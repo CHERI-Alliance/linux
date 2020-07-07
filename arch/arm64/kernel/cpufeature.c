@@ -85,6 +85,7 @@
 #include <asm/kvm_host.h>
 #include <asm/mmu_context.h>
 #include <asm/mte.h>
+#include <asm/morello.h>
 #include <asm/processor.h>
 #include <asm/smp.h>
 #include <asm/sysreg.h>
@@ -293,6 +294,8 @@ static const struct arm64_ftr_bits ftr_id_aa64pfr0[] = {
 static const struct arm64_ftr_bits ftr_id_aa64pfr1[] = {
 	ARM64_FTR_BITS(FTR_VISIBLE_IF_IS_ENABLED(CONFIG_ARM64_SME),
 		       FTR_STRICT, FTR_LOWER_SAFE, ID_AA64PFR1_EL1_SME_SHIFT, 4, 0),
+	ARM64_FTR_BITS(FTR_VISIBLE_IF_IS_ENABLED(CONFIG_ARM64_MORELLO),
+		       FTR_STRICT, FTR_LOWER_SAFE, ID_AA64PFR1_EL1_CE_SHIFT, 4, ID_AA64PFR1_EL1_CE_NI),
 	ARM64_FTR_BITS(FTR_HIDDEN, FTR_STRICT, FTR_LOWER_SAFE, ID_AA64PFR1_EL1_MPAM_frac_SHIFT, 4, 0),
 	ARM64_FTR_BITS(FTR_HIDDEN, FTR_STRICT, FTR_LOWER_SAFE, ID_AA64PFR1_EL1_RAS_frac_SHIFT, 4, 0),
 	ARM64_FTR_BITS(FTR_VISIBLE_IF_IS_ENABLED(CONFIG_ARM64_MTE),
@@ -2347,6 +2350,42 @@ static void cpu_enable_mops(const struct arm64_cpu_capabilities *__unused)
 	sysreg_clear_set(sctlr_el1, 0, SCTLR_EL1_MSCEn);
 }
 
+#ifdef CONFIG_ARM64_MORELLO
+static inline bool cpu_supports_ttpbha(void)
+{
+	u64 mmfr1 = read_sysreg_s(SYS_ID_AA64MMFR1_EL1);
+	u32 val = cpuid_feature_extract_unsigned_field(mmfr1,
+						ID_AA64MMFR1_EL1_HPDS_SHIFT);
+
+	return val == ID_AA64MMFR1_EL1_HPDS_HPDS2;
+}
+
+static bool has_morello(const struct arm64_cpu_capabilities *entry, int scope)
+{
+	bool has_morello;
+
+	if (!has_cpuid_feature(entry, scope))
+		return false;
+
+	/*
+	 * The Morello architecture includes a fixed set of optional features,
+	 * and in particular we rely on ARMv8.2-TTPBHA for the Morello PTE
+	 * attributes. If somehow Morello is implemented but not TTPBHA, we
+	 * cannot use Morello.
+	 */
+	has_morello = cpu_supports_ttpbha();
+	if (!has_morello)
+		pr_warn_once("Invalid HW configuration: Morello is implemented but not TTPBHA\n");
+
+	return has_morello;
+}
+
+static void cpu_enable_morello(const struct arm64_cpu_capabilities *__unused)
+{
+	morello_cpu_setup();
+}
+#endif /* CONFIG_ARM64_MORELLO */
+
 /* Internal helper functions to match cpu capability type */
 static bool
 cpucap_late_cpu_optional(const struct arm64_cpu_capabilities *cap)
@@ -2869,6 +2908,16 @@ static const struct arm64_cpu_capabilities arm64_features[] = {
 		.matches = has_nv1,
 		ARM64_CPUID_FIELDS_NEG(ID_AA64MMFR4_EL1, E2H0, NI_NV1)
 	},
+#ifdef CONFIG_ARM64_MORELLO
+	{
+		.desc = "Morello Capability Architecture",
+		.capability = ARM64_MORELLO,
+		.type = ARM64_CPUCAP_STRICT_BOOT_CPU_FEATURE,
+		.matches = has_morello,
+		.cpu_enable = cpu_enable_morello,
+		ARM64_CPUID_FIELDS(ID_AA64PFR1_EL1, CE, IMP)
+	},
+#endif
 	{},
 };
 
@@ -3033,6 +3082,9 @@ static const struct arm64_cpu_capabilities arm64_elf_hwcaps[] = {
 	HWCAP_CAP(ID_AA64FPFR0_EL1, F8DP2, IMP, CAP_HWCAP, KERNEL_HWCAP_F8DP2),
 	HWCAP_CAP(ID_AA64FPFR0_EL1, F8E4M3, IMP, CAP_HWCAP, KERNEL_HWCAP_F8E4M3),
 	HWCAP_CAP(ID_AA64FPFR0_EL1, F8E5M2, IMP, CAP_HWCAP, KERNEL_HWCAP_F8E5M2),
+#ifdef CONFIG_ARM64_MORELLO
+	HWCAP_CAP(ID_AA64PFR1_EL1, CE, IMP, CAP_HWCAP, KERNEL_HWCAP_MORELLO),
+#endif
 	{},
 };
 

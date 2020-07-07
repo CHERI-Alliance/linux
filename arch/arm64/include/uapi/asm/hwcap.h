@@ -123,4 +123,6 @@
 #define HWCAP2_SME_SF8DP4	(1UL << 61)
 #define HWCAP2_SME_SF8DP2	(1UL << 62)
 
+#define HWCAP2_MORELLO		(1UL << 63)
+
 #endif /* _UAPI__ASM_HWCAP_H */
