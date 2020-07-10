@@ -31,6 +31,19 @@ alternative_else_nop_endif
 	ret
 .Lno_mops:
 #endif
+
+#ifdef CONFIG_ARM64_MORELLO
+alternative_if ARM64_MORELLO
+	ldp	c2, c3, [x1]
+	nop
+	ldp	c4, c5, [x1, #32]
+	nop
+	ldp	c6, c7, [x1, #64]
+	nop
+	ldp	c8, c9, [x1, #96]
+	nop
+alternative_else
+#endif
 	ldp	x2, x3, [x1]
 	ldp	x4, x5, [x1, #16]
 	ldp	x6, x7, [x1, #32]
@@ -39,12 +52,35 @@ alternative_else_nop_endif
 	ldp	x12, x13, [x1, #80]
 	ldp	x14, x15, [x1, #96]
 	ldp	x16, x17, [x1, #112]
+#ifdef CONFIG_ARM64_MORELLO
+alternative_endif
+#endif
 
 	add	x0, x0, #256
 	add	x1, x1, #128
 1:
 	tst	x0, #(PAGE_SIZE - 1)
 
+#ifdef CONFIG_ARM64_MORELLO
+alternative_if ARM64_MORELLO
+	stp	c2, c3, [x0, #-256]
+	ldp	c2, c3, [x1]
+	nop
+	nop
+	stp	c4, c5, [x0, #32 - 256]
+	ldp	c4, c5, [x1, #32]
+	nop
+	nop
+	stp	c6, c7, [x0, #64 - 256]
+	ldp	c6, c7, [x1, #64]
+	nop
+	nop
+	stp	c8, c9, [x0, #96 - 256]
+	ldp	c8, c9, [x1, #96]
+	nop
+	nop
+alternative_else
+#endif
 	stnp	x2, x3, [x0, #-256]
 	ldp	x2, x3, [x1]
 	stnp	x4, x5, [x0, #16 - 256]
@@ -61,12 +97,27 @@ alternative_else_nop_endif
 	ldp	x14, x15, [x1, #96]
 	stnp	x16, x17, [x0, #112 - 256]
 	ldp	x16, x17, [x1, #112]
+#ifdef CONFIG_ARM64_MORELLO
+alternative_endif
+#endif
 
 	add	x0, x0, #128
 	add	x1, x1, #128
 
 	b.ne	1b
 
+#ifdef CONFIG_ARM64_MORELLO
+alternative_if ARM64_MORELLO
+	stp	c2, c3, [x0, #-256]
+	nop
+	stp	c4, c5, [x0, #32 - 256]
+	nop
+	stp	c6, c7, [x0, #64 - 256]
+	nop
+	stp	c8, c9, [x0, #96 - 256]
+	nop
+alternative_else
+#endif
 	stnp	x2, x3, [x0, #-256]
 	stnp	x4, x5, [x0, #16 - 256]
 	stnp	x6, x7, [x0, #32 - 256]
@@ -75,6 +126,9 @@ alternative_else_nop_endif
 	stnp	x12, x13, [x0, #80 - 256]
 	stnp	x14, x15, [x0, #96 - 256]
 	stnp	x16, x17, [x0, #112 - 256]
+#ifdef CONFIG_ARM64_MORELLO
+alternative_endif
+#endif
 
 	ret
 SYM_FUNC_END(__pi_copy_page)
