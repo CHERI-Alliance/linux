@@ -22,6 +22,7 @@
 #include <asm/irq.h>
 #include <asm/memory.h>
 #include <asm/mmu.h>
+#include <asm/morello.h>
 #include <asm/processor.h>
 #include <asm/ptrace.h>
 #include <asm/scs.h>
@@ -218,9 +219,44 @@ alternative_cb_end
 	stp	x26, x27, [sp, #16 * 13]
 	stp	x28, x29, [sp, #16 * 14]
 
+#ifdef CONFIG_ARM64_MORELLO
+alternative_if_not ARM64_MORELLO
+	b	1f
+alternative_else_nop_endif
+
+	stp	c0, c1, [sp, #S_CREGS + 32 * 0]
+	stp	c2, c3, [sp, #S_CREGS + 32 * 1]
+	stp	c4, c5, [sp, #S_CREGS + 32 * 2]
+	stp	c6, c7, [sp, #S_CREGS + 32 * 3]
+	stp	c8, c9, [sp, #S_CREGS + 32 * 4]
+	stp	c10, c11, [sp, #S_CREGS + 32 * 5]
+	stp	c12, c13, [sp, #S_CREGS + 32 * 6]
+	stp	c14, c15, [sp, #S_CREGS + 32 * 7]
+	stp	c16, c17, [sp, #S_CREGS + 32 * 8]
+	stp	c18, c19, [sp, #S_CREGS + 32 * 9]
+	stp	c20, c21, [sp, #S_CREGS + 32 * 10]
+	stp	c22, c23, [sp, #S_CREGS + 32 * 11]
+	stp	c24, c25, [sp, #S_CREGS + 32 * 12]
+	stp	c26, c27, [sp, #S_CREGS + 32 * 13]
+	stp	c28, c29, [sp, #S_CREGS + 32 * 14]
+	str	clr, [sp, #S_CREGS + 32 * 15]
+1:
+#endif
+
 	.if	\el == 0
 	clear_gp_regs
+#ifdef CONFIG_ARM64_MORELLO
+alternative_if_not ARM64_MORELLO
+	b	1f
+alternative_else_nop_endif
+
+	mrs	c21, csp_el0
+	str	c21, [sp, #S_CSP]
+	b	2f
+1:
+#endif
 	mrs	x21, sp_el0
+2:
 	ldr_this_cpu	tsk, __entry_task, x20
 	msr	sp_el0, tsk
 
@@ -332,6 +368,24 @@ alternative_else_nop_endif
 	*/
 	.endm
 
+	/*
+	 * Load C register number \nr and the corresponding X register from the
+	 * saved pt_regs (at sp), and merge the X register into the C register.
+	 */
+	.macro	morello_ldr_merge_c_x, nr:req, xtmp:req
+	ldr	c\nr, [sp, #S_CREGS + \nr * 16]
+	ldr	\xtmp, [sp, #\nr * 8]
+	morello_merge_c_x \nr, \xtmp
+	.endm
+
+	/* Like morello_ldr_merge_c_x but for a consecutive pair of C/X registers */
+	.macro	morello_ldp_merge_c_x, nr1:req, nr2:req, xtmp1:req, xtmp2:req
+	ldp	c\nr1, c\nr2, [sp, #S_CREGS + \nr1 * 16]
+	ldp	\xtmp1, \xtmp2, [sp, #\nr1 * 8]
+	morello_merge_c_x \nr1, \xtmp1
+	morello_merge_c_x \nr2, \xtmp2
+	.endm
+
 	.macro	kernel_exit, el
 	.if	\el != 0
 	disable_daif
@@ -363,7 +417,19 @@ alternative_else_nop_endif
 
 	.if	\el == 0
 	ldr	x23, [sp, #S_SP]		// load return stack pointer
+#ifdef CONFIG_ARM64_MORELLO
+alternative_if_not ARM64_MORELLO
+	b	1f
+alternative_else_nop_endif
+
+	ldr	c24, [sp, #S_CSP]
+	morello_merge_c_x 24, x23		// merge SP into CSP
+	msr	csp_el0, c24
+	b	2f
+1:
+#endif
 	msr	sp_el0, x23
+2:
 	tst	x22, #PSR_MODE32_BIT		// native task?
 	b.eq	3f
 
@@ -409,6 +475,8 @@ alternative_else_nop_endif
 	apply_ssbd 0, x0, x1
 	.endif
 
+	msr	spsr_el1, x22
+
 #ifdef CONFIG_ARM64_MORELLO
 alternative_if_not ARM64_MORELLO
 	b	1f
@@ -416,12 +484,47 @@ alternative_else_nop_endif
 
 	cvtp	c26, x21			// merge PC into PCC
 	msr	celr_el1, c26
-	b	2f
+
+	/*
+	 * We need to restore and merge all C registers, and we do not have any
+	 * other scratch X register, so we have no choice but to spill two C
+	 * registers after merging them and restore them at the end.
+	 */
+	morello_ldp_merge_c_x 0, 1, x2, x3
+	stp	c0, c1, [sp, #S_CREGS]
+	morello_ldp_merge_c_x 2, 3, x0, x1
+	morello_ldp_merge_c_x 4, 5, x0, x1
+	morello_ldp_merge_c_x 6, 7, x0, x1
+	morello_ldp_merge_c_x 8, 9, x0, x1
+	morello_ldp_merge_c_x 10, 11, x0, x1
+	morello_ldp_merge_c_x 12, 13, x0, x1
+	morello_ldp_merge_c_x 14, 15, x0, x1
+	morello_ldp_merge_c_x 16, 17, x0, x1
+	morello_ldp_merge_c_x 18, 19, x0, x1
+	morello_ldp_merge_c_x 20, 21, x0, x1
+	morello_ldp_merge_c_x 22, 23, x0, x1
+	morello_ldp_merge_c_x 24, 25, x0, x1
+	morello_ldp_merge_c_x 26, 27, x0, x1
+	morello_ldp_merge_c_x 28, 29, x0, x1
+	morello_ldr_merge_c_x 30, x0
+	ldp	c0, c1, [sp, #S_CREGS]
+
+	/*
+	 * We do not support ARM64_UNMAP_KERNEL_AT_EL0 together with Morello, so
+	 * to avoid adding even more conditional code at the end of kernel_exit,
+	 * we perform the exception return right away.
+	 *
+	 * Note that erratum 1508412 is not present on Rainier, the only core
+	 * implementing Morello, so we do not need to apply the erratum here.
+	 */
+	add	sp, sp, #PT_REGS_SIZE		// restore sp
+	eret
+	sb
 1:
-#endif
+#endif /* CONFIG_ARM64_MORELLO */
+
 	msr	elr_el1, x21			// set up the return data
-2:
-	msr	spsr_el1, x22
+
 	ldp	x0, x1, [sp, #16 * 0]
 	ldp	x2, x3, [sp, #16 * 1]
 	ldp	x4, x5, [sp, #16 * 2]

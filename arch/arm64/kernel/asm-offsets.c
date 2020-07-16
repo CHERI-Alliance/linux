@@ -81,6 +81,10 @@ int main(void)
   DEFINE(S_SDEI_TTBR1,		offsetof(struct pt_regs, sdei_ttbr1));
   DEFINE(S_PMR_SAVE,		offsetof(struct pt_regs, pmr_save));
   DEFINE(S_STACKFRAME,		offsetof(struct pt_regs, stackframe));
+#ifdef CONFIG_ARM64_MORELLO
+  DEFINE(S_CREGS,		offsetof(struct pt_regs, cregs));
+  DEFINE(S_CSP,			offsetof(struct pt_regs, csp));
+#endif
   DEFINE(PT_REGS_SIZE,		sizeof(struct pt_regs));
   BLANK();
 #ifdef CONFIG_DYNAMIC_FTRACE_WITH_ARGS
