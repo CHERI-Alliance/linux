@@ -84,6 +84,7 @@ int main(void)
 #ifdef CONFIG_ARM64_MORELLO
   DEFINE(S_CREGS,		offsetof(struct pt_regs, cregs));
   DEFINE(S_CSP,			offsetof(struct pt_regs, csp));
+  DEFINE(S_PCC,			offsetof(struct pt_regs, pcc));
 #endif
   DEFINE(PT_REGS_SIZE,		sizeof(struct pt_regs));
   BLANK();

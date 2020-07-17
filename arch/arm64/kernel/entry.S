@@ -240,6 +240,9 @@ alternative_else_nop_endif
 	stp	c26, c27, [sp, #S_CREGS + 32 * 13]
 	stp	c28, c29, [sp, #S_CREGS + 32 * 14]
 	str	clr, [sp, #S_CREGS + 32 * 15]
+
+	mrs	c26, celr_el1
+	str	c26, [sp, #S_PCC]
 1:
 #endif
 
@@ -482,7 +485,8 @@ alternative_if_not ARM64_MORELLO
 	b	1f
 alternative_else_nop_endif
 
-	cvtp	c26, x21			// merge PC into PCC
+	ldr	c26, [sp, #S_PCC]
+	morello_merge_c_x 26, x21		// merge PC into PCC
 	msr	celr_el1, c26
 
 	/*
