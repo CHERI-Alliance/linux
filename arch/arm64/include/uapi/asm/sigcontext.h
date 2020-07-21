@@ -133,6 +133,16 @@ struct extra_context {
 	__u32 __reserved[3];
 };
 
+#define MORELLO_MAGIC	0x4d524c01
+
+struct morello_context {
+	struct _aarch64_ctx head;
+	__u64 __pad;
+	__kernel_uintcap_t cregs[31];
+	__kernel_uintcap_t csp;
+	__kernel_uintcap_t pcc;
+};
+
 #define SVE_MAGIC	0x53564501
 
 struct sve_context {
