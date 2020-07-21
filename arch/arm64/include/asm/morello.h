@@ -30,6 +30,10 @@ struct morello_state {
 /* Must be called with IRQs disabled */
 void morello_cpu_setup(void);
 
+/* Low-level uacces helpers, must not be called directly */
+void __morello_get_user_cap_asm(cap128_t *x, const cap128_t __user *ptr, int *err);
+void __morello_put_user_cap_asm(const cap128_t *x, cap128_t __user *ptr, int *err);
+
 #endif /* CONFIG_ARM64_MORELLO */
 
 /*
