@@ -9,6 +9,7 @@
 
 #include <asm/alternative.h>
 #include <asm/kernel-pgtable.h>
+#include <asm/morello.h>
 #include <asm/sysreg.h>
 
 /*
@@ -344,6 +345,7 @@ do {									\
  * __mte_disable_tco_async(). As `dst` and `src` may contain blocking
  * functions, we must evaluate these outside of the critical section.
  */
+
 #define __put_kernel_nofault(dst, src, type, err_label)			\
 do {									\
 	__typeof__(dst) __pkn_dst = (dst);				\
@@ -358,6 +360,70 @@ do {									\
 	if (unlikely(__pkn_err))					\
 		goto err_label;						\
 } while(0)
+
+#ifdef CONFIG_ARM64_MORELLO
+#define __morello_raw_get_user_cap(x, ptr, err)				\
+do {									\
+	__chk_user_ptr(ptr);						\
+	uaccess_ttbr0_enable();						\
+	__morello_get_user_cap_asm(&(x), (ptr), &(err));		\
+	uaccess_ttbr0_disable();					\
+} while (0)
+
+#define __morello_get_user_cap_error(x, ptr, err)			\
+do {									\
+	const cap128_t __user *__p = (const cap128_t __user *)(ptr);	\
+	BUILD_BUG_ON(sizeof(*__p) != sizeof(*(ptr)));			\
+	might_fault();							\
+	if (!WARN_ON(!system_supports_morello()) &&			\
+	    access_ok(__p, sizeof(*__p))) {				\
+		__p = uaccess_mask_ptr(__p);				\
+		__morello_raw_get_user_cap((x), __p, (err));		\
+	} else {							\
+		(x) = ZERO_CAP; (err) = -EFAULT;			\
+	}								\
+} while (0)
+
+#define __morello_get_user_cap(x, ptr)					\
+({									\
+	int __gu_err = 0;						\
+	__morello_get_user_cap_error((x), (ptr), __gu_err);		\
+	__gu_err;							\
+})
+
+#define morello_get_user_cap	__morello_get_user_cap
+
+#define __morello_raw_put_user_cap(x, ptr, err)				\
+do {									\
+	__chk_user_ptr(ptr);						\
+	uaccess_ttbr0_enable();						\
+	__morello_put_user_cap_asm(&(x), (ptr), &(err));		\
+	uaccess_ttbr0_disable();					\
+} while (0)
+
+#define __morello_put_user_cap_error(x, ptr, err)			\
+do {									\
+	cap128_t __user *__p = (cap128_t __user *)(ptr);		\
+	BUILD_BUG_ON(sizeof(*__p) != sizeof(*(ptr)));			\
+	might_fault();							\
+	if (!WARN_ON(!system_supports_morello()) &&			\
+	    access_ok(__p, sizeof(*__p))) {				\
+		__p = uaccess_mask_ptr(__p);				\
+		__morello_raw_put_user_cap((x), __p, (err));		\
+	} else {							\
+		(err) = -EFAULT;					\
+	}								\
+} while (0)
+
+#define __morello_put_user_cap(x, ptr)					\
+({									\
+	int __pu_err = 0;						\
+	__morello_put_user_cap_error((x), (ptr), __pu_err);		\
+	__pu_err;							\
+})
+
+#define morello_put_user_cap	__morello_put_user_cap
+#endif /* CONFIG_ARM64_MORELLO */
 
 extern unsigned long __must_check __arch_copy_from_user(void *to, const void __user *from, unsigned long n);
 #define raw_copy_from_user(to, from, n)					\
