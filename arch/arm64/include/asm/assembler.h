@@ -569,6 +569,16 @@ alternative_endif
 	.endm
 
 /*
+ * Return a pointer to tsk's pt_regs.
+ */
+	.macro	get_task_pt_regs, rd:req, tsk:req
+	/* See task_pt_regs() in processor.h */
+	ldr	\rd, [\tsk, #TSK_STACK]
+	add	\rd, \rd, #THREAD_SIZE
+	sub	\rd, \rd, #PT_REGS_SIZE
+	.endm
+
+/*
  * If the kernel is built for 52-bit virtual addressing but the hardware only
  * supports 48 bits, we cannot program the pgdir address into TTBR1 directly,
  * but we have to add an offset so that the TTBR1 address corresponds with the

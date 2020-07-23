@@ -254,7 +254,12 @@ alternative_if_not ARM64_MORELLO
 alternative_else_nop_endif
 
 	mrs	c21, csp_el0
-	str	c21, [sp, #S_CSP]
+	mrs	c22, rcsp_el0
+	stp	c21, c22, [sp, #S_CSP]
+
+	mrs	c26, celr_el1			// Reload PCC (c26 got cleared by clear_gp_regs)
+	morello_tst_cap_has_executive c26, x27	// Was the interrupted context in Executive?
+	csel	x21, x21, x22, ne		// If not, save RSP_EL0 as SP_EL0
 	b	2f
 1:
 #endif
@@ -418,6 +423,13 @@ alternative_if_not ARM64_HAS_PAN
 alternative_else_nop_endif
 #endif
 
+#ifdef CONFIG_ARM64_MORELLO
+alternative_if ARM64_MORELLO
+	/* We will need PCC in multiple places thereafter, so load it now */
+	ldr	c26, [sp, #S_PCC]
+alternative_else_nop_endif
+#endif
+
 	.if	\el == 0
 	ldr	x23, [sp, #S_SP]		// load return stack pointer
 #ifdef CONFIG_ARM64_MORELLO
@@ -425,9 +437,16 @@ alternative_if_not ARM64_MORELLO
 	b	1f
 alternative_else_nop_endif
 
-	ldr	c24, [sp, #S_CSP]
+	ldp	c24, c25, [sp, #S_CSP]		// load the saved CSP and RCSP
+	morello_tst_cap_has_executive c26, x27	// are we restoring an Executive context?
+	b.eq	10f				// if not, merge into RCSP instead of CSP
 	morello_merge_c_x 24, x23		// merge SP into CSP
+	b	11f
+10:
+	morello_merge_c_x 25, x23		// merge SP into RCSP
+11:
 	msr	csp_el0, c24
+	msr	rcsp_el0, c25
 	b	2f
 1:
 #endif
@@ -485,7 +504,6 @@ alternative_if_not ARM64_MORELLO
 	b	1f
 alternative_else_nop_endif
 
-	ldr	c26, [sp, #S_PCC]
 	morello_merge_c_x 26, x21		// merge PC into PCC
 	msr	celr_el1, c26
 

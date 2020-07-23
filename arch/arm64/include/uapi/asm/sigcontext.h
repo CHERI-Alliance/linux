@@ -140,6 +140,7 @@ struct morello_context {
 	__u64 __pad;
 	__kernel_uintcap_t cregs[31];
 	__kernel_uintcap_t csp;
+	__kernel_uintcap_t rcsp;
 	__kernel_uintcap_t pcc;
 };
 

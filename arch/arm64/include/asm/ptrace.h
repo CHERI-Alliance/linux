@@ -206,6 +206,7 @@ struct pt_regs {
 #ifdef CONFIG_ARM64_MORELLO
 	cap128_t cregs[31];
 	cap128_t csp;
+	cap128_t rcsp;
 	cap128_t pcc;
 #endif
 };
