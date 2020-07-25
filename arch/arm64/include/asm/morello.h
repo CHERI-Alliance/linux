@@ -37,6 +37,7 @@ struct morello_state {
 void morello_cpu_setup(void);
 
 u64 morello_cap_get_lo_val(const cap128_t *cap);
+void morello_cap_get_val_tag(const cap128_t *cap, __uint128_t *val, u8 *tag);
 
 /* Low-level uacces helpers, must not be called directly */
 void __morello_get_user_cap_asm(cap128_t *x, const cap128_t __user *ptr, int *err);
