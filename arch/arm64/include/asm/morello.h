@@ -13,6 +13,7 @@
 
 struct pt_regs;
 struct task_struct;
+struct user_cap;
 
 #ifdef CONFIG_ARM64_MORELLO
 
@@ -38,6 +39,10 @@ void morello_cpu_setup(void);
 
 u64 morello_cap_get_lo_val(const cap128_t *cap);
 void morello_cap_get_val_tag(const cap128_t *cap, __uint128_t *val, u8 *tag);
+
+/* Reads a capability from tsk's address space */
+int morello_ptrace_read_remote_cap(struct task_struct *tsk, unsigned long addr,
+				   struct user_cap *user_cap);
 
 /* Low-level uacces helpers, must not be called directly */
 void __morello_get_user_cap_asm(cap128_t *x, const cap128_t __user *ptr, int *err);

@@ -74,6 +74,8 @@
 #define PSR_BTYPE_C		(0b10 << PSR_BTYPE_SHIFT)
 #define PSR_BTYPE_J		(0b11 << PSR_BTYPE_SHIFT)
 
+/* Morello-specific request */
+#define PTRACE_PEEKCAP		  12
 /* syscall emulation path in ptrace */
 #define PTRACE_SYSEMU		  31
 #define PTRACE_SYSEMU_SINGLESTEP  32
@@ -354,6 +356,14 @@ struct user_morello_state {
 	__u64		tag_map;
 	/* Capability control register */
 	__u64		cctlr;
+};
+
+/* In-memory capability representation (PTRACE_PEEKCAP) */
+
+struct user_cap {
+	__uint128_t	val;
+	__u8		tag;
+	__u8		__reserved[15];
 };
 
 #endif /* __ASSEMBLY__ */
