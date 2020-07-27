@@ -1651,6 +1651,25 @@ static int morello_get(struct task_struct *target,
 
 	return membuf_write(&to, &out, sizeof(out));
 }
+
+int morello_ptrace_peekcap(struct task_struct *target, unsigned long addr,
+			   unsigned long data)
+{
+	struct user_cap __user *user_cap = (struct user_cap __user *)data;
+	struct user_cap tmp = {0};
+	int err;
+
+	if (!system_supports_morello())
+		return -EINVAL;
+
+	err = morello_ptrace_read_remote_cap(target, addr, &tmp);
+	if (err)
+		return err;
+
+	err = copy_to_user(user_cap, &tmp, sizeof(tmp));
+
+	return err ? -EFAULT : 0;
+}
 #endif /* CONFIG_ARM64_MORELLO */
 
 enum aarch64_regset {
@@ -2426,6 +2445,10 @@ long arch_ptrace(struct task_struct *child, long request,
 	case PTRACE_PEEKMTETAGS:
 	case PTRACE_POKEMTETAGS:
 		return mte_ptrace_copy_tags(child, request, addr, data);
+#ifdef CONFIG_ARM64_MORELLO
+	case PTRACE_PEEKCAP:
+		return morello_ptrace_peekcap(child, addr, data);
+#endif
 	}
 
 	return ptrace_request(child, request, addr, data);
