@@ -87,13 +87,40 @@
  * This must be kept in sync with struct cpu_suspend_ctx in <asm/suspend.h>.
  */
 SYM_FUNC_START(cpu_do_suspend)
+#ifdef CONFIG_ARM64_MORELLO
+alternative_if_not ARM64_MORELLO
+	b	1f
+alternative_else_nop_endif
+
+	/*
+	 * Save the EL0 Morello registers that are stored in thread_struct
+	 * (all of them except (R)CSP_EL0).
+	 * Also save the EL1 Morello system registers we may have written to, in
+	 * particular we need to save the capability view of VBAR_EL1.
+	 */
+	mrs	x2, cctlr_el0
+	mrs	x8, cctlr_el1
+
+	mrs	c9, ctpidr_el0
+	mrs	c10, rctpidr_el0
+	mrs	c11, ddc_el0
+	mrs	c12, rddc_el0
+	mrs	c13, cid_el0
+	mrs	c14, cvbar_el1
+	stp	c9, c10, [x0, #CPU_CTX_CREGS]
+	stp	c11, c12, [x0, #CPU_CTX_CREGS + 32]
+	stp	c13, c14, [x0, #CPU_CTX_CREGS + 64]
+	b	2f
+1:
+#endif /* CONFIG_ARM64_MORELLO */
 	mrs	x2, tpidr_el0
+	mrs	x8, vbar_el1
+2:
 	mrs	x3, tpidrro_el0
 	mrs	x4, contextidr_el1
 	mrs	x5, osdlr_el1
 	mrs	x6, cpacr_el1
 	mrs	x7, tcr_el1
-	mrs	x8, vbar_el1
 	mrs	x9, mdscr_el1
 	mrs	x10, oslsr_el1
 	mrs	x11, sctlr_el1
@@ -136,7 +163,6 @@ SYM_FUNC_START(cpu_do_resume)
 	 */
 	ldr	x18, [x0, #96]
 	str	xzr, [x0, #96]
-	msr	tpidr_el0, x2
 	msr	tpidrro_el0, x3
 	msr	contextidr_el1, x4
 	msr	cpacr_el1, x6
@@ -146,7 +172,36 @@ SYM_FUNC_START(cpu_do_resume)
 	bfi	x8, x7, TCR_EL1_T0SZ_SHIFT, TCR_EL1_T0SZ_WIDTH
 
 	msr	tcr_el1, x8
+
+#ifdef CONFIG_ARM64_MORELLO
+alternative_if_not ARM64_MORELLO
+	b	1f
+alternative_else_nop_endif
+
+	/*
+	 * Ensure that the new value of CPACR_EL1 is effective, to disable
+	 * trapping of Morello instructions.
+	 */
+	isb
+
+	msr	cctlr_el0, x2
+	msr	cctlr_el1, x9
+
+	ldp	c2, c3, [x0, #CPU_CTX_CREGS]
+	msr	ctpidr_el0, c2
+	msr	rctpidr_el0, c3
+	ldp	c2, c3, [x0, #CPU_CTX_CREGS + 32]
+	msr	ddc_el0, c2
+	msr	rddc_el0, c3
+	ldp	c2, c3, [x0, #CPU_CTX_CREGS + 64]
+	msr	cid_el0, c2
+	msr	cvbar_el1, c3
+	b	2f
+1:
+#endif /* CONFIG_ARM64_MORELLO */
+	msr	tpidr_el0, x2
 	msr	vbar_el1, x9
+2:
 	msr	mdscr_el1, x10
 alternative_if ARM64_HAS_TCR2
 	ldr	x2, [x0, #104]
