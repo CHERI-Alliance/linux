@@ -179,7 +179,7 @@ static void print_pstate(struct pt_regs *regs)
 		const char *btype_str = btypes[(pstate & PSR_BTYPE_MASK) >>
 					       PSR_BTYPE_SHIFT];
 
-		printk("pstate: %08llx (%c%c%c%c %c%c%c%c %cPAN %cUAO %cTCO %cDIT %cSSBS BTYPE=%s)\n",
+		printk("pstate: %08llx (%c%c%c%c %c%c%c%c %cPAN %cUAO %cTCO %cDIT %cSSBS ISA=%s BTYPE=%s)\n",
 			pstate,
 			pstate & PSR_N_BIT ? 'N' : 'n',
 			pstate & PSR_Z_BIT ? 'Z' : 'z',
@@ -194,6 +194,7 @@ static void print_pstate(struct pt_regs *regs)
 			pstate & PSR_TCO_BIT ? '+' : '-',
 			pstate & PSR_DIT_BIT ? '+' : '-',
 			pstate & PSR_SSBS_BIT ? '+' : '-',
+			pstate & PSR_C64_BIT ? "C64" : "A64",
 			btype_str);
 	}
 }
@@ -239,6 +240,9 @@ void __show_regs(struct pt_regs *regs)
 
 		pr_cont("\n");
 	}
+
+	if (system_supports_morello())
+		morello_show_regs(regs);
 }
 
 void show_regs(struct pt_regs *regs)
