@@ -1,0 +1,643 @@
+========================
+Morello in AArch64 Linux
+========================
+
+Author: Kevin Brodsky <kevin.brodsky@arm.com>
+
+Date: 2020-09-07
+
+This document describes the provision of Morello functionalities to
+userspace by Linux.
+
+**Disclaimer**
+  Support for Morello in Linux is experimental, just like the
+  Morello architecture itself. Any aspect of the kernel-user ABI
+  introduced for Morello may be later modified or removed, without
+  guaranteeing backwards-compatibility. Additionally, no claim or
+  guarantee is made regarding the security properties of this
+  implementation; the kernel-user interface is currently entirely
+  unrestricted w.r.t. capabilities held by the user context. This means
+  notably that capability-based sandboxes in userspace are
+  straightforward to escape, for instance by issuing syscalls. More
+  details can be found in the Limitations_ section.
+
+Architecture overview
+=====================
+
+Morello is a *prototype* architecture, which is part of a research
+program [1]_ led by Arm. Morello introduces concepts and mechanisms
+specified in the CHERI architecture [2]_ by the University of Cambridge,
+while preserving backwards-compatibility with the Armv8-A architecture.
+
+The additions provided by Morello are centred around the concept of
+hardware capability. In Morello, a capability is a 129-bit object that
+is primarily used to represent a pointer with additional metadata.
+Its value (address), as well as associated bounds and permissions, are
+stored in 128 bits. The 129th bit is a separate entity, the validity
+tag, and denotes whether the capability is valid and can be
+dereferenced. The architecture guarantees that this bit cannot be forged
+by clearing it whenever an invalid operation is performed on a
+capability. The only way (for unprivileged software) to obtain a valid
+capability is by deriving it from another valid capability, possibly
+reducing its bounds and permissions (but never extending them). For a
+much more in-depth introduction to capabilities and other CHERI
+concepts, see [3]_.
+
+Unlike traditional architectural extensions, Morello must be implemented
+together with a fixed set of features. All mandatory Armv8.2-A features
+must be implemented, as well as a number of optional features, in
+particular ARMv8.2-TTPBHA aka FEAT_HPDS2 (which is essential for
+configuring the Morello attributes in page table entries).
+
+The rest of this section provides a non-comprehensive overview of
+architectural features that are relevant to userspace and also concern
+the kernel.
+
+Registers
+---------
+
+The Morello architecture enlarges most registers that can be written to
+at EL0 to 129 bits, allowing them to hold capabilities. It also provides
+a few additional registers. The table below describes the Morello
+registers that can be read and modified in userspace:
+
++--------------+----------------------------+-------------------------------------------------------+
+| Name         | Lower 64 bits aliased with | Description                                           |
++==============+============================+=======================================================+
+| C0-C30       | X0-X30                     | General-purpose Capability Registers                  |
++--------------+----------------------------+-------------------------------------------------------+
+| PCC          | PC                         | Capability Program Counter                            |
++--------------+----------------------------+-------------------------------------------------------+
+| CSP_EL0      | SP_EL0                     | Capability Stack Pointer                              |
++--------------+----------------------------+-------------------------------------------------------+
+| CTPIDR_EL0   | TPIDR_EL0                  | Capability Thread Register                            |
++--------------+----------------------------+-------------------------------------------------------+
+| DDC_EL0      | N/A                        | Default Data Capability                               |
++--------------+----------------------------+-------------------------------------------------------+
+| RCSP_EL0     | RSP_EL0 (new register)     | Restricted Capability Stack Pointer                   |
++--------------+----------------------------+-------------------------------------------------------+
+| RCTPIDR_EL0  | RTPIDR_EL0 (new register)  | Restricted Capability Thread Register                 |
++--------------+----------------------------+-------------------------------------------------------+
+| RDDC_EL0     | N/A                        | Restricted Default Data Capability                    |
++--------------+----------------------------+-------------------------------------------------------+
+| CID_EL0      | N/A                        | Compartment ID Register                               |
++--------------+----------------------------+-------------------------------------------------------+
+| CCTLR_EL0    | N/A                        | Capability Control Register (not a capability itself) |
++--------------+----------------------------+-------------------------------------------------------+
+
+Memory
+------
+
+All general-purpose memory gains the ability to hold capabilities, by
+associating a validity tag to each naturally aligned 128-bit location.
+Capabilities can be loaded from 128-bit-aligned memory locations into
+capability registers via new load instructions, and capabilities can be
+stored in memory via new store instructions. Capability tags in memory
+have the following properties:
+
+* They are only accessible via explicit capability load/store
+  instructions.
+* Non-capability store instructions clear the tag in the corresponding
+  128-bit granule(s).
+* The behaviour of non-capability load and store instructions is
+  otherwise unaffected by the value of capability tags in memory.
+
+The Morello architecture also adds attributes to page table entries,
+specifying whether capability tags can be loaded or stored.
+
+Note: MTE
+  Capability tags in memory should not be confused with the allocation
+  tags introduced by the Memory Tagging Extension (MTE), as allocation
+  tags have significantly different properties. Note that a Morello
+  implementation does not include MTE.
+
+Exceptions
+----------
+
+All load, store and branch instructions may trigger a capability fault
+if the capability being dereferenced does not allow the access or
+branch. This may happen because the target capability is invalid, the
+address is out of bounds, etc. The target capability is formed in a
+different way depending on the type of instruction:
+
+* If the instruction is explicitly capability-based (for instance
+  ``ldr x0, [c1, #16]`` or ``blr c0``), then the target capability is
+  the base capability (potentially with an offset applied).
+
+* If the instruction is a load or store with a 64-bit base (for instance
+  ``ldr x0, [x1]``), then the target capability is the current DDC with
+  its value set to the instruction's target address.
+
+* If the instruction is any other type of branch (for instance
+  ``b <label>`` or ``blr x0``), the target capability is the current PCC
+  with its value set to the instruction's target address.
+
+Instructions loading or storing capabilities (e.g. ``ldr c0, [x1]``)
+may trigger additional faults. An alignment fault will occur if the
+base address is not 16-byte aligned. Additionally, a capability access
+fault may occur if the corresponding PTE does not allow capabilities to
+be loaded or stored.
+
+Note
+  Most instructions operating directly on capability registers (not
+  memory) do not generate any exception. If the operation is invalid
+  for any reason, the resulting capability is invalidated by clearing
+  its tag.
+
+ISAs
+----
+
+The Morello architecture extends AArch64 with the C64 ISA. C64 is a
+variant of A64 where most load, store and register-based branch
+instructions take a capability base register, instead of a 64-bit base
+register. C64 introduces a few other changes to help working with
+capability pointers (for instance, the ``ADR`` instruction returns a
+capability register instead of a 64-bit register).
+
+The current ISA is determined by ``PSTATE.C64`` (C64 if 1, A64
+otherwise). Switching between A64 and C64 can be achieved by:
+
+* Branching to a capability register (e.g. ``blr c0``). In this case,
+  the least significant bit of the capability's address is copied to
+  ``PSTATE.C64``. In other words, a capability branch sets the current
+  ISA to C64 if the LSB of the target address is set, and to A64
+  otherwise.
+
+* Executing the instruction ``bx #4``. In this case, the current ISA is
+  toggled (it becomes C64 if it was A64, and vice versa).
+
+Note
+  Regardless of the current ISA, the LSB of the current address of PCC
+  (PC) is never set.
+
+Executive / Restricted banking
+------------------------------
+
+The Morello architecture provides two "banks", Executive and Restricted,
+for three registers: DDC, the stack pointer and the thread register (see
+also the Registers_ section). The active bank is selected via the
+Executive permission in PCC: if the permission is set, then the
+Executive bank is active, otherwise the Restricted bank is active. The
+following register mnemonics resolve to different registers depending on
+the active bank:
+
++-------------------+--------------+---------------+
+| Register mnemonic | In Executive | In Restricted |
++===================+==============+===============+
+| DDC               | DDC_EL0      | RDDC_EL0      |
++-------------------+--------------+---------------+
+| CSP               | CSP_EL0      | RCSP_EL0      |
++-------------------+--------------+---------------+
+| CTPIDR_EL0        | CTPIDR_EL0   | RCTPIDR_EL0   |
++-------------------+--------------+---------------+
+| RDDC_EL0          | RDDC_EL0     | *UNDEFINED*   |
++-------------------+--------------+---------------+
+| RCSP_EL0          | RCSP_EL0     | *UNDEFINED*   |
++-------------------+--------------+---------------+
+| RCTPIDR_EL0       | RCTPIDR_EL0  | *UNDEFINED*   |
++-------------------+--------------+---------------+
+
+In summary: the DDC, CSP and CTPIDR_EL0 mnemonics resolve to the
+corresponding register in the active bank. The Restricted register
+mnemonics can be used to directly access the Restricted registers, but
+only while in Executive. The Executive registers cannot be accessed
+while in Restricted.
+
+
+Userspace support
+=================
+
+When the kernel is built with Morello support and the hardware supports
+Morello, Morello functionalities are made available to all native
+userspace threads, and the feature is advertised via ``HWCAP2_MORELLO``.
+No explicit opt-in is required, as all added features are fully
+backwards-compatible and **do not modify the existing kernel-user ABI**.
+
+Morello support is built in when ``CONFIG_ARM64_MORELLO`` is selected.
+This requires the assembler to support Morello. When building the kernel
+with Clang, the integrated assembler can be used by setting
+``AS=clang``.
+
+Warning
+  Booting a kernel with Morello support on Morello hardware requires a
+  Morello-aware firmware (notably to disable trapping of Morello
+  instructions). Failing that, the kernel will hang or crash.
+
+The rest of this section assumes that Morello support is enabled (i.e.
+``(getauxval(AT_HWCAP2) & HWCAP2_MORELLO) != 0``), and is only
+applicable to native userspace threads.
+
+Register handling
+-----------------
+
+Generalities
+^^^^^^^^^^^^
+
+All Morello registers listed in Registers_ can be accessed as specified
+by the architecture. They are context-switched as required, and the
+child process inherits their value on ``clone()``. On ``execve()``, they
+are initialized as follows:
+
+* For capability registers, the upper 64 bits and tag are set to:
+
+  - CMAX for PCC and DDC_EL0, as defined in the architecture (tag set,
+    maximum bounds, maximum permissions, object type set to 0).
+  - All zeroes for all other registers.
+
+* For capability registers, the lower 64 bits are set to:
+
+  - The usual value for PCC and CSP_EL0. The lower 64 bits are
+    architecturally aliased to PC and SP_EL0 respectively, and these
+    registers are already initialized to well-defined values (entry
+    point and initial stack pointer value).
+  - All zeroes for all other registers.
+
+* CCTLR_EL0 is set to 0.
+
+Note
+  PCC has all permissions set after ``execve()``, which means that a
+  process is always started in Executive. All Restricted registers are
+  zeroed.
+
+Register merging principle
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Most capability registers are in fact an extended view of standard
+64-bit AArch64 registers, notably the general-purpose registers (X0-X30
+extended to C0-C30). This creates a challenging situation for the
+kernel, because it may modify userspace registers for a variety of
+reasons. In a naive approach, setting a register to a new (64-bit) value
+would zero out the rest of the capability, which is not necessarily
+desirable.
+
+In this implementation, a different approach has been taken, based on a
+simple principle: *whenever the kernel sets a userspace register to a
+64-bit value, the value is "merged" into the corresponding capability
+register* (if there is such a register). The merging operation is
+defined as follows:
+
+* If the value (address) of the capability register is equal to the new
+  64-bit value, nothing is done.
+
+* Otherwise, the value of the capability register is set to the new
+  64-bit value. This operation **may clear the tag** of the capability
+  register. The exact behaviour is identical to that of the ``SCVALUE``
+  instruction, as specified in the architecture.
+
+Because of this principle, the upper 64 bits (and potentially tag) of
+capability registers are left unchanged by operations on userspace
+registers. Such operations include (but are not limited to):
+
+* Returning a value from a syscall by setting X0.
+
+* Setting the TLS descriptor on ``clone()`` (thereby setting
+  TPIDR_EL0).
+
+* Invoking a signal handler, setting at least X0, SP and LR. Note that
+  in that case, the new 64-bit values are merged into the capability
+  registers of the interrupted context. See `Signal handling`_ for more
+  details.
+
+* When a process is traced and stopped, setting registers on behalf of
+  a tracer issuing a ``ptrace(PTRACE_SETREGSET)`` request.
+
+Note: write coalescing
+  To facilitate the implementation of this scheme, the following
+  relaxation is made: from the user's point of view, register merging
+  occurs **when capability registers are read** (for instance via
+  ptrace, see the `Morello regset`_ section). This means that
+  consecutive writes to the same 64-bit register may be coalesced, if
+  the corresponding capability register is not read in between. In the
+  vast majority of cases, this has no impact; however, in specific
+  situations, this may prevent the tag of that capability register from
+  being cleared by intermediate writes. Consider for instance this
+  sequence::
+
+    1: ptrace(PTRACE_GETREGSET, pid, NT_ARM_MORELLO, ...); // Read C0: C0 is tagged
+    2: ptrace(PTRACE_SETREGSET, pid, NT_PRSTATUS, ...);    // Write val1 to X0: merging would untag C0
+    3: ptrace(PTRACE_SETREGSET, pid, NT_PRSTATUS, ...);    // Write val2 to X0: merging would not untag C0
+
+  If it can be guaranteed that ``pid`` has not been scheduled between
+  lines 2 and 3 (because it is in a stopped state), then C0 is still
+  tagged after running this sequence. Otherwise, it is unspecified
+  whether C0 is still tagged.
+
+Executive / Restricted aliasing
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Because of the `Executive / Restricted banking`_, some of the
+architectural registers that a user thread has access to at a given time
+depend on whether PCC holds the Executive permission or not. This is
+problematic for SP and TPIDR_EL0, because the kernel accesses these user
+registers in certain situations. Without any special handling, those
+registers would not be the ones the user thread is actually using if it
+is running in Restricted.
+
+To improve the situation, the kernel takes into account whether the user
+thread is running in Executive or Restricted. We define the *active*
+(64-bit) stack pointer and thread register of a thread as the register
+it actually accesses via the standard mnemonics (SP, TPIDR_EL0), i.e.
+respectively SP_EL0 and TPIDR_EL0 in Executive, and RSP_EL0 and
+RTPIDR_EL0 in Restricted. Additional handling is added to operate on the
+active registers:
+
+* When a user thread's context is saved by the kernel, the active stack
+  pointer and thread register are saved as the thread's current SP and
+  TPIDR_EL0 values.
+
+* When a user thread's context is restored by the kernel, the thread's
+  current SP and TPIDR_EL0 values are restored to the active stack
+  pointer and thread register, based on the Executive permission of the
+  PCC being restored.
+
+This approach especially impacts the following operations:
+
+* Providing a stack pointer and/or TLS descriptor on ``clone()``. If the
+  caller is running in Restricted, then RSP_EL0 and/or RTPIDR_EL0 will
+  be set in the new thread.
+
+* Modifying the saved stack pointer in a signal handler (see the `Signal
+  handling`_ section).
+
+* Getting or setting the stack pointer and/or TLS descriptor via
+  ``ptrace(PTRACE_GETREGSET)`` or ``ptrace(PTRACE_SETREGSET)``
+  operations (``NT_PRSTATUS`` and ``NT_ARM_TLS`` regsets). If the tracee
+  is running in Restricted, then RSP_EL0 and/or RTPIDR_EL0 will be
+  read/written.
+
+Capabilities in memory
+----------------------
+
+Read-write access to capability tags in memory is enabled for all
+**private** mappings in userspace, whether file-backed or anonymous.
+This includes notably:
+
+* Mappings returned by ``mmap()`` where the flags include
+  ``MAP_PRIVATE``.
+* Mappings created through ``sbrk()``.
+* Initial mappings set up during ``execve()``, including the stack.
+
+Shared mappings are explicitly excluded, because capabilities are tied
+to a given address space. Allowing a process to share its own
+capabilities with another process could result in privilege escalation,
+since the capabilities provided by the first process may grant access to
+address ranges that the second process could not otherwise access.
+
+Assuming that the access is otherwise valid (sufficiently aligned,
+allowed by the base capability, etc.), accessing a capability in a
+shared mapping results in the following behaviour:
+
+* If the access is a load, the capability is loaded as normal (the tag
+  is always cleared).
+* If the access is a store, the capability is stored if its tag is
+  cleared. Otherwise (tag set), a capability access fault will occur
+  (resulting in a ``SIGSEGV`` signal as per `Fault handling`_), and the
+  store will be prevented.
+
+On ``clone()`` without ``CLONE_VM`` (``fork()``), all the capability
+tags are preserved in the new address space, with the exception of
+ranges marked with ``MADV_WIPEONFORK``, where the tags are cleared
+along with the data.
+
+Fault handling
+--------------
+
+When a capability fault occurs (see the Exceptions_ section), a
+``SIGSEGV`` signal is raised, and ``siginfo.si_code`` is set to one of
+the following values:
+
+* ``SEGV_CAPTAGERR`` for a capability tag fault (a invalid capability was
+  dereferenced).
+* ``SEGV_CAPSEALEDERR`` for capability sealed fault (a sealed capability
+  was directly dereferenced).
+* ``SEGV_CAPBOUNDSERR`` for a capability bounds fault (a capability was
+  dereferenced at an address beyond its bounds).
+* ``SEGV_CAPPERMERR`` for a capability permission fault (a capability
+  was dereferenced in a way that is not allowed by its permissions).
+* ``SEGV_CAPACCESSERR`` for a capability access fault (a valid
+  capability was stored to a location that does not support capability
+  tags).
+
+An alignment fault caused by a load or store of a capability at an
+unaligned address will raise a ``SIGBUS`` signal as usual.
+
+Additionally, accesses to system registers prevented by the lack of
+System permission in PCC will raise a ``SIGILL`` signal.
+
+Signal handling
+---------------
+
+When a signal handler is invoked:
+
+* PCC is reset to CMAX (see Generalities_ in the Register handling
+  section), and its address is set as usual to the signal handler's.
+  This means in particular that **signal handlers are always run in
+  Executive**. Accordingly, the signal frame is stored on the Executive
+  stack (i.e. through CSP_EL0), if the alternate signal stack is not
+  used.
+
+* CLR (C30) is also reset to CMAX, and its address set as usual (to the
+  signal trampoline). This allows a signal handler to return to the
+  trampoline using the ``ret clr`` instruction, in addition to the usual
+  ``ret [lr]`` instruction.
+
+* A new record ``morello_context`` is saved in the signal frame.
+  This frame record contains the capability GPRs, PCC and both the
+  Executive and Restricted capability stack pointers (CSP_EL0 and
+  RCSP_EL0). See ``arch/arm64/include/uapi/asm/sigcontext.h`` for
+  details about the signal frame.
+
+When a signal handler returns:
+
+* Following the `register merging principle`_, the 64-bit register
+  values contained in the main ``sigcontext`` signal frame record are
+  merged into the capability register values in the ``morello_context``
+  record. In particular, the SP value in ``sigcontext`` gets merged into
+  the CSP_EL0 value in ``morello_context`` if the restored PCC has the
+  Executive permission, and otherwise into ``RCSP_EL0`` (in accordance
+  with `Executive / Restricted aliasing`_).
+
+Note: modifying the saved Morello context
+  A signal handler is free to inspect and modify the capabilities saved
+  in ``morello_context``, as well as the C64 bit in the saved PSTATE
+  value. However, extra care is required when modifying the saved
+  capabilities. Because merging happens in any case, *both the saved
+  capability register value and the corresponding 64-bit register value*
+  must be modified to obtain the desired capability. Particular
+  attention should be paid to the following aspects:
+
+  * Stack pointer registers. The CSP_EL0 and RCSP_EL0 values in
+    ``morello_context`` correspond to the architectural registers
+    (respectively Executive and Restricted capability stack pointer),
+    while the SP value in ``sigcontext`` is the active 64-bit stack
+    pointer in the interrupted context. As a result, if a signal handler
+    intends to modify the active capability stack pointer in the
+    interrupted context, it should modify either CSP_EL0 or RCSP_EL0,
+    depending on the Executive permission of the saved PCC. If it does
+    so, or if it modifies the Executive permission of the saved PCC,
+    then the saved 64-bit SP value needs to be modified to match the
+    address of the active capability stack pointer.
+
+    Note that if it is only desired to adjust the SP offset within the
+    interrupted context's stack, it is sufficient (and recommended) to
+    modify the saved 64-bit SP value, without modifying the saved
+    capability values.
+
+  * A64 / C64 selection. The LSB of the saved PCC should not be set
+    (doing so would cause an instruction abort). Instead, it is possible
+    to modify the ISA of the interrupted context by writing to the C64
+    bit of the saved PSTATE in ``sigcontext``.
+
+C64 ISA support
+---------------
+
+As described in the ISAs_ section, capability-based branch instructions
+may switch to A64 or C64, based on the least significant bit of the
+target address. Support for this pattern is included in the kernel in
+two situations:
+
+* On ``execve()``, the program will be started in C64 if the entry
+  point's LSB is set.
+
+* When a process handles a signal with a signal handler (previously
+  established by a ``sigaction()`` call), the signal handler is started
+  in C64 if the LSB of its address is set.
+
+Note
+  This extension is strictly about providing support for the C64 ISA,
+  not any form of new ABI. For instance, the handler provided to
+  ``sigaction()`` remains a 64-bit pointer. See also the Limitations_
+  section.
+
+ptrace extensions
+-----------------
+
+Two extensions are added to the ptrace interface to enable remote access
+to the tracee's Morello state:
+
+* A new ``NT_ARM_MORELLO`` regset is added, providing read-only access
+  to the tracee's Morello registers.
+
+* A new ``PTRACE_PEEKCAP`` request is added, allowing capabilities to be
+  read from the tracee's memory mappings.
+
+Usage details are provided in the following subsections. In both cases:
+
+* Capability tags are provided separately from the "regular" capability
+  data (stored as untagged 128-bit integers). Providing tagged
+  capabilities to the tracer directly would not make sense, because
+  capabilities are tied to their address space of origin (here the
+  tracee's).
+
+* No direct write access to the capabilities is provided. The creation
+  of arbitrary valid capabilities in the tracee is a highly privileged
+  operation, and allowing such an operation through ptrace without
+  restrictions would fundamentally undermine the CHERI software model (as
+  described in [3]_). Options are being explored to allow the tracee's
+  capabilities to be manipulated, with restrictions.
+
+* Notwithstanding the previous note, it is possible to modify the value
+  (address) of the tracee's capability registers by setting the 64-bit
+  register values via the standard regsets. The new 64-bit value will be
+  merged into the corresponding capability register according to the
+  `register merging principle`_ (and `Executive / Restricted aliasing`_
+  for SP and TPIDR_EL0); note that this may result in the capability
+  register's tag getting cleared. Additionally, the tracee's memory
+  remains writable via the usual mechanisms, but **any write will clear
+  the tags in the corresponding 128-bit granule(s)**.
+
+Morello regset
+^^^^^^^^^^^^^^
+
+The tracee's Morello registers can be read using::
+
+  ptrace(PTRACE_GETREGSET, pid, NT_ARM_MORELLO, &iov);
+
+where ``iov`` points to a ``struct user_morello_state``. The data of
+each capability register is stored as an (untagged) ``__uint128_t``
+integer, and its tag is stored in the ``tag_map`` bitfield, at the index
+returned by ``MORELLO_PT_TAG_MAP_REG_BIT(<regname>)``. See
+``arch/arm64/include/uapi/asm/ptrace.h`` for the definition of the
+struct and macros.
+
+Note
+  Like the other regsets, the ``NT_ARM_MORELLO`` regset will be written
+  for each thread in ELF coredumps.
+
+Capability memory access
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+A capability can be read from the tracee's memory using::
+
+  ptrace(PTRACE_PEEKCAP, pid, addr, &user_cap);
+
+where ``addr`` is the address to read from in the tracee's address
+space, and ``user_cap`` is a ``struct user_cap``, as defined in
+``arch/arm64/include/uapi/asm/ptrace.h``. ``addr`` must be
+capability-aligned (16-byte alignment).
+
+This request may be used on all mappings, whether or not capability
+tag access is enabled (as described in the `Capabilities in memory`_
+section). If capability tag access is disabled for the target mapping,
+then the returned tag will be 0.
+
+
+Limitations
+===========
+
+* As mentioned at the beginning of the `Userspace support`_ section, the
+  existing kernel-user ABI remains unchanged (it is only extended in a few
+  instances). This means in particular that **no support for the
+  pure-capability ABI is provided**. Programs built in the
+  pure-capability ABI [4]_, where all pointers are capabilities, must
+  use a translation layer ("shim") to convert syscall arguments to the
+  base arm64 kernel-user ABI, as well as any other situation where
+  pointers are involved at the kernel-user boundary (for instance
+  pointers in the initial stack layout).
+
+  Investigations are underway to add support for a new pure-capability
+  kernel-user ABI.
+
+
+* **No capability-based restriction is enforced at the kernel-user
+  interface.** This means in particular that:
+
+  - Accesses by the kernel to user memory (uaccess) are not checked
+    against the user's active DDC, allowing syscalls such as ``read()`` or
+    ``write()`` to access memory that the user thread may not otherwise be
+    able to access through the capabilities it has access to. This
+    limitation is to be investigated as part of the support for the
+    pure-capability ABI.
+  - Syscalls in the ``mmap()`` family allow to modify the entire address
+    space without restriction.
+  - A user context running in Restricted is able to register arbitrary
+    signal handlers, which are always invoked in Executive. As a result,
+    a Restricted context can easily cause arbitrary code to be run in
+    Executive.
+  - Any user context (whether running in Executive or Restricted) is
+    able to access the entire address space of the process through the
+    ptrace interface (by forking a child process for that purpose).
+
+* No particular support for the DDCBO and PCCBO bits of CCTLR_EL0 is
+  provided. If either of these bits is set in CCTLR_EL0 and the base of
+  PCC / DDC is non-zero, then userspace **must** apply the corresponding
+  offset to all pointers passed directly or indirectly to the kernel.
+
+* At this stage, a number of features are not supported when the kernel
+  is built with Morello support (see also the ``ARM64_MORELLO`` entry in
+  ``arch/arm64/Kconfig``):
+
+  - Swap support is disabled, because capability tags need to be
+    saved/restored separately when a page is swapped out/in.
+  - A small number of security features are disabled due to the lack of
+    available registers when entering / exiting the kernel.
+  - KVM guests may not use any Morello feature.
+  - Capability tags in memory are not included in core dumps.
+
+References
+==========
+
+.. [1] https://developer.arm.com/architectures/cpu-architecture/a-profile/morello
+.. [2] https://www.cl.cam.ac.uk/research/security/ctsrd/cheri/
+.. [3] https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-941.pdf
+.. [4] https://www.cl.cam.ac.uk/research/security/ctsrd/pdfs/201904-asplos-cheriabi.pdf

@@ -19,6 +19,7 @@ ARM64 Architecture
     legacy_instructions
     memory
     memory-tagging-extension
+    morello
     perf
     pointer-authentication
     ptdump
