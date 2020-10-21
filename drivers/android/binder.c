@@ -4269,7 +4269,11 @@ static void binder_stat_br(struct binder_proc *proc,
 
 static int binder_put_node_cmd(struct binder_proc *proc,
 			       struct binder_thread *thread,
+#ifdef CONFIG_CHERI_PURECAP_UABI
+			       void * __capability *ptrp,
+#else
 			       void __user **ptrp,
+#endif
 			       binder_uintptr_t node_ptr,
 			       binder_uintptr_t node_cookie,
 			       int node_debug_id,
