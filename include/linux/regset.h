@@ -252,7 +252,11 @@ const struct user_regset_view *task_user_regset_view(struct task_struct *tsk);
 
 static inline int user_regset_copyin(unsigned int *pos, unsigned int *count,
 				     const void **kbuf,
+#ifdef CONFIG_CHERI_PURECAP_UABI
+				     const void * __capability *ubuf, void *data,
+#else
 				     const void __user **ubuf, void *data,
+#endif
 				     const int start_pos, const int end_pos)
 {
 	if (*count == 0)
@@ -278,7 +282,11 @@ static inline int user_regset_copyin(unsigned int *pos, unsigned int *count,
 static inline void user_regset_copyin_ignore(unsigned int *pos,
 					     unsigned int *count,
 					     const void **kbuf,
+#ifdef CONFIG_CHERI_PURECAP_UABI
+					     const void * __capability *ubuf,
+#else
 					     const void __user **ubuf,
+#endif
 					     const int start_pos,
 					     const int end_pos)
 {
