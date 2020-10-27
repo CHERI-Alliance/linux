@@ -425,7 +425,11 @@ extern long __sys_recvmsg_sock(struct socket *sock, struct msghdr *msg,
 			       unsigned int flags);
 extern int __copy_msghdr(struct msghdr *kmsg,
 			 struct user_msghdr *umsg,
+#ifdef CONFIG_CHERI_PURECAP_UABI
+			 struct sockaddr * __capability *save_addr);
+#else
 			 struct sockaddr __user **save_addr);
+#endif
 
 /* helpers which do the actual work for syscalls */
 extern int __sys_recvfrom(int fd, void __user *ubuf, size_t size,

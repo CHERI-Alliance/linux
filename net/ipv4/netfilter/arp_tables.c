@@ -1302,7 +1302,12 @@ static int compat_do_replace(struct net *net, sockptr_t arg, unsigned int len)
 	return ret;
 }
 
+
+#ifdef CONFIG_CHERI_PURECAP_UABI
+static int compat_copy_entry_to_user(struct arpt_entry *e, void * __capability *dstptr,
+#else
 static int compat_copy_entry_to_user(struct arpt_entry *e, void __user **dstptr,
+#endif
 				     compat_uint_t *size,
 				     struct xt_counters *counters,
 				     unsigned int i)

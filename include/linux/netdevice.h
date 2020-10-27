@@ -3893,7 +3893,11 @@ static inline bool is_socket_ioctl_cmd(unsigned int cmd)
 {
 	return _IOC_TYPE(cmd) == SOCK_IOC_TYPE;
 }
+#ifdef CONFIG_CHERI_PURECAP_UABI
+int get_user_ifreq(struct ifreq *ifr, void * __capability *ifrdata, void __user *arg);
+#else
 int get_user_ifreq(struct ifreq *ifr, void __user **ifrdata, void __user *arg);
+#endif
 int put_user_ifreq(struct ifreq *ifr, void __user *arg);
 int dev_ioctl(struct net *net, unsigned int cmd, struct ifreq *ifr,
 		void __user *data, bool *need_copyout);

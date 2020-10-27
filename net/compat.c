@@ -35,7 +35,11 @@
 
 int __get_compat_msghdr(struct msghdr *kmsg,
 			struct compat_msghdr *msg,
+#ifdef CONFIG_CHERI_PURECAP_UABI
+			struct sockaddr * __capability *save_addr)
+#else
 			struct sockaddr __user **save_addr)
+#endif
 {
 	ssize_t err;
 
@@ -82,7 +86,11 @@ int __get_compat_msghdr(struct msghdr *kmsg,
 
 int get_compat_msghdr(struct msghdr *kmsg,
 		      struct compat_msghdr __user *umsg,
+#ifdef CONFIG_CHERI_PURECAP_UABI
+		      struct sockaddr * __capability *save_addr,
+#else
 		      struct sockaddr __user **save_addr,
+#endif
 		      struct iovec **iov)
 {
 	struct compat_msghdr msg;
