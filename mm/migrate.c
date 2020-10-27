@@ -2224,7 +2224,11 @@ static int move_pages_and_store_status(int node,
  */
 static int do_pages_move(struct mm_struct *mm, nodemask_t task_nodes,
 			 unsigned long nr_pages,
+#ifdef CONFIG_CHERI_PURECAP_UABI
+			 const void * __capability * __capability pages,
+#else
 			 const void __user * __user *pages,
+#endif
 			 const int __user *nodes,
 			 int __user *status, int flags)
 {
@@ -2329,7 +2333,11 @@ out:
  * Determine the nodes of an array of pages and store it in an array of status.
  */
 static void do_pages_stat_array(struct mm_struct *mm, unsigned long nr_pages,
+#ifdef CONFIG_CHERI_PURECAP_UABI
+				const void * __capability *pages, int *status)
+#else
 				const void __user **pages, int *status)
+#endif
 {
 	unsigned long i;
 
@@ -2392,7 +2400,11 @@ static int get_compat_pages_array(const void __user *chunk_pages[],
  * a user array of status.
  */
 static int do_pages_stat(struct mm_struct *mm, unsigned long nr_pages,
+#ifdef CONFIG_CHERI_PURECAP_UABI
+			 const void * __capability * __capability pages,
+#else
 			 const void __user * __user *pages,
+#endif
 			 int __user *status)
 {
 #define DO_PAGES_STAT_CHUNK_NR 16UL
@@ -2476,7 +2488,11 @@ out:
  * process.
  */
 static int kernel_move_pages(pid_t pid, unsigned long nr_pages,
+#ifdef CONFIG_CHERI_PURECAP_UABI
+			     const void * __capability * __capability pages,
+#else
 			     const void __user * __user *pages,
+#endif
 			     const int __user *nodes,
 			     int __user *status, int flags)
 {
@@ -2506,7 +2522,11 @@ static int kernel_move_pages(pid_t pid, unsigned long nr_pages,
 }
 
 SYSCALL_DEFINE6(move_pages, pid_t, pid, unsigned long, nr_pages,
+#ifdef CONFIG_CHERI_PURECAP_UABI
+		const void * __capability * __capability, pages,
+#else
 		const void __user * __user *, pages,
+#endif
 		const int __user *, nodes,
 		int __user *, status, int, flags)
 {
