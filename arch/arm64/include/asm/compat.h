@@ -83,6 +83,16 @@ struct compat_statfs {
 	int		f_spare[4];
 };
 
+static inline void __user *compat_ptr(compat_uptr_t uptr)
+{
+	/*
+	 * TODO [PCuABI] - this should be done using the current user DDC, not
+	 * the root kernel one.
+	 */
+	return uaddr_to_user_ptr_safe(uptr);
+}
+#define compat_ptr(uptr) compat_ptr(uptr)
+
 #define compat_user_stack_pointer() (user_stack_pointer(task_pt_regs(current)))
 #define COMPAT_MINSIGSTKSZ	2048
 
