@@ -1503,7 +1503,7 @@ void do_fpsimd_exc(unsigned long esr, struct pt_regs *regs)
 	}
 
 	send_sig_fault(SIGFPE, si_code,
-		       (void __user *)instruction_pointer(regs),
+		       as_user_ptr(instruction_pointer(regs)),
 		       current);
 }
 

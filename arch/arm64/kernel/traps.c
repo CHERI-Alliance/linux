@@ -270,21 +270,21 @@ void arm64_force_sig_fault(int signo, int code, unsigned long far,
 	if (signo == SIGKILL)
 		force_sig(SIGKILL);
 	else
-		force_sig_fault(signo, code, (void __user *)far);
+		force_sig_fault(signo, code, as_user_ptr(far));
 }
 
 void arm64_force_sig_mceerr(int code, unsigned long far, short lsb,
 			    const char *str)
 {
 	arm64_show_signal(SIGBUS, str);
-	force_sig_mceerr(code, (void __user *)far, lsb);
+	force_sig_mceerr(code, as_user_ptr(far), lsb);
 }
 
 void arm64_force_sig_ptrace_errno_trap(int errno, unsigned long far,
 				       const char *str)
 {
 	arm64_show_signal(SIGTRAP, str);
-	force_sig_ptrace_errno_trap(errno, (void __user *)far);
+	force_sig_ptrace_errno_trap(errno, as_user_ptr(far));
 }
 
 void arm64_notify_die(const char *str, struct pt_regs *regs,
