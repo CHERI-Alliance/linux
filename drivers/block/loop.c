@@ -2229,7 +2229,9 @@ static long loop_control_ioctl(struct file *file, unsigned int cmd,
 static const struct file_operations loop_ctl_fops = {
 	.open		= nonseekable_open,
 	.unlocked_ioctl	= loop_control_ioctl,
+#ifdef CONFIG_COMPAT
 	.compat_ioctl	= loop_control_ioctl,
+#endif
 	.owner		= THIS_MODULE,
 	.llseek		= noop_llseek,
 };

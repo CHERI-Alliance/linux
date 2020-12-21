@@ -120,7 +120,7 @@ static struct dentry *kvm_debugfs_dir;
 static const struct file_operations stat_fops_per_vm;
 
 static long kvm_vcpu_ioctl(struct file *file, unsigned int ioctl,
-			   unsigned long arg);
+			   user_uintptr_t arg);
 #ifdef CONFIG_KVM_COMPAT
 static long kvm_vcpu_compat_ioctl(struct file *file, unsigned int ioctl,
 				  unsigned long arg);
@@ -4404,7 +4404,7 @@ static int kvm_wait_for_vcpu_online(struct kvm_vcpu *vcpu)
 }
 
 static long kvm_vcpu_ioctl(struct file *filp,
-			   unsigned int ioctl, unsigned long arg)
+			   unsigned int ioctl, user_uintptr_t arg)
 {
 	struct kvm_vcpu *vcpu = filp->private_data;
 	void __user *argp = (void __user *)arg;
@@ -4709,7 +4709,7 @@ static int kvm_device_mmap(struct file *filp, struct vm_area_struct *vma)
 static int kvm_device_ioctl_attr(struct kvm_device *dev,
 				 int (*accessor)(struct kvm_device *dev,
 						 struct kvm_device_attr *attr),
-				 unsigned long arg)
+				 user_uintptr_t arg)
 {
 	struct kvm_device_attr attr;
 
@@ -4723,7 +4723,7 @@ static int kvm_device_ioctl_attr(struct kvm_device *dev,
 }
 
 static long kvm_device_ioctl(struct file *filp, unsigned int ioctl,
-			     unsigned long arg)
+			     user_uintptr_t arg)
 {
 	struct kvm_device *dev = filp->private_data;
 
@@ -5146,7 +5146,7 @@ do {										\
 } while (0)
 
 static long kvm_vm_ioctl(struct file *filp,
-			   unsigned int ioctl, unsigned long arg)
+			   unsigned int ioctl, user_uintptr_t arg)
 {
 	struct kvm *kvm = filp->private_data;
 	void __user *argp = (void __user *)arg;
@@ -5521,7 +5521,7 @@ put_fd:
 }
 
 static long kvm_dev_ioctl(struct file *filp,
-			  unsigned int ioctl, unsigned long arg)
+			  unsigned int ioctl, user_uintptr_t arg)
 {
 	int r = -EINVAL;
 
