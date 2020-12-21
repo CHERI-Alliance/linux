@@ -311,7 +311,7 @@ static int inotify_release(struct inode *ignored, struct file *file)
 }
 
 static long inotify_ioctl(struct file *file, unsigned int cmd,
-			  unsigned long arg)
+			  user_uintptr_t arg)
 {
 	struct fsnotify_group *group;
 	struct fsnotify_event *fsn_event;
@@ -361,7 +361,9 @@ static const struct file_operations inotify_fops = {
 	.fasync		= fsnotify_fasync,
 	.release	= inotify_release,
 	.unlocked_ioctl	= inotify_ioctl,
+#ifdef CONFIG_COMPAT
 	.compat_ioctl	= inotify_ioctl,
+#endif
 	.llseek		= noop_llseek,
 };
 

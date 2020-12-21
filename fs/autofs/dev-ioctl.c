@@ -686,7 +686,7 @@ out:
 }
 
 static long autofs_dev_ioctl(struct file *file, unsigned int command,
-			     unsigned long u)
+			     user_uintptr_t u)
 {
 	int err;
 

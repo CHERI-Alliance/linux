@@ -389,7 +389,7 @@ static noinline int i2cdev_ioctl_smbus(struct i2c_client *client,
 	return res;
 }
 
-static long i2cdev_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long i2cdev_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct i2c_client *client = file->private_data;
 	unsigned long funcs;

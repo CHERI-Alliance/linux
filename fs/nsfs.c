@@ -17,7 +17,7 @@
 static struct vfsmount *nsfs_mnt;
 
 static long ns_ioctl(struct file *filp, unsigned int ioctl,
-			unsigned long arg);
+			user_uintptr_t arg);
 static const struct file_operations ns_file_operations = {
 	.llseek		= no_llseek,
 	.unlocked_ioctl = ns_ioctl,
@@ -120,7 +120,7 @@ int open_related_ns(struct ns_common *ns,
 EXPORT_SYMBOL_GPL(open_related_ns);
 
 static long ns_ioctl(struct file *filp, unsigned int ioctl,
-			unsigned long arg)
+			user_uintptr_t arg)
 {
 	struct user_namespace *user_ns;
 	struct ns_common *ns = get_proc_ns(file_inode(filp));

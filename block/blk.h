@@ -553,7 +553,7 @@ extern struct attribute_group blk_trace_attr_group;
 blk_mode_t file_to_blk_mode(struct file *file);
 int truncate_bdev_range(struct block_device *bdev, blk_mode_t mode,
 		loff_t lstart, loff_t lend);
-long blkdev_ioctl(struct file *file, unsigned cmd, unsigned long arg);
+long blkdev_ioctl(struct file *file, unsigned cmd, user_uintptr_t arg);
 long compat_blkdev_ioctl(struct file *file, unsigned cmd, unsigned long arg);
 
 extern const struct address_space_operations def_blk_aops;

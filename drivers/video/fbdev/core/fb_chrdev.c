@@ -60,7 +60,7 @@ static ssize_t fb_write(struct file *file, const char __user *buf, size_t count,
 }
 
 static long do_fb_ioctl(struct fb_info *info, unsigned int cmd,
-			unsigned long arg)
+			user_uintptr_t arg)
 {
 	const struct fb_ops *fb;
 	struct fb_var_screeninfo var;
@@ -160,7 +160,7 @@ static long do_fb_ioctl(struct fb_info *info, unsigned int cmd,
 	return ret;
 }
 
-static long fb_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long fb_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct fb_info *info = file_fb_info(file);
 

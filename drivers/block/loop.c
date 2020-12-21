@@ -1544,7 +1544,7 @@ static int lo_simple_ioctl(struct loop_device *lo, unsigned int cmd,
 }
 
 static int lo_ioctl(struct block_device *bdev, blk_mode_t mode,
-	unsigned int cmd, unsigned long arg)
+	unsigned int cmd, user_uintptr_t arg)
 {
 	struct loop_device *lo = bdev->bd_disk->private_data;
 	void __user *argp = (void __user *) arg;
@@ -2222,7 +2222,7 @@ found:
 }
 
 static long loop_control_ioctl(struct file *file, unsigned int cmd,
-			       unsigned long parm)
+			       user_uintptr_t parm)
 {
 	switch (cmd) {
 	case LOOP_CTL_ADD:
@@ -2239,7 +2239,9 @@ static long loop_control_ioctl(struct file *file, unsigned int cmd,
 static const struct file_operations loop_ctl_fops = {
 	.open		= nonseekable_open,
 	.unlocked_ioctl	= loop_control_ioctl,
+#ifdef CONFIG_COMPAT
 	.compat_ioctl	= loop_control_ioctl,
+#endif
 	.owner		= THIS_MODULE,
 	.llseek		= noop_llseek,
 };

@@ -673,7 +673,7 @@ __ATTRIBUTE_GROUPS(wdt);
  * Return: 0 if successful, error otherwise.
  */
 static int watchdog_ioctl_op(struct watchdog_device *wdd, unsigned int cmd,
-							unsigned long arg)
+							user_uintptr_t arg)
 {
 	if (!wdd->ops->ioctl)
 		return -ENOIOCTLCMD;
@@ -748,7 +748,7 @@ static ssize_t watchdog_write(struct file *file, const char __user *data,
  */
 
 static long watchdog_ioctl(struct file *file, unsigned int cmd,
-							unsigned long arg)
+							user_uintptr_t arg)
 {
 	struct watchdog_core_data *wd_data = file->private_data;
 	void __user *argp = (void __user *)arg;

@@ -212,7 +212,7 @@ static int fuse_setup_enable_verity(unsigned long arg, struct iovec *iov,
  * limits ioctl data transfers to well-formed ioctls and is the forced
  * behavior for all FUSE servers.
  */
-long fuse_do_ioctl(struct file *file, unsigned int cmd, unsigned long arg,
+long fuse_do_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg,
 		   unsigned int flags)
 {
 	struct fuse_file *ff = file->private_data;
@@ -409,7 +409,7 @@ long fuse_do_ioctl(struct file *file, unsigned int cmd, unsigned long arg,
 EXPORT_SYMBOL_GPL(fuse_do_ioctl);
 
 long fuse_ioctl_common(struct file *file, unsigned int cmd,
-		       unsigned long arg, unsigned int flags)
+		       user_uintptr_t arg, unsigned int flags)
 {
 	struct inode *inode = file_inode(file);
 	struct fuse_conn *fc = get_fuse_conn(inode);
@@ -423,16 +423,18 @@ long fuse_ioctl_common(struct file *file, unsigned int cmd,
 	return fuse_do_ioctl(file, cmd, arg, flags);
 }
 
-long fuse_file_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+long fuse_file_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	return fuse_ioctl_common(file, cmd, arg, 0);
 }
 
+#ifdef CONFIG_COMPAT
 long fuse_file_compat_ioctl(struct file *file, unsigned int cmd,
 			    unsigned long arg)
 {
 	return fuse_ioctl_common(file, cmd, arg, FUSE_IOCTL_COMPAT);
 }
+#endif
 
 static int fuse_priv_ioctl(struct inode *inode, struct fuse_file *ff,
 			   unsigned int cmd, void *ptr, size_t size)

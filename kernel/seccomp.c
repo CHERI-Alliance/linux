@@ -1769,7 +1769,7 @@ out:
 }
 
 static long seccomp_notify_ioctl(struct file *file, unsigned int cmd,
-				 unsigned long arg)
+				 user_uintptr_t arg)
 {
 	struct seccomp_filter *filter = file->private_data;
 	void __user *buf = (void __user *)arg;
@@ -1830,7 +1830,9 @@ static const struct file_operations seccomp_notify_ops = {
 	.poll = seccomp_notify_poll,
 	.release = seccomp_notify_release,
 	.unlocked_ioctl = seccomp_notify_ioctl,
+#ifdef CONFIG_COMPAT
 	.compat_ioctl = seccomp_notify_ioctl,
+#endif
 };
 
 static struct file *init_listener(struct seccomp_filter *filter)

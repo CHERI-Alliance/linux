@@ -256,6 +256,7 @@ unsigned long drm_gem_dma_get_unmapped_area(struct file *filp,
  * non-static version of this you're probably doing it wrong and will break the
  * THIS_MODULE reference by accident.
  */
+#ifdef CONFIG_COMPAT
 #define DEFINE_DRM_GEM_DMA_FOPS(name) \
 	static const struct file_operations name = {\
 		.owner		= THIS_MODULE,\
@@ -269,5 +270,19 @@ unsigned long drm_gem_dma_get_unmapped_area(struct file *filp,
 		.mmap		= drm_gem_mmap,\
 		DRM_GEM_DMA_UNMAPPED_AREA_FOPS \
 	}
+#else
+#define DEFINE_DRM_GEM_DMA_FOPS(name) \
+	static const struct file_operations name = {\
+		.owner		= THIS_MODULE,\
+		.open		= drm_open,\
+		.release	= drm_release,\
+		.unlocked_ioctl	= drm_ioctl,\
+		.poll		= drm_poll,\
+		.read		= drm_read,\
+		.llseek		= noop_llseek,\
+		.mmap		= drm_gem_mmap,\
+		DRM_GEM_DMA_UNMAPPED_AREA_FOPS \
+	}
+#endif
 
 #endif /* __DRM_GEM_DMA_HELPER_H__ */

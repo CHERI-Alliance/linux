@@ -2378,7 +2378,7 @@ static long fuse_dev_ioctl_backing_close(struct file *file, __u32 __user *argp)
 }
 
 static long fuse_dev_ioctl(struct file *file, unsigned int cmd,
-			   unsigned long arg)
+			   user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 

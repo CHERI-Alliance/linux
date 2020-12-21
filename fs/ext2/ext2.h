@@ -752,7 +752,7 @@ extern int ext2_fiemap(struct inode *inode, struct fiemap_extent_info *fieinfo,
 extern int ext2_fileattr_get(struct dentry *dentry, struct fileattr *fa);
 extern int ext2_fileattr_set(struct mnt_idmap *idmap,
 			     struct dentry *dentry, struct fileattr *fa);
-extern long ext2_ioctl(struct file *, unsigned int, unsigned long);
+extern long ext2_ioctl(struct file *, unsigned int, user_uintptr_t);
 extern long ext2_compat_ioctl(struct file *, unsigned int, unsigned long);
 
 /* namei.c */

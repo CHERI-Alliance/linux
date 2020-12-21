@@ -122,7 +122,7 @@ static int sock_mmap(struct file *file, struct vm_area_struct *vma);
 static int sock_close(struct inode *inode, struct file *file);
 static __poll_t sock_poll(struct file *file,
 			      struct poll_table_struct *wait);
-static long sock_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
+static long sock_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg);
 #ifdef CONFIG_COMPAT
 static long compat_sock_ioctl(struct file *file,
 			      unsigned int cmd, unsigned long arg);
@@ -1246,7 +1246,7 @@ static long sock_do_ioctl(struct net *net, struct socket *sock,
  *	what to do with it - that's up to the protocol still.
  */
 
-static long sock_ioctl(struct file *file, unsigned cmd, unsigned long arg)
+static long sock_ioctl(struct file *file, unsigned cmd, user_uintptr_t arg)
 {
 	const struct proto_ops  *ops;
 	struct socket *sock;

@@ -101,7 +101,7 @@ static int bsg_set_command_q(struct bsg_device *bd, int __user *uarg)
 	return 0;
 }
 
-static long bsg_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long bsg_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct bsg_device *bd = to_bsg_device(file_inode(file));
 	struct request_queue *q = bd->queue;

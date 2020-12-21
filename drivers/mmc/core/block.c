@@ -796,7 +796,7 @@ static int mmc_blk_check_blkdev(struct block_device *bdev)
 }
 
 static int mmc_blk_ioctl(struct block_device *bdev, blk_mode_t mode,
-	unsigned int cmd, unsigned long arg)
+	unsigned int cmd, user_uintptr_t arg)
 {
 	struct mmc_blk_data *md;
 	int ret;
@@ -2635,7 +2635,7 @@ static int mmc_blk_alloc_part(struct mmc_card *card,
  * the main block device spawning the RPMB character device.
  */
 static long mmc_rpmb_ioctl(struct file *filp, unsigned int cmd,
-			   unsigned long arg)
+			   user_uintptr_t arg)
 {
 	struct mmc_rpmb_data *rpmb = filp->private_data;
 	int ret;

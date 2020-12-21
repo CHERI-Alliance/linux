@@ -343,7 +343,7 @@ static long cros_ec_chardev_ioctl_readmem(struct cros_ec_dev *ec,
 }
 
 static long cros_ec_chardev_ioctl(struct file *filp, unsigned int cmd,
-				   unsigned long arg)
+				   user_uintptr_t arg)
 {
 	struct chardev_priv *priv = filp->private_data;
 	struct cros_ec_dev *ec = priv->ec_dev;

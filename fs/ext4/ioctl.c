@@ -844,7 +844,7 @@ int ext4_force_shutdown(struct super_block *sb, u32 flags)
 	return 0;
 }
 
-static int ext4_ioctl_shutdown(struct super_block *sb, unsigned long arg)
+static int ext4_ioctl_shutdown(struct super_block *sb, user_uintptr_t arg)
 {
 	u32 flags;
 
@@ -1029,7 +1029,7 @@ out:
 /* So that the fiemap access checks can't overflow on 32 bit machines. */
 #define FIEMAP_MAX_EXTENTS	(UINT_MAX / sizeof(struct fiemap_extent))
 
-static int ext4_ioctl_get_es_cache(struct file *filp, unsigned long arg)
+static int ext4_ioctl_get_es_cache(struct file *filp, user_uintptr_t arg)
 {
 	struct fiemap fiemap;
 	struct fiemap __user *ufiemap = (struct fiemap __user *) arg;
@@ -1229,7 +1229,7 @@ static int ext4_ioctl_setuuid(struct file *filp,
 	return ret;
 }
 
-static long __ext4_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+static long __ext4_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	struct super_block *sb = inode->i_sb;
@@ -1621,7 +1621,7 @@ resizefs_out:
 	}
 }
 
-long ext4_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+long ext4_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 {
 	return __ext4_ioctl(filp, cmd, arg);
 }

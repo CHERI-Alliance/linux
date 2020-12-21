@@ -5903,7 +5903,7 @@ static int perf_event_set_filter(struct perf_event *event, void __user *arg);
 static int perf_copy_attr(struct perf_event_attr __user *uattr,
 			  struct perf_event_attr *attr);
 
-static long _perf_ioctl(struct perf_event *event, unsigned int cmd, unsigned long arg)
+static long _perf_ioctl(struct perf_event *event, unsigned int cmd, user_uintptr_t arg)
 {
 	void (*func)(struct perf_event *);
 	u32 flags = arg;
@@ -6018,7 +6018,7 @@ static long _perf_ioctl(struct perf_event *event, unsigned int cmd, unsigned lon
 	return 0;
 }
 
-static long perf_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long perf_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct perf_event *event = file->private_data;
 	struct perf_event_context *ctx;
