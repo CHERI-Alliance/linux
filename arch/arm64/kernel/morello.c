@@ -13,6 +13,7 @@
 #include <linux/sched/mm.h>
 #include <linux/sched/task_stack.h>
 
+#include <asm/cacheflush.h>
 #include <asm/cpufeature.h>
 #include <asm/morello.h>
 #include <asm/ptrace.h>
@@ -112,11 +113,14 @@ void morello_show_regs(struct pt_regs *regs)
 }
 
 /* Inspired by __access_remote_vm() */
-static int read_remote_cap(struct task_struct *tsk, struct mm_struct *mm,
-			   unsigned long addr, struct user_cap *user_cap)
+static int access_remote_cap(struct task_struct *tsk, struct mm_struct *mm,
+			     unsigned long addr, struct user_cap *user_cap,
+			     unsigned int gup_flags)
 {
-	cap128_t *src;
+	int write = gup_flags & FOLL_WRITE;
+	struct vm_area_struct *vma;
 	struct page *page;
+	cap128_t *kaddr;
 	int ret;
 
 	/* This guarantees that the access will not cross pages */
@@ -126,16 +130,39 @@ static int read_remote_cap(struct task_struct *tsk, struct mm_struct *mm,
 	if (mmap_read_lock_killable(mm))
 		return -EIO;
 
-	page = get_user_page_vma_remote(mm, addr, FOLL_FORCE, &vma);
+	page = get_user_page_vma_remote(mm, addr, gup_flags, &vma);
 	if (IS_ERR(page)) {
 		ret = -EIO;
 		goto out_unlock;
 	}
 
-	src = (cap128_t *)(page_address(page) + offset_in_page(addr));
-	morello_cap_get_val_tag(src, &user_cap->val, &user_cap->tag);
+	kaddr = (cap128_t *)(page_address(page) + offset_in_page(addr));
+
+	if (write) {
+		/*
+		 * Disallow writing a valid (tagged) capability to an untagged
+		 * mapping (currently all shared mappings are untagged, this may
+		 * change in the future).
+		 *
+		 * Reading/writing an untagged capability is always allowed
+		 * (just like regular load and store instructions).
+		 */
+		if (user_cap->tag && (vma->vm_flags & VM_SHARED)) {
+			ret = -EOPNOTSUPP;
+			goto out_put;
+		}
+
+		morello_build_cap_from_root_cap(kaddr, &user_cap->val,
+						user_cap->tag);
+		flush_ptrace_access(vma, (unsigned long)kaddr,
+				    (unsigned long)kaddr + sizeof(cap128_t));
+		set_page_dirty_lock(page);
+	} else {
+		morello_cap_get_val_tag(kaddr, &user_cap->val, &user_cap->tag);
+	}
 	ret = 0;
 
+out_put:
 	put_page(page);
 out_unlock:
 	mmap_read_unlock(mm);
@@ -143,8 +170,10 @@ out_unlock:
 }
 
 /* Inspired by ptrace_access_vm() */
-int morello_ptrace_read_remote_cap(struct task_struct *tsk, unsigned long addr,
-				   struct user_cap *user_cap)
+int morello_ptrace_access_remote_cap(struct task_struct *tsk,
+				     unsigned long addr,
+				     struct user_cap *user_cap,
+				     unsigned int gup_flags)
 {
 	struct mm_struct *mm;
 	int ret;
@@ -161,7 +190,7 @@ int morello_ptrace_read_remote_cap(struct task_struct *tsk, unsigned long addr,
 		return -EPERM;
 	}
 
-	ret = read_remote_cap(tsk, mm, addr, user_cap);
+	ret = access_remote_cap(tsk, mm, addr, user_cap, gup_flags);
 	mmput(mm);
 
 	return ret;

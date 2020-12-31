@@ -29,8 +29,8 @@ void sync_icache_aliases(unsigned long start, unsigned long end)
 	}
 }
 
-static void flush_ptrace_access(struct vm_area_struct *vma, unsigned long start,
-				unsigned long end)
+void flush_ptrace_access(struct vm_area_struct *vma, unsigned long start,
+			 unsigned long end)
 {
 	if (vma->vm_flags & VM_EXEC)
 		sync_icache_aliases(start, end);
