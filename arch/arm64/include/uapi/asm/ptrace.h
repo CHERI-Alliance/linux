@@ -76,6 +76,7 @@
 
 /* Morello-specific request */
 #define PTRACE_PEEKCAP		  12
+#define PTRACE_POKECAP		  13
 /* syscall emulation path in ptrace */
 #define PTRACE_SYSEMU		  31
 #define PTRACE_SYSEMU_SINGLESTEP  32
@@ -358,7 +359,7 @@ struct user_morello_state {
 	__u64		cctlr;
 };
 
-/* In-memory capability representation (PTRACE_PEEKCAP) */
+/* In-memory capability representation (PTRACE_PEEKCAP, PTRACE_POKECAP) */
 
 struct user_cap {
 	__uint128_t	val;
