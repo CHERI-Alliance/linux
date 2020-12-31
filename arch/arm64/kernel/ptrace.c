@@ -1586,6 +1586,14 @@ static int morello_active(struct task_struct *target,
 	return regset->n;
 }
 
+/*
+ * Make sure tag_map is big enough to fit all the capability register
+ * tags (assuming tag_map immediately follows the last capability
+ * register in struct user_morello_state).
+ */
+static_assert(MORELLO_PT_TAG_MAP_REG_BIT(tag_map) <=
+	      sizeof_field(struct user_morello_state, tag_map) * 8);
+
 #define MORELLO_STATE_COPY_VAL_TAG(out, reg, cap) do {			\
 	u8 tag;								\
 	morello_cap_get_val_tag(&cap, &out.reg, &tag);			\
@@ -1604,14 +1612,6 @@ static int morello_get(struct task_struct *target,
 
 	if (!system_supports_morello())
 		return -EINVAL;
-
-	/*
-	 * Make sure tag_map is big enough to fit all the capability register
-	 * tags (assuming tag_map immediately follows the last capability
-	 * register in struct user_morello_state).
-	 */
-	BUILD_BUG_ON(MORELLO_PT_TAG_MAP_REG_BIT(tag_map) >
-		     sizeof_field(struct user_morello_state, tag_map) * 8);
 
 	/*
 	 * The target's 64-bit registers may have been modified (e.g. through
@@ -1652,6 +1652,57 @@ static int morello_get(struct task_struct *target,
 	out.cctlr = morello_state->cctlr;
 
 	return membuf_write(&to, &out, sizeof(out));
+}
+
+#define MORELLO_STATE_BUILD_CAP(state, reg, cap) do {			\
+	u8 tag = (state.tag_map >> MORELLO_PT_TAG_MAP_REG_BIT(reg)) & 0x1; \
+	morello_build_cap_from_root_cap(&cap, &state.reg, tag);		\
+} while (0)
+
+static int morello_set(struct task_struct *target,
+		       const struct user_regset *regset,
+		       unsigned int pos, unsigned int count,
+		       const void *kbuf, const void __user *ubuf)
+{
+	struct pt_regs *regs = task_pt_regs(target);
+	struct morello_state *morello_state =
+		&target->thread.morello_user_state;
+	struct user_morello_state new_state;
+	int ret, i;
+
+	if (!system_supports_morello())
+		return -EINVAL;
+
+	if (!morello_ptrace_forge_cap_enabled)
+		return -EPERM;
+
+	ret = user_regset_copyin(&pos, &count, &kbuf, &ubuf, &new_state, 0, -1);
+	if (ret)
+		return ret;
+
+	for (i = 0; i < ARRAY_SIZE(regs->cregs); i++)
+		MORELLO_STATE_BUILD_CAP(new_state, cregs[i], regs->cregs[i]);
+	MORELLO_STATE_BUILD_CAP(new_state, pcc, regs->pcc);
+
+	MORELLO_STATE_BUILD_CAP(new_state, csp, regs->csp);
+	MORELLO_STATE_BUILD_CAP(new_state, ddc, morello_state->ddc);
+	MORELLO_STATE_BUILD_CAP(new_state, ctpidr, morello_state->ctpidr);
+
+	MORELLO_STATE_BUILD_CAP(new_state, rcsp, regs->rcsp);
+	MORELLO_STATE_BUILD_CAP(new_state, rddc, morello_state->rddc);
+	MORELLO_STATE_BUILD_CAP(new_state, rctpidr, morello_state->rctpidr);
+
+	MORELLO_STATE_BUILD_CAP(new_state, cid, morello_state->cid);
+
+	morello_state->cctlr = new_state.cctlr;
+
+	/*
+	 * Overwrite the old 64-bit register values with the values from the new
+	 * capability state.
+	 */
+	morello_flush_cap_regs_to_64_regs(target);
+
+	return ret;
 }
 
 int morello_ptrace_peekcap(struct task_struct *target, unsigned long addr,
@@ -1899,6 +1950,7 @@ static const struct user_regset aarch64_regsets[] = {
 		.align = sizeof(__uint128_t),
 		.active = morello_active,
 		.regset_get = morello_get,
+		.set = morello_set,
 	},
 #endif
 };
