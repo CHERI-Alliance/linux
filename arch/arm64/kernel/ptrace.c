@@ -1576,6 +1576,8 @@ static int gcs_set(struct task_struct *target, const struct
 #endif
 
 #ifdef CONFIG_ARM64_MORELLO
+static int morello_ptrace_forge_cap_enabled;
+
 static int morello_active(struct task_struct *target,
 			  const struct user_regset *regset)
 {
@@ -2642,3 +2644,27 @@ int valid_user_regs(struct user_pt_regs *regs, struct task_struct *task)
 	else
 		return valid_native_regs(regs);
 }
+
+#ifdef CONFIG_ARM64_MORELLO
+static struct ctl_table morello_ptrace_forge_cap_sysctl_table[] = {
+	{
+		.procname	= "ptrace_forge_cap",
+		.mode		= 0644,
+		.data		= &morello_ptrace_forge_cap_enabled,
+		.maxlen		= sizeof(int),
+		.proc_handler	= proc_dointvec_minmax,
+		.extra1		= SYSCTL_ZERO,
+		.extra2		= SYSCTL_ONE,
+	},
+	{ }
+};
+
+static int __init morello_ptrace_forge_cap_init(void)
+{
+	if (!register_sysctl("cheri", morello_ptrace_forge_cap_sysctl_table))
+		return -EINVAL;
+	return 0;
+}
+
+core_initcall(morello_ptrace_forge_cap_init);
+#endif /* CONFIG_ARM64_MORELLO */
