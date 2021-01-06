@@ -2116,7 +2116,7 @@ static int prctl_set_mm_map(int opt, const void __user *addr, unsigned long data
 }
 #endif /* CONFIG_CHECKPOINT_RESTORE */
 
-static int prctl_set_auxv(struct mm_struct *mm, unsigned long addr,
+static int prctl_set_auxv(struct mm_struct *mm, user_uintptr_t addr,
 			  unsigned long len)
 {
 	/*
@@ -2146,7 +2146,7 @@ static int prctl_set_auxv(struct mm_struct *mm, unsigned long addr,
 	return 0;
 }
 
-static int prctl_set_mm(int opt, unsigned long addr,
+static int prctl_set_mm(int opt, user_uintptr_t addr,
 			unsigned long arg4, unsigned long arg5)
 {
 	struct mm_struct *mm = current->mm;
@@ -2284,12 +2284,20 @@ out:
 }
 
 #ifdef CONFIG_CHECKPOINT_RESTORE
-static int prctl_get_tid_address(struct task_struct *me, int __user * __user *tid_addr)
-{
-	return put_user(me->clear_child_tid, tid_addr);
-}
+#ifdef CONFIG_CHERI_PURECAP_UABI
+static int prctl_get_tid_address(struct task_struct *me, int * __capability * __capability tid_addr)
 #else
 static int prctl_get_tid_address(struct task_struct *me, int __user * __user *tid_addr)
+#endif
+{
+	return put_user_ptr(me->clear_child_tid, tid_addr);
+}
+#else
+#ifdef CONFIG_CHERI_PURECAP_UABI
+static int prctl_get_tid_address(struct task_struct *me, int * __capability * __capability tid_addr)
+#else
+static int prctl_get_tid_address(struct task_struct *me, int __user * __user *tid_addr)
+#endif
 {
 	return -EINVAL;
 }
@@ -2339,7 +2347,7 @@ static inline bool is_valid_name_char(char ch)
 }
 
 static int prctl_set_vma(unsigned long opt, unsigned long addr,
-			 unsigned long size, unsigned long arg)
+			 unsigned long size, user_uintptr_t arg)
 {
 	struct mm_struct *mm = current->mm;
 	const char __user *uname;
@@ -2384,7 +2392,7 @@ static int prctl_set_vma(unsigned long opt, unsigned long addr,
 
 #else /* CONFIG_ANON_VMA_NAME */
 static int prctl_set_vma(unsigned long opt, unsigned long start,
-			 unsigned long size, unsigned long arg)
+			 unsigned long size, user_uintptr_t arg)
 {
 	return -EINVAL;
 }
@@ -2454,8 +2462,8 @@ static int prctl_get_auxv(void __user *addr, unsigned long len)
 	return sizeof(mm->saved_auxv);
 }
 
-SYSCALL_DEFINE5(prctl, int, option, unsigned long, arg2, unsigned long, arg3,
-		unsigned long, arg4, unsigned long, arg5)
+SYSCALL_DEFINE5(prctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
+		user_uintptr_t, arg4, user_uintptr_t, arg5)
 {
 	struct task_struct *me = current;
 	unsigned char comm[sizeof(me->comm)];
@@ -2564,7 +2572,7 @@ SYSCALL_DEFINE5(prctl, int, option, unsigned long, arg2, unsigned long, arg3,
 			current->timer_slack_ns = arg2;
 		break;
 	case PR_MCE_KILL:
-		if (arg4 | arg5)
+		if (arg4 || arg5)
 			return -EINVAL;
 		switch (arg2) {
 		case PR_MCE_KILL_CLEAR:
@@ -2589,7 +2597,7 @@ SYSCALL_DEFINE5(prctl, int, option, unsigned long, arg2, unsigned long, arg3,
 		}
 		break;
 	case PR_MCE_KILL_GET:
-		if (arg2 | arg3 | arg4 | arg5)
+		if (arg2 || arg3 || arg4 || arg5)
 			return -EINVAL;
 		if (current->flags & PF_MCE_PROCESS)
 			error = (current->flags & PF_MCE_EARLY) ?
@@ -2601,7 +2609,11 @@ SYSCALL_DEFINE5(prctl, int, option, unsigned long, arg2, unsigned long, arg3,
 		error = prctl_set_mm(arg2, arg3, arg4, arg5);
 		break;
 	case PR_GET_TID_ADDRESS:
+#ifdef CONFIG_CHERI_PURECAP_UABI
+		error = prctl_get_tid_address(me, (int * __capability * __capability)arg2);
+#else
 		error = prctl_get_tid_address(me, (int __user * __user *)arg2);
+#endif
 		break;
 	case PR_SET_CHILD_SUBREAPER:
 		me->signal->is_child_subreaper = !!arg2;
