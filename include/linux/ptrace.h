@@ -47,12 +47,12 @@ extern int ptrace_access_vm(struct task_struct *tsk, unsigned long addr,
 #define PT_SUSPEND_SECCOMP	(PTRACE_O_SUSPEND_SECCOMP << PT_OPT_FLAG_SHIFT)
 
 extern long arch_ptrace(struct task_struct *child, long request,
-			unsigned long addr, unsigned long data);
+			user_uintptr_t addr, user_uintptr_t data);
 extern int ptrace_readdata(struct task_struct *tsk, unsigned long src, char __user *dst, int len);
 extern int ptrace_writedata(struct task_struct *tsk, char __user *src, unsigned long dst, int len);
 extern void ptrace_disable(struct task_struct *);
 extern int ptrace_request(struct task_struct *child, long request,
-			  unsigned long addr, unsigned long data);
+			  user_uintptr_t addr, user_uintptr_t data);
 extern int ptrace_notify(int exit_code, unsigned long message);
 extern void __ptrace_link(struct task_struct *child,
 			  struct task_struct *new_parent,
@@ -99,9 +99,9 @@ static inline void ptrace_unlink(struct task_struct *child)
 }
 
 int generic_ptrace_peekdata(struct task_struct *tsk, unsigned long addr,
-			    unsigned long data);
+			    user_uintptr_t data);
 int generic_ptrace_pokedata(struct task_struct *tsk, unsigned long addr,
-			    unsigned long data);
+			    user_uintptr_t data);
 
 /**
  * ptrace_parent - return the task that is tracing the given task
