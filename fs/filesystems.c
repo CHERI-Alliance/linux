@@ -188,7 +188,7 @@ static int fs_maxindex(void)
 /*
  * Whee.. Weird sysv syscall. 
  */
-SYSCALL_DEFINE3(sysfs, int, option, unsigned long, arg1, unsigned long, arg2)
+SYSCALL_DEFINE3(sysfs, int, option, user_uintptr_t, arg1, user_uintptr_t, arg2)
 {
 	int retval = -EINVAL;
 
