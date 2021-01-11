@@ -4249,7 +4249,8 @@ do_sigaltstack (const stack_t *ss, stack_t *oss, unsigned long sp,
 
 	if (oss) {
 		memset(oss, 0, sizeof(stack_t));
-		oss->ss_sp = (void __user *) t->sas_ss_sp;
+		/* TODO [PCuABI] - preserving user-provided capability */
+		oss->ss_sp = uaddr_to_user_ptr(t->sas_ss_sp);
 		oss->ss_size = t->sas_ss_size;
 		oss->ss_flags = sas_ss_flags(sp) |
 			(current->sas_ss_flags & SS_FLAG_BITS);
@@ -4273,7 +4274,7 @@ do_sigaltstack (const stack_t *ss, stack_t *oss, unsigned long sp,
 		 * Return before taking any locks if no actual
 		 * sigaltstack changes were requested.
 		 */
-		if (t->sas_ss_sp == (unsigned long)ss_sp &&
+		if (t->sas_ss_sp == user_ptr_addr(ss_sp) &&
 		    t->sas_ss_size == ss_size &&
 		    t->sas_ss_flags == ss_flags)
 			return 0;
@@ -4289,7 +4290,8 @@ do_sigaltstack (const stack_t *ss, stack_t *oss, unsigned long sp,
 				ret = -ENOMEM;
 		}
 		if (!ret) {
-			t->sas_ss_sp = (unsigned long) ss_sp;
+			/* TODO [PCuABI] - preserving user-provided capability */
+			t->sas_ss_sp = user_ptr_addr(ss_sp);
 			t->sas_ss_size = ss_size;
 			t->sas_ss_flags = ss_flags;
 		}
@@ -4326,7 +4328,7 @@ int restore_altstack(const stack_t __user *uss)
 int __save_altstack(stack_t __user *uss, unsigned long sp)
 {
 	struct task_struct *t = current;
-	int err = __put_user((void __user *)t->sas_ss_sp, &uss->ss_sp) |
+	int err = __put_user_ptr(uaddr_to_user_ptr(t->sas_ss_sp), &uss->ss_sp) |
 		__put_user(t->sas_ss_flags, &uss->ss_flags) |
 		__put_user(t->sas_ss_size, &uss->ss_size);
 	return err;
