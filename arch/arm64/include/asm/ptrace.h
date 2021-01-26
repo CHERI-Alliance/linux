@@ -204,10 +204,10 @@ struct pt_regs {
 	u64 exit_rcu;
 
 #ifdef CONFIG_ARM64_MORELLO
-	cap128_t cregs[31];
-	cap128_t csp;
-	cap128_t rcsp;
-	cap128_t pcc;
+	uintcap_t cregs[31];
+	uintcap_t csp;
+	uintcap_t rcsp;
+	uintcap_t pcc;
 #endif
 };
 
