@@ -42,6 +42,14 @@ typedef __kernel_gid16_t        gid16_t;
 typedef unsigned long		uintptr_t;
 typedef long			intptr_t;
 
+#ifdef CONFIG_CHERI_PURECAP_UABI
+typedef __uintcap_t		user_uintptr_t;
+typedef __intcap_t		user_intptr_t;
+#else
+typedef unsigned long		user_uintptr_t;
+typedef long			user_intptr_t;
+#endif
+
 #ifdef CONFIG_HAVE_UID16
 /* This is defined by include/asm-{arch}/posix_types.h */
 typedef __kernel_old_uid_t	old_uid_t;
