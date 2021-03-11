@@ -2259,13 +2259,13 @@ config ARM64_SME
 	  register state capable of holding two dimensional matrix tiles to
 	  enable various matrix operations.
 
-config AS_HAS_MORELLO
-	def_bool $(as-instr,.arch morello)
+config CC_HAS_MORELLO
+	def_bool $(cc-option,-march=morello)
 
 config ARM64_MORELLO
 	bool "Morello capability architecture support"
 	default y
-	depends on AS_HAS_MORELLO
+	depends on CC_HAS_MORELLO
 	select ARCH_NO_SWAP
 	help
 	  The Morello architecture is an experimental extension to Armv8.2-A,
