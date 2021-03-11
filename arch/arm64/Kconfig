@@ -2268,6 +2268,7 @@ config ARM64_MORELLO
 	default y
 	depends on CC_HAS_MORELLO
 	select ARCH_NO_SWAP
+	select ARCH_HAS_CHERI_CAPABILITIES
 	help
 	  The Morello architecture is an experimental extension to Armv8.2-A,
 	  which extends the AArch64 state with the principles proposed in
