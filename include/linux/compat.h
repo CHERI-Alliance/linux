@@ -39,8 +39,15 @@
 #endif
 
 #ifndef __SC_DELOUSE
+#ifdef CONFIG_CHERI_PURECAP_UABI
+#define __SC_DELOUSE(t, v)							\
+	((__force t)(__builtin_choose_expr(__TYPE_IS_USER_PTR(t),		\
+					   (user_uintptr_t)compat_ptr(v),	\
+					   (unsigned long)v)))
+#else /* CONFIG_CHERI_PURECAP_UABI */
 #define __SC_DELOUSE(t,v) ((__force t)(unsigned long)(v))
-#endif
+#endif /* CONFIG_CHERI_PURECAP_UABI */
+#endif /* __SC_DELOUSE */
 
 #ifndef COMPAT_SYSCALL_DEFINE0
 #define COMPAT_SYSCALL_DEFINE0(name) \
