@@ -50,6 +50,12 @@ typedef unsigned long		user_uintptr_t;
 typedef long			user_intptr_t;
 #endif
 
+#ifdef __PTRADDR_TYPE__
+typedef __PTRADDR_TYPE__	ptraddr_t;
+#else
+typedef unsigned long		ptraddr_t;
+#endif
+
 #ifdef CONFIG_HAVE_UID16
 /* This is defined by include/asm-{arch}/posix_types.h */
 typedef __kernel_old_uid_t	old_uid_t;
