@@ -56,6 +56,10 @@ typedef __PTRADDR_TYPE__	ptraddr_t;
 typedef unsigned long		ptraddr_t;
 #endif
 
+#ifdef __CHERI__
+typedef __kernel_uintcap_t	uintcap_t;
+#endif
+
 #ifdef CONFIG_HAVE_UID16
 /* This is defined by include/asm-{arch}/posix_types.h */
 typedef __kernel_old_uid_t	old_uid_t;
