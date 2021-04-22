@@ -4,6 +4,10 @@
 
 #include <linux/typecheck.h>
 
+#ifdef CONFIG_ARCH_HAS_USER_PTR_H
+#include <asm/user_ptr.h>
+#endif
+
 /**
  * as_user_ptr - convert an arbitrary integer value to a user pointer
  * @x: the integer value to convert
