@@ -376,6 +376,59 @@ do {									\
 		goto err_label;						\
 } while(0)
 
+#ifdef CONFIG_CHERI_PURECAP_UABI
+
+#define __get_user_ptr_error(x, ptr, err)				\
+do {									\
+	uintcap_t __x;							\
+	BUILD_BUG_ON(sizeof(x) != sizeof(__x));				\
+	__morello_get_user_cap_error(__x, (ptr), (err));		\
+	(x) = (__force __typeof__(x))__x;				\
+} while (0)
+
+#define __put_user_ptr_error(x, ptr, err)				\
+do {									\
+	uintcap_t __x = (uintcap_t)(x);					\
+	BUILD_BUG_ON(sizeof(x) != sizeof(__x));				\
+	__morello_put_user_cap_error(__x, (ptr), (err));		\
+} while (0)
+
+#else /* CONFIG_CHERI_PURECAP_UABI */
+
+#define __get_user_ptr_error(x, ptr, err)				\
+do {									\
+	BUILD_BUG_ON(sizeof(x) != sizeof(void __user *) ||		\
+		     sizeof(*(ptr)) != sizeof(void __user *));		\
+	__get_user_error((x), (ptr), (err));				\
+} while (0)
+
+#define __put_user_ptr_error(x, ptr, err)				\
+do {									\
+	BUILD_BUG_ON(sizeof(x) != sizeof(void __user *) ||		\
+		     sizeof(*(ptr)) != sizeof(void __user *));		\
+	__put_user_error((x), (ptr), (err));				\
+} while (0)
+
+#endif /* CONFIG_CHERI_PURECAP_UABI */
+
+#define __get_user_ptr(x, ptr)						\
+({									\
+	int __gu_err = 0;						\
+	__get_user_ptr_error((x), (ptr), __gu_err);			\
+	__gu_err;							\
+})
+
+#define get_user_ptr	__get_user_ptr
+
+#define __put_user_ptr(x, ptr)						\
+({									\
+	int __pu_err = 0;						\
+	__put_user_ptr_error((x), (ptr), __pu_err);			\
+	__pu_err;							\
+})
+
+#define put_user_ptr	__put_user_ptr
+
 #ifdef CONFIG_ARM64_MORELLO
 #define __morello_raw_get_user_cap(x, ptr, err)				\
 do {									\
