@@ -344,7 +344,7 @@ int aarch32_break_handler(struct pt_regs *regs)
 	u32 arm_instr;
 	u16 thumb_instr;
 	bool bp = false;
-	void __user *pc = (void __user *)instruction_pointer(regs);
+	void __user *pc = uaddr_to_user_ptr_safe(instruction_pointer(regs));
 
 	if (!compat_user_mode(regs))
 		return -EFAULT;

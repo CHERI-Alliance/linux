@@ -378,17 +378,18 @@ static int user_insn_read(struct pt_regs *regs, u32 *insnp)
 {
 	u32 instr;
 	unsigned long pc = instruction_pointer(regs);
+	void __user *pc_usr_ptr = uaddr_to_user_ptr_safe(pc);
 
 	if (compat_thumb_mode(regs)) {
 		/* 16-bit Thumb instruction */
 		__le16 instr_le;
-		if (get_user(instr_le, (__le16 __user *)pc))
+		if (get_user(instr_le, (__le16 __user *)pc_usr_ptr))
 			return -EFAULT;
 		instr = le16_to_cpu(instr_le);
 		if (aarch32_insn_is_wide(instr)) {
 			u32 instr2;
 
-			if (get_user(instr_le, (__le16 __user *)(pc + 2)))
+			if (get_user(instr_le, (__le16 __user *)(pc_usr_ptr + 2)))
 				return -EFAULT;
 			instr2 = le16_to_cpu(instr_le);
 			instr = (instr << 16) | instr2;
@@ -396,7 +397,7 @@ static int user_insn_read(struct pt_regs *regs, u32 *insnp)
 	} else {
 		/* 32-bit ARM instruction */
 		__le32 instr_le;
-		if (get_user(instr_le, (__le32 __user *)pc))
+		if (get_user(instr_le, (__le32 __user *)pc_usr_ptr))
 			return -EFAULT;
 		instr = le32_to_cpu(instr_le);
 	}
