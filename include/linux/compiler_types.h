@@ -85,6 +85,14 @@ static inline void __chk_io_ptr(const volatile void __iomem *ptr) { }
 
 #ifdef __KERNEL__
 
+#ifdef CONFIG_CHERI_PURECAP_UABI
+#ifdef __CHECKER__
+#error "Source code checkers are currently not supported when CONFIG_CHERI_PURECAP_UABI=y"
+#endif
+#undef __user
+#define __user		__capability
+#endif /* CONFIG_CHERI_PURECAP_UABI */
+
 /* Attributes */
 #include <linux/compiler_attributes.h>
 
