@@ -3,6 +3,7 @@
 #define _LINUX_ERR_H
 
 #include <linux/compiler.h>
+#include <linux/user_ptr.h>
 #include <linux/types.h>
 
 #include <asm/errno.h>
@@ -25,7 +26,7 @@
  *
  * Like IS_ERR(), but does not generate a compiler warning if result is unused.
  */
-#define IS_ERR_VALUE(x) unlikely((unsigned long)(void *)(x) >= (unsigned long)-MAX_ERRNO)
+#define IS_ERR_VALUE(x) unlikely((unsigned long)(x) >= (unsigned long)-MAX_ERRNO)
 
 /**
  * ERR_PTR - Create an error pointer.
@@ -106,6 +107,36 @@ static inline int __must_check PTR_ERR_OR_ZERO(__force const void *ptr)
 {
 	if (IS_ERR(ptr))
 		return PTR_ERR(ptr);
+	else
+		return 0;
+}
+
+/* User pointer variants of the functions above */
+
+static inline void __user * __must_check ERR_USER_PTR(long error)
+{
+	return as_user_ptr(error);
+}
+
+static inline long __must_check USER_PTR_ERR(const void __user *ptr)
+{
+	return user_ptr_addr(ptr);
+}
+
+static inline bool __must_check USER_PTR_IS_ERR(const void __user *ptr)
+{
+	return IS_ERR_VALUE(user_ptr_addr(ptr));
+}
+
+static inline bool __must_check USER_PTR_IS_ERR_OR_NULL(const void __user *ptr)
+{
+	return unlikely(!ptr) || USER_PTR_IS_ERR(ptr);
+}
+
+static inline int __must_check USER_PTR_ERR_OR_ZERO(const void __user *ptr)
+{
+	if (USER_PTR_IS_ERR(ptr))
+		return USER_PTR_ERR(ptr);
 	else
 		return 0;
 }
