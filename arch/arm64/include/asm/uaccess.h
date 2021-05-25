@@ -204,7 +204,8 @@ static inline void __user *__uaccess_mask_ptr(const void __user *ptr)
 	"2:\n"								\
 	_ASM_EXTABLE_##type##ACCESS_ERR_ZERO(1b, 2b, %w0, %w1)		\
 	: "+r" (err), "=r" (x)						\
-	: "r" (addr))
+	/* TODO [PCuABI] - perform the access via the user capability */\
+	: "r" ((ptraddr_t)(user_uintptr_t)(addr)))
 
 #define __raw_get_mem(ldr, x, ptr, err, type)					\
 do {										\
@@ -293,7 +294,8 @@ do {									\
 	"2:\n"								\
 	_ASM_EXTABLE_##type##ACCESS_ERR(1b, 2b, %w0)			\
 	: "+r" (err)							\
-	: "rZ" (x), "r" (addr))
+	/* TODO [PCuABI] - perform the access via the user capability */\
+	: "rZ" (x), "r" ((ptraddr_t)(user_uintptr_t)(addr)))
 
 #define __raw_put_mem(str, x, ptr, err, type)					\
 do {										\
