@@ -229,6 +229,13 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	if (copy_to_user(u_rand_bytes, k_rand_bytes, sizeof(k_rand_bytes)))
 		return -EFAULT;
 
+/* TODO [PCuABI] - remove once the auxval code is modified for PCuABI */
+#ifdef CONFIG_CHERI_PURECAP_UABI
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcheri-pointer-conversion"
+#endif
+
+
 	/* Create the ELF interpreter info */
 	elf_info = (elf_addr_t *)mm->saved_auxv;
 	/* update AT_VECTOR_SIZE_BASE if the number of NEW_AUX_ENT() changes */
@@ -290,6 +297,10 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	NEW_AUX_ENT(AT_RSEQ_ALIGN, rseq_alloc_align());
 #endif
 #undef NEW_AUX_ENT
+/* TODO [PCuABI] - remove once the auxval code is modified for PCuABI */
+#ifdef CONFIG_CHERI_PURECAP_UABI
+#pragma clang diagnostic pop
+#endif
 	/* AT_NULL is zero; clear the rest too */
 	memset(elf_info, 0, (char *)mm->saved_auxv +
 			sizeof(mm->saved_auxv) - (char *)elf_info);
