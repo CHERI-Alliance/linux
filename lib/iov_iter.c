@@ -1161,7 +1161,7 @@ static int iov_npages(const struct iov_iter *i, int maxpages)
 	int npages = 0;
 
 	for (p = iter_iov(i); size; skip = 0, p++) {
-		unsigned offs = offset_in_page(p->iov_base + skip);
+		unsigned offs = offset_in_page(user_ptr_addr(p->iov_base) + skip);
 		size_t len = min(p->iov_len - skip, size);
 
 		if (len) {
