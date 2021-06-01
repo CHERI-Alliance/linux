@@ -1515,7 +1515,8 @@ long do_shmat(int shmid, char __user *shmaddr, int shmflg,
 	      ulong *raddr, unsigned long shmlba)
 {
 	struct shmid_kernel *shp;
-	unsigned long addr = (unsigned long)shmaddr;
+	/* TODO [PCuABI] - capability checks for address space management */
+	unsigned long addr = user_ptr_addr(shmaddr);
 	unsigned long size;
 	struct file *file, *base;
 	int    err;
@@ -1724,7 +1725,8 @@ long ksys_shmdt(char __user *shmaddr)
 {
 	struct mm_struct *mm = current->mm;
 	struct vm_area_struct *vma;
-	unsigned long addr = (unsigned long)shmaddr;
+	/* TODO [PCuABI] - capability checks for address space management */
+	unsigned long addr = user_ptr_addr(shmaddr);
 	int retval = -EINVAL;
 #ifdef CONFIG_MMU
 	loff_t size = 0;

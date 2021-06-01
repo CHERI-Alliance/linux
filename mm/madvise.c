@@ -1532,7 +1532,7 @@ SYSCALL_DEFINE5(process_madvise, int, pidfd, const struct iovec __user *, vec,
 	total_len = iov_iter_count(&iter);
 
 	while (iov_iter_count(&iter)) {
-		ret = do_madvise(mm, (unsigned long)iter_iov_addr(&iter),
+		ret = do_madvise(mm, user_ptr_addr(iter_iov_addr(&iter)),
 					iter_iov_len(&iter), behavior);
 		if (ret < 0)
 			break;
