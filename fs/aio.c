@@ -2002,7 +2002,7 @@ static int __io_submit_one(struct kioctx *ctx, const struct iocb *iocb,
 		return -EFAULT;
 	}
 
-	req->ki_res.obj = (u64)(unsigned long)user_iocb;
+	req->ki_res.obj = user_ptr_addr(user_iocb);
 	req->ki_res.data = iocb->aio_data;
 	req->ki_res.res = 0;
 	req->ki_res.res2 = 0;
@@ -2192,7 +2192,7 @@ SYSCALL_DEFINE3(io_cancel, aio_context_t, ctx_id, struct iocb __user *, iocb,
 	struct aio_kiocb *kiocb;
 	int ret = -EINVAL;
 	u32 key;
-	u64 obj = (u64)(unsigned long)iocb;
+	u64 obj = user_ptr_addr(iocb);
 
 	if (unlikely(get_user(key, &iocb->aio_key)))
 		return -EFAULT;
