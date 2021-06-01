@@ -45,7 +45,7 @@ EXPORT_SYMBOL(_copy_to_user);
 int check_zeroed_user(const void __user *from, size_t size)
 {
 	unsigned long val;
-	uintptr_t align = (user_uintptr_t) from % sizeof(unsigned long);
+	size_t align = user_ptr_addr(from) % sizeof(unsigned long);
 
 	if (unlikely(size == 0))
 		return 1;
