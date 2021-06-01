@@ -40,6 +40,11 @@
 
 #define GCS_SIGNAL_CAP(addr) (((unsigned long)addr) & GCS_CAP_ADDR_MASK)
 
+/* TODO [PCuABI] - remove when actually porting this file to support PCuABI */
+#ifdef CONFIG_CHERI_PURECAP_UABI
+#pragma clang diagnostic ignored "-Wcheri-pointer-conversion"
+#endif
+
 /*
  * Do a signal return; undo the signal stack. These are aligned to 128-bit.
  */
