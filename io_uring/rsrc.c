@@ -128,7 +128,7 @@ static int io_buffer_validate(struct iovec *iov)
 	if (iov->iov_len > SZ_1G)
 		return -EFAULT;
 
-	if (check_add_overflow((unsigned long)iov->iov_base, acct_len, &tmp))
+	if (check_add_overflow(user_ptr_addr(iov->iov_base), acct_len, &tmp))
 		return -EOVERFLOW;
 
 	return 0;
@@ -889,7 +889,8 @@ static int io_sqe_buffer_register(struct io_ring_ctx *ctx, struct iovec *iov,
 		return 0;
 
 	ret = -ENOMEM;
-	pages = io_pin_pages((unsigned long) iov->iov_base, iov->iov_len,
+	/* TODO [PCuABI] - capability checks for uaccess */
+	pages = io_pin_pages(user_ptr_addr(iov->iov_base), iov->iov_len,
 				&nr_pages);
 	if (IS_ERR(pages)) {
 		ret = PTR_ERR(pages);
@@ -933,10 +934,10 @@ static int io_sqe_buffer_register(struct io_ring_ctx *ctx, struct iovec *iov,
 		goto done;
 	}
 
-	off = (unsigned long) iov->iov_base & ~PAGE_MASK;
+	off = user_ptr_addr(iov->iov_base) & ~PAGE_MASK;
 	size = iov->iov_len;
 	/* store original address for later verification */
-	imu->ubuf = (unsigned long) iov->iov_base;
+	imu->ubuf = user_ptr_addr(iov->iov_base);
 	imu->ubuf_end = imu->ubuf + iov->iov_len;
 	imu->nr_bvecs = nr_pages;
 	*pimu = imu;

@@ -1331,8 +1331,9 @@ static int io_send_zc_import(struct io_kiocb *req, struct io_async_msghdr *kmsg)
 	int ret;
 
 	if (sr->flags & IORING_RECVSEND_FIXED_BUF) {
+		/* TODO [PCuABI] - capability checks for uaccess */
 		ret = io_import_fixed(ITER_SOURCE, &kmsg->msg.msg_iter, req->imu,
-					(u64)(uintptr_t)sr->buf, sr->len);
+					user_ptr_addr(sr->buf), sr->len);
 		if (unlikely(ret))
 			return ret;
 		kmsg->msg.sg_from_iter = io_sg_from_iter;
