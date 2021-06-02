@@ -793,7 +793,7 @@ static long ptrace_get_rseq_configuration(struct task_struct *task,
 					  unsigned long size, void __user *data)
 {
 	struct ptrace_rseq_configuration conf = {
-		.rseq_abi_pointer = (u64)(uintptr_t)task->rseq,
+		.rseq_abi_pointer = user_ptr_addr(task->rseq),
 		.rseq_abi_size = task->rseq_len,
 		.signature = task->rseq_sig,
 		.flags = 0,

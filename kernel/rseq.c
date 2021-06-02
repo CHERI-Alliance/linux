@@ -414,8 +414,8 @@ SYSCALL_DEFINE4(rseq, struct rseq __user *, rseq, u32, rseq_len,
 	 * user-space through the ELF auxiliary vector AT_RSEQ_FEATURE_SIZE.
 	 */
 	if (rseq_len < ORIG_RSEQ_SIZE ||
-	    (rseq_len == ORIG_RSEQ_SIZE && !IS_ALIGNED((unsigned long)rseq, ORIG_RSEQ_SIZE)) ||
-	    (rseq_len != ORIG_RSEQ_SIZE && (!IS_ALIGNED((unsigned long)rseq, __alignof__(*rseq)) ||
+	    (rseq_len == ORIG_RSEQ_SIZE && !IS_ALIGNED(user_ptr_addr(rseq), ORIG_RSEQ_SIZE)) ||
+	    (rseq_len != ORIG_RSEQ_SIZE && (!IS_ALIGNED(user_ptr_addr(rseq), __alignof__(*rseq)) ||
 					    rseq_len < offsetof(struct rseq, end))))
 		return -EINVAL;
 	if (!access_ok(rseq, rseq_len))
