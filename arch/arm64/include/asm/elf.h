@@ -208,6 +208,19 @@ typedef compat_elf_greg_t		compat_elf_gregset_t[COMPAT_ELF_NGREG];
 
 #ifdef CONFIG_COMPAT
 
+#ifdef CONFIG_COMPAT64
+
+/*
+ * TODO [PCuABI]: Redefine below macros and typedefs to let ptrace pick them
+ * and build. These redefinitions are not permanent and might not be required if
+ * the ptrace is modified for complete COMPAT64 support.
+ */
+#define COMPAT_ELF_NGREG		ELF_NGREG
+typedef unsigned long			compat_elf_greg_t;
+typedef compat_elf_greg_t		compat_elf_gregset_t[COMPAT_ELF_NGREG];
+
+#else /* !CONFIG_COMPAT64 */
+
 /* PIE load location for compat arm. Must match ARM ELF_ET_DYN_BASE. */
 #define COMPAT_ELF_ET_DYN_BASE		0x000400000UL
 
@@ -244,6 +257,8 @@ extern int aarch32_setup_additional_pages(struct linux_binprm *bprm,
 					  int uses_interp);
 #define compat_arch_setup_additional_pages \
 					aarch32_setup_additional_pages
+
+#endif /* !CONFIG_COMPAT64 */
 
 #endif /* CONFIG_COMPAT */
 

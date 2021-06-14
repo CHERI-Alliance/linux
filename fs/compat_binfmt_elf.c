@@ -14,11 +14,21 @@
  * functions used in binfmt_elf.c to compat versions.
  */
 
+#ifdef CONFIG_COMPAT32
 #include <linux/elfcore-compat.h>
+#else
+/*
+ * TODO [PCuABI] - The header linux/elfcore-compat.h needs some changes for
+ * complete compat64 support so for time being include minimum definitions
+ * from linux/elf.h.
+ */
+#include <linux/elf.h>
+#endif /* CONFIG_COMPAT32 */
 #include <linux/time.h>
 
 #define ELF_COMPAT	1
 
+#ifdef CONFIG_COMPAT32
 /*
  * Rename the basic ELF layout types to refer to the 32-bit class of files.
  */
@@ -137,6 +147,8 @@
 #define exit_elf_binfmt		exit_compat_elf_binfmt
 #define binfmt_elf_test_cases	compat_binfmt_elf_test_cases
 #define binfmt_elf_test_suite	compat_binfmt_elf_test_suite
+
+#endif /* CONFIG_COMPAT32 */
 
 /*
  * We share all the actual code with the native (64-bit) version.
