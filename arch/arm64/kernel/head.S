@@ -222,7 +222,13 @@ SYM_FUNC_START_LOCAL(__primary_switched)
 	init_cpu_task x4, x5, x6
 
 	adr_l	x8, vectors			// load VBAR_EL1 with virtual
-	msr	vbar_el1, x8			// vector table address
+						// vector table address
+#ifdef CONFIG_ARM64_MORELLO
+	cvtp	c8, x8
+	msr	cvbar_el1, c8
+#else
+	msr	vbar_el1, x8
+#endif
 	isb
 
 	stp	x29, x30, [sp, #-16]!
@@ -284,7 +290,13 @@ SYM_INNER_LABEL(init_el1, SYM_L_LOCAL)
 	eret
 
 SYM_INNER_LABEL(init_el2, SYM_L_LOCAL)
-	msr	elr_el2, lr
+	/*
+	 * lr will get clobbered if we call dcache_clean_poc. We cannot spill
+	 * it on the stack as there is no stack yet. Stash it in tpidr_el0
+	 * instead; it is definitely unused at this point and we remain
+	 * compliant with the PCS this way.
+	 */
+	msr	tpidr_el0, lr
 
 	// clean all HYP code to the PoC if we booted at EL2 with the MMU on
 	cbz	x0, 0f
@@ -304,8 +316,33 @@ SYM_INNER_LABEL(init_el2, SYM_L_LOCAL)
 
 	/* Hypervisor stub */
 	adr_l	x0, __hyp_stub_vectors
+	mrs	lr, tpidr_el0
+
+#ifdef CONFIG_ARM64_MORELLO
+	/* Disable trapping of Morello instructions at EL2 and below */
+	mrs	x1, cptr_el2
+	bic	x1, x1, #CPTR_EL2_TC
+	msr	cptr_el2, x1
+	isb
+	/* Disable PCC/DDC base offset and other capability-related features */
+	msr	cctlr_el2, xzr
+
+	/*
+	 * Capability exception entry/return is now enabled, as a result we
+	 * need to set CVBAR and CELR to valid capabilities.
+	 */
+	cvtp	c0, x0
+	msr	cvbar_el2, c0
+	isb
+
+	cvtp	c1, lr
+	msr	celr_el2, c1
+#else /* CONFIG_ARM64_MORELLO */
 	msr	vbar_el2, x0
 	isb
+
+	msr	elr_el2, lr
+#endif /* CONFIG_ARM64_MORELLO */
 
 	mov_q	x1, INIT_SCTLR_EL1_MMU_OFF
 
@@ -388,7 +425,12 @@ SYM_FUNC_START_LOCAL(__secondary_switched)
 
 	str_l	xzr, __early_cpu_boot_status, x3
 	adr_l	x5, vectors
+#ifdef CONFIG_ARM64_MORELLO
+	cvtp	c5, x5
+	msr	cvbar_el1, c5
+#else
 	msr	vbar_el1, x5
+#endif
 	isb
 
 	adr_l	x0, secondary_data
