@@ -109,8 +109,29 @@ SYM_CODE_START_LOCAL(__finalise_el2)
 	// FP configuration, vectors
 	mrs_s	x0, SYS_CPACR_EL12
 	msr	cpacr_el1, x0
+#ifdef CONFIG_ARM64_MORELLO
+	/*
+	 * Morello instructions become available after __cpu_setup() is called.
+	 * This happens before mutate_to_vhe() is called for the primary CPU,
+	 * but only after for secondary CPUs. In the first case we do need to
+	 * copy CVBAR because it has already been set to an appropriate
+	 * capability, however in the second case it will be set later and
+	 * cannot be accessed just yet.
+	 *
+	 * One way to handle this is to copy CVBAR only if the trapping of
+	 * Morello instructions is already disabled, by inspecting the value we
+	 * have just set CPACR_EL1 to.
+	 */
+	tst	x0, CPACR_EL1_CEN_EL1EN
+	b.eq	1f
+	isb
+	mrs	c0, cvbar_el12
+	msr	cvbar_el1, c0
+1:
+#else
 	mrs_s	x0, SYS_VBAR_EL12
 	msr	vbar_el1, x0
+#endif
 
 	// Use EL2 translations for SPE & TRBE and disable access from EL1
 	mrs	x0, mdcr_el2

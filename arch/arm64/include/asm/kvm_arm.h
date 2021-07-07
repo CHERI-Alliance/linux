@@ -298,6 +298,7 @@
 #define CPTR_EL2_TTA	(1 << 20)
 #define CPTR_EL2_TSM	(1 << 12)
 #define CPTR_EL2_TFP	(1 << CPTR_EL2_TFP_SHIFT)
+#define CPTR_EL2_TC	(1 << 9)
 #define CPTR_EL2_TZ	(1 << 8)
 #define CPTR_NVHE_EL2_RES1	0x000032ff /* known RES1 bits in CPTR_EL2 (nVHE) */
 #define CPTR_NVHE_EL2_RES0	(GENMASK(63, 32) |	\

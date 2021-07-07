@@ -2379,11 +2379,6 @@ static bool has_morello(const struct arm64_cpu_capabilities *entry, int scope)
 
 	return has_morello;
 }
-
-static void cpu_enable_morello(const struct arm64_cpu_capabilities *__unused)
-{
-	morello_cpu_setup();
-}
 #endif /* CONFIG_ARM64_MORELLO */
 
 /* Internal helper functions to match cpu capability type */
@@ -2914,7 +2909,7 @@ static const struct arm64_cpu_capabilities arm64_features[] = {
 		.capability = ARM64_MORELLO,
 		.type = ARM64_CPUCAP_STRICT_BOOT_CPU_FEATURE,
 		.matches = has_morello,
-		.cpu_enable = cpu_enable_morello,
+		/* No .cpu_enable(), Morello is initialised very early */
 		ARM64_CPUID_FIELDS(ID_AA64PFR1_EL1, CE, IMP)
 	},
 #endif
