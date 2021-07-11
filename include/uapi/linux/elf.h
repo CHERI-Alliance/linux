@@ -480,4 +480,7 @@ typedef struct elf64_note {
 /* Bits for GNU_PROPERTY_AARCH64_FEATURE_1_BTI */
 #define GNU_PROPERTY_AARCH64_FEATURE_1_BTI	(1U << 0)
 
+/* Bits for PCuABI ELF_header.e_flags for AArch64 */
+#define EF_AARCH64_CHERI_PURECAP		0x00010000
+
 #endif /* _UAPI_LINUX_ELF_H */
