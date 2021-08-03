@@ -1831,7 +1831,7 @@ static const struct file_operations seccomp_notify_ops = {
 	.release = seccomp_notify_release,
 	.unlocked_ioctl = seccomp_notify_ioctl,
 #ifdef CONFIG_COMPAT
-	.compat_ioctl = seccomp_notify_ioctl,
+	.compat_ioctl = compat_ptr_ioctl,
 #endif
 };
 
