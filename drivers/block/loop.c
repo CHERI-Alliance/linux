@@ -2230,7 +2230,7 @@ static const struct file_operations loop_ctl_fops = {
 	.open		= nonseekable_open,
 	.unlocked_ioctl	= loop_control_ioctl,
 #ifdef CONFIG_COMPAT
-	.compat_ioctl	= loop_control_ioctl,
+	.compat_ioctl	= compat_noptr_ioctl,
 #endif
 	.owner		= THIS_MODULE,
 	.llseek		= noop_llseek,
