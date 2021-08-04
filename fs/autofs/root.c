@@ -921,7 +921,7 @@ static long autofs_root_compat_ioctl(struct file *filp,
 		ret = autofs_root_ioctl_unlocked(inode, filp, cmd, arg);
 	else
 		ret = autofs_root_ioctl_unlocked(inode, filp, cmd,
-					      (unsigned long) compat_ptr(arg));
+					      (user_uintptr_t) compat_ptr(arg));
 
 	return ret;
 }
