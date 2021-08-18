@@ -129,15 +129,19 @@ static int padzero(unsigned long address)
 }
 
 /* Let's use some macros to make this stack manipulation a little clearer */
+/*
+ * TODO [PCuABI]: The sp pointer can ideally be a capability pointer so that
+ * the macro defined here need not create capability.
+ */
 #ifdef CONFIG_STACK_GROWSUP
-#define STACK_ADD(sp, items) ((elf_addr_t __user *)uaddr_to_user_ptr_safe(sp) + (items))
+#define STACK_ADD(sp, items) ((elf_stack_item_t __user *)uaddr_to_user_ptr_safe(sp) + (items))
 #define STACK_ROUND(sp, items) \
 	((15 + user_ptr_addr((sp) + (items))) &~ 15UL)
 #define STACK_ALLOC(sp, len) ({ \
 	elf_addr_t __user *old_sp = uaddr_to_user_ptr_safe(sp); sp += len; \
 	old_sp; })
 #else
-#define STACK_ADD(sp, items) ((elf_addr_t __user *)uaddr_to_user_ptr_safe(sp) - (items))
+#define STACK_ADD(sp, items) ((elf_stack_item_t __user *)uaddr_to_user_ptr_safe(sp) - (items))
 #define STACK_ROUND(sp, items) \
 	(user_ptr_addr((sp) - (items)) &~ 15UL)
 #define STACK_ALLOC(sp, len) ({ sp -= len ; (elf_addr_t __user *)uaddr_to_user_ptr_safe(sp); })
@@ -161,7 +165,7 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	unsigned long p = bprm->p;
 	int argc = bprm->argc;
 	int envc = bprm->envc;
-	elf_addr_t __user *sp;
+	elf_stack_item_t __user *sp;
 	elf_addr_t __user *u_platform;
 	elf_addr_t __user *u_base_platform;
 	elf_addr_t __user *u_rand_bytes;
@@ -169,7 +173,7 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	const char *k_base_platform = ELF_BASE_PLATFORM;
 	unsigned char k_rand_bytes[16];
 	int items;
-	elf_addr_t *elf_info;
+	elf_stack_item_t *elf_info;
 	elf_addr_t flags = 0;
 	int ei_index;
 	const struct cred *cred = current_cred();
@@ -220,20 +224,13 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	if (copy_to_user(u_rand_bytes, k_rand_bytes, sizeof(k_rand_bytes)))
 		return -EFAULT;
 
-/* TODO [PCuABI] - remove once the auxval code is modified for PCuABI */
-#ifdef CONFIG_CHERI_PURECAP_UABI
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wcheri-pointer-conversion"
-#endif
-
-
 	/* Create the ELF interpreter info */
-	elf_info = (elf_addr_t *)mm->saved_auxv;
+	elf_info = (elf_stack_item_t *)mm->saved_auxv;
 	/* update AT_VECTOR_SIZE_BASE if the number of NEW_AUX_ENT() changes */
 #define NEW_AUX_ENT(id, val) \
 	do { \
-		*elf_info++ = id; \
-		*elf_info++ = val; \
+		*elf_info++ = (elf_stack_item_t)id;	\
+		*elf_info++ = (elf_stack_item_t)val;	\
 	} while (0)
 
 #ifdef ARCH_DLINFO
@@ -248,31 +245,29 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	NEW_AUX_ENT(AT_HWCAP, ELF_HWCAP);
 	NEW_AUX_ENT(AT_PAGESZ, ELF_EXEC_PAGESIZE);
 	NEW_AUX_ENT(AT_CLKTCK, CLOCKS_PER_SEC);
-	NEW_AUX_ENT(AT_PHDR, phdr_addr);
+	NEW_AUX_ENT(AT_PHDR, elf_uaddr_to_user_ptr(phdr_addr));
 	NEW_AUX_ENT(AT_PHENT, sizeof(struct elf_phdr));
 	NEW_AUX_ENT(AT_PHNUM, exec->e_phnum);
-	NEW_AUX_ENT(AT_BASE, interp_load_addr);
+	NEW_AUX_ENT(AT_BASE, elf_uaddr_to_user_ptr(interp_load_addr));
 	if (bprm->interp_flags & BINPRM_FLAGS_PRESERVE_ARGV0)
 		flags |= AT_FLAGS_PRESERVE_ARGV0;
 	NEW_AUX_ENT(AT_FLAGS, flags);
-	NEW_AUX_ENT(AT_ENTRY, e_entry);
+	NEW_AUX_ENT(AT_ENTRY, elf_uaddr_to_user_ptr(e_entry));
 	NEW_AUX_ENT(AT_UID, from_kuid_munged(cred->user_ns, cred->uid));
 	NEW_AUX_ENT(AT_EUID, from_kuid_munged(cred->user_ns, cred->euid));
 	NEW_AUX_ENT(AT_GID, from_kgid_munged(cred->user_ns, cred->gid));
 	NEW_AUX_ENT(AT_EGID, from_kgid_munged(cred->user_ns, cred->egid));
 	NEW_AUX_ENT(AT_SECURE, bprm->secureexec);
-	NEW_AUX_ENT(AT_RANDOM, (elf_addr_t)(unsigned long)u_rand_bytes);
+	NEW_AUX_ENT(AT_RANDOM, (user_uintptr_t)u_rand_bytes);
 #ifdef ELF_HWCAP2
 	NEW_AUX_ENT(AT_HWCAP2, ELF_HWCAP2);
 #endif
-	NEW_AUX_ENT(AT_EXECFN, bprm->exec);
+	NEW_AUX_ENT(AT_EXECFN, elf_uaddr_to_user_ptr(bprm->exec));
 	if (k_platform) {
-		NEW_AUX_ENT(AT_PLATFORM,
-			    (elf_addr_t)(unsigned long)u_platform);
+		NEW_AUX_ENT(AT_PLATFORM, (user_uintptr_t)u_platform);
 	}
 	if (k_base_platform) {
-		NEW_AUX_ENT(AT_BASE_PLATFORM,
-			    (elf_addr_t)(unsigned long)u_base_platform);
+		NEW_AUX_ENT(AT_BASE_PLATFORM, (user_uintptr_t)u_base_platform);
 	}
 	if (bprm->have_execfd) {
 		NEW_AUX_ENT(AT_EXECFD, bprm->execfd);
@@ -282,10 +277,6 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	NEW_AUX_ENT(AT_RSEQ_ALIGN, __alignof__(struct rseq));
 #endif
 #undef NEW_AUX_ENT
-/* TODO [PCuABI] - remove once the auxval code is modified for PCuABI */
-#ifdef CONFIG_CHERI_PURECAP_UABI
-#pragma clang diagnostic pop
-#endif
 	/* AT_NULL is zero; clear the rest too */
 	memset(elf_info, 0, (char *)mm->saved_auxv +
 			sizeof(mm->saved_auxv) - (char *)elf_info);
@@ -293,7 +284,7 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	/* And advance past the AT_NULL entry.  */
 	elf_info += 2;
 
-	ei_index = elf_info - (elf_addr_t *)mm->saved_auxv;
+	ei_index = elf_info - (elf_stack_item_t *)mm->saved_auxv;
 	sp = STACK_ADD(p, ei_index);
 
 	items = (argc + 1) + (envc + 1) + 1;
@@ -301,10 +292,10 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 
 	/* Point sp at the lowest address on the stack */
 #ifdef CONFIG_STACK_GROWSUP
-	sp = (elf_addr_t __user *)uaddr_to_user_ptr_safe(bprm->p) - items - ei_index;
-	bprm->exec = (unsigned long)sp; /* XXX: PARISC HACK */
+	sp = (elf_stack_item_t __user *)uaddr_to_user_ptr_safe(bprm->p) - items - ei_index;
+	bprm->exec = user_ptr_addr(sp); /* XXX: PARISC HACK */
 #else
-	sp = (elf_addr_t __user *)uaddr_to_user_ptr_safe(bprm->p);
+	sp = (elf_stack_item_t __user *)uaddr_to_user_ptr_safe(bprm->p);
 #endif
 
 
@@ -320,21 +311,21 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 		return -EFAULT;
 
 	/* Now, let's put argc (and argv, envp if appropriate) on the stack */
-	if (put_user(argc, sp++))
+	if (elf_stack_put_user(argc, sp++))
 		return -EFAULT;
 
 	/* Populate list of argv pointers back to argv strings. */
 	p = mm->arg_end = mm->arg_start;
 	while (argc-- > 0) {
 		size_t len;
-		if (put_user((elf_addr_t)p, sp++))
+		if (elf_stack_put_user_ptr(p, sp++))
 			return -EFAULT;
 		len = strnlen_user(uaddr_to_user_ptr_safe(p), MAX_ARG_STRLEN);
 		if (!len || len > MAX_ARG_STRLEN)
 			return -EINVAL;
 		p += len;
 	}
-	if (put_user(0, sp++))
+	if (elf_stack_put_user(0, sp++))
 		return -EFAULT;
 	mm->arg_end = p;
 
@@ -342,19 +333,19 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	mm->env_end = mm->env_start = p;
 	while (envc-- > 0) {
 		size_t len;
-		if (put_user((elf_addr_t)p, sp++))
+		if (elf_stack_put_user_ptr(p, sp++))
 			return -EFAULT;
 		len = strnlen_user(uaddr_to_user_ptr_safe(p), MAX_ARG_STRLEN);
 		if (!len || len > MAX_ARG_STRLEN)
 			return -EINVAL;
 		p += len;
 	}
-	if (put_user(0, sp++))
+	if (elf_stack_put_user(0, sp++))
 		return -EFAULT;
 	mm->env_end = p;
 
 	/* Put the elf_info on the stack in the right place.  */
-	if (copy_to_user(sp, mm->saved_auxv, ei_index * sizeof(elf_addr_t)))
+	if (elf_copy_to_user_stack(sp, mm->saved_auxv, ei_index * sizeof(elf_stack_item_t)))
 		return -EFAULT;
 	return 0;
 }
@@ -1563,12 +1554,12 @@ static int fill_psinfo(struct elf_prpsinfo *psinfo, struct task_struct *p,
 
 static void fill_auxv_note(struct memelfnote *note, struct mm_struct *mm)
 {
-	elf_addr_t *auxv = (elf_addr_t *) mm->saved_auxv;
+	elf_stack_item_t *auxv = (elf_stack_item_t *) mm->saved_auxv;
 	int i = 0;
 	do
 		i += 2;
 	while (auxv[i - 2] != AT_NULL);
-	fill_note(note, "CORE", NT_AUXV, i * sizeof(elf_addr_t), auxv);
+	fill_note(note, "CORE", NT_AUXV, i * sizeof(elf_stack_item_t), auxv);
 }
 
 static void fill_siginfo_note(struct memelfnote *note, user_siginfo_t *csigdata,
