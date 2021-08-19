@@ -48,14 +48,38 @@ asmlinkage long __arm64_sys_ni_syscall(const struct pt_regs *__unused)
  */
 #define __arm64_sys_personality		__arm64_sys_arm64_personality
 
+#define __SYSCALL__(nr, sym, ret_type)	\
+	asmlinkage ret_type __arm64_##sym(const struct pt_regs *);
+
 #undef __SYSCALL
-#define __SYSCALL(nr, sym)	asmlinkage long __arm64_##sym(const struct pt_regs *);
+#define __SYSCALL(nr, sym)	__SYSCALL__(nr, sym, long)
+
+#ifdef CONFIG_CHERI_PURECAP_UABI
+#undef __SYSCALL_RETPTR
+#define __SYSCALL_RETPTR(nr, sym)	__SYSCALL__(nr, sym, user_intptr_t)
+#endif
+
 #include <asm/unistd.h>
 
 #undef __SYSCALL
-#define __SYSCALL(nr, sym)	[nr] = __arm64_##sym,
 
-const syscall_fn_t sys_call_table[__NR_syscalls] = {
+#ifdef CONFIG_CHERI_PURECAP_UABI
+#undef __SYSCALL_RETPTR
+
+#define __SYSCALL(nr, sym) [nr] = { .syscall_fn =  __arm64_##sym, },
+#define __SYSCALL_RETPTR(nr, sym) \
+	[nr] = { .syscall_retptr_fn =  __arm64_##sym, .__retptr = 1 },
+
+const syscall_entry_t sys_call_table[__NR_syscalls] = {
+	[0 ... __NR_syscalls - 1] = {
+		.syscall_fn = __arm64_sys_ni_syscall,
+		.__retptr   = 0,
+	},
+#else
+#define __SYSCALL(nr, sym)     [nr] = __arm64_##sym,
+const syscall_entry_t sys_call_table[__NR_syscalls] = {
 	[0 ... __NR_syscalls - 1] = __arm64_sys_ni_syscall,
+
+#endif
 #include <asm/unistd.h>
 };
