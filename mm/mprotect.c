@@ -679,7 +679,7 @@ fail:
 /*
  * pkey==-1 when doing a legacy mprotect()
  */
-static int do_mprotect_pkey(unsigned long start, size_t len,
+static int do_mprotect_pkey(user_uintptr_t start, size_t len,
 		unsigned long prot, int pkey)
 {
 	unsigned long nstart, end, tmp, reqprot;
@@ -691,6 +691,7 @@ static int do_mprotect_pkey(unsigned long start, size_t len,
 	struct mmu_gather tlb;
 	struct vma_iterator vmi;
 
+	/* TODO [PCuABI] - capability checks for uaccess */
 	start = untagged_addr(start);
 
 	prot &= ~(PROT_GROWSDOWN|PROT_GROWSUP);
@@ -835,7 +836,7 @@ out:
 	return error;
 }
 
-SYSCALL_DEFINE3(mprotect, unsigned long, start, size_t, len,
+SYSCALL_DEFINE3(mprotect, user_uintptr_t, start, size_t, len,
 		unsigned long, prot)
 {
 	return do_mprotect_pkey(start, len, prot, -1);
@@ -843,7 +844,7 @@ SYSCALL_DEFINE3(mprotect, unsigned long, start, size_t, len,
 
 #ifdef CONFIG_ARCH_HAS_PKEYS
 
-SYSCALL_DEFINE4(pkey_mprotect, unsigned long, start, size_t, len,
+SYSCALL_DEFINE4(pkey_mprotect, user_uintptr_t, start, size_t, len,
 		unsigned long, prot, int, pkey)
 {
 	return do_mprotect_pkey(start, len, prot, pkey);
