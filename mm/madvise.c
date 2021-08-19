@@ -1442,6 +1442,7 @@ int do_madvise(struct mm_struct *mm, unsigned long start, size_t len_in, int beh
 		mmap_read_lock(mm);
 	}
 
+	/* TODO [PCuABI] - capability checks for uaccess */
 	start = untagged_addr_remote(mm, start);
 	end = start + len;
 
@@ -1476,7 +1477,7 @@ out:
 	return error;
 }
 
-SYSCALL_DEFINE3(madvise, unsigned long, start, size_t, len_in, int, behavior)
+SYSCALL_DEFINE3(madvise, user_uintptr_t, start, size_t, len_in, int, behavior)
 {
 	return do_madvise(current->mm, start, len_in, behavior);
 }
