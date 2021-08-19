@@ -990,18 +990,19 @@ static int vma_expandable(struct vm_area_struct *vma, unsigned long delta)
  * MREMAP_FIXED option added 5-Dec-1999 by Benjamin LaHaise
  * This option implies MREMAP_MAYMOVE.
  */
-SYSCALL_DEFINE5(mremap, unsigned long, addr, unsigned long, old_len,
+SYSCALL_DEFINE5(__retptr__(mremap), user_uintptr_t, addr, unsigned long, old_len,
 		unsigned long, new_len, unsigned long, flags,
-		unsigned long, new_addr)
+		user_uintptr_t, new_addr)
 {
 	struct mm_struct *mm = current->mm;
 	struct vm_area_struct *vma;
-	unsigned long ret = -EINVAL;
+	user_uintptr_t ret = -EINVAL;
 	bool locked = false;
 	struct vm_userfaultfd_ctx uf = NULL_VM_UFFD_CTX;
 	LIST_HEAD(uf_unmap_early);
 	LIST_HEAD(uf_unmap);
 
+	/* @TODO [PCuABI] - capability validation */
 	/*
 	 * There is a deliberate asymmetry here: we strip the pointer tag
 	 * from the old address but leave the new address alone. This is
@@ -1202,5 +1203,8 @@ out_unlocked:
 	userfaultfd_unmap_complete(mm, &uf_unmap_early);
 	mremap_userfaultfd_complete(&uf, addr, ret, old_len);
 	userfaultfd_unmap_complete(mm, &uf_unmap);
-	return ret;
+	/* TODO [PCuABI] - derive proper capability */
+	return IS_ERR_VALUE(ret) ?
+		ret :
+		(user_intptr_t)uaddr_to_user_ptr_safe((ptraddr_t)ret);
 }
