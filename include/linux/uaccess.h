@@ -192,6 +192,105 @@ copy_to_user(void __user *to, const void *from, unsigned long n)
 	return n;
 }
 
+/*
+ * Tag-preserving uaccess routines.
+ *
+ * These routines behave identically to their counterparts (without the
+ * _with_captags suffix), except that on architectures supporting capabilities,
+ * they also transfer capability tags.
+ */
+
+#ifndef raw_copy_from_user_with_captags
+#define raw_copy_from_user_with_captags raw_copy_from_user
+#endif
+
+#ifndef raw_copy_to_user_with_captags
+#define raw_copy_to_user_with_captags raw_copy_to_user
+#endif
+
+static __always_inline __must_check unsigned long
+__copy_from_user_inatomic_with_captags(void *to, const void __user *from, unsigned long n)
+{
+	unsigned long res;
+
+	instrument_copy_from_user_before(to, from, n);
+	check_object_size(to, n, false);
+	res = raw_copy_from_user_with_captags(to, from, n);
+	instrument_copy_from_user_after(to, from, n, res);
+	return res;
+}
+
+static __always_inline __must_check unsigned long
+__copy_from_user_with_captags(void *to, const void __user *from, unsigned long n)
+{
+	unsigned long res;
+
+	might_fault();
+	instrument_copy_from_user_before(to, from, n);
+	if (should_fail_usercopy())
+		return n;
+	check_object_size(to, n, false);
+	res = raw_copy_from_user_with_captags(to, from, n);
+	instrument_copy_from_user_after(to, from, n, res);
+	return res;
+}
+
+static __always_inline unsigned long __must_check
+copy_from_user_with_captags(void *to, const void __user *from, unsigned long n)
+{
+	unsigned long res = n;
+
+	if (!check_copy_size(to, n, false))
+		return res;
+
+	might_fault();
+	if (!should_fail_usercopy() && likely(access_ok(from, n))) {
+		instrument_copy_from_user_before(to, from, n);
+		res = raw_copy_from_user_with_captags(to, from, n);
+		instrument_copy_from_user_after(to, from, n, res);
+	}
+	if (unlikely(res))
+		memset(to + (n - res), 0, res);
+	return res;
+}
+
+static __always_inline __must_check unsigned long
+__copy_to_user_inatomic_with_captags(void __user *to, const void *from, unsigned long n)
+{
+	if (should_fail_usercopy())
+		return n;
+	instrument_copy_to_user(to, from, n);
+	check_object_size(from, n, true);
+	return raw_copy_to_user_with_captags(to, from, n);
+}
+
+static __always_inline __must_check unsigned long
+__copy_to_user_with_captags(void __user *to, const void *from, unsigned long n)
+{
+	might_fault();
+	if (should_fail_usercopy())
+		return n;
+	instrument_copy_to_user(to, from, n);
+	check_object_size(from, n, true);
+	return raw_copy_to_user_with_captags(to, from, n);
+}
+
+static __always_inline unsigned long __must_check
+copy_to_user_with_captags(void __user *to, const void *from, unsigned long n)
+{
+	if (!check_copy_size(from, n, true))
+		return n;
+
+	might_fault();
+	if (should_fail_usercopy())
+		return n;
+	if (access_ok(to, n)) {
+		instrument_copy_to_user(to, from, n);
+		n = raw_copy_to_user_with_captags(to, from, n);
+	}
+	return n;
+}
+
 #ifndef copy_mc_to_kernel
 /*
  * Without arch opt-in this generic copy_mc_to_kernel() will not handle
