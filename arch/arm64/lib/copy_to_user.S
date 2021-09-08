@@ -9,6 +9,10 @@
 #include <asm/assembler.h>
 #include <asm/cache.h>
 
+#ifndef COPY_FUNC_NAME
+#define COPY_FUNC_NAME __arch_copy_to_user
+#endif
+
 /*
  * Copy to user space from a kernel buffer (alignment handled by the hardware)
  *
@@ -51,9 +55,17 @@
 	user_stp 9997f, \reg1, \reg2, \ptr, \val
 	.endm
 
+	.macro ldpc1 reg1, reg2, ptr, val
+	ldp \reg1, \reg2, [\ptr], \val
+	.endm
+
+	.macro stpc1 reg1, reg2, ptr, val
+	user_stp 9997f, \reg1, \reg2, \ptr, \val, #16
+	.endm
+
 end	.req	x5
 srcin	.req	x15
-SYM_FUNC_START(__arch_copy_to_user)
+SYM_FUNC_START(COPY_FUNC_NAME)
 	add	end, x0, x2
 	mov	srcin, x1
 #include "copy_template.S"
@@ -69,5 +81,5 @@ USER(9998f, sttrb tmp1w, [dst])
 	add	dst, dst, #1
 9998:	sub	x0, end, dst			// bytes not copied
 	ret
-SYM_FUNC_END(__arch_copy_to_user)
-EXPORT_SYMBOL(__arch_copy_to_user)
+SYM_FUNC_END(COPY_FUNC_NAME)
+EXPORT_SYMBOL(COPY_FUNC_NAME)

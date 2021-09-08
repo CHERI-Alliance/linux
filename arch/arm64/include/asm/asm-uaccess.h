@@ -66,18 +66,18 @@ alternative_else_nop_endif
  * This is complicated as there is no post-increment or pair versions of the
  * unprivileged instructions, and USER() only works for single instructions.
  */
-	.macro user_ldp l, reg1, reg2, addr, post_inc
+	.macro user_ldp l, reg1, reg2, addr, post_inc, reg_size=8
 8888:		ldtr	\reg1, [\addr];
-8889:		ldtr	\reg2, [\addr, #8];
+8889:		ldtr	\reg2, [\addr, \reg_size];
 		add	\addr, \addr, \post_inc;
 
 		_asm_extable_uaccess	8888b, \l;
 		_asm_extable_uaccess	8889b, \l;
 	.endm
 
-	.macro user_stp l, reg1, reg2, addr, post_inc
+	.macro user_stp l, reg1, reg2, addr, post_inc, reg_size=8
 8888:		sttr	\reg1, [\addr];
-8889:		sttr	\reg2, [\addr, #8];
+8889:		sttr	\reg2, [\addr, \reg_size];
 		add	\addr, \addr, \post_inc;
 
 		_asm_extable_uaccess	8888b,\l;

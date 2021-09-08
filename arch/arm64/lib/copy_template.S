@@ -39,6 +39,16 @@ C_h	.req	x12
 D_l	.req	x13
 D_h	.req	x14
 
+#ifdef COPY_CAPTAGS
+tmp1c	.req	c3
+tmp2c	.req	c4
+
+Ac_l	.req	c7
+Ac_h	.req	c8
+Bc_l	.req	c9
+Bc_h	.req	c10
+#endif
+
 	mov	dst, dstin
 	cmp	count, #16
 	/*When memory length is less than 16, the accessed are not aligned.*/
@@ -71,6 +81,11 @@ D_h	.req	x14
 	str1	tmp1, dst, #8
 
 .LSrcAligned:
+#ifdef COPY_CAPTAGS
+	/* src now 16-byte aligned, copy capability tags if dst also aligned */
+	tst	dst, #15
+	b.eq	.LSrcAligned_cpycaps
+#endif
 	cmp	count, #64
 	b.ge	.Lcpy_over64
 	/*
@@ -178,4 +193,68 @@ D_h	.req	x14
 
 	tst	count, #0x3f
 	b.ne	.Ltail63
+#ifdef COPY_CAPTAGS
+	b	.Lexitfunc
+
+	/*
+	 * The .L*_cpycaps instruction sequences below are copies of the
+	 * sequences above.
+	 * The only functional difference is that they use capability
+	 * loads/stores, such that capability tags are copied from the source to
+	 * the destination. For that reason, they require both src and dst to be
+	 * 16-byte aligned.
+	 * Because C registers are twice as bigs as X registers, we only need
+	 * half the L/S instructions to transfer the same amount of data.
+	 */
+.LSrcAligned_cpycaps:
+	cmp	count, #64
+	b.ge	.Lcpy_over64_cpycaps
+
+.Ltail63_cpycaps:
+	ands	tmp1, count, #0x30
+	b.eq	.Ltiny15
+	cmp	tmp1w, #0x20
+	b.eq	1f
+	b.lt	2f
+	ldr1	tmp2c, src, #16
+	str1	tmp2c, dst, #16
+1:
+	ldr1	tmp2c, src, #16
+	str1	tmp2c, dst, #16
+2:
+	ldr1	tmp2c, src, #16
+	str1	tmp2c, dst, #16
+	b	.Ltiny15
+
+.Lcpy_over64_cpycaps:
+	subs	count, count, #128
+	b.ge	.Lcpy_body_large_cpycaps
+
+	ldpc1	Ac_l, Ac_h, src, #32
+	stpc1	Ac_l, Ac_h, dst, #32
+	ldpc1	Bc_l, Bc_h, src, #32
+	stpc1	Bc_l, Bc_h, dst, #32
+
+	tst	count, #0x3f
+	b.ne	.Ltail63_cpycaps
+	b	.Lexitfunc
+
+	.p2align	L1_CACHE_SHIFT
+.Lcpy_body_large_cpycaps:
+	ldpc1	Ac_l, Ac_h, src, #32
+	ldpc1	Bc_l, Bc_h, src, #32
+1:
+	/* attempt to keep 64-byte blocks of loads and stores interlaced */
+	stpc1	Ac_l, Ac_h, dst, #32
+	ldpc1	Ac_l, Ac_h, src, #32
+	stpc1	Bc_l, Bc_h, dst, #32
+	ldpc1	Bc_l, Bc_h, src, #32
+	subs	count, count, #64
+	b.ge	1b
+	stpc1	Ac_l, Ac_h, dst, #32
+	stpc1	Bc_l, Bc_h, dst, #32
+
+	tst	count, #0x3f
+	b.ne	.Ltail63_cpycaps
+#endif /* COPY_CAPTAGS */
 .Lexitfunc:

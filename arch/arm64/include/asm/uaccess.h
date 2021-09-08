@@ -463,6 +463,38 @@ extern unsigned long __must_check __arch_copy_to_user(void __user *to, const voi
 #define INLINE_COPY_TO_USER
 #define INLINE_COPY_FROM_USER
 
+extern unsigned long __must_check __arch_copy_from_user_with_captags(void *to, const void __user *from, unsigned long n);
+#define raw_copy_from_user_with_captags(to, from, n)			\
+({									\
+	unsigned long __acfu_ret;					\
+	uaccess_ttbr0_enable();						\
+	if (system_supports_morello())					\
+		__acfu_ret = __arch_copy_from_user_with_captags((to),	\
+					__uaccess_mask_ptr(from), (n));	\
+	else								\
+		__acfu_ret = __arch_copy_from_user((to),		\
+					__uaccess_mask_ptr(from), (n));	\
+	uaccess_ttbr0_disable();					\
+	__acfu_ret;							\
+})
+
+extern unsigned long __must_check __arch_copy_to_user_with_captags(void __user *to, const void *from, unsigned long n);
+#define raw_copy_to_user_with_captags(to, from, n)			\
+({									\
+	unsigned long __actu_ret;					\
+	uaccess_ttbr0_enable();						\
+	if (system_supports_morello())					\
+		__actu_ret = __arch_copy_to_user_with_captags(		\
+					__uaccess_mask_ptr(to),		\
+					(from), (n));			\
+	else								\
+		__actu_ret = __arch_copy_to_user(			\
+					__uaccess_mask_ptr(to),		\
+					(from), (n));			\
+	uaccess_ttbr0_disable();					\
+	__actu_ret;							\
+})
+
 extern unsigned long __must_check __arch_clear_user(void __user *to, unsigned long n);
 static inline unsigned long __must_check __clear_user(void __user *to, unsigned long n)
 {
