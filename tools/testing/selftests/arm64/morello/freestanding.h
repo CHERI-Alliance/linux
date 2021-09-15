@@ -12,6 +12,7 @@
 /* this is provided by libc, so roll our own */
 typedef __kernel_ssize_t ssize_t;
 
+void install_kernel_stack(void);
 uintcap_t __syscall(uintcap_t, uintcap_t, uintcap_t, uintcap_t, uintcap_t, uintcap_t, uintcap_t);
 
 #define __cap(x) ((uintcap_t) (x))
