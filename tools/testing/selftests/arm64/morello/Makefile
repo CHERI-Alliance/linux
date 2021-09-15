@@ -11,7 +11,7 @@ LDFLAGS := -fuse-ld=lld
 CFLAGS += $(CFLAGS_CLANG) $(CFLAGS_PURECAP) $(CFLAGS_COMMON)
 
 SRCS := $(wildcard *.c) $(wildcard *.S)
-PROGS := exit read_write tester
+PROGS := bootstrap exit read_write
 DEPS := $(wildcard *.h)
 
 # these are the final executables
