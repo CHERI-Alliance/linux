@@ -41,21 +41,46 @@
 	name:				\
 	.space	sz, 0
 
+#define TEMP_STACK_SIZE (1<<12)
+
+/* See VARIABLE macro for why we do this */
+.macro got_get_ptr name, reg
+	adrp	\reg, :got:\name
+	ldr	\reg, [\reg, :got_lo12:\name]
+.endm
+
+.macro get_temp_stack_base reg
+	got_get_ptr temp_stack, \reg
+	add	\reg, \reg, #TEMP_STACK_SIZE
+	alignd	\reg, \reg, #4
+.endm
+
+
 .data
 /* store the initial stack pointer here (with argv, envp, etc) */
 VARIABLE(stack_from_kernel, 16)
+VARIABLE(temp_stack, TEMP_STACK_SIZE)
 
 
 .text
 FUNCTION_START(_start)
 	bl	__morello_init_globals
 
-	/* get a capability to the variable. See VARIABLE macro for why */
-	adrp	c0, :got:stack_from_kernel
-	ldr	c0, [c0, :got_lo12:stack_from_kernel]
 	/* save the initial kernel stack to a global variable */
+	got_get_ptr stack_from_kernel, c0
 	mov	c1, csp
 	str	c1, [c0]
+
+	/*
+	 * use a (temporary) custom stack, until main is comfortable with the
+	 * kernel one.  We can get away with this, as the relocation code will
+	 * initialize our capability from a RW root one. Hide it behind a
+	 * switch in case someone really doesn't want this
+	 */
+#ifndef NO_TEMP_STACK
+	get_temp_stack_base c0
+	mov	csp, c0
+#endif
 
 	/* call int main(void) */
 	bl	main
@@ -67,6 +92,45 @@ FUNCTION_START(_start)
 	/* and stay here in case nothing above exits */
 	b	.
 FUNCTION_END(_start)
+
+
+/*
+ * migrate any stack contents on the temporary stack and switch back to the
+ * kernel provided one like a "normal" binary would
+ */
+FUNCTION_START(install_kernel_stack)
+/* this is a noop if we skipped the initial swap */
+#ifndef NO_TEMP_STACK
+	/* r0 - scratch */
+	/* r1, r2, r3 - kernel, user current, user base stack address */
+	/* r4 - counter */
+
+	/* load our stacks to begin migrating */
+	got_get_ptr stack_from_kernel, c0
+	ldr	c1, [c0]
+	mov	c2, csp
+	get_temp_stack_base c3
+
+	/*
+	 * capabilities are architecturally guaranteed to start on a 16-byte
+	 * boundary, so we copy in 16-byte increments to preserve any set tags
+	 * and migrate the stack contents. Pointers shouldn't break as the old
+	 * stack will remain in place
+	 */
+1:
+	/* calculate how many bytes we have left */
+	subs	x4, x3, x2
+	b.eq	2f
+	/* 16-byte copy */
+	ldr	c0, [c3, #-16]!
+	str	c0, [c1, #-16]!
+	b	1b
+2:
+	/* install the new stack */
+	mov	csp, c1
+#endif
+	ret
+FUNCTION_END(install_kernel_stack)
 
 
 /*
