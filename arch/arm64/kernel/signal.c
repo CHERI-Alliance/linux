@@ -35,6 +35,10 @@
 #include <asm/traps.h>
 #include <asm/vdso.h>
 
+#ifdef CONFIG_CHERI_PURECAP_UABI
+#include <cheriintrin.h>
+#endif
+
 /* TODO [PCuABI] - remove when actually porting this file to support PCuABI */
 #ifdef CONFIG_CHERI_PURECAP_UABI
 #pragma clang diagnostic ignored "-Wcheri-pointer-conversion"
@@ -1454,6 +1458,23 @@ void do_signal(struct pt_regs *regs)
 }
 
 unsigned long __ro_after_init signal_minsigstksz;
+
+#ifdef CONFIG_CHERI_PURECAP_UABI
+int arch_validate_sigaction(int sig, const struct k_sigaction *act,
+			    const struct k_sigaction *oact)
+{
+	struct pt_regs *regs = current_pt_regs();
+
+	if (!(cheri_perms_get(regs->pcc) & ARM_CAP_PERMISSION_EXECUTIVE))
+		return -EPERM;
+
+	if (act && act->sa.sa_handler != SIG_IGN && act->sa.sa_handler != SIG_DFL &&
+	    !(cheri_perms_get(act->sa.sa_handler) & ARM_CAP_PERMISSION_EXECUTIVE))
+		return -EINVAL;
+
+	return 0;
+}
+#endif
 
 /*
  * Determine the stack space required for guaranteed signal devliery.
