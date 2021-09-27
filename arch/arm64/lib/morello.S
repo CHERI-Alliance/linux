@@ -149,9 +149,13 @@ SYM_FUNC_START(morello_task_save_user_tls)
 	 * of RCTPIDR (RTPIDR) in tsk->thread instead of TPIDR.
 	 */
 	morello_tst_cap_has_executive c5, x6	// Task running in Executive?
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	csel	c2, c2, c3, ne			// If not, save RTPIDR
+	str	c2, [x1]
+#else
 	csel	x2, x2, x3, ne			// If not, save RTPIDR
 	str	x2, [x1]
-
+#endif
 	ret
 SYM_FUNC_END(morello_task_save_user_tls)
 
@@ -162,7 +166,11 @@ SYM_FUNC_START(morello_task_restore_user_tls)
 
 	/* Load CTPIDR, RCTPIDR and the 64-bit TLS pointer */
 	ldp	c2, c3, [x0, #MORELLO_STATE_CTPIDR]
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	ldr	c4, [x1]
+#else
 	ldr	x4, [x1]
+#endif
 
 	/*
 	 * The 64-bit TLS pointer may have been modified from within the kernel
@@ -173,10 +181,18 @@ SYM_FUNC_START(morello_task_restore_user_tls)
 	ldr	c5, [x8, #S_PCC]
 	morello_tst_cap_has_executive c5, x6	// Task running in Executive?
 	b.eq	1f				// If not, merge into RCTPIDR
-	morello_merge_c_x 2, x4 		// Merge the TLS pointer into CTPIDR
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	mov	c2, c4				// Save the TLS pointer into CTPIDR
+#else
+	morello_merge_c_x 2, x4			// Merge the TLS pointer into CTPIDR
+#endif
 	b	2f
 1:
-	morello_merge_c_x 3, x4 		// Merge the TLS pointer into RCTPIDR
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	mov	c3, c4 				// Save the TLS pointer into RCTPIDR
+#else
+	morello_merge_c_x 3, x4			// Merge the TLS pointer into RCTPIDR
+#endif
 2:
 	msr	ctpidr_el0, c2
 	msr	rctpidr_el0, c3

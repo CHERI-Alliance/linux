@@ -344,7 +344,7 @@ int arch_dup_task_struct(struct task_struct *dst, struct task_struct *src)
 
 asmlinkage void ret_from_fork(void) asm("ret_from_fork");
 
-static unsigned long *task_user_tls(struct task_struct *tsk)
+static user_uintptr_t *task_user_tls(struct task_struct *tsk)
 {
 	if (is_compat_thread(task_thread_info(tsk)))
 		return &tsk->thread.uw.tp2_value;
@@ -354,7 +354,7 @@ static unsigned long *task_user_tls(struct task_struct *tsk)
 
 static void task_save_user_tls(struct task_struct *tsk)
 {
-	unsigned long *user_tls = task_user_tls(tsk);
+	user_uintptr_t *user_tls = task_user_tls(tsk);
 
 	if (!system_supports_morello())
 		*user_tls = read_sysreg(tpidr_el0);
@@ -364,7 +364,7 @@ static void task_save_user_tls(struct task_struct *tsk)
 
 static void task_restore_user_tls(struct task_struct *tsk)
 {
-	unsigned long *user_tls = task_user_tls(tsk);
+	user_uintptr_t *user_tls = task_user_tls(tsk);
 
 	if (!system_supports_morello())
 		write_sysreg(*user_tls, tpidr_el0);
@@ -375,8 +375,8 @@ static void task_restore_user_tls(struct task_struct *tsk)
 int copy_thread(struct task_struct *p, const struct kernel_clone_args *args)
 {
 	unsigned long clone_flags = args->flags;
-	unsigned long stack_start = args->stack;
-	unsigned long tls = args->tls;
+	user_uintptr_t stack_start = args->stack;
+	user_uintptr_t tls = args->tls;
 	struct pt_regs *childregs = task_pt_regs(p);
 
 	memset(&p->thread.cpu_context, 0, sizeof(struct cpu_context));

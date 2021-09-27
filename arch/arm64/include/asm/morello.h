@@ -62,9 +62,9 @@ void morello_thread_start(struct pt_regs *regs, unsigned long pc);
 void morello_thread_init_user(struct task_struct *tsk);
 void morello_thread_save_user_state(struct task_struct *tsk);
 void morello_thread_restore_user_state(struct task_struct *tsk);
-void morello_task_save_user_tls(struct task_struct *tsk, unsigned long *tp_ptr);
+void morello_task_save_user_tls(struct task_struct *tsk, user_uintptr_t *tp_ptr);
 void morello_task_restore_user_tls(struct task_struct *tsk,
-				   const unsigned long *tp_ptr);
+				   const user_uintptr_t *tp_ptr);
 void morello_setup_signal_return(struct pt_regs *regs);
 void morello_show_regs(struct pt_regs *regs);
 
