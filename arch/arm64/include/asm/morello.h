@@ -45,6 +45,10 @@ int morello_ptrace_access_remote_cap(struct task_struct *tsk,
 void __morello_get_user_cap_asm(uintcap_t *x, const uintcap_t __user *ptr, int *err);
 void __morello_put_user_cap_asm(const uintcap_t *x, uintcap_t __user *ptr, int *err);
 
+#ifdef CONFIG_CHERI_PURECAP_UABI
+void morello_thread_set_csp(struct pt_regs *regs, user_uintptr_t sp);
+#endif
+
 #endif /* CONFIG_ARM64_MORELLO */
 
 /*
