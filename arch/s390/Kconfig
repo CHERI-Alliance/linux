@@ -463,6 +463,9 @@ config COMPAT
 
 	  If unsure say N.
 
+config COMPAT32
+	def_bool y if COMPAT
+
 config SMP
 	def_bool y
 
