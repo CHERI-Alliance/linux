@@ -20,6 +20,9 @@ struct __test_meta {
 
 void install_kernel_stack(void);
 uintcap_t __syscall(uintcap_t, uintcap_t, uintcap_t, uintcap_t, uintcap_t, uintcap_t, uintcap_t);
+
+void switch_to_restricted(uintcap_t, void *);
+
 int __attribute__ ((format(printf, 1, 2))) printf(const char *fmt, ...);
 
 #define __cap(x) ((uintcap_t) (x))
@@ -115,5 +118,8 @@ static inline ssize_t write(int fd, const void *buf, size_t count)
 {
 	return syscall(__NR_write, fd, buf, count);
 }
+
+long __clone(int (*fn)(void *), uintcap_t stack, int flags, void *arg,
+	     pid_t *parent_tid, void *tls, pid_t *child_tid);
 
 #endif
