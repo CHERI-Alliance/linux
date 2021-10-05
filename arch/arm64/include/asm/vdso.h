@@ -20,7 +20,7 @@
 
 #define VDSO_SYMBOL(base, name)						   \
 ({									   \
-	(void *)(vdso_offset_##name - VDSO_LBASE + (unsigned long)(base)); \
+	(unsigned long)(vdso_offset_##name - VDSO_LBASE + (unsigned long)(base)); \
 })
 
 extern char vdso_start[], vdso_end[];
