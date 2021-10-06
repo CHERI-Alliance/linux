@@ -4315,12 +4315,16 @@ SYSCALL_DEFINE2(sigaltstack,const stack_t __user *,uss, stack_t __user *,uoss)
 {
 	stack_t new, old;
 	int err;
-	if (uss && copy_from_user(&new, uss, sizeof(stack_t)))
+	if (uss && (IS_ENABLED(CONFIG_CHERI_PURECAP_UABI)
+	    ? copy_from_user_with_captags(&new, uss, sizeof(stack_t))
+	    : copy_from_user(&new, uss, sizeof(stack_t))))
 		return -EFAULT;
 	err = do_sigaltstack(uss ? &new : NULL, uoss ? &old : NULL,
 			      current_user_stack_pointer(),
 			      MINSIGSTKSZ);
-	if (!err && uoss && copy_to_user(uoss, &old, sizeof(stack_t)))
+	if (!err && uoss && (IS_ENABLED(CONFIG_CHERI_PURECAP_UABI)
+	    ? copy_to_user_with_captags(uoss, &old, sizeof(stack_t))
+	    : copy_to_user(uoss, &old, sizeof(stack_t))))
 		err = -EFAULT;
 	return err;
 }
@@ -4328,7 +4332,9 @@ SYSCALL_DEFINE2(sigaltstack,const stack_t __user *,uss, stack_t __user *,uoss)
 int restore_altstack(const stack_t __user *uss)
 {
 	stack_t new;
-	if (copy_from_user(&new, uss, sizeof(stack_t)))
+	if (IS_ENABLED(CONFIG_CHERI_PURECAP_UABI)
+	    ? copy_from_user_with_captags(&new, uss, sizeof(stack_t))
+	    : copy_from_user(&new, uss, sizeof(stack_t)))
 		return -EFAULT;
 	(void)do_sigaltstack(&new, NULL, current_user_stack_pointer(),
 			     MINSIGSTKSZ);
@@ -4506,14 +4512,18 @@ SYSCALL_DEFINE4(rt_sigaction, int, sig,
 	if (sigsetsize != sizeof(sigset_t))
 		return -EINVAL;
 
-	if (act && copy_from_user(&new_sa.sa, act, sizeof(new_sa.sa)))
+	if (act && (IS_ENABLED(CONFIG_CHERI_PURECAP_UABI)
+	    ? copy_from_user_with_captags(&new_sa.sa, act, sizeof(new_sa.sa))
+	    : copy_from_user(&new_sa.sa, act, sizeof(new_sa.sa))))
 		return -EFAULT;
 
 	ret = do_sigaction(sig, act ? &new_sa : NULL, oact ? &old_sa : NULL);
 	if (ret)
 		return ret;
 
-	if (oact && copy_to_user(oact, &old_sa.sa, sizeof(old_sa.sa)))
+	if (oact && (IS_ENABLED(CONFIG_CHERI_PURECAP_UABI)
+	    ? copy_to_user_with_captags(oact, &old_sa.sa, sizeof(old_sa.sa))
+	    : copy_to_user(oact, &old_sa.sa, sizeof(old_sa.sa))))
 		return -EFAULT;
 
 	return 0;
