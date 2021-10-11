@@ -3138,7 +3138,7 @@ static int unix_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 #ifdef CONFIG_COMPAT
 static int unix_compat_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 {
-	return unix_ioctl(sock, cmd, (unsigned long)compat_ptr(arg));
+	return unix_ioctl(sock, cmd, (user_uintptr_t)compat_ptr(arg));
 }
 #endif
 

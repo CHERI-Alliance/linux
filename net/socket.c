@@ -3434,7 +3434,7 @@ static int compat_sock_ioctl_trans(struct file *file, struct socket *sock,
 	const struct proto_ops *ops;
 
 	if (cmd >= SIOCDEVPRIVATE && cmd <= (SIOCDEVPRIVATE + 15))
-		return sock_ioctl(file, cmd, (unsigned long)argp);
+		return sock_ioctl(file, cmd, (user_uintptr_t)argp);
 
 	switch (cmd) {
 	case SIOCWANDEV:
