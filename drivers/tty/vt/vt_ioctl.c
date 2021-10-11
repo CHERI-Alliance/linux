@@ -1112,7 +1112,7 @@ long vt_compat_ioctl(struct tty_struct *tty,
 	 * but we have to convert it to a proper 64 bit pointer.
 	 */
 	default:
-		return vt_ioctl(tty, cmd, (unsigned long)up);
+		return vt_ioctl(tty, cmd, (user_uintptr_t)up);
 	}
 }
 
