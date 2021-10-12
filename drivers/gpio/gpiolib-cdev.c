@@ -263,7 +263,7 @@ static long linehandle_ioctl(struct file *file, unsigned int cmd,
 static long linehandle_ioctl_compat(struct file *file, unsigned int cmd,
 				    unsigned long arg)
 {
-	return linehandle_ioctl(file, cmd, (unsigned long)compat_ptr(arg));
+	return linehandle_ioctl(file, cmd, (user_uintptr_t)compat_ptr(arg));
 }
 #endif
 
@@ -1593,7 +1593,7 @@ static long linereq_ioctl(struct file *file, unsigned int cmd,
 static long linereq_ioctl_compat(struct file *file, unsigned int cmd,
 				 unsigned long arg)
 {
-	return linereq_ioctl(file, cmd, (unsigned long)compat_ptr(arg));
+	return linereq_ioctl(file, cmd, (user_uintptr_t)compat_ptr(arg));
 }
 #endif
 
@@ -2078,7 +2078,7 @@ static long lineevent_ioctl(struct file *file, unsigned int cmd,
 static long lineevent_ioctl_compat(struct file *file, unsigned int cmd,
 				   unsigned long arg)
 {
-	return lineevent_ioctl(file, cmd, (unsigned long)compat_ptr(arg));
+	return lineevent_ioctl(file, cmd, (user_uintptr_t)compat_ptr(arg));
 }
 #endif
 
@@ -2606,7 +2606,7 @@ static long gpio_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 static long gpio_ioctl_compat(struct file *file, unsigned int cmd,
 			      unsigned long arg)
 {
-	return gpio_ioctl(file, cmd, (unsigned long)compat_ptr(arg));
+	return gpio_ioctl(file, cmd, (user_uintptr_t)compat_ptr(arg));
 }
 #endif
 
