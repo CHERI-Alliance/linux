@@ -267,7 +267,7 @@ Efault:
 int
 get_compat_sigset(sigset_t *set, const compat_sigset_t __user *compat)
 {
-#ifdef __BIG_ENDIAN
+#if defined(__BIG_ENDIAN) && defined(CONFIG_COMPAT32)
 	compat_sigset_t v;
 	if (copy_from_user(&v, compat, sizeof(compat_sigset_t)))
 		return -EFAULT;
