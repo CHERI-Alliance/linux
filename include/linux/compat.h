@@ -455,7 +455,7 @@ put_compat_sigset(compat_sigset_t __user *compat, const sigset_t *set,
 		  unsigned int size)
 {
 	/* size <= sizeof(compat_sigset_t) <= sizeof(sigset_t) */
-#if defined(__BIG_ENDIAN) && defined(CONFIG_64BIT)
+#if defined(__BIG_ENDIAN) && defined(CONFIG_64BIT) && defined(CONFIG_COMPAT32)
 	compat_sigset_t v;
 	switch (_NSIG_WORDS) {
 	case 4: v.sig[7] = (set->sig[3] >> 32); v.sig[6] = set->sig[3];
