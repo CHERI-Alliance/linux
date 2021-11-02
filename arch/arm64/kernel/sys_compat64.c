@@ -33,6 +33,12 @@
  */
 #define __arm64_compatentry_sys_mmap2				__arm64_compatentry_sys_mmap
 
+/*
+ * Use the same 'struct stat' as native AArch64.
+ */
+#define __arm64_compatentry_sys_fstatat64			__arm64_compatentry_sys_newfstatat
+#define __arm64_compatentry_sys_fstat64				__arm64_compatentry_sys_newfstat
+
 asmlinkage long sys_ni_syscall(void);
 
 asmlinkage long __arm64_compatentry_sys_ni_syscall(const struct pt_regs *__unused);
