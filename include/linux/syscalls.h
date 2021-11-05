@@ -128,6 +128,9 @@ struct file_attr;
 #define __TYPE_IS_L(t)	(__TYPE_AS(t, 0L))
 #define __TYPE_IS_UL(t)	(__TYPE_AS(t, 0UL))
 #define __TYPE_IS_LL(t) (__TYPE_AS(t, 0LL) || __TYPE_AS(t, 0ULL))
+#ifdef CONFIG_CHERI_PURECAP_UABI
+#define __TYPE_IS_USER_PTR(t) (sizeof(t) == sizeof(user_uintptr_t))
+#endif
 #define __SC_LONG(t, a) __typeof(__builtin_choose_expr(__TYPE_IS_LL(t), 0LL, 0L)) a
 #define __SC_CAST(t, a)	(__force t) a
 #define __SC_TYPE(t, a)	t
