@@ -2088,7 +2088,11 @@ static int io_submit_one(struct kioctx *ctx, struct iocb __user *user_iocb,
  *	fail with -ENOSYS if not implemented.
  */
 SYSCALL_DEFINE3(io_submit, aio_context_t, ctx_id, long, nr,
+#ifdef CONFIG_CHERI_PURECAP_UABI
+		struct iocb * __capability * __capability, iocbpp)
+#else
 		struct iocb __user * __user *, iocbpp)
+#endif
 {
 	struct kioctx *ctx;
 	long ret = 0;
