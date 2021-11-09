@@ -221,7 +221,7 @@ static u64 get_inode_sequence_number(struct inode *inode)
 int get_futex_key(u32 __user *uaddr, unsigned int flags, union futex_key *key,
 		  enum futex_access rw)
 {
-	unsigned long address = (unsigned long)uaddr;
+	unsigned long address = user_ptr_addr(uaddr);
 	struct mm_struct *mm = current->mm;
 	struct page *page;
 	struct folio *folio;
@@ -425,7 +425,7 @@ int fault_in_user_writeable(u32 __user *uaddr)
 	int ret;
 
 	mmap_read_lock(mm);
-	ret = fixup_user_fault(mm, (unsigned long)uaddr,
+	ret = fixup_user_fault(mm, user_ptr_addr(uaddr),
 			       FAULT_FLAG_WRITE, NULL);
 	mmap_read_unlock(mm);
 
@@ -664,7 +664,7 @@ static int handle_futex_death(u32 __user *uaddr, struct task_struct *curr,
 	int err;
 
 	/* Futex address must be 32bit aligned */
-	if ((((unsigned long)uaddr) % sizeof(*uaddr)) != 0)
+	if (((user_ptr_addr(uaddr)) % sizeof(*uaddr)) != 0)
 		return -1;
 
 retry:
@@ -788,7 +788,14 @@ static inline int fetch_robust_entry(struct robust_list __user **entry,
 	if (get_user(uentry, (unsigned long __user *)head))
 		return -EFAULT;
 
-	*entry = (void __user *)(uentry & ~1UL);
+	/*
+	 * TODO [PCuABI] - pointer conversion to be checked
+	 * Each entry points to either next one or head of the list
+	 * so this should probably operate on capabilities and use
+	 * get_user_ptr instead, or validate the capability prior to
+	 * get_user
+	 */
+	*entry = uaddr_to_user_ptr(uentry & ~1UL);
 	*pi = uentry & 1;
 
 	return 0;
