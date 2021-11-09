@@ -782,7 +782,8 @@ static inline int get_sigset_argpack(struct sigset_argpack *to,
 	if (from) {
 		if (!user_read_access_begin(from, sizeof(*from)))
 			return -EFAULT;
-		unsafe_get_user(to->p, &from->p, Efault);
+		if (unlikely(__get_user_ptr(to->p, &from->p)))
+			goto Efault;
 		unsafe_get_user(to->size, &from->size, Efault);
 		user_read_access_end();
 	}
