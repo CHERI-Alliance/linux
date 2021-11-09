@@ -774,8 +774,13 @@ retry:
 /*
  * Fetch a robust-list pointer. Bit 0 signals PI futexes:
  */
+#ifdef CONFIG_CHERI_PURECAP_UABI
+static inline int fetch_robust_entry(struct robust_list * __capability *entry,
+				     struct robust_list * __capability * __capability head,
+#else
 static inline int fetch_robust_entry(struct robust_list __user **entry,
 				     struct robust_list __user * __user *head,
+#endif
 				     unsigned int *pi)
 {
 	unsigned long uentry;
@@ -871,7 +876,11 @@ static void __user *futex_uaddr(struct robust_list __user *entry,
  * Fetch a robust-list pointer. Bit 0 signals PI futexes:
  */
 static inline int
+#ifdef CONFIG_CHERI_PURECAP_UABI
+compat_fetch_robust_entry(compat_uptr_t *uentry, struct robust_list * __capability *entry,
+#else
 compat_fetch_robust_entry(compat_uptr_t *uentry, struct robust_list __user **entry,
+#endif
 		   compat_uptr_t __user *head, unsigned int *pi)
 {
 	if (get_user(*uentry, head))
