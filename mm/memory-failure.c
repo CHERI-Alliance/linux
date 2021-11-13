@@ -348,7 +348,7 @@ static int kill_proc(struct to_kill *tk, unsigned long pfn, int flags)
 
 	if ((flags & MF_ACTION_REQUIRED) && (t == current))
 		ret = force_sig_mceerr(BUS_MCEERR_AR,
-				 (void __user *)tk->addr, addr_lsb);
+				 as_user_ptr(tk->addr), addr_lsb);
 	else
 		/*
 		 * Signal other processes sharing the page if they have
@@ -358,7 +358,7 @@ static int kill_proc(struct to_kill *tk, unsigned long pfn, int flags)
 		 * This could cause a loop when the user sets SIGBUS
 		 * to SIG_IGN, but hopefully no one will do that?
 		 */
-		ret = send_sig_mceerr(BUS_MCEERR_AO, (void __user *)tk->addr,
+		ret = send_sig_mceerr(BUS_MCEERR_AO, as_user_ptr(tk->addr),
 				      addr_lsb, t);
 	if (ret < 0)
 		pr_info("Error sending signal to %s:%d: %d\n",
