@@ -412,7 +412,11 @@ struct user_arg_ptr {
 	bool is_compat;
 #endif
 	union {
+#ifdef CONFIG_CHERI_PURECAP_UABI
+		const char * __capability const * __capability native;
+#else
 		const char __user *const __user *native;
+#endif
 #ifdef CONFIG_COMPAT
 		const compat_uptr_t __user *compat;
 #endif
@@ -2064,8 +2068,13 @@ out_ret:
 }
 
 static int do_execve(struct filename *filename,
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	const char * __capability const * __capability __argv,
+	const char * __capability const * __capability __envp)
+#else
 	const char __user *const __user *__argv,
 	const char __user *const __user *__envp)
+#endif
 {
 	struct user_arg_ptr argv = { .ptr.native = __argv };
 	struct user_arg_ptr envp = { .ptr.native = __envp };
@@ -2073,8 +2082,13 @@ static int do_execve(struct filename *filename,
 }
 
 static int do_execveat(int fd, struct filename *filename,
+#ifdef CONFIG_CHERI_PURECAP_UABI
+		const char * __capability const * __capability __argv,
+		const char * __capability const * __capability __envp,
+#else
 		const char __user *const __user *__argv,
 		const char __user *const __user *__envp,
+#endif
 		int flags)
 {
 	struct user_arg_ptr argv = { .ptr.native = __argv };
@@ -2142,16 +2156,26 @@ void set_dumpable(struct mm_struct *mm, int value)
 
 SYSCALL_DEFINE3(execve,
 		const char __user *, filename,
+#ifdef CONFIG_CHERI_PURECAP_UABI
+		const char * __capability const * __capability, argv,
+		const char * __capability const * __capability, envp)
+#else
 		const char __user *const __user *, argv,
 		const char __user *const __user *, envp)
+#endif
 {
 	return do_execve(getname(filename), argv, envp);
 }
 
 SYSCALL_DEFINE5(execveat,
 		int, fd, const char __user *, filename,
+#ifdef CONFIG_CHERI_PURECAP_UABI
+		const char * __capability const * __capability, argv,
+		const char * __capability const * __capability, envp,
+#else
 		const char __user *const __user *, argv,
 		const char __user *const __user *, envp,
+#endif
 		int, flags)
 {
 	return do_execveat(fd,
