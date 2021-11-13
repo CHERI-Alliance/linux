@@ -294,7 +294,7 @@ static int kill_proc(struct to_kill *tk, unsigned long pfn, int flags)
 
 	if ((flags & MF_ACTION_REQUIRED) && (t == current))
 		ret = force_sig_mceerr(BUS_MCEERR_AR,
-				 (void __user *)tk->addr, addr_lsb);
+				 as_user_ptr(tk->addr), addr_lsb);
 	else
 		/*
 		 * Signal other processes sharing the page if they have
@@ -302,7 +302,7 @@ static int kill_proc(struct to_kill *tk, unsigned long pfn, int flags)
 		 * Don't use force here, it's convenient if the signal
 		 * can be temporarily blocked.
 		 */
-		ret = send_sig_mceerr(BUS_MCEERR_AO, (void __user *)tk->addr,
+		ret = send_sig_mceerr(BUS_MCEERR_AO, as_user_ptr(tk->addr),
 				      addr_lsb, t);
 	if (ret < 0)
 		pr_info("Error sending signal to %s:%d: %d\n",
