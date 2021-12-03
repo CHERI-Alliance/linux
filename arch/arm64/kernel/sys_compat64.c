@@ -44,6 +44,12 @@
 #define __arm64_compatentry_sys_fstatat64			__arm64_compatentry_sys_newfstatat
 #define __arm64_compatentry_sys_fstat64				__arm64_compatentry_sys_newfstat
 
+/*
+ * 64-bit tasks use statfs (not statfs64).
+ */
+#define __arm64_compatentry_compat_sys_statfs64			__arm64_compatentry_compat_sys_statfs
+#define __arm64_compatentry_compat_sys_fstatfs64		__arm64_compatentry_compat_sys_fstatfs
+
 asmlinkage long sys_ni_syscall(void);
 
 asmlinkage long __arm64_compatentry_sys_ni_syscall(const struct pt_regs *__unused);

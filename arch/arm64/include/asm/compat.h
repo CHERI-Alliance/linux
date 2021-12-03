@@ -69,18 +69,18 @@ struct compat_stat {
 };
 
 struct compat_statfs {
-	int		f_type;
-	int		f_bsize;
-	int		f_blocks;
-	int		f_bfree;
-	int		f_bavail;
-	int		f_files;
-	int		f_ffree;
+	compat_long_t	f_type;
+	compat_long_t	f_bsize;
+	compat_long_t	f_blocks;
+	compat_long_t	f_bfree;
+	compat_long_t	f_bavail;
+	compat_long_t	f_files;
+	compat_long_t	f_ffree;
 	compat_fsid_t	f_fsid;
-	int		f_namelen;	/* SunOS ignores this field. */
-	int		f_frsize;
-	int		f_flags;
-	int		f_spare[4];
+	compat_long_t	f_namelen;	/* SunOS ignores this field. */
+	compat_long_t	f_frsize;
+	compat_long_t	f_flags;
+	compat_long_t	f_spare[4];
 };
 
 static inline void __user *compat_ptr(compat_uptr_t uptr)
