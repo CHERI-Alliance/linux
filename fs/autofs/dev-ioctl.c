@@ -763,19 +763,9 @@ static long autofs_dev_ioctl(struct file *file, unsigned int command,
 	return (long) err;
 }
 
-#ifdef CONFIG_COMPAT
-static long autofs_dev_ioctl_compat(struct file *file, unsigned int command,
-				    unsigned long u)
-{
-	return autofs_dev_ioctl(file, command, (user_uintptr_t) compat_ptr(u));
-}
-#else
-#define autofs_dev_ioctl_compat NULL
-#endif
-
 static const struct file_operations _dev_ioctl_fops = {
 	.unlocked_ioctl	 = autofs_dev_ioctl,
-	.compat_ioctl = autofs_dev_ioctl_compat,
+	.compat_ioctl = compat_ptr_ioctl,
 	.owner	 = THIS_MODULE,
 	.llseek = noop_llseek,
 };
