@@ -375,8 +375,7 @@ do {									\
 	const cap128_t __user *__p = (const cap128_t __user *)(ptr);	\
 	BUILD_BUG_ON(sizeof(*__p) != sizeof(*(ptr)));			\
 	might_fault();							\
-	if (!WARN_ON(!system_supports_morello()) &&			\
-	    access_ok(__p, sizeof(*__p))) {				\
+	if (access_ok(__p, sizeof(*__p))) {				\
 		__p = uaccess_mask_ptr(__p);				\
 		__morello_raw_get_user_cap((x), __p, (err));		\
 	} else {							\
@@ -406,8 +405,7 @@ do {									\
 	cap128_t __user *__p = (cap128_t __user *)(ptr);		\
 	BUILD_BUG_ON(sizeof(*__p) != sizeof(*(ptr)));			\
 	might_fault();							\
-	if (!WARN_ON(!system_supports_morello()) &&			\
-	    access_ok(__p, sizeof(*__p))) {				\
+	if (access_ok(__p, sizeof(*__p))) {				\
 		__p = uaccess_mask_ptr(__p);				\
 		__morello_raw_put_user_cap((x), __p, (err));		\
 	} else {							\
