@@ -1578,14 +1578,6 @@ static int gcs_set(struct task_struct *target, const struct
 #ifdef CONFIG_ARM64_MORELLO
 static int morello_ptrace_forge_cap_enabled;
 
-static int morello_active(struct task_struct *target,
-			  const struct user_regset *regset)
-{
-	if (!system_supports_morello())
-		return -ENODEV;
-	return regset->n;
-}
-
 /*
  * Make sure tag_map is big enough to fit all the capability register
  * tags (assuming tag_map immediately follows the last capability
@@ -1609,9 +1601,6 @@ static int morello_get(struct task_struct *target,
 		&target->thread.morello_user_state;
 	struct user_morello_state out;
 	int i;
-
-	if (!system_supports_morello())
-		return -EINVAL;
 
 	/*
 	 * The target's 64-bit registers may have been modified (e.g. through
@@ -1670,9 +1659,6 @@ static int morello_set(struct task_struct *target,
 	struct user_morello_state new_state;
 	int ret, i;
 
-	if (!system_supports_morello())
-		return -EINVAL;
-
 	if (!morello_ptrace_forge_cap_enabled)
 		return -EPERM;
 
@@ -1712,9 +1698,6 @@ int morello_ptrace_peekcap(struct task_struct *target, unsigned long addr,
 	struct user_cap tmp = {0};
 	int err;
 
-	if (!system_supports_morello())
-		return -EINVAL;
-
 	err = morello_ptrace_access_remote_cap(target, addr, &tmp, FOLL_FORCE);
 	if (err)
 		return err;
@@ -1731,9 +1714,6 @@ int morello_ptrace_pokecap(struct task_struct *target, unsigned long addr,
 		(const struct user_cap __user *)data;
 	struct user_cap tmp;
 	int err;
-
-	if (!system_supports_morello())
-		return -EINVAL;
 
 	if (!morello_ptrace_forge_cap_enabled)
 		return -EPERM;
@@ -1972,7 +1952,6 @@ static const struct user_regset aarch64_regsets[] = {
 		.n = sizeof(struct user_morello_state) / sizeof(__uint128_t),
 		.size = sizeof(__uint128_t),
 		.align = sizeof(__uint128_t),
-		.active = morello_active,
 		.regset_get = morello_get,
 		.set = morello_set,
 	},

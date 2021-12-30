@@ -260,9 +260,6 @@ static void __init check_root_cap(const cap128_t *cap)
 
 static int __init morello_cap_init(void)
 {
-	if (!system_supports_morello())
-		return 0;
-
 	__morello_get_ddc(&morello_root_cap);
 
 	check_root_cap(&morello_root_cap);
