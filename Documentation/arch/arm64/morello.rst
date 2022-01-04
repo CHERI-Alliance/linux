@@ -214,14 +214,13 @@ No explicit opt-in is required, as all added features are fully
 backwards-compatible and **do not modify the existing kernel-user ABI**.
 
 Morello support is built in when ``CONFIG_ARM64_MORELLO`` is selected.
-This requires the assembler to support Morello. When building the kernel
-with Clang, the integrated assembler can be used by setting
-``AS=clang``.
+This requires the compiler to support Morello.
 
 Warning
-  Booting a kernel with Morello support on Morello hardware requires a
-  Morello-aware firmware (notably to disable trapping of Morello
-  instructions). Failing that, the kernel will hang or crash.
+  If the kernel is built with Morello support, it **will not** boot on
+  non-Morello hardware. Additionally, a Morello-aware firmware is
+  required (notably to disable trapping of Morello instructions).
+  Failing that, the kernel will hang or crash.
 
 The rest of this section assumes that Morello support is enabled (i.e.
 ``(getauxval(AT_HWCAP2) & HWCAP2_MORELLO) != 0``), and is only
@@ -633,7 +632,6 @@ Limitations
   Investigations are underway to add support for a new pure-capability
   kernel-user ABI.
 
-
 * **No capability-based restriction is enforced at the kernel-user
   interface.** This means in particular that:
 
@@ -662,11 +660,13 @@ Limitations
   is built with Morello support (see also the ``ARM64_MORELLO`` entry in
   ``arch/arm64/Kconfig``):
 
+  - KVM is disabled, because changes to KVM are required to keep it
+    working when Morello is enabled. Additional work would also be
+    required to allow KVM guests to use Morello.
   - Swap support is disabled, because capability tags need to be
     saved/restored separately when a page is swapped out/in.
   - A small number of security features are disabled due to the lack of
     available registers when entering / exiting the kernel.
-  - KVM guests may not use any Morello feature.
   - Capability tags in memory are not included in core dumps.
 
 References
