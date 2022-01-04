@@ -1588,7 +1588,7 @@ static_assert(MORELLO_PT_TAG_MAP_REG_BIT(tag_map) <=
 
 #define MORELLO_STATE_COPY_VAL_TAG(out, reg, cap) do {			\
 	u8 tag;								\
-	morello_cap_get_val_tag(&cap, &out.reg, &tag);			\
+	morello_cap_get_val_tag(cap, &out.reg, &tag);			\
 	out.tag_map |= (__u64)tag << MORELLO_PT_TAG_MAP_REG_BIT(reg);	\
 } while (0)
 
@@ -1645,7 +1645,7 @@ static int morello_get(struct task_struct *target,
 
 #define MORELLO_STATE_BUILD_CAP(state, reg, cap) do {			\
 	u8 tag = (state.tag_map >> MORELLO_PT_TAG_MAP_REG_BIT(reg)) & 0x1; \
-	morello_build_cap_from_root_cap(&cap, &state.reg, tag);		\
+	cap = morello_build_cap_from_root_cap(&state.reg, tag);		\
 } while (0)
 
 static int morello_set(struct task_struct *target,
