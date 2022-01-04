@@ -27,10 +27,8 @@ struct morello_state {
 	unsigned long	cctlr;
 };
 
-u64 morello_cap_get_lo_val(const uintcap_t *cap);
-void morello_cap_get_val_tag(const uintcap_t *cap, __uint128_t *val, u8 *tag);
-void morello_build_cap_from_root_cap(uintcap_t *cap, const __uint128_t *val,
-				    u8 tag);
+void morello_cap_get_val_tag(uintcap_t cap, __uint128_t *val, u8 *tag);
+uintcap_t morello_build_cap_from_root_cap(const __uint128_t *val, u8 tag);
 
 /*
  * Reads or writes a capability from/to tsk's address space (depending on

@@ -5,6 +5,8 @@
 
 #define pr_fmt(fmt) "morello: " fmt
 
+#include <cheriintrin.h>
+
 #include <linux/cache.h>
 #include <linux/capability.h>
 #include <linux/mm.h>
@@ -19,12 +21,10 @@
 #include <asm/ptrace.h>
 
 /* Private functions implemented in morello.S */
-void __morello_cap_lo_hi_tag(const uintcap_t *cap, u64 *lo_val, u64 *hi_val,
+void __morello_cap_lo_hi_tag(uintcap_t cap, u64 *lo_val, u64 *hi_val,
 			     u8 *tag);
-void __morello_cap_cpy(uintcap_t *dst, const uintcap_t *src);
 void __morello_merge_c_x(uintcap_t *creg, u64 xreg);
-bool __morello_cap_has_executive(const uintcap_t *cap);
-void __morello_get_ddc(uintcap_t *dst);
+bool __morello_cap_has_executive(uintcap_t cap);
 
 /* Not defined as static because morello.S refers to it */
 uintcap_t morello_root_cap __ro_after_init;
@@ -40,7 +40,7 @@ static void init_pc_pcc(struct pt_regs *regs, unsigned long pc)
 	 * pc, this will be taken care of when PC is merged into PCC during
 	 * ret_to_user.
 	 */
-	__morello_cap_cpy(&regs->pcc, &morello_root_cap);
+	regs->pcc = morello_root_cap;
 
 	if (pc & 0x1) {
 		/*
@@ -71,10 +71,10 @@ void morello_setup_signal_return(struct pt_regs *regs)
 	 * Also set CLR to a valid capability, to allow a C64 handler to return
 	 * to the trampoline using `ret clr`.
 	 */
-	__morello_cap_cpy(&regs->cregs[30], &morello_root_cap);
+	regs->cregs[30] = morello_root_cap;
 }
 
-static char *format_cap(char *buf, size_t size, const uintcap_t *cap)
+static char *format_cap(char *buf, size_t size, uintcap_t cap)
 {
 	u64 lo_val, hi_val;
 	u8 tag;
@@ -99,16 +99,16 @@ void morello_show_regs(struct pt_regs *regs)
 	morello_merge_cap_regs(regs);
 
 	/* Same layout as the X registers (see __show_regs()) */
-	printk("pcc: %s\n", format_cap(buf, sizeof(buf), &regs->pcc));
-	printk("clr: %s\n", format_cap(buf, sizeof(buf), &regs->cregs[30]));
+	printk("pcc: %s\n", format_cap(buf, sizeof(buf), regs->pcc));
+	printk("clr: %s\n", format_cap(buf, sizeof(buf), regs->cregs[30]));
 
-	printk("csp: %s\n", format_cap(buf, sizeof(buf), &regs->csp));
-	printk("rcsp: %s\n", format_cap(buf, sizeof(buf), &regs->rcsp));
+	printk("csp: %s\n", format_cap(buf, sizeof(buf), regs->csp));
+	printk("rcsp: %s\n", format_cap(buf, sizeof(buf), regs->rcsp));
 
 	for (i = 29; i > 0; i -= 2) {
 		printk("c%-2d: %s c%-2d: %s\n",
-		       i, format_cap(buf, sizeof(buf), &regs->cregs[i]),
-		       i - 1, format_cap(buf2, sizeof(buf2), &regs->cregs[i - 1]));
+		       i, format_cap(buf, sizeof(buf), regs->cregs[i]),
+		       i - 1, format_cap(buf2, sizeof(buf2), regs->cregs[i - 1]));
 	}
 }
 
@@ -152,13 +152,13 @@ static int access_remote_cap(struct task_struct *tsk, struct mm_struct *mm,
 			goto out_put;
 		}
 
-		morello_build_cap_from_root_cap(kaddr, &user_cap->val,
-						user_cap->tag);
+		*kaddr = morello_build_cap_from_root_cap(&user_cap->val,
+							 user_cap->tag);
 		flush_ptrace_access(vma, (unsigned long)kaddr,
 				    (unsigned long)kaddr + sizeof(uintcap_t));
 		set_page_dirty_lock(page);
 	} else {
-		morello_cap_get_val_tag(kaddr, &user_cap->val, &user_cap->tag);
+		morello_cap_get_val_tag(*kaddr, &user_cap->val, &user_cap->tag);
 	}
 	ret = 0;
 
@@ -201,7 +201,7 @@ void morello_merge_cap_regs(struct pt_regs *regs)
 	int i;
 	uintcap_t *active_csp;
 
-	if (__morello_cap_has_executive(&regs->pcc))
+	if (__morello_cap_has_executive(regs->pcc))
 		active_csp = &regs->csp;
 	else
 		active_csp = &regs->rcsp;
@@ -218,29 +218,29 @@ void morello_flush_cap_regs_to_64_regs(struct task_struct *tsk)
 	struct pt_regs *regs = task_pt_regs(tsk);
 	struct morello_state *morello_state =
 		&tsk->thread.morello_user_state;
-	const uintcap_t *active_csp;
-	const uintcap_t *active_ctpidr;
+	uintcap_t active_csp;
+	uintcap_t active_ctpidr;
 	int i;
 
-	if (__morello_cap_has_executive(&regs->pcc)) {
-		active_csp = &regs->csp;
-		active_ctpidr = &morello_state->ctpidr;
+	if (__morello_cap_has_executive(regs->pcc)) {
+		active_csp = regs->csp;
+		active_ctpidr = morello_state->ctpidr;
 	} else {
-		active_csp = &regs->rcsp;
-		active_ctpidr = &morello_state->rctpidr;
+		active_csp = regs->rcsp;
+		active_ctpidr = morello_state->rctpidr;
 	}
 
 	for (i = 0; i < ARRAY_SIZE(regs->cregs); i++)
-		regs->regs[i] = morello_cap_get_lo_val(&regs->cregs[i]);
-	regs->pc = morello_cap_get_lo_val(&regs->pcc);
+		regs->regs[i] = (u64)regs->cregs[i];
+	regs->pc = (u64)regs->pcc;
 
-	regs->sp = morello_cap_get_lo_val(active_csp);
+	regs->sp = (u64)active_csp;
 
-	tsk->thread.uw.tp_value = morello_cap_get_lo_val(active_ctpidr);
+	tsk->thread.uw.tp_value = (u64)active_ctpidr;
 }
 
 
-static void __init check_root_cap(const uintcap_t *cap)
+static void __init check_root_cap(uintcap_t cap)
 {
 	u64 lo_val, hi_val;
 	u8 tag;
@@ -260,9 +260,9 @@ static void __init check_root_cap(const uintcap_t *cap)
 
 static int __init morello_cap_init(void)
 {
-	__morello_get_ddc(&morello_root_cap);
+	morello_root_cap = (uintcap_t)cheri_ddc_get();
 
-	check_root_cap(&morello_root_cap);
+	check_root_cap(morello_root_cap);
 
 	return 0;
 }
