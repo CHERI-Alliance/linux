@@ -1123,7 +1123,7 @@ struct task_struct {
 	/* Restored if set_restore_sigmask() was used: */
 	sigset_t			saved_sigmask;
 	struct sigpending		pending;
-	unsigned long			sas_ss_sp;
+	user_uintptr_t			sas_ss_sp;
 	size_t				sas_ss_size;
 	unsigned int			sas_ss_flags;
 
