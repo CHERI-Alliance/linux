@@ -2379,7 +2379,11 @@ set_status:
 }
 
 static int get_compat_pages_array(const void __user *chunk_pages[],
+#ifdef CONFIG_CHERI_PURECAP_UABI
+				  const void * __capability * __capability pages,
+#else
 				  const void __user * __user *pages,
+#endif
 				  unsigned long chunk_nr)
 {
 	compat_uptr_t __user *pages32 = (compat_uptr_t __user *)pages;
