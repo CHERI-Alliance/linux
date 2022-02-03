@@ -5,6 +5,7 @@
 bootstrap
 clone
 exit
+mmap
 read_write
 sched
 signal
