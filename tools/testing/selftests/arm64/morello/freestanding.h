@@ -9,6 +9,7 @@
 #include <stddef.h>
 #include <asm/unistd.h>
 #include <linux/posix_types.h>
+#include <cheriintrin.h>
 
 /* this is provided by libc, so roll our own */
 typedef __kernel_ssize_t ssize_t;
@@ -35,6 +36,9 @@ int __attribute__ ((format(printf, 1, 2))) printf(const char *fmt, ...);
 #define __TH_LOG_ERROR(fmt, ...) \
 	TH_LOG("ERROR: %s:%d: " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
 
+#define MAX_ERRNO       4095
+#define IS_ERR_VALUE(x) ((unsigned long)(x) >= (unsigned long)-MAX_ERRNO)
+
 /* mimic the kselftest harness */
 #define TEST(test_name) \
 	void test_name##_actual(void); \
@@ -46,6 +50,20 @@ int __attribute__ ((format(printf, 1, 2))) printf(const char *fmt, ...);
 		TH_LOG("PASSED: %s", #test_name); \
 	} \
 	void test_name##_actual(void)
+
+
+#define CAP_LOAD_PERMS					\
+	(CHERI_PERM_LOAD | CHERI_PERM_LOAD_CAP |	\
+	 ARM_CAP_PERMISSION_MUTABLE_LOAD)
+#define CAP_STORE_PERMS					\
+	(CHERI_PERM_STORE | CHERI_PERM_STORE_CAP |	\
+	 CHERI_PERM_STORE_LOCAL_CAP)
+
+#define STACK_REQ_PERMS	(CAP_LOAD_PERMS | CAP_STORE_PERMS | CHERI_PERM_GLOBAL)
+
+#define allocate_mem_raw(size)						\
+	(void *) syscall(__NR_mmap, NULL, size, PROT_READ | PROT_WRITE,	\
+				    MAP_ANONYMOUS | MAP_PRIVATE, -1, 0)
 
 /* this macro emulates its harness counterpart but is not API compatible */
 #define __EXPECT(exp, seen, op, exit_on_fail) \
@@ -121,5 +139,42 @@ static inline ssize_t write(int fd, const void *buf, size_t count)
 
 long __clone(int (*fn)(void *), uintcap_t stack, int flags, void *arg,
 	     pid_t *parent_tid, void *tls, pid_t *child_tid);
+
+static inline void *mmap(void *addr, size_t length, int prot, int flags,
+			 int fd, int offset)
+{
+	return (void *)syscall(__NR_mmap, addr, length, prot, flags, fd, offset);
+}
+
+static inline int munmap(void *addr, size_t length)
+{
+	return syscall(__NR_munmap, addr, length);
+}
+
+static inline void *mmap_verified(void *addr, size_t length, int prot, int flags,
+			    int fd,  int offset, unsigned int perms)
+{
+	void *__addr = mmap(addr, length, prot, flags, fd, offset);
+
+	EXPECT_FALSE(IS_ERR_VALUE(__addr)) {
+		TH_LOG("Failed to allocate memory: %p\n", __addr);
+		return NULL;
+	}
+
+	EXPECT_TRUE(cheri_tag_get(__addr)) {
+		TH_LOG("Invalid capability\n");
+		goto clean_up;
+	}
+
+	EXPECT_EQ(cheri_perms_get(__addr) & perms, perms) {
+		TH_LOG("Insufficient permissions for capability\n");
+		goto clean_up;
+	}
+
+	return __addr;
+clean_up:
+	munmap(__addr, length);
+	return NULL;
+}
 
 #endif
