@@ -269,7 +269,7 @@ __task_cpu_possible_mask(struct task_struct *p, const struct cpumask *mask)
 	if (!static_branch_unlikely(&arm64_mismatched_32bit_el0))
 		return mask;
 
-	if (!is_compat_thread(task_thread_info(p)))
+	if (!is_compat32_thread(task_thread_info(p)))
 		return mask;
 
 	return system_32bit_el0_cpumask();

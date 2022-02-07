@@ -164,7 +164,7 @@ int arch_set_shadow_stack_status(struct task_struct *task, unsigned long arg)
 	if (!system_supports_gcs())
 		return -EINVAL;
 
-	if (is_compat_thread(task_thread_info(task)))
+	if (is_compat32_thread(task_thread_info(task)))
 		return -EINVAL;
 
 	/* Reject unknown flags */
@@ -211,7 +211,7 @@ int arch_get_shadow_stack_status(struct task_struct *task,
 	if (!system_supports_gcs())
 		return -EINVAL;
 
-	if (is_compat_thread(task_thread_info(task)))
+	if (is_compat32_thread(task_thread_info(task)))
 		return -EINVAL;
 
 	return put_user(task->thread.gcs_el0_mode, arg);
@@ -223,7 +223,7 @@ int arch_lock_shadow_stack_status(struct task_struct *task,
 	if (!system_supports_gcs())
 		return -EINVAL;
 
-	if (is_compat_thread(task_thread_info(task)))
+	if (is_compat32_thread(task_thread_info(task)))
 		return -EINVAL;
 
 	/*
