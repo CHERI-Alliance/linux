@@ -315,7 +315,7 @@ errout:
 static inline int is_32bit_api(void)
 {
 #ifdef CONFIG_COMPAT
-	return in_compat_syscall();
+	return in_32bit_compat_syscall();
 #else
 	return (BITS_PER_LONG == 32);
 #endif
