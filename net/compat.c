@@ -110,7 +110,7 @@ int get_compat_msghdr(struct msghdr *kmsg,
 }
 
 /* Bleech... */
-#define CMSG_COMPAT_ALIGN(len)	ALIGN((len), sizeof(s32))
+#define CMSG_COMPAT_ALIGN(len)	ALIGN((len), sizeof(compat_long_t))
 
 #define CMSG_COMPAT_DATA(cmsg)				\
 	((void __user *)((char __user *)(cmsg) + sizeof(struct compat_cmsghdr)))
