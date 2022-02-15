@@ -82,12 +82,6 @@
 #define __arm64_compatentry_compat_sys_getitimer		__arm64_compatentry_sys_getitimer
 #define __arm64_compatentry_compat_sys_setitimer		__arm64_compatentry_sys_setitimer
 
-/*
- * Assign native handler to compat rt_sigreturn syscall till the full
- * compat64 signal support is added.
- */
-#define __arm64_compatentry_compat_sys_rt_sigreturn		__arm64_compatentry_sys_rt_sigreturn
-
 asmlinkage long sys_ni_syscall(void);
 
 asmlinkage long __arm64_compatentry_sys_ni_syscall(const struct pt_regs *__unused);

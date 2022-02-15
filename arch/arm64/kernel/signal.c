@@ -31,7 +31,11 @@
 #include <asm/morello.h>
 #include <asm/ptrace.h>
 #include <asm/syscall.h>
+#ifdef CONFIG_COMPAT32
 #include <asm/signal32.h>
+#else
+#include <asm/signal_compat64.h>
+#endif
 #include <asm/traps.h>
 #include <asm/vdso.h>
 
@@ -39,6 +43,7 @@
 #include <cheriintrin.h>
 #endif
 
+#ifndef SIGNAL_COMPAT64
 /*
  * Do a signal return; undo the signal stack. These are aligned to 128-bit.
  */
@@ -51,6 +56,7 @@ struct frame_record {
 	user_uintptr_t fp;
 	user_uintptr_t lr;
 };
+#endif /* !SIGNAL_COMPAT64 */
 
 struct rt_sigframe_user_layout {
 	struct rt_sigframe __user *sigframe;
@@ -80,10 +86,14 @@ static user_uintptr_t signal_sp(struct pt_regs *regs)
 	 * handlers are always executed in Executive and therefore on the
 	 * Executive stack. Read the actual (Executive) CSP_EL0 instead.
 	 */
+#ifndef SIGNAL_COMPAT64
 	return (user_uintptr_t)regs->csp;
-#else
+#else /* SIGNAL_COMPAT64 */
+	return (user_uintptr_t)uaddr_to_user_ptr_safe(regs->sp);
+#endif /* SIGNAL_COMPAT64 */
+#else /* !CONFIG_ARM64_MORELLO */
 	return regs->sp;
-#endif
+#endif /* !CONFIG_ARM64_MORELLO */
 }
 
 #define BASE_SIGFRAME_SIZE round_up(sizeof(struct rt_sigframe), 16)
@@ -1090,7 +1100,7 @@ static int setup_sigframe(struct rt_sigframe_user_layout *user,
 	struct rt_sigframe __user *sf = user->sigframe;
 
 	/* set up the stack frame for unwinding */
-#ifdef CONFIG_CHERI_PURECAP_UABI
+#if defined(CONFIG_CHERI_PURECAP_UABI) && !defined(SIGNAL_COMPAT64)
 	__morello_put_user_cap_error(regs->cregs[29], &user->next_frame->fp, err);
 	__morello_put_user_cap_error(regs->cregs[30], &user->next_frame->lr, err);
 #else
@@ -1250,7 +1260,7 @@ static void setup_return(struct pt_regs *regs, struct k_sigaction *ka,
 	regs->sp = user_ptr_addr(user->sigframe);
 	regs->regs[29] = user_ptr_addr(&user->next_frame->fp);
 	regs->pc = user_ptr_addr(ka->sa.sa_handler);
-#ifdef CONFIG_CHERI_PURECAP_UABI
+#if defined(CONFIG_CHERI_PURECAP_UABI) && !defined(SIGNAL_COMPAT64)
 	regs->csp = (uintcap_t)user->sigframe;
 	regs->cregs[29] = (uintcap_t)&user->next_frame->fp;
 	regs->pcc = (uintcap_t)ka->sa.sa_handler;
@@ -1320,7 +1330,11 @@ static int setup_rt_frame(int usig, struct ksignal *ksig, sigset_t *set,
 	frame = user.sigframe;
 
 	__put_user_error(0, &frame->uc.uc_flags, err);
+#ifndef SIGNAL_COMPAT64
 	__put_user_ptr_error(as_user_ptr(NULL), &frame->uc.uc_link, err);
+#else
+	__put_user_error(0, &frame->uc.uc_link, err);
+#endif
 
 	err |= __save_altstack(&frame->uc.uc_stack, regs->sp);
 	err |= setup_sigframe(&user, regs, set);
@@ -1330,7 +1344,7 @@ static int setup_rt_frame(int usig, struct ksignal *ksig, sigset_t *set,
 			err |= copy_siginfo_to_user(&frame->info, &ksig->info);
 			regs->regs[1] = user_ptr_addr(&frame->info);
 			regs->regs[2] = user_ptr_addr(&frame->uc);
-#ifdef CONFIG_CHERI_PURECAP_UABI
+#if defined(CONFIG_CHERI_PURECAP_UABI) && !defined(SIGNAL_COMPAT64)
 			regs->cregs[1] = (uintcap_t)&frame->info;
 			regs->cregs[2] = (uintcap_t)&frame->uc;
 #endif
@@ -1340,12 +1354,20 @@ static int setup_rt_frame(int usig, struct ksignal *ksig, sigset_t *set,
 	return err;
 }
 
+/*
+ * The rest of the file is common to native and 64-bit compat, so we only build
+ * it in the native signal.c, not in signal_comp64.c.
+ */
+#ifndef SIGNAL_COMPAT64
 static void setup_restart_syscall(struct pt_regs *regs)
 {
-	if (is_compat_task())
+#ifdef CONFIG_COMPAT32
+	if (is_32bit_compat_task()) {
 		compat_setup_restart_syscall(regs);
-	else
-		regs->regs[8] = __NR_restart_syscall;
+		return;
+	}
+#endif
+	regs->regs[8] = __NR_restart_syscall;
 }
 
 /*
@@ -1363,10 +1385,14 @@ static void handle_signal(struct ksignal *ksig, struct pt_regs *regs)
 	 * Set up the stack frame
 	 */
 	if (is_compat_task()) {
+#ifdef CONFIG_COMPAT32
 		if (ksig->ka.sa.sa_flags & SA_SIGINFO)
 			ret = compat_setup_rt_frame(usig, ksig, oldset, regs);
 		else
 			ret = compat_setup_frame(usig, ksig, oldset, regs);
+#else
+		ret = compat_setup_rt_frame(usig, ksig, oldset, regs);
+#endif
 	} else {
 		ret = setup_rt_frame(usig, ksig, oldset, regs);
 	}
@@ -1504,6 +1530,7 @@ void __init minsigstksz_setup(void)
 		round_up(sizeof(struct frame_record), 16) +
 		16; /* max alignment padding */
 }
+#endif /* !SIGNAL_COMPAT64 */
 
 /*
  * Compile-time assertions for siginfo_t offsets. Check NSIG* as well, as
@@ -1518,7 +1545,7 @@ static_assert(NSIGCHLD	== 6);
 static_assert(NSIGSYS	== 2);
 static_assert(sizeof(siginfo_t) == 128);
 
-#ifdef CONFIG_CHERI_PURECAP_UABI
+#if defined(CONFIG_CHERI_PURECAP_UABI) && !defined(SIGNAL_COMPAT64)
 static_assert(__alignof__(siginfo_t) == 16);
 static_assert(offsetof(siginfo_t, si_signo)	== 0x00);
 static_assert(offsetof(siginfo_t, si_errno)	== 0x04);
@@ -1545,7 +1572,7 @@ static_assert(offsetof(siginfo_t, si_fd)	== 0x18);
 static_assert(offsetof(siginfo_t, si_call_addr)	== 0x10);
 static_assert(offsetof(siginfo_t, si_syscall)	== 0x20);
 static_assert(offsetof(siginfo_t, si_arch)	== 0x24);
-#else /* CONFIG_CHERI_PURECAP_UABI */
+#else /* CONFIG_CHERI_PURECAP_UABI && !SIGNAL_COMPAT64 */
 static_assert(__alignof__(siginfo_t) == 8);
 static_assert(offsetof(siginfo_t, si_signo)	== 0x00);
 static_assert(offsetof(siginfo_t, si_errno)	== 0x04);
@@ -1573,4 +1600,4 @@ static_assert(offsetof(siginfo_t, si_fd)	== 0x18);
 static_assert(offsetof(siginfo_t, si_call_addr)	== 0x10);
 static_assert(offsetof(siginfo_t, si_syscall)	== 0x18);
 static_assert(offsetof(siginfo_t, si_arch)	== 0x1c);
-#endif /* CONFIG_CHERI_PURECAP_UABI */
+#endif /* CONFIG_CHERI_PURECAP_UABI && !SIGNAL_COMPAT64 */
