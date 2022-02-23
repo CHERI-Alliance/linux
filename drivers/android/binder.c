@@ -2610,11 +2610,11 @@ static int binder_translate_fd_array(struct list_head *pf_head,
 	 */
 	fda_offset = parent->buffer - t->buffer->user_data +
 		fda->parent_offset;
-	sender_ufda_base = (void __user *)(uintptr_t)sender_uparent->buffer +
+	sender_ufda_base = uaddr_to_user_ptr(sender_uparent->buffer) +
 				fda->parent_offset;
 
 	if (!IS_ALIGNED((unsigned long)fda_offset, sizeof(u32)) ||
-	    !IS_ALIGNED((unsigned long)sender_ufda_base, sizeof(u32))) {
+	    !IS_ALIGNED(user_ptr_addr(sender_ufda_base), sizeof(u32))) {
 		binder_user_error("%d:%d parent offset not aligned correctly.\n",
 				  proc->pid, thread->pid);
 		return -EINVAL;
@@ -2936,8 +2936,7 @@ static void binder_transaction(struct binder_proc *proc,
 	u32 secctx_sz = 0;
 	struct list_head sgc_head;
 	struct list_head pf_head;
-	const void __user *user_buffer = (const void __user *)
-				(uintptr_t)tr->data.ptr.buffer;
+	const void __user *user_buffer = uaddr_to_user_ptr(tr->data.ptr.buffer);
 	INIT_LIST_HEAD(&sgc_head);
 	INIT_LIST_HEAD(&pf_head);
 
@@ -3283,8 +3282,7 @@ static void binder_transaction(struct binder_proc *proc,
 				&target_proc->alloc,
 				t->buffer,
 				ALIGN(tr->data_size, sizeof(void *)),
-				(const void __user *)
-					(uintptr_t)tr->data.ptr.offsets,
+				uaddr_to_user_ptr(tr->data.ptr.offsets),
 				tr->offsets_size)) {
 		binder_user_error("%d:%d got transaction with invalid offsets ptr\n",
 				proc->pid, thread->pid);
@@ -3528,7 +3526,7 @@ static void binder_transaction(struct binder_proc *proc,
 				goto err_bad_offset;
 			}
 			ret = binder_defer_copy(&sgc_head, sg_buf_offset,
-				(const void __user *)(uintptr_t)bp->buffer,
+				uaddr_to_user_ptr(bp->buffer),
 				bp->length);
 			if (ret) {
 				binder_txn_error("%d:%d deferred copy failed\n",
@@ -3816,7 +3814,7 @@ static int binder_thread_write(struct binder_proc *proc,
 {
 	uint32_t cmd;
 	struct binder_context *context = proc->context;
-	void __user *buffer = (void __user *)(uintptr_t)binder_buffer;
+	void __user *buffer = uaddr_to_user_ptr(binder_buffer);
 	void __user *ptr = buffer + *consumed;
 	void __user *end = buffer + size;
 
@@ -4391,7 +4389,7 @@ static int binder_thread_read(struct binder_proc *proc,
 			      binder_uintptr_t binder_buffer, size_t size,
 			      binder_size_t *consumed, int non_block)
 {
-	void __user *buffer = (void __user *)(uintptr_t)binder_buffer;
+	void __user *buffer = uaddr_to_user_ptr(binder_buffer);
 	void __user *ptr = buffer + *consumed;
 	void __user *end = buffer + size;
 
