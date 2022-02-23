@@ -2099,19 +2099,10 @@ out:
 	return r;
 }
 
-static long dm_ctl_ioctl(struct file *file, uint command, ulong u)
+static long dm_ctl_ioctl(struct file *file, uint command, user_uintptr_t u)
 {
 	return (long)ctl_ioctl(file, command, (struct dm_ioctl __user *)u);
 }
-
-#ifdef CONFIG_COMPAT
-static long dm_compat_ctl_ioctl(struct file *file, uint command, ulong u)
-{
-	return (long)dm_ctl_ioctl(file, command, (ulong) compat_ptr(u));
-}
-#else
-#define dm_compat_ctl_ioctl NULL
-#endif
 
 static int dm_open(struct inode *inode, struct file *filp)
 {
@@ -2155,7 +2146,7 @@ static const struct file_operations _ctl_fops = {
 	.release = dm_release,
 	.poll    = dm_poll,
 	.unlocked_ioctl	 = dm_ctl_ioctl,
-	.compat_ioctl = dm_compat_ctl_ioctl,
+	.compat_ioctl = compat_ptr_ioctl,
 	.owner	 = THIS_MODULE,
 	.llseek  = noop_llseek,
 };

@@ -449,7 +449,7 @@ static void dm_unprepare_ioctl(struct mapped_device *md, int srcu_idx)
 }
 
 static int dm_blk_ioctl(struct block_device *bdev, blk_mode_t mode,
-			unsigned int cmd, unsigned long arg)
+			unsigned int cmd, user_uintptr_t arg)
 {
 	struct mapped_device *md = bdev->bd_disk->private_data;
 	int r, srcu_idx;
