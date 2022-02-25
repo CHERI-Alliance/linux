@@ -35,9 +35,8 @@ obj-y			:= debug-monitors.o entry.o irq.o fpsimd.o		\
 			   smp.o smp_spin_table.o topology.o smccc-call.o	\
 			   syscall.o proton-pack.o idle.o patching.o pi/
 
-obj-$(CONFIG_COMPAT)			+= signal32.o sigreturn32.o
 obj-$(CONFIG_COMPAT64)			+= sys_compat64.o
-obj-$(CONFIG_COMPAT32)			+= sys32.o sys_compat.o
+obj-$(CONFIG_COMPAT32)			+= sys32.o sys_compat.o signal32.o sigreturn32.o
 obj-$(CONFIG_COMPAT_ALIGNMENT_FIXUPS)	+= compat_alignment.o
 obj-$(CONFIG_KUSER_HELPERS)		+= kuser32.o
 obj-$(CONFIG_FUNCTION_TRACER)		+= ftrace.o entry-ftrace.o
