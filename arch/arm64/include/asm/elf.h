@@ -256,6 +256,8 @@ typedef compat_elf_greg_t		compat_elf_gregset_t[COMPAT_ELF_NGREG];
 	SET_PERSONALITY_AARCH64();					\
 })
 
+#define COMPAT_ARCH_DLINFO	SETUP_DLINFO((elf_addr_t)current->mm->context.vdso)
+
 #else /* !CONFIG_COMPAT64 */
 
 /* PIE load location for compat arm. Must match ARM ELF_ET_DYN_BASE. */

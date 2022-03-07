@@ -28,6 +28,29 @@
 
 #define ELF_COMPAT	1
 
+/*
+ * Below redefinitions are common for both 32 and 64 bit compat
+ * and are required due to the addition of PCuABI changes to linux/elf.h.
+ */
+#undef elf_stack_item_t
+#define elf_stack_item_t			elf_addr_t
+
+#undef elf_uaddr_to_user_ptr
+#define elf_uaddr_to_user_ptr(addr)		addr
+
+#ifdef CONFIG_CHERI_PURECAP_UABI
+
+#undef elf_copy_to_user_stack
+#define elf_copy_to_user_stack(to, from, len)	copy_to_user(to, from, len)
+
+#undef elf_stack_put_user_ptr
+#define elf_stack_put_user_ptr(val, ptr)	put_user((elf_addr_t)val, ptr)
+
+#undef elf_stack_put_user
+#define elf_stack_put_user(val, ptr)		put_user(val, ptr)
+
+#endif /* CONFIG_CHERI_PURECAP_UABI */
+
 #ifdef CONFIG_COMPAT32
 /*
  * Rename the basic ELF layout types to refer to the 32-bit class of files.
@@ -72,9 +95,6 @@
  * differ from the native ones, or omitted when they match.
  */
 
-#undef	elf_check_arch
-#define	elf_check_arch	compat_elf_check_arch
-
 #ifdef	COMPAT_ELF_PLATFORM
 #undef	ELF_PLATFORM
 #define	ELF_PLATFORM		COMPAT_ELF_PLATFORM
@@ -88,11 +108,6 @@
 #ifdef	COMPAT_ELF_HWCAP2
 #undef	ELF_HWCAP2
 #define	ELF_HWCAP2		COMPAT_ELF_HWCAP2
-#endif
-
-#ifdef	COMPAT_ARCH_DLINFO
-#undef	ARCH_DLINFO
-#define	ARCH_DLINFO		COMPAT_ARCH_DLINFO
 #endif
 
 #ifdef	COMPAT_ELF_ET_DYN_BASE
@@ -144,6 +159,14 @@
 #define binfmt_elf_test_suite	compat_binfmt_elf_test_suite
 
 #endif /* CONFIG_COMPAT32 */
+
+#undef	elf_check_arch
+#define	elf_check_arch	compat_elf_check_arch
+
+#ifdef	COMPAT_ARCH_DLINFO
+#undef	ARCH_DLINFO
+#define	ARCH_DLINFO		COMPAT_ARCH_DLINFO
+#endif
 
 #ifdef	COMPAT_SET_PERSONALITY
 #undef	SET_PERSONALITY
