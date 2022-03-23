@@ -387,7 +387,11 @@ static char *usb_dump_desc(char *start, char *end, struct usb_device *dev)
  * file_offset - the offset into the devices file on completion
  * The caller must own the device lock.
  */
+#ifdef CONFIG_CHERI_PURECAP_UABI
+static ssize_t usb_device_dump(char * __capability *buffer, size_t *nbytes,
+#else
 static ssize_t usb_device_dump(char __user **buffer, size_t *nbytes,
+#endif
 			       loff_t *skip_bytes, loff_t *file_offset,
 			       struct usb_device *usbdev, struct usb_bus *bus,
 			       int level, int index, int count)
