@@ -590,7 +590,7 @@ int ata_sas_scsi_ioctl(struct ata_port *ap, struct scsi_device *scsidev,
 		return put_user(val, (unsigned long __user *)arg);
 
 	case HDIO_SET_32BIT:
-		val = (unsigned long) arg;
+		val = user_ptr_addr(arg);
 		rc = 0;
 		spin_lock_irqsave(ap->lock, flags);
 		if (ap->pflags & ATA_PFLAG_PIO32CHANGE) {
