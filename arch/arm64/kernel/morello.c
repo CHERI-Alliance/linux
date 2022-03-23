@@ -282,7 +282,7 @@ void morello_flush_cap_regs_to_64_regs(struct task_struct *tsk)
 
 	regs->sp = (u64)active_csp;
 
-	tsk->thread.uw.tp_value = (u64)active_ctpidr;
+	tsk->thread.uw.tp_value = (user_uintptr_t)active_ctpidr;
 }
 
 

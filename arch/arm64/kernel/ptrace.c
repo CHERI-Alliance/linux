@@ -667,7 +667,7 @@ static int tls_get(struct task_struct *target, const struct user_regset *regset,
 	if (target == current)
 		tls_preserve_current_state();
 
-	ret = membuf_store(&to, target->thread.uw.tp_value);
+	ret = membuf_store(&to, (unsigned long)target->thread.uw.tp_value);
 	if (system_supports_tpidr2())
 		ret = membuf_store(&to, target->thread.tpidr2_el0);
 	else
@@ -683,7 +683,7 @@ static int tls_set(struct task_struct *target, const struct user_regset *regset,
 	int ret;
 	unsigned long tls[2];
 
-	tls[0] = target->thread.uw.tp_value;
+	tls[0] = (unsigned long)target->thread.uw.tp_value;
 	if (system_supports_tpidr2())
 		tls[1] = target->thread.tpidr2_el0;
 
@@ -691,7 +691,7 @@ static int tls_set(struct task_struct *target, const struct user_regset *regset,
 	if (ret)
 		return ret;
 
-	target->thread.uw.tp_value = tls[0];
+	target->thread.uw.tp_value = (user_uintptr_t)tls[0];
 	if (system_supports_tpidr2())
 		target->thread.tpidr2_el0 = tls[1];
 
