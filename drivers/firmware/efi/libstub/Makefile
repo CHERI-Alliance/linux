@@ -24,6 +24,8 @@ cflags-$(CONFIG_X86)		+= -m$(BITS) -D__KERNEL__ \
 # disable the stackleak plugin
 cflags-$(CONFIG_ARM64)		+= -fpie $(DISABLE_STACKLEAK_PLUGIN) \
 				   -fno-unwind-tables -fno-asynchronous-unwind-tables
+# disable -march=morello
+cflags-$(CONFIG_ARM64_MORELLO)  := $(subst -march=morello,,$(cflags-y))
 cflags-$(CONFIG_ARM)		+= -DEFI_HAVE_STRLEN -DEFI_HAVE_STRNLEN \
 				   -DEFI_HAVE_MEMCHR -DEFI_HAVE_STRRCHR \
 				   -DEFI_HAVE_STRCMP -fno-builtin -fpic \
@@ -55,6 +57,15 @@ KBUILD_CFLAGS := $(filter-out $(CC_FLAGS_SCS), $(KBUILD_CFLAGS))
 KBUILD_CFLAGS := $(filter-out $(CC_FLAGS_CFI), $(KBUILD_CFLAGS))
 # disable LTO
 KBUILD_CFLAGS := $(filter-out $(CC_FLAGS_LTO), $(KBUILD_CFLAGS))
+
+ifeq ($(CONFIG_ARM64_MORELLO),y)
+# The EFI stub should be built in pure aarch64 mode, which means
+# that Morello & CHERI relevant options should be disabled here.
+# In order to make it work, this needs to happen before processing
+# relevant headers included from within the stub sources,
+# but after the config options are set.
+LINUXINCLUDE += -include $(srctree)/$(src)/efistub_aarch64_mode.h
+endif
 
 lib-y				:= efi-stub-helper.o gop.o secureboot.o tpm.o \
 				   file.o mem.o random.o randomalloc.o pci.o \
