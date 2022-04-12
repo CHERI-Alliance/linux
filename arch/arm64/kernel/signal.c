@@ -963,7 +963,11 @@ static int restore_sigframe(struct pt_regs *regs,
 	return err;
 }
 
-SYSCALL_DEFINE0(rt_sigreturn)
+#ifndef SIGNAL_COMPAT64
+SYSCALL_DEFINE0(__retptr__(rt_sigreturn))
+#else
+COMPAT_SYSCALL_DEFINE0(rt_sigreturn)
+#endif
 {
 	struct pt_regs *regs = current_pt_regs();
 	struct rt_sigframe __user *frame;
@@ -989,7 +993,11 @@ SYSCALL_DEFINE0(rt_sigreturn)
 	if (restore_altstack(&frame->uc.uc_stack))
 		goto badframe;
 
+#if defined(CONFIG_CHERI_PURECAP_UABI) && !defined(SIGNAL_COMPAT64)
+	return regs->cregs[0];
+#else
 	return regs->regs[0];
+#endif
 
 badframe:
 	arm64_notify_segfault(regs->sp);
