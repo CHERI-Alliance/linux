@@ -922,6 +922,9 @@ void start_kernel(void)
 	boot_cpu_init();
 	page_address_init();
 	pr_notice("%s", linux_banner);
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	pr_notice("Userspace ABI: pure-capability (PCuABI), transitional\n");
+#endif
 	early_security_init();
 	setup_arch(&command_line);
 	setup_boot_config();
