@@ -4,7 +4,9 @@ Morello in AArch64 Linux
 
 Author: Kevin Brodsky <kevin.brodsky@arm.com>
 
-Date: 2020-09-07
+| Original date: 2020-09-07
+| Last updated: 2022-04-22
+|
 
 This document describes the provision of Morello functionalities to
 userspace by Linux.
@@ -208,10 +210,8 @@ Userspace support
 =================
 
 When the kernel is built with Morello support and the hardware supports
-Morello, Morello functionalities are made available to all native
-userspace threads, and the feature is advertised via ``HWCAP2_MORELLO``.
-No explicit opt-in is required, as all added features are fully
-backwards-compatible and **do not modify the existing kernel-user ABI**.
+Morello, Morello functionalities are made available to all userspace
+threads, and the feature is advertised via ``HWCAP2_MORELLO``.
 
 Morello support is built in when ``CONFIG_ARM64_MORELLO`` is selected.
 This requires the compiler to support Morello.
@@ -223,8 +223,62 @@ Warning
   Failing that, the kernel will hang or crash.
 
 The rest of this section assumes that Morello support is enabled (i.e.
-``(getauxval(AT_HWCAP2) & HWCAP2_MORELLO) != 0``), and is only
-applicable to native userspace threads.
+``(getauxval(AT_HWCAP2) & HWCAP2_MORELLO) != 0``).
+
+ABIs
+----
+
+In the default kernel configuration, existing aspects of the standard
+AArch64 kernel-user ABI remain unchanged.
+
+As a highly experimental feature, it is possible to choose a different
+kernel-user ABI, the **pure-capability ABI** (PCuABI), by selecting the
+``CONFIG_CHERI_PURECAP_UABI`` option. In this ABI, all pointers at the
+kernel-user boundary are capabilities, providing a native interface for
+pure-capability executables; see the CHERI C/C++ Programming Guide [4]_
+for an overview of this programming model.
+
+When ``CONFIG_CHERI_PURECAP_UABI`` is selected, the meaning of
+``CONFIG_COMPAT`` is modified: instead of providing support for AArch32
+applications, it provides support for the **standard AArch64 ABI**. The
+available ABIs are summarised in the table below.
+
+.. list-table::
+   :header-rows: 1
+   :stub-columns: 1
+
+   * - Config \\ ABI
+     - Native
+     - COMPAT
+   * - CONFIG_CHERI_PURECAP_UABI=n
+     - Standard AArch64
+     - [Not supported]*
+   * - CONFIG_CHERI_PURECAP_UABI=y
+     - PCuABI
+     - Standard AArch64
+
+\* Morello does not support AArch32, so although it is possible to
+select ``CONFIG_COMPAT`` but not ``CONFIG_CHERI_PURECAP_UABI``, this
+configuration is untested.
+
+Please note that the following caveats and limitations currently apply
+when ``CONFIG_CHERI_PURECAP_UABI`` is selected:
+
+* A **transitional** variation of PCuABI is provided by the kernel.
+  The transitional ABI is specified separately in [5]_. Only **a limited
+  set of syscalls** is supported in this ABI.
+
+* Only a **fixed configuration** is supported when
+  ``CONFIG_CHERI_PURECAP_UABI`` is selected:
+  ``morello_transitional_pcuabi_defconfig``.
+  In other words, configuring the kernel with PCuABI support should be
+  done by using ``make morello_transitional_pcuabi_defconfig``.
+  Selecting additional options may cause build and/or runtime errors.
+
+The rest of this document specifies **extensions to the standard AArch64
+ABI**. These extensions are also available in PCuABI, with a number of
+differences. The transitional PCuABI specification [5]_ takes precedence
+where it differs from the present document.
 
 Register handling
 -----------------
@@ -505,10 +559,8 @@ two situations:
   in C64 if the LSB of its address is set.
 
 Note
-  This extension is strictly about providing support for the C64 ISA,
-  not any form of new ABI. For instance, the handler provided to
-  ``sigaction()`` remains a 64-bit pointer. See also the Limitations_
-  section.
+  This extension is strictly about the C64 ISA and is orthogonal to the
+  kernel-user ABI.
 
 ptrace extensions
 -----------------
@@ -619,19 +671,6 @@ Note
 Limitations
 ===========
 
-* As mentioned at the beginning of the `Userspace support`_ section, the
-  existing kernel-user ABI remains unchanged (it is only extended in a few
-  instances). This means in particular that **no support for the
-  pure-capability ABI is provided**. Programs built in the
-  pure-capability ABI [4]_, where all pointers are capabilities, must
-  use a translation layer ("shim") to convert syscall arguments to the
-  base arm64 kernel-user ABI, as well as any other situation where
-  pointers are involved at the kernel-user boundary (for instance
-  pointers in the initial stack layout).
-
-  Investigations are underway to add support for a new pure-capability
-  kernel-user ABI.
-
 * **No capability-based restriction is enforced at the kernel-user
   interface.** This means in particular that:
 
@@ -675,4 +714,5 @@ References
 .. [1] https://developer.arm.com/architectures/cpu-architecture/a-profile/morello
 .. [2] https://www.cl.cam.ac.uk/research/security/ctsrd/cheri/
 .. [3] https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-941.pdf
-.. [4] https://www.cl.cam.ac.uk/research/security/ctsrd/pdfs/201904-asplos-cheriabi.pdf
+.. [4] https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-947.pdf
+.. [5] https://git.morello-project.org/morello/kernel/linux/-/wikis/Transitional-Morello-pure-capability-kernel-user-Linux-ABI-specification
