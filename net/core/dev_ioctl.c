@@ -55,7 +55,9 @@ int dev_ifconf(struct net *net, struct ifconf __user *uifc)
 	} else {
 		struct ifconf ifc;
 
-		if (copy_from_user(&ifc, uifc, sizeof(struct ifconf)))
+		if (IS_ENABLED(CONFIG_CHERI_PURECAP_UABI)
+		    ? copy_from_user_with_captags(&ifc, uifc, sizeof(struct ifconf))
+		    : copy_from_user(&ifc, uifc, sizeof(struct ifconf)))
 			return -EFAULT;
 
 		pos = ifc.ifc_buf;
