@@ -170,7 +170,14 @@ typedef struct compat_siginfo {
 #endif
 
 	union {
-		int _pad[128/sizeof(int) - 3];
+		/*
+		 * compat_uptr_t may have a larger alignment than int, causing
+		 * the _sifields union to also have a larger alignment.
+		 * To account for that, align up the size of the "header"
+		 * constituted by si_signo / si_errno / si_code, in order to
+		 * achieve an overall size of 128 for struct compat_siginfo.
+		 */
+		int _pad[(SI_MAX_SIZE - ALIGN(3*sizeof(int), sizeof(compat_uptr_t)))/sizeof(int)];
 
 		/* kill() */
 		struct {
