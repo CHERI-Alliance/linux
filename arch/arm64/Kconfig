@@ -1976,6 +1976,7 @@ config CC_HAS_SIGN_RETURN_ADDRESS
 
 config AS_HAS_ARMV8_3
 	def_bool $(cc-option,-Wa$(comma)-march=armv8.3-a)
+	depends on !ARM64_MORELLO
 
 config AS_HAS_CFI_NEGATE_RA_STATE
 	def_bool $(as-instr,.cfi_startproc\n.cfi_negate_ra_state\n.cfi_endproc\n)
@@ -2012,6 +2013,7 @@ config ARM64_AMU_EXTN
 
 config AS_HAS_ARMV8_4
 	def_bool $(cc-option,-Wa$(comma)-march=armv8.4-a)
+	depends on !ARM64_MORELLO
 
 config ARM64_TLB_RANGE
 	bool "Enable support for tlbi range feature"
@@ -2030,6 +2032,7 @@ menu "ARMv8.5 architectural features"
 
 config AS_HAS_ARMV8_5
 	def_bool $(cc-option,-Wa$(comma)-march=armv8.5-a)
+	depends on !ARM64_MORELLO
 
 config ARM64_BTI
 	bool "Branch Target Identification support"
