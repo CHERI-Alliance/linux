@@ -418,6 +418,28 @@ __copy_from_user_inatomic_nocache(void *to, const void __user *from,
 
 extern __must_check int check_zeroed_user(const void __user *from, size_t size);
 
+static __always_inline __must_check int
+__copy_struct_from_user_prepare(void *dst, size_t ksize, const void __user *src,
+				size_t usize)
+{
+	size_t size = min(ksize, usize);
+	size_t rest = max(ksize, usize) - size;
+
+	/* Double check if ksize is larger than a known object size. */
+	if (WARN_ON_ONCE(ksize > __builtin_object_size(dst, 1)))
+		return -E2BIG;
+
+	/* Deal with trailing bytes. */
+	if (usize < ksize) {
+		memset(dst + size, 0, rest);
+	} else if (usize > ksize) {
+		int ret = check_zeroed_user(src + size, rest);
+		if (ret <= 0)
+			return ret ?: -E2BIG;
+	}
+	return 0;
+}
+
 /**
  * copy_struct_from_user: copy a struct from userspace
  * @dst:   Destination address, in kernel space. This buffer must be @ksize
@@ -470,24 +492,36 @@ copy_struct_from_user(void *dst, size_t ksize, const void __user *src,
 		      size_t usize)
 {
 	size_t size = min(ksize, usize);
-	size_t rest = max(ksize, usize) - size;
+	int ret;
 
-	/* Double check if ksize is larger than a known object size. */
-	if (WARN_ON_ONCE(ksize > __builtin_object_size(dst, 1)))
-		return -E2BIG;
+	ret = __copy_struct_from_user_prepare(dst, ksize, src, usize);
 
-	/* Deal with trailing bytes. */
-	if (usize < ksize) {
-		memset(dst + size, 0, rest);
-	} else if (usize > ksize) {
-		int ret = check_zeroed_user(src + size, rest);
-		if (ret <= 0)
-			return ret ?: -E2BIG;
-	}
-	/* Copy the interoperable parts of the struct. */
-	if (copy_from_user(dst, src, size))
-		return -EFAULT;
-	return 0;
+	return ret ?: (copy_from_user(dst, src, size) ? -EFAULT : 0);
+}
+
+/**
+ * copy_struct_from_user_with_ptr: copy a struct from userspace
+ *
+ * @dst:   Destination address, in kernel space. This buffer must be @ksize
+ *         bytes long.
+ * @ksize: Size of @dst struct.
+ * @src:   Source address, in userspace.
+ * @usize: (Alleged) size of @src struct.
+  *
+ * Counterpart of copy_struct_from_user that deals with structures,
+ * members of which can contain user pointers.
+ * Otherwise, same logic/requirements apply.
+ */
+static __always_inline __must_check int
+copy_struct_from_user_with_ptr(void *dst, size_t ksize, const void __user *src,
+		      size_t usize)
+{
+	size_t size = min(ksize, usize);
+	int ret;
+
+	ret = __copy_struct_from_user_prepare(dst, ksize, src, usize);
+
+	return ret ?: (copy_from_user_with_ptr(dst, src, size) ? -EFAULT : 0);
 }
 
 bool copy_from_kernel_nofault_allowed(const void *unsafe_src, size_t size);
