@@ -2234,11 +2234,11 @@ size_t fault_in_writeable(char __user *uaddr, size_t size)
 		return 0;
 	if (!user_write_access_begin(uaddr, size))
 		return size;
-	if (!PAGE_ALIGNED(uaddr)) {
+	if (!PAGE_ALIGNED(user_ptr_addr(uaddr))) {
 		unsafe_put_user(0, uaddr, out);
-		uaddr = (char __user *)PAGE_ALIGN((unsigned long)uaddr);
+		uaddr = USER_PTR_PAGE_ALIGN(uaddr);
 	}
-	end = (char __user *)PAGE_ALIGN((unsigned long)start + size);
+	end = USER_PTR_PAGE_ALIGN(start + size);
 	if (unlikely(end < start))
 		end = NULL;
 	while (uaddr != end) {
@@ -2303,7 +2303,8 @@ EXPORT_SYMBOL(fault_in_subpage_writeable);
  */
 size_t fault_in_safe_writeable(const char __user *uaddr, size_t size)
 {
-	unsigned long start = (unsigned long)uaddr, end;
+	/* TODO [PCuABI] - capability checks for uaccess */
+	unsigned long start = user_ptr_addr(uaddr), end;
 	struct mm_struct *mm = current->mm;
 	bool unlocked = false;
 
@@ -2321,8 +2322,8 @@ size_t fault_in_safe_writeable(const char __user *uaddr, size_t size)
 	} while (start != end);
 	mmap_read_unlock(mm);
 
-	if (size > (unsigned long)uaddr - start)
-		return size - ((unsigned long)uaddr - start);
+	if (size > user_ptr_addr(uaddr) - start)
+		return size - (user_ptr_addr(uaddr) - start);
 	return 0;
 }
 EXPORT_SYMBOL(fault_in_safe_writeable);
@@ -2344,11 +2345,11 @@ size_t fault_in_readable(const char __user *uaddr, size_t size)
 		return 0;
 	if (!user_read_access_begin(uaddr, size))
 		return size;
-	if (!PAGE_ALIGNED(uaddr)) {
+	if (!PAGE_ALIGNED(user_ptr_addr(uaddr))) {
 		unsafe_get_user(c, uaddr, out);
-		uaddr = (const char __user *)PAGE_ALIGN((unsigned long)uaddr);
+		uaddr = USER_PTR_PAGE_ALIGN(uaddr);
 	}
-	end = (const char __user *)PAGE_ALIGN((unsigned long)start + size);
+	end = USER_PTR_PAGE_ALIGN(start + size);
 	if (unlikely(end < start))
 		end = NULL;
 	while (uaddr != end) {
