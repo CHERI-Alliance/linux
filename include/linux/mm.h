@@ -221,6 +221,7 @@ int overcommit_policy_handler(struct ctl_table *, int, void *, size_t *,
 
 /* to align the pointer to the (next) page boundary */
 #define PAGE_ALIGN(addr) ALIGN(addr, PAGE_SIZE)
+#define USER_PTR_PAGE_ALIGN(ptr) USER_PTR_ALIGN((ptr), PAGE_SIZE)
 
 /* to align the pointer to the (prev) page boundary */
 #define PAGE_ALIGN_DOWN(addr) ALIGN_DOWN(addr, PAGE_SIZE)
