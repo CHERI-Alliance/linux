@@ -421,7 +421,8 @@ static int __io_sqe_buffers_update(struct io_ring_ctx *ctx,
 				   unsigned int nr_args)
 {
 	u64 __user *tags = u64_to_user_ptr(up->tags);
-	struct iovec iov, __user *iovs = u64_to_user_ptr(up->data);
+	struct iovec iov;
+	struct iovec __user *iovs = u64_to_user_ptr(up->data);
 	struct page *last_hpage = NULL;
 	__u32 done;
 	int i, err;

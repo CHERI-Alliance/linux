@@ -3148,8 +3148,13 @@ static int io_validate_ext_arg(unsigned flags, const void __user *argp, size_t a
 }
 
 static int io_get_ext_arg(unsigned flags, const void __user *argp, size_t *argsz,
+#ifdef CONFIG_CHERI_PURECAP_UABI
+			  struct __kernel_timespec * __capability *ts,
+			  const sigset_t * __capability *sig)
+#else
 			  struct __kernel_timespec __user **ts,
 			  const sigset_t __user **sig)
+#endif
 {
 	struct io_uring_getevents_arg arg;
 
