@@ -92,4 +92,22 @@ static inline ptraddr_t user_ptr_addr(const void __user *ptr)
 	return (ptraddr_t)(user_uintptr_t)ptr;
 }
 
+/**
+ * user_ptr_is_same - checks where two user pointers are exactly the same
+ *
+ * Returns true if @p1 and @p2 are exactly the same user pointers.
+ *
+ * Only use this function if you need to know that two user pointers are
+ * interchangeable, not to check that their address is the same (use the ==
+ * operator for that purpose).
+ */
+static inline bool user_ptr_is_same(const void __user *p1, const void __user *p2)
+{
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	return __builtin_cheri_equal_exact(p1, p2);
+#else
+	return p1 == p2;
+#endif
+}
+
 #endif	/* _LINUX_USER_PTR_H */
