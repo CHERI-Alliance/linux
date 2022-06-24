@@ -519,6 +519,25 @@ static void iov_iter_bvec_advance(struct iov_iter *i, size_t size)
 	i->bvec = bvec;
 }
 
+static void iov_iter_kvec_advance(struct iov_iter *i, size_t size)
+{
+	const struct kvec *kvec, *end;
+
+	if (!i->count)
+		return;
+	i->count -= size;
+
+	size += i->iov_offset; // from beginning of current segment
+	for (kvec = i->kvec, end = kvec + i->nr_segs; kvec < end; kvec++) {
+		if (likely(size < kvec->iov_len))
+			break;
+		size -= kvec->iov_len;
+	}
+	i->iov_offset = size;
+	i->nr_segs -= kvec - i->kvec;
+	i->kvec = kvec;
+}
+
 static void iov_iter_iovec_advance(struct iov_iter *i, size_t size)
 {
 	const struct iovec *iov, *end;
@@ -578,9 +597,10 @@ void iov_iter_advance(struct iov_iter *i, size_t size)
 	if (likely(iter_is_ubuf(i)) || unlikely(iov_iter_is_xarray(i))) {
 		i->iov_offset += size;
 		i->count -= size;
-	} else if (likely(iter_is_iovec(i) || iov_iter_is_kvec(i))) {
-		/* iovec and kvec have identical layouts */
+	} else if (likely(iter_is_iovec(i))) {
 		iov_iter_iovec_advance(i, size);
+	} else if (iov_iter_is_kvec(i)) {
+		iov_iter_kvec_advance(i, size);
 	} else if (iov_iter_is_bvec(i)) {
 		iov_iter_bvec_advance(i, size);
 	} else if (iov_iter_is_folioq(i)) {
@@ -651,7 +671,19 @@ void iov_iter_revert(struct iov_iter *i, size_t unroll)
 	} else if (iov_iter_is_folioq(i)) {
 		i->iov_offset = 0;
 		iov_iter_folioq_revert(i, unroll);
-	} else { /* same logics for iovec and kvec */
+	} else if (iov_iter_is_kvec(i)) {
+		const struct kvec *kvec = i->kvec;
+		while (1) {
+			size_t n = (--kvec)->iov_len;
+			i->nr_segs++;
+			if (unroll <= n) {
+				i->kvec = kvec;
+				i->iov_offset = n - unroll;
+				return;
+			}
+			unroll -= n;
+		}
+	} else { /* handle iovec */
 		const struct iovec *iov = iter_iov(i);
 		while (1) {
 			size_t n = (--iov)->iov_len;
@@ -673,8 +705,10 @@ EXPORT_SYMBOL(iov_iter_revert);
 size_t iov_iter_single_seg_count(const struct iov_iter *i)
 {
 	if (i->nr_segs > 1) {
-		if (likely(iter_is_iovec(i) || iov_iter_is_kvec(i)))
+		if (likely(iter_is_iovec(i)))
 			return min(i->count, iter_iov(i)->iov_len - i->iov_offset);
+		if (iov_iter_is_kvec(i))
+			return min(i->count, i->kvec->iov_len - i->iov_offset);
 		if (iov_iter_is_bvec(i))
 			return min(i->count, i->bvec->bv_len - i->iov_offset);
 	}
@@ -818,6 +852,28 @@ static unsigned long iov_iter_alignment_iovec(const struct iov_iter *i)
 	return res;
 }
 
+static unsigned long iov_iter_alignment_kvec(const struct iov_iter *i)
+{
+	unsigned long res = 0;
+	size_t size = i->count;
+	size_t skip = i->iov_offset;
+	unsigned k;
+
+	for (k = 0; k < i->nr_segs; k++, skip = 0) {
+		size_t len = i->kvec[k].iov_len - skip;
+		if (len) {
+			res |= (ptraddr_t)i->kvec[k].iov_base + skip;
+			if (len > size)
+				len = size;
+			res |= len;
+			size -= len;
+			if (!size)
+				break;
+		}
+	}
+	return res;
+}
+
 static unsigned long iov_iter_alignment_bvec(const struct iov_iter *i)
 {
 	const struct bio_vec *bvec = i->bvec;
@@ -848,9 +904,11 @@ unsigned long iov_iter_alignment(const struct iov_iter *i)
 		return 0;
 	}
 
-	/* iovec and kvec have identical layouts */
-	if (likely(iter_is_iovec(i) || iov_iter_is_kvec(i)))
+	if (likely(iter_is_iovec(i)))
 		return iov_iter_alignment_iovec(i);
+
+	if (iov_iter_is_kvec(i))
+		return iov_iter_alignment_kvec(i);
 
 	if (iov_iter_is_bvec(i))
 		return iov_iter_alignment_bvec(i);
@@ -1174,6 +1232,26 @@ static int iov_npages(const struct iov_iter *i, int maxpages)
 	return npages;
 }
 
+static int kvec_npages(const struct iov_iter *i, int maxpages)
+{
+	size_t skip = i->iov_offset, size = i->count;
+	const struct kvec *p;
+	int npages = 0;
+
+	for (p = i->kvec; size; skip = 0, p++) {
+		unsigned offs = offset_in_page(p->iov_base + skip);
+		size_t len = min(p->iov_len - skip, size);
+
+		if (len) {
+			size -= len;
+			npages += DIV_ROUND_UP(offs + len, PAGE_SIZE);
+			if (unlikely(npages > maxpages))
+				return maxpages;
+		}
+	}
+	return npages;
+}
+
 static int bvec_npages(const struct iov_iter *i, int maxpages)
 {
 	size_t skip = i->iov_offset, size = i->count;
@@ -1197,13 +1275,15 @@ int iov_iter_npages(const struct iov_iter *i, int maxpages)
 	if (unlikely(!i->count))
 		return 0;
 	if (likely(iter_is_ubuf(i))) {
-		unsigned offs = offset_in_page(i->ubuf + i->iov_offset);
+		unsigned offs = offset_in_page(user_ptr_addr(i->ubuf) +
+					       i->iov_offset);
 		int npages = DIV_ROUND_UP(offs + i->count, PAGE_SIZE);
 		return min(npages, maxpages);
 	}
-	/* iovec and kvec have identical layouts */
-	if (likely(iter_is_iovec(i) || iov_iter_is_kvec(i)))
+	if (likely(iter_is_iovec(i)))
 		return iov_npages(i, maxpages);
+	if (iov_iter_is_kvec(i))
+		return kvec_npages(i, maxpages);
 	if (iov_iter_is_bvec(i))
 		return bvec_npages(i, maxpages);
 	if (iov_iter_is_folioq(i)) {
@@ -1227,8 +1307,11 @@ const void *dup_iter(struct iov_iter *new, struct iov_iter *old, gfp_t flags)
 		return new->bvec = kmemdup(new->bvec,
 				    new->nr_segs * sizeof(struct bio_vec),
 				    flags);
-	else if (iov_iter_is_kvec(new) || iter_is_iovec(new))
-		/* iovec and kvec have identical layout */
+	else if (iov_iter_is_kvec(new))
+		return new->kvec = kmemdup(new->kvec,
+				   new->nr_segs * sizeof(struct kvec),
+				   flags);
+	else if (iter_is_iovec(new))
 		return new->__iov = kmemdup(new->__iov,
 				   new->nr_segs * sizeof(struct iovec),
 				   flags);
@@ -1479,16 +1562,15 @@ void iov_iter_restore(struct iov_iter *i, struct iov_iter_state *state)
 	 * For the *vec iters, nr_segs + iov is constant - if we increment
 	 * the vec, then we also decrement the nr_segs count. Hence we don't
 	 * need to track both of these, just one is enough and we can deduct
-	 * the other from that. ITER_KVEC and ITER_IOVEC are the same struct
-	 * size, so we can just increment the iov pointer as they are unionzed.
-	 * ITER_BVEC _may_ be the same size on some archs, but on others it is
-	 * not. Be safe and handle it separately.
+	 * the other from that.
 	 */
-	BUILD_BUG_ON(sizeof(struct iovec) != sizeof(struct kvec));
 	if (iov_iter_is_bvec(i))
 		i->bvec -= state->nr_segs - i->nr_segs;
-	else
+	else if (iov_iter_is_kvec(i))
+		i->kvec -= state->nr_segs - i->nr_segs;
+	else /* handle iovec */
 		i->__iov -= state->nr_segs - i->nr_segs;
+
 	i->nr_segs = state->nr_segs;
 }
 
