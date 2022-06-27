@@ -56,6 +56,16 @@ typedef __u32 __bitwise __wsum;
 #define __aligned_be64 __be64 __attribute__((aligned(8)))
 #define __aligned_le64 __le64 __attribute__((aligned(8)))
 
+#ifndef __KERNEL__
+#ifdef __CHERI_PURE_CAPABILITY__
+typedef __uintcap_t	__kernel_uintptr_t;
+typedef __uintcap_t	__kernel_aligned_uintptr_t;
+#else
+typedef __u64		__kernel_uintptr_t;
+typedef __aligned_u64	__kernel_aligned_uintptr_t;
+#endif
+#endif
+
 typedef unsigned __bitwise __poll_t;
 
 #endif /*  __ASSEMBLY__ */

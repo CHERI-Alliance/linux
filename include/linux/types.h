@@ -7,6 +7,18 @@
 
 #ifndef __ASSEMBLY__
 
+/*
+ * Define UAPI pointer types differently for the kernel, to allow a hybrid
+ * CHERI kernel to handle pointers from a purecap CHERI userspace.
+ */
+#ifdef CONFIG_CHERI_PURECAP_UABI
+typedef __uintcap_t		__kernel_uintptr_t;
+typedef __uintcap_t		__kernel_aligned_uintptr_t;
+#else
+typedef __u64			__kernel_uintptr_t;
+typedef __aligned_u64		__kernel_aligned_uintptr_t;
+#endif
+
 #define DECLARE_BITMAP(name,bits) \
 	unsigned long name[BITS_TO_LONGS(bits)]
 
