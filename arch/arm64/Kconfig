@@ -1871,9 +1871,11 @@ menu "ARMv8.2 architectural features"
 
 config AS_HAS_ARMV8_2
 	def_bool $(cc-option,-Wa$(comma)-march=armv8.2-a)
+	depends on !ARM64_MORELLO
 
 config AS_HAS_SHA3
 	def_bool $(as-instr,.arch armv8.2-a+sha3)
+	depends on !ARM64_MORELLO
 
 config ARM64_PMEM
 	bool "Enable support for persistent memory"
