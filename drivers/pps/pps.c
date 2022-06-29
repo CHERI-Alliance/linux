@@ -88,7 +88,7 @@ static int pps_cdev_pps_fetch(struct pps_device *pps, struct pps_fdata *fdata)
 }
 
 static long pps_cdev_ioctl(struct file *file,
-		unsigned int cmd, unsigned long arg)
+		unsigned int cmd, user_uintptr_t arg)
 {
 	struct pps_device *pps = file->private_data;
 	struct pps_kparams params;
