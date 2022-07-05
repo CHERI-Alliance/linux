@@ -341,7 +341,10 @@ struct compat_ustat {
 	char			f_fpack[6];
 };
 
-#define COMPAT_SIGEV_PAD_SIZE	((SIGEV_MAX_SIZE/sizeof(int)) - 3)
+#define COMPAT_SIGEV_PREAMBLE_SIZE	(sizeof(compat_int_t) * 2 +		\
+					 sizeof(compat_sigval_t))
+#define COMPAT_SIGEV_PAD_SIZE	((SIGEV_MAX_SIZE - COMPAT_SIGEV_PREAMBLE_SIZE)	\
+				 / sizeof(compat_int_t))
 
 typedef struct compat_sigevent {
 	compat_sigval_t sigev_value;
