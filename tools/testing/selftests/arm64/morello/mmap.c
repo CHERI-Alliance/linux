@@ -115,7 +115,7 @@ clean_up:
 	ASSERT_EQ(retval, 0);
 
 	/* do file close */
-	syscall(__NR_close, fd);
+	close(fd);
 }
 
 TEST(test_syscall_mmap)
