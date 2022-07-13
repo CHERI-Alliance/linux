@@ -22,5 +22,10 @@ int sigaction(int n, struct sigaction *sa, const struct sigaction *old);
 int sigprocmask(int how, const sigset_t *mask, sigset_t *old);
 int sigaltstack(const stack_t *ss, stack_t *old_ss);
 int setitimer(int which, const struct itimerval *new_value, struct itimerval *old_value);
+mqd_t mq_open(const char *name, int oflag);
+int mq_unlink(const char *name);
+int mq_notify(mqd_t mqdes, const struct sigevent *sevp);
+int mq_timedsend(mqd_t mqdes, const char *msg, size_t len, unsigned int prio,
+		 const struct timespec *timeout);
 
 #endif /* ! SIGNAL_COMMON_H */
