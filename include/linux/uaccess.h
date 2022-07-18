@@ -291,6 +291,28 @@ copy_to_user_with_captags(void __user *to, const void *from, unsigned long n)
 	return n;
 }
 
+/*
+ * Pointer-preserving uaccess routines.
+ *
+ * These routines should be used in situations where data containing (user)
+ * pointers needs to be transferred to or from user memory.
+ */
+#ifdef CONFIG_CHERI_PURECAP_UABI
+#define __copy_from_user_inatomic_with_ptr	__copy_from_user_inatomic_with_captags
+#define __copy_from_user_with_ptr		__copy_from_user_with_captags
+#define copy_from_user_with_ptr			copy_from_user_with_captags
+#define __copy_to_user_inatomic_with_ptr	__copy_to_user_inatomic_with_captags
+#define __copy_to_user_with_ptr			__copy_to_user_with_captags
+#define copy_to_user_with_ptr			copy_to_user_with_captags
+#else /* CONFIG_CHERI_PURECAP_UABI */
+#define __copy_from_user_inatomic_with_ptr	__copy_from_user_inatomic
+#define __copy_from_user_with_ptr		__copy_from_user
+#define copy_from_user_with_ptr			copy_from_user
+#define __copy_to_user_inatomic_with_ptr	__copy_to_user_inatomic
+#define __copy_to_user_with_ptr			__copy_to_user
+#define copy_to_user_with_ptr			copy_to_user
+#endif /* CONFIG_CHERI_PURECAP_UABI */
+
 #ifndef copy_mc_to_kernel
 /*
  * Without arch opt-in this generic copy_mc_to_kernel() will not handle
