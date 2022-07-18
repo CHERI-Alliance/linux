@@ -3359,9 +3359,7 @@ int get_user_ifreq(struct ifreq *ifr, void __user **ifrdata, void __user *arg)
 		return 0;
 	}
 
-	if (IS_ENABLED(CONFIG_CHERI_PURECAP_UABI)
-	    ? copy_from_user_with_captags(ifr, arg, sizeof(*ifr))
-	    : copy_from_user(ifr, arg, sizeof(*ifr)))
+	if (copy_from_user_with_ptr(ifr, arg, sizeof(*ifr)))
 		return -EFAULT;
 
 	if (ifrdata)
@@ -3378,9 +3376,7 @@ int put_user_ifreq(struct ifreq *ifr, void __user *arg)
 	if (in_compat_syscall())
 		size = sizeof(struct compat_ifreq);
 
-	if (IS_ENABLED(CONFIG_CHERI_PURECAP_UABI)
-	    ? copy_to_user_with_captags(arg, ifr, size)
-	    : copy_to_user(arg, ifr, size))
+	if (copy_to_user_with_ptr(arg, ifr, size))
 		return -EFAULT;
 
 	return 0;
