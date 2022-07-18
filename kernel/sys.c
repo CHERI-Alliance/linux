@@ -2090,12 +2090,9 @@ static int prctl_set_mm_map(int opt, const void __user *addr, unsigned long data
 			return -EINVAL;
 
 		memset(user_auxv, 0, sizeof(user_auxv));
-		if (IS_ENABLED(CONFIG_CHERI_PURECAP_UABI)
-		    ? copy_from_user_with_captags(user_auxv,
-						  (const void __user *)prctl_map.auxv,
-						   prctl_map.auxv_size)
-		    : copy_from_user(user_auxv, (const void __user *)prctl_map.auxv,
-				     prctl_map.auxv_size))
+		if (copy_from_user_with_ptr(user_auxv,
+					    (const void __user *)prctl_map.auxv,
+					    prctl_map.auxv_size))
 			return -EFAULT;
 
 		/* Last entry must be AT_NULL as specification requires */
@@ -2181,9 +2178,8 @@ static int prctl_set_auxv(struct mm_struct *mm, user_uintptr_t addr,
 
 	if (len > sizeof(user_auxv))
 		return -EINVAL;
-	if (IS_ENABLED(CONFIG_CHERI_PURECAP_UABI)
-	    ? copy_from_user_with_captags(user_auxv, (const void __user *)addr, len)
-	    : copy_from_user(user_auxv, (const void __user *)addr, len))
+
+	if (copy_from_user_with_ptr(user_auxv, (const void __user *)addr, len))
 		return -EFAULT;
 
 	/* Make sure the last entry is always AT_NULL */
