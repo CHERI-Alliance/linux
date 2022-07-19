@@ -2424,9 +2424,10 @@ SYSCALL_DEFINE4(epoll_ctl, int, epfd, int, op, int, fd,
 				return -EFAULT;
 
 			epds.events = compat_epds.events;
-			epds.data = compat_epds.data;
+			epds.data = (__kernel_uintptr_t)as_user_ptr(compat_epds.data);
 		} else {
-			if (copy_from_user(&epds, event, sizeof(struct epoll_event)))
+			if (copy_from_user_with_ptr(&epds, event,
+						    sizeof(struct epoll_event)))
 				return -EFAULT;
 		}
 	}
