@@ -1442,7 +1442,7 @@ SYSCALL_DEFINE2(mq_notify, mqd_t, mqdes,
 {
 	struct sigevent n, *p = NULL;
 	if (u_notification) {
-		if (copy_from_user(&n, u_notification, sizeof(struct sigevent)))
+		if (copy_from_user_with_ptr(&n, u_notification, sizeof(struct sigevent)))
 			return -EFAULT;
 		p = &n;
 	}
@@ -1580,7 +1580,8 @@ COMPAT_SYSCALL_DEFINE2(mq_notify, mqd_t, mqdes,
 		if (get_compat_sigevent(&n, u_notification))
 			return -EFAULT;
 		if (n.sigev_notify == SIGEV_THREAD)
-			n.sigev_value.sival_ptr = compat_ptr(n.sigev_value.sival_int);
+			n.sigev_value.sival_ptr =
+				compat_ptr(user_ptr_addr(n.sigev_value.sival_ptr));
 		p = &n;
 	}
 	return do_mq_notify(mqdes, p);
