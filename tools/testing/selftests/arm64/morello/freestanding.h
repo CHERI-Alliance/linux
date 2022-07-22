@@ -15,6 +15,8 @@
 typedef __kernel_ssize_t ssize_t;
 typedef __kernel_pid_t pid_t;
 typedef __kernel_mqd_t mqd_t;
+typedef __kernel_timer_t timer_t;
+typedef __kernel_clockid_t clockid_t;
 
 struct __test_meta {
 	int message;
