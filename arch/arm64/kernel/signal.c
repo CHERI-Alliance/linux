@@ -1349,7 +1349,7 @@ static int setup_rt_frame(int usig, struct ksignal *ksig, sigset_t *set,
 	if (err == 0) {
 		setup_return(regs, &ksig->ka, &user, usig);
 		if (ksig->ka.sa.sa_flags & SA_SIGINFO) {
-			err |= copy_siginfo_to_user(&frame->info, &ksig->info);
+			err |= copy_siginfo_to_user_with_ptr(&frame->info, &ksig->info);
 			regs->regs[1] = user_ptr_addr(&frame->info);
 			regs->regs[2] = user_ptr_addr(&frame->uc);
 #if defined(CONFIG_CHERI_PURECAP_UABI) && !defined(SIGNAL_COMPAT64)
