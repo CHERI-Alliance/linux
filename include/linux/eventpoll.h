@@ -8,6 +8,7 @@
 #ifndef _LINUX_EVENTPOLL_H
 #define _LINUX_EVENTPOLL_H
 
+#include <linux/compat.h>
 #include <uapi/linux/eventpoll.h>
 #include <uapi/linux/kcmp.h>
 
@@ -68,6 +69,11 @@ static inline void eventpoll_release(struct file *file) {}
 
 #endif
 
+struct compat_epoll_event {
+	__poll_t events;
+	__u64 data;
+};
+
 #if defined(CONFIG_ARM) && defined(CONFIG_OABI_COMPAT)
 /* ARM OABI has an incompatible struct layout and needs a special handler */
 extern struct epoll_event __user *
@@ -78,6 +84,17 @@ static inline struct epoll_event __user *
 epoll_put_uevent(__poll_t revents, __u64 data,
 		 struct epoll_event __user *uevent)
 {
+	if (in_compat_syscall()) {
+		struct compat_epoll_event __user *compat_uevent =
+				(struct compat_epoll_event __user *)uevent;
+
+		if (__put_user(revents, &compat_uevent->events) ||
+		    __put_user(data, &compat_uevent->data))
+			return NULL;
+
+		return (struct epoll_event __user *)(compat_uevent+1);
+	}
+
 	if (__put_user(revents, &uevent->events) ||
 	    __put_user(data, &uevent->data))
 		return NULL;
