@@ -218,6 +218,28 @@ struct aio_kiocb {
 	struct eventfd_ctx	*ki_eventfd;
 };
 
+struct compat_iocb {
+	__u64	aio_data;
+#if defined(__BYTE_ORDER) ? __BYTE_ORDER == __LITTLE_ENDIAN : defined(__LITTLE_ENDIAN)
+	__u32	aio_key;
+	__kernel_rwf_t aio_rw_flags;
+#elif defined(__BYTE_ORDER) ? __BYTE_ORDER == __BIG_ENDIAN : defined(__BIG_ENDIAN)
+	__kernel_rwf_t aio_rw_flags;
+	__u32	aio_key;
+#else
+#error edit for your odd byteorder.
+#endif
+	__u16	aio_lio_opcode;
+	__s16	aio_reqprio;
+	__u32	aio_fildes;
+	__u64	aio_buf;
+	__u64	aio_nbytes;
+	__s64	aio_offset;
+	__u64	aio_reserved2;
+	__u32	aio_flags;
+	__u32	aio_resfd;
+};
+
 /*------ sysctl variables----*/
 static DEFINE_SPINLOCK(aio_nr_lock);
 static unsigned long aio_nr;		/* current system wide number of aio requests */
@@ -2028,6 +2050,26 @@ static int __io_submit_one(struct kioctx *ctx, const struct iocb *iocb,
 	}
 }
 
+static int get_compat_iocb(struct iocb *iocb, const struct iocb __user *user_iocb)
+{
+	struct compat_iocb compat_iocb;
+	if (unlikely(copy_from_user(&compat_iocb, user_iocb, sizeof(struct compat_iocb))))
+		return -EFAULT;
+	iocb->aio_data = compat_iocb.aio_data;
+	iocb->aio_key = compat_iocb.aio_key;
+	iocb->aio_rw_flags = compat_iocb.aio_rw_flags;
+	iocb->aio_lio_opcode = compat_iocb.aio_lio_opcode;
+	iocb->aio_reqprio = compat_iocb.aio_reqprio;
+	iocb->aio_fildes = compat_iocb.aio_fildes;
+	iocb->aio_buf = (__kernel_uintptr_t)compat_ptr(compat_iocb.aio_buf);
+	iocb->aio_nbytes = compat_iocb.aio_nbytes;
+	iocb->aio_offset = compat_iocb.aio_offset;
+	iocb->aio_reserved2 = compat_iocb.aio_reserved2;
+	iocb->aio_flags = compat_iocb.aio_flags;
+	iocb->aio_resfd = compat_iocb.aio_resfd;
+	return 0;
+}
+
 static int io_submit_one(struct kioctx *ctx, struct iocb __user *user_iocb,
 			 bool compat)
 {
@@ -2035,8 +2077,13 @@ static int io_submit_one(struct kioctx *ctx, struct iocb __user *user_iocb,
 	struct iocb iocb;
 	int err;
 
-	if (unlikely(copy_from_user(&iocb, user_iocb, sizeof(iocb))))
-		return -EFAULT;
+	if (compat) {
+		if (unlikely(get_compat_iocb(&iocb, user_iocb)))
+			return -EFAULT;
+	} else {
+		if (unlikely(copy_from_user(&iocb, user_iocb, sizeof(iocb))))
+			return -EFAULT;
+	}
 
 	/* enforce forwards compatibility on users */
 	if (unlikely(iocb.aio_reserved2)) {
