@@ -1576,7 +1576,7 @@ static ssize_t aio_setup_rw(int rw, const struct iocb *iocb,
 		struct iovec **iovec, bool vectored, bool compat,
 		struct iov_iter *iter)
 {
-	void __user *buf = (void __user *)(uintptr_t)iocb->aio_buf;
+	void __user *buf = (void __user *)iocb->aio_buf;
 	size_t len = iocb->aio_nbytes;
 
 	if (!vectored) {
@@ -2081,7 +2081,7 @@ static int io_submit_one(struct kioctx *ctx, struct iocb __user *user_iocb,
 		if (unlikely(get_compat_iocb(&iocb, user_iocb)))
 			return -EFAULT;
 	} else {
-		if (unlikely(copy_from_user(&iocb, user_iocb, sizeof(iocb))))
+		if (unlikely(copy_from_user_with_ptr(&iocb, user_iocb, sizeof(iocb))))
 			return -EFAULT;
 	}
 
