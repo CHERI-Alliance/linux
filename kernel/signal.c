@@ -3883,7 +3883,7 @@ static bool access_pidfd_pidns(struct pid *pid)
 }
 
 static int copy_siginfo_from_user_any(kernel_siginfo_t *kinfo,
-		siginfo_t __user *info)
+		siginfo_t __user *info, bool current_pid)
 {
 #ifdef CONFIG_COMPAT
 	/*
@@ -3895,7 +3895,13 @@ static int copy_siginfo_from_user_any(kernel_siginfo_t *kinfo,
 		return copy_siginfo_from_user32(
 			kinfo, (struct compat_siginfo __user *)info);
 #endif
-	return copy_siginfo_from_user(kinfo, info);
+	/*
+	 * TODO [PCuABI]: In case target pid differs from the current pid, this
+	 * code silently ignores the tag copy. Revisit this later to treat this
+	 * as an error(-EINVAL) for PCuABI.
+	 */
+	return (current_pid ? copy_siginfo_from_user_with_ptr(kinfo, info)
+			    : copy_siginfo_from_user(kinfo, info));
 }
 
 static struct pid *pidfd_to_pid(const struct file *file)
@@ -3979,7 +3985,7 @@ SYSCALL_DEFINE4(pidfd_send_signal, int, pidfd, int, sig,
 	}
 
 	if (info) {
-		ret = copy_siginfo_from_user_any(&kinfo, info);
+		ret = copy_siginfo_from_user_any(&kinfo, info, (task_pid(current) == pid));
 		if (unlikely(ret))
 			goto err;
 
