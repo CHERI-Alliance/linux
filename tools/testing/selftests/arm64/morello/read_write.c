@@ -42,7 +42,7 @@ static int fd;
 
 TEST(test_getpid)
 {
-	syscall(__NR_getpid, 0);
+	getpid();
 }
 
 TEST(test_write)
