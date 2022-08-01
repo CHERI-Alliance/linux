@@ -97,3 +97,13 @@ int rt_tgsigqueueinfo(pid_t tgid, pid_t tid, int sig, siginfo_t *uinfo)
 {
 	return syscall(__NR_rt_tgsigqueueinfo, tgid, tid, sig, uinfo);
 }
+
+int pidfd_open(pid_t pid, int flags)
+{
+	return syscall(__NR_pidfd_open, pid, flags);
+}
+
+int pidfd_send_signal(int pidfd, int sig, siginfo_t *uinfo, unsigned int flags)
+{
+	return syscall(__NR_pidfd_send_signal, pidfd, sig, uinfo, flags);
+}

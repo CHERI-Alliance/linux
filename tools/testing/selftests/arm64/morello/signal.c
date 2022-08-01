@@ -330,6 +330,47 @@ TEST(test_rt_tgsigqueueinfo)
 	}
 }
 
+TEST(test_pidfd_send_signal)
+{
+	siginfo_t si, wait_si;
+	pid_t cpid;
+	int pidfd, ret;
+	struct sigaction sa;
+
+	setup_sigusr1_handler(&sa, SIG_UNBLOCK);
+
+	TH_LOG("test_pidfd_send_signal: Signal to the same process");
+	setup_siginfo_same_process(&si);
+	pidfd = pidfd_open(si.si_pid, 0);
+	ASSERT_GE(pidfd, 0) {
+		__TH_LOG_ERROR("Failed to open process file descriptor");
+	}
+	ret = pidfd_send_signal(pidfd, SIGUSR1, &si, 0);
+	ASSERT_EQ(ret, 0) {
+		__TH_LOG_ERROR("pidfd_send_signal syscall failed");
+	}
+	wait(DELAY * 1000);
+	ASSERT_TRUE(signal_status);
+	close(pidfd);
+
+	TH_LOG("test_pidfd_send_signal: Signal to a different process");
+	cpid = setup_siginfo_diff_process(&si);
+
+	pidfd = pidfd_open(cpid, 0);
+	ASSERT_GE(pidfd, 0) {
+		__TH_LOG_ERROR("Failed to open process file descriptor");
+	}
+	ret = pidfd_send_signal(pidfd, SIGUSR1, &si, 0);
+	ASSERT_EQ(ret, 0) {
+		__TH_LOG_ERROR("pidfd_send_signal syscall failed");
+	}
+	ret = waitid(P_PID, cpid, &wait_si, WEXITED, NULL);
+	ASSERT_EQ(ret, 0) {
+		__TH_LOG_ERROR("test_pidfd_send_signal: Failed on wait");
+	}
+	close(pidfd);
+}
+
 int main(void)
 {
 	test_signal_basic();
@@ -337,5 +378,6 @@ int main(void)
 	test_timer_create();
 	test_rt_sigqueueinfo();
 	test_rt_tgsigqueueinfo();
+	test_pidfd_send_signal();
 	return 0;
 }
