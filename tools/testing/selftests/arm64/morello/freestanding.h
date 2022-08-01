@@ -9,6 +9,8 @@
 #include <stddef.h>
 #include <asm/unistd.h>
 #include <linux/posix_types.h>
+#include <linux/resource.h>
+#include <linux/signal.h>
 #include <cheriintrin.h>
 
 /* this is provided by libc, so roll our own */
@@ -17,6 +19,8 @@ typedef __kernel_pid_t pid_t;
 typedef __kernel_mqd_t mqd_t;
 typedef __kernel_timer_t timer_t;
 typedef __kernel_clockid_t clockid_t;
+typedef __kernel_uid_t uid_t;
+typedef __kernel_mode_t mode_t;
 
 #define EXIT_SUCCESS 0
 
@@ -185,6 +189,21 @@ clean_up:
 static inline int close(int fd)
 {
 	return syscall(__NR_close, fd);
+}
+
+static inline pid_t getpid(void)
+{
+	return syscall(__NR_getpid);
+}
+
+static inline uid_t getuid(void)
+{
+	return syscall(__NR_getuid);
+}
+
+static inline int waitid(int id_type, pid_t id, siginfo_t *info, int options, struct rusage *ru)
+{
+	return syscall(__NR_waitid, id_type, id, info, options, ru);
 }
 
 #endif

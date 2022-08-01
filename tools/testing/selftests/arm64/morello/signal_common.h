@@ -31,5 +31,7 @@ int timer_create(clockid_t clockid, struct sigevent *sevp, timer_t *timerid);
 int timer_delete(timer_t timerid);
 int timer_settime(timer_t timerid, int flags, const struct itimerspec *new_value,
 		  struct itimerspec *old_value);
+int rt_sigqueueinfo(pid_t tgid, int sig, siginfo_t *uinfo);
+int rt_tgsigqueueinfo(pid_t tgid, pid_t tid, int sig, siginfo_t *uinfo);
 
 #endif /* ! SIGNAL_COMMON_H */
