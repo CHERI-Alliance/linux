@@ -5,8 +5,9 @@
  * be extended to cover invalid accesses to mmaped memory.
  */
 #include <linux/mman.h>
-#include <errno.h>
-#include <fcntl.h>
+#include <linux/errno.h>
+#include <linux/fs.h>
+#include <linux/fcntl.h>
 #include <cheriintrin.h>
 #include "freestanding.h"
 
