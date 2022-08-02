@@ -3,7 +3,6 @@
  * Copyright (C) 2021  Arm Limited
  */
 
-#include <stddef.h>
 #include <stdbool.h>
 
 #include <linux/signal.h>
