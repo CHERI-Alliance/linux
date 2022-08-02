@@ -371,6 +371,26 @@ TEST(test_pidfd_send_signal)
 	close(pidfd);
 }
 
+TEST(test_rt_sigtimedwait)
+{
+	siginfo_t si, wait_si = (siginfo_t){0};
+	struct sigaction sa;
+	int ret;
+
+	setup_sigusr1_handler(&sa, SIG_SETMASK);
+
+	TH_LOG("test_rt_sigtimedwait: Signal to the same process");
+	setup_siginfo_same_process(&si);
+	ret = rt_sigqueueinfo(si.si_pid, SIGUSR1, &si);
+	ASSERT_EQ(ret, 0) {
+		__TH_LOG_ERROR("rt_sigqueueinfo syscall failed");
+	}
+	ret = rt_sigtimedwait(&sa.sa_mask, &wait_si, NULL, sizeof(sa.sa_mask));
+	ASSERT_EQ(ret, SIGUSR1);
+	ASSERT_TRUE(cheri_is_equal_exact(wait_si.si_value.sival_ptr,
+					 siginfo_params.ptr));
+}
+
 int main(void)
 {
 	test_signal_basic();
@@ -379,5 +399,6 @@ int main(void)
 	test_rt_sigqueueinfo();
 	test_rt_tgsigqueueinfo();
 	test_pidfd_send_signal();
+	test_rt_sigtimedwait();
 	return 0;
 }
