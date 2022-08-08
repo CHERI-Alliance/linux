@@ -50,6 +50,10 @@
 #include <asm/param.h>
 #include <asm/page.h>
 
+#ifdef CONFIG_CHERI_PURECAP_UABI
+#include <cheriintrin.h>
+#endif
+
 #ifndef ELF_COMPAT
 #define ELF_COMPAT 0
 #endif
@@ -159,10 +163,19 @@ static int padzero(unsigned long address)
 #define ELF_BASE_PLATFORM NULL
 #endif
 
+struct elf_load_info {
+	unsigned long start_elf_rx;
+	unsigned long end_elf_rx;
+	unsigned long start_elf_rw;
+	unsigned long end_elf_rw;
+};
+
 static int
 create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 		unsigned long interp_load_addr,
-		unsigned long e_entry, unsigned long phdr_addr)
+		unsigned long e_entry, unsigned long phdr_addr,
+		const struct elf_load_info *exec_load_info,
+		const struct elf_load_info *interp_load_info)
 {
 	struct mm_struct *mm = current->mm;
 	unsigned long p = bprm->p;
@@ -181,6 +194,9 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	int ei_index;
 	const struct cred *cred = current_cred();
 	struct vm_area_struct *vma;
+#if defined(CONFIG_CHERI_PURECAP_UABI) && (ELF_COMPAT == 0)
+	elf_stack_item_t *mm_at_argv, *mm_at_envp;
+#endif
 
 	/*
 	 * In some cases (e.g. Hyper-Threading), we want to avoid L1
@@ -279,6 +295,42 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	NEW_AUX_ENT(AT_RSEQ_FEATURE_SIZE, offsetof(struct rseq, end));
 	NEW_AUX_ENT(AT_RSEQ_ALIGN, __alignof__(struct rseq));
 #endif
+#if defined(CONFIG_CHERI_PURECAP_UABI) && (ELF_COMPAT == 0)
+	/*
+	 * TODO [PCuABI] - Restrict bounds/perms for AT_CHERI_* entries
+	 */
+	NEW_AUX_ENT(AT_CHERI_EXEC_RW_CAP,
+		(exec_load_info->start_elf_rw != ~0UL ?
+			elf_uaddr_to_user_ptr(exec_load_info->start_elf_rw) :
+			NULL));
+	NEW_AUX_ENT(AT_CHERI_EXEC_RX_CAP,
+		elf_uaddr_to_user_ptr(exec_load_info->start_elf_rx));
+	NEW_AUX_ENT(AT_CHERI_INTERP_RW_CAP,
+		((interp_load_addr && interp_load_info->start_elf_rw != ~0UL) ?
+			elf_uaddr_to_user_ptr(interp_load_info->start_elf_rw) :
+			NULL));
+	NEW_AUX_ENT(AT_CHERI_INTERP_RX_CAP,
+		(interp_load_addr ?
+			elf_uaddr_to_user_ptr(interp_load_info->start_elf_rx) :
+			NULL));
+	NEW_AUX_ENT(AT_CHERI_STACK_CAP, elf_uaddr_to_user_ptr(0));
+	NEW_AUX_ENT(AT_CHERI_SEAL_CAP,
+		cheri_bounds_set_exact(elf_uaddr_to_user_ptr(0), 1 << 15));
+	NEW_AUX_ENT(AT_CHERI_CID_CAP, elf_uaddr_to_user_ptr(0));
+
+	/*
+	 * Since the auxv entries are inserted into the mm struct before the
+	 * argv/envp entries are placed on the stack (unknown at this time),
+	 * we save pointers to their positions in the mm struct to update them
+	 * after their positions on the stack are determined.
+	 */
+	NEW_AUX_ENT(AT_ARGC, argc);
+	NEW_AUX_ENT(AT_ARGV, 0);
+	mm_at_argv = elf_info - 1;
+	NEW_AUX_ENT(AT_ENVC, envc);
+	NEW_AUX_ENT(AT_ENVP, 0);
+	mm_at_envp = elf_info - 1;
+#endif /* CONFIG_CHERI_PURECAP_UABI && ELF_COMPAT == 0 */
 #undef NEW_AUX_ENT
 	/* AT_NULL is zero; clear the rest too */
 	memset(elf_info, 0, (char *)mm->saved_auxv +
@@ -318,6 +370,9 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 		return -EFAULT;
 
 	/* Populate list of argv pointers back to argv strings. */
+#if defined(CONFIG_CHERI_PURECAP_UABI) && (ELF_COMPAT == 0)
+	*mm_at_argv = (elf_stack_item_t)sp;
+#endif
 	p = mm->arg_end = mm->arg_start;
 	while (argc-- > 0) {
 		size_t len;
@@ -333,6 +388,9 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	mm->arg_end = p;
 
 	/* Populate list of envp pointers back to envp strings. */
+#if defined(CONFIG_CHERI_PURECAP_UABI) && (ELF_COMPAT == 0)
+	*mm_at_envp = (elf_stack_item_t)sp;
+#endif
 	mm->env_end = mm->env_start = p;
 	while (envc-- > 0) {
 		size_t len;
@@ -636,7 +694,7 @@ static inline int make_prot(u32 p_flags, struct arch_elf_state *arch_state,
 static unsigned long load_elf_interp(struct elfhdr *interp_elf_ex,
 		struct file *interpreter,
 		unsigned long no_base, struct elf_phdr *interp_elf_phdata,
-		struct arch_elf_state *arch_state)
+		struct arch_elf_state *arch_state, struct elf_load_info *load_info)
 {
 	struct elf_phdr *eppnt;
 	unsigned long load_addr = 0;
@@ -661,6 +719,12 @@ static unsigned long load_elf_interp(struct elfhdr *interp_elf_ex,
 		error = -EINVAL;
 		goto out;
 	}
+
+	load_info->start_elf_rx = ~0UL;
+	load_info->start_elf_rw = ~0UL;
+
+	load_info->end_elf_rx = 0;
+	load_info->end_elf_rw = 0;
 
 	eppnt = interp_elf_phdata;
 	for (i = 0; i < interp_elf_ex->e_phnum; i++, eppnt++) {
@@ -703,6 +767,14 @@ static unsigned long load_elf_interp(struct elfhdr *interp_elf_ex,
 				error = -ENOMEM;
 				goto out;
 			}
+			if (eppnt->p_flags & PF_W)
+				load_info->start_elf_rw = min(k, load_info->start_elf_rw);
+			load_info->start_elf_rx = min(k, load_info->start_elf_rx);
+
+			k = load_addr + eppnt->p_vaddr + eppnt->p_memsz;
+			if (eppnt->p_flags & PF_W)
+				load_info->end_elf_rw = max(k, load_info->end_elf_rw);
+			load_info->end_elf_rx = max(k, load_info->end_elf_rx);
 		}
 	}
 
@@ -842,6 +914,7 @@ static int load_elf_binary(struct linux_binprm *bprm)
 	struct arch_elf_state arch_state = INIT_ARCH_ELF_STATE;
 	struct mm_struct *mm;
 	struct pt_regs *regs;
+	struct elf_load_info exec_load_info, interp_load_info;
 
 	retval = -ENOEXEC;
 	/* First of all, some simple consistency checks */
@@ -1027,6 +1100,12 @@ out_free_interp:
 	start_data = 0;
 	end_data = 0;
 
+	exec_load_info.start_elf_rx = ~0UL;
+	exec_load_info.start_elf_rw = ~0UL;
+
+	exec_load_info.end_elf_rx = 0;
+	exec_load_info.end_elf_rw = 0;
+
 	/* Now we do a little grungy work by mmapping the ELF image into
 	   the correct location in memory. */
 	for(i = 0, elf_ppnt = elf_phdata;
@@ -1166,6 +1245,9 @@ out_free_interp:
 			start_code = k;
 		if (start_data < k)
 			start_data = k;
+		if (elf_ppnt->p_flags & PF_W)
+			exec_load_info.start_elf_rw = min(k, exec_load_info.start_elf_rw);
+		exec_load_info.start_elf_rx = min(k, exec_load_info.start_elf_rx);
 
 		/*
 		 * Check to see if the section's size will overflow the
@@ -1189,6 +1271,9 @@ out_free_interp:
 		k = elf_ppnt->p_vaddr + elf_ppnt->p_memsz;
 		if (k > elf_brk)
 			elf_brk = k;
+		if (elf_ppnt->p_flags & PF_W)
+			exec_load_info.end_elf_rw = max(k, exec_load_info.end_elf_rw);
+		exec_load_info.end_elf_rx = max(k, exec_load_info.end_elf_rx);
 	}
 
 	e_entry = elf_ex->e_entry + load_bias;
@@ -1198,6 +1283,13 @@ out_free_interp:
 	end_code += load_bias;
 	start_data += load_bias;
 	end_data += load_bias;
+	exec_load_info.start_elf_rx += load_bias;
+	exec_load_info.end_elf_rx += load_bias;
+	/* ELF has at least one writable load segment */
+	if (exec_load_info.start_elf_rw != ~0UL) {
+		exec_load_info.start_elf_rw += load_bias;
+		exec_load_info.end_elf_rw += load_bias;
+	}
 
 	current->mm->start_brk = current->mm->brk = ELF_PAGEALIGN(elf_brk);
 
@@ -1205,7 +1297,7 @@ out_free_interp:
 		elf_entry = load_elf_interp(interp_elf_ex,
 					    interpreter,
 					    load_bias, interp_elf_phdata,
-					    &arch_state);
+					    &arch_state, &interp_load_info);
 		if (!IS_ERR_VALUE(elf_entry)) {
 			/*
 			 * load_elf_interp() returns relocation
@@ -1245,7 +1337,8 @@ out_free_interp:
 #endif /* ARCH_HAS_SETUP_ADDITIONAL_PAGES */
 
 	retval = create_elf_tables(bprm, elf_ex, interp_load_addr,
-				   e_entry, phdr_addr);
+				   e_entry, phdr_addr,
+				   &exec_load_info, &interp_load_info);
 	if (retval < 0)
 		goto out;
 
