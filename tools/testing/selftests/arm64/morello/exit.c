@@ -16,8 +16,8 @@
 void __attribute__ ((noreturn)) main(void)
 {
 	/* try any exit() */
-	syscall(__NR_exit_group, 0x21);
-	syscall(__NR_exit, 0x22);
+	syscall(__NR_exit_group, EXIT_SUCCESS);
+	syscall(__NR_exit, EXIT_SUCCESS);
 	/* "report" failure the only way you can */
 	for (;;);
 }
