@@ -526,7 +526,7 @@ __SYSCALL(__NR_shmget, sys_shmget)
 #define __NR_shmctl 195
 __SC_COMP(__NR_shmctl, sys_shmctl, compat_sys_shmctl)
 #define __NR_shmat 196
-__SC_COMP(__NR_shmat, sys_shmat, compat_sys_shmat)
+__SC_COMP_RETPTR(__NR_shmat, sys_shmat, compat_sys_shmat)
 #define __NR_shmdt 197
 __SYSCALL(__NR_shmdt, sys_shmdt)
 #define __NR_socket 198
