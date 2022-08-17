@@ -1686,7 +1686,7 @@ out:
 	return err;
 }
 
-SYSCALL_DEFINE3(shmat, int, shmid, char __user *, shmaddr, int, shmflg)
+SYSCALL_DEFINE3(__retptr__(shmat), int, shmid, char __user *, shmaddr, int, shmflg)
 {
 	unsigned long ret;
 	long err;
@@ -1695,7 +1695,8 @@ SYSCALL_DEFINE3(shmat, int, shmid, char __user *, shmaddr, int, shmflg)
 	if (err)
 		return err;
 	force_successful_syscall_return();
-	return (long)ret;
+	/* TODO [PCuABI] - derive proper capability */
+	return (user_uintptr_t)uaddr_to_user_ptr_safe(ret);
 }
 
 #ifdef CONFIG_COMPAT
