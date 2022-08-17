@@ -105,7 +105,11 @@ static int add_del_if(struct net_bridge *br, int ifindex, int isadd)
 
 #define BR_UARGS_MAX 4
 static int br_dev_read_uargs(unsigned long *args, size_t nr_args,
+#ifdef CONFIG_CHERI_PURECAP_UABI
+			     void * __capability * __capability argp, void __user *data)
+#else
 			     void __user **argp, void __user *data)
+#endif
 {
 	int ret;
 
