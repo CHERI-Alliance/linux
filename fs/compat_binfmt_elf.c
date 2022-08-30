@@ -127,7 +127,11 @@
 
 #ifdef	COMPAT_START_THREAD
 #undef	START_THREAD
-#define START_THREAD		COMPAT_START_THREAD
+#define START_THREAD(elf_ex, regs, elf_entry, bprm)		\
+({								\
+	COMPAT_START_THREAD(elf_ex, regs, elf_entry, bprm->p);	\
+	0; /* binfmt_elf return value */			\
+})
 #endif
 
 #ifdef compat_arch_setup_additional_pages

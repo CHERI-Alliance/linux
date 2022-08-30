@@ -1865,7 +1865,7 @@ static int exec_binprm(struct linux_binprm *bprm)
 	trace_sched_process_exec(current, old_pid, bprm);
 	ptrace_event(PTRACE_EVENT_EXEC, old_vpid);
 	proc_exec_connector(current);
-	return 0;
+	return ret;
 }
 
 static int bprm_execve(struct linux_binprm *bprm)
@@ -2064,7 +2064,7 @@ out_free:
 	free_bprm(bprm);
 out_ret:
 	putname(filename);
-	return retval;
+	return retval < 0 ? retval : 0;
 }
 
 static int do_execve(struct filename *filename,
