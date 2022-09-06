@@ -1871,8 +1871,8 @@ long keyctl_capabilities(unsigned char __user *_buffer, size_t buflen)
 /*
  * The key control system call
  */
-SYSCALL_DEFINE5(keyctl, int, option, unsigned long, arg2, unsigned long, arg3,
-		unsigned long, arg4, unsigned long, arg5)
+SYSCALL_DEFINE5(keyctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
+		user_uintptr_t, arg4, user_uintptr_t, arg5)
 {
 	switch (option) {
 	case KEYCTL_GET_KEYRING_ID:
