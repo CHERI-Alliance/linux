@@ -274,6 +274,35 @@ void tls_preserve_current_state(void);
 	.fpsimd_cpu = NR_CPUS,			\
 }
 
+static inline int init_gp_regs(struct pt_regs *regs, unsigned long sp,
+			       int argc, int envc)
+{
+	int retval = 0;
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	unsigned long argv, envp, auxv;
+	/*
+	 * TODO [PCuABI]:
+	 * - When argv/envp/auxv is moved off the stack, update the registers x1-x3
+	 * with the new pointer values, and ensure c1-c3 contain appropriate
+	 * capabilities (currently set to csp).
+	 * - Restrict bounds/perms of c1-c3.
+	 *
+	 * In ret_to_user c regs are first loaded then merged with x regs if their values
+	 * are different. Hence we load capabilities in c regs and the value in x regs.
+	 */
+	retval = argc; /* Placed in x0 */
+	argv = sp + 1 * sizeof(user_uintptr_t); /* Increment past argc on stack */
+	envp = argv + (argc + 1) * sizeof(user_uintptr_t); /* Go past arg vals + NULL */
+	auxv = envp + (envc + 1) * sizeof(user_uintptr_t); /* Go past env vals + NULL */
+	regs->cregs[1] = regs->cregs[2] = regs->cregs[3] = regs->csp;
+	regs->regs[1] = argv;
+	regs->regs[2] = envp;
+	regs->regs[3] = auxv;
+#endif /* CONFIG_CHERI_PURECAP_UABI */
+
+	return retval;
+}
+
 static inline void start_thread_common(struct pt_regs *regs, unsigned long pc)
 {
 	s32 previous_syscall = regs->syscallno;
@@ -285,8 +314,8 @@ static inline void start_thread_common(struct pt_regs *regs, unsigned long pc)
 		regs->pmr_save = GIC_PRIO_IRQON;
 }
 
-static inline void start_thread(struct pt_regs *regs, unsigned long pc,
-				unsigned long sp)
+static inline int start_thread(struct pt_regs *regs, unsigned long pc,
+				unsigned long sp, int argc, int envc)
 {
 	start_thread_common(regs, pc);
 	regs->pstate = PSR_MODE_EL0t;
@@ -295,6 +324,8 @@ static inline void start_thread(struct pt_regs *regs, unsigned long pc,
 
 	if (system_supports_morello())
 		morello_thread_start(regs, pc);
+
+	return init_gp_regs(regs, sp, argc, envc);
 }
 
 #ifdef CONFIG_COMPAT
