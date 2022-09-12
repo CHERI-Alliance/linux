@@ -120,20 +120,6 @@
 #define	ELF_PLAT_INIT		COMPAT_ELF_PLAT_INIT
 #endif
 
-#ifdef	compat_start_thread
-#define COMPAT_START_THREAD(ex, regs, new_ip, new_sp)	\
-	compat_start_thread(regs, new_ip, new_sp)
-#endif
-
-#ifdef	COMPAT_START_THREAD
-#undef	START_THREAD
-#define START_THREAD(elf_ex, regs, elf_entry, bprm)		\
-({								\
-	COMPAT_START_THREAD(elf_ex, regs, elf_entry, bprm->p);	\
-	0; /* binfmt_elf return value */			\
-})
-#endif
-
 #ifdef compat_arch_setup_additional_pages
 #define COMPAT_ARCH_SETUP_ADDITIONAL_PAGES(bprm, ex, interpreter) \
 	compat_arch_setup_additional_pages(bprm, interpreter)
@@ -175,6 +161,20 @@
 #ifdef	COMPAT_SET_PERSONALITY
 #undef	SET_PERSONALITY
 #define	SET_PERSONALITY		COMPAT_SET_PERSONALITY
+#endif
+
+#ifdef	compat_start_thread
+#define COMPAT_START_THREAD(ex, regs, new_ip, new_sp)	\
+	compat_start_thread(regs, new_ip, new_sp)
+#endif
+
+#ifdef	COMPAT_START_THREAD
+#undef	START_THREAD
+#define START_THREAD(elf_ex, regs, elf_entry, bprm)		\
+({								\
+	COMPAT_START_THREAD(elf_ex, regs, elf_entry, bprm->p);	\
+	0; /* binfmt_elf return value */			\
+})
 #endif
 
 /*
