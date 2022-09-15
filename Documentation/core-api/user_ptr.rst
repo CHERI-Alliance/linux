@@ -79,7 +79,6 @@ Each function covers a particular category of input integer:
 
   - User-provided user address: ``uaddr_to_user_ptr()``
   - Kernel-controlled user address: ``uaddr_to_user_ptr_safe()``
-  - Kernel address: ``kaddr_to_user_ptr()``
 
 * **Compat pointer**: ``compat_ptr()``
 
@@ -118,13 +117,6 @@ derived from in the PCuABI case.
 | ``uaddr_to_user_ptr_safe()`` | Kernel-controlled  | Address of new user    | User root capability              | This function should only be used in cases where the |
 |                              | user address       | mappings during        |                                   | kernel needs to access user memory using a bare      |
 |                              |                    | process initialisation |                                   | virtual address that is not provided by userspace.   |
-+------------------------------+--------------------+------------------------+-----------------------------------+------------------------------------------------------+
-| ``kaddr_to_user_ptr()``      | Kernel address     | [None currently]       | Kernel root capability            | There used to be a number of situations where kernel |
-|                              |                    |                        |                                   | memory was accessed through uaccess, requiring user  |
-|                              |                    |                        |                                   | pointers to be created out of kernel addresses.      |
-|                              |                    |                        |                                   | This should no longer be the case and this function  |
-|                              |                    |                        |                                   | will be removed once it is confirmed that there is   |
-|                              |                    |                        |                                   | no use-case left.                                    |
 +------------------------------+--------------------+------------------------+-----------------------------------+------------------------------------------------------+
 | ``compat_ptr()``             | Compat pointer     | Pointer in a           | Current user DDC                  | Must be used whenever converting a compat user       |
 |                              |                    | user-provided          |                                   | pointer to a native user pointer.                    |
