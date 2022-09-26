@@ -5,12 +5,14 @@
 #ifndef __ASM_SHMPARAM_H
 #define __ASM_SHMPARAM_H
 
+#ifdef CONFIG_COMPAT32
 /*
  * For IPC syscalls from compat tasks, we need to use the legacy 16k
  * alignment value. Since we don't have aliasing D-caches, the rest of
  * the time we can safely use PAGE_SIZE.
  */
 #define COMPAT_SHMLBA	(4 * PAGE_SIZE)
+#endif
 
 #include <asm-generic/shmparam.h>
 
