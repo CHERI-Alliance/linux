@@ -173,12 +173,18 @@ struct compat_msqid64_ds {
 struct compat_shmid64_ds {
 	struct compat_ipc64_perm shm_perm;
 	compat_size_t  shm_segsz;
+#ifdef CONFIG_COMPAT64
+	compat_long_t shm_atime;
+	compat_long_t shm_dtime;
+	compat_long_t shm_ctime;
+#else
 	compat_ulong_t shm_atime;
 	compat_ulong_t shm_atime_high;
 	compat_ulong_t shm_dtime;
 	compat_ulong_t shm_dtime_high;
 	compat_ulong_t shm_ctime;
 	compat_ulong_t shm_ctime_high;
+#endif
 	compat_pid_t   shm_cpid;
 	compat_pid_t   shm_lpid;
 	compat_ulong_t shm_nattch;
