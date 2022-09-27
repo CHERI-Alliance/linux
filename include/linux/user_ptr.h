@@ -4,10 +4,6 @@
 
 #include <linux/typecheck.h>
 
-#ifdef CONFIG_ARCH_HAS_USER_PTR_H
-#include <asm/user_ptr.h>
-#endif
-
 /**
  * as_user_ptr() - Convert an arbitrary integer value to a user pointer.
  * @x: The integer value to convert.
@@ -28,7 +24,8 @@
 /* Legacy user pointer conversion macro, new code should use as_user_ptr() */
 #define u64_to_user_ptr(x) as_user_ptr_strict(u64, (x))
 
-#ifndef uaddr_to_user_ptr
+#ifdef CONFIG_CHERI_PURECAP_UABI
+
 /**
  * uaddr_to_user_ptr() - Convert a user-provided address to a user pointer.
  * @addr: The address to set the pointer to.
@@ -42,13 +39,8 @@
  * When the pure-capability uABI is targeted, uses of this function bypass the
  * capability model and should be minimised.
  */
-static inline void __user *uaddr_to_user_ptr(ptraddr_t addr)
-{
-	return as_user_ptr(addr);
-}
-#endif
+void __user *uaddr_to_user_ptr(ptraddr_t addr);
 
-#ifndef uaddr_to_user_ptr_safe
 /**
  * uaddr_to_user_ptr_safe() - Convert a kernel-generated user address to a
  *   user pointer.
@@ -60,11 +52,21 @@ static inline void __user *uaddr_to_user_ptr(ptraddr_t addr)
  * memory at a certain address needs to be accessed, and that address originates
  * from the kernel itself (i.e. it is not provided by userspace).
  */
+void __user *uaddr_to_user_ptr_safe(ptraddr_t addr);
+
+#else /* CONFIG_CHERI_PURECAP_UABI */
+
+static inline void __user *uaddr_to_user_ptr(ptraddr_t addr)
+{
+	return as_user_ptr(addr);
+}
+
 static inline void __user *uaddr_to_user_ptr_safe(ptraddr_t addr)
 {
 	return as_user_ptr(addr);
 }
-#endif
+
+#endif /* CONFIG_CHERI_PURECAP_UABI */
 
 /**
  * user_ptr_addr() - Extract the address of a user pointer.
