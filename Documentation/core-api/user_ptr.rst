@@ -78,7 +78,8 @@ Each function covers a particular category of input integer:
 * **Address**
 
   - User-provided user address: ``uaddr_to_user_ptr()``
-  - Kernel-controlled user address: ``uaddr_to_user_ptr_safe()``
+  - Kernel-controlled user address: ``make_user_ptr_for_*_uaccess()``,
+    ``uaddr_to_user_ptr_safe()`` (see notes in the table below)
 
 * **Compat pointer**: ``compat_ptr()``
 
@@ -103,39 +104,57 @@ PCuABI. The table below provides additional information about these
 functions, as well as the base capability that the user pointer is
 derived from in the PCuABI case.
 
-+------------------------------+--------------------+------------------------+-----------------------------------+------------------------------------------------------+
-| Name                         | Suitable input     | Example of input       | Capability derived from           | Notes                                                |
-+==============================+====================+========================+===================================+======================================================+
-| ``uaddr_to_user_ptr()``      | User-provided      | Address stored in      | By default, user root capability. | Using this function weakens the enforcement of the   |
-|                              | address            | __u64 field of a       | This could be modified for        | capability model, as it allows a process to trigger  |
-|                              |                    | user-provided struct   | testing purposes (e.g. null       | accesses to its own memory without an appropriate    |
-|                              |                    |                        | capability to prevent such        | capability.                                          |
-|                              |                    |                        | capabilities from being created   | It is therefore only a stopgap while waiting for a   |
-|                              |                    |                        | at runtime).                      | uapi change allowing userspace to provide an actual  |
-|                              |                    |                        |                                   | pointer instead of an address.                       |
-+------------------------------+--------------------+------------------------+-----------------------------------+------------------------------------------------------+
-| ``uaddr_to_user_ptr_safe()`` | Kernel-controlled  | Address of new user    | User root capability              | This function should only be used in cases where the |
-|                              | user address       | mappings during        |                                   | kernel needs to access user memory using a bare      |
-|                              |                    | process initialisation |                                   | virtual address that is not provided by userspace.   |
-+------------------------------+--------------------+------------------------+-----------------------------------+------------------------------------------------------+
-| ``compat_ptr()``             | Compat pointer     | Pointer in a           | Current user DDC                  | Must be used whenever converting a compat user       |
-|                              |                    | user-provided          |                                   | pointer to a native user pointer.                    |
-|                              |                    | ``compat_*`` struct    |                                   |                                                      |
-+------------------------------+--------------------+------------------------+-----------------------------------+------------------------------------------------------+
-| ``as_user_ptr()``            | Arbitrary integer  | Error code             | Null capability                   | This is a pure representation change, as suggested   |
-|                              |                    |                        |                                   | by the ``as_`` prefix. Returns up to 64 bits of an   |
-|                              |                    |                        |                                   | arbitrary integer represented as a user pointer. The |
-|                              |                    |                        |                                   | result is not a valid pointer and cannot be          |
-|                              |                    |                        |                                   | dereferenced.                                        |
-+------------------------------+--------------------+------------------------+-----------------------------------+------------------------------------------------------+
-| ``u64_to_user_ptr()``        | ``u64`` integer    | [Deprecated]           | Null capability                   | Legacy function, new callers should not be added.    |
-|                              |                    |                        |                                   | Existing callers should move to either               |
-|                              |                    |                        |                                   | ``as_user_ptr()`` if the user pointer is not used to |
-|                              |                    |                        |                                   | access memory, or ``uaddr_to_user_ptr()`` if the     |
-|                              |                    |                        |                                   | input is an address and the user pointer is          |
-|                              |                    |                        |                                   | dereferenced (or ideally removed if the uapi can be  |
-|                              |                    |                        |                                   | changed appropriately).                              |
-+------------------------------+--------------------+------------------------+-----------------------------------+------------------------------------------------------+
++-----------------------------------+--------------------+---------------------------+-----------------------------------+------------------------------------------------------+
+| Name                              | Suitable input     | Example of input          | Capability derived from           | Notes                                                |
++===================================+====================+===========================+===================================+======================================================+
+| ``uaddr_to_user_ptr()``           | User-provided      | Address stored in         | By default, user root capability. | Using this function weakens the enforcement of the   |
+|                                   | address            | ``__u64`` field of a      | This could be modified for        | capability model, as it allows a process to trigger  |
+|                                   |                    | user-provided struct      | testing purposes (e.g. null       | accesses to its own memory without an appropriate    |
+|                                   |                    |                           | capability to prevent such        | capability.                                          |
+|                                   |                    |                           | capabilities from being created   |                                                      |
+|                                   |                    |                           | at runtime).                      | It is therefore only a stopgap while waiting for a   |
+|                                   |                    |                           |                                   | uapi change allowing userspace to provide an actual  |
+|                                   |                    |                           |                                   | pointer instead of an address.                       |
++-----------------------------------+--------------------+---------------------------+-----------------------------------+------------------------------------------------------+
+| ``uaddr_to_user_ptr_safe()``      | Kernel-controlled  | Address of a user mapping | User root capability              | This function should only be used in the few cases   |
+|                                   | user address       |                           |                                   | where the kernel needs to **provide** a new pointer  |
+|                                   |                    |                           |                                   | to userspace, starting from an address. A typical    |
+|                                   |                    |                           |                                   | example is returning a pointer to a newly created    |
+|                                   |                    |                           |                                   | mapping in ``mmap()``. It should not be used to      |
+|                                   |                    |                           |                                   | perform uaccess, ``make_user_ptr_for_*_uaccess()``   |
+|                                   |                    |                           |                                   | should be used for that purpose.                     |
+|                                   |                    |                           |                                   |                                                      |
+|                                   |                    |                           |                                   | Like ``uaddr_to_user_ptr()``, this function is a     |
+|                                   |                    |                           |                                   | stopgap. In PCuABI, capability pointers provided to  |
+|                                   |                    |                           |                                   | userspace have well-defined bounds and permissions,  |
+|                                   |                    |                           |                                   | and these will eventually be set by dedicated code,  |
+|                                   |                    |                           |                                   | removing the need for this function.                 |
++-----------------------------------+--------------------+---------------------------+-----------------------------------+------------------------------------------------------+
+| ``make_user_ptr_for_*_uaccess()`` | Kernel-controlled  | Address of a user mapping | User root capability              | This function should be used when the kernel needs   |
+|                                   | user address       |                           |                                   | to access user memory at a certain address. That     |
+|                                   |                    |                           |                                   | address must be determined by the kernel itself,     |
+|                                   |                    |                           |                                   | typically from mm information (start address of a    |
+|                                   |                    |                           |                                   | mapping, address of program arguments, etc.).        |
++-----------------------------------+--------------------+---------------------------+-----------------------------------+------------------------------------------------------+
+| ``compat_ptr()``                  | Compat pointer     | Pointer in a              | Current user DDC                  | Must be used whenever converting a compat user       |
+|                                   |                    | user-provided             |                                   | pointer to a native user pointer.                    |
+|                                   |                    | ``compat_*`` struct       |                                   |                                                      |
++-----------------------------------+--------------------+---------------------------+-----------------------------------+------------------------------------------------------+
+| ``as_user_ptr()``                 | Arbitrary integer  | Error code                | Null capability                   | This is a pure representation change, as suggested   |
+|                                   |                    |                           |                                   | by the ``as_`` prefix. Returns up to 64 bits of an   |
+|                                   |                    |                           |                                   | arbitrary integer represented as a user pointer. The |
+|                                   |                    |                           |                                   | result is not a valid pointer and cannot be          |
+|                                   |                    |                           |                                   | dereferenced.                                        |
++-----------------------------------+--------------------+---------------------------+-----------------------------------+------------------------------------------------------+
+| ``u64_to_user_ptr()``             | ``u64`` integer    | [Deprecated]              | Null capability                   | Legacy function, new callers should not be added.    |
+|                                   |                    |                           |                                   |                                                      |
+|                                   |                    |                           |                                   | Existing callers should move to either               |
+|                                   |                    |                           |                                   | ``as_user_ptr()`` if the user pointer is not used to |
+|                                   |                    |                           |                                   | access memory, or ``uaddr_to_user_ptr()`` if the     |
+|                                   |                    |                           |                                   | input is an address and the user pointer is          |
+|                                   |                    |                           |                                   | dereferenced (or ideally removed if the uapi can be  |
+|                                   |                    |                           |                                   | changed appropriately).                              |
++-----------------------------------+--------------------+---------------------------+-----------------------------------+------------------------------------------------------+
 
 
 +-----------------------------------------------------------------------+
@@ -217,6 +236,19 @@ preserving their metadata in PCuABI).
 ``<linux/mm.h>``:
 
 * ``USER_PTR_PAGE_ALIGN(p)``
+
+Explicit checking
+-----------------
+
+In a few situations, typically when user memory is accessed via a kernel
+mapping, it may be necessary to explicitly check that a user pointer allows
+a given type of access to a given range, without dereferencing it.
+
+This can be done using the ``check_user_ptr_*()`` functions, see
+``<linux/user_ptr.h>`` for details on how to use them.
+
+Note that these functions are no-ops (always succeed) when PCuABI is not
+selected, as there is no user pointer metadata to check in that case.
 
 Other functions handling user pointers
 --------------------------------------
