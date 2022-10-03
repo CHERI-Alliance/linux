@@ -501,10 +501,12 @@ struct trace_event_class __refdata event_class_syscall_exit = {
 	.raw_init	= init_syscall_trace,
 };
 
-unsigned long __init __weak arch_syscall_addr(int nr)
+#ifndef ARCH_HAS_SYSCALL_ADDR
+unsigned long __init arch_syscall_addr(int nr)
 {
 	return (unsigned long)sys_call_table[nr];
 }
+#endif
 
 void __init init_ftrace_syscalls(void)
 {

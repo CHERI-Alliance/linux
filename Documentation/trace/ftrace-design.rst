@@ -241,8 +241,9 @@ You need very few things to get the syscalls tracing in an arch.
   - Put the trace_sys_enter() and trace_sys_exit() tracepoints calls from ptrace
     in the ptrace syscalls tracing path.
   - If the system call table on this arch is more complicated than a simple array
-    of addresses of the system calls, implement an arch_syscall_addr to return
-    the address of a given system call.
+    of addresses of the system calls or requires custom handling, define
+    ARCH_HAS_SYSCALL_ADDR in asm/ftrace.h and implement arch_syscall_addr to
+    return the address of a given system call.
   - If the symbol names of the system calls do not match the function names on
     this arch, define ARCH_HAS_SYSCALL_MATCH_SYM_NAME in asm/ftrace.h and
     implement arch_syscall_match_sym_name with the appropriate logic to return
