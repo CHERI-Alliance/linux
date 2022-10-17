@@ -76,6 +76,10 @@ extern bool bpf_global_ma_set;
 		__bpf_put_uattr(x, (union compat_bpf_attr __user *)uattr, to_field) : \
 		__bpf_put_uattr(x, (union bpf_attr __user *)uattr, to_field))
 
+#define bpf_copy_to_user_with_ptr(dest, src, size) \
+	(in_compat64_syscall() ? copy_to_user(dest, src, size) \
+			       : copy_to_user_with_ptr(dest, src, size))
+
 #define bpf_field_exists(uattr_size, field) \
 	(in_compat64_syscall() ? \
 		(uattr_size >= offsetofend(union compat_bpf_attr, field)) : \
