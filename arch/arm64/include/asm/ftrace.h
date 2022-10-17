@@ -178,6 +178,10 @@ static inline bool arch_trace_is_compat_syscall(struct pt_regs *regs)
 	return is_32bit_compat_task();
 }
 
+#if defined(CONFIG_FTRACE_SYSCALLS) && defined(CONFIG_CHERI_PURECAP_UABI)
+#define ARCH_HAS_SYSCALL_ADDR
+#endif
+
 #define ARCH_HAS_SYSCALL_MATCH_SYM_NAME
 
 static inline bool arch_syscall_match_sym_name(const char *sym,
