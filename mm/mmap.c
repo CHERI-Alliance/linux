@@ -185,6 +185,11 @@ SYSCALL_DEFINE1(brk, unsigned long, brk)
 	LIST_HEAD(uf);
 	struct vma_iterator vmi;
 
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	if (!in_compat_syscall())
+		return -ENOSYS;
+#endif
+
 	if (mmap_write_lock_killable(mm))
 		return -EINTR;
 
