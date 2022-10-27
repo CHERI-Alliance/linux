@@ -568,6 +568,8 @@ encoded manner. The codes are the following:
     mg    mergeable advise flag
     bt    arm64 BTI guarded page
     mt    arm64 MTE allocation tags are enabled
+    rc    arm64 Morello capability tag reads are enabled
+    wc    arm64 Morello capability tag writes are enabled
     um    userfaultfd missing tracking
     uw    userfaultfd wr-protect tracking
     ss    shadow stack page

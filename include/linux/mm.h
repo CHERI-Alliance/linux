@@ -382,6 +382,14 @@ extern unsigned int kobjsize(const void *objp);
 # define VM_MTE_ALLOWED	VM_NONE
 #endif
 
+#ifdef CONFIG_ARM64_MORELLO
+# define VM_READ_CAPS	VM_HIGH_ARCH_2	/* Permit capability tag loads */
+# define VM_WRITE_CAPS	VM_HIGH_ARCH_3	/* Permit capability tag stores */
+#else
+# define VM_READ_CAPS	VM_NONE
+# define VM_WRITE_CAPS	VM_NONE
+#endif
+
 #ifndef VM_GROWSUP
 # define VM_GROWSUP	VM_NONE
 #endif
