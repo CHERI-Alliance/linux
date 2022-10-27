@@ -23,15 +23,31 @@ static inline unsigned long arch_calc_vm_prot_bits(unsigned long prot,
 
 static inline unsigned long arch_calc_vm_flag_bits(unsigned long flags)
 {
+	unsigned long ret = 0;
+
 	/*
 	 * Only allow MTE on anonymous mappings as these are guaranteed to be
 	 * backed by tags-capable memory. The vm_flags may be overridden by a
 	 * filesystem supporting MTE (RAM-based).
 	 */
 	if (system_supports_mte() && (flags & MAP_ANONYMOUS))
-		return VM_MTE_ALLOWED;
+		ret |= VM_MTE_ALLOWED;
 
-	return 0;
+	/*
+	 * Allow capability tag access for private mappings as they don't pose
+	 * the risk of leaking capabilities outside their original address-space.
+	 *
+	 * TODO [Morello]: There are certain situations where it is not possible
+	 * to enable capability access in file-backed mappings, even private.
+	 * This is notably the case for DAX, where backing pages are directly
+	 * mapped, and the underlying storage is unlikely to support capability
+	 * tags. Might need to explicitly allow or explicitly disallow certain
+	 * filesystems.
+	 */
+	if (system_supports_morello() && ((flags & MAP_TYPE) == 0x02 /* MAP_PRIVATE */))
+		ret |= VM_READ_CAPS | VM_WRITE_CAPS;
+
+	return ret;
 }
 #define arch_calc_vm_flag_bits(flags) arch_calc_vm_flag_bits(flags)
 
