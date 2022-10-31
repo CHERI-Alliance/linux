@@ -69,7 +69,7 @@ typedef unsigned long		ptraddr_t;
 #endif
 
 #ifdef __CHERI__
-typedef __kernel_uintcap_t	uintcap_t;
+typedef __uintcap_t		uintcap_t;
 #endif
 
 #ifdef CONFIG_HAVE_UID16
