@@ -135,7 +135,7 @@ static int kcmp_epoll_target(struct task_struct *task1,
 #endif
 
 SYSCALL_DEFINE5(kcmp, pid_t, pid1, pid_t, pid2, int, type,
-		unsigned long, idx1, unsigned long, idx2)
+		unsigned long, idx1, user_uintptr_t, idx2)
 {
 	struct task_struct *task1, *task2;
 	int ret;
@@ -206,7 +206,8 @@ SYSCALL_DEFINE5(kcmp, pid_t, pid1, pid_t, pid2, int, type,
 #endif
 		break;
 	case KCMP_EPOLL_TFD:
-		ret = kcmp_epoll_target(task1, task2, idx1, (void *)idx2);
+		ret = kcmp_epoll_target(task1, task2, idx1,
+					(struct kcmp_epoll_slot __user *)idx2);
 		break;
 	default:
 		ret = -EINVAL;
