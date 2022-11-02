@@ -32,12 +32,12 @@ static inline bpfptr_t USER_BPFPTR(void __user *p)
 	return (bpfptr_t) { .user = p };
 }
 
-static inline bpfptr_t make_bpfptr(u64 addr, bool is_kernel)
+static inline bpfptr_t make_bpfptr(__kernel_uintptr_t ptr, bool is_kernel)
 {
 	if (is_kernel)
-		return KERNEL_BPFPTR((void*) (uintptr_t) addr);
+		return KERNEL_BPFPTR((void *)(uintptr_t)ptr);
 	else
-		return USER_BPFPTR(u64_to_user_ptr(addr));
+		return USER_BPFPTR((void __user *)ptr);
 }
 
 static inline bool bpfptr_is_null(bpfptr_t bpfptr)

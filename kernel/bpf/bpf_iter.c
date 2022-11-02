@@ -456,7 +456,7 @@ static int bpf_iter_link_fill_link_info(const struct bpf_link *link,
 {
 	struct bpf_iter_link *iter_link =
 		container_of(link, struct bpf_iter_link, link);
-	char __user *ubuf = u64_to_user_ptr(info->iter.target_name);
+	char __user *ubuf = (char __user *)info->iter.target_name;
 	bpf_iter_fill_link_info_t fill_link_info;
 	u32 ulen = info->iter.target_name_len;
 	const char *target_name;
