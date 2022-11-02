@@ -3,12 +3,10 @@ Adding PCuABI support to drivers
 =================================
 
 This document provides a non-exhaustive overview of the most common
-changes required to support the pure-capability user ABI (PCuABI) in
-arbitrary drivers. It may also be helpful for core subsystems, though
-note that more extensive changes may be required compared to drivers
-with straightforward interactions with userspace.
-
-.. _user pointer documentation: core-api/user_ptr.rst
+changes required to support the `pure-capability kernel-user ABI`_
+(PCuABI) in arbitrary drivers. It may also be helpful for core
+subsystems, though note that more extensive changes may be required
+compared to drivers with straightforward interactions with userspace.
 
 User pointer representation and conversions
 ===========================================
@@ -342,8 +340,8 @@ typically throw the following error::
 
   error: use of __capability is ambiguous
 
-A fixup is then required, as described in section "PCuABI-specific
-changes" of the `user pointer documentation`_. For instance::
+A fixup is then required, as described in section "Leveraging ``__user``"
+of the `PCuABI documentation`_. For instance::
 
   diff --git a/net/socket.c b/net/socket.c
   index 8597fbacb089..ab2a610825cc 100644
@@ -364,3 +362,7 @@ changes" of the `user pointer documentation`_. For instance::
 
 Fortunately, ``__user`` is mostly used in simple types, and such fixups
 are rarely needed in driver code.
+
+.. _user pointer documentation: Documentation/core-api/user_ptr.rst
+.. _PCuABI documentation: Documentation/cheri/pcuabi.rst
+.. _pure-capability kernel-user ABI: `PCuABI documentation`_
