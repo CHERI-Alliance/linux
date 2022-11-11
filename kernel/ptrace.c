@@ -1308,7 +1308,7 @@ int generic_ptrace_peekdata(struct task_struct *tsk, unsigned long addr,
 }
 
 int generic_ptrace_pokedata(struct task_struct *tsk, unsigned long addr,
-			    user_uintptr_t data)
+			    unsigned long data)
 {
 	int copied;
 
