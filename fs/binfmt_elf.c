@@ -47,12 +47,9 @@
 #include <linux/dax.h>
 #include <linux/uaccess.h>
 #include <linux/rseq.h>
+#include <linux/cheri.h>
 #include <asm/param.h>
 #include <asm/page.h>
-
-#ifdef CONFIG_CHERI_PURECAP_UABI
-#include <cheriintrin.h>
-#endif
 
 #ifndef ELF_COMPAT
 #define ELF_COMPAT 0
@@ -314,9 +311,8 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 			elf_uaddr_to_user_ptr(interp_load_info->start_elf_rx) :
 			NULL));
 	NEW_AUX_ENT(AT_CHERI_STACK_CAP, elf_uaddr_to_user_ptr(0));
-	NEW_AUX_ENT(AT_CHERI_SEAL_CAP,
-		cheri_bounds_set_exact(elf_uaddr_to_user_ptr(0), 1 << 15));
-	NEW_AUX_ENT(AT_CHERI_CID_CAP, elf_uaddr_to_user_ptr(0));
+	NEW_AUX_ENT(AT_CHERI_SEAL_CAP, cheri_user_root_seal_cap);
+	NEW_AUX_ENT(AT_CHERI_CID_CAP, cheri_user_root_cid_cap);
 
 	/*
 	 * Since the auxv entries are inserted into the mm struct before the
