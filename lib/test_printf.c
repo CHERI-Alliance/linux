@@ -25,6 +25,10 @@
 
 #include <linux/property.h>
 
+#ifdef __CHERI__
+#include <cheriintrin.h>
+#endif
+
 #include "../tools/testing/selftests/kselftest_module.h"
 
 #define BUF_SIZE 256
@@ -780,6 +784,149 @@ errptr(void)
 }
 
 static void __init
+capability_pointer(void)
+{
+#ifdef __CHERI__
+	enum action {
+		/* No action - use as is */
+		CAP_AXN_NONE,
+		/* Clear capability tag */
+		CAP_TAG_CLEAR,
+		/* Derive null-capability */
+		CAP_NULL_DERIVE
+	};
+
+	struct {
+		const char *plain_fmt;
+		const char *fmt;
+		const char *expected;
+		int   action;
+	} const setup[] = {
+		{
+			.plain_fmt = "%lp",
+			.fmt = "%lpx",
+			.expected =  "1:d800400059ab89ab:"PTR_STR,
+			.action = CAP_AXN_NONE,
+		},
+		{
+			.plain_fmt = "%#lp",
+			.fmt = "%#lpx",
+			.expected = "0x"PTR_STR" [rwRW,0xffff0123456789ab-0xffff0123456799ab]",
+			.action =  CAP_AXN_NONE,
+		},
+		{
+			.plain_fmt = "%lp",
+			.fmt = "%lpx",
+			.expected =  "0:d800400059ab89ab:"PTR_STR,
+			.action = CAP_TAG_CLEAR,
+		},
+		{
+			.plain_fmt = "%#lp",
+			.fmt = "%#lpx",
+			.expected = "0x"PTR_STR" [rwRW,0xffff0123456789ab-0xffff0123456799ab] (invalid)",
+			.action = CAP_TAG_CLEAR,
+		},
+		{
+			.plain_fmt = "%lp",
+			.fmt = "%lpx",
+			.expected = PTR_STR,
+			.action = CAP_NULL_DERIVE,
+		},
+		{
+			.plain_fmt = "%#lp",
+			.fmt = "%#lpx",
+			.expected = PTR_STR,
+			.action = CAP_NULL_DERIVE,
+		}
+	};
+
+	char buf[PLAIN_BUF_SIZE];
+	const char * const cap_fmt_non_hashed[] = {"%lp", "%#lp"};
+	int nchars;
+
+	void * __capability cap = cheri_ddc_get();
+
+	/* Expecting basic permissions to be set */
+	size_t perms = CHERI_PERM_GLOBAL | CHERI_PERM_LOAD | CHERI_PERM_LOAD_CAP |
+		       CHERI_PERM_STORE | CHERI_PERM_STORE_CAP;
+
+	size_t bounds = 4096;
+
+	cap = cheri_address_set(cap, (ptraddr_t)PTR);
+	cap = cheri_perms_and(cap, perms);
+	/*
+	 * Basic checks so that the actual output can be safely compared
+	 * to the expected one
+	 */
+	if (!cheri_tag_get(cap) || cheri_perms_get(cap) != perms
+		|| cheri_is_sealed(cap)) {
+		pr_warn("Failed to create capability for testing - skipping");
+		return;
+	}
+
+	cap = cheri_bounds_set_exact(cap, bounds);
+
+	/* Verify hashing */
+	if (no_hash_pointers) {
+		pr_warn("Skipping capability hashing tests\n");
+		goto non_hashed;
+	}
+
+	for (int i = 0; i < ARRAY_SIZE(cap_fmt_non_hashed); ++i) {
+		nchars = snprintf(buf, PLAIN_BUF_SIZE, cap_fmt_non_hashed[i],
+				  cap);
+
+		/*
+		 * Should be ADDR_WIDTH in this case , but hey, let's not be picky
+		 * about it, at least not here ... not yet ...
+		 */
+		if (nchars != PTR_WIDTH) {
+			/*
+			 * This also covers the case when the value has not been
+			 * actually hashed, as nchars would then be greater than
+			 * PTR_WIDTH
+			 */
+			pr_warn("Something went wrong with hashing capability value\n");
+			failed_tests++;
+			continue;
+		}
+
+		if (strncmp(buf, PTR_VAL_NO_CRNG, PTR_WIDTH) == 0) {
+			pr_warn("crng possibly not yet initialized - capability value buffer contains \"%s\"",
+					PTR_VAL_NO_CRNG);
+		} else if (strncmp(buf, ZEROS, strlen(ZEROS)) != 0) {
+			pr_warn("Unexpected format for supposedly hashed capability value\n");
+			failed_tests++;
+			continue;
+		}
+	}
+
+non_hashed:
+	for (int i = 0; i < ARRAY_SIZE(setup); ++i) {
+		void * __capability current_cap;
+
+		switch (setup[i].action) {
+		case CAP_TAG_CLEAR:
+			current_cap = cheri_tag_clear(cap);
+			break;
+		case CAP_NULL_DERIVE:
+			/* Null-derived capability */
+			current_cap = cheri_address_set(0, cheri_address_get(cap));
+			break;
+		default:
+			current_cap = cap;
+			break;
+		}
+
+		if (no_hash_pointers)
+			test(setup[i].expected, setup[i].plain_fmt, current_cap);
+
+		test(setup[i].expected, setup[i].fmt, current_cap);
+	}
+#endif /* CONFIG_ARM64_MORELLO */
+}
+
+static void __init
 test_pointer(void)
 {
 	plain();
@@ -805,6 +952,7 @@ test_pointer(void)
 	errptr();
 	fwnode_pointer();
 	fourcc_pointer();
+	capability_pointer();
 }
 
 static void __init selftest(void)

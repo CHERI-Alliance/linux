@@ -203,6 +203,66 @@ Example::
 
 	printk("test: difference between pointers: %td\n", ptr2 - ptr1);
 
+Capabilities
+------------
+
+::
+
+	%lp[x]		1:ffffc00000010005:0123456789abcdef
+	%#lp[x]		0x0123456789abcdef [rwxRWE,0x0000000000000000-0xffffffffffffffff]
+
+For printing CHERI architectural capabilities (when supported, otherwise
+the result of using it is undefined). Formatting based on:
+https://github.com/CTSRD-CHERI/cheri-c-programming/wiki/Displaying-Capabilities
+with a small detour of dropping support for basic format in favour of the raw
+one, with the assumption that the actual address can be printed with existing
+printk formats (subject to appropriate casting when dealing with capabilities
+and non-capability formats, which otherwise renders undefined behaviour).
+
+The ``l`` modifier distinguishes capability pointers from standard (integer)
+pointers, giving the following capability format being printed::
+
+	Capability tag:High bits:Low bits
+	------------------------------------
+		 <tag>:<127:64>:<63:0>
+
+
+Specifying ``#`` modifier results in printing capabilities in a simplified format::
+
+	<address> [<permissions>,<base>-<top>] (<attr>)
+
+where::
+
+	- permissions - none or any combination of:
+		- 'r' : CHERI_PERM_LOAD
+		- 'w' : CHERI_PERM_STORE
+		- 'x' : CHERI_PERM_EXECUTE
+		- 'R' : CHERI_PERM_LOAD_CAP
+		- 'W' : CHERI_PERM_STORE_CAP
+		- 'E' : ARM_CAP_PERMISSION_EXECUTIVE
+	- base  - lower bound
+	- top   - upper bound
+	- attr  - none or any combination of:
+		- 'invalid' : capability's tag is clear
+		- 'sentry'  : capability is a sealed entry
+		- 'sealed'  : capability is sealed with a type other than the
+			      sealed entry object type
+
+The above applies to formats with either ``no_hash_pointers`` parameter being
+enabled or ``x`` modifier being provided - otherwise subject to hashing
+(address only, with remaining bits being disregarded).
+
+Refer to `Unmodified Addresses`_ for potential security implications.
+
+Currently only Morello architecture is being supported.
+
+Note:
+An attempt to use this format with a non-capability type is undefined behaviour.
+There are no safety nets, so extra caution is advised! Handle with care.
+Same applies when capabilities are not supported, as the use of either the ``#``
+flag or the ``l`` length modifier is undefined behaviour when combined with
+%p.
+
 Struct Resources
 ----------------
 
