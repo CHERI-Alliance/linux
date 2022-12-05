@@ -63,11 +63,18 @@ int put_cmsg_compat(struct msghdr*, int, int, int, void *);
 int cmsghdr_from_user_compat_to_kern(struct msghdr *, struct sock *,
 				     unsigned char *, int);
 
+/* No need for packing while in COMPAT64. */
+#ifdef CONFIG_COMPAT32
+#define NET_COMPAT_PACKED __packed
+#else
+#define NET_COMPAT_PACKED
+#endif
+
 struct compat_group_req {
 	__u32				 gr_interface;
 	struct __kernel_sockaddr_storage gr_group
 		__aligned(4);
-} __packed;
+} NET_COMPAT_PACKED;
 
 struct compat_group_source_req {
 	__u32				 gsr_interface;
@@ -75,7 +82,7 @@ struct compat_group_source_req {
 		__aligned(4);
 	struct __kernel_sockaddr_storage gsr_source
 		__aligned(4);
-} __packed;
+} NET_COMPAT_PACKED;
 
 struct compat_group_filter {
 	union {
@@ -87,7 +94,7 @@ struct compat_group_filter {
 			__u32				 gf_numsrc_aux;
 			struct __kernel_sockaddr_storage gf_slist[1]
 				__aligned(4);
-		} __packed;
+		} NET_COMPAT_PACKED;
 		struct {
 			__u32				 gf_interface;
 			struct __kernel_sockaddr_storage gf_group
@@ -96,8 +103,8 @@ struct compat_group_filter {
 			__u32				 gf_numsrc;
 			struct __kernel_sockaddr_storage gf_slist_flex[]
 				__aligned(4);
-		} __packed;
+		} NET_COMPAT_PACKED;
 	};
-} __packed;
+} NET_COMPAT_PACKED;
 
 #endif /* NET_COMPAT_H */
