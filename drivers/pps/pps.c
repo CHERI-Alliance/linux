@@ -18,6 +18,7 @@
 #include <linux/poll.h>
 #include <linux/pps_kernel.h>
 #include <linux/slab.h>
+#include <linux/compat.h>
 
 #include "kc.h"
 
