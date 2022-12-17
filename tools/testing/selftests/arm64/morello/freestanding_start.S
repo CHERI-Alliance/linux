@@ -25,7 +25,7 @@
  * besides the .space we specify:
  * - a space for a capability pointing to it (in the .got section)
  * - a capability relocation (in __cap_relocs section) to make the capability
- *   valid (see __morello_init_globals() for more details)
+ *   valid (see __morello_process_{cap,dynamic}_relocs() for more details)
  * We use
  *   adrp	c0, :got:name
  *   ldr	c0, [c0, :got_lo12:name]
@@ -72,7 +72,11 @@ FUNCTION_START(_start)
 	mov	c22, c2
 	mov	c23, c3
 
-	bl	__morello_init_globals
+	/* call void __morello_process_cap_relocs(void) */
+	bl	__morello_process_cap_relocs
+	/* call void __morello_process_dynamic_relocs(char *auxv) */
+	mov	c0, c23
+	bl	__morello_process_dynamic_relocs
 
 	/* save the initial kernel stack to a global variable */
 	got_get_ptr stack_from_kernel, c0
@@ -90,7 +94,7 @@ FUNCTION_START(_start)
 	mov	csp, c0
 #endif
 
-	/* call int main(int argc, char **argv, char **envp, char **auxv) */
+	/* call int main(int argc, char **argv, char **envp, char *auxv) */
 	mov	x0, x20
 	mov	c1, c21
 	mov	c2, c22
