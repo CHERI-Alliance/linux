@@ -501,7 +501,7 @@ static long cec_s_mode(struct cec_adapter *adap, struct cec_fh *fh,
 	return 0;
 }
 
-static long cec_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+static long cec_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 {
 	struct cec_fh *fh = filp->private_data;
 	struct cec_adapter *adap = fh->adap;
@@ -695,7 +695,7 @@ const struct file_operations cec_devnode_fops = {
 	.owner = THIS_MODULE,
 	.open = cec_open,
 	.unlocked_ioctl = cec_ioctl,
-	.compat_ioctl = cec_ioctl,
+	.compat_ioctl = compat_ptr_ioctl,
 	.release = cec_release,
 	.poll = cec_poll,
 	.llseek = no_llseek,
