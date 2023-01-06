@@ -125,7 +125,7 @@ __cold void io_uring_show_fdinfo(struct seq_file *m, struct file *file)
 	cq_entries = min(cq_tail - cq_head, ctx->cq_entries);
 	for (i = 0; i < cq_entries; i++) {
 		unsigned int entry = i + cq_head;
-		struct io_uring_cqe *cqe = &r->cqes[(entry & cq_mask) << cq_shift];
+		struct io_uring_cqe *cqe = &ctx->cqes[(entry & cq_mask) << cq_shift];
 
 		seq_printf(m, "%5u: user_data:%llu, res:%d, flag:%x",
 			   entry & cq_mask, cqe->user_data, cqe->res,

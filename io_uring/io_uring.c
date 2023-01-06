@@ -820,7 +820,6 @@ static void io_req_cqe_overflow(struct io_kiocb *req)
  */
 bool io_cqe_cache_refill(struct io_ring_ctx *ctx, bool overflow)
 {
-	struct io_rings *rings = ctx->rings;
 	unsigned int off = ctx->cached_cq_tail & (ctx->cq_entries - 1);
 	unsigned int free, queued, len;
 
@@ -845,7 +844,7 @@ bool io_cqe_cache_refill(struct io_ring_ctx *ctx, bool overflow)
 		len <<= 1;
 	}
 
-	ctx->cqe_cached = &rings->cqes[off];
+	ctx->cqe_cached = &ctx->cqes[off];
 	ctx->cqe_sentinel = ctx->cqe_cached + len;
 	return true;
 }
@@ -2578,13 +2577,28 @@ static void io_rings_free(struct io_ring_ctx *ctx)
 }
 
 static unsigned long rings_size(struct io_ring_ctx *ctx, unsigned int sq_entries,
-				unsigned int cq_entries, size_t *sq_offset)
+				unsigned int cq_entries, size_t *sq_offset,
+				size_t *cq_offset)
 {
 	struct io_rings *rings;
-	size_t off, sq_array_size;
+	size_t off, cq_array_size, sq_array_size;
 
-	off = struct_size(rings, cqes, cq_entries);
-	if (off == SIZE_MAX)
+	off = sizeof(*rings);
+
+#ifdef CONFIG_SMP
+	off = ALIGN(off, SMP_CACHE_BYTES);
+	if (off == 0)
+		return SIZE_MAX;
+#endif
+
+	if (cq_offset)
+		*cq_offset = off;
+
+	cq_array_size = array_size(sizeof(struct io_uring_cqe), cq_entries);
+	if (cq_array_size == SIZE_MAX)
+		return SIZE_MAX;
+
+	if (check_add_overflow(off, cq_array_size, &off))
 		return SIZE_MAX;
 	if (ctx->flags & IORING_SETUP_CQE32) {
 		if (check_shl_overflow(off, 1, &off))
@@ -3338,14 +3352,14 @@ static __cold int io_allocate_scq_urings(struct io_ring_ctx *ctx,
 					 struct io_uring_params *p)
 {
 	struct io_rings *rings;
-	size_t size, sq_array_offset;
+	size_t size, cqes_offset, sq_array_offset;
 	void *ptr;
 
 	/* make sure these are sane, as we already accounted them */
 	ctx->sq_entries = p->sq_entries;
 	ctx->cq_entries = p->cq_entries;
 
-	size = rings_size(ctx, p->sq_entries, p->cq_entries, &sq_array_offset);
+	size = rings_size(ctx, p->sq_entries, p->cq_entries, &sq_array_offset, &cqes_offset);
 	if (size == SIZE_MAX)
 		return -EOVERFLOW;
 
@@ -3358,6 +3372,7 @@ static __cold int io_allocate_scq_urings(struct io_ring_ctx *ctx,
 		return PTR_ERR(rings);
 
 	ctx->rings = rings;
+	ctx->cqes = (struct io_uring_cqe *)((char *)rings + cqes_offset);
 	if (!(ctx->flags & IORING_SETUP_NO_SQARRAY))
 		ctx->sq_array = (u32 *)((char *)rings + sq_array_offset);
 	rings->sq_ring_mask = p->sq_entries - 1;
@@ -3562,7 +3577,7 @@ static __cold int io_uring_create(unsigned entries, struct io_uring_params *p,
 	p->cq_off.ring_mask = offsetof(struct io_rings, cq_ring_mask);
 	p->cq_off.ring_entries = offsetof(struct io_rings, cq_ring_entries);
 	p->cq_off.overflow = offsetof(struct io_rings, cq_overflow);
-	p->cq_off.cqes = offsetof(struct io_rings, cqes);
+	p->cq_off.cqes = (char *)ctx->cqes - (char *)ctx->rings;
 	p->cq_off.flags = offsetof(struct io_rings, cq_flags);
 	p->cq_off.resv1 = 0;
 	if (!(ctx->flags & IORING_SETUP_NO_MMAP))
