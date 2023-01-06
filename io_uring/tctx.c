@@ -298,7 +298,7 @@ int io_ringfd_register(struct io_ring_ctx *ctx, void __user *__arg,
 			break;
 
 		reg.offset = ret;
-		if (copy_to_user(&arg[i], &reg, sizeof(reg))) {
+		if (put_user(reg.offset, &arg[i].offset)) {
 			fput(tctx->registered_rings[reg.offset]);
 			tctx->registered_rings[reg.offset] = NULL;
 			ret = -EFAULT;
