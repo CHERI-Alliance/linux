@@ -46,6 +46,38 @@ static __cold int io_uring_show_cred(struct seq_file *m, unsigned int id,
 	return 0;
 }
 
+#define print_sqe(m, sqe, sq_idx, sq_shift)						\
+	do {										\
+		seq_printf(m, "%5u: opcode:%s, fd:%d, flags:%x, off:%llu, "		\
+			      "addr:0x%llx, rw_flags:0x%x, buf_index:%d "		\
+			      "user_data:%llu",						\
+			   (sq_idx), io_uring_get_opcode((sqe)->opcode), (sqe)->fd,	\
+			   (sqe)->flags, (unsigned long long) (sqe)->off,		\
+			   (unsigned long long) (sqe)->addr, (sqe)->rw_flags,		\
+			   (sqe)->buf_index, (sqe)->user_data);				\
+		if (sq_shift) {								\
+			u64 *sqeb = (void *) ((sqe) + 1);				\
+			int size = sizeof(*(sqe)) / sizeof(u64);			\
+			int j;								\
+											\
+			for (j = 0; j < size; j++) {					\
+				seq_printf(m, ", e%d:0x%llx", j,			\
+					   (unsigned long long) *sqeb);			\
+				sqeb++;							\
+			}								\
+		}									\
+	} while (0)
+
+#define print_cqe(m, cqe, cq_idx, cq_shift)					\
+	do {									\
+		seq_printf(m, "%5u: user_data:%llu, res:%d, flag:%x",		\
+			   (cq_idx), (cqe)->user_data, (cqe)->res,		\
+			   (cqe)->flags);					\
+		if (cq_shift)							\
+			seq_printf(m, ", extra1:%llu, extra2:%llu\n",		\
+				   (cqe)->big_cqe[0], (cqe)->big_cqe[1]);	\
+	} while (0)
+
 /*
  * Caller holds a reference to the file already, we don't need to do
  * anything else to get an extra reference.
@@ -92,47 +124,34 @@ __cold void io_uring_show_fdinfo(struct seq_file *m, struct file *file)
 	sq_entries = min(sq_tail - sq_head, ctx->sq_entries);
 	for (i = 0; i < sq_entries; i++) {
 		unsigned int entry = i + sq_head;
-		struct io_uring_sqe *sqe;
-		unsigned int sq_idx;
+		unsigned int sq_idx, sq_off;
 
 		if (ctx->flags & IORING_SETUP_NO_SQARRAY)
 			break;
 		sq_idx = READ_ONCE(ctx->sq_array[entry & sq_mask]);
 		if (sq_idx > sq_mask)
 			continue;
-		sqe = &ctx->sq_sqes[sq_idx << sq_shift];
-		seq_printf(m, "%5u: opcode:%s, fd:%d, flags:%x, off:%llu, "
-			      "addr:0x%llx, rw_flags:0x%x, buf_index:%d "
-			      "user_data:%llu",
-			   sq_idx, io_uring_get_opcode(sqe->opcode), sqe->fd,
-			   sqe->flags, (unsigned long long) sqe->off,
-			   (unsigned long long) sqe->addr, sqe->rw_flags,
-			   sqe->buf_index, sqe->user_data);
-		if (sq_shift) {
-			u64 *sqeb = (void *) (sqe + 1);
-			int size = sizeof(struct io_uring_sqe) / sizeof(u64);
-			int j;
+		sq_off = sq_idx << sq_shift;
 
-			for (j = 0; j < size; j++) {
-				seq_printf(m, ", e%d:0x%llx", j,
-						(unsigned long long) *sqeb);
-				sqeb++;
-			}
-		}
+		if (io_in_compat64(ctx))
+			print_sqe(m, &ctx->sq_sqes_compat[sq_off], sq_idx, sq_shift);
+		else
+			print_sqe(m, &ctx->sq_sqes[sq_off], sq_idx, sq_shift);
+
 		seq_printf(m, "\n");
 	}
 	seq_printf(m, "CQEs:\t%u\n", cq_tail - cq_head);
 	cq_entries = min(cq_tail - cq_head, ctx->cq_entries);
 	for (i = 0; i < cq_entries; i++) {
 		unsigned int entry = i + cq_head;
-		struct io_uring_cqe *cqe = &ctx->cqes[(entry & cq_mask) << cq_shift];
+		unsigned int cq_idx = entry & cq_mask;
+		unsigned int cq_off = cq_idx << cq_shift;
 
-		seq_printf(m, "%5u: user_data:%llu, res:%d, flag:%x",
-			   entry & cq_mask, cqe->user_data, cqe->res,
-			   cqe->flags);
-		if (cq_shift)
-			seq_printf(m, ", extra1:%llu, extra2:%llu\n",
-					cqe->big_cqe[0], cqe->big_cqe[1]);
+		if (io_in_compat64(ctx))
+			print_cqe(m, &ctx->cqes_compat[cq_off], cq_idx, cq_shift);
+		else
+			print_cqe(m, &ctx->cqes[cq_off], cq_idx, cq_shift);
+
 		seq_printf(m, "\n");
 	}
 

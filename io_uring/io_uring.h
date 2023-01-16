@@ -61,6 +61,7 @@ static inline bool io_should_wake(struct io_wait_queue *iowq)
 	return dist >= 0 || atomic_read(&ctx->cq_timeouts) != iowq->nr_timeouts;
 }
 
+struct io_uring_cqe *__io_get_ith_cqe(struct io_ring_ctx *ctx, unsigned int i);
 bool io_cqe_cache_refill(struct io_ring_ctx *ctx, bool overflow);
 int io_run_task_work_sig(struct io_ring_ctx *ctx);
 void io_req_defer_failed(struct io_kiocb *req, s32 res);
@@ -151,6 +152,65 @@ static inline void io_submit_flush_completions(struct io_ring_ctx *ctx)
 #define io_for_each_link(pos, head) \
 	for (pos = (head); pos; pos = pos->link)
 
+static inline bool io_in_compat64(struct io_ring_ctx *ctx)
+{
+	return IS_ENABLED(CONFIG_COMPAT64) && ctx->compat;
+}
+
+static inline void convert_compat64_io_uring_sqe(struct io_ring_ctx *ctx,
+						 struct io_uring_sqe *sqe,
+						 const struct compat_io_uring_sqe *compat_sqe)
+{
+/*
+ * The struct io_uring_sqe contains anonymous unions and there is no field
+ * keeping track of which union's member is active. Because in all the cases,
+ * the unions are between integral types and the types are compatible, use the
+ * largest member of each union to perform the copy. Use this compile-time check
+ * to ensure that the union's members are not truncated during the conversion.
+ */
+#define BUILD_BUG_COMPAT_SQE_UNION_ELEM(elem1, elem2) \
+	BUILD_BUG_ON(sizeof_field(struct compat_io_uring_sqe, elem1) != \
+		(offsetof(struct compat_io_uring_sqe, elem2) - \
+		 offsetof(struct compat_io_uring_sqe, elem1)))
+
+	sqe->opcode = READ_ONCE(compat_sqe->opcode);
+	sqe->flags = READ_ONCE(compat_sqe->flags);
+	sqe->ioprio = READ_ONCE(compat_sqe->ioprio);
+	sqe->fd = READ_ONCE(compat_sqe->fd);
+	BUILD_BUG_COMPAT_SQE_UNION_ELEM(addr2, addr);
+	sqe->addr2 = READ_ONCE(compat_sqe->addr2);
+	BUILD_BUG_COMPAT_SQE_UNION_ELEM(addr, len);
+	sqe->addr = READ_ONCE(compat_sqe->addr);
+	sqe->len = READ_ONCE(compat_sqe->len);
+	BUILD_BUG_COMPAT_SQE_UNION_ELEM(rw_flags, user_data);
+	sqe->rw_flags = READ_ONCE(compat_sqe->rw_flags);
+	sqe->user_data = READ_ONCE(compat_sqe->user_data);
+	BUILD_BUG_COMPAT_SQE_UNION_ELEM(buf_index, personality);
+	sqe->buf_index = READ_ONCE(compat_sqe->buf_index);
+	sqe->personality = READ_ONCE(compat_sqe->personality);
+	BUILD_BUG_COMPAT_SQE_UNION_ELEM(splice_fd_in, addr3);
+	sqe->splice_fd_in = READ_ONCE(compat_sqe->splice_fd_in);
+	if (sqe->opcode == IORING_OP_URING_CMD) {
+		size_t native_cmd_size, compat_cmd_size;
+
+		native_cmd_size = sizeof(struct io_uring_sqe) -
+				  offsetof(struct io_uring_sqe, cmd);
+		compat_cmd_size = sizeof(struct compat_io_uring_sqe) -
+				  offsetof(struct compat_io_uring_sqe, cmd);
+		if (ctx->flags & IORING_SETUP_SQE128) {
+			native_cmd_size += sizeof(struct io_uring_sqe);
+			compat_cmd_size += sizeof(struct compat_io_uring_sqe);
+		}
+
+		memcpy_and_pad(sqe->cmd, native_cmd_size,
+			       compat_sqe->cmd, compat_cmd_size, 0);
+	} else {
+		sqe->addr3 = READ_ONCE(compat_sqe->addr3);
+		sqe->__pad2[0] = READ_ONCE(compat_sqe->__pad2[0]);
+	}
+#undef BUILD_BUG_COMPAT_SQE_UNION_ELEM
+}
+
 static inline bool io_get_cqe_overflow(struct io_ring_ctx *ctx,
 					struct io_uring_cqe **ret,
 					bool overflow)
@@ -161,7 +221,7 @@ static inline bool io_get_cqe_overflow(struct io_ring_ctx *ctx,
 		if (unlikely(!io_cqe_cache_refill(ctx, overflow)))
 			return false;
 	}
-	*ret = &ctx->cqes[ctx->cqe_cached];
+	*ret = __io_get_ith_cqe(ctx, ctx->cqe_cached);
 	ctx->cached_cq_tail++;
 	ctx->cqe_cached++;
 	if (ctx->flags & IORING_SETUP_CQE32)
@@ -172,6 +232,34 @@ static inline bool io_get_cqe_overflow(struct io_ring_ctx *ctx,
 static inline bool io_get_cqe(struct io_ring_ctx *ctx, struct io_uring_cqe **ret)
 {
 	return io_get_cqe_overflow(ctx, ret, false);
+}
+
+static inline void __io_fill_cqe(struct io_ring_ctx *ctx, struct io_uring_cqe *cqe,
+				 u64 user_data, s32 res, u32 cflags,
+				 u64 extra1, u64 extra2)
+{
+	if (io_in_compat64(ctx)) {
+		struct compat_io_uring_cqe *compat_cqe = (struct compat_io_uring_cqe *)cqe;
+
+		WRITE_ONCE(compat_cqe->user_data, user_data);
+		WRITE_ONCE(compat_cqe->res, res);
+		WRITE_ONCE(compat_cqe->flags, cflags);
+
+		if (ctx->flags & IORING_SETUP_CQE32) {
+			WRITE_ONCE(compat_cqe->big_cqe[0], extra1);
+			WRITE_ONCE(compat_cqe->big_cqe[1], extra2);
+		}
+		return;
+	}
+
+	WRITE_ONCE(cqe->user_data, user_data);
+	WRITE_ONCE(cqe->res, res);
+	WRITE_ONCE(cqe->flags, cflags);
+
+	if (ctx->flags & IORING_SETUP_CQE32) {
+		WRITE_ONCE(cqe->big_cqe[0], extra1);
+		WRITE_ONCE(cqe->big_cqe[1], extra2);
+	}
 }
 
 static __always_inline bool io_fill_cqe_req(struct io_ring_ctx *ctx,
@@ -192,9 +280,9 @@ static __always_inline bool io_fill_cqe_req(struct io_ring_ctx *ctx,
 					req->cqe.res, req->cqe.flags,
 					req->big_cqe.extra1, req->big_cqe.extra2);
 
-	memcpy(cqe, &req->cqe, sizeof(*cqe));
+	__io_fill_cqe(ctx, cqe, req->cqe.user_data, req->cqe.res,
+		      req->cqe.flags, req->big_cqe.extra1, req->big_cqe.extra2);
 	if (ctx->flags & IORING_SETUP_CQE32) {
-		memcpy(cqe->big_cqe, &req->big_cqe, sizeof(*cqe));
 		memset(&req->big_cqe, 0, sizeof(req->big_cqe));
 	}
 	return true;

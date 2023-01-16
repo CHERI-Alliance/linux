@@ -17,6 +17,10 @@
 #include "kbuf.h"
 #include "memmap.h"
 
+#define IO_BUFFER_LIST_BUF_PER_PAGE (PAGE_SIZE / sizeof(struct io_uring_buf))
+#define IO_BUFFER_LIST_COMPAT_BUF_PER_PAGE (PAGE_SIZE / sizeof(struct compat_io_uring_buf))
+
+
 /* BIDs are addressed by a 16-bit field in a CQE */
 #define MAX_BIDS_PER_BGID (1 << 16)
 
@@ -30,6 +34,32 @@ struct io_provide_buf {
 	__u32				nbufs;
 	__u16				bid;
 };
+
+static int get_compat64_io_uring_buf_reg(struct io_uring_buf_reg *reg,
+					 const void __user *user_reg)
+{
+	struct compat_io_uring_buf_reg compat_reg;
+
+	if (copy_from_user(&compat_reg, user_reg, sizeof(compat_reg)))
+		return -EFAULT;
+	reg->ring_addr = compat_reg.ring_addr;
+	reg->ring_entries = compat_reg.ring_entries;
+	reg->bgid = compat_reg.bgid;
+	reg->flags = compat_reg.flags;
+	memcpy(reg->resv, compat_reg.resv, sizeof(reg->resv));
+	return 0;
+}
+
+static int copy_io_uring_buf_reg_from_user(struct io_ring_ctx *ctx,
+					   struct io_uring_buf_reg *reg,
+					   const void __user *arg)
+{
+	if (io_in_compat64(ctx))
+		return get_compat64_io_uring_buf_reg(reg, arg);
+	if (copy_from_user(reg, arg, sizeof(*reg)))
+		return -EFAULT;
+	return 0;
+}
 
 static inline struct io_buffer_list *io_buffer_get_list(struct io_ring_ctx *ctx,
 							unsigned int bgid)
@@ -138,6 +168,35 @@ static struct io_uring_buf *io_ring_head_to_buf(struct io_uring_buf_ring *br,
 	return &br->bufs[head & mask];
 }
 
+static void __user *io_ring_buffer_select_compat64(struct io_kiocb *req, size_t *len,
+						   struct io_buffer_list *bl,
+						   unsigned int issue_flags)
+{
+	struct compat_io_uring_buf_ring *br = bl->buf_ring_compat;
+	struct compat_io_uring_buf *buf;
+	__u16 head = bl->head;
+
+	if (unlikely(smp_load_acquire(&br->tail) == head))
+		return NULL;
+
+	head &= bl->mask;
+	if (head < IO_BUFFER_LIST_COMPAT_BUF_PER_PAGE) {
+		buf = &br->bufs[head];
+	} else {
+		int off = head & (IO_BUFFER_LIST_COMPAT_BUF_PER_PAGE - 1);
+		int index = head / IO_BUFFER_LIST_COMPAT_BUF_PER_PAGE;
+		buf = page_address(bl->buf_pages[index]);
+		buf += off;
+	}
+	if (*len == 0 || *len > buf->len)
+		*len = buf->len;
+	req->flags |= REQ_F_BUFFER_RING;
+	req->buf_list = bl;
+	req->buf_index = buf->bid;
+
+	return compat_ptr(buf->addr);
+}
+
 static void __user *io_ring_buffer_select(struct io_kiocb *req, size_t *len,
 					  struct io_buffer_list *bl,
 					  unsigned int issue_flags)
@@ -160,6 +219,23 @@ static void __user *io_ring_buffer_select(struct io_kiocb *req, size_t *len,
 	req->buf_list = bl;
 	req->buf_index = buf->bid;
 
+	return u64_to_user_ptr(buf->addr);
+}
+
+static void __user *io_ring_buffer_select_any(struct io_kiocb *req, size_t *len,
+					      struct io_buffer_list *bl,
+					      unsigned int issue_flags)
+{
+	void __user *ret;
+
+	if (io_in_compat64(req->ctx))
+		ret = io_ring_buffer_select_compat64(req, len, bl, issue_flags);
+	else
+		ret = io_ring_buffer_select(req, len, bl, issue_flags);
+
+	if (!ret)
+		return ret;
+
 	if (issue_flags & IO_URING_F_UNLOCKED || !io_file_can_poll(req)) {
 		/*
 		 * If we came in unlocked, we have no choice but to consume the
@@ -175,7 +251,7 @@ static void __user *io_ring_buffer_select(struct io_kiocb *req, size_t *len,
 		req->buf_list = NULL;
 		bl->head++;
 	}
-	return u64_to_user_ptr(buf->addr);
+	return ret;
 }
 
 void __user *io_buffer_select(struct io_kiocb *req, size_t *len,
@@ -190,7 +266,7 @@ void __user *io_buffer_select(struct io_kiocb *req, size_t *len,
 	bl = io_buffer_get_list(ctx, req->buf_index);
 	if (likely(bl)) {
 		if (bl->is_buf_ring)
-			ret = io_ring_buffer_select(req, len, bl, issue_flags);
+			ret = io_ring_buffer_select_any(req, len, bl, issue_flags);
 		else
 			ret = io_provided_buffer_select(req, len, bl);
 	}
@@ -338,7 +414,11 @@ static int __io_remove_buffers(struct io_ring_ctx *ctx,
 		return 0;
 
 	if (bl->is_buf_ring) {
-		i = bl->buf_ring->tail - bl->head;
+		__u16 tail = io_in_compat64(ctx) ?
+			     bl->buf_ring_compat->tail :
+			     bl->buf_ring->tail;
+
+		i = tail - bl->head;
 		if (bl->buf_nr_pages) {
 			int j;
 
@@ -602,15 +682,14 @@ err:
 }
 
 static int io_pin_pbuf_ring(struct io_uring_buf_reg *reg,
+			    size_t ring_size,
 			    struct io_buffer_list *bl)
 {
 	struct io_uring_buf_ring *br = NULL;
 	struct page **pages;
 	int nr_pages, ret;
 
-	pages = io_pin_pages(reg->ring_addr,
-			     flex_array_size(br, bufs, reg->ring_entries),
-			     &nr_pages);
+	pages = io_pin_pages(reg->ring_addr, ring_size, &nr_pages);
 	if (IS_ERR(pages))
 		return PTR_ERR(pages);
 
@@ -650,12 +729,9 @@ error_unpin:
 
 static int io_alloc_pbuf_ring(struct io_ring_ctx *ctx,
 			      struct io_uring_buf_reg *reg,
+			      size_t ring_size,
 			      struct io_buffer_list *bl)
 {
-	size_t ring_size;
-
-	ring_size = reg->ring_entries * sizeof(struct io_uring_buf_ring);
-
 	bl->buf_ring = io_pages_map(&bl->buf_pages, &bl->buf_nr_pages, ring_size);
 	if (!bl->buf_ring)
 		return -ENOMEM;
@@ -669,11 +745,12 @@ int io_register_pbuf_ring(struct io_ring_ctx *ctx, void __user *arg)
 {
 	struct io_uring_buf_reg reg;
 	struct io_buffer_list *bl, *free_bl = NULL;
+	size_t ring_size;
 	int ret;
 
 	lockdep_assert_held(&ctx->uring_lock);
 
-	if (copy_from_user(&reg, arg, sizeof(reg)))
+	if (copy_io_uring_buf_reg_from_user(ctx, &reg, arg))
 		return -EFAULT;
 
 	if (reg.resv[0] || reg.resv[1] || reg.resv[2])
@@ -708,10 +785,14 @@ int io_register_pbuf_ring(struct io_ring_ctx *ctx, void __user *arg)
 			return -ENOMEM;
 	}
 
+	ring_size = reg.ring_entries * (io_in_compat64(ctx) ?
+					sizeof(struct compat_io_uring_buf) :
+					sizeof(struct io_uring_buf));
+
 	if (!(reg.flags & IOU_PBUF_RING_MMAP))
-		ret = io_pin_pbuf_ring(&reg, bl);
+		ret = io_pin_pbuf_ring(&reg, ring_size, bl);
 	else
-		ret = io_alloc_pbuf_ring(ctx, &reg, bl);
+		ret = io_alloc_pbuf_ring(ctx, &reg, ring_size, bl);
 
 	if (!ret) {
 		bl->nr_entries = reg.ring_entries;
@@ -732,7 +813,7 @@ int io_unregister_pbuf_ring(struct io_ring_ctx *ctx, void __user *arg)
 
 	lockdep_assert_held(&ctx->uring_lock);
 
-	if (copy_from_user(&reg, arg, sizeof(reg)))
+	if (copy_io_uring_buf_reg_from_user(ctx, &reg, arg))
 		return -EFAULT;
 	if (reg.resv[0] || reg.resv[1] || reg.resv[2])
 		return -EINVAL;

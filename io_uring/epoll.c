@@ -36,7 +36,7 @@ int io_epoll_ctl_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 		struct epoll_event __user *ev;
 
 		ev = u64_to_user_ptr(READ_ONCE(sqe->addr));
-		if (copy_from_user(&epoll->event, ev, sizeof(*ev)))
+		if (copy_epoll_event_from_user(&epoll->event, ev, req->ctx->compat))
 			return -EFAULT;
 	}
 

@@ -2,6 +2,7 @@
 #ifndef IOU_KBUF_H
 #define IOU_KBUF_H
 
+#include <linux/io_uring_types.h>
 #include <uapi/linux/io_uring.h>
 
 struct io_buffer_list {
@@ -13,7 +14,10 @@ struct io_buffer_list {
 		struct list_head buf_list;
 		struct {
 			struct page **buf_pages;
-			struct io_uring_buf_ring *buf_ring;
+			union {
+				struct io_uring_buf_ring *buf_ring;
+				struct compat_io_uring_buf_ring *buf_ring_compat;
+			};
 		};
 		struct rcu_head rcu;
 	};

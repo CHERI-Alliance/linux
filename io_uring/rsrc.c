@@ -26,6 +26,96 @@ struct io_rsrc_update {
 };
 
 static void io_rsrc_buf_put(struct io_ring_ctx *ctx, struct io_rsrc_put *prsrc);
+
+static int get_compat64_io_uring_rsrc_update(struct io_uring_rsrc_update2 *up2,
+					     const void __user *user_up)
+{
+	struct compat_io_uring_rsrc_update compat_up;
+
+	if (copy_from_user(&compat_up, user_up, sizeof(compat_up)))
+		return -EFAULT;
+	up2->offset = compat_up.offset;
+	up2->resv = compat_up.resv;
+	up2->data = compat_up.data;
+	return 0;
+}
+
+static int get_compat64_io_uring_rsrc_update2(struct io_uring_rsrc_update2 *up2,
+					      const void __user *user_up2)
+{
+	struct compat_io_uring_rsrc_update2 compat_up2;
+
+	if (copy_from_user(&compat_up2, user_up2, sizeof(compat_up2)))
+		return -EFAULT;
+	up2->offset = compat_up2.offset;
+	up2->resv = compat_up2.resv;
+	up2->data = compat_up2.data;
+	up2->tags = compat_up2.tags;
+	up2->nr = compat_up2.nr;
+	up2->resv2 = compat_up2.resv2;
+	return 0;
+}
+
+static int get_compat64_io_uring_rsrc_register(struct io_uring_rsrc_register *rr,
+					       const void __user *user_rr)
+{
+	struct compat_io_uring_rsrc_register compat_rr;
+
+	if (copy_from_user(&compat_rr, user_rr, sizeof(compat_rr)))
+		return -EFAULT;
+	rr->nr = compat_rr.nr;
+	rr->flags = compat_rr.flags;
+	rr->resv2 = compat_rr.resv2;
+	rr->data = compat_rr.data;
+	rr->tags = compat_rr.tags;
+	return 0;
+}
+
+static int copy_io_uring_rsrc_update_from_user(struct io_ring_ctx *ctx,
+					       struct io_uring_rsrc_update2 *up2,
+					       const void __user *arg)
+{
+	if (io_in_compat64(ctx))
+		return get_compat64_io_uring_rsrc_update(up2, arg);
+	if (copy_from_user(up2, arg, sizeof(struct io_uring_rsrc_update)))
+		return -EFAULT;
+	return 0;
+}
+
+static int copy_io_uring_rsrc_update2_from_user(struct io_ring_ctx *ctx,
+						struct io_uring_rsrc_update2 *up2,
+						const void __user *arg,
+						size_t size)
+{
+	if (io_in_compat64(ctx)) {
+		if (size != sizeof(struct compat_io_uring_rsrc_update2))
+			return -EINVAL;
+		return get_compat64_io_uring_rsrc_update2(up2, arg);
+	}
+	if (size != sizeof(*up2))
+		return -EINVAL;
+	if (copy_from_user(up2, arg, sizeof(*up2)))
+		return -EFAULT;
+	return 0;
+}
+
+static int copy_io_uring_rsrc_register_from_user(struct io_ring_ctx *ctx,
+						 struct io_uring_rsrc_register *rr,
+						 const void __user *arg,
+						 size_t size)
+{
+	if (io_in_compat64(ctx)) {
+		if (size != sizeof(struct compat_io_uring_rsrc_register))
+			return -EINVAL;
+		return get_compat64_io_uring_rsrc_register(rr, arg);
+	}
+	if (size != sizeof(*rr))
+		return -EINVAL;
+	if (copy_from_user(rr, arg, size))
+		return -EFAULT;
+	return 0;
+}
+
 static int io_sqe_buffer_register(struct io_ring_ctx *ctx, struct iovec *iov,
 				  struct io_mapped_ubuf **pimu,
 				  struct page **last_hpage);
@@ -499,7 +589,7 @@ int io_register_files_update(struct io_ring_ctx *ctx, void __user *arg,
 	if (!nr_args)
 		return -EINVAL;
 	memset(&up, 0, sizeof(up));
-	if (copy_from_user(&up, arg, sizeof(struct io_uring_rsrc_update)))
+	if (copy_io_uring_rsrc_update_from_user(ctx, &up, arg))
 		return -EFAULT;
 	if (up.resv || up.resv2)
 		return -EINVAL;
@@ -510,11 +600,11 @@ int io_register_rsrc_update(struct io_ring_ctx *ctx, void __user *arg,
 			    unsigned size, unsigned type)
 {
 	struct io_uring_rsrc_update2 up;
+	int ret;
 
-	if (size != sizeof(up))
-		return -EINVAL;
-	if (copy_from_user(&up, arg, sizeof(up)))
-		return -EFAULT;
+	ret = copy_io_uring_rsrc_update2_from_user(ctx, &up, arg, size);
+	if (ret)
+		return ret;
 	if (!up.nr || up.resv || up.resv2)
 		return -EINVAL;
 	return __io_register_rsrc_update(ctx, type, &up, up.nr);
@@ -524,14 +614,11 @@ __cold int io_register_rsrc(struct io_ring_ctx *ctx, void __user *arg,
 			    unsigned int size, unsigned int type)
 {
 	struct io_uring_rsrc_register rr;
+	int ret;
 
-	/* keep it extendible */
-	if (size != sizeof(rr))
-		return -EINVAL;
-
-	memset(&rr, 0, sizeof(rr));
-	if (copy_from_user(&rr, arg, size))
-		return -EFAULT;
+	ret = copy_io_uring_rsrc_register_from_user(ctx, &rr, arg, size);
+	if (ret)
+		return ret;
 	if (!rr.nr || rr.resv2)
 		return -EINVAL;
 	if (rr.flags & ~IORING_RSRC_REGISTER_SPARSE)

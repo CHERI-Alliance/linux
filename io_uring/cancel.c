@@ -65,6 +65,34 @@ check_seq:
 	return true;
 }
 
+static int get_compat64_io_uring_sync_cancel_reg(struct io_uring_sync_cancel_reg *sc,
+						 const void __user *user_sc)
+{
+	struct compat_io_uring_sync_cancel_reg compat_sc;
+
+	if (copy_from_user(&compat_sc, user_sc, sizeof(compat_sc)))
+		return -EFAULT;
+	sc->addr = compat_sc.addr;
+	sc->fd = compat_sc.fd;
+	sc->flags = compat_sc.flags;
+	sc->timeout = compat_sc.timeout;
+	sc->opcode = compat_sc.opcode;
+	memcpy(sc->pad, compat_sc.pad, sizeof(sc->pad));
+	memcpy(sc->pad2, compat_sc.pad2, sizeof(sc->pad2));
+	return 0;
+}
+
+static int copy_io_uring_sync_cancel_reg_from_user(struct io_ring_ctx *ctx,
+						   struct io_uring_sync_cancel_reg *sc,
+						   const void __user *arg)
+{
+	if (io_in_compat64(ctx))
+		return get_compat64_io_uring_sync_cancel_reg(sc, arg);
+	if (copy_from_user(sc, arg, sizeof(*sc)))
+		return -EFAULT;
+	return 0;
+}
+
 static bool io_cancel_cb(struct io_wq_work *work, void *data)
 {
 	struct io_kiocb *req = container_of(work, struct io_kiocb, work);
@@ -274,7 +302,7 @@ int io_sync_cancel(struct io_ring_ctx *ctx, void __user *arg)
 	DEFINE_WAIT(wait);
 	int ret, i;
 
-	if (copy_from_user(&sc, arg, sizeof(sc)))
+	if (copy_io_uring_sync_cancel_reg_from_user(ctx, &sc, arg))
 		return -EFAULT;
 	if (sc.flags & ~CANCEL_FLAGS)
 		return -EINVAL;

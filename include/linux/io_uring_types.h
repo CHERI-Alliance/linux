@@ -6,6 +6,7 @@
 #include <linux/task_work.h>
 #include <linux/bitmap.h>
 #include <linux/llist.h>
+#include <linux/io_uring_compat.h>
 #include <uapi/linux/io_uring.h>
 
 enum {
@@ -259,7 +260,10 @@ struct io_ring_ctx {
 		 * array.
 		 */
 		u32			*sq_array;
-		struct io_uring_sqe	*sq_sqes;
+		union {
+			struct compat_io_uring_sqe	*sq_sqes_compat;
+			struct io_uring_sqe		*sq_sqes;
+		};
 		unsigned		cached_sq_head;
 		unsigned		sq_entries;
 
@@ -311,7 +315,10 @@ struct io_ring_ctx {
 		 * produced, so the application is allowed to modify pending
 		 * entries.
 		 */
-		struct io_uring_cqe	*cqes;
+		union {
+			struct compat_io_uring_cqe	*cqes_compat;
+			struct io_uring_cqe		*cqes;
+		};
 
 		/*
 		 * We cache a range of free CQEs we can use, once exhausted it
