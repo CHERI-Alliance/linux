@@ -95,7 +95,7 @@ static void sigusr1_handler(int n, siginfo_t *si,
 static void setup_sigusr1_handler(struct sigaction *sa, int mask_how)
 {
 	ASSERT_EQ(sigemptyset(&sa->sa_mask), 0);
-	sa->sa_handler = (sighandler_t)sigusr1_handler;
+	sa->sa_handler = (sighandler_t)(void *)sigusr1_handler;
 	sa->sa_flags = SA_SIGINFO;
 	ASSERT_EQ(sigaction(SIGUSR1, sa, NULL), 0);
 	ASSERT_EQ(sigaddset(&sa->sa_mask, SIGUSR1), 0);
@@ -229,7 +229,7 @@ TEST(test_signal_basic)
 	};
 	sigaltstack(&ss, 0);
 	sigemptyset(&sa.sa_mask);
-	sa.sa_handler = (sighandler_t)basic_handler;
+	sa.sa_handler = (sighandler_t)(void *)basic_handler;
 	sa.sa_flags = SA_SIGINFO | SA_ONSTACK;
 	sigaction(SIGALRM, &sa, NULL);
 	sigaction(SIGILL, &sa, NULL);
