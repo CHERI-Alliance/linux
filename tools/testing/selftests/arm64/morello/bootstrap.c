@@ -83,9 +83,10 @@ int verify_auxval(struct morello_auxv *auxv)
 	case AT_CHERI_INTERP_RW_CAP:
 	case AT_CHERI_INTERP_RX_CAP:
 	case AT_BASE:
-		/* Fall through if not null, abi allows it */
+		/* ABI allows this entry to be null */
 		if ((void *)auxv->a_val == NULL)
 			break;
+		/* fallthrough */
 	case AT_ENTRY:
 	case AT_EXECFN:
 	case AT_PLATFORM:
