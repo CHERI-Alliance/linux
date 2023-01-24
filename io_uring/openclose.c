@@ -63,7 +63,7 @@ static int __io_openat_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe
 		open->how.flags |= O_LARGEFILE;
 
 	open->dfd = READ_ONCE(sqe->fd);
-	fname = u64_to_user_ptr(READ_ONCE(sqe->addr));
+	fname = (char __user *)READ_ONCE(sqe->addr);
 	open->filename = getname(fname);
 	if (IS_ERR(open->filename)) {
 		ret = PTR_ERR(open->filename);
@@ -99,7 +99,7 @@ int io_openat2_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	size_t len;
 	int ret;
 
-	how = u64_to_user_ptr(READ_ONCE(sqe->addr2));
+	how = (struct open_how __user *)READ_ONCE(sqe->addr2);
 	len = READ_ONCE(sqe->len);
 	if (len < OPEN_HOW_SIZE_VER0)
 		return -EINVAL;

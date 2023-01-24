@@ -32,8 +32,8 @@ int io_statx_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 
 	sx->dfd = READ_ONCE(sqe->fd);
 	sx->mask = READ_ONCE(sqe->len);
-	path = u64_to_user_ptr(READ_ONCE(sqe->addr));
-	sx->buffer = u64_to_user_ptr(READ_ONCE(sqe->addr2));
+	path = (char __user *)READ_ONCE(sqe->addr);
+	sx->buffer = (struct statx __user *)READ_ONCE(sqe->addr2);
 	sx->flags = READ_ONCE(sqe->statx_flags);
 
 	sx->filename = getname_flags(path,

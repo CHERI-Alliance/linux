@@ -23,7 +23,7 @@ struct io_fadvise {
 
 struct io_madvise {
 	struct file			*file;
-	u64				addr;
+	void __user			*addr;
 	u32				len;
 	u32				advice;
 };
@@ -36,7 +36,7 @@ int io_madvise_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	if (sqe->buf_index || sqe->off || sqe->splice_fd_in)
 		return -EINVAL;
 
-	ma->addr = READ_ONCE(sqe->addr);
+	ma->addr = (void __user *)READ_ONCE(sqe->addr);
 	ma->len = READ_ONCE(sqe->len);
 	ma->advice = READ_ONCE(sqe->fadvise_advice);
 	req->flags |= REQ_F_FORCE_ASYNC;

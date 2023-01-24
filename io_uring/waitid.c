@@ -168,7 +168,7 @@ int io_waitid_cancel(struct io_ring_ctx *ctx, struct io_cancel_data *cd,
 
 	io_ring_submit_lock(ctx, issue_flags);
 	hlist_for_each_entry_safe(req, tmp, &ctx->waitid_list, hash_node) {
-		if (req->cqe.user_data != cd->data &&
+		if (!io_user_data_is_same(req->cqe.user_data, cd->data) &&
 		    !(cd->flags & IORING_ASYNC_CANCEL_ANY))
 			continue;
 		if (__io_waitid_cancel(ctx, req))
@@ -292,7 +292,7 @@ int io_waitid_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	iw->which = READ_ONCE(sqe->len);
 	iw->upid = READ_ONCE(sqe->fd);
 	iw->options = READ_ONCE(sqe->file_index);
-	iw->infop = u64_to_user_ptr(READ_ONCE(sqe->addr2));
+	iw->infop = (struct siginfo __user *)READ_ONCE(sqe->addr2);
 	return 0;
 }
 

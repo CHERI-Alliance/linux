@@ -22,7 +22,7 @@ struct io_msg {
 	struct file			*file;
 	struct file			*src_file;
 	struct callback_head		tw;
-	u64 user_data;
+	__kernel_uintptr_t user_data;
 	u32 len;
 	u32 cmd;
 	u32 src_fd;
@@ -252,7 +252,7 @@ int io_msg_ring_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 		return -EINVAL;
 
 	msg->src_file = NULL;
-	msg->user_data = READ_ONCE(sqe->off);
+	msg->user_data = READ_ONCE(sqe->addr2);
 	msg->len = READ_ONCE(sqe->len);
 	msg->cmd = READ_ONCE(sqe->addr);
 	msg->src_fd = READ_ONCE(sqe->addr3);

@@ -26,7 +26,7 @@
 struct io_rw {
 	/* NOTE: kiocb has the file as the first member, so don't do it here */
 	struct kiocb			kiocb;
-	u64				addr;
+	void __user			*addr;
 	u32				len;
 	rwf_t				flags;
 };
@@ -42,7 +42,7 @@ static int io_iov_compat_buffer_select_prep(struct io_rw *rw)
 	struct compat_iovec __user *uiov;
 	compat_ssize_t clen;
 
-	uiov = u64_to_user_ptr(rw->addr);
+	uiov = rw->addr;
 	if (!access_ok(uiov, sizeof(*uiov)))
 		return -EFAULT;
 	if (__get_user(clen, &uiov->iov_len))
@@ -68,7 +68,7 @@ static int io_iov_buffer_select_prep(struct io_kiocb *req)
 		return io_iov_compat_buffer_select_prep(rw);
 #endif
 
-	uiov = u64_to_user_ptr(rw->addr);
+	uiov = rw->addr;
 	if (get_user(rw->len, &uiov->iov_len))
 		return -EFAULT;
 	return 0;
@@ -85,7 +85,7 @@ static int __io_import_iovec(int ddir, struct io_kiocb *req,
 	int nr_segs, ret;
 	size_t sqe_len;
 
-	buf = u64_to_user_ptr(rw->addr);
+	buf = rw->addr;
 	sqe_len = rw->len;
 
 	if (!def->vectored || req->flags & REQ_F_BUFFER_SELECT) {
@@ -93,8 +93,7 @@ static int __io_import_iovec(int ddir, struct io_kiocb *req,
 			buf = io_buffer_select(req, &sqe_len, issue_flags);
 			if (!buf)
 				return -ENOBUFS;
-			/* TODO [PCuABI] - capability checks for uaccess */
-			rw->addr = user_ptr_addr(buf);
+			rw->addr = buf;
 			rw->len = sqe_len;
 		}
 
@@ -269,7 +268,7 @@ static int io_prep_rw(struct io_kiocb *req, const struct io_uring_sqe *sqe,
 	}
 	rw->kiocb.dio_complete = NULL;
 
-	rw->addr = READ_ONCE(sqe->addr);
+	rw->addr = (void __user *)READ_ONCE(sqe->addr);
 	rw->len = READ_ONCE(sqe->len);
 	rw->flags = READ_ONCE(sqe->rw_flags);
 	return io_prep_rw_setup(req, ddir, do_import);
@@ -649,7 +648,7 @@ static ssize_t loop_rw_iter(int ddir, struct io_rw *rw, struct iov_iter *iter)
 			addr = iter_iov_addr(iter);
 			len = iter_iov_len(iter);
 		} else {
-			addr = u64_to_user_ptr(rw->addr);
+			addr = rw->addr;
 			len = rw->len;
 		}
 

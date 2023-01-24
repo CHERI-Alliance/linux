@@ -20,7 +20,7 @@
 
 struct io_rsrc_update {
 	struct file			*file;
-	u64				arg;
+	__s32 __user			*arg;
 	u32				nr_args;
 	u32				offset;
 };
@@ -36,7 +36,7 @@ static int get_compat64_io_uring_rsrc_update(struct io_uring_rsrc_update2 *up2,
 		return -EFAULT;
 	up2->offset = compat_up.offset;
 	up2->resv = compat_up.resv;
-	up2->data = compat_up.data;
+	up2->data = (__kernel_uintptr_t)compat_ptr(compat_up.data);
 	return 0;
 }
 
@@ -49,8 +49,8 @@ static int get_compat64_io_uring_rsrc_update2(struct io_uring_rsrc_update2 *up2,
 		return -EFAULT;
 	up2->offset = compat_up2.offset;
 	up2->resv = compat_up2.resv;
-	up2->data = compat_up2.data;
-	up2->tags = compat_up2.tags;
+	up2->data = (__kernel_uintptr_t)compat_ptr(compat_up2.data);
+	up2->tags = (__kernel_uintptr_t)compat_ptr(compat_up2.tags);
 	up2->nr = compat_up2.nr;
 	up2->resv2 = compat_up2.resv2;
 	return 0;
@@ -66,8 +66,8 @@ static int get_compat64_io_uring_rsrc_register(struct io_uring_rsrc_register *rr
 	rr->nr = compat_rr.nr;
 	rr->flags = compat_rr.flags;
 	rr->resv2 = compat_rr.resv2;
-	rr->data = compat_rr.data;
-	rr->tags = compat_rr.tags;
+	rr->data = (__kernel_uintptr_t)compat_ptr(compat_rr.data);
+	rr->tags = (__kernel_uintptr_t)compat_ptr(compat_rr.tags);
 	return 0;
 }
 
@@ -77,7 +77,7 @@ static int copy_io_uring_rsrc_update_from_user(struct io_ring_ctx *ctx,
 {
 	if (io_in_compat64(ctx))
 		return get_compat64_io_uring_rsrc_update(up2, arg);
-	if (copy_from_user(up2, arg, sizeof(struct io_uring_rsrc_update)))
+	if (copy_from_user_with_ptr(up2, arg, sizeof(struct io_uring_rsrc_update)))
 		return -EFAULT;
 	return 0;
 }
@@ -94,7 +94,7 @@ static int copy_io_uring_rsrc_update2_from_user(struct io_ring_ctx *ctx,
 	}
 	if (size != sizeof(*up2))
 		return -EINVAL;
-	if (copy_from_user(up2, arg, sizeof(*up2)))
+	if (copy_from_user_with_ptr(up2, arg, sizeof(*up2)))
 		return -EFAULT;
 	return 0;
 }
@@ -111,7 +111,7 @@ static int copy_io_uring_rsrc_register_from_user(struct io_ring_ctx *ctx,
 	}
 	if (size != sizeof(*rr))
 		return -EINVAL;
-	if (copy_from_user(rr, arg, size))
+	if (copy_from_user_with_ptr(rr, arg, size))
 		return -EFAULT;
 	return 0;
 }
@@ -189,13 +189,13 @@ static int io_copy_iov(struct io_ring_ctx *ctx, struct iovec *dst,
 		if (copy_from_user(&ciov, &ciovs[index], sizeof(ciov)))
 			return -EFAULT;
 
-		dst->iov_base = u64_to_user_ptr((u64)ciov.iov_base);
+		dst->iov_base = compat_ptr(ciov.iov_base);
 		dst->iov_len = ciov.iov_len;
 		return 0;
 	}
 #endif
 	src = (struct iovec __user *) arg;
-	if (copy_from_user(dst, &src[index], sizeof(*dst)))
+	if (copy_from_user_with_ptr(dst, &src[index], sizeof(*dst)))
 		return -EFAULT;
 	return 0;
 }
@@ -445,8 +445,8 @@ static int __io_sqe_files_update(struct io_ring_ctx *ctx,
 				 struct io_uring_rsrc_update2 *up,
 				 unsigned nr_args)
 {
-	u64 __user *tags = u64_to_user_ptr(up->tags);
-	__s32 __user *fds = u64_to_user_ptr(up->data);
+	u64 __user *tags = (u64 __user *)up->tags;
+	__s32 __user *fds = (__s32 __user *)up->data;
 	struct io_rsrc_data *data = ctx->file_data;
 	struct io_fixed_file *file_slot;
 	int fd, i, err = 0;
@@ -510,9 +510,9 @@ static int __io_sqe_buffers_update(struct io_ring_ctx *ctx,
 				   struct io_uring_rsrc_update2 *up,
 				   unsigned int nr_args)
 {
-	u64 __user *tags = u64_to_user_ptr(up->tags);
+	u64 __user *tags = (u64 __user *)up->tags;
 	struct iovec iov;
-	struct iovec __user *iovs = u64_to_user_ptr(up->data);
+	struct iovec __user *iovs = (struct iovec __user *)up->data;
 	struct page *last_hpage = NULL;
 	__u32 done;
 	int i, err;
@@ -628,13 +628,13 @@ __cold int io_register_rsrc(struct io_ring_ctx *ctx, void __user *arg,
 	case IORING_RSRC_FILE:
 		if (rr.flags & IORING_RSRC_REGISTER_SPARSE && rr.data)
 			break;
-		return io_sqe_files_register(ctx, u64_to_user_ptr(rr.data),
-					     rr.nr, u64_to_user_ptr(rr.tags));
+		return io_sqe_files_register(ctx, (void __user *)rr.data,
+					     rr.nr, (u64 __user *)rr.tags);
 	case IORING_RSRC_BUFFER:
 		if (rr.flags & IORING_RSRC_REGISTER_SPARSE && rr.data)
 			break;
-		return io_sqe_buffers_register(ctx, u64_to_user_ptr(rr.data),
-					       rr.nr, u64_to_user_ptr(rr.tags));
+		return io_sqe_buffers_register(ctx, (void __user *)rr.data,
+					       rr.nr, (u64 __user *)rr.tags);
 	}
 	return -EINVAL;
 }
@@ -652,7 +652,7 @@ int io_files_update_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	up->nr_args = READ_ONCE(sqe->len);
 	if (!up->nr_args)
 		return -EINVAL;
-	up->arg = READ_ONCE(sqe->addr);
+	up->arg = (__s32 __user *)READ_ONCE(sqe->addr);
 	return 0;
 }
 
@@ -660,7 +660,7 @@ static int io_files_update_with_index_alloc(struct io_kiocb *req,
 					    unsigned int issue_flags)
 {
 	struct io_rsrc_update *up = io_kiocb_to_cmd(req, struct io_rsrc_update);
-	__s32 __user *fds = u64_to_user_ptr(up->arg);
+	__s32 __user *fds = up->arg;
 	unsigned int done;
 	struct file *file;
 	int ret, fd;
@@ -703,7 +703,7 @@ int io_files_update(struct io_kiocb *req, unsigned int issue_flags)
 	int ret;
 
 	up2.offset = up->offset;
-	up2.data = up->arg;
+	up2.data = (__kernel_uintptr_t)up->arg;
 	up2.nr = 0;
 	up2.tags = 0;
 	up2.resv = 0;

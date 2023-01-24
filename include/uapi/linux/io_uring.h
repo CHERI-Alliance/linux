@@ -19,6 +19,11 @@
 #ifndef UAPI_LINUX_IO_URING_H_SKIP_LINUX_TIME_TYPES_H
 #include <linux/time_types.h>
 #endif
+#ifdef __KERNEL__
+#include <linux/stddef.h>	/* for offsetof */
+#else
+#include <stddef.h>		/* for offsetof */
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -33,16 +38,16 @@ struct io_uring_sqe {
 	__u16	ioprio;		/* ioprio for the request */
 	__s32	fd;		/* file descriptor to do IO on */
 	union {
-		__u64	off;	/* offset into file */
-		__u64	addr2;
+		__u64			off;	/* offset into file */
+		__kernel_uintptr_t	addr2;
 		struct {
 			__u32	cmd_op;
 			__u32	__pad1;
 		};
 	};
 	union {
-		__u64	addr;	/* pointer to buffer or iovecs */
-		__u64	splice_off_in;
+		__kernel_uintptr_t	addr;	/* pointer to buffer or iovecs */
+		__u64			splice_off_in;
 		struct {
 			__u32	level;
 			__u32	optname;
@@ -74,7 +79,7 @@ struct io_uring_sqe {
 		__u32		install_fd_flags;
 		__u32		nop_flags;
 	};
-	__u64	user_data;	/* data to be passed back at completion time */
+	__kernel_uintptr_t	user_data;	/* data to be passed back at completion time */
 	/* pack this to avoid bogus arm OABI complaints */
 	union {
 		/* index into fixed buffers, if used */
@@ -95,13 +100,15 @@ struct io_uring_sqe {
 	};
 	union {
 		struct {
-			__u64	addr3;
-			__u64	__pad2[1];
+			__kernel_uintptr_t	addr3;
+			__kernel_uintptr_t	__pad2[1];
 		};
-		__u64	optval;
+		__kernel_uintptr_t	optval;
 		/*
 		 * If the ring is initialized with IORING_SETUP_SQE128, then
-		 * this field is used for 80 bytes of arbitrary command data
+		 * this field is used to double the size of the
+		 * struct io_uring_sqe to store bytes of arbitrary
+		 * command data, i.e. 80 bytes or 160 bytes in PCuABI
 		 */
 		__u8	cmd[0];
 	};
@@ -419,13 +426,14 @@ enum io_uring_msg_ring_flags {
  * IO completion data structure (Completion Queue Entry)
  */
 struct io_uring_cqe {
-	__u64	user_data;	/* sqe->data submission passed back */
-	__s32	res;		/* result code for this event */
-	__u32	flags;
+	__kernel_uintptr_t	user_data;	/* sqe->data submission passed back */
+	__s32			res;		/* result code for this event */
+	__u32			flags;
 
 	/*
 	 * If the ring is initialized with IORING_SETUP_CQE32, then this field
-	 * contains 16-bytes of padding, doubling the size of the CQE.
+	 * doubles the size of the CQE, i.e. contains 16 bytes, or in PCuABI,
+	 * 32 bytes of padding.
 	 */
 	__u64 big_cqe[];
 };
@@ -610,7 +618,7 @@ enum io_wq_type {
 struct io_uring_files_update {
 	__u32 offset;
 	__u32 resv;
-	__aligned_u64 /* __s32 * */ fds;
+	__kernel_aligned_uintptr_t /* __s32 * */ fds;
 };
 
 /*
@@ -623,21 +631,21 @@ struct io_uring_rsrc_register {
 	__u32 nr;
 	__u32 flags;
 	__u64 resv2;
-	__aligned_u64 data;
-	__aligned_u64 tags;
+	__kernel_aligned_uintptr_t data;
+	__kernel_aligned_uintptr_t tags;
 };
 
 struct io_uring_rsrc_update {
 	__u32 offset;
 	__u32 resv;
-	__aligned_u64 data;
+	__kernel_aligned_uintptr_t data;
 };
 
 struct io_uring_rsrc_update2 {
 	__u32 offset;
 	__u32 resv;
-	__aligned_u64 data;
-	__aligned_u64 tags;
+	__kernel_aligned_uintptr_t data;
+	__kernel_aligned_uintptr_t tags;
 	__u32 nr;
 	__u32 resv2;
 };
@@ -674,10 +682,10 @@ struct io_uring_restriction {
 };
 
 struct io_uring_buf {
-	__u64	addr;
-	__u32	len;
-	__u16	bid;
-	__u16	resv;
+	__kernel_uintptr_t	addr;
+	__u32			len;
+	__u16			bid;
+	__u16			resv;
 };
 
 struct io_uring_buf_ring {
@@ -687,9 +695,7 @@ struct io_uring_buf_ring {
 		 * ring tail is overlaid with the io_uring_buf->resv field.
 		 */
 		struct {
-			__u64	resv1;
-			__u32	resv2;
-			__u16	resv3;
+			__u8	resv[offsetof(struct io_uring_buf, resv)];
 			__u16	tail;
 		};
 		__DECLARE_FLEX_ARRAY(struct io_uring_buf, bufs);
@@ -712,11 +718,11 @@ enum io_uring_register_pbuf_ring_flags {
 
 /* argument for IORING_(UN)REGISTER_PBUF_RING */
 struct io_uring_buf_reg {
-	__u64	ring_addr;
-	__u32	ring_entries;
-	__u16	bgid;
-	__u16	flags;
-	__u64	resv[3];
+	__kernel_uintptr_t	ring_addr;
+	__u32			ring_entries;
+	__u16			bgid;
+	__u16			flags;
+	__u64			resv[3];
 };
 
 /* argument for IORING_REGISTER_PBUF_STATUS */
@@ -754,17 +760,17 @@ enum io_uring_register_restriction_op {
 };
 
 struct io_uring_getevents_arg {
-	__u64	sigmask;
-	__u32	sigmask_sz;
-	__u32	pad;
-	__u64	ts;
+	__kernel_uintptr_t	sigmask;
+	__u32			sigmask_sz;
+	__u32			pad;
+	__kernel_uintptr_t	ts;
 };
 
 /*
  * Argument for IORING_REGISTER_SYNC_CANCEL
  */
 struct io_uring_sync_cancel_reg {
-	__u64				addr;
+	__kernel_uintptr_t		addr;
 	__s32				fd;
 	__u32				flags;
 	struct __kernel_timespec	timeout;

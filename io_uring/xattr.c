@@ -53,8 +53,8 @@ static int __io_getxattr_prep(struct io_kiocb *req,
 
 	ix->filename = NULL;
 	ix->ctx.kvalue = NULL;
-	name = u64_to_user_ptr(READ_ONCE(sqe->addr));
-	ix->ctx.cvalue = u64_to_user_ptr(READ_ONCE(sqe->addr2));
+	name = (char __user *)READ_ONCE(sqe->addr);
+	ix->ctx.cvalue = (void __user *)READ_ONCE(sqe->addr2);
 	ix->ctx.size = READ_ONCE(sqe->len);
 	ix->ctx.flags = READ_ONCE(sqe->xattr_flags);
 
@@ -94,7 +94,7 @@ int io_getxattr_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	if (ret)
 		return ret;
 
-	path = u64_to_user_ptr(READ_ONCE(sqe->addr3));
+	path = (char __user *)READ_ONCE(sqe->addr3);
 
 	ix->filename = getname_flags(path, LOOKUP_FOLLOW, NULL);
 	if (IS_ERR(ix->filename)) {
@@ -156,8 +156,8 @@ static int __io_setxattr_prep(struct io_kiocb *req,
 		return -EBADF;
 
 	ix->filename = NULL;
-	name = u64_to_user_ptr(READ_ONCE(sqe->addr));
-	ix->ctx.cvalue = u64_to_user_ptr(READ_ONCE(sqe->addr2));
+	name = (char __user *)READ_ONCE(sqe->addr);
+	ix->ctx.cvalue = (void __user *)READ_ONCE(sqe->addr2);
 	ix->ctx.kvalue = NULL;
 	ix->ctx.size = READ_ONCE(sqe->len);
 	ix->ctx.flags = READ_ONCE(sqe->xattr_flags);
@@ -187,7 +187,7 @@ int io_setxattr_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	if (ret)
 		return ret;
 
-	path = u64_to_user_ptr(READ_ONCE(sqe->addr3));
+	path = (char __user *)READ_ONCE(sqe->addr3);
 
 	ix->filename = getname_flags(path, LOOKUP_FOLLOW, NULL);
 	if (IS_ERR(ix->filename)) {

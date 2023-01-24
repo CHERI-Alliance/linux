@@ -21,7 +21,7 @@
 
 struct io_cancel {
 	struct file			*file;
-	u64				addr;
+	__kernel_uintptr_t		addr;
 	u32				flags;
 	s32				fd;
 	u8				opcode;
@@ -54,7 +54,7 @@ bool io_cancel_req_match(struct io_kiocb *req, struct io_cancel_data *cd)
 		if (req->opcode != cd->opcode)
 			return false;
 	}
-	if (match_user_data && req->cqe.user_data != cd->data)
+	if (match_user_data && !io_user_data_is_same(req->cqe.user_data, cd->data))
 		return false;
 	if (cd->flags & IORING_ASYNC_CANCEL_ALL) {
 check_seq:
@@ -72,7 +72,7 @@ static int get_compat64_io_uring_sync_cancel_reg(struct io_uring_sync_cancel_reg
 
 	if (copy_from_user(&compat_sc, user_sc, sizeof(compat_sc)))
 		return -EFAULT;
-	sc->addr = compat_sc.addr;
+	sc->addr = (__kernel_uintptr_t)compat_sc.addr;
 	sc->fd = compat_sc.fd;
 	sc->flags = compat_sc.flags;
 	sc->timeout = compat_sc.timeout;
@@ -88,7 +88,7 @@ static int copy_io_uring_sync_cancel_reg_from_user(struct io_ring_ctx *ctx,
 {
 	if (io_in_compat64(ctx))
 		return get_compat64_io_uring_sync_cancel_reg(sc, arg);
-	if (copy_from_user(sc, arg, sizeof(*sc)))
+	if (copy_from_user_with_ptr(sc, arg, sizeof(*sc)))
 		return -EFAULT;
 	return 0;
 }

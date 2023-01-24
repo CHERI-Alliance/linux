@@ -125,7 +125,7 @@ int io_futex_cancel(struct io_ring_ctx *ctx, struct io_cancel_data *cd,
 
 	io_ring_submit_lock(ctx, issue_flags);
 	hlist_for_each_entry_safe(req, tmp, &ctx->futex_list, hash_node) {
-		if (req->cqe.user_data != cd->data &&
+		if (!io_user_data_is_same(req->cqe.user_data, cd->data) &&
 		    !(cd->flags & IORING_ASYNC_CANCEL_ANY))
 			continue;
 		if (__io_futex_cancel(ctx, req))
@@ -170,7 +170,7 @@ int io_futex_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 		     sqe->file_index))
 		return -EINVAL;
 
-	iof->uaddr = u64_to_user_ptr(READ_ONCE(sqe->addr));
+	iof->uaddr = (u32 __user *)READ_ONCE(sqe->addr);
 	iof->futex_val = READ_ONCE(sqe->addr2);
 	iof->futex_mask = READ_ONCE(sqe->addr3);
 	flags = READ_ONCE(sqe->fd);
@@ -215,7 +215,7 @@ int io_futexv_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 		     sqe->addr2 || sqe->futex_flags || sqe->addr3))
 		return -EINVAL;
 
-	iof->uaddr = u64_to_user_ptr(READ_ONCE(sqe->addr));
+	iof->uaddr = (u32 __user *)READ_ONCE(sqe->addr);
 	iof->futex_nr = READ_ONCE(sqe->len);
 	if (!iof->futex_nr || iof->futex_nr > FUTEX_WAITV_MAX)
 		return -EINVAL;

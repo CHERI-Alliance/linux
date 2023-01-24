@@ -269,11 +269,11 @@ static int io_msg_copy_hdr(struct io_kiocb *req, struct io_async_msghdr *iomsg,
 		return -EFAULT;
 
 	ret = -EFAULT;
-	unsafe_get_user(msg->msg_name, &sr->umsg->msg_name, ua_end);
+	unsafe_get_user_ptr(msg->msg_name, &sr->umsg->msg_name, ua_end);
 	unsafe_get_user(msg->msg_namelen, &sr->umsg->msg_namelen, ua_end);
-	unsafe_get_user(msg->msg_iov, &sr->umsg->msg_iov, ua_end);
+	unsafe_get_user_ptr(msg->msg_iov, &sr->umsg->msg_iov, ua_end);
 	unsafe_get_user(msg->msg_iovlen, &sr->umsg->msg_iovlen, ua_end);
-	unsafe_get_user(msg->msg_control, &sr->umsg->msg_control, ua_end);
+	unsafe_get_user_ptr(msg->msg_control, &sr->umsg->msg_control, ua_end);
 	unsafe_get_user(msg->msg_controllen, &sr->umsg->msg_controllen, ua_end);
 	msg->msg_flags = 0;
 
@@ -402,13 +402,13 @@ int io_sendmsg_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	if (req->opcode == IORING_OP_SEND) {
 		if (READ_ONCE(sqe->__pad3[0]))
 			return -EINVAL;
-		sr->addr = u64_to_user_ptr(READ_ONCE(sqe->addr2));
+		sr->addr = (void __user *)READ_ONCE(sqe->addr2);
 		sr->addr_len = READ_ONCE(sqe->addr_len);
 	} else if (sqe->addr2 || sqe->file_index) {
 		return -EINVAL;
 	}
 
-	sr->umsg = u64_to_user_ptr(READ_ONCE(sqe->addr));
+	sr->umsg = (struct user_msghdr __user *)READ_ONCE(sqe->addr);
 	sr->len = READ_ONCE(sqe->len);
 	sr->flags = READ_ONCE(sqe->ioprio);
 	if (sr->flags & ~SENDMSG_FLAGS)
@@ -763,7 +763,7 @@ int io_recvmsg_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	if (unlikely(sqe->file_index || sqe->addr2))
 		return -EINVAL;
 
-	sr->umsg = u64_to_user_ptr(READ_ONCE(sqe->addr));
+	sr->umsg = (struct user_msghdr __user *)READ_ONCE(sqe->addr);
 	sr->len = READ_ONCE(sqe->len);
 	sr->flags = READ_ONCE(sqe->ioprio);
 	if (sr->flags & ~RECVMSG_FLAGS)
@@ -1250,7 +1250,7 @@ int io_send_zc_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	if (req->opcode == IORING_OP_SEND_ZC) {
 		if (READ_ONCE(sqe->__pad3[0]))
 			return -EINVAL;
-		zc->addr = u64_to_user_ptr(READ_ONCE(sqe->addr2));
+		zc->addr = (void __user *)READ_ONCE(sqe->addr2);
 		zc->addr_len = READ_ONCE(sqe->addr_len);
 	} else {
 		if (unlikely(sqe->addr2 || sqe->file_index))
@@ -1259,7 +1259,7 @@ int io_send_zc_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 			return -EINVAL;
 	}
 
-	zc->buf = u64_to_user_ptr(READ_ONCE(sqe->addr));
+	zc->buf = (void __user *)READ_ONCE(sqe->addr);
 	zc->len = READ_ONCE(sqe->len);
 	zc->msg_flags = READ_ONCE(sqe->msg_flags) | MSG_NOSIGNAL | MSG_ZEROCOPY;
 	if (zc->msg_flags & MSG_DONTWAIT)
@@ -1505,8 +1505,8 @@ int io_accept_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	if (sqe->len || sqe->buf_index)
 		return -EINVAL;
 
-	accept->addr = u64_to_user_ptr(READ_ONCE(sqe->addr));
-	accept->addr_len = u64_to_user_ptr(READ_ONCE(sqe->addr2));
+	accept->addr = (void __user *)READ_ONCE(sqe->addr);
+	accept->addr_len = (int __user *)READ_ONCE(sqe->addr2);
 	accept->flags = READ_ONCE(sqe->accept_flags);
 	accept->nofile = rlimit(RLIMIT_NOFILE);
 	accept->iou_flags = READ_ONCE(sqe->ioprio);
@@ -1669,8 +1669,8 @@ int io_connect_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	if (sqe->len || sqe->buf_index || sqe->rw_flags || sqe->splice_fd_in)
 		return -EINVAL;
 
-	conn->addr = u64_to_user_ptr(READ_ONCE(sqe->addr));
-	conn->addr_len =  READ_ONCE(sqe->addr2);
+	conn->addr = (void __user *)READ_ONCE(sqe->addr);
+	conn->addr_len = READ_ONCE(sqe->off);
 	conn->in_progress = conn->seen_econnaborted = false;
 
 	io = io_msg_alloc_async(req);

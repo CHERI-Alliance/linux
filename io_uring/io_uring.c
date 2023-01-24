@@ -181,10 +181,10 @@ static int get_compat64_io_uring_getevents_arg(struct io_uring_getevents_arg *ar
 
 	if (copy_from_user(&compat_arg, user_arg, sizeof(compat_arg)))
 		return -EFAULT;
-	arg->sigmask = compat_arg.sigmask;
+	arg->sigmask = (__kernel_uintptr_t)compat_ptr(compat_arg.sigmask);
 	arg->sigmask_sz = compat_arg.sigmask_sz;
 	arg->pad = compat_arg.pad;
-	arg->ts = compat_arg.ts;
+	arg->ts = (__kernel_uintptr_t)compat_ptr(compat_arg.ts);
 	return 0;
 }
 
@@ -200,7 +200,7 @@ static int copy_io_uring_getevents_arg_from_user(struct io_ring_ctx *ctx,
 	}
 	if (size != sizeof(*arg))
 		return -EINVAL;
-	if (copy_from_user(arg, argp, sizeof(*arg)))
+	if (copy_from_user_with_ptr(arg, argp, sizeof(*arg)))
 		return -EFAULT;
 	return 0;
 }
@@ -800,7 +800,8 @@ static __cold void io_uring_drop_tctx_refs(struct task_struct *task)
 	}
 }
 
-static bool io_cqring_event_overflow(struct io_ring_ctx *ctx, u64 user_data,
+static bool io_cqring_event_overflow(struct io_ring_ctx *ctx,
+                                     __kernel_uintptr_t user_data,
 				     s32 res, u32 cflags, u64 extra1, u64 extra2)
 {
 	struct io_overflow_cqe *ocqe;
@@ -894,8 +895,8 @@ struct io_uring_cqe *__io_get_ith_cqe(struct io_ring_ctx *ctx, unsigned int i)
 	       &ctx->cqes[i];
 }
 
-static bool io_fill_cqe_aux(struct io_ring_ctx *ctx, u64 user_data, s32 res,
-			      u32 cflags)
+static bool io_fill_cqe_aux(struct io_ring_ctx *ctx,
+			    __kernel_uintptr_t user_data, s32 res, u32 cflags)
 {
 	struct io_uring_cqe *cqe;
 
@@ -915,7 +916,9 @@ static bool io_fill_cqe_aux(struct io_ring_ctx *ctx, u64 user_data, s32 res,
 	return false;
 }
 
-bool io_post_aux_cqe(struct io_ring_ctx *ctx, u64 user_data, s32 res, u32 cflags)
+static bool __io_post_aux_cqe(struct io_ring_ctx *ctx,
+			      __kernel_uintptr_t user_data, s32 res, u32 cflags,
+			      bool allow_overflow)
 {
 	bool filled;
 
@@ -926,6 +929,12 @@ bool io_post_aux_cqe(struct io_ring_ctx *ctx, u64 user_data, s32 res, u32 cflags
 
 	io_cq_unlock_post(ctx);
 	return filled;
+}
+
+bool io_post_aux_cqe(struct io_ring_ctx *ctx, __kernel_uintptr_t user_data,
+		     s32 res, u32 cflags)
+{
+	return __io_post_aux_cqe(ctx, user_data, res, cflags, true);
 }
 
 /*
@@ -3240,9 +3249,9 @@ static int io_get_ext_arg(struct io_ring_ctx *ctx, unsigned int flags,
 		return ret;
 	if (arg.pad)
 		return -EINVAL;
-	*sig = u64_to_user_ptr(arg.sigmask);
+	*sig = (sigset_t __user *)arg.sigmask;
 	*argsz = arg.sigmask_sz;
-	*ts = u64_to_user_ptr(arg.ts);
+	*ts = (struct __kernel_timespec __user *)arg.ts;
 	return 0;
 }
 
@@ -3753,6 +3762,49 @@ static int __init io_uring_init(void)
 	__BUILD_BUG_VERIFY_OFFSET_SIZE(struct io_uring_sqe, eoffset, sizeof(etype), ename)
 #define BUILD_BUG_SQE_ELEM_SIZE(eoffset, esize, ename) \
 	__BUILD_BUG_VERIFY_OFFSET_SIZE(struct io_uring_sqe, eoffset, esize, ename)
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	BUILD_BUG_ON(sizeof(struct io_uring_sqe) != 128);
+	BUILD_BUG_SQE_ELEM(0,  __u8,  opcode);
+	BUILD_BUG_SQE_ELEM(1,  __u8,  flags);
+	BUILD_BUG_SQE_ELEM(2,  __u16, ioprio);
+	BUILD_BUG_SQE_ELEM(4,  __s32, fd);
+	BUILD_BUG_SQE_ELEM(16, __u64, off);
+	BUILD_BUG_SQE_ELEM(16, __uintcap_t, addr2);
+	BUILD_BUG_SQE_ELEM(16, __u32, cmd_op);
+	BUILD_BUG_SQE_ELEM(20, __u32, __pad1);
+	BUILD_BUG_SQE_ELEM(32, __uintcap_t, addr);
+	BUILD_BUG_SQE_ELEM(32, __u64, splice_off_in);
+	BUILD_BUG_SQE_ELEM(48, __u32, len);
+	BUILD_BUG_SQE_ELEM(52, __kernel_rwf_t, rw_flags);
+	BUILD_BUG_SQE_ELEM(52, __u32, fsync_flags);
+	BUILD_BUG_SQE_ELEM(52, __u16, poll_events);
+	BUILD_BUG_SQE_ELEM(52, __u32, poll32_events);
+	BUILD_BUG_SQE_ELEM(52, __u32, sync_range_flags);
+	BUILD_BUG_SQE_ELEM(52, __u32, msg_flags);
+	BUILD_BUG_SQE_ELEM(52, __u32, timeout_flags);
+	BUILD_BUG_SQE_ELEM(52, __u32, accept_flags);
+	BUILD_BUG_SQE_ELEM(52, __u32, cancel_flags);
+	BUILD_BUG_SQE_ELEM(52, __u32, open_flags);
+	BUILD_BUG_SQE_ELEM(52, __u32, statx_flags);
+	BUILD_BUG_SQE_ELEM(52, __u32, fadvise_advice);
+	BUILD_BUG_SQE_ELEM(52, __u32, splice_flags);
+	BUILD_BUG_SQE_ELEM(52, __u32, rename_flags);
+	BUILD_BUG_SQE_ELEM(52, __u32, unlink_flags);
+	BUILD_BUG_SQE_ELEM(52, __u32, hardlink_flags);
+	BUILD_BUG_SQE_ELEM(52, __u32, xattr_flags);
+	BUILD_BUG_SQE_ELEM(52, __u32, msg_ring_flags);
+	BUILD_BUG_SQE_ELEM(64, __uintcap_t, user_data);
+	BUILD_BUG_SQE_ELEM(80, __u16, buf_index);
+	BUILD_BUG_SQE_ELEM(80, __u16, buf_group);
+	BUILD_BUG_SQE_ELEM(82, __u16, personality);
+	BUILD_BUG_SQE_ELEM(84, __s32, splice_fd_in);
+	BUILD_BUG_SQE_ELEM(84, __u32, file_index);
+	BUILD_BUG_SQE_ELEM(84, __u16, addr_len);
+	BUILD_BUG_SQE_ELEM(86, __u16, __pad3[0]);
+	BUILD_BUG_SQE_ELEM(96, __uintcap_t, addr3);
+	BUILD_BUG_SQE_ELEM_SIZE(96, 0, cmd);
+	BUILD_BUG_SQE_ELEM(112, __uintcap_t, __pad2);
+#else /* !CONFIG_CHERI_PURECAP_UABI */
 	BUILD_BUG_ON(sizeof(struct io_uring_sqe) != 64);
 	BUILD_BUG_SQE_ELEM(0,  __u8,  opcode);
 	BUILD_BUG_SQE_ELEM(1,  __u8,  flags);
@@ -3796,6 +3848,7 @@ static int __init io_uring_init(void)
 	BUILD_BUG_SQE_ELEM(48, __u64, addr3);
 	BUILD_BUG_SQE_ELEM_SIZE(48, 0, cmd);
 	BUILD_BUG_SQE_ELEM(56, __u64, __pad2);
+#endif /* !CONFIG_CHERI_PURECAP_UABI */
 
 	BUILD_BUG_ON(sizeof(struct io_uring_files_update) !=
 		     sizeof(struct io_uring_rsrc_update));

@@ -28,7 +28,7 @@ struct kmem_cache *io_buf_cachep;
 
 struct io_provide_buf {
 	struct file			*file;
-	__u64				addr;
+	void __user			*addr;
 	__u32				len;
 	__u32				bgid;
 	__u32				nbufs;
@@ -42,7 +42,7 @@ static int get_compat64_io_uring_buf_reg(struct io_uring_buf_reg *reg,
 
 	if (copy_from_user(&compat_reg, user_reg, sizeof(compat_reg)))
 		return -EFAULT;
-	reg->ring_addr = compat_reg.ring_addr;
+	reg->ring_addr = (__kernel_uintptr_t)compat_ptr(compat_reg.ring_addr);
 	reg->ring_entries = compat_reg.ring_entries;
 	reg->bgid = compat_reg.bgid;
 	reg->flags = compat_reg.flags;
@@ -56,7 +56,7 @@ static int copy_io_uring_buf_reg_from_user(struct io_ring_ctx *ctx,
 {
 	if (io_in_compat64(ctx))
 		return get_compat64_io_uring_buf_reg(reg, arg);
-	if (copy_from_user(reg, arg, sizeof(*reg)))
+	if (copy_from_user_with_ptr(reg, arg, sizeof(*reg)))
 		return -EFAULT;
 	return 0;
 }
@@ -142,7 +142,7 @@ static void __user *io_provided_buffer_select(struct io_kiocb *req, size_t *len,
 		req->flags |= REQ_F_BUFFER_SELECTED;
 		req->kbuf = kbuf;
 		req->buf_index = kbuf->bid;
-		return u64_to_user_ptr(kbuf->addr);
+		return kbuf->addr;
 	}
 	return NULL;
 }
@@ -219,7 +219,7 @@ static void __user *io_ring_buffer_select(struct io_kiocb *req, size_t *len,
 	req->buf_list = bl;
 	req->buf_index = buf->bid;
 
-	return u64_to_user_ptr(buf->addr);
+	return (void __user *)buf->addr;
 }
 
 static void __user *io_ring_buffer_select_any(struct io_kiocb *req, size_t *len,
@@ -542,17 +542,17 @@ int io_provide_buffers_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe
 	if (!tmp || tmp > MAX_BIDS_PER_BGID)
 		return -E2BIG;
 	p->nbufs = tmp;
-	p->addr = READ_ONCE(sqe->addr);
+	p->addr = (void __user *)READ_ONCE(sqe->addr);
 	p->len = READ_ONCE(sqe->len);
 
 	if (check_mul_overflow((unsigned long)p->len, (unsigned long)p->nbufs,
 				&size))
 		return -EOVERFLOW;
-	if (check_add_overflow((unsigned long)p->addr, size, &tmp_check))
+	if (check_add_overflow(user_ptr_addr(p->addr), size, &tmp_check))
 		return -EOVERFLOW;
 
 	size = (unsigned long)p->len * p->nbufs;
-	if (!access_ok(u64_to_user_ptr(p->addr), size))
+	if (!access_ok(p->addr, size))
 		return -EFAULT;
 
 	p->bgid = READ_ONCE(sqe->buf_group);
@@ -616,7 +616,7 @@ static int io_add_buffers(struct io_ring_ctx *ctx, struct io_provide_buf *pbuf,
 			  struct io_buffer_list *bl)
 {
 	struct io_buffer *buf;
-	u64 addr = pbuf->addr;
+	void __user *addr = pbuf->addr;
 	int i, bid = pbuf->bid;
 
 	for (i = 0; i < pbuf->nbufs; i++) {
@@ -689,6 +689,7 @@ static int io_pin_pbuf_ring(struct io_uring_buf_reg *reg,
 	struct page **pages;
 	int nr_pages, ret;
 
+	/* TODO [PCuABI] - capability checks for uaccess */
 	pages = io_pin_pages(reg->ring_addr, ring_size, &nr_pages);
 	if (IS_ERR(pages))
 		return PTR_ERR(pages);
