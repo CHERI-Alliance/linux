@@ -1,16 +1,20 @@
 # SPDX-License-Identifier: GPL-2.0
 # Copyright (C) 2021  Arm Limited
 
-# lib.mk sets CC. This switch triggers it to clang
+# Set various Clang flags if LLVM is defined or CC is defined as clang
+ifneq ($(shell $(CC) --version 2>&1 | head -n 1 | grep clang),)
+# Explicitly define LLVM to select CLANG_FLAGS appropriately in lib.mk
 LLVM := 1
+endif
+ifneq ($(LLVM),)
+CLANG_LDFLAGS = -fuse-ld=lld
+endif
 
-CLANG_FLAGS = --target=aarch64-linux-gnu
 CFLAGS_PURECAP = -march=morello+c64 -mabi=purecap
-CFLAGS_COMMON = -g -ffreestanding -Wall -Wextra -MMD
+CFLAGS_COMMON = -ffreestanding -Wextra -MMD
 CFLAGS_COMMON += -nostdinc -isystem $(shell $(CC) -print-file-name=include 2>/dev/null)
-CFLAGS_CLANG = $(CLANG_FLAGS) -integrated-as
-CFLAGS += $(CFLAGS_CLANG) $(CFLAGS_PURECAP) $(CFLAGS_COMMON)
-LDFLAGS := -fuse-ld=lld $(CLANG_FLAGS) -nostdlib -static
+CFLAGS += $(CLANG_FLAGS) $(CFLAGS_PURECAP) $(CFLAGS_COMMON)
+LDFLAGS += $(CLANG_LDFLAGS) $(CLANG_FLAGS) -nostdlib -static
 
 SRCS := $(wildcard *.c) $(wildcard *.S)
 PROGS := bootstrap clone exit mmap read_write sched signal
