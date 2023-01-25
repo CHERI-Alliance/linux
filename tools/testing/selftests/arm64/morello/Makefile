@@ -33,7 +33,8 @@ $(OUTPUT)/%.o:%.S $(DEPS)
 $(OUTPUT)/%.o:%.c $(DEPS)
 	$(CC) $< -o $@ $(CFLAGS) -c
 
-$(OUTPUT)/%: $(OUTPUT)/%.o $(OUTPUT)/freestanding_start.o $(OUTPUT)/freestanding_init_globals.o $(OUTPUT)/freestanding.o
+$(OUTPUT)/%: $(OUTPUT)/%.o $(OUTPUT)/freestanding_start.o $(OUTPUT)/freestanding_init_globals.o \
+	$(OUTPUT)/freestanding.o $(OUTPUT)/morello_memcpy.o
 	$(CC) $^ -o $@ $(LDFLAGS)
 
 $(OUTPUT)/signal: $(OUTPUT)/signal_common.o
