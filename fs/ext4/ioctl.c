@@ -1057,7 +1057,7 @@ static int ext4_ioctl_get_es_cache(struct file *filp, user_uintptr_t arg)
 	return error;
 }
 
-static int ext4_ioctl_checkpoint(struct file *filp, unsigned long arg)
+static int ext4_ioctl_checkpoint(struct file *filp, user_uintptr_t arg)
 {
 	int err = 0;
 	__u32 flags = 0;
@@ -1235,7 +1235,7 @@ static long __ext4_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg
 	struct super_block *sb = inode->i_sb;
 	struct mnt_idmap *idmap = file_mnt_idmap(filp);
 
-	ext4_debug("cmd = %u, arg = %lu\n", cmd, arg);
+	ext4_debug("cmd = %u, arg = %lu\n", cmd, (unsigned long)arg);
 
 	switch (cmd) {
 	case FS_IOC_GETFSMAP:
