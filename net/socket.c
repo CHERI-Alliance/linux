@@ -1210,7 +1210,7 @@ void vlan_ioctl_set(int (*hook) (struct net *, void __user *))
 EXPORT_SYMBOL(vlan_ioctl_set);
 
 static long sock_do_ioctl(struct net *net, struct socket *sock,
-			  unsigned int cmd, unsigned long arg)
+			  unsigned int cmd, user_uintptr_t arg)
 {
 	const struct proto_ops *ops = READ_ONCE(sock->ops);
 	struct ifreq ifr;

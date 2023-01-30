@@ -4215,7 +4215,7 @@ static int packet_notifier(struct notifier_block *this,
 
 
 static int packet_ioctl(struct socket *sock, unsigned int cmd,
-			unsigned long arg)
+			user_uintptr_t arg)
 {
 	struct sock *sk = sock->sk;
 

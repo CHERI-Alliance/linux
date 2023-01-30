@@ -754,7 +754,7 @@ static int unix_getname(struct socket *, struct sockaddr *, int);
 static __poll_t unix_poll(struct file *, struct socket *, poll_table *);
 static __poll_t unix_dgram_poll(struct file *, struct socket *,
 				    poll_table *);
-static int unix_ioctl(struct socket *, unsigned int, unsigned long);
+static int unix_ioctl(struct socket *, unsigned int, user_uintptr_t);
 #ifdef CONFIG_COMPAT
 static int unix_compat_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg);
 #endif
@@ -3083,7 +3083,7 @@ out:
 	return fd;
 }
 
-static int unix_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+static int unix_ioctl(struct socket *sock, unsigned int cmd, user_uintptr_t arg)
 {
 	struct sock *sk = sock->sk;
 	long amount = 0;
