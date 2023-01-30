@@ -157,7 +157,7 @@ int ptp_release(struct posix_clock_context *pccontext)
 }
 
 long ptp_ioctl(struct posix_clock_context *pccontext, unsigned int cmd,
-	       unsigned long arg)
+	       user_uintptr_t arg)
 {
 	struct ptp_clock *ptp =
 		container_of(pccontext->clk, struct ptp_clock, clock);

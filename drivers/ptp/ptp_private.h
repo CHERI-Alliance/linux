@@ -131,7 +131,7 @@ int ptp_set_pinfunc(struct ptp_clock *ptp, unsigned int pin,
 		    enum ptp_pin_function func, unsigned int chan);
 
 long ptp_ioctl(struct posix_clock_context *pccontext, unsigned int cmd,
-	       unsigned long arg);
+	       user_uintptr_t arg);
 
 int ptp_open(struct posix_clock_context *pccontext, fmode_t fmode);
 
