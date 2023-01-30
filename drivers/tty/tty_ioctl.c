@@ -766,7 +766,7 @@ static int tty_change_softcar(struct tty_struct *tty, bool enable)
  * to be called by line disciplines to ensure they provide consistent mode
  * setting.
  */
-int tty_mode_ioctl(struct tty_struct *tty, unsigned int cmd, unsigned long arg)
+int tty_mode_ioctl(struct tty_struct *tty, unsigned int cmd, user_uintptr_t arg)
 {
 	struct tty_struct *real_tty;
 	void __user *p = (void __user *)arg;

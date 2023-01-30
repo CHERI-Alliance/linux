@@ -243,7 +243,7 @@ struct tty_ldisc_ops {
 	ssize_t	(*write)(struct tty_struct *tty, struct file *file,
 			 const u8 *buf, size_t nr);
 	int	(*ioctl)(struct tty_struct *tty, unsigned int cmd,
-			unsigned long arg);
+			user_uintptr_t arg);
 	int	(*compat_ioctl)(struct tty_struct *tty, unsigned int cmd,
 			unsigned long arg);
 	void	(*set_termios)(struct tty_struct *tty, const struct ktermios *old);

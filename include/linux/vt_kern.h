@@ -50,7 +50,7 @@ static inline int vc_resize(struct vc_data *vc, unsigned int cols,
 }
 
 struct tty_struct;
-int tioclinux(struct tty_struct *tty, unsigned long arg);
+int tioclinux(struct tty_struct *tty, user_uintptr_t arg);
 
 #ifdef CONFIG_CONSOLE_TRANSLATIONS
 /* consolemap.c */
@@ -161,7 +161,7 @@ int vt_do_kbkeycode_ioctl(int cmd, struct kbkeycode __user *user_kbkc,
 int vt_do_kdsk_ioctl(int cmd, struct kbentry __user *user_kbe, int perm,
 		     unsigned int console);
 int vt_do_kdgkb_ioctl(int cmd, struct kbsentry __user *user_kdgkb, int perm);
-int vt_do_kdskled(unsigned int console, int cmd, unsigned long arg, int perm);
+int vt_do_kdskled(unsigned int console, int cmd, user_uintptr_t arg, int perm);
 int vt_do_kdgkbmode(unsigned int console);
 int vt_do_kdgkbmeta(unsigned int console);
 void vt_reset_unicode(unsigned int console);

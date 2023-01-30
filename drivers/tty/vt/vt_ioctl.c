@@ -281,7 +281,7 @@ static int vt_kdsetmode(struct vc_data *vc, unsigned long mode)
 }
 
 static int vt_k_ioctl(struct tty_struct *tty, unsigned int cmd,
-		unsigned long arg, bool perm)
+		user_uintptr_t arg, bool perm)
 {
 	struct vc_data *vc = tty->driver_data;
 	void __user *up = (void __user *)arg;
@@ -733,7 +733,7 @@ static int vt_resizex(struct vc_data *vc, struct vt_consize __user *cs)
  * capability to modify any console, not just the fg_console.
  */
 int vt_ioctl(struct tty_struct *tty,
-	     unsigned int cmd, unsigned long arg)
+	     unsigned int cmd, user_uintptr_t arg)
 {
 	struct vc_data *vc = tty->driver_data;
 	void __user *up = (void __user *)arg;
@@ -844,7 +844,7 @@ int vt_ioctl(struct tty_struct *tty,
 			return -ENXIO;
 
 		arg--;
-		arg = array_index_nospec(arg, MAX_NR_CONSOLES);
+		arg = array_index_nospec((unsigned long)arg, MAX_NR_CONSOLES);
 		console_lock();
 		ret = vc_allocate(arg);
 		console_unlock();
@@ -902,7 +902,7 @@ int vt_ioctl(struct tty_struct *tty,
 			break;
 		}
 
-		arg = array_index_nospec(arg - 1, MAX_NR_CONSOLES);
+		arg = array_index_nospec((unsigned long)arg - 1, MAX_NR_CONSOLES);
 		return vt_disallocate(arg);
 
 	case VT_RESIZE:

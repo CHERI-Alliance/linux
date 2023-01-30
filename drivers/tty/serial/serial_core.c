@@ -1586,7 +1586,7 @@ static int uart_set_iso7816_config(struct uart_port *port,
  * Called via sys_ioctl.  We can use spin_lock_irq() here.
  */
 static int
-uart_ioctl(struct tty_struct *tty, unsigned int cmd, unsigned long arg)
+uart_ioctl(struct tty_struct *tty, unsigned int cmd, user_uintptr_t arg)
 {
 	struct uart_state *state = tty->driver_data;
 	struct tty_port *port = &state->port;
