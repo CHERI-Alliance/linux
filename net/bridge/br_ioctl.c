@@ -104,9 +104,9 @@ static int add_del_if(struct net_bridge *br, int ifindex, int isadd)
 }
 
 #define BR_UARGS_MAX 4
-static int br_dev_read_uargs(unsigned long *args, size_t nr_args,
+static int br_dev_read_uargs(user_uintptr_t *args, size_t nr_args,
 #ifdef CONFIG_CHERI_PURECAP_UABI
-			     void * __capability * __capability argp, void __user *data)
+			     void * __capability *argp, void __user *data)
 #else
 			     void __user **argp, void __user *data)
 #endif
@@ -129,7 +129,7 @@ static int br_dev_read_uargs(unsigned long *args, size_t nr_args,
 
 		*argp = compat_ptr(args[1]);
 	} else {
-		ret = copy_from_user(args, data, nr_args * sizeof(*args));
+		ret = copy_from_user_with_ptr(args, data, nr_args * sizeof(*args));
 		if (ret)
 			goto fault;
 		*argp = (void __user *)args[1];
@@ -150,7 +150,7 @@ int br_dev_siocdevprivate(struct net_device *dev, struct ifreq *rq,
 {
 	struct net_bridge *br = netdev_priv(dev);
 	struct net_bridge_port *p = NULL;
-	unsigned long args[4];
+	user_uintptr_t args[4];
 	void __user *argp;
 	int ret;
 
@@ -342,7 +342,7 @@ int br_dev_siocdevprivate(struct net_device *dev, struct ifreq *rq,
 
 static int old_deviceless(struct net *net, void __user *data)
 {
-	unsigned long args[3];
+	user_uintptr_t args[3];
 	void __user *argp;
 	int ret;
 
@@ -369,7 +369,7 @@ static int old_deviceless(struct net *net, void __user *data)
 
 		ret = copy_to_user(argp, indices,
 				   array_size(args[2], sizeof(int)))
-			? -EFAULT : args[2];
+			? -EFAULT : (int)args[2];
 
 		kfree(indices);
 		return ret;
