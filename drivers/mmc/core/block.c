@@ -435,8 +435,8 @@ static struct mmc_blk_ioc_data *mmc_blk_ioctl_copy_from_user(
 		return idata;
 	}
 
-	idata->buf = memdup_user((void __user *)(unsigned long)
-				 idata->ic.data_ptr, idata->buf_bytes);
+	idata->buf = memdup_user(uaddr_to_user_ptr(idata->ic.data_ptr),
+				 idata->buf_bytes);
 	if (IS_ERR(idata->buf)) {
 		err = PTR_ERR(idata->buf);
 		goto idata_err;
@@ -460,7 +460,7 @@ static int mmc_blk_ioctl_copy_to_user(struct mmc_ioc_cmd __user *ic_ptr,
 		return -EFAULT;
 
 	if (!idata->ic.write_flag) {
-		if (copy_to_user((void __user *)(unsigned long)ic->data_ptr,
+		if (copy_to_user(uaddr_to_user_ptr(ic->data_ptr),
 				 idata->buf, idata->buf_bytes))
 			return -EFAULT;
 	}
