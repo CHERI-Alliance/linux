@@ -6,6 +6,10 @@
 #include <asm/div64.h>
 #include <uapi/linux/kernel.h>
 
+#if __has_builtin(__builtin_align_up) && __has_builtin(__builtin_align_down)
+#define round_up(x, y) __builtin_align_up((x), (y))
+#define round_down(x, y) __builtin_align_down((x), (y))
+#else
 /*
  * This looks more complex than it should be. But we need to
  * get the type for the ~ right in round_down (it needs to be
@@ -33,6 +37,7 @@
  * To perform arbitrary rounding down, use rounddown() below.
  */
 #define round_down(x, y) ((x) & ~__round_mask(x, y))
+#endif /* __has_builtin(__builtin_align_up) && __has_builtin(__builtin_align_down) */
 
 #define DIV_ROUND_UP __KERNEL_DIV_ROUND_UP
 
