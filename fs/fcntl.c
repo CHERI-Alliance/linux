@@ -692,6 +692,13 @@ static long do_compat_fcntl64(unsigned int fd, unsigned int cmd,
 			break;
 		err = fcntl_setlk(fd, f.file, convert_fcntl_cmd(cmd), &flock);
 		break;
+	case F_GETOWN_EX:
+	case F_SETOWN_EX:
+	case F_GETOWNER_UIDS:
+	case F_GET_RW_HINT:
+	case F_SET_RW_HINT:
+		err = do_fcntl(fd, cmd, (user_uintptr_t)compat_ptr(arg), f.file);
+		break;
 	default:
 		err = do_fcntl(fd, cmd, arg, f.file);
 		break;
