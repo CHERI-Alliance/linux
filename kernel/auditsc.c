@@ -1137,7 +1137,7 @@ static void audit_log_execve_info(struct audit_context *context,
 	unsigned int arg;
 	char *buf_head;
 	char *buf;
-	const char __user *p = (const char __user *)current->mm->arg_start;
+	const char __user *p = uaddr_to_user_ptr_safe(current->mm->arg_start);
 
 	/* NOTE: this buffer needs to be large enough to hold all the non-arg
 	 *       data we put in the audit record for this argument (see the
