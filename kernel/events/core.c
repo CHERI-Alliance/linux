@@ -6743,7 +6743,7 @@ static void perf_sigtrap(struct perf_event *event)
 	if (current->flags & PF_EXITING)
 		return;
 
-	send_sig_perf((void __user *)event->pending_addr,
+	send_sig_perf(as_user_ptr(event->pending_addr),
 		      event->orig_type, event->attr.sig_data);
 }
 
