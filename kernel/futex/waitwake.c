@@ -448,7 +448,7 @@ retry:
 	set_current_state(TASK_INTERRUPTIBLE|TASK_FREEZABLE);
 
 	for (i = 0; i < count; i++) {
-		u32 __user *uaddr = (u32 __user *)(unsigned long)vs[i].w.uaddr;
+		u32 __user *uaddr = uaddr_to_user_ptr(vs[i].w.uaddr);
 		struct futex_q *q = &vs[i].q;
 		u32 val = vs[i].w.val;
 
