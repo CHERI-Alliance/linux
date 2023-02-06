@@ -170,7 +170,7 @@ static int rseq_get_rseq_cs(struct task_struct *t, struct rseq_cs *rseq_cs)
 	}
 	if (ptr >= TASK_SIZE)
 		return -EINVAL;
-	urseq_cs = (struct rseq_cs __user *)(unsigned long)ptr;
+	urseq_cs = uaddr_to_user_ptr(ptr);
 	if (copy_from_user(rseq_cs, urseq_cs, sizeof(*rseq_cs)))
 		return -EFAULT;
 
@@ -186,7 +186,7 @@ static int rseq_get_rseq_cs(struct task_struct *t, struct rseq_cs *rseq_cs)
 	if (rseq_cs->abort_ip - rseq_cs->start_ip < rseq_cs->post_commit_offset)
 		return -EINVAL;
 
-	usig = (u32 __user *)(unsigned long)(rseq_cs->abort_ip - sizeof(u32));
+	usig = uaddr_to_user_ptr(rseq_cs->abort_ip - sizeof(u32));
 	ret = get_user(sig, usig);
 	if (ret)
 		return ret;
