@@ -725,7 +725,7 @@ int drm_mode_dirtyfb_ioctl(struct drm_device *dev,
 		return -ENOENT;
 
 	num_clips = r->num_clips;
-	clips_ptr = (struct drm_clip_rect __user *)(unsigned long)r->clips_ptr;
+	clips_ptr = uaddr_to_user_ptr(r->clips_ptr);
 
 	if (!num_clips != !clips_ptr) {
 		ret = -EINVAL;

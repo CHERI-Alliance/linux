@@ -456,8 +456,8 @@ int drm_mode_obj_get_properties_ioctl(struct drm_device *dev, void *data,
 	}
 
 	ret = drm_mode_object_get_properties(obj, file_priv->atomic,
-			(uint32_t __user *)(unsigned long)(arg->props_ptr),
-			(uint64_t __user *)(unsigned long)(arg->prop_values_ptr),
+			uaddr_to_user_ptr(arg->props_ptr),
+			uaddr_to_user_ptr(arg->prop_values_ptr),
 			&arg->count_props);
 
 out_unref:

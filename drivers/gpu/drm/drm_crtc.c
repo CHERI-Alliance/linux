@@ -838,7 +838,7 @@ int drm_mode_setcrtc(struct drm_device *dev, void *data,
 
 		for (i = 0; i < crtc_req->count_connectors; i++) {
 			connector_set[i] = NULL;
-			set_connectors_ptr = (uint32_t __user *)(unsigned long)crtc_req->set_connectors_ptr;
+			set_connectors_ptr = uaddr_to_user_ptr(crtc_req->set_connectors_ptr);
 			if (get_user(out_id, &set_connectors_ptr[i])) {
 				ret = -EFAULT;
 				goto out;
