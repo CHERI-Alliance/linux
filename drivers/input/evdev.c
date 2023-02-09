@@ -1101,7 +1101,7 @@ static long evdev_do_ioctl(struct file *file, unsigned int cmd,
 		if (copy_from_user(&mask, p, sizeof(mask)))
 			return -EFAULT;
 
-		codes_ptr = (void __user *)(unsigned long)mask.codes_ptr;
+		codes_ptr = uaddr_to_user_ptr(mask.codes_ptr);
 		return evdev_get_mask(client,
 				      mask.type, codes_ptr, mask.codes_size,
 				      compat_mode);
@@ -1113,7 +1113,7 @@ static long evdev_do_ioctl(struct file *file, unsigned int cmd,
 		if (copy_from_user(&mask, p, sizeof(mask)))
 			return -EFAULT;
 
-		codes_ptr = (const void __user *)(unsigned long)mask.codes_ptr;
+		codes_ptr = uaddr_to_user_ptr(mask.codes_ptr);
 		return evdev_set_mask(client,
 				      mask.type, codes_ptr, mask.codes_size,
 				      compat_mode);
