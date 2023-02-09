@@ -240,7 +240,7 @@ int panfrost_ioctl_perfcnt_dump(struct drm_device *dev, void *data,
 	struct panfrost_device *pfdev = dev->dev_private;
 	struct panfrost_perfcnt *perfcnt = pfdev->perfcnt;
 	struct drm_panfrost_perfcnt_dump *req = data;
-	void __user *user_ptr = (void __user *)(uintptr_t)req->buf_ptr;
+	void __user *user_ptr = uaddr_to_user_ptr(req->buf_ptr);
 	int ret;
 
 	ret = panfrost_unstable_ioctl_check();
