@@ -103,4 +103,8 @@ epoll_put_uevent(__poll_t revents, __kernel_uintptr_t data,
 }
 #endif
 
+int copy_epoll_event_from_user(struct epoll_event *epds,
+			       const void __user *user_epds,
+			       bool compat);
+
 #endif /* #ifndef _LINUX_EVENTPOLL_H */
