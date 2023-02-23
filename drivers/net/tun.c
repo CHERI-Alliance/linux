@@ -3068,7 +3068,7 @@ static unsigned char tun_get_addr_len(unsigned short type)
 }
 
 static long __tun_chr_ioctl(struct file *file, unsigned int cmd,
-			    unsigned long arg, int ifreq_len)
+			    user_uintptr_t arg, int ifreq_len)
 {
 	struct tun_file *tfile = file->private_data;
 	struct net *net = sock_net(&tfile->sk);
@@ -3402,7 +3402,7 @@ unlock:
 }
 
 static long tun_chr_ioctl(struct file *file,
-			  unsigned int cmd, unsigned long arg)
+			  unsigned int cmd, user_uintptr_t arg)
 {
 	return __tun_chr_ioctl(file, cmd, arg, sizeof (struct ifreq));
 }
@@ -3411,28 +3411,14 @@ static long tun_chr_ioctl(struct file *file,
 static long tun_chr_compat_ioctl(struct file *file,
 			 unsigned int cmd, unsigned long arg)
 {
-	switch (cmd) {
-	case TUNSETIFF:
-	case TUNGETIFF:
-	case TUNSETTXFILTER:
-	case TUNGETSNDBUF:
-	case TUNSETSNDBUF:
-	case SIOCGIFHWADDR:
-	case SIOCSIFHWADDR:
-		arg = (unsigned long)compat_ptr(arg);
-		break;
-	default:
-		arg = (compat_ulong_t)arg;
-		break;
-	}
-
 	/*
 	 * compat_ifreq is shorter than ifreq, so we must not access beyond
 	 * the end of that structure. All fields that are used in this
 	 * driver are compatible though, we don't need to convert the
 	 * contents.
 	 */
-	return __tun_chr_ioctl(file, cmd, arg, sizeof(struct compat_ifreq));
+	return __tun_chr_ioctl(file, cmd, (user_uintptr_t)compat_ptr(arg),
+			       sizeof(struct compat_ifreq));
 }
 #endif /* CONFIG_COMPAT */
 
