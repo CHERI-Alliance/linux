@@ -2520,7 +2520,7 @@ static int copy_msghdr_from_user(struct msghdr *kmsg,
 	struct user_msghdr msg;
 	ssize_t err;
 
-	if (copy_from_user(&msg, umsg, sizeof(*umsg)))
+	if (copy_from_user_with_ptr(&msg, umsg, sizeof(*umsg)))
 		return -EFAULT;
 
 	err = __copy_msghdr(kmsg, &msg, save_addr);
