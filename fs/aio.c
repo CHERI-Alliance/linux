@@ -54,16 +54,21 @@
 #define AIO_RING_COMPAT_FEATURES	1
 #define AIO_RING_INCOMPAT_FEATURES	0
 struct aio_ring {
-	unsigned	id;	/* kernel internal index number */
-	unsigned	nr;	/* number of io_events */
-	unsigned	head;	/* Written to by userland or under ring_lock
-				 * mutex by aio_read_events_ring(). */
-	unsigned	tail;
+	union {
+		struct {
+			unsigned	id;	/* kernel internal index number */
+			unsigned	nr;	/* number of io_events */
+			unsigned	head;	/* Written to by userland or under ring_lock
+						 * mutex by aio_read_events_ring(). */
+			unsigned	tail;
 
-	unsigned	magic;
-	unsigned	compat_features;
-	unsigned	incompat_features;
-	unsigned	header_length;	/* size of aio_ring */
+			unsigned	magic;
+			unsigned	compat_features;
+			unsigned	incompat_features;
+			unsigned	header_length;	/* size of aio_ring */
+		};
+		struct io_event pad;
+	};
 
 
 	struct io_event		io_events[];
@@ -379,8 +384,8 @@ static void copy_io_event_to_ring(struct kioctx *ctx,
 		folio = ctx->ring_folios[pos / AIO_COMPAT_EVENTS_PER_PAGE];
 		compat_ring_event = folio_address(folio);
 		compat_ring_event += pos % AIO_COMPAT_EVENTS_PER_PAGE;
-		compat_ring_event->data = native_event->data;
-		compat_ring_event->obj = native_event->obj;
+		compat_ring_event->data = __c_ua(native_event->data);
+		compat_ring_event->obj = __c_ua(native_event->obj);
 		compat_ring_event->res = native_event->res;
 		compat_ring_event->res2 = native_event->res2;
 	} else {
@@ -1296,9 +1301,9 @@ static void aio_complete(struct aio_kiocb *iocb)
 
 	copy_io_event_to_ring(ctx, tail, &iocb->ki_res);
 
-	pr_debug("%p[%u]: %p: %p %Lx %Lx %Lx\n", ctx, tail, iocb,
-		 (void __user *)(unsigned long)iocb->ki_res.obj,
-		 iocb->ki_res.data, iocb->ki_res.res, iocb->ki_res.res2);
+	pr_debug("%p[%u]: %p: %#lx %#lx %#Lx %#Lx\n", ctx, tail, iocb,
+		 __c_ua(iocb->ki_res.obj), __c_ua(iocb->ki_res.data),
+		 iocb->ki_res.res, iocb->ki_res.res2);
 
 	/* after flagging the request as done, we
 	 * must never even look at it again
@@ -2138,7 +2143,7 @@ static int __io_submit_one(struct kioctx *ctx, const struct iocb *iocb,
 		return -EFAULT;
 	}
 
-	req->ki_res.obj = user_ptr_addr(user_iocb);
+	req->ki_res.obj = (__kernel_uintptr_t)user_iocb;
 	req->ki_res.data = iocb->aio_data;
 	req->ki_res.res = 0;
 	req->ki_res.res2 = 0;
@@ -2169,7 +2174,7 @@ static int get_compat_iocb(struct iocb *iocb, const struct iocb __user *user_ioc
 	struct compat_iocb compat_iocb;
 	if (unlikely(copy_from_user(&compat_iocb, user_iocb, sizeof(struct compat_iocb))))
 		return -EFAULT;
-	iocb->aio_data = compat_iocb.aio_data;
+	iocb->aio_data = (__kernel_uintptr_t)compat_iocb.aio_data;
 	iocb->aio_key = compat_iocb.aio_key;
 	iocb->aio_rw_flags = compat_iocb.aio_rw_flags;
 	iocb->aio_lio_opcode = compat_iocb.aio_lio_opcode;
@@ -2353,7 +2358,6 @@ SYSCALL_DEFINE3(io_cancel, aio_context_t, ctx_id, struct iocb __user *, iocb,
 	struct aio_kiocb *kiocb;
 	int ret = -EINVAL;
 	u32 key;
-	u64 obj = user_ptr_addr(iocb);
 
 	ctx = lookup_ioctx(ctx_id);
 	if (unlikely(!ctx))
@@ -2372,7 +2376,7 @@ SYSCALL_DEFINE3(io_cancel, aio_context_t, ctx_id, struct iocb __user *, iocb,
 	spin_lock_irq(&ctx->ctx_lock);
 	/* TODO: use a hash or array, this sucks. */
 	list_for_each_entry(kiocb, &ctx->active_reqs, ki_list) {
-		if (kiocb->ki_res.obj == obj) {
+		if (user_ptr_is_same((struct iocb __user *)kiocb->ki_res.obj, iocb)) {
 			ret = kiocb->ki_cancel(&kiocb->rw);
 			list_del_init(&kiocb->ki_list);
 			break;

@@ -58,10 +58,10 @@ enum {
 
 /* read() from /dev/aio returns these structures. */
 struct io_event {
-	__u64		data;		/* the data field from the iocb */
-	__u64		obj;		/* what iocb this event came from */
-	__s64		res;		/* result code for this event */
-	__s64		res2;		/* secondary result */
+	__kernel_uintptr_t	data;		/* the data field from the iocb */
+	__kernel_uintptr_t	obj;		/* what iocb this event came from */
+	__s64			res;		/* result code for this event */
+	__s64			res2;		/* secondary result */
 };
 
 /*
@@ -72,7 +72,7 @@ struct io_event {
 
 struct iocb {
 	/* these are internal to the kernel/libc. */
-	__u64	aio_data;	/* data to be returned in event's data */
+	__kernel_uintptr_t aio_data;	/* data to be returned in event's data */
 
 #if defined(__BYTE_ORDER) ? __BYTE_ORDER == __LITTLE_ENDIAN : defined(__LITTLE_ENDIAN)
 	__u32	aio_key;	/* the kernel sets aio_key to the req # */
