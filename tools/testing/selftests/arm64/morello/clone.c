@@ -109,6 +109,21 @@ void clone_single(struct test_fixture *data)
 
 	int clone_flags = CLONE_VM | CLONE_PARENT_SETTID | CLONE_CHILD_SETTID;
 
+	int (*clone_fn_ptr)(void *) = clone_base_fn;
+
+	/*
+	 * Function pointers are materialised by the compiler by either
+	 * computing from the PCC (ADRP + ADD + SEAL) or loading from GOT. The
+	 * run-time permission settings (executive or restrictive) in PCC may
+	 * not match with the GOT entries. Hence, materialise the function
+	 * pointers explicitly to avoid this mismatch issue.
+	 */
+	if (in_restricted() &&
+	    (cheri_perms_get(clone_fn_ptr) & ARM_CAP_PERMISSION_EXECUTIVE)) {
+		clone_fn_ptr = cheri_address_set(cheri_pcc_get(), (ptraddr_t)clone_fn_ptr);
+		clone_fn_ptr = cheri_sentry_create(clone_fn_ptr);
+	}
+
 	ASSERT_NE(new_stack, NULL);
 	/* For stack probing .... */
 	data->sp = new_stack + STACK_SIZE;
@@ -119,7 +134,7 @@ void clone_single(struct test_fixture *data)
 
 	EXPECT_TRUE(!(data->flags & CLONE_TH_RESTRICTED) || in_restricted());
 
-	result = __clone(clone_base_fn, (uintcap_t)new_stack + STACK_SIZE,
+	result = __clone(clone_fn_ptr, (uintcap_t)new_stack + STACK_SIZE,
 			 clone_flags, data, &ppid, tls, &cpid);
 
 	EXPECT_GT(result, 0) {
