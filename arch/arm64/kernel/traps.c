@@ -378,7 +378,8 @@ static int user_insn_read(struct pt_regs *regs, u32 *insnp)
 {
 	u32 instr;
 	unsigned long pc = instruction_pointer(regs);
-	void __user *pc_usr_ptr = uaddr_to_user_ptr_safe(pc);
+	const void __user *pc_usr_ptr = make_user_ptr_for_read_uaccess(
+		pc, sizeof(instr));
 
 	if (compat_thumb_mode(regs)) {
 		/* 16-bit Thumb instruction */
