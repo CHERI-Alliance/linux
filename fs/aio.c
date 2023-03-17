@@ -77,6 +77,14 @@ struct aio_ring {
 
 #define AIO_RING_PAGES	8
 
+#define AIO_EVENTS_PER_PAGE	(PAGE_SIZE / sizeof(struct io_event))
+#define AIO_EVENTS_FIRST_PAGE	((PAGE_SIZE - sizeof(struct aio_ring)) / sizeof(struct io_event))
+#define AIO_EVENTS_OFFSET	(AIO_EVENTS_PER_PAGE - AIO_EVENTS_FIRST_PAGE)
+
+#define AIO_COMPAT_EVENTS_PER_PAGE	(PAGE_SIZE / sizeof(struct compat_io_event))
+#define AIO_COMPAT_EVENTS_FIRST_PAGE	((PAGE_SIZE - sizeof(struct aio_ring)) / sizeof(struct compat_io_event))
+#define AIO_COMPAT_EVENTS_OFFSET	(AIO_COMPAT_EVENTS_PER_PAGE - AIO_COMPAT_EVENTS_FIRST_PAGE)
+
 struct kioctx_table {
 	struct rcu_head		rcu;
 	unsigned		nr;
@@ -164,6 +172,9 @@ struct kioctx {
 	struct file		*aio_ring_file;
 
 	unsigned		id;
+#ifdef CONFIG_COMPAT64
+	bool			compat;
+#endif
 };
 
 /*
@@ -216,6 +227,13 @@ struct aio_kiocb {
 	 * this is the underlying eventfd context to deliver events to.
 	 */
 	struct eventfd_ctx	*ki_eventfd;
+};
+
+struct compat_io_event {
+	__u64	data;
+	__u64	obj;
+	__s64	res;
+	__s64	res2;
 };
 
 struct compat_iocb {
@@ -278,6 +296,96 @@ static struct vfsmount *aio_mnt;
 
 static const struct file_operations aio_ring_fops;
 static const struct address_space_operations aio_ctx_aops;
+
+static inline bool aio_in_compat64(struct kioctx *ctx)
+{
+#ifdef CONFIG_COMPAT64
+	return ctx->compat;
+#else
+	return false;
+#endif
+}
+
+static inline size_t io_event_size(struct kioctx *ctx)
+{
+	return aio_in_compat64(ctx) ? sizeof(struct compat_io_event)
+				    : sizeof(struct io_event);
+}
+
+static u32 __user *aio_key_uptr(struct kioctx *ctx,
+				struct iocb __user *user_iocb)
+{
+	return aio_in_compat64(ctx) ?
+	       &((struct compat_iocb __user *)user_iocb)->aio_key :
+	       &user_iocb->aio_key;
+}
+
+static int copy_io_events_to_user(struct kioctx *ctx,
+				  struct io_event __user *event_array,
+				  long offset,
+				  unsigned int ring_head,
+				  long nr)
+{
+	unsigned int pos;
+	struct folio *folio;
+
+	if (aio_in_compat64(ctx)) {
+		struct compat_io_event __user * dst;
+		struct compat_io_event *src;
+
+		dst = (struct compat_io_event __user *)event_array + offset;
+		pos = AIO_COMPAT_EVENTS_OFFSET + ring_head;
+		folio = ctx->ring_folios[pos / AIO_COMPAT_EVENTS_PER_PAGE];
+		pos %= AIO_COMPAT_EVENTS_PER_PAGE;
+		src = (struct compat_io_event *)folio_address(folio) + pos;
+		nr = min_t(long, nr, AIO_COMPAT_EVENTS_PER_PAGE - pos);
+		if (copy_to_user(dst, src, sizeof(struct compat_io_event) * nr))
+			return -EFAULT;
+	} else {
+		struct io_event *src;
+
+		pos = AIO_EVENTS_OFFSET + ring_head;
+		folio = ctx->ring_folios[pos / AIO_EVENTS_PER_PAGE];
+		pos %= AIO_EVENTS_PER_PAGE;
+		src = (struct io_event *)folio_address(folio) + pos;
+		nr = min_t(long, nr, AIO_EVENTS_PER_PAGE - pos);
+		if (copy_to_user_with_ptr(event_array + offset, src,
+					  sizeof(struct io_event) * nr))
+			return -EFAULT;
+	}
+
+	return nr;
+}
+
+static void copy_io_event_to_ring(struct kioctx *ctx,
+				  unsigned int ring_idx,
+				  struct io_event *native_event)
+{
+	struct folio *folio;
+	unsigned int pos;
+
+	if (aio_in_compat64(ctx)) {
+		struct compat_io_event *compat_ring_event;
+
+		pos = AIO_COMPAT_EVENTS_OFFSET + ring_idx;
+		folio = ctx->ring_folios[pos / AIO_COMPAT_EVENTS_PER_PAGE];
+		compat_ring_event = folio_address(folio);
+		compat_ring_event += pos % AIO_COMPAT_EVENTS_PER_PAGE;
+		compat_ring_event->data = native_event->data;
+		compat_ring_event->obj = native_event->obj;
+		compat_ring_event->res = native_event->res;
+		compat_ring_event->res2 = native_event->res2;
+	} else {
+		struct io_event *ring_event;
+
+		pos = AIO_EVENTS_OFFSET + ring_idx;
+		folio = ctx->ring_folios[pos / AIO_EVENTS_PER_PAGE];
+		ring_event = folio_address(folio);
+		ring_event += pos % AIO_EVENTS_PER_PAGE;
+		(*ring_event) = *native_event;
+	}
+	flush_dcache_folio(folio);
+}
 
 static struct file *aio_private_file(struct kioctx *ctx, loff_t nr_pages)
 {
@@ -528,7 +636,7 @@ static int aio_setup_ring(struct kioctx *ctx, unsigned int nr_events)
 	nr_events += 2;	/* 1 is required, 2 for good luck */
 
 	size = sizeof(struct aio_ring);
-	size += sizeof(struct io_event) * nr_events;
+	size += io_event_size(ctx) * nr_events;
 
 	nr_pages = PFN_UP(size);
 	if (nr_pages < 0)
@@ -542,7 +650,7 @@ static int aio_setup_ring(struct kioctx *ctx, unsigned int nr_events)
 
 	ctx->aio_ring_file = file;
 	nr_events = (PAGE_SIZE * nr_pages - sizeof(struct aio_ring))
-			/ sizeof(struct io_event);
+			/ io_event_size(ctx);
 
 	ctx->ring_folios = ctx->internal_folios;
 	if (nr_pages > AIO_RING_PAGES) {
@@ -612,10 +720,6 @@ static int aio_setup_ring(struct kioctx *ctx, unsigned int nr_events)
 
 	return 0;
 }
-
-#define AIO_EVENTS_PER_PAGE	(PAGE_SIZE / sizeof(struct io_event))
-#define AIO_EVENTS_FIRST_PAGE	((PAGE_SIZE - sizeof(struct aio_ring)) / sizeof(struct io_event))
-#define AIO_EVENTS_OFFSET	(AIO_EVENTS_PER_PAGE - AIO_EVENTS_FIRST_PAGE)
 
 void kiocb_set_cancel_fn(struct kiocb *iocb, kiocb_cancel_fn *cancel)
 {
@@ -766,10 +870,13 @@ static void aio_nr_sub(unsigned nr)
 /* ioctx_alloc
  *	Allocates and initializes an ioctx.  Returns an ERR_PTR if it failed.
  */
-static struct kioctx *ioctx_alloc(unsigned nr_events)
+static struct kioctx *ioctx_alloc(unsigned nr_events, bool compat)
 {
 	struct mm_struct *mm = current->mm;
 	struct kioctx *ctx;
+	size_t event_size = (IS_ENABLED(CONFIG_COMPAT64) && compat) ?
+			    sizeof(struct compat_io_event) :
+			    sizeof(struct io_event);
 	int err = -ENOMEM;
 
 	/*
@@ -791,7 +898,7 @@ static struct kioctx *ioctx_alloc(unsigned nr_events)
 	nr_events *= 2;
 
 	/* Prevent overflows */
-	if (nr_events > (0x10000000U / sizeof(struct io_event))) {
+	if (nr_events > (0x10000000U / event_size)) {
 		pr_debug("ENOMEM: nr_events too high\n");
 		return ERR_PTR(-EINVAL);
 	}
@@ -803,6 +910,9 @@ static struct kioctx *ioctx_alloc(unsigned nr_events)
 	if (!ctx)
 		return ERR_PTR(-ENOMEM);
 
+#ifdef CONFIG_COMPAT64
+	ctx->compat = compat;
+#endif
 	ctx->max_reqs = max_reqs;
 
 	spin_lock_init(&ctx->ctx_lock);
@@ -1158,8 +1268,7 @@ static void aio_complete(struct aio_kiocb *iocb)
 {
 	struct kioctx	*ctx = iocb->ki_ctx;
 	struct aio_ring	*ring;
-	struct io_event	*ev_page, *event;
-	unsigned tail, pos, head, avail;
+	unsigned tail, head, avail;
 	unsigned long	flags;
 
 	/*
@@ -1170,17 +1279,11 @@ static void aio_complete(struct aio_kiocb *iocb)
 	spin_lock_irqsave(&ctx->completion_lock, flags);
 
 	tail = ctx->tail;
-	pos = tail + AIO_EVENTS_OFFSET;
 
 	if (++tail >= ctx->nr_events)
 		tail = 0;
 
-	ev_page = folio_address(ctx->ring_folios[pos / AIO_EVENTS_PER_PAGE]);
-	event = ev_page + pos % AIO_EVENTS_PER_PAGE;
-
-	*event = iocb->ki_res;
-
-	flush_dcache_folio(ctx->ring_folios[pos / AIO_EVENTS_PER_PAGE]);
+	copy_io_event_to_ring(ctx, tail, &iocb->ki_res);
 
 	pr_debug("%p[%u]: %p: %p %Lx %Lx %Lx\n", ctx, tail, iocb,
 		 (void __user *)(unsigned long)iocb->ki_res.obj,
@@ -1252,10 +1355,11 @@ static inline void iocb_put(struct aio_kiocb *iocb)
  *	events fetched
  */
 static long aio_read_events_ring(struct kioctx *ctx,
-				 struct io_event __user *event, long nr)
+				 struct io_event __user *event, long event_idx,
+				 long nr)
 {
 	struct aio_ring *ring;
-	unsigned head, tail, pos;
+	unsigned head, tail;
 	long ret = 0;
 	int copy_ret;
 
@@ -1289,31 +1393,21 @@ static long aio_read_events_ring(struct kioctx *ctx,
 
 	while (ret < nr) {
 		long avail;
-		struct io_event *ev;
-		struct folio *folio;
 
 		avail = (head <= tail ?  tail : ctx->nr_events) - head;
 		if (head == tail)
 			break;
 
-		pos = head + AIO_EVENTS_OFFSET;
-		folio = ctx->ring_folios[pos / AIO_EVENTS_PER_PAGE];
-		pos %= AIO_EVENTS_PER_PAGE;
+		copy_ret = copy_io_events_to_user(ctx, event,
+						  event_idx + ret, head, avail);
 
-		avail = min(avail, nr - ret);
-		avail = min_t(long, avail, AIO_EVENTS_PER_PAGE - pos);
-
-		ev = folio_address(folio);
-		copy_ret = copy_to_user(event + ret, ev + pos,
-					sizeof(*ev) * avail);
-
-		if (unlikely(copy_ret)) {
+		if (unlikely(copy_ret < 0)) {
 			ret = -EFAULT;
 			goto out;
 		}
 
-		ret += avail;
-		head += avail;
+		ret += copy_ret;
+		head += copy_ret;
 		head %= ctx->nr_events;
 	}
 
@@ -1331,7 +1425,7 @@ out:
 static bool aio_read_events(struct kioctx *ctx, long min_nr, long nr,
 			    struct io_event __user *event, long *i)
 {
-	long ret = aio_read_events_ring(ctx, event + *i, nr - *i);
+	long ret = aio_read_events_ring(ctx, event, *i, nr - *i);
 
 	if (ret > 0)
 		*i += ret;
@@ -1432,7 +1526,7 @@ SYSCALL_DEFINE2(io_setup, unsigned, nr_events, aio_context_t __user *, ctxp)
 		goto out;
 	}
 
-	ioctx = ioctx_alloc(nr_events);
+	ioctx = ioctx_alloc(nr_events, false);
 	ret = PTR_ERR(ioctx);
 	if (!IS_ERR(ioctx)) {
 		ret = put_user(ioctx->user_id, ctxp);
@@ -1463,7 +1557,7 @@ COMPAT_SYSCALL_DEFINE2(io_setup, unsigned, nr_events, compat_aio_context_t __use
 		goto out;
 	}
 
-	ioctx = ioctx_alloc(nr_events);
+	ioctx = ioctx_alloc(nr_events, true);
 	ret = PTR_ERR(ioctx);
 	if (!IS_ERR(ioctx)) {
 		/* truncating is ok because it's a user address */
@@ -2024,7 +2118,7 @@ static int __io_submit_one(struct kioctx *ctx, const struct iocb *iocb,
 		req->ki_eventfd = eventfd;
 	}
 
-	if (unlikely(put_user(KIOCB_KEY, &user_iocb->aio_key))) {
+	if (unlikely(put_user(KIOCB_KEY, aio_key_uptr(ctx, user_iocb)))) {
 		pr_debug("EFAULT: aio_key\n");
 		return -EFAULT;
 	}
@@ -2246,14 +2340,19 @@ SYSCALL_DEFINE3(io_cancel, aio_context_t, ctx_id, struct iocb __user *, iocb,
 	u32 key;
 	u64 obj = user_ptr_addr(iocb);
 
-	if (unlikely(get_user(key, &iocb->aio_key)))
-		return -EFAULT;
-	if (unlikely(key != KIOCB_KEY))
-		return -EINVAL;
-
 	ctx = lookup_ioctx(ctx_id);
 	if (unlikely(!ctx))
 		return -EINVAL;
+
+	if (unlikely(get_user(key, aio_key_uptr(ctx, iocb)))) {
+		ret = -EFAULT;
+		goto out;
+	}
+
+	if (unlikely(key != KIOCB_KEY)) {
+		ret = -EINVAL;
+		goto out;
+	}
 
 	spin_lock_irq(&ctx->ctx_lock);
 	/* TODO: use a hash or array, this sucks. */
@@ -2275,6 +2374,7 @@ SYSCALL_DEFINE3(io_cancel, aio_context_t, ctx_id, struct iocb __user *, iocb,
 		ret = -EINPROGRESS;
 	}
 
+out:
 	percpu_ref_put(&ctx->users);
 
 	return ret;
