@@ -199,7 +199,7 @@ arch_perf_out_copy_user(void *dst, const void *src, unsigned long n)
 	unsigned long ret;
 
 	pagefault_disable();
-	ret = __copy_from_user_inatomic(dst, uaddr_to_user_ptr_safe((ptraddr_t)src), n);
+	ret = __copy_from_user_inatomic(dst, uaddr_to_user_ptr((ptraddr_t)src), n);
 	pagefault_enable();
 
 	return ret;
