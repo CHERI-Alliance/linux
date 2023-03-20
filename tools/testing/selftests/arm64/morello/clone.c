@@ -461,8 +461,8 @@ void run_clone3(struct clone3_fixture *data)
 		ASSERT_EQ(result, 0);
 	}
 
-	result = waitid(P_PID, pid, &wait_si, WEXITED, NULL);
-	ASSERT_EQ(result, 0);
+	result = waitpid(pid, NULL, 0);
+	ASSERT_EQ(result, pid);
 
 	/* child_tid set once the thread gets scheduled */
 	if (args->flags & CLONE_PARENT_SETTID && args->flags & CLONE_CHILD_SETTID

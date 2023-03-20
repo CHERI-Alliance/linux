@@ -213,4 +213,9 @@ static inline int waitid(int id_type, pid_t id, siginfo_t *info, int options, st
 	return syscall(__NR_waitid, id_type, id, info, options, ru);
 }
 
+static inline int waitpid(pid_t pid, int *wstatus, int options)
+{
+	return syscall(__NR_wait4, pid, wstatus, options, 0);
+}
+
 #endif
