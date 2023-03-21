@@ -25,7 +25,7 @@ build_user_cap(ptraddr_t addr, size_t len, cheri_perms_t perms, bool exact_bound
 		ret = cheri_bounds_set(ret, len);
 
 	WARN(perms & ~root_perms,
-	     "Permission mask %#lx discarded while creating user capability %#lp\n",
+	     "Permission mask %#x discarded while creating user capability %#lp\n",
 	     perms & ~root_perms, ret);
 	WARN(cheri_is_invalid(ret),
 	     "Invalid user capability created: %#lp (%s bounds requested)\n",
