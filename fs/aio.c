@@ -418,6 +418,11 @@ static int aio_ring_mmap(struct file *file, struct vm_area_struct *vma)
 {
 	vm_flags_set(vma, VM_DONTEXPAND);
 	vma->vm_ops = &aio_ring_vm_ops;
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	vm_flags_set(vma, VM_READ_CAPS | VM_WRITE_CAPS);
+	vma_set_page_prot(vma);
+#endif
+
 	return 0;
 }
 
