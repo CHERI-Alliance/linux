@@ -122,4 +122,6 @@
 
 #define EHWPOISON	133	/* Memory page has hardware error */
 
+#define ERESERVATION	192	/* PCuABI memory reservation error */
+
 #endif
