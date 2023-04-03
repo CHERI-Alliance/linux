@@ -231,6 +231,8 @@ int get_futex_key(u32 __user *uaddr, unsigned int flags, union futex_key *key,
 
 	fshared = flags & FLAGS_SHARED;
 
+	/* TODO [PCuABI] - capability checks for uaccess */
+
 	/*
 	 * The futex address must be "naturally" aligned.
 	 */
@@ -423,6 +425,8 @@ int fault_in_user_writeable(u32 __user *uaddr)
 {
 	struct mm_struct *mm = current->mm;
 	int ret;
+
+	/* TODO [PCuABI] - capability checks for uaccess */
 
 	mmap_read_lock(mm);
 	ret = fixup_user_fault(mm, user_ptr_addr(uaddr),
