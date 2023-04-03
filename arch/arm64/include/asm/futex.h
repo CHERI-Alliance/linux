@@ -22,6 +22,7 @@ __llsc_futex_atomic_##op(int oparg, u32 __user *uaddr, int *oval)	\
 									\
 	uaccess_enable_privileged();					\
 	asm volatile("// __llsc_futex_atomic_" #op "\n"			\
+	__ASM_UACCESS_BEFORE						\
 "	prfm	pstl1strm, %[uaddr]\n"					\
 "1:	ldxr	%w[oldval], %[uaddr]\n"					\
 	insn "\n"							\
@@ -32,6 +33,7 @@ __llsc_futex_atomic_##op(int oparg, u32 __user *uaddr, int *oval)	\
 "	mov	%w[ret], %w[err]\n"					\
 "3:\n"									\
 "	dmb	ish\n"							\
+	__ASM_UACCESS_AFTER						\
 	_ASM_EXTABLE_UACCESS_ERR(1b, 3b, %w[ret])			\
 	_ASM_EXTABLE_UACCESS_ERR(2b, 3b, %w[ret])			\
 	: [ret] "=&r" (ret), [oldval] "=&r" (oldval),			\
@@ -62,6 +64,7 @@ __llsc_futex_cmpxchg(u32 __user *uaddr, u32 oldval, u32 newval, u32 *oval)
 
 	uaccess_enable_privileged();
 	asm volatile("//__llsc_futex_cmpxchg\n"
+	__ASM_UACCESS_BEFORE
 "	prfm	pstl1strm, %[uaddr]\n"
 "1:	ldxr	%w[curval], %[uaddr]\n"
 "	eor	%w[tmp], %w[curval], %w[oldval]\n"
@@ -74,6 +77,7 @@ __llsc_futex_cmpxchg(u32 __user *uaddr, u32 oldval, u32 newval, u32 *oval)
 "3:\n"
 "	dmb	ish\n"
 "4:\n"
+	__ASM_UACCESS_AFTER
 	_ASM_EXTABLE_UACCESS_ERR(1b, 4b, %w[ret])
 	_ASM_EXTABLE_UACCESS_ERR(2b, 4b, %w[ret])
 	: [ret] "+r" (ret), [curval] "=&r" (val),
