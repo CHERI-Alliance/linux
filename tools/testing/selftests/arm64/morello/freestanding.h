@@ -23,6 +23,7 @@ typedef __kernel_timer_t timer_t;
 typedef __kernel_clockid_t clockid_t;
 typedef __kernel_uid_t uid_t;
 typedef __kernel_mode_t mode_t;
+typedef __kernel_off_t off_t;
 #ifndef __clang__
 typedef __uintcap_t uintcap_t;
 #endif
@@ -166,6 +167,16 @@ static inline ssize_t write(int fd, const void *buf, size_t count)
 	return syscall(__NR_write, fd, buf, count);
 }
 
+static inline off_t lseek(int fd, off_t offset, int whence)
+{
+	return syscall(__NR_lseek, fd, offset, whence);
+}
+
+static inline int openat(int dirfd, const char *pathname, int flags, mode_t mode)
+{
+	return syscall(__NR_openat, dirfd, pathname, flags, mode);
+}
+
 long __clone(int (*fn)(void *), uintcap_t stack, int flags, void *arg,
 	     pid_t *parent_tid, void *tls, pid_t *child_tid);
 
@@ -180,8 +191,49 @@ static inline int munmap(void *addr, size_t length)
 	return syscall(__NR_munmap, addr, length);
 }
 
+static inline int madvise(void *addr, size_t length, int advise)
+{
+	return syscall(__NR_madvise, addr, length, advise);
+}
+
+static inline int mincore(void *addr, size_t length, unsigned char *vec)
+{
+	return syscall(__NR_mincore, addr, length, vec);
+}
+
+static inline int mlock(const void *addr, size_t len)
+{
+	return syscall(__NR_mlock, addr, len);
+}
+
+static inline int mlock2(const void *addr, size_t len, unsigned int flags)
+{
+	return syscall(__NR_mlock2, addr, len, flags);
+}
+
+static inline int munlock(const void *addr, size_t len)
+{
+	return syscall(__NR_munlock, addr, len);
+}
+
+static inline int msync(void *addr, size_t length, int flags)
+{
+	return syscall(__NR_msync, addr, length, flags);
+}
+
+static inline int mprotect(void *addr, size_t length, int prot)
+{
+	return syscall(__NR_mprotect, addr, length, prot);
+}
+
+static inline void *mremap(void *old_address, size_t old_size, size_t new_size,
+			   int flags, void *new_address)
+{
+	return (void *)syscall(__NR_mremap, old_address, old_size, new_size, flags, new_address);
+}
+
 static inline void *mmap_verified(void *addr, size_t length, int prot, int flags,
-			    int fd,  int offset, unsigned int perms)
+				  int fd,  int offset, unsigned int perms)
 {
 	void *__addr = mmap(addr, length, prot, flags, fd, offset);
 
@@ -204,6 +256,11 @@ static inline void *mmap_verified(void *addr, size_t length, int prot, int flags
 clean_up:
 	munmap(__addr, length);
 	return NULL;
+}
+
+static inline int brk(void *addr)
+{
+	return syscall(__NR_brk, addr);
 }
 
 static inline int close(int fd)
@@ -240,9 +297,9 @@ static inline int tmpfd(void)
 	int fd;
 
 	/* First try /tmp, fall back to / if it doesn't exist */
-	fd = syscall(__NR_openat, 0, "/tmp", O_TMPFILE | O_RDWR, 0666);
+	fd = openat(0, "/tmp", O_TMPFILE | O_RDWR, 0666);
 	if (fd == -ENOENT)
-		fd = syscall(__NR_openat, 0, "/", O_TMPFILE | O_RDWR, 0666);
+		fd = openat(0, "/", O_TMPFILE | O_RDWR, 0666);
 
 	ASSERT_GE(fd, 0);
 	return fd;
