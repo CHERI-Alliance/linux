@@ -119,6 +119,17 @@ clean_up:
 	close(fd);
 }
 
+/* test to verify mmap() behaviour when MAP_GROWSDOWN flag is specified */
+TEST(test_map_growsdown)
+{
+	void *ptr;
+	int prot = PROT_READ | PROT_WRITE;
+	int flags = MAP_PRIVATE | MAP_ANONYMOUS | MAP_GROWSDOWN;
+
+	ptr = mmap(NULL, MMAP_SIZE, prot, flags, -1, 0);
+	EXPECT_EQ((unsigned long)ptr, (unsigned long)-EOPNOTSUPP);
+}
+
 int main(int argc __maybe_unused, char **argv __maybe_unused, char **envp __maybe_unused,
 	 struct morello_auxv *auxv)
 {
@@ -126,5 +137,6 @@ int main(int argc __maybe_unused, char **argv __maybe_unused, char **envp __mayb
 
 	test_syscall_mmap();
 	test_syscall_mmap2();
+	test_map_growsdown();
 	return 0;
 }
