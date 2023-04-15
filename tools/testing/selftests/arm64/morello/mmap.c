@@ -130,6 +130,100 @@ TEST(test_map_growsdown)
 	EXPECT_EQ((unsigned long)ptr, (unsigned long)-EOPNOTSUPP);
 }
 
+/* test to verify invalid capability passed to address space management syscalls
+ * results in failure of the syscall.
+ */
+TEST(test_validity_tag_check)
+{
+	void *ptr, *new_ptr;
+	int retval;
+	int prot = PROT_READ | PROT_WRITE;
+	int flags = MAP_PRIVATE | MAP_ANONYMOUS;
+	unsigned char vec[MMAP_SIZE / pagesize];
+
+	/* passing invalid capability to mmap() */
+	ptr = mmap(NULL, MMAP_SIZE, prot, flags, -1, 0);
+	ASSERT_FALSE(IS_ERR_VALUE(ptr));
+	new_ptr = mmap(cheri_tag_clear(ptr), MMAP_SIZE_REDUCED, prot,
+		       flags | MAP_FIXED, -1, 0);
+	EXPECT_EQ((unsigned long)new_ptr, (unsigned long)-EINVAL);
+
+	retval = munmap(ptr, MMAP_SIZE);
+	ASSERT_EQ(retval, 0);
+
+	/* passing invalid capability to munmap() */
+	ptr = mmap(NULL, MMAP_SIZE, prot, flags, -1, 0);
+	ASSERT_FALSE(IS_ERR_VALUE(ptr));
+	EXPECT_EQ(0, probe_mem_range(ptr, MMAP_SIZE,
+				     PROBE_MODE_TOUCH | PROBE_MODE_VERIFY));
+
+	retval = munmap(cheri_tag_clear(ptr), MMAP_SIZE);
+	EXPECT_EQ(retval, -EINVAL);
+
+	retval = munmap(ptr, MMAP_SIZE);
+	ASSERT_EQ(retval, 0);
+
+	/* passing invalid capability to mremap() */
+	ptr = mmap(NULL, MMAP_SIZE_REDUCED, prot, flags, -1, 0);
+	ASSERT_FALSE(IS_ERR_VALUE(ptr));
+	new_ptr = mremap(cheri_tag_clear(ptr), MMAP_SIZE_REDUCED, MMAP_SIZE,
+			 MREMAP_MAYMOVE, 0);
+	EXPECT_EQ((unsigned long)new_ptr, (unsigned long)-EINVAL);
+
+	retval = munmap(ptr, MMAP_SIZE_REDUCED);
+	ASSERT_EQ(retval, 0);
+
+	/* passing invalid capability to mprotect() */
+	ptr = mmap(NULL, MMAP_SIZE, PROT_MAX(prot) | PROT_READ, flags, -1, 0);
+	ASSERT_FALSE(IS_ERR_VALUE(ptr));
+	retval = mprotect(cheri_tag_clear(ptr), MMAP_SIZE, PROT_WRITE);
+	EXPECT_EQ(retval, -EINVAL);
+
+	retval = munmap(ptr, MMAP_SIZE);
+	ASSERT_EQ(retval, 0);
+
+	/* as the remaining syscalls are expected to fail in a similar manner,
+	 * have a common mapping.
+	 */
+	ptr = mmap(NULL, MMAP_SIZE, prot, flags, -1, 0);
+	ASSERT_FALSE(IS_ERR_VALUE(ptr));
+
+	/* passing invalid capability to madvise() */
+	retval = madvise(cheri_tag_clear(ptr), MMAP_SIZE, MADV_WILLNEED);
+	EXPECT_EQ(retval, -EINVAL);
+
+	/* passing invalid capability to mincore() */
+	retval = mincore(cheri_tag_clear(ptr), MMAP_SIZE, vec);
+	EXPECT_EQ(retval, -EINVAL);
+
+	/* passing invalid capability to mlock() */
+	retval = mlock(cheri_tag_clear(ptr), MMAP_SIZE);
+	EXPECT_EQ(retval, -EINVAL);
+
+	/* passing invalid capability to mlock2() */
+	retval = mlock2(cheri_tag_clear(ptr), MMAP_SIZE, MLOCK_ONFAULT);
+	EXPECT_EQ(retval, -EINVAL);
+
+	/* passing invalid capability to munlock() */
+	EXPECT_EQ(0, mlock(ptr, MMAP_SIZE_REDUCED));
+	EXPECT_EQ(0, probe_mem_range(ptr, MMAP_SIZE_REDUCED,
+				     PROBE_MODE_TOUCH | PROBE_MODE_VERIFY));
+
+	retval = munlock(cheri_tag_clear(ptr), MMAP_SIZE_REDUCED);
+	EXPECT_EQ(retval, -EINVAL);
+
+	retval = munlock(ptr, MMAP_SIZE_REDUCED);
+	ASSERT_EQ(retval, 0);
+
+	/* passing invalid capability to msync() */
+	retval = msync(cheri_tag_clear(ptr), MMAP_SIZE, MS_SYNC);
+	EXPECT_EQ(retval, -EINVAL);
+
+	/* unmap the common mapping */
+	retval = munmap(ptr, MMAP_SIZE);
+	ASSERT_EQ(retval, 0);
+}
+
 int main(int argc __maybe_unused, char **argv __maybe_unused, char **envp __maybe_unused,
 	 struct morello_auxv *auxv)
 {
@@ -138,5 +232,6 @@ int main(int argc __maybe_unused, char **argv __maybe_unused, char **envp __mayb
 	test_syscall_mmap();
 	test_syscall_mmap2();
 	test_map_growsdown();
+	test_validity_tag_check();
 	return 0;
 }
