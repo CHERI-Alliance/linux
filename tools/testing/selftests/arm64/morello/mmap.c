@@ -224,6 +224,86 @@ TEST(test_validity_tag_check)
 	ASSERT_EQ(retval, 0);
 }
 
+/* test to verify address space management syscall behaviour when capability
+ * range is modified
+ */
+TEST(test_range_check)
+{
+	void *ptr, *reduced_bound_ptr, *ret;
+	int retval;
+	int prot = PROT_READ | PROT_WRITE;
+	int flags = MAP_PRIVATE | MAP_ANONYMOUS;
+	unsigned char vec[MMAP_SIZE / pagesize];
+
+	/* mapping a smaller range at prev mmap ptr in a subsequent mmap()
+	 * call without first unmapping
+	 */
+	ptr = mmap(NULL, MMAP_SIZE, prot, flags, -1, 0);
+	ASSERT_FALSE(IS_ERR_VALUE(ptr));
+
+	ret = mmap(ptr, MMAP_SIZE_REDUCED, prot, flags | MAP_FIXED, -1, 0);
+	ASSERT_FALSE(IS_ERR_VALUE(ret));
+	EXPECT_EQ(0, probe_mem_range(ret, MMAP_SIZE_REDUCED,
+				     PROBE_MODE_TOUCH | PROBE_MODE_VERIFY));
+
+	retval = munmap(ptr, MMAP_SIZE);
+	ASSERT_EQ(retval, 0);
+
+	/* mapping a larger range at prev mmap ptr in a subsequent mmap()
+	 * call without first unmapping
+	 */
+	ptr = mmap(NULL, MMAP_SIZE, prot, flags, -1, 0);
+	ASSERT_FALSE(IS_ERR_VALUE(ptr));
+
+	ret = mmap(ptr, 2 * MMAP_SIZE, prot, flags | MAP_FIXED, -1, 0);
+	EXPECT_EQ((unsigned long)ret, (unsigned long)-EINVAL);
+
+	retval = munmap(ptr, MMAP_SIZE);
+	ASSERT_EQ(retval, 0);
+
+	/* as the following syscalls are expected to fail in a similar manner,
+	 * have a common mapping and reduced bound pointer.
+	 */
+	ptr = mmap(NULL, MMAP_SIZE, prot, flags, -1, 0);
+	ASSERT_FALSE(IS_ERR_VALUE(ptr));
+	reduced_bound_ptr = cheri_bounds_set(ptr, MMAP_SIZE_REDUCED);
+
+	/* negative munmap() range test */
+	retval = munmap(reduced_bound_ptr, MMAP_SIZE);
+	EXPECT_EQ(retval, -EINVAL);
+
+	/* negative mincore() range test */
+	retval = mincore(reduced_bound_ptr, MMAP_SIZE, vec);
+	EXPECT_EQ(retval, -EINVAL);
+
+	/* negative mlock() range test */
+	retval = mlock(reduced_bound_ptr, MMAP_SIZE);
+	EXPECT_EQ(retval, -EINVAL);
+
+	/* negative munlock() range test */
+	EXPECT_EQ(0, mlock2(ptr, MMAP_SIZE, MLOCK_ONFAULT));
+	EXPECT_EQ(0, probe_mem_range(ptr, MMAP_SIZE,
+				     PROBE_MODE_TOUCH | PROBE_MODE_VERIFY));
+
+	retval = munlock(reduced_bound_ptr, MMAP_SIZE);
+	EXPECT_EQ(retval, -EINVAL);
+
+	retval = munlock(ptr, MMAP_SIZE);
+	ASSERT_EQ(retval, 0);
+
+	/* negative msync() range test */
+	retval = msync(reduced_bound_ptr, MMAP_SIZE, MS_SYNC);
+	EXPECT_EQ(retval, -EINVAL);
+
+	/* negative madvise() range test */
+	retval = madvise(reduced_bound_ptr, MMAP_SIZE, MADV_NORMAL);
+	EXPECT_EQ(retval, -EINVAL);
+
+	/* release the common mapping */
+	retval = munmap(ptr, MMAP_SIZE);
+	ASSERT_EQ(retval, 0);
+}
+
 int main(int argc __maybe_unused, char **argv __maybe_unused, char **envp __maybe_unused,
 	 struct morello_auxv *auxv)
 {
@@ -233,5 +313,6 @@ int main(int argc __maybe_unused, char **argv __maybe_unused, char **envp __mayb
 	test_syscall_mmap2();
 	test_map_growsdown();
 	test_validity_tag_check();
+	test_range_check();
 	return 0;
 }
