@@ -304,6 +304,57 @@ TEST(test_range_check)
 	ASSERT_EQ(retval, 0);
 }
 
+/* test to verify mmap() reservation semantics */
+TEST(test_check_mmap_reservation)
+{
+	void *ptr, *new_ptr;
+	size_t size;
+	int retval;
+	int prot = PROT_READ | PROT_WRITE;
+	int flags = MAP_PRIVATE | MAP_ANONYMOUS;
+
+	/* test to verify rest of reservation region is accessible after a partial
+	 * unmap
+	 */
+	ptr = mmap(NULL, MMAP_SIZE, prot, flags, -1, 0);
+	ASSERT_FALSE(IS_ERR_VALUE(ptr));
+
+	retval = munmap(ptr, pagesize);
+	ASSERT_EQ(retval, 0);
+
+	ptr = ptr + pagesize;
+	size = MMAP_SIZE - pagesize;
+	EXPECT_EQ(0, probe_mem_range(ptr, size,
+				     PROBE_MODE_TOUCH | PROBE_MODE_VERIFY));
+
+	retval = munmap(ptr, size);
+	ASSERT_EQ(retval, 0);
+
+	/* test to verify that a subsequent mmap() call to the same region whose
+	 * reservation has been destroyed fails. This test is in accordance with
+	 * the current implementation.
+	 */
+	ptr = mmap(NULL, MMAP_SIZE, prot, flags, -1, 0);
+	ASSERT_FALSE(IS_ERR_VALUE(ptr));
+
+	retval = munmap(ptr, MMAP_SIZE);
+	ASSERT_EQ(retval, 0);
+
+	new_ptr = mmap(ptr, MMAP_SIZE_REDUCED, prot, flags | MAP_FIXED, -1, 0);
+	EXPECT_EQ((unsigned long)new_ptr, (unsigned long)-ERESERVATION);
+
+	/* null-derived ptr overlaps with an existing reservation */
+	ptr = mmap((void *)(uintptr_t)min_addr, MMAP_SIZE, prot, flags, -1, 0);
+	ASSERT_FALSE(IS_ERR_VALUE(ptr));
+
+	new_ptr = mmap((void *)(uintptr_t)min_addr + MMAP_SIZE_REDUCED, MMAP_SIZE, prot,
+		       flags | MAP_FIXED, -1, 0);
+	EXPECT_EQ((unsigned long)new_ptr, (unsigned long)-ERESERVATION);
+
+	retval = munmap(ptr, MMAP_SIZE);
+	ASSERT_EQ(retval, 0);
+}
+
 int main(int argc __maybe_unused, char **argv __maybe_unused, char **envp __maybe_unused,
 	 struct morello_auxv *auxv)
 {
@@ -314,5 +365,6 @@ int main(int argc __maybe_unused, char **argv __maybe_unused, char **envp __mayb
 	test_map_growsdown();
 	test_validity_tag_check();
 	test_range_check();
+	test_check_mmap_reservation();
 	return 0;
 }
