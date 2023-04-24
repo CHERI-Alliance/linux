@@ -14,6 +14,7 @@
 #define MMAP_SIZE ((1ULL << 16) << 1) /* 64k x 2 */
 #define MMAP_SIZE_REDUCED (MMAP_SIZE >> 1)
 #define FILE_PERM 0666
+#define PROT_ALL (PROT_READ | PROT_WRITE | PROT_EXEC)
 
 #define PROBE_MODE_TOUCH	0x01
 #define PROBE_MODE_VERIFY	0x02
@@ -410,6 +411,147 @@ TEST(test_check_mremap_reservation)
 	EXPECT_EQ(retval, 0);
 }
 
+/* test to verify address space management syscall behaviour when permissions
+ * are modified.
+ */
+TEST(test_permissions)
+{
+	void *ptr, *old_ptr, *new_ptr, *ret;
+	int flags, retval;
+	int prot, max_prot;
+	size_t perms;
+
+	/* increase permission beyond the maximum prot specified for the mapping */
+	flags = MAP_PRIVATE | MAP_ANONYMOUS;
+	max_prot = PROT_READ | PROT_WRITE;
+	prot = PROT_READ;
+
+	ptr = mmap(NULL, MMAP_SIZE, PROT_MAX(max_prot) | prot,
+		   flags, -1, 0);
+	ASSERT_FALSE(IS_ERR_VALUE(ptr));
+
+	retval = mprotect(ptr, MMAP_SIZE, PROT_EXEC);
+	ASSERT_EQ(retval, -EINVAL);
+
+	retval = munmap(ptr, MMAP_SIZE);
+	ASSERT_EQ(retval, 0);
+
+	/* max_prot has fewer permissions than prot */
+	flags = MAP_PRIVATE | MAP_ANONYMOUS;
+	max_prot = PROT_WRITE | PROT_EXEC;
+	prot = PROT_ALL;
+
+	ptr = mmap(NULL, MMAP_SIZE, PROT_MAX(max_prot) | prot, flags, -1, 0);
+	EXPECT_EQ((unsigned long)ptr, (unsigned long)-EINVAL);
+
+	/* max_prot has more permissions than prot */
+	flags = MAP_PRIVATE | MAP_ANONYMOUS;
+	max_prot = PROT_ALL;
+	prot = PROT_READ | PROT_EXEC;
+
+	ptr = mmap(NULL, MMAP_SIZE, PROT_MAX(max_prot) | prot, flags, -1, 0);
+	ASSERT_FALSE(IS_ERR_VALUE(ptr));
+
+	retval = mprotect(ptr, MMAP_SIZE, PROT_WRITE);
+	ASSERT_EQ(retval, 0);
+
+	EXPECT_EQ(0, probe_mem_range(ptr, MMAP_SIZE,
+				     PROBE_MODE_TOUCH | PROBE_MODE_VERIFY));
+
+	retval = munmap(ptr, MMAP_SIZE);
+	ASSERT_EQ(retval, 0);
+
+	/* repeat positive max_prot test with fixed address */
+	flags = MAP_PRIVATE | MAP_ANONYMOUS;
+	max_prot = PROT_ALL;
+	prot = PROT_READ | PROT_EXEC;
+
+	ptr = mmap((void *)(uintptr_t)min_addr, MMAP_SIZE, PROT_MAX(max_prot) | prot,
+		   flags | MAP_FIXED, -1, 0);
+	ASSERT_FALSE(IS_ERR_VALUE(ptr));
+
+	retval = mprotect(ptr, MMAP_SIZE, PROT_WRITE);
+	ASSERT_EQ(retval, 0);
+
+	retval = munmap(ptr, MMAP_SIZE);
+	ASSERT_EQ(retval, 0);
+
+	/* LoadCap and StoreCap permissions must not be given to a shared mapping */
+	flags = MAP_SHARED | MAP_ANONYMOUS;
+	prot = PROT_READ | PROT_WRITE;
+
+	ptr = mmap(NULL, MMAP_SIZE, PROT_MAX(prot) | PROT_READ, flags, -1, 0);
+	ASSERT_FALSE(IS_ERR_VALUE(ptr));
+
+	perms = cheri_perms_get(ptr);
+	EXPECT_EQ((perms & (CHERI_PERM_LOAD_CAP | CHERI_PERM_STORE_CAP)), 0);
+
+	retval = munmap(ptr, MMAP_SIZE);
+	ASSERT_EQ(retval, 0);
+
+	/* permissions of capability returned by mremap must match the permissions
+	 * returned by the original mapping.
+	 */
+	flags = MAP_PRIVATE | MAP_ANONYMOUS;
+	prot = PROT_READ | PROT_WRITE;
+
+	old_ptr = mmap(NULL, MMAP_SIZE_REDUCED, prot, flags, -1, 0);
+	ASSERT_FALSE(IS_ERR_VALUE(old_ptr));
+
+	new_ptr = mremap(old_ptr, MMAP_SIZE_REDUCED, MMAP_SIZE,
+			 MREMAP_MAYMOVE, 0);
+	ASSERT_FALSE(IS_ERR_VALUE(new_ptr));
+
+	ASSERT_EQ(cheri_perms_get(old_ptr), cheri_perms_get(new_ptr));
+	EXPECT_EQ(0, probe_mem_range(new_ptr, MMAP_SIZE,
+				     PROBE_MODE_TOUCH | PROBE_MODE_VERIFY));
+
+	retval = munmap(new_ptr, MMAP_SIZE);
+	ASSERT_EQ(retval, 0);
+
+	/* remapping to a new_ptr having reduced permissions from old_ptr */
+	flags = MAP_PRIVATE | MAP_ANONYMOUS;
+	prot = PROT_READ | PROT_WRITE;
+
+	old_ptr = mmap(NULL, MMAP_SIZE_REDUCED, PROT_MAX(prot | PROT_EXEC) |
+		       prot, flags, -1, 0);
+	ASSERT_FALSE(IS_ERR_VALUE(old_ptr));
+
+	new_ptr = mmap(NULL, MMAP_SIZE, PROT_MAX(prot) | PROT_READ, flags, -1, 0);
+	ASSERT_FALSE(IS_ERR_VALUE(new_ptr));
+
+	ret = mremap(old_ptr, MMAP_SIZE_REDUCED, MMAP_SIZE,
+		     MREMAP_MAYMOVE | MREMAP_FIXED, new_ptr);
+	ASSERT_FALSE(IS_ERR_VALUE(ret));
+	EXPECT_EQ(0, probe_mem_range(new_ptr, MMAP_SIZE,
+				     PROBE_MODE_TOUCH | PROBE_MODE_VERIFY));
+
+	retval = munmap(ret, MMAP_SIZE);
+	ASSERT_EQ(retval, 0);
+
+	/* remapping to new_ptr having increased permissions from old_ptr */
+	flags = MAP_PRIVATE | MAP_ANONYMOUS;
+	prot = PROT_READ | PROT_WRITE;
+
+	old_ptr = mmap(NULL, MMAP_SIZE_REDUCED, PROT_MAX(prot) | PROT_READ,
+		       flags, -1, 0);
+	ASSERT_FALSE(IS_ERR_VALUE(old_ptr));
+
+	new_ptr = mmap(NULL, MMAP_SIZE, PROT_MAX(prot | PROT_EXEC) | prot,
+		       flags, -1, 0);
+	ASSERT_FALSE(IS_ERR_VALUE(new_ptr));
+
+	ret = mremap(old_ptr, MMAP_SIZE_REDUCED, MMAP_SIZE,
+		     MREMAP_MAYMOVE | MREMAP_FIXED, new_ptr);
+	EXPECT_EQ((unsigned long)ret, (unsigned long)-EINVAL);
+
+	retval = munmap(new_ptr, MMAP_SIZE);
+	ASSERT_EQ(retval, 0);
+
+	retval = munmap(old_ptr, MMAP_SIZE_REDUCED);
+	ASSERT_EQ(retval, 0);
+}
+
 int main(int argc __maybe_unused, char **argv __maybe_unused, char **envp __maybe_unused,
 	 struct morello_auxv *auxv)
 {
@@ -422,5 +564,6 @@ int main(int argc __maybe_unused, char **argv __maybe_unused, char **envp __mayb
 	test_range_check();
 	test_check_mmap_reservation();
 	test_check_mremap_reservation();
+	test_permissions();
 	return 0;
 }
