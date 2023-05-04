@@ -1014,6 +1014,20 @@ static int vma_expandable(struct vm_area_struct *vma, unsigned long delta)
 	return 1;
 }
 
+static int check_mremap_user_ptr_perms(user_uintptr_t user_ptr, user_uintptr_t new_user_ptr,
+				unsigned long flags)
+{
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	if (!reserv_is_supported(current->mm) || !(flags & MREMAP_FIXED))
+		return 0;
+
+	if ((cheri_perms_get(user_ptr) | cheri_perms_get(new_user_ptr))
+	    != cheri_perms_get(user_ptr))
+		return -EINVAL;
+#endif
+	return 0;
+}
+
 /*
  * Expand (or shrink) an existing mapping, potentially moving it at the
  * same time (controlled by the MREMAP_MAYMOVE flag and available VM space)
@@ -1092,6 +1106,9 @@ SYSCALL_DEFINE5(__retptr__(mremap), user_uintptr_t, user_ptr, unsigned long, old
 		goto out;
 	}
 	ret = check_pcuabi_map_ptr_arg(new_user_ptr, new_len, flags & MREMAP_FIXED, true);
+	if (ret)
+		goto out;
+	ret = check_mremap_user_ptr_perms(user_ptr, new_user_ptr, flags);
 	if (ret)
 		goto out;
 
