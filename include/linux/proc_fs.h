@@ -36,7 +36,7 @@ struct proc_ops {
 	loff_t	(*proc_lseek)(struct file *, loff_t, int);
 	int	(*proc_release)(struct inode *, struct file *);
 	__poll_t (*proc_poll)(struct file *, struct poll_table_struct *);
-	long	(*proc_ioctl)(struct file *, unsigned int, unsigned long);
+	long	(*proc_ioctl)(struct file *, unsigned int, user_uintptr_t);
 #ifdef CONFIG_COMPAT
 	long	(*proc_compat_ioctl)(struct file *, unsigned int, unsigned long);
 #endif
