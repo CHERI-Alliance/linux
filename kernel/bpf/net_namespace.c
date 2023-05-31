@@ -257,9 +257,9 @@ static int __netns_bpf_prog_query(const union bpf_attr *attr,
 	if (run_array)
 		prog_cnt = bpf_prog_array_length(run_array);
 
-	if (copy_to_user(&uattr->query.attach_flags, &flags, sizeof(flags)))
+	if (bpf_put_uattr(flags, uattr, query.attach_flags))
 		return -EFAULT;
-	if (copy_to_user(&uattr->query.prog_cnt, &prog_cnt, sizeof(prog_cnt)))
+	if (bpf_put_uattr(prog_cnt, uattr, query.prog_cnt))
 		return -EFAULT;
 	if (!attr->query.prog_cnt || !prog_ids || !prog_cnt)
 		return 0;

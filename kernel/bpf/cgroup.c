@@ -1062,9 +1062,9 @@ static int __cgroup_bpf_query(struct cgroup *cgrp, const union bpf_attr *attr,
 
 	/* always output uattr->query.attach_flags as 0 during effective query */
 	flags = effective_query ? 0 : flags;
-	if (copy_to_user(&uattr->query.attach_flags, &flags, sizeof(flags)))
+	if (bpf_put_uattr(flags, uattr, query.attach_flags))
 		return -EFAULT;
-	if (copy_to_user(&uattr->query.prog_cnt, &total_cnt, sizeof(total_cnt)))
+	if (bpf_put_uattr(total_cnt, uattr, query.prog_cnt))
 		return -EFAULT;
 	if (attr->query.prog_cnt == 0 || !prog_ids || !total_cnt)
 		/* return early if user requested only program count + flags */

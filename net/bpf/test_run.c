@@ -488,11 +488,11 @@ static int bpf_test_finish(const union bpf_attr *kattr,
 		}
 	}
 
-	if (copy_to_user(&uattr->test.data_size_out, &size, sizeof(size)))
+	if (bpf_put_uattr(size, uattr, test.data_size_out))
 		goto out;
-	if (copy_to_user(&uattr->test.retval, &retval, sizeof(retval)))
+	if (bpf_put_uattr(retval, uattr, test.retval))
 		goto out;
-	if (copy_to_user(&uattr->test.duration, &duration, sizeof(duration)))
+	if (bpf_put_uattr(duration, uattr, test.duration))
 		goto out;
 	if (err != -ENOSPC)
 		err = 0;
@@ -708,7 +708,7 @@ int bpf_prog_test_run_tracing(struct bpf_prog *prog,
 	}
 
 	retval = ((u32)side_effect << 16) | ret;
-	if (copy_to_user(&uattr->test.retval, &retval, sizeof(retval)))
+	if (bpf_put_uattr(retval, uattr, test.retval))
 		goto out;
 
 	err = 0;
@@ -789,8 +789,7 @@ int bpf_prog_test_run_raw_tp(struct bpf_prog *prog,
 	}
 	put_cpu();
 
-	if (!err &&
-	    copy_to_user(&uattr->test.retval, &info.retval, sizeof(u32)))
+	if (!err && bpf_put_uattr(info.retval, uattr, test.retval))
 		err = -EFAULT;
 
 	kfree(info.ctx);
@@ -846,7 +845,7 @@ static int bpf_ctx_finish(const union bpf_attr *kattr,
 
 	if (copy_to_user(data_out, data, copy_size))
 		goto out;
-	if (copy_to_user(&uattr->test.ctx_size_out, &size, sizeof(size)))
+	if (bpf_put_uattr(size, uattr, test.ctx_size_out))
 		goto out;
 	if (err != -ENOSPC)
 		err = 0;
@@ -1523,7 +1522,7 @@ int bpf_prog_test_run_syscall(struct bpf_prog *prog,
 	retval = bpf_prog_run_pin_on_cpu(prog, ctx);
 	rcu_read_unlock_trace();
 
-	if (copy_to_user(&uattr->test.retval, &retval, sizeof(u32))) {
+	if (bpf_put_uattr(retval, uattr, test.retval)) {
 		err = -EFAULT;
 		goto out;
 	}
