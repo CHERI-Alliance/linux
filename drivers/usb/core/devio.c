@@ -1593,7 +1593,6 @@ find_memory_area(struct usb_dev_state *ps, const struct usbdevfs_urb *uurb)
 {
 	struct usb_memory *usbm = NULL, *iter;
 	unsigned long flags;
-	/* TODO [PCuABI] - capability checks for uaccess */
 	unsigned long uurb_start = user_ptr_addr(uurb->buffer);
 
 	spin_lock_irqsave(&ps->lock, flags);
@@ -1785,6 +1784,13 @@ static int proc_do_submiturb(struct usb_dev_state *ps, struct usbdevfs_urb *uurb
 	if (IS_ERR(as->usbm)) {
 		ret = PTR_ERR(as->usbm);
 		as->usbm = NULL;
+		goto error;
+	}
+
+	if (as->usbm && (
+	    (is_in && !check_user_ptr_write(uurb->buffer, uurb->buffer_length)) ||
+	    (!is_in && !check_user_ptr_read(uurb->buffer, uurb->buffer_length)))) {
+		ret = -EFAULT;
 		goto error;
 	}
 
