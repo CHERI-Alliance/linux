@@ -268,7 +268,7 @@ int io_uring_cmd(struct io_kiocb *req, unsigned int issue_flags)
 	return ret;
 }
 
-int io_uring_cmd_import_fixed(u64 ubuf, unsigned long len, int rw,
+int io_uring_cmd_import_fixed(void __user *ubuf, unsigned long len, int rw,
 			      struct iov_iter *iter, void *ioucmd)
 {
 	struct io_kiocb *req = cmd_to_io_kiocb(ioucmd);

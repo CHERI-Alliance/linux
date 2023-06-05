@@ -976,7 +976,13 @@ static int io_sqe_buffer_register(struct io_ring_ctx *ctx, struct iovec *iov,
 		return 0;
 
 	ret = -ENOMEM;
-	/* TODO [PCuABI] - capability checks for uaccess */
+
+	/*
+	 * When working in PCuABI, explicit user pointer checking is not needed
+	 * during registration as we are already doing it in io_import_fixed.
+	 * Specifically we employ explicit checks before the user data provided
+	 * in the pre-registered buffers is accessed.
+	 */
 	pages = io_pin_pages(user_ptr_addr(iov->iov_base), iov->iov_len,
 				&nr_pages);
 	if (IS_ERR(pages)) {
@@ -1111,8 +1117,9 @@ int io_sqe_buffers_register(struct io_ring_ctx *ctx, void __user *arg,
 
 int io_import_fixed(int ddir, struct iov_iter *iter,
 			   struct io_mapped_ubuf *imu,
-			   u64 buf_addr, size_t len)
+			   void __user *ubuf, size_t len)
 {
+	u64 buf_addr = user_ptr_addr(ubuf);
 	u64 buf_end;
 	size_t offset;
 
@@ -1122,6 +1129,9 @@ int io_import_fixed(int ddir, struct iov_iter *iter,
 		return -EFAULT;
 	/* not inside the mapped region */
 	if (unlikely(buf_addr < imu->ubuf || buf_end > imu->ubuf_end))
+		return -EFAULT;
+	if (unlikely((ddir == ITER_SOURCE && !check_user_ptr_read(ubuf, len)) ||
+		     (ddir == ITER_DEST && !check_user_ptr_write(ubuf, len))))
 		return -EFAULT;
 
 	/*
