@@ -231,8 +231,6 @@ int get_futex_key(u32 __user *uaddr, unsigned int flags, union futex_key *key,
 
 	fshared = flags & FLAGS_SHARED;
 
-	/* TODO [PCuABI] - capability checks for uaccess */
-
 	/*
 	 * The futex address must be "naturally" aligned.
 	 */
@@ -426,7 +424,14 @@ int fault_in_user_writeable(u32 __user *uaddr)
 	struct mm_struct *mm = current->mm;
 	int ret;
 
-	/* TODO [PCuABI] - capability checks for uaccess */
+	/*
+	 * When working in PCuABI, we may have reached this point because an
+	 * atomic load/store failed as a consequence of a capability fault
+	 * and not a page fault. To cover this case we should employ an explicit
+	 * check, so that we can fail and return early.
+	 */
+	if (!check_user_ptr_rw(uaddr, sizeof(u32)))
+		return -EFAULT;
 
 	mmap_read_lock(mm);
 	ret = fixup_user_fault(mm, user_ptr_addr(uaddr),
