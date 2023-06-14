@@ -106,7 +106,7 @@ struct kioctx {
 
 	struct percpu_ref	reqs;
 
-	unsigned long		user_id;
+	aio_context_t		user_id;
 
 	struct __percpu kioctx_cpu *cpu;
 
@@ -320,6 +320,14 @@ static u32 __user *aio_key_uptr(struct kioctx *ctx,
 	       &user_iocb->aio_key;
 }
 
+static inline bool aio_ctx_id_is_same(struct kioctx *ctx,
+				      aio_context_t ctx_id)
+{
+	if (aio_in_compat64(ctx))
+		return ctx->user_id == ctx_id;
+	return user_ptr_is_same(ctx->user_id, ctx_id);
+}
+
 static int copy_io_events_to_user(struct kioctx *ctx,
 				  struct io_event __user *event_array,
 				  long offset,
@@ -500,7 +508,9 @@ static int aio_ring_mremap(struct vm_area_struct *vma)
 		ctx = rcu_dereference(table->table[i]);
 		if (ctx && ctx->aio_ring_file == file) {
 			if (!atomic_read(&ctx->dead)) {
-				ctx->user_id = ctx->mmap_base = vma->vm_start;
+				ctx->mmap_base = vma->vm_start;
+				/* TODO [PCuABI] - derive proper capability */
+				ctx->user_id = uaddr_to_user_ptr_safe(ctx->mmap_base);
 				res = 0;
 			}
 			break;
@@ -705,7 +715,8 @@ static int aio_setup_ring(struct kioctx *ctx, unsigned int nr_events)
 
 	pr_debug("mmap address: 0x%08lx\n", ctx->mmap_base);
 
-	ctx->user_id = ctx->mmap_base;
+	/* TODO [PCuABI] - derive proper capability */
+	ctx->user_id = uaddr_to_user_ptr_safe(ctx->mmap_base);
 	ctx->nr_events = nr_events; /* trusted copy */
 
 	ring = folio_address(ctx->ring_folios[0]);
@@ -966,7 +977,7 @@ static struct kioctx *ioctx_alloc(unsigned nr_events, bool compat)
 	mutex_unlock(&ctx->ring_lock);
 
 	pr_debug("allocated ioctx %p[%ld]: mm=%p mask=0x%x\n",
-		 ctx, ctx->user_id, mm, ctx->nr_events);
+		 ctx, user_ptr_addr(ctx->user_id), mm, ctx->nr_events);
 	return ctx;
 
 err_cleanup:
@@ -1218,9 +1229,9 @@ static inline struct aio_kiocb *aio_get_req(struct kioctx *ctx)
 	return req;
 }
 
-static struct kioctx *lookup_ioctx(unsigned long ctx_id)
+static struct kioctx *lookup_ioctx(aio_context_t ctx_id)
 {
-	struct aio_ring __user *ring  = (void __user *)ctx_id;
+	struct aio_ring __user *ring = ctx_id;
 	struct mm_struct *mm = current->mm;
 	struct kioctx *ctx, *ret = NULL;
 	struct kioctx_table *table;
@@ -1237,7 +1248,7 @@ static struct kioctx *lookup_ioctx(unsigned long ctx_id)
 
 	id = array_index_nospec(id, table->nr);
 	ctx = rcu_dereference(table->table[id]);
-	if (ctx && ctx->user_id == ctx_id) {
+	if (ctx && aio_ctx_id_is_same(ctx, ctx_id)) {
 		if (percpu_ref_tryget_live(&ctx->users))
 			ret = ctx;
 	}
@@ -1509,27 +1520,32 @@ static long read_events(struct kioctx *ctx, long min_nr, long nr,
  *	pointer is passed for ctxp.  Will fail with -ENOSYS if not
  *	implemented.
  */
-SYSCALL_DEFINE2(io_setup, unsigned, nr_events, aio_context_t __user *, ctxp)
+SYSCALL_DEFINE2(io_setup, unsigned, nr_events,
+#ifdef CONFIG_CHERI_PURECAP_UABI
+		aio_context_t * __capability, ctxp)
+#else
+		aio_context_t __user *, ctxp)
+#endif
 {
 	struct kioctx *ioctx = NULL;
-	unsigned long ctx;
+	aio_context_t ctx;
 	long ret;
 
-	ret = get_user(ctx, ctxp);
+	ret = get_user_ptr(ctx, ctxp);
 	if (unlikely(ret))
 		goto out;
 
 	ret = -EINVAL;
 	if (unlikely(ctx || nr_events == 0)) {
 		pr_debug("EINVAL: ctx %lu nr_events %u\n",
-		         ctx, nr_events);
+			 user_ptr_addr(ctx), nr_events);
 		goto out;
 	}
 
 	ioctx = ioctx_alloc(nr_events, false);
 	ret = PTR_ERR(ioctx);
 	if (!IS_ERR(ioctx)) {
-		ret = put_user(ioctx->user_id, ctxp);
+		ret = put_user_ptr(ioctx->user_id, ctxp);
 		if (ret)
 			kill_ioctx(current->mm, ioctx, NULL);
 		percpu_ref_put(&ioctx->users);
@@ -1543,7 +1559,7 @@ out:
 COMPAT_SYSCALL_DEFINE2(io_setup, unsigned, nr_events, compat_aio_context_t __user *, ctxp)
 {
 	struct kioctx *ioctx = NULL;
-	unsigned long ctx;
+	compat_aio_context_t ctx;
 	long ret;
 
 	ret = get_user(ctx, ctxp);
@@ -1560,8 +1576,7 @@ COMPAT_SYSCALL_DEFINE2(io_setup, unsigned, nr_events, compat_aio_context_t __use
 	ioctx = ioctx_alloc(nr_events, true);
 	ret = PTR_ERR(ioctx);
 	if (!IS_ERR(ioctx)) {
-		/* truncating is ok because it's a user address */
-		ret = put_user((compat_aio_context_t)ioctx->user_id, ctxp);
+		ret = put_user(ptr_to_compat(ioctx->user_id), ctxp);
 		if (ret)
 			kill_ioctx(current->mm, ioctx, NULL);
 		percpu_ref_put(&ioctx->users);
@@ -2290,7 +2305,7 @@ COMPAT_SYSCALL_DEFINE3(io_submit, compat_aio_context_t, ctx_id,
 	if (unlikely(nr < 0))
 		return -EINVAL;
 
-	ctx = lookup_ioctx(ctx_id);
+	ctx = lookup_ioctx(compat_ptr(ctx_id));
 	if (unlikely(!ctx)) {
 		pr_debug("EINVAL: invalid context id\n");
 		return -EINVAL;
@@ -2511,7 +2526,7 @@ SYSCALL_DEFINE6(io_pgetevents_time32,
 
 #if defined(CONFIG_COMPAT_32BIT_TIME)
 
-SYSCALL_DEFINE5(io_getevents_time32, __u32, ctx_id,
+SYSCALL_DEFINE5(io_getevents_time32, aio_context_t, ctx_id,
 		__s32, min_nr,
 		__s32, nr,
 		struct io_event __user *, events,
@@ -2563,7 +2578,7 @@ COMPAT_SYSCALL_DEFINE6(io_pgetevents,
 	if (ret)
 		return ret;
 
-	ret = do_io_getevents(ctx_id, min_nr, nr, events, timeout ? &t : NULL);
+	ret = do_io_getevents(compat_ptr(ctx_id), min_nr, nr, events, timeout ? &t : NULL);
 
 	interrupted = signal_pending(current);
 	restore_saved_sigmask_unless(interrupted);
@@ -2598,7 +2613,7 @@ COMPAT_SYSCALL_DEFINE6(io_pgetevents_time64,
 	if (ret)
 		return ret;
 
-	ret = do_io_getevents(ctx_id, min_nr, nr, events, timeout ? &t : NULL);
+	ret = do_io_getevents(compat_ptr(ctx_id), min_nr, nr, events, timeout ? &t : NULL);
 
 	interrupted = signal_pending(current);
 	restore_saved_sigmask_unless(interrupted);

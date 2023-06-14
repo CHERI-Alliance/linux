@@ -56,7 +56,6 @@ typedef s64 compat_long_t;
 typedef u64 compat_ulong_t;
 typedef u64 compat_uptr_t;
 typedef u64 compat_caddr_t;
-typedef u64 compat_aio_context_t;
 typedef u64 compat_old_sigset_t;
 #else
 typedef u32 compat_size_t;
@@ -68,9 +67,10 @@ typedef s32 compat_long_t;
 typedef u32 compat_ulong_t;
 typedef u32 compat_uptr_t;
 typedef u32 compat_caddr_t;
-typedef u32 compat_aio_context_t;
 typedef u32 compat_old_sigset_t;
 #endif
+
+typedef compat_uptr_t compat_aio_context_t;
 
 #ifndef __compat_uid_t
 typedef u32 __compat_uid_t;
