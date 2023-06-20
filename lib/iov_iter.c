@@ -1189,7 +1189,8 @@ static __noclone int copy_iovec_from_user(struct iovec *iov,
 		ssize_t len;
 
 		unsafe_get_user(len, &uiov->iov_len, uaccess_end);
-		unsafe_get_user(buf, &uiov->iov_base, uaccess_end);
+		if (unlikely(__get_user_ptr(buf, &uiov->iov_base)))
+			goto uaccess_end;
 
 		/* check for size_t not fitting in ssize_t .. */
 		if (unlikely(len < 0)) {
