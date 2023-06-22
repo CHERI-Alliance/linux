@@ -243,7 +243,7 @@ SYSCALL_DEFINE3(mincore, unsigned long, start, size_t, len,
 		return -EINVAL;
 
 	/* ..and we need to be passed a valid user-space range */
-	if (!access_ok((void __user *) start, len))
+	if (!access_ok(as_user_ptr(start), len))
 		return -ENOMEM;
 
 	/* This also avoids any overflows on PAGE_ALIGN */
