@@ -3477,7 +3477,7 @@ static int gup_fast_fallback(unsigned long start, unsigned long nr_pages,
 		return -EOVERFLOW;
 	if (end > TASK_SIZE_MAX)
 		return -EFAULT;
-	if (unlikely(!access_ok((void __user *)start, len)))
+	if (unlikely(!access_ok(as_user_ptr(start), len)))
 		return -EFAULT;
 
 	nr_pinned = gup_fast(start, end, gup_flags, pages);
