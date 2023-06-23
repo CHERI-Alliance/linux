@@ -3465,7 +3465,8 @@ extern int do_vmi_munmap(struct vma_iterator *vmi, struct mm_struct *mm,
 			 bool unlock);
 extern int do_munmap(struct mm_struct *, unsigned long, size_t,
 		     struct list_head *uf);
-extern int do_madvise(struct mm_struct *mm, unsigned long start, size_t len_in, int behavior);
+extern int do_madvise(struct mm_struct *mm, user_uintptr_t user_ptr, size_t len_in,
+		      int behavior, bool cap_check_skip);
 
 #ifdef CONFIG_MMU
 extern int do_vma_munmap(struct vma_iterator *vmi, struct vm_area_struct *vma,
