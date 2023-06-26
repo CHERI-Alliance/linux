@@ -36,8 +36,10 @@ static inline int __access_ok(const void __user *ptr, unsigned long size);
  * This is equivalent to the following test:
  * (u65)addr + (u65)size <= (u65)TASK_SIZE_MAX
  */
-static inline int access_ok(const void __user *addr, unsigned long size)
+static inline int access_ok(const void __user *ptr, unsigned long size)
 {
+	unsigned long addr = user_ptr_addr(ptr);
+
 	/*
 	 * Asynchronous I/O running in a kernel thread does not have the
 	 * TIF_TAGGED_ADDR flag of the process owning the mm, so always untag
@@ -47,7 +49,7 @@ static inline int access_ok(const void __user *addr, unsigned long size)
 	    (current->flags & PF_KTHREAD || test_thread_flag(TIF_TAGGED_ADDR)))
 		addr = untagged_addr(addr);
 
-	return likely(__access_ok(addr, size));
+	return likely(__access_ok(as_user_ptr(addr), size));
 }
 #define access_ok access_ok
 
