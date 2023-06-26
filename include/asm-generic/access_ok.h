@@ -31,7 +31,7 @@
 static inline int __access_ok(const void __user *ptr, unsigned long size)
 {
 	unsigned long limit = TASK_SIZE_MAX;
-	unsigned long addr = (unsigned long)ptr;
+	unsigned long addr = user_ptr_addr(ptr);
 
 	if (IS_ENABLED(CONFIG_ALTERNATE_USER_ADDRESS_SPACE) ||
 	    !IS_ENABLED(CONFIG_MMU))
