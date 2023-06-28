@@ -183,6 +183,36 @@ SYSCALL_DEFINE6(futex, u32 __user *, uaddr, int, op, u32, val,
 	return do_futex(uaddr, op, val, tp, uaddr2, (user_uintptr_t)utime, val3);
 }
 
+struct compat_futex_waitv {
+	__u64 val;
+	__u64 uaddr;
+	__u32 flags;
+	__u32 __reserved;
+};
+
+static int copy_futex_waitv_from_user(struct futex_waitv *aux,
+				      const struct futex_waitv __user *uwaitv,
+				      unsigned int i)
+{
+	if (IS_ENABLED(CONFIG_COMPAT64) && in_compat_syscall()) {
+		const struct compat_futex_waitv __user *compat_uwaitv =
+			(const struct compat_futex_waitv __user *)uwaitv;
+		struct compat_futex_waitv compat_aux;
+
+		if (copy_from_user(&compat_aux, &compat_uwaitv[i], sizeof(compat_aux)))
+			return -EFAULT;
+
+		aux->val = compat_aux.val;
+		aux->uaddr = (__kernel_uintptr_t)compat_ptr(compat_aux.uaddr);
+		aux->flags = compat_aux.flags;
+		aux->__reserved = compat_aux.__reserved;
+
+		return 0;
+	}
+
+	return copy_from_user_with_ptr(aux, &uwaitv[i], sizeof(*aux));
+}
+
 /**
  * futex_parse_waitv - Parse a waitv array from userspace
  * @futexv:	Kernel side list of waiters to be filled
@@ -204,7 +234,7 @@ int futex_parse_waitv(struct futex_vector *futexv,
 	for (i = 0; i < nr_futexes; i++) {
 		unsigned int flags;
 
-		if (copy_from_user(&aux, &uwaitv[i], sizeof(aux)))
+		if (copy_futex_waitv_from_user(&aux, uwaitv, i))
 			return -EFAULT;
 
 		if ((aux.flags & ~FUTEX2_VALID_MASK) || aux.__reserved)
@@ -437,8 +467,8 @@ SYSCALL_DEFINE4(futex_requeue,
 
 	cmpval = futexes[0].w.val;
 
-	return futex_requeue(u64_to_user_ptr(futexes[0].w.uaddr), futexes[0].w.flags,
-			     u64_to_user_ptr(futexes[1].w.uaddr), futexes[1].w.flags,
+	return futex_requeue((u32 __user *)futexes[0].w.uaddr, futexes[0].w.flags,
+			     (u32 __user *)futexes[1].w.uaddr, futexes[1].w.flags,
 			     nr_wake, nr_requeue, &cmpval, 0);
 }
 

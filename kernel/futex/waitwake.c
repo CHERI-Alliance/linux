@@ -437,7 +437,7 @@ retry:
 		if (!(vs[i].w.flags & FLAGS_SHARED) && retry)
 			continue;
 
-		ret = get_futex_key(u64_to_user_ptr(vs[i].w.uaddr),
+		ret = get_futex_key((u32 __user *)vs[i].w.uaddr,
 				    vs[i].w.flags,
 				    &vs[i].q.key, FUTEX_READ);
 
@@ -448,7 +448,7 @@ retry:
 	set_current_state(TASK_INTERRUPTIBLE|TASK_FREEZABLE);
 
 	for (i = 0; i < count; i++) {
-		u32 __user *uaddr = uaddr_to_user_ptr(vs[i].w.uaddr);
+		u32 __user *uaddr = (u32 __user *)vs[i].w.uaddr;
 		struct futex_q *q = &vs[i].q;
 		u32 val = vs[i].w.val;
 
