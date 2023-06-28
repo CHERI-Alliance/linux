@@ -14,6 +14,7 @@
 #include <linux/file.h>
 #include <linux/syscalls.h>
 #include <linux/sched.h>
+#include <linux/mm_reserv.h>
 
 /*
  * MS_SYNC syncs the entire file - including mappings.
@@ -29,15 +30,14 @@
  * So by _not_ starting I/O in MS_ASYNC we provide complete flexibility to
  * applications.
  */
-SYSCALL_DEFINE3(msync, unsigned long, start, size_t, len, int, flags)
+SYSCALL_DEFINE3(msync, user_uintptr_t, user_ptr, size_t, len, int, flags)
 {
 	unsigned long end;
 	struct mm_struct *mm = current->mm;
 	struct vm_area_struct *vma;
 	int unmapped_error = 0;
 	int error = -EINVAL;
-
-	start = untagged_addr(start);
+	unsigned long start = untagged_addr((ptraddr_t)user_ptr);
 
 	if (flags & ~(MS_ASYNC | MS_INVALIDATE | MS_SYNC))
 		goto out;
@@ -45,6 +45,12 @@ SYSCALL_DEFINE3(msync, unsigned long, start, size_t, len, int, flags)
 		goto out;
 	if ((flags & MS_ASYNC) && (flags & MS_SYNC))
 		goto out;
+	if (reserv_is_supported(mm) && !check_user_ptr_owning(user_ptr, len))
+		goto out;
+	if (!reserv_cap_within_reserv(user_ptr, false)) {
+		error = -ERESERVATION;
+		goto out;
+	}
 	error = -ENOMEM;
 	len = (len + ~PAGE_MASK) & PAGE_MASK;
 	end = start + len;
