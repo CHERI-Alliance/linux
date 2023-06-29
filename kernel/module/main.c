@@ -1707,11 +1707,13 @@ static int elf_validity_cache_copy(struct load_info *info, int flags)
 		       info->hdr->e_type, ET_REL);
 		goto no_exec;
 	}
+#ifndef ARCH_MODULE_SKIP_ELF_CHECK
 	if (!elf_check_arch(info->hdr)) {
 		pr_err("Invalid architecture in ELF header: %u\n",
 		       info->hdr->e_machine);
 		goto no_exec;
 	}
+#endif
 	if (!module_elf_check_arch(info->hdr)) {
 		pr_err("Invalid module architecture in ELF header: %u\n",
 		       info->hdr->e_machine);
