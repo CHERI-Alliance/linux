@@ -355,6 +355,61 @@ TEST(test_check_mmap_reservation)
 	ASSERT_EQ(retval, 0);
 }
 
+/* test to verify mremap() reservation semantics */
+TEST(test_check_mremap_reservation)
+{
+	void *ptr, *new_ptr;
+	int retval;
+	int prot = PROT_READ | PROT_WRITE;
+	int flags = MAP_PRIVATE | MAP_ANONYMOUS;
+
+	/* expanding a mapping with MREMAP_MAYMOVE flag specified */
+	ptr = mmap(NULL, MMAP_SIZE_REDUCED, prot, flags, -1, 0);
+	ASSERT_FALSE(IS_ERR_VALUE(ptr));
+
+	new_ptr = mremap(ptr, MMAP_SIZE_REDUCED, MMAP_SIZE, MREMAP_MAYMOVE, NULL);
+	ASSERT_FALSE(IS_ERR_VALUE(new_ptr));
+	ASSERT_NE(ptr, new_ptr);
+	EXPECT_EQ(0, probe_mem_range(new_ptr, MMAP_SIZE,
+				     PROBE_MODE_TOUCH | PROBE_MODE_VERIFY));
+
+	retval = munmap(new_ptr, MMAP_SIZE);
+	ASSERT_EQ(retval, 0);
+
+	/* expanding a mapping without MREMAP_MAYMOVE flag triggers an ENOMEM error */
+	ptr = mmap(NULL, MMAP_SIZE_REDUCED, prot, flags, -1, 0);
+	ASSERT_FALSE(IS_ERR_VALUE(ptr));
+
+	new_ptr = mremap(ptr, MMAP_SIZE_REDUCED, MMAP_SIZE, 0, 0);
+	EXPECT_EQ((unsigned long)new_ptr, (unsigned long)-ENOMEM);
+
+	retval = munmap(ptr, MMAP_SIZE_REDUCED);
+	ASSERT_EQ(retval, 0);
+
+	/* attempt to resize a mapping range greater than what the capability owns */
+	ptr = mmap(NULL, MMAP_SIZE_REDUCED, prot, flags, -1, 0);
+	ASSERT_FALSE(IS_ERR_VALUE(ptr));
+
+	new_ptr = mremap(ptr, MMAP_SIZE, MMAP_SIZE, MREMAP_MAYMOVE, 0);
+	EXPECT_EQ((unsigned long)new_ptr, (unsigned long)-EINVAL);
+
+	retval = munmap(ptr, MMAP_SIZE_REDUCED);
+	ASSERT_EQ(retval, 0);
+
+	/* attempt to grow mappings in-place */
+	ptr = mmap(NULL, MMAP_SIZE, prot, flags, -1, 0);
+	ASSERT_FALSE(IS_ERR_VALUE(ptr));
+
+	retval = munmap(ptr + MMAP_SIZE_REDUCED, MMAP_SIZE_REDUCED);
+	ASSERT_EQ(retval, 0);
+
+	new_ptr = mremap(ptr, MMAP_SIZE_REDUCED, MMAP_SIZE, 0, 0);
+	ASSERT_FALSE(IS_ERR_VALUE(new_ptr));
+
+	retval = munmap(new_ptr, MMAP_SIZE);
+	EXPECT_EQ(retval, 0);
+}
+
 int main(int argc __maybe_unused, char **argv __maybe_unused, char **envp __maybe_unused,
 	 struct morello_auxv *auxv)
 {
@@ -366,5 +421,6 @@ int main(int argc __maybe_unused, char **argv __maybe_unused, char **envp __mayb
 	test_validity_tag_check();
 	test_range_check();
 	test_check_mmap_reservation();
+	test_check_mremap_reservation();
 	return 0;
 }
