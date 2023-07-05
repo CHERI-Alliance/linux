@@ -552,6 +552,15 @@ TEST(test_permissions)
 	ASSERT_EQ(retval, 0);
 }
 
+/* test to verify that using brk() results syscall failure */
+TEST(test_brk_check)
+{
+	int retval;
+
+	retval = brk(NULL);
+	EXPECT_EQ(retval, -ENOSYS);
+}
+
 int main(int argc __maybe_unused, char **argv __maybe_unused, char **envp __maybe_unused,
 	 struct morello_auxv *auxv)
 {
@@ -565,5 +574,6 @@ int main(int argc __maybe_unused, char **argv __maybe_unused, char **envp __mayb
 	test_check_mmap_reservation();
 	test_check_mremap_reservation();
 	test_permissions();
+	test_brk_check();
 	return 0;
 }
