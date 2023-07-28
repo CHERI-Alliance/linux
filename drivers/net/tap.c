@@ -1006,7 +1006,7 @@ static int set_offload(struct tap_queue *q, unsigned long arg)
  * provide compatibility with generic tun/tap interface
  */
 static long tap_ioctl(struct file *file, unsigned int cmd,
-		      unsigned long arg)
+		      user_uintptr_t arg)
 {
 	struct tap_queue *q = file->private_data;
 	struct tap_dev *tap;
@@ -1155,6 +1155,17 @@ static long tap_ioctl(struct file *file, unsigned int cmd,
 	}
 }
 
+#ifdef CONFIG_COMPAT
+static long compat_tap_ioctl(struct file *file, unsigned int cmd,
+			     unsigned long arg)
+{
+	user_uintptr_t cmd_arg = (cmd != TUNSETOFFLOAD) ?
+				 (user_uintptr_t)compat_ptr(arg) :
+				 (user_uintptr_t)arg;
+	return tap_ioctl(file, cmd, cmd_arg);
+}
+#endif
+
 static const struct file_operations tap_fops = {
 	.owner		= THIS_MODULE,
 	.open		= tap_open,
@@ -1164,7 +1175,9 @@ static const struct file_operations tap_fops = {
 	.poll		= tap_poll,
 	.llseek		= no_llseek,
 	.unlocked_ioctl	= tap_ioctl,
-	.compat_ioctl	= compat_ptr_ioctl,
+#ifdef CONFIG_COMPAT
+	.compat_ioctl	= compat_tap_ioctl,
+#endif
 };
 
 static int tap_get_user_xdp(struct tap_queue *q, struct xdp_buff *xdp)
