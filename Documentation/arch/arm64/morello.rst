@@ -552,6 +552,11 @@ Note: modifying the saved Morello context
     to modify the ISA of the interrupted context by writing to the C64
     bit of the saved PSTATE in ``sigcontext``.
 
+  * RB-sealed capabilities. The saved PCC should not be RB-sealed; unlike
+    capability-based branch instructions, exception return uses the target
+    capability as-is, without automatic unsealing. Explicit unsealing is
+    therefore required to avoid a capability sealed fault.
+
 C64 ISA support
 ---------------
 
