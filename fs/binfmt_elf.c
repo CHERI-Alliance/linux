@@ -134,23 +134,20 @@ static int padzero(unsigned long address)
 }
 
 /* Let's use some macros to make this stack manipulation a little clearer */
-/*
- * TODO [PCuABI]: The sp pointer can ideally be a capability pointer so that
- * the macro defined here need not create capability.
- */
 #ifdef CONFIG_STACK_GROWSUP
-#define STACK_ADD(sp, items) ((elf_stack_item_t __user *)uaddr_to_user_ptr_safe(sp) + (items))
+#define STACK_ADD(sp, items) ((sp) + (items) * sizeof(elf_stack_item_t))
 #define STACK_ROUND(sp, items) \
-	((15 + user_ptr_addr((sp) + (items))) &~ 15UL)
+	USER_PTR_ALIGN((sp) + (items) * sizeof(elf_stack_item_t), 16)
 #define STACK_ALLOC(sp, len) ({ \
-	elf_addr_t __user *old_sp = uaddr_to_user_ptr_safe(sp); sp += len; \
+	void __user *old_sp = sp; sp += len; \
 	old_sp; })
 #else
-#define STACK_ADD(sp, items) ((elf_stack_item_t __user *)uaddr_to_user_ptr_safe(sp) - (items))
+#define STACK_ADD(sp, items) ((sp) - (items) * sizeof(elf_stack_item_t))
 #define STACK_ROUND(sp, items) \
-	(user_ptr_addr((sp) - (items)) &~ 15UL)
-#define STACK_ALLOC(sp, len) ({ sp -= len ; (elf_addr_t __user *)uaddr_to_user_ptr_safe(sp); })
+	USER_PTR_ALIGN_DOWN((sp) - (items) * sizeof(elf_stack_item_t), 16)
+#define STACK_ALLOC(sp, len) (sp -= len)
 #endif
+static_assert(sizeof(elf_stack_item_t) <= 16);
 
 #ifndef ELF_BASE_PLATFORM
 /*
@@ -179,10 +176,11 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	unsigned long p = bprm->p;
 	int argc = bprm->argc;
 	int envc = bprm->envc;
-	elf_stack_item_t __user *sp;
-	elf_addr_t __user *u_platform;
-	elf_addr_t __user *u_base_platform;
-	elf_addr_t __user *u_rand_bytes;
+	void __user *sp;
+	elf_stack_item_t __user *stack_item;
+	char __user *u_platform;
+	char __user *u_base_platform;
+	char __user *u_rand_bytes;
 	const char *k_platform = ELF_PLATFORM;
 	const char *k_base_platform = ELF_BASE_PLATFORM;
 	unsigned char k_rand_bytes[16];
@@ -192,6 +190,7 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	int ei_index;
 	const struct cred *cred = current_cred();
 	struct vm_area_struct *vma;
+	char __user *ustr;
 #if defined(CONFIG_CHERI_PURECAP_UABI) && (ELF_COMPAT == 0)
 	elf_stack_item_t *mm_at_argv, *mm_at_envp;
 #endif
@@ -205,6 +204,12 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	p = arch_align_stack(p);
 
 	/*
+	 * TODO [PCuABI] - derive an appropriate capability (bounds matching
+	 * the stack reservation, RW permissions)
+	 */
+	sp = uaddr_to_user_ptr_safe(p);
+
+	/*
 	 * If this architecture has a platform capability string, copy it
 	 * to userspace.  In some cases (Sparc), this info is impossible
 	 * for userspace to get any other way, in others (i386) it is
@@ -214,7 +219,7 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	if (k_platform) {
 		size_t len = strlen(k_platform) + 1;
 
-		u_platform = (elf_addr_t __user *)STACK_ALLOC(p, len);
+		u_platform = STACK_ALLOC(sp, len);
 		if (copy_to_user(u_platform, k_platform, len))
 			return -EFAULT;
 	}
@@ -227,7 +232,7 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	if (k_base_platform) {
 		size_t len = strlen(k_base_platform) + 1;
 
-		u_base_platform = (elf_addr_t __user *)STACK_ALLOC(p, len);
+		u_base_platform = STACK_ALLOC(sp, len);
 		if (copy_to_user(u_base_platform, k_base_platform, len))
 			return -EFAULT;
 	}
@@ -236,8 +241,7 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	 * Generate 16 random bytes for userspace PRNG seeding.
 	 */
 	get_random_bytes(k_rand_bytes, sizeof(k_rand_bytes));
-	u_rand_bytes = (elf_addr_t __user *)
-		       STACK_ALLOC(p, sizeof(k_rand_bytes));
+	u_rand_bytes = STACK_ALLOC(sp, sizeof(k_rand_bytes));
 	if (copy_to_user(u_rand_bytes, k_rand_bytes, sizeof(k_rand_bytes)))
 		return -EFAULT;
 
@@ -337,17 +341,16 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	elf_info += 2;
 
 	ei_index = elf_info - (elf_stack_item_t *)mm->saved_auxv;
-	sp = STACK_ADD(p, ei_index);
+	sp = STACK_ADD(sp, ei_index);
 
 	items = (argc + 1) + (envc + 1) + 1;
-	bprm->p = STACK_ROUND(sp, items);
+	sp = STACK_ROUND(sp, items);
+	bprm->p = user_ptr_addr(sp);
 
 	/* Point sp at the lowest address on the stack */
 #ifdef CONFIG_STACK_GROWSUP
-	sp = (elf_stack_item_t __user *)uaddr_to_user_ptr_safe(bprm->p) - items - ei_index;
+	sp -= (items + ei_index) * sizeof(elf_stack_item_t);
 	bprm->exec = user_ptr_addr(sp); /* XXX: PARISC HACK */
-#else
-	sp = (elf_stack_item_t __user *)uaddr_to_user_ptr_safe(bprm->p);
 #endif
 
 
@@ -363,47 +366,51 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 		return -EFAULT;
 
 	/* Now, let's put argc (and argv, envp if appropriate) on the stack */
-	if (elf_stack_put_user(argc, sp++))
+	stack_item = sp;
+
+	if (elf_stack_put_user(argc, stack_item++))
 		return -EFAULT;
 
 	/* Populate list of argv pointers back to argv strings. */
 #if defined(CONFIG_CHERI_PURECAP_UABI) && (ELF_COMPAT == 0)
-	*mm_at_argv = (elf_stack_item_t)sp;
+	*mm_at_argv = (elf_stack_item_t)stack_item;
 #endif
-	p = mm->arg_end = mm->arg_start;
+	/* In PCuABI, this derives a capability from SP pointing to arg_start */
+	ustr = sp + (mm->arg_start - user_ptr_addr(sp));
 	while (argc-- > 0) {
 		size_t len;
-		if (elf_stack_put_user_ptr(p, sp++))
+		if (elf_stack_put_user_ptr(ustr, stack_item++))
 			return -EFAULT;
-		len = strnlen_user(uaddr_to_user_ptr_safe(p), MAX_ARG_STRLEN);
+		len = strnlen_user(ustr, MAX_ARG_STRLEN);
 		if (!len || len > MAX_ARG_STRLEN)
 			return -EINVAL;
-		p += len;
+		ustr += len;
 	}
-	if (elf_stack_put_user(0, sp++))
+	if (elf_stack_put_user(0, stack_item++))
 		return -EFAULT;
-	mm->arg_end = p;
+	mm->arg_end = user_ptr_addr(ustr);
 
 	/* Populate list of envp pointers back to envp strings. */
 #if defined(CONFIG_CHERI_PURECAP_UABI) && (ELF_COMPAT == 0)
-	*mm_at_envp = (elf_stack_item_t)sp;
+	*mm_at_envp = (elf_stack_item_t)stack_item;
 #endif
-	mm->env_end = mm->env_start = p;
+	mm->env_start = user_ptr_addr(ustr);
 	while (envc-- > 0) {
 		size_t len;
-		if (elf_stack_put_user_ptr(p, sp++))
+		if (elf_stack_put_user_ptr(ustr, stack_item++))
 			return -EFAULT;
-		len = strnlen_user(uaddr_to_user_ptr_safe(p), MAX_ARG_STRLEN);
+		len = strnlen_user(ustr, MAX_ARG_STRLEN);
 		if (!len || len > MAX_ARG_STRLEN)
 			return -EINVAL;
-		p += len;
+		ustr += len;
 	}
-	if (elf_stack_put_user(0, sp++))
+	if (elf_stack_put_user(0, stack_item++))
 		return -EFAULT;
-	mm->env_end = p;
+	mm->env_end = user_ptr_addr(ustr);
 
 	/* Put the elf_info on the stack in the right place.  */
-	if (elf_copy_to_user_stack(sp, mm->saved_auxv, ei_index * sizeof(elf_stack_item_t)))
+	if (elf_copy_to_user_stack(stack_item, mm->saved_auxv,
+				   ei_index * sizeof(elf_stack_item_t)))
 		return -EFAULT;
 	return 0;
 }
