@@ -1992,7 +1992,7 @@ static int proc_submiturb(struct usb_dev_state *ps, void __user *arg)
 	struct usbdevfs_urb uurb;
 	sigval_t userurb_sigval;
 
-	if (copy_from_user(&uurb, arg, sizeof(uurb)))
+	if (copy_from_user_with_ptr(&uurb, arg, sizeof(uurb)))
 		return -EFAULT;
 
 	memset(&userurb_sigval, 0, sizeof(userurb_sigval));
