@@ -25,9 +25,9 @@
 
 static unsigned long pagesize;
 
-static inline int probe_mem_range(void *addr, size_t size, int mode)
+static inline int probe_mem_range(void *ptr, size_t size, int mode)
 {
-	unsigned int *p = (unsigned int *)addr;
+	unsigned int *p = (unsigned int *)ptr;
 	size_t probe_size =  size / sizeof(unsigned int);
 
 	if (mode & PROBE_MODE_TOUCH) {
@@ -45,32 +45,30 @@ static inline int probe_mem_range(void *addr, size_t size, int mode)
 /* Simple test to check our ability to create a new anonymous mapping
  * in the virtual address space of the calling process
  */
-static inline __attribute__((always_inline))
-void syscall_mmap(void)
+TEST(test_syscall_mmap)
 {
 
-	void *addr = mmap_verified(NULL, MMAP_SIZE, PROT_READ | PROT_WRITE,
+	void *ptr = mmap_verified(NULL, MMAP_SIZE, PROT_READ | PROT_WRITE,
 				  MAP_ANONYMOUS | MAP_PRIVATE, -1, 0,
 				  CAP_LOAD_PERMS | CAP_STORE_PERMS);
 
-	ASSERT_NE(addr, NULL);
+	ASSERT_NE(ptr, NULL);
 
-	EXPECT_EQ(0, probe_mem_range(addr, MMAP_SIZE,
-				    PROBE_MODE_TOUCH | PROBE_MODE_VERIFY)) {
+	EXPECT_EQ(0, probe_mem_range(ptr, MMAP_SIZE,
+				     PROBE_MODE_TOUCH | PROBE_MODE_VERIFY)) {
 		TH_LOG("Failed on probing allocated mem range\n");
 	}
-	EXPECT_EQ(0, munmap(addr, MMAP_SIZE));
+	EXPECT_EQ(0, munmap(ptr, MMAP_SIZE));
 }
 
 /* test mmap providing it with a file descriptor, testing related
  * functionality
  */
-static inline __attribute__((always_inline))
-void syscall_mmap2(void)
+TEST(test_syscall_mmap2)
 {
 	const char msg[] = "foo";
 	unsigned int msg_len = sizeof(msg); /* No need for the terminator */
-	void *addr;
+	void *ptr;
 	int fd;
 	int retval;
 
@@ -86,49 +84,39 @@ void syscall_mmap2(void)
 	retval = write(fd, msg, msg_len);
 	ASSERT_EQ(retval, (int)msg_len);
 
-	addr = mmap_verified(NULL, MMAP_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd,
-		      0, CHERI_PERM_LOAD | CHERI_PERM_STORE);
+	ptr = mmap_verified(NULL, MMAP_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd,
+			    0, CHERI_PERM_LOAD | CHERI_PERM_STORE);
 
-	EXPECT_NE(addr, NULL)
+	EXPECT_NE(ptr, NULL)
 		goto clean_up;
 
-	EXPECT_EQ(0, probe_mem_range(addr, MMAP_SIZE,
-				      PROBE_MODE_TOUCH | PROBE_MODE_VERIFY));
+	EXPECT_EQ(0, probe_mem_range(ptr, MMAP_SIZE,
+				     PROBE_MODE_TOUCH | PROBE_MODE_VERIFY));
 
 	/* Attempt to change bounds of memory mapping, shrink by factor of 2 */
-	addr = mremap(addr, MMAP_SIZE, MMAP_SIZE_REDUCED, 0, 0);
+	ptr = mremap(ptr, MMAP_SIZE, MMAP_SIZE_REDUCED, 0, 0);
 
-	ASSERT_FALSE(IS_ERR_VALUE(addr));
+	ASSERT_FALSE(IS_ERR_VALUE(ptr));
 	/* advise kernel about how to handle paging of mapped memory.*/
-	retval = madvise(addr, MMAP_SIZE_REDUCED, MADV_WILLNEED);
+	retval = madvise(ptr, MMAP_SIZE_REDUCED, MADV_WILLNEED);
 	ASSERT_EQ(retval, 0);
 
-	EXPECT_EQ(0, probe_mem_range(addr, MMAP_SIZE_REDUCED,
+	EXPECT_EQ(0, probe_mem_range(ptr, MMAP_SIZE_REDUCED,
 				     PROBE_MODE_TOUCH | PROBE_MODE_VERIFY));
 	/* An attempt to change permissions to RO */
-	retval = mprotect(addr, MMAP_SIZE_REDUCED, PROT_READ);
+	retval = mprotect(ptr, MMAP_SIZE_REDUCED, PROT_READ);
 	ASSERT_EQ(retval, 0);
 	/* Write permission should be revoked - verify mode only */
 	/* To be extended when signals are fully supported */
-	EXPECT_EQ(0, probe_mem_range(addr, MMAP_SIZE_REDUCED, PROBE_MODE_VERIFY));
+	EXPECT_EQ(0, probe_mem_range(ptr, MMAP_SIZE_REDUCED, PROBE_MODE_VERIFY));
 
 clean_up:
 	/* do unmap */
-	munmap(addr, MMAP_SIZE_REDUCED);
+	munmap(ptr, MMAP_SIZE_REDUCED);
 	ASSERT_EQ(retval, 0);
 
 	/* do file close */
 	close(fd);
-}
-
-TEST(test_syscall_mmap)
-{
-	syscall_mmap();
-}
-
-TEST(test_syscall_mmap2)
-{
-	syscall_mmap2();
 }
 
 int main(int argc __maybe_unused, char **argv __maybe_unused, char **envp __maybe_unused,
