@@ -379,7 +379,7 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	ustr = sp + (mm->arg_start - user_ptr_addr(sp));
 	while (argc-- > 0) {
 		size_t len;
-		if (elf_stack_put_user_ptr(ustr, stack_item++))
+		if (elf_stack_put_user(ustr, stack_item++))
 			return -EFAULT;
 		len = strnlen_user(ustr, MAX_ARG_STRLEN);
 		if (!len || len > MAX_ARG_STRLEN)
@@ -397,7 +397,7 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	mm->env_start = user_ptr_addr(ustr);
 	while (envc-- > 0) {
 		size_t len;
-		if (elf_stack_put_user_ptr(ustr, stack_item++))
+		if (elf_stack_put_user(ustr, stack_item++))
 			return -EFAULT;
 		len = strnlen_user(ustr, MAX_ARG_STRLEN);
 		if (!len || len > MAX_ARG_STRLEN)
