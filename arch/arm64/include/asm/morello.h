@@ -62,12 +62,6 @@ void morello_thread_set_csp(struct pt_regs *regs, user_uintptr_t sp);
  * Any invalid usage will result in an error at link time.
  */
 
-/*
- * Copies src to dst preserving capability tags.
- * All of dst, src and len must be 16-byte aligned.
- */
-void *morello_capcpy(void *dst, const void *src, size_t len);
-
 void morello_thread_start(struct pt_regs *regs, unsigned long pc);
 void morello_thread_init_user(void);
 void morello_thread_save_user_state(struct task_struct *tsk);
