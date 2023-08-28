@@ -46,24 +46,6 @@ SYM_FUNC_START(morello_build_any_user_cap)
 	ret
 SYM_FUNC_END(morello_build_any_user_cap)
 
-SYM_FUNC_START(morello_capcpy)
-	mov	x3, x0
-	and	x4, x2, #0x10		// Bytes to reach 32-byte alignment (0 or 16)
-	subs	x5, x2, x4		// 32-byte aligned length
-	b.eq	2f
-1:
-	ldp	c6, c7, [x1], #32	// 32-byte loop
-	stp	c6, c7, [x3], #32
-	subs	x5, x5, #32
-	b.ne	1b
-2:
-	cbz	x4, 3f			// 16-byte leftover (if any)
-	ldr	c6, [x1], #16
-	str	c6, [x3], #16
-3:
-	ret
-SYM_FUNC_END(morello_capcpy)
-
 SYM_FUNC_START(__morello_thread_init_user)
 	mov	x9, #THREAD_MORELLO_USER_STATE
 	add	x0, x0, x9		// x0 = tsk->thread.morello_user_state
