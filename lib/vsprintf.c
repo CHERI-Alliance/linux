@@ -43,6 +43,7 @@
 #include <linux/compiler.h>
 #include <linux/property.h>
 #include <linux/notifier.h>
+#include <linux/cheri.h>
 #ifdef CONFIG_BLOCK
 #include <linux/blkdev.h>
 #endif
@@ -52,10 +53,6 @@
 #include <asm/page.h>		/* for PAGE_SIZE */
 #include <asm/byteorder.h>	/* cpu_to_le16 */
 #include <asm/unaligned.h>
-
-#ifdef __CHERI__
-#include <cheriintrin.h>
-#endif
 
 #include <linux/string_helpers.h>
 #include "kstrtox.h"

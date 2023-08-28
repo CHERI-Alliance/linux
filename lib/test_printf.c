@@ -25,9 +25,7 @@
 
 #include <linux/property.h>
 
-#ifdef __CHERI__
-#include <cheriintrin.h>
-#endif
+#include <linux/cheri.h>
 
 #include "../tools/testing/selftests/kselftest_module.h"
 
