@@ -19,6 +19,7 @@
 #include <linux/ratelimit.h>
 #include <linux/rseq.h>
 #include <linux/syscalls.h>
+#include <linux/cheri.h>
 
 #include <asm/daifflags.h>
 #include <asm/debug-monitors.h>
@@ -38,10 +39,6 @@
 #endif
 #include <asm/traps.h>
 #include <asm/vdso.h>
-
-#ifdef CONFIG_CHERI_PURECAP_UABI
-#include <cheriintrin.h>
-#endif
 
 #ifndef SIGNAL_COMPAT64
 /*
