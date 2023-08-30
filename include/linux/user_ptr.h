@@ -6,6 +6,8 @@
 #include <linux/limits.h>
 #include <linux/typecheck.h>
 
+struct reserv_struct;
+
 /**
  * as_user_ptr() - Convert an arbitrary integer value to a user pointer.
  * @x: The integer value to convert.
@@ -110,6 +112,46 @@ bool check_user_ptr_read(const void __user *ptr, size_t len);
 bool check_user_ptr_write(void __user *ptr, size_t len);
 bool check_user_ptr_rw(void __user *ptr, size_t len);
 
+/**
+ * check_user_ptr_owning() - Check whether a user pointer owns a memory region.
+ * @user_ptr: The pointer to check.
+ * @len: The size of the region to check.
+ *
+ * Checks whether @ptr owns the memory region starting at the address of @ptr
+ * and of size @len.
+ *
+ * Return: true if @ptr passes the check.
+ */
+bool check_user_ptr_owning(user_uintptr_t user_ptr, size_t len);
+
+/**
+ * make_user_ptr_owning() - Create a user pointer owning the specified
+ * reservation.
+ *
+ * @reserv: Reservation information.
+ * @addr: Address to set the user pointer to.
+ *
+ * Return: The constructed user pointer.
+ *
+ * The bounds of the returned user pointer are set (exactly) to the bounds of
+ * @reserv, and so are its permissions.
+ */
+user_uintptr_t make_user_ptr_owning(const struct reserv_struct *reserv,
+				    ptraddr_t addr);
+
+/**
+ * user_ptr_owning_perms_from_prot() - Calculate capability permissions from
+ * prot flags and vm_flags.
+ * @prot: Memory protection flags.
+ * @vm_flags: vm_flags of the underlying VMA.
+ *
+ * Return: Calculated capability permission flags.
+ *
+ * Note: unsigned long is used instead of vm_flags_t as linux/mm_types.h cannot
+ * be included here.
+ */
+user_ptr_perms_t user_ptr_owning_perms_from_prot(int prot, unsigned long vm_flags);
+
 #else /* CONFIG_CHERI_PURECAP_UABI */
 
 typedef int user_ptr_perms_t;
@@ -148,6 +190,24 @@ static inline bool check_user_ptr_write(void __user *ptr, size_t len)
 static inline bool check_user_ptr_rw(void __user *ptr, size_t len)
 {
 	return true;
+}
+
+static inline bool check_user_ptr_owning(user_uintptr_t user_ptr, size_t len)
+
+{
+	return true;
+}
+
+static inline user_uintptr_t make_user_ptr_owning(const struct reserv_struct *reserv,
+						  ptraddr_t addr)
+{
+	return addr;
+}
+
+static inline user_ptr_perms_t user_ptr_owning_perms_from_prot(int prot,
+							       unsigned long vm_flags)
+{
+	return 0;
 }
 
 #endif /* CONFIG_CHERI_PURECAP_UABI */
