@@ -283,6 +283,20 @@ void morello_flush_cap_regs_to_64_regs(struct task_struct *tsk)
 	tsk->thread.uw.tp_value = (user_uintptr_t)active_ctpidr;
 }
 
+int memcmp_pages(struct page *page1, struct page *page2)
+{
+	/*
+	 * Always report that the pages are different. This should not create
+	 * correctness issues with the ways memcmp_pages() is currently used.
+	 *
+	 * A precise implementation for Morello should compare both data and
+	 * tags, for those pages whose tags are actually accessible (currently
+	 * most of them). It is unclear whether the extra overhead would
+	 * justify a precise approach.
+	 */
+	return 1;
+}
+
 
 static void __init check_root_cap(uintcap_t cap)
 {
