@@ -25,6 +25,7 @@
 #include <linux/uaccess.h>
 #include <linux/userfaultfd_k.h>
 #include <linux/mempolicy.h>
+#include <linux/mm_reserv.h>
 
 #include <asm/cacheflush.h>
 #include <asm/tlb.h>
@@ -865,17 +866,35 @@ static struct vm_area_struct *vma_to_resize(unsigned long addr,
 	return vma;
 }
 
-static unsigned long mremap_to(unsigned long addr, unsigned long old_len,
-		unsigned long new_addr, unsigned long new_len, bool *locked,
+static user_uintptr_t make_new_user_ptr_owning(ptraddr_t new_vma_addr,
+					       user_uintptr_t old_user_ptr)
+{
+	user_uintptr_t ret;
+
+	ret = reserv_make_user_ptr_owning((ptraddr_t)new_vma_addr, true);
+	if (IS_ERR_VALUE(ret))
+		return ret;
+
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	if (reserv_is_supported(current->mm))
+		ret = cheri_perms_and(ret, cheri_perms_get(old_user_ptr));
+#endif
+	return ret;
+}
+
+static user_uintptr_t mremap_to(user_uintptr_t user_ptr, unsigned long old_len,
+		user_uintptr_t new_user_ptr, unsigned long new_len, bool *locked,
 		unsigned long flags, struct vm_userfaultfd_ctx *uf,
 		struct list_head *uf_unmap_early,
 		struct list_head *uf_unmap)
 {
 	struct mm_struct *mm = current->mm;
 	struct vm_area_struct *vma;
-	unsigned long ret = -EINVAL;
+	user_uintptr_t ret = -EINVAL;
 	unsigned long map_flags = 0;
 	struct reserv_struct reserv_info, *reserv_ptr = NULL;
+	ptraddr_t addr = untagged_addr((ptraddr_t)user_ptr);
+	ptraddr_t new_addr = (ptraddr_t)new_user_ptr;
 
 	if (offset_in_page(new_addr))
 		goto out;
@@ -970,6 +989,13 @@ static unsigned long mremap_to(unsigned long addr, unsigned long old_len,
 	ret = move_vma(vma, addr, old_len, new_len, new_addr, locked, flags, uf,
 		       uf_unmap, reserv_ptr);
 
+	if (!IS_ERR_VALUE(ret) && reserv_is_supported(mm)) {
+		if ((flags & MREMAP_FIXED) &&
+		    user_ptr_is_valid((const void __user *)new_user_ptr))
+			ret = new_user_ptr;
+		else
+			ret = make_new_user_ptr_owning((ptraddr_t)ret, user_ptr);
+	}
 out:
 	return ret;
 }
@@ -995,19 +1021,20 @@ static int vma_expandable(struct vm_area_struct *vma, unsigned long delta)
  * MREMAP_FIXED option added 5-Dec-1999 by Benjamin LaHaise
  * This option implies MREMAP_MAYMOVE.
  */
-SYSCALL_DEFINE5(__retptr__(mremap), user_uintptr_t, addr, unsigned long, old_len,
+SYSCALL_DEFINE5(__retptr__(mremap), user_uintptr_t, user_ptr, unsigned long, old_len,
 		unsigned long, new_len, unsigned long, flags,
-		user_uintptr_t, new_addr)
+		user_uintptr_t, new_user_ptr)
 {
 	struct mm_struct *mm = current->mm;
 	struct vm_area_struct *vma;
 	user_uintptr_t ret = -EINVAL;
 	bool locked = false;
 	struct vm_userfaultfd_ctx uf = NULL_VM_UFFD_CTX;
+	ptraddr_t addr = (ptraddr_t)user_ptr;
+	ptraddr_t new_addr = (ptraddr_t)new_user_ptr;
 	LIST_HEAD(uf_unmap_early);
 	LIST_HEAD(uf_unmap);
 
-	/* @TODO [PCuABI] - capability validation */
 	/*
 	 * There is a deliberate asymmetry here: we strip the pointer tag
 	 * from the old address but leave the new address alone. This is
@@ -1057,7 +1084,18 @@ SYSCALL_DEFINE5(__retptr__(mremap), user_uintptr_t, addr, unsigned long, old_len
 		ret = -EFAULT;
 		goto out;
 	}
+	if (reserv_is_supported(mm) &&
+	    !check_user_ptr_owning(user_ptr, old_len ? old_len : new_len))
+		goto out;
+	if (!reserv_cap_within_reserv(user_ptr, true)) {
+		ret = -ERESERVATION;
+		goto out;
+	}
+	ret = check_pcuabi_map_ptr_arg(new_user_ptr, new_len, flags & MREMAP_FIXED, true);
+	if (ret)
+		goto out;
 
+	ret = -EINVAL;
 	if (is_vm_hugetlb_page(vma)) {
 		struct hstate *h __maybe_unused = hstate_vma(vma);
 
@@ -1079,7 +1117,7 @@ SYSCALL_DEFINE5(__retptr__(mremap), user_uintptr_t, addr, unsigned long, old_len
 	}
 
 	if (flags & (MREMAP_FIXED | MREMAP_DONTUNMAP)) {
-		ret = mremap_to(addr, old_len, new_addr, new_len,
+		ret = mremap_to(user_ptr, old_len, new_user_ptr, new_len,
 				&locked, flags, &uf, &uf_unmap_early,
 				&uf_unmap);
 		goto out;
@@ -1108,7 +1146,7 @@ SYSCALL_DEFINE5(__retptr__(mremap), user_uintptr_t, addr, unsigned long, old_len
 		VMA_ITERATOR(vmi, mm, addr + new_len);
 
 		if (old_len == new_len) {
-			ret = addr;
+			ret = user_ptr;
 			goto out;
 		}
 
@@ -1117,7 +1155,7 @@ SYSCALL_DEFINE5(__retptr__(mremap), user_uintptr_t, addr, unsigned long, old_len
 		if (ret)
 			goto out;
 
-		ret = addr;
+		ret = user_ptr;
 		goto out_unlocked;
 	}
 
@@ -1171,7 +1209,7 @@ SYSCALL_DEFINE5(__retptr__(mremap), user_uintptr_t, addr, unsigned long, old_len
 				locked = true;
 				new_addr = addr;
 			}
-			ret = addr;
+			ret = user_ptr;
 			goto out;
 		}
 	}
@@ -1197,6 +1235,9 @@ SYSCALL_DEFINE5(__retptr__(mremap), user_uintptr_t, addr, unsigned long, old_len
 
 		ret = move_vma(vma, addr, old_len, new_len, new_addr,
 			       &locked, flags, &uf, &uf_unmap, NULL);
+
+		if (!IS_ERR_VALUE(ret) && reserv_is_supported(mm))
+			ret = make_new_user_ptr_owning((ptraddr_t)ret, user_ptr);
 	}
 out:
 	if (offset_in_page(ret))
@@ -1208,8 +1249,5 @@ out_unlocked:
 	userfaultfd_unmap_complete(mm, &uf_unmap_early);
 	mremap_userfaultfd_complete(&uf, addr, ret, old_len);
 	userfaultfd_unmap_complete(mm, &uf_unmap);
-	/* TODO [PCuABI] - derive proper capability */
-	return IS_ERR_VALUE(ret) ?
-		ret :
-		(user_intptr_t)uaddr_to_user_ptr_safe((ptraddr_t)ret);
+	return ret;
 }
