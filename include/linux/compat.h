@@ -958,16 +958,22 @@ static inline bool in_compat_syscall(void) { return is_compat_task(); }
 #ifndef in_compat32_syscall
 static inline bool in_compat32_syscall(void) { return is_compat32_task(); }
 #endif
+#ifndef in_compat64_syscall
+static inline bool in_compat64_syscall(void) { return is_compat64_task(); }
+#endif
 
 #else /* !CONFIG_COMPAT */
 
 #define is_compat_task() (0)
 #define is_compat32_task() (0)
+#define is_compat64_task() (0)
 /* Ensure no one redefines in_compat_syscall() under !CONFIG_COMPAT */
 #define in_compat_syscall in_compat_syscall
 static inline bool in_compat_syscall(void) { return false; }
 #define in_compat32_syscall in_compat32_syscall
 static inline bool in_compat32_syscall(void) { return false; }
+#define in_compat64_syscall in_compat64_syscall
+static inline bool in_compat64_syscall(void) { return false; }
 
 #endif /* CONFIG_COMPAT */
 
