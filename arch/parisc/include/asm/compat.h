@@ -137,6 +137,6 @@ static inline int is_compat_task(void)
 {
 	return __is_compat_task(current);
 }
-#define is_32bit_compat_task is_compat_task
+#define is_compat32_task is_compat_task
 
 #endif /* _ASM_PARISC_COMPAT_H */

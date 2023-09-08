@@ -175,7 +175,7 @@ static inline void arch_ftrace_set_direct_caller(struct ftrace_regs *fregs,
 #define ARCH_TRACE_IGNORE_COMPAT_SYSCALLS
 static inline bool arch_trace_is_compat_syscall(struct pt_regs *regs)
 {
-	return is_32bit_compat_task();
+	return is_compat32_task();
 }
 
 #if defined(CONFIG_FTRACE_SYSCALLS) && defined(CONFIG_CHERI_PURECAP_UABI)

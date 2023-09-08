@@ -175,6 +175,7 @@ static void ptrace_hbptriggered(struct perf_event *bp,
 	struct arch_hw_breakpoint *bkpt = counter_arch_bp(bp);
 	const char *desc = "Hardware breakpoint trap (ptrace)";
 
+#ifdef CONFIG_COMPAT
 	if (is_32bit_compat_task()) {
 		int si_errno = 0;
 		int i;
@@ -196,6 +197,7 @@ static void ptrace_hbptriggered(struct perf_event *bp,
 						  desc);
 		return;
 	}
+#endif
 
 	arm64_force_sig_fault(SIGTRAP, TRAP_HWBKPT, bkpt->trigger, desc);
 }
@@ -2349,9 +2351,9 @@ const struct user_regset_view *task_user_regset_view(struct task_struct *task)
 	 * 32-bit children use an extended user_aarch32_ptrace_view to allow
 	 * access to the TLS register.
 	 */
-	if (is_32bit_compat_task())
+	if (is_compat32_task())
 		return &user_aarch32_view;
-	else if (is_32bit_compat_thread(task_thread_info(task)))
+	else if (is_compat32_thread(task_thread_info(task)))
 		return &user_aarch32_ptrace_view;
 #endif
 
@@ -2403,7 +2405,7 @@ static void report_syscall(struct pt_regs *regs, enum ptrace_syscall_dir dir)
 	 * - Syscall stops behave differently to seccomp and pseudo-step traps
 	 *   (the latter do not nobble any registers).
 	 */
-	regno = (is_32bit_compat_task() ? 12 : 7);
+	regno = (is_compat32_task() ? 12 : 7);
 	saved_reg = regs->regs[regno];
 	regs->regs[regno] = dir;
 
@@ -2539,7 +2541,7 @@ int valid_user_regs(struct user_pt_regs *regs, struct task_struct *task)
 	/* https://lore.kernel.org/lkml/20191118131525.GA4180@willie-the-truck */
 	user_regs_reset_single_step(regs, task);
 
-	if (is_32bit_compat_thread(task_thread_info(task)))
+	if (is_compat32_thread(task_thread_info(task)))
 		return valid_compat_regs(regs);
 	else
 		return valid_native_regs(regs);
