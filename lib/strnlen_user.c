@@ -8,6 +8,44 @@
 #include <asm/word-at-a-time.h>
 
 /*
+ * Returns the byte *index* of '\0' in src, or >= max if not found.
+ *
+ * align specifies the offset of the string (in bytes) in src; characters
+ * in the range [src, src+align) are ignored.
+ */
+static __always_inline long find_zero_aligned(const unsigned long __user *src,
+					      unsigned long max,
+					      unsigned long align)
+{
+	const struct word_at_a_time constants = WORD_AT_A_TIME_CONSTANTS;
+	long res = 0;
+	unsigned long c;
+
+	unsafe_get_user(c, src++, efault);
+	c |= aligned_byte_mask(align);
+
+	for (;;) {
+		unsigned long data;
+		if (has_zero(c, &data, &constants)) {
+			data = prep_zero_mask(c, data, &constants);
+			data = create_zero_mask(data);
+			res += find_zero(data);
+			break;
+		}
+		res += sizeof(unsigned long);
+		/* We already handled 'unsigned long' bytes. Did we do it all ? */
+		if (unlikely(max <= sizeof(unsigned long)))
+			break;
+		max -= sizeof(unsigned long);
+		unsafe_get_user(c, src++, efault);
+	}
+
+	return res;
+efault:
+	return -EFAULT;
+}
+
+/*
  * Do a strnlen, return length of string *with* final '\0'.
  * 'count' is the user-supplied count, while 'max' is the
  * address space maximum.
@@ -20,11 +58,10 @@
  * if it fits in a aligned 'long'. The caller needs to check
  * the return value against "> max".
  */
-static __always_inline long do_strnlen_user(const char __user *src, unsigned long count, unsigned long max)
+static __always_inline long do_strnlen_user(const char __user *src, long count, unsigned long max)
 {
-	const struct word_at_a_time constants = WORD_AT_A_TIME_CONSTANTS;
-	unsigned long align, res = 0;
-	unsigned long c;
+	unsigned long align;
+	long res;
 
 	/*
 	 * Do everything aligned. But that means that we
@@ -34,38 +71,21 @@ static __always_inline long do_strnlen_user(const char __user *src, unsigned lon
 	src -= align;
 	max += align;
 
-	unsafe_get_user(c, (unsigned long __user *)src, efault);
-	c |= aligned_byte_mask(align);
+	res = find_zero_aligned((unsigned long __user *)src, max, align);
 
-	for (;;) {
-		unsigned long data;
-		if (has_zero(c, &data, &constants)) {
-			data = prep_zero_mask(c, data, &constants);
-			data = create_zero_mask(data);
-			return res + find_zero(data) + 1 - align;
-		}
-		res += sizeof(unsigned long);
-		/* We already handled 'unsigned long' bytes. Did we do it all ? */
-		if (unlikely(max <= sizeof(unsigned long)))
-			break;
-		max -= sizeof(unsigned long);
-		unsafe_get_user(c, (unsigned long __user *)(src+res), efault);
-	}
+	if (res < 0)
+		return 0;
+
 	res -= align;
 
 	/*
-	 * Uhhuh. We hit 'max'. But was that the user-specified maximum
-	 * too? If so, return the marker for "too long".
+	 * find_zero_aligned() may end up reading more than count bytes.
+	 * Make sure to return the marker for "too long" in that case.
 	 */
 	if (res >= count)
 		return count+1;
 
-	/*
-	 * Nope: we hit the address space limit, and we still had more
-	 * characters the caller would have wanted. That's 0.
-	 */
-efault:
-	return 0;
+	return res+1;
 }
 
 /**
