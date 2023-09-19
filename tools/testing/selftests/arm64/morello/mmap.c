@@ -18,6 +18,12 @@
 #define PROBE_MODE_TOUCH	0x01
 #define PROBE_MODE_VERIFY	0x02
 
+/* As the minimum address is configurable, consider the default value of
+ * CONFIG_LSM_MMAP_MIN_ADDR which is 65536 (64K) for a fixed address.
+ */
+#define min_addr (1ULL << 16)
+
+static unsigned long pagesize;
 
 static inline int probe_mem_range(void *addr, size_t size, int mode)
 {
@@ -125,8 +131,11 @@ TEST(test_syscall_mmap2)
 	syscall_mmap2();
 }
 
-int main(void)
+int main(int argc __maybe_unused, char **argv __maybe_unused, char **envp __maybe_unused,
+	 struct morello_auxv *auxv)
 {
+	pagesize = get_pagesize(auxv);
+
 	test_syscall_mmap();
 	test_syscall_mmap2();
 	return 0;

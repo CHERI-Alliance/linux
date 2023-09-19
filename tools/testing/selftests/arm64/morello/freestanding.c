@@ -6,6 +6,7 @@
 #include <stdbool.h>
 
 #include <linux/errno.h>
+#include <linux/auxvec.h>
 
 #include "freestanding.h"
 
@@ -91,6 +92,20 @@ static ssize_t __write_all(const char *str, size_t len)
 	}
 
 	return written;
+}
+
+unsigned long get_pagesize(struct morello_auxv *auxv)
+{
+	unsigned long page_size = 0;
+
+	while (auxv->a_type != AT_NULL) {
+		if (auxv->a_type == AT_PAGESZ) {
+			page_size = auxv->a_val;
+			break;
+		}
+		++auxv;
+	}
+	return page_size;
 }
 
 /*
