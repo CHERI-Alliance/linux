@@ -2,6 +2,7 @@
 #ifndef _LINUX_USER_PTR_H
 #define _LINUX_USER_PTR_H
 
+#include <linux/limits.h>
 #include <linux/typecheck.h>
 
 /**
@@ -155,6 +156,49 @@ static inline bool check_user_ptr_rw(void __user *ptr, size_t len)
 static inline ptraddr_t user_ptr_addr(const void __user *ptr)
 {
 	return (ptraddr_t)(user_uintptr_t)ptr;
+}
+
+/**
+ * user_ptr_base() - Extract the lower bound (base) of a user pointer.
+ * @ptr: The user pointer to extract the base from.
+ *
+ * The base of @ptr represents the lowest address than can be accessed
+ * through @ptr. If @ptr does not carry any bound information, the start of the
+ * address space is returned.
+ *
+ * Return: The base of @ptr.
+ */
+static inline ptraddr_t user_ptr_base(const void __user *ptr)
+{
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	return __builtin_cheri_base_get(ptr);
+#else
+	return 0;
+#endif
+}
+
+/**
+ * user_ptr_limit() - Extract the upper bound (limit) of a user pointer.
+ * @ptr: The user pointer to extract the limit from.
+ *
+ * The limit of @ptr represents the end of the region than can be accessed
+ * through @ptr (that is one byte past the highest accessible address). If @ptr
+ * does not carry any bound information, the end of the address space is
+ * returned.
+ *
+ * Return: The limit of @ptr.
+ */
+static inline ptraddr_t user_ptr_limit(const void __user *ptr)
+{
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	return __builtin_cheri_base_get(ptr) + __builtin_cheri_length_get(ptr);
+#else
+	/*
+	 * Ideally TASK_SIZE_MAX, unfortunately we cannot safely include
+	 * <linux/uaccess.h> in this header.
+	 */
+	return ULONG_MAX;
+#endif
 }
 
 /**
