@@ -93,7 +93,7 @@ static int compat_blkpg_ioctl(struct block_device *bdev,
 #endif
 
 static int blk_ioctl_discard(struct block_device *bdev, blk_mode_t mode,
-		user_uintptr_t arg)
+		void __user *argp)
 {
 	unsigned int bs_mask = bdev_logical_block_size(bdev) - 1;
 	uint64_t range[2], start, len, end;
@@ -110,7 +110,7 @@ static int blk_ioctl_discard(struct block_device *bdev, blk_mode_t mode,
 	if (bdev_read_only(bdev))
 		return -EPERM;
 
-	if (copy_from_user(range, (void __user *)arg, sizeof(range)))
+	if (copy_from_user(range, argp, sizeof(range)))
 		return -EFAULT;
 
 	start = range[0];
@@ -192,7 +192,7 @@ static int blk_ioctl_secure_erase(struct block_device *bdev, blk_mode_t mode,
 
 
 static int blk_ioctl_zeroout(struct block_device *bdev, blk_mode_t mode,
-		user_uintptr_t arg)
+		void __user *argp)
 {
 	uint64_t range[2];
 	uint64_t start, end, len;
@@ -201,7 +201,7 @@ static int blk_ioctl_zeroout(struct block_device *bdev, blk_mode_t mode,
 	if (!(mode & BLK_OPEN_WRITE))
 		return -EBADF;
 
-	if (copy_from_user(range, (void __user *)arg, sizeof(range)))
+	if (copy_from_user(range, argp, sizeof(range)))
 		return -EFAULT;
 
 	start = range[0];
@@ -417,14 +417,14 @@ static int blkdev_flushbuf(struct block_device *bdev, unsigned cmd,
 }
 
 static int blkdev_roset(struct block_device *bdev, unsigned cmd,
-		user_uintptr_t arg)
+		int __user *argp)
 {
 	int ret, n;
 
 	if (!capable(CAP_SYS_ADMIN))
 		return -EACCES;
 
-	if (get_user(n, (int __user *)arg))
+	if (get_user(n, argp))
 		return -EFAULT;
 	if (bdev->bd_disk->fops->set_read_only) {
 		ret = bdev->bd_disk->fops->set_read_only(bdev, n);
@@ -546,22 +546,22 @@ static int blkdev_common_ioctl(struct block_device *bdev, blk_mode_t mode,
 	case BLKFLSBUF:
 		return blkdev_flushbuf(bdev, cmd, arg);
 	case BLKROSET:
-		return blkdev_roset(bdev, cmd, arg);
+		return blkdev_roset(bdev, cmd, argp);
 	case BLKDISCARD:
-		return blk_ioctl_discard(bdev, mode, arg);
+		return blk_ioctl_discard(bdev, mode, argp);
 	case BLKSECDISCARD:
 		return blk_ioctl_secure_erase(bdev, mode, argp);
 	case BLKZEROOUT:
-		return blk_ioctl_zeroout(bdev, mode, arg);
+		return blk_ioctl_zeroout(bdev, mode, argp);
 	case BLKGETDISKSEQ:
 		return put_u64(argp, bdev->bd_disk->diskseq);
 	case BLKREPORTZONE:
-		return blkdev_report_zones_ioctl(bdev, cmd, arg);
+		return blkdev_report_zones_ioctl(bdev, cmd, argp);
 	case BLKRESETZONE:
 	case BLKOPENZONE:
 	case BLKCLOSEZONE:
 	case BLKFINISHZONE:
-		return blkdev_zone_mgmt_ioctl(bdev, mode, cmd, arg);
+		return blkdev_zone_mgmt_ioctl(bdev, mode, cmd, argp);
 	case BLKGETZONESZ:
 		return put_uint(argp, bdev_zone_sectors(bdev));
 	case BLKGETNRZONES:

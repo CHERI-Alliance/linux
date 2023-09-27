@@ -339,9 +339,8 @@ static int blkdev_copy_zone_to_user(struct blk_zone *zone, unsigned int idx,
  * Called from blkdev_ioctl.
  */
 int blkdev_report_zones_ioctl(struct block_device *bdev, unsigned int cmd,
-		user_uintptr_t arg)
+		void __user *argp)
 {
-	void __user *argp = (void __user *)arg;
 	struct zone_report_args args;
 	struct blk_zone_report rep;
 	int ret;
@@ -392,9 +391,8 @@ static int blkdev_truncate_zone_range(struct block_device *bdev,
  * Called from blkdev_ioctl.
  */
 int blkdev_zone_mgmt_ioctl(struct block_device *bdev, blk_mode_t mode,
-			   unsigned int cmd, user_uintptr_t arg)
+			   unsigned int cmd, void __user *argp)
 {
-	void __user *argp = (void __user *)arg;
 	struct blk_zone_range zrange;
 	enum req_op op;
 	int ret;

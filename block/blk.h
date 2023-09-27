@@ -451,9 +451,9 @@ static inline void blk_zone_finish_request(struct request *rq)
 		blk_zone_write_plug_finish_request(rq);
 }
 int blkdev_report_zones_ioctl(struct block_device *bdev, unsigned int cmd,
-		unsigned long arg);
+		void __user *argp);
 int blkdev_zone_mgmt_ioctl(struct block_device *bdev, blk_mode_t mode,
-		unsigned int cmd, unsigned long arg);
+		unsigned int cmd, void __user *argp);
 #else /* CONFIG_BLK_DEV_ZONED */
 static inline void disk_init_zone_resources(struct gendisk *disk)
 {
@@ -486,12 +486,12 @@ static inline void blk_zone_finish_request(struct request *rq)
 {
 }
 static inline int blkdev_report_zones_ioctl(struct block_device *bdev,
-		unsigned int cmd, unsigned long arg)
+		unsigned int cmd, void __user *argp)
 {
 	return -ENOTTY;
 }
 static inline int blkdev_zone_mgmt_ioctl(struct block_device *bdev,
-		blk_mode_t mode, unsigned int cmd, unsigned long arg)
+		blk_mode_t mode, unsigned int cmd, void __user *argp)
 {
 	return -ENOTTY;
 }
