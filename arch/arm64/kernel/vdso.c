@@ -32,6 +32,7 @@
 enum vdso_abi {
 	VDSO_ABI_AA64,
 	VDSO_ABI_AA32,
+	VDSO_ABI_PURECAP,
 };
 
 struct vdso_abi_info {
@@ -56,6 +57,13 @@ static struct vdso_abi_info vdso_info[] __ro_after_init = {
 		.vdso_code_end = vdso32_end,
 	},
 #endif /* CONFIG_COMPAT_VDSO */
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	[VDSO_ABI_PURECAP] = {
+		.name = "vdso_purecap",
+		.vdso_code_start = vdso_purecap_start,
+		.vdso_code_end = vdso_purecap_end,
+	},
+#endif /* CONFIG_CHERI_PURECAP_UABI */
 };
 
 static user_uintptr_t make_vdso_ptr(struct vm_area_struct *vdso_text_vma)
@@ -353,7 +361,8 @@ static int __init vdso_init(void)
 }
 arch_initcall(vdso_init);
 
-int arch_setup_additional_pages(struct linux_binprm *bprm, int uses_interp)
+static int __arch_setup_additional_pages(struct linux_binprm *bprm, int uses_interp,
+				    enum vdso_abi abi)
 {
 	struct mm_struct *mm = current->mm;
 	int ret;
@@ -361,8 +370,33 @@ int arch_setup_additional_pages(struct linux_binprm *bprm, int uses_interp)
 	if (mmap_write_lock_killable(mm))
 		return -EINTR;
 
-	ret = __setup_additional_pages(VDSO_ABI_AA64, mm, bprm, uses_interp);
+	ret = __setup_additional_pages(abi, mm, bprm, uses_interp);
 	mmap_write_unlock(mm);
 
 	return ret;
 }
+
+int aarch64_setup_additional_pages(struct linux_binprm *bprm, int uses_interp)
+{
+	return __arch_setup_additional_pages(bprm, uses_interp, VDSO_ABI_AA64);
+}
+
+#ifdef CONFIG_CHERI_PURECAP_UABI
+static struct vm_special_mapping purecap_vdso_map __ro_after_init = {
+	.name	= "[vdso]",
+	.mremap = vdso_mremap,
+};
+
+static int __init purecap_vdso_init(void)
+{
+	vdso_info[VDSO_ABI_PURECAP].cm = &purecap_vdso_map;
+
+	return __vdso_init(VDSO_ABI_PURECAP);
+}
+arch_initcall(purecap_vdso_init);
+
+int purecap_setup_additional_pages(struct linux_binprm *bprm, int uses_interp)
+{
+	return __arch_setup_additional_pages(bprm, uses_interp, VDSO_ABI_PURECAP);
+}
+#endif /* CONFIG_CHERI_PURECAP_UABI */
