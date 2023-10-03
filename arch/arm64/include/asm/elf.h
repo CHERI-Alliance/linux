@@ -165,16 +165,20 @@ do {									\
 		NEW_AUX_ENT(AT_IGNORE, 0);				\
 } while (0)
 
-#ifdef CONFIG_CHERI_PURECAP_UABI
-#define ARCH_DLINFO	SETUP_DLINFO(current->mm->context.vdso)
-#else /* !CONFIG_CHERI_PURECAP_UABI */
-#define ARCH_DLINFO	SETUP_DLINFO((elf_addr_t)current->mm->context.vdso)
-#endif /* CONFIG_CHERI_PURECAP_UABI */
-
 #define ARCH_HAS_SETUP_ADDITIONAL_PAGES
 struct linux_binprm;
-extern int arch_setup_additional_pages(struct linux_binprm *bprm,
+extern int aarch64_setup_additional_pages(struct linux_binprm *bprm,
 				       int uses_interp);
+
+#ifdef CONFIG_CHERI_PURECAP_UABI
+extern int purecap_setup_additional_pages(struct linux_binprm *bprm,
+				       int uses_interp);
+#define arch_setup_additional_pages	purecap_setup_additional_pages
+#define ARCH_DLINFO	SETUP_DLINFO(current->mm->context.vdso)
+#else /* !CONFIG_CHERI_PURECAP_UABI */
+#define arch_setup_additional_pages	aarch64_setup_additional_pages
+#define ARCH_DLINFO	SETUP_DLINFO((elf_addr_t)current->mm->context.vdso)
+#endif /* CONFIG_CHERI_PURECAP_UABI */
 
 /* 1GB of VA */
 #ifdef CONFIG_COMPAT32
@@ -209,6 +213,8 @@ typedef compat_elf_greg_t		compat_elf_gregset_t[COMPAT_ELF_NGREG];
 })
 
 #define COMPAT_ARCH_DLINFO	SETUP_DLINFO(current->mm->context.vdso)
+
+#define compat_arch_setup_additional_pages	aarch64_setup_additional_pages
 
 #else /* !CONFIG_COMPAT64 */
 

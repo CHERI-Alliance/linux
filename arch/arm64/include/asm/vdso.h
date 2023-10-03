@@ -9,8 +9,6 @@
 
 #ifndef __ASSEMBLER__
 
-#include <generated/vdso-offsets.h>
-
 #define VDSO_SYMBOL(base, name)						   \
 ({									   \
 	(unsigned long)(vdso_offset_##name + (unsigned long)(base)); \
@@ -18,6 +16,7 @@
 
 extern char vdso_start[], vdso_end[];
 extern char vdso32_start[], vdso32_end[];
+extern char vdso_purecap_start[], vdso_purecap_end[];
 
 #endif /* !__ASSEMBLER__ */
 
