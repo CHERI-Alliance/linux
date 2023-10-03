@@ -41,6 +41,11 @@
 #endif
 #include <asm/traps.h>
 #include <asm/vdso.h>
+#if defined(CONFIG_CHERI_PURECAP_UABI) && !defined(SIGNAL_COMPAT64)
+#include <generated/vdso-purecap-offsets.h>
+#else
+#include <generated/vdso-offsets.h>
+#endif
 
 #define GCS_SIGNAL_CAP(addr) (((unsigned long)addr) & GCS_CAP_ADDR_MASK)
 
