@@ -32,6 +32,7 @@
 enum vdso_abi {
 	VDSO_ABI_AA64,
 	VDSO_ABI_AA32,
+	VDSO_ABI_PURECAP,
 };
 
 enum vvar_pages {
@@ -64,6 +65,13 @@ static struct vdso_abi_info vdso_info[] __ro_after_init = {
 		.vdso_code_end = vdso32_end,
 	},
 #endif /* CONFIG_COMPAT_VDSO */
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	[VDSO_ABI_PURECAP] = {
+		.name = "vdso_purecap",
+		.vdso_code_start = vdso_purecap_start,
+		.vdso_code_end = vdso_purecap_end,
+	},
+#endif /* CONFIG_CHERI_PURECAP_UABI */
 };
 
 /*
@@ -139,6 +147,10 @@ int vdso_join_timens(struct task_struct *task, struct time_namespace *ns)
 			zap_vma_pages(vma);
 #ifdef CONFIG_COMPAT_VDSO
 		if (vma_is_special_mapping(vma, vdso_info[VDSO_ABI_AA32].dm))
+			zap_vma_pages(vma);
+#endif
+#ifdef CONFIG_CHERI_PURECAP_UABI
+		if (vma_is_special_mapping(vma, vdso_info[VDSO_ABI_PURECAP].dm))
 			zap_vma_pages(vma);
 #endif
 	}
@@ -408,6 +420,47 @@ out:
 }
 #endif /* CONFIG_COMPAT32 */
 
+#ifdef CONFIG_CHERI_PURECAP_UABI
+enum purecap_map {
+	PURECAP_MAP_VVAR,
+	PURECAP_MAP_VDSO,
+};
+
+static struct vm_special_mapping purecap_vdso_maps[] __ro_after_init = {
+	[PURECAP_MAP_VVAR] = {
+		.name	= "[vvar]",
+		.fault = vvar_fault,
+	},
+	[PURECAP_MAP_VDSO] = {
+		.name	= "[vdso]",
+		.mremap = vdso_mremap,
+	},
+};
+
+static int __init purecap_vdso_init(void)
+{
+	vdso_info[VDSO_ABI_PURECAP].dm = &purecap_vdso_maps[PURECAP_MAP_VVAR];
+	vdso_info[VDSO_ABI_PURECAP].cm = &purecap_vdso_maps[PURECAP_MAP_VDSO];
+
+	return __vdso_init(VDSO_ABI_PURECAP);
+}
+arch_initcall(purecap_vdso_init);
+
+int purecap_setup_additional_pages(struct linux_binprm *bprm, int uses_interp)
+{
+	struct mm_struct *mm = current->mm;
+	int ret;
+
+	if (mmap_write_lock_killable(mm))
+		return -EINTR;
+
+	ret = __setup_additional_pages(VDSO_ABI_PURECAP, mm, bprm, uses_interp);
+	mmap_write_unlock(mm);
+
+	return ret;
+}
+#endif /* CONFIG_CHERI_PURECAP_UABI */
+
 enum aarch64_map {
 	AA64_MAP_VVAR,
 	AA64_MAP_VDSO,
@@ -433,7 +486,7 @@ static int __init vdso_init(void)
 }
 arch_initcall(vdso_init);
 
-int arch_setup_additional_pages(struct linux_binprm *bprm, int uses_interp)
+int aarch64_setup_additional_pages(struct linux_binprm *bprm, int uses_interp)
 {
 	struct mm_struct *mm = current->mm;
 	int ret;

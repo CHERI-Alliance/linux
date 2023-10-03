@@ -92,6 +92,7 @@ int verify_auxval(struct morello_auxv *auxv)
 	case AT_PLATFORM:
 	case AT_RANDOM:
 	case AT_PHDR:
+	case AT_SYSINFO_EHDR:
 	case AT_CHERI_EXEC_RX_CAP:
 	case AT_CHERI_STACK_CAP:
 	case AT_CHERI_SEAL_CAP:

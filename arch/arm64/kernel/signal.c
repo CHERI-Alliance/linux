@@ -39,6 +39,11 @@
 #endif
 #include <asm/traps.h>
 #include <asm/vdso.h>
+#if defined(CONFIG_CHERI_PURECAP_UABI) && !defined(SIGNAL_COMPAT64)
+#include <generated/vdso-purecap-offsets.h>
+#else
+#include <generated/vdso-offsets.h>
+#endif
 
 #ifndef SIGNAL_COMPAT64
 /*

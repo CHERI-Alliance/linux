@@ -16,7 +16,9 @@
 
 #ifndef __ASSEMBLY__
 
-#include <generated/vdso-offsets.h>
+#ifdef CONFIG_COMPAT_VDSO
+#include <generated/vdso32-offsets.h>
+#endif
 
 #define VDSO_SYMBOL(base, name)						   \
 ({									   \
@@ -25,6 +27,7 @@
 
 extern char vdso_start[], vdso_end[];
 extern char vdso32_start[], vdso32_end[];
+extern char vdso_purecap_start[], vdso_purecap_end[];
 
 #endif /* !__ASSEMBLY__ */
 
