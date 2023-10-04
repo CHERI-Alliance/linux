@@ -19,6 +19,7 @@
 #include <linux/hugetlb.h>
 #include <linux/pgtable.h>
 
+#include <linux/mm_reserv.h>
 #include <linux/uaccess.h>
 #include "swap.h"
 
@@ -172,6 +173,50 @@ static inline bool can_do_mincore(struct vm_area_struct *vma)
 	       file_permission(vma->vm_file, MAY_WRITE) == 0;
 }
 
+static int check_pcuabi_mincore_ptr_arg(user_uintptr_t user_ptr,
+					unsigned long start,
+					unsigned long len)
+{
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	ptraddr_t cap_base, min_upper_bound;
+	size_t cap_len;
+	cheri_perms_t perms;
+
+	if (!reserv_is_supported(current->mm))
+		return 0;
+
+	cap_base = cheri_base_get(user_ptr);
+	cap_len = cheri_length_get(user_ptr);
+	perms = cheri_perms_get(user_ptr);
+
+	/*
+	 * mincore does not require the VMem permission so as to allow ordinary
+	 * pointers (unlike other address space management syscalls requiring an
+	 * owning capability).
+	 * Requiring at least one of the standard memory permissions RWX will
+	 * however help to reject non-memory capabilities.
+	 */
+	if (!(cheri_is_valid(user_ptr) && cheri_is_unsealed(user_ptr) &&
+	      (perms & CHERI_PERM_GLOBAL) &&
+	      (perms & (CHERI_PERM_LOAD | CHERI_PERM_STORE | CHERI_PERM_EXECUTE))))
+		return -EINVAL;
+
+	/*
+	 * mincore syscall can be invoked as:
+	 * mincore(align_down(p, PAGE_SIZE), sz + (p.addr % PAGE_SIZE), vec)
+	 * Hence, the capability bounds may not encompass the page-aligned range.
+	 * For that reason, we only require that the capability bounds cover at
+	 * least one byte in the first and last page.
+	 */
+	min_upper_bound = start + PAGE_ALIGN_DOWN(len) +
+				  (offset_in_page(len) > 0 ? 1 : 0);
+	if (!((start + PAGE_SIZE > cap_base) &&
+	      (cap_base + cap_len >= min_upper_bound)))
+		return -EINVAL;
+#endif
+	return 0;
+}
+
 static const struct mm_walk_ops mincore_walk_ops = {
 	.pmd_entry		= mincore_pte_range,
 	.pte_hole		= mincore_unmapped_range,
@@ -229,14 +274,13 @@ static long do_mincore(unsigned long addr, unsigned long pages, unsigned char *v
  *		mapped
  *  -EAGAIN - A kernel resource was temporarily unavailable.
  */
-SYSCALL_DEFINE3(mincore, unsigned long, start, size_t, len,
+SYSCALL_DEFINE3(mincore, user_uintptr_t, user_ptr, size_t, len,
 		unsigned char __user *, vec)
 {
 	long retval;
 	unsigned long pages;
 	unsigned char *tmp;
-
-	start = untagged_addr(start);
+	unsigned long start = untagged_addr((ptraddr_t)user_ptr);
 
 	/* Check the start address: needs to be page-aligned.. */
 	if (start & ~PAGE_MASK)
@@ -252,6 +296,10 @@ SYSCALL_DEFINE3(mincore, unsigned long, start, size_t, len,
 
 	if (!access_ok(vec, pages))
 		return -EFAULT;
+
+	retval = check_pcuabi_mincore_ptr_arg(user_ptr, start, len);
+	if (retval)
+		return retval;
 
 	tmp = (void *) __get_free_page(GFP_USER);
 	if (!tmp)
