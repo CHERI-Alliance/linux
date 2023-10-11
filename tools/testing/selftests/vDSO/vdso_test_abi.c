@@ -20,6 +20,7 @@
 
 #include "../kselftest.h"
 #include "vdso_config.h"
+#include "parse_vdso.h"
 
 extern void *vdso_sym(const char *version, const char *name);
 extern void vdso_init_from_sysinfo_ehdr(uintptr_t base);
@@ -181,7 +182,7 @@ static inline void vdso_test_clock(clockid_t clock_id)
 
 int main(int argc, char **argv)
 {
-	unsigned long sysinfo_ehdr = getauxval(AT_SYSINFO_EHDR);
+	uintptr_t sysinfo_ehdr = get_sysinfo_ehdr();
 
 	ksft_print_header();
 	ksft_set_plan(VDSO_TEST_PLAN);
@@ -196,7 +197,7 @@ int main(int argc, char **argv)
 
 	ksft_print_msg("[vDSO kselftest] VDSO_VERSION: %s\n", version);
 
-	vdso_init_from_sysinfo_ehdr(getauxval(AT_SYSINFO_EHDR));
+	vdso_init_from_sysinfo_ehdr(sysinfo_ehdr);
 
 	vdso_test_gettimeofday();
 

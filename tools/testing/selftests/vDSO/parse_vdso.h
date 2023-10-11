@@ -4,6 +4,7 @@
 #define PARSE_VDSO_H
 
 #include <stdint.h>
+#include <sys/auxv.h>
 
 /*
  * To use this vDSO parser, first call one of the vdso_init_* functions.
@@ -27,5 +28,20 @@
 void *vdso_sym(const char *version, const char *name);
 void vdso_init_from_sysinfo_ehdr(uintptr_t base);
 void vdso_init_from_auxv(void *auxv);
+
+/*
+ * Under PCuABI, pointers in the auxiliary vector can no longer be represented
+ * as unsigned long as they are now capabilities. Get the capability to the
+ * vDSO using getauxptr() instead, which returns a a capability instead of
+ * unsigned long.
+ */
+static inline uintptr_t get_sysinfo_ehdr()
+{
+#ifdef __CHERI_PURE_CAPABILITY__
+	return getauxptr(AT_SYSINFO_EHDR);
+#else
+	return (uintptr_t)getauxval(AT_SYSINFO_EHDR);
+#endif
+}
 
 #endif

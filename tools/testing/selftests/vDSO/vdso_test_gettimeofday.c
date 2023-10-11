@@ -25,13 +25,13 @@ int main(int argc, char **argv)
 	const char *version = versions[VDSO_VERSION];
 	const char **name = (const char **)&names[VDSO_NAMES];
 
-	unsigned long sysinfo_ehdr = getauxval(AT_SYSINFO_EHDR);
+	uintptr_t sysinfo_ehdr = getauxval(AT_SYSINFO_EHDR);
 	if (!sysinfo_ehdr) {
 		printf("AT_SYSINFO_EHDR is not present!\n");
 		return KSFT_SKIP;
 	}
 
-	vdso_init_from_sysinfo_ehdr(getauxval(AT_SYSINFO_EHDR));
+	vdso_init_from_sysinfo_ehdr(sysinfo_ehdr);
 
 	/* Find gettimeofday. */
 	typedef long (*gtod_t)(struct timeval *tv, struct timezone *tz);
