@@ -91,8 +91,12 @@ int __attribute__ ((format(printf, 1, 2))) printf(const char *fmt, ...);
 /* this macro emulates its harness counterpart but is not API compatible */
 #define __EXPECT(exp, seen, op, exit_on_fail) \
 	do { \
-		if (!((exp) op (seen))) { \
-			__TH_LOG_ERROR("'(%s) %s (%s)' was false", #exp, #op, #seen); \
+		__typeof__(exp) __exp = (exp); \
+		__typeof__(seen) __seen = (seen); \
+		if (!((__exp) op (__seen))) { \
+			__TH_LOG_ERROR("Expected %s (%lld) %s %s (%lld)", \
+				       #exp, (long long)__exp, #op, \
+				       #seen, (long long)__seen); \
 			__cur_test->message = 1; \
 		} \
 	} while (0); \
