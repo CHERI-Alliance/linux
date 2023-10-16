@@ -27,6 +27,21 @@
 #include <asm/memory.h>
 #include <asm/extable.h>
 
+#ifdef CONFIG_CHERI_PURECAP_UABI
+#define __ASM_SWITCH_TO_C64	"	bx	#4\n"	\
+				".arch morello+c64\n"
+#define __ASM_SWITCH_TO_A64	"	bx	#4\n"	\
+				".arch morello\n"
+#define __ASM_RW_UPTR_CONSTR	"+C"
+#else
+#define __ASM_SWITCH_TO_C64
+#define __ASM_SWITCH_TO_A64
+#define __ASM_RW_UPTR_CONSTR	"+r"
+#endif
+
+#define __ASM_UACCESS_BEFORE	__ASM_SWITCH_TO_C64
+#define __ASM_UACCESS_AFTER	__ASM_SWITCH_TO_A64
+
 static inline int __access_ok(const void __user *ptr, unsigned long size);
 
 /*
