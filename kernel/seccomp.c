@@ -712,7 +712,7 @@ seccomp_prepare_user_filter(const char __user *user_filter)
 		fprog.filter = compat_ptr(fprog32.filter);
 	} else /* falls through to the if below. */
 #endif
-	if (copy_from_user(&fprog, user_filter, sizeof(fprog)))
+	if (copy_from_user_with_ptr(&fprog, user_filter, sizeof(fprog)))
 		goto out;
 	filter = seccomp_prepare_filter(&fprog);
 out:
