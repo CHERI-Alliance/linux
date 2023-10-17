@@ -489,7 +489,7 @@ static inline int tty_audit_push(void)
 
 /* tty_ioctl.c */
 int n_tty_ioctl_helper(struct tty_struct *tty, unsigned int cmd,
-		unsigned long arg);
+		user_uintptr_t arg);
 
 /* vt.c */
 
