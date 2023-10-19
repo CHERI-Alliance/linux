@@ -64,9 +64,11 @@
 	.endm
 
 end	.req	x5
+dstin	.req	x6
 srcin	.req	x15
 SYM_FUNC_START(COPY_FUNC_NAME)
 	add	end, x0, x2
+	mov	dstin, x0
 	mov	srcin, x1
 #include "copy_template.S"
 	mov	x0, #0
