@@ -434,7 +434,13 @@ do {									\
 do {									\
 	__chk_user_ptr(ptr);						\
 	uaccess_ttbr0_enable();						\
-	__morello_get_user_cap_asm(&(x), (ptr), &(err));		\
+	asm volatile(							\
+	"1:	ldtr %1, [%2]\n"					\
+	"2:\n"								\
+	_ASM_EXTABLE_UACCESS_ERR_ZERO(1b, 2b, %w0, %w1)			\
+	: "+r" (err), "=C" (x)						\
+	/* TODO [PCuABI] - perform the access via the user capability */\
+	: "r" ((ptraddr_t)(user_uintptr_t)(ptr)));			\
 	uaccess_ttbr0_disable();					\
 } while (0)
 
@@ -464,7 +470,13 @@ do {									\
 do {									\
 	__chk_user_ptr(ptr);						\
 	uaccess_ttbr0_enable();						\
-	__morello_put_user_cap_asm(&(x), (ptr), &(err));		\
+	asm volatile(							\
+	"1:	sttr %1, [%2]\n"					\
+	"2:\n"								\
+	_ASM_EXTABLE_UACCESS_ERR(1b, 2b, %w0)				\
+	: "+r" (err)							\
+	/* TODO [PCuABI] - perform the access via the user capability */\
+	: "CZ" (x), "r" ((ptraddr_t)(user_uintptr_t)(ptr)));		\
 	uaccess_ttbr0_disable();					\
 } while (0)
 
