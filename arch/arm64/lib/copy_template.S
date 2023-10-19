@@ -18,17 +18,14 @@
  *	x0 - dest
  *	x1 - src
  *	x2 - n
- * Returns:
- *	x0 - dest
  */
-dstin	.req	x0
+dst	.req	x0
 src	.req	x1
 count	.req	x2
 tmp1	.req	x3
 tmp1w	.req	w3
 tmp2	.req	x4
 tmp2w	.req	w4
-dst	.req	x6
 
 A_l	.req	x7
 A_h	.req	x8
@@ -48,8 +45,6 @@ Ac_h	.req	c8
 Bc_l	.req	c9
 Bc_h	.req	c10
 #endif
-
-	mov	dst, dstin
 
 #ifdef CONFIG_AS_HAS_MOPS
 alternative_if_not ARM64_HAS_MOPS
