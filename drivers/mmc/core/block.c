@@ -460,7 +460,7 @@ static int get_mmc_ioc_cmd_from_compat64(struct mmc_ioc_cmd *native_cmd,
 	native_cmd->data_timeout_ns = compat_cmd.data_timeout_ns;
 	native_cmd->cmd_timeout_ms = compat_cmd.cmd_timeout_ms;
 	native_cmd->__pad = compat_cmd.__pad;
-	native_cmd->data_ptr = compat_cmd.data_ptr;
+	native_cmd->data_ptr = (__kernel_uintptr_t)compat_ptr(compat_cmd.data_ptr);
 
 	return 0;
 }
@@ -470,7 +470,7 @@ static int copy_mmc_ioc_cmd_from_user(struct mmc_ioc_cmd *to, void * __user src)
 	if (in_compat64())
 		return get_mmc_ioc_cmd_from_compat64(to, src);
 
-	if (copy_from_user(to, src, sizeof(*to)))
+	if (copy_from_user_with_ptr(to, src, sizeof(*to)))
 		return -EFAULT;
 	return 0;
 }
@@ -503,7 +503,7 @@ static struct mmc_blk_ioc_data *mmc_blk_ioctl_copy_from_user(
 		return idata;
 	}
 
-	idata->buf = memdup_user(uaddr_to_user_ptr(idata->ic.data_ptr),
+	idata->buf = memdup_user((void __user *)idata->ic.data_ptr,
 				 idata->buf_bytes);
 	if (IS_ERR(idata->buf)) {
 		err = PTR_ERR(idata->buf);
@@ -531,7 +531,7 @@ static int mmc_blk_ioctl_copy_to_user(struct mmc_ioc_cmd __user *ic_ptr,
 		return -EFAULT;
 
 	if (!idata->ic.write_flag) {
-		if (copy_to_user(uaddr_to_user_ptr(ic->data_ptr),
+		if (copy_to_user((void __user *)ic->data_ptr,
 				 idata->buf, idata->buf_bytes))
 			return -EFAULT;
 	}
