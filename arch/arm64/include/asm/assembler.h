@@ -34,6 +34,14 @@
 	wx\n	.req	w\n
 	.endr
 
+	.macro req_reg_pcuabi, name, pcuabi_reg, default_reg
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	\name	.req	\pcuabi_reg
+#else
+	\name	.req	\default_reg
+#endif
+	.endm
+
 	.macro disable_daif
 	msr	daifset, #0xf
 	.endm

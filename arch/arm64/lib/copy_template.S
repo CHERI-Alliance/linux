@@ -19,8 +19,10 @@
  *	x1 - src
  *	x2 - n
  */
-dst	.req	x0
-src	.req	x1
+req_reg_pcuabi dst, c0, x0
+dstx	.req	x0
+req_reg_pcuabi src, c1, x1
+srcx	.req	x1
 count	.req	x2
 tmp1	.req	x3
 tmp1w	.req	w3
@@ -50,7 +52,7 @@ Bc_h	.req	c10
 	/*When memory length is less than 16, the accessed are not aligned.*/
 	b.lo	.Ltiny15
 
-	neg	tmp2, src
+	neg	tmp2, srcx
 	ands	tmp2, tmp2, #15/* Bytes to reach alignment. */
 	b.eq	.LSrcAligned
 	sub	count, count, tmp2
@@ -79,7 +81,7 @@ Bc_h	.req	c10
 .LSrcAligned:
 #ifdef COPY_CAPTAGS
 	/* src now 16-byte aligned, copy capability tags if dst also aligned */
-	tst	dst, #15
+	tst	dstx, #15
 	b.eq	.LSrcAligned_cpycaps
 #endif
 	cmp	count, #64
