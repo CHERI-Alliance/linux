@@ -17,7 +17,7 @@ CFLAGS += $(CLANG_FLAGS) $(CFLAGS_PURECAP) $(CFLAGS_COMMON)
 LDFLAGS += $(CLANG_LDFLAGS) $(CLANG_FLAGS) -nostdlib -static
 
 SRCS := $(wildcard *.c) $(wildcard *.S)
-PROGS := bootstrap clone exit mmap read_write sched signal
+PROGS := bootstrap clone exit mmap read_write sched signal uaccess
 DEPS := $(wildcard *.h)
 
 # these are the final executables
