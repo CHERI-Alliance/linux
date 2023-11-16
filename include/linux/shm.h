@@ -14,7 +14,7 @@ struct sysv_shm {
 	struct list_head shm_clist;
 };
 
-long do_shmat(int shmid, char __user *shmaddr, int shmflg, unsigned long *addr,
+long do_shmat(int shmid, char __user *shmaddr, int shmflg, user_uintptr_t *user_ptr,
 	      unsigned long shmlba);
 void exit_shm(struct task_struct *task);
 #define shm_init_task(task) INIT_LIST_HEAD(&(task)->sysvshm.shm_clist)
@@ -24,7 +24,7 @@ struct sysv_shm {
 };
 
 static inline long do_shmat(int shmid, char __user *shmaddr,
-			    int shmflg, unsigned long *addr,
+			    int shmflg, user_uintptr_t *user_ptr,
 			    unsigned long shmlba)
 {
 	return -ENOSYS;
