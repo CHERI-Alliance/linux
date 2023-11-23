@@ -3,6 +3,7 @@
 #define __LINUX_COMPILER_H
 
 #include <linux/compiler_types.h>
+#include <linux/types.h>
 
 #ifndef __ASSEMBLY__
 
@@ -228,7 +229,7 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
  */
 static inline void *offset_to_ptr(const int *off)
 {
-	return (void *)((unsigned long)off + *off);
+	return (void *)((uintptr_t)off + *off);
 }
 
 #endif /* __ASSEMBLY__ */
