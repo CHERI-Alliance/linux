@@ -51,8 +51,13 @@ typedef __kernel_gid32_t	gid_t;
 typedef __kernel_uid16_t        uid16_t;
 typedef __kernel_gid16_t        gid16_t;
 
+#ifdef __CHERI_PURE_CAPABILITY__
+typedef __uintcap_t		uintptr_t;
+typedef __intcap_t		intptr_t;
+#else
 typedef unsigned long		uintptr_t;
 typedef long			intptr_t;
+#endif
 
 #ifdef CONFIG_CHERI_PURECAP_UABI
 typedef __uintcap_t		user_uintptr_t;
