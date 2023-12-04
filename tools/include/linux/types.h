@@ -86,6 +86,16 @@ typedef struct {
 # define __aligned_u64 __u64 __attribute__((aligned(8)))
 #endif
 
+#ifndef __KERNEL__
+#ifdef __CHERI_PURE_CAPABILITY__
+typedef __uintcap_t	__kernel_uintptr_t;
+typedef __uintcap_t	__kernel_aligned_uintptr_t;
+#else
+typedef __u64		__kernel_uintptr_t;
+typedef __aligned_u64	__kernel_aligned_uintptr_t;
+#endif
+#endif
+
 struct list_head {
 	struct list_head *next, *prev;
 };
