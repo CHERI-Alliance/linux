@@ -3111,7 +3111,7 @@ const struct file_operations proc_pagemap_operations = {
 	.open		= pagemap_open,
 	.release	= pagemap_release,
 	.unlocked_ioctl = do_pagemap_cmd,
-	.compat_ioctl	= do_pagemap_cmd,
+	.compat_ioctl	= compat_ptr_ioctl,
 };
 #endif /* CONFIG_PROC_PAGE_MONITOR */
 
