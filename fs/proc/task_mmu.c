@@ -2352,7 +2352,7 @@ static const struct mm_walk_ops pagemap_scan_ops = {
 };
 
 static int pagemap_scan_get_args(struct pm_scan_arg *arg,
-				 unsigned long uarg)
+				 user_uintptr_t uarg)
 {
 	if (copy_from_user(arg, (void __user *)uarg, sizeof(*arg)))
 		return -EFAULT;
@@ -2374,11 +2374,11 @@ static int pagemap_scan_get_args(struct pm_scan_arg *arg,
 	/* Validate memory pointers */
 	if (!IS_ALIGNED(arg->start, PAGE_SIZE))
 		return -EINVAL;
-	if (!access_ok((void __user *)(long)arg->start, arg->end - arg->start))
+	if (!access_ok(as_user_ptr(arg->start), arg->end - arg->start))
 		return -EFAULT;
 	if (!arg->vec && arg->vec_len)
 		return -EINVAL;
-	if (arg->vec && !access_ok((void __user *)(long)arg->vec,
+	if (arg->vec && !access_ok(as_user_ptr(arg->vec),
 			      arg->vec_len * sizeof(struct page_region)))
 		return -EFAULT;
 
@@ -2392,7 +2392,7 @@ static int pagemap_scan_get_args(struct pm_scan_arg *arg,
 }
 
 static int pagemap_scan_writeback_args(struct pm_scan_arg *arg,
-				       unsigned long uargl)
+				       user_uintptr_t uargl)
 {
 	struct pm_scan_arg __user *uarg	= (void __user *)uargl;
 
@@ -2415,7 +2415,7 @@ static int pagemap_scan_init_bounce_buffer(struct pagemap_scan_private *p)
 		return -ENOMEM;
 
 	p->vec_buf->start = p->vec_buf->end = 0;
-	p->vec_out = (struct page_region __user *)(long)p->arg.vec;
+	p->vec_out = uaddr_to_user_ptr(p->arg.vec);
 
 	return 0;
 }
@@ -2447,7 +2447,7 @@ static long pagemap_scan_flush_buffer(struct pagemap_scan_private *p)
 	return n;
 }
 
-static long do_pagemap_scan(struct mm_struct *mm, unsigned long uarg)
+static long do_pagemap_scan(struct mm_struct *mm, user_uintptr_t uarg)
 {
 	struct pagemap_scan_private p = {0};
 	unsigned long walk_start;
@@ -2521,7 +2521,7 @@ static long do_pagemap_scan(struct mm_struct *mm, unsigned long uarg)
 }
 
 static long do_pagemap_cmd(struct file *file, unsigned int cmd,
-			   unsigned long arg)
+			   user_uintptr_t arg)
 {
 	struct mm_struct *mm = file->private_data;
 
@@ -2540,7 +2540,7 @@ const struct file_operations proc_pagemap_operations = {
 	.open		= pagemap_open,
 	.release	= pagemap_release,
 	.unlocked_ioctl = do_pagemap_cmd,
-	.compat_ioctl	= do_pagemap_cmd,
+	.compat_ioctl	= compat_ptr_ioctl,
 };
 #endif /* CONFIG_PROC_PAGE_MONITOR */
 
