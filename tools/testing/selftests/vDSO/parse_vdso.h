@@ -34,12 +34,12 @@ void vdso_init_from_sysinfo_ehdr(uintptr_t base);
  * vDSO using getauxptr() instead, which returns a a capability instead of
  * unsigned long.
  */
-static inline uintptr_t get_sysinfo_ehdr()
+static inline uintptr_t get_sysinfo_ehdr(void)
 {
 #ifdef __CHERI_PURE_CAPABILITY__
-	return getauxptr(AT_SYSINFO_EHDR);
+	return (uintptr_t)getauxptr(AT_SYSINFO_EHDR);
 #else
-	return (uintptr_t)getauxval(AT_SYSINFO_EHDR);
+	return getauxval(AT_SYSINFO_EHDR);
 #endif
 }
 
