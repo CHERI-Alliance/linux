@@ -12,7 +12,7 @@ void io_pages_unmap(void *ptr, struct page ***pages, unsigned short *npages,
 		    bool put_pages);
 
 void *__io_uaddr_map(struct page ***pages, unsigned short *npages,
-		     unsigned long uaddr, size_t size);
+		     void __user * uptr, size_t size);
 
 #ifndef CONFIG_MMU
 unsigned int io_uring_nommu_mmap_capabilities(struct file *file);

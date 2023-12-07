@@ -165,8 +165,9 @@ struct page **io_pin_pages(unsigned long uaddr, unsigned long len, int *npages)
 }
 
 void *__io_uaddr_map(struct page ***pages, unsigned short *npages,
-		     unsigned long uaddr, size_t size)
+		     void __user *uptr, size_t size)
 {
+	unsigned long uaddr = user_ptr_addr(uptr);
 	struct page **page_array;
 	unsigned int nr_pages;
 	void *page_addr;
@@ -175,6 +176,8 @@ void *__io_uaddr_map(struct page ***pages, unsigned short *npages,
 
 	if (uaddr & (PAGE_SIZE - 1) || !size)
 		return ERR_PTR(-EINVAL);
+	if (!check_user_ptr_rw(uptr, size))
+		return ERR_PTR(-EFAULT);
 
 	nr_pages = 0;
 	page_array = io_pin_pages(uaddr, size, &nr_pages);

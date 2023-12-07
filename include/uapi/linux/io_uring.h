@@ -476,7 +476,7 @@ struct io_sqring_offsets {
 	__u32 dropped;
 	__u32 array;
 	__u32 resv1;
-	__u64 user_addr;
+	__kernel_uintptr_t user_addr;
 };
 
 /*
@@ -495,7 +495,7 @@ struct io_cqring_offsets {
 	__u32 cqes;
 	__u32 flags;
 	__u32 resv1;
-	__u64 user_addr;
+	__kernel_uintptr_t user_addr;
 };
 
 /*
