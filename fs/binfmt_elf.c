@@ -132,67 +132,6 @@ static int padzero(unsigned long address)
 	}
 	return 0;
 }
-/*
- * Put a pointer or capability to a string on the stack, return the effective
- * size of the string on the stack or an error.
- * When building a PCuABI kernel, this will take into account padding and
- * create an exactly representable capability if in purecap.
- */
-static long put_str_ptr(char __user *ustr,
-		elf_stack_item_t __user *stack_item)
-{
-	size_t len;
-
-	len = strnlen_user(ustr, MAX_ARG_STRLEN);
-	if (!len || len > MAX_ARG_STRLEN)
-		return -EINVAL;
-
-#if defined(CONFIG_CHERI_PURECAP_UABI)
-	/*
-	 * The start of the string should always be properly aligned, but its
-	 * representable length might be different. Get the representable
-	 * length by using the same length that was used during allocation: the
-	 * length of the original string.
-	 * This takes into account the padding due to length change, but not
-	 * that for alignment. Thus we might not end up at the start of the
-	 * next arg. If not, we will need to take a slow path to go through
-	 * the padding.
-	 */
-	len = cheri_representable_length(len);
-
-	{
-		char __user *str_ptr = ustr;
-#if (ELF_COMPAT == 0)
-		str_ptr = cheri_perms_and(str_ptr,
-			(CHERI_PERM_GLOBAL | CHERI_PERM_STORE | CHERI_PERM_LOAD));
-		str_ptr = cheri_bounds_set_exact(str_ptr, len);
-#endif
-		if (elf_stack_put_user(str_ptr, stack_item++))
-			return -EFAULT;
-	}
-
-	/*
-	 * If right after the end of the argument length we have a zero, that
-	 * means the argument alignment was adjusted in order to create a
-	 * representable capability in purecap, even if we are not loading a
-	 * purecap binary. This padding is added at the end, so find the real
-	 * end by going through the padding.
-	 */
-	for (; len < MAX_ARG_STRLEN; len++) {
-		char c;
-
-		if (get_user(c, ustr + len))
-			return -EFAULT;
-		if (c != '\0')
-			break;
-	}
-#else /* CONFIG_CHERI_PURECAP_UABI */
-	if (elf_stack_put_user(ustr, stack_item++))
-		return -EFAULT;
-#endif /* CONFIG_CHERI_PURECAP_UABI */
-
-	return len;
-}
 
 /* Let's use some macros to make this stack manipulation a little clearer */
 #ifdef CONFIG_STACK_GROWSUP
@@ -255,7 +194,6 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 #if defined(CONFIG_CHERI_PURECAP_UABI) && (ELF_COMPAT == 0)
 	elf_stack_item_t *mm_at_argv, *mm_at_envp;
 #endif
-	long str_ret = 0;
 
 	/*
 	 * In some cases (e.g. Hyper-Threading), we want to avoid L1
@@ -440,10 +378,13 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	/* In PCuABI, this derives a capability from SP pointing to arg_start */
 	ustr = sp + (mm->arg_start - user_ptr_addr(sp));
 	while (argc-- > 0) {
-		str_ret = put_str_ptr(ustr, stack_item++);
-		if (str_ret < 0)
-			return str_ret;
-		ustr += str_ret;
+		size_t len;
+		if (elf_stack_put_user(ustr, stack_item++))
+			return -EFAULT;
+		len = strnlen_user(ustr, MAX_ARG_STRLEN);
+		if (!len || len > MAX_ARG_STRLEN)
+			return -EINVAL;
+		ustr += len;
 	}
 	if (elf_stack_put_user(0, stack_item++))
 		return -EFAULT;
@@ -455,10 +396,13 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 #endif
 	mm->env_start = user_ptr_addr(ustr);
 	while (envc-- > 0) {
-		str_ret = put_str_ptr(ustr, stack_item++);
-		if (str_ret < 0)
-			return str_ret;
-		ustr += str_ret;
+		size_t len;
+		if (elf_stack_put_user(ustr, stack_item++))
+			return -EFAULT;
+		len = strnlen_user(ustr, MAX_ARG_STRLEN);
+		if (!len || len > MAX_ARG_STRLEN)
+			return -EINVAL;
+		ustr += len;
 	}
 	if (elf_stack_put_user(0, stack_item++))
 		return -EFAULT;

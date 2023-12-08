@@ -79,12 +79,6 @@
 
 #include <trace/events/sched.h>
 
-#ifdef CONFIG_CHERI_PURECAP_UABI
-#define STACK_ALIGN_SIZE MAX_ARG_STRLEN
-#else
-#define STACK_ALIGN_SIZE PAGE_SIZE
-#endif
-
 static int bprm_creds_from_file(struct linux_binprm *bprm);
 
 int suid_dumpable = 0;
@@ -539,37 +533,6 @@ static int bprm_stack_limits(struct linux_binprm *bprm)
 }
 
 /*
- * Compute the a new value for p that allows for creating an exactly
- * representable capability with all its padding after.
- */
-size_t align_p_for_representable_bounds(unsigned long p, size_t len)
-{
-#if defined(CONFIG_CHERI_PURECAP_UABI)
-	size_t repr_len = 0, repr_align;
-
-	repr_len = cheri_representable_length(len);
-	repr_align = ~cheri_representable_alignment_mask(len) + 1;
-	/*
-	 * We want the capability base to be aligned. As we work from the last
-	 * to the first argument, we can place the start of the string to be
-	 * aligned for representability.
-	 * All padding then goes after it, both for the representable length
-	 * and for the alignment, to fill the space we left before the previous
-	 * argument we put on the stack.
-	 *
-	 * This is slightly different than the usual way representable
-	 * capabilities are created: usually we cannot change the address
-	 * pointed by the capability, so there can be padding between the
-	 * capability base and the capability value.
-	 * Here we can decide where to place the string, so we build a
-	 * capability with equal base and value, with all padding after.
-	 */
-	p = ALIGN_DOWN(p - repr_len, repr_align) + len;
-#endif
-	return p;
-}
-
-/*
  * 'copy_strings()' copies argument/environment strings from the old
  * processes's memory to the new process's stack.  The call to get_user_pages()
  * ensures the destination page is created and not swapped out.
@@ -584,7 +547,7 @@ static int copy_strings(int argc, struct user_arg_ptr argv,
 
 	while (argc-- > 0) {
 		const char __user *str;
-		size_t len;
+		int len;
 		unsigned long pos;
 
 		ret = -EFAULT;
@@ -595,18 +558,6 @@ static int copy_strings(int argc, struct user_arg_ptr argv,
 		len = strnlen_user(str, MAX_ARG_STRLEN);
 		if (!len)
 			goto out;
-
-		/*
-		 * Handle all strings as if they were for purecap binaries as
-		 * we only know the calling process compat status, which might
-		 * be different from the binary to be exec'ed.
-		 *
-		 * Start directly at the string end, with all the padding
-		 * already skipped.
-		 *
-		 * No-op when !defined(CONFIG_CHERI_PURECAP_UABI).
-		 */
-		bprm->p = align_p_for_representable_bounds(bprm->p, len);
 
 		ret = -E2BIG;
 		if (!valid_arg_len(bprm, len))
@@ -842,14 +793,14 @@ int setup_arg_pages(struct linux_binprm *bprm,
 	if (vma->vm_end - vma->vm_start > stack_base)
 		return -ENOMEM;
 
-	stack_base = ALIGN(stack_top - stack_base, STACK_ALIGN_SIZE);
+	stack_base = PAGE_ALIGN(stack_top - stack_base);
 
 	stack_shift = vma->vm_start - stack_base;
 	mm->arg_start = bprm->p - stack_shift;
 	bprm->p = vma->vm_end - stack_shift;
 #else
 	stack_top = arch_align_stack(stack_top);
-	stack_top = ALIGN(stack_top, STACK_ALIGN_SIZE);
+	stack_top = PAGE_ALIGN(stack_top);
 
 	if (unlikely(stack_top < mmap_min_addr) ||
 	    unlikely(vma->vm_end - vma->vm_start >= stack_top - mmap_min_addr))
