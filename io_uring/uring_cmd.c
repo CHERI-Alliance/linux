@@ -277,6 +277,17 @@ int io_uring_cmd_import_fixed(void __user *ubuf, unsigned long len, int rw,
 }
 EXPORT_SYMBOL_GPL(io_uring_cmd_import_fixed);
 
+static inline void __user *sqe_get_optval(const struct io_uring_sqe *sqe)
+{
+	if (IS_ENABLED(CONFIG_COMPAT64) && in_compat_syscall()) {
+		const __u64 *val = io_uring_sqe_cmd(sqe);
+		return compat_ptr(READ_ONCE(*val));
+	} else {
+		const __kernel_uintptr_t *val = io_uring_sqe_cmd(sqe);
+		return (void __user *)READ_ONCE(*val);
+	}
+}
+
 static inline int io_uring_cmd_getsockopt(struct socket *sock,
 					  struct io_uring_cmd *cmd,
 					  unsigned int issue_flags)
@@ -289,7 +300,7 @@ static inline int io_uring_cmd_getsockopt(struct socket *sock,
 	if (level != SOL_SOCKET)
 		return -EOPNOTSUPP;
 
-	optval = (void __user *)READ_ONCE(cmd->sqe->optval);
+	optval = sqe_get_optval(cmd->sqe);
 	optname = READ_ONCE(cmd->sqe->optname);
 	optlen = READ_ONCE(cmd->sqe->optlen);
 
@@ -312,7 +323,7 @@ static inline int io_uring_cmd_setsockopt(struct socket *sock,
 	void __user *optval;
 	sockptr_t optval_s;
 
-	optval = (void __user *)READ_ONCE(cmd->sqe->optval);
+	optval = sqe_get_optval(cmd->sqe);
 	optname = READ_ONCE(cmd->sqe->optname);
 	optlen = READ_ONCE(cmd->sqe->optlen);
 	level = READ_ONCE(cmd->sqe->level);
