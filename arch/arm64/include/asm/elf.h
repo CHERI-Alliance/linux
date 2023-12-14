@@ -174,12 +174,7 @@ extern int aarch64_setup_additional_pages(struct linux_binprm *bprm,
 extern int purecap_setup_additional_pages(struct linux_binprm *bprm,
 					  int uses_interp);
 #define arch_setup_additional_pages purecap_setup_additional_pages
-/*
- * TODO [PCuABI]: Look into restricting the bounds of this capability to just
- * the vDSO pages, as currently the bounds are of the root user capability.
- */
-#define ARCH_DLINFO	SETUP_DLINFO(uaddr_to_user_ptr_safe( \
-					(elf_addr_t)current->mm->context.vdso))
+#define ARCH_DLINFO	SETUP_DLINFO(current->mm->context.vdso)
 #else /* !CONFIG_CHERI_PURECAP_UABI */
 #define arch_setup_additional_pages aarch64_setup_additional_pages
 #define ARCH_DLINFO	SETUP_DLINFO((elf_addr_t)current->mm->context.vdso)
@@ -224,7 +219,7 @@ typedef compat_elf_greg_t		compat_elf_gregset_t[COMPAT_ELF_NGREG];
 	SET_PERSONALITY_AARCH64();					\
 })
 
-#define COMPAT_ARCH_DLINFO	SETUP_DLINFO((elf_addr_t)current->mm->context.vdso)
+#define COMPAT_ARCH_DLINFO	SETUP_DLINFO(current->mm->context.vdso)
 
 #define compat_arch_setup_additional_pages	aarch64_setup_additional_pages
 

@@ -81,10 +81,23 @@ static struct vdso_abi_info vdso_info[] __ro_after_init = {
 static union vdso_data_store vdso_data_store __page_aligned_data;
 struct vdso_data *vdso_data = vdso_data_store.data;
 
+static user_uintptr_t make_vdso_ptr(struct vm_area_struct *vdso_text_vma)
+{
+	user_uintptr_t ret;
+
+	ret = reserv_vma_make_user_ptr_owning(vdso_text_vma);
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	if (!is_compat_task())
+		ret = cheri_perms_clear(ret, CHERI_PERM_SW_VMEM);
+#endif
+
+	return ret;
+}
+
 static int vdso_mremap(const struct vm_special_mapping *sm,
 		struct vm_area_struct *new_vma)
 {
-	current->mm->context.vdso = (void *)new_vma->vm_start;
+	current->mm->context.vdso = make_vdso_ptr(new_vma);
 
 	return 0;
 }
@@ -230,7 +243,6 @@ static int __setup_additional_pages(enum vdso_abi abi,
 		gp_flags = VM_ARM64_BTI;
 
 	vdso_text_base = vdso_base + VVAR_NR_PAGES * PAGE_SIZE;
-	mm->context.vdso = (void *)vdso_text_base;
 	ret = _install_special_mapping(mm, vdso_text_base, vdso_text_len,
 				       VM_READ|VM_EXEC|gp_flags|
 				       VM_MAYREAD|VM_MAYWRITE|VM_MAYEXEC,
@@ -242,10 +254,12 @@ static int __setup_additional_pages(enum vdso_abi abi,
 				  PROT_READ | PROT_EXEC))
 		goto up_fail;
 
+	mm->context.vdso = make_vdso_ptr(ret);
+
 	return 0;
 
 up_fail:
-	mm->context.vdso = NULL;
+	mm->context.vdso = 0;
 	return PTR_ERR(ret);
 }
 

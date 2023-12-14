@@ -23,7 +23,7 @@ typedef struct {
 	void		*sigpage;
 #endif
 	refcount_t	pinned;
-	void		*vdso;
+	user_uintptr_t	vdso;
 	unsigned long	flags;
 } mm_context_t;
 
