@@ -248,7 +248,7 @@ static int get_compat64_io_uring_params(struct io_uring_params *params,
 static int copy_io_uring_params_from_user(struct io_uring_params *params,
 					  const void __user *src)
 {
-	if (IS_ENABLED(CONFIG_COMPAT64) && in_compat_syscall())
+	if (in_compat64_syscall())
 		return get_compat64_io_uring_params(params, src);
 	if (copy_from_user_with_ptr(params, src, sizeof(*params)))
 		return -EFAULT;

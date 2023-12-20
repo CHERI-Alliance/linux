@@ -194,7 +194,7 @@ static int copy_futex_waitv_from_user(struct futex_waitv *aux,
 				      const struct futex_waitv __user *uwaitv,
 				      unsigned int i)
 {
-	if (IS_ENABLED(CONFIG_COMPAT64) && in_compat_syscall()) {
+	if (in_compat64_syscall()) {
 		const struct compat_futex_waitv __user *compat_uwaitv =
 			(const struct compat_futex_waitv __user *)uwaitv;
 		struct compat_futex_waitv compat_aux;
