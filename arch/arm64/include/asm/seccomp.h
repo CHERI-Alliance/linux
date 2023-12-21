@@ -15,7 +15,7 @@
 #define __NR_seccomp_write_32		__NR_compat_write
 #define __NR_seccomp_exit_32		__NR_compat_exit
 #define __NR_seccomp_sigreturn_32	__NR_compat_rt_sigreturn
-#endif /* CONFIG_COMPAT */
+#endif /* CONFIG_COMPAT32 */
 
 #include <asm-generic/seccomp.h>
 

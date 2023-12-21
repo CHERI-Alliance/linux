@@ -55,7 +55,7 @@
 #define TASK_SIZE_64		(UL(1) << vabits_actual)
 #define TASK_SIZE_MAX		(UL(1) << VA_BITS)
 
-#ifdef CONFIG_COMPAT
+#ifdef CONFIG_COMPAT32
 #if defined(CONFIG_ARM64_64K_PAGES) && defined(CONFIG_KUSER_HELPERS)
 /*
  * With CONFIG_ARM64_64K_PAGES enabled, the last page is occupied
@@ -74,7 +74,7 @@
 #else
 #define TASK_SIZE		TASK_SIZE_64
 #define DEFAULT_MAP_WINDOW	DEFAULT_MAP_WINDOW_64
-#endif /* CONFIG_COMPAT */
+#endif /* CONFIG_COMPAT32 */
 
 #ifdef CONFIG_ARM64_FORCE_52BIT
 #define STACK_TOP_MAX		TASK_SIZE_64
@@ -84,13 +84,13 @@
 #define TASK_UNMAPPED_BASE	(PAGE_ALIGN(DEFAULT_MAP_WINDOW / 4))
 #endif /* CONFIG_ARM64_FORCE_52BIT */
 
-#ifdef CONFIG_COMPAT
+#ifdef CONFIG_COMPAT32
 #define AARCH32_VECTORS_BASE	0xffff0000
 #define STACK_TOP		(test_thread_flag(TIF_32BIT) ? \
 				AARCH32_VECTORS_BASE : STACK_TOP_MAX)
 #else
 #define STACK_TOP		STACK_TOP_MAX
-#endif /* CONFIG_COMPAT */
+#endif /* CONFIG_COMPAT32 */
 
 #ifndef CONFIG_ARM64_FORCE_52BIT
 #define arch_get_mmap_end(addr, len, flags) \

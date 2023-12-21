@@ -302,7 +302,7 @@ void arm64_notify_die(const char *str, struct pt_regs *regs,
 	}
 }
 
-#ifdef CONFIG_COMPAT
+#ifdef CONFIG_COMPAT32
 #define PSTATE_IT_1_0_SHIFT	25
 #define PSTATE_IT_1_0_MASK	(0x3 << PSTATE_IT_1_0_SHIFT)
 #define PSTATE_IT_7_2_SHIFT	10
@@ -684,7 +684,7 @@ static const struct sys64_hook sys64_hooks[] = {
 	{},
 };
 
-#ifdef CONFIG_COMPAT
+#ifdef CONFIG_COMPAT32
 static bool cp15_cond_valid(unsigned long esr, struct pt_regs *regs)
 {
 	int cond;
