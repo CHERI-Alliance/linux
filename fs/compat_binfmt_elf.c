@@ -14,16 +14,7 @@
  * functions used in binfmt_elf.c to compat versions.
  */
 
-#ifdef CONFIG_COMPAT32
 #include <linux/elfcore-compat.h>
-#else
-/*
- * TODO [PCuABI] - The header linux/elfcore-compat.h needs some changes for
- * complete compat64 support so for time being include minimum definitions
- * from linux/elf.h.
- */
-#include <linux/elf.h>
-#endif /* CONFIG_COMPAT32 */
 #include <linux/time.h>
 
 #define ELF_COMPAT	1
@@ -45,6 +36,7 @@
 #define elf_stack_put_user(val, ptr)		put_user((elf_addr_t)(user_uintptr_t)(val), (ptr))
 
 #ifdef CONFIG_COMPAT32
+
 /*
  * Rename the basic ELF layout types to refer to the 32-bit class of files.
  */
@@ -64,6 +56,11 @@
 #define elf_addr_t	Elf32_Addr
 #define ELF_GNU_PROPERTY_ALIGN	ELF32_GNU_PROPERTY_ALIGN
 
+#undef ns_to_kernel_old_timeval
+#define ns_to_kernel_old_timeval ns_to_old_timeval32
+
+#endif /* CONFIG_COMPAT32 */
+
 /*
  * Some data types as stored in coredump.
  */
@@ -79,14 +76,14 @@
 #define elf_prstatus_common	compat_elf_prstatus_common
 #define elf_prpsinfo	compat_elf_prpsinfo
 
-#undef ns_to_kernel_old_timeval
-#define ns_to_kernel_old_timeval ns_to_old_timeval32
-
 /*
  * To use this file, asm/elf.h must define compat_elf_check_arch.
  * The other following macros can be defined if the compat versions
  * differ from the native ones, or omitted when they match.
  */
+
+#undef	elf_check_arch
+#define	elf_check_arch	compat_elf_check_arch
 
 #ifdef	COMPAT_ELF_PLATFORM
 #undef	ELF_PLATFORM
@@ -103,6 +100,11 @@
 #define	ELF_HWCAP2		COMPAT_ELF_HWCAP2
 #endif
 
+#ifdef	COMPAT_ARCH_DLINFO
+#undef	ARCH_DLINFO
+#define	ARCH_DLINFO		COMPAT_ARCH_DLINFO
+#endif
+
 #ifdef	COMPAT_ELF_ET_DYN_BASE
 #undef	ELF_ET_DYN_BASE
 #define	ELF_ET_DYN_BASE		COMPAT_ELF_ET_DYN_BASE
@@ -111,32 +113,6 @@
 #ifdef	COMPAT_ELF_PLAT_INIT
 #undef	ELF_PLAT_INIT
 #define	ELF_PLAT_INIT		COMPAT_ELF_PLAT_INIT
-#endif
-
-#ifdef	compat_elf_read_implies_exec
-#undef	elf_read_implies_exec
-#define	elf_read_implies_exec compat_elf_read_implies_exec
-#endif
-
-/*
- * Rename a few of the symbols that binfmt_elf.c will define.
- * These are all local so the names don't really matter, but it
- * might make some debugging less confusing not to duplicate them.
- */
-#define elf_format		compat_elf_format
-#define init_elf_binfmt		init_compat_elf_binfmt
-#define exit_elf_binfmt		exit_compat_elf_binfmt
-#define binfmt_elf_test_cases	compat_binfmt_elf_test_cases
-#define binfmt_elf_test_suite	compat_binfmt_elf_test_suite
-
-#endif /* CONFIG_COMPAT32 */
-
-#undef	elf_check_arch
-#define	elf_check_arch	compat_elf_check_arch
-
-#ifdef	COMPAT_ARCH_DLINFO
-#undef	ARCH_DLINFO
-#define	ARCH_DLINFO		COMPAT_ARCH_DLINFO
 #endif
 
 #ifdef	COMPAT_SET_PERSONALITY
@@ -169,6 +145,22 @@
 #undef	ARCH_SETUP_ADDITIONAL_PAGES
 #define	ARCH_SETUP_ADDITIONAL_PAGES COMPAT_ARCH_SETUP_ADDITIONAL_PAGES
 #endif
+
+#ifdef	compat_elf_read_implies_exec
+#undef	elf_read_implies_exec
+#define	elf_read_implies_exec compat_elf_read_implies_exec
+#endif
+
+/*
+ * Rename a few of the symbols that binfmt_elf.c will define.
+ * These are all local so the names don't really matter, but it
+ * might make some debugging less confusing not to duplicate them.
+ */
+#define elf_format		compat_elf_format
+#define init_elf_binfmt		init_compat_elf_binfmt
+#define exit_elf_binfmt		exit_compat_elf_binfmt
+#define binfmt_elf_test_cases	compat_binfmt_elf_test_cases
+#define binfmt_elf_test_suite	compat_binfmt_elf_test_suite
 
 /*
  * We share all the actual code with the native (64-bit) version.
