@@ -651,7 +651,8 @@ static unsigned long move_vma(struct vm_area_struct *vma,
 		unsigned long old_addr, unsigned long old_len,
 		unsigned long new_len, unsigned long new_addr,
 		bool *locked, unsigned long flags,
-		struct vm_userfaultfd_ctx *uf, struct list_head *uf_unmap)
+		struct vm_userfaultfd_ctx *uf, struct list_head *uf_unmap,
+		struct reserv_struct *reserv_info)
 {
 	long to_account = new_len - old_len;
 	struct mm_struct *mm = vma->vm_mm;
@@ -705,7 +706,7 @@ static unsigned long move_vma(struct vm_area_struct *vma,
 	vma_start_write(vma);
 	new_pgoff = vma->vm_pgoff + ((old_addr - vma->vm_start) >> PAGE_SHIFT);
 	new_vma = copy_vma(&vma, new_addr, new_len, new_pgoff,
-			   &need_rmap_locks);
+			   &need_rmap_locks, reserv_info);
 	if (!new_vma) {
 		if (vm_flags & VM_ACCOUNT)
 			vm_unacct_memory(to_account >> PAGE_SHIFT);
@@ -874,6 +875,7 @@ static unsigned long mremap_to(unsigned long addr, unsigned long old_len,
 	struct vm_area_struct *vma;
 	unsigned long ret = -EINVAL;
 	unsigned long map_flags = 0;
+	struct reserv_struct reserv_info, *reserv_ptr = NULL;
 
 	if (offset_in_page(new_addr))
 		goto out;
@@ -914,6 +916,9 @@ static unsigned long mremap_to(unsigned long addr, unsigned long old_len,
 	 */
 	if (unlikely(!can_modify_mm(mm, addr, addr + old_len)))
 		return -EPERM;
+
+	if (reserv_find_reserv_info_range(new_addr, new_len, true, &reserv_info))
+		reserv_ptr = &reserv_info;
 
 	if (flags & MREMAP_FIXED) {
 		/*
@@ -963,7 +968,7 @@ static unsigned long mremap_to(unsigned long addr, unsigned long old_len,
 		new_addr = ret;
 
 	ret = move_vma(vma, addr, old_len, new_len, new_addr, locked, flags, uf,
-		       uf_unmap);
+		       uf_unmap, reserv_ptr);
 
 out:
 	return ret;
@@ -1191,7 +1196,7 @@ SYSCALL_DEFINE5(__retptr__(mremap), user_uintptr_t, addr, unsigned long, old_len
 		}
 
 		ret = move_vma(vma, addr, old_len, new_len, new_addr,
-			       &locked, flags, &uf, &uf_unmap);
+			       &locked, flags, &uf, &uf_unmap, NULL);
 	}
 out:
 	if (offset_in_page(ret))

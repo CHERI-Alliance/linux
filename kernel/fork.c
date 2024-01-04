@@ -103,6 +103,7 @@
 #include <linux/rseq.h>
 #include <uapi/linux/pidfd.h>
 #include <linux/pidfs.h>
+#include <linux/mm_reserv.h>
 
 #include <asm/pgalloc.h>
 #include <linux/uaccess.h>
@@ -658,6 +659,8 @@ static __latent_entropy int dup_mmap(struct mm_struct *mm,
 	if (retval)
 		goto out;
 	khugepaged_fork(mm, oldmm);
+
+	reserv_fork(mm, oldmm);
 
 	/* Use __mt_dup() to efficiently build an identical maple tree. */
 	retval = __mt_dup(&oldmm->mm_mt, &mm->mm_mt, GFP_KERNEL);

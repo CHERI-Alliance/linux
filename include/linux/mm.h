@@ -3340,7 +3340,7 @@ extern int insert_vm_struct(struct mm_struct *, struct vm_area_struct *);
 extern void unlink_file_vma(struct vm_area_struct *);
 extern struct vm_area_struct *copy_vma(struct vm_area_struct **,
 	unsigned long addr, unsigned long len, pgoff_t pgoff,
-	bool *need_rmap_locks);
+	bool *need_rmap_locks, struct reserv_struct *reserv_info);
 extern void exit_mmap(struct mm_struct *);
 struct vm_area_struct *vma_modify(struct vma_iterator *vmi,
 				  struct vm_area_struct *prev,
@@ -3455,7 +3455,7 @@ get_unmapped_area(struct file *file, unsigned long addr, unsigned long len,
 
 extern unsigned long mmap_region(struct file *file, unsigned long addr,
 	unsigned long len, vm_flags_t vm_flags, unsigned long pgoff,
-	struct list_head *uf);
+	struct list_head *uf, unsigned long prot);
 extern unsigned long do_mmap(struct file *file, unsigned long addr,
 	unsigned long len, unsigned long prot, unsigned long flags,
 	vm_flags_t vm_flags, unsigned long pgoff, unsigned long *populate,

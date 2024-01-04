@@ -912,7 +912,8 @@ static struct vm_area_struct
 		/* Can we merge the predecessor? */
 		if (addr == prev->vm_end && mpol_equal(vma_policy(prev), policy)
 		    && can_vma_merge_after(prev, vm_flags, anon_vma, file,
-					   pgoff, vm_userfaultfd_ctx, anon_name)) {
+					   pgoff, vm_userfaultfd_ctx, anon_name)
+		    && reserv_vma_range_within_reserv(prev, addr, end - addr)) {
 			merge_prev = true;
 			vma_prev(vmi);
 		}
@@ -921,7 +922,8 @@ static struct vm_area_struct
 	/* Can we merge the successor? */
 	if (next && mpol_equal(policy, vma_policy(next)) &&
 	    can_vma_merge_before(next, vm_flags, anon_vma, file, pgoff+pglen,
-				 vm_userfaultfd_ctx, anon_name)) {
+				 vm_userfaultfd_ctx, anon_name) &&
+	    reserv_vma_range_within_reserv(next, addr, end - addr)) {
 		merge_next = true;
 	}
 
@@ -1400,7 +1402,7 @@ unsigned long do_mmap(struct file *file, unsigned long addr,
 			vm_flags |= VM_NORESERVE;
 	}
 
-	addr = mmap_region(file, addr, len, vm_flags, pgoff, uf);
+	addr = mmap_region(file, addr, len, vm_flags, pgoff, uf, prot);
 	if (!IS_ERR_VALUE(addr) &&
 	    ((vm_flags & VM_LOCKED) ||
 	     (flags & (MAP_POPULATE | MAP_NONBLOCK)) == MAP_POPULATE))
@@ -2818,7 +2820,7 @@ int do_munmap(struct mm_struct *mm, unsigned long start, size_t len,
 
 unsigned long mmap_region(struct file *file, unsigned long addr,
 		unsigned long len, vm_flags_t vm_flags, unsigned long pgoff,
-		struct list_head *uf)
+		struct list_head *uf, unsigned long prot)
 {
 	struct mm_struct *mm = current->mm;
 	struct vm_area_struct *vma = NULL;
@@ -2830,6 +2832,8 @@ unsigned long mmap_region(struct file *file, unsigned long addr,
 	bool writable_file_mapping = false;
 	pgoff_t vm_pgoff;
 	int error;
+	struct reserv_struct reserv_info;
+	bool new_reserv;
 	VMA_ITERATOR(vmi, mm, addr);
 
 	/* Check against address space limit. */
@@ -2846,6 +2850,8 @@ unsigned long mmap_region(struct file *file, unsigned long addr,
 					(len >> PAGE_SHIFT) - nr_pages))
 			return -ENOMEM;
 	}
+
+	new_reserv = !reserv_find_reserv_info_range(addr, len, true, &reserv_info);
 
 	/* Unmap any existing mapping in the area */
 	error = do_vmi_munmap(&vmi, mm, addr, len, uf, false);
@@ -2876,7 +2882,8 @@ unsigned long mmap_region(struct file *file, unsigned long addr,
 	/* Check next */
 	if (next && next->vm_start == end && !vma_policy(next) &&
 	    can_vma_merge_before(next, vm_flags, NULL, file, pgoff+pglen,
-				 NULL_VM_UFFD_CTX, NULL)) {
+				 NULL_VM_UFFD_CTX, NULL) &&
+	    reserv_vma_range_within_reserv(next, addr, len)) {
 		merge_end = next->vm_end;
 		vma = next;
 		vm_pgoff = next->vm_pgoff - pglen;
@@ -2887,7 +2894,8 @@ unsigned long mmap_region(struct file *file, unsigned long addr,
 	    (vma ? can_vma_merge_after(prev, vm_flags, vma->anon_vma, file,
 				       pgoff, vma->vm_userfaultfd_ctx, NULL) :
 		   can_vma_merge_after(prev, vm_flags, NULL, file, pgoff,
-				       NULL_VM_UFFD_CTX, NULL))) {
+				       NULL_VM_UFFD_CTX, NULL)) &&
+	    reserv_vma_range_within_reserv(prev, addr, len)) {
 		merge_start = prev->vm_start;
 		vma = prev;
 		vm_pgoff = prev->vm_pgoff;
@@ -2992,6 +3000,12 @@ cannot_expand:
 	error = -ENOMEM;
 	if (vma_iter_prealloc(&vmi, vma))
 		goto close_and_free_vma;
+
+	if (new_reserv) {
+		reserv_vma_set_reserv(vma, addr, len, prot);
+	} else {
+		reserv_vma_set_reserv_data(vma, &reserv_info);
+	}
 
 	/* Lock the VMA since it is modified after insertion into VMA tree */
 	vma_start_write(vma);
@@ -3466,7 +3480,7 @@ int insert_vm_struct(struct mm_struct *mm, struct vm_area_struct *vma)
  */
 struct vm_area_struct *copy_vma(struct vm_area_struct **vmap,
 	unsigned long addr, unsigned long len, pgoff_t pgoff,
-	bool *need_rmap_locks)
+	bool *need_rmap_locks, struct reserv_struct *reserv_info)
 {
 	struct vm_area_struct *vma = *vmap;
 	unsigned long vma_start = vma->vm_start;
@@ -3516,6 +3530,10 @@ struct vm_area_struct *copy_vma(struct vm_area_struct **vmap,
 		if (!new_vma)
 			goto out;
 		vma_set_range(new_vma, addr, addr + len, pgoff);
+		if (reserv_info)
+			reserv_vma_set_reserv_data(new_vma, reserv_info);
+		else
+			reserv_vma_set_reserv_start_len(new_vma, addr, len);
 		if (vma_dup_policy(vma, new_vma))
 			goto out_free_vma;
 		if (anon_vma_clone(new_vma, vma))
