@@ -95,6 +95,8 @@ static inline int get_dumpable(struct mm_struct *mm)
 #define MMF_TOPDOWN		31	/* mm searches top down by default */
 #define MMF_TOPDOWN_MASK	(1 << MMF_TOPDOWN)
 
+#define MMF_PCUABI_RESERV	32	/* PCuABI memory reservation feature */
+
 #define MMF_INIT_MASK		(MMF_DUMPABLE_MASK | MMF_DUMP_FILTER_MASK |\
 				 MMF_DISABLE_THP_MASK | MMF_HAS_MDWE_MASK |\
 				 MMF_VM_MERGE_ANY_MASK | MMF_TOPDOWN_MASK)
