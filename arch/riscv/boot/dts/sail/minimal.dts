@@ -1,0 +1,103 @@
+// SPDX-License-Identifier: GPL-2.0
+
+/dts-v1/;
+
+/ {
+	#address-cells = <2>;
+	#size-cells = <2>;
+	compatible = "sail,minimal";
+
+	aliases {
+		serial0 = &uart0;
+	};
+
+	chosen {
+		stdout-path = "serial0:115200n8";
+		bootargs = "earlycon console=ttySXU0,115200n8";
+		/*
+		 * Where BBL should load the DTB, needs to be after the
+		 * kernel's BSS but inside normal memory.
+		 */
+		riscv,kernel-end = <0x0 0x83000000>;
+	};
+
+	ddr: memory@80000000 {
+		device_type = "memory";
+		reg = <0x0 0x80000000 0x0 0x4000000>;
+	};
+
+	cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		/* Frequency of timer (CLINT) */
+		timebase-frequency = <100000000>;
+
+		cpu0: cpu@0 {
+			compatible = "riscv";
+			device_type = "cpu";
+			reg = <0>;
+			riscv,isa = "rv64imafdc_svpbmt_zicbom_zicboz_zicbop";
+			riscv,isa-base = "rv64i";
+			riscv,isa-extensions = "i", "m", "a", "f", "d", "c",
+					       "svpbmt", "zicbom", "zicboz",
+					       "zicbop";
+			riscv,cbom-block-size = <64>;
+			riscv,cboz-block-size = <64>;
+			mmu-type = "riscv,sv39";
+
+			status = "okay";
+
+			cpu0_intc: interrupt-controller {
+				#interrupt-cells = <1>;
+				#address-cells = <0>;
+				compatible = "riscv,cpu-intc";
+				interrupt-controller;
+
+				status = "okay";
+			};
+		};
+	};
+
+	soc: soc@0 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "simple-bus";
+		/* child-bus-address parent-bus-address*2 length */
+		ranges = <0x0 0x0 0x0 0x80000000>;
+		dma-noncoherent;
+
+		plic: interrupt-controller@40000000 {
+			compatible = "codasip,plic", "riscv,plic0";
+			reg = <0x40000000 0x4000000>;
+			#address-cells = <0>;
+
+			/* Downstream interrupts - how are they specified and how many are available */
+			interrupt-controller;
+			#interrupt-cells = <1>;
+			riscv,ndev = <31>; /* 1 to 31 inclusive */
+
+			/* Upstream interrupts - where are they connected */
+			/* Per core pairs: machine external interrupt, supervisor external interrupt */
+			interrupts-extended = <
+				&cpu0_intc 11 &cpu0_intc 9
+			>;
+		};
+
+		clint: timer@60014000 {
+			compatible = "riscv,clint0";
+			reg = <0x60014000 0xC000>;
+
+			/* Upstream interrupts - where are they connected */
+			/* Per core pairs: machine software interrupt, machine timer interrupt */
+			interrupts-extended = <
+				&cpu0_intc 3 &cpu0_intc 7
+			>;
+		};
+
+		uart0: serial@60100000 {
+			compatible = "sail,sailuart";
+			reg = <0x10000000 0x1020>;
+		};
+	};
+};
