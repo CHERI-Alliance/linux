@@ -1,0 +1,201 @@
+/dts-v1/;
+
+#include "dt-bindings/gpio/gpio.h"
+
+/* Default platform setup description */
+
+/ {
+	#address-cells = <2>;
+	#size-cells = <2>;
+	compatible = "codasip,a70x";
+
+	aliases {
+		serial0 = &uart0;
+		spi0 = &spi0;
+	};
+
+	chosen {
+		stdout-path = "serial0:115200n8";
+		bootargs = "earlycon console=ttyS0,115200n8";
+	};
+
+	ddr: memory@80000000 {
+		device_type = "memory";
+		reg = <0x0 0x80000000 0x0 0x40000000>;
+	};
+
+	cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		/* Frequency of timer (CLINT) */
+		timebase-frequency = <100000000>;
+
+		cpu0: cpu@0 {
+			compatible = "riscv";
+			device_type = "cpu";
+			reg = <0>;
+			riscv,isa = "rv64imafdc_svpbmt_zicbom_zicboz_zicbop";
+			riscv,cbom-block-size = <64>;
+			riscv,cboz-block-size = <64>;
+			mmu-type = "riscv,sv39";
+
+			status = "okay";
+
+			cpu0_intc: interrupt-controller {
+				#interrupt-cells = <1>;
+				#address-cells = <0>;
+				compatible = "riscv,cpu-intc";
+				interrupt-controller;
+
+				status = "okay";
+			};
+		};
+	};
+
+	soc: soc@0 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "simple-bus";
+		/* child-bus-address parent-bus-address*2 length */
+		ranges = <0x0 0x0 0x0 0x70000000>;
+
+		plic: interrupt-controller@40000000 {
+			compatible = "codasip,plic", "riscv,plic0";
+			reg = <0x40000000 0x4000000>;
+			#address-cells = <0>;
+
+			/* Downstream interrupts - how are they specified and how many are available */
+			interrupt-controller;
+			#interrupt-cells = <1>;
+			riscv,ndev = <7>; /* 1 to 7 inclusive */
+
+			/* Upstream interrupts - where are they connected */
+			/* Per core pairs: machine external interrupt, supervisor external interrupt */
+			interrupts-extended = <
+				&cpu0_intc 11 &cpu0_intc 9
+			>;
+		};
+
+		clint: timer@60014000 {
+			compatible = "codasip,clint", "sifive,clint0";
+			reg = <0x60014000 0xC000>;
+
+			/* Upstream interrupts - where are they connected */
+			/* Per core pairs: machine software interrupt, machine timer interrupt */
+			interrupts-extended = <
+				&cpu0_intc 3 &cpu0_intc 7
+			>;
+		};
+
+		uart0: serial@60100000 {
+			compatible = "codasip,uart16550", "ns16550a";
+			reg = <0x60100000 0x1020>;
+
+			/* Required by OpenSBI */
+			/* UART clock frequency */
+			clock-frequency = <100000000>;
+			current-speed = <115200>;
+			reg-shift = <2>;
+			reg-offset = <0x1000>;
+
+			/* Upstream interrupts */
+			interrupts-extended = <&plic 1>;
+		};
+
+		spi0: spi@60210000 {
+			compatible = "xlnx,xps-spi-2.00.a";
+			reg = <0x60210000 0x1000>;
+		      	xlnx,num-ss-bits = <1>;
+		      	xlnx,num-transfer-bits = <8>;
+		      	clock-frequency = <100000000>;
+			interrupts-extended = <&plic 4>;
+			fifo-size = <16>;	/* Needed for U-Boot */
+
+			#address-cells = <1>;
+                       	#size-cells = <0>;
+
+			mmc@0 {
+				compatible = "mmc-spi-slot";
+                		reg = <0>;
+                		spi-max-frequency = <20000000>;
+                		voltage-ranges = <3300 3300>;
+				disable-wp;
+				/* card-detect, write-protect */
+				gpios = <&gpio_sd 0 GPIO_ACTIVE_LOW>;
+        		};
+		};
+
+		gpio_io: gpio@60300000 {
+			compatible = "xlnx,xps-gpio-1.00.a";
+			reg = <0x60300000 0x10000>;
+			#gpio-cells = <2>;
+			#interrupt-cells = <0x2>;
+			#address-cells = <0>;
+			/* clocks = <&zynqmp_clk 71>; */
+			gpio-controller;
+			interrupt-controller;
+			interrupts-extended = <&plic 7>;
+			xlnx,all-inputs = <0x0>;
+			xlnx,all-outputs = <0x0>;
+			xlnx,dout-default = <0x0>;
+			xlnx,gpio-width = <0x20>;
+			xlnx,interrupt-present = <0x1>;
+			xlnx,is-dual = <0x0>;
+			xlnx,tri-default = <0xfe>;
+		};
+
+		gpio_sd: gpio@60310000 {
+			compatible = "xlnx,xps-gpio-1.00.a";
+			reg = <0x60310000 0x10000>;
+			#gpio-cells = <2>;
+			#interrupt-cells = <0x2>;
+			#address-cells = <0>;
+			/* clocks = <&zynqmp_clk 71>; */
+			gpio-controller;
+			interrupt-controller;
+			interrupts-extended = <&plic 8>;
+			xlnx,all-inputs = <0x0>;
+			xlnx,all-outputs = <0x0>;
+			xlnx,dout-default = <0x0>;
+			xlnx,gpio-width = <0x20>;
+			xlnx,interrupt-present = <0x1>;
+			xlnx,is-dual = <0x0>;
+			xlnx,tri-default = <0x01>;
+
+			sdcard_hog {
+				gpio-hog;
+				gpios = <2 GPIO_ACTIVE_HIGH>;
+				output-high;
+				line-name = "sdcard-fast-gpio";
+			};
+		};
+	};
+
+	clock: clock {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+                clock-frequency = <20000>;
+		clock-accuracy = <100>;
+	};
+
+	gpio-keys {
+		compatible = "gpio-keys";
+
+		key-up {
+			label = "SW3";
+			linux,code = <103>;
+			gpios = <&gpio_io 3 GPIO_ACTIVE_HIGH>;
+		};
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		led-0 {
+			label = "LD0";
+			gpios = <&gpio_io 0 GPIO_ACTIVE_HIGH>;
+			linux,default-trigger = "heartbeat";
+		};
+	};
+};
