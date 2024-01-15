@@ -4,6 +4,7 @@ subdir-y += andes
 subdir-y += canaan
 subdir-y += eswin
 subdir-y += microchip
+subdir-y += sail
 subdir-y += renesas
 subdir-y += sifive
 subdir-y += sophgo
