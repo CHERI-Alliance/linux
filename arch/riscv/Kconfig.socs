@@ -84,6 +84,12 @@ config ARCH_THEAD
 	help
 	  This enables support for the RISC-V based T-HEAD SoCs.
 
+config ARCH_CODASIP
+	bool "Codasip RISC-V SoCs"
+	depends on MMU && !XIP_KERNEL
+	help
+	  This enables support for the Codasip RISC-V SoCs.
+
 config ARCH_VIRT
 	bool "QEMU Virt Machine"
 	select POWER_RESET
