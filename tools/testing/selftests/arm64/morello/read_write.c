@@ -7,7 +7,6 @@
 #include <linux/fs.h>
 #include <linux/stat.h>
 #include <linux/uio.h>
-#include <asm/fcntl.h>
 #include <asm/unistd.h>
 
 #include "freestanding.h"
@@ -25,8 +24,6 @@ static const char w_vec_msg1[VEC_MSG_LEN] = "This message";
 static const char w_vec_msg2[VEC_MSG_LEN] = " is vector\n";
 static char r_vec_msg1[VEC_MSG_LEN];
 static char r_vec_msg2[VEC_MSG_LEN];
-
-static const char file[] = "/check_cap.txt";
 
 static const struct iovec w_iovec[VEC_MSG_NUM] = {
 	{.iov_base = (char *) w_vec_msg1, .iov_len = VEC_MSG_LEN},
@@ -58,8 +55,8 @@ TEST(test_writev)
 
 TEST(test_open)
 {
-	fd = syscall(__NR_openat, 0, file, O_RDWR | O_CREAT, 0666);
-	ASSERT_LE(1, fd) TH_LOG("open failed");
+	/* tmpfd() asserts that the openat syscall succeeds */
+	fd = tmpfd();
 }
 
 TEST(test_read)

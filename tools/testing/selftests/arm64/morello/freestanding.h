@@ -8,6 +8,8 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <asm/unistd.h>
+#include <linux/errno.h>
+#include <linux/fcntl.h>
 #include <linux/posix_types.h>
 #include <linux/resource.h>
 #include <linux/signal.h>
@@ -227,6 +229,23 @@ static inline int waitid(int id_type, pid_t id, siginfo_t *info, int options, st
 static inline int waitpid(pid_t pid, int *wstatus, int options)
 {
 	return syscall(__NR_wait4, pid, wstatus, options, 0);
+}
+
+/*
+ * Creates a new temporary file and returns an fd to it. The file has no name
+ * (see open(2) regarding O_TMPFILE) and is deleted when the fd is closed.
+ */
+static inline int tmpfd(void)
+{
+	int fd;
+
+	/* First try /tmp, fall back to / if it doesn't exist */
+	fd = syscall(__NR_openat, 0, "/tmp", O_TMPFILE | O_RDWR, 0666);
+	if (fd == -ENOENT)
+		fd = syscall(__NR_openat, 0, "/", O_TMPFILE | O_RDWR, 0666);
+
+	ASSERT_GE(fd, 0);
+	return fd;
 }
 
 #endif
