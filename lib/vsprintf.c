@@ -2550,13 +2550,9 @@ char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
 	 * Same applies when hashing is active.
 	 */
 	if ((!cheri_tag_get(cap) && !__builtin_cheri_copy_from_high(cap)) ||
-	    (likely(!no_hash_pointers) && *fmt != 'x')) {
-
-		/* Avoid adding prefix */
-		spec.flags &= ~SPECIAL;
+	    (likely(!no_hash_pointers) && *fmt != 'x'))
 		return pointer(fmt, buf, end, (void *)cheri_address_get(cap),
 			       spec);
-	}
 
 	if (spec.flags & SPECIAL) { /* Simplified format for capabilities */
 		int orig_field_width = spec.field_width;
