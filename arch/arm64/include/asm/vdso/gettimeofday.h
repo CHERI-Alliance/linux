@@ -15,18 +15,11 @@
 
 #define VDSO_HAS_CLOCK_GETRES		1
 
-/*
- * Inline Assembly Macros for Purecap
- * PTR_REG(n) will expand to "cn" under purecap, and "xn" under non-purecap
- * PTR_REG_OP will expand to "C" under purecap and "r" under non-purecap.
- */
 #if defined(__CHERI_PURE_CAPABILITY__)
 #define PTR_REG(n) "c" __stringify(n)
-#define PTR_REG_OP "C"
 #else
 #define PTR_REG(n) "x" __stringify(n)
-#define PTR_REG_OP "r"
-#endif /* __CHERI_PURE_CAPABILITY__ */
+#endif
 
 static __always_inline
 int gettimeofday_fallback(struct __kernel_old_timeval *_tv,
@@ -40,7 +33,7 @@ int gettimeofday_fallback(struct __kernel_old_timeval *_tv,
 	asm volatile(
 	"       svc #0\n"
 	: "=r" (ret)
-	: PTR_REG_OP (tv), PTR_REG_OP (tz), "r" (nr)
+	: "r" (tv), "r" (tz), "r" (nr)
 	: "memory");
 
 	return ret;
@@ -57,7 +50,7 @@ long clock_gettime_fallback(clockid_t _clkid, struct __kernel_timespec *_ts)
 	asm volatile(
 	"       svc #0\n"
 	: "=r" (ret)
-	: "r" (clkid), PTR_REG_OP (ts), "r" (nr)
+	: "r" (clkid), "r" (ts), "r" (nr)
 	: "memory");
 
 	return ret;
@@ -74,7 +67,7 @@ int clock_getres_fallback(clockid_t _clkid, struct __kernel_timespec *_ts)
 	asm volatile(
 	"       svc #0\n"
 	: "=r" (ret)
-	: "r" (clkid), PTR_REG_OP (ts), "r" (nr)
+	: "r" (clkid), "r" (ts), "r" (nr)
 	: "memory");
 
 	return ret;
