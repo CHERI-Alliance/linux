@@ -56,14 +56,6 @@ int main(void)
 #ifdef CONFIG_ARM64_MTE
   DEFINE(THREAD_MTE_CTRL,	offsetof(struct task_struct, thread.mte_ctrl));
 #endif
-#ifdef CONFIG_ARM64_MORELLO
-  DEFINE(THREAD_MORELLO_USER_STATE,	offsetof(struct task_struct, thread.morello_user_state));
-  BLANK();
-  DEFINE(MORELLO_STATE_CTPIDR,	offsetof(struct morello_state, ctpidr));
-  DEFINE(MORELLO_STATE_DDC,	offsetof(struct morello_state, ddc));
-  DEFINE(MORELLO_STATE_CID,	offsetof(struct morello_state, cid));
-  DEFINE(MORELLO_STATE_CCTLR,	offsetof(struct morello_state, cctlr));
-#endif
   BLANK();
   DEFINE(S_X0,			offsetof(struct pt_regs, regs[0]));
   DEFINE(S_X2,			offsetof(struct pt_regs, regs[2]));

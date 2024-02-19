@@ -20,13 +20,6 @@
 #include <asm/morello.h>
 #include <asm/ptrace.h>
 
-/* Private functions implemented in morello.S */
-void __morello_cap_lo_hi_tag(uintcap_t cap, u64 *lo_val, u64 *hi_val,
-			     u8 *tag);
-void __morello_merge_c_x(uintcap_t *creg, u64 xreg);
-bool __morello_cap_has_executive(uintcap_t cap);
-void __morello_thread_init_user(struct task_struct *tsk, uintcap_t ddc);
-
 static uintcap_t morello_sentry_unsealcap __ro_after_init;
 
 /* DDC_ELx reset value (low/high 64 bits), as defined in the Morello spec */
@@ -34,6 +27,25 @@ static uintcap_t morello_sentry_unsealcap __ro_after_init;
 #define DDC_RESET_VAL_HIGH_64	0xffffc00000010005ULL
 
 #define CAP_OTYPE_FIELD_BITS	15
+
+static void cap_lo_hi_tag(uintcap_t cap, u64 *lo_val, u64 *hi_val,
+			     u8 *tag)
+{
+	*lo_val = (u64)cap;
+	*hi_val = __builtin_cheri_copy_from_high((void * __capability)cap);
+	*tag = cheri_tag_get(cap);
+}
+
+static void merge_c_x(uintcap_t *creg, u64 xreg)
+{
+	if (cheri_address_get(*creg) != xreg)
+		*creg = cheri_address_set(*creg, xreg);
+}
+
+static bool cap_has_executive(uintcap_t cap)
+{
+	return cheri_perms_get(cap) & ARM_CAP_PERMISSION_EXECUTIVE;
+}
 
 static bool is_pure_task(void)
 {
@@ -51,6 +63,27 @@ static void update_regs_c64(struct pt_regs *regs, unsigned long pc)
 		regs->pstate |= PSR_C64_BIT;
 		regs->pc = pc & ~0x1;
 	}
+}
+
+void morello_cap_get_val_tag(uintcap_t cap, __uint128_t *val, u8 *tag)
+{
+	*((uintcap_t *)val) = cheri_tag_clear(cap);
+	*tag = cheri_tag_get(cap);
+}
+
+uintcap_t morello_build_any_user_cap(const __uint128_t *val, u8 tag)
+{
+	uintcap_t cap = *((uintcap_t *)val);
+	uintcap_t sealing_cap;
+
+	if (!tag)
+		return cheri_tag_clear(cap);
+
+	sealing_cap = cheri_type_copy(cheri_user_root_allperms_cap, cap);
+
+	cap = (uintcap_t)cheri_cap_build(cheri_user_root_allperms_cap, cap);
+	cap = cheri_seal_conditionally(cap, sealing_cap);
+	return cap;
 }
 
 void morello_thread_start(struct pt_regs *regs, unsigned long pc)
@@ -78,14 +111,100 @@ void morello_thread_init_user(void)
 	/* TODO [PCuABI] - Set DDC to the null capability */
 	uintcap_t ddc = is_pure_task() ? cheri_user_root_cap
 				       : cheri_user_root_allperms_cap;
+	struct morello_state *morello_state = &current->thread.morello_user_state;
 
-	__morello_thread_init_user(current, ddc);
+	/*
+	 * CTPIDR doesn't need to be initialised explicitly:
+	 * - tls_thread_flush() already zeroes tpidr_el0, zeroing ctpidr_el0 as
+	 *   well
+	 * - The value stored in thread.morello_user_state will be set the next
+	 *   time task_save_user_tls() is called, like thread_struct.uw.tp_value.
+	 *
+	 * tls_thread_flush() does not touch rctpidr_el0 so this must be zeroed
+	 * here. We do not need to initialise its value in morello_user_state.
+	 * Only the ddc_el0 register must be initialised to the specific value;
+	 * RDDC is set to a null capability as processes are always started in
+	 * Executive.
+	 */
+	write_cap_sysreg(0, rctpidr_el0);
+
+	write_cap_sysreg(ddc, ddc_el0);
+	write_cap_sysreg(0, rddc_el0);
+	morello_state->ddc = ddc;
+	morello_state->rddc = (uintcap_t)0;
+
+	write_cap_sysreg(0, cid_el0);
+	morello_state->cid = (uintcap_t)0;
+
+	write_sysreg(0, cctlr_el0);
+	morello_state->cctlr = 0;
+}
+
+void morello_thread_save_user_state(struct task_struct *tsk)
+{
+	struct morello_state *morello_state = &tsk->thread.morello_user_state;
+
+	/* (R)CTPIDR is handled by task_save_user_tls */
+	morello_state->ddc = read_cap_sysreg(ddc_el0);
+	morello_state->rddc = read_cap_sysreg(rddc_el0);
+	morello_state->cid = read_cap_sysreg(cid_el0);
+	morello_state->cctlr = read_sysreg(cctlr_el0);
+}
+
+void morello_thread_restore_user_state(struct task_struct *tsk)
+{
+	struct morello_state *morello_state = &tsk->thread.morello_user_state;
+
+	/* (R)CTPIDR is handled by task_restore_user_tls */
+	write_cap_sysreg(morello_state->ddc, ddc_el0);
+	write_cap_sysreg(morello_state->rddc, rddc_el0);
+	write_cap_sysreg(morello_state->cid, cid_el0);
+	write_sysreg(morello_state->cctlr, cctlr_el0);
+}
+
+void morello_task_save_user_tls(struct task_struct *tsk, user_uintptr_t *tp_ptr)
+{
+	struct morello_state *morello_state = &tsk->thread.morello_user_state;
+	struct pt_regs *regs = task_pt_regs(tsk);
+	uintcap_t active_ctpidr;
+
+	morello_state->ctpidr = read_cap_sysreg(ctpidr_el0);
+	morello_state->rctpidr = read_cap_sysreg(rctpidr_el0);
+
+	if (cap_has_executive(regs->pcc))
+		active_ctpidr = morello_state->ctpidr;
+	else
+		active_ctpidr = morello_state->rctpidr;
+
+	*tp_ptr = (user_uintptr_t)active_ctpidr;
+}
+
+void morello_task_restore_user_tls(struct task_struct *tsk,
+				   const user_uintptr_t *tp_ptr)
+{
+	struct morello_state *morello_state = &tsk->thread.morello_user_state;
+	struct pt_regs *regs = task_pt_regs(tsk);
+	uintcap_t *active_ctpidr;
+
+	if (cap_has_executive(regs->pcc))
+		active_ctpidr = &morello_state->ctpidr;
+	else
+		active_ctpidr = &morello_state->rctpidr;
+
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	*active_ctpidr = *tp_ptr;
+#else
+	merge_c_x(active_ctpidr, *tp_ptr);
+#endif
+
+	write_cap_sysreg(morello_state->ctpidr, ctpidr_el0);
+	write_cap_sysreg(morello_state->rctpidr, rctpidr_el0);
 }
 
 #ifdef CONFIG_CHERI_PURECAP_UABI
 void morello_thread_set_csp(struct pt_regs *regs, user_uintptr_t sp)
 {
-	uintcap_t *thread_sp = __morello_cap_has_executive(regs->pcc) ?
+	uintcap_t *thread_sp = cap_has_executive(regs->pcc) ?
 				    &regs->csp : &regs->rcsp;
 	*thread_sp = sp;
 }
@@ -124,7 +243,7 @@ static char *format_cap(char *buf, size_t size, uintcap_t cap)
 	u64 lo_val, hi_val;
 	u8 tag;
 
-	__morello_cap_lo_hi_tag(cap, &lo_val, &hi_val, &tag);
+	cap_lo_hi_tag(cap, &lo_val, &hi_val, &tag);
 
 	if (snprintf(buf, size, "%u:%016llx:%016llx", tag, hi_val, lo_val) <= 0)
 		buf[0] = '\0';
@@ -245,16 +364,16 @@ void morello_merge_cap_regs(struct pt_regs *regs)
 	int i;
 	uintcap_t *active_csp;
 
-	if (__morello_cap_has_executive(regs->pcc))
+	if (cap_has_executive(regs->pcc))
 		active_csp = &regs->csp;
 	else
 		active_csp = &regs->rcsp;
 
 	for (i = 0; i < ARRAY_SIZE(regs->cregs); i++)
-		__morello_merge_c_x(&regs->cregs[i], regs->regs[i]);
+		merge_c_x(&regs->cregs[i], regs->regs[i]);
 
-	__morello_merge_c_x(active_csp, regs->sp);
-	__morello_merge_c_x(&regs->pcc, regs->pc);
+	merge_c_x(active_csp, regs->sp);
+	merge_c_x(&regs->pcc, regs->pc);
 }
 
 void morello_flush_cap_regs_to_64_regs(struct task_struct *tsk)
@@ -266,7 +385,7 @@ void morello_flush_cap_regs_to_64_regs(struct task_struct *tsk)
 	uintcap_t active_ctpidr;
 	int i;
 
-	if (__morello_cap_has_executive(regs->pcc)) {
+	if (cap_has_executive(regs->pcc)) {
 		active_csp = regs->csp;
 		active_ctpidr = morello_state->ctpidr;
 	} else {
@@ -303,7 +422,7 @@ static void __init check_root_cap(uintcap_t cap)
 	u64 lo_val, hi_val;
 	u8 tag;
 
-	__morello_cap_lo_hi_tag(cap, &lo_val, &hi_val, &tag);
+	cap_lo_hi_tag(cap, &lo_val, &hi_val, &tag);
 
 	/*
 	 * Check that DDC has the reset value, otherwise root capabilities and
