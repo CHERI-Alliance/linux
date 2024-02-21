@@ -207,7 +207,22 @@ static inline ptraddr_t user_ptr_limit(const void __user *ptr)
 }
 
 /**
- * user_ptr_is_same() - Checks where two user pointers are exactly the same.
+ * user_ptr_is_valid() - Check if a user pointer is valid.
+ * @ptr: The user pointer to check.
+ *
+ * Return: true if @ptr is valid (tag set in PCuABI).
+ */
+static inline bool user_ptr_is_valid(const void __user *ptr)
+{
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	return __builtin_cheri_tag_get(ptr);
+#else
+	return 0;
+#endif
+}
+
+/**
+ * user_ptr_is_same() - Check whether two user pointers are exactly the same.
  * @p1: The first user pointer to check.
  * @p2: The second user pointer to check.
  *
@@ -223,6 +238,22 @@ static inline bool user_ptr_is_same(const void __user *p1, const void __user *p2
 	return __builtin_cheri_equal_exact(p1, p2);
 #else
 	return p1 == p2;
+#endif
+}
+
+/**
+ * user_ptr_set_addr() - Set the address of the user pointer.
+ * @ptr: The user pointer to set the address of.
+ * @addr: The address to set the pointer to.
+ *
+ * Return: A user pointer with its address set to @addr.
+ */
+static inline void __user *user_ptr_set_addr(void __user *ptr, ptraddr_t addr)
+{
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	return __builtin_cheri_address_set(ptr, addr);
+#else
+	return as_user_ptr(addr);
 #endif
 }
 

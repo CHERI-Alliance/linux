@@ -212,6 +212,12 @@ should always be used when error codes are stored in user pointers.
 Operating on user pointers
 ==========================
 
+Validity
+----------
+
+``user_ptr_is_valid(p)`` (``<linux/user_ptr.h>``) can be used to check
+whether a user pointer is valid,
+
 Comparison
 ----------
 
@@ -249,6 +255,12 @@ This can be done using the ``check_user_ptr_*()`` functions, see
 
 Note that these functions are no-ops (always succeed) when PCuABI is not
 selected, as there is no user pointer metadata to check in that case.
+
+Setting the address
+-------------------
+
+``user_ptr_set_addr(p, a)`` (``<linux/user_ptr.h>``) can be used to set
+the address of a user pointer.
 
 Bounds
 ------
