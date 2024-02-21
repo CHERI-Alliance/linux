@@ -1,8 +1,22 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 #include <linux/bug.h>
 #include <linux/cheri.h>
+#include <linux/mman.h>
 #include <linux/mm_types.h>
 #include <linux/user_ptr.h>
+
+#ifdef CONFIG_HAVE_ARCH_USER_PTR_H
+#include <asm/user_ptr.h>
+#endif
+
+#ifndef arch_user_ptr_owning_perms_from_prot
+static inline
+user_ptr_perms_t arch_user_ptr_owning_perms_from_prot(int prot, unsigned long vm_flags)
+{
+	return 0;
+}
+#endif /* arch_user_ptr_owning_perms_from_prot */
+
 
 void __user *uaddr_to_user_ptr(ptraddr_t addr)
 {
@@ -99,7 +113,33 @@ user_uintptr_t make_user_ptr_owning(const struct reserv_struct *reserv,
 
 user_ptr_perms_t user_ptr_owning_perms_from_prot(int prot, unsigned long vm_flags)
 {
-	/* TODO [PCuABI] - capability permission conversion from memory permission */
-	return (CHERI_PERMS_READ | CHERI_PERMS_WRITE |
-		CHERI_PERMS_EXEC | CHERI_PERMS_ROOTCAP);
+	user_ptr_perms_t perms = CHERI_PERMS_ROOTCAP;
+	int used_prot = PROT_MAX_EXTRACT(prot) ? PROT_MAX_EXTRACT(prot) : prot;
+
+	if (used_prot & PROT_READ) {
+		perms |= CHERI_PERM_LOAD;
+		if (vm_flags & VM_READ_CAPS)
+			perms |= CHERI_PERM_LOAD_CAP;
+	}
+	if (used_prot & PROT_WRITE) {
+		perms |= CHERI_PERM_STORE;
+		if (vm_flags & VM_WRITE_CAPS)
+			perms |= (CHERI_PERM_STORE_CAP | CHERI_PERM_STORE_LOCAL_CAP);
+	}
+	if (used_prot & PROT_EXEC)
+		perms |= CHERI_PERM_EXECUTE;
+
+	/* Fetch any extra architecture specific permissions */
+	perms |= arch_user_ptr_owning_perms_from_prot(used_prot, vm_flags);
+
+	return perms;
+}
+
+bool user_ptr_may_set_prot(user_uintptr_t user_ptr, int prot)
+{
+	user_ptr_perms_t perms = cheri_perms_get(user_ptr);
+
+	return !(((prot & PROT_READ) && !(perms & CHERI_PERM_LOAD)) ||
+		 ((prot & PROT_WRITE) && !(perms & CHERI_PERM_STORE)) ||
+		 ((prot & PROT_EXEC) && !(perms & CHERI_PERM_EXECUTE)));
 }
