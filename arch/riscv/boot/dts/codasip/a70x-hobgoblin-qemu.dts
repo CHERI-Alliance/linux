@@ -1,0 +1,31 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (c) 2024 Codasip Limited
+ *
+ * A730 Hobgoblin FPGA platform emulation in qemu.
+ */
+
+#include "a70x-hobgoblin.dts"
+
+&soc {
+	virtio@70000000 {
+		compatible = "virtio,mmio";
+		reg = <0x70000000 0x200>;
+		interrupts-extended = <&plic 28>;
+	};
+	virtio@70000200 {
+		compatible = "virtio,mmio";
+		reg = <0x70000200 0x200>;
+		interrupts-extended = <&plic 29>;
+	};
+	virtio@70000400 {
+		compatible = "virtio,mmio";
+		reg = <0x70000400 0x200>;
+		interrupts-extended = <&plic 30>;
+	};
+	virtio@70000600 {
+		compatible = "virtio,mmio";
+		reg = <0x70000600 0x200>;
+		interrupts-extended = <&plic 31>;
+	};
+};

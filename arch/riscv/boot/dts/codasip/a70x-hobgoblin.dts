@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (c) 2024 Codasip Limited
+ *
+ * A730 Hobgoblin FPGA platform.
+ */
+
 /dts-v1/;
 
 #include "dt-bindings/gpio/gpio.h"
@@ -58,7 +65,7 @@
 		#size-cells = <1>;
 		compatible = "simple-bus";
 		/* child-bus-address parent-bus-address*2 length */
-		ranges = <0x0 0x0 0x0 0x70000000>;
+		ranges = <0x0 0x0 0x0 0x80000000>;
 
 		plic: interrupt-controller@40000000 {
 			compatible = "codasip,plic", "riscv,plic0";
@@ -68,7 +75,7 @@
 			/* Downstream interrupts - how are they specified and how many are available */
 			interrupt-controller;
 			#interrupt-cells = <1>;
-			riscv,ndev = <7>; /* 1 to 7 inclusive */
+			riscv,ndev = <31>; /* 1 to 31 inclusive */
 
 			/* Upstream interrupts - where are they connected */
 			/* Per core pairs: machine external interrupt, supervisor external interrupt */
