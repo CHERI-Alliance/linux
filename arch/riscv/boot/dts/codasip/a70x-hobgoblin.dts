@@ -205,4 +205,9 @@
 			linux,default-trigger = "heartbeat";
 		};
 	};
+
+	gpio-restart {
+		compatible = "gpio-restart";
+		gpios = <&gpio_sd 3 GPIO_ACTIVE_HIGH>;
+	};
 };
