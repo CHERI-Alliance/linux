@@ -1,0 +1,41 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (c) 2024 Codasip Limited
+ *
+ * A730 Hobgoblin FPGA platform, AXI ethernet block
+ */
+
+#include "a70x-hobgoblin.dts"
+
+&soc {
+	axi_ethernet: ethernet@0x600c0000 {
+		compatible = "xlnx,axi-ethernet-1.00.a";
+		interrupts-extended = <&plic 15>;
+		clock-names = "s_axi_lite_clk";
+		clocks = <&clk_100m>;
+		phy-mode = "rgmii";
+		reg = <0x600c0000 0x40000>;
+		xlnx,rxcsum = <2>;
+		xlnx,rxmem = <0x4000>;
+		xlnx,txcsum = <2>;
+		phy-handle = <&phy0>;
+		axistream-connected = <&axistream_dma>;
+
+		mdio {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			phy0: ethernet-phy@1 {
+				device_type = "ethernet-phy";
+				reg = <1>;
+				interrupts-extended = <&plic 18>;
+			};
+		};
+	};
+	/* U-boot does not support specifying the DMA directly in the
+	 * axi_ethernet above. The kernel does support it though
+	 */
+	axistream_dma: axistream_dma@0x600a0000  {
+		reg = <0x600a0000 0x10000>;
+		interrupts-extended = <&plic 16>, <&plic 17>;
+	};
+};

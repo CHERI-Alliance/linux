@@ -70,6 +70,7 @@
 		compatible = "simple-bus";
 		/* child-bus-address parent-bus-address*2 length */
 		ranges = <0x0 0x0 0x0 0x80000000>;
+		dma-noncoherent;
 
 		plic: interrupt-controller@40000000 {
 			compatible = "codasip,plic", "riscv,plic0";
@@ -181,13 +182,13 @@
 				line-name = "sdcard-fast-gpio";
 			};
 		};
-	};
 
-	clock: clock {
-		compatible = "fixed-clock";
-		#clock-cells = <0>;
-                clock-frequency = <20000>;
-		clock-accuracy = <100>;
+		/* Interconnect runs off this clock */
+		clk_100m: clock@100 {
+			compatible = "fixed-clock";
+			#clock-cells = <0>;
+			clock-frequency = <100000000>;
+		};
 	};
 
 	gpio-keys {
