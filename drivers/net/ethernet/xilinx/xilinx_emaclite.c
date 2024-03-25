@@ -192,38 +192,31 @@ static void xemaclite_disable_interrupts(struct net_local *drvdata)
 /**
  * xemaclite_aligned_write - Write from 16-bit aligned to 32-bit aligned address
  * @src_ptr:	Void pointer to the 16-bit aligned source address
- * @dest_ptr:	Pointer to the 32-bit aligned destination address
+ * @reg:	Pointer to the 32-bit aligned destination register
  * @length:	Number bytes to write from source to destination
  *
  * This function writes data from a 16-bit aligned buffer to a 32-bit aligned
  * address in the EmacLite device.
  */
-static void xemaclite_aligned_write(const void *src_ptr, u32 *dest_ptr,
+static void xemaclite_aligned_write(const void *src_ptr, void __iomem *reg,
 				    unsigned int length)
 {
 	const u16 *from_u16_ptr;
 	u32 align_buffer;
-	u32 *to_u32_ptr;
-	u16 *to_u16_ptr;
 
-	to_u32_ptr = dest_ptr;
 	from_u16_ptr = src_ptr;
 	align_buffer = 0;
 
 	for (; length > 3; length -= 4) {
+		u16 *to_u16_ptr;
+
 		to_u16_ptr = (u16 *)&align_buffer;
 		*to_u16_ptr++ = *from_u16_ptr++;
 		*to_u16_ptr++ = *from_u16_ptr++;
 
-		/* This barrier resolves occasional issues seen around
-		 * cases where the data is not properly flushed out
-		 * from the processor store buffers to the destination
-		 * memory locations.
-		 */
-		wmb();
-
 		/* Output a word */
-		*to_u32_ptr++ = align_buffer;
+		xemaclite_writel(align_buffer, reg);
+		reg += 4;
 	}
 	if (length) {
 		u8 *from_u8_ptr, *to_u8_ptr;
@@ -237,38 +230,33 @@ static void xemaclite_aligned_write(const void *src_ptr, u32 *dest_ptr,
 		for (; length > 0; length--)
 			*to_u8_ptr++ = *from_u8_ptr++;
 
-		/* This barrier resolves occasional issues seen around
-		 * cases where the data is not properly flushed out
-		 * from the processor store buffers to the destination
-		 * memory locations.
-		 */
-		wmb();
-		*to_u32_ptr = align_buffer;
+		xemaclite_writel(align_buffer, reg);
 	}
 }
 
 /**
  * xemaclite_aligned_read - Read from 32-bit aligned to 16-bit aligned buffer
- * @src_ptr:	Pointer to the 32-bit aligned source address
+ * @reg:	Pointer to the 32-bit aligned source register
  * @dest_ptr:	Pointer to the 16-bit aligned destination address
  * @length:	Number bytes to read from source to destination
  *
  * This function reads data from a 32-bit aligned address in the EmacLite device
  * to a 16-bit aligned buffer.
  */
-static void xemaclite_aligned_read(u32 *src_ptr, u8 *dest_ptr,
+static void xemaclite_aligned_read(const void __iomem *reg, u8 *dest_ptr,
 				   unsigned int length)
 {
-	u16 *to_u16_ptr, *from_u16_ptr;
-	u32 *from_u32_ptr;
+	u16 *to_u16_ptr;
 	u32 align_buffer;
 
-	from_u32_ptr = src_ptr;
 	to_u16_ptr = (u16 *)dest_ptr;
 
 	for (; length > 3; length -= 4) {
+		u16 *from_u16_ptr;
+
 		/* Copy each word into the temporary buffer */
-		align_buffer = *from_u32_ptr++;
+		align_buffer = xemaclite_readl(reg);
+		reg += 4;
 		from_u16_ptr = (u16 *)&align_buffer;
 
 		/* Read data from source */
@@ -280,8 +268,8 @@ static void xemaclite_aligned_read(u32 *src_ptr, u8 *dest_ptr,
 		u8 *to_u8_ptr, *from_u8_ptr;
 
 		/* Set up to read the remaining data */
+		align_buffer = xemaclite_readl(reg);
 		to_u8_ptr = (u8 *)to_u16_ptr;
-		align_buffer = *from_u32_ptr++;
 		from_u8_ptr = (u8 *)&align_buffer;
 
 		/* Read the remaining data */
@@ -441,7 +429,7 @@ static u16 xemaclite_recv_data(struct net_local *drvdata, u8 *data, int maxlen)
 		length = maxlen;
 
 	/* Read from the EmacLite device */
-	xemaclite_aligned_read((u32 __force *)(addr + XEL_RXBUFF_OFFSET),
+	xemaclite_aligned_read(addr + XEL_RXBUFF_OFFSET,
 			       data, length);
 
 	/* Acknowledge the frame */
@@ -472,7 +460,7 @@ static void xemaclite_update_address(struct net_local *drvdata,
 	/* Determine the expected Tx buffer address */
 	addr = drvdata->base_addr + drvdata->next_tx_buf_to_use;
 
-	xemaclite_aligned_write(address_ptr, (u32 __force *)addr, ETH_ALEN);
+	xemaclite_aligned_write(address_ptr, addr, ETH_ALEN);
 
 	xemaclite_writel(ETH_ALEN, addr + XEL_TPLR_OFFSET);
 
