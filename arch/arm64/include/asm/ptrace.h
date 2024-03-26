@@ -316,8 +316,12 @@ static inline unsigned long pt_regs_read_reg(const struct pt_regs *regs, int r)
 static inline void pt_regs_write_reg(struct pt_regs *regs, int r,
 				     unsigned long val)
 {
-	if (r != 31)
+	if (r != 31) {
 		regs->regs[r] = val;
+#ifdef CONFIG_ARM64_MORELLO
+		regs->cregs[r] = 0;
+#endif
+	}
 }
 
 /* Valid only for Kernel mode traps. */
