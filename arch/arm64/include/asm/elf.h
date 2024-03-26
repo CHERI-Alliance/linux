@@ -135,7 +135,7 @@ typedef elf_greg_t elf_gregset_t[ELF_NGREG];
 typedef struct user_fpsimd_state elf_fpregset_t;
 
 #define START_THREAD(elf_ex, regs, elf_entry, bprm)			\
-	start_thread(regs, elf_entry, bprm->p, bprm->argc, bprm->envc)
+	start_thread(regs, elf_entry, bprm)
 
 #define SET_PERSONALITY_AARCH64()					\
 ({									\
