@@ -12,6 +12,15 @@ struct coredump_params;
 
 #define CORENAME_MAX_SIZE 128
 
+struct pcuabi_binprm {
+	void __user *pcc;
+	void __user *csp;
+	/* Capabilities to the initial arrays in the new process's address space */
+	void __user *argv;
+	void __user *envp;
+	void __user *auxv;
+};
+
 /*
  * This structure is used to hold the arguments that are used when loading binaries.
  */
@@ -62,6 +71,10 @@ struct linux_binprm {
 	struct rlimit rlim_stack; /* Saved RLIMIT_STACK used during exec. */
 
 	char buf[BINPRM_BUF_SIZE];
+
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	struct pcuabi_binprm pcuabi;
+#endif
 } __randomize_layout;
 
 #define BINPRM_FLAGS_ENFORCE_NONDUMP_BIT 0

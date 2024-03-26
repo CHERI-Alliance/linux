@@ -167,6 +167,27 @@ struct elf_load_info {
 	unsigned long entry;
 };
 
+#if defined(CONFIG_CHERI_PURECAP_UABI) && (ELF_COMPAT == 0)
+static void set_bprm_stack_caps(struct linux_binprm *bprm, void __user *sp)
+{
+	void __user *p;
+	size_t len;
+
+	bprm->pcuabi.csp = sp;
+
+	p = sp + sizeof(elf_stack_item_t);
+	len = (bprm->argc + 1) * sizeof(elf_stack_item_t);
+	bprm->pcuabi.argv = p;
+
+	p += len;
+	len = (bprm->envc + 1) * sizeof(elf_stack_item_t);
+	bprm->pcuabi.envp = p;
+
+	p += len;
+	bprm->pcuabi.auxv = p;
+}
+#endif /* CONFIG_CHERI_PURECAP_UABI && ELF_COMPAT == 0 */
+
 static int
 create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 		unsigned long interp_load_addr,
@@ -303,6 +324,9 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	/*
 	 * TODO [PCuABI] - Restrict bounds/perms for AT_CHERI_* entries
 	 */
+	bprm->pcuabi.pcc = elf_uaddr_to_user_ptr(interp_load_addr ?
+						 interp_load_info->entry :
+						 exec_load_info->entry);
 	NEW_AUX_ENT(AT_CHERI_EXEC_RW_CAP,
 		(exec_load_info->start_elf_rw != ~0UL ?
 			elf_uaddr_to_user_ptr(exec_load_info->start_elf_rw) :
@@ -349,6 +373,12 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	sp = STACK_ROUND(sp, items);
 	bprm->p = user_ptr_addr(sp);
 
+#if defined(CONFIG_CHERI_PURECAP_UABI) && (ELF_COMPAT == 0)
+	set_bprm_stack_caps(bprm, sp);
+	*mm_at_argv = (elf_stack_item_t)bprm->pcuabi.argv;
+	*mm_at_envp = (elf_stack_item_t)bprm->pcuabi.envp;
+#endif
+
 	/* Point sp at the lowest address on the stack */
 #ifdef CONFIG_STACK_GROWSUP
 	sp -= (items + ei_index) * sizeof(elf_stack_item_t);
@@ -374,9 +404,6 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 		return -EFAULT;
 
 	/* Populate list of argv pointers back to argv strings. */
-#if defined(CONFIG_CHERI_PURECAP_UABI) && (ELF_COMPAT == 0)
-	*mm_at_argv = (elf_stack_item_t)stack_item;
-#endif
 	/* In PCuABI, this derives a capability from SP pointing to arg_start */
 	ustr = sp + (mm->arg_start - user_ptr_addr(sp));
 	while (argc-- > 0) {
@@ -393,9 +420,6 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	mm->arg_end = user_ptr_addr(ustr);
 
 	/* Populate list of envp pointers back to envp strings. */
-#if defined(CONFIG_CHERI_PURECAP_UABI) && (ELF_COMPAT == 0)
-	*mm_at_envp = (elf_stack_item_t)stack_item;
-#endif
 	mm->env_start = user_ptr_addr(ustr);
 	while (envc-- > 0) {
 		size_t len;
