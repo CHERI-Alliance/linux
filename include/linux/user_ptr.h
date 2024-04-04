@@ -221,4 +221,26 @@ static inline bool user_ptr_is_same(const void __user *p1, const void __user *p2
 #endif
 }
 
+/**
+ * user_ptr_set_bounds() - Extract the lower and upper bounds of a user pointer.
+ * @ptr: The input user pointer.
+ * @len: The length of the new bounds.
+ *
+ * The lower bound (base) of @ptr is set to its address, and its upper bound
+ * (limit) is set to its address + @len. The lower and upper bounds may be
+ * adjusted downwards (resp. upwards) if they cannot be exactly represented. If
+ * @ptr does not carry any bound information, this function returns @ptr
+ * unchanged.
+ *
+ * Return: @ptr with adjusted bounds.
+ */
+static inline void __user *user_ptr_set_bounds(void __user *ptr, size_t len)
+{
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	return __builtin_cheri_bounds_set(ptr, len);
+#else
+	return ptr;
+#endif
+}
+
 #endif	/* _LINUX_USER_PTR_H */
