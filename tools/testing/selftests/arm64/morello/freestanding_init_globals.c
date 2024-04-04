@@ -47,6 +47,25 @@ struct cap_reloc {
 	size_t perms_to_clear;
 };
 
+static void get_caps(uintptr_t *cap_rx, uintptr_t *cap_rw, const uintptr_t *auxv)
+{
+	for (;;) {
+		switch ((unsigned long)auxv[0])	{
+		case AT_NULL:
+			return;
+		case AT_CHERI_EXEC_RX_CAP:
+			*cap_rx = auxv[1];
+			*cap_rx = cheri_perms_and(*cap_rx, CHERI_PERM_MASK_RX);
+			break;
+		case AT_CHERI_EXEC_RW_CAP:
+			*cap_rw = auxv[1];
+			*cap_rw = cheri_perms_and(*cap_rw, CHERI_PERM_MASK_RW);
+			break;
+		}
+		auxv += 2;
+	}
+}
+
 /*
  * Process capability relocations stored in the __cap_relocs section. Each
  * entry in that section has a layout corresponding to struct cap_reloc.
@@ -55,10 +74,11 @@ struct cap_reloc {
  * because capability relocations must have already been processed in order to
  * refer to such symbols.
  */
-void __morello_process_cap_relocs(void)
+void __morello_process_cap_relocs(void *auxv)
 {
 	const struct cap_reloc *start_cap_relocs, *end_cap_relocs, *reloc;
-	uintcap_t root_cap;
+	uintptr_t cap_rx = 0;
+	uintptr_t cap_rw = 0;
 
 	/*
 	 * References to the linker-generated start/stop section symbols must
@@ -77,15 +97,20 @@ void __morello_process_cap_relocs(void)
 	    "add %0, %0, #:lo12:__stop___cap_relocs"
 	    : "=C"(end_cap_relocs));
 
-	root_cap = (uintcap_t)cheri_ddc_get();
+	get_caps(&cap_rx, &cap_rw, auxv);
 
 	for (reloc = start_cap_relocs; reloc < end_cap_relocs; ++reloc) {
+		bool is_writable =
+			(reloc->perms_to_clear & CHERI_PERM_STORE) == 0;
 		bool is_executable =
 			(reloc->perms_to_clear & CHERI_PERM_EXECUTE) == 0;
 		uintcap_t cap;
 		uintcap_t *target;
 
-		cap = cheri_address_set(root_cap, reloc->base);
+		if (is_writable)
+			cap = cheri_address_set(cap_rw, reloc->base);
+		else
+			cap = cheri_address_set(cap_rx, reloc->base);
 
 		if (!is_executable && reloc->size)
 			cap = cheri_bounds_set(cap, reloc->size);
@@ -96,28 +121,9 @@ void __morello_process_cap_relocs(void)
 		if (is_executable)
 			cap = cheri_sentry_create(cap);
 
-		target = (uintcap_t *)cheri_address_set(root_cap,
+		target = (uintcap_t *)cheri_address_set(cap_rw,
 						reloc->capability_location);
 		*target = cap;
-	}
-}
-
-static void get_caps(uintptr_t *cap_rx, uintptr_t *cap_rw, const uintptr_t *auxv)
-{
-	for (;;) {
-		switch ((unsigned long)auxv[0])	{
-		case AT_NULL:
-			return;
-		case AT_CHERI_EXEC_RX_CAP:
-			*cap_rx = auxv[1];
-			*cap_rx = cheri_perms_and(*cap_rx, CHERI_PERM_MASK_RX);
-			break;
-		case AT_CHERI_EXEC_RW_CAP:
-			*cap_rw = auxv[1];
-			*cap_rw = cheri_perms_and(*cap_rw, CHERI_PERM_MASK_RW);
-			break;
-		}
-		auxv += 2;
 	}
 }
 
