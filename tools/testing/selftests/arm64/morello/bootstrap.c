@@ -87,7 +87,6 @@ int verify_auxval(struct morello_auxv *auxv)
 		if ((void *)auxv->a_val == NULL)
 			break;
 		/* fallthrough */
-	case AT_ENTRY:
 	case AT_EXECFN:
 	case AT_PLATFORM:
 	case AT_RANDOM:
@@ -97,14 +96,23 @@ int verify_auxval(struct morello_auxv *auxv)
 	case AT_CHERI_STACK_CAP:
 	case AT_CHERI_SEAL_CAP:
 	case AT_CHERI_CID_CAP:
-	case AT_ARGV:
-	case AT_ENVP:
 		/* valid and unsealed */
 		ASSERT_TRUE(cheri_tag_get(auxv->a_val))
 			TH_LOG("auxv (%ld) value is invalid", auxv->a_type);
 		ASSERT_FALSE(cheri_type_get(auxv->a_val)) {
 			TH_LOG("auxv (%ld) value is sealed", auxv->a_type);
 		}
+		break;
+	case AT_ENTRY:
+		/* valid */
+		ASSERT_TRUE(cheri_tag_get(auxv->a_val))
+			TH_LOG("auxv (%ld) value is invalid", auxv->a_type);
+		break;
+	case AT_ARGV:
+		ASSERT_CAP_EQ(reg_data.argv, auxv->a_val);
+		break;
+	case AT_ENVP:
+		ASSERT_CAP_EQ(reg_data.envp, auxv->a_val);
 		break;
 	default:
 		/* "null capability with its address set to the usual value" */
@@ -149,56 +157,36 @@ TEST(test_c64)
 	ASSERT_TRUE(cheri_tag_get(cap)) TH_LOG("not running in C64");
 }
 
-TEST(test_stack)
+TEST(test_initial_data)
 {
-	/* copy the pointer so we can modify it */
-	char **stack = stack_from_kernel;
-	int argc_stack;
-	/* start with an argc check */
-	VERIFY_CAP(stack, sizeof(void *), STACK_PERMS, "argc");
-
-	/* dereference and go past argc */
-	argc_stack = *(int *)stack;
-	ASSERT_EQ(argc_stack, reg_data.argc);
-	stack += 1;
+	int envc = 0;
+	int auxc = 0;
 
 	/* argv + null */
-	VERIFY_CAP(stack, sizeof(void *) * (argc_stack + 1), STACK_PERMS, "argv_stack");
-	ASSERT_CAP_EQ(reg_data.argv, stack);
+	VERIFY_CAP(reg_data.argv, sizeof(void *) * (reg_data.argc + 1), STACK_PERMS, "argv");
 
 	/* we are clear to dereference all argv */
-	for (int i = 0; i < argc_stack; i++) {
-		char *arg = *(stack + i);
-		verify_string(arg);
+	for (int i = 0; i < reg_data.argc; i++) {
+		verify_string(reg_data.argv[i]);
 	}
 
-	/* go past argv */
-	stack += argc_stack;
-	ASSERT_NULL(*stack) TH_LOG("argv was not null terminated on stack");
-	/* go past the null terminator */
-	stack += 1;
+	ASSERT_NULL(reg_data.argv[reg_data.argc]) TH_LOG("argv is not null terminated");
 
 	/* progressively check bounds for envp and dereference */
-	ASSERT_CAP_EQ(reg_data.envp, stack);
 	while (1) {
-		char *envp_stack = *stack;
-
-		VERIFY_CAP(stack, sizeof(void *), STACK_PERMS, "envp");
-		stack += 1;
-		if (envp_stack == NULL)
+		VERIFY_CAP(reg_data.envp + envc, sizeof(void *), STACK_PERMS, "envp");
+		if (reg_data.envp[envc] == NULL)
 			break;
-		verify_string(envp_stack);
+		verify_string(reg_data.envp[envc]);
+		envc++;
 	}
 
 	/* finally, go through auxv */
-	ASSERT_CAP_EQ(reg_data.auxv, stack);
 	while (1) {
-		struct morello_auxv *auxv_stack = ((struct morello_auxv *) stack);
-
-		VERIFY_CAP(auxv_stack, sizeof(struct morello_auxv), STACK_PERMS, "auxv");
-		if (verify_auxval(auxv_stack) == 0)
+		VERIFY_CAP(reg_data.auxv + auxc, sizeof(struct morello_auxv), STACK_PERMS, "auxv");
+		if (verify_auxval(&reg_data.auxv[auxc]) == 0)
 			break;
-		stack += 2;
+		auxc++;
 	}
 }
 
@@ -226,7 +214,7 @@ int main(int argc, char **argv, char **envp, struct morello_auxv *auxv)
 	test_write();
 	/* from now on write and exit work, so go wild */
 	test_c64();
-	test_stack();
+	test_initial_data();
 	/* stack is good, use it so we don't overflow the temp one */
 	install_kernel_stack();
 	test_set_tid_address_initial();
