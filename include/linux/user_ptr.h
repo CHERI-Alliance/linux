@@ -2,6 +2,7 @@
 #ifndef _LINUX_USER_PTR_H
 #define _LINUX_USER_PTR_H
 
+#include <linux/cheri.h>
 #include <linux/limits.h>
 #include <linux/typecheck.h>
 
@@ -26,6 +27,8 @@
 #define u64_to_user_ptr(x) as_user_ptr_strict(u64, (x))
 
 #ifdef CONFIG_CHERI_PURECAP_UABI
+
+typedef cheri_perms_t user_ptr_perms_t;
 
 /**
  * uaddr_to_user_ptr() - Convert a user-provided address to a user pointer.
@@ -108,6 +111,8 @@ bool check_user_ptr_write(void __user *ptr, size_t len);
 bool check_user_ptr_rw(void __user *ptr, size_t len);
 
 #else /* CONFIG_CHERI_PURECAP_UABI */
+
+typedef int user_ptr_perms_t;
 
 static inline void __user *uaddr_to_user_ptr(ptraddr_t addr)
 {
