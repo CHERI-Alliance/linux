@@ -140,12 +140,12 @@ static int padzero(unsigned long address)
 	USER_PTR_ALIGN((sp) + (items) * sizeof(elf_stack_item_t), 16)
 #define STACK_ALLOC(sp, len) ({ \
 	void __user *old_sp = sp; sp += len; \
-	old_sp; })
+	user_ptr_set_bounds(old_sp, len); })
 #else
 #define STACK_ADD(sp, items) ((sp) - (items) * sizeof(elf_stack_item_t))
 #define STACK_ROUND(sp, items) \
 	USER_PTR_ALIGN_DOWN((sp) - (items) * sizeof(elf_stack_item_t), 16)
-#define STACK_ALLOC(sp, len) (sp -= len)
+#define STACK_ALLOC(sp, len) ({ sp -= len; user_ptr_set_bounds(sp, len); })
 #endif
 static_assert(sizeof(elf_stack_item_t) <= 16);
 
@@ -168,6 +168,20 @@ struct elf_load_info {
 };
 
 #if defined(CONFIG_CHERI_PURECAP_UABI) && (ELF_COMPAT == 0)
+static void __user *make_user_sp(unsigned long p)
+{
+	/*
+	 * TODO [PCuABI] - derive a capability with bounds matching the stack
+	 * reservation.
+	 */
+	void __user *sp = uaddr_to_user_ptr_safe(p);
+
+	sp = cheri_perms_and(sp, CHERI_PERM_GLOBAL |
+			         CHERI_PERMS_READ | CHERI_PERMS_WRITE);
+
+	return sp;
+}
+
 static elf_stack_item_t make_ro_at_from_addr(ptraddr_t addr, size_t len)
 {
 	void __user *cap;
@@ -177,6 +191,13 @@ static elf_stack_item_t make_ro_at_from_addr(ptraddr_t addr, size_t len)
 	cap = cheri_build_user_cap_inexact_bounds(addr, len, perms);
 
 	return (elf_stack_item_t)cap;
+}
+
+static elf_stack_item_t make_ro_at_from_uptr(void __user *ptr)
+{
+	cheri_perms_t perms = CHERI_PERM_GLOBAL | CHERI_PERM_LOAD;
+
+	return (elf_stack_item_t)cheri_perms_and(ptr, perms);
 }
 
 static elf_stack_item_t make_at_entry(const struct elf_load_info *load_info)
@@ -248,28 +269,61 @@ static void __user *make_elf_rx_cap(const struct elf_load_info *load_info)
 						   len, perms);
 }
 
-static void set_bprm_stack_caps(struct linux_binprm *bprm, void __user *sp)
+static void __user *make_root_stack_cap(void)
+{
+	/*
+	 * TODO [PCuABI] - derive a capability with bounds matching the stack
+	 * reservation.
+	 */
+	void __user *cap = uaddr_to_user_ptr_safe(0);
+
+	cap = cheri_perms_and(cap, CHERI_PERMS_ROOTCAP |
+			           CHERI_PERMS_READ | CHERI_PERMS_WRITE);
+
+	return cap;
+}
+
+static void set_bprm_stack_caps(struct linux_binprm *bprm, void __user *sp,
+				int auxv_size)
 {
 	void __user *p;
 	size_t len;
 
 	bprm->pcuabi.csp = sp;
 
+	/*
+	 * TODO [PCuABI] - argc and envc may be very large (up to
+	 * MAX_ARG_STRINGS), and as a result the bounds of argv/envp may not be
+	 * exact. Padding should ideally be introduced between the arrays in
+	 * such a situation. This should be easily done once they are moved out
+	 * of the stack, as per the PCuABI specification.
+	 */
 	p = sp + sizeof(elf_stack_item_t);
 	len = (bprm->argc + 1) * sizeof(elf_stack_item_t);
-	bprm->pcuabi.argv = p;
+	bprm->pcuabi.argv = cheri_bounds_set(p, len);
 
 	p += len;
 	len = (bprm->envc + 1) * sizeof(elf_stack_item_t);
-	bprm->pcuabi.envp = p;
+	bprm->pcuabi.envp = cheri_bounds_set(p, len);
 
 	p += len;
-	bprm->pcuabi.auxv = p;
+	len = auxv_size * sizeof(elf_stack_item_t);
+	bprm->pcuabi.auxv = cheri_bounds_set(p, len);
 }
 #else /* CONFIG_CHERI_PURECAP_UABI && ELF_COMPAT == 0 */
+static void __user *make_user_sp(unsigned long p)
+{
+	return uaddr_to_user_ptr_safe(p);
+}
+
 static elf_stack_item_t make_ro_at_from_addr(ptraddr_t addr, size_t len)
 {
 	return addr;
+}
+
+static elf_stack_item_t make_ro_at_from_uptr(void __user *ptr)
+{
+	return user_ptr_addr(ptr);
 }
 
 static elf_stack_item_t make_at_entry(const struct elf_load_info *load_info)
@@ -315,12 +369,7 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	 */
 
 	p = arch_align_stack(p);
-
-	/*
-	 * TODO [PCuABI] - derive an appropriate capability (bounds matching
-	 * the stack reservation, RW permissions)
-	 */
-	sp = uaddr_to_user_ptr_safe(p);
+	sp = make_user_sp(p);
 
 	/*
 	 * If this architecture has a platform capability string, copy it
@@ -393,16 +442,17 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	NEW_AUX_ENT(AT_GID, from_kgid_munged(cred->user_ns, cred->gid));
 	NEW_AUX_ENT(AT_EGID, from_kgid_munged(cred->user_ns, cred->egid));
 	NEW_AUX_ENT(AT_SECURE, bprm->secureexec);
-	NEW_AUX_ENT(AT_RANDOM, (user_uintptr_t)u_rand_bytes);
+	NEW_AUX_ENT(AT_RANDOM, make_ro_at_from_uptr(u_rand_bytes));
 #ifdef ELF_HWCAP2
 	NEW_AUX_ENT(AT_HWCAP2, ELF_HWCAP2);
 #endif
-	NEW_AUX_ENT(AT_EXECFN, elf_uaddr_to_user_ptr(bprm->exec));
+	NEW_AUX_ENT(AT_EXECFN, make_ro_at_from_addr(bprm->exec,
+				strnlen(bprm->filename, MAX_ARG_STRLEN) + 1));
 	if (k_platform) {
-		NEW_AUX_ENT(AT_PLATFORM, (user_uintptr_t)u_platform);
+		NEW_AUX_ENT(AT_PLATFORM, make_ro_at_from_uptr(u_platform));
 	}
 	if (k_base_platform) {
-		NEW_AUX_ENT(AT_BASE_PLATFORM, (user_uintptr_t)u_base_platform);
+		NEW_AUX_ENT(AT_BASE_PLATFORM, make_ro_at_from_uptr(u_base_platform));
 	}
 	if (bprm->have_execfd) {
 		NEW_AUX_ENT(AT_EXECFD, bprm->execfd);
@@ -424,7 +474,7 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 		bprm->pcuabi.pcc = make_user_pcc(exec_load_info);
 	}
 
-	NEW_AUX_ENT(AT_CHERI_STACK_CAP, elf_uaddr_to_user_ptr(0));
+	NEW_AUX_ENT(AT_CHERI_STACK_CAP, make_root_stack_cap());
 	NEW_AUX_ENT(AT_CHERI_SEAL_CAP, cheri_user_root_seal_cap);
 	NEW_AUX_ENT(AT_CHERI_CID_CAP, cheri_user_root_cid_cap);
 
@@ -457,7 +507,7 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	bprm->p = user_ptr_addr(sp);
 
 #if defined(CONFIG_CHERI_PURECAP_UABI) && (ELF_COMPAT == 0)
-	set_bprm_stack_caps(bprm, sp);
+	set_bprm_stack_caps(bprm, sp, ei_index);
 	*mm_at_argv = (elf_stack_item_t)bprm->pcuabi.argv;
 	*mm_at_envp = (elf_stack_item_t)bprm->pcuabi.envp;
 #endif
