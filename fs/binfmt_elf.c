@@ -168,6 +168,86 @@ struct elf_load_info {
 };
 
 #if defined(CONFIG_CHERI_PURECAP_UABI) && (ELF_COMPAT == 0)
+static elf_stack_item_t make_ro_at_from_addr(ptraddr_t addr, size_t len)
+{
+	void __user *cap;
+	cheri_perms_t perms;
+
+	perms = CHERI_PERM_GLOBAL | CHERI_PERM_LOAD;
+	cap = cheri_build_user_cap_inexact_bounds(addr, len, perms);
+
+	return (elf_stack_item_t)cap;
+}
+
+static elf_stack_item_t make_at_entry(const struct elf_load_info *load_info)
+{
+	void __user *cap;
+	size_t len;
+	cheri_perms_t perms;
+
+	len = PAGE_ALIGN(load_info->end_elf_rx - load_info->start_elf_rx);
+	perms = CHERI_PERM_GLOBAL | CHERI_PERMS_READ | CHERI_PERMS_EXEC;
+
+	cap = cheri_build_user_cap_inexact_bounds(load_info->start_elf_rx,
+						  len, perms);
+	cap = cheri_address_set(cap, load_info->entry);
+	cap = cheri_sentry_create(cap);
+
+	return (elf_stack_item_t)cap;
+}
+
+static void __user *make_user_pcc(const struct elf_load_info *load_info)
+{
+	void __user *pcc;
+	size_t len;
+	cheri_perms_t perms;
+
+	len = PAGE_ALIGN(load_info->end_elf_rx - load_info->start_elf_rx);
+	perms = CHERI_PERM_GLOBAL | CHERI_PERMS_READ | CHERI_PERMS_EXEC;
+
+	pcc = cheri_build_user_cap_inexact_bounds(load_info->start_elf_rx,
+						  len, perms);
+	pcc = cheri_address_set(pcc, load_info->entry);
+
+	return pcc;
+}
+
+static void __user *make_elf_rw_cap(const struct elf_load_info *load_info)
+{
+	ptraddr_t start_addr;
+	size_t len;
+	cheri_perms_t perms;
+
+	if (load_info->start_elf_rw == ~0UL)
+		return NULL;
+
+	/*
+	 * The RW region typically starts after the first segment, and the
+	 * offset may not be page-aligned.
+	 */
+	start_addr = PAGE_ALIGN_DOWN(load_info->start_elf_rw);
+	len = PAGE_ALIGN(load_info->end_elf_rw - start_addr);
+	perms = CHERI_PERMS_ROOTCAP | CHERI_PERMS_READ | CHERI_PERMS_WRITE;
+#ifdef CONFIG_ARM64_MORELLO
+	perms |= ARM_CAP_PERMISSION_BRANCH_SEALED_PAIR;
+#endif
+	return cheri_build_user_cap_inexact_bounds(start_addr, len, perms);
+}
+
+static void __user *make_elf_rx_cap(const struct elf_load_info *load_info)
+{
+	size_t len;
+	cheri_perms_t perms;
+
+	len = PAGE_ALIGN(load_info->end_elf_rx - load_info->start_elf_rx);
+	perms = CHERI_PERMS_ROOTCAP | CHERI_PERMS_READ | CHERI_PERMS_EXEC;
+#ifdef CONFIG_ARM64_MORELLO
+	perms |= ARM_CAP_PERMISSION_BRANCH_SEALED_PAIR;
+#endif
+	return cheri_build_user_cap_inexact_bounds(load_info->start_elf_rx,
+						   len, perms);
+}
+
 static void set_bprm_stack_caps(struct linux_binprm *bprm, void __user *sp)
 {
 	void __user *p;
@@ -185,6 +265,16 @@ static void set_bprm_stack_caps(struct linux_binprm *bprm, void __user *sp)
 
 	p += len;
 	bprm->pcuabi.auxv = p;
+}
+#else /* CONFIG_CHERI_PURECAP_UABI && ELF_COMPAT == 0 */
+static elf_stack_item_t make_ro_at_from_addr(ptraddr_t addr, size_t len)
+{
+	return addr;
+}
+
+static elf_stack_item_t make_at_entry(const struct elf_load_info *load_info)
+{
+	return load_info->entry;
 }
 #endif /* CONFIG_CHERI_PURECAP_UABI && ELF_COMPAT == 0 */
 
@@ -289,14 +379,15 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	NEW_AUX_ENT(AT_HWCAP, ELF_HWCAP);
 	NEW_AUX_ENT(AT_PAGESZ, ELF_EXEC_PAGESIZE);
 	NEW_AUX_ENT(AT_CLKTCK, CLOCKS_PER_SEC);
-	NEW_AUX_ENT(AT_PHDR, elf_uaddr_to_user_ptr(phdr_addr));
+	NEW_AUX_ENT(AT_PHDR, make_ro_at_from_addr(phdr_addr,
+				     exec->e_phnum * sizeof(struct elf_phdr)));
 	NEW_AUX_ENT(AT_PHENT, sizeof(struct elf_phdr));
 	NEW_AUX_ENT(AT_PHNUM, exec->e_phnum);
 	NEW_AUX_ENT(AT_BASE, elf_uaddr_to_user_ptr(interp_load_addr));
 	if (bprm->interp_flags & BINPRM_FLAGS_PRESERVE_ARGV0)
 		flags |= AT_FLAGS_PRESERVE_ARGV0;
 	NEW_AUX_ENT(AT_FLAGS, flags);
-	NEW_AUX_ENT(AT_ENTRY, elf_uaddr_to_user_ptr(exec_load_info->entry));
+	NEW_AUX_ENT(AT_ENTRY, make_at_entry(exec_load_info));
 	NEW_AUX_ENT(AT_UID, from_kuid_munged(cred->user_ns, cred->uid));
 	NEW_AUX_ENT(AT_EUID, from_kuid_munged(cred->user_ns, cred->euid));
 	NEW_AUX_ENT(AT_GID, from_kgid_munged(cred->user_ns, cred->gid));
@@ -321,26 +412,18 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	NEW_AUX_ENT(AT_RSEQ_ALIGN, __alignof__(struct rseq));
 #endif
 #if defined(CONFIG_CHERI_PURECAP_UABI) && (ELF_COMPAT == 0)
-	/*
-	 * TODO [PCuABI] - Restrict bounds/perms for AT_CHERI_* entries
-	 */
-	bprm->pcuabi.pcc = elf_uaddr_to_user_ptr(interp_load_addr ?
-						 interp_load_info->entry :
-						 exec_load_info->entry);
-	NEW_AUX_ENT(AT_CHERI_EXEC_RW_CAP,
-		(exec_load_info->start_elf_rw != ~0UL ?
-			elf_uaddr_to_user_ptr(exec_load_info->start_elf_rw) :
-			NULL));
-	NEW_AUX_ENT(AT_CHERI_EXEC_RX_CAP,
-		elf_uaddr_to_user_ptr(exec_load_info->start_elf_rx));
-	NEW_AUX_ENT(AT_CHERI_INTERP_RW_CAP,
-		((interp_load_addr && interp_load_info->start_elf_rw != ~0UL) ?
-			elf_uaddr_to_user_ptr(interp_load_info->start_elf_rw) :
-			NULL));
-	NEW_AUX_ENT(AT_CHERI_INTERP_RX_CAP,
-		(interp_load_addr ?
-			elf_uaddr_to_user_ptr(interp_load_info->start_elf_rx) :
-			NULL));
+	NEW_AUX_ENT(AT_CHERI_EXEC_RW_CAP, make_elf_rw_cap(exec_load_info));
+	NEW_AUX_ENT(AT_CHERI_EXEC_RX_CAP, make_elf_rx_cap(exec_load_info));
+	if (interp_load_addr) {
+		NEW_AUX_ENT(AT_CHERI_INTERP_RW_CAP, make_elf_rw_cap(interp_load_info));
+		NEW_AUX_ENT(AT_CHERI_INTERP_RX_CAP, make_elf_rx_cap(interp_load_info));
+		bprm->pcuabi.pcc = make_user_pcc(interp_load_info);
+	} else {
+		NEW_AUX_ENT(AT_CHERI_INTERP_RW_CAP, NULL);
+		NEW_AUX_ENT(AT_CHERI_INTERP_RX_CAP, NULL);
+		bprm->pcuabi.pcc = make_user_pcc(exec_load_info);
+	}
+
 	NEW_AUX_ENT(AT_CHERI_STACK_CAP, elf_uaddr_to_user_ptr(0));
 	NEW_AUX_ENT(AT_CHERI_SEAL_CAP, cheri_user_root_seal_cap);
 	NEW_AUX_ENT(AT_CHERI_CID_CAP, cheri_user_root_cid_cap);
