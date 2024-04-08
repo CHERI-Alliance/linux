@@ -127,10 +127,14 @@ int morello_thread_start(struct pt_regs *regs, unsigned long pc,
 
 void morello_thread_init_user(void)
 {
-	/* TODO [PCuABI] - Set DDC to the null capability */
-	uintcap_t ddc = is_pure_task() ? cheri_user_root_cap
-				       : cheri_user_root_allperms_cap;
 	struct morello_state *morello_state = &current->thread.morello_user_state;
+	uintcap_t ddc;
+
+	if (is_pure_task()) {
+		ddc = 0;
+	} else {
+		ddc = cheri_user_root_allperms_cap;
+	}
 
 	/*
 	 * CTPIDR doesn't need to be initialised explicitly:
