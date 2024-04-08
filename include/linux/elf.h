@@ -65,7 +65,6 @@ extern Elf64_Dyn _DYNAMIC [];
 #endif
 
 #define elf_stack_item_t			user_uintptr_t
-#define elf_uaddr_to_user_ptr(addr)		uaddr_to_user_ptr_safe(addr)
 #define elf_copy_to_user_stack(to, from, len)	copy_to_user_with_ptr(to, from, len)
 #define elf_stack_put_user(val, ptr)		put_user_ptr((user_uintptr_t)(val), (ptr))
 

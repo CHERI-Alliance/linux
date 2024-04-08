@@ -26,9 +26,6 @@
 #undef elf_stack_item_t
 #define elf_stack_item_t			elf_addr_t
 
-#undef elf_uaddr_to_user_ptr
-#define elf_uaddr_to_user_ptr(addr)		addr
-
 #undef elf_copy_to_user_stack
 #define elf_copy_to_user_stack(to, from, len)	copy_to_user(to, from, len)
 
