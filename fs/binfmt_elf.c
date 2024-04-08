@@ -133,6 +133,37 @@ static int padzero(unsigned long address)
 	return 0;
 }
 
+/*
+ * Put a pointer to a string on the stack, return the size of the string on the
+ * stack or an error.
+ */
+static long put_str_ptr(char __user *ustr,
+		elf_stack_item_t __user *stack_item)
+{
+	size_t len;
+
+	len = strnlen_user(ustr, MAX_ARG_STRLEN);
+	if (!len || len > MAX_ARG_STRLEN)
+		return -EINVAL;
+
+	/*
+	 * TODO [PCuABI] - it is possible (though unlikely) that the string
+	 * length makes it impossible to represent the bounds of ustr exactly.
+	 * To avoid string pointers overlapping, padding should therefore be
+	 * introduced at the point where strings are copied into the new
+	 * process (copy_strings() in exec.c). Because strings can be empty
+	 * (just one zero byte), the padding cannot simply be skipped here; some
+	 * padding metadata should instead be made available by exec.c, for
+	 * instance in struct linux_binprm.
+	 */
+	ustr = user_ptr_set_bounds(ustr, len);
+
+	if (elf_stack_put_user(ustr, stack_item++))
+		return -EFAULT;
+
+	return len;
+}
+
 /* Let's use some macros to make this stack manipulation a little clearer */
 #ifdef CONFIG_STACK_GROWSUP
 #define STACK_ADD(sp, items) ((sp) + (items) * sizeof(elf_stack_item_t))
@@ -539,14 +570,16 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	/* Populate list of argv pointers back to argv strings. */
 	/* In PCuABI, this derives a capability from SP pointing to arg_start */
 	ustr = sp + (mm->arg_start - user_ptr_addr(sp));
+#if defined(CONFIG_CHERI_PURECAP_UABI) && (ELF_COMPAT == 0)
+	ustr = cheri_perms_and(ustr, CHERI_PERM_GLOBAL |
+				     CHERI_PERM_LOAD | CHERI_PERM_STORE);
+#endif
 	while (argc-- > 0) {
-		size_t len;
-		if (elf_stack_put_user(ustr, stack_item++))
-			return -EFAULT;
-		len = strnlen_user(ustr, MAX_ARG_STRLEN);
-		if (!len || len > MAX_ARG_STRLEN)
-			return -EINVAL;
-		ustr += len;
+		long str_ret = put_str_ptr(ustr, stack_item++);
+
+		if (str_ret < 0)
+			return str_ret;
+		ustr += str_ret;
 	}
 	if (elf_stack_put_user(0, stack_item++))
 		return -EFAULT;
@@ -555,13 +588,11 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	/* Populate list of envp pointers back to envp strings. */
 	mm->env_start = user_ptr_addr(ustr);
 	while (envc-- > 0) {
-		size_t len;
-		if (elf_stack_put_user(ustr, stack_item++))
-			return -EFAULT;
-		len = strnlen_user(ustr, MAX_ARG_STRLEN);
-		if (!len || len > MAX_ARG_STRLEN)
-			return -EINVAL;
-		ustr += len;
+		long str_ret = put_str_ptr(ustr, stack_item++);
+
+		if (str_ret < 0)
+			return str_ret;
+		ustr += str_ret;
 	}
 	if (elf_stack_put_user(0, stack_item++))
 		return -EFAULT;
