@@ -463,7 +463,7 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 				     exec->e_phnum * sizeof(struct elf_phdr)));
 	NEW_AUX_ENT(AT_PHENT, sizeof(struct elf_phdr));
 	NEW_AUX_ENT(AT_PHNUM, exec->e_phnum);
-	NEW_AUX_ENT(AT_BASE, elf_uaddr_to_user_ptr(interp_load_addr));
+	NEW_AUX_ENT(AT_BASE, interp_load_addr);
 	if (bprm->interp_flags & BINPRM_FLAGS_PRESERVE_ARGV0)
 		flags |= AT_FLAGS_PRESERVE_ARGV0;
 	NEW_AUX_ENT(AT_FLAGS, flags);
