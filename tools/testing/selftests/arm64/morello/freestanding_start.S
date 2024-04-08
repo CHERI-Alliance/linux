@@ -248,6 +248,7 @@ FUNCTION_START(switch_to_restricted)
 	 */
 	adr	c1, #0
 	build	c0, c0, c1
+	seal	c0, c0, rb
 	/* Branch (restricted) */
 	blrr	c0
 
