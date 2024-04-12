@@ -48,6 +48,7 @@
 #include <linux/uaccess.h>
 #include <linux/rseq.h>
 #include <linux/cheri.h>
+#include <linux/mm_reserv.h>
 #include <asm/param.h>
 #include <asm/page.h>
 
@@ -689,15 +690,24 @@ static unsigned long elf_load(struct file *filep, unsigned long addr,
 		 * If the header is requesting these pages to be
 		 * executable, honour that (ppc32 needs this).
 		 */
-		int error;
-
 		zero_start = ELF_PAGEALIGN(zero_start);
 		zero_end = ELF_PAGEALIGN(zero_end);
 
-		error = vm_brk_flags(zero_start, zero_end - zero_start,
-				     prot & PROT_EXEC ? VM_EXEC : 0);
-		if (error)
-			map_addr = error;
+		if (!reserv_is_supported(current->mm)) {
+			int error;
+
+			error = vm_brk_flags(zero_start, zero_end - zero_start,
+					     prot & PROT_EXEC ? VM_EXEC : 0);
+			if (error)
+				map_addr = error;
+		} else if (zero_end > zero_start) {
+			unsigned long addr;
+
+			addr = vm_mmap(0, zero_start, zero_end - zero_start, prot,
+				       MAP_FIXED | MAP_PRIVATE | MAP_ANONYMOUS, 0);
+			if (BAD_ADDR(addr))
+				map_addr = addr;
+		}
 	}
 	return map_addr;
 }
@@ -1332,6 +1342,15 @@ out_free_interp:
 			 * is needed.
 			 */
 			elf_flags |= MAP_FIXED_NOREPLACE;
+
+			if (reserv_is_supported(current->mm)) {
+				total_size = total_mapping_size(elf_phdata,
+								elf_ex->e_phnum);
+				if (!total_size) {
+					retval = -EINVAL;
+					goto out_free_dentry;
+				}
+			}
 		} else if (elf_ex->e_type == ET_DYN) {
 			/*
 			 * This logic is run once for the first LOAD Program
