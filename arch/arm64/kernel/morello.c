@@ -36,12 +36,6 @@ static void cap_lo_hi_tag(uintcap_t cap, u64 *lo_val, u64 *hi_val,
 	*tag = cheri_tag_get(cap);
 }
 
-static void merge_c_x(uintcap_t *creg, u64 xreg)
-{
-	if (cheri_address_get(*creg) != xreg)
-		*creg = cheri_address_set(*creg, xreg);
-}
-
 static bool cap_has_executive(uintcap_t cap)
 {
 	return cheri_perms_get(cap) & ARM_CAP_PERMISSION_EXECUTIVE;
@@ -69,6 +63,12 @@ void morello_cap_get_val_tag(uintcap_t cap, __uint128_t *val, u8 *tag)
 {
 	*((uintcap_t *)val) = cheri_tag_clear(cap);
 	*tag = cheri_tag_get(cap);
+}
+
+void morello_merge_cap_xval(uintcap_t *creg, u64 xreg)
+{
+	if (cheri_address_get(*creg) != xreg)
+		*creg = cheri_address_set(*creg, xreg);
 }
 
 uintcap_t morello_build_any_user_cap(const __uint128_t *val, u8 tag)
@@ -194,7 +194,7 @@ void morello_task_restore_user_tls(struct task_struct *tsk,
 #ifdef CONFIG_CHERI_PURECAP_UABI
 	*active_ctpidr = *tp_ptr;
 #else
-	merge_c_x(active_ctpidr, *tp_ptr);
+	morello_merge_cap_xval(active_ctpidr, *tp_ptr);
 #endif
 
 	write_cap_sysreg(morello_state->ctpidr, ctpidr_el0);
@@ -370,10 +370,10 @@ void morello_merge_cap_regs(struct pt_regs *regs)
 		active_csp = &regs->rcsp;
 
 	for (i = 0; i < ARRAY_SIZE(regs->cregs); i++)
-		merge_c_x(&regs->cregs[i], regs->regs[i]);
+		morello_merge_cap_xval(&regs->cregs[i], regs->regs[i]);
 
-	merge_c_x(active_csp, regs->sp);
-	merge_c_x(&regs->pcc, regs->pc);
+	morello_merge_cap_xval(active_csp, regs->sp);
+	morello_merge_cap_xval(&regs->pcc, regs->pc);
 }
 
 void morello_flush_cap_regs_to_64_regs(struct task_struct *tsk)
