@@ -589,7 +589,7 @@ put_back_event:
 				break;
 			}
 
-			if (copy_to_user(buffer + ret, e->event, length)) {
+			if (copy_to_user_with_ptr(buffer + ret, e->event, length)) {
 				if (ret == 0)
 					ret = -EFAULT;
 				goto put_back_event;

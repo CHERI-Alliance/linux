@@ -767,7 +767,7 @@ long drm_ioctl(struct file *filp,
 	drm_ioctl_t *func;
 	unsigned int nr = DRM_IOCTL_NR(cmd);
 	int retcode = -EINVAL;
-	char stack_kdata[128];
+	char stack_kdata[128] __attribute__((aligned(__alignof__(__kernel_uintptr_t))));
 	char *kdata = NULL;
 	unsigned int in_size, out_size, drv_size, ksize;
 	bool is_driver_ioctl;
@@ -830,7 +830,7 @@ long drm_ioctl(struct file *filp,
 		}
 	}
 
-	if (copy_from_user(kdata, (void __user *)arg, in_size) != 0) {
+	if (copy_from_user_with_ptr(kdata, (void __user *)arg, in_size) != 0) {
 		retcode = -EFAULT;
 		goto err_i1;
 	}
@@ -839,7 +839,7 @@ long drm_ioctl(struct file *filp,
 		memset(kdata + in_size, 0, ksize - in_size);
 
 	retcode = drm_ioctl_kernel(filp, func, kdata, ioctl->flags);
-	if (copy_to_user((void __user *)arg, kdata, out_size) != 0)
+	if (copy_to_user_with_ptr((void __user *)arg, kdata, out_size) != 0)
 		retcode = -EFAULT;
 
       err_i1:
