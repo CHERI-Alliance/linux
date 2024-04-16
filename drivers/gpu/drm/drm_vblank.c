@@ -1033,14 +1033,20 @@ static void send_vblank_event(struct drm_device *dev,
 	case DRM_EVENT_VBLANK:
 	case DRM_EVENT_FLIP_COMPLETE:
 		tv = ktime_to_timespec64(now);
-		e->event.vbl.sequence = seq;
 		/*
 		 * e->event is a user space structure, with hardcoded unsigned
 		 * 32-bit seconds/microseconds. This is safe as we always use
 		 * monotonic timestamps since linux-4.15
 		 */
-		e->event.vbl.tv_sec = tv.tv_sec;
-		e->event.vbl.tv_usec = tv.tv_nsec / 1000;
+		if (e->compat) {
+			e->event.vbl32.sequence = seq;
+			e->event.vbl32.tv_sec = tv.tv_sec;
+			e->event.vbl32.tv_usec = tv.tv_nsec / 1000;
+		} else {
+			e->event.vbl.sequence = seq;
+			e->event.vbl.tv_sec = tv.tv_sec;
+			e->event.vbl.tv_usec = tv.tv_nsec / 1000;
+		}
 		break;
 	case DRM_EVENT_CRTC_SEQUENCE:
 		if (seq)
@@ -1572,10 +1578,13 @@ EXPORT_SYMBOL(drm_crtc_vblank_restore);
 static int drm_queue_vblank_event(struct drm_device *dev, unsigned int pipe,
 				  u64 req_seq,
 				  union drm_wait_vblank *vblwait,
-				  struct drm_file *file_priv)
+				  struct drm_file *file_priv,
+				  bool compat
+				 )
 {
 	struct drm_vblank_crtc *vblank = drm_vblank_crtc(dev, pipe);
 	struct drm_pending_vblank_event *e;
+	struct drm_crtc *crtc = NULL;
 	ktime_t now;
 	u64 seq;
 	int ret;
@@ -1588,12 +1597,19 @@ static int drm_queue_vblank_event(struct drm_device *dev, unsigned int pipe,
 
 	e->pipe = pipe;
 	e->event.base.type = DRM_EVENT_VBLANK;
-	e->event.base.length = sizeof(e->event.vbl);
-	e->event.vbl.user_data = vblwait->request.signal;
-	e->event.vbl.crtc_id = 0;
-	if (drm_core_check_feature(dev, DRIVER_MODESET)) {
-		struct drm_crtc *crtc = drm_crtc_from_index(dev, pipe);
-
+	if (drm_core_check_feature(dev, DRIVER_MODESET))
+		crtc = drm_crtc_from_index(dev, pipe);
+	e->compat = compat;
+	if (compat) {
+		e->event.base.length = sizeof(e->event.vbl32);
+		e->event.vbl32.user_data = vblwait->request.signal;
+		e->event.vbl32.crtc_id = 0;
+		if (crtc)
+			e->event.vbl32.crtc_id = crtc->base.id;
+	} else {
+		e->event.base.length = sizeof(e->event.vbl);
+		e->event.vbl.user_data = vblwait->request.signal;
+		e->event.vbl.crtc_id = 0;
 		if (crtc)
 			e->event.vbl.crtc_id = crtc->base.id;
 	}
@@ -1795,7 +1811,8 @@ int drm_wait_vblank_ioctl(struct drm_device *dev, void *data,
 		/* must hold on to the vblank ref until the event fires
 		 * drm_vblank_put will be called asynchronously
 		 */
-		return drm_queue_vblank_event(dev, pipe, req_seq, vblwait, file_priv);
+		return drm_queue_vblank_event(dev, pipe, req_seq, vblwait,
+					      file_priv, in_compat64_syscall());
 	}
 
 	if (req_seq != seq) {

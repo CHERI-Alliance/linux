@@ -1158,12 +1158,12 @@ struct drm_mode_destroy_dumb {
 struct drm_mode_atomic {
 	__u32 flags;
 	__u32 count_objs;
-	__u64 objs_ptr;
-	__u64 count_props_ptr;
-	__u64 props_ptr;
-	__u64 prop_values_ptr;
-	__u64 reserved;
-	__u64 user_data;
+	__kernel_uintptr_t objs_ptr;
+	__kernel_uintptr_t count_props_ptr;
+	__kernel_uintptr_t props_ptr;
+	__kernel_uintptr_t prop_values_ptr;
+	__kernel_uintptr_t reserved;
+	__kernel_uintptr_t user_data;
 };
 
 struct drm_format_modifier_blob {

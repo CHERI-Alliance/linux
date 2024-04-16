@@ -918,7 +918,9 @@ int drm_atomic_get_property(struct drm_mode_object *obj,
  */
 
 static struct drm_pending_vblank_event *create_vblank_event(
-		struct drm_crtc *crtc, uint64_t user_data)
+		struct drm_crtc *crtc,
+		__kernel_uintptr_t user_data,
+		bool compat)
 {
 	struct drm_pending_vblank_event *e = NULL;
 
@@ -928,8 +930,14 @@ static struct drm_pending_vblank_event *create_vblank_event(
 
 	e->event.base.type = DRM_EVENT_FLIP_COMPLETE;
 	e->event.base.length = sizeof(e->event);
-	e->event.vbl.crtc_id = crtc->base.id;
-	e->event.vbl.user_data = user_data;
+	e->compat = compat;
+	if (compat) {
+		e->event.vbl32.crtc_id = crtc->base.id;
+		e->event.vbl32.user_data = user_data;
+	} else {
+		e->event.vbl.crtc_id = crtc->base.id;
+		e->event.vbl.user_data = user_data;
+	}
 
 	return e;
 }
@@ -1171,20 +1179,43 @@ static int setup_out_fence(struct drm_out_fence_state *fence_state,
 	return 0;
 }
 
+struct drm_mode_atomic32 {
+	__u32 flags;
+	__u32 count_objs;
+	__u64 objs_ptr;
+	__u64 count_props_ptr;
+	__u64 props_ptr;
+	__u64 prop_values_ptr;
+	__u64 reserved;
+	__u64 user_data;
+};
+
 static int prepare_signaling(struct drm_device *dev,
 				  struct drm_atomic_state *state,
-				  struct drm_mode_atomic *arg,
+				  void *arg_data,
 				  struct drm_file *file_priv,
 				  struct drm_out_fence_state **fence_state,
 				  unsigned int *num_fences)
 {
+	struct drm_mode_atomic32 *arg32 = arg_data;
+	struct drm_mode_atomic *arg = arg_data;
 	struct drm_crtc *crtc;
 	struct drm_crtc_state *crtc_state;
 	struct drm_connector *conn;
 	struct drm_connector_state *conn_state;
 	int i, c = 0, ret;
+	__u32 flags;
+	__kernel_uintptr_t user_data;
 
-	if (arg->flags & DRM_MODE_ATOMIC_TEST_ONLY)
+	if (in_compat64_syscall()) {
+		flags = arg32->flags;
+		user_data = arg32->user_data;
+	} else {
+		flags = arg->flags;
+		user_data = arg->user_data;
+	}
+
+	if (flags & DRM_MODE_ATOMIC_TEST_ONLY)
 		return 0;
 
 	for_each_new_crtc_in_state(state, crtc, crtc_state, i) {
@@ -1192,17 +1223,18 @@ static int prepare_signaling(struct drm_device *dev,
 
 		fence_ptr = get_out_fence_for_crtc(crtc_state->state, crtc);
 
-		if (arg->flags & DRM_MODE_PAGE_FLIP_EVENT || fence_ptr) {
+		if (flags & DRM_MODE_PAGE_FLIP_EVENT || fence_ptr) {
 			struct drm_pending_vblank_event *e;
 
-			e = create_vblank_event(crtc, arg->user_data);
+			e = create_vblank_event(crtc, user_data,
+						in_compat64_syscall());
 			if (!e)
 				return -ENOMEM;
 
 			crtc_state->event = e;
 		}
 
-		if (arg->flags & DRM_MODE_PAGE_FLIP_EVENT) {
+		if (flags & DRM_MODE_PAGE_FLIP_EVENT) {
 			struct drm_pending_vblank_event *e = crtc_state->event;
 
 			if (!file_priv)
@@ -1288,7 +1320,7 @@ static int prepare_signaling(struct drm_device *dev,
 	 * Having this flag means user mode pends on event which will never
 	 * reach due to lack of at least one CRTC for signaling
 	 */
-	if (c == 0 && (arg->flags & DRM_MODE_PAGE_FLIP_EVENT)) {
+	if (c == 0 && (flags & DRM_MODE_PAGE_FLIP_EVENT)) {
 		drm_dbg_atomic(dev, "need at least one CRTC for DRM_MODE_PAGE_FLIP_EVENT");
 		return -EINVAL;
 	}
@@ -1361,11 +1393,8 @@ set_async_flip(struct drm_atomic_state *state)
 int drm_mode_atomic_ioctl(struct drm_device *dev,
 			  void *data, struct drm_file *file_priv)
 {
+	struct drm_mode_atomic32 *arg32 = data;
 	struct drm_mode_atomic *arg = data;
-	uint32_t __user *objs_ptr = uaddr_to_user_ptr(arg->objs_ptr);
-	uint32_t __user *count_props_ptr = uaddr_to_user_ptr(arg->count_props_ptr);
-	uint32_t __user *props_ptr = uaddr_to_user_ptr(arg->props_ptr);
-	uint64_t __user *prop_values_ptr = uaddr_to_user_ptr(arg->prop_values_ptr);
 	unsigned int copied_objs, copied_props;
 	struct drm_atomic_state *state;
 	struct drm_modeset_acquire_ctx ctx;
@@ -1373,6 +1402,12 @@ int drm_mode_atomic_ioctl(struct drm_device *dev,
 	int ret = 0;
 	unsigned int i, j, num_fences;
 	bool async_flip = false;
+	__u32 flags;
+	__u32 count_objs;
+	uint32_t __user *objs_ptr;
+	uint32_t __user *count_props_ptr;
+	uint32_t __user *props_ptr;
+	uint64_t __user *prop_values_ptr;
 
 	/* disallow for drivers not supporting atomic: */
 	if (!drm_core_check_feature(dev, DRIVER_ATOMIC))
@@ -1388,17 +1423,36 @@ int drm_mode_atomic_ioctl(struct drm_device *dev,
 		return -EINVAL;
 	}
 
-	if (arg->flags & ~DRM_MODE_ATOMIC_FLAGS) {
+	if (in_compat64_syscall()) {
+		flags = arg32->flags;
+		count_objs = arg32->count_objs;
+		objs_ptr = compat_ptr(arg32->objs_ptr);
+		count_props_ptr = compat_ptr(arg32->count_props_ptr);
+		props_ptr = compat_ptr(arg32->props_ptr);
+		prop_values_ptr = compat_ptr(arg32->prop_values_ptr);
+		if (arg32->reserved) {
+			drm_dbg_atomic(dev, "commit failed: reserved field set\n");
+			return -EINVAL;
+		}
+	} else {
+		flags = arg->flags;
+		count_objs = arg->count_objs;
+		objs_ptr = (uint32_t __user *)arg->objs_ptr;
+		count_props_ptr = (uint32_t __user *)arg->count_props_ptr;
+		props_ptr = (uint32_t __user *)arg->props_ptr;
+		prop_values_ptr = (uint64_t __user *)arg->prop_values_ptr;
+		if (user_ptr_is_same((void __user *)arg->reserved, NULL)) {
+			drm_dbg_atomic(dev, "commit failed: reserved field set\n");
+			return -EINVAL;
+		}
+	}
+
+	if (flags & ~DRM_MODE_ATOMIC_FLAGS) {
 		drm_dbg_atomic(dev, "commit failed: invalid flag\n");
 		return -EINVAL;
 	}
 
-	if (arg->reserved) {
-		drm_dbg_atomic(dev, "commit failed: reserved field set\n");
-		return -EINVAL;
-	}
-
-	if (arg->flags & DRM_MODE_PAGE_FLIP_ASYNC) {
+	if (flags & DRM_MODE_PAGE_FLIP_ASYNC) {
 		if (!dev->mode_config.async_page_flip) {
 			drm_dbg_atomic(dev,
 				       "commit failed: DRM_MODE_PAGE_FLIP_ASYNC not supported\n");
@@ -1409,8 +1463,8 @@ int drm_mode_atomic_ioctl(struct drm_device *dev,
 	}
 
 	/* can't test and expect an event at the same time. */
-	if ((arg->flags & DRM_MODE_ATOMIC_TEST_ONLY) &&
-			(arg->flags & DRM_MODE_PAGE_FLIP_EVENT)) {
+	if ((flags & DRM_MODE_ATOMIC_TEST_ONLY) &&
+			(flags & DRM_MODE_PAGE_FLIP_EVENT)) {
 		drm_dbg_atomic(dev,
 			       "commit failed: page-flip event requested with test-only commit\n");
 		return -EINVAL;
@@ -1422,7 +1476,7 @@ int drm_mode_atomic_ioctl(struct drm_device *dev,
 
 	drm_modeset_acquire_init(&ctx, DRM_MODESET_ACQUIRE_INTERRUPTIBLE);
 	state->acquire_ctx = &ctx;
-	state->allow_modeset = !!(arg->flags & DRM_MODE_ATOMIC_ALLOW_MODESET);
+	state->allow_modeset = !!(flags & DRM_MODE_ATOMIC_ALLOW_MODESET);
 
 retry:
 	copied_objs = 0;
@@ -1430,7 +1484,7 @@ retry:
 	fence_state = NULL;
 	num_fences = 0;
 
-	for (i = 0; i < arg->count_objs; i++) {
+	for (i = 0; i < count_objs; i++) {
 		uint32_t obj_id, count_props;
 		struct drm_mode_object *obj;
 
@@ -1511,9 +1565,9 @@ retry:
 	if (arg->flags & DRM_MODE_PAGE_FLIP_ASYNC)
 		set_async_flip(state);
 
-	if (arg->flags & DRM_MODE_ATOMIC_TEST_ONLY) {
+	if (flags & DRM_MODE_ATOMIC_TEST_ONLY) {
 		ret = drm_atomic_check_only(state);
-	} else if (arg->flags & DRM_MODE_ATOMIC_NONBLOCK) {
+	} else if (flags & DRM_MODE_ATOMIC_NONBLOCK) {
 		ret = drm_atomic_nonblocking_commit(state);
 	} else {
 		ret = drm_atomic_commit(state);

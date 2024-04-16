@@ -494,7 +494,7 @@ enum drm_vblank_seq_type {
 struct drm_wait_vblank_request {
 	enum drm_vblank_seq_type type;
 	unsigned int sequence;
-	unsigned long signal;
+	__kernel_uintptr_t signal;
 };
 
 struct drm_wait_vblank_reply {
@@ -1021,7 +1021,7 @@ struct drm_crtc_queue_sequence {
 	__u32 crtc_id;
 	__u32 flags;
 	__u64 sequence;		/* on input, target sequence. on output, actual sequence */
-	__u64 user_data;	/* user data passed to event */
+	__kernel_uintptr_t user_data; /* user data passed to event */
 };
 
 #if defined(__cplusplus)
@@ -1347,7 +1347,7 @@ struct drm_event {
 
 struct drm_event_vblank {
 	struct drm_event base;
-	__u64 user_data;
+	__kernel_uintptr_t user_data;
 	__u32 tv_sec;
 	__u32 tv_usec;
 	__u32 sequence;
