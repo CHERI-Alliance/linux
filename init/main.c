@@ -1037,7 +1037,7 @@ void start_kernel(void)
 	page_address_init();
 	pr_notice("%s", linux_banner);
 #ifdef CONFIG_CHERI_PURECAP_UABI
-	pr_notice("Userspace ABI: pure-capability (PCuABI), transitional\n");
+	pr_notice("Userspace ABI: pure-capability (PCuABI)\n");
 #endif
 	setup_arch(&command_line);
 	mm_core_init_early();
