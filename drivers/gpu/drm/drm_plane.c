@@ -775,15 +775,27 @@ EXPORT_SYMBOL(drm_mode_plane_set_obj_prop);
 int drm_mode_getplane_res(struct drm_device *dev, void *data,
 			  struct drm_file *file_priv)
 {
+	struct drm_mode_get_plane_res32 {
+		__u64 plane_id_ptr;
+		__u32 count_planes;
+	};
+	struct drm_mode_get_plane_res32 *plane_resp32 = data;
 	struct drm_mode_get_plane_res *plane_resp = data;
 	struct drm_plane *plane;
 	uint32_t __user *plane_ptr;
 	int count = 0;
+	__u32 count_planes;
 
 	if (!drm_core_check_feature(dev, DRIVER_MODESET))
 		return -EOPNOTSUPP;
 
-	plane_ptr = u64_to_user_ptr(plane_resp->plane_id_ptr);
+	if (in_compat64_syscall()) {
+		plane_ptr = compat_ptr(plane_resp32->plane_id_ptr);
+		count_planes = plane_resp32->count_planes;
+	} else {
+		plane_ptr = (uint32_t __user *)(plane_resp->plane_id_ptr);
+		count_planes = plane_resp->count_planes;
+	}
 
 	/*
 	 * This ioctl is called twice, once to determine how much space is
@@ -812,13 +824,18 @@ int drm_mode_getplane_res(struct drm_device *dev, void *data,
 			continue;
 
 		if (drm_lease_held(file_priv, plane->base.id)) {
-			if (count < plane_resp->count_planes &&
+			if (count < count_planes &&
 			    put_user(plane->base.id, plane_ptr + count))
 				return -EFAULT;
 			count++;
 		}
 	}
-	plane_resp->count_planes = count;
+
+	if (in_compat64_syscall()) {
+		plane_resp32->count_planes = count;
+	} else {
+		plane_resp->count_planes = count;
+	}
 
 	return 0;
 }
@@ -826,53 +843,91 @@ int drm_mode_getplane_res(struct drm_device *dev, void *data,
 int drm_mode_getplane(struct drm_device *dev, void *data,
 		      struct drm_file *file_priv)
 {
+	struct drm_mode_get_plane32 {
+		__u32 plane_id;
+
+		__u32 crtc_id;
+		__u32 fb_id;
+
+		__u32 possible_crtcs;
+		__u32 gamma_size;
+
+		__u32 count_format_types;
+		__u64 format_type_ptr;
+	};
+	struct drm_mode_get_plane32 *plane_resp32 = data;
 	struct drm_mode_get_plane *plane_resp = data;
 	struct drm_plane *plane;
 	uint32_t __user *format_ptr;
+	__u32 plane_id, count_format_types, crtc_id, fb_id, possible_crtcs, gamma_size;
 
 	if (!drm_core_check_feature(dev, DRIVER_MODESET))
 		return -EOPNOTSUPP;
 
-	plane = drm_plane_find(dev, file_priv, plane_resp->plane_id);
+	if (in_compat64_syscall()) {
+		format_ptr = compat_ptr(plane_resp32->format_type_ptr);
+		plane_id = plane_resp32->plane_id;
+		count_format_types = plane_resp32->count_format_types;
+	} else {
+		format_ptr = (uint32_t __user *)plane_resp->format_type_ptr;
+		plane_id = plane_resp->plane_id;
+		count_format_types = plane_resp->count_format_types;
+	}
+
+	plane = drm_plane_find(dev, file_priv, plane_id);
 	if (!plane)
 		return -ENOENT;
 
 	drm_modeset_lock(&plane->mutex, NULL);
 	if (plane->state && plane->state->crtc && drm_lease_held(file_priv, plane->state->crtc->base.id))
-		plane_resp->crtc_id = plane->state->crtc->base.id;
+		crtc_id = plane->state->crtc->base.id;
 	else if (!plane->state && plane->crtc && drm_lease_held(file_priv, plane->crtc->base.id))
-		plane_resp->crtc_id = plane->crtc->base.id;
+		crtc_id = plane->crtc->base.id;
 	else
-		plane_resp->crtc_id = 0;
+		crtc_id = 0;
 
 	if (plane->state && plane->state->fb)
-		plane_resp->fb_id = plane->state->fb->base.id;
+		fb_id = plane->state->fb->base.id;
 	else if (!plane->state && plane->fb)
-		plane_resp->fb_id = plane->fb->base.id;
+		fb_id = plane->fb->base.id;
 	else
-		plane_resp->fb_id = 0;
+		fb_id = 0;
 	drm_modeset_unlock(&plane->mutex);
 
-	plane_resp->plane_id = plane->base.id;
-	plane_resp->possible_crtcs = drm_lease_filter_crtcs(file_priv,
-							    plane->possible_crtcs);
+	plane_id = plane->base.id;
+	possible_crtcs = drm_lease_filter_crtcs(file_priv,
+						plane->possible_crtcs);
 
-	plane_resp->gamma_size = 0;
+	gamma_size = 0;
 
 	/*
 	 * This ioctl is called twice, once to determine how much space is
 	 * needed, and the 2nd time to fill it.
 	 */
 	if (plane->format_count &&
-	    (plane_resp->count_format_types >= plane->format_count)) {
-		format_ptr = uaddr_to_user_ptr(plane_resp->format_type_ptr);
+	    (count_format_types >= plane->format_count)) {
 		if (copy_to_user(format_ptr,
 				 plane->format_types,
 				 sizeof(uint32_t) * plane->format_count)) {
 			return -EFAULT;
 		}
 	}
-	plane_resp->count_format_types = plane->format_count;
+
+	if (in_compat64_syscall()) {
+		plane_resp32->crtc_id = crtc_id;
+		plane_resp32->fb_id = fb_id;
+		plane_resp32->plane_id = plane_id;
+		plane_resp32->possible_crtcs = possible_crtcs;
+		plane_resp32->gamma_size = gamma_size;
+		plane_resp32->count_format_types = count_format_types;
+	} else {
+		plane_resp->crtc_id = crtc_id;
+		plane_resp->fb_id = fb_id;
+		plane_resp->plane_id = plane_id;
+		plane_resp->possible_crtcs = possible_crtcs;
+		plane_resp->gamma_size = gamma_size;
+		plane_resp->count_format_types = count_format_types;
+	}
 
 	return 0;
 }

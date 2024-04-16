@@ -92,11 +92,30 @@ int drm_mode_getresources(struct drm_device *dev, void *data,
 			  struct drm_file *file_priv)
 {
 	struct drm_mode_card_res *card_res = data;
+	struct drm_mode_card_res32 {
+		__u64 fb_id_ptr;
+		__u64 crtc_id_ptr;
+		__u64 connector_id_ptr;
+		__u64 encoder_id_ptr;
+		__u32 count_fbs;
+		__u32 count_crtcs;
+		__u32 count_connectors;
+		__u32 count_encoders;
+		__u32 min_width;
+		__u32 max_width;
+		__u32 min_height;
+		__u32 max_height;
+	};
+	struct drm_mode_card_res32 *card_res32 = data;
 	struct drm_framebuffer *fb;
 	struct drm_connector *connector;
 	struct drm_crtc *crtc;
 	struct drm_encoder *encoder;
-	int count, ret = 0;
+	int count_fb = 0, count_fbs;
+	int count_crtc = 0, count_crtcs;
+	int count_encoder = 0, count_encoders;
+	int count_connector = 0, count_connectors;
+	int ret = 0;
 	uint32_t __user *fb_id;
 	uint32_t __user *crtc_id;
 	uint32_t __user *connector_id;
@@ -107,49 +126,54 @@ int drm_mode_getresources(struct drm_device *dev, void *data,
 		return -EOPNOTSUPP;
 
 	mutex_lock(&file_priv->fbs_lock);
-	count = 0;
-	fb_id = u64_to_user_ptr(card_res->fb_id_ptr);
-	list_for_each_entry(fb, &file_priv->fbs, filp_head) {
-		if (count < card_res->count_fbs &&
-		    put_user(fb->base.id, fb_id + count)) {
-			mutex_unlock(&file_priv->fbs_lock);
-			return -EFAULT;
-		}
-		count++;
+	if (in_compat64_syscall()) {
+		fb_id        = compat_ptr(card_res32->fb_id_ptr);
+		crtc_id      = compat_ptr(card_res32->crtc_id_ptr);
+		encoder_id   = compat_ptr(card_res32->encoder_id_ptr);
+		connector_id = compat_ptr(card_res32->connector_id_ptr);
+
+		count_fbs        = card_res32->count_fbs;
+		count_crtcs      = card_res32->count_crtcs;
+		count_encoders   = card_res32->count_encoders;
+		count_connectors = card_res32->count_connectors;
+	} else {
+		fb_id        = (uint32_t __user *)(card_res->fb_id_ptr);
+		crtc_id      = (uint32_t __user *)(card_res->crtc_id_ptr);
+		encoder_id   = (uint32_t __user *)(card_res->encoder_id_ptr);
+		connector_id = (uint32_t __user *)(card_res->connector_id_ptr);
+
+		count_fbs        = card_res->count_fbs;
+		count_crtcs      = card_res->count_crtcs;
+		count_encoders   = card_res->count_encoders;
+		count_connectors = card_res->count_connectors;
 	}
-	card_res->count_fbs = count;
-	mutex_unlock(&file_priv->fbs_lock);
-
-	card_res->max_height = dev->mode_config.max_height;
-	card_res->min_height = dev->mode_config.min_height;
-	card_res->max_width = dev->mode_config.max_width;
-	card_res->min_width = dev->mode_config.min_width;
-
-	count = 0;
-	crtc_id = u64_to_user_ptr(card_res->crtc_id_ptr);
+	list_for_each_entry(fb, &file_priv->fbs, filp_head) {
+		if (count_fb < count_fbs &&
+		    put_user(fb->base.id, fb_id + count_fb)) {
+			ret = -EFAULT;
+			goto error;
+		}
+		count_fb++;
+	}
 	drm_for_each_crtc(crtc, dev) {
 		if (drm_lease_held(file_priv, crtc->base.id)) {
-			if (count < card_res->count_crtcs &&
-			    put_user(crtc->base.id, crtc_id + count))
-				return -EFAULT;
-			count++;
+			if (count_crtc < count_crtcs &&
+			    put_user(crtc->base.id, crtc_id + count_crtc)) {
+				ret = -EFAULT;
+				goto error;
+			}
+			count_crtc++;
 		}
 	}
-	card_res->count_crtcs = count;
-
-	count = 0;
-	encoder_id = u64_to_user_ptr(card_res->encoder_id_ptr);
 	drm_for_each_encoder(encoder, dev) {
-		if (count < card_res->count_encoders &&
-		    put_user(encoder->base.id, encoder_id + count))
-			return -EFAULT;
-		count++;
+		if (count_encoder < count_encoders &&
+		    put_user(encoder->base.id, encoder_id + count_encoder)) {
+			ret = -EFAULT;
+			goto error;
+		}
+		count_encoder++;
 	}
-	card_res->count_encoders = count;
-
 	drm_connector_list_iter_begin(dev, &conn_iter);
-	count = 0;
-	connector_id = u64_to_user_ptr(card_res->connector_id_ptr);
 	drm_for_each_connector_iter(connector, &conn_iter) {
 		/* only expose writeback connectors if userspace understands them */
 		if (!file_priv->writeback_connectors &&
@@ -157,17 +181,41 @@ int drm_mode_getresources(struct drm_device *dev, void *data,
 			continue;
 
 		if (drm_lease_held(file_priv, connector->base.id)) {
-			if (count < card_res->count_connectors &&
-			    put_user(connector->base.id, connector_id + count)) {
+			if (count_connector < count_connectors &&
+			    put_user(connector->base.id, connector_id + count_connector)) {
 				drm_connector_list_iter_end(&conn_iter);
-				return -EFAULT;
+				ret = -EFAULT;
+				goto error;
 			}
-			count++;
+			count_connector++;
 		}
 	}
-	card_res->count_connectors = count;
 	drm_connector_list_iter_end(&conn_iter);
 
+	if (in_compat64_syscall()) {
+		card_res32->count_fbs        = count_fb;
+		card_res32->count_crtcs      = count_crtc;
+		card_res32->count_encoders   = count_encoder;
+		card_res32->count_connectors = count_connector;
+
+		card_res32->max_height = dev->mode_config.max_height;
+		card_res32->min_height = dev->mode_config.min_height;
+		card_res32->max_width  = dev->mode_config.max_width;
+		card_res32->min_width  = dev->mode_config.min_width;
+	} else {
+		card_res->count_fbs        = count_fb;
+		card_res->count_crtcs      = count_crtc;
+		card_res->count_encoders   = count_encoder;
+		card_res->count_connectors = count_connector;
+
+		card_res->max_height = dev->mode_config.max_height;
+		card_res->min_height = dev->mode_config.min_height;
+		card_res->max_width  = dev->mode_config.max_width;
+		card_res->min_width  = dev->mode_config.min_width;
+	}
+
+error:
+	mutex_unlock(&file_priv->fbs_lock);
 	return ret;
 }
 

@@ -435,17 +435,41 @@ int drm_mode_object_get_properties(struct drm_mode_object *obj, bool atomic,
 int drm_mode_obj_get_properties_ioctl(struct drm_device *dev, void *data,
 				      struct drm_file *file_priv)
 {
+	struct drm_mode_obj_get_properties32 {
+		__u64 props_ptr;
+		__u64 prop_values_ptr;
+		__u32 count_props;
+		__u32 obj_id;
+		__u32 obj_type;
+	};
+	struct drm_mode_obj_get_properties32 *arg32 = data;
 	struct drm_mode_obj_get_properties *arg = data;
 	struct drm_mode_object *obj;
 	struct drm_modeset_acquire_ctx ctx;
 	int ret = 0;
+	__u32 obj_id, obj_type, count_props;
+	uint32_t __user *props_ptr;
+	uint64_t __user *prop_values_ptr;
 
 	if (!drm_core_check_feature(dev, DRIVER_MODESET))
 		return -EOPNOTSUPP;
 
 	DRM_MODESET_LOCK_ALL_BEGIN(dev, ctx, 0, ret);
+	if (in_compat64_syscall()) {
+		count_props = arg32->count_props;
+		obj_id = arg32->obj_id;
+		obj_type = arg32->obj_type;
+		props_ptr = compat_ptr(arg32->props_ptr);
+		prop_values_ptr = compat_ptr(arg32->prop_values_ptr);
+	} else {
+		count_props = arg->count_props;
+		obj_id = arg->obj_id;
+		obj_type = arg->obj_type;
+		props_ptr = (uint32_t __user *)(arg->props_ptr);
+		prop_values_ptr = (uint64_t __user *)(arg->prop_values_ptr);
+	}
 
-	obj = drm_mode_object_find(dev, file_priv, arg->obj_id, arg->obj_type);
+	obj = drm_mode_object_find(dev, file_priv, obj_id, obj_type);
 	if (!obj) {
 		ret = -ENOENT;
 		goto out;
@@ -456,13 +480,18 @@ int drm_mode_obj_get_properties_ioctl(struct drm_device *dev, void *data,
 	}
 
 	ret = drm_mode_object_get_properties(obj, file_priv->atomic,
-			uaddr_to_user_ptr(arg->props_ptr),
-			uaddr_to_user_ptr(arg->prop_values_ptr),
-			&arg->count_props);
+			props_ptr,
+			prop_values_ptr,
+			&count_props);
 
 out_unref:
 	drm_mode_object_put(obj);
 out:
+	if (in_compat64_syscall()) {
+		arg32->count_props = count_props;
+	} else {
+		arg->count_props = count_props;
+	}
 	DRM_MODESET_LOCK_ALL_END(dev, ctx, ret);
 	return ret;
 }

@@ -2889,6 +2889,26 @@ drm_mode_expose_to_userspace(const struct drm_display_mode *mode,
 int drm_mode_getconnector(struct drm_device *dev, void *data,
 			  struct drm_file *file_priv)
 {
+	struct drm_mode_get_connector32 {
+		__u64 encoders_ptr;
+		__u64 modes_ptr;
+		__u64 props_ptr;
+		__u64 prop_values_ptr;
+		__u32 count_modes;
+		__u32 count_props;
+		__u32 count_encoders;
+
+		__u32 encoder_id;
+		__u32 connector_id;
+		__u32 connector_type;
+		__u32 connector_type_id;
+		__u32 connection;
+		__u32 mm_width;
+		__u32 mm_height;
+		__u32 subpixel;
+		__u32 pad;
+	};
+	struct drm_mode_get_connector32 *out_resp32 = data;
 	struct drm_mode_get_connector *out_resp = data;
 	struct drm_connector *connector;
 	struct drm_encoder *encoder;
@@ -2901,21 +2921,46 @@ int drm_mode_getconnector(struct drm_device *dev, void *data,
 	struct drm_mode_modeinfo __user *mode_ptr;
 	uint32_t __user *encoder_ptr;
 	bool is_current_master;
+	__u32 connector_id;
+	__u32 count_encoders;
+	__u32 count_modes;
+	__u32 count_props;
+	uint32_t __user *prop_ptr;
+	uint64_t __user *prop_values;
+
+	if (in_compat64_syscall()) {
+		connector_id = out_resp32->connector_id;
+		count_encoders = out_resp32->count_encoders;
+		count_modes = out_resp32->count_modes;
+		count_props = out_resp32->count_props;
+		encoder_ptr = compat_ptr(out_resp32->encoders_ptr);
+		mode_ptr = compat_ptr(out_resp32->modes_ptr);
+		prop_ptr = compat_ptr(out_resp32->props_ptr);
+		prop_values = compat_ptr(out_resp32->prop_values_ptr);
+	} else {
+		connector_id = out_resp->connector_id;
+		count_encoders = out_resp->count_encoders;
+		count_modes = out_resp->count_modes;
+		count_props = out_resp->count_props;
+		encoder_ptr = (uint32_t __user *)(out_resp->encoders_ptr);
+		mode_ptr = (struct drm_mode_modeinfo __user *)(out_resp->modes_ptr);
+		prop_ptr = (uint32_t __user *)(out_resp->props_ptr);
+		prop_values = (uint64_t __user *)(out_resp->prop_values_ptr);
+	}
 
 	if (!drm_core_check_feature(dev, DRIVER_MODESET))
 		return -EOPNOTSUPP;
 
 	memset(&u_mode, 0, sizeof(struct drm_mode_modeinfo));
 
-	connector = drm_connector_lookup(dev, file_priv, out_resp->connector_id);
+	connector = drm_connector_lookup(dev, file_priv, connector_id);
 	if (!connector)
 		return -ENOENT;
 
 	encoders_count = hweight32(connector->possible_encoders);
 
-	if ((out_resp->count_encoders >= encoders_count) && encoders_count) {
+	if ((count_encoders >= encoders_count) && encoders_count) {
 		copied = 0;
-		encoder_ptr = uaddr_to_user_ptr(out_resp->encoders_ptr);
 
 		drm_connector_for_each_possible_encoder(connector, encoder) {
 			if (put_user(encoder->base.id, encoder_ptr + copied)) {
@@ -2925,16 +2970,10 @@ int drm_mode_getconnector(struct drm_device *dev, void *data,
 			copied++;
 		}
 	}
-	out_resp->count_encoders = encoders_count;
-
-	out_resp->connector_id = connector->base.id;
-	out_resp->connector_type = connector->connector_type;
-	out_resp->connector_type_id = connector->connector_type_id;
-
 	is_current_master = drm_is_current_master(file_priv);
 
 	mutex_lock(&dev->mode_config.mutex);
-	if (out_resp->count_modes == 0) {
+	if (count_modes == 0) {
 		if (is_current_master)
 			connector->funcs->fill_modes(connector,
 						     dev->mode_config.max_width,
@@ -2943,11 +2982,6 @@ int drm_mode_getconnector(struct drm_device *dev, void *data,
 			drm_dbg_kms(dev, "User-space requested a forced probe on [CONNECTOR:%d:%s] but is not the DRM master, demoting to read-only probe\n",
 				    connector->base.id, connector->name);
 	}
-
-	out_resp->mm_width = connector->display_info.width_mm;
-	out_resp->mm_height = connector->display_info.height_mm;
-	out_resp->subpixel = connector->display_info.subpixel_order;
-	out_resp->connection = connector->status;
 
 	/* delayed so we get modes regardless of pre-fill_modes state */
 	list_for_each_entry(mode, &connector->modes, head) {
@@ -2964,9 +2998,8 @@ int drm_mode_getconnector(struct drm_device *dev, void *data,
 	 * This ioctl is called twice, once to determine how much space is
 	 * needed, and the 2nd time to fill it.
 	 */
-	if ((out_resp->count_modes >= mode_count) && mode_count) {
+	if ((count_modes >= mode_count) && mode_count) {
 		copied = 0;
-		mode_ptr = uaddr_to_user_ptr(out_resp->modes_ptr);
 		list_for_each_entry(mode, &connector->modes, head) {
 			if (!mode->expose_to_userspace)
 				continue;
@@ -3004,25 +3037,50 @@ int drm_mode_getconnector(struct drm_device *dev, void *data,
 			mode->expose_to_userspace = false;
 	}
 
-	out_resp->count_modes = mode_count;
 	mutex_unlock(&dev->mode_config.mutex);
 
 	drm_modeset_lock(&dev->mode_config.connection_mutex, NULL);
 	encoder = drm_connector_get_encoder(connector);
-	if (encoder)
-		out_resp->encoder_id = encoder->base.id;
-	else
-		out_resp->encoder_id = 0;
 
 	/* Only grab properties after probing, to make sure EDID and other
 	 * properties reflect the latest status.
 	 */
 	ret = drm_mode_object_get_properties(&connector->base, file_priv->atomic,
-			uaddr_to_user_ptr(out_resp->props_ptr),
-			uaddr_to_user_ptr(out_resp->prop_values_ptr),
-			&out_resp->count_props);
+			prop_ptr, prop_values,
+			&count_props);
 	drm_modeset_unlock(&dev->mode_config.connection_mutex);
 
+	if (in_compat64_syscall()) {
+		out_resp32->count_encoders = encoders_count;
+		out_resp32->count_modes = mode_count;
+		out_resp32->count_props = count_props;
+		out_resp32->connector_id = connector->base.id;
+		out_resp32->connector_type = connector->connector_type;
+		out_resp32->connector_type_id = connector->connector_type_id;
+		if (encoder)
+			out_resp32->encoder_id = encoder->base.id;
+		else
+			out_resp32->encoder_id = 0;
+		out_resp32->mm_width = connector->display_info.width_mm;
+		out_resp32->mm_height = connector->display_info.height_mm;
+		out_resp32->subpixel = connector->display_info.subpixel_order;
+		out_resp32->connection = connector->status;
+	} else {
+		out_resp->count_encoders = encoders_count;
+		out_resp->count_modes = mode_count;
+		out_resp->count_props = count_props;
+		out_resp->connector_id = connector->base.id;
+		out_resp->connector_type = connector->connector_type;
+		out_resp->connector_type_id = connector->connector_type_id;
+		if (encoder)
+			out_resp->encoder_id = encoder->base.id;
+		else
+			out_resp->encoder_id = 0;
+		out_resp->mm_width = connector->display_info.width_mm;
+		out_resp->mm_height = connector->display_info.height_mm;
+		out_resp->subpixel = connector->display_info.subpixel_order;
+		out_resp->connection = connector->status;
+	}
 out:
 	drm_connector_put(connector);
 
