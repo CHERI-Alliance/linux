@@ -514,6 +514,7 @@ int drm_mode_getproperty_ioctl(struct drm_device *dev,
 		}
 	}
 
+	count_values = value_count;
 	copied = 0;
 
 	if (drm_property_type_is(property, DRM_MODE_PROP_ENUM) ||
