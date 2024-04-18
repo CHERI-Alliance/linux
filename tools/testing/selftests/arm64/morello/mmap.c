@@ -81,7 +81,7 @@ void syscall_mmap2(void)
 	ASSERT_EQ(retval, (int)msg_len);
 
 	addr = mmap_verified(NULL, MMAP_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd,
-		      0, CAP_LOAD_PERMS | CAP_STORE_PERMS);
+		      0, CHERI_PERM_LOAD | CHERI_PERM_STORE);
 
 	EXPECT_NE(addr, NULL)
 		goto clean_up;
