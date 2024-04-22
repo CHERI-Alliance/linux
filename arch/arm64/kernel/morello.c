@@ -20,6 +20,11 @@
 #include <asm/cpufeature.h>
 #include <asm/morello.h>
 #include <asm/ptrace.h>
+#include <asm/vdso.h>
+
+#ifdef CONFIG_CHERI_PURECAP_UABI
+#include <generated/vdso-purecap-offsets.h>
+#endif
 
 static uintcap_t morello_sentry_unsealcap __ro_after_init;
 
@@ -65,6 +70,18 @@ static void set_creg_user_ptr(struct pt_regs *regs, int r, void __user *val)
 {
 	regs->regs[r] = user_ptr_addr(val);
 	regs->cregs[r] = (uintcap_t)val;
+}
+
+static user_uintptr_t make_purecap_signal_return_clr(void)
+{
+	user_uintptr_t clr = current->mm->context.vdso;
+
+	clr = cheri_perms_and(clr, CHERI_PERM_GLOBAL |
+				   CHERI_PERMS_READ | CHERI_PERMS_EXEC);
+	clr = cheri_address_set(clr, VDSO_SYMBOL(clr, sigtramp));
+	clr = cheri_sentry_create(clr);
+
+	return clr;
 }
 #endif
 
@@ -262,13 +279,14 @@ void morello_setup_signal_return(struct pt_regs *regs)
 	update_regs_c64(regs, regs->pc);
 
 	if (is_pure_task()) {
+#ifdef CONFIG_CHERI_PURECAP_UABI
 		/* Unseal if the pcc has sentry object type */
 		if (cheri_is_sentry(regs->pcc))
 			regs->pcc = cheri_unseal(regs->pcc,
 						 morello_sentry_unsealcap);
 
-		/* TODO [PCuABI] - Adjust the bounds/permissions properly */
-		regs->cregs[30] = cheri_user_root_cap;
+		regs->cregs[30] = make_purecap_signal_return_clr();
+#endif
 	} else /* Hybrid */ {
 		regs->pcc = cheri_user_root_allperms_cap;
 
