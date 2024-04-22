@@ -164,6 +164,22 @@ void morello_thread_init_user(void)
 
 	write_sysreg(cctlr, cctlr_el0);
 	morello_state->cctlr = cctlr;
+
+	if (is_pure_task()) {
+		/*
+		 * arch_user_ptr_owning_perms_from_prot() checks the permissions
+		 * of PCC to decide which permissions to return. It ends up
+		 * being called from binfmt_elf before the thread has even
+		 * started, at which point the value of PCC will be that of the
+		 * old process. To avoid this issue, set PCC to a temporary
+		 * value with all permissions, so that initial reservations
+		 * (executable, interpreter, etc.) are assigned appropriate
+		 * permissions (especially Executive). This value is never
+		 * visible to userspace as morello_thread_start() will set the
+		 * final value.
+		 */
+		task_pt_regs(current)->pcc = cheri_user_root_cap;
+	}
 }
 
 void morello_thread_save_user_state(struct task_struct *tsk)
