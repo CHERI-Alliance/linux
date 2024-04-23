@@ -21,6 +21,7 @@
 #include <linux/time_namespace.h>
 #include <linux/timekeeper_internal.h>
 #include <linux/vmalloc.h>
+#include <linux/mman.h>
 #include <vdso/datapage.h>
 #include <vdso/helpers.h>
 #include <vdso/vsyscall.h>
@@ -199,9 +200,9 @@ static int __setup_additional_pages(enum vdso_abi abi,
 				    struct linux_binprm *bprm,
 				    int uses_interp)
 {
-	unsigned long vdso_base, vdso_text_len, vdso_mapping_len;
+	unsigned long vdso_base, vdso_text_base, vdso_text_len, vdso_mapping_len;
 	unsigned long gp_flags = 0;
-	void *ret;
+	struct vm_area_struct *ret;
 
 	BUILD_BUG_ON(VVAR_NR_PAGES != __VVAR_PAGES);
 
@@ -221,16 +222,24 @@ static int __setup_additional_pages(enum vdso_abi abi,
 	if (IS_ERR(ret))
 		goto up_fail;
 
+	if (reserv_vma_set_reserv(ret, vdso_base, vdso_mapping_len,
+				  PROT_READ | PROT_EXEC))
+		goto up_fail;
+
 	if (system_supports_bti_kernel())
 		gp_flags = VM_ARM64_BTI;
 
-	vdso_base += VVAR_NR_PAGES * PAGE_SIZE;
-	mm->context.vdso = (void *)vdso_base;
-	ret = _install_special_mapping(mm, vdso_base, vdso_text_len,
+	vdso_text_base = vdso_base + VVAR_NR_PAGES * PAGE_SIZE;
+	mm->context.vdso = (void *)vdso_text_base;
+	ret = _install_special_mapping(mm, vdso_text_base, vdso_text_len,
 				       VM_READ|VM_EXEC|gp_flags|
 				       VM_MAYREAD|VM_MAYWRITE|VM_MAYEXEC,
 				       vdso_info[abi].cm);
 	if (IS_ERR(ret))
+		goto up_fail;
+
+	if (reserv_vma_set_reserv(ret, vdso_base, vdso_mapping_len,
+				  PROT_READ | PROT_EXEC))
 		goto up_fail;
 
 	return 0;
