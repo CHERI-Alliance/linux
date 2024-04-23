@@ -200,16 +200,13 @@ struct elf_load_info {
 };
 
 #if defined(CONFIG_CHERI_PURECAP_UABI) && (ELF_COMPAT == 0)
-static void __user *make_user_sp(unsigned long p)
+static void __user *make_user_sp(struct linux_binprm *bprm, unsigned long p)
 {
-	/*
-	 * TODO [PCuABI] - derive a capability with bounds matching the stack
-	 * reservation.
-	 */
-	void __user *sp = uaddr_to_user_ptr_safe(p);
+	void __user *sp = (void __user *)reserv_vma_make_user_ptr_owning(bprm->vma);
 
 	sp = cheri_perms_and(sp, CHERI_PERM_GLOBAL |
 			         CHERI_PERMS_READ | CHERI_PERMS_WRITE);
+	sp = cheri_address_set(sp, p);
 
 	return sp;
 }
@@ -301,18 +298,9 @@ static void __user *make_elf_rx_cap(const struct elf_load_info *load_info)
 						   len, perms);
 }
 
-static void __user *make_root_stack_cap(void)
+static void __user *make_root_stack_cap(struct linux_binprm *bprm)
 {
-	/*
-	 * TODO [PCuABI] - derive a capability with bounds matching the stack
-	 * reservation.
-	 */
-	void __user *cap = uaddr_to_user_ptr_safe(0);
-
-	cap = cheri_perms_and(cap, CHERI_PERMS_ROOTCAP |
-			           CHERI_PERMS_READ | CHERI_PERMS_WRITE);
-
-	return cap;
+	return (void __user *)reserv_vma_make_user_ptr_owning(bprm->vma);
 }
 
 static void set_bprm_stack_caps(struct linux_binprm *bprm, void __user *sp,
@@ -343,7 +331,7 @@ static void set_bprm_stack_caps(struct linux_binprm *bprm, void __user *sp,
 	bprm->pcuabi.auxv = cheri_bounds_set(p, len);
 }
 #else /* CONFIG_CHERI_PURECAP_UABI && ELF_COMPAT == 0 */
-static void __user *make_user_sp(unsigned long p)
+static void __user *make_user_sp(struct linux_binprm *bprm, unsigned long p)
 {
 	return uaddr_to_user_ptr_safe(p);
 }
@@ -401,7 +389,7 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	 */
 
 	p = arch_align_stack(p);
-	sp = make_user_sp(p);
+	sp = make_user_sp(bprm, p);
 
 	/*
 	 * If this architecture has a platform capability string, copy it
@@ -506,7 +494,7 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 		bprm->pcuabi.pcc = make_user_pcc(exec_load_info);
 	}
 
-	NEW_AUX_ENT(AT_CHERI_STACK_CAP, make_root_stack_cap());
+	NEW_AUX_ENT(AT_CHERI_STACK_CAP, make_root_stack_cap(bprm));
 	NEW_AUX_ENT(AT_CHERI_SEAL_CAP, cheri_user_root_seal_cap);
 	NEW_AUX_ENT(AT_CHERI_CID_CAP, cheri_user_root_cid_cap);
 
