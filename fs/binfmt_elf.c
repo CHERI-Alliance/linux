@@ -887,7 +887,7 @@ static inline int make_prot(u32 p_flags, struct arch_elf_state *arch_state,
 	if (p_flags & PF_X)
 		prot |= PROT_EXEC;
 
-	prot |= PROT_MAX(PROT_READ | PROT_WRITE | PROT_EXEC);
+	prot |= PROT_MAX(PROT_READ | PROT_WRITE | PROT_EXEC) | PROT_CAP_INVOKE;
 
 	return arch_elf_adjust_prot(prot, arch_state, has_interp, is_interp);
 }
