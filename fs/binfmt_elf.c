@@ -1287,6 +1287,8 @@ out_free_interp:
 	if (!(current->personality & ADDR_NO_RANDOMIZE) && randomize_va_space)
 		current->flags |= PF_RANDOMIZE;
 
+	reserv_mm_set_flag(current->mm, ELF_COMPAT);
+
 	setup_new_exec(bprm);
 
 	/* Do this so that we can load the interpreter, if need be.  We will
