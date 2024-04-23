@@ -68,6 +68,9 @@
 #include <linux/user_events.h>
 #include <linux/rseq.h>
 #include <linux/ksm.h>
+#include <linux/mm_reserv.h>
+#include <linux/cheri.h>
+#include <linux/mman.h>
 
 #include <linux/uaccess.h>
 #include <asm/mmu_context.h>
@@ -120,6 +123,55 @@ bool path_noexec(const struct path *path)
 	return (path->mnt->mnt_flags & MNT_NOEXEC) ||
 	       (path->mnt->mnt_sb->s_iflags & SB_I_NOEXEC);
 }
+
+#ifdef CONFIG_CHERI_PURECAP_UABI
+static int cheri_max_stack_size = 128 * 1024 * 1024;
+static int __cheri_max_stack_size_min = 256 * 1024;
+static int __cheri_max_stack_size_max = 1024 * 1024 * 1024;
+
+static struct ctl_table pcuabi_sysctls[] = {
+	{
+		.procname	= "max_stack_size",
+		.mode		= 0644,
+		.data		= &cheri_max_stack_size,
+		.maxlen		= sizeof(int),
+		.proc_handler	= proc_dointvec_minmax,
+		.extra1		= &__cheri_max_stack_size_min,
+		.extra2		= &__cheri_max_stack_size_max,
+	},
+};
+
+static void register_pcuabi_sysctls(void)
+{
+	register_sysctl_init("cheri", pcuabi_sysctls);
+}
+
+static int set_stack_reserv(struct vm_area_struct *vma,
+			     struct linux_binprm *bprm)
+{
+	size_t rlim_stack_max = bprm->rlim_stack.rlim_max;
+	ptraddr_t start;
+	size_t len;
+
+	len = min(rlim_stack_max, (size_t)cheri_max_stack_size);
+
+	start = (vma->vm_end - len) & cheri_representable_alignment_mask(len);
+	/*
+	 * vma->vm_end must remain unchanged, so after aligning down the start
+	 * address, we need to recalculate the length.
+	 */
+	len = (vma->vm_end - start);
+	return reserv_vma_set_reserv(vma, start, len, PROT_READ | PROT_WRITE);
+}
+#else
+static inline void register_pcuabi_sysctls(void) {}
+
+static inline int set_stack_reserv(struct vm_area_struct *vma,
+				   struct linux_binprm *bprm)
+{
+	return 0;
+}
+#endif
 
 #ifdef CONFIG_MMU
 /*
@@ -711,6 +763,11 @@ int setup_arg_pages(struct linux_binprm *bprm,
 	stack_base = vma->vm_end - stack_expand;
 #endif
 	current->mm->start_stack = bprm->p;
+
+	ret = set_stack_reserv(vma, bprm);
+	if (ret)
+		goto out_unlock;
+
 	ret = expand_stack_locked(vma, stack_base);
 	if (ret)
 		ret = -EFAULT;
@@ -1999,6 +2056,7 @@ static const struct ctl_table fs_exec_sysctls[] = {
 static int __init init_fs_exec_sysctls(void)
 {
 	register_sysctl_init("fs", fs_exec_sysctls);
+	register_pcuabi_sysctls();
 	return 0;
 }
 
