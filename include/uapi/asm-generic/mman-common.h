@@ -18,6 +18,8 @@
 #define PROT_GROWSUP	0x02000000	/* mprotect flag: extend change to end of growsup vma */
 
 /* PCuABI mapping and capability permissions */
+#define PROT_CAP_INVOKE	0x2000		/* mmap flag: provide CInvoke capability permission */
+
 #define _PROT_MAX_SHIFT		16
 #define PROT_MAX(prot)		((prot) << _PROT_MAX_SHIFT)
 #define PROT_EXTRACT(prot)	((prot) & (PROT_READ | PROT_WRITE | PROT_EXEC))
