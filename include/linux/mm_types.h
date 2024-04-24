@@ -639,6 +639,12 @@ struct vma_numab_state {
 	int prev_scan_seq;
 };
 
+struct reserv_struct {
+	ptraddr_t start;
+	size_t len;
+	user_ptr_perms_t perms;
+};
+
 /*
  * This struct describes a virtual memory area. There is one of these
  * per VM-area/task. A VM area is any part of the process virtual memory
@@ -743,6 +749,9 @@ struct vm_area_struct {
 	struct vma_numab_state *numab_state;	/* NUMA Balancing state */
 #endif
 	struct vm_userfaultfd_ctx vm_userfaultfd_ctx;
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	struct reserv_struct reserv_data;
+#endif
 } __randomize_layout;
 
 #ifdef CONFIG_NUMA
