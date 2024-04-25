@@ -25,19 +25,41 @@ it is the only CHERI-enabled architecture supported in Linux. Adding
 support for other architectures would entail extending the specification
 accordingly.
 
-The present document deals with implementation aspects that are beyond
-the scope of the specification. It aims to provide kernel developers
-with an overview of the changes that have been made to various internal
-kernel APIs in order to support PCuABI.
+This Linux fork implements the essential aspects of PCuABI. However,
+alignment with the specification is not complete. The following
+limitations are currently present in this implementation:
 
-Note: current limitations
-  Support for PCuABI in Linux is a work in progress, and at this stage
-  it is mostly of a functional nature, with only limited enforcement of
-  capability-related restrictions. The variant of the ABI that is
-  currently implemented in Linux is documented in the `transitional
-  PCuABI specification`_, which is forward-compatible with the full
-  specification. Only **a limited set of syscalls** is supported in this
-  ABI.
+* Only a subset of drivers can be built when PCuABI is selected (see
+  section below). Those that can be built generally handle their own
+  ``ioctl`` commands correctly, but in certain cases the corresponding
+  uapi struct may represent pointers as ``__u64``, and as a result the
+  ``ioctl`` handler needs to create valid user pointers from the root
+  user capability to allow the operation to succeed.
+
+* Syscalls targeting another thread/process, including NUMA syscalls and
+  ``process_madvise()``, are not handled according to the spec. In
+  general, capabilities passed to them are not checked, and they are
+  preserved as if targeting the current process.
+
+* The initial kernel-provided data (``argv``, ``envp``, ``auxv``,
+  strings and data referred to from those arrays) is still stored on the
+  stack, instead of a separate memory mapping. The other aspects of the
+  "Kernel-provided data" section of the spec are implemented, which
+  means for instance that ``argv`` should be accessed through the ``C1``
+  register instead of walking the stack.
+
+* The initial strings that elements of ``argv`` and ``envp`` point to
+  are not padded to ensure capability bounds representability. This
+  means that the bounds of capabilities in the ``argv`` and/or ``envp``
+  arrays may overlap. Similarly the ``argv`` and ``envp`` capabilities
+  themselves may overlap with each other. Note however that such a
+  situation is expected to be very rare (requiring an extremely large
+  number of arguments or extremely long strings).
+
+The rest of this document deals with implementation aspects that are
+beyond the scope of the specification. It aims to provide kernel
+developers with an overview of the changes that have been made to
+various internal kernel APIs in order to support PCuABI.
 
 Config option
 =============
@@ -173,5 +195,4 @@ For more information about user pointers and related conversions, please
 refer to the `user pointer documentation`_.
 
 .. _PCuABI specification: https://git.morello-project.org/morello/kernel/linux/-/wikis/Morello-pure-capability-kernel-user-Linux-ABI-specification
-.. _Transitional PCuABI specification: https://git.morello-project.org/morello/kernel/linux/-/wikis/Transitional-Morello-pure-capability-kernel-user-Linux-ABI-specification
 .. _user pointer documentation: Documentation/core-api/user_ptr.rst
