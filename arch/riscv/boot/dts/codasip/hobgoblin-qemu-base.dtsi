@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * Copyright (c) 2024 Codasip Limited
+ * Copyright (c) 2024 Codasip GmbH
  *
- * A730 Hobgoblin FPGA platform emulation in qemu.
+ * A730 Hobgoblin QEMU virtio devices
  */
-
-#include "a70x-hobgoblin.dts"
 
 &soc {
 	virtio@70000000 {

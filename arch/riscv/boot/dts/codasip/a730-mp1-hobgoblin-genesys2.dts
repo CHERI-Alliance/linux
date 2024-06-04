@@ -1,0 +1,25 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (c) 2024 Codasip GmbH
+ *
+ * A730 Hobgoblin FPGA platform for Genesys2
+ *
+ * This is the default version which uses the AXI EMAC IP, this does
+ * require a license to synthesise but is higher performance than the
+ * EtherLite IP.
+ */
+
+/dts-v1/;
+
+/{
+	chosen {
+		stdout-path = "serial0:115200n8";
+		bootargs = "earlycon console=ttyS0,115200n8";
+	};
+};
+
+#include "a730-mp1.dtsi"
+#include "hobgoblin-base.dtsi"
+#include "hobgoblin-genesys2-base.dtsi"
+#include "hobgoblin-axi-emac.dtsi"
+

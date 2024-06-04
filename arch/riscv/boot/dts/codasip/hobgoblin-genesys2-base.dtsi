@@ -1,0 +1,100 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (c) 2024 Codasip GmbH
+ *
+ * A730 Hobgoblin FPGA genesys2 base description. This dts includes all the
+ * hardware that is dependent on the board itself. So things like DDR,
+ * buttons, LEDS, etc go here. Components that are optional or configurable
+ * will be described in the board dts itself. For example, the type of
+ * Ethernet controller used is switchable, so that will not be included here.
+ *
+ */
+
+#include "dt-bindings/input/input.h"
+
+/ {
+	ddr: memory@80000000 {
+		device_type = "memory";
+		reg = <0x0 0x80000000 0x0 0x40000000>;
+	};
+
+	gpio-keys {
+		compatible = "gpio-keys";
+
+		key-enter {
+			label = "BTNC";
+			linux,code = <KEY_ENTER>;
+			gpios = <&gpio_io 16 GPIO_ACTIVE_HIGH>;
+		};
+
+		key-down {
+			label = "BTND";
+			linux,code = <KEY_DOWN>;
+			gpios = <&gpio_io 17 GPIO_ACTIVE_HIGH>;
+		};
+
+		key-left {
+			label = "BTNL";
+			linux,code = <KEY_LEFT>;
+			gpios = <&gpio_io 18 GPIO_ACTIVE_HIGH>;
+		};
+
+		key-right {
+			label = "BTNR";
+			linux,code = <KEY_RIGHT>;
+			gpios = <&gpio_io 19 GPIO_ACTIVE_HIGH>;
+		};
+
+		key-up {
+			label = "BTNU";
+			linux,code = <KEY_UP>;
+			gpios = <&gpio_io 20 GPIO_ACTIVE_HIGH>;
+		};
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		led-0 {
+			label = "LD0";
+			gpios = <&gpio_io 0 GPIO_ACTIVE_HIGH>;
+			linux,default-trigger = "heartbeat";
+		};
+
+		led-1 {
+			label = "LD1";
+			gpios = <&gpio_io 1 GPIO_ACTIVE_HIGH>;
+			linux,default-trigger = "mmc0";
+		};
+
+		led-2 {
+			label = "LD2";
+			gpios = <&gpio_io 2 GPIO_ACTIVE_HIGH>;
+		};
+
+		led-3 {
+			label = "LD3";
+			gpios = <&gpio_io 3 GPIO_ACTIVE_HIGH>;
+		};
+
+		led-4 {
+			label = "LD4";
+			gpios = <&gpio_io 4 GPIO_ACTIVE_HIGH>;
+		};
+
+		led-5 {
+			label = "LD5";
+			gpios = <&gpio_io 5 GPIO_ACTIVE_HIGH>;
+		};
+
+		led-6 {
+			label = "LD6";
+			gpios = <&gpio_io 6 GPIO_ACTIVE_HIGH>;
+		};
+
+		led-7 {
+			label = "LD7";
+			gpios = <&gpio_io 7 GPIO_ACTIVE_HIGH>;
+		};
+	};
+};

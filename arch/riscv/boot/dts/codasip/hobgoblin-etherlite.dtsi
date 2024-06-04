@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * Copyright (c) 2024 Codasip Limited
+ * Copyright (c) 2024 Codasip GmbH
  *
- * A730 Hobgoblin FPGA platform emulation in qemu.
+ * Hobgoblin FPGA platform EtherLite description. This is a very simple
+ * Ethernet controller that does not require a license. It does not do
+ * any DMA or acceleration.
  */
-
-#include "a70x-hobgoblin.dts"
 
 &soc {
 	axi_ethernetlite: ethernet@60020000 {
@@ -27,9 +27,10 @@
 		mdio {
 			#address-cells = <1>;
 			#size-cells = <0>;
-			phy0: phy@1 {
+			phy0: ethernet-phy@1 {
 				device_type = "ethernet-phy";
 				reg = <1>;
+				interrupts-extended = <&plic 18>;
 			      };
 		};
 	};

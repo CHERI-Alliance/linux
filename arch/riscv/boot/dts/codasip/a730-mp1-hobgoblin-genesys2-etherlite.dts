@@ -1,0 +1,20 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (c) 2024 Codasip Limited
+ *
+ * A730 Hobgoblin FPGA platform for Genesys2 with EthernetLite
+ */
+
+/dts-v1/;
+
+/{
+	chosen {
+		stdout-path = "serial0:115200n8";
+		bootargs = "earlycon console=ttyS0,115200n8";
+	};
+};
+
+#include "a730-mp1.dtsi"
+#include "hobgoblin-base.dtsi"
+#include "hobgoblin-genesys2-base.dtsi"
+#include "hobgoblin-etherlite.dtsi"
