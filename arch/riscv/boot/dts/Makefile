@@ -3,6 +3,7 @@ subdir-y += allwinner
 subdir-y += canaan
 subdir-y += codasip
 subdir-y += microchip
+subdir-y += sail
 subdir-y += renesas
 subdir-y += sifive
 subdir-y += sophgo
