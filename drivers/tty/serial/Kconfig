@@ -1618,6 +1618,17 @@ config SERIAL_ESP32_ACM
 	  When earlycon option is enabled the following kernel command line
 	  snippet may be used:
 	    earlycon=esp32s3acm,mmio32,0x60038000
+config SERIAL_SAILUART
+	tristate "SailUART serial port support"
+	depends on HAS_IOMEM
+	depends on OF || COMPILE_TEST
+	select SERIAL_CORE
+
+config SERIAL_SAILUART_CONSOLE
+	bool "SailUART serial port console support"
+	depends on SERIAL_SAILUART=y
+	select SERIAL_CORE_CONSOLE
+	select SERIAL_EARLYCON
 
 endmenu
 
