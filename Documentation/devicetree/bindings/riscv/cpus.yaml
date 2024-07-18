@@ -35,6 +35,7 @@ properties:
               - amd,mbv32
               - andestech,ax45mp
               - canaan,k210
+              - codasip,a730
               - sifive,bullet0
               - sifive,e5
               - sifive,e7
