@@ -60,6 +60,7 @@ properties:
           - enum:
               - anlogic,dr1v90-plic
               - canaan,k210-plic
+              - codasip,plic
               - eswin,eic7700-plic
               - microchip,pic64gx-plic
               - sifive,fu540-c000-plic
