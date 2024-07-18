@@ -1,0 +1,118 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (c) 2024 Codasip GmbH
+ *
+ * A730 MP4 CPU default configuration dtsi file.
+ *
+ * You can do the CPU declarations by a preprocessor macro, but it does look
+ * pretty ugly due to the use of @ and # which don't play well with the C
+ * preprocessor.
+ */
+
+#define NUM_CORES 4
+
+/ {
+	cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		/* Frequency of timer (CLINT) */
+		timebase-frequency = <100000000>;
+
+		cpu0: cpu@0 {
+			compatible = "riscv";
+			device_type = "cpu";
+			reg = <0>;
+			riscv,isa = "rv64imafdc_svpbmt_zicbom_zicboz_zicbop";
+			riscv,isa-base = "rv64i";
+			riscv,isa-extensions = "i", "m", "a", "f", "d", "c",
+					       "svpbmt", "zicbom", "zicboz", "zicbop";
+			riscv,cbom-block-size = <64>;
+			riscv,cboz-block-size = <64>;
+			mmu-type = "riscv,sv39";
+
+			status = "okay";
+
+			cpu0_intc: interrupt-controller {
+				#interrupt-cells = <1>;
+				#address-cells = <0>;
+				compatible = "riscv,cpu-intc";
+				interrupt-controller;
+
+				status = "okay";
+			};
+		};
+
+		cpu1: cpu@1 {
+			compatible = "riscv";
+			device_type = "cpu";
+			reg = <1>;
+			riscv,isa = "rv64imafdc_svpbmt_zicbom_zicboz_zicbop";
+			riscv,isa-base = "rv64i";
+			riscv,isa-extensions = "i", "m", "a", "f", "d", "c",
+					       "svpbmt", "zicbom", "zicboz", "zicbop";
+			riscv,cbom-block-size = <64>;
+			riscv,cboz-block-size = <64>;
+			mmu-type = "riscv,sv39";
+
+			status = "okay";
+
+			cpu1_intc: interrupt-controller {
+				#interrupt-cells = <1>;
+				#address-cells = <0>;
+				compatible = "riscv,cpu-intc";
+				interrupt-controller;
+
+				status = "okay";
+			};
+		};
+
+		cpu2: cpu@2 {
+			compatible = "riscv";
+			device_type = "cpu";
+			reg = <2>;
+			riscv,isa = "rv64imafdc_svpbmt_zicbom_zicboz_zicbop";
+			riscv,isa-base = "rv64i";
+			riscv,isa-extensions = "i", "m", "a", "f", "d", "c",
+					       "svpbmt", "zicbom", "zicboz", "zicbop";
+			riscv,cbom-block-size = <64>;
+			riscv,cboz-block-size = <64>;
+			mmu-type = "riscv,sv39";
+
+			status = "okay";
+
+			cpu2_intc: interrupt-controller {
+				#interrupt-cells = <1>;
+				#address-cells = <0>;
+				compatible = "riscv,cpu-intc";
+				interrupt-controller;
+
+				status = "okay";
+			};
+		};
+
+		cpu3: cpu@3 {
+			compatible = "riscv";
+			device_type = "cpu";
+			reg = <3>;
+			riscv,isa = "rv64imafdc_svpbmt_zicbom_zicboz_zicbop";
+			riscv,isa-base = "rv64i";
+			riscv,isa-extensions = "i", "m", "a", "f", "d", "c",
+					       "svpbmt", "zicbom", "zicboz", "zicbop";
+			riscv,cbom-block-size = <64>;
+			riscv,cboz-block-size = <64>;
+			mmu-type = "riscv,sv39";
+
+			status = "okay";
+
+			cpu3_intc: interrupt-controller {
+				#interrupt-cells = <1>;
+				#address-cells = <0>;
+				compatible = "riscv,cpu-intc";
+				interrupt-controller;
+
+				status = "okay";
+			};
+		};
+	};
+};

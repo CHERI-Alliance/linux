@@ -39,13 +39,39 @@
 			interrupt-controller;
 			#interrupt-cells = <1>;
 			riscv,ndev = <31>; /* 1 to 31 inclusive */
+			#if NUM_CORES == 1
 			interrupts-extended = < &cpu0_intc 11 &cpu0_intc 9 >;
+			#elif NUM_CORES == 4
+			interrupts-extended = < &cpu0_intc 11 &cpu0_intc 9
+						&cpu1_intc 11 &cpu1_intc 9
+						&cpu2_intc 11 &cpu2_intc 9
+						&cpu3_intc 11 &cpu3_intc 9
+					      >;
+			#else
+			#error "Unsupported number of cores"
+			#endif
 		};
 
 		clint: timer@60014000 {
 			compatible = "codasip,clint", "sifive,clint0";
 			reg = <0x60014000 0xC000>;
+			/*
+			 * You don't actually need to change this for Linux
+			 * from the single processor version, since the code
+			 * just finds the first match and then assumes that
+			 * all the other CPUs have the same numbers.
+			 */
+			#if NUM_CORES == 1
 			interrupts-extended = < &cpu0_intc 3 &cpu0_intc 7 >;
+			#elif NUM_CORES == 4
+			interrupts-extended = < &cpu0_intc 3 &cpu0_intc 7
+						&cpu1_intc 3 &cpu1_intc 7
+						&cpu2_intc 3 &cpu2_intc 7
+						&cpu3_intc 3 &cpu3_intc 7
+					      >;
+			#else
+			#error "Unsupported number of cores"
+			#endif
 		};
 
 		uart0: serial@60100000 {

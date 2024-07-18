@@ -5,6 +5,8 @@
  * A730 CPU default configuration dtsi file.
  */
 
+#define NUM_CORES 1
+
 / {
 	cpus {
 		#address-cells = <1>;
