@@ -71,7 +71,7 @@
 	    WARN_ONCE(c, "DEBUG_RWSEMS_WARN_ON(%s): count = 0x%lx, magic = 0x%lx, owner = 0x%lx, curr 0x%lx, list %sempty\n",\
 		#c, atomic_long_read(&(sem)->count),		\
 		(unsigned long) sem->magic,			\
-		atomic_long_read(&(sem)->owner), (long)current,	\
+		(unsigned long)atomic_ptr_read(&(sem)->owner), (long)current,	\
 		list_empty(&(sem)->wait_list) ? "" : "not "))	\
 			debug_locks_off();			\
 	} while (0)
@@ -141,13 +141,13 @@
 static inline void rwsem_set_owner(struct rw_semaphore *sem)
 {
 	lockdep_assert_preemption_disabled();
-	atomic_long_set(&sem->owner, (intptr_t)current);
+	atomic_ptr_set(&sem->owner, (intptr_t)current);
 }
 
 static inline void rwsem_clear_owner(struct rw_semaphore *sem)
 {
 	lockdep_assert_preemption_disabled();
-	atomic_long_set(&sem->owner, 0);
+	atomic_ptr_set(&sem->owner, 0);
 }
 
 /*
@@ -155,7 +155,7 @@ static inline void rwsem_clear_owner(struct rw_semaphore *sem)
  */
 static inline bool rwsem_test_oflags(struct rw_semaphore *sem, long flags)
 {
-	return atomic_long_read(&sem->owner) & flags;
+	return atomic_ptr_read(&sem->owner) & flags;
 }
 
 /*
@@ -172,9 +172,9 @@ static inline void __rwsem_set_reader_owned(struct rw_semaphore *sem,
 					    struct task_struct *owner)
 {
 	unsigned long val = (uintptr_t)owner | RWSEM_READER_OWNED |
-		(atomic_long_read(&sem->owner) & RWSEM_NONSPINNABLE);
+		(atomic_ptr_read(&sem->owner) & RWSEM_NONSPINNABLE);
 
-	atomic_long_set(&sem->owner, val);
+	atomic_ptr_set(&sem->owner, val);
 }
 
 static inline void rwsem_set_reader_owned(struct rw_semaphore *sem)
@@ -189,7 +189,7 @@ static inline void rwsem_set_reader_owned(struct rw_semaphore *sem)
 struct task_struct *rwsem_owner(struct rw_semaphore *sem)
 {
 	return (struct task_struct *)
-		(atomic_long_read(&sem->owner) & ~RWSEM_OWNER_FLAGS_MASK);
+		(atomic_ptr_read(&sem->owner) & ~RWSEM_OWNER_FLAGS_MASK);
 }
 
 /*
@@ -215,10 +215,10 @@ bool is_rwsem_reader_owned(struct rw_semaphore *sem)
  */
 static inline void rwsem_clear_reader_owned(struct rw_semaphore *sem)
 {
-	unsigned long val = atomic_long_read(&sem->owner);
+	uintptr_t val = atomic_ptr_read(&sem->owner);
 
 	while ((val & ~RWSEM_OWNER_FLAGS_MASK) == (unsigned long)current) {
-		if (atomic_long_try_cmpxchg(&sem->owner, &val,
+		if (atomic_ptr_try_cmpxchg(&sem->owner, &val,
 					    val & RWSEM_OWNER_FLAGS_MASK))
 			return;
 	}
@@ -235,14 +235,14 @@ static inline void rwsem_clear_reader_owned(struct rw_semaphore *sem)
  */
 static inline void rwsem_set_nonspinnable(struct rw_semaphore *sem)
 {
-	unsigned long owner = atomic_long_read(&sem->owner);
+	uintptr_t owner = atomic_ptr_read(&sem->owner);
 
 	do {
 		if (!(owner & RWSEM_READER_OWNED))
 			break;
 		if (owner & RWSEM_NONSPINNABLE)
 			break;
-	} while (!atomic_long_try_cmpxchg(&sem->owner, &owner,
+	} while (!atomic_ptr_try_cmpxchg(&sem->owner, &owner,
 					  owner | RWSEM_NONSPINNABLE));
 }
 
@@ -280,7 +280,7 @@ static inline bool rwsem_write_trylock(struct rw_semaphore *sem)
 static inline struct task_struct *
 rwsem_owner_flags(struct rw_semaphore *sem, unsigned long *pflags)
 {
-	unsigned long owner = atomic_long_read(&sem->owner);
+	uintptr_t owner = atomic_ptr_read(&sem->owner);
 
 	*pflags = owner & RWSEM_OWNER_FLAGS_MASK;
 	return (struct task_struct *)(owner & ~RWSEM_OWNER_FLAGS_MASK);
@@ -322,7 +322,7 @@ void __init_rwsem(struct rw_semaphore *sem, const char *name,
 	atomic_long_set(&sem->count, RWSEM_UNLOCKED_VALUE);
 	raw_spin_lock_init(&sem->wait_lock);
 	INIT_LIST_HEAD(&sem->wait_list);
-	atomic_long_set(&sem->owner, 0L);
+	atomic_ptr_set(&sem->owner, 0L);
 #ifdef CONFIG_RWSEM_SPIN_ON_OWNER
 	osq_lock_init(&sem->osq);
 #endif
@@ -938,7 +938,7 @@ done:
 static inline void clear_nonspinnable(struct rw_semaphore *sem)
 {
 	if (unlikely(rwsem_test_oflags(sem, RWSEM_NONSPINNABLE)))
-		atomic_long_andnot(RWSEM_NONSPINNABLE, &sem->owner);
+		atomic_ptr_andnot(RWSEM_NONSPINNABLE, &sem->owner);
 }
 
 #else
@@ -1002,7 +1002,7 @@ rwsem_down_read_slowpath(struct rw_semaphore *sem, long count, unsigned int stat
 	 * writer, don't attempt optimistic lock stealing if the lock is
 	 * very likely owned by readers.
 	 */
-	if ((atomic_long_read(&sem->owner) & RWSEM_READER_OWNED) &&
+	if ((atomic_ptr_read(&sem->owner) & RWSEM_READER_OWNED) &&
 	    (rcnt > 1) && !(count & RWSEM_WRITER_LOCKED))
 		goto queue;
 

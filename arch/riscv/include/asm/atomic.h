@@ -45,6 +45,19 @@ static __always_inline void arch_atomic64_set(atomic64_t *v, s64 i)
 }
 #endif
 
+#if __SIZEOF_POINTER__ != __SIZEOF_LONG__
+#define ATOMIC_PTR_INIT(i) { (i) }
+#endif
+
+static __always_inline uintptr_t arch_atomicuintptr_read(const atomicuintptr_t *v)
+{
+	return READ_ONCE(v->counter);
+}
+static __always_inline void arch_atomicuintptr_set(atomicuintptr_t *v, uintptr_t i)
+{
+	WRITE_ONCE(v->counter, i);
+}
+
 /*
  * First, the atomic ops that have no ordering constraints and therefor don't
  * have the AQ or RL bits set.  These don't return anything, so there's only
@@ -349,5 +362,49 @@ static __always_inline s64 arch_atomic64_dec_if_positive(atomic64_t *v)
 
 #define arch_atomic64_dec_if_positive	arch_atomic64_dec_if_positive
 #endif
+
+#define ATOMIC_PTR_OP(s, op, rettype, ret)				\
+static __always_inline rettype						\
+arch_atomicuintptr_##s(uintptr_t _i, atomicuintptr_t *v)		\
+{									\
+	unsigned long i = __c_ua(_i);					\
+	uintptr_t c, o = arch_atomicuintptr_read(v);			\
+									\
+	do {								\
+		c = o;							\
+		o = arch_cmpxchg(&v->counter, c, c op i);		\
+	} while (unlikely(c != o));					\
+									\
+	ret								\
+}
+
+#define ATOMIC_PTR_OPS(opn, op)						\
+	ATOMIC_PTR_OP(opn, op, void,)					\
+	ATOMIC_PTR_OP(fetch_##opn, op, uintptr_t, return c;)		\
+	ATOMIC_PTR_OP(opn##_return, op, uintptr_t, return c + i;)
+
+ATOMIC_PTR_OPS(add, +)
+ATOMIC_PTR_OPS(and, &)
+ATOMIC_PTR_OPS(or,  |)
+ATOMIC_PTR_OPS(sub, -)
+ATOMIC_PTR_OPS(xor, ^)
+
+#undef ATOMIC_PTR_OP
+#undef ATOMIC_PTR_OPS
+
+#define arch_atomicuintptr_add_return arch_atomicuintptr_add_return
+#define arch_atomicuintptr_and_return arch_atomicuintptr_and_return
+#define arch_atomicuintptr_or_return arch_atomicuintptr_or_return
+#define arch_atomicuintptr_sub_return arch_atomicuintptr_sub_return
+#define arch_atomicuintptr_xor_return arch_atomicuintptr_xor_return
+
+#define arch_atomicuintptr_fetch_add arch_atomicuintptr_fetch_add
+#define arch_atomicuintptr_fetch_and arch_atomicuintptr_fetch_and
+#define arch_atomicuintptr_fetch_or arch_atomicuintptr_fetch_or
+#define arch_atomicuintptr_fetch_sub arch_atomicuintptr_fetch_sub
+#define arch_atomicuintptr_fetch_xor arch_atomicuintptr_fetch_xor
+
+#define arch_atomicuintptr_fetch_add_unless arch_atomicuintptr_fetch_add_unless_undefined
+uintptr_t arch_atomicuintptr_fetch_add_unless_undefined(atomicuintptr_t *v, uintptr_t a, uintptr_t u);
 
 #endif /* _ASM_RISCV_ATOMIC_H */

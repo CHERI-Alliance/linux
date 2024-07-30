@@ -77,7 +77,7 @@ do {									\
 
 #ifndef CONFIG_PREEMPT_RT
 #define __MUTEX_INITIALIZER(lockname) \
-		{ .owner = ATOMIC_LONG_INIT(0) \
+		{ .owner = ATOMIC_PTR_INIT(0) \
 		, .wait_lock = __RAW_SPIN_LOCK_UNLOCKED(lockname.wait_lock) \
 		, .wait_list = LIST_HEAD_INIT(lockname.wait_list) \
 		__DEBUG_MUTEX_INITIALIZER(lockname) \
@@ -229,6 +229,6 @@ DEFINE_GUARD(mutex, struct mutex *, mutex_lock(_T), mutex_unlock(_T))
 DEFINE_GUARD_COND(mutex, _try, mutex_trylock(_T))
 DEFINE_GUARD_COND(mutex, _intr, mutex_lock_interruptible(_T), _RET == 0)
 
-extern unsigned long mutex_get_owner(struct mutex *lock);
+extern uintptr_t mutex_get_owner(struct mutex *lock);
 
 #endif /* __LINUX_MUTEX_H */
