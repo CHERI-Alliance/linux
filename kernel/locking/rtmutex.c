@@ -92,7 +92,7 @@ static inline int __ww_mutex_check_kill(struct rt_mutex *lock,
 static __always_inline struct task_struct *
 rt_mutex_owner_encode(struct rt_mutex_base *lock, struct task_struct *owner)
 {
-	unsigned long val = (unsigned long)owner;
+	uintptr_t val = (uintptr_t)owner;
 
 	if (rt_mutex_has_waiters(lock))
 		val |= RT_MUTEX_HAS_WAITERS;
@@ -119,13 +119,13 @@ static __always_inline void rt_mutex_clear_owner(struct rt_mutex_base *lock)
 static __always_inline void clear_rt_mutex_waiters(struct rt_mutex_base *lock)
 {
 	lock->owner = (struct task_struct *)
-			((unsigned long)lock->owner & ~RT_MUTEX_HAS_WAITERS);
+			((uintptr_t)lock->owner & ~RT_MUTEX_HAS_WAITERS);
 }
 
 static __always_inline void
 fixup_rt_mutex_waiters(struct rt_mutex_base *lock, bool acquire_lock)
 {
-	unsigned long owner, *p = (unsigned long *) &lock->owner;
+	uintptr_t owner, *p = (uintptr_t *) &lock->owner;
 
 	if (rt_mutex_has_waiters(lock))
 		return;
@@ -237,8 +237,8 @@ static __always_inline bool rt_mutex_cmpxchg_release(struct rt_mutex_base *lock,
  */
 static __always_inline void mark_rt_mutex_waiters(struct rt_mutex_base *lock)
 {
-	unsigned long *p = (unsigned long *) &lock->owner;
-	unsigned long owner, new;
+	uintptr_t *p = (uintptr_t *) &lock->owner;
+	uintptr_t owner, new;
 
 	owner = READ_ONCE(*p);
 	do {
@@ -327,7 +327,7 @@ static __always_inline bool rt_mutex_cmpxchg_release(struct rt_mutex_base *lock,
 static __always_inline void mark_rt_mutex_waiters(struct rt_mutex_base *lock)
 {
 	lock->owner = (struct task_struct *)
-			((unsigned long)lock->owner | RT_MUTEX_HAS_WAITERS);
+			((uintptr_t)lock->owner | RT_MUTEX_HAS_WAITERS);
 }
 
 /*

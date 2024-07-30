@@ -220,6 +220,10 @@ typedef struct {
 #endif
 
 typedef struct {
+	uintptr_t counter;
+} atomicuintptr_t;
+
+typedef struct {
 	atomic_t refcnt;
 } rcuref_t;
 

@@ -331,6 +331,10 @@ grep '^[a-z]' "$1" | while read name meta args; do
 	gen_proto "${meta}" "${name}" "atomic64" "s64" ${args}
 done
 
+grep '^[a-z]' "$1" | while read name meta args; do
+	gen_proto "${meta}" "${name}" "atomicuintptr" "uintptr_t" ${args}
+done
+
 cat <<EOF
 #endif /* _LINUX_ATOMIC_FALLBACK_H */
 EOF
