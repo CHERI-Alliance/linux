@@ -44,6 +44,13 @@
 	ti,sgmii-ref-clock-output-enable;
 };
 
+
+/*
+ * We have to have the FMC card anyway on the VCU118 to get an SD card, so we
+ * may as well include the Ethernet in the base as well.
+ */
+#include "hobgoblin-axi-emac-fmc.dtsi"
+
 #include "dt-bindings/input/input.h"
 
 / {
