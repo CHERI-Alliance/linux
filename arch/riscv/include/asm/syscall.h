@@ -97,7 +97,7 @@ static inline int syscall_get_arch(struct task_struct *task)
 #endif
 }
 
-typedef long (*syscall_t)(const struct pt_regs *);
+typedef uintptr_t (*syscall_t)(const struct pt_regs *);
 static inline void syscall_handler(struct pt_regs *regs, ulong syscall)
 {
 	syscall_t fn;
