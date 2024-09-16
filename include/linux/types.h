@@ -79,12 +79,6 @@ typedef u64			__ptraddr64_t;
 typedef __uintcap_t		uintcap_t;
 #endif
 
-static inline unsigned long
-__c_ua(uintptr_t ptr)
-{
-	return (unsigned long __force)ptr;
-}
-
 #ifdef CONFIG_HAVE_UID16
 /* This is defined by arch/{arch}/include/asm/posix_types.h */
 typedef __kernel_old_uid_t	old_uid_t;
