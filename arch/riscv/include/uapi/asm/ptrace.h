@@ -54,6 +54,10 @@ struct user_regs_struct {
 	__uptr t4;
 	__uptr t5;
 	__uptr t6;
+#if defined(__ARCH_WANT_PURECAP) || defined(__CHERI_PURE_CAPABILITY__)
+	/// UAPI: NoConvert: Does not exist in compat version
+	__uptr ddc;
+#endif
 };
 
 struct __riscv_f_ext_state {
