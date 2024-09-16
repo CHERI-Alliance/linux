@@ -5,6 +5,7 @@
 #include <linux/compiler.h>
 #include <linux/user_ptr.h>
 #include <linux/types.h>
+#include <linux/cheri.h>
 
 #include <asm/errno.h>
 
@@ -26,7 +27,7 @@
  *
  * Like IS_ERR(), but does not generate a compiler warning if result is unused.
  */
-#define IS_ERR_VALUE(x) unlikely((unsigned long)(x) >= (unsigned long)-MAX_ERRNO)
+#define IS_ERR_VALUE(x) unlikely(__c_a(x) >= (unsigned long)-MAX_ERRNO)
 
 /**
  * ERR_PTR - Create an error pointer.
@@ -39,7 +40,7 @@
  */
 static inline void * __must_check ERR_PTR(long error)
 {
-	return (void *) error;
+	return __c_fakep((unsigned long)error);
 }
 
 /**
@@ -49,7 +50,7 @@ static inline void * __must_check ERR_PTR(long error)
  */
 static inline long __must_check PTR_ERR(__force const void *ptr)
 {
-	return (long) ptr;
+	return (long)__c_pa(ptr);
 }
 
 /**
@@ -59,7 +60,7 @@ static inline long __must_check PTR_ERR(__force const void *ptr)
  */
 static inline bool __must_check IS_ERR(__force const void *ptr)
 {
-	return IS_ERR_VALUE((unsigned long)ptr);
+	return IS_ERR_VALUE(__c_pa(ptr));
 }
 
 /**
@@ -70,7 +71,7 @@ static inline bool __must_check IS_ERR(__force const void *ptr)
  */
 static inline bool __must_check IS_ERR_OR_NULL(__force const void *ptr)
 {
-	return unlikely(!ptr) || IS_ERR_VALUE((unsigned long)ptr);
+	return unlikely(!ptr) || IS_ERR_VALUE(__c_pa(ptr));
 }
 
 /**
