@@ -131,4 +131,86 @@ extern uintcap_t cheri_user_root_allperms_cap;	/* Userspace root (all permission
 
 #endif /* __CHERI__ */
 
+/*
+ * Macros to correctly cast between unsigned long (aka ptraddr_t), void *
+ * the kernel notion of uintptr_t. These macros are for in kernel
+ * conversions between pointers and plain addresses and are relevant
+ * if CONFIG_CHERI_KERNEL is set. Conversion for user pointers has
+ * a different set of macros.
+ */
+
+/*
+ * Downgrade a pointer to its address.
+ * Use this if you intentionally want to remove the pointer property
+ * from a pointer and reduce it to its address. The result cannot be
+ * turned back into a pointer with CHERI.
+ *
+ * A valid example use would be an alignment check on a pointer's address:
+ *	static inline unsigned long offset_in_page(const void *ptr)
+ *	{
+ *		return __c_pa(ptr) % PAGE_SIZE;
+ *	}
+ *
+ * Other potential uses could be:
+ * - Decode additional information stored in the low bits of the pointer's
+ *   address (e.g. maple_tree, rb_tree).
+ * - Pass the address to printk.
+ * - Most of the VMA functions operate on addresses and not pointers, too.
+ */
+static inline ptraddr_t
+__c_pa(const volatile void *ptr)
+{
+	return (ptraddr_t __force)(uintptr_t)ptr;
+}
+
+/*
+ * Downgrade a uintptr_t to its address.
+ *
+ * Like __c_pa but takese a uintptr_t instead of a void * argument.
+ */
+static inline ptraddr_t
+__c_ua(uintptr_t ptr)
+{
+	return (unsigned long __force)ptr;
+}
+
+/*
+ * Force cast a pointer, uintptr or other integer to an unsigned long.
+ * The result cannot be dereferenced. If possible use __c_pa() or __c_ua()
+ * as approriate instead.
+ *
+ * Valid uses of this macro are in a macro that implements things like
+ * cmpxchg which might be instantiated with both real pointers or a
+ * uintptr_t.
+ */
+#define __c_a(x) (__c_ua((uintptr_t __force)(x)))
+
+/*
+ * Generate a pointer from an unsigned long value. The resulting pointer
+ * cannot be dereferenced!
+ *
+ * Valid user of this macro must be able to proof that the generated
+ * pointer will not be dereferenced.
+ *
+ * Examples of a valid use are:
+ * - An integer value is stored directly in a ->private field of some data
+ *   structure and users of the ->private data field will cast it back to
+ *   the original non-pointer type.
+ * - Additionally, the ERR_PTR related macros use this.
+ */
+static inline void *
+__c_fakep(ptraddr_t val)
+{
+	return (void *)(uintptr_t __force)val;
+}
+
+/*
+ * Like __c_fakep but creates a uintptr_t instead of a void * pointer.
+ */
+static inline uintptr_t
+__c_fakeu(unsigned long val)
+{
+	return (uintptr_t __force)val;
+}
+
 #endif	/* _LINUX_CHERI_H */
