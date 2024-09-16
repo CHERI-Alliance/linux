@@ -6,6 +6,8 @@
 #ifndef _ASM_RISCV_ASM_H
 #define _ASM_RISCV_ASM_H
 
+#include "asm/cherimap.h"
+
 #ifdef __ASSEMBLER__
 #define __ASM_STR(x)	x
 #else
@@ -35,7 +37,37 @@
 #define LGREG		__REG_SEL(3, 2)
 #define SRLI		__REG_SEL(srliw, srli)
 
-#if __SIZEOF_POINTER__ == 8
+#ifdef CONFIG_CHERI_KERNEL
+
+#define CREG_L		__ASM_STR(lc)
+#define CREG_S		__ASM_STR(sc)
+#define CREG_ASM	__REG_SEL(.chericap, .dword)
+#define CSZREG		__REG_SEL(16, 8)
+#define CLGREG		__REG_SEL(4, 3)
+#define PTRC		"C"
+
+#else
+
+#define CREG_L		REG_L
+#define CREG_S		REG_S
+#define CREG_ASM	REG_ASM
+#define CSZREG		SZREG
+#define CLGREG		LGREG
+#define PTRC		"r"
+
+#endif
+
+#if __SIZEOF_POINTER__ == 16
+#ifdef __ASSEMBLER__
+#define RISCV_PTR		.chericap
+#define RISCV_SZPTR		16
+#define RISCV_LGPTR		4
+#else
+#define RISCV_PTR		".chericap"
+#define RISCV_SZPTR		"16"
+#define RISCV_LGPTR		"4"
+#endif
+#elif __SIZEOF_POINTER__ == 8
 #ifdef __ASSEMBLER__
 #define RISCV_PTR		.dword
 #define RISCV_SZPTR		8
@@ -91,23 +123,39 @@
 
 #ifdef CONFIG_SMP
 .macro asm_per_cpu dst sym tmp
-	lw    \tmp, TASK_TI_CPU_NUM(tp)
-	slli  \tmp, \tmp, RISCV_LGPTR
+	lw    \tmp, TASK_TI_CPU_NUM(CREG(tp))
+	slli  \tmp, \tmp, LGREG
+#ifdef CONFIG_CHERI_KERNEL
+	lgc   \dst, __per_cpu_offset
+#else
 	la    \dst, __per_cpu_offset
+#endif
 	add   \dst, \dst, \tmp
 	REG_L \tmp, 0(\dst)
+#ifdef CONFIG_CHERI_KERNEL
+	lgc   \dst, \sym
+#else
 	la    \dst, \sym
+#endif
 	add   \dst, \dst, \tmp
 .endm
 #else /* CONFIG_SMP */
 .macro asm_per_cpu dst sym tmp
+#ifdef CONFIG_CHERI_KERNEL
+	lgc   \dst, \sym
+#else
 	la    \dst, \sym
+#endif
 .endm
 #endif /* CONFIG_SMP */
 
 .macro load_per_cpu dst ptr tmp
 	asm_per_cpu \dst \ptr \tmp
+#ifdef CONFIG_CHERI_KERNEL
+	CREG_L \dst, 0(\dst)
+#else
 	REG_L \dst, 0(\dst)
+#endif
 .endm
 
 #ifdef CONFIG_SHADOW_CALL_STACK
@@ -119,69 +167,74 @@
 .macro load_global_pointer
 .option push
 .option norelax
+#ifdef CONFIG_CHERI_KERNEL
+	/* CHERI does not use the global pointer. Load it with cnull. */
+	mv cgp, cnull
+#else
 	la gp, __global_pointer$
+#endif
 .option pop
 .endm
 #endif /* CONFIG_SHADOW_CALL_STACK */
 
 	/* save all GPs except x1 ~ x5 */
 	.macro save_from_x6_to_x31
-	REG_S x6,  PT_T1(sp)
-	REG_S x7,  PT_T2(sp)
-	REG_S x8,  PT_S0(sp)
-	REG_S x9,  PT_S1(sp)
-	REG_S x10, PT_A0(sp)
-	REG_S x11, PT_A1(sp)
-	REG_S x12, PT_A2(sp)
-	REG_S x13, PT_A3(sp)
-	REG_S x14, PT_A4(sp)
-	REG_S x15, PT_A5(sp)
-	REG_S x16, PT_A6(sp)
-	REG_S x17, PT_A7(sp)
-	REG_S x18, PT_S2(sp)
-	REG_S x19, PT_S3(sp)
-	REG_S x20, PT_S4(sp)
-	REG_S x21, PT_S5(sp)
-	REG_S x22, PT_S6(sp)
-	REG_S x23, PT_S7(sp)
-	REG_S x24, PT_S8(sp)
-	REG_S x25, PT_S9(sp)
-	REG_S x26, PT_S10(sp)
-	REG_S x27, PT_S11(sp)
-	REG_S x28, PT_T3(sp)
-	REG_S x29, PT_T4(sp)
-	REG_S x30, PT_T5(sp)
-	REG_S x31, PT_T6(sp)
+	CREG_S CREG(x6),  PT_T1(CREG(sp))
+	CREG_S CREG(x7),  PT_T2(CREG(sp))
+	CREG_S CREG(x8),  PT_S0(CREG(sp))
+	CREG_S CREG(x9),  PT_S1(CREG(sp))
+	CREG_S CREG(x10), PT_A0(CREG(sp))
+	CREG_S CREG(x11), PT_A1(CREG(sp))
+	CREG_S CREG(x12), PT_A2(CREG(sp))
+	CREG_S CREG(x13), PT_A3(CREG(sp))
+	CREG_S CREG(x14), PT_A4(CREG(sp))
+	CREG_S CREG(x15), PT_A5(CREG(sp))
+	CREG_S CREG(x16), PT_A6(CREG(sp))
+	CREG_S CREG(x17), PT_A7(CREG(sp))
+	CREG_S CREG(x18), PT_S2(CREG(sp))
+	CREG_S CREG(x19), PT_S3(CREG(sp))
+	CREG_S CREG(x20), PT_S4(CREG(sp))
+	CREG_S CREG(x21), PT_S5(CREG(sp))
+	CREG_S CREG(x22), PT_S6(CREG(sp))
+	CREG_S CREG(x23), PT_S7(CREG(sp))
+	CREG_S CREG(x24), PT_S8(CREG(sp))
+	CREG_S CREG(x25), PT_S9(CREG(sp))
+	CREG_S CREG(x26), PT_S10(CREG(sp))
+	CREG_S CREG(x27), PT_S11(CREG(sp))
+	CREG_S CREG(x28), PT_T3(CREG(sp))
+	CREG_S CREG(x29), PT_T4(CREG(sp))
+	CREG_S CREG(x30), PT_T5(CREG(sp))
+	CREG_S CREG(x31), PT_T6(CREG(sp))
 	.endm
 
 	/* restore all GPs except x1 ~ x5 */
 	.macro restore_from_x6_to_x31
-	REG_L x6,  PT_T1(sp)
-	REG_L x7,  PT_T2(sp)
-	REG_L x8,  PT_S0(sp)
-	REG_L x9,  PT_S1(sp)
-	REG_L x10, PT_A0(sp)
-	REG_L x11, PT_A1(sp)
-	REG_L x12, PT_A2(sp)
-	REG_L x13, PT_A3(sp)
-	REG_L x14, PT_A4(sp)
-	REG_L x15, PT_A5(sp)
-	REG_L x16, PT_A6(sp)
-	REG_L x17, PT_A7(sp)
-	REG_L x18, PT_S2(sp)
-	REG_L x19, PT_S3(sp)
-	REG_L x20, PT_S4(sp)
-	REG_L x21, PT_S5(sp)
-	REG_L x22, PT_S6(sp)
-	REG_L x23, PT_S7(sp)
-	REG_L x24, PT_S8(sp)
-	REG_L x25, PT_S9(sp)
-	REG_L x26, PT_S10(sp)
-	REG_L x27, PT_S11(sp)
-	REG_L x28, PT_T3(sp)
-	REG_L x29, PT_T4(sp)
-	REG_L x30, PT_T5(sp)
-	REG_L x31, PT_T6(sp)
+	CREG_L CREG(x6),  PT_T1(CREG(sp))
+	CREG_L CREG(x7),  PT_T2(CREG(sp))
+	CREG_L CREG(x8),  PT_S0(CREG(sp))
+	CREG_L CREG(x9),  PT_S1(CREG(sp))
+	CREG_L CREG(x10), PT_A0(CREG(sp))
+	CREG_L CREG(x11), PT_A1(CREG(sp))
+	CREG_L CREG(x12), PT_A2(CREG(sp))
+	CREG_L CREG(x13), PT_A3(CREG(sp))
+	CREG_L CREG(x14), PT_A4(CREG(sp))
+	CREG_L CREG(x15), PT_A5(CREG(sp))
+	CREG_L CREG(x16), PT_A6(CREG(sp))
+	CREG_L CREG(x17), PT_A7(CREG(sp))
+	CREG_L CREG(x18), PT_S2(CREG(sp))
+	CREG_L CREG(x19), PT_S3(CREG(sp))
+	CREG_L CREG(x20), PT_S4(CREG(sp))
+	CREG_L CREG(x21), PT_S5(CREG(sp))
+	CREG_L CREG(x22), PT_S6(CREG(sp))
+	CREG_L CREG(x23), PT_S7(CREG(sp))
+	CREG_L CREG(x24), PT_S8(CREG(sp))
+	CREG_L CREG(x25), PT_S9(CREG(sp))
+	CREG_L CREG(x26), PT_S10(CREG(sp))
+	CREG_L CREG(x27), PT_S11(CREG(sp))
+	CREG_L CREG(x28), PT_T3(CREG(sp))
+	CREG_L CREG(x29), PT_T4(CREG(sp))
+	CREG_L CREG(x30), PT_T5(CREG(sp))
+	CREG_L CREG(x31), PT_T6(CREG(sp))
 	.endm
 
 /* Annotate a function as being unsuitable for kprobes. */
