@@ -30,8 +30,17 @@ ifeq ($(CONFIG_ARCH_RV64I),y)
 	BITS := 64
 	UTS_MACHINE := riscv64
 
+ifneq ($(CONFIG_CHERI_KERNEL),y)
 	KBUILD_CFLAGS += -mabi=lp64
 	KBUILD_AFLAGS += -mabi=lp64
+else
+	KBUILD_CFLAGS += -mabi=l64pc128
+	KBUILD_AFLAGS += -mabi=l64pc128
+	# For cheri headers (e.g. cheriintrin.h)
+	KBUILD_CFLAGS += -isystem $(shell $(CC) -print-file-name=include)
+	# FIXCHERI: Not sure why this triggers. Silence for now.
+	KBUILD_CFLAGS += -Wno-incompatible-library-redeclaration
+endif
 
 	KBUILD_LDFLAGS += -melf64lriscv
 
@@ -84,6 +93,10 @@ endif
 
 # Check if the toolchain supports Zihintpause extension
 riscv-march-$(CONFIG_TOOLCHAIN_HAS_ZIHINTPAUSE) := $(riscv-march-y)_zihintpause
+
+# Enable CHERI Bakewell support is requested
+riscv-march-$(CONFIG_RISCV_CHERI_BAKEWELL) := $(riscv-march-y)_zcherihybrid
+
 
 # Remove F,D,V from isa string for all. Keep extensions between "fd" and "v" by
 # matching non-v and non-multi-letter extensions out with the filter ([^v_]*)
