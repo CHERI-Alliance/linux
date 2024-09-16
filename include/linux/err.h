@@ -3,7 +3,6 @@
 #define _LINUX_ERR_H
 
 #include <linux/compiler.h>
-#include <linux/user_ptr.h>
 #include <linux/types.h>
 
 #include <asm/errno.h>
@@ -19,6 +18,9 @@
 #define MAX_ERRNO	4095
 
 #ifndef __ASSEMBLY__
+
+#include <linux/user_ptr.h>
+#include <linux/cheri.h>
 
 /**
  * IS_ERR_VALUE - Detect an error pointer.
@@ -39,7 +41,7 @@
  */
 static inline void * __must_check ERR_PTR(long error)
 {
-	return (void *) error;
+	return __c_fakep((unsigned long)error);
 }
 
 /* Return the pointer in the percpu address space. */
@@ -55,11 +57,11 @@ static inline void * __must_check ERR_PTR(long error)
  */
 static inline long __must_check PTR_ERR(__force const void *ptr)
 {
-	return (intptr_t) ptr;
+	return (long) __c_pa(ptr);
 }
 
 /* Read an error pointer from the percpu address space. */
-#define PTR_ERR_PCPU(ptr) (PTR_ERR((const void *)(__force const unsigned long)(ptr)))
+#define PTR_ERR_PCPU(ptr) (PTR_ERR((const void *)(__force const uintptr_t)(ptr)))
 
 /**
  * IS_ERR - Detect an error pointer.
@@ -72,7 +74,7 @@ static inline bool __must_check IS_ERR(__force const void *ptr)
 }
 
 /* Read an error pointer from the percpu address space. */
-#define IS_ERR_PCPU(ptr) (IS_ERR((const void *)(__force const unsigned long)(ptr)))
+#define IS_ERR_PCPU(ptr) (IS_ERR((const void *)(__force const uintptr_t)(ptr)))
 
 /**
  * IS_ERR_OR_NULL - Detect an error pointer or a null pointer.
