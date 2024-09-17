@@ -53,8 +53,8 @@
 #ifdef CONFIG_64BIT
 /* This is used to define the end of the KASAN shadow region */
 #define MODULES_LOWEST_VADDR	(KERNEL_LINK_ADDR - SZ_2G)
-#define MODULES_VADDR		(PFN_ALIGN((unsigned long)&_end) - SZ_2G)
-#define MODULES_END		(PFN_ALIGN((unsigned long)&_start))
+#define MODULES_VADDR		(PFN_ALIGN(__c_pa(&_end)) - SZ_2G)
+#define MODULES_END		(PFN_ALIGN(__c_pa(&_start)))
 #else
 #define MODULES_VADDR		VMALLOC_START
 #define MODULES_END		VMALLOC_END
@@ -154,14 +154,14 @@
 
 struct pt_alloc_ops {
 	pte_t *(*get_pte_virt)(phys_addr_t pa);
-	phys_addr_t (*alloc_pte)(uintptr_t va);
+	phys_addr_t (*alloc_pte)(unsigned long va);
 #ifndef __PAGETABLE_PMD_FOLDED
 	pmd_t *(*get_pmd_virt)(phys_addr_t pa);
-	phys_addr_t (*alloc_pmd)(uintptr_t va);
+	phys_addr_t (*alloc_pmd)(unsigned long va);
 	pud_t *(*get_pud_virt)(phys_addr_t pa);
-	phys_addr_t (*alloc_pud)(uintptr_t va);
+	phys_addr_t (*alloc_pud)(unsigned long va);
 	p4d_t *(*get_p4d_virt)(phys_addr_t pa);
-	phys_addr_t (*alloc_p4d)(uintptr_t va);
+	phys_addr_t (*alloc_p4d)(unsigned long va);
 #endif
 };
 
@@ -272,9 +272,9 @@ static inline struct page *pmd_page(pmd_t pmd)
 	return pfn_to_page(__page_val_to_pfn(pmd_val(pmd)));
 }
 
-static inline unsigned long pmd_page_vaddr(pmd_t pmd)
+static inline uintptr_t pmd_page_vaddr(pmd_t pmd)
 {
-	return (unsigned long)pfn_to_virt(__page_val_to_pfn(pmd_val(pmd)));
+	return (uintptr_t)pfn_to_virt(__page_val_to_pfn(pmd_val(pmd)));
 }
 
 static inline pte_t pmd_pte(pmd_t pmd)

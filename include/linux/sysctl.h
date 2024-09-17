@@ -121,7 +121,7 @@ struct ctl_table_poll {
 
 static inline void *proc_sys_poll_event(struct ctl_table_poll *poll)
 {
-	return (void *)(unsigned long)atomic_read(&poll->event);
+	return __c_fakep(atomic_read(&poll->event));
 }
 
 #define __CTL_TABLE_POLL_INITIALIZER(name) {				\
