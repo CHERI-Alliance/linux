@@ -46,6 +46,6 @@ void *linear_mapping_pa_to_va(unsigned long x)
 {
 	BUG_ON(!kernel_map.va_pa_offset);
 
-	return ((void *)((unsigned long)(x) + kernel_map.va_pa_offset));
+	return (void *)cheri_kcap((unsigned long)(x) + kernel_map.va_pa_offset);
 }
 EXPORT_SYMBOL(linear_mapping_pa_to_va);

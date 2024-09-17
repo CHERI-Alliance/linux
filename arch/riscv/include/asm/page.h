@@ -107,16 +107,16 @@ struct kernel_mapping {
 	unsigned long page_offset;
 	unsigned long virt_addr;
 	unsigned long virt_offset;
-	uintptr_t phys_addr;
-	uintptr_t size;
+	unsigned long phys_addr;
+	unsigned long size;
 	/* Offset between linear mapping virtual address and kernel load address */
 	unsigned long va_pa_offset;
 	/* Offset between kernel mapping virtual address and kernel load address */
 	unsigned long va_kernel_pa_offset;
 	unsigned long va_kernel_xip_pa_offset;
 #ifdef CONFIG_XIP_KERNEL
-	uintptr_t xiprom;
-	uintptr_t xiprom_sz;
+	unsigned long xiprom;
+	unsigned long xiprom_sz;
 #endif
 };
 
@@ -130,15 +130,15 @@ extern phys_addr_t phys_ram_base;
 	((x) >= PAGE_OFFSET && (!IS_ENABLED(CONFIG_64BIT) || (x) < PAGE_OFFSET + KERN_VIRT_SIZE))
 
 #ifndef CONFIG_DEBUG_VIRTUAL
-#define linear_mapping_pa_to_va(x)	((void *)((unsigned long)(x) + kernel_map.va_pa_offset))
+#define linear_mapping_pa_to_va(x)	(cheri_kcap((unsigned long)(x) + kernel_map.va_pa_offset))
 #else
 void *linear_mapping_pa_to_va(unsigned long x);
 #endif
 #define kernel_mapping_pa_to_va(y)	({					\
-	unsigned long _y = (unsigned long)(y);					\
+	unsigned long _y = __c_pa(y);						\
 	(IS_ENABLED(CONFIG_XIP_KERNEL) && _y < phys_ram_base) ?			\
-		(void *)(_y + kernel_map.va_kernel_xip_pa_offset) :		\
-		(void *)(_y + kernel_map.va_kernel_pa_offset + XIP_OFFSET);	\
+		(unsigned long)(_y + kernel_map.va_kernel_xip_pa_offset) :		\
+		(unsigned long)(_y + kernel_map.va_kernel_pa_offset + XIP_OFFSET);	\
 	})
 #define __pa_to_va_nodebug(x)		linear_mapping_pa_to_va(x)
 
@@ -168,8 +168,8 @@ extern phys_addr_t __phys_addr_symbol(unsigned long x);
 #define __phys_addr_symbol(x)	__va_to_pa_nodebug(x)
 #endif /* CONFIG_DEBUG_VIRTUAL */
 
-#define __pa_symbol(x)	__phys_addr_symbol(RELOC_HIDE((unsigned long)(x), 0))
-#define __pa(x)		__virt_to_phys((unsigned long)(x))
+#define __pa_symbol(x)	__phys_addr_symbol(RELOC_HIDE(__c_a(x), 0))
+#define __pa(x)		__virt_to_phys(__c_a(x))
 #define __va(x)		((void *)__pa_to_va_nodebug((phys_addr_t)(x)))
 
 #define phys_to_pfn(phys)	(PFN_DOWN(phys))
@@ -191,7 +191,7 @@ unsigned long kaslr_offset(void);
 #endif /* __ASSEMBLY__ */
 
 #define virt_addr_valid(vaddr)	({						\
-	unsigned long _addr = (unsigned long)vaddr;				\
+	unsigned long _addr = __c_a(vaddr);					\
 	(unsigned long)(_addr) >= PAGE_OFFSET && pfn_valid(virt_to_pfn(_addr));	\
 })
 

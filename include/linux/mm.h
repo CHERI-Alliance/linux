@@ -102,7 +102,7 @@ extern int mmap_rnd_compat_bits __read_mostly;
 #include <asm/processor.h>
 
 #ifndef __pa_symbol
-#define __pa_symbol(x)  __pa(RELOC_HIDE((unsigned long)(x), 0))
+#define __pa_symbol(x)  __pa(RELOC_HIDE(__c_a(x), 0))
 #endif
 
 #ifndef page_to_virt
@@ -148,6 +148,12 @@ static inline void __mm_zero_struct_page(struct page *page)
 	BUILD_BUG_ON(sizeof(struct page) > 96);
 
 	switch (sizeof(struct page)) {
+	case 112:
+		_pp[13] = 0;
+		fallthrough;
+	case 104:
+		_pp[12] = 0;
+		fallthrough;
 	case 96:
 		_pp[11] = 0;
 		fallthrough;
@@ -2367,9 +2373,9 @@ static inline void clear_page_pfmemalloc(struct page *page)
  */
 extern void pagefault_out_of_memory(void);
 
-#define offset_in_page(p)	((unsigned long)(p) & ~PAGE_MASK)
-#define offset_in_thp(page, p)	((unsigned long)(p) & (thp_size(page) - 1))
-#define offset_in_folio(folio, p) ((unsigned long)(p) & (folio_size(folio) - 1))
+#define offset_in_page(p)	(__c_a(p) & ~PAGE_MASK)
+#define offset_in_thp(page, p)	(__c_a(p) & (thp_size(page) - 1))
+#define offset_in_folio(folio, p) (__c_a(p) & (folio_size(folio) - 1))
 
 /*
  * Parameter block passed down to zap_pte_range in exceptional cases.

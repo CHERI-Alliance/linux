@@ -58,7 +58,7 @@ struct list_lru;
 static inline void *xa_mk_value(unsigned long v)
 {
 	WARN_ON((long)v < 0);
-	return (void *)((v << 1) | 1);
+	return __c_fakep((v << 1) | 1);
 }
 
 /**
@@ -70,7 +70,7 @@ static inline void *xa_mk_value(unsigned long v)
  */
 static inline unsigned long xa_to_value(const void *entry)
 {
-	return (unsigned long)entry >> 1;
+	return __c_pa(entry) >> 1;
 }
 
 /**
@@ -82,7 +82,7 @@ static inline unsigned long xa_to_value(const void *entry)
  */
 static inline bool xa_is_value(const void *entry)
 {
-	return (unsigned long)entry & 1;
+	return __c_pa(entry) & 1;
 }
 
 /**
@@ -100,7 +100,7 @@ static inline bool xa_is_value(const void *entry)
  */
 static inline void *xa_tag_pointer(void *p, unsigned long tag)
 {
-	return (void *)((unsigned long)p | tag);
+	return (void *)((uintptr_t)p | tag);
 }
 
 /**
@@ -115,7 +115,7 @@ static inline void *xa_tag_pointer(void *p, unsigned long tag)
  */
 static inline void *xa_untag_pointer(void *entry)
 {
-	return (void *)((unsigned long)entry & ~3UL);
+	return (void *)((uintptr_t)entry & ~3UL);
 }
 
 /**
@@ -148,7 +148,7 @@ static inline unsigned int xa_pointer_tag(void *entry)
  */
 static inline void *xa_mk_internal(unsigned long v)
 {
-	return (void *)((v << 2) | 2);
+	return __c_fakep((v << 2) | 2);
 }
 
 /*
@@ -160,7 +160,7 @@ static inline void *xa_mk_internal(unsigned long v)
  */
 static inline unsigned long xa_to_internal(const void *entry)
 {
-	return (unsigned long)entry >> 2;
+	return __c_pa(entry) >> 2;
 }
 
 /*
@@ -172,7 +172,7 @@ static inline unsigned long xa_to_internal(const void *entry)
  */
 static inline bool xa_is_internal(const void *entry)
 {
-	return ((unsigned long)entry & 3) == 2;
+	return (__c_pa(entry) & 3) == 2;
 }
 
 #define XA_ZERO_ENTRY		xa_mk_internal(257)
@@ -224,7 +224,7 @@ static inline int xa_err(void *entry)
 {
 	/* xa_to_internal() would not do sign extension. */
 	if (xa_is_err(entry))
-		return (long)entry >> 2;
+		return (long)__c_pa(entry) >> 2;
 	return 0;
 }
 
@@ -1249,19 +1249,19 @@ static inline struct xa_node *xa_parent_locked(const struct xarray *xa,
 /* Private */
 static inline void *xa_mk_node(const struct xa_node *node)
 {
-	return (void *)((unsigned long)node | 2);
+	return (void *)((uintptr_t)node | 2);
 }
 
 /* Private */
 static inline struct xa_node *xa_to_node(const void *entry)
 {
-	return (struct xa_node *)((unsigned long)entry - 2);
+	return (struct xa_node *)((uintptr_t)entry - 2);
 }
 
 /* Private */
 static inline bool xa_is_node(const void *entry)
 {
-	return xa_is_internal(entry) && (unsigned long)entry > 4096;
+	return xa_is_internal(entry) && __c_pa(entry) > 4096;
 }
 
 /* Private */
@@ -1362,7 +1362,7 @@ struct xa_state {
  * We encode errnos in the xas->xa_node.  If an error has happened, we need to
  * drop the lock to fix it, and once we've done so the xa_state is invalid.
  */
-#define XA_ERROR(errno) ((struct xa_node *)(((unsigned long)errno << 2) | 2UL))
+#define XA_ERROR(errno) ((struct xa_node *)__c_fakep(((unsigned long)errno << 2) | 2UL))
 #define XAS_BOUNDS	((struct xa_node *)1UL)
 #define XAS_RESTART	((struct xa_node *)3UL)
 
@@ -1453,7 +1453,7 @@ static inline void xas_set_err(struct xa_state *xas, long err)
  */
 static inline bool xas_invalid(const struct xa_state *xas)
 {
-	return (unsigned long)xas->xa_node & 3;
+	return __c_pa(xas->xa_node) & 3;
 }
 
 /**
@@ -1481,13 +1481,13 @@ static inline bool xas_is_node(const struct xa_state *xas)
 /* True if the pointer is something other than a node */
 static inline bool xas_not_node(struct xa_node *node)
 {
-	return ((unsigned long)node & 3) || !node;
+	return (__c_pa(node) & 3) || !node;
 }
 
 /* True if the node represents RESTART or an error */
 static inline bool xas_frozen(struct xa_node *node)
 {
-	return (unsigned long)node & 2;
+	return __c_pa(node) & 2;
 }
 
 /* True if the node represents head-of-tree, RESTART or BOUNDS */
