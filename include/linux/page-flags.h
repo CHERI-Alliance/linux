@@ -214,14 +214,14 @@ static __always_inline const struct page *page_fixed_fake_head(const struct page
 	 * e.g. compound_head) of the @page[1]. It can avoid touch a (possibly)
 	 * cold cacheline in some cases.
 	 */
-	if (IS_ALIGNED((unsigned long)page, PAGE_SIZE) &&
+	if (IS_ALIGNED(__c_pa(page), PAGE_SIZE) &&
 	    test_bit(PG_head, &page->flags)) {
 		/*
 		 * We can safely access the field of the @page[1] with PG_head
 		 * because the @page is a compound page composed with at least
 		 * two contiguous pages.
 		 */
-		unsigned long head = READ_ONCE(page[1].compound_head);
+		uintptr_t head = READ_ONCE(page[1].compound_head);
 
 		if (likely(head & 1))
 			return (const struct page *)(head - 1);
@@ -240,13 +240,13 @@ static __always_inline int page_is_fake_head(const struct page *page)
 	return page_fixed_fake_head(page) != page;
 }
 
-static inline unsigned long _compound_head(const struct page *page)
+static inline uintptr_t _compound_head(const struct page *page)
 {
-	unsigned long head = READ_ONCE(page->compound_head);
+	uintptr_t head = READ_ONCE(page->compound_head);
 
-	if (unlikely(head & 1))
+	if (unlikely(__c_ua(head) & 1))
 		return head - 1;
-	return (unsigned long)page_fixed_fake_head(page);
+	return (uintptr_t)page_fixed_fake_head(page);
 }
 
 #define compound_head(page)	((typeof(page))_compound_head(page))
@@ -281,13 +281,13 @@ static inline unsigned long _compound_head(const struct page *page)
 
 static __always_inline int PageTail(const struct page *page)
 {
-	return READ_ONCE(page->compound_head) & 1 || page_is_fake_head(page);
+	return __c_ua(READ_ONCE(page->compound_head)) & 1 || page_is_fake_head(page);
 }
 
 static __always_inline int PageCompound(const struct page *page)
 {
 	return test_bit(PG_head, &page->flags) ||
-	       READ_ONCE(page->compound_head) & 1;
+	       __c_ua(READ_ONCE(page->compound_head)) & 1;
 }
 
 #define	PAGE_POISON_PATTERN	-1l
@@ -690,17 +690,17 @@ PAGEFLAG_FALSE(VmemmapSelfHosted, vmemmap_self_hosted)
 
 static __always_inline bool folio_mapping_flags(const struct folio *folio)
 {
-	return ((unsigned long)folio->mapping & PAGE_MAPPING_FLAGS) != 0;
+	return (__c_pa(folio->mapping) & PAGE_MAPPING_FLAGS) != 0;
 }
 
 static __always_inline bool PageMappingFlags(const struct page *page)
 {
-	return ((unsigned long)page->mapping & PAGE_MAPPING_FLAGS) != 0;
+	return (__c_pa(page->mapping) & PAGE_MAPPING_FLAGS) != 0;
 }
 
 static __always_inline bool folio_test_anon(const struct folio *folio)
 {
-	return ((unsigned long)folio->mapping & PAGE_MAPPING_ANON) != 0;
+	return (__c_pa(folio->mapping) & PAGE_MAPPING_ANON) != 0;
 }
 
 static __always_inline bool PageAnon(const struct page *page)
@@ -710,13 +710,13 @@ static __always_inline bool PageAnon(const struct page *page)
 
 static __always_inline bool __folio_test_movable(const struct folio *folio)
 {
-	return ((unsigned long)folio->mapping & PAGE_MAPPING_FLAGS) ==
+	return (__c_pa(folio->mapping) & PAGE_MAPPING_FLAGS) ==
 			PAGE_MAPPING_MOVABLE;
 }
 
 static __always_inline bool __PageMovable(const struct page *page)
 {
-	return ((unsigned long)page->mapping & PAGE_MAPPING_FLAGS) ==
+	return (__c_pa(page->mapping) & PAGE_MAPPING_FLAGS) ==
 				PAGE_MAPPING_MOVABLE;
 }
 
@@ -729,7 +729,7 @@ static __always_inline bool __PageMovable(const struct page *page)
  */
 static __always_inline bool folio_test_ksm(const struct folio *folio)
 {
-	return ((unsigned long)folio->mapping & PAGE_MAPPING_FLAGS) ==
+	return (__c_pa(folio->mapping) & PAGE_MAPPING_FLAGS) ==
 				PAGE_MAPPING_KSM;
 }
 
@@ -859,7 +859,7 @@ static inline bool folio_test_large(const struct folio *folio)
 
 static __always_inline void set_compound_head(struct page *page, struct page *head)
 {
-	WRITE_ONCE(page->compound_head, (unsigned long)head + 1);
+	WRITE_ONCE(page->compound_head, (uintptr_t)head + 1);
 }
 
 static __always_inline void clear_compound_head(struct page *page)
