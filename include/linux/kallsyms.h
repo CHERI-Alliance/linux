@@ -169,7 +169,7 @@ static inline int kallsyms_on_each_match_symbol(int (*fn)(void *, unsigned long)
 
 static inline void print_ip_sym(const char *loglvl, unsigned long ip)
 {
-	printk("%s[<%px>] %pS\n", loglvl, (void *) ip, (void *) ip);
+	printk("%s[<%px>] %pS\n", loglvl, __c_fakep(ip), __c_fakep(ip));
 }
 
 #endif /*_LINUX_KALLSYMS_H*/
