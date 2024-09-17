@@ -15,6 +15,10 @@ KBUILD_CFLAGS	:= $(filter-out $(CC_FLAGS_LTO), $(KBUILD_CFLAGS))
 
 KBUILD_CFLAGS	+= -mcmodel=medany
 
+ifneq ($(CONFIG_CHERI_KERNEL),)
+KBUILD_CFLAGS += -mllvm --no-cap-table-relocs
+endif
+
 CFLAGS_cmdline_early.o += -D__NO_FORTIFY
 CFLAGS_fdt_early.o += -D__NO_FORTIFY
 # lib/string.c already defines __NO_FORTIFY
