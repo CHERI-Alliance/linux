@@ -92,22 +92,22 @@ void mempool_kfree(void *element, void *pool_data);
 
 #define mempool_init_kmalloc_pool(_pool, _min_nr, _size)		\
 	mempool_init(_pool, (_min_nr), mempool_kmalloc, mempool_kfree,	\
-		     (void *)(unsigned long)(_size))
+		     __c_fakep(_size))
 #define mempool_create_kmalloc_pool(_min_nr, _size)			\
 	mempool_create((_min_nr), mempool_kmalloc, mempool_kfree,	\
-		       (void *)(unsigned long)(_size))
+		       __c_fakep(_size))
 
 void *mempool_kvmalloc(gfp_t gfp_mask, void *pool_data);
 void mempool_kvfree(void *element, void *pool_data);
 
 static inline int mempool_init_kvmalloc_pool(mempool_t *pool, int min_nr, size_t size)
 {
-	return mempool_init(pool, min_nr, mempool_kvmalloc, mempool_kvfree, (void *) size);
+	return mempool_init(pool, min_nr, mempool_kvmalloc, mempool_kvfree, __c_fakep(size));
 }
 
 static inline mempool_t *mempool_create_kvmalloc_pool(int min_nr, size_t size)
 {
-	return mempool_create(min_nr, mempool_kvmalloc, mempool_kvfree, (void *) size);
+	return mempool_create(min_nr, mempool_kvmalloc, mempool_kvfree, __c_fakep(size));
 }
 
 /*
@@ -119,9 +119,9 @@ void mempool_free_pages(void *element, void *pool_data);
 
 #define mempool_init_page_pool(_pool, _min_nr, _order)			\
 	mempool_init(_pool, (_min_nr), mempool_alloc_pages,		\
-		     mempool_free_pages, (void *)(long)(_order))
+		     mempool_free_pages, __c_fakep(_order))
 #define mempool_create_page_pool(_min_nr, _order)			\
 	mempool_create((_min_nr), mempool_alloc_pages,			\
-		       mempool_free_pages, (void *)(long)(_order))
+		       mempool_free_pages, __c_fakep(_order))
 
 #endif /* _LINUX_MEMPOOL_H */

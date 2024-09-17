@@ -85,13 +85,19 @@ static inline void __chk_io_ptr(const volatile void __iomem *ptr) { }
 
 #ifdef __KERNEL__
 
-#ifdef CONFIG_CHERI_PURECAP_UABI
+#if defined(CONFIG_CHERI_PURECAP_UABI) && !defined(CONFIG_CHERI_KERNEL)
 #ifdef __CHECKER__
-#error "Source code checkers are currently not supported when CONFIG_CHERI_PURECAP_UABI=y"
+#error "Source code checkers are currently not supported in this configuration"
 #endif
 #undef __user
 #define __user		__capability
-#endif /* CONFIG_CHERI_PURECAP_UABI */
+#else
+#ifdef __CHECKER__
+/* Capabilities. FIXCHERI: This helps but is a hack. */
+typedef __signed__ __int128 __intcap_t __attribute__((aligned(16)));
+typedef unsigned __int128 __uintcap_t __attribute__((aligned(16)));
+#endif
+#endif /* CONFIG_CHERI_PURECAP_UABI && !CONFIG_CHERI_KERNEL */
 
 /* Attributes */
 #include <linux/compiler_attributes.h>
@@ -485,7 +491,7 @@ struct ftrace_likely_data {
 #define __native_word(t) \
 	(sizeof(t) == sizeof(char) || sizeof(t) == sizeof(short) || \
 	 sizeof(t) == sizeof(int) || sizeof(t) == sizeof(long) || \
-	 __same_type(t, __intcap_t) || __same_type(t, __uintcap_t))
+	 sizeof(t) == sizeof(void *))
 #else
 #define __native_word(t) \
 	(sizeof(t) == sizeof(char) || sizeof(t) == sizeof(short) || \

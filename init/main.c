@@ -267,7 +267,7 @@ static void * __init get_boot_config_from_initrd(size_t *_size)
 {
 	u32 size, csum;
 	char *data;
-	u32 *hdr;
+	__le32 *hdr;
 	int i;
 
 	if (!initrd_end)
@@ -286,12 +286,12 @@ static void * __init get_boot_config_from_initrd(size_t *_size)
 	return NULL;
 
 found:
-	hdr = (u32 *)(data - 8);
+	hdr = (__le32 *)(data - 8);
 	size = le32_to_cpu(hdr[0]);
 	csum = le32_to_cpu(hdr[1]);
 
 	data = ((void *)hdr) - size;
-	if ((unsigned long)data < initrd_start) {
+	if ((uintptr_t)data < initrd_start) {
 		pr_err("bootconfig size %d is greater than initrd size %ld\n",
 			size, initrd_end - initrd_start);
 		return NULL;
@@ -303,7 +303,7 @@ found:
 	}
 
 	/* Remove bootconfig from initramfs/initrd */
-	initrd_end = (unsigned long)data;
+	initrd_end = (uintptr_t)data;
 	if (_size)
 		*_size = size;
 
@@ -1176,7 +1176,7 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
 	if (list_empty(&blacklisted_initcalls))
 		return false;
 
-	addr = (unsigned long) dereference_function_descriptor(fn);
+	addr = __c_pa(dereference_function_descriptor(fn));
 	sprint_symbol_no_offset(fn_name, addr);
 
 	/*

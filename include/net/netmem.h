@@ -17,7 +17,7 @@
  *
  * Use the supplied helpers to obtain the underlying memory pointer and fields.
  */
-typedef unsigned long __bitwise netmem_ref;
+typedef uintptr_t __bitwise netmem_ref;
 
 /* This conversion fails (returns NULL) if the netmem_ref is not struct page
  * backed.

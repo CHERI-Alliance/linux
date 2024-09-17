@@ -611,7 +611,8 @@ void __init reserve_initrd_mem(void)
 
 	memblock_reserve(start, size);
 	/* Now convert initrd to virtual addresses */
-	initrd_start = (unsigned long)__va(phys_initrd_start);
+	initrd_start = (uintptr_t)cheri_make_kernel_data_cap(
+			__c_pa(__va(phys_initrd_start)), phys_initrd_size);
 	initrd_end = initrd_start + phys_initrd_size;
 	initrd_below_start_ok = 1;
 
@@ -631,7 +632,7 @@ void __weak __init free_initrd_mem(unsigned long start, unsigned long end)
 	memblock_free((void *)aligned_start, aligned_end - aligned_start);
 #endif
 
-	free_reserved_area((void *)start, (void *)end, POISON_FREE_INITMEM,
+	free_reserved_area(__c_fakep(start), __c_fakep(end), POISON_FREE_INITMEM,
 			"initrd");
 }
 

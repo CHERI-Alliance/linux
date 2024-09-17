@@ -869,7 +869,7 @@ struct sk_buff {
 				 * while device pointer would be NULL.
 				 * UDP receive path is one user.
 				 */
-				unsigned long		dev_scratch;
+				uintptr_t		dev_scratch;
 			};
 		};
 		struct rb_node		rbnode; /* used in netem, ip4 defrag, and tcp stack */
@@ -889,21 +889,25 @@ struct sk_buff {
 	 * want to keep them across layers you have to do a skb_clone()
 	 * first. This is owned by whoever has the skb queued ATM.
 	 */
+#ifndef CONFIG_CHERI_KERNEL
 	char			cb[48] __aligned(8);
+#else
+	char			cb[96] __aligned(16);
+#endif
 
 	union {
 		struct {
-			unsigned long	_skb_refdst;
+			uintptr_t	_skb_refdst;
 			void		(*destructor)(struct sk_buff *skb);
 		};
 		struct list_head	tcp_tsorted_anchor;
 #ifdef CONFIG_NET_SOCK_MSG
-		unsigned long		_sk_redir;
+		uintptr_t		_sk_redir;
 #endif
 	};
 
 #if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
-	unsigned long		 _nfct;
+	uintptr_t		 _nfct;
 #endif
 	unsigned int		len,
 				data_len;
@@ -1149,7 +1153,7 @@ static inline struct dst_entry *skb_dst(const struct sk_buff *skb)
 static inline void skb_dst_set(struct sk_buff *skb, struct dst_entry *dst)
 {
 	skb->slow_gro |= !!dst;
-	skb->_skb_refdst = (unsigned long)dst;
+	skb->_skb_refdst = (uintptr_t)dst;
 }
 
 /**
@@ -1166,7 +1170,7 @@ static inline void skb_dst_set_noref(struct sk_buff *skb, struct dst_entry *dst)
 {
 	WARN_ON(!rcu_read_lock_held() && !rcu_read_lock_bh_held());
 	skb->slow_gro |= !!dst;
-	skb->_skb_refdst = (unsigned long)dst | SKB_DST_NOREF;
+	skb->_skb_refdst = (uintptr_t)dst | SKB_DST_NOREF;
 }
 
 /**
@@ -4622,7 +4626,7 @@ static inline struct nf_conntrack *skb_nfct(const struct sk_buff *skb)
 #endif
 }
 
-static inline unsigned long skb_get_nfct(const struct sk_buff *skb)
+static inline uintptr_t skb_get_nfct(const struct sk_buff *skb)
 {
 #if IS_ENABLED(CONFIG_NF_CONNTRACK)
 	return skb->_nfct;
@@ -4631,7 +4635,7 @@ static inline unsigned long skb_get_nfct(const struct sk_buff *skb)
 #endif
 }
 
-static inline void skb_set_nfct(struct sk_buff *skb, unsigned long nfct)
+static inline void skb_set_nfct(struct sk_buff *skb, uintptr_t nfct)
 {
 #if IS_ENABLED(CONFIG_NF_CONNTRACK)
 	skb->slow_gro |= !!nfct;

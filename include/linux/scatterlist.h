@@ -9,7 +9,7 @@
 #include <asm/io.h>
 
 struct scatterlist {
-	unsigned long	page_link;
+	uintptr_t	page_link;
 	unsigned int	offset;
 	unsigned int	length;
 	dma_addr_t	dma_address;
@@ -76,7 +76,7 @@ struct sg_append_table {
 
 static inline unsigned int __sg_flags(struct scatterlist *sg)
 {
-	return sg->page_link & SG_PAGE_LINK_MASK;
+	return __c_ua(sg->page_link) & SG_PAGE_LINK_MASK;
 }
 
 static inline struct scatterlist *sg_chain_ptr(struct scatterlist *sg)
@@ -106,17 +106,17 @@ static inline bool sg_is_last(struct scatterlist *sg)
  **/
 static inline void sg_assign_page(struct scatterlist *sg, struct page *page)
 {
-	unsigned long page_link = sg->page_link & (SG_CHAIN | SG_END);
+	unsigned long page_link = __c_ua(sg->page_link) & (SG_CHAIN | SG_END);
 
 	/*
 	 * In order for the low bit stealing approach to work, pages
 	 * must be aligned at a 32-bit boundary as a minimum.
 	 */
-	BUG_ON((unsigned long)page & SG_PAGE_LINK_MASK);
+	BUG_ON(__c_pa(page) & SG_PAGE_LINK_MASK);
 #ifdef CONFIG_DEBUG_SG
 	BUG_ON(sg_is_chain(sg));
 #endif
-	sg->page_link = page_link | (unsigned long) page;
+	sg->page_link = page_link | (uintptr_t) page;
 }
 
 /**
@@ -222,7 +222,7 @@ static inline void __sg_chain(struct scatterlist *chain_sg,
 	 * Set lowest bit to indicate a link pointer, and make sure to clear
 	 * the termination bit if it happens to be set.
 	 */
-	chain_sg->page_link = ((unsigned long) sgl | SG_CHAIN) & ~SG_END;
+	chain_sg->page_link = ((uintptr_t)sgl | SG_CHAIN) & ~SG_END;
 }
 
 /**
