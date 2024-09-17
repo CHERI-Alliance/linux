@@ -101,7 +101,7 @@ extern void kvfree(const void *addr);
 static inline void __kvfree_call_rcu(struct rcu_head *head, void *ptr)
 {
 	if (head) {
-		call_rcu(head, (rcu_callback_t) ((void *) head - ptr));
+		call_rcu(head, (rcu_callback_t)__c_fakeu((void *)head - ptr));
 		return;
 	}
 

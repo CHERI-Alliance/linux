@@ -66,9 +66,9 @@ struct mem_cgroup;
  * and ensure that 'freelist' is aligned within struct slab.
  */
 #ifdef CONFIG_HAVE_ALIGNED_STRUCT_PAGE
-#define _struct_page_alignment	__aligned(2 * sizeof(unsigned long))
+#define _struct_page_alignment	__aligned(2 * sizeof(uintptr_t))
 #else
-#define _struct_page_alignment	__aligned(sizeof(unsigned long))
+#define _struct_page_alignment	__aligned(sizeof(uintptr_t))
 #endif
 
 struct page {
@@ -106,6 +106,7 @@ struct page {
 			struct address_space *mapping;
 			union {
 				pgoff_t index;		/* Our offset within mapping. */
+				uintptr_t indexp;	/* See mm/percpu.c */
 				unsigned long share;	/* share count for fsdax */
 			};
 			/**
@@ -114,7 +115,7 @@ struct page {
 			 * Used for swp_entry_t if PageSwapCache.
 			 * Indicates order in the buddy system if PageBuddy.
 			 */
-			unsigned long private;
+			uintptr_t private;
 		};
 		struct {	/* page_pool used by netstack */
 			/**
@@ -128,7 +129,7 @@ struct page {
 			atomic_long_t pp_ref_count;
 		};
 		struct {	/* Tail pages of compound page */
-			unsigned long compound_head;	/* Bit zero is set */
+			uintptr_t compound_head;	/* Bit zero is set */
 		};
 		struct {	/* ZONE_DEVICE pages */
 			/** @pgmap: Points to the hosting device page map. */
@@ -238,28 +239,28 @@ struct encoded_page;
 static __always_inline struct encoded_page *encode_page(struct page *page, unsigned long flags)
 {
 	BUILD_BUG_ON(flags > ENCODED_PAGE_BITS);
-	return (struct encoded_page *)(flags | (unsigned long)page);
+	return (struct encoded_page *)(flags | (uintptr_t)page);
 }
 
 static inline unsigned long encoded_page_flags(struct encoded_page *page)
 {
-	return ENCODED_PAGE_BITS & (unsigned long)page;
+	return ENCODED_PAGE_BITS & __c_pa(page);
 }
 
 static inline struct page *encoded_page_ptr(struct encoded_page *page)
 {
-	return (struct page *)(~ENCODED_PAGE_BITS & (unsigned long)page);
+	return (struct page *)(~ENCODED_PAGE_BITS & (uintptr_t)page);
 }
 
 static __always_inline struct encoded_page *encode_nr_pages(unsigned long nr)
 {
 	VM_WARN_ON_ONCE((nr << 2) >> 2 != nr);
-	return (struct encoded_page *)(nr << 2);
+	return (struct encoded_page *)__c_fakep(nr << 2);
 }
 
 static __always_inline unsigned long encoded_nr_pages(struct encoded_page *page)
 {
-	return ((unsigned long)page) >> 2;
+	return __c_pa(page) >> 2;
 }
 
 /*
@@ -348,7 +349,8 @@ struct folio {
 	union {
 		struct {
 			unsigned long _flags_1;
-			unsigned long _head_1;
+			uintptr_t _head_1;
+			unsigned long _folio_avail;
 	/* public: */
 			atomic_t _large_mapcount;
 			atomic_t _entire_mapcount;
@@ -364,7 +366,7 @@ struct folio {
 	union {
 		struct {
 			unsigned long _flags_2;
-			unsigned long _head_2;
+			uintptr_t _head_2;
 	/* public: */
 			void *_hugetlb_subpool;
 			void *_hugetlb_cgroup;
@@ -374,7 +376,7 @@ struct folio {
 		};
 		struct {
 			unsigned long _flags_2a;
-			unsigned long _head_2a;
+			uintptr_t _head_2a;
 	/* public: */
 			struct list_head _deferred_list;
 	/* private: the union with struct page is transitional */
@@ -445,7 +447,7 @@ struct ptdesc {
 		struct rcu_head pt_rcu_head;
 		struct list_head pt_list;
 		struct {
-			unsigned long _pt_pad_1;
+			uintptr_t _pt_pad_1;
 			pgtable_t pmd_huge_pte;
 		};
 	};
@@ -458,7 +460,7 @@ struct ptdesc {
 	};
 
 	union {
-		unsigned long _pt_pad_2;
+		uintptr_t _pt_pad_2;
 #if ALLOC_SPLIT_PTLOCKS
 		spinlock_t *ptl;
 #else
@@ -516,7 +518,7 @@ static_assert(sizeof(struct ptdesc) <= sizeof(struct page));
  */
 #define page_private(page)		((page)->private)
 
-static inline void set_page_private(struct page *page, unsigned long private)
+static inline void set_page_private(struct page *page, uintptr_t private)
 {
 	page->private = private;
 }
@@ -1028,7 +1030,7 @@ extern struct mm_struct init_mm;
 /* Pointer magic because the dynamic array size confuses some compilers. */
 static inline void mm_init_cpumask(struct mm_struct *mm)
 {
-	unsigned long cpu_bitmap = (unsigned long)mm;
+	uintptr_t cpu_bitmap = (uintptr_t)mm;
 
 	cpu_bitmap += offsetof(struct mm_struct, cpu_bitmap);
 	cpumask_clear((struct cpumask *)cpu_bitmap);
@@ -1155,7 +1157,7 @@ static inline int mm_cid_clear_lazy_put(int cid)
 /* Accessor for struct mm_struct's cidmask. */
 static inline cpumask_t *mm_cidmask(struct mm_struct *mm)
 {
-	unsigned long cid_bitmap = (unsigned long)mm;
+	uintptr_t cid_bitmap = (uintptr_t)mm;
 
 	cid_bitmap += offsetof(struct mm_struct, cpu_bitmap);
 	/* Skip cpu_bitmap */
