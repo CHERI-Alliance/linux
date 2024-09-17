@@ -17,6 +17,10 @@
 #include <asm/xip_fixup.h>
 #include "efi-header.S"
 
+#ifdef CONFIG_CHERI_KERNEL
+.option nocapmode
+#endif
+
 __HEAD
 SYM_CODE_START(_start)
 	/*
@@ -68,6 +72,13 @@ pe_head_start:
 	.word 0
 #endif
 
+#ifdef CONFIG_CHERI_KERNEL
+.option capmode
+.macro la dst sym
+llc c\dst, \sym
+.endm
+#endif
+
 .align 2
 #ifdef CONFIG_MMU
 	.global relocate_enable_mmu
@@ -75,21 +86,36 @@ relocate_enable_mmu:
 	/* Relocate return address */
 	la a1, kernel_map
 	XIP_FIXUP_OFFSET a1
+#ifndef CONFIG_CHERI_KERNEL
 	REG_L a1, KERNEL_MAP_VIRT_ADDR(a1)
+#else
+	REG_L a1, KERNEL_MAP_VIRT_ADDR(ca1)
+#endif
 	la a2, _start
 	sub a1, a1, a2
+#ifndef CONFIG_CHERI_KERNEL
 	add ra, ra, a1
+#else
+	add a2, ra, a1
+	auipc cra, 0
+	scaddr cra, cra, a2
+#endif
 
 	/* Point stvec to virtual address of intruction after satp write */
 	la a2, 1f
+#ifndef CONFIG_CHERI_KERNEL
 	add a2, a2, a1
 	csrw CSR_TVEC, a2
+#else
+	cadd ca2, ca2, a1
+	csrw stvecc, ca2
+#endif
 
 	/* Compute satp for kernel page tables, but don't load it yet */
 	srl a2, a0, PAGE_SHIFT
 	la a1, satp_mode
 	XIP_FIXUP_OFFSET a1
-	REG_L a1, 0(a1)
+	REG_L a1, 0(CREG(a1))
 	or a2, a2, a1
 
 	/*
@@ -108,7 +134,11 @@ relocate_enable_mmu:
 1:
 	/* Set trap vector to spin forever to help debug */
 	la a0, .Lsecondary_park
+#ifndef CONFIG_CHERI_KERNEL
 	csrw CSR_TVEC, a0
+#else
+	csrw stvecc, ca0 // SIM: was CSR_TVEC
+#endif
 
 	/* Reload the global pointer */
 	load_global_pointer
@@ -172,13 +202,22 @@ secondary_start_sbi:
 .Lsetup_trap_vector:
 	/* Set trap vector to exception handler */
 	la a0, handle_exception
+#ifndef CONFIG_CHERI_KERNEL
 	csrw CSR_TVEC, a0
+#else
+	csrw stvecc, ca0
+#endif
 
 	/*
 	 * Set sup0 scratch register to 0, indicating to exception vector that
 	 * we are presently executing in kernel.
 	 */
+#ifndef CONFIG_CHERI_KERNEL
 	csrw CSR_SCRATCH, zero
+#else
+	csrw sscratchc, cnull
+#endif
+
 	ret
 
 .align 2
@@ -222,6 +261,13 @@ SYM_CODE_START(_start_kernel)
 	 */
 	csrr a0, CSR_MHARTID
 #endif /* CONFIG_RISCV_M_MODE */
+
+	/* Switch to purecap mode if it's not in purecap mode */
+	auipc ct0, 0
+	gctag t1, ct0
+	bnez t1, .Lpurecap_done
+	modesw
+.Lpurecap_done:
 
 	/* Load the global pointer */
 	load_global_pointer
@@ -279,26 +325,39 @@ SYM_CODE_START(_start_kernel)
 	la a4, __bss_stop
 	ble a4, a3, .Lclear_bss_done
 .Lclear_bss:
-	REG_S zero, (a3)
-	add a3, a3, RISCV_SZPTR
+	REG_S zero, (CREG(a3))
+	CREG(addi) CREG(a3), CREG(a3), __SIZEOF_LONG__
 	blt a3, a4, .Lclear_bss
 .Lclear_bss_done:
 #endif
 	la a2, boot_cpu_hartid
 	XIP_FIXUP_OFFSET a2
-	REG_S a0, (a2)
+	REG_S a0, (CREG(a2))
+
+#ifdef CONFIG_CHERI_KERNEL
+	/* Temporarily setup kernel_code_cap */
+	la t1, kernel_code_cap
+	auipc ct0, 0
+	scaddr ct0, ct0, x0
+	sc ct0, (ct1)
+
+	/* Temporarily setup kernel_data_cap */
+	la t1, kernel_data_cap
+	csrr ct0, ddc
+	sc ct0, (ct1)
+#endif
 
 	/* Initialize page tables and relocate to virtual addresses */
 	la tp, init_task
 	la sp, init_thread_union + THREAD_SIZE
 	XIP_FIXUP_OFFSET sp
-	addi sp, sp, -PT_SIZE_ON_STACK
+	CREG(addi) CREG(sp), CREG(sp), -PT_SIZE_ON_STACK
 	scs_load_init_stack
 #ifdef CONFIG_BUILTIN_DTB
 	la a0, __dtb_start
 	XIP_FIXUP_OFFSET a0
 #else
-	mv a0, a1
+	CREG(mv) CREG(a0), CREG(a1)
 #endif /* CONFIG_BUILTIN_DTB */
 	call setup_vm
 #ifdef CONFIG_MMU
@@ -311,8 +370,19 @@ SYM_CODE_START(_start_kernel)
 	/* Restore C environment */
 	la tp, init_task
 	la sp, init_thread_union + THREAD_SIZE
-	addi sp, sp, -PT_SIZE_ON_STACK
+	CREG(addi) CREG(sp), CREG(sp), -PT_SIZE_ON_STACK
 	scs_load_current
+
+#ifdef CONFIG_CHERI_KERNEL
+	csrr cs3, ddc
+	auipc cs4, 0
+
+	cmv ca0, cs3
+	cmv ca1, cs4
+	llc cra, init_cap_relocs
+	jalr cra
+#endif
+	/* FIXCHERI: Sanitize/restrict caps here (ddc, ppc, ...) */
 
 #ifdef CONFIG_KASAN
 	call kasan_early_init
@@ -383,6 +453,10 @@ SYM_CODE_START_LOCAL(reset_regs)
 	li	t5, 0
 	li	t6, 0
 	csrw	CSR_SCRATCH, 0
+#ifdef CONFIG_CHERI_KERNEL
+	cmv ct0, cnull
+	csrw sscratchc, ct0
+#endif
 
 #ifdef CONFIG_FPU
 	csrr	t0, CSR_MISA
