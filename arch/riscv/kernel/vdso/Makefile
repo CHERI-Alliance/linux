@@ -28,6 +28,10 @@ ccflags-y := -fno-stack-protector
 ccflags-y += -DDISABLE_BRANCH_PROFILING
 ccflags-y += -fno-builtin
 
+ifneq ($(CONFIG_CHERI_KERNEL),)
+KBUILD_CFLAGS += -mllvm --no-cap-table-relocs
+endif
+
 ifneq ($(c-gettimeofday-y),)
   CFLAGS_vgettimeofday.o += -fPIC -include $(c-gettimeofday-y)
 endif
