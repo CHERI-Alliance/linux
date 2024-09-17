@@ -70,14 +70,15 @@ typedef struct {
  * and ensure that 'freelist' is aligned within struct slab.
  */
 #ifdef CONFIG_HAVE_ALIGNED_STRUCT_PAGE
-#define _struct_page_alignment	__aligned(2 * sizeof(unsigned long))
+#define _struct_page_alignment	__aligned(2 * sizeof(uintptr_t))
 #else
-#define _struct_page_alignment	__aligned(sizeof(unsigned long))
+#define _struct_page_alignment	__aligned(sizeof(uintptr_t))
 #endif
 
 struct page {
 	memdesc_flags_t flags;		/* Atomic flags, some possibly
 					 * updated asynchronously */
+
 	/*
 	 * Five words (20/40 bytes) are available in this union.
 	 * WARNING: bit 0 of the first word is used for PageTail(). That
@@ -111,7 +112,7 @@ struct page {
 			 * Indicates order in the buddy system if PageBuddy
 			 * or on pcp_llist.
 			 */
-			unsigned long private;
+			uintptr_t private;
 		};
 		struct {	/* page_pool used by netstack */
 			/**
@@ -119,13 +120,13 @@ struct page {
 			 * page_pool allocated pages.
 			 */
 			unsigned long pp_magic;
-			struct page_pool *pp;
-			unsigned long _pp_mapping_pad;
 			unsigned long dma_addr;
+			struct page_pool *pp;
+			uintptr_t _pp_mapping_pad;
 			atomic_long_t pp_ref_count;
 		};
 		struct {	/* Tail pages of compound page */
-			unsigned long compound_head;	/* Bit zero is set */
+			uintptr_t compound_head;	/* Bit zero is set */
 		};
 		struct {	/* ZONE_DEVICE pages */
 			/*
@@ -183,7 +184,7 @@ struct page {
 	atomic_t _refcount;
 
 #ifdef CONFIG_MEMCG
-	unsigned long memcg_data;
+	uintptr_t memcg_data;
 #elif defined(CONFIG_SLAB_OBJ_EXT)
 	unsigned long _unused_slab_obj_exts;
 #endif
@@ -269,12 +270,12 @@ static inline struct page *encoded_page_ptr(struct encoded_page *page)
 static __always_inline struct encoded_page *encode_nr_pages(unsigned long nr)
 {
 	VM_WARN_ON_ONCE((nr << 2) >> 2 != nr);
-	return (struct encoded_page *)(nr << 2);
+	return (struct encoded_page *)__c_fakep(nr << 2);
 }
 
 static __always_inline unsigned long encoded_nr_pages(struct encoded_page *page)
 {
-	return ((uintptr_t)page) >> 2;
+	return __c_pa(page) >> 2;
 }
 
 /*
@@ -403,8 +404,9 @@ struct folio {
 			};
 			atomic_t _mapcount;
 			atomic_t _refcount;
+
 #ifdef CONFIG_MEMCG
-			unsigned long memcg_data;
+			uintptr_t memcg_data;
 #elif defined(CONFIG_SLAB_OBJ_EXT)
 			unsigned long _unused_slab_obj_exts;
 #endif
@@ -421,7 +423,7 @@ struct folio {
 	union {
 		struct {
 			unsigned long _flags_1;
-			unsigned long _head_1;
+			uintptr_t _head_1;
 			union {
 				struct {
 	/* public: */
@@ -438,7 +440,7 @@ struct folio {
 					};
 	/* private: the union with struct page is transitional */
 				};
-				unsigned long _usable_1[4];
+				uintptr_t _usable_1[4];
 			};
 			atomic_t _mapcount_1;
 			atomic_t _refcount_1;
@@ -453,7 +455,7 @@ struct folio {
 	union {
 		struct {
 			unsigned long _flags_2;
-			unsigned long _head_2;
+			uintptr_t _head_2;
 	/* public: */
 			struct list_head _deferred_list;
 #ifndef CONFIG_64BIT
@@ -467,7 +469,7 @@ struct folio {
 	union {
 		struct {
 			unsigned long _flags_3;
-			unsigned long _head_3;
+			uintptr_t _head_3;
 	/* public: */
 			void *_hugetlb_subpool;
 			void *_hugetlb_cgroup;
@@ -550,7 +552,7 @@ struct ptdesc {
 		struct rcu_head pt_rcu_head;
 		struct list_head pt_list;
 		struct {
-			unsigned long _pt_pad_1;
+			uintptr_t _pt_pad_1;
 			pgtable_t pmd_huge_pte;
 		};
 	};
@@ -566,7 +568,7 @@ struct ptdesc {
 	};
 
 	union {
-		unsigned long _pt_pad_2;
+		uintptr_t _pt_pad_2;
 #if ALLOC_SPLIT_PTLOCKS
 		spinlock_t *ptl;
 #else
@@ -575,8 +577,11 @@ struct ptdesc {
 	};
 	unsigned int __page_type;
 	atomic_t __page_refcount;
+#ifdef CONFIG_CHERI_KERNEL
+	unsigned short _pad;
+#endif
 #ifdef CONFIG_MEMCG
-	unsigned long pt_memcg_data;
+	uintptr_t pt_memcg_data;
 #endif
 };
 
@@ -652,7 +657,7 @@ static inline void ptdesc_pmd_pts_init(struct ptdesc *ptdesc)
  */
 #define page_private(page)		((page)->private)
 
-static inline void set_page_private(struct page *page, unsigned long private)
+static inline void set_page_private(struct page *page, uintptr_t private)
 {
 	page->private = private;
 }
@@ -668,7 +673,7 @@ typedef unsigned long vm_flags_t;
  * freeptr_t represents a SLUB freelist pointer, which might be encoded
  * and not dereferenceable if CONFIG_SLAB_FREELIST_HARDENED is enabled.
  */
-typedef struct { unsigned long v; } freeptr_t;
+typedef struct { uintptr_t v; } freeptr_t;
 
 /*
  * A region containing a mapping of a non-memory backed file under NOMMU

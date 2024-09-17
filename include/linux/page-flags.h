@@ -223,7 +223,7 @@ static __always_inline const struct page *page_fixed_fake_head(const struct page
 		 * because the @page is a compound page composed with at least
 		 * two contiguous pages.
 		 */
-		unsigned long head = READ_ONCE(page[1].compound_head);
+		uintptr_t head = READ_ONCE(page[1].compound_head);
 
 		if (likely(head & 1))
 			return (const struct page *)(head - 1);
@@ -279,9 +279,9 @@ static __always_inline int page_is_fake_head(const struct page *page)
 	return page_fixed_fake_head(page) != page;
 }
 
-static __always_inline unsigned long _compound_head(const struct page *page)
+static __always_inline uintptr_t _compound_head(const struct page *page)
 {
-	unsigned long head = READ_ONCE(page->compound_head);
+	uintptr_t head = READ_ONCE(page->compound_head);
 
 	if (unlikely(head & 1))
 		return head - 1;
