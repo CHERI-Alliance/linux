@@ -208,9 +208,80 @@ __c_fakep(ptraddr_t val)
  * Like __c_fakep but creates a uintptr_t instead of a void * pointer.
  */
 static inline uintptr_t
-__c_fakeu(unsigned long val)
+__c_fakeu(ptraddr_t val)
 {
 	return (uintptr_t __force)val;
 }
+
+#ifdef CONFIG_CHERI_KERNEL
+
+/* Kernel root capabilities. Use with care. */
+extern void * kernel_data_cap;
+extern void * kernel_code_cap;
+
+/*
+ * Create a read/write data capability for a kernel address.
+ * @addr The address.
+ * @return A pointer with bounds that allow access to the
+ *     entire kernel range.
+ *
+ * NOTE: A need to use this function means that the CHERI adoption
+ *       is incomplete. The caller should at least be able to provide
+ *       bounds and thus use cheri_make_kernel_data_cap or
+ *       cheri_make_kernel_code_cap instead.
+ */
+static inline void *
+cheri_kcap(ptraddr_t addr)
+{
+	return cheri_address_set(kernel_data_cap, addr);
+}
+
+/*
+ * Create a capability to access kernel data. The capability is
+ * derived from kernel_data_cap and thus will allow read and write
+ * accesses.
+ */
+static inline void *
+cheri_make_kernel_data_cap(ptraddr_t addr, size_t len)
+{
+	void * ret = cheri_address_set(kernel_data_cap, addr);
+
+	return cheri_bounds_set(ret, len);
+}
+
+/*
+ * Create a capbility for kernel read-only data and/or code.
+ * The capability is derived from kernel_code_cap and thus will
+ * allow read/exec and (if used as a pcc) access to system registers.
+ */
+static inline void *
+cheri_make_kernel_code_cap(ptraddr_t addr)
+{
+	return cheri_address_set(kernel_code_cap, addr);
+}
+
+#else
+
+static inline void *
+cheri_kcap(ptraddr_t addr)
+{
+	return (void *)addr;
+}
+
+static inline void *
+cheri_make_kernel_data_cap(ptraddr_t addr, size_t len)
+{
+	(void)len;
+
+	return (void *)addr;
+}
+
+static inline void *
+cheri_make_kernel_code_cap(ptraddr_t addr)
+{
+	return (void *)addr;
+}
+
+#endif
 
 #endif	/* _LINUX_CHERI_H */
