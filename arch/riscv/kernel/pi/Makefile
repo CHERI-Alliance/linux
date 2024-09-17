@@ -7,7 +7,7 @@ KBUILD_CFLAGS	:= $(subst $(CC_FLAGS_FTRACE),,$(KBUILD_CFLAGS)) -fpie \
 		   -I$(srctree)/scripts/dtc/libfdt -fno-stack-protector \
 		   -D__DISABLE_EXPORTS -ffreestanding \
 		   -fno-asynchronous-unwind-tables -fno-unwind-tables \
-		   $(call cc-option,-fno-addrsig)
+		   $(call cc-option,-fno-addrsig) -mllvm --no-cap-table-relocs
 
 # Disable LTO
 KBUILD_CFLAGS	:= $(filter-out $(CC_FLAGS_LTO), $(KBUILD_CFLAGS))

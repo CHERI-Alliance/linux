@@ -20,7 +20,7 @@
 #include <generated/vdso-offsets.h>
 
 #define VDSO_SYMBOL(base, name)							\
-	(void __user *)((unsigned long)(base) + __vdso_##name##_offset)
+	(void __user *)((uintptr_t)(base) + (unsigned long)__vdso_##name##_offset)
 
 #ifdef CONFIG_COMPAT
 #include <generated/compat_vdso-offsets.h>
