@@ -284,7 +284,7 @@ unsigned long regs_get_kernel_stack_nth(struct pt_regs *regs, unsigned int n)
 	unsigned long *addr = (unsigned long *)kernel_stack_pointer(regs);
 
 	addr += n;
-	if (regs_within_kernel_stack(regs, (unsigned long)addr))
+	if (regs_within_kernel_stack(regs, __c_pa(addr)))
 		return *addr;
 	else
 		return 0;
@@ -295,7 +295,7 @@ void ptrace_disable(struct task_struct *child)
 }
 
 long arch_ptrace(struct task_struct *child, long request,
-		 unsigned long addr, unsigned long data)
+		 user_uintptr_t addr, user_uintptr_t data)
 {
 	long ret = -EIO;
 

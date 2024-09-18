@@ -65,9 +65,10 @@ SYM_CODE_START(handle_exception)
 	save_from_x6_to_x31
 
 #ifdef CONFIG_RISCV_CHERI_BAKEWELL
-	/* store ddc */
+	/* store and clear ddc */
 	csrr ct0, ddc
 	sc ct0, PT_DDC(csp)
+	csrw ddc, cnull
 #endif
 
 	/*
@@ -432,7 +433,7 @@ SYM_DATA_START_LOCAL(excp_vect_table)
 	RISCV_PTR do_trap_unknown
 	RISCV_PTR do_trap_unknown
 	RISCV_PTR do_trap_unknown
-#ifndef CONFIG_CHERI_KERNEL
+#ifndef CONFIG_CHERI_PURECAP_UABI
 	RISCV_PTR do_trap_unknown
 #else
 	RISCV_PTR do_trap_cheri
