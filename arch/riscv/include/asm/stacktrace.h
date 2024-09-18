@@ -7,8 +7,8 @@
 #include <asm/ptrace.h>
 
 struct stackframe {
-	unsigned long fp;
-	unsigned long ra;
+	uintptr_t fp;
+	uintptr_t ra;
 };
 
 extern void notrace walk_stackframe(struct task_struct *task, struct pt_regs *regs,
@@ -18,7 +18,7 @@ extern void dump_backtrace(struct pt_regs *regs, struct task_struct *task,
 
 static inline bool on_thread_stack(void)
 {
-	return !(((unsigned long)(current->stack) ^ current_stack_pointer) & ~(THREAD_SIZE - 1));
+	return !((__c_pa(current->stack) ^ current_stack_pointer) & ~(THREAD_SIZE - 1));
 }
 
 

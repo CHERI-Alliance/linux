@@ -9,7 +9,11 @@
 
 /* Load init_shadow_call_stack to gp. */
 .macro scs_load_init_stack
+#ifndef CONFIG_CHERI_KERNEL
 	la	gp, init_shadow_call_stack
+#else
+	llc	cgp, init_shadow_call_stack
+#endif
 	XIP_FIXUP_OFFSET gp
 .endm
 
@@ -20,19 +24,19 @@
 
 /* Load task_scs_sp(current) to gp. */
 .macro scs_load_current
-	REG_L	gp, TASK_TI_SCS_SP(tp)
+	CREG_L	CREG(gp), TASK_TI_SCS_SP(CREG(tp))
 .endm
 
 /* Load task_scs_sp(current) to gp, but only if tp has changed. */
 .macro scs_load_current_if_task_changed prev
-	beq	\prev, tp, _skip_scs
+	beq	\prev, CREG(tp), _skip_scs
 	scs_load_current
 _skip_scs:
 .endm
 
 /* Save gp to task_scs_sp(current). */
 .macro scs_save_current
-	REG_S	gp, TASK_TI_SCS_SP(tp)
+	CREG_S	CREG(gp), TASK_TI_SCS_SP(CREG(tp))
 .endm
 
 #else /* CONFIG_SHADOW_CALL_STACK */
