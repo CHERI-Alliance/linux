@@ -339,10 +339,10 @@ static inline struct page *alloc_page_vma_noprof(gfp_t gfp,
 }
 #define alloc_page_vma(...)			alloc_hooks(alloc_page_vma_noprof(__VA_ARGS__))
 
-extern unsigned long get_free_pages_noprof(gfp_t gfp_mask, unsigned int order);
+extern uintptr_t get_free_pages_noprof(gfp_t gfp_mask, unsigned int order);
 #define __get_free_pages(...)			alloc_hooks(get_free_pages_noprof(__VA_ARGS__))
 
-extern unsigned long get_zeroed_page_noprof(gfp_t gfp_mask);
+extern uintptr_t get_zeroed_page_noprof(gfp_t gfp_mask);
 #define get_zeroed_page(...)			alloc_hooks(get_zeroed_page_noprof(__VA_ARGS__))
 
 void *alloc_pages_exact_noprof(size_t size, gfp_t gfp_mask) __alloc_size(1);
@@ -361,7 +361,7 @@ __meminit void *alloc_pages_exact_nid_noprof(int nid, size_t size, gfp_t gfp_mas
 	__get_free_pages((gfp_mask) | GFP_DMA, (order))
 
 extern void __free_pages(struct page *page, unsigned int order);
-extern void free_pages(unsigned long addr, unsigned int order);
+extern void free_pages(uintptr_t addr, unsigned int order);
 
 struct page_frag_cache;
 void page_frag_cache_drain(struct page_frag_cache *nc);

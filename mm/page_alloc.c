@@ -60,6 +60,11 @@
 #include "shuffle.h"
 #include "page_reporting.h"
 
+/* FIXCHERI: The page allocation functions should set boundaries on
+ * allocated pages and most likely __va() should respect these
+ * boundaries and return length restricted capabilities, too.
+ */
+
 /* Free Page Internal flags: for internal, non-pcp variants of free_pages(). */
 typedef int __bitwise fpi_t;
 
@@ -572,7 +577,7 @@ void prep_compound_page(struct page *page, unsigned int order)
 
 static inline void set_buddy_order(struct page *page, unsigned int order)
 {
-	set_page_private(page, order);
+	set_page_private(page, __c_fakeu(order));
 	__SetPageBuddy(page);
 }
 
@@ -858,7 +863,7 @@ static inline bool page_expected_state(struct page *page,
 	if (unlikely(atomic_read(&page->_mapcount) != -1))
 		return false;
 
-	if (unlikely((unsigned long)page->mapping |
+	if (unlikely(__c_pa(page->mapping) |
 			page_ref_count(page) |
 #ifdef CONFIG_MEMCG
 			page->memcg_data |
@@ -2645,7 +2650,7 @@ void free_unref_folios(struct folio_batch *folios)
 				      pfn, order, FPI_NONE);
 			continue;
 		}
-		folio->private = (void *)(unsigned long)order;
+		folio->private = __c_fakep(order);
 		if (j != i)
 			folios->folios[j] = folio;
 		j++;
@@ -2656,7 +2661,7 @@ void free_unref_folios(struct folio_batch *folios)
 		struct folio *folio = folios->folios[i];
 		struct zone *zone = folio_zone(folio);
 		unsigned long pfn = folio_pfn(folio);
-		unsigned int order = (unsigned long)folio->private;
+		unsigned int order = __c_pa(folio->private);
 		int migratetype;
 
 		folio->private = NULL;
@@ -4723,18 +4728,18 @@ EXPORT_SYMBOL(__folio_alloc_noprof);
  * address cannot represent highmem pages. Use alloc_pages and then kmap if
  * you need to access high mem.
  */
-unsigned long get_free_pages_noprof(gfp_t gfp_mask, unsigned int order)
+uintptr_t get_free_pages_noprof(gfp_t gfp_mask, unsigned int order)
 {
 	struct page *page;
 
 	page = alloc_pages_noprof(gfp_mask & ~__GFP_HIGHMEM, order);
 	if (!page)
 		return 0;
-	return (unsigned long) page_address(page);
+	return (uintptr_t) page_address(page);
 }
 EXPORT_SYMBOL(get_free_pages_noprof);
 
-unsigned long get_zeroed_page_noprof(gfp_t gfp_mask)
+uintptr_t get_zeroed_page_noprof(gfp_t gfp_mask)
 {
 	return get_free_pages_noprof(gfp_mask | __GFP_ZERO, 0);
 }
@@ -4776,7 +4781,7 @@ void __free_pages(struct page *page, unsigned int order)
 }
 EXPORT_SYMBOL(__free_pages);
 
-void free_pages(unsigned long addr, unsigned int order)
+void free_pages(uintptr_t addr, unsigned int order)
 {
 	if (addr != 0) {
 		VM_BUG_ON(!virt_addr_valid((void *)addr));
@@ -4922,7 +4927,7 @@ void page_frag_free(void *addr)
 }
 EXPORT_SYMBOL(page_frag_free);
 
-static void *make_alloc_exact(unsigned long addr, unsigned int order,
+static void *make_alloc_exact(uintptr_t addr, unsigned int order,
 		size_t size)
 {
 	if (addr) {
@@ -4961,7 +4966,7 @@ static void *make_alloc_exact(unsigned long addr, unsigned int order,
 void *alloc_pages_exact_noprof(size_t size, gfp_t gfp_mask)
 {
 	unsigned int order = get_order(size);
-	unsigned long addr;
+	uintptr_t addr;
 
 	if (WARN_ON_ONCE(gfp_mask & (__GFP_COMP | __GFP_HIGHMEM)))
 		gfp_mask &= ~(__GFP_COMP | __GFP_HIGHMEM);
@@ -4994,7 +4999,7 @@ void * __meminit alloc_pages_exact_nid_noprof(int nid, size_t size, gfp_t gfp_ma
 	p = alloc_pages_node_noprof(nid, gfp_mask, order);
 	if (!p)
 		return NULL;
-	return make_alloc_exact((unsigned long)page_address(p), order, size);
+	return make_alloc_exact((uintptr_t)page_address(p), order, size);
 }
 
 /**
@@ -5006,8 +5011,8 @@ void * __meminit alloc_pages_exact_nid_noprof(int nid, size_t size, gfp_t gfp_ma
  */
 void free_pages_exact(void *virt, size_t size)
 {
-	unsigned long addr = (unsigned long)virt;
-	unsigned long end = addr + PAGE_ALIGN(size);
+	uintptr_t addr = (uintptr_t)virt;
+	uintptr_t end = addr + PAGE_ALIGN(size);
 
 	while (addr < end) {
 		free_page(addr);
@@ -5774,8 +5779,8 @@ unsigned long free_reserved_area(void *start, void *end, int poison, const char 
 	void *pos;
 	unsigned long pages = 0;
 
-	start = (void *)PAGE_ALIGN((unsigned long)start);
-	end = (void *)((unsigned long)end & PAGE_MASK);
+	start = (void *)PAGE_ALIGN((uintptr_t)start);
+	end = (void *)((uintptr_t)end & PAGE_MASK);
 	for (pos = start; pos < end; pos += PAGE_SIZE, pages++) {
 		struct page *page = virt_to_page(pos);
 		void *direct_map_addr;
@@ -6381,7 +6386,7 @@ int __alloc_contig_migrate_range(struct compact_control *cc,
 		}
 
 		ret = migrate_pages(&cc->migratepages, alloc_migration_target,
-			NULL, (unsigned long)&mtc, cc->mode, MR_CONTIG_RANGE, NULL);
+			NULL, (uintptr_t)&mtc, cc->mode, MR_CONTIG_RANGE, NULL);
 
 		if (trace_mm_alloc_contig_migrate_range_info_enabled() && !ret)
 			total_migrated += cc->nr_migratepages;
