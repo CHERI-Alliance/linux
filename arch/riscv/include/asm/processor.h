@@ -113,9 +113,9 @@ struct pt_regs;
 /* CPU-specific state of a task */
 struct thread_struct {
 	/* Callee-saved registers */
-	unsigned long ra;
-	unsigned long sp;	/* Kernel mode stack */
-	unsigned long s[12];	/* s[0]: frame pointer */
+	register_t ra;
+	register_t sp;	/* Kernel mode stack */
+	register_t s[12];	/* s[0]: frame pointer */
 	struct __riscv_d_ext_state fstate;
 	unsigned long bad_cause;
 	u32 riscv_v_flags;
@@ -140,7 +140,7 @@ static inline void arch_thread_struct_whitelist(unsigned long *offset,
 }
 
 #define INIT_THREAD {					\
-	.sp = sizeof(init_stack) + (long)&init_stack,	\
+	.sp = sizeof(init_stack) + (uintptr_t)&init_stack,	\
 	.align_ctl = PR_UNALIGN_NOPRINT,		\
 }
 
@@ -153,8 +153,9 @@ static inline void arch_thread_struct_whitelist(unsigned long *offset,
 
 
 /* Do necessary setup to start up a newly executed thread. */
-extern void start_thread(struct pt_regs *regs,
-			unsigned long pc, unsigned long sp);
+struct linux_binprm;
+extern int start_thread(struct pt_regs *regs, unsigned long pc,
+			struct linux_binprm *bprm);
 
 extern unsigned long __get_wchan(struct task_struct *p);
 
@@ -184,7 +185,7 @@ extern long riscv_v_vstate_ctrl_set_current(unsigned long arg);
 extern long riscv_v_vstate_ctrl_get_current(void);
 #endif /* CONFIG_RISCV_ISA_V */
 
-extern int get_unalign_ctl(struct task_struct *tsk, unsigned long addr);
+extern int get_unalign_ctl(struct task_struct *tsk, uintptr_t addr);
 extern int set_unalign_ctl(struct task_struct *tsk, unsigned int val);
 
 #define GET_UNALIGN_CTL(tsk, addr)	get_unalign_ctl((tsk), (addr))

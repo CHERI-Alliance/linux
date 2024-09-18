@@ -15,6 +15,7 @@
 #include <linux/tick.h>
 #include <linux/ptrace.h>
 #include <linux/uaccess.h>
+#include <linux/binfmts.h>
 
 #include <asm/unistd.h>
 #include <asm/processor.h>
@@ -26,6 +27,9 @@
 #include <asm/cpuidle.h>
 #include <asm/vector.h>
 #include <asm/cpufeature.h>
+#include <asm/bakewell.h>
+
+#include <linux/cheri.h>
 
 #if defined(CONFIG_STACKPROTECTOR) && !defined(CONFIG_STACKPROTECTOR_PER_TASK)
 #include <linux/stackprotector.h>
@@ -49,7 +53,7 @@ int set_unalign_ctl(struct task_struct *tsk, unsigned int val)
 	return 0;
 }
 
-int get_unalign_ctl(struct task_struct *tsk, unsigned long adr)
+int get_unalign_ctl(struct task_struct *tsk, uintptr_t adr)
 {
 	if (!unaligned_ctl_available())
 		return -EINVAL;
@@ -66,28 +70,28 @@ void __show_regs(struct pt_regs *regs)
 		pr_cont(" ra : %pS\n", (void *)regs->ra);
 	}
 
-	pr_cont("epc : " REG_FMT " ra : " REG_FMT " sp : " REG_FMT "\n",
-		regs->epc, regs->ra, regs->sp);
+	pr_cont("epc: " REG_FMT " ra : " REG_FMT " sp : " REG_FMT "\n",
+		__c_ua(regs->epc), __c_ua(regs->ra), __c_ua(regs->sp));
 	pr_cont(" gp : " REG_FMT " tp : " REG_FMT " t0 : " REG_FMT "\n",
-		regs->gp, regs->tp, regs->t0);
+		__c_ua(regs->gp), __c_ua(regs->tp), __c_ua(regs->t0));
 	pr_cont(" t1 : " REG_FMT " t2 : " REG_FMT " s0 : " REG_FMT "\n",
-		regs->t1, regs->t2, regs->s0);
+		__c_ua(regs->t1), __c_ua(regs->t2), __c_ua(regs->s0));
 	pr_cont(" s1 : " REG_FMT " a0 : " REG_FMT " a1 : " REG_FMT "\n",
-		regs->s1, regs->a0, regs->a1);
+		__c_ua(regs->s1), __c_ua(regs->a0), __c_ua(regs->a1));
 	pr_cont(" a2 : " REG_FMT " a3 : " REG_FMT " a4 : " REG_FMT "\n",
-		regs->a2, regs->a3, regs->a4);
+		__c_ua(regs->a2), __c_ua(regs->a3), __c_ua(regs->a4));
 	pr_cont(" a5 : " REG_FMT " a6 : " REG_FMT " a7 : " REG_FMT "\n",
-		regs->a5, regs->a6, regs->a7);
+		__c_ua(regs->a5), __c_ua(regs->a6), __c_ua(regs->a7));
 	pr_cont(" s2 : " REG_FMT " s3 : " REG_FMT " s4 : " REG_FMT "\n",
-		regs->s2, regs->s3, regs->s4);
+		__c_ua(regs->s2), __c_ua(regs->s3), __c_ua(regs->s4));
 	pr_cont(" s5 : " REG_FMT " s6 : " REG_FMT " s7 : " REG_FMT "\n",
-		regs->s5, regs->s6, regs->s7);
+		__c_ua(regs->s5), __c_ua(regs->s6), __c_ua(regs->s7));
 	pr_cont(" s8 : " REG_FMT " s9 : " REG_FMT " s10: " REG_FMT "\n",
-		regs->s8, regs->s9, regs->s10);
+		__c_ua(regs->s8), __c_ua(regs->s9), __c_ua(regs->s10));
 	pr_cont(" s11: " REG_FMT " t3 : " REG_FMT " t4 : " REG_FMT "\n",
-		regs->s11, regs->t3, regs->t4);
+		__c_ua(regs->s11), __c_ua(regs->t3), __c_ua(regs->t4));
 	pr_cont(" t5 : " REG_FMT " t6 : " REG_FMT "\n",
-		regs->t5, regs->t6);
+		__c_ua(regs->t5), __c_ua(regs->t6));
 
 	pr_cont("status: " REG_FMT " badaddr: " REG_FMT " cause: " REG_FMT "\n",
 		regs->status, regs->badaddr, regs->cause);
@@ -127,9 +131,16 @@ static int __init compat_mode_detect(void)
 early_initcall(compat_mode_detect);
 #endif
 
-void start_thread(struct pt_regs *regs, unsigned long pc,
-	unsigned long sp)
+int start_thread(struct pt_regs *regs, unsigned long pc,
+		 struct linux_binprm *bprm)
 {
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	/*
+	 * Make sure that the register state does not contain stale
+	 * capability data.
+	 */
+	memset(regs, 0, sizeof(*regs));
+#endif
 	regs->status = SR_PIE;
 	if (has_fpu()) {
 		regs->status |= SR_FS_INITIAL;
@@ -139,8 +150,18 @@ void start_thread(struct pt_regs *regs, unsigned long pc,
 		 */
 		fstate_restore(current, regs);
 	}
+#ifndef CONFIG_CHERI_PURECAP_UABI
 	regs->epc = pc;
-	regs->sp = sp;
+	regs->sp = bprm->p;
+#else
+	regs->epc = (register_t)bprm->pcuabi.pcc;
+	regs->sp = (register_t)bprm->pcuabi.csp;
+	__asm__ __volatile__("scmode %0, %1, %2" : "=C"(regs->epc) : "C"(regs->epc), "r" (1));
+	regs->a0  = __c_fakeu(bprm->argc);
+	regs->a1 = (register_t)bprm->pcuabi.argv;
+	regs->a2 = (register_t)bprm->pcuabi.envp;
+	regs->a3 = (register_t)bprm->pcuabi.auxv;
+#endif
 
 #ifdef CONFIG_64BIT
 	regs->status &= ~SR_UXL;
@@ -150,6 +171,8 @@ void start_thread(struct pt_regs *regs, unsigned long pc,
 	else
 		regs->status |= SR_UXL_64;
 #endif
+
+	return bprm->argc;
 }
 
 void flush_thread(void)
@@ -195,9 +218,10 @@ int arch_dup_task_struct(struct task_struct *dst, struct task_struct *src)
 int copy_thread(struct task_struct *p, const struct kernel_clone_args *args)
 {
 	unsigned long clone_flags = args->flags;
-	unsigned long usp = args->stack;
-	unsigned long tls = args->tls;
+	uintptr_t usp = args->stack;
+	uintptr_t tls = args->tls;
 	struct pt_regs *childregs = task_pt_regs(p);
+	struct pt_regs *regs = current_pt_regs();
 
 	memset(&p->thread.s, 0, sizeof(p->thread.s));
 
@@ -205,11 +229,14 @@ int copy_thread(struct task_struct *p, const struct kernel_clone_args *args)
 	if (unlikely(args->fn)) {
 		/* Kernel thread */
 		memset(childregs, 0, sizeof(struct pt_regs));
+#ifdef CONFIG_CHERI_PURECAP_UABI
+		childregs->ddc = regs->ddc;
+#endif
 		/* Supervisor/Machine, irqs on: */
 		childregs->status = SR_PP | SR_PIE;
 
-		p->thread.s[0] = (unsigned long)args->fn;
-		p->thread.s[1] = (unsigned long)args->fn_arg;
+		p->thread.s[0] = (uintptr_t)args->fn;
+		p->thread.s[1] = (uintptr_t)args->fn_arg;
 	} else {
 		*childregs = *(current_pt_regs());
 		/* Turn off status.VS */
@@ -224,12 +251,13 @@ int copy_thread(struct task_struct *p, const struct kernel_clone_args *args)
 	p->thread.riscv_v_flags = 0;
 	if (has_vector())
 		riscv_v_thread_alloc(p);
-	p->thread.ra = (unsigned long)ret_from_fork;
-	p->thread.sp = (unsigned long)childregs; /* kernel sp */
+	p->thread.ra = (uintptr_t)cheri_make_kernel_code_cap(__c_pa(&ret_from_fork));
+	p->thread.sp = (uintptr_t)childregs; /* kernel sp */
 	return 0;
 }
 
 void __init arch_task_cache_init(void)
 {
+	bakewell_init();
 	riscv_v_setup_ctx_cache();
 }

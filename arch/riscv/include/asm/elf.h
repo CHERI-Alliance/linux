@@ -91,7 +91,7 @@ do {								\
 	 * COMPAT ELFCLASS32.					\
 	 */							\
 	NEW_AUX_ENT(AT_SYSINFO_EHDR,				\
-		(elf_addr_t)(ulong)current->mm->context.vdso);	\
+		(elf_stack_item_t)current->mm->context.vdso);	\
 	NEW_AUX_ENT(AT_L1I_CACHESIZE,				\
 		get_cache_size(1, CACHE_TYPE_INST));		\
 	NEW_AUX_ENT(AT_L1I_CACHEGEOMETRY,			\
@@ -118,6 +118,9 @@ do {								\
 	else							 \
 		NEW_AUX_ENT(AT_IGNORE, 0);			 \
 } while (0)
+
+#define START_THREAD(elf_ex, regs, elf_entry, bprm)		\
+	start_thread(regs, elf_entry, bprm)
 
 #ifdef CONFIG_MMU
 #define ARCH_HAS_SETUP_ADDITIONAL_PAGES
