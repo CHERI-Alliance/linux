@@ -326,6 +326,6 @@ SYSCALL_DEFINE3(mincore, user_uintptr_t, user_ptr, size_t, len,
 		start += retval << PAGE_SHIFT;
 		retval = 0;
 	}
-	free_page((unsigned long) tmp);
+	free_page((uintptr_t) tmp);
 	return retval;
 }

@@ -597,7 +597,7 @@ static int qeth_l2_pnso(struct qeth_card *card, u8 oc, int cnc,
 	if (rc)
 		QETH_CARD_TEXT_(card, 2, "PNrp%04x", rr->response.code);
 
-	free_page((unsigned long)rr);
+	free_page((uintptr_t)rr);
 	return rc;
 }
 

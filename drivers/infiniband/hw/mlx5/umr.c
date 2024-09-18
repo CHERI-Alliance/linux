@@ -484,7 +484,7 @@ static void mlx5r_umr_free_xlt(void *xlt, size_t length)
 		return;
 	}
 
-	free_pages((unsigned long)xlt, get_order(length));
+	free_pages((uintptr_t)xlt, get_order(length));
 }
 
 static void mlx5r_umr_unmap_free_xlt(struct mlx5_ib_dev *dev, void *xlt,

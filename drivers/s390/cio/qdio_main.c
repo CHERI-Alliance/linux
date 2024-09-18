@@ -933,10 +933,10 @@ int qdio_free(struct ccw_device *cdev)
 	mutex_unlock(&irq_ptr->setup_mutex);
 
 	qdio_free_queues(irq_ptr);
-	free_page((unsigned long) irq_ptr->qdr);
+	free_page((uintptr_t) irq_ptr->qdr);
 	free_page(irq_ptr->chsc_page);
 	kfree(irq_ptr->ccw);
-	free_page((unsigned long) irq_ptr);
+	free_page((uintptr_t) irq_ptr);
 	return 0;
 }
 EXPORT_SYMBOL_GPL(qdio_free);
@@ -1004,14 +1004,14 @@ int qdio_allocate(struct ccw_device *cdev, unsigned int no_input_qs,
 	return 0;
 
 err_queues:
-	free_page((unsigned long) irq_ptr->qdr);
+	free_page((uintptr_t) irq_ptr->qdr);
 err_qdr:
 	free_page(irq_ptr->chsc_page);
 err_chsc:
 err_dbf:
 	kfree(irq_ptr->ccw);
 err_ccw:
-	free_page((unsigned long) irq_ptr);
+	free_page((uintptr_t) irq_ptr);
 	return rc;
 }
 EXPORT_SYMBOL_GPL(qdio_allocate);

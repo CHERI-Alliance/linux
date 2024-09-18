@@ -241,7 +241,7 @@ int mlx4_ib_umem_write_mtt(struct mlx4_ib_dev *dev, struct mlx4_mtt *mtt,
 		err = mlx4_write_mtt(dev->dev, mtt, start_index, npages, pages);
 
 out:
-	free_page((unsigned long) pages);
+	free_page((uintptr_t) pages);
 	return err;
 }
 
@@ -576,7 +576,7 @@ mlx4_alloc_priv_pages(struct ib_device *device,
 	return 0;
 
 err:
-	free_page((unsigned long)mr->pages);
+	free_page((uintptr_t)mr->pages);
 	return ret;
 }
 
@@ -588,7 +588,7 @@ mlx4_free_priv_pages(struct mlx4_ib_mr *mr)
 
 		dma_unmap_single(device->dev.parent, mr->page_map,
 				 mr->page_map_size, DMA_TO_DEVICE);
-		free_page((unsigned long)mr->pages);
+		free_page((uintptr_t)mr->pages);
 		mr->pages = NULL;
 	}
 }

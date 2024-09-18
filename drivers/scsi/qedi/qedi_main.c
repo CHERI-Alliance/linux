@@ -168,17 +168,17 @@ static int qedi_uio_close(struct uio_info *uinfo, struct inode *inode)
 static void __qedi_free_uio_rings(struct qedi_uio_dev *udev)
 {
 	if (udev->uctrl) {
-		free_page((unsigned long)udev->uctrl);
+		free_page((uintptr_t)udev->uctrl);
 		udev->uctrl = NULL;
 	}
 
 	if (udev->ll2_ring) {
-		free_page((unsigned long)udev->ll2_ring);
+		free_page((uintptr_t)udev->ll2_ring);
 		udev->ll2_ring = NULL;
 	}
 
 	if (udev->ll2_buf) {
-		free_pages((unsigned long)udev->ll2_buf, 2);
+		free_pages((uintptr_t)udev->ll2_buf, 2);
 		udev->ll2_buf = NULL;
 	}
 }
@@ -253,7 +253,7 @@ static int __qedi_alloc_uio_rings(struct qedi_uio_dev *udev)
 	return rc;
 
 exit_alloc_buf:
-	free_page((unsigned long)udev->ll2_ring);
+	free_page((uintptr_t)udev->ll2_ring);
 	udev->ll2_ring = NULL;
 exit_alloc_ring:
 	return rc;

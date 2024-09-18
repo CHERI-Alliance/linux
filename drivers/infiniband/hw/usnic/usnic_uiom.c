@@ -183,7 +183,7 @@ out:
 		mmgrab(uiomr->owning_mm);
 
 	mmap_read_unlock(mm);
-	free_page((unsigned long) page_list);
+	free_page((uintptr_t) page_list);
 	return ret;
 }
 

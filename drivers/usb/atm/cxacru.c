@@ -976,7 +976,7 @@ static int cxacru_fw(struct usb_device *usb_dev, enum cxacru_fw_request fw,
 	ret = 0;
 
 cleanup:
-	free_page((unsigned long) buf);
+	free_page((uintptr_t) buf);
 	return ret;
 }
 
@@ -1225,8 +1225,8 @@ static int cxacru_bind(struct usbatm_data *usbatm_instance,
 	return 0;
 
  fail:
-	free_page((unsigned long) instance->snd_buf);
-	free_page((unsigned long) instance->rcv_buf);
+	free_page((uintptr_t) instance->snd_buf);
+	free_page((uintptr_t) instance->rcv_buf);
 	usb_free_urb(instance->snd_urb);
 	usb_free_urb(instance->rcv_urb);
 	kfree(instance);
@@ -1267,8 +1267,8 @@ static void cxacru_unbind(struct usbatm_data *usbatm_instance,
 	usb_free_urb(instance->snd_urb);
 	usb_free_urb(instance->rcv_urb);
 
-	free_page((unsigned long) instance->snd_buf);
-	free_page((unsigned long) instance->rcv_buf);
+	free_page((uintptr_t) instance->snd_buf);
+	free_page((uintptr_t) instance->rcv_buf);
 
 	kfree(instance);
 

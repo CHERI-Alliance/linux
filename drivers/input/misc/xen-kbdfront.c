@@ -415,7 +415,7 @@ static void xenkbd_remove(struct xenbus_device *dev)
 		input_unregister_device(info->ptr);
 	if (info->mtouch)
 		input_unregister_device(info->mtouch);
-	free_page((unsigned long)info->page);
+	free_page((uintptr_t)info->page);
 	kfree(info);
 }
 

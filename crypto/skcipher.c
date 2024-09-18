@@ -170,7 +170,7 @@ finish:
 	if (walk->buffer != walk->page)
 		kfree(walk->buffer);
 	if (walk->page)
-		free_page((unsigned long)walk->page);
+		free_page((uintptr_t)walk->page);
 
 out:
 	return err;
@@ -197,7 +197,7 @@ void skcipher_walk_complete(struct skcipher_walk *walk, int err)
 
 		if (offset_in_page(p->data) + p->len + walk->stride >
 		    PAGE_SIZE)
-			free_page((unsigned long)p->data);
+			free_page((uintptr_t)p->data);
 
 done:
 		list_del(&p->entry);
@@ -209,7 +209,7 @@ done:
 	if (walk->buffer != walk->page)
 		kfree(walk->buffer);
 	if (walk->page)
-		free_page((unsigned long)walk->page);
+		free_page((uintptr_t)walk->page);
 }
 EXPORT_SYMBOL_GPL(skcipher_walk_complete);
 

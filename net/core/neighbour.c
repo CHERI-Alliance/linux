@@ -569,7 +569,7 @@ static void neigh_hash_free_rcu(struct rcu_head *head)
 		kfree(buckets);
 	} else {
 		kmemleak_free(buckets);
-		free_pages((unsigned long)buckets, get_order(size));
+		free_pages((uintptr_t)buckets, get_order(size));
 	}
 	kfree(nht);
 }

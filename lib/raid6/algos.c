@@ -275,7 +275,7 @@ int __init raid6_select_algo(void)
 	/* select raid recover functions */
 	rec_best = raid6_choose_recov();
 
-	free_pages((unsigned long)disk_ptr, RAID6_TEST_DISKS_ORDER);
+	free_pages((uintptr_t)disk_ptr, RAID6_TEST_DISKS_ORDER);
 
 	return gen_best && rec_best ? 0 : -EINVAL;
 }

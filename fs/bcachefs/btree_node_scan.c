@@ -219,7 +219,7 @@ static int read_btree_nodes_worker(void *p)
 		}
 err:
 	bio_put(bio);
-	free_page((unsigned long) buf);
+	free_page((uintptr_t) buf);
 	percpu_ref_get(&ca->io_ref);
 	closure_put(w->cl);
 	kfree(w);

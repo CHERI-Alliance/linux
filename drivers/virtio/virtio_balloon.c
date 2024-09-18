@@ -455,7 +455,7 @@ static unsigned long return_free_pages_to_mm(struct virtio_balloon *vb,
 		page = balloon_page_pop(&vb->free_page_list);
 		if (!page)
 			break;
-		free_pages((unsigned long)page_address(page),
+		free_pages((uintptr_t)page_address(page),
 			   VIRTIO_BALLOON_HINT_BLOCK_ORDER);
 	}
 	vb->num_free_page_blocks -= num_returned;
@@ -694,7 +694,7 @@ static int get_free_page_and_send(struct virtio_balloon *vb)
 	if (vq->num_free > 1) {
 		err = virtqueue_add_inbuf(vq, &sg, 1, p, GFP_KERNEL);
 		if (unlikely(err)) {
-			free_pages((unsigned long)p,
+			free_pages((uintptr_t)p,
 				   VIRTIO_BALLOON_HINT_BLOCK_ORDER);
 			return err;
 		}
@@ -708,7 +708,7 @@ static int get_free_page_and_send(struct virtio_balloon *vb)
 		 * The vq has no available entry to add this page block, so
 		 * just free it.
 		 */
-		free_pages((unsigned long)p, VIRTIO_BALLOON_HINT_BLOCK_ORDER);
+		free_pages((uintptr_t)p, VIRTIO_BALLOON_HINT_BLOCK_ORDER);
 	}
 
 	return 0;

@@ -272,7 +272,7 @@ static void attach_spa(struct cxl_afu *afu)
 void cxl_release_spa(struct cxl_afu *afu)
 {
 	if (afu->native->spa) {
-		free_pages((unsigned long) afu->native->spa,
+		free_pages((uintptr_t) afu->native->spa,
 			afu->native->spa_order);
 		afu->native->spa = NULL;
 	}

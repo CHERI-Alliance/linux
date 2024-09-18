@@ -156,7 +156,7 @@ static int get_dummy_page(struct ipu6_mmu_info *mmu_info)
 	return 0;
 
 err_free_page:
-	free_page((unsigned long)pt);
+	free_page((uintptr_t)pt);
 	return -ENOMEM;
 }
 
@@ -165,7 +165,7 @@ static void free_dummy_page(struct ipu6_mmu_info *mmu_info)
 	dma_unmap_single(mmu_info->dev,
 			 TBL_PHYS_ADDR(mmu_info->dummy_page_pteval),
 			 PAGE_SIZE, DMA_BIDIRECTIONAL);
-	free_page((unsigned long)mmu_info->dummy_page);
+	free_page((uintptr_t)mmu_info->dummy_page);
 }
 
 static int alloc_dummy_l2_pt(struct ipu6_mmu_info *mmu_info)
@@ -194,7 +194,7 @@ static int alloc_dummy_l2_pt(struct ipu6_mmu_info *mmu_info)
 	return 0;
 
 err_free_page:
-	free_page((unsigned long)pt);
+	free_page((uintptr_t)pt);
 	return -ENOMEM;
 }
 
@@ -203,7 +203,7 @@ static void free_dummy_l2_pt(struct ipu6_mmu_info *mmu_info)
 	dma_unmap_single(mmu_info->dev,
 			 TBL_PHYS_ADDR(mmu_info->dummy_l2_pteval),
 			 PAGE_SIZE, DMA_BIDIRECTIONAL);
-	free_page((unsigned long)mmu_info->dummy_l2_pt);
+	free_page((uintptr_t)mmu_info->dummy_l2_pt);
 }
 
 static u32 *alloc_l1_pt(struct ipu6_mmu_info *mmu_info)
@@ -232,7 +232,7 @@ static u32 *alloc_l1_pt(struct ipu6_mmu_info *mmu_info)
 	return pt;
 
 err_free_page:
-	free_page((unsigned long)pt);
+	free_page((uintptr_t)pt);
 	return NULL;
 }
 
@@ -282,7 +282,7 @@ static int l2_map(struct ipu6_mmu_info *mmu_info, unsigned long iova,
 		dma = map_single(mmu_info, l2_virt);
 		if (!dma) {
 			dev_err(mmu_info->dev, "Failed to map l2pt page\n");
-			free_page((unsigned long)l2_virt);
+			free_page((uintptr_t)l2_virt);
 			spin_unlock_irqrestore(&mmu_info->lock, flags);
 			return -EINVAL;
 		}
@@ -772,7 +772,7 @@ static void ipu6_mmu_destroy(struct ipu6_mmu *mmu)
 			dma_unmap_single(mmu_info->dev,
 					 TBL_PHYS_ADDR(mmu_info->l1_pt[l1_idx]),
 					 PAGE_SIZE, DMA_BIDIRECTIONAL);
-			free_page((unsigned long)mmu_info->l2_pts[l1_idx]);
+			free_page((uintptr_t)mmu_info->l2_pts[l1_idx]);
 		}
 	}
 
@@ -780,8 +780,8 @@ static void ipu6_mmu_destroy(struct ipu6_mmu *mmu)
 	free_dummy_page(mmu_info);
 	dma_unmap_single(mmu_info->dev, TBL_PHYS_ADDR(mmu_info->l1_pt_dma),
 			 PAGE_SIZE, DMA_BIDIRECTIONAL);
-	free_page((unsigned long)mmu_info->dummy_l2_pt);
-	free_page((unsigned long)mmu_info->l1_pt);
+	free_page((uintptr_t)mmu_info->dummy_l2_pt);
+	free_page((uintptr_t)mmu_info->l1_pt);
 	kfree(mmu_info);
 }
 

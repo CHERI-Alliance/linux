@@ -4225,7 +4225,7 @@ int ext4_calculate_overhead(struct super_block *sb)
 	}
 	sbi->s_overhead = overhead;
 	smp_wmb();
-	free_page((unsigned long) buf);
+	free_page((uintptr_t) buf);
 	return 0;
 }
 

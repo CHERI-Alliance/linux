@@ -122,7 +122,7 @@ EXPORT_SYMBOL_GPL(hv_alloc_hyperv_zeroed_page);
 void hv_free_hyperv_page(void *addr)
 {
 	if (PAGE_SIZE == HV_HYP_PAGE_SIZE)
-		free_page((unsigned long)addr);
+		free_page((uintptr_t)addr);
 	else
 		kfree(addr);
 }

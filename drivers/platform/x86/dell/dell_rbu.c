@@ -194,7 +194,7 @@ out_alloc_packet_array:
 	while (idx--) {
 		pr_debug("freeing unused packet below floor 0x%lx\n",
 			(unsigned long)virt_to_phys(invalid_addr_packet_array[idx]));
-		free_pages((unsigned long)invalid_addr_packet_array[idx], ordernum);
+		free_pages((uintptr_t)invalid_addr_packet_array[idx], ordernum);
 	}
 	kfree(invalid_addr_packet_array);
 
@@ -325,7 +325,7 @@ static void packet_empty_list(void)
 		memset(newpacket->data, 0, rbu_data.packetsize);
 		set_memory_wb((unsigned long)newpacket->data,
 			1 << newpacket->ordernum);
-		free_pages((unsigned long) newpacket->data,
+		free_pages((uintptr_t) newpacket->data,
 			newpacket->ordernum);
 		kfree(newpacket);
 	}
@@ -348,7 +348,7 @@ static void img_update_free(void)
 	 */
 	memset(rbu_data.image_update_buffer, 0,
 		rbu_data.image_update_buffer_size);
-	free_pages((unsigned long) rbu_data.image_update_buffer,
+	free_pages((uintptr_t) rbu_data.image_update_buffer,
 		rbu_data.image_update_ordernum);
 
 	/*

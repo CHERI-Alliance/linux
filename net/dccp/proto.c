@@ -1244,13 +1244,13 @@ out_ackvec_exit:
 out_free_dccp_mib:
 	dccp_mib_exit();
 out_free_dccp_bhash2:
-	free_pages((unsigned long)dccp_hashinfo.bhash2, bhash_order);
+	free_pages((uintptr_t)dccp_hashinfo.bhash2, bhash_order);
 out_free_dccp_bhash:
-	free_pages((unsigned long)dccp_hashinfo.bhash, bhash_order);
+	free_pages((uintptr_t)dccp_hashinfo.bhash, bhash_order);
 out_free_dccp_locks:
 	inet_ehash_locks_free(&dccp_hashinfo);
 out_free_dccp_ehash:
-	free_pages((unsigned long)dccp_hashinfo.ehash, ehash_order);
+	free_pages((uintptr_t)dccp_hashinfo.ehash, ehash_order);
 out_free_bind2_bucket_cachep:
 	kmem_cache_destroy(dccp_hashinfo.bind2_bucket_cachep);
 out_free_bind_bucket_cachep:
@@ -1273,9 +1273,9 @@ static void __exit dccp_fini(void)
 
 	ccid_cleanup_builtins();
 	dccp_mib_exit();
-	free_pages((unsigned long)dccp_hashinfo.bhash, bhash_order);
-	free_pages((unsigned long)dccp_hashinfo.bhash2, bhash_order);
-	free_pages((unsigned long)dccp_hashinfo.ehash,
+	free_pages((uintptr_t)dccp_hashinfo.bhash, bhash_order);
+	free_pages((uintptr_t)dccp_hashinfo.bhash2, bhash_order);
+	free_pages((uintptr_t)dccp_hashinfo.ehash,
 		   get_order((dccp_hashinfo.ehash_mask + 1) *
 			     sizeof(struct inet_ehash_bucket)));
 	inet_ehash_locks_free(&dccp_hashinfo);

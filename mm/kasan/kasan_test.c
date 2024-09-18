@@ -292,7 +292,7 @@ static void page_alloc_oob_right(struct kunit *test)
 	KUNIT_ASSERT_NOT_ERR_OR_NULL(test, ptr);
 
 	KUNIT_EXPECT_KASAN_FAIL(test, ptr[0] = ptr[size]);
-	free_pages((unsigned long)ptr, order);
+	free_pages((uintptr_t)ptr, order);
 }
 
 static void page_alloc_uaf(struct kunit *test)
@@ -304,7 +304,7 @@ static void page_alloc_uaf(struct kunit *test)
 	pages = alloc_pages(GFP_KERNEL, order);
 	ptr = page_address(pages);
 	KUNIT_ASSERT_NOT_ERR_OR_NULL(test, ptr);
-	free_pages((unsigned long)ptr, order);
+	free_pages((uintptr_t)ptr, order);
 
 	KUNIT_EXPECT_KASAN_FAIL(test, ((volatile char *)ptr)[0]);
 }
@@ -1732,7 +1732,7 @@ static void vmap_tags(struct kunit *test)
 	KUNIT_EXPECT_PTR_EQ(test, p_page, v_page);
 
 	vunmap(v_ptr);
-	free_pages((unsigned long)p_ptr, 1);
+	free_pages((uintptr_t)p_ptr, 1);
 }
 
 static void vm_map_ram_tags(struct kunit *test)
@@ -1762,7 +1762,7 @@ static void vm_map_ram_tags(struct kunit *test)
 	*v_ptr = 0;
 
 	vm_unmap_ram(v_ptr, 1);
-	free_pages((unsigned long)p_ptr, 1);
+	free_pages((uintptr_t)p_ptr, 1);
 }
 
 static void vmalloc_percpu(struct kunit *test)
@@ -1820,7 +1820,7 @@ static void match_all_not_assigned(struct kunit *test)
 		KUNIT_ASSERT_NOT_ERR_OR_NULL(test, ptr);
 		KUNIT_EXPECT_GE(test, (u8)get_tag(ptr), (u8)KASAN_TAG_MIN);
 		KUNIT_EXPECT_LT(test, (u8)get_tag(ptr), (u8)KASAN_TAG_KERNEL);
-		free_pages((unsigned long)ptr, order);
+		free_pages((uintptr_t)ptr, order);
 	}
 
 	if (!kasan_vmalloc_enabled())

@@ -157,7 +157,7 @@ int hv_synic_alloc(void)
 			if (!hv_cpu->synic_event_page) {
 				pr_err("Unable to allocate SYNIC event page\n");
 
-				free_page((unsigned long)hv_cpu->synic_message_page);
+				free_page((uintptr_t)hv_cpu->synic_message_page);
 				hv_cpu->synic_message_page = NULL;
 				goto err;
 			}
@@ -175,7 +175,7 @@ int hv_synic_alloc(void)
 				 * Free the event page here so that hv_synic_free()
 				 * won't later try to re-encrypt it.
 				 */
-				free_page((unsigned long)hv_cpu->synic_event_page);
+				free_page((uintptr_t)hv_cpu->synic_event_page);
 				hv_cpu->synic_event_page = NULL;
 				goto err;
 			}
@@ -244,9 +244,9 @@ void hv_synic_free(void)
 			}
 		}
 
-		free_page((unsigned long)hv_cpu->post_msg_page);
-		free_page((unsigned long)hv_cpu->synic_event_page);
-		free_page((unsigned long)hv_cpu->synic_message_page);
+		free_page((uintptr_t)hv_cpu->post_msg_page);
+		free_page((uintptr_t)hv_cpu->synic_event_page);
+		free_page((uintptr_t)hv_cpu->synic_message_page);
 	}
 
 	kfree(hv_context.hv_numa_map);

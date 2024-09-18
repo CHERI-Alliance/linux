@@ -378,7 +378,7 @@ void qedr_mmap_free(struct rdma_user_mmap_entry *rdma_entry)
 	struct qedr_dev *dev = entry->dev;
 
 	if (entry->mmap_flag == QEDR_USER_MMAP_PHYS_PAGE)
-		free_page((unsigned long)entry->address);
+		free_page((uintptr_t)entry->address);
 	else if (entry->mmap_flag == QEDR_USER_MMAP_IO_WC)
 		dev->ops->rdma_remove_user(dev->rdma_ctx, entry->dpi);
 
@@ -782,7 +782,7 @@ err_free_entry:
 	kfree(entry);
 
 err_free_db_data:
-	free_page((unsigned long)q->db_rec_data);
+	free_page((uintptr_t)q->db_rec_data);
 	q->db_rec_data = NULL;
 	return -ENOMEM;
 }

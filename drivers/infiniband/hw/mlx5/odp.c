@@ -1277,7 +1277,7 @@ resolve_page_fault:
 		    pfault->wqe.wq_num, resume_with_error,
 		    pfault->type);
 	mlx5_core_res_put(res);
-	free_page((unsigned long)wqe_start);
+	free_page((uintptr_t)wqe_start);
 }
 
 static int pages_in_range(u64 address, u32 length)

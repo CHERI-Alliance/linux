@@ -399,7 +399,7 @@ long fuse_do_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg,
 	}
 	err = 0;
  out:
-	free_page((unsigned long) iov_page);
+	free_page((uintptr_t) iov_page);
 	while (ap.num_pages)
 		__free_page(ap.pages[--ap.num_pages]);
 	kfree(ap.pages);

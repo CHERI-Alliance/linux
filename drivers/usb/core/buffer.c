@@ -207,7 +207,7 @@ void hcd_buffer_free_pages(struct usb_hcd *hcd,
 	}
 
 	if (!hcd_uses_dma(hcd)) {
-		free_pages((unsigned long)addr, get_order(size));
+		free_pages((uintptr_t)addr, get_order(size));
 		return;
 	}
 

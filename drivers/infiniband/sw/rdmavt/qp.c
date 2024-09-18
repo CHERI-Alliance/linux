@@ -345,7 +345,7 @@ static void free_qpn_table(struct rvt_qpn_table *qpt)
 	int i;
 
 	for (i = 0; i < ARRAY_SIZE(qpt->map); i++)
-		free_page((unsigned long)qpt->map[i].page);
+		free_page((uintptr_t)qpt->map[i].page);
 }
 
 /**

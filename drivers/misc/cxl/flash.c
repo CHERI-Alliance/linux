@@ -443,11 +443,11 @@ static int device_open(struct inode *inode, struct file *file)
 err1:
 	for (i = 0; i < CXL_AI_MAX_ENTRIES; i++) {
 		if (buffer[i])
-			free_page((unsigned long) buffer[i]);
+			free_page((uintptr_t) buffer[i]);
 	}
 
 	if (le)
-		free_page((unsigned long) le);
+		free_page((uintptr_t) le);
 err:
 	put_device(&adapter->dev);
 err_unlock:
@@ -483,11 +483,11 @@ static int device_close(struct inode *inode, struct file *file)
 
 	for (i = 0; i < CXL_AI_MAX_ENTRIES; i++) {
 		if (buffer[i])
-			free_page((unsigned long) buffer[i]);
+			free_page((uintptr_t) buffer[i]);
 	}
 
 	if (le)
-		free_page((unsigned long) le);
+		free_page((uintptr_t) le);
 
 	up(&sem);
 	put_device(&adapter->dev);

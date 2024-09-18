@@ -721,7 +721,7 @@ void kvm_riscv_gstage_free_pgd(struct kvm *kvm)
 	spin_unlock(&kvm->mmu_lock);
 
 	if (pgd)
-		free_pages((unsigned long)pgd, get_order(gstage_pgd_size));
+		free_pages((uintptr_t)pgd, get_order(gstage_pgd_size));
 }
 
 void kvm_riscv_gstage_update_hgatp(struct kvm_vcpu *vcpu)

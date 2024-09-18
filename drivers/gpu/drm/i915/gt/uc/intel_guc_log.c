@@ -909,7 +909,7 @@ int intel_guc_log_dump(struct intel_guc_log *log, struct drm_printer *p,
 	if (IS_ERR(map)) {
 		guc_dbg(guc, "Failed to pin log object: %pe\n", map);
 		drm_puts(p, "(log data unaccessible)\n");
-		free_page((unsigned long)page);
+		free_page((uintptr_t)page);
 		return PTR_ERR(map);
 	}
 
@@ -926,7 +926,7 @@ int intel_guc_log_dump(struct intel_guc_log *log, struct drm_printer *p,
 	drm_puts(p, "\n");
 
 	i915_gem_object_unpin_map(obj);
-	free_page((unsigned long)page);
+	free_page((uintptr_t)page);
 
 	return 0;
 }

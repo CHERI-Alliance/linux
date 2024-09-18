@@ -142,7 +142,7 @@ static u32 *imgu_mmu_alloc_page_table(u32 pteval)
 static void imgu_mmu_free_page_table(u32 *pt)
 {
 	set_memory_wb((unsigned long)pt, IPU3_PT_ORDER);
-	free_page((unsigned long)pt);
+	free_page((uintptr_t)pt);
 }
 
 /**
@@ -488,7 +488,7 @@ fail_l2pts:
 fail_l2pt:
 	imgu_mmu_free_page_table(mmu->dummy_l2pt);
 fail_dummy_page:
-	free_page((unsigned long)mmu->dummy_page);
+	free_page((uintptr_t)mmu->dummy_page);
 fail_group:
 	kfree(mmu);
 
@@ -511,7 +511,7 @@ void imgu_mmu_exit(struct imgu_mmu_info *info)
 	imgu_mmu_free_page_table(mmu->l1pt);
 	vfree(mmu->l2pts);
 	imgu_mmu_free_page_table(mmu->dummy_l2pt);
-	free_page((unsigned long)mmu->dummy_page);
+	free_page((uintptr_t)mmu->dummy_page);
 	kfree(mmu);
 }
 

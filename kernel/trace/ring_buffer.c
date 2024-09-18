@@ -373,7 +373,7 @@ static __always_inline unsigned int rb_page_commit(struct buffer_page *bpage)
 
 static void free_buffer_page(struct buffer_page *bpage)
 {
-	free_pages((unsigned long)bpage->page, bpage->order);
+	free_pages((uintptr_t)bpage->page, bpage->order);
 	kfree(bpage);
 }
 
@@ -1676,7 +1676,7 @@ static void rb_free_cpu_buffer(struct ring_buffer_per_cpu *cpu_buffer)
 		free_buffer_page(bpage);
 	}
 
-	free_page((unsigned long)cpu_buffer->free_page);
+	free_page((uintptr_t)cpu_buffer->free_page);
 
 	kfree(cpu_buffer);
 }
@@ -5670,7 +5670,7 @@ void ring_buffer_free_read_page(struct trace_buffer *buffer, int cpu,
 	local_irq_restore(flags);
 
  out:
-	free_pages((unsigned long)bpage, data_page->order);
+	free_pages((uintptr_t)bpage, data_page->order);
 	kfree(data_page);
 }
 EXPORT_SYMBOL_GPL(ring_buffer_free_read_page);
@@ -6061,7 +6061,7 @@ int ring_buffer_subbuf_order_set(struct trace_buffer *buffer, int order)
 		cpu_buffer->nr_pages = cpu_buffer->nr_pages_to_update;
 		cpu_buffer->nr_pages_to_update = 0;
 
-		free_pages((unsigned long)cpu_buffer->free_page, old_order);
+		free_pages((uintptr_t)cpu_buffer->free_page, old_order);
 		cpu_buffer->free_page = NULL;
 
 		rb_head_page_activate(cpu_buffer);

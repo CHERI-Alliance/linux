@@ -1723,7 +1723,7 @@ static int fetch_cca_info(u16 cardnr, u16 domain, struct cca_info *ci)
 	}
 
 out:
-	free_page((unsigned long)pg);
+	free_page((uintptr_t)pg);
 	return found == 2 ? 0 : -ENOENT;
 }
 

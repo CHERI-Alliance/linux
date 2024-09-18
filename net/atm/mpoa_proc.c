@@ -221,7 +221,7 @@ static ssize_t proc_mpc_write(struct file *file, const char __user *buff,
 
 	for (p = page, len = 0; len < nbytes; p++) {
 		if (get_user(*p, buff++)) {
-			free_page((unsigned long)page);
+			free_page((uintptr_t)page);
 			return -EFAULT;
 		}
 		len += 1;
@@ -234,7 +234,7 @@ static ssize_t proc_mpc_write(struct file *file, const char __user *buff,
 	if (!parse_qos(page))
 		printk("mpoa: proc_mpc_write: could not parse '%s'\n", page);
 
-	free_page((unsigned long)page);
+	free_page((uintptr_t)page);
 
 	return len;
 }

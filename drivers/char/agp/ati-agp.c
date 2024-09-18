@@ -64,7 +64,7 @@ static int ati_create_page_map(struct ati_page_map *page_map)
 	set_memory_uc((unsigned long)page_map->real, 1);
 	err = map_page_into_agp(virt_to_page(page_map->real));
 	if (err) {
-		free_page((unsigned long)page_map->real);
+		free_page((uintptr_t)page_map->real);
 		return err;
 	}
 	page_map->remapped = page_map->real;
@@ -82,7 +82,7 @@ static void ati_free_page_map(struct ati_page_map *page_map)
 {
 	unmap_page_from_agp(virt_to_page(page_map->real));
 	set_memory_wb((unsigned long)page_map->real, 1);
-	free_page((unsigned long) page_map->real);
+	free_page((uintptr_t) page_map->real);
 }
 
 

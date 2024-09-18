@@ -245,7 +245,7 @@ umem_release:
 	__ib_umem_release(device, umem, 0);
 	atomic64_sub(ib_umem_num_pages(umem), &mm->pinned_vm);
 out:
-	free_page((unsigned long) page_list);
+	free_page((uintptr_t) page_list);
 umem_kfree:
 	if (ret) {
 		mmdrop(umem->owning_mm);

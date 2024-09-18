@@ -577,7 +577,7 @@ static int __init cec_init(void)
 	}
 
 	if (create_debugfs_nodes()) {
-		free_page((unsigned long)ce_arr.array);
+		free_page((uintptr_t)ce_arr.array);
 		return -ENOMEM;
 	}
 

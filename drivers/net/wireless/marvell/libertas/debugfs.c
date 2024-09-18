@@ -261,7 +261,7 @@ static ssize_t lbs_threshold_read(uint16_t tlv_type, uint16_t event_mask,
 	kfree(subscribed);
 
  out_page:
-	free_page((unsigned long)buf);
+	free_page((uintptr_t)buf);
 	return ret;
 }
 

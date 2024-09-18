@@ -4326,7 +4326,7 @@ static void free_pg_vec(struct pgv *pg_vec, unsigned int order,
 			if (is_vmalloc_addr(pg_vec[i].buffer))
 				vfree(pg_vec[i].buffer);
 			else
-				free_pages((unsigned long)pg_vec[i].buffer,
+				free_pages((uintptr_t)pg_vec[i].buffer,
 					   order);
 			pg_vec[i].buffer = NULL;
 		}

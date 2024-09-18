@@ -1202,7 +1202,7 @@ static void bch2_dev_free(struct bch_dev *ca)
 
 	free_percpu(ca->io_done);
 	bch2_dev_buckets_free(ca);
-	free_page((unsigned long) ca->sb_read_scratch);
+	free_page((uintptr_t) ca->sb_read_scratch);
 
 	bch2_time_stats_quantiles_exit(&ca->io_latency[WRITE]);
 	bch2_time_stats_quantiles_exit(&ca->io_latency[READ]);

@@ -1104,7 +1104,7 @@ void mlx5_cleanup_clock(struct mlx5_core_dev *mdev)
 	cancel_delayed_work_sync(&clock->timer.overflow_work);
 
 	if (mdev->clock_info) {
-		free_page((unsigned long)mdev->clock_info);
+		free_page((uintptr_t)mdev->clock_info);
 		mdev->clock_info = NULL;
 	}
 

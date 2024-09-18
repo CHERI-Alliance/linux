@@ -1201,7 +1201,7 @@ static void set_vmcore_list_offsets(size_t elfsz, size_t elfnotes_sz,
 
 static void free_elfcorebuf(void)
 {
-	free_pages((unsigned long)elfcorebuf, get_order(elfcorebuf_sz_orig));
+	free_pages((uintptr_t)elfcorebuf, get_order(elfcorebuf_sz_orig));
 	elfcorebuf = NULL;
 	vfree(elfnotes_buf);
 	elfnotes_buf = NULL;

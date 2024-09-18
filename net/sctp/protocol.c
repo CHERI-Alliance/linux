@@ -1661,7 +1661,7 @@ err_register_defaults:
 	sctp_v4_pf_exit();
 	sctp_v6_pf_exit();
 	sctp_sysctl_unregister();
-	free_pages((unsigned long)sctp_port_hashtable,
+	free_pages((uintptr_t)sctp_port_hashtable,
 		   get_order(sctp_port_hashsize *
 			     sizeof(struct sctp_bind_hashbucket)));
 err_bhash_alloc:
@@ -1702,7 +1702,7 @@ static __exit void sctp_exit(void)
 
 	sctp_sysctl_unregister();
 
-	free_pages((unsigned long)sctp_port_hashtable,
+	free_pages((uintptr_t)sctp_port_hashtable,
 		   get_order(sctp_port_hashsize *
 			     sizeof(struct sctp_bind_hashbucket)));
 	kfree(sctp_ep_hashtable);

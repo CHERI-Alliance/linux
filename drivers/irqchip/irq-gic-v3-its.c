@@ -2203,7 +2203,7 @@ static struct page *its_allocate_prop_table(gfp_t gfp_flags)
 
 static void its_free_prop_table(struct page *prop_page)
 {
-	free_pages((unsigned long)page_address(prop_page),
+	free_pages((uintptr_t)page_address(prop_page),
 		   get_order(LPI_PROPBASE_SZ));
 }
 
@@ -2339,7 +2339,7 @@ static int its_setup_baser(struct its_node *its, struct its_baser *baser,
 		/* 52bit PA is supported only when PageSize=64K */
 		if (psz != SZ_64K) {
 			pr_err("ITS: no 52bit PA support when psz=%d\n", psz);
-			free_pages((unsigned long)base, order);
+			free_pages((uintptr_t)base, order);
 			return -ENXIO;
 		}
 
@@ -2395,7 +2395,7 @@ retry_baser:
 		pr_err("ITS@%pa: %s doesn't stick: %llx %llx\n",
 		       &its->phys_base, its_base_type_string[type],
 		       val, tmp);
-		free_pages((unsigned long)base, order);
+		free_pages((uintptr_t)base, order);
 		return -ENXIO;
 	}
 
@@ -2534,7 +2534,7 @@ static void its_free_tables(struct its_node *its)
 
 	for (i = 0; i < GITS_BASER_NR_REGS; i++) {
 		if (its->tables[i].base) {
-			free_pages((unsigned long)its->tables[i].base,
+			free_pages((uintptr_t)its->tables[i].base,
 				   its->tables[i].order);
 			its->tables[i].base = NULL;
 		}
@@ -2979,7 +2979,7 @@ static struct page *its_allocate_pending_table(gfp_t gfp_flags)
 
 static void its_free_pending_table(struct page *pt)
 {
-	free_pages((unsigned long)page_address(pt), get_order(LPI_PENDBASE_SZ));
+	free_pages((uintptr_t)page_address(pt), get_order(LPI_PENDBASE_SZ));
 }
 
 /*
@@ -5176,7 +5176,7 @@ static int __init its_probe_one(struct its_node *its)
 out_free_tables:
 	its_free_tables(its);
 out_free_cmd:
-	free_pages((unsigned long)its->cmd_base, get_order(ITS_CMD_QUEUE_SZ));
+	free_pages((uintptr_t)its->cmd_base, get_order(ITS_CMD_QUEUE_SZ));
 out_unmap_sgir:
 	if (its->sgir_base)
 		iounmap(its->sgir_base);

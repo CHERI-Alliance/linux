@@ -2935,7 +2935,7 @@ int bnxt_re_destroy_cq(struct ib_cq *ib_cq, struct ib_udata *udata)
 	cctx = rdev->chip_ctx;
 
 	if (cctx->modes.toggle_bits & BNXT_QPLIB_CQ_TOGGLE_BIT) {
-		free_page((unsigned long)cq->uctx_cq_page);
+		free_page((uintptr_t)cq->uctx_cq_page);
 		hash_del(&cq->hash_entry);
 	}
 	bnxt_qplib_destroy_cq(&rdev->qplib_res, &cq->qplib_cq);
@@ -3061,7 +3061,7 @@ int bnxt_re_create_cq(struct ib_cq *ibcq, const struct ib_cq_init_attr *attr,
 	return 0;
 
 free_mem:
-	free_page((unsigned long)cq->uctx_cq_page);
+	free_page((uintptr_t)cq->uctx_cq_page);
 c2fail:
 	ib_umem_release(cq->umem);
 fail:
@@ -4220,7 +4220,7 @@ int bnxt_re_alloc_ucontext(struct ib_ucontext *ctx, struct ib_udata *udata)
 
 	return 0;
 cfail:
-	free_page((unsigned long)uctx->shpg);
+	free_page((uintptr_t)uctx->shpg);
 	uctx->shpg = NULL;
 fail:
 	return rc;
@@ -4237,7 +4237,7 @@ void bnxt_re_dealloc_ucontext(struct ib_ucontext *ib_uctx)
 	rdma_user_mmap_entry_remove(uctx->shpage_mmap);
 	uctx->shpage_mmap = NULL;
 	if (uctx->shpg)
-		free_page((unsigned long)uctx->shpg);
+		free_page((uintptr_t)uctx->shpg);
 
 	if (uctx->dpi.dbr) {
 		/* Free DPI only if this is the first PD allocated by the

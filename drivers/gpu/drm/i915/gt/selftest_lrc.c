@@ -267,7 +267,7 @@ static int live_lrc_layout(void *arg)
 			break;
 	}
 
-	free_page((unsigned long)lrc);
+	free_page((uintptr_t)lrc);
 	return err;
 }
 

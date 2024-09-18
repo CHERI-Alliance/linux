@@ -1340,7 +1340,7 @@ static int selinux_genfs_get_sid(struct dentry *dentry,
 			rc = 0;
 		}
 	}
-	free_page((unsigned long)buffer);
+	free_page((uintptr_t)buffer);
 	return rc;
 }
 

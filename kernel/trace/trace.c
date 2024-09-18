@@ -2626,7 +2626,7 @@ void trace_buffered_event_disable(void)
 	synchronize_rcu();
 
 	for_each_tracing_cpu(cpu) {
-		free_page((unsigned long)per_cpu(trace_buffered_event, cpu));
+		free_page((uintptr_t)per_cpu(trace_buffered_event, cpu));
 		per_cpu(trace_buffered_event, cpu) = NULL;
 	}
 

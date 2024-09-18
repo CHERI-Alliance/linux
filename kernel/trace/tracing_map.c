@@ -309,7 +309,7 @@ static void tracing_map_array_free(struct tracing_map_array *a)
 		if (!a->pages[i])
 			break;
 		kmemleak_free(a->pages[i]);
-		free_page((unsigned long)a->pages[i]);
+		free_page((uintptr_t)a->pages[i]);
 	}
 
 	kfree(a->pages);

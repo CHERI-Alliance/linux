@@ -460,7 +460,7 @@ void kvm_mmu_free_memory_cache(struct kvm_mmu_memory_cache *mc)
 		if (mc->kmem_cache)
 			kmem_cache_free(mc->kmem_cache, mc->objects[--mc->nobjs]);
 		else
-			free_page((unsigned long)mc->objects[--mc->nobjs]);
+			free_page((uintptr_t)mc->objects[--mc->nobjs]);
 	}
 
 	kvfree(mc->objects);
@@ -518,7 +518,7 @@ static void kvm_vcpu_destroy(struct kvm_vcpu *vcpu)
 	 */
 	put_pid(rcu_dereference_protected(vcpu->pid, 1));
 
-	free_page((unsigned long)vcpu->run);
+	free_page((uintptr_t)vcpu->run);
 	kmem_cache_free(kvm_vcpu_cache, vcpu);
 }
 
@@ -4303,7 +4303,7 @@ unlock_vcpu_destroy:
 arch_vcpu_destroy:
 	kvm_arch_vcpu_destroy(vcpu);
 vcpu_free_run_page:
-	free_page((unsigned long)vcpu->run);
+	free_page((uintptr_t)vcpu->run);
 vcpu_free:
 	kmem_cache_free(kvm_vcpu_cache, vcpu);
 vcpu_decrement:

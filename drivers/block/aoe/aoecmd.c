@@ -1746,6 +1746,6 @@ aoecmd_exit(void)
 	kfree(kts);
 	kfree(ktiowq);
 
-	free_page((unsigned long) page_address(empty_page));
+	free_page((uintptr_t) page_address(empty_page));
 	empty_page = NULL;
 }

@@ -471,7 +471,7 @@ vcs_read(struct file *file, char __user *buf, size_t count, loff_t *ppos)
 		ret = read;
 unlock_out:
 	console_unlock();
-	free_page((unsigned long) con_buf);
+	free_page((uintptr_t) con_buf);
 	return ret;
 }
 
@@ -704,7 +704,7 @@ vcs_write(struct file *file, const char __user *buf, size_t count, loff_t *ppos)
 
 unlock_out:
 	console_unlock();
-	free_page((unsigned long) con_buf);
+	free_page((uintptr_t) con_buf);
 	return ret;
 }
 

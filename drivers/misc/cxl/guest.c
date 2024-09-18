@@ -145,9 +145,9 @@ static ssize_t guest_collect_vpd(struct cxl *adapter, struct cxl_afu *afu,
 err2:
 	for (i = 0; i < entries; i++) {
 		if (vpd_buf[i])
-			free_page((unsigned long) vpd_buf[i]);
+			free_page((uintptr_t) vpd_buf[i]);
 	}
-	free_page((unsigned long) le);
+	free_page((uintptr_t) le);
 err1:
 	kfree(vpd_buf);
 	return rc;

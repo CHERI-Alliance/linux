@@ -136,7 +136,7 @@ static void free_page_table(struct isp_mmu *mmu, phys_addr_t page)
 	set_memory_wb((unsigned long)virt, 1);
 #endif
 
-	free_page((unsigned long)virt);
+	free_page((uintptr_t)virt);
 }
 
 static void mmu_remap_error(struct isp_mmu *mmu,
