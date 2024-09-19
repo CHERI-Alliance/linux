@@ -67,6 +67,12 @@ unsigned long __read_once_word_nocheck(const void *addr)
 	return __READ_ONCE(*(unsigned long *)addr);
 }
 
+static __no_sanitize_or_inline
+uintptr_t __read_once_ptr_nocheck(const void *addr)
+{
+	return __READ_ONCE(*(uintptr_t *)addr);
+}
+
 /*
  * Use READ_ONCE_NOCHECK() instead of READ_ONCE() if you need to load a
  * word from memory atomically but without telling KASAN/KCSAN. This is
@@ -77,6 +83,18 @@ unsigned long __read_once_word_nocheck(const void *addr)
 	compiletime_assert(sizeof(x) == sizeof(unsigned long),		\
 		"Unsupported access size for READ_ONCE_NOCHECK().");	\
 	(typeof(x))__read_once_word_nocheck(&(x));			\
+})
+
+/*
+ * Use READ_ONCE_NOCHECK() instead of READ_ONCE() if you need to load a
+ * word from memory atomically but without telling KASAN/KCSAN. This is
+ * usually used by unwinding code when walking the stack of a running process.
+ */
+#define READ_ONCE_NOCHECK_PTR(x)						\
+({										\
+	compiletime_assert(sizeof(x) == sizeof(uintptr_t),			\
+		"Unsupported access size for READ_ONCE_NOCHECK_PTR().");	\
+	(typeof(x))__read_once_ptr_nocheck(&(x));				\
 })
 
 static __no_sanitize_or_inline

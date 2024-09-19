@@ -19,7 +19,7 @@ static bool save_return_addr(void *d, unsigned long pc)
 	struct return_address_data *data = d;
 
 	if (!data->level) {
-		data->addr = (void *)pc;
+		data->addr = __c_fakep(pc);
 		return false;
 	}
 
