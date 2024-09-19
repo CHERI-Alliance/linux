@@ -27,11 +27,11 @@ int riscv_patch_in_stop_machine = false;
 
 #ifdef CONFIG_MMU
 
-static inline bool is_kernel_exittext(uintptr_t addr)
+static inline bool is_kernel_exittext(unsigned long addr)
 {
 	return system_state < SYSTEM_RUNNING &&
-		addr >= (uintptr_t)__exittext_begin &&
-		addr < (uintptr_t)__exittext_end;
+		addr >= __c_pa(__exittext_begin) &&
+		addr < __c_pa(__exittext_end);
 }
 
 /*
@@ -41,10 +41,10 @@ static inline bool is_kernel_exittext(uintptr_t addr)
  */
 static __always_inline void *patch_map(void *addr, const unsigned int fixmap)
 {
-	uintptr_t uintaddr = (uintptr_t) addr;
+	unsigned long uaddr = __c_pa(addr);
 	struct page *page;
 
-	if (core_kernel_text(uintaddr) || is_kernel_exittext(uintaddr))
+	if (core_kernel_text(uaddr) || is_kernel_exittext(uaddr))
 		page = phys_to_page(__pa_symbol(addr));
 	else if (IS_ENABLED(CONFIG_STRICT_MODULE_RWX))
 		page = vmalloc_to_page(addr);
@@ -54,7 +54,7 @@ static __always_inline void *patch_map(void *addr, const unsigned int fixmap)
 	BUG_ON(!page);
 
 	return (void *)set_fixmap_offset(fixmap, page_to_phys(page) +
-					 (uintaddr & ~PAGE_MASK));
+					 (uaddr & ~PAGE_MASK));
 }
 
 static void patch_unmap(int fixmap)
@@ -94,8 +94,8 @@ static int __patch_insn_set(void *addr, u8 c, size_t len)
 	 * called so make sure we don't execute partially patched
 	 * instructions by flushing the icache as soon as possible.
 	 */
-	local_flush_icache_range((unsigned long)waddr,
-				 (unsigned long)waddr + len);
+	local_flush_icache_range(__c_pa(waddr),
+				 __c_pa(waddr) + len);
 
 	patch_unmap(FIX_TEXT_POKE0);
 
@@ -148,8 +148,8 @@ static int __patch_insn_write(void *addr, const void *insn, size_t len)
 	 * called so make sure we don't execute partially patched
 	 * instructions by flushing the icache as soon as possible.
 	 */
-	local_flush_icache_range((unsigned long)waddr,
-				 (unsigned long)waddr + len);
+	local_flush_icache_range(__c_pa(waddr),
+				 __c_pa(waddr) + len);
 
 	patch_unmap(FIX_TEXT_POKE0);
 
