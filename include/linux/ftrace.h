@@ -957,13 +957,13 @@ static inline void __ftrace_enabled_restore(int enabled)
 # endif
 #endif
 
-#define CALLER_ADDR0 ((unsigned long)ftrace_return_address0)
-#define CALLER_ADDR1 ((unsigned long)ftrace_return_address(1))
-#define CALLER_ADDR2 ((unsigned long)ftrace_return_address(2))
-#define CALLER_ADDR3 ((unsigned long)ftrace_return_address(3))
-#define CALLER_ADDR4 ((unsigned long)ftrace_return_address(4))
-#define CALLER_ADDR5 ((unsigned long)ftrace_return_address(5))
-#define CALLER_ADDR6 ((unsigned long)ftrace_return_address(6))
+#define CALLER_ADDR0 (__c_pa(ftrace_return_address0))
+#define CALLER_ADDR1 (__c_pa(ftrace_return_address(1)))
+#define CALLER_ADDR2 (__c_pa(ftrace_return_address(2)))
+#define CALLER_ADDR3 (__c_pa(ftrace_return_address(3)))
+#define CALLER_ADDR4 (__c_pa(ftrace_return_address(4)))
+#define CALLER_ADDR5 (__c_pa(ftrace_return_address(5)))
+#define CALLER_ADDR6 (__c_pa(ftrace_return_address(6)))
 
 static __always_inline unsigned long get_lock_parent_ip(void)
 {
@@ -1137,7 +1137,7 @@ static inline void ftrace_graph_init_idle_task(struct task_struct *t, int cpu) {
 
 static inline unsigned long
 ftrace_graph_ret_addr(struct task_struct *task, int *idx, unsigned long ret,
-		      unsigned long *retp)
+		      uintptr_t *retp)
 {
 	return ret;
 }
