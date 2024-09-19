@@ -50,7 +50,7 @@
  * call.
  */
 
-#define __get_user_asm(insn, x, ptr, err)			\
+#define ___get_user_asm(insn, x, ptr, err, regc)		\
 do {								\
 	__typeof__(x) __x;					\
 	__asm__ __volatile__ (					\
@@ -58,10 +58,13 @@ do {								\
 		"	" insn " %1, %2\n"			\
 		"2:\n"						\
 		_ASM_EXTABLE_UACCESS_ERR_ZERO(1b, 2b, %0, %1)	\
-		: "+r" (err), "=&r" (__x)			\
+		: "+r" (err), "=&"regc (__x)			\
 		: "m" (*(ptr)));				\
 	(x) = __x;						\
 } while (0)
+#define __get_user_asm(insn, x, ptr, err)			\
+	___get_user_asm(insn, x, ptr, err, "r")
+
 
 #ifdef CONFIG_64BIT
 #define __get_user_8(x, ptr, err) \
@@ -101,12 +104,20 @@ do {								\
 		__get_user_asm("lw", (x), __gu_ptr, __gu_err);	\
 		break;						\
 	case 8:							\
-		__get_user_8((x), __gu_ptr, __gu_err);	\
+		__get_user_8((x), __gu_ptr, __gu_err);		\
 		break;						\
 	default:						\
 		BUILD_BUG();					\
 	}							\
 } while (0)
+
+#ifdef CONFIG_RISCV_CHERI_BAKEWELL
+#define __get_user_nocheck_ptr(x, __gu_ptr, __gu_err)		\
+	___get_user_asm("lc", (x), __gu_ptr, __gu_err, "C")
+#else
+#define __get_user_nocheck_ptr(x, __gu_ptr, __gu_err)		\
+	__get_user_nocheck(x, __gu_ptr, __gu_err)
+#endif
 
 /**
  * __get_user: - Get a simple variable from user space, with less checking.
@@ -128,19 +139,24 @@ do {								\
  * Returns zero on success, or -EFAULT on error.
  * On error, the variable @x is set to zero.
  */
-#define __get_user(x, ptr)					\
-({								\
-	const __typeof__(*(ptr)) __user *__gu_ptr = (ptr);	\
-	long __gu_err = 0;					\
-								\
-	__chk_user_ptr(__gu_ptr);				\
-								\
-	__enable_user_access();					\
-	__get_user_nocheck(x, __gu_ptr, __gu_err);		\
-	__disable_user_access();				\
-								\
-	__gu_err;						\
+#define __get_user_p(x, ptr, isptr)					\
+({									\
+	const __typeof__(*(ptr)) __user *__gu_ptr = (ptr);		\
+	long __gu_err = 0;						\
+									\
+	__chk_user_ptr(__gu_ptr);					\
+									\
+	__enable_user_access();						\
+	if (isptr)							\
+		__get_user_nocheck_ptr(x, __gu_ptr, __gu_err);		\
+	else								\
+		__get_user_nocheck(x, __gu_ptr, __gu_err);		\
+	__disable_user_access();					\
+									\
+	__gu_err;							\
 })
+#define __get_user(x, ptr) __get_user_p(x, ptr, 0)
+#define __get_user_ptr(x, ptr) __get_user_p(x, ptr, 1)
 
 /**
  * get_user: - Get a simple variable from user space.
@@ -159,16 +175,18 @@ do {								\
  * Returns zero on success, or -EFAULT on error.
  * On error, the variable @x is set to zero.
  */
-#define get_user(x, ptr)					\
+#define get_user_p(x, ptr, isptr)				\
 ({								\
 	const __typeof__(*(ptr)) __user *__p = (ptr);		\
 	might_fault();						\
-	access_ok(__p, sizeof(*__p)) ?		\
-		__get_user((x), __p) :				\
+	access_ok(__p, sizeof(*__p)) ?				\
+		__get_user_p((x), __p, isptr) :			\
 		((x) = (__force __typeof__(x))0, -EFAULT);	\
 })
+#define get_user(x, ptr) get_user_p(x, ptr, 0)
+#define get_user_ptr(x, ptr) get_user_p(x, ptr, 1)
 
-#define __put_user_asm(insn, x, ptr, err)			\
+#define ___put_user_asm(insn, x, ptr, err, regc)		\
 do {								\
 	__typeof__(*(ptr)) __x = x;				\
 	__asm__ __volatile__ (					\
@@ -177,8 +195,11 @@ do {								\
 		"2:\n"						\
 		_ASM_EXTABLE_UACCESS_ERR(1b, 2b, %0)		\
 		: "+r" (err), "=m" (*(ptr))			\
-		: "rJ" (__x));					\
+		: regc"J" (__x));				\
 } while (0)
+#define __put_user_asm(insn, x, ptr, err)			\
+	___put_user_asm(insn, x, ptr, err, "r")
+
 
 #ifdef CONFIG_64BIT
 #define __put_user_8(x, ptr, err) \
@@ -203,7 +224,7 @@ do {								\
 } while (0)
 #endif /* CONFIG_64BIT */
 
-#define __put_user_nocheck(x, __gu_ptr, __pu_err)					\
+#define __put_user_nocheck(x, __gu_ptr, __pu_err)		\
 do {								\
 	switch (sizeof(*__gu_ptr)) {				\
 	case 1:							\
@@ -216,12 +237,20 @@ do {								\
 		__put_user_asm("sw", (x), __gu_ptr, __pu_err);	\
 		break;						\
 	case 8:							\
-		__put_user_8((x), __gu_ptr, __pu_err);	\
+		__put_user_8((x), __gu_ptr, __pu_err);		\
 		break;						\
 	default:						\
 		BUILD_BUG();					\
 	}							\
 } while (0)
+
+#ifdef CONFIG_RISCV_CHERI_BAKEWELL
+#define __put_user_nocheck_ptr(x, __gu_ptr, __pu_err)		\
+	___put_user_asm("sc", x, __gu_ptr, __pu_err, "C")
+#else
+#define __put_user_nocheck_ptr(x, __gu_ptr, __pu_err)		\
+	__put_user_nocheck(x, __gu_ptr, __pu_err)
+#endif
 
 /**
  * __put_user: - Write a simple value into user space, with less checking.
@@ -244,20 +273,25 @@ do {								\
  *
  * Returns zero on success, or -EFAULT on error.
  */
-#define __put_user(x, ptr)					\
-({								\
-	__typeof__(*(ptr)) __user *__gu_ptr = (ptr);		\
-	__typeof__(*__gu_ptr) __val = (x);			\
-	long __pu_err = 0;					\
-								\
-	__chk_user_ptr(__gu_ptr);				\
-								\
-	__enable_user_access();					\
-	__put_user_nocheck(__val, __gu_ptr, __pu_err);		\
-	__disable_user_access();				\
-								\
-	__pu_err;						\
+#define __put_user_p(x, ptr, isptr)					\
+({									\
+	__typeof__(*(ptr)) __user *__gu_ptr = (ptr);			\
+	__typeof__(*__gu_ptr) __val = (x);				\
+	long __pu_err = 0;						\
+									\
+	__chk_user_ptr(__gu_ptr);					\
+									\
+	__enable_user_access();						\
+	if (isptr)							\
+		__put_user_nocheck_ptr(__val, __gu_ptr, __pu_err);	\
+	else								\
+		__put_user_nocheck(__val, __gu_ptr, __pu_err);		\
+	__disable_user_access();					\
+									\
+	__pu_err;							\
 })
+#define __put_user(x, ptr) __put_user_p(x, ptr, 0)
+#define __put_user_ptr(x, ptr) __put_user_p(x, ptr, 1)
 
 /**
  * put_user: - Write a simple value into user space.
@@ -275,14 +309,16 @@ do {								\
  *
  * Returns zero on success, or -EFAULT on error.
  */
-#define put_user(x, ptr)					\
+#define put_user_p(x, ptr, isptr)				\
 ({								\
 	__typeof__(*(ptr)) __user *__p = (ptr);			\
 	might_fault();						\
-	access_ok(__p, sizeof(*__p)) ?		\
-		__put_user((x), __p) :				\
+	access_ok(__p, sizeof(*__p)) ?				\
+		__put_user_p((x), __p, isptr) :			\
 		-EFAULT;					\
 })
+#define put_user(x, ptr) put_user_p(x, ptr, 0)
+#define put_user_ptr(x, ptr) put_user_p(x, ptr, 1)
 
 
 unsigned long __must_check __asm_copy_to_user(void __user *to,
