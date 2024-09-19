@@ -24,6 +24,7 @@ static int (*__sbi_rfence)(int fid, const struct cpumask *cpu_mask,
 			   unsigned long start, unsigned long size,
 			   unsigned long arg4, unsigned long arg5) __ro_after_init;
 
+/* FIXCHERI: Should all of these arguments be capabilities? */
 struct sbiret sbi_ecall(int ext, int fid, unsigned long arg0,
 			unsigned long arg1, unsigned long arg2,
 			unsigned long arg3, unsigned long arg4,
@@ -31,14 +32,14 @@ struct sbiret sbi_ecall(int ext, int fid, unsigned long arg0,
 {
 	struct sbiret ret;
 
-	register uintptr_t a0 asm ("a0") = (uintptr_t)(arg0);
-	register uintptr_t a1 asm ("a1") = (uintptr_t)(arg1);
-	register uintptr_t a2 asm ("a2") = (uintptr_t)(arg2);
-	register uintptr_t a3 asm ("a3") = (uintptr_t)(arg3);
-	register uintptr_t a4 asm ("a4") = (uintptr_t)(arg4);
-	register uintptr_t a5 asm ("a5") = (uintptr_t)(arg5);
-	register uintptr_t a6 asm ("a6") = (uintptr_t)(fid);
-	register uintptr_t a7 asm ("a7") = (uintptr_t)(ext);
+	register unsigned long a0 asm ("a0") = (unsigned long)(arg0);
+	register unsigned long a1 asm ("a1") = (unsigned long)(arg1);
+	register unsigned long a2 asm ("a2") = (unsigned long)(arg2);
+	register unsigned long a3 asm ("a3") = (unsigned long)(arg3);
+	register unsigned long a4 asm ("a4") = (unsigned long)(arg4);
+	register unsigned long a5 asm ("a5") = (unsigned long)(arg5);
+	register unsigned long a6 asm ("a6") = (unsigned long)(fid);
+	register unsigned long a7 asm ("a7") = (unsigned long)(ext);
 	asm volatile ("ecall"
 		      : "+r" (a0), "+r" (a1)
 		      : "r" (a2), "r" (a3), "r" (a4), "r" (a5), "r" (a6), "r" (a7)
@@ -152,7 +153,7 @@ static void __sbi_send_ipi_v01(unsigned int cpu)
 {
 	unsigned long hart_mask =
 		__sbi_v01_cpumask_to_hartmask(cpumask_of(cpu));
-	sbi_ecall(SBI_EXT_0_1_SEND_IPI, 0, (unsigned long)(&hart_mask),
+	sbi_ecall(SBI_EXT_0_1_SEND_IPI, 0, __c_pa(&hart_mask),
 		  0, 0, 0, 0, 0);
 }
 
@@ -171,16 +172,16 @@ static int __sbi_rfence_v01(int fid, const struct cpumask *cpu_mask,
 	switch (fid) {
 	case SBI_EXT_RFENCE_REMOTE_FENCE_I:
 		sbi_ecall(SBI_EXT_0_1_REMOTE_FENCE_I, 0,
-			  (unsigned long)&hart_mask, 0, 0, 0, 0, 0);
+			  __c_pa(&hart_mask), 0, 0, 0, 0, 0);
 		break;
 	case SBI_EXT_RFENCE_REMOTE_SFENCE_VMA:
 		sbi_ecall(SBI_EXT_0_1_REMOTE_SFENCE_VMA, 0,
-			  (unsigned long)&hart_mask, start, size,
+			  __c_pa(&hart_mask), start, size,
 			  0, 0, 0);
 		break;
 	case SBI_EXT_RFENCE_REMOTE_SFENCE_VMA_ASID:
 		sbi_ecall(SBI_EXT_0_1_REMOTE_SFENCE_VMA_ASID, 0,
-			  (unsigned long)&hart_mask, start, size,
+			  __c_pa(&hart_mask), start, size,
 			  arg4, 0, 0);
 		break;
 	default:
