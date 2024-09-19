@@ -61,7 +61,7 @@ DECLARE_PER_CPU(u32, kstack_offset);
 		u32 offset = raw_cpu_read(kstack_offset);		\
 		u8 *ptr = __kstack_alloca(KSTACK_OFFSET_MAX(offset));	\
 		/* Keep allocation even after "ptr" loses scope. */	\
-		asm volatile("" :: "r"(ptr) : "memory");		\
+		barrier_data(ptr);					\
 	}								\
 } while (0)
 
