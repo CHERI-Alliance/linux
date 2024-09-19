@@ -33,6 +33,8 @@
 #include <asm/vector.h>
 #include <asm/irq_stack.h>
 
+#include <linux/cheri.h>
+
 int show_unhandled_signals = 1;
 
 static DEFINE_SPINLOCK(die_lock);
@@ -119,22 +121,22 @@ void do_trap(struct pt_regs *regs, int signo, int code, unsigned long addr)
 	    && printk_ratelimit()) {
 		pr_info("%s[%d]: unhandled signal %d code 0x%x at 0x" REG_FMT,
 			tsk->comm, task_pid_nr(tsk), signo, code, addr);
-		print_vma_addr(KERN_CONT " in ", instruction_pointer(regs));
+		print_vma_addr(KERN_CONT " in ", __c_ua(instruction_pointer(regs)));
 		pr_cont("\n");
 		__show_regs(regs);
 		dump_instr(KERN_INFO, regs);
 	}
 
-	force_sig_fault(signo, code, (void __user *)addr);
+	force_sig_fault(signo, code, (void __user *)__c_fakeu(addr));
 }
 
 static void do_trap_error(struct pt_regs *regs, int signo, int code,
-	unsigned long addr, const char *str)
+	uintptr_t addr, const char *str)
 {
 	current->thread.bad_cause = regs->cause;
 
 	if (user_mode(regs)) {
-		do_trap(regs, signo, code, addr);
+		do_trap(regs, signo, code, __c_ua(addr));
 	} else {
 		if (!fixup_exception(regs))
 			die(regs, str);
@@ -246,7 +248,7 @@ DO_ERROR_INFO(do_trap_ecall_s,
 DO_ERROR_INFO(do_trap_ecall_m,
 	SIGILL, ILL_ILLTRP, "environment call from M-mode");
 
-static inline unsigned long get_break_insn_length(unsigned long pc)
+static inline unsigned long get_break_insn_length(uintptr_t pc)
 {
 	bug_insn_t insn;
 
@@ -281,13 +283,14 @@ void handle_break(struct pt_regs *regs)
 	current->thread.bad_cause = regs->cause;
 
 	if (user_mode(regs))
-		force_sig_fault(SIGTRAP, TRAP_BRKPT, (void __user *)regs->epc);
+		force_sig_fault(SIGTRAP, TRAP_BRKPT,
+				(void __user *)__c_fakeu(__c_ua(regs->epc)));
 #ifdef CONFIG_KGDB
 	else if (notify_die(DIE_TRAP, "EBREAK", regs, 0, regs->cause, SIGTRAP)
 								== NOTIFY_STOP)
 		return;
 #endif
-	else if (report_bug(regs->epc, regs) == BUG_TRAP_TYPE_WARN ||
+	else if (report_bug(__c_ua(regs->epc), regs) == BUG_TRAP_TYPE_WARN ||
 		 handle_cfi_failure(regs) == BUG_TRAP_TYPE_WARN)
 		regs->epc += get_break_insn_length(regs->epc);
 	else
@@ -315,7 +318,7 @@ asmlinkage __visible __trap_section  __no_stack_protector
 void do_trap_ecall_u(struct pt_regs *regs)
 {
 	if (user_mode(regs)) {
-		long syscall = regs->a7;
+		long syscall = __c_ua(regs->a7);
 
 		regs->epc += 4;
 		regs->orig_a0 = regs->a0;
@@ -394,10 +397,11 @@ asmlinkage void noinstr do_irq(struct pt_regs *regs)
 int is_valid_bugaddr(unsigned long pc)
 {
 	bug_insn_t insn;
+	bug_insn_t *ptr = cheri_make_kernel_data_cap(pc, sizeof(insn));
 
 	if (pc < VMALLOC_START)
 		return 0;
-	if (get_kernel_nofault(insn, (bug_insn_t *)pc))
+	if (get_kernel_nofault(insn, ptr))
 		return 0;
 	if ((insn & __INSN_LENGTH_MASK) == __INSN_LENGTH_32)
 		return (insn == __BUG_INSN_32);
@@ -412,8 +416,8 @@ DEFINE_PER_CPU(unsigned long [OVERFLOW_STACK_SIZE/sizeof(long)],
 
 asmlinkage void handle_bad_stack(struct pt_regs *regs)
 {
-	unsigned long tsk_stk = (unsigned long)current->stack;
-	unsigned long ovf_stk = (unsigned long)this_cpu_ptr(overflow_stack);
+	unsigned long tsk_stk = __c_pa(current->stack);
+	unsigned long ovf_stk = __c_pa(this_cpu_ptr(overflow_stack));
 
 	console_verbose();
 
@@ -429,4 +433,24 @@ asmlinkage void handle_bad_stack(struct pt_regs *regs)
 	for (;;)
 		wait_for_interrupt();
 }
+#endif
+
+#ifdef CONFIG_RISCV_CHERI_BAKEWELL
+
+asmlinkage __visible noinstr void do_trap_cheri(struct pt_regs *regs)
+{
+	unsigned long stval;
+	/* Among other things this handles CHERI faults during usercopy. */
+	if (!user_mode(regs)) {
+		if (fixup_exception(regs))
+			return;
+	}
+
+	stval = csr_read(stval);
+	pr_err("CHERI exception: stval=%#lx at %p\n", stval, (void *)regs->epc);
+	dump_stack();
+	do_trap_error(regs, SIGILL, ILL_ILLOPC, regs->epc,
+		      "CHERI exception");
+}
+
 #endif
