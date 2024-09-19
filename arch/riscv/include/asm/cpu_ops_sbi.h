@@ -21,6 +21,9 @@ extern const struct cpu_operations cpu_ops_sbi;
 struct sbi_hart_boot_data {
 	void *task_ptr;
 	void *stack_ptr;
+#ifdef CONFIG_CHERI_KERNEL
+	void *kernel_code_cap;
+#endif
 };
 #endif
 
