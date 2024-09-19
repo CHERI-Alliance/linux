@@ -36,7 +36,7 @@ static long ax45mp_iocp_sw_workaround(void)
 	ret = sbi_ecall(ANDES_SBI_EXT_ANDES, ANDES_SBI_EXT_IOCP_SW_WORKAROUND,
 			0, 0, 0, 0, 0, 0);
 
-	return ret.error ? 0 : ret.value;
+	return ret.error ? 0 : __c_ua(ret.value);
 }
 
 static void errata_probe_iocp(unsigned int stage, unsigned long arch_id, unsigned long impid)

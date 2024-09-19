@@ -23,13 +23,13 @@ const struct cpu_operations cpu_ops_sbi;
  */
 static struct sbi_hart_boot_data boot_data[NR_CPUS];
 
-static int sbi_hsm_hart_start(unsigned long hartid, unsigned long saddr,
-			      unsigned long priv)
+static int sbi_hsm_hart_start(unsigned long hartid, uintptr_t saddr,
+			      uintptr_t priv)
 {
 	struct sbiret ret;
 
 	ret = sbi_ecall(SBI_EXT_HSM, SBI_EXT_HSM_HART_START,
-			hartid, saddr, priv, 0, 0, 0);
+			__c_fakeu(hartid), saddr, priv, 0, 0, 0);
 	if (ret.error)
 		return sbi_err_map_linux_errno(ret.error);
 	else
@@ -54,7 +54,7 @@ static int sbi_hsm_hart_get_status(unsigned long hartid)
 	struct sbiret ret;
 
 	ret = sbi_ecall(SBI_EXT_HSM, SBI_EXT_HSM_HART_STATUS,
-			hartid, 0, 0, 0, 0, 0);
+			__c_fakeu(hartid), 0, 0, 0, 0, 0);
 	if (ret.error)
 		return sbi_err_map_linux_errno(ret.error);
 	else
@@ -73,10 +73,15 @@ static int sbi_cpu_start(unsigned int cpuid, struct task_struct *tidle)
 	smp_mb();
 	bdata->task_ptr = tidle;
 	bdata->stack_ptr = task_pt_regs(tidle);
+#ifdef CONFIG_CHERI_KERNEL
+	bdata->kernel_code_cap = kernel_code_cap;
+#endif
 	/* Make sure boot data is updated */
 	smp_mb();
 	hsm_data = __pa(bdata);
-	return sbi_hsm_hart_start(hartid, boot_addr, hsm_data);
+	return sbi_hsm_hart_start(hartid,
+			(uintptr_t)cheri_address_set(cheri_user_root_cap, boot_addr),
+			(uintptr_t)cheri_address_set(cheri_user_root_cap, hsm_data));
 }
 
 #ifdef CONFIG_HOTPLUG_CPU
