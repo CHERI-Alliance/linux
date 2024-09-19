@@ -21,13 +21,8 @@ static __always_inline
 int gettimeofday_fallback(struct __kernel_old_timeval *_tv,
 			  struct timezone *_tz)
 {
-#ifdef CONFIG_CHERI_PURECAP_UABI
-	register struct __kernel_old_timeval *tv asm("ca0") = _tv;
-	register struct timezone *tz asm("ca1") = _tz;
-#else
-	register struct __kernel_old_timeval *tv asm("a0") = _tv;
-	register struct timezone *tz asm("a1") = _tz;
-#endif
+	register struct __kernel_old_timeval *tv asm(CREG("a0")) = _tv;
+	register struct timezone *tz asm(CREG("a1")) = _tz;
 	register long ret asm("a0");
 	register long nr asm("a7") = __NR_gettimeofday;
 
@@ -42,12 +37,8 @@ int gettimeofday_fallback(struct __kernel_old_timeval *_tv,
 static __always_inline
 long clock_gettime_fallback(clockid_t _clkid, struct __kernel_timespec *_ts)
 {
-	register clockid_t clkid asm("ca0") = _clkid;
-#ifdef CONFIG_CHERI_PURECAP_UABI
-	register struct __kernel_timespec *ts asm("ca1") = _ts;
-#else
-	register struct __kernel_timespec *ts asm("a1") = _ts;
-#endif
+	register clockid_t clkid asm("a0") = _clkid;
+	register struct __kernel_timespec *ts asm(CREG("a1")) = _ts;
 	register long ret asm("a0");
 	register long nr asm("a7") = __NR_clock_gettime;
 
@@ -63,11 +54,7 @@ static __always_inline
 int clock_getres_fallback(clockid_t _clkid, struct __kernel_timespec *_ts)
 {
 	register clockid_t clkid asm("a0") = _clkid;
-#ifdef CONFIG_CHERI_PURECAP_UABI
-	register struct __kernel_timespec *ts asm("ca1") = _ts;
-#else
-	register struct __kernel_timespec *ts asm("a1") = _ts;
-#endif
+	register struct __kernel_timespec *ts asm(CREG("a1")) = _ts;
 	register long ret asm("a0");
 	register long nr asm("a7") = __NR_clock_getres;
 
