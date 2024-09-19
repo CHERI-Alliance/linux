@@ -52,7 +52,8 @@ static struct __vdso_info compat_vdso_info;
 static int vdso_mremap(const struct vm_special_mapping *sm,
 		       struct vm_area_struct *new_vma)
 {
-	current->mm->context.vdso = (void *)new_vma->vm_start;
+	current->mm->context.vdso = cheri_make_user_code_cap(
+		new_vma->vm_start, new_vma->vm_end - new_vma->vm_start);
 
 	return 0;
 }
@@ -232,7 +233,7 @@ static int __setup_additional_pages(struct mm_struct *mm,
 		goto up_fail;
 
 	vdso_base += VVAR_SIZE;
-	mm->context.vdso = (void *)vdso_base;
+	mm->context.vdso = cheri_make_user_code_cap(vdso_base, vdso_mapping_len);
 
 	ret =
 	   _install_special_mapping(mm, vdso_base, vdso_text_len,
