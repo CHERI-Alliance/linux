@@ -1619,8 +1619,8 @@ static void __init alloc_node_mem_map(struct pglist_data *pgdat)
 		      size, pgdat->node_id);
 	pgdat->node_mem_map = map + offset;
 	pr_debug("%s: node %d, pgdat %08lx, node_mem_map %08lx\n",
-		 __func__, pgdat->node_id, (unsigned long)pgdat,
-		 (unsigned long)pgdat->node_mem_map);
+		 __func__, pgdat->node_id, __c_pa(pgdat),
+		 __c_pa(pgdat->node_mem_map));
 #ifndef CONFIG_NUMA
 	/* the global mem_map is just set as node 0's */
 	if (pgdat == NODE_DATA(0)) {

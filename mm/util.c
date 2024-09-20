@@ -37,7 +37,7 @@
  */
 void kfree_const(const void *x)
 {
-	if (!is_kernel_rodata((unsigned long)x))
+	if (!is_kernel_rodata(__c_pa(x)))
 		kfree(x);
 }
 EXPORT_SYMBOL(kfree_const);
@@ -79,7 +79,7 @@ EXPORT_SYMBOL(kstrdup);
  */
 const char *kstrdup_const(const char *s, gfp_t gfp)
 {
-	if (is_kernel_rodata((unsigned long)s))
+	if (is_kernel_rodata(__c_pa(s)))
 		return s;
 
 	return kstrdup(s, gfp);
@@ -521,7 +521,7 @@ int __account_locked_vm(struct mm_struct *mm, unsigned long pages, bool inc,
 	}
 
 	pr_debug("%s: [%d] caller %ps %c%lu %lu/%lu%s\n", __func__, task->pid,
-		 (void *)_RET_IP_, (inc) ? '+' : '-', pages << PAGE_SHIFT,
+		 __c_fakep(_RET_IP_), (inc) ? '+' : '-', pages << PAGE_SHIFT,
 		 locked_vm << PAGE_SHIFT, task_rlimit(task, RLIMIT_MEMLOCK),
 		 ret ? " - exceeded" : "");
 
@@ -766,7 +766,7 @@ EXPORT_SYMBOL(vcalloc_noprof);
 
 struct anon_vma *folio_anon_vma(struct folio *folio)
 {
-	unsigned long mapping = (unsigned long)folio->mapping;
+	uintptr_t mapping = (uintptr_t)folio->mapping;
 
 	if ((mapping & PAGE_MAPPING_FLAGS) != PAGE_MAPPING_ANON)
 		return NULL;
@@ -797,7 +797,7 @@ struct address_space *folio_mapping(struct folio *folio)
 		return swap_address_space(folio->swap);
 
 	mapping = folio->mapping;
-	if ((unsigned long)mapping & PAGE_MAPPING_FLAGS)
+	if (__c_pa(mapping) & PAGE_MAPPING_FLAGS)
 		return NULL;
 
 	return mapping;
@@ -1098,7 +1098,7 @@ void mem_dump_obj(void *object)
 
 	if (is_vmalloc_addr(object))
 		type = "vmalloc memory";
-	else if (virt_addr_valid(object))
+	else if (virt_addr_valid(__c_pa(object)))
 		type = "non-slab/vmalloc memory";
 	else if (object == NULL)
 		type = "NULL pointer";
