@@ -291,7 +291,9 @@ static inline int get_insn(struct pt_regs *regs, uintptr_t epc, ulong *r_insn)
 	ulong insn = 0;
 
 	if (epc & 0x2 ||
-	    !cheri_check_cap((void *)epc, 4, CHERI_PERMS_MIN_CODE)) {
+	    !cheri_check_cap((void *)epc, 4,
+			     CHERI_PERM_LOAD | CHERI_PERM_EXECUTE))
+	{
 		ulong tmp = 0;
 
 		if (__read_insn(regs, insn, epc, u16))

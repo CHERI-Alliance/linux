@@ -21,6 +21,7 @@
 
 #include <linux/mm_reserv.h>
 #include <linux/uaccess.h>
+#include <linux/cheri.h>
 #include "swap.h"
 
 static int mincore_hugetlb(pte_t *pte, unsigned long hmask, unsigned long addr,

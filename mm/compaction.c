@@ -157,8 +157,8 @@ bool PageMovable(struct page *page)
 void __SetPageMovable(struct page *page, const struct movable_operations *mops)
 {
 	VM_BUG_ON_PAGE(!PageLocked(page), page);
-	VM_BUG_ON_PAGE((unsigned long)mops & PAGE_MAPPING_MOVABLE, page);
-	page->mapping = (void *)((unsigned long)mops | PAGE_MAPPING_MOVABLE);
+	VM_BUG_ON_PAGE((uintptr_t)mops & PAGE_MAPPING_MOVABLE, page);
+	page->mapping = (void *)((uintptr_t)mops | PAGE_MAPPING_MOVABLE);
 }
 EXPORT_SYMBOL(__SetPageMovable);
 
@@ -683,7 +683,7 @@ static unsigned long isolate_freepages_block(struct compact_control *cc,
 		isolated = __isolate_free_page(page, order);
 		if (!isolated)
 			break;
-		set_page_private(page, order);
+		set_page_private(page, __c_fakeu(order));
 
 		nr_scanned += isolated - 1;
 		total_isolated += isolated;
@@ -1664,7 +1664,7 @@ static void fast_isolate_freepages(struct compact_control *cc)
 		/* Isolate the page if available */
 		if (page) {
 			if (__isolate_free_page(page, order)) {
-				set_page_private(page, order);
+				set_page_private(page, __c_fakeu(order));
 				nr_isolated = 1 << order;
 				nr_scanned += nr_isolated - 1;
 				total_isolated += nr_isolated;
@@ -1858,7 +1858,7 @@ static void isolate_freepages(struct compact_control *cc)
  * This is a migrate-callback that "allocates" freepages by taking pages
  * from the isolated freelists in the block we are migrating to.
  */
-static struct folio *compaction_alloc_noprof(struct folio *src, unsigned long data)
+static struct folio *compaction_alloc_noprof(struct folio *src, uintptr_t data)
 {
 	struct compact_control *cc = (struct compact_control *)data;
 	struct folio *dst;
@@ -1893,7 +1893,7 @@ again:
 		size >>= 1;
 
 		list_add(&freepage[size].lru, &cc->freepages[start_order]);
-		set_page_private(&freepage[size], start_order);
+		set_page_private(&freepage[size], __c_fakeu(start_order));
 	}
 	dst = (struct folio *)freepage;
 
@@ -1905,7 +1905,7 @@ again:
 	return page_rmappable_folio(&dst->page);
 }
 
-static struct folio *compaction_alloc(struct folio *src, unsigned long data)
+static struct folio *compaction_alloc(struct folio *src, uintptr_t data)
 {
 	return alloc_hooks(compaction_alloc_noprof(src, data));
 }
@@ -1915,7 +1915,7 @@ static struct folio *compaction_alloc(struct folio *src, unsigned long data)
  * freelist.  All pages on the freelist are from the same zone, so there is no
  * special handling needed for NUMA.
  */
-static void compaction_free(struct folio *dst, unsigned long data)
+static void compaction_free(struct folio *dst, uintptr_t data)
 {
 	struct compact_control *cc = (struct compact_control *)data;
 	int order = folio_order(dst);
@@ -2669,7 +2669,7 @@ rescan:
 		 */
 		nr_migratepages = cc->nr_migratepages;
 		err = migrate_pages(&cc->migratepages, compaction_alloc,
-				compaction_free, (unsigned long)cc, cc->mode,
+				compaction_free, (uintptr_t)cc, cc->mode,
 				MR_COMPACTION, &nr_succeeded);
 
 		trace_mm_compaction_migratepages(nr_migratepages, nr_succeeded);
