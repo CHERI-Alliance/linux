@@ -78,7 +78,7 @@ futex_atomic_cmpxchg_inatomic(u32 *uval, u32 __user *uaddr,
 {
 	int ret = 0;
 	u32 val;
-	uintptr_t tmp;
+	u64 tmp;
 
 	if (!access_ok(uaddr, sizeof(u32)))
 		return -EFAULT;

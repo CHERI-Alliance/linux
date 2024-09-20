@@ -156,7 +156,7 @@ static inline struct rt_mutex_waiter *task_top_pi_waiter(struct task_struct *p)
 
 static inline struct task_struct *rt_mutex_owner(struct rt_mutex_base *lock)
 {
-	unsigned long owner = (unsigned long) READ_ONCE(lock->owner);
+	uintptr_t owner = (uintptr_t) READ_ONCE(lock->owner);
 
 	return (struct task_struct *) (owner & ~RT_MUTEX_HAS_WAITERS);
 }
