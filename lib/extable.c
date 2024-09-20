@@ -17,7 +17,7 @@
 #else
 static inline unsigned long ex_to_insn(const struct exception_table_entry *x)
 {
-	return (uintptr_t)&x->insn + x->insn;
+	return __c_pa(&x->insn) + x->insn;
 }
 #endif
 
