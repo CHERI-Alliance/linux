@@ -1014,7 +1014,7 @@ static void folio_check_dirty_writeback(struct folio *folio,
 		mapping->a_ops->is_dirty_writeback(folio, dirty, writeback);
 }
 
-struct folio *alloc_migrate_folio(struct folio *src, unsigned long private)
+struct folio *alloc_migrate_folio(struct folio *src, uintptr_t private)
 {
 	struct folio *dst;
 	nodemask_t *allowed_mask;
