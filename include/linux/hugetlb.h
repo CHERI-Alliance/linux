@@ -611,6 +611,10 @@ enum hugetlb_page_flags {
  * hugetlb specific page flags.
  */
 #ifdef CONFIG_HUGETLB_PAGE
+/*
+ * CHERI: The ->private field only contains the flags and no
+ * CHERI: pointer data. Thus we can use the unsigned long bitops.
+ */
 #define TESTHPAGEFLAG(uname, flname)				\
 static __always_inline						\
 bool folio_test_hugetlb_##flname(struct folio *folio)		\
@@ -618,7 +622,7 @@ bool folio_test_hugetlb_##flname(struct folio *folio)		\
 		return test_bit(HPG_##flname, private);		\
 	}							\
 static inline int HPage##uname(struct page *page)		\
-	{ return test_bit(HPG_##flname, &(page->private)); }
+	{ return test_bit(HPG_##flname, (void *)&(page->private)); }
 
 #define SETHPAGEFLAG(uname, flname)				\
 static __always_inline						\
@@ -627,7 +631,7 @@ void folio_set_hugetlb_##flname(struct folio *folio)		\
 		set_bit(HPG_##flname, private);			\
 	}							\
 static inline void SetHPage##uname(struct page *page)		\
-	{ set_bit(HPG_##flname, &(page->private)); }
+	{ set_bit(HPG_##flname, (void *)&(page->private)); }
 
 #define CLEARHPAGEFLAG(uname, flname)				\
 static __always_inline						\
@@ -636,7 +640,7 @@ void folio_clear_hugetlb_##flname(struct folio *folio)		\
 		clear_bit(HPG_##flname, private);		\
 	}							\
 static inline void ClearHPage##uname(struct page *page)		\
-	{ clear_bit(HPG_##flname, &(page->private)); }
+	{ clear_bit(HPG_##flname, (void *)&(page->private)); }
 #else
 #define TESTHPAGEFLAG(uname, flname)				\
 static inline bool						\

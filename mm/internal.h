@@ -97,7 +97,7 @@ static inline swp_entry_t folio_swap(swp_entry_t entry,
 
 static inline void *folio_raw_mapping(const struct folio *folio)
 {
-	unsigned long mapping = (unsigned long)folio->mapping;
+	uintptr_t mapping = (uintptr_t)folio->mapping;
 
 	return (void *)(mapping & ~PAGE_MAPPING_FLAGS);
 }
@@ -461,7 +461,7 @@ struct alloc_context {
 static inline unsigned int buddy_order(struct page *page)
 {
 	/* PageBuddy() must be checked by the caller */
-	return page_private(page);
+	return __c_ua(page_private(page));
 }
 
 /*
@@ -475,7 +475,7 @@ static inline unsigned int buddy_order(struct page *page)
  * times, potentially observing different values in the tests and the actual
  * use of the result.
  */
-#define buddy_order_unsafe(page)	READ_ONCE(page_private(page))
+#define buddy_order_unsafe(page)	__c_ua(READ_ONCE(page_private(page)))
 
 /*
  * This function checks whether a page is free && is the buddy

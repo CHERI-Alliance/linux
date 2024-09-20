@@ -7,8 +7,8 @@
 #include <linux/migrate_mode.h>
 #include <linux/hugetlb.h>
 
-typedef struct folio *new_folio_t(struct folio *folio, unsigned long private);
-typedef void free_folio_t(struct folio *folio, unsigned long private);
+typedef struct folio *new_folio_t(struct folio *folio, uintptr_t private);
+typedef void free_folio_t(struct folio *folio, uintptr_t private);
 
 struct migration_target_control;
 
@@ -68,9 +68,9 @@ int migrate_folio_extra(struct address_space *mapping, struct folio *dst,
 int migrate_folio(struct address_space *mapping, struct folio *dst,
 		struct folio *src, enum migrate_mode mode);
 int migrate_pages(struct list_head *l, new_folio_t new, free_folio_t free,
-		  unsigned long private, enum migrate_mode mode, int reason,
+		  uintptr_t private, enum migrate_mode mode, int reason,
 		  unsigned int *ret_succeeded);
-struct folio *alloc_migration_target(struct folio *src, unsigned long private);
+struct folio *alloc_migration_target(struct folio *src, uintptr_t private);
 bool isolate_movable_page(struct page *page, isolate_mode_t mode);
 
 int migrate_huge_page_move_mapping(struct address_space *mapping,
@@ -86,11 +86,11 @@ int folio_migrate_mapping(struct address_space *mapping,
 
 static inline void putback_movable_pages(struct list_head *l) {}
 static inline int migrate_pages(struct list_head *l, new_folio_t new,
-		free_folio_t free, unsigned long private,
+		free_folio_t free, uintptr_t private,
 		enum migrate_mode mode, int reason, unsigned int *ret_succeeded)
 	{ return -ENOSYS; }
 static inline struct folio *alloc_migration_target(struct folio *src,
-		unsigned long private)
+		uintptr_t private)
 	{ return NULL; }
 static inline bool isolate_movable_page(struct page *page, isolate_mode_t mode)
 	{ return false; }
@@ -129,7 +129,7 @@ const struct movable_operations *folio_movable_ops(struct folio *folio)
 	VM_BUG_ON(!__folio_test_movable(folio));
 
 	return (const struct movable_operations *)
-		((unsigned long)folio->mapping - PAGE_MAPPING_MOVABLE);
+		((uintptr_t)folio->mapping - PAGE_MAPPING_MOVABLE);
 }
 
 static inline
@@ -138,7 +138,7 @@ const struct movable_operations *page_movable_ops(struct page *page)
 	VM_BUG_ON(!__PageMovable(page));
 
 	return (const struct movable_operations *)
-		((unsigned long)page->mapping - PAGE_MAPPING_MOVABLE);
+		((uintptr_t)page->mapping - PAGE_MAPPING_MOVABLE);
 }
 
 #ifdef CONFIG_NUMA_BALANCING
