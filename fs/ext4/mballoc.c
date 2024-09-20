@@ -459,8 +459,8 @@ static inline u64 ext4_get_discard_pa_seq_sum(void)
 static inline void *mb_correct_addr_and_bit(int *bit, void *addr)
 {
 #if BITS_PER_LONG == 64
-	*bit += ((unsigned long) addr & 7UL) << 3;
-	addr = (void *) ((unsigned long) addr & ~7UL);
+	*bit += ((uintptr_t) addr & 7UL) << 3;
+	addr = (void *) ((uintptr_t) addr & ~7UL);
 #elif BITS_PER_LONG == 32
 	*bit += ((unsigned long) addr & 3UL) << 3;
 	addr = (void *) ((unsigned long) addr & ~3UL);
@@ -3009,7 +3009,7 @@ static void *ext4_mb_seq_groups_start(struct seq_file *seq, loff_t *pos)
 	if (*pos < 0 || *pos >= ext4_get_groups_count(sb))
 		return NULL;
 	group = *pos + 1;
-	return (void *) ((unsigned long) group);
+	return __c_fakep(group);
 }
 
 static void *ext4_mb_seq_groups_next(struct seq_file *seq, void *v, loff_t *pos)
@@ -3021,13 +3021,13 @@ static void *ext4_mb_seq_groups_next(struct seq_file *seq, void *v, loff_t *pos)
 	if (*pos < 0 || *pos >= ext4_get_groups_count(sb))
 		return NULL;
 	group = *pos + 1;
-	return (void *) ((unsigned long) group);
+	return __c_fakep(group);
 }
 
 static int ext4_mb_seq_groups_show(struct seq_file *seq, void *v)
 {
 	struct super_block *sb = pde_data(file_inode(seq->file));
-	ext4_group_t group = (ext4_group_t) ((unsigned long) v);
+	ext4_group_t group = (ext4_group_t) __c_pa(v);
 	int i, err;
 	char nbuf[16];
 	struct ext4_buddy e4b;
@@ -3206,7 +3206,7 @@ static void *ext4_mb_seq_structs_summary_start(struct seq_file *seq, loff_t *pos
 	if (*pos < 0 || *pos >= 2*MB_NUM_ORDERS(sb))
 		return NULL;
 	position = *pos + 1;
-	return (void *) ((unsigned long) position);
+	return __c_fakep(position);
 }
 
 static void *ext4_mb_seq_structs_summary_next(struct seq_file *seq, void *v, loff_t *pos)
@@ -3218,14 +3218,14 @@ static void *ext4_mb_seq_structs_summary_next(struct seq_file *seq, void *v, lof
 	if (*pos < 0 || *pos >= 2*MB_NUM_ORDERS(sb))
 		return NULL;
 	position = *pos + 1;
-	return (void *) ((unsigned long) position);
+	return __c_fakep(position);
 }
 
 static int ext4_mb_seq_structs_summary_show(struct seq_file *seq, void *v)
 {
 	struct super_block *sb = pde_data(file_inode(seq->file));
 	struct ext4_sb_info *sbi = EXT4_SB(sb);
-	unsigned long position = ((unsigned long) v);
+	unsigned long position = __c_pa(v);
 	struct ext4_group_info *grp;
 	unsigned int count;
 

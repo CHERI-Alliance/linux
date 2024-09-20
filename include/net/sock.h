@@ -594,7 +594,7 @@ static inline bool sk_user_data_is_nocopy(const struct sock *sk)
  */
 static inline void *
 __locked_read_sk_user_data_with_flags(const struct sock *sk,
-				      uintptr_t flags)
+				      unsigned long flags)
 {
 	uintptr_t sk_user_data =
 		(uintptr_t)rcu_dereference_check(__sk_user_data(sk),
@@ -617,7 +617,7 @@ __locked_read_sk_user_data_with_flags(const struct sock *sk,
  */
 static inline void *
 __rcu_dereference_sk_user_data_with_flags(const struct sock *sk,
-					  uintptr_t flags)
+					  unsigned long flags)
 {
 	uintptr_t sk_user_data = (uintptr_t)rcu_dereference(__sk_user_data(sk));
 
@@ -632,8 +632,8 @@ __rcu_dereference_sk_user_data_with_flags(const struct sock *sk,
 	__rcu_dereference_sk_user_data_with_flags(sk, 0)
 #define __rcu_assign_sk_user_data_with_flags(sk, ptr, flags)		\
 ({									\
-	uintptr_t __tmp1 = (uintptr_t)(ptr),				\
-		  __tmp2 = (uintptr_t)(flags);				\
+	uintptr_t __tmp1 = (uintptr_t)(ptr);				\
+	unsigned long __tmp2 = flags;					\
 	WARN_ON_ONCE(__tmp1 & ~SK_USER_DATA_PTRMASK);			\
 	WARN_ON_ONCE(__tmp2 & SK_USER_DATA_PTRMASK);			\
 	rcu_assign_pointer(__sk_user_data((sk)),			\
@@ -1813,7 +1813,7 @@ int sock_no_connect(struct socket *, struct sockaddr *, int, int);
 int sock_no_socketpair(struct socket *, struct socket *);
 int sock_no_accept(struct socket *, struct socket *, struct proto_accept_arg *);
 int sock_no_getname(struct socket *, struct sockaddr *, int);
-int sock_no_ioctl(struct socket *, unsigned int, unsigned long);
+int sock_no_ioctl(struct socket *, unsigned int, uintptr_t);
 int sock_no_listen(struct socket *, int);
 int sock_no_shutdown(struct socket *, int);
 int sock_no_sendmsg(struct socket *, struct msghdr *, size_t);

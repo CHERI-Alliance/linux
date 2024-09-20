@@ -51,7 +51,7 @@ const struct file_operations *debugfs_real_fops(const struct file *filp)
 {
 	struct debugfs_fsdata *fsd = F_DENTRY(filp)->d_fsdata;
 
-	if ((unsigned long)fsd & DEBUGFS_FSDATA_IS_REAL_FOPS_BIT) {
+	if (__c_pa(fsd) & DEBUGFS_FSDATA_IS_REAL_FOPS_BIT) {
 		/*
 		 * Urgh, we've been called w/o a protecting
 		 * debugfs_file_get().
@@ -93,14 +93,14 @@ int debugfs_file_get(struct dentry *dentry)
 		return -EINVAL;
 
 	d_fsd = READ_ONCE(dentry->d_fsdata);
-	if (!((unsigned long)d_fsd & DEBUGFS_FSDATA_IS_REAL_FOPS_BIT)) {
+	if (!(__c_pa(d_fsd) & DEBUGFS_FSDATA_IS_REAL_FOPS_BIT)) {
 		fsd = d_fsd;
 	} else {
 		fsd = kmalloc(sizeof(*fsd), GFP_KERNEL);
 		if (!fsd)
 			return -ENOMEM;
 
-		fsd->real_fops = (void *)((unsigned long)d_fsd &
+		fsd->real_fops = (void *)((uintptr_t)d_fsd &
 					~DEBUGFS_FSDATA_IS_REAL_FOPS_BIT);
 		refcount_set(&fsd->active_users, 1);
 		init_completion(&fsd->active_users_drained);
@@ -188,7 +188,7 @@ void debugfs_enter_cancellation(struct file *file,
 
 	fsd = READ_ONCE(dentry->d_fsdata);
 	if (WARN_ON(!fsd ||
-		    ((unsigned long)fsd & DEBUGFS_FSDATA_IS_REAL_FOPS_BIT)))
+		    (__c_pa(fsd) & DEBUGFS_FSDATA_IS_REAL_FOPS_BIT)))
 		return;
 
 	mutex_lock(&fsd->cancellations_mtx);
@@ -220,7 +220,7 @@ void debugfs_leave_cancellation(struct file *file,
 
 	fsd = READ_ONCE(dentry->d_fsdata);
 	if (WARN_ON(!fsd ||
-		    ((unsigned long)fsd & DEBUGFS_FSDATA_IS_REAL_FOPS_BIT)))
+		    (__c_pa(fsd) & DEBUGFS_FSDATA_IS_REAL_FOPS_BIT)))
 		return;
 
 	mutex_lock(&fsd->cancellations_mtx);

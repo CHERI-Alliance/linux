@@ -223,7 +223,7 @@ static inline void inet_csk_reset_xmit_timer(struct sock *sk, const int what,
 
 	if (when > max_when) {
 		pr_debug("reset_xmit_timer: sk=%p %d when=0x%lx, caller=%p\n",
-			 sk, what, when, (void *)_THIS_IP_);
+			 sk, what, when, __c_fakep(_THIS_IP_));
 		when = max_when;
 	}
 

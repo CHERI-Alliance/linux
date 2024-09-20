@@ -26,7 +26,7 @@ struct sk_buff;
 struct dst_entry {
 	struct net_device       *dev;
 	struct  dst_ops	        *ops;
-	unsigned long		_metrics;
+	uintptr_t		_metrics;
 	unsigned long           expires;
 #ifdef CONFIG_XFRM
 	struct xfrm_state	*xfrm;
@@ -66,7 +66,7 @@ struct dst_entry {
 	 * input/output/ops or performance tanks badly
 	 */
 #ifdef CONFIG_64BIT
-	rcuref_t		__rcuref;	/* 64-bit offset 64 */
+	rcuref_t		__rcuref __aligned(64);	/* 64-bit offset 64 */
 #endif
 	int			__use;
 	unsigned long		lastuse;
@@ -100,7 +100,7 @@ struct dst_metrics {
 } __aligned(4);		/* Low pointer bits contain DST_METRICS_FLAGS */
 extern const struct dst_metrics dst_default_metrics;
 
-u32 *dst_cow_metrics_generic(struct dst_entry *dst, unsigned long old);
+u32 *dst_cow_metrics_generic(struct dst_entry *dst, uintptr_t old);
 
 #define DST_METRICS_READ_ONLY		0x1UL
 #define DST_METRICS_REFCOUNTED		0x2UL
@@ -114,18 +114,18 @@ static inline bool dst_metrics_read_only(const struct dst_entry *dst)
 	return dst->_metrics & DST_METRICS_READ_ONLY;
 }
 
-void __dst_destroy_metrics_generic(struct dst_entry *dst, unsigned long old);
+void __dst_destroy_metrics_generic(struct dst_entry *dst, uintptr_t old);
 
 static inline void dst_destroy_metrics_generic(struct dst_entry *dst)
 {
-	unsigned long val = dst->_metrics;
+	uintptr_t val = dst->_metrics;
 	if (!(val & DST_METRICS_READ_ONLY))
 		__dst_destroy_metrics_generic(dst, val);
 }
 
 static inline u32 *dst_metrics_write_ptr(struct dst_entry *dst)
 {
-	unsigned long p = dst->_metrics;
+	uintptr_t p = dst->_metrics;
 
 	BUG_ON(!p);
 
@@ -141,7 +141,7 @@ static inline void dst_init_metrics(struct dst_entry *dst,
 				    const u32 *src_metrics,
 				    bool read_only)
 {
-	dst->_metrics = ((unsigned long) src_metrics) |
+	dst->_metrics = ((uintptr_t) src_metrics) |
 		(read_only ? DST_METRICS_READ_ONLY : 0);
 }
 
@@ -257,7 +257,7 @@ void dst_release(struct dst_entry *dst);
 
 void dst_release_immediate(struct dst_entry *dst);
 
-static inline void refdst_drop(unsigned long refdst)
+static inline void refdst_drop(uintptr_t refdst)
 {
 	if (!(refdst & SKB_DST_NOREF))
 		dst_release((struct dst_entry *)(refdst & SKB_DST_PTRMASK));
@@ -277,7 +277,7 @@ static inline void skb_dst_drop(struct sk_buff *skb)
 	}
 }
 
-static inline void __skb_dst_copy(struct sk_buff *nskb, unsigned long refdst)
+static inline void __skb_dst_copy(struct sk_buff *nskb, uintptr_t refdst)
 {
 	nskb->slow_gro |= !!refdst;
 	nskb->_skb_refdst = refdst;
@@ -318,7 +318,7 @@ static inline bool skb_dst_force(struct sk_buff *skb)
 		if (!dst_hold_safe(dst))
 			dst = NULL;
 
-		skb->_skb_refdst = (unsigned long)dst;
+		skb->_skb_refdst = (uintptr_t)dst;
 		skb->slow_gro |= !!dst;
 	}
 
@@ -557,7 +557,7 @@ void dst_blackhole_update_pmtu(struct dst_entry *dst, struct sock *sk,
 			       struct sk_buff *skb, u32 mtu, bool confirm_neigh);
 void dst_blackhole_redirect(struct dst_entry *dst, struct sock *sk,
 			    struct sk_buff *skb);
-u32 *dst_blackhole_cow_metrics(struct dst_entry *dst, unsigned long old);
+u32 *dst_blackhole_cow_metrics(struct dst_entry *dst, uintptr_t old);
 struct neighbour *dst_blackhole_neigh_lookup(const struct dst_entry *dst,
 					     struct sk_buff *skb,
 					     const void *daddr);

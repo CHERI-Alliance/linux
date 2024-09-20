@@ -225,7 +225,7 @@ static void debugfs_release_dentry(struct dentry *dentry)
 {
 	struct debugfs_fsdata *fsd = dentry->d_fsdata;
 
-	if ((unsigned long)fsd & DEBUGFS_FSDATA_IS_REAL_FOPS_BIT)
+	if (__c_pa(fsd) & DEBUGFS_FSDATA_IS_REAL_FOPS_BIT)
 		return;
 
 	/* check it wasn't a dir (no fsdata) or automount (no real_fops) */
@@ -442,7 +442,7 @@ static struct dentry *__debugfs_create_file(const char *name, umode_t mode,
 
 	inode->i_op = &debugfs_file_inode_operations;
 	inode->i_fop = proxy_fops;
-	dentry->d_fsdata = (void *)((unsigned long)real_fops |
+	dentry->d_fsdata = (void *)((uintptr_t)real_fops |
 				DEBUGFS_FSDATA_IS_REAL_FOPS_BIT);
 
 	d_instantiate(dentry, inode);
@@ -744,7 +744,7 @@ static void __debugfs_file_removed(struct dentry *dentry)
 	 */
 	smp_mb();
 	fsd = READ_ONCE(dentry->d_fsdata);
-	if ((unsigned long)fsd & DEBUGFS_FSDATA_IS_REAL_FOPS_BIT)
+	if (__c_pa(fsd) & DEBUGFS_FSDATA_IS_REAL_FOPS_BIT)
 		return;
 
 	/* if this was the last reference, we're done */

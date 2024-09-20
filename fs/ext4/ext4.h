@@ -3797,7 +3797,7 @@ static inline void set_bitmap_uptodate(struct buffer_head *bh)
 
 /* For ioend & aio unwritten conversion wait queues */
 #define EXT4_WQ_HASH_SZ		37
-#define ext4_ioend_wq(v)   (&ext4__ioend_wq[((unsigned long)(v)) %\
+#define ext4_ioend_wq(v)   (&ext4__ioend_wq[(__c_pa(v)) %\
 					    EXT4_WQ_HASH_SZ])
 extern wait_queue_head_t ext4__ioend_wq[EXT4_WQ_HASH_SZ];
 

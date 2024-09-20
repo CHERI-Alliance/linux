@@ -272,7 +272,7 @@ int __ext4_journal_stop(const char *where, unsigned int line, handle_t *handle);
  * a properly allocated handle is using a journal or not. */
 static inline int ext4_handle_valid(handle_t *handle)
 {
-	if ((unsigned long)handle < EXT4_NOJOURNAL_MAX_REF_COUNT)
+	if (__c_pa(handle) < EXT4_NOJOURNAL_MAX_REF_COUNT)
 		return 0;
 	return 1;
 }

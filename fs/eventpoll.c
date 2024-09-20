@@ -102,7 +102,7 @@
 struct epoll_filefd {
 	struct file *file;
 	int fd;
-} __packed;
+} __packed __cheri_pointer_align;
 
 /* Wait structure used by the poll hooks */
 struct eppoll_entry {
@@ -496,7 +496,7 @@ static inline void ep_set_busy_poll_napi_id(struct epitem *epi)
 }
 
 static long ep_eventpoll_bp_ioctl(struct file *file, unsigned int cmd,
-				  unsigned long arg)
+				  uintptr_t arg)
 {
 	struct eventpoll *ep = file->private_data;
 	void __user *uarg = (void __user *)arg;
@@ -909,7 +909,7 @@ static void ep_clear_and_put(struct eventpoll *ep)
 }
 
 static long ep_eventpoll_ioctl(struct file *file, unsigned int cmd,
-			       unsigned long arg)
+			       uintptr_t arg)
 {
 	int ret;
 
@@ -1050,10 +1050,10 @@ static void ep_show_fdinfo(struct seq_file *m, struct file *f)
 		struct epitem *epi = rb_entry(rbp, struct epitem, rbn);
 		struct inode *inode = file_inode(epi->ffd.file);
 
-		seq_printf(m, "tfd: %8d events: %8x data: %16llx "
+		seq_printf(m, "tfd: %8d events: %8x data: %16lx "
 			   " pos:%lli ino:%lx sdev:%x\n",
 			   epi->ffd.fd, epi->event.events,
-			   (long long)epi->event.data,
+			   __c_ua(epi->event.data),
 			   (long long)epi->ffd.file->f_pos,
 			   inode->i_ino, inode->i_sb->s_dev);
 		if (seq_has_overflowed(m))
