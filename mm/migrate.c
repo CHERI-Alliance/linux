@@ -1064,10 +1064,10 @@ static void __migrate_folio_extract(struct folio *dst,
 				   int *old_page_state,
 				   struct anon_vma **anon_vmap)
 {
-	unsigned long private = (unsigned long)dst->private;
+	uintptr_t private = (uintptr_t)dst->private;
 
 	*anon_vmap = (struct anon_vma *)(private & ~PAGE_OLD_STATES);
-	*old_page_state = private & PAGE_OLD_STATES;
+	*old_page_state = __c_ua(private) & PAGE_OLD_STATES;
 	dst->private = NULL;
 }
 
@@ -1091,7 +1091,7 @@ static void migrate_folio_undo_src(struct folio *src,
 
 /* Restore the destination folio to the original state upon failure */
 static void migrate_folio_undo_dst(struct folio *dst, bool locked,
-		free_folio_t put_new_folio, unsigned long private)
+		free_folio_t put_new_folio, uintptr_t private)
 {
 	if (locked)
 		folio_unlock(dst);
@@ -1121,7 +1121,7 @@ static void migrate_folio_done(struct folio *src,
 
 /* Obtain the lock on page, remove all ptes. */
 static int migrate_folio_unmap(new_folio_t get_new_folio,
-		free_folio_t put_new_folio, unsigned long private,
+		free_folio_t put_new_folio, uintptr_t private,
 		struct folio *src, struct folio **dstp, enum migrate_mode mode,
 		enum migrate_reason reason, struct list_head *ret)
 {
@@ -1282,7 +1282,7 @@ out:
 }
 
 /* Migrate the folio to the newly allocated folio in dst. */
-static int migrate_folio_move(free_folio_t put_new_folio, unsigned long private,
+static int migrate_folio_move(free_folio_t put_new_folio, uintptr_t private,
 			      struct folio *src, struct folio *dst,
 			      enum migrate_mode mode, enum migrate_reason reason,
 			      struct list_head *ret)
@@ -1379,7 +1379,7 @@ out:
  * will wait in the page fault for migration to complete.
  */
 static int unmap_and_move_huge_page(new_folio_t get_new_folio,
-		free_folio_t put_new_folio, unsigned long private,
+		free_folio_t put_new_folio, uintptr_t private,
 		struct folio *src, int force, enum migrate_mode mode,
 		int reason, struct list_head *ret)
 {
@@ -1534,7 +1534,7 @@ struct migrate_pages_stats {
  * only if ret != 0.
  */
 static int migrate_hugetlbs(struct list_head *from, new_folio_t get_new_folio,
-			    free_folio_t put_new_folio, unsigned long private,
+			    free_folio_t put_new_folio, uintptr_t private,
 			    enum migrate_mode mode, int reason,
 			    struct migrate_pages_stats *stats,
 			    struct list_head *ret_folios)
@@ -1633,7 +1633,7 @@ static int migrate_hugetlbs(struct list_head *from, new_folio_t get_new_folio,
  */
 static int migrate_pages_batch(struct list_head *from,
 		new_folio_t get_new_folio, free_folio_t put_new_folio,
-		unsigned long private, enum migrate_mode mode, int reason,
+		uintptr_t private, enum migrate_mode mode, int reason,
 		struct list_head *ret_folios, struct list_head *split_folios,
 		struct migrate_pages_stats *stats, int nr_pass)
 {
@@ -1877,7 +1877,7 @@ out:
 }
 
 static int migrate_pages_sync(struct list_head *from, new_folio_t get_new_folio,
-		free_folio_t put_new_folio, unsigned long private,
+		free_folio_t put_new_folio, uintptr_t private,
 		enum migrate_mode mode, int reason,
 		struct list_head *ret_folios, struct list_head *split_folios,
 		struct migrate_pages_stats *stats)
@@ -1954,7 +1954,7 @@ static int migrate_pages_sync(struct list_head *from, new_folio_t get_new_folio,
  * split folios of the large folio are migrated successfully.
  */
 int migrate_pages(struct list_head *from, new_folio_t get_new_folio,
-		free_folio_t put_new_folio, unsigned long private,
+		free_folio_t put_new_folio, uintptr_t private,
 		enum migrate_mode mode, int reason, unsigned int *ret_succeeded)
 {
 	int rc, rc_gather;
@@ -2050,7 +2050,7 @@ out:
 	return rc_gather;
 }
 
-struct folio *alloc_migration_target(struct folio *src, unsigned long private)
+struct folio *alloc_migration_target(struct folio *src, uintptr_t private)
 {
 	struct migration_target_control *mtc;
 	gfp_t gfp_mask;
@@ -2112,7 +2112,7 @@ static int do_move_pages_to_node(struct list_head *pagelist, int node)
 	};
 
 	err = migrate_pages(pagelist, alloc_migration_target, NULL,
-		(unsigned long)&mtc, MIGRATE_SYNC, MR_SYSCALL, NULL);
+		(uintptr_t)&mtc, MIGRATE_SYNC, MR_SYSCALL, NULL);
 	if (err)
 		putback_movable_pages(pagelist);
 	return err;
@@ -2565,7 +2565,7 @@ static bool migrate_balanced_pgdat(struct pglist_data *pgdat,
 }
 
 static struct folio *alloc_misplaced_dst_folio(struct folio *src,
-					   unsigned long data)
+					   uintptr_t data)
 {
 	int nid = (int) data;
 	int order = folio_order(src);
