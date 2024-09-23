@@ -400,8 +400,13 @@ SYM_FUNC_END(__switch_to)
 #define do_page_fault do_trap_unknown
 #endif
 
+#ifndef CONFIG_CHERI_KERNEL
 	.section ".rodata"
 	.align LGREG
+#else
+	.section ".data"
+	.align CLGREG
+#endif
 	/* Exception vector table */
 SYM_DATA_START_LOCAL(excp_vect_table)
 	RISCV_PTR do_trap_insn_misaligned
@@ -439,6 +444,11 @@ SYM_DATA_START_LOCAL(excp_vect_table)
 	RISCV_PTR do_trap_cheri
 #endif
 SYM_DATA_END_LABEL(excp_vect_table, SYM_L_LOCAL, excp_vect_table_end)
+
+#ifndef CONFIG_CHERI_KERNEL
+	.section ".rodata"
+	.align LGREG
+#endif
 
 #ifndef CONFIG_MMU
 SYM_DATA_START(__user_rt_sigreturn)
