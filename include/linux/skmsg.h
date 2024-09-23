@@ -518,7 +518,7 @@ static inline bool sk_psock_strp_enabled(struct sk_psock *psock)
 
 static inline bool skb_bpf_strparser(const struct sk_buff *skb)
 {
-	unsigned long sk_redir = skb->_sk_redir;
+	uintptr_t sk_redir = skb->_sk_redir;
 
 	return sk_redir & BPF_F_STRPARSER;
 }
@@ -530,7 +530,7 @@ static inline void skb_bpf_set_strparser(struct sk_buff *skb)
 
 static inline bool skb_bpf_ingress(const struct sk_buff *skb)
 {
-	unsigned long sk_redir = skb->_sk_redir;
+	uintptr_t sk_redir = skb->_sk_redir;
 
 	return sk_redir & BPF_F_INGRESS;
 }
@@ -543,14 +543,14 @@ static inline void skb_bpf_set_ingress(struct sk_buff *skb)
 static inline void skb_bpf_set_redir(struct sk_buff *skb, struct sock *sk_redir,
 				     bool ingress)
 {
-	skb->_sk_redir = (unsigned long)sk_redir;
+	skb->_sk_redir = (uintptr_t)sk_redir;
 	if (ingress)
 		skb->_sk_redir |= BPF_F_INGRESS;
 }
 
 static inline struct sock *skb_bpf_redirect_fetch(const struct sk_buff *skb)
 {
-	unsigned long sk_redir = skb->_sk_redir;
+	uintptr_t sk_redir = skb->_sk_redir;
 
 	return (struct sock *)(sk_redir & BPF_F_PTR_MASK);
 }

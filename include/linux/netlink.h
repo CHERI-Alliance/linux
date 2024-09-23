@@ -294,12 +294,15 @@ struct netlink_callback {
 	int			flags;
 	bool			strict_check;
 	union {
+#ifndef CONFIG_CHERI_KERNEL
 		u8		ctx[48];
-
+#else
+		u8		ctx[96] __cheri_pointer_align;
+#endif
 		/* args is deprecated. Cast a struct over ctx instead
 		 * for proper type safety.
 		 */
-		long		args[6];
+		intptr_t	args[6];
 	};
 };
 

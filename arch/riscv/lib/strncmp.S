@@ -25,10 +25,10 @@ SYM_FUNC_START(strncmp)
 	li	t2, 0
 1:
 	beq	a2, t2, 2f
-	lbu	t0, 0(a0)
-	lbu	t1, 0(a1)
-	addi	a0, a0, 1
-	addi	a1, a1, 1
+	lbu	t0, 0(CREG(a0))
+	lbu	t1, 0(CREG(a1))
+	CREG(addi)	CREG(a0), CREG(a0), 1
+	CREG(addi)	CREG(a1), CREG(a1), 1
 	bne	t0, t1, 3f
 	addi	t2, t2, 1
 	bnez	t0, 1b

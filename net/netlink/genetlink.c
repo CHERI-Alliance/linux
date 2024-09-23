@@ -688,7 +688,7 @@ static void genl_sk_priv_free_by_sock(struct genl_family *family,
 
 	if (!family->sock_priv_size)
 		return;
-	priv = xa_erase(family->sock_privs, (unsigned long) sk);
+	priv = xa_erase(family->sock_privs, __c_pa(sk));
 	if (!priv)
 		return;
 	genl_sk_priv_free(family, priv);
@@ -724,7 +724,7 @@ void *__genl_sk_priv_get(struct genl_family *family, struct sock *sk)
 {
 	if (WARN_ON_ONCE(!family->sock_privs))
 		return ERR_PTR(-EINVAL);
-	return xa_load(family->sock_privs, (unsigned long) sk);
+	return xa_load(family->sock_privs, __c_pa(sk));
 }
 
 /**
@@ -753,7 +753,7 @@ void *genl_sk_priv_get(struct genl_family *family, struct sock *sk)
 	if (IS_ERR(priv))
 		return ERR_CAST(priv);
 
-	old_priv = xa_cmpxchg(family->sock_privs, (unsigned long) sk, NULL,
+	old_priv = xa_cmpxchg(family->sock_privs, __c_pa(sk), NULL,
 			      priv, GFP_KERNEL);
 	if (old_priv) {
 		genl_sk_priv_free(family, priv);
@@ -1355,7 +1355,7 @@ static int ctrl_dumpfamily(struct sk_buff *skb, struct netlink_callback *cb)
 	int n = 0;
 	struct genl_family *rt;
 	struct net *net = sock_net(skb->sk);
-	int fams_to_skip = cb->args[0];
+	int fams_to_skip = __c_ua(cb->args[0]);
 	unsigned int id;
 	int err = 0;
 
@@ -1375,7 +1375,7 @@ static int ctrl_dumpfamily(struct sk_buff *skb, struct netlink_callback *cb)
 		}
 	}
 
-	cb->args[0] = n;
+	cb->args[0] = __c_fakeu(n);
 	return err;
 }
 

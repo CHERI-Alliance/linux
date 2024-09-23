@@ -6,6 +6,13 @@
 #include <linux/linkage.h>
 #include <asm/asm.h>
 
+/*
+ * FIXCHERI: In CHERI use the optimized memmove instead of memcpy
+ * FIXCHERI: for now.
+ */
+
+#ifndef CONFIG_CHERI_KERNEL
+
 /* void *memcpy(void *, const void *, size_t) */
 SYM_FUNC_START(__memcpy)
 	move t6, a0  /* Preserve return value */
@@ -108,3 +115,5 @@ SYM_FUNC_END(__memcpy)
 SYM_FUNC_ALIAS_WEAK(memcpy, __memcpy)
 SYM_FUNC_ALIAS(__pi_memcpy, __memcpy)
 SYM_FUNC_ALIAS(__pi___memcpy, __memcpy)
+
+#endif

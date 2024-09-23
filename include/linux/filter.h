@@ -509,6 +509,8 @@ static inline bool insn_is_cast_user(const struct bpf_insn *insn)
 		bpf_size = BPF_W;				\
 	else if (bytes == sizeof(u64))				\
 		bpf_size = BPF_DW;				\
+	else if (bytes == 2 * sizeof(u64))			\
+		bpf_size = BPF_QW;				\
 								\
 	bpf_size;						\
 })
@@ -576,23 +578,23 @@ static inline bool insn_is_cast_user(const struct bpf_insn *insn)
 #define __BPF_N
 
 #define __BPF_DECL_ARGS(t, a) t   a
-#define __BPF_DECL_REGS(t, a) u64 a
+#define __BPF_DECL_REGS(t, a) uintptr_t a
 
 #define __BPF_PAD(n)							       \
-	__BPF_MAP(n, __BPF_DECL_ARGS, __BPF_N, u64, __ur_1, u64, __ur_2,       \
-		  u64, __ur_3, u64, __ur_4, u64, __ur_5)
+	__BPF_MAP(n, __BPF_DECL_ARGS, __BPF_N, uintptr_t, __ur_1, uintptr_t, __ur_2,       \
+		  uintptr_t, __ur_3, uintptr_t, __ur_4, uintptr_t, __ur_5)
 
 #define BPF_CALL_x(x, attr, name, ...)					       \
 	static __always_inline						       \
-	u64 ____##name(__BPF_MAP(x, __BPF_DECL_ARGS, __BPF_V, __VA_ARGS__));   \
-	typedef u64 (*btf_##name)(__BPF_MAP(x, __BPF_DECL_ARGS, __BPF_V, __VA_ARGS__)); \
-	attr u64 name(__BPF_REG(x, __BPF_DECL_REGS, __BPF_N, __VA_ARGS__));    \
-	attr u64 name(__BPF_REG(x, __BPF_DECL_REGS, __BPF_N, __VA_ARGS__))     \
+	uintptr_t ____##name(__BPF_MAP(x, __BPF_DECL_ARGS, __BPF_V, __VA_ARGS__));   \
+	typedef uintptr_t (*btf_##name)(__BPF_MAP(x, __BPF_DECL_ARGS, __BPF_V, __VA_ARGS__)); \
+	attr uintptr_t name(__BPF_REG(x, __BPF_DECL_REGS, __BPF_N, __VA_ARGS__));    \
+	attr uintptr_t name(__BPF_REG(x, __BPF_DECL_REGS, __BPF_N, __VA_ARGS__))     \
 	{								       \
 		return ((btf_##name)____##name)(__BPF_MAP(x,__BPF_CAST,__BPF_N,__VA_ARGS__));\
 	}								       \
 	static __always_inline						       \
-	u64 ____##name(__BPF_MAP(x, __BPF_DECL_ARGS, __BPF_V, __VA_ARGS__))
+	uintptr_t ____##name(__BPF_MAP(x, __BPF_DECL_ARGS, __BPF_V, __VA_ARGS__))
 
 #define __NOATTR
 #define BPF_CALL_0(name, ...)	BPF_CALL_x(0, __NOATTR, name, __VA_ARGS__)
@@ -926,7 +928,7 @@ static inline int __must_check bpf_prog_lock_ro(struct bpf_prog *fp)
 #ifndef CONFIG_BPF_JIT_ALWAYS_ON
 	if (!fp->jited) {
 		set_vm_flush_reset_perms(fp);
-		return set_memory_ro((unsigned long)fp, fp->pages);
+		return set_memory_ro(__c_pa(fp), fp->pages);
 	}
 #endif
 	return 0;

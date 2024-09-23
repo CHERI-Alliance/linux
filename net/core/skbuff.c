@@ -1965,7 +1965,7 @@ int skb_copy_ubufs(struct sk_buff *skb, gfp_t gfp_mask)
 			}
 			return -ENOMEM;
 		}
-		set_page_private(page, (unsigned long)head);
+		set_page_private(page, (uintptr_t)head);
 		head = page;
 	}
 
@@ -2276,12 +2276,16 @@ int pskb_expand_head(struct sk_buff *skb, int nhead, int ntail,
 	skb->head     = data;
 	skb->head_frag = 0;
 	skb->data    += off;
+	cheri_fixup_bounds(data, skb->data);
 
 	skb_set_end_offset(skb, size);
 #ifdef NET_SKBUFF_DATA_USES_OFFSET
 	off           = nhead;
 #endif
 	skb->tail	      += off;
+#ifndef NET_SKBUFF_DATA_USES_OFFSET
+	cheri_fixup_bounds(data, skb->tail);
+#endif
 	skb_headers_offset_update(skb, nhead);
 	skb->cloned   = 0;
 	skb->hdr_len  = 0;
@@ -3129,7 +3133,7 @@ static bool __skb_splice_bits(struct sk_buff *skb, struct pipe_inode_info *pipe,
 	 * we can avoid a copy since we own the head portion of this page.
 	 */
 	if (__splice_segment(virt_to_page(skb->data),
-			     (unsigned long) skb->data & (PAGE_SIZE - 1),
+			     __c_pa(skb->data) & (PAGE_SIZE - 1),
 			     skb_headlen(skb),
 			     offset, len, spd,
 			     skb_head_is_locked(skb),

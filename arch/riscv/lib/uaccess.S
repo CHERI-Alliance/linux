@@ -13,7 +13,8 @@
 	.endm
 
 SYM_FUNC_START(__asm_copy_to_user)
-#ifdef CONFIG_RISCV_ISA_V
+#if defined(CONFIG_RISCV_ISA_V) && !defined(CONFIG_RISCV_CHERI_BAKEWELL)
+	/* FIXCHERI: ISA_V version is not CHERI ready. */
 	ALTERNATIVE("j fallback_scalar_usercopy", "nop", 0, RISCV_ISA_EXT_v, CONFIG_RISCV_ISA_V)
 	REG_L	t0, riscv_v_usercopy_threshold
 	bltu	a2, t0, fallback_scalar_usercopy
@@ -58,13 +59,14 @@ SYM_FUNC_START(fallback_scalar_usercopy)
 	beq	a0, t1, .Lskip_align_dst
 1:
 	/* a5 - one byte for copying data */
-	fixup lb      a5, 0(a1), 10f
-	addi	a1, a1, 1	/* src */
-	fixup sb      a5, 0(a0), 10f
-	addi	a0, a0, 1	/* dst */
+	fixup lb	a5, 0(CREG(a1)), 10f
+	CREG(addi)	CREG(a1), CREG(a1), 1	/* src */
+	fixup sb	a5, 0(CREG(a0)), 10f
+	CREG(addi)	CREG(a0), CREG(a0), 1	/* dst */
 	bltu	a0, t1, 1b	/* t1 - start of aligned dst */
 
 .Lskip_align_dst:
+
 	/*
 	 * Now dst is aligned.
 	 * Use shift-copy if src is misaligned.
@@ -85,30 +87,37 @@ SYM_FUNC_START(fallback_scalar_usercopy)
 	 */
 	addi	t0, t0, -(8*SZREG) /* not to over run */
 2:
-	fixup REG_L   a4,        0(a1), 10f
-	fixup REG_L   a5,    SZREG(a1), 10f
-	fixup REG_L   a6,  2*SZREG(a1), 10f
-	fixup REG_L   a7,  3*SZREG(a1), 10f
-	fixup REG_L   t1,  4*SZREG(a1), 10f
-	fixup REG_L   t2,  5*SZREG(a1), 10f
-	fixup REG_L   t3,  6*SZREG(a1), 10f
-	fixup REG_L   t4,  7*SZREG(a1), 10f
-	fixup REG_S   a4,        0(a0), 10f
-	fixup REG_S   a5,    SZREG(a0), 10f
-	fixup REG_S   a6,  2*SZREG(a0), 10f
-	fixup REG_S   a7,  3*SZREG(a0), 10f
-	fixup REG_S   t1,  4*SZREG(a0), 10f
-	fixup REG_S   t2,  5*SZREG(a0), 10f
-	fixup REG_S   t3,  6*SZREG(a0), 10f
-	fixup REG_S   t4,  7*SZREG(a0), 10f
-	addi	a0, a0, 8*SZREG
-	addi	a1, a1, 8*SZREG
-	bleu	a0, t0, 2b
+	fixup REG_L   a4,        0(CREG(a1)), 10f
+	fixup REG_L   a5,    SZREG(CREG(a1)), 10f
+	fixup REG_L   a6,  2*SZREG(CREG(a1)), 10f
+	fixup REG_L   a7,  3*SZREG(CREG(a1)), 10f
+	fixup REG_L   t1,  4*SZREG(CREG(a1)), 10f
+	fixup REG_L   t2,  5*SZREG(CREG(a1)), 10f
+	fixup REG_L   t3,  6*SZREG(CREG(a1)), 10f
+	fixup REG_L   t4,  7*SZREG(CREG(a1)), 10f
+	fixup REG_S   a4,        0(CREG(a0)), 10f
+	fixup REG_S   a5,    SZREG(CREG(a0)), 10f
+	fixup REG_S   a6,  2*SZREG(CREG(a0)), 10f
+	fixup REG_S   a7,  3*SZREG(CREG(a0)), 10f
+	fixup REG_S   t1,  4*SZREG(CREG(a0)), 10f
+	fixup REG_S   t2,  5*SZREG(CREG(a0)), 10f
+	fixup REG_S   t3,  6*SZREG(CREG(a0)), 10f
+	fixup REG_S   t4,  7*SZREG(CREG(a0)), 10f
+	CREG(addi)	CREG(a0), CREG(a0), 8*SZREG
+	CREG(addi)	CREG(a1), CREG(a1), 8*SZREG
+	bltu	a0, t0, 2b
 
 	addi	t0, t0, 8*SZREG /* revert to original value */
 	j	.Lbyte_copy_tail
 
 .Lshift_copy:
+#ifdef CONFIG_CHERI_KERNEL
+	/*
+	 * FIXCHERI: No shift copy for now. The code accesses the first
+	 * word out of bounds.
+	 */
+	j .Lbyte_copy_tail
+#endif
 
 	/*
 	 * Word copy with shifting.
@@ -125,8 +134,14 @@ SYM_FUNC_START(fallback_scalar_usercopy)
 	 */
 	/* calculating aligned word boundary for dst */
 	andi	t1, t0, ~(SZREG-1)
+#ifndef CONFIG_CHERI_KERNEL
 	/* Converting unaligned src to aligned src */
 	andi	a1, a1, ~(SZREG-1)
+#else
+	andi	t3, a1, SZREG-1
+	neg	t3, t3
+	cadd	ca1, ca1, t3
+#endif
 
 	/*
 	 * Calculate shifts
@@ -138,7 +153,7 @@ SYM_FUNC_START(fallback_scalar_usercopy)
 	sub	t4, a5, t3
 
 	/* Load the first word to combine with second word */
-	fixup REG_L   a5, 0(a1), 10f
+	fixup REG_L   a5, 0(CREG(a1)), 10f
 
 3:
 	/* Main shifting copy
@@ -150,16 +165,16 @@ SYM_FUNC_START(fallback_scalar_usercopy)
 
 	/* At least one iteration will be executed */
 	srl	a4, a5, t3
-	fixup REG_L   a5, SZREG(a1), 10f
-	addi	a1, a1, SZREG
+	fixup REG_L   a5, SZREG(CREG(a1)), 10f
+	CREG(addi)	CREG(a1), CREG(a1), SZREG
 	sll	a2, a5, t4
 	or	a2, a2, a4
-	fixup REG_S   a2, 0(a0), 10f
-	addi	a0, a0, SZREG
+	fixup REG_S   a2, 0(CREG(a0)), 10f
+	CREG(addi)	CREG(a0), CREG(a0), SZREG
 	bltu	a0, t1, 3b
 
 	/* Revert src to original unaligned value  */
-	add	a1, a1, a3
+	CREG(add)	CREG(a1), CREG(a1), a3
 
 .Lbyte_copy_tail:
 	/*
@@ -171,10 +186,10 @@ SYM_FUNC_START(fallback_scalar_usercopy)
 	 */
 	bgeu	a0, t0, .Lout_copy_user  /* check if end of copy */
 4:
-	fixup lb      a5, 0(a1), 10f
-	addi	a1, a1, 1	/* src */
-	fixup sb      a5, 0(a0), 10f
-	addi	a0, a0, 1	/* dst */
+	fixup lb	a5, 0(CREG(a1)), 10f
+	CREG(addi)	CREG(a1), CREG(a1), 1	/* src */
+	fixup sb	a5, 0(CREG(a0)), 10f
+	CREG(addi)	CREG(a0), CREG(a0), 1	/* dst */
 	bltu	a0, t0, 4b	/* t0 - end of dst */
 
 .Lout_copy_user:
@@ -214,8 +229,8 @@ SYM_FUNC_START(__clear_user)
 	bgeu t0, t1, 2f
 	bltu a0, t0, 4f
 1:
-	fixup REG_S, zero, (a0), 11f
-	addi a0, a0, SZREG
+	fixup REG_S, zero, (CREG(a0)), 11f
+	CREG(addi) CREG(a0), CREG(a0), SZREG
 	bltu a0, t1, 1b
 2:
 	bltu a0, a3, 5f
@@ -226,13 +241,13 @@ SYM_FUNC_START(__clear_user)
 	li a0, 0
 	ret
 4: /* Edge case: unalignment */
-	fixup sb, zero, (a0), 11f
-	addi a0, a0, 1
+	fixup sb, zero, (CREG(a0)), 11f
+	CREG(addi) CREG(a0), CREG(a0), 1
 	bltu a0, t0, 4b
 	j 1b
 5: /* Edge case: remainder */
-	fixup sb, zero, (a0), 11f
-	addi a0, a0, 1
+	fixup sb, zero, (CREG(a0)), 11f
+	CREG(addi) CREG(a0), CREG(a0), 1
 	bltu a0, a3, 5b
 	j 3b
 

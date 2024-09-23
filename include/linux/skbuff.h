@@ -892,7 +892,7 @@ struct sk_buff {
 #ifndef CONFIG_CHERI_KERNEL
 	char			cb[48] __aligned(8);
 #else
-	char			cb[96] __aligned(16);
+	char			cb[96] __cheri_pointer_align;
 #endif
 
 	union {

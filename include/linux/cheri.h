@@ -213,6 +213,19 @@ __c_fakeu(ptraddr_t val)
 	return (uintptr_t __force)val;
 }
 
+/*
+ * Fix the bounds of a pointer by taking them from another pointer.
+ * This is useful in some special case, e.g. after reallocation when
+ * we know that the address in a pointer should be within the bounds
+ * of another pointer but due to address calculations the tag and bounds
+ * on the pointer may have been lost.
+ */
+#define cheri_fixup_bounds(__AUTH, __TOFIX) do {	\
+	void * __tofix = (__TOFIX);			\
+	void * __auth = (__AUTH);			\
+	(__TOFIX) = __auth + (__tofix - __auth);	\
+} while (0)
+
 #ifdef CONFIG_CHERI_KERNEL
 
 #define __cheri_pointer_align __attribute__((aligned(__SIZEOF_POINTER__)))

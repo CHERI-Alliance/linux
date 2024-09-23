@@ -22,10 +22,10 @@ SYM_FUNC_START(strcmp)
 	 *   t0, t1
 	 */
 1:
-	lbu	t0, 0(a0)
-	lbu	t1, 0(a1)
-	addi	a0, a0, 1
-	addi	a1, a1, 1
+	lbu	t0, 0(CREG(a0))
+	lbu	t1, 0(CREG(a1))
+	CREG(addi)	CREG(a0), CREG(a0), 1
+	CREG(addi)	CREG(a1), CREG(a1), 1
 	bne	t0, t1, 2f
 	bnez	t0, 1b
 	li	a0, 0
@@ -69,12 +69,12 @@ strcmp_zbb:
 	/* Main loop for aligned string.  */
 	.p2align 3
 1:
-	REG_L	t0, 0(a0)
-	REG_L	t1, 0(a1)
+	REG_L	t0, 0(CREG(a0))
+	REG_L	t1, 0(CREG(a1))
 	orc.b	t3, t0
 	bne	t3, t4, 2f
-	addi	a0, a0, SZREG
-	addi	a1, a1, SZREG
+	CREG(addi)	CREG(a0), CREG(a0), SZREG
+	CREG(addi)	CREG(a1), CREG(a1), SZREG
 	beq	t0, t1, 1b
 
 	/*
@@ -106,10 +106,10 @@ strcmp_zbb:
 	/* Simple loop for misaligned strings. */
 	.p2align 3
 3:
-	lbu	t0, 0(a0)
-	lbu	t1, 0(a1)
-	addi	a0, a0, 1
-	addi	a1, a1, 1
+	lbu	t0, 0(CREG(a0))
+	lbu	t1, 0(CREG(a1))
+	CREG(addi)	CREG(a0), CREG(a0), 1
+	CREG(addi)	CREG(a1), CREG(a1), 1
 	bne	t0, t1, 4f
 	bnez	t0, 3b
 

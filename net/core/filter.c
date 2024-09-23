@@ -1705,11 +1705,11 @@ BPF_CALL_5(bpf_skb_store_bytes, struct sk_buff *, skb, u32, offset,
 	void *ptr;
 
 	if (unlikely(flags & ~(BPF_F_RECOMPUTE_CSUM | BPF_F_INVALIDATE_HASH)))
-		return -EINVAL;
+		return __c_fakeu((long)-EINVAL);
 	if (unlikely(offset > INT_MAX))
-		return -EFAULT;
+		return __c_fakeu((long)-EFAULT);
 	if (unlikely(bpf_try_make_writable(skb, offset + len)))
-		return -EFAULT;
+		return __c_fakeu((long)-EFAULT);
 
 	ptr = skb->data + offset;
 	if (flags & BPF_F_RECOMPUTE_CSUM)
@@ -1739,7 +1739,7 @@ static const struct bpf_func_proto bpf_skb_store_bytes_proto = {
 int __bpf_skb_store_bytes(struct sk_buff *skb, u32 offset, const void *from,
 			  u32 len, u64 flags)
 {
-	return ____bpf_skb_store_bytes(skb, offset, from, len, flags);
+	return (long)__c_ua(____bpf_skb_store_bytes(skb, offset, from, len, flags));
 }
 
 BPF_CALL_4(bpf_skb_load_bytes, const struct sk_buff *, skb, u32, offset,
@@ -1759,7 +1759,7 @@ BPF_CALL_4(bpf_skb_load_bytes, const struct sk_buff *, skb, u32, offset,
 	return 0;
 err_clear:
 	memset(to, 0, len);
-	return -EFAULT;
+	return __c_fakeu((long)-EFAULT);
 }
 
 static const struct bpf_func_proto bpf_skb_load_bytes_proto = {
@@ -1774,7 +1774,7 @@ static const struct bpf_func_proto bpf_skb_load_bytes_proto = {
 
 int __bpf_skb_load_bytes(const struct sk_buff *skb, u32 offset, void *to, u32 len)
 {
-	return ____bpf_skb_load_bytes(skb, offset, to, len);
+	return (long)__c_ua(____bpf_skb_load_bytes(skb, offset, to, len));
 }
 
 BPF_CALL_4(bpf_flow_dissector_load_bytes,
@@ -1798,7 +1798,7 @@ BPF_CALL_4(bpf_flow_dissector_load_bytes,
 	return 0;
 err_clear:
 	memset(to, 0, len);
-	return -EFAULT;
+	return __c_fakeu((long)-EFAULT);
 }
 
 static const struct bpf_func_proto bpf_flow_dissector_load_bytes_proto = {
@@ -4026,7 +4026,7 @@ BPF_CALL_4(bpf_xdp_load_bytes, struct xdp_buff *, xdp, u32, offset,
 
 	ptr = bpf_xdp_pointer(xdp, offset, len);
 	if (IS_ERR(ptr))
-		return PTR_ERR(ptr);
+		return (uintptr_t)ptr;
 
 	if (!ptr)
 		bpf_xdp_copy_buf(xdp, offset, buf, len, false);
@@ -4048,7 +4048,7 @@ static const struct bpf_func_proto bpf_xdp_load_bytes_proto = {
 
 int __bpf_xdp_load_bytes(struct xdp_buff *xdp, u32 offset, void *buf, u32 len)
 {
-	return ____bpf_xdp_load_bytes(xdp, offset, buf, len);
+	return (long)__c_ua(____bpf_xdp_load_bytes(xdp, offset, buf, len));
 }
 
 BPF_CALL_4(bpf_xdp_store_bytes, struct xdp_buff *, xdp, u32, offset,
@@ -4058,7 +4058,7 @@ BPF_CALL_4(bpf_xdp_store_bytes, struct xdp_buff *, xdp, u32, offset,
 
 	ptr = bpf_xdp_pointer(xdp, offset, len);
 	if (IS_ERR(ptr))
-		return PTR_ERR(ptr);
+		return (uintptr_t)ptr;
 
 	if (!ptr)
 		bpf_xdp_copy_buf(xdp, offset, buf, len, true);
@@ -4080,7 +4080,7 @@ static const struct bpf_func_proto bpf_xdp_store_bytes_proto = {
 
 int __bpf_xdp_store_bytes(struct xdp_buff *xdp, u32 offset, void *buf, u32 len)
 {
-	return ____bpf_xdp_store_bytes(xdp, offset, buf, len);
+	return (long)__c_ua(____bpf_xdp_store_bytes(xdp, offset, buf, len));
 }
 
 static int bpf_xdp_frags_increase_tail(struct xdp_buff *xdp, int offset)
@@ -9857,7 +9857,7 @@ static u32 bpf_convert_ctx_access(enum bpf_access_type type,
 		*insn++ = BPF_LDX_MEM(BPF_DW,
 				      si->dst_reg, si->dst_reg,
 				      bpf_target_off(struct skb_shared_info,
-						     hwtstamps, 8,
+						     hwtstamps, sizeof(uintptr_t),
 						     target_size));
 		break;
 	}
@@ -10716,7 +10716,7 @@ static u32 sock_ops_convert_ctx_access(enum bpf_access_type type,
 		insn = bpf_convert_shinfo_access(si->dst_reg, si->dst_reg, insn);
 		*insn++ = BPF_LDX_MEM(BPF_DW, si->dst_reg, si->dst_reg,
 				      bpf_target_off(struct skb_shared_info,
-						     hwtstamps, 8,
+						     hwtstamps, sizeof(uintptr_t),
 						     target_size));
 		*jmp_on_null_skb = BPF_JMP_IMM(BPF_JEQ, si->dst_reg, 0,
 					       insn - jmp_on_null_skb - 1);

@@ -169,9 +169,9 @@ int nf_conntrack_tuple_taken(const struct nf_conntrack_tuple *tuple,
 static inline struct nf_conn *
 nf_ct_get(const struct sk_buff *skb, enum ip_conntrack_info *ctinfo)
 {
-	unsigned long nfct = skb_get_nfct(skb);
+	uintptr_t nfct = skb_get_nfct(skb);
 
-	*ctinfo = nfct & NFCT_INFOMASK;
+	*ctinfo = __c_ua(nfct) & NFCT_INFOMASK;
 	return (struct nf_conn *)(nfct & NFCT_PTRMASK);
 }
 
@@ -362,7 +362,7 @@ u32 nf_conntrack_count(const struct net *net);
 static inline void
 nf_ct_set(struct sk_buff *skb, struct nf_conn *ct, enum ip_conntrack_info info)
 {
-	skb_set_nfct(skb, (unsigned long)ct | info);
+	skb_set_nfct(skb, (uintptr_t)ct | info);
 }
 
 extern unsigned int nf_conntrack_net_id;

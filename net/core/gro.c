@@ -363,7 +363,7 @@ static void gro_list_prepare(const struct list_head *head,
 			continue;
 		}
 
-		diffs = (unsigned long)p->dev ^ (unsigned long)skb->dev;
+		diffs = __c_pa(p->dev) ^ __c_pa(skb->dev);
 		diffs |= p->vlan_all ^ skb->vlan_all;
 		diffs |= skb_metadata_differs(p, skb);
 		if (maclen == ETH_HLEN)
@@ -382,7 +382,7 @@ static void gro_list_prepare(const struct list_head *head,
 		if (!diffs && unlikely(skb->slow_gro | p->slow_gro)) {
 			diffs |= p->sk != skb->sk;
 			diffs |= skb_metadata_dst_cmp(p, skb);
-			diffs |= skb_get_nfct(p) ^ skb_get_nfct(skb);
+			diffs |= __c_ua(skb_get_nfct(p)) ^ __c_ua(skb_get_nfct(skb));
 
 			diffs |= gro_list_prepare_tc_ext(skb, p, diffs);
 		}

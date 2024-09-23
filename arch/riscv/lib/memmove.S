@@ -28,6 +28,78 @@ SYM_FUNC_START(__memmove)
 	beq a0, a1, .Lreturn_from_memmove
 	beqz a2, .Lreturn_from_memmove
 
+#ifdef CONFIG_CHERI_KERNEL
+	andi t0, a0, CSZREG-1
+	andi t1, a1, CSZREG-1
+	bne t0, t1, .Lnormal
+
+	bleu a0, a1, .Lcapfwd
+
+	cadd ca0, ca0, a2
+	cadd ca1, ca1, a2
+
+.Lcapback:
+	beqz a2, .Lreturn_from_memmove
+	andi t0, a0, CSZREG-1
+	beqz t0, .Lcapback_aligned
+	caddi ca0, ca0, -1
+	caddi ca1, ca1, -1
+	addi a2, a2, -1
+	lbu t0, (ca1)
+	sb t0, (ca0)
+	j .Lcapback
+
+.Lcapback_aligned:
+	andi t1, a2, -CSZREG
+	beqz t1, .Lcapback_tail
+	caddi ca0, ca0, -CSZREG
+	caddi ca1, ca1,  -CSZREG
+	addi a2, a2, -CSZREG
+	lc ct0, (ca1)
+	sc ct0, (ca0)
+	j .Lcapback_aligned
+
+.Lcapback_tail:
+	beqz a2, .Lreturn_from_memmove
+	caddi ca0, ca0, -1
+	caddi ca1, ca1, -1
+	addi a2, a2, -1
+	lbu t0, (ca1)
+	sb t0, (ca0)
+	j .Lcapback_tail
+
+.Lcapfwd:
+	beqz a2, .Lreturn_from_memmove
+	andi t0, a0, CSZREG-1
+	beqz t0, .Lcapfwd_aligned
+	lbu t0, (ca1)
+	sb t0, (ca0)
+	caddi ca0, ca0, 1
+	caddi ca1, ca1, 1
+	addi a2, a2, -1
+	j .Lcapfwd
+
+.Lcapfwd_aligned:
+	andi t1, a2, -CSZREG
+	beqz t1, .Lcapfwd_tail
+	lc ct0, (ca1)
+	sc ct0, (ca0)
+	caddi ca0, ca0, CSZREG
+	caddi ca1, ca1, CSZREG
+	addi a2, a2, -CSZREG
+	j .Lcapfwd_aligned
+
+.Lcapfwd_tail:
+	beqz a2, .Lreturn_from_memmove
+	lbu t0, (ca1)
+	sb t0, (ca0)
+	caddi ca0, ca0, 1
+	caddi ca1, ca1, 1
+	addi a2, a2, -1
+	j .Lcapfwd_tail
+
+.Lnormal:
+#endif /* CONFIG_CHERI_KERNEL */
 	/*
 	 * Register Uses
 	 *      Forward Copy: a1 - Index counter of src
@@ -49,9 +121,9 @@ SYM_FUNC_START(__memmove)
 	 * Solve for some register values now.
 	 * Byte copy does not need t5 or t6.
 	 */
-	mv   t3, a0
-	add  t4, a0, a2
-	add  a4, a1, a2
+	CREG(mv)  CREG(t3), CREG(a0)
+	CREG(add) CREG(t4), CREG(a0), a2
+	CREG(add) CREG(a4), CREG(a1), a2
 
 	/*
 	 * Byte copy if copying less than (2 * SZREG) bytes. This can
@@ -64,8 +136,18 @@ SYM_FUNC_START(__memmove)
 	/*
 	 * Now solve for t5 and t6.
 	 */
+#ifndef CONFIG_CHERI_KERNEL
 	andi t5, t3, -SZREG
 	andi t6, t4, -SZREG
+#else
+	andi t5, t3, SZREG-1
+	neg t5, t5
+	cadd ct5, ct3, t5
+	andi t6, t4, SZREG-1
+	neg t6, t6
+	cadd ct6, ct4, t6
+#endif
+
 	/*
 	 * If dest(Register t3) rounded down to the nearest naturally
 	 * aligned SZREG address, does not equal dest, then add SZREG
@@ -76,7 +158,7 @@ SYM_FUNC_START(__memmove)
 	 * Otherwise, dest is already naturally aligned to SZREG.
 	 */
 	beq  t5, t3, 1f
-		addi t5, t5, SZREG
+		CREG(addi) CREG(t5), CREG(t5), SZREG
 	1:
 
 	/*
@@ -89,17 +171,32 @@ SYM_FUNC_START(__memmove)
 	beqz t1, .Lcoaligned_copy
 	/* Fall through to misaligned fixup copy */
 
+#ifdef CONFIG_CHERI_KERNEL
+	/*
+	 * FIXCHERI: The code for misaligned copy reads data before
+	 * the start of the copy region. Disable it for now.
+	 */
+	j .Lbyte_copy
+#endif
+
 .Lmisaligned_fixup_copy:
 	bltu a1, a0, .Lmisaligned_fixup_copy_reverse
 
 .Lmisaligned_fixup_copy_forward:
-	jal  t0, .Lbyte_copy_until_aligned_forward
+	jal  CREG(t0), .Lbyte_copy_until_aligned_forward
 
 	andi a5, a1, (SZREG - 1) /* Find the alignment offset of src (a1) */
 	slli a6, a5, 3 /* Multiply by 8 to convert that to bits to shift */
 	sub  a5, a1, t3 /* Find the difference between src and dest */
+#ifndef CONFIG_CHERI_KERNEL
 	andi a1, a1, -SZREG /* Align the src pointer */
 	addi a2, t6, SZREG /* The other breakpoint for the unrolled loop*/
+#else
+	andi a7, a1, SZREG-1
+	neg a7, a7
+	cadd ca1, ca1, a7 /* Align the src pointer */
+	caddi ca2, ct6, SZREG /* The other breakpoint for the unrolled loop*/
+#endif
 
 	/*
 	 * Compute The Inverse Shift
@@ -129,39 +226,48 @@ SYM_FUNC_START(__memmove)
 	 * store_ptr = store_ptr_end;
 	 */
 
-	REG_L t0, (0 * SZREG)(a1)
+	REG_L t0, (0 * SZREG)(CREG(a1))
 	1:
-	REG_L t1, (1 * SZREG)(a1)
-	addi  t3, t3, (2 * SZREG)
+	REG_L t1, (1 * SZREG)(CREG(a1))
+	CREG(addi)  CREG(t3), CREG(t3), (2 * SZREG)
 	srl   t0, t0, a6
 	sll   t2, t1, a7
 	or    t2, t0, t2
-	REG_S t2, ((0 * SZREG) - (2 * SZREG))(t3)
+	REG_S t2, ((0 * SZREG) - (2 * SZREG))(CREG(t3))
 
 	beq   t3, a2, 2f
 
-	REG_L t0, (2 * SZREG)(a1)
-	addi  a1, a1, (2 * SZREG)
+	REG_L t0, (2 * SZREG)(CREG(a1))
+	CREG(addi)  CREG(a1), CREG(a1), (2 * SZREG)
 	srl   t1, t1, a6
 	sll   t2, t0, a7
 	or    t2, t1, t2
-	REG_S t2, ((1 * SZREG) - (2 * SZREG))(t3)
+	REG_S t2, ((1 * SZREG) - (2 * SZREG))(CREG(t3))
 
 	bne   t3, t6, 1b
 	2:
-	mv    t3, t6 /* Fix the dest pointer in case the loop was broken */
+	CREG(mv)   CREG(t3), CREG(t6) /* Fix the dest pointer in case the loop was broken */
 
-	add  a1, t3, a5 /* Restore the src pointer */
+	CREG(add)  CREG(a1), CREG(t3), a5 /* Restore the src pointer */
 	j .Lbyte_copy_forward /* Copy any remaining bytes */
 
 .Lmisaligned_fixup_copy_reverse:
-	jal  t0, .Lbyte_copy_until_aligned_reverse
+	jal  CREG(t0), .Lbyte_copy_until_aligned_reverse
 
 	andi a5, a4, (SZREG - 1) /* Find the alignment offset of src (a4) */
 	slli a6, a5, 3 /* Multiply by 8 to convert that to bits to shift */
 	sub  a5, a4, t4 /* Find the difference between src and dest */
+#ifndef CONFIG_CHERI_KERNEL
 	andi a4, a4, -SZREG /* Align the src pointer */
 	addi a2, t5, -SZREG /* The other breakpoint for the unrolled loop*/
+#else
+	andi a7, a4, SZREG-1
+	neg a7, a7
+	cadd ca4, ca4, a7 /* Align the src pointer */
+	andi a7, t5, SZREG-1
+	neg a7, a7
+	cadd ca2, ct5, a7 /* The other breakpoint for the unrolled loop*/
+#endif
 
 	/*
 	 * Compute The Inverse Shift
@@ -191,29 +297,29 @@ SYM_FUNC_START(__memmove)
 	 * store_ptr = store_ptr_end;
 	 */
 
-	REG_L t1, ( 0 * SZREG)(a4)
+	REG_L t1, ( 0 * SZREG)(CREG(a4))
 	1:
-	REG_L t0, (-1 * SZREG)(a4)
-	addi  t4, t4, (-2 * SZREG)
+	REG_L t0, (-1 * SZREG)(CREG(a4))
+	CREG(addi) CREG(t4), CREG(t4), (-2 * SZREG)
 	sll   t1, t1, a7
 	srl   t2, t0, a6
 	or    t2, t1, t2
-	REG_S t2, ( 1 * SZREG)(t4)
+	REG_S t2, ( 1 * SZREG)(CREG(t4))
 
 	beq   t4, a2, 2f
 
-	REG_L t1, (-2 * SZREG)(a4)
-	addi  a4, a4, (-2 * SZREG)
+	REG_L t1, (-2 * SZREG)(CREG(a4))
+	CREG(addi)  CREG(a4), CREG(a4), (-2 * SZREG)
 	sll   t0, t0, a7
 	srl   t2, t1, a6
 	or    t2, t0, t2
-	REG_S t2, ( 0 * SZREG)(t4)
+	REG_S t2, ( 0 * SZREG)(CREG(t4))
 
 	bne   t4, t5, 1b
 	2:
-	mv    t4, t5 /* Fix the dest pointer in case the loop was broken */
+	CREG(mv)    CREG(t4), CREG(t5) /* Fix the dest pointer in case the loop was broken */
 
-	add  a4, t4, a5 /* Restore the src pointer */
+	CREG(add)  CREG(a4), CREG(t4), a5 /* Restore the src pointer */
 	j .Lbyte_copy_reverse /* Copy any remaining bytes */
 
 /*
@@ -225,25 +331,25 @@ SYM_FUNC_START(__memmove)
 	bltu a1, a0, .Lcoaligned_copy_reverse
 
 .Lcoaligned_copy_forward:
-	jal t0, .Lbyte_copy_until_aligned_forward
+	jal CREG(t0), .Lbyte_copy_until_aligned_forward
 
 	1:
-	REG_L t1, ( 0 * SZREG)(a1)
-	addi  a1, a1, SZREG
-	addi  t3, t3, SZREG
-	REG_S t1, (-1 * SZREG)(t3)
+	REG_L t1, ( 0 * SZREG)(CREG(a1))
+	CREG(addi) CREG(a1), CREG(a1), SZREG
+	CREG(addi) CREG(t3), CREG(t3), SZREG
+	REG_S t1, (-1 * SZREG)(CREG(t3))
 	bne   t3, t6, 1b
 
 	j .Lbyte_copy_forward /* Copy any remaining bytes */
 
 .Lcoaligned_copy_reverse:
-	jal t0, .Lbyte_copy_until_aligned_reverse
+	jal CREG(t0), .Lbyte_copy_until_aligned_reverse
 
 	1:
-	REG_L t1, (-1 * SZREG)(a4)
-	addi  a4, a4, -SZREG
-	addi  t4, t4, -SZREG
-	REG_S t1, ( 0 * SZREG)(t4)
+	REG_L t1, (-1 * SZREG)(CREG(a4))
+	CREG(addi) CREG(a4), CREG(a4), -SZREG
+	CREG(addi) CREG(t4), CREG(t4), -SZREG
+	REG_S t1, ( 0 * SZREG)(CREG(t4))
 	bne   t4, t5, 1b
 
 	j .Lbyte_copy_reverse /* Copy any remaining bytes */
@@ -260,24 +366,24 @@ SYM_FUNC_START(__memmove)
 .Lbyte_copy_until_aligned_forward:
 	beq  t3, t5, 2f
 	1:
-	lb   t1,  0(a1)
-	addi a1, a1, 1
-	addi t3, t3, 1
-	sb   t1, -1(t3)
+	lb   t1,  0(CREG(a1))
+	CREG(addi) CREG(a1), CREG(a1), 1
+	CREG(addi) CREG(t3), CREG(t3), 1
+	sb   t1, -1(CREG(t3))
 	bne  t3, t5, 1b
 	2:
-	jalr zero, 0x0(t0) /* Return to multibyte copy loop */
+	jr CREG(t0) /* Return to multibyte copy loop */
 
 .Lbyte_copy_until_aligned_reverse:
 	beq  t4, t6, 2f
 	1:
-	lb   t1, -1(a4)
-	addi a4, a4, -1
-	addi t4, t4, -1
-	sb   t1,  0(t4)
+	lb   t1, -1(CREG(a4))
+	CREG(addi) CREG(a4), CREG(a4), -1
+	CREG(addi) CREG(t4), CREG(t4), -1
+	sb   t1,  0(CREG(t4))
 	bne  t4, t6, 1b
 	2:
-	jalr zero, 0x0(t0) /* Return to multibyte copy loop */
+	jr CREG(t0) /* Return to multibyte copy loop */
 
 /*
  * Simple byte copy loops.
@@ -290,10 +396,10 @@ SYM_FUNC_START(__memmove)
 .Lbyte_copy_forward:
 	beq  t3, t4, 2f
 	1:
-	lb   t1,  0(a1)
-	addi a1, a1, 1
-	addi t3, t3, 1
-	sb   t1, -1(t3)
+	lb   t1,  0(CREG(a1))
+	CREG(addi) CREG(a1), CREG(a1), 1
+	CREG(addi) CREG(t3), CREG(t3), 1
+	sb   t1, -1(CREG(t3))
 	bne  t3, t4, 1b
 	2:
 	ret
@@ -301,10 +407,10 @@ SYM_FUNC_START(__memmove)
 .Lbyte_copy_reverse:
 	beq  t4, t3, 2f
 	1:
-	lb   t1, -1(a4)
-	addi a4, a4, -1
-	addi t4, t4, -1
-	sb   t1,  0(t4)
+	lb   t1, -1(CREG(a4))
+	CREG(addi) CREG(a4), CREG(a4), -1
+	CREG(addi) CREG(t4), CREG(t4), -1
+	sb   t1,  0(CREG(t4))
 	bne  t4, t3, 1b
 	2:
 
@@ -315,3 +421,9 @@ SYM_FUNC_END(__memmove)
 SYM_FUNC_ALIAS_WEAK(memmove, __memmove)
 SYM_FUNC_ALIAS(__pi_memmove, __memmove)
 SYM_FUNC_ALIAS(__pi___memmove, __memmove)
+
+#ifdef CONFIG_CHERI_KERNEL
+SYM_FUNC_ALIAS_WEAK(memcpy, __memmove)
+SYM_FUNC_ALIAS(__pi_memcpy, __memmove)
+SYM_FUNC_ALIAS(__pi___memcpy, __memmove)
+#endif
