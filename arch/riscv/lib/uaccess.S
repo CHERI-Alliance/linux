@@ -210,6 +210,72 @@ EXPORT_SYMBOL(__asm_copy_to_user)
 SYM_FUNC_ALIAS(__asm_copy_from_user, __asm_copy_to_user)
 EXPORT_SYMBOL(__asm_copy_from_user)
 
+#ifdef CONFIG_CHERI_PURECAP_UABI
+SYM_FUNC_START(__asm_copy_to_user_with_captags)
+
+	/* If things are not aligned fall back to normal user copy. */
+	xor t6, a0, a1
+	andi t6, t6, CSZREG - 1
+	bnez t6, __asm_copy_to_user
+
+	/* Enable access to user memory */
+	li t6, SR_SUM
+	csrs CSR_STATUS, t6
+
+	/* Calculate end of dst in t0 and aligned down end of dst in t3 */
+	add t0, a0, a2
+	andi t3, t0, ~(CSZREG - 1)
+
+	/* Copy one byte at a time until we are capability aligned. */
+.Lcap_pre_loop:
+	/* Stop the pre-loop once we are aligned. */
+	andi t1, a0, CSZREG - 1
+	beqz t1, .Lcap_copy_loop
+
+	/* Copy one byte if there is something left. */
+	bgeu a0, t0, .Lcap_copy_out
+	fixup lb t2, 0(ca1), .Lcap_copy_out
+	fixup sb t2, 0(ca0), .Lcap_copy_out
+	caddi ca0, ca0, 1
+	caddi ca1, ca1, 1
+	j .Lcap_pre_loop
+
+.Lcap_copy_loop:
+	/*
+	 * Copy one cap if there is enough data left.
+	 * In case of and exception retry with byte copies.
+	 */
+	bgeu a0, t3, .Lcap_copy_out
+	fixup lc ct2, 0(ca1), .Lcap_post_loop
+	fixup sc ct2, 0(ca0), .Lcap_post_loop
+	caddi ca0, ca0, CSZREG
+	caddi ca1, ca1, CSZREG
+	j .Lcap_copy_loop
+
+.Lcap_post_loop:
+	/* Copy one byte if there is something left. */
+	bgeu a0, t0, .Lcap_copy_out
+	fixup lb t2, 0(ca1), .Lcap_copy_out
+	fixup sb t2, 0(ca0), .Lcap_copy_out
+	caddi ca0, ca0, 1
+	caddi ca1, ca1, 1
+	j .Lcap_post_loop
+
+.Lcap_copy_out:
+	/* Disable access to user memory */
+	csrc CSR_STATUS, t6
+
+	/* Calculate remaining data and return. */
+	sub a0, t0, a0
+	ret
+
+SYM_FUNC_END(__asm_copy_to_user_with_captags)
+EXPORT_SYMBOL(__asm_copy_to_user_with_captags)
+SYM_FUNC_ALIAS(__asm_copy_from_user_with_captags, __asm_copy_to_user_with_captags)
+EXPORT_SYMBOL(__asm_copy_from_user_with_captags)
+
+#endif
+
 
 SYM_FUNC_START(__clear_user)
 
