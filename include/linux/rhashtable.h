@@ -101,13 +101,13 @@ struct bucket_table {
  * Instead we store a NULL
  */
 #define	RHT_NULLS_MARKER(ptr)	\
-	((void *)NULLS_MARKER(((unsigned long) (ptr)) >> 1))
+	((void *)NULLS_MARKER(((uintptr_t) (ptr)) >> 1))
 #define INIT_RHT_NULLS_HEAD(ptr)	\
 	((ptr) = NULL)
 
 static inline bool rht_is_a_nulls(const struct rhash_head *ptr)
 {
-	return ((unsigned long) ptr & 1);
+	return (__c_pa(ptr) & 1);
 }
 
 static inline void *rht_obj(const struct rhashtable *ht,
@@ -359,8 +359,8 @@ static inline struct rhash_head *__rht_ptr(
 	struct rhash_lock_head *p, struct rhash_lock_head __rcu *const *bkt)
 {
 	return (struct rhash_head *)
-		((unsigned long)p & ~BIT(0) ?:
-		 (unsigned long)RHT_NULLS_MARKER(bkt));
+		((uintptr_t)p & ~BIT(0) ?:
+		 (uintptr_t)RHT_NULLS_MARKER(bkt));
 }
 
 /*
@@ -395,7 +395,7 @@ static inline void rht_assign_locked(struct rhash_lock_head __rcu **bkt,
 {
 	if (rht_is_a_nulls(obj))
 		obj = NULL;
-	rcu_assign_pointer(*bkt, (void *)((unsigned long)obj | BIT(0)));
+	rcu_assign_pointer(*bkt, (void *)((uintptr_t)obj | BIT(0)));
 }
 
 static inline void rht_assign_unlock(struct bucket_table *tbl,

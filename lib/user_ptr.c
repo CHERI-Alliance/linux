@@ -111,6 +111,14 @@ user_uintptr_t make_user_ptr_owning(const struct reserv_struct *reserv,
 	return user_ptr;
 }
 
+#ifdef CHERI_PERM_CAP
+#define __CHERI_PERM_LOAD_CAP CHERI_PERM_CAP
+#define __CHERI_PERM_STORE_CAP CHERI_PERM_CAP
+#else
+#define __CHERI_PERM_LOAD_CAP CHERI_PERM_LOAD_CAP
+#define __CHERI_PERM_STORE_CAP CHERI_PERM_STORE_CAP
+#endif
+
 user_ptr_perms_t user_ptr_owning_perms_from_prot(int prot, unsigned long vm_flags)
 {
 	user_ptr_perms_t perms = CHERI_PERMS_ROOTCAP;
@@ -121,12 +129,12 @@ user_ptr_perms_t user_ptr_owning_perms_from_prot(int prot, unsigned long vm_flag
 	if (used_prot & PROT_READ) {
 		perms |= CHERI_PERM_LOAD;
 		if (vm_flags & VM_READ_CAPS)
-			perms |= CHERI_PERM_LOAD_CAP;
+			perms |= __CHERI_PERM_LOAD_CAP;
 	}
 	if (used_prot & PROT_WRITE) {
 		perms |= CHERI_PERM_STORE;
 		if (vm_flags & VM_WRITE_CAPS)
-			perms |= (CHERI_PERM_STORE_CAP | CHERI_PERM_STORE_LOCAL_CAP);
+			perms |= (__CHERI_PERM_STORE_CAP | CHERI_PERM_STORE_LOCAL_CAP);
 	}
 	if (used_prot & PROT_EXEC)
 		perms |= CHERI_PERM_EXECUTE;

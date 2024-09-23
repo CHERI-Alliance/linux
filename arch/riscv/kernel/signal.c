@@ -230,6 +230,16 @@ static size_t get_rt_frame_size(bool cal_all)
 	return frame_size;
 }
 
+#ifdef CONFIG_CHERI_PURECAP_UABI
+int arch_validate_sigaction(int sig, const struct k_sigaction *act,
+			    const struct k_sigaction *oact)
+{
+	/* FIXCHERI: Implement for RISCV */
+
+	return 0;
+}
+#endif
+
 SYSCALL_DEFINE0(__retptr__(rt_sigreturn))
 {
 	struct pt_regs *regs = current_pt_regs();

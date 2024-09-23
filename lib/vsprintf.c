@@ -58,7 +58,7 @@
 #include "kstrtox.h"
 
 /* Disable pointer hashing if requested */
-bool no_hash_pointers __ro_after_init;
+bool no_hash_pointers __ro_after_init = true;
 EXPORT_SYMBOL_GPL(no_hash_pointers);
 
 noinline
@@ -702,7 +702,7 @@ static const char *check_pointer_msg(const void *ptr)
 	if (!ptr)
 		return "(null)";
 
-	if ((unsigned long)ptr < PAGE_SIZE || IS_ERR_VALUE(ptr))
+	if (__c_pa(ptr) < PAGE_SIZE || IS_ERR_VALUE(ptr))
 		return "(efault)";
 
 	return NULL;
@@ -739,11 +739,13 @@ static char *pointer_string(char *buf, char *end,
 	spec.base = 16;
 	spec.flags |= SMALL;
 	if (spec.field_width == -1) {
-		spec.field_width = 2 * sizeof(ptr);
+		spec.field_width = 2 * sizeof(__c_pa(ptr));
 		spec.flags |= ZEROPAD;
 	}
 
-	return number(buf, end, (unsigned long int)ptr, spec);
+	buf = number(buf, end, __c_pa(ptr), spec);
+
+	return buf;
 }
 
 /* Make pointers available for printing early in the boot sequence. */
@@ -790,7 +792,7 @@ static inline int __ptr_to_hashval(const void *ptr, unsigned long *hashval_out)
 	smp_rmb();
 
 #ifdef CONFIG_64BIT
-	hashval = (unsigned long)siphash_1u64((u64)ptr, &ptr_key);
+	hashval = (unsigned long)siphash_1u64(__c_pa(ptr), &ptr_key);
 	/*
 	 * Mask off the first 32 bits, this makes explicit that we have
 	 * modified the address (and 32 bits is plenty for a unique ID).
@@ -824,18 +826,18 @@ static char *ptr_to_id(char *buf, char *end, const void *ptr,
 
 	/* When debugging early boot use non-cryptographically secure hash. */
 	if (unlikely(debug_boot_weak_hash)) {
-		hashval = hash_long((unsigned long)ptr, 32);
-		return pointer_string(buf, end, (const void *)hashval, spec);
+		hashval = hash_long(__c_pa(ptr), 32);
+		return pointer_string(buf, end, __c_fakep(hashval), spec);
 	}
 
 	ret = __ptr_to_hashval(ptr, &hashval);
 	if (ret) {
-		spec.field_width = 2 * sizeof(ptr);
+		spec.field_width = 2 * sizeof(__c_pa(ptr));
 		/* string length must be less than default_width */
 		return error_string(buf, end, str, spec);
 	}
 
-	return pointer_string(buf, end, (const void *)hashval, spec);
+	return pointer_string(buf, end, __c_fakep(hashval), spec);
 }
 
 static char *default_pointer(char *buf, char *end, const void *ptr,
@@ -993,7 +995,7 @@ char *symbol_string(char *buf, char *end, void *ptr,
 
 	if (fmt[1] == 'R')
 		ptr = __builtin_extract_return_addr(ptr);
-	value = (unsigned long)ptr;
+	value = __c_pa(ptr);
 
 #ifdef CONFIG_KALLSYMS
 	if (*fmt == 'B' && fmt[1] == 'b')
@@ -2549,9 +2551,9 @@ char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
 	 * (address only).
 	 * Same applies when hashing is active.
 	 */
-	if ((!cheri_tag_get(cap) && !__builtin_cheri_copy_from_high(cap)) ||
+	if ((!cheri_tag_get(cap) && !cheri_high_get(cap)) ||
 	    (likely(!no_hash_pointers) && *fmt != 'x'))
-		return pointer(fmt, buf, end, (void *)cheri_address_get(cap),
+		return pointer(fmt, buf, end, __c_fakep(cheri_address_get(cap)),
 			       spec);
 
 	if (spec.flags & SPECIAL) { /* Simplified format for capabilities */
@@ -2571,8 +2573,15 @@ char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
 			{ CHERI_PERM_LOAD,              'r' },
 			{ CHERI_PERM_STORE,             'w' },
 			{ CHERI_PERM_EXECUTE,           'x' },
+#ifdef CHERI_PERM_CAP
+			{ CHERI_PERM_CAP,               'C' },
+#endif
+#ifdef CHERI_PERM_LOAD_CAP
 			{ CHERI_PERM_LOAD_CAP,          'R' },
+#endif
+#ifdef CHERI_PERM_STORE_CAP
 			{ CHERI_PERM_STORE_CAP,         'W' },
+#endif
 #ifdef CONFIG_ARM64_MORELLO
 			{ ARM_CAP_PERMISSION_EXECUTIVE,	'E' }
 #endif
@@ -2603,7 +2612,8 @@ char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
 		orig_flags = spec.flags;
 		spec.flags &= ~(ZEROPAD | LEFT);
 
-		buf = pointer_string(buf, end, (void *)cheri_address_get(cap),
+		buf = pointer_string(buf, end,
+				     __c_fakep(cheri_address_get(cap)),
 				     spec);
 
 		update_buf_single(buf, end, ' ');
@@ -2615,11 +2625,11 @@ char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
 		update_buf_single(buf, end, ',');
 
 		base = cheri_base_get(cap);
-		buf = pointer_string(buf, end, (void *)base, spec);
+		buf = pointer_string(buf, end, __c_fakep(base), spec);
 		update_buf_single(buf, end, '-');
 
 		top =  base + cheri_length_get(cap);
-		buf = pointer_string(buf, end, (void *)top, spec);
+		buf = pointer_string(buf, end, __c_fakep(top), spec);
 		update_buf_single(buf, end, ']');
 
 		/* Attributes */
@@ -2672,10 +2682,11 @@ char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
 	update_buf_single(buf, end, cheri_tag_get(cap) ? '1' : '0');
 	update_buf_single(buf, end, ':');
 	buf = pointer_string(buf, end,
-			     (void *) __builtin_cheri_copy_from_high(cap),
+			     __c_fakep(cheri_high_get(cap)),
 			     spec);
 	update_buf_single(buf, end, ':');
-	return pointer_string(buf, end, (void *)cheri_address_get(cap), spec);
+	return pointer_string(buf, end, __c_fakep(cheri_address_get(cap)),
+			      spec);
 
 #undef update_buf_single
 }
@@ -2816,10 +2827,14 @@ qualifier:
 		return ++fmt - start;
 
 	case 'p':
+#ifdef CONFIG_CHERI_KERNEL
+		spec->type = FORMAT_TYPE_CAPABILITY;
+#else
 		spec->type = FORMAT_TYPE_PTR;
 #ifdef __CHERI__
 		if (qualifier == 'l')
 			spec->type = FORMAT_TYPE_CAPABILITY;
+#endif
 #endif
 		return ++fmt - start;
 
