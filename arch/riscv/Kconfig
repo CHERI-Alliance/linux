@@ -556,6 +556,7 @@ config RISCV_ISA_V
 	bool "VECTOR extension support"
 	depends on TOOLCHAIN_HAS_V
 	depends on FPU
+	depends on !RISCV_CHERI_BAKEWELL	# FIXCHERI: CHERIfy vector extension
 	select DYNAMIC_SIGFRAME
 	default y
 	help
