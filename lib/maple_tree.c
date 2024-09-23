@@ -139,7 +139,7 @@ struct maple_big_node {
 	union {
 		struct maple_enode *slot[MAPLE_BIG_NODE_SLOTS];
 		struct {
-			unsigned long padding[MAPLE_BIG_NODE_GAPS];
+			uintptr_t padding[MAPLE_BIG_NODE_GAPS];
 			unsigned long gap[MAPLE_BIG_NODE_GAPS];
 		};
 	};
@@ -435,7 +435,7 @@ static __always_inline bool mt_is_alloc(struct maple_tree *mt)
  * @parent: The parent pointer cast as an unsigned long
  * Return: The shift into that pointer to the star to of the slot
  */
-static inline unsigned long mte_parent_shift(unsigned long parent)
+static inline unsigned long mte_parent_shift(uintptr_t parent)
 {
 	/* Note bit 1 == 0 means 16B */
 	if (likely(parent & MAPLE_PARENT_NOT_RANGE16))
@@ -449,7 +449,7 @@ static inline unsigned long mte_parent_shift(unsigned long parent)
  * @parent: The parent pointer cast as an unsigned long.
  * Return: The slot mask for that parent.
  */
-static inline unsigned long mte_parent_slot_mask(unsigned long parent)
+static inline unsigned long mte_parent_slot_mask(uintptr_t parent)
 {
 	/* Note bit 1 == 0 means 16B */
 	if (likely(parent & MAPLE_PARENT_NOT_RANGE16))
@@ -468,7 +468,7 @@ static inline unsigned long mte_parent_slot_mask(unsigned long parent)
 static inline
 enum maple_type mas_parent_type(struct ma_state *mas, struct maple_enode *enode)
 {
-	unsigned long p_type;
+	uintptr_t p_type;
 
 	p_type = (uintptr_t)mte_to_node(enode)->parent;
 	if (WARN_ON(p_type & MAPLE_PARENT_ROOT))
@@ -625,7 +625,7 @@ static inline void mas_set_alloc_req(struct ma_state *mas, unsigned long count)
 		if (!count)
 			mas->alloc = NULL;
 		else
-			mas->alloc = (struct maple_alloc *)(((count) << 1U) | 1U);
+			mas->alloc = (struct maple_alloc *)__c_fakeu(((count) << 1U) | 1U);
 		return;
 	}
 
@@ -1290,7 +1290,7 @@ static inline void mas_alloc_nodes(struct ma_state *mas, gfp_t gfp)
 
 nomem_bulk:
 	/* Clean up potential freed allocations on bulk failure */
-	memset(slots, 0, max_req * sizeof(unsigned long));
+	memset(slots, 0, max_req * sizeof(uintptr_t));
 	mas->alloc->total = allocated;
 nomem_one:
 	mas_set_alloc_req(mas, requested);
@@ -1796,12 +1796,13 @@ static inline bool mas_find_child(struct ma_state *mas, struct ma_state *child)
 static inline void mab_shift_right(struct maple_big_node *b_node,
 				 unsigned char shift)
 {
-	unsigned long size = b_node->b_end * sizeof(unsigned long);
+	unsigned long psize = b_node->b_end * sizeof(unsigned long);
+	unsigned long ssize = b_node->b_end * sizeof(uintptr_t);
 
-	memmove(b_node->pivot + shift, b_node->pivot, size);
-	memmove(b_node->slot + shift, b_node->slot, size);
+	memmove(b_node->pivot + shift, b_node->pivot, psize);
+	memmove(b_node->slot + shift, b_node->slot, ssize);
 	if (b_node->type == maple_arange_64)
-		memmove(b_node->gap + shift, b_node->gap, size);
+		memmove(b_node->gap + shift, b_node->gap, psize);
 }
 
 /*
@@ -6618,7 +6619,7 @@ static void mas_dup_free(struct ma_state *mas)
 		slots = ma_slots(node, type);
 		count = mas_data_end(mas) + 1;
 		for (i = 0; i < count; i++)
-			((unsigned long *)slots)[i] &= ~MAPLE_NODE_MASK;
+			((uintptr_t *)slots)[i] &= ~MAPLE_NODE_MASK;
 		mt_free_bulk(count, slots);
 	}
 
@@ -6667,7 +6668,7 @@ static inline void mas_dup_alloc(struct ma_state *mas, struct ma_state *new_mas,
 	unsigned char request, count, i;
 	void __rcu **slots;
 	void __rcu **new_slots;
-	unsigned long val;
+	uintptr_t val;
 
 	/* Allocate memory for child nodes. */
 	type = mte_node_type(mas->node);
@@ -6685,7 +6686,7 @@ static inline void mas_dup_alloc(struct ma_state *mas, struct ma_state *new_mas,
 	for (i = 0; i < count; i++) {
 		val = (uintptr_t)mt_slot_locked(mas->tree, slots, i);
 		val &= MAPLE_NODE_MASK;
-		((unsigned long *)new_slots)[i] |= val;
+		((uintptr_t *)new_slots)[i] |= val;
 	}
 }
 

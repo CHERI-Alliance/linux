@@ -138,6 +138,13 @@ ssize_t sized_strscpy(char *dest, const char *src, size_t count)
 #endif
 
 	/*
+	 * Force byte access in CHERI mode as we might hit capability
+	 * bounds at any time.
+	 */
+	if (IS_ENABLED(CONFIG_CHERI_KERNEL))
+		max = 0;
+
+	/*
 	 * load_unaligned_zeropad() or read_word_at_a_time() below may read
 	 * uninitialized bytes after the trailing zero and use them in
 	 * comparisons. Disable this optimization under KMSAN to prevent

@@ -135,7 +135,7 @@ static inline void *assoc_array_ptr_to_leaf(const struct assoc_array_ptr *x)
 }
 
 static inline
-unsigned long __assoc_array_ptr_to_meta(const struct assoc_array_ptr *x)
+uintptr_t __assoc_array_ptr_to_meta(const struct assoc_array_ptr *x)
 {
 	return (uintptr_t)x &
 		~(ASSOC_ARRAY_PTR_SUBTYPE_MASK | ASSOC_ARRAY_PTR_TYPE_MASK);

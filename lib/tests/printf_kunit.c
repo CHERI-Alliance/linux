@@ -27,6 +27,13 @@
 #define PAD_SIZE 16
 #define FILL_CHAR '$'
 
+#ifndef CHERI_PERM_LOAD_CAP
+#define CHERI_PERM_LOAD_CAP CHERI_PERM_CAP
+#endif
+#ifndef CHERI_PERM_STORE_CAP
+#define CHERI_PERM_STORE_CAP CHERI_PERM_CAP
+#endif
+
 #define NOWARN(option, comment, block) \
 	__diag_push(); \
 	__diag_ignore_all(#option, comment); \

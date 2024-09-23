@@ -9,7 +9,7 @@
 #include <asm/io.h>
 
 struct scatterlist {
-	unsigned long	page_link;
+	uintptr_t	page_link;
 	unsigned int	offset;
 	unsigned int	length;
 	dma_addr_t	dma_address;
