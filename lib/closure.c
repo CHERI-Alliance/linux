@@ -270,8 +270,7 @@ static int debug_show(struct seq_file *f, void *data)
 			   r & CLOSURE_REMAINING_MASK);
 
 		seq_printf(f, "%s%s\n",
-			   test_bit(WORK_STRUCT_PENDING_BIT,
-				    work_data_bits(&cl->work)) ? "Q" : "",
+			   work_pending(&cl->work) ? "Q" : "",
 			   r & CLOSURE_RUNNING	? "R" : "");
 
 		if (r & CLOSURE_WAITING)
