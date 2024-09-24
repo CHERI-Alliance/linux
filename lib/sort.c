@@ -13,6 +13,7 @@
 #include <linux/types.h>
 #include <linux/export.h>
 #include <linux/sort.h>
+#include <linux/cheri.h>
 
 /**
  * is_aligned - is this pointer & size okay for word-wide copying?
@@ -38,6 +39,22 @@ static bool is_aligned(const void *base, size_t size, unsigned char align)
 #endif
 	return (lsbits & (align - 1)) == 0;
 }
+
+#ifdef CONFIG_CHERI_KERNEL
+static void swap_words_128(void *a, void *b, size_t n)
+{
+	do {
+		uintptr_t t = *(uintptr_t *)(a + (n -= 16));
+		*(uintptr_t *)(a + n) = *(uintptr_t *)(b + n);
+		*(uintptr_t *)(b + n) = t;
+	} while (n);
+}
+
+#else
+
+#define swap_words_128 swap_words_64
+
+#endif
 
 /**
  * swap_words_32 - swap two elements in 32-bit chunks
@@ -124,6 +141,7 @@ static void swap_bytes(void *a, void *b, size_t n)
 #define SWAP_WORDS_32 (swap_r_func_t)1
 #define SWAP_BYTES    (swap_r_func_t)2
 #define SWAP_WRAPPER  (swap_r_func_t)3
+#define SWAP_WORDS_128 (swap_r_func_t)4
 
 struct wrapper {
 	cmp_func_t cmp;
@@ -141,7 +159,9 @@ static void do_swap(void *a, void *b, size_t size, swap_r_func_t swap_func, cons
 		return;
 	}
 
-	if (swap_func == SWAP_WORDS_64)
+	if (swap_func == SWAP_WORDS_128)
+		swap_words_128(a, b, size);
+	else if (swap_func == SWAP_WORDS_64)
 		swap_words_64(a, b, size);
 	else if (swap_func == SWAP_WORDS_32)
 		swap_words_32(a, b, size);
@@ -207,7 +227,9 @@ static void __sort_r(void *base, size_t num, size_t size,
 		swap_func = NULL;
 
 	if (!swap_func) {
-		if (is_aligned(base, size, 8))
+		if (is_aligned(base, size, 16))
+			swap_func = SWAP_WORDS_128;
+		else if (is_aligned(base, size, 8))
 			swap_func = SWAP_WORDS_64;
 		else if (is_aligned(base, size, 4))
 			swap_func = SWAP_WORDS_32;
