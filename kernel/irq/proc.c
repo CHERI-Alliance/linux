@@ -287,7 +287,7 @@ static int irq_node_proc_show(struct seq_file *m, void *v)
 
 static int irq_spurious_proc_show(struct seq_file *m, void *v)
 {
-	struct irq_desc *desc = irq_to_desc((long) m->private);
+	struct irq_desc *desc = irq_to_desc(__c_pa(m->private));
 
 	seq_printf(m, "count %u\n" "unhandled %u\n" "last_unhandled %u ms\n",
 		   desc->irq_count, desc->irqs_unhandled,
@@ -338,7 +338,7 @@ void register_handler_proc(unsigned int irq, struct irqaction *action)
 void register_irq_proc(unsigned int irq, struct irq_desc *desc)
 {
 	static DEFINE_MUTEX(register_lock);
-	void __maybe_unused *irqp = (void *)(unsigned long) irq;
+	void __maybe_unused *irqp = __c_fakep(irq);
 	char name [MAX_NAMELEN];
 
 	if (!root_irq_dir || (desc->irq_data.chip == &no_irq_chip))
@@ -384,7 +384,7 @@ void register_irq_proc(unsigned int irq, struct irq_desc *desc)
 # endif
 #endif
 	proc_create_single_data("spurious", 0444, desc->dir,
-			irq_spurious_proc_show, (void *)(long)irq);
+			irq_spurious_proc_show, irqp);
 
 out_unlock:
 	mutex_unlock(&register_lock);

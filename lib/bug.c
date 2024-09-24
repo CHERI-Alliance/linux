@@ -54,7 +54,7 @@ extern struct bug_entry __start___bug_table[], __stop___bug_table[];
 static inline unsigned long bug_addr(const struct bug_entry *bug)
 {
 #ifdef CONFIG_GENERIC_BUG_RELATIVE_POINTERS
-	return (unsigned long)&bug->bug_addr_disp + bug->bug_addr_disp;
+	return __c_pa(&bug->bug_addr_disp) + bug->bug_addr_disp;
 #else
 	return bug->bug_addr;
 #endif
@@ -196,7 +196,7 @@ static enum bug_trap_type __report_bug(unsigned long bugaddr, struct pt_regs *re
 
 	if (warning) {
 		/* this is a WARN_ON rather than BUG/BUG_ON */
-		__warn(file, line, (void *)bugaddr, BUG_GET_TAINT(bug), regs,
+		__warn(file, line, __c_fakep(bugaddr), BUG_GET_TAINT(bug), regs,
 		       NULL);
 		return BUG_TRAP_TYPE_WARN;
 	}
@@ -204,8 +204,8 @@ static enum bug_trap_type __report_bug(unsigned long bugaddr, struct pt_regs *re
 	if (file)
 		pr_crit("kernel BUG at %s:%u!\n", file, line);
 	else
-		pr_crit("Kernel BUG at %pB [verbose debug info unavailable]\n",
-			(void *)bugaddr);
+		pr_crit("Kernel BUG at %px [verbose debug info unavailable]\n",
+			__c_fakep(bugaddr));
 
 	return BUG_TRAP_TYPE_BUG;
 }

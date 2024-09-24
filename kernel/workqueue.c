@@ -847,7 +847,7 @@ static void set_work_pool_and_clear_pending(struct work_struct *work,
 	smp_mb();
 }
 
-static inline struct pool_workqueue *work_struct_pwq(unsigned long data)
+static inline struct pool_workqueue *work_struct_pwq(uintptr_t data)
 {
 	return (struct pool_workqueue *)(data & WORK_STRUCT_PWQ_MASK);
 }
