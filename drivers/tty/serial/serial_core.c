@@ -248,7 +248,7 @@ static int uart_alloc_xmit_buf(struct tty_port *port)
 	struct uart_state *state = container_of(port, struct uart_state, port);
 	struct uart_port *uport;
 	unsigned long flags;
-	unsigned long page;
+	uintptr_t page;
 
 	/*
 	 * Initialise and allocate the transmit and temporary
@@ -871,7 +871,7 @@ static int uart_set_info(struct tty_struct *tty, struct tty_port *port,
 	 */
 	change_port = !(uport->flags & UPF_FIXED_PORT)
 		&& (new_port != uport->iobase ||
-		    (unsigned long)new_info->iomem_base != uport->mapbase ||
+		    new_info->iomem_base != uport->mapbase ||
 		    new_info->hub6 != uport->hub6 ||
 		    new_info->io_type != uport->iotype ||
 		    new_info->iomem_reg_shift != uport->regshift ||
@@ -954,7 +954,7 @@ static int uart_set_info(struct tty_struct *tty, struct tty_port *port,
 		uport->hub6 = new_info->hub6;
 		uport->iotype = new_info->io_type;
 		uport->regshift = new_info->iomem_reg_shift;
-		uport->mapbase = (unsigned long)new_info->iomem_base;
+		uport->mapbase = new_info->iomem_base;
 
 		/*
 		 * Claim and map the new regions
@@ -1227,7 +1227,7 @@ static void uart_enable_ms(struct uart_port *uport)
  * FIXME: This wants extracting into a common all driver implementation
  * of TIOCMWAIT using tty_port.
  */
-static int uart_wait_modem_status(struct uart_state *state, unsigned long arg)
+static int uart_wait_modem_status(struct uart_state *state, uintptr_t arg)
 {
 	struct uart_port *uport;
 	struct tty_port *port = &state->port;
@@ -3028,7 +3028,7 @@ static ssize_t iomem_base_show(struct device *dev,
 	struct tty_port *port = dev_get_drvdata(dev);
 
 	uart_get_info(port, &tmp);
-	return sprintf(buf, "0x%lX\n", (unsigned long)tmp.iomem_base);
+	return sprintf(buf, "0x%lX\n", tmp.iomem_base);
 }
 
 static ssize_t iomem_reg_shift_show(struct device *dev,

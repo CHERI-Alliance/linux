@@ -493,17 +493,17 @@ static void virtnet_sq_free_unused_buf(struct virtqueue *vq, void *buf);
 
 static bool is_xdp_frame(void *ptr)
 {
-	return (unsigned long)ptr & VIRTIO_XDP_FLAG;
+	return __c_pa(ptr) & VIRTIO_XDP_FLAG;
 }
 
 static void *xdp_to_ptr(struct xdp_frame *ptr)
 {
-	return (void *)((unsigned long)ptr | VIRTIO_XDP_FLAG);
+	return (void *)((uintptr_t)ptr | VIRTIO_XDP_FLAG);
 }
 
 static struct xdp_frame *ptr_to_xdp(void *ptr)
 {
-	return (struct xdp_frame *)((unsigned long)ptr & ~VIRTIO_XDP_FLAG);
+	return (struct xdp_frame *)((uintptr_t)ptr & ~VIRTIO_XDP_FLAG);
 }
 
 static void __free_old_xmit(struct send_queue *sq, bool in_napi,
@@ -581,7 +581,7 @@ static void give_pages(struct receive_queue *rq, struct page *page)
 
 	/* Find end of list, sew whole thing into vi->rq.pages. */
 	for (end = page; end->private; end = (struct page *)end->private);
-	end->private = (unsigned long)rq->pages;
+	end->private = (uintptr_t)rq->pages;
 	rq->pages = page;
 }
 
@@ -683,17 +683,17 @@ static void skb_xmit_done(struct virtqueue *vq)
 static void *mergeable_len_to_ctx(unsigned int truesize,
 				  unsigned int headroom)
 {
-	return (void *)(unsigned long)((headroom << MRG_CTX_HEADER_SHIFT) | truesize);
+	return __c_fakep((headroom << MRG_CTX_HEADER_SHIFT) | truesize);
 }
 
 static unsigned int mergeable_ctx_to_headroom(void *mrg_ctx)
 {
-	return (unsigned long)mrg_ctx >> MRG_CTX_HEADER_SHIFT;
+	return __c_pa(mrg_ctx) >> MRG_CTX_HEADER_SHIFT;
 }
 
 static unsigned int mergeable_ctx_to_truesize(void *mrg_ctx)
 {
-	return (unsigned long)mrg_ctx & ((1 << MRG_CTX_HEADER_SHIFT) - 1);
+	return __c_pa(mrg_ctx) & ((1 << MRG_CTX_HEADER_SHIFT) - 1);
 }
 
 static struct sk_buff *virtnet_build_skb(void *buf, unsigned int buflen,
@@ -1435,7 +1435,7 @@ static struct sk_buff *receive_small(struct net_device *dev,
 				     unsigned int *xdp_xmit,
 				     struct virtnet_rq_stats *stats)
 {
-	unsigned int xdp_headroom = (unsigned long)ctx;
+	unsigned int xdp_headroom = __c_pa(ctx);
 	struct page *page = virt_to_head_page(buf);
 	struct sk_buff *skb;
 
@@ -2018,7 +2018,7 @@ static int add_recvbuf_small(struct virtnet_info *vi, struct receive_queue *rq,
 {
 	char *buf;
 	unsigned int xdp_headroom = virtnet_get_headroom(vi);
-	void *ctx = (void *)(unsigned long)xdp_headroom;
+	void *ctx = __c_fakep(xdp_headroom);
 	int len = vi->hdr_len + VIRTNET_RX_PAD + GOOD_PACKET_LEN + xdp_headroom;
 	int err;
 
@@ -2061,7 +2061,7 @@ static int add_recvbuf_big(struct virtnet_info *vi, struct receive_queue *rq,
 		sg_set_buf(&rq->sg[i], page_address(first), PAGE_SIZE);
 
 		/* chain new page in list head to match sg */
-		first->private = (unsigned long)list;
+		first->private = (uintptr_t)list;
 		list = first;
 	}
 
@@ -2081,7 +2081,7 @@ static int add_recvbuf_big(struct virtnet_info *vi, struct receive_queue *rq,
 	sg_set_buf(&rq->sg[1], p + offset, PAGE_SIZE - offset);
 
 	/* chain first in list head */
-	first->private = (unsigned long)list;
+	first->private = (uintptr_t)list;
 	err = virtqueue_add_inbuf(rq->vq, rq->sg, vi->big_packets_num_skbfrags + 2,
 				  first, gfp);
 	if (err < 0)
@@ -2535,7 +2535,7 @@ static int xmit_skb(struct send_queue *sq, struct sk_buff *skb)
 	pr_debug("%s: xmit %p %pM\n", vi->dev->name, skb, dest);
 
 	can_push = vi->any_header_sg &&
-		!((unsigned long)skb->data & (__alignof__(*hdr) - 1)) &&
+		!(__c_pa(skb->data) & (__alignof__(*hdr) - 1)) &&
 		!skb_header_cloned(skb) && skb_headroom(skb) >= hdr_len;
 	/* Even if we can, don't push here yet as this would skew
 	 * csum_start offset below. */

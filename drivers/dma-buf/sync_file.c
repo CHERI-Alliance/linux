@@ -348,7 +348,7 @@ out:
 }
 
 static int sync_file_ioctl_set_deadline(struct sync_file *sync_file,
-					unsigned long arg)
+					uintptr_t arg)
 {
 	struct sync_set_deadline ts;
 

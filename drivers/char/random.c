@@ -166,7 +166,7 @@ int __cold execute_with_initialized_rng(struct notifier_block *nb)
 #define warn_unseeded_randomness() \
 	if (IS_ENABLED(CONFIG_WARN_ALL_UNSEEDED_RANDOM) && !crng_ready()) \
 		printk_deferred(KERN_NOTICE "random: %s called from %pS with crng_init=%d\n", \
-				__func__, (void *)_RET_IP_, crng_init)
+				__func__, __c_fakep(_RET_IP_), crng_init)
 
 
 /*********************************************************************
@@ -1094,7 +1094,7 @@ void add_interrupt_randomness(int irq)
 	unsigned int new_count;
 
 	fast_mix(fast_pool->pool, entropy,
-		 (regs ? instruction_pointer(regs) : _RET_IP_) ^ swab(irq));
+		 (regs ? __c_ua(instruction_pointer(regs)) : _RET_IP_) ^ swab(irq));
 	new_count = ++fast_pool->count;
 
 	if (new_count & MIX_INFLIGHT)

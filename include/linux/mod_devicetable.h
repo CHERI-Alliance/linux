@@ -12,7 +12,7 @@
 #include <linux/mei.h>
 #include <linux/types.h>
 #include <linux/uuid.h>
-typedef unsigned long kernel_ulong_t;
+typedef __kernel_uintptr_t kernel_ulong_t;
 #endif
 
 #define PCI_ANY_ID (~0)
@@ -368,16 +368,16 @@ struct input_device_id {
 	__u16 product;
 	__u16 version;
 
-	kernel_ulong_t evbit[INPUT_DEVICE_ID_EV_MAX / BITS_PER_LONG + 1];
-	kernel_ulong_t keybit[INPUT_DEVICE_ID_KEY_MAX / BITS_PER_LONG + 1];
-	kernel_ulong_t relbit[INPUT_DEVICE_ID_REL_MAX / BITS_PER_LONG + 1];
-	kernel_ulong_t absbit[INPUT_DEVICE_ID_ABS_MAX / BITS_PER_LONG + 1];
-	kernel_ulong_t mscbit[INPUT_DEVICE_ID_MSC_MAX / BITS_PER_LONG + 1];
-	kernel_ulong_t ledbit[INPUT_DEVICE_ID_LED_MAX / BITS_PER_LONG + 1];
-	kernel_ulong_t sndbit[INPUT_DEVICE_ID_SND_MAX / BITS_PER_LONG + 1];
-	kernel_ulong_t ffbit[INPUT_DEVICE_ID_FF_MAX / BITS_PER_LONG + 1];
-	kernel_ulong_t swbit[INPUT_DEVICE_ID_SW_MAX / BITS_PER_LONG + 1];
-	kernel_ulong_t propbit[INPUT_DEVICE_ID_PROP_MAX / BITS_PER_LONG + 1];
+	unsigned long evbit[INPUT_DEVICE_ID_EV_MAX / BITS_PER_LONG + 1];
+	unsigned long keybit[INPUT_DEVICE_ID_KEY_MAX / BITS_PER_LONG + 1];
+	unsigned long relbit[INPUT_DEVICE_ID_REL_MAX / BITS_PER_LONG + 1];
+	unsigned long absbit[INPUT_DEVICE_ID_ABS_MAX / BITS_PER_LONG + 1];
+	unsigned long mscbit[INPUT_DEVICE_ID_MSC_MAX / BITS_PER_LONG + 1];
+	unsigned long ledbit[INPUT_DEVICE_ID_LED_MAX / BITS_PER_LONG + 1];
+	unsigned long sndbit[INPUT_DEVICE_ID_SND_MAX / BITS_PER_LONG + 1];
+	unsigned long ffbit[INPUT_DEVICE_ID_FF_MAX / BITS_PER_LONG + 1];
+	unsigned long swbit[INPUT_DEVICE_ID_SW_MAX / BITS_PER_LONG + 1];
+	unsigned long propbit[INPUT_DEVICE_ID_PROP_MAX / BITS_PER_LONG + 1];
 
 	kernel_ulong_t driver_info;
 };

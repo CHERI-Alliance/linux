@@ -101,9 +101,9 @@ struct vc_data {
 	unsigned int	vc_size_row;		/* Bytes per row */
 	unsigned int	vc_scan_lines;		/* # of scan lines */
 	unsigned int	vc_cell_height;		/* CRTC character cell height */
-	unsigned long	vc_origin;		/* [!] Start of real screen */
-	unsigned long	vc_scr_end;		/* [!] End of real screen */
-	unsigned long	vc_visible_origin;	/* [!] Top of visible window */
+	uintptr_t	vc_origin;		/* [!] Start of real screen */
+	uintptr_t	vc_scr_end;		/* [!] End of real screen */
+	uintptr_t	vc_visible_origin;	/* [!] Top of visible window */
 	unsigned int	vc_top, vc_bottom;	/* Scrolling region */
 	const struct consw *vc_sw;
 	unsigned short	*vc_screenbuf;		/* In-memory character/attribute buffer */
@@ -119,7 +119,7 @@ struct vc_data {
 	unsigned int	vc_cursor_type;
 	unsigned short	vc_complement_mask;	/* [#] Xor mask for mouse pointer */
 	unsigned short	vc_s_complement_mask;	/* Saved mouse pointer mask */
-	unsigned long	vc_pos;			/* Cursor address */
+	uintptr_t	vc_pos;			/* Cursor address */
 	/* fonts */	
 	unsigned short	vc_hi_font_mask;	/* [#] Attribute set for upper 256 chars of font or 0 if not supported */
 	struct console_font vc_font;		/* Current VC font set */
