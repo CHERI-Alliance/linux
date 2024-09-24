@@ -52,8 +52,8 @@ struct thread_info {
 	 * exception.  SP is also saved to the stack it can be recovered when
 	 * overwritten.
 	 */
-	long			kernel_sp;	/* Kernel stack pointer */
-	long			user_sp;	/* User stack pointer */
+	register_t		kernel_sp;	/* Kernel stack pointer */
+	user_uintptr_t		user_sp;	/* User stack pointer */
 	int			cpu;
 	unsigned long		syscall_work;	/* SYSCALL_WORK_ flags */
 #ifdef CONFIG_SHADOW_CALL_STACK
