@@ -16,6 +16,14 @@
  * Internal slab definitions
  */
 
+#ifdef CONFIG_CHERI_KERNEL
+extern bool __this_cpu_try_cmpxchg_freelist_undefined_for_cheri(void);
+#define this_cpu_try_cmpxchg_freelist(A, B, C) ({			\
+	(void)(A); (void)(B); (void)(C);				\
+	__this_cpu_try_cmpxchg_freelist_undefined_for_cheri();		\
+})
+typedef struct { void * freelist; unsigned long counter; }	freelist_full_t;
+#else /* CONFIG_CHERI_KERNEL */
 #ifdef CONFIG_64BIT
 # ifdef system_has_cmpxchg128
 # define system_has_freelist_aba()	system_has_cmpxchg128()
@@ -35,6 +43,7 @@ typedef u64 freelist_full_t;
 #if defined(system_has_freelist_aba) && !defined(CONFIG_HAVE_ALIGNED_STRUCT_PAGE)
 #undef system_has_freelist_aba
 #endif
+#endif /*CONFIG_CHERI_KERNEL */
 
 /*
  * Freelist pointer and counter to cmpxchg together, avoids the typical ABA

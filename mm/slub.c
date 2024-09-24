@@ -189,7 +189,11 @@
 #ifndef CONFIG_PREEMPT_RT
 #define slub_get_cpu_ptr(var)		get_cpu_ptr(var)
 #define slub_put_cpu_ptr(var)		put_cpu_ptr(var)
+#ifdef CONFIG_CHERI_KERNEL
+#define USE_LOCKLESS_FAST_PATH()	(false)
+#else
 #define USE_LOCKLESS_FAST_PATH()	(true)
+#endif
 #else
 #define slub_get_cpu_ptr(var)		\
 ({					\
@@ -469,7 +473,7 @@ static struct workqueue_struct *flushwq;
  * freeptr_t represents a SLUB freelist pointer, which might be encoded
  * and not dereferenceable if CONFIG_SLAB_FREELIST_HARDENED is enabled.
  */
-typedef struct { unsigned long v; } freeptr_t;
+typedef struct { uintptr_t v; } freeptr_t;
 
 /*
  * Returns freelist pointer (ptr). With hardening, this is obfuscated
@@ -477,20 +481,20 @@ typedef struct { unsigned long v; } freeptr_t;
  * random number.
  */
 static inline freeptr_t freelist_ptr_encode(const struct kmem_cache *s,
-					    void *ptr, unsigned long ptr_addr)
+					    void *ptr, uintptr_t ptr_addr)
 {
-	unsigned long encoded;
+	uintptr_t encoded;
 
 #ifdef CONFIG_SLAB_FREELIST_HARDENED
-	encoded = (unsigned long)ptr ^ s->random ^ swab(ptr_addr);
+	encoded = (uintptr_t)ptr ^ s->random ^ swab(ptr_addr);
 #else
-	encoded = (unsigned long)ptr;
+	encoded = (uintptr_t)ptr;
 #endif
 	return (freeptr_t){.v = encoded};
 }
 
 static inline void *freelist_ptr_decode(const struct kmem_cache *s,
-					freeptr_t ptr, unsigned long ptr_addr)
+					freeptr_t ptr, uintptr_t ptr_addr)
 {
 	void *decoded;
 
@@ -504,11 +508,11 @@ static inline void *freelist_ptr_decode(const struct kmem_cache *s,
 
 static inline void *get_freepointer(struct kmem_cache *s, void *object)
 {
-	unsigned long ptr_addr;
+	uintptr_t ptr_addr;
 	freeptr_t p;
 
 	object = kasan_reset_tag(object);
-	ptr_addr = (unsigned long)object + s->offset;
+	ptr_addr = (uintptr_t)object + s->offset;
 	p = *(freeptr_t *)(ptr_addr);
 	return freelist_ptr_decode(s, p, ptr_addr);
 }
@@ -533,27 +537,27 @@ static void prefetch_freepointer(const struct kmem_cache *s, void *object)
 __no_kmsan_checks
 static inline void *get_freepointer_safe(struct kmem_cache *s, void *object)
 {
-	unsigned long freepointer_addr;
+	uintptr_t freepointer_addr;
 	freeptr_t p;
 
 	if (!debug_pagealloc_enabled_static())
 		return get_freepointer(s, object);
 
 	object = kasan_reset_tag(object);
-	freepointer_addr = (unsigned long)object + s->offset;
+	freepointer_addr = (uintptr_t)object + s->offset;
 	copy_from_kernel_nofault(&p, (freeptr_t *)freepointer_addr, sizeof(p));
 	return freelist_ptr_decode(s, p, freepointer_addr);
 }
 
 static inline void set_freepointer(struct kmem_cache *s, void *object, void *fp)
 {
-	unsigned long freeptr_addr = (unsigned long)object + s->offset;
+	uintptr_t freeptr_addr = (uintptr_t)object + s->offset;
 
 #ifdef CONFIG_SLAB_FREELIST_HARDENED
 	BUG_ON(object == fp); /* naive detection of double free or corruption */
 #endif
 
-	freeptr_addr = (unsigned long)kasan_reset_tag((void *)freeptr_addr);
+	freeptr_addr = (uintptr_t)kasan_reset_tag((void *)freeptr_addr);
 	*(freeptr_t *)freeptr_addr = freelist_ptr_encode(s, fp, freeptr_addr);
 }
 
@@ -940,7 +944,7 @@ static void print_track(const char *s, struct track *t, unsigned long pr_time)
 		return;
 
 	pr_err("%s in %pS age=%lu cpu=%u pid=%d\n",
-	       s, (void *)t->addr, pr_time - t->when, t->cpu, t->pid);
+	       s, __c_fakep(t->addr), pr_time - t->when, t->cpu, t->pid);
 #ifdef CONFIG_STACKDEPOT
 	handle = READ_ONCE(t->handle);
 	if (handle)
@@ -1931,8 +1935,8 @@ int alloc_slab_obj_exts(struct slab *slab, struct kmem_cache *s,
 		        gfp_t gfp, bool new_slab)
 {
 	unsigned int objects = objs_per_slab(s, slab);
-	unsigned long new_exts;
-	unsigned long old_exts;
+	uintptr_t new_exts;
+	uintptr_t old_exts;
 	struct slabobj_ext *vec;
 
 	gfp &= ~OBJCGS_CLEAR_MASK;
@@ -1948,7 +1952,7 @@ int alloc_slab_obj_exts(struct slab *slab, struct kmem_cache *s,
 		return -ENOMEM;
 	}
 
-	new_exts = (unsigned long)vec;
+	new_exts = (uintptr_t)vec;
 #ifdef CONFIG_MEMCG
 	new_exts |= MEMCG_DATA_OBJEXTS;
 #endif
@@ -4001,7 +4005,11 @@ out:
 	 */
 	slab_post_alloc_hook(s, lru, gfpflags, 1, &object, init, orig_size);
 
+#ifndef CONFIG_CHERI_KERNEL
 	return object;
+#else
+	return cheri_bounds_set(object, s->size);
+#endif
 }
 
 void *kmem_cache_alloc_noprof(struct kmem_cache *s, gfp_t gfpflags)
@@ -5415,7 +5423,7 @@ void __kmem_obj_info(struct kmem_obj_info *kpp, void *object, struct slab *slab)
 #ifdef CONFIG_SLUB_DEBUG
 	objp = fixup_red_left(s, objp);
 	trackp = get_track(s, objp, TRACK_ALLOC);
-	kpp->kp_ret = (void *)trackp->addr;
+	kpp->kp_ret = __c_fakep(trackp->addr);
 #ifdef CONFIG_STACKDEPOT
 	{
 		depot_stack_handle_t handle;
@@ -5426,7 +5434,7 @@ void __kmem_obj_info(struct kmem_obj_info *kpp, void *object, struct slab *slab)
 		if (handle) {
 			nr_entries = stack_depot_fetch(handle, &entries);
 			for (i = 0; i < KS_ADDRS_COUNT && i < nr_entries; i++)
-				kpp->kp_stack[i] = (void *)entries[i];
+				kpp->kp_stack[i] = __c_fakep(entries[i]);
 		}
 
 		trackp = get_track(s, objp, TRACK_FREE);
@@ -5434,7 +5442,7 @@ void __kmem_obj_info(struct kmem_obj_info *kpp, void *object, struct slab *slab)
 		if (handle) {
 			nr_entries = stack_depot_fetch(handle, &entries);
 			for (i = 0; i < KS_ADDRS_COUNT && i < nr_entries; i++)
-				kpp->kp_free_stack[i] = (void *)entries[i];
+				kpp->kp_free_stack[i] = __c_fakep(entries[i]);
 		}
 	}
 #endif
@@ -7038,7 +7046,7 @@ static int slab_debugfs_show(struct seq_file *seq, void *v)
 		seq_printf(seq, "%7ld ", l->count);
 
 		if (l->addr)
-			seq_printf(seq, "%pS", (void *)l->addr);
+			seq_printf(seq, "%pS", __c_fakep(l->addr));
 		else
 			seq_puts(seq, "<not-available>");
 
@@ -7078,7 +7086,7 @@ static int slab_debugfs_show(struct seq_file *seq, void *v)
 				nr_entries = stack_depot_fetch(handle, &entries);
 				seq_puts(seq, "\n");
 				for (j = 0; j < nr_entries; j++)
-					seq_printf(seq, "        %pS\n", (void *)entries[j]);
+					seq_printf(seq, "        %pS\n", __c_fakep(entries[j]));
 			}
 		}
 #endif

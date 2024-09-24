@@ -1050,13 +1050,13 @@ __weak unsigned long vma_mmu_pagesize(struct vm_area_struct *vma)
  * reference it, this region map represents those offsets which have consumed
  * reservation ie. where pages have been instantiated.
  */
-static unsigned long get_vma_private_data(struct vm_area_struct *vma)
+static uintptr_t get_vma_private_data(struct vm_area_struct *vma)
 {
-	return (unsigned long)vma->vm_private_data;
+	return (uintptr_t)vma->vm_private_data;
 }
 
 static void set_vma_private_data(struct vm_area_struct *vma,
-							unsigned long value)
+				 uintptr_t value)
 {
 	vma->vm_private_data = (void *)value;
 }
@@ -1165,7 +1165,7 @@ static void set_vma_resv_map(struct vm_area_struct *vma, struct resv_map *map)
 	VM_BUG_ON_VMA(!is_vm_hugetlb_page(vma), vma);
 	VM_BUG_ON_VMA(vma->vm_flags & VM_MAYSHARE, vma);
 
-	set_vma_private_data(vma, (unsigned long)map);
+	set_vma_private_data(vma, (uintptr_t)map);
 }
 
 static void set_vma_resv_flags(struct vm_area_struct *vma, unsigned long flags)
@@ -7322,7 +7322,7 @@ pte_t *huge_pmd_share(struct mm_struct *mm, struct vm_area_struct *vma,
 	spin_lock(&mm->page_table_lock);
 	if (pud_none(*pud)) {
 		pud_populate(mm, pud,
-				(pmd_t *)((unsigned long)spte & PAGE_MASK));
+				(pmd_t *)((uintptr_t)spte & PAGE_MASK));
 		mm_inc_nr_pmds(mm);
 	} else {
 		put_page(virt_to_page(spte));

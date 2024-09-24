@@ -499,10 +499,10 @@ void __init anon_vma_init(void)
 struct anon_vma *folio_get_anon_vma(struct folio *folio)
 {
 	struct anon_vma *anon_vma = NULL;
-	unsigned long anon_mapping;
+	uintptr_t anon_mapping;
 
 	rcu_read_lock();
-	anon_mapping = (unsigned long)READ_ONCE(folio->mapping);
+	anon_mapping = (uintptr_t)READ_ONCE(folio->mapping);
 	if ((anon_mapping & PAGE_MAPPING_FLAGS) != PAGE_MAPPING_ANON)
 		goto out;
 	if (!folio_mapped(folio))
@@ -545,11 +545,11 @@ struct anon_vma *folio_lock_anon_vma_read(struct folio *folio,
 {
 	struct anon_vma *anon_vma = NULL;
 	struct anon_vma *root_anon_vma;
-	unsigned long anon_mapping;
+	uintptr_t anon_mapping;
 
 retry:
 	rcu_read_lock();
-	anon_mapping = (unsigned long)READ_ONCE(folio->mapping);
+	anon_mapping = (uintptr_t)READ_ONCE(folio->mapping);
 	if ((anon_mapping & PAGE_MAPPING_FLAGS) != PAGE_MAPPING_ANON)
 		goto out;
 	if (!folio_mapped(folio))
@@ -562,7 +562,7 @@ retry:
 		 * folio_move_anon_rmap() might have changed the anon_vma as we
 		 * might not hold the folio lock here.
 		 */
-		if (unlikely((unsigned long)READ_ONCE(folio->mapping) !=
+		if (unlikely((uintptr_t)READ_ONCE(folio->mapping) !=
 			     anon_mapping)) {
 			up_read(&root_anon_vma->rwsem);
 			rcu_read_unlock();
@@ -607,7 +607,7 @@ retry:
 	 * folio_move_anon_rmap() might have changed the anon_vma as we might
 	 * not hold the folio lock here.
 	 */
-	if (unlikely((unsigned long)READ_ONCE(folio->mapping) !=
+	if (unlikely((uintptr_t)READ_ONCE(folio->mapping) !=
 		     anon_mapping)) {
 		anon_vma_unlock_read(anon_vma);
 		put_anon_vma(anon_vma);
@@ -1627,7 +1627,7 @@ static bool try_to_unmap_one(struct folio *folio, struct vm_area_struct *vma,
 	struct page *subpage;
 	bool anon_exclusive, ret = true;
 	struct mmu_notifier_range range;
-	enum ttu_flags flags = (enum ttu_flags)(long)arg;
+	enum ttu_flags flags = (enum ttu_flags)__c_pa(arg);
 	unsigned long pfn;
 	unsigned long hsz = 0;
 
@@ -1950,7 +1950,7 @@ void try_to_unmap(struct folio *folio, enum ttu_flags flags)
 {
 	struct rmap_walk_control rwc = {
 		.rmap_one = try_to_unmap_one,
-		.arg = (void *)flags,
+		.arg = __c_fakep(flags),
 		.done = folio_not_mapped,
 		.anon_lock = folio_lock_anon_vma_read,
 	};
@@ -1976,7 +1976,7 @@ static bool try_to_migrate_one(struct folio *folio, struct vm_area_struct *vma,
 	struct page *subpage;
 	bool anon_exclusive, ret = true;
 	struct mmu_notifier_range range;
-	enum ttu_flags flags = (enum ttu_flags)(long)arg;
+	enum ttu_flags flags = (enum ttu_flags)__c_pa(arg);
 	unsigned long pfn;
 	unsigned long hsz = 0;
 
@@ -2299,7 +2299,7 @@ void try_to_migrate(struct folio *folio, enum ttu_flags flags)
 {
 	struct rmap_walk_control rwc = {
 		.rmap_one = try_to_migrate_one,
-		.arg = (void *)flags,
+		.arg = __c_fakep(flags),
 		.done = folio_not_mapped,
 		.anon_lock = folio_lock_anon_vma_read,
 	};

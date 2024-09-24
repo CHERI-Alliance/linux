@@ -66,7 +66,7 @@ static inline void __init __late_clear_fixmap(enum fixed_addresses idx)
 
 static void __iomem *prev_map[FIX_BTMAPS_SLOTS] __initdata;
 static unsigned long prev_size[FIX_BTMAPS_SLOTS] __initdata;
-static unsigned long slot_virt[FIX_BTMAPS_SLOTS] __initdata;
+static uintptr_t slot_virt[FIX_BTMAPS_SLOTS] __initdata;
 
 void __init early_ioremap_setup(void)
 {
@@ -153,7 +153,7 @@ __early_ioremap(resource_size_t phys_addr, unsigned long size, pgprot_t prot)
 		--nrpages;
 	}
 	WARN(early_ioremap_debug, "%s(%pa, %08lx) [%d] => %08lx + %08lx\n",
-	     __func__, &phys_addr, size, slot, offset, slot_virt[slot]);
+	     __func__, &phys_addr, size, slot, offset, __c_ua(slot_virt[slot]));
 
 	prev_map[slot] = (void __iomem *)(offset + slot_virt[slot]);
 	return prev_map[slot];
@@ -187,7 +187,7 @@ void __init early_iounmap(void __iomem *addr, unsigned long size)
 	WARN(early_ioremap_debug, "%s(%p, %08lx) [%d]\n",
 	      __func__, addr, size, slot);
 
-	virt_addr = (unsigned long)addr;
+	virt_addr = __c_pa((void * __force)addr);
 	if (WARN_ON(virt_addr < fix_to_virt(FIX_BTMAP_BEGIN)))
 		return;
 

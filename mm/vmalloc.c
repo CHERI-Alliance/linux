@@ -78,7 +78,7 @@ static const bool vmap_allow_huge = false;
 
 bool is_vmalloc_addr(const void *x)
 {
-	unsigned long addr = (unsigned long)kasan_reset_tag(x);
+	unsigned long addr = __c_pa(kasan_reset_tag(x));
 
 	return addr >= VMALLOC_START && addr < VMALLOC_END;
 }
@@ -331,16 +331,16 @@ int ioremap_page_range(unsigned long addr, unsigned long end,
 {
 	struct vm_struct *area;
 
-	area = find_vm_area((void *)addr);
+	area = find_vm_area(__c_fakep(addr));
 	if (!area || !(area->flags & VM_IOREMAP)) {
 		WARN_ONCE(1, "vm_area at addr %lx is not marked as VM_IOREMAP\n", addr);
 		return -EINVAL;
 	}
-	if (addr != (unsigned long)area->addr ||
-	    (void *)end != area->addr + get_vm_area_size(area)) {
+	if (addr != __c_pa(area->addr) ||
+	    __c_fakep(end) != area->addr + get_vm_area_size(area)) {
 		WARN_ONCE(1, "ioremap request [%lx,%lx) doesn't match vm_area [%lx, %lx)\n",
-			  addr, end, (long)area->addr,
-			  (long)area->addr + get_vm_area_size(area));
+			  addr, end, __c_pa(area->addr),
+			  __c_pa(area->addr) + get_vm_area_size(area));
 		return -ERANGE;
 	}
 	return vmap_page_range(addr, end, phys_addr, prot);
@@ -675,8 +675,8 @@ static int check_sparse_vm_area(struct vm_struct *area, unsigned long start,
 		return -EINVAL;
 	if ((end - start) >> PAGE_SHIFT > totalram_pages())
 		return -E2BIG;
-	if (start < (unsigned long)area->addr ||
-	    (void *)end > area->addr + get_vm_area_size(area))
+	if (start < __c_pa(area->addr) ||
+	    __c_fakep(end) > area->addr + get_vm_area_size(area))
 		return -ERANGE;
 	return 0;
 }
@@ -723,7 +723,7 @@ int is_vmalloc_or_module_addr(const void *x)
 	 * just put it in the vmalloc space.
 	 */
 #if defined(CONFIG_EXECMEM) && defined(MODULES_VADDR)
-	unsigned long addr = (unsigned long)kasan_reset_tag(x);
+	unsigned long addr = __c_pa(kasan_reset_tag(x));
 	if (addr >= MODULES_VADDR && addr < MODULES_END)
 		return 1;
 #endif
@@ -738,7 +738,7 @@ EXPORT_SYMBOL_GPL(is_vmalloc_or_module_addr);
  */
 struct page *vmalloc_to_page(const void *vmalloc_addr)
 {
-	unsigned long addr = (unsigned long) vmalloc_addr;
+	unsigned long addr = __c_pa(vmalloc_addr);
 	struct page *page = NULL;
 	pgd_t *pgd = pgd_offset_k(addr);
 	p4d_t *p4d;
@@ -1001,7 +1001,7 @@ static struct vmap_area *__find_vmap_area(unsigned long addr, struct rb_root *ro
 {
 	struct rb_node *n = root->rb_node;
 
-	addr = (unsigned long)kasan_reset_tag((void *)addr);
+	addr = __c_pa(kasan_reset_tag(__c_fakep(addr)));
 
 	while (n) {
 		struct vmap_area *va;
@@ -1025,7 +1025,7 @@ __find_vmap_area_exceed_addr(unsigned long addr, struct rb_root *root)
 	struct vmap_area *va = NULL;
 	struct rb_node *n = root->rb_node;
 
-	addr = (unsigned long)kasan_reset_tag((void *)addr);
+	addr = __c_pa(kasan_reset_tag(__c_fakep(addr)));
 
 	while (n) {
 		struct vmap_area *tmp;
@@ -1938,7 +1938,8 @@ static inline void setup_vmalloc_vm(struct vm_struct *vm,
 	struct vmap_area *va, unsigned long flags, const void *caller)
 {
 	vm->flags = flags;
-	vm->addr = (void *)va->va_start;
+	vm->addr = cheri_make_kernel_data_cap(va->va_start,
+					      va->va_end - va->va_start);
 	vm->size = va->va_end - va->va_start;
 	vm->caller = caller;
 	va->vm = vm;
@@ -2016,7 +2017,8 @@ retry:
 	va->flags = (va_flags | vn_id);
 
 	if (vm) {
-		vm->addr = (void *)va->va_start;
+		vm->addr = cheri_make_kernel_data_cap(va->va_start,
+						va->va_end - va->va_start);
 		vm->size = va->va_end - va->va_start;
 		va->vm = vm;
 	}
@@ -2203,7 +2205,7 @@ static void purge_vmap_node(struct work_struct *work)
 
 		list_del_init(&va->list);
 
-		if (is_vmalloc_or_module_addr((void *)orig_start))
+		if (is_vmalloc_or_module_addr(__c_fakep(orig_start)))
 			kasan_release_vmalloc(orig_start, orig_end,
 					      va->va_start, va->va_end);
 
@@ -2570,13 +2572,14 @@ static unsigned long addr_to_vb_idx(unsigned long addr)
 	return addr;
 }
 
-static void *vmap_block_vaddr(unsigned long va_start, unsigned long pages_off)
+static void *vmap_block_vaddr(struct vmap_area *va, unsigned long pages_off)
 {
 	unsigned long addr;
 
-	addr = va_start + (pages_off << PAGE_SHIFT);
-	BUG_ON(addr_to_vb_idx(addr) != addr_to_vb_idx(va_start));
-	return (void *)addr;
+	addr = va->va_start + (pages_off << PAGE_SHIFT);
+	BUG_ON(addr_to_vb_idx(addr) != addr_to_vb_idx(va->va_start));
+	BUG_ON(addr >= va->va_end);
+	return cheri_make_kernel_data_cap(addr, va->va_end - addr);
 }
 
 /**
@@ -2613,7 +2616,7 @@ static void *new_vmap_block(unsigned int order, gfp_t gfp_mask)
 		return ERR_CAST(va);
 	}
 
-	vaddr = vmap_block_vaddr(va->va_start, 0);
+	vaddr = vmap_block_vaddr(va, 0);
 	spin_lock_init(&vb->lock);
 	vb->va = va;
 	/* At least something should be left free */
@@ -2770,7 +2773,7 @@ static void *vb_alloc(unsigned long size, gfp_t gfp_mask)
 		}
 
 		pages_off = VMAP_BBMAP_BITS - vb->free;
-		vaddr = vmap_block_vaddr(vb->va->va_start, pages_off);
+		vaddr = vmap_block_vaddr(vb->va, pages_off);
 		WRITE_ONCE(vb->free, vb->free - (1UL << order));
 		bitmap_set(vb->used_map, pages_off, (1UL << order));
 		if (vb->free == 0) {
@@ -2916,7 +2919,7 @@ EXPORT_SYMBOL_GPL(vm_unmap_aliases);
 void vm_unmap_ram(const void *mem, unsigned int count)
 {
 	unsigned long size = (unsigned long)count << PAGE_SHIFT;
-	unsigned long addr = (unsigned long)kasan_reset_tag(mem);
+	unsigned long addr = __c_pa(kasan_reset_tag(mem));
 	struct vmap_area *va;
 
 	might_sleep();
@@ -2937,7 +2940,7 @@ void vm_unmap_ram(const void *mem, unsigned int count)
 	if (WARN_ON_ONCE(!va))
 		return;
 
-	debug_check_no_locks_freed((void *)va->va_start,
+	debug_check_no_locks_freed(__c_fakep(va->va_start),
 				    (va->va_end - va->va_start));
 	free_unmap_vmap_area(va);
 }
@@ -2967,7 +2970,7 @@ void *vm_map_ram(struct page **pages, unsigned int count, int node)
 		mem = vb_alloc(size, GFP_KERNEL);
 		if (IS_ERR(mem))
 			return NULL;
-		addr = (unsigned long)mem;
+		addr = __c_pa(mem);
 	} else {
 		struct vmap_area *va;
 		va = alloc_vmap_area(size, PAGE_SIZE,
@@ -2978,7 +2981,8 @@ void *vm_map_ram(struct page **pages, unsigned int count, int node)
 			return NULL;
 
 		addr = va->va_start;
-		mem = (void *)addr;
+		mem = cheri_make_kernel_data_cap(addr,
+						 va->va_end - va->va_start);
 	}
 
 	if (vmap_pages_range(addr, addr + size, PAGE_KERNEL,
@@ -2994,7 +2998,7 @@ void *vm_map_ram(struct page **pages, unsigned int count, int node)
 	 */
 	mem = kasan_unpoison_vmalloc(mem, size, KASAN_VMALLOC_PROT_NORMAL);
 
-	return mem;
+	return cheri_bounds_set(mem, size);
 }
 EXPORT_SYMBOL(vm_map_ram);
 
@@ -3064,13 +3068,13 @@ void __init vm_area_register_early(struct vm_struct *vm, size_t align)
 	BUG_ON(vmap_initialized);
 
 	for (p = &vmlist; (cur = *p) != NULL; p = &cur->next) {
-		if ((unsigned long)cur->addr - addr >= vm->size)
+		if (__c_pa(cur->addr) - addr >= vm->size)
 			break;
-		addr = ALIGN((unsigned long)cur->addr + cur->size, align);
+		addr = ALIGN(__c_pa(cur->addr) + cur->size, align);
 	}
 
 	BUG_ON(addr > VMALLOC_END - vm->size);
-	vm->addr = (void *)addr;
+	vm->addr = cheri_make_kernel_data_cap(addr, vm->size);
 	vm->next = *p;
 	*p = vm;
 	kasan_populate_early_vm_area_shadow(vm->addr, vm->size);
@@ -3185,7 +3189,7 @@ struct vm_struct *find_vm_area(const void *addr)
 {
 	struct vmap_area *va;
 
-	va = find_vmap_area((unsigned long)addr);
+	va = find_vmap_area(__c_pa(addr));
 	if (!va)
 		return NULL;
 
@@ -3209,11 +3213,11 @@ struct vm_struct *remove_vm_area(const void *addr)
 
 	might_sleep();
 
-	if (WARN(!PAGE_ALIGNED(addr), "Trying to vfree() bad address (%p)\n",
+	if (WARN(!PAGE_ALIGNED(__c_pa(addr)), "Trying to vfree() bad address (%p)\n",
 			addr))
 		return NULL;
 
-	va = find_unlink_vmap_area((unsigned long)addr);
+	va = find_unlink_vmap_area(__c_pa(addr));
 	if (!va || !va->vm)
 		return NULL;
 	vm = va->vm;
@@ -3253,7 +3257,7 @@ static void vm_reset_perms(struct vm_struct *area)
 	 * the vm_unmap_aliases() flush includes the direct map.
 	 */
 	for (i = 0; i < area->nr_pages; i += 1U << page_order) {
-		unsigned long addr = (unsigned long)page_address(area->pages[i]);
+		unsigned long addr = __c_pa(page_address(area->pages[i]));
 
 		if (addr) {
 			unsigned long page_size;
@@ -3439,7 +3443,7 @@ void *vmap(struct page **pages, unsigned int count,
 	if (!area)
 		return NULL;
 
-	addr = (unsigned long)area->addr;
+	addr = __c_pa(area->addr);
 	if (vmap_pages_range(addr, addr + size, pgprot_nx(prot),
 				pages, PAGE_SHIFT) < 0) {
 		vunmap(area->addr);
@@ -3624,7 +3628,7 @@ static void *__vmalloc_area_node(struct vm_struct *area, gfp_t gfp_mask,
 {
 	const gfp_t nested_gfp = (gfp_mask & GFP_RECLAIM_MASK) | __GFP_ZERO;
 	bool nofail = gfp_mask & __GFP_NOFAIL;
-	unsigned long addr = (unsigned long)area->addr;
+	unsigned long addr = __c_pa(area->addr);
 	unsigned long size = get_vm_area_size(area);
 	unsigned long array_size;
 	unsigned int nr_small_pages = size >> PAGE_SHIFT;
@@ -4179,8 +4183,8 @@ static size_t vmap_ram_vread_iter(struct iov_iter *iter, const char *addr,
 	 * Area is split into regions and tracked with vmap_block, read out
 	 * each region and zero fill the hole between regions.
 	 */
-	xa = addr_to_vb_xa((unsigned long) addr);
-	vb = xa_load(xa, addr_to_vb_idx((unsigned long)addr));
+	xa = addr_to_vb_xa(__c_pa(addr));
+	vb = xa_load(xa, addr_to_vb_idx(__c_pa(addr)));
 	if (!vb)
 		goto finished_zero;
 
@@ -4196,7 +4200,7 @@ static size_t vmap_ram_vread_iter(struct iov_iter *iter, const char *addr,
 		if (remains == 0)
 			goto finished;
 
-		start = vmap_block_vaddr(vb->va->va_start, rs);
+		start = vmap_block_vaddr(vb->va, rs);
 
 		if (addr < start) {
 			size_t to_zero = min_t(size_t, start - addr, remains);
@@ -4264,24 +4268,24 @@ long vread_iter(struct iov_iter *iter, const char *addr, size_t count)
 	struct vmap_node *vn;
 	struct vmap_area *va;
 	struct vm_struct *vm;
-	char *vaddr;
+	unsigned long vaddr;
 	size_t n, size, flags, remains;
 	unsigned long next;
 
 	addr = kasan_reset_tag(addr);
 
 	/* Don't allow overflow */
-	if ((unsigned long) addr + count < count)
-		count = -(unsigned long) addr;
+	if (__c_pa(addr) + count < count)
+		count = -__c_pa(addr);
 
 	remains = count;
 
-	vn = find_vmap_area_exceed_addr_lock((unsigned long) addr, &va);
+	vn = find_vmap_area_exceed_addr_lock(__c_pa(addr), &va);
 	if (!vn)
 		goto finished_zero;
 
 	/* no intersects with alive vmap_area */
-	if ((unsigned long)addr + remains <= va->va_start)
+	if (__c_pa(addr) + remains <= va->va_start)
 		goto finished_zero;
 
 	do {
@@ -4307,14 +4311,14 @@ long vread_iter(struct iov_iter *iter, const char *addr, size_t count)
 		/* Pair with smp_wmb() in clear_vm_uninitialized_flag() */
 		smp_rmb();
 
-		vaddr = (char *) va->va_start;
+		vaddr = va->va_start;
 		size = vm ? get_vm_area_size(vm) : va_size(va);
 
-		if (addr >= vaddr + size)
+		if (__c_pa(addr) >= vaddr + size)
 			goto next_va;
 
-		if (addr < vaddr) {
-			size_t to_zero = min_t(size_t, vaddr - addr, remains);
+		if (__c_pa(addr) < vaddr) {
+			size_t to_zero = min_t(size_t, vaddr - __c_pa(addr), remains);
 			size_t zeroed = zero_iter(iter, to_zero);
 
 			addr += zeroed;
@@ -4324,7 +4328,7 @@ long vread_iter(struct iov_iter *iter, const char *addr, size_t count)
 				goto finished;
 		}
 
-		n = vaddr + size - addr;
+		n = vaddr + size - __c_pa(addr);
 		if (n > remains)
 			n = remains;
 
@@ -4390,7 +4394,7 @@ int remap_vmalloc_range_partial(struct vm_area_struct *vma, unsigned long uaddr,
 
 	size = PAGE_ALIGN(size);
 
-	if (!PAGE_ALIGNED(uaddr) || !PAGE_ALIGNED(kaddr))
+	if (!PAGE_ALIGNED(uaddr) || !PAGE_ALIGNED(__c_pa(kaddr)))
 		return -EINVAL;
 
 	area = find_vm_area(kaddr);
@@ -4813,7 +4817,7 @@ bool vmalloc_dump_obj(void *object)
 	unsigned long addr;
 	unsigned int nr_pages;
 
-	addr = PAGE_ALIGN((unsigned long) object);
+	addr = PAGE_ALIGN(__c_pa(object));
 	vn = addr_to_node(addr);
 
 	if (!spin_trylock(&vn->busy.lock))
@@ -4826,7 +4830,7 @@ bool vmalloc_dump_obj(void *object)
 	}
 
 	vm = va->vm;
-	addr = (unsigned long) vm->addr;
+	addr = __c_pa(vm->addr);
 	caller = vm->caller;
 	nr_pages = vm->nr_pages;
 	spin_unlock(&vn->busy.lock);
@@ -4875,7 +4879,7 @@ static void show_purge_info(struct seq_file *m)
 		spin_lock(&vn->lazy.lock);
 		list_for_each_entry(va, &vn->lazy.head, list) {
 			seq_printf(m, "0x%pK-0x%pK %7ld unpurged vm_area\n",
-				(void *)va->va_start, (void *)va->va_end,
+				__c_fakep(va->va_start), __c_fakep(va->va_end),
 				va->va_end - va->va_start);
 		}
 		spin_unlock(&vn->lazy.lock);
@@ -4897,7 +4901,7 @@ static int vmalloc_info_show(struct seq_file *m, void *p)
 			if (!va->vm) {
 				if (va->flags & VMAP_RAM)
 					seq_printf(m, "0x%pK-0x%pK %7ld vm_map_ram\n",
-						(void *)va->va_start, (void *)va->va_end,
+						__c_fakep(va->va_start), __c_fakep(va->va_end),
 						va->va_end - va->va_start);
 
 				continue;
@@ -4981,11 +4985,11 @@ static void __init vmap_init_free_space(void)
 	 *  |<--------------------------------->|
 	 */
 	for (busy = vmlist; busy; busy = busy->next) {
-		if ((unsigned long) busy->addr - vmap_start > 0) {
+		if (__c_pa(busy->addr) - vmap_start > 0) {
 			free = kmem_cache_zalloc(vmap_area_cachep, GFP_NOWAIT);
 			if (!WARN_ON_ONCE(!free)) {
 				free->va_start = vmap_start;
-				free->va_end = (unsigned long) busy->addr;
+				free->va_end = __c_pa(busy->addr);
 
 				insert_vmap_area_augment(free, NULL,
 					&free_vmap_area_root,
@@ -4993,7 +4997,7 @@ static void __init vmap_init_free_space(void)
 			}
 		}
 
-		vmap_start = (unsigned long) busy->addr + busy->size;
+		vmap_start = __c_pa(busy->addr) + busy->size;
 	}
 
 	if (vmap_end - vmap_start > 0) {
@@ -5128,7 +5132,7 @@ void __init vmalloc_init(void)
 		if (WARN_ON_ONCE(!va))
 			continue;
 
-		va->va_start = (unsigned long)tmp->addr;
+		va->va_start = __c_pa(tmp->addr);
 		va->va_end = va->va_start + tmp->size;
 		va->vm = tmp;
 
