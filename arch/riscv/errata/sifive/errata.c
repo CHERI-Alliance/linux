@@ -74,7 +74,7 @@ static u32 __init_or_module sifive_errata_probe(unsigned long archid,
 	return cpu_req_errata;
 }
 
-static void __init_or_module warn_miss_errata(u32 miss_errata)
+static void warn_miss_errata(u32 miss_errata)
 {
 	int i;
 

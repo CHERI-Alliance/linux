@@ -199,13 +199,16 @@
 #define BOUNDED_SECTION_PRE_LABEL(_sec_, _label_, _BEGIN_, _END_)	\
 	_BEGIN_##_label_ = .;						\
 	KEEP(*(_sec_))							\
-	_END_##_label_ = .;
+	_END_##_label_ = .;						\
+	size$##_BEGIN_##_label_ = ABSOLUTE(. - _BEGIN_##_label_);	\
+	size$##_END_##_label_ = ABSOLUTE(1);	/* FIXCHERI: Should be zero. */
 
 #define BOUNDED_SECTION_POST_LABEL(_sec_, _label_, _BEGIN_, _END_)	\
 	_label_##_BEGIN_ = .;						\
 	KEEP(*(_sec_))							\
 	_label_##_END_ = .;						\
-	size$##_label_##_BEGIN_ = ABSOLUTE(. - _label_##_BEGIN_);
+	size$##_label_##_BEGIN_ = ABSOLUTE(. - _label_##_BEGIN_);	\
+	size$##_label_##_END_ = ABSOLUTE(1);	/* FIXCHERI: Should be zero. */
 
 #define BOUNDED_SECTION_BY(_sec_, _label_)				\
 	BOUNDED_SECTION_PRE_LABEL(_sec_, _label_, __start, __stop)
@@ -474,7 +477,16 @@
 	PROVIDE(kallsyms_token_table = .);				\
 	PROVIDE(kallsyms_token_index = .);				\
 	PROVIDE(kallsyms_markers = .);					\
-	PROVIDE(kallsyms_seqs_of_names = .);
+	PROVIDE(kallsyms_seqs_of_names = .);				\
+	size$kallsyms_addresses = ABSOLUTE(1);				\
+	size$kallsyms_offsets = ABSOLUTE(1);				\
+	size$kallsyms_names = ABSOLUTE(1);				\
+	size$kallsyms_num_syms = ABSOLUTE(1);				\
+	size$kallsyms_relative_base = ABSOLUTE(1);			\
+	size$kallsyms_token_table = ABSOLUTE(1);			\
+	size$kallsyms_token_index = ABSOLUTE(1);			\
+	size$kallsyms_markers = ABSOLUTE(1);				\
+	size$kallsyms_seqs_of_names = ABSOLUTE(1);
 
 /*
  * Read only Data
@@ -570,7 +582,8 @@
 	BTF								\
 									\
 	. = ALIGN((align));						\
-	__end_rodata = .;
+	__end_rodata = .;						\
+	size$__end_rodata = ABSOLUTE(1);
 
 
 /*

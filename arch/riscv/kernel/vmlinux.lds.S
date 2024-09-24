@@ -80,6 +80,7 @@ SECTIONS
 		EXIT_TEXT
 	}
 	__exittext_end = .;
+	size$__exittext_begin = ABSOLUTE(. - __exittext_begin);
 
 	__init_text_end = .;
 	. = ALIGN(SECTION_ALIGN);
@@ -121,6 +122,7 @@ SECTIONS
 #endif
 
 	__init_data_end = .;
+	size$__init_data_begin = ABSOLUTE(. - __init_data_begin);
 
 	. = ALIGN(8);
 	.alternative : {
@@ -129,6 +131,7 @@ SECTIONS
 		__alt_end = .;
 	}
 	__init_end = .;
+	size$__init_begin = ABSOLUTE(. - __init_begin);
 
 	/* Start of data section */
 	_sdata = .;
@@ -186,6 +189,7 @@ SECTIONS
 	__pecoff_data_virt_end = ABSOLUTE(.);
 #endif
 	_end = .;
+	size$_start = ABSOLUTE(. - _start);
 
 	STABS_DEBUG
 	DWARF_DEBUG

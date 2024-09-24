@@ -391,6 +391,7 @@ quiet_cmd_wrap_S_dtb = WRAP    $@
 		echo '.incbin "$<" ';							\
 		echo ".global $${symbase}_end";						\
 		echo "$${symbase}_end:";						\
+                echo ".size $${symbase}_begin, . - $${symbase}_begin";                  \
 		echo '.balign STRUCT_ALIGNMENT';					\
 	} > $@
 

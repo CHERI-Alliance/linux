@@ -717,6 +717,12 @@ struct per_cpu_zonestat {
 	 */
 	unsigned long vm_numa_event[NR_VM_NUMA_EVENT_ITEMS];
 #endif
+#ifdef CONFIG_CHERI_KERNEL
+#if !defined(CONFIG_SMP) && !defined(CONFIG_NUMA)
+	/* FIXCHERI: Zero sized struct generates a linker warning. */
+	unsigned char dummy;
+#endif
+#endif
 };
 
 struct per_cpu_nodestat {
