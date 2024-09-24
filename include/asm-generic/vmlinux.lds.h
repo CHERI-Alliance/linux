@@ -134,7 +134,9 @@
 	*(__rt_sched_class)			\
 	*(__fair_sched_class)			\
 	*(__idle_sched_class)			\
-	__sched_class_lowest = .;
+	__sched_class_lowest = .;		\
+	size$__sched_class_highest = ABSOLUTE(. - __sched_class_highest);	\
+	size$__sched_class_lowest = ABSOLUTE(. - __sched_class_lowest);	\
 
 /* The actual configuration determine if the init/exit sections
  * are handled as text/data or they can be discarded (which
@@ -202,7 +204,8 @@
 #define BOUNDED_SECTION_POST_LABEL(_sec_, _label_, _BEGIN_, _END_)	\
 	_label_##_BEGIN_ = .;						\
 	KEEP(*(_sec_))							\
-	_label_##_END_ = .;
+	_label_##_END_ = .;						\
+	size$##_label_##_BEGIN_ = ABSOLUTE(. - _label_##_BEGIN_);
 
 #define BOUNDED_SECTION_BY(_sec_, _label_)				\
 	BOUNDED_SECTION_PRE_LABEL(_sec_, _label_, __start, __stop)
@@ -315,7 +318,8 @@
 	. = ALIGN(8);							\
 	__##name##_of_table = .;					\
 	KEEP(*(__##name##_of_table))					\
-	KEEP(*(__##name##_of_table_end))
+	KEEP(*(__##name##_of_table_end))				\
+	size$__##name##_of_table = ABSOLUTE(. - __##name##_of_table);
 
 #define TIMER_OF_TABLES()	OF_TABLE(CONFIG_TIMER_OF, timer)
 #define IRQCHIP_OF_MATCH_TABLE() OF_TABLE(CONFIG_IRQCHIP, irqchip)
@@ -362,6 +366,8 @@
 	__start_once = .;						\
 	*(.data.once)							\
 	__end_once = .;							\
+	size$__start_once = ABSOLUTE(. - __start_once);			\
+	size$__end_once = ABSOLUTE(. - __end_once);			\
 	STRUCT_ALIGN();							\
 	*(__tracepoints)						\
 	/* implement dynamic printk debug */				\
@@ -408,7 +414,8 @@
 	KEEP(*(.data..init_task))					\
 	KEEP(*(.data..init_thread_info))				\
 	. = __start_init_stack + THREAD_SIZE;				\
-	__end_init_stack = .;
+	__end_init_stack = .;						\
+	size$init_stack = ABSOLUTE(. - init_stack);
 
 #define JUMP_TABLE_DATA							\
 	. = ALIGN(8);							\
@@ -1172,4 +1179,6 @@
 	SBSS(sbss_align)						\
 	BSS(bss_align)							\
 	. = ALIGN(stop_align);						\
-	__bss_stop = .;
+	__bss_stop = .;							\
+	size$__bss_start = ABSOLUTE(. - __bss_start);			\
+	size$__bss_stop = ABSOLUTE(. - __bss_stop);
