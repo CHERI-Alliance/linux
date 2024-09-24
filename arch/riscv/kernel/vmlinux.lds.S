@@ -26,6 +26,7 @@ OUTPUT_ARCH(riscv)
 ENTRY(_start)
 
 jiffies = jiffies_64;
+size$jiffies = 8;
 
 SECTIONS
 {
@@ -46,6 +47,8 @@ SECTIONS
 		IRQENTRY_TEXT
 		SOFTIRQENTRY_TEXT
 		_etext = .;
+		size$_text = ABSOLUTE(. - _text);
+		size$_stext = ABSOLUTE(. - _stext);
 	}
 
 	. = ALIGN(SECTION_ALIGN);
@@ -55,6 +58,8 @@ SECTIONS
 		_sinittext = .;						\
 		INIT_TEXT						\
 		_einittext = .;						\
+		size$_sinittext = ABSOLUTE(. - _sinittext);
+		size$_einittext = ABSOLUTE(. - _einittext);
 	}
 
 	. = ALIGN(8);
@@ -109,6 +114,12 @@ SECTIONS
 		__rela_dyn_end = .;
 	}
 
+#ifdef CONFIG_RISCV_CHERI_BAKEWELL
+	__cap_relocs : ALIGN(8) {
+		*(__cap_relocs)
+	}
+#endif
+
 	__init_data_end = .;
 
 	. = ALIGN(8);
@@ -130,12 +141,21 @@ SECTIONS
 	_data = .;
 
 	RW_DATA(L1_CACHE_BYTES, PAGE_SIZE, THREAD_ALIGN)
+
+#ifdef CONFIG_RISCV_CHERI_BAKEWELL
+	.captable : {
+		*(.captable)
+	}
+#endif
+
 	.sdata : {
 		__global_pointer$ = . + 0x800;
 		*(.sdata*)
 	}
 
 	.got : { *(.got*) }
+
+	.data.rel : { *(.data.rel*) }
 
 #ifdef CONFIG_RELOCATABLE
 	.data.rel : { *(.data.rel*) }
@@ -155,6 +175,8 @@ SECTIONS
 
 	/* End of data section */
 	_edata = .;
+	size$_data = ABSOLUTE(. - _data);
+	size$_sdata = ABSOLUTE(. - _sdata);
 
 	BSS_SECTION(PAGE_SIZE, PAGE_SIZE, 0)
 
