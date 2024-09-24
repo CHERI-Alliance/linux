@@ -21,7 +21,9 @@
  * The first word is the work queue pointer and the flags rolled into
  * one
  */
+#ifndef CONFIG_CHERI_KERNEL
 #define work_data_bits(work) ((unsigned long *)(&(work)->data))
+#endif
 
 enum work_bits {
 	WORK_STRUCT_PENDING_BIT	= 0,	/* work item is pending execution */
@@ -107,9 +109,9 @@ enum wq_misc_consts {
 #define WORK_STRUCT_NO_POOL	(WORK_OFFQ_POOL_NONE << WORK_OFFQ_POOL_SHIFT)
 #define WORK_STRUCT_PWQ_MASK	(~((1ul << WORK_STRUCT_PWQ_SHIFT) - 1))
 
-#define WORK_DATA_INIT()	ATOMIC_LONG_INIT((unsigned long)WORK_STRUCT_NO_POOL)
+#define WORK_DATA_INIT()	ATOMIC_PTR_INIT((unsigned long)WORK_STRUCT_NO_POOL)
 #define WORK_DATA_STATIC_INIT()	\
-	ATOMIC_LONG_INIT((unsigned long)(WORK_STRUCT_NO_POOL | WORK_STRUCT_STATIC))
+	ATOMIC_PTR_INIT((unsigned long)(WORK_STRUCT_NO_POOL | WORK_STRUCT_STATIC))
 
 struct delayed_work {
 	struct work_struct work;
@@ -263,7 +265,7 @@ extern void destroy_work_on_stack(struct work_struct *work);
 extern void destroy_delayed_work_on_stack(struct delayed_work *work);
 static inline unsigned int work_static(struct work_struct *work)
 {
-	return *work_data_bits(work) & WORK_STRUCT_STATIC;
+	return atomic_ptr_read(&work->data) & WORK_STRUCT_STATIC;
 }
 #else
 static inline void __init_work(struct work_struct *work, int onstack) { }
@@ -275,7 +277,7 @@ static inline unsigned int work_static(struct work_struct *work) { return 0; }
 /*
  * initialize all of a work item in one go
  *
- * NOTE! No point in using "atomic_long_set()": using a direct
+ * NOTE! No point in using "atomic_ptr_set()": using a direct
  * assignment of the work data initializer allows the compiler
  * to generate better code.
  */
@@ -283,7 +285,7 @@ static inline unsigned int work_static(struct work_struct *work) { return 0; }
 #define __INIT_WORK_KEY(_work, _func, _onstack, _key)			\
 	do {								\
 		__init_work((_work), _onstack);				\
-		(_work)->data = (atomic_long_t) WORK_DATA_INIT();	\
+		(_work)->data = (atomic_ptr_t) WORK_DATA_INIT();	\
 		lockdep_init_map(&(_work)->lockdep_map, "(work_completion)"#_work, (_key), 0); \
 		INIT_LIST_HEAD(&(_work)->entry);			\
 		(_work)->func = (_func);				\
@@ -292,7 +294,7 @@ static inline unsigned int work_static(struct work_struct *work) { return 0; }
 #define __INIT_WORK_KEY(_work, _func, _onstack, _key)			\
 	do {								\
 		__init_work((_work), _onstack);				\
-		(_work)->data = (atomic_long_t) WORK_DATA_INIT();	\
+		(_work)->data = (atomic_ptr_t) WORK_DATA_INIT();	\
 		INIT_LIST_HEAD(&(_work)->entry);			\
 		(_work)->func = (_func);				\
 	} while (0)
@@ -353,7 +355,7 @@ static inline unsigned int work_static(struct work_struct *work) { return 0; }
  * @work: The work item in question
  */
 #define work_pending(work) \
-	test_bit(WORK_STRUCT_PENDING_BIT, work_data_bits(work))
+	(atomic_ptr_read(&(work)->data) & WORK_STRUCT_PENDING)
 
 /**
  * delayed_work_pending - Find out whether a delayable work item is currently
