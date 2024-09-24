@@ -64,10 +64,19 @@ struct pt_regs {
 #define PTRACE_SYSEMU			0x1f
 #define PTRACE_SYSEMU_SINGLESTEP	0x20
 
+#ifdef CONFIG_CHERI_KERNEL
+#define CREG_FMT "%#p"
+#define REG_FMT "%#hp"
+#else
 #ifdef CONFIG_64BIT
 #define REG_FMT "%016lx"
 #else
 #define REG_FMT "%08lx"
+#endif
+#endif
+
+#ifndef CREG_FMT
+#define CREG_FMT REG_FMT
 #endif
 
 #define user_mode(regs) (((regs)->status & SR_PP) == 0)

@@ -66,34 +66,34 @@ void __show_regs(struct pt_regs *regs)
 	show_regs_print_info(KERN_DEFAULT);
 
 	if (!user_mode(regs)) {
-		pr_cont("epc : %pS\n", (void *)regs->epc);
-		pr_cont(" ra : %pS\n", (void *)regs->ra);
+		pr_cont(" epc: %pS\n", __c_fakep(__c_ua(regs->epc)));
+		pr_cont(" ra : %pS\n", __c_fakep(__c_ua(regs->ra)));
 	}
 
-	pr_cont("epc: " REG_FMT " ra : " REG_FMT " sp : " REG_FMT "\n",
-		__c_ua(regs->epc), __c_ua(regs->ra), __c_ua(regs->sp));
-	pr_cont(" gp : " REG_FMT " tp : " REG_FMT " t0 : " REG_FMT "\n",
-		__c_ua(regs->gp), __c_ua(regs->tp), __c_ua(regs->t0));
-	pr_cont(" t1 : " REG_FMT " t2 : " REG_FMT " s0 : " REG_FMT "\n",
-		__c_ua(regs->t1), __c_ua(regs->t2), __c_ua(regs->s0));
-	pr_cont(" s1 : " REG_FMT " a0 : " REG_FMT " a1 : " REG_FMT "\n",
-		__c_ua(regs->s1), __c_ua(regs->a0), __c_ua(regs->a1));
-	pr_cont(" a2 : " REG_FMT " a3 : " REG_FMT " a4 : " REG_FMT "\n",
-		__c_ua(regs->a2), __c_ua(regs->a3), __c_ua(regs->a4));
-	pr_cont(" a5 : " REG_FMT " a6 : " REG_FMT " a7 : " REG_FMT "\n",
-		__c_ua(regs->a5), __c_ua(regs->a6), __c_ua(regs->a7));
-	pr_cont(" s2 : " REG_FMT " s3 : " REG_FMT " s4 : " REG_FMT "\n",
-		__c_ua(regs->s2), __c_ua(regs->s3), __c_ua(regs->s4));
-	pr_cont(" s5 : " REG_FMT " s6 : " REG_FMT " s7 : " REG_FMT "\n",
-		__c_ua(regs->s5), __c_ua(regs->s6), __c_ua(regs->s7));
-	pr_cont(" s8 : " REG_FMT " s9 : " REG_FMT " s10: " REG_FMT "\n",
-		__c_ua(regs->s8), __c_ua(regs->s9), __c_ua(regs->s10));
-	pr_cont(" s11: " REG_FMT " t3 : " REG_FMT " t4 : " REG_FMT "\n",
-		__c_ua(regs->s11), __c_ua(regs->t3), __c_ua(regs->t4));
-	pr_cont(" t5 : " REG_FMT " t6 : " REG_FMT "\n",
-		__c_ua(regs->t5), __c_ua(regs->t6));
+	pr_cont(" epc: " CREG_FMT "\n ra : " CREG_FMT "\n sp : " CREG_FMT "\n",
+		regs->epc, regs->ra, regs->sp);
+	pr_cont(" gp : " CREG_FMT "\n tp : " CREG_FMT "\n t0 : " CREG_FMT "\n",
+		regs->gp, regs->tp, regs->t0);
+	pr_cont(" t1 : " CREG_FMT "\n t2 : " CREG_FMT "\n s0 : " CREG_FMT "\n",
+		regs->t1, regs->t2, regs->s0);
+	pr_cont(" s1 : " CREG_FMT "\n a0 : " CREG_FMT "\n a1 : " CREG_FMT "\n",
+		regs->s1, regs->a0, regs->a1);
+	pr_cont(" a2 : " CREG_FMT "\n a3 : " CREG_FMT "\n a4 : " CREG_FMT "\n",
+		regs->a2, regs->a3, regs->a4);
+	pr_cont(" a5 : " CREG_FMT "\n a6 : " CREG_FMT "\n a7 : " CREG_FMT "\n",
+		regs->a5, regs->a6, regs->a7);
+	pr_cont(" s2 : " CREG_FMT "\n s3 : " CREG_FMT "\n s4 : " CREG_FMT "\n",
+		regs->s2, regs->s3, regs->s4);
+	pr_cont(" s5 : " CREG_FMT "\n s6 : " CREG_FMT "\n s7 : " CREG_FMT "\n",
+		regs->s5, regs->s6, regs->s7);
+	pr_cont(" s8 : " CREG_FMT "\n s9 : " CREG_FMT "\n s10: " CREG_FMT "\n",
+		regs->s8, regs->s9, regs->s10);
+	pr_cont(" s11: " CREG_FMT "\n t3 : " CREG_FMT "\n t4 : " CREG_FMT "\n",
+		regs->s11, regs->t3, regs->t4);
+	pr_cont(" t5 : " CREG_FMT "\n t6 : " CREG_FMT "\n",
+		regs->t5, regs->t6);
 
-	pr_cont("status: " REG_FMT " badaddr: " REG_FMT " cause: " REG_FMT "\n",
+	pr_cont("status:  " REG_FMT " badaddr: " REG_FMT " cause: " REG_FMT "\n",
 		regs->status, regs->badaddr, regs->cause);
 }
 void show_regs(struct pt_regs *regs)
@@ -238,7 +238,7 @@ int copy_thread(struct task_struct *p, const struct kernel_clone_args *args)
 		p->thread.s[0] = (uintptr_t)args->fn;
 		p->thread.s[1] = (uintptr_t)args->fn_arg;
 	} else {
-		*childregs = *(current_pt_regs());
+		*childregs = *(regs);
 		/* Turn off status.VS */
 		riscv_v_vstate_off(childregs);
 		if (usp) /* User fork */

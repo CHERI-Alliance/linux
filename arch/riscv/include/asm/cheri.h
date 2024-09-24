@@ -24,4 +24,8 @@
 
 #define CHERI_PERMS_MIN_CODE (CHERI_BW_PERM_READ | CHERI_BW_PERM_EXECUTE)
 
+#ifdef CONFIG_64BIT
+#define cheri_getmode(x) (!!(cheri_high_get(x) & (1UL << 52)))
+#endif
+
 #endif /* __ASM_CHERI_H */

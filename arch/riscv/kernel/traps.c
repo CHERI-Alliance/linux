@@ -437,6 +437,30 @@ asmlinkage void handle_bad_stack(struct pt_regs *regs)
 
 #ifdef CONFIG_RISCV_CHERI_BAKEWELL
 
+static inline const char *
+cheri_stval_type_to_str(unsigned long stval)
+{
+	switch ((stval >> 16) & 0x0fU) {
+	case 0: return "instruction access fault";
+	case 1: return "data fault due to load store or AMO";
+	case 2: return "jump or branch fault";
+	default: return "<unknown>";
+	}
+}
+
+static inline const char *
+cheri_stval_cause_to_str(unsigned long stval)
+{
+	switch (stval & 0x0fU) {
+	case 0: return "tag violation";
+	case 1: return "seal violation";
+	case 2: return "permission violation";
+	case 3: return "invalid access violation";
+	case 4: return "length violation";
+	default: return "<unknown>";
+	}
+}
+
 asmlinkage __visible noinstr void do_trap_cheri(struct pt_regs *regs)
 {
 	unsigned long stval;
@@ -447,7 +471,13 @@ asmlinkage __visible noinstr void do_trap_cheri(struct pt_regs *regs)
 	}
 
 	stval = csr_read(stval);
-	pr_err("CHERI exception: stval=%#lx at %p\n", stval, (void *)regs->epc);
+	pr_err("===== CHERI exception: %#p %hpS\n",
+	       (void *)regs->epc, __c_ua(regs->epc));
+	pr_err("===== CHERI exception: stval=%#lx (%s, %s)\n", stval,
+	       cheri_stval_cause_to_str(stval),
+	       cheri_stval_type_to_str(stval));
+	show_regs(regs);
+	dump_instr(KERN_EMERG, regs);
 	dump_stack();
 	do_trap_error(regs, SIGILL, ILL_ILLOPC, regs->epc,
 		      "CHERI exception");

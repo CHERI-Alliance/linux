@@ -740,6 +740,8 @@ static char *pointer_string(char *buf, char *end,
 	spec.flags |= SMALL;
 	if (spec.field_width == -1) {
 		spec.field_width = 2 * sizeof(__c_pa(ptr));
+		if (spec.flags & SPECIAL)
+			spec.field_width += 2;
 		spec.flags |= ZEROPAD;
 	}
 
@@ -2559,7 +2561,7 @@ char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
 	if (spec.flags & SPECIAL) { /* Simplified format for capabilities */
 		int orig_field_width = spec.field_width;
 		cheri_perms_t perms = cheri_perms_get(cap);
-		ptraddr_t base, top;
+		ptraddr_t base, top, len;
 		const char *start = buf;
 		char *attr_start;
 		unsigned int i;
@@ -2584,6 +2586,19 @@ char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
 #endif
 #ifdef CONFIG_ARM64_MORELLO
 			{ ARM_CAP_PERMISSION_EXECUTIVE,	'E' }
+#endif
+#ifdef CHERI_PERM_SW_00
+			{ 0,                            ' ' },
+			{ CHERI_PERM_SW_00,             '0' },
+#endif
+#ifdef CHERI_PERM_SW_01
+			{ CHERI_PERM_SW_01,             '1' },
+#endif
+#ifdef CHERI_PERM_SW_02
+			{ CHERI_PERM_SW_02,             '2' },
+#endif
+#ifdef CHERI_PERM_SW_03
+			{ CHERI_PERM_SW_03,             '3' },
 #endif
 		};
 
@@ -2618,9 +2633,19 @@ char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
 
 		update_buf_single(buf, end, ' ');
 		update_buf_single(buf, end, '[');
+		update_buf_single(buf, end, cheri_tag_get(cap) ? 'V' : '!');
+#ifdef cheri_getmode
+		update_buf_single(buf, end, cheri_getmode(cap) ? 'M' : 'm');
+#endif
+		update_buf_single(buf, end, cheri_is_sealed(cap) ? 'S'  : '.');
+		update_buf_single(buf, end, ' ');
 		for (i = 0; i < ARRAY_SIZE(__perms); ++i) {
-			if (perms & __perms[i].cperm)
+			if (__perms[i].cperm == 0)
 				update_buf_single(buf, end, __perms[i].id);
+			else if (perms & __perms[i].cperm)
+				update_buf_single(buf, end, __perms[i].id);
+			else
+				update_buf_single(buf, end, '.');
 		}
 		update_buf_single(buf, end, ',');
 
@@ -2628,6 +2653,9 @@ char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
 		buf = pointer_string(buf, end, __c_fakep(base), spec);
 		update_buf_single(buf, end, '-');
 
+		len = cheri_length_get(cap);
+		if (len != 0 && len != ~(ptraddr_t)0)
+			len--;
 		top =  base + cheri_length_get(cap);
 		buf = pointer_string(buf, end, __c_fakep(top), spec);
 		update_buf_single(buf, end, ']');
@@ -2831,10 +2859,12 @@ qualifier:
 		spec->type = FORMAT_TYPE_CAPABILITY;
 #else
 		spec->type = FORMAT_TYPE_PTR;
+#endif
 #ifdef __CHERI__
 		if (qualifier == 'l')
 			spec->type = FORMAT_TYPE_CAPABILITY;
-#endif
+		if (qualifier == 'h')
+			spec->type = FORMAT_TYPE_PTR;
 #endif
 		return ++fmt - start;
 
@@ -3020,7 +3050,8 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list args)
 			break;
 
 		case FORMAT_TYPE_PTR:
-			str = pointer(fmt, str, end, va_arg(args, void *),
+			str = pointer(fmt, str, end,
+				      __c_fakep(va_arg(args, ptraddr_t)),
 				      spec);
 			while (isalnum(*fmt))
 				fmt++;
@@ -3271,6 +3302,7 @@ int vbin_printf(u32 *bin_buf, size_t size, const char *fmt, va_list args)
 #define save_arg(type)							\
 ({									\
 	unsigned long long value;					\
+	static_assert(sizeof(type) <= 8);				\
 	if (sizeof(type) == 8) {					\
 		unsigned long long val8;				\
 		str = PTR_ALIGN(str, sizeof(u32));			\
@@ -3291,6 +3323,25 @@ int vbin_printf(u32 *bin_buf, size_t size, const char *fmt, va_list args)
 	str += sizeof(type);						\
 	value;								\
 })
+
+#if __SIZEOF_POINTER__ > __SIZEOF_LONG__
+#define save_arg_p(type) do {						\
+	uintptr_t valp;							\
+	static_assert(__SIZEOF_POINTER__ == 16);			\
+	static_assert(sizeof(type) == 16);				\
+	str = PTR_ALIGN(str, sizeof(u32));				\
+	valp = va_arg(args, uintptr_t);					\
+	if (str + sizeof(type) <= end) {				\
+		*(u32 *)str = *(u32 *)&valp;				\
+		*(u32 *)(str + 4) = *((u32 *)&valp + 1);		\
+		*(u32 *)(str + 8) = *((u32 *)&valp + 2);		\
+		*(u32 *)(str + 12) = *((u32 *)&valp + 3);		\
+	}								\
+	str += sizeof(type);						\
+} while (0)
+#else
+#define save_arg_p(X)	save_arg(X)
+#endif
 
 	while (*fmt) {
 		int read = format_decode(fmt, &spec);
@@ -3341,11 +3392,11 @@ int vbin_printf(u32 *bin_buf, size_t size, const char *fmt, va_list args)
 			case 'x':
 			case 'K':
 			case 'e':
-				save_arg(void *);
+				save_arg_p(void *);
 				break;
 			default:
 				if (!isalnum(*fmt)) {
-					save_arg(void *);
+					save_arg_p(void *);
 					break;
 				}
 				str = pointer(fmt, str, end, va_arg(args, void *),
@@ -3411,6 +3462,7 @@ int vbin_printf(u32 *bin_buf, size_t size, const char *fmt, va_list args)
 out:
 	return (u32 *)(PTR_ALIGN(str, sizeof(u32))) - bin_buf;
 #undef save_arg
+#undef save_arg_p
 }
 EXPORT_SYMBOL_GPL(vbin_printf);
 
