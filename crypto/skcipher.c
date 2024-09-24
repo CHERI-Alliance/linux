@@ -78,7 +78,7 @@ static inline gfp_t skcipher_walk_gfp(struct skcipher_walk *walk)
  */
 static inline u8 *skcipher_get_spot(u8 *start, unsigned int len)
 {
-	u8 *end_page = (u8 *)(((unsigned long)(start + len - 1)) & PAGE_MASK);
+	u8 *end_page = (u8 *)(((uintptr_t)(start + len - 1)) & PAGE_MASK);
 
 	return max(start, end_page);
 }
@@ -93,7 +93,7 @@ static int skcipher_done_slow(struct skcipher_walk *walk, unsigned int bsize)
 {
 	u8 *addr;
 
-	addr = (u8 *)ALIGN((unsigned long)walk->buffer, walk->alignmask + 1);
+	addr = (u8 *)ALIGN((uintptr_t)walk->buffer, walk->alignmask + 1);
 	addr = skcipher_get_spot(addr, bsize);
 	scatterwalk_copychunks(addr, &walk->out, bsize,
 			       (walk->flags & SKCIPHER_WALK_PHYS) ? 2 : 1);
@@ -159,7 +159,7 @@ unmap_src:
 
 finish:
 	/* Short-circuit for the common/fast path. */
-	if (!((unsigned long)walk->buffer | (unsigned long)walk->page))
+	if (!(__c_pa(walk->buffer) | __c_pa(walk->page)))
 		goto out;
 
 	if (walk->flags & SKCIPHER_WALK_PHYS)
@@ -433,7 +433,7 @@ static int skcipher_walk_first(struct skcipher_walk *walk)
 		return -EDEADLK;
 
 	walk->buffer = NULL;
-	if (unlikely(((unsigned long)walk->iv & walk->alignmask))) {
+	if (unlikely(__c_pa(walk->iv) & walk->alignmask)) {
 		int err = skcipher_copy_iv(walk);
 		if (err)
 			return err;
@@ -587,7 +587,7 @@ static int skcipher_setkey_unaligned(struct crypto_skcipher *tfm,
 	if (!buffer)
 		return -ENOMEM;
 
-	alignbuffer = (u8 *)ALIGN((unsigned long)buffer, alignmask + 1);
+	alignbuffer = (u8 *)ALIGN((uintptr_t)buffer, alignmask + 1);
 	memcpy(alignbuffer, key, keylen);
 	ret = cipher->setkey(tfm, alignbuffer, keylen);
 	kfree_sensitive(buffer);
@@ -615,7 +615,7 @@ int crypto_skcipher_setkey(struct crypto_skcipher *tfm, const u8 *key,
 	if (keylen < cipher->min_keysize || keylen > cipher->max_keysize)
 		return -EINVAL;
 
-	if ((unsigned long)key & alignmask)
+	if (__c_pa(key) & alignmask)
 		err = skcipher_setkey_unaligned(tfm, key, keylen);
 	else
 		err = cipher->setkey(tfm, key, keylen);

@@ -289,7 +289,7 @@ static inline bool con_should_update(const struct vc_data *vc)
 static inline u16 *screenpos(const struct vc_data *vc, unsigned int offset,
 			     bool viewed)
 {
-	unsigned long origin = viewed ? vc->vc_visible_origin : vc->vc_origin;
+	uintptr_t origin = viewed ? vc->vc_visible_origin : vc->vc_origin;
 
 	return (u16 *)(origin + offset);
 }
@@ -530,20 +530,20 @@ void vc_uniscr_copy_line(const struct vc_data *vc, void *dest, bool viewed,
 {
 	u32 **uni_lines = vc->vc_uni_lines;
 	int offset = row * vc->vc_size_row + col * 2;
-	unsigned long pos;
+	uintptr_t pos;
 
 	if (WARN_ON_ONCE(!uni_lines))
 		return;
 
-	pos = (unsigned long)screenpos(vc, offset, viewed);
+	pos = (uintptr_t)screenpos(vc, offset, viewed);
 	if (pos >= vc->vc_origin && pos < vc->vc_scr_end) {
 		/*
 		 * Desired position falls in the main screen buffer.
 		 * However the actual row/col might be different if
 		 * scrollback is active.
 		 */
-		row = (pos - vc->vc_origin) / vc->vc_size_row;
-		col = ((pos - vc->vc_origin) % vc->vc_size_row) / 2;
+		row = __c_ua(pos - vc->vc_origin) / vc->vc_size_row;
+		col = (__c_ua(pos - vc->vc_origin) % vc->vc_size_row) / 2;
 		memcpy(dest, &uni_lines[row][col], nr * sizeof(u32));
 	} else {
 		/*
@@ -590,12 +590,12 @@ static void con_scroll(struct vc_data *vc, unsigned int top,
 	scr_memsetw(clear, vc->vc_video_erase_char, vc->vc_size_row * nr);
 }
 
-static void do_update_region(struct vc_data *vc, unsigned long start, int count)
+static void do_update_region(struct vc_data *vc, uintptr_t start, int count)
 {
 	unsigned int xx, yy, offset;
 	u16 *p = (u16 *)start;
 
-	offset = (start - vc->vc_origin) / 2;
+	offset = __c_ua(start - vc->vc_origin) / 2;
 	xx = offset % vc->vc_cols;
 	yy = offset / vc->vc_cols;
 
@@ -624,7 +624,7 @@ static void do_update_region(struct vc_data *vc, unsigned long start, int count)
 	}
 }
 
-void update_region(struct vc_data *vc, unsigned long start, int count)
+void update_region(struct vc_data *vc, uintptr_t start, int count)
 {
 	WARN_CONSOLE_UNLOCKED();
 
@@ -737,7 +737,7 @@ void invert_screen(struct vc_data *vc, int offset, int count, bool viewed)
 	}
 
 	if (con_should_update(vc))
-		do_update_region(vc, (unsigned long) p, count);
+		do_update_region(vc, (uintptr_t) p, count);
 	notify_update(vc);
 }
 
@@ -785,7 +785,7 @@ static void insert_char(struct vc_data *vc, unsigned int nr)
 	scr_memsetw(p, vc->vc_video_erase_char, nr * 2);
 	vc->vc_need_wrap = 0;
 	if (con_should_update(vc))
-		do_update_region(vc, (unsigned long) p,
+		do_update_region(vc, (uintptr_t) p,
 			vc->vc_cols - vc->state.x);
 }
 
@@ -799,7 +799,7 @@ static void delete_char(struct vc_data *vc, unsigned int nr)
 			nr * 2);
 	vc->vc_need_wrap = 0;
 	if (con_should_update(vc))
-		do_update_region(vc, (unsigned long) p,
+		do_update_region(vc, (uintptr_t) p,
 			vc->vc_cols - vc->state.x);
 }
 
@@ -868,7 +868,7 @@ static void set_origin(struct vc_data *vc)
 	if (!con_is_visible(vc) ||
 	    !vc->vc_sw->con_set_origin ||
 	    !vc->vc_sw->con_set_origin(vc))
-		vc->vc_origin = (unsigned long)vc->vc_screenbuf;
+		vc->vc_origin = (uintptr_t)vc->vc_screenbuf;
 	vc->vc_visible_origin = vc->vc_origin;
 	vc->vc_scr_end = vc->vc_origin + vc->vc_screenbuf_size;
 	vc->vc_pos = vc->vc_origin + vc->vc_size_row * vc->state.y +
@@ -1132,8 +1132,9 @@ static inline int resize_screen(struct vc_data *vc, int width, int height,
 static int vc_do_resize(struct tty_struct *tty, struct vc_data *vc,
 			unsigned int cols, unsigned int lines, bool from_user)
 {
-	unsigned long old_origin, new_origin, new_scr_end, rlth, rrem, err = 0;
-	unsigned long end;
+	uintptr_t old_origin, new_origin, new_scr_end;
+	unsigned long rlth, rrem, err = 0;
+	uintptr_t end;
 	unsigned int old_rows, old_row_size, first_copied_row;
 	unsigned int new_cols, new_rows, new_row_size, new_screen_size;
 	unsigned short *oldscreen, *newscreen;
@@ -1204,7 +1205,7 @@ static int vc_do_resize(struct tty_struct *tty, struct vc_data *vc,
 	rlth = min(old_row_size, new_row_size);
 	rrem = new_row_size - rlth;
 	old_origin = vc->vc_origin;
-	new_origin = (long) newscreen;
+	new_origin = (uintptr_t) newscreen;
 	new_scr_end = new_origin + new_screen_size;
 
 	if (vc->state.y > new_rows) {
@@ -1244,7 +1245,7 @@ static int vc_do_resize(struct tty_struct *tty, struct vc_data *vc,
 	}
 	if (new_scr_end > new_origin)
 		scr_memsetw((void *)new_origin, vc->vc_video_erase_char,
-			    new_scr_end - new_origin);
+			    __c_ua(new_scr_end - new_origin));
 	oldscreen = vc->vc_screenbuf;
 	vc->vc_screenbuf = newscreen;
 	vc->vc_screenbuf_size = new_screen_size;
@@ -1503,13 +1504,13 @@ static void csi_J(struct vc_data *vc, enum CSI_J vpar)
 				     vc->vc_cols - vc->state.x);
 		vc_uniscr_clear_lines(vc, vc->state.y + 1,
 				      vc->vc_rows - vc->state.y - 1);
-		count = (vc->vc_scr_end - vc->vc_pos) >> 1;
+		count = __c_ua(vc->vc_scr_end - vc->vc_pos) >> 1;
 		start = (unsigned short *)vc->vc_pos;
 		break;
 	case CSI_J_START_TO_CURSOR:
 		vc_uniscr_clear_line(vc, 0, vc->state.x + 1);
 		vc_uniscr_clear_lines(vc, 0, vc->state.y);
-		count = ((vc->vc_pos - vc->vc_origin) >> 1) + 1;
+		count = (__c_ua(vc->vc_pos - vc->vc_origin) >> 1) + 1;
 		start = (unsigned short *)vc->vc_origin;
 		break;
 	case CSI_J_FULL:
@@ -1525,7 +1526,7 @@ static void csi_J(struct vc_data *vc, enum CSI_J vpar)
 	}
 	scr_memsetw(start, vc->vc_video_erase_char, 2 * count);
 	if (con_should_update(vc))
-		do_update_region(vc, (unsigned long) start, count);
+		do_update_region(vc, (uintptr_t)start, count);
 	vc->vc_need_wrap = 0;
 }
 
@@ -1561,7 +1562,7 @@ static void csi_K(struct vc_data *vc)
 	scr_memsetw(start + offset, vc->vc_video_erase_char, 2 * count);
 	vc->vc_need_wrap = 0;
 	if (con_should_update(vc))
-		do_update_region(vc, (unsigned long)(start + offset), count);
+		do_update_region(vc, (uintptr_t)(start + offset), count);
 }
 
 /* erase the following count positions */
@@ -2750,7 +2751,7 @@ static int is_double_width(uint32_t ucs)
 }
 
 struct vc_draw_region {
-	unsigned long from, to;
+	uintptr_t from, to;
 	int x;
 };
 
@@ -3829,7 +3830,7 @@ static int do_bind_con_driver(const struct consw *csw, int first, int last,
 
 		old_was_color = vc->vc_can_do_color;
 		vc->vc_sw->con_deinit(vc);
-		vc->vc_origin = (unsigned long)vc->vc_screenbuf;
+		vc->vc_origin = (uintptr_t)vc->vc_screenbuf;
 		visual_init(vc, i, false);
 		set_origin(vc);
 		update_attr(vc);
@@ -4911,7 +4912,7 @@ void putconsxy(struct vc_data *vc, unsigned char xy[static const 2])
 
 u16 vcs_scr_readw(const struct vc_data *vc, const u16 *org)
 {
-	if ((unsigned long)org == vc->vc_pos && softcursor_original != -1)
+	if ((uintptr_t)org == vc->vc_pos && softcursor_original != -1)
 		return softcursor_original;
 	return scr_readw(org);
 }
@@ -4919,7 +4920,7 @@ u16 vcs_scr_readw(const struct vc_data *vc, const u16 *org)
 void vcs_scr_writew(struct vc_data *vc, u16 val, u16 *org)
 {
 	scr_writew(val, org);
-	if ((unsigned long)org == vc->vc_pos) {
+	if ((uintptr_t)org == vc->vc_pos) {
 		softcursor_original = -1;
 		add_softcursor(vc);
 	}

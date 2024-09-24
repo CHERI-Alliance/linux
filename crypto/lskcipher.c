@@ -43,7 +43,7 @@ static int lskcipher_setkey_unaligned(struct crypto_lskcipher *tfm,
 	if (!buffer)
 		return -ENOMEM;
 
-	alignbuffer = (u8 *)ALIGN((unsigned long)buffer, alignmask + 1);
+	alignbuffer = (u8 *)ALIGN((uintptr_t)buffer, alignmask + 1);
 	memcpy(alignbuffer, key, keylen);
 	ret = cipher->setkey(tfm, alignbuffer, keylen);
 	kfree_sensitive(buffer);
@@ -59,7 +59,7 @@ int crypto_lskcipher_setkey(struct crypto_lskcipher *tfm, const u8 *key,
 	if (keylen < cipher->co.min_keysize || keylen > cipher->co.max_keysize)
 		return -EINVAL;
 
-	if ((unsigned long)key & alignmask)
+	if (__c_pa(key) & alignmask)
 		return lskcipher_setkey_unaligned(tfm, key, keylen);
 	else
 		return cipher->setkey(tfm, key, keylen);
@@ -129,8 +129,7 @@ static int crypto_lskcipher_crypt(struct crypto_lskcipher *tfm, const u8 *src,
 {
 	unsigned long alignmask = crypto_lskcipher_alignmask(tfm);
 
-	if (((unsigned long)src | (unsigned long)dst | (unsigned long)iv) &
-	    alignmask)
+	if ((__c_pa(src) | __c_pa(dst) | __c_pa(iv)) & alignmask)
 		return crypto_lskcipher_crypt_unaligned(tfm, src, dst, len, iv,
 							crypt);
 

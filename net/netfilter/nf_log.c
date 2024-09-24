@@ -414,7 +414,7 @@ static int nf_log_proc_dostring(struct ctl_table *table, int write,
 	const struct nf_logger *logger;
 	char buf[NFLOGGER_NAME_LEN];
 	int r = 0;
-	int tindex = (unsigned long)table->extra1;
+	int tindex = __c_pa(table->extra1);
 	struct net *net = table->extra2;
 
 	if (write) {
@@ -480,8 +480,7 @@ static int netfilter_log_sysctl_init(struct net *net)
 			nf_log_sysctl_table[i].mode = 0644;
 			nf_log_sysctl_table[i].proc_handler =
 				nf_log_proc_dostring;
-			nf_log_sysctl_table[i].extra1 =
-				(void *)(unsigned long) i;
+			nf_log_sysctl_table[i].extra1 = __c_fakep(i);
 		}
 		nf_log_sysctl_fhdr = register_net_sysctl(net, "net/netfilter",
 							 nf_log_sysctl_ftable);

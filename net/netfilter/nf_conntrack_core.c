@@ -491,9 +491,9 @@ u32 nf_ct_get_id(const struct nf_conn *ct)
 
 	net_get_random_once(&ct_id_seed, sizeof(ct_id_seed));
 
-	a = (unsigned long)ct;
-	b = (unsigned long)ct->master;
-	c = (unsigned long)nf_ct_net(ct);
+	a = __c_pa(ct);
+	b = __c_pa(ct->master);
+	c = __c_pa(nf_ct_net(ct));
 	d = (unsigned long)siphash(&ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple,
 				   sizeof(ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple),
 				   &ct_id_seed);
@@ -530,9 +530,9 @@ struct nf_conn *nf_ct_tmpl_alloc(struct net *net,
 			return NULL;
 
 		p = tmpl;
-		tmpl = (struct nf_conn *)NFCT_ALIGN((unsigned long)p);
+		tmpl = (struct nf_conn *)NFCT_ALIGN((uintptr_t)p);
 		if (tmpl != p) {
-			tmpl = (struct nf_conn *)NFCT_ALIGN((unsigned long)p);
+			tmpl = (struct nf_conn *)NFCT_ALIGN((uintptr_t)p);
 			tmpl->proto.tmpl_padto = (char *)tmpl - (char *)p;
 		}
 	} else {

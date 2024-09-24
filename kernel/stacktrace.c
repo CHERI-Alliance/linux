@@ -30,7 +30,7 @@ void stack_trace_print(const unsigned long *entries, unsigned int nr_entries,
 		return;
 
 	for (i = 0; i < nr_entries; i++)
-		printk("%*c%pS\n", 1 + spaces, ' ', (void *)entries[i]);
+		printk("%*c%pS\n", 1 + spaces, ' ', (void *)__c_fakep(entries[i]));
 }
 EXPORT_SYMBOL_GPL(stack_trace_print);
 
@@ -54,7 +54,7 @@ int stack_trace_snprint(char *buf, size_t size, const unsigned long *entries,
 
 	for (i = 0; i < nr_entries && size; i++) {
 		generated = snprintf(buf, size, "%*c%pS\n", 1 + spaces, ' ',
-				     (void *)entries[i]);
+				     (void *)__c_fakep(entries[i]));
 
 		total += generated;
 		if (generated >= size) {
@@ -376,10 +376,10 @@ unsigned int stack_trace_save_user(unsigned long *store, unsigned int size)
 
 static inline bool in_irqentry_text(unsigned long ptr)
 {
-	return (ptr >= (unsigned long)&__irqentry_text_start &&
-		ptr < (unsigned long)&__irqentry_text_end) ||
-		(ptr >= (unsigned long)&__softirqentry_text_start &&
-		 ptr < (unsigned long)&__softirqentry_text_end);
+	return (ptr >= __c_pa(&__irqentry_text_start) &&
+		ptr < __c_pa(&__irqentry_text_end)) ||
+		(ptr >= __c_pa(&__softirqentry_text_start) &&
+		 ptr < __c_pa(&__softirqentry_text_end));
 }
 
 /**

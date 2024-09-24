@@ -300,7 +300,7 @@ static int vt_k_ioctl(struct tty_struct *tty, unsigned int cmd,
 		 */
 		if (arg)
 			arg = PIT_TICK_RATE / arg;
-		kd_mksound(arg, 0);
+		kd_mksound(__c_ua(arg), 0);
 		break;
 
 	case KDMKTONE:
@@ -313,8 +313,8 @@ static int vt_k_ioctl(struct tty_struct *tty, unsigned int cmd,
 		 * Generate the tone for the appropriate number of ticks.
 		 * If the time is zero, turn off sound ourselves.
 		 */
-		ticks = msecs_to_jiffies((arg >> 16) & 0xffff);
-		count = ticks ? (arg & 0xffff) : 0;
+		ticks = msecs_to_jiffies((__c_ua(arg) >> 16) & 0xffff);
+		count = ticks ? (__c_ua(arg) & 0xffff) : 0;
 		if (count)
 			count = PIT_TICK_RATE / count;
 		kd_mksound(count, ticks);
@@ -378,7 +378,7 @@ static int vt_k_ioctl(struct tty_struct *tty, unsigned int cmd,
 			return -EPERM;
 
 		console_lock();
-		ret = vt_kdsetmode(vc, arg);
+		ret = vt_kdsetmode(vc, __c_ua(arg));
 		console_unlock();
 		return ret;
 
@@ -396,7 +396,7 @@ static int vt_k_ioctl(struct tty_struct *tty, unsigned int cmd,
 	case KDSKBMODE:
 		if (!perm)
 			return -EPERM;
-		ret = vt_do_kdskbmode(console, arg);
+		ret = vt_do_kdskbmode(console, __c_ua(arg));
 		if (ret)
 			return ret;
 		tty_ldisc_flush(tty);
@@ -408,7 +408,7 @@ static int vt_k_ioctl(struct tty_struct *tty, unsigned int cmd,
 	/* this could be folded into KDSKBMODE, but for compatibility
 	   reasons it is not so easy to fold KDGKBMETA into KDGKBMODE */
 	case KDSKBMETA:
-		return vt_do_kdskbmeta(console, arg);
+		return vt_do_kdskbmeta(console, __c_ua(arg));
 
 	case KDGKBMETA:
 		/* FIXME: should review whether this is worth locking */
@@ -454,13 +454,13 @@ static int vt_k_ioctl(struct tty_struct *tty, unsigned int cmd,
 	case KDSIGACCEPT:
 		if (!perm || !capable(CAP_KILL))
 			return -EPERM;
-		if (!valid_signal(arg) || arg < 1 || arg == SIGKILL)
+		if (!valid_signal(__c_ua(arg)) || __c_ua(arg) < 1 || __c_ua(arg) == SIGKILL)
 			return -EINVAL;
 
 		spin_lock_irq(&vt_spawn_con.lock);
 		put_pid(vt_spawn_con.pid);
 		vt_spawn_con.pid = get_pid(task_pid(current));
-		vt_spawn_con.sig = arg;
+		vt_spawn_con.sig = __c_ua(arg);
 		spin_unlock_irq(&vt_spawn_con.lock);
 		break;
 
@@ -844,13 +844,13 @@ int vt_ioctl(struct tty_struct *tty,
 			return -ENXIO;
 
 		arg--;
-		arg = array_index_nospec((unsigned long)arg, MAX_NR_CONSOLES);
+		arg = __c_fakeu(array_index_nospec(__c_ua(arg), MAX_NR_CONSOLES));
 		console_lock();
-		ret = vc_allocate(arg);
+		ret = vc_allocate(__c_ua(arg));
 		console_unlock();
 		if (ret)
 			return ret;
-		set_console(arg);
+		set_console(__c_ua(arg));
 		break;
 
 	case VT_SETACTIVATE:
@@ -867,7 +867,7 @@ int vt_ioctl(struct tty_struct *tty,
 			return -EPERM;
 		if (arg == 0 || arg > MAX_NR_CONSOLES)
 			return -ENXIO;
-		return vt_waitactive(arg);
+		return vt_waitactive(__c_ua(arg));
 
 	/*
 	 * If a vt is under process control, the kernel will not switch to it
@@ -884,7 +884,7 @@ int vt_ioctl(struct tty_struct *tty,
 			return -EPERM;
 
 		console_lock();
-		ret = vt_reldisp(vc, arg);
+		ret = vt_reldisp(vc, __c_ua(arg));
 		console_unlock();
 
 		return ret;
@@ -902,8 +902,8 @@ int vt_ioctl(struct tty_struct *tty,
 			break;
 		}
 
-		arg = array_index_nospec((unsigned long)arg - 1, MAX_NR_CONSOLES);
-		return vt_disallocate(arg);
+		arg = __c_fakeu(array_index_nospec(__c_ua(arg) - 1, MAX_NR_CONSOLES));
+		return vt_disallocate(__c_ua(arg));
 
 	case VT_RESIZE:
 	{

@@ -419,7 +419,7 @@ static const struct nf_hook_ops ipv6_conntrack_ops[] = {
 
 static int nf_ct_tcp_fixup(struct nf_conn *ct, void *_nfproto)
 {
-	u8 nfproto = (unsigned long)_nfproto;
+	u8 nfproto = __c_pa(_nfproto);
 
 	if (nf_ct_l3num(ct) != nfproto)
 		return 0;
@@ -516,7 +516,7 @@ retry:
 	if (fixup_needed) {
 		struct nf_ct_iter_data iter_data = {
 			.net	= net,
-			.data	= (void *)(unsigned long)nfproto,
+			.data	= __c_fakep(nfproto),
 		};
 		nf_ct_iterate_cleanup_net(nf_ct_tcp_fixup, &iter_data);
 	}

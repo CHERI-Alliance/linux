@@ -9904,8 +9904,8 @@ void __init sched_init_smp(void)
 int in_sched_functions(unsigned long addr)
 {
 	return in_lock_functions(addr) ||
-		(addr >= (unsigned long)__sched_text_start
-		&& addr < (unsigned long)__sched_text_end);
+		(addr >= __c_pa(__sched_text_start)
+		&& addr < __c_pa(__sched_text_end));
 }
 
 #ifdef CONFIG_CGROUP_SCHED
@@ -9922,7 +9922,7 @@ static struct kmem_cache *task_group_cache __ro_after_init;
 
 void __init sched_init(void)
 {
-	unsigned long ptr = 0;
+	uintptr_t ptr = 0;
 	int i;
 
 	/* Make sure the linker didn't screw up */
@@ -9942,7 +9942,7 @@ void __init sched_init(void)
 	ptr += 2 * nr_cpu_ids * sizeof(void **);
 #endif
 	if (ptr) {
-		ptr = (unsigned long)kzalloc(ptr, GFP_NOWAIT);
+		ptr = (uintptr_t)kzalloc(__c_ua(ptr), GFP_NOWAIT);
 
 #ifdef CONFIG_FAIR_GROUP_SCHED
 		root_task_group.se = (struct sched_entity **)ptr;
@@ -10122,8 +10122,8 @@ void __might_sleep(const char *file, int line)
 	WARN_ONCE(state != TASK_RUNNING && current->task_state_change,
 			"do not call blocking ops when !TASK_RUNNING; "
 			"state=%x set at [<%p>] %pS\n", state,
-			(void *)current->task_state_change,
-			(void *)current->task_state_change);
+			__c_fakep(current->task_state_change),
+			__c_fakep(current->task_state_change));
 
 	__might_resched(file, line, 0);
 }

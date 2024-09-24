@@ -879,7 +879,7 @@ static void sched_debug_header(struct seq_file *m)
 
 static int sched_debug_show(struct seq_file *m, void *v)
 {
-	int cpu = (unsigned long)(v - 2);
+	int cpu = __c_pa(v - 2);
 
 	if (cpu != -1)
 		print_cpu(m, cpu);
@@ -918,7 +918,7 @@ static void *sched_debug_start(struct seq_file *file, loff_t *offset)
 	unsigned long n = *offset;
 
 	if (n == 0)
-		return (void *) 1;
+		return (void *)(uintptr_t)1;
 
 	n--;
 
@@ -930,7 +930,7 @@ static void *sched_debug_start(struct seq_file *file, loff_t *offset)
 	*offset = n + 1;
 
 	if (n < nr_cpu_ids)
-		return (void *)(unsigned long)(n + 2);
+		return __c_fakep(n + 2);
 
 	return NULL;
 }

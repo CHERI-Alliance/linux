@@ -31,7 +31,7 @@ static int setkey_unaligned(struct crypto_cipher *tfm, const u8 *key,
 	if (!buffer)
 		return -ENOMEM;
 
-	alignbuffer = (u8 *)ALIGN((unsigned long)buffer, alignmask + 1);
+	alignbuffer = (u8 *)ALIGN((uintptr_t)buffer, alignmask + 1);
 	memcpy(alignbuffer, key, keylen);
 	ret = cia->cia_setkey(crypto_cipher_tfm(tfm), alignbuffer, keylen);
 	kfree_sensitive(buffer);
@@ -48,7 +48,7 @@ int crypto_cipher_setkey(struct crypto_cipher *tfm,
 	if (keylen < cia->cia_min_keysize || keylen > cia->cia_max_keysize)
 		return -EINVAL;
 
-	if ((unsigned long)key & alignmask)
+	if (__c_pa(key) & alignmask)
 		return setkey_unaligned(tfm, key, keylen);
 
 	return cia->cia_setkey(crypto_cipher_tfm(tfm), key, keylen);
@@ -63,10 +63,10 @@ static inline void cipher_crypt_one(struct crypto_cipher *tfm,
 	void (*fn)(struct crypto_tfm *, u8 *, const u8 *) =
 		enc ? cia->cia_encrypt : cia->cia_decrypt;
 
-	if (unlikely(((unsigned long)dst | (unsigned long)src) & alignmask)) {
+	if (unlikely((__c_pa(dst) | __c_pa(src)) & alignmask)) {
 		unsigned int bs = crypto_cipher_blocksize(tfm);
 		u8 buffer[MAX_CIPHER_BLOCKSIZE + MAX_CIPHER_ALIGNMASK];
-		u8 *tmp = (u8 *)ALIGN((unsigned long)buffer, alignmask + 1);
+		u8 *tmp = (u8 *)ALIGN((uintptr_t)buffer, alignmask + 1);
 
 		memcpy(tmp, src, bs);
 		fn(crypto_cipher_tfm(tfm), tmp, tmp);

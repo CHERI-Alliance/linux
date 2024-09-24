@@ -1876,118 +1876,118 @@ SYSCALL_DEFINE5(keyctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 {
 	switch (option) {
 	case KEYCTL_GET_KEYRING_ID:
-		return keyctl_get_keyring_ID((key_serial_t) arg2,
-					     (int) arg3);
+		return keyctl_get_keyring_ID((key_serial_t) __c_ua(arg2),
+					     (int) __c_ua(arg3));
 
 	case KEYCTL_JOIN_SESSION_KEYRING:
 		return keyctl_join_session_keyring((const char __user *) arg2);
 
 	case KEYCTL_UPDATE:
-		return keyctl_update_key((key_serial_t) arg2,
+		return keyctl_update_key((key_serial_t) __c_ua(arg2),
 					 (const void __user *) arg3,
-					 (size_t) arg4);
+					 (size_t) __c_ua(arg4));
 
 	case KEYCTL_REVOKE:
-		return keyctl_revoke_key((key_serial_t) arg2);
+		return keyctl_revoke_key((key_serial_t) __c_ua(arg2));
 
 	case KEYCTL_DESCRIBE:
-		return keyctl_describe_key((key_serial_t) arg2,
+		return keyctl_describe_key((key_serial_t) __c_ua(arg2),
 					   (char __user *) arg3,
-					   (unsigned) arg4);
+					   (unsigned) __c_ua(arg4));
 
 	case KEYCTL_CLEAR:
-		return keyctl_keyring_clear((key_serial_t) arg2);
+		return keyctl_keyring_clear((key_serial_t) __c_ua(arg2));
 
 	case KEYCTL_LINK:
-		return keyctl_keyring_link((key_serial_t) arg2,
-					   (key_serial_t) arg3);
+		return keyctl_keyring_link((key_serial_t) __c_ua(arg2),
+					   (key_serial_t) __c_ua(arg3));
 
 	case KEYCTL_UNLINK:
-		return keyctl_keyring_unlink((key_serial_t) arg2,
-					     (key_serial_t) arg3);
+		return keyctl_keyring_unlink((key_serial_t) __c_ua(arg2),
+					     (key_serial_t) __c_ua(arg3));
 
 	case KEYCTL_SEARCH:
-		return keyctl_keyring_search((key_serial_t) arg2,
+		return keyctl_keyring_search((key_serial_t) __c_ua(arg2),
 					     (const char __user *) arg3,
 					     (const char __user *) arg4,
-					     (key_serial_t) arg5);
+					     (key_serial_t) __c_ua(arg5));
 
 	case KEYCTL_READ:
-		return keyctl_read_key((key_serial_t) arg2,
+		return keyctl_read_key((key_serial_t) __c_ua(arg2),
 				       (char __user *) arg3,
-				       (size_t) arg4);
+				       (size_t) __c_ua(arg4));
 
 	case KEYCTL_CHOWN:
-		return keyctl_chown_key((key_serial_t) arg2,
-					(uid_t) arg3,
-					(gid_t) arg4);
+		return keyctl_chown_key((key_serial_t) __c_ua(arg2),
+					(uid_t) __c_ua(arg3),
+					(gid_t) __c_ua(arg4));
 
 	case KEYCTL_SETPERM:
-		return keyctl_setperm_key((key_serial_t) arg2,
-					  (key_perm_t) arg3);
+		return keyctl_setperm_key((key_serial_t) __c_ua(arg2),
+					  (key_perm_t) __c_ua(arg3));
 
 	case KEYCTL_INSTANTIATE:
-		return keyctl_instantiate_key((key_serial_t) arg2,
+		return keyctl_instantiate_key((key_serial_t) __c_ua(arg2),
 					      (const void __user *) arg3,
-					      (size_t) arg4,
-					      (key_serial_t) arg5);
+					      (size_t) __c_ua(arg4),
+					      (key_serial_t) __c_ua(arg5));
 
 	case KEYCTL_NEGATE:
-		return keyctl_negate_key((key_serial_t) arg2,
-					 (unsigned) arg3,
-					 (key_serial_t) arg4);
+		return keyctl_negate_key((key_serial_t) __c_ua(arg2),
+					 (unsigned) __c_ua(arg3),
+					 (key_serial_t) __c_ua(arg4));
 
 	case KEYCTL_SET_REQKEY_KEYRING:
-		return keyctl_set_reqkey_keyring(arg2);
+		return keyctl_set_reqkey_keyring(__c_ua(arg2));
 
 	case KEYCTL_SET_TIMEOUT:
-		return keyctl_set_timeout((key_serial_t) arg2,
-					  (unsigned) arg3);
+		return keyctl_set_timeout((key_serial_t) __c_ua(arg2),
+					  (unsigned) __c_ua(arg3));
 
 	case KEYCTL_ASSUME_AUTHORITY:
-		return keyctl_assume_authority((key_serial_t) arg2);
+		return keyctl_assume_authority((key_serial_t) __c_ua(arg2));
 
 	case KEYCTL_GET_SECURITY:
-		return keyctl_get_security((key_serial_t) arg2,
+		return keyctl_get_security((key_serial_t) __c_ua(arg2),
 					   (char __user *) arg3,
-					   (size_t) arg4);
+					   (size_t) __c_ua(arg4));
 
 	case KEYCTL_SESSION_TO_PARENT:
 		return keyctl_session_to_parent();
 
 	case KEYCTL_REJECT:
-		return keyctl_reject_key((key_serial_t) arg2,
-					 (unsigned) arg3,
-					 (unsigned) arg4,
-					 (key_serial_t) arg5);
+		return keyctl_reject_key((key_serial_t) __c_ua(arg2),
+					 (unsigned) __c_ua(arg3),
+					 (unsigned) __c_ua(arg4),
+					 (key_serial_t) __c_ua(arg5));
 
 	case KEYCTL_INSTANTIATE_IOV:
 		return keyctl_instantiate_key_iov(
-			(key_serial_t) arg2,
+			(key_serial_t) __c_ua(arg2),
 			(const struct iovec __user *) arg3,
-			(unsigned) arg4,
-			(key_serial_t) arg5);
+			(unsigned) __c_ua(arg4),
+			(key_serial_t) __c_ua(arg5));
 
 	case KEYCTL_INVALIDATE:
-		return keyctl_invalidate_key((key_serial_t) arg2);
+		return keyctl_invalidate_key((key_serial_t) __c_ua(arg2));
 
 	case KEYCTL_GET_PERSISTENT:
-		return keyctl_get_persistent((uid_t)arg2, (key_serial_t)arg3);
+		return keyctl_get_persistent((uid_t)__c_ua(arg2), (key_serial_t)__c_ua(arg3));
 
 	case KEYCTL_DH_COMPUTE:
 		return keyctl_dh_compute((struct keyctl_dh_params __user *) arg2,
-					 (char __user *) arg3, (size_t) arg4,
+					 (char __user *) arg3, (size_t) __c_ua(arg4),
 					 (struct keyctl_kdf_params __user *) arg5);
 
 	case KEYCTL_RESTRICT_KEYRING:
-		return keyctl_restrict_keyring((key_serial_t) arg2,
+		return keyctl_restrict_keyring((key_serial_t) __c_ua(arg2),
 					       (const char __user *) arg3,
 					       (const char __user *) arg4);
 
 	case KEYCTL_PKEY_QUERY:
 		if (arg3 != 0)
 			return -EINVAL;
-		return keyctl_pkey_query((key_serial_t)arg2,
+		return keyctl_pkey_query((key_serial_t)__c_ua(arg2),
 					 (const char __user *)arg4,
 					 (struct keyctl_pkey_query __user *)arg5);
 
@@ -2009,16 +2009,16 @@ SYSCALL_DEFINE5(keyctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 			(const void __user *)arg5);
 
 	case KEYCTL_MOVE:
-		return keyctl_keyring_move((key_serial_t)arg2,
-					   (key_serial_t)arg3,
-					   (key_serial_t)arg4,
-					   (unsigned int)arg5);
+		return keyctl_keyring_move((key_serial_t)__c_ua(arg2),
+					   (key_serial_t)__c_ua(arg3),
+					   (key_serial_t)__c_ua(arg4),
+					   (unsigned int)__c_ua(arg5));
 
 	case KEYCTL_CAPABILITIES:
-		return keyctl_capabilities((unsigned char __user *)arg2, (size_t)arg3);
+		return keyctl_capabilities((unsigned char __user *)arg2, (size_t)__c_ua(arg3));
 
 	case KEYCTL_WATCH_KEY:
-		return keyctl_watch_key((key_serial_t)arg2, (int)arg3, (int)arg4);
+		return keyctl_watch_key((key_serial_t)__c_ua(arg2), (int)__c_ua(arg3), (int)__c_ua(arg4));
 
 	default:
 		return -EOPNOTSUPP;

@@ -79,7 +79,7 @@ static int seqiv_aead_encrypt(struct aead_request *req)
 			return err;
 	}
 
-	if (unlikely(!IS_ALIGNED((unsigned long)info,
+	if (unlikely(!IS_ALIGNED(__c_pa(info),
 				 crypto_aead_alignmask(geniv) + 1))) {
 		info = kmemdup(req->iv, ivsize, req->base.flags &
 			       CRYPTO_TFM_REQ_MAY_SLEEP ? GFP_KERNEL :
