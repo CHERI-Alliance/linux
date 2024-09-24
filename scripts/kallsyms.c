@@ -311,6 +311,11 @@ static void output_label(const char *label)
 	printf("%s:\n", label);
 }
 
+static void output_size(const char *label)
+{
+	printf("\t.size %s, . - %s\n", label, label);
+}
+
 /* Provide proper symbols relocatability by their '_text' relativeness. */
 static void output_address(unsigned long long addr)
 {
@@ -416,6 +421,7 @@ static void write_src(void)
 
 	output_label("kallsyms_num_syms");
 	printf("\t.long\t%u\n", table_cnt);
+	output_size("kallsyms_num_syms");
 	printf("\n");
 
 	/* table of offset markers, that give the offset in the compressed stream
@@ -464,6 +470,7 @@ static void write_src(void)
 			printf(", 0x%02x", table[i]->sym[k]);
 		printf("\n");
 	}
+	output_size("kallsyms_names");
 	printf("\n");
 
 	/*
@@ -478,6 +485,7 @@ static void write_src(void)
 	output_label("kallsyms_markers");
 	for (i = 0; i < ((table_cnt + 255) >> 8); i++)
 		printf("\t.long\t%u\n", markers[i]);
+	output_size("kallsyms_markers");
 	printf("\n");
 
 	free(markers);
@@ -490,11 +498,13 @@ static void write_src(void)
 		printf("\t.asciz\t\"%s\"\n", buf);
 		off += strlen(buf) + 1;
 	}
+	output_size("kallsyms_token_table");
 	printf("\n");
 
 	output_label("kallsyms_token_index");
 	for (i = 0; i < 256; i++)
 		printf("\t.short\t%d\n", best_idx[i]);
+	output_size("kallsyms_token_index");
 	printf("\n");
 
 	if (!base_relative)
@@ -538,11 +548,16 @@ static void write_src(void)
 			printf("\tPTR\t%#llx\n", table[i]->addr);
 		}
 	}
+	if (!base_relative)
+		output_size("kallsyms_addresses");
+	else
+		output_size("kallsyms_offsets");
 	printf("\n");
 
 	if (base_relative) {
 		output_label("kallsyms_relative_base");
 		output_address(relative_base);
+		output_size("kallsyms_relative_base");
 		printf("\n");
 	}
 
@@ -557,6 +572,7 @@ static void write_src(void)
 			(unsigned char)(table[i]->seq >> 16),
 			(unsigned char)(table[i]->seq >> 8),
 			(unsigned char)(table[i]->seq >> 0));
+	output_size("kallsyms_seqs_of_names");
 	printf("\n");
 }
 
