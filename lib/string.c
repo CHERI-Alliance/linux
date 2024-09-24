@@ -113,6 +113,7 @@ ssize_t sized_strscpy(char *dest, const char *src, size_t count)
 	if (count == 0 || WARN_ON_ONCE(count > INT_MAX))
 		return -E2BIG;
 
+#ifndef CONFIG_CHERI_KERNEL
 #ifdef CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS
 	/*
 	 * If src is unaligned, don't cross a page boundary,
@@ -127,6 +128,13 @@ ssize_t sized_strscpy(char *dest, const char *src, size_t count)
 	/* If src or dest is unaligned, don't do word-at-a-time. */
 	if (((long) dest | (long) src) & (sizeof(long) - 1))
 		max = 0;
+#endif
+#else
+	/*
+	 * Force byte access in CHERI mode as we might hit capability
+	 * bounds at any time.
+	 */
+	max = 0;
 #endif
 
 	/*
@@ -838,7 +846,7 @@ void *memchr_inv(const void *start, int c, size_t bytes)
 	value64 |= value64 << 32;
 #endif
 
-	prefix = (unsigned long)start % 8;
+	prefix = __c_pa(start) % 8;
 	if (prefix) {
 		u8 *r;
 
