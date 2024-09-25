@@ -68,7 +68,7 @@ int percpu_ref_init(struct percpu_ref *ref, percpu_ref_func_t *release,
 	unsigned long start_count = 0;
 	struct percpu_ref_data *data;
 
-	ref->percpu_count_ptr = (unsigned long)
+	ref->percpu_count_ptr = (uintptr_t)
 		__alloc_percpu_gfp(sizeof(unsigned long), align, gfp);
 	if (!ref->percpu_count_ptr)
 		return -ENOMEM;
@@ -420,7 +420,7 @@ bool percpu_ref_is_zero(struct percpu_ref *ref)
 	if (ref->data)
 		count = atomic_long_read(&ref->data->count);
 	else
-		count = ref->percpu_count_ptr >> __PERCPU_REF_FLAG_BITS;
+		count = __c_ua(ref->percpu_count_ptr) >> __PERCPU_REF_FLAG_BITS;
 	spin_unlock_irqrestore(&percpu_ref_switch_lock, flags);
 
 	return count == 0;
