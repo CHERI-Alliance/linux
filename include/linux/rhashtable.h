@@ -329,7 +329,7 @@ static inline unsigned long rht_lock(struct bucket_table *tbl,
 	unsigned long flags;
 
 	local_irq_save(flags);
-	bit_spin_lock(0, (unsigned long *)bkt);
+	bit_spin_lock_ptr(0, (uintptr_t *)bkt);
 	lock_map_acquire(&tbl->dep_map);
 	return flags;
 }
@@ -341,7 +341,7 @@ static inline unsigned long rht_lock_nested(struct bucket_table *tbl,
 	unsigned long flags;
 
 	local_irq_save(flags);
-	bit_spin_lock(0, (unsigned long *)bucket);
+	bit_spin_lock_ptr(0, (uintptr_t *)bucket);
 	lock_acquire_exclusive(&tbl->dep_map, subclass, 0, NULL, _THIS_IP_);
 	return flags;
 }
@@ -351,7 +351,7 @@ static inline void rht_unlock(struct bucket_table *tbl,
 			      unsigned long flags)
 {
 	lock_map_release(&tbl->dep_map);
-	bit_spin_unlock(0, (unsigned long *)bkt);
+	bit_spin_unlock_ptr(0, (uintptr_t *)bkt);
 	local_irq_restore(flags);
 }
 
