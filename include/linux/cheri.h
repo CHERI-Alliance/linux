@@ -2,9 +2,21 @@
 #ifndef _LINUX_CHERI_H
 #define _LINUX_CHERI_H
 
+#ifdef __CHECKER__
+#define __capability
+#endif
+
 #ifdef __CHERI__
 
+#ifndef __CHECKER__
+
 #include <cheriintrin.h>
+
+#else /* __CHECKER */
+
+typedef unsigned int cheri_perms_t;
+
+#endif /* __CHECKER */
 
 #include <linux/types.h>
 
