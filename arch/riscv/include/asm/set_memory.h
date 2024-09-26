@@ -20,8 +20,8 @@ static __always_inline int set_kernel_memory(char *startp, char *endp,
 					     int (*set_memory)(unsigned long start,
 							       int num_pages))
 {
-	unsigned long start = (unsigned long)startp;
-	unsigned long end = (unsigned long)endp;
+	unsigned long start = __c_pa(startp);
+	unsigned long end = __c_pa(endp);
 	int num_pages = PAGE_ALIGN(end - start) >> PAGE_SHIFT;
 
 	return set_memory(start, num_pages);
