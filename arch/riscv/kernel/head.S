@@ -381,6 +381,10 @@ SYM_CODE_START(_start_kernel)
 	cmv ca1, cs4
 	llc cra, init_cap_relocs
 	jalr cra
+
+	cmv ca0, cs4
+	llc cra, bakewell_caps_init
+	jalr cra
 #endif
 	/* FIXCHERI: Sanitize/restrict caps here (ddc, ppc, ...) */
 

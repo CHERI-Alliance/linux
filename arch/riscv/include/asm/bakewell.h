@@ -7,6 +7,7 @@
 extern void __init bakewell_init(void);
 extern void __init init_cap_relocs(void * __capability rw,
 				   void * __capability rx);
+extern void __init bakewell_caps_init(uintcap_t rootcap);
 
 #else
 
