@@ -195,7 +195,7 @@ unsigned long kaslr_offset(void);
 	(unsigned long)(_addr) >= PAGE_OFFSET && pfn_valid(virt_to_pfn(_addr));	\
 })
 
-#define VM_DATA_DEFAULT_FLAGS	VM_DATA_FLAGS_NON_EXEC
+#define VM_DATA_DEFAULT_FLAGS	(VM_DATA_FLAGS_NON_EXEC | VM_READ_CAPS | VM_WRITE_CAPS)
 
 #include <asm-generic/memory_model.h>
 #include <asm-generic/getorder.h>
