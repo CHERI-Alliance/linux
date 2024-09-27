@@ -246,10 +246,6 @@ __c_fakeu(ptraddr_t val)
 extern void * kernel_data_cap;
 extern void * kernel_code_cap;
 
-/* User root capabilities. */
-extern void * user_data_cap;
-extern void * user_code_cap;
-
 /*
  * Create a read/write data capability for a kernel address.
  * @addr The address.
@@ -291,15 +287,6 @@ cheri_make_kernel_code_cap(ptraddr_t addr)
 	return cheri_address_set(kernel_code_cap, addr);
 }
 
-/* The same for user code. */
-static inline void __user *
-cheri_make_user_code_cap(ptraddr_t addr, size_t len)
-{
-	void * ret = cheri_address_set(user_code_cap, addr);
-
-	return (void __user *)cheri_bounds_set(ret, len);
-}
-
 #else
 
 #define __cheri_pointer_align
@@ -322,14 +309,6 @@ static inline void *
 cheri_make_kernel_code_cap(ptraddr_t addr)
 {
 	return (void *)addr;
-}
-
-static inline void __user *
-cheri_make_user_code_cap(ptraddr_t addr, size_t len)
-{
-	(void)len;
-
-	return (void __user *)addr;
 }
 
 #endif

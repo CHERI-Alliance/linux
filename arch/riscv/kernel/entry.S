@@ -453,12 +453,6 @@ SYM_DATA_END(kernel_code_cap)
 SYM_DATA_START(kernel_data_cap)
 	RISCV_PTR 0
 SYM_DATA_END(kernel_data_cap)
-SYM_DATA_START(user_code_cap)
-	RISCV_PTR 0
-SYM_DATA_END(user_code_cap)
-SYM_DATA_START(user_data_cap)
-	RISCV_PTR 0
-SYM_DATA_END(user_data_cap)
 #endif
 
 #ifndef CONFIG_CHERI_KERNEL

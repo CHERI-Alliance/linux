@@ -8,6 +8,7 @@
 
 #include <linux/elf.h>
 #include <linux/mm.h>
+#include <linux/mman.h>
 #include <linux/slab.h>
 #include <linux/binfmts.h>
 #include <linux/err.h>
@@ -49,11 +50,19 @@ static struct __vdso_info vdso_info;
 static struct __vdso_info compat_vdso_info;
 #endif
 
+static user_uintptr_t make_vdso_ptr(struct vm_area_struct *vma)
+{
+	user_uintptr_t ret;
+
+	ret = reserv_vma_make_user_ptr_owning(vma);
+
+	return ret;
+}
+
 static int vdso_mremap(const struct vm_special_mapping *sm,
 		       struct vm_area_struct *new_vma)
 {
-	current->mm->context.vdso = cheri_make_user_code_cap(
-		new_vma->vm_start, new_vma->vm_end - new_vma->vm_start);
+	current->mm->context.vdso = make_vdso_ptr(new_vma);
 
 	return 0;
 }
@@ -212,7 +221,8 @@ static int __setup_additional_pages(struct mm_struct *mm,
 				    int uses_interp,
 				    struct __vdso_info *vdso_info)
 {
-	unsigned long vdso_base, vdso_text_len, vdso_mapping_len;
+	unsigned long vdso_base, vdso_text_base;
+	unsigned long vdso_text_len, vdso_mapping_len;
 	void *ret;
 
 	BUILD_BUG_ON(VVAR_NR_PAGES != __VVAR_PAGES);
@@ -232,21 +242,30 @@ static int __setup_additional_pages(struct mm_struct *mm,
 	if (IS_ERR(ret))
 		goto up_fail;
 
-	vdso_base += VVAR_SIZE;
-	mm->context.vdso = cheri_make_user_code_cap(vdso_base, vdso_mapping_len);
+	if (reserv_vma_set_reserv(ret, vdso_base, vdso_mapping_len,
+				  PROT_READ | PROT_EXEC))
+		goto up_fail;
+
+	vdso_text_base = vdso_base + VVAR_SIZE;
 
 	ret =
-	   _install_special_mapping(mm, vdso_base, vdso_text_len,
+	   _install_special_mapping(mm, vdso_text_base, vdso_text_len,
 		(VM_READ | VM_EXEC | VM_MAYREAD | VM_MAYWRITE | VM_MAYEXEC),
 		vdso_info->cm);
 
 	if (IS_ERR(ret))
 		goto up_fail;
 
+	if (reserv_vma_set_reserv(ret, vdso_base, vdso_mapping_len,
+				  PROT_READ | PROT_EXEC))
+		goto up_fail;
+
+	mm->context.vdso = make_vdso_ptr(ret);
+
 	return 0;
 
 up_fail:
-	mm->context.vdso = NULL;
+	mm->context.vdso = 0;
 	return PTR_ERR(ret);
 }
 
