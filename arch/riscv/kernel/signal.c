@@ -156,7 +156,7 @@ static long restore_sigcontext(struct pt_regs *regs,
 	__u32 rsvd;
 	long err;
 	/* sc_regs is structured the same as the start of pt_regs */
-	err = __copy_from_user(regs, &sc->sc_regs, sizeof(sc->sc_regs));
+	err = __copy_from_user_with_captags(regs, &sc->sc_regs, sizeof(sc->sc_regs));
 	if (unlikely(err))
 		return err;
 
@@ -291,7 +291,7 @@ static long setup_sigcontext(struct rt_sigframe __user *frame,
 	long err;
 
 	/* sc_regs is structured the same as the start of pt_regs */
-	err = __copy_to_user(&sc->sc_regs, regs, sizeof(sc->sc_regs));
+	err = __copy_to_user_with_captags(&sc->sc_regs, regs, sizeof(sc->sc_regs));
 	/* Save the floating-point state. */
 	if (has_fpu())
 		err |= save_fp_state(regs, &sc->sc_fpregs);
@@ -342,7 +342,7 @@ static int setup_rt_frame(struct ksignal *ksig, sigset_t *set,
 	if (!access_ok(frame, frame_size))
 		return -EFAULT;
 
-	err |= copy_siginfo_to_user(&frame->info, &ksig->info);
+	err |= copy_siginfo_to_user_with_ptr(&frame->info, &ksig->info);
 
 	/* Create the ucontext. */
 	err |= __put_user(0, &frame->uc.uc_flags);
