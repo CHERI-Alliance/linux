@@ -3558,7 +3558,7 @@ static void *copy_mount_options(const void __user * data)
 	if (!copy)
 		return ERR_PTR(-ENOMEM);
 
-	left = copy_from_user(copy, data, PAGE_SIZE);
+	left = copy_from_user(copy, data, cheri_restrict_len(data, PAGE_SIZE));
 
 	/*
 	 * Not all architectures have an exact copy_from_user(). Resort to

@@ -31,8 +31,10 @@ static __always_inline long do_strncpy_from_user(char *dst, const char __user *s
 	const struct word_at_a_time constants = WORD_AT_A_TIME_CONSTANTS;
 	unsigned long res = 0;
 
-	if (IS_UNALIGNED(src, dst))
+	if (IS_UNALIGNED(__c_pa(src), __c_pa(dst)))
 		goto byte_at_a_time;
+
+	max = cheri_restrict_len(src, max);
 
 	while (max >= sizeof(unsigned long)) {
 		unsigned long c, data, mask;
@@ -121,7 +123,7 @@ long strncpy_from_user(char *dst, const char __user *src, long count)
 		return 0;
 
 	max_addr = TASK_SIZE_MAX;
-	src_addr = (unsigned long)untagged_addr(src);
+	src_addr = __c_pa(untagged_addr(src));
 	if (likely(src_addr < max_addr)) {
 		unsigned long max = max_addr - src_addr;
 		long retval;

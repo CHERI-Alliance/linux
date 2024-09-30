@@ -313,4 +313,29 @@ cheri_make_kernel_code_cap(ptraddr_t addr)
 
 #endif
 
+
+#ifdef __CHERI__
+
+/**
+ * Return the maximum length accessible from this capability starting
+ * with its current base.
+ * @c Capability
+ * @max An upper bound on the limit to return.
+ * @return The number of accessible bytes.
+ */
+static inline unsigned long
+cheri_restrict_len(const volatile void *__capability c, ptraddr_t max)
+{
+	ptraddr_t l = cheri_base_get(c) + cheri_length_get(c) - __c_pa(c);
+
+	return (l < max)  ? l : max;
+}
+
+#else
+
+#define cheri_restrict_len(C, L) (L)
+
+#endif
+
+
 #endif	/* _LINUX_CHERI_H */
