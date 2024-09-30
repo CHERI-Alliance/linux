@@ -25,6 +25,8 @@
 
 unsigned long signal_minsigstksz __ro_after_init;
 
+#include <linux/cheri.h>
+
 extern u32 __user_rt_sigreturn[2];
 static size_t riscv_v_sc_size __ro_after_init;
 
@@ -154,7 +156,7 @@ static long restore_sigcontext(struct pt_regs *regs,
 	__u32 rsvd;
 	long err;
 	/* sc_regs is structured the same as the start of pt_regs */
-	err = __copy_from_user(regs, &sc->sc_regs, sizeof(sc->sc_regs));
+	err = __copy_from_user_with_captags(regs, &sc->sc_regs, sizeof(sc->sc_regs));
 	if (unlikely(err))
 		return err;
 
@@ -222,7 +224,7 @@ static size_t get_rt_frame_size(bool cal_all)
 	return frame_size;
 }
 
-SYSCALL_DEFINE0(rt_sigreturn)
+SYSCALL_DEFINE0(__retptr__(rt_sigreturn))
 {
 	struct pt_regs *regs = current_pt_regs();
 	struct rt_sigframe __user *frame;
@@ -233,7 +235,7 @@ SYSCALL_DEFINE0(rt_sigreturn)
 	/* Always make any pending restarted system calls return -EINTR */
 	current->restart_block.fn = do_no_restart_syscall;
 
-	frame = (struct rt_sigframe __user *)regs->sp;
+	frame = (struct rt_sigframe __user *)(uintptr_t)regs->sp;
 
 	if (!access_ok(frame, frame_size))
 		goto badframe;
@@ -273,7 +275,7 @@ static long setup_sigcontext(struct rt_sigframe __user *frame,
 	long err;
 
 	/* sc_regs is structured the same as the start of pt_regs */
-	err = __copy_to_user(&sc->sc_regs, regs, sizeof(sc->sc_regs));
+	err = __copy_to_user_with_captags(&sc->sc_regs, regs, sizeof(sc->sc_regs));
 	/* Save the floating-point state. */
 	if (has_fpu())
 		err |= save_fp_state(regs, &sc->sc_fpregs);
@@ -292,7 +294,7 @@ static long setup_sigcontext(struct rt_sigframe __user *frame,
 static inline void __user *get_sigframe(struct ksignal *ksig,
 	struct pt_regs *regs, size_t framesize)
 {
-	unsigned long sp;
+	uintptr_t sp;
 	/* Default to using normal stack */
 	sp = regs->sp;
 
@@ -317,18 +319,18 @@ static int setup_rt_frame(struct ksignal *ksig, sigset_t *set,
 {
 	struct rt_sigframe __user *frame;
 	long err = 0;
-	unsigned long __maybe_unused addr;
+	uintptr_t __maybe_unused addr;
 	size_t frame_size = get_rt_frame_size(false);
 
 	frame = get_sigframe(ksig, regs, frame_size);
 	if (!access_ok(frame, frame_size))
 		return -EFAULT;
 
-	err |= copy_siginfo_to_user(&frame->info, &ksig->info);
+	err |= copy_siginfo_to_user_with_ptr(&frame->info, &ksig->info);
 
 	/* Create the ucontext. */
 	err |= __put_user(0, &frame->uc.uc_flags);
-	err |= __put_user(NULL, &frame->uc.uc_link);
+	err |= __put_user_ptr(NULL, &frame->uc.uc_link);
 	err |= __save_altstack(&frame->uc.uc_stack, regs->sp);
 	err |= setup_sigcontext(frame, regs);
 	err |= __copy_to_user(&frame->uc.uc_sigmask, set, sizeof(*set));
@@ -348,7 +350,7 @@ static int setup_rt_frame(struct ksignal *ksig, sigset_t *set,
 			 sizeof(frame->sigreturn_code)))
 		return -EFAULT;
 
-	addr = (unsigned long)&frame->sigreturn_code;
+	addr = (uintptr_t)&frame->sigreturn_code;
 	/* Make sure the two instructions are pushed to icache. */
 	flush_icache_range(addr, addr + sizeof(frame->sigreturn_code));
 
@@ -395,7 +397,7 @@ static void handle_signal(struct ksignal *ksig, struct pt_regs *regs)
 
 void arch_do_signal_or_restart(struct pt_regs *regs)
 {
-	unsigned long continue_addr = 0, restart_addr = 0;
+	uintptr_t continue_addr = 0, restart_addr = 0;
 	int retval = 0;
 	struct ksignal ksig;
 	bool syscall = (regs->cause == EXC_SYSCALL);
