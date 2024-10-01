@@ -1105,7 +1105,7 @@ skip:
 		idx++;
 	}
 	rcu_read_unlock();
-	cb->args[1] = idx;
+	cb->args[1] = __c_fakeu(idx);
 	rules_ops_put(ops);
 
 	return err;
@@ -1176,7 +1176,7 @@ skip:
 		idx++;
 	}
 	rcu_read_unlock();
-	cb->args[0] = idx;
+	cb->args[0] = __c_fakeu(idx);
 
 	return err;
 }

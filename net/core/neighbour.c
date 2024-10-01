@@ -2511,8 +2511,8 @@ static int neightbl_dump_info(struct sk_buff *skb, struct netlink_callback *cb)
 	const struct nlmsghdr *nlh = cb->nlh;
 	struct net *net = sock_net(skb->sk);
 	int family, tidx, nidx = 0;
-	int tbl_skip = cb->args[0];
-	int neigh_skip = cb->args[1];
+	int tbl_skip = __c_ua(cb->args[0]);
+	int neigh_skip = __c_ua(cb->args[1]);
 	struct neigh_table *tbl;
 
 	if (cb->strict_check) {
@@ -2561,8 +2561,8 @@ static int neightbl_dump_info(struct sk_buff *skb, struct netlink_callback *cb)
 		neigh_skip = 0;
 	}
 out:
-	cb->args[0] = tidx;
-	cb->args[1] = nidx;
+	cb->args[0] = __c_fakeu(tidx);
+	cb->args[1] = __c_fakeu(nidx);
 
 	return skb->len;
 }
@@ -2715,8 +2715,8 @@ static int neigh_dump_table(struct neigh_table *tbl, struct sk_buff *skb,
 {
 	struct net *net = sock_net(skb->sk);
 	struct neighbour *n;
-	int err = 0, h, s_h = cb->args[1];
-	int idx, s_idx = idx = cb->args[2];
+	int err = 0, h, s_h = __c_ua(cb->args[1]);
+	int idx, s_idx = idx = __c_ua(cb->args[2]);
 	struct neigh_hash_table *nht;
 	unsigned int flags = NLM_F_MULTI;
 
@@ -2746,8 +2746,8 @@ next:
 		}
 	}
 out:
-	cb->args[1] = h;
-	cb->args[2] = idx;
+	cb->args[1] = __c_fakeu(h);
+	cb->args[2] = __c_fakeu(idx);
 	return err;
 }
 
@@ -2757,8 +2757,8 @@ static int pneigh_dump_table(struct neigh_table *tbl, struct sk_buff *skb,
 {
 	struct pneigh_entry *n;
 	struct net *net = sock_net(skb->sk);
-	int err = 0, h, s_h = cb->args[3];
-	int idx, s_idx = idx = cb->args[4];
+	int err = 0, h, s_h = __c_ua(cb->args[3]);
+	int idx, s_idx = idx = __c_ua(cb->args[4]);
 	unsigned int flags = NLM_F_MULTI;
 
 	if (filter->dev_idx || filter->master_idx)
@@ -2789,8 +2789,8 @@ static int pneigh_dump_table(struct neigh_table *tbl, struct sk_buff *skb,
 
 	read_unlock_bh(&tbl->lock);
 out:
-	cb->args[3] = h;
-	cb->args[4] = idx;
+	cb->args[3] = __c_fakeu(h);
+	cb->args[4] = __c_fakeu(idx);
 	return err;
 }
 
@@ -2877,7 +2877,7 @@ static int neigh_dump_info(struct sk_buff *skb, struct netlink_callback *cb)
 	if (err < 0 && cb->strict_check)
 		return err;
 
-	s_t = cb->args[0];
+	s_t = __c_ua(cb->args[0]);
 
 	rcu_read_lock();
 	for (t = 0; t < NEIGH_NR_TABLES; t++) {
@@ -2899,7 +2899,7 @@ static int neigh_dump_info(struct sk_buff *skb, struct netlink_callback *cb)
 	}
 	rcu_read_unlock();
 
-	cb->args[0] = t;
+	cb->args[0] = __c_fakeu(t);
 	return err;
 }
 
@@ -3802,7 +3802,7 @@ int neigh_sysctl_register(struct net_device *dev, struct neigh_parms *p,
 		goto err;
 
 	for (i = 0; i < NEIGH_VAR_GC_INTERVAL; i++) {
-		t->neigh_vars[i].data += (long) p;
+		t->neigh_vars[i].data = (void *)p + __c_pa(t->neigh_vars[i].data);
 		t->neigh_vars[i].extra1 = dev;
 		t->neigh_vars[i].extra2 = p;
 	}

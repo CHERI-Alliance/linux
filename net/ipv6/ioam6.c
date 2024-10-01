@@ -253,7 +253,7 @@ static int ioam6_genl_dumpns_start(struct netlink_callback *cb)
 		if (!iter)
 			return -ENOMEM;
 
-		cb->args[0] = (long)iter;
+		cb->args[0] = (uintptr_t)iter;
 	}
 
 	rhashtable_walk_enter(&nsdata->namespaces, iter);
@@ -439,7 +439,7 @@ static int ioam6_genl_dumpsc_start(struct netlink_callback *cb)
 		if (!iter)
 			return -ENOMEM;
 
-		cb->args[0] = (long)iter;
+		cb->args[0] = (uintptr_t)iter;
 	}
 
 	rhashtable_walk_enter(&nsdata->schemas, iter);

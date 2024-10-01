@@ -219,7 +219,7 @@ static int stat_put(struct sk_buff *skb, u16 attrtype, u64 val)
 	 * can't be used.
 	 */
 #ifndef CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS
-	if (!IS_ALIGNED((unsigned long)skb_tail_pointer(skb), 8))
+	if (!IS_ALIGNED(__c_pa(skb_tail_pointer(skb)), 8))
 		if (!nla_reserve(skb, ETHTOOL_A_STATS_GRP_PAD, 0))
 			return -EMSGSIZE;
 #endif

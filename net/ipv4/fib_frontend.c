@@ -529,7 +529,7 @@ static int rtentry_to_fib_config(struct net *net, int cmd, struct rtentry *rt,
 		struct net_device *dev;
 		char devname[IFNAMSIZ];
 
-		if (copy_from_user(devname, rt->rt_dev, IFNAMSIZ-1))
+		if (strncpy_from_user(devname, rt->rt_dev, IFNAMSIZ-1) < 0)
 			return -EFAULT;
 
 		devname[IFNAMSIZ-1] = 0;
@@ -1029,8 +1029,8 @@ static int inet_dump_fib(struct sk_buff *skb, struct netlink_callback *cb)
 		goto unlock;
 	}
 
-	s_h = cb->args[0];
-	s_e = cb->args[1];
+	s_h = __c_ua(cb->args[0]);
+	s_e = __c_ua(cb->args[1]);
 
 	err = 0;
 	for (h = s_h; h < FIB_TABLE_HASHSZ; h++, s_e = 0) {
@@ -1052,8 +1052,8 @@ next:
 	}
 out:
 
-	cb->args[1] = e;
-	cb->args[0] = h;
+	cb->args[1] = __c_fakeu(e);
+	cb->args[0] = __c_fakeu(h);
 
 unlock:
 	rcu_read_unlock();

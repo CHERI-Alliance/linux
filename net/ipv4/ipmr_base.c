@@ -302,7 +302,7 @@ int mr_table_dump(struct mr_table *mrt, struct sk_buff *skb,
 			      int cmd, int flags),
 		  spinlock_t *lock, struct fib_dump_filter *filter)
 {
-	unsigned int e = 0, s_e = cb->args[1];
+	unsigned int e = 0, s_e = __c_ua(cb->args[1]);
 	unsigned int flags = NLM_F_MULTI;
 	struct mr_mfc *mfc;
 	int err;
@@ -345,7 +345,7 @@ next_entry2:
 	spin_unlock_bh(lock);
 	err = 0;
 out:
-	cb->args[1] = e;
+	cb->args[1] = __c_fakeu(e);
 	return err;
 }
 EXPORT_SYMBOL(mr_table_dump);
@@ -359,7 +359,7 @@ int mr_rtm_dumproute(struct sk_buff *skb, struct netlink_callback *cb,
 				 int cmd, int flags),
 		     spinlock_t *lock, struct fib_dump_filter *filter)
 {
-	unsigned int t = 0, s_t = cb->args[0];
+	unsigned int t = 0, s_t = __c_ua(cb->args[0]);
 	struct net *net = sock_net(skb->sk);
 	struct mr_table *mrt;
 	int err;
@@ -387,7 +387,7 @@ next_table:
 	}
 	rcu_read_unlock();
 
-	cb->args[0] = t;
+	cb->args[0] = __c_fakeu(t);
 
 	return skb->len;
 }

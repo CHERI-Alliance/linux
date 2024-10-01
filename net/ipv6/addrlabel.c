@@ -498,7 +498,7 @@ static int ip6addrlbl_dump(struct sk_buff *skb, struct netlink_callback *cb)
 	const struct nlmsghdr *nlh = cb->nlh;
 	struct net *net = sock_net(skb->sk);
 	struct ip6addrlbl_entry *p;
-	int idx = 0, s_idx = cb->args[0];
+	int idx = 0, s_idx = __c_ua(cb->args[0]);
 	int err = 0;
 	u32 lseq;
 
@@ -524,7 +524,7 @@ static int ip6addrlbl_dump(struct sk_buff *skb, struct netlink_callback *cb)
 		idx++;
 	}
 	rcu_read_unlock();
-	cb->args[0] = idx;
+	cb->args[0] = __c_fakeu(idx);
 	return err;
 }
 

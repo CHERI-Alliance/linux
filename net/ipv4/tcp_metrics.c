@@ -765,8 +765,8 @@ static int tcp_metrics_nl_dump(struct sk_buff *skb,
 {
 	struct net *net = sock_net(skb->sk);
 	unsigned int max_rows = 1U << tcp_metrics_hash_log;
-	unsigned int row, s_row = cb->args[0];
-	int s_col = cb->args[1], col = s_col;
+	unsigned int row, s_row = __c_ua(cb->args[0]);
+	int s_col = __c_ua(cb->args[1]), col = s_col;
 	int res = 0;
 
 	for (row = s_row; row < max_rows; row++, s_col = 0) {
@@ -790,8 +790,8 @@ static int tcp_metrics_nl_dump(struct sk_buff *skb,
 	}
 
 done:
-	cb->args[0] = row;
-	cb->args[1] = col;
+	cb->args[0] = __c_fakeu(row);
+	cb->args[1] = __c_fakeu(col);
 	return res;
 }
 

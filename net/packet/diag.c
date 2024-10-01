@@ -187,7 +187,7 @@ out_nlmsg_trim:
 
 static int packet_diag_dump(struct sk_buff *skb, struct netlink_callback *cb)
 {
-	int num = 0, s_num = cb->args[0];
+	int num = 0, s_num = __c_ua(cb->args[0]);
 	struct packet_diag_req *req;
 	struct net *net;
 	struct sock *sk;
@@ -216,7 +216,7 @@ next:
 	}
 done:
 	mutex_unlock(&net->packet.sklist_lock);
-	cb->args[0] = num;
+	cb->args[0] = __c_fakeu(num);
 
 	return skb->len;
 }

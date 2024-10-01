@@ -45,7 +45,7 @@ struct deferred_action {
 
 #define MAX_L2_LEN	(VLAN_ETH_HLEN + 3 * MPLS_HLEN)
 struct ovs_frag_data {
-	unsigned long dst;
+	uintptr_t dst;
 	struct vport *vport;
 	struct ovs_skb_cb cb;
 	__be16 inner_protocol;
@@ -876,7 +876,7 @@ static void ovs_fragment(struct net *net, struct vport *vport,
 
 	if (key->eth.type == htons(ETH_P_IP)) {
 		struct rtable ovs_rt = { 0 };
-		unsigned long orig_dst;
+		uintptr_t orig_dst;
 
 		prepare_frag(vport, skb, orig_network_offset,
 			     ovs_key_mac_proto(key));
@@ -891,7 +891,7 @@ static void ovs_fragment(struct net *net, struct vport *vport,
 		ip_do_fragment(net, skb->sk, skb, ovs_vport_output);
 		refdst_drop(orig_dst);
 	} else if (key->eth.type == htons(ETH_P_IPV6)) {
-		unsigned long orig_dst;
+		uintptr_t orig_dst;
 		struct rt6_info ovs_rt;
 
 		prepare_frag(vport, skb, orig_network_offset,

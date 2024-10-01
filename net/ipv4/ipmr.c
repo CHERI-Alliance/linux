@@ -2843,8 +2843,8 @@ static int ipmr_rtm_dumplink(struct sk_buff *skb, struct netlink_callback *cb)
 			return err;
 	}
 
-	s_t = cb->args[0];
-	s_e = cb->args[1];
+	s_t = __c_ua(cb->args[0]);
+	s_e = __c_ua(cb->args[1]);
 
 	ipmr_for_each_table(mrt, net) {
 		struct nlattr *vifs, *af;
@@ -2902,8 +2902,8 @@ skip_table:
 	}
 
 out:
-	cb->args[1] = e;
-	cb->args[0] = t;
+	cb->args[1] = __c_fakeu(e);
+	cb->args[0] = __c_fakeu(t);
 
 	return skb->len;
 }

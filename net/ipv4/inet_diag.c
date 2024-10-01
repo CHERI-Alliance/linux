@@ -1031,8 +1031,8 @@ void inet_diag_dump_icsk(struct inet_hashinfo *hashinfo, struct sk_buff *skb,
 	bc = cb_data->inet_diag_nla_bc;
 	if (idiag_states & TCPF_SYN_RECV)
 		idiag_states |= TCPF_NEW_SYN_RECV;
-	s_i = cb->args[1];
-	s_num = num = cb->args[2];
+	s_i = __c_ua(cb->args[1]);
+	s_num = num = __c_ua(cb->args[2]);
 
 	if (cb->args[0] == 0) {
 		if (!(idiag_states & TCPF_LISTEN) || r->id.idiag_dport)
@@ -1257,8 +1257,8 @@ next_normal:
 	}
 
 done:
-	cb->args[1] = i;
-	cb->args[2] = num;
+	cb->args[1] = __c_fakeu(i);
+	cb->args[2] = __c_fakeu(num);
 out:
 	;
 }

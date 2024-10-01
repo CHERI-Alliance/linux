@@ -204,8 +204,8 @@ static int unix_diag_dump(struct sk_buff *skb, struct netlink_callback *cb)
 
 	req = nlmsg_data(cb->nlh);
 
-	s_slot = cb->args[0];
-	num = s_num = cb->args[1];
+	s_slot = __c_ua(cb->args[0]);
+	num = s_num = __c_ua(cb->args[1]);
 
 	for (slot = s_slot; slot < UNIX_HASH_SIZE; s_num = 0, slot++) {
 		struct sock *sk;
@@ -230,8 +230,8 @@ next:
 		spin_unlock(&net->unx.table.locks[slot]);
 	}
 done:
-	cb->args[0] = slot;
-	cb->args[1] = num;
+	cb->args[0] = __c_fakeu(slot);
+	cb->args[1] = __c_fakeu(num);
 
 	return skb->len;
 }

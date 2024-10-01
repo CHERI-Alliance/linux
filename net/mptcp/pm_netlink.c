@@ -1735,7 +1735,7 @@ int mptcp_pm_nl_dump_addr(struct sk_buff *msg,
 	struct net *net = sock_net(msg->sk);
 	struct mptcp_pm_addr_entry *entry;
 	struct pm_nl_pernet *pernet;
-	int id = cb->args[0];
+	int id = __c_ua(cb->args[0]);
 	void *hdr;
 	int i;
 
@@ -1768,7 +1768,7 @@ int mptcp_pm_nl_dump_addr(struct sk_buff *msg,
 	}
 	spin_unlock_bh(&pernet->lock);
 
-	cb->args[0] = id;
+	cb->args[0] = __c_fakeu(id);
 	return msg->len;
 }
 

@@ -110,6 +110,8 @@
 #include <linux/ptp_clock_kernel.h>
 #include <trace/events/sock.h>
 
+#include <linux/cheri.h>
+
 #ifdef CONFIG_NET_RX_BUSY_POLL
 unsigned int sysctl_net_busy_read __read_mostly;
 unsigned int sysctl_net_busy_poll __read_mostly;
@@ -2796,12 +2798,12 @@ static int ____sys_recvmsg(struct socket *sock, struct msghdr *msg_sys,
 					(struct compat_msghdr __user *) msg;
 	int __user *uaddr_len = COMPAT_NAMELEN(msg);
 	struct sockaddr_storage addr;
-	unsigned long cmsg_ptr;
+	uintptr_t cmsg_ptr;
 	int len;
 	ssize_t err;
 
 	msg_sys->msg_name = &addr;
-	cmsg_ptr = (unsigned long)msg_sys->msg_control;
+	cmsg_ptr = (uintptr_t)msg_sys->msg_control;
 	msg_sys->msg_flags = flags & (MSG_CMSG_CLOEXEC|MSG_CMSG_COMPAT);
 
 	/* We assume all kernel code knows the size of sockaddr_storage */
@@ -2831,10 +2833,10 @@ static int ____sys_recvmsg(struct socket *sock, struct msghdr *msg_sys,
 	if (err)
 		goto out;
 	if (MSG_CMSG_COMPAT & flags)
-		err = __put_user((unsigned long)msg_sys->msg_control - cmsg_ptr,
+		err = __put_user(__c_pa(msg_sys->msg_control) - __c_ua(cmsg_ptr),
 				 &msg_compat->msg_controllen);
 	else
-		err = __put_user((unsigned long)msg_sys->msg_control - cmsg_ptr,
+		err = __put_user(__c_pa(msg_sys->msg_control) - __c_ua(cmsg_ptr),
 				 &msg->msg_controllen);
 	if (err)
 		goto out;

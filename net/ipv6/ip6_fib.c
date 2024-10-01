@@ -592,13 +592,13 @@ static int fib6_dump_table(struct fib6_table *table, struct sk_buff *skb,
 		spin_unlock_bh(&table->tb6_lock);
 		if (res > 0) {
 			cb->args[4] = 1;
-			cb->args[5] = READ_ONCE(w->root->fn_sernum);
+			cb->args[5] = __c_fakeu(READ_ONCE(w->root->fn_sernum));
 		}
 	} else {
 		int sernum = READ_ONCE(w->root->fn_sernum);
 		if (cb->args[5] != sernum) {
 			/* Begin at the root if the tree changed */
-			cb->args[5] = sernum;
+			cb->args[5] = __c_fakeu(sernum);
 			w->state = FWS_INIT;
 			w->node = w->root;
 			w->skip = w->count;
@@ -658,11 +658,11 @@ static int inet6_dump_fib(struct sk_buff *skb, struct netlink_callback *cb)
 			goto unlock;
 		}
 		w->func = fib6_dump_node;
-		cb->args[2] = (long)w;
+		cb->args[2] = (uintptr_t)w;
 
 		/* 2. hook callback destructor.
 		 */
-		cb->args[3] = (long)cb->done;
+		cb->args[3] = (uintptr_t)cb->done;
 		cb->done = fib6_dump_done;
 
 	}
@@ -691,8 +691,8 @@ static int inet6_dump_fib(struct sk_buff *skb, struct netlink_callback *cb)
 		goto unlock;
 	}
 
-	s_h = cb->args[0];
-	s_e = cb->args[1];
+	s_h = __c_ua(cb->args[0]);
+	s_e = __c_ua(cb->args[1]);
 
 	for (h = s_h; h < FIB6_TABLE_HASHSZ; h++, s_e = 0) {
 		e = 0;
@@ -708,8 +708,8 @@ next:
 		}
 	}
 out:
-	cb->args[1] = e;
-	cb->args[0] = h;
+	cb->args[1] = __c_fakeu(e);
+	cb->args[0] = __c_fakeu(h);
 
 unlock:
 	rcu_read_unlock();

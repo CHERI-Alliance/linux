@@ -881,7 +881,7 @@ int fou_nl_get_dumpit(struct sk_buff *skb, struct netlink_callback *cb)
 	}
 	mutex_unlock(&fn->fou_lock);
 
-	cb->args[0] = idx;
+	cb->args[0] = __c_fakeu(idx);
 	return skb->len;
 }
 

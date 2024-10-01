@@ -2279,8 +2279,8 @@ static int fn_trie_dump_leaf(struct key_vector *l, struct fib_table *tb,
 	    !filter->dump_exceptions || !filter->dump_routes)
 		flags |= NLM_F_DUMP_FILTERED;
 
-	s_i = cb->args[4];
-	s_fa = cb->args[5];
+	s_i = __c_ua(cb->args[4]);
+	s_fa = __c_ua(cb->args[5]);
 	i = 0;
 
 	/* rcu_read_lock is hold by caller */
@@ -2343,12 +2343,12 @@ next:
 		i++;
 	}
 
-	cb->args[4] = i;
+	cb->args[4] = __c_fakeu(i);
 	return skb->len;
 
 stop:
-	cb->args[4] = i;
-	cb->args[5] = i_fa;
+	cb->args[4] = __c_fakeu(i);
+	cb->args[5] = __c_fakeu(i_fa);
 	return err;
 }
 
@@ -2361,8 +2361,8 @@ int fib_table_dump(struct fib_table *tb, struct sk_buff *skb,
 	/* Dump starting at last key.
 	 * Note: 0.0.0.0/0 (ie default) is first key.
 	 */
-	int count = cb->args[2];
-	t_key key = cb->args[3];
+	int count = __c_ua(cb->args[2]);
+	t_key key = __c_ua(cb->args[3]);
 
 	/* First time here, count and key are both always 0. Count > 0
 	 * and key == 0 means the dump has wrapped around and we are done.
@@ -2375,8 +2375,8 @@ int fib_table_dump(struct fib_table *tb, struct sk_buff *skb,
 
 		err = fn_trie_dump_leaf(l, tb, skb, cb, filter);
 		if (err < 0) {
-			cb->args[3] = key;
-			cb->args[2] = count;
+			cb->args[3] = __c_fakeu(key);
+			cb->args[2] = __c_fakeu(count);
 			return err;
 		}
 
@@ -2391,8 +2391,8 @@ int fib_table_dump(struct fib_table *tb, struct sk_buff *skb,
 			break;
 	}
 
-	cb->args[3] = key;
-	cb->args[2] = count;
+	cb->args[3] = __c_fakeu(key);
+	cb->args[2] = __c_fakeu(count);
 
 	return 0;
 }

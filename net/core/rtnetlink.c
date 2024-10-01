@@ -4652,8 +4652,8 @@ static int rtnl_fdb_dump(struct sk_buff *skb, struct netlink_callback *cb)
 		ops = br_dev->netdev_ops;
 	}
 
-	s_h = cb->args[0];
-	s_idx = cb->args[1];
+	s_h = __c_ua(cb->args[0]);
+	s_idx = __c_ua(cb->args[1]);
 
 	for (h = s_h; h < NETDEV_HASHENTRIES; h++, s_idx = 0) {
 		idx = 0;
@@ -4713,9 +4713,9 @@ cont:
 	}
 
 out:
-	cb->args[0] = h;
-	cb->args[1] = idx;
-	cb->args[2] = fidx;
+	cb->args[0] = __c_fakeu(h);
+	cb->args[1] = __c_fakeu(idx);
+	cb->args[2] = __c_fakeu(fidx);
 
 	return skb->len;
 }
@@ -5099,7 +5099,7 @@ static int rtnl_bridge_getlink(struct sk_buff *skb, struct netlink_callback *cb)
 	err = skb->len;
 out_err:
 	rcu_read_unlock();
-	cb->args[0] = idx;
+	cb->args[0] = __c_fakeu(idx);
 
 	return err;
 }

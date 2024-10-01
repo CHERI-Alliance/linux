@@ -2057,8 +2057,8 @@ static int put_nla_counters(struct sk_buff *skb, struct seg6_local_lwt *slwt)
 static int cmp_nla_counters(struct seg6_local_lwt *a, struct seg6_local_lwt *b)
 {
 	/* a and b are equal if both have pcpu_counters set or not */
-	return (!!((unsigned long)a->pcpu_counters)) ^
-		(!!((unsigned long)b->pcpu_counters));
+	return (!!(__c_pa(a->pcpu_counters))) ^
+		(!!(__c_pa(b->pcpu_counters)));
 }
 
 static void destroy_attr_counters(struct seg6_local_lwt *slwt)

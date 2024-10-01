@@ -151,8 +151,8 @@ static void raw_diag_dump(struct sk_buff *skb, struct netlink_callback *cb,
 
 	cb_data = cb->data;
 	bc = cb_data->inet_diag_nla_bc;
-	s_slot = cb->args[0];
-	num = s_num = cb->args[1];
+	s_slot = __c_ua(cb->args[0]);
+	num = s_num = __c_ua(cb->args[1]);
 
 	rcu_read_lock();
 	for (slot = s_slot; slot < RAW_HTABLE_SIZE; s_num = 0, slot++) {
@@ -184,8 +184,8 @@ next:
 out_unlock:
 	rcu_read_unlock();
 
-	cb->args[0] = slot;
-	cb->args[1] = num;
+	cb->args[0] = __c_fakeu(slot);
+	cb->args[1] = __c_fakeu(num);
 }
 
 static void raw_diag_get_info(struct sock *sk, struct inet_diag_msg *r,

@@ -1080,7 +1080,7 @@ static int rtnl_net_dumpid(struct sk_buff *skb, struct netlink_callback *cb)
 			.cmd = RTM_NEWNSID,
 		},
 		.idx = 0,
-		.s_idx = cb->args[0],
+		.s_idx = __c_ua(cb->args[0]),
 	};
 	int err = 0;
 
@@ -1094,7 +1094,7 @@ static int rtnl_net_dumpid(struct sk_buff *skb, struct netlink_callback *cb)
 	idr_for_each(&net_cb.tgt_net->netns_ids, rtnl_net_dumpid_one, &net_cb);
 	rcu_read_unlock();
 
-	cb->args[0] = net_cb.idx;
+	cb->args[0] = __c_fakeu(net_cb.idx);
 end:
 	if (net_cb.fillargs.add_ref)
 		put_net(net_cb.tgt_net);

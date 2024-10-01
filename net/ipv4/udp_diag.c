@@ -98,8 +98,8 @@ static void udp_dump(struct udp_table *table, struct sk_buff *skb,
 
 	cb_data = cb->data;
 	bc = cb_data->inet_diag_nla_bc;
-	s_slot = cb->args[0];
-	num = s_num = cb->args[1];
+	s_slot = __c_ua(cb->args[0]);
+	num = s_num = __c_ua(cb->args[1]);
 
 	for (slot = s_slot; slot <= table->mask; s_num = 0, slot++) {
 		struct udp_hslot *hslot = &table->hash[slot];
@@ -140,8 +140,8 @@ next:
 		spin_unlock_bh(&hslot->lock);
 	}
 done:
-	cb->args[0] = slot;
-	cb->args[1] = num;
+	cb->args[0] = __c_fakeu(slot);
+	cb->args[1] = __c_fakeu(num);
 }
 
 static void udp_diag_dump(struct sk_buff *skb, struct netlink_callback *cb,

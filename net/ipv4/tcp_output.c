@@ -3402,7 +3402,7 @@ start:
 	 * and check if ack-trimming & collapsing extended the headroom
 	 * beyond what csum_start can cover.
 	 */
-	if (unlikely((NET_IP_ALIGN && ((unsigned long)skb->data & 3)) ||
+	if (unlikely((NET_IP_ALIGN && (__c_pa(skb->data) & 3)) ||
 		     skb_headroom(skb) >= 0xFFFF)) {
 		struct sk_buff *nskb;
 
