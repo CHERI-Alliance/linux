@@ -49,7 +49,7 @@ TRACE_EVENT(ipi_send_cpu,
 
 	TP_fast_assign(
 		__entry->cpu = cpu;
-		__entry->callsite = (void *)callsite;
+		__entry->callsite = __c_fakep(callsite);
 		__entry->callback = callback;
 	),
 
@@ -71,7 +71,7 @@ TRACE_EVENT(ipi_send_cpumask,
 
 	TP_fast_assign(
 		__assign_cpumask(cpumask, cpumask_bits(cpumask));
-		__entry->callsite = (void *)callsite;
+		__entry->callsite = __c_fakep(callsite);
 		__entry->callback = callback;
 	),
 

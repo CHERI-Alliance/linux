@@ -230,7 +230,7 @@ TRACE_EVENT(iomap_iter,
 		   __print_flags(__entry->flags, "|", IOMAP_FLAGS_STRINGS),
 		   __entry->flags,
 		   __entry->ops,
-		   (void *)__entry->caller)
+		   __c_fakep(__entry->caller))
 );
 
 TRACE_EVENT(iomap_dio_rw_begin,

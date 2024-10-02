@@ -1232,7 +1232,7 @@ static enum print_line_t trace_stack_print(struct trace_iterator *iter,
 	unsigned long *end;
 
 	trace_assign_type(field, iter->ent);
-	end = (unsigned long *)((long)iter->ent + iter->ent_size);
+	end = (unsigned long *)((uintptr_t)iter->ent + iter->ent_size);
 
 	trace_seq_puts(s, "<stack trace>\n");
 

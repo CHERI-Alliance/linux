@@ -683,7 +683,7 @@ void *trace_pid_next(struct trace_pid_list *pid_list, void *v, loff_t *pos)
 	pid = next;
 
 	/* Return pid + 1 to allow zero to be represented */
-	return (void *)(pid + 1);
+	return __c_fakep(pid + 1);
 }
 
 /**
@@ -710,9 +710,9 @@ void *trace_pid_start(struct trace_pid_list *pid_list, loff_t *pos)
 
 	/* Return pid + 1 so that zero can be the exit value */
 	for (pid++; pid && l < *pos;
-	     pid = (unsigned long)trace_pid_next(pid_list, (void *)pid, &l))
+	     pid = __c_pa(trace_pid_next(pid_list, __c_fakep(pid), &l)))
 		;
-	return (void *)pid;
+	return __c_fakep(pid);
 }
 
 /**
@@ -8625,7 +8625,7 @@ trace_create_cpu_file(const char *name, umode_t mode, struct dentry *parent,
 	struct dentry *ret = trace_create_file(name, mode, parent, data, fops);
 
 	if (ret) /* See tracing_get_cpu() */
-		d_inode(ret)->i_cdev = (void *)(cpu + 1);
+		d_inode(ret)->i_cdev = __c_fakep(cpu + 1);
 	return ret;
 }
 

@@ -492,7 +492,7 @@ struct ring_buffer_per_cpu {
 
 	unsigned int			mapped;
 	struct mutex			mapping_lock;
-	unsigned long			*subbuf_ids;	/* ID to subbuf VA */
+	uintptr_t			*subbuf_ids;	/* ID to subbuf VA */
 	struct trace_buffer_meta	*meta_page;
 
 	/* ring buffer pages to update, > 0 to add, < 0 to remove */
@@ -1184,7 +1184,7 @@ EXPORT_SYMBOL_GPL(ring_buffer_normalize_time_stamp);
  */
 static struct list_head *rb_list_head(struct list_head *list)
 {
-	unsigned long val = (unsigned long)list;
+	uintptr_t val = (uintptr_t)list;
 
 	return (struct list_head *)(val & ~RB_FLAG_MASK);
 }
@@ -1867,7 +1867,7 @@ rb_remove_pages(struct ring_buffer_per_cpu *cpu_buffer, unsigned long nr_pages)
 	 * Make sure that we have head_bit value preserved for the
 	 * next page
 	 */
-	tail_page->next = (struct list_head *)((unsigned long)next_page |
+	tail_page->next = (struct list_head *)((uintptr_t)next_page |
 						head_bit);
 	next_page = rb_list_head(next_page);
 	next_page->prev = tail_page;
@@ -1966,7 +1966,7 @@ rb_insert_pages(struct ring_buffer_per_cpu *cpu_buffer)
 		last_page  = pages->prev;
 
 		head_page_with_bit = (struct list_head *)
-				     ((unsigned long)head_page | RB_PAGE_HEAD);
+				     ((uintptr_t)head_page | RB_PAGE_HEAD);
 
 		last_page->next = head_page_with_bit;
 		first_page->prev = prev_page;
@@ -2891,11 +2891,11 @@ rb_try_to_discard(struct ring_buffer_per_cpu *cpu_buffer,
 {
 	unsigned long new_index, old_index;
 	struct buffer_page *bpage;
-	unsigned long addr;
+	uintptr_t addr;
 
 	new_index = rb_event_index(cpu_buffer, event);
 	old_index = new_index + rb_event_ts_length(event);
-	addr = (unsigned long)event;
+	addr = (uintptr_t)event;
 	addr &= ~((PAGE_SIZE << cpu_buffer->buffer->subbuf_order) - 1);
 
 	bpage = READ_ONCE(cpu_buffer->tail_page);
@@ -3803,7 +3803,7 @@ static inline void
 rb_decrement_entry(struct ring_buffer_per_cpu *cpu_buffer,
 		   struct ring_buffer_event *event)
 {
-	unsigned long addr = (unsigned long)event;
+	uintptr_t addr = (uintptr_t)event;
 	struct buffer_page *bpage = cpu_buffer->commit_page;
 	struct buffer_page *start;
 
@@ -6122,14 +6122,14 @@ static void rb_free_meta_page(struct ring_buffer_per_cpu *cpu_buffer)
 }
 
 static void rb_setup_ids_meta_page(struct ring_buffer_per_cpu *cpu_buffer,
-				   unsigned long *subbuf_ids)
+				   uintptr_t *subbuf_ids)
 {
 	struct trace_buffer_meta *meta = cpu_buffer->meta_page;
 	unsigned int nr_subbufs = cpu_buffer->nr_pages + 1;
 	struct buffer_page *first_subbuf, *subbuf;
 	int id = 0;
 
-	subbuf_ids[id] = (unsigned long)cpu_buffer->reader_page->page;
+	subbuf_ids[id] = (uintptr_t)cpu_buffer->reader_page->page;
 	cpu_buffer->reader_page->id = id++;
 
 	first_subbuf = subbuf = rb_set_head_page(cpu_buffer);
@@ -6137,7 +6137,7 @@ static void rb_setup_ids_meta_page(struct ring_buffer_per_cpu *cpu_buffer,
 		if (WARN_ON(id >= nr_subbufs))
 			break;
 
-		subbuf_ids[id] = (unsigned long)subbuf->page;
+		subbuf_ids[id] = (uintptr_t)subbuf->page;
 		subbuf->id = id;
 
 		rb_inc_page(&subbuf);
@@ -6318,7 +6318,8 @@ int ring_buffer_map(struct trace_buffer *buffer, int cpu,
 		    struct vm_area_struct *vma)
 {
 	struct ring_buffer_per_cpu *cpu_buffer;
-	unsigned long flags, *subbuf_ids;
+	unsigned long flags;
+	uintptr_t *subbuf_ids;
 	int err = 0;
 
 	if (!cpumask_test_cpu(cpu, buffer->cpumask))
