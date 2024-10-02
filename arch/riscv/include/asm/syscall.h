@@ -27,7 +27,7 @@ extern void * const compat_sys_call_table[];
 static inline int syscall_get_nr(struct task_struct *task,
 				 struct pt_regs *regs)
 {
-	return regs->a7;
+	return __c_ua(regs->a7);
 }
 
 static inline void syscall_rollback(struct task_struct *task,
@@ -36,30 +36,30 @@ static inline void syscall_rollback(struct task_struct *task,
         regs->a0 = regs->orig_a0;
 }
 
-static inline long syscall_get_error(struct task_struct *task,
+static inline intptr_t syscall_get_error(struct task_struct *task,
 				     struct pt_regs *regs)
 {
-	unsigned long error = regs->a0;
+	uintptr_t error = regs->a0;
 
-	return IS_ERR_VALUE(error) ? error : 0;
+	return IS_ERR_VALUE(error) ? error : __c_fakeu(0);
 }
 
-static inline long syscall_get_return_value(struct task_struct *task,
+static inline intptr_t syscall_get_return_value(struct task_struct *task,
 					    struct pt_regs *regs)
 {
-	return regs->a0;
+	return (intptr_t)regs->a0;
 }
 
 static inline void syscall_set_return_value(struct task_struct *task,
 					    struct pt_regs *regs,
-					    int error, long val)
+					    int error, uintptr_t val)
 {
-	regs->a0 = (long) error ?: val;
+	regs->a0 = error ? __c_fakeu((long)error) : val;
 }
 
 static inline void syscall_get_arguments(struct task_struct *task,
 					 struct pt_regs *regs,
-					 unsigned long *args)
+					 uintptr_t *args)
 {
 	args[0] = regs->orig_a0;
 	args++;
