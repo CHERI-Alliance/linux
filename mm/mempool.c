@@ -62,12 +62,12 @@ static void check_element(mempool_t *pool, void *element)
 
 	/* Mempools backed by slab allocator */
 	if (pool->free == mempool_kfree) {
-		__check_element(pool, element, (size_t)pool->pool_data);
+		__check_element(pool, element, __c_pa(pool->pool_data));
 	} else if (pool->free == mempool_free_slab) {
 		__check_element(pool, element, kmem_cache_size(pool->pool_data));
 	} else if (pool->free == mempool_free_pages) {
 		/* Mempools backed by page allocator */
-		int order = (int)(long)pool->pool_data;
+		int order = (int)(long)__c_pa(pool->pool_data);
 		void *addr = kmap_local_page((struct page *)element);
 
 		__check_element(pool, addr, 1UL << (PAGE_SHIFT + order));
@@ -91,12 +91,12 @@ static void poison_element(mempool_t *pool, void *element)
 
 	/* Mempools backed by slab allocator */
 	if (pool->alloc == mempool_kmalloc) {
-		__poison_element(element, (size_t)pool->pool_data);
+		__poison_element(element, __c_pa(pool->pool_data));
 	} else if (pool->alloc == mempool_alloc_slab) {
 		__poison_element(element, kmem_cache_size(pool->pool_data));
 	} else if (pool->alloc == mempool_alloc_pages) {
 		/* Mempools backed by page allocator */
-		int order = (int)(long)pool->pool_data;
+		int order = (int)(long)__c_pa(pool->pool_data);
 		void *addr = kmap_local_page((struct page *)element);
 
 		__poison_element(addr, 1UL << (PAGE_SHIFT + order));
@@ -118,20 +118,20 @@ static __always_inline bool kasan_poison_element(mempool_t *pool, void *element)
 		return kasan_mempool_poison_object(element);
 	else if (pool->alloc == mempool_alloc_pages)
 		return kasan_mempool_poison_pages(element,
-						(unsigned long)pool->pool_data);
+						  __c_pa(pool->pool_data));
 	return true;
 }
 
 static void kasan_unpoison_element(mempool_t *pool, void *element)
 {
 	if (pool->alloc == mempool_kmalloc)
-		kasan_mempool_unpoison_object(element, (size_t)pool->pool_data);
+		kasan_mempool_unpoison_object(element, __c_pa(pool->pool_data));
 	else if (pool->alloc == mempool_alloc_slab)
 		kasan_mempool_unpoison_object(element,
 					      kmem_cache_size(pool->pool_data));
 	else if (pool->alloc == mempool_alloc_pages)
 		kasan_mempool_unpoison_pages(element,
-					     (unsigned long)pool->pool_data);
+					     __c_pa(pool->pool_data));
 }
 
 static __always_inline void add_element(mempool_t *pool, void *element)
@@ -573,7 +573,7 @@ EXPORT_SYMBOL(mempool_free_slab);
  */
 void *mempool_kmalloc(gfp_t gfp_mask, void *pool_data)
 {
-	size_t size = (size_t)pool_data;
+	size_t size = __c_pa(pool_data);
 	return kmalloc_noprof(size, gfp_mask);
 }
 EXPORT_SYMBOL(mempool_kmalloc);
@@ -586,7 +586,7 @@ EXPORT_SYMBOL(mempool_kfree);
 
 void *mempool_kvmalloc(gfp_t gfp_mask, void *pool_data)
 {
-	size_t size = (size_t)pool_data;
+	size_t size = __c_pa(pool_data);
 	return kvmalloc(size, gfp_mask);
 }
 EXPORT_SYMBOL(mempool_kvmalloc);
@@ -603,14 +603,14 @@ EXPORT_SYMBOL(mempool_kvfree);
  */
 void *mempool_alloc_pages(gfp_t gfp_mask, void *pool_data)
 {
-	int order = (int)(long)pool_data;
+	int order = (int)(long)__c_pa(pool_data);
 	return alloc_pages_noprof(gfp_mask, order);
 }
 EXPORT_SYMBOL(mempool_alloc_pages);
 
 void mempool_free_pages(void *element, void *pool_data)
 {
-	int order = (int)(long)pool_data;
+	int order = (int)(long)__c_pa(pool_data);
 	__free_pages(element, order);
 }
 EXPORT_SYMBOL(mempool_free_pages);

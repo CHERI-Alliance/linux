@@ -1044,7 +1044,7 @@ SYSCALL_DEFINE5(__retptr__(mremap), user_uintptr_t, user_ptr, unsigned long, old
 	user_uintptr_t ret = -EINVAL;
 	bool locked = false;
 	struct vm_userfaultfd_ctx uf = NULL_VM_UFFD_CTX;
-	ptraddr_t addr = (ptraddr_t)user_ptr;
+	ptraddr_t addr = __c_ua(user_ptr);
 	ptraddr_t new_addr = (ptraddr_t)new_user_ptr;
 	LIST_HEAD(uf_unmap_early);
 	LIST_HEAD(uf_unmap);
@@ -1063,10 +1063,10 @@ SYSCALL_DEFINE5(__retptr__(mremap), user_uintptr_t, user_ptr, unsigned long, old
 	addr = untagged_addr(addr);
 
 	if (flags & ~(MREMAP_FIXED | MREMAP_MAYMOVE | MREMAP_DONTUNMAP))
-		return ret;
+		return __c_fakeu(ret);
 
 	if (flags & MREMAP_FIXED && !(flags & MREMAP_MAYMOVE))
-		return ret;
+		return __c_fakeu(ret);
 
 	/*
 	 * MREMAP_DONTUNMAP is always a move and it does not allow resizing
@@ -1074,11 +1074,11 @@ SYSCALL_DEFINE5(__retptr__(mremap), user_uintptr_t, user_ptr, unsigned long, old
 	 */
 	if (flags & MREMAP_DONTUNMAP &&
 			(!(flags & MREMAP_MAYMOVE) || old_len != new_len))
-		return ret;
+		return __c_fakeu(ret);
 
 
 	if (offset_in_page(addr))
-		return ret;
+		return __c_fakeu(ret);
 
 	old_len = PAGE_ALIGN(old_len);
 	new_len = PAGE_ALIGN(new_len);
@@ -1089,10 +1089,10 @@ SYSCALL_DEFINE5(__retptr__(mremap), user_uintptr_t, user_ptr, unsigned long, old
 	 * a zero new-len is nonsensical.
 	 */
 	if (!new_len)
-		return ret;
+		return __c_fakeu(ret);
 
 	if (mmap_write_lock_killable(current->mm))
-		return -EINTR;
+		return __c_fakeu(-EINTR);
 	vma = vma_lookup(mm, addr);
 	if (!vma) {
 		ret = -EFAULT;

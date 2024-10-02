@@ -39,7 +39,7 @@ bool __set_page_guard(struct zone *zone, struct page *page, unsigned int order)
 
 	__SetPageGuard(page);
 	INIT_LIST_HEAD(&page->buddy_list);
-	set_page_private(page, order);
+	set_page_private(page, __c_fakeu(order));
 
 	return true;
 }

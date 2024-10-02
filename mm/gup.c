@@ -2497,7 +2497,7 @@ static int migrate_longterm_unpinnable_pages(
 		};
 
 		if (migrate_pages(movable_page_list, alloc_migration_target,
-				  NULL, (unsigned long)&mtc, MIGRATE_SYNC,
+				  NULL, (uintptr_t)&mtc, MIGRATE_SYNC,
 				  MR_LONGTERM_PIN, NULL)) {
 			ret = -ENOMEM;
 			goto err;
@@ -2889,7 +2889,7 @@ static bool gup_fast_folio_allowed(struct folio *folio, unsigned int flags)
 		return false;
 
 	/* Anonymous folios pose no problem. */
-	mapping_flags = (unsigned long)mapping & PAGE_MAPPING_FLAGS;
+	mapping_flags = __c_pa(mapping) & PAGE_MAPPING_FLAGS;
 	if (mapping_flags)
 		return mapping_flags & PAGE_MAPPING_ANON;
 

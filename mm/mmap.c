@@ -1532,7 +1532,7 @@ struct mmap_arg_struct {
 	unsigned long offset;
 };
 
-SYSCALL_DEFINE1(old_mmap, struct mmap_arg_struct __user *, arg)
+SYSCALL_DEFINE1(__retptr__(old_mmap), struct mmap_arg_struct __user *, arg)
 {
 	struct mmap_arg_struct a;
 
