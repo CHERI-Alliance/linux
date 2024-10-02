@@ -115,15 +115,15 @@ static inline void unlock_mount_hash(void)
 
 static inline struct hlist_head *m_hash(struct vfsmount *mnt, struct dentry *dentry)
 {
-	unsigned long tmp = ((unsigned long)mnt / L1_CACHE_BYTES);
-	tmp += ((unsigned long)dentry / L1_CACHE_BYTES);
+	unsigned long tmp = (__c_pa(mnt) / L1_CACHE_BYTES);
+	tmp += (__c_pa(dentry) / L1_CACHE_BYTES);
 	tmp = tmp + (tmp >> m_hash_shift);
 	return &mount_hashtable[tmp & m_hash_mask];
 }
 
 static inline struct hlist_head *mp_hash(struct dentry *dentry)
 {
-	unsigned long tmp = ((unsigned long)dentry / L1_CACHE_BYTES);
+	unsigned long tmp = (__c_pa(dentry) / L1_CACHE_BYTES);
 	tmp = tmp + (tmp >> mp_hash_shift);
 	return &mountpoint_hashtable[tmp & mp_hash_mask];
 }
@@ -2810,7 +2810,7 @@ static void mnt_warn_timestamp_expiry(struct path *mountpoint, struct vfsmount *
 			mntpath, &sb->s_time_max,
 			(unsigned long long)sb->s_time_max);
 
-		free_page((unsigned long)buf);
+		free_page((uintptr_t)buf);
 		sb->s_iflags |= SB_I_TS_EXPIRY_WARNED;
 	}
 }

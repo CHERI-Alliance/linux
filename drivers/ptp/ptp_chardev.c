@@ -315,7 +315,7 @@ long ptp_ioctl(struct posix_clock_context *pccontext, unsigned int cmd,
 		if (!capable(CAP_SYS_TIME))
 			return -EPERM;
 		req.type = PTP_CLK_REQ_PPS;
-		enable = arg ? 1 : 0;
+		enable = __c_ua(arg) ? 1 : 0;
 		if (mutex_lock_interruptible(&ptp->pincfg_mux))
 			return -ERESTARTSYS;
 		err = ops->enable(ops, &req, enable);

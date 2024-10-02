@@ -347,7 +347,7 @@ static long do_fcntl(int fd, unsigned int cmd, user_uintptr_t arg,
 		struct file *filp)
 {
 	void __user *argp = (void __user *)arg;
-	int argi = (int)arg;
+	int argi = (int)__c_ua(arg);
 	struct flock flock;
 	long err = -EINVAL;
 
@@ -487,7 +487,8 @@ SYSCALL_DEFINE3(fcntl, unsigned int, fd, unsigned int, cmd, user_uintptr_t, arg)
 			goto out1;
 	}
 
-	err = security_file_fcntl(f.file, cmd, arg);
+	/* FIXCHERI: This assumes that the security hook will not deref the argument. */
+	err = security_file_fcntl(f.file, cmd, __c_ua(arg));
 	if (!err)
 		err = do_fcntl(fd, cmd, arg, f.file);
 

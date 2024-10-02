@@ -703,7 +703,7 @@ static void __init do_populate_rootfs(void *unused, async_cookie_t cookie)
 	else
 		printk(KERN_INFO "Unpacking initramfs...\n");
 
-	err = unpack_to_rootfs((char *)initrd_start, initrd_end - initrd_start);
+	err = unpack_to_rootfs((char *)initrd_start, __c_ua(initrd_end - initrd_start));
 	if (err) {
 #ifdef CONFIG_BLK_DEV_RAM
 		populate_initrd_image(err);
@@ -718,9 +718,9 @@ done:
 	 * free only memory that is not part of crashkernel region.
 	 */
 	if (!do_retain_initrd && initrd_start && !kexec_free_initrd()) {
-		free_initrd_mem(initrd_start, initrd_end);
+		free_initrd_mem(__c_ua(initrd_start), __c_ua(initrd_end));
 	} else if (do_retain_initrd && initrd_start) {
-		bin_attr_initrd.size = initrd_end - initrd_start;
+		bin_attr_initrd.size = __c_ua(initrd_end - initrd_start);
 		bin_attr_initrd.private = (void *)initrd_start;
 		if (sysfs_create_bin_file(firmware_kobj, &bin_attr_initrd))
 			pr_err("Failed to create initrd sysfs file");

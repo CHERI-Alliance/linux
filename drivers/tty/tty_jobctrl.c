@@ -581,7 +581,7 @@ long tty_jobctrl_ioctl(struct tty_struct *tty, struct tty_struct *real_tty,
 		no_tty();
 		return 0;
 	case TIOCSCTTY:
-		return tiocsctty(real_tty, file, arg);
+		return tiocsctty(real_tty, file, __c_ua(arg));
 	case TIOCGPGRP:
 		return tiocgpgrp(tty, real_tty, p);
 	case TIOCSPGRP:

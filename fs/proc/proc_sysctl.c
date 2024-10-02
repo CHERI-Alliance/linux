@@ -653,7 +653,7 @@ static __poll_t proc_sys_poll(struct file *filp, poll_table *wait)
 	if (!table->poll)
 		goto out;
 
-	event = (unsigned long)filp->private_data;
+	event = __c_pa(filp->private_data);
 	poll_wait(filp, &table->poll->wait, wait);
 
 	if (event != atomic_read(&table->poll->event)) {

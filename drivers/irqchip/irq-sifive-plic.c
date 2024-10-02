@@ -495,7 +495,7 @@ static int plic_probe(struct platform_device *pdev)
 
 		id = of_match_node(plic_match, to_of_node(dev->fwnode));
 		if (id)
-			plic_quirks = (unsigned long)id->data;
+			plic_quirks = __c_pa(id->data);
 	}
 
 	error = plic_parse_nr_irqs_and_contexts(pdev, &nr_irqs, &nr_contexts);

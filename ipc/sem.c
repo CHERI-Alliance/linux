@@ -1684,10 +1684,10 @@ static long ksys_semctl(int semid, int semnum, int cmd, user_uintptr_t arg, int 
 		int val;
 #if defined(CONFIG_64BIT) && defined(__BIG_ENDIAN)
 		/* big-endian 64bit */
-		val = arg >> 32;
+		val = __c_ua(arg) >> 32;
 #else
 		/* 32bit or little-endian 64bit */
-		val = arg;
+		val = __c_ua(arg);
 #endif
 		return semctl_setval(ns, semid, semnum, val);
 	}
@@ -1708,14 +1708,14 @@ SYSCALL_DEFINE4(semctl, int, semid, int, semnum, int, cmd, user_uintptr_t, arg)
 }
 
 #ifdef CONFIG_ARCH_WANT_IPC_PARSE_VERSION
-long ksys_old_semctl(int semid, int semnum, int cmd, unsigned long arg)
+long ksys_old_semctl(int semid, int semnum, int cmd, uintptr_t arg)
 {
 	int version = ipc_parse_version(&cmd);
 
 	return ksys_semctl(semid, semnum, cmd, arg, version);
 }
 
-SYSCALL_DEFINE4(old_semctl, int, semid, int, semnum, int, cmd, unsigned long, arg)
+SYSCALL_DEFINE4(old_semctl, int, semid, int, semnum, int, cmd, uintptr_t, arg)
 {
 	return ksys_old_semctl(semid, semnum, cmd, arg);
 }

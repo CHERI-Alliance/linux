@@ -2373,7 +2373,7 @@ static int pagemap_scan_get_args(struct pm_scan_arg *arg,
 
 	arg->start = untagged_addr((unsigned long)arg->start);
 	arg->end = untagged_addr((unsigned long)arg->end);
-	arg->vec = untagged_addr((unsigned long)arg->vec);
+	arg->vec = untagged_addr(arg->vec);
 
 	/* Validate memory pointers */
 	if (!IS_ALIGNED(arg->start, PAGE_SIZE))

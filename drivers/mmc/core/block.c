@@ -926,7 +926,7 @@ static int mmc_blk_ioctl(struct block_device *bdev, blk_mode_t mode,
 
 #ifdef CONFIG_COMPAT
 static int mmc_blk_compat_ioctl(struct block_device *bdev, blk_mode_t mode,
-	unsigned int cmd, unsigned long arg)
+	unsigned int cmd, uintptr_t arg)
 {
 	struct mmc_blk_data *md;
 	int ret;

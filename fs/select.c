@@ -102,7 +102,7 @@ struct poll_table_page {
 };
 
 #define POLL_TABLE_FULL(table) \
-	((unsigned long)((table)->entry+1) > PAGE_SIZE + (unsigned long)(table))
+	(__c_pa((table)->entry+1) > PAGE_SIZE + __c_pa(table))
 
 /*
  * Ok, Peter made a complicated, but straightforward multiple_wait() function.

@@ -213,7 +213,7 @@ EXPORT_SYMBOL(fs_param_is_bool);
 int fs_param_is_u32(struct p_log *log, const struct fs_parameter_spec *p,
 		    struct fs_parameter *param, struct fs_parse_result *result)
 {
-	int base = (unsigned long)p->data;
+	int base = __c_pa(p->data);
 	if (param->type != fs_value_is_string)
 		return fs_param_bad_value(log, param);
 	if (!*param->string && (p->flags & fs_param_can_be_empty))

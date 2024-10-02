@@ -848,7 +848,7 @@ static int do_vfs_ioctl(struct file *filp, unsigned int fd,
 		return put_user(inode->i_sb->s_blocksize, (int __user *)argp);
 
 	case FICLONE:
-		return ioctl_file_clone(filp, arg, 0, 0, 0);
+		return ioctl_file_clone(filp, __c_ua(arg), 0, 0, 0);
 
 	case FICLONERANGE:
 		return ioctl_file_clone_range(filp, argp);
@@ -898,7 +898,8 @@ SYSCALL_DEFINE3(ioctl, unsigned int, fd, unsigned int, cmd, user_uintptr_t, arg)
 	if (!f.file)
 		return -EBADF;
 
-	error = security_file_ioctl(f.file, cmd, arg);
+	/* FIXCHERI: Hook cannot deref potential pointer in arg. */
+	error = security_file_ioctl(f.file, cmd, __c_ua(arg));
 	if (error)
 		goto out;
 
@@ -951,7 +952,7 @@ static inline long compat_ioctl(struct file *file, unsigned int cmd,
  * is incompatible between 32-bit and 64-bit architectures, a proper
  * handler is required instead of compat_ptr_ioctl.
  */
-long compat_ptr_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+long compat_ptr_ioctl(struct file *file, unsigned int cmd, uintptr_t arg)
 {
 	return compat_ioctl(file, cmd, arg, true);
 }

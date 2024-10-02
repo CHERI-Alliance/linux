@@ -200,7 +200,7 @@ static int of_platform_serial_probe(struct platform_device *ofdev)
 	    of_device_is_compatible(ofdev->dev.of_node, "brcm,bcm7271-uart"))
 		return -ENODEV;
 
-	port_type = (unsigned long)of_device_get_match_data(&ofdev->dev);
+	port_type = __c_pa(of_device_get_match_data(&ofdev->dev));
 	if (port_type == PORT_UNKNOWN)
 		return -EINVAL;
 

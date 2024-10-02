@@ -2796,7 +2796,7 @@ void *jbd2_alloc(size_t size, gfp_t flags)
 
 	/* Check alignment; SLUB has gotten this wrong in the past,
 	 * and this can lead to user data corruption! */
-	BUG_ON(((unsigned long) ptr) & (size-1));
+	BUG_ON(__c_pa(ptr) & (size-1));
 
 	return ptr;
 }

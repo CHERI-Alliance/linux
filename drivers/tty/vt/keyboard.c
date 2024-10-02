@@ -2128,11 +2128,11 @@ int vt_do_kdskled(unsigned int console, int cmd, user_uintptr_t arg, int perm)
 	case KDSKBLED:
 		if (!perm)
 			return -EPERM;
-		if (arg & ~0x77)
+		if (__c_ua(arg) & ~0x77)
 			return -EINVAL;
                 spin_lock_irqsave(&led_lock, flags);
-		kb->ledflagstate = (arg & 7);
-		kb->default_ledflagstate = ((arg >> 4) & 7);
+		kb->ledflagstate = (__c_ua(arg) & 7);
+		kb->default_ledflagstate = ((__c_ua(arg) >> 4) & 7);
 		set_leds();
                 spin_unlock_irqrestore(&led_lock, flags);
 		return 0;
@@ -2146,7 +2146,7 @@ int vt_do_kdskled(unsigned int console, int cmd, user_uintptr_t arg, int perm)
 	case KDSETLED:
 		if (!perm)
 			return -EPERM;
-		setledstate(kb, arg);
+		setledstate(kb, __c_ua(arg));
 		return 0;
         }
         return -ENOIOCTLCMD;

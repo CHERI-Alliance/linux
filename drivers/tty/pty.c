@@ -654,7 +654,7 @@ static int pty_unix98_ioctl(struct tty_struct *tty,
 	case TIOCGPTN: /* Get PT Number */
 		return put_user(tty->index, (unsigned int __user *)arg);
 	case TIOCSIG:    /* Send signal to other side of pty */
-		return pty_signal(tty, (int) arg);
+		return pty_signal(tty, (int) __c_ua(arg));
 	}
 
 	return -ENOIOCTLCMD;

@@ -111,7 +111,7 @@ u64 stable_page_flags(const struct page *page)
 {
 	const struct folio *folio;
 	unsigned long k;
-	unsigned long mapping;
+	uintptr_t mapping;
 	bool is_anon;
 	u64 u = 0;
 
@@ -124,7 +124,7 @@ u64 stable_page_flags(const struct page *page)
 	folio = page_folio(page);
 
 	k = folio->flags;
-	mapping = (unsigned long)folio->mapping;
+	mapping = (uintptr_t)folio->mapping;
 	is_anon = mapping & PAGE_MAPPING_ANON;
 
 	/*
