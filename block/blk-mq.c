@@ -3228,13 +3228,13 @@ static void blk_mq_clear_rq_mapping(struct blk_mq_tags *drv_tags,
 		return;
 
 	list_for_each_entry(page, &tags->page_list, lru) {
-		unsigned long start = (unsigned long)page_address(page);
-		unsigned long end = start + order_to_size(page->private);
+		unsigned long start = __c_pa(page_address(page));
+		unsigned long end = start + order_to_size(__c_ua(page->private));
 		int i;
 
 		for (i = 0; i < drv_tags->nr_tags; i++) {
 			struct request *rq = drv_tags->rqs[i];
-			unsigned long rq_addr = (unsigned long)rq;
+			unsigned long rq_addr = __c_pa(rq);
 
 			if (rq_addr >= start && rq_addr < end) {
 				WARN_ON_ONCE(req_ref_read(rq) != 0);
@@ -3290,7 +3290,7 @@ void blk_mq_free_rqs(struct blk_mq_tag_set *set, struct blk_mq_tags *tags,
 		 * blk_mq_alloc_rqs().
 		 */
 		kmemleak_free(page_address(page));
-		__free_pages(page, page->private);
+		__free_pages(page, __c_ua(page->private));
 	}
 }
 
@@ -3428,7 +3428,7 @@ static int blk_mq_alloc_rqs(struct blk_mq_tag_set *set,
 		if (!page)
 			goto fail;
 
-		page->private = this_order;
+		page->private = __c_fakeu(this_order);
 		list_add_tail(&page->lru, &tags->page_list);
 
 		p = page_address(page);

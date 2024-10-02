@@ -389,7 +389,7 @@ static void bio_map_kern_endio(struct bio *bio)
 static struct bio *bio_map_kern(struct request_queue *q, void *data,
 		unsigned int len, gfp_t gfp_mask)
 {
-	unsigned long kaddr = (unsigned long)data;
+	unsigned long kaddr = __c_pa(data);
 	unsigned long end = (kaddr + len + PAGE_SIZE - 1) >> PAGE_SHIFT;
 	unsigned long start = kaddr >> PAGE_SHIFT;
 	const int nr_pages = end - start;
@@ -474,7 +474,7 @@ static void bio_copy_kern_endio_read(struct bio *bio)
 static struct bio *bio_copy_kern(struct request_queue *q, void *data,
 		unsigned int len, gfp_t gfp_mask, int reading)
 {
-	unsigned long kaddr = (unsigned long)data;
+	unsigned long kaddr = __c_pa(data);
 	unsigned long end = (kaddr + len + PAGE_SIZE - 1) >> PAGE_SHIFT;
 	unsigned long start = kaddr >> PAGE_SHIFT;
 	struct bio *bio;
@@ -783,7 +783,7 @@ int blk_rq_map_kern(struct request_queue *q, struct request *rq, void *kbuf,
 		    unsigned int len, gfp_t gfp_mask)
 {
 	int reading = rq_data_dir(rq) == READ;
-	unsigned long addr = (unsigned long) kbuf;
+	unsigned long addr = __c_pa(kbuf);
 	struct bio *bio;
 	int ret;
 

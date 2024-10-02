@@ -537,7 +537,7 @@ static int blkdev_bszset(struct file *file, blk_mode_t mode,
  * to deal with the compat_ptr() conversion.
  */
 static int blkdev_common_ioctl(struct block_device *bdev, blk_mode_t mode,
-			       unsigned int cmd, unsigned long arg,
+			       unsigned int cmd, uintptr_t arg,
 			       void __user *argp)
 {
 	unsigned int max_sectors;
@@ -590,7 +590,7 @@ static int blkdev_common_ioctl(struct block_device *bdev, blk_mode_t mode,
 	case BLKFRASET:
 		if(!capable(CAP_SYS_ADMIN))
 			return -EACCES;
-		bdev->bd_disk->bdi->ra_pages = (arg * 512) / PAGE_SIZE;
+		bdev->bd_disk->bdi->ra_pages = (__c_ua(arg) * 512) / PAGE_SIZE;
 		return 0;
 	case BLKRRPART:
 		if (!capable(CAP_SYS_ADMIN))
