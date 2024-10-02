@@ -46,12 +46,12 @@ static inline void syscall_rollback(struct task_struct *task,
 static inline long syscall_get_error(struct task_struct *task,
 				     struct pt_regs *regs)
 {
-	unsigned long error = regs->a0;
+	unsigned long error = __c_ua(regs->a0);
 
 	return IS_ERR_VALUE(error) ? error : 0;
 }
 
-static inline long syscall_get_return_value(struct task_struct *task,
+static inline intptr_t syscall_get_return_value(struct task_struct *task,
 					    struct pt_regs *regs)
 {
 	return regs->a0;
@@ -59,14 +59,14 @@ static inline long syscall_get_return_value(struct task_struct *task,
 
 static inline void syscall_set_return_value(struct task_struct *task,
 					    struct pt_regs *regs,
-					    int error, long val)
+					    int error, uintptr_t val)
 {
-	regs->a0 = (long) error ?: val;
+	regs->a0 = error ? error : val;
 }
 
 static inline void syscall_get_arguments(struct task_struct *task,
 					 struct pt_regs *regs,
-					 unsigned long *args)
+					 uintptr_t *args)
 {
 	args[0] = regs->orig_a0;
 	args[1] = regs->a1;
@@ -78,14 +78,19 @@ static inline void syscall_get_arguments(struct task_struct *task,
 
 static inline void syscall_set_arguments(struct task_struct *task,
 					 struct pt_regs *regs,
-					 const unsigned long *args)
+					 const uintptr_t *args)
 {
-	regs->orig_a0 = args[0];
-	regs->a1 = args[1];
-	regs->a2 = args[2];
-	regs->a3 = args[3];
-	regs->a4 = args[4];
-	regs->a5 = args[5];
+	/*
+	 * FIXCHERI: Handle tagged capabilties here. Currently, tags
+	 * are stripped when copying the arguments into the kernel and
+	 * we try to do something useful here by just changing the address.
+	 */
+	regs->orig_a0 = (uintptr_t)cheri_address_set(regs->orig_a0, __c_ua(args[0]));
+	regs->a1 = (uintptr_t)cheri_address_set(regs->a1, __c_ua(args[1]));
+	regs->a2 = (uintptr_t)cheri_address_set(regs->a2, __c_ua(args[2]));
+	regs->a3 = (uintptr_t)cheri_address_set(regs->a3, __c_ua(args[3]));
+	regs->a4 = (uintptr_t)cheri_address_set(regs->a4, __c_ua(args[4]));
+	regs->a5 = (uintptr_t)cheri_address_set(regs->a5, __c_ua(args[5]));
 }
 
 static inline int syscall_get_arch(struct task_struct *task)
