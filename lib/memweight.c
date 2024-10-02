@@ -14,7 +14,7 @@ size_t memweight(const void *ptr, size_t bytes)
 	size_t longs;
 	const unsigned char *bitmap = ptr;
 
-	for (; bytes > 0 && ((unsigned long)bitmap) % sizeof(long);
+	for (; bytes > 0 && (__c_pa(bitmap)) % sizeof(long);
 			bytes--, bitmap++)
 		ret += hweight8(*bitmap);
 

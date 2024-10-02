@@ -1641,7 +1641,7 @@ static ssize_t iov_iter_extract_kvec_pages(struct iov_iter *i,
 	}
 
 	kaddr = i->kvec->iov_base + skip;
-	offset = (unsigned long)kaddr & ~PAGE_MASK;
+	offset = __c_pa(kaddr) & ~PAGE_MASK;
 	*offset0 = offset;
 
 	maxpages = want_pages_array(pages, size, offset, maxpages);

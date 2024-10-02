@@ -20,8 +20,8 @@ void __crypto_xor(u8 *dst, const u8 *src1, const u8 *src2, unsigned int len)
 
 	if (!IS_ENABLED(CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS)) {
 		int size = sizeof(unsigned long);
-		int d = (((unsigned long)dst ^ (unsigned long)src1) |
-			 ((unsigned long)dst ^ (unsigned long)src2)) &
+		int d = ((__c_pa(dst) ^ __c_pa(src1)) |
+			 (__c_pa(dst) ^ __c_pa(src2))) &
 			(size - 1);
 
 		relalign = d ? 1 << __ffs(d) : size;
@@ -32,7 +32,7 @@ void __crypto_xor(u8 *dst, const u8 *src1, const u8 *src2, unsigned int len)
 		 * equal their relative alignment. This will allow us to
 		 * process the remainder of the input using optimal strides.
 		 */
-		while (((unsigned long)dst & (relalign - 1)) && len > 0) {
+		while ((__c_pa(dst) & (relalign - 1)) && len > 0) {
 			*dst++ = *src1++ ^ *src2++;
 			len--;
 		}

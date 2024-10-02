@@ -192,7 +192,8 @@ const ZSTD_DDict* ZSTD_initStaticDDict(
     ZSTD_DDict* const ddict = (ZSTD_DDict*)sBuffer;
     assert(sBuffer != NULL);
     assert(dict != NULL);
-    if ((size_t)sBuffer & 7) return NULL;   /* 8-aligned */
+    /* FIXCHERI: Open coded __c_pa */
+    if ((size_t __force)(uintptr_t)(sBuffer) & 7) return NULL;   /* 8-aligned */
     if (sBufferSize < neededSpace) return NULL;
     if (dictLoadMethod == ZSTD_dlm_byCopy) {
         ZSTD_memcpy(ddict+1, dict, dictSize);  /* local copy */

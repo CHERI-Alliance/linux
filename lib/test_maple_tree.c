@@ -294,10 +294,10 @@ static noinline void __init check_lb_not_empty(struct maple_tree *mt)
 
 	i = huge;
 	while (i > 4096) {
-		check_insert(mt, i, (void *) i);
+		check_insert(mt, i, __c_fakep(i));
 		for (j = huge; j >= i; j /= 2) {
 			check_load(mt, j-1, NULL);
-			check_load(mt, j, (void *) j);
+			check_load(mt, j, __c_fakep(j));
 			check_load(mt, j+1, NULL);
 		}
 		i /= 2;
@@ -325,10 +325,10 @@ static noinline void __init check_upper_bound_split(struct maple_tree *mt)
 
 	i = 4096;
 	while (i < huge) {
-		check_insert(mt, i, (void *) i);
+		check_insert(mt, i, __c_fakep(i));
 		for (j = i; j >= huge; j *= 2) {
 			check_load(mt, j-1, NULL);
-			check_load(mt, j, (void *) j);
+			check_load(mt, j, __c_fakep(j));
 			check_load(mt, j+1, NULL);
 		}
 		i *= 2;
@@ -340,7 +340,7 @@ static noinline void __init check_mid_split(struct maple_tree *mt)
 {
 	unsigned long huge = 8000UL * 1000 * 1000;
 
-	check_insert(mt, huge, (void *) huge);
+	check_insert(mt, huge, __c_fakep(huge));
 	check_insert(mt, 0, xa_mk_value(0));
 	check_lb_not_empty(mt);
 }
@@ -1444,7 +1444,7 @@ static noinline void __init check_root_expand(struct maple_tree *mt)
 	mas_lock(&mas);
 
 	mas_set(&mas, 0);
-	ptr = (void *)((unsigned long) check_prev_entry | 1UL);
+	ptr = (void *)((uintptr_t) check_prev_entry | 1UL);
 	mas_store_gfp(&mas, ptr, GFP_KERNEL);
 	ptr = mas_next(&mas, ULONG_MAX);
 	MT_BUG_ON(mt, ptr != NULL);
@@ -1453,7 +1453,7 @@ static noinline void __init check_root_expand(struct maple_tree *mt)
 	mas_set(&mas, 1);
 	ptr = mas_prev(&mas, 0);
 	MT_BUG_ON(mt, (mas.index != 0) && (mas.last != 0));
-	MT_BUG_ON(mt, ptr != (void *)((unsigned long) check_prev_entry | 1UL));
+	MT_BUG_ON(mt, ptr != (void *)((uintptr_t) check_prev_entry | 1UL));
 
 	mas_unlock(&mas);
 
@@ -1462,7 +1462,7 @@ static noinline void __init check_root_expand(struct maple_tree *mt)
 	mt_init_flags(mt, 0);
 	mas_lock(&mas);
 	mas_set(&mas, 0);
-	ptr = (void *)((unsigned long) check_prev_entry | 2UL);
+	ptr = (void *)((uintptr_t) check_prev_entry | 2UL);
 	mas_store_gfp(&mas, ptr, GFP_KERNEL);
 	ptr = mas_next(&mas, ULONG_MAX);
 	MT_BUG_ON(mt, ptr != NULL);
@@ -1471,7 +1471,7 @@ static noinline void __init check_root_expand(struct maple_tree *mt)
 	mas_set(&mas, 1);
 	ptr = mas_prev(&mas, 0);
 	MT_BUG_ON(mt, (mas.index != 0) && (mas.last != 0));
-	MT_BUG_ON(mt, ptr != (void *)((unsigned long) check_prev_entry | 2UL));
+	MT_BUG_ON(mt, ptr != (void *)((uintptr_t) check_prev_entry | 2UL));
 
 
 	mas_unlock(&mas);
@@ -2889,7 +2889,7 @@ static noinline void __init check_empty_area_fill(struct maple_tree *mt)
 			mas_lock(&mas);
 			MT_BUG_ON(mt, mas_empty_area(&mas, 0, max, size) != 0);
 			MT_BUG_ON(mt, mas.last != mas.index + size - 1);
-			mas_store_gfp(&mas, (void *)size, GFP_KERNEL);
+			mas_store_gfp(&mas, __c_fakep(size), GFP_KERNEL);
 			mas_unlock(&mas);
 			mas_reset(&mas);
 		}
@@ -2903,7 +2903,7 @@ static noinline void __init check_empty_area_fill(struct maple_tree *mt)
 
 	/* Fill a depth 3 node to the maximum */
 	for (unsigned long i = 629440511; i <= 629440800; i += 6)
-		mtree_store_range(mt, i, i + 5, (void *)i, GFP_KERNEL);
+		mtree_store_range(mt, i, i + 5, __c_fakep(i), GFP_KERNEL);
 	/* Make space in the second-last depth 4 node */
 	mtree_erase(mt, 631668735);
 	/* Make space in the last depth 4 node */

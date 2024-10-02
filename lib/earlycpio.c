@@ -119,7 +119,7 @@ struct cpio_data find_cpio_data(const char *path, void *data,
 		    !memcmp(p, path, mypathsize)) {
 
 			if (nextoff)
-				*nextoff = (long)nptr - (long)data;
+				*nextoff = (long)__c_pa(nptr) - (long)__c_pa(data);
 
 			if (ch[C_NAMESIZE] - mypathsize >= MAX_CPIO_FILE_NAME) {
 				pr_warn(

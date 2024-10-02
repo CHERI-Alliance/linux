@@ -82,10 +82,10 @@ crc32_body(u32 crc, unsigned char const *buf, size_t len, const u32 (*tab)[256])
 	u32 q;
 
 	/* Align it */
-	if (unlikely((long)buf & 3 && len)) {
+	if (unlikely(__c_pa(buf) & 3 && len)) {
 		do {
 			DO_CRC(*buf++);
-		} while ((--len) && ((long)buf)&3);
+		} while ((--len) && (__c_pa(buf))&3);
 	}
 
 # if CRC_LE_BITS == 32

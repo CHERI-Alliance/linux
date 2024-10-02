@@ -243,7 +243,7 @@ void inflate_fast(z_streamp strm, unsigned start)
                     from = out - dist;          /* copy direct from output */
 		    /* minimum length is three */
 		    /* Align out addr */
-		    if (!((long)(out - 1) & 1)) {
+		    if (!(__c_pa(out - 1) & 1)) {
 			*out++ = *from++;
 			len--;
 		    }

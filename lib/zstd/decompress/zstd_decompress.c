@@ -267,7 +267,8 @@ ZSTD_DCtx* ZSTD_initStaticDCtx(void *workspace, size_t workspaceSize)
 {
     ZSTD_DCtx* const dctx = (ZSTD_DCtx*) workspace;
 
-    if ((size_t)workspace & 7) return NULL;  /* 8-aligned */
+    /* FIXCHERI: Open coded __c_pa */
+    if ((size_t __force)(uintptr_t)workspace & 7) return NULL;  /* 8-aligned */
     if (workspaceSize < sizeof(ZSTD_DCtx)) return NULL;  /* minimum size */
 
     ZSTD_initDCtx_internal(dctx);
