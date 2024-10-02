@@ -409,7 +409,7 @@ notrace int in_lock_functions(unsigned long addr)
 	/* Linker adds these: start and end of __lockfunc functions */
 	extern char __lock_text_start[], __lock_text_end[];
 
-	return addr >= (unsigned long)__lock_text_start
-	&& addr < (unsigned long)__lock_text_end;
+	return addr >= __c_pa(__lock_text_start)
+	&& addr < __c_pa(__lock_text_end);
 }
 EXPORT_SYMBOL(in_lock_functions);

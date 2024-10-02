@@ -864,7 +864,7 @@ static struct pool_workqueue *get_work_pwq(struct work_struct *work)
 {
 	uintptr_t data = atomic_ptr_read(&work->data);
 
-	if (data & WORK_STRUCT_PWQ)
+	if (__c_ua(data) & WORK_STRUCT_PWQ)
 		return work_struct_pwq(data);
 	else
 		return NULL;

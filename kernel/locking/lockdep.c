@@ -775,7 +775,7 @@ static void print_lock(struct held_lock *hlock)
 
 	printk(KERN_CONT "%px", hlock->instance);
 	print_lock_name(hlock, lock);
-	printk(KERN_CONT ", at: %pS\n", (void *)hlock->acquire_ip);
+	printk(KERN_CONT ", at: %pS\n", (void *)__c_fakep(hlock->acquire_ip));
 }
 
 static void lockdep_print_held_locks(struct task_struct *p)
@@ -838,7 +838,7 @@ static int static_obj(const void *obj)
 	 * outside of the _stext ... _end range.
 	 */
 	if (system_state < SYSTEM_FREEING_INITMEM &&
-		init_section_contains((void *)addr, 1))
+		init_section_contains(__c_fakep(addr), 1))
 		return 1;
 
 	/*
@@ -961,9 +961,9 @@ static bool assign_lock_key(struct lockdep_map *lock)
 #endif
 
 	if (__is_kernel_percpu_address(addr, &can_addr))
-		lock->key = (void *)can_addr;
+		lock->key = __c_fakep(can_addr);
 	else if (__is_module_percpu_address(addr, &can_addr))
-		lock->key = (void *)can_addr;
+		lock->key = __c_fakep(can_addr);
 	else if (static_obj(lock))
 		lock->key = (void *)lock;
 	else {
@@ -4156,17 +4156,17 @@ void print_irqtrace_events(struct task_struct *curr)
 
 	printk("irq event stamp: %u\n", trace->irq_events);
 	printk("hardirqs last  enabled at (%u): [<%px>] %pS\n",
-		trace->hardirq_enable_event, (void *)trace->hardirq_enable_ip,
-		(void *)trace->hardirq_enable_ip);
+		trace->hardirq_enable_event, __c_fakep(trace->hardirq_enable_ip),
+		__c_fakep(trace->hardirq_enable_ip));
 	printk("hardirqs last disabled at (%u): [<%px>] %pS\n",
-		trace->hardirq_disable_event, (void *)trace->hardirq_disable_ip,
-		(void *)trace->hardirq_disable_ip);
+		trace->hardirq_disable_event, __c_fakep(trace->hardirq_disable_ip),
+		__c_fakep(trace->hardirq_disable_ip));
 	printk("softirqs last  enabled at (%u): [<%px>] %pS\n",
-		trace->softirq_enable_event, (void *)trace->softirq_enable_ip,
-		(void *)trace->softirq_enable_ip);
+		trace->softirq_enable_event, __c_fakep(trace->softirq_enable_ip),
+		__c_fakep(trace->softirq_enable_ip));
 	printk("softirqs last disabled at (%u): [<%px>] %pS\n",
-		trace->softirq_disable_event, (void *)trace->softirq_disable_ip,
-		(void *)trace->softirq_disable_ip);
+		trace->softirq_disable_event, __c_fakep(trace->softirq_disable_ip),
+		__c_fakep(trace->softirq_disable_ip));
 }
 
 static int HARDIRQ_verbose(struct lock_class *class)

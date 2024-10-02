@@ -140,7 +140,7 @@ static struct ucounts *find_ucounts(struct user_namespace *ns, kuid_t uid, struc
 
 static void hlist_add_ucounts(struct ucounts *ucounts)
 {
-	struct hlist_head *hashent = ucounts_hashentry(ucounts->ns, ucounts->uid);
+	struct hlist_head *hashent = ucounts_hashentry(__c_pa(ucounts->ns), ucounts->uid);
 	spin_lock_irq(&ucounts_lock);
 	hlist_add_head(&ucounts->node, hashent);
 	spin_unlock_irq(&ucounts_lock);
@@ -163,7 +163,7 @@ struct ucounts *get_ucounts(struct ucounts *ucounts)
 
 struct ucounts *alloc_ucounts(struct user_namespace *ns, kuid_t uid)
 {
-	struct hlist_head *hashent = ucounts_hashentry(ns, uid);
+	struct hlist_head *hashent = ucounts_hashentry(__c_pa(ns), uid);
 	struct ucounts *ucounts, *new;
 	bool wrapped;
 

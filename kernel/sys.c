@@ -1981,8 +1981,8 @@ static int validate_prctl_map_addr(struct prctl_mm_map *prctl_map)
 	 * Make sure the pairs are ordered.
 	 */
 #define __prctl_check_order(__m1, __op, __m2)				\
-	((unsigned long)prctl_map->__m1 __op				\
-	 (unsigned long)prctl_map->__m2) ? 0 : -EINVAL
+	(__c_a(prctl_map->__m1) __op				\
+	 __c_a(prctl_map->__m2)) ? 0 : -EINVAL
 	error  = __prctl_check_order(start_code, <, end_code);
 	error |= __prctl_check_order(start_data,<=, end_data);
 	error |= __prctl_check_order(start_brk, <=, brk);
@@ -2172,7 +2172,7 @@ static int prctl_set_mm(int opt, user_uintptr_t addr,
 		return -EPERM;
 
 	if (opt == PR_SET_MM_EXE_FILE)
-		return prctl_set_mm_exe_file(mm, (unsigned int)addr);
+		return prctl_set_mm_exe_file(mm, __c_ua(addr));
 
 	if (opt == PR_SET_MM_AUXV)
 		return prctl_set_auxv(mm, addr, arg4);
@@ -2188,7 +2188,7 @@ static int prctl_set_mm(int opt, user_uintptr_t addr,
 	 * validation.
 	 */
 	mmap_read_lock(mm);
-	vma = find_vma(mm, addr);
+	vma = find_vma(mm, __c_ua(addr));
 
 	spin_lock(&mm->arg_lock);
 	prctl_map.start_code	= mm->start_code;
@@ -2205,37 +2205,37 @@ static int prctl_set_mm(int opt, user_uintptr_t addr,
 
 	switch (opt) {
 	case PR_SET_MM_START_CODE:
-		prctl_map.start_code = addr;
+		prctl_map.start_code = __c_ua(addr);
 		break;
 	case PR_SET_MM_END_CODE:
-		prctl_map.end_code = addr;
+		prctl_map.end_code = __c_ua(addr);
 		break;
 	case PR_SET_MM_START_DATA:
-		prctl_map.start_data = addr;
+		prctl_map.start_data = __c_ua(addr);
 		break;
 	case PR_SET_MM_END_DATA:
-		prctl_map.end_data = addr;
+		prctl_map.end_data = __c_ua(addr);
 		break;
 	case PR_SET_MM_START_STACK:
-		prctl_map.start_stack = addr;
+		prctl_map.start_stack = __c_ua(addr);
 		break;
 	case PR_SET_MM_START_BRK:
-		prctl_map.start_brk = addr;
+		prctl_map.start_brk = __c_ua(addr);
 		break;
 	case PR_SET_MM_BRK:
-		prctl_map.brk = addr;
+		prctl_map.brk = __c_ua(addr);
 		break;
 	case PR_SET_MM_ARG_START:
-		prctl_map.arg_start = addr;
+		prctl_map.arg_start = __c_ua(addr);
 		break;
 	case PR_SET_MM_ARG_END:
-		prctl_map.arg_end = addr;
+		prctl_map.arg_end = __c_ua(addr);
 		break;
 	case PR_SET_MM_ENV_START:
-		prctl_map.env_start = addr;
+		prctl_map.env_start = __c_ua(addr);
 		break;
 	case PR_SET_MM_ENV_END:
-		prctl_map.env_end = addr;
+		prctl_map.env_end = __c_ua(addr);
 		break;
 	default:
 		goto out;
@@ -2469,18 +2469,19 @@ SYSCALL_DEFINE5(prctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 	unsigned char comm[sizeof(me->comm)];
 	long error;
 
-	error = security_task_prctl(option, arg2, arg3, arg4, arg5);
+	/* FIXCHERI: This assumes that the security hook will not deref the user pointers. */
+	error = security_task_prctl(option, __c_ua(arg2), __c_ua(arg3), __c_ua(arg4), __c_ua(arg5));
 	if (error != -ENOSYS)
 		return error;
 
 	error = 0;
 	switch (option) {
 	case PR_SET_PDEATHSIG:
-		if (!valid_signal(arg2)) {
+		if (!valid_signal(__c_ua(arg2))) {
 			error = -EINVAL;
 			break;
 		}
-		me->pdeath_signal = arg2;
+		me->pdeath_signal = __c_ua(arg2);
 		break;
 	case PR_GET_PDEATHSIG:
 		error = put_user(me->pdeath_signal, (int __user *)arg2);
@@ -2493,11 +2494,11 @@ SYSCALL_DEFINE5(prctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 			error = -EINVAL;
 			break;
 		}
-		set_dumpable(me->mm, arg2);
+		set_dumpable(me->mm, __c_ua(arg2));
 		break;
 
 	case PR_SET_UNALIGN:
-		error = SET_UNALIGN_CTL(me, arg2);
+		error = SET_UNALIGN_CTL(me, __c_ua(arg2));
 		break;
 	case PR_GET_UNALIGN:
 		error = GET_UNALIGN_CTL(me, arg2);
@@ -2544,7 +2545,7 @@ SYSCALL_DEFINE5(prctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 		error = prctl_get_seccomp();
 		break;
 	case PR_SET_SECCOMP:
-		error = prctl_set_seccomp(arg2, (char __user *)arg3);
+		error = prctl_set_seccomp(__c_ua(arg2), (char __user *)arg3);
 		break;
 	case PR_GET_TSC:
 		error = GET_TSC_CTL(arg2);
@@ -2569,7 +2570,7 @@ SYSCALL_DEFINE5(prctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 			current->timer_slack_ns =
 					current->default_timer_slack_ns;
 		else
-			current->timer_slack_ns = arg2;
+			current->timer_slack_ns = __c_ua(arg2);
 		break;
 	case PR_MCE_KILL:
 		if (arg4 || arg5)
@@ -2606,7 +2607,7 @@ SYSCALL_DEFINE5(prctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 			error = PR_MCE_KILL_DEFAULT;
 		break;
 	case PR_SET_MM:
-		error = prctl_set_mm(arg2, arg3, arg4, arg5);
+		error = prctl_set_mm(__c_ua(arg2), arg3, __c_ua(arg4), __c_ua(arg5));
 		break;
 	case PR_GET_TID_ADDRESS:
 #ifdef CONFIG_CHERI_PURECAP_UABI
@@ -2677,12 +2678,12 @@ SYSCALL_DEFINE5(prctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 	case PR_GET_SPECULATION_CTRL:
 		if (arg3 || arg4 || arg5)
 			return -EINVAL;
-		error = arch_prctl_spec_ctrl_get(me, arg2);
+		error = arch_prctl_spec_ctrl_get(me, __c_ua(arg2));
 		break;
 	case PR_SET_SPECULATION_CTRL:
 		if (arg4 || arg5)
 			return -EINVAL;
-		error = arch_prctl_spec_ctrl_set(me, arg2, arg3);
+		error = arch_prctl_spec_ctrl_set(me, __c_ua(arg2), __c_ua(arg3));
 		break;
 	case PR_PAC_RESET_KEYS:
 		if (arg3 || arg4 || arg5)
@@ -2733,7 +2734,7 @@ SYSCALL_DEFINE5(prctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 		error = (current->flags & PR_IO_FLUSHER) == PR_IO_FLUSHER;
 		break;
 	case PR_SET_SYSCALL_USER_DISPATCH:
-		error = set_syscall_user_dispatch(arg2, arg3, arg4,
+		error = set_syscall_user_dispatch(__c_ua(arg2), __c_ua(arg3), __c_ua(arg4),
 						  (char __user *) arg5);
 		break;
 #ifdef CONFIG_SCHED_CORE
@@ -2742,10 +2743,10 @@ SYSCALL_DEFINE5(prctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 		break;
 #endif
 	case PR_SET_MDWE:
-		error = prctl_set_mdwe(arg2, arg3, arg4, arg5);
+		error = prctl_set_mdwe(__c_ua(arg2), __c_ua(arg3), __c_ua(arg4), __c_ua(arg5));
 		break;
 	case PR_GET_MDWE:
-		error = prctl_get_mdwe(arg2, arg3, arg4, arg5);
+		error = prctl_get_mdwe(__c_ua(arg2), __c_ua(arg3), __c_ua(arg4), __c_ua(arg5));
 		break;
 	case PR_PPC_GET_DEXCR:
 		if (arg3 || arg4 || arg5)
@@ -2758,12 +2759,12 @@ SYSCALL_DEFINE5(prctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 		error = PPC_SET_DEXCR_ASPECT(me, arg2, arg3);
 		break;
 	case PR_SET_VMA:
-		error = prctl_set_vma(arg2, arg3, arg4, arg5);
+		error = prctl_set_vma(__c_ua(arg2), __c_ua(arg3), __c_ua(arg4), arg5);
 		break;
 	case PR_GET_AUXV:
 		if (arg4 || arg5)
 			return -EINVAL;
-		error = prctl_get_auxv((void __user *)arg2, arg3);
+		error = prctl_get_auxv((void __user *)arg2, __c_ua(arg3));
 		break;
 #ifdef CONFIG_KSM
 	case PR_SET_MEMORY_MERGE:
@@ -2792,7 +2793,7 @@ SYSCALL_DEFINE5(prctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 		error = RISCV_V_GET_CONTROL();
 		break;
 	case PR_RISCV_SET_ICACHE_FLUSH_CTX:
-		error = RISCV_SET_ICACHE_FLUSH_CTX(arg2, arg3);
+		error = RISCV_SET_ICACHE_FLUSH_CTX(__c_ua(arg2), __c_ua(arg3));
 		break;
 	default:
 		error = -EINVAL;

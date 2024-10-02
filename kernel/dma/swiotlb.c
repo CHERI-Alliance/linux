@@ -263,7 +263,7 @@ void __init swiotlb_update_mem_attributes(void)
 	if (!mem->nslabs || mem->late_alloc)
 		return;
 	bytes = PAGE_ALIGN(mem->nslabs << IO_TLB_SHIFT);
-	set_memory_decrypted((unsigned long)mem->vaddr, bytes >> PAGE_SHIFT);
+	set_memory_decrypted(__c_pa(mem->vaddr), bytes >> PAGE_SHIFT);
 }
 
 static void swiotlb_init_io_tlb_pool(struct io_tlb_pool *mem, phys_addr_t start,
@@ -506,7 +506,7 @@ retry:
 	if (!mem->slots)
 		goto error_slots;
 
-	set_memory_decrypted((unsigned long)vstart,
+	set_memory_decrypted(__c_pa(vstart),
 			     (nslabs << IO_TLB_SHIFT) >> PAGE_SHIFT);
 	swiotlb_init_io_tlb_pool(mem, virt_to_phys(vstart), nslabs, true,
 				 nareas);
@@ -525,7 +525,7 @@ error_area:
 void __init swiotlb_exit(void)
 {
 	struct io_tlb_pool *mem = &io_tlb_default_mem.defpool;
-	unsigned long tbl_vaddr;
+	uintptr_t tbl_vaddr;
 	size_t tbl_size, slots_size;
 	unsigned int area_order;
 
@@ -536,11 +536,11 @@ void __init swiotlb_exit(void)
 		return;
 
 	pr_info("tearing down default memory pool\n");
-	tbl_vaddr = (unsigned long)phys_to_virt(mem->start);
+	tbl_vaddr = (uintptr_t)phys_to_virt(mem->start);
 	tbl_size = PAGE_ALIGN(mem->end - mem->start);
 	slots_size = PAGE_ALIGN(array_size(sizeof(*mem->slots), mem->nslabs));
 
-	set_memory_encrypted(tbl_vaddr, tbl_size >> PAGE_SHIFT);
+	set_memory_encrypted(__c_ua(tbl_vaddr), tbl_size >> PAGE_SHIFT);
 	if (mem->late_alloc) {
 		area_order = get_order(array_size(sizeof(*mem->areas),
 			mem->nareas));

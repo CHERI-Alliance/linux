@@ -51,8 +51,8 @@ static int kcmp_ptr(void *v1, void *v2, enum kcmp_type type)
 {
 	long t1, t2;
 
-	t1 = kptr_obfuscate((long)v1, type);
-	t2 = kptr_obfuscate((long)v2, type);
+	t1 = kptr_obfuscate((long)__c_pa(v1), type);
+	t2 = kptr_obfuscate((long)__c_pa(v2), type);
 
 	return (t1 < t2) | ((t1 > t2) << 1);
 }
@@ -173,7 +173,7 @@ SYSCALL_DEFINE5(kcmp, pid_t, pid1, pid_t, pid2, int, type,
 		struct file *filp1, *filp2;
 
 		filp1 = get_file_raw_ptr(task1, idx1);
-		filp2 = get_file_raw_ptr(task2, idx2);
+		filp2 = get_file_raw_ptr(task2, __c_ua(idx2));
 
 		if (filp1 && filp2)
 			ret = kcmp_ptr(filp1, filp2, KCMP_FILE);

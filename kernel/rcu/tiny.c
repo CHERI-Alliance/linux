@@ -85,7 +85,7 @@ void rcu_sched_clock_irq(int user)
 static inline bool rcu_reclaim_tiny(struct rcu_head *head)
 {
 	rcu_callback_t f;
-	unsigned long offset = (unsigned long)head->func;
+	unsigned long offset = __c_pa(head->func);
 
 	rcu_lock_acquire(&rcu_callback_map);
 	if (__is_kvfree_rcu_offset(offset)) {
@@ -179,7 +179,7 @@ void call_rcu(struct rcu_head *head, rcu_callback_t func)
 			mem_dump_obj(head);
 		}
 
-		if (!__is_kvfree_rcu_offset((unsigned long)head->func))
+		if (!__is_kvfree_rcu_offset(__c_pa(head->func)))
 			WRITE_ONCE(head->func, tiny_rcu_leak_callback);
 		return;
 	}
