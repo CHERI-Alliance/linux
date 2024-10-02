@@ -156,11 +156,11 @@ static inline bool init_section_intersects(void *virt, size_t size)
  */
 static inline bool is_kernel_core_data(unsigned long addr)
 {
-	if (addr >= (unsigned long)_sdata && addr < (unsigned long)_edata)
+	if (addr >= __c_pa(_sdata) && addr < __c_pa(_edata))
 		return true;
 
-	if (addr >= (unsigned long)__bss_start &&
-	    addr < (unsigned long)__bss_stop)
+	if (addr >= __c_pa(__bss_start) &&
+	    addr < __c_pa(__bss_stop))
 		return true;
 
 	return false;
@@ -176,14 +176,14 @@ static inline bool is_kernel_core_data(unsigned long addr)
  */
 static inline bool is_kernel_rodata(unsigned long addr)
 {
-	return addr >= (unsigned long)__start_rodata &&
-	       addr < (unsigned long)__end_rodata;
+	return addr >= __c_pa(__start_rodata) &&
+	       addr < __c_pa(__end_rodata);
 }
 
 static inline bool is_kernel_ro_after_init(unsigned long addr)
 {
-	return addr >= (unsigned long)__start_ro_after_init &&
-	       addr < (unsigned long)__end_ro_after_init;
+	return addr >= __c_pa(__start_ro_after_init) &&
+	       addr < __c_pa(__end_ro_after_init);
 }
 /**
  * is_kernel_inittext - checks if the pointer address is located in the
@@ -195,8 +195,8 @@ static inline bool is_kernel_ro_after_init(unsigned long addr)
  */
 static inline bool is_kernel_inittext(unsigned long addr)
 {
-	return addr >= (unsigned long)_sinittext &&
-	       addr < (unsigned long)_einittext;
+	return addr >= __c_pa(_sinittext) &&
+	       addr < __c_pa(_einittext);
 }
 
 /**
@@ -210,8 +210,8 @@ static inline bool is_kernel_inittext(unsigned long addr)
  */
 static inline bool __is_kernel_text(unsigned long addr)
 {
-	return addr >= (unsigned long)_stext &&
-	       addr < (unsigned long)_etext;
+	return addr >= __c_pa(_stext) &&
+	       addr < __c_pa(_etext);
 }
 
 /**
@@ -226,10 +226,10 @@ static inline bool __is_kernel_text(unsigned long addr)
  */
 static inline bool __is_kernel(unsigned long addr)
 {
-	return ((addr >= (unsigned long)_stext &&
-	         addr < (unsigned long)_end) ||
-		(addr >= (unsigned long)__init_begin &&
-		 addr < (unsigned long)__init_end));
+	return ((addr >= __c_pa(_stext) &&
+	         addr < __c_pa(_end)) ||
+		(addr >= __c_pa(__init_begin) &&
+		 addr < __c_pa(__init_end)));
 }
 
 #endif /* _ASM_GENERIC_SECTIONS_H_ */

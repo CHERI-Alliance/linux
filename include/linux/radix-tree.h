@@ -54,7 +54,7 @@ DECLARE_PER_CPU(struct radix_tree_preload, radix_tree_preloads);
 
 static inline bool radix_tree_is_internal_node(void *ptr)
 {
-	return ((unsigned long)ptr & RADIX_TREE_ENTRY_MASK) ==
+	return (__c_pa(ptr) & RADIX_TREE_ENTRY_MASK) ==
 				RADIX_TREE_INTERNAL_NODE;
 }
 

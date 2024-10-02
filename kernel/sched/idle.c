@@ -363,10 +363,10 @@ static void do_idle(void)
 		klp_update_patch_state(current);
 }
 
-bool cpu_in_idle(unsigned long pc)
+bool cpu_in_idle(uintptr_t pc)
 {
-	return pc >= (unsigned long)__cpuidle_text_start &&
-		pc < (unsigned long)__cpuidle_text_end;
+	return pc >= (uintptr_t)__cpuidle_text_start &&
+		pc < (uintptr_t)__cpuidle_text_end;
 }
 
 struct idle_timer {

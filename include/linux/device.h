@@ -359,9 +359,9 @@ const char *devm_kstrdup_const(struct device *dev, const char *s, gfp_t gfp);
 void *devm_kmemdup(struct device *dev, const void *src, size_t len, gfp_t gfp)
 	__realloc_size(3);
 
-unsigned long devm_get_free_pages(struct device *dev,
+uintptr_t devm_get_free_pages(struct device *dev,
 				  gfp_t gfp_mask, unsigned int order);
-void devm_free_pages(struct device *dev, unsigned long addr);
+void devm_free_pages(struct device *dev, uintptr_t addr);
 
 #ifdef CONFIG_HAS_IOMEM
 void __iomem *devm_ioremap_resource(struct device *dev,

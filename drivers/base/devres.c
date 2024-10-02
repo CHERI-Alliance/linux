@@ -870,7 +870,7 @@ void *devm_krealloc(struct device *dev, void *ptr, size_t new_size, gfp_t gfp)
 	if (unlikely(ZERO_OR_NULL_PTR(ptr)))
 		return devm_kmalloc(dev, new_size, gfp);
 
-	if (WARN_ON(is_kernel_rodata((unsigned long)ptr)))
+	if (WARN_ON(is_kernel_rodata(__c_pa(ptr))))
 		/*
 		 * We cannot reliably realloc a const string returned by
 		 * devm_kstrdup_const().
@@ -978,7 +978,7 @@ EXPORT_SYMBOL_GPL(devm_kstrdup);
  */
 const char *devm_kstrdup_const(struct device *dev, const char *s, gfp_t gfp)
 {
-	if (is_kernel_rodata((unsigned long)s))
+	if (is_kernel_rodata(__c_pa(s)))
 		return s;
 
 	return devm_kstrdup(dev, s, gfp);
@@ -1056,7 +1056,7 @@ void devm_kfree(struct device *dev, const void *p)
 	 * Special cases: pointer to a string in .rodata returned by
 	 * devm_kstrdup_const() or NULL/ZERO ptr.
 	 */
-	if (unlikely(is_kernel_rodata((unsigned long)p) || ZERO_OR_NULL_PTR(p)))
+	if (unlikely(is_kernel_rodata(__c_pa(p)) || ZERO_OR_NULL_PTR(p)))
 		return;
 
 	rc = devres_destroy(dev, devm_kmalloc_release,
@@ -1087,7 +1087,7 @@ void *devm_kmemdup(struct device *dev, const void *src, size_t len, gfp_t gfp)
 EXPORT_SYMBOL_GPL(devm_kmemdup);
 
 struct pages_devres {
-	unsigned long addr;
+	uintptr_t addr;
 	unsigned int order;
 };
 
@@ -1119,11 +1119,11 @@ static void devm_pages_release(struct device *dev, void *res)
  * Address of allocated memory on success, 0 on failure.
  */
 
-unsigned long devm_get_free_pages(struct device *dev,
+uintptr_t devm_get_free_pages(struct device *dev,
 				  gfp_t gfp_mask, unsigned int order)
 {
 	struct pages_devres *devres;
-	unsigned long addr;
+	uintptr_t addr;
 
 	addr = __get_free_pages(gfp_mask, order);
 
@@ -1153,7 +1153,7 @@ EXPORT_SYMBOL_GPL(devm_get_free_pages);
  * Free memory allocated with devm_get_free_pages(). Unlike free_pages,
  * there is no need to supply the @order.
  */
-void devm_free_pages(struct device *dev, unsigned long addr)
+void devm_free_pages(struct device *dev, uintptr_t addr)
 {
 	struct pages_devres devres = { .addr = addr };
 

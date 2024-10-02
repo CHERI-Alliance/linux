@@ -5,6 +5,7 @@
 #include <asm/types.h>
 #include <linux/bits.h>
 #include <linux/typecheck.h>
+#include <linux/cheri.h>
 
 #include <uapi/linux/kernel.h>
 
@@ -42,8 +43,8 @@ extern unsigned long __sw_hweight64(__u64 w);
  */
 #define bitop(op, nr, addr)						\
 	((__builtin_constant_p(nr) &&					\
-	  __builtin_constant_p((uintptr_t)(addr) != (uintptr_t)NULL) &&	\
-	  (uintptr_t)(addr) != (uintptr_t)NULL &&			\
+	  __builtin_constant_p(__c_a(addr) != __c_a(NULL)) &&		\
+	  __c_a(addr) != __c_a(NULL) &&			\
 	  __builtin_constant_p(*(const unsigned long *)(addr))) ?	\
 	 const##op(nr, addr) : op(nr, addr))
 

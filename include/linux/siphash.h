@@ -82,7 +82,7 @@ static inline u64 siphash(const void *data, size_t len,
 			  const siphash_key_t *key)
 {
 	if (IS_ENABLED(CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS) ||
-	    !IS_ALIGNED((unsigned long)data, SIPHASH_ALIGNMENT))
+	    !IS_ALIGNED(__c_pa(data), SIPHASH_ALIGNMENT))
 		return __siphash_unaligned(data, len, key);
 	return ___siphash_aligned(data, len, key);
 }

@@ -1120,7 +1120,7 @@ static int __send_signal_locked(int sig, struct kernel_siginfo *info,
 
 	if (q) {
 		list_add_tail(&q->list, &pending->list);
-		switch ((unsigned long) info) {
+		switch (__c_pa(info)) {
 		case (unsigned long) SEND_SIG_NOINFO:
 			clear_siginfo(&q->info);
 			q->info.si_signo = sig;
@@ -4289,7 +4289,7 @@ static inline void sigaltstack_unlock(void) { }
 #endif
 
 static int
-do_sigaltstack (const stack_t *ss, stack_t *oss, unsigned long sp,
+do_sigaltstack (const stack_t *ss, stack_t *oss, uintptr_t sp,
 		size_t min_ss_size)
 {
 	struct task_struct *t = current;
@@ -4371,7 +4371,7 @@ int restore_altstack(const stack_t __user *uss)
 	return 0;
 }
 
-int __save_altstack(stack_t __user *uss, unsigned long sp)
+int __save_altstack(stack_t __user *uss, uintptr_t sp)
 {
 	struct task_struct *t = current;
 	int err = __put_user_ptr((void __user *)t->sas_ss_sp, &uss->ss_sp) |

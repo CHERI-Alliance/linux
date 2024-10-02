@@ -36,7 +36,7 @@
  */
 
 /* Hash courtesy of the R5 hash in reiserfs modulo sign bits */
-#define init_name_hash(salt)		(unsigned long)(salt)
+#define init_name_hash(salt)		__c_a(salt)
 
 /* partial hash update function. Assume roughly 4 bits per character */
 static inline unsigned long

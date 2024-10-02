@@ -16,7 +16,7 @@
 #endif
 static inline bool is_ioremap_addr(const void *x)
 {
-	unsigned long addr = (unsigned long)kasan_reset_tag(x);
+	unsigned long addr = __c_pa(kasan_reset_tag(x));
 
 	return addr >= IOREMAP_START && addr < IOREMAP_END;
 }

@@ -2033,7 +2033,7 @@ static inline bool nla_need_padding_for_64bit(struct sk_buff *skb)
 	 * nlattr header for next attribute, will make nla_data()
 	 * 8-byte aligned.
 	 */
-	if (IS_ALIGNED((unsigned long)skb_tail_pointer(skb), 8))
+	if (IS_ALIGNED(__c_pa(skb_tail_pointer(skb)), 8))
 		return true;
 #endif
 	return false;

@@ -1426,7 +1426,7 @@ struct block_device_operations {
 	int (*ioctl)(struct block_device *bdev, blk_mode_t mode,
 			unsigned cmd, user_uintptr_t arg);
 	int (*compat_ioctl)(struct block_device *bdev, blk_mode_t mode,
-			unsigned cmd, unsigned long arg);
+			unsigned cmd, uintptr_t arg);
 	unsigned int (*check_events) (struct gendisk *disk,
 				      unsigned int clearing);
 	void (*unlock_native_capacity) (struct gendisk *);

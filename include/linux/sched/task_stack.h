@@ -27,7 +27,7 @@ static __always_inline void *task_stack_page(const struct task_struct *task)
 static __always_inline unsigned long *end_of_stack(const struct task_struct *task)
 {
 #ifdef CONFIG_STACK_GROWSUP
-	return (unsigned long *)((unsigned long)task->stack + THREAD_SIZE) - 1;
+	return (unsigned long *)((uintptr_t)task->stack + THREAD_SIZE) - 1;
 #else
 	return task->stack;
 #endif
@@ -55,7 +55,7 @@ static inline void setup_thread_stack(struct task_struct *p, struct task_struct 
 static inline unsigned long *end_of_stack(struct task_struct *p)
 {
 #ifdef CONFIG_STACK_GROWSUP
-	return (unsigned long *)((unsigned long)task_thread_info(p) + THREAD_SIZE) - 1;
+	return (unsigned long *)((uintptr_t)task_thread_info(p) + THREAD_SIZE) - 1;
 #else
 	return (unsigned long *)(task_thread_info(p) + 1);
 #endif
@@ -108,9 +108,9 @@ static inline unsigned long stack_not_used(struct task_struct *p)
 	} while (!*n);
 
 # ifdef CONFIG_STACK_GROWSUP
-	return (unsigned long)end_of_stack(p) - (unsigned long)n;
+	return __c_pa(end_of_stack(p)) - __c_pa(n);
 # else
-	return (unsigned long)n - (unsigned long)end_of_stack(p);
+	return __c_pa(n) - __c_pa(end_of_stack(p));
 # endif
 }
 #endif

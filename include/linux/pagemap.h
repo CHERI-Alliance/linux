@@ -389,7 +389,7 @@ static inline void mapping_set_large_folios(struct address_space *mapping)
 static inline bool mapping_large_folio_support(struct address_space *mapping)
 {
 	/* AS_LARGE_FOLIO_SUPPORT is only reasonable for pagecache folios */
-	VM_WARN_ONCE((unsigned long)mapping & PAGE_MAPPING_ANON,
+	VM_WARN_ONCE(__c_pa(mapping) & PAGE_MAPPING_ANON,
 			"Anonymous mapping always supports large folio");
 
 	return IS_ENABLED(CONFIG_TRANSPARENT_HUGEPAGE) &&

@@ -457,7 +457,7 @@ extern bool unhandled_signal(struct task_struct *tsk, int sig);
 void signals_init(void);
 
 int restore_altstack(const stack_t __user *);
-int __save_altstack(stack_t __user *, unsigned long);
+int __save_altstack(stack_t __user *, uintptr_t);
 
 #define unsafe_save_altstack(uss, sp, label) do { \
 	stack_t __user *__uss = uss; \

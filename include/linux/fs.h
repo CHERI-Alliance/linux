@@ -611,7 +611,7 @@ uncached_acl_sentinel(struct task_struct *task)
 static inline bool
 is_uncached_acl(struct posix_acl *acl)
 {
-	return (long)acl & 1;
+	return __c_pa(acl) & 1;
 }
 
 #define IOP_FASTPERM	0x0001

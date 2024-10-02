@@ -24,9 +24,12 @@ __iter_div_u64_rem(u64 dividend, u32 divisor, u64 *remainder)
 #if defined(CONFIG_ARCH_SUPPORTS_INT128) && defined(__SIZEOF_INT128__)
 
 #ifndef mul_u64_u32_add_u64_shr
-static __always_inline u64 mul_u64_u32_add_u64_shr(u64 a, u32 mul, u64 b, unsigned int shift)
+static __always_inline u64 mul_u64_u32_add_u64_shr(u64 _a, u32 _mul, u64 _b, unsigned int shift)
 {
-	return (u64)((((unsigned __int128)a * mul) + b) >> shift);
+	unsigned __int128 a = (unsigned __int128 __force)_a;
+	unsigned __int128 mul = (unsigned __int128 __force)_mul;
+	unsigned __int128 b = (unsigned __int128 __force)_b;
+	return (u64 __force)(((a * mul) + b) >> shift);
 }
 #endif /* mul_u64_u32_add_u64_shr */
 
