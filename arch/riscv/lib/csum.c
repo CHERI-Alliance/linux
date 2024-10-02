@@ -107,7 +107,7 @@ do_csum_common(const unsigned long *ptr, const unsigned long *end,
 	 * Perform alignment (and over-read) bytes on the tail if any bytes
 	 * leftover.
 	 */
-	shift = ((long)ptr - (long)end) * 8;
+	shift = ((long)__c_pa(ptr) - (long)__c_pa(end)) * 8;
 #ifdef __LITTLE_ENDIAN
 	data = (data << shift) >> shift;
 #else
@@ -138,7 +138,7 @@ do_csum_with_alignment(const unsigned char *buff, int len)
 	 * buff. This should always be in the same page and cache line.
 	 * Directly call KASAN with the alignment we will be using.
 	 */
-	offset = (unsigned long)buff & OFFSET_MASK;
+	offset = __c_pa(buff) & OFFSET_MASK;
 	kasan_check_read(buff, len);
 	ptr = (const unsigned long *)(buff - offset);
 
@@ -318,7 +318,7 @@ unsigned int do_csum(const unsigned char *buff, int len)
 	 * branches. The largest chunk of overlap was delegated into the
 	 * do_csum_common function.
 	 */
-	if (has_fast_unaligned_accesses() || (((unsigned long)buff & OFFSET_MASK) == 0))
+	if (has_fast_unaligned_accesses() || ((__c_pa(buff) & OFFSET_MASK) == 0))
 		return do_csum_no_alignment(buff, len);
 
 	return do_csum_with_alignment(buff, len);

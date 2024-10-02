@@ -15,18 +15,18 @@ extern char __init_text_begin[], __init_text_end[];
 extern char __alt_start[], __alt_end[];
 extern char __exittext_begin[], __exittext_end[];
 
-static inline bool is_va_kernel_text(uintptr_t va)
+static inline bool is_va_kernel_text(unsigned long va)
 {
-	uintptr_t start = (uintptr_t)_start;
-	uintptr_t end = (uintptr_t)__init_data_begin;
+	unsigned long start = __c_pa(_start);
+	unsigned long end = __c_pa(__init_data_begin);
 
 	return va >= start && va < end;
 }
 
-static inline bool is_va_kernel_lm_alias_text(uintptr_t va)
+static inline bool is_va_kernel_lm_alias_text(unsigned long va)
 {
-	uintptr_t start = (uintptr_t)lm_alias(_start);
-	uintptr_t end = (uintptr_t)lm_alias(__init_data_begin);
+	unsigned long start = __c_pa(lm_alias(_start));
+	unsigned long end = __c_pa(lm_alias(__init_data_begin));
 
 	return va >= start && va < end;
 }

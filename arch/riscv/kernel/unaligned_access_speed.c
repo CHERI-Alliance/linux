@@ -40,7 +40,7 @@ static int check_unaligned_access(void *param)
 		return 0;
 
 	/* Make an unaligned destination buffer. */
-	dst = (void *)((unsigned long)page_address(page) | 0x1);
+	dst = (void *)((uintptr_t)page_address(page) | 0x1);
 	/* Unalign src as well, but differently (off by 1 + 2 = 3). */
 	src = dst + (MISALIGNED_BUFFER_SIZE / 2);
 	src += 2;
