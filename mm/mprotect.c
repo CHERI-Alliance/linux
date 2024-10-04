@@ -691,7 +691,7 @@ static int do_mprotect_pkey(user_uintptr_t user_ptr, size_t len,
 				(prot & PROT_READ);
 	struct mmu_gather tlb;
 	struct vma_iterator vmi;
-	unsigned long start = untagged_addr(user_ptr);
+	unsigned long start = untagged_addr(__c_ua(user_ptr));
 
 	prot &= ~(PROT_GROWSDOWN|PROT_GROWSUP);
 	if (grows == (PROT_GROWSDOWN|PROT_GROWSUP)) /* can't be both */

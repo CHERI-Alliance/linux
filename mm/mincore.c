@@ -281,7 +281,7 @@ SYSCALL_DEFINE3(mincore, user_uintptr_t, user_ptr, size_t, len,
 	long retval;
 	unsigned long pages;
 	unsigned char *tmp;
-	unsigned long start = untagged_addr((ptraddr_t)user_ptr);
+	unsigned long start = untagged_addr(__c_ua(user_ptr));
 
 	/* Check the start address: needs to be page-aligned.. */
 	if (start & ~PAGE_MASK)

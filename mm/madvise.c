@@ -1412,7 +1412,7 @@ int do_madvise(struct mm_struct *mm, user_uintptr_t user_ptr, size_t len_in,
 	int write;
 	size_t len;
 	struct blk_plug plug;
-	unsigned long start = (ptraddr_t)user_ptr;
+	unsigned long start = __c_ua(user_ptr);
 
 	if (!madvise_behavior_valid(behavior))
 		return -EINVAL;
@@ -1548,7 +1548,7 @@ SYSCALL_DEFINE5(process_madvise, int, pidfd, const struct iovec __user *, vec,
 	total_len = iov_iter_count(&iter);
 
 	while (iov_iter_count(&iter)) {
-		ret = do_madvise(mm, user_ptr_addr(iter_iov_addr(&iter)),
+		ret = do_madvise(mm, (user_uintptr_t)iter_iov_addr(&iter),
 					iter_iov_len(&iter), behavior, true);
 		if (ret < 0)
 			break;

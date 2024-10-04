@@ -893,8 +893,8 @@ static user_uintptr_t mremap_to(user_uintptr_t user_ptr, unsigned long old_len,
 	user_uintptr_t ret = -EINVAL;
 	unsigned long map_flags = 0;
 	struct reserv_struct reserv_info, *reserv_ptr = NULL;
-	ptraddr_t addr = untagged_addr((ptraddr_t)user_ptr);
-	ptraddr_t new_addr = (ptraddr_t)new_user_ptr;
+	ptraddr_t addr = untagged_addr(__c_ua(user_ptr));
+	ptraddr_t new_addr = __c_ua(new_user_ptr);
 
 	if (offset_in_page(new_addr))
 		goto out;
@@ -945,13 +945,13 @@ static user_uintptr_t mremap_to(user_uintptr_t user_ptr, unsigned long old_len,
 		 * VMA is moved to dst address, and munmap dst first.
 		 * do_munmap will check if dst is sealed.
 		 */
-		ret = do_munmap(mm, new_addr, new_len, uf_unmap_early);
+		ret = __c_fakeu(do_munmap(mm, new_addr, new_len, uf_unmap_early));
 		if (ret)
 			goto out;
 	}
 
 	if (old_len > new_len) {
-		ret = do_munmap(mm, addr+new_len, old_len - new_len, uf_unmap);
+		ret = __c_fakeu(do_munmap(mm, addr+new_len, old_len - new_len, uf_unmap));
 		if (ret)
 			goto out;
 		old_len = new_len;
@@ -959,7 +959,7 @@ static user_uintptr_t mremap_to(user_uintptr_t user_ptr, unsigned long old_len,
 
 	vma = vma_to_resize(addr, old_len, new_len, flags);
 	if (IS_ERR(vma)) {
-		ret = PTR_ERR(vma);
+		ret = (user_uintptr_t)vma;
 		goto out;
 	}
 
@@ -976,25 +976,25 @@ static user_uintptr_t mremap_to(user_uintptr_t user_ptr, unsigned long old_len,
 	if (vma->vm_flags & VM_MAYSHARE)
 		map_flags |= MAP_SHARED;
 
-	ret = get_unmapped_area(vma->vm_file, new_addr, new_len, vma->vm_pgoff +
+	ret = __c_fakeu(get_unmapped_area(vma->vm_file, new_addr, new_len, vma->vm_pgoff +
 				((addr - vma->vm_start) >> PAGE_SHIFT),
-				map_flags);
+				map_flags));
 	if (IS_ERR_VALUE(ret))
 		goto out;
 
 	/* We got a new mapping */
 	if (!(flags & MREMAP_FIXED))
-		new_addr = ret;
+		new_addr = __c_ua(ret);
 
-	ret = move_vma(vma, addr, old_len, new_len, new_addr, locked, flags, uf,
-		       uf_unmap, reserv_ptr);
+	ret = __c_fakeu(move_vma(vma, addr, old_len, new_len, new_addr, locked, flags, uf,
+		       uf_unmap, reserv_ptr));
 
 	if (!IS_ERR_VALUE(ret) && reserv_is_supported(mm)) {
 		if ((flags & MREMAP_FIXED) &&
 		    user_ptr_is_valid((const void __user *)new_user_ptr))
 			ret = new_user_ptr;
 		else
-			ret = make_new_user_ptr_owning((ptraddr_t)ret, user_ptr);
+			ret = make_new_user_ptr_owning(__c_ua(ret), user_ptr);
 	}
 out:
 	return ret;
@@ -1045,7 +1045,7 @@ SYSCALL_DEFINE5(__retptr__(mremap), user_uintptr_t, user_ptr, unsigned long, old
 	bool locked = false;
 	struct vm_userfaultfd_ctx uf = NULL_VM_UFFD_CTX;
 	ptraddr_t addr = __c_ua(user_ptr);
-	ptraddr_t new_addr = (ptraddr_t)new_user_ptr;
+	ptraddr_t new_addr = __c_ua(new_user_ptr);
 	LIST_HEAD(uf_unmap_early);
 	LIST_HEAD(uf_unmap);
 
@@ -1063,10 +1063,10 @@ SYSCALL_DEFINE5(__retptr__(mremap), user_uintptr_t, user_ptr, unsigned long, old
 	addr = untagged_addr(addr);
 
 	if (flags & ~(MREMAP_FIXED | MREMAP_MAYMOVE | MREMAP_DONTUNMAP))
-		return __c_fakeu(ret);
+		return ret;
 
 	if (flags & MREMAP_FIXED && !(flags & MREMAP_MAYMOVE))
-		return __c_fakeu(ret);
+		return ret;
 
 	/*
 	 * MREMAP_DONTUNMAP is always a move and it does not allow resizing
@@ -1074,11 +1074,11 @@ SYSCALL_DEFINE5(__retptr__(mremap), user_uintptr_t, user_ptr, unsigned long, old
 	 */
 	if (flags & MREMAP_DONTUNMAP &&
 			(!(flags & MREMAP_MAYMOVE) || old_len != new_len))
-		return __c_fakeu(ret);
+		return ret;
 
 
 	if (offset_in_page(addr))
-		return __c_fakeu(ret);
+		return ret;
 
 	old_len = PAGE_ALIGN(old_len);
 	new_len = PAGE_ALIGN(new_len);
@@ -1089,7 +1089,7 @@ SYSCALL_DEFINE5(__retptr__(mremap), user_uintptr_t, user_ptr, unsigned long, old
 	 * a zero new-len is nonsensical.
 	 */
 	if (!new_len)
-		return __c_fakeu(ret);
+		return ret;
 
 	if (mmap_write_lock_killable(current->mm))
 		return __c_fakeu(-EINTR);
@@ -1105,10 +1105,10 @@ SYSCALL_DEFINE5(__retptr__(mremap), user_uintptr_t, user_ptr, unsigned long, old
 		ret = -ERESERVATION;
 		goto out;
 	}
-	ret = check_pcuabi_map_ptr_arg(new_user_ptr, new_len, flags & MREMAP_FIXED, true);
+	ret = __c_fakeu(check_pcuabi_map_ptr_arg(new_user_ptr, new_len, flags & MREMAP_FIXED, true));
 	if (ret)
 		goto out;
-	ret = check_mremap_user_ptr_perms(user_ptr, new_user_ptr, flags);
+	ret = __c_fakeu(check_mremap_user_ptr_perms(user_ptr, new_user_ptr, flags));
 	if (ret)
 		goto out;
 
@@ -1167,8 +1167,8 @@ SYSCALL_DEFINE5(__retptr__(mremap), user_uintptr_t, user_ptr, unsigned long, old
 			goto out;
 		}
 
-		ret = do_vmi_munmap(&vmi, mm, addr + new_len, old_len - new_len,
-				    &uf_unmap, true);
+		ret = __c_fakeu(do_vmi_munmap(&vmi, mm, addr + new_len, old_len - new_len,
+				    &uf_unmap, true));
 		if (ret)
 			goto out;
 
@@ -1181,7 +1181,7 @@ SYSCALL_DEFINE5(__retptr__(mremap), user_uintptr_t, user_ptr, unsigned long, old
 	 */
 	vma = vma_to_resize(addr, old_len, new_len, flags);
 	if (IS_ERR(vma)) {
-		ret = PTR_ERR(vma);
+		ret = (user_uintptr_t)vma;
 		goto out;
 	}
 
@@ -1246,15 +1246,15 @@ SYSCALL_DEFINE5(__retptr__(mremap), user_uintptr_t, user_ptr, unsigned long, old
 					((addr - vma->vm_start) >> PAGE_SHIFT),
 					map_flags);
 		if (IS_ERR_VALUE(new_addr)) {
-			ret = new_addr;
+			ret = __c_fakeu(new_addr);
 			goto out;
 		}
 
-		ret = move_vma(vma, addr, old_len, new_len, new_addr,
-			       &locked, flags, &uf, &uf_unmap, NULL);
+		ret = __c_fakeu(move_vma(vma, addr, old_len, new_len, new_addr,
+			       &locked, flags, &uf, &uf_unmap, NULL));
 
 		if (!IS_ERR_VALUE(ret) && reserv_is_supported(mm))
-			ret = make_new_user_ptr_owning((ptraddr_t)ret, user_ptr);
+			ret = make_new_user_ptr_owning(__c_ua(ret), user_ptr);
 	}
 out:
 	if (offset_in_page(ret))
@@ -1264,7 +1264,7 @@ out:
 		mm_populate(new_addr + old_len, new_len - old_len);
 out_unlocked:
 	userfaultfd_unmap_complete(mm, &uf_unmap_early);
-	mremap_userfaultfd_complete(&uf, addr, ret, old_len);
+	mremap_userfaultfd_complete(&uf, addr, __c_ua(ret), old_len);
 	userfaultfd_unmap_complete(mm, &uf_unmap);
 	return ret;
 }
