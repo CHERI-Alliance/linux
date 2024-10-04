@@ -445,26 +445,26 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	 */
 	ARCH_DLINFO;
 #endif
-	NEW_AUX_ENT(AT_HWCAP, ELF_HWCAP);
-	NEW_AUX_ENT(AT_PAGESZ, ELF_EXEC_PAGESIZE);
-	NEW_AUX_ENT(AT_CLKTCK, CLOCKS_PER_SEC);
+	NEW_AUX_ENT(AT_HWCAP, __c_fakeu(ELF_HWCAP));
+	NEW_AUX_ENT(AT_PAGESZ, __c_fakeu(ELF_EXEC_PAGESIZE));
+	NEW_AUX_ENT(AT_CLKTCK, __c_fakeu(CLOCKS_PER_SEC));
 	NEW_AUX_ENT(AT_PHDR, make_ro_at_from_addr(phdr_addr,
 				     exec->e_phnum * sizeof(struct elf_phdr)));
-	NEW_AUX_ENT(AT_PHENT, sizeof(struct elf_phdr));
-	NEW_AUX_ENT(AT_PHNUM, exec->e_phnum);
-	NEW_AUX_ENT(AT_BASE, interp_load_addr);
+	NEW_AUX_ENT(AT_PHENT, __c_fakeu(sizeof(struct elf_phdr)));
+	NEW_AUX_ENT(AT_PHNUM, __c_fakeu(exec->e_phnum));
+	NEW_AUX_ENT(AT_BASE, __c_fakeu(interp_load_addr));
 	if (bprm->interp_flags & BINPRM_FLAGS_PRESERVE_ARGV0)
 		flags |= AT_FLAGS_PRESERVE_ARGV0;
-	NEW_AUX_ENT(AT_FLAGS, flags);
+	NEW_AUX_ENT(AT_FLAGS, __c_fakeu(flags));
 	NEW_AUX_ENT(AT_ENTRY, make_at_entry(exec_load_info));
-	NEW_AUX_ENT(AT_UID, from_kuid_munged(cred->user_ns, cred->uid));
-	NEW_AUX_ENT(AT_EUID, from_kuid_munged(cred->user_ns, cred->euid));
-	NEW_AUX_ENT(AT_GID, from_kgid_munged(cred->user_ns, cred->gid));
-	NEW_AUX_ENT(AT_EGID, from_kgid_munged(cred->user_ns, cred->egid));
-	NEW_AUX_ENT(AT_SECURE, bprm->secureexec);
+	NEW_AUX_ENT(AT_UID, __c_fakeu(from_kuid_munged(cred->user_ns, cred->uid)));
+	NEW_AUX_ENT(AT_EUID, __c_fakeu(from_kuid_munged(cred->user_ns, cred->euid)));
+	NEW_AUX_ENT(AT_GID, __c_fakeu(from_kgid_munged(cred->user_ns, cred->gid)));
+	NEW_AUX_ENT(AT_EGID, __c_fakeu(from_kgid_munged(cred->user_ns, cred->egid)));
+	NEW_AUX_ENT(AT_SECURE, __c_fakeu(bprm->secureexec));
 	NEW_AUX_ENT(AT_RANDOM, make_ro_at_from_uptr(u_rand_bytes));
 #ifdef ELF_HWCAP2
-	NEW_AUX_ENT(AT_HWCAP2, ELF_HWCAP2);
+	NEW_AUX_ENT(AT_HWCAP2, __c_fakeu(ELF_HWCAP2));
 #endif
 	NEW_AUX_ENT(AT_EXECFN, make_ro_at_from_addr(bprm->exec,
 				strnlen(bprm->filename, MAX_ARG_STRLEN) + 1));
@@ -475,11 +475,11 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 		NEW_AUX_ENT(AT_BASE_PLATFORM, make_ro_at_from_uptr(u_base_platform));
 	}
 	if (bprm->have_execfd) {
-		NEW_AUX_ENT(AT_EXECFD, bprm->execfd);
+		NEW_AUX_ENT(AT_EXECFD, __c_fakeu(bprm->execfd));
 	}
 #ifdef CONFIG_RSEQ
-	NEW_AUX_ENT(AT_RSEQ_FEATURE_SIZE, offsetof(struct rseq, end));
-	NEW_AUX_ENT(AT_RSEQ_ALIGN, __alignof__(struct rseq));
+	NEW_AUX_ENT(AT_RSEQ_FEATURE_SIZE, __c_fakeu(offsetof(struct rseq, end)));
+	NEW_AUX_ENT(AT_RSEQ_ALIGN, __c_fakeu(__alignof__(struct rseq)));
 #endif
 #if defined(CONFIG_CHERI_PURECAP_UABI) && (ELF_COMPAT == 0)
 	NEW_AUX_ENT(AT_CHERI_EXEC_RW_CAP, make_elf_rw_cap(exec_load_info));
@@ -504,10 +504,10 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	 * we save pointers to their positions in the mm struct to update them
 	 * after their positions on the stack are determined.
 	 */
-	NEW_AUX_ENT(AT_ARGC, argc);
+	NEW_AUX_ENT(AT_ARGC, __c_fakeu(argc));
 	NEW_AUX_ENT(AT_ARGV, 0);
 	mm_at_argv = elf_info - 1;
-	NEW_AUX_ENT(AT_ENVC, envc);
+	NEW_AUX_ENT(AT_ENVC, __c_fakeu(envc));
 	NEW_AUX_ENT(AT_ENVP, 0);
 	mm_at_envp = elf_info - 1;
 #endif /* CONFIG_CHERI_PURECAP_UABI && ELF_COMPAT == 0 */
@@ -553,7 +553,7 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	/* Now, let's put argc (and argv, envp if appropriate) on the stack */
 	stack_item = sp;
 
-	if (elf_stack_put_user(argc, stack_item++))
+	if (elf_stack_put_user(__c_fakeu(argc), stack_item++))
 		return -EFAULT;
 
 	/* Populate list of argv pointers back to argv strings. */
@@ -691,7 +691,7 @@ static unsigned long elf_load(struct file *filep, unsigned long addr,
 		} else if (zero_end > zero_start) {
 			unsigned long addr;
 
-			addr = vm_mmap(0, zero_start, zero_end - zero_start, prot,
+			addr = vm_mmap(NULL, zero_start, zero_end - zero_start, prot,
 				       MAP_FIXED | MAP_PRIVATE | MAP_ANONYMOUS, 0);
 			if (BAD_ADDR(addr))
 				map_addr = addr;

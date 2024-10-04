@@ -89,7 +89,7 @@ epoll_put_uevent(__poll_t revents, __kernel_uintptr_t data,
 				(struct compat_epoll_event __user *)uevent;
 
 		if (__put_user(revents, &compat_uevent->events) ||
-		    __put_user((__u64)data, &compat_uevent->data))
+		    __put_user(__c_ua(data), &compat_uevent->data))
 			return NULL;
 
 		return (struct epoll_event __user *)(compat_uevent+1);

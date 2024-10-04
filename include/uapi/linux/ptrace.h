@@ -83,12 +83,12 @@ struct ptrace_syscall_info {
 	__u8 op;	/* PTRACE_SYSCALL_INFO_* */
 	__u8 pad[3];
 	__u32 arch;
-	__u64 instruction_pointer;
-	__u64 stack_pointer;
+	__kernel_uintptr_t instruction_pointer;
+	__kernel_uintptr_t stack_pointer;
 	union {
 		struct {
 			__u64 nr;
-			__u64 args[6];
+			__kernel_uintptr_t args[6];
 		} entry;
 		struct {
 			__s64 rval;

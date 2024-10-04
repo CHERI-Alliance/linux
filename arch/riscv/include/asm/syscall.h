@@ -36,18 +36,18 @@ static inline void syscall_rollback(struct task_struct *task,
         regs->a0 = regs->orig_a0;
 }
 
-static inline intptr_t syscall_get_error(struct task_struct *task,
+static inline long syscall_get_error(struct task_struct *task,
 				     struct pt_regs *regs)
 {
 	uintptr_t error = regs->a0;
 
-	return IS_ERR_VALUE(error) ? error : __c_fakeu(0);
+	return IS_ERR_VALUE(error) ? (long)__c_ua(error) : 0;
 }
 
-static inline intptr_t syscall_get_return_value(struct task_struct *task,
+static inline long syscall_get_return_value(struct task_struct *task,
 					    struct pt_regs *regs)
 {
-	return (intptr_t)regs->a0;
+	return (long)__c_ua(regs->a0);
 }
 
 static inline void syscall_set_return_value(struct task_struct *task,

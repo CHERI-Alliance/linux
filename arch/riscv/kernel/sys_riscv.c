@@ -8,7 +8,7 @@
 #include <linux/syscalls.h>
 #include <asm/cacheflush.h>
 
-static uintptr_t riscv_sys_mmap(unsigned long addr, unsigned long len,
+static user_uintptr_t riscv_sys_mmap(user_uintptr_t addr, unsigned long len,
 			   unsigned long prot, unsigned long flags,
 			   unsigned long fd, off_t offset,
 			   unsigned long page_shift_offset)
@@ -21,7 +21,7 @@ static uintptr_t riscv_sys_mmap(unsigned long addr, unsigned long len,
 }
 
 #ifdef CONFIG_64BIT
-SYSCALL_DEFINE6(__retptr__(mmap), unsigned long, addr, unsigned long, len,
+SYSCALL_DEFINE6(__retptr__(mmap), user_uintptr_t, addr, unsigned long, len,
 	unsigned long, prot, unsigned long, flags,
 	unsigned long, fd, unsigned long, offset)
 {
@@ -30,7 +30,7 @@ SYSCALL_DEFINE6(__retptr__(mmap), unsigned long, addr, unsigned long, len,
 #endif
 
 #if defined(CONFIG_32BIT) || defined(CONFIG_COMPAT)
-SYSCALL_DEFINE6(__retptr__(mmap2), unsigned long, addr, unsigned long, len,
+SYSCALL_DEFINE6(__retptr__(mmap2), user_uintptr_t, addr, unsigned long, len,
 	unsigned long, prot, unsigned long, flags,
 	unsigned long, fd, unsigned long, offset)
 {

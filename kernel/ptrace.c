@@ -1099,11 +1099,11 @@ int ptrace_request(struct task_struct *child, long request,
 		break;
 
 	case PTRACE_GETSIGMASK:
-		ret = ptrace_getsigmask(child, addr, datavp);
+		ret = ptrace_getsigmask(child, __c_ua(addr), datavp);
 		break;
 
 	case PTRACE_SETSIGMASK:
-		ret = ptrace_setsigmask(child, addr, datavp);
+		ret = ptrace_setsigmask(child, __c_ua(addr), datavp);
 		break;
 
 	case PTRACE_INTERRUPT:
