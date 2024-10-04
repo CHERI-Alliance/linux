@@ -82,7 +82,7 @@ static unsigned long pipe_user_pages_soft = PIPE_DEF_BUFFERS * INR_OPEN_CUR;
 static int pipe_lock_cmp_fn(const struct lockdep_map *a,
 			    const struct lockdep_map *b)
 {
-	return cmp_int((unsigned long) a, (unsigned long) b);
+	return cmp_int(__c_pa(a), __c_pa(b));
 }
 #endif
 

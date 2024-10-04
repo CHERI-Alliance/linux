@@ -1675,12 +1675,12 @@ long do_shmat(int shmid, char __user *shmaddr, int shmflg,
 		if (!user_ptr_is_valid((const void __user *)user_ptr))
 			user_ptr = reserv_make_user_ptr_owning(addr, true);
 	} else {
-		user_ptr = addr;
+		user_ptr = __c_fakeu(addr);
 	}
 	*ruser_ptr = user_ptr;
 	err = 0;
 	if (IS_ERR_VALUE(user_ptr))
-		err = (long)user_ptr;
+		err = (long)__c_ua(user_ptr);
 invalid:
 	mmap_write_unlock(current->mm);
 	if (populate)
@@ -1714,7 +1714,7 @@ SYSCALL_DEFINE3(__retptr__(shmat), int, shmid, char __user *, shmaddr, int, shmf
 
 	err = do_shmat(shmid, shmaddr, shmflg, &ret, SHMLBA);
 	if (err)
-		return err;
+		return __c_fakeu(err);
 	force_successful_syscall_return();
 	return ret;
 }

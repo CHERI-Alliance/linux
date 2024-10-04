@@ -2,6 +2,14 @@
 #ifndef __ASM_CHERI_H
 #define __ASM_CHERI_H
 
+#ifdef __CHECKER__
+#define CHERI_BW_PERM_CAP		1
+#define CHERI_BW_PERM_WRITE		2
+#define CHERI_BW_PERM_READ		4
+#define CHERI_BW_PERM_EXECUTE		8
+#define CHERI_BW_PERM_SYSTEM_REGS	16
+#endif
+
 #define CHERI_PERMS_READ \
 	(CHERI_BW_PERM_READ | CHERI_BW_PERM_CAP)
 

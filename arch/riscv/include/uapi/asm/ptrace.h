@@ -16,7 +16,7 @@
 #define PTRACE_GETFDPIC_INTERP	1
 
 #ifdef __CHERI_PURE_CAPABILITY__
-typedef user_uintptr_t register_t;
+typedef __kernel_uintptr_t register_t;
 #else
 typedef unsigned long register_t;
 #endif

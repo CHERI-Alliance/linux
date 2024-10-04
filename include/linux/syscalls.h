@@ -150,10 +150,14 @@ struct mnt_id_req;
  * This is a special case though, as there will be no extra code generated
  * for those statements, which makes it harmless to use as such.
  */
+#ifdef __CHECKER__
+#define __SC_TEST(t, a) ((void)0)
+#else
 #define __SC_TEST(t, a) 					\
 	(void)(__builtin_cheri_address_get			\
 	       (__builtin_choose_expr(sizeof(t) > sizeof(long),	\
 				      (t)(a), 0)))
+#endif
 #else /* !CONFIG_CHERI_PURECAP_UABI */
 #define __SC_TEST(t, a) (void)BUILD_BUG_ON_ZERO(!__TYPE_IS_LL(t) && sizeof(t) > sizeof(long))
 #endif /* !CONFIG_CHERI_PURECAP_UABI */

@@ -5,7 +5,11 @@
 
 #include <asm/bakewell.h>
 
+#ifndef __CHECKER__
 #include "cheri_init_globals_bw.h"
+#else
+#define cheri_init_globals_3(a,b,c) do { } while (0)
+#endif
 
 /*
  * Set to false if the initial root capability does not meet

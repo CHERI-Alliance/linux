@@ -2938,10 +2938,10 @@ SYSCALL_DEFINE5(clone, unsigned long, clone_flags, user_uintptr_t, newsp,
 		.parent_tid	= parent_tidptr,
 		.exit_signal	= (lower_32_bits(clone_flags) & CSIGNAL),
 		.stack		= (compat_mode ?
-				   (user_uintptr_t)(compat_ulong_t)newsp :
+				   (user_uintptr_t __force)(compat_ulong_t __force)newsp :
 				   newsp),
 		.tls		= (compat_mode ?
-				   (user_uintptr_t)(compat_ulong_t)tls :
+				   (user_uintptr_t __force)(compat_ulong_t __force)tls :
 				   tls),
 	};
 

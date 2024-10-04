@@ -11,7 +11,11 @@
 #define __PTR_ALIGN(p, a)	((typeof(p))ALIGN((unsigned long)(p), (a)))
 #define __PTR_ALIGN_DOWN(p, a)	((typeof(p))ALIGN_DOWN((unsigned long)(p), (a)))
 
+
 #ifdef CONFIG_CHERI_PURECAP_UABI
+#ifdef __CHECKER__
+#define __builtin_cheri_address_set(__p, __a) ((__typeof__(__p))((uintptr_t __force)__a))
+#endif
 /* TODO [PCuABI] - use __builtin_align_{down,up} once GCC supports them */
 #define __CAP_ALIGN(p, a)						\
 ({									\

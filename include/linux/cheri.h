@@ -15,6 +15,26 @@
 #else /* __CHECKER */
 
 typedef unsigned int cheri_perms_t;
+#define cheri_address_set(__c, __a) ((__typeof__(__c))(uintptr_t __force)__a)
+#define cheri_bounds_set(__c, __l) (__c)
+#define cheri_bounds_set_exact(__c, __l) (__c)
+#define cheri_sentry_create(__c) (__c)
+
+#define cheri_base_get(__c) ((ptraddr_t)0)
+#define cheri_address_get(__c) ((ptraddr_t __force)__c)
+#define cheri_length_get(__c) (~(ptraddr_t)0)
+#define cheri_high_get(__c) ((ptraddr_t)0)
+#define cheri_tag_get(__c) (1)
+#define cheri_representable_alignment_mask(__l) (~(ptraddr_t)0)
+#define cheri_representable_length(__l) (__l)
+#define __builtin_cheri_equal_exact(p1, p2) (((uintptr_t __force)p1) == ((uintptr_t __force)p2))
+#define cheri_is_sealed(__c) (0)
+#define cheri_is_unsealed(__c) (1)
+#define cheri_is_sentry(__c) (0)
+#define cheri_is_valid(__c) (1)
+#define cheri_is_invalid(__c) (0)
+#define cheri_perms_and(__c, __m) (__c)
+#define cheri_perms_get(__c) ~0U
 
 #endif /* __CHECKER */
 
