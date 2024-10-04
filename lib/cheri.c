@@ -50,7 +50,7 @@ cheri_build_user_cap_inexact_bounds(ptraddr_t addr, size_t len,
 bool cheri_check_cap(const void * __capability cap, size_t len,
 		     cheri_perms_t perms)
 {
-	ptraddr_t addr = untagged_addr(cheri_address_get(cap));
+	ptraddr_t addr = untagged_addr(__c_pa(cap));
 	/*
 	 * The base address (as returned by cheri_base_get()) is never tagged,
 	 * that is its top byte is always canonical, so no need for

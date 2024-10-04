@@ -90,8 +90,8 @@ bool check_user_ptr_owning(user_uintptr_t user_ptr, size_t len)
 {
 	ptraddr_t addr;
 
-	addr = round_down((ptraddr_t)user_ptr, PAGE_SIZE);
-	len = round_up(len, PAGE_SIZE);
+	addr = round_down(__c_ua(user_ptr), PAGE_SIZE);
+	len = round_up(__c_ua(user_ptr) + len - addr, PAGE_SIZE);
 	user_ptr = cheri_address_set(user_ptr, addr);
 
 	return cheri_check_cap((void * __capability)user_ptr, len,

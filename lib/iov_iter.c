@@ -761,7 +761,7 @@ static bool iov_iter_aligned_kvec(const struct iov_iter *i, unsigned addr_mask,
 			len = size;
 		if (len & len_mask)
 			return false;
-		if (((ptraddr_t)i->kvec[k].iov_base + skip) & addr_mask)
+		if (__c_pa(i->kvec[k].iov_base + skip) & addr_mask)
 			return false;
 
 		size -= len;
@@ -869,7 +869,7 @@ static unsigned long iov_iter_alignment_kvec(const struct iov_iter *i)
 	for (k = 0; k < i->nr_segs; k++, skip = 0) {
 		size_t len = i->kvec[k].iov_len - skip;
 		if (len) {
-			res |= (ptraddr_t)i->kvec[k].iov_base + skip;
+			res |= __c_pa(i->kvec[k].iov_base) + skip;
 			if (len > size)
 				len = size;
 			res |= len;

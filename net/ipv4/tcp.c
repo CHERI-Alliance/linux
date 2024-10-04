@@ -1880,15 +1880,15 @@ static int set_compat64_tcp_zerocopy_receive(sockptr_t dst,
 					     size_t size)
 {
 	struct compat_tcp_zerocopy_receive compat_zc = {
-		.address = (__u64)zc->address,
+		.address = __c_ua(zc->address),
 		.length = zc->length,
 		.recv_skip_hint = zc->recv_skip_hint,
 		.inq = zc->inq,
 		.err = zc->err,
-		.copybuf_address = (__u64)zc->copybuf_address,
+		.copybuf_address = __c_ua(zc->copybuf_address),
 		.copybuf_len = zc->copybuf_len,
 		.flags = zc->flags,
-		.msg_control = (__u64)zc->msg_control,
+		.msg_control = __c_ua(zc->msg_control),
 		.msg_controllen = zc->msg_controllen,
 		.msg_flags = zc->msg_flags,
 		.reserved = zc->reserved,
@@ -2173,7 +2173,7 @@ static int tcp_zerocopy_receive(struct sock *sk,
 				struct scm_timestamping_internal *tss)
 {
 	u32 length = 0, offset, vma_len, avail_len, copylen = 0;
-	unsigned long address = (unsigned long)zc->address;
+	unsigned long address = __c_ua(zc->address);
 	struct page *pages[TCP_ZEROCOPY_PAGE_BATCH_SIZE];
 	s32 copybuf_len = zc->copybuf_len;
 	struct tcp_sock *tp = tcp_sk(sk);

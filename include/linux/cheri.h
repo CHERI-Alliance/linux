@@ -21,7 +21,7 @@ typedef unsigned int cheri_perms_t;
 #define cheri_sentry_create(__c) (__c)
 
 #define cheri_base_get(__c) ((ptraddr_t)0)
-#define cheri_address_get(__c) ((ptraddr_t __force)__c)
+#define cheri_address_get(__c) ((ptraddr_t __force)(uintptr_t __force)__c)
 #define cheri_length_get(__c) (~(ptraddr_t)0)
 #define cheri_high_get(__c) ((ptraddr_t)0)
 #define cheri_tag_get(__c) (1)
