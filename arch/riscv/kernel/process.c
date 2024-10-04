@@ -154,9 +154,9 @@ int start_thread(struct pt_regs *regs, unsigned long pc,
 	regs->epc = pc;
 	regs->sp = bprm->p;
 #else
-	regs->epc = (register_t)bprm->pcuabi.pcc;
+	/* FIXCHERI: compat support missing */
+	regs->epc = (register_t)bakewell_set_capmode(bprm->pcuabi.pcc);
 	regs->sp = (register_t)bprm->pcuabi.csp;
-	__asm__ __volatile__("scmode %0, %1, %2" : "=C"(regs->epc) : "C"(regs->epc), "r" (1));
 	regs->a0  = __c_fakeu(bprm->argc);
 	regs->a1 = (register_t)bprm->pcuabi.argv;
 	regs->a2 = (register_t)bprm->pcuabi.envp;

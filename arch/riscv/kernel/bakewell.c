@@ -28,6 +28,14 @@ void __init bakewell_init(void)
 	__asm__ __volatile__("csrs senvcfg, %0\n" : : "r" (1 << 28));
 }
 
+/* Check boot time detected mbit value. */
+static void __init bakewell_check_mbit(void)
+{
+	pr_info("CHERI: M-bit mask=0x%lx gchi=%d scmode=%d hybrid=%s\n",
+		cheri_mbit_mask, !!cheri_mbit_value, scmode_capmode_value,
+		cheri_hybrid_support ? "yes" : "no");
+}
+
 /* Check validity of the root capability. */
 static void __init bakewell_check_root_cap(uintcap_t root_cap)
 {
@@ -73,6 +81,7 @@ void __init bakewell_caps_init(uintcap_t root_cap)
 	cheri_perms_t perms;
 
 	bakewell_check_root_cap(root_cap);
+	bakewell_check_mbit();
 
 	/* Sanitize root capability. */
 	root_cap = cheri_address_set(root_cap, 0);
@@ -102,3 +111,27 @@ void __init init_cap_relocs(void * __capability rw, void * __capability rx)
 {
 	cheri_init_globals_3(rw, rx, rx);
 }
+
+bool
+__bakewell_is_capmode(void * __capability cap)
+{
+	return (cheri_high_get(cap) & cheri_mbit_mask) == cheri_mbit_value;
+}
+
+void * __capability bakewell_set_capmode(void * __capability cap)
+{
+	__asm__ volatile ("scmode %0, %0, %1"
+			  : "=C" (cap) : "r" (scmode_capmode_value), "0" (cap));
+
+	return cap;
+}
+
+void * __capability bakewell_clear_capmode(void * __capability cap)
+{
+	BUG_ON(!cheri_hybrid_support);
+	__asm__ volatile ("scmode %0, %0, %1"
+			  : "=C" (cap) : "r" (!scmode_capmode_value), "0" (cap));
+
+	return cap;
+}
+

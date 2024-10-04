@@ -445,7 +445,7 @@ SYM_DATA_START_LOCAL(excp_vect_table)
 #endif
 SYM_DATA_END_LABEL(excp_vect_table, SYM_L_LOCAL, excp_vect_table_end)
 
-#ifdef CONFIG_CHERI_KERNEL
+#ifdef CONFIG_CHERI_PURECAP_UABI
 	.align CLGREG
 SYM_DATA_START(kernel_code_cap)
 	RISCV_PTR 0
@@ -453,6 +453,18 @@ SYM_DATA_END(kernel_code_cap)
 SYM_DATA_START(kernel_data_cap)
 	RISCV_PTR 0
 SYM_DATA_END(kernel_data_cap)
+SYM_DATA_START(cheri_mbit_mask)
+	.dword 0
+SYM_DATA_END(cheri_mbit_mask)
+SYM_DATA_START(cheri_mbit_value)
+	.dword 0
+SYM_DATA_END(cheri_mbit_value)
+SYM_DATA_START(scmode_capmode_value)
+	.byte 0
+SYM_DATA_END(scmode_capmode_value)
+SYM_DATA_START(cheri_hybrid_support)
+	.byte 0
+SYM_DATA_END(cheri_hybrid_support)
 #endif
 
 #ifndef CONFIG_CHERI_KERNEL

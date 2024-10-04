@@ -9,6 +9,11 @@ extern void __init init_cap_relocs(void * __capability rw,
 				   void * __capability rx);
 extern void __init bakewell_caps_init(uintcap_t rootcap);
 
+extern unsigned long cheri_mbit_mask;
+extern unsigned long cheri_mbit_value;
+extern unsigned char cheri_hybrid_support;
+extern unsigned char scmode_capmode_value;
+
 #else
 
 static inline void bakewell_init(void)

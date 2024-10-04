@@ -226,12 +226,126 @@ secondary_start_sbi:
 	wfi
 	j .Lsecondary_park
 
+#ifdef CONFIG_CHERI_PURECAP_UABI
+/*
+ * Check if the capability in ca3(!) looks like an infinite capability.
+ * Return if this is not the case. Otherwise use the infinite capability
+ * to jump to the address in t0.
+ * Registers:
+ * - t0: The target address if successful. Not modified on failure.
+ * - t1: Scratch
+ * - ca3: The capability to test.
+ */
+.align 2
+.Ltry_install_infcap:
+	/* Need a valid tag. */
+	gctag t1, ca3
+	beqz t1, 1f
+
+	/* Base must be zero */
+	gcbase t1, ca3
+	bnez t1, 1f
+
+	/* Length must be infinite. */
+	gclen t1, ca3
+	addi t1, t1, 1
+	bnez t1, 1f
+
+	/* Ok, use it. */
+	scaddr ca3, ca3, t0
+	jr ca3
+1:	ret
+#endif
+
 SYM_CODE_END(_start)
 
 SYM_CODE_START(_start_kernel)
 	/* Mask all interrupts */
 	csrw CSR_IE, zero
 	csrw CSR_IP, zero
+
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	/* Switch to capability mode if not already there. */
+	auipc ct0, 0
+	gctag t1, ct0
+	bnez t1, .Linfinity_cap_detect
+	modesw
+
+.Linfinity_cap_detect:
+	/*
+	 * Search for the infinite capability and install it in PCC.
+	 * We first try ca3 where it is supposed to be, then we try ddc.
+	 * If both fail assume pcc contains something suitable.
+	 */
+	llc ct0, .Lmbit_detect
+	call .Ltry_install_infcap
+	csrr ca3, ddc
+	call .Ltry_install_infcap
+
+	/*
+	 * Determine orientation of the M-bit in meta data and scmode.
+	 * The M-bit mask is only correct for 64-bit.
+	 */
+.Lmbit_detect:
+	/*
+	 * Paranoia:
+	 * Switch to capability mode again in case the infinite cap
+	 * did not have capability mode enabled.
+	 */
+	auipc ct1, 0
+	gctag t0, ct1
+	bnez t0, 1f
+	modesw
+
+	/*
+	 * If we are not on a hybrid CPU the scmode will trap and the
+	 * default values of zero are ok.
+	 */
+1:	llc ct0, .Lmbit_done
+	csrw stvecc, ct0
+
+	/*
+	 * We execute in capability mode, thus ct1 (derived from ppc)
+	 * has capability mode enabled. Create a capability with scmode(1)
+	 * from ct1.
+	 */
+	auipc ct1, 0
+	li t3, 1
+	scmode ct2, ct1, t3
+
+	/* If we reach this point we have hybrid support. */
+	llc ct0, cheri_hybrid_support
+	sb t3, (ct0)
+
+	/* If ct1 and ct2 are equal scmode(1) enables capability mode. */
+	llc ct0, scmode_capmode_value
+	sceq t3, ct1, ct2
+	sb t3, (ct0)
+
+	/*
+	 * Create a capability from ct1 with scmode(0) in ct3.
+	 * xor-ing the meta data of ct1 and ct3 gives the mask of
+	 * the M-bit.
+	 */
+	llc ct0, cheri_mbit_mask
+	scmode ct3, ct1, x0
+	gchi t2, ct2
+	gchi t3, ct3
+	xor t2, t2, t3
+	sd t2, (ct0)
+
+	/*
+	 * Given the M-bit mask determine the M-bit value for capability
+	 * mode from the meta data of ct1 that is known to have
+	 * capability mode enbled.
+	 */
+	llc ct0, cheri_mbit_value
+	gchi t1, ct1
+	and t1, t1, t2
+	sd t1, (ct0)
+.Lmbit_done:
+
+#endif
 
 #ifdef CONFIG_RISCV_M_MODE
 	/* flush the instruction cache */
@@ -261,13 +375,6 @@ SYM_CODE_START(_start_kernel)
 	 */
 	csrr a0, CSR_MHARTID
 #endif /* CONFIG_RISCV_M_MODE */
-
-	/* Switch to purecap mode if it's not in purecap mode */
-	auipc ct0, 0
-	gctag t1, ct0
-	bnez t1, .Lpurecap_done
-	modesw
-.Lpurecap_done:
 
 	/* Load the global pointer */
 	load_global_pointer

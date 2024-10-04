@@ -2634,8 +2634,8 @@ char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
 		update_buf_single(buf, end, ' ');
 		update_buf_single(buf, end, '[');
 		update_buf_single(buf, end, cheri_tag_get(cap) ? 'V' : '!');
-#ifdef cheri_getmode
-		update_buf_single(buf, end, cheri_getmode(cap) ? 'M' : 'm');
+#ifdef cheri_is_capmode
+		update_buf_single(buf, end, cheri_is_capmode(cap) ? 'C' : '.');
 #endif
 		update_buf_single(buf, end, cheri_is_sealed(cap) ? 'S'  : '.');
 		update_buf_single(buf, end, ' ');

@@ -40,8 +40,12 @@
 
 #define CHERI_PERMS_MIN_CODE (CHERI_BW_PERM_READ | CHERI_BW_PERM_EXECUTE)
 
-#ifdef CONFIG_64BIT
-#define cheri_getmode(x) (!!(cheri_high_get(x) & (1UL << 52)))
+#ifdef CONFIG_CHERI_PURECAP_UABI
+extern bool __bakewell_is_capmode(void * __capability cap);
+#define cheri_is_capmode(x) __bakewell_is_capmode(x)
+
+extern void * __capability bakewell_set_capmode(void * __capability cap);
+extern void * __capability bakewell_clear_capmode(void * __capability cap);
 #endif
 
 #endif /* __ASM_CHERI_H */
