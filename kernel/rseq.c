@@ -152,16 +152,16 @@ static int rseq_reset_rseq_cpu_node_id(struct task_struct *t)
 static int rseq_get_rseq_cs(struct task_struct *t, struct rseq_cs *rseq_cs)
 {
 	struct rseq_cs __user *urseq_cs;
-	u64 ptr;
+	uintptr_t ptr;
 	u32 __user *usig;
 	u32 sig;
 	int ret;
 
 #ifdef CONFIG_64BIT
-	if (get_user(ptr, &t->rseq->rseq_cs))
+	if (get_user_ptr(ptr, &t->rseq->rseq_cs))
 		return -EFAULT;
 #else
-	if (copy_from_user(&ptr, &t->rseq->rseq_cs, sizeof(ptr)))
+	if (copy_from_user_with_ptr(&ptr, &t->rseq->rseq_cs, sizeof(ptr)))
 		return -EFAULT;
 #endif
 	if (!ptr) {
@@ -170,8 +170,8 @@ static int rseq_get_rseq_cs(struct task_struct *t, struct rseq_cs *rseq_cs)
 	}
 	if (ptr >= TASK_SIZE)
 		return -EINVAL;
-	urseq_cs = uaddr_to_user_ptr(ptr);
-	if (copy_from_user(rseq_cs, urseq_cs, sizeof(*rseq_cs)))
+	urseq_cs = (struct rseq_cs __user *)ptr;
+	if (copy_from_user_with_ptr(rseq_cs, urseq_cs, sizeof(*rseq_cs)))
 		return -EFAULT;
 
 	if (rseq_cs->start_ip >= TASK_SIZE ||
@@ -186,7 +186,7 @@ static int rseq_get_rseq_cs(struct task_struct *t, struct rseq_cs *rseq_cs)
 	if (rseq_cs->abort_ip - rseq_cs->start_ip < rseq_cs->post_commit_offset)
 		return -EINVAL;
 
-	usig = uaddr_to_user_ptr(rseq_cs->abort_ip - sizeof(u32));
+	usig = (void __user *)rseq_cs->abort_ip - sizeof(u32);
 	ret = get_user(sig, usig);
 	if (ret)
 		return ret;
@@ -273,7 +273,7 @@ static bool in_rseq_cs(unsigned long ip, struct rseq_cs *rseq_cs)
 
 static int rseq_ip_fixup(struct pt_regs *regs)
 {
-	unsigned long ip = instruction_pointer(regs);
+	uintptr_t ip = instruction_pointer(regs);
 	struct task_struct *t = current;
 	struct rseq_cs rseq_cs;
 	int ret;
@@ -287,7 +287,7 @@ static int rseq_ip_fixup(struct pt_regs *regs)
 	 * If not nested over a rseq critical section, restart is useless.
 	 * Clear the rseq_cs pointer and return.
 	 */
-	if (!in_rseq_cs(ip, &rseq_cs))
+	if (!in_rseq_cs(__c_ua(ip), &rseq_cs))
 		return clear_rseq_cs(t);
 	ret = rseq_need_restart(t, rseq_cs.flags);
 	if (ret <= 0)
@@ -297,7 +297,7 @@ static int rseq_ip_fixup(struct pt_regs *regs)
 		return ret;
 	trace_rseq_ip_fixup(ip, rseq_cs.start_ip, rseq_cs.post_commit_offset,
 			    rseq_cs.abort_ip);
-	instruction_pointer_set(regs, (unsigned long)rseq_cs.abort_ip);
+	instruction_pointer_set(regs, (user_uintptr_t)rseq_cs.abort_ip);
 	return 0;
 }
 
@@ -347,13 +347,13 @@ error:
  */
 void rseq_syscall(struct pt_regs *regs)
 {
-	unsigned long ip = instruction_pointer(regs);
+	uintptr_t ip = instruction_pointer(regs);
 	struct task_struct *t = current;
 	struct rseq_cs rseq_cs;
 
 	if (!t->rseq)
 		return;
-	if (rseq_get_rseq_cs(t, &rseq_cs) || in_rseq_cs(ip, &rseq_cs))
+	if (rseq_get_rseq_cs(t, &rseq_cs) || in_rseq_cs(__c_ua(ip), &rseq_cs))
 		force_sig(SIGSEGV);
 }
 

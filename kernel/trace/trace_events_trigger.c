@@ -416,7 +416,7 @@ static int
 event_trigger_print(const char *name, struct seq_file *m,
 		    void *data, char *filter_str)
 {
-	long count = (long)data;
+	long count = __c_pa(data);
 
 	seq_puts(m, name);
 

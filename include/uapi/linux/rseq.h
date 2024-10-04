@@ -50,7 +50,7 @@ struct rseq_cs {
 	__u64 start_ip;
 	/* Offset from start_ip. */
 	__u64 post_commit_offset;
-	__u64 abort_ip;
+	__kernel_uintptr_t abort_ip;
 } __attribute__((aligned(4 * sizeof(__u64))));
 
 /*

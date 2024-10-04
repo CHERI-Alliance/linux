@@ -671,7 +671,7 @@ void trace_filter_add_remove_task(struct trace_pid_list *pid_list,
  */
 void *trace_pid_next(struct trace_pid_list *pid_list, void *v, loff_t *pos)
 {
-	long pid = (unsigned long)v;
+	long pid = __c_pa(v);
 	unsigned int next;
 
 	(*pos)++;
@@ -725,7 +725,7 @@ void *trace_pid_start(struct trace_pid_list *pid_list, loff_t *pos)
  */
 int trace_pid_show(struct seq_file *m, void *v)
 {
-	unsigned long pid = (unsigned long)v - 1;
+	unsigned long pid = __c_pa(v) - 1;
 
 	seq_printf(m, "%lu\n", pid);
 	return 0;
@@ -3576,7 +3576,7 @@ char *trace_iter_expand_format(struct trace_iterator *iter)
 static bool trace_safe_str(struct trace_iterator *iter, const char *str,
 			   bool star, int len)
 {
-	unsigned long addr = (unsigned long)str;
+	unsigned long addr = __c_pa(str);
 	struct trace_event *trace_event;
 	struct trace_event_call *event;
 
@@ -3585,13 +3585,13 @@ static bool trace_safe_str(struct trace_iterator *iter, const char *str,
 		return true;
 
 	/* OK if part of the event data */
-	if ((addr >= (unsigned long)iter->ent) &&
-	    (addr < (unsigned long)iter->ent + iter->ent_size))
+	if ((addr >= __c_pa(iter->ent)) &&
+	    (addr < __c_pa(iter->ent) + iter->ent_size))
 		return true;
 
 	/* OK if part of the temp seq buffer */
-	if ((addr >= (unsigned long)iter->tmp_seq.buffer) &&
-	    (addr < (unsigned long)iter->tmp_seq.buffer + TRACE_SEQ_BUFFER_SIZE))
+	if ((addr >= __c_pa(iter->tmp_seq.buffer)) &&
+	    (addr < __c_pa(iter->tmp_seq.buffer) + TRACE_SEQ_BUFFER_SIZE))
 		return true;
 
 	/* Core rodata can not be freed */
@@ -4586,7 +4586,7 @@ static int s_show(struct seq_file *m, void *v)
 static inline int tracing_get_cpu(struct inode *inode)
 {
 	if (inode->i_cdev) /* See trace_create_cpu_file() */
-		return (long)inode->i_cdev - 1;
+		return __c_pa(inode->i_cdev) - 1;
 	return RING_BUFFER_ALL_CPUS;
 }
 
@@ -8156,7 +8156,7 @@ tracing_buffers_splice_read(struct file *file, loff_t *ppos,
 		spd.pages[i] = page;
 		spd.partial[i].len = page_size;
 		spd.partial[i].offset = 0;
-		spd.partial[i].private = (unsigned long)ref;
+		spd.partial[i].private = (uintptr_t)ref;
 		spd.nr_pages++;
 		*ppos += page_size;
 

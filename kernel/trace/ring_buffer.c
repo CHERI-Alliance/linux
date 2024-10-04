@@ -1202,9 +1202,9 @@ rb_is_head_page(struct buffer_page *page, struct list_head *list)
 {
 	unsigned long val;
 
-	val = (unsigned long)list->next;
+	val = __c_pa(list->next);
 
-	if ((val & ~RB_FLAG_MASK) != (unsigned long)&page->list)
+	if ((val & ~RB_FLAG_MASK) != __c_pa(&page->list))
 		return RB_PAGE_MOVED;
 
 	return val & RB_FLAG_MASK;
@@ -1281,21 +1281,21 @@ static int rb_head_page_set(struct ring_buffer_per_cpu *cpu_buffer,
 			    int old_flag, int new_flag)
 {
 	struct list_head *list;
-	unsigned long val = (unsigned long)&head->list;
-	unsigned long ret;
+	uintptr_t val = (uintptr_t)&head->list;
+	uintptr_t ret;
 
 	list = &prev->list;
 
 	val &= ~RB_FLAG_MASK;
 
-	ret = cmpxchg((unsigned long *)&list->next,
+	ret = cmpxchg((uintptr_t *)&list->next,
 		      val | old_flag, val | new_flag);
 
 	/* check if the reader took the page */
 	if ((ret & ~RB_FLAG_MASK) != val)
 		return RB_PAGE_MOVED;
 
-	return ret & RB_FLAG_MASK;
+	return __c_ua(ret) & RB_FLAG_MASK;
 }
 
 static int rb_head_page_set_update(struct ring_buffer_per_cpu *cpu_buffer,
@@ -1373,13 +1373,13 @@ rb_set_head_page(struct ring_buffer_per_cpu *cpu_buffer)
 static bool rb_head_page_replace(struct buffer_page *old,
 				struct buffer_page *new)
 {
-	unsigned long *ptr = (unsigned long *)&old->list.prev->next;
-	unsigned long val;
+	uintptr_t *ptr = (uintptr_t *)&old->list.prev->next;
+	uintptr_t val;
 
 	val = *ptr & ~RB_FLAG_MASK;
 	val |= RB_PAGE_HEAD;
 
-	return try_cmpxchg(ptr, &val, (unsigned long)&new->list);
+	return try_cmpxchg(ptr, &val, (uintptr_t)&new->list);
 }
 
 /*
@@ -1449,7 +1449,7 @@ static void rb_tail_page_update(struct ring_buffer_per_cpu *cpu_buffer,
 static void rb_check_bpage(struct ring_buffer_per_cpu *cpu_buffer,
 			  struct buffer_page *bpage)
 {
-	unsigned long val = (unsigned long)bpage;
+	unsigned long val = __c_pa(bpage);
 
 	RB_WARN_ON(cpu_buffer, val & RB_FLAG_MASK);
 }
@@ -1855,7 +1855,7 @@ rb_remove_pages(struct ring_buffer_per_cpu *cpu_buffer, unsigned long nr_pages)
 
 	for (nr_removed = 0; nr_removed < nr_pages; nr_removed++) {
 		to_remove = rb_list_head(to_remove)->next;
-		head_bit |= (unsigned long)to_remove & RB_PAGE_HEAD;
+		head_bit |= __c_pa(to_remove) & RB_PAGE_HEAD;
 	}
 	/* Read iterators need to reset themselves when some pages removed */
 	cpu_buffer->pages_removed += nr_removed;
@@ -2349,7 +2349,7 @@ rb_commit_index(struct ring_buffer_per_cpu *cpu_buffer)
 static __always_inline unsigned
 rb_event_index(struct ring_buffer_per_cpu *cpu_buffer, struct ring_buffer_event *event)
 {
-	unsigned long addr = (unsigned long)event;
+	unsigned long addr = __c_pa(event);
 
 	addr &= (PAGE_SIZE << cpu_buffer->buffer->subbuf_order) - 1;
 
@@ -6115,7 +6115,7 @@ static int rb_alloc_meta_page(struct ring_buffer_per_cpu *cpu_buffer)
 
 static void rb_free_meta_page(struct ring_buffer_per_cpu *cpu_buffer)
 {
-	unsigned long addr = (unsigned long)cpu_buffer->meta_page;
+	uintptr_t addr = (uintptr_t)cpu_buffer->meta_page;
 
 	free_page(addr);
 	cpu_buffer->meta_page = NULL;

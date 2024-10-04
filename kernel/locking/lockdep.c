@@ -404,7 +404,7 @@ static struct delayed_free {
  */
 #define CLASSHASH_BITS		(MAX_LOCKDEP_KEYS_BITS - 1)
 #define CLASSHASH_SIZE		(1UL << CLASSHASH_BITS)
-#define __classhashfn(key)	hash_long((unsigned long)key, CLASSHASH_BITS)
+#define __classhashfn(key)	hash_long(__c_a(key), CLASSHASH_BITS)
 #define classhashentry(key)	(classhash_table + __classhashfn((key)))
 
 static struct hlist_head classhash_table[CLASSHASH_SIZE];
@@ -415,7 +415,7 @@ static struct hlist_head classhash_table[CLASSHASH_SIZE];
  */
 #define CHAINHASH_BITS		(MAX_LOCKDEP_CHAINS_BITS-1)
 #define CHAINHASH_SIZE		(1UL << CHAINHASH_BITS)
-#define __chainhashfn(chain)	hash_long(chain, CHAINHASH_BITS)
+#define __chainhashfn(chain)	hash_long(__c_a(chain), CHAINHASH_BITS)
 #define chainhashentry(chain)	(chainhash_table + __chainhashfn((chain)))
 
 static struct hlist_head chainhash_table[CHAINHASH_SIZE];
@@ -662,7 +662,7 @@ static const char *usage_str[] =
 
 const char *__get_key_name(const struct lockdep_subclass_key *key, char *str)
 {
-	return kallsyms_lookup((unsigned long)key, NULL, NULL, NULL, str);
+	return kallsyms_lookup(__c_pa(key), NULL, NULL, NULL, str);
 }
 
 static inline unsigned long lock_flag(enum lock_usage_bit bit)
@@ -821,7 +821,7 @@ static int very_verbose(struct lock_class *class)
 #ifdef __KERNEL__
 static int static_obj(const void *obj)
 {
-	unsigned long addr = (unsigned long) obj;
+	unsigned long addr = __c_pa(obj);
 
 	if (is_kernel_core_data(addr))
 		return 1;
@@ -947,7 +947,7 @@ look_up_lock_class(const struct lockdep_map *lock, unsigned int subclass)
  */
 static bool assign_lock_key(struct lockdep_map *lock)
 {
-	unsigned long can_addr, addr = (unsigned long)lock;
+	unsigned long can_addr, addr = __c_pa(lock);
 
 #ifdef __KERNEL__
 	/*
@@ -1203,7 +1203,7 @@ static void init_data_structures_once(void)
 
 static inline struct hlist_head *keyhashentry(const struct lock_class_key *key)
 {
-	unsigned long hash = hash_long((uintptr_t)key, KEYHASH_BITS);
+	unsigned long hash = hash_long(__c_pa(key), KEYHASH_BITS);
 
 	return lock_keys_hash + hash;
 }

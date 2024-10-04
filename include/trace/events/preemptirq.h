@@ -23,8 +23,8 @@ DECLARE_EVENT_CLASS(preemptirq_template,
 	),
 
 	TP_fast_assign(
-		__entry->caller_offs = (s32)(ip - (unsigned long)_stext);
-		__entry->parent_offs = (s32)(parent_ip - (unsigned long)_stext);
+		__entry->caller_offs = (s32)(ip - __c_pa(_stext));
+		__entry->parent_offs = (s32)(parent_ip - __c_pa(_stext));
 	),
 
 	TP_printk("caller=%pS parent=%pS",

@@ -136,8 +136,8 @@ struct ptrace_rseq_configuration {
  * dispatch.
  */
 struct ptrace_sud_config {
+	__kernel_uintptr_t selector;
 	__u64 mode;
-	__u64 selector;
 	__u64 offset;
 	__u64 len;
 };
