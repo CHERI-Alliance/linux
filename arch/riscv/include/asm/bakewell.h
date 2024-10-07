@@ -13,6 +13,7 @@ extern unsigned long cheri_mbit_mask;
 extern unsigned long cheri_mbit_value;
 extern unsigned char cheri_hybrid_support;
 extern unsigned char scmode_capmode_value;
+extern unsigned char acperm_legacy;
 
 #else
 

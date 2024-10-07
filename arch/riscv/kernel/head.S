@@ -255,6 +255,10 @@ secondary_start_sbi:
 	scaddr ca3, ca3, t0
 	jr ca3
 1:	ret
+
+.align 2
+.Ljust_return:
+	ret
 #endif
 
 SYM_CODE_END(_start)
@@ -344,6 +348,22 @@ SYM_CODE_START(_start_kernel)
 	and t1, t1, t2
 	sd t1, (ct0)
 .Lmbit_done:
+
+	/*
+	 * Probe for legacy vs. v0.9 layout of the ACPERM bitmap.
+	 * The call to .Ljust_return will trap if the hardware uses the
+	 * new encoding of the permission bits.
+	 */
+	llc ct0, .Lacperm_done
+	csrw stvecc, ct0
+	llc ct0, .Ljust_return
+	li t1, 0xff
+	acperm ct0, ct0, t1
+	jalr ct0
+	llc ct0, acperm_legacy
+	li t1, 1
+	sb t1, (ct0)
+.Lacperm_done:
 
 #endif
 

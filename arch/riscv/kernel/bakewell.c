@@ -22,7 +22,10 @@ void __init bakewell_init(void)
 {
 	if (!root_cap_valid)
 		panic("CHERI: Invalid root cap\n");
-	pr_info("CHERI bakewell support\n");
+	BUG_ON(!!IS_ENABLED(CONFIG_RISCV_BAKEWELL_LEGACY_PERMS) !=
+	       !!acperm_legacy);
+	pr_info("CHERI bakewell support%s\n",
+		acperm_legacy ? " (legacy acperm)" : "");
 
 	/* Enable user space CHERI support. */
 	__asm__ __volatile__("csrs senvcfg, %0\n" : : "r" (1 << 28));

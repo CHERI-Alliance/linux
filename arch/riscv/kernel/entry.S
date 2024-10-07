@@ -465,6 +465,9 @@ SYM_DATA_END(scmode_capmode_value)
 SYM_DATA_START(cheri_hybrid_support)
 	.byte 0
 SYM_DATA_END(cheri_hybrid_support)
+SYM_DATA_START(acperm_legacy)
+	.byte 0
+SYM_DATA_END(acperm_legacy)
 #endif
 
 #ifndef CONFIG_CHERI_KERNEL
