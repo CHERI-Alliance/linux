@@ -2575,6 +2575,7 @@ char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
 			{ CHERI_PERM_LOAD,              'r' },
 			{ CHERI_PERM_STORE,             'w' },
 			{ CHERI_PERM_EXECUTE,           'x' },
+			{ CHERI_PERM_MUTABLE_LOAD,	'l' },
 #ifdef CHERI_PERM_CAP
 			{ CHERI_PERM_CAP,               'C' },
 #endif

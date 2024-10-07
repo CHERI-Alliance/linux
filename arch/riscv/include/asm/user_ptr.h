@@ -15,9 +15,12 @@ user_ptr_perms_t arch_user_ptr_owning_perms_from_prot(int prot, unsigned long vm
 	struct pt_regs *regs = task_pt_regs(current);
 	cheri_perms_t perms = 0;
 
+	if ((prot & PROT_READ) && (vm_flags & VM_READ_CAPS))
+		perms |= CHERI_PERM_MUTABLE_LOAD;
+
 	if (prot & PROT_EXEC) {
-		if (cheri_perms_get(regs->epc) & CHERI_BW_PERM_SYSTEM_REGS)
-			perms |= CHERI_BW_PERM_SYSTEM_REGS;
+		if (cheri_perms_get(regs->epc) & CHERI_PERM_SYSTEM_REGS)
+			perms |= CHERI_PERM_SYSTEM_REGS;
 	}
 
 	return perms;

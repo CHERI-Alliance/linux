@@ -20,10 +20,12 @@ static bool root_cap_valid = true;
 
 void __init bakewell_init(void)
 {
-	if (!root_cap_valid)
-		panic("CHERI: Invalid root cap\n");
 	BUG_ON(!!IS_ENABLED(CONFIG_RISCV_BAKEWELL_LEGACY_PERMS) !=
 	       !!acperm_legacy);
+
+	if (!root_cap_valid)
+		panic("CHERI: Invalid root cap\n");
+
 	pr_info("CHERI bakewell support%s\n",
 		acperm_legacy ? " (legacy acperm)" : "");
 
@@ -42,6 +44,8 @@ static void __init bakewell_check_mbit(void)
 /* Check validity of the root capability. */
 static void __init bakewell_check_root_cap(uintcap_t root_cap)
 {
+	static const cheri_perms_t allperms = CHERI_PERMS_READ |
+		CHERI_PERMS_WRITE | CHERI_PERMS_EXEC | CHERI_PERMS_ROOTCAP;
 	cheri_perms_t perms = cheri_perms_get(root_cap);
 
 	pr_info("CHERI: Root capability: %#lp (%lp)\n", root_cap, root_cap);
@@ -56,7 +60,7 @@ static void __init bakewell_check_root_cap(uintcap_t root_cap)
 		root_cap_valid = false;
 	}
 
-	if ((perms & CHERI_PERMS_ALL) != CHERI_PERMS_ALL) {
+	if ((perms & allperms) != allperms) {
 		pr_crit("CHERI: Root capability has bad permissions\n");
 		root_cap_valid = false;
 	}
