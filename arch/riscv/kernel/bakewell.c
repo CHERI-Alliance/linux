@@ -92,7 +92,6 @@ void __init bakewell_caps_init(uintcap_t root_cap)
 
 	/* Sanitize root capability. */
 	root_cap = cheri_address_set(root_cap, 0);
-	/* FIXCHERI: M-bit */
 
 	/* All permissions but limited to user addresses. */
 	perms = CHERI_PERMS_ROOTCAP |

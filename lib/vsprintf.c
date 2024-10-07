@@ -2575,15 +2575,26 @@ char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
 			{ CHERI_PERM_LOAD,              'r' },
 			{ CHERI_PERM_STORE,             'w' },
 			{ CHERI_PERM_EXECUTE,           'x' },
-			{ CHERI_PERM_MUTABLE_LOAD,	'l' },
-#ifdef CHERI_PERM_CAP
-			{ CHERI_PERM_CAP,               'C' },
+#ifdef CHERI_PERM_CAP_RW
+			{ CHERI_PERM_CAP_RW,            'C' },
 #endif
 #ifdef CHERI_PERM_LOAD_CAP
 			{ CHERI_PERM_LOAD_CAP,          'R' },
 #endif
 #ifdef CHERI_PERM_STORE_CAP
 			{ CHERI_PERM_STORE_CAP,         'W' },
+#endif
+#if defined(CHERI_PERM_MUTABLE_LOAD) && (CHERI_PERM_MUTABLE_LOAD != 0)
+			{ CHERI_PERM_MUTABLE_LOAD,      'm' },
+#endif
+#if defined(CHERI_PERM_GLOBAL) && (CHERI_PERM_GLOBAL != 0)
+			{ CHERI_PERM_GLOBAL,            'g' },
+#endif
+#if defined(CHERI_PERM_STORE_LOCAL_CAP) && (CHERI_PERM_STORE_LOCAL_CAP != 0)
+			{ CHERI_PERM_STORE_LOCAL_CAP,   'l' },
+#endif
+#if defined(CHERI_PERM_ELEVATED_LOAD) && (CHERI_PERM_ELEVATED_LOAD != 0)
+			{ CHERI_PERM_ELEVATED_LOAD,     'e' },
 #endif
 #ifdef CONFIG_ARM64_MORELLO
 			{ ARM_CAP_PERMISSION_EXECUTIVE,	'E' }
