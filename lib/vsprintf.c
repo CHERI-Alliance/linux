@@ -2666,9 +2666,9 @@ char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
 		update_buf_single(buf, end, '-');
 
 		len = cheri_length_get(cap);
-		if (len != 0 && len != ~(ptraddr_t)0)
-			len--;
-		top =  base + cheri_length_get(cap);
+		top =  base + len;
+		if (top < len)
+			top--;
 		buf = pointer_string(buf, end, __c_fakep(top), spec);
 		update_buf_single(buf, end, ']');
 

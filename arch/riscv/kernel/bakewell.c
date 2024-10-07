@@ -11,6 +11,8 @@
 #define cheri_init_globals_3(a,b,c) do { } while (0)
 #endif
 
+#define __PI __attribute__((nocaprelocs))
+
 /*
  * Set to false if the initial root capability does not meet
  * expectations. This is used to delay the resulting panic to
@@ -76,46 +78,63 @@ static void __init bakewell_check_root_cap(uintcap_t root_cap)
 	}
 }
 
-static inline __init uintcap_t __build_cap(uintcap_t root,
-					   cheri_perms_t perms, ptraddr_t len)
+static inline __init uintcap_t __build_cap(uintcap_t root, cheri_perms_t perms,
+					   ptraddr_t base, ptraddr_t len)
 {
-	return cheri_bounds_set(cheri_perms_and(root, perms), len);
+	root = cheri_address_set(root, base);
+	root = cheri_bounds_set(root, len);
+	return cheri_perms_and(root, perms);
+}
+
+void __init __PI init_cap_relocs(uintcap_t inf)
+{
+	uintcap_t rw, ro, rx;
+	ptraddr_t split = 1ULL << 63;
+
+	rw = __build_cap(inf, CHERI_PERMS_READ | CHERI_PERMS_WRITE,
+			 split, split);
+	rx = __build_cap(inf, CHERI_PERMS_READ | CHERI_PERMS_EXEC,
+			 split, split);
+	ro = __build_cap(inf, CHERI_PERMS_READ, split, split);
+
+	cheri_init_globals_3((void * __capability)rw, (void * __capability)rx,
+			     (void * __capability)ro);
+
+	kernel_data_cap = (void * __capability)rw;
+	kernel_code_cap = (void * __capability)rx;
 }
 
 /* Initialize the kernel's authorizing capabilities for special situations. */
-void __init bakewell_caps_init(uintcap_t root_cap)
+void __init bakewell_caps_init(uintcap_t inf)
 {
 	cheri_perms_t perms;
 
-	bakewell_check_root_cap(root_cap);
+	bakewell_check_root_cap(inf);
 	bakewell_check_mbit();
 
+	pr_info("CHERI: kernel code cap: %#lp\n", kernel_code_cap);
+	pr_info("CHERI: kernel data cap: %#lp\n", kernel_data_cap);
+
 	/* Sanitize root capability. */
-	root_cap = cheri_address_set(root_cap, 0);
+	inf = cheri_address_set(inf, 0);
 
 	/* All permissions but limited to user addresses. */
 	perms = CHERI_PERMS_ROOTCAP |
 	    CHERI_PERMS_READ | CHERI_PERMS_WRITE | CHERI_PERMS_EXEC;
-	cheri_user_root_allperms_cap = __build_cap(root_cap, perms,
-						   TASK_SIZE_MAX);
+	cheri_user_root_allperms_cap = __build_cap(inf, perms, 0, TASK_SIZE_MAX);
 	pr_info("CHERI: user allperms cap: %#lp\n",
 		cheri_user_root_allperms_cap);
 
 	/* All permission, unlimited address range. */
 	perms = CHERI_PERMS_ROOTCAP |
 	    CHERI_PERMS_READ | CHERI_PERMS_WRITE | CHERI_PERMS_EXEC;
-	cheri_user_root_cap = cheri_perms_and(root_cap, perms);
+	cheri_user_root_cap = cheri_perms_and(cheri_user_root_allperms_cap,
+					      perms);
 	pr_info("CHERI: user root cap: %#lp\n", cheri_user_root_cap);
 
 	/* Not supported on RISCV bakewell. */
 	cheri_user_root_seal_cap = __c_fakeu(0);
 	cheri_user_root_cid_cap = __c_fakeu(0);
-}
-
-/* FIXCHERI: Check capability restrictions. */
-void __init init_cap_relocs(void * __capability rw, void * __capability rx)
-{
-	cheri_init_globals_3(rw, rx, rx);
 }
 
 bool

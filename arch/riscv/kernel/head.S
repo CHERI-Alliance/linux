@@ -234,6 +234,7 @@ secondary_start_sbi:
  * Registers:
  * - t0: The target address if successful. Not modified on failure.
  * - t1: Scratch
+ * - t3: Minimum permissions required
  * - ca3: The capability to test.
  */
 .align 2
@@ -250,6 +251,11 @@ secondary_start_sbi:
 	gclen t1, ca3
 	addi t1, t1, 1
 	bnez t1, 1f
+
+	/* Check permissions against t3. */
+	gcperm t1, ca3
+	and t1, t1, t3
+	bne t1, t3, 1f
 
 	/* Ok, use it. */
 	scaddr ca3, ca3, t0
@@ -272,25 +278,46 @@ SYM_CODE_START(_start_kernel)
 	/* Switch to capability mode if not already there. */
 	auipc ct0, 0
 	gctag t1, ct0
-	bnez t1, .Linfinity_cap_detect
+	bnez t1, .Lmodesw1_done
 	modesw
+.Lmodesw1_done:
 
-.Linfinity_cap_detect:
+	/*
+	 * Probe for legacy vs. v0.9 layout of the ACPERM bitmap.
+	 * The call to .Ljust_return will trap if the hardware uses the
+	 * new encoding of the permission bits.
+	 * We will set up t3 for .Ltry_install_infcap and remember the
+	 * probe result in t2. The permissions we ask for in the infinite
+	 * cap ignore _zcherilevels. This can be done later in C code if
+	 * desired.
+	 */
+	llc ct0, .Lacperm_done
+	csrw stvecc, ct0
+	li t2, 0
+	li t3, 0x70043	/* New ACPERM: R, W, X, ASR, LM, C, SDP:0 */
+	llc ct0, .Ljust_return
+	li t1, 0xff
+	acperm ct0, ct0, t1
+	jalr ct0
+	li t2, 1
+	li t3, 0x1001f	/* Legacy ACPERM: R, W, X, ASR, C, SDP:0 */
+.Lacperm_done:
+
 	/*
 	 * Search for the infinite capability and install it in PCC.
 	 * We first try ca3 where it is supposed to be, then we try ddc.
 	 * If both fail assume pcc contains something suitable.
+	 * In any case the infinite cap will be checked more in detail
+	 * later in C-code.
+	 *
+	 * Note that we must not clobber t2 until we store it below.
 	 */
-	llc ct0, .Lmbit_detect
+	llc ct0, .Linfinite_cap_done
 	call .Ltry_install_infcap
 	csrr ca3, ddc
 	call .Ltry_install_infcap
+.Linfinite_cap_done:
 
-	/*
-	 * Determine orientation of the M-bit in meta data and scmode.
-	 * The M-bit mask is only correct for 64-bit.
-	 */
-.Lmbit_detect:
 	/*
 	 * Paranoia:
 	 * Switch to capability mode again in case the infinite cap
@@ -298,14 +325,20 @@ SYM_CODE_START(_start_kernel)
 	 */
 	auipc ct1, 0
 	gctag t0, ct1
-	bnez t0, 1f
+	bnez t0, .Lmodesw2_done
 	modesw
+.Lmodesw2_done:
+
+	/* Store acperm_legcay after the infinite cap is set up. */
+	llc ct0, acperm_legacy
+	sb t2, (ct0)
 
 	/*
+	 * Determine orientation of the M-bit in meta data and scmode.
 	 * If we are not on a hybrid CPU the scmode will trap and the
 	 * default values of zero are ok.
 	 */
-1:	llc ct0, .Lmbit_done
+	llc ct0, .Lmbit_done
 	csrw stvecc, ct0
 
 	/*
@@ -348,22 +381,6 @@ SYM_CODE_START(_start_kernel)
 	and t1, t1, t2
 	sd t1, (ct0)
 .Lmbit_done:
-
-	/*
-	 * Probe for legacy vs. v0.9 layout of the ACPERM bitmap.
-	 * The call to .Ljust_return will trap if the hardware uses the
-	 * new encoding of the permission bits.
-	 */
-	llc ct0, .Lacperm_done
-	csrw stvecc, ct0
-	llc ct0, .Ljust_return
-	li t1, 0xff
-	acperm ct0, ct0, t1
-	jalr ct0
-	llc ct0, acperm_legacy
-	li t1, 1
-	sb t1, (ct0)
-.Lacperm_done:
 
 #endif
 
@@ -462,15 +479,14 @@ SYM_CODE_START(_start_kernel)
 	REG_S a0, (CREG(a2))
 
 #ifdef CONFIG_CHERI_KERNEL
-	/* Temporarily setup kernel_code_cap */
+	/* Temporarily setup kernel_code_cap as infinite */
 	la t1, kernel_code_cap
 	auipc ct0, 0
 	scaddr ct0, ct0, x0
 	sc ct0, (ct1)
 
-	/* Temporarily setup kernel_data_cap */
+	/* Temporarily setup kernel_data_cap as infinite */
 	la t1, kernel_data_cap
-	csrr ct0, ddc
 	sc ct0, (ct1)
 #endif
 
@@ -501,19 +517,24 @@ SYM_CODE_START(_start_kernel)
 	scs_load_current
 
 #ifdef CONFIG_CHERI_KERNEL
-	csrr cs3, ddc
-	auipc cs4, 0
+	/* Setup capabilities and resolve caprelocs. */
+	csrw ddc, cnull
+	csrw stdc, cnull
 
-	cmv ca0, cs3
-	cmv ca1, cs4
-	llc cra, init_cap_relocs
-	jalr cra
+	auipc ca0, 0
+	call init_cap_relocs
 
-	cmv ca0, cs4
-	llc cra, bakewell_caps_init
-	jalr cra
+	auipc ca0, 0
+	call bakewell_caps_init
+
+	/* Use the new kernel code capability for pcc. */
+	llc ct1, .Lsetpcc
+	llc ct0, kernel_code_cap
+	lc ct0, (ct0)
+	scaddr ct0, ct0, t1
+	jr ct0
+.Lsetpcc:
 #endif
-	/* FIXCHERI: Sanitize/restrict caps here (ddc, ppc, ...) */
 
 #ifdef CONFIG_KASAN
 	call kasan_early_init

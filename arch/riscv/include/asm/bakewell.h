@@ -5,9 +5,8 @@
 #ifdef CONFIG_RISCV_CHERI_BAKEWELL
 
 extern void __init bakewell_init(void);
-extern void __init init_cap_relocs(void * __capability rw,
-				   void * __capability rx);
-extern void __init bakewell_caps_init(uintcap_t rootcap);
+extern void __init init_cap_relocs(uintcap_t inf);
+extern void __init bakewell_caps_init(uintcap_t inf);
 
 extern unsigned long cheri_mbit_mask;
 extern unsigned long cheri_mbit_value;
