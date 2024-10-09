@@ -28,19 +28,26 @@ void __init bakewell_init(void)
 	if (!root_cap_valid)
 		panic("CHERI: Invalid root cap\n");
 
-	pr_info("CHERI bakewell support%s\n",
-		acperm_legacy ? " (legacy acperm)" : "");
-
 	/* Enable user space CHERI support. */
 	__asm__ __volatile__("csrs senvcfg, %0\n" : : "r" (1 << 28));
+
+	pr_info("CHERI: bakewell support%s\n",
+		acperm_legacy ? " (legacy acperm)" : "");
+
+	pr_info("CHERI: M-bit mask=0x%lx gchi=%d scmode=%d hybrid=%s\n",
+		cheri_mbit_mask, !!cheri_mbit_value, scmode_capmode_value,
+		cheri_hybrid_support ? "yes" : "no");
+
+	pr_info("CHERI: kernel code cap: %#lp\n", kernel_code_cap);
+	pr_info("CHERI: kernel data cap: %#lp\n", kernel_data_cap);
+	pr_info("CHERI: user allperms cap: %#lp\n",
+		cheri_user_root_allperms_cap);
+	pr_info("CHERI: user root cap: %#lp\n", cheri_user_root_cap);
 }
 
 /* Check boot time detected mbit value. */
 static void __init bakewell_check_mbit(void)
 {
-	pr_info("CHERI: M-bit mask=0x%lx gchi=%d scmode=%d hybrid=%s\n",
-		cheri_mbit_mask, !!cheri_mbit_value, scmode_capmode_value,
-		cheri_hybrid_support ? "yes" : "no");
 }
 
 /* Check validity of the root capability. */
@@ -112,9 +119,6 @@ void __init bakewell_caps_init(uintcap_t inf)
 	bakewell_check_root_cap(inf);
 	bakewell_check_mbit();
 
-	pr_info("CHERI: kernel code cap: %#lp\n", kernel_code_cap);
-	pr_info("CHERI: kernel data cap: %#lp\n", kernel_data_cap);
-
 	/* Sanitize root capability. */
 	inf = cheri_address_set(inf, 0);
 
@@ -122,15 +126,12 @@ void __init bakewell_caps_init(uintcap_t inf)
 	perms = CHERI_PERMS_ROOTCAP |
 	    CHERI_PERMS_READ | CHERI_PERMS_WRITE | CHERI_PERMS_EXEC;
 	cheri_user_root_allperms_cap = __build_cap(inf, perms, 0, TASK_SIZE_MAX);
-	pr_info("CHERI: user allperms cap: %#lp\n",
-		cheri_user_root_allperms_cap);
 
 	/* All permission, unlimited address range. */
 	perms = CHERI_PERMS_ROOTCAP |
 	    CHERI_PERMS_READ | CHERI_PERMS_WRITE | CHERI_PERMS_EXEC;
 	cheri_user_root_cap = cheri_perms_and(cheri_user_root_allperms_cap,
 					      perms);
-	pr_info("CHERI: user root cap: %#lp\n", cheri_user_root_cap);
 
 	/* Not supported on RISCV bakewell. */
 	cheri_user_root_seal_cap = __c_fakeu(0);
