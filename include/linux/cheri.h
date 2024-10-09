@@ -161,6 +161,14 @@ extern uintcap_t cheri_user_root_seal_cap;	/* Userspace sealing root */
 extern uintcap_t cheri_user_root_cid_cap;	/* Userspace compartment ID root */
 extern uintcap_t cheri_user_root_allperms_cap;	/* Userspace root (all permissions) */
 
+#else
+
+#define cheri_check_cap(cap, len, perms) (true)
+#define cheri_address_set(cap, addr) (addr)
+#define cheri_bounds_set(__c, __l) (__c)
+#define cheri_bounds_set_exact(__c, __l) (__c)
+#define cheri_sentry_create(__c) (__c)
+
 #endif /* __CHERI__ */
 
 /*
