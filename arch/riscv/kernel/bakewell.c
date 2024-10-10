@@ -41,8 +41,8 @@ void __init bakewell_init(void)
 	pr_info("CHERI: kernel code cap: %#lp\n", kernel_code_cap);
 	pr_info("CHERI: kernel data cap: %#lp\n", kernel_data_cap);
 	pr_info("CHERI: user allperms cap: %#lp\n",
-		cheri_user_root_allperms_cap);
-	pr_info("CHERI: user root cap: %#lp\n", cheri_user_root_cap);
+		(void *)cheri_user_root_allperms_cap);
+	pr_info("CHERI: user root cap: %#lp\n", (void *)cheri_user_root_cap);
 }
 
 /* Check boot time detected mbit value. */
@@ -57,7 +57,8 @@ static void __init bakewell_check_root_cap(uintcap_t root_cap)
 		CHERI_PERMS_WRITE | CHERI_PERMS_EXEC | CHERI_PERMS_ROOTCAP;
 	cheri_perms_t perms = cheri_perms_get(root_cap);
 
-	pr_info("CHERI: Root capability: %#lp (%lp)\n", root_cap, root_cap);
+	pr_info("CHERI: Root capability: %#lp (%lp)\n",
+		(void *)root_cap, (void *)root_cap);
 
 	if (!cheri_tag_get(root_cap)) {
 		pr_crit("CHERI: Root capability is invalid\n");

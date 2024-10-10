@@ -293,7 +293,7 @@ found:
 	data = ((void *)hdr) - size;
 	if ((uintptr_t)data < initrd_start) {
 		pr_err("bootconfig size %d is greater than initrd size %ld\n",
-			size, initrd_end - initrd_start);
+			size, __c_ua(initrd_end) - __c_ua(initrd_start));
 		return NULL;
 	}
 

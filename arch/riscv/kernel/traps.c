@@ -471,8 +471,8 @@ asmlinkage __visible noinstr void do_trap_cheri(struct pt_regs *regs)
 	}
 
 	stval = csr_read(stval);
-	pr_err("===== CHERI exception: %#p %hpS\n",
-	       (void *)regs->epc, __c_ua(regs->epc));
+	pr_err("===== CHERI exception: %#p %pS\n",
+	       (void *)regs->epc, (void *)regs->epc);
 	pr_err("===== CHERI exception: stval=%#lx (%s, %s)\n", stval,
 	       cheri_stval_cause_to_str(stval),
 	       cheri_stval_type_to_str(stval));

@@ -1257,9 +1257,9 @@ asmlinkage void __init __PI setup_vm(uintptr_t dtb_pa)
 		pr_warn("fixmap btmap start [%08lx] != end [%08lx]\n",
 			pmd_val(fix_bmap_spmd), pmd_val(fix_bmap_epmd));
 		pr_warn("fix_to_virt(FIX_BTMAP_BEGIN): %08lx\n",
-			fix_to_virt(FIX_BTMAP_BEGIN));
+			__c_ua(fix_to_virt(FIX_BTMAP_BEGIN)));
 		pr_warn("fix_to_virt(FIX_BTMAP_END):   %08lx\n",
-			fix_to_virt(FIX_BTMAP_END));
+			__c_ua(fix_to_virt(FIX_BTMAP_END)));
 
 		pr_warn("FIX_BTMAP_END:       %d\n", FIX_BTMAP_END);
 		pr_warn("FIX_BTMAP_BEGIN:     %d\n", FIX_BTMAP_BEGIN);
