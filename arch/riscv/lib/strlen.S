@@ -8,7 +8,10 @@
 /* int strlen(const char *s) */
 SYM_FUNC_START(strlen)
 
+#ifndef CONFIG_CHERI_KERNEL
+	/* ZBB implementation contains out of bounds accesses. */
 	ALTERNATIVE("nop", "j strlen_zbb", 0, RISCV_ISA_EXT_ZBB, CONFIG_RISCV_ISA_ZBB)
+#endif
 
 	/*
 	 * Returns
@@ -62,14 +65,19 @@ strlen_zbb:
 	andi	t2, a0, SZREG-1
 
 	/* Align pointer. */
+#ifdef CONFIG_CHERI_KERNEL
+	andi	t3, a0, -SZREG
+	scaddr	ct0, ca0, t3
+#else
 	andi	t0, a0, -SZREG
+#endif
 
 	li	t3, SZREG
 	sub	t3, t3, t2
 	slli	t2, t2, 3
 
 	/* Get the first word.  */
-	REG_L	t1, 0(t0)
+	REG_L	t1, 0(CREG(t0))
 
 	/*
 	 * Shift away the partial data we loaded to remove the irrelevant bytes
@@ -107,7 +115,7 @@ strlen_zbb:
 	 */
 	.p2align 3
 1:
-	REG_L	t1, SZREG(t0)
+	REG_L	t1, SZREG(CREG(t0))
 	addi	t0, t0, SZREG
 	orc.b	t1, t1
 	beq	t1, t3, 1b
