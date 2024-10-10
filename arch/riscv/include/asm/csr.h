@@ -422,6 +422,9 @@
 #define SEED_ENTROPY_MASK	_AC(0xFFFF, UL)
 
 #ifdef CONFIG_RISCV_M_MODE
+# define scratchc	mscratchc
+# define tvecc		mtvecc
+# define epcc		mepcc
 # define CSR_STATUS	CSR_MSTATUS
 # define CSR_IE		CSR_MIE
 # define CSR_TVEC	CSR_MTVEC
@@ -447,6 +450,9 @@
 # define RV_IRQ_TIMER	IRQ_M_TIMER
 # define RV_IRQ_EXT		IRQ_M_EXT
 #else /* CONFIG_RISCV_M_MODE */
+# define scratchc	sscratchc
+# define tvecc		stvecc
+# define epcc		sepcc
 # define CSR_STATUS	CSR_SSTATUS
 # define CSR_IE		CSR_SIE
 # define CSR_TVEC	CSR_STVEC

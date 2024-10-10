@@ -15,6 +15,7 @@
 #include <asm/image.h>
 #include <asm/scs.h>
 #include <asm/xip_fixup.h>
+#include <asm/asmcheri.h>
 #include "efi-header.S"
 
 #ifdef CONFIG_CHERI_KERNEL
@@ -74,9 +75,6 @@ pe_head_start:
 
 #ifdef CONFIG_CHERI_KERNEL
 .option capmode
-.macro la dst sym
-llc c\dst, \sym
-.endm
 #endif
 
 .align 2
@@ -86,11 +84,7 @@ relocate_enable_mmu:
 	/* Relocate return address */
 	la a1, kernel_map
 	XIP_FIXUP_OFFSET a1
-#ifndef CONFIG_CHERI_KERNEL
-	REG_L a1, KERNEL_MAP_VIRT_ADDR(a1)
-#else
-	REG_L a1, KERNEL_MAP_VIRT_ADDR(ca1)
-#endif
+	REG_L a1, KERNEL_MAP_VIRT_ADDR(CREG(a1))
 	la a2, _start
 	sub a1, a1, a2
 #ifndef CONFIG_CHERI_KERNEL
@@ -103,13 +97,8 @@ relocate_enable_mmu:
 
 	/* Point stvec to virtual address of intruction after satp write */
 	la a2, 1f
-#ifndef CONFIG_CHERI_KERNEL
-	add a2, a2, a1
+	CREG(add) CREG(a2), CREG(a2), a1
 	csrw CSR_TVEC, a2
-#else
-	cadd ca2, ca2, a1
-	csrw stvecc, ca2
-#endif
 
 	/* Compute satp for kernel page tables, but don't load it yet */
 	srl a2, a0, PAGE_SHIFT
@@ -134,11 +123,7 @@ relocate_enable_mmu:
 1:
 	/* Set trap vector to spin forever to help debug */
 	la a0, .Lsecondary_park
-#ifndef CONFIG_CHERI_KERNEL
 	csrw CSR_TVEC, a0
-#else
-	csrw stvecc, ca0 // SIM: was CSR_TVEC
-#endif
 
 	/* Reload the global pointer */
 	load_global_pointer
@@ -202,21 +187,13 @@ secondary_start_sbi:
 .Lsetup_trap_vector:
 	/* Set trap vector to exception handler */
 	la a0, handle_exception
-#ifndef CONFIG_CHERI_KERNEL
 	csrw CSR_TVEC, a0
-#else
-	csrw stvecc, ca0
-#endif
 
 	/*
 	 * Set sup0 scratch register to 0, indicating to exception vector that
 	 * we are presently executing in kernel.
 	 */
-#ifndef CONFIG_CHERI_KERNEL
 	csrw CSR_SCRATCH, zero
-#else
-	csrw sscratchc, cnull
-#endif
 
 	ret
 
@@ -292,7 +269,7 @@ SYM_CODE_START(_start_kernel)
 	 * desired.
 	 */
 	llc ct0, .Lacperm_done
-	csrw stvecc, ct0
+	csrw CSR_TVEC, t0
 	li t2, 0
 	li t3, 0x70043	/* New ACPERM: R, W, X, ASR, LM, C, SDP:0 */
 	llc ct0, .Ljust_return
@@ -314,7 +291,7 @@ SYM_CODE_START(_start_kernel)
 	 */
 	llc ct0, .Linfinite_cap_done
 	call .Ltry_install_infcap
-	csrr ca3, ddc
+	ccsrr a3, ddc
 	call .Ltry_install_infcap
 .Linfinite_cap_done:
 
@@ -339,7 +316,7 @@ SYM_CODE_START(_start_kernel)
 	 * default values of zero are ok.
 	 */
 	llc ct0, .Lmbit_done
-	csrw stvecc, ct0
+	csrw CSR_TVEC, t0
 
 	/*
 	 * We execute in capability mode, thus ct1 (derived from ppc)
@@ -388,7 +365,7 @@ SYM_CODE_START(_start_kernel)
 	/* flush the instruction cache */
 	fence.i
 
-	/* Reset all registers except ra, a0, a1 */
+	/* Reset all registers except ra, a0, a1, (a3 for CHERI) */
 	call reset_regs
 
 	/*
@@ -518,8 +495,8 @@ SYM_CODE_START(_start_kernel)
 
 #ifdef CONFIG_CHERI_KERNEL
 	/* Setup capabilities and resolve caprelocs. */
-	csrw ddc, cnull
-	csrw stdc, cnull
+	ccsrw ddc, zero
+	ccsrw stdc, zero
 
 	auipc ca0, 0
 	call init_cap_relocs
@@ -585,7 +562,9 @@ SYM_CODE_START_LOCAL(reset_regs)
 	li	s0, 0
 	li	s1, 0
 	li	a2, 0
+#ifndef CONFIG_CHERI_KERNEL
 	li	a3, 0
+#endif
 	li	a4, 0
 	li	a5, 0
 	li	a6, 0
@@ -604,11 +583,7 @@ SYM_CODE_START_LOCAL(reset_regs)
 	li	t4, 0
 	li	t5, 0
 	li	t6, 0
-	csrw	CSR_SCRATCH, 0
-#ifdef CONFIG_CHERI_KERNEL
-	cmv ct0, cnull
-	csrw sscratchc, ct0
-#endif
+	csrw	CSR_SCRATCH, zero
 
 #ifdef CONFIG_FPU
 	csrr	t0, CSR_MISA

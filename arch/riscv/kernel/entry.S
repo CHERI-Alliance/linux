@@ -15,13 +15,11 @@
 #include <asm/thread_info.h>
 #include <asm/asm-offsets.h>
 #include <asm/errata_list.h>
+#include <asm/asmcheri.h>
 #include <linux/sizes.h>
 
 #ifdef CONFIG_CHERI_KERNEL
 .option capmode
-.macro la dst sym
-llc c\dst, \sym
-.endm
 #endif
 
 	.section .irqentry.text, "ax"
@@ -40,11 +38,7 @@ SYM_CODE_START(handle_exception)
 	bnez tp, .Lsave_context
 
 .Lrestore_kernel_tpsp:
-#ifndef CONFIG_CHERI_KERNEL
 	csrr tp, CSR_SCRATCH
-#else
-	csrr ctp, sscratchc
-#endif
 	CREG_S CREG(sp), TASK_TI_KERNEL_SP(CREG(tp))
 
 #ifdef CONFIG_VMAP_STACK
@@ -66,9 +60,9 @@ SYM_CODE_START(handle_exception)
 
 #ifdef CONFIG_RISCV_CHERI_BAKEWELL
 	/* store and clear ddc */
-	csrr ct0, ddc
+	ccsrr t0, ddc
 	sc ct0, PT_DDC(csp)
-	csrw ddc, cnull
+	ccsrw ddc, zero
 #endif
 
 	/*
@@ -82,18 +76,10 @@ SYM_CODE_START(handle_exception)
 
 	CREG_L CREG(s0), TASK_TI_USER_SP(CREG(tp))
 	csrrc s1, CSR_STATUS, t0
-#ifndef CONFIG_CHERI_KERNEL
 	csrr s2, CSR_EPC
-#else
-	csrr cs2, sepcc
-#endif
 	csrr s3, CSR_TVAL
 	csrr s4, CSR_CAUSE
-#ifndef CONFIG_CHERI_KERNEL
 	csrr s5, CSR_SCRATCH
-#else
-	csrr cs5, sscratchc
-#endif
 	CREG_S CREG(s0), PT_SP(CREG(sp))
 	REG_S s1, PT_STATUS(CREG(sp))
 	CREG_S CREG(s2), PT_EPC(CREG(sp))
@@ -105,11 +91,7 @@ SYM_CODE_START(handle_exception)
 	 * Set the scratch register to 0, so that if a recursive exception
 	 * occurs, the exception vector knows it came from the kernel
 	 */
-#ifndef CONFIG_CHERI_KERNEL
 	csrw CSR_SCRATCH, x0
-#else
-	csrw sscratchc, cnull
-#endif
 
 	/* Load the global pointer */
 	load_global_pointer
@@ -175,11 +157,7 @@ SYM_CODE_START_NOALIGN(ret_from_exception)
 	 * Save TP into the scratch register , so we can find the kernel data
 	 * structures again.
 	 */
-#ifndef CONFIG_CHERI_KERNEL
 	csrw CSR_SCRATCH, tp
-#else
-	csrw sscratchc, ctp
-#endif
 1:
 #ifdef CONFIG_RISCV_ISA_V_PREEMPTIVE
 	CREG(mv) CREG(a0), CREG(sp)
@@ -211,16 +189,12 @@ SYM_CODE_START_NOALIGN(ret_from_exception)
 #endif
 
 	csrw CSR_STATUS, a0
-#ifndef CONFIG_CHERI_KERNEL
 	csrw CSR_EPC, a2
-#else
-	csrw sepcc, ca2
-#endif
 
 #ifdef CONFIG_RISCV_CHERI_BAKEWELL
 	/* restore ddc */
 	lc ct0, PT_DDC(csp)
-	csrw ddc, ct0
+	ccsrw ddc, t0
 #endif
 
 	CREG_L CREGX(1),  PT_RA(CREG(sp))
@@ -245,7 +219,7 @@ SYM_CODE_START_LOCAL(handle_kernel_stack_overflow)
 #ifndef CONFIG_CHERI_KERNEL
 	csrrw x31, CSR_SCRATCH, x31
 #else
-	csrrw CREGX(31), sscratchc, CREGX(31)
+	csrrw CREGX(31), scratchc, CREGX(31)
 #endif
 	asm_per_cpu CREG(sp), overflow_stack, CREGX(31)
 	li x31, OVERFLOW_STACK_SIZE
@@ -269,18 +243,10 @@ SYM_CODE_START_LOCAL(handle_kernel_stack_overflow)
 
 	CREG_L CREG(s0), TASK_TI_KERNEL_SP(CREG(tp))
 	csrr s1, CSR_STATUS
-#ifndef CONFIG_CHERI_KERNEL
 	csrr s2, CSR_EPC
-#else
-	csrr CREG(s2), sepcc
-#endif
 	csrr s3, CSR_TVAL
 	csrr s4, CSR_CAUSE
-#ifndef CONFIG_CHERI_KERNEL
 	csrr s5, CSR_SCRATCH
-#else
-	csrr CREG(s5), sscratchc
-#endif
 	CREG_S CREG(s0), PT_SP(CREG(sp))
 	REG_S s1, PT_STATUS(CREG(sp))
 	CREG_S CREG(s2), PT_EPC(CREG(sp))
