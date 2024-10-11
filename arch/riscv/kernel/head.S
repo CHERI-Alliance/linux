@@ -251,14 +251,9 @@ SYM_CODE_START(_start_kernel)
 	csrw CSR_IE, zero
 	csrw CSR_IP, zero
 
-#ifdef CONFIG_CHERI_KERNEL
-	/* Switch to capability mode if not already there. */
-	auipc ct0, 0
-	gctag t1, ct0
-	bnez t1, .Lmodesw1_done
-	modesw
-.Lmodesw1_done:
+	enter_capmode
 
+#ifdef CONFIG_CHERI_KERNEL
 	/*
 	 * Probe for legacy vs. v0.9 layout of the ACPERM bitmap.
 	 * The call to .Ljust_return will trap if the hardware uses the
@@ -296,15 +291,10 @@ SYM_CODE_START(_start_kernel)
 .Linfinite_cap_done:
 
 	/*
-	 * Paranoia:
 	 * Switch to capability mode again in case the infinite cap
 	 * did not have capability mode enabled.
 	 */
-	auipc ct1, 0
-	gctag t0, ct1
-	bnez t0, .Lmodesw2_done
-	modesw
-.Lmodesw2_done:
+	enter_capmode
 
 	/* Store acperm_legcay after the infinite cap is set up. */
 	llc ct0, acperm_legacy

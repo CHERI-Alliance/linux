@@ -3,6 +3,9 @@
  * Copyright (C) 2012 Regents of the University of California
  */
 
+#ifndef _ASM_RISCV_ASMCHERI_H
+#define _ASM_RISCV_ASMCHERI_H
+
 #include <asm/asm.h>
 #include <asm/csr.h>
 
@@ -111,5 +114,27 @@ _csrr \csr \gpr \@
 _csrw \csr \gpr \@
 .endm
 
-#endif
+/*
+ * Enter capability mode.
+ * Clobbers: t0, stvecc
+ */
+.macro enter_capmode
+	la t0, 1f
+	csrw CSR_TVEC, t0
+	.byte 0x33, 0x10, 0x00, 0x09	/* New modesw.CAP */
+	j 2f
+1:	auipc ct0, 0
+	gctag t0, ct0
+	bnez t0, 2f
+	.byte 0x33, 0x10, 0x00, 0x12	/* Old modesw. */
+2:
+.endm
 
+#else /* CONFIG_CHERI_KERNEL */
+
+.macro enter_capmode
+.endm
+
+#endif /* CONFIG_CHERI_KERNEL */
+
+#endif /* _ASM_RISCV_ASMCHERI_H */
