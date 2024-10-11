@@ -1,0 +1,6 @@
+CSRMAP(0x305, mtvecc)
+CSRMAP(0x105, stvecc)
+CSRMAP(0x340, mcratchc)
+CSRMAP(0x140, scratchc)
+CSRMAP(0x341, mepcc)
+CSRMAP(0x141, sepcc)

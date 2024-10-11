@@ -81,9 +81,7 @@ ccsrw \repl, \gpr
  */
 #define CSRMAP(TVAL, REPL) csrmapr \csr \gpr TVAL REPL \unique
 .macro _csrr csr gpr unique
-CSRMAP(CSR_TVEC, tvecc)
-CSRMAP(CSR_SCRATCH, scratchc)
-CSRMAP(CSR_EPC, epcc)
+#include "asmcheri_csrmap.h"
 .ifndef .Lcsrmapr_done_\unique
 	csrrs \gpr, \csr, x0
 .endif
@@ -92,9 +90,7 @@ CSRMAP(CSR_EPC, epcc)
 
 #define CSRMAP(TVAL, REPL) csrmapw \csr \gpr TVAL REPL \unique
 .macro _csrw csr gpr unique
-CSRMAP(CSR_TVEC, tvecc)
-CSRMAP(CSR_SCRATCH, scratchc)
-CSRMAP(CSR_EPC, epcc)
+#include "asmcheri_csrmap.h"
 .ifndef .Lcsrmapw_done_\unique
 	csrrw x0, \csr, \gpr
 .endif
@@ -116,23 +112,166 @@ _csrw \csr \gpr \@
 
 /*
  * Enter capability mode.
- * Clobbers: t0, stvecc
+ * @param reg: A scratch register
+ * Clobbers: CSR_TVEC
  */
-.macro enter_capmode
-	la t0, 1f
-	csrw CSR_TVEC, t0
+.macro enter_capmode reg
+	la \reg, 1f
+	csrw CSR_TVEC, \reg
 	.byte 0x33, 0x10, 0x00, 0x09	/* New modesw.CAP */
 	j 2f
-1:	auipc ct0, 0
-	gctag t0, ct0
-	bnez t0, 2f
+1:	auipc c\reg, 0
+	gctag \reg, c\reg
+	bnez \reg, 2f
 	.byte 0x33, 0x10, 0x00, 0x12	/* Old modesw. */
+2:
+.endm
+
+/*
+ * Detect the CHERI acperm layout
+ * @param legacy Set to one if the legacy acperm bitmap layout
+ *     is in use.
+ * @param infperms Filled with the minimum capabilities requried
+ *     for an infinite capability.
+ * @param tmp A scratch register
+ * Clobbers: CSR_TVEC, cra
+ */
+.macro detect_acperm_layout legacy, infperms, tmp
+	/*
+	 * Setup exception vector. The jalr will trap for the new
+	 * acperm bitmask due to missing execute permissions.
+	 */
+	la \tmp, 2f
+	csrw CSR_TVEC, \tmp
+
+	/* Setup call to 1f, use \legacy as a second scratch. */
+	la \tmp, 1f
+	li \legacy, 0xff
+	acperm c\tmp, c\tmp, \legacy
+
+	/* Load v0.9 style acperm values. */
+	li \legacy, 0
+	li \infperms, 0x70063	/* New ACPERM: R, W, X, ASR, LM, C, SDP:1 */
+
+	/*
+	 * Try to call 1f. We will return here for new ACPERM and jump to 
+	 * the trap vector for legacy. In both cases pcc permissions are
+	 * preserved.
+	 */
+	jalr \tmp
+
+	/* We returned from jalr so we are done. */
+	j 3f
+
+	/* Call point for jalr above. */
+1:	ret
+
+2:	/* Trap vector: Load legacy values. */
+	li \legacy, 1
+	li \infperms, 0x1001f
+
+3:	/* Continuation point. */
+.endm
+
+/*
+ * Check a capability and if it is the infinite capability
+ * install it into pcc by jumping to @okaddr.
+ * @param inf A register with the capability to test.
+ * @param perm A register that contains the minimum permission mask
+ *     required for the infinite capability (not modified).
+ * @param tmp A temporary scratch register
+ * @param okaddr The target label where execution will continue in
+ *     case of success.
+ */
+.macro try_install_infcap inf perm tmp okaddr
+	/* Need a valid tag */
+	gctag \tmp, c\inf
+	beqz \tmp, 1f
+
+	/* Base must be zero */
+	gcbase \tmp, c\inf
+	bnez \tmp, 1f
+
+	/* Length must be infinite. */
+	gclen \tmp, c\inf
+	addi \tmp, \tmp, 1
+	bnez \tmp, 1f
+
+	/* Check permissions. */
+	gcperm \tmp, c\inf
+	and \tmp, \tmp, \perm
+	bne \tmp, \perm, 1f
+
+	/* Ok, uses it. */
+	la \tmp, \okaddr
+	scaddr c\inf, c\inf, \tmp
+	jr c\tmp
+
+1:	/* Failure. */
+.endm
+
+/*
+ * Probe for the location and the orientation of the M-bit.
+ * @param mask Will be filled with the bit mask of the mbit in the meta
+ *     data part of a capbility.
+ * @param value Will be filled with the value of the M-bit for capability
+ *     mode. This is either zero or equal to mask.
+ * @param scmodeval This will be filled with the value that must be passed
+ *     to scmode to enable capability mode.
+ * @param hybrid Will be set to 1 if the CPU support hybrid mode and to
+ *     zero for a purecap CPU.
+ * Clobbers: CSR_TVEC
+ *
+ * Prerequisite: We must already operate in capability mode.
+ */
+.macro detect_mbit mask, value, scmodeval, hybrid
+	/*
+	 * If we are not on a hybrid CPU the scmode instruction will trap
+	 * and zero values are ok.
+	 */
+	la \hybrid, 1f
+	csrw CSR_TVEC, \hybrid
+
+	/*
+	 * We execute in capability mode, thus a capability derived
+	 * from ppc has capability mode enabled. Create a capabilities
+	 * with scmode(1) and scmode(0) from these and compare the results.
+	 * witch scmode(1) and compare the results. Use the output
+	 * registers for temporary values.
+	 */
+	auipc c\value, 0
+	li \hybrid, 1
+	scmode c\mask, c\value, \hybrid
+	scmode c\hybrid, c\value, zero
+
+	/* Determine scmodeval */
+	sceq \scmodeval, c\mask, c\value
+
+	/* Get meta data for all three capabilities. */
+	gchi \value, c\value
+	gchi \mask, c\mask
+	gchi \hybrid, c\hybrid
+
+	/* Determine final value of M-bit mask and value. */
+	xor \mask, \mask, \hybrid
+	and \value, \value, \mask
+
+	/* Hybird supported. */
+	li \hybrid, 1
+
+	j 2f
+
+	/* Fallback trap vector target for a purecap CPU. */
+1:	li \mask, 0
+	li \value, 0
+	li \scmodeval, 0
+	li \hybrid, 0
 2:
 .endm
 
 #else /* CONFIG_CHERI_KERNEL */
 
-.macro enter_capmode
+.macro enter_capmode reg
 .endm
 
 #endif /* CONFIG_CHERI_KERNEL */

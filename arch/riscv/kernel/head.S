@@ -194,7 +194,6 @@ secondary_start_sbi:
 	 * we are presently executing in kernel.
 	 */
 	csrw CSR_SCRATCH, zero
-
 	ret
 
 .align 2
@@ -203,47 +202,6 @@ secondary_start_sbi:
 	wfi
 	j .Lsecondary_park
 
-#ifdef CONFIG_CHERI_KERNEL
-/*
- * Check if the capability in ca3(!) looks like an infinite capability.
- * Return if this is not the case. Otherwise use the infinite capability
- * to jump to the address in t0.
- * Registers:
- * - t0: The target address if successful. Not modified on failure.
- * - t1: Scratch
- * - t3: Minimum permissions required
- * - ca3: The capability to test.
- */
-.align 2
-.Ltry_install_infcap:
-	/* Need a valid tag. */
-	gctag t1, ca3
-	beqz t1, 1f
-
-	/* Base must be zero */
-	gcbase t1, ca3
-	bnez t1, 1f
-
-	/* Length must be infinite. */
-	gclen t1, ca3
-	addi t1, t1, 1
-	bnez t1, 1f
-
-	/* Check permissions against t3. */
-	gcperm t1, ca3
-	and t1, t1, t3
-	bne t1, t3, 1f
-
-	/* Ok, use it. */
-	scaddr ca3, ca3, t0
-	jr ca3
-1:	ret
-
-.align 2
-.Ljust_return:
-	ret
-#endif
-
 SYM_CODE_END(_start)
 
 SYM_CODE_START(_start_kernel)
@@ -251,105 +209,7 @@ SYM_CODE_START(_start_kernel)
 	csrw CSR_IE, zero
 	csrw CSR_IP, zero
 
-	enter_capmode
-
-#ifdef CONFIG_CHERI_KERNEL
-	/*
-	 * Probe for legacy vs. v0.9 layout of the ACPERM bitmap.
-	 * The call to .Ljust_return will trap if the hardware uses the
-	 * new encoding of the permission bits.
-	 * We will set up t3 for .Ltry_install_infcap and remember the
-	 * probe result in t2. The permissions we ask for in the infinite
-	 * cap ignore _zcherilevels. This can be done later in C code if
-	 * desired.
-	 */
-	llc ct0, .Lacperm_done
-	csrw CSR_TVEC, t0
-	li t2, 0
-	li t3, 0x70043	/* New ACPERM: R, W, X, ASR, LM, C, SDP:0 */
-	llc ct0, .Ljust_return
-	li t1, 0xff
-	acperm ct0, ct0, t1
-	jalr ct0
-	li t2, 1
-	li t3, 0x1001f	/* Legacy ACPERM: R, W, X, ASR, C, SDP:0 */
-.Lacperm_done:
-
-	/*
-	 * Search for the infinite capability and install it in PCC.
-	 * We first try ca3 where it is supposed to be, then we try ddc.
-	 * If both fail assume pcc contains something suitable.
-	 * In any case the infinite cap will be checked more in detail
-	 * later in C-code.
-	 *
-	 * Note that we must not clobber t2 until we store it below.
-	 */
-	llc ct0, .Linfinite_cap_done
-	call .Ltry_install_infcap
-	ccsrr a3, ddc
-	call .Ltry_install_infcap
-.Linfinite_cap_done:
-
-	/*
-	 * Switch to capability mode again in case the infinite cap
-	 * did not have capability mode enabled.
-	 */
-	enter_capmode
-
-	/* Store acperm_legcay after the infinite cap is set up. */
-	llc ct0, acperm_legacy
-	sb t2, (ct0)
-
-	/*
-	 * Determine orientation of the M-bit in meta data and scmode.
-	 * If we are not on a hybrid CPU the scmode will trap and the
-	 * default values of zero are ok.
-	 */
-	llc ct0, .Lmbit_done
-	csrw CSR_TVEC, t0
-
-	/*
-	 * We execute in capability mode, thus ct1 (derived from ppc)
-	 * has capability mode enabled. Create a capability with scmode(1)
-	 * from ct1.
-	 */
-	auipc ct1, 0
-	li t3, 1
-	scmode ct2, ct1, t3
-
-	/* If we reach this point we have hybrid support. */
-	llc ct0, cheri_hybrid_support
-	sb t3, (ct0)
-
-	/* If ct1 and ct2 are equal scmode(1) enables capability mode. */
-	llc ct0, scmode_capmode_value
-	sceq t3, ct1, ct2
-	sb t3, (ct0)
-
-	/*
-	 * Create a capability from ct1 with scmode(0) in ct3.
-	 * xor-ing the meta data of ct1 and ct3 gives the mask of
-	 * the M-bit.
-	 */
-	llc ct0, cheri_mbit_mask
-	scmode ct3, ct1, x0
-	gchi t2, ct2
-	gchi t3, ct3
-	xor t2, t2, t3
-	sd t2, (ct0)
-
-	/*
-	 * Given the M-bit mask determine the M-bit value for capability
-	 * mode from the meta data of ct1 that is known to have
-	 * capability mode enbled.
-	 */
-	llc ct0, cheri_mbit_value
-	gchi t1, ct1
-	and t1, t1, t2
-	sd t1, (ct0)
-.Lmbit_done:
-
-#endif
+	enter_capmode t1
 
 #ifdef CONFIG_RISCV_M_MODE
 	/* flush the instruction cache */
@@ -417,6 +277,45 @@ SYM_CODE_START(_start_kernel)
 
 #endif /* CONFIG_XIP */
 #endif /* CONFIG_RISCV_BOOT_SPINWAIT */
+
+#ifdef CONFIG_CHERI_KERNEL
+	/* Detect acperm layout. Fills in t2 and t3. */
+	detect_acperm_layout t2 t3 t0
+
+	/*
+	 * Search for the infinite cap in ca3 and ddc and install it in pcc.
+	 * If both fail assume that pcc is ok. Don't clobber t2.
+	 */
+	try_install_infcap a3 t3 t1 .Linfcap_done
+	ccsrr a3, ddc
+	try_install_infcap a3 t3 t1 .Linfcap_done
+.Linfcap_done:
+
+	/*
+	 * Switch to capability mode again in case the infinite cap
+	 * did not have capability mode enabled.
+	 */
+	enter_capmode t1
+
+	/* Store acperm_legcay after the infinite cap is set up. */
+	llc ct0, acperm_legacy
+	sb t2, (ct0)
+
+	/* Detect M-bit properties. */
+	detect_mbit t1 t2 t3 t4
+
+	/* Store the results. */
+	llc ct0, cheri_mbit_mask
+	sd t1, (ct0)
+	llc ct0, cheri_mbit_value
+	sd t2, (ct0)
+	llc ct0, scmode_capmode_value
+	sb t3, (ct0)
+	llc ct0, cheri_hybrid_support
+	sb t4, (ct0)
+.Lmbit_done:
+
+#endif
 
 #ifdef CONFIG_XIP_KERNEL
 	la sp, _end + THREAD_SIZE
