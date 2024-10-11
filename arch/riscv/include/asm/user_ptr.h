@@ -7,7 +7,7 @@
 #include <linux/sched/task_stack.h>
 #include <asm/processor.h>
 
-#ifdef CONFIG_CHERI_PURECAP_UABI
+#ifdef CONFIG_CHERI_KERNEL
 
 static inline
 user_ptr_perms_t arch_user_ptr_owning_perms_from_prot(int prot, unsigned long vm_flags)
@@ -27,6 +27,6 @@ user_ptr_perms_t arch_user_ptr_owning_perms_from_prot(int prot, unsigned long vm
 }
 #define arch_user_ptr_owning_perms_from_prot arch_user_ptr_owning_perms_from_prot
 
-#endif /* CONFIG_CHERI_PURECAP_UABI */
+#endif /* CONFIG_CHERI_KERNEL */
 
 #endif /* __ASM_USER_PTR_H */

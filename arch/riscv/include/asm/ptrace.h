@@ -45,7 +45,7 @@ struct pt_regs {
 	register_t t4;
 	register_t t5;
 	register_t t6;
-#ifdef CONFIG_CHERI_PURECAP_UABI
+#ifdef CONFIG_CHERI_KERNEL
 	register_t ddc;
 #endif
 	/* a0 value before the syscall */
@@ -54,7 +54,7 @@ struct pt_regs {
 	unsigned long status;
 	unsigned long badaddr;
 	unsigned long cause;
-#ifdef CONFIG_CHERI_PURECAP_UABI
+#ifdef CONFIG_CHERI_KERNEL
 	unsigned long _pad;
 #endif
 };

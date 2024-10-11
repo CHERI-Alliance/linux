@@ -134,7 +134,7 @@ early_initcall(compat_mode_detect);
 int start_thread(struct pt_regs *regs, unsigned long pc,
 		 struct linux_binprm *bprm)
 {
-#ifdef CONFIG_CHERI_PURECAP_UABI
+#ifdef CONFIG_CHERI_KERNEL
 	/*
 	 * Make sure that the register state does not contain stale
 	 * capability data.
@@ -150,7 +150,7 @@ int start_thread(struct pt_regs *regs, unsigned long pc,
 		 */
 		fstate_restore(current, regs);
 	}
-#ifndef CONFIG_CHERI_PURECAP_UABI
+#ifndef CONFIG_CHERI_KERNEL
 	regs->epc = pc;
 	regs->sp = bprm->p;
 #else
@@ -229,7 +229,7 @@ int copy_thread(struct task_struct *p, const struct kernel_clone_args *args)
 	if (unlikely(args->fn)) {
 		/* Kernel thread */
 		memset(childregs, 0, sizeof(struct pt_regs));
-#ifdef CONFIG_CHERI_PURECAP_UABI
+#ifdef CONFIG_CHERI_KERNEL
 		childregs->ddc = regs->ddc;
 #endif
 		/* Supervisor/Machine, irqs on: */

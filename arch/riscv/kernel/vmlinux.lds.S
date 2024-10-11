@@ -115,7 +115,7 @@ SECTIONS
 		__rela_dyn_end = .;
 	}
 
-#ifdef CONFIG_RISCV_CHERI_BAKEWELL
+#ifdef CONFIG_CHERI_KERNEL
 	__cap_relocs : ALIGN(8) {
 		*(__cap_relocs)
 	}
@@ -145,7 +145,7 @@ SECTIONS
 
 	RW_DATA(L1_CACHE_BYTES, PAGE_SIZE, THREAD_ALIGN)
 
-#ifdef CONFIG_RISCV_CHERI_BAKEWELL
+#ifdef CONFIG_CHERI_KERNEL
 	.captable : {
 		*(.captable)
 	}

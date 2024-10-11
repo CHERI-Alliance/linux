@@ -120,7 +120,7 @@ void asm_offsets(void)
 	OFFSET(PT_STATUS, pt_regs, status);
 	OFFSET(PT_BADADDR, pt_regs, badaddr);
 	OFFSET(PT_CAUSE, pt_regs, cause);
-#ifdef CONFIG_RISCV_CHERI_BAKEWELL
+#ifdef CONFIG_CHERI_KERNEL
 	OFFSET(PT_DDC, pt_regs, ddc);
 #endif
 

@@ -230,7 +230,7 @@ static size_t get_rt_frame_size(bool cal_all)
 	return frame_size;
 }
 
-#ifdef CONFIG_CHERI_PURECAP_UABI
+#ifdef CONFIG_CHERI_KERNEL
 int arch_validate_sigaction(int sig, const struct k_sigaction *act,
 			    const struct k_sigaction *oact)
 {

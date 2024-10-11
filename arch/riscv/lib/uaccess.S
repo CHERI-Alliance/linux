@@ -13,7 +13,7 @@
 	.endm
 
 SYM_FUNC_START(__asm_copy_to_user)
-#if defined(CONFIG_RISCV_ISA_V) && !defined(CONFIG_RISCV_CHERI_BAKEWELL)
+#if defined(CONFIG_RISCV_ISA_V) && !defined(CONFIG_CHERI_KERNEL)
 	/* FIXCHERI: ISA_V version is not CHERI ready. */
 	ALTERNATIVE("j fallback_scalar_usercopy", "nop", 0, RISCV_ISA_EXT_v, CONFIG_RISCV_ISA_V)
 	REG_L	t0, riscv_v_usercopy_threshold
@@ -210,7 +210,7 @@ EXPORT_SYMBOL(__asm_copy_to_user)
 SYM_FUNC_ALIAS(__asm_copy_from_user, __asm_copy_to_user)
 EXPORT_SYMBOL(__asm_copy_from_user)
 
-#ifdef CONFIG_CHERI_PURECAP_UABI
+#ifdef CONFIG_CHERI_KERNEL
 SYM_FUNC_START(__asm_copy_to_user_with_captags)
 
 	/* If things are not aligned fall back to normal user copy. */

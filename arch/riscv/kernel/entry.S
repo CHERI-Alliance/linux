@@ -58,7 +58,7 @@ SYM_CODE_START(handle_exception)
 	CREG_S CREGX(5),  PT_T0(CREG(sp))
 	save_from_x6_to_x31
 
-#ifdef CONFIG_RISCV_CHERI_BAKEWELL
+#ifdef CONFIG_CHERI_KERNEL
 	/* store and clear ddc */
 	ccsrr t0, ddc
 	sc ct0, PT_DDC(csp)
@@ -191,7 +191,7 @@ SYM_CODE_START_NOALIGN(ret_from_exception)
 	csrw CSR_STATUS, a0
 	csrw CSR_EPC, a2
 
-#ifdef CONFIG_RISCV_CHERI_BAKEWELL
+#ifdef CONFIG_CHERI_KERNEL
 	/* restore ddc */
 	lc ct0, PT_DDC(csp)
 	ccsrw ddc, t0
@@ -404,14 +404,14 @@ SYM_DATA_START_LOCAL(excp_vect_table)
 	RISCV_PTR do_trap_unknown
 	RISCV_PTR do_trap_unknown
 	RISCV_PTR do_trap_unknown
-#ifndef CONFIG_CHERI_PURECAP_UABI
+#ifndef CONFIG_CHERI_KERNEL
 	RISCV_PTR do_trap_unknown
 #else
 	RISCV_PTR do_trap_cheri
 #endif
 SYM_DATA_END_LABEL(excp_vect_table, SYM_L_LOCAL, excp_vect_table_end)
 
-#ifdef CONFIG_CHERI_PURECAP_UABI
+#ifdef CONFIG_CHERI_KERNEL
 	.align CLGREG
 SYM_DATA_START(kernel_code_cap)
 	RISCV_PTR 0

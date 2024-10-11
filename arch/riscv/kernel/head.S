@@ -203,7 +203,7 @@ secondary_start_sbi:
 	wfi
 	j .Lsecondary_park
 
-#ifdef CONFIG_CHERI_PURECAP_UABI
+#ifdef CONFIG_CHERI_KERNEL
 /*
  * Check if the capability in ca3(!) looks like an infinite capability.
  * Return if this is not the case. Otherwise use the infinite capability
@@ -251,7 +251,7 @@ SYM_CODE_START(_start_kernel)
 	csrw CSR_IE, zero
 	csrw CSR_IP, zero
 
-#ifdef CONFIG_CHERI_PURECAP_UABI
+#ifdef CONFIG_CHERI_KERNEL
 	/* Switch to capability mode if not already there. */
 	auipc ct0, 0
 	gctag t1, ct0

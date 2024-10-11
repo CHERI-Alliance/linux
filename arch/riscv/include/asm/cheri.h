@@ -61,7 +61,7 @@
 #define CHERI_PERMS_ROOTCAP \
 	(CHERI_PERM_SW_VMEM)
 
-#ifdef CONFIG_CHERI_PURECAP_UABI
+#ifdef CONFIG_CHERI_KERNEL
 extern bool __bakewell_is_capmode(void * __capability cap);
 #define cheri_is_capmode(x) __bakewell_is_capmode(x)
 

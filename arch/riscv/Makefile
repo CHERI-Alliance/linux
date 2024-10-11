@@ -95,7 +95,7 @@ endif
 riscv-march-$(CONFIG_TOOLCHAIN_HAS_ZIHINTPAUSE) := $(riscv-march-y)_zihintpause
 
 # Enable CHERI Bakewell support is requested
-riscv-march-$(CONFIG_RISCV_CHERI_BAKEWELL) := $(riscv-march-y)_zcherihybrid
+riscv-march-$(CONFIG_CHERI_KERNEL) := $(riscv-march-y)_zcherihybrid
 
 
 # Remove F,D,V from isa string for all. Keep extensions between "fd" and "v" by

@@ -90,14 +90,14 @@
 #define INSN_LEN(insn)			((((insn) & 0x3) < 0x3) ? 2 : 4)
 
 #if defined(CONFIG_64BIT)
-#ifndef CONFIG_CHERI_PURECAP_UABI
+#ifndef CONFIG_CHERI_KERNEL
 #define LOG_REGBYTES			3
 #else
 #define LOG_REGBYTES			4
 #endif
 #define XLEN				64
 #else
-#ifndef CONFIG_CHERI_PURECAP_UABI
+#ifndef CONFIG_CHERI_KERNEL
 #define LOG_REGBYTES			2
 #else
 #define LOG_REGBYTES			3

@@ -2,7 +2,7 @@
 #ifndef __ASM_BAKEWELL_H
 #define __ASM_BAKEWELL_H
 
-#ifdef CONFIG_RISCV_CHERI_BAKEWELL
+#ifdef CONFIG_CHERI_KERNEL
 
 extern void __init bakewell_init(void);
 extern void __init init_cap_relocs(uintcap_t inf);
