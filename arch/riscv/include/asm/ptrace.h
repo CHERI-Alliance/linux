@@ -71,7 +71,7 @@ struct pt_regs {
 #ifdef CONFIG_CHERI_KERNEL
 #define CREG_FMT "%#p"
 #else
-#define CREG_FMT REG_FMT
+#define CREG_FMT "%p"
 #endif
 
 #define user_mode(regs) (((regs)->status & SR_PP) == 0)
