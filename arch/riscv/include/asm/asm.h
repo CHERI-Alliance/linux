@@ -171,7 +171,8 @@
 .option push
 .option norelax
 #ifdef CONFIG_CHERI_KERNEL
-	llc cgp, __global_pointer$
+	/* CHERI does not use the global pointer. Load it with cnull. */
+	cmv cgp, cnull
 #else
 	la gp, __global_pointer$
 #endif
