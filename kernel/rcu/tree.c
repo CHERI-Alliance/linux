@@ -1609,7 +1609,7 @@ static void rcu_sr_normal_complete(struct llist_node *node)
 {
 	struct rcu_synchronize *rs = container_of(
 		(struct rcu_head *) node, struct rcu_synchronize, head);
-	unsigned long oldstate = (unsigned long) rs->head.func;
+	unsigned long oldstate = __c_pa(rs->head.func);
 
 	WARN_ONCE(IS_ENABLED(CONFIG_PROVE_RCU) &&
 		!poll_state_synchronize_rcu(oldstate),
@@ -2938,9 +2938,9 @@ static int __init rcu_spawn_core_kthreads(void)
 static void rcutree_enqueue(struct rcu_data *rdp, struct rcu_head *head, rcu_callback_t func)
 {
 	rcu_segcblist_enqueue(&rdp->cblist, head);
-	if (__is_kvfree_rcu_offset((unsigned long)func))
+	if (__is_kvfree_rcu_offset(__c_pa(func)))
 		trace_rcu_kvfree_callback(rcu_state.name, head,
-					 (unsigned long)func,
+					 __c_pa(func),
 					 rcu_segcblist_n_cbs(&rdp->cblist));
 	else
 		trace_rcu_callback(rcu_state.name, head,
@@ -3052,7 +3052,7 @@ __call_rcu_common(struct rcu_head *head, rcu_callback_t func, bool lazy_in)
 	struct rcu_data *rdp;
 
 	/* Misaligned rcu_head! */
-	WARN_ON_ONCE((unsigned long)head & (sizeof(void *) - 1));
+	WARN_ON_ONCE(__c_pa(head) & (sizeof(void *) - 1));
 
 	if (debug_rcu_head_queue(head)) {
 		/*
@@ -3919,7 +3919,7 @@ static void synchronize_rcu_normal(void)
 	 * snapshot before adding a request.
 	 */
 	if (IS_ENABLED(CONFIG_PROVE_RCU))
-		rs.head.func = (void *) get_state_synchronize_rcu();
+		rs.head.func = __c_fakep(get_state_synchronize_rcu());
 
 	rcu_sr_normal_add_req(&rs);
 
@@ -4436,7 +4436,7 @@ static void rcu_barrier_handler(void *cpu_in)
  */
 void rcu_barrier(void)
 {
-	uintptr_t cpu;
+	unsigned int cpu;
 	unsigned long flags;
 	unsigned long gseq;
 	struct rcu_data *rdp;
@@ -4497,7 +4497,7 @@ retry:
 			continue;
 		}
 		raw_spin_unlock_irqrestore(&rcu_state.barrier_lock, flags);
-		if (smp_call_function_single(cpu, rcu_barrier_handler, (void *)cpu, 1)) {
+		if (smp_call_function_single(cpu, rcu_barrier_handler, __c_fakep(cpu), 1)) {
 			schedule_timeout_uninterruptible(1);
 			goto retry;
 		}

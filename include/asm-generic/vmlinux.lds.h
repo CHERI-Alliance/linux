@@ -1085,7 +1085,8 @@
 	*(.data..percpu)						\
 	*(.data..percpu..shared_aligned)				\
 	PERCPU_DECRYPTED_SECTION					\
-	__per_cpu_end = .;
+	__per_cpu_end = .;						\
+	size$__per_cpu_start = __per_cpu_end - __per_cpu_start;		\
 
 /**
  * PERCPU_VADDR - define output section for percpu area
@@ -1116,7 +1117,8 @@
 	.data..percpu vaddr : AT(__per_cpu_load - LOAD_OFFSET) {	\
 		PERCPU_INPUT(cacheline)					\
 	} phdr								\
-	. = __per_cpu_load + SIZEOF(.data..percpu);
+	. = __per_cpu_load + SIZEOF(.data..percpu);			\
+	size$__per_cpu_load = 1;
 
 /**
  * PERCPU_SECTION - define output section for percpu area, simple version
@@ -1135,6 +1137,7 @@
 	.data..percpu	: AT(ADDR(.data..percpu) - LOAD_OFFSET) {	\
 		__per_cpu_load = .;					\
 		PERCPU_INPUT(cacheline)					\
+		size$__per_cpu_load = 1;				\
 	}
 
 

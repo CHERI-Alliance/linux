@@ -227,8 +227,28 @@ do {									\
  * to prevent the compiler from making incorrect assumptions about the
  * pointer value.  The weird cast keeps both GCC and sparse happy.
  */
+
+#ifdef CONFIG_CHERI_KERNEL
+/* FIXCHERI: This is a hot path. Optimize! */
+static inline void * cheri_shift_percpu_ptr(const uintptr_t p, ptraddr_t off)
+{
+	ptraddr_t ret = __c_ua(p) + off;
+	void *auth = (void *)p;
+
+	if (cheri_tag_get((void *)p)) {
+		auth = cheri_make_kernel_data_cap(cheri_base_get(p) + off,
+						  cheri_length_get(p));
+		auth = cheri_perms_and(auth, cheri_perms_get(p));
+	}
+
+	return cheri_address_set(auth, ret);
+}
+#define SHIFT_PERCPU_PTR(__p, __offset)					\
+	((typeof(*(__p)) *)cheri_shift_percpu_ptr((uintptr_t)__p, __offset))
+#else
 #define SHIFT_PERCPU_PTR(__p, __offset)					\
 	RELOC_HIDE((typeof(*(__p)) __kernel __force *)(__p), (__offset))
+#endif
 
 #define per_cpu_ptr(ptr, cpu)						\
 ({									\

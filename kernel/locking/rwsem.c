@@ -283,7 +283,7 @@ rwsem_owner_flags(struct rw_semaphore *sem, unsigned long *pflags)
 {
 	uintptr_t owner = atomic_ptr_read(&sem->owner);
 
-	*pflags = owner & RWSEM_OWNER_FLAGS_MASK;
+	*pflags = __c_ua(owner) & RWSEM_OWNER_FLAGS_MASK;
 	return (struct task_struct *)(owner & ~RWSEM_OWNER_FLAGS_MASK);
 }
 

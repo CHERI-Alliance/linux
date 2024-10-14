@@ -329,7 +329,7 @@ bool ww_mutex_spin_on_owner(struct mutex *lock, struct ww_acquire_ctx *ww_ctx,
 	 * other thread may already own a lock that we also
 	 * need.
 	 */
-	if (!waiter && (atomic_long_read(&lock->owner) & MUTEX_FLAG_WAITERS))
+	if (!waiter && (atomic_ptr_read(&lock->owner) & MUTEX_FLAG_WAITERS))
 		return false;
 
 	/*

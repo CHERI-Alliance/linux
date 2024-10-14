@@ -45,7 +45,7 @@ enum {
 
 static int show_irq_affinity(int type, struct seq_file *m)
 {
-	struct irq_desc *desc = irq_to_desc((long)m->private);
+	struct irq_desc *desc = irq_to_desc(__c_pa(m->private));
 	const struct cpumask *mask;
 
 	switch (type) {
@@ -82,7 +82,7 @@ static int show_irq_affinity(int type, struct seq_file *m)
 
 static int irq_affinity_hint_proc_show(struct seq_file *m, void *v)
 {
-	struct irq_desc *desc = irq_to_desc((long)m->private);
+	struct irq_desc *desc = irq_to_desc(__c_pa(m->private));
 	unsigned long flags;
 	cpumask_var_t mask;
 
@@ -137,7 +137,7 @@ static inline int irq_select_affinity_usr(unsigned int irq)
 static ssize_t write_irq_affinity(int type, struct file *file,
 		const char __user *buffer, size_t count, loff_t *pos)
 {
-	unsigned int irq = (int)(long)pde_data(file_inode(file));
+	unsigned int irq = (int)__c_pa(pde_data(file_inode(file)));
 	cpumask_var_t new_value;
 	int err;
 
@@ -278,7 +278,7 @@ static const struct proc_ops default_affinity_proc_ops = {
 
 static int irq_node_proc_show(struct seq_file *m, void *v)
 {
-	struct irq_desc *desc = irq_to_desc((long) m->private);
+	struct irq_desc *desc = irq_to_desc(__c_pa(m->private));
 
 	seq_printf(m, "%d\n", irq_desc_get_node(desc));
 	return 0;

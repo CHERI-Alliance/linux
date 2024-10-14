@@ -1,4 +1,5 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
+
 /*
  * Copyright (C) 2012 Regents of the University of California
  */
@@ -140,11 +141,22 @@ relocate_enable_mmu:
 	ret
 #endif /* CONFIG_MMU */
 #ifdef CONFIG_SMP
-	.global secondary_start_sbi
-secondary_start_sbi:
+SYM_CODE_START(secondary_start_sbi)
 	/* Mask all interrupts */
 	csrw CSR_IE, zero
 	csrw CSR_IP, zero
+
+#ifdef CONFIG_CHERI_KERNEL
+	/* Setup environment. */
+	enter_capmode t0
+	detect_acperm_layout t1 t0 t2
+	find_infcap t0 t1 t2
+
+	/* Provide provenance for boot data. */
+	auipc ct0, 0
+	scaddr ca0, ct0, a0
+	scaddr ca1, ct0, a1
+#endif /* CONFIG_CHERI_KERNEL */
 
 	/* Load the global pointer */
 	load_global_pointer
@@ -163,12 +175,12 @@ secondary_start_sbi:
 	/* a0 contains the hartid & a1 contains boot data */
 	li a2, SBI_HART_BOOT_TASK_PTR_OFFSET
 	XIP_FIXUP_OFFSET a2
-	add a2, a2, a1
-	REG_L tp, (a2)
+	CREG(add) CREG(a2), CREG(a1), a2
+	CREG_L CREG(tp), (CREG(a2))
 	li a3, SBI_HART_BOOT_STACK_PTR_OFFSET
 	XIP_FIXUP_OFFSET a3
-	add a3, a3, a1
-	REG_L sp, (a3)
+	CREG(add) CREG(a3), CREG(a1), a3
+	CREG_L CREG(sp), (CREG(a3))
 
 .Lsecondary_start_common:
 
@@ -178,9 +190,18 @@ secondary_start_sbi:
 	XIP_FIXUP_OFFSET a0
 	call relocate_enable_mmu
 #endif
+#ifdef CONFIG_CHERI_KERNEL
+	setup_pcc kernel_code_cap t0 t1
+#endif
 	call .Lsetup_trap_vector
+#ifdef CONFIG_CHERI_KERNEL
+	/* Reset registers. */
+	setup_cheri_regs t0
+	reset_gprs
+#endif
 	scs_load_current
 	tail smp_callin
+SYM_CODE_END(secondary_start_sbi)
 #endif /* CONFIG_SMP */
 
 .align 2
@@ -250,6 +271,23 @@ SYM_CODE_START(_start_kernel)
 	li t0, SR_FS_VS
 	csrc CSR_STATUS, t0
 
+#ifdef CONFIG_CHERI_KERNEL
+	/* Detect acperm layout. Fills in t2 and t3. */
+	detect_acperm_layout t2 t3 t0
+
+	/* Install infinite capability in pcc. */
+	find_infcap t3 t1 t2
+
+	/*
+	 * Switch to capability mode again in case the infinite cap
+	 * did not have capability mode enabled.
+	 */
+	enter_capmode t1
+
+	/* NOTE: Do not clobber t2 until it is stored below. */
+#endif
+
+
 #ifdef CONFIG_RISCV_BOOT_SPINWAIT
 	li t0, CONFIG_NR_CPUS
 	blt a0, t0, .Lgood_cores
@@ -261,7 +299,7 @@ SYM_CODE_START(_start_kernel)
 	/* Pick one hart to run the main boot sequence */
 	la a3, hart_lottery
 	li a2, 1
-	amoadd.w a3, a2, (a3)
+	amoadd.w a3, a2, (CREG(a3))
 	bnez a3, .Lsecondary_start
 
 #else
@@ -279,24 +317,6 @@ SYM_CODE_START(_start_kernel)
 #endif /* CONFIG_RISCV_BOOT_SPINWAIT */
 
 #ifdef CONFIG_CHERI_KERNEL
-	/* Detect acperm layout. Fills in t2 and t3. */
-	detect_acperm_layout t2 t3 t0
-
-	/*
-	 * Search for the infinite cap in ca3 and ddc and install it in pcc.
-	 * If both fail assume that pcc is ok. Don't clobber t2.
-	 */
-	try_install_infcap a3 t3 t1 .Linfcap_done
-	ccsrr a3, ddc
-	try_install_infcap a3 t3 t1 .Linfcap_done
-.Linfcap_done:
-
-	/*
-	 * Switch to capability mode again in case the infinite cap
-	 * did not have capability mode enabled.
-	 */
-	enter_capmode t1
-
 	/* Store acperm_legcay after the infinite cap is set up. */
 	llc ct0, acperm_legacy
 	sb t2, (ct0)
@@ -313,8 +333,6 @@ SYM_CODE_START(_start_kernel)
 	sb t3, (ct0)
 	llc ct0, cheri_hybrid_support
 	sb t4, (ct0)
-.Lmbit_done:
-
 #endif
 
 #ifdef CONFIG_XIP_KERNEL
@@ -375,14 +393,6 @@ SYM_CODE_START(_start_kernel)
 	call relocate_enable_mmu
 #endif /* CONFIG_MMU */
 
-#ifdef CONFIG_CHERI_KERNEL
-	/* Reset all register to kill stale capabilities. */
-	reset_gprs
-#ifdef CONFIG_RISCV_ISA_V
-	#error "NOT IMPLEMENTED: Check if ISA_V registers can contain capabilities."
-#endif
-#endif /* CONFIG_CHERI_KERNEL */
-
 	call .Lsetup_trap_vector
 	/* Restore C environment */
 	la tp, init_task
@@ -402,23 +412,20 @@ SYM_CODE_START(_start_kernel)
 	scs_load_current
 
 #ifdef CONFIG_CHERI_KERNEL
-	/* Setup capabilities and resolve caprelocs. */
-	ccsrw ddc, zero
-	ccsrw stdc, zero
-
 	auipc ca0, 0
 	call init_cap_relocs
 
 	auipc ca0, 0
 	call bakewell_caps_init
 
-	/* Use the new kernel code capability for pcc. */
-	llc ct1, .Lsetpcc
-	llc ct0, kernel_code_cap
-	lc ct0, (ct0)
-	scaddr ct0, ct0, t1
-	jr ct0
-.Lsetpcc:
+	/*
+	 * Setup/Reset registers. Setup trap vector again to derive it
+	 * from the new pcc.
+	 */
+	setup_pcc kernel_code_cap t0 t1
+	call .Lsetup_trap_vector
+	setup_cheri_regs t0
+	reset_gprs
 #endif
 
 #ifdef CONFIG_KASAN
@@ -439,8 +446,8 @@ SYM_CODE_START(_start_kernel)
 	XIP_FIXUP_OFFSET a1
 	la a2, __cpu_spinwait_task_pointer
 	XIP_FIXUP_OFFSET a2
-	add a1, a3, a1
-	add a2, a3, a2
+	CREG(add) CREG(a1), CREG(a1), a3
+	CREG(add) CREG(a2), CREG(a2), a3
 
 	/*
 	 * This hart didn't win the lottery, so we wait for the winning hart to
@@ -448,8 +455,8 @@ SYM_CODE_START(_start_kernel)
 	 */
 .Lwait_for_cpu_up:
 	/* FIXME: We should WFI to save some energy here. */
-	REG_L sp, (a1)
-	REG_L tp, (a2)
+	CREG_L CREG(sp), (CREG(a1))
+	CREG_L CREG(tp), (CREG(a2))
 	beqz sp, .Lwait_for_cpu_up
 	beqz tp, .Lwait_for_cpu_up
 	fence

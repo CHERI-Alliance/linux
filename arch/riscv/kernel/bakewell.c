@@ -28,9 +28,6 @@ void __init bakewell_init(void)
 	if (!root_cap_valid)
 		panic("CHERI: Invalid root cap\n");
 
-	/* Enable user space CHERI support. */
-	__asm__ __volatile__("csrs senvcfg, %0\n" : : "r" (1 << 28));
-
 	pr_info("CHERI: bakewell support%s\n",
 		acperm_legacy ? " (legacy acperm)" : "");
 
@@ -43,11 +40,6 @@ void __init bakewell_init(void)
 	pr_info("CHERI: user allperms cap: %#lp\n",
 		(void *)cheri_user_root_allperms_cap);
 	pr_info("CHERI: user root cap: %#lp\n", (void *)cheri_user_root_cap);
-}
-
-/* Check boot time detected mbit value. */
-static void __init bakewell_check_mbit(void)
-{
 }
 
 /* Check validity of the root capability. */
@@ -118,7 +110,6 @@ void __init bakewell_caps_init(uintcap_t inf)
 	cheri_perms_t perms;
 
 	bakewell_check_root_cap(inf);
-	bakewell_check_mbit();
 
 	/* Sanitize root capability. */
 	inf = cheri_address_set(inf, 0);

@@ -15,6 +15,7 @@
 #include <linux/irqflags_types.h>
 #include <linux/typecheck.h>
 #include <linux/cleanup.h>
+#include <linux/cheri.h>
 #include <asm/irqflags.h>
 #include <asm/percpu.h>
 

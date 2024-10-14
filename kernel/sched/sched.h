@@ -2356,7 +2356,7 @@ extern struct sched_class __sched_class_highest[];
 extern struct sched_class __sched_class_lowest[];
 
 #define for_class_range(class, _from, _to) \
-	for (class = (_from); class < (_to); class++)
+	for (class = __sched_class_highest + (__c_pa(_from) - __c_pa(__sched_class_highest)); class < (_to); class++)
 
 #define for_each_class(class) \
 	for_class_range(class, __sched_class_highest, __sched_class_lowest)

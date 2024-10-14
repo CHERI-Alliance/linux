@@ -204,10 +204,27 @@ _csrw \csr \gpr \@
 
 	/* Ok, uses it. */
 	la \tmp, \okaddr
-	scaddr c\inf, c\inf, \tmp
+	scaddr c\tmp, c\inf, \tmp
 	jr c\tmp
 
 1:	/* Failure. */
+.endm
+
+/*
+ * Find the infinite capability in ca3 or ddc. If found install it
+ * in pcc. Otherwise assume that the capability in pcc is ok.
+ * @param perm A register that contains the minimum permission mask
+ *     required for the infinite capability (not modified). Try x0
+ *     if you don't know.
+ * @param tmp1 A temporary scratch register
+ * @param tmp2 A temporary scratch register
+ */
+.macro find_infcap perm tmp1 tmp2
+	cmv c\tmp1, ca3
+	try_install_infcap \tmp1 \perm \tmp2 100f
+	ccsrr \tmp1, ddc
+	try_install_infcap \tmp1 \perm \tmp2 100f
+100:	enter_capmode \tmp1
 .endm
 
 /*
@@ -270,13 +287,13 @@ _csrw \csr \gpr \@
 .endm
 
 /*
- * Reset all general purpose registers to zero.
+ * Reset all general purpose registers except sp and tp to zero.
  */
 .macro reset_gprs
 	li x1, 0
-	li x2, 0
+	/* Skip sp */
 	li x3, 0
-	li x4, 0
+	/* Skip tp */
 	li x5, 0
 	li x6, 0
 	li x7, 0
@@ -304,6 +321,34 @@ _csrw \csr \gpr \@
 	li x29, 0
 	li x30, 0
 	li x31, 0
+.endm
+
+/*
+ * Derive the current pcc from the given capability in memory.
+ * @param cap The name of the code capability.
+ * @param tmp1 Temporary.
+ * @param tmp2 Temporary.
+ */
+.macro setup_pcc cap tmp1 tmp2
+	la \tmp1, \cap
+	lc c\tmp1, (c\tmp1)
+	la \tmp2, 1f
+	scaddr c\tmp1, c\tmp1, \tmp2
+	jr c\tmp1
+1:
+.endm
+
+
+/*
+ * Clear stale capabilities in CHERI registers and enable CHERI
+ * for user mode.
+ * @param tmp A scratch register
+ */
+.macro setup_cheri_regs tmp
+	ccsrw ddc, zero
+	ccsrw stdc, zero
+	li \tmp, 1 << 28
+	csrs senvcfg, \tmp
 .endm
 
 #else /* CONFIG_CHERI_KERNEL */

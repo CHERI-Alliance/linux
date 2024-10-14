@@ -113,15 +113,15 @@
 /* default addr <-> pcpu_ptr mapping, override in asm/percpu.h if necessary */
 #ifndef __addr_to_pcpu_ptr
 #define __addr_to_pcpu_ptr(addr)					\
-	(void __percpu *)((uintptr_t)(addr) -			\
-			  (uintptr_t)pcpu_base_addr	+		\
+	(void __percpu *)((__c_pa(addr) -				\
+			  __c_pa(pcpu_base_addr))	+		\
 			  (uintptr_t)__per_cpu_start)
 #endif
 #ifndef __pcpu_ptr_to_addr
 #define __pcpu_ptr_to_addr(ptr)						\
 	(void __force *)((uintptr_t)(ptr) +				\
-			 (uintptr_t)pcpu_base_addr -		\
-			 (uintptr_t)__per_cpu_start)
+			 (__c_pa(pcpu_base_addr) -			\
+			 __c_pa(__per_cpu_start)))
 #endif
 #else	/* CONFIG_SMP */
 /* on UP, it's always identity mapped */
@@ -1909,7 +1909,7 @@ area_found:
 
 	pcpu_alloc_tag_alloc_hook(chunk, off, size);
 
-	return ptr;
+	return cheri_make_kernel_data_cap(__c_pa(ptr), size);
 
 fail_unlock:
 	spin_unlock_irqrestore(&pcpu_lock, flags);
@@ -2316,13 +2316,13 @@ bool __is_kernel_percpu_address(unsigned long addr, unsigned long *can_addr)
 
 	for_each_possible_cpu(cpu) {
 		void *start = per_cpu_ptr(base, cpu);
-		void *va = (void *)addr;
+		void *va = __c_fakep(addr);
 
 		if (va >= start && va < start + static_size) {
 			if (can_addr) {
 				*can_addr = (unsigned long) (va - start);
-				*can_addr += (unsigned long)
-					per_cpu_ptr(base, get_boot_cpu_id());
+				*can_addr += __c_pa(
+					per_cpu_ptr(base, get_boot_cpu_id()));
 			}
 			return true;
 		}
@@ -3128,7 +3128,9 @@ int __init pcpu_embed_first_chunk(size_t reserved_size, size_t dyn_size,
 				continue;
 			}
 			/* copy and return the unused part */
-			memcpy(ptr, __per_cpu_load, ai->static_size);
+			memcpy(ptr, cheri_make_kernel_data_cap(
+				__c_pa(__per_cpu_load), ai->static_size),
+				ai->static_size);
 			pcpu_fc_free(ptr + size_sum, ai->unit_size - size_sum);
 		}
 	}
@@ -3311,7 +3313,9 @@ int __init pcpu_page_first_chunk(size_t reserved_size, pcpu_fc_cpu_to_node_fn_t 
 		flush_cache_vmap_early(unit_addr, unit_addr + ai->unit_size);
 
 		/* copy static data */
-		memcpy((void *)unit_addr, __per_cpu_load, ai->static_size);
+		memcpy((void *)unit_addr, cheri_make_kernel_data_cap(
+			__c_pa(__per_cpu_load), ai->static_size),
+			ai->static_size);
 	}
 
 	/* we're ready, commit */
@@ -3364,7 +3368,7 @@ void __init setup_per_cpu_areas(void)
 	if (rc < 0)
 		panic("Failed to initialize percpu areas.");
 
-	delta = (unsigned long)pcpu_base_addr - (unsigned long)__per_cpu_start;
+	delta = __c_pa(pcpu_base_addr) - __c_pa(__per_cpu_start);
 	for_each_possible_cpu(cpu)
 		__per_cpu_offset[cpu] = delta + pcpu_unit_offsets[cpu];
 }

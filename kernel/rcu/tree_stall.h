@@ -790,7 +790,7 @@ static void check_cpu_stall(struct rcu_data *rdp)
 		if (kvm_check_and_clear_guest_paused())
 			return;
 
-		rcu_stall_notifier_call_chain(RCU_STALL_NOTIFY_NORM, (void *)j - gps);
+		rcu_stall_notifier_call_chain(RCU_STALL_NOTIFY_NORM, __c_fakep(j) - gps);
 		if (self_detected) {
 			/* We haven't checked in, so go dump stack. */
 			print_cpu_stall(gps);
