@@ -22,6 +22,7 @@ void asm_offsets(void);
 
 void asm_offsets(void)
 {
+	DEFINE(TASK_STRUCT_SIZE, sizeof(struct task_struct));
 	OFFSET(TASK_THREAD_RA, task_struct, thread.ra);
 	OFFSET(TASK_THREAD_SP, task_struct, thread.sp);
 	OFFSET(TASK_THREAD_S0, task_struct, thread.s[0]);

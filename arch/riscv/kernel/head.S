@@ -375,10 +375,29 @@ SYM_CODE_START(_start_kernel)
 	call relocate_enable_mmu
 #endif /* CONFIG_MMU */
 
+#ifdef CONFIG_CHERI_KERNEL
+	/* Reset all register to kill stale capabilities. */
+	reset_gprs
+#ifdef CONFIG_RISCV_ISA_V
+	#error "NOT IMPLEMENTED: Check if ISA_V registers can contain capabilities."
+#endif
+#endif /* CONFIG_CHERI_KERNEL */
+
 	call .Lsetup_trap_vector
 	/* Restore C environment */
 	la tp, init_task
+#ifdef CONFIG_CHERI_KERNEL
+	li t0, TASK_STRUCT_SIZE
+	scbnds ctp, ctp, t0
+#endif
+#ifndef CONFIG_CHERI_KERNEL
 	la sp, init_thread_union + THREAD_SIZE
+#else
+	la sp, init_thread_union
+	li t0, THREAD_SIZE
+	scbnds csp, csp, t0
+	cadd csp, csp, t0
+#endif
 	CREG(addi) CREG(sp), CREG(sp), -PT_SIZE_ON_STACK
 	scs_load_current
 

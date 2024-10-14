@@ -9,11 +9,7 @@
 
 /* Load init_shadow_call_stack to gp. */
 .macro scs_load_init_stack
-#ifndef CONFIG_CHERI_KERNEL
 	la	gp, init_shadow_call_stack
-#else
-	llc	cgp, init_shadow_call_stack
-#endif
 	XIP_FIXUP_OFFSET gp
 .endm
 
