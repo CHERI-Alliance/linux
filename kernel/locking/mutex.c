@@ -233,13 +233,12 @@ static void __mutex_handoff(struct mutex *lock, struct task_struct *task)
 	uintptr_t owner = atomic_ptr_read(&lock->owner);
 
 	for (;;) {
-		uintptr_t new;
+		uintptr_t new = (uintptr_t)task;
 
 		MUTEX_WARN_ON(__owner_task(owner) != current);
 		MUTEX_WARN_ON(owner & MUTEX_FLAG_PICKUP);
 
-		new = (owner & MUTEX_FLAG_WAITERS);
-		new |= (uintptr_t)task;
+		new |= (owner & MUTEX_FLAG_WAITERS);
 		if (task)
 			new |= MUTEX_FLAG_PICKUP;
 

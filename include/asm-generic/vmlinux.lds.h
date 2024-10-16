@@ -136,7 +136,7 @@
 	*(__idle_sched_class)			\
 	__sched_class_lowest = .;		\
 	size$__sched_class_highest = ABSOLUTE(. - __sched_class_highest);	\
-	size$__sched_class_lowest = ABSOLUTE(. - __sched_class_lowest);	\
+	size$__sched_class_lowest = 1;
 
 /* The actual configuration determine if the init/exit sections
  * are handled as text/data or they can be discarded (which
@@ -201,14 +201,14 @@
 	KEEP(*(_sec_))							\
 	_END_##_label_ = .;						\
 	size$##_BEGIN_##_label_ = ABSOLUTE(. - _BEGIN_##_label_);	\
-	size$##_END_##_label_ = ABSOLUTE(1);	/* FIXCHERI: Should be zero. */
+	size$##_END_##_label_ = 1;
 
 #define BOUNDED_SECTION_POST_LABEL(_sec_, _label_, _BEGIN_, _END_)	\
 	_label_##_BEGIN_ = .;						\
 	KEEP(*(_sec_))							\
 	_label_##_END_ = .;						\
 	size$##_label_##_BEGIN_ = ABSOLUTE(. - _label_##_BEGIN_);	\
-	size$##_label_##_END_ = ABSOLUTE(1);	/* FIXCHERI: Should be zero. */
+	size$##_label_##_END_ = 1;
 
 #define BOUNDED_SECTION_BY(_sec_, _label_)				\
 	BOUNDED_SECTION_PRE_LABEL(_sec_, _label_, __start, __stop)
@@ -370,7 +370,7 @@
 	*(.data.once)							\
 	__end_once = .;							\
 	size$__start_once = ABSOLUTE(. - __start_once);			\
-	size$__end_once = ABSOLUTE(. - __end_once);			\
+	size$__end_once = 1;						\
 	STRUCT_ALIGN();							\
 	*(__tracepoints)						\
 	/* implement dynamic printk debug */				\
@@ -418,7 +418,8 @@
 	KEEP(*(.data..init_thread_info))				\
 	. = __start_init_stack + THREAD_SIZE;				\
 	__end_init_stack = .;						\
-	size$init_stack = ABSOLUTE(. - init_stack);
+	size$init_stack = ABSOLUTE(. - init_stack);			\
+	size$__end_init_stack = 1;
 
 #define JUMP_TABLE_DATA							\
 	. = ALIGN(8);							\
@@ -583,7 +584,8 @@
 									\
 	. = ALIGN((align));						\
 	__end_rodata = .;						\
-	size$__end_rodata = ABSOLUTE(1);
+	size$__start_rodata = ABSOLUTE(. - __start_rodata);		\
+	size$__end_rodata = 1;
 
 
 /*
@@ -596,7 +598,13 @@
 		__cpuidle_text_start = .;				\
 		*(.cpuidle.text)					\
 		__cpuidle_text_end = .;					\
-		__noinstr_text_end = .;
+		__noinstr_text_end = .;					\
+		size$__cpuidle_text_start =				\
+			ABSOLUTE(. - __cpuidle_text_start);		\
+		size$__cpuidle_text_end = 1;				\
+		size$__noinstr_text_start =				\
+			ABSOLUTE(. - __noinstr_text_start);		\
+		size$__noinstr_text_end = 1;
 
 /*
  * .text section. Map to function alignment to avoid address changes
@@ -624,7 +632,10 @@
 		ALIGN_FUNCTION();					\
 		__sched_text_start = .;					\
 		*(.sched.text)						\
-		__sched_text_end = .;
+		__sched_text_end = .;					\
+		size$__sched_text_start =				\
+			ABSOLUTE(. - __sched_text_start);		\
+		size$__sched_text_end = 1;
 
 /* spinlock.text is aling to function alignment to secure we have same
  * address even at second ld pass when generating System.map */
@@ -632,37 +643,55 @@
 		ALIGN_FUNCTION();					\
 		__lock_text_start = .;					\
 		*(.spinlock.text)					\
-		__lock_text_end = .;
+		__lock_text_end = .;					\
+		size$__lock_text_start =				\
+			ABSOLUTE(. - __lock_text_start);		\
+		size$__lock_text_end =1;
 
 #define KPROBES_TEXT							\
 		ALIGN_FUNCTION();					\
 		__kprobes_text_start = .;				\
 		*(.kprobes.text)					\
-		__kprobes_text_end = .;
+		__kprobes_text_end = .;					\
+		size$__kprobes_text_start =				\
+			ABSOLUTE(. - __kprobes_text_start);		\
+		size$__kprobes_text_end = 1;
 
 #define ENTRY_TEXT							\
 		ALIGN_FUNCTION();					\
 		__entry_text_start = .;					\
 		*(.entry.text)						\
-		__entry_text_end = .;
+		__entry_text_end = .;					\
+		size$__entry_text_start  =				\
+			ABSOLUTE(. - __entry_text_start);		\
+		size$__entry_text_end  = 1;
 
 #define IRQENTRY_TEXT							\
 		ALIGN_FUNCTION();					\
 		__irqentry_text_start = .;				\
 		*(.irqentry.text)					\
-		__irqentry_text_end = .;
+		__irqentry_text_end = .;				\
+		size$__irqentry_text_start =				\
+			ABSOLUTE(. - __irqentry_text_start);		\
+		size$__irqentry_text_end = 1;
 
 #define SOFTIRQENTRY_TEXT						\
 		ALIGN_FUNCTION();					\
 		__softirqentry_text_start = .;				\
 		*(.softirqentry.text)					\
-		__softirqentry_text_end = .;
+		__softirqentry_text_end = .;				\
+		size$__softirqentry_text_start =			\
+			ABSOLUTE(. - __softirqentry_text_start);	\
+		size$__softirqentry_text_end = 1;
 
 #define STATIC_CALL_TEXT						\
 		ALIGN_FUNCTION();					\
 		__static_call_text_start = .;				\
 		*(.static_call.text)					\
-		__static_call_text_end = .;
+		__static_call_text_end = .;				\
+		size$__static_call_text_start =				\
+			ABSOLUTE(. - __static_call_text_start);		\
+		size$__static_call_text_end = 1;
 
 /* Section used for early init (in .S files) */
 #define HEAD_TEXT  KEEP(*(.head.text))
@@ -943,10 +972,18 @@
 		. = ALIGN(initsetup_align);				\
 		BOUNDED_SECTION_POST_LABEL(.init.setup, __setup, _start, _end)
 
+/*
+ * FIXCHERI:
+ * Extend the size of per-level init call arrays to the end of
+ * the entire initcall array. Otherwise the rootfs entries at
+ * the end of level 5 will cause CHERI faults.
+ */
 #define INIT_CALLS_LEVEL(level)						\
 		__initcall##level##_start = .;				\
 		KEEP(*(.initcall##level##.init))			\
 		KEEP(*(.initcall##level##s.init))			\
+		size$__initcall##level##_start = 			\
+		    ABSOLUTE(__initcall_end - __initcall##level##_start);
 
 #define INIT_CALLS							\
 		__initcall_start = .;					\
@@ -960,7 +997,9 @@
 		INIT_CALLS_LEVEL(rootfs)				\
 		INIT_CALLS_LEVEL(6)					\
 		INIT_CALLS_LEVEL(7)					\
-		__initcall_end = .;
+		__initcall_end = .;					\
+		size$__initcall_start = ABSOLUTE(. - __initcall_start);	\
+		size$__initcall_end = 1;
 
 #define CON_INITCALL							\
 	BOUNDED_SECTION_POST_LABEL(.con_initcall.init, __con_initcall, _start, _end)
@@ -982,7 +1021,9 @@
 	__initramfs_start = .;						\
 	KEEP(*(.init.ramfs))						\
 	. = ALIGN(8);							\
-	KEEP(*(.init.ramfs.info))
+	KEEP(*(.init.ramfs.info))					\
+	. = ALIGN(8);							\
+	size$__initramfs_start = ABSOLUTE(. - __initramfs_start);
 #else
 #define INIT_RAM_FS
 #endif
@@ -1087,6 +1128,7 @@
 	PERCPU_DECRYPTED_SECTION					\
 	__per_cpu_end = .;						\
 	size$__per_cpu_start = __per_cpu_end - __per_cpu_start;		\
+	size$__per_cpu_end = 1;
 
 /**
  * PERCPU_VADDR - define output section for percpu area
@@ -1178,6 +1220,8 @@
 		_sinittext = .;						\
 		INIT_TEXT						\
 		_einittext = .;						\
+		size$_sinittext = ABSOLUTE(_einittext - _sinittext);	\
+		size$_einittext = 1;					\
 	}
 
 #define INIT_DATA_SECTION(initsetup_align)				\
@@ -1197,4 +1241,4 @@
 	. = ALIGN(stop_align);						\
 	__bss_stop = .;							\
 	size$__bss_start = ABSOLUTE(. - __bss_start);			\
-	size$__bss_stop = ABSOLUTE(. - __bss_stop);
+	size$__bss_stop = 1;
