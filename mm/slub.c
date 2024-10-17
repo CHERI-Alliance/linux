@@ -4409,11 +4409,13 @@ redo:
 			goto redo;
 		}
 	} else {
+		unsigned long flags;
+
 		/* Update the free list under the local lock */
-		local_lock(&s->cpu_slab->lock);
+		local_lock_irqsave(&s->cpu_slab->lock, flags);
 		c = this_cpu_ptr(s->cpu_slab);
 		if (unlikely(slab != c->slab)) {
-			local_unlock(&s->cpu_slab->lock);
+			local_unlock_irqrestore(&s->cpu_slab->lock, flags);
 			goto redo;
 		}
 		tid = c->tid;
@@ -4423,7 +4425,7 @@ redo:
 		c->freelist = head;
 		c->tid = next_tid(tid);
 
-		local_unlock(&s->cpu_slab->lock);
+		local_unlock_irqrestore(&s->cpu_slab->lock, flags);
 	}
 	stat_add(s, FREE_FASTPATH, cnt);
 }
