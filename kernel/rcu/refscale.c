@@ -1140,7 +1140,7 @@ ref_scale_init(void)
 
 	for (i = 0; i < nreaders; i++) {
 		init_waitqueue_head(&reader_tasks[i].wq);
-		firsterr = torture_create_kthread(ref_scale_reader, (void *)i,
+		firsterr = torture_create_kthread(ref_scale_reader, __c_fakep(i),
 						  reader_tasks[i].task);
 		if (torture_init_error(firsterr))
 			goto unwind;

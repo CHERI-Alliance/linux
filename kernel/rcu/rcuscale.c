@@ -813,7 +813,7 @@ kfree_scale_init(void)
 	}
 
 	for (i = 0; i < kfree_nrealthreads; i++) {
-		firsterr = torture_create_kthread(kfree_scale_thread, (void *)i,
+		firsterr = torture_create_kthread(kfree_scale_thread, __c_fakep(i),
 						  kfree_reader_tasks[i]);
 		if (torture_init_error(firsterr))
 			goto unwind;
@@ -1009,7 +1009,7 @@ rcu_scale_init(void)
 		goto unwind;
 	}
 	for (i = 0; i < nrealreaders; i++) {
-		firsterr = torture_create_kthread(rcu_scale_reader, (void *)i,
+		firsterr = torture_create_kthread(rcu_scale_reader, __c_fakep(i),
 						  reader_tasks[i]);
 		if (torture_init_error(firsterr))
 			goto unwind;
@@ -1036,7 +1036,7 @@ rcu_scale_init(void)
 			firsterr = -ENOMEM;
 			goto unwind;
 		}
-		firsterr = torture_create_kthread(rcu_scale_writer, (void *)i,
+		firsterr = torture_create_kthread(rcu_scale_writer, __c_fakep(i),
 						  writer_tasks[i]);
 		if (torture_init_error(firsterr))
 			goto unwind;

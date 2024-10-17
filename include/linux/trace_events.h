@@ -409,7 +409,7 @@ struct trace_event_call {
 	int	(*perf_perm)(struct trace_event_call *,
 			     struct perf_event *);
 #endif
-};
+} __cheri_pointer_align;
 
 #ifdef CONFIG_DYNAMIC_EVENTS
 bool trace_event_dyn_try_get_ref(struct trace_event_call *call);

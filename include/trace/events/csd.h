@@ -25,7 +25,7 @@ TRACE_EVENT(csd_queue_cpu,
 
 	    TP_fast_assign(
 		__entry->cpu = cpu;
-		__entry->callsite = (void *)callsite;
+		__entry->callsite = __c_fakep(callsite);
 		__entry->func = func;
 		__entry->csd  = csd;
 		),

@@ -52,8 +52,8 @@ TRACE_EVENT(rseq_ip_fixup,
 	),
 
 	TP_printk("regs_ip=0x%lx start_ip=0x%lx post_commit_offset=%lu abort_ip=0x%lx",
-		__entry->regs_ip, __entry->start_ip,
-		__entry->post_commit_offset, __entry->abort_ip)
+		__c_ua(__entry->regs_ip), __c_ua(__entry->start_ip),
+		__entry->post_commit_offset, __c_ua(__entry->abort_ip))
 );
 
 #endif /* _TRACE_SOCK_H */
