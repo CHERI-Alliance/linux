@@ -295,6 +295,7 @@
 #define CSR_SCAUSE		0x142
 #define CSR_STVAL		0x143
 #define CSR_SIP			0x144
+#define CSR_STVAL2		0x14b
 #define CSR_SATP		0x180
 
 #define CSR_STIMECMP		0x14D
@@ -380,6 +381,7 @@
 #define CSR_MCAUSE		0x342
 #define CSR_MTVAL		0x343
 #define CSR_MIP			0x344
+#define CSR_MTVAL2		0x34b
 #define CSR_PMPCFG0		0x3a0
 #define CSR_PMPADDR0		0x3b0
 #define CSR_MVENDORID		0xf11
@@ -433,6 +435,7 @@
 # define CSR_EPC	CSR_MEPC
 # define CSR_CAUSE	CSR_MCAUSE
 # define CSR_TVAL	CSR_MTVAL
+# define CSR_TVAL2	CSR_MTVAL2
 # define CSR_IP		CSR_MIP
 
 # define CSR_IEH		CSR_MIEH
@@ -461,6 +464,7 @@
 # define CSR_EPC	CSR_SEPC
 # define CSR_CAUSE	CSR_SCAUSE
 # define CSR_TVAL	CSR_STVAL
+# define CSR_TVAL2	CSR_STVAL2
 # define CSR_IP		CSR_SIP
 
 # define CSR_IEH		CSR_SIEH

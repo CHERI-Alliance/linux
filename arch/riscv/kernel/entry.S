@@ -434,6 +434,9 @@ SYM_DATA_END(cheri_hybrid_support)
 SYM_DATA_START(acperm_legacy)
 	.byte 0
 SYM_DATA_END(acperm_legacy)
+SYM_DATA_START(has_xtval2)
+	.byte 0
+SYM_DATA_END(has_xtval2)
 #endif
 
 #ifndef CONFIG_CHERI_KERNEL

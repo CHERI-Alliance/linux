@@ -437,10 +437,12 @@ asmlinkage void handle_bad_stack(struct pt_regs *regs)
 
 #ifdef CONFIG_CHERI_KERNEL
 
+#include <asm/bakewell.h>
+
 static inline const char *
-cheri_stval_type_to_str(unsigned long stval)
+cheri_xtval2_type_to_str(unsigned long xtval2)
 {
-	switch ((stval >> 16) & 0x0fU) {
+	switch ((xtval2 >> 16) & 0x0fU) {
 	case 0: return "instruction access fault";
 	case 1: return "data fault due to load store or AMO";
 	case 2: return "jump or branch fault";
@@ -449,9 +451,9 @@ cheri_stval_type_to_str(unsigned long stval)
 }
 
 static inline const char *
-cheri_stval_cause_to_str(unsigned long stval)
+cheri_xtval2_cause_to_str(unsigned long xtval2)
 {
-	switch (stval & 0x0fU) {
+	switch (xtval2 & 0x0fU) {
 	case 0: return "tag violation";
 	case 1: return "seal violation";
 	case 2: return "permission violation";
@@ -463,19 +465,23 @@ cheri_stval_cause_to_str(unsigned long stval)
 
 asmlinkage __visible noinstr void do_trap_cheri(struct pt_regs *regs)
 {
-	unsigned long stval;
+	unsigned long xtval2;
 	/* Among other things this handles CHERI faults during usercopy. */
 	if (!user_mode(regs)) {
 		if (fixup_exception(regs))
 			return;
 	}
 
-	stval = csr_read(stval);
+	if (has_xtval2)
+		xtval2 = csr_read(CSR_TVAL2);
+	else
+		xtval2 = csr_read(CSR_TVAL);
 	pr_err("===== CHERI exception: %#p %pS\n",
 	       (void *)regs->epc, (void *)regs->epc);
-	pr_err("===== CHERI exception: stval=%#lx (%s, %s)\n", stval,
-	       cheri_stval_cause_to_str(stval),
-	       cheri_stval_type_to_str(stval));
+	pr_err("===== CHERI exception: addr=%#lx xtval2=%#lx (%s, %s)\n",
+	       regs->badaddr, xtval2,
+	       cheri_xtval2_cause_to_str(xtval2),
+	       cheri_xtval2_type_to_str(xtval2));
 	show_regs(regs);
 	dump_instr(KERN_EMERG, regs);
 	dump_stack();

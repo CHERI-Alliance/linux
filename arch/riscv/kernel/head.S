@@ -333,6 +333,10 @@ SYM_CODE_START(_start_kernel)
 	sb t3, (ct0)
 	llc ct0, cheri_hybrid_support
 	sb t4, (ct0)
+
+	detect_csr CSR_TVAL2, t1
+	llc ct0, has_xtval2
+	sb t1, (ct0)
 #endif
 
 #ifdef CONFIG_XIP_KERNEL
