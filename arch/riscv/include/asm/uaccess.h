@@ -389,7 +389,16 @@ unsigned long __must_check clear_user(void __user *to, unsigned long n)
 do {									\
 	long __kr_err = 0;						\
 									\
-	__get_user_nocheck(*((type *)(dst)), (type *)(src), __kr_err);	\
+	switch (sizeof(type)) {						\
+	case __SIZEOF_POINTER__:					\
+		__get_user_nocheck_ptr(*((type *)(dst)),		\
+				   (type *)(src), __kr_err);		\
+		break;							\
+	default:							\
+		__get_user_nocheck(*((type *)(dst)),			\
+				   (type *)(src), __kr_err);		\
+		break;							\
+	}								\
 	if (unlikely(__kr_err))						\
 		goto err_label;						\
 } while (0)
@@ -398,7 +407,16 @@ do {									\
 do {									\
 	long __kr_err = 0;						\
 									\
-	__put_user_nocheck(*((type *)(src)), (type *)(dst), __kr_err);	\
+	switch (sizeof(type)) {						\
+	case __SIZEOF_POINTER__:					\
+		__put_user_nocheck_ptr(*((type *)(src)),		\
+				       (type *)(dst), __kr_err);	\
+		break;							\
+	default:							\
+		__put_user_nocheck(*((type *)(src)),			\
+				   (type *)(dst), __kr_err);		\
+		break;							\
+	}								\
 	if (unlikely(__kr_err))						\
 		goto err_label;						\
 } while (0)
