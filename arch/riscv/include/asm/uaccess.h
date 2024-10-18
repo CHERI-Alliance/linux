@@ -477,10 +477,25 @@ unsigned long __must_check clear_user(void __user *to, unsigned long n)
 }
 
 #define __get_kernel_nofault(dst, src, type, err_label)			\
-	__get_user_nocheck(*((type *)(dst)), (__force type __user *)(src), err_label)
+	do {								\
+		if (sizeof(type) == __SIZEOF_POINTER__)			\
+			__get_user_nocheck_ptr(*((type *)(dst)),	\
+				       (__force type __user *)(src),	\
+				       err_label);			\
+		else							\
+			__get_user_nocheck(*((type *)(dst)),		\
+				(__force type __user *)(src), err_label);\
+	} while (0)
 
 #define __put_kernel_nofault(dst, src, type, err_label)			\
-	__put_user_nocheck(*((type *)(src)), (__force type __user *)(dst), err_label)
+	do {								\
+		if (sizeof(type) == __SIZEOF_POINTER__)			\
+			__put_user_nocheck_ptr(*((type *)(src)),	\
+			       (__force type __user *)(dst), err_label);\
+		else							\
+			__put_user_nocheck(*((type *)(src)),		\
+				(__force type __user *)(dst), err_label);\
+	} while (0)
 
 static __must_check __always_inline bool user_access_begin(const void __user *ptr, size_t len)
 {
