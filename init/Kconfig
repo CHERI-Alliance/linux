@@ -1659,9 +1659,6 @@ config SHMEM
 config AIO
 	bool "Enable AIO support" if EXPERT
 	default y
-	# FIXCHERI: fs/aio.c needs more thought with a CHERI enabled
-	# FIXCHERI: kernel and not all morello changes have been ported.
-	depends on !CHERI_KERNEL
 	help
 	  This option enables POSIX asynchronous I/O which may by used
 	  by some high performance threaded applications. Disabling

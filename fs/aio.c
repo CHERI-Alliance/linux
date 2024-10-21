@@ -713,7 +713,7 @@ static int aio_setup_ring(struct kioctx *ctx, unsigned int nr_events)
 				 PROT_READ | PROT_WRITE,
 				 MAP_SHARED, 0, 0, &unused, NULL);
 	mmap_write_unlock(mm);
-	if (IS_ERR((void *)ctx->mmap_base)) {
+	if (IS_ERR(__c_fakep(ctx->mmap_base))) {
 		ctx->mmap_size = 0;
 		aio_free_ring(ctx);
 		return -ENOMEM;
@@ -2050,14 +2050,14 @@ static int aio_poll(struct aio_kiocb *aiocb, const struct iocb *iocb)
 	__poll_t mask;
 
 	/* reject any unknown events outside the normal event mask. */
-	if ((u16)iocb->aio_buf != iocb->aio_buf)
+	if ((u16)__c_ua(iocb->aio_buf) != __c_ua(iocb->aio_buf))
 		return -EINVAL;
 	/* reject fields that are not defined for poll */
 	if (iocb->aio_offset || iocb->aio_nbytes || iocb->aio_rw_flags)
 		return -EINVAL;
 
 	INIT_WORK(&req->work, aio_poll_complete_work);
-	req->events = demangle_poll(iocb->aio_buf) | EPOLLERR | EPOLLHUP;
+	req->events = demangle_poll(__c_ua(iocb->aio_buf)) | EPOLLERR | EPOLLHUP;
 
 	req->head = NULL;
 	req->cancelled = false;
@@ -2175,7 +2175,7 @@ static int get_compat_iocb(struct iocb *iocb, const struct iocb __user *user_ioc
 	struct compat_iocb compat_iocb;
 	if (unlikely(copy_from_user(&compat_iocb, user_iocb, sizeof(struct compat_iocb))))
 		return -EFAULT;
-	iocb->aio_data = (__kernel_uintptr_t)compat_iocb.aio_data;
+	iocb->aio_data = __c_fakeu(compat_iocb.aio_data);
 	iocb->aio_key = compat_iocb.aio_key;
 	iocb->aio_rw_flags = compat_iocb.aio_rw_flags;
 	iocb->aio_lio_opcode = compat_iocb.aio_lio_opcode;
@@ -2213,7 +2213,7 @@ static int io_submit_one(struct kioctx *ctx, struct iocb __user *user_iocb,
 
 	/* prevent overflows */
 	if (unlikely(
-	    (iocb.aio_buf != (unsigned long)iocb.aio_buf) ||
+	    (iocb.aio_buf != (unsigned long)__c_ua(iocb.aio_buf)) ||
 	    (iocb.aio_nbytes != (size_t)iocb.aio_nbytes) ||
 	    ((ssize_t)iocb.aio_nbytes < 0)
 	   )) {
