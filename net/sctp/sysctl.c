@@ -596,8 +596,10 @@ int sctp_sysctl_net_register(struct net *net)
 	if (!table)
 		return -ENOMEM;
 
-	for (i = 0; i < table_size; i++)
+	for (i = 0; i < table_size; i++) {
 		table[i].data += (char *)(&net->sctp) - (char *)&init_net.sctp;
+		cheri_fixup_bounds(&net->sctp, table[i].data);
+	}
 
 	table[SCTP_RTO_MIN_IDX].extra2 = &net->sctp.rto_max;
 	table[SCTP_RTO_MAX_IDX].extra1 = &net->sctp.rto_min;
