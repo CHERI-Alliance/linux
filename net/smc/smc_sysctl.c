@@ -218,8 +218,10 @@ int __net_init smc_sysctl_net_init(struct net *net)
 		if (!table)
 			goto err_alloc;
 
-		for (i = 0; i < table_size; i++)
+		for (i = 0; i < table_size; i++) {
 			table[i].data += (void *)net - (void *)&init_net;
+			cheri_fixup_bounds(net, table[i].data);
+		}
 	}
 
 	net->smc.smc_hdr = register_net_sysctl_sz(net, "net/smc", table,

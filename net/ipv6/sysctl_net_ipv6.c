@@ -263,8 +263,10 @@ static int __net_init ipv6_sysctl_net_init(struct net *net)
 	if (!ipv6_table)
 		goto out;
 	/* Update the variables to point into the current struct net */
-	for (i = 0; i < table_size; i++)
+	for (i = 0; i < table_size; i++) {
 		ipv6_table[i].data += (void *)net - (void *)&init_net;
+		cheri_fixup_bounds(net, ipv6_table[i].data);
+	}
 
 	ipv6_route_table = ipv6_route_sysctl_init(net);
 	if (!ipv6_route_table)
