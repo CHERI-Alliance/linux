@@ -2668,6 +2668,7 @@ static int __devinet_sysctl_register(struct net *net, char *dev_name,
 
 	for (i = 0; i < ARRAY_SIZE(t->devinet_vars); i++) {
 		t->devinet_vars[i].data += (char *)p - (char *)&ipv4_devconf;
+		cheri_fixup_bounds(p, t->devinet_vars[i].data);
 		t->devinet_vars[i].extra1 = p;
 		t->devinet_vars[i].extra2 = net;
 	}

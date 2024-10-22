@@ -1663,6 +1663,7 @@ static __net_init int ipv4_sysctl_init_net(struct net *net)
 				 * the current struct net
 				 */
 				table[i].data += (void *)net - (void *)&init_net;
+				cheri_fixup_bounds(net, table[i].data);
 			} else {
 				/* Entries without data pointer are global;
 				 * Make them read-only in non-init_net ns

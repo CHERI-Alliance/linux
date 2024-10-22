@@ -773,6 +773,7 @@ static __net_init int sysctl_core_net_init(struct net *net)
 				break;
 
 			tbl[i].data += (char *)net - (char *)&init_net;
+			cheri_fixup_bounds(net, tbl[i].data);
 		}
 		for (; i < table_size; ++i)
 			tbl[i].mode &= ~0222;
