@@ -7199,7 +7199,7 @@ static int __addrconf_sysctl_register(struct net *net, char *dev_name,
 		goto out;
 
 	for (i = 0; i < table_size; i++) {
-		table[i].data += (char *)p - (char *)&ipv6_devconf;
+		table[i].data = (void*)p + (table[i].data - (void*)&ipv6_devconf);
 		/* If one of these is already set, then it is not safe to
 		 * overwrite either of them: this makes proc_dointvec_minmax
 		 * usable.
