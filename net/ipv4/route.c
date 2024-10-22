@@ -3626,8 +3626,10 @@ static __net_init int sysctl_route_net_init(struct net *net)
 		/* Update the variables to point into the current struct net
 		 * except for the first element flush
 		 */
-		for (i = 1; i < table_size; i++)
+		for (i = 1; i < table_size; i++) {
 			tbl[i].data += (void *)net - (void *)&init_net;
+			cheri_fixup_bounds(net, tbl[i].data);
+		}
 	}
 	tbl[0].extra1 = net;
 
