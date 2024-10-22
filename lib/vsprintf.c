@@ -2526,7 +2526,7 @@ char *pointer(const char *fmt, char *buf, char *end, void *ptr,
  *			 <tag>:<127:64>:<63:0>
  *			 (* outcome subject to kernel pointer hashing )
  *	#lp[x] - Simplified format as:
- *			 <address> [permissions=[rwxRWE],<base>-<top>] (attr=[invalid,sentry,sealed])
+ *			 <address> [<permissions>,<base>-<top>] (attr=[invalid,sentry,sealed])
  *			 (* outcome subject to kernel pointer hashing )
  *
  * Details at:
@@ -2551,12 +2551,13 @@ char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
 	/*
 	 * For null-derived capabilities switch to basic format
 	 * (address only).
-	 * Same applies when hashing is active.
+	 * Same applies when hashing is active or an extended pointer
+	 * format is used.
 	 */
 	if ((!cheri_tag_get(cap) && !cheri_high_get(cap)) ||
+	    (isalnum(*fmt) && *fmt != 'x') ||
 	    (likely(!no_hash_pointers) && *fmt != 'x'))
-		return pointer(fmt, buf, end, __c_fakep(cheri_address_get(cap)),
-			       spec);
+		return pointer(fmt, buf, end, cap, spec);
 
 	if (spec.flags & SPECIAL) { /* Simplified format for capabilities */
 		int orig_field_width = spec.field_width;
