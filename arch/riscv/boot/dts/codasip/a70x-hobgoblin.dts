@@ -23,7 +23,7 @@
 
 	chosen {
 		stdout-path = "serial0:115200n8";
-		bootargs = "earlycon console=ttyS0,115200n8";
+		bootargs = "earlycon console=ttyS0,115200n8 root=/dev/mmcblk0p2 rootdelay=1";
 	};
 
 	ddr: memory@80000000 {
