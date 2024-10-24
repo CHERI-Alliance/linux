@@ -244,7 +244,7 @@ static void io_rsrc_put_work(struct io_rsrc_node *node)
 	struct io_rsrc_put *prsrc = &node->item;
 
 	if (prsrc->tag)
-		io_post_aux_cqe(node->ctx, prsrc->tag, 0, 0);
+		io_post_aux_cqe(node->ctx, __c_fakeu(prsrc->tag), 0, 0);
 
 	switch (node->type) {
 	case IORING_RSRC_FILE:

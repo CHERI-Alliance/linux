@@ -58,14 +58,14 @@ static int io_poll_wake(struct wait_queue_entry *wait, unsigned mode, int sync,
 
 static inline struct io_kiocb *wqe_to_req(struct wait_queue_entry *wqe)
 {
-	unsigned long priv = (unsigned long)wqe->private;
+	uintptr_t priv = (uintptr_t)wqe->private;
 
 	return (struct io_kiocb *)(priv & ~IO_WQE_F_DOUBLE);
 }
 
 static inline bool wqe_is_double(struct wait_queue_entry *wqe)
 {
-	unsigned long priv = (unsigned long)wqe->private;
+	uintptr_t priv = (uintptr_t)wqe->private;
 
 	return priv & IO_WQE_F_DOUBLE;
 }
@@ -121,7 +121,7 @@ static struct io_poll *io_poll_get_single(struct io_kiocb *req)
 static void io_poll_req_insert(struct io_kiocb *req)
 {
 	struct io_hash_table *table = &req->ctx->cancel_table;
-	u32 index = hash_long(req->cqe.user_data, table->hash_bits);
+	u32 index = hash_long(__c_ua(req->cqe.user_data), table->hash_bits);
 	struct io_hash_bucket *hb = &table->hbs[index];
 
 	spin_lock(&hb->lock);
@@ -132,7 +132,7 @@ static void io_poll_req_insert(struct io_kiocb *req)
 static void io_poll_req_delete(struct io_kiocb *req, struct io_ring_ctx *ctx)
 {
 	struct io_hash_table *table = &req->ctx->cancel_table;
-	u32 index = hash_long(req->cqe.user_data, table->hash_bits);
+	u32 index = hash_long(__c_ua(req->cqe.user_data), table->hash_bits);
 	spinlock_t *lock = &table->hbs[index].lock;
 
 	spin_lock(lock);
@@ -143,7 +143,7 @@ static void io_poll_req_delete(struct io_kiocb *req, struct io_ring_ctx *ctx)
 static void io_poll_req_insert_locked(struct io_kiocb *req)
 {
 	struct io_hash_table *table = &req->ctx->cancel_table_locked;
-	u32 index = hash_long(req->cqe.user_data, table->hash_bits);
+	u32 index = hash_long(__c_ua(req->cqe.user_data), table->hash_bits);
 
 	lockdep_assert_held(&req->ctx->uring_lock);
 
@@ -494,7 +494,7 @@ static void __io_queue_proc(struct io_poll *poll, struct io_poll_table *pt,
 			    struct io_poll **poll_ptr)
 {
 	struct io_kiocb *req = pt->req;
-	unsigned long wqe_private = (unsigned long) req;
+	uintptr_t wqe_private = (uintptr_t) req;
 
 	/*
 	 * The file being polled uses multiple waitqueues for poll handling
@@ -806,7 +806,7 @@ static struct io_kiocb *io_poll_find(struct io_ring_ctx *ctx, bool poll_only,
 				     struct io_hash_bucket **out_bucket)
 {
 	struct io_kiocb *req;
-	u32 index = hash_long(cd->data, table->hash_bits);
+	u32 index = hash_long(__c_ua(cd->data), table->hash_bits);
 	struct io_hash_bucket *hb = &table->hbs[index];
 
 	*out_bucket = NULL;

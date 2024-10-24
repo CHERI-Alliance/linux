@@ -45,7 +45,7 @@ io_fixed_file_slot(struct io_file_table *table, unsigned i)
 
 static inline unsigned int io_slot_flags(struct io_fixed_file *slot)
 {
-	return (slot->file_ptr & ~FFS_MASK) << REQ_F_SUPPORT_NOWAIT_BIT;
+	return (__c_ua(slot->file_ptr) & ~FFS_MASK) << REQ_F_SUPPORT_NOWAIT_BIT;
 }
 
 static inline struct file *io_slot_file(struct io_fixed_file *slot)
@@ -62,7 +62,7 @@ static inline struct file *io_file_from_index(struct io_file_table *table,
 static inline void io_fixed_file_set(struct io_fixed_file *file_slot,
 				     struct file *file)
 {
-	file_slot->file_ptr = (unsigned long)file |
+	file_slot->file_ptr = (uintptr_t)file |
 		(io_file_get_flags(file) >> REQ_F_SUPPORT_NOWAIT_BIT);
 }
 

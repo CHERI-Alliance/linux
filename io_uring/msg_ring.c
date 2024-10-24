@@ -254,8 +254,8 @@ int io_msg_ring_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	msg->src_file = NULL;
 	msg->user_data = READ_ONCE(sqe->addr2);
 	msg->len = READ_ONCE(sqe->len);
-	msg->cmd = READ_ONCE(sqe->addr);
-	msg->src_fd = READ_ONCE(sqe->addr3);
+	msg->cmd = __c_ua(READ_ONCE(sqe->addr));
+	msg->src_fd = __c_ua(READ_ONCE(sqe->addr3));
 	msg->dst_fd = READ_ONCE(sqe->file_index);
 	msg->flags = READ_ONCE(sqe->msg_ring_flags);
 	if (msg->flags & ~IORING_MSG_RING_MASK)

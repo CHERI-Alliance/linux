@@ -1666,9 +1666,6 @@ config AIO
 
 config IO_URING
 	bool "Enable IO uring support" if EXPERT
-	# FIXCHERI: This needs more thought wrt. a CHERI kernel and
-	# FIXCHERI: not all morello changes have been ported yet.
-	depends on !CHERI_KERNEL
 	select IO_WQ
 	default y
 	help

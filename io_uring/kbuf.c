@@ -328,7 +328,7 @@ static int io_ring_buffers_peek(struct io_kiocb *req, struct buf_sel_arg *arg,
 		if (buf->len > arg->max_len)
 			buf->len = arg->max_len;
 
-		iov->iov_base = u64_to_user_ptr(buf->addr);
+		iov->iov_base = (void __user *)buf->addr;
 		iov->iov_len = buf->len;
 		iov++;
 
@@ -689,7 +689,7 @@ static int io_pin_pbuf_ring(struct io_uring_buf_reg *reg,
 	struct page **pages;
 	int nr_pages, ret;
 
-	pages = io_pin_pages(reg->ring_addr, ring_size, &nr_pages);
+	pages = io_pin_pages(__c_ua(reg->ring_addr), ring_size, &nr_pages);
 	if (IS_ERR(pages))
 		return PTR_ERR(pages);
 

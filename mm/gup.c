@@ -3576,6 +3576,7 @@ EXPORT_SYMBOL_GPL(get_user_pages_fast);
  * pin_user_pages_fast() - pin user pages in memory without taking locks
  *
  * @start:      starting user address
+ * 		FIXCHERI: This should be a capability.
  * @nr_pages:   number of pages from start to pin
  * @gup_flags:  flags modifying pin behaviour
  * @pages:      array that receives pointers to the pages pinned.
@@ -3605,6 +3606,7 @@ EXPORT_SYMBOL_GPL(pin_user_pages_fast);
  *
  * @mm:		mm_struct of target mm
  * @start:	starting user address
+ * 		FIXCHERI: This should be a capability.
  * @nr_pages:	number of pages from start to pin
  * @gup_flags:	flags modifying lookup behaviour
  * @pages:	array that receives pointers to the pages pinned.

@@ -53,8 +53,8 @@ static __cold int io_uring_show_cred(struct seq_file *m, unsigned int id,
 			      "user_data:%llu",						\
 			   (sq_idx), io_uring_get_opcode((sqe)->opcode), (sqe)->fd,	\
 			   (sqe)->flags, (unsigned long long) (sqe)->off,		\
-			   (unsigned long long) (sqe)->addr, (sqe)->rw_flags,		\
-			   (sqe)->buf_index, (unsigned long long) (sqe)->user_data);	\
+			   (unsigned long long) __c_a((sqe)->addr), (sqe)->rw_flags,	\
+			   (sqe)->buf_index, (unsigned long long) __c_a((sqe)->user_data));	\
 		if (sq_shift) {								\
 			u64 *sqeb = (void *) ((sqe) + 1);				\
 			int size = sizeof(*(sqe)) / sizeof(u64);			\
@@ -71,7 +71,7 @@ static __cold int io_uring_show_cred(struct seq_file *m, unsigned int id,
 #define print_cqe(m, cqe, cq_idx, cq_shift)					\
 	do {									\
 		seq_printf(m, "%5u: user_data:%llu, res:%d, flag:%x",		\
-			   (cq_idx), (unsigned long long) (cqe)->user_data,	\
+			   (cq_idx), (unsigned long long) __c_a((cqe)->user_data),	\
 			   (cqe)->res, (cqe)->flags);				\
 		if (cq_shift)							\
 			seq_printf(m, ", extra1:%llu, extra2:%llu\n",		\
@@ -237,7 +237,7 @@ __cold void io_uring_show_fdinfo(struct seq_file *m, struct file *file)
 		struct io_uring_cqe *cqe = &ocqe->cqe;
 
 		seq_printf(m, "  user_data=%llu, res=%d, flags=%x\n",
-			   (unsigned long long) cqe->user_data, cqe->res,
+			   (unsigned long long) __c_ua(cqe->user_data), cqe->res,
 			   cqe->flags);
 	}
 

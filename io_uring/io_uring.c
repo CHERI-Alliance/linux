@@ -277,7 +277,7 @@ static int set_compat64_io_uring_params(void __user *user_params,
 	compat_params.sq_off.flags = params->sq_off.flags;
 	compat_params.sq_off.dropped = params->sq_off.dropped;
 	compat_params.sq_off.array = params->sq_off.array;
-	compat_params.sq_off.user_addr = (__u64)params->sq_off.user_addr;
+	compat_params.sq_off.user_addr = __c_ua(params->sq_off.user_addr);
 
 	compat_params.cq_off.head = params->cq_off.head;
 	compat_params.cq_off.tail = params->cq_off.tail;
@@ -287,7 +287,7 @@ static int set_compat64_io_uring_params(void __user *user_params,
 	compat_params.cq_off.cqes = params->cq_off.cqes;
 	compat_params.cq_off.flags = params->cq_off.flags;
 	compat_params.cq_off.resv1 = params->cq_off.resv1;
-	compat_params.cq_off.user_addr = (__u64)params->cq_off.user_addr;
+	compat_params.cq_off.user_addr = __c_ua(params->cq_off.user_addr);
 
 	if (copy_to_user(user_params, &compat_params, sizeof(compat_params)))
 		return -EFAULT;
@@ -915,7 +915,7 @@ static bool io_cqring_event_overflow(struct io_ring_ctx *ctx,
 		ocq_size += sizeof(struct io_uring_cqe);
 
 	ocqe = kmalloc(ocq_size, GFP_ATOMIC | __GFP_ACCOUNT);
-	trace_io_uring_cqe_overflow(ctx, user_data, res, cflags, ocqe);
+	trace_io_uring_cqe_overflow(ctx, __c_ua(user_data), res, cflags, ocqe);
 	if (!ocqe) {
 		/*
 		 * If we're in ring overflow flush mode, or in task cancel mode,
@@ -1009,7 +1009,7 @@ static bool io_fill_cqe_aux(struct io_ring_ctx *ctx,
 	 * the ring.
 	 */
 	if (likely(io_get_cqe(ctx, &cqe))) {
-		trace_io_uring_complete(ctx, NULL, user_data, res, cflags, 0, 0);
+		trace_io_uring_complete(ctx, NULL, __c_ua(user_data), res, cflags, 0, 0);
 
 		__io_fill_cqe(ctx, cqe, user_data, res, cflags, 0, 0);
 		return true;
@@ -2951,7 +2951,7 @@ static __cold void io_tctx_exit_cb(struct callback_head *cb)
 	 * work cancelation off the exec path.
 	 */
 	if (tctx && !atomic_read(&tctx->in_cancel))
-		io_uring_del_tctx_node((unsigned long)work->ctx);
+		io_uring_del_tctx_node(__c_pa(work->ctx));
 	complete(&work->completion);
 }
 

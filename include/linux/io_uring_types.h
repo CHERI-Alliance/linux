@@ -58,7 +58,7 @@ struct io_wq_work {
 
 struct io_fixed_file {
 	/* file * with additional FFS_* flags */
-	unsigned long file_ptr;
+	uintptr_t file_ptr;
 };
 
 struct io_file_table {

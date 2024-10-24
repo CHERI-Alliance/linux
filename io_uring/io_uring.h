@@ -197,7 +197,7 @@ static inline void convert_compat64_io_uring_sqe(struct io_ring_ctx *ctx,
 	switch (sqe->opcode) {
 	case IORING_OP_POLL_REMOVE:
 	case IORING_OP_MSG_RING:
-		sqe->addr2 = (__kernel_uintptr_t)READ_ONCE(compat_sqe->addr2);
+		sqe->addr2 = __c_fakeu(READ_ONCE(compat_sqe->addr2));
 		break;
 	default:
 		sqe->addr2 = (__kernel_uintptr_t)compat_ptr(READ_ONCE(compat_sqe->addr2));
@@ -214,7 +214,7 @@ static inline void convert_compat64_io_uring_sqe(struct io_ring_ctx *ctx,
 	case IORING_OP_POLL_REMOVE:
 	case IORING_OP_TIMEOUT_REMOVE:
 	case IORING_OP_ASYNC_CANCEL:
-		sqe->addr = (__kernel_uintptr_t)READ_ONCE(compat_sqe->addr);
+		sqe->addr = __c_fakeu(READ_ONCE(compat_sqe->addr));
 		break;
 	default:
 		sqe->addr = (__kernel_uintptr_t)compat_ptr(READ_ONCE(compat_sqe->addr));
@@ -224,7 +224,7 @@ static inline void convert_compat64_io_uring_sqe(struct io_ring_ctx *ctx,
 	sqe->len = READ_ONCE(compat_sqe->len);
 	BUILD_BUG_COMPAT_SQE_UNION_ELEM(rw_flags, user_data);
 	sqe->rw_flags = READ_ONCE(compat_sqe->rw_flags);
-	sqe->user_data = (__kernel_uintptr_t)READ_ONCE(compat_sqe->user_data);
+	sqe->user_data = (__kernel_uintptr_t)__c_fakeu(READ_ONCE(compat_sqe->user_data));
 	BUILD_BUG_COMPAT_SQE_UNION_ELEM(buf_index, personality);
 	sqe->buf_index = READ_ONCE(compat_sqe->buf_index);
 	sqe->personality = READ_ONCE(compat_sqe->personality);
@@ -246,7 +246,7 @@ static inline void convert_compat64_io_uring_sqe(struct io_ring_ctx *ctx,
 			       compat_sqe->cmd, compat_cmd_size, 0);
 	} else {
 		sqe->addr3 = (__kernel_uintptr_t)compat_ptr(READ_ONCE(compat_sqe->addr3));
-		sqe->__pad2[0] = READ_ONCE(compat_sqe->__pad2[0]);
+		sqe->__pad2[0] = __c_fakeu(READ_ONCE(compat_sqe->__pad2[0]));
 	}
 #undef BUILD_BUG_COMPAT_SQE_UNION_ELEM
 }
@@ -281,7 +281,7 @@ static inline void __io_fill_cqe(struct io_ring_ctx *ctx, struct io_uring_cqe *c
 	if (io_in_compat64(ctx)) {
 		struct compat_io_uring_cqe *compat_cqe = (struct compat_io_uring_cqe *)cqe;
 
-		WRITE_ONCE(compat_cqe->user_data, (__u64)user_data);
+		WRITE_ONCE(compat_cqe->user_data, __c_ua(user_data));
 		WRITE_ONCE(compat_cqe->res, res);
 		WRITE_ONCE(compat_cqe->flags, cflags);
 
@@ -316,7 +316,7 @@ static __always_inline bool io_fill_cqe_req(struct io_ring_ctx *ctx,
 		return false;
 
 	if (trace_io_uring_complete_enabled())
-		trace_io_uring_complete(req->ctx, req, req->cqe.user_data,
+		trace_io_uring_complete(req->ctx, req, __c_ua(req->cqe.user_data),
 					req->cqe.res, req->cqe.flags,
 					req->big_cqe.extra1, req->big_cqe.extra2);
 

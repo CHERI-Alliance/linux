@@ -21,7 +21,7 @@ static int get_compat64_io_uring_rsrc_update(struct io_uring_rsrc_update *up,
 		return -EFAULT;
 	up->offset = compat_up.offset;
 	up->resv = compat_up.resv;
-	up->data = compat_up.data;
+	up->data = (__kernel_uintptr_t)compat_ptr(compat_up.data);
 	return 0;
 }
 
@@ -136,14 +136,14 @@ int __io_uring_add_tctx_node(struct io_ring_ctx *ctx)
 				return ret;
 		}
 	}
-	if (!xa_load(&tctx->xa, (unsigned long)ctx)) {
+	if (!xa_load(&tctx->xa, __c_pa(ctx))) {
 		node = kmalloc(sizeof(*node), GFP_KERNEL);
 		if (!node)
 			return -ENOMEM;
 		node->ctx = ctx;
 		node->task = current;
 
-		ret = xa_err(xa_store(&tctx->xa, (unsigned long)ctx,
+		ret = xa_err(xa_store(&tctx->xa, __c_pa(ctx),
 					node, GFP_KERNEL));
 		if (ret) {
 			kfree(node);
@@ -329,7 +329,7 @@ int io_ringfd_register(struct io_ring_ctx *ctx, void __user *__arg,
 			end = start + 1;
 		}
 
-		ret = io_ring_add_registered_fd(tctx, reg.data, start, end);
+		ret = io_ring_add_registered_fd(tctx, __c_ua(reg.data), start, end);
 		if (ret < 0)
 			break;
 
