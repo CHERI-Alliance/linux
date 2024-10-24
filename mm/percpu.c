@@ -1769,6 +1769,9 @@ void __percpu *pcpu_alloc_noprof(size_t size, size_t align, bool reserved,
 	 */
 	if (unlikely(align < PCPU_MIN_ALLOC_SIZE))
 		align = PCPU_MIN_ALLOC_SIZE;
+	/* Align to a least the size of a pointer if the allocation is large enough. */
+	if (size >= __SIZEOF_POINTER__ && align < __SIZEOF_POINTER__)
+		align = __SIZEOF_POINTER__;
 
 	size = ALIGN(size, PCPU_MIN_ALLOC_SIZE);
 	bits = size >> PCPU_MIN_ALLOC_SHIFT;
