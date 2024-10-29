@@ -39,7 +39,7 @@
 
 static inline size_t chunk_size(const struct gen_pool_chunk *chunk)
 {
-	return chunk->end_addr - chunk->start_addr + 1;
+	return __c_ua(chunk->end_addr) - __c_ua(chunk->start_addr) + 1;
 }
 
 static inline int
@@ -181,7 +181,7 @@ EXPORT_SYMBOL(gen_pool_create);
  *
  * Returns 0 on success or a -ve errno on failure.
  */
-int gen_pool_add_owner(struct gen_pool *pool, unsigned long virt, phys_addr_t phys,
+int gen_pool_add_owner(struct gen_pool *pool, uintptr_t virt, phys_addr_t phys,
 		 size_t size, int nid, void *owner)
 {
 	struct gen_pool_chunk *chunk;
@@ -195,6 +195,11 @@ int gen_pool_add_owner(struct gen_pool *pool, unsigned long virt, phys_addr_t ph
 
 	chunk->phys_addr = phys;
 	chunk->start_addr = virt;
+	/* If the caller provided a valid pointer, set bounds on it. */
+#ifdef CONFIG_CHERI_KERNEL
+	if (cheri_tag_get(chunk->start_addr))
+		chunk->start_addr = cheri_bounds_set(chunk->start_addr, size);
+#endif
 	chunk->end_addr = virt + size - 1;
 	chunk->owner = owner;
 	atomic_long_set(&chunk->avail, size);
@@ -221,8 +226,8 @@ phys_addr_t gen_pool_virt_to_phys(struct gen_pool *pool, unsigned long addr)
 
 	rcu_read_lock();
 	list_for_each_entry_rcu(chunk, &pool->chunks, next_chunk) {
-		if (addr >= chunk->start_addr && addr <= chunk->end_addr) {
-			paddr = chunk->phys_addr + (addr - chunk->start_addr);
+		if (addr >= __c_ua(chunk->start_addr) && addr <= __c_ua(chunk->end_addr)) {
+			paddr = chunk->phys_addr + (addr - __c_ua(chunk->start_addr));
 			break;
 		}
 	}
@@ -274,11 +279,11 @@ EXPORT_SYMBOL(gen_pool_destroy);
  * Can not be used in NMI handler on architectures without
  * NMI-safe cmpxchg implementation.
  */
-unsigned long gen_pool_alloc_algo_owner(struct gen_pool *pool, size_t size,
+uintptr_t gen_pool_alloc_algo_owner(struct gen_pool *pool, size_t size,
 		genpool_algo_t algo, void *data, void **owner)
 {
 	struct gen_pool_chunk *chunk;
-	unsigned long addr = 0;
+	uintptr_t addr = 0;
 	int order = pool->min_alloc_order;
 	unsigned long nbits, start_bit, end_bit, remain;
 
@@ -302,7 +307,7 @@ unsigned long gen_pool_alloc_algo_owner(struct gen_pool *pool, size_t size,
 		end_bit = chunk_size(chunk) >> order;
 retry:
 		start_bit = algo(chunk->bits, end_bit, start_bit,
-				 nbits, data, pool, chunk->start_addr);
+				 nbits, data, pool, __c_ua(chunk->start_addr));
 		if (start_bit >= end_bit)
 			continue;
 		remain = bitmap_set_ll(chunk->bits, start_bit, nbits);
@@ -321,6 +326,10 @@ retry:
 		break;
 	}
 	rcu_read_unlock();
+#ifdef CONFIG_CHERI_KERNEL
+	if (cheri_tag_get(addr))
+		addr = cheri_bounds_set(addr, size);
+#endif
 	return addr;
 }
 EXPORT_SYMBOL(gen_pool_alloc_algo_owner);
@@ -362,7 +371,7 @@ EXPORT_SYMBOL(gen_pool_dma_alloc);
 void *gen_pool_dma_alloc_algo(struct gen_pool *pool, size_t size,
 		dma_addr_t *dma, genpool_algo_t algo, void *data)
 {
-	unsigned long vaddr;
+	uintptr_t vaddr;
 
 	if (!pool)
 		return NULL;
@@ -372,7 +381,7 @@ void *gen_pool_dma_alloc_algo(struct gen_pool *pool, size_t size,
 		return NULL;
 
 	if (dma)
-		*dma = gen_pool_virt_to_phys(pool, vaddr);
+		*dma = gen_pool_virt_to_phys(pool, __c_ua(vaddr));
 
 	return (void *)vaddr;
 }
@@ -484,7 +493,7 @@ EXPORT_SYMBOL(gen_pool_dma_zalloc_align);
  * pool.  Can not be used in NMI handler on architectures without
  * NMI-safe cmpxchg implementation.
  */
-void gen_pool_free_owner(struct gen_pool *pool, unsigned long addr, size_t size,
+void gen_pool_free_owner(struct gen_pool *pool, uintptr_t addr, size_t size,
 		void **owner)
 {
 	struct gen_pool_chunk *chunk;
@@ -503,7 +512,7 @@ void gen_pool_free_owner(struct gen_pool *pool, unsigned long addr, size_t size,
 	list_for_each_entry_rcu(chunk, &pool->chunks, next_chunk) {
 		if (addr >= chunk->start_addr && addr <= chunk->end_addr) {
 			BUG_ON(addr + size - 1 > chunk->end_addr);
-			start_bit = (addr - chunk->start_addr) >> order;
+			start_bit = (__c_ua(addr) - __c_ua(chunk->start_addr)) >> order;
 			remain = bitmap_clear_ll(chunk->bits, start_bit, nbits);
 			BUG_ON(remain);
 			size = nbits << order;
@@ -559,8 +568,8 @@ bool gen_pool_has_addr(struct gen_pool *pool, unsigned long start,
 
 	rcu_read_lock();
 	list_for_each_entry_rcu(chunk, &(pool)->chunks, next_chunk) {
-		if (start >= chunk->start_addr && start <= chunk->end_addr) {
-			if (end <= chunk->end_addr) {
+		if (start >= __c_ua(chunk->start_addr) && start <= __c_ua(chunk->end_addr)) {
+			if (end <= __c_ua(chunk->end_addr)) {
 				found = true;
 				break;
 			}

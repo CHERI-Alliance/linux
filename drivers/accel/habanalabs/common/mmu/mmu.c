@@ -828,7 +828,7 @@ int hl_mmu_hr_init(struct hl_device *hdev, struct hl_mmu_hr_priv *hr_priv, u32 h
 	size_t pool_chunk_size = SZ_4M;
 	struct pgt_info *hop0_pgt;
 	dma_addr_t dma_addr;
-	u64 virt_addr;
+	uintptr_t virt_addr;
 	int i, rc;
 
 	/*
