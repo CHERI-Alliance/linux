@@ -221,7 +221,7 @@ static int __init atomic_pool_init(void)
 	if (ptr) {
 		int ret;
 
-		ret = gen_pool_add_virt(atomic_pool, (unsigned long)ptr,
+		ret = gen_pool_add_virt(atomic_pool, (uintptr_t)ptr,
 					page_to_phys(page),
 					atomic_pool_size, -1);
 		if (ret)
