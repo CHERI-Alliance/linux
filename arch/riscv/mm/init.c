@@ -985,9 +985,9 @@ static void __init create_kernel_page_table(pgd_t *pgdir, bool early)
 static void __init __PI create_fdt_early_page_table(unsigned long fix_fdt_va,
 					       uintptr_t dtb_pa)
 {
+	unsigned long fdtlen = fdt_totalsize(dtb_pa);
 #ifndef CONFIG_BUILTIN_DTB
 	unsigned long pa = __c_ua(dtb_pa) & ~(PMD_SIZE - 1);
-	unsigned long maxlen = 0;
 
 	/* Make sure the fdt fixmap address is always aligned on PMD size */
 	BUILD_BUG_ON(FIX_FDT % (PMD_SIZE / PAGE_SIZE));
@@ -996,17 +996,15 @@ static void __init __PI create_fdt_early_page_table(unsigned long fix_fdt_va,
 	if (!IS_ENABLED(CONFIG_64BIT)) {
 		__pi_create_pgd_mapping(early_pg_dir, fix_fdt_va,
 				   pa, MAX_FDT_SIZE, PAGE_KERNEL);
-		maxlen = MAX_FDT_SIZE;
 	} else {
 		__pi_create_pmd_mapping(fixmap_pmd, fix_fdt_va,
 				   pa, PMD_SIZE, PAGE_KERNEL);
 		__pi_create_pmd_mapping(fixmap_pmd, fix_fdt_va + PMD_SIZE,
 				   pa + PMD_SIZE, PMD_SIZE, PAGE_KERNEL);
-		maxlen = 2 * PMD_SIZE;
 	}
 
-	dtb_early_va = (void *)cheri_make_kernel_data_cap(fix_fdt_va, maxlen)
-					+ (__c_ua(dtb_pa) & (PMD_SIZE - 1));
+	dtb_early_va = (void *)cheri_make_kernel_data_cap(
+			fix_fdt_va + (__c_ua(dtb_pa) & (PMD_SIZE - 1)), fdtlen);
 #else
 	/*
 	 * For 64-bit kernel, __va can't be used since it would return a linear
@@ -1015,10 +1013,16 @@ static void __init __PI create_fdt_early_page_table(unsigned long fix_fdt_va,
 	 * kernel is mapped in the linear mapping, that makes no difference.
 	 */
 	dtb_early_va = cheri_make_kernel_data_cap(
-		kernel_mapping_pa_to_va(dtb_pa), fdt_totalsize(dtb_pa));
+		kernel_mapping_pa_to_va(dtb_pa), fdtlen);
 #endif
-
 	dtb_early_pa = dtb_pa;
+#ifdef CONFIG_CHERI_KERNEL
+	dtb_early_va = cheri_perms_and(dtb_early_va,
+				       CHERI_PERMS_READ | CHERI_PERMS_WRITE);
+	dtb_early_pa = cheri_bounds_set(dtb_early_pa, fdtlen);
+	dtb_early_pa = cheri_perms_and(dtb_early_pa,
+				       CHERI_PERMS_READ | CHERI_PERMS_WRITE);
+#endif
 }
 
 /*
@@ -1049,15 +1053,24 @@ static void __init __PI pt_ops_set_early(void)
  */
 static void __init __PI pt_ops_set_fixmap(void)
 {
-	pt_ops.alloc_pte = (void *)cheri_address_set(kernel_code_cap, kernel_mapping_pa_to_va(alloc_pte_fixmap));
-	pt_ops.get_pte_virt = (void *)cheri_address_set(kernel_code_cap, kernel_mapping_pa_to_va(get_pte_virt_fixmap));
+#ifdef CONFIG_CHERI_KERNEL
+	/* FIXCHERI: split is wrong for 32-bit. */
+	void *base = NULL;
+	ptraddr_t split = 1ULL << 63;
+	base = cheri_address_set(kernel_data_cap, split);
+	base = cheri_bounds_set(base, split);
+	base = cheri_perms_and(base, CHERI_PERMS_READ | CHERI_PERMS_EXEC);
+#endif
+
+	pt_ops.alloc_pte = (void *)cheri_address_set(base, kernel_mapping_pa_to_va(alloc_pte_fixmap));
+	pt_ops.get_pte_virt = (void *)cheri_address_set(base, kernel_mapping_pa_to_va(get_pte_virt_fixmap));
 #ifndef __PAGETABLE_PMD_FOLDED
-	pt_ops.alloc_pmd = (void *)cheri_address_set(kernel_code_cap, kernel_mapping_pa_to_va(alloc_pmd_fixmap));
-	pt_ops.get_pmd_virt = (void *)cheri_address_set(kernel_code_cap, kernel_mapping_pa_to_va(get_pmd_virt_fixmap));
-	pt_ops.alloc_pud = (void *)cheri_address_set(kernel_code_cap, kernel_mapping_pa_to_va(alloc_pud_fixmap));
-	pt_ops.get_pud_virt = (void *)cheri_address_set(kernel_code_cap, kernel_mapping_pa_to_va(get_pud_virt_fixmap));
-	pt_ops.alloc_p4d = (void *)cheri_address_set(kernel_code_cap, kernel_mapping_pa_to_va(alloc_p4d_fixmap));
-	pt_ops.get_p4d_virt = (void *)cheri_address_set(kernel_code_cap, kernel_mapping_pa_to_va(get_p4d_virt_fixmap));
+	pt_ops.alloc_pmd = (void *)cheri_address_set(base, kernel_mapping_pa_to_va(alloc_pmd_fixmap));
+	pt_ops.get_pmd_virt = (void *)cheri_address_set(base, kernel_mapping_pa_to_va(get_pmd_virt_fixmap));
+	pt_ops.alloc_pud = (void *)cheri_address_set(base, kernel_mapping_pa_to_va(alloc_pud_fixmap));
+	pt_ops.get_pud_virt = (void *)cheri_address_set(base, kernel_mapping_pa_to_va(get_pud_virt_fixmap));
+	pt_ops.alloc_p4d = (void *)cheri_address_set(base, kernel_mapping_pa_to_va(alloc_p4d_fixmap));
+	pt_ops.get_p4d_virt = (void *)cheri_address_set(base, kernel_mapping_pa_to_va(get_p4d_virt_fixmap));
 #endif
 }
 

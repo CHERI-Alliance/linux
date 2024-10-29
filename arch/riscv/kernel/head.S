@@ -423,6 +423,16 @@ SYM_CODE_START(_start_kernel)
 	call bakewell_caps_init
 
 	/*
+	 * Restrict permissions on csp and ctp according to
+	 * kernel_data_cap.
+	 */
+	la t0, kernel_data_cap
+	lc ct0, (ct0)
+	gcperm t0, ct0
+	acperm csp, csp, t0
+	acperm ctp, ctp, t0
+
+	/*
 	 * Setup/Reset registers. Setup trap vector again to derive it
 	 * from the new pcc.
 	 */
