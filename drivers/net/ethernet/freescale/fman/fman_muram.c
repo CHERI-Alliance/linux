@@ -56,7 +56,7 @@ struct muram_info *fman_muram_init(phys_addr_t base, size_t size)
 		goto pool_destroy;
 	}
 
-	ret = gen_pool_add_virt(muram->pool, (unsigned long)vaddr,
+	ret = gen_pool_add_virt(muram->pool, (uintptr_t)vaddr,
 				base, size, -1);
 	if (ret < 0) {
 		pr_err("%s(): MURAM pool add failed\n", __func__);

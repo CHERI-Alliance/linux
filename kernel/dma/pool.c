@@ -113,11 +113,11 @@ static int atomic_pool_expand(struct gen_pool *pool, size_t pool_size,
 	 * Memory in the atomic DMA pools must be unencrypted, the pools do not
 	 * shrink so no re-encryption occurs in dma_direct_free().
 	 */
-	ret = set_memory_decrypted((unsigned long)page_to_virt(page),
+	ret = set_memory_decrypted(__c_pa(page_to_virt(page)),
 				   1 << order);
 	if (ret)
 		goto remove_mapping;
-	ret = gen_pool_add_virt(pool, (unsigned long)addr, page_to_phys(page),
+	ret = gen_pool_add_virt(pool, (uintptr_t)addr, page_to_phys(page),
 				pool_size, NUMA_NO_NODE);
 	if (ret)
 		goto encrypt_mapping;
@@ -126,7 +126,7 @@ static int atomic_pool_expand(struct gen_pool *pool, size_t pool_size,
 	return 0;
 
 encrypt_mapping:
-	ret = set_memory_encrypted((unsigned long)page_to_virt(page),
+	ret = set_memory_encrypted(__c_pa(page_to_virt(page)),
 				   1 << order);
 	if (WARN_ON_ONCE(ret)) {
 		/* Decrypt succeeded but encrypt failed, purposely leak */
@@ -241,14 +241,14 @@ static struct page *__dma_alloc_from_pool(struct device *dev, size_t size,
 		struct gen_pool *pool, void **cpu_addr,
 		bool (*phys_addr_ok)(struct device *, phys_addr_t, size_t))
 {
-	unsigned long addr;
+	uintptr_t addr;
 	phys_addr_t phys;
 
 	addr = gen_pool_alloc(pool, size);
 	if (!addr)
 		return NULL;
 
-	phys = gen_pool_virt_to_phys(pool, addr);
+	phys = gen_pool_virt_to_phys(pool, __c_ua(addr));
 	if (phys_addr_ok && !phys_addr_ok(dev, phys, size)) {
 		gen_pool_free(pool, addr, size);
 		return NULL;
@@ -285,9 +285,9 @@ bool dma_free_from_pool(struct device *dev, void *start, size_t size)
 	struct gen_pool *pool = NULL;
 
 	while ((pool = dma_guess_pool(pool, 0))) {
-		if (!gen_pool_has_addr(pool, (unsigned long)start, size))
+		if (!gen_pool_has_addr(pool, __c_pa(start), size))
 			continue;
-		gen_pool_free(pool, (unsigned long)start, size);
+		gen_pool_free(pool, (uintptr_t)start, size);
 		return true;
 	}
 

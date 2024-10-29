@@ -410,7 +410,7 @@ static int cfv_create_genpool(struct cfv_info *cfv)
 	if (!cfv->genpool)
 		goto err;
 
-	err = gen_pool_add_virt(cfv->genpool, (unsigned long)cfv->alloc_addr,
+	err = gen_pool_add_virt(cfv->genpool, (uintptr_t)cfv->alloc_addr,
 				(phys_addr_t)virt_to_phys(cfv->alloc_addr),
 				cfv->allocsz, -1);
 	if (err)

@@ -824,7 +824,7 @@ int hl_mmu_hr_init(struct hl_device *hdev, struct hl_mmu_hr_priv *hr_priv, u32 h
 	size_t pool_chunk_size = SZ_4M;
 	struct pgt_info *hop0_pgt;
 	dma_addr_t dma_addr;
-	u64 virt_addr;
+	uintptr_t virt_addr;
 	int i, rc;
 
 	/*
@@ -1085,7 +1085,7 @@ struct pgt_info *hl_mmu_hr_alloc_hop(struct hl_ctx *ctx, struct hl_mmu_hr_priv *
 		if (ZERO_OR_NULL_PTR(virt_addr))
 			break;
 
-		if (gen_pool_add_virt(hr_priv->mmu_pgt_pool, (unsigned long)virt_addr,
+		if (gen_pool_add_virt(hr_priv->mmu_pgt_pool, (uintptr_t)virt_addr,
 								phys_addr, SZ_2M, -1)) {
 			hl_asic_dma_free_coherent(hdev, SZ_2M, virt_addr, phys_addr);
 			virt_addr = NULL;

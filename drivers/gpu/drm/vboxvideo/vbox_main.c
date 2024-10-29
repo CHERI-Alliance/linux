@@ -129,7 +129,7 @@ int vbox_hw_init(struct vbox_private *vbox)
 		return PTR_ERR(vbox->guest_pool);
 
 	ret = gen_pool_add_virt(vbox->guest_pool,
-				(unsigned long)vbox->guest_heap,
+				(uintptr_t)vbox->guest_heap,
 				GUEST_HEAP_OFFSET(vbox),
 				GUEST_HEAP_USABLE_SIZE, -1);
 	if (ret)
