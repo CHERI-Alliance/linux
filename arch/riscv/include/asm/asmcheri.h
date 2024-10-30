@@ -120,6 +120,7 @@ _csrw \csr \gpr \@
 	csrw CSR_TVEC, \reg
 	.byte 0x33, 0x10, 0x00, 0x09	/* New modesw.CAP */
 	j 2f
+.align 2
 1:	auipc c\reg, 0
 	gctag \reg, c\reg
 	bnez \reg, 2f
@@ -166,6 +167,7 @@ _csrw \csr \gpr \@
 	/* Call point for jalr above. */
 1:	ret
 
+.align 2
 2:	/* Trap vector: Load legacy values. */
 	li \legacy, 1
 	li \infperms, 0x1001f
@@ -279,6 +281,7 @@ _csrw \csr \gpr \@
 	j 2f
 
 	/* Fallback trap vector target for a purecap CPU. */
+.align 2
 1:	li \mask, 0
 	li \value, 0
 	li \scmodeval, 0
@@ -297,6 +300,7 @@ _csrw \csr \gpr \@
 	csrr \reg, \csr
 	li \reg, 1
 	j 2f
+.align 2
 1:	li \reg, 0
 2:
 .endm
