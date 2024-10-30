@@ -72,6 +72,40 @@ bool __riscv_isa_extension_available(const unsigned long *isa_bitmap, unsigned i
 }
 EXPORT_SYMBOL_GPL(__riscv_isa_extension_available);
 
+static bool riscv_probe_zicbom(void)
+{
+	int ret;
+	unsigned char buf[256] __attribute__((aligned(256)));
+
+	asm volatile(
+		"	mv %0, zero\n"
+		"1:"	CBO_FLUSH(%1)
+		"	li %0, 1\n"
+		"2:"
+		_ASM_EXTABLE(1b, 2b)
+		: "=r" (ret) : PTRC(buf)
+	);
+
+	return ret;
+}
+
+static bool riscv_probe_zicboz(void)
+{
+	int ret;
+	unsigned char buf[256] __attribute__((aligned(256)));
+
+	asm volatile(
+		"	mv %0, zero\n"
+		"1:"	CBO_ZERO(%1)
+		"	li %0, 1\n"
+		"2:"
+		_ASM_EXTABLE(1b, 2b)
+		: "=r" (ret) : PTRC(buf)
+	);
+
+	return ret;
+}
+
 static bool riscv_isa_extension_check(int id)
 {
 	switch (id) {
@@ -83,6 +117,15 @@ static bool riscv_isa_extension_check(int id)
 			pr_err("Zicbom disabled as cbom-block-size present, but is not a power-of-2\n");
 			return false;
 		}
+		if (!riscv_probe_zicbom()) {
+			pr_err("Zicbom announced but not supported by hardware\n");
+#ifdef CONFIG_ERRATA_QEMU_CMO
+			pr_err("WARNING: Will assume no cache flush is neccessary\n");
+			riscv_cbom_block_size = L1_CACHE_BYTES;
+			riscv_noncoherent_supported();
+#endif
+			return false;
+		}
 		return true;
 	case RISCV_ISA_EXT_ZICBOZ:
 		if (!riscv_cboz_block_size) {
@@ -90,6 +133,10 @@ static bool riscv_isa_extension_check(int id)
 			return false;
 		} else if (!is_power_of_2(riscv_cboz_block_size)) {
 			pr_err("Zicboz disabled as cboz-block-size present, but is not a power-of-2\n");
+			return false;
+		}
+		if (!riscv_probe_zicboz()) {
+			pr_err("Zicboz announced but not supported by hardware\n");
 			return false;
 		}
 		return true;

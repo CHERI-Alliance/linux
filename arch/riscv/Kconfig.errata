@@ -119,4 +119,16 @@ config ERRATA_THEAD_PMU
 
 	  If you don't know what to do here, say "Y".
 
+config ERRATA_QEMU_CMO
+	bool "Assume working DMA without CBO.FLUSH support"
+	default n
+	help
+	  If running on qemu cache flush instructions are generally
+	  not required and only most recent versions of qemu support
+	  their emulation. If the ISA string announces support for
+	  the ZICBOM extension but the hardware does not support it
+	  assume that DMA works correctly without cache flushing.
+
+	  If unsure say "N".
+
 endmenu # "CPU errata selection"
