@@ -10,6 +10,7 @@
 #include <asm/hwcap.h>
 #include <asm/insn-def.h>
 #include <asm/page.h>
+#include <asm/asmcheri.h>
 
 #define CBOZ_ALT(order, old, new)				\
 	ALTERNATIVE(old, new, 0,				\
@@ -26,7 +27,8 @@ SYM_FUNC_START(clear_page)
 	 */
 	CBOZ_ALT(12, "j .Lno_zicboz", "nop")
 
-	lw	a1, riscv_cboz_block_size
+	la	a1, riscv_cboz_block_size
+	lw	a1, (CREG(a1))
 	add	a2, a0, a2
 .Lzero_loop:
 	CBO_ZERO(a0)
