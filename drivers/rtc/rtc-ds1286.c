@@ -54,7 +54,7 @@ static int ds1286_alarm_irq_enable(struct device *dev, unsigned int enabled)
 
 #ifdef CONFIG_RTC_INTF_DEV
 
-static int ds1286_ioctl(struct device *dev, unsigned int cmd, unsigned long arg)
+static int ds1286_ioctl(struct device *dev, unsigned int cmd, user_uintptr_t arg)
 {
 	struct ds1286_priv *priv = dev_get_drvdata(dev);
 	unsigned long flags;

@@ -541,7 +541,7 @@ static int rx8025_probe(struct i2c_client *client)
 	i2c_set_clientdata(client, rx8025);
 
 	if (id)
-		rx8025->model = id->driver_data;
+		rx8025->model = __c_ua(id->driver_data);
 
 	err = rx8025_init_client(client);
 	if (err)

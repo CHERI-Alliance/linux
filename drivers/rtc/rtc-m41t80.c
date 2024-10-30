@@ -721,7 +721,7 @@ static ssize_t wdt_read(struct file *file, char __user *buf,
  *	querying capabilities and current status.
  */
 static int wdt_ioctl(struct file *file, unsigned int cmd,
-		     unsigned long arg)
+		     user_uintptr_t arg)
 {
 	int new_margin, rv;
 	static struct watchdog_info ident = {
@@ -774,7 +774,7 @@ static int wdt_ioctl(struct file *file, unsigned int cmd,
 }
 
 static long wdt_unlocked_ioctl(struct file *file, unsigned int cmd,
-			       unsigned long arg)
+			       user_uintptr_t arg)
 {
 	int ret;
 
@@ -898,10 +898,10 @@ static int m41t80_probe(struct i2c_client *client)
 	m41t80_data->client = client;
 	if (client->dev.of_node) {
 		m41t80_data->features = (unsigned long)
-			of_device_get_match_data(&client->dev);
+			__c_pa(of_device_get_match_data(&client->dev));
 	} else {
 		const struct i2c_device_id *id = i2c_match_id(m41t80_id, client);
-		m41t80_data->features = id->driver_data;
+		m41t80_data->features = __c_ua(id->driver_data);
 	}
 	i2c_set_clientdata(client, m41t80_data);
 

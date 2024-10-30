@@ -332,7 +332,7 @@ static int pcf2127_rtc_set_time(struct device *dev, struct rtc_time *tm)
 }
 
 static int pcf2127_rtc_ioctl(struct device *dev,
-				unsigned int cmd, unsigned long arg)
+				unsigned int cmd, user_uintptr_t arg)
 {
 	struct pcf2127 *pcf2127 = dev_get_drvdata(dev);
 	int val, touser = 0;
@@ -1376,7 +1376,7 @@ static int pcf2127_i2c_probe(struct i2c_client *client)
 			return -ENODEV;
 	} else {
 		enum pcf21xx_type type =
-			i2c_match_id(pcf2127_i2c_id, client)->driver_data;
+			__c_ua(i2c_match_id(pcf2127_i2c_id, client)->driver_data);
 
 		if (type >= PCF21XX_LAST_ID)
 			return -ENODEV;
@@ -1449,7 +1449,7 @@ static int pcf2127_spi_probe(struct spi_device *spi)
 		if (!variant)
 			return -ENODEV;
 	} else {
-		enum pcf21xx_type type = spi_get_device_id(spi)->driver_data;
+		enum pcf21xx_type type = __c_ua(spi_get_device_id(spi)->driver_data);
 
 		if (type >= PCF21XX_LAST_ID)
 			return -ENODEV;

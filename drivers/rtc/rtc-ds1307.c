@@ -1744,11 +1744,11 @@ static int ds1307_probe(struct i2c_client *client)
 
 	match = device_get_match_data(&client->dev);
 	if (match) {
-		ds1307->type = (uintptr_t)match;
+		ds1307->type = __c_pa(match);
 		chip = &chips[ds1307->type];
 	} else if (id) {
 		chip = &chips[id->driver_data];
-		ds1307->type = id->driver_data;
+		ds1307->type = __c_ua(id->driver_data);
 	} else {
 		return -ENODEV;
 	}

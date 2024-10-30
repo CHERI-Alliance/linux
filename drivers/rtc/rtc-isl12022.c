@@ -208,7 +208,7 @@ static int isl12022_rtc_set_time(struct device *dev, struct rtc_time *tm)
 	return regmap_bulk_write(regmap, ISL12022_REG_SC, buf, sizeof(buf));
 }
 
-static int isl12022_rtc_ioctl(struct device *dev, unsigned int cmd, unsigned long arg)
+static int isl12022_rtc_ioctl(struct device *dev, unsigned int cmd, user_uintptr_t arg)
 {
 	struct regmap *regmap = dev_get_drvdata(dev);
 	u32 user, val;

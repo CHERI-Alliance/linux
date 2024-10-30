@@ -523,7 +523,7 @@ static int abx80x_alarm_irq_enable(struct device *dev, unsigned int enabled)
 	return err;
 }
 
-static int abx80x_ioctl(struct device *dev, unsigned int cmd, unsigned long arg)
+static int abx80x_ioctl(struct device *dev, unsigned int cmd, user_uintptr_t arg)
 {
 	struct i2c_client *client = to_i2c_client(dev);
 	int status, tmp;
@@ -769,7 +769,7 @@ static int abx80x_probe(struct i2c_client *client)
 	int i, data, err, trickle_cfg = -EINVAL;
 	char buf[7];
 	const struct i2c_device_id *id = i2c_match_id(abx80x_id, client);
-	unsigned int part = id->driver_data;
+	unsigned int part = __c_ua(id->driver_data);
 	unsigned int partnumber;
 	unsigned int majrev, minrev;
 	unsigned int lot;
