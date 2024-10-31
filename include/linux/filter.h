@@ -987,9 +987,9 @@ int sk_get_filter(struct sock *sk, sockptr_t optval, unsigned int len);
 bool sk_filter_charge(struct sock *sk, struct sk_filter *fp);
 void sk_filter_uncharge(struct sock *sk, struct sk_filter *fp);
 
-u64 __bpf_call_base(u64 r1, u64 r2, u64 r3, u64 r4, u64 r5);
+uintptr_t __bpf_call_base(uintptr_t r1, uintptr_t r2, uintptr_t r3, uintptr_t r4, uintptr_t r5);
 #define __bpf_call_base_args \
-	((u64 (*)(u64, u64, u64, u64, u64, const struct bpf_insn *)) \
+	((uintptr_t (*)(uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, const struct bpf_insn *)) \
 	 (void *)__bpf_call_base)
 
 struct bpf_prog *bpf_int_jit_compile(struct bpf_prog *prog);

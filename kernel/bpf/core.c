@@ -1536,7 +1536,7 @@ struct bpf_prog *bpf_jit_blind_constants(struct bpf_prog *prog)
  * to go into kallsyms for correlation from e.g. bpftool, so naming
  * must not change.
  */
-noinline u64 __bpf_call_base(u64 r1, u64 r2, u64 r3, u64 r4, u64 r5)
+noinline uintptr_t __bpf_call_base(uintptr_t r1, uintptr_t r2, uintptr_t r3, uintptr_t r4, uintptr_t r5)
 {
 	return 0;
 }
@@ -1716,7 +1716,7 @@ bool bpf_opcode_in_insntable(u8 code)
  *
  * Return: whatever value is in %BPF_R0 at program exit
  */
-static u64 ___bpf_prog_run(uintptr_t *regs, const struct bpf_insn *insn)
+static uintptr_t ___bpf_prog_run(uintptr_t *regs, const struct bpf_insn *insn)
 {
 #define BPF_INSN_2_LBL(x, y)    [BPF_##x | BPF_##y] = &&x##_##y
 #define BPF_INSN_3_LBL(x, y, z) [BPF_##x | BPF_##y | BPF_##z] = &&x##_##y##_##z
@@ -2086,7 +2086,7 @@ out:
 		insn += insn->imm;
 		CONT;
 	JMP_EXIT:
-		return __c_ua(BPF_R0);
+		return BPF_R0;
 	/* JMP */
 #define COND_JMP(SIGN, OPCODE, CMP_OP)				\
 	JMP_##OPCODE##_X:					\
@@ -2244,7 +2244,7 @@ out:
 }
 
 /*
- * FIXCHERI: Use sizeof(u64) for the diff to maintain userland expectations
+ * FIXCHERI: Use sizeof(u64) for the division to maintain userland expectations
  * FIXCHERI: wrt. the number of values that can be put on the stack.
  */
 #define PROG_NAME(stack_size) __bpf_prog_run##stack_size
@@ -2257,12 +2257,12 @@ static unsigned int PROG_NAME(stack_size)(const void *ctx, const struct bpf_insn
 	kmsan_unpoison_memory(stack, sizeof(stack)); \
 	FP = (uintptr_t)&stack[ARRAY_SIZE(stack)]; \
 	ARG1 = (uintptr_t) ctx; \
-	return ___bpf_prog_run(regs, insn); \
+	return __c_ua(___bpf_prog_run(regs, insn)); \
 }
 
 #define PROG_NAME_ARGS(stack_size) __bpf_prog_run_args##stack_size
 #define DEFINE_BPF_PROG_RUN_ARGS(stack_size) \
-static u64 PROG_NAME_ARGS(stack_size)(u64 r1, u64 r2, u64 r3, u64 r4, u64 r5, \
+static uintptr_t PROG_NAME_ARGS(stack_size)(uintptr_t r1, uintptr_t r2, uintptr_t r3, uintptr_t r4, uintptr_t r5, \
 				      const struct bpf_insn *insn) \
 { \
 	uintptr_t stack[stack_size / sizeof(u64)]; \
@@ -2270,11 +2270,11 @@ static u64 PROG_NAME_ARGS(stack_size)(u64 r1, u64 r2, u64 r3, u64 r4, u64 r5, \
 \
 	kmsan_unpoison_memory(stack, sizeof(stack)); \
 	FP =  (uintptr_t)&stack[ARRAY_SIZE(stack)]; \
-	BPF_R1 = __c_fakeu(r1); \
-	BPF_R2 = __c_fakeu(r2); \
-	BPF_R3 = __c_fakeu(r3); \
-	BPF_R4 = __c_fakeu(r4); \
-	BPF_R5 = __c_fakeu(r5); \
+	BPF_R1 = r1; \
+	BPF_R2 = r2; \
+	BPF_R3 = r3; \
+	BPF_R4 = r4; \
+	BPF_R5 = r5; \
 	return ___bpf_prog_run(regs, insn); \
 }
 
@@ -2304,7 +2304,7 @@ EVAL4(PROG_NAME_LIST, 416, 448, 480, 512)
 #undef PROG_NAME_LIST
 #define PROG_NAME_LIST(stack_size) PROG_NAME_ARGS(stack_size),
 static __maybe_unused
-u64 (*interpreters_args[])(u64 r1, u64 r2, u64 r3, u64 r4, u64 r5,
+uintptr_t (*interpreters_args[])(uintptr_t r1, uintptr_t r2, uintptr_t r3, uintptr_t r4, uintptr_t r5,
 			   const struct bpf_insn *insn) = {
 EVAL6(PROG_NAME_LIST, 32, 64, 96, 128, 160, 192)
 EVAL6(PROG_NAME_LIST, 224, 256, 288, 320, 352, 384)
