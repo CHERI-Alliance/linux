@@ -45,7 +45,12 @@
 #define _BIT128(x)	((unsigned __int128)(1) << (x))
 #endif
 
-#define __ALIGN_KERNEL(x, a)		__ALIGN_KERNEL_MASK(x, (__typeof__(x))(a) - 1)
+#ifndef __ASSEMBLY__
+#define __ALIGN_GEN_MASK(x, a)		(_Generic(x, __kernel_uintptr_t: (unsigned long)(a), default: (a)) - 1)
+#else
+#define __ALIGN_GEN_MASK(x, a)		 ((a) - 1)
+#endif
+#define __ALIGN_KERNEL(x, a)		__ALIGN_KERNEL_MASK(x, __ALIGN_GEN_MASK(x, a))
 #define __ALIGN_KERNEL_MASK(x, mask)	(((x) + (mask)) & ~(mask))
 
 #define __KERNEL_DIV_ROUND_UP(n, d) (((n) + (d) - 1) / (d))
