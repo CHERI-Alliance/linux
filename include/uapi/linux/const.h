@@ -28,9 +28,12 @@
 #define _BITUL(x)	(_UL(1) << (x))
 #define _BITULL(x)	(_ULL(1) << (x))
 
-/* FIXCHERI: Need a bitter solution here. */
-#define __ALIGN_MASK_TYPE(x)		__typeof__(__builtin_choose_expr(__same_type(x, __uintptr_t), 0UL, x))
-#define __ALIGN_KERNEL(x, a)		__ALIGN_KERNEL_MASK(x, (__ALIGN_MASK_TYPE(x))(a) - 1)
+#ifndef __ASSEMBLY__
+#define __ALIGN_GEN_MASK(x, a)		(_Generic(x, __uintptr_t: (unsigned long)(a), default: (a)) - 1)
+#else
+#define __ALIGN_GEN_MASK(x, a)		 ((a) - 1)
+#endif
+#define __ALIGN_KERNEL(x, a)		__ALIGN_KERNEL_MASK(x, __ALIGN_GEN_MASK(x, a))
 #define __ALIGN_KERNEL_MASK(x, mask)	(((x) + (mask)) & ~(mask))
 
 #define __KERNEL_DIV_ROUND_UP(n, d) (((n) + (d) - 1) / (d))
