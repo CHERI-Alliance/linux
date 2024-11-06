@@ -135,7 +135,7 @@ asmlinkage long __riscv_sys_ni_syscall(const struct pt_regs *);
  * allow SYSCALL_PREP(name) to be expanded.
  */
 #define __SYSCALL_DEFINE0(sname, ret_type)				       	\
-	SYSCALL_METADATA(sname, 0);						\
+	SYSCALL_METADATA(0, sname);						\
 	asmlinkage ret_type __riscv_sys##sname(const struct pt_regs *__unused);	\
 	ALLOW_ERROR_INJECTION(__riscv_sys##sname, ERRNO);			\
 	asmlinkage ret_type __riscv_sys##sname(const struct pt_regs *__unused)

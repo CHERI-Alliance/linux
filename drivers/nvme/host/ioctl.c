@@ -135,7 +135,7 @@ static int nvme_map_user_request(struct request *req, u64 ubuffer,
 		if (WARN_ON_ONCE(flags & NVME_IOCTL_VEC))
 			return -EINVAL;
 		/* TODO [PCuABI]: change ubuffer type to void __user * */
-		ret = io_uring_cmd_import_fixed(ubuffer, bufflen,
+		ret = io_uring_cmd_import_fixed((void *)ubuffer, bufflen,
 				rq_data_dir(req), &iter, ioucmd);
 		if (ret < 0)
 			goto out;

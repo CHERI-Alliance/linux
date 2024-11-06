@@ -5,6 +5,7 @@
 
 #include <asm/types.h>
 #include <linux/compiler.h>
+#include <linux/cheri.h>
 
 /*
  * The "GOLDEN_RATIO_PRIME" is used in ifs/btrfs/brtfs_inode.h and

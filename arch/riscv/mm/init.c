@@ -1013,7 +1013,7 @@ static void __init __PI create_fdt_early_page_table(unsigned long fix_fdt_va,
 	 * kernel is mapped in the linear mapping, that makes no difference.
 	 */
 	dtb_early_va = cheri_make_kernel_data_cap(
-		kernel_mapping_pa_to_va(dtb_pa), fdtlen);
+		kernel_mapping_pa_to_va((void *)dtb_pa), fdtlen);
 #endif
 	dtb_early_pa = dtb_pa;
 #ifdef CONFIG_CHERI_KERNEL

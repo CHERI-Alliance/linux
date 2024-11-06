@@ -264,7 +264,7 @@ extern void destroy_work_on_stack(struct work_struct *work);
 extern void destroy_delayed_work_on_stack(struct delayed_work *work);
 static inline unsigned int work_static(struct work_struct *work)
 {
-	return __c_ua(work->data) & WORK_STRUCT_STATIC;
+	return __c_ua(atomic_ptr_read(&work->data)) & WORK_STRUCT_STATIC;
 }
 #else
 static inline void __init_work(struct work_struct *work, int onstack) { }
