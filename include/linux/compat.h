@@ -959,6 +959,9 @@ static inline bool in_compat_syscall(void) { return is_compat_task(); }
 static inline bool in_compat32_syscall(void) { return is_compat32_task(); }
 #endif
 #ifndef in_compat64_syscall
+#ifndef CONFIG_COMPAT64
+#define is_compat64_task() (0)
+#endif
 static inline bool in_compat64_syscall(void) { return is_compat64_task(); }
 #endif
 

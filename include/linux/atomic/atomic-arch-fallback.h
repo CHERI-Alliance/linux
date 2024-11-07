@@ -4689,6 +4689,7 @@ raw_atomic64_dec_if_positive(atomic64_t *v)
 #endif
 }
 
+#if __SIZEOF_POINTER__ != __SIZEOF_LONG__
 /**
  * raw_atomicuintptr_read() - atomic load with relaxed ordering
  * @v: pointer to atomicuintptr_t
@@ -6811,5 +6812,6 @@ raw_atomicuintptr_dec_if_positive(atomicuintptr_t *v)
 #endif
 }
 
+#endif /* __SIZEOF_POINTER__ != __SIZEOF_LONG__ */
 #endif /* _LINUX_ATOMIC_FALLBACK_H */
-// 748c377f117809c3d3a545c36917b1de37a6f113
+// 6b1d3766468dfcc3ffa186cfd8876ddff0666785

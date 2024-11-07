@@ -29,7 +29,7 @@
 #define _BITULL(x)	(_ULL(1) << (x))
 
 #ifndef __ASSEMBLY__
-#define __ALIGN_GEN_MASK(x, a)		(_Generic(x, __uintptr_t: (unsigned long)(a), default: (a)) - 1)
+#define __ALIGN_GEN_MASK(x, a)		(_Generic(x, __kernel_uintptr_t: (unsigned long)(a), default: (a)) - 1)
 #else
 #define __ALIGN_GEN_MASK(x, a)		 ((a) - 1)
 #endif

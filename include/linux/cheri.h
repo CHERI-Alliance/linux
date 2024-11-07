@@ -197,7 +197,7 @@ extern uintcap_t cheri_user_root_allperms_cap;	/* Userspace root (all permission
  * - Pass the address to printk.
  * - Most of the VMA functions operate on addresses and not pointers, too.
  */
-static inline ptraddr_t
+static __always_inline ptraddr_t
 __c_pa(const volatile void *ptr)
 {
 	return (ptraddr_t __force)(uintptr_t)ptr;
@@ -208,7 +208,7 @@ __c_pa(const volatile void *ptr)
  *
  * Like __c_pa but takese a uintptr_t instead of a void * argument.
  */
-static inline ptraddr_t
+static __always_inline ptraddr_t
 __c_ua(uintptr_t ptr)
 {
 	return (unsigned long __force)ptr;
@@ -238,7 +238,7 @@ __c_ua(uintptr_t ptr)
  *   the original non-pointer type.
  * - Additionally, the ERR_PTR related macros use this.
  */
-static inline void *
+static __always_inline void *
 __c_fakep(ptraddr_t val)
 {
 	return (void *)(uintptr_t __force)val;
@@ -247,7 +247,7 @@ __c_fakep(ptraddr_t val)
 /*
  * Like __c_fakep but creates a uintptr_t instead of a void * pointer.
  */
-static inline uintptr_t
+static __always_inline uintptr_t
 __c_fakeu(ptraddr_t val)
 {
 	return (uintptr_t __force)val;
@@ -285,7 +285,7 @@ extern void * kernel_code_cap;
  *       bounds and thus use cheri_make_kernel_data_cap or
  *       cheri_make_kernel_code_cap instead.
  */
-static inline void *
+static __always_inline void *
 cheri_kcap(ptraddr_t addr)
 {
 	return cheri_address_set(kernel_data_cap, addr);
@@ -296,7 +296,7 @@ cheri_kcap(ptraddr_t addr)
  * derived from kernel_data_cap and thus will allow read and write
  * accesses.
  */
-static inline void *
+static __always_inline void *
 cheri_make_kernel_data_cap(ptraddr_t addr, size_t len)
 {
 	void * ret = cheri_address_set(kernel_data_cap, addr);
@@ -309,7 +309,7 @@ cheri_make_kernel_data_cap(ptraddr_t addr, size_t len)
  * The capability is derived from kernel_code_cap and thus will
  * allow read/exec and (if used as a pcc) access to system registers.
  */
-static inline void *
+static __always_inline void *
 cheri_make_kernel_code_cap(ptraddr_t addr)
 {
 	return cheri_address_set(kernel_code_cap, addr);
@@ -319,13 +319,13 @@ cheri_make_kernel_code_cap(ptraddr_t addr)
 
 #define __cheri_pointer_align
 
-static inline void *
+static __always_inline void *
 cheri_kcap(ptraddr_t addr)
 {
 	return (void *)addr;
 }
 
-static inline void *
+static __always_inline void *
 cheri_make_kernel_data_cap(ptraddr_t addr, size_t len)
 {
 	(void)len;
@@ -333,7 +333,7 @@ cheri_make_kernel_data_cap(ptraddr_t addr, size_t len)
 	return (void *)addr;
 }
 
-static inline void *
+static __always_inline void *
 cheri_make_kernel_code_cap(ptraddr_t addr)
 {
 	return (void *)addr;
@@ -351,7 +351,7 @@ cheri_make_kernel_code_cap(ptraddr_t addr)
  * @max An upper bound on the limit to return.
  * @return The number of accessible bytes.
  */
-static inline unsigned long
+static __always_inline unsigned long
 cheri_restrict_len(const volatile void *__capability c, ptraddr_t max)
 {
 	ptraddr_t l = cheri_base_get(c) + cheri_length_get(c) - __c_pa(c);

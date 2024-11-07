@@ -29,6 +29,7 @@
 
 #include <linux/list.h>
 #include <linux/irqreturn.h>
+#include <linux/compat.h>
 
 #include <video/nomodeset.h>
 

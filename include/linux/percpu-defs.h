@@ -333,6 +333,12 @@ extern void __this_cpu_preempt_check(const char *op);
 static __always_inline void __this_cpu_preempt_check(const char *op) { }
 #endif
 
+#if __SIZEOF_POINTER__ == 16
+#define IFLP128(x) x
+#else
+#define IFLP128(x)
+#endif
+
 #define __pcpu_size_call_return(stem, variable)				\
 ({									\
 	typeof(variable) pscr_ret__;					\
@@ -342,7 +348,7 @@ static __always_inline void __this_cpu_preempt_check(const char *op) { }
 	case 2: pscr_ret__ = stem##2(variable); break;			\
 	case 4: pscr_ret__ = stem##4(variable); break;			\
 	case 8: pscr_ret__ = stem##8(variable); break;			\
-	case 16: pscr_ret__ = stem##16(variable); break;		\
+	IFLP128(case 16: pscr_ret__ = stem##16(variable); break;)	\
 	default:							\
 		__bad_size_call_parameter(); break;			\
 	}								\
@@ -358,7 +364,7 @@ static __always_inline void __this_cpu_preempt_check(const char *op) { }
 	case 2: pscr2_ret__ = stem##2(variable, __VA_ARGS__); break;	\
 	case 4: pscr2_ret__ = stem##4(variable, __VA_ARGS__); break;	\
 	case 8: pscr2_ret__ = stem##8(variable, __VA_ARGS__); break;	\
-	case 16: pscr2_ret__ = stem##16(variable, __VA_ARGS__); break;	\
+	IFLP128(case 16: pscr2_ret__ = stem##16(variable, __VA_ARGS__); break;)	\
 	default:							\
 		__bad_size_call_parameter(); break;			\
 	}								\
@@ -374,7 +380,7 @@ static __always_inline void __this_cpu_preempt_check(const char *op) { }
 	case 2: pscr2_ret__ = stem##2(variable, __VA_ARGS__); break;	\
 	case 4: pscr2_ret__ = stem##4(variable, __VA_ARGS__); break;	\
 	case 8: pscr2_ret__ = stem##8(variable, __VA_ARGS__); break;	\
-	case 16: pscr2_ret__ = stem##16(variable, __VA_ARGS__); break;	\
+	IFLP128(case 16: pscr2_ret__ = stem##16(variable, __VA_ARGS__); break;)	\
 	default:							\
 		__bad_size_call_parameter(); break;			\
 	}								\
@@ -389,7 +395,7 @@ do {									\
 		case 2: stem##2(variable, __VA_ARGS__);break;		\
 		case 4: stem##4(variable, __VA_ARGS__);break;		\
 		case 8: stem##8(variable, __VA_ARGS__);break;		\
-		case 16: stem##16(variable, __VA_ARGS__);break;		\
+		IFLP128(case 16: stem##16(variable, __VA_ARGS__);break;)	\
 		default: 						\
 			__bad_size_call_parameter();break;		\
 	}								\

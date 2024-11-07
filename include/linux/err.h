@@ -3,9 +3,7 @@
 #define _LINUX_ERR_H
 
 #include <linux/compiler.h>
-#include <linux/user_ptr.h>
 #include <linux/types.h>
-#include <linux/cheri.h>
 
 #include <asm/errno.h>
 
@@ -20,6 +18,9 @@
 #define MAX_ERRNO	4095
 
 #ifndef __ASSEMBLY__
+
+#include <linux/user_ptr.h>
+#include <linux/cheri.h>
 
 /**
  * IS_ERR_VALUE - Detect an error pointer.

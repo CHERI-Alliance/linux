@@ -646,7 +646,7 @@
 		__lock_text_end = .;					\
 		size$__lock_text_start =				\
 			ABSOLUTE(. - __lock_text_start);		\
-		size$__lock_text_end =1;
+		size$__lock_text_end = 1;
 
 #define KPROBES_TEXT							\
 		ALIGN_FUNCTION();					\

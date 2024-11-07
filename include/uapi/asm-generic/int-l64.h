@@ -29,13 +29,6 @@ typedef unsigned int __u32;
 typedef __signed__ long __s64;
 typedef unsigned long __u64;
 
-#if defined(__CHECKER__) || !defined(__CHERI__)
-typedef unsigned __int128 __uintptr_t;
-#else
-typedef __uintcap_t __uintptr_t;
-#endif
-
-
 #endif /* __ASSEMBLY__ */
 
 

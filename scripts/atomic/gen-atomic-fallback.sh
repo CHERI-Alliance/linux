@@ -331,9 +331,13 @@ grep '^[a-z]' "$1" | while read name meta args; do
 	gen_proto "${meta}" "${name}" "atomic64" "s64" ${args}
 done
 
+echo "#if __SIZEOF_POINTER__ != __SIZEOF_LONG__"
+
 grep '^[a-z]' "$1" | while read name meta args; do
 	gen_proto "${meta}" "${name}" "atomicuintptr" "uintptr_t" ${args}
 done
+
+echo "#endif /* __SIZEOF_POINTER__ != __SIZEOF_LONG__ */"
 
 cat <<EOF
 #endif /* _LINUX_ATOMIC_FALLBACK_H */
