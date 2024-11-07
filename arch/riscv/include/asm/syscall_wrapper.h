@@ -51,7 +51,7 @@ asmlinkage long __riscv_sys_ni_syscall(const struct pt_regs *);
 	asmlinkage long __riscv_compat_sys##name(const struct pt_regs *regs);		\
 	ALLOW_ERROR_INJECTION(__riscv_compat_sys##name, ERRNO);				\
 	static inline long __do_compat_sys##name(__MAP(x,__SC_DECL,__VA_ARGS__));	\
-	__SYSCALL_SE_DEFINEx(x, compat_sys, name, __VA_ARGS__)				\
+	__SYSCALL_SE_DEFINEx(x, compat_sys, name, long, __VA_ARGS__)			\
 	{										\
 		return __do_compat_sys##name(__MAP(x,__SC_DELOUSE,__VA_ARGS__));	\
 	}										\

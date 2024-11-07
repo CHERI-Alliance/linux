@@ -839,12 +839,10 @@ config ARCH_SUPPORTS_CRASH_DUMP
 config ARCH_HAS_GENERIC_CRASHKERNEL_RESERVATION
 	def_bool CRASH_RESERVE
 
-# FIXCHERI: COMPAT support is broken in the CHERI kernel sources even
-# FIXCHERI: if not compiling for CHERI
 config COMPAT
 	bool "Kernel support for 32-bit U-mode"
 	default 64BIT
-	depends on 64BIT && MMU && FIXCHERI
+	depends on 64BIT && MMU
 	help
 	  This option enables support for a 32-bit U-mode running under a 64-bit
 	  kernel at S-mode. riscv32-specific components such as system calls,
@@ -852,6 +850,9 @@ config COMPAT
 	  ptrace interface are handled appropriately by the kernel.
 
 	  If you want to execute 32-bit userspace applications, say Y.
+
+config COMPAT32
+	def_bool y if COMPAT
 
 config PARAVIRT
 	bool "Enable paravirtualization code"
