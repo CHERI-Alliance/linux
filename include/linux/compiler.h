@@ -236,7 +236,7 @@ typedef unsigned long __uintcap_t;
  */
 #define ___ADDRESSABLE(sym, __attrs) \
 	static void * __used __attrs \
-	__UNIQUE_ID(__PASTE(__addressable_,sym)) = (void * __force)(__uintcap_t __force)&sym;
+	__UNIQUE_ID(__PASTE(__addressable_,sym)) = (void * __force)(char * __force)&sym;
 #define __ADDRESSABLE(sym) \
 	___ADDRESSABLE(sym, __section(".discard.addressable"))
 
@@ -246,7 +246,7 @@ typedef unsigned long __uintcap_t;
  */
 static inline void *offset_to_ptr(const int *off)
 {
-	return (void *)((__uintcap_t)off + *off);
+	return (void *)((char *)off + *off);
 }
 
 #endif /* __ASSEMBLY__ */
@@ -298,8 +298,13 @@ static inline void *offset_to_ptr(const int *off)
  *     sizeof(int) == sizeof(int)     (x) was a constant expression
  *     sizeof(int) != sizeof(void)    (x) was not a constant expression
  */
+#if __SIZEOF_POINTER__ != __SIZEOF_LONG__
 #define __is_constexpr(x) \
 	(sizeof(int) == sizeof(*(8 ? ((void * __force)(__uintcap_t __force)((long)(x) * 0l)) : (int *)8)))
+#else
+#define __is_constexpr(x) \
+	(sizeof(int) == sizeof(*(8 ? ((void * __force)(unsigned long __force)((long)(x) * 0l)) : (int *)8)))
+#endif
 
 /*
  * Whether 'type' is a signed type or an unsigned type. Supports scalar types,

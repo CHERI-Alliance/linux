@@ -180,7 +180,7 @@ SYSCALL_DEFINE6(futex, u32 __user *, uaddr, int, op, u32, val,
 		tp = &t;
 	}
 
-	return do_futex(uaddr, op, val, tp, uaddr2, __c_pa(utime), val3);
+	return do_futex(uaddr, op, val, tp, uaddr2, __c_pa_u(utime), val3);
 }
 
 struct compat_futex_waitv {
@@ -540,7 +540,7 @@ SYSCALL_DEFINE6(futex_time32, u32 __user *, uaddr, int, op, u32, val,
 		tp = &t;
 	}
 
-	return do_futex(uaddr, op, val, tp, uaddr2, __c_pa(utime), val3);
+	return do_futex(uaddr, op, val, tp, uaddr2, __c_pa_u(utime), val3);
 }
 #endif /* CONFIG_COMPAT_32BIT_TIME */
 

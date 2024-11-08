@@ -12,6 +12,11 @@
 
 #include <cheriintrin.h>
 
+/* For ARM morello. */
+#ifndef cheri_high_get
+#define cheri_high_get(x) __builtin_cheri_copy_from_high(x)
+#endif
+
 #else /* __CHECKER */
 
 typedef unsigned int cheri_perms_t;
@@ -203,6 +208,12 @@ __c_pa(const volatile void *ptr)
 	return (ptraddr_t __force)(uintptr_t)ptr;
 }
 
+static __always_inline ptraddr_t
+__c_pa_u(const volatile void __user *ptr)
+{
+	return (ptraddr_t __force)(__kernel_uintptr_t)ptr;
+}
+
 /*
  * Downgrade a uintptr_t to its address.
  *
@@ -315,6 +326,8 @@ cheri_make_kernel_code_cap(ptraddr_t addr)
 	return cheri_address_set(kernel_code_cap, addr);
 }
 
+#define cheri_bounds_set_kernel(x,l) cheri_bounds_set(x,l)
+
 #else
 
 #define __cheri_pointer_align
@@ -339,6 +352,17 @@ cheri_make_kernel_code_cap(ptraddr_t addr)
 	return (void *)addr;
 }
 
+/*
+ * If the kernel is not CHERI enabled setting a bound on
+ * a kernel pointer is a NOP. Make this an inline function to
+ * catch bogus calls to this function with a real capability.
+ */
+static __always_inline void *
+cheri_bounds_set_kernel(void *ptr, size_t len)
+{
+	return ptr;
+}
+
 #endif
 
 
@@ -354,7 +378,7 @@ cheri_make_kernel_code_cap(ptraddr_t addr)
 static __always_inline unsigned long
 cheri_restrict_len(const volatile void *__capability c, ptraddr_t max)
 {
-	ptraddr_t l = cheri_base_get(c) + cheri_length_get(c) - __c_pa(c);
+	ptraddr_t l = cheri_base_get(c) + cheri_length_get(c) - __c_pa_u(c);
 
 	return (l < max)  ? l : max;
 }
@@ -364,6 +388,5 @@ cheri_restrict_len(const volatile void *__capability c, ptraddr_t max)
 #define cheri_restrict_len(C, L) (L)
 
 #endif
-
 
 #endif	/* _LINUX_CHERI_H */

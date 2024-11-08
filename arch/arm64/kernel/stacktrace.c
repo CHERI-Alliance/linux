@@ -431,7 +431,7 @@ void arch_stack_walk_user(stack_trace_consume_fn consume_entry, void *cookie,
 		struct frame_tail __user *tail;
 
 		tail = (struct frame_tail __user *)regs->regs[29];
-		while (tail && !((unsigned long)tail & 0x7))
+		while (tail && !(__c_pa_u(tail) & 0x7))
 			tail = unwind_user_frame(tail, cookie, consume_entry);
 	} else {
 #ifdef CONFIG_COMPAT
@@ -439,7 +439,7 @@ void arch_stack_walk_user(stack_trace_consume_fn consume_entry, void *cookie,
 		struct compat_frame_tail __user *tail;
 
 		tail = (struct compat_frame_tail __user *)regs->compat_fp - 1;
-		while (tail && !((unsigned long)tail & 0x3))
+		while (tail && !(__c_pa_u(tail) & 0x3))
 			tail = unwind_compat_user_frame(tail, cookie, consume_entry);
 #endif
 	}

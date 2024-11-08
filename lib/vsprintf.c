@@ -2557,7 +2557,11 @@ char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
 	if ((!cheri_tag_get(cap) && !cheri_high_get(cap)) ||
 	    (isalnum(*fmt) && *fmt != 'x') ||
 	    (likely(!no_hash_pointers) && *fmt != 'x'))
+#ifdef CONFIG_CHERI_KERNEL
 		return pointer(fmt, buf, end, cap, spec);
+#else
+		return pointer(fmt, buf, end, (void *)__c_pa_u(cap), spec);
+#endif
 
 	if (spec.flags & SPECIAL) { /* Simplified format for capabilities */
 		int orig_field_width = spec.field_width;

@@ -1634,6 +1634,7 @@ config CHERI_PURECAP_UABI_ONLY
 	depends on ARCH_HAS_CHERI_CAPABILITIES
 	depends on ARCH_HAS_CHERI_UABI_ONLY
 	select COMPAT64 if COMPAT
+	select CHERI_PURECAP_UABI
 	help
 	  Select this to convert the native kernel-user ABI to pure-capability
 	  (PCuABI). On the kernel side, all user pointers become capabilities.

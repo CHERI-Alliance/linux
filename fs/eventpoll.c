@@ -909,7 +909,7 @@ static void ep_clear_and_put(struct eventpoll *ep)
 }
 
 static long ep_eventpoll_ioctl(struct file *file, unsigned int cmd,
-			       uintptr_t arg)
+			       user_uintptr_t arg)
 {
 	int ret;
 

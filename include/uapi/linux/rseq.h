@@ -109,7 +109,7 @@ struct rseq {
 	 * 32-bit architectures should update the low order bits of the
 	 * rseq_cs field, leaving the high order bits initialized to 0.
 	 */
-	__u64 rseq_cs;
+	__kernel_uintptr_t rseq_cs;
 
 	/*
 	 * Restartable sequences flags field.

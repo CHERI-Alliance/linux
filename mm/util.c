@@ -1098,7 +1098,7 @@ void mem_dump_obj(void *object)
 
 	if (is_vmalloc_addr(object))
 		type = "vmalloc memory";
-	else if (virt_addr_valid(__c_pa(object)))
+	else if (virt_addr_valid(object))
 		type = "non-slab/vmalloc memory";
 	else if (object == NULL)
 		type = "NULL pointer";

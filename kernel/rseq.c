@@ -152,7 +152,7 @@ static int rseq_reset_rseq_cpu_node_id(struct task_struct *t)
 static int rseq_get_rseq_cs(struct task_struct *t, struct rseq_cs *rseq_cs)
 {
 	struct rseq_cs __user *urseq_cs;
-	uintptr_t ptr;
+	__kernel_uintptr_t ptr;
 	u32 __user *usig;
 	u32 sig;
 	int ret;
@@ -254,7 +254,7 @@ static int clear_rseq_cs(struct task_struct *t)
 	 * Set rseq_cs to NULL.
 	 */
 #ifdef CONFIG_64BIT
-	return put_user(0UL, &t->rseq->rseq_cs);
+	return put_user_ptr((user_uintptr_t)0, &t->rseq->rseq_cs);
 #else
 	if (clear_user(&t->rseq->rseq_cs, sizeof(t->rseq->rseq_cs)))
 		return -EFAULT;

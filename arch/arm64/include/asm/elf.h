@@ -195,11 +195,6 @@ extern int purecap_setup_additional_pages(struct linux_binprm *bprm,
 #define COMPAT_ELF_PLATFORM		("v8l")
 #endif
 
-/* AArch32 registers. */
-#define COMPAT_ELF_NGREG		18
-typedef unsigned int			compat_elf_greg_t;
-typedef compat_elf_greg_t		compat_elf_gregset_t[COMPAT_ELF_NGREG];
-
 #ifdef CONFIG_COMPAT
 
 #define compat_start_thread		compat_start_thread

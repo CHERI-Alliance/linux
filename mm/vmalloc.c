@@ -2998,7 +2998,7 @@ void *vm_map_ram(struct page **pages, unsigned int count, int node)
 	 */
 	mem = kasan_unpoison_vmalloc(mem, size, KASAN_VMALLOC_PROT_NORMAL);
 
-	return cheri_bounds_set(mem, size);
+	return cheri_bounds_set_kernel(mem, size);
 }
 EXPORT_SYMBOL(vm_map_ram);
 
