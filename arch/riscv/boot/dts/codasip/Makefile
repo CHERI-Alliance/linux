@@ -8,3 +8,7 @@ dtb-$(CONFIG_ARCH_CODASIP) += a730-mp1-hobgoblin-vcu118.dtb
 dtb-$(CONFIG_ARCH_CODASIP) += a730-mp1-hobgoblin-vcu118-qemu.dtb
 dtb-$(CONFIG_ARCH_CODASIP) += a730-mp4-hobgoblin-vcu118.dtb
 dtb-$(CONFIG_ARCH_CODASIP) += a730-mp4-hobgoblin-vcu118-qemu.dtb
+dtb-$(CONFIG_ARCH_CODASIP) += x730-mp1-hobgoblin-vcu118.dtb
+dtb-$(CONFIG_ARCH_CODASIP) += x730-mp1-hobgoblin-vcu118-qemu.dtb
+dtb-$(CONFIG_ARCH_CODASIP) += x730-mp4-hobgoblin-vcu118.dtb
+dtb-$(CONFIG_ARCH_CODASIP) += x730-mp4-hobgoblin-vcu118-qemu.dtb
