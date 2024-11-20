@@ -15,7 +15,8 @@ int reserv_vma_set_reserv(struct vm_area_struct *vma, ptraddr_t start,
 	/* Reservation base/length is expected as page aligned */
 	VM_BUG_ON(start & ~PAGE_MASK || len % PAGE_SIZE);
 
-	vma->reserv_data.start = start & cheri_representable_alignment_mask(len);
+	vma->reserv_data.start = start & cheri_representable_alignment_mask(len + ~cheri_representable_alignment_mask(len));
+	len += start - vma->reserv_data.start;
 	vma->reserv_data.len = cheri_representable_length(len);
 	vma->reserv_data.perms = user_ptr_owning_perms_from_prot(prot,
 								 vma->vm_flags);
@@ -33,7 +34,8 @@ int reserv_vma_set_reserv_start_len(struct vm_area_struct *vma, ptraddr_t start,
 	/* Reservation base/length is expected as page aligned */
 	VM_BUG_ON(start & ~PAGE_MASK || len % PAGE_SIZE);
 
-	vma->reserv_data.start = start & cheri_representable_alignment_mask(len);
+	vma->reserv_data.start = start & cheri_representable_alignment_mask(len + ~cheri_representable_alignment_mask(len));
+	len += start - vma->reserv_data.start;
 	vma->reserv_data.len = cheri_representable_length(len);
 
 	return 0;
