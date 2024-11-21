@@ -1681,7 +1681,12 @@ retry:
 	gap = vma_iter_addr(&vmi) + info->start_gap;
 	gap += (info->align_offset - gap) & info->align_mask;
 	tmp = vma_next(&vmi);
-	if (tmp && (tmp->vm_flags & VM_STARTGAP_FLAGS)) { /* Avoid prev check if possible */
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	if (tmp)
+#else
+	if (tmp && (tmp->vm_flags & VM_STARTGAP_FLAGS))
+#endif
+	{ /* Avoid prev check if possible */
 		if (vm_start_gap(tmp) < gap + length - 1) {
 			low_limit = tmp->vm_end;
 			vma_iter_reset(&vmi);
@@ -1733,7 +1738,12 @@ retry:
 	gap -= (gap - info->align_offset) & info->align_mask;
 	gap_end = vma_iter_end(&vmi);
 	tmp = vma_next(&vmi);
-	if (tmp && (tmp->vm_flags & VM_STARTGAP_FLAGS)) { /* Avoid prev check if possible */
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	if (tmp)
+#else
+	if (tmp && (tmp->vm_flags & VM_STARTGAP_FLAGS))
+#endif
+	{
 		if (vm_start_gap(tmp) < gap_end) {
 			high_limit = vm_start_gap(tmp);
 			vma_iter_reset(&vmi);
