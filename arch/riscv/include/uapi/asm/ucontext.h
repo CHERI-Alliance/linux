@@ -10,8 +10,23 @@
 
 #include <linux/types.h>
 
+/*
+ * CHERI: Make sure that the offset of uc_mcontext is the same for CHERI
+ * and non-CHERI. With CHERI the fields increase as follows:
+ * _uc_pad: Additional padding of __SIZEOF_LONG__ bytes required
+ * uc_link: Size increases by __SIZEOF_LONG__
+ * uc_stack: Size increases by __SIZEOF_LONG__
+ * As the non-CHERI structure contains (previously hidden) padding of
+ * __SIZEOF_LONG__ bytes before uc_mcontext we can consume that. For
+ * the rest we eat into the unused space that is reserved for sigset_t
+ * extension.
+ */
 struct ucontext {
 	unsigned long	  uc_flags;
+#if __SIZEOF_POINTER__ > __SIZEOF_LONG__
+	/// UAPI: NoConvert: Does not exist in compat version
+	unsigned long	  _uc_pad;
+#endif
 	struct ucontext	 *uc_link;
 	stack_t		  uc_stack;
 	sigset_t	  uc_sigmask;
@@ -21,7 +36,11 @@ struct ucontext {
 	 * at the end of this structure and explicitly state it can be
 	 * expanded, so we didn't want to box ourselves in here.
 	 */
+#if __SIZEOF_POINTER__ > __SIZEOF_LONG__
+	__u8		  __unused[1024 / 8 - sizeof(sigset_t) - 2 * __SIZEOF_LONG__];
+#else
 	__u8		  __unused[1024 / 8 - sizeof(sigset_t)];
+#endif
 	/*
 	 * We can't put uc_sigmask at the end of this structure because we need
 	 * to be able to expand sigcontext in the future.  For example, the
@@ -32,6 +51,10 @@ struct ucontext {
 	 * assume sigset_t won't be extended an extreme amount, we're
 	 * prioritizing this.
 	 */
+#if __SIZEOF_POINTER__ == __SIZEOF_LONG__
+	/// UAPI: NoConvert: Does not exist in compat version
+	unsigned long _uc_pad2;
+#endif
 	struct sigcontext uc_mcontext;
 };
 
