@@ -161,9 +161,16 @@ user_uintptr_t reserv_make_user_ptr_owning(ptraddr_t vma_addr, bool locked)
 	vma = find_vma(mm, vma_addr);
 
 	if (WARN_ON(!vma || vma->vm_start != vma_addr)) {
+		printk(KERN_ERR "DETAILS: vma=0x%lx addr=0x%lx/0x%lx\n", (long)vma, (long)vma->vm_start, (long)vma_addr);
+#if 0
+		/*
+		 * FIXCHERI: Continue normally. We probably hit a VM merge.
+		 * FIXCHERI: Need to check if the merge is ok!
+		 */
 		if (!locked)
 			mmap_read_unlock(mm);
 		return __c_fakeu(vma_addr);
+#endif
 	}
 
 	reserv = vma->reserv_data;
