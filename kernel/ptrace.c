@@ -1067,10 +1067,10 @@ int ptrace_request(struct task_struct *child, long request,
 	switch (request) {
 	case PTRACE_PEEKTEXT:
 	case PTRACE_PEEKDATA:
-		return generic_ptrace_peekdata(child, __c_ua(addr), data);
+		return generic_ptrace_peekdata(child, __c_ua(addr), __c_ua(data));
 	case PTRACE_POKETEXT:
 	case PTRACE_POKEDATA:
-		return generic_ptrace_pokedata(child, __c_ua(addr), data);
+		return generic_ptrace_pokedata(child, __c_ua(addr), __c_ua(data));
 
 #ifdef PTRACE_OLDSETOPTIONS
 	case PTRACE_OLDSETOPTIONS:
@@ -1308,7 +1308,7 @@ int generic_ptrace_peekdata(struct task_struct *tsk, unsigned long addr,
 }
 
 int generic_ptrace_pokedata(struct task_struct *tsk, unsigned long addr,
-			    user_uintptr_t data)
+			    unsigned long data)
 {
 	int copied;
 
