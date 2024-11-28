@@ -10,6 +10,10 @@
 
 #include <linux/types.h>
 
+/* RISCV CHERI specific requests. */
+#define PTRACE_PEEKCAP            12
+#define PTRACE_POKECAP            13
+
 #define PTRACE_GETFDPIC		33
 
 #define PTRACE_GETFDPIC_EXEC	0
@@ -58,6 +62,13 @@ struct user_regs_struct {
 	/// UAPI: NoConvert: Does not exist in compat version
 	__uptr ddc;
 #endif
+};
+
+struct user_cap {
+	__uptr val;
+	__u8 tag;
+	/// UAPI: NoConvert: Padding
+	__u8 _pad[sizeof(__uptr) - 1];
 };
 
 struct __riscv_f_ext_state {
