@@ -1067,7 +1067,7 @@ int ptrace_request(struct task_struct *child, long request,
 	switch (request) {
 	case PTRACE_PEEKTEXT:
 	case PTRACE_PEEKDATA:
-		return generic_ptrace_peekdata(child, __c_ua(addr), __c_ua(data));
+		return generic_ptrace_peekdata(child, __c_ua(addr), data);
 	case PTRACE_POKETEXT:
 	case PTRACE_POKEDATA:
 		return generic_ptrace_pokedata(child, __c_ua(addr), __c_ua(data));
