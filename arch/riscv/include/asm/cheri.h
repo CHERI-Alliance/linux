@@ -2,10 +2,13 @@
 #ifndef __ASM_CHERI_H
 #define __ASM_CHERI_H
 
-/* Do not depend on the compiler to define the correct permission bits. */
 
-#ifdef CONFIG_RISCV_BAKEWELL_LEGACY_PERMS
+#ifdef __CHERI_BW_CAP_PERMISSION_CAPABILITY__
 
+/**
+ * We are compiling with a legacy compiler. Do not depend on
+ * the compiler to get the permissions correct.
+ */
 #define CHERI_PERM_CAP_RW		0x000001
 #define CHERI_PERM_STORE		0x000002
 #define CHERI_PERM_LOAD			0x000004
@@ -40,6 +43,10 @@
 #define CHERI_PERM_LOAD			0x040000
 
 #endif
+
+#define ZCHERILEVELS_PERMS \
+	(CHERI_PERM_ELEVATED_LOAD | CHERI_PERM_STORE_LOCAL_CAP \
+	 | CHERI_PERM_GLOBAL)
 
 #define CHERI_PERM_SW_VMEM		CHERI_PERM_SW_00
 

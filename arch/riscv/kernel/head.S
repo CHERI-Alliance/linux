@@ -276,7 +276,7 @@ SYM_CODE_START(_start_kernel)
 	detect_acperm_layout t2 t3 t0
 
 	/* Install infinite capability in pcc. */
-	find_infcap t3 t1 t2
+	find_infcap t3 t1 t0
 
 	/*
 	 * Switch to capability mode again in case the infinite cap
@@ -320,6 +320,19 @@ SYM_CODE_START(_start_kernel)
 	/* Store acperm_legcay after the infinite cap is set up. */
 	llc ct0, acperm_legacy
 	sb t2, (ct0)
+
+	/*
+	 * Detect zcherilevels if not legacy acperm.
+	 * Use kernel_data_cap as scratch.
+	 */
+	li t1, 0
+	bnez t2, .Llevels_done
+	detect_cheri_levels t1, kernel_data_cap, t2
+
+.Llevels_done:
+	/* Write back result */
+	llc ct0, has_cheri_levels
+	sb t1, (ct0)
 
 	/* Detect M-bit properties. */
 	detect_mbit t1 t2 t3 t4

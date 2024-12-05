@@ -165,6 +165,7 @@ extern uintcap_t cheri_user_root_cap;		/* Userspace (data/code) root */
 extern uintcap_t cheri_user_root_seal_cap;	/* Userspace sealing root */
 extern uintcap_t cheri_user_root_cid_cap;	/* Userspace compartment ID root */
 extern uintcap_t cheri_user_root_allperms_cap;	/* Userspace root (all permissions) */
+extern cheri_perms_t cheri_unsupported_perms;	/* Permission bits not supported by current hardware. */
 
 #else
 

@@ -9,6 +9,7 @@ uintcap_t cheri_user_root_cap __ro_after_init;
 uintcap_t cheri_user_root_seal_cap __ro_after_init;
 uintcap_t cheri_user_root_cid_cap __ro_after_init;
 uintcap_t cheri_user_root_allperms_cap __ro_after_init;
+cheri_perms_t cheri_unsupported_perms = 0;
 
 static void * __capability
 build_user_cap(ptraddr_t addr, size_t len, cheri_perms_t perms, bool exact_bounds)
@@ -24,7 +25,7 @@ build_user_cap(ptraddr_t addr, size_t len, cheri_perms_t perms, bool exact_bound
 	else
 		ret = cheri_bounds_set(ret, len);
 
-	WARN(perms & ~root_perms,
+	WARN((perms & ~cheri_unsupported_perms) & ~root_perms,
 	     "Permission mask %#x discarded while creating user capability %#lp\n",
 	     perms & ~root_perms, ret);
 	WARN(cheri_is_invalid(ret),

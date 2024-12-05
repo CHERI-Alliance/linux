@@ -22,8 +22,11 @@ static bool root_cap_valid = true;
 
 void __init bakewell_init(void)
 {
-	BUG_ON(!!IS_ENABLED(CONFIG_RISCV_BAKEWELL_LEGACY_PERMS) !=
-	       !!acperm_legacy);
+#ifdef __CHERI_BW_CAP_PERMISSION_CAPABILITY__
+	BUG_ON(!acperm_legacy);
+#else
+	BUG_ON(acperm_legacy);
+#endif
 
 	if (!root_cap_valid)
 		panic("CHERI: Invalid root cap\n");
@@ -40,13 +43,20 @@ void __init bakewell_init(void)
 	pr_info("CHERI: user allperms cap: %#lp\n",
 		(void *)cheri_user_root_allperms_cap);
 	pr_info("CHERI: user root cap: %#lp\n", (void *)cheri_user_root_cap);
+	pr_info("CHERI: Permission bits not supported by hardware: 0x%x\n",
+		cheri_unsupported_perms);
 }
 
 /* Check validity of the root capability. */
 static void __init bakewell_check_root_cap(uintcap_t root_cap)
 {
-	static const cheri_perms_t allperms = CHERI_PERMS_READ |
+	cheri_perms_t allperms = CHERI_PERMS_READ |
 		CHERI_PERMS_WRITE | CHERI_PERMS_EXEC | CHERI_PERMS_ROOTCAP;
+
+	if (!has_cheri_levels)
+		cheri_unsupported_perms |= ZCHERILEVELS_PERMS;
+	allperms &= ~cheri_unsupported_perms;
+
 	cheri_perms_t perms = cheri_perms_get(root_cap);
 
 	pr_info("CHERI: Root capability: %#lp (%lp)\n",
@@ -63,7 +73,8 @@ static void __init bakewell_check_root_cap(uintcap_t root_cap)
 	}
 
 	if ((perms & allperms) != allperms) {
-		pr_crit("CHERI: Root capability has bad permissions\n");
+		pr_crit("CHERI: Root capability has bad permissions: is=0x%lx expected=0x%lx\n",
+			(unsigned long)perms, (unsigned long)allperms);
 		root_cap_valid = false;
 	}
 

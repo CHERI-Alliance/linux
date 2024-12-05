@@ -1072,15 +1072,6 @@ config RISCV_CHERI_BAKEWELL
 	  CHERI Bakewell is an implementation of the CHERI capability
 	  architecture for RISCV. With CHERI
 
-config RISCV_BAKEWELL_LEGACY_PERMS
-	bool "Use legacy (per v0.9) permission bits"
-	default n
-	depends on RISCV_CHERI_BAKEWELL
-	help
-	  In Version 0.9 of the bakewell CHERI specification the encoding
-	  of permission bits changed. Select this option to use old
-	  legacy permissions.
-
 config BUILTIN_DTB
 	bool "Built-in device tree"
 	depends on OF && NONPORTABLE

@@ -151,15 +151,15 @@ _csrw \csr \gpr \@
 	acperm c\tmp, c\tmp, \legacy
 
 	/* Load v0.9 style acperm values. */
-	li \legacy, 0
-	li \infperms, 0x70063	/* New ACPERM: R, W, X, ASR, LM, C, SDP:1 */
+	li \legacy, 1
+	li \infperms, 0x1001f
 
 	/*
 	 * Try to call 1f. We will return here for new ACPERM and jump to 
 	 * the trap vector for legacy. In both cases pcc permissions are
 	 * preserved.
 	 */
-	jalr \tmp
+	jalr c\tmp
 
 	/* We returned from jalr so we are done. */
 	j 3f
@@ -169,10 +169,43 @@ _csrw \csr \gpr \@
 
 .align 2
 2:	/* Trap vector: Load legacy values. */
-	li \legacy, 1
-	li \infperms, 0x1001f
+	li \legacy, 0
+	li \infperms, 0x70063	/* New ACPERM: R, W, X, ASR, LM, C, SDP:1 */
 
 3:	/* Continuation point. */
+.endm
+
+/*
+ * Detect support for cheri levels.
+ * Pre-requisites:
+ * - New (v0.9+) permission layout
+ * - Operating in capability mode
+ * @param res Set to true if cheri levels are support, false otherwise
+ * @param scratchmem A scratch memory location
+ * @param tmp A temporary register
+ */
+.macro detect_cheri_levels res, scratchmem, tmp
+	/*
+	 * Create a capbility that is local itself and does not have
+	 * the store local permission set by clearing SL and the level
+	 * (aka the global bit). We clear the EL bit for symmetry
+	 * reasons only.
+	 */
+	la \tmp, \scratchmem
+	li \res, ~0x001c	/* Clear: Level, EL, SL */
+	acperm c\tmp, c\tmp, \res
+
+	/*
+	 * Store the capability to the scratch memory location and
+	 * read it back. With zcherilevel this will clear the tag.
+	 */
+	sc c\tmp, (c\tmp)
+	lc c\tmp, (c\tmp)
+
+	/* Check the tag and calculate the result value. */
+	li \res, 1
+	gctag \tmp, c\tmp
+	sub \res, \res, \tmp
 .endm
 
 /*
