@@ -60,11 +60,6 @@
 #include "shuffle.h"
 #include "page_reporting.h"
 
-/* FIXCHERI: The page allocation functions should set boundaries on
- * allocated pages and most likely __va() should respect these
- * boundaries and return length restricted capabilities, too.
- */
-
 /* Free Page Internal flags: for internal, non-pcp variants of free_pages(). */
 typedef int __bitwise fpi_t;
 
@@ -426,6 +421,28 @@ void set_pageblock_migratetype(struct page *page, int migratetype)
 	set_pfnblock_flags_mask(page, (unsigned long)migratetype,
 				page_to_pfn(page), MIGRATETYPE_MASK);
 }
+
+#ifdef CONFIG_CHERI_KERNEL
+/*
+ * Store the page order for this allocation in all of the page structures.
+ * A value of -1 indiciates a free page. The page order will be used by
+ * page_address but also by other page-to-virt functions to set bounds on
+ * the resulting capability.
+ */
+static inline void set_page_alloc_order(struct page *page,
+					unsigned long cnt, short val)
+{
+	unsigned long i;
+
+	for (i = 0; i < cnt; ++i)
+		page[i].alloc_order = val;
+}
+#else
+static inline void set_page_alloc_order(struct page *page,
+					unsigned long cnt, short val)
+{
+}
+#endif
 
 #ifdef CONFIG_DEBUG_VM
 static int page_outside_zone_boundaries(struct zone *zone, struct page *page)
@@ -1133,6 +1150,8 @@ __always_inline bool free_pages_prepare(struct page *page,
 	 */
 	arch_free_page(page, order);
 
+	set_page_alloc_order(page, 1UL << order, -1);
+
 	debug_pagealloc_unmap_pages(page, 1 << order);
 
 	return true;
@@ -1430,6 +1449,7 @@ inline void post_alloc_hook(struct page *page, unsigned int order,
 	set_page_private(page, 0);
 	set_page_refcounted(page);
 
+	set_page_alloc_order(page, 1UL << order, order);
 	arch_alloc_page(page, order);
 	debug_pagealloc_map_pages(page, 1 << order);
 
