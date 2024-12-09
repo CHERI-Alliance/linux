@@ -2568,54 +2568,69 @@ char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
 		cheri_perms_t perms = cheri_perms_get(cap);
 		ptraddr_t base, top, len;
 		const char *start = buf;
-		char *attr_start;
 		unsigned int i;
-		int attrib = 0;
 		int orig_flags;
 
 		/* Note: order matters to match the format expected */
 		struct {
-			cheri_perms_t cperm; char id;
+			cheri_perms_t cperm;
+			char set, unset;
 		} static const __perms[] = {
-			{ CHERI_PERM_LOAD,              'r' },
-			{ CHERI_PERM_STORE,             'w' },
-			{ CHERI_PERM_EXECUTE,           'x' },
-#ifdef CHERI_PERM_CAP_RW
-			{ CHERI_PERM_CAP_RW,            'C' },
-#endif
-#ifdef CHERI_PERM_LOAD_CAP
-			{ CHERI_PERM_LOAD_CAP,          'R' },
-#endif
-#ifdef CHERI_PERM_STORE_CAP
-			{ CHERI_PERM_STORE_CAP,         'W' },
-#endif
-#if defined(CHERI_PERM_MUTABLE_LOAD) && (CHERI_PERM_MUTABLE_LOAD != 0)
-			{ CHERI_PERM_MUTABLE_LOAD,      'm' },
-#endif
-#if defined(CHERI_PERM_GLOBAL) && (CHERI_PERM_GLOBAL != 0)
-			{ CHERI_PERM_GLOBAL,            'g' },
-#endif
-#if defined(CHERI_PERM_STORE_LOCAL_CAP) && (CHERI_PERM_STORE_LOCAL_CAP != 0)
-			{ CHERI_PERM_STORE_LOCAL_CAP,   'l' },
-#endif
-#if defined(CHERI_PERM_ELEVATED_LOAD) && (CHERI_PERM_ELEVATED_LOAD != 0)
-			{ CHERI_PERM_ELEVATED_LOAD,     'e' },
-#endif
-#ifdef CONFIG_ARM64_MORELLO
-			{ ARM_CAP_PERMISSION_EXECUTIVE,	'E' }
-#endif
+			{ 1U << 30,			'V', 'I' },	/* Tag */
+
+			{ 0, ':', ':' },
+
 #ifdef CHERI_PERM_SW_00
-			{ 0,                            ' ' },
-			{ CHERI_PERM_SW_00,             '0' },
+			{ CHERI_PERM_SW_00,             '1', '0' },
 #endif
 #ifdef CHERI_PERM_SW_01
-			{ CHERI_PERM_SW_01,             '1' },
+			{ CHERI_PERM_SW_01,             '1', '0' },
 #endif
 #ifdef CHERI_PERM_SW_02
-			{ CHERI_PERM_SW_02,             '2' },
+			{ CHERI_PERM_SW_02,             '1', '0' },
 #endif
 #ifdef CHERI_PERM_SW_03
-			{ CHERI_PERM_SW_03,             '3' },
+			{ CHERI_PERM_SW_03,             '1', '0' },
+#endif
+
+#ifdef cheri_is_capmode
+			{ 0, ':', ':' },
+			{ 1U << 29,			'C', 'I' },	/* Cap vs. Int mode */
+#endif
+
+			{ 0, ':', ':' },
+
+			{ CHERI_PERM_LOAD,              'r', '.' },
+			{ CHERI_PERM_STORE,             'w', '.' },
+			{ CHERI_PERM_EXECUTE,           'x', '.' },
+#ifdef CHERI_PERM_CAP_RW
+			{ CHERI_PERM_CAP_RW,            'C', '.' },
+#endif
+#ifdef CHERI_PERM_LOAD_CAP
+			{ CHERI_PERM_LOAD_CAP,          'R', '.' },
+#endif
+#ifdef CHERI_PERM_STORE_CAP
+			{ CHERI_PERM_STORE_CAP,         'W', '.' },
+#endif
+#ifdef CHERI_PERM_SYSTEM_REGS
+			{ CHERI_PERM_SYSTEM_REGS,	'a', '.' },
+#endif
+#if defined(CHERI_PERM_MUTABLE_LOAD) && (CHERI_PERM_MUTABLE_LOAD != 0)
+			{ CHERI_PERM_MUTABLE_LOAD,      'l', '.' },
+#endif
+#if defined(CHERI_PERM_STORE_LOCAL_CAP) && (CHERI_PERM_STORE_LOCAL_CAP != 0)
+			{ CHERI_PERM_STORE_LOCAL_CAP,   's', '.' },
+#endif
+#if defined(CHERI_PERM_ELEVATED_LOAD) && (CHERI_PERM_ELEVATED_LOAD != 0)
+			{ CHERI_PERM_ELEVATED_LOAD,     'e', '.' },
+#endif
+#ifdef CONFIG_ARM64_MORELLO
+			{ ARM_CAP_PERMISSION_EXECUTIVE,	'E', '.' }
+#endif
+
+#if defined(CHERI_PERM_GLOBAL) && (CHERI_PERM_GLOBAL != 0)
+			{ 0, ':', ':' },
+			{ CHERI_PERM_GLOBAL,            '1', '0' },
 #endif
 		};
 
@@ -2648,23 +2663,22 @@ char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
 				     __c_fakep(cheri_address_get(cap)),
 				     spec);
 
-		update_buf_single(buf, end, ' ');
 		update_buf_single(buf, end, '[');
-		update_buf_single(buf, end, cheri_tag_get(cap) ? 'V' : '!');
+		if (cheri_tag_get(cap))
+			perms |= 1U << 30;
 #ifdef cheri_is_capmode
-		update_buf_single(buf, end, cheri_is_capmode(cap) ? 'C' : '.');
+		if (cheri_is_capmode(cap))
+			perms |= 1U << 29;
 #endif
-		update_buf_single(buf, end, cheri_is_sealed(cap) ? 'S'  : '.');
-		update_buf_single(buf, end, ' ');
 		for (i = 0; i < ARRAY_SIZE(__perms); ++i) {
-			if (__perms[i].cperm == 0)
-				update_buf_single(buf, end, __perms[i].id);
-			else if (perms & __perms[i].cperm)
-				update_buf_single(buf, end, __perms[i].id);
+			if (perms & __perms[i].cperm)
+				update_buf_single(buf, end, __perms[i].set);
 			else
-				update_buf_single(buf, end, '.');
+				update_buf_single(buf, end, __perms[i].unset);
 		}
-		update_buf_single(buf, end, ',');
+		update_buf_single(buf, end, ':');
+		update_buf_single(buf, end, cheri_is_sealed(cap) ? 'S'  : '.');
+		update_buf_single(buf, end, ':');
 
 		base = cheri_base_get(cap);
 		buf = pointer_string(buf, end, __c_fakep(base), spec);
@@ -2676,43 +2690,6 @@ char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
 			top--;
 		buf = pointer_string(buf, end, __c_fakep(top), spec);
 		update_buf_single(buf, end, ']');
-
-		/* Attributes */
-		/* Reset precision to output full attribute identifiers here */
-		spec.precision = -1;
-
-		/*
-		 * Keep track of the attribute start section to format
-		 * it properly in case there are attributes to be reported.
-		 * Otherwise simply rolling on a buffer might lead to overflowing
-		 * past the terminating character if the buffer is big enough.
-		 */
-		attr_start = buf;
-		buf += 2;
-
-		if (!cheri_tag_get(cap)) {
-			buf = string_nocheck(buf, end, "invalid", spec);
-			++attrib;
-		}
-		if (cheri_is_sentry(cap)) {
-			if (attrib++)
-				update_buf_single(buf, end, ',');
-			buf = string_nocheck(buf, end, "sentry", spec);
-
-		}
-		if (cheri_is_sealed(cap)) {
-			if (attrib++)
-				update_buf_single(buf, end, ',');
-			buf = string_nocheck(buf, end, "sealed", spec);
-		}
-
-		if (attrib) {
-			update_buf_single(attr_start, end, ' ');
-			update_buf_single(attr_start, end, '(');
-			update_buf_single(buf, end, ')');
-		} else {
-			buf = attr_start; /* Rollback on space and opening bracket */
-		}
 
 		/* Restore the originally requested width */
 		spec.field_width = orig_field_width;
