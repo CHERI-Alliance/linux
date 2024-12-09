@@ -63,6 +63,10 @@
 #define __io_par(v)     __io_ar(v)
 #endif
 
+#ifndef __va_a
+#define __va_a(x)	(__c_pa(__va(x)))
+#endif
+
 /*
  * "__DISABLE_TRACE_MMIO__" flag can be used to disable MMIO tracing for
  * specific kernel drivers in case of excessive/unwanted logging.
@@ -1088,6 +1092,22 @@ static inline void iowrite64_rep(volatile void __iomem *addr,
 
 #define __io_virt(x) ((void __force *)(x))
 
+#ifdef CONFIG_CHERI_KERNEL
+static inline void *__va_bounded(unsigned long address)
+{
+	struct page *page = phys_to_page(address);
+	unsigned long addr = __va_a(address);
+	unsigned long sz;
+
+	if (page->alloc_order < 0)
+		return __c_fakep(addr);
+	sz = PAGE_SIZE << page->alloc_order;
+	return cheri_build_kernel_data_cap(ALIGN_DOWN(addr, sz), addr, sz);
+}
+#else
+#define __va_bounded(ADDRESS) __va(ADDRESS)
+#endif
+
 /*
  * Change virtual addresses to physical addresses and vv.
  * These are pretty trivial
@@ -1104,8 +1124,15 @@ static inline unsigned long virt_to_phys(volatile void *address)
 #define phys_to_virt phys_to_virt
 static inline void *phys_to_virt(unsigned long address)
 {
-	return __va(address);
+	return __va_bounded(address);
 }
+#ifndef phys_to_virt_a
+#define phys_to_virt_a(x) __va_a(x)
+#endif
+#endif
+
+#ifndef phys_to_virt_a
+#define phys_to_virt_a(x) (__c_pa(phys_to_virt(x)))
 #endif
 
 /**
@@ -1233,7 +1260,7 @@ extern void ioport_unmap(void __iomem *p);
 #define xlate_dev_mem_ptr xlate_dev_mem_ptr
 static inline void *xlate_dev_mem_ptr(phys_addr_t addr)
 {
-	return __va(addr);
+	return __va_bounded(addr);
 }
 #endif
 
