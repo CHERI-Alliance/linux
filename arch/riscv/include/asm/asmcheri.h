@@ -129,6 +129,24 @@ _csrw \csr \gpr \@
 .endm
 
 /*
+ * Auto detect the scmode value for capability mode and enable
+ * capability mode or the given register.
+ * @param reg The register
+ * @param tmp1 Scratch register
+ * @param tmp2 Scratch register
+ * Must be in capability mode for the detection to work correctly.
+ * FIXCHERI: Once we are fully v0.9 this should just be scmode c\reg, c\reg, x0
+ * FIXCHERI: Until then we need two scratch registers.
+ */
+.macro scmode_capmode reg tmp1 tmp2
+	auipc c\tmp1, 0
+	li \tmp2, 1
+	scmode c\tmp1, c\tmp1, \tmp2
+	sceq \tmp2, c\tmp1, c\tmp2
+	scmode c\reg, c\reg, \tmp2
+.endm
+
+/*
  * Detect the CHERI acperm layout
  * @param legacy Set to one if the legacy acperm bitmap layout
  *     is in use.
@@ -213,7 +231,7 @@ _csrw \csr \gpr \@
  * install it into pcc by jumping to @okaddr.
  * @param inf A register with the capability to test.
  * @param perm A register that contains the minimum permission mask
- *     required for the infinite capability (not modified).
+ *     required for the infinite capability (not modified on failure).
  * @param tmp A temporary scratch register
  * @param okaddr The target label where execution will continue in
  *     case of success.
@@ -237,9 +255,10 @@ _csrw \csr \gpr \@
 	and \tmp, \tmp, \perm
 	bne \tmp, \perm, 1f
 
-	/* Ok, uses it. */
+	/* Ok, use it. */
 	la \tmp, \okaddr
 	scaddr c\tmp, c\inf, \tmp
+	scmode_capmode \tmp, \inf, \perm
 	jr c\tmp
 
 1:	/* Failure. */
