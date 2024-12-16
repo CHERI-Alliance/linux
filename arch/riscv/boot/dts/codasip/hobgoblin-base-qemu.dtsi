@@ -1,0 +1,13 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (c) 2024 Codasip GmbH
+ *
+ * Modified version of the A730 Hobgoblin FPGA platform base description.
+ * As qemu doesn't model the CPU's cache, DMA devices are cache coherent.
+ */
+
+#include "hobgoblin-base.dtsi"
+
+&soc {
+	/delete-property/ dma-noncoherent;
+};

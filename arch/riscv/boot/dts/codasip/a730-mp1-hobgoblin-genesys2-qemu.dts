@@ -15,7 +15,7 @@
 };
 
 #include "a730-mp1.dtsi"
-#include "hobgoblin-base.dtsi"
+#include "hobgoblin-base-qemu.dtsi"
 #include "hobgoblin-genesys2-base.dtsi"
 #include "hobgoblin-axi-emac.dtsi"
 #include "hobgoblin-qemu-base.dtsi"

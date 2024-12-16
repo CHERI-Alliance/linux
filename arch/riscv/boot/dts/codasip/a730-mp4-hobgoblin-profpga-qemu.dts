@@ -15,7 +15,7 @@
 };
 
 #include "a730-mp4.dtsi"
-#include "hobgoblin-base.dtsi"
+#include "hobgoblin-base-qemu.dtsi"
 #include "hobgoblin-profpga-base.dtsi"
 #include "hobgoblin-axi-emac.dtsi"
 #include "hobgoblin-qemu-base.dtsi"

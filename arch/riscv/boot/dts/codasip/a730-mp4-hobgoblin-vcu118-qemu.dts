@@ -17,6 +17,6 @@
 };
 
 #include "a730-mp4.dtsi"
-#include "hobgoblin-base.dtsi"
+#include "hobgoblin-base-qemu.dtsi"
 #include "hobgoblin-vcu118-base.dtsi"
 #include "hobgoblin-qemu-base.dtsi"
