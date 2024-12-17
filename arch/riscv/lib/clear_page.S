@@ -10,6 +10,7 @@
 #include <asm/hwcap.h>
 #include <asm/insn-def.h>
 #include <asm/page.h>
+#include <asm/asmcheri.h>
 
 #define CBOZ_ALT(order, old, new)				\
 	ALTERNATIVE(old, new, 0,				\
@@ -26,45 +27,46 @@ SYM_FUNC_START(clear_page)
 	 */
 	CBOZ_ALT(12, "j .Lno_zicboz", "nop")
 
-	lw	a1, riscv_cboz_block_size
+	la	a1, riscv_cboz_block_size
+	lw	a1, (CREG(a1))
 	add	a2, a0, a2
 .Lzero_loop:
 	CBO_ZERO(a0)
-	add	a0, a0, a1
+	add	CREG(a0), CREG(a0), a1
 	CBOZ_ALT(11, "bltu a0, a2, .Lzero_loop; ret", "nop; nop")
 	CBO_ZERO(a0)
-	add	a0, a0, a1
+	add	CREG(a0), CREG(a0), a1
 	CBOZ_ALT(10, "bltu a0, a2, .Lzero_loop; ret", "nop; nop")
 	CBO_ZERO(a0)
-	add	a0, a0, a1
+	add	CREG(a0), CREG(a0), a1
 	CBO_ZERO(a0)
-	add	a0, a0, a1
+	add	CREG(a0), CREG(a0), a1
 	CBOZ_ALT(9, "bltu a0, a2, .Lzero_loop; ret", "nop; nop")
 	CBO_ZERO(a0)
-	add	a0, a0, a1
+	add	CREG(a0), CREG(a0), a1
 	CBO_ZERO(a0)
-	add	a0, a0, a1
+	add	CREG(a0), CREG(a0), a1
 	CBO_ZERO(a0)
-	add	a0, a0, a1
+	add	CREG(a0), CREG(a0), a1
 	CBO_ZERO(a0)
-	add	a0, a0, a1
+	add	CREG(a0), CREG(a0), a1
 	CBOZ_ALT(8, "bltu a0, a2, .Lzero_loop; ret", "nop; nop")
 	CBO_ZERO(a0)
-	add	a0, a0, a1
+	add	CREG(a0), CREG(a0), a1
 	CBO_ZERO(a0)
-	add	a0, a0, a1
+	add	CREG(a0), CREG(a0), a1
 	CBO_ZERO(a0)
-	add	a0, a0, a1
+	add	CREG(a0), CREG(a0), a1
 	CBO_ZERO(a0)
-	add	a0, a0, a1
+	add	CREG(a0), CREG(a0), a1
 	CBO_ZERO(a0)
-	add	a0, a0, a1
+	add	CREG(a0), CREG(a0), a1
 	CBO_ZERO(a0)
-	add	a0, a0, a1
+	add	CREG(a0), CREG(a0), a1
 	CBO_ZERO(a0)
-	add	a0, a0, a1
+	add	CREG(a0), CREG(a0), a1
 	CBO_ZERO(a0)
-	add	a0, a0, a1
+	add	CREG(a0), CREG(a0), a1
 	bltu	a0, a2, .Lzero_loop
 	ret
 .Lno_zicboz:
