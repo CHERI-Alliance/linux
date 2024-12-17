@@ -397,9 +397,9 @@ int kasan_populate_vmalloc(unsigned long addr, unsigned long size)
 static int kasan_depopulate_vmalloc_pte(pte_t *ptep, unsigned long addr,
 					void *unused)
 {
-	uintptr_t page;
+	unsigned long page;
 
-	page = (uintptr_t)__va(pte_pfn(ptep_get(ptep)) << PAGE_SHIFT);
+	page = (unsigned long)__va(pte_pfn(ptep_get(ptep)) << PAGE_SHIFT);
 
 	spin_lock(&init_mm.page_table_lock);
 

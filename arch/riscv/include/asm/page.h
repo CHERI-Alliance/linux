@@ -130,9 +130,9 @@ extern phys_addr_t phys_ram_base;
 	((x) >= PAGE_OFFSET && (!IS_ENABLED(CONFIG_64BIT) || (x) < PAGE_OFFSET + KERN_VIRT_SIZE))
 
 #ifndef CONFIG_DEBUG_VIRTUAL
-#define linear_mapping_pa_to_va(x)	((unsigned long)x + kernel_map.va_pa_offset)
+#define linear_mapping_pa_to_va(x)	(cheri_kcap((unsigned long)(x) + kernel_map.va_pa_offset))
 #else
-unsigned long linear_mapping_pa_to_va(unsigned long x);
+void *linear_mapping_pa_to_va(unsigned long x);
 #endif
 #define kernel_mapping_pa_to_va(y)	({					\
 	unsigned long _y = __c_pa(y);						\
@@ -170,16 +170,7 @@ extern phys_addr_t __phys_addr_symbol(unsigned long x);
 
 #define __pa_symbol(x)	__phys_addr_symbol(RELOC_HIDE(__c_a(x), 0))
 #define __pa(x)		__virt_to_phys(__c_a(x))
-#ifdef CONFIG_CHERI_KERNEL
-#define __va_a(x)	((unsigned long)__pa_to_va_nodebug((phys_addr_t)(x)))
-#define __va(x)		({ \
-	unsigned long __a = __va_a(x); \
-	cheri_build_kernel_data_cap(ALIGN_DOWN(__a, PAGE_SIZE), __a, PAGE_SIZE); \
-})
-#else
 #define __va(x)		((void *)__pa_to_va_nodebug((phys_addr_t)(x)))
-#define __va_a(x)	((unsigned long)__pa_to_va_nodebug((phys_addr_t)(x)))
-#endif
 
 #define phys_to_pfn(phys)	(PFN_DOWN(phys))
 #define pfn_to_phys(pfn)	(PFN_PHYS(pfn))
@@ -188,17 +179,7 @@ extern phys_addr_t __phys_addr_symbol(unsigned long x);
 #define pfn_to_virt(pfn)	(__va(pfn_to_phys(pfn)))
 
 #define virt_to_page(vaddr)	(pfn_to_page(virt_to_pfn(vaddr)))
-#ifndef CONFIG_CHERI_KERNEL
 #define page_to_virt(page)	(pfn_to_virt(page_to_pfn(page)))
-#else
-#define page_to_virt(page) \
-({ \
-	unsigned long addr = __va_a(pfn_to_phys(page_to_pfn(page))); \
-	short shift = (page->alloc_order < 0) ? 0 : page->alloc_order;  \
-	unsigned long sz = PAGE_SIZE << shift; \
-	cheri_build_kernel_data_cap(ALIGN_DOWN(addr, sz), addr, sz); \
-})
-#endif
 
 #define page_to_phys(page)	(pfn_to_phys(page_to_pfn(page)))
 #define phys_to_page(paddr)	(pfn_to_page(phys_to_pfn(paddr)))

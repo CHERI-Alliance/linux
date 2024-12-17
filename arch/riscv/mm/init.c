@@ -1290,7 +1290,7 @@ static void __init create_linear_mapping_range(phys_addr_t start,
 	unsigned long va, map_size;
 
 	for (pa = start; pa < end; pa += map_size) {
-		va = __va_a(pa);
+		va = __c_pa(__va(pa));
 		map_size = fixed_map_size ? fixed_map_size :
 					    best_map_size(pa, va, end - pa);
 

@@ -170,15 +170,6 @@ struct page {
 	/* Usage count. *DO NOT USE DIRECTLY*. See page_ref.h */
 	atomic_t _refcount;
 
-#ifdef CONFIG_CHERI_KERNEL
-	/*
-	 * Keep track or the page order for allocations. This allows
-	 * stuff like phys_to_virt to at least set boundaries according
-	 * to the page allocation order.
-	 */
-	short alloc_order;
-#endif
-
 #ifdef CONFIG_SLAB_OBJ_EXT
 	unsigned long memcg_data;
 #endif

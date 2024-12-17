@@ -366,11 +366,6 @@ cheri_bounds_set_kernel(void *ptr, size_t len)
 
 #endif
 
-static __always_inline void *
-cheri_build_kernel_data_cap(ptraddr_t base, ptraddr_t addr, size_t len)
-{
-	return cheri_address_set(cheri_make_kernel_data_cap(base, len), addr);
-}
 
 #ifdef __CHERI__
 

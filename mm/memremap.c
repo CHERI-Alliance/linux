@@ -376,7 +376,7 @@ void *memremap_pages(struct dev_pagemap *pgmap, int nid)
 		return ERR_PTR(error);
 	}
 
-	return cheri_make_kernel_data_cap(__va_a(pgmap->ranges[0].start), range_len(&pgmap->ranges[0]));
+	return __va(pgmap->ranges[0].start);
 }
 EXPORT_SYMBOL_GPL(memremap_pages);
 
