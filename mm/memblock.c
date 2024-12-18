@@ -460,7 +460,7 @@ static int __init_memblock memblock_double_array(struct memblock_type *type,
 				min(new_area_start, memblock.current_limit),
 				new_alloc_size, PAGE_SIZE);
 
-		new_array = addr ? __va(addr) : NULL;
+		new_array = addr ? cheri_make_kernel_data_cap(__va_a(addr), new_alloc_size) : NULL;
 	}
 	if (!addr) {
 		pr_err("memblock: Failed to double %s array from %ld to %ld entries !\n",
@@ -1588,7 +1588,7 @@ static void * __init memblock_alloc_internal(
 	if (!alloc)
 		return NULL;
 
-	return phys_to_virt(alloc);
+	return cheri_make_kernel_data_cap(phys_to_virt_a(alloc), size);
 }
 
 /**
