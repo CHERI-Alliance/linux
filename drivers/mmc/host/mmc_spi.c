@@ -796,41 +796,57 @@ mmc_spi_data_do(struct mmc_spi_host *host, struct mmc_command *cmd,
 	for_each_sg(data->sg, sg, data->sg_len, n_sg) {
 		int			status = 0;
 		void			*kmap_addr;
-		unsigned		length = sg->length;
+		unsigned		total = sg->length;
+		unsigned		offset = sg->offset;
+		unsigned int		pidx = 0;
+		struct page		*page;
+		unsigned		length;
 
-		/* allow pio too; we don't allow highmem */
-		kmap_addr = kmap(sg_page(sg));
-		if (write)
-			t->tx_buf = kmap_addr + sg->offset;
-		else
-			t->rx_buf = kmap_addr + sg->offset;
-
-		/* transfer each block, and update request status */
-		while (length) {
-			t->len = min(length, blk_size);
-
-			dev_dbg(&spi->dev, "    %s block, %d bytes\n", write_or_read, t->len);
-
+		while (offset >= PAGE_SIZE) {
+			offset -= PAGE_SIZE;
+			pidx++;
+		}
+		while (total) {
+			length = min_t(unsigned, PAGE_SIZE - offset, total);
+			page = sg_page(sg) + pidx;
+			kmap_addr = kmap(page);
 			if (write)
-				status = mmc_spi_writeblock(host, t, timeout);
+				t->tx_buf = kmap_addr + offset;
 			else
-				status = mmc_spi_readblock(host, t, timeout);
-			if (status < 0)
-				break;
+				t->rx_buf = kmap_addr + offset;
 
-			data->bytes_xfered += t->len;
-			length -= t->len;
+			/* transfer each block, and update request status */
+			total -= length;
+			while (length) {
+				t->len = min(length, blk_size);
 
-			if (!multiple)
+				dev_dbg(&spi->dev, "    %s block, %d bytes\n", write_or_read, t->len);
+
+				if (write)
+					status = mmc_spi_writeblock(host, t, timeout);
+				else
+					status = mmc_spi_readblock(host, t, timeout);
+				if (status < 0)
+					break;
+
+				data->bytes_xfered += t->len;
+				length -= t->len;
+
+				if (!multiple)
+					break;
+			}
+
+			/* discard mappings */
+			if (write)
+				/* nothing to do */;
+			else
+				flush_dcache_page(page);
+			kunmap(page);
+			offset = 0;
+			pidx++;
+			if (status < 0 || !multiple)
 				break;
 		}
-
-		/* discard mappings */
-		if (write)
-			/* nothing to do */;
-		else
-			flush_dcache_page(sg_page(sg));
-		kunmap(sg_page(sg));
 
 		if (status < 0) {
 			data->error = status;
