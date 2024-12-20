@@ -4236,8 +4236,8 @@ pciserial_init_one(struct pci_dev *dev, const struct pci_device_id *ent)
 			return rc;
 	}
 
-	if (ent->driver_data >= ARRAY_SIZE(pci_boards)) {
-		pci_err(dev, "invalid driver_data: %ld\n", ent->driver_data);
+	if (__c_ua(ent->driver_data) >= ARRAY_SIZE(pci_boards)) {
+		pci_err(dev, "invalid driver_data: %ld\n", __c_ua(ent->driver_data));
 		return -EINVAL;
 	}
 
