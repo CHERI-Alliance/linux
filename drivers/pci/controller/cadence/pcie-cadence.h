@@ -402,7 +402,7 @@ static inline u32 cdns_pcie_readl(struct cdns_pcie *pcie, u32 reg)
 static inline u32 cdns_pcie_read_sz(void __iomem *addr, int size)
 {
 	void __iomem *aligned_addr = PTR_ALIGN_DOWN(addr, 0x4);
-	unsigned int offset = (unsigned long)addr & 0x3;
+	unsigned int offset = __c_a(addr) & 0x3;
 	u32 val = readl(aligned_addr);
 
 	if (!IS_ALIGNED((uintptr_t)addr, size)) {
@@ -419,11 +419,11 @@ static inline u32 cdns_pcie_read_sz(void __iomem *addr, int size)
 static inline void cdns_pcie_write_sz(void __iomem *addr, int size, u32 value)
 {
 	void __iomem *aligned_addr = PTR_ALIGN_DOWN(addr, 0x4);
-	unsigned int offset = (unsigned long)addr & 0x3;
+	unsigned int offset = __c_a(addr) & 0x3;
 	u32 mask;
 	u32 val;
 
-	if (!IS_ALIGNED((uintptr_t)addr, size)) {
+	if (!IS_ALIGNED(__c_a(addr), size)) {
 		pr_warn("Address %p and size %d are not aligned\n", addr, size);
 		return;
 	}

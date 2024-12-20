@@ -68,7 +68,7 @@ int pci_add_dynid(struct pci_driver *drv,
 	dynid->id.subdevice = subdevice;
 	dynid->id.class = class;
 	dynid->id.class_mask = class_mask;
-	dynid->id.driver_data = driver_data;
+	dynid->id.driver_data = __c_fakeu(driver_data);
 
 	spin_lock(&drv->dynids.lock);
 	list_add_tail(&dynid->node, &drv->dynids.list);

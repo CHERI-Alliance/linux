@@ -283,7 +283,7 @@ EXPORT_SYMBOL_GPL(dw_pcie_find_ext_capability);
 
 int dw_pcie_read(void __iomem *addr, int size, u32 *val)
 {
-	if (!IS_ALIGNED((uintptr_t)addr, size)) {
+	if (!IS_ALIGNED(__c_a(addr), size)) {
 		*val = 0;
 		return PCIBIOS_BAD_REGISTER_NUMBER;
 	}
@@ -305,7 +305,7 @@ EXPORT_SYMBOL_GPL(dw_pcie_read);
 
 int dw_pcie_write(void __iomem *addr, int size, u32 val)
 {
-	if (!IS_ALIGNED((uintptr_t)addr, size))
+	if (!IS_ALIGNED(__c_a(addr), size))
 		return PCIBIOS_BAD_REGISTER_NUMBER;
 
 	if (size == 4)

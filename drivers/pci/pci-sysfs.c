@@ -1035,7 +1035,7 @@ static int pci_mmap_resource(struct kobject *kobj, struct bin_attribute *attr,
 			     struct vm_area_struct *vma, int write_combine)
 {
 	struct pci_dev *pdev = to_pci_dev(kobj_to_dev(kobj));
-	int bar = (unsigned long)attr->private;
+	int bar = __c_pa(attr->private);
 	enum pci_mmap_state mmap_type;
 	struct resource *res = &pdev->resource[bar];
 	int ret;
@@ -1075,7 +1075,7 @@ static ssize_t pci_resource_io(struct file *filp, struct kobject *kobj,
 {
 #ifdef CONFIG_HAS_IOPORT
 	struct pci_dev *pdev = to_pci_dev(kobj_to_dev(kobj));
-	int bar = (unsigned long)attr->private;
+	int bar = __c_pa(attr->private);
 	unsigned long port = off;
 
 	port += pci_resource_start(pdev, bar);
@@ -1201,7 +1201,7 @@ static int pci_create_attr(struct pci_dev *pdev, int num, int write_combine)
 	res_attr->attr.name = res_attr_name;
 	res_attr->attr.mode = 0600;
 	res_attr->size = pci_resource_len(pdev, num);
-	res_attr->private = (void *)(unsigned long)num;
+	res_attr->private = __c_fakep(num);
 	retval = sysfs_create_bin_file(&pdev->dev.kobj, res_attr);
 	if (retval) {
 		kfree(res_attr);
