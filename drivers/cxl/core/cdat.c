@@ -62,7 +62,7 @@ static int cdat_dsmas_handler(union acpi_subtable_headers *header, void *arg,
 	int rc;
 
 	len = le16_to_cpu((__force __le16)hdr->length);
-	if (len != size || (unsigned long)hdr + len > end) {
+	if (len != size || __c_pa(hdr) + len > end) {
 		pr_warn("Malformed DSMAS table length: (%u:%u)\n", size, len);
 		return -EINVAL;
 	}
@@ -136,7 +136,7 @@ static int cdat_dslbis_handler(union acpi_subtable_headers *header, void *arg,
 	u16 len;
 
 	len = le16_to_cpu((__force __le16)hdr->length);
-	if (len != size || (unsigned long)hdr + len > end) {
+	if (len != size || __c_pa(hdr) + len > end) {
 		pr_warn("Malformed DSLBIS table length: (%u:%u)\n", size, len);
 		return -EINVAL;
 	}
@@ -435,7 +435,7 @@ static int cdat_sslbis_handler(union acpi_subtable_headers *header, void *arg,
 	len = le16_to_cpu((__force __le16)header->cdat.length);
 	remain = len - size;
 	if (!remain || remain % sizeof(tbl->entries[0]) ||
-	    (unsigned long)header + len > end) {
+	    __c_pa(header) + len > end) {
 		dev_warn(dev, "Malformed SSLBIS table length: (%u)\n", len);
 		return -EINVAL;
 	}

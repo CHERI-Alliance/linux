@@ -653,7 +653,7 @@ err:
 }
 
 static long __cxl_memdev_ioctl(struct cxl_memdev *cxlmd, unsigned int cmd,
-			       unsigned long arg)
+			       uintptr_t arg)
 {
 	switch (cmd) {
 	case CXL_MEM_QUERY_COMMANDS:
@@ -666,7 +666,7 @@ static long __cxl_memdev_ioctl(struct cxl_memdev *cxlmd, unsigned int cmd,
 }
 
 static long cxl_memdev_ioctl(struct file *file, unsigned int cmd,
-			     unsigned long arg)
+			     uintptr_t arg)
 {
 	struct cxl_memdev *cxlmd = file->private_data;
 	struct cxl_dev_state *cxlds;
