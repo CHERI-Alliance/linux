@@ -568,7 +568,7 @@ static void tsi721_advance_work(struct tsi721_bdma_chan *bdma_chan,
 		  bdma_chan->id);
 }
 
-static void tsi721_dma_tasklet(unsigned long data)
+static void tsi721_dma_tasklet(uintptr_t data)
 {
 	struct tsi721_bdma_chan *bdma_chan = (struct tsi721_bdma_chan *)data;
 	u32 dmac_int, dmac_sts;
@@ -991,7 +991,7 @@ int tsi721_register_dma(struct tsi721_device *priv)
 		INIT_LIST_HEAD(&bdma_chan->free_list);
 
 		tasklet_init(&bdma_chan->tasklet, tsi721_dma_tasklet,
-			     (unsigned long)bdma_chan);
+			     (uintptr_t)bdma_chan);
 		list_add_tail(&bdma_chan->dchan.device_node,
 			      &mport->dma.channels);
 		nr_channels++;

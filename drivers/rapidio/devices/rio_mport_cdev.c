@@ -2066,7 +2066,7 @@ static int mport_cdev_release(struct inode *inode, struct file *filp)
  * mport_cdev_ioctl() - IOCTLs for character device
  */
 static long mport_cdev_ioctl(struct file *filp,
-		unsigned int cmd, unsigned long arg)
+		unsigned int cmd, uintptr_t arg)
 {
 	int err = -EINVAL;
 	struct mport_cdev_priv *data = filp->private_data;
@@ -2105,7 +2105,7 @@ static long mport_cdev_ioctl(struct file *filp,
 	case RIO_DISABLE_PORTWRITE_RANGE:
 		return rio_mport_remove_pw_filter(data, (void __user *)arg);
 	case RIO_SET_EVENT_MASK:
-		data->event_mask = (u32)arg;
+		data->event_mask = __c_ua(arg);
 		return 0;
 	case RIO_GET_EVENT_MASK:
 		if (copy_to_user((void __user *)arg, &data->event_mask,
