@@ -1426,7 +1426,7 @@ int check_pcuabi_map_ptr_arg(user_uintptr_t user_ptr, unsigned long len,
 		 * contained within a reservation, get_unmapped_area will
 		 * ensure that -ERESERVATION is returned.
 		 */
-		if (reserv_aligned_range_within_reserv(addr, len, locked))
+		if (reserv_range_within_reserv(addr, len, locked))
 			return -ERESERVATION;
 		return 0;
 	}
@@ -1752,7 +1752,7 @@ retry:
 	} else {
 		tmp = vma_prev(&vmi);
 		if (tmp && vm_end_gap(tmp) > gap) {
-			high_limit = reserv_vma_reserv_start(tmp);
+			high_limit = reserv_vma_outer_start(tmp);
 			vma_iter_reset(&vmi);
 			goto retry;
 		}
@@ -2109,7 +2109,7 @@ static int acct_stack_growth(struct vm_area_struct *vma,
 	if (size > rlimit(RLIMIT_STACK))
 		return -ENOMEM;
 
-	if (reserv_is_supported(mm) && size > reserv_vma_reserv_len(vma))
+	if (reserv_is_supported(mm) && size > reserv_vma_inner_len(vma))
 		return -ERESERVATION;
 
 	/* mlock limit tests */

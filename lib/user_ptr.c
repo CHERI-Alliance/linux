@@ -103,8 +103,8 @@ user_uintptr_t make_user_ptr_owning(const struct reserv_struct *reserv,
 {
 	user_uintptr_t user_ptr;
 
-	user_ptr = (user_uintptr_t)cheri_build_user_cap(reserv->start,
-							reserv->len,
+	user_ptr = (user_uintptr_t)cheri_build_user_cap(reserv->outer_start,
+							reserv->outer_len,
 							reserv->perms);
 	user_ptr = cheri_address_set(user_ptr, addr);
 
