@@ -92,8 +92,8 @@ admin:
  */
 static void __user *nvme_to_user_ptr(uintptr_t ptrval)
 {
-	if (in_compat_syscall())
-		ptrval = (compat_uptr_t)ptrval;
+	if (in_compat32_syscall())
+		ptrval = (uintptr_t __force)(compat_uptr_t __force)ptrval;
 	return (void __user *)ptrval;
 }
 
@@ -118,7 +118,7 @@ static void nvme_unmap_bio(struct bio *bio)
 	blk_rq_unmap_user(bio);
 }
 
-static int nvme_map_user_request(struct request *req, u64 ubuffer,
+static int nvme_map_user_request(struct request *req, uintptr_t ubuffer,
 		unsigned bufflen, void __user *meta_buffer, unsigned meta_len,
 		u32 meta_seed, struct io_uring_cmd *ioucmd, unsigned int flags)
 {
@@ -134,7 +134,6 @@ static int nvme_map_user_request(struct request *req, u64 ubuffer,
 		/* fixedbufs is only for non-vectored io */
 		if (WARN_ON_ONCE(flags & NVME_IOCTL_VEC))
 			return -EINVAL;
-		/* TODO [PCuABI]: change ubuffer type to void __user * */
 		ret = io_uring_cmd_import_fixed((void *)ubuffer, bufflen,
 				rq_data_dir(req), &iter, ioucmd);
 		if (ret < 0)
@@ -172,7 +171,7 @@ out:
 }
 
 static int nvme_submit_user_cmd(struct request_queue *q,
-		struct nvme_command *cmd, u64 ubuffer, unsigned bufflen,
+		struct nvme_command *cmd, uintptr_t ubuffer, unsigned bufflen,
 		void __user *meta_buffer, unsigned meta_len, u32 meta_seed,
 		u64 *result, unsigned timeout, unsigned int flags)
 {
@@ -384,8 +383,8 @@ static int nvme_user_cmd64(struct nvme_ctrl *ctrl, struct nvme_ns *ns,
 }
 
 struct nvme_uring_data {
-	__u64	metadata;
-	__u64	addr;
+	__kernel_uintptr_t	metadata;
+	__kernel_uintptr_t	addr;
 	__u32	data_len;
 	__u32	metadata_len;
 	__u32	timeout_ms;
@@ -592,7 +591,7 @@ static int nvme_ns_ioctl(struct nvme_ns *ns, unsigned int cmd,
 }
 
 int nvme_ioctl(struct block_device *bdev, blk_mode_t mode,
-		unsigned int cmd, unsigned long arg)
+		unsigned int cmd, uintptr_t arg)
 {
 	struct nvme_ns *ns = bdev->bd_disk->private_data;
 	bool open_for_write = mode & BLK_OPEN_WRITE;
@@ -607,7 +606,7 @@ int nvme_ioctl(struct block_device *bdev, blk_mode_t mode,
 	return nvme_ns_ioctl(ns, cmd, argp, flags, open_for_write);
 }
 
-long nvme_ns_chr_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+long nvme_ns_chr_ioctl(struct file *file, unsigned int cmd, uintptr_t arg)
 {
 	struct nvme_ns *ns =
 		container_of(file_inode(file)->i_cdev, struct nvme_ns, cdev);
@@ -692,7 +691,7 @@ static int nvme_ns_head_ctrl_ioctl(struct nvme_ns *ns, unsigned int cmd,
 }
 
 int nvme_ns_head_ioctl(struct block_device *bdev, blk_mode_t mode,
-		unsigned int cmd, unsigned long arg)
+		unsigned int cmd, uintptr_t arg)
 {
 	struct nvme_ns_head *head = bdev->bd_disk->private_data;
 	bool open_for_write = mode & BLK_OPEN_WRITE;
@@ -725,7 +724,7 @@ out_unlock:
 }
 
 long nvme_ns_head_chr_ioctl(struct file *file, unsigned int cmd,
-		unsigned long arg)
+		uintptr_t arg)
 {
 	bool open_for_write = file->f_mode & FMODE_WRITE;
 	struct cdev *cdev = file_inode(file)->i_cdev;
@@ -831,7 +830,7 @@ out_unlock:
 }
 
 long nvme_dev_ioctl(struct file *file, unsigned int cmd,
-		unsigned long arg)
+		uintptr_t arg)
 {
 	bool open_for_write = file->f_mode & FMODE_WRITE;
 	struct nvme_ctrl *ctrl = file->private_data;

@@ -2674,7 +2674,7 @@ static int nvme_pci_alloc_iod_mempool(struct nvme_dev *dev)
 
 	dev->iod_mempool = mempool_create_node(1,
 			mempool_kmalloc, mempool_kfree,
-			(void *)alloc_size, GFP_KERNEL,
+			__c_fakep(alloc_size), GFP_KERNEL,
 			dev_to_node(dev->dev));
 	if (!dev->iod_mempool)
 		return -ENOMEM;
@@ -2938,7 +2938,7 @@ static unsigned long check_vendor_combination_bug(struct pci_dev *pdev)
 static struct nvme_dev *nvme_pci_alloc_dev(struct pci_dev *pdev,
 		const struct pci_device_id *id)
 {
-	unsigned long quirks = id->driver_data;
+	unsigned long quirks = __c_ua(id->driver_data);
 	int node = dev_to_node(&pdev->dev);
 	struct nvme_dev *dev;
 	int ret = -ENOMEM;
