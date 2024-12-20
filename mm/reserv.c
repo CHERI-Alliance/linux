@@ -5,6 +5,22 @@
 #include <linux/mm.h>
 #include <linux/slab.h>
 
+static inline void
+reserv_calculate_outer(struct reserv_struct *reserv)
+{
+	ptraddr_t start = reserv->inner_start;
+	ptraddr_t end = reserv->inner_start + reserv->inner_len;
+	ptraddr_t mask = cheri_representable_alignment_mask(end - start);
+
+	while ((start & mask) != start) {
+		start &= mask;
+		mask = cheri_representable_alignment_mask(end - start);
+	}
+
+	reserv->outer_start = start;
+	reserv->outer_len = cheri_representable_length(end - start);
+}
+
 int reserv_vma_set_reserv(struct vm_area_struct *vma, ptraddr_t start,
 			  size_t len, int prot)
 {
@@ -15,9 +31,9 @@ int reserv_vma_set_reserv(struct vm_area_struct *vma, ptraddr_t start,
 	/* Reservation base/length is expected as page aligned */
 	VM_BUG_ON(start & ~PAGE_MASK || len % PAGE_SIZE);
 
-	vma->reserv_data.start = start & cheri_representable_alignment_mask(len + ~cheri_representable_alignment_mask(len));
-	len += start - vma->reserv_data.start;
-	vma->reserv_data.len = cheri_representable_length(len);
+	vma->reserv_data.inner_start = start;
+	vma->reserv_data.inner_len = len;
+	reserv_calculate_outer(&vma->reserv_data);
 	vma->reserv_data.perms = user_ptr_owning_perms_from_prot(prot,
 								 vma->vm_flags);
 
@@ -34,9 +50,9 @@ int reserv_vma_set_reserv_start_len(struct vm_area_struct *vma, ptraddr_t start,
 	/* Reservation base/length is expected as page aligned */
 	VM_BUG_ON(start & ~PAGE_MASK || len % PAGE_SIZE);
 
-	vma->reserv_data.start = start & cheri_representable_alignment_mask(len + ~cheri_representable_alignment_mask(len));
-	len += start - vma->reserv_data.start;
-	vma->reserv_data.len = cheri_representable_length(len);
+	vma->reserv_data.inner_start = start;
+	vma->reserv_data.inner_len = len;
+	reserv_calculate_outer(&vma->reserv_data);
 
 	return 0;
 }
@@ -85,19 +101,28 @@ bool reserv_vma_range_within_reserv(struct vm_area_struct *vma, ptraddr_t start,
 		return true;
 
 	/* Check if there is match with the existing reservations */
-	return vma->reserv_data.start <= start &&
-		vma->reserv_data.start + vma->reserv_data.len >= start + len;
+	return vma->reserv_data.inner_start <= start &&
+		vma->reserv_data.inner_start + vma->reserv_data.inner_len >= start + len;
 }
 
 bool reserv_cap_within_reserv(user_uintptr_t cap, bool locked)
 {
-	return reserv_find_reserv_info_range(cheri_base_get(cap),
-					     cheri_length_get(cap),
-					     locked, NULL);
+	struct reserv_struct reserv;
+	ptraddr_t base, len;
+
+	if (!reserv_is_supported(current->mm))
+		return true;
+	if (!reserv_find_reserv_info_range(cheri_address_get(cap), 1,
+					   locked, &reserv))
+		return false;
+
+	base = cheri_base_get(cap);
+	len = cheri_length_get(cap);
+	return base + len > len && reserv.outer_start <= base &&
+		base + len <= reserv.outer_start + reserv.outer_len;
 }
 
-bool reserv_aligned_range_within_reserv(ptraddr_t start, size_t len,
-					bool locked)
+bool reserv_range_within_reserv(ptraddr_t start, size_t len, bool locked)
 {
 	ptraddr_t aligned_start = start & cheri_representable_alignment_mask(len);
 	size_t aligned_len = cheri_representable_length(len);
@@ -163,7 +188,7 @@ user_uintptr_t reserv_make_user_ptr_owning(ptraddr_t vma_addr, bool locked)
 	if (WARN_ON(!vma || vma->vm_start != vma_addr)) {
 		if (!locked)
 			mmap_read_unlock(mm);
-		return vma_addr;
+		return __c_fakeu(vma_addr);
 	}
 
 	reserv = vma->reserv_data;
