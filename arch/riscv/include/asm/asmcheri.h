@@ -113,19 +113,14 @@ _csrw \csr \gpr \@
 /*
  * Enter capability mode.
  * @param reg: A scratch register
- * Clobbers: CSR_TVEC
+ * 0.9 modesw.cap and legacy modesw have the same opcode
  */
 .macro enter_capmode reg
-	la \reg, 1f
-	csrw CSR_TVEC, \reg
-	.byte 0x33, 0x10, 0x00, 0x09	/* New modesw.CAP */
-	j 2f
-.align 2
-1:	auipc c\reg, 0
+	auipc c\reg, 0
 	gctag \reg, c\reg
-	bnez \reg, 2f
-	.byte 0x33, 0x10, 0x00, 0x12	/* Old modesw. */
-2:
+	bnez \reg, 1f
+	.byte 0x33, 0x10, 0x00, 0x12	/* modesw / modesw.CAP */
+1:
 .endm
 
 /*
