@@ -1,0 +1,65 @@
+default:
+  tags:
+    - linux
+    - docker
+  image: docker-registry.codasip.com/cheri/linux:0.1.0
+
+variables:
+  KUBERNETES_CPU_REQUEST: "16"
+  KUBERNETES_CPU_LIMIT: "16"
+  OMP_NUM_THREADS: "16"
+  KUBERNETES_MEMORY_REQUEST: "256Gi"
+  KUBERNETES_MEMORY_LIMIT: "256Gi"
+
+stages:
+  - build
+
+build_riscv64_cheri:
+  stage: build
+  script:
+    - mkdir -p $CI_PROJECT_DIR
+    - cd $CI_PROJECT_DIR
+    - mkdir -p /tmp/dl
+    - mkdir -p /opt/bin
+    - 'curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" -o /tmp/dl/sparse.tgz "https://gitlab.codasip.com/api/v4/projects/1640/packages/generic/sparse/default/sparse.tgz"'
+    - 'tar -C /opt/bin -xvzf /tmp/dl/sparse.tgz'
+    - 'PATH="/opt/cherillvm/bin:/opt/bin:${PATH}"'
+    - export PATH
+    - 'make LLVM=1 ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- CC="clang -target riscv64" HOSTCC=/usr/bin/gcc qemu_riscv64cheripc_defconfig'
+    - 'make -j $(nproc) LLVM=1 ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- CC="clang -target riscv64" HOSTCC=/usr/bin/gcc C=2 all modules 2>&1 | tee log'
+    - echo "CHECKING sparse messages"
+    - 'if grep "preserving" log; then echo ERROR: Unexpected sparse warnings; false; else echo "No unexpected sparse errors"; fi'
+
+build_morello:
+  stage: build
+  script:
+    - mkdir -p $CI_PROJECT_DIR
+    - cd $CI_PROJECT_DIR
+    - 'PATH="/opt/morello/bin:/opt/bin:${PATH}"'
+    - export PATH
+    - 'make LLVM=1 ARCH=arm64 CROSS_COMPILE=arm64-linux-gnu- HOSTCC=/usr/bin/gcc morello_pcuabi_defconfig'
+    - 'make -j $(nproc) LLVM=1 ARCH=arm64 CROSS_COMPILE=arm64-linux-gnu- HOSTCC=/usr/bin/gcc all modules'
+
+build_arm64:
+  stage: build
+  script:
+    - mkdir -p $CI_PROJECT_DIR
+    - cd $CI_PROJECT_DIR
+    - 'make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- defconfig'
+    - 'make -j $(nproc) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- all modules'
+
+build_x64:
+  stage: build
+  script:
+    - mkdir -p $CI_PROJECT_DIR
+    - cd $CI_PROJECT_DIR
+    - make defconfig
+    - make -j $(nproc) all modules
+
+build_riscv64:
+  stage: build
+  script:
+    - mkdir -p $CI_PROJECT_DIR
+    - cd $CI_PROJECT_DIR
+    - make ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- defconfig
+    - make -j $(nproc) ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- all modules
