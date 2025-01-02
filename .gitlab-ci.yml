@@ -1,0 +1,138 @@
+default:
+  tags:
+    - linux
+    - docker
+  image: docker-registry.codasip.com/cheri/linux:0.1.0
+
+variables:
+  KUBERNETES_CPU_REQUEST: "16"
+  KUBERNETES_CPU_LIMIT: "16"
+  OMP_NUM_THREADS: "16"
+  KUBERNETES_MEMORY_REQUEST: "256Gi"
+  KUBERNETES_MEMORY_LIMIT: "256Gi"
+
+stages:
+  - build
+
+
+.riscv64_cheri_script: &riscv64_cheri_script
+  - S=$SCHEDULE
+  - mkdir -p $CI_PROJECT_DIR
+  - cd $CI_PROJECT_DIR
+  - 'PATH="/opt/cherillvm/bin:${PATH}"'
+  - export PATH
+  - set -o pipefail
+  - 'make LLVM=1 ARCH=riscv CC="clang -target riscv64" HOSTCC=/usr/bin/gcc "${CONFIG}"'
+  - 'make -j $(nproc) LLVM=1 ARCH=riscv CC="clang -target riscv64" HOSTCC=/usr/bin/gcc compile_commands.json all modules'
+  - 'grep "file.:.*\.c.$" compile_commands.json | sed "s/.*file.:..//; s/.$//" | xargs -n 10 -P 12 -- clang-tidy --checks="-*,cheri-*,-cheri-Uapi" --header-filter=".*" -system-headers --extra-arg=-Wno-array-bounds 2>&1 | tee tidy.log'
+  - echo "CHECKING clang-tidy messages"
+  - 'egrep "(warning|error):" tidy.log | tee tidyerr.log || true'
+  - touch .clang-tidy-ignore
+  - 'if grep -v -f .clang-tidy-ignore tidyerr.log >/dev/null; then echo ERROR: Unexpected clang-tidy warnings; false; else echo "No unexpected clang-tidy errors"; fi'
+
+.riscv64_noncheri_script: &riscv64_noncheri_script
+    - mkdir -p $CI_PROJECT_DIR
+    - cd $CI_PROJECT_DIR
+    - 'PATH="/opt/cherillvm/bin:${PATH}"'
+    - export PATH
+    - 'make LLVM=1 ARCH=riscv CC="clang -target riscv64" HOSTCC=/usr/bin/gcc "${CONFIG}"'
+    - 'make -j $(nproc) LLVM=1 ARCH=riscv CC="clang -target riscv64" HOSTCC=/usr/bin/gcc all modules'
+
+build_riscv64_cheri_default:
+  stage: build
+  script:
+    - CONFIG=qemu_riscv64cheripc_defconfig
+    - *riscv64_cheri_script
+
+build_riscv64_cheri_full:
+  stage: build
+  rules:
+    - if: $SCHEDULE == "nightly"
+    - if: $SCHEDULE == "all"
+  script:
+    - CONFIG=cheri_full_defconfig
+    - *riscv64_cheri_script
+
+build_riscv64_cheri_compiletest:
+  stage: build
+  rules:
+    - if: $SCHEDULE == "weekly"
+    - if: $SCHEDULE == "all"
+  script:
+    - CONFIG=cheri_compiletest_defconfig
+    - *riscv64_cheri_script
+
+build_x730_prime:
+  stage: build
+  script:
+    - CONFIG=codasip-x730-prime_defconfig
+    - *riscv64_cheri_script
+
+build_x730_hogoblin2:
+  stage: build
+  rules:
+    - if: $SCHEDULE == "weekly"
+    - if: $SCHEDULE == "all"
+  script:
+    - CONFIG=codasip-x730-hobgoblin2_defconfig
+    - *riscv64_cheri_script
+
+build_a730_prime:
+  stage: build
+  rules:
+    - if: $SCHEDULE == "weekly"
+    - if: $SCHEDULE == "all"
+  script:
+    - CONFIG=codasip-a730-prime_defconfig
+    - *riscv64_noncheri_script
+
+build_a730_hogoblin2:
+  stage: build
+  rules:
+    - if: $SCHEDULE == "weekly"
+    - if: $SCHEDULE == "all"
+  script:
+    - CONFIG=codasip-a730-hobgoblin2_defconfig
+    - *riscv64_noncheri_script
+
+build_morello:
+  stage: build
+  script:
+    - mkdir -p $CI_PROJECT_DIR
+    - cd $CI_PROJECT_DIR
+    - 'PATH="/opt/morello/bin:/opt/bin:${PATH}"'
+    - export PATH
+    - 'make LLVM=1 ARCH=arm64 CROSS_COMPILE=arm64-linux-gnu- HOSTCC=/usr/bin/gcc morello_pcuabi_defconfig'
+    - 'make -j $(nproc) LLVM=1 ARCH=arm64 CROSS_COMPILE=arm64-linux-gnu- HOSTCC=/usr/bin/gcc all modules'
+
+build_arm64:
+  stage: build
+  script:
+    - mkdir -p $CI_PROJECT_DIR
+    - cd $CI_PROJECT_DIR
+    - 'make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- defconfig'
+    - 'make -j $(nproc) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- all modules'
+
+build_i386:
+  stage: build
+  script:
+    - mkdir -p $CI_PROJECT_DIR
+    - cd $CI_PROJECT_DIR
+    - make i386_defconfig
+    - make -j $(nproc) all modules
+
+build_x64:
+  stage: build
+  script:
+    - mkdir -p $CI_PROJECT_DIR
+    - cd $CI_PROJECT_DIR
+    - make defconfig
+    - make -j $(nproc) all modules
+
+build_riscv64:
+  stage: build
+  script:
+    - mkdir -p $CI_PROJECT_DIR
+    - cd $CI_PROJECT_DIR
+    - make ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- defconfig
+    - make -j $(nproc) ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- all modules
