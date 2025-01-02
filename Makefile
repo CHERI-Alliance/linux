@@ -857,6 +857,7 @@ ifdef CONFIG_CHERI_PURECAP_UABI
 # __capability in the deprecated position, i.e. as a prefix for *.
 # Disable deprecated-declarations to avoid getting warnings about this.
 KBUILD_CFLAGS	+= $(call cc-disable-warning, deprecated-declarations)
+CHECKFLAGS	+= -D__CHERI__ -D__CHERI_PURE_CAPABILITY__
 endif
 
 ifdef CONFIG_FRAME_POINTER
