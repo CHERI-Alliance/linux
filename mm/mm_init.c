@@ -767,7 +767,9 @@ void __meminit reserve_bootmem_region(phys_addr_t start,
 			 * access it yet.
 			 */
 			__SetPageReserved(page);
+#ifdef CONFIG_CHERI_KERNEL
 			page->alloc_order = -1;
+#endif
 		}
 	}
 }

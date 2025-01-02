@@ -170,7 +170,7 @@ extern cheri_perms_t cheri_unsupported_perms;	/* Permission bits not supported b
 #else
 
 #define cheri_check_cap(cap, len, perms) (true)
-#define cheri_address_set(cap, addr) (addr)
+#define cheri_address_set(cap, addr) ((void *)(addr))
 #define cheri_bounds_set(__c, __l) (__c)
 #define cheri_bounds_set_exact(__c, __l) (__c)
 #define cheri_sentry_create(__c) (__c)
@@ -212,7 +212,11 @@ __c_pa(const volatile void *ptr)
 static __always_inline ptraddr_t
 __c_pa_u(const volatile void __user *ptr)
 {
+#ifdef __CHERI__
 	return (ptraddr_t __force)(__kernel_uintptr_t)ptr;
+#else
+	return (ptraddr_t __force)ptr;
+#endif
 }
 
 /*

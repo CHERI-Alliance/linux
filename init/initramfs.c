@@ -654,9 +654,9 @@ static bool __init kexec_free_initrd(void)
 	 */
 	memset((void *)initrd_start, 0, initrd_end - initrd_start);
 	if (initrd_start < crashk_start)
-		free_initrd_mem(__c_pa(initrd_start), crashk_start);
+		free_initrd_mem(__c_ua(initrd_start), crashk_start);
 	if (initrd_end > crashk_end)
-		free_initrd_mem(crashk_end, __c_pa(initrd_end));
+		free_initrd_mem(crashk_end, __c_ua(initrd_end));
 	return true;
 }
 #else

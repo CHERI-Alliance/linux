@@ -810,7 +810,7 @@ engine_instance_list:
 
 	if (guc->ads_capture_size && guc->ads_capture_size != PAGE_ALIGN(total_size))
 		guc_warn(guc, "ADS capture alloc size changed from %d to %d\n",
-			 guc->ads_capture_size, PAGE_ALIGN(total_size));
+			 guc->ads_capture_size, (unsigned int)PAGE_ALIGN(total_size));
 
 	return PAGE_ALIGN(total_size);
 }

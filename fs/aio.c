@@ -1575,7 +1575,7 @@ COMPAT_SYSCALL_DEFINE2(io_setup, unsigned, nr_events, compat_aio_context_t __use
 	ret = -EINVAL;
 	if (unlikely(ctx || nr_events == 0)) {
 		pr_debug("EINVAL: ctx %lu nr_events %u\n",
-		         ctx, nr_events);
+		         (unsigned long)ctx, nr_events);
 		goto out;
 	}
 

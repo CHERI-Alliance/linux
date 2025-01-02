@@ -236,7 +236,7 @@ typedef unsigned long __uintcap_t;
  */
 #define ___ADDRESSABLE(sym, __attrs) \
 	static void * __used __attrs \
-	__UNIQUE_ID(__PASTE(__addressable_,sym)) = (void * __force)(char * __force)&sym;
+	__UNIQUE_ID(__PASTE(__addressable_,sym)) = (void * __force)(__uintcap_t)&sym;
 #define __ADDRESSABLE(sym) \
 	___ADDRESSABLE(sym, __section(".discard.addressable"))
 
