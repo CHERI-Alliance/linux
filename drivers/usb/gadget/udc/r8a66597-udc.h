@@ -137,7 +137,7 @@ static inline void r8a66597_read_fifo(struct r8a66597 *r8a66597,
 		/* 32-bit accesses for on_chip controllers */
 
 		/* aligned buf case */
-		if (len >= 4 && !((unsigned long)buf & 0x03)) {
+		if (len >= 4 && !(__c_pa(buf) & 0x03)) {
 			ioread32_rep(fifoaddr, buf, len / 4);
 			buf += len & ~0x03;
 			len &= 0x03;
@@ -154,7 +154,7 @@ static inline void r8a66597_read_fifo(struct r8a66597 *r8a66597,
 		/* 16-bit accesses for external controllers */
 
 		/* aligned buf case */
-		if (len >= 2 && !((unsigned long)buf & 0x01)) {
+		if (len >= 2 && !(__c_pa(buf) & 0x01)) {
 			ioread16_rep(fifoaddr, buf, len / 2);
 			buf += len & ~0x01;
 			len &= 0x01;
@@ -202,14 +202,14 @@ static inline void r8a66597_write_fifo(struct r8a66597 *r8a66597,
 
 	if (r8a66597->pdata->on_chip) {
 		/* 32-bit access only if buf is 32-bit aligned */
-		if (len >= 4 && !((unsigned long)buf & 0x03)) {
+		if (len >= 4 && !(__c_pa(buf) & 0x03)) {
 			iowrite32_rep(fifoaddr, buf, len / 4);
 			buf += len & ~0x03;
 			len &= 0x03;
 		}
 	} else {
 		/* 16-bit access only if buf is 16-bit aligned */
-		if (len >= 2 && !((unsigned long)buf & 0x01)) {
+		if (len >= 2 && !(__c_pa(buf) & 0x01)) {
 			iowrite16_rep(fifoaddr, buf, len / 2);
 			buf += len & ~0x01;
 			len &= 0x01;

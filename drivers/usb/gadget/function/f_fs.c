@@ -660,7 +660,7 @@ static int ffs_ep0_release(struct inode *inode, struct file *file)
 	return 0;
 }
 
-static long ffs_ep0_ioctl(struct file *file, unsigned code, unsigned long value)
+static long ffs_ep0_ioctl(struct file *file, unsigned code, uintptr_t value)
 {
 	struct ffs_data *ffs = file->private_data;
 	struct usb_gadget *gadget = ffs->gadget;
@@ -668,7 +668,7 @@ static long ffs_ep0_ioctl(struct file *file, unsigned code, unsigned long value)
 
 	if (code == FUNCTIONFS_INTERFACE_REVMAP) {
 		struct ffs_function *func = ffs->func;
-		ret = func ? ffs_func_revmap_intf(func, value) : -ENODEV;
+		ret = func ? ffs_func_revmap_intf(func, __c_ua(value)) : -ENODEV;
 	} else if (gadget && gadget->ops->ioctl) {
 		ret = gadget->ops->ioctl(gadget, code, value);
 	} else {
@@ -1721,7 +1721,7 @@ err_dmabuf_put:
 }
 
 static long ffs_epfile_ioctl(struct file *file, unsigned code,
-			     unsigned long value)
+			     uintptr_t value)
 {
 	struct ffs_epfile *epfile = file->private_data;
 	struct ffs_ep *ep;
@@ -2629,7 +2629,7 @@ static int __must_check ffs_do_descs(unsigned count, char *data, unsigned len,
 			data = NULL;
 
 		/* Record "descriptor" entity */
-		ret = entity(FFS_DESCRIPTOR, (u8 *)num, (void *)data, priv);
+		ret = entity(FFS_DESCRIPTOR, __c_fakep(num), (void *)data, priv);
 		if (ret < 0) {
 			pr_debug("entity DESCRIPTOR(%02lx); ret = %d\n",
 				 num, ret);
@@ -3268,13 +3268,13 @@ static int __ffs_func_bind_do_descs(enum ffs_entity_type type, u8 *valuep,
 	 */
 	if (func->function.ss_descriptors) {
 		ep_desc_id = 2;
-		func->function.ss_descriptors[(long)valuep] = desc;
+		func->function.ss_descriptors[__c_pa(valuep)] = desc;
 	} else if (func->function.hs_descriptors) {
 		ep_desc_id = 1;
-		func->function.hs_descriptors[(long)valuep] = desc;
+		func->function.hs_descriptors[__c_pa(valuep)] = desc;
 	} else {
 		ep_desc_id = 0;
-		func->function.fs_descriptors[(long)valuep]    = desc;
+		func->function.fs_descriptors[__c_pa(valuep)]    = desc;
 	}
 
 	if (!desc || desc->bDescriptorType != USB_DT_ENDPOINT)

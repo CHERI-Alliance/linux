@@ -400,7 +400,7 @@ ep_release (struct inode *inode, struct file *fd)
 	return 0;
 }
 
-static long ep_ioctl(struct file *fd, unsigned code, unsigned long value)
+static long ep_ioctl(struct file *fd, unsigned code, uintptr_t value)
 {
 	struct ep_data		*data = fd->private_data;
 	int			status;
@@ -1250,7 +1250,7 @@ out:
 	return mask;
 }
 
-static long gadget_dev_ioctl (struct file *fd, unsigned code, unsigned long value)
+static long gadget_dev_ioctl (struct file *fd, unsigned code, uintptr_t value)
 {
 	struct dev_data		*dev = fd->private_data;
 	struct usb_gadget	*gadget = dev->gadget;

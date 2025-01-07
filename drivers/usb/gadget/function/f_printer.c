@@ -774,13 +774,13 @@ printer_poll(struct file *fd, poll_table *wait)
 }
 
 static long
-printer_ioctl(struct file *fd, unsigned int code, unsigned long arg)
+printer_ioctl(struct file *fd, unsigned int code, uintptr_t arg)
 {
 	struct printer_dev	*dev = fd->private_data;
 	unsigned long		flags;
 	int			status = 0;
 
-	DBG(dev, "printer_ioctl: cmd=0x%4.4x, arg=%lu\n", code, arg);
+	DBG(dev, "printer_ioctl: cmd=0x%4.4x, arg=%lu\n", code, __c_ua(arg));
 
 	/* handle ioctls */
 
@@ -796,7 +796,7 @@ printer_ioctl(struct file *fd, unsigned int code, unsigned long arg)
 		status = (int)dev->printer_status;
 		break;
 	case GADGET_SET_PRINTER_STATUS:
-		dev->printer_status = (u8)arg;
+		dev->printer_status = (u8)__c_ua(arg);
 		break;
 	default:
 		/* could not handle ioctl */

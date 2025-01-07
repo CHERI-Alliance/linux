@@ -2174,7 +2174,7 @@ static int mv_udc_probe(struct platform_device *pdev)
 		return retval;
 
 	udc->op_regs =
-		(struct mv_op_regs __iomem *)((unsigned long)udc->cap_regs
+		(struct mv_op_regs __iomem *)((uintptr_t)udc->cap_regs
 		+ (readl(&udc->cap_regs->caplength_hciversion)
 			& CAPLENGTH_MASK));
 	udc->max_eps = readl(&udc->cap_regs->dccparams) & DCCPARAMS_DEN_MASK;

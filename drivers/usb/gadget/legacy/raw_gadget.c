@@ -476,7 +476,7 @@ out_put:
 
 /*----------------------------------------------------------------------*/
 
-static int raw_ioctl_init(struct raw_dev *dev, unsigned long value)
+static int raw_ioctl_init(struct raw_dev *dev, uintptr_t value)
 {
 	int ret = 0;
 	int driver_id_number;
@@ -575,7 +575,7 @@ out_free_driver_id_number:
 	return ret;
 }
 
-static int raw_ioctl_run(struct raw_dev *dev, unsigned long value)
+static int raw_ioctl_run(struct raw_dev *dev, uintptr_t value)
 {
 	int ret = 0;
 	unsigned long flags;
@@ -611,7 +611,7 @@ out_unlock:
 	return ret;
 }
 
-static int raw_ioctl_event_fetch(struct raw_dev *dev, unsigned long value)
+static int raw_ioctl_event_fetch(struct raw_dev *dev, uintptr_t value)
 {
 	struct usb_raw_event arg;
 	unsigned long flags;
@@ -754,7 +754,7 @@ out_unlock:
 	return ret;
 }
 
-static int raw_ioctl_ep0_write(struct raw_dev *dev, unsigned long value)
+static int raw_ioctl_ep0_write(struct raw_dev *dev, uintptr_t value)
 {
 	int ret = 0;
 	void *data;
@@ -768,7 +768,7 @@ static int raw_ioctl_ep0_write(struct raw_dev *dev, unsigned long value)
 	return ret;
 }
 
-static int raw_ioctl_ep0_read(struct raw_dev *dev, unsigned long value)
+static int raw_ioctl_ep0_read(struct raw_dev *dev, uintptr_t value)
 {
 	int ret = 0;
 	void *data;
@@ -792,7 +792,7 @@ free:
 	return ret;
 }
 
-static int raw_ioctl_ep0_stall(struct raw_dev *dev, unsigned long value)
+static int raw_ioctl_ep0_stall(struct raw_dev *dev, uintptr_t value)
 {
 	int ret = 0;
 	unsigned long flags;
@@ -836,7 +836,7 @@ out_unlock:
 	return ret;
 }
 
-static int raw_ioctl_ep_enable(struct raw_dev *dev, unsigned long value)
+static int raw_ioctl_ep_enable(struct raw_dev *dev, uintptr_t value)
 {
 	int ret = 0, i;
 	unsigned long flags;
@@ -916,9 +916,9 @@ out_unlock:
 	return ret;
 }
 
-static int raw_ioctl_ep_disable(struct raw_dev *dev, unsigned long value)
+static int raw_ioctl_ep_disable(struct raw_dev *dev, uintptr_t value)
 {
-	int ret = 0, i = value;
+	int ret = 0, i = __c_ua(value);
 	unsigned long flags;
 
 	spin_lock_irqsave(&dev->lock, flags);
@@ -971,9 +971,9 @@ out_unlock:
 }
 
 static int raw_ioctl_ep_set_clear_halt_wedge(struct raw_dev *dev,
-		unsigned long value, bool set, bool halt)
+		uintptr_t value, bool set, bool halt)
 {
-	int ret = 0, i = value;
+	int ret = 0, i = __c_ua(value);
 	unsigned long flags;
 
 	spin_lock_irqsave(&dev->lock, flags);
@@ -1140,7 +1140,7 @@ out_unlock:
 	return ret;
 }
 
-static int raw_ioctl_ep_write(struct raw_dev *dev, unsigned long value)
+static int raw_ioctl_ep_write(struct raw_dev *dev, uintptr_t value)
 {
 	int ret = 0;
 	char *data;
@@ -1154,7 +1154,7 @@ static int raw_ioctl_ep_write(struct raw_dev *dev, unsigned long value)
 	return ret;
 }
 
-static int raw_ioctl_ep_read(struct raw_dev *dev, unsigned long value)
+static int raw_ioctl_ep_read(struct raw_dev *dev, uintptr_t value)
 {
 	int ret = 0;
 	char *data;
@@ -1178,7 +1178,7 @@ free:
 	return ret;
 }
 
-static int raw_ioctl_configure(struct raw_dev *dev, unsigned long value)
+static int raw_ioctl_configure(struct raw_dev *dev, uintptr_t value)
 {
 	int ret = 0;
 	unsigned long flags;
@@ -1203,7 +1203,7 @@ out_unlock:
 	return ret;
 }
 
-static int raw_ioctl_vbus_draw(struct raw_dev *dev, unsigned long value)
+static int raw_ioctl_vbus_draw(struct raw_dev *dev, uintptr_t value)
 {
 	int ret = 0;
 	unsigned long flags;
@@ -1219,7 +1219,7 @@ static int raw_ioctl_vbus_draw(struct raw_dev *dev, unsigned long value)
 		ret = -EBUSY;
 		goto out_unlock;
 	}
-	usb_gadget_vbus_draw(dev->gadget, 2 * value);
+	usb_gadget_vbus_draw(dev->gadget, 2 * __c_ua(value));
 
 out_unlock:
 	spin_unlock_irqrestore(&dev->lock, flags);
@@ -1243,7 +1243,7 @@ static void fill_ep_limits(struct usb_ep *ep, struct usb_raw_ep_limits *limits)
 	limits->max_streams = ep->max_streams;
 }
 
-static int raw_ioctl_eps_info(struct raw_dev *dev, unsigned long value)
+static int raw_ioctl_eps_info(struct raw_dev *dev, uintptr_t value)
 {
 	int ret = 0, i;
 	unsigned long flags;
@@ -1290,7 +1290,7 @@ out:
 	return ret;
 }
 
-static long raw_ioctl(struct file *fd, unsigned int cmd, unsigned long value)
+static long raw_ioctl(struct file *fd, unsigned int cmd, uintptr_t value)
 {
 	struct raw_dev *dev = fd->private_data;
 	int ret = 0;
@@ -1362,7 +1362,9 @@ static long raw_ioctl(struct file *fd, unsigned int cmd, unsigned long value)
 static const struct file_operations raw_fops = {
 	.open =			raw_open,
 	.unlocked_ioctl =	raw_ioctl,
+#ifndef CONFIG_CHERI_KERNEL
 	.compat_ioctl =		raw_ioctl,
+#endif
 	.release =		raw_release,
 	.llseek =		no_llseek,
 };

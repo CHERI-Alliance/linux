@@ -886,7 +886,7 @@ static int mv_u3d_ep_dequeue(struct usb_ep *_ep, struct usb_request *_req)
 					struct mv_u3d_req, queue);
 
 			/* Point first TRB of next request to the EP context. */
-			iowrite32((unsigned long) next_req->trb_head,
+			iowrite32(__c_a(next_req->trb_head),
 					&ep_context->trb_addr_lo);
 		} else {
 			struct mv_u3d_ep_context *ep_context;
@@ -1826,7 +1826,7 @@ static int mv_u3d_probe(struct platform_device *dev)
 	} else {
 		dev_dbg(&dev->dev, "cap_regs address: 0x%lx/0x%lx\n",
 			(unsigned long) r->start,
-			(unsigned long) u3d->cap_regs);
+			__c_a(u3d->cap_regs));
 	}
 
 	/* we will access controller register, so enable the u3d controller */
