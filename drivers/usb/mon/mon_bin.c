@@ -572,7 +572,7 @@ static void mon_bin_event(struct mon_reader_bin *rp, struct urb *urb,
 	ep->epnum = dir | usb_endpoint_num(epd);
 	ep->devnum = urb->dev->devnum;
 	ep->busnum = urb->dev->bus->busnum;
-	ep->id = (unsigned long) urb;
+	ep->id = __c_pa(urb);
 	ep->ts_sec = ts.tv_sec;
 	ep->ts_usec = ts.tv_nsec / NSEC_PER_USEC;
 	ep->status = status;
@@ -660,7 +660,7 @@ static void mon_bin_error(void *data, struct urb *urb, int error)
 	ep->epnum |= usb_endpoint_num(&urb->ep->desc);
 	ep->devnum = urb->dev->devnum;
 	ep->busnum = urb->dev->bus->busnum;
-	ep->id = (unsigned long) urb;
+	ep->id = __c_pa(urb);
 	ep->ts_sec = ts.tv_sec;
 	ep->ts_usec = ts.tv_nsec / NSEC_PER_USEC;
 	ep->status = error;
@@ -984,7 +984,7 @@ static int mon_bin_queued(struct mon_reader_bin *rp)
 
 /*
  */
-static long mon_bin_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long mon_bin_ioctl(struct file *file, unsigned int cmd, uintptr_t arg)
 {
 	struct mon_reader_bin *rp = file->private_data;
 	// struct mon_bus* mbus = rp->r.m_bus;
@@ -1023,10 +1023,10 @@ static long mon_bin_ioctl(struct file *file, unsigned int cmd, unsigned long arg
 		int size;
 		struct mon_pgmap *vec;
 
-		if (arg < BUFF_MIN || arg > BUFF_MAX)
+		if (__c_ua(arg) < BUFF_MIN || __c_ua(arg) > BUFF_MAX)
 			return -EINVAL;
 
-		size = CHUNK_ALIGN(arg);
+		size = CHUNK_ALIGN(__c_ua(arg));
 		vec = kcalloc(size / CHUNK_SIZE, sizeof(struct mon_pgmap),
 			      GFP_KERNEL);
 		if (vec == NULL) {
@@ -1060,7 +1060,7 @@ static long mon_bin_ioctl(struct file *file, unsigned int cmd, unsigned long arg
 		break;
 
 	case MON_IOCH_MFLUSH:
-		ret = mon_bin_flush(rp, arg);
+		ret = mon_bin_flush(rp, __c_ua(arg));
 		break;
 
 	case MON_IOCX_GET:
@@ -1337,7 +1337,7 @@ static int mon_bin_wait_event(struct file *file, struct mon_reader_bin *rp)
 static int mon_alloc_buff(struct mon_pgmap *map, int npages)
 {
 	int n;
-	unsigned long vaddr;
+	uintptr_t vaddr;
 
 	for (n = 0; n < npages; n++) {
 		vaddr = get_zeroed_page(GFP_KERNEL);
