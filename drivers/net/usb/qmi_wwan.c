@@ -1519,7 +1519,7 @@ static int qmi_wwan_probe(struct usb_interface *intf,
 	 */
 	if (!id->driver_info) {
 		dev_dbg(&intf->dev, "setting defaults for dynamic device id\n");
-		id->driver_info = (unsigned long)&qmi_wwan_info;
+		id->driver_info = (uintptr_t)&qmi_wwan_info;
 	}
 
 	/* There are devices where the same interface number can be

@@ -169,7 +169,7 @@ static int cx82310_bind(struct usbnet *dev, struct usb_interface *intf)
 	/* we can receive URBs up to 4KB from the device */
 	dev->rx_urb_size = 4096;
 
-	dev->partial_data = (unsigned long) kmalloc(dev->hard_mtu, GFP_KERNEL);
+	dev->partial_data = (uintptr_t) kmalloc(dev->hard_mtu, GFP_KERNEL);
 	if (!dev->partial_data)
 		return -ENOMEM;
 
@@ -250,18 +250,18 @@ static int cx82310_rx_fixup(struct usbnet *dev, struct sk_buff *skb)
 	 * If the last skb ended with an incomplete packet, this skb contains
 	 * end of that packet at the beginning.
 	 */
-	if (dev->partial_rem) {
-		len = dev->partial_len + dev->partial_rem;
+	if (__c_ua(dev->partial_rem)) {
+		len = __c_ua(dev->partial_len) + __c_ua(dev->partial_rem);
 		skb2 = alloc_skb(len, GFP_ATOMIC);
 		if (!skb2)
 			return 0;
 		skb_put(skb2, len);
 		memcpy(skb2->data, (void *)dev->partial_data,
-		       dev->partial_len);
-		memcpy(skb2->data + dev->partial_len, skb->data,
-		       dev->partial_rem);
+		       __c_ua(dev->partial_len));
+		memcpy(skb2->data + __c_ua(dev->partial_len), skb->data,
+		       __c_ua(dev->partial_rem));
 		usbnet_skb_return(dev, skb2);
-		skb_pull(skb, (dev->partial_rem + 1) & ~1);
+		skb_pull(skb, (__c_ua(dev->partial_rem) + 1) & ~1);
 		dev->partial_rem = 0;
 		if (skb->len < 2)
 			return 1;
@@ -289,10 +289,10 @@ static int cx82310_rx_fixup(struct usbnet *dev, struct sk_buff *skb)
 
 		/* incomplete packet, save it for the next skb */
 		if (len > skb->len) {
-			dev->partial_len = skb->len;
-			dev->partial_rem = len - skb->len;
+			dev->partial_len = __c_fakeu(skb->len);
+			dev->partial_rem = __c_fakeu(len - skb->len);
 			memcpy((void *)dev->partial_data, skb->data,
-			       dev->partial_len);
+			       __c_ua(dev->partial_len));
 			skb_pull(skb, skb->len);
 			break;
 		}

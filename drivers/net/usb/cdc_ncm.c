@@ -840,7 +840,7 @@ int cdc_ncm_bind_common(struct usbnet *dev, struct usb_interface *intf, u8 data_
 	spin_lock_init(&ctx->mtx);
 
 	/* store ctx pointer in device data field */
-	dev->data[0] = (unsigned long)ctx;
+	dev->data[0] = (uintptr_t)ctx;
 
 	/* only the control interface can be successfully probed */
 	ctx->control = intf;
