@@ -189,27 +189,27 @@ static const struct ati_receiver_type type_firefly	= {
 static const struct usb_device_id ati_remote_table[] = {
 	{
 		USB_DEVICE(ATI_REMOTE_VENDOR_ID, LOLA_REMOTE_PRODUCT_ID),
-		.driver_info = (unsigned long)&type_ati
+		.driver_info = (uintptr_t)&type_ati
 	},
 	{
 		USB_DEVICE(ATI_REMOTE_VENDOR_ID, LOLA2_REMOTE_PRODUCT_ID),
-		.driver_info = (unsigned long)&type_ati
+		.driver_info = (uintptr_t)&type_ati
 	},
 	{
 		USB_DEVICE(ATI_REMOTE_VENDOR_ID, ATI_REMOTE_PRODUCT_ID),
-		.driver_info = (unsigned long)&type_ati
+		.driver_info = (uintptr_t)&type_ati
 	},
 	{
 		USB_DEVICE(ATI_REMOTE_VENDOR_ID, NVIDIA_REMOTE_PRODUCT_ID),
-		.driver_info = (unsigned long)&type_ati
+		.driver_info = (uintptr_t)&type_ati
 	},
 	{
 		USB_DEVICE(ATI_REMOTE_VENDOR_ID, MEDION_REMOTE_PRODUCT_ID),
-		.driver_info = (unsigned long)&type_medion
+		.driver_info = (uintptr_t)&type_medion
 	},
 	{
 		USB_DEVICE(ATI_REMOTE_VENDOR_ID, FIREFLY_REMOTE_PRODUCT_ID),
-		.driver_info = (unsigned long)&type_firefly
+		.driver_info = (uintptr_t)&type_firefly
 	},
 	{}	/* Terminating entry */
 };

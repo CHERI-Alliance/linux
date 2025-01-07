@@ -2319,12 +2319,12 @@ static const struct usb_device_id products[] = {
 	{
 		/* SMSC7500 USB Gigabit Ethernet Device */
 		USB_DEVICE(USB_VENDOR_ID_SMSC, USB_PRODUCT_ID_LAN7500),
-		.driver_info = (unsigned long) &smsc75xx_info,
+		.driver_info = (uintptr_t) &smsc75xx_info,
 	},
 	{
 		/* SMSC7500 USB Gigabit Ethernet Device */
 		USB_DEVICE(USB_VENDOR_ID_SMSC, USB_PRODUCT_ID_LAN7505),
-		.driver_info = (unsigned long) &smsc75xx_info,
+		.driver_info = (uintptr_t) &smsc75xx_info,
 	},
 	{ },		/* END */
 };

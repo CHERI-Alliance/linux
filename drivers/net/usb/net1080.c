@@ -496,10 +496,10 @@ static const struct driver_info	net1080_info = {
 static const struct usb_device_id	products [] = {
 {
 	USB_DEVICE(0x0525, 0x1080),	// NetChip ref design
-	.driver_info =	(unsigned long) &net1080_info,
+	.driver_info =	(uintptr_t) &net1080_info,
 }, {
 	USB_DEVICE(0x06D0, 0x0622),	// Laplink Gold
-	.driver_info =	(unsigned long) &net1080_info,
+	.driver_info =	(uintptr_t) &net1080_info,
 },
 	{ },		// END
 };

@@ -291,7 +291,7 @@ static const struct usb_device_id	products [] = {
 	.idVendor		= 0x04DD,
 	.idProduct		= 0x8005,	/* A-300 */
 	ZAURUS_FAKE_INTERFACE,
-	.driver_info = (unsigned long)&bogus_mdlm_info,
+	.driver_info = (uintptr_t)&bogus_mdlm_info,
 }, {
 	.match_flags    =   USB_DEVICE_ID_MATCH_INT_INFO
 			  | USB_DEVICE_ID_MATCH_DEVICE,
@@ -305,7 +305,7 @@ static const struct usb_device_id	products [] = {
 	.idVendor		= 0x04DD,
 	.idProduct		= 0x8006,	/* B-500/SL-5600 */
 	ZAURUS_FAKE_INTERFACE,
-	.driver_info = (unsigned long)&bogus_mdlm_info,
+	.driver_info = (uintptr_t)&bogus_mdlm_info,
 }, {
 	.match_flags    =   USB_DEVICE_ID_MATCH_INT_INFO
 	          | USB_DEVICE_ID_MATCH_DEVICE,
@@ -319,7 +319,7 @@ static const struct usb_device_id	products [] = {
 	.idVendor		= 0x04DD,
 	.idProduct		= 0x8007,	/* C-700 */
 	ZAURUS_FAKE_INTERFACE,
-	.driver_info = (unsigned long)&bogus_mdlm_info,
+	.driver_info = (uintptr_t)&bogus_mdlm_info,
 }, {
 	.match_flags    =   USB_DEVICE_ID_MATCH_INT_INFO
 		 | USB_DEVICE_ID_MATCH_DEVICE,
@@ -331,7 +331,7 @@ static const struct usb_device_id	products [] = {
 	/* C-750/C-760/C-860/SL-C3000 PDA in MDLM mode */
 	USB_DEVICE_AND_INTERFACE_INFO(0x04DD, 0x9031, USB_CLASS_COMM,
 			USB_CDC_SUBCLASS_MDLM, USB_CDC_PROTO_NONE),
-	.driver_info = (unsigned long) &bogus_mdlm_info,
+	.driver_info = (uintptr_t) &bogus_mdlm_info,
 }, {
 	.match_flags    =   USB_DEVICE_ID_MATCH_INT_INFO
 		 | USB_DEVICE_ID_MATCH_DEVICE,
@@ -345,7 +345,7 @@ static const struct usb_device_id	products [] = {
 	.idVendor		= 0x04DD,
 	.idProduct		= 0x9032,	/* SL-6000 */
 	ZAURUS_FAKE_INTERFACE,
-	.driver_info = (unsigned long)&bogus_mdlm_info,
+	.driver_info = (uintptr_t)&bogus_mdlm_info,
 }, {
 	.match_flags    =   USB_DEVICE_ID_MATCH_INT_INFO
 		 | USB_DEVICE_ID_MATCH_DEVICE,
@@ -359,12 +359,12 @@ static const struct usb_device_id	products [] = {
 	/* Motorola Rokr E6 */
 	USB_DEVICE_AND_INTERFACE_INFO(0x22b8, 0x6027, USB_CLASS_COMM,
 			USB_CDC_SUBCLASS_MDLM, USB_CDC_PROTO_NONE),
-	.driver_info = (unsigned long) &bogus_mdlm_info,
+	.driver_info = (uintptr_t) &bogus_mdlm_info,
 }, {
 	/* Motorola MOTOMAGX phones */
 	USB_DEVICE_AND_INTERFACE_INFO(0x22b8, 0x6425, USB_CLASS_COMM,
 			USB_CDC_SUBCLASS_MDLM, USB_CDC_PROTO_NONE),
-	.driver_info = (unsigned long) &bogus_mdlm_info,
+	.driver_info = (uintptr_t) &bogus_mdlm_info,
 },
 
 /* Olympus has some models with a Zaurus-compatible option.
@@ -383,7 +383,7 @@ static const struct usb_device_id	products [] = {
 {
 	USB_DEVICE_AND_INTERFACE_INFO(0x046d, 0xc11f, USB_CLASS_COMM,
 			USB_CDC_SUBCLASS_MDLM, USB_CDC_PROTO_NONE),
-	.driver_info = (unsigned long) &bogus_mdlm_info,
+	.driver_info = (uintptr_t) &bogus_mdlm_info,
 },
 	{ },		// END
 };

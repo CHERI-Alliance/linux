@@ -192,16 +192,16 @@ static const struct driver_info huawei_cdc_ncm_info = {
 static const struct usb_device_id huawei_cdc_ncm_devs[] = {
 	/* Huawei NCM devices disguised as vendor specific */
 	{ USB_VENDOR_AND_INTERFACE_INFO(0x12d1, 0xff, 0x02, 0x16),
-	  .driver_info = (unsigned long)&huawei_cdc_ncm_info,
+	  .driver_info = (uintptr_t)&huawei_cdc_ncm_info,
 	},
 	{ USB_VENDOR_AND_INTERFACE_INFO(0x12d1, 0xff, 0x02, 0x46),
-	  .driver_info = (unsigned long)&huawei_cdc_ncm_info,
+	  .driver_info = (uintptr_t)&huawei_cdc_ncm_info,
 	},
 	{ USB_VENDOR_AND_INTERFACE_INFO(0x12d1, 0xff, 0x02, 0x76),
-	  .driver_info = (unsigned long)&huawei_cdc_ncm_info,
+	  .driver_info = (uintptr_t)&huawei_cdc_ncm_info,
 	},
 	{ USB_VENDOR_AND_INTERFACE_INFO(0x12d1, 0xff, 0x03, 0x16),
-	  .driver_info = (unsigned long)&huawei_cdc_ncm_info,
+	  .driver_info = (uintptr_t)&huawei_cdc_ncm_info,
 	},
 
 	/* Terminating entry */

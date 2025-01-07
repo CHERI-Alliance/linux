@@ -101,24 +101,24 @@ static const struct usb_device_id	products [] = {
 /* full speed cables */
 {
 	USB_DEVICE(0x067b, 0x0000),	// PL-2301
-	.driver_info =	(unsigned long) &prolific_info,
+	.driver_info =	(uintptr_t) &prolific_info,
 }, {
 	USB_DEVICE(0x067b, 0x0001),	// PL-2302
-	.driver_info =	(unsigned long) &prolific_info,
+	.driver_info =	(uintptr_t) &prolific_info,
 },
 
 /* high speed cables */
 {
 	USB_DEVICE(0x067b, 0x25a1),     /* PL-25A1, no eeprom */
-	.driver_info =  (unsigned long) &prolific_info,
+	.driver_info =  (uintptr_t) &prolific_info,
 }, {
 	USB_DEVICE(0x050d, 0x258a),     /* Belkin F5U258/F5U279 (PL-25A1) */
-	.driver_info =  (unsigned long) &prolific_info,
+	.driver_info =  (uintptr_t) &prolific_info,
 }, {
 	USB_DEVICE(0x3923, 0x7825),     /* National Instruments USB
 					 * Host-to-Host Cable
 					 */
-	.driver_info =  (unsigned long) &prolific_info,
+	.driver_info =  (uintptr_t) &prolific_info,
 
 },
 
@@ -129,7 +129,7 @@ static const struct usb_device_id	products [] = {
 					 * Data Link,
 					 * Unitek Y-3501
 					 */
-	.driver_info =  (unsigned long) &prolific_info,
+	.driver_info =  (uintptr_t) &prolific_info,
 },
 
 	{ },		// END

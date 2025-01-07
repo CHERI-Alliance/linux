@@ -126,14 +126,14 @@ static const struct usb_device_id products[] = {
 {
 	USB_DEVICE_AND_INTERFACE_INFO(VENDOR_ID_REALTEK, 0x8153, USB_CLASS_COMM,
 				      USB_CDC_SUBCLASS_ETHERNET, USB_CDC_PROTO_NONE),
-	.driver_info = (unsigned long)&r8153_info,
+	.driver_info = (uintptr_t)&r8153_info,
 },
 
 /* Lenovo Powered USB-C Travel Hub (4X90S92381, based on Realtek RTL8153) */
 {
 	USB_DEVICE_AND_INTERFACE_INFO(VENDOR_ID_LENOVO, 0x721e, USB_CLASS_COMM,
 				      USB_CDC_SUBCLASS_ETHERNET, USB_CDC_PROTO_NONE),
-	.driver_info = (unsigned long)&r8153_info,
+	.driver_info = (uintptr_t)&r8153_info,
 },
 
 	{ },		/* END */
