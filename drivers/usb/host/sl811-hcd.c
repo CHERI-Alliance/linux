@@ -1643,9 +1643,11 @@ sl811h_probe(struct platform_device *dev)
 		 * NOTE: 64-bit resource->start is getting truncated
 		 * to avoid compiler warning, assuming that ->start
 		 * is always 32-bit for this case
+		 * FIXCHERI: Not sure what to do here!
 		 */
-		addr_reg = (void __iomem *) (unsigned long) addr->start;
-		data_reg = (void __iomem *) (unsigned long) data->start;
+		WARN_ON(IS_ENABLED(CONFIG_CHERI_KERNEL));
+		addr_reg = (void __iomem *) __c_fakep(addr->start);
+		data_reg = (void __iomem *) __c_fakep(data->start);
 	} else {
 		addr_reg = ioremap(addr->start, 1);
 		if (addr_reg == NULL) {
