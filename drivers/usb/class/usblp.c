@@ -516,7 +516,7 @@ static __poll_t usblp_poll(struct file *file, struct poll_table_struct *wait)
 	return ret;
 }
 
-static long usblp_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long usblp_ioctl(struct file *file, unsigned int cmd, uintptr_t arg)
 {
 	struct usblp *usblp = file->private_data;
 	int length, err, i;
@@ -600,7 +600,7 @@ static long usblp_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 #endif
 
 			usblp_unlink_urbs(usblp);
-			retval = usblp_set_protocol(usblp, arg);
+			retval = usblp_set_protocol(usblp, __c_ua(arg));
 			if (retval < 0) {
 				usblp_set_protocol(usblp,
 					usblp->current_protocol);
@@ -616,7 +616,7 @@ static long usblp_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 			}
 
 			err = usblp_hp_channel_change_request(usblp,
-				arg, &newChannel);
+				__c_ua(arg), &newChannel);
 			if (err < 0) {
 				dev_err(&usblp->dev->dev,
 					"usblp%d: error = %d setting "
@@ -628,7 +628,7 @@ static long usblp_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 
 			dev_dbg(&usblp->intf->dev,
 				"usblp%d requested/got HP channel %ld/%d\n",
-				usblp->minor, arg, newChannel);
+				usblp->minor, __c_ua(arg), newChannel);
 			break;
 
 		case IOCNR_GET_BUS_ADDRESS:
@@ -1084,7 +1084,9 @@ static const struct file_operations usblp_fops = {
 	.write =	usblp_write,
 	.poll =		usblp_poll,
 	.unlocked_ioctl =	usblp_ioctl,
+#ifndef CONFIG_CHERI_KERNEL
 	.compat_ioctl =		usblp_ioctl,
+#endif
 	.open =		usblp_open,
 	.release =	usblp_release,
 	.llseek =	noop_llseek,

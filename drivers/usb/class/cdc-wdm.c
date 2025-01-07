@@ -788,7 +788,7 @@ static int wdm_release(struct inode *inode, struct file *file)
 	return 0;
 }
 
-static long wdm_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long wdm_ioctl(struct file *file, unsigned int cmd, uintptr_t arg)
 {
 	struct wdm_device *desc = file->private_data;
 	int rv = 0;

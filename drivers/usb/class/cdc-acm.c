@@ -995,7 +995,7 @@ static int set_serial_info(struct tty_struct *tty, struct serial_struct *ss)
 	return retval;
 }
 
-static int wait_serial_change(struct acm *acm, unsigned long arg)
+static int wait_serial_change(struct acm *acm, uintptr_t arg)
 {
 	int rv = 0;
 	DECLARE_WAITQUEUE(wait, current);
@@ -1055,7 +1055,7 @@ static int acm_tty_get_icount(struct tty_struct *tty,
 }
 
 static int acm_tty_ioctl(struct tty_struct *tty,
-					unsigned int cmd, unsigned long arg)
+					unsigned int cmd, uintptr_t arg)
 {
 	struct acm *acm = tty->driver_data;
 	int rv = -ENOIOCTLCMD;
@@ -1195,7 +1195,7 @@ static int acm_probe(struct usb_interface *intf,
 	int res;
 
 	/* normal quirks */
-	quirks = (unsigned long)id->driver_info;
+	quirks = __c_ua(id->driver_info);
 
 	if (quirks == IGNORE_DEVICE)
 		return -ENODEV;
