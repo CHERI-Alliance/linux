@@ -1260,13 +1260,17 @@ static int hcd_alloc_coherent(struct usb_bus *bus,
 			      enum dma_data_direction dir)
 {
 	unsigned char *vaddr;
+	size_t aligned_size = size;
 
 	if (*vaddr_handle == NULL) {
 		WARN_ON_ONCE(1);
 		return -EFAULT;
 	}
 
-	vaddr = hcd_buffer_alloc(bus, size + sizeof(unsigned long),
+#ifdef CONFIG_CHERI_KERNEL
+	aligned_size = ALIGN(aligned_size, sizeof(uintptr_t));
+#endif
+	vaddr = hcd_buffer_alloc(bus, aligned_size + sizeof(uintptr_t),
 				 mem_flags, dma_handle);
 	if (!vaddr)
 		return -ENOMEM;
@@ -1279,8 +1283,12 @@ static int hcd_alloc_coherent(struct usb_bus *bus,
 	 * memory footprint over access speed since the amount
 	 * of memory available for dma may be limited.
 	 */
-	put_unaligned((unsigned long)*vaddr_handle,
-		      (unsigned long *)(vaddr + size));
+#ifdef CONFIG_CHERI_KERNEL
+	*(uintptr_t *)(vaddr + aligned_size) = (uintptr_t)(*vaddr_handle);
+#else
+	put_unaligned((uintptr_t)*vaddr_handle,
+		      (uintptr_t *)(vaddr + size));
+#endif
 
 	if (dir == DMA_TO_DEVICE)
 		memcpy(vaddr, *vaddr_handle, size);
@@ -1295,7 +1303,11 @@ static void hcd_free_coherent(struct usb_bus *bus, dma_addr_t *dma_handle,
 {
 	unsigned char *vaddr = *vaddr_handle;
 
-	vaddr = (void *)get_unaligned((unsigned long *)(vaddr + size));
+#ifdef CONFIG_CHERI_KERNEL
+	vaddr = (void *)*(uintptr_t *)(vaddr + ALIGN(size, sizeof(uintptr_t)));
+#else
+	vaddr = (void *)get_unaligned((uintptr_t *)(vaddr + size));
+#endif
 
 	if (dir == DMA_FROM_DEVICE)
 		memcpy(vaddr, *vaddr_handle, size);

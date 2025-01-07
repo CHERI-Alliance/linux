@@ -607,7 +607,7 @@ bool usb_endpoint_is_ignored(struct usb_device *udev,
 		if (!usb_match_one_id_intf(udev, intf, id))
 			continue;
 
-		address = id->driver_info;
+		address = __c_ua(id->driver_info);
 		if (address == epd->bEndpointAddress)
 			return true;
 	}
@@ -666,7 +666,7 @@ static u32 usb_detect_static_quirks(struct usb_device *udev,
 		    !usb_match_any_interface(udev, id))
 			continue;
 
-		quirks |= (u32)(id->driver_info);
+		quirks |= (u32)(__c_ua(id->driver_info));
 	}
 
 	return quirks;
