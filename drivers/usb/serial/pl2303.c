@@ -369,7 +369,7 @@ static int pl2303_endpoint_hack(struct usb_serial *serial,
 static int pl2303_calc_num_ports(struct usb_serial *serial,
 					struct usb_serial_endpoints *epds)
 {
-	unsigned long quirks = (unsigned long)usb_get_serial_data(serial);
+	unsigned long quirks = __c_pa(usb_get_serial_data(serial));
 	struct device *dev = &serial->interface->dev;
 	int ret;
 
@@ -485,7 +485,7 @@ static int pl2303_startup(struct usb_serial *serial)
 		return -ENOMEM;
 
 	spriv->type = &pl2303_type_data[type];
-	spriv->quirks = (unsigned long)usb_get_serial_data(serial);
+	spriv->quirks = __c_pa(usb_get_serial_data(serial));
 	spriv->quirks |= spriv->type->quirks;
 
 	usb_set_serial_data(serial, spriv);

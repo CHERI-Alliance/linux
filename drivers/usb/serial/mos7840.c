@@ -1384,7 +1384,7 @@ static int mos7840_get_lsr_info(struct tty_struct *tty,
  *****************************************************************************/
 
 static int mos7840_ioctl(struct tty_struct *tty,
-			 unsigned int cmd, unsigned long arg)
+			 unsigned int cmd, uintptr_t arg)
 {
 	struct usb_serial_port *port = tty->driver_data;
 	void __user *argp = (void __user *)arg;
@@ -1466,7 +1466,7 @@ static int mos7810_check(struct usb_serial *serial)
 static int mos7840_probe(struct usb_serial *serial,
 				const struct usb_device_id *id)
 {
-	unsigned long device_flags = id->driver_info;
+	unsigned long device_flags = __c_ua(id->driver_info);
 	u8 *buf;
 
 	/* Skip device-type detection if we already have device flags. */
@@ -1491,7 +1491,7 @@ static int mos7840_probe(struct usb_serial *serial,
 
 	kfree(buf);
 out:
-	usb_set_serial_data(serial, (void *)device_flags);
+	usb_set_serial_data(serial, __c_fakep(device_flags));
 
 	return 0;
 }
@@ -1499,7 +1499,7 @@ out:
 static int mos7840_calc_num_ports(struct usb_serial *serial,
 					struct usb_serial_endpoints *epds)
 {
-	unsigned long device_flags = (unsigned long)usb_get_serial_data(serial);
+	unsigned long device_flags = __c_pa(usb_get_serial_data(serial));
 	int num_ports = MCS_PORTS(device_flags);
 
 	if (num_ports == 0 || num_ports > 4)
@@ -1533,7 +1533,7 @@ static int mos7840_attach(struct usb_serial *serial)
 static int mos7840_port_probe(struct usb_serial_port *port)
 {
 	struct usb_serial *serial = port->serial;
-	unsigned long device_flags = (unsigned long)usb_get_serial_data(serial);
+	unsigned long device_flags = __c_pa(usb_get_serial_data(serial));
 	struct moschip_port *mos7840_port;
 	int status;
 	int pnum;

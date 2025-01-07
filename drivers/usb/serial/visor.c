@@ -384,7 +384,7 @@ static int palm_os_3_probe(struct usb_serial *serial,
 	 * save off our num_ports info so that we can use it in the
 	 * calc_num_ports callback
 	 */
-	usb_set_serial_data(serial, (void *)(long)num_ports);
+	usb_set_serial_data(serial, __c_fakep(num_ports));
 
 	/* ask for the number of bytes available, but ignore the
 	   response as it is broken */
@@ -468,7 +468,7 @@ static int visor_calc_num_ports(struct usb_serial *serial,
 					struct usb_serial_endpoints *epds)
 {
 	unsigned int vid = le16_to_cpu(serial->dev->descriptor.idVendor);
-	int num_ports = (int)(long)(usb_get_serial_data(serial));
+	int num_ports = (int)__c_pa(usb_get_serial_data(serial));
 
 	if (num_ports)
 		usb_set_serial_data(serial, NULL);

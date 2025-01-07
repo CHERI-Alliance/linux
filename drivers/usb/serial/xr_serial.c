@@ -881,7 +881,7 @@ static int xr_set_rs485_config(struct tty_struct *tty,
 	return 0;
 }
 
-static int xr_ioctl(struct tty_struct *tty, unsigned int cmd, unsigned long arg)
+static int xr_ioctl(struct tty_struct *tty, unsigned int cmd, uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 
@@ -1017,7 +1017,7 @@ static int xr_port_probe(struct usb_serial_port *port)
 	enum xr_type_id type_id;
 	int ret;
 
-	type_id = (int)(unsigned long)usb_get_serial_data(port->serial);
+	type_id = (int)__c_pa(usb_get_serial_data(port->serial));
 	type = &xr_types[type_id];
 
 	data = kzalloc(sizeof(*data), GFP_KERNEL);

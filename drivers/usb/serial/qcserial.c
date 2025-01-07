@@ -403,7 +403,7 @@ static int qcprobe(struct usb_serial *serial, const struct usb_device_id *id)
 		break;
 	default:
 		dev_err(dev, "unsupported device layout type: %lu\n",
-			id->driver_info);
+			__c_ua(id->driver_info));
 		break;
 	}
 
@@ -419,7 +419,7 @@ done:
 	}
 
 	if (!retval)
-		usb_set_serial_data(serial, (void *)(unsigned long)sendsetup);
+		usb_set_serial_data(serial, __c_fakep(sendsetup));
 
 	return retval;
 }
@@ -433,7 +433,7 @@ static int qc_attach(struct usb_serial *serial)
 	if (!data)
 		return -ENOMEM;
 
-	sendsetup = !!(unsigned long)(usb_get_serial_data(serial));
+	sendsetup = !!__c_pa(usb_get_serial_data(serial));
 	if (sendsetup)
 		data->use_send_setup = 1;
 

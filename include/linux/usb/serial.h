@@ -273,7 +273,7 @@ struct usb_serial_driver {
 	/* Called only by the tty layer */
 	unsigned int (*write_room)(struct tty_struct *tty);
 	int  (*ioctl)(struct tty_struct *tty,
-		      unsigned int cmd, unsigned long arg);
+		      unsigned int cmd, uintptr_t arg);
 	void (*get_serial)(struct tty_struct *tty, struct serial_struct *ss);
 	int  (*set_serial)(struct tty_struct *tty, struct serial_struct *ss);
 	void (*set_termios)(struct tty_struct *tty, struct usb_serial_port *port,

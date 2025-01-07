@@ -160,7 +160,7 @@ static int spcp8x5_port_probe(struct usb_serial_port *port)
 		return -ENOMEM;
 
 	spin_lock_init(&priv->lock);
-	priv->quirks = id->driver_info;
+	priv->quirks = __c_ua(id->driver_info);
 
 	usb_set_serial_port_data(port, priv);
 

@@ -938,7 +938,7 @@ out:
 static int mxuport_calc_num_ports(struct usb_serial *serial,
 					struct usb_serial_endpoints *epds)
 {
-	unsigned long features = (unsigned long)usb_get_serial_data(serial);
+	unsigned long features = __c_pa(usb_get_serial_data(serial));
 	int num_ports;
 	int i;
 

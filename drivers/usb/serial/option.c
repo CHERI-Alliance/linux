@@ -2421,7 +2421,7 @@ static int option_probe(struct usb_serial *serial,
 {
 	struct usb_interface_descriptor *iface_desc =
 				&serial->interface->cur_altsetting->desc;
-	unsigned long device_flags = id->driver_info;
+	unsigned long device_flags = __c_ua(id->driver_info);
 
 	/* Never bind to the CD-Rom emulation interface	*/
 	if (iface_desc->bInterfaceClass == USB_CLASS_MASS_STORAGE)
@@ -2443,7 +2443,7 @@ static int option_probe(struct usb_serial *serial,
 		return -ENODEV;
 
 	/* Store the device flags so we can use them during attach. */
-	usb_set_serial_data(serial, (void *)device_flags);
+	usb_set_serial_data(serial, __c_fakep(device_flags));
 
 	return 0;
 }
@@ -2467,7 +2467,7 @@ static int option_attach(struct usb_serial *serial)
 		return -ENOMEM;
 
 	/* Retrieve device flags stored at probe. */
-	device_flags = (unsigned long)usb_get_serial_data(serial);
+	device_flags = __c_pa(usb_get_serial_data(serial));
 
 	iface_desc = &serial->interface->cur_altsetting->desc;
 
