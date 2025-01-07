@@ -473,7 +473,7 @@ exit:
  *	iowarrior_ioctl
  */
 static long iowarrior_ioctl(struct file *file, unsigned int cmd,
-							unsigned long arg)
+							uintptr_t arg)
 {
 	struct iowarrior *dev = NULL;
 	__u8 *buffer;
@@ -498,7 +498,7 @@ static long iowarrior_ioctl(struct file *file, unsigned int cmd,
 	}
 
 	dev_dbg(&dev->interface->dev, "minor %d, cmd 0x%.4x, arg %ld\n",
-		dev->minor, cmd, arg);
+		dev->minor, cmd, __c_ua(arg));
 
 	retval = 0;
 	switch (cmd) {

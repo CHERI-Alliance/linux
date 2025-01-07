@@ -378,7 +378,7 @@ static void simple_fill_buf(struct urb *urb)
 
 static inline unsigned long buffer_offset(void *buf)
 {
-	return (unsigned long)buf & (ARCH_KMALLOC_MINALIGN - 1);
+	return __c_pa(buf) & (ARCH_KMALLOC_MINALIGN - 1);
 }
 
 static int check_guard_bytes(struct usbtest_dev *tdev, struct urb *urb)
