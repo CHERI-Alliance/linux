@@ -98,7 +98,7 @@ static void write_ptddata_to_fifo(struct isp116x *isp116x, void *buf, int len)
 	/* When reading buffer as u16, we have to take care byte order */
 	/* doesn't get mixed up */
 
-	if ((unsigned long)dp2 & 1) {
+	if (__c_pa(dp2) & 1) {
 		/* not aligned */
 		for (; len > 1; len -= 2) {
 			w = *dp++;
@@ -135,7 +135,7 @@ static void read_ptddata_from_fifo(struct isp116x *isp116x, void *buf, int len)
 	/* When reading buffer as u16, we have to take care byte order */
 	/* doesn't get mixed up */
 
-	if ((unsigned long)dp2 & 1) {
+	if (__c_pa(dp2) & 1) {
 		/* not aligned */
 		for (; len > 1; len -= 2) {
 			w = isp116x_raw_read_data16(isp116x);

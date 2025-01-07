@@ -1019,7 +1019,7 @@ static void ohci_stop (struct usb_hcd *hcd)
 	if (ohci->hcca) {
 		if (hcd->localmem_pool)
 			gen_pool_free(hcd->localmem_pool,
-				      (unsigned long)ohci->hcca,
+				      (uintptr_t)ohci->hcca,
 				      sizeof(*ohci->hcca));
 		else
 			dma_free_coherent(hcd->self.controller,

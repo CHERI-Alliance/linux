@@ -1346,6 +1346,7 @@ static struct platform_driver * const platform_drivers[] = {
 #ifdef CONFIG_SPARC_LEON
 	&ehci_grlib_driver,
 #endif
+	NULL,
 };
 
 static int __init ehci_hcd_init(void)
@@ -1370,7 +1371,7 @@ static int __init ehci_hcd_init(void)
 	ehci_debug_root = debugfs_create_dir("ehci", usb_debug_root);
 #endif
 
-	retval = platform_register_drivers(platform_drivers, ARRAY_SIZE(platform_drivers));
+	retval = platform_register_drivers(platform_drivers, ARRAY_SIZE(platform_drivers) - 1);
 	if (retval < 0)
 		goto clean0;
 
