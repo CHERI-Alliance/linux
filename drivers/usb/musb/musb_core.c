@@ -325,11 +325,11 @@ static void musb_default_write_fifo(struct musb_hw_ep *hw_ep, u16 len,
 			'T', hw_ep->epnum, fifo, len, src);
 
 	/* we can't assume unaligned reads work */
-	if (likely((0x01 & (unsigned long) src) == 0)) {
+	if (likely((0x01 & __c_pa(src)) == 0)) {
 		u16	index = 0;
 
 		/* best case is 32bit-aligned source address */
-		if ((0x02 & (unsigned long) src) == 0) {
+		if ((0x02 & __c_pa(src)) == 0) {
 			if (len >= 4) {
 				iowrite32_rep(fifo, src + index, len >> 2);
 				index += len & ~0x03;
@@ -367,11 +367,11 @@ static void musb_default_read_fifo(struct musb_hw_ep *hw_ep, u16 len, u8 *dst)
 			'R', hw_ep->epnum, fifo, len, dst);
 
 	/* we can't assume unaligned writes work */
-	if (likely((0x01 & (unsigned long) dst) == 0)) {
+	if (likely((0x01 & __c_pa(dst)) == 0)) {
 		u16	index = 0;
 
 		/* best case is 32bit-aligned destination address */
-		if ((0x02 & (unsigned long) dst) == 0) {
+		if ((0x02 & __c_pa(dst)) == 0) {
 			if (len >= 4) {
 				ioread32_rep(fifo, dst, len >> 2);
 				index = len & ~0x03;
