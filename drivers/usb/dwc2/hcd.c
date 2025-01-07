@@ -1110,7 +1110,7 @@ static void dwc2_hc_write_packet(struct dwc2_hsotg *hsotg,
 
 	dword_count = (byte_count + 3) / 4;
 
-	if (((unsigned long)data_buf & 0x3) == 0) {
+	if ((__c_pa(data_buf) & 0x3) == 0) {
 		/* xfer_buf is DWORD aligned */
 		for (i = 0; i < dword_count; i++, data_buf++)
 			dwc2_writel(hsotg, *data_buf, HCFIFO(chan->hc_num));
@@ -2447,8 +2447,8 @@ static void dwc2_free_dma_aligned_buffer(struct urb *urb)
 
 	/* Restore urb->transfer_buffer from the end of the allocated area */
 	memcpy(&stored_xfer_buffer,
-	       PTR_ALIGN(urb->transfer_buffer + urb->transfer_buffer_length,
-			 dma_get_cache_alignment()),
+	       __builtin_assume_aligned(PTR_ALIGN(urb->transfer_buffer + urb->transfer_buffer_length,
+			 dma_get_cache_alignment()), __SIZEOF_POINTER__),
 	       sizeof(urb->transfer_buffer));
 
 	if (usb_urb_dir_in(urb)) {
@@ -2492,8 +2492,8 @@ static int dwc2_alloc_dma_aligned_buffer(struct urb *urb, gfp_t mem_flags)
 	 * Position value of original urb->transfer_buffer pointer to the end
 	 * of allocation for later referencing
 	 */
-	memcpy(PTR_ALIGN(kmalloc_ptr + urb->transfer_buffer_length,
-			 dma_get_cache_alignment()),
+	memcpy(__builtin_assume_aligned(PTR_ALIGN(kmalloc_ptr + urb->transfer_buffer_length,
+			 dma_get_cache_alignment()), __SIZEOF_POINTER__),
 	       &urb->transfer_buffer, sizeof(urb->transfer_buffer));
 
 	if (usb_urb_dir_out(urb))

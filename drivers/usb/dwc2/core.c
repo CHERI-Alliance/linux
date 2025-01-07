@@ -629,57 +629,56 @@ void dwc2_dump_host_registers(struct dwc2_hsotg *hsotg)
 	dev_dbg(hsotg->dev, "Host Global Registers\n");
 	addr = hsotg->regs + HCFG;
 	dev_dbg(hsotg->dev, "HCFG	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, HCFG));
+		__c_a(addr), dwc2_readl(hsotg, HCFG));
 	addr = hsotg->regs + HFIR;
 	dev_dbg(hsotg->dev, "HFIR	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, HFIR));
+		__c_a(addr), dwc2_readl(hsotg, HFIR));
 	addr = hsotg->regs + HFNUM;
 	dev_dbg(hsotg->dev, "HFNUM	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, HFNUM));
+		__c_a(addr), dwc2_readl(hsotg, HFNUM));
 	addr = hsotg->regs + HPTXSTS;
 	dev_dbg(hsotg->dev, "HPTXSTS	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, HPTXSTS));
+		__c_a(addr), dwc2_readl(hsotg, HPTXSTS));
 	addr = hsotg->regs + HAINT;
 	dev_dbg(hsotg->dev, "HAINT	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, HAINT));
+		__c_a(addr), dwc2_readl(hsotg, HAINT));
 	addr = hsotg->regs + HAINTMSK;
 	dev_dbg(hsotg->dev, "HAINTMSK	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, HAINTMSK));
+		__c_a(addr), dwc2_readl(hsotg, HAINTMSK));
 	if (hsotg->params.dma_desc_enable) {
 		addr = hsotg->regs + HFLBADDR;
 		dev_dbg(hsotg->dev, "HFLBADDR @0x%08lX : 0x%08X\n",
-			(unsigned long)addr, dwc2_readl(hsotg, HFLBADDR));
+			__c_a(addr), dwc2_readl(hsotg, HFLBADDR));
 	}
 
 	addr = hsotg->regs + HPRT0;
 	dev_dbg(hsotg->dev, "HPRT0	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, HPRT0));
+		__c_a(addr), dwc2_readl(hsotg, HPRT0));
 
 	for (i = 0; i < hsotg->params.host_channels; i++) {
 		dev_dbg(hsotg->dev, "Host Channel %d Specific Registers\n", i);
 		addr = hsotg->regs + HCCHAR(i);
 		dev_dbg(hsotg->dev, "HCCHAR	 @0x%08lX : 0x%08X\n",
-			(unsigned long)addr, dwc2_readl(hsotg, HCCHAR(i)));
+			__c_a(addr), dwc2_readl(hsotg, HCCHAR(i)));
 		addr = hsotg->regs + HCSPLT(i);
 		dev_dbg(hsotg->dev, "HCSPLT	 @0x%08lX : 0x%08X\n",
-			(unsigned long)addr, dwc2_readl(hsotg, HCSPLT(i)));
+			__c_a(addr), dwc2_readl(hsotg, HCSPLT(i)));
 		addr = hsotg->regs + HCINT(i);
 		dev_dbg(hsotg->dev, "HCINT	 @0x%08lX : 0x%08X\n",
-			(unsigned long)addr, dwc2_readl(hsotg, HCINT(i)));
+			__c_a(addr), dwc2_readl(hsotg, HCINT(i)));
 		addr = hsotg->regs + HCINTMSK(i);
 		dev_dbg(hsotg->dev, "HCINTMSK	 @0x%08lX : 0x%08X\n",
-			(unsigned long)addr, dwc2_readl(hsotg, HCINTMSK(i)));
+			__c_a(addr), dwc2_readl(hsotg, HCINTMSK(i)));
 		addr = hsotg->regs + HCTSIZ(i);
 		dev_dbg(hsotg->dev, "HCTSIZ	 @0x%08lX : 0x%08X\n",
-			(unsigned long)addr, dwc2_readl(hsotg, HCTSIZ(i)));
+			__c_a(addr), dwc2_readl(hsotg, HCTSIZ(i)));
 		addr = hsotg->regs + HCDMA(i);
 		dev_dbg(hsotg->dev, "HCDMA	 @0x%08lX : 0x%08X\n",
-			(unsigned long)addr, dwc2_readl(hsotg, HCDMA(i)));
+			__c_a(addr), dwc2_readl(hsotg, HCDMA(i)));
 		if (hsotg->params.dma_desc_enable) {
 			addr = hsotg->regs + HCDMAB(i);
 			dev_dbg(hsotg->dev, "HCDMAB	 @0x%08lX : 0x%08X\n",
-				(unsigned long)addr, dwc2_readl(hsotg,
-								HCDMAB(i)));
+				__c_a(addr), dwc2_readl(hsotg, HCDMAB(i)));
 		}
 	}
 #endif
@@ -701,80 +700,80 @@ void dwc2_dump_global_registers(struct dwc2_hsotg *hsotg)
 	dev_dbg(hsotg->dev, "Core Global Registers\n");
 	addr = hsotg->regs + GOTGCTL;
 	dev_dbg(hsotg->dev, "GOTGCTL	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, GOTGCTL));
+		__c_a(addr), dwc2_readl(hsotg, GOTGCTL));
 	addr = hsotg->regs + GOTGINT;
 	dev_dbg(hsotg->dev, "GOTGINT	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, GOTGINT));
+		__c_a(addr), dwc2_readl(hsotg, GOTGINT));
 	addr = hsotg->regs + GAHBCFG;
 	dev_dbg(hsotg->dev, "GAHBCFG	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, GAHBCFG));
+		__c_a(addr), dwc2_readl(hsotg, GAHBCFG));
 	addr = hsotg->regs + GUSBCFG;
 	dev_dbg(hsotg->dev, "GUSBCFG	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, GUSBCFG));
+		__c_a(addr), dwc2_readl(hsotg, GUSBCFG));
 	addr = hsotg->regs + GRSTCTL;
 	dev_dbg(hsotg->dev, "GRSTCTL	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, GRSTCTL));
+		__c_a(addr), dwc2_readl(hsotg, GRSTCTL));
 	addr = hsotg->regs + GINTSTS;
 	dev_dbg(hsotg->dev, "GINTSTS	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, GINTSTS));
+		__c_a(addr), dwc2_readl(hsotg, GINTSTS));
 	addr = hsotg->regs + GINTMSK;
 	dev_dbg(hsotg->dev, "GINTMSK	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, GINTMSK));
+		__c_a(addr), dwc2_readl(hsotg, GINTMSK));
 	addr = hsotg->regs + GRXSTSR;
 	dev_dbg(hsotg->dev, "GRXSTSR	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, GRXSTSR));
+		__c_a(addr), dwc2_readl(hsotg, GRXSTSR));
 	addr = hsotg->regs + GRXFSIZ;
 	dev_dbg(hsotg->dev, "GRXFSIZ	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, GRXFSIZ));
+		__c_a(addr), dwc2_readl(hsotg, GRXFSIZ));
 	addr = hsotg->regs + GNPTXFSIZ;
 	dev_dbg(hsotg->dev, "GNPTXFSIZ	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, GNPTXFSIZ));
+		__c_a(addr), dwc2_readl(hsotg, GNPTXFSIZ));
 	addr = hsotg->regs + GNPTXSTS;
 	dev_dbg(hsotg->dev, "GNPTXSTS	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, GNPTXSTS));
+		__c_a(addr), dwc2_readl(hsotg, GNPTXSTS));
 	addr = hsotg->regs + GI2CCTL;
 	dev_dbg(hsotg->dev, "GI2CCTL	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, GI2CCTL));
+		__c_a(addr), dwc2_readl(hsotg, GI2CCTL));
 	addr = hsotg->regs + GPVNDCTL;
 	dev_dbg(hsotg->dev, "GPVNDCTL	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, GPVNDCTL));
+		__c_a(addr), dwc2_readl(hsotg, GPVNDCTL));
 	addr = hsotg->regs + GGPIO;
 	dev_dbg(hsotg->dev, "GGPIO	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, GGPIO));
+		__c_a(addr), dwc2_readl(hsotg, GGPIO));
 	addr = hsotg->regs + GUID;
 	dev_dbg(hsotg->dev, "GUID	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, GUID));
+		__c_a(addr), dwc2_readl(hsotg, GUID));
 	addr = hsotg->regs + GSNPSID;
 	dev_dbg(hsotg->dev, "GSNPSID	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, GSNPSID));
+		__c_a(addr), dwc2_readl(hsotg, GSNPSID));
 	addr = hsotg->regs + GHWCFG1;
 	dev_dbg(hsotg->dev, "GHWCFG1	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, GHWCFG1));
+		__c_a(addr), dwc2_readl(hsotg, GHWCFG1));
 	addr = hsotg->regs + GHWCFG2;
 	dev_dbg(hsotg->dev, "GHWCFG2	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, GHWCFG2));
+		__c_a(addr), dwc2_readl(hsotg, GHWCFG2));
 	addr = hsotg->regs + GHWCFG3;
 	dev_dbg(hsotg->dev, "GHWCFG3	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, GHWCFG3));
+		__c_a(addr), dwc2_readl(hsotg, GHWCFG3));
 	addr = hsotg->regs + GHWCFG4;
 	dev_dbg(hsotg->dev, "GHWCFG4	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, GHWCFG4));
+		__c_a(addr), dwc2_readl(hsotg, GHWCFG4));
 	addr = hsotg->regs + GLPMCFG;
 	dev_dbg(hsotg->dev, "GLPMCFG	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, GLPMCFG));
+		__c_a(addr), dwc2_readl(hsotg, GLPMCFG));
 	addr = hsotg->regs + GPWRDN;
 	dev_dbg(hsotg->dev, "GPWRDN	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, GPWRDN));
+		__c_a(addr), dwc2_readl(hsotg, GPWRDN));
 	addr = hsotg->regs + GDFIFOCFG;
 	dev_dbg(hsotg->dev, "GDFIFOCFG	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, GDFIFOCFG));
+		__c_a(addr), dwc2_readl(hsotg, GDFIFOCFG));
 	addr = hsotg->regs + HPTXFSIZ;
 	dev_dbg(hsotg->dev, "HPTXFSIZ	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, HPTXFSIZ));
+		__c_a(addr), dwc2_readl(hsotg, HPTXFSIZ));
 
 	addr = hsotg->regs + PCGCTL;
 	dev_dbg(hsotg->dev, "PCGCTL	 @0x%08lX : 0x%08X\n",
-		(unsigned long)addr, dwc2_readl(hsotg, PCGCTL));
+		__c_a(addr), dwc2_readl(hsotg, PCGCTL));
 #endif
 }
 
