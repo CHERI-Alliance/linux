@@ -78,8 +78,8 @@ static int sbi_cpu_start(unsigned int cpuid, struct task_struct *tidle)
 	hsm_data = __pa(bdata);
 	/* FIXCHERI: Use correct permissions. */
 	return sbi_hsm_hart_start(hartid,
-			cheri_address_set(cheri_user_root_cap, boot_addr),
-			cheri_address_set(cheri_user_root_cap, hsm_data));
+			(uintptr_t)cheri_address_set(cheri_user_root_cap, boot_addr),
+			(uintptr_t)cheri_address_set(cheri_user_root_cap, hsm_data));
 }
 
 #ifdef CONFIG_HOTPLUG_CPU
