@@ -36,4 +36,10 @@
 static const __maybe_unused int pgtable_l4_enabled;
 static const __maybe_unused int pgtable_l5_enabled;
 
+#define _PAGE_CHERIPTE_CW	0
+#define _PAGE_CHERIPTE_CRG	0
+#define riscv_cheripte_cw	0
+#define riscv_pgprot_set_cw(prot)	(prot)
+#define riscv_pgprot_clear_cw(prot)	(prot)
+
 #endif /* _ASM_RISCV_PGTABLE_32_H */
