@@ -189,6 +189,7 @@ extern struct pt_alloc_ops pt_ops __initdata;
 
 #define _PAGE_KERNEL		(_PAGE_READ \
 				| _PAGE_WRITE \
+				| riscv_cheripte_cw \
 				| _PAGE_PRESENT \
 				| _PAGE_ACCESSED \
 				| _PAGE_DIRTY \

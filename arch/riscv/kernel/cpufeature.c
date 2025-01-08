@@ -307,6 +307,7 @@ const struct riscv_isa_ext_data riscv_isa_ext[] = {
 	__RISCV_ISA_EXT_DATA(xandespmu, RISCV_ISA_EXT_XANDESPMU),
 	__RISCV_ISA_EXT_DATA(zcheripurecap, RISCV_ISA_EXT_ZCHERIPURECAP),
 	__RISCV_ISA_EXT_DATA(zcherihybrid, RISCV_ISA_EXT_ZCHERIHYBRID),
+	__RISCV_ISA_EXT_DATA(zcheripte, RISCV_ISA_EXT_ZCHERIPTE),
 };
 
 const size_t riscv_isa_ext_count = ARRAY_SIZE(riscv_isa_ext);

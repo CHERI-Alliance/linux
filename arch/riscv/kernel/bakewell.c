@@ -34,6 +34,9 @@ void __init bakewell_init(void)
 	pr_info("CHERI: bakewell support%s\n",
 		acperm_legacy ? " (legacy acperm)" : "");
 
+	pr_info("CHERI: Selected SATP mode: 0x%lx PTE.CW support: %s\n",
+		(unsigned long)satp_mode, riscv_cheripte_cw ? "yes" : "no");
+
 	pr_info("CHERI: M-bit mask=0x%lx gchi=%d scmode=%d hybrid=%s\n",
 		cheri_mbit_mask, !!cheri_mbit_value, scmode_capmode_value,
 		cheri_hybrid_support ? "yes" : "no");
