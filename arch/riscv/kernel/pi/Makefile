@@ -7,12 +7,16 @@ KBUILD_CFLAGS	:= $(subst $(CC_FLAGS_FTRACE),,$(KBUILD_CFLAGS)) -fpie \
 		   -I$(srctree)/scripts/dtc/libfdt -fno-stack-protector \
 		   -D__DISABLE_EXPORTS -ffreestanding \
 		   -fno-asynchronous-unwind-tables -fno-unwind-tables \
-		   $(call cc-option,-fno-addrsig) -mllvm --no-cap-table-relocs
+		   $(call cc-option,-fno-addrsig)
 
 # Disable LTO
 KBUILD_CFLAGS	:= $(filter-out $(CC_FLAGS_LTO), $(KBUILD_CFLAGS))
 
 KBUILD_CFLAGS	+= -mcmodel=medany
+
+ifneq ($(CONFIG_CHERI_KERNEL),)
+KBUILD_CFLAGS += -mllvm --no-cap-table-relocs
+endif
 
 CFLAGS_cmdline_early.o += -D__NO_FORTIFY
 CFLAGS_lib-fdt_ro.o += -D__NO_FORTIFY

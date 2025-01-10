@@ -19,7 +19,9 @@ obj-vdso = $(patsubst %, %.o, $(vdso-syms)) note.o
 ccflags-y := -fno-stack-protector
 ccflags-y += -DDISABLE_BRANCH_PROFILING
 
+ifneq ($(CONFIG_CHERI_KERNEL),)
 KBUILD_CFLAGS += -mllvm --no-cap-table-relocs
+endif
 
 ifneq ($(c-gettimeofday-y),)
   CFLAGS_vgettimeofday.o += -fPIC -include $(c-gettimeofday-y)
