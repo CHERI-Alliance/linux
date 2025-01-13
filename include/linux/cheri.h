@@ -329,6 +329,12 @@ cheri_make_kernel_code_cap(ptraddr_t addr)
 
 #define cheri_bounds_set_kernel(x,l) cheri_bounds_set(x,l)
 
+static __always_inline void *
+cheri_build_kernel_data_cap(ptraddr_t base, ptraddr_t addr, size_t len)
+{
+	return cheri_address_set(cheri_make_kernel_data_cap(base, len), addr);
+}
+
 #else
 
 #define __cheri_pointer_align
@@ -364,13 +370,13 @@ cheri_bounds_set_kernel(void *ptr, size_t len)
 	return ptr;
 }
 
-#endif
-
 static __always_inline void *
 cheri_build_kernel_data_cap(ptraddr_t base, ptraddr_t addr, size_t len)
 {
-	return cheri_address_set(cheri_make_kernel_data_cap(base, len), addr);
+	return (void *)addr;
 }
+
+#endif
 
 #ifdef __CHERI__
 

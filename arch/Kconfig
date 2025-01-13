@@ -1626,6 +1626,7 @@ choice
 
 config CHERI_NONE
 	bool "None"
+	depends on !ARCH_HAS_CHERI_CAPABILITIES
 	help
 	  Do not enable CHERI support at all.
 
