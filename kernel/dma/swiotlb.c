@@ -1789,6 +1789,7 @@ static int rmem_swiotlb_device_init(struct reserved_mem *rmem,
 {
 	struct io_tlb_mem *mem = rmem->priv;
 	unsigned long nslabs = rmem->size >> IO_TLB_SHIFT;
+	void *virt;
 
 	/* Set Per-device io tlb area to one */
 	unsigned int nareas = 1;
@@ -1827,7 +1828,9 @@ static int rmem_swiotlb_device_init(struct reserved_mem *rmem,
 
 		set_memory_decrypted((unsigned long)phys_to_virt(rmem->base),
 				     rmem->size >> PAGE_SHIFT);
-		swiotlb_init_io_tlb_pool(pool, rmem->base, nslabs,
+		virt = cheri_make_kernel_data_cap(phys_to_virt_a(rmem->base),
+						  rmem->size);
+		swiotlb_init_io_tlb_pool(pool, rmem->base, virt, nslabs,
 					 false, nareas);
 		mem->force_bounce = true;
 		mem->for_alloc = true;
