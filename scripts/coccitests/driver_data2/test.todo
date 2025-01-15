@@ -1,0 +1,82 @@
+
+struct foo foos[] = {
+	{
+		.driver_info = (unsigned long)&id1,
+		.driver_info = (kernel_ulong_t)&id1,
+		.other = (unsigned long)&id2,
+		.driver_data = (unsigned long)&id3,
+		.driver_data = (kernel_ulong_t)&id3,
+		.driver_data = (unsigned long)&id3,
+		.driver_info = (unsigned long)&id1,
+		.driver_info = (kernel_ulong_t)&id1,
+		.driver_data = (unsigned long)&id3,
+		.driver_data = (kernel_ulong_t)&id3,
+		.driver_data = (unsigned long)&id3,
+		.driver_info = (kernel_ulong_t)&id1,
+	},
+	{
+		.driver_info = (kernel_ulong_t)&id4,
+		.other = (kernel_ulong_t)&id5,
+		.driver_data = (kernel_ulong_t)&id6,
+	},
+	{
+		.driver_info = (unsigned long)&id7,
+		.other = (unsigned long)&id8,
+		.driver_data = (unsigned long)&id9,
+	},
+	{
+		.driver_info = (kernel_ulong_t)&id10,
+		.other = (kernel_ulong_t)&id11,
+		.driver_data = (kernel_ulong_t)&id12,
+	},
+	{
+		.driver_info = (other)&id13,
+		.other = (other)&id14,
+		.driver_data = (other)&id15,
+	},
+	{
+		.driver_info = (kernel_ulong_t)0,
+	},
+	{
+		.driver_data = (kernel_ulong_t)0,
+	},
+	{
+		.driver_info = (unsigned long)&id1,
+		.other = (unsigned long)&id2,
+		.driver_data = (unsigned long)&id3,
+	},
+	{
+		.driver_info = (kernel_ulong_t)&id4,
+		.other = (kernel_ulong_t)&id5,
+		.driver_data = (kernel_ulong_t)&id6,
+	},
+	{
+		.driver_info = (unsigned long)&id7,
+		.other = (unsigned long)&id8,
+		.driver_data = (unsigned long)&id9,
+	},
+	{
+		.driver_info = (kernel_ulong_t)&id10,
+		.other = (kernel_ulong_t)&id11,
+		.driver_data = (kernel_ulong_t)&id12,
+	},
+	{
+		.driver_info = (other)&id13,
+		.other = (other)&id14,
+		.driver_data = (other)&id15,
+	},
+	{
+		.driver_info = (unsigned long)&id1,
+		.driver_info = (kernel_ulong_t)&id1,
+		.other = (unsigned long)&id2,
+		.driver_data = (unsigned long)&id3,
+		.driver_data = (kernel_ulong_t)&id3,
+		.driver_data = (unsigned long)&id3,
+		.driver_info = (unsigned long)&id1,
+		.driver_info = (kernel_ulong_t)&id1,
+		.driver_data = (unsigned long)&id3,
+		.driver_data = (kernel_ulong_t)&id3,
+		.driver_data = (unsigned long)&id3,
+		.driver_info = (kernel_ulong_t)&id1,
+	}
+};

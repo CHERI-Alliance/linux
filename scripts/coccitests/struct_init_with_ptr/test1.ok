@@ -1,0 +1,29 @@
+
+struct foo foos[] = {
+	{
+		(uintptr_t)&s1,
+		(uintptr_t)&s2,
+		(other)&s3,
+	},
+	{
+		(unsigned long)0
+	},
+	{
+		(kernel_ulong_t)0
+	},
+	{
+		(other)0
+	},
+	{
+		(uintptr_t)&t1,
+		(uintptr_t)&t2,
+		(other)&t3,
+	}
+};
+
+static const struct pci_device_id mid_pwr_pci_ids[] = {
+	{ PCI_VDEVICE(INTEL, PCI_DEVICE_ID_PENWELL), (uintptr_t)&pnw_info },
+	{ PCI_VDEVICE(INTEL, PCI_DEVICE_ID_TANGIER), (uintptr_t)&tng_info },
+	{}
+};
+

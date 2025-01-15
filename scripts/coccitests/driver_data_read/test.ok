@@ -1,0 +1,15 @@
+uintptr_t driver_data = intel_early_ids[i].driver_data;
+uintptr_t driver_data = intel_early_ids[i].driver_data;
+uintptr_t driver_data = intel_early_ids[i].driver_info;
+uintptr_t driver_data = intel_early_ids[i].driver_info;
+
+kernel_ulong_t driver_data = intel_early_ids[i]->other;
+unsigned long driver_data = intel_early_ids[i]->other;
+kernel_ulong_t driver_data = intel_early_ids[i]->other;
+unsigned long driver_data = intel_early_ids[i]->other;
+
+uintptr_t driver_data = intel_early_ids[i]->driver_data;
+uintptr_t driver_data = intel_early_ids[i]->driver_data;
+uintptr_t driver_data = intel_early_ids[i]->driver_info;
+uintptr_t driver_data = intel_early_ids[i]->driver_info;
+

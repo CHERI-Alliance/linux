@@ -1,0 +1,63 @@
+
+struct foo * foos[10] = {
+	a, b, c,
+};
+
+struct bar bars[] = {
+};
+
+struct baz bazs = {
+};
+
+int f(void)
+{
+}
+
+int g(void);
+
+struct data datas[] = {
+	{
+		(uintptr_t)foos,
+		(uintptr_t)bars,
+		(kernel_ulong_t)others,
+		(uintptr_t)f,
+		(uintptr_t)f,
+		(kernel_ulong_t)g,
+		(unsigned long)g,
+		(kernel_ulong_t)bazs,
+	},
+	{
+		(kernel_ulong_t)0,
+		(unsigned long)0,
+	},
+	{
+		(uintptr_t)foos,
+		(uintptr_t)bars,
+		(kernel_ulong_t)others,
+		(uintptr_t)f,
+		(uintptr_t)f,
+		(kernel_ulong_t)g,
+		(unsigned long)g,
+		(kernel_ulong_t)bazs,
+	},
+	{
+		(uintptr_t)foos,
+		(uintptr_t)bars,
+		(unsigned long)others,
+		(uintptr_t)f,
+		(uintptr_t)f,
+		(kernel_ulong_t)g,
+		(unsigned long)g,
+		(unsigned long)bazs,
+	},
+	{
+		(other)foos,
+		(other)bars,
+		(other)others,
+		(other)f,
+		(other)f,
+		(other)g,
+		(other)g,
+		(other)bazs,
+	},
+};

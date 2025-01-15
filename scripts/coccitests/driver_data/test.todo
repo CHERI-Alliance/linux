@@ -1,0 +1,41 @@
+
+struct foo {
+	unsigned long driver_data;
+	unsigned long other;
+	kernel_ulong_t other;
+	other_type other;
+	unsigned long driver_info;
+	unsigned long other;
+
+	kernel_ulong_t driver_data;
+	unsigned long other;
+	kernel_ulong_t other;
+	other_type other;
+	kernel_ulong_t driver_info;
+};
+
+struct bar {
+	kernel_ulong_t driver_data;
+	unsigned long other;
+	kernel_ulong_t other;
+	other_type other;
+	kernel_ulong_t driver_info;
+	kernel_ulong_t other;
+
+	unsigned long driver_data;
+	unsigned long other;
+	kernel_ulong_t other;
+	other_type other;
+	unsigned long driver_info;
+	unsigned long other;
+};
+
+struct baz {
+	other driver_data;
+	unsigned long other;
+	kernel_ulong_t other;
+	other_type other;
+	other driver_info;
+	other other;
+};
+

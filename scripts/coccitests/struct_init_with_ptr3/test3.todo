@@ -1,0 +1,64 @@
+
+struct foo * foos[10] = {
+	a, b, c,
+};
+
+struct bar bars[] = {
+};
+
+struct baz bazs = {
+};
+
+int f(void)
+{
+}
+
+int g(void);
+
+struct data datas[] = {
+	{
+		.other_field = (kernel_ulong_t)foos,
+		.other_field = (kernel_ulong_t)bars,
+		.other_field = (kernel_ulong_t)others,
+		.other_field = (kernel_ulong_t)f,
+		.other_field = (unsigned long)f,
+		.other_field = (kernel_ulong_t)g,
+		.other_field = (unsigned long)g,
+		.other_field = (kernel_ulong_t)bazs,
+	},
+	{
+		.other_field = (kernel_ulong_t)0,
+		.other_field = (unsigned long)0,
+	},
+	{
+		.other_field = (kernel_ulong_t)foos,
+		.other_field = (kernel_ulong_t)bars,
+		.other_field = (kernel_ulong_t)others,
+		.other_field = (kernel_ulong_t)f,
+		.other_field = (unsigned long)f,
+		.other_field = (kernel_ulong_t)g,
+		.other_field = (unsigned long)g,
+		.other_field = (kernel_ulong_t)bazs,
+	},
+	{
+		.other_field = (unsigned long)foos,
+		.other_field = (unsigned long)bars,
+		.other_field = (unsigned long)others,
+		.other_field = (kernel_ulong_t)f,
+		.other_field = (unsigned long)f,
+		.other_field = (kernel_ulong_t)g,
+		.other_field = (unsigned long)g,
+		.other_field = (unsigned long)bazs,
+	},
+	{
+		.other_field = (other)foos,
+		.other_field = (other)bars,
+		.other_field = (other)others,
+		.other_field = (other)f,
+		.other_field = (other)f,
+		.other_field = (other)g,
+		.other_field = (other)g,
+		.other_field = (other)bazs,
+		.driver_data = (kernel_ulong_t)foos,
+	},
+};

@@ -1,0 +1,7 @@
+
+static const struct pci_device_id mid_pwr_pci_ids[] = {
+	{ PCI_VDEVICE(INTEL, PCI_DEVICE_ID_PENWELL), (uintptr_t)&pnw_info },
+	{ PCI_VDEVICE(INTEL, PCI_DEVICE_ID_TANGIER), (uintptr_t)&tng_info },
+	{}
+};
+
