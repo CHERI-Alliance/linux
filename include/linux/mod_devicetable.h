@@ -12,11 +12,7 @@
 #include <linux/mei.h>
 #include <linux/types.h>
 #include <linux/uuid.h>
-#ifdef CONFIG_CHERI_KERNEL
-typedef __kernel_uintptr_t kernel_ulong_t;
-#else
 typedef unsigned long kernel_ulong_t;
-#endif
 #endif
 
 #define PCI_ANY_ID (~0)
@@ -153,8 +149,8 @@ struct usb_device_id {
 	__u8		bInterfaceNumber;
 
 	/* not matched against */
-	kernel_ulong_t	driver_info
-		__attribute__((aligned(sizeof(kernel_ulong_t))));
+	uintptr_t	driver_info
+		__attribute__((aligned(sizeof(uintptr_t))));
 };
 
 /* Some useful macros to use to create struct usb_device_id */

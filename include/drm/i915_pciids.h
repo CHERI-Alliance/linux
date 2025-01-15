@@ -30,7 +30,7 @@
  *	__u32 vendor, device;
  *      __u32 subvendor, subdevice;
  *	__u32 class, class_mask;
- *	kernel_ulong_t driver_data;
+ *	uintptr_t driver_data;
  * };
  * Don't use C99 here because "class" is reserved and we want to
  * give userspace flexibility.
