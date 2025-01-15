@@ -142,7 +142,7 @@ user_ptr_perms_t user_ptr_owning_perms_from_prot(int prot, unsigned long vm_flag
 	/* Fetch any extra architecture specific permissions */
 	perms |= arch_user_ptr_owning_perms_from_prot(used_prot, vm_flags);
 
-	return perms;
+	return perms & ~cheri_unsupported_perms;
 }
 
 bool user_ptr_may_set_prot(user_uintptr_t user_ptr, int prot)

@@ -65,6 +65,7 @@ bool cheri_check_cap(const void * __capability cap, size_t len,
 	if (addr < base || addr > base + cheri_length_get(cap) - len)
 		return false;
 
+	perms &= ~cheri_unsupported_perms;
 	if (perms & ~cheri_perms_get(cap))
 		return false;
 

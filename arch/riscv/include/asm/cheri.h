@@ -65,9 +65,6 @@
 #define CHERI_PERMS_EXEC \
 	(CHERI_PERM_EXECUTE | CHERI_PERM_SYSTEM_REGS)
 
-#define CHERI_PERMS_ROOTCAP \
-	(CHERI_PERM_SW_VMEM)
-
 #ifdef CONFIG_CHERI_KERNEL
 extern bool __riscv_cheri_is_capmode(void * __capability cap);
 #define cheri_is_capmode(x) __riscv_cheri_is_capmode(x)
