@@ -1,12 +1,12 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
-#ifndef __ASM_BAKEWELL_H
-#define __ASM_BAKEWELL_H
+#ifndef __ASM_RISCVCHERI_H
+#define __ASM_RISCVCHERI_H
 
 #ifdef CONFIG_CHERI_KERNEL
 
-extern void __init bakewell_init(void);
+extern void __init riscv_cheri_init(void);
 extern void __init init_cap_relocs(uintcap_t inf);
-extern void __init bakewell_caps_init(uintcap_t inf);
+extern void __init riscv_cheri_caps_init(uintcap_t inf);
 
 extern unsigned long cheri_mbit_mask;
 extern unsigned long cheri_mbit_value;
@@ -18,10 +18,10 @@ extern unsigned char has_cheri_levels;
 
 #else
 
-static inline void bakewell_init(void)
+static inline void riscv_cheri_init(void)
 {
 }
 
 #endif
 
-#endif /* __ASM_BAKEWELL_H */
+#endif /* __ASM_RISCVCHERI_H */

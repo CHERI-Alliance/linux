@@ -66,7 +66,7 @@ config RISCV
 	select ARCH_USE_MEMTEST
 	select ARCH_USE_QUEUED_RWLOCKS
 	select ARCH_USES_CFI_TRAPS if CFI_CLANG
-	select ARCH_USES_HIGH_VMA_FLAGS if RISCV_CHERI_BAKEWELL
+	select ARCH_USES_HIGH_VMA_FLAGS if RISCV_CHERI
 	select ARCH_WANT_BATCHED_UNMAP_TLB_FLUSH if MMU
 	select ARCH_WANT_DEFAULT_TOPDOWN_MMAP_LAYOUT if MMU
 	select ARCH_WANT_FRAME_POINTERS
@@ -126,7 +126,7 @@ config RISCV
 	select HAVE_ARCH_TRACEHOOK
 	select HAVE_ARCH_TRANSPARENT_HUGEPAGE if 64BIT && MMU
 	select HAVE_ARCH_USERFAULTFD_MINOR if 64BIT && USERFAULTFD
-	select HAVE_ARCH_VMAP_STACK if MMU && 64BIT && !RISCV_CHERI_BAKEWELL
+	select HAVE_ARCH_VMAP_STACK if MMU && 64BIT && !RISCV_CHERI
 	select HAVE_ASM_MODVERSIONS
 	select HAVE_CONTEXT_TRACKING_USER
 	select HAVE_DEBUG_KMEMLEAK
@@ -558,7 +558,7 @@ config RISCV_ISA_V
 	bool "VECTOR extension support"
 	depends on TOOLCHAIN_HAS_V
 	depends on FPU
-	depends on !RISCV_CHERI_BAKEWELL	# FIXCHERI: CHERIfy vector extension
+	depends on !RISCV_CHERI	# FIXCHERI: CHERIfy vector extension
 	select DYNAMIC_SIGFRAME
 	default y
 	help
@@ -768,7 +768,7 @@ config RISCV_SLOW_UNALIGNED_ACCESS
 config RISCV_EFFICIENT_UNALIGNED_ACCESS
 	bool "Assume the system supports fast unaligned memory accesses"
 	depends on NONPORTABLE
-	depends on !RISCV_CHERI_BAKEWELL
+	depends on !RISCV_CHERI
 	select DCACHE_WORD_ACCESS if MMU
 	select HAVE_EFFICIENT_UNALIGNED_ACCESS
 	help
@@ -831,7 +831,7 @@ config ARCH_SELECTS_KEXEC_FILE
 	select KEXEC_ELF
 
 config ARCH_SUPPORTS_KEXEC_PURGATORY
-	def_bool ARCH_SUPPORTS_KEXEC_FILE && !RISCV_CHERI_BAKEWELL
+	def_bool ARCH_SUPPORTS_KEXEC_FILE && !RISCV_CHERI
 
 config ARCH_SUPPORTS_CRASH_DUMP
 	def_bool y
@@ -1054,13 +1054,13 @@ config RISCV_ISA_FALLBACK
 	  on the replacement properties, "riscv,isa-base" and
 	  "riscv,isa-extensions".
 
-config CC_HAS_CHERI_BAKEWELL
+config CC_HAS_RISCV_CHERI
 	def_bool $(cc-option,-march=rv64imafdc_zcherihybrid -mabi=l64pc128d)
 
-config RISCV_CHERI_BAKEWELL
-	bool "CHERI Bakewell capability support"
+config RISCV_CHERI
+	bool "RISCV CHERI capability support"
 	default y
-	depends on CC_HAS_CHERI_BAKEWELL
+	depends on CC_HAS_RISCV_CHERI
 	depends on 64BIT
 	# FIXCHERI: Implement 64bit integer pointer mode support at least
 	depends on !COMPAT
@@ -1069,8 +1069,8 @@ config RISCV_CHERI_BAKEWELL
 	select ARCH_HAS_CHERI_UABI_AND_KERNEL
 	select ARCH_USES_HIGH_VMA_FLAGS
 	help
-	  CHERI Bakewell is an implementation of the CHERI capability
-	  architecture for RISCV. With CHERI
+	  RISCV CHERI is an implementation of the CHERI capability
+	  architecture for RISCV.
 
 config BUILTIN_DTB
 	bool "Built-in device tree"
@@ -1095,7 +1095,7 @@ config PORTABLE
 	bool
 	default !NONPORTABLE
 	# FIXCHERI: Disable EFI support for now, need to think about the ABI.
-	select EFI if !RISCV_CHERI_BAKEWELL
+	select EFI if !RISCV_CHERI
 	select MMU
 	select OF
 

@@ -437,7 +437,7 @@ asmlinkage void handle_bad_stack(struct pt_regs *regs)
 
 #ifdef CONFIG_CHERI_KERNEL
 
-#include <asm/bakewell.h>
+#include <asm/riscvcheri.h>
 
 static inline const char *
 cheri_xtval2_type_to_str(unsigned long xtval2)

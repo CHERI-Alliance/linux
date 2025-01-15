@@ -3,7 +3,7 @@
 #include <linux/cheri.h>
 #include <linux/pgtable.h>
 
-#include <asm/bakewell.h>
+#include <asm/riscvcheri.h>
 
 #ifndef __CHECKER__
 #include "cheri_init_globals_bw.h"
@@ -20,7 +20,7 @@
  */
 static bool root_cap_valid = true;
 
-void __init bakewell_init(void)
+void __init riscv_cheri_init(void)
 {
 #ifdef __CHERI_BW_CAP_PERMISSION_CAPABILITY__
 	BUG_ON(!acperm_legacy);
@@ -31,7 +31,7 @@ void __init bakewell_init(void)
 	if (!root_cap_valid)
 		panic("CHERI: Invalid root cap\n");
 
-	pr_info("CHERI: bakewell support%s\n",
+	pr_info("CHERI: riscv cheri support%s\n",
 		acperm_legacy ? " (legacy acperm)" : "");
 
 	pr_info("CHERI: Selected SATP mode: 0x%lx PTE.CW support: %s\n",
@@ -51,7 +51,7 @@ void __init bakewell_init(void)
 }
 
 /* Check validity of the root capability. */
-static void __init bakewell_check_root_cap(uintcap_t root_cap)
+static void __init riscv_cheri_check_root_cap(uintcap_t root_cap)
 {
 	cheri_perms_t allperms = CHERI_PERMS_READ |
 		CHERI_PERMS_WRITE | CHERI_PERMS_EXEC | CHERI_PERMS_ROOTCAP;
@@ -119,11 +119,11 @@ void __init __PI init_cap_relocs(uintcap_t inf)
 }
 
 /* Initialize the kernel's authorizing capabilities for special situations. */
-void __init bakewell_caps_init(uintcap_t inf)
+void __init riscv_cheri_caps_init(uintcap_t inf)
 {
 	cheri_perms_t perms;
 
-	bakewell_check_root_cap(inf);
+	riscv_cheri_check_root_cap(inf);
 
 	/* Sanitize root capability. */
 	inf = cheri_address_set(inf, 0);
@@ -139,18 +139,18 @@ void __init bakewell_caps_init(uintcap_t inf)
 	cheri_user_root_cap = cheri_perms_and(cheri_user_root_allperms_cap,
 					      perms);
 
-	/* Not supported on RISCV bakewell. */
+	/* Not supported on RISCV CHERI. */
 	cheri_user_root_seal_cap = __c_fakeu(0);
 	cheri_user_root_cid_cap = __c_fakeu(0);
 }
 
 bool
-__bakewell_is_capmode(void * __capability cap)
+__riscv_cheri_is_capmode(void * __capability cap)
 {
 	return (cheri_high_get(cap) & cheri_mbit_mask) == cheri_mbit_value;
 }
 
-void * __capability bakewell_set_capmode(void * __capability cap)
+void * __capability riscv_cheri_set_capmode(void * __capability cap)
 {
 	__asm__ volatile ("scmode %0, %0, %1"
 			  : "=C" (cap) : "r" (scmode_capmode_value), "0" (cap));
@@ -158,7 +158,7 @@ void * __capability bakewell_set_capmode(void * __capability cap)
 	return cap;
 }
 
-void * __capability bakewell_clear_capmode(void * __capability cap)
+void * __capability riscv_cheri_clear_capmode(void * __capability cap)
 {
 	BUG_ON(!cheri_hybrid_support);
 	__asm__ volatile ("scmode %0, %0, %1"

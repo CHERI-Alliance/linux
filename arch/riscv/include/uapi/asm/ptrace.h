@@ -10,7 +10,7 @@
 
 #include <linux/types.h>
 
-/* Bakewell specific requests. */
+/* RISCV CHERI specific requests. */
 #define PTRACE_PEEKCAP            12
 #define PTRACE_POKECAP            13
 

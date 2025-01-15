@@ -433,7 +433,7 @@ SYM_CODE_START(_start_kernel)
 	call init_cap_relocs
 
 	auipc ca0, 0
-	call bakewell_caps_init
+	call riscv_cheri_caps_init
 
 	/*
 	 * Restrict permissions on csp and ctp according to

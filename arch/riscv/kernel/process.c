@@ -27,7 +27,7 @@
 #include <asm/cpuidle.h>
 #include <asm/vector.h>
 #include <asm/cpufeature.h>
-#include <asm/bakewell.h>
+#include <asm/riscvcheri.h>
 
 #include <linux/cheri.h>
 
@@ -155,7 +155,7 @@ int start_thread(struct pt_regs *regs, unsigned long pc,
 	regs->sp = bprm->p;
 #else
 	/* FIXCHERI: compat support missing */
-	regs->epc = (register_t)bakewell_set_capmode(bprm->pcuabi.pcc);
+	regs->epc = (register_t)riscv_cheri_set_capmode(bprm->pcuabi.pcc);
 	regs->sp = (register_t)bprm->pcuabi.csp;
 	regs->a0  = __c_fakeu(bprm->argc);
 	regs->a1 = (register_t)bprm->pcuabi.argv;
@@ -258,6 +258,6 @@ int copy_thread(struct task_struct *p, const struct kernel_clone_args *args)
 
 void __init arch_task_cache_init(void)
 {
-	bakewell_init();
+	riscv_cheri_init();
 	riscv_v_setup_ctx_cache();
 }

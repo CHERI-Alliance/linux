@@ -69,11 +69,11 @@
 	(CHERI_PERM_SW_VMEM)
 
 #ifdef CONFIG_CHERI_KERNEL
-extern bool __bakewell_is_capmode(void * __capability cap);
-#define cheri_is_capmode(x) __bakewell_is_capmode(x)
+extern bool __riscv_cheri_is_capmode(void * __capability cap);
+#define cheri_is_capmode(x) __riscv_cheri_is_capmode(x)
 
-extern void * __capability bakewell_set_capmode(void * __capability cap);
-extern void * __capability bakewell_clear_capmode(void * __capability cap);
+extern void * __capability riscv_cheri_set_capmode(void * __capability cap);
+extern void * __capability riscv_cheri_clear_capmode(void * __capability cap);
 #endif
 
 #endif /* __ASM_CHERI_H */

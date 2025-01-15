@@ -170,7 +170,7 @@ static inline u64 riscv_page_io(void)
 #define _PAGE_CHERIPTE_CW	(1UL << 60)
 #define _PAGE_CHERIPTE_CRG	(1UL << 59)
 
-#ifdef CONFIG_RISCV_CHERI_BAKEWELL
+#ifdef CONFIG_RISCV_CHERI
 
 extern unsigned long riscv_cheripte_cw;
 
@@ -188,13 +188,13 @@ static inline pgprot_t riscv_pgprot_clear_cw(pgprot_t prot)
 	return __pgprot(pgprot_val(prot) & ~riscv_cheripte_cw);
 }
 
-#else /* CONFIG_RISCV_CHERI_BAKEWELL */
+#else /* CONFIG_RISCV_CHERI */
 
 #define riscv_pgprot_set_cw(prot)	(prot)
 #define riscv_pgprot_clear_cw(prot)	(prot)
 #define riscv_cheripte_cw		0
 
-#endif /* CONFIG_RISCV_CHERI_BAKEWELL */
+#endif /* CONFIG_RISCV_CHERI */
 
 /* Set of bits to preserve across pte_modify() */
 #define _PAGE_CHG_MASK  (~(unsigned long)(_PAGE_PRESENT | _PAGE_READ |	\

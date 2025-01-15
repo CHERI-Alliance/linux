@@ -94,7 +94,7 @@ endif
 # Check if the toolchain supports Zihintpause extension
 riscv-march-$(CONFIG_TOOLCHAIN_HAS_ZIHINTPAUSE) := $(riscv-march-y)_zihintpause
 
-# Enable CHERI Bakewell support is requested
+# Enable RISCV CHERI support if requested
 riscv-march-$(CONFIG_CHERI_KERNEL) := $(riscv-march-y)_zcherihybrid
 
 

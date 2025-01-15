@@ -61,7 +61,7 @@ bool pgtable_l5_enabled __ro_after_init = !IS_ENABLED(CONFIG_XIP_KERNEL);
 EXPORT_SYMBOL(pgtable_l4_enabled);
 EXPORT_SYMBOL(pgtable_l5_enabled);
 
-#ifdef CONFIG_RISCV_CHERI_BAKEWELL
+#ifdef CONFIG_RISCV_CHERI
 unsigned long riscv_cheripte_cw = 0;
 EXPORT_SYMBOL(riscv_cheripte_cw);
 #endif
