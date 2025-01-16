@@ -135,7 +135,7 @@ static int apple_soc_cpufreq_set_target(struct cpufreq_policy *policy,
 					unsigned int index)
 {
 	struct apple_cpu_priv *priv = policy->driver_data;
-	unsigned int pstate = policy->freq_table[index].driver_data;
+	uintptr_t pstate = policy->freq_table[index].driver_data;
 	u64 reg;
 
 	/* Fallback for newer SoCs */

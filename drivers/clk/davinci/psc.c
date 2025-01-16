@@ -503,12 +503,12 @@ static const struct of_device_id davinci_psc_of_match[] = {
 
 static const struct platform_device_id davinci_psc_id_table[] = {
 #ifdef CONFIG_ARCH_DAVINCI_DA830
-	{ .name = "da830-psc0", .driver_data = (kernel_ulong_t)&da830_psc0_init_data },
-	{ .name = "da830-psc1", .driver_data = (kernel_ulong_t)&da830_psc1_init_data },
+	{ .name = "da830-psc0", .driver_data = (uintptr_t)&da830_psc0_init_data },
+	{ .name = "da830-psc1", .driver_data = (uintptr_t)&da830_psc1_init_data },
 #endif
 #ifdef CONFIG_ARCH_DAVINCI_DA850
-	{ .name = "da850-psc0", .driver_data = (kernel_ulong_t)&da850_psc0_init_data },
-	{ .name = "da850-psc1", .driver_data = (kernel_ulong_t)&da850_psc1_init_data },
+	{ .name = "da850-psc0", .driver_data = (uintptr_t)&da850_psc0_init_data },
+	{ .name = "da850-psc1", .driver_data = (uintptr_t)&da850_psc1_init_data },
 #endif
 	{ }
 };

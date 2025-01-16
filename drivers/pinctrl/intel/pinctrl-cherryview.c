@@ -1785,7 +1785,7 @@ static DEFINE_NOIRQ_DEV_PM_OPS(chv_pinctrl_pm_ops,
 			       chv_pinctrl_suspend_noirq, chv_pinctrl_resume_noirq);
 
 static const struct acpi_device_id chv_pinctrl_acpi_match[] = {
-	{ "INT33FF", (kernel_ulong_t)chv_soc_data },
+	{ "INT33FF", (uintptr_t)chv_soc_data },
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, chv_pinctrl_acpi_match);

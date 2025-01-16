@@ -1133,9 +1133,9 @@ static const struct bq2425x_chip_info bq24257_info = {
 };
 
 static const struct i2c_device_id bq24257_i2c_ids[] = {
-	{ "bq24250", (kernel_ulong_t)&bq24250_info },
-	{ "bq24251", (kernel_ulong_t)&bq24251_info },
-	{ "bq24257", (kernel_ulong_t)&bq24257_info },
+	{ "bq24250", (uintptr_t)&bq24250_info },
+	{ "bq24251", (uintptr_t)&bq24251_info },
+	{ "bq24257", (uintptr_t)&bq24257_info },
 	{}
 };
 MODULE_DEVICE_TABLE(i2c, bq24257_i2c_ids);
@@ -1150,9 +1150,9 @@ MODULE_DEVICE_TABLE(of, bq24257_of_match);
 
 #ifdef CONFIG_ACPI
 static const struct acpi_device_id bq24257_acpi_match[] = {
-	{ "BQ242500", (kernel_ulong_t)&bq24250_info },
-	{ "BQ242510", (kernel_ulong_t)&bq24251_info },
-	{ "BQ242570", (kernel_ulong_t)&bq24257_info },
+	{ "BQ242500", (uintptr_t)&bq24250_info },
+	{ "BQ242510", (uintptr_t)&bq24251_info },
+	{ "BQ242570", (uintptr_t)&bq24257_info },
 	{}
 };
 MODULE_DEVICE_TABLE(acpi, bq24257_acpi_match);

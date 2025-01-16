@@ -3115,14 +3115,14 @@ static const struct pci_device_id pch_udc_pcidev_id[] = {
 		PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_QUARK_X1000_UDC),
 		.class = PCI_CLASS_SERIAL_USB_DEVICE,
 		.class_mask = 0xffffffff,
-		.driver_data = (kernel_ulong_t)&pch_udc_quark_platform_init,
+		.driver_data = (uintptr_t)&pch_udc_quark_platform_init,
 	},
 	{
 		PCI_DEVICE_SUB(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_EG20T_UDC,
 			       PCI_VENDOR_ID_CIRCUITCO, PCI_SUBSYSTEM_ID_CIRCUITCO_MINNOWBOARD),
 		.class = PCI_CLASS_SERIAL_USB_DEVICE,
 		.class_mask = 0xffffffff,
-		.driver_data = (kernel_ulong_t)&pch_udc_minnow_platform_init,
+		.driver_data = (uintptr_t)&pch_udc_minnow_platform_init,
 	},
 	{
 		PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_EG20T_UDC),

@@ -447,10 +447,10 @@ static const struct amd_lps0_hid_device_data amd_cezanne = {
 };
 
 static const struct acpi_device_id amd_hid_ids[] = {
-	{"AMD0004",	(kernel_ulong_t)&amd_picasso,	},
-	{"AMD0005",	(kernel_ulong_t)&amd_picasso,	},
-	{"AMDI0005",	(kernel_ulong_t)&amd_picasso,	},
-	{"AMDI0006",	(kernel_ulong_t)&amd_cezanne,	},
+	{"AMD0004",	(uintptr_t)&amd_picasso,	},
+	{"AMD0005",	(uintptr_t)&amd_picasso,	},
+	{"AMDI0005",	(uintptr_t)&amd_picasso,	},
+	{"AMDI0006",	(uintptr_t)&amd_cezanne,	},
 	{}
 };
 

@@ -596,14 +596,14 @@ static const struct soc_device_data soc_device_MSHW0040 = {
 };
 
 static const struct acpi_device_id soc_button_acpi_match[] = {
-	{ "PNP0C40", (unsigned long)&soc_device_PNP0C40 },
-	{ "INT33D3", (unsigned long)&soc_device_INT33D3 },
-	{ "ID9001", (unsigned long)&soc_device_INT33D3 },
+	{ "PNP0C40", (uintptr_t)&soc_device_PNP0C40 },
+	{ "INT33D3", (uintptr_t)&soc_device_INT33D3 },
+	{ "ID9001", (uintptr_t)&soc_device_INT33D3 },
 	{ "ACPI0011", 0 },
 
 	/* Microsoft Surface Devices (3th, 5th and 6th generation) */
-	{ "MSHW0028", (unsigned long)&soc_device_MSHW0028 },
-	{ "MSHW0040", (unsigned long)&soc_device_MSHW0040 },
+	{ "MSHW0028", (uintptr_t)&soc_device_MSHW0028 },
+	{ "MSHW0040", (uintptr_t)&soc_device_MSHW0040 },
 
 	{ }
 };

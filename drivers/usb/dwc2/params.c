@@ -332,7 +332,7 @@ const struct of_device_id dwc2_of_match_table[] = {
 MODULE_DEVICE_TABLE(of, dwc2_of_match_table);
 
 const struct acpi_device_id dwc2_acpi_match[] = {
-	{ "BCM2848", (kernel_ulong_t)dwc2_set_bcm_params },
+	{ "BCM2848", (uintptr_t)dwc2_set_bcm_params },
 	{ },
 };
 MODULE_DEVICE_TABLE(acpi, dwc2_acpi_match);
@@ -347,7 +347,7 @@ const struct pci_device_id dwc2_pci_ids[] = {
 	},
 	{
 		PCI_DEVICE(PCI_VENDOR_ID_LOONGSON, PCI_DEVICE_ID_LOONGSON_DWC2),
-		.driver_data = (unsigned long)dwc2_set_loongson_params,
+		.driver_data = (uintptr_t)dwc2_set_loongson_params,
 	},
 	{ /* end: all zeroes */ }
 };

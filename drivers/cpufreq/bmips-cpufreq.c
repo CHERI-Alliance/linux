@@ -105,7 +105,7 @@ static unsigned int bmips_cpufreq_get(unsigned int cpu)
 static int bmips_cpufreq_target_index(struct cpufreq_policy *policy,
 				      unsigned int index)
 {
-	unsigned int div = policy->freq_table[index].driver_data;
+	uintptr_t div = policy->freq_table[index].driver_data;
 
 	switch (priv->bmips_type) {
 	case BMIPS5200:

@@ -544,7 +544,7 @@ static const struct platform_device_id kbl_board_ids[] = {
 	{
 		.name = "kbl_rt5660",
 		.driver_data =
-			(kernel_ulong_t)&kabylake_audio_card_rt5660,
+			(uintptr_t)&kabylake_audio_card_rt5660,
 	},
 	{ }
 };

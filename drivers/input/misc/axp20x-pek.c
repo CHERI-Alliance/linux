@@ -387,11 +387,11 @@ static const struct dev_pm_ops axp20x_pek_pm_ops = {
 static const struct platform_device_id axp_pek_id_match[] = {
 	{
 		.name = "axp20x-pek",
-		.driver_data = (kernel_ulong_t)&axp20x_info,
+		.driver_data = (uintptr_t)&axp20x_info,
 	},
 	{
 		.name = "axp221-pek",
-		.driver_data = (kernel_ulong_t)&axp221_info,
+		.driver_data = (uintptr_t)&axp221_info,
 	},
 	{ /* sentinel */ }
 };

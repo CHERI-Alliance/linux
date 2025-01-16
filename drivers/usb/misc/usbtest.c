@@ -3036,7 +3036,7 @@ static const struct usb_device_id id_table[] = {
 
 #ifdef GENERIC
 	/* module params can specify devices to use for control tests */
-	{ .driver_info = (unsigned long) &generic_info, },
+	{ .driver_info = (uintptr_t) &generic_info, },
 #endif
 
 	/*-------------------------------------------------------------*/

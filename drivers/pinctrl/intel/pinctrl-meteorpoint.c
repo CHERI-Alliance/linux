@@ -444,7 +444,7 @@ static const struct intel_pinctrl_soc_data mtps_soc_data = {
 };
 
 static const struct acpi_device_id mtp_pinctrl_acpi_match[] = {
-	{ "INTC1084", (kernel_ulong_t)&mtps_soc_data },
+	{ "INTC1084", (uintptr_t)&mtps_soc_data },
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, mtp_pinctrl_acpi_match);

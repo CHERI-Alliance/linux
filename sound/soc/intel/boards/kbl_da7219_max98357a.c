@@ -665,7 +665,7 @@ static const struct platform_device_id kbl_board_ids[] = {
 	{
 		.name = "kbl_da7219_mx98357a",
 		.driver_data =
-			(kernel_ulong_t)&kabylake_audio_card_da7219_m98357a,
+			(uintptr_t)&kabylake_audio_card_da7219_m98357a,
 	},
 	{ }
 };

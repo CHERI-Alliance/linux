@@ -322,22 +322,22 @@ static const struct zorrocl zcl_picasso4_z2 = {
 static const struct zorro_device_id cirrusfb_zorro_table[] = {
 	{
 		.id		= ZORRO_PROD_HELFRICH_SD64_REG,
-		.driver_data	= (unsigned long)&zcl_sd64,
+		.driver_data	= (uintptr_t)&zcl_sd64,
 	}, {
 		.id		= ZORRO_PROD_HELFRICH_PICCOLO_REG,
-		.driver_data	= (unsigned long)&zcl_piccolo,
+		.driver_data	= (uintptr_t)&zcl_piccolo,
 	}, {
 		.id	= ZORRO_PROD_VILLAGE_TRONIC_PICASSO_II_II_PLUS_REG,
-		.driver_data	= (unsigned long)&zcl_picasso,
+		.driver_data	= (uintptr_t)&zcl_picasso,
 	}, {
 		.id		= ZORRO_PROD_GVP_EGS_28_24_SPECTRUM_REG,
-		.driver_data	= (unsigned long)&zcl_spectrum,
+		.driver_data	= (uintptr_t)&zcl_spectrum,
 	}, {
 		.id		= ZORRO_PROD_VILLAGE_TRONIC_PICASSO_IV_Z3,
-		.driver_data	= (unsigned long)&zcl_picasso4_z3,
+		.driver_data	= (uintptr_t)&zcl_picasso4_z3,
 	}, {
 		.id		= ZORRO_PROD_VILLAGE_TRONIC_PICASSO_IV_Z2_REG,
-		.driver_data	= (unsigned long)&zcl_picasso4_z2,
+		.driver_data	= (uintptr_t)&zcl_picasso4_z2,
 	},
 	{ 0 }
 };

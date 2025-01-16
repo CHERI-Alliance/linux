@@ -1137,22 +1137,22 @@ static const struct platform_device_id kbl_board_ids[] = {
 	{
 		.name = "kbl_da7219_max98927",
 		.driver_data =
-			(kernel_ulong_t)&kbl_audio_card_da7219_m98927,
+			(uintptr_t)&kbl_audio_card_da7219_m98927,
 	},
 	{
 		.name = "kbl_max98927",
 		.driver_data =
-			(kernel_ulong_t)&kbl_audio_card_max98927,
+			(uintptr_t)&kbl_audio_card_max98927,
 	},
 	{
 		.name = "kbl_da7219_max98373",
 		.driver_data =
-			(kernel_ulong_t)&kbl_audio_card_da7219_m98373,
+			(uintptr_t)&kbl_audio_card_da7219_m98373,
 	},
 	{
 		.name = "kbl_max98373",
 		.driver_data =
-			(kernel_ulong_t)&kbl_audio_card_max98373,
+			(uintptr_t)&kbl_audio_card_max98373,
 	},
 	{ }
 };

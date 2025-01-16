@@ -827,8 +827,8 @@ static int lp_gpio_resume(struct device *dev)
 static DEFINE_SIMPLE_DEV_PM_OPS(lp_gpio_pm_ops, NULL, lp_gpio_resume);
 
 static const struct acpi_device_id lynxpoint_gpio_acpi_match[] = {
-	{ "INT33C7", (kernel_ulong_t)&lptlp_soc_data },
-	{ "INT3437", (kernel_ulong_t)&lptlp_soc_data },
+	{ "INT33C7", (uintptr_t)&lptlp_soc_data },
+	{ "INT3437", (uintptr_t)&lptlp_soc_data },
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, lynxpoint_gpio_acpi_match);

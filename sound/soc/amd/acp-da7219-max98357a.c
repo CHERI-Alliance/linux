@@ -787,8 +787,8 @@ static int cz_probe(struct platform_device *pdev)
 
 #ifdef CONFIG_ACPI
 static const struct acpi_device_id cz_audio_acpi_match[] = {
-	{ "AMD7219", (unsigned long)&cz_card },
-	{ "AMDI5682", (unsigned long)&cz_rt5682_card},
+	{ "AMD7219", (uintptr_t)&cz_card },
+	{ "AMDI5682", (uintptr_t)&cz_rt5682_card},
 	{},
 };
 MODULE_DEVICE_TABLE(acpi, cz_audio_acpi_match);

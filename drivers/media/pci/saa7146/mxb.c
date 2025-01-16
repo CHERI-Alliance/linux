@@ -825,7 +825,7 @@ static const struct pci_device_id pci_tbl[] = {
 		.device	   = PCI_DEVICE_ID_PHILIPS_SAA7146,
 		.subvendor = 0x0000,
 		.subdevice = 0x0000,
-		.driver_data = (unsigned long)&mxb,
+		.driver_data = (uintptr_t)&mxb,
 	}, {
 		.vendor	= 0,
 	}

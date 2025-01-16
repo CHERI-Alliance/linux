@@ -2055,7 +2055,7 @@ err_stop:
 static int sony_probe(struct hid_device *hdev, const struct hid_device_id *id)
 {
 	int ret;
-	unsigned long quirks = id->driver_data;
+	uintptr_t quirks = id->driver_data;
 	struct sony_sc *sc;
 	struct usb_device *usbdev;
 	unsigned int connect_mask = HID_CONNECT_DEFAULT;

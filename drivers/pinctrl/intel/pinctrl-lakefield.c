@@ -343,7 +343,7 @@ static const struct intel_pinctrl_soc_data lkf_soc_data = {
 };
 
 static const struct acpi_device_id lkf_pinctrl_acpi_match[] = {
-	{ "INT34C4", (kernel_ulong_t)&lkf_soc_data },
+	{ "INT34C4", (uintptr_t)&lkf_soc_data },
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, lkf_pinctrl_acpi_match);

@@ -322,7 +322,7 @@ static const struct intel_pinctrl_soc_data jsl_soc_data = {
 };
 
 static const struct acpi_device_id jsl_pinctrl_acpi_match[] = {
-	{ "INT34C8", (kernel_ulong_t)&jsl_soc_data },
+	{ "INT34C8", (uintptr_t)&jsl_soc_data },
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, jsl_pinctrl_acpi_match);

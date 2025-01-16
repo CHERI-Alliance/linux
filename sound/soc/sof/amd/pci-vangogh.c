@@ -83,7 +83,7 @@ static void acp_pci_vgh_remove(struct pci_dev *pci)
 /* PCI IDs */
 static const struct pci_device_id vgh_pci_ids[] = {
 	{ PCI_DEVICE(PCI_VENDOR_ID_AMD, ACP_PCI_DEV_ID),
-	.driver_data = (unsigned long)&vangogh_desc},
+	.driver_data = (uintptr_t)&vangogh_desc},
 	{ 0, }
 };
 MODULE_DEVICE_TABLE(pci, vgh_pci_ids);

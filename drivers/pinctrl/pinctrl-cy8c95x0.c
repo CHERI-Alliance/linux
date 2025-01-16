@@ -164,7 +164,7 @@ struct cy8c95x0_pinctrl {
 	DECLARE_BITMAP(shiftmask, MAX_LINE);
 	int nport;
 	struct gpio_chip gpio_chip;
-	unsigned long driver_data;
+	uintptr_t driver_data;
 	struct regulator *regulator;
 	struct device *dev;
 	struct pinctrl_dev *pctldev;

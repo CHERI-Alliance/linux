@@ -351,7 +351,7 @@ static const struct tng_pinctrl mrfld_soc_data = {
 };
 
 static const struct acpi_device_id mrfld_acpi_table[] = {
-	{ "INTC1002", (kernel_ulong_t)&mrfld_soc_data },
+	{ "INTC1002", (uintptr_t)&mrfld_soc_data },
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, mrfld_acpi_table);

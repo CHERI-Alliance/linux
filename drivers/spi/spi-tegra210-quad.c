@@ -1514,16 +1514,16 @@ MODULE_DEVICE_TABLE(of, tegra_qspi_of_match);
 static const struct acpi_device_id tegra_qspi_acpi_match[] = {
 	{
 		.id = "NVDA1213",
-		.driver_data = (kernel_ulong_t)&tegra210_qspi_soc_data,
+		.driver_data = (uintptr_t)&tegra210_qspi_soc_data,
 	}, {
 		.id = "NVDA1313",
-		.driver_data = (kernel_ulong_t)&tegra186_qspi_soc_data,
+		.driver_data = (uintptr_t)&tegra186_qspi_soc_data,
 	}, {
 		.id = "NVDA1413",
-		.driver_data = (kernel_ulong_t)&tegra234_qspi_soc_data,
+		.driver_data = (uintptr_t)&tegra234_qspi_soc_data,
 	}, {
 		.id = "NVDA1513",
-		.driver_data = (kernel_ulong_t)&tegra241_qspi_soc_data,
+		.driver_data = (uintptr_t)&tegra241_qspi_soc_data,
 	},
 	{}
 };

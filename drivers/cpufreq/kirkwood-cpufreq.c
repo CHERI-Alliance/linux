@@ -50,7 +50,7 @@ static unsigned int kirkwood_cpufreq_get_cpu_frequency(unsigned int cpu)
 static int kirkwood_cpufreq_target(struct cpufreq_policy *policy,
 			    unsigned int index)
 {
-	unsigned int state = kirkwood_freq_table[index].driver_data;
+	uintptr_t state = kirkwood_freq_table[index].driver_data;
 	unsigned long reg;
 
 	local_irq_disable();

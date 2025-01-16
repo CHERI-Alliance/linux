@@ -128,7 +128,7 @@ struct snd_hwdep_dsp_image {
 	unsigned char name[64];		/* W: ID (e.g. file name) */
 	unsigned char __user *image;	/* W: binary image */
 	size_t length;			/* W: size of image in bytes */
-	unsigned long driver_data;	/* W: driver-specific data */
+	uintptr_t driver_data;	/* W: driver-specific data */
 };
 
 #define SNDRV_HWDEP_IOCTL_PVERSION	_IOR ('H', 0x00, int)

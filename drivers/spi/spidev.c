@@ -756,9 +756,9 @@ static const struct acpi_device_id spidev_acpi_ids[] = {
 	 * description of the connected peripheral and they should also use
 	 * a proper driver instead of poking directly to the SPI bus.
 	 */
-	{ "SPT0001", (kernel_ulong_t)&spidev_acpi_check },
-	{ "SPT0002", (kernel_ulong_t)&spidev_acpi_check },
-	{ "SPT0003", (kernel_ulong_t)&spidev_acpi_check },
+	{ "SPT0001", (uintptr_t)&spidev_acpi_check },
+	{ "SPT0002", (uintptr_t)&spidev_acpi_check },
+	{ "SPT0003", (uintptr_t)&spidev_acpi_check },
 	{},
 };
 MODULE_DEVICE_TABLE(acpi, spidev_acpi_ids);

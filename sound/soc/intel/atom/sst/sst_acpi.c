@@ -344,8 +344,8 @@ static void sst_acpi_remove(struct platform_device *pdev)
 }
 
 static const struct acpi_device_id sst_acpi_ids[] = {
-	{ "80860F28", (unsigned long)&snd_soc_acpi_intel_baytrail_machines},
-	{ "808622A8", (unsigned long)&snd_soc_acpi_intel_cherrytrail_machines},
+	{ "80860F28", (uintptr_t)&snd_soc_acpi_intel_baytrail_machines},
+	{ "808622A8", (uintptr_t)&snd_soc_acpi_intel_cherrytrail_machines},
 	{ },
 };
 

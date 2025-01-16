@@ -572,16 +572,16 @@ static const struct sp_dev_vdata dev_vdata[] = {
 	},
 };
 static const struct pci_device_id sp_pci_table[] = {
-	{ PCI_VDEVICE(AMD, 0x1537), (kernel_ulong_t)&dev_vdata[0] },
-	{ PCI_VDEVICE(AMD, 0x1456), (kernel_ulong_t)&dev_vdata[1] },
-	{ PCI_VDEVICE(AMD, 0x1468), (kernel_ulong_t)&dev_vdata[2] },
-	{ PCI_VDEVICE(AMD, 0x1486), (kernel_ulong_t)&dev_vdata[3] },
-	{ PCI_VDEVICE(AMD, 0x15DF), (kernel_ulong_t)&dev_vdata[4] },
-	{ PCI_VDEVICE(AMD, 0x14CA), (kernel_ulong_t)&dev_vdata[5] },
-	{ PCI_VDEVICE(AMD, 0x15C7), (kernel_ulong_t)&dev_vdata[6] },
-	{ PCI_VDEVICE(AMD, 0x1649), (kernel_ulong_t)&dev_vdata[6] },
-	{ PCI_VDEVICE(AMD, 0x17E0), (kernel_ulong_t)&dev_vdata[7] },
-	{ PCI_VDEVICE(AMD, 0x156E), (kernel_ulong_t)&dev_vdata[8] },
+	{ PCI_VDEVICE(AMD, 0x1537), (uintptr_t)&dev_vdata[0] },
+	{ PCI_VDEVICE(AMD, 0x1456), (uintptr_t)&dev_vdata[1] },
+	{ PCI_VDEVICE(AMD, 0x1468), (uintptr_t)&dev_vdata[2] },
+	{ PCI_VDEVICE(AMD, 0x1486), (uintptr_t)&dev_vdata[3] },
+	{ PCI_VDEVICE(AMD, 0x15DF), (uintptr_t)&dev_vdata[4] },
+	{ PCI_VDEVICE(AMD, 0x14CA), (uintptr_t)&dev_vdata[5] },
+	{ PCI_VDEVICE(AMD, 0x15C7), (uintptr_t)&dev_vdata[6] },
+	{ PCI_VDEVICE(AMD, 0x1649), (uintptr_t)&dev_vdata[6] },
+	{ PCI_VDEVICE(AMD, 0x17E0), (uintptr_t)&dev_vdata[7] },
+	{ PCI_VDEVICE(AMD, 0x156E), (uintptr_t)&dev_vdata[8] },
 	/* Last entry must be zero */
 	{ 0, }
 };

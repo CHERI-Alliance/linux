@@ -441,7 +441,7 @@ static int tps65910_i2c_probe(struct i2c_client *i2c)
 	struct tps65910_board *pmic_plat_data;
 	struct tps65910_board *of_pmic_plat_data = NULL;
 	struct tps65910_platform_data *init_data;
-	unsigned long chip_id = id->driver_data;
+	uintptr_t chip_id = id->driver_data;
 	int ret;
 
 	pmic_plat_data = dev_get_platdata(&i2c->dev);

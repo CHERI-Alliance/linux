@@ -478,7 +478,7 @@ static int fealnx_init_one(struct pci_dev *pdev,
 	char boardname[12];
 	void __iomem *ioaddr;
 	unsigned long len;
-	unsigned int chip_id = ent->driver_data;
+	uintptr_t chip_id = ent->driver_data;
 	struct net_device *dev;
 	void *ring_space;
 	dma_addr_t ring_dma;

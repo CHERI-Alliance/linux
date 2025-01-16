@@ -606,7 +606,7 @@ static void __init intel_graphics_quirks(int num, int slot, int func)
 	device = read_pci_config_16(num, slot, func, PCI_DEVICE_ID);
 
 	for (i = 0; i < ARRAY_SIZE(intel_early_ids); i++) {
-		kernel_ulong_t driver_data = intel_early_ids[i].driver_data;
+		uintptr_t driver_data = intel_early_ids[i].driver_data;
 
 		if (intel_early_ids[i].device != device)
 			continue;

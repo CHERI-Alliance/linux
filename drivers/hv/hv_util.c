@@ -674,23 +674,23 @@ static int util_resume(struct hv_device *dev)
 static const struct hv_vmbus_device_id id_table[] = {
 	/* Shutdown guid */
 	{ HV_SHUTDOWN_GUID,
-	  .driver_data = (unsigned long)&util_shutdown
+	  .driver_data = (uintptr_t)&util_shutdown
 	},
 	/* Time synch guid */
 	{ HV_TS_GUID,
-	  .driver_data = (unsigned long)&util_timesynch
+	  .driver_data = (uintptr_t)&util_timesynch
 	},
 	/* Heartbeat guid */
 	{ HV_HEART_BEAT_GUID,
-	  .driver_data = (unsigned long)&util_heartbeat
+	  .driver_data = (uintptr_t)&util_heartbeat
 	},
 	/* KVP guid */
 	{ HV_KVP_GUID,
-	  .driver_data = (unsigned long)&util_kvp
+	  .driver_data = (uintptr_t)&util_kvp
 	},
 	/* VSS GUID */
 	{ HV_VSS_GUID,
-	  .driver_data = (unsigned long)&util_vss
+	  .driver_data = (uintptr_t)&util_vss
 	},
 	{ },
 };

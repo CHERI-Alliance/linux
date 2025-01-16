@@ -364,7 +364,7 @@ struct vio_driver {
 	int (*probe)(struct vio_dev *dev, const struct vio_device_id *id);
 	void (*remove)(struct vio_dev *dev);
 	void (*shutdown)(struct vio_dev *dev);
-	unsigned long			driver_data;
+	uintptr_t driver_data;
 	struct device_driver		driver;
 	bool				no_irq;
 };

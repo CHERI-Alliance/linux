@@ -199,31 +199,31 @@ out:
 static const struct platform_device_id board_ids[] = {
 	{
 		.name = "acp3xalc56821019",
-		.driver_data = (kernel_ulong_t)&rt5682_rt1019_data,
+		.driver_data = (uintptr_t)&rt5682_rt1019_data,
 	},
 	{
 		.name = "acp3xalc5682sm98360",
-		.driver_data = (kernel_ulong_t)&rt5682s_max_data,
+		.driver_data = (uintptr_t)&rt5682s_max_data,
 	},
 	{
 		.name = "acp3xalc5682s1019",
-		.driver_data = (kernel_ulong_t)&rt5682s_rt1019_data,
+		.driver_data = (uintptr_t)&rt5682s_rt1019_data,
 	},
 	{
 		.name = "acp3x-es83xx",
-		.driver_data = (kernel_ulong_t)&es83xx_rn_data,
+		.driver_data = (uintptr_t)&es83xx_rn_data,
 	},
 	{
 		.name = "rmb-nau8825-max",
-		.driver_data = (kernel_ulong_t)&max_nau8825_data,
+		.driver_data = (uintptr_t)&max_nau8825_data,
 	},
 	{
 		.name = "rmb-rt5682s-rt1019",
-		.driver_data = (kernel_ulong_t)&rt5682s_rt1019_rmb_data,
+		.driver_data = (uintptr_t)&rt5682s_rt1019_rmb_data,
 	},
 	{
 		.name = "acp-pdm-mach",
-		.driver_data = (kernel_ulong_t)&acp_dmic_data,
+		.driver_data = (uintptr_t)&acp_dmic_data,
 	},
 	{ }
 };

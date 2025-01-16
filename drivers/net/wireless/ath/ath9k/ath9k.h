@@ -1014,7 +1014,7 @@ struct ath_softc {
 	struct timespec64 last_event_time;
 #endif
 
-	unsigned long driver_data;
+	uintptr_t driver_data;
 
 	u8 gtt_cnt;
 	u32 intrstatus;

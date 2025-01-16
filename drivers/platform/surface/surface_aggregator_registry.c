@@ -348,55 +348,55 @@ static const struct software_node *ssam_node_group_sp9[] = {
 
 static const struct acpi_device_id ssam_platform_hub_match[] = {
 	/* Surface Pro 4, 5, and 6 (OMBR < 0x10) */
-	{ "MSHW0081", (unsigned long)ssam_node_group_gen5 },
+	{ "MSHW0081", (uintptr_t)ssam_node_group_gen5 },
 
 	/* Surface Pro 6 (OMBR >= 0x10) */
-	{ "MSHW0111", (unsigned long)ssam_node_group_gen5 },
+	{ "MSHW0111", (uintptr_t)ssam_node_group_gen5 },
 
 	/* Surface Pro 7 */
-	{ "MSHW0116", (unsigned long)ssam_node_group_sp7 },
+	{ "MSHW0116", (uintptr_t)ssam_node_group_sp7 },
 
 	/* Surface Pro 7+ */
-	{ "MSHW0119", (unsigned long)ssam_node_group_sp7 },
+	{ "MSHW0119", (uintptr_t)ssam_node_group_sp7 },
 
 	/* Surface Pro 8 */
-	{ "MSHW0263", (unsigned long)ssam_node_group_sp8 },
+	{ "MSHW0263", (uintptr_t)ssam_node_group_sp8 },
 
 	/* Surface Pro 9 */
-	{ "MSHW0343", (unsigned long)ssam_node_group_sp9 },
+	{ "MSHW0343", (uintptr_t)ssam_node_group_sp9 },
 
 	/* Surface Book 2 */
-	{ "MSHW0107", (unsigned long)ssam_node_group_gen5 },
+	{ "MSHW0107", (uintptr_t)ssam_node_group_gen5 },
 
 	/* Surface Book 3 */
-	{ "MSHW0117", (unsigned long)ssam_node_group_sb3 },
+	{ "MSHW0117", (uintptr_t)ssam_node_group_sb3 },
 
 	/* Surface Laptop 1 */
-	{ "MSHW0086", (unsigned long)ssam_node_group_gen5 },
+	{ "MSHW0086", (uintptr_t)ssam_node_group_gen5 },
 
 	/* Surface Laptop 2 */
-	{ "MSHW0112", (unsigned long)ssam_node_group_gen5 },
+	{ "MSHW0112", (uintptr_t)ssam_node_group_gen5 },
 
 	/* Surface Laptop 3 (13", Intel) */
-	{ "MSHW0114", (unsigned long)ssam_node_group_sl3 },
+	{ "MSHW0114", (uintptr_t)ssam_node_group_sl3 },
 
 	/* Surface Laptop 3 (15", AMD) and 4 (15", AMD) */
-	{ "MSHW0110", (unsigned long)ssam_node_group_sl3 },
+	{ "MSHW0110", (uintptr_t)ssam_node_group_sl3 },
 
 	/* Surface Laptop 4 (13", Intel) */
-	{ "MSHW0250", (unsigned long)ssam_node_group_sl3 },
+	{ "MSHW0250", (uintptr_t)ssam_node_group_sl3 },
 
 	/* Surface Laptop 5 */
-	{ "MSHW0350", (unsigned long)ssam_node_group_sl5 },
+	{ "MSHW0350", (uintptr_t)ssam_node_group_sl5 },
 
 	/* Surface Laptop Go 1 */
-	{ "MSHW0118", (unsigned long)ssam_node_group_slg1 },
+	{ "MSHW0118", (uintptr_t)ssam_node_group_slg1 },
 
 	/* Surface Laptop Go 2 */
-	{ "MSHW0290", (unsigned long)ssam_node_group_slg1 },
+	{ "MSHW0290", (uintptr_t)ssam_node_group_slg1 },
 
 	/* Surface Laptop Studio */
-	{ "MSHW0123", (unsigned long)ssam_node_group_sls },
+	{ "MSHW0123", (uintptr_t)ssam_node_group_sls },
 
 	{ },
 };

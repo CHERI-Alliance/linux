@@ -645,9 +645,9 @@ static int broxton_audio_probe(struct platform_device *pdev)
 
 static const struct platform_device_id bxt_board_ids[] = {
 	{ .name = "bxt_alc298s_i2s", .driver_data =
-				(unsigned long)&broxton_rt298 },
+				(uintptr_t)&broxton_rt298 },
 	{ .name = "glk_alc298s_i2s", .driver_data =
-				(unsigned long)&geminilake_rt298 },
+				(uintptr_t)&geminilake_rt298 },
 	{}
 };
 MODULE_DEVICE_TABLE(platform, bxt_board_ids);

@@ -70,7 +70,7 @@ static const struct rtw89_driver_info rtw89_8922ae_info = {
 static const struct pci_device_id rtw89_8922ae_id_table[] = {
 	{
 		PCI_DEVICE(PCI_VENDOR_ID_REALTEK, 0x8922),
-		.driver_data = (kernel_ulong_t)&rtw89_8922ae_info,
+		.driver_data = (uintptr_t)&rtw89_8922ae_info,
 	},
 	{},
 };

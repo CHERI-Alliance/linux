@@ -481,7 +481,7 @@ static const struct intel_pinctrl_soc_data *ehl_soc_data_array[] = {
 };
 
 static const struct acpi_device_id ehl_pinctrl_acpi_match[] = {
-	{ "INTC1020", (kernel_ulong_t)ehl_soc_data_array },
+	{ "INTC1020", (uintptr_t)ehl_soc_data_array },
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, ehl_pinctrl_acpi_match);

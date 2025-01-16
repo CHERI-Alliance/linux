@@ -231,7 +231,7 @@ static int keyboard_led_probe(struct platform_device *pdev)
 
 #ifdef CONFIG_ACPI
 static const struct acpi_device_id keyboard_led_acpi_match[] = {
-	{ "GOOG0002", (kernel_ulong_t)&keyboard_led_drvdata_acpi },
+	{ "GOOG0002", (uintptr_t)&keyboard_led_drvdata_acpi },
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, keyboard_led_acpi_match);

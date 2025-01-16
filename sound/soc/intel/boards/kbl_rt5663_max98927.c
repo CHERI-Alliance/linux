@@ -1044,12 +1044,12 @@ static int kabylake_audio_probe(struct platform_device *pdev)
 static const struct platform_device_id kbl_board_ids[] = {
 	{
 		.name = "kbl_rt5663",
-		.driver_data = (kernel_ulong_t)&kabylake_audio_card_rt5663,
+		.driver_data = (uintptr_t)&kabylake_audio_card_rt5663,
 	},
 	{
 		.name = "kbl_rt5663_m98927",
 		.driver_data =
-			(kernel_ulong_t)&kabylake_audio_card_rt5663_m98927,
+			(uintptr_t)&kabylake_audio_card_rt5663_m98927,
 	},
 	{ }
 };

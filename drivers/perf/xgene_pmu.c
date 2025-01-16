@@ -1769,9 +1769,9 @@ static const struct of_device_id xgene_pmu_of_match[] = {
 MODULE_DEVICE_TABLE(of, xgene_pmu_of_match);
 #ifdef CONFIG_ACPI
 static const struct acpi_device_id xgene_pmu_acpi_match[] = {
-	{"APMC0D5B", (kernel_ulong_t)&xgene_pmu_data},
-	{"APMC0D5C", (kernel_ulong_t)&xgene_pmu_v2_data},
-	{"APMC0D83", (kernel_ulong_t)&xgene_pmu_v3_data},
+	{"APMC0D5B", (uintptr_t)&xgene_pmu_data},
+	{"APMC0D5C", (uintptr_t)&xgene_pmu_v2_data},
+	{"APMC0D83", (uintptr_t)&xgene_pmu_v3_data},
 	{},
 };
 MODULE_DEVICE_TABLE(acpi, xgene_pmu_acpi_match);

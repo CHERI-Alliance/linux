@@ -1577,8 +1577,8 @@ static int byt_set_soc_data(struct intel_pinctrl *vg,
 }
 
 static const struct acpi_device_id byt_gpio_acpi_match[] = {
-	{ "INT33B2", (kernel_ulong_t)byt_soc_data },
-	{ "INT33FC", (kernel_ulong_t)byt_soc_data },
+	{ "INT33B2", (uintptr_t)byt_soc_data },
+	{ "INT33FC", (uintptr_t)byt_soc_data },
 	{ }
 };
 

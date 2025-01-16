@@ -1153,13 +1153,13 @@ static const struct of_device_id ad7173_of_match[] = {
 MODULE_DEVICE_TABLE(of, ad7173_of_match);
 
 static const struct spi_device_id ad7173_id_table[] = {
-	{ "ad7172-2", (kernel_ulong_t)&ad7173_device_info[ID_AD7172_2]},
-	{ "ad7172-4", (kernel_ulong_t)&ad7173_device_info[ID_AD7172_4]},
-	{ "ad7173-8", (kernel_ulong_t)&ad7173_device_info[ID_AD7173_8]},
-	{ "ad7175-2", (kernel_ulong_t)&ad7173_device_info[ID_AD7175_2]},
-	{ "ad7175-8", (kernel_ulong_t)&ad7173_device_info[ID_AD7175_8]},
-	{ "ad7176-2", (kernel_ulong_t)&ad7173_device_info[ID_AD7176_2]},
-	{ "ad7177-2", (kernel_ulong_t)&ad7173_device_info[ID_AD7177_2]},
+	{ "ad7172-2", (uintptr_t)&ad7173_device_info[ID_AD7172_2]},
+	{ "ad7172-4", (uintptr_t)&ad7173_device_info[ID_AD7172_4]},
+	{ "ad7173-8", (uintptr_t)&ad7173_device_info[ID_AD7173_8]},
+	{ "ad7175-2", (uintptr_t)&ad7173_device_info[ID_AD7175_2]},
+	{ "ad7175-8", (uintptr_t)&ad7173_device_info[ID_AD7175_8]},
+	{ "ad7176-2", (uintptr_t)&ad7173_device_info[ID_AD7176_2]},
+	{ "ad7177-2", (uintptr_t)&ad7173_device_info[ID_AD7177_2]},
 	{ }
 };
 MODULE_DEVICE_TABLE(spi, ad7173_id_table);

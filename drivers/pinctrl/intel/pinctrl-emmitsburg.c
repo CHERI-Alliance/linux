@@ -354,7 +354,7 @@ static const struct intel_pinctrl_soc_data ebg_soc_data = {
 };
 
 static const struct acpi_device_id ebg_pinctrl_acpi_match[] = {
-	{ "INTC1071", (kernel_ulong_t)&ebg_soc_data },
+	{ "INTC1071", (uintptr_t)&ebg_soc_data },
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, ebg_pinctrl_acpi_match);

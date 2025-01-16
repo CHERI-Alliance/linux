@@ -819,8 +819,8 @@ static const struct intel_pinctrl_soc_data cnllp_soc_data = {
 };
 
 static const struct acpi_device_id cnl_pinctrl_acpi_match[] = {
-	{ "INT3450", (kernel_ulong_t)&cnlh_soc_data },
-	{ "INT34BB", (kernel_ulong_t)&cnllp_soc_data },
+	{ "INT3450", (uintptr_t)&cnlh_soc_data },
+	{ "INT34BB", (uintptr_t)&cnllp_soc_data },
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, cnl_pinctrl_acpi_match);

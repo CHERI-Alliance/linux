@@ -373,16 +373,16 @@ static const struct smi_node cs35l57_hda = {
  * drivers/acpi/scan.c: acpi_device_enumeration_by_parent().
  */
 static const struct acpi_device_id smi_acpi_ids[] = {
-	{ "BSG1160", (unsigned long)&bsg1160_data },
-	{ "BSG2150", (unsigned long)&bsg2150_data },
-	{ "CSC3551", (unsigned long)&cs35l41_hda },
-	{ "CSC3554", (unsigned long)&cs35l54_hda },
-	{ "CSC3556", (unsigned long)&cs35l56_hda },
-	{ "CSC3557", (unsigned long)&cs35l57_hda },
-	{ "INT3515", (unsigned long)&int3515_data },
+	{ "BSG1160", (uintptr_t)&bsg1160_data },
+	{ "BSG2150", (uintptr_t)&bsg2150_data },
+	{ "CSC3551", (uintptr_t)&cs35l41_hda },
+	{ "CSC3554", (uintptr_t)&cs35l54_hda },
+	{ "CSC3556", (uintptr_t)&cs35l56_hda },
+	{ "CSC3557", (uintptr_t)&cs35l57_hda },
+	{ "INT3515", (uintptr_t)&int3515_data },
 	/* Non-conforming _HID for Cirrus Logic already released */
-	{ "CLSA0100", (unsigned long)&cs35l41_hda },
-	{ "CLSA0101", (unsigned long)&cs35l41_hda },
+	{ "CLSA0100", (uintptr_t)&cs35l41_hda },
+	{ "CLSA0101", (uintptr_t)&cs35l41_hda },
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, smi_acpi_ids);

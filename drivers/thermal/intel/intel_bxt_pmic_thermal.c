@@ -269,7 +269,7 @@ static int pmic_thermal_probe(struct platform_device *pdev)
 static const struct platform_device_id pmic_thermal_id_table[] = {
 	{
 		.name = "bxt_wcove_thermal",
-		.driver_data = (kernel_ulong_t)&bxtwc_thermal_data,
+		.driver_data = (uintptr_t)&bxtwc_thermal_data,
 	},
 	{},
 };

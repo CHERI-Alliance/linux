@@ -3547,13 +3547,13 @@ static const struct dev_pm_ops sh_eth_dev_pm_ops = {
 #endif
 
 static const struct platform_device_id sh_eth_id_table[] = {
-	{ "sh7619-ether", (kernel_ulong_t)&sh7619_data },
-	{ "sh771x-ether", (kernel_ulong_t)&sh771x_data },
-	{ "sh7724-ether", (kernel_ulong_t)&sh7724_data },
-	{ "sh7734-gether", (kernel_ulong_t)&sh7734_data },
-	{ "sh7757-ether", (kernel_ulong_t)&sh7757_data },
-	{ "sh7757-gether", (kernel_ulong_t)&sh7757_data_giga },
-	{ "sh7763-gether", (kernel_ulong_t)&sh7763_data },
+	{ "sh7619-ether", (uintptr_t)&sh7619_data },
+	{ "sh771x-ether", (uintptr_t)&sh771x_data },
+	{ "sh7724-ether", (uintptr_t)&sh7724_data },
+	{ "sh7734-gether", (uintptr_t)&sh7734_data },
+	{ "sh7757-ether", (uintptr_t)&sh7757_data },
+	{ "sh7757-gether", (uintptr_t)&sh7757_data_giga },
+	{ "sh7763-gether", (uintptr_t)&sh7763_data },
 	{ }
 };
 MODULE_DEVICE_TABLE(platform, sh_eth_id_table);

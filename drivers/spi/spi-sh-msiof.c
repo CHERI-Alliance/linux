@@ -1400,7 +1400,7 @@ static void sh_msiof_spi_remove(struct platform_device *pdev)
 }
 
 static const struct platform_device_id spi_driver_ids[] = {
-	{ "spi_sh_msiof",	(kernel_ulong_t)&sh_data },
+	{ "spi_sh_msiof",	(uintptr_t)&sh_data },
 	{},
 };
 MODULE_DEVICE_TABLE(platform, spi_driver_ids);

@@ -1296,7 +1296,7 @@ MODULE_DEVICE_TABLE(of, nxp_fspi_dt_ids);
 
 #ifdef CONFIG_ACPI
 static const struct acpi_device_id nxp_fspi_acpi_ids[] = {
-	{ "NXP0009", .driver_data = (kernel_ulong_t)&lx2160a_data, },
+	{ "NXP0009", .driver_data = (uintptr_t)&lx2160a_data, },
 	{}
 };
 MODULE_DEVICE_TABLE(acpi, nxp_fspi_acpi_ids);

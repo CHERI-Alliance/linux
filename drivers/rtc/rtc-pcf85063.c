@@ -638,11 +638,11 @@ static int pcf85063_probe(struct i2c_client *client)
 }
 
 static const struct i2c_device_id pcf85063_ids[] = {
-	{ "pca85073a", .driver_data = (kernel_ulong_t)&config_pcf85063a },
-	{ "pcf85063", .driver_data = (kernel_ulong_t)&config_pcf85063 },
-	{ "pcf85063tp", .driver_data = (kernel_ulong_t)&config_pcf85063tp },
-	{ "pcf85063a", .driver_data = (kernel_ulong_t)&config_pcf85063a },
-	{ "rv8263", .driver_data = (kernel_ulong_t)&config_rv8263 },
+	{ "pca85073a", .driver_data = (uintptr_t)&config_pcf85063a },
+	{ "pcf85063", .driver_data = (uintptr_t)&config_pcf85063 },
+	{ "pcf85063tp", .driver_data = (uintptr_t)&config_pcf85063tp },
+	{ "pcf85063a", .driver_data = (uintptr_t)&config_pcf85063a },
+	{ "rv8263", .driver_data = (uintptr_t)&config_rv8263 },
 	{}
 };
 MODULE_DEVICE_TABLE(i2c, pcf85063_ids);

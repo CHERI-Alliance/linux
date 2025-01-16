@@ -85,7 +85,7 @@ static void acp_pci_rn_remove(struct pci_dev *pci)
 /* PCI IDs */
 static const struct pci_device_id rn_pci_ids[] = {
 	{ PCI_DEVICE(PCI_VENDOR_ID_AMD, ACP_PCI_DEV_ID),
-	.driver_data = (unsigned long)&renoir_desc},
+	.driver_data = (uintptr_t)&renoir_desc},
 	{ 0, }
 };
 MODULE_DEVICE_TABLE(pci, rn_pci_ids);

@@ -432,8 +432,8 @@ static const struct sof_dev_desc sof_acpi_cherrytrail_desc = {
 };
 
 static const struct acpi_device_id sof_baytrail_match[] = {
-	{ "80860F28", (unsigned long)&sof_acpi_baytrail_desc },
-	{ "808622A8", (unsigned long)&sof_acpi_cherrytrail_desc },
+	{ "80860F28", (uintptr_t)&sof_acpi_baytrail_desc },
+	{ "808622A8", (uintptr_t)&sof_acpi_cherrytrail_desc },
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, sof_baytrail_match);

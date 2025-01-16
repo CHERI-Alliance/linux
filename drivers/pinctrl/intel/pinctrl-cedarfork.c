@@ -321,7 +321,7 @@ static const struct intel_pinctrl_soc_data cdf_soc_data = {
 };
 
 static const struct acpi_device_id cdf_pinctrl_acpi_match[] = {
-	{ "INTC3001", (kernel_ulong_t)&cdf_soc_data },
+	{ "INTC3001", (uintptr_t)&cdf_soc_data },
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, cdf_pinctrl_acpi_match);

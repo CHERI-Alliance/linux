@@ -40,7 +40,7 @@ static const struct sp_dev_vdata dev_vdata[] = {
 };
 
 static const struct acpi_device_id sp_acpi_match[] = {
-	{ "AMDI0C00", (kernel_ulong_t)&dev_vdata[0] },
+	{ "AMDI0C00", (uintptr_t)&dev_vdata[0] },
 	{ },
 };
 MODULE_DEVICE_TABLE(acpi, sp_acpi_match);

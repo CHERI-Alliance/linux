@@ -328,7 +328,7 @@ MODULE_DEVICE_TABLE(of, s3c2410_wdt_match);
 static const struct platform_device_id s3c2410_wdt_ids[] = {
 	{
 		.name = "s3c2410-wdt",
-		.driver_data = (unsigned long)&drv_data_s3c2410,
+		.driver_data = (uintptr_t)&drv_data_s3c2410,
 	},
 	{}
 };

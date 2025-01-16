@@ -27,8 +27,8 @@ static const struct intel_th_drvdata intel_th_acpi_uncore = {
 };
 
 static const struct acpi_device_id intel_th_acpi_ids[] = {
-	{ "INTC1000",	(kernel_ulong_t)&intel_th_acpi_uncore },
-	{ "INTC1001",	(kernel_ulong_t)&intel_th_acpi_pch },
+	{ "INTC1000",	(uintptr_t)&intel_th_acpi_uncore },
+	{ "INTC1001",	(uintptr_t)&intel_th_acpi_pch },
 	{ "",		0 },
 };
 

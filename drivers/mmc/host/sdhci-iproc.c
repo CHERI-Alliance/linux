@@ -346,10 +346,10 @@ static const struct sdhci_iproc_data bcm_arasan_data = {
 };
 
 static const struct acpi_device_id sdhci_iproc_acpi_ids[] = {
-	{ .id = "BRCM5871", .driver_data = (kernel_ulong_t)&iproc_cygnus_data },
-	{ .id = "BRCM5872", .driver_data = (kernel_ulong_t)&iproc_data },
-	{ .id = "BCM2847",  .driver_data = (kernel_ulong_t)&bcm_arasan_data },
-	{ .id = "BRCME88C", .driver_data = (kernel_ulong_t)&bcm2711_data },
+	{ .id = "BRCM5871", .driver_data = (uintptr_t)&iproc_cygnus_data },
+	{ .id = "BRCM5872", .driver_data = (uintptr_t)&iproc_data },
+	{ .id = "BCM2847",  .driver_data = (uintptr_t)&bcm_arasan_data },
+	{ .id = "BRCME88C", .driver_data = (uintptr_t)&bcm2711_data },
 	{ /* sentinel */ }
 };
 MODULE_DEVICE_TABLE(acpi, sdhci_iproc_acpi_ids);

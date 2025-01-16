@@ -155,7 +155,7 @@ static int pata_buddha_probe(struct zorro_dev *z,
 	struct ata_host *host;
 	void __iomem *buddha_board;
 	unsigned long board;
-	unsigned int type = ent->driver_data;
+	uintptr_t type = ent->driver_data;
 	unsigned int nr_ports = (type == BOARD_CATWEASEL) ? 3 : 2;
 	void *old_drvdata;
 	int i;

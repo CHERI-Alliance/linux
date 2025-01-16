@@ -655,7 +655,7 @@ static const struct sof_dev_desc sof_acpi_broadwell_desc = {
 };
 
 static const struct acpi_device_id sof_broadwell_match[] = {
-	{ "INT3438", (unsigned long)&sof_acpi_broadwell_desc },
+	{ "INT3438", (uintptr_t)&sof_acpi_broadwell_desc },
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, sof_broadwell_match);

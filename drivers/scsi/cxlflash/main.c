@@ -3179,11 +3179,11 @@ static struct dev_dependent_vals dev_briard_vals = { CXLFLASH_MAX_SECTORS,
  */
 static struct pci_device_id cxlflash_pci_table[] = {
 	{PCI_VENDOR_ID_IBM, PCI_DEVICE_ID_IBM_CORSA,
-	 PCI_ANY_ID, PCI_ANY_ID, 0, 0, (kernel_ulong_t)&dev_corsa_vals},
+	 PCI_ANY_ID, PCI_ANY_ID, 0, 0, (uintptr_t)&dev_corsa_vals},
 	{PCI_VENDOR_ID_IBM, PCI_DEVICE_ID_IBM_FLASH_GT,
-	 PCI_ANY_ID, PCI_ANY_ID, 0, 0, (kernel_ulong_t)&dev_flash_gt_vals},
+	 PCI_ANY_ID, PCI_ANY_ID, 0, 0, (uintptr_t)&dev_flash_gt_vals},
 	{PCI_VENDOR_ID_IBM, PCI_DEVICE_ID_IBM_BRIARD,
-	 PCI_ANY_ID, PCI_ANY_ID, 0, 0, (kernel_ulong_t)&dev_briard_vals},
+	 PCI_ANY_ID, PCI_ANY_ID, 0, 0, (uintptr_t)&dev_briard_vals},
 	{}
 };
 

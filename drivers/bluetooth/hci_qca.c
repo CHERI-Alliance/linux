@@ -2641,11 +2641,11 @@ MODULE_DEVICE_TABLE(of, qca_bluetooth_of_match);
 
 #ifdef CONFIG_ACPI
 static const struct acpi_device_id qca_bluetooth_acpi_match[] = {
-	{ "QCOM2066", (kernel_ulong_t)&qca_soc_data_qca2066 },
-	{ "QCOM6390", (kernel_ulong_t)&qca_soc_data_qca6390 },
-	{ "DLA16390", (kernel_ulong_t)&qca_soc_data_qca6390 },
-	{ "DLB16390", (kernel_ulong_t)&qca_soc_data_qca6390 },
-	{ "DLB26390", (kernel_ulong_t)&qca_soc_data_qca6390 },
+	{ "QCOM2066", (uintptr_t)&qca_soc_data_qca2066 },
+	{ "QCOM6390", (uintptr_t)&qca_soc_data_qca6390 },
+	{ "DLA16390", (uintptr_t)&qca_soc_data_qca6390 },
+	{ "DLB16390", (uintptr_t)&qca_soc_data_qca6390 },
+	{ "DLB26390", (uintptr_t)&qca_soc_data_qca6390 },
 	{ },
 };
 MODULE_DEVICE_TABLE(acpi, qca_bluetooth_acpi_match);

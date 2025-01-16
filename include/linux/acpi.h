@@ -1329,7 +1329,7 @@ struct acpi_probe_entry {
 		acpi_tbl_table_handler probe_table;
 		acpi_tbl_entry_handler probe_subtbl;
 	};
-	kernel_ulong_t driver_data;
+	uintptr_t driver_data;
 };
 
 #define ACPI_DECLARE_PROBE_ENTRY(table, name, table_id, subtable,	\

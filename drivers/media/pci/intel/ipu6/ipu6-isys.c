@@ -1353,7 +1353,7 @@ static const struct ipu6_auxdrv_data ipu6_isys_auxdrv_data = {
 static const struct auxiliary_device_id ipu6_isys_id_table[] = {
 	{
 		.name = "intel_ipu6.isys",
-		.driver_data = (kernel_ulong_t)&ipu6_isys_auxdrv_data,
+		.driver_data = (uintptr_t)&ipu6_isys_auxdrv_data,
 	},
 	{ }
 };

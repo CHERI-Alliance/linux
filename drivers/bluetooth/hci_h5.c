@@ -1088,8 +1088,8 @@ static const struct h5_device_data h5_data_rtl8723bs = {
 #ifdef CONFIG_ACPI
 static const struct acpi_device_id h5_acpi_match[] = {
 #ifdef CONFIG_BT_HCIUART_RTL
-	{ "OBDA0623", (kernel_ulong_t)&h5_data_rtl8723bs },
-	{ "OBDA8723", (kernel_ulong_t)&h5_data_rtl8723bs },
+	{ "OBDA0623", (uintptr_t)&h5_data_rtl8723bs },
+	{ "OBDA8723", (uintptr_t)&h5_data_rtl8723bs },
 #endif
 	{ },
 };

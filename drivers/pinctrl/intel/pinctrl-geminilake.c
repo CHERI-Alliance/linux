@@ -443,7 +443,7 @@ static const struct intel_pinctrl_soc_data *glk_pinctrl_soc_data[] = {
 };
 
 static const struct acpi_device_id glk_pinctrl_acpi_match[] = {
-	{ "INT3453", (kernel_ulong_t)glk_pinctrl_soc_data },
+	{ "INT3453", (uintptr_t)glk_pinctrl_soc_data },
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, glk_pinctrl_acpi_match);

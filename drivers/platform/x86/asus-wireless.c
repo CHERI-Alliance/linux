@@ -43,8 +43,8 @@ static const struct hswc_params atk4002_id_params = {
 };
 
 static const struct acpi_device_id device_ids[] = {
-	{"ATK4001", (kernel_ulong_t)&atk4001_id_params},
-	{"ATK4002", (kernel_ulong_t)&atk4002_id_params},
+	{"ATK4001", (uintptr_t)&atk4001_id_params},
+	{"ATK4002", (uintptr_t)&atk4002_id_params},
 	{"", 0},
 };
 MODULE_DEVICE_TABLE(acpi, device_ids);

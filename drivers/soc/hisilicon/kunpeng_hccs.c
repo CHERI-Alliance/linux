@@ -1340,8 +1340,8 @@ static const struct hccs_verspecific_data hisi04b2_verspec_data = {
 };
 
 static const struct acpi_device_id hccs_acpi_match[] = {
-	{ "HISI04B1", (unsigned long)&hisi04b1_verspec_data},
-	{ "HISI04B2", (unsigned long)&hisi04b2_verspec_data},
+	{ "HISI04B1", (uintptr_t)&hisi04b1_verspec_data},
+	{ "HISI04B2", (uintptr_t)&hisi04b2_verspec_data},
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, hccs_acpi_match);

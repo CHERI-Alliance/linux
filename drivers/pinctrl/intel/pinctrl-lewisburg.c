@@ -303,7 +303,7 @@ static const struct intel_pinctrl_soc_data lbg_soc_data = {
 };
 
 static const struct acpi_device_id lbg_pinctrl_acpi_match[] = {
-	{ "INT3536", (kernel_ulong_t)&lbg_soc_data },
+	{ "INT3536", (uintptr_t)&lbg_soc_data },
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, lbg_pinctrl_acpi_match);

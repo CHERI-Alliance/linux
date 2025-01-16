@@ -366,8 +366,8 @@ static struct catpt_spec wpt_desc = {
 };
 
 static const struct acpi_device_id catpt_ids[] = {
-	{ "INT33C8", (unsigned long)&lpt_desc },
-	{ "INT3438", (unsigned long)&wpt_desc },
+	{ "INT33C8", (uintptr_t)&lpt_desc },
+	{ "INT3438", (uintptr_t)&wpt_desc },
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, catpt_ids);

@@ -360,7 +360,7 @@ MODULE_DEVICE_TABLE(of, mchp48l640_of_table);
 static const struct spi_device_id mchp48l640_spi_ids[] = {
 	{
 		.name = "48l640",
-		.driver_data = (kernel_ulong_t)&mchp48l640_caps,
+		.driver_data = (uintptr_t)&mchp48l640_caps,
 	},
 	{}
 };

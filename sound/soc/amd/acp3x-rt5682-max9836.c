@@ -533,9 +533,9 @@ static int acp3x_probe(struct platform_device *pdev)
 }
 
 static const struct acpi_device_id acp3x_audio_acpi_match[] = {
-	{ "AMDI5682", (unsigned long)&acp3x_5682},
-	{ "AMDI1015", (unsigned long)&acp3x_1015},
-	{ "10021015", (unsigned long)&acp3x_1015p},
+	{ "AMDI5682", (uintptr_t)&acp3x_5682},
+	{ "AMDI1015", (uintptr_t)&acp3x_1015},
+	{ "10021015", (uintptr_t)&acp3x_1015p},
 	{},
 };
 MODULE_DEVICE_TABLE(acpi, acp3x_audio_acpi_match);

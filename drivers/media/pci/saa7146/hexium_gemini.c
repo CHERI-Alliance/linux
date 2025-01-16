@@ -365,14 +365,14 @@ static const struct pci_device_id pci_tbl[] = {
 	 .device = PCI_DEVICE_ID_PHILIPS_SAA7146,
 	 .subvendor = 0x17c8,
 	 .subdevice = 0x2401,
-	 .driver_data = (unsigned long) &hexium_gemini_4bnc,
+	 .driver_data = (uintptr_t) &hexium_gemini_4bnc,
 	 },
 	{
 	 .vendor = PCI_VENDOR_ID_PHILIPS,
 	 .device = PCI_DEVICE_ID_PHILIPS_SAA7146,
 	 .subvendor = 0x17c8,
 	 .subdevice = 0x2402,
-	 .driver_data = (unsigned long) &hexium_gemini_dual_4bnc,
+	 .driver_data = (uintptr_t) &hexium_gemini_dual_4bnc,
 	 },
 	{
 	 .vendor = 0,

@@ -1121,7 +1121,7 @@ MODULE_DEVICE_TABLE(of, sdhci_dwcmshc_dt_ids);
 static const struct acpi_device_id sdhci_dwcmshc_acpi_ids[] = {
 	{
 		.id = "MLNXBF30",
-		.driver_data = (kernel_ulong_t)&sdhci_dwcmshc_bf3_pdata,
+		.driver_data = (uintptr_t)&sdhci_dwcmshc_bf3_pdata,
 	},
 	{}
 };
