@@ -253,7 +253,7 @@ void sys_fillrect(struct fb_info *p, const struct fb_fillrect *rect)
 
 	pat = pixel_to_pat( bpp, fg);
 
-	dst = (unsigned long *)((unsigned long)p->screen_base & ~(bytes-1));
+	dst = (unsigned long *)((uintptr_t)p->screen_base & ~(bytes-1));
 	dst_idx = ((unsigned long)p->screen_base & (bytes - 1))*8;
 	dst_idx += rect->dy*p->fix.line_length*8+rect->dx*bpp;
 	/* FIXME For now we support 1-32 bpp only */

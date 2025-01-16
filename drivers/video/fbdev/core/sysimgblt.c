@@ -100,7 +100,7 @@ static void color_imageblit(const struct fb_image *image, struct fb_info *p,
 		dst1 += p->fix.line_length;
 		if (pitch_index) {
 			dst2 += p->fix.line_length;
-			dst1 = (u8 *)((long)dst2 & ~(sizeof(u32) - 1));
+			dst1 = (u8 *)((intptr_t)dst2 & ~(sizeof(u32) - 1));
 
 			start_index += pitch_index;
 			start_index &= 32 - 1;
@@ -167,7 +167,7 @@ static void slow_imageblit(const struct fb_image *image, struct fb_info *p,
 		src += spitch;
 		if (pitch_index) {
 			dst2 += pitch;
-			dst1 = (u8 *)((long)dst2 & ~(sizeof(u32) - 1));
+			dst1 = (u8 *)((intptr_t)dst2 & ~(sizeof(u32) - 1));
 			start_index += pitch_index;
 			start_index &= 32 - 1;
 		}
