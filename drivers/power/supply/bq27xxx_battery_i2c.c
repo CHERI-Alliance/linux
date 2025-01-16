@@ -156,7 +156,7 @@ static int bq27xxx_battery_i2c_probe(struct i2c_client *client)
 		return num;
 	ret = devm_add_action_or_reset(&client->dev,
 				       bq27xxx_battery_i2c_devm_ida_free,
-				       (void *)num);
+				       __c_fakep(num));
 	if (ret)
 		return ret;
 
