@@ -32,7 +32,7 @@ SYM_FUNC_START(clear_page)
 	add	a2, a0, a2
 .Lzero_loop:
 	CBO_ZERO(a0)
-	add	a0, a0, a1
+	add	CREG(a0), CREG(a0), a1
 	CBOZ_ALT(11, "bltu a0, a2, .Lzero_loop; ret", "nop; nop")
 	CBO_ZERO(a0)
 	add	CREG(a0), CREG(a0), a1
