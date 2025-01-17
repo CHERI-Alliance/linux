@@ -3219,7 +3219,7 @@ static ssize_t show_cursor_blink(struct device *device,
 	if (!ops)
 		goto err;
 
-	blink = delayed_work_pending(&ops->cursor_work);
+	blink = __c_ua(delayed_work_pending(&ops->cursor_work));
 err:
 	console_unlock();
 	return sysfs_emit(buf, "%d\n", blink);
