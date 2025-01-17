@@ -279,7 +279,7 @@ static struct sg_table *vmalloc_to_sgt(char *data, uint32_t size, int *sg_ents)
 	struct scatterlist *sg;
 	struct page *pg;
 
-	if (WARN_ON(!PAGE_ALIGNED(data)))
+	if (WARN_ON(!PAGE_ALIGNED(__c_pa(data))))
 		return NULL;
 
 	sgt = kmalloc(sizeof(*sgt), GFP_KERNEL);
