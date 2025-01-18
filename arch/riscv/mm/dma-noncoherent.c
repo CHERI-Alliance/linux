@@ -28,6 +28,13 @@ static inline void arch_dma_cache_wback(phys_addr_t paddr, size_t size)
 	ALT_CMO_OP(CLEAN, vaddr, size, riscv_cbom_block_size);
 }
 
+#ifdef CONFIG_CHERI_KERNEL
+/*
+ * Cache invalidate operations with Cheri are not safe, as they
+ * can stale data with valid tags in extarnal memory.
+ */
+#define arch_dma_cache_inv arch_dma_cache_wback_inv
+#else
 static inline void arch_dma_cache_inv(phys_addr_t paddr, size_t size)
 {
 	void *vaddr = phys_to_virt(paddr);
@@ -41,6 +48,7 @@ static inline void arch_dma_cache_inv(phys_addr_t paddr, size_t size)
 
 	ALT_CMO_OP(INVAL, vaddr, size, riscv_cbom_block_size);
 }
+#endif
 
 static inline void arch_dma_cache_wback_inv(phys_addr_t paddr, size_t size)
 {
