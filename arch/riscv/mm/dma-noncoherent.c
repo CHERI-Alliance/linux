@@ -39,7 +39,12 @@ static inline void arch_dma_cache_inv(phys_addr_t paddr, size_t size)
 	}
 #endif
 
+#ifdef CONFIG_RISCV_CHERI
+	/* Replace INVAL with FLUSH as recommended by the CHERI spec. */
+	ALT_CMO_OP(FLUSH, vaddr, size, riscv_cbom_block_size);
+#else
 	ALT_CMO_OP(INVAL, vaddr, size, riscv_cbom_block_size);
+#endif
 }
 
 static inline void arch_dma_cache_wback_inv(phys_addr_t paddr, size_t size)
