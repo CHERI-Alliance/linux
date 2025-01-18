@@ -29,6 +29,12 @@ void arch_invalidate_pmem(void *addr, size_t size)
 		return;
 	}
 #endif
+
+#ifdef CONFIG_RISCV_CHERI
+	/* Replace INVAL with FLUSH as recommended by the CHERI spec. */
+	ALT_CMO_OP(FLUSH, addr, size, riscv_cbom_block_size);
+#else
 	ALT_CMO_OP(INVAL, addr, size, riscv_cbom_block_size);
+#endif
 }
 EXPORT_SYMBOL_GPL(arch_invalidate_pmem);
