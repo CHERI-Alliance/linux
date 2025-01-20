@@ -4,119 +4,64 @@ virtual context
 virtual org
 virtual report
 
-@depends on patch@
-identifier __type;
-identifier __name;
-expression __data;
+@initialize:python@
 @@
 
-  struct __type __name[...] = {
+import re
+mtxt = '^ *\. *(driver_data|driver_info) *= *\( *(unsigned *long|kernel_ulong_t) *\) *'
+wtxt = ' *(\[|\]|\&|\.|\(|\)|->) *'
+m = re.compile(mtxt)
+w = re.compile(wtxt)
+
+
+@r1 depends on patch@
+identifier __type;
+identifier __name;
+initializer __init;
+position p;
+@@
+
+struct __type __name[...] = {
 	...,
 	{
 		...,
-		.driver_data =
--		(unsigned long)
-+		(uintptr_t)
-		&__data
+		__init@p
 		,...
 	}
 	,...
- };
+};
 
-@depends on patch@
-identifier __type;
-identifier __name;
-expression __data;
+
+@script:python r2 depends on patch@
+init << r1.__init;
+cast;
+rest;
 @@
 
-  struct __type __name[...] = {
+(init, _) = re.subn(w, '\\1', init)
+(init, n) = re.subn(m, '.\\1 = (uintptr_t)', init)
+if n == 0:
+	cocci.include_match(False)
+else:
+	coccinelle.rest = init
+
+
+@depends on patch@
+identifier r1.__type;
+identifier r1.__name;
+initializer r1.__init;
+position r1.p;
+identifier r2.rest;
+@@
+
+struct __type __name[...] = {
 	...,
 	{
 		...,
-		.driver_data =
--		(kernel_ulong_t)
-+		(uintptr_t)
-		&__data
+-		__init@p
++		rest
 		,...
 	}
 	,...
- };
-
-@depends on patch@
-identifier __type;
-identifier __name;
-expression __data;
-typedef kernel_ulong_t;
-@@
-
-  struct __type __name[...] = {
-	...,
-	{
-		...,
-		.driver_data =
--		(kernel_ulong_t)
-+		(uintptr_t)
-		&__data
-		,...
-	}
-	,...
- };
-
-@depends on patch@
-identifier __type;
-identifier __name;
-expression __data;
-@@
-
-  struct __type __name[...] = {
-	...,
-	{
-		...,
-		.driver_info =
--		(unsigned long)
-+		(uintptr_t)
-		&__data
-		,...
-	}
-	,...
- };
-
-@depends on patch@
-identifier __type;
-identifier __name;
-expression __data;
-@@
-
-  struct __type __name[...] = {
-	...,
-	{
-		...,
-		.driver_info =
--		(kernel_ulong_t)
-+		(uintptr_t)
-		&__data
-		,...
-	}
-	,...
- };
-
-@depends on patch@
-identifier __type;
-identifier __name;
-expression __data;
-typedef kernel_ulong_t;
-@@
-
-  struct __type __name[...] = {
-	...,
-	{
-		...,
-		.driver_info =
--		(kernel_ulong_t)
-+		(uintptr_t)
-		&__data
-		,...
-	}
-	,...
- };
+};
 

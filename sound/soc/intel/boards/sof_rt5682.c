@@ -781,94 +781,55 @@ static int sof_audio_probe(struct platform_device *pdev)
 static const struct platform_device_id board_ids[] = {
 	{
 		.name = "sof_rt5682",
-		.driver_data = (kernel_ulong_t)(SOF_RT5682_MCLK_EN |
-					SOF_SSP_PORT_CODEC(2)),
+		.driver_data = (uintptr_t)(SOF_RT5682_MCLK_EN | SOF_SSP_PORT_CODEC(2)),
 	},
 	{
 		.name = "glk_rt5682_def",
-		.driver_data = (kernel_ulong_t)(SOF_RT5682_MCLK_EN |
-					SOF_SSP_PORT_CODEC(2) |
-					SOF_SSP_PORT_AMP(1)),
+		.driver_data = (uintptr_t)(SOF_RT5682_MCLK_EN | SOF_SSP_PORT_CODEC(2)| SOF_SSP_PORT_AMP(1)),
 	},
 	{
 		.name = "icl_rt5682_def",
-		.driver_data = (kernel_ulong_t)(SOF_RT5682_MCLK_EN |
-					SOF_SSP_PORT_CODEC(0)),
+		.driver_data = (uintptr_t)(SOF_RT5682_MCLK_EN | SOF_SSP_PORT_CODEC(0)),
 	},
 	{
 		.name = "cml_rt5682_def",
-		.driver_data = (kernel_ulong_t)(SOF_RT5682_MCLK_EN |
-					SOF_SSP_PORT_CODEC(0) |
-					SOF_SSP_PORT_AMP(1)),
+		.driver_data = (uintptr_t)(SOF_RT5682_MCLK_EN | SOF_SSP_PORT_CODEC(0)| SOF_SSP_PORT_AMP(1)),
 	},
 	{
 		.name = "jsl_rt5682_def",
-		.driver_data = (kernel_ulong_t)(SOF_RT5682_MCLK_EN |
-					SOF_SSP_PORT_CODEC(0) |
-					SOF_SSP_PORT_AMP(1)),
+		.driver_data = (uintptr_t)(SOF_RT5682_MCLK_EN | SOF_SSP_PORT_CODEC(0)| SOF_SSP_PORT_AMP(1)),
 	},
 	{
 		.name = "tgl_rt5682_def",
-		.driver_data = (kernel_ulong_t)(SOF_RT5682_MCLK_EN |
-					SOF_SSP_PORT_CODEC(0) |
-					SOF_SSP_PORT_AMP(1) |
-					SOF_NUM_IDISP_HDMI(4) |
-					SOF_SSP_PORT_BT_OFFLOAD(2) |
-					SOF_BT_OFFLOAD_PRESENT),
+		.driver_data = (uintptr_t)(SOF_RT5682_MCLK_EN | SOF_SSP_PORT_CODEC(0)| SOF_SSP_PORT_AMP(1)| SOF_NUM_IDISP_HDMI(4)| SOF_SSP_PORT_BT_OFFLOAD(2)| SOF_BT_OFFLOAD_PRESENT),
 	},
 	{
 		.name = "adl_rt5682_def",
-		.driver_data = (kernel_ulong_t)(SOF_RT5682_MCLK_EN |
-					SOF_SSP_PORT_CODEC(0) |
-					SOF_SSP_PORT_AMP(1) |
-					SOF_NUM_IDISP_HDMI(4) |
-					SOF_SSP_PORT_BT_OFFLOAD(2) |
-					SOF_BT_OFFLOAD_PRESENT),
+		.driver_data = (uintptr_t)(SOF_RT5682_MCLK_EN | SOF_SSP_PORT_CODEC(0)| SOF_SSP_PORT_AMP(1)| SOF_NUM_IDISP_HDMI(4)| SOF_SSP_PORT_BT_OFFLOAD(2)| SOF_BT_OFFLOAD_PRESENT),
 	},
 	{
 		.name = "adl_mx98357_rt5682",
-		.driver_data = (kernel_ulong_t)(SOF_RT5682_MCLK_EN |
-					SOF_SSP_PORT_CODEC(0) |
-					SOF_SSP_PORT_AMP(2) |
-					SOF_NUM_IDISP_HDMI(4)),
+		.driver_data = (uintptr_t)(SOF_RT5682_MCLK_EN | SOF_SSP_PORT_CODEC(0)| SOF_SSP_PORT_AMP(2)| SOF_NUM_IDISP_HDMI(4)),
 	},
 	{
 		.name = "adl_rt5682_c1_h02",
-		.driver_data = (kernel_ulong_t)(SOF_RT5682_MCLK_EN |
-					SOF_SSP_PORT_CODEC(1) |
-					/* SSP 0 and SSP 2 are used for HDMI IN */
-					SOF_SSP_MASK_HDMI_CAPTURE(0x5)),
+		.driver_data = (uintptr_t)(SOF_RT5682_MCLK_EN | SOF_SSP_PORT_CODEC(1)| SOF_SSP_MASK_HDMI_CAPTURE(0x5)),
 	},
 	{
 		.name = "rpl_mx98357_rt5682",
-		.driver_data = (kernel_ulong_t)(SOF_RT5682_MCLK_EN |
-					SOF_SSP_PORT_CODEC(0) |
-					SOF_SSP_PORT_AMP(2) |
-					SOF_NUM_IDISP_HDMI(4)),
+		.driver_data = (uintptr_t)(SOF_RT5682_MCLK_EN | SOF_SSP_PORT_CODEC(0)| SOF_SSP_PORT_AMP(2)| SOF_NUM_IDISP_HDMI(4)),
 	},
 	{
 		.name = "rpl_rt5682_def",
-		.driver_data = (kernel_ulong_t)(SOF_RT5682_MCLK_EN |
-					SOF_SSP_PORT_CODEC(0) |
-					SOF_SSP_PORT_AMP(1) |
-					SOF_NUM_IDISP_HDMI(4) |
-					SOF_SSP_PORT_BT_OFFLOAD(2) |
-					SOF_BT_OFFLOAD_PRESENT),
+		.driver_data = (uintptr_t)(SOF_RT5682_MCLK_EN | SOF_SSP_PORT_CODEC(0)| SOF_SSP_PORT_AMP(1)| SOF_NUM_IDISP_HDMI(4)| SOF_SSP_PORT_BT_OFFLOAD(2)| SOF_BT_OFFLOAD_PRESENT),
 	},
 	{
 		.name = "rpl_rt5682_c1_h02",
-		.driver_data = (kernel_ulong_t)(SOF_RT5682_MCLK_EN |
-					SOF_SSP_PORT_CODEC(1) |
-					/* SSP 0 and SSP 2 are used for HDMI IN */
-					SOF_SSP_MASK_HDMI_CAPTURE(0x5)),
+		.driver_data = (uintptr_t)(SOF_RT5682_MCLK_EN | SOF_SSP_PORT_CODEC(1)| SOF_SSP_MASK_HDMI_CAPTURE(0x5)),
 	},
 	{
 		.name = "mtl_rt5682_def",
-		.driver_data = (kernel_ulong_t)(SOF_RT5682_MCLK_EN |
-					SOF_SSP_PORT_CODEC(0) |
-					SOF_SSP_PORT_AMP(1) |
-					SOF_SSP_PORT_BT_OFFLOAD(2) |
-					SOF_BT_OFFLOAD_PRESENT),
+		.driver_data = (uintptr_t)(SOF_RT5682_MCLK_EN | SOF_SSP_PORT_CODEC(0)| SOF_SSP_PORT_AMP(1)| SOF_SSP_PORT_BT_OFFLOAD(2)| SOF_BT_OFFLOAD_PRESENT),
 	},
 	{ }
 };

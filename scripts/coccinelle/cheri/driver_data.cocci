@@ -4,42 +4,51 @@ virtual context
 virtual org
 virtual report
 
-@depends on patch@
-identifier __type;
-identifier __field =~ "^(driver_info|driver_data)$";
+@initialize:python@
 @@
 
- struct __type {
-	...
--	unsigned long
-+	uintptr_t
-	__field;
-	...
- }
+import re
+texpr = '^unsigned long|kernel_ulong_t$'
+nexpr = '^driver_data|driver_info$'
+tre = re.compile(texpr)
+nre = re.compile(nexpr)
 
-@depends on patch@
+@r1 depends on patch@
 identifier __type;
-identifier __field =~ "^(driver_info|driver_data)$";
+type __ftype;
+identifier __fname;
+typedef uintptr_t;
 @@
 
- struct __type {
+struct __type {
 	...
--	kernel_ulong_t
-+	uintptr_t
-	__field;
+	__ftype
+	__fname;
 	...
- }
+}
 
-@depends on patch@
-identifier __type;
-identifier __field =~ "^(driver_info|driver_data)$";
-typedef kernel_ulong_t;
+@script:python depends on patch@
+t << r1.__ftype;
+n << r1.__fname;
 @@
 
- struct __type {
+if not tre.match(t):
+	cocci.include_match(False)
+if not nre.match(n):
+	cocci.include_match(False)
+
+
+@depends on patch@
+identifier r1.__type;
+type r1.__ftype;
+identifier r1.__fname;
+typedef uintptr_t;
+@@
+
+struct __type {
 	...
--	kernel_ulong_t
+-	__ftype
 +	uintptr_t
-	__field;
+	__fname;
 	...
- }
+}

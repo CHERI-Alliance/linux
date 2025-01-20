@@ -292,32 +292,19 @@ static int sof_audio_probe(struct platform_device *pdev)
 static const struct platform_device_id board_ids[] = {
 	{
 		.name = "adl_rt1019p_8825",
-		.driver_data = (kernel_ulong_t)(SOF_SSP_PORT_CODEC(0) |
-					SOF_SSP_PORT_AMP(2) |
-					SOF_NUM_IDISP_HDMI(4)),
+		.driver_data = (uintptr_t)(SOF_SSP_PORT_CODEC(0)| SOF_SSP_PORT_AMP(2)| SOF_NUM_IDISP_HDMI(4)),
 	},
 	{
 		.name = "adl_nau8825_def",
-		.driver_data = (kernel_ulong_t)(SOF_SSP_PORT_CODEC(0) |
-					SOF_SSP_PORT_AMP(1) |
-					SOF_NUM_IDISP_HDMI(4) |
-					SOF_SSP_PORT_BT_OFFLOAD(2) |
-					SOF_BT_OFFLOAD_PRESENT),
+		.driver_data = (uintptr_t)(SOF_SSP_PORT_CODEC(0)| SOF_SSP_PORT_AMP(1)| SOF_NUM_IDISP_HDMI(4)| SOF_SSP_PORT_BT_OFFLOAD(2)| SOF_BT_OFFLOAD_PRESENT),
 	},
 	{
 		.name = "rpl_nau8825_def",
-		.driver_data = (kernel_ulong_t)(SOF_SSP_PORT_CODEC(0) |
-					SOF_SSP_PORT_AMP(1) |
-					SOF_NUM_IDISP_HDMI(4) |
-					SOF_SSP_PORT_BT_OFFLOAD(2) |
-					SOF_BT_OFFLOAD_PRESENT),
+		.driver_data = (uintptr_t)(SOF_SSP_PORT_CODEC(0)| SOF_SSP_PORT_AMP(1)| SOF_NUM_IDISP_HDMI(4)| SOF_SSP_PORT_BT_OFFLOAD(2)| SOF_BT_OFFLOAD_PRESENT),
 	},
 	{
 		.name = "mtl_nau8825_def",
-		.driver_data = (kernel_ulong_t)(SOF_SSP_PORT_CODEC(2) |
-					SOF_SSP_PORT_AMP(0) |
-					SOF_SSP_PORT_BT_OFFLOAD(1) |
-					SOF_BT_OFFLOAD_PRESENT),
+		.driver_data = (uintptr_t)(SOF_SSP_PORT_CODEC(2)| SOF_SSP_PORT_AMP(0)| SOF_SSP_PORT_BT_OFFLOAD(1)| SOF_BT_OFFLOAD_PRESENT),
 	},
 	{ }
 };

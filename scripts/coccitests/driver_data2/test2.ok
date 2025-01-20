@@ -35,10 +35,10 @@ struct foo foos[] = {
 		.driver_data = (other)&id15,
 	},
 	{
-		.driver_info = (kernel_ulong_t)0,
+		.driver_info = (uintptr_t)0,
 	},
 	{
-		.driver_data = (kernel_ulong_t)0,
+		.driver_data = (uintptr_t)0,
 	},
 	{
 		.driver_info = (uintptr_t)&id1,

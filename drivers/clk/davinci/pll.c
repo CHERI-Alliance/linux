@@ -875,11 +875,11 @@ static const struct of_device_id davinci_pll_of_match[] = {
 
 static const struct platform_device_id davinci_pll_id_table[] = {
 #ifdef CONFIG_ARCH_DAVINCI_DA830
-	{ .name = "da830-pll",   .driver_data = (kernel_ulong_t)da830_pll_init   },
+	{ .name = "da830-pll",   .driver_data = (uintptr_t)da830_pll_init   },
 #endif
 #ifdef CONFIG_ARCH_DAVINCI_DA850
-	{ .name = "da850-pll0",  .driver_data = (kernel_ulong_t)da850_pll0_init  },
-	{ .name = "da850-pll1",  .driver_data = (kernel_ulong_t)da850_pll1_init  },
+	{ .name = "da850-pll0",  .driver_data = (uintptr_t)da850_pll0_init  },
+	{ .name = "da850-pll1",  .driver_data = (uintptr_t)da850_pll1_init  },
 #endif
 	{ }
 };

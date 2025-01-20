@@ -457,47 +457,27 @@ static int audio_probe(struct platform_device *pdev)
 static const struct platform_device_id board_ids[] = {
 	{
 		.name = "glk_da7219_def",
-		.driver_data = (kernel_ulong_t)(SOF_DA7219_GLK_BOARD |
-					SOF_SSP_PORT_CODEC(2) |
-					SOF_SSP_PORT_AMP(1)),
+		.driver_data = (uintptr_t)(SOF_DA7219_GLK_BOARD | SOF_SSP_PORT_CODEC(2)| SOF_SSP_PORT_AMP(1)),
 	},
 	{
 		.name = "cml_da7219_def",
-		.driver_data = (kernel_ulong_t)(SOF_DA7219_CML_BOARD |
-					SOF_SSP_PORT_CODEC(0) |
-					SOF_SSP_PORT_AMP(1)),
+		.driver_data = (uintptr_t)(SOF_DA7219_CML_BOARD | SOF_SSP_PORT_CODEC(0)| SOF_SSP_PORT_AMP(1)),
 	},
 	{
 		.name = "jsl_da7219_def",
-		.driver_data = (kernel_ulong_t)(SOF_DA7219_JSL_BOARD |
-					SOF_SSP_PORT_CODEC(0) |
-					SOF_SSP_PORT_AMP(1)),
+		.driver_data = (uintptr_t)(SOF_DA7219_JSL_BOARD | SOF_SSP_PORT_CODEC(0)| SOF_SSP_PORT_AMP(1)),
 	},
 	{
 		.name = "adl_da7219_def",
-		.driver_data = (kernel_ulong_t)(SOF_DA7219_MCLK_EN |
-					SOF_SSP_PORT_CODEC(0) |
-					SOF_SSP_PORT_AMP(1) |
-					SOF_NUM_IDISP_HDMI(4) |
-					SOF_SSP_PORT_BT_OFFLOAD(2) |
-					SOF_BT_OFFLOAD_PRESENT),
+		.driver_data = (uintptr_t)(SOF_DA7219_MCLK_EN | SOF_SSP_PORT_CODEC(0)| SOF_SSP_PORT_AMP(1)| SOF_NUM_IDISP_HDMI(4)| SOF_SSP_PORT_BT_OFFLOAD(2)| SOF_BT_OFFLOAD_PRESENT),
 	},
 	{
 		.name = "rpl_da7219_def",
-		.driver_data = (kernel_ulong_t)(SOF_DA7219_MCLK_EN |
-					SOF_SSP_PORT_CODEC(0) |
-					SOF_SSP_PORT_AMP(1) |
-					SOF_NUM_IDISP_HDMI(4) |
-					SOF_SSP_PORT_BT_OFFLOAD(2) |
-					SOF_BT_OFFLOAD_PRESENT),
+		.driver_data = (uintptr_t)(SOF_DA7219_MCLK_EN | SOF_SSP_PORT_CODEC(0)| SOF_SSP_PORT_AMP(1)| SOF_NUM_IDISP_HDMI(4)| SOF_SSP_PORT_BT_OFFLOAD(2)| SOF_BT_OFFLOAD_PRESENT),
 	},
 	{
 		.name = "mtl_da7219_def",
-		.driver_data = (kernel_ulong_t)(SOF_DA7219_MCLK_EN |
-					SOF_SSP_PORT_CODEC(2) |
-					SOF_SSP_PORT_AMP(0) |
-					SOF_SSP_PORT_BT_OFFLOAD(1) |
-					SOF_BT_OFFLOAD_PRESENT),
+		.driver_data = (uintptr_t)(SOF_DA7219_MCLK_EN | SOF_SSP_PORT_CODEC(2)| SOF_SSP_PORT_AMP(0)| SOF_SSP_PORT_BT_OFFLOAD(1)| SOF_BT_OFFLOAD_PRESENT),
 	},
 	{ }
 };

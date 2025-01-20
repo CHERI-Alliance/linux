@@ -1,7 +1,7 @@
 
 struct foo foos[] = {
 	{
-		(uintptr_t)&s1,
+		(uintptr_t)&s1[0],
 		(uintptr_t)&s2,
 		(other)&s3,
 	},
@@ -15,8 +15,8 @@ struct foo foos[] = {
 		(other)0
 	},
 	{
-		(uintptr_t)&t1,
-		(uintptr_t)&t2,
+		(uintptr_t)&t1.x,
+		(uintptr_t)&t2->y,
 		(other)&t3,
 	}
 };

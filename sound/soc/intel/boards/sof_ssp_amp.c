@@ -180,35 +180,24 @@ static const struct platform_device_id board_ids[] = {
 	},
 	{
 		.name = "tgl_rt1308_hdmi_ssp",
-		.driver_data = (kernel_ulong_t)(SOF_SSP_PORT_AMP(2) |
-					SOF_SSP_MASK_HDMI_CAPTURE(0x22)),
-					/* SSP 1 and SSP 5 are used for HDMI IN */
+		.driver_data = (uintptr_t)(SOF_SSP_PORT_AMP(2)| SOF_SSP_MASK_HDMI_CAPTURE(0x22)),
+		/* SSP 1 and SSP 5 are used for HDMI IN */
 	},
 	{
 		.name = "adl_cs35l41",
-		.driver_data = (kernel_ulong_t)(SOF_SSP_PORT_AMP(1) |
-					SOF_NUM_IDISP_HDMI(4) |
-					SOF_HDMI_PLAYBACK_PRESENT |
-					SOF_SSP_PORT_BT_OFFLOAD(2) |
-					SOF_BT_OFFLOAD_PRESENT),
+		.driver_data = (uintptr_t)(SOF_SSP_PORT_AMP(1)| SOF_NUM_IDISP_HDMI(4)| SOF_HDMI_PLAYBACK_PRESENT | SOF_SSP_PORT_BT_OFFLOAD(2)| SOF_BT_OFFLOAD_PRESENT),
 	},
 	{
 		.name = "adl_lt6911_hdmi_ssp",
-		.driver_data = (kernel_ulong_t)(SOF_SSP_MASK_HDMI_CAPTURE(0x5) |
-					/* SSP 0 and SSP 2 are used for HDMI IN */
-					SOF_HDMI_PLAYBACK_PRESENT),
+		.driver_data = (uintptr_t)(SOF_SSP_MASK_HDMI_CAPTURE(0x5)| SOF_HDMI_PLAYBACK_PRESENT),
 	},
 	{
 		.name = "rpl_lt6911_hdmi_ssp",
-		.driver_data = (kernel_ulong_t)(SOF_SSP_MASK_HDMI_CAPTURE(0x5) |
-					/* SSP 0 and SSP 2 are used for HDMI IN */
-					SOF_HDMI_PLAYBACK_PRESENT),
+		.driver_data = (uintptr_t)(SOF_SSP_MASK_HDMI_CAPTURE(0x5)| SOF_HDMI_PLAYBACK_PRESENT),
 	},
 	{
 		.name = "mtl_lt6911_hdmi_ssp",
-		.driver_data = (kernel_ulong_t)(SOF_SSP_MASK_HDMI_CAPTURE(0x5) |
-					/* SSP 0 and SSP 2 are used for HDMI IN */
-					SOF_HDMI_PLAYBACK_PRESENT),
+		.driver_data = (uintptr_t)(SOF_SSP_MASK_HDMI_CAPTURE(0x5)| SOF_HDMI_PLAYBACK_PRESENT),
 	},
 	{ }
 };

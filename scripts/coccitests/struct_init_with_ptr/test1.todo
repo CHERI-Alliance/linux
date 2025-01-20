@@ -1,7 +1,7 @@
 
 struct foo foos[] = {
 	{
-		(unsigned long)&s1,
+		(unsigned long)&s1[0],
 		(kernel_ulong_t)&s2,
 		(other)&s3,
 	},
@@ -15,8 +15,8 @@ struct foo foos[] = {
 		(other)0
 	},
 	{
-		(unsigned long)&t1,
-		(kernel_ulong_t)&t2,
+		(unsigned long)&t1.x,
+		(kernel_ulong_t)&t2->y,
 		(other)&t3,
 	}
 };

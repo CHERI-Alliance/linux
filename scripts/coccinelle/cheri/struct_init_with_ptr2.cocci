@@ -4,95 +4,67 @@ virtual context
 virtual org
 virtual report
 
-@structdef depends on patch@
-type __type0;
-identifier __ident0;
+@initialize:python@
 @@
 
-__type0 __ident0[...] = {
+import re
+texpr = '^unsigned long|kernel_ulong_t$'
+tre = re.compile(texpr)
+
+@match1 depends on patch@
+type __type0;
+identifier __array;
+@@
+
+__type0 __array[...] = {
 	...
 };
 
-@fundef depends on patch@
+@match2 depends on patch@
 type __type1;
-identifier __ident1;
+identifier __func;
 @@
 
-__type1 __ident1(...)
+__type1 __func(...)
 {
 	...
 }
 
-@depends on patch@
+@r1 depends on patch@
+type __cast;
+position p;
 identifier __ident;
 identifier __type;
-identifier __data = structdef.__ident0;
-typedef uintptr_t;
+identifier __data;
 @@
 
- struct __type __ident[...] = {
+struct __type __ident[...] = {
 	...,
 	{
 		...,
--		(unsigned long)__data
-+		(uintptr_t)__data
-		,...
+		(__cast@p)__data,
+		...
 	}
 	,...
- };
+};
+
+@script:python depends on patch@
+a << match1.__array;
+f << match2.__func;
+t << r1.__cast;
+d << r1.__data;
+@@
+
+if not tre.match(t):
+	cocci.include_match(False)
+if d != a and d != f:
+	cocci.include_match(False)
 
 @depends on patch@
-identifier __ident;
-identifier __type;
-identifier __data = fundef.__ident1;
+type r1.__cast;
+position p = r1.p;
 typedef uintptr_t;
 @@
 
- struct __type __ident[...] = {
-	...,
-	{
-		...,
--		(unsigned long)__data
-+		(uintptr_t)__data
-		,...
-	}
-	,...
- };
-
-@depends on patch@
-identifier __ident;
-identifier __type;
-identifier __data = structdef.__ident0;
-typedef kernel_ulong_t;
-typedef uintptr_t;
-@@
-
- struct __type __ident[...] = {
-	...,
-	{
-		...,
--		(kernel_ulong_t)__data
-+		(uintptr_t)__data
-		,...
-	}
-	,...
- };
-
-@depends on patch@
-identifier __ident;
-identifier __type;
-identifier __data = fundef.__ident1;
-typedef kernel_ulong_t;
-typedef uintptr_t;
-@@
-
- struct __type __ident[...] = {
-	...,
-	{
-		...,
--		(kernel_ulong_t)__data
-+		(uintptr_t)__data
-		,...
-	}
-	,...
- };
+- __cast@p
++ uintptr_t
