@@ -1359,7 +1359,7 @@ struct drm_event_vblank {
  */
 struct drm_event_crtc_sequence {
 	struct drm_event	base;
-	__u64			user_data;
+	__kernel_uintptr_t	user_data;
 	__s64			time_ns;
 	__u64			sequence;
 };
