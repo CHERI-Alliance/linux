@@ -1602,7 +1602,7 @@ static int drm_queue_vblank_event(struct drm_device *dev, unsigned int pipe,
 	e->compat = compat;
 	if (compat) {
 		e->event.base.length = sizeof(e->event.vbl32);
-		e->event.vbl32.user_data = vblwait->request.signal;
+		e->event.vbl32.user_data = __c_ua(vblwait->request.signal);
 		e->event.vbl32.crtc_id = 0;
 		if (crtc)
 			e->event.vbl32.crtc_id = crtc->base.id;

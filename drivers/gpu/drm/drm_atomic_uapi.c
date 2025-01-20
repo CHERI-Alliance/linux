@@ -933,7 +933,7 @@ static struct drm_pending_vblank_event *create_vblank_event(
 	e->compat = compat;
 	if (compat) {
 		e->event.vbl32.crtc_id = crtc->base.id;
-		e->event.vbl32.user_data = user_data;
+		e->event.vbl32.user_data = __c_ua(user_data);
 	} else {
 		e->event.vbl.crtc_id = crtc->base.id;
 		e->event.vbl.user_data = user_data;
@@ -1209,7 +1209,7 @@ static int prepare_signaling(struct drm_device *dev,
 
 	if (in_compat64_syscall()) {
 		flags = arg32->flags;
-		user_data = arg32->user_data;
+		user_data = __c_fakeu(arg32->user_data);
 	} else {
 		flags = arg->flags;
 		user_data = arg->user_data;
