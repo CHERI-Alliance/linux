@@ -17,3 +17,4 @@
 #include "x730-mp4.dtsi"
 #include "hobgoblin-base.dtsi"
 #include "hobgoblin-vcu118-base.dtsi"
+#include "hobgoblin-vcu118-cmu.dtsi"
