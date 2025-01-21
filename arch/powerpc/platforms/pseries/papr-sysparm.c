@@ -310,7 +310,8 @@ free_sysparm_buf:
 	return ret;
 }
 
-static long papr_sysparm_ioctl(struct file *filp, unsigned int ioctl, unsigned long arg)
+static long papr_sysparm_ioctl(struct file *filp, unsigned int ioctl,
+			       user_uintptr_t arg)
 {
 	void __user *argp = (__force void __user *)arg;
 	long ret;

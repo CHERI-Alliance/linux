@@ -505,7 +505,8 @@ free_blob:
 /*
  * Top-level ioctl handler for /dev/papr-vpd.
  */
-static long papr_vpd_dev_ioctl(struct file *filp, unsigned int ioctl, unsigned long arg)
+static long papr_vpd_dev_ioctl(struct file *filp, unsigned int ioctl,
+			       user_uintptr_t arg)
 {
 	void __user *argp = (__force void __user *)arg;
 	long ret;

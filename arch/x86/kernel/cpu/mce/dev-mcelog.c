@@ -252,7 +252,7 @@ static __poll_t mce_chrdev_poll(struct file *file, poll_table *wait)
 }
 
 static long mce_chrdev_ioctl(struct file *f, unsigned int cmd,
-				unsigned long arg)
+				user_uintptr_t arg)
 {
 	int __user *p = (int __user *)arg;
 

@@ -630,7 +630,7 @@ static int clp_immediate_command(struct clp_req *req)
 }
 
 static long clp_misc_ioctl(struct file *filp, unsigned int cmd,
-			   unsigned long arg)
+			   user_uintptr_t arg)
 {
 	struct clp_req req;
 	void __user *argp;

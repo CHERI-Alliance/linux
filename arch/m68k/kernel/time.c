@@ -104,7 +104,7 @@ static int rtc_generic_set_time(struct device *dev, struct rtc_time *tm)
 	return 0;
 }
 
-static int rtc_ioctl(struct device *dev, unsigned int cmd, unsigned long arg)
+static int rtc_ioctl(struct device *dev, unsigned int cmd, user_uintptr_t arg)
 {
 	struct rtc_pll_info pll;
 	struct rtc_pll_info __user *argp = (void __user *)arg;

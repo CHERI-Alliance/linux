@@ -120,7 +120,7 @@ alpha_rtc_set_time(struct device *dev, struct rtc_time *tm)
 }
 
 static int
-alpha_rtc_ioctl(struct device *dev, unsigned int cmd, unsigned long arg)
+alpha_rtc_ioctl(struct device *dev, unsigned int cmd, user_uintptr_t arg)
 {
 	switch (cmd) {
 	case RTC_EPOCH_READ:

@@ -1657,7 +1657,8 @@ static long cfset_ioctl_start(unsigned long arg, struct file *file)
  * S390_HWCTR_STOP: Stops the counter sets on the CPU list given with the
  *    previous S390_HWCTR_START subcommand.
  */
-static long cfset_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long cfset_ioctl(struct file *file, unsigned int cmd,
+			user_uintptr_t arg)
 {
 	int ret;
 

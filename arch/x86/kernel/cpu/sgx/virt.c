@@ -274,7 +274,7 @@ static int sgx_vepc_open(struct inode *inode, struct file *file)
 }
 
 static long sgx_vepc_ioctl(struct file *file,
-			   unsigned int cmd, unsigned long arg)
+			   unsigned int cmd, user_uintptr_t arg)
 {
 	struct sgx_vepc *vepc = file->private_data;
 

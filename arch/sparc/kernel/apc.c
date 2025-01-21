@@ -86,7 +86,7 @@ static int apc_release(struct inode *inode, struct file *f)
 	return 0;
 }
 
-static long apc_ioctl(struct file *f, unsigned int cmd, unsigned long __arg)
+static long apc_ioctl(struct file *f, unsigned int cmd, user_uintptr_t __arg)
 {
 	__u8 inarg, __user *arg = (__u8 __user *) __arg;
 

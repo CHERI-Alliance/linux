@@ -130,7 +130,7 @@ static __poll_t hostaudio_poll(struct file *file,
 }
 
 static long hostaudio_ioctl(struct file *file,
-			   unsigned int cmd, unsigned long arg)
+			   unsigned int cmd, user_uintptr_t arg)
 {
 	struct hostaudio_state *state = file->private_data;
 	unsigned long data = 0;
@@ -224,7 +224,7 @@ static int hostaudio_release(struct inode *inode, struct file *file)
 /* /dev/mixer file operations */
 
 static long hostmixer_ioctl_mixdev(struct file *file,
-				  unsigned int cmd, unsigned long arg)
+				  unsigned int cmd, user_uintptr_t arg)
 {
 	struct hostmixer_state *state = file->private_data;
 

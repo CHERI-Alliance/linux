@@ -110,7 +110,7 @@ out:
 }
 
 static long hypfs_sprp_ioctl(struct file *file, unsigned int cmd,
-			       unsigned long arg)
+			       user_uintptr_t arg)
 {
 	void __user *argp;
 

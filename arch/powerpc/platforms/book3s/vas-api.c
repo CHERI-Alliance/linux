@@ -277,7 +277,7 @@ static int coproc_open(struct inode *inode, struct file *fp)
 	return 0;
 }
 
-static int coproc_ioc_tx_win_open(struct file *fp, unsigned long arg)
+static int coproc_ioc_tx_win_open(struct file *fp, user_uintptr_t arg)
 {
 	void __user *uptr = (void __user *)arg;
 	struct vas_tx_win_open_attr uattr;
@@ -543,7 +543,8 @@ out:
 	return rc;
 }
 
-static long coproc_ioctl(struct file *fp, unsigned int cmd, unsigned long arg)
+static long coproc_ioctl(struct file *fp, unsigned int cmd,
+			 user_uintptr_t arg)
 {
 	switch (cmd) {
 	case VAS_TX_WIN_OPEN:

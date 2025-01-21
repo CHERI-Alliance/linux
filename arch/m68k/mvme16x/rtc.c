@@ -35,7 +35,7 @@ static const unsigned char days_in_mo[] =
 
 static atomic_t rtc_ready = ATOMIC_INIT(1);
 
-static long rtc_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long rtc_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	volatile MK48T08ptr_t rtc = (MK48T08ptr_t)MVME_RTC_BASE;
 	unsigned long flags;

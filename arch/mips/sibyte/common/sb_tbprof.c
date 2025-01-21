@@ -490,7 +490,7 @@ static ssize_t sbprof_tb_read(struct file *filp, char __user *buf,
 
 static long sbprof_tb_ioctl(struct file *filp,
 			    unsigned int command,
-			    unsigned long arg)
+			    user_uintptr_t arg)
 {
 	int err = 0;
 

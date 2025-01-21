@@ -109,7 +109,7 @@ static DEFINE_MUTEX(ubd_lock);
 static DEFINE_MUTEX(ubd_mutex); /* replaces BKL, might not be needed */
 
 static int ubd_ioctl(struct block_device *bdev, blk_mode_t mode,
-		     unsigned int cmd, unsigned long arg);
+		     unsigned int cmd, user_uintptr_t arg);
 static int ubd_getgeo(struct block_device *bdev, struct hd_geometry *geo);
 
 #define MAX_DEV (16)
@@ -1352,7 +1352,7 @@ static int ubd_getgeo(struct block_device *bdev, struct hd_geometry *geo)
 }
 
 static int ubd_ioctl(struct block_device *bdev, blk_mode_t mode,
-		     unsigned int cmd, unsigned long arg)
+		     unsigned int cmd, user_uintptr_t arg)
 {
 	struct ubd *ubd_dev = bdev->bd_disk->private_data;
 	u16 ubd_id[ATA_ID_WORDS];

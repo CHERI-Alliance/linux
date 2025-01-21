@@ -121,7 +121,7 @@ static ssize_t harddog_write(struct file *file, const char __user *data, size_t 
 }
 
 static int harddog_ioctl_unlocked(struct file *file,
-				  unsigned int cmd, unsigned long arg)
+				  unsigned int cmd, user_uintptr_t arg)
 {
 	void __user *argp= (void __user *)arg;
 	static struct watchdog_info ident = {
@@ -145,7 +145,7 @@ static int harddog_ioctl_unlocked(struct file *file,
 }
 
 static long harddog_ioctl(struct file *file,
-			  unsigned int cmd, unsigned long arg)
+			  unsigned int cmd, user_uintptr_t arg)
 {
 	long ret;
 

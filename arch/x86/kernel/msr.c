@@ -145,7 +145,7 @@ static ssize_t msr_write(struct file *file, const char __user *buf,
 	return bytes ? bytes : err;
 }
 
-static long msr_ioctl(struct file *file, unsigned int ioc, unsigned long arg)
+static long msr_ioctl(struct file *file, unsigned int ioc, user_uintptr_t arg)
 {
 	u32 __user *uregs = (u32 __user *)arg;
 	u32 regs[8];

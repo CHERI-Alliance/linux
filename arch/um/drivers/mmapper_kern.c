@@ -41,7 +41,8 @@ static ssize_t mmapper_write(struct file *file, const char __user *buf,
 	return simple_write_to_buffer(v_buf, mmapper_size, ppos, buf, count);
 }
 
-static long mmapper_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long mmapper_ioctl(struct file *file, unsigned int cmd,
+			  user_uintptr_t arg)
 {
 	return -ENOIOCTLCMD;
 }

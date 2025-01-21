@@ -269,7 +269,7 @@ static int opal_prd_release(struct inode *inode, struct file *file)
 }
 
 static long opal_prd_ioctl(struct file *file, unsigned int cmd,
-		unsigned long param)
+		user_uintptr_t param)
 {
 	struct opal_prd_info info;
 	struct opal_prd_scom scom;

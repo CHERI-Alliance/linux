@@ -58,7 +58,8 @@ static ssize_t dbfs_read(struct file *file, char __user *buf,
 	return rc;
 }
 
-static long dbfs_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long dbfs_ioctl(struct file *file, unsigned int cmd,
+		       user_uintptr_t arg)
 {
 	struct hypfs_dbfs_file *df = file_inode(file)->i_private;
 	long rc;

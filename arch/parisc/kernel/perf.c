@@ -184,7 +184,8 @@ static int perf_open(struct inode *inode, struct file *file);
 static ssize_t perf_read(struct file *file, char __user *buf, size_t cnt, loff_t *ppos);
 static ssize_t perf_write(struct file *file, const char __user *buf,
 	size_t count, loff_t *ppos);
-static long perf_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
+static long perf_ioctl(struct file *file, unsigned int cmd,
+		       user_uintptr_t arg);
 static void perf_start_counters(void);
 static int perf_stop_counters(uint32_t *raddr);
 static const struct rdr_tbl_ent * perf_rdr_get_entry(uint32_t rdr_num);
@@ -424,7 +425,8 @@ static void perf_patch_images(void)
  * must be running on the processor that you wish to change.
  */
 
-static long perf_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long perf_ioctl(struct file *file, unsigned int cmd,
+		       user_uintptr_t arg)
 {
 	long error_start;
 	uint32_t raddr[4];

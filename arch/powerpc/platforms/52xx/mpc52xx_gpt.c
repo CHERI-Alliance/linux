@@ -544,7 +544,7 @@ static const struct watchdog_info mpc5200_wdt_info = {
 };
 
 static long mpc52xx_wdt_ioctl(struct file *file, unsigned int cmd,
-			      unsigned long arg)
+			      user_uintptr_t arg)
 {
 	struct mpc52xx_gpt_priv *gpt_wdt = file->private_data;
 	int __user *data = (int __user *)arg;

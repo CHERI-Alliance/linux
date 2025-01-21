@@ -29,7 +29,7 @@ static int arc_hl_mmap(struct file *fp, struct vm_area_struct *vma)
 }
 
 static long arc_hl_ioctl(struct file *file, unsigned int cmd,
-			unsigned long arg)
+			user_uintptr_t arg)
 {
 	/* we only support, returning the physical addr to mmap in user space */
 	put_user((unsigned int)__HOSTLINK__, (int __user *)arg);

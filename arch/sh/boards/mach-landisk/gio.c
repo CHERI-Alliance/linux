@@ -53,7 +53,7 @@ static int gio_close(struct inode *inode, struct file *filp)
 	return 0;
 }
 
-static long gio_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+static long gio_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 {
 	unsigned int data;
 	static unsigned int addr = 0;
