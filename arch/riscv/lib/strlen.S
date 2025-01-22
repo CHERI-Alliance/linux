@@ -23,7 +23,7 @@ SYM_FUNC_START(strlen)
 	 * Clobbers:
 	 *   t0, t1
 	 */
-	CREG(mv)	CREG(t1), CREG(a0)
+	mv	CREG(t1), CREG(a0)
 1:
 	lbu	t0, 0(CREG(t1))
 	beqz	t0, 2f

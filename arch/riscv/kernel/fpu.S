@@ -21,7 +21,7 @@
 
 SYM_FUNC_START(__fstate_save)
 	li  a2,  TASK_THREAD_F0
-	CREG(add) CREG(a0), CREG(a0), a2
+	add CREG(a0), CREG(a0), a2
 	li t1, SR_FS
 	csrs CSR_STATUS, t1
 	frcsr t0
@@ -64,7 +64,7 @@ SYM_FUNC_END(__fstate_save)
 
 SYM_FUNC_START(__fstate_restore)
 	li  a2,  TASK_THREAD_F0
-	CREG(add) CREG(a0), CREG(a0), a2
+	add CREG(a0), CREG(a0), a2
 	li t1, SR_FS
 	lw t0, TASK_THREAD_FCSR_F0(CREG(a0))
 	csrs CSR_STATUS, t1
@@ -127,7 +127,7 @@ SYM_FUNC_END(__fstate_restore)
 #else
 	llc CREG(t2), 1f
 #endif
-	CREG(add) CREG(t0), CREG(t2), t0
+	add CREG(t0), CREG(t2), t0
 	li t1, SR_FS
 	csrs CSR_STATUS, t1
 	jr CREG(t0)

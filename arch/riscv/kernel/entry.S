@@ -100,10 +100,10 @@ SYM_CODE_START(handle_exception)
 	scs_load_current_if_task_changed CREG(s5)
 
 #ifdef CONFIG_RISCV_ISA_V_PREEMPTIVE
-	CREG(mv) CREG(a0), CREG(sp)
+	mv CREG(a0), CREG(sp)
 	call riscv_v_context_nesting_start
 #endif
-	CREG(mv) CREG(a0), CREG(sp) /* pt_regs */
+	mv CREG(a0), CREG(sp) /* pt_regs */
 	la ra, ret_from_exception
 
 	/*
@@ -119,7 +119,7 @@ SYM_CODE_START(handle_exception)
 	slli t0, s4, RISCV_LGPTR
 	la t1, excp_vect_table
 	la t2, excp_vect_table_end
-	CREG(add) CREG(t0), CREG(t1), t0
+	add CREG(t0), CREG(t1), t0
 	/* Check if exception code lies within bounds */
 	bgeu t0, t2, 1f
 	CREG_L CREG(t0), 0(CREG(t0))
@@ -160,7 +160,7 @@ SYM_CODE_START_NOALIGN(ret_from_exception)
 	csrw CSR_SCRATCH, tp
 1:
 #ifdef CONFIG_RISCV_ISA_V_PREEMPTIVE
-	CREG(mv) CREG(a0), CREG(sp)
+	mv CREG(a0), CREG(sp)
 	call riscv_v_context_nesting_end
 #endif
 	REG_L a0, PT_STATUS(CREG(sp))
@@ -223,13 +223,13 @@ SYM_CODE_START_LOCAL(handle_kernel_stack_overflow)
 #endif
 	asm_per_cpu CREG(sp), overflow_stack, CREGX(31)
 	li x31, OVERFLOW_STACK_SIZE
-	CREG(add) CREG(sp), CREG(sp), x31
+	add CREG(sp), CREG(sp), x31
 	/* zero out x31 again and restore x31 */
 #ifndef CONFIG_CHERI_KERNEL
 	xor x31, x31, x31
 	csrrw x31, CSR_SCRATCH, x31
 #else
-	cmv CREGX(31), cnull
+	mv CREGX(31), cnull
 	csrrw CREGX(31), sscratchc, CREGX(31)
 #endif
 
@@ -253,7 +253,7 @@ SYM_CODE_START_LOCAL(handle_kernel_stack_overflow)
 	REG_S s3, PT_BADADDR(CREG(sp))
 	REG_S s4, PT_CAUSE(CREG(sp))
 	CREG_S CREG(s5), PT_TP(CREG(sp))
-	CREG(mv) CREG(a0), CREG(sp)
+	mv CREG(a0), CREG(sp)
 	tail handle_bad_stack
 SYM_CODE_END(handle_kernel_stack_overflow)
 ASM_NOKPROBE(handle_kernel_stack_overflow)
@@ -263,10 +263,10 @@ SYM_CODE_START(ret_from_fork)
 	call schedule_tail
 	beqz s0, 1f	/* not from kernel thread */
 	/* Call fn(arg) */
-	CREG(mv) CREG(a0), CREG(s1)
+	mv CREG(a0), CREG(s1)
 	jalr CREG(s0)
 1:
-	CREG(mv) CREG(a0), CREG(sp) /* pt_regs */
+	mv CREG(a0), CREG(sp) /* pt_regs */
 	la ra, ret_from_exception
 	tail syscall_exit_to_user_mode
 SYM_CODE_END(ret_from_fork)
@@ -293,7 +293,7 @@ SYM_FUNC_START(call_on_irq_stack)
 	/* Switch to the per-CPU IRQ stack and call the handler */
 	load_per_cpu t0, irq_stack_ptr, t1
 	li	t1, IRQ_STACK_SIZE
-	CREG(add)	CREG(sp), CREG(t0), t1
+	add	CREG(sp), CREG(t0), t1
 	jalr	CREG(a1)
 
 	/* Switch back to the thread shadow call stack */
@@ -322,8 +322,8 @@ SYM_FUNC_END(call_on_irq_stack)
 SYM_FUNC_START(__switch_to)
 	/* Save context into prev->thread */
 	li    a4,  TASK_THREAD_RA
-	CREG(add)   CREG(a3), CREG(a0), a4
-	CREG(add)   CREG(a4), CREG(a1), a4
+	add   CREG(a3), CREG(a0), a4
+	add   CREG(a4), CREG(a1), a4
 	CREG_S CREG(ra),  TASK_THREAD_RA_RA(CREG(a3))
 	CREG_S CREG(sp),  TASK_THREAD_SP_RA(CREG(a3))
 	CREG_S CREG(s0),  TASK_THREAD_S0_RA(CREG(a3))
@@ -356,7 +356,7 @@ SYM_FUNC_START(__switch_to)
 	CREG_L CREG(s10), TASK_THREAD_S10_RA(CREG(a4))
 	CREG_L CREG(s11), TASK_THREAD_S11_RA(CREG(a4))
 	/* The offset of thread_info in task_struct is zero. */
-	CREG(mv) CREG(tp), CREG(a1)
+	mv CREG(tp), CREG(a1)
 	/* Switch to the next shadow call stack */
 	scs_load_current
 	ret

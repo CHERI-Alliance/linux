@@ -35,8 +35,8 @@ SYM_FUNC_START(__memmove)
 
 	bleu a0, a1, .Lcapfwd
 
-	cadd ca0, ca0, a2
-	cadd ca1, ca1, a2
+	add ca0, ca0, a2
+	add ca1, ca1, a2
 
 .Lcapback:
 	beqz a2, .Lreturn_from_memmove
@@ -121,9 +121,9 @@ SYM_FUNC_START(__memmove)
 	 * Solve for some register values now.
 	 * Byte copy does not need t5 or t6.
 	 */
-	CREG(mv)  CREG(t3), CREG(a0)
-	CREG(add) CREG(t4), CREG(a0), a2
-	CREG(add) CREG(a4), CREG(a1), a2
+	mv  CREG(t3), CREG(a0)
+	add CREG(t4), CREG(a0), a2
+	add CREG(a4), CREG(a1), a2
 
 	/*
 	 * Byte copy if copying less than (2 * SZREG) bytes. This can
@@ -142,10 +142,10 @@ SYM_FUNC_START(__memmove)
 #else
 	andi t5, t3, SZREG-1
 	neg t5, t5
-	cadd ct5, ct3, t5
+	add ct5, ct3, t5
 	andi t6, t4, SZREG-1
 	neg t6, t6
-	cadd ct6, ct4, t6
+	add ct6, ct4, t6
 #endif
 
 	/*
@@ -194,7 +194,7 @@ SYM_FUNC_START(__memmove)
 #else
 	andi a7, a1, SZREG-1
 	neg a7, a7
-	cadd ca1, ca1, a7 /* Align the src pointer */
+	add ca1, ca1, a7 /* Align the src pointer */
 	caddi ca2, ct6, SZREG /* The other breakpoint for the unrolled loop*/
 #endif
 
@@ -246,9 +246,9 @@ SYM_FUNC_START(__memmove)
 
 	bne   t3, t6, 1b
 	2:
-	CREG(mv)   CREG(t3), CREG(t6) /* Fix the dest pointer in case the loop was broken */
+	mv   CREG(t3), CREG(t6) /* Fix the dest pointer in case the loop was broken */
 
-	CREG(add)  CREG(a1), CREG(t3), a5 /* Restore the src pointer */
+	add  CREG(a1), CREG(t3), a5 /* Restore the src pointer */
 	j .Lbyte_copy_forward /* Copy any remaining bytes */
 
 .Lmisaligned_fixup_copy_reverse:
@@ -263,10 +263,10 @@ SYM_FUNC_START(__memmove)
 #else
 	andi a7, a4, SZREG-1
 	neg a7, a7
-	cadd ca4, ca4, a7 /* Align the src pointer */
+	add ca4, ca4, a7 /* Align the src pointer */
 	andi a7, t5, SZREG-1
 	neg a7, a7
-	cadd ca2, ct5, a7 /* The other breakpoint for the unrolled loop*/
+	add ca2, ct5, a7 /* The other breakpoint for the unrolled loop*/
 #endif
 
 	/*
@@ -317,9 +317,9 @@ SYM_FUNC_START(__memmove)
 
 	bne   t4, t5, 1b
 	2:
-	CREG(mv)    CREG(t4), CREG(t5) /* Fix the dest pointer in case the loop was broken */
+	mv    CREG(t4), CREG(t5) /* Fix the dest pointer in case the loop was broken */
 
-	CREG(add)  CREG(a4), CREG(t4), a5 /* Restore the src pointer */
+	add  CREG(a4), CREG(t4), a5 /* Restore the src pointer */
 	j .Lbyte_copy_reverse /* Copy any remaining bytes */
 
 /*

@@ -140,7 +140,7 @@ SYM_FUNC_START(fallback_scalar_usercopy)
 #else
 	andi	t3, a1, SZREG-1
 	neg	t3, t3
-	cadd	ca1, ca1, t3
+	add	ca1, ca1, t3
 #endif
 
 	/*
@@ -174,7 +174,7 @@ SYM_FUNC_START(fallback_scalar_usercopy)
 	bltu	a0, t1, 3b
 
 	/* Revert src to original unaligned value  */
-	CREG(add)	CREG(a1), CREG(a1), a3
+	add	CREG(a1), CREG(a1), a3
 
 .Lbyte_copy_tail:
 	/*

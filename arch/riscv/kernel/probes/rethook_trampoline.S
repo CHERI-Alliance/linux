@@ -79,7 +79,7 @@ SYM_CODE_START(arch_rethook_trampoline)
 	addi sp, sp, -(PT_SIZE_ON_STACK)
 	save_all_base_regs
 
-	move a0, sp /* pt_regs */
+	mv CREG(a0), CREG(sp) /* pt_regs */
 
 	call arch_rethook_trampoline_callback
 

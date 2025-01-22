@@ -9,7 +9,7 @@
 
 /* void *memset(void *, int, size_t) */
 SYM_FUNC_START(__memset)
-	CREG(mv) CREG(t0), CREG(a0)  /* Preserve return value */
+	mv CREG(t0), CREG(a0)  /* Preserve return value */
 
 	/* Defer to byte-oriented fill for small sizes */
 	sltiu a3, a2, 16
@@ -56,7 +56,7 @@ SYM_FUNC_START(__memset)
 	sub t0, t0, a4
 #else
 	neg a5, a4
-	cadd ct0, ct0, a5
+	add ct0, ct0, a5
 #endif
 
 	/* Jump into loop body */
@@ -69,7 +69,7 @@ SYM_FUNC_START(__memset)
 #ifdef CONFIG_64BIT
 	srli a4, a4, 1
 #endif
-	CREG(add) CREG(a5), CREG(a5), a4
+	add CREG(a5), CREG(a5), a4
 	jr CREG(a5)
 3:
 	REG_S a1,        0(CREG(t0))

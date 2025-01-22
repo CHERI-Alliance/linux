@@ -137,14 +137,14 @@
 #else
 	la    \dst, __per_cpu_offset
 #endif
-	CREG(add)   CREG(\dst), CREG(\dst), \tmp
+	add   CREG(\dst), CREG(\dst), \tmp
 	CREG_L \tmp, 0(\dst)
 #ifdef CONFIG_CHERI_KERNEL
 	llc    CREG(\dst), \sym
 #else
 	la    \dst, \sym
 #endif
-	CREG(add)   CREG(\dst), CREG(\dst), \tmp
+	add   CREG(\dst), CREG(\dst), \tmp
 .endm
 #else /* CONFIG_SMP */
 .macro asm_per_cpu dst sym tmp
@@ -172,7 +172,7 @@
 .option norelax
 #ifdef CONFIG_CHERI_KERNEL
 	/* CHERI does not use the global pointer. Load it with cnull. */
-	cmv cgp, cnull
+	mv cgp, cnull
 #else
 	la gp, __global_pointer$
 #endif

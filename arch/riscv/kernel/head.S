@@ -98,7 +98,7 @@ relocate_enable_mmu:
 
 	/* Point stvec to virtual address of intruction after satp write */
 	la a2, 1f
-	CREG(add) CREG(a2), CREG(a2), a1
+	add CREG(a2), CREG(a2), a1
 	csrw CSR_TVEC, a2
 
 	/* Compute satp for kernel page tables, but don't load it yet */
@@ -175,11 +175,11 @@ SYM_CODE_START(secondary_start_sbi)
 	/* a0 contains the hartid & a1 contains boot data */
 	li a2, SBI_HART_BOOT_TASK_PTR_OFFSET
 	XIP_FIXUP_OFFSET a2
-	CREG(add) CREG(a2), CREG(a1), a2
+	add CREG(a2), CREG(a1), a2
 	CREG_L CREG(tp), (CREG(a2))
 	li a3, SBI_HART_BOOT_STACK_PTR_OFFSET
 	XIP_FIXUP_OFFSET a3
-	CREG(add) CREG(a3), CREG(a1), a3
+	add CREG(a3), CREG(a1), a3
 	CREG_L CREG(sp), (CREG(a3))
 
 .Lsecondary_start_common:
@@ -401,7 +401,7 @@ SYM_CODE_START(_start_kernel)
 	la a0, __dtb_start
 	XIP_FIXUP_OFFSET a0
 #else
-	CREG(mv) CREG(a0), CREG(a1)
+	mv CREG(a0), CREG(a1)
 #endif /* CONFIG_BUILTIN_DTB */
 	call setup_vm
 #ifdef CONFIG_MMU
@@ -423,7 +423,7 @@ SYM_CODE_START(_start_kernel)
 	la sp, init_thread_union
 	li t0, THREAD_SIZE
 	scbnds csp, csp, t0
-	cadd csp, csp, t0
+	add csp, csp, t0
 #endif
 	CREG(addi) CREG(sp), CREG(sp), -PT_SIZE_ON_STACK
 	scs_load_current
@@ -473,8 +473,8 @@ SYM_CODE_START(_start_kernel)
 	XIP_FIXUP_OFFSET a1
 	la a2, __cpu_spinwait_task_pointer
 	XIP_FIXUP_OFFSET a2
-	CREG(add) CREG(a1), CREG(a1), a3
-	CREG(add) CREG(a2), CREG(a2), a3
+	add CREG(a1), CREG(a1), a3
+	add CREG(a2), CREG(a2), a3
 
 	/*
 	 * This hart didn't win the lottery, so we wait for the winning hart to

@@ -269,7 +269,7 @@ _csrw \csr \gpr \@
  * @param tmp2 A temporary scratch register
  */
 .macro find_infcap perm tmp1 tmp2
-	cmv c\tmp1, ca3
+	mv c\tmp1, ca3
 	try_install_infcap \tmp1 \perm \tmp2 100f
 	ccsrr \tmp1, ddc
 	try_install_infcap \tmp1 \perm \tmp2 100f
