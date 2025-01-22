@@ -1059,7 +1059,7 @@ config CC_HAS_RISCV_CHERI
 
 config RISCV_CHERI
 	bool "RISCV CHERI capability support"
-	default y
+	default n
 	depends on CC_HAS_RISCV_CHERI
 	depends on 64BIT
 	# FIXCHERI: Implement 64bit integer pointer mode support at least
