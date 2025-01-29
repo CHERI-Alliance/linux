@@ -108,7 +108,7 @@ int copy_bpf_fprog_from_user(struct sock_fprog *dst, sockptr_t src, int len)
 	} else {
 		if (len != sizeof(*dst))
 			return -EINVAL;
-		if (copy_from_sockptr(dst, src, sizeof(*dst)))
+		if (copy_from_sockptr_with_ptr(dst, src, sizeof(*dst)))
 			return -EFAULT;
 	}
 
