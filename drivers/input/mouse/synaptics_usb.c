@@ -323,7 +323,7 @@ static int synusb_probe(struct usb_interface *intf,
 	synusb->input = input_dev;
 	mutex_init(&synusb->pm_mutex);
 
-	synusb->flags = id->driver_info;
+	synusb->flags = __c_ua(id->driver_info);
 	if (synusb->flags & SYNUSB_COMBO) {
 		/*
 		 * This is a combo device, we need to set proper
