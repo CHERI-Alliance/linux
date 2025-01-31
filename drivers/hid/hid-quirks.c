@@ -1093,7 +1093,7 @@ static struct hid_device_id *hid_exists_dquirk(const struct hid_device *hdev)
 
 	if (bl_entry != NULL)
 		dbg_hid("Found dynamic quirk 0x%lx for HID device 0x%04x:0x%04x\n",
-			bl_entry->driver_data, bl_entry->vendor,
+			__c_ua(bl_entry->driver_data), bl_entry->vendor,
 			bl_entry->product);
 
 	return bl_entry;
@@ -1134,7 +1134,7 @@ static int hid_modify_dquirk(const struct hid_device_id *id,
 	hdev->group = q_new->hid_bl_item.group = id->group;
 	hdev->vendor = q_new->hid_bl_item.vendor = id->vendor;
 	hdev->product = q_new->hid_bl_item.product = id->product;
-	q_new->hid_bl_item.driver_data = quirks;
+	q_new->hid_bl_item.driver_data = __c_fakeu(quirks);
 
 	mutex_lock(&dquirks_lock);
 
@@ -1305,7 +1305,7 @@ unsigned long hid_lookup_quirk(const struct hid_device *hdev)
 	mutex_lock(&dquirks_lock);
 	quirk_entry = hid_exists_dquirk(hdev);
 	if (quirk_entry)
-		quirks = quirk_entry->driver_data;
+		quirks = __c_ua(quirk_entry->driver_data);
 	else
 		quirks = hid_gets_squirk(hdev);
 	mutex_unlock(&dquirks_lock);
