@@ -21,15 +21,11 @@
  */
 struct fb_info *framebuffer_alloc(size_t size, struct device *dev)
 {
-#define BYTES_PER_LONG (BITS_PER_LONG/8)
-#define PADDING (BYTES_PER_LONG - (sizeof(struct fb_info) % BYTES_PER_LONG))
 	int fb_info_size = sizeof(struct fb_info);
 	struct fb_info *info;
 	char *p;
 
-	if (size)
-		fb_info_size += PADDING;
-
+	fb_info_size = ALIGN(fb_info_size, __SIZEOF_POINTER__);
 	p = kzalloc(fb_info_size + size, GFP_KERNEL);
 
 	if (!p)
