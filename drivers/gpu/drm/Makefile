@@ -163,6 +163,7 @@ obj-$(CONFIG_DRM_RADEON)+= radeon/
 obj-$(CONFIG_DRM_AMDGPU)+= amd/amdgpu/
 obj-$(CONFIG_DRM_AMDGPU)+= amd/amdxcp/
 obj-$(CONFIG_DRM_I915)	+= i915/
+obj-$(CONFIG_DRM_SMI)	+= smifb2/
 obj-$(CONFIG_DRM_XE)	+= xe/
 obj-$(CONFIG_DRM_KMB_DISPLAY)  += kmb/
 obj-$(CONFIG_DRM_MGAG200) += mgag200/
