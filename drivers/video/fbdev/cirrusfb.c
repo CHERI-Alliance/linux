@@ -2104,7 +2104,7 @@ static int cirrusfb_pci_register(struct pci_dev *pdev,
 	}
 
 	cinfo = info->par;
-	cinfo->btype = (enum cirrus_board) ent->driver_data;
+	cinfo->btype = (enum cirrus_board) __c_ua(ent->driver_data);
 
 	dev_dbg(info->device,
 		" Found PCI device, base address 0 is 0x%Lx, btype set to %d\n",

@@ -2350,7 +2350,7 @@ static int snd_pcm_hw_rule_muldivk(struct snd_pcm_hw_params *params,
 	struct snd_interval t;
 	snd_interval_muldivk(hw_param_interval_c(params, rule->deps[0]),
 			 hw_param_interval_c(params, rule->deps[1]),
-			 (unsigned long) rule->private, &t);
+			 __c_pa(rule->private), &t);
 	return snd_interval_refine(hw_param_interval(params, rule->var), &t);
 }
 
@@ -2359,7 +2359,7 @@ static int snd_pcm_hw_rule_mulkdiv(struct snd_pcm_hw_params *params,
 {
 	struct snd_interval t;
 	snd_interval_mulkdiv(hw_param_interval_c(params, rule->deps[0]),
-			 (unsigned long) rule->private,
+			 __c_pa(rule->private),
 			 hw_param_interval_c(params, rule->deps[1]), &t);
 	return snd_interval_refine(hw_param_interval(params, rule->var), &t);
 }
@@ -2525,12 +2525,12 @@ static int snd_pcm_hw_constraints_init(struct snd_pcm_substream *substream)
 	if (err < 0)
 		return err;
 	err = snd_pcm_hw_rule_add(runtime, 0, SNDRV_PCM_HW_PARAM_FRAME_BITS, 
-				  snd_pcm_hw_rule_mulkdiv, (void*) 8,
+				  snd_pcm_hw_rule_mulkdiv, __c_fakep(8),
 				  SNDRV_PCM_HW_PARAM_PERIOD_BYTES, SNDRV_PCM_HW_PARAM_PERIOD_SIZE, -1);
 	if (err < 0)
 		return err;
 	err = snd_pcm_hw_rule_add(runtime, 0, SNDRV_PCM_HW_PARAM_FRAME_BITS, 
-				  snd_pcm_hw_rule_mulkdiv, (void*) 8,
+				  snd_pcm_hw_rule_mulkdiv, __c_fakep(8),
 				  SNDRV_PCM_HW_PARAM_BUFFER_BYTES, SNDRV_PCM_HW_PARAM_BUFFER_SIZE, -1);
 	if (err < 0)
 		return err;
@@ -2540,12 +2540,12 @@ static int snd_pcm_hw_constraints_init(struct snd_pcm_substream *substream)
 	if (err < 0)
 		return err;
 	err = snd_pcm_hw_rule_add(runtime, 0, SNDRV_PCM_HW_PARAM_RATE, 
-				  snd_pcm_hw_rule_mulkdiv, (void*) 1000000,
+				  snd_pcm_hw_rule_mulkdiv, __c_fakep(1000000),
 				  SNDRV_PCM_HW_PARAM_PERIOD_SIZE, SNDRV_PCM_HW_PARAM_PERIOD_TIME, -1);
 	if (err < 0)
 		return err;
 	err = snd_pcm_hw_rule_add(runtime, 0, SNDRV_PCM_HW_PARAM_RATE, 
-				  snd_pcm_hw_rule_mulkdiv, (void*) 1000000,
+				  snd_pcm_hw_rule_mulkdiv, __c_fakep(1000000),
 				  SNDRV_PCM_HW_PARAM_BUFFER_SIZE, SNDRV_PCM_HW_PARAM_BUFFER_TIME, -1);
 	if (err < 0)
 		return err;
@@ -2560,12 +2560,12 @@ static int snd_pcm_hw_constraints_init(struct snd_pcm_substream *substream)
 	if (err < 0)
 		return err;
 	err = snd_pcm_hw_rule_add(runtime, 0, SNDRV_PCM_HW_PARAM_PERIOD_SIZE, 
-				  snd_pcm_hw_rule_mulkdiv, (void*) 8,
+				  snd_pcm_hw_rule_mulkdiv, __c_fakep(8),
 				  SNDRV_PCM_HW_PARAM_PERIOD_BYTES, SNDRV_PCM_HW_PARAM_FRAME_BITS, -1);
 	if (err < 0)
 		return err;
 	err = snd_pcm_hw_rule_add(runtime, 0, SNDRV_PCM_HW_PARAM_PERIOD_SIZE, 
-				  snd_pcm_hw_rule_muldivk, (void*) 1000000,
+				  snd_pcm_hw_rule_muldivk, __c_fakep(1000000),
 				  SNDRV_PCM_HW_PARAM_PERIOD_TIME, SNDRV_PCM_HW_PARAM_RATE, -1);
 	if (err < 0)
 		return err;
@@ -2575,32 +2575,32 @@ static int snd_pcm_hw_constraints_init(struct snd_pcm_substream *substream)
 	if (err < 0)
 		return err;
 	err = snd_pcm_hw_rule_add(runtime, 0, SNDRV_PCM_HW_PARAM_BUFFER_SIZE, 
-				  snd_pcm_hw_rule_mulkdiv, (void*) 8,
+				  snd_pcm_hw_rule_mulkdiv, __c_fakep(8),
 				  SNDRV_PCM_HW_PARAM_BUFFER_BYTES, SNDRV_PCM_HW_PARAM_FRAME_BITS, -1);
 	if (err < 0)
 		return err;
 	err = snd_pcm_hw_rule_add(runtime, 0, SNDRV_PCM_HW_PARAM_BUFFER_SIZE, 
-				  snd_pcm_hw_rule_muldivk, (void*) 1000000,
+				  snd_pcm_hw_rule_muldivk, __c_fakep(1000000),
 				  SNDRV_PCM_HW_PARAM_BUFFER_TIME, SNDRV_PCM_HW_PARAM_RATE, -1);
 	if (err < 0)
 		return err;
 	err = snd_pcm_hw_rule_add(runtime, 0, SNDRV_PCM_HW_PARAM_PERIOD_BYTES, 
-				  snd_pcm_hw_rule_muldivk, (void*) 8,
+				  snd_pcm_hw_rule_muldivk, __c_fakep(8),
 				  SNDRV_PCM_HW_PARAM_PERIOD_SIZE, SNDRV_PCM_HW_PARAM_FRAME_BITS, -1);
 	if (err < 0)
 		return err;
 	err = snd_pcm_hw_rule_add(runtime, 0, SNDRV_PCM_HW_PARAM_BUFFER_BYTES, 
-				  snd_pcm_hw_rule_muldivk, (void*) 8,
+				  snd_pcm_hw_rule_muldivk, __c_fakep(8),
 				  SNDRV_PCM_HW_PARAM_BUFFER_SIZE, SNDRV_PCM_HW_PARAM_FRAME_BITS, -1);
 	if (err < 0)
 		return err;
 	err = snd_pcm_hw_rule_add(runtime, 0, SNDRV_PCM_HW_PARAM_PERIOD_TIME, 
-				  snd_pcm_hw_rule_mulkdiv, (void*) 1000000,
+				  snd_pcm_hw_rule_mulkdiv, __c_fakep(1000000),
 				  SNDRV_PCM_HW_PARAM_PERIOD_SIZE, SNDRV_PCM_HW_PARAM_RATE, -1);
 	if (err < 0)
 		return err;
 	err = snd_pcm_hw_rule_add(runtime, 0, SNDRV_PCM_HW_PARAM_BUFFER_TIME, 
-				  snd_pcm_hw_rule_mulkdiv, (void*) 1000000,
+				  snd_pcm_hw_rule_mulkdiv, __c_fakep(1000000),
 				  SNDRV_PCM_HW_PARAM_BUFFER_SIZE, SNDRV_PCM_HW_PARAM_RATE, -1);
 	if (err < 0)
 		return err;
@@ -3335,7 +3335,7 @@ static int snd_pcm_common_ioctl(struct file *file,
 	case SNDRV_PCM_IOCTL_START:
 		return snd_pcm_start_lock_irq(substream);
 	case SNDRV_PCM_IOCTL_LINK:
-		return snd_pcm_link(substream, (int)(unsigned long) arg);
+		return snd_pcm_link(substream, __c_pa_u(arg));
 	case SNDRV_PCM_IOCTL_UNLINK:
 		return snd_pcm_unlink(substream);
 	case SNDRV_PCM_IOCTL_RESUME:
@@ -3372,7 +3372,7 @@ static int snd_pcm_common_ioctl(struct file *file,
 	case SNDRV_PCM_IOCTL_DROP:
 		return snd_pcm_drop(substream);
 	case SNDRV_PCM_IOCTL_PAUSE:
-		return snd_pcm_pause_lock_irq(substream, (unsigned long)arg);
+		return snd_pcm_pause_lock_irq(substream, __c_pa_u(arg));
 	case SNDRV_PCM_IOCTL_WRITEI_FRAMES:
 	case SNDRV_PCM_IOCTL_READI_FRAMES:
 		return snd_pcm_xferi_frames_ioctl(substream, arg);
@@ -3389,7 +3389,7 @@ static int snd_pcm_common_ioctl(struct file *file,
 }
 
 static long snd_pcm_ioctl(struct file *file, unsigned int cmd,
-			  unsigned long arg)
+			  user_uintptr_t arg)
 {
 	struct snd_pcm_file *pcm_file;
 

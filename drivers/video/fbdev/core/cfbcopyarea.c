@@ -404,8 +404,8 @@ void cfb_copyarea(struct fb_info *p, const struct fb_copyarea *area)
 
 	// split the base of the framebuffer into a long-aligned address and the
 	// index of the first bit
-	base = (unsigned long __iomem *)((unsigned long)p->screen_base & ~(bytes-1));
-	dst_idx = src_idx = 8*((unsigned long)p->screen_base & (bytes-1));
+	base = (unsigned long __iomem *)((uintptr_t)p->screen_base & ~(bytes-1));
+	dst_idx = src_idx = 8*(__c_pa(p->screen_base) & (bytes-1));
 	// add offset of source and target area
 	dst_idx += dy*bits_per_line + dx*p->var.bits_per_pixel;
 	src_idx += sy*bits_per_line + sx*p->var.bits_per_pixel;

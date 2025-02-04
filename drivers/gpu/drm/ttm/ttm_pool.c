@@ -55,7 +55,7 @@
  */
 struct ttm_pool_dma {
 	dma_addr_t addr;
-	unsigned long vaddr;
+	uintptr_t vaddr;
 };
 
 static unsigned long page_pool_size;
@@ -96,7 +96,7 @@ static struct page *ttm_pool_alloc_page(struct ttm_pool *pool, gfp_t gfp_flags,
 	if (!pool->use_dma_alloc) {
 		p = alloc_pages_node(pool->nid, gfp_flags, order);
 		if (p)
-			p->private = order;
+			p->private = __c_fakeu(order);
 		return p;
 	}
 
@@ -120,8 +120,8 @@ static struct page *ttm_pool_alloc_page(struct ttm_pool *pool, gfp_t gfp_flags,
 	else
 		p = virt_to_page(vaddr);
 
-	dma->vaddr = (unsigned long)vaddr | order;
-	p->private = (unsigned long)dma;
+	dma->vaddr = (uintptr_t)vaddr | order;
+	p->private = (uintptr_t)dma;
 	return p;
 
 error_free:
@@ -348,10 +348,10 @@ static unsigned int ttm_pool_page_order(struct ttm_pool *pool, struct page *p)
 	if (pool->use_dma_alloc) {
 		struct ttm_pool_dma *dma = (void *)p->private;
 
-		return dma->vaddr & ~PAGE_MASK;
+		return __c_ua(dma->vaddr) & ~PAGE_MASK;
 	}
 
-	return p->private;
+	return __c_ua(p->private);
 }
 
 /* Called when we got a page, either from a pool or newly allocated */

@@ -1407,7 +1407,7 @@ EXPORT_SYMBOL(snd_pcm_hw_constraint_ratdens);
 static int snd_pcm_hw_rule_msbits(struct snd_pcm_hw_params *params,
 				  struct snd_pcm_hw_rule *rule)
 {
-	unsigned int l = (unsigned long) rule->private;
+	unsigned int l = __c_pa(rule->private);
 	int width = l & 0xffff;
 	unsigned int msbits = l >> 16;
 	const struct snd_interval *i =
@@ -1445,7 +1445,7 @@ int snd_pcm_hw_constraint_msbits(struct snd_pcm_runtime *runtime,
 	unsigned long l = (msbits << 16) | width;
 	return snd_pcm_hw_rule_add(runtime, cond, -1,
 				    snd_pcm_hw_rule_msbits,
-				    (void*) l,
+				    __c_fakep(l),
 				    SNDRV_PCM_HW_PARAM_SAMPLE_BITS, -1);
 }
 EXPORT_SYMBOL(snd_pcm_hw_constraint_msbits);
@@ -1453,7 +1453,7 @@ EXPORT_SYMBOL(snd_pcm_hw_constraint_msbits);
 static int snd_pcm_hw_rule_step(struct snd_pcm_hw_params *params,
 				struct snd_pcm_hw_rule *rule)
 {
-	unsigned long step = (unsigned long) rule->private;
+	unsigned long step = __c_pa(rule->private);
 	return snd_interval_step(hw_param_interval(params, rule->var), step);
 }
 
@@ -1472,7 +1472,7 @@ int snd_pcm_hw_constraint_step(struct snd_pcm_runtime *runtime,
 			       unsigned long step)
 {
 	return snd_pcm_hw_rule_add(runtime, cond, var, 
-				   snd_pcm_hw_rule_step, (void *) step,
+				   snd_pcm_hw_rule_step, __c_fakep(step),
 				   var, -1);
 }
 EXPORT_SYMBOL(snd_pcm_hw_constraint_step);
@@ -1510,7 +1510,7 @@ EXPORT_SYMBOL(snd_pcm_hw_constraint_pow2);
 static int snd_pcm_hw_rule_noresample_func(struct snd_pcm_hw_params *params,
 					   struct snd_pcm_hw_rule *rule)
 {
-	unsigned int base_rate = (unsigned int)(uintptr_t)rule->private;
+	unsigned int base_rate = __c_pa(rule->private);
 	struct snd_interval *rate;
 
 	rate = hw_param_interval(params, SNDRV_PCM_HW_PARAM_RATE);
@@ -1530,7 +1530,7 @@ int snd_pcm_hw_rule_noresample(struct snd_pcm_runtime *runtime,
 	return snd_pcm_hw_rule_add(runtime, SNDRV_PCM_HW_PARAMS_NORESAMPLE,
 				   SNDRV_PCM_HW_PARAM_RATE,
 				   snd_pcm_hw_rule_noresample_func,
-				   (void *)(uintptr_t)base_rate,
+				   __c_fakep(base_rate),
 				   SNDRV_PCM_HW_PARAM_RATE, -1);
 }
 EXPORT_SYMBOL(snd_pcm_hw_rule_noresample);

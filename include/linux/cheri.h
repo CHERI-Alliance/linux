@@ -2,6 +2,8 @@
 #ifndef _LINUX_CHERI_H
 #define _LINUX_CHERI_H
 
+#include <asm/barrier.h>
+
 #ifdef __CHECKER__
 #define __capability
 #endif

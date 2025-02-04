@@ -1765,7 +1765,7 @@ static int snd_ctl_elem_add_user(struct snd_ctl_file *file,
 	struct snd_ctl_elem_info info;
 	int err;
 
-	if (copy_from_user(&info, _info, sizeof(info)))
+	if (copy_from_user_with_ptr(&info, _info, sizeof(info)))
 		return -EFAULT;
 	err = snd_ctl_elem_add(file, &info, replace);
 	if (err < 0)
@@ -1919,7 +1919,7 @@ static int snd_ctl_tlv_ioctl(struct snd_ctl_file *file,
 	return -ENXIO;
 }
 
-static long snd_ctl_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long snd_ctl_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct snd_ctl_file *ctl;
 	struct snd_card *card;
