@@ -15484,7 +15484,7 @@ static __init int prepare_tail_call_tests(struct bpf_array **pprogs)
 					goto out_err;
 				}
 				*insn = BPF_EMIT_CALL(addr);
-				if ((long)__bpf_call_base + insn->imm != addr)
+				if ((long)__c_pa(__bpf_call_base) + insn->imm != addr)
 					*insn = BPF_JMP_A(0); /* Skip: NOP */
 				break;
 			}
