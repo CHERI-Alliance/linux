@@ -25,10 +25,12 @@
 #include <linux/pci.h>
 #include <linux/pci-ecam.h>
 #include <linux/platform_device.h>
+#include <linux/irqchip/chained_irq.h>
 
 #include "../pci.h"
 
 /* Register definitions */
+#define XILINX_PCIE_REG_VSEC		0x0000012c
 #define XILINX_PCIE_REG_BIR		0x00000130
 #define XILINX_PCIE_REG_IDR		0x00000138
 #define XILINX_PCIE_REG_IMR		0x0000013c
@@ -39,6 +41,12 @@
 #define XILINX_PCIE_REG_RPEFR		0x00000154
 #define XILINX_PCIE_REG_RPIFR1		0x00000158
 #define XILINX_PCIE_REG_RPIFR2		0x0000015c
+#define XILINX_PCIE_REG_RPID2		0x00000160
+#define XILINX_PCIE_REG_RPID2M		0x00000164
+#define XILINX_PCIE_REG_MSI_LOW		0x00000170
+#define XILINX_PCIE_REG_MSI_HI		0x00000174
+#define XILINX_PCIE_REG_MSI_LOW_MASK	0x00000178
+#define XILINX_PCIE_REG_MSI_HI_MASK	0x0000017c
 
 /* Interrupt registers definitions */
 #define XILINX_PCIE_INTR_LINK_DOWN	BIT(0)
@@ -95,7 +103,11 @@
 #define XILINX_PCIE_REG_PSCR_LNKUP	BIT(11)
 
 /* Number of MSI IRQs */
-#define XILINX_NUM_MSI_IRQS		128
+#define XILINX_NUM_MSI_IRQS		64
+
+#define MSI_DECD_MODE			0x1
+#define MSI_FIFO_MODE			0x2
+
 
 /**
  * struct xilinx_pcie - PCIe port information
@@ -105,16 +117,19 @@
  * @map_lock: Mutex protecting the MSI allocation
  * @msi_domain: MSI IRQ domain pointer
  * @leg_domain: Legacy IRQ domain pointer
- * @resources: Bus Resources
+ * @msi_decode: True if MSI decoded in hardware, rather than FIFO
+ * @irq_lo,irq_hi: Interrupts used for MSI decode mode
  */
 struct xilinx_pcie {
 	struct device *dev;
 	void __iomem *reg_base;
+	spinlock_t mask_lock; /* Need to do a read/modify/write unfortunately */
 	unsigned long msi_map[BITS_TO_LONGS(XILINX_NUM_MSI_IRQS)];
 	struct mutex map_lock;
 	struct irq_domain *msi_domain;
 	struct irq_domain *leg_domain;
-	struct list_head resources;
+	bool msi_decode;
+	unsigned int irq_lo, irq_hi;
 };
 
 static inline u32 pcie_read(struct xilinx_pcie *pcie, u32 reg)
@@ -159,6 +174,16 @@ static void xilinx_pcie_clear_err_interrupts(struct xilinx_pcie *pcie)
 		pcie_write(pcie, XILINX_PCIE_RPEFR_ALL_MASK,
 			   XILINX_PCIE_REG_RPEFR);
 	}
+}
+
+/*
+ * This is only used in legacy mode to pop the entry out of the FIFO
+ * @pcie: PCIe port information
+ */
+static inline void xilinx_pop_fifo(struct xilinx_pcie *pcie)
+{
+	/* Clear interrupt FIFO register 1 */
+	pcie_write(pcie, XILINX_PCIE_RPIFR1_ALL_MASK, XILINX_PCIE_REG_RPIFR1);
 }
 
 /**
@@ -212,13 +237,25 @@ static struct pci_ops xilinx_pcie_ops = {
 
 /* MSI functions */
 
-static void xilinx_msi_top_irq_ack(struct irq_data *d)
+static void xilinx_msi_fifo_top_irq_ack(struct irq_data *d)
 {
 	/*
 	 * xilinx_pcie_intr_handler() will have performed the Ack.
 	 * Eventually, this should be fixed and the Ack be moved in
 	 * the respective callbacks for INTx and MSI.
 	 */
+}
+
+static void xilinx_msi_decode_top_irq_mask(struct irq_data *d)
+{
+	pci_msi_mask_irq(d);
+	irq_chip_mask_parent(d);
+}
+
+static void xilinx_msi_decode_top_irq_unmask(struct irq_data *d)
+{
+	pci_msi_unmask_irq(d);
+	irq_chip_unmask_parent(d);
 }
 
 static void xilinx_compose_msi_msg(struct irq_data *data, struct msi_msg *msg)
@@ -231,8 +268,82 @@ static void xilinx_compose_msi_msg(struct irq_data *data, struct msi_msg *msg)
 	msg->data = data->hwirq;
 }
 
-static struct irq_chip xilinx_msi_bottom_chip = {
+
+/* Ack an irq in decode mode */
+static void xilinx_msi_decode_ack_irq(struct irq_data *data)
+{
+	struct xilinx_pcie *pcie = irq_data_get_irq_chip_data(data);
+	irq_hw_number_t hwirq = data->hwirq;
+
+	if (hwirq > 31) {
+		hwirq -= 32;
+		pcie_write(pcie, 1 << hwirq, XILINX_PCIE_REG_MSI_HI);
+	} else {
+		pcie_write(pcie, 1 << hwirq, XILINX_PCIE_REG_MSI_LOW);
+	}
+}
+
+/*
+ * Decode mode provides registers to mask, unfortunately there are no
+ * set/clear registers so we have to do a read/write with a spinlock
+ */
+static void xilinx_msi_decode_irq_mask(struct irq_data *data)
+{
+	struct xilinx_pcie *pcie = irq_data_get_irq_chip_data(data);
+	irq_hw_number_t hwirq = data->hwirq;
+	u32 mask, val, reg;
+	unsigned long flags;
+
+	if (hwirq > 31) {
+		reg = XILINX_PCIE_REG_MSI_HI_MASK;
+		mask = ~BIT(hwirq - 32);
+	} else {
+		reg = XILINX_PCIE_REG_MSI_LOW_MASK;
+		mask = ~BIT(hwirq);
+	}
+
+	spin_lock_irqsave(&pcie->mask_lock, flags);
+	val = pcie_read(pcie, reg) & mask;
+	pcie_write(pcie, val, reg);
+	spin_unlock_irqrestore(&pcie->mask_lock, flags);
+}
+
+static void xilinx_msi_decode_irq_unmask(struct irq_data *data)
+{
+	struct xilinx_pcie *pcie = irq_data_get_irq_chip_data(data);
+	irq_hw_number_t hwirq = data->hwirq;
+	u32 mask, val, reg;
+	unsigned long flags;
+
+	if (hwirq > 31) {
+		reg = XILINX_PCIE_REG_MSI_HI_MASK;
+		mask = BIT(hwirq - 32);
+	} else {
+		reg = XILINX_PCIE_REG_MSI_LOW_MASK;
+		mask = BIT(hwirq);
+	}
+
+	spin_lock_irqsave(&pcie->mask_lock, flags);
+	val = pcie_read(pcie, reg) | mask;
+	pcie_write(pcie, val, reg);
+	spin_unlock_irqrestore(&pcie->mask_lock, flags);
+}
+
+/*
+ * This is the bottom chip for the decode mode, it provides both ACK
+ * and mask operations.
+ */
+static struct irq_chip xilinx_msi_decode_bottom_chip = {
 	.name			= "Xilinx MSI",
+	.irq_compose_msi_msg	= xilinx_compose_msi_msg,
+	.irq_ack		= xilinx_msi_decode_ack_irq,
+	.irq_mask               = xilinx_msi_decode_irq_mask,
+	.irq_unmask             = xilinx_msi_decode_irq_unmask,
+};
+
+/* Legacy FIFO operations */
+static struct irq_chip xilinx_msi_fifo_bottom_chip = {
+	.name			= "Xilinx FIFO MSI",
 	.irq_compose_msi_msg	= xilinx_compose_msi_msg,
 };
 
@@ -241,6 +352,7 @@ static int xilinx_msi_domain_alloc(struct irq_domain *domain, unsigned int virq,
 {
 	struct xilinx_pcie *pcie = domain->host_data;
 	int hwirq, i;
+	struct irq_chip *chip;
 
 	mutex_lock(&pcie->map_lock);
 
@@ -251,9 +363,13 @@ static int xilinx_msi_domain_alloc(struct irq_domain *domain, unsigned int virq,
 	if (hwirq < 0)
 		return -ENOSPC;
 
+	/* Chose different ops depending on which mode we are in */
+	chip = pcie->msi_decode ? &xilinx_msi_decode_bottom_chip
+				: &xilinx_msi_fifo_bottom_chip;
+
 	for (i = 0; i < nr_irqs; i++)
 		irq_domain_set_info(domain, virq + i, hwirq + i,
-				    &xilinx_msi_bottom_chip, domain->host_data,
+				    chip, domain->host_data,
 				    handle_edge_irq, NULL, NULL);
 
 	return 0;
@@ -280,12 +396,19 @@ static const struct irq_domain_ops xilinx_msi_domain_ops = {
 static bool xilinx_init_dev_msi_info(struct device *dev, struct irq_domain *domain,
 				     struct irq_domain *real_parent, struct msi_domain_info *info)
 {
+	struct xilinx_pcie *pcie = domain->host_data;
 	struct irq_chip *chip = info->chip;
 
 	if (!msi_lib_init_dev_msi_info(dev, domain, real_parent, info))
 		return false;
 
-	chip->irq_ack = xilinx_msi_top_irq_ack;
+	if (pcie->msi_decode) {
+		chip->irq_ack = irq_chip_ack_parent;
+		chip->irq_mask = xilinx_msi_decode_top_irq_mask;
+		chip->irq_unmask = xilinx_msi_decode_top_irq_unmask;
+	} else {
+		chip->irq_ack = xilinx_msi_fifo_top_irq_ack;
+	}
 	return true;
 }
 
@@ -321,6 +444,11 @@ static int xilinx_allocate_msi_domains(struct xilinx_pcie *pcie)
 
 static void xilinx_free_irq_domains(struct xilinx_pcie *pcie)
 {
+	if (pcie->msi_decode) {
+		irq_set_chained_handler_and_data(pcie->irq_lo, NULL, NULL);
+		irq_set_chained_handler_and_data(pcie->irq_hi, NULL, NULL);
+	}
+
 	irq_domain_remove(pcie->msi_domain);
 	irq_domain_remove(pcie->leg_domain);
 }
@@ -351,6 +479,98 @@ static const struct irq_domain_ops intx_domain_ops = {
 };
 
 /* PCIe HW Functions */
+
+
+/*
+ * This is called with the hi or lo reg to read. It will scan for any bit set and
+ * invoke the appropriate irq handler. Ack is handled by the chip callback
+ */
+static void xilinx_pcie_handle_msi_decode_irq(struct xilinx_pcie *pcie,
+					      u32 status_reg)
+{
+	struct irq_domain *domain = pcie->msi_domain->parent;
+	bool high = (status_reg == XILINX_PCIE_REG_MSI_HI);
+	unsigned long status;
+	unsigned int hwirq;
+	u32 bit;
+
+	while ((status = pcie_read(pcie, status_reg)) != 0) {
+		for_each_set_bit(bit, &status, 32) {
+			hwirq = high ? bit + 32 : bit;
+			generic_handle_domain_irq(domain, hwirq);
+		}
+	}
+}
+
+static void xilinx_pcie_msi_decode_handler_high(struct irq_desc *desc)
+{
+	struct irq_chip *chip = irq_desc_get_chip(desc);
+	struct xilinx_pcie *pcie = irq_desc_get_handler_data(desc);
+
+	chained_irq_enter(chip, desc);
+	xilinx_pcie_handle_msi_decode_irq(pcie, XILINX_PCIE_REG_MSI_HI);
+	chained_irq_exit(chip, desc);
+}
+
+static void xilinx_pcie_msi_decode_handler_low(struct irq_desc *desc)
+{
+	struct irq_chip *chip = irq_desc_get_chip(desc);
+	struct xilinx_pcie *pcie = irq_desc_get_handler_data(desc);
+
+	chained_irq_enter(chip, desc);
+	xilinx_pcie_handle_msi_decode_irq(pcie, XILINX_PCIE_REG_MSI_LOW);
+	chained_irq_exit(chip, desc);
+}
+
+/*
+ * This is the old way of handling MSI interrupts, there is a FIFO that
+ * receives the MSI write, which is then popped by this routine. The
+ * problem with this is that if the FIFO is full when the MSI write arrives,
+ * then the interrupt is completely lost. The newer mechanism is much better
+ * as it decodes the MSI on arrival and raises the IRQ in a more conventional
+ * manner.
+ */
+static void xilinx_handle_fifo_irq(struct xilinx_pcie *pcie)
+{
+	struct device *dev = pcie->dev;
+	struct irq_domain *domain;
+	u32 val;
+
+	val = pcie_read(pcie, XILINX_PCIE_REG_RPIFR1);
+
+	/* Check whether interrupt valid */
+	if (!(val & XILINX_PCIE_RPIFR1_INTR_VALID)) {
+		dev_warn(dev, "RP Intr FIFO1 read error\n");
+		xilinx_pop_fifo(pcie);
+		return;
+	}
+
+	/* Decode the IRQ number */
+	if (val & XILINX_PCIE_RPIFR1_MSI_INTR) {
+		val = pcie_read(pcie, XILINX_PCIE_REG_RPIFR2) &
+			XILINX_PCIE_RPIFR2_MSG_DATA;
+		domain = pcie->msi_domain;
+	} else {
+		val = (val & XILINX_PCIE_RPIFR1_INTR_MASK) >>
+			XILINX_PCIE_RPIFR1_INTR_SHIFT;
+		domain = pcie->leg_domain;
+	}
+
+	xilinx_pop_fifo(pcie);
+
+	generic_handle_domain_irq(domain, val);
+}
+
+static void xilinx_handle_decode_intx_irq(struct xilinx_pcie *pcie)
+{
+	struct irq_domain *domain = pcie->leg_domain;
+	u32 bit;
+	unsigned long mask;
+
+	mask = pcie_read(pcie, XILINX_PCIE_REG_RPID2) >> 16;
+	for_each_set_bit(bit, &mask, 4)
+		generic_handle_domain_irq(domain, bit);
+}
 
 /**
  * xilinx_pcie_intr_handler - Interrupt Service Handler
@@ -400,33 +620,12 @@ static irqreturn_t xilinx_pcie_intr_handler(int irq, void *data)
 		xilinx_pcie_clear_err_interrupts(pcie);
 	}
 
-	if (status & (XILINX_PCIE_INTR_INTX | XILINX_PCIE_INTR_MSI)) {
-		struct irq_domain *domain;
-
-		val = pcie_read(pcie, XILINX_PCIE_REG_RPIFR1);
-
-		/* Check whether interrupt valid */
-		if (!(val & XILINX_PCIE_RPIFR1_INTR_VALID)) {
-			dev_warn(dev, "RP Intr FIFO1 read error\n");
-			goto error;
-		}
-
-		/* Decode the IRQ number */
-		if (val & XILINX_PCIE_RPIFR1_MSI_INTR) {
-			val = pcie_read(pcie, XILINX_PCIE_REG_RPIFR2) &
-				XILINX_PCIE_RPIFR2_MSG_DATA;
-			domain = pcie->msi_domain;
-		} else {
-			val = (val & XILINX_PCIE_RPIFR1_INTR_MASK) >>
-				XILINX_PCIE_RPIFR1_INTR_SHIFT;
-			domain = pcie->leg_domain;
-		}
-
-		/* Clear interrupt FIFO register 1 */
-		pcie_write(pcie, XILINX_PCIE_RPIFR1_ALL_MASK,
-			   XILINX_PCIE_REG_RPIFR1);
-
-		generic_handle_domain_irq(domain, val);
+	if (!pcie->msi_decode) {
+		if (status & (XILINX_PCIE_INTR_INTX | XILINX_PCIE_INTR_MSI))
+			xilinx_handle_fifo_irq(pcie);
+	} else {
+		if (status & XILINX_PCIE_INTR_INTX)
+			xilinx_handle_decode_intx_irq(pcie);
 	}
 
 	if (status & XILINX_PCIE_INTR_SLV_UNSUPP)
@@ -456,7 +655,7 @@ static irqreturn_t xilinx_pcie_intr_handler(int irq, void *data)
 	if (status & XILINX_PCIE_INTR_MST_ERRP)
 		dev_warn(dev, "Master error poison\n");
 
-error:
+error: __maybe_unused;
 	/* Clear the Interrupt Decode register */
 	pcie_write(pcie, status, XILINX_PCIE_REG_IDR);
 
@@ -536,6 +735,13 @@ static void xilinx_pcie_init_port(struct xilinx_pcie *pcie)
 	pcie_write(pcie, pcie_read(pcie, XILINX_PCIE_REG_RPSC) |
 			 XILINX_PCIE_REG_RPSC_BEN,
 		   XILINX_PCIE_REG_RPSC);
+
+	pcie_write(pcie, XILINX_PCIE_IDR_ALL_MASK,
+			 XILINX_PCIE_REG_MSI_LOW_MASK);
+	pcie_write(pcie, XILINX_PCIE_IDR_ALL_MASK,
+			 XILINX_PCIE_REG_MSI_HI_MASK);
+	pcie_write(pcie, GENMASK(19, 16),
+			       XILINX_PCIE_REG_RPID2M);
 }
 
 /**
@@ -566,13 +772,36 @@ static int xilinx_pcie_parse_dt(struct xilinx_pcie *pcie)
 	err = devm_request_irq(dev, irq, xilinx_pcie_intr_handler,
 			       IRQF_SHARED | IRQF_NO_THREAD,
 			       "xilinx-pcie", pcie);
-	if (err) {
-		dev_err(dev, "unable to request irq %d\n", irq);
-		return err;
+
+
+	pcie->msi_decode = device_property_read_bool(dev, "xlnx,msi-decode");
+
+	dev_info(dev, "Using %s MSI interrupt mode\n",
+		      pcie->msi_decode ? "decode" : "legacy FIFO");
+
+	/* The MSI interrupts appear as two irq lines, 0->31 and 32->63 */
+	if (pcie->msi_decode) {
+		pcie->irq_lo = irq_of_parse_and_map(node, 1);
+		if (!pcie->irq_lo) {
+			dev_err(dev, "unable to request MSI low irq\n");
+			return -EINVAL;
+		}
+		pcie->irq_hi = irq_of_parse_and_map(node, 2);
+		if (!pcie->irq_hi) {
+			dev_err(dev, "unable to request MSI high irq\n");
+			return -EINVAL;
+		}
+		irq_set_chained_handler_and_data(pcie->irq_lo,
+				xilinx_pcie_msi_decode_handler_low, pcie);
+
+		irq_set_chained_handler_and_data(pcie->irq_hi,
+				xilinx_pcie_msi_decode_handler_high, pcie);
 	}
 
 	return 0;
 }
+
+
 
 /**
  * xilinx_pcie_probe - Probe function
@@ -596,6 +825,7 @@ static int xilinx_pcie_probe(struct platform_device *pdev)
 
 	pcie = pci_host_bridge_priv(bridge);
 	mutex_init(&pcie->map_lock);
+	spin_lock_init(&pcie->mask_lock);
 	pcie->dev = dev;
 
 	err = xilinx_pcie_parse_dt(pcie);
