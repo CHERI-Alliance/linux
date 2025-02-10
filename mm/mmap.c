@@ -1650,6 +1650,10 @@ static inline bool accountable_mapping(struct file *file, vm_flags_t vm_flags)
  * @info: The unmapped area information including the range [low_limit -
  * high_limit), the alignment offset and mask.
  *
+ * CHERI: An unmapped area must never overlap with the reserve of an
+ * CHERI: existing vma. This requires more expensive checks because
+ * CHERI: searching the vma-tree does not take reservations into account.
+ *
  * Return: A memory address or -ENOMEM.
  */
 static unsigned long unmapped_area(struct vm_unmapped_area_info *info)
@@ -1681,12 +1685,8 @@ retry:
 	gap = vma_iter_addr(&vmi) + info->start_gap;
 	gap += (info->align_offset - gap) & info->align_mask;
 	tmp = vma_next(&vmi);
-#ifdef CONFIG_CHERI_PURECAP_UABI
-	if (tmp)
-#else
-	if (tmp && (tmp->vm_flags & VM_STARTGAP_FLAGS))
-#endif
-	{ /* Avoid prev check if possible */
+#ifndef CONFIG_CHERI_PURECAP_UABI
+	if (tmp && (tmp->vm_flags & VM_STARTGAP_FLAGS)) { /* Avoid prev check if possible */
 		if (vm_start_gap(tmp) < gap + length - 1) {
 			low_limit = tmp->vm_end;
 			vma_iter_reset(&vmi);
@@ -1700,6 +1700,20 @@ retry:
 			goto retry;
 		}
 	}
+#else
+	if (tmp && vm_start_gap(tmp) < gap + length - 1) {
+		low_limit = reserv_vma_outer_start(tmp) +
+					reserv_vma_outer_len(tmp);
+		vma_iter_reset(&vmi);
+		goto retry;
+	}
+	tmp = vma_prev(&vmi);
+	if (tmp && vm_end_gap(tmp) > gap) {
+		low_limit = vm_end_gap(tmp);
+		vma_iter_reset(&vmi);
+		goto retry;
+	}
+#endif
 
 	return gap;
 }
@@ -1711,6 +1725,10 @@ retry:
  *
  * @info: The unmapped area information including the range [low_limit -
  * high_limit), the alignment offset and mask.
+ *
+ * CHERI: An unmapped area must never overlap with the reserve of an
+ * CHERI: existing vma. This requires more expensive checks because
+ * CHERI: searching the vma-tree does not take reservations into account.
  *
  * Return: A memory address or -ENOMEM.
  */
@@ -1738,12 +1756,8 @@ retry:
 	gap -= (gap - info->align_offset) & info->align_mask;
 	gap_end = vma_iter_end(&vmi);
 	tmp = vma_next(&vmi);
-#ifdef CONFIG_CHERI_PURECAP_UABI
-	if (tmp)
-#else
-	if (tmp && (tmp->vm_flags & VM_STARTGAP_FLAGS))
-#endif
-	{
+#ifndef CONFIG_CHERI_PURECAP_UABI
+	if (tmp && (tmp->vm_flags & VM_STARTGAP_FLAGS)) { /* Avoid prev check if possible */
 		if (vm_start_gap(tmp) < gap_end) {
 			high_limit = vm_start_gap(tmp);
 			vma_iter_reset(&vmi);
@@ -1752,11 +1766,24 @@ retry:
 	} else {
 		tmp = vma_prev(&vmi);
 		if (tmp && vm_end_gap(tmp) > gap) {
-			high_limit = reserv_vma_outer_start(tmp);
+			high_limit = tmp->vm_start;
 			vma_iter_reset(&vmi);
 			goto retry;
 		}
 	}
+#else
+	if (tmp && vm_start_gap(tmp) < gap_end) {
+		high_limit = vm_start_gap(tmp);
+		vma_iter_reset(&vmi);
+		goto retry;
+	}
+	tmp = vma_prev(&vmi);
+	if (tmp && vm_end_gap(tmp) > gap) {
+		high_limit = reserv_vma_outer_start(tmp);
+		vma_iter_reset(&vmi);
+		goto retry;
+	}
+#endif
 
 	return gap;
 }
