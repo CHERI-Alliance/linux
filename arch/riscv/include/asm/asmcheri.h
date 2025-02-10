@@ -412,7 +412,6 @@ _csrw \csr \gpr \@
  */
 .macro setup_cheri_regs tmp
 	ccsrw ddc, zero
-	ccsrw stdc, zero
 	li \tmp, 1 << 28
 	csrs senvcfg, \tmp
 .endm
