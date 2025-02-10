@@ -118,7 +118,7 @@ static int mtk_rng_probe(struct platform_device *pdev)
 	priv->rng.cleanup = mtk_rng_cleanup;
 #endif
 	priv->rng.read = mtk_rng_read;
-	priv->rng.priv = (unsigned long)&pdev->dev;
+	priv->rng.priv = (uintptr_t)&pdev->dev;
 	priv->rng.quality = 900;
 
 	priv->clk = devm_clk_get(&pdev->dev, "rng");

@@ -136,7 +136,7 @@ static int atmel_trng_probe(struct platform_device *pdev)
 	trng->has_half_rate = data->has_half_rate;
 	trng->rng.name = pdev->name;
 	trng->rng.read = atmel_trng_read;
-	trng->rng.priv = (unsigned long)&pdev->dev;
+	trng->rng.priv = (uintptr_t)&pdev->dev;
 	platform_set_drvdata(pdev, trng);
 
 #ifndef CONFIG_PM

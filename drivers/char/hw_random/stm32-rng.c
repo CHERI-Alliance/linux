@@ -551,7 +551,7 @@ static int stm32_rng_probe(struct platform_device *ofdev)
 	priv->rng.name = dev_driver_string(dev);
 	priv->rng.init = stm32_rng_init;
 	priv->rng.read = stm32_rng_read;
-	priv->rng.priv = (unsigned long) dev;
+	priv->rng.priv = (uintptr_t) dev;
 	priv->rng.quality = 900;
 
 	pm_runtime_set_autosuspend_delay(dev, 100);

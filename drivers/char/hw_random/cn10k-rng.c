@@ -196,7 +196,7 @@ static int cn10k_rng_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 		return -ENOMEM;
 
 	rng->ops.read = cn10k_rng_read;
-	rng->ops.priv = (unsigned long)rng;
+	rng->ops.priv = (uintptr_t)rng;
 
 	rng->extended_trng_regs = cn10k_is_extended_trng_regs_supported(pdev);
 

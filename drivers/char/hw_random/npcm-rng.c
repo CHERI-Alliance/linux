@@ -109,8 +109,8 @@ static int npcm_rng_probe(struct platform_device *pdev)
 #endif
 	priv->rng.name = pdev->name;
 	priv->rng.read = npcm_rng_read;
-	priv->rng.priv = (unsigned long)&pdev->dev;
-	priv->clkp = (u32)(uintptr_t)of_device_get_match_data(&pdev->dev);
+	priv->rng.priv = (uintptr_t)&pdev->dev;
+	priv->clkp = (u32)__c_pa(of_device_get_match_data(&pdev->dev));
 
 	writel(NPCM_RNG_M1ROSEL, priv->base + NPCM_RNGMODE_REG);
 

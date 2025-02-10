@@ -122,7 +122,7 @@ static int exynos_trng_probe(struct platform_device *pdev)
 
 	trng->rng.init = exynos_trng_init;
 	trng->rng.read = exynos_trng_do_read;
-	trng->rng.priv = (unsigned long) trng;
+	trng->rng.priv = (uintptr_t) trng;
 
 	platform_set_drvdata(pdev, trng);
 	trng->dev = &pdev->dev;
