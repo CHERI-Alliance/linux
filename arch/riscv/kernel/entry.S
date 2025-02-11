@@ -419,6 +419,9 @@ SYM_DATA_END(kernel_code_cap)
 SYM_DATA_START(kernel_data_cap)
 	RISCV_PTR 0
 SYM_DATA_END(kernel_data_cap)
+SYM_DATA_START(kernel_ro_cap)
+	RISCV_PTR 0
+SYM_DATA_END(kernel_ro_cap)
 SYM_DATA_START(cheri_mbit_mask)
 	.dword 0
 SYM_DATA_END(cheri_mbit_mask)

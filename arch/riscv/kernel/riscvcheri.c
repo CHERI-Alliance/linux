@@ -43,6 +43,7 @@ void __init riscv_cheri_init(void)
 
 	pr_info("CHERI: kernel code cap: %#lp\n", kernel_code_cap);
 	pr_info("CHERI: kernel data cap: %#lp\n", kernel_data_cap);
+	pr_info("CHERI: kernel ro   cap: %#lp\n", kernel_ro_cap);
 	pr_info("CHERI: user allperms cap: %#lp\n",
 		(void *)cheri_user_root_allperms_cap);
 	pr_info("CHERI: user root cap: %#lp\n", (void *)cheri_user_root_cap);
@@ -116,6 +117,7 @@ void __init __PI init_cap_relocs(uintcap_t inf)
 
 	kernel_data_cap = (void * __capability)rw;
 	kernel_code_cap = (void * __capability)rx;
+	kernel_ro_cap = (void *__capability)ro;
 }
 
 /* Initialize the kernel's authorizing capabilities for special situations. */

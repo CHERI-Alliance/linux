@@ -291,9 +291,10 @@ __c_fakeu(ptraddr_t val)
 /* Kernel root capabilities. Use with care. */
 extern void * kernel_data_cap;
 extern void * kernel_code_cap;
+extern void * kernel_ro_cap;
 
 /*
- * Create a read/write data capability for a kernel address.
+ * Create a read-only data capability for a kernel address.
  * @addr The address.
  * @return A pointer with bounds that allow access to the
  *     entire kernel range.
@@ -304,9 +305,9 @@ extern void * kernel_code_cap;
  *       cheri_make_kernel_code_cap instead.
  */
 static __always_inline void *
-cheri_kcap(ptraddr_t addr)
+cheri_kcap_ro(ptraddr_t addr)
 {
-	return cheri_address_set(kernel_data_cap, addr);
+	return cheri_address_set(kernel_ro_cap, addr);
 }
 
 /*
@@ -346,7 +347,7 @@ cheri_build_kernel_data_cap(ptraddr_t base, ptraddr_t addr, size_t len)
 #define __cheri_pointer_align
 
 static __always_inline void *
-cheri_kcap(ptraddr_t addr)
+cheri_kcap_ro(ptraddr_t addr)
 {
 	return (void *)addr;
 }

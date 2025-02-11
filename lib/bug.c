@@ -132,7 +132,11 @@ void bug_get_file_line(struct bug_entry *bug, const char **file,
 {
 #ifdef CONFIG_DEBUG_BUGVERBOSE
 #ifdef CONFIG_GENERIC_BUG_RELATIVE_POINTERS
+#ifdef CONFIG_CHERI_KERNEL
+	*file = cheri_kcap_ro(__c_pa(&bug->file_disp ) + bug->file_disp);
+#else
 	*file = (const char *)&bug->file_disp + bug->file_disp;
+#endif
 #else
 	*file = bug->file;
 #endif
