@@ -416,6 +416,11 @@ __futex_hash(union futex_key *key, struct futex_private_hash *fph)
 	int node = key->both.node;
 	u32 hash;
 
+	static_assert(offsetof(union futex_key, both.offset) ==
+		      offsetof(union futex_key, private.offset));
+	static_assert(offsetof(union futex_key, both.offset) ==
+		      offsetof(union futex_key, shared.offset));
+
 	if (node == FUTEX_NO_NODE) {
 		struct futex_hash_bucket *hb;
 
@@ -621,9 +626,9 @@ int get_futex_key(u32 __user *uaddr, unsigned int flags, union futex_key *key,
 		 * on its own.
 		 */
 		if (IS_ENABLED(CONFIG_MMU))
-			key->private.mm = mm;
+			key->private.mmaddr = __c_pa(mm);
 		else
-			key->private.mm = NULL;
+			key->private.mmaddr = 0;
 
 		key->private.address = address;
 		return 0;
@@ -723,7 +728,7 @@ again:
 		}
 
 		key->both.offset |= FUT_OFF_MMSHARED; /* ref taken on mm */
-		key->private.mm = mm;
+		key->private.mmaddr = __c_pa(mm);
 		key->private.address = address;
 
 	} else {
@@ -795,7 +800,7 @@ int fault_in_user_writeable(u32 __user *uaddr)
 		return -EFAULT;
 
 	mmap_read_lock(mm);
-	ret = fixup_user_fault(mm, user_ptr_addr(uaddr),
+	ret = fixup_user_fault(mm, (uintptr_t)uaddr,
 			       FAULT_FLAG_WRITE, NULL);
 	mmap_read_unlock(mm);
 

@@ -38,7 +38,7 @@ union futex_key {
 	} shared;
 	struct {
 		union {
-			struct mm_struct *mm;
+			unsigned long mmaddr;
 			u64 __tmp;
 		};
 		unsigned long address;
