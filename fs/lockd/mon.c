@@ -266,7 +266,7 @@ static void nsm_init_private(struct nsm_handle *nsm)
 
 	ns = ktime_get_ns();
 	put_unaligned(ns, p);
-	put_unaligned((uintptr_t)nsm, p + 1);
+	put_unaligned(__c_pa(nsm), p + 1);
 }
 
 static struct nsm_handle *nsm_create_handle(const struct sockaddr *sap,
