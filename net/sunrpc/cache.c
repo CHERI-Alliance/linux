@@ -593,7 +593,7 @@ static void __unhash_deferred_req(struct cache_deferred_req *dreq)
 
 static void __hash_deferred_req(struct cache_deferred_req *dreq, struct cache_head *item)
 {
-	int hash = DFR_HASH(item);
+	int hash = DFR_HASH(__c_pa(item));
 
 	INIT_LIST_HEAD(&dreq->recent);
 	hlist_add_head(&dreq->hash, &cache_defer_hash[hash]);
@@ -733,7 +733,7 @@ static void cache_revisit_request(struct cache_head *item)
 	struct cache_deferred_req *dreq;
 	struct list_head pending;
 	struct hlist_node *tmp;
-	int hash = DFR_HASH(item);
+	int hash = DFR_HASH(__c_pa(item));
 
 	INIT_LIST_HEAD(&pending);
 	spin_lock(&cache_defer_lock);

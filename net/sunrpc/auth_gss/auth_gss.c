@@ -1175,7 +1175,7 @@ gss_auth_find_or_add_hashed(const struct rpc_auth_create_args *args,
 		struct gss_auth *new)
 {
 	struct gss_auth *gss_auth;
-	unsigned long hashval = (unsigned long)clnt;
+	unsigned long hashval = __c_pa(clnt);
 
 	spin_lock(&gss_auth_hash_lock);
 	hash_for_each_possible(gss_auth_hash_table,
