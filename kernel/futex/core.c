@@ -115,6 +115,10 @@ late_initcall(fail_futex_debugfs);
  */
 struct futex_hash_bucket *futex_hash(union futex_key *key)
 {
+	static_assert(offsetof(union futex_key, both.offset) ==
+		      offsetof(union futex_key, private.offset));
+	static_assert(offsetof(union futex_key, both.offset) ==
+		      offsetof(union futex_key, shared.offset));
 	u32 hash = jhash2((u32 *)key, offsetof(typeof(*key), both.offset) / 4,
 			  key->both.offset);
 
@@ -260,9 +264,9 @@ int get_futex_key(u32 __user *uaddr, unsigned int flags, union futex_key *key,
 		 * on its own.
 		 */
 		if (IS_ENABLED(CONFIG_MMU))
-			key->private.mm = mm;
+			key->private.mmaddr = __c_pa(mm);
 		else
-			key->private.mm = NULL;
+			key->private.mmaddr = 0;
 
 		key->private.address = address;
 		return 0;
@@ -362,7 +366,7 @@ again:
 		}
 
 		key->both.offset |= FUT_OFF_MMSHARED; /* ref taken on mm */
-		key->private.mm = mm;
+		key->private.mmaddr = __c_pa(mm);
 		key->private.address = address;
 
 	} else {
