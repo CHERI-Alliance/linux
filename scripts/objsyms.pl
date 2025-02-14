@@ -9,6 +9,7 @@ die "oops" unless scalar @ARGV == 1;
 my $file = shift @ARGV;
 
 my %relocs = ();
+my %dyns = ();
 my %addrs = ();
 my @syms = ();
 
@@ -198,6 +199,9 @@ sub annotate
 		my $capaddr = $r->{obj} + $r->{off};
 		printf(" => %llx", $capaddr);
 		symbolize($capaddr);
+	} elsif (exists($dyns{$addr})) {
+		my $d = $dyns{$addr};
+		printf(" => %s\@extern", $d->{target});
 	}
 
 	printf("\n");
@@ -308,6 +312,25 @@ while (1) {
 	};
 }
 close($relocfh);
+
+open (my $dynfh, "llvm-objdump -R '$file' | ") or die "not found: $!";
+while (<$dynfh>) {
+	chomp;
+	next if m/^\s*$/;
+	next if m{file format elf};
+	next if m/^DYNAMIC RELOC/;
+	next if m/^OFFSET\s+TYPE/;
+	m{^\s*([a-f\d]+)\s+([A-Z0-9_]+)\s+(\S+)\s*$}
+	    or die "BAD RELOCATION >>>${_}<<<";
+	my ($addr, $type, $target) = ($1, $2, $3);
+	$addr = hex($addr);
+	$dyns{$addr} = {
+		addr => $addr,
+		type => $type,
+		target => $target
+	};
+}
+close($dynfh);
 
 open (my $fh, "llvm-objdump --mattr=+zcherihybrid -dl '$file' |") or die "not found: $!";
 while (<$fh>) {
