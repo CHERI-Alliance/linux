@@ -1521,7 +1521,7 @@ static __net_init int ipv4_sysctl_init_net(struct net *net)
 				/* Update the variables to point into
 				 * the current struct net
 				 */
-				table[i].data += (void *)net - (void *)&init_net;
+				table[i].data = (void *)net + (__c_pa(table[i].data) - __c_pa(&init_net));
 			} else {
 				/* Entries without data pointer are global;
 				 * Make them read-only in non-init_net ns
