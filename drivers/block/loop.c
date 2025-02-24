@@ -856,7 +856,7 @@ static void loop_queue_work(struct loop_device *lo, struct loop_cmd *cmd)
 		if (cur_worker->blkcg_css == cmd->blkcg_css) {
 			worker = cur_worker;
 			break;
-		} else if ((long)cur_worker->blkcg_css < (long)cmd->blkcg_css) {
+		} else if ((long)__c_pa(cur_worker->blkcg_css) < (long)__c_pa(cmd->blkcg_css)) {
 			node = &(*node)->rb_left;
 		} else {
 			node = &(*node)->rb_right;
@@ -1519,7 +1519,7 @@ static int loop_set_block_size(struct loop_device *lo, unsigned long arg)
 }
 
 static int lo_simple_ioctl(struct loop_device *lo, unsigned int cmd,
-			   unsigned long arg)
+			   user_uintptr_t arg)
 {
 	int err;
 
@@ -1531,10 +1531,10 @@ static int lo_simple_ioctl(struct loop_device *lo, unsigned int cmd,
 		err = loop_set_capacity(lo);
 		break;
 	case LOOP_SET_DIRECT_IO:
-		err = loop_set_dio(lo, arg);
+		err = loop_set_dio(lo, __c_ua(arg));
 		break;
 	case LOOP_SET_BLOCK_SIZE:
-		err = loop_set_block_size(lo, arg);
+		err = loop_set_block_size(lo, __c_ua(arg));
 		break;
 	default:
 		err = -EINVAL;
@@ -1560,7 +1560,7 @@ static int lo_ioctl(struct block_device *bdev, blk_mode_t mode,
 		struct loop_config config;
 
 		memset(&config, 0, sizeof(config));
-		config.fd = arg;
+		config.fd = __c_ua(arg);
 
 		return loop_configure(lo, mode, bdev, &config);
 	}
@@ -1573,7 +1573,7 @@ static int lo_ioctl(struct block_device *bdev, blk_mode_t mode,
 		return loop_configure(lo, mode, bdev, &config);
 	}
 	case LOOP_CHANGE_FD:
-		return loop_change_fd(lo, bdev, arg);
+		return loop_change_fd(lo, bdev, __c_ua(arg));
 	case LOOP_CLR_FD:
 		return loop_clr_fd(lo);
 	case LOOP_SET_STATUS:
@@ -2225,11 +2225,11 @@ static long loop_control_ioctl(struct file *file, unsigned int cmd,
 {
 	switch (cmd) {
 	case LOOP_CTL_ADD:
-		return loop_add(parm);
+		return loop_add(__c_ua(parm));
 	case LOOP_CTL_REMOVE:
-		return loop_control_remove(parm);
+		return loop_control_remove(__c_ua(parm));
 	case LOOP_CTL_GET_FREE:
-		return loop_control_get_free(parm);
+		return loop_control_get_free(__c_ua(parm));
 	default:
 		return -ENOSYS;
 	}
