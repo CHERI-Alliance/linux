@@ -269,7 +269,7 @@ static int radeon_cs_sync_rings(struct radeon_cs_parser *p)
 int radeon_cs_parser_init(struct radeon_cs_parser *p, void *data)
 {
 	struct drm_radeon_cs *cs = data;
-	uint64_t *chunk_array_ptr;
+	user_uintptr_t *chunk_array_ptr;
 	u64 size;
 	unsigned i;
 	u32 ring = RADEON_CS_RING_GFX;
@@ -289,13 +289,13 @@ int radeon_cs_parser_init(struct radeon_cs_parser *p, void *data)
 	p->chunk_relocs = NULL;
 	p->chunk_flags = NULL;
 	p->chunk_const_ib = NULL;
-	p->chunks_array = kvmalloc_array(cs->num_chunks, sizeof(uint64_t), GFP_KERNEL);
+	p->chunks_array = kvmalloc_array(cs->num_chunks, sizeof(user_uintptr_t), GFP_KERNEL);
 	if (p->chunks_array == NULL) {
 		return -ENOMEM;
 	}
-	chunk_array_ptr = (uint64_t *)(unsigned long)(cs->chunks);
+	chunk_array_ptr = (user_uintptr_t *)(user_uintptr_t)(cs->chunks);
 	if (copy_from_user(p->chunks_array, chunk_array_ptr,
-			       sizeof(uint64_t)*cs->num_chunks)) {
+			       sizeof(user_uintptr_t)*cs->num_chunks)) {
 		return -EFAULT;
 	}
 	p->cs_flags = 0;
@@ -309,7 +309,7 @@ int radeon_cs_parser_init(struct radeon_cs_parser *p, void *data)
 		struct drm_radeon_cs_chunk user_chunk;
 		uint32_t __user *cdata;
 
-		chunk_ptr = (void __user*)(unsigned long)p->chunks_array[i];
+		chunk_ptr = (void __user*)(user_uintptr_t)p->chunks_array[i];
 		if (copy_from_user(&user_chunk, chunk_ptr,
 				       sizeof(struct drm_radeon_cs_chunk))) {
 			return -EFAULT;
@@ -338,7 +338,7 @@ int radeon_cs_parser_init(struct radeon_cs_parser *p, void *data)
 		}
 
 		size = p->chunks[i].length_dw;
-		cdata = (void __user *)(unsigned long)user_chunk.chunk_data;
+		cdata = (void __user *)(uintptr_t)user_chunk.chunk_data;
 		p->chunks[i].user_ptr = cdata;
 		if (user_chunk.chunk_id == RADEON_CHUNK_ID_CONST_IB)
 			continue;
@@ -666,10 +666,11 @@ static int radeon_cs_ib_fill(struct radeon_device *rdev, struct radeon_cs_parser
 	return 0;
 }
 
-int radeon_cs_ioctl(struct drm_device *dev, void *data, struct drm_file *filp)
+static inline int __radeon_cs_ioctl(struct drm_device *dev, void *data,
+				    struct drm_file *filp,
+				    struct radeon_cs_parser *parser)
 {
 	struct radeon_device *rdev = dev->dev_private;
-	struct radeon_cs_parser parser;
 	int r;
 
 	down_read(&rdev->exclusive_lock);
@@ -684,50 +685,61 @@ int radeon_cs_ioctl(struct drm_device *dev, void *data, struct drm_file *filp)
 			r = -EAGAIN;
 		return r;
 	}
-	/* initialize parser */
-	memset(&parser, 0, sizeof(struct radeon_cs_parser));
-	parser.filp = filp;
-	parser.rdev = rdev;
-	parser.dev = rdev->dev;
-	parser.family = rdev->family;
-	r = radeon_cs_parser_init(&parser, data);
+	parser->filp = filp;
+	parser->rdev = rdev;
+	parser->dev = rdev->dev;
+	parser->family = rdev->family;
+	r = radeon_cs_parser_init(parser, data);
 	if (r) {
 		DRM_ERROR("Failed to initialize parser !\n");
-		radeon_cs_parser_fini(&parser, r, false);
+		radeon_cs_parser_fini(parser, r, false);
 		up_read(&rdev->exclusive_lock);
 		r = radeon_cs_handle_lockup(rdev, r);
 		return r;
 	}
 
-	r = radeon_cs_ib_fill(rdev, &parser);
+	r = radeon_cs_ib_fill(rdev, parser);
 	if (!r) {
-		r = radeon_cs_parser_relocs(&parser);
+		r = radeon_cs_parser_relocs(parser);
 		if (r && r != -ERESTARTSYS)
 			DRM_ERROR("Failed to parse relocation %d!\n", r);
 	}
 
 	if (r) {
-		radeon_cs_parser_fini(&parser, r, false);
+		radeon_cs_parser_fini(parser, r, false);
 		up_read(&rdev->exclusive_lock);
 		r = radeon_cs_handle_lockup(rdev, r);
 		return r;
 	}
 
-	trace_radeon_cs(&parser);
+	trace_radeon_cs(parser);
 
-	r = radeon_cs_ib_chunk(rdev, &parser);
+	r = radeon_cs_ib_chunk(rdev, parser);
 	if (r) {
 		goto out;
 	}
-	r = radeon_cs_ib_vm_chunk(rdev, &parser);
+	r = radeon_cs_ib_vm_chunk(rdev, parser);
 	if (r) {
 		goto out;
 	}
 out:
-	radeon_cs_parser_fini(&parser, r, true);
+	radeon_cs_parser_fini(parser, r, true);
 	up_read(&rdev->exclusive_lock);
 	r = radeon_cs_handle_lockup(rdev, r);
 	return r;
+}
+
+int radeon_cs_ioctl(struct drm_device *dev, void *data, struct drm_file *filp)
+{
+	int ret;
+	struct radeon_cs_parser *parser = kzalloc(sizeof(*parser), GFP_KERNEL);
+
+	if (parser == NULL)
+		return -EFAULT;
+	ret = __radeon_cs_ioctl(dev, data, filp, parser);
+	kfree(parser);
+
+	return ret;
 }
 
 /**

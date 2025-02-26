@@ -265,7 +265,7 @@ static int radeon_pci_probe(struct pci_dev *pdev,
 	if (!ent)
 		return -ENODEV; /* Avoid NULL-ptr deref in drm_get_pci_dev */
 
-	flags = ent->driver_data;
+	flags = __c_ua(ent->driver_data);
 
 	if (!radeon_si_support) {
 		switch (flags & RADEON_FAMILY_MASK) {
@@ -310,7 +310,7 @@ static int radeon_pci_probe(struct pci_dev *pdev,
 
 	pci_set_drvdata(pdev, dev);
 
-	ret = drm_dev_register(dev, ent->driver_data);
+	ret = drm_dev_register(dev, __c_ua(ent->driver_data));
 	if (ret)
 		goto err_agp;
 
@@ -465,7 +465,7 @@ static int radeon_pmops_runtime_idle(struct device *dev)
 }
 
 long radeon_drm_ioctl(struct file *filp,
-		      unsigned int cmd, unsigned long arg)
+		      unsigned int cmd, user_uintptr_t arg)
 {
 	struct drm_file *file_priv = filp->private_data;
 	struct drm_device *dev;

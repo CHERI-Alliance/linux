@@ -1021,7 +1021,7 @@ struct radeon_cs_parser {
 	/* chunks */
 	unsigned		nchunks;
 	struct radeon_cs_chunk	*chunks;
-	uint64_t		*chunks_array;
+	user_uintptr_t		*chunks_array;
 	/* IB */
 	unsigned		idx;
 	/* relocations */
