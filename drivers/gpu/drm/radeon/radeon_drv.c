@@ -268,7 +268,7 @@ static int radeon_pci_probe(struct pci_dev *pdev,
 	if (!ent)
 		return -ENODEV; /* Avoid NULL-ptr deref in drm_get_pci_dev */
 
-	flags = ent->driver_data;
+	flags = __c_ua(ent->driver_data);
 
 	if (!radeon_si_support) {
 		switch (flags & RADEON_FAMILY_MASK) {
@@ -496,7 +496,7 @@ static long radeon_kms_compat_ioctl(struct file *filp, unsigned int cmd, unsigne
 	if (nr < DRM_COMMAND_BASE)
 		return drm_compat_ioctl(filp, cmd, arg);
 
-	return radeon_drm_ioctl(filp, cmd, arg);
+	return radeon_drm_ioctl(filp, cmd, (user_uintptr_t)compat_ptr(arg));
 }
 #endif
 
