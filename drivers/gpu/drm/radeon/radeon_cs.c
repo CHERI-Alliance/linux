@@ -265,7 +265,7 @@ static int radeon_cs_sync_rings(struct radeon_cs_parser *p)
 int radeon_cs_parser_init(struct radeon_cs_parser *p, void *data)
 {
 	struct drm_radeon_cs *cs = data;
-	uint64_t *chunk_array_ptr;
+	user_uintptr_t *chunk_array_ptr;
 	u64 size;
 	unsigned i;
 	u32 ring = RADEON_CS_RING_GFX;
@@ -286,13 +286,13 @@ int radeon_cs_parser_init(struct radeon_cs_parser *p, void *data)
 	p->chunk_relocs = NULL;
 	p->chunk_flags = NULL;
 	p->chunk_const_ib = NULL;
-	p->chunks_array = kvmalloc_array(cs->num_chunks, sizeof(uint64_t), GFP_KERNEL);
+	p->chunks_array = kvmalloc_array(cs->num_chunks, sizeof(user_uintptr_t), GFP_KERNEL);
 	if (p->chunks_array == NULL) {
 		return -ENOMEM;
 	}
-	chunk_array_ptr = (uint64_t *)(unsigned long)(cs->chunks);
+	chunk_array_ptr = (user_uintptr_t *)(user_uintptr_t)(cs->chunks);
 	if (copy_from_user(p->chunks_array, chunk_array_ptr,
-			       sizeof(uint64_t)*cs->num_chunks)) {
+			       sizeof(user_uintptr_t)*cs->num_chunks)) {
 		return -EFAULT;
 	}
 	p->cs_flags = 0;
@@ -306,7 +306,7 @@ int radeon_cs_parser_init(struct radeon_cs_parser *p, void *data)
 		struct drm_radeon_cs_chunk user_chunk;
 		uint32_t __user *cdata;
 
-		chunk_ptr = (void __user*)(unsigned long)p->chunks_array[i];
+		chunk_ptr = (void __user*)(user_uintptr_t)p->chunks_array[i];
 		if (copy_from_user(&user_chunk, chunk_ptr,
 				       sizeof(struct drm_radeon_cs_chunk))) {
 			return -EFAULT;
@@ -335,7 +335,7 @@ int radeon_cs_parser_init(struct radeon_cs_parser *p, void *data)
 		}
 
 		size = p->chunks[i].length_dw;
-		cdata = (void __user *)(unsigned long)user_chunk.chunk_data;
+		cdata = (void __user *)(uintptr_t)user_chunk.chunk_data;
 		p->chunks[i].user_ptr = cdata;
 		if (user_chunk.chunk_id == RADEON_CHUNK_ID_CONST_IB)
 			continue;

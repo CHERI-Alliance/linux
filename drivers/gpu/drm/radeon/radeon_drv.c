@@ -267,7 +267,7 @@ static int radeon_pci_probe(struct pci_dev *pdev,
 	if (!ent)
 		return -ENODEV; /* Avoid NULL-ptr deref in drm_get_pci_dev */
 
-	flags = ent->driver_data;
+	flags = __c_ua(ent->driver_data);
 
 	if (!radeon_si_support) {
 		switch (flags & RADEON_FAMILY_MASK) {
