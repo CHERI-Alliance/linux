@@ -14,6 +14,8 @@ static inline unsigned long arch_calc_vm_flag_bits(unsigned long flags)
 
 	if ((flags & MAP_TYPE) == 0x02 /* MAP_PRIVATE */)
 		ret |= VM_READ_CAPS | VM_WRITE_CAPS;
+	if (flags & MAP_ANONYMOUS)
+		ret |= VM_READ_CAPS | VM_WRITE_CAPS;
 
 	return ret;
 }
