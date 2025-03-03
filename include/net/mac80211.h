@@ -1349,7 +1349,8 @@ ieee80211_tx_info_clear_status(struct ieee80211_tx_info *info)
 		     offsetof(struct ieee80211_tx_info, control.rates));
 	BUILD_BUG_ON(offsetof(struct ieee80211_tx_info, status.rates) !=
 		     offsetof(struct ieee80211_tx_info, driver_rates));
-	BUILD_BUG_ON(offsetof(struct ieee80211_tx_info, status.rates) != 8);
+	BUILD_BUG_ON(offsetof(struct ieee80211_tx_info, status.rates) !=
+		     max(8, sizeof(void *)));
 	/* clear the rate counts */
 	for (i = 0; i < IEEE80211_TX_MAX_RATES; i++)
 		info->status.rates[i].count = 0;
