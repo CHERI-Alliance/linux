@@ -18,7 +18,7 @@
 
 struct x509_parse_context {
 	struct x509_certificate	*cert;		/* Certificate being constructed */
-	unsigned long	data;			/* Start of data */
+	uintptr_t	data;			/* Start of data */
 	const void	*key;			/* Key data */
 	size_t		key_size;		/* Size of key data */
 	const void	*params;		/* Key parameters */
@@ -79,7 +79,7 @@ struct x509_certificate *x509_cert_parse(const void *data, size_t datalen)
 		return ERR_PTR(-ENOMEM);
 
 	ctx->cert = cert;
-	ctx->data = (unsigned long)data;
+	ctx->data = (uintptr_t)data;
 
 	/* Attempt to decode the certificate */
 	ret = asn1_ber_decoder(&x509_decoder, ctx, data, datalen);
@@ -149,7 +149,7 @@ int x509_note_OID(void *context, size_t hdrlen,
 		char buffer[50];
 		sprint_oid(value, vlen, buffer, sizeof(buffer));
 		pr_debug("Unknown OID: [%lu] %s\n",
-			 (unsigned long)value - ctx->data, buffer);
+			 __c_pa(value) - __c_ua(ctx->data), buffer);
 	}
 	return 0;
 }
@@ -165,7 +165,7 @@ int x509_note_tbs_certificate(void *context, size_t hdrlen,
 	struct x509_parse_context *ctx = context;
 
 	pr_debug("x509_note_tbs_certificate(,%zu,%02x,%ld,%zu)!\n",
-		 hdrlen, tag, (unsigned long)value - ctx->data, vlen);
+		 hdrlen, tag, __c_pa(value) - __c_ua(ctx->data), vlen);
 
 	ctx->cert->tbs = value - hdrlen;
 	ctx->cert->tbs_size = vlen + hdrlen;
@@ -349,15 +349,15 @@ int x509_extract_name_segment(void *context, size_t hdrlen,
 	switch (ctx->last_oid) {
 	case OID_commonName:
 		ctx->cn_size = vlen;
-		ctx->cn_offset = (unsigned long)value - ctx->data;
+		ctx->cn_offset = __c_pa(value) - __c_ua(ctx->data);
 		break;
 	case OID_organizationName:
 		ctx->o_size = vlen;
-		ctx->o_offset = (unsigned long)value - ctx->data;
+		ctx->o_offset = __c_pa(value) - __c_ua(ctx->data);
 		break;
 	case OID_email_address:
 		ctx->email_size = vlen;
-		ctx->email_offset = (unsigned long)value - ctx->data;
+		ctx->email_offset = __c_pa(value) - __c_ua(ctx->data);
 		break;
 	default:
 		break;
