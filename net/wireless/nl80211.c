@@ -1018,15 +1018,15 @@ static int nl80211_prepare_wdev_dump(struct netlink_callback *cb,
 		mutex_lock(&(*rdev)->wiphy.mtx);
 		rtnl_unlock();
 		/* 0 is the first index - add 1 to parse only once */
-		cb->args[0] = (*rdev)->wiphy_idx + 1;
-		cb->args[1] = (*wdev)->identifier;
+		cb->args[0] = __c_fakeu((*rdev)->wiphy_idx) + 1;
+		cb->args[1] = __c_fakeu((*wdev)->identifier);
 	} else {
 		/* subtract the 1 again here */
 		struct wiphy *wiphy;
 		struct wireless_dev *tmp;
 
 		rtnl_lock();
-		wiphy = wiphy_idx_to_wiphy(cb->args[0] - 1);
+		wiphy = wiphy_idx_to_wiphy(__c_ua(cb->args[0]) - 1);
 		if (!wiphy) {
 			rtnl_unlock();
 			return -ENODEV;
@@ -1035,7 +1035,7 @@ static int nl80211_prepare_wdev_dump(struct netlink_callback *cb,
 		*wdev = NULL;
 
 		list_for_each_entry(tmp, &(*rdev)->wiphy.wdev_list, list) {
-			if (tmp->identifier == cb->args[1]) {
+			if (tmp->identifier == __c_ua(cb->args[1])) {
 				*wdev = tmp;
 				break;
 			}
@@ -3086,7 +3086,7 @@ static int nl80211_dump_wiphy(struct sk_buff *skb, struct netlink_callback *cb)
 			rtnl_unlock();
 			return ret;
 		}
-		cb->args[0] = (long)state;
+		cb->args[0] = (intptr_t)state;
 	}
 
 	for_each_rdev(rdev) {
@@ -3968,8 +3968,8 @@ static int nl80211_dump_interface(struct sk_buff *skb, struct netlink_callback *
 {
 	int wp_idx = 0;
 	int if_idx = 0;
-	int wp_start = cb->args[0];
-	int if_start = cb->args[1];
+	int wp_start = __c_ua(cb->args[0]);
+	int if_start = __c_ua(cb->args[1]);
 	int filter_wiphy = -1;
 	struct cfg80211_registered_device *rdev;
 	struct wireless_dev *wdev;
@@ -3992,11 +3992,11 @@ static int nl80211_dump_interface(struct sk_buff *skb, struct netlink_callback *
 		 * value needed to determine that parsing is necessary.
 		 */
 		if (filter_wiphy >= 0)
-			cb->args[2] = filter_wiphy + 1;
+			cb->args[2] = __c_fakeu(filter_wiphy) + 1;
 		else
-			cb->args[2] = -1;
-	} else if (cb->args[2] > 0) {
-		filter_wiphy = cb->args[2] - 1;
+			cb->args[2] = __c_fakeu(-1);
+	} else if (__c_ua(cb->args[2]) > 0) {
+		filter_wiphy = __c_ua(cb->args[2]) - 1;
 	}
 
 	for_each_rdev(rdev) {
@@ -4033,8 +4033,8 @@ static int nl80211_dump_interface(struct sk_buff *skb, struct netlink_callback *
 		wp_idx++;
 	}
  out:
-	cb->args[0] = wp_idx;
-	cb->args[1] = if_idx;
+	cb->args[0] = __c_fakeu(wp_idx);
+	cb->args[1] = __c_fakeu(if_idx);
 
 	ret = skb->len;
  out_unlock:
@@ -6769,7 +6769,7 @@ static int nl80211_dump_station(struct sk_buff *skb,
 	struct cfg80211_registered_device *rdev;
 	struct wireless_dev *wdev;
 	u8 mac_addr[ETH_ALEN];
-	int sta_idx = cb->args[2];
+	int sta_idx = __c_ua(cb->args[2]);
 	int err;
 
 	err = nl80211_prepare_wdev_dump(cb, &rdev, &wdev, NULL);
@@ -6808,7 +6808,7 @@ static int nl80211_dump_station(struct sk_buff *skb,
 	}
 
  out:
-	cb->args[2] = sta_idx;
+	cb->args[2] = __c_fakeu(sta_idx);
 	err = skb->len;
  out_err:
 	wiphy_unlock(&rdev->wiphy);
@@ -7767,7 +7767,7 @@ static int nl80211_dump_mpath(struct sk_buff *skb,
 	struct wireless_dev *wdev;
 	u8 dst[ETH_ALEN];
 	u8 next_hop[ETH_ALEN];
-	int path_idx = cb->args[2];
+	int path_idx = __c_ua(cb->args[2]);
 	int err;
 
 	err = nl80211_prepare_wdev_dump(cb, &rdev, &wdev, NULL);
@@ -7804,7 +7804,7 @@ static int nl80211_dump_mpath(struct sk_buff *skb,
 	}
 
  out:
-	cb->args[2] = path_idx;
+	cb->args[2] = __c_fakeu(path_idx);
 	err = skb->len;
  out_err:
 	wiphy_unlock(&rdev->wiphy);
@@ -7967,7 +7967,7 @@ static int nl80211_dump_mpp(struct sk_buff *skb,
 	struct wireless_dev *wdev;
 	u8 dst[ETH_ALEN];
 	u8 mpp[ETH_ALEN];
-	int path_idx = cb->args[2];
+	int path_idx = __c_ua(cb->args[2]);
 	int err;
 
 	err = nl80211_prepare_wdev_dump(cb, &rdev, &wdev, NULL);
@@ -8004,7 +8004,7 @@ static int nl80211_dump_mpp(struct sk_buff *skb,
 	}
 
  out:
-	cb->args[2] = path_idx;
+	cb->args[2] = __c_fakeu(path_idx);
 	err = skb->len;
  out_err:
 	wiphy_unlock(&rdev->wiphy);
@@ -8722,7 +8722,7 @@ static int nl80211_get_reg_dump(struct sk_buff *skb,
 {
 	const struct ieee80211_regdomain *regdom = NULL;
 	struct cfg80211_registered_device *rdev;
-	int err, reg_idx, start = cb->args[2];
+	int err, reg_idx, start = __c_ua(cb->args[2]);
 
 	rcu_read_lock();
 
@@ -8752,7 +8752,7 @@ static int nl80211_get_reg_dump(struct sk_buff *skb,
 		}
 	}
 
-	cb->args[2] = reg_idx;
+	cb->args[2] = __c_fakeu(reg_idx);
 	err = skb->len;
 out_err:
 	rcu_read_unlock();
@@ -10406,7 +10406,7 @@ static int nl80211_dump_scan(struct sk_buff *skb, struct netlink_callback *cb)
 	struct cfg80211_internal_bss *scan;
 	struct wireless_dev *wdev;
 	struct nlattr **attrbuf;
-	int start = cb->args[2], idx = 0;
+	int start = __c_ua(cb->args[2]), idx = 0;
 	bool dump_include_use_data;
 	int err;
 
@@ -10455,7 +10455,7 @@ static int nl80211_dump_scan(struct sk_buff *skb, struct netlink_callback *cb)
 
 	spin_unlock_bh(&rdev->bss_lock);
 
-	cb->args[2] = idx;
+	cb->args[2] = __c_fakeu(idx);
 	wiphy_unlock(&rdev->wiphy);
 
 	return skb->len;
@@ -10546,7 +10546,7 @@ static int nl80211_dump_survey(struct sk_buff *skb, struct netlink_callback *cb)
 	struct survey_info survey;
 	struct cfg80211_registered_device *rdev;
 	struct wireless_dev *wdev;
-	int survey_idx = cb->args[2];
+	int survey_idx = __c_ua(cb->args[2]);
 	int res;
 	bool radio_stats;
 
@@ -10598,7 +10598,7 @@ static int nl80211_dump_survey(struct sk_buff *skb, struct netlink_callback *cb)
 	}
 
  out:
-	cb->args[2] = survey_idx;
+	cb->args[2] = __c_fakeu(survey_idx);
 	res = skb->len;
  out_err:
 	kfree(attrbuf);
@@ -11712,12 +11712,12 @@ static int nl80211_testmode_dump(struct sk_buff *skb,
 
 	rtnl_lock();
 
-	if (cb->args[0]) {
+	if (__c_ua(cb->args[0]) != 0) {
 		/*
 		 * 0 is a valid index, but not valid for args[0],
 		 * so we need to offset by 1.
 		 */
-		phy_idx = cb->args[0] - 1;
+		phy_idx = __c_ua(cb->args[0]) - 1;
 
 		rdev = cfg80211_rdev_by_wiphy_idx(phy_idx);
 		if (!rdev) {
@@ -11747,7 +11747,7 @@ static int nl80211_testmode_dump(struct sk_buff *skb,
 		phy_idx = rdev->wiphy_idx;
 
 		if (attrbuf[NL80211_ATTR_TESTDATA])
-			cb->args[1] = (long)attrbuf[NL80211_ATTR_TESTDATA];
+			cb->args[1] = (intptr_t)attrbuf[NL80211_ATTR_TESTDATA];
 	}
 
 	if (cb->args[1]) {
@@ -11795,7 +11795,7 @@ static int nl80211_testmode_dump(struct sk_buff *skb,
 
 	err = skb->len;
 	/* see above */
-	cb->args[0] = phy_idx + 1;
+	cb->args[0] = __c_fakeu(phy_idx) + 1;
  out_err:
 	kfree(attrbuf);
 	rtnl_unlock();
@@ -15021,9 +15021,9 @@ static int nl80211_prepare_vendor_dump(struct sk_buff *skb,
 	void *data = NULL;
 	unsigned int data_len = 0;
 
-	if (cb->args[0]) {
+	if (__c_ua(cb->args[0]) != 0) {
 		/* subtract the 1 again here */
-		struct wiphy *wiphy = wiphy_idx_to_wiphy(cb->args[0] - 1);
+		struct wiphy *wiphy = wiphy_idx_to_wiphy(__c_ua(cb->args[0]) - 1);
 		struct wireless_dev *tmp;
 
 		if (!wiphy)
@@ -15031,9 +15031,9 @@ static int nl80211_prepare_vendor_dump(struct sk_buff *skb,
 		*rdev = wiphy_to_rdev(wiphy);
 		*wdev = NULL;
 
-		if (cb->args[1]) {
+		if (__c_ua(cb->args[1]) != 0) {
 			list_for_each_entry(tmp, &wiphy->wdev_list, list) {
-				if (tmp->identifier == cb->args[1] - 1) {
+				if (tmp->identifier == __c_ua(cb->args[1]) - 1) {
 					*wdev = tmp;
 					break;
 				}
@@ -15109,12 +15109,12 @@ static int nl80211_prepare_vendor_dump(struct sk_buff *skb,
 	}
 
 	/* 0 is the first index - add 1 to parse only once */
-	cb->args[0] = (*rdev)->wiphy_idx + 1;
+	cb->args[0] = __c_fakeu((*rdev)->wiphy_idx) + 1;
 	/* add 1 to know if it was NULL */
-	cb->args[1] = *wdev ? (*wdev)->identifier + 1 : 0;
-	cb->args[2] = vcmd_idx;
-	cb->args[3] = (unsigned long)data;
-	cb->args[4] = data_len;
+	cb->args[1] = __c_fakeu(*wdev ? (*wdev)->identifier + 1 : 0);
+	cb->args[2] = __c_fakeu(vcmd_idx);
+	cb->args[3] = (intptr_t)data;
+	cb->args[4] = __c_fakeu(data_len);
 
 	/* keep rtnl locked in successful case */
 	err = 0;
@@ -15140,9 +15140,9 @@ static int nl80211_vendor_cmd_dump(struct sk_buff *skb,
 	if (err)
 		goto out;
 
-	vcmd_idx = cb->args[2];
+	vcmd_idx = __c_ua(cb->args[2]);
 	data = (void *)cb->args[3];
-	data_len = cb->args[4];
+	data_len = __c_ua(cb->args[4]);
 	vcmd = &rdev->wiphy.vendor_commands[vcmd_idx];
 
 	if (vcmd->flags & (WIPHY_VENDOR_CMD_NEED_WDEV |
