@@ -206,7 +206,7 @@ drop_alg:
 
 static int crypto_dump_report(struct sk_buff *skb, struct netlink_callback *cb)
 {
-	const size_t start_pos = cb->args[0];
+	const size_t start_pos = __c_ua(cb->args[0]);
 	size_t pos = 0;
 	struct crypto_dump_info info;
 	struct crypto_alg *alg;
@@ -228,7 +228,7 @@ static int crypto_dump_report(struct sk_buff *skb, struct netlink_callback *cb)
 		}
 		pos++;
 	}
-	cb->args[0] = pos;
+	cb->args[0] = __c_fakeu(pos);
 	res = skb->len;
 out:
 	up_read(&crypto_alg_sem);
