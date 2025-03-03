@@ -2722,7 +2722,7 @@ ieee80211_deliver_skb(struct ieee80211_rx_data *rx)
 		 */
 		int align;
 
-		align = (unsigned long)(skb->data + sizeof(struct ethhdr)) & 3;
+		align = (unsigned long)(__c_pa(skb->data) + sizeof(struct ethhdr)) & 3;
 		if (align) {
 			if (WARN_ON(skb_headroom(skb) < 3)) {
 				dev_kfree_skb(skb);
