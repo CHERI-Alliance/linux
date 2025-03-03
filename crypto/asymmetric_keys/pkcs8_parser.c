@@ -19,7 +19,7 @@
 
 struct pkcs8_parse_context {
 	struct public_key *pub;
-	unsigned long	data;			/* Start of data */
+	uintptr_t	data;			/* Start of data */
 	enum OID	last_oid;		/* Last OID encountered */
 	enum OID	algo_oid;		/* Algorithm OID */
 	u32		key_size;
@@ -42,7 +42,7 @@ int pkcs8_note_OID(void *context, size_t hdrlen,
 
 		sprint_oid(value, vlen, buffer, sizeof(buffer));
 		pr_info("Unknown OID: [%lu] %s\n",
-			(unsigned long)value - ctx->data, buffer);
+			(unsigned long)value - (unsigned long)ctx->data, buffer);
 	}
 	return 0;
 }
