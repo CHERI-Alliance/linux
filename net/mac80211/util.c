@@ -1488,7 +1488,7 @@ int ieee80211_build_preq_ies(struct ieee80211_sub_if_data *sdata, u8 *buffer,
 			     u32 flags)
 {
 	struct sk_buff *skb = alloc_skb(buffer_len, GFP_KERNEL);
-	uintptr_t offs;
+	ptraddr_t offs;
 	int ret, i;
 	u8 *start;
 
@@ -1513,7 +1513,7 @@ int ieee80211_build_preq_ies(struct ieee80211_sub_if_data *sdata, u8 *buffer,
 
 	/* adjust ie_desc for copy */
 	for (i = 0; i < NUM_NL80211_BANDS; i++) {
-		offs = ie_desc->ies[i] - start;
+		offs = __c_pa(ie_desc->ies[i]) - __c_pa(start);
 		ie_desc->ies[i] = buffer + offs;
 	}
 	offs = ie_desc->common_ies - start;
