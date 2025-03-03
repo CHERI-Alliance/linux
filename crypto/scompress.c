@@ -29,7 +29,7 @@ struct scomp_scratch {
 	spinlock_t	lock;
 	union {
 		void	*src __guarded_by(&lock);
-		unsigned long saddr __guarded_by(&lock);
+		uintptr_t saddr __guarded_by(&lock);
 	};
 };
 
