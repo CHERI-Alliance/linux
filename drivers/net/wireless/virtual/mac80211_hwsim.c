@@ -1583,7 +1583,7 @@ static void mac80211_hwsim_tx_frame_nl(struct ieee80211_hw *hw,
 	/* We create a cookie to identify this skb */
 	cookie = atomic_inc_return(&data->pending_cookie);
 	info->rate_driver_data[0] = (void *)cookie;
-	if (nla_put_u64_64bit(skb, HWSIM_ATTR_COOKIE, cookie, HWSIM_ATTR_PAD))
+	if (nla_put_u64_64bit(skb, HWSIM_ATTR_COOKIE, __c_ua(cookie), HWSIM_ATTR_PAD))
 		goto nla_put_failure;
 
 	genlmsg_end(skb, msg_head);
@@ -6247,7 +6247,7 @@ out_err:
 static int hwsim_dump_radio_nl(struct sk_buff *skb,
 			       struct netlink_callback *cb)
 {
-	int last_idx = cb->args[0] - 1;
+	int last_idx = __c_ua(cb->args[0]) - 1;
 	struct mac80211_hwsim_data *data = NULL;
 	int res = 0;
 	void *hdr;
@@ -6275,7 +6275,7 @@ static int hwsim_dump_radio_nl(struct sk_buff *skb,
 		last_idx = data->idx;
 	}
 
-	cb->args[0] = last_idx + 1;
+	cb->args[0] = __c_fakeu(last_idx) + 1;
 
 	/* list changed, but no new element sent, set interrupted flag */
 	if (skb->len == 0 && cb->prev_seq && cb->seq != cb->prev_seq) {
