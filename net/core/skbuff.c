@@ -4942,7 +4942,11 @@ err:
 EXPORT_SYMBOL_GPL(skb_segment);
 
 #ifdef CONFIG_SKB_EXTENSIONS
+#if __SIZEOF_POINTER__ > 8
+#define SKB_EXT_ALIGN_VALUE	__SIZEOF_POINTER__
+#else
 #define SKB_EXT_ALIGN_VALUE	8
+#endif
 #define SKB_EXT_CHUNKSIZEOF(x)	(ALIGN((sizeof(x)), SKB_EXT_ALIGN_VALUE) / SKB_EXT_ALIGN_VALUE)
 
 static const u8 skb_ext_type_len[] = {

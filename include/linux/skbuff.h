@@ -4677,7 +4677,7 @@ struct skb_ext {
 	refcount_t refcnt;
 	u8 offset[SKB_EXT_NUM]; /* in chunks of 8 bytes */
 	u8 chunks;		/* same */
-	char data[] __aligned(8);
+	char data[] __aligned(8) __cheri_pointer_align;
 };
 
 struct skb_ext *__skb_ext_alloc(gfp_t flags);
