@@ -15,9 +15,16 @@ static bool noncoherent_supported __ro_after_init;
 int dma_cache_alignment __ro_after_init = ARCH_DMA_MINALIGN;
 EXPORT_SYMBOL_GPL(dma_cache_alignment);
 
+static inline void *phys_to_virt_sz(unsigned long address, size_t sz)
+{
+	unsigned long addr = __va_a(address);
+
+	return cheri_build_kernel_data_cap(addr, addr, sz);
+}
+
 static inline void arch_dma_cache_wback(phys_addr_t paddr, size_t size)
 {
-	void *vaddr = phys_to_virt(paddr);
+	void *vaddr = phys_to_virt_sz(paddr, size);
 
 #ifdef CONFIG_RISCV_NONSTANDARD_CACHE_OPS
 	if (unlikely(noncoherent_cache_ops.wback)) {
@@ -30,7 +37,7 @@ static inline void arch_dma_cache_wback(phys_addr_t paddr, size_t size)
 
 static inline void arch_dma_cache_inv(phys_addr_t paddr, size_t size)
 {
-	void *vaddr = phys_to_virt(paddr);
+	void *vaddr = phys_to_virt_sz(paddr, size);
 
 #ifdef CONFIG_RISCV_NONSTANDARD_CACHE_OPS
 	if (unlikely(noncoherent_cache_ops.inv)) {
@@ -49,7 +56,7 @@ static inline void arch_dma_cache_inv(phys_addr_t paddr, size_t size)
 
 static inline void arch_dma_cache_wback_inv(phys_addr_t paddr, size_t size)
 {
-	void *vaddr = phys_to_virt(paddr);
+	void *vaddr = phys_to_virt_sz(paddr, size);
 
 #ifdef CONFIG_RISCV_NONSTANDARD_CACHE_OPS
 	if (unlikely(noncoherent_cache_ops.wback_inv)) {
