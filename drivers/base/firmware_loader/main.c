@@ -675,7 +675,7 @@ static int fw_add_devm_name(struct device *dev, const char *name)
 		return -ENOMEM;
 	}
 
-	fwn->magic = (uintptr_t)&fw_cache;
+	fwn->magic = __c_pa(&fw_cache);
 	devres_add(dev, fwn);
 
 	return 0;
