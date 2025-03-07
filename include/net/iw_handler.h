@@ -431,7 +431,11 @@ static inline int iwe_stream_lcp_len(struct iw_request_info *info)
 	if (info->flags & IW_REQUEST_FLAG_COMPAT)
 		return IW_EV_COMPAT_LCP_LEN;
 #endif
+#ifdef CONFIG_CHERI_KERNEL
+	return IW_EV_LCP_PK_LEN;
+#else
 	return IW_EV_LCP_LEN;
+#endif
 }
 
 static inline int iwe_stream_point_len(struct iw_request_info *info)
@@ -440,7 +444,11 @@ static inline int iwe_stream_point_len(struct iw_request_info *info)
 	if (info->flags & IW_REQUEST_FLAG_COMPAT)
 		return IW_EV_COMPAT_POINT_LEN;
 #endif
+#ifdef CONFIG_CHERI_KERNEL
+	return IW_EV_POINT_PK_LEN;
+#else
 	return IW_EV_POINT_LEN;
+#endif
 }
 
 static inline int iwe_stream_event_len_adjust(struct iw_request_info *info,
