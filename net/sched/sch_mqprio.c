@@ -450,17 +450,17 @@ static void mqprio_attach(struct Qdisc *sch)
 }
 
 static struct netdev_queue *mqprio_queue_get(struct Qdisc *sch,
-					     unsigned long cl)
+					     uintptr_t cl)
 {
 	struct net_device *dev = qdisc_dev(sch);
-	unsigned long ntx = cl - 1;
+	unsigned long ntx = __c_ua(cl) - 1;
 
 	if (ntx >= dev->num_tx_queues)
 		return NULL;
 	return netdev_get_tx_queue(dev, ntx);
 }
 
-static int mqprio_graft(struct Qdisc *sch, unsigned long cl, struct Qdisc *new,
+static int mqprio_graft(struct Qdisc *sch, uintptr_t cl, struct Qdisc *new,
 			struct Qdisc **old, struct netlink_ext_ack *extack)
 {
 	struct net_device *dev = qdisc_dev(sch);
@@ -609,7 +609,7 @@ nla_put_failure:
 	return -1;
 }
 
-static struct Qdisc *mqprio_leaf(struct Qdisc *sch, unsigned long cl)
+static struct Qdisc *mqprio_leaf(struct Qdisc *sch, uintptr_t cl)
 {
 	struct netdev_queue *dev_queue = mqprio_queue_get(sch, cl);
 
@@ -619,7 +619,7 @@ static struct Qdisc *mqprio_leaf(struct Qdisc *sch, unsigned long cl)
 	return rtnl_dereference(dev_queue->qdisc_sleeping);
 }
 
-static unsigned long mqprio_find(struct Qdisc *sch, u32 classid)
+static uintptr_t mqprio_find(struct Qdisc *sch, u32 classid)
 {
 	struct net_device *dev = qdisc_dev(sch);
 	unsigned int ntx = TC_H_MIN(classid);
@@ -629,22 +629,22 @@ static unsigned long mqprio_find(struct Qdisc *sch, u32 classid)
 	 * num_tx_queues. All of these are backed by actual Qdiscs.
 	 */
 	if (ntx < TC_H_MIN_PRIORITY)
-		return (ntx <= dev->num_tx_queues) ? ntx : 0;
+		return (ntx <= dev->num_tx_queues) ? __c_fakeu(ntx) : 0;
 
 	/* The second region represents the hardware traffic classes. These
 	 * are represented by classid values of TC_H_MIN_PRIORITY through
 	 * TC_H_MIN_PRIORITY + netdev_get_num_tc - 1
 	 */
-	return ((ntx - TC_H_MIN_PRIORITY) < netdev_get_num_tc(dev)) ? ntx : 0;
+	return ((ntx - TC_H_MIN_PRIORITY) < netdev_get_num_tc(dev)) ? __c_fakeu(ntx) : 0;
 }
 
-static int mqprio_dump_class(struct Qdisc *sch, unsigned long cl,
+static int mqprio_dump_class(struct Qdisc *sch, uintptr_t cl,
 			 struct sk_buff *skb, struct tcmsg *tcm)
 {
 	if (cl < TC_H_MIN_PRIORITY) {
 		struct netdev_queue *dev_queue = mqprio_queue_get(sch, cl);
 		struct net_device *dev = qdisc_dev(sch);
-		int tc = netdev_txq_to_tc(dev, cl - 1);
+		int tc = netdev_txq_to_tc(dev, __c_ua(cl - 1));
 
 		tcm->tcm_parent = (tc < 0) ? 0 :
 			TC_H_MAKE(TC_H_MAJ(sch->handle),
@@ -658,7 +658,7 @@ static int mqprio_dump_class(struct Qdisc *sch, unsigned long cl,
 	return 0;
 }
 
-static int mqprio_dump_class_stats(struct Qdisc *sch, unsigned long cl,
+static int mqprio_dump_class_stats(struct Qdisc *sch, uintptr_t cl,
 				   struct gnet_dump *d)
 	__releases(d->lock)
 	__acquires(d->lock)
@@ -669,7 +669,7 @@ static int mqprio_dump_class_stats(struct Qdisc *sch, unsigned long cl,
 		struct gnet_stats_queue qstats = {0};
 		struct gnet_stats_basic_sync bstats;
 		struct net_device *dev = qdisc_dev(sch);
-		struct netdev_tc_txq tc = dev->tc_to_txq[cl & TC_BITMASK];
+		struct netdev_tc_txq tc = dev->tc_to_txq[__c_ua(cl) & TC_BITMASK];
 
 		gnet_stats_basic_sync_init(&bstats);
 		/* Drop lock here it will be reclaimed before touching
@@ -725,7 +725,7 @@ static void mqprio_walk(struct Qdisc *sch, struct qdisc_walker *arg)
 	/* Walk hierarchy with a virtual class per tc */
 	arg->count = arg->skip;
 	for (ntx = arg->skip; ntx < netdev_get_num_tc(dev); ntx++) {
-		if (!tc_qdisc_stats_dump(sch, ntx + TC_H_MIN_PRIORITY, arg))
+		if (!tc_qdisc_stats_dump(sch, __c_fakeu(ntx + TC_H_MIN_PRIORITY), arg))
 			return;
 	}
 
@@ -737,7 +737,7 @@ static void mqprio_walk(struct Qdisc *sch, struct qdisc_walker *arg)
 
 	/* Reset offset, sort out remaining per-queue qdiscs */
 	for (ntx -= TC_MAX_QUEUE; ntx < dev->num_tx_queues; ntx++) {
-		if (arg->fn(sch, ntx + 1, arg) < 0) {
+		if (arg->fn(sch, __c_fakeu(ntx + 1), arg) < 0) {
 			arg->stop = 1;
 			return;
 		}
@@ -748,7 +748,7 @@ static void mqprio_walk(struct Qdisc *sch, struct qdisc_walker *arg)
 static struct netdev_queue *mqprio_select_queue(struct Qdisc *sch,
 						struct tcmsg *tcm)
 {
-	return mqprio_queue_get(sch, TC_H_MIN(tcm->tcm_parent));
+	return mqprio_queue_get(sch, __c_fakeu(TC_H_MIN(tcm->tcm_parent)));
 }
 
 static const struct Qdisc_class_ops mqprio_class_ops = {

@@ -194,9 +194,9 @@ static inline struct htb_class *htb_find(u32 handle, struct Qdisc *sch)
 	return container_of(clc, struct htb_class, common);
 }
 
-static unsigned long htb_search(struct Qdisc *sch, u32 handle)
+static uintptr_t htb_search(struct Qdisc *sch, u32 handle)
 {
-	return (unsigned long)htb_find(handle, sch);
+	return (uintptr_t)htb_find(handle, sch);
 }
 
 #define HTB_DIRECT ((struct htb_class *)-1L)
@@ -1237,7 +1237,7 @@ nla_put_failure:
 	return -1;
 }
 
-static int htb_dump_class(struct Qdisc *sch, unsigned long arg,
+static int htb_dump_class(struct Qdisc *sch, uintptr_t arg,
 			  struct sk_buff *skb, struct tcmsg *tcm)
 {
 	struct htb_class *cl = (struct htb_class *)arg;
@@ -1317,7 +1317,7 @@ static void htb_offload_aggregate_stats(struct htb_sched *q,
 }
 
 static int
-htb_dump_class_stats(struct Qdisc *sch, unsigned long arg, struct gnet_dump *d)
+htb_dump_class_stats(struct Qdisc *sch, uintptr_t arg, struct gnet_dump *d)
 {
 	struct htb_class *cl = (struct htb_class *)arg;
 	struct htb_sched *q = qdisc_priv(sch);
@@ -1438,7 +1438,7 @@ static void htb_offload_move_qdisc(struct Qdisc *sch, struct htb_class *cl_old,
 	}
 }
 
-static int htb_graft(struct Qdisc *sch, unsigned long arg, struct Qdisc *new,
+static int htb_graft(struct Qdisc *sch, uintptr_t arg, struct Qdisc *new,
 		     struct Qdisc **old, struct netlink_ext_ack *extack)
 {
 	struct netdev_queue *dev_queue = sch->dev_queue;
@@ -1475,13 +1475,13 @@ static int htb_graft(struct Qdisc *sch, unsigned long arg, struct Qdisc *new,
 	return 0;
 }
 
-static struct Qdisc *htb_leaf(struct Qdisc *sch, unsigned long arg)
+static struct Qdisc *htb_leaf(struct Qdisc *sch, uintptr_t arg)
 {
 	struct htb_class *cl = (struct htb_class *)arg;
 	return !cl->level ? cl->leaf.q : NULL;
 }
 
-static void htb_qlen_notify(struct Qdisc *sch, unsigned long arg)
+static void htb_qlen_notify(struct Qdisc *sch, uintptr_t arg)
 {
 	struct htb_class *cl = (struct htb_class *)arg;
 
@@ -1687,7 +1687,7 @@ static void htb_destroy(struct Qdisc *sch)
 	kfree(q->direct_qdiscs);
 }
 
-static int htb_delete(struct Qdisc *sch, unsigned long arg,
+static int htb_delete(struct Qdisc *sch, uintptr_t arg,
 		      struct netlink_ext_ack *extack)
 {
 	struct htb_sched *q = qdisc_priv(sch);
@@ -1756,7 +1756,7 @@ static int htb_delete(struct Qdisc *sch, unsigned long arg,
 
 static int htb_change_class(struct Qdisc *sch, u32 classid,
 			    u32 parentid, struct nlattr **tca,
-			    unsigned long *arg, struct netlink_ext_ack *extack)
+			    uintptr_t *arg, struct netlink_ext_ack *extack)
 {
 	int err = -EINVAL;
 	struct htb_sched *q = qdisc_priv(sch);
@@ -2056,7 +2056,7 @@ static int htb_change_class(struct Qdisc *sch, u32 classid,
 
 	qdisc_class_hash_grow(sch, &q->clhash);
 
-	*arg = (unsigned long)cl;
+	*arg = (uintptr_t)cl;
 	return 0;
 
 err_kill_estimator:
@@ -2068,7 +2068,7 @@ failure:
 	return err;
 }
 
-static struct tcf_block *htb_tcf_block(struct Qdisc *sch, unsigned long arg,
+static struct tcf_block *htb_tcf_block(struct Qdisc *sch, uintptr_t arg,
 				       struct netlink_ext_ack *extack)
 {
 	struct htb_sched *q = qdisc_priv(sch);
@@ -2077,7 +2077,7 @@ static struct tcf_block *htb_tcf_block(struct Qdisc *sch, unsigned long arg,
 	return cl ? cl->block : q->block;
 }
 
-static unsigned long htb_bind_filter(struct Qdisc *sch, unsigned long parent,
+static uintptr_t htb_bind_filter(struct Qdisc *sch, uintptr_t parent,
 				     u32 classid)
 {
 	struct htb_class *cl = htb_find(classid, sch);
@@ -2093,10 +2093,10 @@ static unsigned long htb_bind_filter(struct Qdisc *sch, unsigned long parent,
 	 */
 	if (cl)
 		qdisc_class_get(&cl->common);
-	return (unsigned long)cl;
+	return (uintptr_t)cl;
 }
 
-static void htb_unbind_filter(struct Qdisc *sch, unsigned long arg)
+static void htb_unbind_filter(struct Qdisc *sch, uintptr_t arg)
 {
 	struct htb_class *cl = (struct htb_class *)arg;
 
@@ -2114,7 +2114,7 @@ static void htb_walk(struct Qdisc *sch, struct qdisc_walker *arg)
 
 	for (i = 0; i < q->clhash.hashsize; i++) {
 		hlist_for_each_entry(cl, &q->clhash.hash[i], common.hnode) {
-			if (!tc_qdisc_stats_dump(sch, (unsigned long)cl, arg))
+			if (!tc_qdisc_stats_dump(sch, (uintptr_t)cl, arg))
 				return;
 		}
 	}

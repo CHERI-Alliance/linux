@@ -34,8 +34,8 @@ struct route4_fastmap {
 
 struct route4_head {
 	struct route4_fastmap		fastmap[16];
-	struct route4_bucket __rcu	*table[256 + 1];
 	struct rcu_head			rcu;
+	struct route4_bucket __rcu	*table[256 + 1];
 };
 
 struct route4_bucket {
@@ -381,7 +381,7 @@ static const struct nla_policy route4_policy[TCA_ROUTE4_MAX + 1] = {
 };
 
 static int route4_set_parms(struct net *net, struct tcf_proto *tp,
-			    unsigned long base, struct route4_filter *f,
+			    uintptr_t base, struct route4_filter *f,
 			    u32 handle, struct route4_head *head,
 			    struct nlattr **tb, struct nlattr *est, int new,
 			    u32 flags, struct netlink_ext_ack *extack)
@@ -474,7 +474,7 @@ static int route4_set_parms(struct net *net, struct tcf_proto *tp,
 }
 
 static int route4_change(struct net *net, struct sk_buff *in_skb,
-			 struct tcf_proto *tp, unsigned long base, u32 handle,
+			 struct tcf_proto *tp, uintptr_t base, u32 handle,
 			 struct nlattr **tca, void **arg, u32 flags,
 			 struct netlink_ext_ack *extack)
 {
@@ -650,8 +650,8 @@ nla_put_failure:
 	return -1;
 }
 
-static void route4_bind_class(void *fh, u32 classid, unsigned long cl, void *q,
-			      unsigned long base)
+static void route4_bind_class(void *fh, u32 classid, uintptr_t cl, void *q,
+			      uintptr_t base)
 {
 	struct route4_filter *f = fh;
 

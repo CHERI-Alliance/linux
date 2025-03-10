@@ -26,9 +26,9 @@
 #define HTSIZE 256
 
 struct fw_head {
+	struct rcu_head		rcu;
 	u32			mask;
 	struct fw_filter __rcu	*ht[HTSIZE];
-	struct rcu_head		rcu;
 };
 
 struct fw_filter {
@@ -200,7 +200,7 @@ static const struct nla_policy fw_policy[TCA_FW_MAX + 1] = {
 
 static int fw_set_parms(struct net *net, struct tcf_proto *tp,
 			struct fw_filter *f, struct nlattr **tb,
-			struct nlattr **tca, unsigned long base, u32 flags,
+			struct nlattr **tca, uintptr_t base, u32 flags,
 			struct netlink_ext_ack *extack)
 {
 	struct fw_head *head = rtnl_dereference(tp->root);
@@ -237,7 +237,7 @@ static int fw_set_parms(struct net *net, struct tcf_proto *tp,
 }
 
 static int fw_change(struct net *net, struct sk_buff *in_skb,
-		     struct tcf_proto *tp, unsigned long base,
+		     struct tcf_proto *tp, uintptr_t base,
 		     u32 handle, struct nlattr **tca, void **arg,
 		     u32 flags, struct netlink_ext_ack *extack)
 {
@@ -412,8 +412,8 @@ nla_put_failure:
 	return -1;
 }
 
-static void fw_bind_class(void *fh, u32 classid, unsigned long cl, void *q,
-			  unsigned long base)
+static void fw_bind_class(void *fh, u32 classid, uintptr_t cl, void *q,
+			  uintptr_t base)
 {
 	struct fw_filter *f = fh;
 

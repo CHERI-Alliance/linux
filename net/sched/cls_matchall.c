@@ -67,7 +67,7 @@ static void mall_destroy_work(struct work_struct *work)
 
 static void mall_destroy_hw_filter(struct tcf_proto *tp,
 				   struct cls_mall_head *head,
-				   unsigned long cookie,
+				   uintptr_t cookie,
 				   struct netlink_ext_ack *extack)
 {
 	struct tc_cls_matchall_offload cls_mall = {};
@@ -83,7 +83,7 @@ static void mall_destroy_hw_filter(struct tcf_proto *tp,
 
 static int mall_replace_hw_filter(struct tcf_proto *tp,
 				  struct cls_mall_head *head,
-				  unsigned long cookie,
+				  uintptr_t cookie,
 				  struct netlink_ext_ack *extack)
 {
 	struct tc_cls_matchall_offload cls_mall = {};
@@ -135,7 +135,7 @@ static void mall_destroy(struct tcf_proto *tp, bool rtnl_held,
 	tcf_unbind_filter(tp, &head->res);
 
 	if (!tc_skip_hw(head->flags))
-		mall_destroy_hw_filter(tp, head, (unsigned long) head, extack);
+		mall_destroy_hw_filter(tp, head, (uintptr_t) head, extack);
 
 	if (tcf_exts_get_net(&head->exts))
 		tcf_queue_work(&head->rwork, mall_destroy_work);
@@ -160,7 +160,7 @@ static const struct nla_policy mall_policy[TCA_MATCHALL_MAX + 1] = {
 };
 
 static int mall_change(struct net *net, struct sk_buff *in_skb,
-		       struct tcf_proto *tp, unsigned long base,
+		       struct tcf_proto *tp, uintptr_t base,
 		       u32 handle, struct nlattr **tca,
 		       void **arg, u32 flags,
 		       struct netlink_ext_ack *extack)
@@ -219,7 +219,7 @@ static int mall_change(struct net *net, struct sk_buff *in_skb,
 	}
 
 	if (!tc_skip_hw(new->flags)) {
-		err = mall_replace_hw_filter(tp, new, (unsigned long)new,
+		err = mall_replace_hw_filter(tp, new, (uintptr_t)new,
 					     extack);
 		if (err)
 			goto err_replace_hw_filter;
@@ -288,7 +288,7 @@ static int mall_reoffload(struct tcf_proto *tp, bool add, flow_setup_cb_t *cb,
 	tc_cls_common_offload_init(&cls_mall.common, tp, head->flags, extack);
 	cls_mall.command = add ?
 		TC_CLSMATCHALL_REPLACE : TC_CLSMATCHALL_DESTROY;
-	cls_mall.cookie = (unsigned long)head;
+	cls_mall.cookie = (uintptr_t)head;
 
 	err = tc_setup_offload_action(&cls_mall.rule->action, &head->exts,
 				      cls_mall.common.extack);
@@ -309,7 +309,7 @@ static int mall_reoffload(struct tcf_proto *tp, bool add, flow_setup_cb_t *cb,
 
 static void mall_stats_hw_filter(struct tcf_proto *tp,
 				 struct cls_mall_head *head,
-				 unsigned long cookie)
+				 uintptr_t cookie)
 {
 	struct tc_cls_matchall_offload cls_mall = {};
 	struct tcf_block *block = tp->chain->block;
@@ -335,7 +335,7 @@ static int mall_dump(struct net *net, struct tcf_proto *tp, void *fh,
 		return skb->len;
 
 	if (!tc_skip_hw(head->flags))
-		mall_stats_hw_filter(tp, head, (unsigned long)head);
+		mall_stats_hw_filter(tp, head, (uintptr_t)head);
 
 	t->tcm_handle = head->handle;
 
@@ -376,8 +376,8 @@ nla_put_failure:
 	return -1;
 }
 
-static void mall_bind_class(void *fh, u32 classid, unsigned long cl, void *q,
-			    unsigned long base)
+static void mall_bind_class(void *fh, u32 classid, uintptr_t cl, void *q,
+			    uintptr_t base)
 {
 	struct cls_mall_head *head = fh;
 

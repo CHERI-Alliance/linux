@@ -173,7 +173,7 @@ static int em_ipt_change(struct net *net, void *data, int data_len,
 		goto err;
 
 	em->datalen = sizeof(*im) + mdata_len;
-	em->data = (unsigned long)im;
+	em->data = (uintptr_t)im;
 	return 0;
 
 err:

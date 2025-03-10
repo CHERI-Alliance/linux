@@ -187,7 +187,7 @@ static int offload_action_init(struct flow_offload_action *fl_action,
 	fl_action->extack = extack;
 	fl_action->command = cmd;
 	fl_action->index = act->tcfa_index;
-	fl_action->cookie = (unsigned long)act;
+	fl_action->cookie = (uintptr_t)act;
 
 	if (act->ops->offload_act_setup) {
 		spin_lock_bh(&act->tcfa_lock);
@@ -508,8 +508,8 @@ static int tcf_dump_walker(struct tcf_idrinfo *idrinfo, struct sk_buff *skb,
 			   struct netlink_callback *cb)
 {
 	int err = 0, index = -1, s_i = 0, n_i = 0;
-	u32 act_flags = cb->args[2];
-	unsigned long jiffy_since = cb->args[3];
+	u32 act_flags = __c_ua(cb->args[2]);
+	unsigned long jiffy_since = __c_ua(cb->args[3]);
 	struct nlattr *nest;
 	struct idr *idr = &idrinfo->action_idr;
 	struct tc_action *p;
@@ -518,7 +518,7 @@ static int tcf_dump_walker(struct tcf_idrinfo *idrinfo, struct sk_buff *skb,
 
 	mutex_lock(&idrinfo->lock);
 
-	s_i = cb->args[0];
+	s_i = __c_ua(cb->args[0]);
 
 	idr_for_each_entry_ul(idr, p, tmp, id) {
 		index++;
@@ -555,12 +555,12 @@ static int tcf_dump_walker(struct tcf_idrinfo *idrinfo, struct sk_buff *skb,
 	}
 done:
 	if (index >= 0)
-		cb->args[0] = index + 1;
+		cb->args[0] = __c_fakeu(index + 1);
 
 	mutex_unlock(&idrinfo->lock);
 	if (n_i) {
 		if (act_flags & TCA_ACT_FLAG_LARGE_DUMP_ON)
-			cb->args[1] = n_i;
+			cb->args[1] = __c_fakeu(n_i);
 	}
 	return n_i;
 
@@ -2190,7 +2190,7 @@ static int tc_dump_action(struct sk_buff *skb, struct netlink_callback *cb)
 	cb->args[2] = 0;
 	if (tb[TCA_ROOT_FLAGS]) {
 		bf = nla_get_bitfield32(tb[TCA_ROOT_FLAGS]);
-		cb->args[2] = bf.value;
+		cb->args[2] = __c_fakeu(bf.value);
 	}
 
 	if (tb[TCA_ROOT_TIME_DELTA]) {
@@ -2209,7 +2209,7 @@ static int tc_dump_action(struct sk_buff *skb, struct netlink_callback *cb)
 	t->tca_family = AF_UNSPEC;
 	t->tca__pad1 = 0;
 	t->tca__pad2 = 0;
-	cb->args[3] = jiffy_since;
+	cb->args[3] = __c_fakeu(jiffy_since);
 	count_attr = nla_reserve(skb, TCA_ROOT_COUNT, sizeof(u32));
 	if (!count_attr)
 		goto out_module_put;
@@ -2225,7 +2225,7 @@ static int tc_dump_action(struct sk_buff *skb, struct netlink_callback *cb)
 	if (ret > 0) {
 		nla_nest_end(skb, nest);
 		ret = skb->len;
-		act_count = cb->args[1];
+		act_count = __c_ua(cb->args[1]);
 		memcpy(nla_data(count_attr), &act_count, sizeof(u32));
 		cb->args[1] = 0;
 	} else

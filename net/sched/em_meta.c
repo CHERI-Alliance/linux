@@ -71,13 +71,16 @@
 #include <net/sock.h>
 
 struct meta_obj {
-	unsigned long		value;
+	union {
+		unsigned long	value;
+		uintptr_t	valuep;
+	};
 	unsigned int		len;
 };
 
 struct meta_value {
 	struct tcf_meta_val	hdr;
-	unsigned long		val;
+	uintptr_t		val;
 	unsigned int		len;
 };
 
@@ -150,7 +153,7 @@ static inline int var_dev(struct net_device *dev, struct meta_obj *dst)
 	if (unlikely(dev == NULL))
 		return -1;
 
-	dst->value = (unsigned long) dev->name;
+	dst->valuep = (uintptr_t) dev->name;
 	dst->len = strlen(dev->name);
 	return 0;
 }
@@ -320,7 +323,7 @@ META_COLLECTOR(var_sk_bound_if)
 
 	bound_dev_if = READ_ONCE(skb->sk->sk_bound_dev_if);
 	if (bound_dev_if == 0) {
-		dst->value = (unsigned long) "any";
+		dst->valuep = (uintptr_t) "any";
 		dst->len = 3;
 	} else {
 		struct net_device *dev;
@@ -687,7 +690,7 @@ static int meta_var_compare(struct meta_obj *a, struct meta_obj *b)
 	int r = a->len - b->len;
 
 	if (r == 0)
-		r = memcmp((void *) a->value, (void *) b->value, a->len);
+		r = memcmp((void *) a->valuep, (void *) b->valuep, a->len);
 
 	return r;
 }
@@ -696,7 +699,7 @@ static int meta_var_change(struct meta_value *dst, struct nlattr *nla)
 {
 	int len = nla_len(nla);
 
-	dst->val = (unsigned long)kmemdup(nla_data(nla), len, GFP_KERNEL);
+	dst->val = (uintptr_t)kmemdup(nla_data(nla), len, GFP_KERNEL);
 	if (dst->val == 0UL)
 		return -ENOMEM;
 	dst->len = len;
@@ -737,9 +740,9 @@ static int meta_int_compare(struct meta_obj *a, struct meta_obj *b)
 	/* Let gcc optimize it, the unlikely is not really based on
 	 * some numbers but jump free code for mismatches seems
 	 * more logical. */
-	if (unlikely(a->value == b->value))
+	if (unlikely(a->valuep == b->valuep))
 		return 0;
-	else if (a->value < b->value)
+	else if (a->valuep < b->valuep)
 		return -1;
 	else
 		return 1;
@@ -748,10 +751,10 @@ static int meta_int_compare(struct meta_obj *a, struct meta_obj *b)
 static int meta_int_change(struct meta_value *dst, struct nlattr *nla)
 {
 	if (nla_len(nla) >= sizeof(unsigned long)) {
-		dst->val = *(unsigned long *) nla_data(nla);
+		dst->val = __c_fakeu(*(unsigned long *) nla_data(nla));
 		dst->len = sizeof(unsigned long);
 	} else if (nla_len(nla) == sizeof(u32)) {
-		dst->val = nla_get_u32(nla);
+		dst->val = __c_fakeu(nla_get_u32(nla));
 		dst->len = sizeof(u32);
 	} else
 		return -EINVAL;
@@ -775,7 +778,7 @@ static int meta_int_dump(struct sk_buff *skb, struct meta_value *v, int tlv)
 		if (nla_put(skb, tlv, sizeof(unsigned long), &v->val))
 			goto nla_put_failure;
 	} else if (v->len == sizeof(u32)) {
-		if (nla_put_u32(skb, tlv, v->val))
+		if (nla_put_u32(skb, tlv, __c_ua(v->val)))
 			goto nla_put_failure;
 	}
 
@@ -828,7 +831,7 @@ static int meta_get(struct sk_buff *skb, struct tcf_pkt_info *info,
 	int err = 0;
 
 	if (meta_id(v) == TCF_META_ID_VALUE) {
-		dst->value = v->val;
+		dst->valuep = v->val;
 		dst->len = v->len;
 		return 0;
 	}
@@ -947,7 +950,7 @@ static int em_meta_change(struct net *net, void *data, int len,
 		goto errout;
 
 	m->datalen = sizeof(*meta);
-	m->data = (unsigned long) meta;
+	m->data = (uintptr_t) meta;
 
 	err = 0;
 errout:

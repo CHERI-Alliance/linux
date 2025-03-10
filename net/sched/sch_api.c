@@ -336,7 +336,7 @@ out:
 
 static struct Qdisc *qdisc_leaf(struct Qdisc *p, u32 classid)
 {
-	unsigned long cl;
+	uintptr_t cl;
 	const struct Qdisc_class_ops *cops = p->ops->cl_ops;
 
 	if (cops == NULL)
@@ -782,7 +782,7 @@ void qdisc_tree_reduce_backlog(struct Qdisc *sch, int n, int len)
 {
 	bool qdisc_is_offloaded = sch->flags & TCQ_F_OFFLOADED;
 	const struct Qdisc_class_ops *cops;
-	unsigned long cl;
+	uintptr_t cl;
 	u32 parentid;
 	bool notify;
 	int drops;
@@ -1180,7 +1180,7 @@ skip:
 			dev_activate(dev);
 	} else {
 		const struct Qdisc_class_ops *cops = parent->ops->cl_ops;
-		unsigned long cl;
+		uintptr_t cl;
 		int err;
 
 		/* Only support running class lockless if parent is lockless */
@@ -1451,7 +1451,7 @@ struct check_loop_arg {
 	int			depth;
 };
 
-static int check_loop_fn(struct Qdisc *q, unsigned long cl,
+static int check_loop_fn(struct Qdisc *q, uintptr_t cl,
 			 struct qdisc_walker *w);
 
 static int check_loop(struct Qdisc *q, struct Qdisc *p, int depth)
@@ -1470,7 +1470,7 @@ static int check_loop(struct Qdisc *q, struct Qdisc *p, int depth)
 }
 
 static int
-check_loop_fn(struct Qdisc *q, unsigned long cl, struct qdisc_walker *w)
+check_loop_fn(struct Qdisc *q, uintptr_t cl, struct qdisc_walker *w)
 {
 	struct Qdisc *leaf;
 	const struct Qdisc_class_ops *cops = q->ops->cl_ops;
@@ -1859,8 +1859,8 @@ static int tc_dump_qdisc(struct sk_buff *skb, struct netlink_callback *cb)
 	struct nlattr *tca[TCA_MAX + 1];
 	int err;
 
-	s_idx = cb->args[0];
-	s_q_idx = q_idx = cb->args[1];
+	s_idx = __c_ua(cb->args[0]);
+	s_q_idx = q_idx = __c_ua(cb->args[1]);
 
 	idx = 0;
 	ASSERT_RTNL();
@@ -1896,8 +1896,8 @@ cont:
 	}
 
 done:
-	cb->args[0] = idx;
-	cb->args[1] = q_idx;
+	cb->args[0] = __c_fakeu(idx);
+	cb->args[1] = __c_fakeu(q_idx);
 
 	return skb->len;
 }
@@ -1909,7 +1909,7 @@ done:
  ************************************************/
 
 static int tc_fill_tclass(struct sk_buff *skb, struct Qdisc *q,
-			  unsigned long cl, u32 portid, u32 seq, u16 flags,
+			  uintptr_t cl, u32 portid, u32 seq, u16 flags,
 			  int event, struct netlink_ext_ack *extack)
 {
 	struct tcmsg *tcm;
@@ -1961,7 +1961,7 @@ nla_put_failure:
 
 static int tclass_notify(struct net *net, struct sk_buff *oskb,
 			 struct nlmsghdr *n, struct Qdisc *q,
-			 unsigned long cl, int event, struct netlink_ext_ack *extack)
+			 uintptr_t cl, int event, struct netlink_ext_ack *extack)
 {
 	struct sk_buff *skb;
 	u32 portid = oskb ? NETLINK_CB(oskb).portid : 0;
@@ -1984,7 +1984,7 @@ static int tclass_notify(struct net *net, struct sk_buff *oskb,
 
 static int tclass_get_notify(struct net *net, struct sk_buff *oskb,
 			     struct nlmsghdr *n, struct Qdisc *q,
-			     unsigned long cl, struct netlink_ext_ack *extack)
+			     uintptr_t cl, struct netlink_ext_ack *extack)
 {
 	struct sk_buff *skb;
 	u32 portid = oskb ? NETLINK_CB(oskb).portid : 0;
@@ -2006,7 +2006,7 @@ static int tclass_get_notify(struct net *net, struct sk_buff *oskb,
 static int tclass_del_notify(struct net *net,
 			     const struct Qdisc_class_ops *cops,
 			     struct sk_buff *oskb, struct nlmsghdr *n,
-			     struct Qdisc *q, unsigned long cl,
+			     struct Qdisc *q, uintptr_t cl,
 			     struct netlink_ext_ack *extack)
 {
 	u32 portid = oskb ? NETLINK_CB(oskb).portid : 0;
@@ -2045,8 +2045,8 @@ static int tclass_del_notify(struct net *net,
 
 struct tcf_bind_args {
 	struct tcf_walker w;
-	unsigned long base;
-	unsigned long cl;
+	uintptr_t base;
+	uintptr_t cl;
 	u32 classid;
 };
 
@@ -2066,12 +2066,12 @@ static int tcf_node_bind(struct tcf_proto *tp, void *n, struct tcf_walker *arg)
 
 struct tc_bind_class_args {
 	struct qdisc_walker w;
-	unsigned long new_cl;
+	uintptr_t new_cl;
 	u32 portid;
 	u32 clid;
 };
 
-static int tc_bind_class_walker(struct Qdisc *q, unsigned long cl,
+static int tc_bind_class_walker(struct Qdisc *q, uintptr_t cl,
 				struct qdisc_walker *w)
 {
 	struct tc_bind_class_args *a = (struct tc_bind_class_args *)w;
@@ -2103,7 +2103,7 @@ static int tc_bind_class_walker(struct Qdisc *q, unsigned long cl,
 }
 
 static void tc_bind_tclass(struct Qdisc *q, u32 portid, u32 clid,
-			   unsigned long new_cl)
+			   uintptr_t new_cl)
 {
 	const struct Qdisc_class_ops *cops = q->ops->cl_ops;
 	struct tc_bind_class_args args = {};
@@ -2120,7 +2120,7 @@ static void tc_bind_tclass(struct Qdisc *q, u32 portid, u32 clid,
 #else
 
 static void tc_bind_tclass(struct Qdisc *q, u32 portid, u32 clid,
-			   unsigned long new_cl)
+			   uintptr_t new_cl)
 {
 }
 
@@ -2135,8 +2135,8 @@ static int tc_ctl_tclass(struct sk_buff *skb, struct nlmsghdr *n,
 	struct net_device *dev;
 	struct Qdisc *q = NULL;
 	const struct Qdisc_class_ops *cops;
-	unsigned long cl = 0;
-	unsigned long new_cl;
+	uintptr_t cl = 0;
+	uintptr_t new_cl;
 	u32 portid;
 	u32 clid;
 	u32 qid;
@@ -2265,7 +2265,7 @@ struct qdisc_dump_args {
 	struct netlink_callback	*cb;
 };
 
-static int qdisc_class_dump(struct Qdisc *q, unsigned long cl,
+static int qdisc_class_dump(struct Qdisc *q, uintptr_t cl,
 			    struct qdisc_walker *arg)
 {
 	struct qdisc_dump_args *a = (struct qdisc_dump_args *)arg;
@@ -2294,10 +2294,10 @@ static int tc_dump_tclass_qdisc(struct Qdisc *q, struct sk_buff *skb,
 	arg.skb = skb;
 	arg.cb = cb;
 	arg.w.stop  = 0;
-	arg.w.skip = cb->args[1];
+	arg.w.skip = __c_ua(cb->args[1]);
 	arg.w.count = 0;
 	q->ops->cl_ops->walk(q, &arg.w);
-	cb->args[1] = arg.w.count;
+	cb->args[1] = __c_fakeu(arg.w.count);
 	if (arg.w.stop)
 		return -1;
 	(*t_p)++;
@@ -2349,7 +2349,7 @@ static int tc_dump_tclass(struct sk_buff *skb, struct netlink_callback *cb)
 	if (!dev)
 		return 0;
 
-	s_t = cb->args[0];
+	s_t = __c_ua(cb->args[0]);
 	t = 0;
 
 	if (tc_dump_tclass_root(rtnl_dereference(dev->qdisc),
@@ -2363,7 +2363,7 @@ static int tc_dump_tclass(struct sk_buff *skb, struct netlink_callback *cb)
 		goto done;
 
 done:
-	cb->args[0] = t;
+	cb->args[0] = __c_fakeu(t);
 
 	dev_put(dev);
 	return skb->len;

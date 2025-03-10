@@ -199,7 +199,7 @@ static int tcf_em_validate(struct tcf_proto *tp,
 			goto errout;
 
 
-		em->data = ref;
+		em->data = __c_fakeu(ref);
 	} else {
 		/* Note: This lookup will increase the module refcnt
 		 * of the ematch module referenced. In case of a failure,
@@ -259,14 +259,14 @@ static int tcf_em_validate(struct tcf_proto *tp,
 					goto errout;
 				if (data_len < sizeof(u32))
 					goto errout;
-				em->data = *(u32 *) data;
+				em->data = __c_fakeu(*(u32 *) data);
 			} else {
 				void *v = kmemdup(data, data_len, GFP_KERNEL);
 				if (v == NULL) {
 					err = -ENOBUFS;
 					goto errout;
 				}
-				em->data = (unsigned long) v;
+				em->data = (uintptr_t) v;
 			}
 			em->datalen = data_len;
 		}
@@ -469,7 +469,7 @@ int tcf_em_tree_dump(struct sk_buff *skb, struct tcf_ematch_tree *tree, int tlv)
 			if (em->ops->dump(skb, em) < 0)
 				goto nla_put_failure;
 		} else if (tcf_em_is_container(em) || tcf_em_is_simple(em)) {
-			u32 u = em->data;
+			u32 u = __c_ua(em->data);
 			nla_put_nohdr(skb, sizeof(u), &u);
 		} else if (em->datalen > 0)
 			nla_put_nohdr(skb, em->datalen, (void *) em->data);
@@ -513,7 +513,7 @@ proceed:
 				goto stack_overflow;
 
 			stack[stackp++] = match_idx;
-			match_idx = cur_match->data;
+			match_idx = __c_ua(cur_match->data);
 			goto proceed;
 		}
 

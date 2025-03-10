@@ -1259,7 +1259,7 @@ errout_qdisc:
 	return err;
 }
 
-static int __tcf_qdisc_cl_find(struct Qdisc *q, u32 parent, unsigned long *cl,
+static int __tcf_qdisc_cl_find(struct Qdisc *q, u32 parent, uintptr_t *cl,
 			       int ifindex, struct netlink_ext_ack *extack)
 {
 	if (ifindex == TCM_IFINDEX_MAGIC_BLOCK)
@@ -1280,7 +1280,7 @@ static int __tcf_qdisc_cl_find(struct Qdisc *q, u32 parent, unsigned long *cl,
 }
 
 static struct tcf_block *__tcf_block_find(struct net *net, struct Qdisc *q,
-					  unsigned long cl, int ifindex,
+					  uintptr_t cl, int ifindex,
 					  u32 block_index,
 					  struct netlink_ext_ack *extack)
 {
@@ -1354,7 +1354,7 @@ static void tcf_block_refcnt_put(struct tcf_block *block, bool rtnl_held)
  */
 
 static struct tcf_block *tcf_block_find(struct net *net, struct Qdisc **q,
-					u32 *parent, unsigned long *cl,
+					u32 *parent, uintptr_t *cl,
 					int ifindex, u32 block_index,
 					struct netlink_ext_ack *extack)
 {
@@ -2221,7 +2221,7 @@ static int tc_new_tfilter(struct sk_buff *skb, struct nlmsghdr *n,
 	struct tcf_chain *chain;
 	struct tcf_block *block;
 	struct tcf_proto *tp;
-	unsigned long cl;
+	uintptr_t cl;
 	void *fh;
 	int err;
 	int tp_created;
@@ -2455,7 +2455,7 @@ static int tc_del_tfilter(struct sk_buff *skb, struct nlmsghdr *n,
 	struct tcf_chain *chain = NULL;
 	struct tcf_block *block = NULL;
 	struct tcf_proto *tp = NULL;
-	unsigned long cl = 0;
+	uintptr_t cl = 0;
 	void *fh = NULL;
 	int err;
 	bool rtnl_held = false;
@@ -2611,7 +2611,7 @@ static int tc_get_tfilter(struct sk_buff *skb, struct nlmsghdr *n,
 	struct tcf_chain *chain = NULL;
 	struct tcf_block *block = NULL;
 	struct tcf_proto *tp = NULL;
-	unsigned long cl = 0;
+	uintptr_t cl = 0;
 	void *fh = NULL;
 	int err;
 	bool rtnl_held = false;
@@ -2782,13 +2782,13 @@ static bool tcf_chain_dump(struct tcf_chain *chain, struct Qdisc *q, u32 parent,
 		arg.q = q;
 		arg.parent = parent;
 		arg.w.stop = 0;
-		arg.w.skip = cb->args[1] - 1;
+		arg.w.skip = __c_ua(cb->args[1]) - 1;
 		arg.w.count = 0;
 		arg.w.cookie = cb->args[2];
 		arg.terse_dump = terse;
 		tp->ops->walk(tp, &arg.w, true);
 		cb->args[2] = arg.w.cookie;
-		cb->args[1] = arg.w.count + 1;
+		cb->args[1] = __c_fakeu(arg.w.count + 1);
 		if (arg.w.stop)
 			goto errout;
 	}
@@ -2848,7 +2848,7 @@ static int tc_dump_tfilter(struct sk_buff *skb, struct netlink_callback *cb)
 	} else {
 		const struct Qdisc_class_ops *cops;
 		struct net_device *dev;
-		unsigned long cl = 0;
+		uintptr_t cl = 0;
 
 		dev = __dev_get_by_index(net, tcm->tcm_ifindex);
 		if (!dev)
@@ -2879,7 +2879,7 @@ static int tc_dump_tfilter(struct sk_buff *skb, struct netlink_callback *cb)
 			q = NULL;
 	}
 
-	index_start = cb->args[0];
+	index_start = __c_ua(cb->args[0]);
 	index = 0;
 
 	for (chain = __tcf_get_next_chain(block, NULL);
@@ -2900,7 +2900,7 @@ static int tc_dump_tfilter(struct sk_buff *skb, struct netlink_callback *cb)
 
 	if (tcm->tcm_ifindex == TCM_IFINDEX_MAGIC_BLOCK)
 		tcf_block_refcnt_put(block, true);
-	cb->args[0] = index;
+	cb->args[0] = __c_fakeu(index);
 
 out:
 	/* If we did no progress, the error (EMSGSIZE) is real */
@@ -3084,7 +3084,7 @@ static int tc_ctl_chain(struct sk_buff *skb, struct nlmsghdr *n,
 	struct Qdisc *q;
 	struct tcf_chain *chain;
 	struct tcf_block *block;
-	unsigned long cl;
+	uintptr_t cl;
 	int err;
 
 replay:
@@ -3232,7 +3232,7 @@ static int tc_dump_chain(struct sk_buff *skb, struct netlink_callback *cb)
 	} else {
 		const struct Qdisc_class_ops *cops;
 		struct net_device *dev;
-		unsigned long cl = 0;
+		uintptr_t cl = 0;
 
 		dev = __dev_get_by_index(net, tcm->tcm_ifindex);
 		if (!dev)
@@ -3262,7 +3262,7 @@ static int tc_dump_chain(struct sk_buff *skb, struct netlink_callback *cb)
 			q = NULL;
 	}
 
-	index_start = cb->args[0];
+	index_start = __c_ua(cb->args[0]);
 	index = 0;
 
 	mutex_lock(&block->lock);
@@ -3289,7 +3289,7 @@ static int tc_dump_chain(struct sk_buff *skb, struct netlink_callback *cb)
 
 	if (tcm->tcm_ifindex == TCM_IFINDEX_MAGIC_BLOCK)
 		tcf_block_refcnt_put(block, true);
-	cb->args[0] = index;
+	cb->args[0] = __c_fakeu(index);
 
 out:
 	/* If we did no progress, the error (EMSGSIZE) is real */
@@ -3866,7 +3866,7 @@ int tc_setup_action(struct flow_action *flow_action,
 		for (k = 0; k < index ; k++) {
 			entry[k].hw_stats = tc_act_hw_stats(act->hw_stats);
 			entry[k].hw_index = act->tcfa_index;
-			entry[k].cookie = (unsigned long)act;
+			entry[k].cookie = (uintptr_t)act;
 			entry[k].miss_cookie =
 				tcf_exts_miss_cookie_get(miss_cookie_base, i);
 		}

@@ -542,7 +542,7 @@ nla_put_failure:
 	return -1;
 }
 
-static int tbf_dump_class(struct Qdisc *sch, unsigned long cl,
+static int tbf_dump_class(struct Qdisc *sch, uintptr_t cl,
 			  struct sk_buff *skb, struct tcmsg *tcm)
 {
 	struct tbf_sched_data *q = qdisc_priv(sch);
@@ -553,7 +553,7 @@ static int tbf_dump_class(struct Qdisc *sch, unsigned long cl,
 	return 0;
 }
 
-static int tbf_graft(struct Qdisc *sch, unsigned long arg, struct Qdisc *new,
+static int tbf_graft(struct Qdisc *sch, uintptr_t arg, struct Qdisc *new,
 		     struct Qdisc **old, struct netlink_ext_ack *extack)
 {
 	struct tbf_sched_data *q = qdisc_priv(sch);
@@ -567,13 +567,13 @@ static int tbf_graft(struct Qdisc *sch, unsigned long arg, struct Qdisc *new,
 	return 0;
 }
 
-static struct Qdisc *tbf_leaf(struct Qdisc *sch, unsigned long arg)
+static struct Qdisc *tbf_leaf(struct Qdisc *sch, uintptr_t arg)
 {
 	struct tbf_sched_data *q = qdisc_priv(sch);
 	return q->qdisc;
 }
 
-static unsigned long tbf_find(struct Qdisc *sch, u32 classid)
+static uintptr_t tbf_find(struct Qdisc *sch, u32 classid)
 {
 	return 1;
 }

@@ -156,10 +156,10 @@ static int mq_dump(struct Qdisc *sch, struct sk_buff *skb)
 	return mq_offload_stats(sch);
 }
 
-static struct netdev_queue *mq_queue_get(struct Qdisc *sch, unsigned long cl)
+static struct netdev_queue *mq_queue_get(struct Qdisc *sch, uintptr_t cl)
 {
 	struct net_device *dev = qdisc_dev(sch);
-	unsigned long ntx = cl - 1;
+	unsigned long ntx = __c_ua(cl) - 1;
 
 	if (ntx >= dev->num_tx_queues)
 		return NULL;
@@ -169,10 +169,10 @@ static struct netdev_queue *mq_queue_get(struct Qdisc *sch, unsigned long cl)
 static struct netdev_queue *mq_select_queue(struct Qdisc *sch,
 					    struct tcmsg *tcm)
 {
-	return mq_queue_get(sch, TC_H_MIN(tcm->tcm_parent));
+	return mq_queue_get(sch, __c_fakeu(TC_H_MIN(tcm->tcm_parent)));
 }
 
-static int mq_graft(struct Qdisc *sch, unsigned long cl, struct Qdisc *new,
+static int mq_graft(struct Qdisc *sch, uintptr_t cl, struct Qdisc *new,
 		    struct Qdisc **old, struct netlink_ext_ack *extack)
 {
 	struct netdev_queue *dev_queue = mq_queue_get(sch, cl);
@@ -189,7 +189,7 @@ static int mq_graft(struct Qdisc *sch, unsigned long cl, struct Qdisc *new,
 		dev_activate(dev);
 
 	graft_offload.handle = sch->handle;
-	graft_offload.graft_params.queue = cl - 1;
+	graft_offload.graft_params.queue = __c_ua(cl) - 1;
 	graft_offload.graft_params.child_handle = new ? new->handle : 0;
 	graft_offload.command = TC_MQ_GRAFT;
 
@@ -198,23 +198,23 @@ static int mq_graft(struct Qdisc *sch, unsigned long cl, struct Qdisc *new,
 	return 0;
 }
 
-static struct Qdisc *mq_leaf(struct Qdisc *sch, unsigned long cl)
+static struct Qdisc *mq_leaf(struct Qdisc *sch, uintptr_t cl)
 {
 	struct netdev_queue *dev_queue = mq_queue_get(sch, cl);
 
 	return rtnl_dereference(dev_queue->qdisc_sleeping);
 }
 
-static unsigned long mq_find(struct Qdisc *sch, u32 classid)
+static uintptr_t mq_find(struct Qdisc *sch, u32 classid)
 {
 	unsigned int ntx = TC_H_MIN(classid);
 
-	if (!mq_queue_get(sch, ntx))
+	if (!mq_queue_get(sch, __c_fakeu(ntx)))
 		return 0;
-	return ntx;
+	return __c_fakeu(ntx);
 }
 
-static int mq_dump_class(struct Qdisc *sch, unsigned long cl,
+static int mq_dump_class(struct Qdisc *sch, uintptr_t cl,
 			 struct sk_buff *skb, struct tcmsg *tcm)
 {
 	struct netdev_queue *dev_queue = mq_queue_get(sch, cl);
@@ -225,7 +225,7 @@ static int mq_dump_class(struct Qdisc *sch, unsigned long cl,
 	return 0;
 }
 
-static int mq_dump_class_stats(struct Qdisc *sch, unsigned long cl,
+static int mq_dump_class_stats(struct Qdisc *sch, uintptr_t cl,
 			       struct gnet_dump *d)
 {
 	struct netdev_queue *dev_queue = mq_queue_get(sch, cl);
@@ -247,7 +247,7 @@ static void mq_walk(struct Qdisc *sch, struct qdisc_walker *arg)
 
 	arg->count = arg->skip;
 	for (ntx = arg->skip; ntx < dev->num_tx_queues; ntx++) {
-		if (!tc_qdisc_stats_dump(sch, ntx + 1, arg))
+		if (!tc_qdisc_stats_dump(sch, __c_fakeu(ntx + 1), arg))
 			break;
 	}
 }
