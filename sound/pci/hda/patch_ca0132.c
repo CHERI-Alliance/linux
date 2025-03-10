@@ -5590,7 +5590,7 @@ static int ca0132_vnode_switch_set(struct snd_kcontrol *kcontrol,
 	if (effective) {
 		int dir = get_amp_direction(kcontrol);
 		int ch = get_amp_channels(kcontrol);
-		unsigned long pval;
+		uintptr_t pval;
 
 		mutex_lock(&codec->control_mutex);
 		pval = kcontrol->private_value;
@@ -6473,7 +6473,7 @@ static int ca0132_volume_info(struct snd_kcontrol *kcontrol,
 	hda_nid_t nid = get_amp_nid(kcontrol);
 	int ch = get_amp_channels(kcontrol);
 	int dir = get_amp_direction(kcontrol);
-	unsigned long pval;
+	uintptr_t pval;
 	int err;
 
 	switch (nid) {
@@ -6550,7 +6550,7 @@ static int ca0132_volume_put(struct snd_kcontrol *kcontrol,
 	effective = ca0132_is_vnode_effective(codec, nid, &shared_nid);
 	if (effective) {
 		int dir = get_amp_direction(kcontrol);
-		unsigned long pval;
+		uintptr_t pval;
 
 		snd_hda_power_up(codec);
 		mutex_lock(&codec->control_mutex);
@@ -6619,7 +6619,7 @@ static int ca0132_volume_tlv(struct snd_kcontrol *kcontrol, int op_flag,
 	hda_nid_t nid = get_amp_nid(kcontrol);
 	int ch = get_amp_channels(kcontrol);
 	int dir = get_amp_direction(kcontrol);
-	unsigned long pval;
+	uintptr_t pval;
 	int err;
 
 	switch (nid) {

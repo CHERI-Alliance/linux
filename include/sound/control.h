@@ -59,7 +59,7 @@ struct snd_kcontrol_new {
 		snd_kcontrol_tlv_rw_t *c;
 		const unsigned int *p;
 	} tlv;
-	unsigned long private_value;
+	uintptr_t private_value;
 };
 
 struct snd_kcontrol_volatile {
@@ -78,7 +78,7 @@ struct snd_kcontrol {
 		snd_kcontrol_tlv_rw_t *c;
 		const unsigned int *p;
 	} tlv;
-	unsigned long private_value;
+	uintptr_t private_value;
 	void *private_data;
 	void (*private_free)(struct snd_kcontrol *kcontrol);
 	struct snd_kcontrol_volatile vd[] __counted_by(count);	/* volatile data */
@@ -126,7 +126,7 @@ struct snd_ctl_layer_ops {
 
 typedef int (*snd_kctl_ioctl_func_t) (struct snd_card * card,
 				      struct snd_ctl_file * control,
-				      unsigned int cmd, unsigned long arg);
+				      unsigned int cmd, user_uintptr_t arg);
 
 void snd_ctl_notify(struct snd_card * card, unsigned int mask, struct snd_ctl_elem_id * id);
 void snd_ctl_notify_one(struct snd_card * card, unsigned int mask, struct snd_kcontrol * kctl, unsigned int ioff);

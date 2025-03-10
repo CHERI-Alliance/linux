@@ -524,14 +524,18 @@ static int __init alsa_hwdep_init(void)
 {
 	snd_hwdep_proc_init();
 	snd_ctl_register_ioctl(snd_hwdep_control_ioctl);
+#ifndef CONFIG_CHERI_KERNEL
 	snd_ctl_register_ioctl_compat(snd_hwdep_control_ioctl);
+#endif
 	return 0;
 }
 
 static void __exit alsa_hwdep_exit(void)
 {
 	snd_ctl_unregister_ioctl(snd_hwdep_control_ioctl);
+#ifndef CONFIG_CHERI_KERNEL
 	snd_ctl_unregister_ioctl_compat(snd_hwdep_control_ioctl);
+#endif
 	snd_hwdep_proc_done();
 }
 

@@ -47,7 +47,7 @@ struct snd_akm4xxx {
 	unsigned int num_dacs;			/* AK4524 or AK4528 DACs */
 	unsigned char images[AK4XXX_IMAGE_SIZE]; /* saved register image */
 	unsigned char volumes[AK4XXX_IMAGE_SIZE]; /* saved volume values */
-	unsigned long private_value[AK4XXX_MAX_CHIPS];	/* helper for driver */
+	uintptr_t private_value[AK4XXX_MAX_CHIPS];	/* helper for driver */
 	void *private_data[AK4XXX_MAX_CHIPS];		/* helper for driver */
 	/* template should fill the following fields */
 	unsigned int idx_offset;		/* control index offset */

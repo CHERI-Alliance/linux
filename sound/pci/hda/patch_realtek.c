@@ -3004,7 +3004,7 @@ static int alc268_beep_switch_put(struct snd_kcontrol *kcontrol,
 				  struct snd_ctl_elem_value *ucontrol)
 {
 	struct hda_codec *codec = snd_kcontrol_chip(kcontrol);
-	unsigned long pval;
+	uintptr_t pval;
 	int err;
 
 	mutex_lock(&codec->control_mutex);
