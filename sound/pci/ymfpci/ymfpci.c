@@ -305,7 +305,7 @@ static int __snd_card_ymfpci_probe(struct pci_dev *pci,
 
 	if (mpu_res) {
 		err = snd_mpu401_uart_new(card, 0, MPU401_HW_YMFPCI,
-					  mpu_port[dev],
+					  __c_fakeu(mpu_port[dev]),
 					  MPU401_INFO_INTEGRATED |
 					  MPU401_INFO_IRQ_HOOK,
 					  -1, &chip->rawmidi);

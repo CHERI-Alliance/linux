@@ -58,8 +58,8 @@ struct snd_mpu401 {
 
 	unsigned short hardware;	/* MPU401_HW_XXXX */
 	unsigned int info_flags;	/* MPU401_INFO_XXX */
-	unsigned long port;		/* base port of MPU-401 chip */
-	unsigned long cport;		/* port + 1 (usually) */
+	uintptr_t port;			/* base port of MPU-401 chip */
+	uintptr_t cport;		/* port + 1 (usually) */
 	struct resource *res;		/* port resource */
 	int irq;			/* IRQ number of MPU-401 chip */
 
@@ -81,8 +81,8 @@ struct snd_mpu401 {
 	
 	struct timer_list timer;
 
-	void (*write) (struct snd_mpu401 * mpu, unsigned char data, unsigned long addr);
-	unsigned char (*read) (struct snd_mpu401 *mpu, unsigned long addr);
+	void (*write) (struct snd_mpu401 * mpu, unsigned char data, uintptr_t addr);
+	unsigned char (*read) (struct snd_mpu401 *mpu, uintptr_t addr);
 };
 
 /* I/O ports */
@@ -115,7 +115,7 @@ irqreturn_t snd_mpu401_uart_interrupt_tx(int irq, void *dev_id);
 int snd_mpu401_uart_new(struct snd_card *card,
 			int device,
 			unsigned short hardware,
-			unsigned long port,
+			uintptr_t port,
 			unsigned int info_flags,
 			int irq,
 			struct snd_rawmidi ** rrawmidi);

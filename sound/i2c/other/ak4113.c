@@ -187,8 +187,8 @@ static int snd_ak4113_in_error_get(struct snd_kcontrol *kcontrol,
 
 	guard(spinlock_irq)(&chip->lock);
 	ucontrol->value.integer.value[0] =
-		chip->errors[kcontrol->private_value];
-	chip->errors[kcontrol->private_value] = 0;
+		chip->errors[__c_ua(kcontrol->private_value)];
+	chip->errors[__c_ua(kcontrol->private_value)] = 0;
 	return 0;
 }
 

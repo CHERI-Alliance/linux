@@ -881,7 +881,9 @@ static int fcp_hwdep_init(struct usb_mixer_interface *mixer)
 	hw->exclusive = 1;
 	hw->ops.open = fcp_hwdep_open;
 	hw->ops.ioctl = fcp_hwdep_ioctl;
+#ifndef CONFIG_CHERI_KERNEL
 	hw->ops.ioctl_compat = fcp_hwdep_ioctl;
+#endif
 	hw->ops.read = fcp_hwdep_read;
 	hw->ops.poll = fcp_hwdep_poll;
 	hw->ops.release = fcp_hwdep_release;

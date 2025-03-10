@@ -1296,7 +1296,7 @@ static int __snd_card_fm801_probe(struct pci_dev *pci,
 	if (err < 0)
 		return err;
 	err = snd_mpu401_uart_new(card, 0, MPU401_HW_FM801,
-				  chip->port + FM801_MPU401_DATA,
+				  __c_fakeu(chip->port + FM801_MPU401_DATA),
 				  MPU401_INFO_INTEGRATED |
 				  MPU401_INFO_IRQ_HOOK,
 				  -1, &chip->rmidi);

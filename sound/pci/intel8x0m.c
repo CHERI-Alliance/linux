@@ -1190,7 +1190,7 @@ static int __snd_intel8x0m_probe(struct pci_dev *pci,
 	}
 	strcat(card->shortname," Modem");
 
-	err = snd_intel8x0m_init(card, pci, pci_id->driver_data);
+	err = snd_intel8x0m_init(card, pci, __c_ua(pci_id->driver_data));
 	if (err < 0)
 		return err;
 

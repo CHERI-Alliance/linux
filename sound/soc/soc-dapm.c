@@ -4142,7 +4142,7 @@ static int snd_soc_dapm_dai_link_put(struct snd_kcontrol *kcontrol,
 
 static void
 snd_soc_dapm_free_kcontrol(struct snd_soc_card *card,
-			unsigned long *private_value,
+			uintptr_t *private_value,
 			int num_c2c_params,
 			const char **w_param_text)
 {
@@ -4163,7 +4163,7 @@ snd_soc_dapm_alloc_kcontrol(struct snd_soc_card *card,
 			char *link_name,
 			const struct snd_soc_pcm_stream *c2c_params,
 			int num_c2c_params, const char **w_param_text,
-			unsigned long *private_value)
+			uintptr_t *private_value)
 {
 	struct soc_enum w_param_enum[] = {
 		SOC_ENUM_SINGLE(0, 0, 0, NULL),
@@ -4237,7 +4237,7 @@ snd_soc_dapm_new_dai(struct snd_soc_card *card,
 	const struct snd_kcontrol_new *kcontrol_news;
 	int num_kcontrols;
 	const char **w_param_text;
-	unsigned long private_value = 0;
+	uintptr_t private_value = 0;
 	char *link_name;
 	int ret = -ENOMEM;
 

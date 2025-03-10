@@ -6312,7 +6312,9 @@ static int snd_hdspm_create_hwdep(struct snd_card *card,
 
 	hw->ops.open = snd_hdspm_hwdep_dummy_op;
 	hw->ops.ioctl = snd_hdspm_hwdep_ioctl;
+#ifndef CONFIG_CHERI_KERNEL
 	hw->ops.ioctl_compat = snd_hdspm_hwdep_ioctl;
+#endif
 	hw->ops.release = snd_hdspm_hwdep_dummy_op;
 
 	return 0;

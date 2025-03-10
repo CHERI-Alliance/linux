@@ -59,7 +59,7 @@ struct snd_kcontrol_new {
 		snd_kcontrol_tlv_rw_t *c;
 		const unsigned int *p;
 	} tlv;
-	unsigned long private_value;
+	uintptr_t private_value;
 };
 
 struct snd_kcontrol_volatile {
@@ -78,7 +78,7 @@ struct snd_kcontrol {
 		snd_kcontrol_tlv_rw_t *c;
 		const unsigned int *p;
 	} tlv;
-	unsigned long private_value;
+	uintptr_t private_value;
 	void *private_data;
 	void (*private_free)(struct snd_kcontrol *kcontrol);
 	struct snd_kcontrol_volatile vd[] __counted_by(count);	/* volatile data */

@@ -188,7 +188,7 @@ static int db1200_audio_probe(struct platform_device *pdev)
 	const struct platform_device_id *pid = platform_get_device_id(pdev);
 	struct snd_soc_card *card;
 
-	card = db1200_cards[pid->driver_data];
+	card = db1200_cards[__c_ua(pid->driver_data)];
 	card->dev = &pdev->dev;
 	return devm_snd_soc_register_card(&pdev->dev, card);
 }

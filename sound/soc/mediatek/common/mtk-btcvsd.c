@@ -74,7 +74,7 @@ enum BT_SCO_BAND {
 
 struct mtk_btcvsd_snd_hw_info {
 	unsigned int num_valid_addr;
-	unsigned long bt_sram_addr[20];
+	uintptr_t bt_sram_addr[20];
 	unsigned int packet_length;
 	unsigned int packet_num;
 };
@@ -340,7 +340,7 @@ static int btcvsd_tx_clean_buffer(struct mtk_btcvsd_snd *bt)
 		void *dst;
 
 		dev_info(bt->dev, "%s(), clean addr 0x%lx\n", __func__,
-			 bt->tx->buffer_info.bt_sram_addr[i]);
+			 (unsigned long)bt->tx->buffer_info.bt_sram_addr[i]);
 
 		dst = (void *)bt->tx->buffer_info.bt_sram_addr[i];
 
@@ -366,7 +366,8 @@ static int mtk_btcvsd_read_from_bt(struct mtk_btcvsd_snd *bt,
 	u8 *src;
 	unsigned int packet_buf_ofs;
 	unsigned long flags;
-	unsigned long connsys_addr_rx, ap_addr_rx;
+	unsigned long connsys_addr_rx;
+	uintptr_t ap_addr_rx;
 
 	connsys_addr_rx = *bt->bt_reg_pkt_r;
 	ap_addr_rx = (uintptr_t)bt->bt_sram_bank2_base +
@@ -416,7 +417,8 @@ static int mtk_btcvsd_write_to_bt(struct mtk_btcvsd_snd *bt,
 	unsigned int i;
 	unsigned long flags;
 	u8 *dst;
-	unsigned long connsys_addr_tx, ap_addr_tx;
+	unsigned long connsys_addr_tx;
+	uintptr_t ap_addr_tx;
 	bool new_ap_addr_tx = true;
 
 	connsys_addr_tx = *bt->bt_reg_pkt_w;
@@ -468,7 +470,7 @@ static int mtk_btcvsd_write_to_bt(struct mtk_btcvsd_snd *bt,
 		bt->tx->buffer_info.bt_sram_addr[next_idx] = ap_addr_tx;
 		spin_unlock_irqrestore(&bt->tx_lock, flags);
 		dev_info(bt->dev, "%s(), new ap_addr_tx = 0x%lx, num_valid_addr %d\n",
-			 __func__, ap_addr_tx,
+			 __func__, (unsigned long)ap_addr_tx,
 			 bt->tx->buffer_info.num_valid_addr);
 	}
 
@@ -516,8 +518,9 @@ static irqreturn_t mtk_btcvsd_snd_irq_handler(int irq_id, void *dev)
 
 	if (bt->tx->state == BT_SCO_STATE_LOOPBACK) {
 		u8 *src, *dst;
-		unsigned long connsys_addr_rx, ap_addr_rx;
-		unsigned long connsys_addr_tx, ap_addr_tx;
+		unsigned long connsys_addr_rx;
+		unsigned long connsys_addr_tx;
+		uintptr_t ap_addr_rx, ap_addr_tx;
 
 		connsys_addr_rx = *bt->bt_reg_pkt_r;
 		ap_addr_rx = (uintptr_t)bt->bt_sram_bank2_base +

@@ -2108,7 +2108,9 @@ static int __init alsa_rawmidi_init(void)
 {
 
 	snd_ctl_register_ioctl(snd_rawmidi_control_ioctl);
+#ifndef CONFIG_CHERI_KERNEL
 	snd_ctl_register_ioctl_compat(snd_rawmidi_control_ioctl);
+#endif
 #ifdef CONFIG_SND_OSSEMUL
 	{ int i;
 	/* check device map table */
@@ -2132,7 +2134,9 @@ static int __init alsa_rawmidi_init(void)
 static void __exit alsa_rawmidi_exit(void)
 {
 	snd_ctl_unregister_ioctl(snd_rawmidi_control_ioctl);
+#ifndef CONFIG_CHERI_KERNEL
 	snd_ctl_unregister_ioctl_compat(snd_rawmidi_control_ioctl);
+#endif
 }
 
 module_init(alsa_rawmidi_init)

@@ -34,7 +34,7 @@ static unsigned long avs_rt5682_quirk = AVS_RT5682_MCLK_EN | AVS_RT5682_SSP_CODE
 
 static int avs_rt5682_quirk_cb(const struct dmi_system_id *id)
 {
-	avs_rt5682_quirk = (uintptr_t)id->driver_data;
+	avs_rt5682_quirk = __c_pa(id->driver_data);
 	return 1;
 }
 
@@ -274,7 +274,7 @@ static int avs_rt5682_probe(struct platform_device *pdev)
 	int ssp_port, tdm_slot, ret;
 
 	if (pdev->id_entry && pdev->id_entry->driver_data)
-		avs_rt5682_quirk = (unsigned long)pdev->id_entry->driver_data;
+		avs_rt5682_quirk = __c_ua(pdev->id_entry->driver_data);
 
 	dmi_check_system(avs_rt5682_quirk_table);
 	dev_dbg(dev, "avs_rt5682_quirk = %lx\n", avs_rt5682_quirk);
