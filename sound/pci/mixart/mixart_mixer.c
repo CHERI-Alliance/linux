@@ -823,8 +823,8 @@ static int mixart_pcm_vol_get(struct snd_kcontrol *kcontrol, struct snd_ctl_elem
 	struct snd_mixart *chip = snd_kcontrol_chip(kcontrol);
 	int idx = snd_ctl_get_ioffidx(kcontrol, &ucontrol->id); /* index */
 	int *stored_volume;
-	int is_capture = kcontrol->private_value & MIXART_VOL_REC_MASK;
-	int is_aes = kcontrol->private_value & MIXART_VOL_AES_MASK;
+	int is_capture = __c_ua(kcontrol->private_value) & MIXART_VOL_REC_MASK;
+	int is_aes = __c_ua(kcontrol->private_value) & MIXART_VOL_AES_MASK;
 	mutex_lock(&chip->mgr->mixer_mutex);
 	if(is_capture) {
 		if(is_aes)	stored_volume = chip->digital_capture_volume[1];	/* AES capture */
@@ -845,8 +845,8 @@ static int mixart_pcm_vol_put(struct snd_kcontrol *kcontrol, struct snd_ctl_elem
 	struct snd_mixart *chip = snd_kcontrol_chip(kcontrol);
 	int idx = snd_ctl_get_ioffidx(kcontrol, &ucontrol->id); /* index */
 	int changed = 0;
-	int is_capture = kcontrol->private_value & MIXART_VOL_REC_MASK;
-	int is_aes = kcontrol->private_value & MIXART_VOL_AES_MASK;
+	int is_capture = __c_ua(kcontrol->private_value) & MIXART_VOL_REC_MASK;
+	int is_aes = __c_ua(kcontrol->private_value) & MIXART_VOL_AES_MASK;
 	int* stored_volume;
 	int i;
 	mutex_lock(&chip->mgr->mixer_mutex);
@@ -904,7 +904,7 @@ static int mixart_pcm_sw_get(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_
 	int idx = snd_ctl_get_ioffidx(kcontrol, &ucontrol->id); /* index */
 	snd_BUG_ON(idx >= MIXART_PLAYBACK_STREAMS);
 	mutex_lock(&chip->mgr->mixer_mutex);
-	if(kcontrol->private_value & MIXART_VOL_AES_MASK)	/* AES playback */
+	if(__c_ua(kcontrol->private_value) & MIXART_VOL_AES_MASK)	/* AES playback */
 		idx += MIXART_PLAYBACK_STREAMS;
 	ucontrol->value.integer.value[0] = chip->digital_playback_active[idx][0];
 	ucontrol->value.integer.value[1] = chip->digital_playback_active[idx][1];
@@ -916,7 +916,7 @@ static int mixart_pcm_sw_put(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_
 {
 	struct snd_mixart *chip = snd_kcontrol_chip(kcontrol);
 	int changed = 0;
-	int is_aes = kcontrol->private_value & MIXART_VOL_AES_MASK;
+	int is_aes = __c_ua(kcontrol->private_value) & MIXART_VOL_AES_MASK;
 	int idx = snd_ctl_get_ioffidx(kcontrol, &ucontrol->id); /* index */
 	int i, j;
 	snd_BUG_ON(idx >= MIXART_PLAYBACK_STREAMS);

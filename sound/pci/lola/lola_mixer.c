@@ -502,7 +502,7 @@ static int lola_analog_vol_info(struct snd_kcontrol *kcontrol,
 				struct snd_ctl_elem_info *uinfo)
 {
 	struct lola *chip = snd_kcontrol_chip(kcontrol);
-	int dir = kcontrol->private_value;
+	int dir = __c_ua(kcontrol->private_value);
 
 	uinfo->type = SNDRV_CTL_ELEM_TYPE_INTEGER;
 	uinfo->count = chip->pin[dir].num_pins;
@@ -515,7 +515,7 @@ static int lola_analog_vol_get(struct snd_kcontrol *kcontrol,
 			       struct snd_ctl_elem_value *ucontrol)
 {
 	struct lola *chip = snd_kcontrol_chip(kcontrol);
-	int dir = kcontrol->private_value;
+	int dir = __c_ua(kcontrol->private_value);
 	int i;
 
 	for (i = 0; i < chip->pin[dir].num_pins; i++)
@@ -528,7 +528,7 @@ static int lola_analog_vol_put(struct snd_kcontrol *kcontrol,
 			       struct snd_ctl_elem_value *ucontrol)
 {
 	struct lola *chip = snd_kcontrol_chip(kcontrol);
-	int dir = kcontrol->private_value;
+	int dir = __c_ua(kcontrol->private_value);
 	int i, err;
 
 	for (i = 0; i < chip->pin[dir].num_pins; i++) {
@@ -545,7 +545,7 @@ static int lola_analog_vol_tlv(struct snd_kcontrol *kcontrol, int op_flag,
 			       unsigned int size, unsigned int __user *tlv)
 {
 	struct lola *chip = snd_kcontrol_chip(kcontrol);
-	int dir = kcontrol->private_value;
+	int dir = __c_ua(kcontrol->private_value);
 	unsigned int val1, val2;
 	struct lola_pin *pin;
 
@@ -588,7 +588,7 @@ static int create_analog_mixer(struct lola *chip, int dir, char *name)
 	if (chip->pin[dir].num_pins != chip->pin[dir].num_analog_pins)
 		return 0;
 	lola_analog_mixer.name = name;
-	lola_analog_mixer.private_value = dir;
+	lola_analog_mixer.private_value = __c_fakeu(dir);
 	return snd_ctl_add(chip->card,
 			   snd_ctl_new1(&lola_analog_mixer, chip));
 }
@@ -661,7 +661,7 @@ static int create_input_src_mixer(struct lola *chip)
 static int lola_src_gain_info(struct snd_kcontrol *kcontrol,
 			      struct snd_ctl_elem_info *uinfo)
 {
-	unsigned int count = (kcontrol->private_value >> 8) & 0xff;
+	unsigned int count = (__c_ua(kcontrol->private_value) >> 8) & 0xff;
 
 	uinfo->type = SNDRV_CTL_ELEM_TYPE_INTEGER;
 	uinfo->count = count;
@@ -674,8 +674,8 @@ static int lola_src_gain_get(struct snd_kcontrol *kcontrol,
 			     struct snd_ctl_elem_value *ucontrol)
 {
 	struct lola *chip = snd_kcontrol_chip(kcontrol);
-	unsigned int ofs = kcontrol->private_value & 0xff;
-	unsigned int count = (kcontrol->private_value >> 8) & 0xff;
+	unsigned int ofs = __c_ua(kcontrol->private_value) & 0xff;
+	unsigned int count = (__c_ua(kcontrol->private_value) >> 8) & 0xff;
 	unsigned int mask, i;
 
 	mask = readl(&chip->mixer.array->src_gain_enable);
@@ -697,8 +697,8 @@ static int lola_src_gain_put(struct snd_kcontrol *kcontrol,
 			     struct snd_ctl_elem_value *ucontrol)
 {
 	struct lola *chip = snd_kcontrol_chip(kcontrol);
-	unsigned int ofs = kcontrol->private_value & 0xff;
-	unsigned int count = (kcontrol->private_value >> 8) & 0xff;
+	unsigned int ofs = __c_ua(kcontrol->private_value) & 0xff;
+	unsigned int count = (__c_ua(kcontrol->private_value) >> 8) & 0xff;
 	int i, err;
 
 	for (i = 0; i < count; i++) {
@@ -730,7 +730,7 @@ static int create_src_gain_mixer(struct lola *chip,
 				 int num, int ofs, char *name)
 {
 	lola_src_gain_mixer.name = name;
-	lola_src_gain_mixer.private_value = ofs + (num << 8);
+	lola_src_gain_mixer.private_value = __c_fakeu(ofs + (num << 8));
 	return snd_ctl_add(chip->card,
 			   snd_ctl_new1(&lola_src_gain_mixer, chip));
 }
@@ -742,7 +742,7 @@ static int create_src_gain_mixer(struct lola *chip,
 static int lola_dest_gain_info(struct snd_kcontrol *kcontrol,
 			       struct snd_ctl_elem_info *uinfo)
 {
-	unsigned int src_num = (kcontrol->private_value >> 8) & 0xff;
+	unsigned int src_num = (__c_ua(kcontrol->private_value) >> 8) & 0xff;
 
 	uinfo->type = SNDRV_CTL_ELEM_TYPE_INTEGER;
 	uinfo->count = src_num;
@@ -755,9 +755,9 @@ static int lola_dest_gain_get(struct snd_kcontrol *kcontrol,
 			      struct snd_ctl_elem_value *ucontrol)
 {
 	struct lola *chip = snd_kcontrol_chip(kcontrol);
-	unsigned int src_ofs = kcontrol->private_value & 0xff;
-	unsigned int src_num = (kcontrol->private_value >> 8) & 0xff;
-	unsigned int dst_ofs = (kcontrol->private_value >> 16) & 0xff;
+	unsigned int src_ofs = __c_ua(kcontrol->private_value) & 0xff;
+	unsigned int src_num = (__c_ua(kcontrol->private_value) >> 8) & 0xff;
+	unsigned int dst_ofs = (__c_ua(kcontrol->private_value) >> 16) & 0xff;
 	unsigned int dst, mask, i;
 
 	dst = snd_ctl_get_ioffidx(kcontrol, &ucontrol->id) + dst_ofs;
@@ -780,9 +780,9 @@ static int lola_dest_gain_put(struct snd_kcontrol *kcontrol,
 			      struct snd_ctl_elem_value *ucontrol)
 {
 	struct lola *chip = snd_kcontrol_chip(kcontrol);
-	unsigned int src_ofs = kcontrol->private_value & 0xff;
-	unsigned int src_num = (kcontrol->private_value >> 8) & 0xff;
-	unsigned int dst_ofs = (kcontrol->private_value >> 16) & 0xff;
+	unsigned int src_ofs = __c_ua(kcontrol->private_value) & 0xff;
+	unsigned int src_num = (__c_ua(kcontrol->private_value) >> 8) & 0xff;
+	unsigned int dst_ofs = (__c_ua(kcontrol->private_value) >> 16) & 0xff;
 	unsigned int dst, mask;
 	unsigned short gains[MAX_STREAM_COUNT];
 	int i, num;
@@ -820,7 +820,7 @@ static int create_dest_gain_mixer(struct lola *chip,
 	lola_dest_gain_mixer.count = num;
 	lola_dest_gain_mixer.name = name;
 	lola_dest_gain_mixer.private_value =
-		src_ofs + (src_num << 8) + (ofs << 16) + (num << 24);
+		__c_fakeu(src_ofs + (src_num << 8) + (ofs << 16) + (num << 24));
 	return snd_ctl_add(chip->card,
 			  snd_ctl_new1(&lola_dest_gain_mixer, chip));
 }

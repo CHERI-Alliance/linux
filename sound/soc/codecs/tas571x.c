@@ -229,7 +229,7 @@ err_ret:
 static int tas571x_coefficient_info(struct snd_kcontrol *kcontrol,
 				   struct snd_ctl_elem_info *uinfo)
 {
-	int numcoef = kcontrol->private_value >> 16;
+	int numcoef = __c_ua(kcontrol->private_value) >> 16;
 
 	uinfo->type = SNDRV_CTL_ELEM_TYPE_INTEGER;
 	uinfo->count = numcoef;
@@ -243,8 +243,8 @@ static int tas571x_coefficient_get(struct snd_kcontrol *kcontrol,
 {
 	struct snd_soc_component *component = snd_soc_kcontrol_component(kcontrol);
 	struct i2c_client *i2c = to_i2c_client(component->dev);
-	int numcoef = kcontrol->private_value >> 16;
-	int index = kcontrol->private_value & 0xffff;
+	int numcoef = __c_ua(kcontrol->private_value) >> 16;
+	int index = __c_ua(kcontrol->private_value) & 0xffff;
 
 	return tas571x_reg_read_multiword(i2c, index,
 		ucontrol->value.integer.value, numcoef);
@@ -255,8 +255,8 @@ static int tas571x_coefficient_put(struct snd_kcontrol *kcontrol,
 {
 	struct snd_soc_component *component = snd_soc_kcontrol_component(kcontrol);
 	struct i2c_client *i2c = to_i2c_client(component->dev);
-	int numcoef = kcontrol->private_value >> 16;
-	int index = kcontrol->private_value & 0xffff;
+	int numcoef = __c_ua(kcontrol->private_value) >> 16;
+	int index = __c_ua(kcontrol->private_value) & 0xffff;
 
 	return tas571x_reg_write_multiword(i2c, index,
 		ucontrol->value.integer.value, numcoef);

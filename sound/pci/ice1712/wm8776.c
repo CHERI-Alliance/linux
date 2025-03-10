@@ -452,7 +452,7 @@ static int snd_wm8776_volume_info(struct snd_kcontrol *kcontrol,
 				   struct snd_ctl_elem_info *uinfo)
 {
 	struct snd_wm8776 *wm = snd_kcontrol_chip(kcontrol);
-	int n = kcontrol->private_value;
+	int n = __c_ua(kcontrol->private_value);
 
 	uinfo->type = SNDRV_CTL_ELEM_TYPE_INTEGER;
 	uinfo->count = (wm->ctl[n].flags & WM8776_FLAG_STEREO) ? 2 : 1;
@@ -466,7 +466,7 @@ static int snd_wm8776_enum_info(struct snd_kcontrol *kcontrol,
 				      struct snd_ctl_elem_info *uinfo)
 {
 	struct snd_wm8776 *wm = snd_kcontrol_chip(kcontrol);
-	int n = kcontrol->private_value;
+	int n = __c_ua(kcontrol->private_value);
 
 	return snd_ctl_enum_info(uinfo, 1, wm->ctl[n].max,
 						wm->ctl[n].enum_names);
@@ -476,7 +476,7 @@ static int snd_wm8776_ctl_get(struct snd_kcontrol *kcontrol,
 				  struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_wm8776 *wm = snd_kcontrol_chip(kcontrol);
-	int n = kcontrol->private_value;
+	int n = __c_ua(kcontrol->private_value);
 	u16 val1, val2;
 
 	if (wm->ctl[n].get)
@@ -507,7 +507,7 @@ static int snd_wm8776_ctl_put(struct snd_kcontrol *kcontrol,
 				  struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_wm8776 *wm = snd_kcontrol_chip(kcontrol);
-	int n = kcontrol->private_value;
+	int n = __c_ua(kcontrol->private_value);
 	u16 val, regval1, regval2;
 
 	/* this also works for enum because value is a union */
@@ -550,7 +550,7 @@ static int snd_wm8776_add_control(struct snd_wm8776 *wm, int num)
 
 	memset(&cont, 0, sizeof(cont));
 	cont.iface = SNDRV_CTL_ELEM_IFACE_MIXER;
-	cont.private_value = num;
+	cont.private_value = __c_fakeu(num);
 	cont.name = wm->ctl[num].name;
 	cont.access = SNDRV_CTL_ELEM_ACCESS_READWRITE;
 	if (wm->ctl[num].flags & WM8776_FLAG_LIM ||

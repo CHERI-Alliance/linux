@@ -881,7 +881,8 @@ static int snd_rawmidi_ioctl_status64(struct snd_rawmidi_file *rfile,
 	return 0;
 }
 
-static long snd_rawmidi_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long snd_rawmidi_ioctl(struct file *file, unsigned int cmd,
+			      user_uintptr_t arg)
 {
 	struct snd_rawmidi_file *rfile;
 	struct snd_rawmidi *rmidi;
@@ -1038,7 +1039,7 @@ static int snd_rawmidi_call_ump_ioctl(struct snd_card *card, int cmd,
 static int snd_rawmidi_control_ioctl(struct snd_card *card,
 				     struct snd_ctl_file *control,
 				     unsigned int cmd,
-				     unsigned long arg)
+				     user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 
@@ -2104,7 +2105,9 @@ static int __init alsa_rawmidi_init(void)
 {
 
 	snd_ctl_register_ioctl(snd_rawmidi_control_ioctl);
+#ifndef CONFIG_CHERI_KERNEL
 	snd_ctl_register_ioctl_compat(snd_rawmidi_control_ioctl);
+#endif
 #ifdef CONFIG_SND_OSSEMUL
 	{ int i;
 	/* check device map table */
@@ -2128,7 +2131,9 @@ static int __init alsa_rawmidi_init(void)
 static void __exit alsa_rawmidi_exit(void)
 {
 	snd_ctl_unregister_ioctl(snd_rawmidi_control_ioctl);
+#ifndef CONFIG_CHERI_KERNEL
 	snd_ctl_unregister_ioctl_compat(snd_rawmidi_control_ioctl);
+#endif
 }
 
 module_init(alsa_rawmidi_init)

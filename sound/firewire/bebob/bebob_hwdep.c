@@ -140,7 +140,7 @@ hwdep_release(struct snd_hwdep *hwdep, struct file *file)
 
 static int
 hwdep_ioctl(struct snd_hwdep *hwdep, struct file *file,
-	    unsigned int cmd, unsigned long arg)
+	    unsigned int cmd, user_uintptr_t arg)
 {
 	struct snd_bebob *bebob = hwdep->private_data;
 
@@ -159,7 +159,7 @@ hwdep_ioctl(struct snd_hwdep *hwdep, struct file *file,
 #ifdef CONFIG_COMPAT
 static int
 hwdep_compat_ioctl(struct snd_hwdep *hwdep, struct file *file,
-		   unsigned int cmd, unsigned long arg)
+		   unsigned int cmd, user_uintptr_t arg)
 {
 	return hwdep_ioctl(hwdep, file, cmd,
 			   (unsigned long)compat_ptr(arg));

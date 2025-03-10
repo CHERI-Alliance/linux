@@ -724,7 +724,7 @@ snd_vortex_eqtoggle_get(struct snd_kcontrol *kcontrol,
 {
 	vortex_t *vortex = snd_kcontrol_chip(kcontrol);
 	eqlzr_t *eq = &(vortex->eq);
-	//int i = kcontrol->private_value;
+	//int i = __c_ua(kcontrol->private_value);
 
 	ucontrol->value.integer.value[0] = eq->this54 ? 0 : 1;
 
@@ -737,7 +737,7 @@ snd_vortex_eqtoggle_put(struct snd_kcontrol *kcontrol,
 {
 	vortex_t *vortex = snd_kcontrol_chip(kcontrol);
 	eqlzr_t *eq = &(vortex->eq);
-	//int i = kcontrol->private_value;
+	//int i = __c_ua(kcontrol->private_value);
 
 	eq->this54 = ucontrol->value.integer.value[0] ? 0 : 1;
 	vortex_Eqlzr_SetBypass(vortex, eq->this54);
@@ -770,7 +770,7 @@ static int
 snd_vortex_eq_get(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	vortex_t *vortex = snd_kcontrol_chip(kcontrol);
-	int i = kcontrol->private_value;
+	int i = __c_ua(kcontrol->private_value);
 	u16 gainL = 0, gainR = 0;
 
 	vortex_Eqlzr_GetLeftGain(vortex, i, &gainL);
@@ -784,7 +784,7 @@ static int
 snd_vortex_eq_put(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	vortex_t *vortex = snd_kcontrol_chip(kcontrol);
-	int changed = 0, i = kcontrol->private_value;
+	int changed = 0, i = __c_ua(kcontrol->private_value);
 	u16 gainL = 0, gainR = 0;
 
 	vortex_Eqlzr_GetLeftGain(vortex, i, &gainL);
@@ -888,7 +888,7 @@ static int vortex_eq_init(vortex_t *vortex)
 			return -ENOMEM;
 		snprintf(kcontrol->id.name, sizeof(kcontrol->id.name),
 			"%s Playback Volume", EqBandLabels[i]);
-		kcontrol->private_value = i;
+		kcontrol->private_value = __c_fakeu(i);
 		err = snd_ctl_add(vortex->card, kcontrol);
 		if (err < 0)
 			return err;

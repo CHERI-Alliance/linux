@@ -415,8 +415,8 @@ static int snd_ca0106_volume_get(struct snd_kcontrol *kcontrol,
         unsigned int value;
 	int channel_id, reg;
 
-	channel_id = (kcontrol->private_value >> 8) & 0xff;
-	reg = kcontrol->private_value & 0xff;
+	channel_id = (__c_ua(kcontrol->private_value) >> 8) & 0xff;
+	reg = __c_ua(kcontrol->private_value) & 0xff;
 
         value = snd_ca0106_ptr_read(emu, reg, channel_id);
         ucontrol->value.integer.value[0] = 0xff - ((value >> 24) & 0xff); /* Left */
@@ -431,8 +431,8 @@ static int snd_ca0106_volume_put(struct snd_kcontrol *kcontrol,
         unsigned int oval, nval;
 	int channel_id, reg;
 
-	channel_id = (kcontrol->private_value >> 8) & 0xff;
-	reg = kcontrol->private_value & 0xff;
+	channel_id = (__c_ua(kcontrol->private_value) >> 8) & 0xff;
+	reg = __c_ua(kcontrol->private_value) & 0xff;
 
 	oval = snd_ca0106_ptr_read(emu, reg, channel_id);
 	nval = ((0xff - ucontrol->value.integer.value[0]) << 24) |
@@ -461,7 +461,7 @@ static int snd_ca0106_i2c_volume_get(struct snd_kcontrol *kcontrol,
         struct snd_ca0106 *emu = snd_kcontrol_chip(kcontrol);
 	int source_id;
 
-	source_id = kcontrol->private_value;
+	source_id = __c_ua(kcontrol->private_value);
 
         ucontrol->value.integer.value[0] = emu->i2c_capture_volume[source_id][0];
         ucontrol->value.integer.value[1] = emu->i2c_capture_volume[source_id][1];
@@ -477,7 +477,7 @@ static int snd_ca0106_i2c_volume_put(struct snd_kcontrol *kcontrol,
 	int source_id;
 	int change = 0;
 
-	source_id = kcontrol->private_value;
+	source_id = __c_ua(kcontrol->private_value);
 	ogain = emu->i2c_capture_volume[source_id][0]; /* Left */
 	ngain = ucontrol->value.integer.value[0];
 	if (ngain > 0xff)
@@ -508,8 +508,8 @@ static int spi_mute_get(struct snd_kcontrol *kcontrol,
 			struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_ca0106 *emu = snd_kcontrol_chip(kcontrol);
-	unsigned int reg = kcontrol->private_value >> SPI_REG_SHIFT;
-	unsigned int bit = kcontrol->private_value & SPI_REG_MASK;
+	unsigned int reg = __c_ua(kcontrol->private_value) >> SPI_REG_SHIFT;
+	unsigned int bit = __c_ua(kcontrol->private_value) & SPI_REG_MASK;
 
 	ucontrol->value.integer.value[0] = !(emu->spi_dac_reg[reg] & bit);
 	return 0;
@@ -519,8 +519,8 @@ static int spi_mute_put(struct snd_kcontrol *kcontrol,
 			struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_ca0106 *emu = snd_kcontrol_chip(kcontrol);
-	unsigned int reg = kcontrol->private_value >> SPI_REG_SHIFT;
-	unsigned int bit = kcontrol->private_value & SPI_REG_MASK;
+	unsigned int reg = __c_ua(kcontrol->private_value) >> SPI_REG_SHIFT;
+	unsigned int bit = __c_ua(kcontrol->private_value) & SPI_REG_MASK;
 	int ret;
 
 	ret = emu->spi_dac_reg[reg] & bit;
@@ -547,7 +547,7 @@ static int spi_mute_put(struct snd_kcontrol *kcontrol,
 	.get =   snd_ca0106_volume_get,				\
 	.put =   snd_ca0106_volume_put,				\
 	.tlv = { .p = snd_ca0106_db_scale1 },			\
-	.private_value = ((chid) << 8) | (reg)			\
+	.private_value = (uintptr_t __force)(((chid) << 8) | (reg))	\
 }
 
 static const struct snd_kcontrol_new snd_ca0106_volume_ctls[] = {
@@ -692,7 +692,7 @@ snd_ca0106_volume_spi_dac_ctl(const struct snd_ca0106_details *details,
 	reg = spi_dmute_reg[dac_id];
 	bit = spi_dmute_bit[dac_id];
 
-	spi_switch.private_value = (reg << SPI_REG_SHIFT) | bit;
+	spi_switch.private_value = __c_fakeu((reg << SPI_REG_SHIFT) | bit);
 
 	return spi_switch;
 }

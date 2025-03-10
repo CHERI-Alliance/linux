@@ -42,7 +42,7 @@ static int adau1781_spi_probe(struct spi_device *spi)
 
 	return adau1781_probe(&spi->dev,
 		devm_regmap_init_spi(spi, &config),
-		id->driver_data, adau1781_spi_switch_mode);
+		__c_ua(id->driver_data), adau1781_spi_switch_mode);
 }
 
 static void adau1781_spi_remove(struct spi_device *spi)

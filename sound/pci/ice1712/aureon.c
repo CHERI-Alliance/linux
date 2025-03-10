@@ -347,7 +347,7 @@ static int aureon_ac97_init(struct snd_ice1712 *ice)
 static int aureon_ac97_vol_info(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_info *uinfo)
 {
 	uinfo->type = SNDRV_CTL_ELEM_TYPE_INTEGER;
-	uinfo->count = kcontrol->private_value & AUREON_AC97_STEREO ? 2 : 1;
+	uinfo->count = __c_ua(kcontrol->private_value) & AUREON_AC97_STEREO ? 2 : 1;
 	uinfo->value.integer.min = 0;
 	uinfo->value.integer.max = 31;
 	return 0;
@@ -360,9 +360,9 @@ static int aureon_ac97_vol_get(struct snd_kcontrol *kcontrol, struct snd_ctl_ele
 
 	mutex_lock(&ice->gpio_mutex);
 
-	vol = aureon_ac97_read(ice, kcontrol->private_value & 0x7F);
+	vol = aureon_ac97_read(ice, __c_ua(kcontrol->private_value) & 0x7F);
 	ucontrol->value.integer.value[0] = 0x1F - (vol & 0x1F);
-	if (kcontrol->private_value & AUREON_AC97_STEREO)
+	if (__c_ua(kcontrol->private_value) & AUREON_AC97_STEREO)
 		ucontrol->value.integer.value[1] = 0x1F - ((vol >> 8) & 0x1F);
 
 	mutex_unlock(&ice->gpio_mutex);
@@ -377,15 +377,15 @@ static int aureon_ac97_vol_put(struct snd_kcontrol *kcontrol, struct snd_ctl_ele
 
 	snd_ice1712_save_gpio_status(ice);
 
-	ovol = aureon_ac97_read(ice, kcontrol->private_value & 0x7F);
+	ovol = aureon_ac97_read(ice, __c_ua(kcontrol->private_value) & 0x7F);
 	nvol = (0x1F - ucontrol->value.integer.value[0]) & 0x001F;
-	if (kcontrol->private_value & AUREON_AC97_STEREO)
+	if (__c_ua(kcontrol->private_value) & AUREON_AC97_STEREO)
 		nvol |= ((0x1F - ucontrol->value.integer.value[1]) << 8) & 0x1F00;
 	nvol |= ovol & ~0x1F1F;
 
 	change = (ovol != nvol);
 	if (change)
-		aureon_ac97_write(ice, kcontrol->private_value & 0x7F, nvol);
+		aureon_ac97_write(ice, __c_ua(kcontrol->private_value) & 0x7F, nvol);
 
 	snd_ice1712_restore_gpio_status(ice);
 
@@ -404,7 +404,7 @@ static int aureon_ac97_mute_get(struct snd_kcontrol *kcontrol, struct snd_ctl_el
 	mutex_lock(&ice->gpio_mutex);
 
 	ucontrol->value.integer.value[0] = aureon_ac97_read(ice,
-			kcontrol->private_value & 0x7F) & 0x8000 ? 0 : 1;
+			__c_ua(kcontrol->private_value) & 0x7F) & 0x8000 ? 0 : 1;
 
 	mutex_unlock(&ice->gpio_mutex);
 	return 0;
@@ -418,12 +418,12 @@ static int aureon_ac97_mute_put(struct snd_kcontrol *kcontrol, struct snd_ctl_el
 
 	snd_ice1712_save_gpio_status(ice);
 
-	ovol = aureon_ac97_read(ice, kcontrol->private_value & 0x7F);
+	ovol = aureon_ac97_read(ice, __c_ua(kcontrol->private_value) & 0x7F);
 	nvol = (ucontrol->value.integer.value[0] ? 0x0000 : 0x8000) | (ovol & ~0x8000);
 
 	change = (ovol != nvol);
 	if (change)
-		aureon_ac97_write(ice, kcontrol->private_value & 0x7F, nvol);
+		aureon_ac97_write(ice, __c_ua(kcontrol->private_value) & 0x7F, nvol);
 
 	snd_ice1712_restore_gpio_status(ice);
 
@@ -781,7 +781,7 @@ static int wm_master_vol_put(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_
  */
 static int wm_vol_info(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_info *uinfo)
 {
-	int voices = kcontrol->private_value >> 8;
+	int voices = __c_ua(kcontrol->private_value) >> 8;
 	uinfo->type = SNDRV_CTL_ELEM_TYPE_INTEGER;
 	uinfo->count = voices;
 	uinfo->value.integer.min = 0;		/* mute (-101dB) */
@@ -795,8 +795,8 @@ static int wm_vol_get(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *
 	struct aureon_spec *spec = ice->spec;
 	int i, ofs, voices;
 
-	voices = kcontrol->private_value >> 8;
-	ofs = kcontrol->private_value & 0xff;
+	voices = __c_ua(kcontrol->private_value) >> 8;
+	ofs = __c_ua(kcontrol->private_value) & 0xff;
 	for (i = 0; i < voices; i++)
 		ucontrol->value.integer.value[i] =
 			spec->vol[ofs+i] & ~WM_VOL_MUTE;
@@ -810,8 +810,8 @@ static int wm_vol_put(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *
 	int i, idx, ofs, voices;
 	int change = 0;
 
-	voices = kcontrol->private_value >> 8;
-	ofs = kcontrol->private_value & 0xff;
+	voices = __c_ua(kcontrol->private_value) >> 8;
+	ofs = __c_ua(kcontrol->private_value) & 0xff;
 	snd_ice1712_save_gpio_status(ice);
 	for (i = 0; i < voices; i++) {
 		unsigned int vol = ucontrol->value.integer.value[i];
@@ -836,7 +836,7 @@ static int wm_vol_put(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *
 static int wm_mute_info(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_info *uinfo)
 {
 	uinfo->type = SNDRV_CTL_ELEM_TYPE_BOOLEAN;
-	uinfo->count = kcontrol->private_value >> 8;
+	uinfo->count = __c_ua(kcontrol->private_value) >> 8;
 	uinfo->value.integer.min = 0;
 	uinfo->value.integer.max = 1;
 	return 0;
@@ -848,8 +848,8 @@ static int wm_mute_get(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value 
 	struct aureon_spec *spec = ice->spec;
 	int voices, ofs, i;
 
-	voices = kcontrol->private_value >> 8;
-	ofs = kcontrol->private_value & 0xFF;
+	voices = __c_ua(kcontrol->private_value) >> 8;
+	ofs = __c_ua(kcontrol->private_value) & 0xFF;
 
 	for (i = 0; i < voices; i++)
 		ucontrol->value.integer.value[i] =
@@ -863,8 +863,8 @@ static int wm_mute_put(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value 
 	struct aureon_spec *spec = ice->spec;
 	int change = 0, voices, ofs, i;
 
-	voices = kcontrol->private_value >> 8;
-	ofs = kcontrol->private_value & 0xFF;
+	voices = __c_ua(kcontrol->private_value) >> 8;
+	ofs = __c_ua(kcontrol->private_value) & 0xFF;
 
 	snd_ice1712_save_gpio_status(ice);
 	for (i = 0; i < voices; i++) {

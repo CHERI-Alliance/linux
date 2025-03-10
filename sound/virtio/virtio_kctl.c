@@ -48,9 +48,9 @@ static int virtsnd_kctl_info(struct snd_kcontrol *kcontrol,
 			     struct snd_ctl_elem_info *uinfo)
 {
 	struct virtio_snd *snd = kcontrol->private_data;
-	struct virtio_kctl *kctl = &snd->kctls[kcontrol->private_value];
+	struct virtio_kctl *kctl = &snd->kctls[__c_ua(kcontrol->private_value)];
 	struct virtio_snd_ctl_info *kinfo =
-		&snd->kctl_infos[kcontrol->private_value];
+		&snd->kctl_infos[__c_ua(kcontrol->private_value)];
 	unsigned int i;
 
 	uinfo->type = g_v2a_type_map[le32_to_cpu(kinfo->type)];
@@ -104,7 +104,7 @@ static int virtsnd_kctl_get(struct snd_kcontrol *kcontrol,
 {
 	struct virtio_snd *snd = kcontrol->private_data;
 	struct virtio_snd_ctl_info *kinfo =
-		&snd->kctl_infos[kcontrol->private_value];
+		&snd->kctl_infos[__c_ua(kcontrol->private_value)];
 	unsigned int type = le32_to_cpu(kinfo->type);
 	unsigned int count = le32_to_cpu(kinfo->count);
 	struct virtio_snd_msg *msg;
@@ -123,7 +123,7 @@ static int virtsnd_kctl_get(struct snd_kcontrol *kcontrol,
 
 	hdr = virtsnd_ctl_msg_request(msg);
 	hdr->hdr.code = cpu_to_le32(VIRTIO_SND_R_CTL_READ);
-	hdr->control_id = cpu_to_le32(kcontrol->private_value);
+	hdr->control_id = cpu_to_le32(__c_ua(kcontrol->private_value));
 
 	rc = virtsnd_ctl_msg_send_sync(snd, msg);
 	if (rc)
@@ -177,7 +177,7 @@ static int virtsnd_kctl_put(struct snd_kcontrol *kcontrol,
 {
 	struct virtio_snd *snd = kcontrol->private_data;
 	struct virtio_snd_ctl_info *kinfo =
-		&snd->kctl_infos[kcontrol->private_value];
+		&snd->kctl_infos[__c_ua(kcontrol->private_value)];
 	unsigned int type = le32_to_cpu(kinfo->type);
 	unsigned int count = le32_to_cpu(kinfo->count);
 	struct virtio_snd_msg *msg;
@@ -193,7 +193,7 @@ static int virtsnd_kctl_put(struct snd_kcontrol *kcontrol,
 
 	hdr = virtsnd_ctl_msg_request(msg);
 	hdr->hdr.code = cpu_to_le32(VIRTIO_SND_R_CTL_WRITE);
-	hdr->control_id = cpu_to_le32(kcontrol->private_value);
+	hdr->control_id = cpu_to_le32(__c_ua(kcontrol->private_value));
 
 	kvalue = (void *)((u8 *)hdr + sizeof(*hdr));
 
@@ -260,7 +260,7 @@ static int virtsnd_kctl_tlv_op(struct snd_kcontrol *kcontrol, int op_flag,
 	sg_init_one(&sg, tlv, size);
 
 	hdr = virtsnd_ctl_msg_request(msg);
-	hdr->control_id = cpu_to_le32(kcontrol->private_value);
+	hdr->control_id = cpu_to_le32(__c_ua(kcontrol->private_value));
 
 	switch (op_flag) {
 	case SNDRV_CTL_TLV_OP_READ:
@@ -433,7 +433,7 @@ int virtsnd_kctl_build_devs(struct virtio_snd *snd)
 		kctl_new.info = virtsnd_kctl_info;
 		kctl_new.get = virtsnd_kctl_get;
 		kctl_new.put = virtsnd_kctl_put;
-		kctl_new.private_value = cid;
+		kctl_new.private_value = __c_fakeu(cid);
 
 		kctl->kctl = snd_ctl_new1(&kctl_new, snd);
 		if (!kctl->kctl)

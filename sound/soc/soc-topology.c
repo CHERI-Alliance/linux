@@ -676,7 +676,7 @@ static int soc_tplg_dbytes_create(struct soc_tplg *tplg, size_t size)
 
 	memset(&kc, 0, sizeof(kc));
 	kc.name = be->hdr.name;
-	kc.private_value = (long)sbe;
+	kc.private_value = (uintptr_t)sbe;
 	kc.iface = SNDRV_CTL_ELEM_IFACE_MIXER;
 	kc.access = le32_to_cpu(be->hdr.access);
 
@@ -740,7 +740,7 @@ static int soc_tplg_dmixer_create(struct soc_tplg *tplg, size_t size)
 
 	memset(&kc, 0, sizeof(kc));
 	kc.name = mc->hdr.name;
-	kc.private_value = (long)sm;
+	kc.private_value = (uintptr_t)sm;
 	kc.iface = SNDRV_CTL_ELEM_IFACE_MIXER;
 	kc.access = le32_to_cpu(mc->hdr.access);
 
@@ -885,7 +885,7 @@ static int soc_tplg_denum_create(struct soc_tplg *tplg, size_t size)
 
 	memset(&kc, 0, sizeof(kc));
 	kc.name = ec->hdr.name;
-	kc.private_value = (long)se;
+	kc.private_value = (uintptr_t)se;
 	kc.iface = SNDRV_CTL_ELEM_IFACE_MIXER;
 	kc.access = le32_to_cpu(ec->hdr.access);
 
@@ -1117,7 +1117,7 @@ static int soc_tplg_dapm_widget_dmixer_create(struct soc_tplg *tplg, struct snd_
 	dev_dbg(tplg->dev, " adding DAPM widget mixer control %s\n",
 		mc->hdr.name);
 
-	kc->private_value = (long)sm;
+	kc->private_value = (uintptr_t)sm;
 	kc->name = devm_kstrdup(tplg->dev, mc->hdr.name, GFP_KERNEL);
 	if (!kc->name)
 		return -ENOMEM;
@@ -1186,7 +1186,7 @@ static int soc_tplg_dapm_widget_denum_create(struct soc_tplg *tplg, struct snd_k
 	dev_dbg(tplg->dev, " adding DAPM widget enum control %s\n",
 		ec->hdr.name);
 
-	kc->private_value = (long)se;
+	kc->private_value = (uintptr_t)se;
 	kc->name = devm_kstrdup(tplg->dev, ec->hdr.name, GFP_KERNEL);
 	if (!kc->name)
 		return -ENOMEM;
@@ -1269,7 +1269,7 @@ static int soc_tplg_dapm_widget_dbytes_create(struct soc_tplg *tplg, struct snd_
 		"ASoC: adding bytes kcontrol %s with access 0x%x\n",
 		be->hdr.name, be->hdr.access);
 
-	kc->private_value = (long)sbe;
+	kc->private_value = (uintptr_t)sbe;
 	kc->name = devm_kstrdup(tplg->dev, be->hdr.name, GFP_KERNEL);
 	if (!kc->name)
 		return -ENOMEM;

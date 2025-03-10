@@ -34,7 +34,7 @@ static int cs35l56_hda_i2c_probe(struct i2c_client *clt)
 		return ret;
 	}
 
-	ret = cs35l56_hda_common_probe(cs35l56, id->driver_data, clt->addr);
+	ret = cs35l56_hda_common_probe(cs35l56, __c_ua(id->driver_data), clt->addr);
 	if (ret)
 		return ret;
 	ret = cs35l56_irq_request(&cs35l56->base, clt->irq);

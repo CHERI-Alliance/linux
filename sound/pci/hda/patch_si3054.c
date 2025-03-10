@@ -86,8 +86,8 @@ static int si3054_switch_get(struct snd_kcontrol *kcontrol,
 		               struct snd_ctl_elem_value *uvalue)
 {
 	struct hda_codec *codec = snd_kcontrol_chip(kcontrol);
-	u16 reg  = PRIVATE_REG(kcontrol->private_value);
-	u16 mask = PRIVATE_MASK(kcontrol->private_value);
+	u16 reg  = PRIVATE_REG(__c_ua(kcontrol->private_value));
+	u16 mask = PRIVATE_MASK(__c_ua(kcontrol->private_value));
 	uvalue->value.integer.value[0] = (GET_REG(codec, reg)) & mask ? 1 : 0 ;
 	return 0;
 }
@@ -96,8 +96,8 @@ static int si3054_switch_put(struct snd_kcontrol *kcontrol,
 		               struct snd_ctl_elem_value *uvalue)
 {
 	struct hda_codec *codec = snd_kcontrol_chip(kcontrol);
-	u16 reg  = PRIVATE_REG(kcontrol->private_value);
-	u16 mask = PRIVATE_MASK(kcontrol->private_value);
+	u16 reg  = PRIVATE_REG(__c_ua(kcontrol->private_value));
+	u16 mask = PRIVATE_MASK(__c_ua(kcontrol->private_value));
 	if (uvalue->value.integer.value[0])
 		SET_REG_CACHE(codec, reg, (GET_REG(codec, reg)) | mask);
 	else

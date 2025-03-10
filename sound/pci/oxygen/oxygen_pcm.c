@@ -114,7 +114,7 @@ static const struct snd_pcm_hardware *const oxygen_hardware[PCM_COUNT] = {
 static inline unsigned int
 oxygen_substream_channel(struct snd_pcm_substream *substream)
 {
-	return (unsigned int)(uintptr_t)substream->runtime->private_data;
+	return __c_pa(substream->runtime->private_data);
 }
 
 static int oxygen_open(struct snd_pcm_substream *substream,
@@ -124,7 +124,7 @@ static int oxygen_open(struct snd_pcm_substream *substream,
 	struct snd_pcm_runtime *runtime = substream->runtime;
 	int err;
 
-	runtime->private_data = (void *)(uintptr_t)channel;
+	runtime->private_data = __c_fakep(channel);
 	if (channel == PCM_B && chip->has_ac97_1 &&
 	    (chip->model.device_config & CAPTURE_2_FROM_AC97_1))
 		runtime->hw = oxygen_ac97_hardware;

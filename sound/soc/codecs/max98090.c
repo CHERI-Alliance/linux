@@ -2544,7 +2544,7 @@ static int max98090_i2c_probe(struct i2c_client *i2c)
 {
 	struct max98090_priv *max98090;
 	const struct acpi_device_id *acpi_id;
-	kernel_ulong_t driver_data = 0;
+	uintptr_t driver_data = 0;
 	int ret;
 
 	pr_debug("max98090_i2c_probe\n");
@@ -2568,7 +2568,7 @@ static int max98090_i2c_probe(struct i2c_client *i2c)
 		driver_data = i2c_id->driver_data;
 	}
 
-	max98090->devtype = driver_data;
+	max98090->devtype = __c_ua(driver_data);
 	i2c_set_clientdata(i2c, max98090);
 	max98090->pdata = i2c->dev.platform_data;
 

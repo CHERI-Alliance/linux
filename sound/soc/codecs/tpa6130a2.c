@@ -252,7 +252,7 @@ static int tpa6130a2_probe(struct i2c_client *client)
 	i2c_set_clientdata(client, data);
 
 	id = i2c_match_id(tpa6130a2_id, client);
-	data->id = id->driver_data;
+	data->id = __c_ua(id->driver_data);
 
 	if (data->power_gpio >= 0) {
 		ret = devm_gpio_request(dev, data->power_gpio,

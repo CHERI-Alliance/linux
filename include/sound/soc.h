@@ -76,7 +76,7 @@ struct platform_device;
 {	.iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = (xname),\
 	.info = snd_soc_info_volsw_range, .get = snd_soc_get_volsw_range, \
 	.put = snd_soc_put_volsw_range, \
-	.private_value = (unsigned long)&(struct soc_mixer_control) \
+	.private_value = (uintptr_t)&(struct soc_mixer_control) \
 		{.reg = xreg, .rreg = xreg, .shift = xshift, \
 		 .rshift = xshift,  .min = xmin, .max = xmax, \
 		 .invert = xinvert} }
@@ -96,7 +96,7 @@ struct platform_device;
 	.info = snd_soc_info_volsw_sx, \
 	.get = snd_soc_get_volsw_sx,\
 	.put = snd_soc_put_volsw_sx, \
-	.private_value = (unsigned long)&(struct soc_mixer_control) \
+	.private_value = (uintptr_t)&(struct soc_mixer_control) \
 		{.reg = xreg, .rreg = xreg, \
 		.shift = xshift, .rshift = xshift, \
 		.max = xmax, .min = xmin} }
@@ -107,7 +107,7 @@ struct platform_device;
 	.tlv.p = (tlv_array), \
 	.info = snd_soc_info_volsw_range, \
 	.get = snd_soc_get_volsw_range, .put = snd_soc_put_volsw_range, \
-	.private_value = (unsigned long)&(struct soc_mixer_control) \
+	.private_value = (uintptr_t)&(struct soc_mixer_control) \
 		{.reg = xreg, .rreg = xreg, .shift = xshift, \
 		 .rshift = xshift, .min = xmin, .max = xmax, \
 		 .invert = xinvert} }
@@ -155,7 +155,7 @@ struct platform_device;
 	.info = snd_soc_info_volsw_sx, \
 	.get = snd_soc_get_volsw_sx, \
 	.put = snd_soc_put_volsw_sx, \
-	.private_value = (unsigned long)&(struct soc_mixer_control) \
+	.private_value = (uintptr_t)&(struct soc_mixer_control) \
 		{.reg = xreg, .rreg = xreg, \
 		.shift = shift_left, .rshift = shift_right, \
 		.max = xmax, .min = xmin} }
@@ -167,7 +167,7 @@ struct platform_device;
 	.tlv.p = (tlv_array), \
 	.info = snd_soc_info_volsw, \
 	.get = snd_soc_get_volsw, .put = snd_soc_put_volsw, \
-	.private_value = (unsigned long)&(struct soc_mixer_control) \
+	.private_value = (uintptr_t)&(struct soc_mixer_control) \
 		{.reg = xreg, .rreg = xreg, \
 		 .shift = xshift_left, .rshift = xshift_right, \
 		 .min = xmin, .max = xmax, .invert = xinvert} }
@@ -198,7 +198,7 @@ struct platform_device;
 	.info = snd_soc_info_volsw_sx, \
 	.get = snd_soc_get_volsw_sx, \
 	.put = snd_soc_put_volsw_sx, \
-	.private_value = (unsigned long)&(struct soc_mixer_control) \
+	.private_value = (uintptr_t)&(struct soc_mixer_control) \
 		{.reg = xreg, .rreg = xrreg, \
 		.shift = xshift, .rshift = xshift, \
 		.max = xmax, .min = xmin} }
@@ -220,7 +220,7 @@ struct platform_device;
 	.tlv.p  = (tlv_array), \
 	.info = snd_soc_info_volsw, .get = snd_soc_get_volsw,\
 	.put = snd_soc_put_volsw, \
-	.private_value = (unsigned long)&(struct soc_mixer_control) \
+	.private_value = (uintptr_t)&(struct soc_mixer_control) \
 	{.reg = xreg, .rreg = xreg,  \
 	 .min = xmin, .max = xmax, \
 	.sign_bit = 7,} }
@@ -255,7 +255,7 @@ struct platform_device;
 {	.iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname,\
 	.info = snd_soc_info_enum_double, \
 	.get = snd_soc_get_enum_double, .put = snd_soc_put_enum_double, \
-	.private_value = (unsigned long)&xenum }
+	.private_value = (uintptr_t)&xenum }
 #define SOC_SINGLE_EXT(xname, xreg, xshift, xmax, xinvert,\
 	 xhandler_get, xhandler_put) \
 {	.iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname, \
@@ -293,7 +293,7 @@ struct platform_device;
 	.tlv.p = (tlv_array), \
 	.info = snd_soc_info_volsw_range, \
 	.get = xhandler_get, .put = xhandler_put, \
-	.private_value = (unsigned long)&(struct soc_mixer_control) \
+	.private_value = (uintptr_t)&(struct soc_mixer_control) \
 		{.reg = xreg, .rreg = xreg, .shift = xshift, \
 		 .rshift = xshift, .min = xmin, .max = xmax, \
 		 .invert = xinvert} }
@@ -343,7 +343,7 @@ struct platform_device;
 {	.iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname, \
 	.info = snd_soc_info_enum_double, \
 	.get = xhandler_get, .put = xhandler_put, \
-	.private_value = (unsigned long)&xenum }
+	.private_value = (uintptr_t)&xenum }
 #define SOC_VALUE_ENUM_EXT(xname, xenum, xhandler_get, xhandler_put) \
 	SOC_ENUM_EXT(xname, xenum, xhandler_get, xhandler_put)
 
@@ -351,20 +351,20 @@ struct platform_device;
 {	.iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname,   \
 	.info = snd_soc_bytes_info, .get = snd_soc_bytes_get, \
 	.put = snd_soc_bytes_put, .private_value =	      \
-		((unsigned long)&(struct soc_bytes)           \
+		((uintptr_t)&(struct soc_bytes)           \
 		{.base = xbase, .num_regs = xregs }) }
 #define SND_SOC_BYTES_E(xname, xbase, xregs, xhandler_get, xhandler_put) \
 {	.iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname, \
 	.info = snd_soc_bytes_info, .get = xhandler_get, \
 	.put = xhandler_put, .private_value = \
-		((unsigned long)&(struct soc_bytes) \
+		((uintptr_t)&(struct soc_bytes) \
 		{.base = xbase, .num_regs = xregs }) }
 
 #define SND_SOC_BYTES_MASK(xname, xbase, xregs, xmask)	      \
 {	.iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname,   \
 	.info = snd_soc_bytes_info, .get = snd_soc_bytes_get, \
 	.put = snd_soc_bytes_put, .private_value =	      \
-		((unsigned long)&(struct soc_bytes)           \
+		((uintptr_t)&(struct soc_bytes)           \
 		{.base = xbase, .num_regs = xregs,	      \
 		 .mask = xmask }) }
 
@@ -375,7 +375,7 @@ struct platform_device;
 {	.iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname, \
 	.info = snd_soc_bytes_info_ext, \
 	.get = xhandler_get, .put = xhandler_put, \
-	.private_value = (unsigned long)&(struct soc_bytes_ext) \
+	.private_value = (uintptr_t)&(struct soc_bytes_ext) \
 		{.max = xcount} }
 #define SND_SOC_BYTES_TLV(xname, xcount, xhandler_get, xhandler_put) \
 {	.iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname, \
@@ -383,14 +383,14 @@ struct platform_device;
 		  SNDRV_CTL_ELEM_ACCESS_TLV_CALLBACK, \
 	.tlv.c = (snd_soc_bytes_tlv_callback), \
 	.info = snd_soc_bytes_info_ext, \
-	.private_value = (unsigned long)&(struct soc_bytes_ext) \
+	.private_value = (uintptr_t)&(struct soc_bytes_ext) \
 		{.max = xcount, .get = xhandler_get, .put = xhandler_put, } }
 #define SOC_SINGLE_XR_SX(xname, xregbase, xregcount, xnbits, \
 		xmin, xmax, xinvert) \
 {	.iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = (xname), \
 	.info = snd_soc_info_xr_sx, .get = snd_soc_get_xr_sx, \
 	.put = snd_soc_put_xr_sx, \
-	.private_value = (unsigned long)&(struct soc_mreg_control) \
+	.private_value = (uintptr_t)&(struct soc_mreg_control) \
 		{.regbase = xregbase, .regcount = xregcount, .nbits = xnbits, \
 		.invert = xinvert, .min = xmin, .max = xmax} }
 

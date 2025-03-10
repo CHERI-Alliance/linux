@@ -434,7 +434,7 @@ static int se200pci_cont_enum_info(struct snd_kcontrol *kc,
 {
 	int n, c;
 
-	n = kc->private_value;
+	n = __c_ua(kc->private_value);
 	c = se200pci_get_enum_count(n);
 	if (!c)
 		return -EINVAL;
@@ -446,7 +446,7 @@ static int se200pci_cont_volume_get(struct snd_kcontrol *kc,
 {
 	struct snd_ice1712 *ice = snd_kcontrol_chip(kc);
 	struct se_spec *spec = ice->spec;
-	int n = kc->private_value;
+	int n = __c_ua(kc->private_value);
 	uc->value.integer.value[0] = spec->vol[n].ch1;
 	uc->value.integer.value[1] = spec->vol[n].ch2;
 	return 0;
@@ -457,7 +457,7 @@ static int se200pci_cont_boolean_get(struct snd_kcontrol *kc,
 {
 	struct snd_ice1712 *ice = snd_kcontrol_chip(kc);
 	struct se_spec *spec = ice->spec;
-	int n = kc->private_value;
+	int n = __c_ua(kc->private_value);
 	uc->value.integer.value[0] = spec->vol[n].ch1;
 	return 0;
 }
@@ -467,7 +467,7 @@ static int se200pci_cont_enum_get(struct snd_kcontrol *kc,
 {
 	struct snd_ice1712 *ice = snd_kcontrol_chip(kc);
 	struct se_spec *spec = ice->spec;
-	int n = kc->private_value;
+	int n = __c_ua(kc->private_value);
 	uc->value.enumerated.item[0] = spec->vol[n].ch1;
 	return 0;
 }
@@ -518,7 +518,7 @@ static int se200pci_cont_volume_put(struct snd_kcontrol *kc,
 {
 	struct snd_ice1712 *ice = snd_kcontrol_chip(kc);
 	struct se_spec *spec = ice->spec;
-	int n = kc->private_value;
+	int n = __c_ua(kc->private_value);
 	unsigned int vol1, vol2;
 	int changed;
 
@@ -544,7 +544,7 @@ static int se200pci_cont_boolean_put(struct snd_kcontrol *kc,
 {
 	struct snd_ice1712 *ice = snd_kcontrol_chip(kc);
 	struct se_spec *spec = ice->spec;
-	int n = kc->private_value;
+	int n = __c_ua(kc->private_value);
 	unsigned int vol1;
 
 	vol1 = !!uc->value.integer.value[0];
@@ -561,7 +561,7 @@ static int se200pci_cont_enum_put(struct snd_kcontrol *kc,
 {
 	struct snd_ice1712 *ice = snd_kcontrol_chip(kc);
 	struct se_spec *spec = ice->spec;
-	int n = kc->private_value;
+	int n = __c_ua(kc->private_value);
 	unsigned int vol1;
 
 	vol1 = uc->value.enumerated.item[0];
@@ -587,7 +587,7 @@ static int se200pci_add_controls(struct snd_ice1712 *ice)
 	memset(&cont, 0, sizeof(cont));
 	cont.iface = SNDRV_CTL_ELEM_IFACE_MIXER;
 	for (i = 0; i < ARRAY_SIZE(se200pci_cont); i++) {
-		cont.private_value = i;
+		cont.private_value = __c_fakeu(i);
 		cont.name = se200pci_cont[i].name;
 		cont.access = SNDRV_CTL_ELEM_ACCESS_READWRITE;
 		cont.tlv.p = NULL;

@@ -626,7 +626,7 @@ static int uniphier_aio_vol_get(struct snd_kcontrol *kcontrol,
 	struct snd_soc_component *comp = snd_soc_kcontrol_component(kcontrol);
 	struct uniphier_aio_chip *chip = snd_soc_component_get_drvdata(comp);
 	struct uniphier_aio_sub *sub;
-	int oport_hw = kcontrol->private_value;
+	int oport_hw = __c_ua(kcontrol->private_value);
 
 	sub = find_volume(chip, oport_hw);
 	if (!sub)
@@ -643,7 +643,7 @@ static int uniphier_aio_vol_put(struct snd_kcontrol *kcontrol,
 	struct snd_soc_component *comp = snd_soc_kcontrol_component(kcontrol);
 	struct uniphier_aio_chip *chip = snd_soc_component_get_drvdata(comp);
 	struct uniphier_aio_sub *sub;
-	int oport_hw = kcontrol->private_value;
+	int oport_hw = __c_ua(kcontrol->private_value);
 
 	sub = find_volume(chip, oport_hw);
 	if (!sub)

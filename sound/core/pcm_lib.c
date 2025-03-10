@@ -2549,7 +2549,7 @@ static void pcm_chmap_ctl_private_free(struct snd_kcontrol *kcontrol)
 int snd_pcm_add_chmap_ctls(struct snd_pcm *pcm, int stream,
 			   const struct snd_pcm_chmap_elem *chmap,
 			   int max_channels,
-			   unsigned long private_value,
+			   uintptr_t private_value,
 			   struct snd_pcm_chmap **info_ret)
 {
 	struct snd_pcm_chmap *info;

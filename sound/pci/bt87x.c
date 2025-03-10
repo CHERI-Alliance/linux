@@ -786,7 +786,7 @@ static int snd_bt87x_detect_card(struct pci_dev *pci)
 
 	supported = pci_match_id(snd_bt87x_ids, pci);
 	if (supported && supported->driver_data > 0)
-		return supported->driver_data;
+		return __c_ua(supported->driver_data);
 
 	for (i = 0; i < ARRAY_SIZE(denylist); ++i)
 		if (denylist[i].subvendor == pci->subsystem_vendor &&
@@ -820,7 +820,7 @@ static int __snd_bt87x_probe(struct pci_dev *pci,
 			return -ENODEV;
 		boardid = err;
 	} else
-		boardid = pci_id->driver_data;
+		boardid = __c_ua(pci_id->driver_data);
 
 	if (dev >= SNDRV_CARDS)
 		return -ENODEV;

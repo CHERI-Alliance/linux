@@ -989,7 +989,7 @@ add_control(struct hda_gen_spec *spec, int type, const char *name,
 		knew->subdevice = HDA_SUBDEV_AMP_FLAG;
 	if (knew->access == 0)
 		knew->access = SNDRV_CTL_ELEM_ACCESS_READWRITE;
-	knew->private_value = val;
+	knew->private_value = __c_fakeu(val);
 	return knew;
 }
 
@@ -1115,7 +1115,7 @@ static int hda_gen_bind_mute_get(struct snd_kcontrol *kcontrol,
 				 struct snd_ctl_elem_value *ucontrol)
 {
 	struct hda_codec *codec = snd_kcontrol_chip(kcontrol);
-	unsigned long pval;
+	uintptr_t pval;
 	int err;
 
 	mutex_lock(&codec->control_mutex);
@@ -1131,14 +1131,14 @@ static int hda_gen_bind_mute_put(struct snd_kcontrol *kcontrol,
 				 struct snd_ctl_elem_value *ucontrol)
 {
 	struct hda_codec *codec = snd_kcontrol_chip(kcontrol);
-	unsigned long pval;
+	uintptr_t pval;
 	int i, indices, err = 0, change = 0;
 
 	sync_auto_mute_bits(kcontrol, ucontrol);
 
 	mutex_lock(&codec->control_mutex);
 	pval = kcontrol->private_value;
-	indices = (pval & AMP_VAL_IDX_MASK) >> AMP_VAL_IDX_SHIFT;
+	indices = (__c_ua(pval) & AMP_VAL_IDX_MASK) >> AMP_VAL_IDX_SHIFT;
 	for (i = 0; i < indices; i++) {
 		kcontrol->private_value = (pval & ~AMP_VAL_IDX_MASK) |
 			(i << AMP_VAL_IDX_SHIFT);
@@ -2675,7 +2675,7 @@ static int out_jack_mode_get(struct snd_kcontrol *kcontrol,
 			     struct snd_ctl_elem_value *ucontrol)
 {
 	struct hda_codec *codec = snd_kcontrol_chip(kcontrol);
-	hda_nid_t nid = kcontrol->private_value;
+	hda_nid_t nid = __c_ua(kcontrol->private_value);
 	if (snd_hda_codec_get_pin_target(codec, nid) == PIN_HP)
 		ucontrol->value.enumerated.item[0] = 1;
 	else
@@ -2687,7 +2687,7 @@ static int out_jack_mode_put(struct snd_kcontrol *kcontrol,
 			     struct snd_ctl_elem_value *ucontrol)
 {
 	struct hda_codec *codec = snd_kcontrol_chip(kcontrol);
-	hda_nid_t nid = kcontrol->private_value;
+	hda_nid_t nid = __c_ua(kcontrol->private_value);
 	unsigned int val;
 
 	val = ucontrol->value.enumerated.item[0] ? PIN_HP : PIN_OUT;
@@ -2759,7 +2759,7 @@ static int create_out_jack_modes(struct hda_codec *codec, int num_pins,
 						    &out_jack_mode_enum);
 			if (!knew)
 				return -ENOMEM;
-			knew->private_value = pin;
+			knew->private_value = __c_fakeu(pin);
 		}
 	}
 
@@ -2822,7 +2822,7 @@ static int in_jack_mode_info(struct snd_kcontrol *kcontrol,
 			     struct snd_ctl_elem_info *uinfo)
 {
 	struct hda_codec *codec = snd_kcontrol_chip(kcontrol);
-	hda_nid_t nid = kcontrol->private_value;
+	hda_nid_t nid = __c_ua(kcontrol->private_value);
 	unsigned int vref_caps = get_vref_caps(codec, nid);
 
 	snd_hda_enum_helper_info(kcontrol, uinfo, hweight32(vref_caps),
@@ -2837,7 +2837,7 @@ static int in_jack_mode_get(struct snd_kcontrol *kcontrol,
 			    struct snd_ctl_elem_value *ucontrol)
 {
 	struct hda_codec *codec = snd_kcontrol_chip(kcontrol);
-	hda_nid_t nid = kcontrol->private_value;
+	hda_nid_t nid = __c_ua(kcontrol->private_value);
 	unsigned int vref_caps = get_vref_caps(codec, nid);
 	unsigned int idx;
 
@@ -2850,7 +2850,7 @@ static int in_jack_mode_put(struct snd_kcontrol *kcontrol,
 			    struct snd_ctl_elem_value *ucontrol)
 {
 	struct hda_codec *codec = snd_kcontrol_chip(kcontrol);
-	hda_nid_t nid = kcontrol->private_value;
+	hda_nid_t nid = __c_ua(kcontrol->private_value);
 	unsigned int vref_caps = get_vref_caps(codec, nid);
 	unsigned int val, idx;
 
@@ -2904,7 +2904,7 @@ static int create_in_jack_mode(struct hda_codec *codec, hda_nid_t pin)
 	knew = snd_hda_gen_add_kctl(spec, name, &in_jack_mode_enum);
 	if (!knew)
 		return -ENOMEM;
-	knew->private_value = pin;
+	knew->private_value = __c_fakeu(pin);
 	return 0;
 }
 
@@ -2915,7 +2915,7 @@ static int hp_mic_jack_mode_info(struct snd_kcontrol *kcontrol,
 				 struct snd_ctl_elem_info *uinfo)
 {
 	struct hda_codec *codec = snd_kcontrol_chip(kcontrol);
-	hda_nid_t nid = kcontrol->private_value;
+	hda_nid_t nid = __c_ua(kcontrol->private_value);
 	int out_jacks = get_out_jack_num_items(codec, nid);
 	int in_jacks = get_in_jack_num_items(codec, nid);
 	const char *text = NULL;
@@ -2970,7 +2970,7 @@ static int hp_mic_jack_mode_get(struct snd_kcontrol *kcontrol,
 				struct snd_ctl_elem_value *ucontrol)
 {
 	struct hda_codec *codec = snd_kcontrol_chip(kcontrol);
-	hda_nid_t nid = kcontrol->private_value;
+	hda_nid_t nid = __c_ua(kcontrol->private_value);
 	ucontrol->value.enumerated.item[0] =
 		get_cur_hp_mic_jack_mode(codec, nid);
 	return 0;
@@ -2980,7 +2980,7 @@ static int hp_mic_jack_mode_put(struct snd_kcontrol *kcontrol,
 				struct snd_ctl_elem_value *ucontrol)
 {
 	struct hda_codec *codec = snd_kcontrol_chip(kcontrol);
-	hda_nid_t nid = kcontrol->private_value;
+	hda_nid_t nid = __c_ua(kcontrol->private_value);
 	int out_jacks = get_out_jack_num_items(codec, nid);
 	int in_jacks = get_in_jack_num_items(codec, nid);
 	unsigned int val, oldval, idx;
@@ -3027,7 +3027,7 @@ static int create_hp_mic_jack_mode(struct hda_codec *codec, hda_nid_t pin)
 				    &hp_mic_jack_mode_enum);
 	if (!knew)
 		return -ENOMEM;
-	knew->private_value = pin;
+	knew->private_value = __c_fakeu(pin);
 	spec->hp_mic_jack_modes = 1;
 	return 0;
 }
@@ -3480,7 +3480,7 @@ static int cap_put_caller(struct snd_kcontrol *kcontrol,
 		path = get_input_path(codec, adc_idx, i);
 		if (!path || !path->ctls[type])
 			continue;
-		kcontrol->private_value = path->ctls[type];
+		kcontrol->private_value = __c_fakeu(path->ctls[type]);
 		ret = func(kcontrol, ucontrol);
 		if (ret < 0) {
 			err = ret;
@@ -3696,7 +3696,7 @@ static int create_bind_cap_vol_ctl(struct hda_codec *codec, int idx,
 		if (!knew)
 			return -ENOMEM;
 		knew->index = idx;
-		knew->private_value = vol_ctl;
+		knew->private_value = __c_fakeu(vol_ctl);
 		knew->subdevice = HDA_SUBDEV_AMP_FLAG;
 	}
 	if (sw_ctl) {
@@ -3704,7 +3704,7 @@ static int create_bind_cap_vol_ctl(struct hda_codec *codec, int idx,
 		if (!knew)
 			return -ENOMEM;
 		knew->index = idx;
-		knew->private_value = sw_ctl;
+		knew->private_value = __c_fakeu(sw_ctl);
 		knew->subdevice = HDA_SUBDEV_AMP_FLAG;
 		if (spec->mic_mute_led)
 			knew->access |= SNDRV_CTL_ELEM_ACCESS_MIC_LED;

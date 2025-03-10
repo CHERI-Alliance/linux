@@ -350,7 +350,7 @@ static int pcxhr_pcm_vol_get(struct snd_kcontrol *kcontrol,
 	struct snd_pcxhr *chip = snd_kcontrol_chip(kcontrol);
 	int idx = snd_ctl_get_ioffidx(kcontrol, &ucontrol->id);	/* index */
 	int *stored_volume;
-	int is_capture = kcontrol->private_value;
+	int is_capture = __c_ua(kcontrol->private_value);
 
 	mutex_lock(&chip->mgr->mixer_mutex);
 	if (is_capture)		/* digital capture */
@@ -369,7 +369,7 @@ static int pcxhr_pcm_vol_put(struct snd_kcontrol *kcontrol,
 	struct snd_pcxhr *chip = snd_kcontrol_chip(kcontrol);
 	int idx = snd_ctl_get_ioffidx(kcontrol, &ucontrol->id);	/* index */
 	int changed = 0;
-	int is_capture = kcontrol->private_value;
+	int is_capture = __c_ua(kcontrol->private_value);
 	int *stored_volume;
 	int i;
 
@@ -920,7 +920,7 @@ static int pcxhr_iec958_get(struct snd_kcontrol *kcontrol,
 
 	mutex_lock(&chip->mgr->mixer_mutex);
 	for(i = 0; i < 5; i++) {
-		if (kcontrol->private_value == 0)	/* playback */
+		if (__c_ua(kcontrol->private_value) == 0)	/* playback */
 			aes_bits = chip->aes_bits[i];
 		else {				/* capture */
 			if (chip->mgr->is_hr_stereo)

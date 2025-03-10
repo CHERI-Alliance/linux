@@ -292,7 +292,7 @@ static int outmixer_event(struct snd_soc_dapm_widget *w,
 	struct snd_kcontrol *kcontrol, int event)
 {
 	struct snd_soc_component *component = snd_soc_dapm_to_component(w->dapm);
-	u32 reg_shift = kcontrol->private_value & 0xfff;
+	u32 reg_shift = __c_ua(kcontrol->private_value) & 0xfff;
 	int ret = 0;
 	u16 reg;
 

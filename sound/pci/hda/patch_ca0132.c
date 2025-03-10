@@ -4060,7 +4060,7 @@ static unsigned int ca0132_capture_pcm_delay(struct hda_pcm_stream *info,
 	  .get = snd_hda_mixer_amp_volume_get, \
 	  .put = ca0132_alt_volume_put, \
 	  .tlv = { .c = snd_hda_mixer_amp_tlv }, \
-	  .private_value = HDA_COMPOSE_AMP_VAL(nid, channel, 0, dir) }
+	  .private_value = (uintptr_t __force)(HDA_COMPOSE_AMP_VAL(nid, channel, 0, dir)) }
 
 #define CA0132_CODEC_MUTE_MONO(xname, nid, channel, dir) \
 	{ .iface = SNDRV_CTL_ELEM_IFACE_MIXER, \
@@ -4069,7 +4069,7 @@ static unsigned int ca0132_capture_pcm_delay(struct hda_pcm_stream *info,
 	  .info = snd_hda_mixer_amp_switch_info, \
 	  .get = ca0132_switch_get, \
 	  .put = ca0132_switch_put, \
-	  .private_value = HDA_COMPOSE_AMP_VAL(nid, channel, 0, dir) }
+	  .private_value = (uintptr_t __force)(HDA_COMPOSE_AMP_VAL(nid, channel, 0, dir)) }
 
 /* stereo */
 #define CA0132_CODEC_VOL(xname, nid, dir) \
@@ -5578,12 +5578,12 @@ static int ca0132_vnode_switch_set(struct snd_kcontrol *kcontrol,
 	if (effective) {
 		int dir = get_amp_direction(kcontrol);
 		int ch = get_amp_channels(kcontrol);
-		unsigned long pval;
+		uintptr_t pval;
 
 		mutex_lock(&codec->control_mutex);
 		pval = kcontrol->private_value;
-		kcontrol->private_value = HDA_COMPOSE_AMP_VAL(shared_nid, ch,
-								0, dir);
+		kcontrol->private_value = __c_fakeu(HDA_COMPOSE_AMP_VAL(shared_nid, ch,
+								0, dir));
 		ret = snd_hda_mixer_amp_switch_put(kcontrol, ucontrol);
 		kcontrol->private_value = pval;
 		mutex_unlock(&codec->control_mutex);
@@ -6461,7 +6461,7 @@ static int ca0132_volume_info(struct snd_kcontrol *kcontrol,
 	hda_nid_t nid = get_amp_nid(kcontrol);
 	int ch = get_amp_channels(kcontrol);
 	int dir = get_amp_direction(kcontrol);
-	unsigned long pval;
+	uintptr_t pval;
 	int err;
 
 	switch (nid) {
@@ -6470,7 +6470,7 @@ static int ca0132_volume_info(struct snd_kcontrol *kcontrol,
 		nid = spec->shared_out_nid;
 		mutex_lock(&codec->control_mutex);
 		pval = kcontrol->private_value;
-		kcontrol->private_value = HDA_COMPOSE_AMP_VAL(nid, ch, 0, dir);
+		kcontrol->private_value = __c_fakeu(HDA_COMPOSE_AMP_VAL(nid, ch, 0, dir));
 		err = snd_hda_mixer_amp_volume_info(kcontrol, uinfo);
 		kcontrol->private_value = pval;
 		mutex_unlock(&codec->control_mutex);
@@ -6480,7 +6480,7 @@ static int ca0132_volume_info(struct snd_kcontrol *kcontrol,
 		nid = spec->shared_mic_nid;
 		mutex_lock(&codec->control_mutex);
 		pval = kcontrol->private_value;
-		kcontrol->private_value = HDA_COMPOSE_AMP_VAL(nid, ch, 0, dir);
+		kcontrol->private_value = __c_fakeu(HDA_COMPOSE_AMP_VAL(nid, ch, 0, dir));
 		err = snd_hda_mixer_amp_volume_info(kcontrol, uinfo);
 		kcontrol->private_value = pval;
 		mutex_unlock(&codec->control_mutex);
@@ -6538,13 +6538,13 @@ static int ca0132_volume_put(struct snd_kcontrol *kcontrol,
 	effective = ca0132_is_vnode_effective(codec, nid, &shared_nid);
 	if (effective) {
 		int dir = get_amp_direction(kcontrol);
-		unsigned long pval;
+		uintptr_t pval;
 
 		snd_hda_power_up(codec);
 		mutex_lock(&codec->control_mutex);
 		pval = kcontrol->private_value;
-		kcontrol->private_value = HDA_COMPOSE_AMP_VAL(shared_nid, ch,
-								0, dir);
+		kcontrol->private_value = __c_fakeu(HDA_COMPOSE_AMP_VAL(shared_nid, ch,
+								0, dir));
 		changed = snd_hda_mixer_amp_volume_put(kcontrol, ucontrol);
 		kcontrol->private_value = pval;
 		mutex_unlock(&codec->control_mutex);
@@ -6607,7 +6607,7 @@ static int ca0132_volume_tlv(struct snd_kcontrol *kcontrol, int op_flag,
 	hda_nid_t nid = get_amp_nid(kcontrol);
 	int ch = get_amp_channels(kcontrol);
 	int dir = get_amp_direction(kcontrol);
-	unsigned long pval;
+	uintptr_t pval;
 	int err;
 
 	switch (nid) {
@@ -6616,7 +6616,7 @@ static int ca0132_volume_tlv(struct snd_kcontrol *kcontrol, int op_flag,
 		nid = spec->shared_out_nid;
 		mutex_lock(&codec->control_mutex);
 		pval = kcontrol->private_value;
-		kcontrol->private_value = HDA_COMPOSE_AMP_VAL(nid, ch, 0, dir);
+		kcontrol->private_value = __c_fakeu(HDA_COMPOSE_AMP_VAL(nid, ch, 0, dir));
 		err = snd_hda_mixer_amp_tlv(kcontrol, op_flag, size, tlv);
 		kcontrol->private_value = pval;
 		mutex_unlock(&codec->control_mutex);
@@ -6626,7 +6626,7 @@ static int ca0132_volume_tlv(struct snd_kcontrol *kcontrol, int op_flag,
 		nid = spec->shared_mic_nid;
 		mutex_lock(&codec->control_mutex);
 		pval = kcontrol->private_value;
-		kcontrol->private_value = HDA_COMPOSE_AMP_VAL(nid, ch, 0, dir);
+		kcontrol->private_value = __c_fakeu(HDA_COMPOSE_AMP_VAL(nid, ch, 0, dir));
 		err = snd_hda_mixer_amp_tlv(kcontrol, op_flag, size, tlv);
 		kcontrol->private_value = pval;
 		mutex_unlock(&codec->control_mutex);
@@ -6661,7 +6661,7 @@ static int ca0132_alt_add_effect_slider(struct hda_codec *codec, hda_nid_t nid,
 		knew.get = ca0132_alt_slider_ctl_get;
 		knew.put = ca0132_alt_effect_slider_put;
 		knew.private_value =
-			HDA_COMPOSE_AMP_VAL(nid, 1, 0, type);
+			__c_fakeu(HDA_COMPOSE_AMP_VAL(nid, 1, 0, type));
 		break;
 	}
 

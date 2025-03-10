@@ -429,7 +429,7 @@ static int spdif_bit_switch_get(struct snd_kcontrol *ctl,
 				struct snd_ctl_elem_value *value)
 {
 	struct oxygen *chip = ctl->private_data;
-	u32 bit = ctl->private_value;
+	u32 bit = __c_ua(ctl->private_value);
 
 	value->value.integer.value[0] =
 		!!(oxygen_read32(chip, OXYGEN_SPDIF_CONTROL) & bit);
@@ -440,7 +440,7 @@ static int spdif_bit_switch_put(struct snd_kcontrol *ctl,
 				struct snd_ctl_elem_value *value)
 {
 	struct oxygen *chip = ctl->private_data;
-	u32 bit = ctl->private_value;
+	u32 bit = __c_ua(ctl->private_value);
 	u32 oldreg, newreg;
 	int changed;
 
@@ -471,8 +471,8 @@ static int monitor_get(struct snd_kcontrol *ctl,
 		       struct snd_ctl_elem_value *value)
 {
 	struct oxygen *chip = ctl->private_data;
-	u8 bit = ctl->private_value;
-	int invert = ctl->private_value & (1 << 8);
+	u8 bit = __c_ua(ctl->private_value);
+	int invert = __c_ua(ctl->private_value) & (1 << 8);
 
 	value->value.integer.value[0] =
 		!!invert ^ !!(oxygen_read8(chip, OXYGEN_ADC_MONITOR) & bit);
@@ -483,8 +483,8 @@ static int monitor_put(struct snd_kcontrol *ctl,
 		       struct snd_ctl_elem_value *value)
 {
 	struct oxygen *chip = ctl->private_data;
-	u8 bit = ctl->private_value;
-	int invert = ctl->private_value & (1 << 8);
+	u8 bit = __c_ua(ctl->private_value);
+	int invert = __c_ua(ctl->private_value) & (1 << 8);
 	u8 oldreg, newreg;
 	int changed;
 
@@ -505,10 +505,10 @@ static int ac97_switch_get(struct snd_kcontrol *ctl,
 			   struct snd_ctl_elem_value *value)
 {
 	struct oxygen *chip = ctl->private_data;
-	unsigned int codec = (ctl->private_value >> 24) & 1;
-	unsigned int index = ctl->private_value & 0xff;
-	unsigned int bitnr = (ctl->private_value >> 8) & 0xff;
-	int invert = ctl->private_value & (1 << 16);
+	unsigned int codec = (__c_ua(ctl->private_value) >> 24) & 1;
+	unsigned int index = __c_ua(ctl->private_value) & 0xff;
+	unsigned int bitnr = (__c_ua(ctl->private_value) >> 8) & 0xff;
+	int invert = __c_ua(ctl->private_value) & (1 << 16);
 	u16 reg;
 
 	mutex_lock(&chip->mutex);
@@ -528,7 +528,7 @@ static void mute_ac97_ctl(struct oxygen *chip, unsigned int control)
 
 	if (!chip->controls[control])
 		return;
-	priv_idx = chip->controls[control]->private_value & 0xff;
+	priv_idx = __c_ua(chip->controls[control]->private_value) & 0xff;
 	value = oxygen_read_ac97(chip, 0, priv_idx);
 	if (!(value & 0x8000)) {
 		oxygen_write_ac97(chip, 0, priv_idx, value | 0x8000);
@@ -543,10 +543,10 @@ static int ac97_switch_put(struct snd_kcontrol *ctl,
 			   struct snd_ctl_elem_value *value)
 {
 	struct oxygen *chip = ctl->private_data;
-	unsigned int codec = (ctl->private_value >> 24) & 1;
-	unsigned int index = ctl->private_value & 0xff;
-	unsigned int bitnr = (ctl->private_value >> 8) & 0xff;
-	int invert = ctl->private_value & (1 << 16);
+	unsigned int codec = (__c_ua(ctl->private_value) >> 24) & 1;
+	unsigned int index = __c_ua(ctl->private_value) & 0xff;
+	unsigned int bitnr = (__c_ua(ctl->private_value) >> 8) & 0xff;
+	int invert = __c_ua(ctl->private_value) & (1 << 16);
 	u16 oldreg, newreg;
 	int change;
 
@@ -586,7 +586,7 @@ static int ac97_switch_put(struct snd_kcontrol *ctl,
 static int ac97_volume_info(struct snd_kcontrol *ctl,
 			    struct snd_ctl_elem_info *info)
 {
-	int stereo = (ctl->private_value >> 16) & 1;
+	int stereo = (__c_ua(ctl->private_value) >> 16) & 1;
 
 	info->type = SNDRV_CTL_ELEM_TYPE_INTEGER;
 	info->count = stereo ? 2 : 1;
@@ -599,9 +599,9 @@ static int ac97_volume_get(struct snd_kcontrol *ctl,
 			   struct snd_ctl_elem_value *value)
 {
 	struct oxygen *chip = ctl->private_data;
-	unsigned int codec = (ctl->private_value >> 24) & 1;
-	int stereo = (ctl->private_value >> 16) & 1;
-	unsigned int index = ctl->private_value & 0xff;
+	unsigned int codec = (__c_ua(ctl->private_value) >> 24) & 1;
+	int stereo = (__c_ua(ctl->private_value) >> 16) & 1;
+	unsigned int index = __c_ua(ctl->private_value) & 0xff;
 	u16 reg;
 
 	mutex_lock(&chip->mutex);
@@ -620,9 +620,9 @@ static int ac97_volume_put(struct snd_kcontrol *ctl,
 			   struct snd_ctl_elem_value *value)
 {
 	struct oxygen *chip = ctl->private_data;
-	unsigned int codec = (ctl->private_value >> 24) & 1;
-	int stereo = (ctl->private_value >> 16) & 1;
-	unsigned int index = ctl->private_value & 0xff;
+	unsigned int codec = (__c_ua(ctl->private_value) >> 24) & 1;
+	int stereo = (__c_ua(ctl->private_value) >> 16) & 1;
+	unsigned int index = __c_ua(ctl->private_value) & 0xff;
 	u16 oldreg, newreg;
 	int change;
 

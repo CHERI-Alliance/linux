@@ -25,7 +25,7 @@ static int ad193x_spi_probe(struct spi_device *spi)
 	config.write_flag_mask = 0x08;
 
 	return ad193x_probe(&spi->dev, devm_regmap_init_spi(spi, &config),
-			    (enum ad193x_type)id->driver_data);
+			    (enum ad193x_type)__c_ua(id->driver_data));
 }
 
 static const struct spi_device_id ad193x_spi_id[] = {

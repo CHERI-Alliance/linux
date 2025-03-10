@@ -561,7 +561,7 @@ snd_seq_oss_synth_addr(struct seq_oss_devinfo *dp, int dev, struct snd_seq_event
  * OSS compatible ioctl
  */
 int
-snd_seq_oss_synth_ioctl(struct seq_oss_devinfo *dp, int dev, unsigned int cmd, unsigned long addr)
+snd_seq_oss_synth_ioctl(struct seq_oss_devinfo *dp, int dev, unsigned int cmd, user_uintptr_t addr)
 {
 	struct seq_oss_synth *rec;
 	struct seq_oss_synthinfo *info;
@@ -658,8 +658,8 @@ snd_seq_oss_synth_info_read(struct snd_info_buffer *buf)
 			    rec->synth_type, rec->synth_subtype,
 			    rec->nr_voices);
 		snd_iprintf(buf, "  capabilities : ioctl %s / load_patch %s\n",
-			    enabled_str((long)rec->oper.ioctl),
-			    enabled_str((long)rec->oper.load_patch));
+			    enabled_str((long)__c_pa(rec->oper.ioctl)),
+			    enabled_str((long)__c_pa(rec->oper.load_patch)));
 		snd_use_lock_free(&rec->use_lock);
 	}
 }

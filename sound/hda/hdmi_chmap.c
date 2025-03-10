@@ -666,7 +666,7 @@ static int hdmi_chmap_ctl_tlv(struct snd_kcontrol *kcontrol, int op_flag,
 {
 	struct snd_pcm_chmap *info = snd_kcontrol_chip(kcontrol);
 	struct hdac_chmap *chmap = info->private_data;
-	int pcm_idx = kcontrol->private_value;
+	int pcm_idx = __c_ua(kcontrol->private_value);
 	unsigned int __user *dst;
 	int chs, count = 0;
 	unsigned long max_chs;
@@ -740,7 +740,7 @@ static int hdmi_chmap_ctl_get(struct snd_kcontrol *kcontrol,
 {
 	struct snd_pcm_chmap *info = snd_kcontrol_chip(kcontrol);
 	struct hdac_chmap *chmap = info->private_data;
-	int pcm_idx = kcontrol->private_value;
+	int pcm_idx = __c_ua(kcontrol->private_value);
 	unsigned char pcm_chmap[8];
 	int i;
 
@@ -758,7 +758,7 @@ static int hdmi_chmap_ctl_put(struct snd_kcontrol *kcontrol,
 {
 	struct snd_pcm_chmap *info = snd_kcontrol_chip(kcontrol);
 	struct hdac_chmap *hchmap = info->private_data;
-	int pcm_idx = kcontrol->private_value;
+	int pcm_idx = __c_ua(kcontrol->private_value);
 	unsigned int ctl_idx;
 	struct snd_pcm_substream *substream;
 	unsigned char chmap[8], per_pin_chmap[8];
@@ -832,7 +832,7 @@ int snd_hdac_add_chmap_ctls(struct snd_pcm *pcm, int pcm_idx,
 
 	err = snd_pcm_add_chmap_ctls(pcm,
 				     SNDRV_PCM_STREAM_PLAYBACK,
-				     NULL, 0, pcm_idx, &chmap);
+				     NULL, 0, __c_fakeu(pcm_idx), &chmap);
 	if (err < 0)
 		return err;
 	/* override handlers */

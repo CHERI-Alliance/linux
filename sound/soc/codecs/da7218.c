@@ -3254,7 +3254,7 @@ static int da7218_i2c_probe(struct i2c_client *i2c)
 
 	i2c_set_clientdata(i2c, da7218);
 
-	da7218->dev_id = (uintptr_t)i2c_get_match_data(i2c);
+	da7218->dev_id = __c_pa(i2c_get_match_data(i2c));
 
 	if ((da7218->dev_id != DA7217_DEV_ID) &&
 	    (da7218->dev_id != DA7218_DEV_ID)) {

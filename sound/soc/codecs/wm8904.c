@@ -2202,11 +2202,11 @@ static int wm8904_i2c_probe(struct i2c_client *i2c)
 		match = of_match_node(wm8904_of_match, i2c->dev.of_node);
 		if (match == NULL)
 			return -EINVAL;
-		wm8904->devtype = (uintptr_t)match->data;
+		wm8904->devtype = __c_pa(match->data);
 	} else {
 		const struct i2c_device_id *id =
 			i2c_match_id(wm8904_i2c_id, i2c);
-		wm8904->devtype = id->driver_data;
+		wm8904->devtype = __c_ua(id->driver_data);
 	}
 
 	i2c_set_clientdata(i2c, wm8904);

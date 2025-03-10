@@ -180,7 +180,7 @@ static int cs35l56_hda_mixer_get(struct snd_kcontrol *kcontrol,
 	unsigned int reg_val;
 	int i;
 
-	regmap_read(cs35l56->base.regmap, kcontrol->private_value, &reg_val);
+	regmap_read(cs35l56->base.regmap, __c_ua(kcontrol->private_value), &reg_val);
 	reg_val &= CS35L56_ASP_TXn_SRC_MASK;
 
 	for (i = 0; i < CS35L56_NUM_INPUT_SRC; ++i) {
@@ -203,7 +203,7 @@ static int cs35l56_hda_mixer_put(struct snd_kcontrol *kcontrol,
 	if (item >= CS35L56_NUM_INPUT_SRC)
 		return -EINVAL;
 
-	regmap_update_bits_check(cs35l56->base.regmap, kcontrol->private_value,
+	regmap_update_bits_check(cs35l56->base.regmap, __c_ua(kcontrol->private_value),
 				 CS35L56_INPUT_MASK, cs35l56_tx_input_values[item],
 				 &changed);
 
@@ -361,7 +361,7 @@ static void cs35l56_hda_create_controls(struct cs35l56_hda *cs35l56)
 	for (i = 0; i < ARRAY_SIZE(cs35l56_hda_mixer_controls); ++i) {
 		snprintf(name, sizeof(name), "%s %s", cs35l56->amp_name,
 			 cs35l56_hda_mixer_controls[i].name);
-		ctl_template.private_value = cs35l56_hda_mixer_controls[i].reg;
+		ctl_template.private_value = __c_fakeu(cs35l56_hda_mixer_controls[i].reg);
 		cs35l56->mixer_ctl[i] = snd_ctl_new1(&ctl_template, cs35l56);
 		if (snd_ctl_add(cs35l56->codec->card, cs35l56->mixer_ctl[i])) {
 			dev_err(cs35l56->base.dev, "Failed to add KControl: %s\n",

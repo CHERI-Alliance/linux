@@ -1734,7 +1734,7 @@ static const struct reg_sequence aic3007_class_d[] = {
 	{ AIC3X_PAGE_SELECT, 0x00 },
 };
 
-int aic3x_probe(struct device *dev, struct regmap *regmap, kernel_ulong_t driver_data)
+int aic3x_probe(struct device *dev, struct regmap *regmap, uintptr_t driver_data)
 {
 	struct aic3x_priv *aic3x;
 	struct aic3x_setup_data *ai3x_setup;
@@ -1786,7 +1786,7 @@ int aic3x_probe(struct device *dev, struct regmap *regmap, kernel_ulong_t driver
 		}
 	}
 
-	aic3x->model = driver_data;
+	aic3x->model = __c_ua(driver_data);
 
 	aic3x->gpio_reset = devm_gpiod_get_optional(dev, "reset",
 						    GPIOD_OUT_HIGH);

@@ -1766,7 +1766,7 @@ static int max98088_i2c_probe(struct i2c_client *i2c)
 			return PTR_ERR(max98088->mclk);
 
 	id = i2c_match_id(max98088_i2c_id, i2c);
-	max98088->devtype = id->driver_data;
+	max98088->devtype = __c_ua(id->driver_data);
 
 	i2c_set_clientdata(i2c, max98088);
 	max98088->pdata = i2c->dev.platform_data;

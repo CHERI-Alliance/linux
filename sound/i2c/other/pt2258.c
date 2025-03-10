@@ -81,7 +81,7 @@ static int pt2258_stereo_volume_get(struct snd_kcontrol *kcontrol,
 				    struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_pt2258 *pt = kcontrol->private_data;
-	int base = kcontrol->private_value;
+	int base = __c_ua(kcontrol->private_value);
 
 	/* chip does not support register reads */
 	ucontrol->value.integer.value[0] = 79 - pt->volume[base];
@@ -93,7 +93,7 @@ static int pt2258_stereo_volume_put(struct snd_kcontrol *kcontrol,
 				    struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_pt2258 *pt = kcontrol->private_data;
-	int base = kcontrol->private_value;
+	int base = __c_ua(kcontrol->private_value);
 	unsigned char bytes[2];
 	int val0, val1;
 
@@ -184,7 +184,7 @@ int snd_pt2258_build_controls(struct snd_pt2258 *pt)
 		knew.count = 1;
 		knew.access = SNDRV_CTL_ELEM_ACCESS_READWRITE |
 		    SNDRV_CTL_ELEM_ACCESS_TLV_READ;
-		knew.private_value = 2 * i;
+		knew.private_value = __c_fakeu(2 * i);
 		knew.info = pt2258_stereo_volume_info;
 		knew.get = pt2258_stereo_volume_get;
 		knew.put = pt2258_stereo_volume_put;

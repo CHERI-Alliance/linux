@@ -1663,7 +1663,7 @@ static int snd_ensoniq_control_get(struct snd_kcontrol *kcontrol,
 				   struct snd_ctl_elem_value *ucontrol)
 {
 	struct ensoniq *ensoniq = snd_kcontrol_chip(kcontrol);
-	int mask = kcontrol->private_value;
+	int mask = __c_ua(kcontrol->private_value);
 	
 	spin_lock_irq(&ensoniq->reg_lock);
 	ucontrol->value.integer.value[0] = ensoniq->ctrl & mask ? 1 : 0;
@@ -1675,7 +1675,7 @@ static int snd_ensoniq_control_put(struct snd_kcontrol *kcontrol,
 				   struct snd_ctl_elem_value *ucontrol)
 {
 	struct ensoniq *ensoniq = snd_kcontrol_chip(kcontrol);
-	int mask = kcontrol->private_value;
+	int mask = __c_ua(kcontrol->private_value);
 	unsigned int nval;
 	int change;
 	

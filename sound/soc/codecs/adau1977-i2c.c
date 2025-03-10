@@ -27,7 +27,7 @@ static int adau1977_i2c_probe(struct i2c_client *client)
 
 	return adau1977_probe(&client->dev,
 		devm_regmap_init_i2c(client, &config),
-		id->driver_data, NULL);
+		__c_ua(id->driver_data), NULL);
 }
 
 static const struct i2c_device_id adau1977_i2c_ids[] = {

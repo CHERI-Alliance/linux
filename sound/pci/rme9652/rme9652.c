@@ -845,7 +845,7 @@ static int snd_rme9652_control_spdif_mask_info(struct snd_kcontrol *kcontrol, st
 
 static int snd_rme9652_control_spdif_mask_get(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
-	ucontrol->value.iec958.status[0] = kcontrol->private_value;
+	ucontrol->value.iec958.status[0] = __c_ua(kcontrol->private_value);
 	return 0;
 }
 
@@ -1350,7 +1350,7 @@ static int snd_rme9652_get_adat_sync(struct snd_kcontrol *kcontrol, struct snd_c
 	struct snd_rme9652 *rme9652 = snd_kcontrol_chip(kcontrol);
 	unsigned int mask1, mask2, val;
 	
-	switch (kcontrol->private_value) {
+	switch (__c_ua(kcontrol->private_value)) {
 	case 0: mask1 = RME9652_lock_0; mask2 = RME9652_sync_0; break;	
 	case 1: mask1 = RME9652_lock_1; mask2 = RME9652_sync_1; break;	
 	case 2: mask1 = RME9652_lock_2; mask2 = RME9652_sync_2; break;	
@@ -1549,7 +1549,7 @@ snd_rme9652_proc_read(struct snd_info_entry *entry, struct snd_info_buffer *buff
 	snd_iprintf(buffer, "Buffers: capture %p playback %p\n",
 		    rme9652->capture_buffer, rme9652->playback_buffer);
 	snd_iprintf(buffer, "IRQ: %d Registers bus: 0x%lx VM: 0x%lx\n",
-		    rme9652->irq, rme9652->port, (unsigned long)rme9652->iobase);
+		    rme9652->irq, rme9652->port, __c_pa(rme9652->iobase));
 	snd_iprintf(buffer, "Control register: %x\n", rme9652->control_register);
 
 	snd_iprintf(buffer, "\n");

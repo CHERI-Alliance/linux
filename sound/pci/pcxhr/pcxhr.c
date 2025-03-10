@@ -632,7 +632,7 @@ static int pcxhr_update_r_buffer(struct pcxhr_stream *stream)
 	dev_dbg(chip->card->dev,
 		"%s(pcm%c%d) : addr(%p) bytes(%zx) subs(%d)\n", __func__,
 		is_capture ? 'c' : 'p',
-		chip->chip_idx, (void *)(long)subs->runtime->dma_addr,
+		chip->chip_idx, __c_fakep(subs->runtime->dma_addr),
 		subs->runtime->dma_bytes, subs->number);
 
 	pcxhr_init_rmh(&rmh, CMD_UPDATE_R_BUFFERS);
@@ -1519,15 +1519,15 @@ static int pcxhr_probe(struct pci_dev *pci,
 		return -ENODEV;
 	}
 	card_name =
-		pcxhr_board_params[pci_id->driver_data].board_name;
+		pcxhr_board_params[__c_ua(pci_id->driver_data)].board_name;
 	mgr->playback_chips =
-		pcxhr_board_params[pci_id->driver_data].playback_chips;
+		pcxhr_board_params[__c_ua(pci_id->driver_data)].playback_chips;
 	mgr->capture_chips  =
-		pcxhr_board_params[pci_id->driver_data].capture_chips;
+		pcxhr_board_params[__c_ua(pci_id->driver_data)].capture_chips;
 	mgr->fw_file_set =
-		pcxhr_board_params[pci_id->driver_data].fw_file_set;
+		pcxhr_board_params[__c_ua(pci_id->driver_data)].fw_file_set;
 	mgr->firmware_num  =
-		pcxhr_board_params[pci_id->driver_data].firmware_num;
+		pcxhr_board_params[__c_ua(pci_id->driver_data)].firmware_num;
 	mgr->mono_capture = mono[dev];
 	mgr->is_hr_stereo = (mgr->playback_chips == 1);
 	mgr->board_has_aes1 = PCXHR_BOARD_HAS_AES1(mgr);

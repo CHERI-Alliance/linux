@@ -27,7 +27,7 @@ static int adau1781_i2c_probe(struct i2c_client *client)
 
 	return adau1781_probe(&client->dev,
 		devm_regmap_init_i2c(client, &config),
-		id->driver_data, NULL);
+		__c_ua(id->driver_data), NULL);
 }
 
 static void adau1781_i2c_remove(struct i2c_client *client)

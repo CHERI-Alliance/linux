@@ -1543,7 +1543,7 @@ static int wm8962_dsp2_ena_info(struct snd_kcontrol *kcontrol,
 static int wm8962_dsp2_ena_get(struct snd_kcontrol *kcontrol,
 			       struct snd_ctl_elem_value *ucontrol)
 {
-	int shift = kcontrol->private_value;
+	int shift = __c_ua(kcontrol->private_value);
 	struct snd_soc_component *component = snd_soc_kcontrol_component(kcontrol);
 	struct wm8962_priv *wm8962 = snd_soc_component_get_drvdata(component);
 
@@ -1555,7 +1555,7 @@ static int wm8962_dsp2_ena_get(struct snd_kcontrol *kcontrol,
 static int wm8962_dsp2_ena_put(struct snd_kcontrol *kcontrol,
 			       struct snd_ctl_elem_value *ucontrol)
 {
-	int shift = kcontrol->private_value;
+	int shift = __c_ua(kcontrol->private_value);
 	struct snd_soc_component *component = snd_soc_kcontrol_component(kcontrol);
 	struct wm8962_priv *wm8962 = snd_soc_component_get_drvdata(component);
 	int old = wm8962->dsp2_ena;

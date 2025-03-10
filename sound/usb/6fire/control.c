@@ -186,7 +186,7 @@ static int usb6fire_control_output_vol_put(struct snd_kcontrol *kcontrol,
 		struct snd_ctl_elem_value *ucontrol)
 {
 	struct control_runtime *rt = snd_kcontrol_chip(kcontrol);
-	unsigned int ch = kcontrol->private_value;
+	unsigned int ch = __c_ua(kcontrol->private_value);
 	int changed = 0;
 
 	if (ch > 4) {
@@ -216,7 +216,7 @@ static int usb6fire_control_output_vol_get(struct snd_kcontrol *kcontrol,
 		struct snd_ctl_elem_value *ucontrol)
 {
 	struct control_runtime *rt = snd_kcontrol_chip(kcontrol);
-	unsigned int ch = kcontrol->private_value;
+	unsigned int ch = __c_ua(kcontrol->private_value);
 
 	if (ch > 4) {
 		dev_err(&rt->chip->dev->dev,
@@ -233,7 +233,7 @@ static int usb6fire_control_output_mute_put(struct snd_kcontrol *kcontrol,
 	struct snd_ctl_elem_value *ucontrol)
 {
 	struct control_runtime *rt = snd_kcontrol_chip(kcontrol);
-	unsigned int ch = kcontrol->private_value;
+	unsigned int ch = __c_ua(kcontrol->private_value);
 	u8 old = rt->output_mute;
 	u8 value = 0;
 
@@ -260,7 +260,7 @@ static int usb6fire_control_output_mute_get(struct snd_kcontrol *kcontrol,
 	struct snd_ctl_elem_value *ucontrol)
 {
 	struct control_runtime *rt = snd_kcontrol_chip(kcontrol);
-	unsigned int ch = kcontrol->private_value;
+	unsigned int ch = __c_ua(kcontrol->private_value);
 	u8 value = rt->output_mute >> ch;
 
 	if (ch > 4) {

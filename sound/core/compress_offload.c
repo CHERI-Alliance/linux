@@ -221,7 +221,7 @@ static inline size_t snd_compr_get_avail(struct snd_compr_stream *stream)
 }
 
 static int
-snd_compr_ioctl_avail(struct snd_compr_stream *stream, unsigned long arg)
+snd_compr_ioctl_avail(struct snd_compr_stream *stream, uintptr_t arg)
 {
 	struct snd_compr_avail ioctl_avail;
 	size_t avail;
@@ -430,7 +430,7 @@ static __poll_t snd_compr_poll(struct file *f, poll_table *wait)
 }
 
 static int
-snd_compr_get_caps(struct snd_compr_stream *stream, unsigned long arg)
+snd_compr_get_caps(struct snd_compr_stream *stream, user_uintptr_t arg)
 {
 	int retval;
 	struct snd_compr_caps caps;
@@ -450,7 +450,7 @@ out:
 
 #ifndef COMPR_CODEC_CAPS_OVERFLOW
 static int
-snd_compr_get_codec_caps(struct snd_compr_stream *stream, unsigned long arg)
+snd_compr_get_codec_caps(struct snd_compr_stream *stream, user_uintptr_t arg)
 {
 	int retval;
 	struct snd_compr_codec_caps *caps __free(kfree) = NULL;
@@ -569,7 +569,7 @@ static int snd_compress_check_input(struct snd_compr_params *params)
 }
 
 static int
-snd_compr_set_params(struct snd_compr_stream *stream, unsigned long arg)
+snd_compr_set_params(struct snd_compr_stream *stream, uintptr_t arg)
 {
 	struct snd_compr_params *params __free(kfree) = NULL;
 	int retval;
@@ -609,7 +609,7 @@ snd_compr_set_params(struct snd_compr_stream *stream, unsigned long arg)
 }
 
 static int
-snd_compr_get_params(struct snd_compr_stream *stream, unsigned long arg)
+snd_compr_get_params(struct snd_compr_stream *stream, uintptr_t arg)
 {
 	struct snd_codec *params __free(kfree) = NULL;
 	int retval;
@@ -629,7 +629,7 @@ snd_compr_get_params(struct snd_compr_stream *stream, unsigned long arg)
 }
 
 static int
-snd_compr_get_metadata(struct snd_compr_stream *stream, unsigned long arg)
+snd_compr_get_metadata(struct snd_compr_stream *stream, uintptr_t arg)
 {
 	struct snd_compr_metadata metadata;
 	int retval;
@@ -651,7 +651,7 @@ snd_compr_get_metadata(struct snd_compr_stream *stream, unsigned long arg)
 }
 
 static int
-snd_compr_set_metadata(struct snd_compr_stream *stream, unsigned long arg)
+snd_compr_set_metadata(struct snd_compr_stream *stream, uintptr_t arg)
 {
 	struct snd_compr_metadata metadata;
 	int retval;
@@ -672,7 +672,7 @@ snd_compr_set_metadata(struct snd_compr_stream *stream, unsigned long arg)
 }
 
 static inline int
-snd_compr_tstamp(struct snd_compr_stream *stream, unsigned long arg)
+snd_compr_tstamp(struct snd_compr_stream *stream, uintptr_t arg)
 {
 	struct snd_compr_tstamp tstamp = {0};
 	int ret;
@@ -939,7 +939,7 @@ static int snd_compr_partial_drain(struct snd_compr_stream *stream)
 	return snd_compress_wait_for_drain(stream);
 }
 
-static long snd_compr_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
+static long snd_compr_ioctl(struct file *f, unsigned int cmd, uintptr_t arg)
 {
 	struct snd_compr_file *data = f->private_data;
 	struct snd_compr_stream *stream;

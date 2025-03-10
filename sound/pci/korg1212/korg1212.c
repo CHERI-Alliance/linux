@@ -1698,7 +1698,7 @@ static int snd_korg1212_control_phase_get(struct snd_kcontrol *kcontrol,
 					  struct snd_ctl_elem_value *u)
 {
 	struct snd_korg1212 *korg1212 = snd_kcontrol_chip(kcontrol);
-	int i = kcontrol->private_value;
+	int i = __c_ua(kcontrol->private_value);
 
 	spin_lock_irq(&korg1212->lock);
 
@@ -1721,11 +1721,11 @@ static int snd_korg1212_control_phase_put(struct snd_kcontrol *kcontrol,
 
 	spin_lock_irq(&korg1212->lock);
 
-	i = kcontrol->private_value;
+	i = __c_ua(kcontrol->private_value);
 
 	korg1212->volumePhase[i] = !!u->value.integer.value[0];
 
-	val = korg1212->sharedBufferPtr->volumeData[kcontrol->private_value];
+	val = korg1212->sharedBufferPtr->volumeData[__c_ua(kcontrol->private_value)];
 
 	if ((u->value.integer.value[0] != 0) != (val < 0)) {
 		val = abs(val) * (korg1212->volumePhase[i] > 0 ? -1 : 1);
@@ -1736,7 +1736,7 @@ static int snd_korg1212_control_phase_put(struct snd_kcontrol *kcontrol,
 	if (i >= 8) {
 		korg1212->volumePhase[i+1] = !!u->value.integer.value[1];
 
-		val = korg1212->sharedBufferPtr->volumeData[kcontrol->private_value+1];
+		val = korg1212->sharedBufferPtr->volumeData[__c_ua(kcontrol->private_value)+1];
 
 		if ((u->value.integer.value[1] != 0) != (val < 0)) {
 			val = abs(val) * (korg1212->volumePhase[i+1] > 0 ? -1 : 1);
@@ -1768,7 +1768,7 @@ static int snd_korg1212_control_volume_get(struct snd_kcontrol *kcontrol,
 
 	spin_lock_irq(&korg1212->lock);
 
-	i = kcontrol->private_value;
+	i = __c_ua(kcontrol->private_value);
         u->value.integer.value[0] = abs(korg1212->sharedBufferPtr->volumeData[i]);
 
 	if (i >= 8) 
@@ -1789,7 +1789,7 @@ static int snd_korg1212_control_volume_put(struct snd_kcontrol *kcontrol,
 
 	spin_lock_irq(&korg1212->lock);
 
-	i = kcontrol->private_value;
+	i = __c_ua(kcontrol->private_value);
 
 	if (u->value.integer.value[0] >= k1212MinVolume && 
 	    u->value.integer.value[0] >= k1212MaxVolume &&
@@ -1834,7 +1834,7 @@ static int snd_korg1212_control_route_get(struct snd_kcontrol *kcontrol,
 
 	spin_lock_irq(&korg1212->lock);
 
-	i = kcontrol->private_value;
+	i = __c_ua(kcontrol->private_value);
 	u->value.enumerated.item[0] = korg1212->sharedBufferPtr->routeData[i];
 
 	if (i >= 8) 
@@ -1853,7 +1853,7 @@ static int snd_korg1212_control_route_put(struct snd_kcontrol *kcontrol,
 
 	spin_lock_irq(&korg1212->lock);
 
-	i = kcontrol->private_value;
+	i = __c_ua(kcontrol->private_value);
 
 	if (u->value.enumerated.item[0] < kAudioChannels &&
 	    u->value.enumerated.item[0] !=

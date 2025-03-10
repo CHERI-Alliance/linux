@@ -1180,7 +1180,7 @@ static int wm8985_i2c_probe(struct i2c_client *i2c)
 
 	i2c_set_clientdata(i2c, wm8985);
 
-	wm8985->dev_type = id->driver_data;
+	wm8985->dev_type = __c_ua(id->driver_data);
 
 	wm8985->regmap = devm_regmap_init_i2c(i2c, &wm8985_regmap);
 	if (IS_ERR(wm8985->regmap)) {

@@ -499,7 +499,7 @@ static int snd_ac97_page_save(struct snd_ac97 *ac97, int reg, struct snd_kcontro
 	if ((kcontrol->private_value & (1<<25)) &&
 	    (ac97->ext_id & AC97_EI_REV_MASK) >= AC97_EI_REV_23 &&
 	    (reg >= 0x60 && reg < 0x70)) {
-		unsigned short page = (kcontrol->private_value >> 26) & 0x0f;
+		unsigned short page = (__c_ua(kcontrol->private_value) >> 26) & 0x0f;
 		mutex_lock(&ac97->page_mutex); /* lock paging */
 		page_save = snd_ac97_read(ac97, AC97_INT_PAGING) & AC97_PAGE_MASK;
 		snd_ac97_update_bits(ac97, AC97_INT_PAGING, AC97_PAGE_MASK, page);
@@ -519,9 +519,9 @@ static void snd_ac97_page_restore(struct snd_ac97 *ac97, int page_save)
 static int snd_ac97_info_volsw(struct snd_kcontrol *kcontrol,
 			       struct snd_ctl_elem_info *uinfo)
 {
-	int mask = (kcontrol->private_value >> 16) & 0xff;
-	int shift = (kcontrol->private_value >> 8) & 0x0f;
-	int rshift = (kcontrol->private_value >> 12) & 0x0f;
+	int mask = (__c_ua(kcontrol->private_value) >> 16) & 0xff;
+	int shift = (__c_ua(kcontrol->private_value) >> 8) & 0x0f;
+	int rshift = (__c_ua(kcontrol->private_value) >> 12) & 0x0f;
 
 	uinfo->type = mask == 1 ? SNDRV_CTL_ELEM_TYPE_BOOLEAN : SNDRV_CTL_ELEM_TYPE_INTEGER;
 	uinfo->count = shift == rshift ? 1 : 2;
@@ -534,11 +534,11 @@ static int snd_ac97_get_volsw(struct snd_kcontrol *kcontrol,
 			      struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_ac97 *ac97 = snd_kcontrol_chip(kcontrol);
-	int reg = kcontrol->private_value & 0xff;
-	int shift = (kcontrol->private_value >> 8) & 0x0f;
-	int rshift = (kcontrol->private_value >> 12) & 0x0f;
-	int mask = (kcontrol->private_value >> 16) & 0xff;
-	int invert = (kcontrol->private_value >> 24) & 0x01;
+	int reg = __c_ua(kcontrol->private_value) & 0xff;
+	int shift = (__c_ua(kcontrol->private_value) >> 8) & 0x0f;
+	int rshift = (__c_ua(kcontrol->private_value) >> 12) & 0x0f;
+	int mask = (__c_ua(kcontrol->private_value) >> 16) & 0xff;
+	int invert = (__c_ua(kcontrol->private_value) >> 24) & 0x01;
 	int page_save;
 
 	page_save = snd_ac97_page_save(ac97, reg, kcontrol);
@@ -558,11 +558,11 @@ static int snd_ac97_put_volsw(struct snd_kcontrol *kcontrol,
 			      struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_ac97 *ac97 = snd_kcontrol_chip(kcontrol);
-	int reg = kcontrol->private_value & 0xff;
-	int shift = (kcontrol->private_value >> 8) & 0x0f;
-	int rshift = (kcontrol->private_value >> 12) & 0x0f;
-	int mask = (kcontrol->private_value >> 16) & 0xff;
-	int invert = (kcontrol->private_value >> 24) & 0x01;
+	int reg = __c_ua(kcontrol->private_value) & 0xff;
+	int shift = (__c_ua(kcontrol->private_value) >> 8) & 0x0f;
+	int rshift = (__c_ua(kcontrol->private_value) >> 12) & 0x0f;
+	int mask = (__c_ua(kcontrol->private_value) >> 16) & 0xff;
+	int invert = (__c_ua(kcontrol->private_value) >> 24) & 0x01;
 	int err, page_save;
 	unsigned short val, val2, val_mask;
 	
@@ -584,7 +584,7 @@ static int snd_ac97_put_volsw(struct snd_kcontrol *kcontrol,
 #ifdef CONFIG_SND_AC97_POWER_SAVE
 	/* check analog mixer power-down */
 	if ((val_mask & AC97_PD_EAPD) &&
-	    (kcontrol->private_value & (1<<30))) {
+	    (__c_ua(kcontrol->private_value) & (1<<30))) {
 		if (val & AC97_PD_EAPD)
 			ac97->power_up &= ~(1 << (reg>>1));
 		else
@@ -802,10 +802,10 @@ static int snd_ac97_spdif_default_put(struct snd_kcontrol *kcontrol, struct snd_
 static int snd_ac97_put_spsa(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_ac97 *ac97 = snd_kcontrol_chip(kcontrol);
-	int reg = kcontrol->private_value & 0xff;
-	int shift = (kcontrol->private_value >> 8) & 0x0f;
-	int mask = (kcontrol->private_value >> 16) & 0xff;
-	// int invert = (kcontrol->private_value >> 24) & 0xff;
+	int reg = __c_ua(kcontrol->private_value) & 0xff;
+	int shift = (__c_ua(kcontrol->private_value) >> 8) & 0x0f;
+	int mask = (__c_ua(kcontrol->private_value) >> 16) & 0xff;
+	// int invert = (__c_ua(kcontrol->private_value) >> 24) & 0xff;
 	unsigned short value, old, new;
 	int change;
 
@@ -871,9 +871,9 @@ static const struct snd_kcontrol_new snd_ac97_controls_spdif[5] = {
 static int snd_ac97_ad18xx_pcm_info_bits(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_info *uinfo)
 {
 	struct snd_ac97 *ac97 = snd_kcontrol_chip(kcontrol);
-	int mask = (kcontrol->private_value >> 16) & 0x0f;
-	int lshift = (kcontrol->private_value >> 8) & 0x0f;
-	int rshift = (kcontrol->private_value >> 12) & 0x0f;
+	int mask = (__c_ua(kcontrol->private_value) >> 16) & 0x0f;
+	int lshift = (__c_ua(kcontrol->private_value) >> 8) & 0x0f;
+	int rshift = (__c_ua(kcontrol->private_value) >> 12) & 0x0f;
 
 	uinfo->type = mask == 1 ? SNDRV_CTL_ELEM_TYPE_BOOLEAN : SNDRV_CTL_ELEM_TYPE_INTEGER;
 	if (lshift != rshift && (ac97->flags & AC97_STEREO_MUTES))
@@ -888,10 +888,10 @@ static int snd_ac97_ad18xx_pcm_info_bits(struct snd_kcontrol *kcontrol, struct s
 static int snd_ac97_ad18xx_pcm_get_bits(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_ac97 *ac97 = snd_kcontrol_chip(kcontrol);
-	int codec = kcontrol->private_value & 3;
-	int lshift = (kcontrol->private_value >> 8) & 0x0f;
-	int rshift = (kcontrol->private_value >> 12) & 0x0f;
-	int mask = (kcontrol->private_value >> 16) & 0xff;
+	int codec = __c_ua(kcontrol->private_value) & 3;
+	int lshift = (__c_ua(kcontrol->private_value) >> 8) & 0x0f;
+	int rshift = (__c_ua(kcontrol->private_value) >> 12) & 0x0f;
+	int mask = (__c_ua(kcontrol->private_value) >> 16) & 0xff;
 	
 	ucontrol->value.integer.value[0] = mask - ((ac97->spec.ad18xx.pcmreg[codec] >> lshift) & mask);
 	if (lshift != rshift && (ac97->flags & AC97_STEREO_MUTES))
@@ -902,10 +902,10 @@ static int snd_ac97_ad18xx_pcm_get_bits(struct snd_kcontrol *kcontrol, struct sn
 static int snd_ac97_ad18xx_pcm_put_bits(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_ac97 *ac97 = snd_kcontrol_chip(kcontrol);
-	int codec = kcontrol->private_value & 3;
-	int lshift = (kcontrol->private_value >> 8) & 0x0f;
-	int rshift = (kcontrol->private_value >> 12) & 0x0f;
-	int mask = (kcontrol->private_value >> 16) & 0xff;
+	int codec = __c_ua(kcontrol->private_value) & 3;
+	int lshift = (__c_ua(kcontrol->private_value) >> 8) & 0x0f;
+	int rshift = (__c_ua(kcontrol->private_value) >> 12) & 0x0f;
+	int mask = (__c_ua(kcontrol->private_value) >> 16) & 0xff;
 	unsigned short val, valmask;
 	
 	val = (mask - (ucontrol->value.integer.value[0] & mask)) << lshift;
@@ -934,7 +934,7 @@ static int snd_ac97_ad18xx_pcm_info_volume(struct snd_kcontrol *kcontrol, struct
 static int snd_ac97_ad18xx_pcm_get_volume(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_ac97 *ac97 = snd_kcontrol_chip(kcontrol);
-	int codec = kcontrol->private_value & 3;
+	int codec = __c_ua(kcontrol->private_value) & 3;
 	
 	mutex_lock(&ac97->page_mutex);
 	ucontrol->value.integer.value[0] = 31 - ((ac97->spec.ad18xx.pcmreg[codec] >> 8) & 31);
@@ -946,7 +946,7 @@ static int snd_ac97_ad18xx_pcm_get_volume(struct snd_kcontrol *kcontrol, struct 
 static int snd_ac97_ad18xx_pcm_put_volume(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_ac97 *ac97 = snd_kcontrol_chip(kcontrol);
-	int codec = kcontrol->private_value & 3;
+	int codec = __c_ua(kcontrol->private_value) & 3;
 	unsigned short val1, val2;
 	
 	val1 = 31 - (ucontrol->value.integer.value[0] & 31);
@@ -2737,7 +2737,7 @@ static int bind_hp_volsw_put(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_
 {
 	int err = snd_ac97_put_volsw(kcontrol, ucontrol);
 	if (err > 0) {
-		unsigned long priv_saved = kcontrol->private_value;
+		uintptr_t priv_saved = kcontrol->private_value;
 		kcontrol->private_value = (kcontrol->private_value & ~0xff) | AC97_HEADPHONE;
 		snd_ac97_put_volsw(kcontrol, ucontrol);
 		kcontrol->private_value = priv_saved;
@@ -2838,8 +2838,8 @@ static int master_mute_sw_put(struct snd_kcontrol *kcontrol, struct snd_ctl_elem
 	int err = snd_ac97_put_volsw(kcontrol, ucontrol);
 	if (err > 0) {
 		struct snd_ac97 *ac97 = snd_kcontrol_chip(kcontrol);
-		int shift = (kcontrol->private_value >> 8) & 0x0f;
-		int rshift = (kcontrol->private_value >> 12) & 0x0f;
+		int shift = (__c_ua(kcontrol->private_value) >> 8) & 0x0f;
+		int rshift = (__c_ua(kcontrol->private_value) >> 12) & 0x0f;
 		unsigned short mask;
 		if (shift != rshift)
 			mask = AC97_MUTE_MASK_STEREO;
@@ -2874,8 +2874,8 @@ static int hp_master_mute_sw_put(struct snd_kcontrol *kcontrol,
 	int err = bind_hp_volsw_put(kcontrol, ucontrol);
 	if (err > 0) {
 		struct snd_ac97 *ac97 = snd_kcontrol_chip(kcontrol);
-		int shift = (kcontrol->private_value >> 8) & 0x0f;
-		int rshift = (kcontrol->private_value >> 12) & 0x0f;
+		int shift = (__c_ua(kcontrol->private_value) >> 8) & 0x0f;
+		int rshift = (__c_ua(kcontrol->private_value) >> 12) & 0x0f;
 		unsigned short mask;
 		if (shift != rshift)
 			mask = AC97_MUTE_MASK_STEREO;

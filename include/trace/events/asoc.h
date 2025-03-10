@@ -183,7 +183,7 @@ TRACE_EVENT(snd_soc_dapm_path,
 		__assign_str(pname);
 		__assign_str(pnname);
 		__entry->path_connect = path->connect;
-		__entry->path_node = (long)path->node[dir];
+		__entry->path_node = __c_pa(path->node[dir]);
 		__entry->path_dir = dir;
 	),
 

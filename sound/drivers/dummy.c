@@ -722,7 +722,7 @@ static int snd_dummy_volume_get(struct snd_kcontrol *kcontrol,
 				struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_dummy *dummy = snd_kcontrol_chip(kcontrol);
-	int addr = kcontrol->private_value;
+	int addr = __c_ua(kcontrol->private_value);
 
 	spin_lock_irq(&dummy->mixer_lock);
 	ucontrol->value.integer.value[0] = dummy->mixer_volume[addr][0];
@@ -735,7 +735,7 @@ static int snd_dummy_volume_put(struct snd_kcontrol *kcontrol,
 				struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_dummy *dummy = snd_kcontrol_chip(kcontrol);
-	int change, addr = kcontrol->private_value;
+	int change, addr = __c_ua(kcontrol->private_value);
 	int left, right;
 
 	left = ucontrol->value.integer.value[0];
@@ -771,7 +771,7 @@ static int snd_dummy_capsrc_get(struct snd_kcontrol *kcontrol,
 				struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_dummy *dummy = snd_kcontrol_chip(kcontrol);
-	int addr = kcontrol->private_value;
+	int addr = __c_ua(kcontrol->private_value);
 
 	spin_lock_irq(&dummy->mixer_lock);
 	ucontrol->value.integer.value[0] = dummy->capture_source[addr][0];
@@ -783,7 +783,7 @@ static int snd_dummy_capsrc_get(struct snd_kcontrol *kcontrol,
 static int snd_dummy_capsrc_put(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_dummy *dummy = snd_kcontrol_chip(kcontrol);
-	int change, addr = kcontrol->private_value;
+	int change, addr = __c_ua(kcontrol->private_value);
 	int left, right;
 
 	left = ucontrol->value.integer.value[0] & 1;

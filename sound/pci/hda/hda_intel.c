@@ -2117,7 +2117,7 @@ static int azx_probe(struct pci_dev *pci,
 		return err;
 	}
 
-	err = azx_create(card, pci, dev, pci_id->driver_data, &chip);
+	err = azx_create(card, pci, dev, __c_ua(pci_id->driver_data), &chip);
 	if (err < 0)
 		goto out_free;
 	card->private_data = chip;

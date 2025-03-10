@@ -1021,7 +1021,7 @@ static int alc5623_i2c_probe(struct i2c_client *client)
 	if ((vid1 != 0x10ec) || (vid2 != id->driver_data)) {
 		dev_err(&client->dev, "unknown or wrong codec\n");
 		dev_err(&client->dev, "Expected %x:%lx, got %x:%x\n",
-				0x10ec, id->driver_data,
+				0x10ec, __c_ua(id->driver_data),
 				vid1, vid2);
 		return -ENODEV;
 	}

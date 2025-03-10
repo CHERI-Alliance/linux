@@ -1761,7 +1761,7 @@ static int snd_rme32_control_spdif_mask_get(struct snd_kcontrol *kcontrol,
 					    struct snd_ctl_elem_value *
 					    ucontrol)
 {
-	ucontrol->value.iec958.status[0] = kcontrol->private_value;
+	ucontrol->value.iec958.status[0] = __c_ua(kcontrol->private_value);
 	return 0;
 }
 

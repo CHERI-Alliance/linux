@@ -305,7 +305,7 @@ static int scarlett_ctl_info(struct snd_kcontrol *kctl,
 	uinfo->type = SNDRV_CTL_ELEM_TYPE_INTEGER;
 	uinfo->count = elem->channels;
 	uinfo->value.integer.min = 0;
-	uinfo->value.integer.max = (int)kctl->private_value +
+	uinfo->value.integer.max = (int)__c_ua(kctl->private_value) +
 		SND_SCARLETT_LEVEL_BIAS;
 	uinfo->value.integer.step = 1;
 	return 0;
@@ -322,7 +322,7 @@ static int scarlett_ctl_get(struct snd_kcontrol *kctl,
 		if (err < 0)
 			return err;
 
-		val = clamp(val / 256, -128, (int)kctl->private_value) +
+		val = clamp(val / 256, -128, (int)__c_ua(kctl->private_value)) +
 				    SND_SCARLETT_LEVEL_BIAS;
 		ucontrol->value.integer.value[i] = val;
 	}

@@ -22,7 +22,7 @@ static int control_info(struct snd_kcontrol *kcontrol,
 {
 	struct snd_usb_audio *chip = snd_kcontrol_chip(kcontrol);
 	struct snd_usb_caiaqdev *cdev = caiaqdev(chip->card);
-	int pos = kcontrol->private_value;
+	int pos = __c_ua(kcontrol->private_value);
 	int is_intval = pos & CNT_INTVAL;
 	int maxval = 63;
 
@@ -68,7 +68,7 @@ static int control_get(struct snd_kcontrol *kcontrol,
 {
 	struct snd_usb_audio *chip = snd_kcontrol_chip(kcontrol);
 	struct snd_usb_caiaqdev *cdev = caiaqdev(chip->card);
-	int pos = kcontrol->private_value;
+	int pos = __c_ua(kcontrol->private_value);
 
 	if (pos & CNT_INTVAL)
 		ucontrol->value.integer.value[0]
@@ -85,7 +85,7 @@ static int control_put(struct snd_kcontrol *kcontrol,
 {
 	struct snd_usb_audio *chip = snd_kcontrol_chip(kcontrol);
 	struct snd_usb_caiaqdev *cdev = caiaqdev(chip->card);
-	int pos = kcontrol->private_value;
+	int pos = __c_ua(kcontrol->private_value);
 	int v = ucontrol->value.integer.value[0];
 	unsigned char cmd;
 
@@ -576,7 +576,7 @@ static int add_controls(const struct caiaq_controller *c, int num,
 
 	for (i = 0; i < num; i++, c++) {
 		kcontrol_template.name = c->name;
-		kcontrol_template.private_value = c->index;
+		kcontrol_template.private_value = __c_fakeu(c->index);
 		kc = snd_ctl_new1(&kcontrol_template, cdev);
 		ret = snd_ctl_add(cdev->chip.card, kc);
 		if (ret < 0)

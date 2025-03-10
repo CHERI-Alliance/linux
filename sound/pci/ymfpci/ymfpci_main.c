@@ -1438,8 +1438,8 @@ static int snd_ymfpci_get_single(struct snd_kcontrol *kcontrol,
 				 struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_ymfpci *chip = snd_kcontrol_chip(kcontrol);
-	int reg = kcontrol->private_value & 0xffff;
-	unsigned int shift = (kcontrol->private_value >> 16) & 0xff;
+	int reg = __c_ua(kcontrol->private_value) & 0xffff;
+	unsigned int shift = (__c_ua(kcontrol->private_value) >> 16) & 0xff;
 	unsigned int mask = 1;
 	
 	switch (reg) {
@@ -1456,8 +1456,8 @@ static int snd_ymfpci_put_single(struct snd_kcontrol *kcontrol,
 				 struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_ymfpci *chip = snd_kcontrol_chip(kcontrol);
-	int reg = kcontrol->private_value & 0xffff;
-	unsigned int shift = (kcontrol->private_value >> 16) & 0xff;
+	int reg = __c_ua(kcontrol->private_value) & 0xffff;
+	unsigned int shift = (__c_ua(kcontrol->private_value) >> 16) & 0xff;
  	unsigned int mask = 1;
 	int change;
 	unsigned int val, oval;
@@ -1490,7 +1490,7 @@ static const DECLARE_TLV_DB_LINEAR(db_scale_native, TLV_DB_GAIN_MUTE, 0);
 
 static int snd_ymfpci_info_double(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_info *uinfo)
 {
-	unsigned int reg = kcontrol->private_value;
+	unsigned int reg = __c_ua(kcontrol->private_value);
 
 	if (reg < 0x80 || reg >= 0xc0)
 		return -EINVAL;
@@ -1504,7 +1504,7 @@ static int snd_ymfpci_info_double(struct snd_kcontrol *kcontrol, struct snd_ctl_
 static int snd_ymfpci_get_double(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_ymfpci *chip = snd_kcontrol_chip(kcontrol);
-	unsigned int reg = kcontrol->private_value;
+	unsigned int reg = __c_ua(kcontrol->private_value);
 	unsigned int shift_left = 0, shift_right = 16, mask = 16383;
 	unsigned int val;
 	
@@ -1521,7 +1521,7 @@ static int snd_ymfpci_get_double(struct snd_kcontrol *kcontrol, struct snd_ctl_e
 static int snd_ymfpci_put_double(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_ymfpci *chip = snd_kcontrol_chip(kcontrol);
-	unsigned int reg = kcontrol->private_value;
+	unsigned int reg = __c_ua(kcontrol->private_value);
 	unsigned int shift_left = 0, shift_right = 16, mask = 16383;
 	int change;
 	unsigned int val1, val2, oval;
@@ -1668,7 +1668,7 @@ static int snd_ymfpci_set_gpio_out(struct snd_ymfpci *chip, int pin, int enable)
 static int snd_ymfpci_gpio_sw_get(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_ymfpci *chip = snd_kcontrol_chip(kcontrol);
-	int pin = (int)kcontrol->private_value;
+	int pin = (int)__c_ua(kcontrol->private_value);
 	ucontrol->value.integer.value[0] = snd_ymfpci_get_gpio_out(chip, pin);
 	return 0;
 }
@@ -1676,7 +1676,7 @@ static int snd_ymfpci_gpio_sw_get(struct snd_kcontrol *kcontrol, struct snd_ctl_
 static int snd_ymfpci_gpio_sw_put(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_ymfpci *chip = snd_kcontrol_chip(kcontrol);
-	int pin = (int)kcontrol->private_value;
+	int pin = (int)__c_ua(kcontrol->private_value);
 
 	if (snd_ymfpci_get_gpio_out(chip, pin) != ucontrol->value.integer.value[0]) {
 		snd_ymfpci_set_gpio_out(chip, pin, !!ucontrol->value.integer.value[0]);
@@ -1863,7 +1863,7 @@ int snd_ymfpci_mixer(struct snd_ymfpci *chip, int rear_switch)
 			return -ENOMEM;
 		kctl->id.device = chip->pcm->device;
 		kctl->id.subdevice = idx;
-		kctl->private_value = (unsigned long)substream;
+		kctl->private_value = (uintptr_t)substream;
 		err = snd_ctl_add(chip->card, kctl);
 		if (err < 0)
 			return err;
@@ -2135,7 +2135,7 @@ static int snd_ymfpci_memalloc(struct snd_ymfpci *chip)
 			ptr_addr += chip->bank_size_playback;
 		}
 	}
-	ptr = (char *)ALIGN((unsigned long)ptr, 0x100);
+	ptr = (char *)ALIGN((uintptr_t)ptr, 0x100);
 	ptr_addr = ALIGN(ptr_addr, 0x100);
 	chip->bank_base_capture = ptr;
 	chip->bank_base_capture_addr = ptr_addr;
@@ -2145,7 +2145,7 @@ static int snd_ymfpci_memalloc(struct snd_ymfpci *chip)
 			ptr += chip->bank_size_capture;
 			ptr_addr += chip->bank_size_capture;
 		}
-	ptr = (char *)ALIGN((unsigned long)ptr, 0x100);
+	ptr = (char *)ALIGN((uintptr_t)ptr, 0x100);
 	ptr_addr = ALIGN(ptr_addr, 0x100);
 	chip->bank_base_effect = ptr;
 	chip->bank_base_effect_addr = ptr_addr;
@@ -2155,7 +2155,7 @@ static int snd_ymfpci_memalloc(struct snd_ymfpci *chip)
 			ptr += chip->bank_size_effect;
 			ptr_addr += chip->bank_size_effect;
 		}
-	ptr = (char *)ALIGN((unsigned long)ptr, 0x100);
+	ptr = (char *)ALIGN((uintptr_t)ptr, 0x100);
 	ptr_addr = ALIGN(ptr_addr, 0x100);
 	chip->work_base = ptr;
 	chip->work_base_addr = ptr_addr;

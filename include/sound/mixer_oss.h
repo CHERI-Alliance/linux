@@ -59,7 +59,7 @@ struct snd_mixer_oss_file {
 };
 
 int snd_mixer_oss_ioctl_card(struct snd_card *card,
-			     unsigned int cmd, unsigned long arg);
+			     unsigned int cmd, user_uintptr_t arg);
 
 #endif /* CONFIG_SND_MIXER_OSS */
 

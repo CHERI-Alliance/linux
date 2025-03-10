@@ -1113,7 +1113,7 @@ static int __snd_via82xx_probe(struct pci_dev *pci,
 		return err;
 	chip = card->private_data;
 
-	card_type = pci_id->driver_data;
+	card_type = __c_ua(pci_id->driver_data);
 	switch (card_type) {
 	case TYPE_CARD_VIA82XX_MODEM:
 		strcpy(card->driver, "VIA82XX-MODEM");

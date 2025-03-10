@@ -77,7 +77,7 @@ int snd_opl3_open(struct snd_hwdep * hw, struct file *file)
  * ioctl for hwdep device:
  */
 int snd_opl3_ioctl(struct snd_hwdep * hw, struct file *file,
-		   unsigned int cmd, unsigned long arg)
+		   unsigned int cmd, user_uintptr_t arg)
 {
 	struct snd_opl3 *opl3 = hw->private_data;
 	void __user *argp = (void __user *)arg;
@@ -144,13 +144,13 @@ int snd_opl3_ioctl(struct snd_hwdep * hw, struct file *file,
 #ifdef CONFIG_SND_OSSEMUL
 	case SNDRV_DM_FM_OSS_IOCTL_SET_MODE:
 #endif
-		return snd_opl3_set_mode(opl3, (int) arg);
+		return snd_opl3_set_mode(opl3, (int) __c_ua(arg));
 
 	case SNDRV_DM_FM_IOCTL_SET_CONNECTION:
 #ifdef CONFIG_SND_OSSEMUL
 	case SNDRV_DM_FM_OSS_IOCTL_SET_OPL:
 #endif
-		return snd_opl3_set_connection(opl3, (int) arg);
+		return snd_opl3_set_connection(opl3, (int) __c_ua(arg));
 
 #ifdef OPL3_SUPPORT_SYNTH
 	case SNDRV_DM_FM_IOCTL_CLEAR_PATCHES:

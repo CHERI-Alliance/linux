@@ -30,7 +30,7 @@ int snd_seq_oss_synth_sysex(struct seq_oss_devinfo *dp, int dev, unsigned char *
 			    struct snd_seq_event *ev);
 int snd_seq_oss_synth_addr(struct seq_oss_devinfo *dp, int dev, struct snd_seq_event *ev);
 int snd_seq_oss_synth_ioctl(struct seq_oss_devinfo *dp, int dev, unsigned int cmd,
-			    unsigned long addr);
+			    user_uintptr_t addr);
 int snd_seq_oss_synth_raw_event(struct seq_oss_devinfo *dp, int dev,
 				unsigned char *data, struct snd_seq_event *ev);
 

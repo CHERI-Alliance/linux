@@ -164,7 +164,7 @@ static int snd_vx222_probe(struct pci_dev *pci,
 	if (err < 0)
 		return err;
 
-	switch ((int)pci_id->driver_data) {
+	switch ((int)__c_ua(pci_id->driver_data)) {
 	case VX_PCI_VX222_OLD:
 		hw = &vx222_old_hw;
 		break;

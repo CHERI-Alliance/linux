@@ -1395,7 +1395,7 @@ static int pcmdev_gain_ctrl_add(struct pcmdevice_priv *pcm_dev,
 		}
 		pcmdev_ctrl->dev_no = dev_no;
 		pcmdev_controls[mix_index].private_value =
-			(unsigned long)pcmdev_ctrl;
+			(uintptr_t)pcmdev_ctrl;
 		pcmdev_controls[mix_index].name = name;
 		pcmdev_controls[mix_index].access =
 			SNDRV_CTL_ELEM_ACCESS_TLV_READ |
@@ -2092,7 +2092,7 @@ static int pcmdevice_i2c_probe(struct i2c_client *i2c)
 		goto out;
 	}
 
-	pcm_dev->chip_id = (id != NULL) ? id->driver_data : 0;
+	pcm_dev->chip_id = (id != NULL) ? __c_ua(id->driver_data) : 0;
 
 	pcm_dev->dev = &i2c->dev;
 	pcm_dev->client = i2c;

@@ -1704,7 +1704,7 @@ int snd_hda_ctl_add(struct hda_codec *codec, hda_nid_t nid,
 	if (kctl->id.subdevice & HDA_SUBDEV_AMP_FLAG) {
 		flags |= HDA_NID_ITEM_AMP;
 		if (nid == 0)
-			nid = get_amp_nid_(kctl->private_value);
+			nid = get_amp_nid_(__c_ua(kctl->private_value));
 	}
 	if ((kctl->id.subdevice & HDA_SUBDEV_NID_FLAG) != 0 && nid == 0)
 		nid = kctl->id.subdevice & 0xffff;
@@ -2200,7 +2200,7 @@ static int snd_hda_spdif_default_get(struct snd_kcontrol *kcontrol,
 				     struct snd_ctl_elem_value *ucontrol)
 {
 	struct hda_codec *codec = snd_kcontrol_chip(kcontrol);
-	int idx = kcontrol->private_value;
+	int idx = __c_ua(kcontrol->private_value);
 	struct hda_spdif_out *spdif;
 
 	if (WARN_ON(codec->spdif_out.used <= idx))
@@ -2306,7 +2306,7 @@ static int snd_hda_spdif_default_put(struct snd_kcontrol *kcontrol,
 				     struct snd_ctl_elem_value *ucontrol)
 {
 	struct hda_codec *codec = snd_kcontrol_chip(kcontrol);
-	int idx = kcontrol->private_value;
+	int idx = __c_ua(kcontrol->private_value);
 	struct hda_spdif_out *spdif;
 	hda_nid_t nid;
 	unsigned short val;
@@ -2337,7 +2337,7 @@ static int snd_hda_spdif_out_switch_get(struct snd_kcontrol *kcontrol,
 					struct snd_ctl_elem_value *ucontrol)
 {
 	struct hda_codec *codec = snd_kcontrol_chip(kcontrol);
-	int idx = kcontrol->private_value;
+	int idx = __c_ua(kcontrol->private_value);
 	struct hda_spdif_out *spdif;
 
 	if (WARN_ON(codec->spdif_out.used <= idx))
@@ -2364,7 +2364,7 @@ static int snd_hda_spdif_out_switch_put(struct snd_kcontrol *kcontrol,
 					struct snd_ctl_elem_value *ucontrol)
 {
 	struct hda_codec *codec = snd_kcontrol_chip(kcontrol);
-	int idx = kcontrol->private_value;
+	int idx = __c_ua(kcontrol->private_value);
 	struct hda_spdif_out *spdif;
 	hda_nid_t nid;
 	unsigned short val;
@@ -2477,7 +2477,7 @@ int snd_hda_create_dig_out_ctls(struct hda_codec *codec,
 		if (!kctl)
 			return -ENOMEM;
 		kctl->id.index = idx;
-		kctl->private_value = codec->spdif_out.used - 1;
+		kctl->private_value = __c_fakeu(codec->spdif_out.used - 1);
 		err = snd_hda_ctl_add(codec, associated_nid, kctl);
 		if (err < 0)
 			return err;
@@ -2625,7 +2625,7 @@ static int snd_hda_spdif_in_switch_put(struct snd_kcontrol *kcontrol,
 				       struct snd_ctl_elem_value *ucontrol)
 {
 	struct hda_codec *codec = snd_kcontrol_chip(kcontrol);
-	hda_nid_t nid = kcontrol->private_value;
+	hda_nid_t nid = __c_ua(kcontrol->private_value);
 	unsigned int val = !!ucontrol->value.integer.value[0];
 	int change;
 
@@ -2644,7 +2644,7 @@ static int snd_hda_spdif_in_status_get(struct snd_kcontrol *kcontrol,
 				       struct snd_ctl_elem_value *ucontrol)
 {
 	struct hda_codec *codec = snd_kcontrol_chip(kcontrol);
-	hda_nid_t nid = kcontrol->private_value;
+	hda_nid_t nid = __c_ua(kcontrol->private_value);
 	unsigned int val;
 	unsigned int sbits;
 
@@ -2702,7 +2702,7 @@ int snd_hda_create_spdif_in_ctls(struct hda_codec *codec, hda_nid_t nid)
 		kctl = snd_ctl_new1(dig_mix, codec);
 		if (!kctl)
 			return -ENOMEM;
-		kctl->private_value = nid;
+		kctl->private_value = __c_fakeu(nid);
 		err = snd_hda_ctl_add(codec, nid, kctl);
 		if (err < 0)
 			return err;

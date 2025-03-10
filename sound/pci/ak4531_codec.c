@@ -47,19 +47,19 @@ static void snd_ak4531_dump(struct snd_ak4531 *ak4531)
 { .iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname, .index = xindex, \
   .info = snd_ak4531_info_single, \
   .get = snd_ak4531_get_single, .put = snd_ak4531_put_single, \
-  .private_value = reg | (shift << 16) | (mask << 24) | (invert << 22) }
+  .private_value = (uintptr_t __force)(reg | (shift << 16) | (mask << 24) | (invert << 22)) }
 #define AK4531_SINGLE_TLV(xname, xindex, reg, shift, mask, invert, xtlv)    \
 { .iface = SNDRV_CTL_ELEM_IFACE_MIXER, \
   .access = SNDRV_CTL_ELEM_ACCESS_READWRITE | SNDRV_CTL_ELEM_ACCESS_TLV_READ, \
   .name = xname, .index = xindex, \
   .info = snd_ak4531_info_single, \
   .get = snd_ak4531_get_single, .put = snd_ak4531_put_single, \
-  .private_value = reg | (shift << 16) | (mask << 24) | (invert << 22), \
+  .private_value = (uintptr_t __force)(reg | (shift << 16) | (mask << 24) | (invert << 22)), \
   .tlv = { .p = (xtlv) } }
 
 static int snd_ak4531_info_single(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_info *uinfo)
 {
-	int mask = (kcontrol->private_value >> 24) & 0xff;
+	int mask = (__c_ua(kcontrol->private_value) >> 24) & 0xff;
 
 	uinfo->type = mask == 1 ? SNDRV_CTL_ELEM_TYPE_BOOLEAN : SNDRV_CTL_ELEM_TYPE_INTEGER;
 	uinfo->count = 1;
@@ -71,10 +71,10 @@ static int snd_ak4531_info_single(struct snd_kcontrol *kcontrol, struct snd_ctl_
 static int snd_ak4531_get_single(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_ak4531 *ak4531 = snd_kcontrol_chip(kcontrol);
-	int reg = kcontrol->private_value & 0xff;
-	int shift = (kcontrol->private_value >> 16) & 0x07;
-	int mask = (kcontrol->private_value >> 24) & 0xff;
-	int invert = (kcontrol->private_value >> 22) & 1;
+	int reg = __c_ua(kcontrol->private_value) & 0xff;
+	int shift = (__c_ua(kcontrol->private_value) >> 16) & 0x07;
+	int mask = (__c_ua(kcontrol->private_value) >> 24) & 0xff;
+	int invert = (__c_ua(kcontrol->private_value) >> 22) & 1;
 	int val;
 
 	mutex_lock(&ak4531->reg_mutex);
@@ -90,10 +90,10 @@ static int snd_ak4531_get_single(struct snd_kcontrol *kcontrol, struct snd_ctl_e
 static int snd_ak4531_put_single(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_ak4531 *ak4531 = snd_kcontrol_chip(kcontrol);
-	int reg = kcontrol->private_value & 0xff;
-	int shift = (kcontrol->private_value >> 16) & 0x07;
-	int mask = (kcontrol->private_value >> 24) & 0xff;
-	int invert = (kcontrol->private_value >> 22) & 1;
+	int reg = __c_ua(kcontrol->private_value) & 0xff;
+	int shift = (__c_ua(kcontrol->private_value) >> 16) & 0x07;
+	int mask = (__c_ua(kcontrol->private_value) >> 24) & 0xff;
+	int invert = (__c_ua(kcontrol->private_value) >> 22) & 1;
 	int change;
 	int val;
 
@@ -114,19 +114,19 @@ static int snd_ak4531_put_single(struct snd_kcontrol *kcontrol, struct snd_ctl_e
 { .iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname, .index = xindex, \
   .info = snd_ak4531_info_double, \
   .get = snd_ak4531_get_double, .put = snd_ak4531_put_double, \
-  .private_value = left_reg | (right_reg << 8) | (left_shift << 16) | (right_shift << 19) | (mask << 24) | (invert << 22) }
+  .private_value = (uintptr_t __force)(left_reg | (right_reg << 8) | (left_shift << 16) | (right_shift << 19) | (mask << 24) | (invert << 22)) }
 #define AK4531_DOUBLE_TLV(xname, xindex, left_reg, right_reg, left_shift, right_shift, mask, invert, xtlv) \
 { .iface = SNDRV_CTL_ELEM_IFACE_MIXER, \
   .access = SNDRV_CTL_ELEM_ACCESS_READWRITE | SNDRV_CTL_ELEM_ACCESS_TLV_READ, \
   .name = xname, .index = xindex, \
   .info = snd_ak4531_info_double, \
   .get = snd_ak4531_get_double, .put = snd_ak4531_put_double, \
-  .private_value = left_reg | (right_reg << 8) | (left_shift << 16) | (right_shift << 19) | (mask << 24) | (invert << 22), \
+  .private_value = (uintptr_t __force)(left_reg | (right_reg << 8) | (left_shift << 16) | (right_shift << 19) | (mask << 24) | (invert << 22)), \
   .tlv = { .p = (xtlv) } }
 
 static int snd_ak4531_info_double(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_info *uinfo)
 {
-	int mask = (kcontrol->private_value >> 24) & 0xff;
+	int mask = (__c_ua(kcontrol->private_value) >> 24) & 0xff;
 
 	uinfo->type = mask == 1 ? SNDRV_CTL_ELEM_TYPE_BOOLEAN : SNDRV_CTL_ELEM_TYPE_INTEGER;
 	uinfo->count = 2;
@@ -138,12 +138,12 @@ static int snd_ak4531_info_double(struct snd_kcontrol *kcontrol, struct snd_ctl_
 static int snd_ak4531_get_double(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_ak4531 *ak4531 = snd_kcontrol_chip(kcontrol);
-	int left_reg = kcontrol->private_value & 0xff;
-	int right_reg = (kcontrol->private_value >> 8) & 0xff;
-	int left_shift = (kcontrol->private_value >> 16) & 0x07;
-	int right_shift = (kcontrol->private_value >> 19) & 0x07;
-	int mask = (kcontrol->private_value >> 24) & 0xff;
-	int invert = (kcontrol->private_value >> 22) & 1;
+	int left_reg = __c_ua(kcontrol->private_value) & 0xff;
+	int right_reg = (__c_ua(kcontrol->private_value) >> 8) & 0xff;
+	int left_shift = (__c_ua(kcontrol->private_value) >> 16) & 0x07;
+	int right_shift = (__c_ua(kcontrol->private_value) >> 19) & 0x07;
+	int mask = (__c_ua(kcontrol->private_value) >> 24) & 0xff;
+	int invert = (__c_ua(kcontrol->private_value) >> 22) & 1;
 	int left, right;
 
 	mutex_lock(&ak4531->reg_mutex);
@@ -162,12 +162,12 @@ static int snd_ak4531_get_double(struct snd_kcontrol *kcontrol, struct snd_ctl_e
 static int snd_ak4531_put_double(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_ak4531 *ak4531 = snd_kcontrol_chip(kcontrol);
-	int left_reg = kcontrol->private_value & 0xff;
-	int right_reg = (kcontrol->private_value >> 8) & 0xff;
-	int left_shift = (kcontrol->private_value >> 16) & 0x07;
-	int right_shift = (kcontrol->private_value >> 19) & 0x07;
-	int mask = (kcontrol->private_value >> 24) & 0xff;
-	int invert = (kcontrol->private_value >> 22) & 1;
+	int left_reg = __c_ua(kcontrol->private_value) & 0xff;
+	int right_reg = (__c_ua(kcontrol->private_value) >> 8) & 0xff;
+	int left_shift = (__c_ua(kcontrol->private_value) >> 16) & 0x07;
+	int right_shift = (__c_ua(kcontrol->private_value) >> 19) & 0x07;
+	int mask = (__c_ua(kcontrol->private_value) >> 24) & 0xff;
+	int invert = (__c_ua(kcontrol->private_value) >> 22) & 1;
 	int change;
 	int left, right;
 
@@ -199,7 +199,7 @@ static int snd_ak4531_put_double(struct snd_kcontrol *kcontrol, struct snd_ctl_e
 { .iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname, .index = xindex, \
   .info = snd_ak4531_info_input_sw, \
   .get = snd_ak4531_get_input_sw, .put = snd_ak4531_put_input_sw, \
-  .private_value = reg1 | (reg2 << 8) | (left_shift << 16) | (right_shift << 24) }
+  .private_value = (uintptr_t __force)(reg1 | (reg2 << 8) | (left_shift << 16) | (right_shift << 24)) }
 
 static int snd_ak4531_info_input_sw(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_info *uinfo)
 {
@@ -213,10 +213,10 @@ static int snd_ak4531_info_input_sw(struct snd_kcontrol *kcontrol, struct snd_ct
 static int snd_ak4531_get_input_sw(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_ak4531 *ak4531 = snd_kcontrol_chip(kcontrol);
-	int reg1 = kcontrol->private_value & 0xff;
-	int reg2 = (kcontrol->private_value >> 8) & 0xff;
-	int left_shift = (kcontrol->private_value >> 16) & 0x0f;
-	int right_shift = (kcontrol->private_value >> 24) & 0x0f;
+	int reg1 = __c_ua(kcontrol->private_value) & 0xff;
+	int reg2 = (__c_ua(kcontrol->private_value) >> 8) & 0xff;
+	int left_shift = (__c_ua(kcontrol->private_value) >> 16) & 0x0f;
+	int right_shift = (__c_ua(kcontrol->private_value) >> 24) & 0x0f;
 
 	mutex_lock(&ak4531->reg_mutex);
 	ucontrol->value.integer.value[0] = (ak4531->regs[reg1] >> left_shift) & 1;
@@ -230,10 +230,10 @@ static int snd_ak4531_get_input_sw(struct snd_kcontrol *kcontrol, struct snd_ctl
 static int snd_ak4531_put_input_sw(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_ak4531 *ak4531 = snd_kcontrol_chip(kcontrol);
-	int reg1 = kcontrol->private_value & 0xff;
-	int reg2 = (kcontrol->private_value >> 8) & 0xff;
-	int left_shift = (kcontrol->private_value >> 16) & 0x0f;
-	int right_shift = (kcontrol->private_value >> 24) & 0x0f;
+	int reg1 = __c_ua(kcontrol->private_value) & 0xff;
+	int reg2 = (__c_ua(kcontrol->private_value) >> 8) & 0xff;
+	int left_shift = (__c_ua(kcontrol->private_value) >> 16) & 0x0f;
+	int right_shift = (__c_ua(kcontrol->private_value) >> 24) & 0x0f;
 	int change;
 	int val1, val2;
 

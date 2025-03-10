@@ -157,7 +157,7 @@ static const DECLARE_TLV_DB_SCALE(db_scale_adc, -2100, 50, 1);
 static int maya_vol_info(struct snd_kcontrol *kcontrol,
 			 struct snd_ctl_elem_info *uinfo)
 {
-	unsigned int idx = kcontrol->private_value;
+	unsigned int idx = __c_ua(kcontrol->private_value);
 	const struct maya_vol_info *vol = &vol_info[idx];
 
 	uinfo->type = SNDRV_CTL_ELEM_TYPE_INTEGER;
@@ -173,7 +173,7 @@ static int maya_vol_get(struct snd_kcontrol *kcontrol,
 	struct snd_maya44 *chip = snd_kcontrol_chip(kcontrol);
 	struct snd_wm8776 *wm =
 		&chip->wm[snd_ctl_get_ioff(kcontrol, &ucontrol->id)];
-	unsigned int idx = kcontrol->private_value;
+	unsigned int idx = __c_ua(kcontrol->private_value);
 
 	mutex_lock(&chip->mutex);
 	ucontrol->value.integer.value[0] = wm->volumes[idx][0];
@@ -188,7 +188,7 @@ static int maya_vol_put(struct snd_kcontrol *kcontrol,
 	struct snd_maya44 *chip = snd_kcontrol_chip(kcontrol);
 	struct snd_wm8776 *wm =
 		&chip->wm[snd_ctl_get_ioff(kcontrol, &ucontrol->id)];
-	unsigned int idx = kcontrol->private_value;
+	unsigned int idx = __c_ua(kcontrol->private_value);
 	const struct maya_vol_info *vol = &vol_info[idx];
 	unsigned int val, data;
 	int ch, changed = 0;
@@ -234,7 +234,7 @@ static int maya_sw_get(struct snd_kcontrol *kcontrol,
 	struct snd_maya44 *chip = snd_kcontrol_chip(kcontrol);
 	struct snd_wm8776 *wm =
 		&chip->wm[snd_ctl_get_ioff(kcontrol, &ucontrol->id)];
-	unsigned int idx = GET_SW_VAL_IDX(kcontrol->private_value);
+	unsigned int idx = GET_SW_VAL_IDX(__c_ua(kcontrol->private_value));
 
 	ucontrol->value.integer.value[0] = (wm->switch_bits >> idx) & 1;
 	return 0;
@@ -246,7 +246,7 @@ static int maya_sw_put(struct snd_kcontrol *kcontrol,
 	struct snd_maya44 *chip = snd_kcontrol_chip(kcontrol);
 	struct snd_wm8776 *wm =
 		&chip->wm[snd_ctl_get_ioff(kcontrol, &ucontrol->id)];
-	unsigned int idx = GET_SW_VAL_IDX(kcontrol->private_value);
+	unsigned int idx = GET_SW_VAL_IDX(__c_ua(kcontrol->private_value));
 	unsigned int mask, val;
 	int changed;
 
@@ -256,9 +256,9 @@ static int maya_sw_put(struct snd_kcontrol *kcontrol,
 	val = ucontrol->value.integer.value[0];
 	if (val)
 		wm->switch_bits |= mask;
-	mask = GET_SW_VAL_MASK(kcontrol->private_value);
+	mask = GET_SW_VAL_MASK(__c_ua(kcontrol->private_value));
 	changed = wm8776_write_bits(chip->ice, wm,
-				    GET_SW_VAL_REG(kcontrol->private_value),
+				    GET_SW_VAL_REG(__c_ua(kcontrol->private_value)),
 				    mask, val ? mask : 0);
 	mutex_unlock(&chip->mutex);
 	return changed;
@@ -297,11 +297,11 @@ static int maya_gpio_sw_get(struct snd_kcontrol *kcontrol,
 			    struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_maya44 *chip = snd_kcontrol_chip(kcontrol);
-	unsigned int shift = GET_GPIO_VAL_SHIFT(kcontrol->private_value);
+	unsigned int shift = GET_GPIO_VAL_SHIFT(__c_ua(kcontrol->private_value));
 	unsigned int val;
 
 	val = (snd_ice1712_gpio_read(chip->ice) >> shift) & 1;
-	if (GET_GPIO_VAL_INV(kcontrol->private_value))
+	if (GET_GPIO_VAL_INV(__c_ua(kcontrol->private_value)))
 		val = !val;
 	ucontrol->value.integer.value[0] = val;
 	return 0;
@@ -311,14 +311,14 @@ static int maya_gpio_sw_put(struct snd_kcontrol *kcontrol,
 			    struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_maya44 *chip = snd_kcontrol_chip(kcontrol);
-	unsigned int shift = GET_GPIO_VAL_SHIFT(kcontrol->private_value);
+	unsigned int shift = GET_GPIO_VAL_SHIFT(__c_ua(kcontrol->private_value));
 	unsigned int val, mask;
 	int changed;
 
 	mutex_lock(&chip->mutex);
 	mask = 1 << shift;
 	val = ucontrol->value.integer.value[0];
-	if (GET_GPIO_VAL_INV(kcontrol->private_value))
+	if (GET_GPIO_VAL_INV(__c_ua(kcontrol->private_value)))
 		val = !val;
 	val = val ? mask : 0;
 	changed = maya_set_gpio_bits(chip->ice, mask, val);

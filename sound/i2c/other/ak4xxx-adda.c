@@ -338,16 +338,16 @@ EXPORT_SYMBOL(snd_akm4xxx_init);
 #define AK_VOL_CVT 			(1<<21)	/* need dB conversion */
 #define AK_NEEDSMSB 			(1<<22)	/* need MSB update bit */
 #define AK_INVERT 			(1<<23)	/* data is inverted */
-#define AK_GET_CHIP(val)		(((val) >> 8) & 0xff)
-#define AK_GET_ADDR(val)		((val) & 0xff)
-#define AK_GET_SHIFT(val)		(((val) >> 16) & 0x0f)
-#define AK_GET_VOL_CVT(val)		(((val) >> 21) & 1)
-#define AK_GET_IPGA(val)		(((val) >> 20) & 1)
-#define AK_GET_NEEDSMSB(val)		(((val) >> 22) & 1)
-#define AK_GET_INVERT(val)		(((val) >> 23) & 1)
-#define AK_GET_MASK(val)		(((val) >> 24) & 0xff)
+#define AK_GET_CHIP(val)		(((__c_a(val)) >> 8) & 0xff)
+#define AK_GET_ADDR(val)		((__c_a(val)) & 0xff)
+#define AK_GET_SHIFT(val)		(((__c_a(val)) >> 16) & 0x0f)
+#define AK_GET_VOL_CVT(val)		(((__c_a(val)) >> 21) & 1)
+#define AK_GET_IPGA(val)		(((__c_a(val)) >> 20) & 1)
+#define AK_GET_NEEDSMSB(val)		(((__c_a(val)) >> 22) & 1)
+#define AK_GET_INVERT(val)		(((__c_a(val)) >> 23) & 1)
+#define AK_GET_MASK(val)		(((__c_a(val)) >> 24) & 0xff)
 #define AK_COMPOSE(chip,addr,shift,mask) \
-	(((chip) << 8) | (addr) | ((shift) << 16) | ((mask) << 24))
+	__c_fakeu(((chip) << 8) | (addr) | ((shift) << 16) | ((mask) << 24))
 
 static int snd_akm4xxx_volume_info(struct snd_kcontrol *kcontrol,
 				   struct snd_ctl_elem_info *uinfo)

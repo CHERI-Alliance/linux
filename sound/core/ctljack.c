@@ -15,7 +15,7 @@
 static int jack_detect_kctl_get(struct snd_kcontrol *kcontrol,
 				struct snd_ctl_elem_value *ucontrol)
 {
-	ucontrol->value.integer.value[0] = kcontrol->private_value;
+	ucontrol->value.integer.value[0] = __c_ua(kcontrol->private_value);
 	return 0;
 }
 
@@ -79,6 +79,6 @@ void snd_kctl_jack_report(struct snd_card *card,
 {
 	if (kctl->private_value == status)
 		return;
-	kctl->private_value = status;
+	kctl->private_value = __c_fakeu(status);
 	snd_ctl_notify(card, SNDRV_CTL_EVENT_MASK_VALUE, &kctl->id);
 }

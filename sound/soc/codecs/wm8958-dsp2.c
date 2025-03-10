@@ -496,7 +496,7 @@ static int wm8958_mbc_info(struct snd_kcontrol *kcontrol,
 static int wm8958_mbc_get(struct snd_kcontrol *kcontrol,
 			  struct snd_ctl_elem_value *ucontrol)
 {
-	int mbc = kcontrol->private_value;
+	int mbc = __c_ua(kcontrol->private_value);
 	struct snd_soc_component *component = snd_soc_kcontrol_component(kcontrol);
 	struct wm8994_priv *wm8994 = snd_soc_component_get_drvdata(component);
 
@@ -508,7 +508,7 @@ static int wm8958_mbc_get(struct snd_kcontrol *kcontrol,
 static int wm8958_mbc_put(struct snd_kcontrol *kcontrol,
 			  struct snd_ctl_elem_value *ucontrol)
 {
-	int mbc = kcontrol->private_value;
+	int mbc = __c_ua(kcontrol->private_value);
 	struct snd_soc_component *component = snd_soc_kcontrol_component(kcontrol);
 	struct wm8994_priv *wm8994 = snd_soc_component_get_drvdata(component);
 
@@ -619,7 +619,7 @@ static int wm8958_vss_info(struct snd_kcontrol *kcontrol,
 static int wm8958_vss_get(struct snd_kcontrol *kcontrol,
 			  struct snd_ctl_elem_value *ucontrol)
 {
-	int vss = kcontrol->private_value;
+	int vss = __c_ua(kcontrol->private_value);
 	struct snd_soc_component *component = snd_soc_kcontrol_component(kcontrol);
 	struct wm8994_priv *wm8994 = snd_soc_component_get_drvdata(component);
 
@@ -631,7 +631,7 @@ static int wm8958_vss_get(struct snd_kcontrol *kcontrol,
 static int wm8958_vss_put(struct snd_kcontrol *kcontrol,
 			  struct snd_ctl_elem_value *ucontrol)
 {
-	int vss = kcontrol->private_value;
+	int vss = __c_ua(kcontrol->private_value);
 	struct snd_soc_component *component = snd_soc_kcontrol_component(kcontrol);
 	struct wm8994_priv *wm8994 = snd_soc_component_get_drvdata(component);
 
@@ -680,7 +680,7 @@ static int wm8958_hpf_info(struct snd_kcontrol *kcontrol,
 static int wm8958_hpf_get(struct snd_kcontrol *kcontrol,
 			  struct snd_ctl_elem_value *ucontrol)
 {
-	int hpf = kcontrol->private_value;
+	int hpf = __c_ua(kcontrol->private_value);
 	struct snd_soc_component *component = snd_soc_kcontrol_component(kcontrol);
 	struct wm8994_priv *wm8994 = snd_soc_component_get_drvdata(component);
 
@@ -695,7 +695,7 @@ static int wm8958_hpf_get(struct snd_kcontrol *kcontrol,
 static int wm8958_hpf_put(struct snd_kcontrol *kcontrol,
 			  struct snd_ctl_elem_value *ucontrol)
 {
-	int hpf = kcontrol->private_value;
+	int hpf = __c_ua(kcontrol->private_value);
 	struct snd_soc_component *component = snd_soc_kcontrol_component(kcontrol);
 	struct wm8994_priv *wm8994 = snd_soc_component_get_drvdata(component);
 
@@ -786,7 +786,7 @@ static int wm8958_enh_eq_info(struct snd_kcontrol *kcontrol,
 static int wm8958_enh_eq_get(struct snd_kcontrol *kcontrol,
 			  struct snd_ctl_elem_value *ucontrol)
 {
-	int eq = kcontrol->private_value;
+	int eq = __c_ua(kcontrol->private_value);
 	struct snd_soc_component *component = snd_soc_kcontrol_component(kcontrol);
 	struct wm8994_priv *wm8994 = snd_soc_component_get_drvdata(component);
 
@@ -798,7 +798,7 @@ static int wm8958_enh_eq_get(struct snd_kcontrol *kcontrol,
 static int wm8958_enh_eq_put(struct snd_kcontrol *kcontrol,
 			  struct snd_ctl_elem_value *ucontrol)
 {
-	int eq = kcontrol->private_value;
+	int eq = __c_ua(kcontrol->private_value);
 	struct snd_soc_component *component = snd_soc_kcontrol_component(kcontrol);
 	struct wm8994_priv *wm8994 = snd_soc_component_get_drvdata(component);
 

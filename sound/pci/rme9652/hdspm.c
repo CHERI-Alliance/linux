@@ -2417,7 +2417,7 @@ static int snd_hdspm_get_autosync_sample_rate(struct snd_kcontrol *kcontrol,
 
 	switch (hdspm->io_type) {
 	case RayDAT:
-		switch (kcontrol->private_value) {
+		switch (__c_ua(kcontrol->private_value)) {
 		case 0:
 			ucontrol->value.enumerated.item[0] =
 				hdspm_get_wc_sample_rate(hdspm);
@@ -2433,12 +2433,12 @@ static int snd_hdspm_get_autosync_sample_rate(struct snd_kcontrol *kcontrol,
 		default:
 			ucontrol->value.enumerated.item[0] =
 				hdspm_get_s1_sample_rate(hdspm,
-						kcontrol->private_value-1);
+						__c_ua(kcontrol->private_value)-1);
 		}
 		break;
 
 	case AIO:
-		switch (kcontrol->private_value) {
+		switch (__c_ua(kcontrol->private_value)) {
 		case 0: /* WC */
 			ucontrol->value.enumerated.item[0] =
 				hdspm_get_wc_sample_rate(hdspm);
@@ -2454,13 +2454,13 @@ static int snd_hdspm_get_autosync_sample_rate(struct snd_kcontrol *kcontrol,
 		default:
 			ucontrol->value.enumerated.item[0] =
 				hdspm_get_s1_sample_rate(hdspm,
-						kcontrol->private_value-1);
+						__c_ua(kcontrol->private_value)-1);
 		}
 		break;
 
 	case AES32:
 
-		switch (kcontrol->private_value) {
+		switch (__c_ua(kcontrol->private_value)) {
 		case 0: /* WC */
 			ucontrol->value.enumerated.item[0] =
 				hdspm_get_wc_sample_rate(hdspm);
@@ -2480,7 +2480,7 @@ static int snd_hdspm_get_autosync_sample_rate(struct snd_kcontrol *kcontrol,
 		default: /* AES1 to AES8 */
 			ucontrol->value.enumerated.item[0] =
 				hdspm_get_aes_sample_rate(hdspm,
-						kcontrol->private_value -
+						__c_ua(kcontrol->private_value) -
 						HDSPM_AES32_AUTOSYNC_FROM_AES1);
 			break;
 		}
@@ -3235,7 +3235,7 @@ static int snd_hdspm_get_toggle_setting(struct snd_kcontrol *kcontrol,
 			       struct snd_ctl_elem_value *ucontrol)
 {
 	struct hdspm *hdspm = snd_kcontrol_chip(kcontrol);
-	u32 regmask = kcontrol->private_value;
+	u32 regmask = __c_ua(kcontrol->private_value);
 
 	spin_lock_irq(&hdspm->lock);
 	ucontrol->value.integer.value[0] = hdspm_toggle_setting(hdspm, regmask);
@@ -3247,7 +3247,7 @@ static int snd_hdspm_put_toggle_setting(struct snd_kcontrol *kcontrol,
 			       struct snd_ctl_elem_value *ucontrol)
 {
 	struct hdspm *hdspm = snd_kcontrol_chip(kcontrol);
-	u32 regmask = kcontrol->private_value;
+	u32 regmask = __c_ua(kcontrol->private_value);
 	int change;
 	unsigned int val;
 
@@ -3488,7 +3488,7 @@ static int hdspm_set_tristate(struct hdspm *hdspm, int mode, u32 regmask)
 static int snd_hdspm_info_tristate(struct snd_kcontrol *kcontrol,
 				       struct snd_ctl_elem_info *uinfo)
 {
-	u32 regmask = kcontrol->private_value;
+	u32 regmask = __c_ua(kcontrol->private_value);
 
 	static const char *const texts_spdif[] = { "Optical", "Coaxial", "Internal" };
 	static const char *const texts_levels[] = { "Hi Gain", "+4 dBu", "-10 dBV" };
@@ -3508,7 +3508,7 @@ static int snd_hdspm_get_tristate(struct snd_kcontrol *kcontrol,
 				      struct snd_ctl_elem_value *ucontrol)
 {
 	struct hdspm *hdspm = snd_kcontrol_chip(kcontrol);
-	u32 regmask = kcontrol->private_value;
+	u32 regmask = __c_ua(kcontrol->private_value);
 
 	spin_lock_irq(&hdspm->lock);
 	ucontrol->value.enumerated.item[0] = hdspm_tristate(hdspm, regmask);
@@ -3520,7 +3520,7 @@ static int snd_hdspm_put_tristate(struct snd_kcontrol *kcontrol,
 				      struct snd_ctl_elem_value *ucontrol)
 {
 	struct hdspm *hdspm = snd_kcontrol_chip(kcontrol);
-	u32 regmask = kcontrol->private_value;
+	u32 regmask = __c_ua(kcontrol->private_value);
 	int change;
 	int val;
 
@@ -4011,7 +4011,7 @@ static int snd_hdspm_get_sync_check(struct snd_kcontrol *kcontrol,
 
 	switch (hdspm->io_type) {
 	case RayDAT:
-		switch (kcontrol->private_value) {
+		switch (__c_ua(kcontrol->private_value)) {
 		case 0: /* WC */
 			val = hdspm_wc_sync_check(hdspm); break;
 		case 7: /* TCO */
@@ -4020,12 +4020,12 @@ static int snd_hdspm_get_sync_check(struct snd_kcontrol *kcontrol,
 			val = hdspm_sync_in_sync_check(hdspm); break;
 		default:
 			val = hdspm_s1_sync_check(hdspm,
-					kcontrol->private_value-1);
+					__c_ua(kcontrol->private_value)-1);
 		}
 		break;
 
 	case AIO:
-		switch (kcontrol->private_value) {
+		switch (__c_ua(kcontrol->private_value)) {
 		case 0: /* WC */
 			val = hdspm_wc_sync_check(hdspm); break;
 		case 4: /* TCO */
@@ -4034,12 +4034,12 @@ static int snd_hdspm_get_sync_check(struct snd_kcontrol *kcontrol,
 			val = hdspm_sync_in_sync_check(hdspm); break;
 		default:
 			val = hdspm_s1_sync_check(hdspm,
-					kcontrol->private_value-1);
+					__c_ua(kcontrol->private_value)-1);
 		}
 		break;
 
 	case MADI:
-		switch (kcontrol->private_value) {
+		switch (__c_ua(kcontrol->private_value)) {
 		case 0: /* WC */
 			val = hdspm_wc_sync_check(hdspm); break;
 		case 1: /* MADI */
@@ -4056,7 +4056,7 @@ static int snd_hdspm_get_sync_check(struct snd_kcontrol *kcontrol,
 		break;
 
 	case AES32:
-		switch (kcontrol->private_value) {
+		switch (__c_ua(kcontrol->private_value)) {
 		case 0: /* WC */
 			val = hdspm_wc_sync_check(hdspm); break;
 		case 9: /* TCO */
@@ -4065,14 +4065,14 @@ static int snd_hdspm_get_sync_check(struct snd_kcontrol *kcontrol,
 			val = hdspm_sync_in_sync_check(hdspm); break;
 		default: /* AES1 to AES8 */
 			 val = hdspm_aes_sync_check(hdspm,
-					 kcontrol->private_value-1);
+					 __c_ua(kcontrol->private_value)-1);
 		}
 		break;
 
 	}
 
 	if (hdspm->tco) {
-		switch (kcontrol->private_value) {
+		switch (__c_ua(kcontrol->private_value)) {
 		case 11:
 			/* Check TCO for lock state of its current input */
 			val = hdspm_tco_input_check(hdspm, HDSPM_TCO1_TCO_lock);
@@ -4878,7 +4878,7 @@ snd_hdspm_proc_read_madi(struct snd_info_entry *entry,
 			hdspm->serial);
 
 	snd_iprintf(buffer, "IRQ: %d Registers bus: 0x%lx VM: 0x%lx\n",
-			hdspm->irq, hdspm->port, (unsigned long)hdspm->iobase);
+			hdspm->irq, hdspm->port, __c_pa(hdspm->iobase));
 
 	snd_iprintf(buffer, "--- System ---\n");
 
@@ -5035,7 +5035,7 @@ snd_hdspm_proc_read_aes32(struct snd_info_entry * entry,
 		    hdspm->firmware_rev);
 
 	snd_iprintf(buffer, "IRQ: %d Registers bus: 0x%lx VM: 0x%lx\n",
-		    hdspm->irq, hdspm->port, (unsigned long)hdspm->iobase);
+		    hdspm->irq, hdspm->port, __c_pa(hdspm->iobase));
 
 	snd_iprintf(buffer, "--- System ---\n");
 
@@ -6147,7 +6147,7 @@ static int snd_hdspm_hwdep_dummy_op(struct snd_hwdep *hw, struct file *file)
 }
 
 static int snd_hdspm_hwdep_ioctl(struct snd_hwdep *hw, struct file *file,
-		unsigned int cmd, unsigned long arg)
+		unsigned int cmd, user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 	struct hdspm *hdspm = hw->private_data;
@@ -6376,7 +6376,9 @@ static int snd_hdspm_create_hwdep(struct snd_card *card,
 
 	hw->ops.open = snd_hdspm_hwdep_dummy_op;
 	hw->ops.ioctl = snd_hdspm_hwdep_ioctl;
+#ifndef CONFIG_CHERI_KERNEL
 	hw->ops.ioctl_compat = snd_hdspm_hwdep_ioctl;
+#endif
 	hw->ops.release = snd_hdspm_hwdep_dummy_op;
 
 	return 0;
@@ -6583,7 +6585,7 @@ static int snd_hdspm_create(struct snd_card *card,
 	io_extent = pci_resource_len(pci, 0);
 	hdspm->iobase = pcim_iomap_table(pci)[0];
 	dev_dbg(card->dev, "remapped region (0x%lx) 0x%lx-0x%lx\n",
-			(unsigned long)hdspm->iobase, hdspm->port,
+			__c_pa(hdspm->iobase), hdspm->port,
 			hdspm->port + io_extent - 1);
 
 	if (devm_request_irq(&pci->dev, pci->irq, snd_hdspm_interrupt,

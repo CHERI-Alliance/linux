@@ -187,8 +187,8 @@ static int snd_ak4113_in_error_get(struct snd_kcontrol *kcontrol,
 
 	spin_lock_irq(&chip->lock);
 	ucontrol->value.integer.value[0] =
-		chip->errors[kcontrol->private_value];
-	chip->errors[kcontrol->private_value] = 0;
+		chip->errors[__c_ua(kcontrol->private_value)];
+	chip->errors[__c_ua(kcontrol->private_value)] = 0;
 	spin_unlock_irq(&chip->lock);
 	return 0;
 }
@@ -199,9 +199,9 @@ static int snd_ak4113_in_bit_get(struct snd_kcontrol *kcontrol,
 				 struct snd_ctl_elem_value *ucontrol)
 {
 	struct ak4113 *chip = snd_kcontrol_chip(kcontrol);
-	unsigned char reg = kcontrol->private_value & 0xff;
-	unsigned char bit = (kcontrol->private_value >> 8) & 0xff;
-	unsigned char inv = (kcontrol->private_value >> 31) & 1;
+	unsigned char reg = __c_ua(kcontrol->private_value) & 0xff;
+	unsigned char bit = (__c_ua(kcontrol->private_value) >> 8) & 0xff;
+	unsigned char inv = (__c_ua(kcontrol->private_value) >> 31) & 1;
 
 	ucontrol->value.integer.value[0] =
 		((reg_read(chip, reg) & (1 << bit)) ? 1 : 0) ^ inv;

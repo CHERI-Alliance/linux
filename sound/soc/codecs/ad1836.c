@@ -375,7 +375,7 @@ static int ad1836_spi_probe(struct spi_device *spi)
 	if (IS_ERR(ad1836->regmap))
 		return PTR_ERR(ad1836->regmap);
 
-	ad1836->type = spi_get_device_id(spi)->driver_data;
+	ad1836->type = __c_ua(spi_get_device_id(spi)->driver_data);
 
 	spi_set_drvdata(spi, ad1836);
 

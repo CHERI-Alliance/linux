@@ -337,7 +337,7 @@ snd_s1810c_get_switch_state(struct usb_mixer_interface *mixer,
 	struct snd_usb_audio *chip = mixer->chip;
 	struct s1810_mixer_state *private = mixer->private_data;
 	u32 field = 0;
-	u32 ctl_idx = (u32) (kctl->private_value & 0xFF);
+	u32 ctl_idx = (u32) (__c_ua(kctl->private_value) & 0xFF);
 	int ret = 0;
 
 	mutex_lock(&private->usb_mutex);
@@ -363,7 +363,7 @@ snd_s1810c_set_switch_state(struct usb_mixer_interface *mixer,
 {
 	struct snd_usb_audio *chip = mixer->chip;
 	struct s1810_mixer_state *private = mixer->private_data;
-	u32 pval = (u32) kctl->private_value;
+	u32 pval = (u32) __c_ua(kctl->private_value);
 	u32 ctl_id = (pval >> 8) & 0xFF;
 	u32 ctl_val = (pval >> 16) & 0x1;
 	int ret = 0;
@@ -383,7 +383,7 @@ snd_s1810c_switch_get(struct snd_kcontrol *kctl,
 	struct usb_mixer_elem_list *list = snd_kcontrol_chip(kctl);
 	struct usb_mixer_interface *mixer = list->mixer;
 	struct s1810_mixer_state *private = mixer->private_data;
-	u32 pval = (u32) kctl->private_value;
+	u32 pval = (u32) __c_ua(kctl->private_value);
 	u32 ctl_idx = pval & 0xFF;
 	u32 state = 0;
 	int ret = 0;
@@ -414,7 +414,7 @@ snd_s1810c_switch_set(struct snd_kcontrol *kctl,
 	struct usb_mixer_elem_list *list = snd_kcontrol_chip(kctl);
 	struct usb_mixer_interface *mixer = list->mixer;
 	struct s1810_mixer_state *private = mixer->private_data;
-	u32 pval = (u32) kctl->private_value;
+	u32 pval = (u32) __c_ua(kctl->private_value);
 	u32 ctl_idx = pval & 0xFF;
 	u32 curval = 0;
 	u32 newval = 0;

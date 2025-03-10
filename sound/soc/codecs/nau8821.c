@@ -1873,7 +1873,7 @@ static void nau8821_check_quirks(void)
 
 	dmi_id = dmi_first_match(nau8821_quirk_table);
 	if (dmi_id)
-		nau8821_quirk = (unsigned long)dmi_id->driver_data;
+		nau8821_quirk = __c_pa(dmi_id->driver_data);
 }
 
 static int nau8821_i2c_probe(struct i2c_client *i2c)

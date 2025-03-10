@@ -16,17 +16,17 @@
 { .iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname, \
   .info = snd_ac97_info_volsw,		\
   .get = snd_ac97_get_volsw, .put = snd_ac97_put_volsw, \
-  .private_value =  AC97_SINGLE_VALUE(reg, shift, mask, invert) }
+  .private_value =  (uintptr_t __force)AC97_SINGLE_VALUE(reg, shift, mask, invert) }
 #define AC97_PAGE_SINGLE(xname, reg, shift, mask, invert, page)		\
 { .iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname, \
   .info = snd_ac97_info_volsw,		\
   .get = snd_ac97_get_volsw, .put = snd_ac97_put_volsw, \
-  .private_value =  AC97_PAGE_SINGLE_VALUE(reg, shift, mask, invert, page) }
+  .private_value =  (uintptr_t __force)AC97_PAGE_SINGLE_VALUE(reg, shift, mask, invert, page) }
 #define AC97_DOUBLE(xname, reg, shift_left, shift_right, mask, invert) \
 { .iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = (xname), \
   .info = snd_ac97_info_volsw,		\
   .get = snd_ac97_get_volsw, .put = snd_ac97_put_volsw, \
-  .private_value = (reg) | ((shift_left) << 8) | ((shift_right) << 12) | ((mask) << 16) | ((invert) << 24) }
+  .private_value = (uintptr_t __force)((reg) | ((shift_left) << 8) | ((shift_right) << 12) | ((mask) << 16) | ((invert) << 24)) }
 
 /* enum control */
 struct ac97_enum {

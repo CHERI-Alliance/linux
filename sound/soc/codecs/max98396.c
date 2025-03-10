@@ -1744,7 +1744,7 @@ static int max98396_i2c_probe(struct i2c_client *i2c)
 	}
 	i2c_set_clientdata(i2c, max98396);
 
-	max98396->device_id =  id->driver_data;
+	max98396->device_id = __c_ua(id->driver_data);
 
 	/* regmap initialization */
 	if (max98396->device_id == CODEC_TYPE_MAX98396)

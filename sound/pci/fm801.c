@@ -848,7 +848,7 @@ static const struct snd_tea575x_ops snd_fm801_tea_ops = {
 static int snd_fm801_info_single(struct snd_kcontrol *kcontrol,
 				 struct snd_ctl_elem_info *uinfo)
 {
-	int mask = (kcontrol->private_value >> 16) & 0xff;
+	int mask = (__c_ua(kcontrol->private_value) >> 16) & 0xff;
 
 	uinfo->type = mask == 1 ? SNDRV_CTL_ELEM_TYPE_BOOLEAN : SNDRV_CTL_ELEM_TYPE_INTEGER;
 	uinfo->count = 1;
@@ -861,10 +861,10 @@ static int snd_fm801_get_single(struct snd_kcontrol *kcontrol,
 				struct snd_ctl_elem_value *ucontrol)
 {
 	struct fm801 *chip = snd_kcontrol_chip(kcontrol);
-	int reg = kcontrol->private_value & 0xff;
-	int shift = (kcontrol->private_value >> 8) & 0xff;
-	int mask = (kcontrol->private_value >> 16) & 0xff;
-	int invert = (kcontrol->private_value >> 24) & 0xff;
+	int reg = __c_ua(kcontrol->private_value) & 0xff;
+	int shift = (__c_ua(kcontrol->private_value) >> 8) & 0xff;
+	int mask = (__c_ua(kcontrol->private_value) >> 16) & 0xff;
+	int invert = (__c_ua(kcontrol->private_value) >> 24) & 0xff;
 	long *value = ucontrol->value.integer.value;
 
 	value[0] = (fm801_ioread16(chip, reg) >> shift) & mask;
@@ -877,10 +877,10 @@ static int snd_fm801_put_single(struct snd_kcontrol *kcontrol,
 				struct snd_ctl_elem_value *ucontrol)
 {
 	struct fm801 *chip = snd_kcontrol_chip(kcontrol);
-	int reg = kcontrol->private_value & 0xff;
-	int shift = (kcontrol->private_value >> 8) & 0xff;
-	int mask = (kcontrol->private_value >> 16) & 0xff;
-	int invert = (kcontrol->private_value >> 24) & 0xff;
+	int reg = __c_ua(kcontrol->private_value) & 0xff;
+	int shift = (__c_ua(kcontrol->private_value) >> 8) & 0xff;
+	int mask = (__c_ua(kcontrol->private_value) >> 16) & 0xff;
+	int invert = (__c_ua(kcontrol->private_value) >> 24) & 0xff;
 	unsigned short val;
 
 	val = (ucontrol->value.integer.value[0] & mask);
@@ -904,7 +904,7 @@ static int snd_fm801_put_single(struct snd_kcontrol *kcontrol,
 static int snd_fm801_info_double(struct snd_kcontrol *kcontrol,
 				 struct snd_ctl_elem_info *uinfo)
 {
-	int mask = (kcontrol->private_value >> 16) & 0xff;
+	int mask = (__c_ua(kcontrol->private_value) >> 16) & 0xff;
 
 	uinfo->type = mask == 1 ? SNDRV_CTL_ELEM_TYPE_BOOLEAN : SNDRV_CTL_ELEM_TYPE_INTEGER;
 	uinfo->count = 2;
@@ -917,11 +917,11 @@ static int snd_fm801_get_double(struct snd_kcontrol *kcontrol,
 				struct snd_ctl_elem_value *ucontrol)
 {
 	struct fm801 *chip = snd_kcontrol_chip(kcontrol);
-        int reg = kcontrol->private_value & 0xff;
-	int shift_left = (kcontrol->private_value >> 8) & 0x0f;
-	int shift_right = (kcontrol->private_value >> 12) & 0x0f;
-	int mask = (kcontrol->private_value >> 16) & 0xff;
-	int invert = (kcontrol->private_value >> 24) & 0xff;
+        int reg = __c_ua(kcontrol->private_value) & 0xff;
+	int shift_left = (__c_ua(kcontrol->private_value) >> 8) & 0x0f;
+	int shift_right = (__c_ua(kcontrol->private_value) >> 12) & 0x0f;
+	int mask = (__c_ua(kcontrol->private_value) >> 16) & 0xff;
+	int invert = (__c_ua(kcontrol->private_value) >> 24) & 0xff;
 	long *value = ucontrol->value.integer.value;
 
 	spin_lock_irq(&chip->reg_lock);
@@ -939,11 +939,11 @@ static int snd_fm801_put_double(struct snd_kcontrol *kcontrol,
 				struct snd_ctl_elem_value *ucontrol)
 {
 	struct fm801 *chip = snd_kcontrol_chip(kcontrol);
-	int reg = kcontrol->private_value & 0xff;
-	int shift_left = (kcontrol->private_value >> 8) & 0x0f;
-	int shift_right = (kcontrol->private_value >> 12) & 0x0f;
-	int mask = (kcontrol->private_value >> 16) & 0xff;
-	int invert = (kcontrol->private_value >> 24) & 0xff;
+	int reg = __c_ua(kcontrol->private_value) & 0xff;
+	int shift_left = (__c_ua(kcontrol->private_value) >> 8) & 0x0f;
+	int shift_right = (__c_ua(kcontrol->private_value) >> 12) & 0x0f;
+	int mask = (__c_ua(kcontrol->private_value) >> 16) & 0xff;
+	int invert = (__c_ua(kcontrol->private_value) >> 24) & 0xff;
 	unsigned short val1, val2;
  
 	val1 = ucontrol->value.integer.value[0] & mask;
@@ -1307,7 +1307,7 @@ static int __snd_card_fm801_probe(struct pci_dev *pci,
 	if (err < 0)
 		return err;
 	err = snd_mpu401_uart_new(card, 0, MPU401_HW_FM801,
-				  chip->port + FM801_MPU401_DATA,
+				  __c_fakeu(chip->port + FM801_MPU401_DATA),
 				  MPU401_INFO_INTEGRATED |
 				  MPU401_INFO_IRQ_HOOK,
 				  -1, &chip->rmidi);

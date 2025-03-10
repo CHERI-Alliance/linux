@@ -43,7 +43,7 @@ static int adau1977_spi_probe(struct spi_device *spi)
 
 	return adau1977_probe(&spi->dev,
 		devm_regmap_init_spi(spi, &config),
-		id->driver_data, adau1977_spi_switch_mode);
+		__c_ua(id->driver_data), adau1977_spi_switch_mode);
 }
 
 static const struct spi_device_id adau1977_spi_ids[] = {

@@ -452,7 +452,7 @@ static int ak5558_i2c_probe(struct i2c_client *i2c)
 		return ret;
 	}
 
-	dev_id = (uintptr_t)of_device_get_match_data(&i2c->dev);
+	dev_id = __c_pa(of_device_get_match_data(&i2c->dev));
 	switch (dev_id) {
 	case AK5552:
 		ret = devm_snd_soc_register_component(&i2c->dev,

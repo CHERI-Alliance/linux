@@ -343,7 +343,7 @@ out:
 }
 
 static int usb_stream_hwdep_ioctl(struct snd_hwdep *hw, struct file *file,
-				  unsigned int cmd, unsigned long arg)
+				  unsigned int cmd, user_uintptr_t arg)
 {
 	struct usb_stream_config cfg;
 	struct us122l *us122l = hw->private_data;
@@ -428,7 +428,9 @@ static int usb_stream_hwdep_new(struct snd_card *card)
 	hw->ops.open = usb_stream_hwdep_open;
 	hw->ops.release = usb_stream_hwdep_release;
 	hw->ops.ioctl = usb_stream_hwdep_ioctl;
+#ifndef CONFIG_CHERI_KERNEL
 	hw->ops.ioctl_compat = usb_stream_hwdep_ioctl;
+#endif
 	hw->ops.mmap = usb_stream_hwdep_mmap;
 	hw->ops.poll = usb_stream_hwdep_poll;
 
@@ -542,7 +544,7 @@ static int us122l_usb_probe(struct usb_interface *intf,
 	struct snd_card *card;
 	int err;
 
-	err = usx2y_create_card(device, intf, &card, device_id->driver_info);
+	err = usx2y_create_card(device, intf, &card, __c_ua(device_id->driver_info));
 	if (err < 0)
 		return err;
 

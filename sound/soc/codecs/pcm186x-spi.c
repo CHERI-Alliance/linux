@@ -25,7 +25,7 @@ MODULE_DEVICE_TABLE(of, pcm186x_of_match);
 static int pcm186x_spi_probe(struct spi_device *spi)
 {
 	const enum pcm186x_type type =
-			 (enum pcm186x_type)spi_get_device_id(spi)->driver_data;
+			 (enum pcm186x_type)__c_ua(spi_get_device_id(spi)->driver_data);
 	int irq = spi->irq;
 	struct regmap *regmap;
 

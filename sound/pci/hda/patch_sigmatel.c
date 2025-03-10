@@ -604,7 +604,7 @@ static int stac_aloopback_put(struct snd_kcontrol *kcontrol,
 	 * first two bytes of the mask
 	 */
 	dac_mode = snd_hda_codec_read(codec, codec->core.afg, 0,
-				      kcontrol->private_value & 0xFFFF, 0x0);
+				      __c_ua(kcontrol->private_value) & 0xFFFF, 0x0);
 	dac_mode >>= spec->aloopback_shift;
 
 	if (spec->aloopback & idx_val) {
@@ -616,7 +616,7 @@ static int stac_aloopback_put(struct snd_kcontrol *kcontrol,
 	}
 
 	snd_hda_codec_write_cache(codec, codec->core.afg, 0,
-		kcontrol->private_value >> 16, dac_mode);
+		__c_ua(kcontrol->private_value) >> 16, dac_mode);
 
 	return 1;
 }
@@ -851,7 +851,7 @@ static int stac_auto_create_beep_ctls(struct hda_codec *codec,
 		if (!knew)
 			return -ENOMEM;
 		knew->private_value =
-			HDA_COMPOSE_AMP_VAL(nid, 1, 0, HDA_OUTPUT);
+			__c_fakeu(HDA_COMPOSE_AMP_VAL(nid, 1, 0, HDA_OUTPUT));
 	}
 
 	/* check to see if there is volume support for the amp */
@@ -862,7 +862,7 @@ static int stac_auto_create_beep_ctls(struct hda_codec *codec,
 		if (!knew)
 			return -ENOMEM;
 		knew->private_value =
-			HDA_COMPOSE_AMP_VAL(nid, 1, 0, HDA_OUTPUT);
+			__c_fakeu(HDA_COMPOSE_AMP_VAL(nid, 1, 0, HDA_OUTPUT));
 	}
 	return 0;
 }
@@ -4335,7 +4335,7 @@ static int stac_parse_auto_config(struct hda_codec *codec)
 	if (spec->aloopback_ctl &&
 	    snd_hda_get_bool_hint(codec, "loopback") == 1) {
 		unsigned int wr_verb =
-			spec->aloopback_ctl->private_value >> 16;
+			__c_ua(spec->aloopback_ctl->private_value) >> 16;
 		if (snd_hdac_regmap_add_vendor_verb(&codec->core, wr_verb))
 			return -ENOMEM;
 		if (!snd_hda_gen_add_kctl(&spec->gen, NULL, spec->aloopback_ctl))

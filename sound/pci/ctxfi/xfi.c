@@ -87,7 +87,7 @@ ct_card_probe(struct pci_dev *pci, const struct pci_device_id *pci_id)
 		multiple = 2;
 	}
 	err = ct_atc_create(card, pci, reference_rate, multiple,
-			    pci_id->driver_data, subsystem[dev], &atc);
+			    __c_ua(pci_id->driver_data), subsystem[dev], &atc);
 	if (err < 0)
 		goto error;
 

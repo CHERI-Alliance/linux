@@ -573,7 +573,7 @@ static int had_register_chmap_ctls(struct snd_intelhad *intelhaddata,
 	int err;
 
 	err = snd_pcm_add_chmap_ctls(pcm, SNDRV_PCM_STREAM_PLAYBACK,
-			NULL, 0, (unsigned long)intelhaddata,
+			NULL, 0, (uintptr_t)intelhaddata,
 			&intelhaddata->chmap);
 	if (err < 0)
 		return err;

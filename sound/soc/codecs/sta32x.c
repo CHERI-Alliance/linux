@@ -255,7 +255,7 @@ static SOC_ENUM_SINGLE_DECL(sta32x_limiter2_release_rate_enum,
 static int sta32x_coefficient_info(struct snd_kcontrol *kcontrol,
 				   struct snd_ctl_elem_info *uinfo)
 {
-	int numcoef = kcontrol->private_value >> 16;
+	int numcoef = __c_ua(kcontrol->private_value) >> 16;
 	uinfo->type = SNDRV_CTL_ELEM_TYPE_BYTES;
 	uinfo->count = 3 * numcoef;
 	return 0;
@@ -266,8 +266,8 @@ static int sta32x_coefficient_get(struct snd_kcontrol *kcontrol,
 {
 	struct snd_soc_component *component = snd_soc_kcontrol_component(kcontrol);
 	struct sta32x_priv *sta32x = snd_soc_component_get_drvdata(component);
-	int numcoef = kcontrol->private_value >> 16;
-	int index = kcontrol->private_value & 0xffff;
+	int numcoef = __c_ua(kcontrol->private_value) >> 16;
+	int index = __c_ua(kcontrol->private_value) & 0xffff;
 	unsigned int cfud, val;
 	int i, ret = 0;
 
@@ -308,8 +308,8 @@ static int sta32x_coefficient_put(struct snd_kcontrol *kcontrol,
 {
 	struct snd_soc_component *component = snd_soc_kcontrol_component(kcontrol);
 	struct sta32x_priv *sta32x = snd_soc_component_get_drvdata(component);
-	int numcoef = kcontrol->private_value >> 16;
-	int index = kcontrol->private_value & 0xffff;
+	int numcoef = __c_ua(kcontrol->private_value) >> 16;
+	int index = __c_ua(kcontrol->private_value) & 0xffff;
 	unsigned int cfud;
 	int i;
 

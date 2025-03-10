@@ -1624,7 +1624,7 @@ static int snd_hdsp_control_spdif_mask_info(struct snd_kcontrol *kcontrol, struc
 
 static int snd_hdsp_control_spdif_mask_get(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
-	ucontrol->value.iec958.status[0] = kcontrol->private_value;
+	ucontrol->value.iec958.status[0] = __c_ua(kcontrol->private_value);
 	return 0;
 }
 
@@ -1716,7 +1716,7 @@ static int snd_hdsp_get_toggle_setting(struct snd_kcontrol *kcontrol,
 		struct snd_ctl_elem_value *ucontrol)
 {
 	struct hdsp *hdsp = snd_kcontrol_chip(kcontrol);
-	u32 regmask = kcontrol->private_value;
+	u32 regmask = __c_ua(kcontrol->private_value);
 
 	spin_lock_irq(&hdsp->lock);
 	ucontrol->value.integer.value[0] = hdsp_toggle_setting(hdsp, regmask);
@@ -1728,7 +1728,7 @@ static int snd_hdsp_put_toggle_setting(struct snd_kcontrol *kcontrol,
 		struct snd_ctl_elem_value *ucontrol)
 {
 	struct hdsp *hdsp = snd_kcontrol_chip(kcontrol);
-	u32 regmask = kcontrol->private_value;
+	u32 regmask = __c_ua(kcontrol->private_value);
 	int change;
 	unsigned int val;
 
@@ -3403,7 +3403,7 @@ snd_hdsp_proc_read(struct snd_info_entry *entry, struct snd_info_buffer *buffer)
 	snd_iprintf(buffer, "Buffers: capture %p playback %p\n",
 		    hdsp->capture_buffer, hdsp->playback_buffer);
 	snd_iprintf(buffer, "IRQ: %d Registers bus: 0x%lx VM: 0x%lx\n",
-		    hdsp->irq, hdsp->port, (unsigned long)hdsp->iobase);
+		    hdsp->irq, hdsp->port, __c_pa(hdsp->iobase));
 	snd_iprintf(buffer, "Control register: 0x%x\n", hdsp->control_register);
 	snd_iprintf(buffer, "Control2 register: 0x%x\n",
 		    hdsp->control2_register);
@@ -4725,7 +4725,7 @@ static int hdsp_get_peak(struct hdsp *hdsp, struct hdsp_peak_rms __user *peak_rm
 	return 0;
 }
 
-static int snd_hdsp_hwdep_ioctl(struct snd_hwdep *hw, struct file *file, unsigned int cmd, unsigned long arg)
+static int snd_hdsp_hwdep_ioctl(struct snd_hwdep *hw, struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct hdsp *hdsp = hw->private_data;
 	void __user *argp = (void __user *)arg;
@@ -4951,7 +4951,9 @@ static int snd_hdsp_create_hwdep(struct snd_card *card, struct hdsp *hdsp)
 	strcpy(hw->name, "HDSP hwdep interface");
 
 	hw->ops.ioctl = snd_hdsp_hwdep_ioctl;
+#ifndef CONFIG_CHERI_KERNEL
 	hw->ops.ioctl_compat = snd_hdsp_hwdep_ioctl;
+#endif
 
 	return 0;
 }

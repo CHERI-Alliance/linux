@@ -19,7 +19,7 @@
 static int snd_emux_open_seq_oss(struct snd_seq_oss_arg *arg, void *closure);
 static int snd_emux_close_seq_oss(struct snd_seq_oss_arg *arg);
 static int snd_emux_ioctl_seq_oss(struct snd_seq_oss_arg *arg, unsigned int cmd,
-				  unsigned long ioarg);
+				  user_uintptr_t ioarg);
 static int snd_emux_load_patch_seq_oss(struct snd_seq_oss_arg *arg, int format,
 				       const char __user *buf, int offs, int count);
 static int snd_emux_reset_seq_oss(struct snd_seq_oss_arg *arg);
@@ -231,7 +231,8 @@ snd_emux_load_patch_seq_oss(struct snd_seq_oss_arg *arg, int format,
  * ioctl
  */
 static int
-snd_emux_ioctl_seq_oss(struct snd_seq_oss_arg *arg, unsigned int cmd, unsigned long ioarg)
+snd_emux_ioctl_seq_oss(struct snd_seq_oss_arg *arg, unsigned int cmd,
+		       user_uintptr_t ioarg)
 {
 	struct snd_emux_port *p;
 	struct snd_emux *emu;

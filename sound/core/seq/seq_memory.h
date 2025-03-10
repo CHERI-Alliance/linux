@@ -22,7 +22,7 @@ union __snd_seq_event {
 #if IS_ENABLED(CONFIG_SND_SEQ_UMP)
 		u32 extra;
 #endif
-	} __packed raw;
+	} __packed __cheri_pointer_align raw;
 };
 
 /* container for sequencer event (internal use) */

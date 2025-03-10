@@ -292,7 +292,7 @@ static SOC_ENUM_SINGLE_DECL(sta350_limiter2_release_rate_enum,
 static int sta350_coefficient_info(struct snd_kcontrol *kcontrol,
 				   struct snd_ctl_elem_info *uinfo)
 {
-	int numcoef = kcontrol->private_value >> 16;
+	int numcoef = __c_ua(kcontrol->private_value) >> 16;
 	uinfo->type = SNDRV_CTL_ELEM_TYPE_BYTES;
 	uinfo->count = 3 * numcoef;
 	return 0;
@@ -303,8 +303,8 @@ static int sta350_coefficient_get(struct snd_kcontrol *kcontrol,
 {
 	struct snd_soc_component *component = snd_soc_kcontrol_component(kcontrol);
 	struct sta350_priv *sta350 = snd_soc_component_get_drvdata(component);
-	int numcoef = kcontrol->private_value >> 16;
-	int index = kcontrol->private_value & 0xffff;
+	int numcoef = __c_ua(kcontrol->private_value) >> 16;
+	int index = __c_ua(kcontrol->private_value) & 0xffff;
 	unsigned int cfud, val;
 	int i, ret = 0;
 
@@ -345,8 +345,8 @@ static int sta350_coefficient_put(struct snd_kcontrol *kcontrol,
 {
 	struct snd_soc_component *component = snd_soc_kcontrol_component(kcontrol);
 	struct sta350_priv *sta350 = snd_soc_component_get_drvdata(component);
-	int numcoef = kcontrol->private_value >> 16;
-	int index = kcontrol->private_value & 0xffff;
+	int numcoef = __c_ua(kcontrol->private_value) >> 16;
+	int index = __c_ua(kcontrol->private_value) & 0xffff;
 	unsigned int cfud;
 	int i;
 
@@ -426,14 +426,14 @@ static int sta350_cache_sync(struct snd_soc_component *component)
 	.info = sta350_coefficient_info, \
 	.get = sta350_coefficient_get,\
 	.put = sta350_coefficient_put, \
-	.private_value = index | (1 << 16) }
+	.private_value = (uintptr_t __force)(index | (1 << 16)) }
 
 #define BIQUAD_COEFS(xname, index) \
 {	.iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname, \
 	.info = sta350_coefficient_info, \
 	.get = sta350_coefficient_get,\
 	.put = sta350_coefficient_put, \
-	.private_value = index | (5 << 16) }
+	.private_value = (uintptr_t __force)(index | (5 << 16)) }
 
 static const struct snd_kcontrol_new sta350_snd_controls[] = {
 SOC_SINGLE_TLV("Master Volume", STA350_MVOL, 0, 0xff, 1, mvol_tlv),

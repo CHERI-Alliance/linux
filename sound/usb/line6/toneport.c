@@ -411,7 +411,7 @@ static int toneport_init(struct usb_line6 *line6,
 	int err;
 	struct usb_line6_toneport *toneport = line6_to_toneport(line6);
 
-	toneport->type = id->driver_info;
+	toneport->type = __c_ua(id->driver_info);
 
 	line6->disconnect = line6_toneport_disconnect;
 	line6->startup = toneport_startup;
@@ -560,7 +560,7 @@ static int toneport_probe(struct usb_interface *interface,
 			  const struct usb_device_id *id)
 {
 	return line6_probe(interface, id, "Line6-TonePort",
-			   &toneport_properties_table[id->driver_info],
+			   &toneport_properties_table[__c_ua(id->driver_info)],
 			   toneport_init, sizeof(struct usb_line6_toneport));
 }
 

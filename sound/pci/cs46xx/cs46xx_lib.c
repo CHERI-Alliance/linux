@@ -1880,7 +1880,7 @@ static int snd_cs46xx_vol_info(struct snd_kcontrol *kcontrol,
 static int snd_cs46xx_vol_get(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_cs46xx *chip = snd_kcontrol_chip(kcontrol);
-	int reg = kcontrol->private_value;
+	int reg = __c_ua(kcontrol->private_value);
 	unsigned int val = snd_cs46xx_peek(chip, reg);
 	ucontrol->value.integer.value[0] = 0xffff - (val >> 16);
 	ucontrol->value.integer.value[1] = 0xffff - (val & 0xffff);
@@ -1890,7 +1890,7 @@ static int snd_cs46xx_vol_get(struct snd_kcontrol *kcontrol, struct snd_ctl_elem
 static int snd_cs46xx_vol_put(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_cs46xx *chip = snd_kcontrol_chip(kcontrol);
-	int reg = kcontrol->private_value;
+	int reg = __c_ua(kcontrol->private_value);
 	unsigned int val = ((0xffff - ucontrol->value.integer.value[0]) << 16 | 
 			    (0xffff - ucontrol->value.integer.value[1]));
 	unsigned int old = snd_cs46xx_peek(chip, reg);
@@ -1964,7 +1964,7 @@ static int snd_cs46xx_iec958_get(struct snd_kcontrol *kcontrol,
                                  struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_cs46xx *chip = snd_kcontrol_chip(kcontrol);
-	int reg = kcontrol->private_value;
+	int reg = __c_ua(kcontrol->private_value);
 
 	if (reg == CS46XX_MIXER_SPDIF_OUTPUT_ELEMENT)
 		ucontrol->value.integer.value[0] = (chip->dsp_spos_instance->spdif_status_out & DSP_SPDIF_STATUS_OUTPUT_ENABLED);
@@ -1980,7 +1980,7 @@ static int snd_cs46xx_iec958_put(struct snd_kcontrol *kcontrol,
 	struct snd_cs46xx *chip = snd_kcontrol_chip(kcontrol);
 	int change, res;
 
-	switch (kcontrol->private_value) {
+	switch (__c_ua(kcontrol->private_value)) {
 	case CS46XX_MIXER_SPDIF_OUTPUT_ELEMENT:
 		mutex_lock(&chip->spos_mutex);
 		change = (chip->dsp_spos_instance->spdif_status_out & DSP_SPDIF_STATUS_OUTPUT_ENABLED);

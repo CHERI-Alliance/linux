@@ -31,7 +31,7 @@ static int ad193x_i2c_probe(struct i2c_client *client)
 
 	return ad193x_probe(&client->dev,
 			    devm_regmap_init_i2c(client, &config),
-			    (enum ad193x_type)id->driver_data);
+			    (enum ad193x_type)__c_ua(id->driver_data));
 }
 
 static struct i2c_driver ad193x_i2c_driver = {

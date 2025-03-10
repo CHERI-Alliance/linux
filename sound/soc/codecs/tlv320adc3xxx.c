@@ -552,7 +552,7 @@ static int adc3xxx_pll_delay(struct snd_soc_dapm_widget *w,
 static int adc3xxx_coefficient_info(struct snd_kcontrol *kcontrol,
 				    struct snd_ctl_elem_info *uinfo)
 {
-	int numcoeff = kcontrol->private_value >> 16;
+	int numcoeff = __c_ua(kcontrol->private_value) >> 16;
 
 	uinfo->type = SNDRV_CTL_ELEM_TYPE_INTEGER;
 	uinfo->count = numcoeff;
@@ -565,8 +565,8 @@ static int adc3xxx_coefficient_get(struct snd_kcontrol *kcontrol,
 				   struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_soc_component *component = snd_soc_kcontrol_component(kcontrol);
-	int numcoeff  = kcontrol->private_value >> 16;
-	int reg = kcontrol->private_value & 0xffff;
+	int numcoeff  = __c_ua(kcontrol->private_value) >> 16;
+	int reg = __c_ua(kcontrol->private_value) & 0xffff;
 	int index = 0;
 
 	for (index = 0; index < numcoeff; index++) {
@@ -591,8 +591,8 @@ static int adc3xxx_coefficient_put(struct snd_kcontrol *kcontrol,
 				   struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_soc_component *component = snd_soc_kcontrol_component(kcontrol);
-	int numcoeff  = kcontrol->private_value >> 16;
-	int reg = kcontrol->private_value & 0xffff;
+	int numcoeff  = __c_ua(kcontrol->private_value) >> 16;
+	int reg = __c_ua(kcontrol->private_value) & 0xffff;
 	int index = 0;
 	int ret;
 
@@ -623,7 +623,7 @@ static int adc3xxx_coefficient_put(struct snd_kcontrol *kcontrol,
 	.get = adc3xxx_coefficient_get,\
 	.put = adc3xxx_coefficient_put, \
 	.access = SNDRV_CTL_ELEM_ACCESS_READWRITE, \
-	.private_value = reg | (numcoeffs << 16) \
+	.private_value = (uintptr_t __force)(reg | (numcoeffs << 16)) \
 }
 
 static const char * const adc_softstepping_text[] = { "1 step", "2 step", "off" };
@@ -1405,7 +1405,7 @@ static int adc3xxx_i2c_probe(struct i2c_client *i2c)
 	i2c_set_clientdata(i2c, adc3xxx);
 
 	id = i2c_match_id(adc3xxx_i2c_id, i2c);
-	adc3xxx->type = id->driver_data;
+	adc3xxx->type = __c_ua(id->driver_data);
 
 	/* Reset codec chip */
 	gpiod_set_value_cansleep(adc3xxx->rst_pin, 1);

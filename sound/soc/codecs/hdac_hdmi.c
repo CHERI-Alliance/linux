@@ -991,7 +991,7 @@ static int hdac_hdmi_create_pin_port_muxs(struct hdac_device *hdev,
 	if (!kc->name)
 		return -ENOMEM;
 
-	kc->private_value = (long)se;
+	kc->private_value = (uintptr_t)se;
 	kc->iface = SNDRV_CTL_ELEM_IFACE_MIXER;
 	kc->access = 0;
 	kc->info = snd_soc_info_enum_double;
@@ -1798,7 +1798,7 @@ static int create_fill_jack_kcontrols(struct snd_soc_card *card,
 			if (!kc[i].name)
 				return -ENOMEM;
 
-			kc[i].private_value = (unsigned long)name;
+			kc[i].private_value = (uintptr_t)name;
 			kc[i].iface = SNDRV_CTL_ELEM_IFACE_MIXER;
 			kc[i].access = 0;
 			kc[i].info = snd_soc_dapm_info_pin_switch;

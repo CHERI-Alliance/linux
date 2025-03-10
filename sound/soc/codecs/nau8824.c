@@ -1941,7 +1941,7 @@ static void nau8824_check_quirks(void)
 
 	dmi_id = dmi_first_match(nau8824_quirk_table);
 	if (dmi_id)
-		nau8824_quirk = (unsigned long)dmi_id->driver_data;
+		nau8824_quirk = __c_pa(dmi_id->driver_data);
 }
 
 const char *nau8824_components(void)

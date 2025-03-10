@@ -27,7 +27,7 @@ static int aic32x4_i2c_probe(struct i2c_client *i2c)
 	config.val_bits = 8;
 
 	regmap = devm_regmap_init_i2c(i2c, &config);
-	type = (uintptr_t)i2c_get_match_data(i2c);
+	type = __c_pa(i2c_get_match_data(i2c));
 
 	return aic32x4_probe(&i2c->dev, regmap, type);
 }

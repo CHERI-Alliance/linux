@@ -1513,7 +1513,7 @@ static int stm32_sai_sub_probe(struct platform_device *pdev)
 	if (!sai)
 		return -ENOMEM;
 
-	sai->id = (uintptr_t)device_get_match_data(&pdev->dev);
+	sai->id = __c_pa(device_get_match_data(&pdev->dev));
 
 	sai->pdev = pdev;
 	mutex_init(&sai->ctrl_lock);

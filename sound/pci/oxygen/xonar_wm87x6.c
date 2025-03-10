@@ -501,9 +501,9 @@ static int wm8776_bit_switch_get(struct snd_kcontrol *ctl,
 {
 	struct oxygen *chip = ctl->private_data;
 	struct xonar_wm87x6 *data = chip->model_data;
-	u16 bit = ctl->private_value & 0xffff;
-	unsigned int reg_index = (ctl->private_value >> 16) & 0xff;
-	bool invert = (ctl->private_value >> 24) & 1;
+	u16 bit = __c_ua(ctl->private_value) & 0xffff;
+	unsigned int reg_index = (__c_ua(ctl->private_value) >> 16) & 0xff;
+	bool invert = (__c_ua(ctl->private_value) >> 24) & 1;
 
 	value->value.integer.value[0] =
 		((data->wm8776_regs[reg_index] & bit) != 0) ^ invert;
@@ -515,10 +515,10 @@ static int wm8776_bit_switch_put(struct snd_kcontrol *ctl,
 {
 	struct oxygen *chip = ctl->private_data;
 	struct xonar_wm87x6 *data = chip->model_data;
-	u16 bit = ctl->private_value & 0xffff;
+	u16 bit = __c_ua(ctl->private_value) & 0xffff;
 	u16 reg_value;
-	unsigned int reg_index = (ctl->private_value >> 16) & 0xff;
-	bool invert = (ctl->private_value >> 24) & 1;
+	unsigned int reg_index = (__c_ua(ctl->private_value) >> 16) & 0xff;
+	bool invert = (__c_ua(ctl->private_value) >> 24) & 1;
 	int changed;
 
 	mutex_lock(&chip->mutex);
@@ -568,19 +568,19 @@ static int wm8776_field_enum_info(struct snd_kcontrol *ctl,
 	u8 max;
 	const char *const *names;
 
-	max = (ctl->private_value >> 12) & 0xf;
-	switch ((ctl->private_value >> 24) & 0x1f) {
+	max = (__c_ua(ctl->private_value) >> 12) & 0xf;
+	switch ((__c_ua(ctl->private_value) >> 24) & 0x1f) {
 	case WM8776_ALCCTRL2:
 		names = hld;
 		break;
 	case WM8776_ALCCTRL3:
-		if (((ctl->private_value >> 20) & 0xf) == 0) {
-			if (ctl->private_value & LC_CONTROL_LIMITER)
+		if (((__c_ua(ctl->private_value) >> 20) & 0xf) == 0) {
+			if (__c_ua(ctl->private_value) & LC_CONTROL_LIMITER)
 				names = atk_lim;
 			else
 				names = atk_alc;
 		} else {
-			if (ctl->private_value & LC_CONTROL_LIMITER)
+			if (__c_ua(ctl->private_value) & LC_CONTROL_LIMITER)
 				names = dcy_lim;
 			else
 				names = dcy_alc;
@@ -600,8 +600,8 @@ static int wm8776_field_volume_info(struct snd_kcontrol *ctl,
 {
 	info->type = SNDRV_CTL_ELEM_TYPE_INTEGER;
 	info->count = 1;
-	info->value.integer.min = (ctl->private_value >> 8) & 0xf;
-	info->value.integer.max = (ctl->private_value >> 12) & 0xf;
+	info->value.integer.min = (__c_ua(ctl->private_value) >> 8) & 0xf;
+	info->value.integer.max = (__c_ua(ctl->private_value) >> 12) & 0xf;
 	return 0;
 }
 
@@ -622,13 +622,13 @@ static void wm8776_field_set_from_ctl(struct snd_kcontrol *ctl)
 	if (!(ctl->private_value & mode))
 		return;
 
-	value = ctl->private_value & 0xf;
-	min = (ctl->private_value >> 8) & 0xf;
-	max = (ctl->private_value >> 12) & 0xf;
-	mask = (ctl->private_value >> 16) & 0xf;
-	shift = (ctl->private_value >> 20) & 0xf;
-	reg_index = (ctl->private_value >> 24) & 0x1f;
-	invert = (ctl->private_value >> 29) & 0x1;
+	value = __c_ua(ctl->private_value) & 0xf;
+	min = (__c_ua(ctl->private_value) >> 8) & 0xf;
+	max = (__c_ua(ctl->private_value) >> 12) & 0xf;
+	mask = (__c_ua(ctl->private_value) >> 16) & 0xf;
+	shift = (__c_ua(ctl->private_value) >> 20) & 0xf;
+	reg_index = (__c_ua(ctl->private_value) >> 24) & 0x1f;
+	invert = (__c_ua(ctl->private_value) >> 29) & 0x1;
 
 	if (invert)
 		value = max - (value - min);
@@ -644,12 +644,12 @@ static int wm8776_field_set(struct snd_kcontrol *ctl, unsigned int value)
 	u8 min, max;
 	int changed;
 
-	min = (ctl->private_value >> 8) & 0xf;
-	max = (ctl->private_value >> 12) & 0xf;
+	min = (__c_ua(ctl->private_value) >> 8) & 0xf;
+	max = (__c_ua(ctl->private_value) >> 12) & 0xf;
 	if (value < min || value > max)
 		return -EINVAL;
 	mutex_lock(&chip->mutex);
-	changed = value != (ctl->private_value & 0xf);
+	changed = value != (__c_ua(ctl->private_value) & 0xf);
 	if (changed) {
 		ctl->private_value = (ctl->private_value & ~0xf) | value;
 		wm8776_field_set_from_ctl(ctl);
@@ -661,14 +661,14 @@ static int wm8776_field_set(struct snd_kcontrol *ctl, unsigned int value)
 static int wm8776_field_enum_get(struct snd_kcontrol *ctl,
 				 struct snd_ctl_elem_value *value)
 {
-	value->value.enumerated.item[0] = ctl->private_value & 0xf;
+	value->value.enumerated.item[0] = __c_ua(ctl->private_value) & 0xf;
 	return 0;
 }
 
 static int wm8776_field_volume_get(struct snd_kcontrol *ctl,
 				   struct snd_ctl_elem_value *value)
 {
-	value->value.integer.value[0] = ctl->private_value & 0xf;
+	value->value.integer.value[0] = __c_ua(ctl->private_value) & 0xf;
 	return 0;
 }
 
@@ -753,7 +753,7 @@ static int wm8776_input_mux_get(struct snd_kcontrol *ctl,
 {
 	struct oxygen *chip = ctl->private_data;
 	struct xonar_wm87x6 *data = chip->model_data;
-	unsigned int mux_bit = ctl->private_value;
+	unsigned int mux_bit = __c_ua(ctl->private_value);
 
 	value->value.integer.value[0] =
 		!!(data->wm8776_regs[WM8776_ADCMUX] & mux_bit);
@@ -766,7 +766,7 @@ static int wm8776_input_mux_put(struct snd_kcontrol *ctl,
 	struct oxygen *chip = ctl->private_data;
 	struct xonar_wm87x6 *data = chip->model_data;
 	struct snd_kcontrol *other_ctl;
-	unsigned int mux_bit = ctl->private_value;
+	unsigned int mux_bit = __c_ua(ctl->private_value);
 	u16 reg;
 	int changed;
 
@@ -874,7 +874,7 @@ static void activate_control(struct oxygen *chip,
 {
 	unsigned int access;
 
-	if (ctl->private_value & mode)
+	if (__c_ua(ctl->private_value) & mode)
 		access = 0;
 	else
 		access = SNDRV_CTL_ELEM_ACCESS_INACTIVE;
@@ -898,7 +898,7 @@ static int wm8776_level_control_put(struct snd_kcontrol *ctl,
 	mutex_lock(&chip->mutex);
 	changed = value->value.enumerated.item[0] != ctl->private_value;
 	if (changed) {
-		ctl->private_value = value->value.enumerated.item[0];
+		ctl->private_value = __c_fakeu(value->value.enumerated.item[0]);
 		ctrl1 = data->wm8776_regs[WM8776_ALCCTRL1];
 		ctrl2 = data->wm8776_regs[WM8776_ALCCTRL2];
 		switch (value->value.enumerated.item[0]) {

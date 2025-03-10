@@ -979,8 +979,8 @@ static int snd_cs4281_get_volume(struct snd_kcontrol *kcontrol,
 				 struct snd_ctl_elem_value *ucontrol)
 {
 	struct cs4281 *chip = snd_kcontrol_chip(kcontrol);
-	int regL = (kcontrol->private_value >> 16) & 0xffff;
-	int regR = kcontrol->private_value & 0xffff;
+	int regL = (__c_ua(kcontrol->private_value) >> 16) & 0xffff;
+	int regR = __c_ua(kcontrol->private_value) & 0xffff;
 	int volL, volR;
 
 	volL = CS_VOL_MASK - (snd_cs4281_peekBA0(chip, regL) & CS_VOL_MASK);
@@ -996,8 +996,8 @@ static int snd_cs4281_put_volume(struct snd_kcontrol *kcontrol,
 {
 	struct cs4281 *chip = snd_kcontrol_chip(kcontrol);
 	int change = 0;
-	int regL = (kcontrol->private_value >> 16) & 0xffff;
-	int regR = kcontrol->private_value & 0xffff;
+	int regL = (__c_ua(kcontrol->private_value) >> 16) & 0xffff;
+	int regR = __c_ua(kcontrol->private_value) & 0xffff;
 	int volL, volR;
 
 	volL = CS_VOL_MASK - (snd_cs4281_peekBA0(chip, regL) & CS_VOL_MASK);

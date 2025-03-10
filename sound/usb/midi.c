@@ -1066,7 +1066,7 @@ static void update_roland_altsetting(struct snd_usb_midi *umidi)
 	is_light_load = intf->cur_altsetting != intf->altsetting;
 	if (umidi->roland_load_ctl->private_value == is_light_load)
 		return;
-	hostif = &intf->altsetting[umidi->roland_load_ctl->private_value];
+	hostif = &intf->altsetting[__c_ua(umidi->roland_load_ctl->private_value)];
 	intfd = get_iface_desc(hostif);
 	snd_usbmidi_input_stop(&umidi->list);
 	usb_set_interface(umidi->dev, intfd->bInterfaceNumber,
@@ -2005,7 +2005,7 @@ static int roland_load_info(struct snd_kcontrol *kcontrol,
 static int roland_load_get(struct snd_kcontrol *kcontrol,
 			   struct snd_ctl_elem_value *value)
 {
-	value->value.enumerated.item[0] = kcontrol->private_value;
+	value->value.enumerated.item[0] = __c_ua(kcontrol->private_value);
 	return 0;
 }
 
@@ -2018,9 +2018,9 @@ static int roland_load_put(struct snd_kcontrol *kcontrol,
 	if (value->value.enumerated.item[0] > 1)
 		return -EINVAL;
 	mutex_lock(&umidi->mutex);
-	changed = value->value.enumerated.item[0] != kcontrol->private_value;
+	changed = value->value.enumerated.item[0] != __c_ua(kcontrol->private_value);
 	if (changed)
-		kcontrol->private_value = value->value.enumerated.item[0];
+		kcontrol->private_value = __c_fakeu(value->value.enumerated.item[0]);
 	mutex_unlock(&umidi->mutex);
 	return changed;
 }

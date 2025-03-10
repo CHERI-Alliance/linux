@@ -701,10 +701,10 @@ static int tasdevice_i2c_probe(struct i2c_client *i2c)
 			ret = -EINVAL;
 			goto err;
 		}
-		tas_priv->chip_id = acpi_id->driver_data;
+		tas_priv->chip_id = __c_ua(acpi_id->driver_data);
 		tas_priv->isacpi = true;
 	} else {
-		tas_priv->chip_id = id ? id->driver_data : 0;
+		tas_priv->chip_id = id ? __c_ua(id->driver_data) : 0;
 		tas_priv->isacpi = false;
 	}
 

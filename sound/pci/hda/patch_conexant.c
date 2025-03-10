@@ -73,7 +73,7 @@ static int set_beep_amp(struct conexant_spec *spec, hda_nid_t nid,
 					    &cxt_beep_mixer[i]);
 		if (!knew)
 			return -ENOMEM;
-		knew->private_value = beep_amp;
+		knew->private_value = __c_fakeu(beep_amp);
 	}
 	return 0;
 }

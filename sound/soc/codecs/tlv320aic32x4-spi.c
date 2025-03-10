@@ -29,7 +29,7 @@ static int aic32x4_spi_probe(struct spi_device *spi)
 	config.read_flag_mask = 0x01;
 
 	regmap = devm_regmap_init_spi(spi, &config);
-	type = (uintptr_t)spi_get_device_match_data(spi);
+	type = __c_pa(spi_get_device_match_data(spi));
 
 	return aic32x4_probe(&spi->dev, regmap, type);
 }

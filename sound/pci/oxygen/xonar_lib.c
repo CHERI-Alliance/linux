@@ -92,8 +92,8 @@ int xonar_gpio_bit_switch_get(struct snd_kcontrol *ctl,
 			      struct snd_ctl_elem_value *value)
 {
 	struct oxygen *chip = ctl->private_data;
-	u16 bit = ctl->private_value;
-	bool invert = ctl->private_value & XONAR_GPIO_BIT_INVERT;
+	u16 bit = __c_ua(ctl->private_value);
+	bool invert = __c_ua(ctl->private_value) & XONAR_GPIO_BIT_INVERT;
 
 	value->value.integer.value[0] =
 		!!(oxygen_read16(chip, OXYGEN_GPIO_DATA) & bit) ^ invert;
@@ -104,8 +104,8 @@ int xonar_gpio_bit_switch_put(struct snd_kcontrol *ctl,
 			      struct snd_ctl_elem_value *value)
 {
 	struct oxygen *chip = ctl->private_data;
-	u16 bit = ctl->private_value;
-	bool invert = ctl->private_value & XONAR_GPIO_BIT_INVERT;
+	u16 bit = __c_ua(ctl->private_value);
+	bool invert = __c_ua(ctl->private_value) & XONAR_GPIO_BIT_INVERT;
 	u16 old_bits, new_bits;
 	int changed;
 

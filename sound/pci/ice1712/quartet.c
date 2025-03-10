@@ -674,7 +674,7 @@ static int qtet_enum_info(struct snd_kcontrol *kcontrol,
 		struct snd_ctl_elem_info *uinfo)
 {
 	struct qtet_kcontrol_private private =
-		qtet_privates[kcontrol->private_value];
+		qtet_privates[__c_ua(kcontrol->private_value)];
 	return snd_ctl_enum_info(uinfo, 1, ARRAY_SIZE(private.texts),
 				 private.texts);
 }
@@ -683,7 +683,7 @@ static int qtet_sw_get(struct snd_kcontrol *kcontrol,
 		struct snd_ctl_elem_value *ucontrol)
 {
 	struct qtet_kcontrol_private private =
-		qtet_privates[kcontrol->private_value];
+		qtet_privates[__c_ua(kcontrol->private_value)];
 	struct snd_ice1712 *ice = snd_kcontrol_chip(kcontrol);
 	ucontrol->value.integer.value[0] =
 		(private.get_register(ice) & private.bit) ? 1 : 0;
@@ -694,7 +694,7 @@ static int qtet_sw_put(struct snd_kcontrol *kcontrol,
 		struct snd_ctl_elem_value *ucontrol)
 {
 	struct qtet_kcontrol_private private =
-		qtet_privates[kcontrol->private_value];
+		qtet_privates[__c_ua(kcontrol->private_value)];
 	struct snd_ice1712 *ice = snd_kcontrol_chip(kcontrol);
 	unsigned int old, new;
 	old = private.get_register(ice);

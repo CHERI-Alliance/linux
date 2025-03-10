@@ -396,10 +396,10 @@ static int snd_at73c213_mono_get(struct snd_kcontrol *kcontrol,
 				 struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_at73c213 *chip = snd_kcontrol_chip(kcontrol);
-	int reg = kcontrol->private_value & 0xff;
-	int shift = (kcontrol->private_value >> 8) & 0xff;
-	int mask = (kcontrol->private_value >> 16) & 0xff;
-	int invert = (kcontrol->private_value >> 24) & 0xff;
+	int reg = __c_ua(kcontrol->private_value) & 0xff;
+	int shift = (__c_ua(kcontrol->private_value) >> 8) & 0xff;
+	int mask = (__c_ua(kcontrol->private_value) >> 16) & 0xff;
+	int invert = (__c_ua(kcontrol->private_value) >> 24) & 0xff;
 
 	mutex_lock(&chip->mixer_lock);
 
@@ -419,10 +419,10 @@ static int snd_at73c213_mono_put(struct snd_kcontrol *kcontrol,
 				 struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_at73c213 *chip = snd_kcontrol_chip(kcontrol);
-	int reg = kcontrol->private_value & 0xff;
-	int shift = (kcontrol->private_value >> 8) & 0xff;
-	int mask = (kcontrol->private_value >> 16) & 0xff;
-	int invert = (kcontrol->private_value >> 24) & 0xff;
+	int reg = __c_ua(kcontrol->private_value) & 0xff;
+	int shift = (__c_ua(kcontrol->private_value) >> 8) & 0xff;
+	int mask = (__c_ua(kcontrol->private_value) >> 16) & 0xff;
+	int invert = (__c_ua(kcontrol->private_value) >> 24) & 0xff;
 	int change, retval;
 	unsigned short val;
 
@@ -448,7 +448,7 @@ static int snd_at73c213_mono_put(struct snd_kcontrol *kcontrol,
 static int snd_at73c213_stereo_info(struct snd_kcontrol *kcontrol,
 				  struct snd_ctl_elem_info *uinfo)
 {
-	int mask = (kcontrol->private_value >> 24) & 0xff;
+	int mask = (__c_ua(kcontrol->private_value) >> 24) & 0xff;
 
 	if (mask == 1)
 		uinfo->type = SNDRV_CTL_ELEM_TYPE_BOOLEAN;
@@ -466,12 +466,12 @@ static int snd_at73c213_stereo_get(struct snd_kcontrol *kcontrol,
 				 struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_at73c213 *chip = snd_kcontrol_chip(kcontrol);
-	int left_reg = kcontrol->private_value & 0xff;
-	int right_reg = (kcontrol->private_value >> 8) & 0xff;
-	int shift_left = (kcontrol->private_value >> 16) & 0x07;
-	int shift_right = (kcontrol->private_value >> 19) & 0x07;
-	int mask = (kcontrol->private_value >> 24) & 0xff;
-	int invert = (kcontrol->private_value >> 22) & 1;
+	int left_reg = __c_ua(kcontrol->private_value) & 0xff;
+	int right_reg = (__c_ua(kcontrol->private_value) >> 8) & 0xff;
+	int shift_left = (__c_ua(kcontrol->private_value) >> 16) & 0x07;
+	int shift_right = (__c_ua(kcontrol->private_value) >> 19) & 0x07;
+	int mask = (__c_ua(kcontrol->private_value) >> 24) & 0xff;
+	int invert = (__c_ua(kcontrol->private_value) >> 22) & 1;
 
 	mutex_lock(&chip->mixer_lock);
 
@@ -496,12 +496,12 @@ static int snd_at73c213_stereo_put(struct snd_kcontrol *kcontrol,
 				 struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_at73c213 *chip = snd_kcontrol_chip(kcontrol);
-	int left_reg = kcontrol->private_value & 0xff;
-	int right_reg = (kcontrol->private_value >> 8) & 0xff;
-	int shift_left = (kcontrol->private_value >> 16) & 0x07;
-	int shift_right = (kcontrol->private_value >> 19) & 0x07;
-	int mask = (kcontrol->private_value >> 24) & 0xff;
-	int invert = (kcontrol->private_value >> 22) & 1;
+	int left_reg = __c_ua(kcontrol->private_value) & 0xff;
+	int right_reg = (__c_ua(kcontrol->private_value) >> 8) & 0xff;
+	int shift_left = (__c_ua(kcontrol->private_value) >> 16) & 0x07;
+	int shift_right = (__c_ua(kcontrol->private_value) >> 19) & 0x07;
+	int mask = (__c_ua(kcontrol->private_value) >> 24) & 0xff;
+	int invert = (__c_ua(kcontrol->private_value) >> 22) & 1;
 	int change, retval;
 	unsigned short val1, val2;
 
@@ -545,9 +545,9 @@ static int snd_at73c213_mono_switch_get(struct snd_kcontrol *kcontrol,
 				 struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_at73c213 *chip = snd_kcontrol_chip(kcontrol);
-	int reg = kcontrol->private_value & 0xff;
-	int shift = (kcontrol->private_value >> 8) & 0xff;
-	int invert = (kcontrol->private_value >> 24) & 0xff;
+	int reg = __c_ua(kcontrol->private_value) & 0xff;
+	int shift = (__c_ua(kcontrol->private_value) >> 8) & 0xff;
+	int invert = (__c_ua(kcontrol->private_value) >> 24) & 0xff;
 
 	mutex_lock(&chip->mixer_lock);
 
@@ -567,10 +567,10 @@ static int snd_at73c213_mono_switch_put(struct snd_kcontrol *kcontrol,
 				 struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_at73c213 *chip = snd_kcontrol_chip(kcontrol);
-	int reg = kcontrol->private_value & 0xff;
-	int shift = (kcontrol->private_value >> 8) & 0xff;
-	int mask = (kcontrol->private_value >> 16) & 0xff;
-	int invert = (kcontrol->private_value >> 24) & 0xff;
+	int reg = __c_ua(kcontrol->private_value) & 0xff;
+	int shift = (__c_ua(kcontrol->private_value) >> 8) & 0xff;
+	int mask = (__c_ua(kcontrol->private_value) >> 16) & 0xff;
+	int invert = (__c_ua(kcontrol->private_value) >> 24) & 0xff;
 	int change, retval;
 	unsigned short val;
 
@@ -604,7 +604,7 @@ static int snd_at73c213_pa_volume_info(struct snd_kcontrol *kcontrol,
 	uinfo->type = SNDRV_CTL_ELEM_TYPE_INTEGER;
 	uinfo->count = 1;
 	uinfo->value.integer.min = 0;
-	uinfo->value.integer.max = ((kcontrol->private_value >> 16) & 0xff) - 1;
+	uinfo->value.integer.max = ((__c_ua(kcontrol->private_value) >> 16) & 0xff) - 1;
 
 	return 0;
 }
@@ -643,7 +643,7 @@ static int snd_at73c213_aux_capture_volume_info(
 	.info = snd_at73c213_mono_switch_info,				\
 	.get = snd_at73c213_mono_switch_get,				\
 	.put = snd_at73c213_mono_switch_put,				\
-	.private_value = (reg | (shift << 8) | (mask << 16) | (invert << 24)) \
+	.private_value = (uintptr_t __force)(reg | (shift << 8) | (mask << 16) | (invert << 24)) \
 }
 
 #define AT73C213_STEREO(xname, xindex, left_reg, right_reg, shift_left, shift_right, mask, invert) \
@@ -654,7 +654,7 @@ static int snd_at73c213_aux_capture_volume_info(
 	.info = snd_at73c213_stereo_info,				\
 	.get = snd_at73c213_stereo_get,					\
 	.put = snd_at73c213_stereo_put,					\
-	.private_value = (left_reg | (right_reg << 8)			\
+	.private_value = (uintptr_t __force)(left_reg | (right_reg << 8)			\
 			| (shift_left << 16) | (shift_right << 19)	\
 			| (mask << 24) | (invert << 22))		\
 }

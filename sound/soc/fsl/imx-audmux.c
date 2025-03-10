@@ -140,7 +140,7 @@ static void audmux_debugfs_init(void)
 	audmux_debugfs_root = debugfs_create_dir("audmux", NULL);
 
 	for (i = 0; i < MX31_AUDMUX_PORT7_SSI_PINS_7 + 1; i++) {
-		snprintf(buf, sizeof(buf), "ssi%lu", i);
+		snprintf(buf, sizeof(buf), "ssi%lu", __c_ua(i));
 		debugfs_create_file(buf, 0444, audmux_debugfs_root,
 				    (void *)i, &audmux_debugfs_fops);
 	}
@@ -290,7 +290,7 @@ static int imx_audmux_probe(struct platform_device *pdev)
 		audmux_clk = NULL;
 	}
 
-	audmux_type = (uintptr_t)of_device_get_match_data(&pdev->dev);
+	audmux_type = __c_pa(of_device_get_match_data(&pdev->dev));
 
 	switch (audmux_type) {
 	case IMX31_AUDMUX:

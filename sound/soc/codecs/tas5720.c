@@ -739,7 +739,7 @@ static int tas5720_probe(struct i2c_client *client)
 
 	id = i2c_match_id(tas5720_id, client);
 	data->tas5720_client = client;
-	data->devtype = id->driver_data;
+	data->devtype = __c_ua(id->driver_data);
 
 	switch (id->driver_data) {
 	case TAS5720:

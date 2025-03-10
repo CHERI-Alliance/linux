@@ -61,7 +61,7 @@ static int create_beep_ctls(struct hda_codec *codec)
 		kctl = snd_ctl_new1(knew, codec);
 		if (!kctl)
 			return -ENOMEM;
-		kctl->private_value = spec->beep_amp;
+		kctl->private_value = __c_fakeu(spec->beep_amp);
 		err = snd_hda_ctl_add(codec, 0, kctl);
 		if (err < 0)
 			return err;

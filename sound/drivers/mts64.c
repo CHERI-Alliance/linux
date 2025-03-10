@@ -512,7 +512,7 @@ static int snd_mts64_ctl_smpte_time_get(struct snd_kcontrol *kctl,
 					struct snd_ctl_elem_value *uctl)
 {
 	struct mts64 *mts = snd_kcontrol_chip(kctl);
-	int idx = kctl->private_value;
+	int idx = __c_ua(kctl->private_value);
 
 	spin_lock_irq(&mts->lock);
 	uctl->value.integer.value[0] = mts->time[idx];
@@ -525,7 +525,7 @@ static int snd_mts64_ctl_smpte_time_put(struct snd_kcontrol *kctl,
 					struct snd_ctl_elem_value *uctl)
 {
 	struct mts64 *mts = snd_kcontrol_chip(kctl);
-	int idx = kctl->private_value;
+	int idx = __c_ua(kctl->private_value);
 	unsigned int time = uctl->value.integer.value[0] % 60;
 	int changed = 0;
 

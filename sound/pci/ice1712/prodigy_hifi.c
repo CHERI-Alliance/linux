@@ -397,7 +397,7 @@ static int wm_dac_vol_put(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_val
 static int wm8766_vol_info(struct snd_kcontrol *kcontrol,
 			   struct snd_ctl_elem_info *uinfo)
 {
-	int voices = kcontrol->private_value >> 8;
+	int voices = __c_ua(kcontrol->private_value) >> 8;
 	uinfo->type = SNDRV_CTL_ELEM_TYPE_INTEGER;
 	uinfo->count = voices;
 	uinfo->value.integer.min = 0;		/* mute */
@@ -412,8 +412,8 @@ static int wm8766_vol_get(struct snd_kcontrol *kcontrol,
 	struct prodigy_hifi_spec *spec = ice->spec;
 	int i, ofs, voices;
 
-	voices = kcontrol->private_value >> 8;
-	ofs = kcontrol->private_value & 0xff;
+	voices = __c_ua(kcontrol->private_value) >> 8;
+	ofs = __c_ua(kcontrol->private_value) & 0xff;
 	for (i = 0; i < voices; i++)
 		ucontrol->value.integer.value[i] = spec->vol[ofs + i];
 	return 0;
@@ -426,8 +426,8 @@ static int wm8766_vol_put(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_val
 	int i, idx, ofs, voices;
 	int change = 0;
 
-	voices = kcontrol->private_value >> 8;
-	ofs = kcontrol->private_value & 0xff;
+	voices = __c_ua(kcontrol->private_value) >> 8;
+	ofs = __c_ua(kcontrol->private_value) & 0xff;
 	mutex_lock(&ice->gpio_mutex);
 	for (i = 0; i < voices; i++) {
 		if (ucontrol->value.integer.value[i] != spec->vol[ofs + i]) {
@@ -627,7 +627,7 @@ static int wm_adc_mux_get(struct snd_kcontrol *kcontrol,
 			  struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_ice1712 *ice = snd_kcontrol_chip(kcontrol);
-	int bit = kcontrol->private_value;
+	int bit = __c_ua(kcontrol->private_value);
 
 	mutex_lock(&ice->gpio_mutex);
 	ucontrol->value.integer.value[0] =
@@ -640,7 +640,7 @@ static int wm_adc_mux_put(struct snd_kcontrol *kcontrol,
 			  struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_ice1712 *ice = snd_kcontrol_chip(kcontrol);
-	int bit = kcontrol->private_value;
+	int bit = __c_ua(kcontrol->private_value);
 	unsigned short oval, nval;
 	int change;
 

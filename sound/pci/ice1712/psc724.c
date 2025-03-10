@@ -259,7 +259,7 @@ static int psc724_ctl_get(struct snd_kcontrol *kcontrol,
 				  struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_ice1712 *ice = snd_kcontrol_chip(kcontrol);
-	int n = kcontrol->private_value;
+	int n = __c_ua(kcontrol->private_value);
 
 	ucontrol->value.integer.value[0] = psc724_cont[n].get(ice);
 
@@ -270,7 +270,7 @@ static int psc724_ctl_put(struct snd_kcontrol *kcontrol,
 				  struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_ice1712 *ice = snd_kcontrol_chip(kcontrol);
-	int n = kcontrol->private_value;
+	int n = __c_ua(kcontrol->private_value);
 
 	psc724_cont[n].set(ice, ucontrol->value.integer.value[0]);
 
@@ -338,7 +338,7 @@ static int psc724_add_controls(struct snd_ice1712 *ice)
 	memset(&cont, 0, sizeof(cont));
 	cont.iface = SNDRV_CTL_ELEM_IFACE_MIXER;
 	for (i = 0; i < ARRAY_SIZE(psc724_cont); i++) {
-		cont.private_value = i;
+		cont.private_value = __c_fakeu(i);
 		cont.name = psc724_cont[i].name;
 		cont.access = SNDRV_CTL_ELEM_ACCESS_READWRITE;
 		cont.info = snd_ctl_boolean_mono_info;

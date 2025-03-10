@@ -210,7 +210,7 @@ static int input_vol_get(struct snd_kcontrol *ctl,
 {
 	struct oxygen *chip = ctl->private_data;
 	struct dg *data = chip->model_data;
-	unsigned int idx = ctl->private_value;
+	unsigned int idx = __c_ua(ctl->private_value);
 
 	mutex_lock(&chip->mutex);
 	value->value.integer.value[0] = data->input_vol[idx][0];
@@ -224,7 +224,7 @@ static int input_vol_put(struct snd_kcontrol *ctl,
 {
 	struct oxygen *chip = ctl->private_data;
 	struct dg *data = chip->model_data;
-	unsigned int idx = ctl->private_value;
+	unsigned int idx = __c_ua(ctl->private_value);
 	int changed = 0;
 	int ret = 0;
 

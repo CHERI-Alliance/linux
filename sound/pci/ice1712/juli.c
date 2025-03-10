@@ -291,8 +291,8 @@ static int juli_mute_get(struct snd_kcontrol *kcontrol,
 {
 	struct snd_ice1712 *ice = snd_kcontrol_chip(kcontrol);
 	unsigned int val;
-	val = ice->gpio.get_data(ice) & (unsigned int) kcontrol->private_value;
-	if (kcontrol->private_value == GPIO_MUTE_CONTROL)
+	val = ice->gpio.get_data(ice) & (unsigned int) __c_ua(kcontrol->private_value);
+	if (__c_ua(kcontrol->private_value) == GPIO_MUTE_CONTROL)
 		/* val 0 = signal on */
 		ucontrol->value.integer.value[0] = (val) ? 0 : 1;
 	else
@@ -309,7 +309,7 @@ static int juli_mute_put(struct snd_kcontrol *kcontrol,
 	old_gpio = ice->gpio.get_data(ice);
 	if (ucontrol->value.integer.value[0]) {
 		/* unmute */
-		if (kcontrol->private_value == GPIO_MUTE_CONTROL) {
+		if (__c_ua(kcontrol->private_value) == GPIO_MUTE_CONTROL) {
 			/* 0 = signal on */
 			new_gpio = old_gpio & ~GPIO_MUTE_CONTROL;
 			/* un-smuting DAC */
@@ -317,10 +317,10 @@ static int juli_mute_put(struct snd_kcontrol *kcontrol,
 		} else
 			/* 1 = signal on */
 			new_gpio =  old_gpio |
-				(unsigned int) kcontrol->private_value;
+				(unsigned int) __c_ua(kcontrol->private_value);
 	} else {
 		/* mute */
-		if (kcontrol->private_value == GPIO_MUTE_CONTROL) {
+		if (__c_ua(kcontrol->private_value) == GPIO_MUTE_CONTROL) {
 			/* 1 = signal off */
 			new_gpio = old_gpio | GPIO_MUTE_CONTROL;
 			/* smuting DAC */
@@ -328,7 +328,7 @@ static int juli_mute_put(struct snd_kcontrol *kcontrol,
 		} else
 			/* 0 = signal off */
 			new_gpio =  old_gpio &
-				~((unsigned int) kcontrol->private_value);
+				~((unsigned int) __c_ua(kcontrol->private_value));
 	}
 	/* dev_dbg(ice->card->dev,
 		"JULI - mute/unmute: control_value: 0x%x, old_gpio: 0x%x, "

@@ -342,7 +342,7 @@ static int ct_alsa_mix_volume_get(struct snd_kcontrol *kcontrol,
 				  struct snd_ctl_elem_value *ucontrol)
 {
 	struct ct_atc *atc = snd_kcontrol_chip(kcontrol);
-	enum CT_AMIXER_CTL type = get_amixer_index(kcontrol->private_value);
+	enum CT_AMIXER_CTL type = get_amixer_index(__c_ua(kcontrol->private_value));
 	struct amixer *amixer;
 	int i, val;
 
@@ -365,7 +365,7 @@ static int ct_alsa_mix_volume_put(struct snd_kcontrol *kcontrol,
 {
 	struct ct_atc *atc = snd_kcontrol_chip(kcontrol);
 	struct ct_mixer *mixer = atc->mixer;
-	enum CT_AMIXER_CTL type = get_amixer_index(kcontrol->private_value);
+	enum CT_AMIXER_CTL type = get_amixer_index(__c_ua(kcontrol->private_value));
 	struct amixer *amixer;
 	int i, j, val, oval, change = 0;
 
@@ -580,7 +580,7 @@ static int ct_alsa_mix_switch_get(struct snd_kcontrol *kcontrol,
 {
 	struct ct_mixer *mixer =
 		((struct ct_atc *)snd_kcontrol_chip(kcontrol))->mixer;
-	enum CTALSA_MIXER_CTL type = kcontrol->private_value;
+	enum CTALSA_MIXER_CTL type = __c_ua(kcontrol->private_value);
 
 	ucontrol->value.integer.value[0] = get_switch_state(mixer, type);
 	return 0;
@@ -591,7 +591,7 @@ static int ct_alsa_mix_switch_put(struct snd_kcontrol *kcontrol,
 {
 	struct ct_atc *atc = snd_kcontrol_chip(kcontrol);
 	struct ct_mixer *mixer = atc->mixer;
-	enum CTALSA_MIXER_CTL type = kcontrol->private_value;
+	enum CTALSA_MIXER_CTL type = __c_ua(kcontrol->private_value);
 	int state;
 
 	state = ucontrol->value.integer.value[0];
@@ -742,7 +742,7 @@ static int ct_mixer_kcontrols_create(struct ct_mixer *mixer)
 	for (type = VOL_MIXER_START; type <= VOL_MIXER_END; type++) {
 		if (ct_kcontrol_init_table[type].ctl) {
 			vol_ctl.name = ct_kcontrol_init_table[type].name;
-			vol_ctl.private_value = (unsigned long)type;
+			vol_ctl.private_value = __c_fakeu(type);
 			err = ct_mixer_kcontrol_new(mixer, &vol_ctl);
 			if (err)
 				return err;
@@ -754,7 +754,7 @@ static int ct_mixer_kcontrols_create(struct ct_mixer *mixer)
 	for (type = SWH_MIXER_START; type <= SWH_MIXER_END; type++) {
 		if (ct_kcontrol_init_table[type].ctl) {
 			swh_ctl.name = ct_kcontrol_init_table[type].name;
-			swh_ctl.private_value = (unsigned long)type;
+			swh_ctl.private_value = __c_fakeu(type);
 			err = ct_mixer_kcontrol_new(mixer, &swh_ctl);
 			if (err)
 				return err;

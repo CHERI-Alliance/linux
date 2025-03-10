@@ -99,7 +99,7 @@ static int ac97_channel_mode_info(struct snd_kcontrol *kcontrol, struct snd_ctl_
 {
 	static const char * const texts[] = { "2ch", "4ch", "6ch", "8ch" };
 
-	return snd_ctl_enum_info(uinfo, 1, kcontrol->private_value, texts);
+	return snd_ctl_enum_info(uinfo, 1, __c_ua(kcontrol->private_value), texts);
 }
 
 static int ac97_channel_mode_get(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
@@ -1089,7 +1089,7 @@ static int snd_ac97_stac9758_output_jack_info(struct snd_kcontrol *kcontrol, str
 static int snd_ac97_stac9758_output_jack_get(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_ac97 *ac97 = snd_kcontrol_chip(kcontrol);
-	int shift = kcontrol->private_value;
+	int shift = __c_ua(kcontrol->private_value);
 	unsigned short val;
 
 	val = ac97->regs[AC97_SIGMATEL_OUTSEL] >> shift;
@@ -1103,7 +1103,7 @@ static int snd_ac97_stac9758_output_jack_get(struct snd_kcontrol *kcontrol, stru
 static int snd_ac97_stac9758_output_jack_put(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_ac97 *ac97 = snd_kcontrol_chip(kcontrol);
-	int shift = kcontrol->private_value;
+	int shift = __c_ua(kcontrol->private_value);
 	unsigned short val;
 
 	if (ucontrol->value.enumerated.item[0] > 4)
@@ -1128,7 +1128,7 @@ static int snd_ac97_stac9758_input_jack_info(struct snd_kcontrol *kcontrol, stru
 static int snd_ac97_stac9758_input_jack_get(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_ac97 *ac97 = snd_kcontrol_chip(kcontrol);
-	int shift = kcontrol->private_value;
+	int shift = __c_ua(kcontrol->private_value);
 	unsigned short val;
 
 	val = ac97->regs[AC97_SIGMATEL_INSEL];
@@ -1139,7 +1139,7 @@ static int snd_ac97_stac9758_input_jack_get(struct snd_kcontrol *kcontrol, struc
 static int snd_ac97_stac9758_input_jack_put(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_ac97 *ac97 = snd_kcontrol_chip(kcontrol);
-	int shift = kcontrol->private_value;
+	int shift = __c_ua(kcontrol->private_value);
 
 	return ac97_update_bits_page(ac97, AC97_SIGMATEL_INSEL, 7 << shift,
 				     ucontrol->value.enumerated.item[0] << shift, 0);
@@ -3686,7 +3686,7 @@ static int snd_ac97_vt1618_UAJ_info(struct snd_kcontrol *kcontrol,
 				    struct snd_ctl_elem_info *uinfo)
 {
 	return snd_ctl_enum_info(uinfo, 1, 4,
-				 vt1618_uaj[kcontrol->private_value].items);
+				 vt1618_uaj[__c_ua(kcontrol->private_value)].items);
 }
 
 /* All of the vt1618 Universal Audio Jack twiddlers are on
@@ -3705,13 +3705,13 @@ static int snd_ac97_vt1618_UAJ_get(struct snd_kcontrol *kcontrol,
 	snd_ac97_update_bits(pac97, AC97_INT_PAGING, AC97_PAGE_MASK, 0);
 
 	uaj = snd_ac97_read(pac97, 0x60) &
-		vt1618_uaj[kcontrol->private_value].mask;
+		vt1618_uaj[__c_ua(kcontrol->private_value)].mask;
 
 	snd_ac97_update_bits(pac97, AC97_INT_PAGING, AC97_PAGE_MASK, datpag);
 	mutex_unlock(&pac97->page_mutex);
 
 	ucontrol->value.enumerated.item[0] = uaj >>
-		vt1618_uaj[kcontrol->private_value].shift;
+		vt1618_uaj[__c_ua(kcontrol->private_value)].shift;
 
 	return 0;
 }
@@ -3720,9 +3720,9 @@ static int snd_ac97_vt1618_UAJ_put(struct snd_kcontrol *kcontrol,
 				   struct snd_ctl_elem_value *ucontrol)
 {
 	return ac97_update_bits_page(snd_kcontrol_chip(kcontrol), 0x60,
-				     vt1618_uaj[kcontrol->private_value].mask,
+				     vt1618_uaj[__c_ua(kcontrol->private_value)].mask,
 				     ucontrol->value.enumerated.item[0]<<
-				     vt1618_uaj[kcontrol->private_value].shift,
+				     vt1618_uaj[__c_ua(kcontrol->private_value)].shift,
 				     0);
 }
 

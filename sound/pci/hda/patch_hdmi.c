@@ -344,7 +344,7 @@ static int hdmi_eld_ctl_info(struct snd_kcontrol *kcontrol,
 
 	uinfo->type = SNDRV_CTL_ELEM_TYPE_BYTES;
 
-	pcm_idx = kcontrol->private_value;
+	pcm_idx = __c_ua(kcontrol->private_value);
 	mutex_lock(&spec->pcm_lock);
 	per_pin = pcm_idx_to_pin(spec, pcm_idx);
 	if (!per_pin) {
@@ -370,7 +370,7 @@ static int hdmi_eld_ctl_get(struct snd_kcontrol *kcontrol,
 	int pcm_idx;
 	int err = 0;
 
-	pcm_idx = kcontrol->private_value;
+	pcm_idx = __c_ua(kcontrol->private_value);
 	mutex_lock(&spec->pcm_lock);
 	per_pin = pcm_idx_to_pin(spec, pcm_idx);
 	if (!per_pin) {
@@ -418,7 +418,7 @@ static int hdmi_create_eld_ctl(struct hda_codec *codec, int pcm_idx,
 	kctl = snd_ctl_new1(&eld_bytes_ctl, codec);
 	if (!kctl)
 		return -ENOMEM;
-	kctl->private_value = pcm_idx;
+	kctl->private_value = __c_fakeu(pcm_idx);
 	kctl->id.device = device;
 
 	/* no pin nid is associated with the kctl now

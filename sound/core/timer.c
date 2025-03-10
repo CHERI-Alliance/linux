@@ -2010,7 +2010,7 @@ enum {
 };
 
 static long __snd_timer_user_ioctl(struct file *file, unsigned int cmd,
-				 unsigned long arg, bool compat)
+				   user_uintptr_t arg, bool compat)
 {
 	struct snd_timer_user *tu;
 	void __user *argp = (void __user *)arg;
@@ -2058,7 +2058,7 @@ static long __snd_timer_user_ioctl(struct file *file, unsigned int cmd,
 }
 
 static long snd_timer_user_ioctl(struct file *file, unsigned int cmd,
-				 unsigned long arg)
+				 user_uintptr_t arg)
 {
 	struct snd_timer_user *tu = file->private_data;
 

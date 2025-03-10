@@ -757,7 +757,7 @@ static const unsigned short snd_emu1010_adc_pad_regs[] = {
 static int snd_emu1010_adc_pads_get(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_emu10k1 *emu = snd_kcontrol_chip(kcontrol);
-	unsigned int mask = snd_emu1010_adc_pad_regs[kcontrol->private_value];
+	unsigned int mask = snd_emu1010_adc_pad_regs[__c_ua(kcontrol->private_value)];
 
 	ucontrol->value.integer.value[0] = (emu->emu1010.adc_pads & mask) ? 1 : 0;
 	return 0;
@@ -766,7 +766,7 @@ static int snd_emu1010_adc_pads_get(struct snd_kcontrol *kcontrol, struct snd_ct
 static int snd_emu1010_adc_pads_put(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_emu10k1 *emu = snd_kcontrol_chip(kcontrol);
-	unsigned int mask = snd_emu1010_adc_pad_regs[kcontrol->private_value];
+	unsigned int mask = snd_emu1010_adc_pad_regs[__c_ua(kcontrol->private_value)];
 	unsigned int val, cache;
 	int change;
 
@@ -815,7 +815,7 @@ static const unsigned short snd_emu1010_dac_regs[] = {
 static int snd_emu1010_dac_pads_get(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_emu10k1 *emu = snd_kcontrol_chip(kcontrol);
-	unsigned int mask = snd_emu1010_dac_regs[kcontrol->private_value];
+	unsigned int mask = snd_emu1010_dac_regs[__c_ua(kcontrol->private_value)];
 
 	ucontrol->value.integer.value[0] = (emu->emu1010.dac_pads & mask) ? 1 : 0;
 	return 0;
@@ -824,7 +824,7 @@ static int snd_emu1010_dac_pads_get(struct snd_kcontrol *kcontrol, struct snd_ct
 static int snd_emu1010_dac_pads_put(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_emu10k1 *emu = snd_kcontrol_chip(kcontrol);
-	unsigned int mask = snd_emu1010_dac_regs[kcontrol->private_value];
+	unsigned int mask = snd_emu1010_dac_regs[__c_ua(kcontrol->private_value)];
 	unsigned int val, cache;
 	int change;
 

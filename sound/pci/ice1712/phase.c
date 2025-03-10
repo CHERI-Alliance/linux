@@ -464,7 +464,7 @@ static int phase28_init(struct snd_ice1712 *ice)
 static int wm_vol_info(struct snd_kcontrol *kcontrol,
 			struct snd_ctl_elem_info *uinfo)
 {
-	int voices = kcontrol->private_value >> 8;
+	int voices = __c_ua(kcontrol->private_value) >> 8;
 	uinfo->type = SNDRV_CTL_ELEM_TYPE_INTEGER;
 	uinfo->count = voices;
 	uinfo->value.integer.min = 0;		/* mute (-101dB) */
@@ -479,8 +479,8 @@ static int wm_vol_get(struct snd_kcontrol *kcontrol,
 	struct phase28_spec *spec = ice->spec;
 	int i, ofs, voices;
 
-	voices = kcontrol->private_value >> 8;
-	ofs = kcontrol->private_value & 0xff;
+	voices = __c_ua(kcontrol->private_value) >> 8;
+	ofs = __c_ua(kcontrol->private_value) & 0xff;
 	for (i = 0; i < voices; i++)
 		ucontrol->value.integer.value[i] =
 			spec->vol[ofs+i] & ~WM_VOL_MUTE;
@@ -495,8 +495,8 @@ static int wm_vol_put(struct snd_kcontrol *kcontrol,
 	int i, idx, ofs, voices;
 	int change = 0;
 
-	voices = kcontrol->private_value >> 8;
-	ofs = kcontrol->private_value & 0xff;
+	voices = __c_ua(kcontrol->private_value) >> 8;
+	ofs = __c_ua(kcontrol->private_value) & 0xff;
 	snd_ice1712_save_gpio_status(ice);
 	for (i = 0; i < voices; i++) {
 		unsigned int vol;
@@ -522,7 +522,7 @@ static int wm_vol_put(struct snd_kcontrol *kcontrol,
 static int wm_mute_info(struct snd_kcontrol *kcontrol,
 			struct snd_ctl_elem_info *uinfo) {
 	uinfo->type = SNDRV_CTL_ELEM_TYPE_BOOLEAN;
-	uinfo->count = kcontrol->private_value >> 8;
+	uinfo->count = __c_ua(kcontrol->private_value) >> 8;
 	uinfo->value.integer.min = 0;
 	uinfo->value.integer.max = 1;
 	return 0;
@@ -535,8 +535,8 @@ static int wm_mute_get(struct snd_kcontrol *kcontrol,
 	struct phase28_spec *spec = ice->spec;
 	int voices, ofs, i;
 
-	voices = kcontrol->private_value >> 8;
-	ofs = kcontrol->private_value & 0xFF;
+	voices = __c_ua(kcontrol->private_value) >> 8;
+	ofs = __c_ua(kcontrol->private_value) & 0xFF;
 
 	for (i = 0; i < voices; i++)
 		ucontrol->value.integer.value[i] =
@@ -551,8 +551,8 @@ static int wm_mute_put(struct snd_kcontrol *kcontrol,
 	struct phase28_spec *spec = ice->spec;
 	int change = 0, voices, ofs, i;
 
-	voices = kcontrol->private_value >> 8;
-	ofs = kcontrol->private_value & 0xFF;
+	voices = __c_ua(kcontrol->private_value) >> 8;
+	ofs = __c_ua(kcontrol->private_value) & 0xFF;
 
 	snd_ice1712_save_gpio_status(ice);
 	for (i = 0; i < voices; i++) {

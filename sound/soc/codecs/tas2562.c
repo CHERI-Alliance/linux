@@ -740,7 +740,7 @@ static int tas2562_probe(struct i2c_client *client)
 	id = i2c_match_id(tas2562_id, client);
 	data->client = client;
 	data->dev = &client->dev;
-	data->model_id = id->driver_data;
+	data->model_id = __c_ua(id->driver_data);
 
 	tas2562_parse_dt(data);
 

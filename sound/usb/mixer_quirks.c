@@ -292,7 +292,7 @@ static int snd_usb_soundblaster_remote_init(struct usb_mixer_interface *mixer)
 
 static int snd_audigy2nx_led_get(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
-	ucontrol->value.integer.value[0] = kcontrol->private_value >> 8;
+	ucontrol->value.integer.value[0] = __c_ua(kcontrol->private_value) >> 8;
 	return 0;
 }
 
@@ -331,23 +331,23 @@ static int snd_audigy2nx_led_put(struct snd_kcontrol *kcontrol,
 {
 	struct usb_mixer_elem_list *list = snd_kcontrol_chip(kcontrol);
 	struct usb_mixer_interface *mixer = list->mixer;
-	int index = kcontrol->private_value & 0xff;
+	int index = __c_ua(kcontrol->private_value) & 0xff;
 	unsigned int value = ucontrol->value.integer.value[0];
-	int old_value = kcontrol->private_value >> 8;
+	int old_value = __c_ua(kcontrol->private_value) >> 8;
 	int err;
 
 	if (value > 1)
 		return -EINVAL;
 	if (value == old_value)
 		return 0;
-	kcontrol->private_value = (value << 8) | index;
+	kcontrol->private_value = __c_fakeu((value << 8) | index);
 	err = snd_audigy2nx_led_update(mixer, value, index);
 	return err < 0 ? err : 1;
 }
 
 static int snd_audigy2nx_led_resume(struct usb_mixer_elem_list *list)
 {
-	int priv_value = list->kctl->private_value;
+	int priv_value = __c_ua(list->kctl->private_value);
 
 	return snd_audigy2nx_led_update(list->mixer, priv_value >> 8,
 					priv_value & 0xff);
@@ -389,7 +389,7 @@ static int snd_audigy2nx_controls_create(struct usb_mixer_interface *mixer)
 
 		knew = snd_audigy2nx_control;
 		knew.name = snd_audigy2nx_led_names[i];
-		knew.private_value = (1 << 8) | i; /* LED on as default */
+		knew.private_value = __c_fakeu((1 << 8) | i); /* LED on as default */
 		err = add_single_ctl_with_resume(mixer, 0,
 						 snd_audigy2nx_led_resume,
 						 &knew, NULL);
@@ -461,7 +461,7 @@ static int snd_emu0204_ch_switch_info(struct snd_kcontrol *kcontrol,
 static int snd_emu0204_ch_switch_get(struct snd_kcontrol *kcontrol,
 				     struct snd_ctl_elem_value *ucontrol)
 {
-	ucontrol->value.enumerated.item[0] = kcontrol->private_value;
+	ucontrol->value.enumerated.item[0] = __c_ua(kcontrol->private_value);
 	return 0;
 }
 
@@ -497,10 +497,10 @@ static int snd_emu0204_ch_switch_put(struct snd_kcontrol *kcontrol,
 	if (value > 1)
 		return -EINVAL;
 
-	if (value == kcontrol->private_value)
+	if (value == __c_ua(kcontrol->private_value))
 		return 0;
 
-	kcontrol->private_value = value;
+	kcontrol->private_value = __c_fakeu(value);
 	err = snd_emu0204_ch_switch_update(mixer, value);
 	return err < 0 ? err : 1;
 }
@@ -508,7 +508,7 @@ static int snd_emu0204_ch_switch_put(struct snd_kcontrol *kcontrol,
 static int snd_emu0204_ch_switch_resume(struct usb_mixer_elem_list *list)
 {
 	return snd_emu0204_ch_switch_update(list->mixer,
-					    list->kctl->private_value);
+					    __c_ua(list->kctl->private_value));
 }
 
 static const struct snd_kcontrol_new snd_emu0204_control = {
@@ -560,7 +560,7 @@ static int snd_xonar_u1_switch_put(struct snd_kcontrol *kcontrol,
 	u8 old_status, new_status;
 	int err;
 
-	old_status = kcontrol->private_value;
+	old_status = __c_ua(kcontrol->private_value);
 	if (ucontrol->value.integer.value[0])
 		new_status = old_status | 0x02;
 	else
@@ -568,7 +568,7 @@ static int snd_xonar_u1_switch_put(struct snd_kcontrol *kcontrol,
 	if (new_status == old_status)
 		return 0;
 
-	kcontrol->private_value = new_status;
+	kcontrol->private_value = __c_fakeu(new_status);
 	err = snd_xonar_u1_switch_update(list->mixer, new_status);
 	return err < 0 ? err : 1;
 }
@@ -576,7 +576,7 @@ static int snd_xonar_u1_switch_put(struct snd_kcontrol *kcontrol,
 static int snd_xonar_u1_switch_resume(struct usb_mixer_elem_list *list)
 {
 	return snd_xonar_u1_switch_update(list->mixer,
-					  list->kctl->private_value);
+					  __c_ua(list->kctl->private_value));
 }
 
 static const struct snd_kcontrol_new snd_xonar_u1_output_switch = {
@@ -689,9 +689,9 @@ static int snd_mbox1_clk_switch_get(struct snd_kcontrol *kctl,
 	if (err < 0)
 		goto err;
 
-	kctl->private_value = err;
+	kctl->private_value = __c_fakeu(err);
 	err = 0;
-	ucontrol->value.enumerated.item[0] = kctl->private_value;
+	ucontrol->value.enumerated.item[0] = __c_ua(kctl->private_value);
 err:
 	snd_usb_unlock_shutdown(chip);
 	return err;
@@ -733,12 +733,12 @@ static int snd_mbox1_clk_switch_put(struct snd_kcontrol *kctl,
 	int err;
 	bool cur_val, new_val;
 
-	cur_val = kctl->private_value;
+	cur_val = __c_ua(kctl->private_value);
 	new_val = ucontrol->value.enumerated.item[0];
 	if (cur_val == new_val)
 		return 0;
 
-	kctl->private_value = new_val;
+	kctl->private_value = __c_fakeu(new_val);
 	err = snd_mbox1_clk_switch_update(mixer, new_val);
 	return err < 0 ? err : 1;
 }
@@ -756,7 +756,7 @@ static int snd_mbox1_clk_switch_info(struct snd_kcontrol *kcontrol,
 
 static int snd_mbox1_clk_switch_resume(struct usb_mixer_elem_list *list)
 {
-	return snd_mbox1_clk_switch_update(list->mixer, list->kctl->private_value);
+	return snd_mbox1_clk_switch_update(list->mixer, __c_ua(list->kctl->private_value));
 }
 
 /* Digidesign Mbox 1 input source switch (analog/spdif) */
@@ -764,7 +764,7 @@ static int snd_mbox1_clk_switch_resume(struct usb_mixer_elem_list *list)
 static int snd_mbox1_src_switch_get(struct snd_kcontrol *kctl,
 				    struct snd_ctl_elem_value *ucontrol)
 {
-	ucontrol->value.enumerated.item[0] = kctl->private_value;
+	ucontrol->value.enumerated.item[0] = __c_ua(kctl->private_value);
 	return 0;
 }
 
@@ -803,12 +803,12 @@ static int snd_mbox1_src_switch_put(struct snd_kcontrol *kctl,
 	int err;
 	bool cur_val, new_val;
 
-	cur_val = kctl->private_value;
+	cur_val = __c_ua(kctl->private_value);
 	new_val = ucontrol->value.enumerated.item[0];
 	if (cur_val == new_val)
 		return 0;
 
-	kctl->private_value = new_val;
+	kctl->private_value = __c_fakeu(new_val);
 	err = snd_mbox1_src_switch_update(mixer, new_val);
 	return err < 0 ? err : 1;
 }
@@ -826,7 +826,7 @@ static int snd_mbox1_src_switch_info(struct snd_kcontrol *kcontrol,
 
 static int snd_mbox1_src_switch_resume(struct usb_mixer_elem_list *list)
 {
-	return snd_mbox1_src_switch_update(list->mixer, list->kctl->private_value);
+	return snd_mbox1_src_switch_update(list->mixer, __c_ua(list->kctl->private_value));
 }
 
 static const struct snd_kcontrol_new snd_mbox1_clk_switch = {
@@ -873,7 +873,7 @@ static int snd_ni_control_init_val(struct usb_mixer_interface *mixer,
 				   struct snd_kcontrol *kctl)
 {
 	struct usb_device *dev = mixer->chip->dev;
-	unsigned int pval = kctl->private_value;
+	unsigned int pval = __c_ua(kctl->private_value);
 	u8 value;
 	int err;
 
@@ -894,14 +894,14 @@ static int snd_ni_control_init_val(struct usb_mixer_interface *mixer,
 static int snd_nativeinstruments_control_get(struct snd_kcontrol *kcontrol,
 					     struct snd_ctl_elem_value *ucontrol)
 {
-	ucontrol->value.integer.value[0] = kcontrol->private_value >> 24;
+	ucontrol->value.integer.value[0] = __c_ua(kcontrol->private_value) >> 24;
 	return 0;
 }
 
 static int snd_ni_update_cur_val(struct usb_mixer_elem_list *list)
 {
 	struct snd_usb_audio *chip = list->mixer->chip;
-	unsigned int pval = list->kctl->private_value;
+	unsigned int pval = __c_ua(list->kctl->private_value);
 	int err;
 
 	err = snd_usb_lock_shutdown(chip);
@@ -919,7 +919,7 @@ static int snd_nativeinstruments_control_put(struct snd_kcontrol *kcontrol,
 					     struct snd_ctl_elem_value *ucontrol)
 {
 	struct usb_mixer_elem_list *list = snd_kcontrol_chip(kcontrol);
-	u8 oldval = (kcontrol->private_value >> 24) & 0xff;
+	u8 oldval = (__c_ua(kcontrol->private_value) >> 24) & 0xff;
 	u8 newval = ucontrol->value.integer.value[0];
 	int err;
 
@@ -1033,7 +1033,7 @@ static int snd_ftu_eff_switch_init(struct usb_mixer_interface *mixer,
 				   struct snd_kcontrol *kctl)
 {
 	struct usb_device *dev = mixer->chip->dev;
-	unsigned int pval = kctl->private_value;
+	unsigned int pval = __c_ua(kctl->private_value);
 	int err;
 	unsigned char value[2];
 
@@ -1055,14 +1055,14 @@ static int snd_ftu_eff_switch_init(struct usb_mixer_interface *mixer,
 static int snd_ftu_eff_switch_get(struct snd_kcontrol *kctl,
 					struct snd_ctl_elem_value *ucontrol)
 {
-	ucontrol->value.enumerated.item[0] = kctl->private_value >> 24;
+	ucontrol->value.enumerated.item[0] = __c_ua(kctl->private_value) >> 24;
 	return 0;
 }
 
 static int snd_ftu_eff_switch_update(struct usb_mixer_elem_list *list)
 {
 	struct snd_usb_audio *chip = list->mixer->chip;
-	unsigned int pval = list->kctl->private_value;
+	unsigned int pval = __c_ua(list->kctl->private_value);
 	unsigned char value[2];
 	int err;
 
@@ -1087,7 +1087,7 @@ static int snd_ftu_eff_switch_put(struct snd_kcontrol *kctl,
 					struct snd_ctl_elem_value *ucontrol)
 {
 	struct usb_mixer_elem_list *list = snd_kcontrol_chip(kctl);
-	unsigned int pval = list->kctl->private_value;
+	unsigned int pval = __c_ua(list->kctl->private_value);
 	int cur_val, err, new_val;
 
 	cur_val = pval >> 24;
@@ -1121,7 +1121,7 @@ static int snd_ftu_create_effect_switch(struct usb_mixer_interface *mixer,
 					 &template, &list);
 	if (err < 0)
 		return err;
-	list->kctl->private_value = (validx << 8) | bUnitID;
+	list->kctl->private_value = __c_fakeu((validx << 8) | bUnitID);
 	snd_ftu_eff_switch_init(mixer, list->kctl);
 	return 0;
 }
@@ -1647,8 +1647,8 @@ static int snd_microii_spdif_default_get(struct snd_kcontrol *kcontrol,
 	if (err < 0)
 		return err;
 
-	ucontrol->value.iec958.status[0] = kcontrol->private_value & 0xff;
-	ucontrol->value.iec958.status[1] = (kcontrol->private_value >> 8) & 0xff;
+	ucontrol->value.iec958.status[0] = __c_ua(kcontrol->private_value) & 0xff;
+	ucontrol->value.iec958.status[1] = (__c_ua(kcontrol->private_value) >> 8) & 0xff;
 	ucontrol->value.iec958.status[2] = 0x00;
 
 	/* use known values for that card: interface#1 altsetting#1 */
@@ -1688,7 +1688,7 @@ static int snd_microii_spdif_default_get(struct snd_kcontrol *kcontrol,
 static int snd_microii_spdif_default_update(struct usb_mixer_elem_list *list)
 {
 	struct snd_usb_audio *chip = list->mixer->chip;
-	unsigned int pval = list->kctl->private_value;
+	unsigned int pval = __c_ua(list->kctl->private_value);
 	u8 reg;
 	int err;
 
@@ -1733,7 +1733,7 @@ static int snd_microii_spdif_default_put(struct snd_kcontrol *kcontrol,
 	unsigned int pval, pval_old;
 	int err;
 
-	pval = pval_old = kcontrol->private_value;
+	pval = pval_old = __c_ua(kcontrol->private_value);
 	pval &= 0xfffff0f0;
 	pval |= (ucontrol->value.iec958.status[1] & 0x0f) << 8;
 	pval |= (ucontrol->value.iec958.status[0] & 0x0f);
@@ -1748,7 +1748,7 @@ static int snd_microii_spdif_default_put(struct snd_kcontrol *kcontrol,
 	if (pval == pval_old)
 		return 0;
 
-	kcontrol->private_value = pval;
+	kcontrol->private_value = __c_fakeu(pval);
 	err = snd_microii_spdif_default_update(list);
 	return err < 0 ? err : 1;
 }
@@ -1775,7 +1775,7 @@ static int snd_microii_spdif_switch_get(struct snd_kcontrol *kcontrol,
 static int snd_microii_spdif_switch_update(struct usb_mixer_elem_list *list)
 {
 	struct snd_usb_audio *chip = list->mixer->chip;
-	u8 reg = list->kctl->private_value;
+	u8 reg = __c_ua(list->kctl->private_value);
 	int err;
 
 	err = snd_usb_lock_shutdown(chip);
@@ -1803,10 +1803,10 @@ static int snd_microii_spdif_switch_put(struct snd_kcontrol *kcontrol,
 	int err;
 
 	reg = ucontrol->value.integer.value[0] ? 0x28 : 0x2a;
-	if (reg != list->kctl->private_value)
+	if (reg != __c_ua(list->kctl->private_value))
 		return 0;
 
-	kcontrol->private_value = reg;
+	kcontrol->private_value = __c_fakeu(reg);
 	err = snd_microii_spdif_switch_update(list);
 	return err < 0 ? err : 1;
 }
@@ -1863,7 +1863,7 @@ static int snd_microii_controls_create(struct usb_mixer_interface *mixer)
 static int snd_soundblaster_e1_switch_get(struct snd_kcontrol *kcontrol,
 					  struct snd_ctl_elem_value *ucontrol)
 {
-	ucontrol->value.integer.value[0] = kcontrol->private_value;
+	ucontrol->value.integer.value[0] = __c_ua(kcontrol->private_value);
 	return 0;
 }
 
@@ -1895,9 +1895,9 @@ static int snd_soundblaster_e1_switch_put(struct snd_kcontrol *kcontrol,
 	unsigned char value = !!ucontrol->value.integer.value[0];
 	int err;
 
-	if (kcontrol->private_value == value)
+	if (__c_ua(kcontrol->private_value) == value)
 		return 0;
-	kcontrol->private_value = value;
+	kcontrol->private_value = __c_fakeu(value);
 	err = snd_soundblaster_e1_switch_update(list->mixer, value);
 	return err < 0 ? err : 1;
 }
@@ -1905,7 +1905,7 @@ static int snd_soundblaster_e1_switch_put(struct snd_kcontrol *kcontrol,
 static int snd_soundblaster_e1_switch_resume(struct usb_mixer_elem_list *list)
 {
 	return snd_soundblaster_e1_switch_update(list->mixer,
-						 list->kctl->private_value);
+						 __c_ua(list->kctl->private_value));
 }
 
 static int snd_soundblaster_e1_switch_info(struct snd_kcontrol *kcontrol,
@@ -2000,7 +2000,7 @@ static int realtek_ctl_connector_get(struct snd_kcontrol *kcontrol,
 {
 	struct usb_mixer_elem_info *cval = kcontrol->private_data;
 	struct snd_usb_audio *chip = cval->head.mixer->chip;
-	u32 pv = kcontrol->private_value;
+	u32 pv = __c_ua(kcontrol->private_value);
 	u32 node_id = pv & 0xff;
 	u32 sense;
 	u32 cbj_ctrl2;
@@ -2077,7 +2077,7 @@ static int realtek_add_jack(struct usb_mixer_interface *mixer,
 		kfree(cval);
 		return -ENOMEM;
 	}
-	kctl->private_value = val;
+	kctl->private_value = __c_fakeu(val);
 	strscpy(kctl->id.name, name, sizeof(kctl->id.name));
 	kctl->private_free = snd_usb_mixer_elem_free;
 	return snd_usb_mixer_add_control(&cval->head, kctl);
@@ -2238,7 +2238,7 @@ static int snd_rme_rate_get(struct snd_kcontrol *kcontrol,
 	err = snd_rme_get_status1(kcontrol, &status1);
 	if (err < 0)
 		return err;
-	switch (kcontrol->private_value) {
+	switch (__c_ua(kcontrol->private_value)) {
 	case SND_RME_DOMAIN_SYSTEM:
 		idx = SND_RME_CLK_SYSTEM(status1);
 		if (idx < ARRAY_SIZE(snd_rme_rate_table))
@@ -2271,7 +2271,7 @@ static int snd_rme_sync_state_get(struct snd_kcontrol *kcontrol,
 	err = snd_rme_get_status1(kcontrol, &status1);
 	if (err < 0)
 		return err;
-	switch (kcontrol->private_value) {
+	switch (__c_ua(kcontrol->private_value)) {
 	case SND_RME_DOMAIN_AES:  /* AES */
 		if (status1 & SND_RME_CLK_AES_SYNC)
 			idx = SND_RME_CLOCK_SYNC;
@@ -2364,7 +2364,7 @@ static int snd_rme_rate_info(struct snd_kcontrol *kcontrol,
 {
 	uinfo->type = SNDRV_CTL_ELEM_TYPE_INTEGER;
 	uinfo->count = 1;
-	switch (kcontrol->private_value) {
+	switch (__c_ua(kcontrol->private_value)) {
 	case SND_RME_DOMAIN_SYSTEM:
 		uinfo->value.integer.min = 32000;
 		uinfo->value.integer.max = 800000;
@@ -2592,10 +2592,10 @@ static int snd_bbfpro_ctl_get(struct snd_kcontrol *kcontrol,
 	u8 reg, idx, val;
 	int pv;
 
-	pv = kcontrol->private_value;
+	pv = __c_ua(kcontrol->private_value);
 	reg = pv & SND_BBFPRO_CTL_REG_MASK;
 	idx = (pv >> SND_BBFPRO_CTL_IDX_SHIFT) & SND_BBFPRO_CTL_IDX_MASK;
-	val = kcontrol->private_value >> SND_BBFPRO_CTL_VAL_SHIFT;
+	val = __c_ua(kcontrol->private_value) >> SND_BBFPRO_CTL_VAL_SHIFT;
 
 	if ((reg == SND_BBFPRO_CTL_REG1 &&
 	     idx == SND_BBFPRO_CTL_REG1_CLK_OPTICAL) ||
@@ -2615,7 +2615,7 @@ static int snd_bbfpro_ctl_info(struct snd_kcontrol *kcontrol,
 	u8 reg, idx;
 	int pv;
 
-	pv = kcontrol->private_value;
+	pv = __c_ua(kcontrol->private_value);
 	reg = pv & SND_BBFPRO_CTL_REG_MASK;
 	idx = (pv >> SND_BBFPRO_CTL_IDX_SHIFT) & SND_BBFPRO_CTL_IDX_MASK;
 
@@ -2653,7 +2653,7 @@ static int snd_bbfpro_ctl_put(struct snd_kcontrol *kcontrol,
 	struct usb_mixer_elem_list *list = snd_kcontrol_chip(kcontrol);
 	struct usb_mixer_interface *mixer = list->mixer;
 
-	pv = kcontrol->private_value;
+	pv = __c_ua(kcontrol->private_value);
 	reg = pv & SND_BBFPRO_CTL_REG_MASK;
 	idx = (pv >> SND_BBFPRO_CTL_IDX_SHIFT) & SND_BBFPRO_CTL_IDX_MASK;
 	old_value = (pv >> SND_BBFPRO_CTL_VAL_SHIFT) & SND_BBFPRO_CTL_VAL_MASK;
@@ -2674,9 +2674,9 @@ static int snd_bbfpro_ctl_put(struct snd_kcontrol *kcontrol,
 	if (val == old_value)
 		return 0;
 
-	kcontrol->private_value = reg
+	kcontrol->private_value = __c_fakeu(reg
 		| ((idx & SND_BBFPRO_CTL_IDX_MASK) << SND_BBFPRO_CTL_IDX_SHIFT)
-		| ((val & SND_BBFPRO_CTL_VAL_MASK) << SND_BBFPRO_CTL_VAL_SHIFT);
+		| ((val & SND_BBFPRO_CTL_VAL_MASK) << SND_BBFPRO_CTL_VAL_SHIFT));
 
 	err = snd_bbfpro_ctl_update(mixer, reg, idx, val);
 	return err < 0 ? err : 1;
@@ -2687,7 +2687,7 @@ static int snd_bbfpro_ctl_resume(struct usb_mixer_elem_list *list)
 	u8 reg, idx;
 	int value, pv;
 
-	pv = list->kctl->private_value;
+	pv = __c_ua(list->kctl->private_value);
 	reg = pv & SND_BBFPRO_CTL_REG_MASK;
 	idx = (pv >> SND_BBFPRO_CTL_IDX_SHIFT) & SND_BBFPRO_CTL_IDX_MASK;
 	value = (pv >> SND_BBFPRO_CTL_VAL_SHIFT) & SND_BBFPRO_CTL_VAL_MASK;
@@ -2729,7 +2729,7 @@ static int snd_bbfpro_vol_get(struct snd_kcontrol *kcontrol,
 			      struct snd_ctl_elem_value *ucontrol)
 {
 	ucontrol->value.integer.value[0] =
-		kcontrol->private_value >> SND_BBFPRO_MIXER_VAL_SHIFT;
+		__c_ua(kcontrol->private_value) >> SND_BBFPRO_MIXER_VAL_SHIFT;
 	return 0;
 }
 
@@ -2753,8 +2753,8 @@ static int snd_bbfpro_vol_put(struct snd_kcontrol *kcontrol,
 	struct usb_mixer_interface *mixer = list->mixer;
 
 	uvalue = ucontrol->value.integer.value[0];
-	idx = kcontrol->private_value & SND_BBFPRO_MIXER_IDX_MASK;
-	old_value = kcontrol->private_value >> SND_BBFPRO_MIXER_VAL_SHIFT;
+	idx = __c_ua(kcontrol->private_value) & SND_BBFPRO_MIXER_IDX_MASK;
+	old_value = __c_ua(kcontrol->private_value) >> SND_BBFPRO_MIXER_VAL_SHIFT;
 
 	if (uvalue > SND_BBFPRO_MIXER_VAL_MAX)
 		return -EINVAL;
@@ -2764,8 +2764,8 @@ static int snd_bbfpro_vol_put(struct snd_kcontrol *kcontrol,
 
 	new_val = uvalue & SND_BBFPRO_MIXER_VAL_MASK;
 
-	kcontrol->private_value = idx
-		| (new_val << SND_BBFPRO_MIXER_VAL_SHIFT);
+	kcontrol->private_value = __c_fakeu(idx
+		| (new_val << SND_BBFPRO_MIXER_VAL_SHIFT));
 
 	err = snd_bbfpro_vol_update(mixer, idx, new_val);
 	return err < 0 ? err : 1;
@@ -2773,7 +2773,7 @@ static int snd_bbfpro_vol_put(struct snd_kcontrol *kcontrol,
 
 static int snd_bbfpro_vol_resume(struct usb_mixer_elem_list *list)
 {
-	int pv = list->kctl->private_value;
+	int pv = __c_ua(list->kctl->private_value);
 	u16 idx = pv & SND_BBFPRO_MIXER_IDX_MASK;
 	u32 val = (pv >> SND_BBFPRO_MIXER_VAL_SHIFT)
 		& SND_BBFPRO_MIXER_VAL_MASK;
@@ -2805,9 +2805,9 @@ static int snd_bbfpro_ctl_add(struct usb_mixer_interface *mixer, u8 reg,
 	struct snd_kcontrol_new knew = snd_bbfpro_ctl_control;
 
 	knew.name = name;
-	knew.private_value = (reg & SND_BBFPRO_CTL_REG_MASK)
+	knew.private_value = __c_fakeu((reg & SND_BBFPRO_CTL_REG_MASK)
 		| ((index & SND_BBFPRO_CTL_IDX_MASK)
-			<< SND_BBFPRO_CTL_IDX_SHIFT);
+			<< SND_BBFPRO_CTL_IDX_SHIFT));
 
 	return add_single_ctl_with_resume(mixer, 0, snd_bbfpro_ctl_resume,
 		&knew, NULL);
@@ -2819,7 +2819,7 @@ static int snd_bbfpro_vol_add(struct usb_mixer_interface *mixer, u16 index,
 	struct snd_kcontrol_new knew = snd_bbfpro_vol_control;
 
 	knew.name = name;
-	knew.private_value = index & SND_BBFPRO_MIXER_IDX_MASK;
+	knew.private_value = __c_fakeu(index & SND_BBFPRO_MIXER_IDX_MASK);
 
 	return add_single_ctl_with_resume(mixer, 0, snd_bbfpro_vol_resume,
 		&knew, NULL);
@@ -3236,7 +3236,7 @@ static const struct snd_djm_device snd_djm_devices[] = {
 static int snd_djm_controls_info(struct snd_kcontrol *kctl,
 				struct snd_ctl_elem_info *info)
 {
-	unsigned long private_value = kctl->private_value;
+	unsigned long private_value = __c_ua(kctl->private_value);
 	u8 device_idx = (private_value & SND_DJM_DEVICE_MASK) >> SND_DJM_DEVICE_SHIFT;
 	u8 ctl_idx = (private_value & SND_DJM_GROUP_MASK) >> SND_DJM_GROUP_SHIFT;
 	const struct snd_djm_device *device = &snd_djm_devices[device_idx];
@@ -3293,7 +3293,7 @@ static int snd_djm_controls_update(struct usb_mixer_interface *mixer,
 static int snd_djm_controls_get(struct snd_kcontrol *kctl,
 				struct snd_ctl_elem_value *elem)
 {
-	elem->value.enumerated.item[0] = kctl->private_value & SND_DJM_VALUE_MASK;
+	elem->value.enumerated.item[0] = __c_ua(kctl->private_value) & SND_DJM_VALUE_MASK;
 	return 0;
 }
 
@@ -3301,13 +3301,13 @@ static int snd_djm_controls_put(struct snd_kcontrol *kctl, struct snd_ctl_elem_v
 {
 	struct usb_mixer_elem_list *list = snd_kcontrol_chip(kctl);
 	struct usb_mixer_interface *mixer = list->mixer;
-	unsigned long private_value = kctl->private_value;
+	unsigned long private_value = __c_ua(kctl->private_value);
 
 	u8 device = (private_value & SND_DJM_DEVICE_MASK) >> SND_DJM_DEVICE_SHIFT;
 	u8 group = (private_value & SND_DJM_GROUP_MASK) >> SND_DJM_GROUP_SHIFT;
 	u16 value = elem->value.enumerated.item[0];
 
-	kctl->private_value = (((unsigned long)device << SND_DJM_DEVICE_SHIFT) |
+	kctl->private_value = __c_fakeu(((unsigned long)device << SND_DJM_DEVICE_SHIFT) |
 			      (group << SND_DJM_GROUP_SHIFT) |
 			      value);
 
@@ -3316,7 +3316,7 @@ static int snd_djm_controls_put(struct snd_kcontrol *kctl, struct snd_ctl_elem_v
 
 static int snd_djm_controls_resume(struct usb_mixer_elem_list *list)
 {
-	unsigned long private_value = list->kctl->private_value;
+	unsigned long private_value = __c_ua(list->kctl->private_value);
 	u8 device = (private_value & SND_DJM_DEVICE_MASK) >> SND_DJM_DEVICE_SHIFT;
 	u8 group = (private_value & SND_DJM_GROUP_MASK) >> SND_DJM_GROUP_SHIFT;
 	u16 value = (private_value & SND_DJM_VALUE_MASK);
@@ -3344,7 +3344,7 @@ static int snd_djm_controls_create(struct usb_mixer_interface *mixer,
 	for (i = 0; i < device->ncontrols; i++) {
 		value = device->controls[i].default_value;
 		knew.name = device->controls[i].name;
-		knew.private_value = (
+		knew.private_value = __c_fakeu(
 			((unsigned long)device_idx << SND_DJM_DEVICE_SHIFT) |
 			(i << SND_DJM_GROUP_SHIFT) |
 			value);

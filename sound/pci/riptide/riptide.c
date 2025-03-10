@@ -162,8 +162,8 @@ MODULE_PARM_DESC(opl3_port, "OPL3 port # for Riptide driver.");
 #define CMDIF_TIMEOUT    50000
 #define RESET_TRIES      5
 
-#define READ_PORT_ULONG(p)     inl((unsigned long)&(p))
-#define WRITE_PORT_ULONG(p,x)  outl(x,(unsigned long)&(p))
+#define READ_PORT_ULONG(p)     inl(__c_pa(&(p)))
+#define WRITE_PORT_ULONG(p,x)  outl(x,__c_pa(&(p)))
 
 #define READ_AUDIO_CONTROL(p)     READ_PORT_ULONG(p->audio_control)
 #define WRITE_AUDIO_CONTROL(p,x)  WRITE_PORT_ULONG(p->audio_control,x)
@@ -1768,7 +1768,7 @@ static int snd_riptide_initialize(struct snd_riptide *chip)
 		cif = kzalloc(sizeof(struct cmdif), GFP_KERNEL);
 		if (!cif)
 			return -ENOMEM;
-		cif->hwport = (struct riptideport *)chip->port;
+		cif->hwport = (struct riptideport *)__c_fakep(chip->port);
 		spin_lock_init(&cif->lock);
 		chip->cif = cif;
 	}
@@ -1831,7 +1831,7 @@ snd_riptide_create(struct snd_card *card, struct pci_dev *pci)
 	err = pci_request_regions(pci, "RIPTIDE");
 	if (err < 0)
 		return err;
-	hwport = (struct riptideport *)chip->port;
+	hwport = (struct riptideport *)__c_fakep(chip->port);
 	UNSET_AIE(hwport);
 
 	if (devm_request_threaded_irq(&pci->dev, pci->irq,
@@ -2061,7 +2061,7 @@ __snd_card_riptide_probe(struct pci_dev *pci, const struct pci_device_id *pci_id
 		val = mpu_port[dev];
 		pci_write_config_word(chip->pci, PCI_EXT_MPU_Base, val);
 		err = snd_mpu401_uart_new(card, 0, MPU401_HW_RIPTIDE,
-					  val, MPU401_INFO_IRQ_HOOK, -1,
+					  __c_fakeu(val), MPU401_INFO_IRQ_HOOK, -1,
 					  &chip->rmidi);
 		if (err < 0)
 			snd_printk(KERN_WARNING
