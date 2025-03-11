@@ -145,9 +145,15 @@ static inline void __mm_zero_struct_page(struct page *page)
 	 /* Check that struct page is either 56, 64, 72, 80, 88, 96, 104 or 112 bytes */
 	BUILD_BUG_ON(sizeof(struct page) & 7);
 	BUILD_BUG_ON(sizeof(struct page) < 56);
-	BUILD_BUG_ON(sizeof(struct page) > 112);
+	BUILD_BUG_ON(sizeof(struct page) > 128);
 
 	switch (sizeof(struct page)) {
+	case 128:
+		_pp[15] = 0;
+		fallthrough;
+	case 120:
+		_pp[14] = 0;
+		fallthrough;
 	case 112:
 		_pp[13] = 0;
 		fallthrough;

@@ -87,7 +87,13 @@
  * Define vmemmap for pfn_to_page & page_to_pfn calls. Needed if kernel
  * is configured with CONFIG_SPARSEMEM_VMEMMAP enabled.
  */
-#define vmemmap		((struct page *)VMEMMAP_START - (phys_ram_base >> PAGE_SHIFT))
+#define vmemmap		((struct page *)__c_fakep(VMEMMAP_START) - (phys_ram_base >> PAGE_SHIFT))
+#ifdef CONFIG_CHERI_KERNEL
+#define vmemmap_ptr	__vmemmap_ptr
+#ifndef __ASSEMBLY__
+extern struct page * __vmemmap_ptr;
+#endif
+#endif
 
 #define PCI_IO_SIZE      SZ_16M
 #define PCI_IO_END       VMEMMAP_START

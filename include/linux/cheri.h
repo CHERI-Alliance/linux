@@ -402,9 +402,30 @@ cheri_restrict_len(const volatile void *__capability c, ptraddr_t max)
 	return (l < max)  ? l : max;
 }
 
+#ifndef cheri_tag_clear
+/*
+ * Arch independant fallback implementation of cheri_clear_tag().
+ */
+static __always_inline void * __capability
+cheri_tag_clear(void * __capability cap)
+{
+	void * __capability tmp = cap;
+	unsigned long low;
+
+	barrier();
+	low = *(unsigned long *)&tmp;
+	barrier();
+	*(unsigned long*)&tmp = low;
+	barrier();
+
+	return tmp;
+}
+#endif
+
 #else
 
 #define cheri_restrict_len(C, L) (L)
+#define cheri_tag_clear(X) (X)
 
 #endif
 

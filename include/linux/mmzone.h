@@ -1814,10 +1814,10 @@ struct mem_section {
 	 * the location of the section here to guide allocation.
 	 * (see sparse.c::memory_present())
 	 *
-	 * Making it a UL at least makes someone do a cast
+	 * Making it a uintptr_t at least makes someone do a cast
 	 * before using it wrong.
 	 */
-	unsigned long section_mem_map;
+	uintptr_t section_mem_map;
 
 	struct mem_section_usage *usage;
 #ifdef CONFIG_PAGE_EXTENSION
@@ -1910,7 +1910,7 @@ enum {
 
 static inline struct page *__section_mem_map_addr(struct mem_section *section)
 {
-	unsigned long map = section->section_mem_map;
+	uintptr_t map = section->section_mem_map;
 	map &= SECTION_MAP_MASK;
 	return (struct page *)map;
 }

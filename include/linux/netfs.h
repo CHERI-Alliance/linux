@@ -101,7 +101,7 @@ struct netfs_folio {
 
 static inline bool netfs_is_folio_info(const void *priv)
 {
-	return (unsigned long)priv & NETFS_FOLIO_INFO;
+	return __c_pa(priv) & NETFS_FOLIO_INFO;
 }
 
 static inline struct netfs_folio *__netfs_folio_info(const void *priv)

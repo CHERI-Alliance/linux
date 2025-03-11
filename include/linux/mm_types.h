@@ -180,7 +180,7 @@ struct page {
 #endif
 
 #ifdef CONFIG_SLAB_OBJ_EXT
-	unsigned long memcg_data;
+	uintptr_t memcg_data;
 #endif
 
 	/*
@@ -342,8 +342,11 @@ struct folio {
 			};
 			atomic_t _mapcount;
 			atomic_t _refcount;
+#ifdef CONFIG_CHERI_KERNEL
+			short alloc_order;
+#endif
 #ifdef CONFIG_SLAB_OBJ_EXT
-			unsigned long memcg_data;
+			uintptr_t memcg_data;
 #endif
 #if defined(WANT_PAGE_VIRTUAL)
 			void *virtual;
@@ -478,8 +481,11 @@ struct ptdesc {
 	};
 	unsigned int __page_type;
 	atomic_t __page_refcount;
+#ifdef CONFIG_CHERI_KERNEL
+	unsigned short _pad;
+#endif
 #ifdef CONFIG_MEMCG
-	unsigned long pt_memcg_data;
+	uintptr_t pt_memcg_data;
 #endif
 };
 

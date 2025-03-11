@@ -18,10 +18,11 @@
 #include <linux/bug.h>
 #include <linux/mm_types.h>
 
+#define __fix_to_virt_a(x)	(FIXADDR_TOP - ((x) << PAGE_SHIFT))
 #ifndef CONFIG_CHERI_KERNEL
-#define __fix_to_virt(x)	(FIXADDR_TOP - ((x) << PAGE_SHIFT))
+#define __fix_to_virt(x) __fix_to_virt_a(x)
 #else
-#define __fix_to_virt(x)	((uintptr_t)cheri_make_kernel_data_cap((FIXADDR_TOP - ((x) << PAGE_SHIFT)), PAGE_SIZE))
+#define __fix_to_virt(x)	((uintptr_t)cheri_make_kernel_data_cap(__fix_to_virt_a(x), PAGE_SIZE))
 #endif
 
 #define __virt_to_fix(x)	((FIXADDR_TOP - ((x)&PAGE_MASK)) >> PAGE_SHIFT)

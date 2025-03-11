@@ -25,7 +25,7 @@
 
 /* Load task_scs_sp(current) to gp, but only if tp has changed. */
 .macro scs_load_current_if_task_changed prev
-	beq	\prev, CREG(tp), _skip_scs
+	beq	\prev, tp, _skip_scs
 	scs_load_current
 _skip_scs:
 .endm

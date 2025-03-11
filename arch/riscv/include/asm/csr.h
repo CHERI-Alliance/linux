@@ -511,6 +511,19 @@
 	__v;							\
 })
 
+#ifdef CONFIG_CHERI_KERNEL
+#define csr_cread(csr)						\
+({								\
+	register uintptr_t __v;				\
+	__asm__ __volatile__ ("csrr %0, " __ASM_STR(csr)	\
+			      : "=C" (__v) :			\
+			      : "memory");			\
+	__v;							\
+})
+#else
+#define csr_cread(csr) csr_read(csr)
+#endif
+
 #define csr_write(csr, val)					\
 ({								\
 	unsigned long __v = (unsigned long)(val);		\
@@ -518,6 +531,18 @@
 			      : : "rK" (__v)			\
 			      : "memory");			\
 })
+
+#ifdef CONFIG_CHERI_KERNEL
+#define csr_cwrite(csr, val)					\
+({								\
+	uintptr_t __v = (uintptr_t)(val);			\
+	__asm__ __volatile__ ("csrw " __ASM_STR(csr) ", %0"	\
+			      : : "C" (__v)			\
+			      : "memory");			\
+})
+#else
+#define csr_cwrite(csr, val) csr_write(csr, val)
+#endif
 
 #define csr_read_set(csr, val)					\
 ({								\

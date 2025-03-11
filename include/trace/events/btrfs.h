@@ -1506,7 +1506,7 @@ TRACE_EVENT(alloc_extent_state,
 	TP_fast_assign(
 		__entry->state	= state,
 		__entry->mask	= (__force unsigned long)mask,
-		__entry->ip	= (const void *)IP
+		__entry->ip	= __c_fakep(IP)
 	),
 
 	TP_printk("state=%p mask=%s caller=%pS", __entry->state,
@@ -1526,7 +1526,7 @@ TRACE_EVENT(free_extent_state,
 
 	TP_fast_assign(
 		__entry->state	= state,
-		__entry->ip = (const void *)IP
+		__entry->ip = __c_fakep(IP)
 	),
 
 	TP_printk("state=%p caller=%pS", __entry->state, __entry->ip)

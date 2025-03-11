@@ -8,6 +8,7 @@
 #include <linux/linkage.h>
 #include <linux/ratelimit_types.h>
 #include <linux/once_lite.h>
+#include <linux/cheri.h>
 
 extern const char linux_banner[];
 extern const char linux_proc_banner[];
@@ -358,7 +359,12 @@ struct pi_entry {
 	const char *fmt;
 	const char *func;
 	const char *file;
-	unsigned int line;
+	union {
+		unsigned int line;
+#ifdef CONFIG_CHERI_KERNEL
+		void *_pad;
+#endif
+	};
 
 	/*
 	 * While printk and pr_* have the level stored in the string at compile
@@ -378,7 +384,8 @@ struct pi_entry {
 	 * directly in the message format (@fmt), not here.
 	 */
 	const char *subsys_fmt_prefix;
-} __packed;
+
+} __packed __cheri_pointer_align;
 
 #define __printk_index_emit(_fmt, _level, _subsys_fmt_prefix)		\
 	do {								\

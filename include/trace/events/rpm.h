@@ -97,7 +97,7 @@ TRACE_EVENT(rpm_return_int,
 		__entry->ret = ret;
 	),
 
-	TP_printk("%pS:%s ret=%d", (void *)__entry->ip, __get_str(name),
+	TP_printk("%pS:%s ret=%d", __c_fakep(__entry->ip), __get_str(name),
 		__entry->ret)
 );
 

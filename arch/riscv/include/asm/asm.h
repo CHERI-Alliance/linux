@@ -130,7 +130,7 @@
 #endif
 
 .macro asm_per_cpu dst sym tmp
-	REG_L \tmp, TASK_TI_CPU_NUM(tp)
+	REG_L \tmp, TASK_TI_CPU_NUM(CREG(tp))
 	slli  \tmp, \tmp, PER_CPU_OFFSET_SHIFT
 #ifdef CONFIG_CHERI_KERNEL
 	llc   CREG(\dst), __per_cpu_offset
@@ -138,9 +138,9 @@
 	la    \dst, __per_cpu_offset
 #endif
 	add   CREG(\dst), CREG(\dst), \tmp
-	CREG_L \tmp, 0(\dst)
+	REG_L \tmp, 0(CREG(\dst))
 #ifdef CONFIG_CHERI_KERNEL
-	llc    CREG(\dst), \sym
+	llc   CREG(\dst), \sym
 #else
 	la    \dst, \sym
 #endif
