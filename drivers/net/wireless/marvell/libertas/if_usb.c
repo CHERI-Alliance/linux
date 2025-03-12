@@ -211,7 +211,7 @@ static int if_usb_probe(struct usb_interface *intf,
 	init_waitqueue_head(&cardp->fw_wq);
 
 	cardp->udev = udev;
-	cardp->model = (uint32_t) id->driver_info;
+	cardp->model = __c_ua(id->driver_info);
 	iface_desc = intf->cur_altsetting;
 
 	lbs_deb_usbd(&udev->dev, "bcdUSB = 0x%X bDeviceClass = 0x%X"

@@ -241,7 +241,8 @@ int mwifiex_debug_info_to_buffer(struct mwifiex_private *priv, char *buf,
 {
 	char *p = buf;
 	struct mwifiex_debug_data *d = &items[0];
-	size_t size, addr;
+	size_t size;
+	uintptr_t addr;
 	long val;
 	int i, j;
 
@@ -254,9 +255,9 @@ int mwifiex_debug_info_to_buffer(struct mwifiex_private *priv, char *buf,
 		size = d[i].size / d[i].num;
 
 		if (i < (num_of_items - 3))
-			addr = d[i].addr + (size_t)info;
+			addr = d[i].addr + (uintptr_t)info;
 		else /* The last 3 items are struct mwifiex_adapter variables */
-			addr = d[i].addr + (size_t)priv->adapter;
+			addr = d[i].addr + (uintptr_t)priv->adapter;
 
 		for (j = 0; j < d[i].num; j++) {
 			switch (size) {
@@ -736,8 +737,8 @@ void *mwifiex_alloc_dma_align_buf(int rx_len, gfp_t flags)
 
 	skb_reserve(skb, MWIFIEX_RX_HEADROOM);
 
-	pad = MWIFIEX_ALIGN_ADDR(skb->data, MWIFIEX_DMA_ALIGN_SZ) -
-	      (long)skb->data;
+	pad = MWIFIEX_ALIGN_ADDR(__c_pa(skb->data), MWIFIEX_DMA_ALIGN_SZ) -
+	      __c_pa(skb->data);
 
 	skb_reserve(skb, pad);
 

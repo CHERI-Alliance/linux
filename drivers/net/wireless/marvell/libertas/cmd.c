@@ -28,7 +28,7 @@
  *
  * returns:	0 on success, error on failure
  */
-int lbs_cmd_copyback(struct lbs_private *priv, unsigned long extra,
+int lbs_cmd_copyback(struct lbs_private *priv, uintptr_t extra,
 		     struct cmd_header *resp)
 {
 	struct cmd_header *buf = (void *)extra;
@@ -51,7 +51,7 @@ EXPORT_SYMBOL_GPL(lbs_cmd_copyback);
  *
  *  returns:	0 for success
  */
-static int lbs_cmd_async_callback(struct lbs_private *priv, unsigned long extra,
+static int lbs_cmd_async_callback(struct lbs_private *priv, uintptr_t extra,
 		     struct cmd_header *resp)
 {
 	return 0;
@@ -160,7 +160,7 @@ out:
 	return ret;
 }
 
-static int lbs_ret_host_sleep_cfg(struct lbs_private *priv, unsigned long dummy,
+static int lbs_ret_host_sleep_cfg(struct lbs_private *priv, uintptr_t dummy,
 			struct cmd_header *resp)
 {
 	if (priv->is_host_sleep_activated) {
@@ -347,7 +347,7 @@ int lbs_set_deep_sleep(struct lbs_private *priv, int deep_sleep)
 }
 
 static int lbs_ret_host_sleep_activate(struct lbs_private *priv,
-		unsigned long dummy,
+		uintptr_t dummy,
 		struct cmd_header *cmd)
 {
 	priv->is_host_sleep_activated = 1;
@@ -1506,8 +1506,8 @@ int lbs_set_power_adapt_cfg(struct lbs_private *priv, int enable, int8_t p0,
 
 struct cmd_ctrl_node *__lbs_cmd_async(struct lbs_private *priv,
 	uint16_t command, struct cmd_header *in_cmd, int in_cmd_size,
-	int (*callback)(struct lbs_private *, unsigned long, struct cmd_header *),
-	unsigned long callback_arg)
+	int (*callback)(struct lbs_private *, uintptr_t, struct cmd_header *),
+	uintptr_t callback_arg)
 {
 	struct cmd_ctrl_node *cmdnode;
 
@@ -1568,8 +1568,8 @@ void lbs_cmd_async(struct lbs_private *priv, uint16_t command,
 
 int __lbs_cmd(struct lbs_private *priv, uint16_t command,
 	      struct cmd_header *in_cmd, int in_cmd_size,
-	      int (*callback)(struct lbs_private *, unsigned long, struct cmd_header *),
-	      unsigned long callback_arg)
+	      int (*callback)(struct lbs_private *, uintptr_t, struct cmd_header *),
+	      uintptr_t callback_arg)
 {
 	struct cmd_ctrl_node *cmdnode;
 	unsigned long flags;

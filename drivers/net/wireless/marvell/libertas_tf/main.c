@@ -360,7 +360,7 @@ static uintptr_t lbtf_op_prepare_multicast(struct ieee80211_hw *hw,
 	int mc_count = netdev_hw_addr_list_count(mc_list);
 
 	if (!mc_count || mc_count > MRVDRV_MAX_MULTICAST_LIST_SIZE)
-		return mc_count;
+		return __c_fakeu(mc_count);
 
 	priv->nr_of_multicastmacaddr = mc_count;
 	i = 0;

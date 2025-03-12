@@ -134,7 +134,7 @@ mwifiex_is_alg_wep(u32 cipher)
  */
 static void *mwifiex_cfg80211_get_adapter(struct wiphy *wiphy)
 {
-	return (void *) (*(unsigned long *) wiphy_priv(wiphy));
+	return (void *) (*(uintptr_t *) wiphy_priv(wiphy));
 }
 
 /*
@@ -3123,7 +3123,7 @@ struct wireless_dev *mwifiex_add_virtual_intf(struct wiphy *wiphy,
 	dev->ethtool_ops = &mwifiex_ethtool_ops;
 
 	mdev_priv = netdev_priv(dev);
-	*((unsigned long *) mdev_priv) = (unsigned long) priv;
+	*((uintptr_t *) mdev_priv) = (uintptr_t) priv;
 
 	SET_NETDEV_DEV(dev, adapter->dev);
 
@@ -4451,7 +4451,7 @@ int mwifiex_register_cfg80211(struct mwifiex_adapter *adapter)
 
 	/* Set struct mwifiex_adapter pointer in wiphy_priv */
 	wdev_priv = wiphy_priv(wiphy);
-	*(unsigned long *)wdev_priv = (unsigned long)adapter;
+	*(uintptr_t *)wdev_priv = (uintptr_t)adapter;
 
 	set_wiphy_dev(wiphy, priv->adapter->dev);
 

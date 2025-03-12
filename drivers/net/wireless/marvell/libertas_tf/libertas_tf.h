@@ -327,8 +327,8 @@ struct cmd_ctrl_node {
 	int result;
 	/* command response */
 	int (*callback)(struct lbtf_private *,
-			unsigned long, struct cmd_header *);
-	unsigned long callback_arg;
+			uintptr_t, struct cmd_header *);
+	uintptr_t callback_arg;
 	/* command data */
 	struct cmd_header *cmdbuf;
 	/* wait queue */
@@ -505,16 +505,16 @@ void lbtf_bcn_sent(struct lbtf_private *priv);
 })
 
 #define lbtf_cmd_with_response(priv, cmdnr, cmd)	\
-	lbtf_cmd(priv, cmdnr, cmd, lbtf_cmd_copyback, (unsigned long) (cmd))
+	lbtf_cmd(priv, cmdnr, cmd, lbtf_cmd_copyback, (uintptr_t) (cmd))
 
 void lbtf_cmd_async(struct lbtf_private *priv, uint16_t command,
 	struct cmd_header *in_cmd, int in_cmd_size);
 
 int __lbtf_cmd(struct lbtf_private *priv, uint16_t command,
 	      struct cmd_header *in_cmd, int in_cmd_size,
-	      int (*callback)(struct lbtf_private *, unsigned long,
+	      int (*callback)(struct lbtf_private *, uintptr_t,
 			      struct cmd_header *),
-	      unsigned long callback_arg);
+	      uintptr_t callback_arg);
 
-int lbtf_cmd_copyback(struct lbtf_private *priv, unsigned long extra,
+int lbtf_cmd_copyback(struct lbtf_private *priv, uintptr_t extra,
 		     struct cmd_header *resp);
