@@ -966,7 +966,7 @@ static uintptr_t carl9170_op_prepare_multicast(struct ieee80211_hw *hw,
 	netdev_hw_addr_list_for_each(ha, mc_list)
 		mchash |= 1ULL << (ha->addr[5] >> 2);
 
-	return mchash;
+	return __c_fakeu(mchash);
 }
 
 static void carl9170_op_configure_filter(struct ieee80211_hw *hw,
@@ -993,8 +993,8 @@ static void carl9170_op_configure_filter(struct ieee80211_hw *hw,
 	if (*new_flags & FIF_ALLMULTI)
 		multicast = ~0ULL;
 
-	if (multicast != ar->cur_mc_hash)
-		WARN_ON(carl9170_update_multicast(ar, multicast));
+	if (__c_ua(multicast) != ar->cur_mc_hash)
+		WARN_ON(carl9170_update_multicast(ar, __c_ua(multicast)));
 
 	if (changed_flags & FIF_OTHER_BSS) {
 		ar->sniffer_enabled = !!(*new_flags & FIF_OTHER_BSS);
