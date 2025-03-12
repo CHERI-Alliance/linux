@@ -509,8 +509,8 @@ struct wl1271_acx_mem_map {
 	__le32 num_rx_mem_blocks;
 
 	/* the following 4 fields are valid in SLAVE mode only */
-	u8 *tx_cbuf;
-	u8 *rx_cbuf;
+	unsigned long tx_cbuf;
+	unsigned long rx_cbuf;
 	__le32 rx_ctrl;
 	__le32 tx_ctrl;
 } __packed;
