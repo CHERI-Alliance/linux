@@ -134,7 +134,7 @@ mwifiex_info_read(struct file *file, char __user *ubuf,
 	p += sprintf(p, "\n");
 
 	ret = simple_read_from_buffer(ubuf, count, ppos, (char *) page,
-				      (uintptr_t) p - page);
+				      __c_pa(p) - __c_ua(page));
 
 free_and_exit:
 	free_page(page);
@@ -221,7 +221,7 @@ mwifiex_getlog_read(struct file *file, char __user *ubuf,
 
 
 	ret = simple_read_from_buffer(ubuf, count, ppos, (char *) page,
-				      (uintptr_t) p - page);
+				      __c_pa(p) - __c_ua(page));
 
 free_and_exit:
 	free_page(page);
@@ -310,7 +310,7 @@ mwifiex_histogram_read(struct file *file, char __user *ubuf,
 	}
 
 	ret = simple_read_from_buffer(ubuf, count, ppos, (char *)page,
-				      (uintptr_t)p - page);
+				      __c_pa(p) - __c_ua(page));
 
 free_and_exit:
 	free_page(page);
@@ -397,7 +397,7 @@ mwifiex_debug_read(struct file *file, char __user *ubuf,
 	p += mwifiex_debug_info_to_buffer(priv, p, &info);
 
 	ret = simple_read_from_buffer(ubuf, count, ppos, (char *) page,
-				      (uintptr_t) p - page);
+				      __c_pa(p) - __c_ua(page));
 
 free_and_exit:
 	free_page(page);

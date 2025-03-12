@@ -5305,7 +5305,7 @@ static void mwl8k_configure_filter(struct ieee80211_hw *hw,
 				   uintptr_t multicast)
 {
 	struct mwl8k_priv *priv = hw->priv;
-	struct mwl8k_cmd_pkt_hdr *cmd = (void *)(unsigned long)multicast;
+	struct mwl8k_cmd_pkt_hdr *cmd = (void *)multicast;
 
 	/*
 	 * AP firmware doesn't allow fine-grained control over
