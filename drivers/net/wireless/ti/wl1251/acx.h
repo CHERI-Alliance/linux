@@ -1145,29 +1145,29 @@ struct wl1251_acx_config_memory {
 struct wl1251_acx_mem_map {
 	struct acx_header header;
 
-	void *code_start;
-	void *code_end;
+	unsigned long code_start;
+	unsigned long code_end;
 
-	void *wep_defkey_start;
-	void *wep_defkey_end;
+	unsigned long wep_defkey_start;
+	unsigned long wep_defkey_end;
 
-	void *sta_table_start;
-	void *sta_table_end;
+	unsigned long sta_table_start;
+	unsigned long sta_table_end;
 
-	void *packet_template_start;
-	void *packet_template_end;
+	unsigned long packet_template_start;
+	unsigned long packet_template_end;
 
-	void *queue_memory_start;
-	void *queue_memory_end;
+	unsigned long queue_memory_start;
+	unsigned long queue_memory_end;
 
-	void *packet_memory_pool_start;
-	void *packet_memory_pool_end;
+	unsigned long packet_memory_pool_start;
+	unsigned long packet_memory_pool_end;
 
-	void *debug_buffer1_start;
-	void *debug_buffer1_end;
+	unsigned long debug_buffer1_start;
+	unsigned long debug_buffer1_end;
 
-	void *debug_buffer2_start;
-	void *debug_buffer2_end;
+	unsigned long debug_buffer2_start;
+	unsigned long debug_buffer2_end;
 
 	/* Number of blocks FW allocated for TX packets */
 	u32 num_tx_mem_blocks;

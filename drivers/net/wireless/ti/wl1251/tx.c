@@ -198,8 +198,8 @@ static int wl1251_tx_send_packet(struct wl1251 *wl, struct sk_buff *skb,
 	   This happens at least with EAPOL packets from the user space.
 	   Our DMA requires packets to be aligned on a 4-byte boundary.
 	*/
-	if (unlikely((long)skb->data & 0x03)) {
-		int offset = (4 - (long)skb->data) & 0x03;
+	if (unlikely(__c_pa(skb->data) & 0x03)) {
+		int offset = (4 - __c_pa(skb->data)) & 0x03;
 		wl1251_debug(DEBUG_TX, "skb offset %d", offset);
 
 		/* check whether the current skb can be used */
@@ -215,7 +215,7 @@ static int wl1251_tx_send_packet(struct wl1251 *wl, struct sk_buff *skb,
 			dev_kfree_skb_any(skb);
 			wl->tx_frames[tx_hdr->id] = skb = newskb;
 
-			offset = (4 - (long)skb->data) & 0x03;
+			offset = (4 - __c_pa(skb->data)) & 0x03;
 			wl1251_debug(DEBUG_TX, "new skb offset %d", offset);
 		}
 
