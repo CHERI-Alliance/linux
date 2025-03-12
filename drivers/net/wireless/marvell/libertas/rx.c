@@ -40,7 +40,7 @@ struct rxpackethdr {
 
 struct rx80211packethdr {
 	struct rxpd rx_pd;
-	void *eth80211_hdr;
+	unsigned long eth80211_hdr;
 } __packed;
 
 static int process_rxed_802_11_packet(struct lbs_private *priv,

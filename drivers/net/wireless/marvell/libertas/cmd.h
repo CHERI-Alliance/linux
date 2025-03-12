@@ -17,9 +17,9 @@ struct cmd_ctrl_node {
 	int result;
 	/* command response */
 	int (*callback)(struct lbs_private *,
-			unsigned long,
+			uintptr_t,
 			struct cmd_header *);
-	unsigned long callback_arg;
+	uintptr_t callback_arg;
 	/* command data */
 	struct cmd_header *cmdbuf;
 	/* wait queue */
@@ -45,15 +45,15 @@ void lbs_cmd_async(struct lbs_private *priv, uint16_t command,
 
 int __lbs_cmd(struct lbs_private *priv, uint16_t command,
 	      struct cmd_header *in_cmd, int in_cmd_size,
-	      int (*callback)(struct lbs_private *, unsigned long, struct cmd_header *),
-	      unsigned long callback_arg);
+	      int (*callback)(struct lbs_private *, uintptr_t, struct cmd_header *),
+	      uintptr_t callback_arg);
 
 struct cmd_ctrl_node *__lbs_cmd_async(struct lbs_private *priv,
 	uint16_t command, struct cmd_header *in_cmd, int in_cmd_size,
-	int (*callback)(struct lbs_private *, unsigned long, struct cmd_header *),
-	unsigned long callback_arg);
+	int (*callback)(struct lbs_private *, uintptr_t, struct cmd_header *),
+	uintptr_t callback_arg);
 
-int lbs_cmd_copyback(struct lbs_private *priv, unsigned long extra,
+int lbs_cmd_copyback(struct lbs_private *priv, uintptr_t extra,
 		     struct cmd_header *resp);
 
 int lbs_allocate_cmd_buffer(struct lbs_private *priv);
