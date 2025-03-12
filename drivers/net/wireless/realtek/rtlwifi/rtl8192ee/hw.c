@@ -210,7 +210,7 @@ static void _rtl92ee_set_fw_ps_rf_off_low_power(struct ieee80211_hw *hw)
 	_rtl92ee_set_fw_clock_off(hw, rpwm_val);
 }
 
-void rtl92ee_fw_clk_off_timer_callback(unsigned long data)
+void rtl92ee_fw_clk_off_timer_callback(uintptr_t data)
 {
 	struct ieee80211_hw *hw = (struct ieee80211_hw *)data;
 
