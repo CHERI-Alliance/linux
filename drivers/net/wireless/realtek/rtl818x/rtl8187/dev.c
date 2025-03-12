@@ -166,7 +166,14 @@ static inline void rtl818x_iowrite32_async(struct rtl8187_priv *priv,
 {
 	__le32 buf = cpu_to_le32(val);
 
-	rtl8187_iowrite_async(priv, cpu_to_le16((unsigned long)addr),
+	/*
+	 * FIXCHERI:
+	 * Upstream code seems very questionable here. The only caller
+	 * passes in a kerenl pointer for "addr" and we should probably
+	 * deref it instead of casting it to an integer. Additionally,
+	 * there seems to be some endianness confusion that we leave alone.
+	 */
+	rtl8187_iowrite_async(priv, cpu_to_le16((unsigned long)*addr),
 			      &buf, sizeof(buf));
 }
 
@@ -812,8 +819,7 @@ static int rtl8187b_init_hw(struct ieee80211_hw *dev)
 	rtl818x_iowrite8(priv, &priv->map->WPA_CONF, 0);
 	for (i = 0; i < ARRAY_SIZE(rtl8187b_reg_table); i++) {
 		rtl818x_iowrite8_idx(priv,
-				     (u8 *)(uintptr_t)
-				     (rtl8187b_reg_table[i][0] | 0xFF00),
+				     __c_fakep((rtl8187b_reg_table[i][0] | 0xFF00)),
 				     rtl8187b_reg_table[i][1],
 				     rtl8187b_reg_table[i][2]);
 	}
@@ -1300,16 +1306,16 @@ static void rtl8187_bss_info_changed(struct ieee80211_hw *dev,
 
 }
 
-static u64 rtl8187_prepare_multicast(struct ieee80211_hw *dev,
+static uintptr_t rtl8187_prepare_multicast(struct ieee80211_hw *dev,
 				     struct netdev_hw_addr_list *mc_list)
 {
-	return netdev_hw_addr_list_count(mc_list);
+	return __c_fakeu(netdev_hw_addr_list_count(mc_list));
 }
 
 static void rtl8187_configure_filter(struct ieee80211_hw *dev,
 				     unsigned int changed_flags,
 				     unsigned int *total_flags,
-				     u64 multicast)
+				     uintptr_t multicast)
 {
 	struct rtl8187_priv *priv = dev->priv;
 
@@ -1318,7 +1324,7 @@ static void rtl8187_configure_filter(struct ieee80211_hw *dev,
 	if (changed_flags & FIF_CONTROL)
 		priv->rx_conf ^= RTL818X_RX_CONF_CTRL;
 	if (*total_flags & FIF_OTHER_BSS ||
-	    *total_flags & FIF_ALLMULTI || multicast > 0)
+	    *total_flags & FIF_ALLMULTI || __c_ua(multicast) > 0)
 		priv->rx_conf |= RTL818X_RX_CONF_MONITOR;
 	else
 		priv->rx_conf &= ~RTL818X_RX_CONF_MONITOR;

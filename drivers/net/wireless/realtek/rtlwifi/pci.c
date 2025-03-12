@@ -1174,7 +1174,7 @@ static int _rtl_pci_init_tx_ring(struct ieee80211_hw *hw,
 				      sizeof(*buffer_desc) * entries,
 				      &buffer_desc_dma, GFP_KERNEL);
 
-		if (!buffer_desc || (unsigned long)buffer_desc & 0xFF) {
+		if (!buffer_desc || __c_pa(buffer_desc) & 0xFF) {
 			pr_err("Cannot allocate TX ring (prio = %d)\n",
 			       prio);
 			return -ENOMEM;
@@ -1191,7 +1191,7 @@ static int _rtl_pci_init_tx_ring(struct ieee80211_hw *hw,
 	desc = dma_alloc_coherent(&rtlpci->pdev->dev, sizeof(*desc) * entries,
 				  &desc_dma, GFP_KERNEL);
 
-	if (!desc || (unsigned long)desc & 0xFF) {
+	if (!desc || __c_pa(desc) & 0xFF) {
 		pr_err("Cannot allocate TX ring (prio = %d)\n", prio);
 		return -ENOMEM;
 	}
@@ -1237,7 +1237,7 @@ static int _rtl_pci_init_rx_ring(struct ieee80211_hw *hw, int rxring_idx)
 				       rtlpci->rxringcount,
 				       &rtlpci->rx_ring[rxring_idx].dma, GFP_KERNEL);
 		if (!rtlpci->rx_ring[rxring_idx].buffer_desc ||
-		    (ulong)rtlpci->rx_ring[rxring_idx].buffer_desc & 0xFF) {
+		    __c_pa(rtlpci->rx_ring[rxring_idx].buffer_desc) & 0xFF) {
 			pr_err("Cannot allocate RX ring\n");
 			return -ENOMEM;
 		}
@@ -1260,7 +1260,7 @@ static int _rtl_pci_init_rx_ring(struct ieee80211_hw *hw, int rxring_idx)
 				       rtlpci->rxringcount,
 				       &rtlpci->rx_ring[rxring_idx].dma, GFP_KERNEL);
 		if (!rtlpci->rx_ring[rxring_idx].desc ||
-		    (unsigned long)rtlpci->rx_ring[rxring_idx].desc & 0xFF) {
+		    __c_pa(rtlpci->rx_ring[rxring_idx].desc) & 0xFF) {
 			pr_err("Cannot allocate RX ring\n");
 			return -ENOMEM;
 		}
@@ -2174,7 +2174,7 @@ int rtl_pci_probe(struct pci_dev *pdev,
 
 	/*shared mem start */
 	rtlpriv->io.pci_mem_start =
-			(unsigned long)pci_iomap(pdev,
+			(uintptr_t)pci_iomap(pdev,
 			rtlpriv->cfg->bar_id, pmem_len);
 	if (rtlpriv->io.pci_mem_start == 0) {
 		WARN_ONCE(true, "rtlwifi: Can't map PCI mem\n");
@@ -2185,7 +2185,7 @@ int rtl_pci_probe(struct pci_dev *pdev,
 	rtl_dbg(rtlpriv, COMP_INIT, DBG_DMESG,
 		"mem mapped space: start: 0x%08lx len:%08lx flags:%08lx, after map:0x%08lx\n",
 		pmem_start, pmem_len, pmem_flags,
-		rtlpriv->io.pci_mem_start);
+		__c_ua(rtlpriv->io.pci_mem_start));
 
 	/* Disable Clk Request */
 	pci_write_config_byte(pdev, 0x81, 0);

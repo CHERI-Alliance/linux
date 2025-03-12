@@ -1049,12 +1049,21 @@ enum mac80211_rate_control_flags {
 	IEEE80211_TX_RC_160_MHZ_WIDTH		= BIT(10),
 };
 
+#ifndef CONFIG_CHERI_KERNEL
 
 /* there are 40 bytes if you don't need the rateset to be kept */
 #define IEEE80211_TX_INFO_DRIVER_DATA_SIZE 40
 
 /* if you do need the rateset, then you have less space */
 #define IEEE80211_TX_INFO_RATE_DRIVER_DATA_SIZE 24
+
+#else
+
+/* For CHERI the size of struct sk_buff->cb is increased. */
+#define IEEE80211_TX_INFO_DRIVER_DATA_SIZE 80
+#define IEEE80211_TX_INFO_RATE_DRIVER_DATA_SIZE 64
+
+#endif
 
 /* maximum number of rate stages */
 #define IEEE80211_TX_MAX_RATES	4
@@ -1223,7 +1232,11 @@ struct ieee80211_tx_info {
 			u16 tx_time;
 			u8 flags;
 			u8 pad2;
+#ifndef CONFIG_CHERI_KERNEL
 			void *status_driver_data[16 / sizeof(void *)];
+#else
+			void *status_driver_data[48 / sizeof(void *)];
+#endif
 		} status;
 		struct {
 			struct ieee80211_tx_rate driver_rates[
@@ -1237,6 +1250,9 @@ struct ieee80211_tx_info {
 			IEEE80211_TX_INFO_DRIVER_DATA_SIZE / sizeof(void *)];
 	};
 };
+#ifndef __CHECKER__
+static_assert(sizeof(struct ieee80211_tx_info) <= sizeof_field(struct sk_buff, cb));
+#endif
 
 static inline u16
 ieee80211_info_set_tx_time_est(struct ieee80211_tx_info *info, u16 tx_time_est)
@@ -4437,12 +4453,12 @@ struct ieee80211_ops {
 	void (*stop_ap)(struct ieee80211_hw *hw, struct ieee80211_vif *vif,
 			struct ieee80211_bss_conf *link_conf);
 
-	u64 (*prepare_multicast)(struct ieee80211_hw *hw,
+	uintptr_t (*prepare_multicast)(struct ieee80211_hw *hw,
 				 struct netdev_hw_addr_list *mc_list);
 	void (*configure_filter)(struct ieee80211_hw *hw,
 				 unsigned int changed_flags,
 				 unsigned int *total_flags,
-				 u64 multicast);
+				 uintptr_t multicast);
 	void (*config_iface_filter)(struct ieee80211_hw *hw,
 				    struct ieee80211_vif *vif,
 				    unsigned int filter_flags,

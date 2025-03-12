@@ -1011,7 +1011,7 @@ static int rtl8180_init_rx_ring(struct ieee80211_hw *dev)
 	priv->rx_ring = dma_alloc_coherent(&priv->pdev->dev,
 					   priv->rx_ring_sz * 32,
 					   &priv->rx_ring_dma, GFP_KERNEL);
-	if (!priv->rx_ring || (unsigned long)priv->rx_ring & 0xFF) {
+	if (!priv->rx_ring || __c_pa(priv->rx_ring) & 0xFF) {
 		wiphy_err(dev->wiphy, "Cannot allocate RX ring\n");
 		return -ENOMEM;
 	}
@@ -1082,7 +1082,7 @@ static int rtl8180_init_tx_ring(struct ieee80211_hw *dev,
 
 	ring = dma_alloc_coherent(&priv->pdev->dev, sizeof(*ring) * entries,
 				  &dma, GFP_KERNEL);
-	if (!ring || (unsigned long)ring & 0xFF) {
+	if (!ring || __c_pa(ring) & 0xFF) {
 		wiphy_err(dev->wiphy, "Cannot allocate TX ring (prio = %d)\n",
 			  prio);
 		return -ENOMEM;
@@ -1568,16 +1568,16 @@ static void rtl8180_bss_info_changed(struct ieee80211_hw *dev,
 	}
 }
 
-static u64 rtl8180_prepare_multicast(struct ieee80211_hw *dev,
+static uintptr_t rtl8180_prepare_multicast(struct ieee80211_hw *dev,
 				     struct netdev_hw_addr_list *mc_list)
 {
-	return netdev_hw_addr_list_count(mc_list);
+	return __c_fakeu(netdev_hw_addr_list_count(mc_list));
 }
 
 static void rtl8180_configure_filter(struct ieee80211_hw *dev,
 				     unsigned int changed_flags,
 				     unsigned int *total_flags,
-				     u64 multicast)
+				     uintptr_t multicast)
 {
 	struct rtl8180_priv *priv = dev->priv;
 
@@ -1587,7 +1587,7 @@ static void rtl8180_configure_filter(struct ieee80211_hw *dev,
 		priv->rx_conf ^= RTL818X_RX_CONF_CTRL;
 	if (changed_flags & FIF_OTHER_BSS)
 		priv->rx_conf ^= RTL818X_RX_CONF_MONITOR;
-	if (*total_flags & FIF_ALLMULTI || multicast > 0)
+	if (*total_flags & FIF_ALLMULTI || __c_ua(multicast) > 0)
 		priv->rx_conf |= RTL818X_RX_CONF_MULTICAST;
 	else
 		priv->rx_conf &= ~RTL818X_RX_CONF_MULTICAST;

@@ -506,7 +506,7 @@ static unsigned int _rtl_rx_get_padding(struct ieee80211_hdr *hdr,
 		/* Input might be invalid, avoid accessing memory outside
 		 * the buffer.
 		 */
-		if ((unsigned long)qc - (unsigned long)hdr < len &&
+		if (__c_pa(qc) - __c_pa(hdr) < len &&
 		    *qc & IEEE80211_QOS_CTL_A_MSDU_PRESENT)
 			padding ^= NET_IP_ALIGN;
 	}

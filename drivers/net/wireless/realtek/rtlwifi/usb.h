@@ -12,7 +12,7 @@
 	.match_flags = USB_DEVICE_ID_MATCH_DEVICE, \
 	.idVendor = (vend), \
 	.idProduct = (prod), \
-	.driver_info = (kernel_ulong_t)&(cfg)
+	.driver_info = (uintptr_t)&(cfg)
 
 #define USB_HIGH_SPEED_BULK_SIZE	512
 #define USB_FULL_SPEED_BULK_SIZE	64
@@ -55,7 +55,7 @@ static inline void _rtl_install_trx_info(struct rtl_usb *rtlusb,
 	struct ieee80211_tx_info *info = IEEE80211_SKB_CB(skb);
 
 	info->rate_driver_data[0] = rtlusb;
-	info->rate_driver_data[1] = (void *)(__kernel_size_t)ep_num;
+	info->rate_driver_data[1] = __c_fakep(ep_num);
 }
 
 /*  Add suspend/resume later */

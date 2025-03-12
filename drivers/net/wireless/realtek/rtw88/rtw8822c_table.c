@@ -8,6 +8,7 @@
 #include "rtw8822c_table.h"
 
 static const u32 rtw8822c_mac[] = {
+	0
 };
 
 RTW_DECL_TABLE_PHY_COND(rtw8822c_mac, rtw_phy_cfg_mac);

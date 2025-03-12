@@ -644,7 +644,7 @@ static int rtw_sdio_write_port(struct rtw_dev *rtwdev, struct sk_buff *skb,
 	if (ret)
 		return ret;
 
-	if (!IS_ALIGNED((unsigned long)skb->data, RTW_SDIO_DATA_PTR_ALIGN))
+	if (!IS_ALIGNED(__c_pa(skb->data), RTW_SDIO_DATA_PTR_ALIGN))
 		rtw_warn(rtwdev, "Got unaligned SKB in %s() for queue %u\n",
 			 __func__, queue);
 
@@ -842,7 +842,7 @@ static void rtw_sdio_tx_skb_prepare(struct rtw_dev *rtwdev,
 
 	pkt_desc = skb_push(skb, chip->tx_pkt_desc_sz);
 
-	data_addr = (unsigned long)pkt_desc;
+	data_addr = __c_pa(pkt_desc);
 	aligned_addr = ALIGN(data_addr, RTW_SDIO_DATA_PTR_ALIGN);
 
 	if (data_addr != aligned_addr) {

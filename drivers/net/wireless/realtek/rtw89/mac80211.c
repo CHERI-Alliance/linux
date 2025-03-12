@@ -222,7 +222,7 @@ static int rtw89_ops_change_interface(struct ieee80211_hw *hw,
 static void rtw89_ops_configure_filter(struct ieee80211_hw *hw,
 				       unsigned int changed_flags,
 				       unsigned int *new_flags,
-				       u64 multicast)
+				       uintptr_t multicast)
 {
 	struct rtw89_dev *rtwdev = hw->priv;
 	const struct rtw89_mac_gen_def *mac = rtwdev->chip->mac_def;

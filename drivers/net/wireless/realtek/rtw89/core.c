@@ -4085,7 +4085,7 @@ void rtw89_check_quirks(struct rtw89_dev *rtwdev, const struct dmi_system_id *qu
 		return;
 
 	for (match = dmi_first_match(quirks); match; match = dmi_first_match(match + 1)) {
-		quirk = (uintptr_t)match->driver_data;
+		quirk = __c_pa(match->driver_data);
 		if (quirk >= NUM_OF_RTW89_QUIRKS)
 			continue;
 
