@@ -744,7 +744,7 @@ static uintptr_t wl1251_op_prepare_multicast(struct ieee80211_hw *hw,
 		}
 	}
 
-	return (u64)(uintptr_t)fp;
+	return (uintptr_t)fp;
 }
 
 #define WL1251_SUPPORTED_FILTERS (FIF_ALLMULTI | \
@@ -759,7 +759,7 @@ static void wl1251_op_configure_filter(struct ieee80211_hw *hw,
 				       unsigned int *total,
 				       uintptr_t multicast)
 {
-	struct wl1251_filter_params *fp = (void *)(unsigned long)multicast;
+	struct wl1251_filter_params *fp = (void *)multicast;
 	struct wl1251 *wl = hw->priv;
 	int ret;
 
