@@ -1797,7 +1797,7 @@ static DEVICE_ATTR_RO(remapped_nvme);
 
 static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 {
-	uintptr_t board_id = ent->driver_data;
+	unsigned long board_id = __c_ua(ent->driver_data);
 	struct ata_port_info pi = ahci_port_info[board_id];
 	const struct ata_port_info *ppi[] = { &pi, NULL };
 	struct device *dev = &pdev->dev;

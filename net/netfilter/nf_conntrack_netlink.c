@@ -3169,7 +3169,7 @@ ctnetlink_exp_dump_table(struct sk_buff *skb, struct netlink_callback *cb)
 	last = (struct nf_conntrack_expect *)cb->args[1];
 	for (; cb->args[0] < nf_ct_expect_hsize; cb->args[0]++) {
 restart:
-		hlist_for_each_entry_rcu(exp, &nf_ct_expect_hash[cb->args[0]],
+		hlist_for_each_entry_rcu(exp, &nf_ct_expect_hash[__c_ua(cb->args[0])],
 					 hnode) {
 			if (l3proto && exp->tuple.src.l3num != l3proto)
 				continue;
