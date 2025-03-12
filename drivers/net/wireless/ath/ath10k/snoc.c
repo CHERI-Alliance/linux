@@ -501,7 +501,7 @@ static int __ath10k_snoc_rx_post_buf(struct ath10k_snoc_pipe *pipe)
 	if (!skb)
 		return -ENOMEM;
 
-	WARN_ONCE((unsigned long)skb->data & 3, "unaligned skb");
+	WARN_ONCE(__c_pa(skb->data) & 3, "unaligned skb");
 
 	paddr = dma_map_single(ar->dev, skb->data,
 			       skb->len + skb_tailroom(skb),
@@ -1449,7 +1449,7 @@ static void ath10k_msa_dump_memory(struct ath10k *ar,
 	buf_len -= sizeof(*hdr);
 
 	hdr->region_type = cpu_to_le32(current_region->type);
-	hdr->start = cpu_to_le32((unsigned long)ar->msa.vaddr);
+	hdr->start = cpu_to_le32(__c_pa(ar->msa.vaddr));
 	hdr->length = cpu_to_le32(ar->msa.mem_size);
 
 	if (current_region->len < ar->msa.mem_size) {

@@ -40,7 +40,7 @@ static int carl9170_fw_verify_descs(struct ar9170 *ar,
 	const struct carl9170fw_desc_head *head, unsigned int max_len)
 {
 	const struct carl9170fw_desc_head *pos;
-	unsigned long pos_addr, end_addr;
+	uintptr_t pos_addr, end_addr;
 	unsigned int pos_length;
 
 	if (max_len < sizeof(*pos))
@@ -49,7 +49,7 @@ static int carl9170_fw_verify_descs(struct ar9170 *ar,
 	max_len = min_t(unsigned int, CARL9170FW_DESC_MAX_LENGTH, max_len);
 
 	pos = head;
-	pos_addr = (unsigned long) pos;
+	pos_addr = (uintptr_t) pos;
 	end_addr = pos_addr + max_len;
 
 	while (pos_addr < end_addr) {
@@ -160,10 +160,10 @@ static int carl9170_fw_checksum(struct ar9170 *ar, const __u8 *data,
 	}
 
 	dsc_len = min_t(unsigned int, len,
-			(unsigned long)chk_desc - (unsigned long)otus_desc);
+			__c_pa(chk_desc) - __c_pa(otus_desc));
 
-	fin = (unsigned long) last_desc + sizeof(*last_desc);
-	diff = fin - (unsigned long) otus_desc;
+	fin = __c_pa(last_desc) + sizeof(*last_desc);
+	diff = fin - __c_pa(otus_desc);
 
 	if (diff < len)
 		len -= diff;
@@ -408,7 +408,7 @@ int carl9170_parse_firmware(struct ar9170 *ar)
 		return -ENODATA;
 	}
 
-	header_offset = (unsigned long)fw_desc - (unsigned long)fw->data;
+	header_offset = __c_pa(fw_desc) - __c_pa(fw->data);
 
 	err = carl9170_fw_verify_descs(ar, fw_desc, fw->size - header_offset);
 	if (err) {

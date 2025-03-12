@@ -341,11 +341,11 @@ int ath12k_dp_rx_bufs_replenish(struct ath12k_base *ab,
 		if (!skb)
 			break;
 
-		if (!IS_ALIGNED((unsigned long)skb->data,
+		if (!IS_ALIGNED(__c_pa(skb->data),
 				DP_RX_BUFFER_ALIGN_SIZE)) {
 			skb_pull(skb,
-				 PTR_ALIGN(skb->data, DP_RX_BUFFER_ALIGN_SIZE) -
-				 skb->data);
+				 __c_pa(PTR_ALIGN(skb->data, DP_RX_BUFFER_ALIGN_SIZE)) -
+				 __c_pa(skb->data));
 		}
 
 		paddr = dma_map_single(ab->dev, skb->data,
@@ -2643,7 +2643,10 @@ try_again:
 
 		desc_va = ((u64)le32_to_cpu(desc->buf_va_hi) << 32 |
 			   le32_to_cpu(desc->buf_va_lo));
-		desc_info = (struct ath12k_rx_desc_info *)((unsigned long)desc_va);
+		/* FIXCHERI: Get rid of cheri_make_kernel_data_cap() */
+		desc_info = (struct ath12k_rx_desc_info *)
+			cheri_make_kernel_data_cap(desc_va,
+						   sizeof(&desc_info));
 
 		/* retry manual desc retrieval */
 		if (!desc_info) {
@@ -3340,7 +3343,10 @@ ath12k_dp_process_rx_err_buf(struct ath12k *ar, struct hal_reo_dest_ring *desc,
 
 	desc_va = ((u64)le32_to_cpu(desc->buf_va_hi) << 32 |
 		   le32_to_cpu(desc->buf_va_lo));
-	desc_info = (struct ath12k_rx_desc_info *)((unsigned long)desc_va);
+	/* FIXCHERI: Get rid of cheri_make_kernel_data_cap() */
+	desc_info = (struct ath12k_rx_desc_info *)
+		cheri_make_kernel_data_cap(desc_va,
+					   sizeof(*desc_info));
 
 	/* retry manual desc retrieval */
 	if (!desc_info) {

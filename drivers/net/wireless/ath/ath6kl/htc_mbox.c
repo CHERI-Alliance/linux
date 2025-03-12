@@ -349,7 +349,7 @@ static void ath6kl_htc_tx_buf_align(u8 **buf, unsigned long len)
 {
 	u8 *align_addr;
 
-	if (!IS_ALIGNED((unsigned long) *buf, 4)) {
+	if (!IS_ALIGNED(__c_pa(*buf), 4)) {
 		align_addr = PTR_ALIGN(*buf - 4, 4);
 		memmove(align_addr, *buf, len);
 		*buf = align_addr;

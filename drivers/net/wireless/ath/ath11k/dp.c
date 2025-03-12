@@ -276,8 +276,8 @@ int ath11k_dp_srng_setup(struct ath11k_base *ab, struct dp_srng *ring,
 		return -ENOMEM;
 
 	ring->vaddr = PTR_ALIGN(ring->vaddr_unaligned, HAL_RING_BASE_ALIGN);
-	ring->paddr = ring->paddr_unaligned + ((unsigned long)ring->vaddr -
-		      (unsigned long)ring->vaddr_unaligned);
+	ring->paddr = ring->paddr_unaligned + (__c_pa(ring->vaddr) -
+		      __c_pa(ring->vaddr_unaligned));
 
 	params.ring_base_vaddr = ring->vaddr;
 	params.ring_base_paddr = ring->paddr;
@@ -632,8 +632,8 @@ static int ath11k_dp_link_desc_bank_alloc(struct ath11k_base *ab,
 		desc_bank[i].vaddr = PTR_ALIGN(desc_bank[i].vaddr_unaligned,
 					       HAL_LINK_DESC_ALIGN);
 		desc_bank[i].paddr = desc_bank[i].paddr_unaligned +
-				     ((unsigned long)desc_bank[i].vaddr -
-				      (unsigned long)desc_bank[i].vaddr_unaligned);
+				     (__c_pa(desc_bank[i].vaddr) -
+				      __c_pa(desc_bank[i].vaddr_unaligned));
 		desc_bank[i].size = desc_sz;
 	}
 

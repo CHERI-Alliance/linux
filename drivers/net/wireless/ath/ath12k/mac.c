@@ -6582,7 +6582,7 @@ static void ath12k_mac_configure_filter(struct ath12k *ar,
 static void ath12k_mac_op_configure_filter(struct ieee80211_hw *hw,
 					   unsigned int changed_flags,
 					   unsigned int *total_flags,
-					   u64 multicast)
+					   uintptr_t multicast)
 {
 	struct ath12k_hw *ah = ath12k_hw_to_ah(hw);
 	struct ath12k *ar;

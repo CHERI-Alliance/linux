@@ -1274,7 +1274,7 @@ static void ath9k_hif_usb_firmware_cb(const struct firmware *fw, void *context)
 				&hif_dev->interface->dev,
 				hif_dev->usb_device_id->idProduct,
 				hif_dev->udev->product,
-				hif_dev->usb_device_id->driver_info);
+				__c_ua(hif_dev->usb_device_id->driver_info));
 	if (ret) {
 		ret = -EINVAL;
 		goto err_htc_hw_init;

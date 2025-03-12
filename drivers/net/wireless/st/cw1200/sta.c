@@ -529,7 +529,7 @@ void cw1200_set_beacon_wakeup_period_work(struct work_struct *work)
 				     priv->join_dtim_period, 0);
 }
 
-u64 cw1200_prepare_multicast(struct ieee80211_hw *hw,
+uintptr_t cw1200_prepare_multicast(struct ieee80211_hw *hw,
 			     struct netdev_hw_addr_list *mc_list)
 {
 	static u8 broadcast_ipv6[ETH_ALEN] = {
@@ -565,13 +565,13 @@ u64 cw1200_prepare_multicast(struct ieee80211_hw *hw,
 		priv->multicast_filter.num_addrs = __cpu_to_le32(count);
 	}
 
-	return netdev_hw_addr_list_count(mc_list);
+	return __c_fakeu(netdev_hw_addr_list_count(mc_list));
 }
 
 void cw1200_configure_filter(struct ieee80211_hw *dev,
 			     unsigned int changed_flags,
 			     unsigned int *total_flags,
-			     u64 multicast)
+			     uintptr_t multicast)
 {
 	struct cw1200_common *priv = dev->priv;
 	bool listening = !!(*total_flags &

@@ -162,10 +162,10 @@ static int __ath10k_htt_rx_ring_fill_n(struct ath10k_htt *htt, int num)
 			goto fail;
 		}
 
-		if (!IS_ALIGNED((unsigned long)skb->data, HTT_RX_DESC_ALIGN))
+		if (!IS_ALIGNED(__c_pa(skb->data), HTT_RX_DESC_ALIGN))
 			skb_pull(skb,
-				 PTR_ALIGN(skb->data, HTT_RX_DESC_ALIGN) -
-				 skb->data);
+				 __c_pa(PTR_ALIGN(skb->data, HTT_RX_DESC_ALIGN)) -
+				 __c_pa(skb->data));
 
 		/* Clear rx_desc attention word before posting to Rx ring */
 		rx_desc = HTT_RX_BUF_TO_RX_DESC(hw, skb->data);
@@ -3237,7 +3237,7 @@ static void ath10k_htt_rx_h_rx_offload(struct ath10k *ar,
 		 * mac80211 complains.  This shouldn't reduce performance much
 		 * because these offloaded frames are rare.
 		 */
-		offset = 4 - ((unsigned long)msdu->data & 3);
+		offset = 4 - (__c_pa(msdu->data) & 3);
 		skb_put(msdu, offset);
 		memmove(msdu->data + offset, msdu->data, msdu->len);
 		skb_pull(msdu, offset);
@@ -4075,7 +4075,7 @@ bool ath10k_htt_t2h_msg_handler(struct ath10k *ar, struct sk_buff *skb)
 	enum htt_t2h_msg_type type;
 
 	/* confirm alignment */
-	if (!IS_ALIGNED((unsigned long)skb->data, 4))
+	if (!IS_ALIGNED(__c_pa(skb->data), 4))
 		ath10k_warn(ar, "unaligned htt message, expect trouble\n");
 
 	ath10k_dbg(ar, ATH10K_DBG_HTT, "htt rx, msg_type: 0x%0X\n",

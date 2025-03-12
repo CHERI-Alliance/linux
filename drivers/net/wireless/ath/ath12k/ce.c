@@ -286,7 +286,7 @@ static int ath12k_ce_rx_post_pipe(struct ath12k_ce_pipe *pipe)
 			goto exit;
 		}
 
-		WARN_ON_ONCE(!IS_ALIGNED((unsigned long)skb->data, 4));
+		WARN_ON_ONCE(!IS_ALIGNED(__c_pa(skb->data), 4));
 
 		paddr = dma_map_single(ab->dev, skb->data,
 				       skb->len + skb_tailroom(skb),

@@ -3135,7 +3135,7 @@ struct wl1271_filter_params {
 	u8 mc_list[ACX_MC_ADDRESS_GROUP_MAX][ETH_ALEN];
 };
 
-static u64 wl1271_op_prepare_multicast(struct ieee80211_hw *hw,
+static uintptr_t wl1271_op_prepare_multicast(struct ieee80211_hw *hw,
 				       struct netdev_hw_addr_list *mc_list)
 {
 	struct wl1271_filter_params *fp;
@@ -3160,7 +3160,7 @@ static u64 wl1271_op_prepare_multicast(struct ieee80211_hw *hw,
 		}
 	}
 
-	return (u64)(unsigned long)fp;
+	return (uintptr_t)fp;
 }
 
 #define WL1271_SUPPORTED_FILTERS (FIF_ALLMULTI | \
@@ -3171,9 +3171,9 @@ static u64 wl1271_op_prepare_multicast(struct ieee80211_hw *hw,
 
 static void wl1271_op_configure_filter(struct ieee80211_hw *hw,
 				       unsigned int changed,
-				       unsigned int *total, u64 multicast)
+				       unsigned int *total, uintptr_t multicast)
 {
-	struct wl1271_filter_params *fp = (void *)(unsigned long)multicast;
+	struct wl1271_filter_params *fp = (void *)multicast;
 	struct wl1271 *wl = hw->priv;
 	struct wl12xx_vif *wlvif;
 

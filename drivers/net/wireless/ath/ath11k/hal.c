@@ -317,8 +317,8 @@ static void ath11k_hal_srng_dst_hw_init(struct ath11k_base *ab,
 			   val);
 
 	hp_addr = hal->rdp.paddr +
-		  ((unsigned long)srng->u.dst_ring.hp_addr -
-		   (unsigned long)hal->rdp.vaddr);
+		  (__c_pa(srng->u.dst_ring.hp_addr) -
+		   __c_pa(hal->rdp.vaddr));
 	ath11k_hif_write32(ab, reg_base + HAL_REO1_RING_HP_ADDR_LSB_OFFSET(ab),
 			   hp_addr & HAL_ADDR_LSB_REG_MASK);
 	ath11k_hif_write32(ab, reg_base + HAL_REO1_RING_HP_ADDR_MSB_OFFSET(ab),
@@ -419,8 +419,8 @@ static void ath11k_hal_srng_src_hw_init(struct ath11k_base *ab,
 
 	if (srng->ring_id != HAL_SRNG_RING_ID_WBM_IDLE_LINK) {
 		tp_addr = hal->rdp.paddr +
-			  ((unsigned long)srng->u.src_ring.tp_addr -
-			   (unsigned long)hal->rdp.vaddr);
+			  (__c_pa(srng->u.src_ring.tp_addr) -
+			   __c_pa(hal->rdp.vaddr));
 		ath11k_hif_write32(ab,
 				   reg_base + HAL_TCL1_RING_TP_ADDR_LSB_OFFSET(ab),
 				   tp_addr & HAL_ADDR_LSB_REG_MASK);
@@ -530,12 +530,12 @@ dma_addr_t ath11k_hal_srng_get_hp_addr(struct ath11k_base *ab,
 
 	if (srng->ring_dir == HAL_SRNG_DIR_SRC)
 		return ab->hal.wrp.paddr +
-		       ((unsigned long)srng->u.src_ring.hp_addr -
-			(unsigned long)ab->hal.wrp.vaddr);
+		       (__c_pa(srng->u.src_ring.hp_addr) -
+			__c_pa(ab->hal.wrp.vaddr));
 	else
 		return ab->hal.rdp.paddr +
-		       ((unsigned long)srng->u.dst_ring.hp_addr -
-			 (unsigned long)ab->hal.rdp.vaddr);
+		       (__c_pa(srng->u.dst_ring.hp_addr) -
+			 __c_pa(ab->hal.rdp.vaddr));
 }
 
 dma_addr_t ath11k_hal_srng_get_tp_addr(struct ath11k_base *ab,
@@ -546,12 +546,12 @@ dma_addr_t ath11k_hal_srng_get_tp_addr(struct ath11k_base *ab,
 
 	if (srng->ring_dir == HAL_SRNG_DIR_SRC)
 		return ab->hal.rdp.paddr +
-		       ((unsigned long)srng->u.src_ring.tp_addr -
-			(unsigned long)ab->hal.rdp.vaddr);
+		       (__c_pa(srng->u.src_ring.tp_addr) -
+			__c_pa(ab->hal.rdp.vaddr));
 	else
 		return ab->hal.wrp.paddr +
-		       ((unsigned long)srng->u.dst_ring.tp_addr -
-			(unsigned long)ab->hal.wrp.vaddr);
+		       (__c_pa(srng->u.dst_ring.tp_addr) -
+			__c_pa(ab->hal.wrp.vaddr));
 }
 
 u32 ath11k_hal_ce_get_desc_size(enum hal_ce_desc type)
@@ -848,14 +848,14 @@ void ath11k_hal_srng_access_end(struct ath11k_base *ab, struct hal_srng *srng)
 			srng->u.src_ring.last_tp =
 				*(volatile u32 *)srng->u.src_ring.tp_addr;
 			ath11k_hif_write32(ab,
-					   (unsigned long)srng->u.src_ring.hp_addr -
-					   (unsigned long)ab->mem,
+					   __c_pa(srng->u.src_ring.hp_addr) -
+					   __c_pa(ab->mem),
 					   srng->u.src_ring.hp);
 		} else {
 			srng->u.dst_ring.last_hp = *srng->u.dst_ring.hp_addr;
 			ath11k_hif_write32(ab,
-					   (unsigned long)srng->u.dst_ring.tp_addr -
-					   (unsigned long)ab->mem,
+					   __c_pa(srng->u.dst_ring.tp_addr) -
+					   __c_pa(ab->mem),
 					   srng->u.dst_ring.tp);
 		}
 	}
@@ -1020,14 +1020,14 @@ int ath11k_hal_srng_setup(struct ath11k_base *ab, enum hal_ring_type type,
 		} else {
 			if (!ab->hw_params.supports_shadow_regs)
 				srng->u.src_ring.hp_addr =
-				(u32 *)((unsigned long)ab->mem + reg_base);
+				(u32 *)((uintptr_t)ab->mem + reg_base);
 			else
 				ath11k_dbg(ab, ATH11K_DBG_HAL,
 					   "type %d ring_num %d reg_base 0x%x shadow 0x%lx\n",
 					   type, ring_num,
 					   reg_base,
-					   (unsigned long)srng->u.src_ring.hp_addr -
-					   (unsigned long)ab->mem);
+					   __c_pa(srng->u.src_ring.hp_addr) -
+					   __c_pa(ab->mem));
 		}
 	} else {
 		/* During initialization loop count in all the descriptors
@@ -1053,7 +1053,7 @@ int ath11k_hal_srng_setup(struct ath11k_base *ab, enum hal_ring_type type,
 		} else {
 			if (!ab->hw_params.supports_shadow_regs)
 				srng->u.dst_ring.tp_addr =
-				(u32 *)((unsigned long)ab->mem + reg_base +
+				(u32 *)((uintptr_t)ab->mem + reg_base +
 					(HAL_REO1_RING_TP(ab) - HAL_REO1_RING_HP(ab)));
 			else
 				ath11k_dbg(ab, ATH11K_DBG_HAL,
@@ -1061,8 +1061,8 @@ int ath11k_hal_srng_setup(struct ath11k_base *ab, enum hal_ring_type type,
 					   type, ring_num,
 					   reg_base + (HAL_REO1_RING_TP(ab) -
 						       HAL_REO1_RING_HP(ab)),
-					   (unsigned long)srng->u.dst_ring.tp_addr -
-					   (unsigned long)ab->mem);
+					   __c_pa(srng->u.dst_ring.tp_addr) -
+					   __c_pa(ab->mem));
 		}
 	}
 
@@ -1097,10 +1097,10 @@ static void ath11k_hal_srng_update_hp_tp_addr(struct ath11k_base *ab,
 
 	if (srng_config->ring_dir == HAL_SRNG_DIR_DST)
 		srng->u.dst_ring.tp_addr = (u32 *)(HAL_SHADOW_REG(ab, shadow_cfg_idx) +
-						   (unsigned long)ab->mem);
+						   (uintptr_t)ab->mem);
 	else
 		srng->u.src_ring.hp_addr = (u32 *)(HAL_SHADOW_REG(ab, shadow_cfg_idx) +
-						   (unsigned long)ab->mem);
+						   (uintptr_t)ab->mem);
 }
 
 int ath11k_hal_srng_update_shadow_config(struct ath11k_base *ab,

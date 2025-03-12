@@ -180,8 +180,8 @@ int ath5k_init_leds(struct ath5k_hw *ah)
 #endif
 	if (match) {
 		__set_bit(ATH_STAT_LEDSOFT, ah->status);
-		ah->led_pin = ATH_PIN(match->driver_data);
-		ah->led_on = ATH_POLARITY(match->driver_data);
+		ah->led_pin = ATH_PIN(__c_ua(match->driver_data));
+		ah->led_on = ATH_POLARITY(__c_ua(match->driver_data));
 	}
 
 	if (!test_bit(ATH_STAT_LEDSOFT, ah->status))

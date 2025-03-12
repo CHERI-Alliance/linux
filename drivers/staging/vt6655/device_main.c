@@ -1547,7 +1547,7 @@ static void vnt_bss_info_changed(struct ieee80211_hw *hw,
 	}
 }
 
-static u64 vnt_prepare_multicast(struct ieee80211_hw *hw,
+static uintptr_t vnt_prepare_multicast(struct ieee80211_hw *hw,
 				 struct netdev_hw_addr_list *mc_list)
 {
 	struct vnt_private *priv = hw->priv;
@@ -1563,12 +1563,12 @@ static u64 vnt_prepare_multicast(struct ieee80211_hw *hw,
 
 	priv->mc_list_count = mc_list->count;
 
-	return mc_filter;
+	return __c_fakeu(mc_filter);
 }
 
 static void vnt_configure(struct ieee80211_hw *hw,
 			  unsigned int changed_flags,
-			  unsigned int *total_flags, u64 multicast)
+			  unsigned int *total_flags, uintptr_t multicast)
 {
 	struct vnt_private *priv = hw->priv;
 	u8 rx_mode = 0;
@@ -1595,9 +1595,9 @@ static void vnt_configure(struct ieee80211_hw *hw,
 			} else {
 				VT6655_MAC_SELECT_PAGE1(priv->port_offset);
 
-				multicast =  le64_to_cpu(multicast);
-				iowrite32((u32)multicast, priv->port_offset +  MAC_REG_MAR0);
-				iowrite32((u32)(multicast >> 32),
+				multicast =  __c_fakeu(le64_to_cpu(multicast));
+				iowrite32((u32)__c_ua(multicast), priv->port_offset +  MAC_REG_MAR0);
+				iowrite32((u32)(__c_ua(multicast) >> 32),
 					  priv->port_offset + MAC_REG_MAR0 + 4);
 
 				VT6655_MAC_SELECT_PAGE0(priv->port_offset);

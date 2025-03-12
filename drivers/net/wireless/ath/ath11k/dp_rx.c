@@ -376,11 +376,11 @@ int ath11k_dp_rxbufs_replenish(struct ath11k_base *ab, int mac_id,
 		if (!skb)
 			break;
 
-		if (!IS_ALIGNED((unsigned long)skb->data,
+		if (!IS_ALIGNED(__c_pa(skb->data),
 				DP_RX_BUFFER_ALIGN_SIZE)) {
 			skb_pull(skb,
-				 PTR_ALIGN(skb->data, DP_RX_BUFFER_ALIGN_SIZE) -
-				 skb->data);
+				 __c_pa(PTR_ALIGN(skb->data, DP_RX_BUFFER_ALIGN_SIZE)) -
+				 __c_pa(skb->data));
 		}
 
 		paddr = dma_map_single(ab->dev, skb->data,
@@ -2857,10 +2857,10 @@ static struct sk_buff *ath11k_dp_rx_alloc_mon_status_buf(struct ath11k_base *ab,
 	if (!skb)
 		goto fail_alloc_skb;
 
-	if (!IS_ALIGNED((unsigned long)skb->data,
+	if (!IS_ALIGNED(__c_pa(skb->data),
 			DP_RX_BUFFER_ALIGN_SIZE)) {
-		skb_pull(skb, PTR_ALIGN(skb->data, DP_RX_BUFFER_ALIGN_SIZE) -
-			 skb->data);
+		skb_pull(skb, __c_pa(PTR_ALIGN(skb->data, DP_RX_BUFFER_ALIGN_SIZE)) -
+			 __c_pa(skb->data));
 	}
 
 	paddr = dma_map_single(ab->dev, skb->data,

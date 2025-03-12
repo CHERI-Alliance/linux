@@ -775,7 +775,7 @@ static int __ath10k_pci_rx_post_buf(struct ath10k_pci_pipe *pipe)
 	if (!skb)
 		return -ENOMEM;
 
-	WARN_ONCE((unsigned long)skb->data & 3, "unaligned skb");
+	WARN_ONCE(__c_pa(skb->data) & 3, "unaligned skb");
 
 	paddr = dma_map_single(ar->dev, skb->data,
 			       skb->len + skb_tailroom(skb),

@@ -580,7 +580,10 @@ void ath12k_dp_tx_completion_handler(struct ath12k_base *ab, int ring_id)
 			/* HW done cookie conversion */
 			desc_va = ((u64)le32_to_cpu(tx_status->buf_va_hi) << 32 |
 				   le32_to_cpu(tx_status->buf_va_lo));
-			tx_desc = (struct ath12k_tx_desc_info *)((unsigned long)desc_va);
+			/* FIXCHERI: Get rid of cheri_make_kernel_data_cap() */
+			tx_desc = (struct ath12k_tx_desc_info *)
+				cheri_make_kernel_data_cap(desc_va,
+							   sizeof(*tx_desc));
 		} else {
 			/* SW does cookie conversion to VA */
 			desc_id = le32_get_bits(tx_status->buf_va_hi,

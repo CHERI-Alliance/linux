@@ -427,7 +427,7 @@ static int wcn36xx_config(struct ieee80211_hw *hw, u32 changed)
 
 static void wcn36xx_configure_filter(struct ieee80211_hw *hw,
 				     unsigned int changed,
-				     unsigned int *total, u64 multicast)
+				     unsigned int *total, uintptr_t multicast)
 {
 	struct wcn36xx_hal_rcv_flt_mc_addr_list_type *fp;
 	struct wcn36xx *wcn = hw->priv;
@@ -440,7 +440,7 @@ static void wcn36xx_configure_filter(struct ieee80211_hw *hw,
 
 	*total &= FIF_ALLMULTI;
 
-	fp = (void *)(unsigned long)multicast;
+	fp = (void *)multicast;
 	list_for_each_entry(tmp, &wcn->vif_list, list) {
 		vif = wcn36xx_priv_to_vif(tmp);
 
@@ -455,7 +455,7 @@ static void wcn36xx_configure_filter(struct ieee80211_hw *hw,
 	kfree(fp);
 }
 
-static u64 wcn36xx_prepare_multicast(struct ieee80211_hw *hw,
+static uintptr_t wcn36xx_prepare_multicast(struct ieee80211_hw *hw,
 				     struct netdev_hw_addr_list *mc_list)
 {
 	struct wcn36xx_hal_rcv_flt_mc_addr_list_type *fp;
@@ -479,7 +479,7 @@ static u64 wcn36xx_prepare_multicast(struct ieee80211_hw *hw,
 		}
 	}
 
-	return (u64)(unsigned long)fp;
+	return (uintptr_t)fp;
 }
 
 static void wcn36xx_tx(struct ieee80211_hw *hw,

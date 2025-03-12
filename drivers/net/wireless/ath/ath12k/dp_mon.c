@@ -1280,10 +1280,10 @@ int ath12k_dp_mon_buf_replenish(struct ath12k_base *ab,
 		if (unlikely(!skb))
 			goto fail_alloc_skb;
 
-		if (!IS_ALIGNED((unsigned long)skb->data, DP_RX_BUFFER_ALIGN_SIZE)) {
+		if (!IS_ALIGNED(__c_pa(skb->data), DP_RX_BUFFER_ALIGN_SIZE)) {
 			skb_pull(skb,
-				 PTR_ALIGN(skb->data, DP_RX_BUFFER_ALIGN_SIZE) -
-				 skb->data);
+				 __c_pa(PTR_ALIGN(skb->data, DP_RX_BUFFER_ALIGN_SIZE)) -
+				 __c_pa(skb->data));
 		}
 
 		paddr = dma_map_single(ab->dev, skb->data,
@@ -1424,8 +1424,8 @@ struct sk_buff *ath12k_dp_mon_tx_alloc_skb(void)
 
 	skb_reserve(skb, MAX_MONITOR_HEADER);
 
-	if (!IS_ALIGNED((unsigned long)skb->data, 4))
-		skb_pull(skb, PTR_ALIGN(skb->data, 4) - skb->data);
+	if (!IS_ALIGNED(__c_pa(skb->data), 4))
+		skb_pull(skb, __c_pa(PTR_ALIGN(skb->data, 4)) - __c_pa(skb->data));
 
 	return skb;
 }

@@ -29,7 +29,7 @@ static struct sk_buff *ath10k_htc_build_tx_ctrl_skb(void *ar)
 		return NULL;
 
 	skb_reserve(skb, 20); /* FIXME: why 20 bytes? */
-	WARN_ONCE((unsigned long)skb->data & 3, "unaligned skb");
+	WARN_ONCE(__c_pa(skb->data) & 3, "unaligned skb");
 
 	skb_cb = ATH10K_SKB_CB(skb);
 	memset(skb_cb, 0, sizeof(*skb_cb));
@@ -1185,7 +1185,7 @@ struct sk_buff *ath10k_htc_alloc_skb(struct ath10k *ar, int size)
 	skb_reserve(skb, sizeof(struct ath10k_htc_hdr));
 
 	/* FW/HTC requires 4-byte aligned streams */
-	if (!IS_ALIGNED((unsigned long)skb->data, 4))
+	if (!IS_ALIGNED(__c_pa(skb->data), 4))
 		ath10k_warn(ar, "Unaligned HTC tx skb\n");
 
 	return skb;

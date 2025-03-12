@@ -90,7 +90,7 @@ static inline struct ath6kl_sdio *ath6kl_sdio_priv(struct ath6kl *ar)
  */
 static inline bool buf_needs_bounce(u8 *buf)
 {
-	return ((unsigned long) buf & 0x3) || !virt_addr_valid(buf);
+	return (__c_pa(buf) & 0x3) || !virt_addr_valid(buf);
 }
 
 static void ath6kl_sdio_set_mbox_info(struct ath6kl *ar)
@@ -373,7 +373,7 @@ static int ath6kl_sdio_alloc_prep_scat_req(struct ath6kl_sdio *ar_sdio,
 			}
 
 			s_req->virt_dma_buf =
-				(u8 *)L1_CACHE_ALIGN((unsigned long)virt_buf);
+				(u8 *)L1_CACHE_ALIGN((uintptr_t)virt_buf);
 		} else {
 			/* allocate sglist */
 			s_req->sgentries = kzalloc(size, GFP_KERNEL);

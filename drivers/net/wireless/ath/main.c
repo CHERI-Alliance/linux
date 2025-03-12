@@ -48,7 +48,7 @@ struct sk_buff *ath_rxbuf_alloc(struct ath_common *common,
 	 * systems :( */
 	skb = __dev_alloc_skb(len + common->cachelsz - 1, gfp_mask);
 	if (skb != NULL) {
-		off = ((unsigned long) skb->data) % common->cachelsz;
+		off = __c_pa(skb->data) % common->cachelsz;
 		if (off != 0)
 			skb_reserve(skb, common->cachelsz - off);
 	} else {

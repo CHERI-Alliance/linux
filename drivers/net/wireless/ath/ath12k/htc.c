@@ -20,7 +20,7 @@ struct sk_buff *ath12k_htc_alloc_skb(struct ath12k_base *ab, int size)
 	skb_reserve(skb, sizeof(struct ath12k_htc_hdr));
 
 	/* FW/HTC requires 4-byte aligned streams */
-	if (!IS_ALIGNED((unsigned long)skb->data, 4))
+	if (!IS_ALIGNED(__c_pa(skb->data), 4))
 		ath12k_warn(ab, "Unaligned HTC tx skb\n");
 
 	return skb;
@@ -42,7 +42,7 @@ static struct sk_buff *ath12k_htc_build_tx_ctrl_skb(void)
 		return NULL;
 
 	skb_reserve(skb, sizeof(struct ath12k_htc_hdr));
-	WARN_ON_ONCE(!IS_ALIGNED((unsigned long)skb->data, 4));
+	WARN_ON_ONCE(!IS_ALIGNED(__c_pa(skb->data), 4));
 
 	skb_cb = ATH12K_SKB_CB(skb);
 	memset(skb_cb, 0, sizeof(*skb_cb));

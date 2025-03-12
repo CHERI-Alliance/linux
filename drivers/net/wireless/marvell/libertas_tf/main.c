@@ -351,7 +351,7 @@ static int lbtf_op_config(struct ieee80211_hw *hw, u32 changed)
 	return 0;
 }
 
-static u64 lbtf_op_prepare_multicast(struct ieee80211_hw *hw,
+static uintptr_t lbtf_op_prepare_multicast(struct ieee80211_hw *hw,
 				     struct netdev_hw_addr_list *mc_list)
 {
 	struct lbtf_private *priv = hw->priv;
@@ -367,14 +367,14 @@ static u64 lbtf_op_prepare_multicast(struct ieee80211_hw *hw,
 	netdev_hw_addr_list_for_each(ha, mc_list)
 		memcpy(&priv->multicastlist[i++], ha->addr, ETH_ALEN);
 
-	return mc_count;
+	return __c_fakeu(mc_count);
 }
 
 #define SUPPORTED_FIF_FLAGS  FIF_ALLMULTI
 static void lbtf_op_configure_filter(struct ieee80211_hw *hw,
 			unsigned int changed_flags,
 			unsigned int *new_flags,
-			u64 multicast)
+			uintptr_t multicast)
 {
 	struct lbtf_private *priv = hw->priv;
 	int old_mac_control = priv->mac_control;
@@ -391,10 +391,10 @@ static void lbtf_op_configure_filter(struct ieee80211_hw *hw,
 
 	priv->mac_control &= ~CMD_ACT_MAC_PROMISCUOUS_ENABLE;
 	if (*new_flags & (FIF_ALLMULTI) ||
-	    multicast > MRVDRV_MAX_MULTICAST_LIST_SIZE) {
+	    __c_ua(multicast) > MRVDRV_MAX_MULTICAST_LIST_SIZE) {
 		priv->mac_control |= CMD_ACT_MAC_ALL_MULTICAST_ENABLE;
 		priv->mac_control &= ~CMD_ACT_MAC_MULTICAST_ENABLE;
-	} else if (multicast) {
+	} else if (__c_ua(multicast)) {
 		priv->mac_control |= CMD_ACT_MAC_MULTICAST_ENABLE;
 		priv->mac_control &= ~CMD_ACT_MAC_ALL_MULTICAST_ENABLE;
 		lbtf_cmd_set_mac_multicast_addr(priv);

@@ -477,7 +477,7 @@ netdev_tx_t ath6kl_data_tx(struct sk_buff *skb, struct net_device *dev)
 
 	spin_unlock_bh(&ar->lock);
 
-	if (!IS_ALIGNED((unsigned long) skb->data - HTC_HDR_LENGTH, 4) &&
+	if (!IS_ALIGNED(__c_pa(skb->data) - HTC_HDR_LENGTH, 4) &&
 	    skb_cloned(skb)) {
 		/*
 		 * We will touch (move the buffer data to align it. Since the
@@ -898,7 +898,7 @@ void ath6kl_rx_refill(struct htc_target *target, enum htc_endpoint_id endpoint)
 			break;
 
 		packet = (struct htc_packet *) skb->head;
-		if (!IS_ALIGNED((unsigned long) skb->data, 4)) {
+		if (!IS_ALIGNED(__c_pa(skb->data), 4)) {
 			size_t len = skb_headlen(skb);
 			skb->data = PTR_ALIGN(skb->data - 4, 4);
 			skb_set_tail_pointer(skb, len);
@@ -924,7 +924,7 @@ void ath6kl_refill_amsdu_rxbufs(struct ath6kl *ar, int count)
 			return;
 
 		packet = (struct htc_packet *) skb->head;
-		if (!IS_ALIGNED((unsigned long) skb->data, 4)) {
+		if (!IS_ALIGNED(__c_pa(skb->data), 4)) {
 			size_t len = skb_headlen(skb);
 			skb->data = PTR_ALIGN(skb->data - 4, 4);
 			skb_set_tail_pointer(skb, len);

@@ -755,7 +755,7 @@ struct sk_buff *ath12k_wmi_alloc_skb(struct ath12k_wmi_base *wmi_ab, u32 len)
 		return NULL;
 
 	skb_reserve(skb, WMI_SKB_HEADROOM);
-	if (!IS_ALIGNED((unsigned long)skb->data, 4))
+	if (!IS_ALIGNED(__c_pa(skb->data), 4))
 		ath12k_warn(ab, "unaligned WMI skb data\n");
 
 	skb_put(skb, round_len);

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0+
+ // SPDX-License-Identifier: GPL-2.0+
 /*
  * Copyright (c) 1996, 2003 VIA Networking Technologies, Inc.
  * All rights reserved.
@@ -840,7 +840,7 @@ static void vnt_bss_info_changed(struct ieee80211_hw *hw,
 	}
 }
 
-static u64 vnt_prepare_multicast(struct ieee80211_hw *hw,
+static uintptr_t vnt_prepare_multicast(struct ieee80211_hw *hw,
 				 struct netdev_hw_addr_list *mc_list)
 {
 	struct vnt_private *priv = hw->priv;
@@ -855,12 +855,12 @@ static u64 vnt_prepare_multicast(struct ieee80211_hw *hw,
 
 	priv->mc_list_count = mc_list->count;
 
-	return mc_filter;
+	return __c_fakeu(mc_filter);
 }
 
 static void vnt_configure(struct ieee80211_hw *hw,
 			  unsigned int changed_flags,
-			  unsigned int *total_flags, u64 multicast)
+			  unsigned int *total_flags, uintptr_t multicast)
 {
 	struct vnt_private *priv = hw->priv;
 	u8 rx_mode = 0;
@@ -877,7 +877,7 @@ static void vnt_configure(struct ieee80211_hw *hw,
 			if (priv->mc_list_count > 2)
 				vnt_mac_set_filter(priv, ~0);
 			else
-				vnt_mac_set_filter(priv, multicast);
+				vnt_mac_set_filter(priv, __c_ua(multicast));
 
 			rx_mode |= RCR_MULTICAST | RCR_BROADCAST;
 		} else {

@@ -315,7 +315,7 @@ ath5k_bss_info_changed(struct ieee80211_hw *hw, struct ieee80211_vif *vif,
 }
 
 
-static u64
+static uintptr_t
 ath5k_prepare_multicast(struct ieee80211_hw *hw,
 			struct netdev_hw_addr_list *mc_list)
 {
@@ -341,7 +341,7 @@ ath5k_prepare_multicast(struct ieee80211_hw *hw,
 		 *      ha->addr[5]); */
 	}
 
-	return ((u64)(mfilt[1]) << 32) | mfilt[0];
+	return __c_fakeu(((u64)(mfilt[1]) << 32) | mfilt[0]);
 }
 
 
@@ -365,7 +365,7 @@ ath5k_prepare_multicast(struct ieee80211_hw *hw,
  */
 static void
 ath5k_configure_filter(struct ieee80211_hw *hw, unsigned int changed_flags,
-		       unsigned int *new_flags, u64 multicast)
+		       unsigned int *new_flags, uintptr_t multicast)
 {
 #define SUPPORTED_FIF_FLAGS \
 	(FIF_ALLMULTI | FIF_FCSFAIL | \
@@ -378,8 +378,8 @@ ath5k_configure_filter(struct ieee80211_hw *hw, unsigned int changed_flags,
 
 	mutex_lock(&ah->lock);
 
-	mfilt[0] = multicast;
-	mfilt[1] = multicast >> 32;
+	mfilt[0] = __c_ua(multicast);
+	mfilt[1] = __c_ua(multicast) >> 32;
 
 	/* Only deal with supported flags */
 	*new_flags &= SUPPORTED_FIF_FLAGS;

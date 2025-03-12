@@ -954,7 +954,7 @@ out:
 	return err;
 }
 
-static u64 carl9170_op_prepare_multicast(struct ieee80211_hw *hw,
+static uintptr_t carl9170_op_prepare_multicast(struct ieee80211_hw *hw,
 					 struct netdev_hw_addr_list *mc_list)
 {
 	struct netdev_hw_addr *ha;
@@ -966,13 +966,13 @@ static u64 carl9170_op_prepare_multicast(struct ieee80211_hw *hw,
 	netdev_hw_addr_list_for_each(ha, mc_list)
 		mchash |= 1ULL << (ha->addr[5] >> 2);
 
-	return mchash;
+	return __c_fakeu(mchash);
 }
 
 static void carl9170_op_configure_filter(struct ieee80211_hw *hw,
 					 unsigned int changed_flags,
 					 unsigned int *new_flags,
-					 u64 multicast)
+					 uintptr_t multicast)
 {
 	struct ar9170 *ar = hw->priv;
 
@@ -993,8 +993,8 @@ static void carl9170_op_configure_filter(struct ieee80211_hw *hw,
 	if (*new_flags & FIF_ALLMULTI)
 		multicast = ~0ULL;
 
-	if (multicast != ar->cur_mc_hash)
-		WARN_ON(carl9170_update_multicast(ar, multicast));
+	if (__c_ua(multicast) != ar->cur_mc_hash)
+		WARN_ON(carl9170_update_multicast(ar, __c_ua(multicast)));
 
 	if (changed_flags & FIF_OTHER_BSS) {
 		ar->sniffer_enabled = !!(*new_flags & FIF_OTHER_BSS);
@@ -1592,7 +1592,7 @@ static int carl9170_register_hwrng(struct ar9170 *ar)
 		 "%s_%s", KBUILD_MODNAME, wiphy_name(ar->hw->wiphy));
 	ar->rng.rng.name = ar->rng.name;
 	ar->rng.rng.data_read = carl9170_rng_read;
-	ar->rng.rng.priv = (unsigned long)ar;
+	ar->rng.rng.priv = (uintptr_t)ar;
 
 	err = devm_hwrng_register(&ar->udev->dev, &ar->rng.rng);
 	if (err) {
