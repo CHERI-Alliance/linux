@@ -167,8 +167,8 @@ static int __ath10k_htt_rx_ring_fill_n(struct ath10k_htt *htt, int num)
 
 		if (!IS_ALIGNED((unsigned long)skb->data, HTT_RX_DESC_ALIGN))
 			skb_pull(skb,
-				 PTR_ALIGN(skb->data, HTT_RX_DESC_ALIGN) -
-				 skb->data);
+				 __c_pa(PTR_ALIGN(skb->data, HTT_RX_DESC_ALIGN)) -
+				 __c_pa(skb->data));
 
 		/* Clear rx_desc attention word before posting to Rx ring */
 		rx_desc = HTT_RX_BUF_TO_RX_DESC(hw, skb->data);

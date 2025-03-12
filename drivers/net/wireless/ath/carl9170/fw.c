@@ -40,7 +40,7 @@ static int carl9170_fw_verify_descs(struct ar9170 *ar,
 	const struct carl9170fw_desc_head *head, unsigned int max_len)
 {
 	const struct carl9170fw_desc_head *pos;
-	unsigned long pos_addr, end_addr;
+	uintptr_t pos_addr, end_addr;
 	unsigned int pos_length;
 
 	if (max_len < sizeof(*pos))
@@ -162,8 +162,8 @@ static int carl9170_fw_checksum(struct ar9170 *ar, const __u8 *data,
 	dsc_len = min_t(unsigned int, len,
 			(unsigned long)chk_desc - (unsigned long)otus_desc);
 
-	fin = (uintptr_t) last_desc + sizeof(*last_desc);
-	diff = fin - (uintptr_t) otus_desc;
+	fin = __c_pa(last_desc) + sizeof(*last_desc);
+	diff = fin - __c_pa(otus_desc);
 
 	if (diff < len)
 		len -= diff;
