@@ -588,8 +588,8 @@ brcmf_pcie_copy_dev_tomem(struct brcmf_pciedev_info *devinfo, u32 mem_offset,
 	__le16 *dst16;
 	u8 *dst8;
 
-	if (((ulong)address & 4) || ((ulong)dstaddr & 4) || (len & 4)) {
-		if (((ulong)address & 2) || ((ulong)dstaddr & 2) || (len & 2)) {
+	if ((__c_pa(address) & 4) || (__c_pa(dstaddr) & 4) || (len & 4)) {
+		if ((__c_pa(address) & 2) || (__c_pa(dstaddr) & 2) || (len & 2)) {
 			dst8 = (u8 *)dstaddr;
 			while (len) {
 				*dst8 = ioread8(address);
@@ -2477,7 +2477,7 @@ brcmf_pcie_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 	bus->bus_priv.pcie = pcie_bus_dev;
 	bus->ops = &brcmf_pcie_bus_ops;
 	bus->proto_type = BRCMF_PROTO_MSGBUF;
-	bus->fwvid = id->driver_data;
+	bus->fwvid = __c_ua(id->driver_data);
 	bus->chip = devinfo->coreid;
 	bus->wowl_supported = pci_pme_capable(pdev, PCI_D3hot);
 	dev_set_drvdata(&pdev->dev, bus);

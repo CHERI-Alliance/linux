@@ -1771,7 +1771,7 @@ static int rsi_send_beacon(struct rsi_common *common)
 
 	memset(skb->data, 0, MAX_MGMT_PKT_SIZE);
 
-	dword_align_bytes = ((unsigned long)skb->data & 0x3f);
+	dword_align_bytes = (__c_pa(skb->data) & 0x3f);
 	if (dword_align_bytes)
 		skb_pull(skb, (64 - dword_align_bytes));
 	if (rsi_prepare_beacon(common, skb)) {

@@ -1429,7 +1429,7 @@ brcmf_usb_probe(struct usb_interface *intf, const struct usb_device_id *id)
 	else
 		brcmf_dbg(USB, "Broadcom full speed USB WLAN interface detected\n");
 
-	ret = brcmf_usb_probe_cb(devinfo, id->driver_info);
+	ret = brcmf_usb_probe_cb(devinfo, __c_ua(id->driver_info));
 	if (ret)
 		goto fail;
 

@@ -1770,7 +1770,7 @@ static void iwl_mvm_rx_tx_cmd_single(struct iwl_mvm *mvm,
 		 * TLC uses this and doesn't support the new FW rate
 		 */
 		info->status.status_driver_data[1] =
-			(void *)(uintptr_t)le32_to_cpu(tx_resp->initial_rate);
+			__c_fakep(le32_to_cpu(tx_resp->initial_rate));
 
 		/* Single frame failure in an AMPDU queue => send BAR */
 		if (info->flags & IEEE80211_TX_CTL_AMPDU &&
@@ -2113,7 +2113,7 @@ static void iwl_mvm_tx_reclaim(struct iwl_mvm *mvm, int sta_id, int tid,
 	tx_info->status.status_driver_data[0] =
 		RS_DRV_DATA_PACK(tid_data->lq_color,
 				 tx_info->status.status_driver_data[0]);
-	tx_info->status.status_driver_data[1] = (void *)(uintptr_t)rate;
+	tx_info->status.status_driver_data[1] = __c_fakep(rate);
 
 	skb_queue_walk(&reclaimed_skbs, skb) {
 		struct ieee80211_hdr *hdr = (void *)skb->data;
@@ -2199,7 +2199,7 @@ void iwl_mvm_rx_ba_notif(struct iwl_mvm *mvm, struct iwl_rx_cmd_buffer *rxb)
 		ba_info.status.tx_time =
 			(u16)le32_to_cpu(ba_res->wireless_time);
 		ba_info.status.status_driver_data[0] =
-			(void *)(uintptr_t)ba_res->reduced_txp;
+			__c_fakep(ba_res->reduced_txp);
 
 		tfd_cnt = le16_to_cpu(ba_res->tfd_cnt);
 		if (!tfd_cnt)
@@ -2283,7 +2283,7 @@ void iwl_mvm_rx_ba_notif(struct iwl_mvm *mvm, struct iwl_rx_cmd_buffer *rxb)
 	ba_info.status.ampdu_len = ba_notif->txed;
 	ba_info.status.tx_time = tid_data->tx_time;
 	ba_info.status.status_driver_data[0] =
-		(void *)(uintptr_t)ba_notif->reduced_txp;
+		__c_fakep(ba_notif->reduced_txp);
 
 	rcu_read_unlock();
 

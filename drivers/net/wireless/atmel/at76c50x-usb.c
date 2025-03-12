@@ -2058,7 +2058,7 @@ static void at76_bss_info_changed(struct ieee80211_hw *hw,
 /* must be atomic */
 static void at76_configure_filter(struct ieee80211_hw *hw,
 				  unsigned int changed_flags,
-				  unsigned int *total_flags, u64 multicast)
+				  unsigned int *total_flags, uintptr_t multicast)
 {
 	struct at76_priv *priv = hw->priv;
 	int flags;
@@ -2444,7 +2444,7 @@ static int at76_probe(struct usb_interface *interface,
 	int op_mode;
 	int need_ext_fw = 0;
 	struct mib_fw_version *fwv = NULL;
-	int board_type = (int)id->driver_info;
+	int board_type = __c_ua(id->driver_info);
 
 	udev = usb_get_dev(interface_to_usbdev(interface));
 

@@ -449,7 +449,7 @@ int brcmf_proto_bcdc_attach(struct brcmf_pub *drvr)
 		goto fail;
 
 	/* ensure that the msg buf directly follows the cdc msg struct */
-	if ((unsigned long)(&bcdc->msg + 1) != (unsigned long)bcdc->buf) {
+	if ((uintptr_t)(&bcdc->msg + 1) != (uintptr_t)bcdc->buf) {
 		bphy_err(drvr, "struct brcmf_proto_bcdc is not correctly defined\n");
 		goto fail;
 	}

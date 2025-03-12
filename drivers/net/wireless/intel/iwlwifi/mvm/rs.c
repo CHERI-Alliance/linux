@@ -3038,10 +3038,10 @@ static void __iwl_mvm_rs_tx_status(struct iwl_mvm *mvm,
 	u32 lq_hwrate;
 	struct rs_rate lq_rate, tx_resp_rate;
 	struct iwl_scale_tbl_info *curr_tbl, *other_tbl, *tmp_tbl;
-	u32 tlc_info = (uintptr_t)info->status.status_driver_data[0];
+	u32 tlc_info = __c_pa(info->status.status_driver_data[0]);
 	u8 reduced_txp = tlc_info & RS_DRV_DATA_TXP_MSK;
 	u8 lq_color = RS_DRV_DATA_LQ_COLOR_GET(tlc_info);
-	u32 tx_resp_hwrate = (uintptr_t)info->status.status_driver_data[1];
+	u32 tx_resp_hwrate = __c_pa(info->status.status_driver_data[1]);
 	struct iwl_mvm_sta *mvmsta = iwl_mvm_sta_from_mac80211(sta);
 	struct iwl_lq_sta *lq_sta = &mvmsta->deflink.lq_sta.rs_drv;
 

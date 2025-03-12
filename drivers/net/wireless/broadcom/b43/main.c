@@ -3567,7 +3567,7 @@ static int b43_rng_init(struct b43_wl *wl)
 		 "%s_%s", KBUILD_MODNAME, wiphy_name(wl->hw->wiphy));
 	wl->rng.name = wl->rng_name;
 	wl->rng.data_read = b43_rng_read;
-	wl->rng.priv = (unsigned long)wl;
+	wl->rng.priv = (uintptr_t)wl;
 	wl->rng_initialized = true;
 	err = hwrng_register(&wl->rng);
 	if (err) {
@@ -4283,7 +4283,7 @@ out_unlock:
 
 static void b43_op_configure_filter(struct ieee80211_hw *hw,
 				    unsigned int changed, unsigned int *fflags,
-				    u64 multicast)
+				    uintptr_t multicast)
 {
 	struct b43_wl *wl = hw_to_b43_wl(hw);
 	struct b43_wldev *dev;

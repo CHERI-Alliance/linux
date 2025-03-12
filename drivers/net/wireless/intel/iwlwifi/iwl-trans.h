@@ -219,7 +219,7 @@ enum iwl_error_event_table_status {
 struct iwl_host_cmd {
 	const void *data[IWL_MAX_CMD_TBS_PER_TFD];
 	struct iwl_rx_packet *resp_pkt;
-	unsigned long _rx_page_addr;
+	uintptr_t _rx_page_addr;
 	u32 _rx_page_order;
 
 	u32 flags;
@@ -243,7 +243,7 @@ struct iwl_rx_cmd_buffer {
 
 static inline void *rxb_addr(struct iwl_rx_cmd_buffer *r)
 {
-	return (void *)((unsigned long)page_address(r->_page) + r->_offset);
+	return (void *)((uintptr_t)page_address(r->_page) + r->_offset);
 }
 
 static inline int rxb_offset(struct iwl_rx_cmd_buffer *r)

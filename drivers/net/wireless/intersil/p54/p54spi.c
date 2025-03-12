@@ -468,6 +468,7 @@ static void p54spi_op_tx(struct ieee80211_hw *dev, struct sk_buff *skb)
 	unsigned long flags;
 
 	BUILD_BUG_ON(sizeof(*di) > sizeof((mi->data)));
+	BUILD_BUG_ON(sizeof(*di) > sizeof(info->rate_driver_data));
 
 	spin_lock_irqsave(&priv->tx_lock, flags);
 	list_add_tail(&di->tx_list, &priv->tx_pending);

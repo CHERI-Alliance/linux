@@ -203,7 +203,7 @@ EXPORT_SYMBOL_GPL(mt76x02_init_device);
 
 void mt76x02_configure_filter(struct ieee80211_hw *hw,
 			      unsigned int changed_flags,
-			      unsigned int *total_flags, u64 multicast)
+			      unsigned int *total_flags, uintptr_t multicast)
 {
 	struct mt76x02_dev *dev = hw->priv;
 	u32 flags = 0;

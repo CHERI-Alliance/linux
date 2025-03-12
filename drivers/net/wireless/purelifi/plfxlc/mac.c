@@ -543,11 +543,11 @@ static int plfxlc_op_config(struct ieee80211_hw *hw, u32 changed)
 static void plfxlc_op_configure_filter(struct ieee80211_hw *hw,
 				       unsigned int changed_flags,
 				       unsigned int *new_flags,
-				       u64 multicast)
+				       uintptr_t multicast)
 {
 	struct plfxlc_mc_hash hash = {
-		.low = multicast,
-		.high = multicast >> 32,
+		.low = __c_ua(multicast),
+		.high = __c_ua(multicast) >> 32,
 	};
 	struct plfxlc_mac *mac = plfxlc_hw_mac(hw);
 	unsigned long flags;

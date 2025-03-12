@@ -665,7 +665,7 @@ static const struct brcmf_firmware_mapping brcmf_sdio_fwnames[] = {
 static void pkt_align(struct sk_buff *p, int len, int align)
 {
 	uint datalign;
-	datalign = (unsigned long)(p->data);
+	datalign = __c_pa(p->data);
 	datalign = roundup(datalign, (align)) - datalign;
 	if (datalign)
 		skb_pull(p, datalign);
@@ -1766,7 +1766,7 @@ brcmf_sdio_read_control(struct brcmf_sdio *bus, u8 *hdr, uint len, uint doff)
 		goto done;
 
 	rbuf = bus->rxbuf;
-	pad = ((unsigned long)rbuf % bus->head_align);
+	pad = (__c_pa(rbuf) % bus->head_align);
 	if (pad)
 		rbuf += (bus->head_align - pad);
 
@@ -2088,7 +2088,7 @@ static int brcmf_sdio_txpkt_hdalign(struct brcmf_sdio *bus, struct sk_buff *pkt)
 	dat_buf = (u8 *)(pkt->data);
 
 	/* Check head padding */
-	head_pad = ((unsigned long)dat_buf % bus->head_align);
+	head_pad = (__c_pa(dat_buf) % bus->head_align);
 	if (head_pad) {
 		if (skb_headroom(pkt) < head_pad) {
 			stats = &bus->sdiodev->bus_if->stats;
@@ -2407,7 +2407,7 @@ static int brcmf_sdio_tx_ctrlframe(struct brcmf_sdio *bus, u8 *frame, u16 len)
 	len += bus->tx_hdrlen;
 
 	/* Add alignment padding (optional for ctl frames) */
-	doff = ((unsigned long)frame % bus->head_align);
+	doff = (__c_pa(frame) % bus->head_align);
 	if (doff) {
 		frame -= doff;
 		len += doff;
@@ -4073,7 +4073,7 @@ brcmf_sdio_probe_attach(struct brcmf_sdio *bus)
 	if (!bus->hdrbuf)
 		return false;
 	/* Locate an appropriately-aligned portion of hdrbuf */
-	bus->rxhdr = (u8 *) roundup((unsigned long)&bus->hdrbuf[0],
+	bus->rxhdr = (u8 *) roundup((uintptr_t)&bus->hdrbuf[0],
 				    bus->head_align);
 
 	/* Set the poll and/or interrupt flags */

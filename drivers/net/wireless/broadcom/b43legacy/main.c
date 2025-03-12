@@ -2430,7 +2430,7 @@ static int b43legacy_rng_init(struct b43legacy_wl *wl)
 		 "%s_%s", KBUILD_MODNAME, wiphy_name(wl->hw->wiphy));
 	wl->rng.name = wl->rng_name;
 	wl->rng.data_read = b43legacy_rng_read;
-	wl->rng.priv = (unsigned long)wl;
+	wl->rng.priv = (uintptr_t)wl;
 	wl->rng_initialized = 1;
 	err = hwrng_register(&wl->rng);
 	if (err) {
@@ -2877,7 +2877,8 @@ static void b43legacy_op_bss_info_changed(struct ieee80211_hw *hw,
 
 static void b43legacy_op_configure_filter(struct ieee80211_hw *hw,
 					  unsigned int changed,
-					  unsigned int *fflags,u64 multicast)
+					  unsigned int *fflags,
+					  uintptr_t multicast)
 {
 	struct b43legacy_wl *wl = hw_to_b43legacy_wl(hw);
 	struct b43legacy_wldev *dev = wl->current_dev;

@@ -34,7 +34,7 @@ static int __cw1200_reg_read(struct cw1200_common *priv, u16 addr,
 	u32 sdio_reg_addr_17bit;
 
 	/* Check if buffer is aligned to 4 byte boundary */
-	if (WARN_ON(((unsigned long)buf & 3) && (buf_len > 4))) {
+	if (WARN_ON((__c_pa(buf) & 3) && (buf_len > 4))) {
 		pr_err("buffer is not aligned.\n");
 		return -EINVAL;
 	}

@@ -1230,7 +1230,7 @@ static int mt798x_wmac_probe(struct platform_device *pdev)
 	int irq, ret;
 	u32 chip_id;
 
-	chip_id = (uintptr_t)of_device_get_match_data(&pdev->dev);
+	chip_id = __c_pa(of_device_get_match_data(&pdev->dev));
 
 	mem_base = devm_platform_ioremap_resource(pdev, 0);
 	if (IS_ERR(mem_base)) {

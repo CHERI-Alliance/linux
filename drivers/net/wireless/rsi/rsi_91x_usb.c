@@ -335,7 +335,7 @@ static int rsi_rx_urb_submit(struct rsi_hw *adapter, u8 ep_num, gfp_t mem_flags)
 		return -ENOMEM;
 	skb_reserve(skb, MAX_DWORD_ALIGN_BYTES);
 	skb_put(skb, RSI_MAX_RX_USB_PKT_SIZE - MAX_DWORD_ALIGN_BYTES);
-	dword_align_bytes = (unsigned long)skb->data & 0x3f;
+	dword_align_bytes = __c_pa(skb->data) & 0x3f;
 	if (dword_align_bytes > 0)
 		skb_push(skb, dword_align_bytes);
 	urb->transfer_buffer = skb->data;

@@ -372,7 +372,7 @@ static void iwl_mvm_sec_key_remove_ap_iter(struct ieee80211_hw *hw,
 					   void *data)
 {
 	struct iwl_mvm *mvm = IWL_MAC80211_GET_MVM(hw);
-	unsigned int link_id = (uintptr_t)data;
+	unsigned int link_id = __c_pa(data);
 
 	if (key->hw_key_idx == STA_KEY_IDX_INVALID)
 		return;
@@ -404,5 +404,5 @@ void iwl_mvm_sec_key_remove_ap(struct iwl_mvm *mvm,
 
 	ieee80211_iter_keys_rcu(mvm->hw, vif,
 				iwl_mvm_sec_key_remove_ap_iter,
-				(void *)(uintptr_t)link_id);
+				__c_fakep(link_id));
 }

@@ -800,7 +800,7 @@ void p54_tx_80211(struct ieee80211_hw *dev,
 		return;
 	}
 
-	padding = (unsigned long)(skb->data - (sizeof(*hdr) + sizeof(*txhdr))) & 3;
+	padding = (unsigned long)(__c_pa(skb->data) - (sizeof(*hdr) + sizeof(*txhdr))) & 3;
 	len = skb->len;
 
 	if (info->control.hw_key) {

@@ -154,7 +154,7 @@ int il4965_mac_start(struct ieee80211_hw *hw);
 void il4965_mac_stop(struct ieee80211_hw *hw, bool suspend);
 void il4965_configure_filter(struct ieee80211_hw *hw,
 			     unsigned int changed_flags,
-			     unsigned int *total_flags, u64 multicast);
+			     unsigned int *total_flags, uintptr_t multicast);
 int il4965_mac_set_key(struct ieee80211_hw *hw, enum set_key_cmd cmd,
 		       struct ieee80211_vif *vif, struct ieee80211_sta *sta,
 		       struct ieee80211_key_conf *key);

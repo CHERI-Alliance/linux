@@ -518,7 +518,7 @@ cw1200_tx_h_align(struct cw1200_common *priv,
 		  struct cw1200_txinfo *t,
 		  u8 *flags)
 {
-	size_t offset = (size_t)t->skb->data & 3;
+	size_t offset = __c_pa(t->skb->data) & 3;
 
 	if (!offset)
 		return 0;

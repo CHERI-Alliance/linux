@@ -90,7 +90,7 @@ mt7601u_tx_pktid_dec(struct mt7601u_dev *dev, struct mt76_tx_status *stat)
 static void mt7601u_tx_skb_remove_dma_overhead(struct sk_buff *skb,
 					       struct ieee80211_tx_info *info)
 {
-	int pkt_len = (unsigned long)info->status.status_driver_data[0];
+	int pkt_len = __c_pa(info->status.status_driver_data[0]);
 
 	skb_pull(skb, sizeof(struct mt76_txwi) + 4);
 	if (ieee80211_get_hdrlen_from_skb(skb) % 4)
@@ -201,7 +201,7 @@ void mt7601u_tx(struct ieee80211_hw *hw, struct ieee80211_tx_control *control,
 	int hw_q = skb2q(skb);
 
 	BUILD_BUG_ON(ARRAY_SIZE(info->status.status_driver_data) < 1);
-	info->status.status_driver_data[0] = (void *)(unsigned long)pkt_len;
+	info->status.status_driver_data[0] = __c_fakep(pkt_len);
 
 	if (mt7601u_skb_rooms(dev, skb) || mt76_insert_hdr_pad(skb)) {
 		ieee80211_free_txskb(dev->hw, skb);

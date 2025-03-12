@@ -1512,7 +1512,7 @@ static void mac80211_hwsim_tx_frame_nl(struct ieee80211_hw *hw,
 	int i;
 	struct hwsim_tx_rate tx_attempts[IEEE80211_TX_MAX_RATES];
 	struct hwsim_tx_rate_flag tx_attempts_flags[IEEE80211_TX_MAX_RATES];
-	uintptr_t cookie;
+	u64 cookie;
 
 	if (data->ps != PS_DISABLED)
 		hdr->frame_control |= cpu_to_le16(IEEE80211_FCTL_PM);
@@ -1582,8 +1582,8 @@ static void mac80211_hwsim_tx_frame_nl(struct ieee80211_hw *hw,
 
 	/* We create a cookie to identify this skb */
 	cookie = atomic_inc_return(&data->pending_cookie);
-	info->rate_driver_data[0] = (void *)cookie;
-	if (nla_put_u64_64bit(skb, HWSIM_ATTR_COOKIE, __c_ua(cookie), HWSIM_ATTR_PAD))
+	info->rate_driver_data[0] = __c_fakep(cookie);
+	if (nla_put_u64_64bit(skb, HWSIM_ATTR_COOKIE, cookie, HWSIM_ATTR_PAD))
 		goto nla_put_failure;
 
 	genlmsg_end(skb, msg_head);
@@ -2449,7 +2449,8 @@ static int mac80211_hwsim_config(struct ieee80211_hw *hw, u32 changed)
 
 static void mac80211_hwsim_configure_filter(struct ieee80211_hw *hw,
 					    unsigned int changed_flags,
-					    unsigned int *total_flags,u64 multicast)
+					    unsigned int *total_flags,
+					    uintptr_t multicast)
 {
 	struct mac80211_hwsim_data *data = hw->priv;
 

@@ -86,7 +86,7 @@ int rsi_prepare_mgmt_desc(struct rsi_common *common, struct sk_buff *skb)
 		return -ENOSPC;
 	}
 	skb_push(skb, header_size);
-	dword_align_bytes = ((unsigned long)skb->data & 0x3f);
+	dword_align_bytes = (__c_pa(skb->data) & 0x3f);
 	if (dword_align_bytes > skb_headroom(skb)) {
 		rsi_dbg(ERR_ZONE,
 			"%s: Failed to add dword align\n", __func__);
@@ -178,7 +178,7 @@ int rsi_prepare_data_desc(struct rsi_common *common, struct sk_buff *skb)
 		return -ENOSPC;
 	}
 	skb_push(skb, header_size);
-	dword_align_bytes = ((unsigned long)skb->data & 0x3f);
+	dword_align_bytes = (__c_pa(skb->data) & 0x3f);
 	if (header_size > skb_headroom(skb)) {
 		rsi_dbg(ERR_ZONE, "%s: Not enough headroom\n", __func__);
 		return -ENOSPC;

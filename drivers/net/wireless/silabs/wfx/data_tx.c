@@ -340,7 +340,7 @@ static int wfx_tx_inner(struct wfx_vif *wvif, struct ieee80211_sta *sta, struct 
 	struct ieee80211_key_conf *hw_key = tx_info->control.hw_key;
 	struct ieee80211_hdr *hdr = (struct ieee80211_hdr *)skb->data;
 	int queue_id = skb_get_queue_mapping(skb);
-	size_t offset = (size_t)skb->data & 3;
+	size_t offset = __c_pa(skb->data) & 3;
 	int wmsg_len = sizeof(struct wfx_hif_msg) + sizeof(struct wfx_hif_req_tx) + offset;
 
 	WARN(queue_id >= IEEE80211_NUM_ACS, "unsupported queue_id");
