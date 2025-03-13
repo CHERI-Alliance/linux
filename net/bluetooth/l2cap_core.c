@@ -3004,7 +3004,7 @@ fail:
 }
 
 static inline int l2cap_get_conf_opt(void **ptr, int *type, int *olen,
-				     unsigned long *val)
+				     uintptr_t *val)
 {
 	struct l2cap_conf_opt *opt = *ptr;
 	int len;
@@ -3017,31 +3017,31 @@ static inline int l2cap_get_conf_opt(void **ptr, int *type, int *olen,
 
 	switch (opt->len) {
 	case 1:
-		*val = *((u8 *) opt->val);
+		*val = __c_fakeu(*((u8 *) opt->val));
 		break;
 
 	case 2:
-		*val = get_unaligned_le16(opt->val);
+		*val = __c_fakeu(get_unaligned_le16(opt->val));
 		break;
 
 	case 4:
-		*val = get_unaligned_le32(opt->val);
+		*val = __c_fakeu(get_unaligned_le32(opt->val));
 		break;
 
 	default:
-		*val = (unsigned long) opt->val;
+		*val = (uintptr_t) opt->val;
 		break;
 	}
 
-	BT_DBG("type 0x%2.2x len %u val 0x%lx", *type, opt->len, *val);
+	BT_DBG("type 0x%2.2x len %u val 0x%lx", *type, opt->len, __c_ua(*val));
 	return len;
 }
 
-static void l2cap_add_conf_opt(void **ptr, u8 type, u8 len, unsigned long val, size_t size)
+static void l2cap_add_conf_opt(void **ptr, u8 type, u8 len, uintptr_t val, size_t size)
 {
 	struct l2cap_conf_opt *opt = *ptr;
 
-	BT_DBG("type 0x%2.2x len %u val 0x%lx", type, len, val);
+	BT_DBG("type 0x%2.2x len %u val 0x%lx", type, len, __c_ua(val));
 
 	if (size < L2CAP_CONF_OPT_SIZE + len)
 		return;
@@ -3051,15 +3051,15 @@ static void l2cap_add_conf_opt(void **ptr, u8 type, u8 len, unsigned long val, s
 
 	switch (len) {
 	case 1:
-		*((u8 *) opt->val)  = val;
+		*((u8 *) opt->val)  = __c_ua(val);
 		break;
 
 	case 2:
-		put_unaligned_le16(val, opt->val);
+		put_unaligned_le16(__c_ua(val), opt->val);
 		break;
 
 	case 4:
-		put_unaligned_le32(val, opt->val);
+		put_unaligned_le32(__c_ua(val), opt->val);
 		break;
 
 	default:
@@ -3098,7 +3098,7 @@ static void l2cap_add_opt_efs(void **ptr, struct l2cap_chan *chan, size_t size)
 	}
 
 	l2cap_add_conf_opt(ptr, L2CAP_CONF_EFS, sizeof(efs),
-			   (unsigned long) &efs, size);
+			   (uintptr_t) &efs, size);
 }
 
 static void l2cap_ack_timeout(struct work_struct *work)
@@ -3277,7 +3277,7 @@ done:
 	if (chan->imtu != L2CAP_DEFAULT_MTU) {
 		if (!chan->imtu)
 			l2cap_mtu_auto(chan);
-		l2cap_add_conf_opt(&ptr, L2CAP_CONF_MTU, 2, chan->imtu,
+		l2cap_add_conf_opt(&ptr, L2CAP_CONF_MTU, 2, __c_fakeu(chan->imtu),
 				   endptr - ptr);
 	}
 
@@ -3298,7 +3298,7 @@ done:
 		rfc.max_pdu_size    = 0;
 
 		l2cap_add_conf_opt(&ptr, L2CAP_CONF_RFC, sizeof(rfc),
-				   (unsigned long) &rfc, endptr - ptr);
+				   (uintptr_t) &rfc, endptr - ptr);
 		break;
 
 	case L2CAP_MODE_ERTM:
@@ -3318,21 +3318,21 @@ done:
 				       L2CAP_DEFAULT_TX_WINDOW);
 
 		l2cap_add_conf_opt(&ptr, L2CAP_CONF_RFC, sizeof(rfc),
-				   (unsigned long) &rfc, endptr - ptr);
+				   (uintptr_t) &rfc, endptr - ptr);
 
 		if (test_bit(FLAG_EFS_ENABLE, &chan->flags))
 			l2cap_add_opt_efs(&ptr, chan, endptr - ptr);
 
 		if (test_bit(FLAG_EXT_CTRL, &chan->flags))
 			l2cap_add_conf_opt(&ptr, L2CAP_CONF_EWS, 2,
-					   chan->tx_win, endptr - ptr);
+					   __c_fakeu(chan->tx_win), endptr - ptr);
 
 		if (chan->conn->feat_mask & L2CAP_FEAT_FCS)
 			if (chan->fcs == L2CAP_FCS_NONE ||
 			    test_bit(CONF_RECV_NO_FCS, &chan->conf_state)) {
 				chan->fcs = L2CAP_FCS_NONE;
 				l2cap_add_conf_opt(&ptr, L2CAP_CONF_FCS, 1,
-						   chan->fcs, endptr - ptr);
+						   __c_fakeu(chan->fcs), endptr - ptr);
 			}
 		break;
 
@@ -3350,7 +3350,7 @@ done:
 		rfc.max_pdu_size = cpu_to_le16(size);
 
 		l2cap_add_conf_opt(&ptr, L2CAP_CONF_RFC, sizeof(rfc),
-				   (unsigned long) &rfc, endptr - ptr);
+				   (uintptr_t) &rfc, endptr - ptr);
 
 		if (test_bit(FLAG_EFS_ENABLE, &chan->flags))
 			l2cap_add_opt_efs(&ptr, chan, endptr - ptr);
@@ -3360,7 +3360,7 @@ done:
 			    test_bit(CONF_RECV_NO_FCS, &chan->conf_state)) {
 				chan->fcs = L2CAP_FCS_NONE;
 				l2cap_add_conf_opt(&ptr, L2CAP_CONF_FCS, 1,
-						   chan->fcs, endptr - ptr);
+						   __c_fakeu(chan->fcs), endptr - ptr);
 			}
 		break;
 	}
@@ -3379,7 +3379,7 @@ static int l2cap_parse_conf_req(struct l2cap_chan *chan, void *data, size_t data
 	void *req = chan->conf_req;
 	int len = chan->conf_len;
 	int type, hint, olen;
-	unsigned long val;
+	uintptr_t val;
 	struct l2cap_conf_rfc rfc = { .mode = L2CAP_MODE_BASIC };
 	struct l2cap_conf_efs efs;
 	u8 remote_efs = 0;
@@ -3401,13 +3401,13 @@ static int l2cap_parse_conf_req(struct l2cap_chan *chan, void *data, size_t data
 		case L2CAP_CONF_MTU:
 			if (olen != 2)
 				break;
-			mtu = val;
+			mtu = __c_ua(val);
 			break;
 
 		case L2CAP_CONF_FLUSH_TO:
 			if (olen != 2)
 				break;
-			chan->flush_to = val;
+			chan->flush_to = __c_ua(val);
 			break;
 
 		case L2CAP_CONF_QOS:
@@ -3422,7 +3422,7 @@ static int l2cap_parse_conf_req(struct l2cap_chan *chan, void *data, size_t data
 		case L2CAP_CONF_FCS:
 			if (olen != 1)
 				break;
-			if (val == L2CAP_FCS_NONE)
+			if (__c_ua(val)	== L2CAP_FCS_NONE)
 				set_bit(CONF_RECV_NO_FCS, &chan->conf_state);
 			break;
 
@@ -3442,7 +3442,7 @@ static int l2cap_parse_conf_req(struct l2cap_chan *chan, void *data, size_t data
 			if (hint)
 				break;
 			result = L2CAP_CONF_UNKNOWN;
-			l2cap_add_conf_opt(&ptr, (u8)type, sizeof(u8), type, endptr - ptr);
+			l2cap_add_conf_opt(&ptr, (u8)type, sizeof(u8), __c_fakeu(type), endptr - ptr);
 			break;
 		}
 	}
@@ -3481,7 +3481,7 @@ done:
 			return -ECONNREFUSED;
 
 		l2cap_add_conf_opt(&ptr, L2CAP_CONF_RFC, sizeof(rfc),
-				   (unsigned long) &rfc, endptr - ptr);
+				   (uintptr_t) &rfc, endptr - ptr);
 	}
 
 	if (result == L2CAP_CONF_SUCCESS) {
@@ -3494,7 +3494,7 @@ done:
 			chan->omtu = mtu;
 			set_bit(CONF_MTU_DONE, &chan->conf_state);
 		}
-		l2cap_add_conf_opt(&ptr, L2CAP_CONF_MTU, 2, chan->omtu, endptr - ptr);
+		l2cap_add_conf_opt(&ptr, L2CAP_CONF_MTU, 2, __c_fakeu(chan->omtu), endptr - ptr);
 
 		if (remote_efs) {
 			if (chan->local_stype != L2CAP_SERV_NOTRAFIC &&
@@ -3508,7 +3508,7 @@ done:
 
 				l2cap_add_conf_opt(&ptr, L2CAP_CONF_EFS,
 						   sizeof(efs),
-						   (unsigned long) &efs, endptr - ptr);
+						   (uintptr_t) &efs, endptr - ptr);
 			} else {
 				/* Send PENDING Conf Rsp */
 				result = L2CAP_CONF_PENDING;
@@ -3541,7 +3541,7 @@ done:
 			set_bit(CONF_MODE_DONE, &chan->conf_state);
 
 			l2cap_add_conf_opt(&ptr, L2CAP_CONF_RFC,
-					   sizeof(rfc), (unsigned long) &rfc, endptr - ptr);
+					   sizeof(rfc), (uintptr_t) &rfc, endptr - ptr);
 
 			if (remote_efs &&
 			    test_bit(FLAG_EFS_ENABLE, &chan->flags)) {
@@ -3556,7 +3556,7 @@ done:
 					le32_to_cpu(efs.sdu_itime);
 				l2cap_add_conf_opt(&ptr, L2CAP_CONF_EFS,
 						   sizeof(efs),
-						   (unsigned long) &efs, endptr - ptr);
+						   (uintptr_t) &efs, endptr - ptr);
 			}
 			break;
 
@@ -3570,7 +3570,7 @@ done:
 			set_bit(CONF_MODE_DONE, &chan->conf_state);
 
 			l2cap_add_conf_opt(&ptr, L2CAP_CONF_RFC, sizeof(rfc),
-					   (unsigned long) &rfc, endptr - ptr);
+					   (uintptr_t) &rfc, endptr - ptr);
 
 			break;
 
@@ -3598,7 +3598,7 @@ static int l2cap_parse_conf_rsp(struct l2cap_chan *chan, void *rsp, int len,
 	void *ptr = req->data;
 	void *endptr = data + size;
 	int type, olen;
-	unsigned long val;
+	uintptr_t val;
 	struct l2cap_conf_rfc rfc = { .mode = L2CAP_MODE_BASIC };
 	struct l2cap_conf_efs efs;
 
@@ -3613,21 +3613,21 @@ static int l2cap_parse_conf_rsp(struct l2cap_chan *chan, void *rsp, int len,
 		case L2CAP_CONF_MTU:
 			if (olen != 2)
 				break;
-			if (val < L2CAP_DEFAULT_MIN_MTU) {
+			if (__c_ua(val) < L2CAP_DEFAULT_MIN_MTU) {
 				*result = L2CAP_CONF_UNACCEPT;
 				chan->imtu = L2CAP_DEFAULT_MIN_MTU;
 			} else
-				chan->imtu = val;
-			l2cap_add_conf_opt(&ptr, L2CAP_CONF_MTU, 2, chan->imtu,
+				chan->imtu = __c_ua(val);
+			l2cap_add_conf_opt(&ptr, L2CAP_CONF_MTU, 2, __c_fakeu(chan->imtu),
 					   endptr - ptr);
 			break;
 
 		case L2CAP_CONF_FLUSH_TO:
 			if (olen != 2)
 				break;
-			chan->flush_to = val;
+			chan->flush_to = __c_ua(val);
 			l2cap_add_conf_opt(&ptr, L2CAP_CONF_FLUSH_TO, 2,
-					   chan->flush_to, endptr - ptr);
+					   __c_fakeu(chan->flush_to), endptr - ptr);
 			break;
 
 		case L2CAP_CONF_RFC:
@@ -3639,15 +3639,15 @@ static int l2cap_parse_conf_rsp(struct l2cap_chan *chan, void *rsp, int len,
 				return -ECONNREFUSED;
 			chan->fcs = 0;
 			l2cap_add_conf_opt(&ptr, L2CAP_CONF_RFC, sizeof(rfc),
-					   (unsigned long) &rfc, endptr - ptr);
+					   (uintptr_t) &rfc, endptr - ptr);
 			break;
 
 		case L2CAP_CONF_EWS:
 			if (olen != 2)
 				break;
-			chan->ack_win = min_t(u16, val, chan->ack_win);
+			chan->ack_win = min_t(u16, __c_ua(val), chan->ack_win);
 			l2cap_add_conf_opt(&ptr, L2CAP_CONF_EWS, 2,
-					   chan->tx_win, endptr - ptr);
+					   __c_fakeu(chan->tx_win), endptr - ptr);
 			break;
 
 		case L2CAP_CONF_EFS:
@@ -3659,14 +3659,14 @@ static int l2cap_parse_conf_rsp(struct l2cap_chan *chan, void *rsp, int len,
 			    efs.stype != chan->local_stype)
 				return -ECONNREFUSED;
 			l2cap_add_conf_opt(&ptr, L2CAP_CONF_EFS, sizeof(efs),
-					   (unsigned long) &efs, endptr - ptr);
+					   (uintptr_t) &efs, endptr - ptr);
 			break;
 
 		case L2CAP_CONF_FCS:
 			if (olen != 1)
 				break;
 			if (*result == L2CAP_CONF_PENDING)
-				if (val == L2CAP_FCS_NONE)
+				if (__c_ua(val) == L2CAP_FCS_NONE)
 					set_bit(CONF_RECV_NO_FCS,
 						&chan->conf_state);
 			break;
@@ -3853,7 +3853,7 @@ void __l2cap_connect_rsp_defer(struct l2cap_chan *chan)
 static void l2cap_conf_rfc_get(struct l2cap_chan *chan, void *rsp, int len)
 {
 	int type, olen;
-	unsigned long val;
+	uintptr_t val;
 	/* Use sane default values in case a misbehaving remote device
 	 * did not send an RFC or extended window size option.
 	 */
@@ -3885,7 +3885,7 @@ static void l2cap_conf_rfc_get(struct l2cap_chan *chan, void *rsp, int len)
 		case L2CAP_CONF_EWS:
 			if (olen != 2)
 				break;
-			txwin_ext = val;
+			txwin_ext = __c_ua(val);
 			break;
 		}
 	}

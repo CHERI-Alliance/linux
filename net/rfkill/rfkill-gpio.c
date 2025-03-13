@@ -67,7 +67,7 @@ static int rfkill_gpio_acpi_probe(struct device *dev,
 	if (!id)
 		return -ENODEV;
 
-	rfkill->type = (unsigned)id->driver_data;
+	rfkill->type = __c_ua(id->driver_data);
 
 	return devm_acpi_dev_add_driver_gpios(dev, acpi_rfkill_default_gpios);
 }

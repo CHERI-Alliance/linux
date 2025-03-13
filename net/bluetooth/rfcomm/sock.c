@@ -854,12 +854,12 @@ static int rfcomm_sock_getsockopt(struct socket *sock, int level, int optname, c
 	return err;
 }
 
-static int rfcomm_sock_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+static int rfcomm_sock_ioctl(struct socket *sock, unsigned int cmd, user_uintptr_t arg)
 {
 	struct sock *sk __maybe_unused = sock->sk;
 	int err;
 
-	BT_DBG("sk %p cmd %x arg %lx", sk, cmd, arg);
+	BT_DBG("sk %p cmd %x arg %lx", sk, cmd, __c_ua(arg));
 
 	err = bt_sock_ioctl(sock, cmd, arg);
 

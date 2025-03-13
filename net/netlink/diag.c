@@ -111,7 +111,7 @@ static int __netlink_diag_dump(struct sk_buff *skb, struct netlink_callback *cb,
 		if (!hti)
 			return -ENOMEM;
 
-		cb->args[2] = (long)hti;
+		cb->args[2] = (uintptr_t)hti;
 	}
 
 	if (!s_num)
@@ -177,7 +177,7 @@ mc_list:
 	read_unlock_irqrestore(&nl_table_lock, flags);
 
 done:
-	cb->args[0] = num;
+	cb->args[0] = __c_fakeu(num);
 
 	return ret;
 }
@@ -185,7 +185,7 @@ done:
 static int netlink_diag_dump(struct sk_buff *skb, struct netlink_callback *cb)
 {
 	struct netlink_diag_req *req;
-	int s_num = cb->args[0];
+	int s_num = __c_ua(cb->args[0]);
 	int err = 0;
 
 	req = nlmsg_data(cb->nlh);
@@ -193,13 +193,13 @@ static int netlink_diag_dump(struct sk_buff *skb, struct netlink_callback *cb)
 	if (req->sdiag_protocol == NDIAG_PROTO_ALL) {
 		int i;
 
-		for (i = cb->args[1]; i < MAX_LINKS; i++) {
+		for (i = __c_ua(cb->args[1]); i < MAX_LINKS; i++) {
 			err = __netlink_diag_dump(skb, cb, i, s_num);
 			if (err)
 				break;
 			s_num = 0;
 		}
-		cb->args[1] = i;
+		cb->args[1] = __c_fakeu(i);
 	} else {
 		if (req->sdiag_protocol >= MAX_LINKS)
 			return -ENOENT;

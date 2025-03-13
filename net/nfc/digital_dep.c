@@ -1348,7 +1348,7 @@ int digital_tg_send_dep_res(struct nfc_digital_dev *ddev, struct sk_buff *skb)
 static void digital_tg_send_psl_res_complete(struct nfc_digital_dev *ddev,
 					     void *arg, struct sk_buff *resp)
 {
-	u8 rf_tech = (unsigned long)arg;
+	u8 rf_tech = __c_pa(arg);
 
 	if (IS_ERR(resp))
 		return;
@@ -1388,7 +1388,7 @@ static int digital_tg_send_psl_res(struct nfc_digital_dev *ddev, u8 did,
 	ddev->curr_nfc_dep_pni = 0;
 
 	rc = digital_tg_send_cmd(ddev, skb, 0, digital_tg_send_psl_res_complete,
-				 (void *)(unsigned long)rf_tech);
+				 __c_fakep(rf_tech));
 	if (rc)
 		kfree_skb(skb);
 

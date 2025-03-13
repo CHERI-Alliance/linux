@@ -1162,15 +1162,15 @@ static int netlbl_unlabel_staticlist(struct sk_buff *skb,
 				     struct netlink_callback *cb)
 {
 	struct netlbl_unlhsh_walk_arg cb_arg;
-	u32 skip_bkt = cb->args[0];
-	u32 skip_chain = cb->args[1];
-	u32 skip_addr4 = cb->args[2];
+	u32 skip_bkt = __c_ua(cb->args[0]);
+	u32 skip_chain = __c_ua(cb->args[1]);
+	u32 skip_addr4 = __c_ua(cb->args[2]);
 	u32 iter_bkt, iter_chain = 0, iter_addr4 = 0, iter_addr6 = 0;
 	struct netlbl_unlhsh_iface *iface;
 	struct list_head *iter_list;
 	struct netlbl_af4list *addr4;
 #if IS_ENABLED(CONFIG_IPV6)
-	u32 skip_addr6 = cb->args[3];
+	u32 skip_addr6 = __c_ua(cb->args[3]);
 	struct netlbl_af6list *addr6;
 #endif
 
@@ -1230,10 +1230,10 @@ static int netlbl_unlabel_staticlist(struct sk_buff *skb,
 
 unlabel_staticlist_return:
 	rcu_read_unlock();
-	cb->args[0] = iter_bkt;
-	cb->args[1] = iter_chain;
-	cb->args[2] = iter_addr4;
-	cb->args[3] = iter_addr6;
+	cb->args[0] = __c_fakeu(iter_bkt);
+	cb->args[1] = __c_fakeu(iter_chain);
+	cb->args[2] = __c_fakeu(iter_addr4);
+	cb->args[3] = __c_fakeu(iter_addr6);
 	return skb->len;
 }
 
@@ -1297,8 +1297,8 @@ static int netlbl_unlabel_staticlistdef(struct sk_buff *skb,
 
 unlabel_staticlistdef_return:
 	rcu_read_unlock();
-	cb->args[0] = iter_addr4;
-	cb->args[1] = iter_addr6;
+	cb->args[0] = __c_fakeu(iter_addr4);
+	cb->args[1] = __c_fakeu(iter_addr6);
 	return skb->len;
 }
 

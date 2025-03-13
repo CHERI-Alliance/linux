@@ -38,7 +38,7 @@ static DEFINE_HASHTABLE(smc_wr_rx_hash, SMC_WR_RX_HASH_BITS);
 static DEFINE_SPINLOCK(smc_wr_rx_hash_lock);
 
 struct smc_wr_tx_pend {	/* control data for a pending send request */
-	u64			wr_id;		/* work request id sent */
+	uintptr_t		wr_id;		/* work request id sent */
 	smc_wr_tx_handler	handler;
 	enum ib_wc_status	wc_status;	/* CQE status */
 	struct smc_link		*link;
@@ -63,7 +63,7 @@ void smc_wr_tx_wait_no_pending_sends(struct smc_link *link)
 	wait_event(link->wr_tx_wait, !smc_wr_is_tx_pend(link));
 }
 
-static inline int smc_wr_tx_find_pending_index(struct smc_link *link, u64 wr_id)
+static inline int smc_wr_tx_find_pending_index(struct smc_link *link, uintptr_t wr_id)
 {
 	u32 i;
 
@@ -202,7 +202,7 @@ int smc_wr_tx_get_free_slot(struct smc_link *link,
 	struct smc_wr_tx_pend *wr_pend;
 	u32 idx = link->wr_tx_cnt;
 	struct ib_send_wr *wr_ib;
-	u64 wr_id;
+	uintptr_t wr_id;
 	int rc;
 
 	*wr_buf = NULL;
@@ -248,7 +248,7 @@ int smc_wr_tx_get_v2_slot(struct smc_link *link,
 {
 	struct smc_wr_tx_pend *wr_pend;
 	struct ib_send_wr *wr_ib;
-	u64 wr_id;
+	uintptr_t wr_id;
 
 	if (link->wr_tx_v2_pend->idx == link->wr_tx_cnt)
 		return -EBUSY;
@@ -370,7 +370,7 @@ int smc_wr_reg_send(struct smc_link *link, struct ib_mr *mr)
 	ib_req_notify_cq(link->smcibdev->roce_cq_send,
 			 IB_CQ_NEXT_COMP | IB_CQ_REPORT_MISSED_EVENTS);
 	link->wr_reg_state = POSTED;
-	link->wr_reg.wr.wr_id = (u64)(uintptr_t)mr;
+	link->wr_reg.wr.wr_id = (uintptr_t)mr;
 	link->wr_reg.mr = mr;
 	link->wr_reg.key = mr->rkey;
 	rc = ib_post_send(link->roce_qp, &link->wr_reg.wr, NULL);
@@ -437,7 +437,7 @@ static inline void smc_wr_rx_demultiplex(struct ib_wc *wc)
 
 	if (wc->byte_len < sizeof(*wr_rx))
 		return; /* short message */
-	temp_wr_id = wc->wr_id;
+	temp_wr_id = __c_ua(wc->wr_id);
 	index = do_div(temp_wr_id, link->wr_rx_cnt);
 	wr_rx = (struct smc_wr_rx_hdr *)&link->wr_rx_bufs[index];
 	hash_for_each_possible(smc_wr_rx_hash, handler, list, wr_rx->type) {
@@ -453,7 +453,7 @@ static inline void smc_wr_rx_process_cqes(struct ib_wc wc[], int num)
 
 	for (i = 0; i < num; i++) {
 		link = wc[i].qp->qp_context;
-		link->wr_rx_id_compl = wc[i].wr_id;
+		link->wr_rx_id_compl = __c_ua(wc[i].wr_id);
 		if (wc[i].status == IB_WC_SUCCESS) {
 			link->wr_rx_tstamp = jiffies;
 			smc_wr_rx_demultiplex(&wc[i]);
@@ -560,7 +560,7 @@ static void smc_wr_init_sge(struct smc_link *lnk)
 	u32 i;
 
 	for (i = 0; i < lnk->wr_tx_cnt; i++) {
-		lnk->wr_tx_sges[i].addr = send_inline ? (uintptr_t)(&lnk->wr_tx_bufs[i]) :
+		lnk->wr_tx_sges[i].addr = send_inline ? __c_pa(&lnk->wr_tx_bufs[i]) :
 			lnk->wr_tx_dma_addr + i * SMC_WR_BUF_SIZE;
 		lnk->wr_tx_sges[i].length = SMC_WR_TX_SIZE;
 		lnk->wr_tx_sges[i].lkey = lnk->roce_pd->local_dma_lkey;

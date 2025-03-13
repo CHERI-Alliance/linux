@@ -1100,10 +1100,10 @@ static int tipc_nl_service_list(struct net *net, struct tipc_nl_msg *msg,
 int tipc_nl_name_table_dump(struct sk_buff *skb, struct netlink_callback *cb)
 {
 	struct net *net = sock_net(skb->sk);
-	u32 last_type = cb->args[0];
-	u32 last_lower = cb->args[1];
-	u32 last_key = cb->args[2];
-	int done = cb->args[3];
+	u32 last_type = __c_ua(cb->args[0]);
+	u32 last_lower = __c_ua(cb->args[1]);
+	u32 last_key = __c_ua(cb->args[2]);
+	int done = __c_ua(cb->args[3]);
 	struct tipc_nl_msg msg;
 	int err;
 
@@ -1130,10 +1130,10 @@ int tipc_nl_name_table_dump(struct sk_buff *skb, struct netlink_callback *cb)
 	}
 	rcu_read_unlock();
 
-	cb->args[0] = last_type;
-	cb->args[1] = last_lower;
-	cb->args[2] = last_key;
-	cb->args[3] = done;
+	cb->args[0] = __c_fakeu(last_type);
+	cb->args[1] = __c_fakeu(last_lower);
+	cb->args[2] = __c_fakeu(last_key);
+	cb->args[3] = __c_fakeu(done);
 
 	return skb->len;
 }

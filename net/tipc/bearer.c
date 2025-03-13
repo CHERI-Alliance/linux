@@ -875,7 +875,7 @@ msg_full:
 int tipc_nl_bearer_dump(struct sk_buff *skb, struct netlink_callback *cb)
 {
 	int err;
-	int i = cb->args[0];
+	int i = __c_ua(cb->args[0]);
 	struct tipc_bearer *bearer;
 	struct tipc_nl_msg msg;
 	struct net *net = sock_net(skb->sk);
@@ -900,7 +900,7 @@ int tipc_nl_bearer_dump(struct sk_buff *skb, struct netlink_callback *cb)
 	}
 	rtnl_unlock();
 
-	cb->args[0] = i;
+	cb->args[0] = __c_fakeu(i);
 	return skb->len;
 }
 
@@ -1229,7 +1229,7 @@ msg_full:
 int tipc_nl_media_dump(struct sk_buff *skb, struct netlink_callback *cb)
 {
 	int err;
-	int i = cb->args[0];
+	int i = __c_ua(cb->args[0]);
 	struct tipc_nl_msg msg;
 
 	if (i == MAX_MEDIA)
@@ -1248,7 +1248,7 @@ int tipc_nl_media_dump(struct sk_buff *skb, struct netlink_callback *cb)
 	}
 	rtnl_unlock();
 
-	cb->args[0] = i;
+	cb->args[0] = __c_fakeu(i);
 	return skb->len;
 }
 

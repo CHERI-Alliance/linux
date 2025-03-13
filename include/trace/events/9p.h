@@ -139,7 +139,7 @@ TRACE_EVENT(9p_client_req,
 		    ),
 
 	    TP_printk("client %lu request %s tag  %d",
-		    (long)__entry->clnt, show_9p_op(__entry->type),
+		    __c_pa(__entry->clnt), show_9p_op(__entry->type),
 		    __entry->tag)
  );
 
@@ -163,7 +163,7 @@ TRACE_EVENT(9p_client_res,
 		    ),
 
 	    TP_printk("client %lu response %s tag  %d err %d",
-		      (long)__entry->clnt, show_9p_op(__entry->type),
+		      (long)__c_pa(__entry->clnt), show_9p_op(__entry->type),
 		      __entry->tag, __entry->err)
 );
 
@@ -190,7 +190,7 @@ TRACE_EVENT(9p_protocol_dump,
 				__get_dynamic_array_len(line));
 		    ),
 	    TP_printk("clnt %lu %s(tag = %d)\n%*ph\n",
-		      (unsigned long)__entry->clnt, show_9p_op(__entry->type),
+		      __c_pa(__entry->clnt), show_9p_op(__entry->type),
 		      __entry->tag, __get_dynamic_array_len(line),
 		      __get_dynamic_array(line))
  );

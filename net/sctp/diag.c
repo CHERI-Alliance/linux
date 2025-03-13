@@ -467,7 +467,7 @@ static void sctp_diag_dump(struct sk_buff *skb, struct netlink_callback *cb,
 		.r = r,
 		.net_admin = netlink_net_capable(cb->skb, CAP_NET_ADMIN),
 	};
-	int pos = cb->args[2];
+	int pos = __c_ua(cb->args[2]);
 
 	/* eps hashtable dumps
 	 * args:
@@ -499,7 +499,7 @@ skip:
 
 	sctp_transport_traverse_process(sctp_sock_filter, sctp_sock_dump,
 					net, &pos, &commp);
-	cb->args[2] = pos;
+	cb->args[2] = __c_fakeu(pos);
 
 done:
 	cb->args[1] = cb->args[4];

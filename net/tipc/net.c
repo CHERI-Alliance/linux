@@ -201,7 +201,7 @@ int tipc_nl_net_dump(struct sk_buff *skb, struct netlink_callback *cb)
 {
 	struct net *net = sock_net(skb->sk);
 	int err;
-	int done = cb->args[0];
+	int done = __c_ua(cb->args[0]);
 	struct tipc_nl_msg msg;
 
 	if (done)
@@ -217,7 +217,7 @@ int tipc_nl_net_dump(struct sk_buff *skb, struct netlink_callback *cb)
 
 	done = 1;
 out:
-	cb->args[0] = done;
+	cb->args[0] = __c_fakeu(done);
 
 	return skb->len;
 }

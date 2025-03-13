@@ -3297,7 +3297,8 @@ static int tipc_getsockopt(struct socket *sock, int lvl, int opt,
 	return put_user(sizeof(value), ol);
 }
 
-static int tipc_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+static int tipc_ioctl(struct socket *sock, unsigned int cmd,
+		      user_uintptr_t arg)
 {
 	struct net *net = sock_net(sock->sk);
 	struct tipc_sioc_nodeid_req nr = {0};
@@ -3603,7 +3604,7 @@ int __tipc_dump_start(struct netlink_callback *cb, struct net *net)
 		if (!iter)
 			return -ENOMEM;
 
-		cb->args[4] = (long)iter;
+		cb->args[4] = (intptr_t)iter;
 	}
 
 	rhashtable_walk_enter(&tn->sk_rht, iter);
@@ -3777,9 +3778,9 @@ static int __tipc_nl_list_sk_publ(struct sk_buff *skb,
 int tipc_nl_publ_dump(struct sk_buff *skb, struct netlink_callback *cb)
 {
 	int err;
-	u32 tsk_portid = cb->args[0];
-	u32 last_publ = cb->args[1];
-	u32 done = cb->args[2];
+	u32 tsk_portid = __c_ua(cb->args[0]);
+	u32 last_publ = __c_ua(cb->args[1]);
+	u32 done = __c_ua(cb->args[2]);
 	struct net *net = sock_net(skb->sk);
 	struct tipc_sock *tsk;
 
@@ -3816,9 +3817,9 @@ int tipc_nl_publ_dump(struct sk_buff *skb, struct netlink_callback *cb)
 	release_sock(&tsk->sk);
 	sock_put(&tsk->sk);
 
-	cb->args[0] = tsk_portid;
-	cb->args[1] = last_publ;
-	cb->args[2] = done;
+	cb->args[0] = __c_fakeu(tsk_portid);
+	cb->args[1] = __c_fakeu(last_publ);
+	cb->args[2] = __c_fakeu(done);
 
 	return skb->len;
 }

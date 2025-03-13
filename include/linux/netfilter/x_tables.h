@@ -433,7 +433,7 @@ static inline struct xt_counters *
 xt_get_this_cpu_counter(struct xt_counters *cnt)
 {
 	if (nr_cpu_ids > 1)
-		return this_cpu_ptr((void __percpu *) (uintptr_t) cnt->pcnt);
+		return this_cpu_ptr((void __percpu *)cnt->percpu);
 
 	return cnt;
 }
@@ -442,7 +442,7 @@ static inline struct xt_counters *
 xt_get_per_cpu_counter(struct xt_counters *cnt, unsigned int cpu)
 {
 	if (nr_cpu_ids > 1)
-		return per_cpu_ptr((void __percpu *) (uintptr_t) cnt->pcnt, cpu);
+		return per_cpu_ptr((void __percpu *)cnt->percpu, cpu);
 
 	return cnt;
 }

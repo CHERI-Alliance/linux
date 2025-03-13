@@ -318,7 +318,7 @@ nest_err:
 static int br_mdb_fill_info(struct sk_buff *skb, struct netlink_callback *cb,
 			    struct net_device *dev)
 {
-	int idx = 0, s_idx = cb->args[1], err = 0, pidx = 0, s_pidx = cb->args[2];
+	int idx = 0, s_idx = __c_ua(cb->args[1]), err = 0, pidx = 0, s_pidx = __c_ua(cb->args[2]);
 	struct net_bridge *br = netdev_priv(dev);
 	struct net_bridge_mdb_entry *mp;
 	struct nlattr *nest, *nest2;
@@ -371,8 +371,8 @@ skip:
 	}
 
 out:
-	cb->args[1] = idx;
-	cb->args[2] = pidx;
+	cb->args[1] = __c_fakeu(idx);
+	cb->args[2] = __c_fakeu(pidx);
 	nla_nest_end(skb, nest);
 	return err;
 }
@@ -760,7 +760,7 @@ static int br_mdb_add_group_sg(const struct br_mdb_config *cfg,
 			return br_mdb_replace_group_sg(cfg, mp, p, brmctx,
 						       flags);
 		}
-		if ((unsigned long)p->key.port < (unsigned long)cfg->p)
+		if (__c_pa(p->key.port) < __c_pa(cfg->p))
 			break;
 	}
 
@@ -985,7 +985,7 @@ static int br_mdb_add_group_star_g(const struct br_mdb_config *cfg,
 			return br_mdb_replace_group_star_g(cfg, mp, p, brmctx,
 							   flags, extack);
 		}
-		if ((unsigned long)p->key.port < (unsigned long)cfg->p)
+		if (__c_pa(p->key.port) < __c_pa(cfg->p))
 			break;
 	}
 

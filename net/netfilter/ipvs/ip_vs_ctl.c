@@ -324,7 +324,7 @@ ip_vs_svc_hashkey(struct netns_ipvs *ipvs, int af, unsigned int proto,
 			    addr->ip6[2]^addr->ip6[3];
 #endif
 	ahash = ntohl(addr_fold);
-	ahash ^= ((size_t) ipvs >> 8);
+	ahash ^= (__c_pa(ipvs) >> 8);
 
 	return (proto ^ ahash ^ (porth >> IP_VS_SVC_TAB_BITS) ^ porth) &
 	       IP_VS_SVC_TAB_MASK;
@@ -335,7 +335,7 @@ ip_vs_svc_hashkey(struct netns_ipvs *ipvs, int af, unsigned int proto,
  */
 static inline unsigned int ip_vs_svc_fwm_hashkey(struct netns_ipvs *ipvs, __u32 fwmark)
 {
-	return (((size_t)ipvs>>8) ^ fwmark) & IP_VS_SVC_TAB_MASK;
+	return ((__c_pa(ipvs)>>8) ^ fwmark) & IP_VS_SVC_TAB_MASK;
 }
 
 /*
@@ -3389,7 +3389,7 @@ static int ip_vs_genl_dump_services(struct sk_buff *skb,
 				    struct netlink_callback *cb)
 {
 	int idx = 0, i;
-	int start = cb->args[0];
+	int start = __c_ua(cb->args[0]);
 	struct ip_vs_service *svc;
 	struct net *net = sock_net(skb->sk);
 	struct netns_ipvs *ipvs = net_ipvs(net);
@@ -3419,7 +3419,7 @@ static int ip_vs_genl_dump_services(struct sk_buff *skb,
 
 nla_put_failure:
 	mutex_unlock(&__ip_vs_mutex);
-	cb->args[0] = idx;
+	cb->args[0] = __c_fakeu(idx);
 
 	return skb->len;
 }
@@ -3600,7 +3600,7 @@ static int ip_vs_genl_dump_dests(struct sk_buff *skb,
 				 struct netlink_callback *cb)
 {
 	int idx = 0;
-	int start = cb->args[0];
+	int start = __c_ua(cb->args[0]);
 	struct ip_vs_service *svc;
 	struct ip_vs_dest *dest;
 	struct nlattr *attrs[IPVS_CMD_ATTR_MAX + 1];
@@ -3629,7 +3629,7 @@ static int ip_vs_genl_dump_dests(struct sk_buff *skb,
 	}
 
 nla_put_failure:
-	cb->args[0] = idx;
+	cb->args[0] = __c_fakeu(idx);
 
 out_err:
 	mutex_unlock(&__ip_vs_mutex);

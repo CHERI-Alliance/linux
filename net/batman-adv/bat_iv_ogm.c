@@ -1976,9 +1976,9 @@ batadv_iv_ogm_orig_dump(struct sk_buff *msg, struct netlink_callback *cb,
 {
 	struct batadv_hashtable *hash = bat_priv->orig_hash;
 	struct hlist_head *head;
-	int bucket = cb->args[0];
-	int idx = cb->args[1];
-	int sub = cb->args[2];
+	int bucket = __c_ua(cb->args[0]);
+	int idx = __c_ua(cb->args[1]);
+	int sub = __c_ua(cb->args[2]);
 	int portid = NETLINK_CB(cb->skb).portid;
 
 	while (bucket < hash->size) {
@@ -1993,9 +1993,9 @@ batadv_iv_ogm_orig_dump(struct sk_buff *msg, struct netlink_callback *cb,
 		bucket++;
 	}
 
-	cb->args[0] = bucket;
-	cb->args[1] = idx;
-	cb->args[2] = sub;
+	cb->args[0] = __c_fakeu(bucket);
+	cb->args[1] = __c_fakeu(idx);
+	cb->args[2] = __c_fakeu(sub);
 }
 
 /**
@@ -2135,8 +2135,8 @@ batadv_iv_ogm_neigh_dump(struct sk_buff *msg, struct netlink_callback *cb,
 {
 	struct batadv_hard_iface *hard_iface;
 	int i_hardif = 0;
-	int i_hardif_s = cb->args[0];
-	int idx = cb->args[1];
+	int i_hardif_s = __c_ua(cb->args[0]);
+	int idx = __c_ua(cb->args[1]);
 	int portid = NETLINK_CB(cb->skb).portid;
 
 	rcu_read_lock();
@@ -2169,8 +2169,8 @@ batadv_iv_ogm_neigh_dump(struct sk_buff *msg, struct netlink_callback *cb,
 	}
 	rcu_read_unlock();
 
-	cb->args[0] = i_hardif;
-	cb->args[1] = idx;
+	cb->args[0] = __c_fakeu(i_hardif);
+	cb->args[1] = __c_fakeu(idx);
 }
 
 /**
@@ -2473,7 +2473,7 @@ static void batadv_iv_gw_dump(struct sk_buff *msg, struct netlink_callback *cb,
 {
 	int portid = NETLINK_CB(cb->skb).portid;
 	struct batadv_gw_node *gw_node;
-	int idx_skip = cb->args[0];
+	int idx_skip = __c_ua(cb->args[0]);
 	int idx = 0;
 
 	spin_lock_bh(&bat_priv->gw.list_lock);
@@ -2494,7 +2494,7 @@ static void batadv_iv_gw_dump(struct sk_buff *msg, struct netlink_callback *cb,
 unlock:
 	spin_unlock_bh(&bat_priv->gw.list_lock);
 
-	cb->args[0] = idx_skip;
+	cb->args[0] = __c_fakeu(idx_skip);
 }
 
 static struct batadv_algo_ops batadv_batman_iv __read_mostly = {

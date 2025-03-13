@@ -480,7 +480,7 @@ list_set_list(const struct ip_set *set,
 {
 	const struct list_set *map = set->data;
 	struct nlattr *atd, *nested;
-	u32 i = 0, first = cb->args[IPSET_CB_ARG0];
+	u32 i = 0, first = __c_ua(cb->args[IPSET_CB_ARG0]);
 	char name[IPSET_MAXNAMELEN];
 	struct set_elem *e;
 	int ret = 0;
@@ -521,7 +521,7 @@ nla_put_failure:
 		cb->args[IPSET_CB_ARG0] = 0;
 		ret = -EMSGSIZE;
 	} else {
-		cb->args[IPSET_CB_ARG0] = i;
+		cb->args[IPSET_CB_ARG0] = __c_fakeu(i);
 		nla_nest_end(skb, atd);
 	}
 out:

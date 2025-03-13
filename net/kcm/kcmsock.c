@@ -1524,7 +1524,8 @@ static struct file *kcm_clone(struct socket *osock)
 	return sock_alloc_file(newsock, 0, osock->sk->sk_prot_creator->name);
 }
 
-static int kcm_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+static int kcm_ioctl(struct socket *sock, unsigned int cmd,
+		     user_uintptr_t arg)
 {
 	int err;
 

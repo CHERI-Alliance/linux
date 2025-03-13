@@ -1474,7 +1474,7 @@ ip_set_dump_done(struct netlink_callback *cb)
 	if (cb->args[IPSET_CB_ARG0]) {
 		struct ip_set_net *inst =
 			(struct ip_set_net *)cb->args[IPSET_CB_NET];
-		ip_set_id_t index = (ip_set_id_t)cb->args[IPSET_CB_INDEX];
+		ip_set_id_t index = (ip_set_id_t)__c_ua(cb->args[IPSET_CB_INDEX]);
 		struct ip_set *set = ip_set_ref_netlink(inst, index);
 
 		if (set->variant->uref)
@@ -1523,7 +1523,7 @@ ip_set_dump_start(struct netlink_callback *cb)
 	if (ret)
 		goto error;
 
-	cb->args[IPSET_CB_PROTO] = nla_get_u8(cda[IPSET_ATTR_PROTOCOL]);
+	cb->args[IPSET_CB_PROTO] = __c_fakeu(nla_get_u8(cda[IPSET_ATTR_PROTOCOL]));
 	if (cda[IPSET_ATTR_SETNAME]) {
 		ip_set_id_t index;
 		struct ip_set *set;
@@ -1535,7 +1535,7 @@ ip_set_dump_start(struct netlink_callback *cb)
 			goto error;
 		}
 		dump_type = DUMP_ONE;
-		cb->args[IPSET_CB_INDEX] = index;
+		cb->args[IPSET_CB_INDEX] = __c_fakeu(index);
 	} else {
 		dump_type = DUMP_ALL;
 	}
@@ -1545,8 +1545,8 @@ ip_set_dump_start(struct netlink_callback *cb)
 
 		dump_type |= (f << 16);
 	}
-	cb->args[IPSET_CB_NET] = (unsigned long)inst;
-	cb->args[IPSET_CB_DUMP] = dump_type;
+	cb->args[IPSET_CB_NET] = (uintptr_t)inst;
+	cb->args[IPSET_CB_DUMP] = __c_fakeu(dump_type);
 
 	return 0;
 
@@ -1576,15 +1576,15 @@ ip_set_dump_do(struct sk_buff *skb, struct netlink_callback *cb)
 	if (cb->args[IPSET_CB_INDEX] >= inst->ip_set_max)
 		goto out;
 
-	dump_type = DUMP_TYPE(cb->args[IPSET_CB_DUMP]);
-	dump_flags = DUMP_FLAGS(cb->args[IPSET_CB_DUMP]);
-	max = dump_type == DUMP_ONE ? cb->args[IPSET_CB_INDEX] + 1
+	dump_type = DUMP_TYPE(__c_ua(cb->args[IPSET_CB_DUMP]));
+	dump_flags = DUMP_FLAGS(__c_ua(cb->args[IPSET_CB_DUMP]));
+	max = dump_type == DUMP_ONE ? __c_ua(cb->args[IPSET_CB_INDEX]) + 1
 				    : inst->ip_set_max;
 dump_last:
 	pr_debug("dump type, flag: %u %u index: %ld\n",
-		 dump_type, dump_flags, cb->args[IPSET_CB_INDEX]);
+		 dump_type, dump_flags, __c_ua(cb->args[IPSET_CB_INDEX]));
 	for (; cb->args[IPSET_CB_INDEX] < max; cb->args[IPSET_CB_INDEX]++) {
-		index = (ip_set_id_t)cb->args[IPSET_CB_INDEX];
+		index = (ip_set_id_t)__c_ua(cb->args[IPSET_CB_INDEX]);
 		write_lock_bh(&ip_set_ref_lock);
 		set = ip_set(inst, index);
 		is_destroyed = inst->is_destroyed;
@@ -1625,7 +1625,7 @@ dump_last:
 			goto release_refcount;
 		}
 		if (nla_put_u8(skb, IPSET_ATTR_PROTOCOL,
-			       cb->args[IPSET_CB_PROTO]) ||
+			       __c_ua(cb->args[IPSET_CB_PROTO])) ||
 		    nla_put_string(skb, IPSET_ATTR_SETNAME, set->name))
 			goto nla_put_failure;
 		if (dump_flags & IPSET_FLAG_LIST_SETNAME)
@@ -1662,7 +1662,7 @@ dump_last:
 	/* If we dump all sets, continue with dumping last ones */
 	if (dump_type == DUMP_ALL) {
 		dump_type = DUMP_LAST;
-		cb->args[IPSET_CB_DUMP] = dump_type | (dump_flags << 16);
+		cb->args[IPSET_CB_DUMP] = __c_fakeu(dump_type | (dump_flags << 16));
 		cb->args[IPSET_CB_INDEX] = 0;
 		if (set && set->variant->uref)
 			set->variant->uref(set, cb, false);

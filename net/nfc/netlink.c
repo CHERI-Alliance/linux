@@ -125,7 +125,7 @@ static struct nfc_dev *__get_device_from_cb(struct netlink_callback *cb)
 static int nfc_genl_dump_targets(struct sk_buff *skb,
 				 struct netlink_callback *cb)
 {
-	int i = cb->args[0];
+	int i = __c_ua(cb->args[0]);
 	struct nfc_dev *dev = (struct nfc_dev *) cb->args[1];
 	int rc;
 
@@ -134,7 +134,7 @@ static int nfc_genl_dump_targets(struct sk_buff *skb,
 		if (IS_ERR(dev))
 			return PTR_ERR(dev);
 
-		cb->args[1] = (long) dev;
+		cb->args[1] = (intptr_t) dev;
 	}
 
 	device_lock(&dev->dev);
@@ -152,7 +152,7 @@ static int nfc_genl_dump_targets(struct sk_buff *skb,
 
 	device_unlock(&dev->dev);
 
-	cb->args[0] = i;
+	cb->args[0] = __c_fakeu(i);
 
 	return skb->len;
 }
@@ -602,7 +602,7 @@ static int nfc_genl_dump_devices(struct sk_buff *skb,
 		iter = kmalloc(sizeof(struct class_dev_iter), GFP_KERNEL);
 		if (!iter)
 			return -ENOMEM;
-		cb->args[0] = (long) iter;
+		cb->args[0] = (intptr_t) iter;
 	}
 
 	mutex_lock(&nfc_devlist_mutex);
@@ -627,7 +627,7 @@ static int nfc_genl_dump_devices(struct sk_buff *skb,
 
 	mutex_unlock(&nfc_devlist_mutex);
 
-	cb->args[1] = (long) dev;
+	cb->args[1] = (intptr_t) dev;
 
 	return skb->len;
 }
@@ -1368,7 +1368,7 @@ static int nfc_genl_dump_ses(struct sk_buff *skb,
 		iter = kmalloc(sizeof(struct class_dev_iter), GFP_KERNEL);
 		if (!iter)
 			return -ENOMEM;
-		cb->args[0] = (long) iter;
+		cb->args[0] = (intptr_t) iter;
 	}
 
 	mutex_lock(&nfc_devlist_mutex);
@@ -1393,7 +1393,7 @@ static int nfc_genl_dump_ses(struct sk_buff *skb,
 
 	mutex_unlock(&nfc_devlist_mutex);
 
-	cb->args[1] = (long) dev;
+	cb->args[1] = (intptr_t) dev;
 
 	return skb->len;
 }

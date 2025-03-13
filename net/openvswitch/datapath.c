@@ -1477,8 +1477,8 @@ static int ovs_flow_cmd_dump(struct sk_buff *skb, struct netlink_callback *cb)
 		struct sw_flow *flow;
 		u32 bucket, obj;
 
-		bucket = cb->args[0];
-		obj = cb->args[1];
+		bucket = __c_ua(cb->args[0]);
+		obj = __c_ua(cb->args[1]);
 		flow = ovs_flow_tbl_dump_next(ti, &bucket, &obj);
 		if (!flow)
 			break;
@@ -1489,8 +1489,8 @@ static int ovs_flow_cmd_dump(struct sk_buff *skb, struct netlink_callback *cb)
 					   OVS_FLOW_CMD_GET, ufid_flags) < 0)
 			break;
 
-		cb->args[0] = bucket;
-		cb->args[1] = obj;
+		cb->args[0] = __c_fakeu(bucket);
+		cb->args[1] = __c_fakeu(obj);
 	}
 	rcu_read_unlock();
 	return skb->len;
@@ -2027,7 +2027,7 @@ static int ovs_dp_cmd_dump(struct sk_buff *skb, struct netlink_callback *cb)
 {
 	struct ovs_net *ovs_net = net_generic(sock_net(skb->sk), ovs_net_id);
 	struct datapath *dp;
-	int skip = cb->args[0];
+	int skip = __c_ua(cb->args[0]);
 	int i = 0;
 
 	ovs_lock();
@@ -2041,7 +2041,7 @@ static int ovs_dp_cmd_dump(struct sk_buff *skb, struct netlink_callback *cb)
 	}
 	ovs_unlock();
 
-	cb->args[0] = i;
+	cb->args[0] = __c_fakeu(i);
 
 	return skb->len;
 }
@@ -2481,7 +2481,7 @@ static int ovs_vport_cmd_dump(struct sk_buff *skb, struct netlink_callback *cb)
 {
 	struct ovs_header *ovs_header = genlmsg_data(nlmsg_data(cb->nlh));
 	struct datapath *dp;
-	int bucket = cb->args[0], skip = cb->args[1];
+	int bucket = __c_ua(cb->args[0]), skip =__c_ua( cb->args[1]);
 	int i, j = 0;
 
 	rcu_read_lock();
@@ -2512,8 +2512,8 @@ static int ovs_vport_cmd_dump(struct sk_buff *skb, struct netlink_callback *cb)
 out:
 	rcu_read_unlock();
 
-	cb->args[0] = i;
-	cb->args[1] = j;
+	cb->args[0] = __c_fakeu(i);
+	cb->args[1] = __c_fakeu(j);
 
 	return skb->len;
 }

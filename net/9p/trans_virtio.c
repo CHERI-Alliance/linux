@@ -355,8 +355,8 @@ static int p9_get_mapped_pages(struct virtio_chan *chan,
 		if (len > count)
 			len = count;
 
-		nr_pages = DIV_ROUND_UP((unsigned long)p + len, PAGE_SIZE) -
-			   (unsigned long)p / PAGE_SIZE;
+		nr_pages = DIV_ROUND_UP(__c_pa(p) + len, PAGE_SIZE) -
+			   __c_pa(p) / PAGE_SIZE;
 
 		*pages = kmalloc_array(nr_pages, sizeof(struct page *),
 				       GFP_NOFS);

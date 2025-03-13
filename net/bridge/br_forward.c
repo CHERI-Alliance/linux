@@ -312,7 +312,7 @@ void br_multicast_flood(struct net_bridge_mdb_entry *mdst,
 		lport = p ? p->key.port : NULL;
 		rport = br_multicast_rport_from_node_skb(rp, skb);
 
-		if ((unsigned long)lport > (unsigned long)rport) {
+		if (__c_pa(lport) > __c_pa(rport)) {
 			port = lport;
 
 			if (port->flags & BR_MULTICAST_TO_UNICAST) {
@@ -332,9 +332,9 @@ void br_multicast_flood(struct net_bridge_mdb_entry *mdst,
 		if (IS_ERR(prev))
 			goto out;
 delivered:
-		if ((unsigned long)lport >= (unsigned long)port)
+		if (__c_pa(lport) >= __c_pa(port))
 			p = rcu_dereference(p->next);
-		if ((unsigned long)rport >= (unsigned long)port)
+		if (__c_pa(rport) >= __c_pa(port))
 			rp = rcu_dereference(hlist_next_rcu(rp));
 	}
 

@@ -189,7 +189,7 @@ int batadv_algo_dump(struct sk_buff *msg, struct netlink_callback *cb)
 {
 	int portid = NETLINK_CB(cb->skb).portid;
 	struct batadv_algo_ops *bat_algo_ops;
-	int skip = cb->args[0];
+	int skip = __c_ua(cb->args[0]);
 	int i = 0;
 
 	hlist_for_each_entry(bat_algo_ops, &batadv_algo_list, list) {
@@ -203,7 +203,7 @@ int batadv_algo_dump(struct sk_buff *msg, struct netlink_callback *cb)
 		}
 	}
 
-	cb->args[0] = i;
+	cb->args[0] = __c_fakeu(i);
 
 	return msg->len;
 }

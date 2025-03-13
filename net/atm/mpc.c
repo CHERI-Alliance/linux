@@ -1442,7 +1442,7 @@ static void mpc_cache_check(struct timer_list *unused)
 }
 
 static int atm_mpoa_ioctl(struct socket *sock, unsigned int cmd,
-			  unsigned long arg)
+			  user_uintptr_t arg)
 {
 	int err = 0;
 	struct atm_vcc *vcc = ATM_SD(sock);
@@ -1455,7 +1455,7 @@ static int atm_mpoa_ioctl(struct socket *sock, unsigned int cmd,
 
 	switch (cmd) {
 	case ATMMPC_CTRL:
-		err = atm_mpoa_mpoad_attach(vcc, (int)arg);
+		err = atm_mpoa_mpoad_attach(vcc, __c_ua(arg));
 		if (err >= 0)
 			sock->state = SS_CONNECTED;
 		break;

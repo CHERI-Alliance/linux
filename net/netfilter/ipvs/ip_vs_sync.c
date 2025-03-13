@@ -406,7 +406,7 @@ get_curr_sync_buff(struct netns_ipvs *ipvs, struct ipvs_master_sync_state *ms,
 static inline int
 select_master_thread_id(struct netns_ipvs *ipvs, struct ip_vs_conn *cp)
 {
-	return ((long) cp >> (1 + ilog2(sizeof(*cp)))) & ipvs->threads_mask;
+	return (__c_pa(cp) >> (1 + ilog2(sizeof(*cp)))) & ipvs->threads_mask;
 }
 
 /*
@@ -688,7 +688,7 @@ sloop:
 	buff = ms->sync_buff;
 	if (buff) {
 		m = buff->mesg;
-		pad = (4 - (size_t) buff->head) & 3;
+		pad = (4 - __c_pa(buff->head)) & 3;
 		/* Send buffer if it is for v0 */
 		if (buff->head + len + pad > buff->end || m->reserved) {
 			sb_queue_tail(ipvs, ms);

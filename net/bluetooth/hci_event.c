@@ -6831,7 +6831,7 @@ unlock:
 
 static int hci_iso_term_big_sync(struct hci_dev *hdev, void *data)
 {
-	u8 handle = PTR_UINT(data);
+	u8 handle = __c_pa(data);
 
 	return hci_le_terminate_big_sync(hdev, handle,
 					 HCI_ERROR_LOCAL_HOST_TERM);
@@ -6890,7 +6890,7 @@ static void hci_le_create_big_complete_evt(struct hci_dev *hdev, void *data,
 		 * has completed.
 		 */
 		hci_cmd_sync_queue(hdev, hci_iso_term_big_sync,
-				   UINT_PTR(ev->handle), NULL);
+				   __c_fakep(ev->handle), NULL);
 
 	hci_dev_unlock(hdev);
 }

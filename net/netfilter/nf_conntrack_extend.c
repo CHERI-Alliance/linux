@@ -98,7 +98,7 @@ void *nf_ct_ext_add(struct nf_conn *ct, enum nf_ct_ext_id id, gfp_t gfp)
 	WARN_ON(nf_ct_is_confirmed(ct));
 
 	/* struct nf_ct_ext uses u8 to store offsets/size */
-	BUILD_BUG_ON(total_extension_size() > 255u);
+	BUILD_BUG_ON(total_extension_size() > ~(__typeof__(new->len))0);
 
 	if (ct->ext) {
 		const struct nf_ct_ext *old = ct->ext;

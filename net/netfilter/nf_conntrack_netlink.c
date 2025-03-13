@@ -1212,13 +1212,13 @@ restart:
 			nf_ct_put(nf_ct_evict[i]);
 		}
 
-		lockp = &nf_conntrack_locks[cb->args[0] % CONNTRACK_LOCKS];
+		lockp = &nf_conntrack_locks[__c_ua(cb->args[0]) % CONNTRACK_LOCKS];
 		nf_conntrack_lock(lockp);
 		if (cb->args[0] >= nf_conntrack_htable_size) {
 			spin_unlock(lockp);
 			goto out;
 		}
-		hlist_nulls_for_each_entry(h, n, &nf_conntrack_hash[cb->args[0]],
+		hlist_nulls_for_each_entry(h, n, &nf_conntrack_hash[__c_ua(cb->args[0])],
 					   hnnode) {
 			ct = nf_ct_tuplehash_to_ctrack(h);
 			if (nf_ct_is_expired(ct)) {
@@ -1250,7 +1250,7 @@ restart:
 					    ct, true, flags);
 			if (res < 0) {
 				nf_conntrack_get(&ct->ct_general);
-				cb->args[1] = (unsigned long)ct;
+				cb->args[1] = (uintptr_t)ct;
 				spin_unlock(lockp);
 				goto out;
 			}
@@ -2539,7 +2539,7 @@ ctnetlink_ct_stat_cpu_dump(struct sk_buff *skb, struct netlink_callback *cb)
 	if (cb->args[0] == nr_cpu_ids)
 		return 0;
 
-	for (cpu = cb->args[0]; cpu < nr_cpu_ids; cpu++) {
+	for (cpu = __c_ua(cb->args[0]); cpu < nr_cpu_ids; cpu++) {
 		const struct ip_conntrack_stat *st;
 
 		if (!cpu_possible(cpu))
@@ -2552,7 +2552,7 @@ ctnetlink_ct_stat_cpu_dump(struct sk_buff *skb, struct netlink_callback *cb)
 						    cpu, st) < 0)
 				break;
 	}
-	cb->args[0] = cpu;
+	cb->args[0] = __c_fakeu(cpu);
 
 	return skb->len;
 }
@@ -2992,10 +2992,10 @@ static __be32 nf_expect_get_id(const struct nf_conntrack_expect *exp)
 
 	net_get_random_once(&exp_id_seed, sizeof(exp_id_seed));
 
-	a = (unsigned long)exp;
-	b = (unsigned long)exp->helper;
-	c = (unsigned long)exp->master;
-	d = (unsigned long)siphash(&exp->tuple, sizeof(exp->tuple), &exp_id_seed);
+	a = __c_pa(exp);
+	b = __c_pa(exp->helper);
+	c = __c_pa(exp->master);
+	d = siphash(&exp->tuple, sizeof(exp->tuple), &exp_id_seed);
 
 #ifdef CONFIG_64BIT
 	return (__force __be32)siphash_4u64((u64)a, (u64)b, (u64)c, (u64)d, &exp_id_seed);
@@ -3189,7 +3189,7 @@ restart:
 						    exp) < 0) {
 				if (!refcount_inc_not_zero(&exp->use))
 					continue;
-				cb->args[1] = (unsigned long)exp;
+				cb->args[1] = (uintptr_t)exp;
 				goto out;
 			}
 		}
@@ -3235,7 +3235,7 @@ restart:
 					    exp) < 0) {
 			if (!refcount_inc_not_zero(&exp->use))
 				continue;
-			cb->args[1] = (unsigned long)exp;
+			cb->args[1] = (uintptr_t)exp;
 			goto out;
 		}
 	}
@@ -3420,7 +3420,7 @@ static int ctnetlink_del_expect(struct sk_buff *skb,
 
 		if (cda[CTA_EXPECT_ID]) {
 			__be32 id = nla_get_be32(cda[CTA_EXPECT_ID]);
-			if (ntohl(id) != (u32)(unsigned long)exp) {
+			if (ntohl(id) != (u32)__c_pa(exp)) {
 				nf_ct_expect_put(exp);
 				return -ENOENT;
 			}
@@ -3727,7 +3727,7 @@ ctnetlink_exp_stat_cpu_dump(struct sk_buff *skb, struct netlink_callback *cb)
 	if (cb->args[0] == nr_cpu_ids)
 		return 0;
 
-	for (cpu = cb->args[0]; cpu < nr_cpu_ids; cpu++) {
+	for (cpu = __c_ua(cb->args[0]); cpu < nr_cpu_ids; cpu++) {
 		const struct ip_conntrack_stat *st;
 
 		if (!cpu_possible(cpu))
@@ -3739,7 +3739,7 @@ ctnetlink_exp_stat_cpu_dump(struct sk_buff *skb, struct netlink_callback *cb)
 						 cpu, st) < 0)
 			break;
 	}
-	cb->args[0] = cpu;
+	cb->args[0] = __c_fakeu(cpu);
 
 	return skb->len;
 }

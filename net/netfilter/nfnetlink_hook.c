@@ -308,7 +308,7 @@ static int nfnl_hook_dump(struct sk_buff *nlskb,
 	struct net *net = sock_net(nlskb->sk);
 	struct nf_hook_ops * const *ops;
 	const struct nf_hook_entries *e;
-	unsigned int i = cb->args[0];
+	unsigned int i = __c_ua(cb->args[0]);
 
 	rcu_read_lock();
 
@@ -321,7 +321,7 @@ static int nfnl_hook_dump(struct sk_buff *nlskb,
 		goto done;
 	}
 
-	if ((unsigned long)e != ctx->headv || i >= e->num_hook_entries)
+	if (__c_pa(e) != ctx->headv || i >= e->num_hook_entries)
 		cb->seq++;
 
 	ops = nf_hook_entries_get_hook_ops(e);
@@ -336,7 +336,7 @@ static int nfnl_hook_dump(struct sk_buff *nlskb,
 done:
 	nl_dump_check_consistent(cb, nlmsg_hdr(nlskb));
 	rcu_read_unlock();
-	cb->args[0] = i;
+	cb->args[0] = __c_fakeu(i);
 	return nlskb->len;
 }
 
@@ -375,7 +375,7 @@ static int nfnl_hook_dump_start(struct netlink_callback *cb)
 		return -ENOMEM;
 
 	strscpy(ctx->devname, name, sizeof(ctx->devname));
-	ctx->headv = (unsigned long)head;
+	ctx->headv = __c_pa(head);
 	ctx->hook = hooknum;
 
 	cb->seq = 1;

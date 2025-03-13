@@ -108,7 +108,7 @@ out:
 static inline void *vcc_walk(struct seq_file *seq, loff_t l)
 {
 	struct vcc_state *state = seq->private;
-	int family = (uintptr_t)(pde_data(file_inode(seq->file)));
+	int family = __c_pa(pde_data(file_inode(seq->file)));
 
 	return __vcc_walk(&state->sk, family, &state->bucket, l) ?
 	       state : NULL;
@@ -316,7 +316,7 @@ static ssize_t proc_dev_atm_read(struct file *file, char __user *buf,
 				 size_t count, loff_t *pos)
 {
 	struct atm_dev *dev;
-	unsigned long page;
+	uintptr_t page;
 	int length;
 
 	if (count == 0)

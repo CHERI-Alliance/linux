@@ -334,7 +334,7 @@ static void nci_rf_deactivate_req(struct nci_dev *ndev, const void *opt)
 {
 	struct nci_rf_deactivate_cmd cmd;
 
-	cmd.type = (unsigned long)opt;
+	cmd.type = __c_pa(opt);
 
 	nci_send_cmd(ndev, NCI_OP_RF_DEACTIVATE_CMD,
 		     sizeof(struct nci_rf_deactivate_cmd), &cmd);
@@ -658,7 +658,7 @@ EXPORT_SYMBOL(nci_set_config);
 static void nci_nfcee_discover_req(struct nci_dev *ndev, const void *opt)
 {
 	struct nci_nfcee_discover_cmd cmd;
-	__u8 action = (unsigned long)opt;
+	__u8 action = __c_pa(opt);
 
 	cmd.discovery_action = action;
 
@@ -669,7 +669,7 @@ int nci_nfcee_discover(struct nci_dev *ndev, u8 action)
 {
 	unsigned long opt = action;
 
-	return __nci_request(ndev, nci_nfcee_discover_req, (void *)opt,
+	return __nci_request(ndev, nci_nfcee_discover_req, __c_fakep(opt),
 				msecs_to_jiffies(NCI_CMD_TIMEOUT));
 }
 EXPORT_SYMBOL(nci_nfcee_discover);
@@ -742,7 +742,7 @@ EXPORT_SYMBOL(nci_core_conn_create);
 
 static void nci_core_conn_close_req(struct nci_dev *ndev, const void *opt)
 {
-	__u8 conn_id = (unsigned long)opt;
+	__u8 conn_id = __c_pa(opt);
 
 	nci_send_cmd(ndev, NCI_OP_CORE_CONN_CLOSE_CMD, 1, &conn_id);
 }
@@ -752,7 +752,7 @@ int nci_core_conn_close(struct nci_dev *ndev, u8 conn_id)
 	unsigned long opt = conn_id;
 
 	ndev->cur_conn_id = conn_id;
-	return __nci_request(ndev, nci_core_conn_close_req, (void *)opt,
+	return __nci_request(ndev, nci_core_conn_close_req, __c_fakep(opt),
 			     msecs_to_jiffies(NCI_CMD_TIMEOUT));
 }
 EXPORT_SYMBOL(nci_core_conn_close);
@@ -966,7 +966,7 @@ static void nci_deactivate_target(struct nfc_dev *nfc_dev,
 	}
 
 	if (atomic_read(&ndev->state) == NCI_POLL_ACTIVE) {
-		nci_request(ndev, nci_rf_deactivate_req, (void *)nci_mode,
+		nci_request(ndev, nci_rf_deactivate_req, __c_fakep(nci_mode),
 			    msecs_to_jiffies(NCI_RF_DEACTIVATE_TIMEOUT));
 	}
 }

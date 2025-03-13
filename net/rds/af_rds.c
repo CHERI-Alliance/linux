@@ -252,7 +252,8 @@ static __poll_t rds_poll(struct file *file, struct socket *sock,
 	return mask;
 }
 
-static int rds_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+static int rds_ioctl(struct socket *sock, unsigned int cmd,
+		     user_uintptr_t arg)
 {
 	struct rds_sock *rs = rds_sk_to_rs(sock->sk);
 	rds_tos_t utos, tos = 0;

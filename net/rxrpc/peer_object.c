@@ -36,7 +36,7 @@ static unsigned long rxrpc_peer_hash_key(struct rxrpc_local *local,
 
 	_enter("");
 
-	hash_key = (unsigned long)local / __alignof__(*local);
+	hash_key = __c_pa(local) / __alignof__(*local);
 	hash_key += srx->transport_type;
 	hash_key += srx->transport_len;
 	hash_key += srx->transport.family;
@@ -83,7 +83,7 @@ static long rxrpc_peer_cmp_key(const struct rxrpc_peer *peer,
 	long diff;
 
 	diff = ((peer->hash_key - hash_key) ?:
-		((unsigned long)peer->local - (unsigned long)local) ?:
+		(__c_pa(peer->local) - __c_pa(local)) ?:
 		(peer->srx.transport_type - srx->transport_type) ?:
 		(peer->srx.transport_len - srx->transport_len) ?:
 		(peer->srx.transport.family - srx->transport.family));

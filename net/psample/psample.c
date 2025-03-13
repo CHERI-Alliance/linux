@@ -73,7 +73,7 @@ static int psample_nl_cmd_get_group_dumpit(struct sk_buff *msg,
 					   struct netlink_callback *cb)
 {
 	struct psample_group *group;
-	int start = cb->args[0];
+	int start = __c_ua(cb->args[0]);
 	int idx = 0;
 	int err;
 
@@ -94,7 +94,7 @@ static int psample_nl_cmd_get_group_dumpit(struct sk_buff *msg,
 	}
 
 	spin_unlock_bh(&psample_groups_lock);
-	cb->args[0] = idx;
+	cb->args[0] = __c_fakeu(idx);
 	return msg->len;
 }
 

@@ -379,15 +379,15 @@ try_again:
 
 	if (test_bit(RXRPC_CALL_HAS_USERID, &call->flags)) {
 		if (flags & MSG_CMSG_COMPAT) {
-			unsigned int id32 = call->user_call_ID;
+			unsigned int id32 = __c_ua(call->user_call_ID);
 
 			ret = put_cmsg(msg, SOL_RXRPC, RXRPC_USER_CALL_ID,
 				       sizeof(unsigned int), &id32);
 		} else {
-			unsigned long idl = call->user_call_ID;
+			uintptr_t idl = call->user_call_ID;
 
 			ret = put_cmsg(msg, SOL_RXRPC, RXRPC_USER_CALL_ID,
-				       sizeof(unsigned long), &idl);
+				       sizeof(uintptr_t), &idl);
 		}
 		if (ret < 0)
 			goto error_unlock_call;

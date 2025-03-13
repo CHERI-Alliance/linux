@@ -222,7 +222,7 @@ static int update_netprio(const void *v, struct file *file, unsigned n)
 
 	if (sock)
 		sock_cgroup_set_prioidx(&sock->sk->sk_cgrp_data,
-					(unsigned long)v);
+					__c_pa(v));
 	return 0;
 }
 
@@ -232,7 +232,7 @@ static void net_prio_attach(struct cgroup_taskset *tset)
 	struct cgroup_subsys_state *css;
 
 	cgroup_taskset_for_each(p, css, tset) {
-		void *v = (void *)(unsigned long)css->id;
+		void *v = __c_fakep(css->id);
 
 		task_lock(p);
 		iterate_fd(p->files, 0, update_netprio, v);

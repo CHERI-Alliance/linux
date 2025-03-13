@@ -613,9 +613,9 @@ check_entry_size_and_hooks(struct ip6t_entry *e,
 	unsigned int h;
 	int err;
 
-	if ((unsigned long)e % __alignof__(struct ip6t_entry) != 0 ||
-	    (unsigned char *)e + sizeof(struct ip6t_entry) >= limit ||
-	    (unsigned char *)e + e->next_offset > limit)
+	if (__c_pa(e) % __alignof__(struct ip6t_entry) != 0 ||
+	    __c_pa(e) + sizeof(struct ip6t_entry) >= __c_pa(limit) ||
+	    __c_pa(e) + e->next_offset > __c_pa(limit))
 		return -EINVAL;
 
 	if (e->next_offset
@@ -645,7 +645,7 @@ check_entry_size_and_hooks(struct ip6t_entry *e,
 	}
 
 	/* Clear counters and comefrom */
-	e->counters = ((struct xt_counters) { 0, 0 });
+	e->counters = ((struct xt_counters) { .pcnt = 0, .bcnt = 0 });
 	e->comefrom = 0;
 	return 0;
 }

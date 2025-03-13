@@ -712,7 +712,7 @@ void afs_charge_preallocation(struct work_struct *work)
 		if (rxrpc_kernel_charge_accept(net->socket,
 					       afs_wake_up_async_call,
 					       afs_rx_attach,
-					       (unsigned long)call,
+					       (uintptr_t)call,
 					       GFP_KERNEL,
 					       call->debug_id) < 0)
 			break;

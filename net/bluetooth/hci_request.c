@@ -115,8 +115,8 @@ void hci_req_sync_complete(struct hci_dev *hdev, u8 result, u16 opcode,
 
 /* Execute request and wait for completion. */
 int __hci_req_sync(struct hci_dev *hdev, int (*func)(struct hci_request *req,
-						     unsigned long opt),
-		   unsigned long opt, u32 timeout, u8 *hci_status)
+						     uintptr_t opt),
+		   uintptr_t opt, u32 timeout, u8 *hci_status)
 {
 	struct hci_request req;
 	int err = 0;
@@ -191,8 +191,8 @@ int __hci_req_sync(struct hci_dev *hdev, int (*func)(struct hci_request *req,
 }
 
 int hci_req_sync(struct hci_dev *hdev, int (*req)(struct hci_request *req,
-						  unsigned long opt),
-		 unsigned long opt, u32 timeout, u8 *hci_status)
+						  uintptr_t opt),
+		 uintptr_t opt, u32 timeout, u8 *hci_status)
 {
 	int ret;
 
@@ -811,7 +811,7 @@ void hci_req_add_le_passive_scan(struct hci_request *req)
 }
 
 static int hci_req_add_le_interleaved_scan(struct hci_request *req,
-					   unsigned long opt)
+					   uintptr_t opt)
 {
 	struct hci_dev *hdev = req->hdev;
 	int ret = 0;

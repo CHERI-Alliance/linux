@@ -234,7 +234,7 @@ static int ncsi_pkg_info_all_nl(struct sk_buff *skb,
 	if (!ndp)
 		return -ENODEV;
 
-	package_id = cb->args[0];
+	package_id = __c_ua(cb->args[0]);
 	package = NULL;
 	NCSI_FOR_EACH_PACKAGE(ndp, np)
 		if (np->id == package_id)
@@ -264,7 +264,7 @@ static int ncsi_pkg_info_all_nl(struct sk_buff *skb,
 	nla_nest_end(skb, attr);
 	genlmsg_end(skb, hdr);
 
-	cb->args[0] = package_id + 1;
+	cb->args[0] = __c_fakeu(package_id + 1);
 
 	return skb->len;
 err:

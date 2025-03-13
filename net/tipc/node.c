@@ -2316,8 +2316,8 @@ int tipc_nl_node_dump(struct sk_buff *skb, struct netlink_callback *cb)
 	int err;
 	struct net *net = sock_net(skb->sk);
 	struct tipc_net *tn = net_generic(net, tipc_net_id);
-	int done = cb->args[0];
-	int last_addr = cb->args[1];
+	int done = __c_ua(cb->args[0]);
+	int last_addr = __c_ua(cb->args[1]);
 	struct tipc_node *node;
 	struct tipc_nl_msg msg;
 
@@ -2368,8 +2368,8 @@ int tipc_nl_node_dump(struct sk_buff *skb, struct netlink_callback *cb)
 	}
 	done = 1;
 out:
-	cb->args[0] = done;
-	cb->args[1] = last_addr;
+	cb->args[0] = __c_fakeu(done);
+	cb->args[1] = __c_fakeu(last_addr);
 	rcu_read_unlock();
 
 	return skb->len;
@@ -2666,10 +2666,10 @@ int tipc_nl_node_dump_link(struct sk_buff *skb, struct netlink_callback *cb)
 	struct tipc_net *tn = net_generic(net, tipc_net_id);
 	struct tipc_node *node;
 	struct tipc_nl_msg msg;
-	u32 prev_node = cb->args[0];
-	u32 prev_link = cb->args[1];
-	int done = cb->args[2];
-	bool bc_link = cb->args[3];
+	u32 prev_node = __c_ua(cb->args[0]);
+	u32 prev_link = __c_ua(cb->args[1]);
+	int done = __c_ua(cb->args[2]);
+	bool bc_link = __c_ua(cb->args[3]);
 	int err;
 
 	if (done)
@@ -2741,10 +2741,10 @@ int tipc_nl_node_dump_link(struct sk_buff *skb, struct netlink_callback *cb)
 out:
 	rcu_read_unlock();
 
-	cb->args[0] = prev_node;
-	cb->args[1] = prev_link;
-	cb->args[2] = done;
-	cb->args[3] = bc_link;
+	cb->args[0] = __c_fakeu(prev_node);
+	cb->args[1] = __c_fakeu(prev_link);
+	cb->args[2] = __c_fakeu(done);
+	cb->args[3] = __c_fakeu(bc_link);
 
 	return skb->len;
 }
@@ -2834,7 +2834,7 @@ int tipc_nl_node_get_monitor(struct sk_buff *skb, struct genl_info *info)
 int tipc_nl_node_dump_monitor(struct sk_buff *skb, struct netlink_callback *cb)
 {
 	struct net *net = sock_net(skb->sk);
-	u32 prev_bearer = cb->args[0];
+	u32 prev_bearer = __c_ua(cb->args[0]);
 	struct tipc_nl_msg msg;
 	int bearer_id;
 	int err;
@@ -2853,7 +2853,7 @@ int tipc_nl_node_dump_monitor(struct sk_buff *skb, struct netlink_callback *cb)
 			break;
 	}
 	rtnl_unlock();
-	cb->args[0] = bearer_id;
+	cb->args[0] = __c_fakeu(bearer_id);
 
 	return skb->len;
 }
@@ -2862,9 +2862,9 @@ int tipc_nl_node_dump_monitor_peer(struct sk_buff *skb,
 				   struct netlink_callback *cb)
 {
 	struct net *net = sock_net(skb->sk);
-	u32 prev_node = cb->args[1];
-	u32 bearer_id = cb->args[2];
-	int done = cb->args[0];
+	u32 prev_node = __c_ua(cb->args[1]);
+	u32 bearer_id = __c_ua(cb->args[2]);
+	int done = __c_ua(cb->args[0]);
 	struct tipc_nl_msg msg;
 	int err;
 
@@ -2904,9 +2904,9 @@ int tipc_nl_node_dump_monitor_peer(struct sk_buff *skb,
 		done = 1;
 
 	rtnl_unlock();
-	cb->args[0] = done;
-	cb->args[1] = prev_node;
-	cb->args[2] = bearer_id;
+	cb->args[0] = __c_fakeu(done);
+	cb->args[1] = __c_fakeu(prev_node);
+	cb->args[2] = __c_fakeu(bearer_id);
 
 	return skb->len;
 }

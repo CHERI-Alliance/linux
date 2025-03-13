@@ -2187,7 +2187,7 @@ static int mpls_dump_routes(struct sk_buff *skb, struct netlink_callback *cb)
 			return skb->len;
 	}
 
-	index = cb->args[0];
+	index = __c_ua(cb->args[0]);
 	if (index < MPLS_LABEL_FIRST_UNRESERVED)
 		index = MPLS_LABEL_FIRST_UNRESERVED;
 
@@ -2213,7 +2213,7 @@ static int mpls_dump_routes(struct sk_buff *skb, struct netlink_callback *cb)
 				    index, rt, flags) < 0)
 			break;
 	}
-	cb->args[0] = index;
+	cb->args[0] = __c_fakeu(index);
 
 	return skb->len;
 }

@@ -970,7 +970,7 @@ batadv_netlink_dump_hardif(struct sk_buff *msg, struct netlink_callback *cb)
 	struct batadv_priv *bat_priv;
 	int ifindex;
 	int portid = NETLINK_CB(cb->skb).portid;
-	int skip = cb->args[0];
+	int skip = __c_ua(cb->args[0]);
 	int i = 0;
 
 	ifindex = batadv_netlink_get_ifindex(cb->nlh,
@@ -1012,7 +1012,7 @@ batadv_netlink_dump_hardif(struct sk_buff *msg, struct netlink_callback *cb)
 
 	dev_put(soft_iface);
 
-	cb->args[0] = i;
+	cb->args[0] = __c_fakeu(i);
 
 	return msg->len;
 }

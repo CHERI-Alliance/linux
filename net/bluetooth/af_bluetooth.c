@@ -541,14 +541,14 @@ __poll_t bt_sock_poll(struct file *file, struct socket *sock,
 }
 EXPORT_SYMBOL(bt_sock_poll);
 
-int bt_sock_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+int bt_sock_ioctl(struct socket *sock, unsigned int cmd, user_uintptr_t arg)
 {
 	struct sock *sk = sock->sk;
 	struct sk_buff *skb;
 	long amount;
 	int err;
 
-	BT_DBG("sk %p cmd %x arg %lx", sk, cmd, arg);
+	BT_DBG("sk %p cmd %x arg %lx", sk, cmd, __c_ua(arg));
 
 	switch (cmd) {
 	case TIOCOUTQ:

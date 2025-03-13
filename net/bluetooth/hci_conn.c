@@ -842,7 +842,7 @@ static void bis_cleanup(struct hci_conn *conn)
 
 static int remove_cig_sync(struct hci_dev *hdev, void *data)
 {
-	u8 handle = PTR_UINT(data);
+	u8 handle = __c_pa(data);
 
 	return hci_le_remove_cig_sync(hdev, handle);
 }
@@ -851,7 +851,7 @@ static int hci_le_remove_cig(struct hci_dev *hdev, u8 handle)
 {
 	bt_dev_dbg(hdev, "handle 0x%2.2x", handle);
 
-	return hci_cmd_sync_queue(hdev, remove_cig_sync, UINT_PTR(handle),
+	return hci_cmd_sync_queue(hdev, remove_cig_sync, __c_fakep(handle),
 				  NULL);
 }
 
@@ -1759,7 +1759,7 @@ static int hci_le_create_big(struct hci_conn *conn, struct bt_iso_qos *qos)
 static int set_cig_params_sync(struct hci_dev *hdev, void *data)
 {
 	DEFINE_FLEX(struct hci_cp_le_set_cig_params, pdu, cis, num_cis, 0x1f);
-	u8 cig_id = PTR_UINT(data);
+	u8 cig_id = __c_pa(data);
 	struct hci_conn *conn;
 	struct bt_iso_qos *qos;
 	u8 aux_num_cis = 0;
@@ -1867,7 +1867,7 @@ static bool hci_le_set_cig_params(struct hci_conn *conn, struct bt_iso_qos *qos)
 
 done:
 	if (hci_cmd_sync_queue(hdev, set_cig_params_sync,
-			       UINT_PTR(qos->ucast.cig), NULL) < 0)
+			       __c_fakep(qos->ucast.cig), NULL) < 0)
 		return false;
 
 	return true;

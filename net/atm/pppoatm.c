@@ -368,7 +368,7 @@ nospace:
 
 /* This handles ioctls sent to the /dev/ppp interface */
 static int pppoatm_devppp_ioctl(struct ppp_channel *chan, unsigned int cmd,
-	unsigned long arg)
+	user_uintptr_t arg)
 {
 	switch (cmd) {
 	case PPPIOCGFLAGS:
@@ -437,7 +437,7 @@ static int pppoatm_assign_vcc(struct atm_vcc *atmvcc, void __user *arg)
  * -ENOIOCTLCMD for any unrecognized ioctl
  */
 static int pppoatm_ioctl(struct socket *sock, unsigned int cmd,
-	unsigned long arg)
+	user_uintptr_t arg)
 {
 	struct atm_vcc *atmvcc = ATM_SD(sock);
 	void __user *argp = (void __user *)arg;

@@ -473,11 +473,11 @@ static int rxrpc_sendmsg_cmsg(struct msghdr *msg, struct rxrpc_send_params *p)
 			if (msg->msg_flags & MSG_CMSG_COMPAT) {
 				if (len != sizeof(u32))
 					return -EINVAL;
-				p->call.user_call_ID = *(u32 *)CMSG_DATA(cmsg);
+				p->call.user_call_ID = __c_fakeu(*(u32 *)CMSG_DATA(cmsg));
 			} else {
-				if (len != sizeof(unsigned long))
+				if (len != sizeof(uintptr_t))
 					return -EINVAL;
-				p->call.user_call_ID = *(unsigned long *)
+				p->call.user_call_ID = *(uintptr_t *)
 					CMSG_DATA(cmsg);
 			}
 			got_user_ID = true;
@@ -753,8 +753,8 @@ int rxrpc_kernel_send_data(struct socket *sock, struct rxrpc_call *call,
 
 	_enter("{%d},", call->debug_id);
 
-	ASSERTCMP(msg->msg_name, ==, NULL);
-	ASSERTCMP(msg->msg_control, ==, NULL);
+	ASSERTCMP(__c_pa(msg->msg_name), ==, 0);
+	ASSERTCMP(__c_pa(msg->msg_control), ==, 0);
 
 	mutex_lock(&call->user_mutex);
 

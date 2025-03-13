@@ -653,7 +653,7 @@ static int netlbl_cipsov4_listall(struct sk_buff *skb,
 				  struct netlink_callback *cb)
 {
 	struct netlbl_cipsov4_doiwalk_arg cb_arg;
-	u32 doi_skip = cb->args[0];
+	u32 doi_skip = __c_ua(cb->args[0]);
 
 	cb_arg.nl_cb = cb;
 	cb_arg.skb = skb;
@@ -661,7 +661,7 @@ static int netlbl_cipsov4_listall(struct sk_buff *skb,
 
 	cipso_v4_doi_walk(&doi_skip, netlbl_cipsov4_listall_cb, &cb_arg);
 
-	cb->args[0] = doi_skip;
+	cb->args[0] = __c_fakeu(doi_skip);
 	return skb->len;
 }
 

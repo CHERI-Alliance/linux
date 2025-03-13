@@ -492,7 +492,7 @@ err:
 
 static int l2tp_nl_cmd_tunnel_dump(struct sk_buff *skb, struct netlink_callback *cb)
 {
-	int ti = cb->args[0];
+	int ti = __c_ua(cb->args[0]);
 	struct l2tp_tunnel *tunnel;
 	struct net *net = sock_net(skb->sk);
 
@@ -513,7 +513,7 @@ static int l2tp_nl_cmd_tunnel_dump(struct sk_buff *skb, struct netlink_callback 
 	}
 
 out:
-	cb->args[0] = ti;
+	cb->args[0] = __c_fakeu(ti);
 
 	return skb->len;
 }
@@ -831,8 +831,8 @@ static int l2tp_nl_cmd_session_dump(struct sk_buff *skb, struct netlink_callback
 	struct net *net = sock_net(skb->sk);
 	struct l2tp_session *session;
 	struct l2tp_tunnel *tunnel = NULL;
-	int ti = cb->args[0];
-	int si = cb->args[1];
+	int ti = __c_ua(cb->args[0]);
+	int si = __c_ua(cb->args[1]);
 
 	for (;;) {
 		if (!tunnel) {
@@ -863,8 +863,8 @@ static int l2tp_nl_cmd_session_dump(struct sk_buff *skb, struct netlink_callback
 	}
 
 out:
-	cb->args[0] = ti;
-	cb->args[1] = si;
+	cb->args[0] = __c_fakeu(ti);
+	cb->args[1] = __c_fakeu(si);
 
 	return skb->len;
 }

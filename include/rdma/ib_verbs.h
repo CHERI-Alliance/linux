@@ -1013,7 +1013,7 @@ enum ib_wc_flags {
 
 struct ib_wc {
 	union {
-		u64		wr_id;
+		uintptr_t	wr_id;
 		struct ib_cqe	*wr_cqe;
 	};
 	enum ib_wc_status	status;
@@ -1380,7 +1380,7 @@ struct ib_cqe {
 struct ib_send_wr {
 	struct ib_send_wr      *next;
 	union {
-		u64		wr_id;
+		uintptr_t	wr_id;
 		struct ib_cqe	*wr_cqe;
 	};
 	struct ib_sge	       *sg_list;
@@ -4072,7 +4072,7 @@ static inline u64 ib_dma_map_single(struct ib_device *dev,
 				    enum dma_data_direction direction)
 {
 	if (ib_uses_virt_dma(dev))
-		return (uintptr_t)cpu_addr;
+		return __c_ua((uintptr_t)cpu_addr);
 	return dma_map_single(dev->dma_device, cpu_addr, size, direction);
 }
 
@@ -4106,7 +4106,7 @@ static inline u64 ib_dma_map_page(struct ib_device *dev,
 					 enum dma_data_direction direction)
 {
 	if (ib_uses_virt_dma(dev))
-		return (uintptr_t)(page_address(page) + offset);
+		return __c_ua((uintptr_t)(page_address(page) + offset));
 	return dma_map_page(dev->dma_device, page, offset, size, direction);
 }
 

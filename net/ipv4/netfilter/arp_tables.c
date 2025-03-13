@@ -460,9 +460,9 @@ static inline int check_entry_size_and_hooks(struct arpt_entry *e,
 	unsigned int h;
 	int err;
 
-	if ((unsigned long)e % __alignof__(struct arpt_entry) != 0 ||
-	    (unsigned char *)e + sizeof(struct arpt_entry) >= limit ||
-	    (unsigned char *)e + e->next_offset > limit)
+	if (__c_pa(e) % __alignof__(struct arpt_entry) != 0 ||
+	    __c_pa(e) + sizeof(struct arpt_entry) >= __c_pa(limit) ||
+	    __c_pa(e) + e->next_offset > __c_pa(limit))
 		return -EINVAL;
 
 	if (e->next_offset
@@ -492,7 +492,7 @@ static inline int check_entry_size_and_hooks(struct arpt_entry *e,
 	}
 
 	/* Clear counters and comefrom */
-	e->counters = ((struct xt_counters) { 0, 0 });
+	e->counters = ((struct xt_counters) { .pcnt = 0, .bcnt = 0 });
 	e->comefrom = 0;
 	return 0;
 }

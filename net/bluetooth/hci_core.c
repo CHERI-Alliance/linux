@@ -312,7 +312,7 @@ static int inquiry_cache_dump(struct hci_dev *hdev, int num, __u8 *buf)
 	return copied;
 }
 
-static int hci_inq_req(struct hci_request *req, unsigned long opt)
+static int hci_inq_req(struct hci_request *req, uintptr_t opt)
 {
 	struct hci_inquiry_req *ir = (struct hci_inquiry_req *) opt;
 	struct hci_dev *hdev = req->hdev;
@@ -380,7 +380,7 @@ int hci_inquiry(void __user *arg)
 	timeo = ir.length * msecs_to_jiffies(2000);
 
 	if (do_inquiry) {
-		err = hci_req_sync(hdev, hci_inq_req, (unsigned long) &ir,
+		err = hci_req_sync(hdev, hci_inq_req, (uintptr_t) &ir,
 				   timeo, NULL);
 		if (err < 0)
 			goto done;

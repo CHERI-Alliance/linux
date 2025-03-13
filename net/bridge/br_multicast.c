@@ -1531,7 +1531,7 @@ __br_multicast_add_group(struct net_bridge_mcast *brmctx,
 	     pp = &p->next) {
 		if (br_port_group_equal(p, pmctx->port, src))
 			goto found;
-		if ((unsigned long)p->key.port < (unsigned long)pmctx->port)
+		if (__c_pa(p->key.port) < __c_pa(pmctx->port))
 			break;
 	}
 
@@ -3252,7 +3252,7 @@ br_multicast_get_rport_slot(struct net_bridge_mcast *brmctx,
 	hlist_for_each(rlist, mc_router_list) {
 		p = br_multicast_rport_from_node(brmctx, mc_router_list, rlist);
 
-		if ((unsigned long)port >= (unsigned long)p)
+		if (__c_pa(port) >= __c_pa(p))
 			break;
 
 		slot = rlist;

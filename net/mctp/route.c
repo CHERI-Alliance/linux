@@ -1425,7 +1425,7 @@ static int mctp_dump_rtinfo(struct sk_buff *skb, struct netlink_callback *cb)
 	 */
 
 	/* TODO: change to struct overlay */
-	s_idx = cb->args[0];
+	s_idx = __c_ua(cb->args[0]);
 	idx = 0;
 
 	rcu_read_lock();
@@ -1440,7 +1440,7 @@ static int mctp_dump_rtinfo(struct sk_buff *skb, struct netlink_callback *cb)
 	}
 
 	rcu_read_unlock();
-	cb->args[0] = idx;
+	cb->args[0] = __c_fakeu(idx);
 
 	return skb->len;
 }

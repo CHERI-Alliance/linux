@@ -122,8 +122,8 @@ static int getaddr_dumpit(struct sk_buff *skb, struct netlink_callback *cb)
 {
 	struct phonet_device_list *pndevs;
 	struct phonet_device *pnd;
-	int dev_idx = 0, dev_start_idx = cb->args[0];
-	int addr_idx = 0, addr_start_idx = cb->args[1];
+	int dev_idx = 0, dev_start_idx = __c_ua(cb->args[0]);
+	int addr_idx = 0, addr_start_idx = __c_ua(cb->args[1]);
 
 	pndevs = phonet_device_list(sock_net(skb->sk));
 	rcu_read_lock();
@@ -149,8 +149,8 @@ static int getaddr_dumpit(struct sk_buff *skb, struct netlink_callback *cb)
 
 out:
 	rcu_read_unlock();
-	cb->args[0] = dev_idx;
-	cb->args[1] = addr_idx;
+	cb->args[0] = __c_fakeu(dev_idx);
+	cb->args[1] = __c_fakeu(addr_idx);
 
 	return skb->len;
 }
@@ -267,7 +267,7 @@ static int route_dumpit(struct sk_buff *skb, struct netlink_callback *cb)
 	u8 addr;
 
 	rcu_read_lock();
-	for (addr = cb->args[0]; addr < 64; addr++) {
+	for (addr = __c_ua(cb->args[0]); addr < 64; addr++) {
 		struct net_device *dev = phonet_route_get_rcu(net, addr << 2);
 
 		if (!dev)
@@ -280,7 +280,7 @@ static int route_dumpit(struct sk_buff *skb, struct netlink_callback *cb)
 			break;
 	}
 	rcu_read_unlock();
-	cb->args[0] = addr;
+	cb->args[0] = __c_fakeu(addr);
 
 	return err;
 }

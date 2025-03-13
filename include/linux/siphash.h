@@ -132,7 +132,7 @@ static inline u32 hsiphash(const void *data, size_t len,
 			   const hsiphash_key_t *key)
 {
 	if (IS_ENABLED(CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS) ||
-	    !IS_ALIGNED((unsigned long)data, HSIPHASH_ALIGNMENT))
+	    !IS_ALIGNED(__c_pa(data), HSIPHASH_ALIGNMENT))
 		return __hsiphash_unaligned(data, len, key);
 	return ___hsiphash_aligned(data, len, key);
 }

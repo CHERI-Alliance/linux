@@ -994,7 +994,7 @@ static int hci_sock_reject_list_del(struct hci_dev *hdev, void __user *arg)
 
 /* Ioctls that require bound socket */
 static int hci_sock_bound_ioctl(struct sock *sk, unsigned int cmd,
-				unsigned long arg)
+				user_uintptr_t arg)
 {
 	struct hci_dev *hdev = hci_hdev_from_sock(sk);
 
@@ -1034,13 +1034,13 @@ static int hci_sock_bound_ioctl(struct sock *sk, unsigned int cmd,
 }
 
 static int hci_sock_ioctl(struct socket *sock, unsigned int cmd,
-			  unsigned long arg)
+			  user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 	struct sock *sk = sock->sk;
 	int err;
 
-	BT_DBG("cmd %x arg %lx", cmd, arg);
+	BT_DBG("cmd %x arg %lx", cmd, __c_ua(arg));
 
 	/* Make sure the cmd is valid before doing anything */
 	switch (cmd) {
@@ -1120,22 +1120,22 @@ static int hci_sock_ioctl(struct socket *sock, unsigned int cmd,
 	case HCIDEVUP:
 		if (!capable(CAP_NET_ADMIN))
 			return -EPERM;
-		return hci_dev_open(arg);
+		return hci_dev_open(__c_ua(arg));
 
 	case HCIDEVDOWN:
 		if (!capable(CAP_NET_ADMIN))
 			return -EPERM;
-		return hci_dev_close(arg);
+		return hci_dev_close(__c_ua(arg));
 
 	case HCIDEVRESET:
 		if (!capable(CAP_NET_ADMIN))
 			return -EPERM;
-		return hci_dev_reset(arg);
+		return hci_dev_reset(__c_ua(arg));
 
 	case HCIDEVRESTAT:
 		if (!capable(CAP_NET_ADMIN))
 			return -EPERM;
-		return hci_dev_reset_stat(arg);
+		return hci_dev_reset_stat(__c_ua(arg));
 
 	case HCISETSCAN:
 	case HCISETAUTH:

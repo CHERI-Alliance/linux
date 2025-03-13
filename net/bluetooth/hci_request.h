@@ -55,11 +55,11 @@ void hci_req_cmd_complete(struct hci_dev *hdev, u16 opcode, u8 status,
 			  hci_req_complete_skb_t *req_complete_skb);
 
 int hci_req_sync(struct hci_dev *hdev, int (*req)(struct hci_request *req,
-						  unsigned long opt),
-		 unsigned long opt, u32 timeout, u8 *hci_status);
+						  uintptr_t opt),
+		 uintptr_t opt, u32 timeout, u8 *hci_status);
 int __hci_req_sync(struct hci_dev *hdev, int (*func)(struct hci_request *req,
-						     unsigned long opt),
-		   unsigned long opt, u32 timeout, u8 *hci_status);
+						     uintptr_t opt),
+		   uintptr_t opt, u32 timeout, u8 *hci_status);
 
 struct sk_buff *hci_prepare_cmd(struct hci_dev *hdev, u16 opcode, u32 plen,
 				const void *param);

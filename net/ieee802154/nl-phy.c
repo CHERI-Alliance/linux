@@ -145,7 +145,7 @@ int ieee802154_dump_phy(struct sk_buff *skb, struct netlink_callback *cb)
 	struct dump_phy_data data = {
 		.cb = cb,
 		.skb = skb,
-		.s_idx = cb->args[0],
+		.s_idx = __c_ua(cb->args[0]),
 		.idx = 0,
 	};
 
@@ -153,7 +153,7 @@ int ieee802154_dump_phy(struct sk_buff *skb, struct netlink_callback *cb)
 
 	wpan_phy_for_each(ieee802154_dump_phy_iter, &data);
 
-	cb->args[0] = data.idx;
+	cb->args[0] = __c_fakeu(data.idx);
 
 	return skb->len;
 }

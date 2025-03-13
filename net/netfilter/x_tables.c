@@ -553,7 +553,7 @@ static int xt_check_entry_match(const char *match, const char *target,
 
 	pos = (struct xt_entry_match *)match;
 	do {
-		if ((unsigned long)pos % alignment)
+		if (__c_pa(pos) % alignment)
 			return -EINVAL;
 
 		if (length < (int)sizeof(struct xt_entry_match))
@@ -1526,7 +1526,7 @@ EXPORT_SYMBOL_GPL(xt_unregister_table);
 #ifdef CONFIG_PROC_FS
 static void *xt_table_seq_start(struct seq_file *seq, loff_t *pos)
 {
-	u8 af = (unsigned long)pde_data(file_inode(seq->file));
+	u8 af = __c_pa(pde_data(file_inode(seq->file)));
 	struct net *net = seq_file_net(seq);
 	struct xt_pernet *xt_net;
 
@@ -1538,7 +1538,7 @@ static void *xt_table_seq_start(struct seq_file *seq, loff_t *pos)
 
 static void *xt_table_seq_next(struct seq_file *seq, void *v, loff_t *pos)
 {
-	u8 af = (unsigned long)pde_data(file_inode(seq->file));
+	u8 af = __c_pa(pde_data(file_inode(seq->file)));
 	struct net *net = seq_file_net(seq);
 	struct xt_pernet *xt_net;
 
@@ -1549,7 +1549,7 @@ static void *xt_table_seq_next(struct seq_file *seq, void *v, loff_t *pos)
 
 static void xt_table_seq_stop(struct seq_file *seq, void *v)
 {
-	u_int8_t af = (unsigned long)pde_data(file_inode(seq->file));
+	u_int8_t af = __c_pa(pde_data(file_inode(seq->file)));
 
 	mutex_unlock(&xt[af].mutex);
 }
@@ -1593,7 +1593,7 @@ static void *xt_mttg_seq_next(struct seq_file *seq, void *v, loff_t *ppos,
 		[MTTG_TRAV_NFP_UNSPEC] = MTTG_TRAV_NFP_SPEC,
 		[MTTG_TRAV_NFP_SPEC]   = MTTG_TRAV_DONE,
 	};
-	uint8_t nfproto = (unsigned long)pde_data(file_inode(seq->file));
+	uint8_t nfproto = __c_pa(pde_data(file_inode(seq->file)));
 	struct nf_mttg_trav *trav = seq->private;
 
 	if (ppos != NULL)
@@ -1642,7 +1642,7 @@ static void *xt_mttg_seq_start(struct seq_file *seq, loff_t *pos,
 
 static void xt_mttg_seq_stop(struct seq_file *seq, void *v)
 {
-	uint8_t nfproto = (unsigned long)pde_data(file_inode(seq->file));
+	uint8_t nfproto = __c_pa(pde_data(file_inode(seq->file)));
 	struct nf_mttg_trav *trav = seq->private;
 
 	switch (trav->class) {
@@ -1941,7 +1941,7 @@ bool xt_percpu_counter_alloc(struct xt_percpu_counter_alloc_state *state,
 		if (!state->mem)
 			return false;
 	}
-	counter->pcnt = (__force unsigned long)(state->mem + state->off);
+	counter->percpu = (uintptr_t)(state->mem + state->off);
 	state->off += sizeof(*counter);
 	if (state->off > (XT_PCPU_BLOCK_SIZE - sizeof(*counter))) {
 		state->mem = NULL;
@@ -1953,10 +1953,10 @@ EXPORT_SYMBOL_GPL(xt_percpu_counter_alloc);
 
 void xt_percpu_counter_free(struct xt_counters *counters)
 {
-	uintptr_t pcnt = counters->pcnt;
+	uintptr_t percpu = counters->percpu;
 
-	if (nr_cpu_ids > 1 && (pcnt & (XT_PCPU_BLOCK_SIZE - 1)) == 0)
-		free_percpu((void __percpu *)pcnt);
+	if (nr_cpu_ids > 1 && (__c_ua(percpu) & (XT_PCPU_BLOCK_SIZE - 1)) == 0)
+		free_percpu((void __percpu *)percpu);
 }
 EXPORT_SYMBOL_GPL(xt_percpu_counter_free);
 

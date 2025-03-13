@@ -25,7 +25,11 @@
 
 #define SMC_WR_TX_SIZE 44 /* actual size of wr_send data (<=SMC_WR_BUF_SIZE) */
 
+#ifdef CONFIG_CHERI_KERNEL
+#define SMC_WR_TX_PEND_PRIV_SIZE 48
+#else
 #define SMC_WR_TX_PEND_PRIV_SIZE 32
+#endif
 
 struct smc_wr_tx_pend_priv {
 	u8			priv[SMC_WR_TX_PEND_PRIV_SIZE];
@@ -49,9 +53,9 @@ struct smc_wr_rx_handler {
 /* Only used by RDMA write WRs.
  * All other WRs (CDC/LLC) use smc_wr_tx_send handling WR_ID implicitly
  */
-static inline long smc_wr_tx_get_next_wr_id(struct smc_link *link)
+static inline intptr_t smc_wr_tx_get_next_wr_id(struct smc_link *link)
 {
-	return atomic_long_inc_return(&link->wr_tx_id);
+	return __c_fakeu(atomic_long_inc_return(&link->wr_tx_id));
 }
 
 static inline void smc_wr_tx_set_wr_id(atomic_long_t *wr_tx_id, long val)

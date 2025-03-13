@@ -113,7 +113,7 @@ static int rxrpc_preparse_xdr_rxkad(struct key_preparsed_payload *prep,
 		       token->kad->ticket[6], token->kad->ticket[7]);
 
 	/* count the number of tokens attached */
-	prep->payload.data[1] = (void *)((unsigned long)prep->payload.data[1] + 1);
+	prep->payload.data[1] = __c_fakep(__c_pa(prep->payload.data[1]) + 1);
 
 	/* attach the data */
 	for (pptoken = (struct rxrpc_key_token **)&prep->payload.data[0];
@@ -358,7 +358,7 @@ static int rxrpc_preparse(struct key_preparsed_payload *prep)
 	memcpy(&token->kad->ticket, v1->ticket, v1->ticket_length);
 
 	/* count the number of tokens attached */
-	prep->payload.data[1] = (void *)((unsigned long)prep->payload.data[1] + 1);
+	prep->payload.data[1] = __c_fakep(__c_pa(prep->payload.data[1]) + 1);
 
 	/* attach the data */
 	pp = (struct rxrpc_key_token **)&prep->payload.data[0];
@@ -680,8 +680,7 @@ static long rxrpc_read(const struct key *key,
 			return -ENOPKG;
 		}
 
-		if (WARN_ON((unsigned long)xdr - (unsigned long)oldxdr !=
-			    toksize))
+		if (WARN_ON(__c_pa(xdr) - __c_pa(oldxdr) != toksize))
 			return -EIO;
 	}
 
@@ -692,7 +691,7 @@ static long rxrpc_read(const struct key *key,
 
 	if (WARN_ON(tok != ntoks))
 		return -EIO;
-	if (WARN_ON((unsigned long)xdr - (unsigned long)buffer != size))
+	if (WARN_ON(__c_pa(xdr) - __c_pa(buffer) != size))
 		return -EIO;
 	_leave(" = %zu", size);
 	return size;

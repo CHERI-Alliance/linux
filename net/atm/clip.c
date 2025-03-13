@@ -653,7 +653,7 @@ static int atm_init_atmarp(struct atm_vcc *vcc)
 	return 0;
 }
 
-static int clip_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+static int clip_ioctl(struct socket *sock, unsigned int cmd, user_uintptr_t arg)
 {
 	struct atm_vcc *vcc = ATM_SD(sock);
 	int err = 0;
@@ -673,7 +673,7 @@ static int clip_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 
 	switch (cmd) {
 	case SIOCMKCLIP:
-		err = clip_create(arg);
+		err = clip_create(__c_ua(arg));
 		break;
 	case ATMARPD_CTRL:
 		err = atm_init_atmarp(vcc);
@@ -683,13 +683,13 @@ static int clip_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 		}
 		break;
 	case ATMARP_MKIP:
-		err = clip_mkip(vcc, arg);
+		err = clip_mkip(vcc, __c_ua(arg));
 		break;
 	case ATMARP_SETENTRY:
 		err = clip_setentry(vcc, (__force __be32)arg);
 		break;
 	case ATMARP_ENCAP:
-		err = clip_encap(vcc, arg);
+		err = clip_encap(vcc, __c_ua(arg));
 		break;
 	}
 	return err;

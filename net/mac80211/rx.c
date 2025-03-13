@@ -4870,7 +4870,7 @@ static bool ieee80211_invoke_fast_rx(struct ieee80211_rx_data *rx,
 	struct {
 		u8 snap[sizeof(rfc1042_header)];
 		__be16 proto;
-	} *payload __aligned(2);
+	} __aligned(2) *payload;
 	struct {
 		u8 da[ETH_ALEN];
 		u8 sa[ETH_ALEN];

@@ -223,8 +223,8 @@ static netdev_tx_t lec_start_xmit(struct sk_buff *skb,
 	}
 
 	pr_debug("skbuff head:%lx data:%lx tail:%lx end:%lx\n",
-		 (long)skb->head, (long)skb->data, (long)skb_tail_pointer(skb),
-		 (long)skb_end_pointer(skb));
+		 __c_pa(skb->head), __c_pa(skb->data),
+		 __c_pa(skb_tail_pointer(skb)), __c_pa(skb_end_pointer(skb)));
 #if IS_ENABLED(CONFIG_BRIDGE)
 	if (memcmp(skb->data, bridge_ula_lec, sizeof(bridge_ula_lec)) == 0)
 		lec_handle_bridge(skb, dev);
@@ -986,7 +986,8 @@ static const struct seq_operations lec_seq_ops = {
 };
 #endif
 
-static int lane_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+static int lane_ioctl(struct socket *sock, unsigned int cmd,
+		      user_uintptr_t arg)
 {
 	struct atm_vcc *vcc = ATM_SD(sock);
 	int err = 0;
@@ -1004,12 +1005,12 @@ static int lane_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 
 	switch (cmd) {
 	case ATMLEC_CTRL:
-		err = lecd_attach(vcc, (int)arg);
+		err = lecd_attach(vcc, __c_ua(arg));
 		if (err >= 0)
 			sock->state = SS_CONNECTED;
 		break;
 	case ATMLEC_MCAST:
-		err = lec_mcast_attach(vcc, (int)arg);
+		err = lec_mcast_attach(vcc, (int)__c_ua(arg));
 		break;
 	case ATMLEC_DATA:
 		err = lec_vcc_attach(vcc, (void __user *)arg);

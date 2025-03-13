@@ -1170,8 +1170,8 @@ int batadv_tt_local_dump(struct sk_buff *msg, struct netlink_callback *cb)
 	struct batadv_hashtable *hash;
 	int ret;
 	int ifindex;
-	int bucket = cb->args[0];
-	int idx = cb->args[1];
+	int bucket = __c_ua(cb->args[0]);
+	int idx = __c_ua(cb->args[1]);
 	int portid = NETLINK_CB(cb->skb).portid;
 
 	ifindex = batadv_netlink_get_ifindex(cb->nlh, BATADV_ATTR_MESH_IFINDEX);
@@ -1208,8 +1208,8 @@ int batadv_tt_local_dump(struct sk_buff *msg, struct netlink_callback *cb)
 	batadv_hardif_put(primary_if);
 	dev_put(soft_iface);
 
-	cb->args[0] = bucket;
-	cb->args[1] = idx;
+	cb->args[0] = __c_fakeu(bucket);
+	cb->args[1] = __c_fakeu(idx);
 
 	return ret;
 }
@@ -1946,9 +1946,9 @@ int batadv_tt_global_dump(struct sk_buff *msg, struct netlink_callback *cb)
 	struct hlist_head *head;
 	int ret;
 	int ifindex;
-	int bucket = cb->args[0];
-	int idx = cb->args[1];
-	int sub = cb->args[2];
+	int bucket = __c_ua(cb->args[0]);
+	int idx = __c_ua(cb->args[1]);
+	int sub = __c_ua(cb->args[2]);
 	int portid = NETLINK_CB(cb->skb).portid;
 
 	ifindex = batadv_netlink_get_ifindex(cb->nlh, BATADV_ATTR_MESH_IFINDEX);
@@ -1988,9 +1988,9 @@ int batadv_tt_global_dump(struct sk_buff *msg, struct netlink_callback *cb)
 	batadv_hardif_put(primary_if);
 	dev_put(soft_iface);
 
-	cb->args[0] = bucket;
-	cb->args[1] = idx;
-	cb->args[2] = sub;
+	cb->args[0] = __c_fakeu(bucket);
+	cb->args[1] = __c_fakeu(idx);
+	cb->args[2] = __c_fakeu(sub);
 
 	return ret;
 }

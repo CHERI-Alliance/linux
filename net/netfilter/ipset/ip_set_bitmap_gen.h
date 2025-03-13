@@ -206,7 +206,7 @@ mtype_list(const struct ip_set *set,
 	struct mtype *map = set->data;
 	struct nlattr *adt, *nested;
 	void *x;
-	u32 id, first = cb->args[IPSET_CB_ARG0];
+	u32 id, first = __c_ua(cb->args[IPSET_CB_ARG0]);
 	int ret = 0;
 
 	adt = nla_nest_start(skb, IPSET_ATTR_ADT);
@@ -217,7 +217,7 @@ mtype_list(const struct ip_set *set,
 	for (; cb->args[IPSET_CB_ARG0] < map->elements;
 	     cb->args[IPSET_CB_ARG0]++) {
 		cond_resched_rcu();
-		id = cb->args[IPSET_CB_ARG0];
+		id = __c_ua(cb->args[IPSET_CB_ARG0]);
 		x = get_ext(set, map, id);
 		if (!test_bit(id, map->members) ||
 		    (SET_WITH_TIMEOUT(set) &&

@@ -440,7 +440,7 @@ int ieee802154_dump_iface(struct sk_buff *skb, struct netlink_callback *cb)
 	struct net *net = sock_net(skb->sk);
 	struct net_device *dev;
 	int idx;
-	int s_idx = cb->args[0];
+	int s_idx = __c_ua(cb->args[0]);
 
 	pr_debug("%s\n", __func__);
 
@@ -456,7 +456,7 @@ int ieee802154_dump_iface(struct sk_buff *skb, struct netlink_callback *cb)
 cont:
 		idx++;
 	}
-	cb->args[0] = idx;
+	cb->args[0] = __c_fakeu(idx);
 
 	return skb->len;
 }
@@ -776,7 +776,7 @@ ieee802154_llsec_dump_table(struct sk_buff *skb, struct netlink_callback *cb,
 	struct net_device *dev;
 	struct llsec_dump_data data;
 	int idx = 0;
-	int first_dev = cb->args[0];
+	int first_dev = __c_ua(cb->args[0]);
 	int rc;
 
 	for_each_netdev(net, dev) {
@@ -788,8 +788,8 @@ ieee802154_llsec_dump_table(struct sk_buff *skb, struct netlink_callback *cb,
 			goto skip;
 
 		data.skb = skb;
-		data.s_idx = cb->args[1];
-		data.s_idx2 = cb->args[2];
+		data.s_idx = __c_ua(cb->args[1]);
+		data.s_idx2 = __c_ua(cb->args[2]);
 		data.dev = dev;
 		data.portid = NETLINK_CB(cb->skb).portid;
 		data.nlmsg_seq = cb->nlh->nlmsg_seq;
@@ -805,7 +805,7 @@ ieee802154_llsec_dump_table(struct sk_buff *skb, struct netlink_callback *cb,
 skip:
 		idx++;
 	}
-	cb->args[0] = idx;
+	cb->args[0] = __c_fakeu(idx);
 
 	return skb->len;
 }

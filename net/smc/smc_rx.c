@@ -183,7 +183,7 @@ static int smc_rx_splice(struct pipe_inode_info *pipe, char *src, size_t len,
 		priv[0]->smc = smc;
 		partial[0].offset = src - (char *)smc->conn.rmb_desc->cpu_addr;
 		partial[0].len = len;
-		partial[0].private = (unsigned long)priv[0];
+		partial[0].private = (uintptr_t)priv[0];
 		pages[0] = smc->conn.rmb_desc->pages;
 	} else {
 		int size, left = len;
@@ -196,7 +196,7 @@ static int smc_rx_splice(struct pipe_inode_info *pipe, char *src, size_t len,
 			pages[i] = vmalloc_to_page(buf);
 			partial[i].offset = offset;
 			partial[i].len = size;
-			partial[i].private = (unsigned long)priv[i];
+			partial[i].private = (uintptr_t)priv[i];
 			buf += size / sizeof(*buf);
 			left -= size;
 			offset = 0;

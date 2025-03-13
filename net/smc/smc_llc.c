@@ -511,7 +511,7 @@ static int smc_llc_send_confirm_rkey(struct smc_link *send_link,
 			rkeyllc->rtoken[rtok_ix].rmb_key =
 				htonl(rmb_desc->mr[link->link_idx]->rkey);
 			rkeyllc->rtoken[rtok_ix].rmb_vaddr = rmb_desc->is_vm ?
-				cpu_to_be64((uintptr_t)rmb_desc->cpu_addr) :
+				cpu_to_be64(__c_pa(rmb_desc->cpu_addr)) :
 				cpu_to_be64((u64)sg_dma_address
 					    (rmb_desc->sgt[link->link_idx].sgl));
 			rtok_ix++;
@@ -522,7 +522,7 @@ static int smc_llc_send_confirm_rkey(struct smc_link *send_link,
 	rkeyllc->rtoken[0].rmb_key =
 		htonl(rmb_desc->mr[send_link->link_idx]->rkey);
 	rkeyllc->rtoken[0].rmb_vaddr = rmb_desc->is_vm ?
-		cpu_to_be64((uintptr_t)rmb_desc->cpu_addr) :
+		cpu_to_be64(__c_pa(rmb_desc->cpu_addr)) :
 		cpu_to_be64((u64)sg_dma_address
 			    (rmb_desc->sgt[send_link->link_idx].sgl));
 	/* send llc message */
@@ -629,7 +629,7 @@ static int smc_llc_fill_ext_v2(struct smc_llc_msg_add_link_v2_ext *ext,
 		ext->rt[i].rmb_key = htonl(rmb->mr[prim_lnk_idx]->rkey);
 		ext->rt[i].rmb_key_new = htonl(rmb->mr[lnk_idx]->rkey);
 		ext->rt[i].rmb_vaddr_new = rmb->is_vm ?
-			cpu_to_be64((uintptr_t)rmb->cpu_addr) :
+			cpu_to_be64(__c_pa(rmb->cpu_addr)) :
 			cpu_to_be64((u64)sg_dma_address(rmb->sgt[lnk_idx].sgl));
 		buf_pos = smc_llc_get_next_rmb(lgr, &buf_lst, buf_pos);
 	}
@@ -868,7 +868,7 @@ static int smc_llc_add_link_cont(struct smc_link *link,
 		addc_llc->rt[i].rmb_key = htonl(rmb->mr[prim_lnk_idx]->rkey);
 		addc_llc->rt[i].rmb_key_new = htonl(rmb->mr[lnk_idx]->rkey);
 		addc_llc->rt[i].rmb_vaddr_new = rmb->is_vm ?
-			cpu_to_be64((uintptr_t)rmb->cpu_addr) :
+			cpu_to_be64(__c_pa(rmb->cpu_addr)) :
 			cpu_to_be64((u64)sg_dma_address(rmb->sgt[lnk_idx].sgl));
 
 		(*num_rkeys_todo)--;

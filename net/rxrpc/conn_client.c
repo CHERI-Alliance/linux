@@ -271,7 +271,7 @@ int rxrpc_look_up_bundle(struct rxrpc_call *call, gfp_t gfp)
 	while (p) {
 		bundle = rb_entry(p, struct rxrpc_bundle, local_node);
 
-#define cmp(X, Y) ((long)(X) - (long)(Y))
+#define cmp(X, Y) ((long)__c_a(X) - (long)__c_a(Y))
 		diff = (cmp(bundle->peer, call->peer) ?:
 			cmp(bundle->key, call->key) ?:
 			cmp(bundle->security_level, call->security_level) ?:
@@ -300,7 +300,7 @@ int rxrpc_look_up_bundle(struct rxrpc_call *call, gfp_t gfp)
 		parent = *pp;
 		bundle = rb_entry(parent, struct rxrpc_bundle, local_node);
 
-#define cmp(X, Y) ((long)(X) - (long)(Y))
+#define cmp(X, Y) ((long)__c_a(X) - (long)__c_a(Y))
 		diff = (cmp(bundle->peer, call->peer) ?:
 			cmp(bundle->key, call->key) ?:
 			cmp(bundle->security_level, call->security_level) ?:

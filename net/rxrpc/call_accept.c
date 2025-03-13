@@ -23,7 +23,7 @@
 #include "ar-internal.h"
 
 static void rxrpc_dummy_notify(struct sock *sk, struct rxrpc_call *call,
-			       unsigned long user_call_ID)
+			       uintptr_t user_call_ID)
 {
 }
 
@@ -35,7 +35,7 @@ static int rxrpc_service_prealloc_one(struct rxrpc_sock *rx,
 				      struct rxrpc_backlog *b,
 				      rxrpc_notify_rx_t notify_rx,
 				      rxrpc_user_attach_call_t user_attach_call,
-				      unsigned long user_call_ID, gfp_t gfp,
+				      uintptr_t user_call_ID, gfp_t gfp,
 				      unsigned int debug_id)
 {
 	struct rxrpc_call *call, *xcall;
@@ -103,7 +103,7 @@ static int rxrpc_service_prealloc_one(struct rxrpc_sock *rx,
 	__set_bit(RXRPC_CALL_EV_INITIAL_PING, &call->events);
 
 	trace_rxrpc_call(call->debug_id, refcount_read(&call->ref),
-			 user_call_ID, rxrpc_call_new_prealloc_service);
+			 __c_ua(user_call_ID), rxrpc_call_new_prealloc_service);
 
 	write_lock(&rx->call_lock);
 
@@ -144,7 +144,7 @@ static int rxrpc_service_prealloc_one(struct rxrpc_sock *rx,
 
 	b->call_backlog[call_head] = call;
 	smp_store_release(&b->call_backlog_head, (call_head + 1) & (size - 1));
-	_leave(" = 0 [%d -> %lx]", call->debug_id, user_call_ID);
+	_leave(" = 0 [%d -> %lx]", call->debug_id, __c_ua(user_call_ID));
 	return 0;
 
 id_in_use:
@@ -220,7 +220,7 @@ void rxrpc_discard_prealloc(struct rxrpc_sock *rx)
 		struct rxrpc_call *call = b->call_backlog[tail];
 		rcu_assign_pointer(call->socket, rx);
 		if (rx->discard_new_call) {
-			_debug("discard %lx", call->user_call_ID);
+			_debug("discard %lx", __c_ua(call->user_call_ID));
 			rx->discard_new_call(call, call->user_call_ID);
 			if (call->notify_rx)
 				call->notify_rx = rxrpc_dummy_notify;
@@ -433,7 +433,7 @@ discard:
 /*
  * Charge up socket with preallocated calls, attaching user call IDs.
  */
-int rxrpc_user_charge_accept(struct rxrpc_sock *rx, unsigned long user_call_ID)
+int rxrpc_user_charge_accept(struct rxrpc_sock *rx, uintptr_t user_call_ID)
 {
 	struct rxrpc_backlog *b = rx->backlog;
 
@@ -463,7 +463,7 @@ int rxrpc_user_charge_accept(struct rxrpc_sock *rx, unsigned long user_call_ID)
 int rxrpc_kernel_charge_accept(struct socket *sock,
 			       rxrpc_notify_rx_t notify_rx,
 			       rxrpc_user_attach_call_t user_attach_call,
-			       unsigned long user_call_ID, gfp_t gfp,
+			       uintptr_t user_call_ID, gfp_t gfp,
 			       unsigned int debug_id)
 {
 	struct rxrpc_sock *rx = rxrpc_sk(sock->sk);

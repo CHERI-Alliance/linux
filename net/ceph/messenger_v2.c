@@ -760,7 +760,7 @@ static int setup_crypto(struct ceph_connection *con,
 		return ret;
 	}
 
-	WARN_ON((unsigned long)con_secret &
+	WARN_ON(__c_pa(con_secret) &
 		crypto_aead_alignmask(con->v2.gcm_tfm));
 	ret = crypto_aead_setkey(con->v2.gcm_tfm, con_secret, CEPH_GCM_KEY_LEN);
 	if (ret) {

@@ -516,8 +516,8 @@ static int netlbl_mgmt_listall(struct sk_buff *skb,
 			       struct netlink_callback *cb)
 {
 	struct netlbl_domhsh_walk_arg cb_arg;
-	u32 skip_bkt = cb->args[0];
-	u32 skip_chain = cb->args[1];
+	u32 skip_bkt = __c_ua(cb->args[0]);
+	u32 skip_chain = __c_ua(cb->args[1]);
 
 	cb_arg.nl_cb = cb;
 	cb_arg.skb = skb;
@@ -528,8 +528,8 @@ static int netlbl_mgmt_listall(struct sk_buff *skb,
 			   netlbl_mgmt_listall_cb,
 			   &cb_arg);
 
-	cb->args[0] = skip_bkt;
-	cb->args[1] = skip_chain;
+	cb->args[0] = __c_fakeu(skip_bkt);
+	cb->args[1] = __c_fakeu(skip_chain);
 	return skb->len;
 }
 
@@ -684,7 +684,7 @@ protocols_cb_failure:
 static int netlbl_mgmt_protocols(struct sk_buff *skb,
 				 struct netlink_callback *cb)
 {
-	u32 protos_sent = cb->args[0];
+	u32 protos_sent = __c_ua(cb->args[0]);
 
 	if (protos_sent == 0) {
 		if (netlbl_mgmt_protocols_cb(skb,
@@ -711,7 +711,7 @@ static int netlbl_mgmt_protocols(struct sk_buff *skb,
 #endif
 
 protocols_return:
-	cb->args[0] = protos_sent;
+	cb->args[0] = __c_fakeu(protos_sent);
 	return skb->len;
 }
 

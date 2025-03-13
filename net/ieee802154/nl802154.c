@@ -270,11 +270,11 @@ nl802154_prepare_wpan_dev_dump(struct sk_buff *skb,
 		}
 		*rdev = wpan_phy_to_rdev((*wpan_dev)->wpan_phy);
 		/* 0 is the first index - add 1 to parse only once */
-		cb->args[0] = (*rdev)->wpan_phy_idx + 1;
-		cb->args[1] = (*wpan_dev)->identifier;
+		cb->args[0] = __c_fakeu((*rdev)->wpan_phy_idx + 1);
+		cb->args[1] = __c_fakeu((*wpan_dev)->identifier);
 	} else {
 		/* subtract the 1 again here */
-		struct wpan_phy *wpan_phy = wpan_phy_idx_to_wpan_phy(cb->args[0] - 1);
+		struct wpan_phy *wpan_phy = wpan_phy_idx_to_wpan_phy(__c_ua(cb->args[0]) - 1);
 		struct wpan_dev *tmp;
 
 		if (!wpan_phy) {
@@ -615,7 +615,7 @@ nl802154_dump_wpan_phy(struct sk_buff *skb, struct netlink_callback *cb)
 			rtnl_unlock();
 			return ret;
 		}
-		cb->args[0] = (long)state;
+		cb->args[0] = (intptr_t)state;
 	}
 
 	list_for_each_entry(rdev, &cfg802154_rdev_list, list) {
@@ -861,8 +861,8 @@ nl802154_dump_interface(struct sk_buff *skb, struct netlink_callback *cb)
 {
 	int wp_idx = 0;
 	int if_idx = 0;
-	int wp_start = cb->args[0];
-	int if_start = cb->args[1];
+	int wp_start = __c_ua(cb->args[0]);
+	int if_start = __c_ua(cb->args[1]);
 	struct cfg802154_registered_device *rdev;
 	struct wpan_dev *wpan_dev;
 
@@ -894,8 +894,8 @@ nl802154_dump_interface(struct sk_buff *skb, struct netlink_callback *cb)
 out:
 	rtnl_unlock();
 
-	cb->args[0] = wp_idx;
-	cb->args[1] = if_idx;
+	cb->args[0] = __c_fakeu(wp_idx);
+	cb->args[1] = __c_fakeu(if_idx);
 
 	return skb->len;
 }

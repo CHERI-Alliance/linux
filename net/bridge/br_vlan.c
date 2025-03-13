@@ -1957,7 +1957,7 @@ static int br_vlan_dump_dev(const struct net_device *dev,
 	bool dump_global = !!(dump_flags & BRIDGE_VLANDB_DUMPF_GLOBAL);
 	bool dump_stats = !!(dump_flags & BRIDGE_VLANDB_DUMPF_STATS);
 	struct net_bridge_vlan_group *vg;
-	int idx = 0, s_idx = cb->args[1];
+	int idx = 0, s_idx = __c_ua(cb->args[1]);
 	struct nlmsghdr *nlh = NULL;
 	struct net_bridge_port *p;
 	struct br_vlan_msg *bvm;
@@ -2062,7 +2062,7 @@ update_end:
 			err = -EMSGSIZE;
 	}
 
-	cb->args[1] = err ? idx : 0;
+	cb->args[1] = __c_fakeu(err ? idx : 0);
 
 	nlmsg_end(skb, nlh);
 
@@ -2076,7 +2076,7 @@ static const struct nla_policy br_vlan_db_dump_pol[BRIDGE_VLANDB_DUMP_MAX + 1] =
 static int br_vlan_rtm_dump(struct sk_buff *skb, struct netlink_callback *cb)
 {
 	struct nlattr *dtb[BRIDGE_VLANDB_DUMP_MAX + 1];
-	int idx = 0, err = 0, s_idx = cb->args[0];
+	int idx = 0, err = 0, s_idx = __c_ua(cb->args[0]);
 	struct net *net = sock_net(skb->sk);
 	struct br_vlan_msg *bvm;
 	struct net_device *dev;
@@ -2114,7 +2114,7 @@ skip:
 			idx++;
 		}
 	}
-	cb->args[0] = idx;
+	cb->args[0] = __c_fakeu(idx);
 	rcu_read_unlock();
 
 	return skb->len;

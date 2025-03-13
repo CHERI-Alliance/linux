@@ -757,7 +757,7 @@ static int cgw_dump_jobs(struct sk_buff *skb, struct netlink_callback *cb)
 	struct net *net = sock_net(skb->sk);
 	struct cgw_job *gwj = NULL;
 	int idx = 0;
-	int s_idx = cb->args[0];
+	int s_idx = __c_ua(cb->args[0]);
 
 	rcu_read_lock();
 	hlist_for_each_entry_rcu(gwj, &net->can.cgw_list, list) {
@@ -773,7 +773,7 @@ cont:
 	}
 	rcu_read_unlock();
 
-	cb->args[0] = idx;
+	cb->args[0] = __c_fakeu(idx);
 
 	return skb->len;
 }

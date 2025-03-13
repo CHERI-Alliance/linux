@@ -2237,8 +2237,8 @@ int batadv_bla_claim_dump(struct sk_buff *msg, struct netlink_callback *cb)
 	struct net_device *soft_iface;
 	struct batadv_hashtable *hash;
 	struct batadv_priv *bat_priv;
-	int bucket = cb->args[0];
-	int idx = cb->args[1];
+	int bucket = __c_ua(cb->args[0]);
+	int idx = __c_ua(cb->args[1]);
 	int ifindex;
 	int ret = 0;
 
@@ -2269,8 +2269,8 @@ int batadv_bla_claim_dump(struct sk_buff *msg, struct netlink_callback *cb)
 		bucket++;
 	}
 
-	cb->args[0] = bucket;
-	cb->args[1] = idx;
+	cb->args[0] = __c_fakeu(bucket);
+	cb->args[1] = __c_fakeu(idx);
 
 	ret = msg->len;
 
@@ -2407,8 +2407,8 @@ int batadv_bla_backbone_dump(struct sk_buff *msg, struct netlink_callback *cb)
 	struct net_device *soft_iface;
 	struct batadv_hashtable *hash;
 	struct batadv_priv *bat_priv;
-	int bucket = cb->args[0];
-	int idx = cb->args[1];
+	int bucket = __c_ua(cb->args[0]);
+	int idx = __c_ua(cb->args[1]);
 	int ifindex;
 	int ret = 0;
 
@@ -2439,8 +2439,8 @@ int batadv_bla_backbone_dump(struct sk_buff *msg, struct netlink_callback *cb)
 		bucket++;
 	}
 
-	cb->args[0] = bucket;
-	cb->args[1] = idx;
+	cb->args[0] = __c_fakeu(bucket);
+	cb->args[1] = __c_fakeu(idx);
 
 	ret = msg->len;
 

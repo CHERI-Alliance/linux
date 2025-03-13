@@ -847,7 +847,7 @@ static int rose_connect(struct socket *sock, struct sockaddr *uaddr, int addr_le
 	}
 	rose->dest_addr   = addr->srose_addr;
 	rose->dest_call   = addr->srose_call;
-	rose->rand        = ((long)rose & 0xFFFF) + rose->lci;
+	rose->rand        = ((long)__c_pa(rose) & 0xFFFF) + rose->lci;
 	rose->dest_ndigis = addr->srose_ndigis;
 
 	if (addr_len == sizeof(struct full_sockaddr_rose)) {
@@ -1325,7 +1325,8 @@ static int rose_recvmsg(struct socket *sock, struct msghdr *msg, size_t size,
 }
 
 
-static int rose_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+static int rose_ioctl(struct socket *sock, unsigned int cmd,
+		      user_uintptr_t arg)
 {
 	struct sock *sk = sock->sk;
 	struct rose_sock *rose = rose_sk(sk);

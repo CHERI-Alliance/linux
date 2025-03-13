@@ -59,9 +59,9 @@ static int vsock_diag_dump(struct sk_buff *skb, struct netlink_callback *cb)
 	net = sock_net(skb->sk);
 
 	/* State saved between calls: */
-	table = cb->args[0];
-	bucket = cb->args[1];
-	i = last_i = cb->args[2];
+	table = __c_ua(cb->args[0]);
+	bucket = __c_ua(cb->args[1]);
+	i = last_i = __c_ua(cb->args[2]);
 
 	/* TODO VMCI pending sockets? */
 
@@ -131,9 +131,9 @@ next_connected:
 done:
 	spin_unlock_bh(&vsock_table_lock);
 
-	cb->args[0] = table;
-	cb->args[1] = bucket;
-	cb->args[2] = i;
+	cb->args[0] = __c_fakeu(table);
+	cb->args[1] = __c_fakeu(bucket);
+	cb->args[2] = __c_fakeu(i);
 
 	return skb->len;
 }

@@ -3149,7 +3149,7 @@ static int smc_getsockopt(struct socket *sock, int level, int optname,
 }
 
 static int smc_ioctl(struct socket *sock, unsigned int cmd,
-		     unsigned long arg)
+		     user_uintptr_t arg)
 {
 	union smc_host_cursor cons, urg;
 	struct smc_connection *conn;

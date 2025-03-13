@@ -454,8 +454,8 @@ static int __tipc_nl_add_udp_addr(struct sk_buff *skb,
 
 int tipc_udp_nl_dump_remoteip(struct sk_buff *skb, struct netlink_callback *cb)
 {
-	u32 bid = cb->args[0];
-	u32 skip_cnt = cb->args[1];
+	u32 bid = __c_ua(cb->args[0]);
+	u32 skip_cnt = __c_ua(cb->args[1]);
 	u32 portid = NETLINK_CB(cb->skb).portid;
 	struct udp_replicast *rcast, *tmp;
 	struct tipc_bearer *b;
@@ -532,8 +532,8 @@ count:
 	}
 done:
 	rtnl_unlock();
-	cb->args[0] = bid;
-	cb->args[1] = i;
+	cb->args[0] = __c_fakeu(bid);
+	cb->args[1] = __c_fakeu(i);
 
 	return skb->len;
 }

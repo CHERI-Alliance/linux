@@ -36,10 +36,15 @@ enum nf_ct_ext_id {
 
 /* Extensions: optional stuff which isn't permanently in struct. */
 struct nf_ct_ext {
+#ifdef CONFIG_CHERI_KERNEL
+	u16 offset[NF_CT_EXT_NUM];
+	u16 len;
+#else
 	u8 offset[NF_CT_EXT_NUM];
 	u8 len;
+#endif
 	unsigned int gen_id;
-	char data[] __aligned(8);
+	char data[] __aligned(8) __cheri_pointer_align;
 };
 
 static inline bool __nf_ct_ext_exist(const struct nf_ct_ext *ext, u8 id)

@@ -136,7 +136,8 @@ static int do_cmtp_sock_ioctl(struct socket *sock, unsigned int cmd, void __user
 	return -EINVAL;
 }
 
-static int cmtp_sock_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+static int cmtp_sock_ioctl(struct socket *sock, unsigned int cmd,
+			   user_uintptr_t arg)
 {
 	return do_cmtp_sock_ioctl(sock, cmd, (void __user *)arg);
 }

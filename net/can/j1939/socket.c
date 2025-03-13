@@ -1299,7 +1299,7 @@ void j1939_sk_netdev_event_netdown(struct j1939_priv *priv)
 }
 
 static int j1939_sk_no_ioctlcmd(struct socket *sock, unsigned int cmd,
-				unsigned long arg)
+				user_uintptr_t arg)
 {
 	/* no ioctls for socket layer -> hand it down to NIC layer */
 	return -ENOIOCTLCMD;

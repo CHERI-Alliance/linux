@@ -1107,7 +1107,7 @@ smcr_clc_prep_confirm_accept(struct smc_connection *conn,
 	}
 	clc->r0.rmbe_size = conn->rmbe_size_comp;
 	clc->r0.rmb_dma_addr = conn->rmb_desc->is_vm ?
-		cpu_to_be64((uintptr_t)conn->rmb_desc->cpu_addr) :
+		cpu_to_be64(__c_pa(conn->rmb_desc->cpu_addr)) :
 		cpu_to_be64((u64)sg_dma_address
 			    (conn->rmb_desc->sgt[link->link_idx].sgl));
 	hton24(clc->r0.psn, link->psn_initial);
