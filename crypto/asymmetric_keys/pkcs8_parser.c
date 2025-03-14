@@ -19,7 +19,7 @@
 
 struct pkcs8_parse_context {
 	struct public_key *pub;
-	unsigned long	data;			/* Start of data */
+	uintptr_t	data;			/* Start of data */
 	enum OID	last_oid;		/* Last OID encountered */
 	enum OID	algo_oid;		/* Algorithm OID */
 	u32		key_size;
@@ -42,7 +42,7 @@ int pkcs8_note_OID(void *context, size_t hdrlen,
 
 		sprint_oid(value, vlen, buffer, sizeof(buffer));
 		pr_info("Unknown OID: [%lu] %s\n",
-			(unsigned long)value - ctx->data, buffer);
+			__c_pa(value) - __c_ua(ctx->data), buffer);
 	}
 	return 0;
 }
@@ -107,7 +107,7 @@ static struct public_key *pkcs8_parse(const void *data, size_t datalen)
 	if (!ctx.pub)
 		goto error;
 
-	ctx.data = (unsigned long)data;
+	ctx.data = (uintptr_t)data;
 
 	/* Attempt to decode the private key */
 	ret = asn1_ber_decoder(&pkcs8_decoder, &ctx, data, datalen);

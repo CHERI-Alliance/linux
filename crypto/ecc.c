@@ -375,10 +375,10 @@ static uint128_t mul_64_64(u64 left, u64 right)
 {
 	uint128_t result;
 #if defined(CONFIG_ARCH_SUPPORTS_INT128)
-	unsigned __int128 m = (unsigned __int128)left * right;
+	unsigned __int128 m = (unsigned __force __int128)left * right;
 
-	result.m_low  = m;
-	result.m_high = m >> 64;
+	result.m_low  = (u64 __force)m;
+	result.m_high = (u64 __force)(m >> 64);
 #else
 	u64 a0 = left & 0xffffffffull;
 	u64 a1 = left >> 32;

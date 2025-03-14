@@ -58,7 +58,7 @@ static int pefile_parse_binary(const void *pebuf, unsigned int pelen,
 	case PE_OPT_MAGIC_PE32:
 		chkaddr(0, cursor, sizeof(*pe32));
 		ctx->image_checksum_offset =
-			(unsigned long)&pe32->csum - (unsigned long)pebuf;
+			__c_pa(&pe32->csum) - __c_pa(pebuf);
 		ctx->header_size = pe32->header_size;
 		cursor += sizeof(*pe32);
 		ctx->n_data_dirents = pe32->data_dirs;
@@ -67,7 +67,7 @@ static int pefile_parse_binary(const void *pebuf, unsigned int pelen,
 	case PE_OPT_MAGIC_PE32PLUS:
 		chkaddr(0, cursor, sizeof(*pe64));
 		ctx->image_checksum_offset =
-			(unsigned long)&pe64->csum - (unsigned long)pebuf;
+			__c_pa(&pe64->csum) - __c_pa(pebuf);
 		ctx->header_size = pe64->header_size;
 		cursor += sizeof(*pe64);
 		ctx->n_data_dirents = pe64->data_dirs;
@@ -91,7 +91,7 @@ static int pefile_parse_binary(const void *pebuf, unsigned int pelen,
 	cursor += sizeof(*dde) * ctx->n_data_dirents;
 
 	ctx->cert_dirent_offset =
-		(unsigned long)&ddir->certs - (unsigned long)pebuf;
+		__c_pa(&ddir->certs) - __c_pa(pebuf);
 	ctx->certs_size = ddir->certs.size;
 
 	if (!ddir->certs.virtual_address || !ddir->certs.size) {
