@@ -1394,7 +1394,7 @@ static int get_active_key(struct opal_dev *dev, void *data)
 	return get_active_key_cont(dev);
 }
 
-static int generic_table_write_data(struct opal_dev *dev, const u64 data,
+static int generic_table_write_data(struct opal_dev *dev, const uintptr_t data,
 				    u64 offset, u64 size, const u8 *uid)
 {
 	const u8 __user *src = (u8 __user *)(uintptr_t)data;

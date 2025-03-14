@@ -486,8 +486,8 @@ bool bio_integrity_prep(struct bio *bio)
 		goto err_end_io;
 	}
 
-	end = (((unsigned long) buf) + len + PAGE_SIZE - 1) >> PAGE_SHIFT;
-	start = ((unsigned long) buf) >> PAGE_SHIFT;
+	end = (__c_pa(buf) + len + PAGE_SIZE - 1) >> PAGE_SHIFT;
+	start = __c_pa(buf) >> PAGE_SHIFT;
 	nr_pages = end - start;
 
 	/* Allocate bio integrity payload and integrity vectors */
