@@ -323,7 +323,7 @@ static int search_csum_tree(struct btrfs_fs_info *fs_info,
 found:
 	ret = (min(csum_start + csum_len, disk_bytenr + len) -
 		   disk_bytenr) >> fs_info->sectorsize_bits;
-	read_extent_buffer(path->nodes[0], dst, (uintptr_t)item,
+	read_extent_buffer(path->nodes[0], dst, __c_pa(item),
 			ret * csum_size);
 out:
 	if (ret == -ENOENT || ret == -EFBIG)
@@ -602,7 +602,7 @@ int btrfs_lookup_csums_list(struct btrfs_root *root, u64 start, u64 end,
 
 			read_extent_buffer(path->nodes[0],
 					   sums->sums,
-					   ((uintptr_t)item) + offset,
+					   __c_pa(item) + offset,
 					   bytes_to_csum_size(fs_info, size));
 
 			start += size;
@@ -746,7 +746,7 @@ search_forward:
 			offset = bytes_to_csum_size(fs_info, start - key.offset);
 
 			read_extent_buffer(path->nodes[0], csum_dest,
-					   ((uintptr_t)item) + offset,
+					   __c_pa(item) + offset,
 					   bytes_to_csum_size(fs_info, size));
 
 			bitmap_set(csum_bitmap,
@@ -1264,7 +1264,7 @@ found:
 	ins_size *= csum_size;
 	ins_size = min_t(u32, (unsigned long)item_end - (unsigned long)item,
 			      ins_size);
-	write_extent_buffer(leaf, sums->sums + index, (uintptr_t)item,
+	write_extent_buffer(leaf, sums->sums + index, __c_pa(item),
 			    ins_size);
 
 	index += ins_size;

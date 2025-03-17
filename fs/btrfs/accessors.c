@@ -12,7 +12,7 @@
 static void __cold report_setget_bounds(const struct extent_buffer *eb,
 					const void *ptr, unsigned off, int size)
 {
-	unsigned long member_offset = (uintptr_t)ptr + off;
+	const unsigned long member_offset = __c_pa(ptr) + off;
 
 	btrfs_warn(eb->fs_info,
 		   "bad eb member %s: ptr 0x%lx start %llu member offset %lu size %d",
@@ -52,7 +52,7 @@ static __always_inline void memcpy_split_src(char *dest, const char *src1,
 u##bits btrfs_get_##bits(const struct extent_buffer *eb,		\
 			 const void *ptr, unsigned long off)		\
 {									\
-	const unsigned long member_offset = (unsigned long)ptr + off;	\
+	const unsigned long member_offset = __c_pa(ptr) + off;		\
 	const unsigned long idx = get_eb_folio_index(eb, member_offset);\
 	const unsigned long oif = get_eb_offset_in_folio(eb,		\
 							 member_offset);\
@@ -82,7 +82,7 @@ u##bits btrfs_get_##bits(const struct extent_buffer *eb,		\
 void btrfs_set_##bits(const struct extent_buffer *eb, void *ptr,	\
 		      unsigned long off, u##bits val)			\
 {									\
-	const unsigned long member_offset = (unsigned long)ptr + off;	\
+	const unsigned long member_offset = __c_pa(ptr) + off;		\
 	const unsigned long idx = get_eb_folio_index(eb, member_offset);\
 	const unsigned long oif = get_eb_offset_in_folio(eb,		\
 							 member_offset);\
@@ -120,6 +120,6 @@ void btrfs_node_key(const struct extent_buffer *eb,
 		    struct btrfs_disk_key *disk_key, int nr)
 {
 	unsigned long ptr = btrfs_node_key_ptr_offset(eb, nr);
-	read_eb_member(eb, (struct btrfs_key_ptr *)ptr,
+	read_eb_member(eb, (struct btrfs_key_ptr *)__c_fakep(ptr),
 		       struct btrfs_key_ptr, key, disk_key);
 }
