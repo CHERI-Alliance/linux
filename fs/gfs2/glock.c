@@ -1588,11 +1588,11 @@ fail:
 	return;
 
 trap_recursive:
-	fs_err(sdp, "original: %pSR\n", (void *)gh2->gh_ip);
+	fs_err(sdp, "original: %pSR\n", __c_fakep(gh2->gh_ip));
 	fs_err(sdp, "pid: %d\n", pid_nr(gh2->gh_owner_pid));
 	fs_err(sdp, "lock type: %d req lock state : %d\n",
 	       gh2->gh_gl->gl_name.ln_type, gh2->gh_state);
-	fs_err(sdp, "new: %pSR\n", (void *)gh->gh_ip);
+	fs_err(sdp, "new: %pSR\n", __c_fakep(gh->gh_ip));
 	fs_err(sdp, "pid: %d\n", pid_nr(gh->gh_owner_pid));
 	fs_err(sdp, "lock type: %d req lock state : %d\n",
 	       gh->gh_gl->gl_name.ln_type, gh->gh_state);
@@ -2343,7 +2343,7 @@ static void dump_holder(struct seq_file *seq, const struct gfs2_holder *gh,
 	gfs2_print_dbg(seq, "%s H: s:%s f:%s e:%d p:%ld [%s] %pS\n",
 		       fs_id_buf, state2str(gh->gh_state),
 		       hflags2str(flags_buf, gh->gh_flags, gh->gh_iflags),
-		       gh->gh_error, (long)owner_pid, comm, (void *)gh->gh_ip);
+		       gh->gh_error, (long)owner_pid, comm, __c_fakep(gh->gh_ip));
 	rcu_read_unlock();
 }
 

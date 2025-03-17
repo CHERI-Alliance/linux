@@ -198,7 +198,7 @@ SYSCALL_DEFINE3(sysfs, int, option, user_uintptr_t, arg1, user_uintptr_t, arg2)
 			break;
 
 		case 2:
-			retval = fs_name(arg1, (char __user *) arg2);
+			retval = fs_name(__c_ua(arg1), (char __user *) arg2);
 			break;
 
 		case 3:

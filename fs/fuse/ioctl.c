@@ -104,7 +104,7 @@ static int fuse_copy_ioctl_iovec(struct fuse_conn *fc, struct iovec *dst,
 		    fiov[i].len != (unsigned long) fiov[i].len)
 			return -EIO;
 
-		dst[i].iov_base = (void __user *) (unsigned long) fiov[i].base;
+		dst[i].iov_base = (void __user *) (uintptr_t) fiov[i].base;
 		dst[i].iov_len = (size_t) fiov[i].len;
 
 #ifdef CONFIG_COMPAT
@@ -119,7 +119,7 @@ static int fuse_copy_ioctl_iovec(struct fuse_conn *fc, struct iovec *dst,
 }
 
 /* For fs-verity, determine iov lengths from input */
-static int fuse_setup_measure_verity(unsigned long arg, struct iovec *iov)
+static int fuse_setup_measure_verity(user_uintptr_t arg, struct iovec *iov)
 {
 	__u16 digest_size;
 	struct fsverity_digest __user *uarg = (void __user *)arg;
@@ -135,7 +135,7 @@ static int fuse_setup_measure_verity(unsigned long arg, struct iovec *iov)
 	return 0;
 }
 
-static int fuse_setup_enable_verity(unsigned long arg, struct iovec *iov,
+static int fuse_setup_enable_verity(user_uintptr_t arg, struct iovec *iov,
 				    unsigned int *in_iovs)
 {
 	struct fsverity_enable_arg enable;

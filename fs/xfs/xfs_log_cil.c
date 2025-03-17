@@ -515,7 +515,7 @@ xlog_cil_insert_format_items(
 			}
 		}
 
-		ASSERT(IS_ALIGNED((unsigned long)lv->lv_buf, sizeof(uint64_t)));
+		ASSERT(IS_ALIGNED(__c_pa(lv->lv_buf), sizeof(uint64_t)));
 		lip->li_ops->iop_format(lip, lv);
 insert:
 		xfs_cil_prepare_item(log, lv, old_lv, diff_len);

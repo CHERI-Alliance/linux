@@ -153,7 +153,7 @@ static int cuse_release(struct inode *inode, struct file *file)
 }
 
 static long cuse_file_ioctl(struct file *file, unsigned int cmd,
-			    unsigned long arg)
+			    user_uintptr_t arg)
 {
 	struct fuse_file *ff = file->private_data;
 	struct cuse_conn *cc = fc_to_cc(ff->fm->fc);
@@ -175,7 +175,7 @@ static long cuse_file_compat_ioctl(struct file *file, unsigned int cmd,
 	if (cc->unrestricted_ioctl)
 		flags |= FUSE_IOCTL_UNRESTRICTED;
 
-	return fuse_do_ioctl(file, cmd, arg, flags);
+	return fuse_do_ioctl(file, cmd, (user_uintptr_t)compat_ptr(arg), flags);
 }
 
 static const struct file_operations cuse_frontend_fops = {

@@ -507,7 +507,7 @@ do {									\
 		pr_err("\n");						\
 		pr_err("Assertion failed\n");		\
 		pr_err("%lx " #OP " %lx is false\n",			\
-		       (unsigned long)(X), (unsigned long)(Y));		\
+		       __c_pa(X), __c_pa(Y));				\
 		BUG();							\
 	}								\
 } while (0)

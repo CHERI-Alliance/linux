@@ -1480,9 +1480,9 @@ static void diLog(struct jfs_log *log, struct tblock *tblk, struct lrd *lrd,
 		 * passed to us in the iplist[1] and iplist[2].
 		 */
 		lrd->log.noredoinoext.iagnum =
-		    cpu_to_le32((u32) (size_t) cd->iplist[1]);
+		    cpu_to_le32((u32) (size_t) __c_pa(cd->iplist[1]));
 		lrd->log.noredoinoext.inoext_idx =
-		    cpu_to_le32((u32) (size_t) cd->iplist[2]);
+		    cpu_to_le32((u32) (size_t) __c_pa(cd->iplist[2]));
 
 		pxdlock = (struct pxd_lock *) & tlck->lock;
 		*pxd = pxdlock->pxd;

@@ -637,7 +637,7 @@ static long pipe_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 	case IOC_WATCH_QUEUE_SET_SIZE: {
 		int ret;
 		mutex_lock(&pipe->mutex);
-		ret = watch_queue_set_size(pipe, arg);
+		ret = watch_queue_set_size(pipe, __c_ua(arg));
 		mutex_unlock(&pipe->mutex);
 		return ret;
 	}

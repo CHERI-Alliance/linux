@@ -152,7 +152,7 @@ static inline struct metapage *page_to_mp(struct page *page, int offset)
 static inline int insert_metapage(struct page *page, struct metapage *mp)
 {
 	if (mp) {
-		set_page_private(page, (unsigned long)mp);
+		set_page_private(page, (uintptr_t)mp);
 		SetPagePrivate(page);
 		kmap(page);
 	}

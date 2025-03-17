@@ -168,7 +168,7 @@ int ubifs_fileattr_set(struct mnt_idmap *idmap,
 	return setflags(inode, flags);
 }
 
-long ubifs_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+long ubifs_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	int err;
 	struct inode *inode = file_inode(file);

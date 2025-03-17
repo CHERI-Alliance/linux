@@ -255,7 +255,8 @@ static int thread_with_stdio_flush(struct file *file, fl_owner_t id)
 	return thr->thr.ret;
 }
 
-static long thread_with_stdio_ioctl(struct file *file, unsigned int cmd, unsigned long p)
+static long thread_with_stdio_ioctl(struct file *file, unsigned int cmd,
+				    user_uintptr_t p)
 {
 	struct thread_with_stdio *thr =
 		container_of(file->private_data, struct thread_with_stdio, thr);

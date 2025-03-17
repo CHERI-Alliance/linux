@@ -135,7 +135,7 @@ xlog_prepare_iovec(
 	oph->oh_flags = 0;
 
 	buf = vec->i_addr + sizeof(struct xlog_op_header);
-	ASSERT(IS_ALIGNED((unsigned long)buf, sizeof(uint64_t)));
+	ASSERT(IS_ALIGNED(__c_pa(buf), sizeof(uint64_t)));
 
 	*vecp = vec;
 	return buf;

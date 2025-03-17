@@ -1266,7 +1266,7 @@ out:
 	return ret;
 }
 
-long nilfs_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+long nilfs_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	void __user *argp = (void __user *)arg;

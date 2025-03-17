@@ -323,12 +323,12 @@ static inline struct bch_fs_usage *fs_usage_ptr(struct bch_fs *c,
 						unsigned journal_seq,
 						bool gc)
 {
+	struct bch_fs_usage __percpu *fsu;
 	percpu_rwsem_assert_held(&c->mark_lock);
 	BUG_ON(!gc && !journal_seq);
 
-	return this_cpu_ptr(gc
-			    ? c->usage_gc
-			    : c->usage[journal_seq & JOURNAL_BUF_MASK]);
+	fsu = gc ? c->usage_gc : c->usage[journal_seq & JOURNAL_BUF_MASK];
+	return this_cpu_ptr(fsu);
 }
 
 int bch2_update_replicas(struct bch_fs *, struct bkey_s_c,

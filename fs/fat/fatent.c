@@ -138,7 +138,7 @@ static int fat12_ent_get(struct fat_entry *fatent)
 static int fat16_ent_get(struct fat_entry *fatent)
 {
 	int next = le16_to_cpu(*fatent->u.ent16_p);
-	WARN_ON((unsigned long)fatent->u.ent16_p & (2 - 1));
+	WARN_ON(__c_pa(fatent->u.ent16_p) & (2 - 1));
 	if (next >= BAD_FAT16)
 		next = FAT_ENT_EOF;
 	return next;
@@ -147,7 +147,7 @@ static int fat16_ent_get(struct fat_entry *fatent)
 static int fat32_ent_get(struct fat_entry *fatent)
 {
 	int next = le32_to_cpu(*fatent->u.ent32_p) & 0x0fffffff;
-	WARN_ON((unsigned long)fatent->u.ent32_p & (4 - 1));
+	WARN_ON(__c_pa(fatent->u.ent32_p) & (4 - 1));
 	if (next >= BAD_FAT32)
 		next = FAT_ENT_EOF;
 	return next;

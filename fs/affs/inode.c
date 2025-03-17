@@ -259,7 +259,7 @@ out:
 void
 affs_evict_inode(struct inode *inode)
 {
-	unsigned long cache_page;
+	uintptr_t cache_page;
 	pr_debug("evict_inode(ino=%lu, nlink=%u)\n",
 		 inode->i_ino, inode->i_nlink);
 	truncate_inode_pages_final(&inode->i_data);
@@ -272,7 +272,7 @@ affs_evict_inode(struct inode *inode)
 	invalidate_inode_buffers(inode);
 	clear_inode(inode);
 	affs_free_prealloc(inode);
-	cache_page = (unsigned long)AFFS_I(inode)->i_lc;
+	cache_page = (uintptr_t)AFFS_I(inode)->i_lc;
 	if (cache_page) {
 		pr_debug("freeing ext cache\n");
 		AFFS_I(inode)->i_lc = NULL;
@@ -398,7 +398,7 @@ affs_add_entry(struct inode *dir, struct inode *inode, struct dentry *dentry, s3
 	}
 	affs_fix_checksum(sb, bh);
 	mark_buffer_dirty_inode(bh, inode);
-	dentry->d_fsdata = (void *)(long)bh->b_blocknr;
+	dentry->d_fsdata = __c_fakep(bh->b_blocknr);
 
 	affs_lock_dir(dir);
 	retval = affs_insert_hash(dir, bh);

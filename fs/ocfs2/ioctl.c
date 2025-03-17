@@ -838,7 +838,7 @@ bail:
 	return status;
 }
 
-long ocfs2_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+long ocfs2_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	void __user *argp = (void __user *)arg;

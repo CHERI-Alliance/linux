@@ -939,7 +939,8 @@ out:
 
 static DEFINE_IDR(bch_chardev_minor);
 
-static long bch2_chardev_ioctl(struct file *filp, unsigned cmd, unsigned long v)
+static long bch2_chardev_ioctl(struct file *filp, unsigned cmd,
+		               user_uintptr_t v)
 {
 	unsigned minor = iminor(file_inode(filp));
 	struct bch_fs *c = minor < U8_MAX ? idr_find(&bch_chardev_minor, minor) : NULL;

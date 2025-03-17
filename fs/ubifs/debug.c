@@ -928,7 +928,7 @@ void ubifs_dump_pnode(struct ubifs_info *c, struct ubifs_pnode *pnode,
 
 	pr_err("(pid %d) dumping pnode:\n", current->pid);
 	pr_err("\taddress %zx parent %zx cnext %zx\n",
-	       (size_t)pnode, (size_t)parent, (size_t)pnode->cnext);
+	       (size_t)__c_pa(pnode), (size_t)__c_pa(parent), (size_t)__c_pa(pnode->cnext));
 	pr_err("\tflags %lu iip %d level %d num %d\n",
 	       pnode->flags, iip, pnode->level, pnode->num);
 	for (i = 0; i < UBIFS_LPT_FANOUT; i++) {

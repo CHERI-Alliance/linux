@@ -250,7 +250,7 @@ extern int nilfs_sync_file(struct file *, loff_t, loff_t, int);
 int nilfs_fileattr_get(struct dentry *dentry, struct fileattr *m);
 int nilfs_fileattr_set(struct mnt_idmap *idmap,
 		       struct dentry *dentry, struct fileattr *fa);
-long nilfs_ioctl(struct file *, unsigned int, unsigned long);
+long nilfs_ioctl(struct file *, unsigned int, user_uintptr_t);
 long nilfs_compat_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
 int nilfs_ioctl_prepare_clean_segments(struct the_nilfs *, struct nilfs_argv *,
 				       void **);

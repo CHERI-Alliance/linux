@@ -398,7 +398,7 @@ EXPORT_SYMBOL_GPL(fuse_sync_release);
 u64 fuse_lock_owner_id(struct fuse_conn *fc, fl_owner_t id)
 {
 	u32 *k = fc->scramble_key;
-	u64 v = (unsigned long) id;
+	u64 v = __c_a(id);
 	u32 v0 = v;
 	u32 v1 = v >> 32;
 	u32 sum = 0;
@@ -1454,9 +1454,9 @@ out:
 	return written ? written : err;
 }
 
-static inline unsigned long fuse_get_user_addr(const struct iov_iter *ii)
+static inline uintptr_t fuse_get_user_addr(const struct iov_iter *ii)
 {
-	return (unsigned long)iter_iov(ii)->iov_base + ii->iov_offset;
+	return (uintptr_t)iter_iov(ii)->iov_base + ii->iov_offset;
 }
 
 static inline size_t fuse_get_frag_size(const struct iov_iter *ii,
@@ -1474,7 +1474,7 @@ static int fuse_get_user_pages(struct fuse_args_pages *ap, struct iov_iter *ii,
 
 	/* Special case for kernel I/O: can copy directly into the buffer */
 	if (iov_iter_is_kvec(ii)) {
-		unsigned long user_addr = fuse_get_user_addr(ii);
+		uintptr_t user_addr = fuse_get_user_addr(ii);
 		size_t frag_size = fuse_get_frag_size(ii, *nbytesp);
 
 		if (write)

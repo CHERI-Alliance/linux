@@ -763,7 +763,7 @@ int ubifs_save_dirty_idx_lnums(struct ubifs_info *c)
 			 c->dirty_idx.arr[c->dirty_idx.cnt - 1]->free);
 	/* Replace the lprops pointers with LEB numbers */
 	for (i = 0; i < c->dirty_idx.cnt; i++)
-		c->dirty_idx.arr[i] = (void *)(size_t)c->dirty_idx.arr[i]->lnum;
+		c->dirty_idx.arr[i] = __c_fakep(c->dirty_idx.arr[i]->lnum);
 	ubifs_release_lprops(c);
 	return 0;
 }
@@ -911,7 +911,7 @@ static int find_dirtiest_idx_leb(struct ubifs_info *c)
 		if (!c->dirty_idx.cnt)
 			return -ENOSPC;
 		/* The lprops pointers were replaced by LEB numbers */
-		lnum = (size_t)c->dirty_idx.arr[--c->dirty_idx.cnt];
+		lnum = __c_pa(c->dirty_idx.arr[--c->dirty_idx.cnt]);
 		lp = ubifs_lpt_lookup(c, lnum);
 		if (IS_ERR(lp))
 			return PTR_ERR(lp);

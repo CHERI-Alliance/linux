@@ -2097,7 +2097,7 @@ void ubifs_destroy_size_tree(struct ubifs_info *c);
 int ubifs_fileattr_get(struct dentry *dentry, struct fileattr *fa);
 int ubifs_fileattr_set(struct mnt_idmap *idmap,
 		       struct dentry *dentry, struct fileattr *fa);
-long ubifs_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
+long ubifs_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg);
 void ubifs_set_inode_flags(struct inode *inode);
 #ifdef CONFIG_COMPAT
 long ubifs_compat_ioctl(struct file *file, unsigned int cmd, unsigned long arg);

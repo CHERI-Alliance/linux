@@ -37,12 +37,12 @@ static void fuse_advise_use_readdirplus(struct inode *dir)
 #if BITS_PER_LONG >= 64
 static inline void __fuse_dentry_settime(struct dentry *entry, u64 time)
 {
-	entry->d_fsdata = (void *) time;
+	entry->d_fsdata = __c_fakep(time);
 }
 
 static inline u64 fuse_dentry_time(const struct dentry *entry)
 {
-	return (u64)entry->d_fsdata;
+	return __c_pa(entry->d_fsdata);
 }
 
 #else
@@ -1716,7 +1716,7 @@ static long fuse_dir_compat_ioctl(struct file *file, unsigned int cmd,
 	if (fc->minor < 18)
 		return -ENOTTY;
 
-	return fuse_ioctl_common(file, cmd, arg,
+	return fuse_ioctl_common(file, cmd, (user_uintptr_t)compat_ptr(arg),
 				 FUSE_IOCTL_COMPAT | FUSE_IOCTL_DIR);
 }
 

@@ -57,10 +57,10 @@ static ssize_t fuse_conn_waiting_read(struct file *file, char __user *buf,
 			return 0;
 
 		value = atomic_read(&fc->num_waiting);
-		file->private_data = (void *)value;
+		file->private_data = __c_fakep(value);
 		fuse_conn_put(fc);
 	}
-	size = sprintf(tmp, "%ld\n", (long)file->private_data);
+	size = sprintf(tmp, "%ld\n", (long)__c_pa(file->private_data));
 	return simple_read_from_buffer(buf, len, ppos, tmp, size);
 }
 

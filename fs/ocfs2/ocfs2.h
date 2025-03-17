@@ -914,10 +914,10 @@ static inline void *correct_addr_and_bit_unaligned(int *bit, void *addr)
 {
 #if BITS_PER_LONG == 64
 	*bit += ((unsigned long) addr & 7UL) << 3;
-	addr = (void *) ((unsigned long) addr & ~7UL);
+	addr = (void *) ((uintptr_t) addr & ~7UL);
 #elif BITS_PER_LONG == 32
-	*bit += ((unsigned long) addr & 3UL) << 3;
-	addr = (void *) ((unsigned long) addr & ~3UL);
+	*bit += (__c_pa(addr) & 3UL) << 3;
+	addr = (void *) ((uintptr_t) addr & ~3UL);
 #else
 #error "how many bits you are?!"
 #endif

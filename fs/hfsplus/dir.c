@@ -22,7 +22,7 @@
 static inline void hfsplus_instantiate(struct dentry *dentry,
 				       struct inode *inode, u32 cnid)
 {
-	dentry->d_fsdata = (void *)(unsigned long)cnid;
+	dentry->d_fsdata = __c_fakep(cnid);
 	d_instantiate(dentry, inode);
 }
 
@@ -66,7 +66,7 @@ again:
 			goto fail;
 		}
 		cnid = be32_to_cpu(entry.folder.id);
-		dentry->d_fsdata = (void *)(unsigned long)cnid;
+		dentry->d_fsdata = __c_fakep(cnid);
 	} else if (type == HFSPLUS_FILE) {
 		if (fd.entrylength < sizeof(struct hfsplus_cat_file)) {
 			err = -EIO;
@@ -92,10 +92,10 @@ again:
 				 * We found a link pointing to another link,
 				 * so ignore it and treat it as regular file.
 				 */
-				cnid = (unsigned long)dentry->d_fsdata;
+				cnid = __c_pa(dentry->d_fsdata);
 				linkid = 0;
 			} else {
-				dentry->d_fsdata = (void *)(unsigned long)cnid;
+				dentry->d_fsdata = __c_fakep(cnid);
 				linkid =
 					be32_to_cpu(entry.file.permissions.dev);
 				str.len = sprintf(name, "iNode%d", linkid);
@@ -108,7 +108,7 @@ again:
 				goto again;
 			}
 		} else if (!dentry->d_fsdata)
-			dentry->d_fsdata = (void *)(unsigned long)cnid;
+			dentry->d_fsdata = __c_fakep(cnid);
 	} else {
 		pr_err("invalid catalog entry type in lookup\n");
 		err = -EIO;
@@ -314,7 +314,7 @@ static int hfsplus_link(struct dentry *src_dentry, struct inode *dst_dir,
 		return -EPERM;
 
 	mutex_lock(&sbi->vh_mutex);
-	if (inode->i_ino == (u32)(unsigned long)src_dentry->d_fsdata) {
+	if (inode->i_ino == (u32)__c_pa(src_dentry->d_fsdata)) {
 		for (;;) {
 			get_random_bytes(&id, sizeof(cnid));
 			id &= 0x3fffffff;
@@ -330,7 +330,7 @@ static int hfsplus_link(struct dentry *src_dentry, struct inode *dst_dir,
 		}
 		HFSPLUS_I(inode)->linkid = id;
 		cnid = sbi->next_cnid++;
-		src_dentry->d_fsdata = (void *)(unsigned long)cnid;
+		src_dentry->d_fsdata = __c_fakep(cnid);
 		res = hfsplus_create_cat(cnid, src_dir,
 			&src_dentry->d_name, inode);
 		if (res)
@@ -368,7 +368,7 @@ static int hfsplus_unlink(struct inode *dir, struct dentry *dentry)
 		return -EPERM;
 
 	mutex_lock(&sbi->vh_mutex);
-	cnid = (u32)(unsigned long)dentry->d_fsdata;
+	cnid = (u32)__c_pa(dentry->d_fsdata);
 	if (inode->i_ino == cnid &&
 	    atomic_read(&HFSPLUS_I(inode)->opencnt)) {
 		str.name = name;
@@ -549,7 +549,7 @@ static int hfsplus_rename(struct mnt_idmap *idmap,
 			return res;
 	}
 
-	res = hfsplus_rename_cat((u32)(unsigned long)old_dentry->d_fsdata,
+	res = hfsplus_rename_cat((u32)__c_pa(old_dentry->d_fsdata),
 				 old_dir, &old_dentry->d_name,
 				 new_dir, &new_dentry->d_name);
 	if (!res)

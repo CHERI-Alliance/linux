@@ -31,7 +31,7 @@ static int hfsplus_ioctl_bless(struct file *file, int __user *user_flags)
 	struct hfsplus_sb_info *sbi = HFSPLUS_SB(inode->i_sb);
 	struct hfsplus_vh *vh = sbi->s_vhdr;
 	struct hfsplus_vh *bvh = sbi->s_backup_vhdr;
-	u32 cnid = (unsigned long)dentry->d_fsdata;
+	u32 cnid = __c_pa(dentry->d_fsdata);
 
 	if (!capable(CAP_SYS_ADMIN))
 		return -EPERM;
@@ -57,7 +57,7 @@ static int hfsplus_ioctl_bless(struct file *file, int __user *user_flags)
 	return 0;
 }
 
-long hfsplus_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+long hfsplus_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 

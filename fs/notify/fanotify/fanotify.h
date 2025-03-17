@@ -23,8 +23,12 @@ enum {
  * fh buf should be dword aligned. On 64bit arch, the ext_buf pointer is
  * stored in either the first or last 2 dwords.
  */
-#define FANOTIFY_INLINE_FH_LEN	(3 << 2)
 #define FANOTIFY_FH_HDR_LEN	offsetof(struct fanotify_fh, buf)
+#if __SIZEOF_POINTER__ > __SIZEOF_LONG__
+#define FANOTIFY_INLINE_FH_LEN	(2 * __SIZEOF_POINTER__ - FANOTIFY_FH_HDR_LEN)
+#else
+#define FANOTIFY_INLINE_FH_LEN (3 << 2)
+#endif
 
 /* Fixed size struct for file handle */
 struct fanotify_fh {

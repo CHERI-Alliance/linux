@@ -80,7 +80,7 @@ affs_readdir(struct file *file, struct dir_context *ctx)
 	/* If the directory hasn't changed since the last call to readdir(),
 	 * we can jump directly to where we left off.
 	 */
-	ino = (u32)(long)file->private_data;
+	ino = __c_pa(file->private_data);
 	if (ino && inode_eq_iversion(inode, file->f_version)) {
 		pr_debug("readdir() left off=%d\n", ino);
 		goto inside;
@@ -132,7 +132,7 @@ inside:
 	}
 done:
 	file->f_version = inode_query_iversion(inode);
-	file->private_data = (void *)(long)ino;
+	file->private_data = __c_fakep(ino);
 	affs_brelse(fh_bh);
 
 out_brelse_dir:

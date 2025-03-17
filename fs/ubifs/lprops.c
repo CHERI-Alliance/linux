@@ -174,7 +174,7 @@ static int add_to_lpt_heap(struct ubifs_info *c, struct ubifs_lprops *lprops,
 
 		/* Compare to some other LEB on the bottom of heap */
 		/* Pick a position kind of randomly */
-		cpos = (((size_t)lprops >> 4) & b) + b;
+		cpos = (((size_t)__c_pa(lprops) >> 4) & b) + b;
 		ubifs_assert(c, cpos >= b);
 		ubifs_assert(c, cpos < LPT_HEAP_SZ);
 		ubifs_assert(c, cpos < heap->cnt);
@@ -975,7 +975,7 @@ void dbg_check_heap(struct ubifs_info *c, struct ubifs_lpt_heap *heap, int cat,
 		}
 		if (lprops != lp) {
 			ubifs_err(c, "lprops %zx lp %zx lprops->lnum %d lp->lnum %d",
-				  (size_t)lprops, (size_t)lp, lprops->lnum,
+				  (size_t)__c_pa(lprops), (size_t)__c_pa(lp), lprops->lnum,
 				  lp->lnum);
 			err = 4;
 			goto out;

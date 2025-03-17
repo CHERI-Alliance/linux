@@ -199,7 +199,7 @@ DECLARE_EVENT_CLASS(xfs_perag_class,
 		  __entry->agno,
 		  __entry->refcount,
 		  __entry->active_refcount,
-		  (char *)__entry->caller_ip)
+		  __c_fakep(__entry->caller_ip))
 );
 
 #define DEFINE_PERAG_REF_EVENT(name)	\
@@ -416,7 +416,7 @@ DECLARE_EVENT_CLASS(xfs_bmap_class,
 		  (int64_t)__entry->startblock,
 		  __entry->blockcount,
 		  __entry->state,
-		  (char *)__entry->caller_ip)
+		  __c_fakep(__entry->caller_ip))
 )
 
 #define DEFINE_BMAP_EVENT(name) \
@@ -466,7 +466,7 @@ DECLARE_EVENT_CLASS(xfs_buf_class,
 		  __entry->lockval,
 		  __print_flags(__entry->flags, "|", XFS_BUF_FLAGS),
 		  __entry->buf_ops,
-		  (void *)__entry->caller_ip)
+		  __c_fakep(__entry->caller_ip))
 )
 
 #define DEFINE_BUF_EVENT(name) \
@@ -534,7 +534,7 @@ DECLARE_EVENT_CLASS(xfs_buf_flags_class,
 		  __entry->pincount,
 		  __entry->lockval,
 		  __print_flags(__entry->flags, "|", XFS_BUF_FLAGS),
-		  (void *)__entry->caller_ip)
+		  __c_fakep(__entry->caller_ip))
 )
 
 #define DEFINE_BUF_FLAGS_EVENT(name) \
@@ -737,7 +737,7 @@ DECLARE_EVENT_CLASS(xfs_lock_class,
 		  MAJOR(__entry->dev), MINOR(__entry->dev),
 		  __entry->ino,
 		  __print_flags(__entry->lock_flags, "|", XFS_LOCK_FLAGS),
-		  (void *)__entry->caller_ip)
+		  __c_fakep(__entry->caller_ip))
 )
 
 #define DEFINE_LOCK_EVENT(name) \
@@ -868,7 +868,7 @@ DECLARE_EVENT_CLASS(xfs_iref_class,
 		  __entry->ino,
 		  __entry->count,
 		  __entry->pincount,
-		  (char *)__entry->caller_ip)
+		  __c_fakep(__entry->caller_ip))
 )
 
 TRACE_EVENT(xfs_iomap_prealloc_size,
@@ -1346,7 +1346,7 @@ TRACE_EVENT(xfs_log_force,
 	),
 	TP_printk("dev %d:%d lsn 0x%llx caller %pS",
 		  MAJOR(__entry->dev), MINOR(__entry->dev),
-		  __entry->lsn, (void *)__entry->caller_ip)
+		  __entry->lsn, __c_fakep(__entry->caller_ip))
 )
 
 #define DEFINE_LOG_ITEM_EVENT(name) \
@@ -1631,7 +1631,7 @@ TRACE_EVENT(xfs_bunmap,
 		  __entry->fileoff,
 		  __entry->len,
 		  __print_flags(__entry->flags, "|", XFS_BMAPI_FLAGS),
-		  (void *)__entry->caller_ip)
+		  __c_fakep(__entry->caller_ip))
 
 );
 
@@ -1749,7 +1749,7 @@ DECLARE_EVENT_CLASS(xfs_agf_class,
 		  __entry->flcount,
 		  __entry->freeblks,
 		  __entry->longest,
-		  (void *)__entry->caller_ip)
+		  __c_fakep(__entry->caller_ip))
 );
 #define DEFINE_AGF_EVENT(name) \
 DEFINE_EVENT(xfs_agf_class, name, \
@@ -2257,7 +2257,7 @@ DECLARE_EVENT_CLASS(xfs_log_recover_item_class,
 	TP_ARGS(log, trans, item, pass),
 	TP_STRUCT__entry(
 		__field(dev_t, dev)
-		__field(unsigned long, item)
+		__field(uintptr_t, item)
 		__field(xlog_tid_t, tid)
 		__field(xfs_lsn_t, lsn)
 		__field(int, type)
@@ -2267,7 +2267,7 @@ DECLARE_EVENT_CLASS(xfs_log_recover_item_class,
 	),
 	TP_fast_assign(
 		__entry->dev = log->l_mp->m_super->s_dev;
-		__entry->item = (unsigned long)item;
+		__entry->item = (uintptr_t)item;
 		__entry->tid = trans->r_log_tid;
 		__entry->lsn = trans->r_lsn;
 		__entry->type = ITEM_TYPE(item);
@@ -2599,7 +2599,7 @@ DECLARE_EVENT_CLASS(xfs_defer_class,
 	TP_printk("dev %d:%d tp %p caller %pS",
 		  MAJOR(__entry->dev), MINOR(__entry->dev),
 		  __entry->tp,
-		  (char *)__entry->caller_ip)
+		  __c_fakep(__entry->caller_ip))
 )
 #define DEFINE_DEFER_EVENT(name) \
 DEFINE_EVENT(xfs_defer_class, name, \
@@ -2821,7 +2821,7 @@ DECLARE_EVENT_CLASS(xfs_ag_error_class,
 		  MAJOR(__entry->dev), MINOR(__entry->dev),
 		  __entry->agno,
 		  __entry->error,
-		  (char *)__entry->caller_ip)
+		  __c_fakep(__entry->caller_ip))
 );
 
 #define DEFINE_AG_ERROR_EVENT(name) \
@@ -3470,7 +3470,7 @@ DECLARE_EVENT_CLASS(xfs_inode_error_class,
 		  MAJOR(__entry->dev), MINOR(__entry->dev),
 		  __entry->ino,
 		  __entry->error,
-		  (char *)__entry->caller_ip)
+		  __c_fakep(__entry->caller_ip))
 );
 
 #define DEFINE_INODE_ERROR_EVENT(name) \
@@ -3932,7 +3932,7 @@ DECLARE_EVENT_CLASS(xfs_trans_class,
 		  MAJOR(__entry->dev), MINOR(__entry->dev),
 		  __entry->tid,
 		  __entry->flags,
-		  (char *)__entry->caller_ip)
+		  __c_fakep(__entry->caller_ip))
 )
 
 #define DEFINE_TRANS_EVENT(name) \
@@ -4436,7 +4436,7 @@ DECLARE_EVENT_CLASS(xfs_icwalk_class,
 		  __entry->prid,
 		  __entry->min_file_size,
 		  __entry->scan_limit,
-		  (char *)__entry->caller_ip)
+		  __c_fakep(__entry->caller_ip))
 );
 #define DEFINE_ICWALK_EVENT(name)	\
 DEFINE_EVENT(xfs_icwalk_class, name,	\
@@ -4481,7 +4481,7 @@ DECLARE_EVENT_CLASS(xlog_iclog_class,
 		  __entry->offset,
 		  __entry->lsn,
 		  __print_flags(__entry->flags, "|", XLOG_ICL_STRINGS),
-		  (char *)__entry->caller_ip)
+		  __c_fakep(__entry->caller_ip))
 
 );
 

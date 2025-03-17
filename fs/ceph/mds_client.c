@@ -433,8 +433,8 @@ static int parse_reply_info_readdir(void **p, void *end,
 		goto done;
 
 	BUG_ON(!info->dir_entries);
-	if ((unsigned long)(info->dir_entries + num) >
-	    (unsigned long)info->dir_entries + info->dir_buf_size) {
+	if (__c_pa(info->dir_entries + num) >
+	    __c_pa(info->dir_entries) + info->dir_buf_size) {
 		pr_err_client(cl, "dir contents are larger than expected\n");
 		WARN_ON(1);
 		goto bad;
@@ -1982,7 +1982,7 @@ enum {
 static int wake_up_session_cb(struct inode *inode, int mds, void *arg)
 {
 	struct ceph_inode_info *ci = ceph_inode(inode);
-	unsigned long ev = (unsigned long)arg;
+	unsigned long ev = __c_pa(arg);
 
 	if (ev == RECONNECT) {
 		spin_lock(&ci->i_ceph_lock);
@@ -2009,8 +2009,7 @@ static void wake_up_session_caps(struct ceph_mds_session *session, int ev)
 	struct ceph_client *cl = session->s_mdsc->fsc->client;
 
 	doutc(cl, "session %p mds%d\n", session, session->s_mds);
-	ceph_iterate_session_caps(session, wake_up_session_cb,
-				  (void *)(unsigned long)ev);
+	ceph_iterate_session_caps(session, wake_up_session_cb, __c_fakep(ev));
 }
 
 /*

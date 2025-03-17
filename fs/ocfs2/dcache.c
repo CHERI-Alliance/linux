@@ -28,7 +28,7 @@ void ocfs2_dentry_attach_gen(struct dentry *dentry)
 	unsigned long gen =
 		OCFS2_I(d_inode(dentry->d_parent))->ip_dir_lock_gen;
 	BUG_ON(d_inode(dentry));
-	dentry->d_fsdata = (void *)gen;
+	dentry->d_fsdata = __c_fakep(gen);
 }
 
 
@@ -52,7 +52,7 @@ static int ocfs2_dentry_revalidate(struct dentry *dentry, unsigned int flags)
 	 * one stored in the inode.
 	 */
 	if (inode == NULL) {
-		unsigned long gen = (unsigned long) dentry->d_fsdata;
+		unsigned long gen = __c_pa(dentry->d_fsdata);
 		unsigned long pgen;
 		spin_lock(&dentry->d_lock);
 		pgen = OCFS2_I(d_inode(dentry->d_parent))->ip_dir_lock_gen;

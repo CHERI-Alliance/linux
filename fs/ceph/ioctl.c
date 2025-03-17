@@ -291,7 +291,7 @@ static int vet_mds_for_fscrypt(struct file *file)
 	return ret;
 }
 
-static long ceph_set_encryption_policy(struct file *file, unsigned long arg)
+static long ceph_set_encryption_policy(struct file *file, user_uintptr_t arg)
 {
 	int ret, got = 0;
 	struct inode *inode = file_inode(file);
@@ -356,14 +356,14 @@ static const char *ceph_ioctl_cmd_name(const unsigned int cmd)
 	}
 }
 
-long ceph_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+long ceph_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(file);
 	struct ceph_fs_client *fsc = ceph_inode_to_fs_client(inode);
 	int ret;
 
 	doutc(fsc->client, "file %p %p %llx.%llx cmd %s arg %lu\n", file,
-	      inode, ceph_vinop(inode), ceph_ioctl_cmd_name(cmd), arg);
+	      inode, ceph_vinop(inode), ceph_ioctl_cmd_name(cmd), __c_ua(arg));
 	switch (cmd) {
 	case CEPH_IOC_GET_LAYOUT:
 		return ceph_ioctl_get_layout(file, (void __user *)arg);

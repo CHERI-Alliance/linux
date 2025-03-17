@@ -552,7 +552,7 @@ int nilfs_delete_entry(struct nilfs_dir_entry *dir, struct folio *folio)
 {
 	struct address_space *mapping = folio->mapping;
 	struct inode *inode = mapping->host;
-	char *kaddr = (char *)((unsigned long)dir & ~(folio_size(folio) - 1));
+	char *kaddr = (char *)((uintptr_t)dir & ~(folio_size(folio) - 1));
 	size_t from, to;
 	struct nilfs_dir_entry *de, *pde = NULL;
 	int err;

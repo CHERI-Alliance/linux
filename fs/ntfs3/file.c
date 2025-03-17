@@ -18,7 +18,7 @@
 #include "ntfs.h"
 #include "ntfs_fs.h"
 
-static int ntfs_ioctl_fitrim(struct ntfs_sb_info *sbi, unsigned long arg)
+static int ntfs_ioctl_fitrim(struct ntfs_sb_info *sbi, user_uintptr_t arg)
 {
 	struct fstrim_range __user *user_range;
 	struct fstrim_range range;
@@ -48,7 +48,7 @@ static int ntfs_ioctl_fitrim(struct ntfs_sb_info *sbi, unsigned long arg)
 	return 0;
 }
 
-long ntfs_ioctl(struct file *filp, u32 cmd, unsigned long arg)
+long ntfs_ioctl(struct file *filp, u32 cmd, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	struct ntfs_sb_info *sbi = inode->i_sb->s_fs_info;

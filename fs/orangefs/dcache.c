@@ -95,7 +95,7 @@ out_drop:
 static int orangefs_d_revalidate(struct dentry *dentry, unsigned int flags)
 {
 	int ret;
-	unsigned long time = (unsigned long) dentry->d_fsdata;
+	unsigned long time = __c_pa(dentry->d_fsdata);
 
 	if (time_before(jiffies, time))
 		return 1;

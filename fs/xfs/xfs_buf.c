@@ -345,8 +345,8 @@ xfs_buf_alloc_kmem(
 	if (!bp->b_addr)
 		return -ENOMEM;
 
-	if (((unsigned long)(bp->b_addr + size - 1) & PAGE_MASK) !=
-	    ((unsigned long)bp->b_addr & PAGE_MASK)) {
+	if ((__c_pa(bp->b_addr + size - 1) & PAGE_MASK) !=
+	    (__c_pa(bp->b_addr) & PAGE_MASK)) {
 		/* b_addr spans two pages - use alloc_page instead */
 		kfree(bp->b_addr);
 		bp->b_addr = NULL;

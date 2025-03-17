@@ -106,7 +106,7 @@ static inline void __bch2_dev_put(struct bch_dev *ca)
 #ifdef CONFIG_BCACHEFS_DEBUG
 	long r = atomic_long_dec_return(&ca->ref);
 	if (r < (long) !ca->dying)
-		panic("bch_dev->ref underflow, last put: %pS\n", (void *) ca->last_put);
+		panic("bch_dev->ref underflow, last put: %pS\n", __c_fakep(ca->last_put));
 	ca->last_put = _THIS_IP_;
 	if (!r)
 		complete(&ca->ref_completion);

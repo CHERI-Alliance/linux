@@ -2718,7 +2718,7 @@ int jfs_readdir(struct file *file, struct dir_context *ctx)
 	struct ldtentry *d;
 	struct dtslot *t;
 	int d_namleft, len, outlen;
-	unsigned long dirent_buf;
+	uintptr_t dirent_buf;
 	char *name_ptr;
 	u32 dir_index;
 	int do_index = 0;
@@ -2891,7 +2891,7 @@ int jfs_readdir(struct file *file, struct dir_context *ctx)
 		for (i = index; i < p->header.nextindex; i++) {
 			d = (struct ldtentry *) & p->slot[stbl[i]];
 
-			if (((long) jfs_dirent + d->namlen + 1) >
+			if (((intptr_t) jfs_dirent + d->namlen + 1) >
 			    (dirent_buf + PAGE_SIZE)) {
 				/* DBCS codepages could overrun dirent_buf */
 				index = i;

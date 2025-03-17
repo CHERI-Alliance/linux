@@ -550,7 +550,7 @@ static inline void ep_set_busy_poll_napi_id(struct epitem *epi)
 }
 
 static long ep_eventpoll_bp_ioctl(struct file *file, unsigned int cmd,
-				  unsigned long arg)
+				  user_uintptr_t arg)
 {
 	return -EOPNOTSUPP;
 }
