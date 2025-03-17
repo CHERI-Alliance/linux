@@ -73,7 +73,7 @@ unlock:
  *  2) REISERFS_IOC_[GS]ETFLAGS, REISERFS_IOC_[GS]ETVERSION
  *  3) That's all for a while ...
  */
-long reiserfs_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+long reiserfs_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	int err = 0;
@@ -143,7 +143,7 @@ long reiserfs_compat_ioctl(struct file *file, unsigned int cmd,
 		return -ENOIOCTLCMD;
 	}
 
-	return reiserfs_ioctl(file, cmd, (unsigned long) compat_ptr(arg));
+	return reiserfs_ioctl(file, cmd, (user_uintptr_t) compat_ptr(arg));
 }
 #endif
 

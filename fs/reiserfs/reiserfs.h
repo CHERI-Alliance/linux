@@ -1935,8 +1935,8 @@ struct reiserfs_de_head {
  */
 #ifdef ADDR_UNALIGNED_BITS
 
-#   define aligned_address(addr)           ((void *)((long)(addr) & ~((1UL << ADDR_UNALIGNED_BITS) - 1)))
-#   define unaligned_offset(addr)          (((int)((long)(addr) & ((1 << ADDR_UNALIGNED_BITS) - 1))) << 3)
+#   define aligned_address(addr)           ((void *)((uintptr_t)(addr) & ~((1UL << ADDR_UNALIGNED_BITS) - 1)))
+#   define unaligned_offset(addr)          (((int)(__c_pa(addr) & ((1 << ADDR_UNALIGNED_BITS) - 1))) << 3)
 
 #   define set_bit_unaligned(nr, addr)	\
 	__test_and_set_bit_le((nr) + unaligned_offset(addr), aligned_address(addr))
@@ -2804,7 +2804,7 @@ struct reiserfs_journal_header {
 #define JBH_HASH_MASK 8191
 
 #define _jhashfn(sb,block)	\
-	(((unsigned long)sb>>L1_CACHE_SHIFT) ^ \
+	((__c_pa(sb)>>L1_CACHE_SHIFT) ^ \
 	 (((block)<<(JBH_HASH_SHIFT - 6)) ^ ((block) >> 13) ^ ((block) << (JBH_HASH_SHIFT - 12))))
 #define journal_hash(t,sb,block) ((t)[_jhashfn((sb),(block)) & JBH_HASH_MASK])
 
@@ -3413,7 +3413,7 @@ __u32 r5_hash(const signed char *msg, int len);
 int reiserfs_fileattr_get(struct dentry *dentry, struct fileattr *fa);
 int reiserfs_fileattr_set(struct mnt_idmap *idmap,
 			  struct dentry *dentry, struct fileattr *fa);
-long reiserfs_ioctl(struct file *filp, unsigned int cmd, unsigned long arg);
+long reiserfs_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg);
 long reiserfs_compat_ioctl(struct file *filp,
 		   unsigned int cmd, unsigned long arg);
 int reiserfs_unpack(struct inode *inode);
