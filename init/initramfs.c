@@ -629,7 +629,7 @@ void __weak __init free_initrd_mem(unsigned long start, unsigned long end)
 	unsigned long aligned_start = ALIGN_DOWN(start, PAGE_SIZE);
 	unsigned long aligned_end = ALIGN(end, PAGE_SIZE);
 
-	memblock_free((void *)aligned_start, aligned_end - aligned_start);
+	memblock_free(__c_fakep(aligned_start), aligned_end - aligned_start);
 #endif
 
 	free_reserved_area(__c_fakep(start), __c_fakep(end), POISON_FREE_INITMEM,
@@ -679,11 +679,11 @@ static void __init populate_initrd_image(char *err)
 	if (IS_ERR(file))
 		return;
 
-	written = xwrite(file, (char *)initrd_start, initrd_end - initrd_start,
+	written = xwrite(file, (char *)initrd_start, __c_ua(initrd_end) - __c_ua(initrd_start),
 			&pos);
 	if (written != initrd_end - initrd_start)
 		pr_err("/initrd.image: incomplete write (%zd != %ld)\n",
-		       written, initrd_end - initrd_start);
+		       written, __c_ua(initrd_end - initrd_start));
 	fput(file);
 }
 #endif /* CONFIG_BLK_DEV_RAM */
