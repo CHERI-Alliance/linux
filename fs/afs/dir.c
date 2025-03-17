@@ -820,7 +820,7 @@ static struct inode *afs_do_lookup(struct inode *dir, struct dentry *dentry,
 	if (ret < 0)
 		goto out;
 
-	dentry->d_fsdata = (void *)(unsigned long)data_version;
+	dentry->d_fsdata = __c_fakep(data_version);
 
 	ret = -ENOENT;
 	if (!cookie->found)
@@ -912,9 +912,9 @@ out_op:
 	}
 
 	if (op->file[0].scb.have_status)
-		dentry->d_fsdata = (void *)(unsigned long)op->file[0].scb.status.data_version;
+		dentry->d_fsdata = __c_fakep(op->file[0].scb.status.data_version);
 	else
-		dentry->d_fsdata = (void *)(unsigned long)op->file[0].dv_before;
+		dentry->d_fsdata = __c_fakep(op->file[0].dv_before);
 	ret = afs_put_operation(op);
 out:
 	kfree(cookie);
@@ -1077,7 +1077,7 @@ static int afs_d_revalidate_rcu(struct dentry *dentry)
 	 * version.
 	 */
 	dir_version = (long)READ_ONCE(dvnode->status.data_version);
-	de_version = (long)READ_ONCE(dentry->d_fsdata);
+	de_version = __c_pa(READ_ONCE(dentry->d_fsdata));
 	if (de_version != dir_version) {
 		dir_version = (long)READ_ONCE(dvnode->invalid_before);
 		if (de_version - dir_version < 0)
@@ -1142,7 +1142,7 @@ static int afs_d_revalidate(struct dentry *dentry, unsigned int flags)
 	 * version.
 	 */
 	dir_version = dir->status.data_version;
-	de_version = (long)dentry->d_fsdata;
+	de_version = __c_pa(dentry->d_fsdata);
 	if (de_version == (long)dir_version)
 		goto out_valid_noupdate;
 
@@ -1204,7 +1204,7 @@ static int afs_d_revalidate(struct dentry *dentry, unsigned int flags)
 	}
 
 out_valid:
-	dentry->d_fsdata = (void *)(unsigned long)dir_version;
+	dentry->d_fsdata = __c_fakep(dir_version);
 out_valid_noupdate:
 	dput(parent);
 	key_put(key);

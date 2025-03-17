@@ -287,7 +287,7 @@ int afs_dynroot_mkdir(struct afs_net *net, struct afs_cell *cell)
 	}
 
 	/* Note that we're retaining an extra ref on the dentry */
-	subdir->d_fsdata = (void *)1UL;
+	subdir->d_fsdata = __c_fakep(1UL);
 	ret = 0;
 unlock:
 	inode_unlock(root->d_inode);

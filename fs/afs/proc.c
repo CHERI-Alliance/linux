@@ -500,7 +500,7 @@ static int afs_proc_sysname_show(struct seq_file *m, void *v)
 {
 	struct afs_net *net = afs_seq2net(m);
 	struct afs_sysnames *sysnames = net->sysnames;
-	unsigned int i = (unsigned long)v - 1;
+	unsigned int i = __c_pa(v) - 1;
 
 	if (i < sysnames->nr)
 		seq_printf(m, "%s\n", sysnames->subs[i]);
@@ -518,7 +518,7 @@ static void *afs_proc_sysname_start(struct seq_file *m, loff_t *pos)
 	names = net->sysnames;
 	if (*pos >= names->nr)
 		return NULL;
-	return (void *)(unsigned long)(*pos + 1);
+	return __c_fakep(*pos + 1);
 }
 
 static void *afs_proc_sysname_next(struct seq_file *m, void *v, loff_t *pos)
@@ -529,7 +529,7 @@ static void *afs_proc_sysname_next(struct seq_file *m, void *v, loff_t *pos)
 	*pos += 1;
 	if (*pos >= names->nr)
 		return NULL;
-	return (void *)(unsigned long)(*pos + 1);
+	return __c_fakep(*pos + 1);
 }
 
 static void afs_proc_sysname_stop(struct seq_file *m, void *v)

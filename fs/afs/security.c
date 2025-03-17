@@ -127,7 +127,7 @@ static void afs_hash_permits(struct afs_permits *permits)
 	int i;
 
 	for (i = 0; i < permits->nr_permits; i++) {
-		h += (unsigned long)permits->permits[i].key / sizeof(void *);
+		h += __c_pa(permits->permits[i].key) / sizeof(void *);
 		h += permits->permits[i].access;
 	}
 

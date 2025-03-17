@@ -18,11 +18,11 @@
 
 struct workqueue_struct *afs_async_calls;
 
-static void afs_wake_up_call_waiter(struct sock *, struct rxrpc_call *, unsigned long);
-static void afs_wake_up_async_call(struct sock *, struct rxrpc_call *, unsigned long);
+static void afs_wake_up_call_waiter(struct sock *, struct rxrpc_call *, uintptr_t);
+static void afs_wake_up_async_call(struct sock *, struct rxrpc_call *, uintptr_t);
 static void afs_process_async_call(struct work_struct *);
-static void afs_rx_new_call(struct sock *, struct rxrpc_call *, unsigned long);
-static void afs_rx_discard_new_call(struct rxrpc_call *, unsigned long);
+static void afs_rx_new_call(struct sock *, struct rxrpc_call *, uintptr_t);
+static void afs_rx_discard_new_call(struct rxrpc_call *, uintptr_t);
 static int afs_deliver_cm_op_id(struct afs_call *);
 
 /* asynchronous incoming call initial processing */
@@ -284,7 +284,7 @@ void afs_flat_call_destructor(struct afs_call *call)
  */
 static void afs_notify_end_request_tx(struct sock *sock,
 				      struct rxrpc_call *rxcall,
-				      unsigned long call_user_ID)
+				      uintptr_t call_user_ID)
 {
 	struct afs_call *call = (struct afs_call *)call_user_ID;
 
@@ -333,7 +333,7 @@ void afs_make_call(struct afs_call *call, gfp_t gfp)
 
 	/* create a call */
 	rxcall = rxrpc_kernel_begin_call(call->net->socket, call->peer, call->key,
-					 (unsigned long)call,
+					 (uintptr_t)call,
 					 tx_total_len,
 					 call->max_lifespan,
 					 gfp,
@@ -631,7 +631,7 @@ void afs_wait_for_call_to_complete(struct afs_call *call)
  * wake up a waiting call
  */
 static void afs_wake_up_call_waiter(struct sock *sk, struct rxrpc_call *rxcall,
-				    unsigned long call_user_ID)
+				    uintptr_t call_user_ID)
 {
 	struct afs_call *call = (struct afs_call *)call_user_ID;
 
@@ -643,7 +643,7 @@ static void afs_wake_up_call_waiter(struct sock *sk, struct rxrpc_call *rxcall,
  * wake up an asynchronous call
  */
 static void afs_wake_up_async_call(struct sock *sk, struct rxrpc_call *rxcall,
-				   unsigned long call_user_ID)
+				   uintptr_t call_user_ID)
 {
 	struct afs_call *call = (struct afs_call *)call_user_ID;
 	int r;
@@ -680,7 +680,7 @@ static void afs_process_async_call(struct work_struct *work)
 	_leave("");
 }
 
-static void afs_rx_attach(struct rxrpc_call *rxcall, unsigned long user_call_ID)
+static void afs_rx_attach(struct rxrpc_call *rxcall, uintptr_t user_call_ID)
 {
 	struct afs_call *call = (struct afs_call *)user_call_ID;
 
@@ -725,7 +725,7 @@ void afs_charge_preallocation(struct work_struct *work)
  * Discard a preallocated call when a socket is shut down.
  */
 static void afs_rx_discard_new_call(struct rxrpc_call *rxcall,
-				    unsigned long user_call_ID)
+				    uintptr_t user_call_ID)
 {
 	struct afs_call *call = (struct afs_call *)user_call_ID;
 
@@ -737,7 +737,7 @@ static void afs_rx_discard_new_call(struct rxrpc_call *rxcall,
  * Notification of an incoming call.
  */
 static void afs_rx_new_call(struct sock *sk, struct rxrpc_call *rxcall,
-			    unsigned long user_call_ID)
+			    uintptr_t user_call_ID)
 {
 	struct afs_net *net = afs_sock2net(sk);
 
@@ -780,7 +780,7 @@ static int afs_deliver_cm_op_id(struct afs_call *call)
  */
 static void afs_notify_end_reply_tx(struct sock *sock,
 				    struct rxrpc_call *rxcall,
-				    unsigned long call_user_ID)
+				    uintptr_t call_user_ID)
 {
 	struct afs_call *call = (struct afs_call *)call_user_ID;
 
