@@ -12,13 +12,13 @@
 static bool check_setget_bounds(const struct extent_buffer *eb,
 				const void *ptr, unsigned off, int size)
 {
-	const unsigned long member_offset = (unsigned long)ptr + off;
+	const unsigned long member_offset = __c_pa(ptr) + off;
 
 	if (unlikely(member_offset + size > eb->len)) {
 		btrfs_warn(eb->fs_info,
 		"bad eb member %s: ptr 0x%lx start %llu member offset %lu size %d",
 			(member_offset > eb->len ? "start" : "end"),
-			(unsigned long)ptr, eb->start, member_offset, size);
+			__c_pa(ptr), eb->start, member_offset, size);
 		return false;
 	}
 
@@ -60,7 +60,7 @@ void btrfs_init_map_token(struct btrfs_map_token *token, struct extent_buffer *e
 u##bits btrfs_get_token_##bits(struct btrfs_map_token *token,		\
 			       const void *ptr, unsigned long off)	\
 {									\
-	const unsigned long member_offset = (unsigned long)ptr + off;	\
+	const unsigned long member_offset = __c_pa(ptr) + off;		\
 	const unsigned long idx = get_eb_folio_index(token->eb, member_offset); \
 	const unsigned long oil = get_eb_offset_in_folio(token->eb,	\
 							 member_offset);\
@@ -91,7 +91,7 @@ u##bits btrfs_get_token_##bits(struct btrfs_map_token *token,		\
 u##bits btrfs_get_##bits(const struct extent_buffer *eb,		\
 			 const void *ptr, unsigned long off)		\
 {									\
-	const unsigned long member_offset = (unsigned long)ptr + off;	\
+	const unsigned long member_offset = __c_pa(ptr) + off;		\
 	const unsigned long idx = get_eb_folio_index(eb, member_offset);\
 	const unsigned long oil = get_eb_offset_in_folio(eb,		\
 							 member_offset);\
@@ -114,7 +114,7 @@ void btrfs_set_token_##bits(struct btrfs_map_token *token,		\
 			    const void *ptr, unsigned long off,		\
 			    u##bits val)				\
 {									\
-	const unsigned long member_offset = (unsigned long)ptr + off;	\
+	const unsigned long member_offset = __c_pa(ptr) + off;		\
 	const unsigned long idx = get_eb_folio_index(token->eb, member_offset); \
 	const unsigned long oil = get_eb_offset_in_folio(token->eb,	\
 							 member_offset);\
@@ -148,7 +148,7 @@ void btrfs_set_token_##bits(struct btrfs_map_token *token,		\
 void btrfs_set_##bits(const struct extent_buffer *eb, void *ptr,	\
 		      unsigned long off, u##bits val)			\
 {									\
-	const unsigned long member_offset = (unsigned long)ptr + off;	\
+	const unsigned long member_offset = __c_pa(ptr) + off;		\
 	const unsigned long idx = get_eb_folio_index(eb, member_offset);\
 	const unsigned long oil = get_eb_offset_in_folio(eb,		\
 							 member_offset);\
@@ -180,6 +180,6 @@ void btrfs_node_key(const struct extent_buffer *eb,
 		    struct btrfs_disk_key *disk_key, int nr)
 {
 	unsigned long ptr = btrfs_node_key_ptr_offset(eb, nr);
-	read_eb_member(eb, (struct btrfs_key_ptr *)ptr,
+	read_eb_member(eb, (struct btrfs_key_ptr *)__c_fakep(ptr),
 		       struct btrfs_key_ptr, key, disk_key);
 }

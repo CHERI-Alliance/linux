@@ -41,7 +41,7 @@ static inline u32 btrfs_file_extent_inline_item_len(
 static inline unsigned long btrfs_file_extent_inline_start(
 				const struct btrfs_file_extent_item *e)
 {
-	return (unsigned long)e + BTRFS_FILE_EXTENT_INLINE_DATA_START;
+	return __c_pa(e) + BTRFS_FILE_EXTENT_INLINE_DATA_START;
 }
 
 static inline u32 btrfs_file_extent_calc_inline_size(u32 datasize)

@@ -706,7 +706,7 @@ static int tlv_put_btrfs_timespec(struct send_ctx *sctx, u16 attr,
 				  struct btrfs_timespec *ts)
 {
 	struct btrfs_timespec bts;
-	read_extent_buffer(eb, &bts, (unsigned long)ts, sizeof(bts));
+	read_extent_buffer(eb, &bts, __c_pa(ts), sizeof(bts));
 	return tlv_put(sctx, attr, &bts, sizeof(bts));
 }
 
@@ -1024,8 +1024,7 @@ static int iterate_inode_ref(struct btrfs_root *root, struct btrfs_path *path,
 
 
 	if (found_key->type == BTRFS_INODE_REF_KEY) {
-		ptr = (unsigned long)btrfs_item_ptr(eb, slot,
-						    struct btrfs_inode_ref);
+		ptr = __c_pa(btrfs_item_ptr(eb, slot, struct btrfs_inode_ref));
 		total = btrfs_item_size(eb, slot);
 		elem_size = sizeof(*iref);
 	} else {
@@ -1038,15 +1037,15 @@ static int iterate_inode_ref(struct btrfs_root *root, struct btrfs_path *path,
 		fs_path_reset(p);
 
 		if (found_key->type == BTRFS_INODE_REF_KEY) {
-			iref = (struct btrfs_inode_ref *)(ptr + cur);
+			iref = (struct btrfs_inode_ref *)__c_fakep(ptr + cur);
 			name_len = btrfs_inode_ref_name_len(eb, iref);
-			name_off = (unsigned long)(iref + 1);
+			name_off = __c_pa(iref + 1);
 			index = btrfs_inode_ref_index(eb, iref);
 			dir = found_key->offset;
 		} else {
-			extref = (struct btrfs_inode_extref *)(ptr + cur);
+			extref = (struct btrfs_inode_extref *)__c_fakep(ptr + cur);
 			name_len = btrfs_inode_extref_name_len(eb, extref);
-			name_off = (unsigned long)&extref->name;
+			name_off = __c_pa(&extref->name);
 			index = btrfs_inode_extref_index(eb, extref);
 			dir = btrfs_inode_extref_parent(eb, extref);
 		}
@@ -1201,7 +1200,7 @@ static int iterate_dir_item(struct btrfs_root *root, struct btrfs_path *path,
 			}
 		}
 
-		read_extent_buffer(eb, buf, (unsigned long)(di + 1),
+		read_extent_buffer(eb, buf, __c_pa(di + 1),
 				name_len + data_len);
 
 		len = sizeof(*di) + name_len + data_len;
@@ -1312,7 +1311,7 @@ struct backref_ctx {
 
 static int __clone_root_cmp_bsearch(const void *key, const void *elt)
 {
-	u64 root = (u64)(uintptr_t)key;
+	u64 root = (u64)__c_pa(key);
 	const struct clone_root *cr = elt;
 
 	if (root < btrfs_root_id(cr->root))
@@ -1345,7 +1344,7 @@ static int iterate_backrefs(u64 ino, u64 offset, u64 num_bytes, u64 root_id,
 	struct clone_root *clone_root;
 
 	/* First check if the root is in the list of accepted clone sources */
-	clone_root = bsearch((void *)(uintptr_t)root_id, bctx->sctx->clone_roots,
+	clone_root = bsearch(__c_fakep(root_id), bctx->sctx->clone_roots,
 			     bctx->sctx->clone_roots_cnt,
 			     sizeof(struct clone_root),
 			     __clone_root_cmp_bsearch);
@@ -1476,7 +1475,7 @@ static void store_backref_cache(u64 leaf_bytenr, const struct ulist *root_ids,
 		const u64 root_id = node->val;
 		struct clone_root *root;
 
-		root = bsearch((void *)(uintptr_t)root_id, sctx->clone_roots,
+		root = bsearch(__c_fakep(root_id), sctx->clone_roots,
 			       sctx->clone_roots_cnt, sizeof(struct clone_root),
 			       __clone_root_cmp_bsearch);
 		if (!root)
@@ -2061,7 +2060,7 @@ static int get_first_ref(struct btrfs_root *root, u64 ino,
 				      struct btrfs_inode_ref);
 		len = btrfs_inode_ref_name_len(path->nodes[0], iref);
 		ret = fs_path_add_from_extent_buffer(name, path->nodes[0],
-						     (unsigned long)(iref + 1),
+						     __c_pa(iref + 1),
 						     len);
 		parent_dir = found_key.offset;
 	} else {
@@ -2070,7 +2069,7 @@ static int get_first_ref(struct btrfs_root *root, u64 ino,
 					struct btrfs_inode_extref);
 		len = btrfs_inode_extref_name_len(path->nodes[0], extref);
 		ret = fs_path_add_from_extent_buffer(name, path->nodes[0],
-					(unsigned long)&extref->name, len);
+					__c_pa(&extref->name), len);
 		parent_dir = btrfs_inode_extref_parent(path->nodes[0], extref);
 	}
 	if (ret < 0)
@@ -2553,7 +2552,7 @@ static int send_subvol_begin(struct send_ctx *sctx)
 	}
 	ref = btrfs_item_ptr(leaf, path->slots[0], struct btrfs_root_ref);
 	namelen = btrfs_root_ref_name_len(leaf, ref);
-	read_extent_buffer(leaf, name, (unsigned long)(ref + 1), namelen);
+	read_extent_buffer(leaf, name, __c_pa(ref + 1), namelen);
 	btrfs_release_path(path);
 
 	if (parent_root) {
@@ -3937,7 +3936,7 @@ static int is_ancestor(struct btrfs_root *root,
 
 				ptr = btrfs_item_ptr_offset(leaf, slot);
 				extref = (struct btrfs_inode_extref *)
-					(ptr + cur_offset);
+					__c_fakep(ptr + cur_offset);
 				parent = btrfs_inode_extref_parent(leaf,
 								   extref);
 				cur_offset += sizeof(*extref);
@@ -5868,7 +5867,7 @@ static int send_capabilities(struct send_ctx *sctx)
 	if (ret < 0)
 		goto out;
 
-	data_ptr = (unsigned long)(di + 1) + btrfs_dir_name_len(leaf, di);
+	data_ptr = __c_pa(di + 1) + btrfs_dir_name_len(leaf, di);
 	read_extent_buffer(leaf, buf, data_ptr, buf_len);
 
 	ret = send_set_xattr(sctx, fspath, XATTR_NAME_CAPS,
@@ -7191,7 +7190,7 @@ static int compare_refs(struct send_ctx *sctx, struct btrfs_path *path,
 	item_size = btrfs_item_size(leaf, path->slots[0]);
 	ptr = btrfs_item_ptr_offset(leaf, path->slots[0]);
 	while (cur_offset < item_size) {
-		extref = (struct btrfs_inode_extref *)(ptr +
+		extref = (struct btrfs_inode_extref *)__c_fakep(ptr +
 						       cur_offset);
 		dirid = btrfs_inode_extref_parent(leaf, extref);
 		ref_name_len = btrfs_inode_extref_name_len(leaf, extref);

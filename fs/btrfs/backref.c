@@ -1038,14 +1038,14 @@ static int add_inline_refs(struct btrfs_backref_walk_ctx *ctx,
 	flags = btrfs_extent_flags(leaf, ei);
 	btrfs_item_key_to_cpu(leaf, &found_key, slot);
 
-	ptr = (unsigned long)(ei + 1);
-	end = (unsigned long)ei + item_size;
+	ptr = __c_pa(ei + 1);
+	end = __c_pa(ei) + item_size;
 
 	if (found_key.type == BTRFS_EXTENT_ITEM_KEY &&
 	    flags & BTRFS_EXTENT_FLAG_TREE_BLOCK) {
 		struct btrfs_tree_block_info *info;
 
-		info = (struct btrfs_tree_block_info *)ptr;
+		info = (struct btrfs_tree_block_info *)__c_fakep(ptr);
 		*info_level = btrfs_tree_block_level(leaf, info);
 		ptr += sizeof(struct btrfs_tree_block_info);
 		BUG_ON(ptr > end);
@@ -1060,7 +1060,7 @@ static int add_inline_refs(struct btrfs_backref_walk_ctx *ctx,
 		u64 offset;
 		int type;
 
-		iref = (struct btrfs_extent_inline_ref *)ptr;
+		iref = (struct btrfs_extent_inline_ref *)__c_fakep(ptr);
 		type = btrfs_get_extent_inline_ref_type(leaf, iref,
 							BTRFS_REF_TYPE_ANY);
 		if (type == BTRFS_REF_TYPE_INVALID)
@@ -2098,7 +2098,7 @@ int btrfs_find_one_extref(struct btrfs_root *root, u64 inode_objectid,
 
 		ret = 0;
 		ptr = btrfs_item_ptr_offset(leaf, path->slots[0]);
-		extref = (struct btrfs_inode_extref *)ptr;
+		extref = (struct btrfs_inode_extref *)__c_fakep(ptr);
 		*ret_extref = extref;
 		if (found_off)
 			*found_off = found_key.offset;
@@ -2172,7 +2172,7 @@ char *btrfs_ref_to_path(struct btrfs_root *fs_root, struct btrfs_path *path,
 		iref = btrfs_item_ptr(eb, slot, struct btrfs_inode_ref);
 
 		name_len = btrfs_inode_ref_name_len(eb, iref);
-		name_off = (unsigned long)(iref + 1);
+		name_off = __c_pa(iref + 1);
 
 		parent = next_inum;
 		--bytes_left;
@@ -2305,13 +2305,13 @@ static int get_extent_inline_ref(unsigned long *ptr,
 		} else {
 			*out_eiref = (struct btrfs_extent_inline_ref *)(ei + 1);
 		}
-		*ptr = (unsigned long)*out_eiref;
-		if ((unsigned long)(*ptr) >= (unsigned long)ei + item_size)
+		*ptr = __c_pa(*out_eiref);
+		if ((unsigned long)(*ptr) >= __c_pa(ei) + item_size)
 			return -ENOENT;
 	}
 
-	end = (unsigned long)ei + item_size;
-	*out_eiref = (struct btrfs_extent_inline_ref *)(*ptr);
+	end = __c_pa(ei) + item_size;
+	*out_eiref = (struct btrfs_extent_inline_ref *)__c_fakep(*ptr);
 	*out_type = btrfs_get_extent_inline_ref_type(eb, *out_eiref,
 						     BTRFS_REF_TYPE_ANY);
 	if (*out_type == BTRFS_REF_TYPE_INVALID)
@@ -2498,9 +2498,9 @@ int iterate_extent_inodes(struct btrfs_backref_walk_ctx *ctx,
 		ULIST_ITER_INIT(&root_uiter);
 		while (!ret && (root_node = ulist_next(ctx->roots, &root_uiter))) {
 			btrfs_debug(ctx->fs_info,
-				    "root %llu references leaf %llu, data list %#llx",
+				    "root %llu references leaf %llu, data list %#lx",
 				    root_node->val, ref_node->val,
-				    ref_node->aux);
+				    __c_ua(ref_node->aux));
 			ret = iterate_leaf_refs(ctx->fs_info, inode_list,
 						root_node->val, ctx->bytenr,
 						iterate, user_ctx);
@@ -2625,7 +2625,7 @@ static int iterate_inode_refs(u64 inum, struct inode_fs_paths *ipath)
 				cur, found_key.objectid,
 				btrfs_root_id(fs_root));
 			ret = inode_to_path(parent, name_len,
-				      (unsigned long)(iref + 1), eb, ipath);
+				      __c_pa(iref + 1), eb, ipath);
 			if (ret)
 				break;
 			len = sizeof(*iref) + name_len;
@@ -2680,11 +2680,11 @@ static int iterate_inode_extrefs(u64 inum, struct inode_fs_paths *ipath)
 		while (cur_offset < item_size) {
 			u32 name_len;
 
-			extref = (struct btrfs_inode_extref *)(ptr + cur_offset);
+			extref = (struct btrfs_inode_extref *)__c_fakep(ptr + cur_offset);
 			parent = btrfs_inode_extref_parent(eb, extref);
 			name_len = btrfs_inode_extref_name_len(eb, extref);
 			ret = inode_to_path(parent, name_len,
-				      (unsigned long)&extref->name, eb, ipath);
+				      __c_pa(&extref->name), eb, ipath);
 			if (ret)
 				break;
 
@@ -2711,7 +2711,7 @@ static int inode_to_path(u64 inum, u32 name_len, unsigned long name_off,
 	char *fspath;
 	char *fspath_min;
 	int i = ipath->fspath->elem_cnt;
-	const int s_ptr = sizeof(char *);
+	const int s_ptr = sizeof(u64);
 	u32 bytes_left;
 
 	bytes_left = ipath->fspath->bytes_left > s_ptr ?
@@ -2724,7 +2724,7 @@ static int inode_to_path(u64 inum, u32 name_len, unsigned long name_off,
 		return PTR_ERR(fspath);
 
 	if (fspath > fspath_min) {
-		ipath->fspath->val[i] = (u64)(unsigned long)fspath;
+		ipath->fspath->val[i] = __c_pa(fspath);
 		++ipath->fspath->elem_cnt;
 		ipath->fspath->bytes_left = fspath - fspath_min;
 	} else {
@@ -2982,7 +2982,7 @@ int btrfs_backref_iter_next(struct btrfs_backref_iter *iter)
 			int type;
 
 			iref = (struct btrfs_extent_inline_ref *)
-				((unsigned long)iter->cur_ptr);
+				__c_fakep((unsigned long)iter->cur_ptr);
 			type = btrfs_extent_inline_ref_type(eb, iref);
 
 			size = btrfs_extent_inline_ref_size(type);
@@ -3521,7 +3521,7 @@ int btrfs_backref_add_tree_node(struct btrfs_trans_handle *trans,
 
 			/* Update key for inline backref */
 			iref = (struct btrfs_extent_inline_ref *)
-				((unsigned long)iter->cur_ptr);
+				__c_fakep((unsigned long)iter->cur_ptr);
 			type = btrfs_get_extent_inline_ref_type(eb, iref,
 							BTRFS_REF_TYPE_BLOCK);
 			if (type == BTRFS_REF_TYPE_INVALID) {

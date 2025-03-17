@@ -44,13 +44,13 @@ static inline void put_unaligned_le8(u8 val, void *p)
 
 #define read_eb_member(eb, ptr, type, member, result) (\
 	read_extent_buffer(eb, (char *)(result),			\
-			   ((unsigned long)(ptr)) +			\
+			   (__c_pa(ptr)) +				\
 			    offsetof(type, member),			\
 			    sizeof_field(type, member)))
 
 #define write_eb_member(eb, ptr, type, member, result) (\
 	write_extent_buffer(eb, (char *)(result),			\
-			   ((unsigned long)(ptr)) +			\
+			   (__c_pa(ptr)) +				\
 			    offsetof(type, member),			\
 			    sizeof_field(type, member)))
 
@@ -169,12 +169,12 @@ BTRFS_SETGET_STACK_FUNCS(stack_device_generation, struct btrfs_dev_item,
 
 static inline unsigned long btrfs_device_uuid(struct btrfs_dev_item *d)
 {
-	return (unsigned long)d + offsetof(struct btrfs_dev_item, uuid);
+	return __c_pa(d) + offsetof(struct btrfs_dev_item, uuid);
 }
 
 static inline unsigned long btrfs_device_fsid(struct btrfs_dev_item *d)
 {
-	return (unsigned long)d + offsetof(struct btrfs_dev_item, fsid);
+	return __c_pa(d) + offsetof(struct btrfs_dev_item, fsid);
 }
 
 BTRFS_SETGET_FUNCS(chunk_length, struct btrfs_chunk, length, 64);
@@ -212,7 +212,7 @@ BTRFS_SETGET_STACK_FUNCS(stack_stripe_offset, struct btrfs_stripe, offset, 64);
 
 static inline struct btrfs_stripe *btrfs_stripe_nr(struct btrfs_chunk *c, int nr)
 {
-	unsigned long offset = (unsigned long)c;
+	uintptr_t offset = (uintptr_t)c;
 
 	offset += offsetof(struct btrfs_chunk, stripe);
 	offset += nr * sizeof(struct btrfs_stripe);
@@ -404,7 +404,7 @@ static inline u64 btrfs_node_blockptr(const struct extent_buffer *eb, int nr)
 
 	ptr = offsetof(struct btrfs_node, ptrs) +
 		sizeof(struct btrfs_key_ptr) * nr;
-	return btrfs_key_blockptr(eb, (struct btrfs_key_ptr *)ptr);
+	return btrfs_key_blockptr(eb, (struct btrfs_key_ptr *)__c_fakep(ptr));
 }
 
 static inline void btrfs_set_node_blockptr(const struct extent_buffer *eb,
@@ -414,7 +414,7 @@ static inline void btrfs_set_node_blockptr(const struct extent_buffer *eb,
 
 	ptr = offsetof(struct btrfs_node, ptrs) +
 		sizeof(struct btrfs_key_ptr) * nr;
-	btrfs_set_key_blockptr(eb, (struct btrfs_key_ptr *)ptr, val);
+	btrfs_set_key_blockptr(eb, (struct btrfs_key_ptr *)__c_fakep(ptr), val);
 }
 
 static inline u64 btrfs_node_ptr_generation(const struct extent_buffer *eb, int nr)
@@ -423,7 +423,7 @@ static inline u64 btrfs_node_ptr_generation(const struct extent_buffer *eb, int 
 
 	ptr = offsetof(struct btrfs_node, ptrs) +
 		sizeof(struct btrfs_key_ptr) * nr;
-	return btrfs_key_generation(eb, (struct btrfs_key_ptr *)ptr);
+	return btrfs_key_generation(eb, (struct btrfs_key_ptr *)__c_fakep(ptr));
 }
 
 static inline void btrfs_set_node_ptr_generation(const struct extent_buffer *eb,
@@ -433,7 +433,7 @@ static inline void btrfs_set_node_ptr_generation(const struct extent_buffer *eb,
 
 	ptr = offsetof(struct btrfs_node, ptrs) +
 		sizeof(struct btrfs_key_ptr) * nr;
-	btrfs_set_key_generation(eb, (struct btrfs_key_ptr *)ptr, val);
+	btrfs_set_key_generation(eb, (struct btrfs_key_ptr *)__c_fakep(ptr), val);
 }
 
 static inline unsigned long btrfs_node_key_ptr_offset(const struct extent_buffer *eb, int nr)
@@ -451,7 +451,7 @@ static inline void btrfs_set_node_key(const struct extent_buffer *eb,
 	unsigned long ptr;
 
 	ptr = btrfs_node_key_ptr_offset(eb, nr);
-	write_eb_member(eb, (struct btrfs_key_ptr *)ptr,
+	write_eb_member(eb, (struct btrfs_key_ptr *)__c_fakep(ptr),
 		        struct btrfs_key_ptr, key, disk_key);
 }
 
@@ -469,7 +469,7 @@ static inline unsigned long btrfs_item_nr_offset(const struct extent_buffer *eb,
 
 static inline struct btrfs_item *btrfs_item_nr(const struct extent_buffer *eb, int nr)
 {
-	return (struct btrfs_item *)btrfs_item_nr_offset(eb, nr);
+	return (struct btrfs_item *)__c_fakep(btrfs_item_nr_offset(eb, nr));
 }
 
 #define BTRFS_ITEM_SETGET_FUNCS(member)						\
@@ -1050,7 +1050,7 @@ BTRFS_SETGET_STACK_FUNCS(stack_verity_descriptor_size,
 
 /* Cast into the data area of the leaf. */
 #define btrfs_item_ptr(leaf, slot, type)				\
-	((type *)(btrfs_item_nr_offset(leaf, 0) + btrfs_item_offset(leaf, slot)))
+	((type *)__c_fakep(btrfs_item_nr_offset(leaf, 0) + btrfs_item_offset(leaf, slot)))
 
 #define btrfs_item_ptr_offset(leaf, slot)				\
 	((unsigned long)(btrfs_item_nr_offset(leaf, 0) + btrfs_item_offset(leaf, slot)))

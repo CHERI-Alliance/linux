@@ -395,7 +395,7 @@ int btrfs_get_extent_inline_ref_type(const struct extent_buffer *eb,
 	btrfs_print_leaf(eb);
 	btrfs_err(fs_info,
 		  "eb %llu iref 0x%lx invalid extent inline ref type %d",
-		  eb->start, (unsigned long)iref, type);
+		  eb->start, __c_pa(iref), type);
 
 	return BTRFS_REF_TYPE_INVALID;
 }
@@ -875,8 +875,8 @@ again:
 	ei = btrfs_item_ptr(leaf, path->slots[0], struct btrfs_extent_item);
 	flags = btrfs_extent_flags(leaf, ei);
 
-	ptr = (unsigned long)(ei + 1);
-	end = (unsigned long)ei + item_size;
+	ptr = __c_pa(ei + 1);
+	end = __c_pa(ei) + item_size;
 
 	if (flags & BTRFS_EXTENT_FLAG_TREE_BLOCK && !skinny_metadata) {
 		ptr += sizeof(struct btrfs_tree_block_info);
@@ -890,7 +890,7 @@ again:
 
 	ret = -ENOENT;
 	while (ptr < end) {
-		iref = (struct btrfs_extent_inline_ref *)ptr;
+		iref = (struct btrfs_extent_inline_ref *)__c_fakep(ptr);
 		type = btrfs_get_extent_inline_ref_type(leaf, iref, needed);
 		if (type == BTRFS_EXTENT_OWNER_REF_KEY) {
 			ASSERT(btrfs_fs_incompat(fs_info, SIMPLE_QUOTA));
@@ -970,7 +970,7 @@ again:
 			goto out;
 		}
 	}
-	*ref_ret = (struct btrfs_extent_inline_ref *)ptr;
+	*ref_ret = (struct btrfs_extent_inline_ref *)__c_fakep(ptr);
 out:
 	if (insert) {
 		path->keep_locks = 0;
@@ -1002,7 +1002,7 @@ void setup_inline_extent_backref(struct btrfs_trans_handle *trans,
 
 	leaf = path->nodes[0];
 	ei = btrfs_item_ptr(leaf, path->slots[0], struct btrfs_extent_item);
-	item_offset = (unsigned long)iref - (unsigned long)ei;
+	item_offset = __c_pa(iref) - __c_pa(ei);
 
 	type = extent_ref_type(parent, owner);
 	size = btrfs_extent_inline_ref_size(type);
@@ -1016,13 +1016,13 @@ void setup_inline_extent_backref(struct btrfs_trans_handle *trans,
 	if (extent_op)
 		__run_delayed_extent_op(extent_op, leaf, ei);
 
-	ptr = (unsigned long)ei + item_offset;
-	end = (unsigned long)ei + btrfs_item_size(leaf, path->slots[0]);
+	ptr = __c_pa(ei) + item_offset;
+	end = __c_pa(ei) + btrfs_item_size(leaf, path->slots[0]);
 	if (ptr < end - size)
 		memmove_extent_buffer(leaf, ptr + size, ptr,
 				      end - size - ptr);
 
-	iref = (struct btrfs_extent_inline_ref *)ptr;
+	iref = (struct btrfs_extent_inline_ref *)__c_fakep(ptr);
 	btrfs_set_extent_inline_ref_type(leaf, iref, type);
 	if (type == BTRFS_EXTENT_DATA_REF_KEY) {
 		struct btrfs_extent_data_ref *dref;
@@ -1164,7 +1164,7 @@ static noinline_for_stack int update_inline_extent_backref(
 		btrfs_print_leaf(leaf);
 		btrfs_err(fs_info,
 "invalid refs_to_mod for backref entry, iref %lu extent %llu num_bytes %u, has %d expect >= -%llu",
-			  (unsigned long)iref, key.objectid, extent_size,
+			  __c_pa(iref), key.objectid, extent_size,
 			  refs_to_mod, refs);
 		return -EUCLEAN;
 	}
@@ -1178,8 +1178,8 @@ static noinline_for_stack int update_inline_extent_backref(
 	} else {
 		size =  btrfs_extent_inline_ref_size(type);
 		item_size = btrfs_item_size(leaf, path->slots[0]);
-		ptr = (unsigned long)iref;
-		end = (unsigned long)ei + item_size;
+		ptr = __c_pa(iref);
+		end = __c_pa(ei) + item_size;
 		if (ptr + size < end)
 			memmove_extent_buffer(leaf, ptr, ptr + size,
 					      end - ptr - size);
@@ -2936,14 +2936,14 @@ u64 btrfs_get_extent_owner_root(struct btrfs_fs_info *fs_info,
 		return 0;
 
 	ei = btrfs_item_ptr(leaf, slot, struct btrfs_extent_item);
-	ptr = (unsigned long)(ei + 1);
-	end = (unsigned long)ei + btrfs_item_size(leaf, slot);
+	ptr = __c_pa(ei + 1);
+	end = __c_pa(ei) + btrfs_item_size(leaf, slot);
 
 	/* No inline ref items of any kind, can't check type. */
 	if (ptr == end)
 		return 0;
 
-	iref = (struct btrfs_extent_inline_ref *)ptr;
+	iref = (struct btrfs_extent_inline_ref *)__c_fakep(ptr);
 	type = btrfs_get_extent_inline_ref_type(leaf, iref, BTRFS_REF_TYPE_ANY);
 
 	/* We found an owner ref, get the root out of it. */

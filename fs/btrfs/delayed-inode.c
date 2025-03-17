@@ -766,7 +766,7 @@ static int btrfs_insert_delayed_item(struct btrfs_trans_handle *trans,
 
 		data_ptr = btrfs_item_ptr(path->nodes[0], path->slots[0], char);
 		write_extent_buffer(path->nodes[0], &curr->data,
-				    (unsigned long)data_ptr, curr->data_len);
+				    __c_pa(data_ptr), curr->data_len);
 		path->slots[0]++;
 	}
 
@@ -1038,7 +1038,7 @@ static int __btrfs_update_delayed_inode(struct btrfs_trans_handle *trans,
 	leaf = path->nodes[0];
 	inode_item = btrfs_item_ptr(leaf, path->slots[0],
 				    struct btrfs_inode_item);
-	write_extent_buffer(leaf, &node->inode_item, (unsigned long)inode_item,
+	write_extent_buffer(leaf, &node->inode_item, __c_pa(inode_item),
 			    sizeof(struct btrfs_inode_item));
 	btrfs_mark_buffer_dirty(trans, leaf);
 

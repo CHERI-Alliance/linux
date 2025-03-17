@@ -1893,7 +1893,7 @@ static noinline int btrfs_search_path_in_tree(struct btrfs_fs_info *info,
 		}
 
 		*(ptr + len) = '/';
-		read_extent_buffer(l, ptr, (unsigned long)(iref + 1), len);
+		read_extent_buffer(l, ptr, __c_pa(iref + 1), len);
 
 		if (key.offset == BTRFS_FIRST_FREE_OBJECTID)
 			break;
@@ -1978,8 +1978,7 @@ static int btrfs_search_path_in_tree_user(struct mnt_idmap *idmap,
 			}
 
 			*(ptr + len) = '/';
-			read_extent_buffer(leaf, ptr,
-					(unsigned long)(iref + 1), len);
+			read_extent_buffer(leaf, ptr, __c_pa(iref + 1), len);
 
 			/* Check the read+exec permission of this directory */
 			ret = btrfs_previous_item(root, path, dirid,
@@ -3421,13 +3420,13 @@ static long btrfs_ioctl_ino_to_path(struct btrfs_root *root, void __user *arg)
 
 	for (i = 0; i < ipath->fspath->elem_cnt; ++i) {
 		rel_ptr = ipath->fspath->val[i] -
-			  (u64)(unsigned long)ipath->fspath->val;
+			  (u64)__c_pa(ipath->fspath->val);
 		ipath->fspath->val[i] = rel_ptr;
 	}
 
 	btrfs_free_path(path);
 	path = NULL;
-	ret = copy_to_user((void __user *)(unsigned long)ipa->fspath,
+	ret = copy_to_user((void __user *)(user_uintptr_t)ipa->fspath,
 			   ipath->fspath, size);
 	if (ret) {
 		ret = -EFAULT;
@@ -3496,7 +3495,7 @@ static long btrfs_ioctl_logical_to_ino(struct btrfs_fs_info *fs_info,
 	if (ret < 0)
 		goto out;
 
-	ret = copy_to_user((void __user *)(unsigned long)loi->inodes, inodes,
+	ret = copy_to_user((void __user *)(user_uintptr_t)loi->inodes, inodes,
 			   size);
 	if (ret)
 		ret = -EFAULT;
@@ -4649,7 +4648,7 @@ out_acct:
 }
 
 long btrfs_ioctl(struct file *file, unsigned int
-		cmd, unsigned long arg)
+		cmd, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(file);
 	struct btrfs_fs_info *fs_info = inode_to_fs_info(inode);
@@ -4741,7 +4740,7 @@ long btrfs_ioctl(struct file *file, unsigned int
 	case BTRFS_IOC_BALANCE_V2:
 		return btrfs_ioctl_balance(file, argp);
 	case BTRFS_IOC_BALANCE_CTL:
-		return btrfs_ioctl_balance_ctl(fs_info, arg);
+		return btrfs_ioctl_balance_ctl(fs_info, __c_ua(arg));
 	case BTRFS_IOC_BALANCE_PROGRESS:
 		return btrfs_ioctl_balance_progress(fs_info, argp);
 	case BTRFS_IOC_SET_RECEIVED_SUBVOL:
@@ -4818,6 +4817,6 @@ long btrfs_compat_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 		break;
 	}
 
-	return btrfs_ioctl(file, cmd, (unsigned long) compat_ptr(arg));
+	return btrfs_ioctl(file, cmd, (user_uintptr_t) compat_ptr(arg));
 }
 #endif

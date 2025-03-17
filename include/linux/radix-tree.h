@@ -213,7 +213,7 @@ static inline int radix_tree_deref_retry(void *arg)
  */
 static inline int radix_tree_exception(void *arg)
 {
-	return unlikely((unsigned long)arg & RADIX_TREE_ENTRY_MASK);
+	return unlikely(__c_pa(arg) & RADIX_TREE_ENTRY_MASK);
 }
 
 int radix_tree_insert(struct radix_tree_root *, unsigned long index,

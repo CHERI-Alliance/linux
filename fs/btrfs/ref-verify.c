@@ -460,10 +460,10 @@ static int process_extent_item(struct btrfs_fs_info *fs_info,
 		iref = (struct btrfs_extent_inline_ref *)(ei + 1);
 	}
 
-	ptr = (unsigned long)iref;
-	end = (unsigned long)ei + item_size;
+	ptr = __c_pa(iref);
+	end = __c_pa(ei) + item_size;
 	while (ptr < end) {
-		iref = (struct btrfs_extent_inline_ref *)ptr;
+		iref = (struct btrfs_extent_inline_ref *)__c_fakep(ptr);
 		type = btrfs_extent_inline_ref_type(leaf, iref);
 		offset = btrfs_extent_inline_ref_offset(leaf, iref);
 		switch (type) {

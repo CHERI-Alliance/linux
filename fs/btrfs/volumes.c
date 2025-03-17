@@ -3619,7 +3619,7 @@ static int insert_balance_item(struct btrfs_fs_info *fs_info,
 	leaf = path->nodes[0];
 	item = btrfs_item_ptr(leaf, path->slots[0], struct btrfs_balance_item);
 
-	memzero_extent_buffer(leaf, (unsigned long)item, sizeof(*item));
+	memzero_extent_buffer(leaf, __c_pa(item), sizeof(*item));
 
 	btrfs_cpu_balance_args_to_disk(&disk_bargs, &bctl->data);
 	btrfs_set_balance_data(leaf, item, &disk_bargs);
@@ -7120,8 +7120,8 @@ static int read_one_chunk(struct btrfs_key *key, struct extent_buffer *leaf,
 			btrfs_stripe_offset_nr(leaf, chunk, i);
 		devid = btrfs_stripe_devid_nr(leaf, chunk, i);
 		args.devid = devid;
-		read_extent_buffer(leaf, uuid, (unsigned long)
-				   btrfs_stripe_dev_uuid_nr(chunk, i),
+		read_extent_buffer(leaf, uuid,
+				   __c_pa(btrfs_stripe_dev_uuid_nr(chunk, i)),
 				   BTRFS_UUID_SIZE);
 		args.uuid = uuid;
 		map->stripes[i].dev = btrfs_find_device(fs_info->fs_devices, &args);
@@ -7392,7 +7392,7 @@ int btrfs_read_sys_array(struct btrfs_fs_info *fs_info)
 			break;
 		}
 
-		chunk = (struct btrfs_chunk *)sb_array_offset;
+		chunk = (struct btrfs_chunk *)__c_fakep(sb_array_offset);
 		/*
 		 * At least one btrfs_chunk with one stripe must be present,
 		 * exact stripe count check comes afterwards
@@ -7669,7 +7669,7 @@ static u64 btrfs_dev_stats_value(const struct extent_buffer *eb,
 
 	read_extent_buffer(eb, &val,
 			   offsetof(struct btrfs_dev_stats_item, values) +
-			    ((unsigned long)ptr) + (index * sizeof(u64)),
+			    __c_pa(ptr) + (index * sizeof(u64)),
 			   sizeof(val));
 	return val;
 }
@@ -7680,7 +7680,7 @@ static void btrfs_set_dev_stats_value(struct extent_buffer *eb,
 {
 	write_extent_buffer(eb, &val,
 			    offsetof(struct btrfs_dev_stats_item, values) +
-			     ((unsigned long)ptr) + (index * sizeof(u64)),
+			     __c_pa(ptr) + (index * sizeof(u64)),
 			    sizeof(val));
 }
 

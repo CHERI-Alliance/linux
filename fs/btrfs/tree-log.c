@@ -542,8 +542,8 @@ insert:
 		struct btrfs_inode_item *src_item;
 		struct btrfs_inode_item *dst_item;
 
-		src_item = (struct btrfs_inode_item *)src_ptr;
-		dst_item = (struct btrfs_inode_item *)dst_ptr;
+		src_item = (struct btrfs_inode_item *)__c_fakep(src_ptr);
+		dst_item = (struct btrfs_inode_item *)__c_fakep(dst_ptr);
 
 		if (btrfs_inode_generation(eb, src_item) == 0) {
 			struct extent_buffer *dst_eb = path->nodes[0];
@@ -576,14 +576,14 @@ insert:
 
 	if (save_old_i_size) {
 		struct btrfs_inode_item *dst_item;
-		dst_item = (struct btrfs_inode_item *)dst_ptr;
+		dst_item = (struct btrfs_inode_item *)__c_fakep(dst_ptr);
 		btrfs_set_inode_size(path->nodes[0], dst_item, saved_i_size);
 	}
 
 	/* make sure the generation is filled in */
 	if (key->type == BTRFS_INODE_ITEM_KEY) {
 		struct btrfs_inode_item *dst_item;
-		dst_item = (struct btrfs_inode_item *)dst_ptr;
+		dst_item = (struct btrfs_inode_item *)__c_fakep(dst_ptr);
 		if (btrfs_inode_generation(path->nodes[0], dst_item) == 0) {
 			btrfs_set_inode_generation(path->nodes[0], dst_item,
 						   trans->transid);
@@ -604,7 +604,7 @@ static int read_alloc_one_name(struct extent_buffer *eb, void *start, int len,
 	if (!buf)
 		return -ENOMEM;
 
-	read_extent_buffer(eb, buf, (unsigned long)start, len);
+	read_extent_buffer(eb, buf, __c_pa(start), len);
 	name->name = buf;
 	name->len = len;
 	return 0;
@@ -704,9 +704,9 @@ static noinline int replay_one_extent(struct btrfs_trans_handle *trans,
 		existing = btrfs_item_ptr(leaf, path->slots[0],
 					  struct btrfs_file_extent_item);
 
-		read_extent_buffer(eb, &cmp1, (unsigned long)item,
+		read_extent_buffer(eb, &cmp1, __c_pa(item),
 				   sizeof(cmp1));
-		read_extent_buffer(leaf, &cmp2, (unsigned long)existing,
+		read_extent_buffer(leaf, &cmp2, __c_pa(existing),
 				   sizeof(cmp2));
 
 		/*
@@ -745,7 +745,7 @@ static noinline int replay_one_extent(struct btrfs_trans_handle *trans,
 		dest_offset = btrfs_item_ptr_offset(path->nodes[0],
 						    path->slots[0]);
 		copy_extent_buffer(path->nodes[0], eb, dest_offset,
-				(unsigned long)item,  sizeof(*item));
+				__c_pa(item),  sizeof(*item));
 
 		ins.objectid = btrfs_file_extent_disk_bytenr(eb, item);
 		ins.offset = btrfs_file_extent_disk_num_bytes(eb, item);
@@ -1109,7 +1109,7 @@ again:
 		while (ptr < ptr_end) {
 			struct fscrypt_str victim_name;
 
-			victim_ref = (struct btrfs_inode_ref *)ptr;
+			victim_ref = (struct btrfs_inode_ref *)__c_fakep(ptr);
 			ret = read_alloc_one_name(leaf, (victim_ref + 1),
 				 btrfs_inode_ref_name_len(leaf, victim_ref),
 				 &victim_name);
@@ -1134,7 +1134,7 @@ again:
 			}
 			kfree(victim_name.name);
 
-			ptr = (unsigned long)(victim_ref + 1) + victim_name.len;
+			ptr = __c_pa(victim_ref + 1) + victim_name.len;
 		}
 	}
 	btrfs_release_path(path);
@@ -1159,7 +1159,7 @@ again:
 		while (cur_offset < item_size) {
 			struct fscrypt_str victim_name;
 
-			extref = (struct btrfs_inode_extref *)(base + cur_offset);
+			extref = (struct btrfs_inode_extref *)__c_fakep(base + cur_offset);
 
 			if (btrfs_inode_extref_parent(leaf, extref) != parent_objectid)
 				goto next;
@@ -1238,7 +1238,7 @@ static int extref_get_fields(struct extent_buffer *eb, unsigned long ref_ptr,
 	struct btrfs_inode_extref *extref;
 	int ret;
 
-	extref = (struct btrfs_inode_extref *)ref_ptr;
+	extref = (struct btrfs_inode_extref *)__c_fakep(ref_ptr);
 
 	ret = read_alloc_one_name(eb, &extref->name,
 				  btrfs_inode_extref_name_len(eb, extref), name);
@@ -1259,7 +1259,7 @@ static int ref_get_fields(struct extent_buffer *eb, unsigned long ref_ptr,
 	struct btrfs_inode_ref *ref;
 	int ret;
 
-	ref = (struct btrfs_inode_ref *)ref_ptr;
+	ref = (struct btrfs_inode_ref *)__c_fakep(ref_ptr);
 
 	ret = read_alloc_one_name(eb, ref + 1, btrfs_inode_ref_name_len(eb, ref),
 				  name);
@@ -1390,7 +1390,7 @@ static noinline int add_inode_ref(struct btrfs_trans_handle *trans,
 
 		ref_struct_size = sizeof(struct btrfs_inode_extref);
 		log_ref_ver = 1;
-		r = (struct btrfs_inode_extref *)ref_ptr;
+		r = (struct btrfs_inode_extref *)__c_fakep(ref_ptr);
 		parent_objectid = btrfs_inode_extref_parent(eb, r);
 	} else {
 		ref_struct_size = sizeof(struct btrfs_inode_ref);
@@ -1527,7 +1527,7 @@ static int count_inode_extrefs(struct btrfs_inode *inode, struct btrfs_path *pat
 		cur_offset = 0;
 
 		while (cur_offset < item_size) {
-			extref = (struct btrfs_inode_extref *) (ptr + cur_offset);
+			extref = (struct btrfs_inode_extref *)__c_fakep(ptr + cur_offset);
 			name_len = btrfs_inode_extref_name_len(leaf, extref);
 
 			nlink++;
@@ -1580,10 +1580,10 @@ process_slot:
 		while (ptr < ptr_end) {
 			struct btrfs_inode_ref *ref;
 
-			ref = (struct btrfs_inode_ref *)ptr;
+			ref = (struct btrfs_inode_ref *)__c_fakep(ptr);
 			name_len = btrfs_inode_ref_name_len(path->nodes[0],
 							    ref);
-			ptr = (unsigned long)(ref + 1) + name_len;
+			ptr = __c_pa(ref + 1) + name_len;
 			nlink++;
 		}
 
@@ -2241,7 +2241,7 @@ process_leaf:
 				goto out;
 			}
 			read_extent_buffer(path->nodes[0], name,
-					   (unsigned long)(di + 1), name_len);
+					   __c_pa(di + 1), name_len);
 
 			log_di = btrfs_lookup_xattr(NULL, log, log_path, ino,
 						    name, name_len, 0);
@@ -5310,19 +5310,19 @@ static int btrfs_check_ref_name_override(struct extent_buffer *eb,
 		if (key->type == BTRFS_INODE_REF_KEY) {
 			struct btrfs_inode_ref *iref;
 
-			iref = (struct btrfs_inode_ref *)(ptr + cur_offset);
+			iref = (struct btrfs_inode_ref *)__c_fakep(ptr + cur_offset);
 			parent = key->offset;
 			this_name_len = btrfs_inode_ref_name_len(eb, iref);
-			name_ptr = (unsigned long)(iref + 1);
+			name_ptr = __c_pa(iref + 1);
 			this_len = sizeof(*iref) + this_name_len;
 		} else {
 			struct btrfs_inode_extref *extref;
 
-			extref = (struct btrfs_inode_extref *)(ptr +
+			extref = (struct btrfs_inode_extref *)__c_fakep(ptr +
 							       cur_offset);
 			parent = btrfs_inode_extref_parent(eb, extref);
 			this_name_len = btrfs_inode_extref_name_len(eb, extref);
-			name_ptr = (unsigned long)&extref->name;
+			name_ptr = __c_pa(&extref->name);
 			this_len = sizeof(*extref) + this_name_len;
 		}
 
@@ -6047,7 +6047,7 @@ static int insert_delayed_items_batch(struct btrfs_trans_handle *trans,
 
 		data_ptr = btrfs_item_ptr(path->nodes[0], path->slots[0], char);
 		write_extent_buffer(path->nodes[0], &curr->data,
-				    (unsigned long)data_ptr, curr->data_len);
+				    __c_pa(data_ptr), curr->data_len);
 		curr = list_next_entry(curr, log_list);
 		path->slots[0]++;
 	}
@@ -6798,7 +6798,7 @@ static int btrfs_log_all_parents(struct btrfs_trans_handle *trans,
 				struct btrfs_inode_extref *extref;
 
 				extref = (struct btrfs_inode_extref *)
-					(ptr + cur_offset);
+					__c_fakep(ptr + cur_offset);
 				inode_key.objectid = btrfs_inode_extref_parent(
 					leaf, extref);
 				cur_offset += sizeof(*extref);

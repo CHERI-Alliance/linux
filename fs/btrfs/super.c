@@ -810,7 +810,7 @@ char *btrfs_get_subvol_name_from_objectid(struct btrfs_fs_info *fs_info,
 			goto err;
 		}
 		read_extent_buffer(path->nodes[0], ptr + 1,
-				   (unsigned long)(root_ref + 1), len);
+				   __c_pa(root_ref + 1), len);
 		ptr[0] = '/';
 		dirid = btrfs_root_ref_dirid(path->nodes[0], root_ref);
 		btrfs_release_path(path);
@@ -852,7 +852,7 @@ char *btrfs_get_subvol_name_from_objectid(struct btrfs_fs_info *fs_info,
 				goto err;
 			}
 			read_extent_buffer(path->nodes[0], ptr + 1,
-					   (unsigned long)(inode_ref + 1), len);
+					   __c_pa(inode_ref + 1), len);
 			ptr[0] = '/';
 			btrfs_release_path(path);
 		}
@@ -2193,7 +2193,7 @@ static int btrfs_control_open(struct inode *inode, struct file *file)
  * Used by /dev/btrfs-control for devices ioctls.
  */
 static long btrfs_control_ioctl(struct file *file, unsigned int cmd,
-				unsigned long arg)
+				user_uintptr_t arg)
 {
 	struct btrfs_ioctl_vol_args *vol;
 	struct btrfs_device *device = NULL;
