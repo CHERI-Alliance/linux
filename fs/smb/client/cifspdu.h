@@ -2592,14 +2592,14 @@ struct fea {
 struct fealist {
 	__le32 list_len;
 	struct fea list;
-} __attribute__((packed));
+};
 
 /* used to hold an arbitrary blob of data */
 struct data_blob {
 	__u8 *data;
 	size_t length;
 	void (*free) (struct data_blob *data_blob);
-} __attribute__((packed));
+};
 
 
 #ifdef CONFIG_CIFS_POSIX

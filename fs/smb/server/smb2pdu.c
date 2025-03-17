@@ -75,7 +75,7 @@ static inline bool check_session_id(struct ksmbd_conn *conn, u64 id)
 
 struct channel *lookup_chann_list(struct ksmbd_session *sess, struct ksmbd_conn *conn)
 {
-	return xa_load(&sess->ksmbd_chann_list, (long)conn);
+	return xa_load(&sess->ksmbd_chann_list, __c_pa(conn));
 }
 
 /**
@@ -1549,7 +1549,7 @@ binding_session:
 				return -ENOMEM;
 
 			chann->conn = conn;
-			xa_store(&sess->ksmbd_chann_list, (long)conn, chann, GFP_KERNEL);
+			xa_store(&sess->ksmbd_chann_list, __c_pa(conn), chann, GFP_KERNEL);
 		}
 	}
 
@@ -1630,7 +1630,7 @@ static int krb5_authenticate(struct ksmbd_work *work,
 				return -ENOMEM;
 
 			chann->conn = conn;
-			xa_store(&sess->ksmbd_chann_list, (long)conn, chann, GFP_KERNEL);
+			xa_store(&sess->ksmbd_chann_list, __c_pa(conn), chann, GFP_KERNEL);
 		}
 	}
 

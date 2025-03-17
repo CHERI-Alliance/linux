@@ -9,6 +9,7 @@
 
 #include "ntlmssp.h"
 #include "smbacl.h"
+#include <linux/cheri.h>
 
 /*Create Action Flags*/
 #define FILE_SUPERSEDED                0x00000000
@@ -265,7 +266,7 @@ struct file_sparse {
 struct fs_type_info {
 	char		*fs_name;
 	long		magic_number;
-} __packed;
+} __packed __cheri_pointer_align;
 
 /*
  *	PDU query infolevel structure definitions

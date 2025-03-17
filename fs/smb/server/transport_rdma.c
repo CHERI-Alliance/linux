@@ -217,8 +217,8 @@ unsigned int get_smbd_max_read_write_size(void)
 
 static inline int get_buf_page_count(void *buf, int size)
 {
-	return DIV_ROUND_UP((uintptr_t)buf + size, PAGE_SIZE) -
-		(uintptr_t)buf / PAGE_SIZE;
+	return DIV_ROUND_UP(__c_pa(buf) + size, PAGE_SIZE) -
+		__c_pa(buf) / PAGE_SIZE;
 }
 
 static void smb_direct_destroy_pools(struct smb_direct_transport *transport);

@@ -154,9 +154,9 @@ static int check_wsl_eas(struct kvec *rsp_iov)
 		if (!next)
 			break;
 		if (!IS_ALIGNED(next, 4) ||
-		    check_add_overflow((unsigned long)ea, next, &addr))
+		    check_add_overflow(__c_pa(ea), next, &addr))
 			return -EINVAL;
-		ea = (void *)addr;
+		ea = (void *)ea + (__c_pa(ea) - addr);
 	}
 	return 0;
 }

@@ -30,12 +30,12 @@ cifs_uniqueid_to_ino_t(u64 fileid)
 
 static inline void cifs_set_time(struct dentry *dentry, unsigned long time)
 {
-	dentry->d_fsdata = (void *) time;
+	dentry->d_fsdata = __c_fakep(time);
 }
 
 static inline unsigned long cifs_get_time(struct dentry *dentry)
 {
-	return (unsigned long) dentry->d_fsdata;
+	return __c_pa(dentry->d_fsdata);
 }
 
 extern struct file_system_type cifs_fs_type, smb3_fs_type;
@@ -134,7 +134,7 @@ extern ssize_t cifs_file_copychunk_range(unsigned int xid,
 					struct file *dst_file, loff_t destoff,
 					size_t len, unsigned int flags);
 
-extern long cifs_ioctl(struct file *filep, unsigned int cmd, unsigned long arg);
+extern long cifs_ioctl(struct file *filep, unsigned int cmd, user_uintptr_t arg);
 extern void cifs_setsize(struct inode *inode, loff_t offset);
 extern int cifs_truncate_page(struct address_space *mapping, loff_t from);
 

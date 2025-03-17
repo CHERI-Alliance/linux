@@ -201,7 +201,7 @@ static int ksmbd_chann_del(struct ksmbd_conn *conn, struct ksmbd_session *sess)
 {
 	struct channel *chann;
 
-	chann = xa_erase(&sess->ksmbd_chann_list, (long)conn);
+	chann = xa_erase(&sess->ksmbd_chann_list, __c_pa(conn));
 	if (!chann)
 		return -ENOENT;
 

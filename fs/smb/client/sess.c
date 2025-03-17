@@ -1508,8 +1508,8 @@ sess_auth_ntlmv2(struct sess_data *sess_data)
 	}
 
 
-	sess_data->iov[2].iov_len = (long) bcc_ptr -
-			(long) sess_data->iov[2].iov_base;
+	sess_data->iov[2].iov_len = (long) __c_pa(bcc_ptr) -
+			(long) __c_pa(sess_data->iov[2].iov_base);
 
 	rc = sess_sendreceive(sess_data);
 	if (rc)
@@ -1538,7 +1538,7 @@ sess_auth_ntlmv2(struct sess_data *sess_data)
 		/* no string area to decode, do nothing */
 	} else if (smb_buf->Flags2 & SMBFLG2_UNICODE) {
 		/* unicode string area must be word-aligned */
-		if (!IS_ALIGNED((unsigned long)bcc_ptr - (unsigned long)smb_buf, 2)) {
+		if (!IS_ALIGNED(__c_pa(bcc_ptr) - __c_pa(smb_buf), 2)) {
 			++bcc_ptr;
 			--bytes_remaining;
 		}
@@ -1634,8 +1634,8 @@ sess_auth_kerberos(struct sess_data *sess_data)
 		ascii_ssetup_strings(&bcc_ptr, ses, sess_data->nls_cp);
 	}
 
-	sess_data->iov[2].iov_len = (long) bcc_ptr -
-			(long) sess_data->iov[2].iov_base;
+	sess_data->iov[2].iov_len = (long) __c_pa(bcc_ptr) -
+			(long) __c_pa(sess_data->iov[2].iov_base);
 
 	rc = sess_sendreceive(sess_data);
 	if (rc)
@@ -1674,7 +1674,7 @@ sess_auth_kerberos(struct sess_data *sess_data)
 		/* no string area to decode, do nothing */
 	} else if (smb_buf->Flags2 & SMBFLG2_UNICODE) {
 		/* unicode string area must be word-aligned */
-		if (!IS_ALIGNED((unsigned long)bcc_ptr - (unsigned long)smb_buf, 2)) {
+		if (!IS_ALIGNED(__c_pa(bcc_ptr) - __c_pa(smb_buf), 2)) {
 			++bcc_ptr;
 			--bytes_remaining;
 		}
@@ -1732,8 +1732,8 @@ _sess_auth_rawntlmssp_assemble_req(struct sess_data *sess_data)
 	}
 	unicode_oslm_strings(&bcc_ptr, sess_data->nls_cp);
 
-	sess_data->iov[2].iov_len = (long) bcc_ptr -
-					(long) sess_data->iov[2].iov_base;
+	sess_data->iov[2].iov_len = (long) __c_pa(bcc_ptr) -
+					(long) __c_pa(sess_data->iov[2].iov_base);
 
 	return 0;
 }
@@ -1927,7 +1927,7 @@ sess_auth_rawntlmssp_authenticate(struct sess_data *sess_data)
 		/* no string area to decode, do nothing */
 	} else if (smb_buf->Flags2 & SMBFLG2_UNICODE) {
 		/* unicode string area must be word-aligned */
-		if (!IS_ALIGNED((unsigned long)bcc_ptr - (unsigned long)smb_buf, 2)) {
+		if (!IS_ALIGNED(__c_pa(bcc_ptr) - __c_pa(smb_buf), 2)) {
 			++bcc_ptr;
 			--bytes_remaining;
 		}
