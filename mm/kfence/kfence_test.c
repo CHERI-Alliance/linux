@@ -94,7 +94,7 @@ static const char *get_access_type(const struct expect_report *r)
 /* Check observed report matches information in @r. */
 static bool report_matches(const struct expect_report *r)
 {
-	unsigned long addr = (unsigned long)r->addr;
+	unsigned long addr = __c_pa(r->addr);
 	bool ret = false;
 	unsigned long flags;
 	typeof(observed.lines) expect;
@@ -162,7 +162,7 @@ static bool report_matches(const struct expect_report *r)
 		break;
 	}
 
-	cur += scnprintf(cur, end - cur, " 0x%p", (void *)addr);
+	cur += scnprintf(cur, end - cur, " 0x%p", __c_fakep(addr));
 
 	spin_lock_irqsave(&observed.lock, flags);
 	if (!report_available())
@@ -298,9 +298,9 @@ static void *test_alloc(struct kunit *test, size_t size, gfp_t gfp, enum allocat
 
 			if (policy == ALLOCATE_ANY)
 				return alloc;
-			if (policy == ALLOCATE_LEFT && PAGE_ALIGNED(alloc))
+			if (policy == ALLOCATE_LEFT && PAGE_ALIGNED(__c_pa(alloc)))
 				return alloc;
-			if (policy == ALLOCATE_RIGHT && !PAGE_ALIGNED(alloc))
+			if (policy == ALLOCATE_RIGHT && !PAGE_ALIGNED(__c_pa(alloc)))
 				return alloc;
 		} else if (policy == ALLOCATE_NONE)
 			return alloc;
@@ -721,7 +721,7 @@ static void test_krealloc(struct kunit *test)
 		KUNIT_EXPECT_EQ(test, buf[i], (char)(i + 1));
 
 	buf = krealloc(buf, 0, GFP_KERNEL); /* Free. */
-	KUNIT_EXPECT_EQ(test, (unsigned long)buf, (unsigned long)ZERO_SIZE_PTR);
+	KUNIT_EXPECT_EQ(test, __c_pa(buf), (unsigned long)ZERO_SIZE_PTR);
 	KUNIT_ASSERT_FALSE(test, report_available()); /* No reports yet! */
 
 	READ_ONCE(*expect.addr); /* Ensure krealloc() actually freed earlier KFENCE object. */

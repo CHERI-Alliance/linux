@@ -70,7 +70,7 @@ static int get_stack_skipnr(const unsigned long stack_entries[], int num_entries
 	}
 
 	for (skipnr = 0; skipnr < num_entries; skipnr++) {
-		int len = scnprintf(buf, sizeof(buf), "%ps", (void *)stack_entries[skipnr]);
+		int len = scnprintf(buf, sizeof(buf), "%ps", __c_fakep(stack_entries[skipnr]));
 
 		if (str_has_prefix(buf, ARCH_FUNC_PREFIX "kfence_") ||
 		    str_has_prefix(buf, ARCH_FUNC_PREFIX "__kfence_") ||
@@ -120,7 +120,7 @@ static void kfence_print_stack(struct seq_file *seq, const struct kfence_metadat
 
 		/* stack_trace_seq_print() does not exist; open code our own. */
 		for (; i < track->num_stack_entries; i++)
-			seq_con_printf(seq, " %pS\n", (void *)track->stack_entries[i]);
+			seq_con_printf(seq, " %pS\n", __c_fakep(track->stack_entries[i]));
 	} else {
 		seq_con_printf(seq, " no %s stack\n", show_alloc ? "allocation" : "deallocation");
 	}
@@ -129,7 +129,7 @@ static void kfence_print_stack(struct seq_file *seq, const struct kfence_metadat
 void kfence_print_object(struct seq_file *seq, const struct kfence_metadata *meta)
 {
 	const int size = abs(meta->size);
-	const unsigned long start = meta->addr;
+	const uintptr_t start = meta->addr;
 	const struct kmem_cache *const cache = meta->cache;
 
 	lockdep_assert_held(&meta->lock);
@@ -159,14 +159,17 @@ static void print_diff_canary(unsigned long address, size_t bytes_to_show,
 			      const struct kfence_metadata *meta)
 {
 	const unsigned long show_until_addr = address + bytes_to_show;
-	const u8 *cur, *end;
+	const u8 *cur;
+	unsigned long end;
 
 	/* Do not show contents of object nor read into following guard page. */
-	end = (const u8 *)(address < meta->addr ? min(show_until_addr, meta->addr)
-						: min(show_until_addr, PAGE_ALIGN(address)));
+	end = (address < __c_ua(meta->addr)
+			? min(show_until_addr, __c_ua(meta->addr))
+			: min(show_until_addr, PAGE_ALIGN(address)));
 
 	pr_cont("[");
-	for (cur = (const u8 *)address; cur < end; cur++) {
+	cur = (const u8 *)cheri_make_kernel_data_cap(address, end - address);
+	for (; __c_pa(cur) < end; cur++) {
 		if (*cur == KFENCE_CANARY_PATTERN_U8(cur))
 			pr_cont(" .");
 		else if (no_hash_pointers)
@@ -221,34 +224,34 @@ void kfence_report_error(unsigned long address, bool is_write, struct pt_regs *r
 		const bool left_of_object = address < meta->addr;
 
 		pr_err("BUG: KFENCE: out-of-bounds %s in %pS\n\n", get_access_type(is_write),
-		       (void *)stack_entries[skipnr]);
+		       __c_fakep(stack_entries[skipnr]));
 		pr_err("Out-of-bounds %s at 0x%p (%luB %s of kfence-#%td):\n",
-		       get_access_type(is_write), (void *)address,
-		       left_of_object ? meta->addr - address : address - meta->addr,
+		       get_access_type(is_write), __c_fakep(address),
+		       left_of_object ? __c_ua(meta->addr) - address : address - __c_ua(meta->addr),
 		       left_of_object ? "left" : "right", object_index);
 		break;
 	}
 	case KFENCE_ERROR_UAF:
 		pr_err("BUG: KFENCE: use-after-free %s in %pS\n\n", get_access_type(is_write),
-		       (void *)stack_entries[skipnr]);
+		       __c_fakep(stack_entries[skipnr]));
 		pr_err("Use-after-free %s at 0x%p (in kfence-#%td):\n",
-		       get_access_type(is_write), (void *)address, object_index);
+		       get_access_type(is_write), __c_fakep(address), object_index);
 		break;
 	case KFENCE_ERROR_CORRUPTION:
-		pr_err("BUG: KFENCE: memory corruption in %pS\n\n", (void *)stack_entries[skipnr]);
-		pr_err("Corrupted memory at 0x%p ", (void *)address);
+		pr_err("BUG: KFENCE: memory corruption in %pS\n\n", __c_fakep(stack_entries[skipnr]));
+		pr_err("Corrupted memory at 0x%p ", __c_fakep(address));
 		print_diff_canary(address, 16, meta);
 		pr_cont(" (in kfence-#%td):\n", object_index);
 		break;
 	case KFENCE_ERROR_INVALID:
 		pr_err("BUG: KFENCE: invalid %s in %pS\n\n", get_access_type(is_write),
-		       (void *)stack_entries[skipnr]);
+		       __c_fakep(stack_entries[skipnr]));
 		pr_err("Invalid %s at 0x%p:\n", get_access_type(is_write),
-		       (void *)address);
+		       __c_fakep(address));
 		break;
 	case KFENCE_ERROR_INVALID_FREE:
-		pr_err("BUG: KFENCE: invalid free in %pS\n\n", (void *)stack_entries[skipnr]);
-		pr_err("Invalid free of 0x%p (in kfence-#%td):\n", (void *)address,
+		pr_err("BUG: KFENCE: invalid free in %pS\n\n", __c_fakep(stack_entries[skipnr]));
+		pr_err("Invalid free of 0x%p (in kfence-#%td):\n", __c_fakep(address),
 		       object_index);
 		break;
 	}
@@ -285,14 +288,14 @@ static void kfence_to_kp_stack(const struct kfence_track *track, void **kp_stack
 
 	i = get_stack_skipnr(track->stack_entries, track->num_stack_entries, NULL);
 	for (j = 0; i < track->num_stack_entries && j < KS_ADDRS_COUNT; ++i, ++j)
-		kp_stack[j] = (void *)track->stack_entries[i];
+		kp_stack[j] = __c_fakep(track->stack_entries[i]);
 	if (j < KS_ADDRS_COUNT)
 		kp_stack[j] = NULL;
 }
 
 bool __kfence_obj_info(struct kmem_obj_info *kpp, void *object, struct slab *slab)
 {
-	struct kfence_metadata *meta = addr_to_metadata((unsigned long)object);
+	struct kfence_metadata *meta = addr_to_metadata(__c_pa(object));
 	unsigned long flags;
 
 	if (!meta)

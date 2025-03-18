@@ -3119,7 +3119,7 @@ static void commit_charge(struct folio *folio, struct mem_cgroup *memcg)
 	 * - exclusive reference
 	 * - mem_cgroup_trylock_pages()
 	 */
-	folio->memcg_data = (unsigned long)memcg;
+	folio->memcg_data = (uintptr_t)memcg;
 }
 
 /**
@@ -3259,7 +3259,7 @@ static struct obj_cgroup *current_objcg_update(void)
 		old = xchg(&current->objcg, NULL);
 		if (old) {
 			old = (struct obj_cgroup *)
-				((unsigned long)old & ~CURRENT_OBJCG_UPDATE_FLAG);
+				((uintptr_t)old & ~CURRENT_OBJCG_UPDATE_FLAG);
 			obj_cgroup_put(old);
 
 			old = NULL;
@@ -3442,7 +3442,7 @@ int __memcg_kmem_charge_page(struct page *page, gfp_t gfp, int order)
 		ret = obj_cgroup_charge_pages(objcg, gfp, 1 << order);
 		if (!ret) {
 			obj_cgroup_get(objcg);
-			page->memcg_data = (unsigned long)objcg |
+			page->memcg_data = (uintptr_t)objcg |
 				MEMCG_DATA_KMEM;
 			return 0;
 		}
@@ -6282,7 +6282,7 @@ static int mem_cgroup_move_account(struct folio *folio,
 	css_get(&to->css);
 	css_put(&from->css);
 
-	folio->memcg_data = (unsigned long)to;
+	folio->memcg_data = (uintptr_t)to;
 
 	__folio_memcg_unlock(from);
 
@@ -6831,7 +6831,7 @@ static void mem_cgroup_exit(struct task_struct *task)
 	struct obj_cgroup *objcg = task->objcg;
 
 	objcg = (struct obj_cgroup *)
-		((unsigned long)objcg & ~CURRENT_OBJCG_UPDATE_FLAG);
+		((uintptr_t)objcg & ~CURRENT_OBJCG_UPDATE_FLAG);
 	obj_cgroup_put(objcg);
 
 	/*

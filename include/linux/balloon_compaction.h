@@ -93,7 +93,7 @@ static inline void balloon_page_insert(struct balloon_dev_info *balloon,
 {
 	__SetPageOffline(page);
 	__SetPageMovable(page, &balloon_mops);
-	set_page_private(page, (unsigned long)balloon);
+	set_page_private(page, (uintptr_t)balloon);
 	list_add(&page->lru, &balloon->pages);
 }
 

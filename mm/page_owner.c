@@ -500,7 +500,7 @@ static inline int print_page_owner_memcg(char *kbuf, size_t count, int ret,
 					 struct page *page)
 {
 #ifdef CONFIG_MEMCG
-	unsigned long memcg_data;
+	uintptr_t memcg_data;
 	struct mem_cgroup *memcg;
 	bool online;
 	char name[80];
@@ -907,7 +907,7 @@ static int stack_print(struct seq_file *m, void *v)
 		return 0;
 
 	for (i = 0; i < nr_entries; i++)
-		seq_printf(m, " %pS\n", (void *)entries[i]);
+		seq_printf(m, " %pS\n", (void *)__c_fakep(entries[i]));
 	seq_printf(m, "nr_base_pages: %d\n\n", nr_base_pages);
 
 	return 0;

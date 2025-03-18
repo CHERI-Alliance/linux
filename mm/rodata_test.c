@@ -39,11 +39,11 @@ void rodata_test(void)
 	}
 
 	/* test 4: check if the rodata section is PAGE_SIZE aligned */
-	if (!PAGE_ALIGNED(__start_rodata)) {
+	if (!PAGE_ALIGNED(__c_pa(__start_rodata))) {
 		pr_err("start of .rodata is not page size aligned\n");
 		return;
 	}
-	if (!PAGE_ALIGNED(__end_rodata)) {
+	if (!PAGE_ALIGNED(__c_pa(__end_rodata))) {
 		pr_err("end of .rodata is not page size aligned\n");
 		return;
 	}

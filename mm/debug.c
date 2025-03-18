@@ -73,7 +73,7 @@ static void __dump_folio(struct folio *folio, struct page *page,
 
 #ifdef CONFIG_MEMCG
 	if (folio->memcg_data)
-		pr_warn("memcg:%lx\n", folio->memcg_data);
+		pr_warn("memcg:%lx\n", __c_ua(folio->memcg_data));
 #endif
 	if (folio_test_ksm(folio))
 		type = "ksm ";

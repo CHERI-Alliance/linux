@@ -3499,14 +3499,14 @@ void *vmap_pfn(unsigned long *pfns, unsigned int count, pgprot_t prot)
 			__builtin_return_address(0));
 	if (!area)
 		return NULL;
-	if (apply_to_page_range(&init_mm, (unsigned long)area->addr,
+	if (apply_to_page_range(&init_mm, __c_pa(area->addr),
 			count * PAGE_SIZE, vmap_pfn_apply, &data)) {
 		free_vm_area(area);
 		return NULL;
 	}
 
-	flush_cache_vmap((unsigned long)area->addr,
-			 (unsigned long)area->addr + count * PAGE_SIZE);
+	flush_cache_vmap(__c_pa(area->addr),
+			 __c_pa(area->addr) + count * PAGE_SIZE);
 
 	return area->addr;
 }

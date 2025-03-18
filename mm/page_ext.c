@@ -241,7 +241,7 @@ fail:
 #else /* CONFIG_SPARSEMEM */
 static bool page_ext_invalid(struct page_ext *page_ext)
 {
-	return !page_ext || (((unsigned long)page_ext & PAGE_EXT_INVALID) == PAGE_EXT_INVALID);
+	return !page_ext || ((__c_pa(page_ext) & PAGE_EXT_INVALID) == PAGE_EXT_INVALID);
 }
 
 static struct page_ext *lookup_page_ext(const struct page *page)

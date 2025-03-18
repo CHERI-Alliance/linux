@@ -21,7 +21,7 @@
  * lower 3 bits of the address, to detect memory corruptions with higher
  * probability, where similar constants are used.
  */
-#define KFENCE_CANARY_PATTERN_U8(addr) ((u8)0xaa ^ (u8)((unsigned long)(addr) & 0x7))
+#define KFENCE_CANARY_PATTERN_U8(addr) ((u8)0xaa ^ (u8)(__c_a(addr) & 0x7))
 
 /*
  * Define a continuous 8-byte canary starting from a multiple of 8. The canary
@@ -73,7 +73,7 @@ struct kfence_metadata {
 	 *
 	 * Invariant: ALIGN_DOWN(addr, PAGE_SIZE) is constant.
 	 */
-	unsigned long addr;
+	uintptr_t addr;
 
 	/*
 	 * The size of the original allocation.
@@ -113,7 +113,7 @@ static inline struct kfence_metadata *addr_to_metadata(unsigned long addr)
 
 	/* The checks do not affect performance; only called from slow-paths. */
 
-	if (!is_kfence_address((void *)addr))
+	if (!is_kfence_address(__c_fakep(addr)))
 		return NULL;
 
 	/*
@@ -121,7 +121,7 @@ static inline struct kfence_metadata *addr_to_metadata(unsigned long addr)
 	 * __kfence_pool, in which case we would report an "invalid access"
 	 * error.
 	 */
-	index = (addr - (unsigned long)__kfence_pool) / (PAGE_SIZE * 2) - 1;
+	index = (addr - __c_pa(__kfence_pool)) / (PAGE_SIZE * 2) - 1;
 	if (index < 0 || index >= CONFIG_KFENCE_NUM_OBJECTS)
 		return NULL;
 

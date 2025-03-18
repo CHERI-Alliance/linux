@@ -2131,21 +2131,21 @@ static int add_page_for_migration(struct mm_struct *mm, const void __user *p,
 		int node, struct list_head *pagelist, bool migrate_all)
 {
 	struct vm_area_struct *vma;
-	unsigned long addr;
+	uintptr_t addr;
 	struct page *page;
 	struct folio *folio;
 	int err;
 
 	mmap_read_lock(mm);
-	addr = (unsigned long)untagged_addr_remote(mm, p);
+	addr = (uintptr_t)untagged_addr_remote(mm, p);
 
 	err = -EFAULT;
-	vma = vma_lookup(mm, addr);
+	vma = vma_lookup(mm, __c_ua(addr));
 	if (!vma || !vma_migratable(vma))
 		goto out;
 
 	/* FOLL_DUMP to ignore special (like zero) pages */
-	page = follow_page(vma, addr, FOLL_GET | FOLL_DUMP);
+	page = follow_page(vma, __c_ua(addr), FOLL_GET | FOLL_DUMP);
 
 	err = PTR_ERR(page);
 	if (IS_ERR(page))
@@ -2565,9 +2565,9 @@ static bool migrate_balanced_pgdat(struct pglist_data *pgdat,
 }
 
 static struct folio *alloc_misplaced_dst_folio(struct folio *src,
-					   uintptr_t data)
+					       uintptr_t data)
 {
-	int nid = (int) data;
+	int nid = (int) __c_ua(data);
 	int order = folio_order(src);
 	gfp_t gfp = __GFP_THISNODE;
 
@@ -2662,7 +2662,7 @@ int migrate_misplaced_folio(struct folio *folio, struct vm_area_struct *vma,
 
 	list_add(&folio->lru, &migratepages);
 	nr_remaining = migrate_pages(&migratepages, alloc_misplaced_dst_folio,
-				     NULL, node, MIGRATE_ASYNC,
+				     NULL, __c_fakeu(node), MIGRATE_ASYNC,
 				     MR_NUMA_MISPLACED, &nr_succeeded);
 	if (nr_remaining) {
 		if (!list_empty(&migratepages)) {

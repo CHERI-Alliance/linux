@@ -883,7 +883,7 @@ static inline bool page_expected_state(struct page *page,
 	if (unlikely(__c_pa(page->mapping) |
 			page_ref_count(page) |
 #ifdef CONFIG_MEMCG
-			page->memcg_data |
+			__c_ua(page->memcg_data) |
 #endif
 #ifdef CONFIG_PAGE_POOL
 			((page->pp_magic & ~0x3UL) == PP_SIGNATURE) |

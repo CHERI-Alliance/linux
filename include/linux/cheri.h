@@ -336,7 +336,7 @@ cheri_make_kernel_code_cap(ptraddr_t addr)
 
 #define cheri_bounds_set_kernel(x,l) cheri_bounds_set(x,l)
 
-static __always_inline void *
+static __maybe_unused void *
 cheri_build_kernel_data_cap(ptraddr_t base, ptraddr_t addr, size_t len)
 {
 	return cheri_address_set(cheri_make_kernel_data_cap(base, len), addr);

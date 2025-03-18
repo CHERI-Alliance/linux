@@ -247,10 +247,10 @@ static bool kfence_unprotect(unsigned long addr)
 	return !KFENCE_WARN_ON(!kfence_protect_page(ALIGN_DOWN(addr, PAGE_SIZE), false));
 }
 
-static inline unsigned long metadata_to_pageaddr(const struct kfence_metadata *meta)
+static inline uintptr_t metadata_to_pageaddr(const struct kfence_metadata *meta)
 {
 	unsigned long offset = (meta - kfence_metadata + 1) * PAGE_SIZE * 2;
-	unsigned long pageaddr = (unsigned long)&__kfence_pool[offset];
+	uintptr_t pageaddr = (uintptr_t)&__kfence_pool[offset];
 
 	/* The checks do not affect performance; only called from slow-paths. */
 
@@ -316,9 +316,9 @@ static inline bool check_canary_byte(u8 *addr)
 
 	atomic_long_inc(&counters[KFENCE_COUNTER_BUGS]);
 
-	meta = addr_to_metadata((unsigned long)addr);
+	meta = addr_to_metadata(__c_pa(addr));
 	raw_spin_lock_irqsave(&meta->lock, flags);
-	kfence_report_error((unsigned long)addr, false, NULL, meta, KFENCE_ERROR_CORRUPTION);
+	kfence_report_error(__c_pa(addr), false, NULL, meta, KFENCE_ERROR_CORRUPTION);
 	raw_spin_unlock_irqrestore(&meta->lock, flags);
 
 	return false;
@@ -326,8 +326,8 @@ static inline bool check_canary_byte(u8 *addr)
 
 static inline void set_canary(const struct kfence_metadata *meta)
 {
-	const unsigned long pageaddr = ALIGN_DOWN(meta->addr, PAGE_SIZE);
-	unsigned long addr = pageaddr;
+	const uintptr_t pageaddr = ALIGN_DOWN(meta->addr, PAGE_SIZE);
+	uintptr_t addr = pageaddr;
 
 	/*
 	 * The canary may be written to part of the object memory, but it does
@@ -343,8 +343,8 @@ static inline void set_canary(const struct kfence_metadata *meta)
 
 static inline void check_canary(const struct kfence_metadata *meta)
 {
-	const unsigned long pageaddr = ALIGN_DOWN(meta->addr, PAGE_SIZE);
-	unsigned long addr = pageaddr;
+	const uintptr_t pageaddr = ALIGN_DOWN(meta->addr, PAGE_SIZE);
+	uintptr_t addr = pageaddr;
 
 	/*
 	 * We'll iterate over each canary byte per-side until a corrupted byte
@@ -432,7 +432,7 @@ static void *kfence_guarded_alloc(struct kmem_cache *cache, size_t size, gfp_t g
 	meta->addr = metadata_to_pageaddr(meta);
 	/* Unprotect if we're reusing this page. */
 	if (meta->state == KFENCE_OBJECT_FREED)
-		kfence_unprotect(meta->addr);
+		kfence_unprotect(__c_ua(meta->addr));
 
 	/*
 	 * Note: for allocations made before RNG initialization, will always
@@ -479,7 +479,7 @@ static void *kfence_guarded_alloc(struct kmem_cache *cache, size_t size, gfp_t g
 		cache->ctor(addr);
 
 	if (random_fault)
-		kfence_protect(meta->addr); /* Random "faults" by protecting the object. */
+		kfence_protect(__c_ua(meta->addr)); /* Random "faults" by protecting the object. */
 
 	atomic_long_inc(&counters[KFENCE_COUNTER_ALLOCATED]);
 	atomic_long_inc(&counters[KFENCE_COUNTER_ALLOCS]);
@@ -495,26 +495,30 @@ static void kfence_guarded_free(void *addr, struct kfence_metadata *meta, bool z
 
 	raw_spin_lock_irqsave(&meta->lock, flags);
 
-	if (meta->state != KFENCE_OBJECT_ALLOCATED || meta->addr != (unsigned long)addr) {
+	if (meta->state != KFENCE_OBJECT_ALLOCATED || meta->addr != __c_pa(addr)) {
 		/* Invalid or double-free, bail out. */
 		atomic_long_inc(&counters[KFENCE_COUNTER_BUGS]);
-		kfence_report_error((unsigned long)addr, false, NULL, meta,
+		kfence_report_error(__c_pa(addr), false, NULL, meta,
 				    KFENCE_ERROR_INVALID_FREE);
 		raw_spin_unlock_irqrestore(&meta->lock, flags);
 		return;
 	}
 
 	/* Detect racy use-after-free, or incorrect reallocation of this page by KFENCE. */
-	kcsan_begin_scoped_access((void *)ALIGN_DOWN((unsigned long)addr, PAGE_SIZE), PAGE_SIZE,
+	kcsan_begin_scoped_access((void *)ALIGN_DOWN((uintptr_t)addr, PAGE_SIZE), PAGE_SIZE,
 				  KCSAN_ACCESS_SCOPED | KCSAN_ACCESS_WRITE | KCSAN_ACCESS_ASSERT,
 				  &assert_page_exclusive);
 
 	if (CONFIG_KFENCE_STRESS_TEST_FAULTS)
-		kfence_unprotect((unsigned long)addr); /* To check canary bytes. */
+		kfence_unprotect(__c_pa(addr)); /* To check canary bytes. */
 
 	/* Restore page protection if there was an OOB access. */
 	if (meta->unprotected_page) {
-		memzero_explicit((void *)ALIGN_DOWN(meta->unprotected_page, PAGE_SIZE), PAGE_SIZE);
+		/* Address is from a page fault and does not have bounds. */
+		void *ptr = cheri_make_kernel_data_cap(
+			ALIGN_DOWN(meta->unprotected_page, PAGE_SIZE),
+			PAGE_SIZE);
+		memzero_explicit(ptr, PAGE_SIZE);
 		kfence_protect(meta->unprotected_page);
 		meta->unprotected_page = 0;
 	}
@@ -538,7 +542,7 @@ static void kfence_guarded_free(void *addr, struct kfence_metadata *meta, bool z
 		memzero_explicit(addr, meta->size);
 
 	/* Protect to detect use-after-frees. */
-	kfence_protect((unsigned long)addr);
+	kfence_protect(__c_pa(addr));
 
 	kcsan_end_scoped_access(&assert_page_exclusive);
 	if (!zombie) {
@@ -568,16 +572,16 @@ static void rcu_guarded_free(struct rcu_head *h)
  * Returns 0 on success; otherwise returns the address up to
  * which partial initialization succeeded.
  */
-static unsigned long kfence_init_pool(void)
+static uintptr_t kfence_init_pool(void)
 {
-	unsigned long addr;
+	uintptr_t addr;
 	struct page *pages;
 	int i;
 
 	if (!arch_kfence_init_pool())
-		return (unsigned long)__kfence_pool;
+		return (uintptr_t)__kfence_pool;
 
-	addr = (unsigned long)__kfence_pool;
+	addr = (uintptr_t)__kfence_pool;
 	pages = virt_to_page(__kfence_pool);
 
 	/*
@@ -596,7 +600,7 @@ static unsigned long kfence_init_pool(void)
 
 		__folio_set_slab(slab_folio(slab));
 #ifdef CONFIG_MEMCG_KMEM
-		slab->obj_exts = (unsigned long)&kfence_metadata_init[i / 2 - 1].obj_exts |
+		slab->obj_exts = (uintptr_t)&kfence_metadata_init[i / 2 - 1].obj_exts |
 				 MEMCG_DATA_OBJEXTS;
 #endif
 	}
@@ -608,7 +612,7 @@ static unsigned long kfence_init_pool(void)
 	 * which simplifies the mapping of address to metadata index.
 	 */
 	for (i = 0; i < 2; i++) {
-		if (unlikely(!kfence_protect(addr)))
+		if (unlikely(!kfence_protect(__c_ua(addr))))
 			return addr;
 
 		addr += PAGE_SIZE;
@@ -625,7 +629,7 @@ static unsigned long kfence_init_pool(void)
 		list_add_tail(&meta->list, &kfence_freelist);
 
 		/* Protect the right redzone. */
-		if (unlikely(!kfence_protect(addr + PAGE_SIZE)))
+		if (unlikely(!kfence_protect(__c_ua(addr) + PAGE_SIZE)))
 			goto reset_slab;
 
 		addr += 2 * PAGE_SIZE;
@@ -656,7 +660,7 @@ reset_slab:
 
 static bool __init kfence_init_pool_early(void)
 {
-	unsigned long addr;
+	uintptr_t addr;
 
 	if (!__kfence_pool)
 		return false;
@@ -681,7 +685,7 @@ static bool __init kfence_init_pool_early(void)
 	 * fails for the first page, and therefore expect addr==__kfence_pool in
 	 * most failure cases.
 	 */
-	memblock_free_late(__pa(addr), KFENCE_POOL_SIZE - (addr - (unsigned long)__kfence_pool));
+	memblock_free_late(__pa(addr), KFENCE_POOL_SIZE - (__c_ua(addr) - __c_pa(__kfence_pool)));
 	__kfence_pool = NULL;
 
 	memblock_free_late(__pa(kfence_metadata_init), KFENCE_METADATA_SIZE);
@@ -712,7 +716,7 @@ DEFINE_SHOW_ATTRIBUTE(stats);
 static void *start_object(struct seq_file *seq, loff_t *pos)
 {
 	if (*pos < CONFIG_KFENCE_NUM_OBJECTS)
-		return (void *)((long)*pos + 1);
+		return (void *)(__c_fakep(*pos) + 1);
 	return NULL;
 }
 
@@ -724,13 +728,13 @@ static void *next_object(struct seq_file *seq, void *v, loff_t *pos)
 {
 	++*pos;
 	if (*pos < CONFIG_KFENCE_NUM_OBJECTS)
-		return (void *)((long)*pos + 1);
+		return (void *)(__c_fakep(*pos) + 1);
 	return NULL;
 }
 
 static int show_object(struct seq_file *seq, void *v)
 {
-	struct kfence_metadata *meta = &kfence_metadata[(long)v - 1];
+	struct kfence_metadata *meta = &kfence_metadata[__c_pa(v) - 1];
 	unsigned long flags;
 
 	raw_spin_lock_irqsave(&meta->lock, flags);
@@ -903,7 +907,7 @@ static int kfence_init_late(void)
 {
 	const unsigned long nr_pages_pool = KFENCE_POOL_SIZE / PAGE_SIZE;
 	const unsigned long nr_pages_meta = KFENCE_METADATA_SIZE / PAGE_SIZE;
-	unsigned long addr = (unsigned long)__kfence_pool;
+	uintptr_t addr = (uintptr_t)__kfence_pool;
 	unsigned long free_size = KFENCE_POOL_SIZE;
 	int err = -ENOMEM;
 
@@ -946,7 +950,7 @@ static int kfence_init_late(void)
 	}
 
 	pr_err("%s failed\n", __func__);
-	free_size = KFENCE_POOL_SIZE - (addr - (unsigned long)__kfence_pool);
+	free_size = KFENCE_POOL_SIZE - (__c_ua(addr) - __c_pa(__kfence_pool));
 	err = -EBUSY;
 
 #ifdef CONFIG_CONTIG_ALLOC
@@ -1115,7 +1119,7 @@ void *__kfence_alloc(struct kmem_cache *s, size_t size, gfp_t flags)
 
 size_t kfence_ksize(const void *addr)
 {
-	const struct kfence_metadata *meta = addr_to_metadata((unsigned long)addr);
+	const struct kfence_metadata *meta = addr_to_metadata(__c_pa(addr));
 
 	/*
 	 * Read locklessly -- if there is a race with __kfence_alloc(), this is
@@ -1126,7 +1130,7 @@ size_t kfence_ksize(const void *addr)
 
 void *kfence_object_start(const void *addr)
 {
-	const struct kfence_metadata *meta = addr_to_metadata((unsigned long)addr);
+	const struct kfence_metadata *meta = addr_to_metadata(__c_pa(addr));
 
 	/*
 	 * Read locklessly -- if there is a race with __kfence_alloc(), this is
@@ -1137,7 +1141,7 @@ void *kfence_object_start(const void *addr)
 
 void __kfence_free(void *addr)
 {
-	struct kfence_metadata *meta = addr_to_metadata((unsigned long)addr);
+	struct kfence_metadata *meta = addr_to_metadata(__c_pa(addr));
 
 #ifdef CONFIG_MEMCG_KMEM
 	KFENCE_WARN_ON(meta->obj_exts.objcg);
@@ -1156,12 +1160,12 @@ void __kfence_free(void *addr)
 
 bool kfence_handle_page_fault(unsigned long addr, bool is_write, struct pt_regs *regs)
 {
-	const int page_index = (addr - (unsigned long)__kfence_pool) / PAGE_SIZE;
+	const int page_index = (addr - __c_pa(__kfence_pool)) / PAGE_SIZE;
 	struct kfence_metadata *to_report = NULL;
 	enum kfence_error_type error_type;
 	unsigned long flags;
 
-	if (!is_kfence_address((void *)addr))
+	if (!is_kfence_address(__c_fakep(addr)))
 		return false;
 
 	if (!READ_ONCE(kfence_enabled)) /* If disabled at runtime ... */
@@ -1178,7 +1182,7 @@ bool kfence_handle_page_fault(unsigned long addr, bool is_write, struct pt_regs 
 		if (meta && READ_ONCE(meta->state) == KFENCE_OBJECT_ALLOCATED) {
 			to_report = meta;
 			/* Data race ok; distance calculation approximate. */
-			distance = addr - data_race(meta->addr + meta->size);
+			distance = addr - data_race(__c_ua(meta->addr) + meta->size);
 		}
 
 		meta = addr_to_metadata(addr + PAGE_SIZE);

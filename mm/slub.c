@@ -1898,7 +1898,7 @@ static inline void mark_failed_objexts_alloc(struct slab *slab)
 	slab->obj_exts = OBJEXTS_ALLOC_FAIL;
 }
 
-static inline void handle_failed_objexts_alloc(unsigned long obj_exts,
+static inline void handle_failed_objexts_alloc(uintptr_t obj_exts,
 			struct slabobj_ext *vec, unsigned int objects)
 {
 	/*
@@ -1918,7 +1918,7 @@ static inline void handle_failed_objexts_alloc(unsigned long obj_exts,
 
 static inline void mark_objexts_empty(struct slabobj_ext *obj_exts) {}
 static inline void mark_failed_objexts_alloc(struct slab *slab) {}
-static inline void handle_failed_objexts_alloc(unsigned long obj_exts,
+static inline void handle_failed_objexts_alloc(uintptr_t obj_exts,
 			struct slabobj_ext *vec, unsigned int objects) {}
 
 #endif /* CONFIG_MEM_ALLOC_PROFILING_DEBUG */

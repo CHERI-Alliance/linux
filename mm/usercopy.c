@@ -120,8 +120,8 @@ static bool overlaps(const unsigned long ptr, unsigned long n,
 static inline void check_kernel_text_object(const unsigned long ptr,
 					    unsigned long n, bool to_user)
 {
-	unsigned long textlow = (unsigned long)_stext;
-	unsigned long texthigh = (unsigned long)_etext;
+	unsigned long textlow = __c_pa(_stext);
+	unsigned long texthigh = __c_pa(_etext);
 	unsigned long textlow_linear, texthigh_linear;
 
 	if (overlaps(ptr, n, textlow, texthigh))
@@ -135,13 +135,13 @@ static inline void check_kernel_text_object(const unsigned long ptr,
 	 * __pa() is not just the reverse of __va(). This can be detected
 	 * and checked:
 	 */
-	textlow_linear = (unsigned long)lm_alias(textlow);
+	textlow_linear = __c_pa(lm_alias(textlow));
 	/* No different mapping: we're done. */
 	if (textlow_linear == textlow)
 		return;
 
 	/* Check the secondary mapping... */
-	texthigh_linear = (unsigned long)lm_alias(texthigh);
+	texthigh_linear = __c_pa(lm_alias(texthigh));
 	if (overlaps(ptr, n, textlow_linear, texthigh_linear))
 		usercopy_abort("linear kernel text", NULL, to_user,
 			       ptr - textlow_linear, n);
@@ -162,7 +162,7 @@ static inline void check_bogus_address(const unsigned long ptr, unsigned long n,
 static inline void check_heap_object(const void *ptr, unsigned long n,
 				     bool to_user)
 {
-	unsigned long addr = (unsigned long)ptr;
+	unsigned long addr = __c_pa(ptr);
 	unsigned long offset;
 	struct folio *folio;
 
@@ -220,7 +220,7 @@ void __check_object_size(const void *ptr, unsigned long n, bool to_user)
 		return;
 
 	/* Check for invalid addresses. */
-	check_bogus_address((const unsigned long)ptr, n, to_user);
+	check_bogus_address(__c_pa(ptr), n, to_user);
 
 	/* Check for bad stack object. */
 	switch (check_stack_object(ptr, n)) {
@@ -251,7 +251,7 @@ void __check_object_size(const void *ptr, unsigned long n, bool to_user)
 	check_heap_object(ptr, n, to_user);
 
 	/* Check for object in kernel to avoid text exposure. */
-	check_kernel_text_object((const unsigned long)ptr, n, to_user);
+	check_kernel_text_object(__c_pa(ptr), n, to_user);
 }
 EXPORT_SYMBOL(__check_object_size);
 

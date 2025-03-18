@@ -1,5 +1,9 @@
 # SPDX-License-Identifier: GPL-2.0
 
+ifdef CONFIG_DAMON_VADDR_KUNIT_TEST
+CFLAGS_vaddr.o :=  -Wframe-larger-than=4096
+endif
+
 obj-y				:= core.o
 obj-$(CONFIG_DAMON_VADDR)	+= ops-common.o vaddr.o
 obj-$(CONFIG_DAMON_PADDR)	+= ops-common.o paddr.o

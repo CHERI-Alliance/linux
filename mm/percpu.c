@@ -3305,15 +3305,15 @@ int __init pcpu_page_first_chunk(size_t reserved_size, pcpu_fc_cpu_to_node_fn_t 
 			(uintptr_t)vm.addr + unit * ai->unit_size;
 
 		for (i = 0; i < unit_pages; i++)
-			pcpu_populate_pte(unit_addr + (i << PAGE_SHIFT));
+			pcpu_populate_pte(__c_ua(unit_addr) + (i << PAGE_SHIFT));
 
 		/* pte already populated, the following shouldn't fail */
-		rc = __pcpu_map_pages(unit_addr, &pages[unit * unit_pages],
+		rc = __pcpu_map_pages(__c_ua(unit_addr), &pages[unit * unit_pages],
 				      unit_pages);
 		if (rc < 0)
 			panic("failed to map percpu area, err=%d\n", rc);
 
-		flush_cache_vmap_early(unit_addr, unit_addr + ai->unit_size);
+		flush_cache_vmap_early(__c_ua(unit_addr), __c_ua(unit_addr) + ai->unit_size);
 
 		/* copy static data */
 		memcpy((void *)unit_addr, cheri_make_kernel_data_cap(

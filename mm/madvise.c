@@ -1026,11 +1026,12 @@ static long madvise_remove(struct vm_area_struct *vma,
 static int madvise_vma_behavior(struct vm_area_struct *vma,
 				struct vm_area_struct **prev,
 				unsigned long start, unsigned long end,
-				unsigned long behavior)
+				uintptr_t ubehavior)
 {
 	int error;
 	struct anon_vma_name *anon_name;
 	unsigned long new_flags = vma->vm_flags;
+	unsigned long behavior = __c_ua(ubehavior);
 
 	switch (behavior) {
 	case MADV_REMOVE:
@@ -1226,10 +1227,10 @@ static bool process_madvise_behavior_valid(int behavior)
  */
 static
 int madvise_walk_vmas(struct mm_struct *mm, unsigned long start,
-		      unsigned long end, unsigned long arg,
+		      unsigned long end, uintptr_t arg,
 		      int (*visit)(struct vm_area_struct *vma,
 				   struct vm_area_struct **prev, unsigned long start,
-				   unsigned long end, unsigned long arg))
+				   unsigned long end, uintptr_t arg))
 {
 	struct vm_area_struct *vma;
 	struct vm_area_struct *prev;
@@ -1287,7 +1288,7 @@ int madvise_walk_vmas(struct mm_struct *mm, unsigned long start,
 static int madvise_vma_anon_name(struct vm_area_struct *vma,
 				 struct vm_area_struct **prev,
 				 unsigned long start, unsigned long end,
-				 unsigned long anon_name)
+				 uintptr_t anon_name)
 {
 	int error;
 
@@ -1328,7 +1329,7 @@ int madvise_set_anon_name(struct mm_struct *mm, unsigned long start,
 	if (end == start)
 		return 0;
 
-	return madvise_walk_vmas(mm, start, end, (unsigned long)anon_name,
+	return madvise_walk_vmas(mm, start, end, (uintptr_t)anon_name,
 				 madvise_vma_anon_name);
 }
 #endif /* CONFIG_ANON_VMA_NAME */
@@ -1477,7 +1478,7 @@ int do_madvise(struct mm_struct *mm, user_uintptr_t user_ptr, size_t len_in,
 		error = madvise_populate(mm, start, end, behavior);
 		break;
 	default:
-		error = madvise_walk_vmas(mm, start, end, behavior,
+		error = madvise_walk_vmas(mm, start, end, __c_fakeu(behavior),
 					  madvise_vma_behavior);
 		break;
 	}

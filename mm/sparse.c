@@ -122,7 +122,7 @@ static inline unsigned long sparse_encode_early_nid(int nid)
 
 static inline int sparse_early_nid(struct mem_section *section)
 {
-	return (section->section_mem_map >> SECTION_NID_SHIFT);
+	return (__c_ua(section->section_mem_map) >> SECTION_NID_SHIFT);
 }
 
 /* Validate the physical addressing limitations of the model */
@@ -237,8 +237,8 @@ static void __init memory_present(int nid, unsigned long start, unsigned long en
 
 		ms = __nr_to_section(section);
 		if (!ms->section_mem_map) {
-			ms->section_mem_map = sparse_encode_early_nid(nid) |
-							SECTION_IS_ONLINE;
+			ms->section_mem_map = __c_fakeu(sparse_encode_early_nid(nid) |
+							SECTION_IS_ONLINE);
 			__section_mark_present(ms, section);
 		}
 	}
@@ -279,7 +279,7 @@ static void __init memblocks_present(void)
 static unsigned long sparse_encode_mem_map(struct page *mem_map, unsigned long pnum)
 {
 	unsigned long coded_mem_map =
-		(unsigned long)(mem_map - (section_nr_to_pfn(pnum)));
+		__c_pa(mem_map - (section_nr_to_pfn(pnum)));
 	BUILD_BUG_ON(SECTION_MAP_LAST_BIT > PFN_SECTION_SHIFT);
 	BUG_ON(coded_mem_map & ~SECTION_MAP_MASK);
 	return coded_mem_map;
@@ -481,7 +481,7 @@ void * __meminit sparse_buffer_alloc(unsigned long size)
 	void *ptr = NULL;
 
 	if (sparsemap_buf) {
-		ptr = (void *) roundup((unsigned long)sparsemap_buf, size);
+		ptr = (void *) roundup((uintptr_t)sparsemap_buf, size);
 		if (ptr + size > sparsemap_buf_end)
 			ptr = NULL;
 		else {

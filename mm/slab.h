@@ -96,8 +96,11 @@ struct slab {
 
 	unsigned int __page_type;
 	atomic_t __page_refcount;
+#ifdef CONFIG_CHERI_KERNEL
+	unsigned short _pad;
+#endif
 #ifdef CONFIG_SLAB_OBJ_EXT
-	unsigned long obj_exts;
+	uintptr_t obj_exts;
 #endif
 };
 
@@ -554,7 +557,7 @@ static inline bool kmem_cache_debug_flags(struct kmem_cache *s, slab_flags_t fla
  */
 static inline struct slabobj_ext *slab_obj_exts(struct slab *slab)
 {
-	unsigned long obj_exts = READ_ONCE(slab->obj_exts);
+	uintptr_t obj_exts = READ_ONCE(slab->obj_exts);
 
 #ifdef CONFIG_MEMCG
 	VM_BUG_ON_PAGE(obj_exts && !(obj_exts & MEMCG_DATA_OBJEXTS),
