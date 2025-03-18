@@ -247,7 +247,7 @@ static int snapshot_set_swap_area(struct snapshot_data *data,
 }
 
 static long snapshot_ioctl(struct file *filp, unsigned int cmd,
-							unsigned long arg)
+							user_uintptr_t arg)
 {
 	int error = 0;
 	struct snapshot_data *data;

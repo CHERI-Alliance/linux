@@ -136,7 +136,7 @@ enum trace_type {
 struct syscall_trace_enter {
 	struct trace_entry	ent;
 	int			nr;
-	unsigned long		args[];
+	uintptr_t		args[];
 };
 
 struct syscall_trace_exit {

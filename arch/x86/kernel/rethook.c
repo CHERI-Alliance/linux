@@ -105,7 +105,7 @@ STACK_FRAME_NON_STANDARD_FP(arch_rethook_trampoline);
 
 /* This is called from rethook_trampoline_handler(). */
 void arch_rethook_fixup_return(struct pt_regs *regs,
-			       unsigned long correct_ret_addr)
+			       uintptr_t correct_ret_addr)
 {
 	unsigned long *frame_pointer = (void *)(regs + 1);
 

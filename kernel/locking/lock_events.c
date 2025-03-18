@@ -68,7 +68,7 @@ ssize_t __weak lockevent_read(struct file *file, char __user *user_buf,
 	/*
 	 * Get the counter ID stored in file->f_inode->i_private
 	 */
-	id = (long)file_inode(file)->i_private;
+	id = (long)__c_pa(file_inode(file)->i_private);
 
 	if (id >= lockevent_num)
 		return -EBADF;
@@ -93,7 +93,7 @@ static ssize_t lockevent_write(struct file *file, const char __user *user_buf,
 	/*
 	 * Get the counter ID stored in file->f_inode->i_private
 	 */
-	if ((long)file_inode(file)->i_private != LOCKEVENT_reset_cnts)
+	if ((long)__c_pa(file_inode(file)->i_private) != LOCKEVENT_reset_cnts)
 		return count;
 
 	for_each_possible_cpu(cpu) {
@@ -160,7 +160,7 @@ static int __init init_lockevent_counts(void)
 		if (skip_lockevent(lockevent_names[i]))
 			continue;
 		if (IS_ERR(debugfs_create_file(lockevent_names[i], 0400, d_counts,
-					 (void *)(long)i, &fops_lockevent)))
+					 __c_fakep(i), &fops_lockevent)))
 			goto fail_undo;
 	}
 

@@ -203,7 +203,7 @@ NOKPROBE_SYMBOL(rethook_hook);
 
 /* This assumes the 'tsk' is the current task or is not running. */
 static uintptr_t __rethook_find_ret_addr(struct task_struct *tsk,
-					     struct llist_node **cur)
+					 struct llist_node **cur)
 {
 	struct rethook_node *rh = NULL;
 	struct llist_node *node = *cur;
@@ -215,7 +215,7 @@ static uintptr_t __rethook_find_ret_addr(struct task_struct *tsk,
 
 	while (node) {
 		rh = container_of(node, struct rethook_node, llist);
-		if (rh->ret_addr != (unsigned long)arch_rethook_trampoline) {
+		if (rh->ret_addr != (uintptr_t)arch_rethook_trampoline) {
 			*cur = node;
 			return rh->ret_addr;
 		}
@@ -245,7 +245,7 @@ uintptr_t rethook_find_ret_addr(struct task_struct *tsk, uintptr_t frame,
 				 struct llist_node **cur)
 {
 	struct rethook_node *rhn = NULL;
-	unsigned long ret;
+	uintptr_t ret;
 
 	if (WARN_ON_ONCE(!cur))
 		return 0;
@@ -265,7 +265,7 @@ uintptr_t rethook_find_ret_addr(struct task_struct *tsk, uintptr_t frame,
 NOKPROBE_SYMBOL(rethook_find_ret_addr);
 
 void __weak arch_rethook_fixup_return(struct pt_regs *regs,
-				      unsigned long correct_ret_addr)
+				      uintptr_t correct_ret_addr)
 {
 	/*
 	 * Do nothing by default. If the architecture which uses a
@@ -279,7 +279,7 @@ void __weak arch_rethook_fixup_return(struct pt_regs *regs,
 uintptr_t rethook_trampoline_handler(struct pt_regs *regs, uintptr_t frame)
 {
 	struct llist_node *first, *node = NULL;
-	unsigned long correct_ret_addr;
+	uintptr_t correct_ret_addr;
 	rethook_handler_t handler;
 	struct rethook_node *rhn;
 

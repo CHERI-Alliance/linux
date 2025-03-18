@@ -215,7 +215,7 @@ static void profile_discard_flip_buffers(void)
 
 static void do_profile_hits(int type, void *__pc, unsigned int nr_hits)
 {
-	unsigned long primary, secondary, flags, pc = (unsigned long)__pc;
+	unsigned long primary, secondary, flags, pc = __c_pa(__pc);
 	int i, j, cpu;
 	struct profile_hit *hits;
 

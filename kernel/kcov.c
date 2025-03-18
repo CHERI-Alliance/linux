@@ -573,7 +573,7 @@ static inline bool kcov_check_handle(u64 handle, bool common_valid,
 }
 
 static int kcov_ioctl_locked(struct kcov *kcov, unsigned int cmd,
-			     unsigned long arg)
+			     user_uintptr_t arg)
 {
 	struct task_struct *t;
 	unsigned long flags, unused;
@@ -595,7 +595,7 @@ static int kcov_ioctl_locked(struct kcov *kcov, unsigned int cmd,
 		t = current;
 		if (kcov->t != NULL || t->kcov != NULL)
 			return -EBUSY;
-		mode = kcov_get_mode(arg);
+		mode = kcov_get_mode(__c_ua(arg));
 		if (mode < 0)
 			return mode;
 		kcov_fault_in_area(kcov);
@@ -608,7 +608,7 @@ static int kcov_ioctl_locked(struct kcov *kcov, unsigned int cmd,
 		return 0;
 	case KCOV_DISABLE:
 		/* Disable coverage for the current task. */
-		unused = arg;
+		unused = __c_ua(arg);
 		if (unused != 0 || current->kcov != kcov)
 			return -EINVAL;
 		t = current;
@@ -680,7 +680,8 @@ static int kcov_ioctl_locked(struct kcov *kcov, unsigned int cmd,
 	}
 }
 
-static long kcov_ioctl(struct file *filep, unsigned int cmd, unsigned long arg)
+static long kcov_ioctl(struct file *filep, unsigned int cmd,
+		       user_uintptr_t arg)
 {
 	struct kcov *kcov;
 	int res;
@@ -700,7 +701,7 @@ static long kcov_ioctl(struct file *filep, unsigned int cmd, unsigned long arg)
 		 * First check the size argument - it must be at least 2
 		 * to hold the current position and one PC.
 		 */
-		size = arg;
+		size = __c_ua(arg);
 		if (size < 2 || size > INT_MAX / sizeof(unsigned long))
 			return -EINVAL;
 		area = vmalloc_user(size * sizeof(unsigned long));
@@ -732,7 +733,7 @@ static long kcov_ioctl(struct file *filep, unsigned int cmd, unsigned long arg)
 			kfree(remote_arg);
 			return -EINVAL;
 		}
-		arg = (unsigned long)remote_arg;
+		arg = (uintptr_t)remote_arg;
 		fallthrough;
 	default:
 		/*
@@ -750,7 +751,9 @@ static long kcov_ioctl(struct file *filep, unsigned int cmd, unsigned long arg)
 static const struct file_operations kcov_fops = {
 	.open		= kcov_open,
 	.unlocked_ioctl	= kcov_ioctl,
+#ifndef CONFIG_CHERI_KERNEL
 	.compat_ioctl	= kcov_ioctl,
+#endif
 	.mmap		= kcov_mmap,
 	.release        = kcov_close,
 };

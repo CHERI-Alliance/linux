@@ -258,7 +258,7 @@ static int lstats_show(struct seq_file *m, void *v)
 				if (!bt)
 					break;
 
-				seq_printf(m, " %ps", (void *)bt);
+				seq_printf(m, " %ps", __c_fakep(bt));
 			}
 			seq_puts(m, "\n");
 		}

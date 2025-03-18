@@ -4415,7 +4415,7 @@ static void rcu_barrier_entrain(struct rcu_data *rdp)
  */
 static void rcu_barrier_handler(void *cpu_in)
 {
-	uintptr_t cpu = (uintptr_t)cpu_in;
+	unsigned long cpu = __c_pa(cpu_in);
 	struct rcu_data *rdp = per_cpu_ptr(&rcu_data, cpu);
 
 	lockdep_assert_irqs_disabled();

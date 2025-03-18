@@ -14,7 +14,7 @@ void arch_rethook_prepare(struct rethook_node *rh, struct pt_regs *regs, bool mc
 NOKPROBE_SYMBOL(arch_rethook_prepare);
 
 void arch_rethook_fixup_return(struct pt_regs *regs,
-			       unsigned long correct_ret_addr)
+			       uintptr_t correct_ret_addr)
 {
 	/* Replace fake return address with real one. */
 	regs->gprs[14] = correct_ret_addr;

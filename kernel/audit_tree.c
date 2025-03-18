@@ -213,7 +213,7 @@ static __cacheline_aligned_in_smp DEFINE_SPINLOCK(hash_lock);
 static unsigned long inode_to_key(const struct inode *inode)
 {
 	/* Use address pointed to by connector->obj as the key */
-	return (unsigned long)&inode->i_fsnotify_marks;
+	return __c_pa(&inode->i_fsnotify_marks);
 }
 
 static inline struct list_head *chunk_hash(unsigned long key)
@@ -670,8 +670,7 @@ int audit_remove_tree_rule(struct audit_krule *rule)
 
 static int compare_root(struct vfsmount *mnt, void *arg)
 {
-	return inode_to_key(d_backing_inode(mnt->mnt_root)) ==
-	       (unsigned long)arg;
+	return inode_to_key(d_backing_inode(mnt->mnt_root)) == __c_pa(arg);
 }
 
 void audit_trim_trees(void)
@@ -707,7 +706,7 @@ void audit_trim_trees(void)
 			/* this could be NULL if the watch is dying else where... */
 			node->index |= 1U<<31;
 			if (iterate_mounts(compare_root,
-					   (void *)(chunk->key),
+					   __c_fakep(chunk->key),
 					   root_mnt))
 				node->index &= ~(1U<<31);
 		}

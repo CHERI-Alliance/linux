@@ -589,13 +589,13 @@ static struct page *alloc_dma_pages(gfp_t gfp, size_t bytes, u64 phys_limit)
 	}
 
 	vaddr = phys_to_virt(paddr);
-	if (set_memory_decrypted((unsigned long)vaddr, PFN_UP(bytes)))
+	if (set_memory_decrypted(__c_pa(vaddr), PFN_UP(bytes)))
 		goto error;
 	return page;
 
 error:
 	/* Intentional leak if pages cannot be encrypted again. */
-	if (!set_memory_encrypted((unsigned long)vaddr, PFN_UP(bytes)))
+	if (!set_memory_encrypted(__c_pa(vaddr), PFN_UP(bytes)))
 		__free_pages(page, order);
 	return NULL;
 }
@@ -661,7 +661,7 @@ static void swiotlb_free_tlb(void *vaddr, size_t bytes)
 		return;
 
 	/* Intentional leak if pages cannot be encrypted again. */
-	if (!set_memory_encrypted((unsigned long)vaddr, PFN_UP(bytes)))
+	if (!set_memory_encrypted(__c_pa(vaddr), PFN_UP(bytes)))
 		__free_pages(virt_to_page(vaddr), get_order(bytes));
 }
 
@@ -1826,7 +1826,7 @@ static int rmem_swiotlb_device_init(struct reserved_mem *rmem,
 			return -ENOMEM;
 		}
 
-		set_memory_decrypted((unsigned long)phys_to_virt(rmem->base),
+		set_memory_decrypted(phys_to_virt_a(rmem->base),
 				     rmem->size >> PAGE_SHIFT);
 		virt = cheri_make_kernel_data_cap(phys_to_virt_a(rmem->base),
 						  rmem->size);

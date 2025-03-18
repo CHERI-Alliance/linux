@@ -52,11 +52,11 @@ static inline void *dereference_symbol_descriptor(void *ptr)
 	struct module *mod;
 
 	ptr = dereference_kernel_function_descriptor(ptr);
-	if (is_ksym_addr((unsigned long)ptr))
+	if (is_ksym_addr(__c_pa(ptr)))
 		return ptr;
 
 	preempt_disable();
-	mod = __module_address((unsigned long)ptr);
+	mod = __module_address(__c_pa(ptr));
 	preempt_enable();
 
 	if (mod)

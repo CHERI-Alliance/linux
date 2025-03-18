@@ -1508,7 +1508,7 @@ static void unregister_snapshot_trigger(char *glob,
 static int
 snapshot_trigger_print(struct seq_file *m, struct event_trigger_data *data)
 {
-	return event_trigger_print("snapshot", m, (void *)data->count,
+	return event_trigger_print("snapshot", m, __c_fakep(data->count),
 				   data->filter_str);
 }
 

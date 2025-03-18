@@ -12,13 +12,13 @@ enum bug_trap_type report_cfi_failure(struct pt_regs *regs, unsigned long addr,
 {
 	if (target)
 		pr_err("CFI failure at %pS (target: %pS; expected type: 0x%08x)\n",
-		       (void *)addr, (void *)*target, type);
+		       __c_fakep(addr), __c_fakep(*target), type);
 	else
 		pr_err("CFI failure at %pS (no target information)\n",
-		       (void *)addr);
+		       __c_fakep(addr));
 
 	if (IS_ENABLED(CONFIG_CFI_PERMISSIVE)) {
-		__warn(NULL, 0, (void *)addr, 0, regs, NULL);
+		__warn(NULL, 0, __c_fakep(addr), 0, regs, NULL);
 		return BUG_TRAP_TYPE_WARN;
 	}
 
@@ -28,7 +28,7 @@ enum bug_trap_type report_cfi_failure(struct pt_regs *regs, unsigned long addr,
 #ifdef CONFIG_ARCH_USES_CFI_TRAPS
 static inline unsigned long trap_address(s32 *p)
 {
-	return (unsigned long)((long)p + (long)*p);
+	return (unsigned long)((long)__c_pa(p) + (long)*p);
 }
 
 static bool is_trap(unsigned long addr, s32 *start, s32 *end)

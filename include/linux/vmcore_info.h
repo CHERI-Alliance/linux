@@ -49,9 +49,9 @@ phys_addr_t paddr_vmcoreinfo_note(void);
 #define VMCOREINFO_PAGESIZE(value) \
 	vmcoreinfo_append_str("PAGESIZE=%ld\n", value)
 #define VMCOREINFO_SYMBOL(name) \
-	vmcoreinfo_append_str("SYMBOL(%s)=%lx\n", #name, (unsigned long)&name)
+	vmcoreinfo_append_str("SYMBOL(%s)=%lx\n", #name, __c_pa(&name))
 #define VMCOREINFO_SYMBOL_ARRAY(name) \
-	vmcoreinfo_append_str("SYMBOL(%s)=%lx\n", #name, (unsigned long)name)
+	vmcoreinfo_append_str("SYMBOL(%s)=%lx\n", #name, __c_pa(name))
 #define VMCOREINFO_SIZE(name) \
 	vmcoreinfo_append_str("SIZE(%s)=%lu\n", #name, \
 			      (unsigned long)sizeof(name))

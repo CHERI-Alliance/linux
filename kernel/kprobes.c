@@ -70,7 +70,7 @@ static DEFINE_PER_CPU(struct kprobe *, kprobe_instance);
 kprobe_opcode_t * __weak kprobe_lookup_name(const char *name,
 					unsigned int __unused)
 {
-	return ((kprobe_opcode_t *)(kallsyms_lookup_name(name)));
+	return ((kprobe_opcode_t *)__c_fakep(kallsyms_lookup_name(name)));
 }
 
 /*
@@ -194,7 +194,7 @@ kprobe_opcode_t *__get_insn_slot(struct kprobe_insn_cache *c)
 	slot = kip->insns;
 
 	/* Record the perf ksymbol register event after adding the page */
-	perf_event_ksymbol(PERF_RECORD_KSYMBOL_TYPE_OOL, (unsigned long)kip->insns,
+	perf_event_ksymbol(PERF_RECORD_KSYMBOL_TYPE_OOL, __c_pa(kip->insns),
 			   PAGE_SIZE, false, c->sym);
 out:
 	mutex_unlock(&c->mutex);
@@ -219,7 +219,7 @@ static bool collect_one_slot(struct kprobe_insn_page *kip, int idx)
 			 * the page.
 			 */
 			perf_event_ksymbol(PERF_RECORD_KSYMBOL_TYPE_OOL,
-					   (unsigned long)kip->insns, PAGE_SIZE, true,
+					   __c_pa(kip->insns), PAGE_SIZE, true,
 					   kip->cache->sym);
 			list_del_rcu(&kip->list);
 			synchronize_rcu();
@@ -262,7 +262,7 @@ void __free_insn_slot(struct kprobe_insn_cache *c,
 	mutex_lock(&c->mutex);
 	rcu_read_lock();
 	list_for_each_entry_rcu(kip, &c->pages, list) {
-		idx = ((long)slot - (long)kip->insns) /
+		idx = (__c_pa(slot) - (long)__c_pa(kip->insns)) /
 			(c->insn_size * sizeof(kprobe_opcode_t));
 		if (idx >= 0 && idx < slots_per_page(c))
 			goto out;
@@ -300,8 +300,8 @@ bool __is_insn_slot_addr(struct kprobe_insn_cache *c, unsigned long addr)
 
 	rcu_read_lock();
 	list_for_each_entry_rcu(kip, &c->pages, list) {
-		if (addr >= (unsigned long)kip->insns &&
-		    addr < (unsigned long)kip->insns + PAGE_SIZE) {
+		if (addr >= __c_pa(kip->insns) &&
+		    addr < __c_pa(kip->insns) + PAGE_SIZE) {
 			ret = true;
 			break;
 		}
@@ -323,7 +323,7 @@ int kprobe_cache_get_kallsym(struct kprobe_insn_cache *c, unsigned int *symnum,
 			continue;
 		strscpy(sym, c->sym, KSYM_NAME_LEN);
 		*type = 't';
-		*value = (unsigned long)kip->insns;
+		*value = (unsigned long)__c_pa(kip->insns);
 		ret = 0;
 		break;
 	}
@@ -1378,8 +1378,8 @@ out:
 bool __weak arch_within_kprobe_blacklist(unsigned long addr)
 {
 	/* The '__kprobes' functions and entry code must not be probed. */
-	return addr >= (unsigned long)__kprobes_text_start &&
-	       addr < (unsigned long)__kprobes_text_end;
+	return addr >= __c_pa(__kprobes_text_start) &&
+	       addr < __c_pa(__kprobes_text_end);
 }
 
 static bool __within_kprobe_blacklist(unsigned long addr)
@@ -1412,7 +1412,7 @@ bool within_kprobe_blacklist(unsigned long addr)
 		if (!p)
 			return false;
 		*p = '\0';
-		addr = (unsigned long)kprobe_lookup_name(symname, 0);
+		addr = __c_pa(kprobe_lookup_name(symname, 0));
 		if (addr)
 			return __within_kprobe_blacklist(addr);
 	}
@@ -1438,7 +1438,7 @@ kprobe_opcode_t *__weak arch_adjust_kprobe_addr(unsigned long addr,
 						bool *on_func_entry)
 {
 	*on_func_entry = !offset;
-	return (kprobe_opcode_t *)(addr + offset);
+	return (kprobe_opcode_t *)__c_fakep(addr + offset);
 }
 
 /*
@@ -1472,7 +1472,7 @@ _kprobe_addr(kprobe_opcode_t *addr, const char *symbol_name,
 	 * @addr' + @offset' where @addr' is the symbol start address.
 	 */
 	addr = (void *)addr + offset;
-	if (!kallsyms_lookup_size_offset((unsigned long)addr, NULL, &offset))
+	if (!kallsyms_lookup_size_offset(__c_pa(addr), NULL, &offset))
 		return ERR_PTR(-ENOENT);
 	addr = (void *)addr - offset;
 
@@ -1481,7 +1481,7 @@ _kprobe_addr(kprobe_opcode_t *addr, const char *symbol_name,
 	 * magical function entry details while telling us if this was indeed
 	 * at the start of the function.
 	 */
-	addr = arch_adjust_kprobe_addr((unsigned long)addr, offset, on_func_entry);
+	addr = arch_adjust_kprobe_addr(__c_pa(addr), offset, on_func_entry);
 	if (addr)
 		return addr;
 
@@ -1538,7 +1538,7 @@ static inline int warn_kprobe_rereg(struct kprobe *p)
 
 static int check_ftrace_location(struct kprobe *p)
 {
-	unsigned long addr = (unsigned long)p->addr;
+	unsigned long addr = __c_pa(p->addr);
 
 	if (ftrace_location(addr) == addr) {
 #ifdef CONFIG_KPROBES_ON_FTRACE
@@ -1574,20 +1574,20 @@ static int check_kprobe_address_safe(struct kprobe *p,
 
 	/* Ensure the address is in a text area, and find a module if exists. */
 	*probed_mod = NULL;
-	if (!core_kernel_text((unsigned long) p->addr)) {
-		*probed_mod = __module_text_address((unsigned long) p->addr);
+	if (!core_kernel_text(__c_pa(p->addr))) {
+		*probed_mod = __module_text_address(__c_pa(p->addr));
 		if (!(*probed_mod)) {
 			ret = -EINVAL;
 			goto out;
 		}
 	}
 	/* Ensure it is not in reserved area. */
-	if (in_gate_area_no_mm((unsigned long) p->addr) ||
-	    within_kprobe_blacklist((unsigned long) p->addr) ||
+	if (in_gate_area_no_mm(__c_pa(p->addr)) ||
+	    within_kprobe_blacklist(__c_pa(p->addr)) ||
 	    jump_label_text_reserved(p->addr, p->addr) ||
 	    static_call_text_reserved(p->addr, p->addr) ||
-	    find_bug((unsigned long)p->addr) ||
-	    is_cfi_preamble_symbol((unsigned long)p->addr)) {
+	    find_bug(__c_pa(p->addr)) ||
+	    is_cfi_preamble_symbol(__c_pa(p->addr))) {
 		ret = -EINVAL;
 		goto out;
 	}
@@ -1607,7 +1607,7 @@ static int check_kprobe_address_safe(struct kprobe *p,
 		 * If the module freed '.init.text', we couldn't insert
 		 * kprobes in there.
 		 */
-		if (within_module_init((unsigned long)p->addr, *probed_mod) &&
+		if (within_module_init(__c_pa(p->addr), *probed_mod) &&
 		    !module_is_coming(*probed_mod)) {
 			module_put(*probed_mod);
 			*probed_mod = NULL;
@@ -2152,7 +2152,7 @@ static int pre_handler_kretprobe(struct kprobe *p, struct pt_regs *regs)
 NOKPROBE_SYMBOL(pre_handler_kretprobe);
 
 static void kretprobe_rethook_handler(struct rethook_node *rh, void *data,
-				      unsigned long ret_addr,
+				      uintptr_t ret_addr,
 				      struct pt_regs *regs)
 {
 	struct kretprobe *rp = (struct kretprobe *)data;
@@ -2537,7 +2537,7 @@ static int __init populate_kprobe_blacklist(unsigned long *start,
 	int ret;
 
 	for (iter = start; iter < end; iter++) {
-		entry = (unsigned long)dereference_symbol_descriptor((void *)*iter);
+		entry = __c_pa(dereference_symbol_descriptor(__c_fakep(*iter)));
 		ret = kprobe_add_ksym_blacklist(entry);
 		if (ret == -EINVAL)
 			continue;
@@ -2546,14 +2546,14 @@ static int __init populate_kprobe_blacklist(unsigned long *start,
 	}
 
 	/* Symbols in '__kprobes_text' are blacklisted */
-	ret = kprobe_add_area_blacklist((unsigned long)__kprobes_text_start,
-					(unsigned long)__kprobes_text_end);
+	ret = kprobe_add_area_blacklist(__c_pa(__kprobes_text_start),
+					__c_pa(__kprobes_text_end));
 	if (ret)
 		return ret;
 
 	/* Symbols in 'noinstr' section are blacklisted */
-	ret = kprobe_add_area_blacklist((unsigned long)__noinstr_text_start,
-					(unsigned long)__noinstr_text_end);
+	ret = kprobe_add_area_blacklist(__c_pa(__noinstr_text_start),
+					__c_pa(__noinstr_text_end));
 
 	return ret ? : arch_populate_kprobe_blacklist();
 }
@@ -2834,7 +2834,7 @@ static int show_kprobe_addr(struct seq_file *pi, void *v)
 	head = &kprobe_table[i];
 	preempt_disable();
 	hlist_for_each_entry_rcu(p, head, hlist) {
-		sym = kallsyms_lookup((unsigned long)p->addr, NULL,
+		sym = kallsyms_lookup(__c_pa(p->addr), NULL,
 					&offset, &modname, namebuf);
 		if (kprobe_aggrprobe(p)) {
 			list_for_each_entry_rcu(kp, &p->list, list)
@@ -2878,10 +2878,10 @@ static int kprobe_blacklist_seq_show(struct seq_file *m, void *v)
 	 */
 	if (!kallsyms_show_value(m->file->f_cred))
 		seq_printf(m, "0x%px-0x%px\t%ps\n", NULL, NULL,
-			   (void *)ent->start_addr);
+			   __c_fakep(ent->start_addr));
 	else
-		seq_printf(m, "0x%px-0x%px\t%ps\n", (void *)ent->start_addr,
-			   (void *)ent->end_addr, (void *)ent->start_addr);
+		seq_printf(m, "0x%px-0x%px\t%ps\n", __c_fakep(ent->start_addr),
+			   __c_fakep(ent->end_addr), __c_fakep(ent->start_addr));
 	return 0;
 }
 

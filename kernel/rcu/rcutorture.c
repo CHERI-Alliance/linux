@@ -3170,7 +3170,7 @@ static int rcu_torture_barrier_init(void)
 	for (i = 0; i < n_barrier_cbs; i++) {
 		init_waitqueue_head(&barrier_cbs_wq[i]);
 		ret = torture_create_kthread(rcu_torture_barrier_cbs,
-					     (void *)(long)i,
+					     __c_fakep(i),
 					     barrier_cbs_tasks[i]);
 		if (ret)
 			return ret;
@@ -3839,7 +3839,7 @@ rcu_torture_init(void)
 	}
 	for (i = 0; i < nrealreaders; i++) {
 		rcu_torture_reader_mbchk[i].rtc_chkrdr = -1;
-		firsterr = torture_create_kthread(rcu_torture_reader, (void *)i,
+		firsterr = torture_create_kthread(rcu_torture_reader, __c_fakep(i),
 						  reader_tasks[i]);
 		if (torture_init_error(firsterr))
 			goto unwind;

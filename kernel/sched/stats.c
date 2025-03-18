@@ -99,7 +99,7 @@ void __update_stats_enqueue_sleeper(struct rq *rq, struct task_struct *p,
 			 */
 			if (unlikely(prof_on == SLEEP_PROFILING)) {
 				profile_hits(SLEEP_PROFILING,
-					     (void *)get_wchan(p),
+					     (void *)__c_fakep(get_wchan(p)),
 					     delta >> 20);
 			}
 			account_scheduler_latency(p, delta >> 10, 0);
@@ -199,7 +199,7 @@ static void *schedstat_start(struct seq_file *file, loff_t *offset)
 	*offset = n + 1;
 
 	if (n < nr_cpu_ids)
-		return (void *)(unsigned long)(n + 2);
+		return (void *)__c_fakep(n + 2);
 
 	return NULL;
 }
