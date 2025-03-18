@@ -161,13 +161,13 @@ static s_max get_signed_val(struct type_descriptor *type, void *val)
 {
 	if (is_inline_int(type)) {
 		unsigned extra_bits = sizeof(s_max)*8 - type_bit_width(type);
-		unsigned long ulong_val = (unsigned long)val;
+		unsigned long ulong_val = __c_pa(val);
 
-		return ((s_max)ulong_val) << extra_bits >> extra_bits;
+		return ((s_max __force)ulong_val) << extra_bits >> extra_bits;
 	}
 
 	if (type_bit_width(type) == 64)
-		return *(s64 *)val;
+		return (s_max __force)*(s64 *)val;
 
 	return *(s_max *)val;
 }
@@ -180,10 +180,10 @@ static bool val_is_negative(struct type_descriptor *type, void *val)
 static u_max get_unsigned_val(struct type_descriptor *type, void *val)
 {
 	if (is_inline_int(type))
-		return (unsigned long)val;
+		return (u_max __force)__c_pa(val);
 
 	if (type_bit_width(type) == 64)
-		return *(u64 *)val;
+		return (u_max __force)*(u64 *)val;
 
 	return *(u_max *)val;
 }
@@ -197,19 +197,19 @@ static void val_to_string(char *str, size_t size, struct type_descriptor *type,
 			u_max val = get_unsigned_val(type, value);
 
 			scnprintf(str, size, "0x%08x%08x%08x%08x",
-				(u32)(val >> 96),
-				(u32)(val >> 64),
-				(u32)(val >> 32),
-				(u32)(val));
+				(u32 __force)(val >> 96),
+				(u32 __force)(val >> 64),
+				(u32 __force)(val >> 32),
+				(u32 __force)(val));
 #else
 			WARN_ON(1);
 #endif
 		} else if (type_is_signed(type)) {
 			scnprintf(str, size, "%lld",
-				(s64)get_signed_val(type, value));
+				(s64 __force)get_signed_val(type, value));
 		} else {
 			scnprintf(str, size, "%llu",
-				(u64)get_unsigned_val(type, value));
+				(u64 __force)get_unsigned_val(type, value));
 		}
 	}
 }
@@ -341,7 +341,7 @@ static void handle_null_ptr_deref(struct type_mismatch_data_common *data)
 }
 
 static void handle_misaligned_access(struct type_mismatch_data_common *data,
-				unsigned long ptr)
+				     uintptr_t ptr)
 {
 	if (suppress_report(data->location))
 		return;
@@ -357,7 +357,7 @@ static void handle_misaligned_access(struct type_mismatch_data_common *data,
 }
 
 static void handle_object_size_mismatch(struct type_mismatch_data_common *data,
-					unsigned long ptr)
+					uintptr_t ptr)
 {
 	if (suppress_report(data->location))
 		return;
@@ -365,19 +365,19 @@ static void handle_object_size_mismatch(struct type_mismatch_data_common *data,
 	ubsan_prologue(data->location, "object-size-mismatch");
 	pr_err("%s address %p with insufficient space\n",
 		type_check_kinds[data->type_check_kind],
-		(void *) ptr);
+		(void *)ptr);
 	pr_err("for an object of type %s\n", data->type->type_name);
 	ubsan_epilogue();
 }
 
 static void ubsan_type_mismatch_common(struct type_mismatch_data_common *data,
-				unsigned long ptr)
+				uintptr_t ptr)
 {
 	unsigned long flags = user_access_save();
 
 	if (!ptr)
 		handle_null_ptr_deref(data);
-	else if (data->alignment && !IS_ALIGNED(ptr, data->alignment))
+	else if (data->alignment && !IS_ALIGNED(__c_ua(ptr), data->alignment))
 		handle_misaligned_access(data, ptr);
 	else
 		handle_object_size_mismatch(data, ptr);
@@ -395,7 +395,7 @@ void __ubsan_handle_type_mismatch(struct type_mismatch_data *data,
 		.type_check_kind = data->type_check_kind
 	};
 
-	ubsan_type_mismatch_common(&common_data, (unsigned long)ptr);
+	ubsan_type_mismatch_common(&common_data, (uintptr_t)ptr);
 }
 EXPORT_SYMBOL(__ubsan_handle_type_mismatch);
 
@@ -409,7 +409,7 @@ void __ubsan_handle_type_mismatch_v1(void *_data, void *ptr)
 		.type_check_kind = data->type_check_kind
 	};
 
-	ubsan_type_mismatch_common(&common_data, (unsigned long)ptr);
+	ubsan_type_mismatch_common(&common_data, (uintptr_t)ptr);
 }
 EXPORT_SYMBOL(__ubsan_handle_type_mismatch_v1);
 

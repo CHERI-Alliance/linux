@@ -52,34 +52,34 @@ static __always_inline void fproduct_copy_from_wide_(u64 *output, u128 *input)
 {
 	{
 		u128 xi = input[0];
-		output[0] = ((u64)(xi));
+		output[0] = ((u64 __force)(xi));
 	}
 	{
 		u128 xi = input[1];
-		output[1] = ((u64)(xi));
+		output[1] = ((u64 __force)(xi));
 	}
 	{
 		u128 xi = input[2];
-		output[2] = ((u64)(xi));
+		output[2] = ((u64 __force)(xi));
 	}
 	{
 		u128 xi = input[3];
-		output[3] = ((u64)(xi));
+		output[3] = ((u64 __force)(xi));
 	}
 	{
 		u128 xi = input[4];
-		output[4] = ((u64)(xi));
+		output[4] = ((u64 __force)(xi));
 	}
 }
 
 static __always_inline void
 fproduct_sum_scalar_multiplication_(u128 *output, u64 *input, u64 s)
 {
-	output[0] += (u128)input[0] * s;
-	output[1] += (u128)input[1] * s;
-	output[2] += (u128)input[2] * s;
-	output[3] += (u128)input[3] * s;
-	output[4] += (u128)input[4] * s;
+	output[0] += (u128 __force)input[0] * s;
+	output[1] += (u128 __force)input[1] * s;
+	output[2] += (u128 __force)input[2] * s;
+	output[3] += (u128 __force)input[3] * s;
+	output[4] += (u128 __force)input[4] * s;
 }
 
 static __always_inline void fproduct_carry_wide_(u128 *tmp)
@@ -88,18 +88,18 @@ static __always_inline void fproduct_carry_wide_(u128 *tmp)
 		u32 ctr = 0;
 		u128 tctr = tmp[ctr];
 		u128 tctrp1 = tmp[ctr + 1];
-		u64 r0 = ((u64)(tctr)) & 0x7ffffffffffffLLU;
+		u64 r0 = ((u64 __force)(tctr)) & 0x7ffffffffffffLLU;
 		u128 c = ((tctr) >> (51));
-		tmp[ctr] = ((u128)(r0));
+		tmp[ctr] = ((u128 __force)(r0));
 		tmp[ctr + 1] = ((tctrp1) + (c));
 	}
 	{
 		u32 ctr = 1;
 		u128 tctr = tmp[ctr];
 		u128 tctrp1 = tmp[ctr + 1];
-		u64 r0 = ((u64)(tctr)) & 0x7ffffffffffffLLU;
+		u64 r0 = ((u64 __force)(tctr)) & 0x7ffffffffffffLLU;
 		u128 c = ((tctr) >> (51));
-		tmp[ctr] = ((u128)(r0));
+		tmp[ctr] = ((u128 __force)(r0));
 		tmp[ctr + 1] = ((tctrp1) + (c));
 	}
 
@@ -107,18 +107,18 @@ static __always_inline void fproduct_carry_wide_(u128 *tmp)
 		u32 ctr = 2;
 		u128 tctr = tmp[ctr];
 		u128 tctrp1 = tmp[ctr + 1];
-		u64 r0 = ((u64)(tctr)) & 0x7ffffffffffffLLU;
+		u64 r0 = ((u64 __force)(tctr)) & 0x7ffffffffffffLLU;
 		u128 c = ((tctr) >> (51));
-		tmp[ctr] = ((u128)(r0));
+		tmp[ctr] = ((u128 __force)(r0));
 		tmp[ctr + 1] = ((tctrp1) + (c));
 	}
 	{
 		u32 ctr = 3;
 		u128 tctr = tmp[ctr];
 		u128 tctrp1 = tmp[ctr + 1];
-		u64 r0 = ((u64)(tctr)) & 0x7ffffffffffffLLU;
+		u64 r0 = ((u64 __force)(tctr)) & 0x7ffffffffffffLLU;
 		u128 c = ((tctr) >> (51));
-		tmp[ctr] = ((u128)(r0));
+		tmp[ctr] = ((u128 __force)(r0));
 		tmp[ctr + 1] = ((tctrp1) + (c));
 	}
 }
@@ -199,8 +199,8 @@ static __always_inline void fmul_fmul(u64 *output, u64 *input, u64 *input21)
 		fproduct_carry_wide_(t);
 		b4 = t[4];
 		b0 = t[0];
-		b4_ = ((b4) & (((u128)(0x7ffffffffffffLLU))));
-		b0_ = ((b0) + (((u128)(19) * (((u64)(((b4) >> (51))))))));
+		b4_ = ((b4) & (((u128 __force)(0x7ffffffffffffLLU))));
+		b0_ = ((b0) + (((u128 __force)(19) * (((u64 __force)(((b4) >> (51))))))));
 		t[4] = b4_;
 		t[0] = b0_;
 		fproduct_copy_from_wide_(output, t);
@@ -225,16 +225,16 @@ static __always_inline void fsquare_fsquare__(u128 *tmp, u64 *output)
 	u64 d2 = r2 * 2 * 19;
 	u64 d419 = r4 * 19;
 	u64 d4 = d419 * 2;
-	u128 s0 = ((((((u128)(r0) * (r0))) + (((u128)(d4) * (r1))))) +
-		   (((u128)(d2) * (r3))));
-	u128 s1 = ((((((u128)(d0) * (r1))) + (((u128)(d4) * (r2))))) +
-		   (((u128)(r3 * 19) * (r3))));
-	u128 s2 = ((((((u128)(d0) * (r2))) + (((u128)(r1) * (r1))))) +
-		   (((u128)(d4) * (r3))));
-	u128 s3 = ((((((u128)(d0) * (r3))) + (((u128)(d1) * (r2))))) +
-		   (((u128)(r4) * (d419))));
-	u128 s4 = ((((((u128)(d0) * (r4))) + (((u128)(d1) * (r3))))) +
-		   (((u128)(r2) * (r2))));
+	u128 s0 = ((((((u128 __force)(r0) * (r0))) + (((u128 __force)(d4) * (r1))))) +
+		   (((u128 __force)(d2) * (r3))));
+	u128 s1 = ((((((u128 __force)(d0) * (r1))) + (((u128 __force)(d4) * (r2))))) +
+		   (((u128 __force)(r3 * 19) * (r3))));
+	u128 s2 = ((((((u128 __force)(d0) * (r2))) + (((u128 __force)(r1) * (r1))))) +
+		   (((u128 __force)(d4) * (r3))));
+	u128 s3 = ((((((u128 __force)(d0) * (r3))) + (((u128 __force)(d1) * (r2))))) +
+		   (((u128 __force)(r4) * (d419))));
+	u128 s4 = ((((((u128 __force)(d0) * (r4))) + (((u128 __force)(d1) * (r3))))) +
+		   (((u128 __force)(r2) * (r2))));
 	tmp[0] = s0;
 	tmp[1] = s1;
 	tmp[2] = s2;
@@ -256,8 +256,8 @@ static __always_inline void fsquare_fsquare_(u128 *tmp, u64 *output)
 	fproduct_carry_wide_(tmp);
 	b4 = tmp[4];
 	b0 = tmp[0];
-	b4_ = ((b4) & (((u128)(0x7ffffffffffffLLU))));
-	b0_ = ((b0) + (((u128)(19) * (((u64)(((b4) >> (51))))))));
+	b4_ = ((b4) & (((u128 __force)(0x7ffffffffffffLLU))));
+	b0_ = ((b0) + (((u128 __force)(19) * (((u64 __force)(((b4) >> (51))))))));
 	tmp[4] = b4_;
 	tmp[0] = b0_;
 	fproduct_copy_from_wide_(output, tmp);
@@ -401,29 +401,29 @@ static __always_inline void fscalar(u64 *output, u64 *b, u64 s)
 	u128 b0_;
 	{
 		u64 xi = b[0];
-		tmp[0] = ((u128)(xi) * (s));
+		tmp[0] = ((u128 __force)(xi) * (s));
 	}
 	{
 		u64 xi = b[1];
-		tmp[1] = ((u128)(xi) * (s));
+		tmp[1] = ((u128 __force)(xi) * (s));
 	}
 	{
 		u64 xi = b[2];
-		tmp[2] = ((u128)(xi) * (s));
+		tmp[2] = ((u128 __force)(xi) * (s));
 	}
 	{
 		u64 xi = b[3];
-		tmp[3] = ((u128)(xi) * (s));
+		tmp[3] = ((u128 __force)(xi) * (s));
 	}
 	{
 		u64 xi = b[4];
-		tmp[4] = ((u128)(xi) * (s));
+		tmp[4] = ((u128 __force)(xi) * (s));
 	}
 	fproduct_carry_wide_(tmp);
 	b4 = tmp[4];
 	b0 = tmp[0];
-	b4_ = ((b4) & (((u128)(0x7ffffffffffffLLU))));
-	b0_ = ((b0) + (((u128)(19) * (((u64)(((b4) >> (51))))))));
+	b4_ = ((b4) & (((u128 __force)(0x7ffffffffffffLLU))));
+	b0_ = ((b0) + (((u128 __force)(19) * (((u64 __force)(((b4) >> (51))))))));
 	tmp[4] = b4_;
 	tmp[0] = b0_;
 	fproduct_copy_from_wide_(output, tmp);

@@ -588,7 +588,7 @@ static int LZ4_compress_HC_extStateHC(
 {
 	LZ4HC_CCtx_internal *ctx = &((LZ4_streamHC_t *)state)->internal_donotuse;
 
-	if (((size_t)(state)&(sizeof(void *) - 1)) != 0) {
+	if (((size_t)__c_pa(state)&(sizeof(void *) - 1)) != 0) {
 		/* Error : state is not aligned
 		 * for pointers (32 or 64 bits)
 		 */

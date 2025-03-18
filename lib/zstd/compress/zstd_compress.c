@@ -120,7 +120,7 @@ ZSTD_CCtx* ZSTD_initStaticCCtx(void* workspace, size_t workspaceSize)
     ZSTD_cwksp ws;
     ZSTD_CCtx* cctx;
     if (workspaceSize <= sizeof(ZSTD_CCtx)) return NULL;  /* minimum size */
-    if ((size_t)workspace & 7) return NULL;  /* must be 8-aligned */
+    if ((size_t __force)(uintptr_t)workspace & 7) return NULL;  /* must be 8-aligned */
     ZSTD_cwksp_init(&ws, workspace, workspaceSize, ZSTD_cwksp_static_alloc);
 
     cctx = (ZSTD_CCtx*)ZSTD_cwksp_reserve_object(&ws, sizeof(ZSTD_CCtx));
@@ -4888,7 +4888,7 @@ const ZSTD_CDict* ZSTD_initStaticCDict(
     ZSTD_CDict* cdict;
     ZSTD_CCtx_params params;
 
-    if ((size_t)workspace & 7) return NULL;  /* 8-aligned */
+    if ((size_t __force)(uintptr_t)workspace & 7) return NULL;  /* 8-aligned */
 
     {
         ZSTD_cwksp ws;

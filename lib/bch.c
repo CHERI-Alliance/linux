@@ -229,7 +229,7 @@ void bch_encode(struct bch_control *bch, const uint8_t *data,
 	}
 
 	/* process first unaligned data bytes */
-	m = ((unsigned long)data) & 3;
+	m = __c_pa(data) & 3;
 	if (m) {
 		mlen = (len < (4-m)) ? len : 4-m;
 		bch_encode_unaligned(bch, data, mlen, bch->ecc_buf);

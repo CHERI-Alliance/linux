@@ -50,7 +50,7 @@ static const char * const speed_str_list[] = {"unset", "very_slow", "slow", "nor
 
 static const char *attr_enum_to_string(void *attr, const char * const str_list[], bool *to_free)
 {
-	long val = (long)attr;
+	long val = __c_pa(attr);
 
 	*to_free = false;
 	if (!val)
@@ -115,7 +115,7 @@ static int attr_enum_filter(void *attr, const char *input, int *err,
 		const char * const str_list[], int max)
 {
 	int i, j, input_int = -1;
-	long test_val = (long)attr;
+	long test_val = (long)__c_pa(attr);
 	const char *input_val = NULL;
 
 	for (i = 0; input[i]; i++) {
@@ -179,7 +179,7 @@ static int attr_string_filter(void *attr, const char *input, int *err)
 static int attr_bool_filter(void *attr, const char *input, int *err)
 {
 	int i, input_int = -1;
-	long val = (long)attr;
+	long val = (long)__c_pa(attr);
 	const char *input_str = NULL;
 
 	for (i = 0; input[i]; i++) {
@@ -216,9 +216,9 @@ static void *attr_speed_get(void *test_or_suite, bool is_test)
 	struct kunit_case *test = is_test ? test_or_suite : NULL;
 
 	if (test)
-		return ((void *) test->attr.speed);
+		return __c_fakep(test->attr.speed);
 	else
-		return ((void *) suite->attr.speed);
+		return __c_fakep(suite->attr.speed);
 }
 
 static void *attr_module_get(void *test_or_suite, bool is_test)
@@ -243,7 +243,7 @@ static void *attr_is_init_get(void *test_or_suite, bool is_test)
 	if (test)
 		return ((void *) NULL);
 	else
-		return ((void *) suite->is_init);
+		return __c_fakep(suite->is_init);
 }
 
 /* List of all Test Attributes */

@@ -626,7 +626,7 @@ __debug_object_init(void *addr, const struct debug_obj_descr *descr, int onstack
 
 	debug_objects_fill_pool();
 
-	db = get_bucket((unsigned long) addr);
+	db = get_bucket(__c_pa(addr));
 
 	raw_spin_lock_irqsave(&db->lock, flags);
 
@@ -703,7 +703,7 @@ int debug_object_activate(void *addr, const struct debug_obj_descr *descr)
 
 	debug_objects_fill_pool();
 
-	db = get_bucket((unsigned long) addr);
+	db = get_bucket(__c_pa(addr));
 
 	raw_spin_lock_irqsave(&db->lock, flags);
 
@@ -758,7 +758,7 @@ void debug_object_deactivate(void *addr, const struct debug_obj_descr *descr)
 	if (!debug_objects_enabled)
 		return;
 
-	db = get_bucket((unsigned long) addr);
+	db = get_bucket(__c_pa(addr));
 
 	raw_spin_lock_irqsave(&db->lock, flags);
 
@@ -800,7 +800,7 @@ void debug_object_destroy(void *addr, const struct debug_obj_descr *descr)
 	if (!debug_objects_enabled)
 		return;
 
-	db = get_bucket((unsigned long) addr);
+	db = get_bucket(__c_pa(addr));
 
 	raw_spin_lock_irqsave(&db->lock, flags);
 
@@ -847,7 +847,7 @@ void debug_object_free(void *addr, const struct debug_obj_descr *descr)
 	if (!debug_objects_enabled)
 		return;
 
-	db = get_bucket((unsigned long) addr);
+	db = get_bucket(__c_pa(addr));
 
 	raw_spin_lock_irqsave(&db->lock, flags);
 
@@ -892,7 +892,7 @@ void debug_object_assert_init(void *addr, const struct debug_obj_descr *descr)
 
 	debug_objects_fill_pool();
 
-	db = get_bucket((unsigned long) addr);
+	db = get_bucket(__c_pa(addr));
 
 	raw_spin_lock_irqsave(&db->lock, flags);
 	obj = lookup_object_or_alloc(addr, db, descr, false, true);
@@ -931,7 +931,7 @@ debug_object_active_state(void *addr, const struct debug_obj_descr *descr,
 	if (!debug_objects_enabled)
 		return;
 
-	db = get_bucket((unsigned long) addr);
+	db = get_bucket(__c_pa(addr));
 
 	raw_spin_lock_irqsave(&db->lock, flags);
 
@@ -958,13 +958,14 @@ EXPORT_SYMBOL_GPL(debug_object_active_state);
 #ifdef CONFIG_DEBUG_OBJECTS_FREE
 static void __debug_check_no_obj_freed(const void *address, unsigned long size)
 {
-	unsigned long flags, oaddr, saddr, eaddr, paddr, chunks;
+	unsigned long flags, saddr, eaddr, paddr, chunks;
+	uintptr_t oaddr;
 	int cnt, objs_checked = 0;
 	struct debug_obj *obj, o;
 	struct debug_bucket *db;
 	struct hlist_node *tmp;
 
-	saddr = (unsigned long) address;
+	saddr = __c_pa(address);
 	eaddr = saddr + size;
 	paddr = saddr & ODEBUG_CHUNK_MASK;
 	chunks = ((eaddr - paddr) + (ODEBUG_CHUNK_SIZE - 1));
@@ -978,8 +979,8 @@ repeat:
 		raw_spin_lock_irqsave(&db->lock, flags);
 		hlist_for_each_entry_safe(obj, tmp, &db->list, node) {
 			cnt++;
-			oaddr = (unsigned long) obj->object;
-			if (oaddr < saddr || oaddr >= eaddr)
+			oaddr = (uintptr_t) obj->object;
+			if (__c_ua(oaddr) < saddr || __c_ua(oaddr) >= eaddr)
 				continue;
 
 			switch (obj->state) {

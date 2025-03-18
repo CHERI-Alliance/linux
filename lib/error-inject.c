@@ -71,12 +71,12 @@ static void populate_error_injection_list(struct error_injection_entry *start,
 
 	mutex_lock(&ei_mutex);
 	for (iter = start; iter < end; iter++) {
-		entry = (unsigned long)dereference_symbol_descriptor((void *)iter->addr);
+		entry = __c_pa(dereference_symbol_descriptor(__c_fakep(iter->addr)));
 
 		if (!kernel_text_address(entry) ||
 		    !kallsyms_lookup_size_offset(entry, &size, &offset)) {
 			pr_err("Failed to find error inject entry at %p\n",
-				(void *)entry);
+				__c_fakep(entry));
 			continue;
 		}
 
@@ -198,7 +198,7 @@ static int ei_seq_show(struct seq_file *m, void *v)
 {
 	struct ei_entry *ent = list_entry(v, struct ei_entry, list);
 
-	seq_printf(m, "%ps\t%s\n", (void *)ent->start_addr,
+	seq_printf(m, "%ps\t%s\n", __c_fakep(ent->start_addr),
 		   error_type_string(ent->etype));
 	return 0;
 }

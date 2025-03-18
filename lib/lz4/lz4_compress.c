@@ -813,7 +813,7 @@ static void LZ4_renormDictT(LZ4_stream_t_internal *LZ4_dict,
 	const BYTE *src)
 {
 	if ((LZ4_dict->currentOffset > 0x80000000) ||
-		((uptrval)LZ4_dict->currentOffset > (uptrval)src)) {
+		((uptrval __force)LZ4_dict->currentOffset > (uptrval)src)) {
 		/* address space overflow */
 		/* rescale hash table */
 		U32 const delta = LZ4_dict->currentOffset - 64 * KB;

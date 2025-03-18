@@ -169,7 +169,7 @@ static noinline void test_ ## name (struct kunit *test)		\
 	/* Clear entire check buffer for 0xFF overlap test. */	\
 	memset(check_buf, 0x00, sizeof(check_buf));		\
 	/* Fill stack with 0xFF. */				\
-	ignored = leaf_ ##name((unsigned long)&ignored, 1,	\
+	ignored = leaf_ ##name(__c_pa(&ignored), 1,		\
 				FETCH_ARG_ ## which(zero));	\
 	/* Verify all bytes overwritten with 0xFF. */		\
 	for (sum = 0, i = 0; i < target_size; i++)		\
@@ -177,7 +177,7 @@ static noinline void test_ ## name (struct kunit *test)		\
 	/* Clear entire check buffer for later bit tests. */	\
 	memset(check_buf, 0x00, sizeof(check_buf));		\
 	/* Extract stack-defined variable contents. */		\
-	ignored = leaf_ ##name((unsigned long)&ignored, 0,	\
+	ignored = leaf_ ##name(__c_pa(&ignored), 0,		\
 				FETCH_ARG_ ## which(zero));	\
 	/*							\
 	 * Delay the sum test to here to do as little as	\
@@ -193,8 +193,8 @@ static noinline void test_ ## name (struct kunit *test)		\
 		"stackframe was not the same between calls!? "	\
 		"(fill %zu wide, target offset by %d)\n",	\
 		fill_size,					\
-		(int)((ssize_t)(uintptr_t)fill_start -		\
-		      (ssize_t)(uintptr_t)target_start));	\
+		(int)((ssize_t)__c_pa(fill_start) -		\
+		      (ssize_t)__c_pa(target_start)));		\
 								\
 	/* Look for any bytes still 0xFF in check region. */	\
 	for (sum = 0, i = 0; i < target_size; i++)		\
@@ -213,7 +213,7 @@ static noinline DO_NOTHING_TYPE_ ## which(var_type)		\
 do_nothing_ ## name(var_type *ptr)				\
 {								\
 	/* Will always be true, but compiler doesn't know. */	\
-	if ((unsigned long)ptr > 0x2)				\
+	if (__c_pa(ptr) > 0x2)				\
 		return DO_NOTHING_RETURN_ ## which(ptr);	\
 	else							\
 		return DO_NOTHING_RETURN_ ## which(ptr + 1);	\

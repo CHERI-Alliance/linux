@@ -1298,7 +1298,7 @@ static void dmirror_device_remove_chunks(struct dmirror_device *mdevice)
 
 static long dmirror_fops_unlocked_ioctl(struct file *filp,
 					unsigned int command,
-					unsigned long arg)
+					user_uintptr_t arg)
 {
 	void __user *uarg = (void __user *)arg;
 	struct hmm_dmirror_cmd cmd;
