@@ -14,7 +14,7 @@ struct suspend_context {
 	struct pt_regs regs;
 	/* Saved and restored by high-level functions */
 	unsigned long envcfg;
-	unsigned long tvec;
+	uintptr_t tvec;
 	unsigned long ie;
 #ifdef CONFIG_MMU
 	unsigned long satp;
@@ -32,7 +32,7 @@ int __cpu_suspend_enter(struct suspend_context *context);
 /* High-level CPU suspend which will save context and call finish() */
 int cpu_suspend(unsigned long arg,
 		int (*finish)(unsigned long arg,
-			      uintptr_t entry,
+			      unsigned long entry,
 			      uintptr_t context));
 
 /* Low-level CPU resume entry function */

@@ -11,7 +11,7 @@
  * next frame tail.
  */
 static unsigned long user_backtrace(struct perf_callchain_entry_ctx *entry,
-				    unsigned long fp, unsigned long reg_ra)
+				    uintptr_t fp, unsigned long reg_ra)
 {
 	struct stackframe buftail;
 	unsigned long ra = 0;
@@ -32,7 +32,7 @@ static unsigned long user_backtrace(struct perf_callchain_entry_ctx *entry,
 
 	fp = buftail.fp;
 	if (ra != 0)
-		perf_callchain_store(entry, ra);
+		perf_callchain_store(entry, __c_ua(ra));
 	else
 		return 0;
 
@@ -56,10 +56,10 @@ static unsigned long user_backtrace(struct perf_callchain_entry_ctx *entry,
 void perf_callchain_user(struct perf_callchain_entry_ctx *entry,
 			 struct pt_regs *regs)
 {
-	unsigned long fp = 0;
+	uintptr_t fp = 0;
 
 	fp = regs->s0;
-	perf_callchain_store(entry, regs->epc);
+	perf_callchain_store(entry, __c_ua(regs->epc));
 
 	fp = user_backtrace(entry, fp, regs->ra);
 	while (fp && !(fp & 0x3) && entry->nr < entry->max_stack)

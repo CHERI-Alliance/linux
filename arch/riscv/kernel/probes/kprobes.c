@@ -27,10 +27,10 @@ static void __kprobes arch_prepare_ss_slot(struct kprobe *p)
 	u32 insn = __BUG_INSN_32;
 	unsigned long offset = GET_INSN_LENGTH(p->opcode);
 
-	p->ainsn.api.restore = (unsigned long)p->addr + offset;
+	p->ainsn.api.restore = (uintptr_t)p->addr + offset;
 
 	patch_text(p->ainsn.api.insn, &p->opcode, 1);
-	patch_text((void *)((unsigned long)(p->ainsn.api.insn) + offset),
+	patch_text((void *)((uintptr_t)(p->ainsn.api.insn) + offset),
 		   &insn, 1);
 }
 
@@ -45,15 +45,15 @@ static void __kprobes arch_simulate_insn(struct kprobe *p, struct pt_regs *regs)
 
 	if (p->ainsn.api.handler)
 		p->ainsn.api.handler((u32)p->opcode,
-					(unsigned long)p->addr, regs);
+					(uintptr_t)p->addr, regs);
 
 	post_kprobe_handler(p, kcb, regs);
 }
 
 static bool __kprobes arch_check_kprobe(struct kprobe *p)
 {
-	unsigned long tmp  = (unsigned long)p->addr - p->offset;
-	unsigned long addr = (unsigned long)p->addr;
+	uintptr_t tmp  = (uintptr_t)p->addr - p->offset;
+	uintptr_t addr = (uintptr_t)p->addr;
 
 	while (tmp <= addr) {
 		if (tmp == addr)
@@ -69,7 +69,7 @@ int __kprobes arch_prepare_kprobe(struct kprobe *p)
 {
 	u16 *insn = (u16 *)p->addr;
 
-	if ((unsigned long)insn & 0x1)
+	if (__c_pa(insn) & 0x1)
 		return -EILSEQ;
 
 	if (!arch_check_kprobe(p))
@@ -166,7 +166,7 @@ static void __kprobes setup_singlestep(struct kprobe *p,
 				       struct pt_regs *regs,
 				       struct kprobe_ctlblk *kcb, int reenter)
 {
-	unsigned long slot;
+	uintptr_t slot;
 
 	if (reenter) {
 		save_previous_kprobe(kcb);
@@ -178,7 +178,7 @@ static void __kprobes setup_singlestep(struct kprobe *p,
 
 	if (p->ainsn.api.insn) {
 		/* prepare for single stepping */
-		slot = (unsigned long)p->ainsn.api.insn;
+		slot = (uintptr_t)p->ainsn.api.insn;
 
 		/* IRQs and single stepping do not mix well. */
 		kprobes_save_local_irqflag(kcb, regs);
@@ -219,7 +219,7 @@ post_kprobe_handler(struct kprobe *cur, struct kprobe_ctlblk *kcb, struct pt_reg
 {
 	/* return addr restore if non-branching insn */
 	if (cur->ainsn.api.restore != 0)
-		regs->epc = cur->ainsn.api.restore;
+		regs->epc = cheri_address_set(regs->epc, cur->ainsn.api.restore);
 
 	/* restore back original saved kprobe variables and continue */
 	if (kcb->kprobe_status == KPROBE_REENTER) {
@@ -254,7 +254,7 @@ int __kprobes kprobe_fault_handler(struct pt_regs *regs, unsigned int trapnr)
 		 * and allow the page fault handler to continue as a
 		 * normal page fault.
 		 */
-		regs->epc = (unsigned long) cur->addr;
+		regs->epc = (uintptr_t)cur->addr;
 		BUG_ON(!instruction_pointer(regs));
 
 		if (kcb->kprobe_status == KPROBE_REENTER)
@@ -282,7 +282,7 @@ kprobe_breakpoint_handler(struct pt_regs *regs)
 {
 	struct kprobe *p, *cur_kprobe;
 	struct kprobe_ctlblk *kcb;
-	unsigned long addr = instruction_pointer(regs);
+	uintptr_t addr = instruction_pointer(regs);
 
 	kcb = get_kprobe_ctlblk();
 	cur_kprobe = kprobe_running();
@@ -331,11 +331,11 @@ bool __kprobes
 kprobe_single_step_handler(struct pt_regs *regs)
 {
 	struct kprobe_ctlblk *kcb = get_kprobe_ctlblk();
-	unsigned long addr = instruction_pointer(regs);
+	uintptr_t addr = instruction_pointer(regs);
 	struct kprobe *cur = kprobe_running();
 
 	if (cur && (kcb->kprobe_status & (KPROBE_HIT_SS | KPROBE_REENTER)) &&
-	    ((unsigned long)&cur->ainsn.api.insn[0] + GET_INSN_LENGTH(cur->opcode) == addr)) {
+	    ((uintptr_t)&cur->ainsn.api.insn[0] + GET_INSN_LENGTH(cur->opcode) == addr)) {
 		kprobes_restore_local_irqflag(kcb, regs);
 		post_kprobe_handler(cur, kcb, regs);
 		return true;
@@ -352,8 +352,8 @@ int __init arch_populate_kprobe_blacklist(void)
 {
 	int ret;
 
-	ret = kprobe_add_area_blacklist((unsigned long)__irqentry_text_start,
-					(unsigned long)__irqentry_text_end);
+	ret = kprobe_add_area_blacklist(__c_pa(__irqentry_text_start),
+					__c_pa(__irqentry_text_end));
 	return ret;
 }
 

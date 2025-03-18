@@ -53,8 +53,8 @@ struct rethook_node {
 	struct rcu_head		rcu;
 	struct llist_node	llist;
 	struct rethook		*rethook;
-	unsigned long		ret_addr;
-	unsigned long		frame;
+	uintptr_t		ret_addr;
+	uintptr_t		frame;
 };
 
 struct rethook *rethook_alloc(void *data, rethook_handler_t handler, int size, int num);
@@ -86,8 +86,7 @@ void arch_rethook_fixup_return(struct pt_regs *regs,
 			       unsigned long correct_ret_addr);
 
 /* Generic trampoline handler, arch code must prepare asm stub */
-unsigned long rethook_trampoline_handler(struct pt_regs *regs,
-					 unsigned long frame);
+uintptr_t rethook_trampoline_handler(struct pt_regs *regs, uintptr_t frame);
 
 #ifdef CONFIG_RETHOOK
 void rethook_flush_task(struct task_struct *tk);

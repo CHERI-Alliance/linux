@@ -13,6 +13,9 @@
 
 #define __PI __attribute__((nocaprelocs))
 
+struct page *__vmemmap_ptr;
+EXPORT_SYMBOL(__vmemmap_ptr);
+
 /*
  * Set to false if the initial root capability does not meet
  * expectations. This is used to delay the resulting panic to
@@ -144,6 +147,8 @@ void __init riscv_cheri_caps_init(uintcap_t inf)
 	/* Not supported on RISCV CHERI. */
 	cheri_user_root_seal_cap = __c_fakeu(0);
 	cheri_user_root_cid_cap = __c_fakeu(0);
+
+	__vmemmap_ptr = cheri_make_kernel_data_cap(VMEMMAP_START, VMEMMAP_SIZE);
 }
 
 bool

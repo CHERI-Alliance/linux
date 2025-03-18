@@ -367,7 +367,7 @@ EXPORT_SYMBOL(vm_get_page_prot);
 
 void __set_fixmap(enum fixed_addresses idx, phys_addr_t phys, pgprot_t prot)
 {
-	unsigned long addr = __c_ua(__fix_to_virt(idx));
+	unsigned long addr = __fix_to_virt_a(idx);
 	pte_t *ptep;
 
 	BUG_ON(idx <= FIX_HOLE || idx >= __end_of_fixed_addresses);
@@ -1338,14 +1338,14 @@ asmlinkage void __init __PI setup_vm(uintptr_t dtb_pa)
 	__pi_create_kernel_page_table(early_pg_dir, true);
 
 	/* Setup early mapping for FDT early scan */
-	create_fdt_early_page_table(__c_ua(__fix_to_virt(FIX_FDT)), dtb_pa);
+	create_fdt_early_page_table(__fix_to_virt_a(FIX_FDT), dtb_pa);
 
 	/*
 	 * Bootime fixmap only can handle PMD_SIZE mapping. Thus, boot-ioremap
 	 * range can not span multiple pmds.
 	 */
-	BUG_ON((__fix_to_virt(FIX_BTMAP_BEGIN) >> PMD_SHIFT)
-		     != (__fix_to_virt(FIX_BTMAP_END) >> PMD_SHIFT));
+	BUG_ON((__fix_to_virt_a(FIX_BTMAP_BEGIN) >> PMD_SHIFT)
+		     != (__fix_to_virt_a(FIX_BTMAP_END) >> PMD_SHIFT));
 
 #ifndef __PAGETABLE_PMD_FOLDED
 	/*
@@ -1354,8 +1354,8 @@ asmlinkage void __init __PI setup_vm(uintptr_t dtb_pa)
 	 * FIX_BTMAP_BEGIN should lie in the same pmd. Verify that and warn
 	 * the user if not.
 	 */
-	fix_bmap_spmd = fixmap_pmd[pmd_index(__fix_to_virt(FIX_BTMAP_BEGIN))];
-	fix_bmap_epmd = fixmap_pmd[pmd_index(__fix_to_virt(FIX_BTMAP_END))];
+	fix_bmap_spmd = fixmap_pmd[pmd_index(__fix_to_virt_a(FIX_BTMAP_BEGIN))];
+	fix_bmap_epmd = fixmap_pmd[pmd_index(__fix_to_virt_a(FIX_BTMAP_END))];
 	if (pmd_val(fix_bmap_spmd) != pmd_val(fix_bmap_epmd)) {
 		WARN_ON(1);
 		pr_warn("fixmap btmap start [%08lx] != end [%08lx]\n",
@@ -1458,7 +1458,7 @@ static void __init setup_vm_final(void)
 	 * directly in swapper_pg_dir in addition to the pgd entry that points
 	 * to fixmap_pte.
 	 */
-	unsigned long idx = pgd_index(__fix_to_virt(FIX_FDT));
+	unsigned long idx = pgd_index(__fix_to_virt_a(FIX_FDT));
 
 	set_pgd(&swapper_pg_dir[idx], early_pg_dir[idx]);
 #endif

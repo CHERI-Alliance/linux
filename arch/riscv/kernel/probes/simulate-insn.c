@@ -8,12 +8,12 @@
 #include "simulate-insn.h"
 
 static inline bool rv_insn_reg_get_val(struct pt_regs *regs, u32 index,
-				       unsigned long *ptr)
+				       uintptr_t *ptr)
 {
 	if (index == 0)
 		*ptr = 0;
 	else if (index <= 31)
-		*ptr = *((unsigned long *)regs + index);
+		*ptr = *((uintptr_t *)regs + index);
 	else
 		return false;
 
@@ -21,19 +21,19 @@ static inline bool rv_insn_reg_get_val(struct pt_regs *regs, u32 index,
 }
 
 static inline bool rv_insn_reg_set_val(struct pt_regs *regs, u32 index,
-				       unsigned long val)
+				       uintptr_t val)
 {
 	if (index == 0)
 		return true;
 	else if (index <= 31)
-		*((unsigned long *)regs + index) = val;
+		*((uintptr_t *)regs + index) = val;
 	else
 		return false;
 
 	return true;
 }
 
-bool __kprobes simulate_jal(u32 opcode, unsigned long addr, struct pt_regs *regs)
+bool __kprobes simulate_jal(u32 opcode, uintptr_t addr, struct pt_regs *regs)
 {
 	/*
 	 *     31    30       21    20     19        12 11 7 6      0
@@ -58,7 +58,7 @@ bool __kprobes simulate_jal(u32 opcode, unsigned long addr, struct pt_regs *regs
 	return ret;
 }
 
-bool __kprobes simulate_jalr(u32 opcode, unsigned long addr, struct pt_regs *regs)
+bool __kprobes simulate_jalr(u32 opcode, uintptr_t addr, struct pt_regs *regs)
 {
 	/*
 	 * 31          20 19 15 14 12 11 7 6      0
@@ -66,7 +66,7 @@ bool __kprobes simulate_jalr(u32 opcode, unsigned long addr, struct pt_regs *reg
 	 *      12         5      3    5    JALR/JR
 	 */
 	bool ret;
-	unsigned long base_addr;
+	uintptr_t base_addr;
 	u32 imm = (opcode >> 20) & 0xfff;
 	u32 rd_index = (opcode >> 7) & 0x1f;
 	u32 rs1_index = (opcode >> 15) & 0x1f;
@@ -98,7 +98,7 @@ bool __kprobes simulate_jalr(u32 opcode, unsigned long addr, struct pt_regs *reg
 #error "Unexpected __riscv_xlen"
 #endif
 
-bool __kprobes simulate_auipc(u32 opcode, unsigned long addr, struct pt_regs *regs)
+bool __kprobes simulate_auipc(u32 opcode, uintptr_t addr, struct pt_regs *regs)
 {
 	/*
 	 * auipc instruction:
@@ -108,7 +108,7 @@ bool __kprobes simulate_auipc(u32 opcode, unsigned long addr, struct pt_regs *re
 	 */
 
 	u32 rd_idx = auipc_rd_idx(opcode);
-	unsigned long rd_val = addr + auipc_offset(opcode);
+	uintptr_t rd_val = addr + auipc_offset(opcode);
 
 	if (!rv_insn_reg_set_val(regs, rd_idx, rd_val))
 		return false;
@@ -136,7 +136,7 @@ bool __kprobes simulate_auipc(u32 opcode, unsigned long addr, struct pt_regs *re
 #define branch_offset(opcode) \
 	sign_extend32((branch_imm(opcode)), 12)
 
-bool __kprobes simulate_branch(u32 opcode, unsigned long addr, struct pt_regs *regs)
+bool __kprobes simulate_branch(u32 opcode, uintptr_t addr, struct pt_regs *regs)
 {
 	/*
 	 * branch instructions:
@@ -153,8 +153,8 @@ bool __kprobes simulate_branch(u32 opcode, unsigned long addr, struct pt_regs *r
 
 	s32 offset;
 	s32 offset_tmp;
-	unsigned long rs1_val;
-	unsigned long rs2_val;
+	uintptr_t rs1_val;
+	uintptr_t rs2_val;
 
 	if (!rv_insn_reg_get_val(regs, branch_rs1_idx(opcode), &rs1_val) ||
 	    !rv_insn_reg_get_val(regs, branch_rs2_idx(opcode), &rs2_val))
@@ -169,10 +169,10 @@ bool __kprobes simulate_branch(u32 opcode, unsigned long addr, struct pt_regs *r
 		offset = (rs1_val != rs2_val) ? offset_tmp : 4;
 		break;
 	case RVG_FUNCT3_BLT:
-		offset = ((long)rs1_val < (long)rs2_val) ? offset_tmp : 4;
+		offset = ((long)__c_ua(rs1_val) < (long)__c_ua(rs2_val)) ? offset_tmp : 4;
 		break;
 	case RVG_FUNCT3_BGE:
-		offset = ((long)rs1_val >= (long)rs2_val) ? offset_tmp : 4;
+		offset = ((long)__c_ua(rs1_val) >= (long)__c_ua(rs2_val)) ? offset_tmp : 4;
 		break;
 	case RVG_FUNCT3_BLTU:
 		offset = (rs1_val < rs2_val) ? offset_tmp : 4;
@@ -189,7 +189,7 @@ bool __kprobes simulate_branch(u32 opcode, unsigned long addr, struct pt_regs *r
 	return true;
 }
 
-bool __kprobes simulate_c_j(u32 opcode, unsigned long addr, struct pt_regs *regs)
+bool __kprobes simulate_c_j(u32 opcode, uintptr_t addr, struct pt_regs *regs)
 {
 	/*
 	 *  15    13 12                            2 1      0
@@ -213,7 +213,7 @@ bool __kprobes simulate_c_j(u32 opcode, unsigned long addr, struct pt_regs *regs
 	return true;
 }
 
-static bool __kprobes simulate_c_jr_jalr(u32 opcode, unsigned long addr, struct pt_regs *regs,
+static bool __kprobes simulate_c_jr_jalr(u32 opcode, uintptr_t addr, struct pt_regs *regs,
 					 bool is_jalr)
 {
 	/*
@@ -222,7 +222,7 @@ static bool __kprobes simulate_c_jr_jalr(u32 opcode, unsigned long addr, struct 
 	 *     4       5     5    2
 	 */
 
-	unsigned long jump_addr;
+	uintptr_t jump_addr;
 
 	u32 rs1 = (opcode >> 7) & 0x1f;
 
@@ -240,17 +240,17 @@ static bool __kprobes simulate_c_jr_jalr(u32 opcode, unsigned long addr, struct 
 	return true;
 }
 
-bool __kprobes simulate_c_jr(u32 opcode, unsigned long addr, struct pt_regs *regs)
+bool __kprobes simulate_c_jr(u32 opcode, uintptr_t addr, struct pt_regs *regs)
 {
 	return simulate_c_jr_jalr(opcode, addr, regs, false);
 }
 
-bool __kprobes simulate_c_jalr(u32 opcode, unsigned long addr, struct pt_regs *regs)
+bool __kprobes simulate_c_jalr(u32 opcode, uintptr_t addr, struct pt_regs *regs)
 {
 	return simulate_c_jr_jalr(opcode, addr, regs, true);
 }
 
-static bool __kprobes simulate_c_bnez_beqz(u32 opcode, unsigned long addr, struct pt_regs *regs,
+static bool __kprobes simulate_c_bnez_beqz(u32 opcode, uintptr_t addr, struct pt_regs *regs,
 					   bool is_bnez)
 {
 	/*
@@ -261,7 +261,7 @@ static bool __kprobes simulate_c_bnez_beqz(u32 opcode, unsigned long addr, struc
 
 	s32 offset;
 	u32 rs1;
-	unsigned long rs1_val;
+	uintptr_t rs1_val;
 
 	rs1 = 0x8 | ((opcode >> 7) & 0x7);
 
@@ -284,12 +284,12 @@ static bool __kprobes simulate_c_bnez_beqz(u32 opcode, unsigned long addr, struc
 	return true;
 }
 
-bool __kprobes simulate_c_bnez(u32 opcode, unsigned long addr, struct pt_regs *regs)
+bool __kprobes simulate_c_bnez(u32 opcode, uintptr_t addr, struct pt_regs *regs)
 {
 	return simulate_c_bnez_beqz(opcode, addr, regs, true);
 }
 
-bool __kprobes simulate_c_beqz(u32 opcode, unsigned long addr, struct pt_regs *regs)
+bool __kprobes simulate_c_beqz(u32 opcode, uintptr_t addr, struct pt_regs *regs)
 {
 	return simulate_c_bnez_beqz(opcode, addr, regs, false);
 }
