@@ -26,7 +26,8 @@ build_riscv64_cheri:
     - 'PATH="/opt/cherillvm/bin:/opt/bin:${PATH}"'
     - export PATH
     - 'make LLVM=1 ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- CC="clang -target riscv64" HOSTCC=/usr/bin/gcc qemu_riscv64cheripc_defconfig'
-    - 'make -j $(nproc) LLVM=1 ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- CC="clang -target riscv64" HOSTCC=/usr/bin/gcc C=2 all modules 2>&1 | tee log'
+    - 'make -j $(nproc) LLVM=1 ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- CC="clang -target riscv64" HOSTCC=/usr/bin/gcc all modules'
+    - 'make -j $(nproc) LLVM=1 ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- CC="clang -target riscv64" HOSTCC=/usr/bin/gcc C=2 all modules >log 2>&1'
     - echo "CHECKING sparse messages"
     - 'if grep "preserving" log; then echo ERROR: Unexpected sparse warnings; false; else echo "No unexpected sparse errors"; fi'
 
