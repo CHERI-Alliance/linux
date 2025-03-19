@@ -44,7 +44,13 @@
  * All tables and structures must be byte-packed to match the ACPI
  * specification, since the tables are provided by the system BIOS
  */
+#ifndef CONFIG_CHERI_KERNEL
+/*
+ * FIXCHERI: Do not pack stuff for now. We will have to come up with a real
+ * FIXCHERI: solution once we support ACPI.
+ */
 #pragma pack(1)
+#endif
 
 /*
  * Note: C bitfields are not used for this reason:
