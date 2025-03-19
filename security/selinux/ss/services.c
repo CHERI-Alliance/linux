@@ -3944,7 +3944,7 @@ static int __security_read_policy(struct selinux_policy *policy,
 	if (rc)
 		return rc;
 
-	*len = (unsigned long)fp.data - (unsigned long)data;
+	*len = __c_pa(fp.data) - __c_pa(data);
 	return 0;
 }
 

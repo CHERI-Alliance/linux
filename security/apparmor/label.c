@@ -45,7 +45,7 @@ static void free_proxy(struct aa_proxy *proxy)
 		/* p->label will not updated any more as p is dead */
 		aa_put_label(rcu_dereference_protected(proxy->label, true));
 		memset(proxy, 0, sizeof(*proxy));
-		RCU_INIT_POINTER(proxy->label, (struct aa_label *)PROXY_POISON);
+		RCU_INIT_POINTER(proxy->label, (struct aa_label *)__c_fakep(PROXY_POISON));
 		kfree(proxy);
 	}
 }
@@ -327,7 +327,7 @@ void aa_label_destroy(struct aa_label *label)
 		label_for_each(i, label, profile) {
 			aa_put_profile(profile);
 			label->vec[i.i] = (struct aa_profile *)
-					   (LABEL_POISON + (long) i.i);
+					   __c_fakep(LABEL_POISON + (long) i.i);
 		}
 	}
 

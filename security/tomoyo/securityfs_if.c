@@ -131,7 +131,7 @@ static const struct file_operations tomoyo_self_operations = {
  */
 static int tomoyo_open(struct inode *inode, struct file *file)
 {
-	const u8 key = (uintptr_t) file_inode(file)->i_private;
+	const u8 key = __c_pa(file_inode(file)->i_private);
 
 	return tomoyo_open_control(key, file);
 }
@@ -224,7 +224,7 @@ static const struct file_operations tomoyo_operations = {
 static void __init tomoyo_create_entry(const char *name, const umode_t mode,
 				       struct dentry *parent, const u8 key)
 {
-	securityfs_create_file(name, mode, parent, (void *) (uintptr_t) key,
+	securityfs_create_file(name, mode, parent, __c_fakep(key),
 			       &tomoyo_operations);
 }
 
