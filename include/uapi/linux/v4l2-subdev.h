@@ -238,9 +238,16 @@ struct v4l2_subdev_route {
 struct v4l2_subdev_routing {
 	__u32 which;
 	__u32 len_routes;
-	__u64 routes;
+#if __SIZEOF_POINTER__ == 16
+	__u64 _pad;
+#endif
+	__kernel_uintptr_t routes;
 	__u32 num_routes;
+#if __SIZEOF_POINTER__ == 16
+	__u32 reserved[7];
+#else
 	__u32 reserved[11];
+#endif
 };
 
 /*

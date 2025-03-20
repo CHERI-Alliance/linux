@@ -40,7 +40,7 @@
  * Userspace API
  */
 
-static inline void __user *media_get_uptr(__u64 arg)
+static inline void __user *media_get_uptr(uintptr_t arg)
 {
 	return (void __user *)(uintptr_t)arg;
 }

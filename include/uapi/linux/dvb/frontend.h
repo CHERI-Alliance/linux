@@ -907,7 +907,7 @@ struct dtv_property {
 		} buffer;
 	} u;
 	int result;
-} __attribute__ ((packed));
+} __attribute__ ((packed)) __attribute__((aligned(__SIZEOF_POINTER__)));
 
 /* num of properties cannot exceed DTV_IOCTL_MAX_MSGS per ioctl */
 #define DTV_IOCTL_MAX_MSGS 64
