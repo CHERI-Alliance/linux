@@ -718,7 +718,7 @@ static int snd_cx88_switch_get(struct snd_kcontrol *kcontrol,
 {
 	struct cx88_audio_dev *chip = snd_kcontrol_chip(kcontrol);
 	struct cx88_core *core = chip->core;
-	u32 bit = kcontrol->private_value;
+	u32 bit = __c_ua(kcontrol->private_value);
 
 	value->value.integer.value[0] = !(cx_read(AUD_VOL_CTL) & bit);
 	return 0;
@@ -729,7 +729,7 @@ static int snd_cx88_switch_put(struct snd_kcontrol *kcontrol,
 {
 	struct cx88_audio_dev *chip = snd_kcontrol_chip(kcontrol);
 	struct cx88_core *core = chip->core;
-	u32 bit = kcontrol->private_value;
+	u32 bit = __c_ua(kcontrol->private_value);
 	int ret = 0;
 	u32 vol;
 

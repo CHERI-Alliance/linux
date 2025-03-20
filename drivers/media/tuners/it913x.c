@@ -395,7 +395,7 @@ static int it913x_probe(struct platform_device *pdev)
 	dev->pdev = pdev;
 	dev->regmap = pdata->regmap;
 	dev->fe = pdata->fe;
-	dev->chip_ver = id->driver_data;
+	dev->chip_ver = __c_ua(id->driver_data);
 	dev->role = pdata->role;
 
 	fe->tuner_priv = dev;

@@ -880,7 +880,7 @@ dvb_pll_probe(struct i2c_client *client)
 	cfg = client->dev.platform_data;
 	fe = cfg->fe;
 	i2c_set_clientdata(client, fe);
-	desc_id = (unsigned int) id->driver_data;
+	desc_id = __c_ua(id->driver_data);
 
 	if (!dvb_pll_attach(fe, client->addr, client->adapter, desc_id))
 		return -ENOMEM;

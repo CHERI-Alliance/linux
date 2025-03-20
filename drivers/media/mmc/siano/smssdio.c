@@ -242,7 +242,7 @@ static int smssdio_probe(struct sdio_func *func,
 	struct smssdio_device *smsdev;
 	struct smsdevice_params_t params;
 
-	board_id = id->driver_data;
+	board_id = __c_ua(id->driver_data);
 
 	smsdev = kzalloc(sizeof(struct smssdio_device), GFP_KERNEL);
 	if (!smsdev)

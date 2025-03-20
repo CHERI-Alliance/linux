@@ -198,7 +198,7 @@ void wave5_vdi_free_sram(struct vpu_device *vpu_dev)
 		return;
 
 	if (vb->vaddr)
-		gen_pool_free(vpu_dev->sram_pool, (unsigned long)vb->vaddr,
+		gen_pool_free(vpu_dev->sram_pool, (uintptr_t)vb->vaddr,
 			      vb->size);
 
 	memset(vb, 0, sizeof(*vb));

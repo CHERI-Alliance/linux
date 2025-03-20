@@ -582,8 +582,8 @@ static int sd_config(struct gspca_dev *gspca_dev,
 
 	cam = &gspca_dev->cam;
 
-	sd->bridge = id->driver_info >> 8;
-	sd->subtype = id->driver_info;
+	sd->bridge = __c_ua(id->driver_info) >> 8;
+	sd->subtype = __c_ua(id->driver_info);
 
 	if (sd->subtype == AiptekMiniPenCam13) {
 

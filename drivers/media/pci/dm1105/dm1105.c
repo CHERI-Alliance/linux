@@ -355,7 +355,7 @@ struct dm1105_dev {
 	spinlock_t lock;
 };
 
-#define dm_io_mem(reg)	((unsigned long)(&dev->io_mem[reg]))
+#define dm_io_mem(reg)	(__c_pa(&dev->io_mem[reg]))
 
 #define dm_readb(reg)		inb(dm_io_mem(reg))
 #define dm_writeb(reg, value)	outb((value), (dm_io_mem(reg)))

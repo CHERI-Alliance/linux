@@ -338,7 +338,7 @@ static int ivtvfb_prep_frame(struct ivtv *itv, int cmd, void __user *source,
 	}
 
 	/* Not fatal, but will have undesirable results */
-	if ((unsigned long)source & 3)
+	if (__c_pa(source) & 3)
 		IVTVFB_WARN("ivtvfb_prep_frame: Source address not 32 bit aligned (%p)\n",
 			    source);
 
@@ -408,10 +408,10 @@ static ssize_t ivtvfb_write(struct fb_info *info, const char __user *buf,
 	/* If transfer size > threshold and both src/dst
 	addresses are aligned, use DMA */
 	if (count >= 4096 &&
-	    ((unsigned long)buf & 3) == ((unsigned long)dst & 3)) {
+	    (__c_pa(buf) & 3) == (__c_pa(dst) & 3)) {
 		/* Odd address = can't DMA. Align */
-		if ((unsigned long)dst & 3) {
-			lead = 4 - ((unsigned long)dst & 3);
+		if (__c_pa(dst) & 3) {
+			lead = 4 - (__c_pa(dst) & 3);
 			if (copy_from_user(dst, buf, lead))
 				return -EFAULT;
 			buf += lead;
@@ -441,7 +441,7 @@ static ssize_t ivtvfb_write(struct fb_info *info, const char __user *buf,
 	return (err) ? err : count;
 }
 
-static int ivtvfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg)
+static int ivtvfb_ioctl(struct fb_info *info, unsigned int cmd, user_uintptr_t arg)
 {
 	DEFINE_WAIT(wait);
 	struct ivtv *itv = (struct ivtv *)info->par;

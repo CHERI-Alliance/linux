@@ -40,7 +40,7 @@
  * Userspace API
  */
 
-static inline void __user *media_get_uptr(__u64 arg)
+static inline void __user *media_get_uptr(uintptr_t arg)
 {
 	return (void __user *)(uintptr_t)arg;
 }
@@ -432,7 +432,7 @@ static const struct media_ioctl_info ioctl_info[] = {
 };
 
 static long media_device_ioctl(struct file *filp, unsigned int cmd,
-			       unsigned long __arg)
+			       user_uintptr_t __arg)
 {
 	struct media_devnode *devnode = media_devnode_data(filp);
 	struct media_device *dev = devnode->media_dev;

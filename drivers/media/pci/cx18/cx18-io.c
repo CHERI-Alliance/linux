@@ -17,12 +17,12 @@ void cx18_memset_io(struct cx18 *cx, void __iomem *addr, int val, size_t count)
 	u32 val4 = val2 | (val2 << 16);
 
 	/* Align writes on the CX23418's addresses */
-	if ((count > 0) && ((unsigned long)dst & 1)) {
+	if ((count > 0) && (__c_pa(dst) & 1)) {
 		cx18_writeb(cx, (u8) val, dst);
 		count--;
 		dst++;
 	}
-	if ((count > 1) && ((unsigned long)dst & 2)) {
+	if ((count > 1) && (__c_pa(dst) & 2)) {
 		cx18_writew(cx, val2, dst);
 		count -= 2;
 		dst += 2;

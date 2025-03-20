@@ -3129,8 +3129,8 @@ static int sd_config(struct gspca_dev *gspca_dev,
 {
 	struct sd *sd = (struct sd *) gspca_dev;
 
-	sd->bridge = id->driver_info >> 8;
-	sd->flags = id->driver_info & 0xff;
+	sd->bridge = __c_ua(id->driver_info) >> 8;
+	sd->flags = __c_ua(id->driver_info) & 0xff;
 
 	if (id->idVendor == 0x046d &&
 	    (id->idProduct == 0x0892 || id->idProduct == 0x0896))

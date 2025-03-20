@@ -246,7 +246,7 @@ static int tw686x_probe(struct pci_dev *pci_dev,
 	dev = kzalloc(sizeof(*dev), GFP_KERNEL);
 	if (!dev)
 		return -ENOMEM;
-	dev->type = pci_id->driver_data;
+	dev->type = __c_ua(pci_id->driver_data);
 	dev->dma_mode = dma_mode;
 	sprintf(dev->name, "tw%04X", pci_dev->device);
 

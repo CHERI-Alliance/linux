@@ -1127,7 +1127,7 @@ static int mt9p031_probe(struct i2c_client *client)
 	mt9p031->pdata = pdata;
 	mt9p031->output_control	= MT9P031_OUTPUT_CONTROL_DEF;
 	mt9p031->mode2 = MT9P031_READ_MODE_2_ROW_BLC;
-	mt9p031->model = did->driver_data;
+	mt9p031->model = __c_ua(did->driver_data);
 
 	mt9p031->regulators[0].supply = "vdd";
 	mt9p031->regulators[1].supply = "vdd_io";

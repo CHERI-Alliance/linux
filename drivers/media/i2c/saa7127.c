@@ -741,7 +741,7 @@ static int saa7127_probe(struct i2c_client *client)
 	}
 
 	if (id->driver_data) {	/* Chip type is already known */
-		state->ident = id->driver_data;
+		state->ident = __c_ua(id->driver_data);
 	} else {		/* Needs detection */
 		int read_result;
 

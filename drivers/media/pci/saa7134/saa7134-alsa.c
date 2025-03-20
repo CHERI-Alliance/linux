@@ -379,7 +379,7 @@ static int snd_saa7134_capsrc_set(struct snd_kcontrol *kcontrol,
 				  int left, int right, bool force_notify)
 {
 	snd_card_saa7134_t *chip = snd_kcontrol_chip(kcontrol);
-	int change = 0, addr = kcontrol->private_value;
+	int change = 0, addr = __c_ua(kcontrol->private_value);
 	int active, old_addr;
 	u32 anabar, xbarin;
 	int analog_io, rate;
@@ -916,7 +916,7 @@ static int snd_saa7134_volume_get(struct snd_kcontrol * kcontrol,
 				  struct snd_ctl_elem_value * ucontrol)
 {
 	snd_card_saa7134_t *chip = snd_kcontrol_chip(kcontrol);
-	int addr = kcontrol->private_value;
+	int addr = __c_ua(kcontrol->private_value);
 
 	ucontrol->value.integer.value[0] = chip->mixer_volume[addr][0];
 	ucontrol->value.integer.value[1] = chip->mixer_volume[addr][1];
@@ -929,7 +929,7 @@ static int snd_saa7134_volume_put(struct snd_kcontrol * kcontrol,
 	snd_card_saa7134_t *chip = snd_kcontrol_chip(kcontrol);
 	struct saa7134_dev *dev = chip->dev;
 
-	int change, addr = kcontrol->private_value;
+	int change, addr = __c_ua(kcontrol->private_value);
 	int left, right;
 
 	left = ucontrol->value.integer.value[0];
@@ -1013,7 +1013,7 @@ static int snd_saa7134_capsrc_get(struct snd_kcontrol * kcontrol,
 				  struct snd_ctl_elem_value * ucontrol)
 {
 	snd_card_saa7134_t *chip = snd_kcontrol_chip(kcontrol);
-	int addr = kcontrol->private_value;
+	int addr = __c_ua(kcontrol->private_value);
 
 	spin_lock_irq(&chip->mixer_lock);
 	if (chip->capture_source_addr == addr) {
@@ -1078,7 +1078,7 @@ static int snd_card_saa7134_new_mixer(snd_card_saa7134_t * chip)
 	for (idx = 0; idx < ARRAY_SIZE(snd_saa7134_capture_controls); idx++) {
 		kcontrol = snd_ctl_new1(&snd_saa7134_capture_controls[idx],
 					chip);
-		addr = snd_saa7134_capture_controls[idx].private_value;
+		addr = __c_ua(snd_saa7134_capture_controls[idx].private_value);
 		chip->capture_ctl[addr] = kcontrol;
 		err = snd_ctl_add(card, kcontrol);
 		if (err < 0)

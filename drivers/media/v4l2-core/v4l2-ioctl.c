@@ -3206,7 +3206,7 @@ static int check_array_args(unsigned int cmd, void *parg, size_t *array_size,
 		if (routing->len_routes > 256)
 			return -E2BIG;
 
-		*user_ptr = u64_to_user_ptr(routing->routes);
+		*user_ptr = (void __user *)(routing->routes);
 		*kernel_ptr = (void **)&routing->routes;
 		*array_size = sizeof(struct v4l2_subdev_route)
 			    * routing->len_routes;
@@ -3269,7 +3269,7 @@ static int video_get_user(void __user *arg, void *parg,
 	}
 
 	if (cmd == real_cmd) {
-		if (copy_from_user(parg, (void __user *)arg, n))
+		if (copy_from_user_with_ptr(parg, (void __user *)arg, n))
 			err = -EFAULT;
 	} else if (in_compat_syscall()) {
 		memset(parg, 0, n);
@@ -3387,7 +3387,7 @@ static int video_put_user(void __user *arg, void *parg,
 }
 
 long
-video_usercopy(struct file *file, unsigned int orig_cmd, unsigned long arg,
+video_usercopy(struct file *file, unsigned int orig_cmd, uintptr_t arg,
 	       v4l2_kioctl func)
 {
 	char	sbuf[128];
@@ -3498,7 +3498,7 @@ out:
 }
 
 long video_ioctl2(struct file *file,
-	       unsigned int cmd, unsigned long arg)
+	       unsigned int cmd, uintptr_t arg)
 {
 	return video_usercopy(file, cmd, arg, __video_do_ioctl);
 }

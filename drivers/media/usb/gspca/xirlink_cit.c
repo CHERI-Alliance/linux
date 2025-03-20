@@ -857,7 +857,7 @@ static int sd_config(struct gspca_dev *gspca_dev,
 	struct sd *sd = (struct sd *) gspca_dev;
 	struct cam *cam;
 
-	sd->model = id->driver_info;
+	sd->model = __c_ua(id->driver_info);
 	if (sd->model == CIT_MODEL3 && ibm_netcam_pro)
 		sd->model = CIT_IBM_NETCAM_PRO;
 

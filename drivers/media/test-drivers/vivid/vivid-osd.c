@@ -65,7 +65,7 @@ void vivid_clear_fb(struct vivid_dev *dev)
 
 /* --------------------------------------------------------------------- */
 
-static int vivid_fb_ioctl(struct fb_info *info, unsigned cmd, unsigned long arg)
+static int vivid_fb_ioctl(struct fb_info *info, unsigned cmd, user_uintptr_t arg)
 {
 	struct vivid_dev *dev = (struct vivid_dev *)info->par;
 

@@ -419,7 +419,7 @@ static int sd_config(struct gspca_dev *gspca_dev,
 	cam = &gspca_dev->cam;
 	cam->needs_full_bandwidth = 1;
 
-	sd->chip_revision = id->driver_info;
+	sd->chip_revision = __c_ua(id->driver_info);
 	if (sd->chip_revision == Rev012A) {
 		cam->cam_mode = sif_012a_mode;
 		cam->nmodes = ARRAY_SIZE(sif_012a_mode);
@@ -891,7 +891,7 @@ static int sd_probe(struct usb_interface *intf,
 		    const struct usb_device_id *id)
 {
 	return gspca_dev_probe(intf, id,
-				sd_desc[id->driver_info],
+				sd_desc[__c_ua(id->driver_info)],
 				sizeof(struct sd),
 			       THIS_MODULE);
 }

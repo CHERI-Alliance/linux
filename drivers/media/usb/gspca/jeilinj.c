@@ -308,7 +308,7 @@ static int sd_config(struct gspca_dev *gspca_dev,
 	struct cam *cam = &gspca_dev->cam;
 	struct sd *dev  = (struct sd *) gspca_dev;
 
-	dev->type = id->driver_info;
+	dev->type = __c_ua(id->driver_info);
 	dev->quality = QUALITY_DEF;
 
 	cam->cam_mode = jlj_mode;
@@ -517,7 +517,7 @@ static int sd_probe(struct usb_interface *intf,
 		const struct usb_device_id *id)
 {
 	return gspca_dev_probe(intf, id,
-			sd_desc[id->driver_info],
+			sd_desc[__c_ua(id->driver_info)],
 			sizeof(struct sd),
 			THIS_MODULE);
 }

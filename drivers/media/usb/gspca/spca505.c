@@ -592,7 +592,7 @@ static int sd_config(struct gspca_dev *gspca_dev,
 
 	cam = &gspca_dev->cam;
 	cam->cam_mode = vga_mode;
-	sd->subtype = id->driver_info;
+	sd->subtype = __c_ua(id->driver_info);
 	if (sd->subtype != IntelPCCameraPro)
 		cam->nmodes = ARRAY_SIZE(vga_mode);
 	else			/* no 640x480 for IntelPCCameraPro */

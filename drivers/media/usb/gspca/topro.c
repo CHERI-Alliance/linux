@@ -4002,7 +4002,7 @@ static int sd_config(struct gspca_dev *gspca_dev,
 {
 	struct sd *sd = (struct sd *) gspca_dev;
 
-	sd->bridge = id->driver_info;
+	sd->bridge = __c_ua(id->driver_info);
 
 	gspca_dev->cam.cam_mode = vga_mode;
 	gspca_dev->cam.nmodes = ARRAY_SIZE(vga_mode);

@@ -2234,7 +2234,7 @@ static int imx7_csi_probe(struct platform_device *pdev)
 	if (IS_ERR(csi->regbase))
 		return PTR_ERR(csi->regbase);
 
-	csi->model = (enum imx_csi_model)(uintptr_t)of_device_get_match_data(&pdev->dev);
+	csi->model = (enum imx_csi_model)__c_pa(of_device_get_match_data(&pdev->dev));
 
 	ret = devm_request_irq(dev, csi->irq, imx7_csi_irq_handler, 0, "csi",
 			       (void *)csi);

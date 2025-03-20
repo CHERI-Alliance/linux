@@ -1811,7 +1811,7 @@ static int m88ds3103_probe(struct i2c_client *client)
 		goto err_kfree;
 
 	dev->chip_id = utmp >> 1;
-	dev->chiptype = (u8)id->driver_data;
+	dev->chiptype = (u8)__c_ua(id->driver_data);
 
 	dev_dbg(&client->dev, "chip_id=%02x\n", dev->chip_id);
 

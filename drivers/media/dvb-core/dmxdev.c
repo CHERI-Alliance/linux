@@ -1031,7 +1031,7 @@ static int dvb_demux_do_ioctl(struct file *file,
 {
 	struct dmxdev_filter *dmxdevfilter = file->private_data;
 	struct dmxdev *dmxdev = dmxdevfilter->dev;
-	unsigned long arg = (unsigned long)parg;
+	unsigned long arg = __c_pa(parg);
 	int ret = 0;
 
 	if (mutex_lock_interruptible(&dmxdev->mutex))
@@ -1180,7 +1180,7 @@ static int dvb_demux_do_ioctl(struct file *file,
 }
 
 static long dvb_demux_ioctl(struct file *file, unsigned int cmd,
-			    unsigned long arg)
+			    user_uintptr_t arg)
 {
 	return dvb_usercopy(file, cmd, arg, dvb_demux_do_ioctl);
 }
@@ -1260,7 +1260,9 @@ static const struct file_operations dvb_demux_fops = {
 	.owner = THIS_MODULE,
 	.read = dvb_demux_read,
 	.unlocked_ioctl = dvb_demux_ioctl,
+#ifndef CONFIG_CHERI_KERNEL
 	.compat_ioctl = dvb_demux_ioctl,
+#endif
 	.open = dvb_demux_open,
 	.release = dvb_demux_release,
 	.poll = dvb_demux_poll,
@@ -1285,7 +1287,7 @@ static int dvb_dvr_do_ioctl(struct file *file,
 {
 	struct dvb_device *dvbdev = file->private_data;
 	struct dmxdev *dmxdev = dvbdev->priv;
-	unsigned long arg = (unsigned long)parg;
+	unsigned long arg = __c_pa(parg);
 	int ret;
 
 	if (mutex_lock_interruptible(&dmxdev->mutex))
@@ -1328,7 +1330,7 @@ static int dvb_dvr_do_ioctl(struct file *file,
 }
 
 static long dvb_dvr_ioctl(struct file *file,
-			 unsigned int cmd, unsigned long arg)
+			 unsigned int cmd, user_uintptr_t arg)
 {
 	return dvb_usercopy(file, cmd, arg, dvb_dvr_do_ioctl);
 }

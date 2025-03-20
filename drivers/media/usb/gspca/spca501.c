@@ -1814,7 +1814,7 @@ static int sd_config(struct gspca_dev *gspca_dev,
 	cam = &gspca_dev->cam;
 	cam->cam_mode = vga_mode;
 	cam->nmodes = ARRAY_SIZE(vga_mode);
-	sd->subtype = id->driver_info;
+	sd->subtype = __c_ua(id->driver_info);
 
 	return 0;
 }

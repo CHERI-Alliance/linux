@@ -458,7 +458,7 @@ static int solo_pci_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 	else
 		dev_info(&pdev->dev, "Probing Softlogic 6110\n");
 
-	solo_dev->type = id->driver_data;
+	solo_dev->type = __c_ua(id->driver_data);
 	solo_dev->pdev = pdev;
 	ret = v4l2_device_register(&pdev->dev, &solo_dev->v4l2_dev);
 	if (ret)

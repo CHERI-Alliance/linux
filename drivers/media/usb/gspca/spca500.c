@@ -562,7 +562,7 @@ static int sd_config(struct gspca_dev *gspca_dev,
 	struct cam *cam;
 
 	cam = &gspca_dev->cam;
-	sd->subtype = id->driver_info;
+	sd->subtype = __c_ua(id->driver_info);
 	if (sd->subtype != LogitechClickSmart310) {
 		cam->cam_mode = vga_mode;
 		cam->nmodes = ARRAY_SIZE(vga_mode);

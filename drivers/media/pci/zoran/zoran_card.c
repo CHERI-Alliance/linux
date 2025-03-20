@@ -1289,7 +1289,7 @@ static int zoran_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 			goto zr_unreg;
 		}
 
-		card_num = ent->driver_data;
+		card_num = __c_ua(ent->driver_data);
 		if (card_num >= NUM_CARDS) {
 			pci_err(pdev, "Unknown card, try specifying card=X module parameter\n");
 			goto zr_unreg;

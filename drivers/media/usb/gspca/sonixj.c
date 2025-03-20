@@ -1518,9 +1518,9 @@ static int sd_config(struct gspca_dev *gspca_dev,
 	struct sd *sd = (struct sd *) gspca_dev;
 	struct cam *cam;
 
-	sd->bridge = id->driver_info >> 16;
-	sd->sensor = id->driver_info >> 8;
-	sd->flags = id->driver_info;
+	sd->bridge = __c_ua(id->driver_info) >> 16;
+	sd->sensor = __c_ua(id->driver_info) >> 8;
+	sd->flags = __c_ua(id->driver_info);
 
 	cam = &gspca_dev->cam;
 	if (sd->sensor == SENSOR_ADCM1700) {

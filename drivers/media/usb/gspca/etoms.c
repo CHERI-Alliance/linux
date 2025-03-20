@@ -540,7 +540,7 @@ static int sd_config(struct gspca_dev *gspca_dev,
 	struct cam *cam;
 
 	cam = &gspca_dev->cam;
-	sd->sensor = id->driver_info;
+	sd->sensor = __c_ua(id->driver_info);
 	if (sd->sensor == SENSOR_PAS106) {
 		cam->cam_mode = sif_mode;
 		cam->nmodes = ARRAY_SIZE(sif_mode);

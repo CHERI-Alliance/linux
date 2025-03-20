@@ -156,8 +156,7 @@ void stk1160_copy_video(struct stk1160 *dev, u8 *src, int len)
 		return;
 	}
 
-	if ((unsigned long)dst + lencopy >
-		(unsigned long)buf->mem + buf->length) {
+	if (__c_pa(dst) + lencopy > __c_pa(buf->mem) + buf->length) {
 		printk_ratelimited(KERN_WARNING "stk1160: buffer overflow detected\n");
 		return;
 	}
@@ -200,8 +199,7 @@ void stk1160_copy_video(struct stk1160 *dev, u8 *src, int len)
 			return;
 		}
 
-		if ((unsigned long)dst + lencopy >
-			(unsigned long)buf->mem + buf->length) {
+		if (__c_pa(dst) + lencopy > __c_pa(buf->mem) + buf->length) {
 			printk_ratelimited(KERN_WARNING "stk1160: buffer overflow detected\n");
 			return;
 		}

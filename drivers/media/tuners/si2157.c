@@ -896,7 +896,7 @@ static int si2157_probe(struct i2c_client *client)
 	dev->inversion = cfg->inversion;
 	dev->dont_load_firmware = cfg->dont_load_firmware;
 	dev->if_port = cfg->if_port;
-	dev->part_id = (u8)id->driver_data;
+	dev->part_id = (u8)__c_ua(id->driver_data);
 	dev->if_frequency = 5000000; /* default value of property 0x0706 */
 	mutex_init(&dev->i2c_mutex);
 	INIT_DELAYED_WORK(&dev->stat_work, si2157_stat_work);

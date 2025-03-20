@@ -3929,7 +3929,7 @@ static int em28xx_usb_probe(struct usb_interface *intf,
 	kref_init(&dev->ref);
 
 	dev->devno = nr;
-	dev->model = id->driver_info;
+	dev->model = __c_ua(id->driver_info);
 	dev->alt   = -1;
 	dev->is_audio_only = has_vendor_audio && !(has_video || has_dvb);
 	dev->has_video = has_video;
@@ -4036,7 +4036,7 @@ static int em28xx_usb_probe(struct usb_interface *intf,
 						!(has_video || has_dvb);
 		dev->dev_next->has_video = false;
 		dev->dev_next->ifnum = ifnum;
-		dev->dev_next->model = id->driver_info;
+		dev->dev_next->model = __c_ua(id->driver_info);
 
 		mutex_init(&dev->dev_next->lock);
 		retval = em28xx_init_dev(dev->dev_next, udev, intf,

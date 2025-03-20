@@ -362,7 +362,7 @@ static int sd_config(struct gspca_dev *gspca_dev,
 	cam->cam_mode = vga_mode;	/* only 640x480 */
 	cam->nmodes = ARRAY_SIZE(vga_mode);
 
-	sd->flags = id->driver_info;
+	sd->flags = __c_ua(id->driver_info);
 	return 0;
 }
 

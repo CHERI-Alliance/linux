@@ -934,7 +934,7 @@ static int imx296_identify_model(struct imx296 *sensor)
 	int temp = 0;
 	int ret;
 
-	model = (uintptr_t)of_device_get_match_data(sensor->dev);
+	model = __c_pa(of_device_get_match_data(sensor->dev));
 	if (model) {
 		dev_dbg(sensor->dev,
 			"sensor model auto-detection disabled, forcing 0x%04x\n",

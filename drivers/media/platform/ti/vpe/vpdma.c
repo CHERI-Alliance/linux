@@ -368,7 +368,7 @@ int vpdma_alloc_desc_buf(struct vpdma_buf *buf, size_t size)
 	if (!buf->addr)
 		return -ENOMEM;
 
-	WARN_ON(((unsigned long)buf->addr & VPDMA_DESC_ALIGN) != 0);
+	WARN_ON((__c_pa(buf->addr) & VPDMA_DESC_ALIGN) != 0);
 
 	return 0;
 }

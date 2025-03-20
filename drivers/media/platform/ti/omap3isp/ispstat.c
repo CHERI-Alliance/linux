@@ -521,7 +521,7 @@ int omap3isp_stat_request_statistics_time32(struct ispstat *stat,
 
 	data->ts.tv_sec = data64.ts.tv_sec;
 	data->ts.tv_usec = data64.ts.tv_usec;
-	data->buf = (uintptr_t)data64.buf;
+	data->buf = __c_pa(data64.buf);
 	memcpy(&data->frame, &data64.frame, sizeof(data->frame));
 
 	return 0;

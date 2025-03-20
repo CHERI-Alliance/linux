@@ -715,7 +715,7 @@ static int ccdc_config(struct isp_ccdc_device *ccdc,
 		ccdc->fpc_en = !!(OMAP3ISP_CCDC_FPC & ccdc_struct->flag);
 
 		if (ccdc->fpc_en) {
-			if (copy_from_user(&fpc, ccdc_struct->fpc, sizeof(fpc)))
+			if (copy_from_user_with_ptr(&fpc, ccdc_struct->fpc, sizeof(fpc)))
 				return -EFAULT;
 
 			size = fpc.fpnum * 4;
@@ -731,8 +731,12 @@ static int ccdc_config(struct isp_ccdc_device *ccdc,
 			if (fpc_new.addr == NULL)
 				return -ENOMEM;
 
+			/*
+			 * FIXCHERI: This will not work on CHERI because
+			 * FIXCHERI: fpcaddr is not a pointer.
+			 */
 			if (copy_from_user(fpc_new.addr,
-					   (__force void __user *)(long)fpc.fpcaddr,
+					   (__force void __user *)__c_fakeu(fpc.fpcaddr),
 					   size)) {
 				dma_free_coherent(isp->dev, size, fpc_new.addr,
 						  fpc_new.dma);

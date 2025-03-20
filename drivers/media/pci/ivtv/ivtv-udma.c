@@ -11,13 +11,13 @@
 #include "ivtv-driver.h"
 #include "ivtv-udma.h"
 
-void ivtv_udma_get_page_info(struct ivtv_dma_page_info *dma_page, unsigned long first, unsigned long size)
+void ivtv_udma_get_page_info(struct ivtv_dma_page_info *dma_page, uintptr_t first, unsigned long size)
 {
 	dma_page->uaddr = first & PAGE_MASK;
-	dma_page->offset = first & ~PAGE_MASK;
-	dma_page->tail = 1 + ((first+size-1) & ~PAGE_MASK);
-	dma_page->first = (first & PAGE_MASK) >> PAGE_SHIFT;
-	dma_page->last = ((first+size-1) & PAGE_MASK) >> PAGE_SHIFT;
+	dma_page->offset = __c_ua(first) & ~PAGE_MASK;
+	dma_page->tail = 1 + ((__c_ua(first)+size-1) & ~PAGE_MASK);
+	dma_page->first = (__c_ua(first) & PAGE_MASK) >> PAGE_SHIFT;
+	dma_page->last = ((__c_ua(first)+size-1) & PAGE_MASK) >> PAGE_SHIFT;
 	dma_page->page_count = dma_page->last - dma_page->first + 1;
 	if (dma_page->page_count == 1) dma_page->tail -= dma_page->offset;
 }
@@ -105,7 +105,7 @@ int ivtv_udma_setup(struct ivtv *itv, unsigned long ivtv_dest_addr,
 		return -EBUSY;
 	}
 
-	ivtv_udma_get_page_info(&user_dma, (unsigned long)userbuf, size_in_bytes);
+	ivtv_udma_get_page_info(&user_dma, (uintptr_t)userbuf, size_in_bytes);
 
 	if (user_dma.page_count <= 0) {
 		IVTV_DEBUG_WARN("ivtv_udma_setup: Error %d page_count from %d bytes %d offset\n",
@@ -114,7 +114,7 @@ int ivtv_udma_setup(struct ivtv *itv, unsigned long ivtv_dest_addr,
 	}
 
 	/* Pin user pages for DMA Xfer */
-	err = pin_user_pages_unlocked(user_dma.uaddr, user_dma.page_count,
+	err = pin_user_pages_unlocked(__c_ua(user_dma.uaddr), user_dma.page_count,
 			dma->map, 0);
 
 	if (user_dma.page_count != err) {

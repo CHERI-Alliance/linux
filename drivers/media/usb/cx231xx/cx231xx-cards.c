@@ -1730,7 +1730,7 @@ static int cx231xx_usb_probe(struct usb_interface *interface,
 
 	snprintf(dev->name, 29, "cx231xx #%d", nr);
 	dev->devno = nr;
-	dev->model = id->driver_info;
+	dev->model = __c_ua(id->driver_info);
 	dev->video_mode.alt = -1;
 	dev->dev = d;
 

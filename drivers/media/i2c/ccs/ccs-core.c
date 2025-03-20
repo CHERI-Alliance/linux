@@ -561,8 +561,7 @@ static const struct ccs_csi_data_format ccs_csi_data_formats[] = {
 
 static const char *pixel_order_str[] = { "GRBG", "RGGB", "BGGR", "GBRG" };
 
-#define to_csi_format_idx(fmt) (((unsigned long)(fmt)			\
-				 - (unsigned long)ccs_csi_data_formats) \
+#define to_csi_format_idx(fmt) ((__c_pa(fmt) - __c_pa(ccs_csi_data_formats)) \
 				/ sizeof(*ccs_csi_data_formats))
 
 static u32 ccs_pixel_order(struct ccs_sensor *sensor)

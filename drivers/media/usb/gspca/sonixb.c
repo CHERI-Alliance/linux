@@ -924,8 +924,8 @@ static int sd_config(struct gspca_dev *gspca_dev,
 		return -ENODEV;
 
 	/* copy the webcam info from the device id */
-	sd->sensor = id->driver_info >> 8;
-	sd->bridge = id->driver_info & 0xff;
+	sd->sensor = __c_ua(id->driver_info) >> 8;
+	sd->bridge = __c_ua(id->driver_info) & 0xff;
 
 	cam = &gspca_dev->cam;
 	if (!(sensor_data[sd->sensor].flags & F_SIF)) {

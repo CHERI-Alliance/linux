@@ -681,7 +681,7 @@ static int au0828_usb_probe(struct usb_interface *interface,
 	mutex_init(&dev->mutex);
 	mutex_init(&dev->dvb.lock);
 	dev->usbdev = usbdev;
-	dev->boardnr = id->driver_info;
+	dev->boardnr = __c_ua(id->driver_info);
 	dev->board = au0828_boards[dev->boardnr];
 
 	/* Initialize the media controller */

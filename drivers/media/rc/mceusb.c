@@ -1667,7 +1667,7 @@ static int mceusb_dev_probe(struct usb_interface *intf,
 	struct mceusb_dev *ir = NULL;
 	int pipe, maxp, i, res;
 	char buf[63], name[128] = "";
-	enum mceusb_model_type model = id->driver_info;
+	enum mceusb_model_type model = __c_ua(id->driver_info);
 	bool is_gen3;
 	bool is_microsoft_gen1;
 	bool tx_mask_normal;

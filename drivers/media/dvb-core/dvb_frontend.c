@@ -1943,12 +1943,12 @@ static int dtv_property_process_set(struct dvb_frontend *fe,
 	case DTV_VOLTAGE:
 		c->voltage = data;
 		r = dvb_frontend_handle_ioctl(file, FE_SET_VOLTAGE,
-					      (void *)c->voltage);
+					      __c_fakep(c->voltage));
 		break;
 	case DTV_TONE:
 		c->sectone = data;
 		r = dvb_frontend_handle_ioctl(file, FE_SET_TONE,
-					      (void *)c->sectone);
+					      __c_fakep(c->sectone));
 		break;
 	case DTV_CODE_RATE_HP:
 		c->code_rate_HP = data;
@@ -2104,7 +2104,7 @@ static int dvb_frontend_do_ioctl(struct file *file, unsigned int cmd,
 }
 
 static long dvb_frontend_ioctl(struct file *file, unsigned int cmd,
-			       unsigned long arg)
+			       user_uintptr_t arg)
 {
 	struct dvb_device *dvbdev = file->private_data;
 
@@ -2572,7 +2572,7 @@ static int dvb_frontend_handle_ioctl(struct file *file,
 
 	case FE_DISEQC_SEND_BURST:
 		if (fe->ops.diseqc_send_burst) {
-			err = fe->ops.diseqc_send_burst(fe, (long)parg);
+			err = fe->ops.diseqc_send_burst(fe, (long)__c_pa(parg));
 			fepriv->state = FESTATE_DISEQC;
 			fepriv->status = 0;
 		}
@@ -2580,7 +2580,7 @@ static int dvb_frontend_handle_ioctl(struct file *file,
 
 	case FE_SET_TONE:
 		if (fe->ops.set_tone) {
-			fepriv->tone = (long)parg;
+			fepriv->tone = (long)__c_pa(parg);
 			err = fe->ops.set_tone(fe, fepriv->tone);
 			fepriv->state = FESTATE_DISEQC;
 			fepriv->status = 0;
@@ -2589,7 +2589,7 @@ static int dvb_frontend_handle_ioctl(struct file *file,
 
 	case FE_SET_VOLTAGE:
 		if (fe->ops.set_voltage) {
-			fepriv->voltage = (long)parg;
+			fepriv->voltage = (long)__c_pa(parg);
 			err = fe->ops.set_voltage(fe, fepriv->voltage);
 			fepriv->state = FESTATE_DISEQC;
 			fepriv->status = 0;
@@ -2603,11 +2603,11 @@ static int dvb_frontend_handle_ioctl(struct file *file,
 
 	case FE_ENABLE_HIGH_LNB_VOLTAGE:
 		if (fe->ops.enable_high_lnb_voltage)
-			err = fe->ops.enable_high_lnb_voltage(fe, (long)parg);
+			err = fe->ops.enable_high_lnb_voltage(fe, (long)__c_pa(parg));
 		break;
 
 	case FE_SET_FRONTEND_TUNE_MODE:
-		fepriv->tune_mode_flags = (unsigned long)parg;
+		fepriv->tune_mode_flags = __c_pa(parg);
 		err = 0;
 		break;
 	/* DEPRECATED dish control ioctls */
@@ -2615,7 +2615,7 @@ static int dvb_frontend_handle_ioctl(struct file *file,
 	case FE_DISHNETWORK_SEND_LEGACY_CMD:
 		if (fe->ops.dishnetwork_send_legacy_command) {
 			err = fe->ops.dishnetwork_send_legacy_command(fe,
-							 (unsigned long)parg);
+							 __c_pa(parg));
 			fepriv->state = FESTATE_DISEQC;
 			fepriv->status = 0;
 		} else if (fe->ops.set_voltage) {
@@ -2635,7 +2635,7 @@ static int dvb_frontend_handle_ioctl(struct file *file,
 			 * initialization, so parg is 8 bits and does not
 			 * include the initialization or start bit
 			 */
-			unsigned long swcmd = ((unsigned long)parg) << 1;
+			unsigned long swcmd = __c_pa(parg) << 1;
 			ktime_t nexttime;
 			ktime_t tv[10];
 			int i;

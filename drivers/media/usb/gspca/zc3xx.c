@@ -6326,7 +6326,7 @@ static int sd_config(struct gspca_dev *gspca_dev,
 		sd->bridge = BRIDGE_ZC303;
 
 	/* define some sensors from the vendor/product */
-	sd->sensor = id->driver_info;
+	sd->sensor = __c_ua(id->driver_info);
 
 	sd->reg08 = REG08_DEF;
 

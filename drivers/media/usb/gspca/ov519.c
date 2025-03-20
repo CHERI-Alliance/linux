@@ -3221,7 +3221,7 @@ static int sd_config(struct gspca_dev *gspca_dev,
 	struct sd *sd = (struct sd *) gspca_dev;
 	struct cam *cam = &gspca_dev->cam;
 
-	sd->bridge = id->driver_info & BRIDGE_MASK;
+	sd->bridge = __c_ua(id->driver_info) & BRIDGE_MASK;
 	sd->invert_led = (id->driver_info & BRIDGE_INVERT_LED) != 0;
 
 	switch (sd->bridge) {

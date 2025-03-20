@@ -1489,11 +1489,11 @@ static int dvb_net_do_ioctl(struct file *file,
 			ret = -EPERM;
 			goto ioctl_error;
 		}
-		if ((unsigned long) parg >= DVB_NET_DEVICES_MAX) {
+		if (__c_pa(parg) >= DVB_NET_DEVICES_MAX) {
 			ret = -EINVAL;
 			goto ioctl_error;
 		}
-		ret = dvb_net_remove_if(dvbnet, (unsigned long) parg);
+		ret = dvb_net_remove_if(dvbnet, __c_pa(parg));
 		if (!ret)
 			module_put(dvbdev->adapter->module);
 		break;
@@ -1559,7 +1559,7 @@ ioctl_error:
 }
 
 static long dvb_net_ioctl(struct file *file,
-	      unsigned int cmd, unsigned long arg)
+	      unsigned int cmd, user_uintptr_t arg)
 {
 	return dvb_usercopy(file, cmd, arg, dvb_net_do_ioctl);
 }

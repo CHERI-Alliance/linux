@@ -351,20 +351,20 @@ struct media_v2_topology {
 
 	__u32 num_entities;
 	__u32 reserved1;
-	__u64 ptr_entities;
+	__kernel_uintptr_t ptr_entities;
 
 	__u32 num_interfaces;
 	__u32 reserved2;
-	__u64 ptr_interfaces;
+	__kernel_uintptr_t ptr_interfaces;
 
 	__u32 num_pads;
 	__u32 reserved3;
-	__u64 ptr_pads;
+	__kernel_uintptr_t ptr_pads;
 
 	__u32 num_links;
 	__u32 reserved4;
-	__u64 ptr_links;
-} __attribute__ ((packed));
+	__kernel_uintptr_t ptr_links;
+};
 
 /* ioctls */
 

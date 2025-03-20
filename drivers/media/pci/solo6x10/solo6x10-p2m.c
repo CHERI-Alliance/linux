@@ -32,7 +32,7 @@ int solo_p2m_dma(struct solo_dev *solo_dev, int wr,
 	dma_addr_t dma_addr;
 	int ret;
 
-	if (WARN_ON_ONCE((unsigned long)sys_addr & 0x03))
+	if (WARN_ON_ONCE(__c_pa(sys_addr) & 0x03))
 		return -EINVAL;
 	if (WARN_ON_ONCE(!size))
 		return -EINVAL;

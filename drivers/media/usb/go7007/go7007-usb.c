@@ -1107,7 +1107,7 @@ static int go7007_usb_probe(struct usb_interface *intf,
 		break;
 	default:
 		dev_err(&intf->dev, "unknown board ID %d!\n",
-				(unsigned int)id->driver_info);
+				(int)__c_ua(id->driver_info));
 		return -ENODEV;
 	}
 
@@ -1124,7 +1124,7 @@ static int go7007_usb_probe(struct usb_interface *intf,
 	usb->board = board;
 	usb->usbdev = usbdev;
 	usb_make_path(usbdev, go->bus_info, sizeof(go->bus_info));
-	go->board_id = id->driver_info;
+	go->board_id = __c_ua(id->driver_info);
 	strscpy(go->name, name, sizeof(go->name));
 	if (board->flags & GO7007_USB_EZUSB)
 		go->hpi_ops = &go7007_usb_ezusb_hpi_ops;

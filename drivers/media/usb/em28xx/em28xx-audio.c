@@ -427,20 +427,20 @@ static int em28xx_vol_put(struct snd_kcontrol *kcontrol,
 	} else {
 		mutex_lock(&dev->lock);
 	}
-	rc = em28xx_read_ac97(dev, kcontrol->private_value);
+	rc = em28xx_read_ac97(dev, __c_ua(kcontrol->private_value));
 	if (rc < 0)
 		goto err;
 
 	val |= rc & 0x8000;	/* Preserve the mute flag */
 
-	rc = em28xx_write_ac97(dev, kcontrol->private_value, val);
+	rc = em28xx_write_ac97(dev, __c_ua(kcontrol->private_value), val);
 	if (rc < 0)
 		goto err;
 
 	dprintk("%sleft vol %d, right vol %d (0x%04x) to ac97 volume control 0x%04x\n",
 		(val & 0x8000) ? "muted " : "",
 		0x1f - ((val >> 8) & 0x1f), 0x1f - (val & 0x1f),
-		val, (int)kcontrol->private_value);
+		val, (int)__c_ua(kcontrol->private_value));
 
 err:
 	mutex_unlock(&dev->lock);
@@ -466,7 +466,7 @@ static int em28xx_vol_get(struct snd_kcontrol *kcontrol,
 	} else {
 		mutex_lock(&dev->lock);
 	}
-	val = em28xx_read_ac97(dev, kcontrol->private_value);
+	val = em28xx_read_ac97(dev, __c_ua(kcontrol->private_value));
 	mutex_unlock(&dev->lock);
 	if (val < 0)
 		return val;
@@ -474,7 +474,7 @@ static int em28xx_vol_get(struct snd_kcontrol *kcontrol,
 	dprintk("%sleft vol %d, right vol %d (0x%04x) from ac97 volume control 0x%04x\n",
 		(val & 0x8000) ? "muted " : "",
 		0x1f - ((val >> 8) & 0x1f), 0x1f - (val & 0x1f),
-		val, (int)kcontrol->private_value);
+		val, (int)__c_ua(kcontrol->private_value));
 
 	value->value.integer.value[0] = 0x1f - (val & 0x1f);
 	value->value.integer.value[1] = 0x1f - ((val >> 8) & 0x1f);
@@ -502,7 +502,7 @@ static int em28xx_vol_put_mute(struct snd_kcontrol *kcontrol,
 	} else {
 		mutex_lock(&dev->lock);
 	}
-	rc = em28xx_read_ac97(dev, kcontrol->private_value);
+	rc = em28xx_read_ac97(dev, __c_ua(kcontrol->private_value));
 	if (rc < 0)
 		goto err;
 
@@ -511,14 +511,14 @@ static int em28xx_vol_put_mute(struct snd_kcontrol *kcontrol,
 	else
 		rc |= 0x8000;
 
-	rc = em28xx_write_ac97(dev, kcontrol->private_value, rc);
+	rc = em28xx_write_ac97(dev, __c_ua(kcontrol->private_value), rc);
 	if (rc < 0)
 		goto err;
 
 	dprintk("%sleft vol %d, right vol %d (0x%04x) to ac97 volume control 0x%04x\n",
 		(val & 0x8000) ? "muted " : "",
 		0x1f - ((val >> 8) & 0x1f), 0x1f - (val & 0x1f),
-		val, (int)kcontrol->private_value);
+		val, (int)__c_ua(kcontrol->private_value));
 
 err:
 	mutex_unlock(&dev->lock);
@@ -544,7 +544,7 @@ static int em28xx_vol_get_mute(struct snd_kcontrol *kcontrol,
 	} else {
 		mutex_lock(&dev->lock);
 	}
-	val = em28xx_read_ac97(dev, kcontrol->private_value);
+	val = em28xx_read_ac97(dev, __c_ua(kcontrol->private_value));
 	mutex_unlock(&dev->lock);
 	if (val < 0)
 		return val;
@@ -557,7 +557,7 @@ static int em28xx_vol_get_mute(struct snd_kcontrol *kcontrol,
 	dprintk("%sleft vol %d, right vol %d (0x%04x) from ac97 volume control 0x%04x\n",
 		(val & 0x8000) ? "muted " : "",
 		0x1f - ((val >> 8) & 0x1f), 0x1f - (val & 0x1f),
-		val, (int)kcontrol->private_value);
+		val, (int)__c_ua(kcontrol->private_value));
 
 	return 0;
 }
@@ -574,7 +574,7 @@ static int em28xx_cvol_new(struct snd_card *card, struct em28xx *dev,
 
 	memset(&tmp, 0, sizeof(tmp));
 	tmp.iface = SNDRV_CTL_ELEM_IFACE_MIXER;
-	tmp.private_value = id;
+	tmp.private_value = __c_fakeu(id);
 	tmp.name  = ctl_name;
 
 	/* Add Mute Control */
@@ -591,7 +591,7 @@ static int em28xx_cvol_new(struct snd_card *card, struct em28xx *dev,
 
 	memset(&tmp, 0, sizeof(tmp));
 	tmp.iface = SNDRV_CTL_ELEM_IFACE_MIXER;
-	tmp.private_value = id;
+	tmp.private_value = __c_fakeu(id);
 	tmp.name  = ctl_name;
 
 	/* Add Volume Control */

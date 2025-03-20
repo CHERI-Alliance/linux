@@ -1077,7 +1077,7 @@ static int saa7134_initdev(struct pci_dev *pci_dev,
 	}
 
 	/* board config */
-	dev->board = pci_id->driver_data;
+	dev->board = __c_ua(pci_id->driver_data);
 	if ((unsigned)card[dev->nr] < saa7134_bcount)
 		dev->board = card[dev->nr];
 	if (SAA7134_BOARD_UNKNOWN == dev->board)

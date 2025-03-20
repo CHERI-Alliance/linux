@@ -1317,7 +1317,7 @@ static int ite_probe(struct pnp_dev *pdev, const struct pnp_device_id
 	ret = -ENODEV;
 
 	/* get the model number */
-	model_no = (int)dev_id->driver_data;
+	model_no = __c_ua(dev_id->driver_data);
 	dev_dbg(&pdev->dev, "Auto-detected model: %s\n",
 		ite_dev_descs[model_no].model);
 

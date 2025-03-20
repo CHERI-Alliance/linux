@@ -808,8 +808,8 @@ static int sd_config(struct gspca_dev *gspca_dev,
 	struct sd *sd = (struct sd *) gspca_dev;
 	struct cam *cam = &gspca_dev->cam;
 
-	sd->sensor = id->driver_info >> 8;
-	sd->type = id->driver_info;
+	sd->sensor = __c_ua(id->driver_info) >> 8;
+	sd->type = __c_ua(id->driver_info);
 
 	cam->cam_mode = vga_mode;
 	cam->nmodes = ARRAY_SIZE(vga_mode);

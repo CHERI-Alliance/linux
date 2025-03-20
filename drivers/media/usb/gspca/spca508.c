@@ -1373,7 +1373,7 @@ static int sd_config(struct gspca_dev *gspca_dev,
 	cam->cam_mode = sif_mode;
 	cam->nmodes = ARRAY_SIZE(sif_mode);
 
-	sd->subtype = id->driver_info;
+	sd->subtype = __c_ua(id->driver_info);
 
 	init_data = init_data_tb[sd->subtype];
 	return write_vector(gspca_dev, init_data);
