@@ -905,7 +905,7 @@ int vivid_vid_out_g_fbuf(struct file *file, void *priv,
 			V4L2_FBUF_CAP_LOCAL_ALPHA |
 			V4L2_FBUF_CAP_LOCAL_INV_ALPHA;
 	a->flags = V4L2_FBUF_FLAG_OVERLAY | dev->fbuf_out_flags;
-	a->base = (void *)dev->video_pbase;
+	a->base = __c_fakep(dev->video_pbase);
 	a->fmt.width = dev->display_width;
 	a->fmt.height = dev->display_height;
 	if (vivid_fb_green_bits(dev) == 5)

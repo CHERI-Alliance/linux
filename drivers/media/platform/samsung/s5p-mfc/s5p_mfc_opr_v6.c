@@ -2263,7 +2263,7 @@ static void s5p_mfc_clear_int_flags_v6(struct s5p_mfc_dev *dev)
 }
 
 static unsigned int
-s5p_mfc_read_info_v6(struct s5p_mfc_ctx *ctx, unsigned long ofs)
+s5p_mfc_read_info_v6(struct s5p_mfc_ctx *ctx, uintptr_t ofs)
 {
 	int ret;
 
@@ -2381,25 +2381,25 @@ static int s5p_mfc_get_enc_slice_type_v6(struct s5p_mfc_dev *dev)
 static unsigned int s5p_mfc_get_pic_type_top_v6(struct s5p_mfc_ctx *ctx)
 {
 	return s5p_mfc_read_info_v6(ctx,
-		(__force unsigned long) ctx->dev->mfc_regs->d_ret_picture_tag_top);
+		(uintptr_t) ctx->dev->mfc_regs->d_ret_picture_tag_top);
 }
 
 static unsigned int s5p_mfc_get_pic_type_bot_v6(struct s5p_mfc_ctx *ctx)
 {
 	return s5p_mfc_read_info_v6(ctx,
-		(__force unsigned long) ctx->dev->mfc_regs->d_ret_picture_tag_bot);
+		(uintptr_t) ctx->dev->mfc_regs->d_ret_picture_tag_bot);
 }
 
 static unsigned int s5p_mfc_get_crop_info_h_v6(struct s5p_mfc_ctx *ctx)
 {
 	return s5p_mfc_read_info_v6(ctx,
-		(__force unsigned long) ctx->dev->mfc_regs->d_display_crop_info1);
+		(uintptr_t) ctx->dev->mfc_regs->d_display_crop_info1);
 }
 
 static unsigned int s5p_mfc_get_crop_info_v_v6(struct s5p_mfc_ctx *ctx)
 {
 	return s5p_mfc_read_info_v6(ctx,
-		(__force unsigned long) ctx->dev->mfc_regs->d_display_crop_info2);
+		(uintptr_t) ctx->dev->mfc_regs->d_display_crop_info2);
 }
 
 static struct s5p_mfc_regs mfc_regs;

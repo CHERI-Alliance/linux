@@ -37,11 +37,11 @@ static inline struct page **frame_vector_pages(struct frame_vector *vec)
 	return (struct page **)(vec->ptrs);
 }
 
-static inline unsigned long *frame_vector_pfns(struct frame_vector *vec)
+static inline uintptr_t *frame_vector_pfns(struct frame_vector *vec)
 {
 	if (!vec->is_pfns)
 		frame_vector_to_pfns(vec);
-	return (unsigned long *)(vec->ptrs);
+	return (uintptr_t *)(vec->ptrs);
 }
 
 #endif /* _MEDIA_FRAME_VECTOR_H */

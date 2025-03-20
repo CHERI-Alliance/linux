@@ -1477,7 +1477,7 @@ static int __init omap_vout_create_video_devices(struct platform_device *pdev)
 		 * To be precise: fbuf.base should match smem_start of
 		 * struct fb_fix_screeninfo.
 		 */
-		vout->fbuf.base = (void *)(uintptr_t)info.paddr;
+		vout->fbuf.base = __c_fakep(info.paddr);
 
 		/* Set VRFB as rotation_type for omap2 and omap3 */
 		if (omap_vout_dss_omap24xx() || omap_vout_dss_omap34xx())

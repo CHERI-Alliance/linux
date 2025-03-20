@@ -283,7 +283,7 @@ struct ivtv_user_dma {
 };
 
 struct ivtv_dma_page_info {
-	unsigned long uaddr;
+	uintptr_t uaddr;
 	unsigned long first;
 	unsigned long last;
 	unsigned int offset;

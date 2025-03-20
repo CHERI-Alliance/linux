@@ -110,18 +110,18 @@ EXPORT_SYMBOL(put_vaddr_frames);
 int frame_vector_to_pages(struct frame_vector *vec)
 {
 	int i;
-	unsigned long *nums;
+	uintptr_t *nums;
 	struct page **pages;
 
 	if (!vec->is_pfns)
 		return 0;
 	nums = frame_vector_pfns(vec);
 	for (i = 0; i < vec->nr_frames; i++)
-		if (!pfn_valid(nums[i]))
+		if (!pfn_valid(__c_ua(nums[i])))
 			return -EINVAL;
 	pages = (struct page **)nums;
 	for (i = 0; i < vec->nr_frames; i++)
-		pages[i] = pfn_to_page(nums[i]);
+		pages[i] = pfn_to_page(__c_ua(nums[i]));
 	vec->is_pfns = false;
 	return 0;
 }
@@ -136,15 +136,15 @@ EXPORT_SYMBOL(frame_vector_to_pages);
 void frame_vector_to_pfns(struct frame_vector *vec)
 {
 	int i;
-	unsigned long *nums;
+	uintptr_t *nums;
 	struct page **pages;
 
 	if (vec->is_pfns)
 		return;
 	pages = (struct page **)(vec->ptrs);
-	nums = (unsigned long *)pages;
+	nums = (uintptr_t *)pages;
 	for (i = 0; i < vec->nr_frames; i++)
-		nums[i] = page_to_pfn(pages[i]);
+		nums[i] = __c_fakeu(page_to_pfn(pages[i]));
 	vec->is_pfns = true;
 }
 EXPORT_SYMBOL(frame_vector_to_pfns);

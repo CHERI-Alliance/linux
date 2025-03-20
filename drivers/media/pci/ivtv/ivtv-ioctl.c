@@ -1419,7 +1419,8 @@ static int ivtv_g_fbuf(struct file *file, void *fh, struct v4l2_framebuffer *fb)
 	    fb->fmt.pixelformat == V4L2_PIX_FMT_YUV32)
 		fb->fmt.bytesperline *= 2;
 	fb->fmt.sizeimage = fb->fmt.bytesperline * fb->fmt.height;
-	fb->base = (void *)itv->osd_video_pbase;
+	/* base is a physical address, so no CHERI bounds. */
+	fb->base = __c_fakep(itv->osd_video_pbase);
 	fb->flags = 0;
 
 	if (itv->osd_chroma_key_state)
