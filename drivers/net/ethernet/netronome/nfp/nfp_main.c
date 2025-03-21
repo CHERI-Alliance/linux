@@ -767,7 +767,7 @@ static int nfp_pci_probe(struct pci_dev *pdev,
 	     pdev->device == PCI_DEVICE_ID_NFP6000_VF))
 		dev_warn(&pdev->dev, "Binding NFP VF device to the NFP PF driver, the VF driver is called 'nfp_netvf'\n");
 
-	dev_info = &nfp_dev_info[pci_id->driver_data];
+	dev_info = &nfp_dev_info[__c_ua(pci_id->driver_data)];
 
 	err = pci_enable_device(pdev);
 	if (err < 0)

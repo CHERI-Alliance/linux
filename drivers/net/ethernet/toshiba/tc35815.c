@@ -832,7 +832,7 @@ static int tc35815_init_one(struct pci_dev *pdev,
 
 	printk(KERN_INFO "%s: %s at 0x%lx, %pM, IRQ %d\n",
 		dev->name,
-		chip_info[ent->driver_data].name,
+		chip_info[__c_ua(ent->driver_data)].name,
 		dev->base_addr,
 		dev->dev_addr,
 		dev->irq);

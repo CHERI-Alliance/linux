@@ -275,8 +275,8 @@ static inline void
 		return NULL;
 	}
 
-	if ((unsigned long)skb->data & SKB_ADJ_MASK) {
-		u32 r = SKB_ADJ - ((unsigned long)skb->data & SKB_ADJ_MASK);
+	if (__c_pa(skb->data) & SKB_ADJ_MASK) {
+		u32 r = SKB_ADJ - (__c_pa(skb->data) & SKB_ADJ_MASK);
 
 		skb_reserve(skb, r);
 	}
@@ -313,8 +313,8 @@ static inline void
 	if (unlikely(!skb))
 		return NULL;
 
-	if ((unsigned long)skb->data & SKB_ADJ_MASK) {
-		u32 r = SKB_ADJ - ((unsigned long)skb->data & SKB_ADJ_MASK);
+	if (__c_pa(skb->data) & SKB_ADJ_MASK) {
+		u32 r = SKB_ADJ - (__c_pa(skb->data) & SKB_ADJ_MASK);
 
 		skb_reserve(skb, r);
 	}
@@ -373,8 +373,8 @@ static inline void
 		return NULL;
 	}
 
-	if ((unsigned long)skb->data & SKB_ADJ_MASK) {
-		u32 r = SKB_ADJ - ((unsigned long)skb->data & SKB_ADJ_MASK);
+	if (__c_pa(skb->data) & SKB_ADJ_MASK) {
+		u32 r = SKB_ADJ - (__c_pa(skb->data) & SKB_ADJ_MASK);
 
 		skb_reserve(skb, r);
 	}

@@ -4052,7 +4052,7 @@ static int mlx4_init_one(struct pci_dev *pdev, const struct pci_device_id *id)
 	dev->persist->pdev = pdev;
 	dev->persist->dev = dev;
 	pci_set_drvdata(pdev, dev->persist);
-	priv->pci_dev_data = id->driver_data;
+	priv->pci_dev_data = __c_ua(id->driver_data);
 	mutex_init(&dev->persist->device_state_mutex);
 	mutex_init(&dev->persist->interface_state_mutex);
 	mutex_init(&dev->persist->pci_status_mutex);
@@ -4062,7 +4062,7 @@ static int mlx4_init_one(struct pci_dev *pdev, const struct pci_device_id *id)
 	if (ret)
 		goto err_devlink_unregister;
 	mlx4_devlink_set_params_init_values(devlink);
-	ret =  __mlx4_init_one(pdev, id->driver_data, priv);
+	ret =  __mlx4_init_one(pdev, __c_ua(id->driver_data), priv);
 	if (ret)
 		goto err_params_unregister;
 

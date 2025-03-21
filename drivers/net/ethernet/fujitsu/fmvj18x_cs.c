@@ -431,14 +431,14 @@ static int fmvj18x_config(struct pcmcia_device *link)
 	    goto failed;
 
     dev->irq = link->irq;
-    dev->base_addr = link->resource[0]->start;
+    dev->base_addr = __c_fakeu(link->resource[0]->start);
 
     if (resource_size(link->resource[1]) != 0) {
 	ret = fmvj18x_setup_mfc(link);
 	if (ret != 0) goto failed;
     }
 
-    ioaddr = dev->base_addr;
+    ioaddr = __c_ua(dev->base_addr);
 
     /* Reset controller */
     if (sram_config == 0) 
@@ -524,7 +524,7 @@ static int fmvj18x_config(struct pcmcia_device *link)
     /* print current configuration */
     netdev_info(dev, "%s, sram %s, port %#3lx, irq %d, hw_addr %pM\n",
 		card_name, sram_config == 0 ? "4K TX*2" : "8K TX*2",
-		dev->base_addr, dev->irq, dev->dev_addr);
+		__c_ua(dev->base_addr), dev->irq, dev->dev_addr);
 
     return 0;
     
@@ -611,7 +611,7 @@ static int fmvj18x_setup_mfc(struct pcmcia_device *link)
 	return -1;
     }
     
-    ioaddr = dev->base_addr;
+    ioaddr = __c_ua(dev->base_addr);
     writeb(0x47, lp->base+0x800);	/* Config Option Register of LAN */
     writeb(0x0,  lp->base+0x802);	/* Config and Status Register */
 
@@ -719,7 +719,7 @@ static irqreturn_t fjn_interrupt(int dummy, void *dev_id)
     unsigned int ioaddr;
     unsigned short tx_stat, rx_stat;
 
-    ioaddr = dev->base_addr;
+    ioaddr = __c_ua(dev->base_addr);
 
     /* avoid multiple interrupts */
     outw(0x0000, ioaddr + TX_INTR);
@@ -777,7 +777,7 @@ static irqreturn_t fjn_interrupt(int dummy, void *dev_id)
 static void fjn_tx_timeout(struct net_device *dev, unsigned int txqueue)
 {
     struct local_info *lp = netdev_priv(dev);
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
 
     netdev_notice(dev, "transmit timed out with status %04x, %s?\n",
 		  htons(inw(ioaddr + TX_STATUS)),
@@ -807,7 +807,7 @@ static netdev_tx_t fjn_start_xmit(struct sk_buff *skb,
 					struct net_device *dev)
 {
     struct local_info *lp = netdev_priv(dev);
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
     short length = skb->len;
     
     if (length < ETH_ZLEN)
@@ -879,7 +879,7 @@ static netdev_tx_t fjn_start_xmit(struct sk_buff *skb,
 static void fjn_reset(struct net_device *dev)
 {
     struct local_info *lp = netdev_priv(dev);
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
     int i;
 
     netdev_dbg(dev, "fjn_reset() called\n");
@@ -957,7 +957,7 @@ static void fjn_reset(struct net_device *dev)
 
 static void fjn_rx(struct net_device *dev)
 {
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
     int boguscount = 10;	/* 5 -> 10: by agy 19940922 */
 
     pr_debug("%s: in rx_packet(), rx_status %02x.\n",
@@ -1049,7 +1049,7 @@ static void netdev_get_drvinfo(struct net_device *dev,
 	strscpy(info->driver, DRV_NAME, sizeof(info->driver));
 	strscpy(info->version, DRV_VERSION, sizeof(info->version));
 	snprintf(info->bus_info, sizeof(info->bus_info),
-		"PCMCIA 0x%lx", dev->base_addr);
+		"PCMCIA 0x%lx", __c_ua(dev->base_addr));
 }
 
 static const struct ethtool_ops netdev_ethtool_ops = {
@@ -1089,7 +1089,7 @@ static int fjn_close(struct net_device *dev)
 {
     struct local_info *lp = netdev_priv(dev);
     struct pcmcia_device *link = lp->p_dev;
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
 
     pr_debug("fjn_close('%s').\n", dev->name);
 
@@ -1124,7 +1124,7 @@ static int fjn_close(struct net_device *dev)
 
 static void set_rx_mode(struct net_device *dev)
 {
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
     u_char mc_filter[8];		 /* Multicast hash filter */
     u_long flags;
     int i;

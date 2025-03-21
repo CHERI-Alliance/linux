@@ -977,7 +977,7 @@ static int init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 
 	mmio_start = pci_resource_start(pdev, 0);
 	mmio_len = pci_resource_len(pdev, 0);
-	bi = t1_get_board_info(ent->driver_data);
+	bi = t1_get_board_info(__c_ua(ent->driver_data));
 
 	for (i = 0; i < bi->port_number; ++i) {
 		struct net_device *netdev;
@@ -1028,8 +1028,8 @@ static int init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 		netif_carrier_off(netdev);
 		netdev->irq = pdev->irq;
 		netdev->if_port = i;
-		netdev->mem_start = mmio_start;
-		netdev->mem_end = mmio_start + mmio_len - 1;
+		netdev->mem_start = __c_fakeu(mmio_start);
+		netdev->mem_end = __c_fakeu(mmio_start + mmio_len - 1);
 		netdev->ml_priv = adapter;
 		netdev->hw_features |= NETIF_F_SG | NETIF_F_IP_CSUM |
 			NETIF_F_RXCSUM;

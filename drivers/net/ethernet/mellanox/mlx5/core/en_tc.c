@@ -3968,9 +3968,9 @@ parse_tc_actions(struct mlx5e_tc_act_parse_state *parse_state,
 			prev_attr->action |= MLX5_FLOW_CONTEXT_ACTION_COUNT;
 			flow_flag_set(flow, USE_ACT_STATS);
 
-			attr->tc_act_cookies[attr->tc_act_cookies_count++] = act->cookie;
+			attr->tc_act_cookies[attr->tc_act_cookies_count++] = __c_ua(act->cookie);
 		} else if (!tc_act->stats_action) {
-			prev_attr->tc_act_cookies[prev_attr->tc_act_cookies_count++] = act->cookie;
+			prev_attr->tc_act_cookies[prev_attr->tc_act_cookies_count++] = __c_ua(act->cookie);
 		}
 	}
 
@@ -4334,7 +4334,7 @@ mlx5e_alloc_flow(struct mlx5e_priv *priv, int attr_size,
 		goto err_free;
 
 	flow->flags = flow_flags;
-	flow->cookie = f->cookie;
+	flow->cookie = __c_ua(f->cookie);
 	flow->priv = priv;
 
 	attr = mlx5_alloc_flow_attr(mlx5e_get_flow_namespace(flow));
@@ -4721,7 +4721,7 @@ int mlx5e_configure_flower(struct net_device *dev, struct mlx5e_priv *priv,
 				   "flow cookie already exists, ignoring");
 		netdev_warn_once(priv->netdev,
 				 "flow cookie %lx already exists, ignoring\n",
-				 f->cookie);
+				 __c_ua(f->cookie));
 		err = -EEXIST;
 		goto rcu_unlock;
 	}

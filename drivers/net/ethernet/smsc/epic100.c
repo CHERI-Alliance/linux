@@ -321,7 +321,7 @@ static int epic_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 {
 	static int card_idx = -1;
 	void __iomem *ioaddr;
-	int chip_idx = (int) ent->driver_data;
+	int chip_idx = (int)__c_ua(ent->driver_data);
 	struct net_device *dev;
 	struct epic_private *ep;
 	int i, ret, option = 0, duplex = 0;
@@ -390,7 +390,7 @@ static int epic_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	ep->rx_ring_dma = ring_dma;
 
 	if (dev->mem_start) {
-		option = dev->mem_start;
+		option = __c_ua(dev->mem_start);
 		duplex = (dev->mem_start & 16) ? 1 : 0;
 	} else if (card_idx >= 0  &&  card_idx < MAX_UNITS) {
 		if (options[card_idx] >= 0)

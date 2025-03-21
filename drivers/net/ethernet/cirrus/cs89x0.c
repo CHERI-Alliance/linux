@@ -1287,9 +1287,9 @@ static void __init reset_chip(struct net_device *dev)
 		iowrite8(0, lp->virt_addr + DATA_PORT + 1);
 
 		iowrite16(PP_CS8920_ISAMemB, lp->virt_addr + ADD_PORT);
-		iowrite8((dev->mem_start >> 16) & 0xff,
+		iowrite8((__c_ua(dev->mem_start) >> 16) & 0xff,
 			 lp->virt_addr + DATA_PORT);
-		iowrite8((dev->mem_start >> 8) & 0xff,
+		iowrite8((__c_ua(dev->mem_start) >> 8) & 0xff,
 			 lp->virt_addr + DATA_PORT + 1);
 	}
 
@@ -1462,7 +1462,7 @@ cs89x0_probe1(struct net_device *dev, void __iomem *ioaddr, int modular)
 			lp->adapter_cnf = eeprom_buff[ADAPTER_CNF_OFFSET / 2];
 		/* Store ISA configuration */
 		lp->isa_config = eeprom_buff[ISA_CNF_OFFSET / 2];
-		dev->mem_start = eeprom_buff[PACKET_PAGE_OFFSET / 2] << 8;
+		dev->mem_start = __c_fakeu(eeprom_buff[PACKET_PAGE_OFFSET / 2] << 8);
 
 		/* eeprom_buff has 32-bit ints, so we can't just memcpy it */
 		/* store the initial memory base address */

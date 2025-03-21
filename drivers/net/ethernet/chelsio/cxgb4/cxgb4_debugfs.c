@@ -393,7 +393,7 @@ static int cim_ibq_open(struct inode *inode, struct file *file)
 {
 	int ret;
 	struct seq_tab *p;
-	unsigned int qid = (uintptr_t)inode->i_private & 7;
+	unsigned int qid = __c_pa(inode->i_private) & 7;
 	struct adapter *adap = inode->i_private - qid;
 
 	p = seq_open_tab(file, CIM_IBQ_SIZE, 4 * sizeof(u32), 0, cimq_show);
@@ -420,7 +420,7 @@ static int cim_obq_open(struct inode *inode, struct file *file)
 {
 	int ret;
 	struct seq_tab *p;
-	unsigned int qid = (uintptr_t)inode->i_private & 7;
+	unsigned int qid = __c_pa(inode->i_private) & 7;
 	struct adapter *adap = inode->i_private - qid;
 
 	p = seq_open_tab(file, 6 * CIM_OBQ_SIZE, 4 * sizeof(u32), 0, cimq_show);
@@ -997,7 +997,7 @@ static int devlog_show(struct seq_file *seq, void *v)
 			   "Seq#", "Tstamp", "Level", "Facility", "Message");
 	else {
 		struct devlog_info *dinfo = seq->private;
-		int fidx = (uintptr_t)v - 2;
+		int fidx = __c_pa(v) - 2;
 		unsigned long index;
 		struct fw_devlog_e *e;
 
@@ -1044,7 +1044,7 @@ static inline void *devlog_get_idx(struct devlog_info *dinfo, loff_t pos)
 	if (pos > dinfo->nentries)
 		return NULL;
 
-	return (void *)(uintptr_t)(pos + 1);
+	return __c_fakep(pos + 1);
 }
 
 static void *devlog_start(struct seq_file *seq, loff_t *pos)
@@ -1166,7 +1166,7 @@ static int mboxlog_show(struct seq_file *seq, void *v)
 		return 0;
 	}
 
-	entry_idx = log->cursor + ((uintptr_t)v - 2);
+	entry_idx = log->cursor + (__c_pa(v) - 2);
 	if (entry_idx >= log->size)
 		entry_idx -= log->size;
 	entry = mbox_cmd_log_entry(log, entry_idx);
@@ -1194,7 +1194,7 @@ static inline void *mboxlog_get_idx(struct seq_file *seq, loff_t pos)
 	struct adapter *adapter = seq->private;
 	struct mbox_cmd_log *log = adapter->mbox_log;
 
-	return ((pos <= log->size) ? (void *)(uintptr_t)(pos + 1) : NULL);
+	return ((pos <= log->size) ? __c_fakep(pos + 1) : NULL);
 }
 
 static void *mboxlog_start(struct seq_file *seq, loff_t *pos)
@@ -1245,7 +1245,7 @@ static int mbox_show(struct seq_file *seq, void *v)
 					      "unknown", "<unread>" };
 
 	int i;
-	unsigned int mbox = (uintptr_t)seq->private & 7;
+	unsigned int mbox = __c_pa(seq->private) & 7;
 	struct adapter *adap = seq->private - mbox;
 	void __iomem *addr = adap->regs + PF_REG(mbox, CIM_PF_MAILBOX_DATA_A);
 
@@ -1299,7 +1299,7 @@ static ssize_t mbox_write(struct file *file, const char __user *buf,
 		return -EINVAL;
 
 	ino = file_inode(file);
-	mbox = (uintptr_t)ino->i_private & 7;
+	mbox = __c_pa(ino->i_private) & 7;
 	adap = ino->i_private - mbox;
 	addr = adap->regs + PF_REG(mbox, CIM_PF_MAILBOX_DATA_A);
 	ctrl = addr + MBOX_LEN;
@@ -1327,7 +1327,7 @@ static int mps_trc_show(struct seq_file *seq, void *v)
 {
 	int enabled, i;
 	struct trace_params tp;
-	unsigned int trcidx = (uintptr_t)seq->private & 3;
+	unsigned int trcidx = __c_pa(seq->private) & 3;
 	struct adapter *adap = seq->private - trcidx;
 
 	t4_get_trace_filter(adap, &tp, trcidx, &enabled);
@@ -1421,7 +1421,7 @@ static ssize_t mps_trc_write(struct file *file, const char __user *buf,
 	u32 j;
 
 	ino = file_inode(file);
-	trcidx = (uintptr_t)ino->i_private & 3;
+	trcidx = __c_pa(ino->i_private) & 3;
 	adap = ino->i_private - trcidx;
 
 	/* Don't accept input more than 1K, can't be anything valid except lots
@@ -1696,7 +1696,7 @@ static int mps_tcam_show(struct seq_file *seq, void *v)
 		u64 mask;
 		u8 addr[ETH_ALEN];
 		bool replicate, dip_hit = false, vlan_vld = false;
-		unsigned int idx = (uintptr_t)v - 2;
+		unsigned int idx = __c_pa(v) - 2;
 		u64 tcamy, tcamx, val;
 		u32 cls_lo, cls_hi, ctl, data2, vnix = 0, vniy = 0;
 		u32 rplc[8] = {0};
@@ -1890,7 +1890,7 @@ static inline void *mps_tcam_get_idx(struct seq_file *seq, loff_t pos)
 	int max_mac_addr = is_t4(adap->params.chip) ?
 				NUM_MPS_CLS_SRAM_L_INSTANCES :
 				NUM_MPS_T5_CLS_SRAM_L_INSTANCES;
-	return ((pos <= max_mac_addr) ? (void *)(uintptr_t)(pos + 1) : NULL);
+	return ((pos <= max_mac_addr) ? __c_fakep(pos + 1) : NULL);
 }
 
 static void *mps_tcam_start(struct seq_file *seq, loff_t *pos)
@@ -2389,7 +2389,7 @@ static int dcb_info_show(struct seq_file *seq, void *v)
 	if (v == SEQ_START_TOKEN) {
 		seq_puts(seq, "Data Center Bridging Information\n");
 	} else {
-		int port = (uintptr_t)v - 2;
+		int port = __c_pa(v) - 2;
 		struct net_device *dev = adap->port[port];
 		struct port_info *pi = netdev2pinfo(dev);
 		struct port_dcb_info *dcb = &pi->dcb;
@@ -2514,7 +2514,7 @@ static int dcb_info_show(struct seq_file *seq, void *v)
 static inline void *dcb_info_get_idx(struct adapter *adap, loff_t pos)
 {
 	return (pos <= adap->params.nports
-		? (void *)((uintptr_t)pos + 1)
+		? __c_fakep(pos + 1)
 		: NULL);
 }
 
@@ -2657,7 +2657,7 @@ static int sge_qinfo_show(struct seq_file *seq, void *v)
 	const struct sge_uld_rxq_info *urxq_info;
 	struct cxgb4_tc_port_mqprio *port_mqprio;
 	struct adapter *adap = seq->private;
-	int i, j, n, r = (uintptr_t)v - 1;
+	int i, j, n, r = __c_pa(v) - 1;
 	struct sge *s = &adap->sge;
 
 	eth_entries = DIV_ROUND_UP(adap->sge.ethqsets, 4);
@@ -3208,7 +3208,7 @@ static void *sge_queue_start(struct seq_file *seq, loff_t *pos)
 {
 	int entries = sge_queue_entries(seq->private);
 
-	return *pos < entries ? (void *)((uintptr_t)*pos + 1) : NULL;
+	return *pos < entries ? __c_fakep(*pos + 1) : NULL;
 }
 
 static void sge_queue_stop(struct seq_file *seq, void *v)
@@ -3220,7 +3220,7 @@ static void *sge_queue_next(struct seq_file *seq, void *v, loff_t *pos)
 	int entries = sge_queue_entries(seq->private);
 
 	++*pos;
-	return *pos < entries ? (void *)((uintptr_t)*pos + 1) : NULL;
+	return *pos < entries ? __c_fakep(*pos + 1) : NULL;
 }
 
 static const struct seq_operations sge_qinfo_seq_ops = {
@@ -3257,7 +3257,7 @@ int mem_open(struct inode *inode, struct file *file)
 
 	file->private_data = inode->i_private;
 
-	mem = (uintptr_t)file->private_data & 0x7;
+	mem = __c_pa(file->private_data) & 0x7;
 	adap = file->private_data - mem;
 
 	(void)t4_fwcache(adap, FW_PARAM_DEV_FWCACHE_FLUSH);
@@ -3270,7 +3270,7 @@ static ssize_t mem_read(struct file *file, char __user *buf, size_t count,
 {
 	loff_t pos = *ppos;
 	loff_t avail = file_inode(file)->i_size;
-	unsigned int mem = (uintptr_t)file->private_data & 0x7;
+	unsigned int mem = __c_pa(file->private_data) & 0x7;
 	struct adapter *adap = file->private_data - mem;
 	__be32 *data;
 	int ret;

@@ -25,9 +25,9 @@
 #define CRB_HI(off)	((crb_hub_agt[CRB_BLK(off)] << 20) | ((off) & 0xf0000))
 #define CRB_INDIRECT_2M	(0x1e0000UL)
 
-static void netxen_nic_io_write_128M(struct netxen_adapter *adapter,
+void netxen_nic_io_write_128M(struct netxen_adapter *adapter,
 		void __iomem *addr, u32 data);
-static u32 netxen_nic_io_read_128M(struct netxen_adapter *adapter,
+u32 netxen_nic_io_read_128M(struct netxen_adapter *adapter,
 		void __iomem *addr);
 
 #define PCI_OFFSET_FIRST_RANGE(adapter, off)    \
@@ -37,7 +37,7 @@ static u32 netxen_nic_io_read_128M(struct netxen_adapter *adapter,
 #define PCI_OFFSET_THIRD_RANGE(adapter, off)    \
 	((adapter)->ahw.pci_base2 + (off) - THIRD_PAGE_GROUP_START)
 
-static void __iomem *pci_base_offset(struct netxen_adapter *adapter,
+static __maybe_unused void __iomem *pci_base_offset(struct netxen_adapter *adapter,
 					    unsigned long off)
 {
 	if (ADDR_IN_RANGE(off, FIRST_PAGE_GROUP_START, FIRST_PAGE_GROUP_END))
@@ -52,7 +52,7 @@ static void __iomem *pci_base_offset(struct netxen_adapter *adapter,
 	return NULL;
 }
 
-static crb_128M_2M_block_map_t
+static __maybe_unused crb_128M_2M_block_map_t
 crb_128M_2M_map[64] __cacheline_aligned_in_smp = {
     {{{0, 0,         0,         0} } },		/* 0: PCI */
     {{{1, 0x0100000, 0x0102000, 0x120000},	/* 1: PCIE */
@@ -213,7 +213,7 @@ crb_128M_2M_map[64] __cacheline_aligned_in_smp = {
 /*
  * top 12 bits of crb internal address (hub, agent)
  */
-static unsigned crb_hub_agt[64] =
+static __maybe_unused unsigned crb_hub_agt[64] =
 {
 	0,
 	NETXEN_HW_CRB_HUB_AGT_ADR_PS,
@@ -287,7 +287,7 @@ static unsigned crb_hub_agt[64] =
 
 #define NETXEN_PCIE_SEM_TIMEOUT	10000
 
-static int netxen_nic_set_mtu_xgb(struct netxen_adapter *adapter, int new_mtu);
+static __maybe_unused int netxen_nic_set_mtu_xgb(struct netxen_adapter *adapter, int new_mtu);
 
 int
 netxen_pcie_sem_lock(struct netxen_adapter *adapter, int sem, u32 id_reg)
@@ -315,7 +315,7 @@ netxen_pcie_sem_unlock(struct netxen_adapter *adapter, int sem)
 	NXRD32(adapter, NETXEN_PCIE_REG(PCIE_SEM_UNLOCK(sem)));
 }
 
-static int netxen_niu_xg_init_port(struct netxen_adapter *adapter, int port)
+static __maybe_unused int netxen_niu_xg_init_port(struct netxen_adapter *adapter, int port)
 {
 	if (NX_IS_REVISION_P2(adapter->ahw.revision_id)) {
 		NXWR32(adapter, NETXEN_NIU_XGE_CONFIG_1+(0x10000*port), 0x1447);
@@ -326,7 +326,7 @@ static int netxen_niu_xg_init_port(struct netxen_adapter *adapter, int port)
 }
 
 /* Disable an XG interface */
-static int netxen_niu_disable_xg_port(struct netxen_adapter *adapter)
+static __maybe_unused int netxen_niu_disable_xg_port(struct netxen_adapter *adapter)
 {
 	__u32 mac_cfg;
 	u32 port = adapter->physical_port;
@@ -353,7 +353,7 @@ static int netxen_niu_disable_xg_port(struct netxen_adapter *adapter)
 #define MAC_LO(addr) \
 	((addr[5] << 16) | (addr[4] << 8) | (addr[3]))
 
-static int netxen_p2_nic_set_promisc(struct netxen_adapter *adapter, u32 mode)
+static __maybe_unused int netxen_p2_nic_set_promisc(struct netxen_adapter *adapter, u32 mode)
 {
 	u32 mac_cfg;
 	u32 cnt = 0;
@@ -404,7 +404,7 @@ static int netxen_p2_nic_set_promisc(struct netxen_adapter *adapter, u32 mode)
 	return 0;
 }
 
-static int netxen_p2_nic_set_mac_addr(struct netxen_adapter *adapter, u8 *addr)
+static __maybe_unused int netxen_p2_nic_set_mac_addr(struct netxen_adapter *adapter, u8 *addr)
 {
 	u32 mac_hi, mac_lo;
 	u32 reg_hi, reg_lo;
@@ -430,7 +430,7 @@ static int netxen_p2_nic_set_mac_addr(struct netxen_adapter *adapter, u8 *addr)
 	return 0;
 }
 
-static int
+static __maybe_unused int
 netxen_nic_enable_mcast_filter(struct netxen_adapter *adapter)
 {
 	u32	val = 0;
@@ -459,7 +459,7 @@ netxen_nic_enable_mcast_filter(struct netxen_adapter *adapter)
 	return 0;
 }
 
-static int
+static __maybe_unused int
 netxen_nic_disable_mcast_filter(struct netxen_adapter *adapter)
 {
 	u32	val = 0;
@@ -485,7 +485,7 @@ netxen_nic_disable_mcast_filter(struct netxen_adapter *adapter)
 	return 0;
 }
 
-static int
+static __maybe_unused int
 netxen_nic_set_mcast_addr(struct netxen_adapter *adapter,
 		int index, u8 *addr)
 {
@@ -501,7 +501,7 @@ netxen_nic_set_mcast_addr(struct netxen_adapter *adapter,
 	return 0;
 }
 
-static void netxen_p2_nic_set_multi(struct net_device *netdev)
+static __maybe_unused void netxen_p2_nic_set_multi(struct net_device *netdev)
 {
 	struct netxen_adapter *adapter = netdev_priv(netdev);
 	struct netdev_hw_addr *ha;
@@ -546,7 +546,7 @@ static void netxen_p2_nic_set_multi(struct net_device *netdev)
 		netxen_nic_set_mcast_addr(adapter, i++, null_addr);
 }
 
-static int
+static __maybe_unused int
 netxen_send_cmd_descs(struct netxen_adapter *adapter,
 		struct cmd_desc_type0 *cmd_desc_arr, int nr_desc)
 {
@@ -598,7 +598,7 @@ netxen_send_cmd_descs(struct netxen_adapter *adapter,
 	return 0;
 }
 
-static int
+static __maybe_unused int
 nx_p3_sre_macaddr_change(struct netxen_adapter *adapter, u8 *addr, unsigned op)
 {
 	nx_nic_req_t req;
@@ -618,7 +618,7 @@ nx_p3_sre_macaddr_change(struct netxen_adapter *adapter, u8 *addr, unsigned op)
 	return netxen_send_cmd_descs(adapter, (struct cmd_desc_type0 *)&req, 1);
 }
 
-static int nx_p3_nic_add_mac(struct netxen_adapter *adapter,
+static __maybe_unused int nx_p3_nic_add_mac(struct netxen_adapter *adapter,
 		const u8 *addr, struct list_head *del_list)
 {
 	struct list_head *head;
@@ -644,7 +644,7 @@ static int nx_p3_nic_add_mac(struct netxen_adapter *adapter,
 				cur->mac_addr, NETXEN_MAC_ADD);
 }
 
-static void netxen_p3_nic_set_multi(struct net_device *netdev)
+static __maybe_unused void netxen_p3_nic_set_multi(struct net_device *netdev)
 {
 	struct netxen_adapter *adapter = netdev_priv(netdev);
 	struct netdev_hw_addr *ha;
@@ -693,7 +693,7 @@ send_fw_cmd:
 	}
 }
 
-static int netxen_p3_nic_set_promisc(struct netxen_adapter *adapter, u32 mode)
+static __maybe_unused int netxen_p3_nic_set_promisc(struct netxen_adapter *adapter, u32 mode)
 {
 	nx_nic_req_t req;
 	u64 word;
@@ -726,7 +726,7 @@ void netxen_p3_free_mac_list(struct netxen_adapter *adapter)
 	}
 }
 
-static int netxen_p3_nic_set_mac_addr(struct netxen_adapter *adapter, u8 *addr)
+static __maybe_unused int netxen_p3_nic_set_mac_addr(struct netxen_adapter *adapter, u8 *addr)
 {
 	/* assuming caller has already copied new addr to netdev */
 	netxen_p3_nic_set_multi(adapter->netdev);
@@ -964,14 +964,13 @@ int netxen_nic_change_mtu(struct net_device *netdev, int mtu)
 
 	return rc;
 }
-
-static int netxen_get_flash_block(struct netxen_adapter *adapter, int base,
+extern void *foo;
+static __maybe_unused int netxen_get_flash_block(struct netxen_adapter *adapter, int base,
 				  int size, __le32 * buf)
 {
-	int i, v, addr;
+	int i = i, v = 0, addr;
 	__le32 *ptr32;
 	int ret;
-
 	addr = base;
 	ptr32 = buf;
 	for (i = 0; i < size / sizeof(u32); i++) {
@@ -995,16 +994,17 @@ static int netxen_get_flash_block(struct netxen_adapter *adapter, int base,
 	return 0;
 }
 
+/* GOOD */
+extern void *foo;
 int netxen_get_flash_mac_addr(struct netxen_adapter *adapter, u64 *mac)
 {
-	__le32 *pmac = (__le32 *) mac;
+	void *pmac = foo; //(__le32 *) mac;
 	u32 offset;
 
 	offset = NX_FW_MAC_ADDR_OFFSET + (adapter->portnum * sizeof(u64));
 
 	if (netxen_get_flash_block(adapter, offset, sizeof(u64), pmac) == -1)
 		return -1;
-
 	if (*mac == ~0ULL) {
 
 		offset = NX_OLD_MAC_ADDR_OFFSET +
@@ -1020,6 +1020,8 @@ int netxen_get_flash_mac_addr(struct netxen_adapter *adapter, u64 *mac)
 	return 0;
 }
 
+#if 0
+/* BAD */
 int netxen_p3_get_mac_addr(struct netxen_adapter *adapter, u64 *mac)
 {
 	uint32_t crbaddr, mac_hi, mac_lo;
@@ -1039,10 +1041,11 @@ int netxen_p3_get_mac_addr(struct netxen_adapter *adapter, u64 *mac)
 	return 0;
 }
 
+/* BAD */
 /*
  * Changes the CRB window to the specified window.
  */
-static void
+static __maybe_unused void
 netxen_nic_pci_set_crbwindow_128M(struct netxen_adapter *adapter,
 		u32 window)
 {
@@ -1073,6 +1076,7 @@ netxen_nic_pci_set_crbwindow_128M(struct netxen_adapter *adapter,
 		adapter->ahw.crb_win = window;
 }
 
+/* BAD */
 /*
  * Returns < 0 if off is not valid,
  *	 1 if window access is needed. 'off' is set to offset from
@@ -1080,7 +1084,7 @@ netxen_nic_pci_set_crbwindow_128M(struct netxen_adapter *adapter,
  *	 0 if no window access is needed. 'off' is set to 2M addr
  * In: 'off' is offset from base in 128M pci map
  */
-static int
+static __maybe_unused int
 netxen_nic_pci_get_crb_addr_2M(struct netxen_adapter *adapter,
 		ulong off, void __iomem **addr)
 {
@@ -1116,7 +1120,7 @@ netxen_nic_pci_get_crb_addr_2M(struct netxen_adapter *adapter,
  * Out: 'off' is 2M pci map addr
  * side effect: lock crb window
  */
-static void
+static __maybe_unused void
 netxen_nic_pci_set_crbwindow_2M(struct netxen_adapter *adapter, ulong off)
 {
 	u32 window;
@@ -1135,7 +1139,7 @@ netxen_nic_pci_set_crbwindow_2M(struct netxen_adapter *adapter, ulong off)
 	}
 }
 
-static void __iomem *
+static __maybe_unused void __iomem *
 netxen_nic_map_indirect_address_128M(struct netxen_adapter *adapter,
 		ulong win_off, void __iomem **mem_ptr)
 {
@@ -1161,7 +1165,7 @@ netxen_nic_map_indirect_address_128M(struct netxen_adapter *adapter,
 	return addr;
 }
 
-static int
+static __maybe_unused int
 netxen_nic_hw_write_wx_128M(struct netxen_adapter *adapter, ulong off, u32 data)
 {
 	unsigned long flags;
@@ -1188,7 +1192,8 @@ netxen_nic_hw_write_wx_128M(struct netxen_adapter *adapter, ulong off, u32 data)
 	return 0;
 }
 
-static u32
+/* BAD */
+static __maybe_unused u32
 netxen_nic_hw_read_wx_128M(struct netxen_adapter *adapter, ulong off)
 {
 	unsigned long flags;
@@ -1216,7 +1221,7 @@ netxen_nic_hw_read_wx_128M(struct netxen_adapter *adapter, ulong off)
 	return data;
 }
 
-static int
+static __maybe_unused int
 netxen_nic_hw_write_wx_2M(struct netxen_adapter *adapter, ulong off, u32 data)
 {
 	unsigned long flags;
@@ -1247,7 +1252,7 @@ netxen_nic_hw_write_wx_2M(struct netxen_adapter *adapter, ulong off, u32 data)
 	return -EIO;
 }
 
-static u32
+static __maybe_unused u32
 netxen_nic_hw_read_wx_2M(struct netxen_adapter *adapter, ulong off)
 {
 	unsigned long flags;
@@ -1278,7 +1283,7 @@ netxen_nic_hw_read_wx_2M(struct netxen_adapter *adapter, ulong off)
 }
 
 /* window 1 registers only */
-static void netxen_nic_io_write_128M(struct netxen_adapter *adapter,
+void netxen_nic_io_write_128M(struct netxen_adapter *adapter,
 		void __iomem *addr, u32 data)
 {
 	read_lock(&adapter->ahw.crb_lock);
@@ -1286,7 +1291,7 @@ static void netxen_nic_io_write_128M(struct netxen_adapter *adapter,
 	read_unlock(&adapter->ahw.crb_lock);
 }
 
-static u32 netxen_nic_io_read_128M(struct netxen_adapter *adapter,
+u32 netxen_nic_io_read_128M(struct netxen_adapter *adapter,
 		void __iomem *addr)
 {
 	u32 val;
@@ -1298,13 +1303,13 @@ static u32 netxen_nic_io_read_128M(struct netxen_adapter *adapter,
 	return val;
 }
 
-static void netxen_nic_io_write_2M(struct netxen_adapter *adapter,
+static __maybe_unused void netxen_nic_io_write_2M(struct netxen_adapter *adapter,
 		void __iomem *addr, u32 data)
 {
 	writel(data, addr);
 }
 
-static u32 netxen_nic_io_read_2M(struct netxen_adapter *adapter,
+static __maybe_unused u32 netxen_nic_io_read_2M(struct netxen_adapter *adapter,
 		void __iomem *addr)
 {
 	return readl(addr);
@@ -1329,7 +1334,7 @@ netxen_get_ioaddr(struct netxen_adapter *adapter, u32 offset)
 	return addr;
 }
 
-static int
+static __maybe_unused int
 netxen_nic_pci_set_window_128M(struct netxen_adapter *adapter,
 		u64 addr, u32 *start)
 {
@@ -1345,7 +1350,7 @@ netxen_nic_pci_set_window_128M(struct netxen_adapter *adapter,
 	return -EIO;
 }
 
-static int
+static __maybe_unused int
 netxen_nic_pci_set_window_2M(struct netxen_adapter *adapter,
 		u64 addr, u32 *start)
 {
@@ -1361,8 +1366,9 @@ netxen_nic_pci_set_window_2M(struct netxen_adapter *adapter,
 	*start = NETXEN_PCI_OCM0_2M + GET_MEM_OFFS_2M(addr);
 	return 0;
 }
+/* BAD */
 
-static int
+static __maybe_unused int
 netxen_nic_pci_mem_access_direct(struct netxen_adapter *adapter, u64 off,
 		u64 *data, int op)
 {
@@ -1432,7 +1438,7 @@ netxen_pci_camqm_write_2M(struct netxen_adapter *adapter, u64 off, u64 data)
 
 #define MAX_CTL_CHECK   1000
 
-static int
+static __maybe_unused int
 netxen_nic_pci_mem_write_128M(struct netxen_adapter *adapter,
 		u64 off, u64 data)
 {
@@ -1509,7 +1515,8 @@ correct:
 	return ret;
 }
 
-static int
+/* BAD */
+static __maybe_unused int
 netxen_nic_pci_mem_read_128M(struct netxen_adapter *adapter,
 		u64 off, u64 *data)
 {
@@ -1591,7 +1598,7 @@ correct:
 	return ret;
 }
 
-static int
+static __maybe_unused int
 netxen_nic_pci_mem_write_2M(struct netxen_adapter *adapter,
 		u64 off, u64 data)
 {
@@ -1658,7 +1665,7 @@ correct:
 	return ret;
 }
 
-static int
+static __maybe_unused int
 netxen_nic_pci_mem_read_2M(struct netxen_adapter *adapter,
 		u64 off, u64 *data)
 {
@@ -1834,7 +1841,7 @@ int netxen_nic_get_board_info(struct netxen_adapter *adapter)
 }
 
 /* NIU access sections */
-static int netxen_nic_set_mtu_xgb(struct netxen_adapter *adapter, int new_mtu)
+static __maybe_unused int netxen_nic_set_mtu_xgb(struct netxen_adapter *adapter, int new_mtu)
 {
 	new_mtu += MTU_FUDGE_FACTOR;
 	if (adapter->physical_port == 0)
@@ -1929,7 +1936,7 @@ netxen_nic_wol_supported(struct netxen_adapter *adapter)
 	return 0;
 }
 
-static u32 netxen_md_cntrl(struct netxen_adapter *adapter,
+static __maybe_unused u32 netxen_md_cntrl(struct netxen_adapter *adapter,
 			struct netxen_minidump_template_hdr *template_hdr,
 			struct netxen_minidump_entry_crb *crtEntry)
 {
@@ -2063,7 +2070,7 @@ static u32 netxen_md_cntrl(struct netxen_adapter *adapter,
 }
 
 /* Read memory or MN */
-static u32
+static __maybe_unused u32
 netxen_md_rdmem(struct netxen_adapter *adapter,
 		struct netxen_minidump_entry_rdmem
 			*memEntry, u64 *data_buff)
@@ -2086,7 +2093,7 @@ out:
 }
 
 /* Read CRB operation */
-static u32 netxen_md_rd_crb(struct netxen_adapter *adapter,
+static __maybe_unused u32 netxen_md_rd_crb(struct netxen_adapter *adapter,
 			struct netxen_minidump_entry_crb
 				*crbEntry, u32 *data_buff)
 {
@@ -2107,7 +2114,7 @@ static u32 netxen_md_rd_crb(struct netxen_adapter *adapter,
 }
 
 /* Read ROM */
-static u32
+static __maybe_unused u32
 netxen_md_rdrom(struct netxen_adapter *adapter,
 			struct netxen_minidump_entry_rdrom
 				*romEntry, __le32 *data_buff)
@@ -2141,7 +2148,7 @@ lock_try:
 }
 
 /* Handle L2 Cache */
-static u32
+static __maybe_unused u32
 netxen_md_L2Cache(struct netxen_adapter *adapter,
 				struct netxen_minidump_entry_cache
 					*cacheEntry, u32 *data_buff)
@@ -2198,7 +2205,7 @@ netxen_md_L2Cache(struct netxen_adapter *adapter,
 
 
 /* Handle L1 Cache */
-static u32 netxen_md_L1Cache(struct netxen_adapter *adapter,
+static __maybe_unused u32 netxen_md_L1Cache(struct netxen_adapter *adapter,
 				struct netxen_minidump_entry_cache
 					*cacheEntry, u32 *data_buff)
 {
@@ -2233,7 +2240,7 @@ static u32 netxen_md_L1Cache(struct netxen_adapter *adapter,
 }
 
 /* Reading OCM memory */
-static u32
+static __maybe_unused u32
 netxen_md_rdocm(struct netxen_adapter *adapter,
 				struct netxen_minidump_entry_rdocm
 					*ocmEntry, u32 *data_buff)
@@ -2253,7 +2260,7 @@ netxen_md_rdocm(struct netxen_adapter *adapter,
 }
 
 /* Read MUX data */
-static u32
+static __maybe_unused u32
 netxen_md_rdmux(struct netxen_adapter *adapter, struct netxen_minidump_entry_mux
 					*muxEntry, u32 *data_buff)
 {
@@ -2275,7 +2282,7 @@ netxen_md_rdmux(struct netxen_adapter *adapter, struct netxen_minidump_entry_mux
 }
 
 /* Handling Queue State Reads */
-static u32
+static __maybe_unused u32
 netxen_md_rdqueue(struct netxen_adapter *adapter,
 				struct netxen_minidump_entry_queue
 					*queueEntry, u32 *data_buff)
@@ -2308,7 +2315,7 @@ netxen_md_rdqueue(struct netxen_adapter *adapter,
 * as much data as we expect from the entry.
 */
 
-static int netxen_md_entry_err_chk(struct netxen_adapter *adapter,
+static __maybe_unused int netxen_md_entry_err_chk(struct netxen_adapter *adapter,
 				struct netxen_minidump_entry *entry, int esize)
 {
 	if (esize < 0) {
@@ -2327,7 +2334,7 @@ static int netxen_md_entry_err_chk(struct netxen_adapter *adapter,
 	return 0;
 }
 
-static int netxen_parse_md_template(struct netxen_adapter *adapter)
+static __maybe_unused int netxen_parse_md_template(struct netxen_adapter *adapter)
 {
 	int num_of_entries, buff_level, e_cnt, esize;
 	int rv = 0, sane_start = 0, sane_end = 0;
@@ -2475,7 +2482,7 @@ static int netxen_parse_md_template(struct netxen_adapter *adapter)
 	return 0;
 }
 
-static int
+static __maybe_unused int
 netxen_collect_minidump(struct netxen_adapter *adapter)
 {
 	int ret = 0;
@@ -2546,3 +2553,4 @@ netxen_dump_fw(struct netxen_adapter *adapter)
 		return;
 	}
 }
+#endif

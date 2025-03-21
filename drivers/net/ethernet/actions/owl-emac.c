@@ -169,7 +169,7 @@ static struct sk_buff *owl_emac_alloc_skb(struct net_device *netdev)
 		return NULL;
 
 	/* Ensure 4 bytes DMA alignment. */
-	offset = ((uintptr_t)skb->data) & (OWL_EMAC_SKB_ALIGN - 1);
+	offset = __c_pa(skb->data) & (OWL_EMAC_SKB_ALIGN - 1);
 	if (unlikely(offset))
 		skb_reserve(skb, OWL_EMAC_SKB_ALIGN - offset);
 

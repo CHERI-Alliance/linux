@@ -3299,8 +3299,8 @@ i40e_aq_set_lldp_mib(struct i40e_hw *hw,
 
 	cmd->type = mib_type;
 	cmd->length = cpu_to_le16(buff_size);
-	cmd->address_high = cpu_to_le32(upper_32_bits((uintptr_t)buff));
-	cmd->address_low = cpu_to_le32(lower_32_bits((uintptr_t)buff));
+	cmd->address_high = cpu_to_le32(upper_32_bits(__c_pa(buff)));
+	cmd->address_low = cpu_to_le32(lower_32_bits(__c_pa(buff)));
 
 	status = i40e_asq_send_command(hw, &desc, buff, buff_size, cmd_details);
 	return status;

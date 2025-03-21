@@ -44,7 +44,7 @@ static void
 octeon_pci_fastwrite(struct octeon_device *oct, u8 __iomem *mapped_addr,
 		     u8 *hostbuf, u32 len)
 {
-	while ((len) && ((unsigned long)mapped_addr) & 7) {
+	while ((len) && (__c_pa(mapped_addr)) & 7) {
 		writeb(*(hostbuf++), mapped_addr++);
 		len--;
 	}
@@ -68,7 +68,7 @@ static void
 octeon_pci_fastread(struct octeon_device *oct, u8 __iomem *mapped_addr,
 		    u8 *hostbuf, u32 len)
 {
-	while ((len) && ((unsigned long)mapped_addr) & 7) {
+	while ((len) && (__c_pa(mapped_addr)) & 7) {
 		*(hostbuf++) = readb(mapped_addr++);
 		len--;
 	}

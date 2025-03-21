@@ -143,8 +143,8 @@ struct tlan_list {
 	u32		forward;
 	u16		c_stat;
 	u16		frame_size;
-	struct tlan_buffer buffer[TLAN_BUFFERS_PER_LIST];
-};
+	struct tlan_buffer buffer[TLAN_BUFFERS_PER_LIST] __cheri_pointer_align;
+} __cheri_pointer_align;
 
 
 typedef u8 TLanBuffer[TLAN_MAX_FRAME_SIZE];
@@ -441,62 +441,68 @@ struct tlan_priv {
 
 /* Routines to access internal registers. */
 
-static inline u8 tlan_dio_read8(u16 base_addr, u16 internal_addr)
+static inline u8 _tlan_dio_read8(u16 base_addr, u16 internal_addr)
 {
 	outw(internal_addr, base_addr + TLAN_DIO_ADR);
 	return inb((base_addr + TLAN_DIO_DATA) + (internal_addr & 0x3));
 
 }
+#define tlan_dio_read8(a, b) _tlan_dio_read8(__c_a(a), b)
 
 
 
 
-static inline u16 tlan_dio_read16(u16 base_addr, u16 internal_addr)
+static inline u16 _tlan_dio_read16(u16 base_addr, u16 internal_addr)
 {
 	outw(internal_addr, base_addr + TLAN_DIO_ADR);
 	return inw((base_addr + TLAN_DIO_DATA) + (internal_addr & 0x2));
 
 }
+#define tlan_dio_read16(a, b) _tlan_dio_read16(__c_a(a), b)
 
 
 
 
-static inline u32 tlan_dio_read32(u16 base_addr, u16 internal_addr)
+static inline u32 _tlan_dio_read32(u16 base_addr, u16 internal_addr)
 {
 	outw(internal_addr, base_addr + TLAN_DIO_ADR);
 	return inl(base_addr + TLAN_DIO_DATA);
 
 }
+#define tlan_dio_read32(a, b) _tlan_dio_read32(__c_a(a), b)
 
 
 
 
-static inline void tlan_dio_write8(u16 base_addr, u16 internal_addr, u8 data)
+static inline void _tlan_dio_write8(u16 base_addr, u16 internal_addr, u8 data)
 {
 	outw(internal_addr, base_addr + TLAN_DIO_ADR);
 	outb(data, base_addr + TLAN_DIO_DATA + (internal_addr & 0x3));
 
 }
+#define tlan_dio_write8(a, b, c) _tlan_dio_write8(__c_a(a), b, c)
 
 
 
 
-static inline void tlan_dio_write16(u16 base_addr, u16 internal_addr, u16 data)
+static inline void _tlan_dio_write16(u16 base_addr, u16 internal_addr, u16 data)
 {
 	outw(internal_addr, base_addr + TLAN_DIO_ADR);
 	outw(data, base_addr + TLAN_DIO_DATA + (internal_addr & 0x2));
 
 }
+#define tlan_dio_write16(a, b, c) _tlan_dio_write16(__c_a(a), b, c)
 
 
 
 
-static inline void tlan_dio_write32(u16 base_addr, u16 internal_addr, u32 data)
+static inline void _tlan_dio_write32(u16 base_addr, u16 internal_addr, u32 data)
 {
 	outw(internal_addr, base_addr + TLAN_DIO_ADR);
 	outl(data, base_addr + TLAN_DIO_DATA + (internal_addr & 0x2));
 
 }
+#define tlan_dio_write32(a, b, c) _tlan_dio_write32(__c_a(a), b, c)
 
 #define tlan_clear_bit(bit, port)	outb_p(inb_p(port) & ~bit, port)
 #define tlan_get_bit(bit, port)	((int) (inb_p(port) & bit))

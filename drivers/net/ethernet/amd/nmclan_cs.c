@@ -626,9 +626,9 @@ static int nmclan_config(struct pcmcia_device *link)
 	  goto failed;
 
   dev->irq = link->irq;
-  dev->base_addr = link->resource[0]->start;
+  dev->base_addr = __c_fakeu(link->resource[0]->start);
 
-  ioaddr = dev->base_addr;
+  ioaddr = __c_ua(dev->base_addr);
 
   /* Read the ethernet address from the CIS. */
   len = pcmcia_get_tuple(link, 0x80, &buf);
@@ -673,7 +673,7 @@ static int nmclan_config(struct pcmcia_device *link)
   }
 
   netdev_info(dev, "nmclan: port %#3lx, irq %d, %s port, hw_addr %pM\n",
-	      dev->base_addr, dev->irq, if_names[dev->if_port], dev->dev_addr);
+	      __c_ua(dev->base_addr), dev->irq, if_names[dev->if_port], dev->dev_addr);
   return 0;
 
 failed:
@@ -743,8 +743,8 @@ static void nmclan_reset(struct net_device *dev)
   lp->tx_free_frames=AM2150_MAX_TX_FRAMES;
 
   /* Reinitialize the MACE chip for operation. */
-  mace_init(lp, dev->base_addr, dev->dev_addr);
-  mace_write(lp, dev->base_addr, MACE_IMR, MACE_IMR_DEFAULT);
+  mace_init(lp, __c_ua(dev->base_addr), dev->dev_addr);
+  mace_write(lp, __c_ua(dev->base_addr), MACE_IMR, MACE_IMR_DEFAULT);
 
   /* Restore the multicast list and enable TX and RX. */
   restore_multicast_list(dev);
@@ -774,7 +774,7 @@ mace_open
 ---------------------------------------------------------------------------- */
 static int mace_open(struct net_device *dev)
 {
-  unsigned int ioaddr = dev->base_addr;
+  unsigned int ioaddr = __c_ua(dev->base_addr);
   mace_private *lp = netdev_priv(dev);
   struct pcmcia_device *link = lp->p_dev;
 
@@ -797,7 +797,7 @@ mace_close
 ---------------------------------------------------------------------------- */
 static int mace_close(struct net_device *dev)
 {
-  unsigned int ioaddr = dev->base_addr;
+  unsigned int ioaddr = __c_ua(dev->base_addr);
   mace_private *lp = netdev_priv(dev);
   struct pcmcia_device *link = lp->p_dev;
 
@@ -817,7 +817,7 @@ static void netdev_get_drvinfo(struct net_device *dev,
 {
 	strscpy(info->driver, DRV_NAME, sizeof(info->driver));
 	snprintf(info->bus_info, sizeof(info->bus_info),
-		"PCMCIA 0x%lx", dev->base_addr);
+		"PCMCIA 0x%lx", __c_ua(dev->base_addr));
 }
 
 static const struct ethtool_ops netdev_ethtool_ops = {
@@ -855,7 +855,7 @@ static netdev_tx_t mace_start_xmit(struct sk_buff *skb,
 					 struct net_device *dev)
 {
   mace_private *lp = netdev_priv(dev);
-  unsigned int ioaddr = dev->base_addr;
+  unsigned int ioaddr = __c_ua(dev->base_addr);
 
   netif_stop_queue(dev);
 
@@ -924,7 +924,7 @@ static irqreturn_t mace_interrupt(int irq, void *dev_id)
     return IRQ_NONE;
   }
 
-  ioaddr = dev->base_addr;
+  ioaddr = __c_ua(dev->base_addr);
 
   if (lp->tx_irq_disabled) {
     const char *msg;
@@ -1059,7 +1059,7 @@ mace_rx
 static int mace_rx(struct net_device *dev, unsigned char RxCnt)
 {
   mace_private *lp = netdev_priv(dev);
-  unsigned int ioaddr = dev->base_addr;
+  unsigned int ioaddr = __c_ua(dev->base_addr);
   unsigned char rx_framecnt;
   unsigned short rx_status;
 
@@ -1268,7 +1268,7 @@ static struct net_device_stats *mace_get_stats(struct net_device *dev)
 {
   mace_private *lp = netdev_priv(dev);
 
-  update_stats(dev->base_addr, dev);
+  update_stats(__c_ua(dev->base_addr), dev);
 
   pr_debug("%s: updating the statistics.\n", dev->name);
   pr_linux_stats(&dev->stats);
@@ -1450,7 +1450,7 @@ static void set_multicast_list(struct net_device *dev)
 
 static void restore_multicast_list(struct net_device *dev)
 {
-  unsigned int ioaddr = dev->base_addr;
+  unsigned int ioaddr = __c_ua(dev->base_addr);
   mace_private *lp = netdev_priv(dev);
 
   pr_debug("%s: restoring Rx mode to %d addresses.\n", dev->name,

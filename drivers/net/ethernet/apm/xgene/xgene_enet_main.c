@@ -2038,7 +2038,7 @@ static int xgene_enet_probe(struct platform_device *pdev)
 			  NETIF_F_GRO |
 			  NETIF_F_SG;
 
-	pdata->enet_id = (enum xgene_enet_id)device_get_match_data(&pdev->dev);
+	pdata->enet_id = (enum xgene_enet_id)__c_pa(device_get_match_data(&pdev->dev));
 	if (!pdata->enet_id) {
 		ret = -ENODEV;
 		goto err;

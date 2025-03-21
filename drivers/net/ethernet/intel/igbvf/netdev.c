@@ -2713,7 +2713,7 @@ static int igbvf_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	struct net_device *netdev;
 	struct igbvf_adapter *adapter;
 	struct e1000_hw *hw;
-	const struct igbvf_info *ei = igbvf_info_tbl[ent->driver_data];
+	const struct igbvf_info *ei = igbvf_info_tbl[__c_ua(ent->driver_data)];
 	static int cards_found;
 	int err;
 

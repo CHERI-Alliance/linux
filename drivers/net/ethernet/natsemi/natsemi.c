@@ -803,7 +803,7 @@ static int natsemi_probe1(struct pci_dev *pdev, const struct pci_device_id *ent)
 {
 	struct net_device *dev;
 	struct netdev_private *np;
-	int i, option, irq, chip_idx = ent->driver_data;
+	int i, option, irq, chip_idx = __c_ua(ent->driver_data);
 	static int find_cnt = -1;
 	resource_size_t iostart;
 	unsigned long iosize;

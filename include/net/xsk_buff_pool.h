@@ -20,7 +20,15 @@ struct xdp_sock;
 struct device;
 struct page;
 
+/*
+ * FIXCHERI: Reduce size and find another solution for those
+ * FIXCHERI: that need this much data.
+ */
+#if __SIZEOF_POINTER__ > 8
+#define XSK_PRIV_MAX (3 * __SIZEOF_POINTER__)
+#else
 #define XSK_PRIV_MAX 24
+#endif
 
 struct xdp_buff_xsk {
 	struct xdp_buff xdp;

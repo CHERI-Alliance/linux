@@ -695,7 +695,7 @@ static int ixgbe_ipsec_add_sa(struct xfrm_state *xs,
 
 		ixgbe_ipsec_set_rx_sa(hw, sa_idx, rsa.xs->id.spi, rsa.key,
 				      rsa.salt, rsa.mode, rsa.iptbl_ind);
-		xs->xso.offload_handle = sa_idx + IXGBE_IPSEC_BASE_RX_INDEX;
+		xs->xso.offload_handle = __c_fakeu(sa_idx + IXGBE_IPSEC_BASE_RX_INDEX);
 
 		ipsec->num_rx_sa++;
 
@@ -736,7 +736,7 @@ static int ixgbe_ipsec_add_sa(struct xfrm_state *xs,
 
 		ixgbe_ipsec_set_tx_sa(hw, sa_idx, tsa.key, tsa.salt);
 
-		xs->xso.offload_handle = sa_idx + IXGBE_IPSEC_BASE_TX_INDEX;
+		xs->xso.offload_handle = __c_fakeu(sa_idx + IXGBE_IPSEC_BASE_TX_INDEX);
 
 		ipsec->num_tx_sa++;
 	}
@@ -767,12 +767,12 @@ static void ixgbe_ipsec_del_sa(struct xfrm_state *xs)
 		struct rx_sa *rsa;
 		u8 ipi;
 
-		sa_idx = xs->xso.offload_handle - IXGBE_IPSEC_BASE_RX_INDEX;
+		sa_idx = __c_ua(xs->xso.offload_handle) - IXGBE_IPSEC_BASE_RX_INDEX;
 		rsa = &ipsec->rx_tbl[sa_idx];
 
 		if (!rsa->used) {
 			netdev_err(dev, "Invalid Rx SA selected sa_idx=%d offload_handle=%lu\n",
-				   sa_idx, xs->xso.offload_handle);
+				   sa_idx, __c_ua(xs->xso.offload_handle));
 			return;
 		}
 
@@ -797,11 +797,11 @@ static void ixgbe_ipsec_del_sa(struct xfrm_state *xs)
 		memset(rsa, 0, sizeof(struct rx_sa));
 		ipsec->num_rx_sa--;
 	} else {
-		sa_idx = xs->xso.offload_handle - IXGBE_IPSEC_BASE_TX_INDEX;
+		sa_idx = __c_ua(xs->xso.offload_handle) - IXGBE_IPSEC_BASE_TX_INDEX;
 
 		if (!ipsec->tx_tbl[sa_idx].used) {
 			netdev_err(dev, "Invalid Tx SA selected sa_idx=%d offload_handle=%lu\n",
-				   sa_idx, xs->xso.offload_handle);
+				   sa_idx, __c_ua(xs->xso.offload_handle));
 			return;
 		}
 
@@ -955,7 +955,7 @@ int ixgbe_ipsec_vf_add_sa(struct ixgbe_adapter *adapter, u32 *msgbuf, u32 vf)
 	if (err)
 		goto err_aead;
 
-	pfsa = xs->xso.offload_handle;
+	pfsa = __c_ua(xs->xso.offload_handle);
 	if (pfsa < IXGBE_IPSEC_BASE_TX_INDEX) {
 		sa_idx = pfsa - IXGBE_IPSEC_BASE_RX_INDEX;
 		ipsec->rx_tbl[sa_idx].vf = vf;
@@ -966,7 +966,7 @@ int ixgbe_ipsec_vf_add_sa(struct ixgbe_adapter *adapter, u32 *msgbuf, u32 vf)
 		ipsec->tx_tbl[sa_idx].mode |= IXGBE_RXTXMOD_VF;
 	}
 
-	msgbuf[1] = xs->xso.offload_handle;
+	msgbuf[1] = __c_ua(xs->xso.offload_handle);
 
 	return 0;
 
@@ -1093,10 +1093,10 @@ int ixgbe_ipsec_tx(struct ixgbe_ring *tx_ring,
 		return 0;
 	}
 
-	itd->sa_idx = xs->xso.offload_handle - IXGBE_IPSEC_BASE_TX_INDEX;
+	itd->sa_idx = __c_ua(xs->xso.offload_handle) - IXGBE_IPSEC_BASE_TX_INDEX;
 	if (unlikely(itd->sa_idx >= IXGBE_IPSEC_MAX_SA_COUNT)) {
 		netdev_err(tx_ring->netdev, "%s: bad sa_idx=%d handle=%lu\n",
-			   __func__, itd->sa_idx, xs->xso.offload_handle);
+			   __func__, itd->sa_idx, __c_ua(xs->xso.offload_handle));
 		return 0;
 	}
 

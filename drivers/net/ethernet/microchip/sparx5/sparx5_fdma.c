@@ -278,8 +278,8 @@ static int sparx5_fdma_napi_callback(struct napi_struct *napi, int weight)
 		rx->dcb_index &= FDMA_DCB_MAX - 1;
 		sparx5_fdma_rx_add_dcb(rx, old_dcb,
 				       rx->dma +
-				       ((unsigned long)old_dcb -
-					(unsigned long)rx->dcb_entries));
+				       (__c_pa(old_dcb) -
+					__c_pa(rx->dcb_entries)));
 	}
 	if (counter < weight) {
 		napi_complete_done(&rx->napi, counter);
@@ -300,8 +300,8 @@ static struct sparx5_tx_dcb_hw *sparx5_fdma_next_dcb(struct sparx5_tx *tx,
 	next_dcb = dcb;
 	next_dcb++;
 	/* Handle wrap-around */
-	if ((unsigned long)next_dcb >=
-	    ((unsigned long)tx->first_entry + FDMA_DCB_MAX * sizeof(*dcb)))
+	if (__c_pa(next_dcb) >=
+	    (__c_pa(tx->first_entry) + FDMA_DCB_MAX * sizeof(*dcb)))
 		next_dcb = tx->first_entry;
 	return next_dcb;
 }
@@ -322,8 +322,7 @@ int sparx5_fdma_xmit(struct sparx5 *sparx5, u32 *ifh, struct sk_buff *skb)
 	list_move_tail(&db->list, &tx->db_list);
 	next_dcb_hw->nextptr = FDMA_DCB_INVALID_DATA;
 	tx->curr_entry->nextptr = tx->dma +
-		((unsigned long)next_dcb_hw -
-		 (unsigned long)tx->first_entry);
+		(__c_pa(next_dcb_hw) - __c_pa(tx->first_entry));
 	tx->curr_entry = next_dcb_hw;
 	memset(db->cpu_addr, 0, FDMA_XTR_BUFFER_SIZE);
 	memcpy(db->cpu_addr, ifh, IFH_LEN * 4);

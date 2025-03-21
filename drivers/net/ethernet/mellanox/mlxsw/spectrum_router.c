@@ -8350,8 +8350,8 @@ mlxsw_sp_dev_rif_type(const struct mlxsw_sp *mlxsw_sp,
 static int mlxsw_sp_rif_index_alloc(struct mlxsw_sp *mlxsw_sp, u16 *p_rif_index,
 				    u8 rif_entries)
 {
-	*p_rif_index = gen_pool_alloc(mlxsw_sp->router->rifs_table,
-				      rif_entries);
+	*p_rif_index = __c_ua(gen_pool_alloc(mlxsw_sp->router->rifs_table,
+					     rif_entries));
 	if (*p_rif_index == 0)
 		return -ENOBUFS;
 	*p_rif_index -= MLXSW_SP_ROUTER_GENALLOC_OFFSET;
@@ -8366,7 +8366,7 @@ static void mlxsw_sp_rif_index_free(struct mlxsw_sp *mlxsw_sp, u16 rif_index,
 				    u8 rif_entries)
 {
 	gen_pool_free(mlxsw_sp->router->rifs_table,
-		      MLXSW_SP_ROUTER_GENALLOC_OFFSET + rif_index, rif_entries);
+		      __c_fakeu(MLXSW_SP_ROUTER_GENALLOC_OFFSET) + rif_index, rif_entries);
 }
 
 static struct mlxsw_sp_rif *mlxsw_sp_rif_alloc(size_t rif_size, u16 rif_index,
@@ -11085,7 +11085,7 @@ static int mlxsw_sp_rifs_table_init(struct mlxsw_sp *mlxsw_sp)
 	gen_pool_set_algo(rifs_table, gen_pool_first_fit_order_align,
 			  NULL);
 
-	err = gen_pool_add(rifs_table, MLXSW_SP_ROUTER_GENALLOC_OFFSET,
+	err = gen_pool_add(rifs_table, __c_fakeu(MLXSW_SP_ROUTER_GENALLOC_OFFSET),
 			   MLXSW_CORE_RES_GET(mlxsw_sp->core, MAX_RIFS), -1);
 	if (err)
 		goto err_gen_pool_add;

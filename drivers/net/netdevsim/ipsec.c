@@ -191,7 +191,7 @@ static int nsim_ipsec_add_sa(struct xfrm_state *xs,
 	/* the XFRM stack doesn't like offload_handle == 0,
 	 * so add a bitflag in case our array index is 0
 	 */
-	xs->xso.offload_handle = sa_idx | NSIM_IPSEC_VALID;
+	xs->xso.offload_handle = __c_fakeu(sa_idx | NSIM_IPSEC_VALID);
 	ipsec->count++;
 
 	return 0;
@@ -203,7 +203,7 @@ static void nsim_ipsec_del_sa(struct xfrm_state *xs)
 	struct nsim_ipsec *ipsec = &ns->ipsec;
 	u16 sa_idx;
 
-	sa_idx = xs->xso.offload_handle & ~NSIM_IPSEC_VALID;
+	sa_idx = __c_ua(xs->xso.offload_handle) & ~NSIM_IPSEC_VALID;
 	if (!ipsec->sa[sa_idx].used) {
 		netdev_err(ns->netdev, "Invalid SA for delete sa_idx=%d\n",
 			   sa_idx);
@@ -254,7 +254,7 @@ bool nsim_ipsec_tx(struct netdevsim *ns, struct sk_buff *skb)
 		return false;
 	}
 
-	sa_idx = xs->xso.offload_handle & ~NSIM_IPSEC_VALID;
+	sa_idx = __c_ua(xs->xso.offload_handle) & ~NSIM_IPSEC_VALID;
 	if (unlikely(sa_idx >= NSIM_IPSEC_MAX_SA_COUNT)) {
 		netdev_err(ns->netdev, "bad sa_idx=%d max=%d\n",
 			   sa_idx, NSIM_IPSEC_MAX_SA_COUNT);

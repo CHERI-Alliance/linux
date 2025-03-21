@@ -7516,7 +7516,7 @@ int stmmac_dvr_probe(struct device *device,
 	priv->pause = pause;
 	priv->plat = plat_dat;
 	priv->ioaddr = res->addr;
-	priv->dev->base_addr = (unsigned long)res->addr;
+	priv->dev->base_addr = (uintptr_t)res->addr;
 	priv->plat->dma_cfg->multi_msi_en =
 		(priv->plat->flags & STMMAC_FLAG_MULTI_MSI_EN);
 

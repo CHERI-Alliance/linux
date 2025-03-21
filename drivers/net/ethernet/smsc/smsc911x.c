@@ -711,7 +711,7 @@ static int smsc911x_phy_check_loopbackpkt(struct smsc911x_data *pdata)
 	unsigned int tries;
 	u32 wrsz;
 	u32 rdsz;
-	ulong bufp;
+	uintptr_t bufp;
 
 	for (tries = 0; tries < 10; tries++) {
 		unsigned int txcmd_a;
@@ -724,7 +724,7 @@ static int smsc911x_phy_check_loopbackpkt(struct smsc911x_data *pdata)
 		memset(pdata->loopback_rx_pkt, 0, MIN_PACKET_SIZE);
 
 		/* Write tx packet to 118 */
-		txcmd_a = (u32)((ulong)pdata->loopback_tx_pkt & 0x03) << 16;
+		txcmd_a = (u32)(__c_pa(pdata->loopback_tx_pkt) & 0x03) << 16;
 		txcmd_a |= TX_CMD_A_FIRST_SEG_ | TX_CMD_A_LAST_SEG_;
 		txcmd_a |= MIN_PACKET_SIZE;
 
@@ -733,9 +733,9 @@ static int smsc911x_phy_check_loopbackpkt(struct smsc911x_data *pdata)
 		smsc911x_reg_write(pdata, TX_DATA_FIFO, txcmd_a);
 		smsc911x_reg_write(pdata, TX_DATA_FIFO, txcmd_b);
 
-		bufp = (ulong)pdata->loopback_tx_pkt & (~0x3);
+		bufp = (uintptr_t)pdata->loopback_tx_pkt & (~0x3);
 		wrsz = MIN_PACKET_SIZE + 3;
-		wrsz += (u32)((ulong)pdata->loopback_tx_pkt & 0x3);
+		wrsz += (u32)(__c_pa(pdata->loopback_tx_pkt) & 0x3);
 		wrsz >>= 2;
 
 		pdata->ops->tx_writefifo(pdata, (unsigned int *)bufp, wrsz);
@@ -777,9 +777,9 @@ static int smsc911x_phy_check_loopbackpkt(struct smsc911x_data *pdata)
 		}
 
 		pktlength = ((status & 0x3FFF0000UL) >> 16);
-		bufp = (ulong)pdata->loopback_rx_pkt;
+		bufp = (uintptr_t)pdata->loopback_rx_pkt;
 		rdsz = pktlength + 3;
-		rdsz += (u32)((ulong)pdata->loopback_rx_pkt & 0x3);
+		rdsz += (u32)(__c_pa(pdata->loopback_rx_pkt) & 0x3);
 		rdsz >>= 2;
 
 		pdata->ops->rx_readfifo(pdata, (unsigned int *)bufp, rdsz);
@@ -865,7 +865,7 @@ static int smsc911x_phy_loopbacktest(struct net_device *dev)
 
 	smsc911x_reg_write(pdata, TX_CFG, TX_CFG_TX_ON_);
 	smsc911x_reg_write(pdata, RX_CFG,
-		(u32)((ulong)pdata->loopback_rx_pkt & 0x03) << 8);
+		(u32)(__c_pa(pdata->loopback_rx_pkt) & 0x03) << 8);
 
 	for (i = 0; i < 10; i++) {
 		/* Set PHY to 10/FD, no ANEG, and loopback mode */
@@ -1699,7 +1699,7 @@ static int smsc911x_open(struct net_device *dev)
 		   dev->irq);
 
 	netdev_info(dev, "SMSC911x/921x identified at %#08lx, IRQ: %d\n",
-		    (unsigned long)pdata->ioaddr, dev->irq);
+		    __c_pa(pdata->ioaddr), dev->irq);
 
 	/* Reset the last known duplex and carrier */
 	pdata->last_duplex = -1;
@@ -1792,7 +1792,7 @@ smsc911x_hard_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	unsigned int tx_cmd_b;
 	unsigned int temp;
 	u32 wrsz;
-	ulong bufp;
+	uintptr_t bufp;
 
 	freespace = smsc911x_reg_read(pdata, TX_FIFO_INF) & TX_FIFO_INF_TDFREE_;
 
@@ -1801,7 +1801,7 @@ smsc911x_hard_start_xmit(struct sk_buff *skb, struct net_device *dev)
 			  "Tx data fifo low, space available: %d", freespace);
 
 	/* Word alignment adjustment */
-	tx_cmd_a = (u32)((ulong)skb->data & 0x03) << 16;
+	tx_cmd_a = (u32)(__c_pa(skb->data) & 0x03) << 16;
 	tx_cmd_a |= TX_CMD_A_FIRST_SEG_ | TX_CMD_A_LAST_SEG_;
 	tx_cmd_a |= (unsigned int)skb->len;
 
@@ -1811,9 +1811,9 @@ smsc911x_hard_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	smsc911x_reg_write(pdata, TX_DATA_FIFO, tx_cmd_a);
 	smsc911x_reg_write(pdata, TX_DATA_FIFO, tx_cmd_b);
 
-	bufp = (ulong)skb->data & (~0x3);
+	bufp = (uintptr_t)skb->data & (~0x3);
 	wrsz = (u32)skb->len + 3;
-	wrsz += (u32)((ulong)skb->data & 0x3);
+	wrsz += (u32)(__c_pa(skb->data) & 0x3);
 	wrsz >>= 2;
 
 	pdata->ops->tx_writefifo(pdata, (unsigned int *)bufp, wrsz);
@@ -2184,8 +2184,7 @@ static int smsc911x_init(struct net_device *dev)
 	unsigned int to = 100;
 
 	SMSC_TRACE(pdata, probe, "Driver Parameters:");
-	SMSC_TRACE(pdata, probe, "LAN base: 0x%08lX",
-		   (unsigned long)pdata->ioaddr);
+	SMSC_TRACE(pdata, probe, "LAN base: 0x%08lX", __c_pa(pdata->ioaddr));
 	SMSC_TRACE(pdata, probe, "IRQ: %d", dev->irq);
 	SMSC_TRACE(pdata, probe, "PHY will be autodetected.");
 

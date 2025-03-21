@@ -614,7 +614,7 @@ static int fealnx_init_one(struct pci_dev *pdev,
 	np->mii.phy_id = np->phys[0];
 
 	if (dev->mem_start)
-		option = dev->mem_start;
+		option = __c_ua(dev->mem_start);
 
 	/* The lower four bits are the media type. */
 	if (option > 0) {

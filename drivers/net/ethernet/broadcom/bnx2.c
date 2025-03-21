@@ -365,7 +365,7 @@ static void bnx2_setup_cnic_irq_info(struct bnx2 *bp)
 
 	cp->irq_arr[0].vector = bp->irq_tbl[sb_id].vector;
 	cp->irq_arr[0].status_blk = (void *)
-		((unsigned long) bnapi->status_blk.msi +
+		((uintptr_t) bnapi->status_blk.msi +
 		(BNX2_SBLK_MSIX_ALIGN_SIZE * sb_id));
 	cp->irq_arr[0].status_blk_map = bp->status_blk_mapping;
 	cp->irq_arr[0].status_blk_num = sb_id;
@@ -8576,7 +8576,8 @@ bnx2_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	}
 
 	netdev_info(dev, "%s (%c%d) %s found at mem %lx, IRQ %d, "
-		    "node addr %pM\n", board_info[ent->driver_data].name,
+		    "node addr %pM\n",
+		    board_info[__c_ua(ent->driver_data)].name,
 		    ((BNX2_CHIP_ID(bp) & 0xf000) >> 12) + 'A',
 		    ((BNX2_CHIP_ID(bp) & 0x0ff0) >> 4),
 		    bnx2_bus_string(bp, str), (long)pci_resource_start(pdev, 0),

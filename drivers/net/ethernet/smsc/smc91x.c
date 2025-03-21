@@ -1890,7 +1890,7 @@ static int smc_probe(struct net_device *dev, void __iomem *ioaddr,
 	SMC_SELECT_BANK(lp, 1);
 	val = SMC_GET_BASE(lp);
 	val = ((val & 0x1F00) >> 3) << SMC_IO_SHIFT;
-	if (((unsigned long)ioaddr & (0x3e0 << SMC_IO_SHIFT)) != val) {
+	if ((__c_pa(ioaddr) & (0x3e0 << SMC_IO_SHIFT)) != val) {
 		netdev_warn(dev, "%s: IOADDR %p doesn't match configuration (%x).\n",
 			    CARDNAME, ioaddr, val);
 	}
@@ -1917,7 +1917,7 @@ static int smc_probe(struct net_device *dev, void __iomem *ioaddr,
 	pr_info_once("%s\n", version);
 
 	/* fill in some of the fields */
-	dev->base_addr = (unsigned long)ioaddr;
+	dev->base_addr = (uintptr_t)ioaddr;
 	lp->base = ioaddr;
 	lp->version = revision_register & 0xff;
 	spin_lock_init(&lp->lock);

@@ -495,7 +495,7 @@ static int sundance_probe1(struct pci_dev *pdev,
 	struct net_device *dev;
 	struct netdev_private *np;
 	static int card_idx;
-	int chip_idx = ent->driver_data;
+	int chip_idx = __c_ua(ent->driver_data);
 	int irq;
 	int i;
 	void __iomem *ioaddr;

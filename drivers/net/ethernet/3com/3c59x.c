@@ -1012,7 +1012,7 @@ static int vortex_init_one(struct pci_dev *pdev,
 
 	if (global_use_mmio < 0 && (unit >= MAX_UNITS || use_mmio[unit] < 0)) {
 		/* Determine the default if the user didn't override us */
-		vci = &vortex_info_tbl[ent->driver_data];
+		vci = &vortex_info_tbl[__c_ua(ent->driver_data)];
 		pci_bar = vci->drv_flags & (IS_CYCLONE | IS_TORNADO) ? 1 : 0;
 	} else if (unit < MAX_UNITS && use_mmio[unit] >= 0)
 		pci_bar = use_mmio[unit] ? 1 : 0;
@@ -1028,7 +1028,7 @@ static int vortex_init_one(struct pci_dev *pdev,
 	}
 
 	rc = vortex_probe1(&pdev->dev, ioaddr, pdev->irq,
-			   ent->driver_data, unit);
+			   __c_ua(ent->driver_data), unit);
 	if (rc < 0)
 		goto out_iounmap;
 
@@ -1132,7 +1132,7 @@ static int vortex_probe1(struct device *gendev, void __iomem *ioaddr, int irq,
 		 * The 'options' param is passed in as the third arg to the
 		 * LILO 'ether=' argument for non-modular use
 		 */
-		option = dev->mem_start;
+		option = __c_ua(dev->mem_start);
 	}
 	else if (card_idx < MAX_UNITS) {
 		if (options[card_idx] >= 0)
@@ -1158,7 +1158,7 @@ static int vortex_probe1(struct device *gendev, void __iomem *ioaddr, int irq,
 	       vci->name,
 	       ioaddr);
 
-	dev->base_addr = (unsigned long)ioaddr;
+	dev->base_addr = (uintptr_t)ioaddr;
 	dev->irq = irq;
 	dev->mtu = mtu;
 	vp->ioaddr = ioaddr;
@@ -2969,7 +2969,7 @@ static void vortex_get_drvinfo(struct net_device *dev,
 				sizeof(info->bus_info));
 		else
 			snprintf(info->bus_info, sizeof(info->bus_info),
-				"EISA 0x%lx %d", dev->base_addr, dev->irq);
+				"EISA 0x%lx %d", __c_ua(dev->base_addr), dev->irq);
 	}
 }
 
@@ -3331,12 +3331,12 @@ static void __exit vortex_eisa_cleanup(void)
 #endif
 
 	if (compaq_net_device) {
-		ioaddr = ioport_map(compaq_net_device->base_addr,
+		ioaddr = ioport_map(__c_ua(compaq_net_device->base_addr),
 		                    VORTEX_TOTAL_SIZE);
 
 		unregister_netdev(compaq_net_device);
 		iowrite16(TotalReset, ioaddr + EL3_CMD);
-		release_region(compaq_net_device->base_addr,
+		release_region(__c_ua(compaq_net_device->base_addr),
 		               VORTEX_TOTAL_SIZE);
 
 		free_netdev(compaq_net_device);

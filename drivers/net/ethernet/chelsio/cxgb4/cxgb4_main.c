@@ -1770,7 +1770,7 @@ static void process_tid_release_list(struct work_struct *work)
 	spin_lock_bh(&adap->tid_release_lock);
 	while (adap->tid_release_head) {
 		void **p = adap->tid_release_head;
-		unsigned int chan = (uintptr_t)p & 3;
+		unsigned int chan = __c_pa(p) & 3;
 		p = (void *)p - chan;
 
 		adap->tid_release_head = *p;

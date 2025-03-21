@@ -174,7 +174,7 @@ int liquidio_set_feature(struct net_device *netdev, int cmd, u16 param1)
 	nctrl.ncmd.s.cmd = cmd;
 	nctrl.ncmd.s.param1 = param1;
 	nctrl.iq_no = lio->linfo.txpciq[0].s.q_no;
-	nctrl.netpndev = (u64)netdev;
+	nctrl.netpndev = (uintptr_t)netdev;
 	nctrl.cb_fn = liquidio_link_ctrl_cmd_completion;
 
 	ret = octnet_send_nic_ctrl_pkt(lio->oct_dev, &nctrl);
@@ -860,7 +860,7 @@ int liquidio_setup_io_queues(struct octeon_device *octeon_dev, int ifidx,
 		droq = octeon_dev->droq[q_no];
 		napi = &droq->napi;
 		dev_dbg(&octeon_dev->pci_dev->dev, "netif_napi_add netdev:%llx oct:%llx\n",
-			(u64)netdev, (u64)octeon_dev);
+			(u64)__c_pa(netdev), (u64)__c_pa(octeon_dev));
 		netif_napi_add(netdev, napi, liquidio_napi_poll);
 
 		/* designate a CPU for this droq */

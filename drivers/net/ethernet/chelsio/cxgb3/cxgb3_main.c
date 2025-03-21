@@ -3241,7 +3241,7 @@ static int init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 
 	mmio_start = pci_resource_start(pdev, 0);
 	mmio_len = pci_resource_len(pdev, 0);
-	ai = t3_get_adapter_info(ent->driver_data);
+	ai = t3_get_adapter_info(__c_ua(ent->driver_data));
 
 	adapter = kzalloc(sizeof(*adapter), GFP_KERNEL);
 	if (!adapter) {
@@ -3300,8 +3300,8 @@ static int init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 		pi->port_id = i;
 		netif_carrier_off(netdev);
 		netdev->irq = pdev->irq;
-		netdev->mem_start = mmio_start;
-		netdev->mem_end = mmio_start + mmio_len - 1;
+		netdev->mem_start = __c_fakeu(mmio_start);
+		netdev->mem_end = __c_fakeu(mmio_start + mmio_len - 1);
 		netdev->hw_features = NETIF_F_SG | NETIF_F_IP_CSUM |
 			NETIF_F_TSO | NETIF_F_RXCSUM | NETIF_F_HW_VLAN_CTAG_RX;
 		netdev->features |= netdev->hw_features |

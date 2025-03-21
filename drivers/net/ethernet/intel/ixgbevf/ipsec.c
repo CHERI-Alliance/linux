@@ -338,7 +338,7 @@ static int ixgbevf_ipsec_add_sa(struct xfrm_state *xs,
 		/* the preparations worked, so save the info */
 		memcpy(&ipsec->rx_tbl[sa_idx], &rsa, sizeof(rsa));
 
-		xs->xso.offload_handle = sa_idx + IXGBE_IPSEC_BASE_RX_INDEX;
+		xs->xso.offload_handle = __c_fakeu(sa_idx + IXGBE_IPSEC_BASE_RX_INDEX);
 
 		ipsec->num_rx_sa++;
 
@@ -378,7 +378,7 @@ static int ixgbevf_ipsec_add_sa(struct xfrm_state *xs,
 		/* the preparations worked, so save the info */
 		memcpy(&ipsec->tx_tbl[sa_idx], &tsa, sizeof(tsa));
 
-		xs->xso.offload_handle = sa_idx + IXGBE_IPSEC_BASE_TX_INDEX;
+		xs->xso.offload_handle = __c_fakeu(sa_idx + IXGBE_IPSEC_BASE_TX_INDEX);
 
 		ipsec->num_tx_sa++;
 	}
@@ -401,11 +401,11 @@ static void ixgbevf_ipsec_del_sa(struct xfrm_state *xs)
 	ipsec = adapter->ipsec;
 
 	if (xs->xso.dir == XFRM_DEV_OFFLOAD_IN) {
-		sa_idx = xs->xso.offload_handle - IXGBE_IPSEC_BASE_RX_INDEX;
+		sa_idx = __c_ua(xs->xso.offload_handle) - IXGBE_IPSEC_BASE_RX_INDEX;
 
 		if (!ipsec->rx_tbl[sa_idx].used) {
 			netdev_err(dev, "Invalid Rx SA selected sa_idx=%d offload_handle=%lu\n",
-				   sa_idx, xs->xso.offload_handle);
+				   sa_idx, __c_ua(xs->xso.offload_handle));
 			return;
 		}
 
@@ -414,11 +414,11 @@ static void ixgbevf_ipsec_del_sa(struct xfrm_state *xs)
 		memset(&ipsec->rx_tbl[sa_idx], 0, sizeof(struct rx_sa));
 		ipsec->num_rx_sa--;
 	} else {
-		sa_idx = xs->xso.offload_handle - IXGBE_IPSEC_BASE_TX_INDEX;
+		sa_idx = __c_ua(xs->xso.offload_handle) - IXGBE_IPSEC_BASE_TX_INDEX;
 
 		if (!ipsec->tx_tbl[sa_idx].used) {
 			netdev_err(dev, "Invalid Tx SA selected sa_idx=%d offload_handle=%lu\n",
-				   sa_idx, xs->xso.offload_handle);
+				   sa_idx, __c_ua(xs->xso.offload_handle));
 			return;
 		}
 
@@ -485,10 +485,10 @@ int ixgbevf_ipsec_tx(struct ixgbevf_ring *tx_ring,
 		return 0;
 	}
 
-	sa_idx = xs->xso.offload_handle - IXGBE_IPSEC_BASE_TX_INDEX;
+	sa_idx = __c_ua(xs->xso.offload_handle) - IXGBE_IPSEC_BASE_TX_INDEX;
 	if (unlikely(sa_idx >= IXGBE_IPSEC_MAX_SA_COUNT)) {
 		netdev_err(tx_ring->netdev, "%s: bad sa_idx=%d handle=%lu\n",
-			   __func__, sa_idx, xs->xso.offload_handle);
+			   __func__, sa_idx, __c_ua(xs->xso.offload_handle));
 		return 0;
 	}
 

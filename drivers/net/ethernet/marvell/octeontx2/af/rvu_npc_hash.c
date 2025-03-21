@@ -23,7 +23,7 @@
 static u64 rvu_npc_wide_extract(const u64 input[], size_t start_bit,
 				size_t width_bits)
 {
-	const u64 mask = ~(u64)((~(__uint128_t)0) << width_bits);
+	const u64 mask = ~(u64 __force)((~(__uint128_t __force)0) << width_bits);
 	const size_t msb = start_bit + width_bits - 1;
 	const size_t lword = start_bit >> 6;
 	const size_t uword = msb >> 6;

@@ -4028,9 +4028,9 @@ static int ksz_alloc_desc(struct dev_info *adapter)
 	}
 
 	/* Align to the next cache line boundary. */
-	offset = (((ulong) adapter->desc_pool.alloc_virt % DESC_ALIGNMENT) ?
+	offset = ((__c_pa(adapter->desc_pool.alloc_virt) % DESC_ALIGNMENT) ?
 		(DESC_ALIGNMENT -
-		((ulong) adapter->desc_pool.alloc_virt % DESC_ALIGNMENT)) : 0);
+		(__c_pa(adapter->desc_pool.alloc_virt) % DESC_ALIGNMENT)) : 0);
 	adapter->desc_pool.virt = adapter->desc_pool.alloc_virt + offset;
 	adapter->desc_pool.phys = adapter->desc_pool.dma_addr + offset;
 
@@ -6706,7 +6706,7 @@ static int pcidev_init(struct pci_dev *pdev, const struct pci_device_id *id)
 			hw->port_info[pi].state = media_disconnected;
 		}
 
-		dev->mem_start = (unsigned long) hw->io;
+		dev->mem_start = (uintptr_t) hw->io;
 		dev->mem_end = dev->mem_start + reg_len - 1;
 		dev->irq = pdev->irq;
 		if (MAIN_PORT == i)

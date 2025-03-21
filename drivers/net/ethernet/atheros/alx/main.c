@@ -97,7 +97,7 @@ static int alx_refill_rx_ring(struct alx_priv *alx, gfp_t gfp)
 		if (!skb)
 			break;
 
-		if (((unsigned long)skb->data & 0xfff) == 0xfc0)
+		if ((__c_pa(skb->data) & 0xfff) == 0xfc0)
 			skb_reserve(skb, 64);
 
 		dma = dma_map_single(&alx->hw.pdev->dev,

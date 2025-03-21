@@ -162,7 +162,7 @@ MODULE_DEVICE_TABLE(pci, ne2k_pci_tbl);
 
 /* ---- No user-serviceable parts below ---- */
 
-#define NE_BASE	 (dev->base_addr)
+#define NE_BASE	 __c_ua(dev->base_addr)
 #define NE_CMD		0x00
 #define NE_DATAPORT	0x10	/* NatSemi-defined port window offset. */
 #define NE_RESET	0x1f	/* Issue a read to reset, a write to clear. */
@@ -230,7 +230,7 @@ static int ne2k_pci_init_one(struct pci_dev *pdev,
 	int i;
 	unsigned char SA_prom[32];
 	int start_page, stop_page;
-	int irq, reg0, chip_idx = ent->driver_data;
+	int irq, reg0, chip_idx = __c_ua(ent->driver_data);
 	static unsigned int fnd_cnt;
 	long ioaddr;
 	int flags = pci_clone_list[chip_idx].flags;
@@ -363,7 +363,7 @@ static int ne2k_pci_init_one(struct pci_dev *pdev,
 
 	/* Set up the rest of the parameters. */
 	dev->irq = irq;
-	dev->base_addr = ioaddr;
+	dev->base_addr = __c_fakeu(ioaddr);
 	pci_set_drvdata(pdev, dev);
 
 	ei_status.name = pci_clone_list[chip_idx].name;
@@ -386,7 +386,7 @@ static int ne2k_pci_init_one(struct pci_dev *pdev,
 	ei_status.block_input = &ne2k_pci_block_input;
 	ei_status.block_output = &ne2k_pci_block_output;
 	ei_status.get_8390_hdr = &ne2k_pci_get_8390_hdr;
-	ei_status.priv = (unsigned long) pdev;
+	ei_status.priv = (uintptr_t) pdev;
 
 	dev->ethtool_ops = &ne2k_pci_ethtool_ops;
 	NS8390_init(dev, 0);
@@ -416,7 +416,7 @@ err_out:
  */
 static inline int set_realtek_fdx(struct net_device *dev)
 {
-	long ioaddr = dev->base_addr;
+	long ioaddr = __c_ua(dev->base_addr);
 
 	outb(0xC0 + E8390_NODMA, ioaddr + NE_CMD); /* Page 3 */
 	outb(0xC0, ioaddr + 0x01); /* Enable writes to CONFIG3 */
@@ -428,7 +428,7 @@ static inline int set_realtek_fdx(struct net_device *dev)
 
 static inline int set_holtek_fdx(struct net_device *dev)
 {
-	long ioaddr = dev->base_addr;
+	long ioaddr = __c_ua(dev->base_addr);
 
 	outb(inb(ioaddr + 0x20) | 0x80, ioaddr + 0x20);
 	return 0;
@@ -501,7 +501,7 @@ static void ne2k_pci_get_8390_hdr(struct net_device *dev,
 				  struct e8390_pkt_hdr *hdr, int ring_page)
 {
 
-	long nic_base = dev->base_addr;
+	long nic_base = __c_ua(dev->base_addr);
 
 	/* This *shouldn't* happen. If it does, it's the last thing you'll see
 	 */
@@ -540,7 +540,7 @@ static void ne2k_pci_get_8390_hdr(struct net_device *dev,
 static void ne2k_pci_block_input(struct net_device *dev, int count,
 				 struct sk_buff *skb, int ring_offset)
 {
-	long nic_base = dev->base_addr;
+	long nic_base = __c_ua(dev->base_addr);
 	char *buf = skb->data;
 
 	/* This *shouldn't* happen.
@@ -698,7 +698,7 @@ static void ne2k_pci_remove_one(struct pci_dev *pdev)
 
 	BUG_ON(!dev);
 	unregister_netdev(dev);
-	release_region(dev->base_addr, NE_IO_EXTENT);
+	release_region(__c_ua(dev->base_addr), NE_IO_EXTENT);
 	free_netdev(dev);
 	pci_disable_device(pdev);
 }

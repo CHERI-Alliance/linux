@@ -407,8 +407,8 @@ sgdma_txphysaddr(struct altera_tse_private *priv,
 		 struct sgdma_descrip __iomem *desc)
 {
 	dma_addr_t paddr = priv->txdescmem_busaddr;
-	uintptr_t offs = (uintptr_t)desc - (uintptr_t)priv->tx_dma_desc;
-	return (dma_addr_t)((uintptr_t)paddr + offs);
+	unsigned long offs = __c_pa(desc) - __c_pa(priv->tx_dma_desc);
+	return (dma_addr_t)((unsigned long)paddr + offs);
 }
 
 static dma_addr_t
@@ -416,8 +416,8 @@ sgdma_rxphysaddr(struct altera_tse_private *priv,
 		 struct sgdma_descrip __iomem *desc)
 {
 	dma_addr_t paddr = priv->rxdescmem_busaddr;
-	uintptr_t offs = (uintptr_t)desc - (uintptr_t)priv->rx_dma_desc;
-	return (dma_addr_t)((uintptr_t)paddr + offs);
+	unsigned long offs = __c_pa(desc) - __c_pa(priv->rx_dma_desc);
+	return (dma_addr_t)((unsigned long)paddr + offs);
 }
 
 #define list_remove_head(list, entry, type, member)			\

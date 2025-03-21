@@ -1543,7 +1543,7 @@ static int velocity_alloc_rx_buf(struct velocity_info *vptr, int idx)
 	 *	64byte alignment.
 	 */
 	skb_reserve(rd_info->skb,
-			64 - ((unsigned long) rd_info->skb->data & 63));
+			64 - (__c_pa(rd_info->skb->data) & 63));
 	rd_info->skb_dma = dma_map_single(vptr->dev, rd_info->skb->data,
 					vptr->rx.buf_sz, DMA_FROM_DEVICE);
 
@@ -2910,7 +2910,7 @@ static int velocity_pci_probe(struct pci_dev *pdev,
 			       const struct pci_device_id *ent)
 {
 	const struct velocity_info_tbl *info =
-					&chip_info_table[ent->driver_data];
+					&chip_info_table[__c_ua(ent->driver_data)];
 	int ret;
 
 	ret = pci_enable_device(pdev);

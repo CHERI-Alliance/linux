@@ -802,7 +802,7 @@ static int ax_init_dev(struct net_device *dev)
 		goto err_out;
 
 	netdev_info(dev, "%dbit, irq %d, %lx, MAC: %pM\n",
-		    ei_local->word16 ? 16 : 8, dev->irq, dev->base_addr,
+		    ei_local->word16 ? 16 : 8, dev->irq, __c_ua(dev->base_addr),
 		    dev->dev_addr);
 
 	return 0;
@@ -906,7 +906,7 @@ static int ax_probe(struct platform_device *pdev)
 	}
 
 	ei_local->mem = ioremap(mem->start, mem_size);
-	dev->base_addr = (unsigned long)ei_local->mem;
+	dev->base_addr = (uintptr_t)ei_local->mem;
 
 	if (ei_local->mem == NULL) {
 		dev_err(&pdev->dev, "Cannot ioremap area %pR\n", mem);

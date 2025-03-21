@@ -583,7 +583,7 @@ static int hamachi_init_one(struct pci_dev *pdev,
 {
 	struct hamachi_private *hmp;
 	int option, i, rx_int_var, tx_int_var, boguscnt;
-	int chip_id = ent->driver_data;
+	int chip_id = __c_ua(ent->driver_data);
 	int irq;
 	void __iomem *ioaddr;
 	unsigned long base;
@@ -665,7 +665,7 @@ static int hamachi_init_one(struct pci_dev *pdev,
 	/* Check for options being passed in */
 	option = card_idx < MAX_UNITS ? options[card_idx] : 0;
 	if (dev->mem_start)
-		option = dev->mem_start;
+		option = __c_ua(dev->mem_start);
 
 	/* If the bus size is misidentified, do the following. */
 	force32 = force32 ? force32 :

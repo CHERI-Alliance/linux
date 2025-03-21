@@ -80,7 +80,7 @@ static inline struct nf_conntrack_helper *tcf_ct_helper(const struct tc_action *
 static inline void
 tcf_ct_flow_table_restore_skb(struct sk_buff *skb, uintptr_t cookie)
 {
-	enum ip_conntrack_info ctinfo = cookie & NFCT_INFOMASK;
+	enum ip_conntrack_info ctinfo = __c_ua(cookie) & NFCT_INFOMASK;
 	struct nf_conn *ct;
 
 	ct = (struct nf_conn *)(cookie & NFCT_PTRMASK);

@@ -443,7 +443,7 @@ static int dmfe_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	db->buf_pool_start = db->buf_pool_ptr;
 	db->buf_pool_dma_start = db->buf_pool_dma_ptr;
 
-	db->chip_id = ent->driver_data;
+	db->chip_id = __c_ua(ent->driver_data);
 	/* IO type range. */
 	db->ioaddr = pci_iomap(pdev, 0, 0);
 	if (!db->ioaddr) {
@@ -483,7 +483,7 @@ static int dmfe_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 		goto err_out_unmap;
 
 	dev_info(&dev->dev, "Davicom DM%04lx at pci%s, %pM, irq %d\n",
-		 ent->driver_data >> 16,
+		 __c_ua(ent->driver_data) >> 16,
 		 pci_name(pdev), dev->dev_addr, pdev->irq);
 
 	pci_set_master(pdev);

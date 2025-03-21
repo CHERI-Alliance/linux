@@ -1188,10 +1188,10 @@ static int otx2_tc_del_flow(struct otx2_nic *nic,
 	struct otx2_tc_flow *flow_node;
 	int err;
 
-	flow_node = otx2_tc_get_entry_by_cookie(flow_cfg, tc_flow_cmd->cookie);
+	flow_node = otx2_tc_get_entry_by_cookie(flow_cfg, __c_ua(tc_flow_cmd->cookie));
 	if (!flow_node) {
 		netdev_err(nic->netdev, "tc flow not found for cookie 0x%lx\n",
-			   tc_flow_cmd->cookie);
+			   __c_ua(tc_flow_cmd->cookie));
 		return -EINVAL;
 	}
 
@@ -1269,7 +1269,7 @@ static int otx2_tc_add_flow(struct otx2_nic *nic,
 	if (!new_node)
 		return -ENOMEM;
 	spin_lock_init(&new_node->lock);
-	new_node->cookie = tc_flow_cmd->cookie;
+	new_node->cookie = __c_ua(tc_flow_cmd->cookie);
 	new_node->prio = tc_flow_cmd->common.prio;
 	new_node->mcast_grp_idx = MCAST_INVALID_GRP;
 
@@ -1282,7 +1282,7 @@ static int otx2_tc_add_flow(struct otx2_nic *nic,
 	}
 
 	/* If a flow exists with the same cookie, delete it */
-	old_node = otx2_tc_get_entry_by_cookie(flow_cfg, tc_flow_cmd->cookie);
+	old_node = otx2_tc_get_entry_by_cookie(flow_cfg, __c_ua(tc_flow_cmd->cookie));
 	if (old_node)
 		otx2_tc_del_flow(nic, tc_flow_cmd);
 
@@ -1352,10 +1352,10 @@ static int otx2_tc_get_flow_stats(struct otx2_nic *nic,
 	struct otx2_tc_flow *flow_node;
 	int err;
 
-	flow_node = otx2_tc_get_entry_by_cookie(nic->flow_cfg, tc_flow_cmd->cookie);
+	flow_node = otx2_tc_get_entry_by_cookie(nic->flow_cfg, __c_ua(tc_flow_cmd->cookie));
 	if (!flow_node) {
 		netdev_info(nic->netdev, "tc flow not found for cookie %lx",
-			    tc_flow_cmd->cookie);
+			    __c_ua(tc_flow_cmd->cookie));
 		return -EINVAL;
 	}
 

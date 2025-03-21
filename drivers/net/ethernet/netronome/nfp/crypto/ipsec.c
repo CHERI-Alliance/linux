@@ -542,7 +542,7 @@ static int nfp_net_xfrm_add_state(struct xfrm_state *x,
 	}
 
 	/* 0 is invalid offload_handle for kernel */
-	x->xso.offload_handle = saidx + 1;
+	x->xso.offload_handle = __c_fakeu(saidx + 1);
 	return 0;
 }
 
@@ -550,7 +550,7 @@ static void nfp_net_xfrm_del_state(struct xfrm_state *x)
 {
 	struct nfp_ipsec_cfg_mssg msg = {
 		.cmd = NFP_IPSEC_CFG_MSSG_INV_SA,
-		.sa_idx = x->xso.offload_handle - 1,
+		.sa_idx = __c_ua(x->xso.offload_handle) - 1,
 	};
 	struct net_device *netdev = x->xso.real_dev;
 	struct nfp_net *nn;
@@ -562,7 +562,7 @@ static void nfp_net_xfrm_del_state(struct xfrm_state *x)
 	if (err)
 		nn_warn(nn, "Failed to invalidate SA in hardware\n");
 
-	xa_erase(&nn->xa_ipsec, x->xso.offload_handle - 1);
+	xa_erase(&nn->xa_ipsec, __c_ua(x->xso.offload_handle) - 1);
 }
 
 static bool nfp_net_ipsec_offload_ok(struct sk_buff *skb, struct xfrm_state *x)
@@ -611,7 +611,7 @@ bool nfp_net_ipsec_tx_prep(struct nfp_net_dp *dp, struct sk_buff *skb,
 
 	offload_info->seq_hi = xo->seq.hi;
 	offload_info->seq_low = xo->seq.low;
-	offload_info->handle = x->xso.offload_handle;
+	offload_info->handle = __c_ua(x->xso.offload_handle);
 
 	return true;
 }

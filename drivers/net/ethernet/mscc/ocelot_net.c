@@ -251,7 +251,7 @@ static int ocelot_setup_tc_cls_matchall_police(struct ocelot_port_private *priv,
 		return err;
 	}
 
-	priv->tc.police_id = f->cookie;
+	priv->tc.police_id = __c_ua(f->cookie);
 	priv->tc.offload_cnt++;
 
 	return 0;
@@ -292,9 +292,9 @@ static int ocelot_setup_tc_cls_matchall_mirred(struct ocelot_port_private *priv,
 		return err;
 
 	if (ingress)
-		priv->tc.ingress_mirred_id = f->cookie;
+		priv->tc.ingress_mirred_id = __c_ua(f->cookie);
 	else
-		priv->tc.egress_mirred_id = f->cookie;
+		priv->tc.egress_mirred_id = __c_ua(f->cookie);
 	priv->tc.offload_cnt++;
 
 	return 0;

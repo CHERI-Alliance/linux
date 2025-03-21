@@ -3906,7 +3906,7 @@ static int iavf_handle_tclass(struct iavf_adapter *adapter, u32 tc,
  * cloud_filter_list_lock.
  */
 static struct iavf_cloud_filter *iavf_find_cf(struct iavf_adapter *adapter,
-					      unsigned long *cookie)
+					      unsigned long cookie)
 {
 	struct iavf_cloud_filter *filter = NULL;
 
@@ -3914,7 +3914,7 @@ static struct iavf_cloud_filter *iavf_find_cf(struct iavf_adapter *adapter,
 		return NULL;
 
 	list_for_each_entry(filter, &adapter->cloud_filter_list, list) {
-		if (!memcmp(cookie, &filter->cookie, sizeof(filter->cookie)))
+		if (cookie == filter->cookie)
 			return filter;
 	}
 	return NULL;
@@ -3953,7 +3953,7 @@ static int iavf_configure_clsflower(struct iavf_adapter *adapter,
 
 	/* bail out here if filter already exists */
 	spin_lock_bh(&adapter->cloud_filter_list_lock);
-	if (iavf_find_cf(adapter, &cls_flower->cookie)) {
+	if (iavf_find_cf(adapter, __c_ua(cls_flower->cookie))) {
 		dev_err(&adapter->pdev->dev, "Failed to add TC Flower filter, it already exists\n");
 		err = -EEXIST;
 		goto spin_unlock;
@@ -4000,7 +4000,7 @@ static int iavf_delete_clsflower(struct iavf_adapter *adapter,
 	int err = 0;
 
 	spin_lock_bh(&adapter->cloud_filter_list_lock);
-	filter = iavf_find_cf(adapter, &cls_flower->cookie);
+	filter = iavf_find_cf(adapter, __c_ua(cls_flower->cookie));
 	if (filter) {
 		filter->del = true;
 		adapter->aq_required |= IAVF_FLAG_AQ_DEL_CLOUD_FILTER;

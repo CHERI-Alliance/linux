@@ -668,7 +668,8 @@ static void mtk_star_update_stats(struct mtk_star_priv *priv)
 
 static struct sk_buff *mtk_star_alloc_skb(struct net_device *ndev)
 {
-	uintptr_t tail, offset;
+	uintptr_t tail;
+	unsigned long offset;
 	struct sk_buff *skb;
 
 	skb = dev_alloc_skb(MTK_STAR_MAX_FRAME_SIZE);
@@ -678,7 +679,7 @@ static struct sk_buff *mtk_star_alloc_skb(struct net_device *ndev)
 	/* Align to 16 bytes. */
 	tail = (uintptr_t)skb_tail_pointer(skb);
 	if (tail & (MTK_STAR_SKB_ALIGNMENT - 1)) {
-		offset = tail & (MTK_STAR_SKB_ALIGNMENT - 1);
+		offset = __c_ua(tail) & (MTK_STAR_SKB_ALIGNMENT - 1);
 		skb_reserve(skb, MTK_STAR_SKB_ALIGNMENT - offset);
 	}
 

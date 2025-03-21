@@ -908,7 +908,7 @@ static void ks8842_dealloc_dma_bufs(struct ks8842_adapter *adapter)
 
 static bool ks8842_dma_filter_fn(struct dma_chan *chan, void *filter_param)
 {
-	return chan->chan_id == (long)filter_param;
+	return chan->chan_id == (long)__c_pa(filter_param);
 }
 
 static int ks8842_alloc_dma_bufs(struct net_device *netdev)
@@ -927,7 +927,7 @@ static int ks8842_alloc_dma_bufs(struct net_device *netdev)
 	sg_init_table(&tx_ctl->sg, 1);
 
 	tx_ctl->chan = dma_request_channel(mask, ks8842_dma_filter_fn,
-					   (void *)(long)tx_ctl->channel);
+					   __c_fakep(tx_ctl->channel));
 	if (!tx_ctl->chan) {
 		err = -ENODEV;
 		goto err;
@@ -949,7 +949,7 @@ static int ks8842_alloc_dma_bufs(struct net_device *netdev)
 	}
 
 	rx_ctl->chan = dma_request_channel(mask, ks8842_dma_filter_fn,
-					   (void *)(long)rx_ctl->channel);
+					   __c_fakep(rx_ctl->channel));
 	if (!rx_ctl->chan) {
 		err = -ENODEV;
 		goto err;

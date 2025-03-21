@@ -895,7 +895,7 @@ xirc2ps_config(struct pcmcia_device * link)
 
     /* we can now register the device with the net subsystem */
     dev->irq = link->irq;
-    dev->base_addr = link->resource[0]->start;
+    dev->base_addr = __c_fakeu(link->resource[0]->start);
 
     if (local->dingo)
 	do_reset(dev, 1); /* a kludge to make the cem56 work */
@@ -909,7 +909,7 @@ xirc2ps_config(struct pcmcia_device * link)
 
     /* give some infos about the hardware */
     netdev_info(dev, "%s: port %#3lx, irq %d, hwaddr %pM\n",
-		local->manf_str, (u_long)dev->base_addr, (int)dev->irq,
+		local->manf_str, __c_ua(dev->base_addr), (int)dev->irq,
 		dev->dev_addr);
 
     return 0;
@@ -987,7 +987,7 @@ xirc2ps_interrupt(int irq, void *dev_id)
     if (!netif_device_present(dev))
 	return IRQ_HANDLED;
 
-    ioaddr = dev->base_addr;
+    ioaddr = __c_ua(dev->base_addr);
     if (lp->mohawk) { /* must disable the interrupt */
 	PutByte(XIRCREG_CR, 0);
     }
@@ -1214,7 +1214,7 @@ static netdev_tx_t
 do_start_xmit(struct sk_buff *skb, struct net_device *dev)
 {
     struct local_info *lp = netdev_priv(dev);
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
     int okay;
     unsigned freespace;
     unsigned pktlen = skb->len;
@@ -1295,7 +1295,7 @@ static void set_address(struct set_address_info *sa_info, const char *addr)
  */
 static void set_addresses(struct net_device *dev)
 {
-	unsigned int ioaddr = dev->base_addr;
+	unsigned int ioaddr = __c_ua(dev->base_addr);
 	struct local_info *lp = netdev_priv(dev);
 	struct netdev_hw_addr *ha;
 	struct set_address_info sa_info;
@@ -1331,7 +1331,7 @@ static void set_addresses(struct net_device *dev)
 static void
 set_multicast_list(struct net_device *dev)
 {
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
     unsigned value;
 
     SelectPage(0x42);
@@ -1407,7 +1407,7 @@ static void netdev_get_drvinfo(struct net_device *dev,
 {
 	strscpy(info->driver, "xirc2ps_cs", sizeof(info->driver));
 	snprintf(info->bus_info, sizeof(info->bus_info), "PCMCIA 0x%lx",
-		 dev->base_addr);
+		 __c_ua(dev->base_addr));
 }
 
 static const struct ethtool_ops netdev_ethtool_ops = {
@@ -1418,7 +1418,7 @@ static int
 do_ioctl(struct net_device *dev, struct ifreq *rq, int cmd)
 {
     struct local_info *local = netdev_priv(dev);
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
     struct mii_ioctl_data *data = if_mii(rq);
 
     pr_debug("%s: ioctl(%-.6s, %#04x) %04x %04x %04x %04x\n",
@@ -1450,7 +1450,7 @@ static void
 hardreset(struct net_device *dev)
 {
     struct local_info *local = netdev_priv(dev);
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
 
     SelectPage(4);
     udelay(1);
@@ -1467,7 +1467,7 @@ static void
 do_reset(struct net_device *dev, int full)
 {
     struct local_info *local = netdev_priv(dev);
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
     unsigned value;
 
     pr_debug("%s: do_reset(%p,%d)\n", dev->name, dev, full);
@@ -1628,7 +1628,7 @@ static int
 init_mii(struct net_device *dev)
 {
     struct local_info *local = netdev_priv(dev);
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
     unsigned control, status, linkpartner;
     int i;
 
@@ -1698,7 +1698,7 @@ static void
 do_powerdown(struct net_device *dev)
 {
 
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
 
     pr_debug("do_powerdown(%p)\n", dev);
 
@@ -1710,7 +1710,7 @@ do_powerdown(struct net_device *dev)
 static int
 do_stop(struct net_device *dev)
 {
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
     struct local_info *lp = netdev_priv(dev);
     struct pcmcia_device *link = lp->p_dev;
 

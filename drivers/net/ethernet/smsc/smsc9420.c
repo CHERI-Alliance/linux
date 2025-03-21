@@ -1564,7 +1564,7 @@ smsc9420_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 	pd->msg_enable = smsc_debug;
 	pd->rx_csum = true;
 
-	netif_dbg(pd, probe, pd->dev, "lan_base=0x%08lx\n", (ulong)virt_addr);
+	netif_dbg(pd, probe, pd->dev, "lan_base=0x%08lx\n", __c_pa(virt_addr));
 
 	id_rev = smsc9420_reg_read(pd, ID_REV);
 	switch (id_rev & 0xFFFF0000) {

@@ -439,7 +439,7 @@ static int sis900_probe(struct pci_dev *pci_dev,
 	void *ring_space;
 	void __iomem *ioaddr;
 	int i, ret;
-	const char *card_name = card_names[pci_id->driver_data];
+	const char *card_name = card_names[__c_ua(pci_id->driver_data)];
 	const char *dev_name = pci_name(pci_dev);
 
 /* when built into the kernel, we only print version if device is found */

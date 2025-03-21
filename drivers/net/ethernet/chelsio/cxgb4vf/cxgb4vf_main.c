@@ -1979,7 +1979,7 @@ static int mboxlog_show(struct seq_file *seq, void *v)
 		return 0;
 	}
 
-	entry_idx = log->cursor + ((uintptr_t)v - 2);
+	entry_idx = log->cursor + (__c_pa(v) - 2);
 	if (entry_idx >= log->size)
 		entry_idx -= log->size;
 	entry = mbox_cmd_log_entry(log, entry_idx);
@@ -2007,7 +2007,7 @@ static inline void *mboxlog_get_idx(struct seq_file *seq, loff_t pos)
 	struct adapter *adapter = seq->private;
 	struct mbox_cmd_log *log = adapter->mbox_log;
 
-	return ((pos <= log->size) ? (void *)(uintptr_t)(pos + 1) : NULL);
+	return ((pos <= log->size) ? __c_fakep(pos + 1) : NULL);
 }
 
 static void *mboxlog_start(struct seq_file *seq, loff_t *pos)
@@ -2042,7 +2042,7 @@ static int sge_qinfo_show(struct seq_file *seq, void *v)
 {
 	struct adapter *adapter = seq->private;
 	int eth_entries = DIV_ROUND_UP(adapter->sge.ethqsets, QPL);
-	int qs, r = (uintptr_t)v - 1;
+	int qs, r = __c_pa(v) - 1;
 
 	if (r)
 		seq_putc(seq, '\n');
@@ -2145,7 +2145,7 @@ static void *sge_queue_start(struct seq_file *seq, loff_t *pos)
 {
 	int entries = sge_queue_entries(seq->private);
 
-	return *pos < entries ? (void *)((uintptr_t)*pos + 1) : NULL;
+	return *pos < entries ? __c_fakep(*pos + 1) : NULL;
 }
 
 static void sge_queue_stop(struct seq_file *seq, void *v)
@@ -2157,7 +2157,7 @@ static void *sge_queue_next(struct seq_file *seq, void *v, loff_t *pos)
 	int entries = sge_queue_entries(seq->private);
 
 	++*pos;
-	return *pos < entries ? (void *)((uintptr_t)*pos + 1) : NULL;
+	return *pos < entries ? __c_fakep(*pos + 1) : NULL;
 }
 
 static const struct seq_operations sge_qinfo_sops = {
@@ -2178,7 +2178,7 @@ static int sge_qstats_show(struct seq_file *seq, void *v)
 {
 	struct adapter *adapter = seq->private;
 	int eth_entries = DIV_ROUND_UP(adapter->sge.ethqsets, QPL);
-	int qs, r = (uintptr_t)v - 1;
+	int qs, r = __c_pa(v) - 1;
 
 	if (r)
 		seq_putc(seq, '\n');
@@ -2274,7 +2274,7 @@ static void *sge_qstats_start(struct seq_file *seq, loff_t *pos)
 {
 	int entries = sge_qstats_entries(seq->private);
 
-	return *pos < entries ? (void *)((uintptr_t)*pos + 1) : NULL;
+	return *pos < entries ? __c_fakep(*pos + 1) : NULL;
 }
 
 static void sge_qstats_stop(struct seq_file *seq, void *v)
@@ -2286,7 +2286,7 @@ static void *sge_qstats_next(struct seq_file *seq, void *v, loff_t *pos)
 	int entries = sge_qstats_entries(seq->private);
 
 	(*pos)++;
-	return *pos < entries ? (void *)((uintptr_t)*pos + 1) : NULL;
+	return *pos < entries ? __c_fakep(*pos + 1) : NULL;
 }
 
 static const struct seq_operations sge_qstats_sops = {
@@ -2336,7 +2336,7 @@ static int interfaces_show(struct seq_file *seq, void *v)
 		seq_puts(seq, "Interface  Port   VIID\n");
 	} else {
 		struct adapter *adapter = seq->private;
-		int pidx = (uintptr_t)v - 2;
+		int pidx = __c_pa(v) - 2;
 		struct net_device *dev = adapter->port[pidx];
 		struct port_info *pi = netdev_priv(dev);
 
@@ -2349,7 +2349,7 @@ static int interfaces_show(struct seq_file *seq, void *v)
 static inline void *interfaces_get_idx(struct adapter *adapter, loff_t pos)
 {
 	return pos <= adapter->params.nports
-		? (void *)(uintptr_t)(pos + 1)
+		? __c_fakep(pos + 1)
 		: NULL;
 }
 

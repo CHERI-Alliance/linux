@@ -283,8 +283,8 @@ static int tc589_config(struct pcmcia_device *link)
 		goto failed;
 
 	dev->irq = link->irq;
-	dev->base_addr = link->resource[0]->start;
-	ioaddr = dev->base_addr;
+	dev->base_addr = __c_fakeu(link->resource[0]->start);
+	ioaddr = __c_ua(dev->base_addr);
 	EL3WINDOW(0);
 
 	/* The 3c589 has an extra EEPROM for configuration info, including
@@ -301,7 +301,7 @@ static int tc589_config(struct pcmcia_device *link)
 			addr[i] = htons(read_eeprom(ioaddr, i));
 		if (addr[0] == htons(0x6060)) {
 			dev_err(&link->dev, "IO port conflict at 0x%03lx-0x%03lx\n",
-					dev->base_addr, dev->base_addr+15);
+					__c_ua(dev->base_addr), __c_ua(dev->base_addr)+15);
 			goto failed;
 		}
 	}
@@ -328,7 +328,7 @@ static int tc589_config(struct pcmcia_device *link)
 	}
 
 	netdev_info(dev, "3Com 3c%s, io %#3lx, irq %d, hw_addr %pM\n",
-			(multi ? "562" : "589"), dev->base_addr, dev->irq,
+			(multi ? "562" : "589"), __c_ua(dev->base_addr), dev->irq,
 			dev->dev_addr);
 	netdev_info(dev, "  %dK FIFO split %s Rx:Tx, %s xcvr\n",
 			(fifo & 7) ? 32 : 8, ram_split[(fifo >> 16) & 3],
@@ -374,9 +374,9 @@ static int tc589_resume(struct pcmcia_device *link)
 static void tc589_wait_for_completion(struct net_device *dev, int cmd)
 {
 	int i = 100;
-	outw(cmd, dev->base_addr + EL3_CMD);
+	outw(cmd, __c_ua(dev->base_addr) + EL3_CMD);
 	while (--i > 0)
-		if (!(inw(dev->base_addr + EL3_STATUS) & 0x1000))
+		if (!(inw(__c_ua(dev->base_addr) + EL3_STATUS) & 0x1000))
 			break;
 	if (i == 0)
 		netdev_warn(dev, "command 0x%04x did not complete!\n", cmd);
@@ -404,7 +404,7 @@ static u16 read_eeprom(unsigned int ioaddr, int index)
 static void tc589_set_xcvr(struct net_device *dev, int if_port)
 {
 	struct el3_private *lp = netdev_priv(dev);
-	unsigned int ioaddr = dev->base_addr;
+	unsigned int ioaddr = __c_ua(dev->base_addr);
 
 	EL3WINDOW(0);
 	switch (if_port) {
@@ -433,7 +433,7 @@ static void tc589_set_xcvr(struct net_device *dev, int if_port)
 
 static void dump_status(struct net_device *dev)
 {
-	unsigned int ioaddr = dev->base_addr;
+	unsigned int ioaddr = __c_ua(dev->base_addr);
 	EL3WINDOW(1);
 	netdev_info(dev, "  irq status %04x, rx status %04x, tx status %02x  tx free %04x\n",
 			inw(ioaddr+EL3_STATUS), inw(ioaddr+RX_STATUS),
@@ -448,7 +448,7 @@ static void dump_status(struct net_device *dev)
 /* Reset and restore all of the 3c589 registers. */
 static void tc589_reset(struct net_device *dev)
 {
-	unsigned int ioaddr = dev->base_addr;
+	unsigned int ioaddr = __c_ua(dev->base_addr);
 	int i;
 
 	EL3WINDOW(0);
@@ -491,7 +491,7 @@ static void netdev_get_drvinfo(struct net_device *dev,
 {
 	strscpy(info->driver, DRV_NAME, sizeof(info->driver));
 	snprintf(info->bus_info, sizeof(info->bus_info),
-		"PCMCIA 0x%lx", dev->base_addr);
+		"PCMCIA 0x%lx", __c_ua(dev->base_addr));
 }
 
 static const struct ethtool_ops netdev_ethtool_ops = {
@@ -528,14 +528,14 @@ static int el3_open(struct net_device *dev)
 	mod_timer(&lp->media, jiffies + HZ);
 
 	dev_dbg(&link->dev, "%s: opened, status %4.4x.\n",
-	  dev->name, inw(dev->base_addr + EL3_STATUS));
+	  dev->name, inw(__c_ua(dev->base_addr) + EL3_STATUS));
 
 	return 0;
 }
 
 static void el3_tx_timeout(struct net_device *dev, unsigned int txqueue)
 {
-	unsigned int ioaddr = dev->base_addr;
+	unsigned int ioaddr = __c_ua(dev->base_addr);
 
 	netdev_warn(dev, "Transmit timed out!\n");
 	dump_status(dev);
@@ -549,7 +549,7 @@ static void el3_tx_timeout(struct net_device *dev, unsigned int txqueue)
 
 static void pop_tx_status(struct net_device *dev)
 {
-	unsigned int ioaddr = dev->base_addr;
+	unsigned int ioaddr = __c_ua(dev->base_addr);
 	int i;
 
 	/* Clear the Tx status stack. */
@@ -572,7 +572,7 @@ static void pop_tx_status(struct net_device *dev)
 static netdev_tx_t el3_start_xmit(struct sk_buff *skb,
 					struct net_device *dev)
 {
-	unsigned int ioaddr = dev->base_addr;
+	unsigned int ioaddr = __c_ua(dev->base_addr);
 	struct el3_private *priv = netdev_priv(dev);
 	unsigned long flags;
 
@@ -614,7 +614,7 @@ static irqreturn_t el3_interrupt(int irq, void *dev_id)
 	if (!netif_device_present(dev))
 		return IRQ_NONE;
 
-	ioaddr = dev->base_addr;
+	ioaddr = __c_ua(dev->base_addr);
 
 	netdev_dbg(dev, "interrupt, status %4.4x.\n", inw(ioaddr + EL3_STATUS));
 
@@ -687,7 +687,7 @@ static void media_check(struct timer_list *t)
 {
 	struct el3_private *lp = from_timer(lp, t, media);
 	struct net_device *dev = lp->p_dev->priv;
-	unsigned int ioaddr = dev->base_addr;
+	unsigned int ioaddr = __c_ua(dev->base_addr);
 	u16 media, errs;
 	unsigned long flags;
 
@@ -794,7 +794,7 @@ static struct net_device_stats *el3_get_stats(struct net_device *dev)
 
 static void update_stats(struct net_device *dev)
 {
-	unsigned int ioaddr = dev->base_addr;
+	unsigned int ioaddr = __c_ua(dev->base_addr);
 
 	netdev_dbg(dev, "updating the statistics.\n");
 	/* Turn off statistics updates while reading. */
@@ -825,7 +825,7 @@ static void update_stats(struct net_device *dev)
 
 static int el3_rx(struct net_device *dev)
 {
-	unsigned int ioaddr = dev->base_addr;
+	unsigned int ioaddr = __c_ua(dev->base_addr);
 	int worklimit = 32;
 	short rx_status;
 
@@ -889,7 +889,7 @@ static int el3_rx(struct net_device *dev)
 
 static void set_rx_mode(struct net_device *dev)
 {
-	unsigned int ioaddr = dev->base_addr;
+	unsigned int ioaddr = __c_ua(dev->base_addr);
 	u16 opts = SetRxFilter | RxStation | RxBroadcast;
 
 	if (dev->flags & IFF_PROMISC)
@@ -913,7 +913,7 @@ static int el3_close(struct net_device *dev)
 {
 	struct el3_private *lp = netdev_priv(dev);
 	struct pcmcia_device *link = lp->p_dev;
-	unsigned int ioaddr = dev->base_addr;
+	unsigned int ioaddr = __c_ua(dev->base_addr);
 
 	dev_dbg(&link->dev, "%s: shutting down ethercard.\n", dev->name);
 

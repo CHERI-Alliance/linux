@@ -300,12 +300,12 @@ void mlx5_pages_debugfs_cleanup(struct mlx5_core_dev *dev)
 	debugfs_remove_recursive(dev->priv.dbg.pages_debugfs);
 }
 
-static u64 qp_read_field(struct mlx5_core_dev *dev, struct mlx5_core_qp *qp,
+static uintptr_t qp_read_field(struct mlx5_core_dev *dev, struct mlx5_core_qp *qp,
 			 int index, int *is_str)
 {
 	int outlen = MLX5_ST_SZ_BYTES(query_qp_out);
 	u32 in[MLX5_ST_SZ_DW(query_qp_in)] = {};
-	u64 param = 0;
+	uintptr_t param = 0;
 	u32 *out;
 	int state;
 	u32 *qpc;
@@ -326,15 +326,15 @@ static u64 qp_read_field(struct mlx5_core_dev *dev, struct mlx5_core_qp *qp,
 	qpc = MLX5_ADDR_OF(query_qp_out, out, qpc);
 	switch (index) {
 	case QP_PID:
-		param = qp->pid;
+		param = __c_fakeu(qp->pid);
 		break;
 	case QP_STATE:
 		state = MLX5_GET(qpc, qpc, state);
-		param = (unsigned long)mlx5_qp_state_str(state);
+		param = (uintptr_t)mlx5_qp_state_str(state);
 		*is_str = 1;
 		break;
 	case QP_XPORT:
-		param = (unsigned long)mlx5_qp_type_str(MLX5_GET(qpc, qpc, st));
+		param = (uintptr_t)mlx5_qp_type_str(MLX5_GET(qpc, qpc, st));
 		*is_str = 1;
 		break;
 	case QP_MTU:
@@ -359,20 +359,20 @@ static u64 qp_read_field(struct mlx5_core_dev *dev, struct mlx5_core_qp *qp,
 		}
 		break;
 	case QP_N_RECV:
-		param = 1 << MLX5_GET(qpc, qpc, log_rq_size);
+		param = __c_fakeu(1 << MLX5_GET(qpc, qpc, log_rq_size));
 		break;
 	case QP_RECV_SZ:
-		param = 1 << (MLX5_GET(qpc, qpc, log_rq_stride) + 4);
+		param = __c_fakeu(1 << (MLX5_GET(qpc, qpc, log_rq_stride) + 4));
 		break;
 	case QP_N_SEND:
 		if (!MLX5_GET(qpc, qpc, no_sq))
-			param = 1 << MLX5_GET(qpc, qpc, log_sq_size);
+			param = __c_fakeu(1 << MLX5_GET(qpc, qpc, log_sq_size));
 		break;
 	case QP_LOG_PG_SZ:
-		param = MLX5_GET(qpc, qpc, log_page_size) + 12;
+		param = __c_fakeu(MLX5_GET(qpc, qpc, log_page_size) + 12);
 		break;
 	case QP_RQPN:
-		param = MLX5_GET(qpc, qpc, remote_qpn);
+		param = __c_fakeu(MLX5_GET(qpc, qpc, remote_qpn));
 		break;
 	}
 out:
@@ -464,7 +464,7 @@ static ssize_t dbg_read(struct file *filp, char __user *buf, size_t count,
 	struct mlx5_rsc_debug *d;
 	char tbuf[18];
 	int is_str = 0;
-	u64 field;
+	uintptr_t field;
 	int ret;
 
 	desc = filp->private_data;
@@ -475,11 +475,11 @@ static ssize_t dbg_read(struct file *filp, char __user *buf, size_t count,
 		break;
 
 	case MLX5_DBG_RSC_EQ:
-		field = eq_read_field(d->dev, d->object, desc->i);
+		field = __c_fakeu(eq_read_field(d->dev, d->object, desc->i));
 		break;
 
 	case MLX5_DBG_RSC_CQ:
-		field = cq_read_field(d->dev, d->object, desc->i);
+		field = __c_fakeu(cq_read_field(d->dev, d->object, desc->i));
 		break;
 
 	default:
@@ -488,9 +488,9 @@ static ssize_t dbg_read(struct file *filp, char __user *buf, size_t count,
 	}
 
 	if (is_str)
-		ret = snprintf(tbuf, sizeof(tbuf), "%s\n", (const char *)(unsigned long)field);
+		ret = snprintf(tbuf, sizeof(tbuf), "%s\n", (const char *)(uintptr_t)field);
 	else
-		ret = snprintf(tbuf, sizeof(tbuf), "0x%llx\n", field);
+		ret = snprintf(tbuf, sizeof(tbuf), "0x%llx\n", (unsigned long long)__c_ua(field));
 
 	return simple_read_from_buffer(buf, count, pos, tbuf, ret);
 }

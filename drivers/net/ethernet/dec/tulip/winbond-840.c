@@ -352,7 +352,7 @@ static int w840_probe1(struct pci_dev *pdev, const struct pci_device_id *ent)
 	struct net_device *dev;
 	struct netdev_private *np;
 	static int find_cnt;
-	int chip_idx = ent->driver_data;
+	int chip_idx = __c_ua(ent->driver_data);
 	int irq;
 	int i, option = find_cnt < MAX_UNITS ? options[find_cnt] : 0;
 	__le16 addr[ETH_ALEN / 2];
@@ -403,7 +403,7 @@ static int w840_probe1(struct pci_dev *pdev, const struct pci_device_id *ent)
 	pci_set_drvdata(pdev, dev);
 
 	if (dev->mem_start)
-		option = dev->mem_start;
+		option = __c_ua(dev->mem_start);
 
 	/* The lower four bits are the media type. */
 	if (option > 0) {

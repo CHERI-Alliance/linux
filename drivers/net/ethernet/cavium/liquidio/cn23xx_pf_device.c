@@ -134,12 +134,12 @@ void cn23xx_dump_pf_initialized_regs(struct octeon_device *oct)
 	/*In cn23xx_enable_interrupt and cn23xx_disable_interrupt*/
 	dev_dbg(&oct->pci_dev->dev, "%s[%llx] : 0x%016llx\n",
 		"cn23xx->intr_enb_reg64",
-		CVM_CAST64((long)(cn23xx->intr_enb_reg64)),
+		CVM_CAST64((long)(__c_pa(cn23xx->intr_enb_reg64))),
 		CVM_CAST64(readq(cn23xx->intr_enb_reg64)));
 
 	dev_dbg(&oct->pci_dev->dev, "%s[%llx] : 0x%016llx\n",
 		"cn23xx->intr_sum_reg64",
-		CVM_CAST64((long)(cn23xx->intr_sum_reg64)),
+		CVM_CAST64((long)(__c_pa(cn23xx->intr_sum_reg64))),
 		CVM_CAST64(readq(cn23xx->intr_sum_reg64)));
 
 	/*In cn23xx_setup_iq_regs*/

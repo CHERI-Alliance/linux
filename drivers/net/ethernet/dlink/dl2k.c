@@ -105,7 +105,7 @@ rio_probe1 (struct pci_dev *pdev, const struct pci_device_id *ent)
 	struct net_device *dev;
 	struct netdev_private *np;
 	static int card_idx;
-	int chip_idx = ent->driver_data;
+	int chip_idx = __c_ua(ent->driver_data);
 	int err, irq;
 	void __iomem *ioaddr;
 	void *ring_space;

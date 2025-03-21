@@ -570,7 +570,7 @@ static int init_shared_mem(struct s2io_nic *nic)
 	int i, j, blk_cnt;
 	int lst_size, lst_per_page;
 	struct net_device *dev = nic->dev;
-	unsigned long tmp;
+	uintptr_t tmp;
 	struct buffAdd *ba;
 	struct config_param *config = &nic->config;
 	struct mac_info *mac_control = &nic->mac_control;
@@ -777,7 +777,7 @@ static int init_shared_mem(struct s2io_nic *nic)
 
 			pre_rxd_blk = tmp_v_addr;
 			pre_rxd_blk->reserved_2_pNext_RxD_block =
-				(unsigned long)tmp_v_addr_next;
+				__c_pa(tmp_v_addr_next);
 			pre_rxd_blk->pNext_RxD_Blk_physical =
 				(u64)tmp_p_addr_next;
 		}
@@ -814,7 +814,7 @@ static int init_shared_mem(struct s2io_nic *nic)
 					if (!ba->ba_0_org)
 						return -ENOMEM;
 					mem_allocated += size;
-					tmp = (unsigned long)ba->ba_0_org;
+					tmp = (uintptr_t)ba->ba_0_org;
 					tmp += ALIGN_SIZE;
 					tmp &= ~((unsigned long)ALIGN_SIZE);
 					ba->ba_0 = (void *)tmp;
@@ -824,7 +824,7 @@ static int init_shared_mem(struct s2io_nic *nic)
 					if (!ba->ba_1_org)
 						return -ENOMEM;
 					mem_allocated += size;
-					tmp = (unsigned long)ba->ba_1_org;
+					tmp = (uintptr_t)ba->ba_1_org;
 					tmp += ALIGN_SIZE;
 					tmp &= ~((unsigned long)ALIGN_SIZE);
 					ba->ba_1 = (void *)tmp;
@@ -2326,14 +2326,15 @@ static struct sk_buff *s2io_txdl_getskb(struct fifo_info *fifo_data,
 	u16 j, frg_cnt;
 
 	txds = txdlp;
-	if (txds->Host_Control == (u64)(long)fifo_data->ufo_in_band_v) {
+	if (txds->Host_Control == __c_pa(fifo_data->ufo_in_band_v)) {
 		dma_unmap_single(&nic->pdev->dev,
 				 (dma_addr_t)txds->Buffer_Pointer,
 				 sizeof(u64), DMA_TO_DEVICE);
 		txds++;
 	}
 
-	skb = (struct sk_buff *)((unsigned long)txds->Host_Control);
+	/* FIXCHERI: Avoid use of cheri_make_kernel_data_cap() */
+	skb = (struct sk_buff *)cheri_make_kernel_data_cap(txds->Host_Control, sizeof(*skb));
 	if (!skb) {
 		memset(txdlp, 0, (sizeof(struct TxD) * fifo_data->max_txds));
 		return NULL;
@@ -2459,7 +2460,7 @@ static int fill_rx_buffers(struct s2io_nic *nic, struct ring_info *ring,
 	int off, size, block_no, block_no1;
 	u32 alloc_tab = 0;
 	u32 alloc_cnt;
-	u64 tmp;
+	uintptr_t tmp;
 	struct buffAdd *ba;
 	struct RxD_t *first_rxdp = NULL;
 	u64 Buffer0_ptr = 0, Buffer1_ptr = 0;
@@ -2542,7 +2543,7 @@ static int fill_rx_buffers(struct s2io_nic *nic, struct ring_info *ring,
 
 			rxdp->Control_2 =
 				SET_BUFFER0_SIZE_1(size - NET_IP_ALIGN);
-			rxdp->Host_Control = (unsigned long)skb;
+			rxdp->Host_Control = __c_pa(skb);
 		} else if (ring->rxd_mode == RXD_MODE_3B) {
 			/*
 			 * 2 buffer mode -
@@ -2561,10 +2562,10 @@ static int fill_rx_buffers(struct s2io_nic *nic, struct ring_info *ring,
 
 			ba = &ring->ba[block_no][off];
 			skb_reserve(skb, BUF0_LEN);
-			tmp = (u64)(unsigned long)skb->data;
+			tmp = (uintptr_t)skb->data;
 			tmp += ALIGN_SIZE;
 			tmp &= ~ALIGN_SIZE;
-			skb->data = (void *) (unsigned long)tmp;
+			skb->data = (void *)tmp;
 			skb_reset_tail_pointer(skb);
 
 			if (from_card_up) {
@@ -2606,8 +2607,8 @@ static int fill_rx_buffers(struct s2io_nic *nic, struct ring_info *ring,
 					if (dma_mapping_error(&nic->pdev->dev,
 							      rxdp3->Buffer1_ptr)) {
 						dma_unmap_single(&ring->pdev->dev,
-								 (dma_addr_t)(unsigned long)
-								 skb->data,
+								 (dma_addr_t)
+								 __c_pa(skb->data),
 								 ring->mtu + 4,
 								 DMA_FROM_DEVICE);
 						goto pci_map_failed;
@@ -2618,7 +2619,7 @@ static int fill_rx_buffers(struct s2io_nic *nic, struct ring_info *ring,
 					(ring->mtu + 4);
 			}
 			rxdp->Control_2 |= s2BIT(0);
-			rxdp->Host_Control = (unsigned long) (skb);
+			rxdp->Host_Control = __c_pa(skb);
 		}
 		if (alloc_tab & ((1 << rxsync_frequency) - 1))
 			rxdp->Control_1 |= RXD_OWN_XENA;
@@ -2673,7 +2674,8 @@ static void free_rxd_blk(struct s2io_nic *sp, int ring_no, int blk)
 	for (j = 0 ; j < rxd_count[sp->rxd_mode]; j++) {
 		rxdp = mac_control->rings[ring_no].
 			rx_blocks[blk].rxds[j].virt_addr;
-		skb = (struct sk_buff *)((unsigned long)rxdp->Host_Control);
+		/* FIXCHERI: Avoid use of cheri_make_kernel_data_cap() */
+		skb = (struct sk_buff *)cheri_make_kernel_data_cap(rxdp->Host_Control, sizeof(*skb));
 		if (!skb)
 			continue;
 		if (sp->rxd_mode == RXD_MODE_1) {
@@ -2918,7 +2920,8 @@ static int rx_intr_handler(struct ring_info *ring_data, int budget)
 				  ring_data->dev->name);
 			break;
 		}
-		skb = (struct sk_buff *)((unsigned long)rxdp->Host_Control);
+		/* FIXCHERI: Avoid use of cheri_make_kernel_data_cap() */
+		skb = (struct sk_buff *)cheri_make_kernel_data_cap(rxdp->Host_Control, sizeof(*skb));
 		if (skb == NULL) {
 			DBG_PRINT(ERR_DBG, "%s: NULL skb in Rx Intr\n",
 				  ring_data->dev->name);
@@ -4132,7 +4135,7 @@ static netdev_tx_t s2io_xmit(struct sk_buff *skb, struct net_device *dev)
 	if (dma_mapping_error(&sp->pdev->dev, txdp->Buffer_Pointer))
 		goto pci_map_failed;
 
-	txdp->Host_Control = (unsigned long)skb;
+	txdp->Host_Control = __c_pa(skb);
 	txdp->Control_1 |= TXD_BUFFER0_SIZE(frg_len);
 
 	frg_cnt = skb_shinfo(skb)->nr_frags;
@@ -6780,7 +6783,7 @@ static int set_rxd_buffer_pointer(struct s2io_nic *sp, struct RxD_t *rxdp,
 					       DMA_FROM_DEVICE);
 			if (dma_mapping_error(&sp->pdev->dev, rxdp1->Buffer0_ptr))
 				goto memalloc_failed;
-			rxdp->Host_Control = (unsigned long) (*skb);
+			rxdp->Host_Control = __c_pa(*skb);
 		}
 	} else if ((sp->rxd_mode == RXD_MODE_3B) && (rxdp->Host_Control == 0)) {
 		struct RxD3 *rxdp3 = (struct RxD3 *)rxdp;
@@ -6815,7 +6818,7 @@ static int set_rxd_buffer_pointer(struct s2io_nic *sp, struct RxD_t *rxdp,
 						 DMA_FROM_DEVICE);
 				goto memalloc_failed;
 			}
-			rxdp->Host_Control = (unsigned long) (*skb);
+			rxdp->Host_Control = __c_pa(*skb);
 
 			/* Buffer-1 will be dummy buffer not used */
 			rxdp3->Buffer1_ptr = *temp1 =
@@ -7280,8 +7283,9 @@ static int rx_osm_handler(struct ring_info *ring_data, struct RxD_t * rxdp)
 {
 	struct s2io_nic *sp = ring_data->nic;
 	struct net_device *dev = ring_data->dev;
+	/* FIXCHERI: Avoid use of cheri_make_kernel_data_cap() */
 	struct sk_buff *skb = (struct sk_buff *)
-		((unsigned long)rxdp->Host_Control);
+		cheri_make_kernel_data_cap(rxdp->Host_Control, sizeof(*skb));
 	int ring_no = ring_data->ring_no;
 	u16 l3_csum, l4_csum;
 	unsigned long long err = rxdp->Control_1 & RXD_T_CODE;
@@ -8194,7 +8198,7 @@ static int check_L2_lro_capable(u8 *buffer, struct iphdr **ip,
 	*ip = (struct iphdr *)(buffer + ip_off);
 	ip_len = (u8)((*ip)->ihl);
 	ip_len <<= 2;
-	*tcp = (struct tcphdr *)((unsigned long)*ip + ip_len);
+	*tcp = (struct tcphdr *)((uintptr_t)*ip + ip_len);
 
 	return 0;
 }

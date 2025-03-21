@@ -281,7 +281,7 @@ static unsigned int addr_to_dbi_in_syspage(struct mlx5_core_dev *dev,
 	bf_reg_size = 1 << MLX5_CAP_GEN(dev, log_bf_reg_size);
 
 	uar_idx = (bfreg->map - up->map) >> MLX5_ADAPTER_PAGE_SHIFT;
-	bfreg_idx = (((uintptr_t)bfreg->map % MLX5_ADAPTER_PAGE_SIZE) - MLX5_BF_OFFSET) / bf_reg_size;
+	bfreg_idx = ((__c_pa(bfreg->map) % MLX5_ADAPTER_PAGE_SIZE) - MLX5_BF_OFFSET) / bf_reg_size;
 
 	return uar_idx * MLX5_BFREGS_PER_UAR + bfreg_idx;
 }

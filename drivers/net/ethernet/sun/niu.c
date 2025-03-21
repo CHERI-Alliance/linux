@@ -4351,7 +4351,7 @@ static int niu_alloc_rx_ring_info(struct niu *np,
 					   &rp->mbox_dma, GFP_KERNEL);
 	if (!rp->mbox)
 		return -ENOMEM;
-	if ((unsigned long)rp->mbox & (64UL - 1)) {
+	if (__c_pa(rp->mbox) & (64UL - 1)) {
 		netdev_err(np->dev, "Coherent alloc gives misaligned RXDMA mailbox %p\n",
 			   rp->mbox);
 		return -EINVAL;
@@ -4362,7 +4362,7 @@ static int niu_alloc_rx_ring_info(struct niu *np,
 					  &rp->rcr_dma, GFP_KERNEL);
 	if (!rp->rcr)
 		return -ENOMEM;
-	if ((unsigned long)rp->rcr & (64UL - 1)) {
+	if (__c_pa(rp->rcr) & (64UL - 1)) {
 		netdev_err(np->dev, "Coherent alloc gives misaligned RXDMA RCR table %p\n",
 			   rp->rcr);
 		return -EINVAL;
@@ -4375,7 +4375,7 @@ static int niu_alloc_rx_ring_info(struct niu *np,
 					  &rp->rbr_dma, GFP_KERNEL);
 	if (!rp->rbr)
 		return -ENOMEM;
-	if ((unsigned long)rp->rbr & (64UL - 1)) {
+	if (__c_pa(rp->rbr) & (64UL - 1)) {
 		netdev_err(np->dev, "Coherent alloc gives misaligned RXDMA RBR table %p\n",
 			   rp->rbr);
 		return -EINVAL;
@@ -4409,7 +4409,7 @@ static int niu_alloc_tx_ring_info(struct niu *np,
 					   &rp->mbox_dma, GFP_KERNEL);
 	if (!rp->mbox)
 		return -ENOMEM;
-	if ((unsigned long)rp->mbox & (64UL - 1)) {
+	if (__c_pa(rp->mbox) & (64UL - 1)) {
 		netdev_err(np->dev, "Coherent alloc gives misaligned TXDMA mailbox %p\n",
 			   rp->mbox);
 		return -EINVAL;
@@ -4420,7 +4420,7 @@ static int niu_alloc_tx_ring_info(struct niu *np,
 					    &rp->descr_dma, GFP_KERNEL);
 	if (!rp->descr)
 		return -ENOMEM;
-	if ((unsigned long)rp->descr & (64UL - 1)) {
+	if (__c_pa(rp->descr) & (64UL - 1)) {
 		netdev_err(np->dev, "Coherent alloc gives misaligned TXDMA descr table %p\n",
 			   rp->descr);
 		return -EINVAL;
@@ -6659,7 +6659,7 @@ static netdev_tx_t niu_start_xmit(struct sk_buff *skb,
 	} else
 		skb_orphan(skb);
 
-	align = ((unsigned long) skb->data & (16 - 1));
+	align = (__c_pa(skb->data) & (16 - 1));
 	headroom = align + sizeof(struct tx_pkt_hdr);
 
 	ehdr = (struct ethhdr *) skb->data;

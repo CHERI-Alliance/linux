@@ -1569,7 +1569,7 @@ dm9000_probe(struct platform_device *pdev)
 	}
 
 	/* fill in parameters for net-dev structure */
-	ndev->base_addr = (unsigned long)db->io_addr;
+	ndev->base_addr = (uintptr_t)db->io_addr;
 
 	/* ensure at least we have a default set of IO routines */
 	dm9000_set_io(db, iosize);

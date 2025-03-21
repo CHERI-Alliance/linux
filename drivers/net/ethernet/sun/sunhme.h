@@ -495,7 +495,7 @@ struct quattro {
 
 /* We use this to acquire receive skb's that we can DMA directly into. */
 #define ALIGNED_RX_SKB_ADDR(addr) \
-        ((((unsigned long)(addr) + (64UL - 1UL)) & ~(64UL - 1UL)) - (unsigned long)(addr))
+        (((__c_pa(addr) + (64UL - 1UL)) & ~(64UL - 1UL)) - __c_pa(addr))
 #define happy_meal_alloc_skb(__length, __gfp_flags) \
 ({	struct sk_buff *__skb; \
 	__skb = alloc_skb((__length) + 64, (__gfp_flags)); \

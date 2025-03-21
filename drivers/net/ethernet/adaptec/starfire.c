@@ -639,7 +639,7 @@ static int starfire_init_one(struct pci_dev *pdev,
 {
 	struct device *d = &pdev->dev;
 	struct netdev_private *np;
-	int i, irq, chip_idx = ent->driver_data;
+	int i, irq, chip_idx = __c_ua(ent->driver_data);
 	struct net_device *dev;
 	u8 addr[ETH_ALEN];
 	long ioaddr;

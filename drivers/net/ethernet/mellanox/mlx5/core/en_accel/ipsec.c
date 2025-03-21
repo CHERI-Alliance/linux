@@ -767,7 +767,7 @@ static int mlx5e_xfrm_add_state(struct xfrm_state *x,
 			    MLX5E_IPSEC_TUNNEL_SA);
 
 out:
-	x->xso.offload_handle = (unsigned long)sa_entry;
+	x->xso.offload_handle = (uintptr_t)sa_entry;
 	return 0;
 
 err_add_rule:
@@ -1165,7 +1165,7 @@ static int mlx5e_xfrm_add_policy(struct xfrm_policy *x,
 	if (err)
 		goto err_fs;
 
-	x->xdo.offload_handle = (unsigned long)pol_entry;
+	x->xdo.offload_handle = (uintptr_t)pol_entry;
 	return 0;
 
 err_fs:

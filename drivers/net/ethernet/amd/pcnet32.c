@@ -455,7 +455,7 @@ static void pcnet32_netif_stop(struct net_device *dev)
 static void pcnet32_netif_start(struct net_device *dev)
 {
 	struct pcnet32_private *lp = netdev_priv(dev);
-	ulong ioaddr = dev->base_addr;
+	ulong ioaddr = __c_ua(dev->base_addr);
 	u16 val;
 
 	netif_wake_queue(dev);
@@ -678,7 +678,7 @@ static int pcnet32_suspend(struct net_device *dev, unsigned long *flags,
 	int csr5;
 	struct pcnet32_private *lp = netdev_priv(dev);
 	const struct pcnet32_access *a = lp->a;
-	ulong ioaddr = dev->base_addr;
+	ulong ioaddr = __c_ua(dev->base_addr);
 	int ticks;
 
 	/* really old chips have to be stopped. */
@@ -727,7 +727,7 @@ static int pcnet32_get_link_ksettings(struct net_device *dev,
 	} else if (lp->chip_version == PCNET32_79C970A) {
 		if (lp->autoneg) {
 			cmd->base.autoneg = AUTONEG_ENABLE;
-			if (lp->a->read_bcr(dev->base_addr, 4) == 0xc0)
+			if (lp->a->read_bcr(__c_ua(dev->base_addr), 4) == 0xc0)
 				cmd->base.port = PORT_AUI;
 			else
 				cmd->base.port = PORT_TP;
@@ -749,7 +749,7 @@ static int pcnet32_set_link_ksettings(struct net_device *dev,
 				      const struct ethtool_link_ksettings *cmd)
 {
 	struct pcnet32_private *lp = netdev_priv(dev);
-	ulong ioaddr = dev->base_addr;
+	ulong ioaddr = __c_ua(dev->base_addr);
 	unsigned long flags;
 	int r = -EOPNOTSUPP;
 	int suspended, bcr2, bcr9, csr15;
@@ -803,7 +803,7 @@ static void pcnet32_get_drvinfo(struct net_device *dev,
 			sizeof(info->bus_info));
 	else
 		snprintf(info->bus_info, sizeof(info->bus_info),
-			"VLB 0x%lx", dev->base_addr);
+			"VLB 0x%lx", __c_ua(dev->base_addr));
 }
 
 static u32 pcnet32_get_link(struct net_device *dev)
@@ -816,14 +816,14 @@ static u32 pcnet32_get_link(struct net_device *dev)
 	if (lp->mii) {
 		r = mii_link_ok(&lp->mii_if);
 	} else if (lp->chip_version == PCNET32_79C970A) {
-		ulong ioaddr = dev->base_addr;	/* card base I/O address */
+		ulong ioaddr = __c_ua(dev->base_addr);	/* card base I/O address */
 		/* only read link if port is set to TP */
 		if (!lp->autoneg && lp->port_tp)
 			r = (lp->a->read_bcr(ioaddr, 4) != 0xc0);
 		else /* link always up for AUI port or port auto select */
 			r = 1;
 	} else if (lp->chip_version > PCNET32_79C970A) {
-		ulong ioaddr = dev->base_addr;	/* card base I/O address */
+		ulong ioaddr = __c_ua(dev->base_addr);	/* card base I/O address */
 		r = (lp->a->read_bcr(ioaddr, 4) != 0xc0);
 	} else {	/* can not detect link on really old chips */
 		r = 1;
@@ -880,7 +880,7 @@ static int pcnet32_set_ringparam(struct net_device *dev,
 	struct pcnet32_private *lp = netdev_priv(dev);
 	unsigned long flags;
 	unsigned int size;
-	ulong ioaddr = dev->base_addr;
+	ulong ioaddr = __c_ua(dev->base_addr);
 	int i;
 
 	if (ering->rx_mini_pending || ering->rx_jumbo_pending)
@@ -967,7 +967,7 @@ static int pcnet32_loopback_test(struct net_device *dev, uint64_t * data1)
 {
 	struct pcnet32_private *lp = netdev_priv(dev);
 	const struct pcnet32_access *a = lp->a;	/* access to registers */
-	ulong ioaddr = dev->base_addr;	/* card base I/O address */
+	ulong ioaddr = __c_ua(dev->base_addr);	/* card base I/O address */
 	struct sk_buff *skb;	/* sk buff */
 	int x, i;		/* counters */
 	int numbuffs = 4;	/* number of TX/RX buffers and descs */
@@ -1131,7 +1131,7 @@ static int pcnet32_set_phys_id(struct net_device *dev,
 {
 	struct pcnet32_private *lp = netdev_priv(dev);
 	const struct pcnet32_access *a = lp->a;
-	ulong ioaddr = dev->base_addr;
+	ulong ioaddr = __c_ua(dev->base_addr);
 	unsigned long flags;
 	int i;
 
@@ -1388,7 +1388,7 @@ static int pcnet32_poll(struct napi_struct *napi, int budget)
 {
 	struct pcnet32_private *lp = container_of(napi, struct pcnet32_private, napi);
 	struct net_device *dev = lp->dev;
-	unsigned long ioaddr = dev->base_addr;
+	unsigned long ioaddr = __c_ua(dev->base_addr);
 	unsigned long flags;
 	int work_done;
 	u16 val;
@@ -1435,7 +1435,7 @@ static void pcnet32_get_regs(struct net_device *dev, struct ethtool_regs *regs,
 	u16 *buff = ptr;
 	struct pcnet32_private *lp = netdev_priv(dev);
 	const struct pcnet32_access *a = lp->a;
-	ulong ioaddr = dev->base_addr;
+	ulong ioaddr = __c_ua(dev->base_addr);
 	unsigned long flags;
 
 	spin_lock_irqsave(&lp->lock, flags);
@@ -1833,7 +1833,7 @@ pcnet32_probe1(unsigned long ioaddr, int shared, struct pci_dev *pdev)
 		}
 	}
 
-	dev->base_addr = ioaddr;
+	dev->base_addr = __c_fakeu(ioaddr);
 	lp = netdev_priv(dev);
 	/* dma_alloc_coherent returns page-aligned memory, so we do not have to check the alignment */
 	lp->init_block = dma_alloc_coherent(&pdev->dev,
@@ -2089,7 +2089,7 @@ static int pcnet32_open(struct net_device *dev)
 {
 	struct pcnet32_private *lp = netdev_priv(dev);
 	struct pci_dev *pdev = lp->pci_dev;
-	unsigned long ioaddr = dev->base_addr;
+	unsigned long ioaddr = __c_ua(dev->base_addr);
 	u16 val;
 	int i;
 	int rc;
@@ -2421,7 +2421,7 @@ static int pcnet32_init_ring(struct net_device *dev)
 static void pcnet32_restart(struct net_device *dev, unsigned int csr0_bits)
 {
 	struct pcnet32_private *lp = netdev_priv(dev);
-	unsigned long ioaddr = dev->base_addr;
+	unsigned long ioaddr = __c_ua(dev->base_addr);
 	int i;
 
 	/* wait for stop */
@@ -2450,7 +2450,7 @@ static void pcnet32_restart(struct net_device *dev, unsigned int csr0_bits)
 static void pcnet32_tx_timeout(struct net_device *dev, unsigned int txqueue)
 {
 	struct pcnet32_private *lp = netdev_priv(dev);
-	unsigned long ioaddr = dev->base_addr, flags;
+	unsigned long ioaddr = __c_ua(dev->base_addr), flags;
 
 	spin_lock_irqsave(&lp->lock, flags);
 	/* Transmitter timeout, serious problems. */
@@ -2491,7 +2491,7 @@ static netdev_tx_t pcnet32_start_xmit(struct sk_buff *skb,
 				      struct net_device *dev)
 {
 	struct pcnet32_private *lp = netdev_priv(dev);
-	unsigned long ioaddr = dev->base_addr;
+	unsigned long ioaddr = __c_ua(dev->base_addr);
 	u16 status;
 	int entry;
 	unsigned long flags;
@@ -2557,7 +2557,7 @@ pcnet32_interrupt(int irq, void *dev_id)
 	u16 csr0;
 	int boguscnt = max_interrupt_work;
 
-	ioaddr = dev->base_addr;
+	ioaddr = __c_ua(dev->base_addr);
 	lp = netdev_priv(dev);
 
 	spin_lock(&lp->lock);
@@ -2619,7 +2619,7 @@ pcnet32_interrupt(int irq, void *dev_id)
 
 static int pcnet32_close(struct net_device *dev)
 {
-	unsigned long ioaddr = dev->base_addr;
+	unsigned long ioaddr = __c_ua(dev->base_addr);
 	struct pcnet32_private *lp = netdev_priv(dev);
 	unsigned long flags;
 
@@ -2662,7 +2662,7 @@ static int pcnet32_close(struct net_device *dev)
 static struct net_device_stats *pcnet32_get_stats(struct net_device *dev)
 {
 	struct pcnet32_private *lp = netdev_priv(dev);
-	unsigned long ioaddr = dev->base_addr;
+	unsigned long ioaddr = __c_ua(dev->base_addr);
 	unsigned long flags;
 
 	spin_lock_irqsave(&lp->lock, flags);
@@ -2679,7 +2679,7 @@ static void pcnet32_load_multicast(struct net_device *dev)
 	volatile struct pcnet32_init_block *ib = lp->init_block;
 	volatile __le16 *mcast_table = (__le16 *)ib->filter;
 	struct netdev_hw_addr *ha;
-	unsigned long ioaddr = dev->base_addr;
+	unsigned long ioaddr = __c_ua(dev->base_addr);
 	int i;
 	u32 crc;
 
@@ -2713,7 +2713,7 @@ static void pcnet32_load_multicast(struct net_device *dev)
  */
 static void pcnet32_set_multicast_list(struct net_device *dev)
 {
-	unsigned long ioaddr = dev->base_addr, flags;
+	unsigned long ioaddr = __c_ua(dev->base_addr), flags;
 	struct pcnet32_private *lp = netdev_priv(dev);
 	int csr15, suspended;
 
@@ -2749,7 +2749,7 @@ static void pcnet32_set_multicast_list(struct net_device *dev)
 static int mdio_read(struct net_device *dev, int phy_id, int reg_num)
 {
 	struct pcnet32_private *lp = netdev_priv(dev);
-	unsigned long ioaddr = dev->base_addr;
+	unsigned long ioaddr = __c_ua(dev->base_addr);
 	u16 val_out;
 
 	if (!lp->mii)
@@ -2765,7 +2765,7 @@ static int mdio_read(struct net_device *dev, int phy_id, int reg_num)
 static void mdio_write(struct net_device *dev, int phy_id, int reg_num, int val)
 {
 	struct pcnet32_private *lp = netdev_priv(dev);
-	unsigned long ioaddr = dev->base_addr;
+	unsigned long ioaddr = __c_ua(dev->base_addr);
 
 	if (!lp->mii)
 		return;
@@ -2847,14 +2847,14 @@ static void pcnet32_check_media(struct net_device *dev, int verbose)
 	if (lp->mii) {
 		curr_link = mii_link_ok(&lp->mii_if);
 	} else if (lp->chip_version == PCNET32_79C970A) {
-		ulong ioaddr = dev->base_addr;	/* card base I/O address */
+		ulong ioaddr = __c_ua(dev->base_addr);	/* card base I/O address */
 		/* only read link if port is set to TP */
 		if (!lp->autoneg && lp->port_tp)
 			curr_link = (lp->a->read_bcr(ioaddr, 4) != 0xc0);
 		else /* link always up for AUI port or port auto select */
 			curr_link = 1;
 	} else {
-		ulong ioaddr = dev->base_addr;	/* card base I/O address */
+		ulong ioaddr = __c_ua(dev->base_addr);	/* card base I/O address */
 		curr_link = (lp->a->read_bcr(ioaddr, 4) != 0xc0);
 	}
 	if (!curr_link) {
@@ -2877,13 +2877,13 @@ static void pcnet32_check_media(struct net_device *dev, int verbose)
 					    (ecmd.duplex == DUPLEX_FULL)
 					    ? "full" : "half");
 			}
-			bcr9 = lp->a->read_bcr(dev->base_addr, 9);
+			bcr9 = lp->a->read_bcr(__c_ua(dev->base_addr), 9);
 			if ((bcr9 & (1 << 0)) != lp->mii_if.full_duplex) {
 				if (lp->mii_if.full_duplex)
 					bcr9 |= (1 << 0);
 				else
 					bcr9 &= ~(1 << 0);
-				lp->a->write_bcr(dev->base_addr, 9, bcr9);
+				lp->a->write_bcr(__c_ua(dev->base_addr), 9, bcr9);
 			}
 		} else {
 			netif_info(lp, link, dev, "link up\n");
@@ -2943,7 +2943,7 @@ static void pcnet32_remove_one(struct pci_dev *pdev)
 
 		unregister_netdev(dev);
 		pcnet32_free_ring(dev);
-		release_region(dev->base_addr, PCNET32_TOTAL_SIZE);
+		release_region(__c_ua(dev->base_addr), PCNET32_TOTAL_SIZE);
 		dma_free_coherent(&lp->pci_dev->dev, sizeof(*lp->init_block),
 				  lp->init_block, lp->init_dma_addr);
 		free_netdev(dev);
@@ -3026,7 +3026,7 @@ static void __exit pcnet32_cleanup_module(void)
 		next_dev = lp->next;
 		unregister_netdev(pcnet32_dev);
 		pcnet32_free_ring(pcnet32_dev);
-		release_region(pcnet32_dev->base_addr, PCNET32_TOTAL_SIZE);
+		release_region(__c_ua(pcnet32_dev->base_addr), PCNET32_TOTAL_SIZE);
 		dma_free_coherent(&lp->pci_dev->dev, sizeof(*lp->init_block),
 				  lp->init_block, lp->init_dma_addr);
 		free_netdev(pcnet32_dev);

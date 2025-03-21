@@ -421,17 +421,17 @@ struct __aligned(sizeof(long)) cpsw_meta_xdp {
 
 static inline int cpsw_is_xdpf_handle(void *handle)
 {
-	return (unsigned long)handle & BIT(0);
+	return __c_pa(handle) & BIT(0);
 }
 
 static inline void *cpsw_xdpf_to_handle(struct xdp_frame *xdpf)
 {
-	return (void *)((unsigned long)xdpf | BIT(0));
+	return (void *)((uintptr_t)xdpf | BIT(0));
 }
 
 static inline struct xdp_frame *cpsw_handle_to_xdpf(void *handle)
 {
-	return (struct xdp_frame *)((unsigned long)handle & ~BIT(0));
+	return (struct xdp_frame *)((uintptr_t)handle & ~BIT(0));
 }
 
 int cpsw_init_common(struct cpsw_common *cpsw, void __iomem *ss_regs,

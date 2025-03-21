@@ -102,7 +102,7 @@ struct ei_device {
 	unsigned char saved_irq;	/* Original dev->irq value. */
 	u32 *reg_offset;		/* Register mapping table */
 	spinlock_t page_lock;		/* Page register locks */
-	unsigned long priv;		/* Private field to store bus IDs etc. */
+	uintptr_t priv;			/* Private field to store bus IDs etc. */
 	u32 msg_enable;			/* debug message level */
 #ifdef AX88796_PLATFORM
 	unsigned char rxcr_base;	/* default value for RXCR */
@@ -154,10 +154,10 @@ struct ei_device {
  */
 
 #ifndef ei_inb
-#define ei_inb(_p)	inb(_p)
-#define ei_outb(_v, _p)	outb(_v, _p)
-#define ei_inb_p(_p)	inb(_p)
-#define ei_outb_p(_v, _p) outb(_v, _p)
+#define ei_inb(_p)	inb(__c_a(_p))
+#define ei_outb(_v, _p)	outb(_v, __c_a(_p))
+#define ei_inb_p(_p)	inb(__c_a(_p))
+#define ei_outb_p(_v, _p) outb(_v, __c_a(_p))
 #endif
 
 #ifndef EI_SHIFT

@@ -1607,7 +1607,7 @@ out:
 int
 ice_flow_add_entry(struct ice_hw *hw, enum ice_block blk, u64 prof_id,
 		   u64 entry_id, u16 vsi_handle, enum ice_flow_priority prio,
-		   void *data, u64 *entry_h)
+		   void *data, uintptr_t *entry_h)
 {
 	struct ice_flow_entry *e = NULL;
 	struct ice_flow_prof *prof;
@@ -1673,7 +1673,7 @@ out:
  * @blk: classification stage
  * @entry_h: handle to the flow entry to be removed
  */
-int ice_flow_rem_entry(struct ice_hw *hw, enum ice_block blk, u64 entry_h)
+int ice_flow_rem_entry(struct ice_hw *hw, enum ice_block blk, uintptr_t entry_h)
 {
 	struct ice_flow_entry *entry;
 	struct ice_flow_prof *prof;

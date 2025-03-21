@@ -324,7 +324,7 @@ static struct hw_info *get_hwinfo(struct pcmcia_device *link)
 static struct hw_info *get_prom(struct pcmcia_device *link)
 {
     struct net_device *dev = link->priv;
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
     u8 addr[ETH_ALEN];
     u_char prom[32];
     int i, j;
@@ -385,13 +385,13 @@ static struct hw_info *get_dl10019(struct pcmcia_device *link)
     u_char sum;
 
     for (sum = 0, i = 0x14; i < 0x1c; i++)
-	sum += inb_p(dev->base_addr + i);
+	sum += inb_p(__c_ua(dev->base_addr) + i);
     if (sum != 0xff)
 	return NULL;
     for (i = 0; i < 6; i++)
-	addr[i] = inb_p(dev->base_addr + 0x14 + i);
+	addr[i] = inb_p(__c_ua(dev->base_addr) + 0x14 + i);
     eth_hw_addr_set(dev, addr);
-    i = inb(dev->base_addr + 0x1f);
+    i = inb(__c_ua(dev->base_addr) + 0x1f);
     return ((i == 0x91)||(i == 0x99)) ? &dl10022_info : &dl10019_info;
 }
 
@@ -404,7 +404,7 @@ static struct hw_info *get_dl10019(struct pcmcia_device *link)
 static struct hw_info *get_ax88190(struct pcmcia_device *link)
 {
     struct net_device *dev = link->priv;
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
     u8 addr[ETH_ALEN];
     int i, j;
 
@@ -532,7 +532,7 @@ static struct hw_info *pcnet_try_config(struct pcmcia_device *link,
 		return NULL;
 
 	dev->irq = link->irq;
-	dev->base_addr = link->resource[0]->start;
+	dev->base_addr = __c_fakeu(link->resource[0]->start);
 
 	if (info->flags & HAS_MISC_REG) {
 		if ((if_port == 1) || (if_port == 2))
@@ -579,7 +579,7 @@ static int pcnet_config(struct pcmcia_device *link)
 	    local_hw_info = pcnet_try_config(link, &has_shmem, 1);
 	    if (local_hw_info == NULL) {
 		    dev_notice(&link->dev, "unable to read hardware net"
-			    " address for io base %#3lx\n", dev->base_addr);
+			    " address for io base %#3lx\n", __c_ua(dev->base_addr));
 		    goto failed;
 	    }
     }
@@ -625,7 +625,7 @@ static int pcnet_config(struct pcmcia_device *link)
     }
 
     if (info->flags & (IS_DL10019|IS_DL10022)) {
-	u_char id = inb(dev->base_addr + 0x1a);
+	u_char id = inb(__c_ua(dev->base_addr) + 0x1a);
 	netdev_info(dev, "NE2000 (DL100%d rev %02x): ",
 		    (info->flags & IS_DL10022) ? 22 : 19, id);
 	if (info->pna_phy)
@@ -633,9 +633,9 @@ static int pcnet_config(struct pcmcia_device *link)
     } else {
 	netdev_info(dev, "NE2000 Compatible: ");
     }
-    pr_cont("io %#3lx, irq %d,", dev->base_addr, dev->irq);
+    pr_cont("io %#3lx, irq %d,", __c_ua(dev->base_addr), dev->irq);
     if (info->flags & USE_SHMEM)
-	pr_cont(" mem %#5lx,", dev->mem_start);
+	pr_cont(" mem %#5lx,", __c_ua(dev->mem_start));
     if (info->flags & HAS_MISC_REG)
 	pr_cont(" %s xcvr,", if_names[dev->if_port]);
     pr_cont(" hw_addr %pM\n", dev->dev_addr);
@@ -844,7 +844,7 @@ static void write_asic(unsigned int ioaddr, int location, short asic_data)
 
 static void set_misc_reg(struct net_device *dev)
 {
-    unsigned int nic_base = dev->base_addr;
+    unsigned long nic_base = __c_ua(dev->base_addr);
     struct pcnet_dev *info = PRIV(dev);
     u_char tmp;
 
@@ -883,7 +883,7 @@ static void set_misc_reg(struct net_device *dev)
 static void mii_phy_probe(struct net_device *dev)
 {
     struct pcnet_dev *info = PRIV(dev);
-    unsigned int mii_addr = dev->base_addr + DLINK_GPIO;
+    unsigned long mii_addr = __c_ua(dev->base_addr) + DLINK_GPIO;
     int i;
     u_int tmp, phyid;
 
@@ -909,7 +909,7 @@ static int pcnet_open(struct net_device *dev)
     int ret;
     struct pcnet_dev *info = PRIV(dev);
     struct pcmcia_device *link = info->p_dev;
-    unsigned int nic_base = dev->base_addr;
+    unsigned int nic_base = __c_ua(dev->base_addr);
 
     dev_dbg(&link->dev, "pcnet_open('%s')\n", dev->name);
 
@@ -961,7 +961,7 @@ static int pcnet_close(struct net_device *dev)
 
 static void pcnet_reset_8390(struct net_device *dev)
 {
-    unsigned int nic_base = dev->base_addr;
+    unsigned int nic_base = __c_ua(dev->base_addr);
     int i;
 
     ei_status.txing = ei_status.dmaing = 0;
@@ -1020,7 +1020,7 @@ static void ei_watchdog(struct timer_list *t)
 {
     struct pcnet_dev *info = from_timer(info, t, watchdog);
     struct net_device *dev = info->p_dev->priv;
-    unsigned int nic_base = dev->base_addr;
+    unsigned int nic_base = __c_ua(dev->base_addr);
     unsigned int mii_addr = nic_base + DLINK_GPIO;
     u_short link;
 
@@ -1065,7 +1065,7 @@ static void ei_watchdog(struct timer_list *t)
 	    outb((p & 0x0140) ? 4 : 0, nic_base + DLINK_DIAG);
 	} else if (link && (info->flags & IS_DL10019)) {
 	    /* Disable collision detection on full duplex links */
-	    write_asic(dev->base_addr, 4, (p & 0x140) ? DL19FDUPLX : 0);
+	    write_asic(__c_ua(dev->base_addr), 4, (p & 0x140) ? DL19FDUPLX : 0);
 	}
 	if (link) {
 	    if (info->phy_id == info->eth_phy) {
@@ -1109,7 +1109,7 @@ static int ei_ioctl(struct net_device *dev, struct ifreq *rq, int cmd)
 {
     struct pcnet_dev *info = PRIV(dev);
     struct mii_ioctl_data *data = if_mii(rq);
-    unsigned int mii_addr = dev->base_addr + DLINK_GPIO;
+    unsigned long mii_addr = __c_ua(dev->base_addr) + DLINK_GPIO;
 
     if (!(info->flags & (IS_DL10019|IS_DL10022)))
 	return -EINVAL;
@@ -1134,7 +1134,7 @@ static void dma_get_8390_hdr(struct net_device *dev,
 			     struct e8390_pkt_hdr *hdr,
 			     int ring_page)
 {
-    unsigned int nic_base = dev->base_addr;
+    unsigned int nic_base = __c_ua(dev->base_addr);
 
     if (ei_status.dmaing) {
 	netdev_err(dev, "DMAing conflict in dma_block_input."
@@ -1165,7 +1165,7 @@ static void dma_get_8390_hdr(struct net_device *dev,
 static void dma_block_input(struct net_device *dev, int count,
 			    struct sk_buff *skb, int ring_offset)
 {
-    unsigned int nic_base = dev->base_addr;
+    unsigned int nic_base = __c_ua(dev->base_addr);
     int xfer_count = count;
     char *buf = skb->data;
     struct ei_device *ei_local = netdev_priv(dev);
@@ -1222,7 +1222,7 @@ static void dma_block_input(struct net_device *dev, int count,
 static void dma_block_output(struct net_device *dev, int count,
 			     const u_char *buf, const int start_page)
 {
-    unsigned int nic_base = dev->base_addr;
+    unsigned int nic_base = __c_ua(dev->base_addr);
     struct pcnet_dev *info = PRIV(dev);
 #ifdef PCMCIA_DEBUG
     int retries = 0;
@@ -1387,7 +1387,7 @@ static void shmem_block_input(struct net_device *dev, int count,
 
     if (offset + count > ei_status.priv) {
 	/* We must wrap the input move. */
-	int semi_count = ei_status.priv - offset;
+	int semi_count = __c_ua(ei_status.priv) - offset;
 	copyin(buf, base + offset, semi_count);
 	buf += semi_count;
 	offset = TX_PAGES<<8;
@@ -1458,8 +1458,8 @@ static int setup_shmem_window(struct pcmcia_device *link, int start_pg,
     }
 
     ei_status.mem = info->base + offset;
-    ei_status.priv = resource_size(link->resource[3]);
-    dev->mem_start = (u_long)ei_status.mem;
+    ei_status.priv = __c_fakeu(resource_size(link->resource[3]));
+    dev->mem_start = (uintptr_t)ei_status.mem;
     dev->mem_end = dev->mem_start + resource_size(link->resource[3]);
 
     ei_status.tx_start_page = start_pg;

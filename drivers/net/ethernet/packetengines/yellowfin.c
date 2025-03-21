@@ -372,7 +372,7 @@ static int yellowfin_init_one(struct pci_dev *pdev,
 	struct net_device *dev;
 	struct yellowfin_private *np;
 	int irq;
-	int chip_idx = ent->driver_data;
+	int chip_idx = __c_ua(ent->driver_data);
 	static int find_cnt;
 	void __iomem *ioaddr;
 	int i, option = find_cnt < MAX_UNITS ? options[find_cnt] : 0;
@@ -458,7 +458,7 @@ static int yellowfin_init_one(struct pci_dev *pdev,
 	np->tx_status_dma = ring_dma;
 
 	if (dev->mem_start)
-		option = dev->mem_start;
+		option = __c_ua(dev->mem_start);
 
 	/* The lower four bits are the media type. */
 	if (option > 0) {
@@ -826,7 +826,7 @@ static netdev_tx_t yellowfin_start_xmit(struct sk_buff *skb,
 	entry = yp->cur_tx % TX_RING_SIZE;
 
 	if (gx_fix) {	/* Note: only works for paddable protocols e.g.  IP. */
-		int cacheline_end = ((unsigned long)skb->data + skb->len) % 32;
+		int cacheline_end = (__c_pa(skb->data) + skb->len) % 32;
 		/* Fix GX chipset errata. */
 		if (cacheline_end > 24  || cacheline_end == 0) {
 			len = skb->len + 32 - cacheline_end + 1;

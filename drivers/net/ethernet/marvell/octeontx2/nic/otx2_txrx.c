@@ -654,7 +654,7 @@ static bool otx2_sqe_add_sg(struct otx2_nic *pfvf, struct otx2_snd_queue *sq,
 		sq->sg[sq->head].num_segs++;
 	}
 
-	sq->sg[sq->head].skb = (u64)skb;
+	sq->sg[sq->head].skb = (uintptr_t)skb;
 	return true;
 }
 
@@ -833,17 +833,17 @@ unmap:
 
 static u64 otx2_tso_frag_dma_addr(struct otx2_snd_queue *sq,
 				  struct sk_buff *skb, int seg,
-				  u64 seg_addr, int hdr_len, int sqe)
+				  uintptr_t seg_addr, int hdr_len, int sqe)
 {
 	struct sg_list *sg = &sq->sg[sqe];
 	const skb_frag_t *frag;
 	int offset;
 
 	if (seg < 0)
-		return sg->dma_addr[0] + (seg_addr - (u64)skb->data);
+		return sg->dma_addr[0] + (__c_ua(seg_addr) - __c_pa(skb->data));
 
 	frag = &skb_shinfo(skb)->frags[seg];
-	offset = seg_addr - (u64)skb_frag_address(frag);
+	offset = __c_ua(seg_addr) - __c_pa(skb_frag_address(frag));
 	if (skb_headlen(skb) - hdr_len)
 		seg++;
 	return sg->dma_addr[seg] + offset;
@@ -934,7 +934,7 @@ static void otx2_sq_append_tso(struct otx2_nic *pfvf, struct otx2_snd_queue *sq,
 			list.dma_addr[list.num_segs] =
 				otx2_tso_frag_dma_addr(sq, skb,
 						       tso.next_frag_idx - 1,
-						       (u64)tso.data, hdr_len,
+						       (uintptr_t)tso.data, hdr_len,
 						       first_sqe);
 			list.num_segs++;
 			pkt_len += size;
@@ -953,7 +953,7 @@ static void otx2_sq_append_tso(struct otx2_nic *pfvf, struct otx2_snd_queue *sq,
 		if (!tcp_data) {
 			sqe_hdr->pnc = 1;
 			sqe_hdr->sqe_id = first_sqe;
-			sq->sg[first_sqe].skb = (u64)skb;
+			sq->sg[first_sqe].skb = (uintptr_t)skb;
 		} else {
 			sqe_hdr->pnc = 0;
 		}

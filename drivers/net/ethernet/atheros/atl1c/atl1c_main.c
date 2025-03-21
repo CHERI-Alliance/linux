@@ -1784,7 +1784,7 @@ static int atl1c_alloc_rx_buffer(struct atl1c_adapter *adapter, u32 queue,
 			break;
 		}
 
-		if (((unsigned long)skb->data & 0xfff) == 0xfc0)
+		if ((__c_pa(skb->data) & 0xfff) == 0xfc0)
 			skb_reserve(skb, 64);
 
 		/*

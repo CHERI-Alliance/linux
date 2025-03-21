@@ -735,7 +735,7 @@ static int ethoc_open(struct net_device *dev)
 
 	napi_enable(&priv->napi);
 
-	ethoc_init_ring(priv, dev->mem_start);
+	ethoc_init_ring(priv, __c_ua(dev->mem_start));
 	ethoc_reset(priv);
 
 	if (netif_queue_stopped(dev)) {
@@ -753,7 +753,8 @@ static int ethoc_open(struct net_device *dev)
 
 	if (netif_msg_ifup(priv)) {
 		dev_info(&dev->dev, "I/O: %08lx Memory: %08lx-%08lx\n",
-				dev->base_addr, dev->mem_start, dev->mem_end);
+				__c_ua(dev->base_addr),
+				__c_ua(dev->mem_start), __c_ua(dev->mem_end));
 	}
 
 	return 0;
@@ -984,7 +985,7 @@ static int ethoc_set_ringparam(struct net_device *dev,
 
 	priv->num_tx = rounddown_pow_of_two(ring->tx_pending);
 	priv->num_rx = ring->rx_pending;
-	ethoc_init_ring(priv, dev->mem_start);
+	ethoc_init_ring(priv, __c_ua(dev->mem_start));
 
 	if (netif_running(dev)) {
 		ethoc_enable_irq(priv, INT_MASK_TX | INT_MASK_RX);
@@ -1059,7 +1060,7 @@ static int ethoc_probe(struct platform_device *pdev)
 		goto free;
 	}
 
-	netdev->base_addr = mmio->start;
+	netdev->base_addr = __c_fakeu(mmio->start);
 
 	/* obtain buffer memory space */
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 1);
@@ -1072,8 +1073,8 @@ static int ethoc_probe(struct platform_device *pdev)
 			goto free;
 		}
 
-		netdev->mem_start = mem->start;
-		netdev->mem_end   = mem->end;
+		netdev->mem_start = __c_fakeu(mem->start);
+		netdev->mem_end   = __c_fakeu(mem->end);
 	}
 
 
@@ -1088,7 +1089,7 @@ static int ethoc_probe(struct platform_device *pdev)
 	priv = netdev_priv(netdev);
 	priv->netdev = netdev;
 
-	priv->iobase = devm_ioremap(&pdev->dev, netdev->base_addr,
+	priv->iobase = devm_ioremap(&pdev->dev, __c_ua(netdev->base_addr),
 			resource_size(mmio));
 	if (!priv->iobase) {
 		dev_err(&pdev->dev, "cannot remap I/O memory space\n");
@@ -1098,7 +1099,7 @@ static int ethoc_probe(struct platform_device *pdev)
 
 	if (netdev->mem_end) {
 		priv->membase = devm_ioremap(&pdev->dev,
-			netdev->mem_start, resource_size(mem));
+			__c_ua(netdev->mem_start), resource_size(mem));
 		if (!priv->membase) {
 			dev_err(&pdev->dev, "cannot remap memory space\n");
 			ret = -ENXIO;
@@ -1123,7 +1124,7 @@ static int ethoc_probe(struct platform_device *pdev)
 
 	/* calculate the number of TX/RX buffers, maximum 128 supported */
 	num_bd = min_t(unsigned int,
-		128, (netdev->mem_end - netdev->mem_start + 1) / ETHOC_BUFSIZ);
+		128, (__c_ua(netdev->mem_end) - __c_ua(netdev->mem_start) + 1) / ETHOC_BUFSIZ);
 	if (num_bd < 4) {
 		ret = -ENODEV;
 		goto free;

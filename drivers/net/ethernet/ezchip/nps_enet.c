@@ -37,7 +37,7 @@ static void nps_enet_read_rx_fifo(struct net_device *ndev,
 	struct nps_enet_priv *priv = netdev_priv(ndev);
 	s32 i, last = length & (sizeof(u32) - 1);
 	u32 *reg = (u32 *)dst, len = length / sizeof(u32);
-	bool dst_is_aligned = IS_ALIGNED((unsigned long)dst, sizeof(u32));
+	bool dst_is_aligned = IS_ALIGNED(__c_pa(dst), sizeof(u32));
 
 	/* In case dst is not aligned we need an intermediate buffer */
 	if (dst_is_aligned) {
@@ -381,7 +381,7 @@ static void nps_enet_send_frame(struct net_device *ndev,
 	short length = skb->len;
 	u32 i, len = DIV_ROUND_UP(length, sizeof(u32));
 	u32 *src = (void *)skb->data;
-	bool src_is_aligned = IS_ALIGNED((unsigned long)src, sizeof(u32));
+	bool src_is_aligned = IS_ALIGNED(__c_pa(src), sizeof(u32));
 
 	/* In case src is not aligned we need an intermediate buffer */
 	if (src_is_aligned)

@@ -88,8 +88,8 @@ static irqreturn_t ei_irq_wrapper(int irq, void *dev_id);
 static void ei_watchdog(struct timer_list *t);
 static void axnet_reset_8390(struct net_device *dev);
 
-static int mdio_read(unsigned int addr, int phy_id, int loc);
-static void mdio_write(unsigned int addr, int phy_id, int loc, int value);
+static int mdio_read(uintptr_t addr, int phy_id, int loc);
+static void mdio_write(uintptr_t addr, int phy_id, int loc, int value);
 
 static void get_8390_hdr(struct net_device *,
 			 struct e8390_pkt_hdr *, int);
@@ -186,7 +186,7 @@ static void axnet_detach(struct pcmcia_device *link)
 static int get_prom(struct pcmcia_device *link)
 {
     struct net_device *dev = link->priv;
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
     u8 addr[ETH_ALEN];
     int i, j;
 
@@ -297,7 +297,7 @@ static int axnet_config(struct pcmcia_device *link)
 	    goto failed;
 
     dev->irq = link->irq;
-    dev->base_addr = link->resource[0]->start;
+    dev->base_addr = __c_fakeu(link->resource[0]->start);
 
     if (!get_prom(link)) {
 	pr_notice("this is not an AX88190 card!\n");
@@ -315,13 +315,13 @@ static int axnet_config(struct pcmcia_device *link)
     ei_status.block_input = block_input;
     ei_status.block_output = block_output;
 
-    if (inb(dev->base_addr + AXNET_TEST) != 0)
+    if (inb(__c_ua(dev->base_addr) + AXNET_TEST) != 0)
 	info->flags |= IS_AX88790;
     else
 	info->flags |= IS_AX88190;
 
     if (info->flags & IS_AX88790)
-	outb(0x10, dev->base_addr + AXNET_GPIO);  /* select Internal PHY */
+	outb(0x10, __c_ua(dev->base_addr) + AXNET_GPIO);  /* select Internal PHY */
 
     info->active_low = 0;
 
@@ -357,7 +357,7 @@ static int axnet_config(struct pcmcia_device *link)
 
     netdev_info(dev, "Asix AX88%d90: io %#3lx, irq %d, hw_addr %pM\n",
 		((info->flags & IS_AX88790) ? 7 : 1),
-		dev->base_addr, dev->irq, dev->dev_addr);
+		__c_ua(dev->base_addr), dev->irq, dev->dev_addr);
     if (info->phy_id != -1) {
 	netdev_dbg(dev, "  MII transceiver at index %d, status %x\n",
 		   info->phy_id, j);
@@ -426,8 +426,9 @@ static void mdio_sync(unsigned int addr)
     }
 }
 
-static int mdio_read(unsigned int addr, int phy_id, int loc)
+static int mdio_read(uintptr_t _addr, int phy_id, int loc)
 {
+    unsigned long addr = __c_ua(_addr);
     u_int cmd = (0xf6<<10)|(phy_id<<5)|loc;
     int i, retval = 0;
 
@@ -445,8 +446,9 @@ static int mdio_read(unsigned int addr, int phy_id, int loc)
     return (retval>>1) & 0xffff;
 }
 
-static void mdio_write(unsigned int addr, int phy_id, int loc, int value)
+static void mdio_write(uintptr_t _addr, int phy_id, int loc, int value)
 {
+    unsigned long addr = __c_ua(_addr);
     u_int cmd = (0x05<<28)|(phy_id<<23)|(loc<<18)|(1<<17)|value;
     int i;
 
@@ -469,7 +471,7 @@ static int axnet_open(struct net_device *dev)
     int ret;
     struct axnet_dev *info = PRIV(dev);
     struct pcmcia_device *link = info->p_dev;
-    unsigned int nic_base = dev->base_addr;
+    unsigned int nic_base = __c_ua(dev->base_addr);
     
     dev_dbg(&link->dev, "axnet_open('%s')\n", dev->name);
 
@@ -518,7 +520,7 @@ static int axnet_close(struct net_device *dev)
 
 static void axnet_reset_8390(struct net_device *dev)
 {
-    unsigned int nic_base = dev->base_addr;
+    unsigned int nic_base = __c_ua(dev->base_addr);
     int i;
 
     ei_status.txing = ei_status.dmaing = 0;
@@ -552,15 +554,15 @@ static void ei_watchdog(struct timer_list *t)
 {
     struct axnet_dev *info = from_timer(info, t, watchdog);
     struct net_device *dev = info->p_dev->priv;
-    unsigned int nic_base = dev->base_addr;
-    unsigned int mii_addr = nic_base + AXNET_MII_EEP;
+    uintptr_t nic_base = dev->base_addr;
+    uintptr_t mii_addr = nic_base + AXNET_MII_EEP;
     u_short link;
 
     if (!netif_device_present(dev)) goto reschedule;
 
     /* Check for pending interrupt with expired latency timer: with
        this, we can limp along even if the interrupt is blocked */
-    if (info->stale++ && (inb_p(nic_base + EN0_ISR) & ENISR_ALL)) {
+    if (info->stale++ && (inb_p(__c_ua(nic_base) + EN0_ISR) & ENISR_ALL)) {
 	if (!info->fast_poll)
 	    netdev_info(dev, "interrupt(s) dropped!\n");
 	ei_irq_wrapper(dev->irq, dev);
@@ -609,7 +611,7 @@ static int axnet_ioctl(struct net_device *dev, struct ifreq *rq, int cmd)
 {
     struct axnet_dev *info = PRIV(dev);
     struct mii_ioctl_data *data = if_mii(rq);
-    unsigned int mii_addr = dev->base_addr + AXNET_MII_EEP;
+    uintptr_t mii_addr = dev->base_addr + AXNET_MII_EEP;
     switch (cmd) {
     case SIOCGMIIPHY:
 	data->phy_id = info->phy_id;
@@ -630,7 +632,7 @@ static void get_8390_hdr(struct net_device *dev,
 			 struct e8390_pkt_hdr *hdr,
 			 int ring_page)
 {
-    unsigned int nic_base = dev->base_addr;
+    unsigned int nic_base = __c_ua(dev->base_addr);
 
     outb_p(0, nic_base + EN0_RSARLO);		/* On page boundary */
     outb_p(ring_page, nic_base + EN0_RSARHI);
@@ -648,7 +650,7 @@ static void get_8390_hdr(struct net_device *dev,
 static void block_input(struct net_device *dev, int count,
 			struct sk_buff *skb, int ring_offset)
 {
-    unsigned int nic_base = dev->base_addr;
+    unsigned int nic_base = __c_ua(dev->base_addr);
     struct ei_device *ei_local = netdev_priv(dev);
     char *buf = skb->data;
 
@@ -669,7 +671,7 @@ static void block_input(struct net_device *dev, int count,
 static void block_output(struct net_device *dev, int count,
 			 const u_char *buf, const int start_page)
 {
-    unsigned int nic_base = dev->base_addr;
+    unsigned int nic_base = __c_ua(dev->base_addr);
 
     pr_debug("%s: [bo=%d]\n", dev->name, count);
 
@@ -908,7 +910,7 @@ static int ax_close(struct net_device *dev)
 
 static void axnet_tx_timeout(struct net_device *dev, unsigned int txqueue)
 {
-	long e8390_base = dev->base_addr;
+	long e8390_base = __c_ua(dev->base_addr);
 	struct ei_device *ei_local = netdev_priv(dev);
 	int txsr, isr, tickssofar = jiffies - dev_trans_start(dev);
 	unsigned long flags;
@@ -954,7 +956,7 @@ static void axnet_tx_timeout(struct net_device *dev, unsigned int txqueue)
 static netdev_tx_t axnet_start_xmit(struct sk_buff *skb,
 					  struct net_device *dev)
 {
-	long e8390_base = dev->base_addr;
+	long e8390_base = __c_ua(dev->base_addr);
 	struct ei_device *ei_local = netdev_priv(dev);
 	int length, send_length, output_page;
 	unsigned long flags;
@@ -1094,7 +1096,7 @@ static irqreturn_t ax_interrupt(int irq, void *dev_id)
 	int handled = 0;
 	unsigned long flags;
 
-	e8390_base = dev->base_addr;
+	e8390_base = __c_ua(dev->base_addr);
 	ei_local = netdev_priv(dev);
 
 	/*
@@ -1210,7 +1212,7 @@ static irqreturn_t ax_interrupt(int irq, void *dev_id)
 
 static void ei_tx_err(struct net_device *dev)
 {
-	long e8390_base = dev->base_addr;
+	long e8390_base = __c_ua(dev->base_addr);
 	unsigned char txsr = inb_p(e8390_base+EN0_TSR);
 	unsigned char tx_was_aborted = txsr & (ENTSR_ABT+ENTSR_FU);
 
@@ -1250,7 +1252,7 @@ static void ei_tx_err(struct net_device *dev)
 
 static void ei_tx_intr(struct net_device *dev)
 {
-	long e8390_base = dev->base_addr;
+	long e8390_base = __c_ua(dev->base_addr);
 	struct ei_device *ei_local = netdev_priv(dev);
 	int status = inb(e8390_base + EN0_TSR);
     
@@ -1337,7 +1339,7 @@ static void ei_tx_intr(struct net_device *dev)
 
 static void ei_receive(struct net_device *dev)
 {
-	long e8390_base = dev->base_addr;
+	long e8390_base = __c_ua(dev->base_addr);
 	struct ei_device *ei_local = netdev_priv(dev);
 	unsigned char rxing_page, this_frame, next_frame;
 	unsigned short current_offset;
@@ -1454,7 +1456,7 @@ static void ei_receive(struct net_device *dev)
 static void ei_rx_overrun(struct net_device *dev)
 {
 	struct axnet_dev *info = PRIV(dev);
-	long e8390_base = dev->base_addr;
+	long e8390_base = __c_ua(dev->base_addr);
 	unsigned char was_txing, must_resend = 0;
 	struct ei_device *ei_local = netdev_priv(dev);
     
@@ -1519,7 +1521,7 @@ static void ei_rx_overrun(struct net_device *dev)
  
 static struct net_device_stats *get_stats(struct net_device *dev)
 {
-	long ioaddr = dev->base_addr;
+	long ioaddr = __c_ua(dev->base_addr);
 	struct ei_device *ei_local = netdev_priv(dev);
 	unsigned long flags;
     
@@ -1567,7 +1569,7 @@ static inline void make_mc_bits(u8 *bits, struct net_device *dev)
  
 static void do_set_multicast_list(struct net_device *dev)
 {
-	long e8390_base = dev->base_addr;
+	long e8390_base = __c_ua(dev->base_addr);
 	int i;
 	struct ei_device *ei_local = netdev_priv(dev);
 
@@ -1626,7 +1628,7 @@ static void set_multicast_list(struct net_device *dev)
 static void AX88190_init(struct net_device *dev, int startp)
 {
 	struct axnet_dev *info = PRIV(dev);
-	long e8390_base = dev->base_addr;
+	long e8390_base = __c_ua(dev->base_addr);
 	struct ei_device *ei_local = netdev_priv(dev);
 	int i;
 	int endcfg = ei_local->word16 ? (0x48 | ENDCFG_WTS) : 0x48;
@@ -1692,7 +1694,7 @@ static void AX88190_init(struct net_device *dev, int startp)
 static void NS8390_trigger_send(struct net_device *dev, unsigned int length,
 								int start_page)
 {
-	long e8390_base = dev->base_addr;
+	long e8390_base = __c_ua(dev->base_addr);
  	struct ei_device *ei_local __attribute((unused)) = netdev_priv(dev);
     
 	if (inb_p(e8390_base) & E8390_TRANS) 

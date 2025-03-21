@@ -517,8 +517,8 @@ static int acenic_probe_one(struct pci_dev *pdev,
 	 * dev->base_addr since it was means for I/O port
 	 * addresses but who gives a damn.
 	 */
-	dev->base_addr = pci_resource_start(pdev, 0);
-	ap->regs = ioremap(dev->base_addr, 0x4000);
+	dev->base_addr = __c_fakeu(pci_resource_start(pdev, 0));
+	ap->regs = ioremap(__c_ua(dev->base_addr), 0x4000);
 	if (!ap->regs) {
 		printk(KERN_ERR "%s:  Unable to map I/O register, "
 		       "AceNIC %i will be disabled.\n",
@@ -557,7 +557,7 @@ static int acenic_probe_one(struct pci_dev *pdev,
 		break;
 	}
 
-	printk("Gigabit Ethernet at 0x%08lx, ", dev->base_addr);
+	printk("Gigabit Ethernet at 0x%08lx, ", __c_ua(dev->base_addr));
 	printk("irq %d\n", pdev->irq);
 
 #ifdef CONFIG_ACENIC_OMIT_TIGON_I

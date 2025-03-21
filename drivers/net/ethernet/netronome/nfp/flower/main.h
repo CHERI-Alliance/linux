@@ -535,7 +535,7 @@ nfp_flower_internal_port_can_offload(struct nfp_app *app,
  */
 static inline bool nfp_flower_is_merge_flow(struct nfp_fl_payload *flow_pay)
 {
-	return flow_pay->tc_flower_cookie == (unsigned long)flow_pay;
+	return flow_pay->tc_flower_cookie == __c_pa(flow_pay);
 }
 
 static inline bool nfp_flower_is_supported_bridge(struct net_device *netdev)

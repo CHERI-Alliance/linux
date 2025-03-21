@@ -1855,7 +1855,7 @@ static void ixgbe_dma_sync_frag(struct ixgbe_ring *rx_ring,
 {
 	if (ring_uses_build_skb(rx_ring)) {
 		unsigned long mask = (unsigned long)ixgbe_rx_pg_size(rx_ring) - 1;
-		unsigned long offset = (unsigned long)(skb->data) & mask;
+		unsigned long offset = __c_pa(skb->data) & mask;
 
 		dma_sync_single_range_for_cpu(rx_ring->dev,
 					      IXGBE_CB(skb)->dma,
@@ -10823,7 +10823,7 @@ static int ixgbe_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	struct net_device *netdev;
 	struct ixgbe_adapter *adapter = NULL;
 	struct ixgbe_hw *hw;
-	const struct ixgbe_info *ii = ixgbe_info_tbl[ent->driver_data];
+	const struct ixgbe_info *ii = ixgbe_info_tbl[__c_ua(ent->driver_data)];
 	unsigned int indices = MAX_TX_QUEUES;
 	u8 part_str[IXGBE_PBANUM_LENGTH];
 	int i, err, expected_gts;

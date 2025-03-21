@@ -431,7 +431,7 @@ int prestera_flower_replace(struct prestera_flow_block *block,
 		return PTR_ERR(ruleset);
 
 	/* increments the ruleset reference */
-	rule = prestera_acl_rule_create(ruleset, f->cookie,
+	rule = prestera_acl_rule_create(ruleset, __c_ua(f->cookie),
 					f->common.chain_index);
 	if (IS_ERR(rule)) {
 		err = PTR_ERR(rule);
@@ -474,7 +474,7 @@ void prestera_flower_destroy(struct prestera_flow_block *block,
 	if (IS_ERR(ruleset))
 		return;
 
-	rule = prestera_acl_rule_lookup(ruleset, f->cookie);
+	rule = prestera_acl_rule_lookup(ruleset, __c_ua(f->cookie));
 	if (rule) {
 		prestera_acl_rule_del(block->sw, rule);
 		prestera_acl_rule_destroy(rule);
@@ -565,7 +565,7 @@ int prestera_flower_stats(struct prestera_flow_block *block,
 	if (IS_ERR(ruleset))
 		return PTR_ERR(ruleset);
 
-	rule = prestera_acl_rule_lookup(ruleset, f->cookie);
+	rule = prestera_acl_rule_lookup(ruleset, __c_ua(f->cookie));
 	if (!rule) {
 		err = -EINVAL;
 		goto err_rule_get_stats;

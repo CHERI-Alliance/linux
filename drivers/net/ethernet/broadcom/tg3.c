@@ -7837,7 +7837,7 @@ static int tigon3_dma_hwbug_workaround(struct tg3_napi *tnapi,
 	if (tg3_asic_rev(tp) != ASIC_REV_5701)
 		new_skb = skb_copy(skb, GFP_ATOMIC);
 	else {
-		int more_headroom = 4 - ((unsigned long)skb->data & 3);
+		int more_headroom = 4 - (__c_pa(skb->data) & 3);
 
 		new_skb = skb_copy_expand(skb,
 					  skb_headroom(skb) + more_headroom,

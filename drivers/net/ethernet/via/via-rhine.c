@@ -1132,7 +1132,7 @@ static int rhine_init_one_platform(struct platform_device *pdev)
 		return -EINVAL;
 
 	return rhine_init_one_common(&pdev->dev, *quirks,
-				     (long)ioaddr, ioaddr, irq);
+				     __c_pa(ioaddr), ioaddr, irq);
 }
 
 static int alloc_ring(struct net_device* dev)
@@ -1786,7 +1786,7 @@ static netdev_tx_t rhine_start_tx(struct sk_buff *skb,
 	rp->tx_skbuff[entry] = skb;
 
 	if ((rp->quirks & rqRhineI) &&
-	    (((unsigned long)skb->data & 3) || skb_shinfo(skb)->nr_frags != 0 || skb->ip_summed == CHECKSUM_PARTIAL)) {
+	    ((__c_pa(skb->data) & 3) || skb_shinfo(skb)->nr_frags != 0 || skb->ip_summed == CHECKSUM_PARTIAL)) {
 		/* Must use alignment buffer. */
 		if (skb->len > PKT_BUF_SZ) {
 			/* packet too long, drop it */

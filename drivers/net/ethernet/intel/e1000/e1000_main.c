@@ -1471,7 +1471,7 @@ static bool e1000_check_64k_bound(struct e1000_adapter *adapter, void *start,
 				  unsigned long len)
 {
 	struct e1000_hw *hw = &adapter->hw;
-	unsigned long begin = (unsigned long)start;
+	unsigned long begin = __c_pa(start);
 	unsigned long end = begin + len;
 
 	/* First rev 82545 and 82546 need to not allow any memory
@@ -2863,7 +2863,7 @@ static int e1000_tx_map(struct e1000_adapter *adapter,
 		 * terminating buffers within evenly-aligned dwords.
 		 */
 		if (unlikely(adapter->pcix_82544 &&
-		   !((unsigned long)(skb->data + offset + size - 1) & 4) &&
+		   !(__c_pa(skb->data + offset + size - 1) & 4) &&
 		   size > 4))
 			size -= 4;
 
@@ -3150,8 +3150,7 @@ static netdev_tx_t e1000_xmit_frame(struct sk_buff *skb,
 				 * if end byte alignment not correct move us
 				 * into the next dword
 				 */
-				if ((unsigned long)(skb_tail_pointer(skb) - 1)
-				    & 4)
+				if (__c_pa(skb_tail_pointer(skb) - 1) & 4)
 					break;
 				pull_size = min((unsigned int)4, skb->data_len);
 				if (!__pskb_pull_tail(skb, pull_size)) {
@@ -4624,11 +4623,11 @@ static void e1000_alloc_rx_buffers(struct e1000_adapter *adapter,
 
 		/* Fix for errata 23, can't cross 64kB boundary */
 		if (!e1000_check_64k_bound(adapter,
-					(void *)(unsigned long)buffer_info->dma,
+					__c_fakep(buffer_info->dma),
 					adapter->rx_buffer_len)) {
 			e_err(rx_err, "dma align check failed: %u bytes at "
 			      "%p\n", adapter->rx_buffer_len,
-			      (void *)(unsigned long)buffer_info->dma);
+			      __c_fakep(buffer_info->dma));
 
 			dma_unmap_single(&pdev->dev, buffer_info->dma,
 					 adapter->rx_buffer_len,

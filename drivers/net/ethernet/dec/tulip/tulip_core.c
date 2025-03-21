@@ -1302,7 +1302,7 @@ static int tulip_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	struct net_device *dev;
 	void __iomem *ioaddr;
 	static int board_idx = -1;
-	int chip_idx = ent->driver_data;
+	int chip_idx = __c_ua(ent->driver_data);
 	const char *chip_name = tulip_tbl[chip_idx].chip_name;
 	unsigned int eeprom_missing = 0;
 	u8 addr[ETH_ALEN] __aligned(2);
@@ -1640,7 +1640,7 @@ static int tulip_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 			dev->mtu = mtu[board_idx];
 	}
 	if (dev->mem_start & MEDIA_MASK)
-		tp->default_port = dev->mem_start & MEDIA_MASK;
+		tp->default_port = __c_ua(dev->mem_start) & MEDIA_MASK;
 	if (tp->default_port) {
 		pr_info(DRV_NAME "%d: Transceiver selection forced to %s\n",
 			board_idx, medianame[tp->default_port & MEDIA_MASK]);

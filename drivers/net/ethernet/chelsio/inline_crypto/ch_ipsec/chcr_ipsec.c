@@ -298,7 +298,7 @@ static int ch_ipsec_xfrm_add_state(struct xfrm_state *x,
 	if (x->props.flags & XFRM_STATE_ESN)
 		sa_entry->esn = 1;
 	ch_ipsec_setkey(x, sa_entry);
-	x->xso.offload_handle = (unsigned long)sa_entry;
+	x->xso.offload_handle = (uintptr_t)sa_entry;
 	try_module_get(THIS_MODULE);
 out:
 	return res;

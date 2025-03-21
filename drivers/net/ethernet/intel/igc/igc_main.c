@@ -6849,7 +6849,7 @@ static int igc_probe(struct pci_dev *pdev,
 	struct igc_adapter *adapter;
 	struct net_device *netdev;
 	struct igc_hw *hw;
-	const struct igc_info *ei = igc_info_tbl[ent->driver_data];
+	const struct igc_info *ei = igc_info_tbl[__c_ua(ent->driver_data)];
 	int err;
 
 	err = pci_enable_device_mem(pdev);
@@ -6910,8 +6910,8 @@ static int igc_probe(struct pci_dev *pdev,
 	igc_ethtool_set_ops(netdev);
 	netdev->watchdog_timeo = 5 * HZ;
 
-	netdev->mem_start = pci_resource_start(pdev, 0);
-	netdev->mem_end = pci_resource_end(pdev, 0);
+	netdev->mem_start = __c_fakeu(pci_resource_start(pdev, 0));
+	netdev->mem_end = __c_fakeu(pci_resource_end(pdev, 0));
 
 	/* PCI config space info */
 	hw->vendor_id = pdev->vendor;

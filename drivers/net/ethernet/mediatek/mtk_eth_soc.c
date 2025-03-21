@@ -1118,7 +1118,7 @@ static bool mtk_rx_get_desc(struct mtk_eth *eth, struct mtk_rx_dma_v2 *rxd,
 static void *mtk_max_lro_buf_alloc(gfp_t gfp_mask)
 {
 	unsigned int size = mtk_max_frag_size(MTK_MAX_LRO_RX_LENGTH);
-	unsigned long data;
+	uintptr_t data;
 
 	data = __get_free_pages(gfp_mask | __GFP_COMP | __GFP_NOWARN,
 				get_order(size));
@@ -4639,7 +4639,7 @@ static int mtk_add_mac(struct mtk_eth *eth, struct device_node *np)
 	SET_NETDEV_DEV(eth->netdev[id], eth->dev);
 	eth->netdev[id]->watchdog_timeo = 5 * HZ;
 	eth->netdev[id]->netdev_ops = &mtk_netdev_ops;
-	eth->netdev[id]->base_addr = (unsigned long)eth->base;
+	eth->netdev[id]->base_addr = (uintptr_t)eth->base;
 
 	eth->netdev[id]->hw_features = eth->soc->hw_features;
 	if (eth->hwlro)
@@ -4989,7 +4989,7 @@ static int mtk_probe(struct platform_device *pdev)
 		} else
 			netif_info(eth, probe, eth->netdev[i],
 				   "mediatek frame engine at 0x%08lx, irq %d\n",
-				   eth->netdev[i]->base_addr, eth->irq[0]);
+				   __c_ua(eth->netdev[i]->base_addr), eth->irq[0]);
 	}
 
 	/* we run 2 devices on the same DMA ring so we need a dummy device

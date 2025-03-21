@@ -7359,7 +7359,7 @@ static int e1000_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	struct net_device *netdev;
 	struct e1000_adapter *adapter;
 	struct e1000_hw *hw;
-	const struct e1000_info *ei = e1000_info_tbl[ent->driver_data];
+	const struct e1000_info *ei = e1000_info_tbl[__c_ua(ent->driver_data)];
 	resource_size_t mmio_start, mmio_len;
 	resource_size_t flash_start, flash_len;
 	static int cards_found;
@@ -7451,8 +7451,8 @@ static int e1000_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	netif_napi_add(netdev, &adapter->napi, e1000e_poll);
 	strscpy(netdev->name, pci_name(pdev), sizeof(netdev->name));
 
-	netdev->mem_start = mmio_start;
-	netdev->mem_end = mmio_start + mmio_len;
+	netdev->mem_start = __c_fakeu(mmio_start);
+	netdev->mem_end = __c_fakeu(mmio_start + mmio_len);
 
 	adapter->bd_number = cards_found++;
 

@@ -1108,8 +1108,8 @@ static int xemaclite_of_probe(struct platform_device *ofdev)
 		goto error;
 	}
 
-	ndev->mem_start = res->start;
-	ndev->mem_end = res->end;
+	ndev->mem_start = __c_fakeu(res->start);
+	ndev->mem_end = __c_fakeu(res->end);
 
 	spin_lock_init(&lp->reset_lock);
 	lp->next_tx_buf_to_use = 0x0;

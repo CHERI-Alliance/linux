@@ -148,8 +148,8 @@ struct mlx5_ct_entry {
 	struct rhash_head tuple_node;
 	struct rhash_head tuple_nat_node;
 	struct mlx5_ct_counter *counter;
-	unsigned long cookie;
-	unsigned long restore_cookie;
+	uintptr_t cookie;
+	uintptr_t restore_cookie;
 	struct mlx5_ct_tuple tuple;
 	struct mlx5_ct_tuple tuple_nat;
 	struct mlx5_ct_zone_rule zone_rules[2];
@@ -717,7 +717,7 @@ mlx5_tc_ct_entry_create_mod_hdr(struct mlx5_tc_ct_priv *ct_priv,
 	meta = mlx5_tc_ct_get_ct_metadata_action(flow_rule);
 	if (!meta)
 		return -EOPNOTSUPP;
-	ctinfo = meta->ct_metadata.cookie & NFCT_INFOMASK;
+	ctinfo = __c_ua(meta->ct_metadata.cookie) & NFCT_INFOMASK;
 
 	err = mlx5_get_label_mapping(ct_priv, meta->ct_metadata.labels,
 				     &attr->ct_attr.ct_labels_id);
@@ -1173,7 +1173,7 @@ mlx5_tc_ct_block_flow_offload_add(struct mlx5_ct_ft *ft,
 	struct flow_rule *flow_rule = flow_cls_offload_flow_rule(flow);
 	struct mlx5_tc_ct_priv *ct_priv = ft->ct_priv;
 	struct flow_action_entry *meta_action;
-	unsigned long cookie = flow->cookie;
+	unsigned long cookie = __c_ua(flow->cookie);
 	struct mlx5_ct_entry *entry;
 	int err;
 
@@ -1276,7 +1276,7 @@ mlx5_tc_ct_block_flow_offload_del(struct mlx5_ct_ft *ft,
 				  struct flow_cls_offload *flow)
 {
 	struct mlx5_tc_ct_priv *ct_priv = ft->ct_priv;
-	unsigned long cookie = flow->cookie;
+	unsigned long cookie = __c_ua(flow->cookie);
 	struct mlx5_ct_entry *entry;
 
 	spin_lock_bh(&ct_priv->ht_lock);
@@ -1304,7 +1304,7 @@ mlx5_tc_ct_block_flow_offload_stats(struct mlx5_ct_ft *ft,
 				    struct flow_cls_offload *f)
 {
 	struct mlx5_tc_ct_priv *ct_priv = ft->ct_priv;
-	unsigned long cookie = f->cookie;
+	unsigned long cookie = __c_ua(f->cookie);
 	struct mlx5_ct_entry *entry;
 	u64 lastuse, packets, bytes;
 

@@ -179,7 +179,7 @@ static void	tlan_phy_monitor(struct timer_list *t);
 
 static void	tlan_reset_lists(struct net_device *);
 static void	tlan_free_lists(struct net_device *);
-static void	tlan_print_dio(u16);
+static void	tlan_print_dio(uintptr_t);
 static void	tlan_print_list(struct tlan_list *, char *, int);
 static void	tlan_read_and_clear_stats(struct net_device *, int);
 static void	tlan_reset_adapter(struct net_device *);
@@ -204,8 +204,8 @@ static void	tlan_phy_finish_auto_neg(struct net_device *);
 
 static bool	__tlan_mii_read_reg(struct net_device *, u16, u16, u16 *);
 static void	tlan_mii_read_reg(struct net_device *, u16, u16, u16 *);
-static void	tlan_mii_send_data(u16, u32, unsigned);
-static void	tlan_mii_sync(u16);
+static void	tlan_mii_send_data(uintptr_t, u32, unsigned);
+static void	tlan_mii_sync(uintptr_t);
 static void	__tlan_mii_write_reg(struct net_device *, u16, u16, u16);
 static void	tlan_mii_write_reg(struct net_device *, u16, u16, u16);
 
@@ -215,22 +215,31 @@ static void	tlan_ee_receive_byte(u16, u8 *, int);
 static int	tlan_ee_read_byte(struct net_device *, u8, u8 *);
 
 
+/* FIXCHERI: tlan_store_skb() for CHERI is a very ugly hack! */
 static inline void
 tlan_store_skb(struct tlan_list *tag, struct sk_buff *skb)
 {
+#ifdef CONFIG_CHERI_KERNEL
+	*(uintptr_t *)&tag->buffer[8] = (uintptr_t)skb;
+#else
 	unsigned long addr = (unsigned long)skb;
 	tag->buffer[9].address = addr;
 	tag->buffer[8].address = upper_32_bits(addr);
+#endif
 }
 
 static inline struct sk_buff *
 tlan_get_skb(const struct tlan_list *tag)
 {
+#ifdef CONFIG_CHERI_KERNEL
+	return (struct sk_buff *)*(uintptr_t *)&tag->buffer[8];
+#else
 	unsigned long addr;
 
 	addr = tag->buffer[9].address;
 	addr |= ((unsigned long) tag->buffer[8].address << 16) << 16;
 	return (struct sk_buff *) addr;
+#endif
 }
 
 static u32
@@ -334,7 +343,7 @@ static void tlan_stop(struct net_device *dev)
 
 	del_timer_sync(&priv->media_timer);
 	tlan_read_and_clear_stats(dev, TLAN_RECORD);
-	outl(TLAN_HC_AD_RST, dev->base_addr + TLAN_HOST_CMD);
+	outl(TLAN_HC_AD_RST, __c_ua(dev->base_addr) + TLAN_HOST_CMD);
 	/* Reset and power down phy */
 	tlan_reset_adapter(dev);
 	if (priv->timer.function != NULL) {
@@ -478,7 +487,7 @@ static int tlan_probe1(struct pci_dev *pdev, long ioaddr, int irq, int rev,
 	if (pdev) {
 		u32		   pci_io_base = 0;
 
-		priv->adapter = &board_info[ent->driver_data];
+		priv->adapter = &board_info[__c_ua(ent->driver_data)];
 
 		rc = dma_set_mask(&pdev->dev, DMA_BIT_MASK(32));
 		if (rc) {
@@ -501,7 +510,7 @@ static int tlan_probe1(struct pci_dev *pdev, long ioaddr, int irq, int rev,
 			goto err_out_free_dev;
 		}
 
-		dev->base_addr = pci_io_base;
+		dev->base_addr = __c_fakeu(pci_io_base);
 		dev->irq = pdev->irq;
 		priv->adapter_rev = pdev->revision;
 		pci_set_master(pdev);
@@ -518,24 +527,24 @@ static int tlan_probe1(struct pci_dev *pdev, long ioaddr, int irq, int rev,
 			priv->adapter = &board_info[14];
 			priv->adapter_rev = 10;		/* TLAN 1.0 */
 		}
-		dev->base_addr = ioaddr;
+		dev->base_addr = __c_fakeu(ioaddr);
 		dev->irq = irq;
 	}
 
 	/* Kernel parameters */
 	if (dev->mem_start) {
-		priv->aui    = dev->mem_start & 0x01;
-		priv->duplex = ((dev->mem_start & 0x06) == 0x06) ? 0
-			: (dev->mem_start & 0x06) >> 1;
+		priv->aui    = __c_ua(dev->mem_start) & 0x01;
+		priv->duplex = ((__c_ua(dev->mem_start) & 0x06) == 0x06) ? 0
+			: (__c_ua(dev->mem_start) & 0x06) >> 1;
 		priv->speed  = ((dev->mem_start & 0x18) == 0x18) ? 0
-			: (dev->mem_start & 0x18) >> 3;
+			: (__c_ua(dev->mem_start) & 0x18) >> 3;
 
 		if (priv->speed == 0x1)
 			priv->speed = TLAN_SPEED_10;
 		else if (priv->speed == 0x2)
 			priv->speed = TLAN_SPEED_100;
 
-		debug = priv->debug = dev->mem_end;
+		debug = priv->debug = __c_ua(dev->mem_end);
 	} else {
 		priv->aui    = aui[boards_found];
 		priv->speed  = speed[boards_found];
@@ -576,7 +585,7 @@ static int tlan_probe1(struct pci_dev *pdev, long ioaddr, int irq, int rev,
 
 	netdev_info(dev, "irq=%2d, io=%04x, %s, Rev. %d\n",
 		    (int)dev->irq,
-		    (int)dev->base_addr,
+		    (int)__c_ua(dev->base_addr),
 		    priv->adapter->device_label,
 		    priv->adapter_rev);
 	return 0;
@@ -611,7 +620,7 @@ static void tlan_eisa_cleanup(void)
 					  priv->dma_storage,
 					  priv->dma_storage_dma);
 		}
-		release_region(dev->base_addr, 0x10);
+		release_region(__c_ua(dev->base_addr), 0x10);
 		unregister_netdev(dev);
 		tlan_eisa_devices = priv->next_device;
 		free_netdev(dev);
@@ -833,7 +842,7 @@ static int tlan_init(struct net_device *dev)
 		return -ENOMEM;
 	}
 	priv->rx_list = (struct tlan_list *)
-		ALIGN((unsigned long)priv->dma_storage, 8);
+		ALIGN((uintptr_t)priv->dma_storage, 8);
 	priv->rx_list_dma = ALIGN(priv->dma_storage_dma, 8);
 	priv->tx_list = priv->rx_list + TLAN_NUM_RX_LISTS;
 	priv->tx_list_dma =
@@ -1083,8 +1092,8 @@ static netdev_tx_t tlan_start_tx(struct sk_buff *skb, struct net_device *dev)
 		TLAN_DBG(TLAN_DEBUG_TX,
 			 "TRANSMIT:  Starting TX on buffer %d\n",
 			 priv->tx_tail);
-		outl(tail_list_phys, dev->base_addr + TLAN_CH_PARM);
-		outl(TLAN_HC_GO, dev->base_addr + TLAN_HOST_CMD);
+		outl(tail_list_phys, __c_ua(dev->base_addr) + TLAN_CH_PARM);
+		outl(TLAN_HC_GO, __c_ua(dev->base_addr) + TLAN_HOST_CMD);
 	} else {
 		TLAN_DBG(TLAN_DEBUG_TX,
 			 "TRANSMIT:  Adding buffer %d to TX channel\n",
@@ -1137,18 +1146,18 @@ static irqreturn_t tlan_handle_interrupt(int irq, void *dev_id)
 
 	spin_lock(&priv->lock);
 
-	host_int = inw(dev->base_addr + TLAN_HOST_INT);
+	host_int = inw(__c_ua(dev->base_addr) + TLAN_HOST_INT);
 	type = (host_int & TLAN_HI_IT_MASK) >> 2;
 	if (type) {
 		u32	ack;
 		u32	host_cmd;
 
-		outw(host_int, dev->base_addr + TLAN_HOST_INT);
+		outw(host_int, __c_ua(dev->base_addr) + TLAN_HOST_INT);
 		ack = tlan_int_vector[type](dev, host_int);
 
 		if (ack) {
 			host_cmd = TLAN_HC_ACK | ack | (type << 18);
-			outl(host_cmd, dev->base_addr + TLAN_HOST_CMD);
+			outl(host_cmd, __c_ua(dev->base_addr) + TLAN_HOST_CMD);
 		}
 	}
 
@@ -1394,7 +1403,7 @@ static u32 tlan_handle_tx_eof(struct net_device *dev, u16 host_int)
 			+ sizeof(struct tlan_list)*priv->tx_head;
 		if ((head_list->c_stat & TLAN_CSTAT_READY)
 		    == TLAN_CSTAT_READY) {
-			outl(head_list_phys, dev->base_addr + TLAN_CH_PARM);
+			outl(head_list_phys, __c_ua(dev->base_addr) + TLAN_CH_PARM);
 			ack |= TLAN_HC_GO;
 		} else {
 			priv->tx_in_progress = 0;
@@ -1547,7 +1556,7 @@ drop_and_reuse:
 		head_list = priv->rx_list + priv->rx_head;
 		head_list_phys = priv->rx_list_dma
 			+ sizeof(struct tlan_list)*priv->rx_head;
-		outl(head_list_phys, dev->base_addr + TLAN_CH_PARM);
+		outl(head_list_phys, __c_ua(dev->base_addr) + TLAN_CH_PARM);
 		ack |= TLAN_HC_GO | TLAN_HC_RT;
 		priv->rx_eoc_count++;
 	}
@@ -1637,7 +1646,7 @@ static u32 tlan_handle_tx_eoc(struct net_device *dev, u16 host_int)
 		if ((head_list->c_stat & TLAN_CSTAT_READY)
 		    == TLAN_CSTAT_READY) {
 			netif_stop_queue(dev);
-			outl(head_list_phys, dev->base_addr + TLAN_CH_PARM);
+			outl(head_list_phys, __c_ua(dev->base_addr) + TLAN_CH_PARM);
 			ack |= TLAN_HC_GO;
 		} else {
 			priv->tx_in_progress = 0;
@@ -1684,10 +1693,10 @@ static u32 tlan_handle_status_check(struct net_device *dev, u16 host_int)
 	ack = 1;
 	if (host_int & TLAN_HI_IV_MASK) {
 		netif_stop_queue(dev);
-		error = inl(dev->base_addr + TLAN_CH_PARM);
+		error = inl(__c_ua(dev->base_addr) + TLAN_CH_PARM);
 		netdev_info(dev, "Adaptor Error = 0x%x\n", error);
 		tlan_read_and_clear_stats(dev, TLAN_RECORD);
-		outl(TLAN_HC_AD_RST, dev->base_addr + TLAN_HOST_CMD);
+		outl(TLAN_HC_AD_RST, __c_ua(dev->base_addr) + TLAN_HOST_CMD);
 
 		schedule_work(&priv->tlan_tqueue);
 
@@ -1762,7 +1771,7 @@ static u32 tlan_handle_rx_eoc(struct net_device *dev, u16 host_int)
 			 priv->rx_head, priv->rx_tail);
 		head_list_phys = priv->rx_list_dma
 			+ sizeof(struct tlan_list)*priv->rx_head;
-		outl(head_list_phys, dev->base_addr + TLAN_CH_PARM);
+		outl(head_list_phys, __c_ua(dev->base_addr) + TLAN_CH_PARM);
 		ack |= TLAN_HC_GO | TLAN_HC_RT;
 		priv->rx_eoc_count++;
 	}
@@ -1992,8 +2001,9 @@ static void tlan_free_lists(struct net_device *dev)
  *
  **************************************************************/
 
-static void tlan_print_dio(u16 io_base)
+static void tlan_print_dio(uintptr_t _io_base)
 {
+	u16 io_base = __c_ua(_io_base);
 	u32 data0, data1;
 	int	i;
 
@@ -2073,34 +2083,34 @@ static void tlan_read_and_clear_stats(struct net_device *dev, int record)
 	u32		multi_col, single_col;
 	u32		excess_col, late_col, loss;
 
-	outw(TLAN_GOOD_TX_FRMS, dev->base_addr + TLAN_DIO_ADR);
-	tx_good  = inb(dev->base_addr + TLAN_DIO_DATA);
-	tx_good += inb(dev->base_addr + TLAN_DIO_DATA + 1) << 8;
-	tx_good += inb(dev->base_addr + TLAN_DIO_DATA + 2) << 16;
-	tx_under = inb(dev->base_addr + TLAN_DIO_DATA + 3);
+	outw(TLAN_GOOD_TX_FRMS, __c_ua(dev->base_addr) + TLAN_DIO_ADR);
+	tx_good  = inb(__c_ua(dev->base_addr) + TLAN_DIO_DATA);
+	tx_good += inb(__c_ua(dev->base_addr) + TLAN_DIO_DATA + 1) << 8;
+	tx_good += inb(__c_ua(dev->base_addr) + TLAN_DIO_DATA + 2) << 16;
+	tx_under = inb(__c_ua(dev->base_addr) + TLAN_DIO_DATA + 3);
 
-	outw(TLAN_GOOD_RX_FRMS, dev->base_addr + TLAN_DIO_ADR);
-	rx_good  = inb(dev->base_addr + TLAN_DIO_DATA);
-	rx_good += inb(dev->base_addr + TLAN_DIO_DATA + 1) << 8;
-	rx_good += inb(dev->base_addr + TLAN_DIO_DATA + 2) << 16;
-	rx_over  = inb(dev->base_addr + TLAN_DIO_DATA + 3);
+	outw(TLAN_GOOD_RX_FRMS, __c_ua(dev->base_addr) + TLAN_DIO_ADR);
+	rx_good  = inb(__c_ua(dev->base_addr) + TLAN_DIO_DATA);
+	rx_good += inb(__c_ua(dev->base_addr) + TLAN_DIO_DATA + 1) << 8;
+	rx_good += inb(__c_ua(dev->base_addr) + TLAN_DIO_DATA + 2) << 16;
+	rx_over  = inb(__c_ua(dev->base_addr) + TLAN_DIO_DATA + 3);
 
-	outw(TLAN_DEFERRED_TX, dev->base_addr + TLAN_DIO_ADR);
-	def_tx  = inb(dev->base_addr + TLAN_DIO_DATA);
-	def_tx += inb(dev->base_addr + TLAN_DIO_DATA + 1) << 8;
-	crc     = inb(dev->base_addr + TLAN_DIO_DATA + 2);
-	code    = inb(dev->base_addr + TLAN_DIO_DATA + 3);
+	outw(TLAN_DEFERRED_TX, __c_ua(dev->base_addr) + TLAN_DIO_ADR);
+	def_tx  = inb(__c_ua(dev->base_addr) + TLAN_DIO_DATA);
+	def_tx += inb(__c_ua(dev->base_addr) + TLAN_DIO_DATA + 1) << 8;
+	crc     = inb(__c_ua(dev->base_addr) + TLAN_DIO_DATA + 2);
+	code    = inb(__c_ua(dev->base_addr) + TLAN_DIO_DATA + 3);
 
-	outw(TLAN_MULTICOL_FRMS, dev->base_addr + TLAN_DIO_ADR);
-	multi_col   = inb(dev->base_addr + TLAN_DIO_DATA);
-	multi_col  += inb(dev->base_addr + TLAN_DIO_DATA + 1) << 8;
-	single_col  = inb(dev->base_addr + TLAN_DIO_DATA + 2);
-	single_col += inb(dev->base_addr + TLAN_DIO_DATA + 3) << 8;
+	outw(TLAN_MULTICOL_FRMS, __c_ua(dev->base_addr) + TLAN_DIO_ADR);
+	multi_col   = inb(__c_ua(dev->base_addr) + TLAN_DIO_DATA);
+	multi_col  += inb(__c_ua(dev->base_addr) + TLAN_DIO_DATA + 1) << 8;
+	single_col  = inb(__c_ua(dev->base_addr) + TLAN_DIO_DATA + 2);
+	single_col += inb(__c_ua(dev->base_addr) + TLAN_DIO_DATA + 3) << 8;
 
-	outw(TLAN_EXCESSCOL_FRMS, dev->base_addr + TLAN_DIO_ADR);
-	excess_col = inb(dev->base_addr + TLAN_DIO_DATA);
-	late_col   = inb(dev->base_addr + TLAN_DIO_DATA + 1);
-	loss       = inb(dev->base_addr + TLAN_DIO_DATA + 2);
+	outw(TLAN_EXCESSCOL_FRMS, __c_ua(dev->base_addr) + TLAN_DIO_ADR);
+	excess_col = inb(__c_ua(dev->base_addr) + TLAN_DIO_DATA);
+	late_col   = inb(__c_ua(dev->base_addr) + TLAN_DIO_DATA + 1);
+	loss       = inb(__c_ua(dev->base_addr) + TLAN_DIO_DATA + 2);
 
 	if (record) {
 		dev->stats.rx_packets += rx_good;
@@ -2155,17 +2165,17 @@ tlan_reset_adapter(struct net_device *dev)
 
 /*  1.	Assert reset bit. */
 
-	data = inl(dev->base_addr + TLAN_HOST_CMD);
+	data = inl(__c_ua(dev->base_addr) + TLAN_HOST_CMD);
 	data |= TLAN_HC_AD_RST;
-	outl(data, dev->base_addr + TLAN_HOST_CMD);
+	outl(data, __c_ua(dev->base_addr) + TLAN_HOST_CMD);
 
 	udelay(1000);
 
 /*  2.	Turn off interrupts. (Probably isn't necessary) */
 
-	data = inl(dev->base_addr + TLAN_HOST_CMD);
+	data = inl(__c_ua(dev->base_addr) + TLAN_HOST_CMD);
 	data |= TLAN_HC_INT_OFF;
-	outl(data, dev->base_addr + TLAN_HOST_CMD);
+	outl(data, __c_ua(dev->base_addr) + TLAN_HOST_CMD);
 
 /*  3.	Clear AREGs and HASHs. */
 
@@ -2179,13 +2189,13 @@ tlan_reset_adapter(struct net_device *dev)
 
 /*  5.	Load Ld_Tmr and Ld_Thr in HOST_CMD. */
 
-	outl(TLAN_HC_LD_TMR | 0x3f, dev->base_addr + TLAN_HOST_CMD);
-	outl(TLAN_HC_LD_THR | 0x9, dev->base_addr + TLAN_HOST_CMD);
+	outl(TLAN_HC_LD_TMR | 0x3f, __c_ua(dev->base_addr) + TLAN_HOST_CMD);
+	outl(TLAN_HC_LD_THR | 0x9, __c_ua(dev->base_addr) + TLAN_HOST_CMD);
 
 /*  6.	Unreset the MII by setting NMRST (in NetSio) to 1. */
 
-	outw(TLAN_NET_SIO, dev->base_addr + TLAN_DIO_ADR);
-	addr = dev->base_addr + TLAN_DIO_DATA + TLAN_NET_SIO;
+	outw(TLAN_NET_SIO, __c_ua(dev->base_addr) + TLAN_DIO_ADR);
+	addr = __c_ua(dev->base_addr) + TLAN_DIO_DATA + TLAN_NET_SIO;
 	tlan_set_bit(TLAN_NET_SIO_NMRST, addr);
 
 /*  7.	Setup the remaining registers. */
@@ -2307,12 +2317,12 @@ tlan_finish_reset(struct net_device *dev)
 	if (status & MII_GS_LINK) {
 		tlan_set_mac(dev, 0, dev->dev_addr);
 		priv->phy_online = 1;
-		outb((TLAN_HC_INT_ON >> 8), dev->base_addr + TLAN_HOST_CMD + 1);
+		outb((TLAN_HC_INT_ON >> 8), __c_ua(dev->base_addr) + TLAN_HOST_CMD + 1);
 		if (debug >= 1 && debug != TLAN_DEBUG_PROBE)
 			outb((TLAN_HC_REQ_INT >> 8),
-			     dev->base_addr + TLAN_HOST_CMD + 1);
-		outl(priv->rx_list_dma, dev->base_addr + TLAN_CH_PARM);
-		outl(TLAN_HC_GO | TLAN_HC_RT, dev->base_addr + TLAN_HOST_CMD);
+			     __c_ua(dev->base_addr) + TLAN_HOST_CMD + 1);
+		outl(priv->rx_list_dma, __c_ua(dev->base_addr) + TLAN_CH_PARM);
+		outl(TLAN_HC_GO | TLAN_HC_RT, __c_ua(dev->base_addr) + TLAN_HOST_CMD);
 		tlan_dio_write8(dev->base_addr, TLAN_LED_REG, TLAN_LED_LINK);
 		netif_carrier_on(dev);
 	} else {
@@ -2842,8 +2852,8 @@ __tlan_mii_read_reg(struct net_device *dev, u16 phy, u16 reg, u16 *val)
 	lockdep_assert_held(&priv->lock);
 
 	err = false;
-	outw(TLAN_NET_SIO, dev->base_addr + TLAN_DIO_ADR);
-	sio = dev->base_addr + TLAN_DIO_DATA + TLAN_NET_SIO;
+	outw(TLAN_NET_SIO, __c_ua(dev->base_addr) + TLAN_DIO_ADR);
+	sio = __c_ua(dev->base_addr) + TLAN_DIO_DATA + TLAN_NET_SIO;
 
 	tlan_mii_sync(dev->base_addr);
 
@@ -2922,8 +2932,9 @@ static void tlan_mii_read_reg(struct net_device *dev, u16 phy, u16 reg,
  *
  **************************************************************/
 
-static void tlan_mii_send_data(u16 base_port, u32 data, unsigned num_bits)
+static void tlan_mii_send_data(uintptr_t _base_port, u32 data, unsigned num_bits)
 {
+	u16 base_port = __c_ua(_base_port);
 	u16 sio;
 	u32 i;
 
@@ -2964,8 +2975,9 @@ static void tlan_mii_send_data(u16 base_port, u32 data, unsigned num_bits)
  *
  **************************************************************/
 
-static void tlan_mii_sync(u16 base_port)
+static void tlan_mii_sync(uintptr_t _base_port)
 {
+	u16 base_port = __c_ua(_base_port);
 	int i;
 	u16 sio;
 
@@ -3012,8 +3024,8 @@ __tlan_mii_write_reg(struct net_device *dev, u16 phy, u16 reg, u16 val)
 
 	lockdep_assert_held(&priv->lock);
 
-	outw(TLAN_NET_SIO, dev->base_addr + TLAN_DIO_ADR);
-	sio = dev->base_addr + TLAN_DIO_DATA + TLAN_NET_SIO;
+	outw(TLAN_NET_SIO, __c_ua(dev->base_addr) + TLAN_DIO_ADR);
+	sio = __c_ua(dev->base_addr) + TLAN_DIO_DATA + TLAN_NET_SIO;
 
 	tlan_mii_sync(dev->base_addr);
 
@@ -3248,24 +3260,24 @@ static int tlan_ee_read_byte(struct net_device *dev, u8 ee_addr, u8 *data)
 
 	spin_lock_irqsave(&priv->lock, flags);
 
-	tlan_ee_send_start(dev->base_addr);
-	err = tlan_ee_send_byte(dev->base_addr, 0xa0, TLAN_EEPROM_ACK);
+	tlan_ee_send_start(__c_ua(dev->base_addr));
+	err = tlan_ee_send_byte(__c_ua(dev->base_addr), 0xa0, TLAN_EEPROM_ACK);
 	if (err) {
 		ret = 1;
 		goto fail;
 	}
-	err = tlan_ee_send_byte(dev->base_addr, ee_addr, TLAN_EEPROM_ACK);
+	err = tlan_ee_send_byte(__c_ua(dev->base_addr), ee_addr, TLAN_EEPROM_ACK);
 	if (err) {
 		ret = 2;
 		goto fail;
 	}
-	tlan_ee_send_start(dev->base_addr);
-	err = tlan_ee_send_byte(dev->base_addr, 0xa1, TLAN_EEPROM_ACK);
+	tlan_ee_send_start(__c_ua(dev->base_addr));
+	err = tlan_ee_send_byte(__c_ua(dev->base_addr), 0xa1, TLAN_EEPROM_ACK);
 	if (err) {
 		ret = 3;
 		goto fail;
 	}
-	tlan_ee_receive_byte(dev->base_addr, data, TLAN_EEPROM_STOP);
+	tlan_ee_receive_byte(__c_ua(dev->base_addr), data, TLAN_EEPROM_STOP);
 fail:
 	spin_unlock_irqrestore(&priv->lock, flags);
 

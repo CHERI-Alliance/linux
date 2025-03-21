@@ -259,8 +259,8 @@ enum RxCfg { RxAllMulti = 0x0004, RxPromisc = 0x0002,
 #define RS_MULTICAST	0x0001
 #define RS_ERRORS	(RS_ALGNERR | RS_BADCRC | RS_TOOLONG | RS_TOOSHORT)
 
-#define set_bits(v, p) outw(inw(p)|(v), (p))
-#define mask_bits(v, p) outw(inw(p)&(v), (p))
+#define set_bits(v, p) outw(inw(__c_a(p))|(v), (__c_a(p)))
+#define mask_bits(v, p) outw(inw(__c_a(p))&(v), (__c_a(p)))
 
 /*====================================================================*/
 
@@ -435,7 +435,7 @@ static int mhz_mfc_config(struct pcmcia_device *link)
     if (pcmcia_loop_config(link, mhz_mfc_config_check, NULL))
 	    return -ENODEV;
 
-    dev->base_addr = link->resource[0]->start;
+    dev->base_addr = __c_fakeu(link->resource[0]->start);
 
     /* Allocate a memory window, for accessing the ISR */
     link->resource[2]->flags = WIN_DATA_WIDTH_8|WIN_MEMORY_TYPE_AM|WIN_ENABLE;
@@ -519,7 +519,7 @@ static void mot_config(struct pcmcia_device *link)
 {
     struct net_device *dev = link->priv;
     struct smc_private *smc = netdev_priv(dev);
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
     unsigned int iouart = link->resource[1]->start;
 
     /* Set UART base address and force map with COR bit 1 */
@@ -539,7 +539,7 @@ static void mot_config(struct pcmcia_device *link)
 static int mot_setup(struct pcmcia_device *link)
 {
     struct net_device *dev = link->priv;
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
     int i, wait, loop;
     u8 mac[ETH_ALEN];
     u_int addr;
@@ -590,7 +590,7 @@ static int smc_config(struct pcmcia_device *link)
 
     i = pcmcia_loop_config(link, smc_configcheck, NULL);
     if (!i)
-	    dev->base_addr = link->resource[0]->start;
+	    dev->base_addr = __c_fakeu(link->resource[0]->start);
 
     return i;
 }
@@ -641,7 +641,7 @@ static int osi_config(struct pcmcia_device *link)
 	link->resource[1]->end = 0;
 	i = pcmcia_request_io(link);
     }
-    dev->base_addr = link->resource[0]->start + 0x10;
+    dev->base_addr = __c_fakeu(link->resource[0]->start) + 0x10;
     return i;
 }
 
@@ -765,7 +765,7 @@ static int smc91c92_resume(struct pcmcia_device *link)
 static int check_sig(struct pcmcia_device *link)
 {
     struct net_device *dev = link->priv;
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
     int width;
     u_short s;
 
@@ -885,7 +885,7 @@ static int smc91c92_config(struct pcmcia_device *link)
 	case 9: name = "110"; break;
 	}
 
-    ioaddr = dev->base_addr;
+    ioaddr = __c_ua(dev->base_addr);
     if (rev > 0) {
 	u_long mcr;
 	SMC_SELECT_BANK(0);
@@ -924,7 +924,7 @@ static int smc91c92_config(struct pcmcia_device *link)
     }
 
     netdev_info(dev, "smc91c%s rev %d: io %#3lx, irq %d, hw_addr %pM\n",
-		name, (rev & 0x0f), dev->base_addr, dev->irq, dev->dev_addr);
+		name, (rev & 0x0f), __c_ua(dev->base_addr), dev->irq, dev->dev_addr);
 
     if (rev > 0) {
 	if (mir & 0x3ff)
@@ -987,7 +987,7 @@ static void mdio_sync(unsigned int addr)
 
 static int mdio_read(struct net_device *dev, int phy_id, int loc)
 {
-    unsigned int addr = dev->base_addr + MGMT;
+    unsigned int addr = __c_ua(dev->base_addr) + MGMT;
     u_int cmd = (0x06<<10)|(phy_id<<5)|loc;
     int i, retval = 0;
 
@@ -1007,7 +1007,7 @@ static int mdio_read(struct net_device *dev, int phy_id, int loc)
 
 static void mdio_write(struct net_device *dev, int phy_id, int loc, int value)
 {
-    unsigned int addr = dev->base_addr + MGMT;
+    unsigned int addr = __c_ua(dev->base_addr) + MGMT;
     u_int cmd = (0x05<<28)|(phy_id<<23)|(loc<<18)|(1<<17)|value;
     int i;
 
@@ -1053,7 +1053,7 @@ static int smc_open(struct net_device *dev)
     struct pcmcia_device *link = smc->p_dev;
 
     dev_dbg(&link->dev, "%s: smc_open(%p), ID/Window %4.4x.\n",
-	  dev->name, dev, inw(dev->base_addr + BANK_SELECT));
+	  dev->name, dev, inw(__c_ua(dev->base_addr) + BANK_SELECT));
 #ifdef PCMCIA_DEBUG
     smc_dump(dev);
 #endif
@@ -1085,7 +1085,7 @@ static int smc_close(struct net_device *dev)
 {
     struct smc_private *smc = netdev_priv(dev);
     struct pcmcia_device *link = smc->p_dev;
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
 
     dev_dbg(&link->dev, "%s: smc_close(), status %4.4x.\n",
 	  dev->name, inw(ioaddr + BANK_SELECT));
@@ -1122,7 +1122,7 @@ static void smc_hardware_send_packet(struct net_device * dev)
 {
     struct smc_private *smc = netdev_priv(dev);
     struct sk_buff *skb = smc->saved_skb;
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
     u_char packet_no;
 
     if (!skb) {
@@ -1184,7 +1184,7 @@ static void smc_hardware_send_packet(struct net_device * dev)
 static void smc_tx_timeout(struct net_device *dev, unsigned int txqueue)
 {
     struct smc_private *smc = netdev_priv(dev);
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
 
     netdev_notice(dev, "transmit timed out, Tx_status %2.2x status %4.4x.\n",
 		  inw(ioaddr)&0xff, inw(ioaddr + 2));
@@ -1199,7 +1199,7 @@ static netdev_tx_t smc_start_xmit(struct sk_buff *skb,
 					struct net_device *dev)
 {
     struct smc_private *smc = netdev_priv(dev);
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
     u_short num_pages;
     short time_out, ir;
     unsigned long flags;
@@ -1268,7 +1268,7 @@ static netdev_tx_t smc_start_xmit(struct sk_buff *skb,
 static void smc_tx_err(struct net_device * dev)
 {
     struct smc_private *smc = netdev_priv(dev);
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
     int saved_packet = inw(ioaddr + PNR_ARR) & 0xff;
     int packet_no = inw(ioaddr + FIFO_PORTS) & 0x7f;
     int tx_status;
@@ -1310,7 +1310,7 @@ static void smc_tx_err(struct net_device * dev)
 static void smc_eph_irq(struct net_device *dev)
 {
     struct smc_private *smc = netdev_priv(dev);
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
     u_short card_stats, ephs;
 
     SMC_SELECT_BANK(0);
@@ -1353,7 +1353,7 @@ static irqreturn_t smc_interrupt(int irq, void *dev_id)
     if (!netif_device_present(dev))
 	return IRQ_NONE;
 
-    ioaddr = dev->base_addr;
+    ioaddr = __c_ua(dev->base_addr);
 
     netdev_dbg(dev, "SMC91c92 interrupt %d at %#x.\n",
 	       irq, ioaddr);
@@ -1472,7 +1472,7 @@ irq_done:
 
 static void smc_rx(struct net_device *dev)
 {
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
     int rx_status;
     int packet_length;	/* Caution: not frame length, rather words
 			   to transfer from the chip. */
@@ -1545,7 +1545,7 @@ static void smc_rx(struct net_device *dev)
 
 static void set_rx_mode(struct net_device *dev)
 {
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
     struct smc_private *smc = netdev_priv(dev);
     unsigned char multicast_table[8];
     unsigned long flags;
@@ -1615,7 +1615,7 @@ static int s9k_config(struct net_device *dev, struct ifmap *map)
 static void smc_set_xcvr(struct net_device *dev, int if_port)
 {
     struct smc_private *smc = netdev_priv(dev);
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
     u_short saved_bank;
 
     saved_bank = inw(ioaddr + BANK_SELECT);
@@ -1638,7 +1638,7 @@ static void smc_set_xcvr(struct net_device *dev, int if_port)
 
 static void smc_reset(struct net_device *dev)
 {
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
     struct smc_private *smc = netdev_priv(dev);
     int i;
 
@@ -1715,7 +1715,7 @@ static void media_check(struct timer_list *t)
 {
     struct smc_private *smc = from_timer(smc, t, media);
     struct net_device *dev = smc->mii_if.dev;
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
     u_short i, media, saved_bank;
     u_short link;
     unsigned long flags;
@@ -1835,7 +1835,7 @@ reschedule:
 
 static int smc_link_ok(struct net_device *dev)
 {
-    unsigned int ioaddr = dev->base_addr;
+    unsigned int ioaddr = __c_ua(dev->base_addr);
     struct smc_private *smc = netdev_priv(dev);
 
     if (smc->cfg & CFG_MII_SELECT) {
@@ -1850,7 +1850,7 @@ static void smc_netdev_get_ecmd(struct net_device *dev,
 				struct ethtool_link_ksettings *ecmd)
 {
 	u16 tmp;
-	unsigned int ioaddr = dev->base_addr;
+	unsigned int ioaddr = __c_ua(dev->base_addr);
 	u32 supported;
 
 	supported = (SUPPORTED_TP | SUPPORTED_AUI |
@@ -1874,7 +1874,7 @@ static int smc_netdev_set_ecmd(struct net_device *dev,
 			       const struct ethtool_link_ksettings *ecmd)
 {
 	u16 tmp;
-	unsigned int ioaddr = dev->base_addr;
+	unsigned int ioaddr = __c_ua(dev->base_addr);
 
 	if (ecmd->base.speed != SPEED_10)
 		return -EINVAL;
@@ -1917,7 +1917,7 @@ static int smc_get_link_ksettings(struct net_device *dev,
 				  struct ethtool_link_ksettings *ecmd)
 {
 	struct smc_private *smc = netdev_priv(dev);
-	unsigned int ioaddr = dev->base_addr;
+	unsigned int ioaddr = __c_ua(dev->base_addr);
 	u16 saved_bank = inw(ioaddr + BANK_SELECT);
 	unsigned long flags;
 
@@ -1936,7 +1936,7 @@ static int smc_set_link_ksettings(struct net_device *dev,
 				  const struct ethtool_link_ksettings *ecmd)
 {
 	struct smc_private *smc = netdev_priv(dev);
-	unsigned int ioaddr = dev->base_addr;
+	unsigned int ioaddr = __c_ua(dev->base_addr);
 	u16 saved_bank = inw(ioaddr + BANK_SELECT);
 	int ret;
 	unsigned long flags;
@@ -1955,7 +1955,7 @@ static int smc_set_link_ksettings(struct net_device *dev,
 static u32 smc_get_link(struct net_device *dev)
 {
 	struct smc_private *smc = netdev_priv(dev);
-	unsigned int ioaddr = dev->base_addr;
+	unsigned int ioaddr = __c_ua(dev->base_addr);
 	u16 saved_bank = inw(ioaddr + BANK_SELECT);
 	u32 ret;
 	unsigned long flags;
@@ -1972,7 +1972,7 @@ static int smc_nway_reset(struct net_device *dev)
 {
 	struct smc_private *smc = netdev_priv(dev);
 	if (smc->cfg & CFG_MII_SELECT) {
-		unsigned int ioaddr = dev->base_addr;
+		unsigned int ioaddr = __c_ua(dev->base_addr);
 		u16 saved_bank = inw(ioaddr + BANK_SELECT);
 		int res;
 
@@ -2000,7 +2000,7 @@ static int smc_ioctl (struct net_device *dev, struct ifreq *rq, int cmd)
 	struct mii_ioctl_data *mii = if_mii(rq);
 	int rc = 0;
 	u16 saved_bank;
-	unsigned int ioaddr = dev->base_addr;
+	unsigned int ioaddr = __c_ua(dev->base_addr);
 	unsigned long flags;
 
 	if (!netif_running(dev))

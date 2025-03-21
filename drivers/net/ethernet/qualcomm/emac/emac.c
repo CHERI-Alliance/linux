@@ -566,7 +566,7 @@ static int emac_probe_resources(struct platform_device *pdev,
 	if (IS_ERR(adpt->csr))
 		return PTR_ERR(adpt->csr);
 
-	netdev->base_addr = (unsigned long)adpt->base;
+	netdev->base_addr = (uintptr_t)adpt->base;
 
 	return 0;
 }

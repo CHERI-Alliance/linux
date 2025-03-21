@@ -645,7 +645,7 @@ static bool mlx5e_decap_take(struct mlx5e_decap_entry *e)
 
 static struct mlx5e_encap_entry *
 mlx5e_encap_get(struct mlx5e_priv *priv, struct mlx5e_encap_key *key,
-		uintptr_t hash_key)
+		unsigned long hash_key)
 {
 	struct mlx5_eswitch *esw = priv->mdev->priv.eswitch;
 	struct mlx5e_encap_key e_key;
@@ -665,7 +665,7 @@ mlx5e_encap_get(struct mlx5e_priv *priv, struct mlx5e_encap_key *key,
 
 static struct mlx5e_decap_entry *
 mlx5e_decap_get(struct mlx5e_priv *priv, struct mlx5e_decap_key *key,
-		uintptr_t hash_key)
+		unsigned long hash_key)
 {
 	struct mlx5_eswitch *esw = priv->mdev->priv.eswitch;
 	struct mlx5e_decap_key r_key;
@@ -827,7 +827,7 @@ int mlx5e_attach_encap(struct mlx5e_priv *priv,
 	struct mlx5e_encap_key key;
 	bool entry_created = false;
 	unsigned short family;
-	uintptr_t hash_key;
+	unsigned long hash_key;
 	int err = 0;
 
 	lockdep_assert_held(&esw->offloads.encap_tbl_lock);
@@ -946,7 +946,7 @@ int mlx5e_attach_decap(struct mlx5e_priv *priv,
 	struct mlx5_pkt_reformat_params reformat_params;
 	struct mlx5e_decap_entry *d;
 	struct mlx5e_decap_key key;
-	uintptr_t hash_key;
+	unsigned long hash_key;
 	int err = 0;
 
 	if (sizeof(attr->eth) > MLX5_CAP_ESW(priv->mdev, max_encap_header_size)) {

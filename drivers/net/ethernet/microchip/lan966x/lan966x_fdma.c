@@ -605,8 +605,7 @@ allocate_new:
 		dcb_reload++;
 		dcb_reload &= FDMA_DCB_MAX - 1;
 
-		nextptr = rx->dma + ((unsigned long)old_dcb -
-				     (unsigned long)rx->dcbs);
+		nextptr = rx->dma + (__c_pa(old_dcb) - __c_pa(rx->dcbs));
 		lan966x_fdma_rx_add_dcb(rx, old_dcb, nextptr);
 		lan966x_fdma_rx_reload(rx);
 	}

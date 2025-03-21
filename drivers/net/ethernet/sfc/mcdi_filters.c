@@ -35,7 +35,7 @@ static unsigned int
 efx_mcdi_filter_entry_flags(const struct efx_mcdi_filter_table *table,
 			   unsigned int filter_idx)
 {
-	return table->entry[filter_idx].spec & EFX_EF10_FILTER_FLAGS;
+	return __c_ua(table->entry[filter_idx].spec) & EFX_EF10_FILTER_FLAGS;
 }
 
 static u32 efx_mcdi_filter_get_unsafe_id(u32 filter_id)
@@ -86,7 +86,7 @@ efx_mcdi_filter_set_entry(struct efx_mcdi_filter_table *table,
 			  const struct efx_filter_spec *spec,
 			  unsigned int flags)
 {
-	table->entry[filter_idx].spec =	(unsigned long)spec | flags;
+	table->entry[filter_idx].spec =	(uintptr_t)spec | flags;
 }
 
 static void

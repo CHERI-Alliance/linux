@@ -287,6 +287,7 @@ __c_fakeu(ptraddr_t val)
 #ifdef CONFIG_CHERI_KERNEL
 
 #define __cheri_pointer_align __attribute__((aligned(__SIZEOF_POINTER__)))
+#define __packed_if_not_cheri
 
 /* Kernel root capabilities. Use with care. */
 extern void * kernel_data_cap;
@@ -345,6 +346,7 @@ cheri_build_kernel_data_cap(ptraddr_t base, ptraddr_t addr, size_t len)
 #else
 
 #define __cheri_pointer_align
+#define __packed_if_not_cheri __packed
 
 static __always_inline void *
 cheri_kcap_ro(ptraddr_t addr)

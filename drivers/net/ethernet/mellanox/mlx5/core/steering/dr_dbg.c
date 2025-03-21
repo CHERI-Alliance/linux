@@ -7,7 +7,7 @@
 #include <linux/version.h>
 #include "dr_types.h"
 
-#define DR_DBG_PTR_TO_ID(p) ((u64)(uintptr_t)(p) & 0xFFFFFFFFULL)
+#define DR_DBG_PTR_TO_ID(p) ((u64)__c_pa(p) & 0xFFFFFFFFULL)
 
 enum dr_dump_rec_type {
 	DR_DUMP_REC_TYPE_DOMAIN = 3000,

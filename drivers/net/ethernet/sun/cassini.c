@@ -1191,8 +1191,7 @@ static void cas_init_rx_dma(struct cas *cp)
 		val |= CAS_BASE(RX_CFG_DESC_RING1, RX_DESC_RINGN_INDEX(1));
 	writel(val, cp->regs + REG_RX_CFG);
 
-	val = (unsigned long) cp->init_rxds[0] -
-		(unsigned long) cp->init_block;
+	val = __c_pa(cp->init_rxds[0]) - __c_pa(cp->init_block);
 	writel((desc_dma + val) >> 32, cp->regs + REG_RX_DB_HI);
 	writel((desc_dma + val) & 0xffffffff, cp->regs + REG_RX_DB_LOW);
 	writel(RX_DESC_RINGN_SIZE(0) - 4, cp->regs + REG_RX_KICK);
@@ -1201,8 +1200,7 @@ static void cas_init_rx_dma(struct cas *cp)
 		/* rx desc 2 is for IPSEC packets. however,
 		 * we don't it that for that purpose.
 		 */
-		val = (unsigned long) cp->init_rxds[1] -
-			(unsigned long) cp->init_block;
+		val = __c_pa(cp->init_rxds[1]) - __c_pa(cp->init_block);
 		writel((desc_dma + val) >> 32, cp->regs + REG_PLUS_RX_DB1_HI);
 		writel((desc_dma + val) & 0xffffffff, cp->regs +
 		       REG_PLUS_RX_DB1_LOW);
@@ -1211,16 +1209,14 @@ static void cas_init_rx_dma(struct cas *cp)
 	}
 
 	/* rx completion registers */
-	val = (unsigned long) cp->init_rxcs[0] -
-		(unsigned long) cp->init_block;
+	val = __c_pa(cp->init_rxcs[0]) - __c_pa(cp->init_block);
 	writel((desc_dma + val) >> 32, cp->regs + REG_RX_CB_HI);
 	writel((desc_dma + val) & 0xffffffff, cp->regs + REG_RX_CB_LOW);
 
 	if (cp->cas_flags & CAS_FLAG_REG_PLUS) {
 		/* rx comp 2-4 */
 		for (i = 1; i < MAX_RX_COMP_RINGS; i++) {
-			val = (unsigned long) cp->init_rxcs[i] -
-				(unsigned long) cp->init_block;
+			val = __c_pa(cp->init_rxcs[i]) - __c_pa(cp->init_block);
 			writel((desc_dma + val) >> 32, cp->regs +
 			       REG_PLUS_RX_CBN_HI(i));
 			writel((desc_dma + val) & 0xffffffff, cp->regs +
@@ -2749,7 +2745,7 @@ static inline int cas_xmit_tx_ringN(struct cas *cp, int ring,
 			       offset_in_page(skb->data), len, DMA_TO_DEVICE);
 
 	tentry = entry;
-	tabort = cas_calc_tabort(cp, (unsigned long) skb->data, len);
+	tabort = cas_calc_tabort(cp, __c_pa(skb->data), len);
 	if (unlikely(tabort)) {
 		/* NOTE: len is always >  tabort */
 		cas_write_txd(cp, ring, entry, mapping, len - tabort,
@@ -2849,8 +2845,7 @@ static void cas_init_tx_dma(struct cas *cp)
 
 	/* write out tx ring info and tx desc bases */
 	for (i = 0; i < MAX_TX_RINGS; i++) {
-		off = (unsigned long) cp->init_txds[i] -
-			(unsigned long) cp->init_block;
+		off = __c_pa(cp->init_txds[i]) - __c_pa(cp->init_block);
 
 		val |= CAS_TX_RINGN_BASE(i);
 		writel((desc_dma + off) >> 32, cp->regs + REG_TX_DBN_HI(i));

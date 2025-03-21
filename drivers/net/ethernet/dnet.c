@@ -522,11 +522,11 @@ static netdev_tx_t dnet_start_xmit(struct sk_buff *skb, struct net_device *dev)
 
 	dnet_readl(bp, TX_STATUS);
 
-	bufp = (unsigned int *)(((unsigned long) skb->data) & ~0x3UL);
+	bufp = (unsigned int *)(((uintptr_t) skb->data) & ~0x3UL);
 	wrsz = (u32) skb->len + 3;
-	wrsz += ((unsigned long) skb->data) & 0x3;
+	wrsz += (__c_pa(skb->data) & 0x3);
 	wrsz >>= 2;
-	tx_cmd = ((((unsigned long)(skb->data)) & 0x03) << 16) | (u32) skb->len;
+	tx_cmd = ((__c_pa(skb->data) & 0x03) << 16) | (u32) skb->len;
 
 	/* check if there is enough room for the current frame */
 	if (wrsz < (DNET_FIFO_SIZE - dnet_readl(bp, TX_FIFO_WCNT))) {
@@ -791,7 +791,7 @@ static int dnet_probe(struct platform_device *pdev)
 	netif_napi_add(dev, &bp->napi, dnet_poll);
 	dev->ethtool_ops = &dnet_ethtool_ops;
 
-	dev->base_addr = (unsigned long)bp->regs;
+	dev->base_addr = (uintptr_t)bp->regs;
 
 	bp->capabilities = dnet_readl(bp, VERCAPS) & DNET_CAPS_MASK;
 
