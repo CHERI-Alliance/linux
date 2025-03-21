@@ -561,7 +561,7 @@ static void nfp_net_xfrm_del_state(struct net_device *dev, struct xfrm_state *x)
 	if (err)
 		nn_warn(nn, "Failed to invalidate SA in hardware\n");
 
-	xa_erase(&nn->xa_ipsec, x->xso.offload_handle - 1);
+	xa_erase(&nn->xa_ipsec, __c_ua(x->xso.offload_handle) - 1);
 }
 
 static const struct xfrmdev_ops nfp_net_ipsec_xfrmdev_ops = {
@@ -599,7 +599,7 @@ bool nfp_net_ipsec_tx_prep(struct nfp_net_dp *dp, struct sk_buff *skb,
 
 	offload_info->seq_hi = xo->seq.hi;
 	offload_info->seq_low = xo->seq.low;
-	offload_info->handle = x->xso.offload_handle;
+	offload_info->handle = __c_ua(x->xso.offload_handle);
 
 	return true;
 }

@@ -813,7 +813,7 @@ static int ocelot_flower_parse(struct ocelot *ocelot, int port, bool ingress,
 	int ret;
 
 	filter->prio = f->common.prio;
-	filter->id.cookie = f->cookie;
+	filter->id.cookie = __c_ua(f->cookie);
 	filter->id.tc_offload = true;
 
 	ret = ocelot_flower_parse_action(ocelot, port, ingress, f, filter);
@@ -912,7 +912,7 @@ int ocelot_cls_flower_replace(struct ocelot *ocelot, int port,
 	}
 
 	filter = ocelot_vcap_block_find_filter_by_id(&ocelot->block[block_id],
-						     f->cookie, true);
+						     __c_ua(f->cookie), true);
 	if (filter) {
 		/* Filter already exists on other ports */
 		if (!ingress) {
@@ -981,7 +981,7 @@ int ocelot_cls_flower_destroy(struct ocelot *ocelot, int port,
 
 	block = &ocelot->block[block_id];
 
-	filter = ocelot_vcap_block_find_filter_by_id(block, f->cookie, true);
+	filter = ocelot_vcap_block_find_filter_by_id(block, __c_ua(f->cookie), true);
 	if (!filter)
 		return 0;
 
@@ -1024,7 +1024,7 @@ int ocelot_cls_flower_stats(struct ocelot *ocelot, int port,
 
 	block = &ocelot->block[block_id];
 
-	filter = ocelot_vcap_block_find_filter_by_id(block, f->cookie, true);
+	filter = ocelot_vcap_block_find_filter_by_id(block, __c_ua(f->cookie), true);
 	if (!filter || filter->type == OCELOT_VCAP_FILTER_DUMMY)
 		return 0;
 

@@ -534,17 +534,18 @@ static inline bool nicvf_xdp_rx(struct nicvf *nic, struct bpf_prog *prog,
 	struct page *page;
 	u32 action;
 	u16 len, offset = 0;
-	u64 dma_addr, cpu_addr;
+	u64 dma_addr, paddr;
+	uintptr_t cpu_addr;
 	void *orig_data;
 
 	/* Retrieve packet buffer's DMA address and length */
 	len = *((u16 *)((void *)cqe_rx + (3 * sizeof(u64))));
 	dma_addr = *((u64 *)((void *)cqe_rx + (7 * sizeof(u64))));
 
-	cpu_addr = nicvf_iova_to_phys(nic, dma_addr);
-	if (!cpu_addr)
+	paddr = nicvf_iova_to_phys(nic, dma_addr);
+	if (!paddr)
 		return false;
-	cpu_addr = (u64)phys_to_virt(cpu_addr);
+	cpu_addr = (uintptr_t)phys_to_virt(paddr);
 	page = virt_to_page((void *)cpu_addr);
 
 	xdp_init_buff(&xdp, RCV_FRAG_LEN + XDP_PACKET_HEADROOM,

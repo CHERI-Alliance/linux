@@ -752,7 +752,8 @@ typhoon_start_tx(struct sk_buff *skb, struct net_device *dev)
 	first_txd->flags = TYPHOON_TX_DESC | TYPHOON_DESC_VALID;
 	first_txd->numDesc = 0;
 	first_txd->len = 0;
-	first_txd->tx_addr = (u64)((uintptr_t) skb);
+	/* FIXCHERI: Preserve full pointer? */
+	first_txd->tx_addr = (u64)__c_pa(skb);
 	first_txd->processFlags = 0;
 
 	if (skb->ip_summed == CHECKSUM_PARTIAL) {
@@ -1516,7 +1517,8 @@ typhoon_clean_tx(struct typhoon *tp, struct transmit_ring *txRing,
 			/* This tx_desc describes a packet.
 			 */
 			unsigned long ptr = tx->tx_addr;
-			struct sk_buff *skb = (struct sk_buff *) ptr;
+			/* FIXCHERI: Remove use of cheri_make_kernel_data_cap() */
+			struct sk_buff *skb = (struct sk_buff *)cheri_make_kernel_data_cap(ptr, sizeof(*skb));
 			dev_kfree_skb_irq(skb);
 		} else if (type == TYPHOON_FRAG_DESC) {
 			/* This tx_desc describes a memory mapping. Free it.

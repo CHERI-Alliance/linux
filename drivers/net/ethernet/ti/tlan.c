@@ -215,22 +215,31 @@ static void	tlan_ee_receive_byte(u16, u8 *, int);
 static int	tlan_ee_read_byte(struct net_device *, u8, u8 *);
 
 
+/* FIXCHERI: tlan_store_skb() for CHERI is a very ugly hack! */
 static inline void
 tlan_store_skb(struct tlan_list *tag, struct sk_buff *skb)
 {
+#ifdef CONFIG_CHERI_KERNEL
+	*(uintptr_t *)(void *)&tag->buffer[8] = (uintptr_t)skb;
+#else
 	uintptr_t addr = (uintptr_t)skb;
 	tag->buffer[9].address = addr;
 	tag->buffer[8].address = upper_32_bits(addr);
+#endif
 }
 
 static inline struct sk_buff *
 tlan_get_skb(const struct tlan_list *tag)
 {
+#ifdef CONFIG_CHERI_KERNEL
+	return (struct sk_buff *)*(uintptr_t *)(void *)&tag->buffer[8];
+#else
 	unsigned long addr;
 
 	addr = tag->buffer[9].address;
 	addr |= ((unsigned long) tag->buffer[8].address << 16) << 16;
 	return (struct sk_buff *) addr;
+#endif
 }
 
 static u32
@@ -518,7 +527,7 @@ static int tlan_probe1(struct pci_dev *pdev, long ioaddr, int irq, int rev,
 			priv->adapter = &board_info[14];
 			priv->adapter_rev = 10;		/* TLAN 1.0 */
 		}
-		dev->base_addr = ioaddr;
+		dev->base_addr = __c_fakeu(ioaddr);
 		dev->irq = irq;
 	}
 

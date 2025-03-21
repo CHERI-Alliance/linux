@@ -143,8 +143,8 @@ struct tlan_list {
 	u32		forward;
 	u16		c_stat;
 	u16		frame_size;
-	struct tlan_buffer buffer[TLAN_BUFFERS_PER_LIST];
-};
+	struct tlan_buffer buffer[TLAN_BUFFERS_PER_LIST] __cheri_pointer_align;
+} __cheri_pointer_align;
 
 
 typedef u8 TLanBuffer[TLAN_MAX_FRAME_SIZE];

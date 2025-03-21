@@ -88,8 +88,8 @@ static irqreturn_t ei_irq_wrapper(int irq, void *dev_id);
 static void ei_watchdog(struct timer_list *t);
 static void axnet_reset_8390(struct net_device *dev);
 
-static int mdio_read(unsigned int addr, int phy_id, int loc);
-static void mdio_write(unsigned int addr, int phy_id, int loc, int value);
+static int mdio_read(uintptr_t addr, int phy_id, int loc);
+static void mdio_write(uintptr_t addr, int phy_id, int loc, int value);
 
 static void get_8390_hdr(struct net_device *,
 			 struct e8390_pkt_hdr *, int);
@@ -426,8 +426,9 @@ static void mdio_sync(unsigned int addr)
     }
 }
 
-static int mdio_read(unsigned int addr, int phy_id, int loc)
+static int mdio_read(uintptr_t _addr, int phy_id, int loc)
 {
+    unsigned long addr = __c_ua(_addr);
     u_int cmd = (0xf6<<10)|(phy_id<<5)|loc;
     int i, retval = 0;
 
@@ -445,8 +446,9 @@ static int mdio_read(unsigned int addr, int phy_id, int loc)
     return (retval>>1) & 0xffff;
 }
 
-static void mdio_write(unsigned int addr, int phy_id, int loc, int value)
+static void mdio_write(uintptr_t _addr, int phy_id, int loc, int value)
 {
+    unsigned long addr = __c_ua(_addr);
     u_int cmd = (0x05<<28)|(phy_id<<23)|(loc<<18)|(1<<17)|value;
     int i;
 
@@ -908,7 +910,7 @@ static int ax_close(struct net_device *dev)
 
 static void axnet_tx_timeout(struct net_device *dev, unsigned int txqueue)
 {
-	long e8390_base = dev->base_addr;
+	long e8390_base = __c_ua(dev->base_addr);
 	struct ei_device *ei_local = netdev_priv(dev);
 	int txsr, isr, tickssofar = jiffies - dev_trans_start(dev);
 	unsigned long flags;
@@ -954,7 +956,7 @@ static void axnet_tx_timeout(struct net_device *dev, unsigned int txqueue)
 static netdev_tx_t axnet_start_xmit(struct sk_buff *skb,
 					  struct net_device *dev)
 {
-	long e8390_base = dev->base_addr;
+	long e8390_base = __c_ua(dev->base_addr);
 	struct ei_device *ei_local = netdev_priv(dev);
 	int length, send_length, output_page;
 	unsigned long flags;
@@ -1094,7 +1096,7 @@ static irqreturn_t ax_interrupt(int irq, void *dev_id)
 	int handled = 0;
 	unsigned long flags;
 
-	e8390_base = dev->base_addr;
+	e8390_base = __c_ua(dev->base_addr);
 	ei_local = netdev_priv(dev);
 
 	/*
@@ -1210,7 +1212,7 @@ static irqreturn_t ax_interrupt(int irq, void *dev_id)
 
 static void ei_tx_err(struct net_device *dev)
 {
-	long e8390_base = dev->base_addr;
+	long e8390_base = __c_ua(dev->base_addr);
 	unsigned char txsr = inb_p(e8390_base+EN0_TSR);
 	unsigned char tx_was_aborted = txsr & (ENTSR_ABT+ENTSR_FU);
 
@@ -1250,7 +1252,7 @@ static void ei_tx_err(struct net_device *dev)
 
 static void ei_tx_intr(struct net_device *dev)
 {
-	long e8390_base = dev->base_addr;
+	long e8390_base = __c_ua(dev->base_addr);
 	struct ei_device *ei_local = netdev_priv(dev);
 	int status = inb(e8390_base + EN0_TSR);
     
@@ -1337,7 +1339,7 @@ static void ei_tx_intr(struct net_device *dev)
 
 static void ei_receive(struct net_device *dev)
 {
-	long e8390_base = dev->base_addr;
+	long e8390_base = __c_ua(dev->base_addr);
 	struct ei_device *ei_local = netdev_priv(dev);
 	unsigned char rxing_page, this_frame, next_frame;
 	unsigned short current_offset;
@@ -1454,7 +1456,7 @@ static void ei_receive(struct net_device *dev)
 static void ei_rx_overrun(struct net_device *dev)
 {
 	struct axnet_dev *info = PRIV(dev);
-	long e8390_base = dev->base_addr;
+	long e8390_base = __c_ua(dev->base_addr);
 	unsigned char was_txing, must_resend = 0;
 	struct ei_device *ei_local = netdev_priv(dev);
     
@@ -1519,7 +1521,7 @@ static void ei_rx_overrun(struct net_device *dev)
  
 static struct net_device_stats *get_stats(struct net_device *dev)
 {
-	long ioaddr = dev->base_addr;
+	long ioaddr = __c_ua(dev->base_addr);
 	struct ei_device *ei_local = netdev_priv(dev);
 	unsigned long flags;
     
@@ -1567,7 +1569,7 @@ static inline void make_mc_bits(u8 *bits, struct net_device *dev)
  
 static void do_set_multicast_list(struct net_device *dev)
 {
-	long e8390_base = dev->base_addr;
+	long e8390_base = __c_ua(dev->base_addr);
 	int i;
 	struct ei_device *ei_local = netdev_priv(dev);
 
@@ -1626,7 +1628,7 @@ static void set_multicast_list(struct net_device *dev)
 static void AX88190_init(struct net_device *dev, int startp)
 {
 	struct axnet_dev *info = PRIV(dev);
-	long e8390_base = dev->base_addr;
+	long e8390_base = __c_ua(dev->base_addr);
 	struct ei_device *ei_local = netdev_priv(dev);
 	int i;
 	int endcfg = ei_local->word16 ? (0x48 | ENDCFG_WTS) : 0x48;
@@ -1692,7 +1694,7 @@ static void AX88190_init(struct net_device *dev, int startp)
 static void NS8390_trigger_send(struct net_device *dev, unsigned int length,
 								int start_page)
 {
-	long e8390_base = dev->base_addr;
+	long e8390_base = __c_ua(dev->base_addr);
  	struct ei_device *ei_local __attribute((unused)) = netdev_priv(dev);
     
 	if (inb_p(e8390_base) & E8390_TRANS) 

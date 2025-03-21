@@ -206,7 +206,7 @@ netdev_tx_t mlxbf_gige_start_xmit(struct sk_buff *skb,
 		return NETDEV_TX_OK;
 	}
 
-	buff_addr = (intptr_t)skb->data;
+	buff_addr = __c_pa(skb->data);
 	start_dma_page = buff_addr >> MLXBF_GIGE_DMA_PAGE_SHIFT;
 	end_dma_page   = (buff_addr + skb->len - 1) >> MLXBF_GIGE_DMA_PAGE_SHIFT;
 

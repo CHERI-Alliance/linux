@@ -1462,7 +1462,7 @@ cs89x0_probe1(struct net_device *dev, void __iomem *ioaddr, int modular)
 			lp->adapter_cnf = eeprom_buff[ADAPTER_CNF_OFFSET / 2];
 		/* Store ISA configuration */
 		lp->isa_config = eeprom_buff[ISA_CNF_OFFSET / 2];
-		dev->mem_start = eeprom_buff[PACKET_PAGE_OFFSET / 2] << 8;
+		dev->mem_start = __c_fakeu(eeprom_buff[PACKET_PAGE_OFFSET / 2] << 8);
 
 		/* eeprom_buff has 32-bit ints, so we can't just memcpy it */
 		/* store the initial memory base address */

@@ -685,7 +685,7 @@ struct mlxsw_reg_trans {
 	struct completion completion;
 	atomic_t active;
 	mlxsw_reg_trans_cb_t *cb;
-	unsigned long cb_priv;
+	uintptr_t cb_priv;
 	const struct mlxsw_reg_info *reg;
 	enum mlxsw_core_reg_access_type type;
 	int err;
@@ -968,7 +968,7 @@ static int mlxsw_emad_reg_access(struct mlxsw_core *mlxsw_core,
 				 struct mlxsw_reg_trans *trans,
 				 struct list_head *bulk_list,
 				 mlxsw_reg_trans_cb_t *cb,
-				 unsigned long cb_priv, u64 tid)
+				 uintptr_t cb_priv, u64 tid)
 {
 	struct sk_buff *skb;
 	int err;
@@ -2678,7 +2678,7 @@ static int mlxsw_core_reg_access_emad(struct mlxsw_core *mlxsw_core,
 				      enum mlxsw_core_reg_access_type type,
 				      struct list_head *bulk_list,
 				      mlxsw_reg_trans_cb_t *cb,
-				      unsigned long cb_priv)
+				      uintptr_t cb_priv)
 {
 	u64 tid = mlxsw_core_tid_get(mlxsw_core);
 	struct mlxsw_reg_trans *trans;
@@ -2700,7 +2700,7 @@ static int mlxsw_core_reg_access_emad(struct mlxsw_core *mlxsw_core,
 int mlxsw_reg_trans_query(struct mlxsw_core *mlxsw_core,
 			  const struct mlxsw_reg_info *reg, char *payload,
 			  struct list_head *bulk_list,
-			  mlxsw_reg_trans_cb_t *cb, unsigned long cb_priv)
+			  mlxsw_reg_trans_cb_t *cb, uintptr_t cb_priv)
 {
 	return mlxsw_core_reg_access_emad(mlxsw_core, reg, payload,
 					  MLXSW_CORE_REG_ACCESS_TYPE_QUERY,
@@ -2711,7 +2711,7 @@ EXPORT_SYMBOL(mlxsw_reg_trans_query);
 int mlxsw_reg_trans_write(struct mlxsw_core *mlxsw_core,
 			  const struct mlxsw_reg_info *reg, char *payload,
 			  struct list_head *bulk_list,
-			  mlxsw_reg_trans_cb_t *cb, unsigned long cb_priv)
+			  mlxsw_reg_trans_cb_t *cb, uintptr_t cb_priv)
 {
 	return mlxsw_core_reg_access_emad(mlxsw_core, reg, payload,
 					  MLXSW_CORE_REG_ACCESS_TYPE_WRITE,
@@ -2891,7 +2891,7 @@ free_in_mbox:
 
 static void mlxsw_core_reg_access_cb(struct mlxsw_core *mlxsw_core,
 				     char *payload, size_t payload_len,
-				     unsigned long cb_priv)
+				     uintptr_t cb_priv)
 {
 	char *orig_payload = (char *) cb_priv;
 

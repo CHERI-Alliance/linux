@@ -83,7 +83,7 @@ enum cn10k_cpt_hw_state_e {
 
 struct cn10k_ipsec {
 	/* Outbound CPT */
-	u64 io_addr;
+	uintptr_t io_addr;
 	atomic_t cpt_state;
 	struct cn10k_cpt_inst_queue iq;
 

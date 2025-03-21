@@ -28,12 +28,12 @@ static void sparx5_tc_matchall_parse_action(struct sparx5_port *port,
 					    struct sparx5_mall_entry *entry,
 					    struct flow_action_entry *action,
 					    bool ingress,
-					    unsigned long cookie)
+					    uintptr_t cookie)
 {
 	entry->port = port;
 	entry->type = action->id;
 	entry->ingress = ingress;
-	entry->cookie = cookie;
+	entry->cookie = __c_ua(cookie);
 }
 
 static void
@@ -102,7 +102,7 @@ static int sparx5_tc_matchall_replace(struct net_device *ndev,
 	case FLOW_ACTION_GOTO:
 		err = vcap_enable_lookups(sparx5->vcap_ctrl, ndev,
 					  tmo->common.chain_index,
-					  action->chain_index, tmo->cookie,
+					  action->chain_index, __c_ua(tmo->cookie),
 					  true);
 		if (err == -EFAULT) {
 			NL_SET_ERR_MSG_MOD(tmo->common.extack,
@@ -145,7 +145,7 @@ static int sparx5_tc_matchall_destroy(struct net_device *ndev,
 	int err = 0;
 
 	entry = sparx5_tc_matchall_entry_find(&sparx5->mall_entries,
-					      tmo->cookie);
+					      __c_ua(tmo->cookie));
 	if (!entry)
 		return -ENOENT;
 
@@ -153,7 +153,7 @@ static int sparx5_tc_matchall_destroy(struct net_device *ndev,
 		sparx5_mirror_del(entry);
 	} else if (entry->type == FLOW_ACTION_GOTO) {
 		err = vcap_enable_lookups(sparx5->vcap_ctrl, ndev,
-					  0, 0, tmo->cookie, false);
+					  0, 0, __c_ua(tmo->cookie), false);
 	} else {
 		NL_SET_ERR_MSG_MOD(tmo->common.extack, "Unsupported action");
 		err = -EOPNOTSUPP;
@@ -173,7 +173,7 @@ static int sparx5_tc_matchall_stats(struct net_device *ndev,
 	struct sparx5_mall_entry *entry;
 
 	entry = sparx5_tc_matchall_entry_find(&sparx5->mall_entries,
-					      tmo->cookie);
+					      __c_ua(tmo->cookie));
 	if (!entry)
 		return -ENOENT;
 

@@ -53,7 +53,7 @@ struct octnic_ctrl_pkt {
 	u64 iq_no;
 
 	/** The network device that issued the control command. */
-	u64 netpndev;
+	uintptr_t netpndev;
 
 	/** Callback function called when the command has been fetched */
 	octnic_ctrl_pkt_cb_fn_t cb_fn;
