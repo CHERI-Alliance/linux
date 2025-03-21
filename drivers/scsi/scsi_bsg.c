@@ -7,8 +7,6 @@
 #include <scsi/sg.h>
 #include "scsi_priv.h"
 
-#define uptr64(val) uaddr_to_user_ptr(val)
-
 static int scsi_bsg_sg_io_fn(struct request_queue *q, struct sg_io_v4 *hdr,
 		bool open_for_write, unsigned int timeout)
 {
@@ -39,7 +37,7 @@ static int scsi_bsg_sg_io_fn(struct request_queue *q, struct sg_io_v4 *hdr,
 	}
 
 	ret = -EFAULT;
-	if (copy_from_user(scmd->cmnd, uptr64(hdr->request), scmd->cmd_len))
+	if (copy_from_user(scmd->cmnd, (void * __user)hdr->request, scmd->cmd_len))
 		goto out_put_request;
 	ret = -EPERM;
 	if (!scsi_cmd_allowed(scmd->cmnd, open_for_write))
@@ -47,10 +45,10 @@ static int scsi_bsg_sg_io_fn(struct request_queue *q, struct sg_io_v4 *hdr,
 
 	ret = 0;
 	if (hdr->dout_xfer_len) {
-		ret = blk_rq_map_user(rq->q, rq, NULL, uptr64(hdr->dout_xferp),
+		ret = blk_rq_map_user(rq->q, rq, NULL, (void * __user)hdr->dout_xferp,
 				hdr->dout_xfer_len, GFP_KERNEL);
 	} else if (hdr->din_xfer_len) {
-		ret = blk_rq_map_user(rq->q, rq, NULL, uptr64(hdr->din_xferp),
+		ret = blk_rq_map_user(rq->q, rq, NULL, (void * __user)hdr->din_xferp,
 				hdr->din_xfer_len, GFP_KERNEL);
 	}
 
@@ -77,7 +75,7 @@ static int scsi_bsg_sg_io_fn(struct request_queue *q, struct sg_io_v4 *hdr,
 		int len = min_t(unsigned int, hdr->max_response_len,
 				scmd->sense_len);
 
-		if (copy_to_user(uptr64(hdr->response), scmd->sense_buffer,
+		if (copy_to_user((void * __user)hdr->response, scmd->sense_buffer,
 				 len))
 			ret = -EFAULT;
 		else

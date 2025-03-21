@@ -628,7 +628,7 @@ efct_hw_io_init_sges(struct efct_hw *hw,
 
 int
 efct_hw_io_add_sge(struct efct_hw *hw, struct efct_hw_io *io,
-		   uintptr_t addr, u32 length);
+		   unsigned long addr, u32 length);
 int
 efct_hw_io_abort(struct efct_hw *hw, struct efct_hw_io *io_to_abort,
 		 bool send_abts, void *cb, void *arg);

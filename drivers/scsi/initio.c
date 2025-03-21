@@ -2891,7 +2891,7 @@ static int initio_probe_one(struct pci_dev *pdev,
 	shost->max_lun = 32;	/* 10/21/97                     */
 	shost->irq = pdev->irq;
 	shost->this_id = host->scsi_id;	/* Assign HCS index           */
-	shost->base = host->addr;
+	shost->base = __c_fakeu(host->addr);
 	shost->sg_tablesize = TOTAL_SG_ENTRY;
 
 	error = request_irq(pdev->irq, i91u_intr, IRQF_SHARED, "i91u", shost);

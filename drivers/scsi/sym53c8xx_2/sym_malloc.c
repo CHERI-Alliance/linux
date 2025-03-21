@@ -44,6 +44,7 @@
  *  pages of memory that will be useful if we ever need to deal 
  *  with IO MMUs for PCI.
  */
+/* FIXCHERI: Should set bounds but that will likely trap in __sym_mfree(). */
 static void *___sym_malloc(m_pool_p mp, int size)
 {
 	int i = 0;
@@ -95,7 +96,8 @@ static void ___sym_mfree(m_pool_p mp, void *ptr, int size)
 	int i = 0;
 	int s = (1 << SYM_MEM_SHIFT);
 	m_link_p q;
-	unsigned long a, b;
+	uintptr_t a;
+	unsigned long b;
 	m_link_p h = mp->h;
 
 #ifdef DEBUG
@@ -122,7 +124,7 @@ static void ___sym_mfree(m_pool_p mp, void *ptr, int size)
 #endif
 			break;
 		}
-		b = a ^ s;
+		b = __c_ua(a) ^ s;
 		q = &h[i];
 		while (q->next && q->next != (m_link_p)(uintptr_t) b) {
 			q = q->next;

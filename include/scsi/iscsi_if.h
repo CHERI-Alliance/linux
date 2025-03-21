@@ -738,8 +738,8 @@ enum iscsi_ping_status_code {
 	ISCSI_PING_NO_ARP_RECEIVED		= 0x9,
 };
 
-#define iscsi_ptr(_handle) ((void*)(unsigned long)_handle)
-#define iscsi_handle(_ptr) ((uint64_t)(uintptr_t)_ptr)
+#define iscsi_ptr(_handle) (__c_fakep(_handle))
+#define iscsi_handle(_ptr) ((uint64_t __force)(uintptr_t __force)_ptr)
 
 /*
  * These flags presents iSCSI Data-Path capabilities.

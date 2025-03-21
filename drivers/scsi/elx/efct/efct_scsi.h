@@ -126,8 +126,8 @@ enum efct_scsi_tmf_resp {
 };
 
 struct efct_scsi_sgl {
-	uintptr_t	addr;
-	uintptr_t	dif_addr;
+	unsigned long	addr;
+	unsigned long	dif_addr;
 	size_t		len;
 };
 

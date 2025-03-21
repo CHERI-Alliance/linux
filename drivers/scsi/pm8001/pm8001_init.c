@@ -544,7 +544,7 @@ static struct pm8001_hba_info *pm8001_pci_alloc(struct pci_dev *pdev,
 
 	pm8001_ha->pdev = pdev;
 	pm8001_ha->dev = &pdev->dev;
-	pm8001_ha->chip_id = ent->driver_data;
+	pm8001_ha->chip_id = __c_ua(ent->driver_data);
 	pm8001_ha->chip = &pm8001_chips[pm8001_ha->chip_id];
 	pm8001_ha->irq = pdev->irq;
 	pm8001_ha->sas = sha;

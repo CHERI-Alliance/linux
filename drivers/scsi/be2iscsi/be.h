@@ -148,7 +148,7 @@ struct be_ctrl_info {
 
 /* Returns number of pages spanned by the data starting at the given addr */
 #define PAGES_4K_SPANNED(_address, size)				\
-		((u32)((((size_t)(_address) & (PAGE_SIZE_4K - 1)) +	\
+		((u32)((((size_t)__c_pa(_address) & (PAGE_SIZE_4K - 1)) +	\
 			(size) + (PAGE_SIZE_4K - 1)) >> PAGE_SHIFT_4K))
 
 /* Returns bit offset within a DWORD of a bitfield */

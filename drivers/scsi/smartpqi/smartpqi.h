@@ -537,11 +537,15 @@ struct pqi_host_memory {
 	struct pqi_sg_descriptor sg_descriptor[PQI_HOST_MAX_SG_DESCRIPTORS];
 };
 
+#pragma pack()
+
 struct pqi_host_memory_descriptor {
 	struct pqi_host_memory *host_memory;
 	dma_addr_t		host_memory_dma_handle;
 	void			**host_chunk_virt_address;
 };
+
+#pragma pack(1)
 
 struct pqi_aio_error_info {
 	u8	status;
