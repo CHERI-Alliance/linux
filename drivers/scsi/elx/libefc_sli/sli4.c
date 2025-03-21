@@ -94,7 +94,7 @@ sli_cmd_common_create_cq(struct sli4 *sli4, void *buf, struct efc_dma *qmem,
 {
 	struct sli4_rqst_cmn_create_cq_v2 *cqv2 = NULL;
 	u32 p;
-	uintptr_t addr;
+	unsigned long addr;
 	u32 num_pages = 0;
 	size_t cmd_size = 0;
 	u32 page_size = 0;
@@ -179,7 +179,7 @@ sli_cmd_common_create_eq(struct sli4 *sli4, void *buf, struct efc_dma *qmem)
 {
 	struct sli4_rqst_cmn_create_eq *eq;
 	u32 p;
-	uintptr_t addr;
+	unsigned long addr;
 	u16 num_pages;
 	u32 dw5_flags = 0;
 	u32 dw6_flags = 0, ver;
@@ -243,7 +243,7 @@ sli_cmd_common_create_mq_ext(struct sli4 *sli4, void *buf, struct efc_dma *qmem,
 {
 	struct sli4_rqst_cmn_create_mq_ext *mq;
 	u32 p;
-	uintptr_t addr;
+	unsigned long addr;
 	u32 num_pages;
 	u16 dw6w1_flags = 0;
 
@@ -302,7 +302,7 @@ sli_cmd_wq_create(struct sli4 *sli4, void *buf, struct efc_dma *qmem, u16 cq_id)
 {
 	struct sli4_rqst_wq_create *wq;
 	u32 p;
-	uintptr_t addr;
+	unsigned long addr;
 	u32 page_size = 0;
 	u32 n_wqe = 0;
 	u16 num_pages;
@@ -370,7 +370,7 @@ sli_cmd_rq_create_v1(struct sli4 *sli4, void *buf, struct efc_dma *qmem,
 {
 	struct sli4_rqst_rq_create_v1 *rq;
 	u32 p;
-	uintptr_t addr;
+	unsigned long addr;
 	u32 num_pages;
 
 	rq = sli_config_cmd_init(sli4, buf, SLI4_CFG_PYLD_LENGTH(rq_create_v1),
@@ -432,7 +432,7 @@ sli_cmd_rq_create_v2(struct sli4 *sli4, u32 num_rqs,
 	struct sli4_rqst_rq_create_v2 *req = NULL;
 	u32 i, p, offset = 0;
 	u32 payload_size, page_count;
-	uintptr_t addr;
+	unsigned long addr;
 	u32 num_pages;
 	__le32 len;
 
@@ -819,7 +819,7 @@ static int sli_cmd_cq_set_create(struct sli4 *sli4,
 				 struct efc_dma *dma)
 {
 	struct sli4_rqst_cmn_create_cq_set_v0 *req = NULL;
-	uintptr_t addr;
+	unsigned long addr;
 	u32 i, offset = 0,  page_bytes = 0, payload_size;
 	u32 p = 0, page_size = 0, n_cqe = 0, num_pages_cq;
 	u32 dw5_flags = 0;
@@ -5049,7 +5049,7 @@ sli_cmd_post_hdr_templates(struct sli4 *sli4, void *buf, struct efc_dma *dma,
 			   u16 rpi, struct efc_dma *payload_dma)
 {
 	struct sli4_rqst_post_hdr_templates *req = NULL;
-	uintptr_t phys = 0;
+	unsigned long phys = 0;
 	u32 i = 0;
 	u32 page_count, payload_size;
 

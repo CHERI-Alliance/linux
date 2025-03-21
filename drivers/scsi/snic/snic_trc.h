@@ -17,11 +17,11 @@ extern unsigned int snic_trace_max_pages;
 /* Global Data structure for trace to manage trace functionality */
 struct snic_trc_data {
 	u64	ts;		/* Time Stamp */
-	char	*fn;		/* Ptr to Function Name */
+	char	*fn __cheri_pointer_align;		/* Ptr to Function Name */
 	u32	hno;		/* SCSI Host ID */
 	u32	tag;		/* Command Tag */
 	u64 data[5];
-} __attribute__((__packed__));
+} __attribute__((__packed__)) __cheri_pointer_align;
 
 #define SNIC_TRC_ENTRY_SZ  64	/* in Bytes */
 

@@ -1577,7 +1577,7 @@ void aac_reinit_aif(struct aac_dev *aac, unsigned int index)
 
 static int aac_probe_one(struct pci_dev *pdev, const struct pci_device_id *id)
 {
-	unsigned index = id->driver_data;
+	unsigned long index = __c_ua(id->driver_data);
 	struct Scsi_Host *shost;
 	struct aac_dev *aac;
 	struct list_head *insert = &aac_devices;

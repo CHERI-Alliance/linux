@@ -857,6 +857,9 @@ struct AdapterControlBlock
 	struct pci_dev *	pdev;
 	struct Scsi_Host *	host;
 	unsigned long		vir2phy_offset;
+	uintptr_t		vir2phy_base;
+#define __vir2phy_delta(ACB,P) (((ACB)->vir2phy_offset+(P)) - (unsigned long)((ACB)->vir2phy_base))
+#define __vir2phy(ACB,P) ((ACB)->vir2phy_base + __vir2phy_delta((ACB),P))
 	/* Offset is used in making arc cdb physical to virtual calculations */
 	uint32_t		outbound_int_enable;
 	uint32_t		cdb_phyaddr_hi32;

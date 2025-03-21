@@ -231,7 +231,7 @@ efct_sframe_common_send(struct efct_node *node,
 	struct efct_hw_send_frame_context *ctx;
 
 	u32 heap_size = seq->payload->dma.size;
-	uintptr_t heap_phys_base = seq->payload->dma.phys;
+	unsigned long heap_phys_base = seq->payload->dma.phys;
 	u8 *heap_virt_base = seq->payload->dma.virt;
 	u32 heap_offset = 0;
 
