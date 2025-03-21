@@ -1150,7 +1150,7 @@ sg_ioctl_common(struct file *filp, Sg_device *sdp, Sg_fd *sfp,
 }
 
 static long
-sg_ioctl(struct file *filp, unsigned int cmd_in, unsigned long arg)
+sg_ioctl(struct file *filp, unsigned int cmd_in, user_uintptr_t arg)
 {
 	void __user *p = (void __user *)arg;
 	Sg_device *sdp;
@@ -1273,7 +1273,7 @@ sg_mmap(struct file *filp, struct vm_area_struct *vma)
 	req_sz = vma->vm_end - vma->vm_start;
 	SCSI_LOG_TIMEOUT(3, sg_printk(KERN_INFO, sfp->parentdp,
 				      "sg_mmap starting, vm_start=%p, len=%d\n",
-				      (void *) vma->vm_start, (int) req_sz));
+				      __c_fakep(vma->vm_start), (int) req_sz));
 	if (vma->vm_pgoff)
 		return -EINVAL;	/* want no offset */
 	rsv_schp = &sfp->reserve;
@@ -1780,7 +1780,7 @@ sg_start_req(Sg_request *srp, unsigned char *cmd)
 
 	if (sg_allow_dio && hp->flags & SG_FLAG_DIRECT_IO &&
 	    dxfer_dir != SG_DXFER_UNKNOWN && !iov_count &&
-	    blk_rq_aligned(q, (unsigned long)hp->dxferp, dxfer_len))
+	    blk_rq_aligned(q, __c_pa(hp->dxferp), dxfer_len))
 		md = NULL;
 	else
 		md = &map_data;

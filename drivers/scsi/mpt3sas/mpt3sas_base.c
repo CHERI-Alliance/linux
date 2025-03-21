@@ -2306,7 +2306,7 @@ _base_build_nvme_prp(struct MPT3SAS_ADAPTER *ioc, u16 smid,
 	 * want our first entry to be a PRP List entry.
 	 */
 	page_mask = ioc->page_size - 1;
-	page_mask_result = (uintptr_t)((u8 *)prp_page + prp_size) & page_mask;
+	page_mask_result = __c_pa((u8 *)prp_page + prp_size) & page_mask;
 	if (!page_mask_result) {
 		/* Bump up to next page boundary. */
 		prp_page = (__le64 *)((u8 *)prp_page + prp_size);
@@ -2527,7 +2527,7 @@ base_make_prp_nvme(struct MPT3SAS_ADAPTER *ioc,
 		offset = sge_addr & page_mask;
 
 		/* Put PRP pointer due to page boundary*/
-		page_mask_result = (uintptr_t)(curr_buff + 1) & page_mask;
+		page_mask_result = __c_pa(curr_buff + 1) & page_mask;
 		if (unlikely(!page_mask_result)) {
 			scmd_printk(KERN_NOTICE,
 				scmd, "page boundary curr_buff: 0x%p\n",
@@ -6237,7 +6237,7 @@ base_alloc_rdpq_dma_pool(struct MPT3SAS_ADAPTER *ioc, int sz)
 		} else {
 			ioc->reply_post[i].reply_post_free =
 			    (Mpi2ReplyDescriptorsUnion_t *)
-			    ((long)ioc->reply_post[i-1].reply_post_free
+			    ((uintptr_t)ioc->reply_post[i-1].reply_post_free
 			    + reply_post_free_sz);
 			ioc->reply_post[i].reply_post_free_dma =
 			    (dma_addr_t)

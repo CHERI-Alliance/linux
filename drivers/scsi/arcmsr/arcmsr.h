@@ -311,8 +311,8 @@ struct FIRMWARE_INFO
 /* iop message_rwbuffer for message command */
 #define ARCMSR_MESSAGE_RWBUFFER			      0x0000fa00
 
-#define MEM_BASE0(x)	(u32 __iomem *)((unsigned long)acb->mem_base0 + x)
-#define MEM_BASE1(x)	(u32 __iomem *)((unsigned long)acb->mem_base1 + x)
+#define MEM_BASE0(x)	(u32 __iomem *)((uintptr_t)acb->mem_base0 + x)
+#define MEM_BASE1(x)	(u32 __iomem *)((uintptr_t)acb->mem_base1 + x)
 /* 
 ************************************************************************
 **                SPEC. for Areca HBC adapter
@@ -857,6 +857,9 @@ struct AdapterControlBlock
 	struct pci_dev *	pdev;
 	struct Scsi_Host *	host;
 	unsigned long		vir2phy_offset;
+	uintptr_t		vir2phy_base;
+#define __vir2phy_delta(ACB,P) (((ACB)->vir2phy_offset+(P)) - __c_ua((ACB)->vir2phy_base))
+#define __vir2phy(ACB,P) ((ACB)->vir2phy_base + __vir2phy_delta((ACB),P))
 	/* Offset is used in making arc cdb physical to virtual calculations */
 	uint32_t		outbound_int_enable;
 	uint32_t		cdb_phyaddr_hi32;

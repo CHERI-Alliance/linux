@@ -334,13 +334,13 @@ static bool hpsa_cmd_dev_match(struct ctlr_info *h, struct CommandList *c,
 
 static inline struct ctlr_info *sdev_to_hba(struct scsi_device *sdev)
 {
-	unsigned long *priv = shost_priv(sdev->host);
+	uintptr_t *priv = shost_priv(sdev->host);
 	return (struct ctlr_info *) *priv;
 }
 
 static inline struct ctlr_info *shost_to_hba(struct Scsi_Host *sh)
 {
-	unsigned long *priv = shost_priv(sh);
+	uintptr_t *priv = shost_priv(sh);
 	return (struct ctlr_info *) *priv;
 }
 
@@ -5867,7 +5867,7 @@ static int hpsa_scsi_host_alloc(struct ctlr_info *h)
 	sh->cmd_per_lun = sh->can_queue;
 	sh->sg_tablesize = h->maxsgentries;
 	sh->transportt = hpsa_sas_transport_template;
-	sh->hostdata[0] = (unsigned long) h;
+	sh->hostdata[0] = (uintptr_t) h;
 	sh->irq = pci_irq_vector(h->pdev, 0);
 	sh->unique_id = sh->irq;
 

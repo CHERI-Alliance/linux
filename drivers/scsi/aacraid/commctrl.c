@@ -185,7 +185,7 @@ static int open_getadapter_fib(struct aac_dev * dev, void __user *arg)
 		 * Without the aid of a persistent history, this also helps
 		 * reduce the chance that the opaque context would be reused.
 		 */
-		fibctx->unique = (u32)((ulong)fibctx & 0xFFFFFFFF);
+		fibctx->unique = (u32)(__c_pa(fibctx) & 0xFFFFFFFF);
 		/*
 		 *	Initialize the mutex used to wait for the next AIF.
 		 */
@@ -419,7 +419,7 @@ static int close_getadapter_fib(struct aac_dev * dev, void __user *arg)
 		/*
 		 *	Extract the fibctx from the input parameters
 		 */
-		if (fibctx->unique == (u32)(uintptr_t)arg) /* We found a winner */
+		if (fibctx->unique == (u32)__c_pa(arg)) /* We found a winner */
 			break;
 		entry = entry->next;
 		fibctx = NULL;

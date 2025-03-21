@@ -65,7 +65,7 @@ static void asd_free_ddb(struct asd_ha_struct *asd_ha, int ddb)
 static void asd_set_ddb_type(struct domain_device *dev)
 {
 	struct asd_ha_struct *asd_ha = dev->port->ha->lldd_ha;
-	int ddb = (int) (unsigned long) dev->lldd_dev;
+	int ddb = (int) __c_pa(dev->lldd_dev);
 
 	if (dev->dev_type == SAS_SATA_PM_PORT)
 		asd_ddbsite_write_byte(asd_ha,ddb, DDB_TYPE, DDB_TYPE_PM_PORT);
@@ -87,7 +87,7 @@ static int asd_init_sata_tag_ddb(struct domain_device *dev)
 	for (i = 0; i < sizeof(struct asd_ddb_sata_tag); i += 2)
 		asd_ddbsite_write_word(asd_ha, ddb, i, 0xFFFF);
 
-	asd_ddbsite_write_word(asd_ha, (int) (unsigned long) dev->lldd_dev,
+	asd_ddbsite_write_word(asd_ha, (int) __c_pa(dev->lldd_dev),
 			       SISTER_DDB, ddb);
 	return 0;
 }
@@ -96,7 +96,7 @@ void asd_set_dmamode(struct domain_device *dev)
 {
 	struct asd_ha_struct *asd_ha = dev->port->ha->lldd_ha;
 	struct ata_device *ata_dev = sas_to_ata_dev(dev);
-	int ddb = (int) (unsigned long) dev->lldd_dev;
+	int ddb = (int) __c_pa(dev->lldd_dev);
 	u32 qdepth = 0;
 
 	if (dev->dev_type == SAS_SATA_DEV || dev->dev_type == SAS_SATA_PM_PORT) {
@@ -120,7 +120,7 @@ void asd_set_dmamode(struct domain_device *dev)
 static int asd_init_sata(struct domain_device *dev)
 {
 	struct asd_ha_struct *asd_ha = dev->port->ha->lldd_ha;
-	int ddb = (int) (unsigned long) dev->lldd_dev;
+	int ddb = (int) __c_pa(dev->lldd_dev);
 
 	asd_ddbsite_write_word(asd_ha, ddb, ATA_CMD_SCBPTR, 0xFFFF);
 	if (dev->dev_type == SAS_SATA_DEV || dev->dev_type == SAS_SATA_PM ||
@@ -144,7 +144,7 @@ static int asd_init_target_ddb(struct domain_device *dev)
 	if (ddb < 0)
 		return ddb;
 
-	dev->lldd_dev = (void *) (unsigned long) ddb;
+	dev->lldd_dev = (void *)__c_fakep(ddb);
 
 	asd_ddbsite_write_byte(asd_ha, ddb, 0, DDB_TP_CONN_TYPE);
 	asd_ddbsite_write_byte(asd_ha, ddb, 1, 0);
@@ -225,7 +225,7 @@ static int asd_init_sata_pm_table_ddb(struct domain_device *dev)
 	for (i = 0; i < 32; i += 2)
 		asd_ddbsite_write_word(asd_ha, ddb, i, 0xFFFF);
 
-	asd_ddbsite_write_word(asd_ha, (int) (unsigned long) dev->lldd_dev,
+	asd_ddbsite_write_word(asd_ha, (int) __c_pa(dev->lldd_dev),
 			       SISTER_DDB, ddb);
 
 	return 0;
@@ -259,7 +259,7 @@ static int asd_init_sata_pm_port_ddb(struct domain_device *dev)
 	asd_ddbsite_write_word(asd_ha, ddb, ATA_CMD_SCBPTR, 0xFFFF);
 	asd_init_sata(dev);
 
-	parent_ddb = (int) (unsigned long) dev->parent->lldd_dev;
+	parent_ddb = (int) __c_pa(dev->parent->lldd_dev);
 	asd_ddbsite_write_word(asd_ha, ddb, PARENT_DDB, parent_ddb);
 	pmtable_ddb = asd_ddbsite_read_word(asd_ha, parent_ddb, SISTER_DDB);
 	asd_ddbsite_write_word(asd_ha, pmtable_ddb, dev->sata_dev.port_no,ddb);
@@ -296,7 +296,7 @@ static int asd_init_sata_pm_ddb(struct domain_device *dev)
 	res = asd_init_sata_pm_table_ddb(dev);
 	if (res)
 		asd_free_ddb(dev->port->ha->lldd_ha,
-			     (int) (unsigned long) dev->lldd_dev);
+			     (int) __c_pa(dev->lldd_dev));
 out:
 	return res;
 }
@@ -333,7 +333,7 @@ void asd_dev_gone(struct domain_device *dev)
 	struct asd_ha_struct *asd_ha = dev->port->ha->lldd_ha;
 
 	spin_lock_irqsave(&asd_ha->hw_prof.ddb_lock, flags);
-	ddb = (int) (unsigned long) dev->lldd_dev;
+	ddb = (int) __c_pa(dev->lldd_dev);
 	sister_ddb = asd_ddbsite_read_word(asd_ha, ddb, SISTER_DDB);
 
 	if (sister_ddb != 0xFFFF)

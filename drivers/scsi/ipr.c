@@ -2209,7 +2209,7 @@ static void ipr_log_fabric_error(struct ipr_ioa_cfg *ioa_cfg,
 
 		add_len -= be16_to_cpu(fabric->length);
 		fabric = (struct ipr_hostrcb_fabric_desc *)
-			((unsigned long)fabric + be16_to_cpu(fabric->length));
+			((uintptr_t)fabric + be16_to_cpu(fabric->length));
 	}
 
 	ipr_log_hex_data(ioa_cfg, (__be32 *)fabric, add_len);
@@ -2303,7 +2303,7 @@ static void ipr_log_sis64_fabric_error(struct ipr_ioa_cfg *ioa_cfg,
 
 		add_len -= be16_to_cpu(fabric->length);
 		fabric = (struct ipr_hostrcb64_fabric_desc *)
-			((unsigned long)fabric + be16_to_cpu(fabric->length));
+			((uintptr_t)fabric + be16_to_cpu(fabric->length));
 	}
 
 	ipr_log_hex_data(ioa_cfg, (__be32 *)fabric, add_len);
@@ -6619,7 +6619,7 @@ static void *ipr_get_mode_page(struct ipr_mode_pages *mode_pages,
 				       mode_hdr->page_length);
 			length -= page_length;
 			mode_hdr = (struct ipr_mode_page_hdr *)
-				((unsigned long)mode_hdr + page_length);
+				((uintptr_t)mode_hdr + page_length);
 		}
 	}
 	return NULL;

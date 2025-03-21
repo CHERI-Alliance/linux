@@ -2936,8 +2936,7 @@ static int blogic_qcmd_lck(struct scsi_cmnd *command)
 		ccb->datalen = count * sizeof(struct blogic_sg_seg);
 		if (blogic_multimaster_type(adapter))
 			ccb->data = (unsigned int) ccb->dma_handle +
-					((unsigned long) &ccb->sglist -
-					(unsigned long) ccb);
+					(__c_pa(&ccb->sglist) - __c_pa(ccb));
 		else
 			ccb->data = virt_to_32bit_virt(ccb->sglist);
 

@@ -500,7 +500,7 @@ static void escb_tasklet_complete(struct asd_ascb *ascb,
 				continue;
 			dev = task->dev;
 
-			x = (unsigned long)dev->lldd_dev;
+			x = __c_pa(dev->lldd_dev);
 			if (x == conn_handle)
 				last_dev_task = task;
 		}
@@ -526,7 +526,7 @@ static void escb_tasklet_complete(struct asd_ascb *ascb,
 				continue;
 			dev = task->dev;
 
-			x = (unsigned long)dev->lldd_dev;
+			x = __c_pa(dev->lldd_dev);
 			if (x == conn_handle)
 				sas_task_abort(task);
 		}

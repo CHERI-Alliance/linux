@@ -280,7 +280,7 @@ static int sas_host_match(struct attribute_container *cont,
 
 static int do_sas_phy_delete(struct device *dev, void *data)
 {
-	int pass = (int)(unsigned long)data;
+	int pass = (int)__c_pa(data);
 
 	if (pass == 0 && scsi_is_sas_port(dev))
 		sas_port_delete(dev_to_sas_port(dev));

@@ -695,7 +695,7 @@ struct Scsi_Host {
 	unsigned char prot_guard_type;
 
 	/* legacy crap */
-	unsigned long base;
+	uintptr_t base;
 	unsigned long io_port;
 	unsigned char n_io_port;
 	unsigned char dma_channel;

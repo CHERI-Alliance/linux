@@ -44,6 +44,7 @@
  *  pages of memory that will be useful if we ever need to deal 
  *  with IO MMUs for PCI.
  */
+/* FIXCHERI: Should set bounds but that will likely trap in __sym_mfree(). */
 static void *___sym_malloc(m_pool_p mp, int size)
 {
 	int i = 0;
@@ -95,7 +96,8 @@ static void ___sym_mfree(m_pool_p mp, void *ptr, int size)
 	int i = 0;
 	int s = (1 << SYM_MEM_SHIFT);
 	m_link_p q;
-	unsigned long a, b;
+	uintptr_t a;
+	unsigned long b;
 	m_link_p h = mp->h;
 
 #ifdef DEBUG
@@ -110,7 +112,7 @@ static void ___sym_mfree(m_pool_p mp, void *ptr, int size)
 		++i;
 	}
 
-	a = (unsigned long)ptr;
+	a = (uintptr_t)ptr;
 
 	while (1) {
 		if (s == SYM_MEM_CLUSTER_SIZE) {
@@ -122,9 +124,9 @@ static void ___sym_mfree(m_pool_p mp, void *ptr, int size)
 #endif
 			break;
 		}
-		b = a ^ s;
+		b = __c_ua(a) ^ s;
 		q = &h[i];
-		while (q->next && q->next != (m_link_p) b) {
+		while (q->next && q->next != (m_link_p) __c_fakep(b)) {
 			q = q->next;
 		}
 		if (!q->next) {
@@ -347,7 +349,7 @@ dma_addr_t __vtobus(m_pool_ident_t dev_dmat, void *m)
 	m_pool_p mp;
 	int hc = VTOB_HASH_CODE(m);
 	m_vtob_p vp = NULL;
-	void *a = (void *)((unsigned long)m & ~SYM_MEM_CLUSTER_MASK);
+	void *a = (void *)((uintptr_t)m & ~SYM_MEM_CLUSTER_MASK);
 	dma_addr_t b;
 
 	spin_lock_irqsave(&sym53c8xx_lock, flags);

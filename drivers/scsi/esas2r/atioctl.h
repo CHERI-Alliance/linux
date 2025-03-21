@@ -658,9 +658,9 @@ struct atto_csmi {
 };
 
 struct atto_module_info {
-	void *adapter;
-	void *pci_dev;
-	void *scsi_host;
+	unsigned long adapter;
+	unsigned long pci_dev;
+	unsigned long scsi_host;
 	unsigned short host_no;
 	union {
 		struct {

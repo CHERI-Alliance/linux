@@ -817,7 +817,7 @@ static int wd719x_board_found(struct Scsi_Host *sh)
 
 	INIT_LIST_HEAD(&wd->active_scbs);
 
-	sh->base = pci_resource_start(wd->pdev, 0);
+	sh->base = __c_fakeu(pci_resource_start(wd->pdev, 0));
 
 	wd->type = wd719x_detect_type(wd);
 
@@ -862,7 +862,7 @@ static int wd719x_board_found(struct Scsi_Host *sh)
 	sh->this_id = wd->params->own_scsi_id & WD719X_EE_SCSI_ID_MASK;
 
 	dev_info(&wd->pdev->dev, "%s at I/O 0x%lx, IRQ %u, SCSI ID %d\n",
-		 card_types[wd->type], sh->base, sh->irq, sh->this_id);
+		 card_types[wd->type], __c_ua(sh->base), sh->irq, sh->this_id);
 
 	return 0;
 

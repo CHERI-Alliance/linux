@@ -655,7 +655,7 @@ static void arcmsr_hbaF_assign_regAddr(struct AdapterControlBlock *acb)
 	struct MessageUnit_F __iomem *pmuF;
 
 	memset(acb->dma_coherent2, 0xff, acb->completeQ_size);
-	acb->message_wbuffer = (uint32_t *)round_up((unsigned long)acb->dma_coherent2 +
+	acb->message_wbuffer = (uint32_t *)round_up((uintptr_t)acb->dma_coherent2 +
 		acb->completeQ_size, 4);
 	acb->message_rbuffer = ((void *)acb->message_wbuffer) + 0x100;
 	acb->msgcode_rwbuffer = ((void *)acb->message_wbuffer) + 0x200;
@@ -771,11 +771,11 @@ static int arcmsr_alloc_xor_buffer(struct AdapterControlBlock *acb)
 		&dma_coherent_handle, GFP_KERNEL);
 	acb->xorVirt = dma_coherent;
 	acb->xorPhys = dma_coherent_handle;
-	pXorPhys = (struct Xor_sg *)((unsigned long)dma_coherent +
+	pXorPhys = (struct Xor_sg *)((uintptr_t)dma_coherent +
 		sizeof(struct HostRamBuf));
 	acb->xorVirtOffset = sizeof(struct HostRamBuf) +
 		(sizeof(struct Xor_sg) * acb->xor_mega);
-	pXorVirt = (void **)((unsigned long)dma_coherent +
+	pXorVirt = (void **)((uintptr_t)dma_coherent +
 		(unsigned long)acb->xorVirtOffset);
 	for (i = 0; i < acb->xor_mega; i++) {
 		dma_coherent = dma_alloc_coherent(&pdev->dev,
@@ -843,7 +843,7 @@ static int arcmsr_alloc_ccb_pool(struct AdapterControlBlock *acb)
 	acb->ccbsize = roundup_ccbsize;
 	ccb_tmp = dma_coherent;
 	curr_phy_upper32 = upper_32_bits(dma_coherent_handle);
-	acb->vir2phy_offset = (unsigned long)dma_coherent - (unsigned long)dma_coherent_handle;
+	acb->vir2phy_offset = __c_pa(dma_coherent) - (unsigned long)dma_coherent_handle;
 	for(i = 0; i < acb->maxFreeCCB; i++){
 		cdb_phyaddr = (unsigned long)dma_coherent_handle + offsetof(struct CommandControlBlock, arcmsr_cdb);
 		switch (acb->adapter_type) {
@@ -870,7 +870,7 @@ static int arcmsr_alloc_ccb_pool(struct AdapterControlBlock *acb)
 		}
 		else
 			list_add_tail(&ccb_tmp->list, &acb->ccb_free_list);
-		ccb_tmp = (struct CommandControlBlock *)((unsigned long)ccb_tmp + roundup_ccbsize);
+		ccb_tmp = (struct CommandControlBlock *)((uintptr_t)ccb_tmp + roundup_ccbsize);
 		dma_coherent_handle = next_ccb_phy;
 	}
 	if (acb->adapter_type != ACB_ADAPTER_TYPE_F) {
@@ -1095,7 +1095,7 @@ static int arcmsr_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 	acb = (struct AdapterControlBlock *) host->hostdata;
 	memset(acb,0,sizeof(struct AdapterControlBlock));
 	acb->pdev = pdev;
-	acb->adapter_type = id->driver_data;
+	acb->adapter_type = __c_ua(id->driver_data);
 	if (arcmsr_set_dma_mask(acb))
 		goto scsi_host_release;
 	acb->host = host;
@@ -1540,7 +1540,7 @@ static void arcmsr_done4abort_postqueue(struct AdapterControlBlock *acb)
 			ccb_cdb_phy = (flag_ccb << 5) & 0xffffffff;
 			if (acb->cdb_phyadd_hipart)
 				ccb_cdb_phy = ccb_cdb_phy | acb->cdb_phyadd_hipart;
-			pARCMSR_CDB = (struct ARCMSR_CDB *)(acb->vir2phy_offset + ccb_cdb_phy);
+			pARCMSR_CDB = (struct ARCMSR_CDB *)__vir2phy(acb, ccb_cdb_phy);
 			pCCB = container_of(pARCMSR_CDB, struct CommandControlBlock, arcmsr_cdb);
 			error = (flag_ccb & ARCMSR_CCBREPLY_FLAG_ERROR_MODE0) ? true : false;
 			arcmsr_drain_donequeue(acb, pCCB, error);
@@ -1559,7 +1559,7 @@ static void arcmsr_done4abort_postqueue(struct AdapterControlBlock *acb)
 				ccb_cdb_phy = (flag_ccb << 5) & 0xffffffff;
 				if (acb->cdb_phyadd_hipart)
 					ccb_cdb_phy = ccb_cdb_phy | acb->cdb_phyadd_hipart;
-				pARCMSR_CDB = (struct ARCMSR_CDB *)(acb->vir2phy_offset + ccb_cdb_phy);
+				pARCMSR_CDB = (struct ARCMSR_CDB *)__vir2phy(acb, ccb_cdb_phy);
 				pCCB = container_of(pARCMSR_CDB, struct CommandControlBlock, arcmsr_cdb);
 				error = (flag_ccb & ARCMSR_CCBREPLY_FLAG_ERROR_MODE0) ? true : false;
 				arcmsr_drain_donequeue(acb, pCCB, error);
@@ -1578,7 +1578,7 @@ static void arcmsr_done4abort_postqueue(struct AdapterControlBlock *acb)
 			ccb_cdb_phy = (flag_ccb & 0xFFFFFFF0);
 			if (acb->cdb_phyadd_hipart)
 				ccb_cdb_phy = ccb_cdb_phy | acb->cdb_phyadd_hipart;
-			pARCMSR_CDB = (struct  ARCMSR_CDB *)(acb->vir2phy_offset + ccb_cdb_phy);
+			pARCMSR_CDB = (struct  ARCMSR_CDB *)__vir2phy(acb, ccb_cdb_phy);
 			pCCB = container_of(pARCMSR_CDB, struct CommandControlBlock, arcmsr_cdb);
 			error = (flag_ccb & ARCMSR_CCBREPLY_FLAG_ERROR_MODE1) ? true : false;
 			arcmsr_drain_donequeue(acb, pCCB, error);
@@ -1611,8 +1611,7 @@ static void arcmsr_done4abort_postqueue(struct AdapterControlBlock *acb)
 				ccb_cdb_phy = (addressLow & 0xFFFFFFF0);
 				if (acb->cdb_phyadd_hipart)
 					ccb_cdb_phy = ccb_cdb_phy | acb->cdb_phyadd_hipart;
-				pARCMSR_CDB = (struct  ARCMSR_CDB *)
-					(acb->vir2phy_offset + ccb_cdb_phy);
+				pARCMSR_CDB = (struct  ARCMSR_CDB *)__vir2phy(acb, ccb_cdb_phy);
 				pCCB = container_of(pARCMSR_CDB,
 					struct CommandControlBlock, arcmsr_cdb);
 				error = (addressLow &
@@ -2088,7 +2087,7 @@ static void arcmsr_free_ccb_pool(struct AdapterControlBlock *acb)
 
 		pXorPhys = (struct Xor_sg *)(acb->xorVirt +
 			sizeof(struct HostRamBuf));
-		pXorVirt = (void **)((unsigned long)acb->xorVirt +
+		pXorVirt = (void **)((uintptr_t)acb->xorVirt +
 			(unsigned long)acb->xorVirtOffset);
 		for (i = 0; i < acb->xor_mega; i++) {
 			if (pXorPhys->xorPhys) {
@@ -2546,7 +2545,7 @@ static void arcmsr_hbaA_postqueue_isr(struct AdapterControlBlock *acb)
 		cdb_phy_addr = (flag_ccb << 5) & 0xffffffff;
 		if (acb->cdb_phyadd_hipart)
 			cdb_phy_addr = cdb_phy_addr | acb->cdb_phyadd_hipart;
-		pARCMSR_CDB = (struct ARCMSR_CDB *)(acb->vir2phy_offset + cdb_phy_addr);
+		pARCMSR_CDB = (struct ARCMSR_CDB *)__vir2phy(acb, cdb_phy_addr);
 		pCCB = container_of(pARCMSR_CDB, struct CommandControlBlock, arcmsr_cdb);
 		error = (flag_ccb & ARCMSR_CCBREPLY_FLAG_ERROR_MODE0) ? true : false;
 		arcmsr_drain_donequeue(acb, pCCB, error);
@@ -2567,7 +2566,7 @@ static void arcmsr_hbaB_postqueue_isr(struct AdapterControlBlock *acb)
 		cdb_phy_addr = (flag_ccb << 5) & 0xffffffff;
 		if (acb->cdb_phyadd_hipart)
 			cdb_phy_addr = cdb_phy_addr | acb->cdb_phyadd_hipart;
-		pARCMSR_CDB = (struct ARCMSR_CDB *)(acb->vir2phy_offset + cdb_phy_addr);
+		pARCMSR_CDB = (struct ARCMSR_CDB *)__vir2phy(acb, cdb_phy_addr);
 		pCCB = container_of(pARCMSR_CDB, struct CommandControlBlock, arcmsr_cdb);
 		error = (flag_ccb & ARCMSR_CCBREPLY_FLAG_ERROR_MODE0) ? true : false;
 		arcmsr_drain_donequeue(acb, pCCB, error);
@@ -2596,8 +2595,7 @@ static void arcmsr_hbaC_postqueue_isr(struct AdapterControlBlock *acb)
 		ccb_cdb_phy = (flag_ccb & 0xFFFFFFF0);
 		if (acb->cdb_phyadd_hipart)
 			ccb_cdb_phy = ccb_cdb_phy | acb->cdb_phyadd_hipart;
-		arcmsr_cdb = (struct ARCMSR_CDB *)(acb->vir2phy_offset
-			+ ccb_cdb_phy);
+		arcmsr_cdb = (struct ARCMSR_CDB *)__vir2phy(acb, + ccb_cdb_phy);
 		ccb = container_of(arcmsr_cdb, struct CommandControlBlock,
 			arcmsr_cdb);
 		error = (flag_ccb & ARCMSR_CCBREPLY_FLAG_ERROR_MODE1)
@@ -2640,8 +2638,7 @@ static void arcmsr_hbaD_postqueue_isr(struct AdapterControlBlock *acb)
 			ccb_cdb_phy = (addressLow & 0xFFFFFFF0);
 			if (acb->cdb_phyadd_hipart)
 				ccb_cdb_phy = ccb_cdb_phy | acb->cdb_phyadd_hipart;
-			arcmsr_cdb = (struct ARCMSR_CDB *)(acb->vir2phy_offset
-				+ ccb_cdb_phy);
+			arcmsr_cdb = (struct ARCMSR_CDB *)__vir2phy(acb, + ccb_cdb_phy);
 			ccb = container_of(arcmsr_cdb,
 				struct CommandControlBlock, arcmsr_cdb);
 			error = (addressLow & ARCMSR_CCBREPLY_FLAG_ERROR_MODE1)
@@ -3600,7 +3597,7 @@ polling_hba_ccb_retry:
 		ccb_cdb_phy = (flag_ccb << 5) & 0xffffffff;
 		if (acb->cdb_phyadd_hipart)
 			ccb_cdb_phy = ccb_cdb_phy | acb->cdb_phyadd_hipart;
-		arcmsr_cdb = (struct ARCMSR_CDB *)(acb->vir2phy_offset + ccb_cdb_phy);
+		arcmsr_cdb = (struct ARCMSR_CDB *)__vir2phy(acb, ccb_cdb_phy);
 		ccb = container_of(arcmsr_cdb, struct CommandControlBlock, arcmsr_cdb);
 		poll_ccb_done |= (ccb == poll_ccb) ? 1 : 0;
 		if ((ccb->acb != acb) || (ccb->startdone != ARCMSR_CCB_START)) {
@@ -3669,7 +3666,7 @@ polling_hbb_ccb_retry:
 		ccb_cdb_phy = (flag_ccb << 5) & 0xffffffff;
 		if (acb->cdb_phyadd_hipart)
 			ccb_cdb_phy = ccb_cdb_phy | acb->cdb_phyadd_hipart;
-		arcmsr_cdb = (struct ARCMSR_CDB *)(acb->vir2phy_offset + ccb_cdb_phy);
+		arcmsr_cdb = (struct ARCMSR_CDB *)__vir2phy(acb, ccb_cdb_phy);
 		ccb = container_of(arcmsr_cdb, struct CommandControlBlock, arcmsr_cdb);
 		poll_ccb_done |= (ccb == poll_ccb) ? 1 : 0;
 		if ((ccb->acb != acb) || (ccb->startdone != ARCMSR_CCB_START)) {
@@ -3730,7 +3727,7 @@ polling_hbc_ccb_retry:
 		ccb_cdb_phy = (flag_ccb & 0xFFFFFFF0);
 		if (acb->cdb_phyadd_hipart)
 			ccb_cdb_phy = ccb_cdb_phy | acb->cdb_phyadd_hipart;
-		arcmsr_cdb = (struct ARCMSR_CDB *)(acb->vir2phy_offset + ccb_cdb_phy);
+		arcmsr_cdb = (struct ARCMSR_CDB *)__vir2phy(acb, ccb_cdb_phy);
 		pCCB = container_of(arcmsr_cdb, struct CommandControlBlock, arcmsr_cdb);
 		poll_ccb_done |= (pCCB == poll_ccb) ? 1 : 0;
 		/* check ifcommand done with no error*/
@@ -3802,8 +3799,7 @@ polling_hbaD_ccb_retry:
 		ccb_cdb_phy = (flag_ccb & 0xFFFFFFF0);
 		if (acb->cdb_phyadd_hipart)
 			ccb_cdb_phy = ccb_cdb_phy | acb->cdb_phyadd_hipart;
-		arcmsr_cdb = (struct ARCMSR_CDB *)(acb->vir2phy_offset +
-			ccb_cdb_phy);
+		arcmsr_cdb = (struct ARCMSR_CDB *)__vir2phy(acb, ccb_cdb_phy);
 		pCCB = container_of(arcmsr_cdb, struct CommandControlBlock,
 			arcmsr_cdb);
 		poll_ccb_done |= (pCCB == poll_ccb) ? 1 : 0;

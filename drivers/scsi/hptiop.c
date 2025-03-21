@@ -303,7 +303,7 @@ static int iop_send_sync_request_itl(struct hptiop_hba *hba,
 
 	writel(readl(&req->flags) | IOP_REQUEST_FLAG_SYNC_REQUEST, &req->flags);
 	writel(0, &req->context);
-	writel((unsigned long)req - (unsigned long)hba->u.itl.iop,
+	writel(__c_pa(req) - __c_pa(hba->u.itl.iop),
 			&hba->u.itl.iop->inbound_queue);
 	readl(&hba->u.itl.iop->outbound_intstatus);
 
@@ -408,7 +408,7 @@ static int iop_get_config_itl(struct hptiop_hba *hba,
 		return -1;
 
 	req = (struct hpt_iop_request_get_config __iomem *)
-			((unsigned long)hba->u.itl.iop + req32);
+			((uintptr_t)hba->u.itl.iop + req32);
 
 	writel(0, &req->header.flags);
 	writel(IOP_REQUEST_TYPE_GET_CONFIG, &req->header.type);
@@ -480,7 +480,7 @@ static int iop_set_config_itl(struct hptiop_hba *hba,
 		return -1;
 
 	req = (struct hpt_iop_request_set_config __iomem *)
-			((unsigned long)hba->u.itl.iop + req32);
+			((uintptr_t)hba->u.itl.iop + req32);
 
 	memcpy_toio((u8 __iomem *)req + sizeof(struct hpt_iop_request_header),
 		(u8 *)config + sizeof(struct hpt_iop_request_header),
@@ -798,7 +798,7 @@ static void hptiop_iop_request_callback_itl(struct hptiop_hba *hba, u32 tag)
 	struct hpt_ioctl_k *arg;
 
 	req = (struct hpt_iop_request_header __iomem *)
-			((unsigned long)hba->u.itl.iop + tag);
+			((uintptr_t)hba->u.itl.iop + tag);
 	dprintk("hptiop_iop_request_callback_itl: req=%p, type=%d, "
 			"result=%d, context=0x%x tag=%d\n",
 			req, readl(&req->type), readl(&req->result),

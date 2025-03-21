@@ -114,7 +114,7 @@ static int asd_map_ioport(struct asd_ha_struct *asd_ha)
 	io_handle->start = pci_resource_start(asd_ha->pcidev, i);
 	io_handle->len   = pci_resource_len(asd_ha->pcidev, i);
 	io_handle->flags = pci_resource_flags(asd_ha->pcidev, i);
-	io_handle->addr  = (void __iomem *) io_handle->start;
+	io_handle->addr  = (void __iomem *) __c_fakep(io_handle->start);
 	if (!io_handle->start || !io_handle->len) {
 		asd_printk("couldn't get IO ports for %s\n",
 			   pci_name(asd_ha->pcidev));
@@ -685,7 +685,7 @@ static int asd_unregister_sas_ha(struct asd_ha_struct *asd_ha)
 static int asd_pci_probe(struct pci_dev *dev, const struct pci_device_id *id)
 {
 	const struct asd_pcidev_struct *asd_dev;
-	unsigned asd_id = (unsigned) id->driver_data;
+	unsigned asd_id = __c_ua(id->driver_data);
 	struct asd_ha_struct *asd_ha;
 	struct Scsi_Host *shost;
 	int err;

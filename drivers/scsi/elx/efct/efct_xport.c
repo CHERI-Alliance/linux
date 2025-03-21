@@ -296,7 +296,7 @@ efct_xport_status(struct efct_xport *xport, enum efct_xport_status cmd,
 		break;
 
 	case EFCT_XPORT_LINK_STATISTICS:
-		memcpy((void *)result, &efct->xport->fc_xport_stats,
+		memcpy(result, &efct->xport->fc_xport_stats,
 		       sizeof(union efct_xport_stats_u));
 		break;
 	case EFCT_XPORT_LINK_STAT_RESET: {

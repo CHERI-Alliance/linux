@@ -6195,7 +6195,7 @@ sysfs_ctlreg_write(struct file *filp, struct kobject *kobj,
 	if (count <= LPFC_REG_WRITE_KEY_SIZE)
 		return 0;
 
-	if (off % 4 || count % 4 || (unsigned long)buf % 4)
+	if (off % 4 || count % 4 || __c_pa(buf) % 4)
 		return -EINVAL;
 
 	/* This is to protect HBA registers from accidental writes. */
@@ -6257,7 +6257,7 @@ sysfs_ctlreg_read(struct file *filp, struct kobject *kobj,
 
 	if (count == 0) return 0;
 
-	if (off % 4 || count % 4 || (unsigned long)buf % 4)
+	if (off % 4 || count % 4 || __c_pa(buf) % 4)
 		return -EINVAL;
 
 	spin_lock_irq(&phba->hbalock);

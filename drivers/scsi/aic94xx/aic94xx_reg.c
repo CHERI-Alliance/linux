@@ -18,8 +18,7 @@ static void asd_write_byte(struct asd_ha_struct *asd_ha,
 			   unsigned long offs, u8 val)
 {
 	if (unlikely(asd_ha->iospace))
-		outb(val,
-		     (unsigned long)asd_ha->io_handle[0].addr + (offs & 0xFF));
+		outb(val, __c_pa(asd_ha->io_handle[0].addr) + (offs & 0xFF));
 	else
 		writeb(val, asd_ha->io_handle[0].addr + offs);
 	wmb();
@@ -29,8 +28,7 @@ static void asd_write_word(struct asd_ha_struct *asd_ha,
 			   unsigned long offs, u16 val)
 {
 	if (unlikely(asd_ha->iospace))
-		outw(val,
-		     (unsigned long)asd_ha->io_handle[0].addr + (offs & 0xFF));
+		outw(val, __c_pa(asd_ha->io_handle[0].addr) + (offs & 0xFF));
 	else
 		writew(val, asd_ha->io_handle[0].addr + offs);
 	wmb();
@@ -40,8 +38,7 @@ static void asd_write_dword(struct asd_ha_struct *asd_ha,
 			    unsigned long offs, u32 val)
 {
 	if (unlikely(asd_ha->iospace))
-		outl(val,
-		     (unsigned long)asd_ha->io_handle[0].addr + (offs & 0xFF));
+		outl(val, __c_pa(asd_ha->io_handle[0].addr) + (offs & 0xFF));
 	else
 		writel(val, asd_ha->io_handle[0].addr + offs);
 	wmb();
@@ -53,8 +50,7 @@ static u8 asd_read_byte(struct asd_ha_struct *asd_ha, unsigned long offs)
 {
 	u8 val;
 	if (unlikely(asd_ha->iospace))
-		val = inb((unsigned long) asd_ha->io_handle[0].addr
-			  + (offs & 0xFF));
+		val = inb(__c_pa(asd_ha->io_handle[0].addr) + (offs & 0xFF));
 	else
 		val = readb(asd_ha->io_handle[0].addr + offs);
 	rmb();
@@ -66,8 +62,7 @@ static u16 asd_read_word(struct asd_ha_struct *asd_ha,
 {
 	u16 val;
 	if (unlikely(asd_ha->iospace))
-		val = inw((unsigned long)asd_ha->io_handle[0].addr
-			  + (offs & 0xFF));
+		val = inw(__c_pa(asd_ha->io_handle[0].addr) + (offs & 0xFF));
 	else
 		val = readw(asd_ha->io_handle[0].addr + offs);
 	rmb();
@@ -79,8 +74,7 @@ static u32 asd_read_dword(struct asd_ha_struct *asd_ha,
 {
 	u32 val;
 	if (unlikely(asd_ha->iospace))
-		val = inl((unsigned long) asd_ha->io_handle[0].addr
-			  + (offs & 0xFF));
+		val = inl(__c_pa(asd_ha->io_handle[0].addr) + (offs & 0xFF));
 	else
 		val = readl(asd_ha->io_handle[0].addr + offs);
 	rmb();

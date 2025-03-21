@@ -1552,9 +1552,9 @@ static int setup_buffering(struct scsi_tape *STp, const char __user *buf,
 	else
 		i = STp->try_dio_now && try_wdio;
 
-	if (i && ((unsigned long)buf & queue_dma_alignment(
+	if (i && (__c_pa(buf) & queue_dma_alignment(
 					STp->device->request_queue)) == 0) {
-		i = sgl_map_user_pages(STbp, STbp->use_sg, (unsigned long)buf,
+		i = sgl_map_user_pages(STbp, STbp->use_sg, __c_pa(buf),
 				       count, (is_read ? READ : WRITE));
 		if (i > 0) {
 			STbp->do_dio = i;
@@ -3499,7 +3499,8 @@ out:
 
 
 /* The ioctl command */
-static long st_ioctl(struct file *file, unsigned int cmd_in, unsigned long arg)
+static long st_ioctl(struct file *file, unsigned int cmd_in,
+		     user_uintptr_t arg)
 {
 	void __user *p = (void __user *)arg;
 	int i, cmd_nr, cmd_type, bt;

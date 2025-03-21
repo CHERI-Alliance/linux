@@ -5018,7 +5018,7 @@ static void FPT_busMstrDataXferStart(u32 p_port, struct sccb *pcurrSCCB)
 
 		count = pcurrSCCB->Sccb_XferCnt;
 
-		addr = (u32)(unsigned long)pcurrSCCB->DataPointer + pcurrSCCB->Sccb_ATC;
+		addr = (u32)__c_pa(pcurrSCCB->DataPointer) + pcurrSCCB->Sccb_ATC;
 	}
 
 	else {

@@ -3460,7 +3460,7 @@ static int pmcraid_check_ioctl_buffer(
 static long pmcraid_chr_ioctl(
 	struct file *filep,
 	unsigned int cmd,
-	unsigned long arg
+	user_uintptr_t arg
 )
 {
 	struct pmcraid_instance *pinstance = NULL;
@@ -3928,7 +3928,7 @@ static void pmcraid_worker_function(struct work_struct *workp)
  * Return Value
  *	None
  */
-static void pmcraid_tasklet_function(unsigned long instance)
+static void pmcraid_tasklet_function(uintptr_t instance)
 {
 	struct pmcraid_isr_param *hrrq_vector;
 	struct pmcraid_instance *pinstance;
@@ -4432,7 +4432,7 @@ static void pmcraid_init_tasklets(struct pmcraid_instance *pinstance)
 	for (i = 0; i < pinstance->num_hrrq; i++)
 		tasklet_init(&pinstance->isr_tasklet[i],
 			     pmcraid_tasklet_function,
-			     (unsigned long)&pinstance->hrrq_vector[i]);
+			     (uintptr_t)&pinstance->hrrq_vector[i]);
 }
 
 /**

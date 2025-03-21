@@ -624,7 +624,7 @@ static const struct proc_ops esas2r_proc_ops = {
 static struct Scsi_Host *esas2r_proc_host;
 static int esas2r_proc_major;
 
-long esas2r_proc_ioctl(struct file *fp, unsigned int cmd, unsigned long arg)
+long esas2r_proc_ioctl(struct file *fp, unsigned int cmd, user_uintptr_t arg)
 {
 	return esas2r_ioctl_handler(esas2r_proc_host->hostdata,
 				    cmd, (void __user *)arg);
@@ -696,7 +696,7 @@ int esas2r_show_info(struct seq_file *m, struct Scsi_Host *sh)
 		if (t->buffered_target_state == TS_PRESENT) {
 			seq_printf(m, " %3d   %3d\n",
 				   ++dev_count,
-				   (u16)(uintptr_t)(t - a->targetdb));
+				   (u16)(__c_pa(t) - __c_pa(a->targetdb)));
 		}
 
 	if (dev_count == 0)
@@ -1544,7 +1544,7 @@ void esas2r_complete_request_cb(struct esas2r_adapter *a,
 }
 
 /* Run tasklet to handle stuff outside of interrupt context. */
-void esas2r_adapter_tasklet(unsigned long context)
+void esas2r_adapter_tasklet(uintptr_t context)
 {
 	struct esas2r_adapter *a = (struct esas2r_adapter *)context;
 

@@ -2793,7 +2793,7 @@ out_unlock_pciaccess:
  * @arg: ?
  */
 static long
-_ctl_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+_ctl_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	long ret;
 
@@ -2813,7 +2813,7 @@ _ctl_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
  * @arg: ?
  */
 static long
-_ctl_mpt2_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+_ctl_mpt2_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	long ret;
 

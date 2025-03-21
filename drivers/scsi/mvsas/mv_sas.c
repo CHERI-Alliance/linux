@@ -1707,7 +1707,7 @@ static void mvs_work_queue(struct work_struct *work)
 	struct mvs_wq *mwq = container_of(dw, struct mvs_wq, work_q);
 	struct mvs_info *mvi = mwq->mvi;
 	unsigned long flags;
-	u32 phy_no = (unsigned long) mwq->data;
+	u32 phy_no = __c_pa(mwq->data);
 	struct mvs_phy *phy = &mvi->phy[phy_no];
 	struct asd_sas_phy *sas_phy = &phy->sas_phy;
 
@@ -1808,8 +1808,7 @@ void mvs_int_port(struct mvs_info *mvi, int phy_no, u32 events)
 			mvs_do_release_task(mvi, phy_no, NULL);
 			phy->phy_event |= PHY_PLUG_OUT;
 			MVS_CHIP_DISP->clear_srs_irq(mvi, 0, 1);
-			mvs_handle_event(mvi,
-				(void *)(unsigned long)phy_no,
+			mvs_handle_event(mvi, __c_fakep(phy_no),
 				PHY_PLUG_EVENT);
 			ready = mvs_is_phy_ready(mvi, phy_no);
 			if (ready || dev_sata) {
@@ -1866,8 +1865,7 @@ void mvs_int_port(struct mvs_info *mvi, int phy_no, u32 events)
 	} else if (phy->irq_status & PHYEV_BROAD_CH) {
 		mv_dprintk("phy %d broadcast change.\n",
 			phy_no + mvi->id*mvi->chip->n_phy);
-		mvs_handle_event(mvi, (void *)(unsigned long)phy_no,
-				EXP_BRCT_CHG);
+		mvs_handle_event(mvi, __c_fakep(phy_no), EXP_BRCT_CHG);
 	}
 }
 

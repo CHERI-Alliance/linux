@@ -561,7 +561,7 @@ static int be_ctrl_init(struct beiscsi_hba *phba, struct pci_dev *pdev)
 
 	mbox_mem_align->size = sizeof(struct be_mcc_mailbox);
 	mbox_mem_align->va = PTR_ALIGN(mbox_mem_alloc->va, 16);
-	mbox_mem_align->dma = PTR_ALIGN(mbox_mem_alloc->dma, 16);
+	mbox_mem_align->dma = ALIGN(mbox_mem_alloc->dma, 16);
 	memset(mbox_mem_align->va, 0, sizeof(struct be_mcc_mailbox));
 	mutex_init(&ctrl->mbox_lock);
 	spin_lock_init(&phba->ctrl.mcc_lock);
@@ -2741,7 +2741,7 @@ static int hwi_init_async_pdu_ctx(struct beiscsi_hba *phba)
 
 			pasync_ctx->async_entry =
 					(struct hd_async_entry *)
-					((long unsigned int)pasync_ctx +
+					((uintptr_t)pasync_ctx +
 					sizeof(struct hd_async_context));
 
 			pasync_ctx->num_entries = BEISCSI_ASYNC_HDQ_SIZE(phba,
@@ -2889,7 +2889,7 @@ static int hwi_init_async_pdu_ctx(struct beiscsi_hba *phba)
 				pasync_header_h->index = index;
 				INIT_LIST_HEAD(&pasync_header_h->link);
 				pasync_header_h->pbuffer =
-					(void *)((unsigned long)
+					(void *)((uintptr_t)
 						 (pasync_ctx->
 						  async_header.va_base) +
 						 (p->defpdu_hdr_sz * index));
@@ -2925,7 +2925,7 @@ static int hwi_init_async_pdu_ctx(struct beiscsi_hba *phba)
 						 phba->params.defpdu_data_sz);
 				}
 				pasync_data_h->pbuffer =
-					(void *)((unsigned long)
+					(void *)((uintptr_t)
 					(pasync_ctx->async_data.va_base) +
 					(p->defpdu_data_sz * num_per_mem));
 

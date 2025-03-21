@@ -722,7 +722,7 @@ static int zorro_esp_probe(struct zorro_dev *z,
 	int err;
 
 	board = zorro_resource_start(z);
-	zdd = &zorro_esp_boards[ent->driver_data];
+	zdd = &zorro_esp_boards[__c_ua(ent->driver_data)];
 
 	pr_info("%s found at address 0x%lx.\n", zdd->name, board);
 

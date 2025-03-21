@@ -130,7 +130,7 @@ static void mvs_free(struct mvs_info *mvi)
 }
 
 #ifdef CONFIG_SCSI_MVSAS_TASKLET
-static void mvs_tasklet(unsigned long opaque)
+static void mvs_tasklet(uintptr_t opaque)
 {
 	u32 stat;
 	u16 core_nr, i = 0;
@@ -291,7 +291,7 @@ int mvs_ioremap(struct mvs_info *mvi, int bar, int bar_ex)
 		if (res_flag_ex & IORESOURCE_MEM)
 			mvi->regs_ex = ioremap(res_start, res_len);
 		else
-			mvi->regs_ex = (void *)res_start;
+			mvi->regs_ex = __c_fakep(res_start);
 		if (!mvi->regs_ex)
 			goto err_out;
 	}
@@ -331,14 +331,14 @@ static struct mvs_info *mvs_pci_alloc(struct pci_dev *pdev,
 	struct sas_ha_struct *sha = SHOST_TO_SAS_HA(shost);
 
 	mvi = kzalloc(sizeof(*mvi) +
-		(1L << mvs_chips[ent->driver_data].slot_width) *
+		(1L << mvs_chips[__c_ua(ent->driver_data)].slot_width) *
 		sizeof(struct mvs_slot_info), GFP_KERNEL);
 	if (!mvi)
 		return NULL;
 
 	mvi->pdev = pdev;
 	mvi->dev = &pdev->dev;
-	mvi->chip_id = ent->driver_data;
+	mvi->chip_id = __c_ua(ent->driver_data);
 	mvi->chip = &mvs_chips[mvi->chip_id];
 	INIT_LIST_HEAD(&mvi->wq_list);
 
@@ -500,7 +500,7 @@ static int mvs_pci_init(struct pci_dev *pdev, const struct pci_device_id *ent)
 		goto err_out_regions;
 	}
 
-	chip = &mvs_chips[ent->driver_data];
+	chip = &mvs_chips[__c_ua(ent->driver_data)];
 	SHOST_TO_SAS_HA(shost) =
 		kcalloc(1, sizeof(struct sas_ha_struct), GFP_KERNEL);
 	if (!SHOST_TO_SAS_HA(shost)) {
@@ -543,7 +543,7 @@ static int mvs_pci_init(struct pci_dev *pdev, const struct pci_device_id *ent)
 	struct mvs_prv_info *mpi = SHOST_TO_SAS_HA(shost)->lldd_ha;
 
 	tasklet_init(&(mpi->mv_tasklet), mvs_tasklet,
-		     (unsigned long)SHOST_TO_SAS_HA(shost));
+		     (uintptr_t)SHOST_TO_SAS_HA(shost));
 	}
 #endif
 

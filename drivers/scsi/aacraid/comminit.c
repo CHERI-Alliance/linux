@@ -391,7 +391,7 @@ static int aac_comm_init(struct aac_dev * dev)
 	if (!aac_alloc_comm(dev, (void * *)&headers, size, QUEUE_ALIGNMENT))
 		return -ENOMEM;
 
-	queues = (struct aac_entry *)(((ulong)headers) + hdrsize);
+	queues = (struct aac_entry *)(((uintptr_t)headers) + hdrsize);
 
 	/* Adapter to Host normal priority Command queue */ 
 	comm->queue[HostNormCmdQueue].base = queues;

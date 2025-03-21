@@ -5032,7 +5032,7 @@ static int resp_report_zones(struct scsi_cmnd *scp,
 	if (devip->zcap < devip->zsize)
 		put_unaligned_be64(devip->zsize, arr + 16);
 
-	rep_len = (unsigned long)desc - (unsigned long)arr;
+	rep_len = __c_pa(desc) - __c_pa(arr);
 	ret = fill_from_dev_buffer(scp, arr, min_t(u32, alloc_len, rep_len));
 
 fini:

@@ -19,7 +19,7 @@
 // Entry points for char node driver
 static DEFINE_MUTEX(mraid_mm_mutex);
 static int mraid_mm_open(struct inode *, struct file *);
-static long mraid_mm_unlocked_ioctl(struct file *, uint, unsigned long);
+static long mraid_mm_unlocked_ioctl(struct file *, uint, user_uintptr_t);
 
 
 // routines to convert to and from the old the format
@@ -100,7 +100,7 @@ mraid_mm_open(struct inode *inode, struct file *filep)
  * @arg		: user ioctl packet
  */
 static int
-mraid_mm_ioctl(struct file *filep, unsigned int cmd, unsigned long arg)
+mraid_mm_ioctl(struct file *filep, unsigned int cmd, user_uintptr_t arg)
 {
 	uioc_t		*kioc;
 	char		signature[EXT_IOCTL_SIGN_SZ]	= {0};
@@ -213,7 +213,7 @@ mraid_mm_ioctl(struct file *filep, unsigned int cmd, unsigned long arg)
 
 static long
 mraid_mm_unlocked_ioctl(struct file *filep, unsigned int cmd,
-		        unsigned long arg)
+		        user_uintptr_t arg)
 {
 	int err;
 

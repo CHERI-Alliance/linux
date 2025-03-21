@@ -521,7 +521,7 @@ static void virtio_scsi_init_hdr(struct virtio_device *vdev,
 	cmd->lun[1] = sc->device->id;
 	cmd->lun[2] = (sc->device->lun >> 8) | 0x40;
 	cmd->lun[3] = sc->device->lun & 0xff;
-	cmd->tag = cpu_to_virtio64(vdev, (unsigned long)sc);
+	cmd->tag = cpu_to_virtio64(vdev, __c_pa(sc));
 	cmd->task_attr = VIRTIO_SCSI_S_SIMPLE;
 	cmd->prio = 0;
 	cmd->crn = 0;
@@ -718,7 +718,7 @@ static int virtscsi_abort(struct scsi_cmnd *sc)
 		.lun[1] = sc->device->id,
 		.lun[2] = (sc->device->lun >> 8) | 0x40,
 		.lun[3] = sc->device->lun & 0xff,
-		.tag = cpu_to_virtio64(vscsi->vdev, (unsigned long)sc),
+		.tag = cpu_to_virtio64(vscsi->vdev, __c_pa(sc)),
 	};
 	return virtscsi_tmf(vscsi, cmd);
 }

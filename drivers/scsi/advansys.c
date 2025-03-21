@@ -2667,8 +2667,8 @@ static const char *advansys_info(struct Scsi_Host *shost)
 		}
 		sprintf(info,
 			"AdvanSys SCSI %s: PCI %s: PCIMEM 0x%lX-0x%lX, IRQ 0x%X",
-			ASC_VERSION, widename, (ulong)adv_dvc_varp->iop_base,
-			(ulong)adv_dvc_varp->iop_base + boardp->asc_n_io_port - 1, boardp->irq);
+			ASC_VERSION, widename, __c_pa(adv_dvc_varp->iop_base),
+			__c_pa(adv_dvc_varp->iop_base) + boardp->asc_n_io_port - 1, boardp->irq);
 	}
 	BUG_ON(strlen(info) >= ASC_INFO_SIZE);
 	ASC_DBG(1, "end\n");
@@ -3985,7 +3985,7 @@ static int AscInitMicroCodeVar(ASC_DVC_VAR *asc_dvc)
 			 ASC_TID_TO_TARGET_ID(asc_dvc->cfg->chip_scsi_id));
 
 	/* Ensure overrun buffer is aligned on an 8 byte boundary. */
-	BUG_ON((unsigned long)asc_dvc->overrun_buf & 7);
+	BUG_ON(__c_pa(asc_dvc->overrun_buf) & 7);
 	asc_dvc->overrun_dma = dma_map_single(board->dev, asc_dvc->overrun_buf,
 					ASC_OVERRUN_BSIZE, DMA_FROM_DEVICE);
 	if (dma_mapping_error(board->dev, asc_dvc->overrun_dma)) {
@@ -11032,8 +11032,9 @@ static int advansys_board_found(struct Scsi_Host *shost, unsigned int iop,
 
 	/* BIOS start address. */
 	if (ASC_NARROW_BOARD(boardp)) {
-		shost->base = AscGetChipBiosAddress(asc_dvc_varp->iop_base,
-						    asc_dvc_varp->bus_type);
+		shost->base = __c_fakeu(AscGetChipBiosAddress(
+						asc_dvc_varp->iop_base,
+						asc_dvc_varp->bus_type));
 	} else {
 		/*
 		 * Fill-in BIOS board variables. The Wide BIOS saves
@@ -11063,7 +11064,7 @@ static int advansys_board_found(struct Scsi_Host *shost, unsigned int iop,
 			 * Convert x86 realmode code segment to a linear
 			 * address by shifting left 4.
 			 */
-			shost->base = ((ulong)boardp->bios_codeseg << 4);
+			shost->base = __c_fakeu((ulong)boardp->bios_codeseg << 4);
 		} else {
 			shost->base = 0;
 		}

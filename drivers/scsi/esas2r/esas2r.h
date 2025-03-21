@@ -971,7 +971,7 @@ u8 handle_hba_ioctl(struct esas2r_adapter *a,
 		    struct atto_ioctl *ioctl_hba);
 int esas2r_queuecommand(struct Scsi_Host *host, struct scsi_cmnd *cmd);
 int esas2r_show_info(struct seq_file *m, struct Scsi_Host *sh);
-long esas2r_proc_ioctl(struct file *fp, unsigned int cmd, unsigned long arg);
+long esas2r_proc_ioctl(struct file *fp, unsigned int cmd, user_uintptr_t arg);
 
 /* SCSI error handler (eh) functions */
 int esas2r_eh_abort(struct scsi_cmnd *cmd);
@@ -992,7 +992,7 @@ int esas2r_write_vda(struct esas2r_adapter *a, const char *buf, long off,
 int esas2r_read_fs(struct esas2r_adapter *a, char *buf, long off, int count);
 int esas2r_write_fs(struct esas2r_adapter *a, const char *buf, long off,
 		    int count);
-void esas2r_adapter_tasklet(unsigned long context);
+void esas2r_adapter_tasklet(uintptr_t context);
 irqreturn_t esas2r_interrupt(int irq, void *dev_id);
 irqreturn_t esas2r_msi_interrupt(int irq, void *dev_id);
 void esas2r_kickoff_timer(struct esas2r_adapter *a);
@@ -1386,7 +1386,7 @@ static inline bool esas2r_adapter_interrupt_pending(struct esas2r_adapter *a)
 static inline u16 esas2r_targ_get_id(struct esas2r_target *t,
 				     struct esas2r_adapter *a)
 {
-	return (u16)(uintptr_t)(t - a->targetdb);
+	return (u16)(__c_pa(t) - __c_pa(a->targetdb));
 }
 
 /*  Build and start an asynchronous event request */

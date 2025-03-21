@@ -64,7 +64,7 @@ csio_mem_read(struct file *file, char __user *buf, size_t count, loff_t *ppos)
 {
 	loff_t pos = *ppos;
 	loff_t avail = file_inode(file)->i_size;
-	unsigned int mem = (uintptr_t)file->private_data & 3;
+	unsigned int mem = __c_pa(file->private_data) & 3;
 	struct csio_hw *hw = file->private_data - mem;
 
 	if (pos < 0)

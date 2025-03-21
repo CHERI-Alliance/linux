@@ -1173,7 +1173,7 @@ static int aac_cfg_open(struct inode *inode, struct file *file)
  */
 
 static long aac_cfg_ioctl(struct file *file,
-		unsigned int cmd, unsigned long arg)
+		unsigned int cmd, user_uintptr_t arg)
 {
 	struct aac_dev *aac = (struct aac_dev *)file->private_data;
 

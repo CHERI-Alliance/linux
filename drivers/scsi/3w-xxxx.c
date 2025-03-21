@@ -843,7 +843,7 @@ static int tw_allocate_memory(TW_Device_Extension *tw_dev, int size, int which)
 		return 1;
 	}
 
-	if ((unsigned long)cpu_addr % (tw_dev->tw_pci_dev->device == TW_DEVICE_ID ? TW_ALIGNMENT_6000 : TW_ALIGNMENT_7000)) {
+	if (__c_pa(cpu_addr) % (tw_dev->tw_pci_dev->device == TW_DEVICE_ID ? TW_ALIGNMENT_6000 : TW_ALIGNMENT_7000)) {
 		printk(KERN_WARNING "3w-xxxx: Couldn't allocate correctly aligned memory.\n");
 		dma_free_coherent(&tw_dev->tw_pci_dev->dev, size * TW_Q_LENGTH,
 				cpu_addr, dma_handle);
@@ -872,7 +872,8 @@ static int tw_allocate_memory(TW_Device_Extension *tw_dev, int size, int which)
 } /* End tw_allocate_memory() */
 
 /* This function handles ioctl for the character device */
-static long tw_chrdev_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long tw_chrdev_ioctl(struct file *file, unsigned int cmd,
+			    user_uintptr_t arg)
 {
 	int request_id;
 	dma_addr_t dma_handle;

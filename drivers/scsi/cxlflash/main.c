@@ -3475,7 +3475,7 @@ out:
  * Return: 0 on success, -errno on failure
  */
 static long cxlflash_chr_ioctl(struct file *file, unsigned int cmd,
-			       unsigned long arg)
+			       user_uintptr_t arg)
 {
 	typedef int (*hioctl) (struct cxlflash_cfg *, void *);
 

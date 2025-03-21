@@ -985,7 +985,7 @@ static int mpi3mr_build_nvme_prp(struct mpi3mr_ioc *mrioc,
 	 * Check if we are within 1 entry of a page boundary we don't
 	 * want our first entry to be a PRP List entry.
 	 */
-	page_mask_result = (uintptr_t)((u8 *)prp_page + prp_size) & page_mask;
+	page_mask_result = __c_pa((u8 *)prp_page + prp_size) & page_mask;
 	if (!page_mask_result) {
 		dprint_bsg_err(mrioc, "%s: PRP page is not page aligned\n",
 		    __func__);

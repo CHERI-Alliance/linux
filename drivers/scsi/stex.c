@@ -1704,7 +1704,7 @@ static int stex_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 		goto out_iounmap;
 	}
 
-	hba->cardtype = (unsigned int) id->driver_data;
+	hba->cardtype = __c_ua(id->driver_data);
 	ci = &stex_card_info[hba->cardtype];
 	switch (id->subdevice) {
 	case 0x4221:

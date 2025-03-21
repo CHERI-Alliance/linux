@@ -375,8 +375,7 @@ static int asd_build_ata_ascb(struct asd_ascb *ascb, struct sas_task *task,
 		memcpy(scb->ata_task.atapi_packet, task->ata_task.atapi_packet,
 		       16);
 	scb->ata_task.sister_scb = cpu_to_le16(0xFFFF);
-	scb->ata_task.conn_handle = cpu_to_le16(
-		(u16)(unsigned long)dev->lldd_dev);
+	scb->ata_task.conn_handle = cpu_to_le16((u16)__c_pa(dev->lldd_dev));
 
 	if (likely(!task->ata_task.device_control_reg_update)) {
 		flags = 0;
@@ -437,8 +436,7 @@ static int asd_build_smp_ascb(struct asd_ascb *ascb, struct sas_task *task,
 		cpu_to_le32((u32)sg_dma_len(&task->smp_task.smp_resp)-4);
 
 	scb->smp_task.sister_scb = cpu_to_le16(0xFFFF);
-	scb->smp_task.conn_handle = cpu_to_le16((u16)
-						(unsigned long)dev->lldd_dev);
+	scb->smp_task.conn_handle = cpu_to_le16((u16)__c_pa(dev->lldd_dev));
 
 	ascb->tasklet_complete = asd_task_tasklet_complete;
 
@@ -485,8 +483,7 @@ static int asd_build_ssp_ascb(struct asd_ascb *ascb, struct sas_task *task,
 	       task->ssp_task.cmd->cmd_len);
 
 	scb->ssp_task.sister_scb = cpu_to_le16(0xFFFF);
-	scb->ssp_task.conn_handle = cpu_to_le16(
-		(u16)(unsigned long)dev->lldd_dev);
+	scb->ssp_task.conn_handle = cpu_to_le16((u16)__c_pa(dev->lldd_dev));
 	scb->ssp_task.data_dir = data_dir_flags[task->data_dir];
 	scb->ssp_task.retry_count = scb->ssp_task.retry_count;
 

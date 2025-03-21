@@ -2233,7 +2233,7 @@ static void *t4_uld_add(const struct cxgb4_lld_info *lldi)
 			"t4 0x%p, rxq id #%d: %u.\n",
 			cdev, i, lldi->rxq_ids[i]);
 
-	memcpy(cxgbi_cdev_priv(cdev), lldi, sizeof(*lldi));
+	memcpy((struct cxgb4_lld_info *)cxgbi_cdev_priv(cdev), lldi, sizeof(*lldi));
 	cdev->flags = CXGBI_FLAG_DEV_T4;
 	cdev->pdev = lldi->pdev;
 	cdev->ports = lldi->ports;

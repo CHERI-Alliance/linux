@@ -371,9 +371,9 @@ static int imm_out(imm_struct *dev, char *buffer, int len)
 	case IMM_EPP_8:
 		epp_reset(ppb);
 		w_ctr(ppb, 0x4);
-		if (dev->mode == IMM_EPP_32 && !(((long) buffer | len) & 0x03))
+		if (dev->mode == IMM_EPP_32 && !(((long) __c_pa(buffer) | len) & 0x03))
 			outsl(ppb + 4, buffer, len >> 2);
-		else if (dev->mode == IMM_EPP_16 && !(((long) buffer | len) & 0x01))
+		else if (dev->mode == IMM_EPP_16 && !(((long) __c_pa(buffer) | len) & 0x01))
 			outsw(ppb + 4, buffer, len >> 1);
 		else
 			outsb(ppb + 4, buffer, len);
@@ -428,9 +428,9 @@ static int imm_in(imm_struct *dev, char *buffer, int len)
 	case IMM_EPP_8:
 		epp_reset(ppb);
 		w_ctr(ppb, 0x24);
-		if (dev->mode == IMM_EPP_32 && !(((long) buffer | len) & 0x03))
+		if (dev->mode == IMM_EPP_32 && !(((long) __c_pa(buffer) | len) & 0x03))
 			insw(ppb + 4, buffer, len >> 2);
-		else if (dev->mode == IMM_EPP_16 && !(((long) buffer | len) & 0x01))
+		else if (dev->mode == IMM_EPP_16 && !(((long) __c_pa(buffer) | len) & 0x01))
 			insl(ppb + 4, buffer, len >> 1);
 		else
 			insb(ppb + 4, buffer, len);

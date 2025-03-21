@@ -4510,13 +4510,13 @@ lpfc_new_io_buf(struct lpfc_hba *phba, int num_to_alloc)
 			 * check to be sure.
 			 */
 			if ((phba->sli3_options & LPFC_SLI3_BG_ENABLED) &&
-			    (((unsigned long)(lpfc_ncmd->data) &
+			    ((__c_pa(lpfc_ncmd->data) &
 			    (unsigned long)(SLI4_PAGE_SIZE - 1)) != 0)) {
 				lpfc_printf_log(phba, KERN_ERR,
 						LOG_TRACE_EVENT,
 						"3369 Memory alignment err: "
 						"addr=%lx\n",
-						(unsigned long)lpfc_ncmd->data);
+						__c_pa(lpfc_ncmd->data));
 				dma_pool_free(phba->lpfc_sg_dma_buf_pool,
 					      lpfc_ncmd->data,
 					      lpfc_ncmd->dma_handle);

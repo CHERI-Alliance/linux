@@ -154,8 +154,7 @@ static int asd_clear_nexus_I_T(struct domain_device *dev,
 	case NEXUS_PHASE_RESUME:
 		scb->clear_nexus.flags = RESUME_TX;
 	}
-	scb->clear_nexus.conn_handle = cpu_to_le16((u16)(unsigned long)
-						   dev->lldd_dev);
+	scb->clear_nexus.conn_handle = cpu_to_le16((u16)__c_pa(dev->lldd_dev));
 	CLEAR_NEXUS_POST;
 }
 
@@ -206,8 +205,7 @@ static int asd_clear_nexus_I_T_L(struct domain_device *dev, u8 *lun)
 	scb->clear_nexus.nexus = NEXUS_I_T_L;
 	scb->clear_nexus.flags = SEND_Q | EXEC_Q | NOTINQ;
 	memcpy(scb->clear_nexus.ssp_task.lun, lun, 8);
-	scb->clear_nexus.conn_handle = cpu_to_le16((u16)(unsigned long)
-						   dev->lldd_dev);
+	scb->clear_nexus.conn_handle = cpu_to_le16((u16)__c_pa(dev->lldd_dev));
 	CLEAR_NEXUS_POST;
 }
 
@@ -221,8 +219,7 @@ static int asd_clear_nexus_tag(struct sas_task *task)
 	memcpy(scb->clear_nexus.ssp_task.lun, task->ssp_task.LUN, 8);
 	scb->clear_nexus.ssp_task.tag = tascb->tag;
 	if (task->dev->tproto)
-		scb->clear_nexus.conn_handle = cpu_to_le16((u16)(unsigned long)
-							  task->dev->lldd_dev);
+		scb->clear_nexus.conn_handle = cpu_to_le16((u16)__c_pa(task->dev->lldd_dev));
 	CLEAR_NEXUS_POST;
 }
 
@@ -234,8 +231,7 @@ static int asd_clear_nexus_index(struct sas_task *task)
 	CLEAR_NEXUS_PRE;
 	scb->clear_nexus.nexus = NEXUS_TRANS_CX;
 	if (task->dev->tproto)
-		scb->clear_nexus.conn_handle = cpu_to_le16((u16)(unsigned long)
-							  task->dev->lldd_dev);
+		scb->clear_nexus.conn_handle = cpu_to_le16((u16)__c_pa(task->dev->lldd_dev));
 	scb->clear_nexus.index = cpu_to_le16(tascb->tc_index);
 	CLEAR_NEXUS_POST;
 }
@@ -446,8 +442,7 @@ int asd_abort_task(struct sas_task *task)
 	}
 
 	scb->abort_task.sister_scb = cpu_to_le16(0xFFFF);
-	scb->abort_task.conn_handle = cpu_to_le16(
-		(u16)(unsigned long)task->dev->lldd_dev);
+	scb->abort_task.conn_handle = cpu_to_le16((u16)__c_pa(task->dev->lldd_dev));
 	scb->abort_task.retry_count = 1;
 	scb->abort_task.index = cpu_to_le16((u16)tascb->tc_index);
 	scb->abort_task.itnl_to = cpu_to_le16(ITNL_TIMEOUT_CONST);
@@ -593,8 +588,7 @@ static int asd_initiate_ssp_tmf(struct domain_device *dev, u8 *lun,
 	scb->ssp_tmf.ssp_task.tmf = tmf;
 
 	scb->ssp_tmf.sister_scb = cpu_to_le16(0xFFFF);
-	scb->ssp_tmf.conn_handle= cpu_to_le16((u16)(unsigned long)
-					      dev->lldd_dev);
+	scb->ssp_tmf.conn_handle= cpu_to_le16((u16)__c_pa(dev->lldd_dev));
 	scb->ssp_tmf.retry_count = 1;
 	scb->ssp_tmf.itnl_to = cpu_to_le16(ITNL_TIMEOUT_CONST);
 	if (tmf == TMF_QUERY_TASK)

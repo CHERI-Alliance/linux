@@ -200,7 +200,7 @@ static void pm8001_free(struct pm8001_hba_info *pm8001_ha)
  * @opaque: the passed general host adapter struct
  * Note: pm8001_tasklet is common for pm8001 & pm80xx
  */
-static void pm8001_tasklet(unsigned long opaque)
+static void pm8001_tasklet(uintptr_t opaque)
 {
 	struct isr_param *irq_vector = (struct isr_param *)opaque;
 	struct pm8001_hba_info *pm8001_ha = irq_vector->drv_inst;
@@ -222,12 +222,12 @@ static void pm8001_init_tasklet(struct pm8001_hba_info *pm8001_ha)
 	if ((!pm8001_ha->pdev->msix_cap || !pci_msi_enabled()) ||
 	    (pm8001_ha->chip_id == chip_8001)) {
 		tasklet_init(&pm8001_ha->tasklet[0], pm8001_tasklet,
-			     (unsigned long)&(pm8001_ha->irq_vector[0]));
+			     (uintptr_t)&(pm8001_ha->irq_vector[0]));
 		return;
 	}
 	for (i = 0; i < PM8001_MAX_MSIX_VEC; i++)
 		tasklet_init(&pm8001_ha->tasklet[i], pm8001_tasklet,
-			     (unsigned long)&(pm8001_ha->irq_vector[i]));
+			     (uintptr_t)&(pm8001_ha->irq_vector[i]));
 }
 
 static void pm8001_kill_tasklet(struct pm8001_hba_info *pm8001_ha)
@@ -507,8 +507,7 @@ static int pm8001_ioremap(struct pm8001_hba_info *pm8001_ha)
 			pm8001_dbg(pm8001_ha, INIT,
 				   "base addr %llx virt_addr=%llx len=%d\n",
 				   (u64)pm8001_ha->io_mem[logicalBar].membase,
-				   (u64)(unsigned long)
-				   pm8001_ha->io_mem[logicalBar].memvirtaddr,
+				   (u64)__c_pa(pm8001_ha->io_mem[logicalBar].memvirtaddr),
 				   pm8001_ha->io_mem[logicalBar].memsize);
 		} else {
 			pm8001_ha->io_mem[logicalBar].membase	= 0;
@@ -540,7 +539,7 @@ static struct pm8001_hba_info *pm8001_pci_alloc(struct pci_dev *pdev,
 
 	pm8001_ha->pdev = pdev;
 	pm8001_ha->dev = &pdev->dev;
-	pm8001_ha->chip_id = ent->driver_data;
+	pm8001_ha->chip_id = __c_ua(ent->driver_data);
 	pm8001_ha->chip = &pm8001_chips[pm8001_ha->chip_id];
 	pm8001_ha->irq = pdev->irq;
 	pm8001_ha->sas = sha;
@@ -1142,7 +1141,7 @@ static int pm8001_pci_probe(struct pci_dev *pdev,
 		rc = -ENOMEM;
 		goto err_out_regions;
 	}
-	chip = &pm8001_chips[ent->driver_data];
+	chip = &pm8001_chips[__c_ua(ent->driver_data)];
 	sha = kzalloc(sizeof(struct sas_ha_struct), GFP_KERNEL);
 	if (!sha) {
 		rc = -ENOMEM;
