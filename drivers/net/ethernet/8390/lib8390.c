@@ -255,7 +255,7 @@ static int __ei_close(struct net_device *dev)
 
 static void __ei_tx_timeout(struct net_device *dev, unsigned int txqueue)
 {
-	unsigned long e8390_base = dev->base_addr;
+	uintptr_t e8390_base = dev->base_addr;
 	struct ei_device *ei_local = netdev_priv(dev);
 	int txsr, isr, tickssofar = jiffies - dev_trans_start(dev);
 	unsigned long flags;
@@ -302,7 +302,7 @@ static void __ei_tx_timeout(struct net_device *dev, unsigned int txqueue)
 static netdev_tx_t __ei_start_xmit(struct sk_buff *skb,
 				   struct net_device *dev)
 {
-	unsigned long e8390_base = dev->base_addr;
+	uintptr_t e8390_base = dev->base_addr;
 	struct ei_device *ei_local = netdev_priv(dev);
 	int send_length = skb->len, output_page;
 	unsigned long flags;
@@ -427,7 +427,7 @@ static netdev_tx_t __ei_start_xmit(struct sk_buff *skb,
 static irqreturn_t __ei_interrupt(int irq, void *dev_id)
 {
 	struct net_device *dev = dev_id;
-	unsigned long e8390_base = dev->base_addr;
+	uintptr_t e8390_base = dev->base_addr;
 	int interrupts, nr_serviced = 0;
 	struct ei_device *ei_local = netdev_priv(dev);
 
@@ -532,7 +532,7 @@ static void __ei_poll(struct net_device *dev)
 
 static void ei_tx_err(struct net_device *dev)
 {
-	unsigned long e8390_base = dev->base_addr;
+	uintptr_t e8390_base = dev->base_addr;
 	/* ei_local is used on some platforms via the EI_SHIFT macro */
 	struct ei_device *ei_local __maybe_unused = netdev_priv(dev);
 	unsigned char txsr = ei_inb_p(e8390_base+EN0_TSR);
@@ -578,7 +578,7 @@ static void ei_tx_err(struct net_device *dev)
 
 static void ei_tx_intr(struct net_device *dev)
 {
-	unsigned long e8390_base = dev->base_addr;
+	uintptr_t e8390_base = dev->base_addr;
 	struct ei_device *ei_local = netdev_priv(dev);
 	int status = ei_inb(e8390_base + EN0_TSR);
 
@@ -658,7 +658,7 @@ static void ei_tx_intr(struct net_device *dev)
 
 static void ei_receive(struct net_device *dev)
 {
-	unsigned long e8390_base = dev->base_addr;
+	uintptr_t e8390_base = dev->base_addr;
 	struct ei_device *ei_local = netdev_priv(dev);
 	unsigned char rxing_page, this_frame, next_frame;
 	unsigned short current_offset;
@@ -787,7 +787,7 @@ static void ei_receive(struct net_device *dev)
 
 static void ei_rx_overrun(struct net_device *dev)
 {
-	unsigned long e8390_base = dev->base_addr;
+	uintptr_t e8390_base = dev->base_addr;
 	unsigned char was_txing, must_resend = 0;
 	/* ei_local is used on some platforms via the EI_SHIFT macro */
 	struct ei_device *ei_local __maybe_unused = netdev_priv(dev);
@@ -855,7 +855,7 @@ static void ei_rx_overrun(struct net_device *dev)
 
 static struct net_device_stats *__ei_get_stats(struct net_device *dev)
 {
-	unsigned long ioaddr = dev->base_addr;
+	uintptr_t ioaddr = dev->base_addr;
 	struct ei_device *ei_local = netdev_priv(dev);
 	unsigned long flags;
 
@@ -902,7 +902,7 @@ static inline void make_mc_bits(u8 *bits, struct net_device *dev)
 
 static void do_set_multicast_list(struct net_device *dev)
 {
-	unsigned long e8390_base = dev->base_addr;
+	uintptr_t e8390_base = dev->base_addr;
 	int i;
 	struct ei_device *ei_local = netdev_priv(dev);
 
@@ -1013,7 +1013,7 @@ static struct net_device *____alloc_ei_netdev(int size)
 
 static void __NS8390_init(struct net_device *dev, int startp)
 {
-	unsigned long e8390_base = dev->base_addr;
+	uintptr_t e8390_base = dev->base_addr;
 	struct ei_device *ei_local = netdev_priv(dev);
 	int i;
 	int endcfg = ei_local->word16
@@ -1075,7 +1075,7 @@ static void __NS8390_init(struct net_device *dev, int startp)
 static void NS8390_trigger_send(struct net_device *dev, unsigned int length,
 								int start_page)
 {
-	unsigned long e8390_base = dev->base_addr;
+	uintptr_t e8390_base = dev->base_addr;
 	struct ei_device *ei_local __attribute((unused)) = netdev_priv(dev);
 
 	ei_outb_p(E8390_NODMA+E8390_PAGE0, e8390_base+E8390_CMD);

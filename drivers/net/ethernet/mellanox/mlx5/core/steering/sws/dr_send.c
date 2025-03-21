@@ -12,7 +12,7 @@
 enum { CQ_OK = 0, CQ_EMPTY = -1, CQ_POLL_ERR = -2 };
 
 struct dr_data_seg {
-	u64 addr;
+	uintptr_t addr;
 	u32 length;
 	u32 lkey;
 	unsigned int send_flags;
@@ -415,7 +415,7 @@ dr_rdma_handle_icm_write_segments(struct mlx5_wqe_ctrl_seg *wq_ctrl,
 
 	wq_dseg->byte_count = cpu_to_be32(data_seg->length);
 	wq_dseg->lkey = cpu_to_be32(data_seg->lkey);
-	wq_dseg->addr = cpu_to_be64(data_seg->addr);
+	wq_dseg->addr = cpu_to_be64(__c_ua(data_seg->addr));
 
 	*size = (sizeof(*wq_ctrl) +    /* WQE ctrl segment */
 		 sizeof(*wq_dseg) +    /* WQE data segment */
@@ -589,7 +589,7 @@ static void dr_fill_write_icm_segs(struct mlx5dr_domain *dmn,
 		memcpy(send_ring->buf + buff_offset,
 		       (void *)(uintptr_t)send_info->write.addr,
 		       send_info->write.length);
-		send_info->write.addr = (uintptr_t)send_ring->mr->dma_addr + buff_offset;
+		send_info->write.addr = __c_fakeu(send_ring->mr->dma_addr) + buff_offset;
 		send_info->write.lkey = send_ring->mr->mkey;
 
 		send_ring->tx_head++;
@@ -604,7 +604,7 @@ static void dr_fill_write_icm_segs(struct mlx5dr_domain *dmn,
 	send_info->read.length = send_info->write.length;
 
 	/* Read into dedicated sync buffer */
-	send_info->read.addr = (uintptr_t)send_ring->sync_mr->dma_addr;
+	send_info->read.addr = __c_fakeu(send_ring->sync_mr->dma_addr);
 	send_info->read.lkey = send_ring->sync_mr->mkey;
 
 	if (send_ring->pending_wqe % send_ring->signal_th == 0)
@@ -873,7 +873,7 @@ int mlx5dr_send_postsend_args(struct mlx5dr_domain *dmn, u64 arg_id,
 			      u16 num_of_actions, u8 *actions_data)
 {
 	int data_len, iter = 0, cur_sent;
-	u64 addr;
+	uintptr_t addr;
 	int ret;
 
 	addr = (uintptr_t)actions_data;

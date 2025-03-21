@@ -212,7 +212,7 @@ static int cxgb4_matchall_alloc_tc(struct net_device *dev,
 	}
 
 	tc_port_matchall->egress.hwtc = e->idx;
-	tc_port_matchall->egress.cookie = cls->cookie;
+	tc_port_matchall->egress.cookie = __c_ua(cls->cookie);
 	tc_port_matchall->egress.state = CXGB4_MATCHALL_STATE_ENABLED;
 	return 0;
 
@@ -326,7 +326,7 @@ static int cxgb4_matchall_add_filter(struct net_device *dev,
 	if (fidx < adap->tids.nhpftids)
 		fs->prio = 1;
 	fs->tc_prio = cls->common.prio;
-	fs->tc_cookie = cls->cookie;
+	fs->tc_cookie = __c_ua(cls->cookie);
 	fs->type = filter_type;
 	fs->hitcnts = 1;
 

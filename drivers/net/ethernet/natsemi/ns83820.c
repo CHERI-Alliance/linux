@@ -557,7 +557,7 @@ static inline int rx_refill(struct net_device *ndev, gfp_t gfp)
 		if (unlikely(!skb))
 			break;
 
-		skb_reserve(skb, skb->data - PTR_ALIGN(skb->data, 16));
+		skb_reserve(skb, __c_pa(skb->data) - ALIGN(__c_pa(skb->data), 16));
 		if (gfp != GFP_ATOMIC)
 			spin_lock_irqsave(&dev->rx_info.lock, flags);
 		res = ns83820_add_rx_skb(dev, skb);

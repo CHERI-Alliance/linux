@@ -1140,7 +1140,7 @@ static int mlx4_en_set_ringparam(struct net_device *dev,
 	if (param->rx_pending < MLX4_EN_MIN_RX_SIZE) {
 		en_warn(priv, "%s: rx_pending (%d) < min (%d)\n",
 			__func__, param->rx_pending,
-			MLX4_EN_MIN_RX_SIZE);
+			(int)MLX4_EN_MIN_RX_SIZE);
 		return -EINVAL;
 	}
 	if (param->tx_pending < MLX4_EN_MIN_TX_SIZE) {

@@ -1037,7 +1037,7 @@ int nfp_flower_merge_offloaded_flows(struct nfp_app *app,
 	if (!merge_flow)
 		return -ENOMEM;
 
-	merge_flow->tc_flower_cookie = (uintptr_t)merge_flow;
+	merge_flow->tc_flower_cookie = __c_pa(merge_flow);
 	merge_flow->ingress_dev = sub_flow1->ingress_dev;
 
 	memcpy(merge_flow->unmasked_data, sub_flow1->unmasked_data,
@@ -1384,11 +1384,11 @@ nfp_flower_add_offload(struct nfp_app *app, struct net_device *netdev,
 			goto err_destroy_flow;
 	}
 
-	err = nfp_compile_flow_metadata(app, flow->cookie, flow_pay, netdev, extack);
+	err = nfp_compile_flow_metadata(app, __c_ua(flow->cookie), flow_pay, netdev, extack);
 	if (err)
 		goto err_destroy_flow;
 
-	flow_pay->tc_flower_cookie = flow->cookie;
+	flow_pay->tc_flower_cookie = __c_ua(flow->cookie);
 	err = rhashtable_insert_fast(&priv->flow_table, &flow_pay->fl_node,
 				     nfp_flower_table_params);
 	if (err) {
@@ -1570,7 +1570,7 @@ nfp_flower_del_offload(struct nfp_app *app, struct net_device *netdev,
 		return err;
 	}
 
-	nfp_flow = nfp_flower_search_fl_table(app, flow->cookie, netdev);
+	nfp_flow = nfp_flower_search_fl_table(app, __c_ua(flow->cookie), netdev);
 	if (!nfp_flow) {
 		NL_SET_ERR_MSG_MOD(extack, "invalid entry: cannot remove flow that does not exist");
 		return -ENOENT;
@@ -1701,7 +1701,7 @@ nfp_flower_get_stats(struct nfp_app *app, struct net_device *netdev,
 		return nfp_fl_ct_stats(flow, ct_map_ent);
 
 	extack = flow->common.extack;
-	nfp_flow = nfp_flower_search_fl_table(app, flow->cookie, netdev);
+	nfp_flow = nfp_flower_search_fl_table(app, __c_ua(flow->cookie), netdev);
 	if (!nfp_flow) {
 		NL_SET_ERR_MSG_MOD(extack, "invalid entry: cannot dump stats for flow that does not exist");
 		return -EINVAL;

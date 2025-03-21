@@ -470,7 +470,7 @@ nfp_tun_write_neigh(struct net_device *netdev, struct nfp_app *app,
 	bool neigh_invalid = !(neigh->nud_state & NUD_VALID) || neigh->dead;
 	size_t neigh_size = is_ipv6 ? sizeof(struct nfp_tun_neigh_v6) :
 			    sizeof(struct nfp_tun_neigh_v4);
-	uintptr_t cookie = (uintptr_t)neigh;
+	unsigned long cookie = __c_pa(neigh);
 	struct nfp_flower_priv *priv = app->priv;
 	struct nfp_tun_neigh_lag lag_info;
 	struct nfp_neigh_entry *nn_entry;

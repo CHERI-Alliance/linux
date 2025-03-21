@@ -710,7 +710,7 @@ static int smsc911x_phy_check_loopbackpkt(struct smsc911x_data *pdata)
 	unsigned int tries;
 	u32 wrsz;
 	u32 rdsz;
-	ulong bufp;
+	uintptr_t bufp;
 
 	for (tries = 0; tries < 10; tries++) {
 		unsigned int txcmd_a;
@@ -1698,7 +1698,7 @@ static int smsc911x_open(struct net_device *dev)
 		   dev->irq);
 
 	netdev_info(dev, "SMSC911x/921x identified at %#08lx, IRQ: %d\n",
-		    (unsigned long)pdata->ioaddr, dev->irq);
+		    __c_pa(pdata->ioaddr), dev->irq);
 
 	/* Reset the last known duplex and carrier */
 	pdata->last_duplex = -1;
@@ -1791,7 +1791,7 @@ smsc911x_hard_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	unsigned int tx_cmd_b;
 	unsigned int temp;
 	u32 wrsz;
-	ulong bufp;
+	uintptr_t bufp;
 
 	freespace = smsc911x_reg_read(pdata, TX_FIFO_INF) & TX_FIFO_INF_TDFREE_;
 
@@ -2193,8 +2193,7 @@ static int smsc911x_init(struct net_device *dev)
 	unsigned int to = 100;
 
 	SMSC_TRACE(pdata, probe, "Driver Parameters:");
-	SMSC_TRACE(pdata, probe, "LAN base: 0x%08lX",
-		   (unsigned long)pdata->ioaddr);
+	SMSC_TRACE(pdata, probe, "LAN base: 0x%08lX", __c_pa(pdata->ioaddr));
 	SMSC_TRACE(pdata, probe, "IRQ: %d", dev->irq);
 	SMSC_TRACE(pdata, probe, "PHY will be autodetected.");
 

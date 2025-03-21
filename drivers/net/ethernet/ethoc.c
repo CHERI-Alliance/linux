@@ -735,7 +735,7 @@ static int ethoc_open(struct net_device *dev)
 
 	napi_enable(&priv->napi);
 
-	ethoc_init_ring(priv, dev->mem_start);
+	ethoc_init_ring(priv, __c_ua(dev->mem_start));
 	ethoc_reset(priv);
 
 	if (netif_queue_stopped(dev)) {
@@ -984,7 +984,7 @@ static int ethoc_set_ringparam(struct net_device *dev,
 
 	priv->num_tx = rounddown_pow_of_two(ring->tx_pending);
 	priv->num_rx = ring->rx_pending;
-	ethoc_init_ring(priv, dev->mem_start);
+	ethoc_init_ring(priv, __c_ua(dev->mem_start));
 
 	if (netif_running(dev)) {
 		ethoc_enable_irq(priv, INT_MASK_TX | INT_MASK_RX);
@@ -1123,7 +1123,7 @@ static int ethoc_probe(struct platform_device *pdev)
 
 	/* calculate the number of TX/RX buffers, maximum 128 supported */
 	num_bd = min_t(unsigned int,
-		128, (netdev->mem_end - netdev->mem_start + 1) / ETHOC_BUFSIZ);
+		128, (__c_ua(netdev->mem_end) - __c_ua(netdev->mem_start) + 1) / ETHOC_BUFSIZ);
 	if (num_bd < 4) {
 		ret = -ENODEV;
 		goto free;

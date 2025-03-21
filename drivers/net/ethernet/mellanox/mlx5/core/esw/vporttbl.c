@@ -2,17 +2,18 @@
 // Copyright (c) 2021 Mellanox Technologies.
 
 #include "eswitch.h"
+#include <linux/cheri.h>
 
 /* This struct is used as a key to the hash table and we need it to be packed
  * so hash result is consistent
  */
 struct mlx5_vport_key {
+	struct esw_vport_tbl_namespace *vport_ns;
 	u32 chain;
 	u16 prio;
 	u16 vport;
 	u16 vhca_id;
-	struct esw_vport_tbl_namespace *vport_ns;
-} __packed;
+} __packed __cheri_pointer_align;
 
 struct mlx5_vport_table {
 	struct hlist_node hlist;

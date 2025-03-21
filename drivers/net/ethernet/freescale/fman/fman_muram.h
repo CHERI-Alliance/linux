@@ -15,8 +15,8 @@ struct muram_info;
 
 struct muram_info *fman_muram_init(phys_addr_t base, size_t size);
 
-unsigned long fman_muram_offset_to_vbase(struct muram_info *muram,
-					 unsigned long offset);
+uintptr_t fman_muram_offset_to_vbase(struct muram_info *muram,
+				     unsigned long offset);
 
 unsigned long fman_muram_alloc(struct muram_info *muram, size_t size);
 

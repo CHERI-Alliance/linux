@@ -421,7 +421,7 @@ MODULE_DEVICE_TABLE(of, w5100_of_match);
 static int w5100_spi_probe(struct spi_device *spi)
 {
 	const struct w5100_ops *ops;
-	kernel_ulong_t driver_data;
+	uintptr_t driver_data;
 	const void *mac = NULL;
 	u8 tmpmac[ETH_ALEN];
 	int priv_size;

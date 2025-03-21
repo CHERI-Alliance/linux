@@ -466,7 +466,7 @@ static int lan966x_tc_flower_add(struct lan966x_port *port,
 	if (IS_ERR(vrule))
 		return PTR_ERR(vrule);
 
-	vrule->cookie = f->cookie;
+	vrule->cookie = __c_ua(f->cookie);
 	err = lan966x_tc_flower_use_dissectors(f, admin, vrule, &l3_proto);
 	if (err)
 		goto out;
@@ -565,7 +565,7 @@ static int lan966x_tc_flower_del(struct lan966x_port *port,
 
 	vctrl = port->lan966x->vcap_ctrl;
 	while (true) {
-		rule_id = vcap_lookup_rule_by_cookie(vctrl, f->cookie);
+		rule_id = vcap_lookup_rule_by_cookie(vctrl, __c_ua(f->cookie));
 		if (rule_id <= 0)
 			break;
 
@@ -588,7 +588,7 @@ static int lan966x_tc_flower_stats(struct lan966x_port *port,
 	int err;
 
 	err = vcap_get_rule_count_by_cookie(port->lan966x->vcap_ctrl,
-					    &count, f->cookie);
+					    &count, __c_ua(f->cookie));
 	if (err)
 		return err;
 
