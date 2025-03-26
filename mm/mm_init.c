@@ -745,9 +745,12 @@ static inline void init_reserved_page(unsigned long pfn, int nid)
  * called for each range allocated by the bootmem allocator and
  * marks the pages PageReserved. The remaining valid pages are later
  * sent to the buddy page allocator.
+ *
+ * Set "allocated" to true if the range can be used (e.g. for DMA)
+ * without being allocated by page_alloc().
  */
 void __meminit reserve_bootmem_region(phys_addr_t start,
-				      phys_addr_t end, int nid)
+				      phys_addr_t end, int nid, bool allocated)
 {
 	unsigned long start_pfn = PFN_DOWN(start);
 	unsigned long end_pfn = PFN_UP(end);
@@ -768,7 +771,13 @@ void __meminit reserve_bootmem_region(phys_addr_t start,
 			 */
 			__SetPageReserved(page);
 #ifdef CONFIG_CHERI_KERNEL
-			page->alloc_order = -1;
+			if (allocated) {
+				long len = (end_pfn - start_pfn) << PAGE_SHIFT;
+				BUG_ON(len < 0);
+				page->alloc_order = (unsigned long)-len;
+			} else {
+				page->alloc_order = -1;
+			}
 #endif
 		}
 	}

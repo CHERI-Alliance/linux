@@ -2152,7 +2152,7 @@ static void __init memmap_init_reserved_pages(void)
 		end = start + region->size;
 
 		if (memblock_is_nomap(region))
-			reserve_bootmem_region(start, end, nid);
+			reserve_bootmem_region(start, end, nid, false);
 
 		memblock_set_node(start, end, &memblock.reserved, nid);
 	}
@@ -2170,7 +2170,7 @@ static void __init memmap_init_reserved_pages(void)
 			if (!numa_valid_node(nid))
 				nid = early_pfn_to_nid(PFN_DOWN(start));
 
-			reserve_bootmem_region(start, end, nid);
+			reserve_bootmem_region(start, end, nid, true);
 		}
 	}
 }
