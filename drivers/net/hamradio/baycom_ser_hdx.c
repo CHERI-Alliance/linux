@@ -155,16 +155,16 @@ static inline void baycom_int_freq(struct baycom_state *bc)
 static inline void ser12_set_divisor(struct net_device *dev,
 				     unsigned char divisor)
 {
-	outb(0x81, LCR(dev->base_addr));	/* DLAB = 1 */
-	outb(divisor, DLL(dev->base_addr));
-	outb(0, DLM(dev->base_addr));
-	outb(0x01, LCR(dev->base_addr));	/* word length = 6 */
+	outb(0x81, LCR(__c_ua(dev->base_addr)));	/* DLAB = 1 */
+	outb(divisor, DLL(__c_ua(dev->base_addr)));
+	outb(0, DLM(__c_ua(dev->base_addr)));
+	outb(0x01, LCR(__c_ua(dev->base_addr)));	/* word length = 6 */
 	/*
 	 * make sure the next interrupt is generated;
 	 * 0 must be used to power the modem; the modem draws its
 	 * power from the TxD line
 	 */
-	outb(0x00, THR(dev->base_addr));
+	outb(0x00, THR(__c_ua(dev->base_addr)));
 	/*
 	 * it is important not to set the divider while transmitting;
 	 * this reportedly makes some UARTs generating interrupts
@@ -190,7 +190,7 @@ static inline void ser12_tx(struct net_device *dev, struct baycom_state *bc)
 	 * first output the last bit (!) then call HDLC transmitter,
 	 * since this may take quite long
 	 */
-	outb(0x0e | (!!bc->modem.ser12.tx_bit), MCR(dev->base_addr));
+	outb(0x0e | (!!bc->modem.ser12.tx_bit), MCR(__c_ua(dev->base_addr)));
 	if (bc->modem.shreg <= 1)
 		bc->modem.shreg = 0x10000 | hdlcdrv_getbits(&bc->hdrv);
 	bc->modem.ser12.tx_bit = !(bc->modem.ser12.tx_bit ^
@@ -206,7 +206,7 @@ static inline void ser12_rx(struct net_device *dev, struct baycom_state *bc)
 	/*
 	 * do demodulator
 	 */
-	cur_s = inb(MSR(dev->base_addr)) & 0x10;	/* the CTS line */
+	cur_s = inb(MSR(__c_ua(dev->base_addr))) & 0x10;	/* the CTS line */
 	hdlcdrv_channelbit(&bc->hdrv, cur_s);
 	bc->modem.ser12.dcd_shreg = (bc->modem.ser12.dcd_shreg << 1) |
 		(cur_s != bc->modem.ser12.last_sample);
@@ -336,14 +336,14 @@ static inline void ser12_rx(struct net_device *dev, struct baycom_state *bc)
 		 */
 		bc->modem.ser12.dcd_sum0 -= (bc->modem.ser12.dcd_shreg & 1);
 	}
-	outb(0x0d, MCR(dev->base_addr));		/* transmitter off */
+	outb(0x0d, MCR(__c_ua(dev->base_addr)));		/* transmitter off */
 	if (bc->modem.shreg & 1) {
 		hdlcdrv_putbits(&bc->hdrv, bc->modem.shreg >> 1);
 		bc->modem.shreg = 0x10000;
 	}
 	if(!bc->modem.ser12.dcd_time) {
 		if (bc->opt_dcd & 1) 
-			hdlcdrv_setdcd(&bc->hdrv, !((inb(MSR(dev->base_addr)) ^ bc->opt_dcd) & 0x80));
+			hdlcdrv_setdcd(&bc->hdrv, !((inb(MSR(__c_ua(dev->base_addr))) ^ bc->opt_dcd) & 0x80));
 		else
 			hdlcdrv_setdcd(&bc->hdrv, (bc->modem.ser12.dcd_sum0 +
 						   bc->modem.ser12.dcd_sum1 +
@@ -368,17 +368,17 @@ static irqreturn_t ser12_interrupt(int irq, void *dev_id)
 	if (!dev || !bc || bc->hdrv.magic != HDLCDRV_MAGIC)
 		return IRQ_NONE;
 	/* fast way out */
-	if ((iir = inb(IIR(dev->base_addr))) & 1)
+	if ((iir = inb(IIR(__c_ua(dev->base_addr)))) & 1)
 		return IRQ_NONE;
 	baycom_int_freq(bc);
 	do {
 		switch (iir & 6) {
 		case 6:
-			inb(LSR(dev->base_addr));
+			inb(LSR(__c_ua(dev->base_addr)));
 			break;
 			
 		case 4:
-			inb(RBR(dev->base_addr));
+			inb(RBR(__c_ua(dev->base_addr)));
 			break;
 			
 		case 2:
@@ -391,14 +391,14 @@ static irqreturn_t ser12_interrupt(int irq, void *dev_id)
 				ser12_rx(dev, bc);
 				bc->modem.arb_divider--;
 			}
-			outb(0x00, THR(dev->base_addr));
+			outb(0x00, THR(__c_ua(dev->base_addr)));
 			break;
 			
 		default:
-			inb(MSR(dev->base_addr));
+			inb(MSR(__c_ua(dev->base_addr)));
 			break;
 		}
-		iir = inb(IIR(dev->base_addr));
+		iir = inb(IIR(__c_ua(dev->base_addr)));
 	} while (!(iir & 1));
 	if (bc->modem.arb_divider <= 0) {
 		bc->modem.arb_divider = SER12_ARB_DIVIDER(bc);
@@ -460,29 +460,29 @@ static int ser12_open(struct net_device *dev)
 
 	if (!dev || !bc)
 		return -ENXIO;
-	if (!dev->base_addr || dev->base_addr > 0x1000-SER12_EXTENT ||
+	if (!__c_ua(dev->base_addr) || __c_ua(dev->base_addr) > 0x1000-SER12_EXTENT ||
 	    dev->irq < 2 || dev->irq > 15)
 		return -ENXIO;
-	if (!request_region(dev->base_addr, SER12_EXTENT, "baycom_ser12"))
+	if (!request_region(__c_ua(dev->base_addr), SER12_EXTENT, "baycom_ser12"))
 		return -EACCES;
 	memset(&bc->modem, 0, sizeof(bc->modem));
 	bc->hdrv.par.bitrate = 1200;
-	if ((u = ser12_check_uart(dev->base_addr)) == c_uart_unknown) {
-		release_region(dev->base_addr, SER12_EXTENT);       
+	if ((u = ser12_check_uart(__c_ua(dev->base_addr))) == c_uart_unknown) {
+		release_region(__c_ua(dev->base_addr), SER12_EXTENT);       
 		return -EIO;
 	}
-	outb(0, FCR(dev->base_addr));  /* disable FIFOs */
-	outb(0x0d, MCR(dev->base_addr));
-	outb(0, IER(dev->base_addr));
+	outb(0, FCR(__c_ua(dev->base_addr)));  /* disable FIFOs */
+	outb(0x0d, MCR(__c_ua(dev->base_addr)));
+	outb(0, IER(__c_ua(dev->base_addr)));
 	if (request_irq(dev->irq, ser12_interrupt, IRQF_SHARED,
 			"baycom_ser12", dev)) {
-		release_region(dev->base_addr, SER12_EXTENT);       
+		release_region(__c_ua(dev->base_addr), SER12_EXTENT);       
 		return -EBUSY;
 	}
 	/*
 	 * enable transmitter empty interrupt
 	 */
-	outb(2, IER(dev->base_addr));
+	outb(2, IER(__c_ua(dev->base_addr)));
 	/*
 	 * set the SIO to 6 Bits/character and 19200 or 28800 baud, so that
 	 * we get exactly (hopefully) 2 or 3 interrupts per radio symbol,
@@ -490,7 +490,7 @@ static int ser12_open(struct net_device *dev)
 	 */
 	ser12_set_divisor(dev, bc->opt_dcd ? 6 : 4);
 	printk(KERN_INFO "%s: ser12 at iobase 0x%lx irq %u uart %s\n", 
-	       bc_drvname, dev->base_addr, dev->irq, uart_str[u]);
+	       bc_drvname, __c_ua(dev->base_addr), dev->irq, uart_str[u]);
 	return 0;
 }
 
@@ -505,12 +505,12 @@ static int ser12_close(struct net_device *dev)
 	/*
 	 * disable interrupts
 	 */
-	outb(0, IER(dev->base_addr));
-	outb(1, MCR(dev->base_addr));
+	outb(0, IER(__c_ua(dev->base_addr)));
+	outb(1, MCR(__c_ua(dev->base_addr)));
 	free_irq(dev->irq, dev);
-	release_region(dev->base_addr, SER12_EXTENT);
+	release_region(__c_ua(dev->base_addr), SER12_EXTENT);
 	printk(KERN_INFO "%s: close ser12 at iobase 0x%lx irq %u\n",
-	       bc_drvname, dev->base_addr, dev->irq);
+	       bc_drvname, __c_ua(dev->base_addr), dev->irq);
 	return 0;
 }
 

@@ -350,7 +350,7 @@ int sja1105_cls_flower_add(struct dsa_switch *ds, int port,
 	struct netlink_ext_ack *extack = cls->common.extack;
 	struct sja1105_private *priv = ds->priv;
 	const struct flow_action_entry *act;
-	unsigned long cookie = cls->cookie;
+	unsigned long cookie = __c_ua(cls->cookie);
 	bool routing_rule = false;
 	struct sja1105_key key;
 	bool gate_rule = false;
@@ -463,7 +463,7 @@ int sja1105_cls_flower_del(struct dsa_switch *ds, int port,
 			   struct flow_cls_offload *cls, bool ingress)
 {
 	struct sja1105_private *priv = ds->priv;
-	struct sja1105_rule *rule = sja1105_rule_find(priv, cls->cookie);
+	struct sja1105_rule *rule = sja1105_rule_find(priv, __c_ua(cls->cookie));
 	struct sja1105_l2_policing_entry *policing;
 	int old_sharindx;
 
@@ -503,7 +503,7 @@ int sja1105_cls_flower_stats(struct dsa_switch *ds, int port,
 			     struct flow_cls_offload *cls, bool ingress)
 {
 	struct sja1105_private *priv = ds->priv;
-	struct sja1105_rule *rule = sja1105_rule_find(priv, cls->cookie);
+	struct sja1105_rule *rule = sja1105_rule_find(priv, __c_ua(cls->cookie));
 	int rc;
 
 	if (!rule)

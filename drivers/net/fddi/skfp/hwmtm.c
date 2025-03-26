@@ -459,7 +459,7 @@ void init_fddi_driver(struct s_smc *smc, u_char *mac_addr)
 	/*
 	 * make sure that the start pointer is 16 byte aligned
 	 */
-	i = 16 - ((long)smc->os.hwm.descr_p & 0xf) ;
+	i = 16 - ((long)__c_pa(smc->os.hwm.descr_p) & 0xf) ;
 	if (i != 16) {
 		DB_GEN(3, "i = %d", i);
 		smc->os.hwm.descr_p = (union s_fp_descr volatile *)
@@ -1826,7 +1826,7 @@ void smt_send_mbuf(struct s_smc *smc, SMbuf *mb, int fc)
 	frag_count = 0 ;
 	len = mb->sm_len ;
 	while (len) {
-		n = SMT_PAGESIZE - ((long)data & (SMT_PAGESIZE-1)) ;
+		n = SMT_PAGESIZE - ((long)__c_pa(data) & (SMT_PAGESIZE-1)) ;
 		if (n >= len) {
 			n = len ;
 		}

@@ -70,7 +70,7 @@ static void com90io_copy_from_card(struct net_device *dev, int bufnum,
 
 static u_char get_buffer_byte(struct net_device *dev, unsigned offset)
 {
-	int ioaddr = dev->base_addr;
+	int ioaddr = __c_ua(dev->base_addr);
 
 	arcnet_outb(offset >> 8, ioaddr, COM9026_REG_W_ADDR_HI);
 	arcnet_outb(offset & 0xff, ioaddr, COM9026_REG_W_ADDR_LO);
@@ -82,7 +82,7 @@ static u_char get_buffer_byte(struct net_device *dev, unsigned offset)
 static void put_buffer_byte(struct net_device *dev, unsigned offset,
 			    u_char datum)
 {
-	int ioaddr = dev->base_addr;
+	int ioaddr = __c_ua(dev->base_addr);
 
 	arcnet_outb(offset >> 8, ioaddr, COM9026_REG_W_ADDR_HI);
 	arcnet_outb(offset & 0xff, ioaddr, COM9026_REG_W_ADDR_LO);
@@ -95,7 +95,7 @@ static void put_buffer_byte(struct net_device *dev, unsigned offset,
 static void get_whole_buffer(struct net_device *dev, unsigned offset,
 			     unsigned length, char *dest)
 {
-	int ioaddr = dev->base_addr;
+	int ioaddr = __c_ua(dev->base_addr);
 
 	arcnet_outb((offset >> 8) | AUTOINCflag, ioaddr, COM9026_REG_W_ADDR_HI);
 	arcnet_outb(offset & 0xff, ioaddr, COM9026_REG_W_ADDR_LO);
@@ -111,7 +111,7 @@ static void get_whole_buffer(struct net_device *dev, unsigned offset,
 static void put_whole_buffer(struct net_device *dev, unsigned offset,
 			     unsigned length, char *dest)
 {
-	int ioaddr = dev->base_addr;
+	int ioaddr = __c_ua(dev->base_addr);
 
 	arcnet_outb((offset >> 8) | AUTOINCflag, ioaddr, COM9026_REG_W_ADDR_HI);
 	arcnet_outb(offset & 0xff, ioaddr,COM9026_REG_W_ADDR_LO);
@@ -129,7 +129,7 @@ static void put_whole_buffer(struct net_device *dev, unsigned offset,
  */
 static int __init com90io_probe(struct net_device *dev)
 {
-	int ioaddr = dev->base_addr, status;
+	int ioaddr = __c_ua(dev->base_addr), status;
 	unsigned long airqmask;
 
 	if (BUGLVL(D_NORMAL)) {
@@ -221,7 +221,7 @@ err_out:
 static int __init com90io_found(struct net_device *dev)
 {
 	struct arcnet_local *lp;
-	int ioaddr = dev->base_addr;
+	int ioaddr = __c_ua(dev->base_addr);
 	int err;
 
 	/* Reserve the irq */
@@ -231,7 +231,7 @@ static int __init com90io_found(struct net_device *dev)
 		return -ENODEV;
 	}
 	/* Reserve the I/O region */
-	if (!request_region(dev->base_addr, ARCNET_TOTAL_SIZE,
+	if (!request_region(__c_ua(dev->base_addr), ARCNET_TOTAL_SIZE,
 			    "arcnet (COM90xx-IO)")) {
 		free_irq(dev->irq, dev);
 		return -EBUSY;
@@ -259,12 +259,12 @@ static int __init com90io_found(struct net_device *dev)
 		arcnet_outb(arcnet_inb(ioaddr, COM9026_REG_RW_CONFIG) & ~IOMAPflag,
 			    ioaddr, COM9026_REG_RW_CONFIG);
 		free_irq(dev->irq, dev);
-		release_region(dev->base_addr, ARCNET_TOTAL_SIZE);
+		release_region(__c_ua(dev->base_addr), ARCNET_TOTAL_SIZE);
 		return err;
 	}
 
 	arc_printk(D_NORMAL, dev, "COM90IO: station %02Xh found at %03lXh, IRQ %d.\n",
-		   dev->dev_addr[0], dev->base_addr, dev->irq);
+		   dev->dev_addr[0], __c_ua(dev->base_addr), dev->irq);
 
 	return 0;
 }
@@ -279,7 +279,7 @@ static int __init com90io_found(struct net_device *dev)
 static int com90io_reset(struct net_device *dev, int really_reset)
 {
 	struct arcnet_local *lp = netdev_priv(dev);
-	short ioaddr = dev->base_addr;
+	short ioaddr = __c_ua(dev->base_addr);
 
 	arc_printk(D_INIT, dev, "Resetting %s (status=%02Xh)\n",
 		   dev->name, arcnet_inb(ioaddr, COM9026_REG_R_STATUS));
@@ -310,21 +310,21 @@ static int com90io_reset(struct net_device *dev, int really_reset)
 
 static void com90io_command(struct net_device *dev, int cmd)
 {
-	short ioaddr = dev->base_addr;
+	short ioaddr = __c_ua(dev->base_addr);
 
 	arcnet_outb(cmd, ioaddr, COM9026_REG_W_COMMAND);
 }
 
 static int com90io_status(struct net_device *dev)
 {
-	short ioaddr = dev->base_addr;
+	short ioaddr = __c_ua(dev->base_addr);
 
 	return arcnet_inb(ioaddr, COM9026_REG_R_STATUS);
 }
 
 static void com90io_setmask(struct net_device *dev, int mask)
 {
-	short ioaddr = dev->base_addr;
+	short ioaddr = __c_ua(dev->base_addr);
 
 	arcnet_outb(mask, ioaddr, COM9026_REG_W_INTMASK);
 }
@@ -389,7 +389,7 @@ static int __init com90io_init(void)
 	if (!dev)
 		return -ENOMEM;
 
-	dev->base_addr = io;
+	dev->base_addr = __c_fakeu(io);
 	dev->irq = irq;
 	if (dev->irq == 2)
 		dev->irq = 9;
@@ -408,7 +408,7 @@ static int __init com90io_init(void)
 static void __exit com90io_exit(void)
 {
 	struct net_device *dev = my_dev;
-	int ioaddr = dev->base_addr;
+	int ioaddr = __c_ua(dev->base_addr);
 
 	unregister_netdev(dev);
 
@@ -419,7 +419,7 @@ static void __exit com90io_exit(void)
 		    ioaddr, COM9026_REG_RW_CONFIG);
 
 	free_irq(dev->irq, dev);
-	release_region(dev->base_addr, ARCNET_TOTAL_SIZE);
+	release_region(__c_ua(dev->base_addr), ARCNET_TOTAL_SIZE);
 	free_arcdev(dev);
 }
 

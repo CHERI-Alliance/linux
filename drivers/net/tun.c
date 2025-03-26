@@ -3192,7 +3192,7 @@ static long __tun_chr_ioctl(struct file *file, unsigned int cmd,
 
 	case TUNSETOWNER:
 		/* Set owner of the device */
-		owner = make_kuid(current_user_ns(), arg);
+		owner = make_kuid(current_user_ns(), __c_ua(arg));
 		if (!uid_valid(owner)) {
 			ret = -EINVAL;
 			break;
@@ -3205,7 +3205,7 @@ static long __tun_chr_ioctl(struct file *file, unsigned int cmd,
 
 	case TUNSETGROUP:
 		/* Set group of the device */
-		group = make_kgid(current_user_ns(), arg);
+		group = make_kgid(current_user_ns(), __c_ua(arg));
 		if (!gid_valid(group)) {
 			ret = -EINVAL;
 			break;
@@ -3231,7 +3231,7 @@ static long __tun_chr_ioctl(struct file *file, unsigned int cmd,
 					   "Refused to change device type\n");
 				break;
 			}
-			tun->dev->type = (int) arg;
+			tun->dev->type = (int) __c_ua(arg);
 			tun->dev->addr_len = tun_get_addr_len(tun->dev->type);
 			netif_info(tun, drv, tun->dev, "linktype set to %d\n",
 				   tun->dev->type);
@@ -3241,11 +3241,11 @@ static long __tun_chr_ioctl(struct file *file, unsigned int cmd,
 		break;
 
 	case TUNSETDEBUG:
-		tun->msg_enable = (u32)arg;
+		tun->msg_enable = (u32)__c_ua(arg);
 		break;
 
 	case TUNSETOFFLOAD:
-		ret = set_offload(tun, arg);
+		ret = set_offload(tun, __c_ua(arg));
 		break;
 
 	case TUNSETTXFILTER:

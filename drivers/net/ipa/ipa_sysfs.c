@@ -109,7 +109,7 @@ static umode_t ipa_endpoint_id_is_visible(struct kobject *kobj,
 	dev_attr = container_of(attr, struct device_attribute, attr);
 	ea = container_of(dev_attr, struct dev_ext_attribute, attr);
 
-	visible = !!ipa->name_map[(enum ipa_endpoint_name)(uintptr_t)ea->var];
+	visible = !!ipa->name_map[(enum ipa_endpoint_name)__c_pa(ea->var)];
 
 	return visible ? attr->mode : 0;
 }
@@ -122,7 +122,7 @@ static ssize_t endpoint_id_attr_show(struct device *dev,
 	struct dev_ext_attribute *ea;
 
 	ea = container_of(attr, struct dev_ext_attribute, attr);
-	endpoint = ipa->name_map[(enum ipa_endpoint_name)(uintptr_t)ea->var];
+	endpoint = ipa->name_map[(enum ipa_endpoint_name)__c_pa(ea->var)];
 
 	return sysfs_emit(buf, "%u\n", endpoint->endpoint_id);
 }

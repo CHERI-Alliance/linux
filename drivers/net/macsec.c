@@ -3330,7 +3330,7 @@ static int macsec_dump_txsc(struct sk_buff *skb, struct netlink_callback *cb)
 	struct net_device *dev;
 	int dev_idx, d;
 
-	dev_idx = cb->args[0];
+	dev_idx = __c_ua(cb->args[0]);
 
 	d = 0;
 	rtnl_lock();
@@ -3355,7 +3355,7 @@ next:
 
 done:
 	rtnl_unlock();
-	cb->args[0] = d;
+	cb->args[0] = __c_fakeu(d);
 	return skb->len;
 }
 

@@ -496,14 +496,14 @@ static int __init com90xx_found(int ioaddr, int airq, u_long shmem,
 		last_mirror += mirror_size;
 	last_mirror -= mirror_size;
 
-	dev->mem_start = first_mirror;
-	dev->mem_end = last_mirror + MIRROR_SIZE - 1;
+	dev->mem_start = __c_fakeu(first_mirror);
+	dev->mem_end = __c_fakeu(last_mirror + MIRROR_SIZE - 1);
 
 	iounmap(p);
 	release_mem_region(shmem, MIRROR_SIZE);
 
-	if (!request_mem_region(dev->mem_start,
-				dev->mem_end - dev->mem_start + 1,
+	if (!request_mem_region(__c_ua(dev->mem_start),
+				__c_ua(dev->mem_end) - __c_ua(dev->mem_start) + 1,
 				"arcnet (90xx)"))
 		goto err_free_dev;
 
@@ -523,8 +523,8 @@ static int __init com90xx_found(int ioaddr, int airq, u_long shmem,
 	lp->hw.owner = THIS_MODULE;
 	lp->hw.copy_to_card = com90xx_copy_to_card;
 	lp->hw.copy_from_card = com90xx_copy_from_card;
-	lp->mem_start = ioremap(dev->mem_start,
-				dev->mem_end - dev->mem_start + 1);
+	lp->mem_start = ioremap(__c_ua(dev->mem_start),
+				__c_ua(dev->mem_end) - __c_ua(dev->mem_start) + 1);
 	if (!lp->mem_start) {
 		arc_printk(D_NORMAL, dev, "Can't remap device memory!\n");
 		goto err_free_irq;
@@ -534,12 +534,12 @@ static int __init com90xx_found(int ioaddr, int airq, u_long shmem,
 	arcnet_set_addr(dev, arcnet_readb(lp->mem_start,
 					  COM9026_REG_R_STATION));
 
-	dev->base_addr = ioaddr;
+	dev->base_addr = __c_fakeu(ioaddr);
 
 	arc_printk(D_NORMAL, dev, "COM90xx station %02Xh found at %03lXh, IRQ %d, ShMem %lXh (%ld*%xh).\n",
 		   dev->dev_addr[0],
-		   dev->base_addr, dev->irq, dev->mem_start,
-		   (dev->mem_end - dev->mem_start + 1) / mirror_size,
+		   __c_ua(dev->base_addr), dev->irq, __c_ua(dev->mem_start),
+		   (__c_ua(dev->mem_end) - __c_ua(dev->mem_start) + 1) / mirror_size,
 		   mirror_size);
 
 	if (register_netdev(dev))
@@ -553,7 +553,7 @@ err_unmap:
 err_free_irq:
 	free_irq(dev->irq, dev);
 err_release_mem:
-	release_mem_region(dev->mem_start, dev->mem_end - dev->mem_start + 1);
+	release_mem_region(__c_ua(dev->mem_start), __c_ua(dev->mem_end) - __c_ua(dev->mem_start) + 1);
 err_free_dev:
 	free_arcdev(dev);
 	return -EIO;
@@ -561,21 +561,21 @@ err_free_dev:
 
 static void com90xx_command(struct net_device *dev, int cmd)
 {
-	short ioaddr = dev->base_addr;
+	short ioaddr = __c_ua(dev->base_addr);
 
 	arcnet_outb(cmd, ioaddr, COM9026_REG_W_COMMAND);
 }
 
 static int com90xx_status(struct net_device *dev)
 {
-	short ioaddr = dev->base_addr;
+	short ioaddr = __c_ua(dev->base_addr);
 
 	return arcnet_inb(ioaddr, COM9026_REG_R_STATUS);
 }
 
 static void com90xx_setmask(struct net_device *dev, int mask)
 {
-	short ioaddr = dev->base_addr;
+	short ioaddr = __c_ua(dev->base_addr);
 
 	arcnet_outb(mask, ioaddr, COM9026_REG_W_INTMASK);
 }
@@ -590,7 +590,7 @@ static void com90xx_setmask(struct net_device *dev, int mask)
 static int com90xx_reset(struct net_device *dev, int really_reset)
 {
 	struct arcnet_local *lp = netdev_priv(dev);
-	short ioaddr = dev->base_addr;
+	short ioaddr = __c_ua(dev->base_addr);
 
 	arc_printk(D_INIT, dev, "Resetting (status=%02Xh)\n",
 		   arcnet_inb(ioaddr, COM9026_REG_R_STATUS));
@@ -671,9 +671,9 @@ static void __exit com90xx_exit(void)
 		unregister_netdev(dev);
 		free_irq(dev->irq, dev);
 		iounmap(lp->mem_start);
-		release_region(dev->base_addr, ARCNET_TOTAL_SIZE);
-		release_mem_region(dev->mem_start,
-				   dev->mem_end - dev->mem_start + 1);
+		release_region(__c_ua(dev->base_addr), ARCNET_TOTAL_SIZE);
+		release_mem_region(__c_ua(dev->mem_start),
+				   __c_ua(dev->mem_end) - __c_ua(dev->mem_start) + 1);
 		free_arcdev(dev);
 	}
 }

@@ -525,7 +525,7 @@ static int hdlcdrv_siocdevprivate(struct net_device *dev, struct ifreq *ifr,
 		return 0;
 		
 	case HDLCDRVCTL_GETMODEMPAR:
-		bi.data.mp.iobase = dev->base_addr;
+		bi.data.mp.iobase = __c_ua(dev->base_addr);
 		bi.data.mp.irq = dev->irq;
 		bi.data.mp.dma = dev->dma;
 		bi.data.mp.dma2 = s->ptt_out.dma2;
@@ -537,7 +537,7 @@ static int hdlcdrv_siocdevprivate(struct net_device *dev, struct ifreq *ifr,
 	case HDLCDRVCTL_SETMODEMPAR:
 		if ((!capable(CAP_SYS_RAWIO)) || netif_running(dev))
 			return -EACCES;
-		dev->base_addr = bi.data.mp.iobase;
+		dev->base_addr = __c_fakeu(bi.data.mp.iobase);
 		dev->irq = bi.data.mp.irq;
 		dev->dma = bi.data.mp.dma;
 		s->ptt_out.dma2 = bi.data.mp.dma2;
@@ -703,7 +703,7 @@ struct net_device *hdlcdrv_register(const struct hdlcdrv_ops *ops,
 	s = netdev_priv(dev);
 	s->magic = HDLCDRV_MAGIC;
 	s->ops = ops;
-	dev->base_addr = baseaddr;
+	dev->base_addr = __c_fakeu(baseaddr);
 	dev->irq = irq;
 	dev->dma = dma;
 

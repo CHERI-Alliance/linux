@@ -9,7 +9,7 @@
 /* Actual tasklet function, will be called whenever tasklet is scheduled.
  * Calls event handler involves callback for each element in the message queue
  */
-static void ipc_task_queue_handler(unsigned long data)
+static void ipc_task_queue_handler(uintptr_t data)
 {
 	struct ipc_task_queue *ipc_task = (struct ipc_task_queue *)data;
 	unsigned int q_rpos = ipc_task->q_rpos;
@@ -186,7 +186,7 @@ int ipc_task_init(struct ipc_task *ipc_task)
 	spin_lock_init(&ipc_queue->q_lock);
 
 	tasklet_init(ipc_task->ipc_tasklet, ipc_task_queue_handler,
-		     (unsigned long)ipc_queue);
+		     (uintptr_t)ipc_queue);
 	return 0;
 }
 

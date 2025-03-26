@@ -372,7 +372,7 @@ struct iosm_mux {
 	u8 initialized:1,
 	   ev_mux_net_transmit_pending:1,
 	   adb_prep_ongoing;
-} __packed;
+} __packed_if_not_cheri;
 
 /* MUX configuration structure */
 struct ipc_mux_config {

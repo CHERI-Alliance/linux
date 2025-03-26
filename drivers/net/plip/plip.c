@@ -1286,7 +1286,7 @@ static void plip_attach (struct parport *port)
 		strcpy(dev->name, name);
 
 		dev->irq = port->irq;
-		dev->base_addr = port->base;
+		dev->base_addr = __c_fakeu(port->base);
 		if (port->irq == -1) {
 			printk(KERN_INFO "plip: %s has no IRQ. Using IRQ-less mode,"
 		                 "which is fairly inefficient!\n", port->name);
@@ -1320,11 +1320,11 @@ static void plip_attach (struct parport *port)
 		if (dev->irq != -1)
 			printk(KERN_INFO "%s: Parallel port at %#3lx, "
 					 "using IRQ %d.\n",
-				         dev->name, dev->base_addr, dev->irq);
+				         dev->name, __c_ua(dev->base_addr), dev->irq);
 		else
 			printk(KERN_INFO "%s: Parallel port at %#3lx, "
 					 "not using IRQ.\n",
-					 dev->name, dev->base_addr);
+					 dev->name, __c_ua(dev->base_addr));
 		dev_plip[unit++] = dev;
 	}
 	return;

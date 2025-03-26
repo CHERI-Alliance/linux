@@ -434,8 +434,8 @@ static int pc300_pci_init_one(struct pci_dev *pdev,
 
 		spin_lock_init(&port->lock);
 		dev->irq = card->irq;
-		dev->mem_start = ramphys;
-		dev->mem_end = ramphys + ramsize - 1;
+		dev->mem_start = __c_fakeu(ramphys);
+		dev->mem_end = __c_fakeu(ramphys + ramsize - 1);
 		dev->tx_queue_len = 50;
 		dev->netdev_ops = &pc300_ops;
 		hdlc->attach = sca_attach;

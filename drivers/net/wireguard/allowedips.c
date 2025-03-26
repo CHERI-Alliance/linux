@@ -168,7 +168,7 @@ static bool node_placement(struct allowedips_node __rcu *trie, const u8 *key,
 
 static inline void connect_node(struct allowedips_node __rcu **parent, u8 bit, struct allowedips_node *node)
 {
-	node->parent_bit_packed = (unsigned long)parent | bit;
+	node->parent_bit_packed = (uintptr_t)parent | bit;
 	rcu_assign_pointer(*parent, node);
 }
 
@@ -321,14 +321,14 @@ void wg_allowedips_remove_by_peer(struct allowedips *table,
 		parent_bit = (struct allowedips_node **)(node->parent_bit_packed & ~3UL);
 		*parent_bit = child;
 		parent = (void *)parent_bit -
-			 offsetof(struct allowedips_node, bit[node->parent_bit_packed & 1]);
+			 offsetof(struct allowedips_node, bit[__c_ua(node->parent_bit_packed) & 1]);
 		free_parent = !rcu_access_pointer(node->bit[0]) &&
 			      !rcu_access_pointer(node->bit[1]) &&
-			      (node->parent_bit_packed & 3) <= 1 &&
+			      (__c_ua(node->parent_bit_packed) & 3) <= 1 &&
 			      !rcu_access_pointer(parent->peer);
 		if (free_parent)
 			child = rcu_dereference_protected(
-					parent->bit[!(node->parent_bit_packed & 1)],
+					parent->bit[!(__c_ua(node->parent_bit_packed) & 1)],
 					lockdep_is_held(lock));
 		call_rcu(&node->rcu, node_free_rcu);
 		if (!free_parent)

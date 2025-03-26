@@ -876,9 +876,9 @@ static int hi3110_can_probe(struct spi_device *spi)
 
 	match = device_get_match_data(dev);
 	if (match)
-		priv->model = (enum hi3110_model)(uintptr_t)match;
+		priv->model = (enum hi3110_model)__c_pa(match);
 	else
-		priv->model = spi_get_device_id(spi)->driver_data;
+		priv->model = __c_ua(spi_get_device_id(spi)->driver_data);
 	priv->net = net;
 	priv->clk = clk;
 

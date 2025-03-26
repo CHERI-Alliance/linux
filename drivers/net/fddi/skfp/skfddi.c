@@ -273,7 +273,7 @@ static int skfp_init_one(struct pci_dev *pdev,
 	smc->os.ResetRequested = FALSE;
 	skb_queue_head_init(&smc->os.SendSkbQueue);
 
-	dev->base_addr = (unsigned long)mem;
+	dev->base_addr = (uintptr_t)mem;
 
 	err = skfp_driver_init(dev);
 	if (err)
@@ -1320,7 +1320,7 @@ void *mac_drv_get_space(struct s_smc *smc, unsigned int size)
 	smc->os.SharedMemHeap += size;	// Move heap pointer.
 
 	pr_debug("mac_drv_get_space end\n");
-	pr_debug("virt addr: %lx\n", (ulong) virt);
+	pr_debug("virt addr: %lx\n", __c_pa(virt));
 	pr_debug("bus  addr: %lx\n", (ulong)
 	       (smc->os.SharedMemDMA +
 		((char *) virt - (char *)smc->os.SharedMemAddr)));
@@ -1357,7 +1357,7 @@ void *mac_drv_get_desc_mem(struct s_smc *smc, unsigned int size)
 
 	virt = mac_drv_get_space(smc, size);
 
-	size = (u_int) (16 - (((unsigned long) virt) & 15UL));
+	size = (u_int) (16 - (__c_pa(virt) & 15UL));
 	size = size % 16;
 
 	pr_debug("Allocate %u bytes alignment gap ", size);
@@ -1888,7 +1888,7 @@ int mac_drv_rx_init(struct s_smc *smc, int len, int fc,
 	if (len != la_len || len < FDDI_MAC_HDR_LEN || !look_ahead) {
 		pr_debug("fddi: Discard invalid local SMT frame\n");
 		pr_debug("  len=%d, la_len=%d, (ULONG) look_ahead=%08lXh.\n",
-		       len, la_len, (unsigned long) look_ahead);
+		       len, la_len, __c_pa(look_ahead));
 		return 0;
 	}
 	skb = alloc_skb(len + 3, GFP_ATOMIC);

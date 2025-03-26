@@ -949,7 +949,7 @@ static int tap_ioctl_set_queue(struct file *file, unsigned int flags)
 	return ret;
 }
 
-static int set_offload(struct tap_queue *q, unsigned long arg)
+static int set_offload(struct tap_queue *q, user_uintptr_t arg)
 {
 	struct tap_dev *tap;
 	netdev_features_t features;

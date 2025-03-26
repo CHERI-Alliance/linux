@@ -410,7 +410,7 @@ static int ks8995_probe(struct spi_device *spi)
 {
 	struct ks8995_switch *ks;
 	int err;
-	int variant = spi_get_device_id(spi)->driver_data;
+	int variant = __c_ua(spi_get_device_id(spi)->driver_data);
 
 	if (variant >= max_variant) {
 		dev_err(&spi->dev, "bad chip variant %d\n", variant);

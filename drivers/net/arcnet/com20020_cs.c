@@ -52,7 +52,7 @@
 static void regdump(struct net_device *dev)
 {
 #ifdef DEBUG
-	int ioaddr = dev->base_addr;
+	int ioaddr = __c_ua(dev->base_addr);
 	int count;
 
 	netdev_dbg(dev, "register dump:\n");
@@ -230,7 +230,8 @@ static int com20020_config(struct pcmcia_device *link)
 		goto failed;
 	}
 
-	ioaddr = dev->base_addr = link->resource[0]->start;
+	dev->base_addr = __c_fakeu(link->resource[0]->start);
+	ioaddr = link->resource[0]->start;
 	dev_dbg(&link->dev, "got ioaddr %Xh\n", ioaddr);
 
 	dev_dbg(&link->dev, "request IRQ %d\n",
@@ -266,7 +267,7 @@ static int com20020_config(struct pcmcia_device *link)
 	}
 
 	netdev_dbg(dev, "port %#3lx, irq %d\n",
-		   dev->base_addr, dev->irq);
+		   __c_ua(dev->base_addr), dev->irq);
 	return 0;
 
 failed:
@@ -298,7 +299,7 @@ static int com20020_resume(struct pcmcia_device *link)
 	struct net_device *dev = info->dev;
 
 	if (link->open) {
-		int ioaddr = dev->base_addr;
+		int ioaddr = __c_ua(dev->base_addr);
 		struct arcnet_local *lp = netdev_priv(dev);
 
 		arcnet_outb(lp->config | 0x80, ioaddr, COM20020_REG_W_CONFIG);

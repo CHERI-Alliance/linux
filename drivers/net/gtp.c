@@ -2270,7 +2270,7 @@ static int gtp_genl_dump_pdp(struct sk_buff *skb,
 				struct netlink_callback *cb)
 {
 	struct gtp_dev *last_gtp = (struct gtp_dev *)cb->args[2], *gtp;
-	int i, j, bucket = cb->args[0], skip = cb->args[1];
+	int i, j, bucket = __c_ua(cb->args[0]), skip = __c_ua(cb->args[1]);
 	struct net *net = sock_net(skb->sk);
 	struct pdp_ctx *pctx;
 	struct gtp_net *gn;
@@ -2297,9 +2297,9 @@ static int gtp_genl_dump_pdp(struct sk_buff *skb,
 					    cb->nlh->nlmsg_seq,
 					    NLM_F_MULTI,
 					    cb->nlh->nlmsg_type, pctx)) {
-					cb->args[0] = i;
-					cb->args[1] = j;
-					cb->args[2] = (unsigned long)gtp;
+					cb->args[0] = __c_fakeu(i);
+					cb->args[1] = __c_fakeu(j);
+					cb->args[2] = (uintptr_t)gtp;
 					goto out;
 				}
 				j++;

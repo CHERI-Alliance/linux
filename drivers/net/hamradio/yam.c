@@ -462,22 +462,22 @@ static void yam_set_uart(struct net_device *dev)
 	struct yam_port *yp = netdev_priv(dev);
 	int divisor = 115200 / yp->baudrate;
 
-	outb(0, IER(dev->base_addr));
-	outb(LCR_DLAB | LCR_BIT8, LCR(dev->base_addr));
-	outb(divisor, DLL(dev->base_addr));
-	outb(0, DLM(dev->base_addr));
-	outb(LCR_BIT8, LCR(dev->base_addr));
-	outb(PTT_OFF, MCR(dev->base_addr));
-	outb(0x00, FCR(dev->base_addr));
+	outb(0, IER(__c_ua(dev->base_addr)));
+	outb(LCR_DLAB | LCR_BIT8, LCR(__c_ua(dev->base_addr)));
+	outb(divisor, DLL(__c_ua(dev->base_addr)));
+	outb(0, DLM(__c_ua(dev->base_addr)));
+	outb(LCR_BIT8, LCR(__c_ua(dev->base_addr)));
+	outb(PTT_OFF, MCR(__c_ua(dev->base_addr)));
+	outb(0x00, FCR(__c_ua(dev->base_addr)));
 
 	/* Flush pending irq */
 
-	inb(RBR(dev->base_addr));
-	inb(MSR(dev->base_addr));
+	inb(RBR(__c_ua(dev->base_addr)));
+	inb(MSR(__c_ua(dev->base_addr)));
 
 	/* Enable rx irq */
 
-	outb(ENABLE_RTXINT, IER(dev->base_addr));
+	outb(ENABLE_RTXINT, IER(__c_ua(dev->base_addr)));
 }
 
 
@@ -569,12 +569,12 @@ static inline void yam_rx_byte(struct net_device *dev, struct yam_port *yp, unsi
 
 static void ptt_on(struct net_device *dev)
 {
-	outb(PTT_ON, MCR(dev->base_addr));
+	outb(PTT_ON, MCR(__c_ua(dev->base_addr)));
 }
 
 static void ptt_off(struct net_device *dev)
 {
-	outb(PTT_OFF, MCR(dev->base_addr));
+	outb(PTT_OFF, MCR(__c_ua(dev->base_addr)));
 }
 
 static netdev_tx_t yam_send_packet(struct sk_buff *skb,
@@ -683,7 +683,7 @@ static void yam_tx_byte(struct net_device *dev, struct yam_port *yp)
 		break;
 	case TX_DATA:
 		b = yp->tx_buf[yp->tx_count++];
-		outb(b, THR(dev->base_addr));
+		outb(b, THR(__c_ua(dev->base_addr)));
 		temp = yp->tx_crcl;
 		yp->tx_crcl = chktabl[temp] ^ yp->tx_crch;
 		yp->tx_crch = chktabh[temp] ^ b;
@@ -694,11 +694,11 @@ static void yam_tx_byte(struct net_device *dev, struct yam_port *yp)
 	case TX_CRC1:
 		yp->tx_crch = chktabl[yp->tx_crcl] ^ yp->tx_crch;
 		yp->tx_crcl = chktabh[yp->tx_crcl] ^ chktabl[yp->tx_crch] ^ 0xff;
-		outb(yp->tx_crcl, THR(dev->base_addr));
+		outb(yp->tx_crcl, THR(__c_ua(dev->base_addr)));
 		yp->tx_state = TX_CRC2;
 		break;
 	case TX_CRC2:
-		outb(chktabh[yp->tx_crch] ^ 0xFF, THR(dev->base_addr));
+		outb(chktabh[yp->tx_crch] ^ 0xFF, THR(__c_ua(dev->base_addr)));
 		if (skb_queue_empty(&yp->send_queue)) {
 			yp->tx_count = (yp->bitrate * yp->txtail) / 8000;
 			if (yp->dupmode == 2)
@@ -741,9 +741,9 @@ static irqreturn_t yam_interrupt(int irq, void *dev_id)
 		if (!netif_running(dev))
 			continue;
 
-		while ((iir = IIR_MASK & inb(IIR(dev->base_addr))) != IIR_NOPEND) {
-			unsigned char msr = inb(MSR(dev->base_addr));
-			unsigned char lsr = inb(LSR(dev->base_addr));
+		while ((iir = IIR_MASK & inb(IIR(__c_ua(dev->base_addr)))) != IIR_NOPEND) {
+			unsigned char msr = inb(MSR(__c_ua(dev->base_addr)));
+			unsigned char lsr = inb(LSR(__c_ua(dev->base_addr)));
 			unsigned char rxb;
 
 			handled = 1;
@@ -764,7 +764,7 @@ static irqreturn_t yam_interrupt(int irq, void *dev_id)
 			}
 			if (lsr & LSR_RXC) {
 				++yp->nb_rxint;
-				rxb = inb(RBR(dev->base_addr));
+				rxb = inb(RBR(__c_ua(dev->base_addr)));
 				if (msr & RX_FLAG)
 					yam_rx_flag(dev, yp);
 				else
@@ -838,30 +838,30 @@ static int yam_open(struct net_device *dev)
 	int i;
 	int ret=0;
 
-	printk(KERN_INFO "Trying %s at iobase 0x%lx irq %u\n", dev->name, dev->base_addr, dev->irq);
+	printk(KERN_INFO "Trying %s at iobase 0x%lx irq %u\n", dev->name, __c_ua(dev->base_addr), dev->irq);
 
 	if (!yp->bitrate)
 		return -ENXIO;
-	if (!dev->base_addr || dev->base_addr > 0x1000 - YAM_EXTENT ||
+	if (!__c_ua(dev->base_addr) || __c_ua(dev->base_addr) > 0x1000 - YAM_EXTENT ||
 		dev->irq < 2 || dev->irq > 15) {
 		return -ENXIO;
 	}
-	if (!request_region(dev->base_addr, YAM_EXTENT, dev->name))
+	if (!request_region(__c_ua(dev->base_addr), YAM_EXTENT, dev->name))
 	{
-		printk(KERN_ERR "%s: cannot 0x%lx busy\n", dev->name, dev->base_addr);
+		printk(KERN_ERR "%s: cannot 0x%lx busy\n", dev->name, __c_ua(dev->base_addr));
 		return -EACCES;
 	}
-	if ((u = yam_check_uart(dev->base_addr)) == c_uart_unknown) {
+	if ((u = yam_check_uart(__c_ua(dev->base_addr))) == c_uart_unknown) {
 		printk(KERN_ERR "%s: cannot find uart type\n", dev->name);
 		ret = -EIO;
 		goto out_release_base;
 	}
-	if (fpga_download(dev->base_addr, yp->bitrate)) {
+	if (fpga_download(__c_ua(dev->base_addr), yp->bitrate)) {
 		printk(KERN_ERR "%s: cannot init FPGA\n", dev->name);
 		ret = -EIO;
 		goto out_release_base;
 	}
-	outb(0, IER(dev->base_addr));
+	outb(0, IER(__c_ua(dev->base_addr)));
 	if (request_irq(dev->irq, yam_interrupt, IRQF_SHARED, dev->name, dev)) {
 		printk(KERN_ERR "%s: irq %d busy\n", dev->name, dev->irq);
 		ret = -EBUSY;
@@ -878,16 +878,16 @@ static int yam_open(struct net_device *dev)
 	for (i = 0; i < NR_PORTS; i++) {
 		struct net_device *yam_dev = yam_devs[i];
 
-		inb(LSR(yam_dev->base_addr));
+		inb(LSR(__c_ua(yam_dev->base_addr)));
 		yam_dev->stats.rx_fifo_errors = 0;
 	}
 
-	printk(KERN_INFO "%s at iobase 0x%lx irq %u uart %s\n", dev->name, dev->base_addr, dev->irq,
+	printk(KERN_INFO "%s at iobase 0x%lx irq %u uart %s\n", dev->name, __c_ua(dev->base_addr), dev->irq,
 		   uart_str[u]);
 	return 0;
 
 out_release_base:
-	release_region(dev->base_addr, YAM_EXTENT);
+	release_region(__c_ua(dev->base_addr), YAM_EXTENT);
 	return ret;
 }
 
@@ -904,17 +904,17 @@ static int yam_close(struct net_device *dev)
 	/*
 	 * disable interrupts
 	 */
-	outb(0, IER(dev->base_addr));
-	outb(1, MCR(dev->base_addr));
+	outb(0, IER(__c_ua(dev->base_addr)));
+	outb(1, MCR(__c_ua(dev->base_addr)));
 	/* Remove IRQ handler if last */
 	free_irq(dev->irq,dev);
-	release_region(dev->base_addr, YAM_EXTENT);
+	release_region(__c_ua(dev->base_addr), YAM_EXTENT);
 	netif_stop_queue(dev);
 	while ((skb = skb_dequeue(&yp->send_queue)))
 		dev_kfree_skb(skb);
 
 	printk(KERN_INFO "%s: close yam at iobase 0x%lx irq %u\n",
-		   yam_drvname, dev->base_addr, dev->irq);
+		   yam_drvname, __c_ua(dev->base_addr), dev->irq);
 	return 0;
 }
 
@@ -978,7 +978,7 @@ static int yam_siocdevprivate(struct net_device *dev, struct ifreq *ifr, void __
 
 		if (yi.cfg.mask & YAM_IOBASE) {
 			yp->iobase = yi.cfg.iobase;
-			dev->base_addr = yi.cfg.iobase;
+			dev->base_addr = __c_fakeu(yi.cfg.iobase);
 		}
 		if (yi.cfg.mask & YAM_IRQ) {
 			if (yi.cfg.irq > 15)
@@ -1092,7 +1092,7 @@ static void yam_setup(struct net_device *dev)
 	yp->pers = DEFAULT_PERS;
 	yp->dev = dev;
 
-	dev->base_addr = yp->iobase;
+	dev->base_addr = __c_fakeu(yp->iobase);
 	dev->irq = yp->irq;
 
 	skb_queue_head_init(&yp->send_queue);

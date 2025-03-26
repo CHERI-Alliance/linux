@@ -494,7 +494,7 @@ out_err:
 static int hwsim_dump_radio_nl(struct sk_buff *skb,
 			       struct netlink_callback *cb)
 {
-	int idx = cb->args[0];
+	int idx = __c_ua(cb->args[0]);
 	struct hwsim_phy *phy;
 	int res;
 
@@ -515,7 +515,7 @@ static int hwsim_dump_radio_nl(struct sk_buff *skb,
 		idx = phy->idx + 1;
 	}
 
-	cb->args[0] = idx;
+	cb->args[0] = __c_fakeu(idx);
 
 done:
 	mutex_unlock(&hwsim_phys_lock);

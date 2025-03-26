@@ -340,7 +340,7 @@ static int vxlan_vnifilter_dump_dev(const struct net_device *dev,
 	struct vxlan_vni_node *tmp, *v, *vbegin = NULL, *vend = NULL;
 	struct vxlan_dev *vxlan = netdev_priv(dev);
 	struct tunnel_msg *new_tmsg, *tmsg;
-	int idx = 0, s_idx = cb->args[1];
+	int idx = 0, s_idx = __c_ua(cb->args[1]);
 	struct vxlan_vni_group *vg;
 	struct nlmsghdr *nlh;
 	bool dump_stats;
@@ -397,7 +397,7 @@ update_end:
 			err = -EMSGSIZE;
 	}
 
-	cb->args[1] = err ? idx : 0;
+	cb->args[1] = __c_fakeu(err ? idx : 0);
 
 	nlmsg_end(skb, nlh);
 
@@ -406,7 +406,7 @@ update_end:
 
 static int vxlan_vnifilter_dump(struct sk_buff *skb, struct netlink_callback *cb)
 {
-	int idx = 0, err = 0, s_idx = cb->args[0];
+	int idx = 0, err = 0, s_idx = __c_ua(cb->args[0]);
 	struct net *net = sock_net(skb->sk);
 	struct tunnel_msg *tmsg;
 	struct net_device *dev;
@@ -448,7 +448,7 @@ skip:
 			idx++;
 		}
 	}
-	cb->args[0] = idx;
+	cb->args[0] = __c_fakeu(idx);
 	rcu_read_unlock();
 
 	return skb->len;

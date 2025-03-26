@@ -626,7 +626,7 @@ static int dfx_register(struct device *bdev)
 		}
 	} else {
 		bp->base.port = bar_start[0];
-		dev->base_addr = bar_start[0];
+		dev->base_addr = __c_fakeu(bar_start[0]);
 	}
 
 	/* Initialize new device structure */
@@ -2931,7 +2931,7 @@ static int dfx_hw_dma_uninit(DFX_board_t *bp, PI_UINT32 type)
 #ifdef DYNAMIC_BUFFERS
 static void my_skb_align(struct sk_buff *skb, int n)
 {
-	unsigned long x = (unsigned long)skb->data;
+	unsigned long x = __c_pa(skb->data);
 	unsigned long v;
 
 	v = ALIGN(x, n);	/* Where we want to be */

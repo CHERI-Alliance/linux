@@ -272,17 +272,17 @@ static const struct ethtool_ops veth_ethtool_ops = {
 
 static bool veth_is_xdp_frame(void *ptr)
 {
-	return (unsigned long)ptr & VETH_XDP_FLAG;
+	return __c_pa(ptr) & VETH_XDP_FLAG;
 }
 
 static struct xdp_frame *veth_ptr_to_xdp(void *ptr)
 {
-	return (void *)((unsigned long)ptr & ~VETH_XDP_FLAG);
+	return (void *)((uintptr_t)ptr & ~VETH_XDP_FLAG);
 }
 
 static void *veth_xdp_to_ptr(struct xdp_frame *xdp)
 {
-	return (void *)((unsigned long)xdp | VETH_XDP_FLAG);
+	return (void *)((uintptr_t)xdp | VETH_XDP_FLAG);
 }
 
 static void veth_ptr_free(void *ptr)

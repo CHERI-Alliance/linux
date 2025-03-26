@@ -660,7 +660,7 @@ static int rr_init1(struct net_device *dev)
 		 * Sanity test to see if we conflict with the DMA
 		 * limitations of the Roadrunner.
 		 */
-		if ((((unsigned long)skb->data) & 0xfff) > ~65320)
+		if ((__c_pa(skb->data) & 0xfff) > ~65320)
 			printk("skb alloc error\n");
 
 		set_rraddr(&rrpriv->rx_ring[i].addr, addr);

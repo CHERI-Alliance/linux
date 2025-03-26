@@ -70,10 +70,10 @@ static int __init arcrimi_probe(struct net_device *dev)
 		pr_info("%s\n", "RIM I (entirely mem-mapped) support");
 		pr_info("E-mail me if you actually test the RIM I driver, please!\n");
 		pr_info("Given: node %02Xh, shmem %lXh, irq %d\n",
-			dev->dev_addr[0], dev->mem_start, dev->irq);
+			dev->dev_addr[0], __c_ua(dev->mem_start), dev->irq);
 	}
 
-	if (dev->mem_start <= 0 || dev->irq <= 0) {
+	if (__c_ua(dev->mem_start) <= 0 || dev->irq <= 0) {
 		if (BUGLVL(D_NORMAL))
 			pr_err("No autoprobe for RIM I; you must specify the shmem and irq!\n");
 		return -ENODEV;
@@ -88,7 +88,7 @@ static int __init arcrimi_probe(struct net_device *dev)
 	 * and this reserve will be released and the correct size
 	 * will be taken.
 	 */
-	if (!request_mem_region(dev->mem_start, MIRROR_SIZE, "arcnet (90xx)")) {
+	if (!request_mem_region(__c_ua(dev->mem_start), MIRROR_SIZE, "arcnet (90xx)")) {
 		if (BUGLVL(D_NORMAL))
 			pr_notice("Card memory already allocated\n");
 		return -ENODEV;
@@ -128,9 +128,9 @@ static int __init arcrimi_found(struct net_device *dev)
 	int mirror_size;
 	int err;
 
-	p = ioremap(dev->mem_start, MIRROR_SIZE);
+	p = ioremap(__c_ua(dev->mem_start), MIRROR_SIZE);
 	if (!p) {
-		release_mem_region(dev->mem_start, MIRROR_SIZE);
+		release_mem_region(__c_ua(dev->mem_start), MIRROR_SIZE);
 		arc_printk(D_NORMAL, dev, "Can't ioremap\n");
 		return -ENODEV;
 	}
@@ -138,12 +138,12 @@ static int __init arcrimi_found(struct net_device *dev)
 	/* reserve the irq */
 	if (request_irq(dev->irq, arcnet_interrupt, 0, "arcnet (RIM I)", dev)) {
 		iounmap(p);
-		release_mem_region(dev->mem_start, MIRROR_SIZE);
+		release_mem_region(__c_ua(dev->mem_start), MIRROR_SIZE);
 		arc_printk(D_NORMAL, dev, "Can't get IRQ %d!\n", dev->irq);
 		return -ENODEV;
 	}
 
-	shmem = dev->mem_start;
+	shmem = __c_ua(dev->mem_start);
 	arcnet_writeb(TESTvalue, p, COM9026_REG_W_INTMASK);
 	arcnet_writeb(TESTvalue, p, COM9026_REG_W_COMMAND);
 					/* actually the station/node ID */
@@ -170,8 +170,8 @@ static int __init arcrimi_found(struct net_device *dev)
 		last_mirror += mirror_size;
 	last_mirror -= mirror_size;
 
-	dev->mem_start = first_mirror;
-	dev->mem_end = last_mirror + MIRROR_SIZE - 1;
+	dev->mem_start = __c_fakeu(first_mirror);
+	dev->mem_end = __c_fakeu(last_mirror + MIRROR_SIZE - 1);
 
 	/* initialize the rest of the device structure. */
 
@@ -192,15 +192,15 @@ static int __init arcrimi_found(struct net_device *dev)
 	 */
 	iounmap(p);
 	release_mem_region(shmem, MIRROR_SIZE);
-	if (!request_mem_region(dev->mem_start,
-				dev->mem_end - dev->mem_start + 1,
+	if (!request_mem_region(__c_ua(dev->mem_start),
+				__c_ua(dev->mem_end) - __c_ua(dev->mem_start) + 1,
 				"arcnet (90xx)")) {
 		arc_printk(D_NORMAL, dev, "Card memory already allocated\n");
 		goto err_free_irq;
 	}
 
-	lp->mem_start = ioremap(dev->mem_start,
-				dev->mem_end - dev->mem_start + 1);
+	lp->mem_start = ioremap(__c_ua(dev->mem_start),
+				__c_ua(dev->mem_end) - __c_ua(dev->mem_start) + 1);
 	if (!lp->mem_start) {
 		arc_printk(D_NORMAL, dev, "Can't remap device memory!\n");
 		goto err_release_mem;
@@ -212,8 +212,8 @@ static int __init arcrimi_found(struct net_device *dev)
 
 	arc_printk(D_NORMAL, dev, "ARCnet RIM I: station %02Xh found at IRQ %d, ShMem %lXh (%ld*%d bytes)\n",
 		   dev->dev_addr[0],
-		   dev->irq, dev->mem_start,
-		   (dev->mem_end - dev->mem_start + 1) / mirror_size,
+		   dev->irq, __c_ua(dev->mem_start),
+		   (__c_ua(dev->mem_end) - __c_ua(dev->mem_start) + 1) / mirror_size,
 		   mirror_size);
 
 	err = register_netdev(dev);
@@ -225,7 +225,7 @@ static int __init arcrimi_found(struct net_device *dev)
 err_unmap:
 	iounmap(lp->mem_start);
 err_release_mem:
-	release_mem_region(dev->mem_start, dev->mem_end - dev->mem_start + 1);
+	release_mem_region(__c_ua(dev->mem_start), __c_ua(dev->mem_end) - __c_ua(dev->mem_start) + 1);
 err_free_irq:
 	free_irq(dev->irq, dev);
 	return -EIO;
@@ -328,7 +328,7 @@ static int __init arc_rimi_init(void)
 	if (node && node != 0xff)
 		arcnet_set_addr(dev, node);
 
-	dev->mem_start = io;
+	dev->mem_start = __c_fakeu(io);
 	dev->irq = irq;
 	if (dev->irq == 2)
 		dev->irq = 9;
@@ -349,7 +349,7 @@ static void __exit arc_rimi_exit(void)
 
 	unregister_netdev(dev);
 	iounmap(lp->mem_start);
-	release_mem_region(dev->mem_start, dev->mem_end - dev->mem_start + 1);
+	release_mem_region(__c_ua(dev->mem_start), __c_ua(dev->mem_end) - __c_ua(dev->mem_start) + 1);
 	free_irq(dev->irq, dev);
 	free_arcdev(dev);
 }

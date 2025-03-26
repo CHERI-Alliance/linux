@@ -487,7 +487,7 @@ struct fst_card_info {
  *      physical offsets so we have to convert. The only saving grace is that
  *      this should all collapse back to a simple indirection eventually.
  */
-#define WIN_OFFSET(X)   ((long)&(((struct fst_shared *)SMC_BASE)->X))
+#define WIN_OFFSET(X)   ((long)__c_pa(&(((struct fst_shared *)SMC_BASE)->X)))
 
 #define FST_RDB(C, E)    (readb((C)->mem + WIN_OFFSET(E)))
 #define FST_RDW(C, E)    (readw((C)->mem + WIN_OFFSET(E)))
@@ -2403,7 +2403,7 @@ fst_add_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 
 	/* Record info we need */
 	card->irq = pdev->irq;
-	card->type = ent->driver_data;
+	card->type = __c_ua(ent->driver_data);
 	card->family = ((ent->driver_data == FST_TYPE_T2P) ||
 			(ent->driver_data == FST_TYPE_T4P))
 	    ? FST_FAMILY_TXP : FST_FAMILY_TXU;
@@ -2440,11 +2440,11 @@ fst_add_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 		 * informational. Give them the buffer addresses
 		 * and basic card I/O.
 		 */
-		dev->mem_start   = card->phys_mem
-				+ BUF_OFFSET(txBuffer[i][0][0]);
-		dev->mem_end     = card->phys_mem
-				+ BUF_OFFSET(txBuffer[i][NUM_TX_BUFFER - 1][LEN_RX_BUFFER - 1]);
-		dev->base_addr   = card->pci_conf;
+		dev->mem_start   = __c_fakeu(card->phys_mem
+				+ BUF_OFFSET(txBuffer[i][0][0]));
+		dev->mem_end     = __c_fakeu(card->phys_mem
+				+ BUF_OFFSET(txBuffer[i][NUM_TX_BUFFER - 1][LEN_RX_BUFFER - 1]));
+		dev->base_addr   = __c_fakeu(card->pci_conf);
 		dev->irq         = card->irq;
 
 		dev->netdev_ops = &fst_ops;

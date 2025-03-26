@@ -236,7 +236,7 @@ static int mhi_wwan_ctrl_probe(struct mhi_device *mhi_dev,
 	dev_set_drvdata(&mhi_dev->dev, mhiwwan);
 
 	/* Register as a wwan port, id->driver_data contains wwan port type */
-	port = wwan_create_port(&cntrl->mhi_dev->dev, id->driver_data,
+	port = wwan_create_port(&cntrl->mhi_dev->dev, __c_ua(id->driver_data),
 				&wwan_pops, NULL, mhiwwan);
 	if (IS_ERR(port)) {
 		kfree(mhiwwan);

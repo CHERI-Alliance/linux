@@ -246,7 +246,7 @@ static int macvlan_broadcast_one(struct sk_buff *skb,
 
 static u32 macvlan_hash_mix(const struct macvlan_dev *vlan)
 {
-	return (u32)(((unsigned long)vlan) >> L1_CACHE_SHIFT);
+	return (u32)(__c_pa(vlan) >> L1_CACHE_SHIFT);
 }
 
 

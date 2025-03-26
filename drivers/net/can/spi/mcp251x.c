@@ -1340,9 +1340,9 @@ static int mcp251x_can_probe(struct spi_device *spi)
 	priv->can.ctrlmode_supported = CAN_CTRLMODE_3_SAMPLES |
 		CAN_CTRLMODE_LOOPBACK | CAN_CTRLMODE_LISTENONLY;
 	if (match)
-		priv->model = (enum mcp251x_model)(uintptr_t)match;
+		priv->model = (enum mcp251x_model)__c_pa(match);
 	else
-		priv->model = spi_get_device_id(spi)->driver_data;
+		priv->model = __c_ua(spi_get_device_id(spi)->driver_data);
 	priv->net = net;
 	priv->clk = clk;
 

@@ -633,7 +633,7 @@ static void sl_uninit(struct net_device *dev)
 /* Hook the destructor so we can free slip devices at the right point in time */
 static void sl_free_netdev(struct net_device *dev)
 {
-	int i = dev->base_addr;
+	int i = __c_ua(dev->base_addr);
 
 	slip_devs[i] = NULL;
 }
@@ -757,7 +757,7 @@ static struct slip *sl_alloc(void)
 	if (!dev)
 		return NULL;
 
-	dev->base_addr  = i;
+	dev->base_addr  = __c_fakeu(i);
 	sl = netdev_priv(dev);
 
 	/* Initialize channel control data */
@@ -1073,7 +1073,7 @@ static void slip_unesc6(struct slip *sl, unsigned char s)
 
 /* Perform I/O control on an active SLIP channel. */
 static int slip_ioctl(struct tty_struct *tty, unsigned int cmd,
-		unsigned long arg)
+		user_uintptr_t arg)
 {
 	struct slip *sl = tty->disc_data;
 	unsigned int tmp;

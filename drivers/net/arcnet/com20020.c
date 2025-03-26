@@ -62,7 +62,7 @@ static void com20020_close(struct net_device *);
 static void com20020_copy_from_card(struct net_device *dev, int bufnum,
 				    int offset, void *buf, int count)
 {
-	int ioaddr = dev->base_addr, ofs = 512 * bufnum + offset;
+	int ioaddr = __c_ua(dev->base_addr), ofs = 512 * bufnum + offset;
 
 	/* set up the address register */
 	arcnet_outb((ofs >> 8) | RDDATAflag | AUTOINCflag,
@@ -77,7 +77,7 @@ static void com20020_copy_from_card(struct net_device *dev, int bufnum,
 static void com20020_copy_to_card(struct net_device *dev, int bufnum,
 				  int offset, void *buf, int count)
 {
-	int ioaddr = dev->base_addr, ofs = 512 * bufnum + offset;
+	int ioaddr = __c_ua(dev->base_addr), ofs = 512 * bufnum + offset;
 
 	/* set up the address register */
 	arcnet_outb((ofs >> 8) | AUTOINCflag, ioaddr, COM20020_REG_W_ADDR_HI);
@@ -91,7 +91,7 @@ static void com20020_copy_to_card(struct net_device *dev, int bufnum,
 /* Reset the card and check some basic stuff during the detection stage. */
 int com20020_check(struct net_device *dev)
 {
-	int ioaddr = dev->base_addr, status;
+	int ioaddr = __c_ua(dev->base_addr), status;
 	struct arcnet_local *lp = netdev_priv(dev);
 
 	arcnet_outb(XTOcfg(3) | RESETcfg, ioaddr, COM20020_REG_W_CONFIG);
@@ -153,7 +153,7 @@ int com20020_check(struct net_device *dev)
 
 static int com20020_set_hwaddr(struct net_device *dev, void *addr)
 {
-	int ioaddr = dev->base_addr;
+	int ioaddr = __c_ua(dev->base_addr);
 	struct arcnet_local *lp = netdev_priv(dev);
 	struct sockaddr *hwaddr = addr;
 
@@ -166,7 +166,7 @@ static int com20020_set_hwaddr(struct net_device *dev, void *addr)
 
 static int com20020_netdev_open(struct net_device *dev)
 {
-	int ioaddr = dev->base_addr;
+	int ioaddr = __c_ua(dev->base_addr);
 	struct arcnet_local *lp = netdev_priv(dev);
 
 	lp->config |= TXENcfg;
@@ -177,7 +177,7 @@ static int com20020_netdev_open(struct net_device *dev)
 
 static int com20020_netdev_close(struct net_device *dev)
 {
-	int ioaddr = dev->base_addr;
+	int ioaddr = __c_ua(dev->base_addr);
 	struct arcnet_local *lp = netdev_priv(dev);
 
 	arcnet_close(dev);
@@ -203,7 +203,7 @@ const struct net_device_ops com20020_netdev_ops = {
 int com20020_found(struct net_device *dev, int shared)
 {
 	struct arcnet_local *lp;
-	int ioaddr = dev->base_addr;
+	int ioaddr = __c_ua(dev->base_addr);
 
 	/* Initialize the rest of the device structure. */
 
@@ -247,7 +247,7 @@ int com20020_found(struct net_device *dev, int shared)
 	}
 
 	arc_printk(D_NORMAL, dev, "%s: station %02Xh found at %03lXh, IRQ %d.\n",
-		   lp->card_name, dev->dev_addr[0], dev->base_addr, dev->irq);
+		   lp->card_name, dev->dev_addr[0], __c_ua(dev->base_addr), dev->irq);
 
 	if (lp->backplane)
 		arc_printk(D_NORMAL, dev, "Using backplane mode.\n");
@@ -282,7 +282,7 @@ int com20020_found(struct net_device *dev, int shared)
 static int com20020_reset(struct net_device *dev, int really_reset)
 {
 	struct arcnet_local *lp = netdev_priv(dev);
-	u_int ioaddr = dev->base_addr;
+	u_int ioaddr = __c_ua(dev->base_addr);
 	u_char inbyte;
 
 	arc_printk(D_DEBUG, dev, "%s: %d: %s: dev: %p, lp: %p, dev->name: %s\n",
@@ -331,7 +331,7 @@ static int com20020_reset(struct net_device *dev, int really_reset)
 
 static void com20020_setmask(struct net_device *dev, int mask)
 {
-	u_int ioaddr = dev->base_addr;
+	u_int ioaddr = __c_ua(dev->base_addr);
 
 	arc_printk(D_DURING, dev, "Setting mask to %x at %x\n", mask, ioaddr);
 	arcnet_outb(mask, ioaddr, COM20020_REG_W_INTMASK);
@@ -339,14 +339,14 @@ static void com20020_setmask(struct net_device *dev, int mask)
 
 static void com20020_command(struct net_device *dev, int cmd)
 {
-	u_int ioaddr = dev->base_addr;
+	u_int ioaddr = __c_ua(dev->base_addr);
 
 	arcnet_outb(cmd, ioaddr, COM20020_REG_W_COMMAND);
 }
 
 static int com20020_status(struct net_device *dev)
 {
-	u_int ioaddr = dev->base_addr;
+	u_int ioaddr = __c_ua(dev->base_addr);
 
 	return arcnet_inb(ioaddr, COM20020_REG_R_STATUS) +
 		(arcnet_inb(ioaddr, COM20020_REG_R_DIAGSTAT) << 8);
@@ -355,7 +355,7 @@ static int com20020_status(struct net_device *dev)
 static void com20020_close(struct net_device *dev)
 {
 	struct arcnet_local *lp = netdev_priv(dev);
-	int ioaddr = dev->base_addr;
+	int ioaddr = __c_ua(dev->base_addr);
 
 	/* disable transmitter */
 	lp->config &= ~TXENcfg;
@@ -372,7 +372,7 @@ static void com20020_close(struct net_device *dev)
 static void com20020_set_mc_list(struct net_device *dev)
 {
 	struct arcnet_local *lp = netdev_priv(dev);
-	int ioaddr = dev->base_addr;
+	int ioaddr = __c_ua(dev->base_addr);
 
 	if ((dev->flags & IFF_PROMISC) && (dev->flags & IFF_UP)) {
 		/* Enable promiscuous mode */

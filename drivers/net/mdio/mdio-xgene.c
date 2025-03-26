@@ -332,7 +332,7 @@ static int xgene_mdio_probe(struct platform_device *pdev)
 	void __iomem *csr_base;
 	int mdio_id = 0, ret = 0;
 
-	mdio_id = (uintptr_t)device_get_match_data(&pdev->dev);
+	mdio_id = __c_pa(device_get_match_data(&pdev->dev));
 	if (!mdio_id)
 		return -ENODEV;
 

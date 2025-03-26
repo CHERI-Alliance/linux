@@ -170,16 +170,16 @@ static inline void baycom_int_freq(struct baycom_state *bc)
 static inline void ser12_set_divisor(struct net_device *dev,
                                      unsigned int divisor)
 {
-        outb(0x81, LCR(dev->base_addr));        /* DLAB = 1 */
-        outb(divisor, DLL(dev->base_addr));
-        outb(divisor >> 8, DLM(dev->base_addr));
-        outb(0x01, LCR(dev->base_addr));        /* word length = 6 */
+        outb(0x81, LCR(__c_ua(dev->base_addr)));        /* DLAB = 1 */
+        outb(divisor, DLL(__c_ua(dev->base_addr)));
+        outb(divisor >> 8, DLM(__c_ua(dev->base_addr)));
+        outb(0x01, LCR(__c_ua(dev->base_addr)));        /* word length = 6 */
         /*
          * make sure the next interrupt is generated;
          * 0 must be used to power the modem; the modem draws its
          * power from the TxD line
          */
-        outb(0x00, THR(dev->base_addr));
+        outb(0x00, THR(__c_ua(dev->base_addr)));
         /*
          * it is important not to set the divider while transmitting;
          * this reportedly makes some UARTs generating interrupts
@@ -255,22 +255,22 @@ static irqreturn_t ser12_interrupt(int irq, void *dev_id)
 	if (!bc || bc->hdrv.magic != HDLCDRV_MAGIC)
 		return IRQ_NONE;
 	/* fast way out for shared irq */
-	if ((iir = inb(IIR(dev->base_addr))) & 1) 	
+	if ((iir = inb(IIR(__c_ua(dev->base_addr)))) & 1) 	
 		return IRQ_NONE;
 	/* get current time */
 	ktime_get_ts64(&ts);
-	msr = inb(MSR(dev->base_addr));
+	msr = inb(MSR(__c_ua(dev->base_addr)));
 	/* delta DCD */
 	if ((msr & 8) && bc->opt_dcd)
 		hdlcdrv_setdcd(&bc->hdrv, !((msr ^ bc->opt_dcd) & 0x80));
 	do {
 		switch (iir & 6) {
 		case 6:
-			inb(LSR(dev->base_addr));
+			inb(LSR(__c_ua(dev->base_addr)));
 			break;
 			
 		case 4:
-			inb(RBR(dev->base_addr));
+			inb(RBR(__c_ua(dev->base_addr)));
 			break;
 			
 		case 2:
@@ -279,7 +279,7 @@ static irqreturn_t ser12_interrupt(int irq, void *dev_id)
 			 * 0 must be used to power the modem; the modem draws its
 			 * power from the TxD line
 			 */
-			outb(0x00, THR(dev->base_addr));
+			outb(0x00, THR(__c_ua(dev->base_addr)));
 			baycom_int_freq(bc);
 			txcount++;
 			/*
@@ -287,19 +287,19 @@ static irqreturn_t ser12_interrupt(int irq, void *dev_id)
 			 * since this may take quite long
 			 */
 			if (bc->modem.ptt)
-				outb(0x0e | (!!bc->modem.ser12.tx_bit), MCR(dev->base_addr));
+				outb(0x0e | (!!bc->modem.ser12.tx_bit), MCR(__c_ua(dev->base_addr)));
 			else
-				outb(0x0d, MCR(dev->base_addr));       /* transmitter off */
+				outb(0x0d, MCR(__c_ua(dev->base_addr)));       /* transmitter off */
 			break;
 			
 		default:
-			msr = inb(MSR(dev->base_addr));
+			msr = inb(MSR(__c_ua(dev->base_addr)));
 			/* delta DCD */
 			if ((msr & 8) && bc->opt_dcd) 
 				hdlcdrv_setdcd(&bc->hdrv, !((msr ^ bc->opt_dcd) & 0x80));
 			break;
 		}
-		iir = inb(IIR(dev->base_addr));
+		iir = inb(IIR(__c_ua(dev->base_addr)));
 	} while (!(iir & 1));
 	ser12_rx(dev, bc, &ts, msr & 0x10); /* CTS */
 	if (bc->modem.ptt && txcount) {
@@ -378,7 +378,7 @@ static int ser12_open(struct net_device *dev)
 
 	if (!dev || !bc)
 		return -ENXIO;
-	if (!dev->base_addr || dev->base_addr > 0xffff-SER12_EXTENT ||
+	if (!__c_ua(dev->base_addr) || __c_ua(dev->base_addr) > 0xffff-SER12_EXTENT ||
 	    dev->irq < 2 || dev->irq > nr_irqs) {
 		printk(KERN_INFO "baycom_ser_fdx: invalid portnumber (max %u) "
 				"or irq (2 <= irq <= %d)\n",
@@ -390,25 +390,25 @@ static int ser12_open(struct net_device *dev)
 				"(300...4800)\n");
 		return -EINVAL;
 	}
-	if (!request_region(dev->base_addr, SER12_EXTENT, "baycom_ser_fdx")) {
+	if (!request_region(__c_ua(dev->base_addr), SER12_EXTENT, "baycom_ser_fdx")) {
 		printk(KERN_WARNING "BAYCOM_SER_FSX: I/O port 0x%04lx busy\n",
-		       dev->base_addr);
+		       __c_ua(dev->base_addr));
 		return -EACCES;
 	}
 	memset(&bc->modem, 0, sizeof(bc->modem));
 	bc->hdrv.par.bitrate = bc->baud;
 	bc->baud_us = 1000000/bc->baud;
 	bc->baud_uartdiv = (115200/8)/bc->baud;
-	if ((u = ser12_check_uart(dev->base_addr)) == c_uart_unknown){
-		release_region(dev->base_addr, SER12_EXTENT);
+	if ((u = ser12_check_uart(__c_ua(dev->base_addr))) == c_uart_unknown){
+		release_region(__c_ua(dev->base_addr), SER12_EXTENT);
 		return -EIO;
 	}
-	outb(0, FCR(dev->base_addr));  /* disable FIFOs */
-	outb(0x0d, MCR(dev->base_addr));
-	outb(0, IER(dev->base_addr));
+	outb(0, FCR(__c_ua(dev->base_addr)));  /* disable FIFOs */
+	outb(0x0d, MCR(__c_ua(dev->base_addr)));
+	outb(0, IER(__c_ua(dev->base_addr)));
 	if (request_irq(dev->irq, ser12_interrupt, IRQF_SHARED,
 			"baycom_ser_fdx", dev)) {
-		release_region(dev->base_addr, SER12_EXTENT);
+		release_region(__c_ua(dev->base_addr), SER12_EXTENT);
 		return -EBUSY;
 	}
 	/*
@@ -422,16 +422,16 @@ static int ser12_open(struct net_device *dev)
 	/*
 	 * enable transmitter empty interrupt and modem status interrupt
 	 */
-	outb(0x0a, IER(dev->base_addr));
+	outb(0x0a, IER(__c_ua(dev->base_addr)));
 	/*
 	 * make sure the next interrupt is generated;
 	 * 0 must be used to power the modem; the modem draws its
 	 * power from the TxD line
 	 */
-	outb(0x00, THR(dev->base_addr));
+	outb(0x00, THR(__c_ua(dev->base_addr)));
 	hdlcdrv_setdcd(&bc->hdrv, 0);
 	printk(KERN_INFO "%s: ser_fdx at iobase 0x%lx irq %u baud %u uart %s\n",
-	       bc_drvname, dev->base_addr, dev->irq, bc->baud, uart_str[u]);
+	       bc_drvname, __c_ua(dev->base_addr), dev->irq, bc->baud, uart_str[u]);
 	return 0;
 }
 
@@ -446,12 +446,12 @@ static int ser12_close(struct net_device *dev)
 	/*
 	 * disable interrupts
 	 */
-	outb(0, IER(dev->base_addr));
-	outb(1, MCR(dev->base_addr));
+	outb(0, IER(__c_ua(dev->base_addr)));
+	outb(1, MCR(__c_ua(dev->base_addr)));
 	free_irq(dev->irq, dev);
-	release_region(dev->base_addr, SER12_EXTENT);
+	release_region(__c_ua(dev->base_addr), SER12_EXTENT);
 	printk(KERN_INFO "%s: close ser_fdx at iobase 0x%lx irq %u\n",
-	       bc_drvname, dev->base_addr, dev->irq);
+	       bc_drvname, __c_ua(dev->base_addr), dev->irq);
 	return 0;
 }
 

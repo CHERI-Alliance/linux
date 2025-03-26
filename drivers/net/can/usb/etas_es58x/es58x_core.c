@@ -2150,7 +2150,7 @@ static void es58x_free_netdevs(struct es58x_device *es58x_dev)
  *	any error occurs.
  */
 static struct es58x_device *es58x_init_es58x_dev(struct usb_interface *intf,
-						 kernel_ulong_t driver_info)
+						 unsigned long driver_info)
 {
 	struct device *dev = &intf->dev;
 	struct es58x_device *es58x_dev;
@@ -2221,7 +2221,7 @@ static int es58x_probe(struct usb_interface *intf,
 	struct es58x_device *es58x_dev;
 	int ch_idx;
 
-	es58x_dev = es58x_init_es58x_dev(intf, id->driver_info);
+	es58x_dev = es58x_init_es58x_dev(intf, __c_ua(id->driver_info));
 	if (IS_ERR(es58x_dev))
 		return PTR_ERR(es58x_dev);
 

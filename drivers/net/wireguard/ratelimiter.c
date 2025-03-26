@@ -87,7 +87,7 @@ bool wg_ratelimiter_allow(struct sk_buff *skb, struct net *net)
 	 * 3 words in the end. This way, siphash's len param fits into the final
 	 * u32, and we don't incur an extra round.
 	 */
-	const u32 net_word = (unsigned long)net;
+	const u32 net_word = __c_pa(net);
 	struct ratelimiter_entry *entry;
 	struct hlist_head *bucket;
 	u64 ip;

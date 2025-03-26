@@ -1687,17 +1687,17 @@ static int hso_serial_tiocmset(struct tty_struct *tty,
 }
 
 static int hso_serial_ioctl(struct tty_struct *tty,
-			    unsigned int cmd, unsigned long arg)
+			    unsigned int cmd, user_uintptr_t arg)
 {
 	struct hso_serial *serial = tty->driver_data;
 	int ret = 0;
-	hso_dbg(0x8, "IOCTL cmd: %d, arg: %ld\n", cmd, arg);
+	hso_dbg(0x8, "IOCTL cmd: %d, arg: %ld\n", cmd, __c_ua(arg));
 
 	if (!serial)
 		return -ENODEV;
 	switch (cmd) {
 	case TIOCMIWAIT:
-		ret = hso_wait_modem_status(serial, arg);
+		ret = hso_wait_modem_status(serial, __c_ua(arg));
 		break;
 	default:
 		ret = -ENOIOCTLCMD;

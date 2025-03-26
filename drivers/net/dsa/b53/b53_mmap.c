@@ -263,7 +263,7 @@ static int b53_mmap_probe_of(struct platform_device *pdev,
 		return -ENOMEM;
 
 	pdata->regs = mem;
-	pdata->chip_id = (u32)(unsigned long)device_get_match_data(dev);
+	pdata->chip_id = (u32)__c_pa(device_get_match_data(dev));
 	pdata->big_endian = of_property_read_bool(np, "big-endian");
 
 	of_ports = of_get_child_by_name(np, "ports");

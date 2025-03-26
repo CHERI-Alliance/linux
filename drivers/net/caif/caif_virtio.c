@@ -120,7 +120,7 @@ struct cfv_info {
 	void *alloc_addr;
 	dma_addr_t alloc_dma;
 	struct gen_pool *genpool;
-	unsigned long reserved_mem;
+	uintptr_t reserved_mem;
 	size_t reserved_size;
 	struct cfv_stats stats;
 	struct dentry *debugfs;
@@ -149,7 +149,7 @@ static void free_buf_info(struct cfv_info *cfv, struct buf_info *buf_info)
 {
 	if (!buf_info)
 		return;
-	gen_pool_free(cfv->genpool, (unsigned long) buf_info->vaddr,
+	gen_pool_free(cfv->genpool, (uintptr_t) buf_info->vaddr,
 		      buf_info->size);
 	kfree(buf_info);
 }
@@ -232,7 +232,7 @@ static struct sk_buff *cfv_alloc_and_copy_skb(int *err,
 	}
 
 	cfpkt_len = frm_len - (cfv->rx_hr + cfv->rx_tr);
-	pad_len = (unsigned long)(frm + cfv->rx_hr) & (IP_HDR_ALIGN - 1);
+	pad_len = (unsigned long)(__c_pa(frm) + cfv->rx_hr) & (IP_HDR_ALIGN - 1);
 
 	skb = netdev_alloc_skb(cfv->ndev, frm_len + pad_len);
 	if (!skb) {
@@ -282,7 +282,7 @@ static int cfv_rx_poll(struct napi_struct *napi, int quota)
 				goto exit;
 		}
 
-		buf = phys_to_virt((unsigned long) riov->iov[riov->i].iov_base);
+		buf = phys_to_virt(__c_pa(riov->iov[riov->i].iov_base));
 		/* TODO: Add check on valid buffer address */
 
 		skb = cfv_alloc_and_copy_skb(&err, cfv, buf,
