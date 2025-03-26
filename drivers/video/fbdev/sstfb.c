@@ -1347,7 +1347,7 @@ static int sstfb_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 	par  = info->par;
 	fix  = &info->fix;
 
-	par->type = id->driver_data;
+	par->type = __c_ua(id->driver_data);
 	spec = &voodoo_spec[par->type];
 	f_ddprintk("found device : %s\n", spec->name);
 

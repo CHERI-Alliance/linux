@@ -449,7 +449,7 @@ pxa3xx_gcu_write(struct file *file, const char *buff,
 
 
 static long
-pxa3xx_gcu_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+pxa3xx_gcu_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	unsigned long flags;
 	struct pxa3xx_gcu_priv *priv = to_pxa3xx_gcu_priv(file);

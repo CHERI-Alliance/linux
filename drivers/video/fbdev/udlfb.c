@@ -29,6 +29,13 @@
 
 #define OUT_EP_NUM	1	/* The endpoint number we will use */
 
+#ifdef CONFIG_CHERI_KERNEL
+#define SMEM_TO_PTR(F) cheri_make_kernel_data_cap((F).smem_start,	\
+						    (F).smem_len)
+#else
+#define SMEM_TO_PTR(F) ((char *)(F).smem_start)
+#endif
+
 static const struct fb_fix_screeninfo dlfb_fix = {
 	.id =           "udlfb",
 	.type =         FB_TYPE_PACKED_PIXELS,
@@ -346,7 +353,7 @@ static int dlfb_ops_mmap(struct fb_info *info, struct vm_area_struct *vma)
 		pos, size);
 
 	while (size > 0) {
-		page = vmalloc_to_pfn((void *)pos);
+		page = vmalloc_to_pfn(__c_fakep(pos));
 		if (remap_pfn_range(vma, start, page, PAGE_SIZE, PAGE_SHARED))
 			return -EAGAIN;
 
@@ -640,7 +647,7 @@ static int dlfb_handle_damage(struct dlfb_data *dlfb, int x, int y, int width, i
 		const int byte_offset = line_offset + (x * BPP);
 
 		if (dlfb_render_hline(dlfb, &urb,
-				      (char *) dlfb->info->fix.smem_start,
+				      SMEM_TO_PTR(dlfb->info->fix),
 				      &cmd, byte_offset, width * BPP,
 				      &bytes_identical, &bytes_sent))
 			goto error;
@@ -752,7 +759,7 @@ static void dlfb_dpy_deferred_io(struct fb_info *info, struct list_head *pageref
 
 	/* walk the written page list and render each to device */
 	list_for_each_entry(pageref, pagereflist, list) {
-		if (dlfb_render_hline(dlfb, &urb, (char *) info->fix.smem_start,
+		if (dlfb_render_hline(dlfb, &urb, SMEM_TO_PTR(info->fix),
 				      &cmd, pageref->offset, PAGE_SIZE,
 				      &bytes_identical, &bytes_sent))
 			goto error;
@@ -1202,7 +1209,7 @@ static int dlfb_realloc_framebuffer(struct dlfb_data *dlfb, struct fb_info *info
 
 		info->screen_buffer = new_fb;
 		info->fix.smem_len = new_len;
-		info->fix.smem_start = (uintptr_t) new_fb;
+		info->fix.smem_start = __c_pa(new_fb);
 		info->flags = udlfb_info_flags;
 
 		/*

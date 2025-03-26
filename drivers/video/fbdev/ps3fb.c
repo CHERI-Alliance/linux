@@ -775,7 +775,7 @@ static int ps3fb_wait_for_vsync(u32 crtc)
      */
 
 static int ps3fb_ioctl(struct fb_info *info, unsigned int cmd,
-		       unsigned long arg)
+		       user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 	u32 val;
