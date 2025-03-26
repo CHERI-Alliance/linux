@@ -64,7 +64,7 @@ static int	sisfb_get_fix(struct fb_fix_screeninfo *fix, int con,
 				struct fb_info *info);
 
 static int	sisfb_ioctl(struct fb_info *info, unsigned int cmd,
-			    unsigned long arg);
+			    user_uintptr_t arg);
 static int	sisfb_set_par(struct fb_info *info);
 static int	sisfb_blank(int blank,
 				struct fb_info *info);
@@ -1655,7 +1655,7 @@ sisfb_blank(int blank, struct fb_info *info)
 /* ----------- FBDev related routines for all series ---------- */
 
 static int	sisfb_ioctl(struct fb_info *info, unsigned int cmd,
-			    unsigned long arg)
+			    user_uintptr_t arg)
 {
 	struct sis_video_info	*ivideo = (struct sis_video_info *)info->par;
 	struct sis_memreq	sismemreq;
@@ -5825,7 +5825,7 @@ static int sisfb_post_xgi(struct pci_dev *pdev)
 
 static int sisfb_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 {
-	struct sisfb_chip_info	*chipinfo = &sisfb_chip_info[ent->driver_data];
+	struct sisfb_chip_info	*chipinfo = &sisfb_chip_info[__c_ua(ent->driver_data)];
 	struct sis_video_info	*ivideo = NULL;
 	struct fb_info		*sis_fb_info = NULL;
 	u16 reg16;
@@ -6228,7 +6228,7 @@ error_3:	vfree(ivideo->bios_abase);
 	}
 
 	printk(KERN_INFO "sisfb: Video RAM at 0x%lx, mapped to 0x%lx, size %ldk\n",
-		ivideo->video_base, (unsigned long)ivideo->video_vbase, ivideo->video_size / 1024);
+		ivideo->video_base, __c_pa(ivideo->video_vbase), ivideo->video_size / 1024);
 
 	if(ivideo->video_offset) {
 		printk(KERN_INFO "sisfb: Viewport offset %ldk\n",
@@ -6236,7 +6236,7 @@ error_3:	vfree(ivideo->bios_abase);
 	}
 
 	printk(KERN_INFO "sisfb: MMIO at 0x%lx, mapped to 0x%lx, size %ldk\n",
-		ivideo->mmio_base, (unsigned long)ivideo->mmio_vbase, ivideo->mmio_size / 1024);
+		ivideo->mmio_base, __c_pa(ivideo->mmio_vbase), ivideo->mmio_size / 1024);
 
 
 	/* Determine the size of the command queue */

@@ -1187,7 +1187,7 @@ static int s3_pci_probe(struct pci_dev *dev, const struct pci_device_id *id)
 
 	pcibios_bus_to_resource(dev->bus, &vga_res, &bus_reg);
 
-	par->state.vgabase = (void __iomem *) (unsigned long) vga_res.start;
+	par->state.vgabase = (void __iomem *)__c_fakep(vga_res.start);
 
 	/* Unlock regs */
 	cr38 = vga_rcrt(par->state.vgabase, 0x38);
@@ -1197,7 +1197,7 @@ static int s3_pci_probe(struct pci_dev *dev, const struct pci_device_id *id)
 	vga_wcrt(par->state.vgabase, 0x39, 0xA5);
 
 	/* Identify chip type */
-	par->chip = id->driver_data & CHIP_MASK;
+	par->chip = __c_ua(id->driver_data) & CHIP_MASK;
 	par->rev = vga_rcrt(par->state.vgabase, 0x2f);
 	if (par->chip & CHIP_UNDECIDED_FLAG)
 		par->chip = s3_identification(par);

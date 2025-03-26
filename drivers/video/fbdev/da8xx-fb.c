@@ -1127,7 +1127,7 @@ static int fb_wait_for_vsync(struct fb_info *info)
 }
 
 static int fb_ioctl(struct fb_info *info, unsigned int cmd,
-			  unsigned long arg)
+			  user_uintptr_t arg)
 {
 	struct lcd_sync_arg sync_arg;
 

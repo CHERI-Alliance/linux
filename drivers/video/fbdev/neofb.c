@@ -1938,7 +1938,7 @@ static struct fb_info *neo_alloc_fb_info(struct pci_dev *dev,
 
 	par = info->par;
 
-	info->fix.accel = id->driver_data;
+	info->fix.accel = __c_ua(id->driver_data);
 
 	par->pci_burst = !nopciburst;
 	par->lcd_stretch = !nostretch;
@@ -1995,7 +1995,7 @@ static struct fb_info *neo_alloc_fb_info(struct pci_dev *dev,
 	info->fix.xpanstep = 0;
 	info->fix.ypanstep = 4;
 	info->fix.ywrapstep = 0;
-	info->fix.accel = id->driver_data;
+	info->fix.accel = __c_ua(id->driver_data);
 
 	info->fbops = &neofb_ops;
 	info->pseudo_palette = par->palette;

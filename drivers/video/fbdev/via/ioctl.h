@@ -183,7 +183,7 @@ struct _panel_size_pos_info {
 extern int viafb_LCD_ON;
 extern int viafb_DVI_ON;
 
-int viafb_ioctl_get_viafb_info(u_long arg);
+int viafb_ioctl_get_viafb_info(user_uintptr_t arg);
 int viafb_ioctl_hotplug(int hres, int vres, int bpp);
 
 #endif /* __IOCTL_H__ */

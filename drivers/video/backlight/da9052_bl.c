@@ -114,7 +114,7 @@ static int da9052_backlight_probe(struct platform_device *pdev)
 
 	wleds->da9052 = dev_get_drvdata(pdev->dev.parent);
 	wleds->brightness = 0;
-	wleds->led_reg = platform_get_device_id(pdev)->driver_data;
+	wleds->led_reg = __c_ua(platform_get_device_id(pdev)->driver_data);
 	wleds->state = DA9052_WLEDS_OFF;
 
 	memset(&props, 0, sizeof(struct backlight_properties));

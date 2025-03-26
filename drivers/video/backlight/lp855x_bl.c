@@ -413,14 +413,14 @@ static int lp855x_probe(struct i2c_client *cl)
 
 	if (id) {
 		lp->chipname = id->name;
-		lp->chip_id = id->driver_data;
+		lp->chip_id = __c_ua(id->driver_data);
 	} else {
 		acpi_id = acpi_match_device(dev->driver->acpi_match_table, dev);
 		if (!acpi_id)
 			return -ENODEV;
 
 		lp->chipname = acpi_id->id;
-		lp->chip_id = acpi_id->driver_data;
+		lp->chip_id = __c_ua(acpi_id->driver_data);
 	}
 
 	switch (lp->chip_id) {

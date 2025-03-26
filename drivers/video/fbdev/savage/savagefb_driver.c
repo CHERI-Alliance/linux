@@ -2054,7 +2054,7 @@ static int savage_init_fb_info(struct fb_info *info, struct pci_dev *dev,
 	info->fix.type_aux	   = 0;
 	info->fix.ypanstep	   = 1;
 	info->fix.ywrapstep   = 0;
-	info->fix.accel       = id->driver_data;
+	info->fix.accel       = __c_ua(id->driver_data);
 
 	switch (info->fix.accel) {
 	case FB_ACCEL_SUPERSAVAGE:

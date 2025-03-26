@@ -157,7 +157,7 @@ static inline void mga_memcpy_toio(vaddr_t va, const void* src, int len) {
 #else
         u_int32_t __iomem* addr = va.vaddr;
 
-	if ((unsigned long)src & 3) {
+	if (__c_pa(src) & 3) {
 		while (len >= 4) {
 			fb_writel(get_unaligned((u32 *)src), addr);
 			addr++;

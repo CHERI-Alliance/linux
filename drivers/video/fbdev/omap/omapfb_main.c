@@ -1049,7 +1049,7 @@ EXPORT_SYMBOL(omapfb_write_first_pixel);
  * here to be accessible by user mode code.
  */
 static int omapfb_ioctl(struct fb_info *fbi, unsigned int cmd,
-			unsigned long arg)
+			user_uintptr_t arg)
 {
 	struct omapfb_plane_struct *plane = fbi->par;
 	struct omapfb_device	*fbdev = plane->fbdev;

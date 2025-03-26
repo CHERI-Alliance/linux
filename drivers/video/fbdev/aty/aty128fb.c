@@ -469,7 +469,7 @@ static int aty128fb_setcolreg(u_int regno, u_int red, u_int green, u_int blue,
 static int aty128fb_pan_display(struct fb_var_screeninfo *var,
 			   struct fb_info *fb);
 static int aty128fb_blank(int blank, struct fb_info *fb);
-static int aty128fb_ioctl(struct fb_info *info, u_int cmd, unsigned long arg);
+static int aty128fb_ioctl(struct fb_info *info, u_int cmd, user_uintptr_t arg);
 static int aty128fb_sync(struct fb_info *info);
 
     /*
@@ -1911,7 +1911,7 @@ static int aty128_init(struct pci_dev *pdev, const struct pci_device_id *ent)
 
 	/* range check to make sure */
 	if (ent->driver_data < ARRAY_SIZE(r128_family))
-		strlcat(video_card, r128_family[ent->driver_data],
+		strlcat(video_card, r128_family[__c_ua(ent->driver_data)],
 			sizeof(video_card));
 
 	printk(KERN_INFO "aty128fb: %s [chip rev 0x%x] ", video_card, chip_rev);
@@ -1921,7 +1921,7 @@ static int aty128_init(struct pci_dev *pdev, const struct pci_device_id *ent)
 	else
 		printk("%dk %s\n", par->vram_size / 1024, par->mem->name);
 
-	par->chip_gen = ent->driver_data;
+	par->chip_gen = __c_ua(ent->driver_data);
 
 	/* fill in info */
 	info->fbops = &aty128fb_ops;
@@ -2296,7 +2296,7 @@ static int aty128fb_setcolreg(u_int regno, u_int red, u_int green, u_int blue,
 /* in param: u32*	backlight value: 0 to 15 */
 #define FBIO_ATY128_SET_MIRROR	_IOW('@', 2, __u32)
 
-static int aty128fb_ioctl(struct fb_info *info, u_int cmd, u_long arg)
+static int aty128fb_ioctl(struct fb_info *info, u_int cmd, user_uintptr_t arg)
 {
 	struct aty128fb_par *par = info->par;
 	u32 value;

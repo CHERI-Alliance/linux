@@ -1723,7 +1723,7 @@ static int cyberpro_pci_probe(struct pci_dev *dev,
 		return err;
 
 	err = -ENOMEM;
-	cfb = cyberpro_alloc_fb_info(id->driver_data, name);
+	cfb = cyberpro_alloc_fb_info(__c_ua(id->driver_data), name);
 	if (!cfb)
 		goto failed_release;
 

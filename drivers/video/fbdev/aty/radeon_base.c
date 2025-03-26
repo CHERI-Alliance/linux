@@ -964,7 +964,7 @@ static int radeonfb_pan_display (struct fb_var_screeninfo *var,
 
 
 static int radeonfb_ioctl (struct fb_info *info, unsigned int cmd,
-                           unsigned long arg)
+                           user_uintptr_t arg)
 {
         struct radeonfb_info *rinfo = info->par;
 	unsigned int tmp;
@@ -2279,7 +2279,7 @@ static int radeonfb_pci_register(struct pci_dev *pdev,
 		snprintf(rinfo->name, sizeof(rinfo->name),
 			 "ATI Radeon %x", ent->device & 0xffff);
 
-	rinfo->family = ent->driver_data & CHIP_FAMILY_MASK;
+	rinfo->family = __c_ua(ent->driver_data) & CHIP_FAMILY_MASK;
 	rinfo->chipset = pdev->device;
 	rinfo->has_CRTC2 = (ent->driver_data & CHIP_HAS_CRTC2) != 0;
 	rinfo->is_mobility = (ent->driver_data & CHIP_IS_MOBILITY) != 0;

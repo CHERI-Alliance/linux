@@ -1409,7 +1409,7 @@ static int sh_mobile_lcdc_overlay_pan(struct fb_var_screeninfo *var,
 }
 
 static int sh_mobile_lcdc_overlay_ioctl(struct fb_info *info, unsigned int cmd,
-				      unsigned long arg)
+				      user_uintptr_t arg)
 {
 	struct sh_mobile_lcdc_overlay *ovl = info->par;
 
@@ -1730,7 +1730,7 @@ static int sh_mobile_lcdc_pan(struct fb_var_screeninfo *var,
 }
 
 static int sh_mobile_lcdc_ioctl(struct fb_info *info, unsigned int cmd,
-				unsigned long arg)
+				user_uintptr_t arg)
 {
 	struct sh_mobile_lcdc_chan *ch = info->par;
 	int retval;

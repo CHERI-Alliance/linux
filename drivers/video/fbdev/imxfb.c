@@ -702,7 +702,7 @@ static int imxfb_init_fbinfo(struct platform_device *pdev)
 	memset(fbi, 0, sizeof(struct imxfb_info));
 
 	fbi->pdev = pdev;
-	fbi->devtype = pdev->id_entry->driver_data;
+	fbi->devtype = __c_ua(pdev->id_entry->driver_data);
 
 	strscpy(info->fix.id, IMX_NAME, sizeof(info->fix.id));
 

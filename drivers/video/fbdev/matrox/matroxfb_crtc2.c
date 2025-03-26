@@ -422,7 +422,7 @@ static int matroxfb_dh_get_vblank(const struct matroxfb_dh_fb_info* m2info, stru
 
 static int matroxfb_dh_ioctl(struct fb_info *info,
 		unsigned int cmd,
-		unsigned long arg)
+		user_uintptr_t arg)
 {
 #define m2info (container_of(info, struct matroxfb_dh_fb_info, fbcon))
 	struct matrox_fb_info *minfo = m2info->primary_dev;

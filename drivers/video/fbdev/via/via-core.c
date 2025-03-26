@@ -631,7 +631,7 @@ static int via_pci_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	 */
 	memset(&global_dev, 0, sizeof(global_dev));
 	global_dev.pdev = pdev;
-	global_dev.chip_type = ent->driver_data;
+	global_dev.chip_type = __c_ua(ent->driver_data);
 	global_dev.port_cfg = adap_configs;
 	if (machine_is_olpc())
 		global_dev.port_cfg = olpc_adap_configs;

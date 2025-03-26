@@ -874,7 +874,7 @@ static int adp8870_probe(struct i2c_client *client)
 	data->revid = ADP8870_DEVID(reg_val);
 	data->client = client;
 	data->pdata = pdata;
-	data->id = id->driver_data;
+	data->id = __c_ua(id->driver_data);
 	data->current_brightness = 0;
 	i2c_set_clientdata(client, data);
 

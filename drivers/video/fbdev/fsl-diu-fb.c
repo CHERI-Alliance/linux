@@ -1264,7 +1264,7 @@ static int fsl_diu_pan_display(struct fb_var_screeninfo *var,
 }
 
 static int fsl_diu_ioctl(struct fb_info *info, unsigned int cmd,
-		       unsigned long arg)
+		       user_uintptr_t arg)
 {
 	struct mfb_info *mfbi = info->par;
 	struct diu_ad *ad = mfbi->ad;

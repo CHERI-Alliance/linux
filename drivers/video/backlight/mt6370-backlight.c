@@ -252,7 +252,7 @@ static int mt6370_check_vendor_info(struct mt6370_priv *priv)
 	if (ret)
 		return ret;
 
-	of_vid = (uintptr_t)device_get_match_data(priv->dev);
+	of_vid = __c_pa(device_get_match_data(priv->dev));
 	hw_vid = FIELD_GET(MT6370_VENID_MASK, dev_info);
 	hw_vid = (hw_vid == 0x9 || hw_vid == 0xb) ? MT6370_VID_6372 : MT6370_VID_COMMON;
 	if (hw_vid != of_vid)

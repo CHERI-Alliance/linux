@@ -650,7 +650,7 @@ static int gxt4500_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 		goto err_free_fb;
 
 	par = info->par;
-	cardtype = ent->driver_data;
+	cardtype = __c_ua(ent->driver_data);
 	par->refclk_ps = cardinfo[cardtype].refclk_ps;
 	info->fix = gxt4500_fix;
 	strscpy(info->fix.id, cardinfo[cardtype].cardname,
