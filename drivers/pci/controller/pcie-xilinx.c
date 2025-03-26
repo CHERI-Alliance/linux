@@ -68,8 +68,23 @@
 #define XILINX_PCIE_INTR_MST_DECERR	BIT(26)
 #define XILINX_PCIE_INTR_MST_SLVERR	BIT(27)
 #define XILINX_PCIE_INTR_MST_ERRP	BIT(28)
+
 #define XILINX_PCIE_IMR_ALL_MASK	0x1FF30FED
 #define XILINX_PCIE_IMR_ENABLE_MASK	0x1FF30F0D
+#define XILINX_PCIE_IMR_LINK_DOWN	BIT(0)
+#define XILINX_PCIE_IMR_HOT_RESET	BIT(4)
+#define XILINX_PCIE_IMR_CFG_TIMEOUT	BIT(8)
+#define XILINX_PCIE_IMR_CORRECTABLE	BIT(9)
+#define XILINX_PCIE_IMR_NON_FATAL	BIT(10)
+#define XILINX_PCIE_IMR_FATAL		BIT(11)
+#define XILINX_PCIE_IMR_INTX		BIT(16)
+#define XILINX_PCIE_IMR_MSI		BIT(17)
+#define XILINX_PCIE_IMR_SLAVE_UNSUPPORTED_REQ	BIT(20)
+#define XILINX_PCIE_IMR_SLAVE_UNEXPECTED_COMP	BIT(21)
+#define XILINX_PCIE_IMR_SLAVE_ERROR_POISON	BIT(23)
+#define XILINX_PCIE_IMR_SLAVE_COMPLETER_ABORT	BIT(23)
+
+
 #define XILINX_PCIE_IDR_ALL_MASK	0xFFFFFFFF
 
 /* Root Port Error FIFO Read Register definitions */
@@ -108,6 +123,10 @@
 #define MSI_DECD_MODE			0x1
 #define MSI_FIFO_MODE			0x2
 
+
+static int report_correctable = 1;
+MODULE_PARM_DESC(report_correctable, "Report correctable PCIe errors");
+module_param(report_correctable, int, 0444);
 
 /**
  * struct xilinx_pcie - PCIe port information
@@ -713,6 +732,7 @@ static int xilinx_pcie_init_irq_domain(struct xilinx_pcie *pcie)
 static void xilinx_pcie_init_port(struct xilinx_pcie *pcie)
 {
 	struct device *dev = pcie->dev;
+	u32 imr_mask = XILINX_PCIE_IMR_ENABLE_MASK;
 
 	if (xilinx_pcie_link_up(pcie))
 		dev_info(dev, "PCIe Link is UP\n");
@@ -728,8 +748,12 @@ static void xilinx_pcie_init_port(struct xilinx_pcie *pcie)
 			 XILINX_PCIE_IMR_ALL_MASK,
 		   XILINX_PCIE_REG_IDR);
 
+	/* Switch off correctable errors if we need to */
+	if (!report_correctable)
+		imr_mask &= ~XILINX_PCIE_IMR_CORRECTABLE;
+
 	/* Enable all interrupts we handle */
-	pcie_write(pcie, XILINX_PCIE_IMR_ENABLE_MASK, XILINX_PCIE_REG_IMR);
+	pcie_write(pcie, imr_mask, XILINX_PCIE_REG_IMR);
 
 	/* Enable the Bridge enable bit */
 	pcie_write(pcie, pcie_read(pcie, XILINX_PCIE_REG_RPSC) |
