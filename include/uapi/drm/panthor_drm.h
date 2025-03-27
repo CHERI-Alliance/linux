@@ -995,7 +995,7 @@ struct drm_panthor_bo_set_label {
 	 *
 	 * Length cannot be greater than 4096
 	 */
-	__u64 label;
+	__kernel_uintptr_t label;
 };
 
 /**

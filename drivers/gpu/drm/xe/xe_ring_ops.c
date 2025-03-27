@@ -161,9 +161,12 @@ static int emit_pipe_invalidate(u32 mask_flags, bool invalidate_tlb, u32 *dw,
 				 LRC_PPHWSP_FLUSH_INVAL_SCRATCH_ADDR, 0);
 }
 
-static int emit_store_imm_ppgtt_posted(u64 addr, u64 value,
+/* FIXCHERI: Check capability?! */
+static int emit_store_imm_ppgtt_posted(user_uintptr_t _addr, u64 value,
 				       u32 *dw, int i)
 {
+	u64 addr = __c_ua(_addr);
+
 	dw[i++] = MI_STORE_DATA_IMM | MI_SDI_NUM_QW(1);
 	dw[i++] = lower_32_bits(addr);
 	dw[i++] = upper_32_bits(addr);

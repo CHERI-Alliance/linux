@@ -230,7 +230,7 @@ struct drm_etnaviv_wait_fence {
 #define ETNA_USERPTR_READ	0x01
 #define ETNA_USERPTR_WRITE	0x02
 struct drm_etnaviv_gem_userptr {
-	__u64 user_ptr;	/* in, page aligned user pointer */
+	__kernel_uintptr_t user_ptr;	/* in, page aligned user pointer */
 	__u64 user_size;	/* in, page aligned user size */
 	__u32 flags;		/* in, flags */
 	__u32 handle;	/* out, non-zero handle */

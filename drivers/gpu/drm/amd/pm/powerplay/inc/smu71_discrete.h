@@ -401,6 +401,7 @@ typedef struct SMU71_Discrete_FanTable SMU71_Discrete_FanTable;
 #define SMU7_DISCRETE_GPIO_SCLK_DEBUG             4
 #define SMU7_DISCRETE_GPIO_SCLK_DEBUG_BIT         (0x1 << SMU7_DISCRETE_GPIO_SCLK_DEBUG)
 
+#ifndef CONFIG_CHERI_KERNEL
 struct SMU71_MclkDpmScoreboard
 {
 
@@ -463,6 +464,7 @@ struct SMU71_MclkDpmScoreboard
 };
 
 typedef struct SMU71_MclkDpmScoreboard SMU71_MclkDpmScoreboard;
+#endif
 
 struct SMU71_UlvScoreboard
 {

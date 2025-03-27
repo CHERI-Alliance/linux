@@ -19,7 +19,7 @@ struct xe_sync_entry {
 	struct dma_fence *fence;
 	struct dma_fence_chain *chain_fence;
 	struct xe_user_fence *ufence;
-	u64 addr;
+	user_uintptr_t addr;
 	u64 timeline_value;
 	u32 type;
 	u32 flags;

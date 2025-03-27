@@ -167,7 +167,7 @@ struct drm_xe_user_extension {
 	 *
 	 * Pointer to the next struct drm_xe_user_extension, or zero if the end.
 	 */
-	__u64 next_extension;
+	__kernel_uintptr_t next_extension;
 
 	/**
 	 * @name: Name of the extension.
@@ -729,7 +729,7 @@ struct drm_xe_query_pxp_status {
  */
 struct drm_xe_device_query {
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__kernel_uintptr_t extensions;
 
 #define DRM_XE_DEVICE_QUERY_ENGINES		0
 #define DRM_XE_DEVICE_QUERY_MEM_REGIONS		1
@@ -749,7 +749,7 @@ struct drm_xe_device_query {
 	__u32 size;
 
 	/** @data: Queried data is placed here */
-	__u64 data;
+	__kernel_uintptr_t data;
 
 	/** @reserved: Reserved */
 	__u64 reserved[2];
@@ -803,7 +803,7 @@ struct drm_xe_gem_create {
 #define DRM_XE_GEM_CREATE_EXTENSION_SET_PROPERTY	0
 #define   DRM_XE_GEM_CREATE_SET_PROPERTY_PXP_TYPE	0
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__kernel_uintptr_t extensions;
 
 	/**
 	 * @size: Size of the object to be created, must match region
@@ -1006,7 +1006,7 @@ struct drm_xe_vm_destroy {
  */
 struct drm_xe_vm_bind_op {
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__kernel_uintptr_t extensions;
 
 	/**
 	 * @obj: GEM object to operate on, MBZ for MAP_USERPTR, MBZ for UNMAP
@@ -1072,7 +1072,7 @@ struct drm_xe_vm_bind_op {
 		__u64 obj_offset;
 
 		/** @userptr: user pointer to bind on */
-		__u64 userptr;
+		__kernel_uintptr_t userptr;
 
 		/**
 		 * @cpu_addr_mirror_offset: Offset from GPU @addr to create
@@ -1259,7 +1259,7 @@ struct drm_xe_exec_queue_create {
 #define   DRM_XE_EXEC_QUEUE_SET_PROPERTY_TIMESLICE		1
 #define   DRM_XE_EXEC_QUEUE_SET_PROPERTY_PXP_TYPE		2
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__kernel_uintptr_t extensions;
 
 	/** @width: submission width (number BB per exec) for this exec queue */
 	__u16 width;
@@ -1284,7 +1284,7 @@ struct drm_xe_exec_queue_create {
 	 * length = width (i) * num_placements (j)
 	 * index = j + i * width
 	 */
-	__u64 instances;
+	__kernel_uintptr_t instances;
 
 	/** @reserved: Reserved */
 	__u64 reserved[2];
@@ -1365,7 +1365,7 @@ struct drm_xe_exec_queue_get_property {
  */
 struct drm_xe_sync {
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__kernel_uintptr_t extensions;
 
 #define DRM_XE_SYNC_TYPE_SYNCOBJ		0x0
 #define DRM_XE_SYNC_TYPE_TIMELINE_SYNCOBJ	0x1
@@ -1389,7 +1389,7 @@ struct drm_xe_sync {
 		 * mapped when the user fence is signalled. Must be qword
 		 * aligned.
 		 */
-		__u64 addr;
+		__kernel_uintptr_t addr;
 	};
 
 	/**
@@ -1424,7 +1424,7 @@ struct drm_xe_sync {
  */
 struct drm_xe_exec {
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__kernel_uintptr_t extensions;
 
 	/** @exec_queue_id: Exec queue ID for the batch buffer */
 	__u32 exec_queue_id;
@@ -1433,13 +1433,13 @@ struct drm_xe_exec {
 	__u32 num_syncs;
 
 	/** @syncs: Pointer to struct drm_xe_sync array. */
-	__u64 syncs;
+	__kernel_uintptr_t syncs;
 
 	/**
 	 * @address: address of batch buffer if num_batch_buffer == 1 or an
 	 * array of batch buffer addresses
 	 */
-	__u64 address;
+	__kernel_uintptr_t address;
 
 	/**
 	 * @num_batch_buffer: number of batch buffer in this exec, must match
@@ -1484,12 +1484,12 @@ struct drm_xe_exec {
  */
 struct drm_xe_wait_user_fence {
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__kernel_uintptr_t extensions;
 
 	/**
 	 * @addr: user pointer address to wait on, must qword aligned
 	 */
-	__u64 addr;
+	__kernel_uintptr_t addr;
 
 #define DRM_XE_UFENCE_WAIT_OP_EQ	0x0
 #define DRM_XE_UFENCE_WAIT_OP_NEQ	0x1
@@ -1573,13 +1573,13 @@ enum drm_xe_observation_op {
  */
 struct drm_xe_observation_param {
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__kernel_uintptr_t extensions;
 	/** @observation_type: observation stream type, of enum @drm_xe_observation_type */
 	__u64 observation_type;
 	/** @observation_op: observation stream op, of enum @drm_xe_observation_op */
 	__u64 observation_op;
 	/** @param: Pointer to actual stream params */
-	__u64 param;
+	__kernel_uintptr_t param;
 };
 
 /**
@@ -1828,7 +1828,7 @@ enum drm_xe_oa_property_id {
  */
 struct drm_xe_oa_config {
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__kernel_uintptr_t extensions;
 
 	/** @uuid: String formatted like "%\08x-%\04x-%\04x-%\04x-%\012x" */
 	char uuid[36];
@@ -1840,7 +1840,7 @@ struct drm_xe_oa_config {
 	 * @regs_ptr: Pointer to (register address, value) pairs for OA config
 	 * registers. Expected length of buffer is: (2 * sizeof(u32) * @n_regs).
 	 */
-	__u64 regs_ptr;
+	__kernel_uintptr_t regs_ptr;
 };
 
 /**
@@ -1870,7 +1870,7 @@ struct drm_xe_oa_stream_status {
  */
 struct drm_xe_oa_stream_info {
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__kernel_uintptr_t extensions;
 
 	/** @oa_buf_size: OA buffer size */
 	__u64 oa_buf_size;

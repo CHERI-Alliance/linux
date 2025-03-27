@@ -1051,7 +1051,7 @@ struct drm_mode_crtc_page_flip_target {
 	__u32 fb_id;
 	__u32 flags;
 	__u32 sequence;
-	__u64 user_data;
+	__kernel_uintptr_t user_data;
 };
 
 /**

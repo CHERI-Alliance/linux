@@ -23,7 +23,7 @@ int i915_user_extensions(struct i915_user_extension __user *ext,
 	while (ext) {
 		int i, err;
 		u32 name;
-		u64 next;
+		user_uintptr_t next;
 
 		if (!stackdepth--) /* recursion vs useful flexibility */
 			return -E2BIG;
@@ -50,11 +50,11 @@ int i915_user_extensions(struct i915_user_extension __user *ext,
 		if (err)
 			return err;
 
-		if (get_user(next, &ext->next_extension) ||
+		if (get_user_ptr(next, &ext->next_extension) ||
 		    overflows_type(next, uintptr_t))
 			return -EFAULT;
 
-		ext = u64_to_user_ptr(next);
+		ext = (void __user *)next;
 	}
 
 	return 0;

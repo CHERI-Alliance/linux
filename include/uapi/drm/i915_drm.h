@@ -105,7 +105,7 @@ struct i915_user_extension {
 	 *
 	 * Pointer to the next struct i915_user_extension, or zero if the end.
 	 */
-	__u64 next_extension;
+	__kernel_uintptr_t next_extension;
 	/**
 	 * @name: Name of the extension.
 	 *

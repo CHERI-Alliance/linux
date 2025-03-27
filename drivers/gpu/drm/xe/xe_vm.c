@@ -3106,9 +3106,9 @@ static int vm_bind_ioctl_check_args(struct xe_device *xe, struct xe_vm *vm,
 		if (!*bind_ops)
 			return args->num_binds > 1 ? -ENOBUFS : -ENOMEM;
 
-		err = copy_from_user(*bind_ops, bind_user,
-				     sizeof(struct drm_xe_vm_bind_op) *
-				     args->num_binds);
+		err = copy_from_user_with_ptr(*bind_ops, bind_user,
+					      sizeof(struct drm_xe_vm_bind_op) *
+					      args->num_binds);
 		if (XE_IOCTL_DBG(xe, err)) {
 			err = -EFAULT;
 			goto free_bind_ops;
@@ -3818,7 +3818,8 @@ void xe_vm_snapshot_capture_delayed(struct xe_vm_snapshot *snap)
 			err = xe_bo_read(bo, snap->snap[i].bo_ofs,
 					 snap->snap[i].data, snap->snap[i].len);
 		} else {
-			void __user *userptr = (void __user *)(size_t)snap->snap[i].bo_ofs;
+			/* FIXCHERI: User space should provide a valid cap. */
+			const void __user *userptr = make_user_ptr_for_read_uaccess(snap->snap[i].bo_ofs, snap->snap[i].len);
 
 			kthread_use_mm(snap->snap[i].mm);
 			if (!copy_from_user(snap->snap[i].data, userptr, snap->snap[i].len))

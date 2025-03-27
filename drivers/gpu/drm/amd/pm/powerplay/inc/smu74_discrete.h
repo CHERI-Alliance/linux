@@ -399,7 +399,7 @@ typedef struct SMU74_Discrete_FanTable SMU74_Discrete_FanTable;
 #define SMU7_DISCRETE_GPIO_SCLK_DEBUG             4
 #define SMU7_DISCRETE_GPIO_SCLK_DEBUG_BIT         (0x1 << SMU7_DISCRETE_GPIO_SCLK_DEBUG)
 
-
+#ifndef CONFIG_CHERI_KERNEL
 struct SMU7_MclkDpmScoreboard {
 	uint32_t PercentageBusy;
 
@@ -465,6 +465,7 @@ struct SMU7_MclkDpmScoreboard {
 };
 
 typedef struct SMU7_MclkDpmScoreboard SMU7_MclkDpmScoreboard;
+#endif
 
 struct SMU7_UlvScoreboard {
 	uint8_t     EnterUlv;

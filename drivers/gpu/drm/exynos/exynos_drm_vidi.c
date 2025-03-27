@@ -245,6 +245,14 @@ int vidi_connection_ioctl(struct drm_device *drm_dev, void *data,
 	}
 
 	if (vidi->connection) {
+#ifdef CONFIG_CHERI_KERNEL
+		/* FIXCHERI: The upstream code cast what appears to be
+		 * FIXCHERI: a user pointer to a kernel pointer. Warn
+		 * FIXCHERI: if this code is hit with CHERI.
+		 */
+		WARN_ONCE(1, "%s: Invalid user pointer handling?\n", __func__);
+		return -EINVAL;
+#else
 		const struct drm_edid *drm_edid;
 		const struct edid *raw_edid;
 		size_t size;
@@ -263,6 +271,7 @@ int vidi_connection_ioctl(struct drm_device *drm_dev, void *data,
 			return -EINVAL;
 		}
 		ctx->raw_edid = drm_edid;
+#endif
 	} else {
 		/* with connection = 0, free raw_edid */
 		drm_edid_free(ctx->raw_edid);

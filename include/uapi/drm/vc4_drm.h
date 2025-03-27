@@ -271,7 +271,7 @@ struct drm_vc4_create_shader_bo {
 	__u32 flags;
 
 	/* Pointer to the data. */
-	__u64 data;
+	__kernel_uintptr_t data;
 
 	/** Returned GEM handle for the BO. */
 	__u32 handle;

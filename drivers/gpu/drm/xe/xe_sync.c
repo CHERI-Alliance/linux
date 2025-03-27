@@ -49,11 +49,11 @@ static void user_fence_put(struct xe_user_fence *ufence)
 	kref_put(&ufence->refcount, user_fence_destroy);
 }
 
-static struct xe_user_fence *user_fence_create(struct xe_device *xe, u64 addr,
+static struct xe_user_fence *user_fence_create(struct xe_device *xe, user_uintptr_t addr,
 					       u64 value)
 {
 	struct xe_user_fence *ufence;
-	u64 __user *ptr = u64_to_user_ptr(addr);
+	u64 __user *ptr = (void __user *)addr;
 	u64 __maybe_unused prefetch_val;
 
 	if (get_user(prefetch_val, ptr))
@@ -122,7 +122,7 @@ int xe_sync_entry_parse(struct xe_device *xe, struct xe_file *xef,
 	bool disallow_user_fence = flags & SYNC_PARSE_FLAG_DISALLOW_USER_FENCE;
 	bool signal;
 
-	if (copy_from_user(&sync_in, sync_user, sizeof(*sync_user)))
+	if (copy_from_user_with_ptr(&sync_in, sync_user, sizeof(*sync_user)))
 		return -EFAULT;
 
 	if (XE_IOCTL_DBG(xe, sync_in.flags & ~DRM_XE_SYNC_FLAG_SIGNAL) ||

@@ -1301,7 +1301,7 @@ static int xe_oa_user_ext_set_property(struct xe_oa *oa, enum xe_oa_user_extn_fr
 	int err;
 	u32 idx;
 
-	err = copy_from_user(&ext, address, sizeof(ext));
+	err = copy_from_user_with_ptr(&ext, address, sizeof(ext));
 	if (XE_IOCTL_DBG(oa->xe, err))
 		return -EFAULT;
 
@@ -1338,7 +1338,7 @@ static int xe_oa_user_extensions(struct xe_oa *oa, enum xe_oa_user_extn_from fro
 	if (XE_IOCTL_DBG(oa->xe, ext_number >= MAX_USER_EXTENSIONS))
 		return -E2BIG;
 
-	err = copy_from_user(&ext, address, sizeof(ext));
+	err = copy_from_user_with_ptr(&ext, address, sizeof(ext));
 	if (XE_IOCTL_DBG(oa->xe, err))
 		return -EFAULT;
 
@@ -1553,7 +1553,7 @@ static long xe_oa_info_locked(struct xe_oa_stream *stream, user_uintptr_t arg)
 	struct drm_xe_oa_stream_info info = { .oa_buf_size = stream->oa_buffer.bo->size, };
 	void __user *uaddr = (void __user *)arg;
 
-	if (copy_to_user(uaddr, &info, sizeof(info)))
+	if (copy_to_user_with_ptr(uaddr, &info, sizeof(info)))
 		return -EFAULT;
 
 	return 0;
@@ -2281,7 +2281,7 @@ int xe_oa_add_config_ioctl(struct drm_device *dev, user_uintptr_t data, struct d
 		return -EACCES;
 	}
 
-	err = copy_from_user(&param, (void __user *)data, sizeof(param));
+	err = copy_from_user_with_ptr(&param, (void __user *)data, sizeof(param));
 	if (XE_IOCTL_DBG(oa->xe, err))
 		return -EFAULT;
 
@@ -2308,7 +2308,7 @@ int xe_oa_add_config_ioctl(struct drm_device *dev, user_uintptr_t data, struct d
 
 	oa_config->regs_len = arg->n_regs;
 	regs = xe_oa_alloc_regs(oa, xe_oa_is_valid_config_reg_addr,
-				u64_to_user_ptr(arg->regs_ptr),
+				(void __user *)arg->regs_ptr,
 				arg->n_regs);
 	if (IS_ERR(regs)) {
 		drm_dbg(&oa->xe->drm, "Failed to create OA config for mux_regs\n");
