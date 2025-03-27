@@ -176,7 +176,7 @@ struct page {
 	 * stuff like phys_to_virt to at least set boundaries according
 	 * to the page allocation order.
 	 */
-	short alloc_order;
+	long alloc_order;
 #endif
 
 #ifdef CONFIG_SLAB_OBJ_EXT
@@ -343,7 +343,7 @@ struct folio {
 			atomic_t _mapcount;
 			atomic_t _refcount;
 #ifdef CONFIG_CHERI_KERNEL
-			short alloc_order;
+			long alloc_order;
 #endif
 #ifdef CONFIG_SLAB_OBJ_EXT
 			uintptr_t memcg_data;
