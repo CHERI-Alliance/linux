@@ -231,8 +231,8 @@ struct map_info {
 	void (*set_vpp)(struct map_info *, int);
 
 	unsigned long pfow_base;
-	unsigned long map_priv_1;
-	unsigned long map_priv_2;
+	uintptr_t map_priv_1;
+	uintptr_t map_priv_2;
 	struct device_node *device_node;
 	void *fldrv_priv;
 	struct mtd_chip_driver *fldrv;

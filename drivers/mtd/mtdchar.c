@@ -930,7 +930,7 @@ static int mtdchar_ioctl(struct file *file, u_int cmd, user_uintptr_t arg)
 			if (cmd == MEMERASE64) {
 				struct erase_info_user64 einfo64;
 
-				if (copy_from_user(&einfo64, argp,
+				if (copy_from_user_with_ptr(&einfo64, argp,
 					    sizeof(struct erase_info_user64))) {
 					kfree(erase);
 					return -EFAULT;
@@ -940,7 +940,7 @@ static int mtdchar_ioctl(struct file *file, u_int cmd, user_uintptr_t arg)
 			} else {
 				struct erase_info_user einfo32;
 
-				if (copy_from_user(&einfo32, argp,
+				if (copy_from_user_with_ptr(&einfo32, argp,
 					    sizeof(struct erase_info_user))) {
 					kfree(erase);
 					return -EFAULT;
@@ -1029,7 +1029,7 @@ static int mtdchar_ioctl(struct file *file, u_int cmd, user_uintptr_t arg)
 	{
 		struct erase_info_user einfo;
 
-		if (copy_from_user(&einfo, argp, sizeof(einfo)))
+		if (copy_from_user_with_ptr(&einfo, argp, sizeof(einfo)))
 			return -EFAULT;
 
 		ret = mtd_lock(mtd, einfo.start, einfo.length);
@@ -1040,7 +1040,7 @@ static int mtdchar_ioctl(struct file *file, u_int cmd, user_uintptr_t arg)
 	{
 		struct erase_info_user einfo;
 
-		if (copy_from_user(&einfo, argp, sizeof(einfo)))
+		if (copy_from_user_with_ptr(&einfo, argp, sizeof(einfo)))
 			return -EFAULT;
 
 		ret = mtd_unlock(mtd, einfo.start, einfo.length);
@@ -1051,7 +1051,7 @@ static int mtdchar_ioctl(struct file *file, u_int cmd, user_uintptr_t arg)
 	{
 		struct erase_info_user einfo;
 
-		if (copy_from_user(&einfo, argp, sizeof(einfo)))
+		if (copy_from_user_with_ptr(&einfo, argp, sizeof(einfo)))
 			return -EFAULT;
 
 		ret = mtd_is_locked(mtd, einfo.start, einfo.length);
@@ -1070,7 +1070,7 @@ static int mtdchar_ioctl(struct file *file, u_int cmd, user_uintptr_t arg)
 		if (ret)
 			return ret;
 
-		if (copy_to_user(argp, &oi, sizeof(struct nand_oobinfo)))
+		if (copy_to_user_with_ptr(argp, &oi, sizeof(struct nand_oobinfo)))
 			return -EFAULT;
 		break;
 	}
@@ -1277,7 +1277,7 @@ static long mtdchar_compat_ioctl(struct file *file, unsigned int cmd,
 			break;
 		}
 
-		if (copy_from_user(&buf, argp, sizeof(buf)))
+		if (copy_from_user_with_ptr(&buf, argp, sizeof(buf)))
 			ret = -EFAULT;
 		else
 			ret = mtdchar_writeoob(file, mtd, buf.start,
@@ -1292,7 +1292,7 @@ static long mtdchar_compat_ioctl(struct file *file, unsigned int cmd,
 		struct mtd_oob_buf32 __user *buf_user = argp;
 
 		/* NOTE: writes return length to buf->start */
-		if (copy_from_user(&buf, argp, sizeof(buf)))
+		if (copy_from_user_with_ptr(&buf, argp, sizeof(buf)))
 			ret = -EFAULT;
 		else
 			ret = mtdchar_readoob(file, mtd, buf.start,
