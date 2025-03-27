@@ -172,9 +172,9 @@ static void test_overlap(struct kunit *test)
 
 	KUNIT_EXPECT_PTR_NE(test, p1, p2);
 	if (p1 < p2)
-		KUNIT_EXPECT_LT(test, (uintptr_t)(p1 + bytes - 1), (uintptr_t)p2);
+		KUNIT_EXPECT_LT(test, __c_pa(p1 + bytes - 1), __c_pa(p2));
 	else
-		KUNIT_EXPECT_LT(test, (uintptr_t)(p2 + bytes - 1), (uintptr_t)p1);
+		KUNIT_EXPECT_LT(test, __c_pa(p2 + bytes - 1), __c_pa(p1));
 
 	KUNIT_EXPECT_NE(test, a1, a2);
 	if (a1 < a2)

@@ -148,7 +148,7 @@ enum MES_LOG_CONTEXT_STATE {
 struct MES_LOG_CONTEXT_STATE_CHANGE {
 	void				*h_context;
 	enum MES_LOG_CONTEXT_STATE	new_context_state;
-};
+} __cheri_pointer_align;
 
 struct MES_LOG_QUEUE_NEW_WORK {
 	uint64_t                   h_queue;
@@ -188,13 +188,13 @@ struct MES_LOG_ENTRY_DATA {
 		struct MES_LOG_QUEUE_NO_MORE_WORK       queue_no_more_work;
 		struct MES_LOG_QUEUE_WAIT_SYNC_OBJECT   queue_wait_sync_object;
 		uint64_t                                all[2];
-	};
-};
+	} __cheri_pointer_align;
+} __cheri_pointer_align;
 
 struct MES_LOG_BUFFER {
 	struct MES_LOG_ENTRY_HEADER	header;
 	struct MES_LOG_ENTRY_DATA	entries[1];
-};
+} __cheri_pointer_align;
 
 enum MES_SWIP_TO_HWIP_DEF {
 	MES_MAX_HWIP_SEGMENT = 8,

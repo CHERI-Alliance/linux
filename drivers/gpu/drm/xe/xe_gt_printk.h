@@ -120,7 +120,7 @@ static inline struct drm_printer xe_gt_dbg_printer(struct xe_gt *gt)
 	struct drm_printer p = {
 		.printfn = __xe_gt_printfn_dbg,
 		.arg = gt,
-		.origin = (const void *)_THIS_IP_,
+		.origin = (const void *)__c_fakep(_THIS_IP_),
 	};
 	return p;
 }

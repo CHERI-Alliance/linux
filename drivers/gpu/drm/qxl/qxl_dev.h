@@ -376,7 +376,7 @@ union qxl_release_info {
 struct qxl_release_info_ext {
 	union qxl_release_info *info;
 	uint32_t group_id;
-};
+} __cheri_pointer_align;
 
 struct qxl_data_chunk {
 	uint32_t data_size;

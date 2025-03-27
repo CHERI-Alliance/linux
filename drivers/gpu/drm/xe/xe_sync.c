@@ -49,11 +49,11 @@ static void user_fence_put(struct xe_user_fence *ufence)
 	kref_put(&ufence->refcount, user_fence_destroy);
 }
 
-static struct xe_user_fence *user_fence_create(struct xe_device *xe, u64 addr,
+static struct xe_user_fence *user_fence_create(struct xe_device *xe, user_uintptr_t addr,
 					       u64 value)
 {
 	struct xe_user_fence *ufence;
-	u64 __user *ptr = u64_to_user_ptr(addr);
+	u64 __user *ptr = (void __user *)addr;
 	u64 __maybe_unused prefetch_val;
 
 	if (get_user(prefetch_val, ptr))

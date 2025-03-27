@@ -40,7 +40,7 @@ struct spsc_queue {
 	 struct spsc_node *head;
 
 	/* atomic pointer to struct spsc_node* */
-	atomic_long_t tail;
+	atomic_ptr_t tail;
 
 	atomic_t job_count;
 };
@@ -48,7 +48,7 @@ struct spsc_queue {
 static inline void spsc_queue_init(struct spsc_queue *queue)
 {
 	queue->head = NULL;
-	atomic_long_set(&queue->tail, (intptr_t)&queue->head);
+	atomic_ptr_set(&queue->tail, (intptr_t)&queue->head);
 	atomic_set(&queue->job_count, 0);
 }
 
@@ -73,7 +73,7 @@ static inline bool spsc_queue_push(struct spsc_queue *queue, struct spsc_node *n
 	atomic_inc(&queue->job_count);
 	smp_mb__after_atomic();
 
-	tail = (struct spsc_node **)atomic_long_xchg(&queue->tail, (intptr_t)&node->next);
+	tail = (struct spsc_node **)atomic_ptr_xchg(&queue->tail, (intptr_t)&node->next);
 	WRITE_ONCE(*tail, node);
 
 	/*
@@ -106,8 +106,8 @@ static inline struct spsc_node *spsc_queue_pop(struct spsc_queue *queue)
 	if (unlikely(!next)) {
 		/* slowpath for the last element in the queue */
 
-		if (atomic_long_cmpxchg(&queue->tail,
-				(intptr_t)&node->next, (intptr_t) &queue->head) != (long)&node->next) {
+		if (atomic_ptr_cmpxchg(&queue->tail,
+				(intptr_t)&node->next, (intptr_t) &queue->head) != (intptr_t)&node->next) {
 			/* Updating tail failed wait for new next to appear */
 			do {
 				smp_rmb();

@@ -2368,7 +2368,7 @@ int xe_oa_add_config_ioctl(struct drm_device *dev, user_uintptr_t data, struct d
 
 	oa_config->regs_len = arg->n_regs;
 	regs = xe_oa_alloc_regs(oa, xe_oa_is_valid_config_reg_addr,
-				u64_to_user_ptr(arg->regs_ptr),
+				(void __user *)arg->regs_ptr,
 				arg->n_regs);
 	if (IS_ERR(regs)) {
 		drm_dbg(&oa->xe->drm, "Failed to create OA config for mux_regs\n");

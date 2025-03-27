@@ -37,7 +37,7 @@ enum xe_exec_queue_sched_prop {
 };
 
 static int exec_queue_user_extensions(struct xe_device *xe, struct xe_exec_queue *q,
-				      u64 extensions, int ext_number);
+				      user_uintptr_t extensions, int ext_number);
 
 static void __xe_exec_queue_free(struct xe_exec_queue *q)
 {
@@ -95,7 +95,7 @@ static struct xe_exec_queue *__xe_exec_queue_alloc(struct xe_device *xe,
 						   struct xe_vm *vm,
 						   u32 logical_mask,
 						   u16 width, struct xe_hw_engine *hwe,
-						   u32 flags, u64 extensions)
+						   u32 flags, user_uintptr_t extensions)
 {
 	struct xe_exec_queue *q;
 	struct xe_gt *gt = hwe->gt;
@@ -213,7 +213,7 @@ static void __xe_exec_queue_fini(struct xe_exec_queue *q)
 struct xe_exec_queue *xe_exec_queue_create(struct xe_device *xe, struct xe_vm *vm,
 					   u32 logical_mask, u16 width,
 					   struct xe_hw_engine *hwe, u32 flags,
-					   u64 extensions)
+					   user_uintptr_t extensions)
 {
 	struct xe_exec_queue *q;
 	int err;
@@ -256,7 +256,7 @@ ALLOW_ERROR_INJECTION(xe_exec_queue_create, ERRNO);
 struct xe_exec_queue *xe_exec_queue_create_class(struct xe_device *xe, struct xe_gt *gt,
 						 struct xe_vm *vm,
 						 enum xe_engine_class class,
-						 u32 flags, u64 extensions)
+						 u32 flags, user_uintptr_t extensions)
 {
 	struct xe_hw_engine *hwe, *hwe0 = NULL;
 	enum xe_hw_engine_id id;
@@ -297,7 +297,7 @@ struct xe_exec_queue *xe_exec_queue_create_class(struct xe_device *xe, struct xe
  */
 struct xe_exec_queue *xe_exec_queue_create_bind(struct xe_device *xe,
 						struct xe_tile *tile,
-						u32 flags, u64 extensions)
+						u32 flags, user_uintptr_t extensions)
 {
 	struct xe_gt *gt = tile->primary_gt;
 	struct xe_exec_queue *q;
@@ -529,9 +529,9 @@ static const xe_exec_queue_set_property_fn exec_queue_set_property_funcs[] = {
 
 static int exec_queue_user_ext_set_property(struct xe_device *xe,
 					    struct xe_exec_queue *q,
-					    u64 extension)
+					    user_uintptr_t extension)
 {
-	u64 __user *address = u64_to_user_ptr(extension);
+	user_uintptr_t __user *address = (void __user *)extension;
 	struct drm_xe_ext_set_property ext;
 	int err;
 	u32 idx;
@@ -557,7 +557,7 @@ static int exec_queue_user_ext_set_property(struct xe_device *xe,
 
 typedef int (*xe_exec_queue_user_extension_fn)(struct xe_device *xe,
 					       struct xe_exec_queue *q,
-					       u64 extension);
+					       user_uintptr_t extension);
 
 static const xe_exec_queue_user_extension_fn exec_queue_user_extension_funcs[] = {
 	[DRM_XE_EXEC_QUEUE_EXTENSION_SET_PROPERTY] = exec_queue_user_ext_set_property,
@@ -565,9 +565,9 @@ static const xe_exec_queue_user_extension_fn exec_queue_user_extension_funcs[] =
 
 #define MAX_USER_EXTENSIONS	16
 static int exec_queue_user_extensions(struct xe_device *xe, struct xe_exec_queue *q,
-				      u64 extensions, int ext_number)
+				      user_uintptr_t extensions, int ext_number)
 {
-	u64 __user *address = u64_to_user_ptr(extensions);
+	user_uintptr_t __user *address = (void __user *)extensions;
 	struct drm_xe_user_extension ext;
 	int err;
 	u32 idx;
@@ -656,7 +656,7 @@ int xe_exec_queue_create_ioctl(struct drm_device *dev, void *data,
 	struct drm_xe_exec_queue_create *args = data;
 	struct drm_xe_engine_class_instance eci[XE_HW_ENGINE_MAX_INSTANCE];
 	struct drm_xe_engine_class_instance __user *user_eci =
-		u64_to_user_ptr(args->instances);
+		(void __user *)args->instances;
 	struct xe_hw_engine *hwe;
 	struct xe_vm *vm;
 	struct xe_tile *tile;

@@ -400,7 +400,7 @@ int amdgpu_xcp_dev_register(struct amdgpu_device *adev,
 		if (!adev->xcp_mgr->xcp[i].ddev)
 			break;
 
-		ret = drm_dev_register(adev->xcp_mgr->xcp[i].ddev, ent->driver_data);
+		ret = drm_dev_register(adev->xcp_mgr->xcp[i].ddev, __c_ua(ent->driver_data));
 		if (ret)
 			return ret;
 	}

@@ -66,7 +66,7 @@ static int
 v3d_lookup_bos(struct drm_device *dev,
 	       struct drm_file *file_priv,
 	       struct v3d_job *job,
-	       u64 bo_handles,
+	       user_uintptr_t bo_handles,
 	       u32 bo_count)
 {
 	job->bo_count = bo_count;
@@ -323,7 +323,7 @@ v3d_put_multisync_post_deps(struct v3d_submit_ext *se)
 static int
 v3d_get_multisync_post_deps(struct drm_file *file_priv,
 			    struct v3d_submit_ext *se,
-			    u32 count, u64 handles)
+			    u32 count, __u64ptr handles)
 {
 	struct drm_v3d_sem __user *post_deps;
 	int i, ret;
@@ -656,7 +656,7 @@ v3d_copy_query_info(struct v3d_performance_query_info *query_info,
 		    unsigned int count,
 		    unsigned int nperfmons,
 		    u32 __user *syncs,
-		    u64 __user *kperfmon_ids,
+		    __u64ptr __user *kperfmon_ids,
 		    struct drm_file *file_priv)
 {
 	unsigned int i, j;
@@ -664,16 +664,16 @@ v3d_copy_query_info(struct v3d_performance_query_info *query_info,
 
 	for (i = 0; i < count; i++) {
 		struct v3d_performance_query *query = &query_info->queries[i];
-		u32 __user *ids_pointer;
+		u32 __user * ids_pointer;
 		u32 sync, id;
-		u64 ids;
+		__u64ptr ids;
 
 		if (get_user(sync, syncs++)) {
 			err = -EFAULT;
 			goto error;
 		}
 
-		if (get_user(ids, kperfmon_ids++)) {
+		if (get_user_ptr(ids, kperfmon_ids++)) {
 			err = -EFAULT;
 			goto error;
 		}
@@ -821,7 +821,7 @@ v3d_get_cpu_copy_performance_query_params(struct drm_file *file_priv,
  */
 static int
 v3d_get_extensions(struct drm_file *file_priv,
-		   u64 ext_handles,
+		   __u64ptr ext_handles,
 		   struct v3d_submit_ext *se,
 		   struct v3d_cpu_job *job)
 {
