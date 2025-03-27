@@ -355,7 +355,7 @@ static int pci_endpoint_test_validate_xfer_params(struct device *dev,
 }
 
 static bool pci_endpoint_test_copy(struct pci_endpoint_test *test,
-				   unsigned long arg)
+				   user_uintptr_t arg)
 {
 	struct pci_endpoint_test_xfer_param param;
 	bool ret = false;
@@ -417,7 +417,7 @@ static bool pci_endpoint_test_copy(struct pci_endpoint_test *test,
 	}
 
 	if (alignment && !IS_ALIGNED(orig_src_phys_addr, alignment)) {
-		src_phys_addr = PTR_ALIGN(orig_src_phys_addr, alignment);
+		src_phys_addr = ALIGN(orig_src_phys_addr, alignment);
 		offset = src_phys_addr - orig_src_phys_addr;
 		src_addr = orig_src_addr + offset;
 	} else {
@@ -449,7 +449,7 @@ static bool pci_endpoint_test_copy(struct pci_endpoint_test *test,
 	}
 
 	if (alignment && !IS_ALIGNED(orig_dst_phys_addr, alignment)) {
-		dst_phys_addr = PTR_ALIGN(orig_dst_phys_addr, alignment);
+		dst_phys_addr = ALIGN(orig_dst_phys_addr, alignment);
 		offset = dst_phys_addr - orig_dst_phys_addr;
 		dst_addr = orig_dst_addr + offset;
 	} else {
@@ -495,7 +495,7 @@ err:
 }
 
 static bool pci_endpoint_test_write(struct pci_endpoint_test *test,
-				    unsigned long arg)
+				    user_uintptr_t arg)
 {
 	struct pci_endpoint_test_xfer_param param;
 	bool ret = false;
@@ -554,7 +554,7 @@ static bool pci_endpoint_test_write(struct pci_endpoint_test *test,
 	}
 
 	if (alignment && !IS_ALIGNED(orig_phys_addr, alignment)) {
-		phys_addr =  PTR_ALIGN(orig_phys_addr, alignment);
+		phys_addr =  ALIGN(orig_phys_addr, alignment);
 		offset = phys_addr - orig_phys_addr;
 		addr = orig_addr + offset;
 	} else {
@@ -596,7 +596,7 @@ err:
 }
 
 static bool pci_endpoint_test_read(struct pci_endpoint_test *test,
-				   unsigned long arg)
+				   user_uintptr_t arg)
 {
 	struct pci_endpoint_test_xfer_param param;
 	bool ret = false;
@@ -652,7 +652,7 @@ static bool pci_endpoint_test_read(struct pci_endpoint_test *test,
 	}
 
 	if (alignment && !IS_ALIGNED(orig_phys_addr, alignment)) {
-		phys_addr = PTR_ALIGN(orig_phys_addr, alignment);
+		phys_addr = ALIGN(orig_phys_addr, alignment);
 		offset = phys_addr - orig_phys_addr;
 		addr = orig_addr + offset;
 	} else {
@@ -726,7 +726,7 @@ err:
 }
 
 static long pci_endpoint_test_ioctl(struct file *file, unsigned int cmd,
-				    unsigned long arg)
+				    user_uintptr_t arg)
 {
 	int ret = -EINVAL;
 	enum pci_barno bar;
@@ -740,7 +740,7 @@ static long pci_endpoint_test_ioctl(struct file *file, unsigned int cmd,
 
 	switch (cmd) {
 	case PCITEST_BAR:
-		bar = arg;
+		bar = __c_ua(arg);
 		if (bar > BAR_5)
 			goto ret;
 		if (is_am654_pci_dev(pdev) && bar == BAR_0)
@@ -752,7 +752,7 @@ static long pci_endpoint_test_ioctl(struct file *file, unsigned int cmd,
 		break;
 	case PCITEST_MSI:
 	case PCITEST_MSIX:
-		ret = pci_endpoint_test_msi_irq(test, arg, cmd == PCITEST_MSIX);
+		ret = pci_endpoint_test_msi_irq(test, __c_ua(arg), cmd == PCITEST_MSIX);
 		break;
 	case PCITEST_WRITE:
 		ret = pci_endpoint_test_write(test, arg);
@@ -764,7 +764,7 @@ static long pci_endpoint_test_ioctl(struct file *file, unsigned int cmd,
 		ret = pci_endpoint_test_copy(test, arg);
 		break;
 	case PCITEST_SET_IRQTYPE:
-		ret = pci_endpoint_test_set_irq(test, arg);
+		ret = pci_endpoint_test_set_irq(test, __c_ua(arg));
 		break;
 	case PCITEST_GET_IRQTYPE:
 		ret = irq_type;

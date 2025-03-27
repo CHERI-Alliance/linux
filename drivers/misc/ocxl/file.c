@@ -196,7 +196,7 @@ static void irq_free(void *private)
 }
 
 static long afu_ioctl(struct file *file, unsigned int cmd,
-		unsigned long args)
+		user_uintptr_t args)
 {
 	struct ocxl_context *ctx = file->private_data;
 	struct ocxl_ioctl_irq_fd irq_fd;

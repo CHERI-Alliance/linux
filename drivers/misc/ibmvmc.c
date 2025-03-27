@@ -1356,7 +1356,7 @@ static long ibmvmc_ioctl_requestvmc(struct ibmvmc_file_session *session,
  *	Non-zero - Failure
  */
 static long ibmvmc_ioctl(struct file *file,
-			 unsigned int cmd, unsigned long arg)
+			 unsigned int cmd, user_uintptr_t arg)
 {
 	struct ibmvmc_file_session *session = file->private_data;
 

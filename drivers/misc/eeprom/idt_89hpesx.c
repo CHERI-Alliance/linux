@@ -1102,7 +1102,7 @@ static void idt_get_fw_data(struct idt_89hpesx_dev *pdev)
 	}
 
 	/* Retrieve EEPROM size */
-	pdev->eesize = (u32)ee_id->driver_data;
+	pdev->eesize = (u32)__c_ua(ee_id->driver_data);
 
 	/* Get custom EEPROM address from 'reg' attribute */
 	ret = fwnode_property_read_u32(fwnode, "reg", &eeprom_addr);

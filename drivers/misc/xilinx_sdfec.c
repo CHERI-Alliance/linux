@@ -628,7 +628,7 @@ static int xsdfec_table_write(struct xsdfec_dev *xsdfec, u32 offset,
 
 	nr_pages = n;
 
-	res = pin_user_pages_fast((unsigned long)src_ptr, nr_pages, 0, pages);
+	res = pin_user_pages_fast(__c_pa(src_ptr), nr_pages, 0, pages);
 	if (res < nr_pages) {
 		if (res > 0)
 			unpin_user_pages(pages, res);
@@ -933,7 +933,7 @@ static int xsdfec_set_default_config(struct xsdfec_dev *xsdfec)
 }
 
 static long xsdfec_dev_ioctl(struct file *fptr, unsigned int cmd,
-			     unsigned long data)
+			     user_uintptr_t data)
 {
 	struct xsdfec_dev *xsdfec;
 	void __user *arg = (void __user *)data;

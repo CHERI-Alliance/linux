@@ -305,7 +305,7 @@ static long afu_ioctl_get_afu_id(struct cxl_context *ctx,
 	return 0;
 }
 
-long afu_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+long afu_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct cxl_context *ctx = file->private_data;
 

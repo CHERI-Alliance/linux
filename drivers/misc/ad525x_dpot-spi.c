@@ -86,7 +86,7 @@ static int ad_dpot_spi_probe(struct spi_device *spi)
 	};
 
 	return ad_dpot_probe(&spi->dev, &bdata,
-			     spi_get_device_id(spi)->driver_data,
+			     __c_ua(spi_get_device_id(spi)->driver_data),
 			     spi_get_device_id(spi)->name);
 }
 

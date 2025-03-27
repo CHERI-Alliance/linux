@@ -807,7 +807,7 @@ static int pch_phub_probe(struct pci_dev *pdev,
 		chip->pch_mac_start_address = PCH_PHUB_MAC_START_ADDR_EG20T;
 	}
 
-	chip->ioh_type = id->driver_data;
+	chip->ioh_type = __c_ua(id->driver_data);
 	pci_set_drvdata(pdev, chip);
 
 	return 0;

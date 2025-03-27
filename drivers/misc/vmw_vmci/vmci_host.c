@@ -913,7 +913,7 @@ static int vmci_host_do_recv_notifications(struct vmci_host_dev *vmci_host_dev,
 }
 
 static long vmci_host_unlocked_ioctl(struct file *filp,
-				     unsigned int iocmd, unsigned long ioarg)
+				     unsigned int iocmd, user_uintptr_t ioarg)
 {
 #define VMCI_DO_IOCTL(ioctl_name, ioctl_fn) do {			\
 		char *name = "IOCTL_VMCI_" # ioctl_name;		\

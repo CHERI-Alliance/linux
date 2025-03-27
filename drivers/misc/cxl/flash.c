@@ -456,7 +456,8 @@ err_unlock:
 	return rc;
 }
 
-static long device_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long device_ioctl(struct file *file, unsigned int cmd,
+		         user_uintptr_t arg)
 {
 	struct cxl *adapter = file->private_data;
 

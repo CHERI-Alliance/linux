@@ -224,8 +224,8 @@ static unsigned long lookup_addr(char *arg)
 		cached_addr = kallsyms_lookup_name(arg);
 	}
 
-	return (unsigned long)dereference_function_descriptor(
-			(void *)cached_addr);
+	return __c_pa(dereference_function_descriptor(
+			(void *)__c_fakep(cached_addr)));
 }
 
 static void break_helper(char *bp_type, char *arg, unsigned long vaddr)
@@ -305,34 +305,34 @@ static int get_thread_id_continue(char *put_str, char *arg)
 static int check_and_rewind_pc(char *put_str, char *arg)
 {
 	unsigned long addr = lookup_addr(arg);
-	unsigned long ip;
+	uintptr_t ip;
 	int offset = 0;
 
 	kgdb_hex2mem(&put_str[1], (char *)kgdbts_gdb_regs,
 		 NUMREGBYTES);
 	gdb_regs_to_pt_regs(kgdbts_gdb_regs, &kgdbts_regs);
 	ip = instruction_pointer(&kgdbts_regs);
-	v2printk("Stopped at IP: %lx\n", ip);
+	v2printk("Stopped at IP: %lx\n", __c_ua(ip));
 #ifdef GDB_ADJUSTS_BREAK_OFFSET
 	/* On some arches, a breakpoint stop requires it to be decremented */
-	if (addr + BREAK_INSTR_SIZE == ip)
+	if (addr + BREAK_INSTR_SIZE == __c_ua(ip))
 		offset = -BREAK_INSTR_SIZE;
 #endif
 
 	if (arch_needs_sstep_emulation && sstep_addr &&
-	    ip + offset == sstep_addr &&
+	    __c_ua(ip + offset) == sstep_addr &&
 	    ((!strcmp(arg, "do_sys_openat2") || !strcmp(arg, "kernel_clone")))) {
 		/* This is special case for emulated single step */
 		v2printk("Emul: rewind hit single step bp\n");
 		restart_from_top_after_write = 1;
-	} else if (strcmp(arg, "silent") && ip + offset != addr) {
+	} else if (strcmp(arg, "silent") && __c_ua(ip + offset) != addr) {
 		eprintk("kgdbts: BP mismatch %lx expected %lx\n",
-			   ip + offset, addr);
+			   __c_ua(ip + offset), addr);
 		return 1;
 	}
 	/* Readjust the instruction pointer if needed */
 	ip += offset;
-	cont_addr = ip;
+	cont_addr = __c_ua(ip);
 #ifdef GDB_ADJUSTS_BREAK_OFFSET
 	instruction_pointer_set(&kgdbts_regs, ip);
 #endif
@@ -352,7 +352,7 @@ static int check_single_step(char *put_str, char *arg)
 		 NUMREGBYTES);
 	gdb_regs_to_pt_regs(kgdbts_gdb_regs, &kgdbts_regs);
 	v2printk("Singlestep stopped at IP: %lx\n",
-		   instruction_pointer(&kgdbts_regs));
+		   __c_ua(instruction_pointer(&kgdbts_regs)));
 
 	if (sstep_thread_id != cont_thread_id) {
 		/*
@@ -378,7 +378,7 @@ continue_test:
 	matched_id = 0;
 	if (instruction_pointer(&kgdbts_regs) == addr) {
 		eprintk("kgdbts: SingleStep failed at %lx\n",
-			   instruction_pointer(&kgdbts_regs));
+			   __c_ua(instruction_pointer(&kgdbts_regs)));
 		return 1;
 	}
 
@@ -497,7 +497,7 @@ static int emul_sstep_put(char *put_str, char *arg)
 			 NUMREGBYTES);
 		gdb_regs_to_pt_regs(kgdbts_gdb_regs, &kgdbts_regs);
 		v2printk("Stopped at IP: %lx\n",
-			 instruction_pointer(&kgdbts_regs));
+			 __c_ua(instruction_pointer(&kgdbts_regs)));
 		/* Want to stop at IP + break instruction size by default */
 		sstep_addr = cont_addr + BREAK_INSTR_SIZE;
 		break;

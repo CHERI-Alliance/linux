@@ -1050,7 +1050,7 @@ static int do_execute_ddcb(struct genwqe_file *cfile,
  * Return: 0 success
  */
 static long genwqe_ioctl(struct file *filp, unsigned int cmd,
-			 unsigned long arg)
+			 user_uintptr_t arg)
 {
 	int rc = 0;
 	struct genwqe_file *cfile = (struct genwqe_file *)filp->private_data;

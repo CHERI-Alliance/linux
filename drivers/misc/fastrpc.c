@@ -2098,7 +2098,7 @@ static int is_attach_rejected(struct fastrpc_user *fl)
 }
 
 static long fastrpc_device_ioctl(struct file *file, unsigned int cmd,
-				 unsigned long arg)
+				 user_uintptr_t arg)
 {
 	struct fastrpc_user *fl = (struct fastrpc_user *)file->private_data;
 	char __user *argp = (char __user *)arg;
