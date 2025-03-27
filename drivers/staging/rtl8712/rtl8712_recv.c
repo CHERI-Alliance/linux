@@ -46,7 +46,7 @@ int r8712_init_recv_priv(struct recv_priv *precvpriv,
 	if (!precvpriv->pallocated_recv_buf)
 		return -ENOMEM;
 	precvpriv->precv_buf = precvpriv->pallocated_recv_buf + 4 -
-			      ((addr_t)(precvpriv->pallocated_recv_buf) & 3);
+			      (__c_pa(precvpriv->pallocated_recv_buf) & 3);
 	precvbuf = (struct recv_buf *)precvpriv->precv_buf;
 	for (i = 0; i < NR_RECVBUFF; i++) {
 		INIT_LIST_HEAD(&precvbuf->list);
@@ -68,7 +68,7 @@ int r8712_init_recv_priv(struct recv_priv *precvpriv,
 		pskb = netdev_alloc_skb(padapter->pnetdev, MAX_RECVBUF_SZ +
 		       RECVBUFF_ALIGN_SZ);
 		if (pskb) {
-			tmpaddr = (addr_t)pskb->data;
+			tmpaddr = __c_pa(pskb->data);
 			alignment = tmpaddr & (RECVBUFF_ALIGN_SZ - 1);
 			skb_reserve(pskb, (RECVBUFF_ALIGN_SZ - alignment));
 			skb_queue_tail(&precvpriv->free_recv_skb_queue, pskb);
@@ -1036,7 +1036,7 @@ static void recvbuf2recvframe(struct _adapter *padapter, struct sk_buff *pskb)
 			return;
 
 		precvframe->u.hdr.pkt = pkt_copy;
-		skb_reserve(pkt_copy, 4 - ((addr_t)(pkt_copy->data) % 4));
+		skb_reserve(pkt_copy, 4 - (__c_pa(pkt_copy->data) % 4));
 		skb_reserve(pkt_copy, shift_sz);
 		memcpy(pkt_copy->data, pbuf, tmp_len);
 		precvframe->u.hdr.rx_head = pkt_copy->data;

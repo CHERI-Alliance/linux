@@ -199,7 +199,7 @@ void r8712_wep_encrypt(struct _adapter *padapter, u8 *pxmitframe)
 				arcfour_encrypt(&mycontext, payload + length,
 						crc, 4);
 				pframe += pxmitpriv->frag_len;
-				pframe = (u8 *)RND4((addr_t)(pframe));
+				pframe = (u8 *)RND4((uintptr_t)(pframe));
 			}
 		}
 	}
@@ -624,7 +624,7 @@ u32 r8712_tkip_encrypt(struct _adapter *padapter, u8 *pxmitframe)
 							payload + length, crc,
 							4);
 					pframe += pxmitpriv->frag_len;
-					pframe = (u8 *)RND4((addr_t)(pframe));
+					pframe = (u8 *)RND4((uintptr_t)(pframe));
 				}
 			}
 		} else {
@@ -1173,7 +1173,7 @@ u32 r8712_aes_encrypt(struct _adapter *padapter, u8 *pxmitframe)
 					aes_cipher(prwskey, pattrib->hdrlen,
 						   pframe, length);
 					pframe += pxmitpriv->frag_len;
-					pframe = (u8 *)RND4((addr_t)(pframe));
+					pframe = (u8 *)RND4((uintptr_t)(pframe));
 				}
 			}
 		} else {

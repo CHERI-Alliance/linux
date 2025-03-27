@@ -845,7 +845,7 @@ static int rtsx_probe(struct pci_dev *pci,
 	 * 64-bit system
 	 */
 	dev_info(&pci->dev, "Original address: 0x%lx, remapped address: 0x%lx\n",
-		 (unsigned long)(dev->addr), (unsigned long)(dev->remap_addr));
+		 (unsigned long)(dev->addr), __c_pa(dev->remap_addr));
 
 	dev->rtsx_resv_buf = dmam_alloc_coherent(&pci->dev, RTSX_RESV_BUF_LEN,
 						 &dev->rtsx_resv_buf_addr,

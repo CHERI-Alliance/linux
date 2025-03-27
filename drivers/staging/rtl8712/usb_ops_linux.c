@@ -266,7 +266,7 @@ u32 r8712_usb_read_port(struct intf_hdl *pintfhdl, u32 addr, u32 cnt, u8 *rmem)
 				 MAX_RECVBUF_SZ + RECVBUFF_ALIGN_SZ);
 		if (!precvbuf->pskb)
 			return _FAIL;
-		tmpaddr = (addr_t)precvbuf->pskb->data;
+		tmpaddr = __c_pa(precvbuf->pskb->data);
 		alignment = tmpaddr & (RECVBUFF_ALIGN_SZ - 1);
 		skb_reserve(precvbuf->pskb,
 			    (RECVBUFF_ALIGN_SZ - alignment));
@@ -484,7 +484,7 @@ int r8712_usbctrl_vendorreq(struct intf_priv *pintfpriv, u8 request, u16 value,
 	palloc_buf = kmalloc((u32)len + 16, GFP_ATOMIC);
 	if (!palloc_buf)
 		return -ENOMEM;
-	pIo_buf = palloc_buf + 16 - ((addr_t)(palloc_buf) & 0x0f);
+	pIo_buf = palloc_buf + 16 - (__c_pa(palloc_buf) & 0x0f);
 	if (requesttype == 0x01) {
 		pipe = usb_rcvctrlpipe(udev, 0); /* read_in */
 		reqtype =  RTL871X_VENQT_READ;

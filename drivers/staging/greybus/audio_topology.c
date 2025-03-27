@@ -343,7 +343,7 @@ static int gbcodec_mixer_ctl_put(struct snd_kcontrol *kcontrol,
 {	.iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname, \
 	.count = kcount, .info = gbcodec_mixer_ctl_info, \
 	.get = gbcodec_mixer_ctl_get, .put = gbcodec_mixer_ctl_put, \
-	.private_value = (unsigned long)data }
+	.private_value = (uintptr_t)data }
 
 /*
  * although below callback functions seems redundant to above functions.
@@ -494,7 +494,7 @@ exit:
 {	.iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname, \
 	.count = kcount, .info = gbcodec_mixer_dapm_ctl_info, \
 	.get = gbcodec_mixer_dapm_ctl_get, .put = gbcodec_mixer_dapm_ctl_put, \
-	.private_value = (unsigned long)data}
+	.private_value = (uintptr_t)data}
 
 static int gbcodec_event_spk(struct snd_soc_dapm_widget *w,
 			     struct snd_kcontrol *k, int event)
@@ -1334,7 +1334,7 @@ static int gbaudio_tplg_process_header(struct gbaudio_module_info *module,
 	module->num_dapm_routes = tplg_data->num_routes;
 
 	/* update block offset */
-	module->dai_offset = (unsigned long)&tplg_data->data;
+	module->dai_offset = (uintptr_t)&tplg_data->data;
 	module->control_offset = module->dai_offset +
 					le32_to_cpu(tplg_data->size_dais);
 	module->widget_offset = module->control_offset +
@@ -1342,11 +1342,11 @@ static int gbaudio_tplg_process_header(struct gbaudio_module_info *module,
 	module->route_offset = module->widget_offset +
 					le32_to_cpu(tplg_data->size_widgets);
 
-	dev_dbg(module->dev, "DAI offset is 0x%lx\n", module->dai_offset);
+	dev_dbg(module->dev, "DAI offset is 0x%lx\n", __c_ua(module->dai_offset));
 	dev_dbg(module->dev, "control offset is %lx\n",
-		module->control_offset);
-	dev_dbg(module->dev, "widget offset is %lx\n", module->widget_offset);
-	dev_dbg(module->dev, "route offset is %lx\n", module->route_offset);
+		__c_ua(module->control_offset));
+	dev_dbg(module->dev, "widget offset is %lx\n", __c_ua(module->widget_offset));
+	dev_dbg(module->dev, "route offset is %lx\n", __c_ua(module->route_offset));
 
 	return 0;
 }

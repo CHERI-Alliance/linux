@@ -44,7 +44,7 @@ int _r8712_init_sta_priv(struct	sta_priv *pstapriv)
 	if (!pstapriv->pallocated_stainfo_buf)
 		return -ENOMEM;
 	pstapriv->pstainfo_buf = pstapriv->pallocated_stainfo_buf + 4 -
-		((addr_t)(pstapriv->pallocated_stainfo_buf) & 3);
+		(__c_pa(pstapriv->pallocated_stainfo_buf) & 3);
 	_init_queue(&pstapriv->free_sta_queue);
 	spin_lock_init(&pstapriv->sta_hash_lock);
 	pstapriv->asoc_sta_count = 0;

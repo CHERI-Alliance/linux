@@ -429,7 +429,7 @@ static int ad9834_probe(struct spi_device *spi)
 	}
 
 	st->spi = spi;
-	st->devid = spi_get_device_id(spi)->driver_data;
+	st->devid = __c_ua(spi_get_device_id(spi)->driver_data);
 	indio_dev->name = spi_get_device_id(spi)->name;
 	switch (st->devid) {
 	case ID_AD9833:

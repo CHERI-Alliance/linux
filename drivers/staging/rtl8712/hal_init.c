@@ -182,7 +182,7 @@ static u8 rtl8712_dl_fw(struct _adapter *adapter)
 			return ret;
 
 		txdesc = (struct tx_desc *)(tmpchar + FWBUFF_ALIGN_SZ -
-			    ((addr_t)(tmpchar) & (FWBUFF_ALIGN_SZ - 1)));
+			    (__c_pa(tmpchar) & (FWBUFF_ALIGN_SZ - 1)));
 		payload = (u8 *)(txdesc) + txdscp_sz;
 		ptr = (u8 *)mappedfw + offsetof(struct fw_hdr, fwpriv) +
 		      fwhdr.fw_priv_sz;

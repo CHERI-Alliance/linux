@@ -31,8 +31,8 @@
 
 static uint remainder_len(struct pkt_file *pfile)
 {
-	return (uint)(pfile->buf_len - ((addr_t)(pfile->cur_addr) -
-	       (addr_t)(pfile->buf_start)));
+	return (uint)(pfile->buf_len - (__c_pa(pfile->cur_addr) -
+	       __c_pa(pfile->buf_start)));
 }
 
 void _r8712_open_pktfile(_pkt *pktptr, struct pkt_file *pfile)

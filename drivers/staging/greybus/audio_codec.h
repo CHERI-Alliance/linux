@@ -149,10 +149,10 @@ struct gbaudio_module_info {
 	int num_controls;
 	int num_dapm_widgets;
 	int num_dapm_routes;
-	unsigned long dai_offset;
-	unsigned long widget_offset;
-	unsigned long control_offset;
-	unsigned long route_offset;
+	uintptr_t dai_offset;
+	uintptr_t widget_offset;
+	uintptr_t control_offset;
+	uintptr_t route_offset;
 	struct snd_kcontrol_new *controls;
 	struct snd_soc_dapm_widget *dapm_widgets;
 	struct snd_soc_dapm_route *dapm_routes;

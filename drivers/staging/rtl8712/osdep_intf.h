@@ -17,7 +17,7 @@
 #include "osdep_service.h"
 #include "drv_types.h"
 
-#define RND4(x)	(((x >> 2) + ((x & 3) != 0)) << 2)
+#define RND4(x)	(PTR_ALIGN(((void *)x),4))
 
 struct intf_priv {
 	u8 *intf_dev;

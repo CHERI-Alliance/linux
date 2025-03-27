@@ -62,7 +62,7 @@ int _r8712_init_recv_priv(struct recv_priv *precvpriv,
 		return -ENOMEM;
 	precvpriv->precv_frame_buf = precvpriv->pallocated_frame_buf +
 				    RXFRAME_ALIGN_SZ -
-				    ((addr_t)(precvpriv->pallocated_frame_buf) &
+				    (__c_pa(precvpriv->pallocated_frame_buf) &
 				    (RXFRAME_ALIGN_SZ - 1));
 	precvframe = (union recv_frame *)precvpriv->precv_frame_buf;
 	for (i = 0; i < NR_RECVFRAME; i++) {

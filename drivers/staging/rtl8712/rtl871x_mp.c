@@ -49,7 +49,7 @@ static int init_mp_priv(struct mp_priv *pmp_priv)
 
 	pmp_priv->pmp_xmtframe_buf = pmp_priv->pallocated_mp_xmitframe_buf +
 			 4 -
-			 ((addr_t)(pmp_priv->pallocated_mp_xmitframe_buf) & 3);
+			 (__c_pa(pmp_priv->pallocated_mp_xmitframe_buf) & 3);
 	pmp_xmitframe = (struct mp_xmit_frame *)pmp_priv->pmp_xmtframe_buf;
 	for (i = 0; i < NR_MP_XMITFRAME; i++) {
 		INIT_LIST_HEAD(&(pmp_xmitframe->list));

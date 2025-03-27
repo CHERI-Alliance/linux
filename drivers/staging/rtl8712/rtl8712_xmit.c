@@ -708,7 +708,7 @@ static void dump_xframe(struct _adapter *padapter,
 				 (unsigned char *)pxmitframe);
 #endif
 		mem_addr += w_sz;
-		mem_addr = (u8 *)RND4(((addr_t)(mem_addr)));
+		mem_addr = (u8 *)RND4(((uintptr_t)(mem_addr)));
 	}
 }
 

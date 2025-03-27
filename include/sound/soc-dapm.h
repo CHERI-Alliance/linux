@@ -368,19 +368,19 @@ struct soc_enum;
 	.info = snd_soc_info_enum_double, \
  	.get = snd_soc_dapm_get_enum_double, \
  	.put = snd_soc_dapm_put_enum_double, \
-  	.private_value = (unsigned long)&xenum }
+	.private_value = (uintptr_t)&xenum }
 #define SOC_DAPM_ENUM_EXT(xname, xenum, xget, xput) \
 {	.iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname, \
 	.info = snd_soc_info_enum_double, \
 	.get = xget, \
 	.put = xput, \
-	.private_value = (unsigned long)&xenum }
+	.private_value = (uintptr_t)&xenum }
 #define SOC_DAPM_PIN_SWITCH(xname) \
 {	.iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname " Switch", \
 	.info = snd_soc_dapm_info_pin_switch, \
 	.get = snd_soc_dapm_get_pin_switch, \
 	.put = snd_soc_dapm_put_pin_switch, \
-	.private_value = (unsigned long)xname }
+	.private_value = (uintptr_t)xname }
 
 /* dapm stream operations */
 #define SND_SOC_DAPM_STREAM_NOP			0x0

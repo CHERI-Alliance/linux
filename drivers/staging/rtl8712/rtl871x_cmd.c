@@ -57,7 +57,7 @@ int r8712_init_cmd_priv(struct cmd_priv *pcmdpriv)
 	if (!pcmdpriv->cmd_allocated_buf)
 		return -ENOMEM;
 	pcmdpriv->cmd_buf = pcmdpriv->cmd_allocated_buf  +  CMDBUFF_ALIGN_SZ -
-			    ((addr_t)(pcmdpriv->cmd_allocated_buf) &
+			    (__c_pa(pcmdpriv->cmd_allocated_buf) &
 			    (CMDBUFF_ALIGN_SZ - 1));
 	pcmdpriv->rsp_allocated_buf = kmalloc(MAX_RSPSZ + 4, GFP_ATOMIC);
 	if (!pcmdpriv->rsp_allocated_buf) {
@@ -66,7 +66,7 @@ int r8712_init_cmd_priv(struct cmd_priv *pcmdpriv)
 		return -ENOMEM;
 	}
 	pcmdpriv->rsp_buf = pcmdpriv->rsp_allocated_buf  +  4 -
-			    ((addr_t)(pcmdpriv->rsp_allocated_buf) & 3);
+			    (__c_pa(pcmdpriv->rsp_allocated_buf) & 3);
 	pcmdpriv->cmd_issued_cnt = 0;
 	pcmdpriv->cmd_done_cnt = 0;
 	pcmdpriv->rsp_cnt = 0;
@@ -82,7 +82,7 @@ int r8712_init_evt_priv(struct evt_priv *pevtpriv)
 	if (!pevtpriv->evt_allocated_buf)
 		return -ENOMEM;
 	pevtpriv->evt_buf = pevtpriv->evt_allocated_buf  +  4 -
-			    ((addr_t)(pevtpriv->evt_allocated_buf) & 3);
+			    (__c_pa(pevtpriv->evt_allocated_buf) & 3);
 	pevtpriv->evt_done_cnt = 0;
 	return 0;
 }

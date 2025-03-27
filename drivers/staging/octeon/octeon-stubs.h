@@ -1209,12 +1209,12 @@ static inline int cvmx_wqe_get_grp(struct cvmx_wqe *work)
 
 static inline void *cvmx_phys_to_ptr(uint64_t physical_address)
 {
-	return (void *)(uintptr_t)(physical_address);
+	return __c_fakep(physical_address);
 }
 
 static inline phys_addr_t cvmx_ptr_to_phys(void *ptr)
 {
-	return (unsigned long)ptr;
+	return __c_pa(ptr);
 }
 
 static inline int cvmx_helper_get_interface_num(int ipd_port)
@@ -1351,14 +1351,14 @@ static inline void cvmx_pow_work_request_async(int scr_addr,
 
 static inline struct cvmx_wqe *cvmx_pow_work_response_async(int scr_addr)
 {
-	struct cvmx_wqe *wqe = (void *)(unsigned long)scr_addr;
+	struct cvmx_wqe *wqe = __c_fakep(scr_addr);
 
 	return wqe;
 }
 
 static inline struct cvmx_wqe *cvmx_pow_work_request_sync(cvmx_pow_wait_t wait)
 {
-	return (void *)(unsigned long)wait;
+	return __c_fakep(wait);
 }
 
 static inline int cvmx_spi_restart_interface(int interface,

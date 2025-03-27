@@ -1620,7 +1620,7 @@ static int tsi148_dma_list_add(struct vme_dma_list *list,
 	}
 
 	/* Test descriptor alignment */
-	if ((unsigned long)&entry->descriptor & 0x7) {
+	if (__c_pa(&entry->descriptor) & 0x7) {
 		dev_err(tsi148_bridge->parent, "Descriptor not aligned to 8 byte boundary as required: %p\n",
 			&entry->descriptor);
 		retval = -EINVAL;

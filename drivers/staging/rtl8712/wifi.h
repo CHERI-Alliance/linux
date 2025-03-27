@@ -123,14 +123,14 @@ static inline unsigned char get_tofr_ds(unsigned char *pframe)
 	} while (0)
 
 #define GetSequence(pbuf)	(le16_to_cpu(*(__le16 *)\
-				((addr_t)(pbuf) + 22)) >> 4)
+				((uintptr_t)(pbuf) + 22)) >> 4)
 
-#define GetFragNum(pbuf)	(le16_to_cpu(*(__le16 *)((addr_t)\
+#define GetFragNum(pbuf)	(le16_to_cpu(*(__le16 *)((uintptr_t)\
 				(pbuf) + 22)) & 0x0f)
 
 #define SetSeqNum(pbuf, num) ({ \
-	*(__le16 *)((addr_t)(pbuf) + 22) = \
-	cpu_to_le16((le16_to_cpu(*(__le16 *)((addr_t)(pbuf) + 22)) & \
+	*(__le16 *)((uintptr_t)(pbuf) + 22) = \
+	cpu_to_le16((le16_to_cpu(*(__le16 *)((uintptr_t)(pbuf) + 22)) & \
 	0x000f) | (0xfff0 & (num << 4))); \
 })
 
@@ -148,13 +148,13 @@ static inline unsigned char get_tofr_ds(unsigned char *pframe)
 
 #define GetAMsdu(pbuf) (((le16_to_cpu(*(__le16 *)pbuf)) >> 7) & 0x1)
 
-#define GetAddr1Ptr(pbuf)	((unsigned char *)((addr_t)(pbuf) + 4))
+#define GetAddr1Ptr(pbuf)	((unsigned char *)((uintptr_t)(pbuf) + 4))
 
-#define GetAddr2Ptr(pbuf)	((unsigned char *)((addr_t)(pbuf) + 10))
+#define GetAddr2Ptr(pbuf)	((unsigned char *)((uintptr_t)(pbuf) + 10))
 
-#define GetAddr3Ptr(pbuf)	((unsigned char *)((addr_t)(pbuf) + 16))
+#define GetAddr3Ptr(pbuf)	((unsigned char *)((uintptr_t)(pbuf) + 16))
 
-#define GetAddr4Ptr(pbuf)	((unsigned char *)((addr_t)(pbuf) + 24))
+#define GetAddr4Ptr(pbuf)	((unsigned char *)((uintptr_t)(pbuf) + 24))
 
 static inline unsigned char *get_hdr_bssid(unsigned char *pframe)
 {

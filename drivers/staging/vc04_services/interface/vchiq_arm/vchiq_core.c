@@ -1564,7 +1564,7 @@ parse_message(struct vchiq_state *state, struct vchiq_header *header)
 
 	DEBUG_INITIALISE(state->local);
 
-	DEBUG_VALUE(PARSE_HEADER, (int)(long)header);
+	DEBUG_VALUE(PARSE_HEADER, (int)__c_pa(header));
 	msgid = header->msgid;
 	DEBUG_VALUE(PARSE_MSGID, msgid);
 	size = header->size;
@@ -1624,7 +1624,7 @@ parse_message(struct vchiq_state *state, struct vchiq_header *header)
 	if (size > 0)
 		vchiq_log_dump_mem(state->dev, "Rcvd", 0, header->data, min(16, size));
 
-	if (((unsigned long)header & VCHIQ_SLOT_MASK) +
+	if ((__c_pa(header) & VCHIQ_SLOT_MASK) +
 	    calc_stride(size) > VCHIQ_SLOT_SIZE) {
 		dev_err(state->dev, "core: header %pK (msgid %x) - size %x too big for slot\n",
 			header, (unsigned int)msgid, (unsigned int)size);
@@ -2085,7 +2085,7 @@ struct vchiq_slot_zero *
 vchiq_init_slots(struct device *dev, void *mem_base, int mem_size)
 {
 	int mem_align =
-		(int)((VCHIQ_SLOT_SIZE - (long)mem_base) & VCHIQ_SLOT_MASK);
+		(int)((VCHIQ_SLOT_SIZE - (long)__c_pa(mem_base)) & VCHIQ_SLOT_MASK);
 	struct vchiq_slot_zero *slot_zero =
 		(struct vchiq_slot_zero *)(mem_base + mem_align);
 	int num_slots = (mem_size - mem_align) / VCHIQ_SLOT_SIZE;

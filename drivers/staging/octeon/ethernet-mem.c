@@ -30,7 +30,7 @@ static int cvm_oct_fill_hw_skbuff(int pool, int size, int elements)
 
 		if (unlikely(!skb))
 			break;
-		skb_reserve(skb, 256 - (((unsigned long)skb->data) & 0x7f));
+		skb_reserve(skb, 256 - (__c_pa(skb->data) & 0x7f));
 		*(struct sk_buff **)(skb->data - sizeof(void *)) = skb;
 		cvmx_fpa_free(skb->data, pool, size / 128);
 		freed--;
@@ -97,7 +97,7 @@ static int cvm_oct_fill_hw_memory(int pool, int size, int elements)
 				elements * size, pool);
 			break;
 		}
-		fpa = (char *)(((unsigned long)memory + 256) & ~0x7fUL);
+		fpa = (char *)(((uintptr_t)memory + 256) & ~0x7fUL);
 		*((char **)fpa - 1) = memory;
 		cvmx_fpa_free(fpa, pool, 0);
 		freed--;

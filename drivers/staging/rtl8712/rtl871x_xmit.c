@@ -85,7 +85,7 @@ int _r8712_init_xmit_priv(struct xmit_priv *pxmitpriv,
 		return -ENOMEM;
 	}
 	pxmitpriv->pxmit_frame_buf = pxmitpriv->pallocated_frame_buf + 4 -
-			((addr_t) (pxmitpriv->pallocated_frame_buf) & 3);
+			(__c_pa(pxmitpriv->pallocated_frame_buf) & 3);
 	pxframe = (struct xmit_frame *) pxmitpriv->pxmit_frame_buf;
 	for (i = 0; i < NR_XMITFRAME; i++) {
 		INIT_LIST_HEAD(&(pxframe->list));
@@ -122,7 +122,7 @@ int _r8712_init_xmit_priv(struct xmit_priv *pxmitpriv,
 	if (!pxmitpriv->pallocated_xmitbuf)
 		goto clean_up_frame_buf;
 	pxmitpriv->pxmitbuf = pxmitpriv->pallocated_xmitbuf + 4 -
-			      ((addr_t)(pxmitpriv->pallocated_xmitbuf) & 3);
+			      (__c_pa(pxmitpriv->pallocated_xmitbuf) & 3);
 	pxmitbuf = (struct xmit_buf *)pxmitpriv->pxmitbuf;
 	for (i = 0; i < NR_XMITBUFF; i++) {
 		INIT_LIST_HEAD(&pxmitbuf->list);
@@ -133,7 +133,7 @@ int _r8712_init_xmit_priv(struct xmit_priv *pxmitpriv,
 			goto clean_up_alloc_buf;
 		}
 		pxmitbuf->pbuf = pxmitbuf->pallocated_buf + XMITBUF_ALIGN_SZ -
-				 ((addr_t) (pxmitbuf->pallocated_buf) &
+				 (__c_pa(pxmitbuf->pallocated_buf) &
 				 (XMITBUF_ALIGN_SZ - 1));
 		if (r8712_xmit_resource_alloc(padapter, pxmitbuf)) {
 			j = 1;
@@ -433,7 +433,7 @@ static int xmitframe_addmic(struct _adapter *padapter,
 			payload = pframe;
 			for (curfragnum = 0; curfragnum < pattrib->nr_frags;
 			     curfragnum++) {
-				payload = (u8 *)RND4((addr_t)(payload));
+				payload = (u8 *)RND4((uintptr_t)(payload));
 				payload += pattrib->hdrlen + pattrib->iv_len;
 				if ((curfragnum + 1) == pattrib->nr_frags) {
 					length = pattrib->last_txcmdsz -
@@ -606,7 +606,7 @@ sint r8712_xmitframe_coalesce(struct _adapter *padapter, _pkt *pkt,
 	sint	frg_len, mpdu_len, llc_sz;
 	u32	mem_sz;
 	u8	frg_inx;
-	addr_t addr;
+	uintptr_t addr;
 	u8 *pframe, *mem_start, *ptxdesc;
 	struct sta_info		*psta;
 	struct security_priv	*psecpriv = &padapter->securitypriv;
@@ -707,8 +707,8 @@ sint r8712_xmitframe_coalesce(struct _adapter *padapter, _pkt *pkt,
 			ClearMFrag(mem_start);
 			break;
 		}
-		addr = (addr_t)(pframe);
-		mem_start = (unsigned char *)RND4(addr) + TXDESC_OFFSET;
+		addr = (uintptr_t)(pframe);
+		mem_start = (unsigned char *)RND4((void *)addr) + TXDESC_OFFSET;
 		memcpy(mem_start, pbuf_start + TXDESC_OFFSET, pattrib->hdrlen);
 	}
 

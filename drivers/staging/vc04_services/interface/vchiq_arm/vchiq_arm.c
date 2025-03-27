@@ -260,9 +260,9 @@ create_pagelist(struct vchiq_instance *instance, char *buf, char __user *ubuf,
 	drv_mgmt = dev_get_drvdata(instance->state->dev);
 
 	if (buf)
-		offset = (uintptr_t)buf & (PAGE_SIZE - 1);
+		offset = __c_pa(buf) & (PAGE_SIZE - 1);
 	else
-		offset = (uintptr_t)ubuf & (PAGE_SIZE - 1);
+		offset = __c_pa(ubuf) & (PAGE_SIZE - 1);
 	num_pages = DIV_ROUND_UP(count + offset, PAGE_SIZE);
 
 	if ((size_t)num_pages > (SIZE_MAX - sizeof(struct pagelist) -
@@ -334,7 +334,7 @@ create_pagelist(struct vchiq_instance *instance, char *buf, char __user *ubuf,
 		}
 		/* do not try and release vmalloc pages */
 	} else {
-		actual_pages = pin_user_pages_fast((unsigned long)ubuf & PAGE_MASK, num_pages,
+		actual_pages = pin_user_pages_fast(__c_pa(ubuf) & PAGE_MASK, num_pages,
 						   type == PAGELIST_READ, pages);
 
 		if (actual_pages != num_pages) {
@@ -528,7 +528,7 @@ static int vchiq_platform_init(struct platform_device *pdev, struct vchiq_state 
 		return -ENOMEM;
 	}
 
-	WARN_ON(((unsigned long)slot_mem & (PAGE_SIZE - 1)) != 0);
+	WARN_ON((__c_pa(slot_mem) & (PAGE_SIZE - 1)) != 0);
 
 	vchiq_slot_zero = vchiq_init_slots(dev, slot_mem, slot_mem_size);
 	if (!vchiq_slot_zero)
@@ -975,7 +975,7 @@ vchiq_blocking_bulk_transfer(struct vchiq_instance *instance, unsigned int handl
 		if (bulk) {
 			/* This thread has an outstanding bulk transfer. */
 			/* FIXME: why compare a dma address to a pointer? */
-			if ((bulk->data != (dma_addr_t)(uintptr_t)data) || (bulk->size != size)) {
+			if ((bulk->data != (dma_addr_t)__c_pa(data)) || (bulk->size != size)) {
 				/*
 				 * This is not a retry of the previous one.
 				 * Cancel the signal when the transfer completes.
