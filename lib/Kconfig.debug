@@ -462,7 +462,8 @@ config FRAME_WARN
 	default 2048 if PARISC
 	default 1536 if (!64BIT && XTENSA)
 	default 1280 if !64BIT
-	default 2048 if 64BIT
+	default 4096 if 64BIT && CHERI_KERNEL
+	default 2048 if 64BIT && !CHERI_KERNEL
 	help
 	  Tell the compiler to warn at build time for stack frames larger than this.
 	  Setting this too low will cause a lot of warnings.
