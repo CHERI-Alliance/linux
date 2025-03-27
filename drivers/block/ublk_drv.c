@@ -158,7 +158,7 @@ struct ublk_uring_cmd_pdu {
 struct ublk_io {
 	/* userspace buffer address from io cmd */
 	union {
-		__u64	addr;
+		__u64ptr addr;
 		struct ublk_auto_buf_reg buf;
 	};
 	unsigned int flags;
@@ -283,20 +283,20 @@ static DEFINE_XARRAY(ublk_zoned_report_descs);
 static int ublk_zoned_insert_report_desc(const struct request *req,
 		struct ublk_zoned_report_desc *desc)
 {
-	return xa_insert(&ublk_zoned_report_descs, (uintptr_t)req,
+	return xa_insert(&ublk_zoned_report_descs, __c_pa(req),
 			    desc, GFP_KERNEL);
 }
 
 static struct ublk_zoned_report_desc *ublk_zoned_erase_report_desc(
 		const struct request *req)
 {
-	return xa_erase(&ublk_zoned_report_descs, (uintptr_t)req);
+	return xa_erase(&ublk_zoned_report_descs, __c_pa(req));
 }
 
 static struct ublk_zoned_report_desc *ublk_zoned_get_report_desc(
 		const struct request *req)
 {
-	return xa_load(&ublk_zoned_report_descs, (uintptr_t)req);
+	return xa_load(&ublk_zoned_report_descs, __c_pa(req));
 }
 
 static int ublk_get_nr_zones(const struct ublk_device *ub)
@@ -1311,7 +1311,7 @@ static void ublk_dispatch_req(struct ublk_queue *ubq,
 
 	pr_devel("%s: complete: qid %d tag %d io_flags %x addr %llx\n",
 			__func__, ubq->q_id, req->tag, io->flags,
-			ublk_get_iod(ubq, req->tag)->addr);
+			(__u64)ublk_get_iod(ubq, req->tag)->addr);
 
 	/*
 	 * Task is exiting if either:
@@ -2098,7 +2098,7 @@ static inline int ublk_check_cmd_op(u32 cmd_op)
 
 static inline int ublk_set_auto_buf_reg(struct ublk_io *io, struct io_uring_cmd *cmd)
 {
-	io->buf = ublk_sqe_addr_to_auto_buf_reg(READ_ONCE(cmd->sqe->addr));
+	io->buf = ublk_sqe_addr_to_auto_buf_reg(__c_ua(READ_ONCE(cmd->sqe->addr)));
 
 	if (io->buf.reserved0 || io->buf.reserved1)
 		return -EINVAL;
@@ -2148,7 +2148,7 @@ ublk_fill_io_cmd(struct ublk_io *io, struct io_uring_cmd *cmd)
 
 static inline int
 ublk_config_io_buf(const struct ublk_device *ub, struct ublk_io *io,
-		   struct io_uring_cmd *cmd, unsigned long buf_addr,
+		   struct io_uring_cmd *cmd, __u64ptr buf_addr,
 		   u16 *buf_idx)
 {
 	if (ublk_dev_support_auto_buf_reg(ub))
@@ -2256,7 +2256,7 @@ static int ublk_unregister_io_buf(struct io_uring_cmd *cmd,
 	return io_buffer_unregister_bvec(cmd, index, issue_flags);
 }
 
-static int ublk_check_fetch_buf(const struct ublk_device *ub, __u64 buf_addr)
+static int ublk_check_fetch_buf(const struct ublk_device *ub, __u64ptr buf_addr)
 {
 	if (ublk_dev_need_map_io(ub)) {
 		/*
@@ -2273,7 +2273,7 @@ static int ublk_check_fetch_buf(const struct ublk_device *ub, __u64 buf_addr)
 }
 
 static int ublk_fetch(struct io_uring_cmd *cmd, struct ublk_device *ub,
-		      struct ublk_io *io, __u64 buf_addr)
+		      struct ublk_io *io, __u64ptr buf_addr)
 {
 	int ret = 0;
 
@@ -2310,7 +2310,7 @@ out:
 }
 
 static int ublk_check_commit_and_fetch(const struct ublk_device *ub,
-				       struct ublk_io *io, __u64 buf_addr)
+				       struct ublk_io *io, __u64ptr buf_addr)
 {
 	struct request *req = io->req;
 
@@ -2354,7 +2354,7 @@ static bool ublk_get_data(const struct ublk_queue *ubq, struct ublk_io *io,
 	ublk_get_iod(ubq, req->tag)->addr = io->addr;
 	pr_devel("%s: update iod->addr: qid %d tag %d io_flags %x addr %llx\n",
 			__func__, ubq->q_id, req->tag, io->flags,
-			ublk_get_iod(ubq, req->tag)->addr);
+			(__u64)ublk_get_iod(ubq, req->tag)->addr);
 
 	return ublk_start_io(ubq, req, io);
 }
@@ -2372,7 +2372,7 @@ static int ublk_ch_uring_cmd_local(struct io_uring_cmd *cmd,
 	u16 q_id = READ_ONCE(ub_src->q_id);
 	u16 tag = READ_ONCE(ub_src->tag);
 	s32 result = READ_ONCE(ub_src->result);
-	u64 addr = READ_ONCE(ub_src->addr); /* unioned with zone_append_lba */
+	uintptr_t addr = READ_ONCE(ub_src->addr); /* unioned with zone_append_lba */
 	struct request *req;
 	int ret;
 	bool compl;
@@ -2459,7 +2459,7 @@ static int ublk_ch_uring_cmd_local(struct io_uring_cmd *cmd,
 		if (buf_idx != UBLK_INVALID_BUF_IDX)
 			io_buffer_unregister_bvec(cmd, buf_idx, issue_flags);
 		if (req_op(req) == REQ_OP_ZONE_APPEND)
-			req->__sector = addr;
+			req->__sector = __c_ua(addr);
 		if (compl)
 			__ublk_complete_rq(req, io, ublk_dev_need_map_io(ub));
 
@@ -3266,7 +3266,7 @@ static inline void ublk_ctrl_cmd_dump(struct io_uring_cmd *cmd)
 {
 	const struct ublksrv_ctrl_cmd *header = io_uring_sqe_cmd(cmd->sqe);
 
-	pr_devel("%s: cmd_op %x, dev id %d qid %d data %llx buf %llx len %u\n",
+	pr_devel("%s: cmd_op %x, dev id %d qid %d data %llx buf %lx len %u\n",
 			__func__, cmd->cmd_op, header->dev_id, header->queue_id,
 			header->data[0], (unsigned long)header->addr, header->len);
 }
