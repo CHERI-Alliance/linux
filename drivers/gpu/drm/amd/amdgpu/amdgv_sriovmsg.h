@@ -156,7 +156,7 @@ struct amd_sriov_msg_pf2vf_info_header {
 	uint32_t version;
 	/* reserved */
 	uint32_t reserved[2];
-};
+} __packed;
 
 #define AMD_SRIOV_MSG_PF2VF_INFO_FILLED_SIZE (49)
 struct amd_sriov_msg_pf2vf_info {
@@ -213,7 +213,7 @@ struct amd_sriov_msg_pf2vf_info {
 	uint32_t gpu_capacity;
 	/* reserved */
 	uint32_t reserved[256 - AMD_SRIOV_MSG_PF2VF_INFO_FILLED_SIZE];
-};
+} __packed;
 
 struct amd_sriov_msg_vf2pf_info_header {
 	/* the total structure size in byte */
@@ -222,7 +222,7 @@ struct amd_sriov_msg_vf2pf_info_header {
 	uint32_t version;
 	/* reserved */
 	uint32_t reserved[2];
-};
+} __packed;
 
 #define AMD_SRIOV_MSG_VF2PF_INFO_FILLED_SIZE (73)
 struct amd_sriov_msg_vf2pf_info {
@@ -266,14 +266,14 @@ struct amd_sriov_msg_vf2pf_info {
 	struct {
 		uint8_t id;
 		uint32_t version;
-	} ucode_info[AMD_SRIOV_MSG_RESERVE_UCODE];
+	} __packed ucode_info[AMD_SRIOV_MSG_RESERVE_UCODE];
 	uint64_t dummy_page_addr;
 	/* FB allocated for guest MES to record UQ info */
 	uint64_t mes_info_addr;
 	uint32_t mes_info_size;
 	/* reserved */
 	uint32_t reserved[256 - AMD_SRIOV_MSG_VF2PF_INFO_FILLED_SIZE];
-};
+} __packed;
 
 /* mailbox message send from guest to host  */
 enum amd_sriov_mailbox_request_message {

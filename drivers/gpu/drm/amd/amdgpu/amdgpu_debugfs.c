@@ -317,7 +317,8 @@ end:
 	return result;
 }
 
-static long amdgpu_debugfs_regs2_ioctl(struct file *f, unsigned int cmd, unsigned long data)
+static long amdgpu_debugfs_regs2_ioctl(struct file *f, unsigned int cmd,
+				       user_uintptr_t data)
 {
 	struct amdgpu_debugfs_regs2_data *rd = f->private_data;
 	struct amdgpu_debugfs_regs2_iocdata v1_data;
@@ -476,7 +477,8 @@ done:
 	return result;
 }
 
-static long amdgpu_debugfs_gprwave_ioctl(struct file *f, unsigned int cmd, unsigned long data)
+static long amdgpu_debugfs_gprwave_ioctl(struct file *f, unsigned int cmd,
+					 user_uintptr_t data)
 {
 	struct amdgpu_debugfs_gprwave_data *rd = f->private_data;
 	int r = 0;

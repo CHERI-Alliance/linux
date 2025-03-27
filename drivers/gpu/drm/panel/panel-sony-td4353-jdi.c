@@ -240,7 +240,7 @@ static int sony_td4353_jdi_probe(struct mipi_dsi_device *dsi)
 	if (!ctx)
 		return -ENOMEM;
 
-	ctx->type = (uintptr_t)of_device_get_match_data(dev);
+	ctx->type = __c_pa(of_device_get_match_data(dev));
 
 	ctx->supplies[0].supply = "vddio";
 	ctx->supplies[1].supply = "vsp";

@@ -607,7 +607,7 @@ static int amdgpu_vcn_dec_get_create_msg(struct amdgpu_ring *ring, uint32_t hand
 	if (r)
 		return r;
 
-	msg = (uint32_t *)AMDGPU_GPU_PAGE_ALIGN((unsigned long)ib->ptr);
+	msg = (uint32_t *)AMDGPU_GPU_PAGE_ALIGN((uintptr_t)ib->ptr);
 	msg[0] = cpu_to_le32(0x00000028);
 	msg[1] = cpu_to_le32(0x00000038);
 	msg[2] = cpu_to_le32(0x00000001);
@@ -642,7 +642,7 @@ static int amdgpu_vcn_dec_get_destroy_msg(struct amdgpu_ring *ring, uint32_t han
 	if (r)
 		return r;
 
-	msg = (uint32_t *)AMDGPU_GPU_PAGE_ALIGN((unsigned long)ib->ptr);
+	msg = (uint32_t *)AMDGPU_GPU_PAGE_ALIGN((uintptr_t)ib->ptr);
 	msg[0] = cpu_to_le32(0x00000028);
 	msg[1] = cpu_to_le32(0x00000018);
 	msg[2] = cpu_to_le32(0x00000000);
@@ -1277,8 +1277,8 @@ int amdgpu_vcn_psp_update_sram(struct amdgpu_device *adev, int inst_idx,
 			    (inst_idx ? AMDGPU_UCODE_ID_VCN1_RAM :
 					AMDGPU_UCODE_ID_VCN0_RAM)),
 		.mc_addr = adev->vcn.inst[inst_idx].dpg_sram_gpu_addr,
-		.ucode_size = ((uintptr_t)adev->vcn.inst[inst_idx].dpg_sram_curr_addr -
-			      (uintptr_t)adev->vcn.inst[inst_idx].dpg_sram_cpu_addr),
+		.ucode_size = (__c_pa(adev->vcn.inst[inst_idx].dpg_sram_curr_addr) -
+			       __c_pa(adev->vcn.inst[inst_idx].dpg_sram_cpu_addr)),
 	};
 
 	return psp_execute_ip_fw_load(&adev->psp, &ucode);

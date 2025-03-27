@@ -65,7 +65,7 @@ static int
 v3d_lookup_bos(struct drm_device *dev,
 	       struct drm_file *file_priv,
 	       struct v3d_job *job,
-	       u64 bo_handles,
+	       user_uintptr_t bo_handles,
 	       u32 bo_count)
 {
 	job->bo_count = bo_count;

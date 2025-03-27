@@ -935,7 +935,7 @@ struct drm_amdgpu_query_fw {
 /* Input structure for the INFO ioctl */
 struct drm_amdgpu_info {
 	/* Where the return value will be stored */
-	__u64 return_pointer;
+	__kernel_uintptr_t return_pointer;
 	/* The size of the return value. Just like "size" in "snprintf",
 	 * it limits how many bytes the kernel can write. */
 	__u32 return_size;

@@ -122,7 +122,7 @@ static int lvds_codec_probe(struct platform_device *pdev)
 		return -ENOMEM;
 
 	lvds_codec->dev = &pdev->dev;
-	lvds_codec->connector_type = (uintptr_t)of_device_get_match_data(dev);
+	lvds_codec->connector_type = __c_pa(of_device_get_match_data(dev));
 
 	lvds_codec->vcc = devm_regulator_get(lvds_codec->dev, "power");
 	if (IS_ERR(lvds_codec->vcc))

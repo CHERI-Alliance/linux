@@ -178,7 +178,7 @@ static int drm_aux_hpd_bridge_probe(struct auxiliary_device *auxdev,
 	data->bridge.funcs = &drm_aux_hpd_bridge_funcs;
 	data->bridge.of_node = dev_get_platdata(data->dev);
 	data->bridge.ops = DRM_BRIDGE_OP_HPD;
-	data->bridge.type = id->driver_data;
+	data->bridge.type = __c_ua(id->driver_data);
 
 	auxiliary_set_drvdata(auxdev, data);
 

@@ -215,7 +215,7 @@ static int display_connector_probe(struct platform_device *pdev)
 
 	platform_set_drvdata(pdev, conn);
 
-	type = (uintptr_t)of_device_get_match_data(&pdev->dev);
+	type = __c_pa(of_device_get_match_data(&pdev->dev));
 
 	/* Get the exact connector type. */
 	switch (type) {

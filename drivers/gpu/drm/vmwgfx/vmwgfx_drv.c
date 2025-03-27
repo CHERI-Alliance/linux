@@ -1299,7 +1299,7 @@ out_io_encoding:
 }
 
 static long vmw_unlocked_ioctl(struct file *filp, unsigned int cmd,
-			       unsigned long arg)
+			       user_uintptr_t arg)
 {
 	return vmw_generic_ioctl(filp, cmd, arg, &drm_ioctl);
 }

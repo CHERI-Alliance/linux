@@ -229,7 +229,7 @@ MODULE_DEVICE_TABLE(pci, mgag200_pciidlist);
 static int
 mgag200_pci_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 {
-	enum mga_type type = (enum mga_type)ent->driver_data;
+	enum mga_type type = (enum mga_type)__c_ua(ent->driver_data);
 	struct mga_device *mdev;
 	struct drm_device *dev;
 	int ret;

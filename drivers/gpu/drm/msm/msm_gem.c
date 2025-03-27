@@ -322,7 +322,7 @@ static vm_fault_t msm_gem_fault(struct vm_fault *vmf)
 
 	pfn = page_to_pfn(pages[pgoff]);
 
-	VERB("Inserting %p pfn %lx, pa %lx", (void *)vmf->address,
+	VERB("Inserting %p pfn %lx, pa %lx", __c_fakep(vmf->address),
 			pfn, pfn << PAGE_SHIFT);
 
 	ret = vmf_insert_pfn(vma, vmf->address, pfn);

@@ -3684,7 +3684,7 @@ static long i915_perf_config_locked(struct i915_perf_stream *stream,
  */
 static long i915_perf_ioctl_locked(struct i915_perf_stream *stream,
 				   unsigned int cmd,
-				   unsigned long arg)
+				   user_uintptr_t arg)
 {
 	switch (cmd) {
 	case I915_PERF_IOCTL_ENABLE:
@@ -3713,7 +3713,7 @@ static long i915_perf_ioctl_locked(struct i915_perf_stream *stream,
  */
 static long i915_perf_ioctl(struct file *file,
 			    unsigned int cmd,
-			    unsigned long arg)
+			    user_uintptr_t arg)
 {
 	struct i915_perf_stream *stream = file->private_data;
 	long ret;

@@ -264,7 +264,7 @@ static int lsdc_pci_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	struct lsdc_device *ldev;
 	int ret;
 
-	descp = lsdc_device_probe(pdev, ent->driver_data);
+	descp = lsdc_device_probe(pdev, __c_ua(ent->driver_data));
 	if (IS_ERR_OR_NULL(descp))
 		return -ENODEV;
 

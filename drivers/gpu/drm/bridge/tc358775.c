@@ -669,7 +669,7 @@ static int tc_probe(struct i2c_client *client)
 
 	tc->dev = dev;
 	tc->i2c = client;
-	tc->type = (enum tc3587x5_type)(unsigned long)of_device_get_match_data(dev);
+	tc->type = (enum tc3587x5_type)__c_pa(of_device_get_match_data(dev));
 
 	tc->panel_bridge = devm_drm_of_get_bridge(dev, dev->of_node,
 						  TC358775_LVDS_OUT0, 0);

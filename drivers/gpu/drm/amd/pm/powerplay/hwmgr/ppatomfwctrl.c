@@ -34,7 +34,7 @@ static const union atom_voltage_object_v4 *pp_atomfwctrl_lookup_voltage_type_v4(
 			voltage_object_info_table->table_header.structuresize);
 	unsigned int offset =
 			offsetof(struct atom_voltage_objects_info_v4_1, voltage_object[0]);
-	unsigned long start = (unsigned long)voltage_object_info_table;
+	uintptr_t start = (uintptr_t)voltage_object_info_table;
 
 	while (offset < size) {
 		const union atom_voltage_object_v4 *voltage_object =
@@ -184,7 +184,7 @@ static bool pp_atomfwctrl_lookup_gpio_pin(
 			gpio_lookup_table->table_header.structuresize);
 	unsigned int offset =
 			offsetof(struct atom_gpio_pin_lut_v2_1, gpio_pin[0]);
-	unsigned long start = (unsigned long)gpio_lookup_table;
+	uintptr_t start = (uintptr_t)gpio_lookup_table;
 
 	while (offset < size) {
 		const struct  atom_gpio_pin_assignment *pin_assignment =

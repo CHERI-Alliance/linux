@@ -191,7 +191,7 @@ static vm_fault_t etnaviv_gem_fault(struct vm_fault *vmf)
 
 	pfn = page_to_pfn(pages[pgoff]);
 
-	VERB("Inserting %p pfn %lx, pa %lx", (void *)vmf->address,
+	VERB("Inserting %p pfn %lx, pa %lx", __c_fakep(vmf->address),
 	     pfn, pfn << PAGE_SHIFT);
 
 	return vmf_insert_pfn(vma, vmf->address, pfn);
@@ -657,10 +657,10 @@ static int etnaviv_gem_userptr_get_pages(struct etnaviv_gem_object *etnaviv_obj)
 
 	do {
 		unsigned num_pages = npages - pinned;
-		uint64_t ptr = userptr->ptr + pinned * PAGE_SIZE;
+		uintptr_t ptr = userptr->ptr + pinned * PAGE_SIZE;
 		struct page **pages = pvec + pinned;
 
-		ret = pin_user_pages_fast(ptr, num_pages, gup_flags, pages);
+		ret = pin_user_pages_fast(__c_ua(ptr), num_pages, gup_flags, pages);
 		if (ret < 0) {
 			unpin_user_pages(pvec, pinned);
 			kvfree(pvec);

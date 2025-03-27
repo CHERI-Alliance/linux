@@ -324,7 +324,7 @@ static int ipu_pre_remove(struct platform_device *pdev)
 	clk_disable_unprepare(pre->clk_axi);
 
 	if (pre->buffer_virt)
-		gen_pool_free(pre->iram, (unsigned long)pre->buffer_virt,
+		gen_pool_free(pre->iram, (uintptr_t)pre->buffer_virt,
 			      IPU_PRE_MAX_WIDTH * IPU_PRE_NUM_SCANLINES * 4);
 	return 0;
 }

@@ -1178,7 +1178,7 @@ static int nwl_dsi_probe(struct platform_device *pdev)
 
 	attr = soc_device_match(nwl_dsi_quirks_match);
 	if (attr)
-		dsi->quirks = (uintptr_t)attr->data;
+		dsi->quirks = __c_pa(attr->data);
 
 	dsi->bridge.driver_private = dsi;
 	dsi->bridge.funcs = &nwl_dsi_bridge_funcs;

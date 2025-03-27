@@ -695,8 +695,8 @@ int amdgpu_umsch_mm_psp_execute_cmd_buf(struct amdgpu_umsch_mm *umsch)
 	struct amdgpu_firmware_info ucode = {
 		.ucode_id = AMDGPU_UCODE_ID_UMSCH_MM_CMD_BUFFER,
 		.mc_addr = adev->umsch_mm.cmd_buf_gpu_addr,
-		.ucode_size = ((uintptr_t)adev->umsch_mm.cmd_buf_curr_ptr -
-			      (uintptr_t)adev->umsch_mm.cmd_buf_ptr),
+		.ucode_size = (__c_pa(adev->umsch_mm.cmd_buf_curr_ptr) -
+			       __c_pa(adev->umsch_mm.cmd_buf_ptr)),
 	};
 
 	return psp_execute_ip_fw_load(&adev->psp, &ucode);

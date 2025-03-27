@@ -841,7 +841,7 @@ static int nouveau_drm_probe(struct pci_dev *pdev,
 	if (ret)
 		goto fail_pci;
 
-	ret = drm_dev_register(drm_dev, pent->driver_data);
+	ret = drm_dev_register(drm_dev, __c_ua(pent->driver_data));
 	if (ret)
 		goto fail_drm_dev_init;
 
@@ -1235,7 +1235,7 @@ nouveau_ioctls[] = {
 };
 
 long
-nouveau_drm_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+nouveau_drm_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct drm_file *filp = file->private_data;
 	struct drm_device *dev = filp->minor->dev;

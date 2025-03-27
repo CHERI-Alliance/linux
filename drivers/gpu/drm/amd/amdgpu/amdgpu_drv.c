@@ -2197,7 +2197,7 @@ static int amdgpu_pci_probe(struct pci_dev *pdev,
 {
 	struct drm_device *ddev;
 	struct amdgpu_device *adev;
-	uintptr_t flags = ent->driver_data;
+	unsigned long flags = __c_ua(ent->driver_data);
 	int ret, retry = 0, i;
 	bool supports_atomic = false;
 
@@ -2822,7 +2822,7 @@ static int amdgpu_pmops_runtime_idle(struct device *dev)
 }
 
 long amdgpu_drm_ioctl(struct file *filp,
-		      unsigned int cmd, unsigned long arg)
+		      unsigned int cmd, user_uintptr_t arg)
 {
 	struct drm_file *file_priv = filp->private_data;
 	struct drm_device *dev;

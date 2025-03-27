@@ -3115,7 +3115,7 @@ static int tegra_dc_parse_dt(struct tegra_dc *dc)
 static int tegra_dc_match_by_pipe(struct device *dev, const void *data)
 {
 	struct tegra_dc *dc = dev_get_drvdata(dev);
-	unsigned int pipe = (unsigned long)(void *)data;
+	unsigned int pipe = __c_pa(data);
 
 	return dc->pipe == pipe;
 }

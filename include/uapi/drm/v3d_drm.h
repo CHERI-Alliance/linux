@@ -200,7 +200,7 @@ struct drm_v3d_submit_cl {
 
 	/* Pointer to a u32 array of the BOs that are referenced by the job.
 	 */
-	__u64 bo_handles;
+	__kernel_uintptr_t bo_handles;
 
 	/* Number of BO handles passed in (size is that times 4). */
 	__u32 bo_handle_count;
@@ -346,7 +346,7 @@ struct drm_v3d_submit_csd {
 
 	/* Pointer to a u32 array of the BOs that are referenced by the job.
 	 */
-	__u64 bo_handles;
+	__kernel_uintptr_t bo_handles;
 
 	/* Number of BO handles passed in (size is that times 4). */
 	__u32 bo_handle_count;
@@ -588,7 +588,7 @@ struct drm_v3d_submit_cpu {
 	 * For DRM_V3D_EXT_ID_CPU_COPY_PERFORMANCE_QUERY, it must contain one
 	 * BO, where the performance queries will be written.
 	 */
-	__u64 bo_handles;
+	__kernel_uintptr_t bo_handles;
 
 	/* Number of BO handles passed in (size is that times 4). */
 	__u32 bo_handle_count;

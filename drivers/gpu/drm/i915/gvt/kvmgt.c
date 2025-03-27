@@ -1133,7 +1133,7 @@ static int intel_vgpu_set_irqs(struct intel_vgpu *vgpu, u32 flags,
 }
 
 static long intel_vgpu_ioctl(struct vfio_device *vfio_dev, unsigned int cmd,
-			     unsigned long arg)
+			     user_uintptr_t arg)
 {
 	struct intel_vgpu *vgpu = vfio_dev_to_vgpu(vfio_dev);
 	unsigned long minsz;

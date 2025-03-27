@@ -46,7 +46,7 @@
 #include "amdgpu_dma_buf.h"
 #include "kfd_debug.h"
 
-static long kfd_ioctl(struct file *, unsigned int, unsigned long);
+static long kfd_ioctl(struct file *, unsigned int, user_uintptr_t);
 static int kfd_open(struct inode *, struct file *);
 static int kfd_release(struct inode *, struct file *);
 static int kfd_mmap(struct file *, struct vm_area_struct *);
@@ -3230,7 +3230,8 @@ static const struct amdkfd_ioctl_desc amdkfd_ioctls[] = {
 
 #define AMDKFD_CORE_IOCTL_COUNT	ARRAY_SIZE(amdkfd_ioctls)
 
-static long kfd_ioctl(struct file *filep, unsigned int cmd, unsigned long arg)
+static long kfd_ioctl(struct file *filep, unsigned int cmd,
+		      user_uintptr_t arg)
 {
 	struct kfd_process *process;
 	amdkfd_ioctl_t *func;

@@ -682,10 +682,10 @@ static int sn65dsi83_probe(struct i2c_client *client)
 	ctx->dev = dev;
 
 	if (dev->of_node) {
-		model = (enum sn65dsi83_model)(uintptr_t)
-			of_device_get_match_data(dev);
+		model = (enum sn65dsi83_model)__c_pa(
+			of_device_get_match_data(dev));
 	} else {
-		model = id->driver_data;
+		model = __c_ua(id->driver_data);
 	}
 
 	/* Put the chip in reset, pull EN line low, and assure 10ms reset low timing. */

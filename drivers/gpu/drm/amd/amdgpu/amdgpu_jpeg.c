@@ -336,8 +336,8 @@ int amdgpu_jpeg_psp_update_sram(struct amdgpu_device *adev, int inst_idx,
 	struct amdgpu_firmware_info ucode = {
 		.ucode_id = AMDGPU_UCODE_ID_JPEG_RAM,
 		.mc_addr = adev->jpeg.inst[inst_idx].dpg_sram_gpu_addr,
-		.ucode_size = ((uintptr_t)adev->jpeg.inst[inst_idx].dpg_sram_curr_addr -
-			      (uintptr_t)adev->jpeg.inst[inst_idx].dpg_sram_cpu_addr),
+		.ucode_size = (__c_pa(adev->jpeg.inst[inst_idx].dpg_sram_curr_addr) -
+			       __c_pa(adev->jpeg.inst[inst_idx].dpg_sram_cpu_addr)),
 	};
 
 	return psp_execute_ip_fw_load(&adev->psp, &ucode);

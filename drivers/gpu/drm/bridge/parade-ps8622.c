@@ -484,7 +484,7 @@ static int ps8622_probe(struct i2c_client *client)
 		return ret;
 	}
 
-	ps8622->max_lane_count = id->driver_data;
+	ps8622->max_lane_count = __c_ua(id->driver_data);
 
 	if (of_property_read_u32(dev->of_node, "lane-count",
 						&ps8622->lane_count)) {

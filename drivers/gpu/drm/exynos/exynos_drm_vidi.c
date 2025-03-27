@@ -246,6 +246,14 @@ int vidi_connection_ioctl(struct drm_device *drm_dev, void *data,
 	}
 
 	if (vidi->connection) {
+#ifdef CONFIG_CHERI_KERNEL
+		/* FIXCHERI: The upstream code cast what appears to be
+		 * FIXCHERI: a user pointer to a kernel pointer. Warn
+		 * FIXCHERI: if this code is hit with CHERI.
+		 */
+		WARN_ONCE(1, "%s: Invalid user pointer handling?\n", __func__);
+		return -EINVAL;
+#else
 		struct edid *raw_edid;
 
 		raw_edid = (struct edid *)(unsigned long)vidi->edid;
@@ -260,6 +268,7 @@ int vidi_connection_ioctl(struct drm_device *drm_dev, void *data,
 					  "failed to allocate raw_edid.\n");
 			return -ENOMEM;
 		}
+#endif
 	} else {
 		/*
 		 * with connection = 0, free raw_edid
