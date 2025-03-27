@@ -2542,7 +2542,7 @@ out_mem:
 }
 
 static int pkt_ioctl(struct block_device *bdev, blk_mode_t mode,
-		unsigned int cmd, unsigned long arg)
+		unsigned int cmd, user_uintptr_t arg)
 {
 	struct pktcdvd_device *pd = bdev->bd_disk->private_data;
 	struct device *ddev = disk_to_dev(pd->disk);
@@ -2785,7 +2785,8 @@ static void pkt_get_status(struct pkt_ctrl_command *ctrl_cmd)
 	mutex_unlock(&ctl_mutex);
 }
 
-static long pkt_ctl_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long pkt_ctl_ioctl(struct file *file, unsigned int cmd,
+			  user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 	struct pkt_ctrl_command ctrl_cmd;

@@ -3280,7 +3280,7 @@ put_result:
 	err = resource_statistics_to_skb(skb, &resource_statistics, !capable(CAP_SYS_ADMIN));
 	if (err)
 		goto out;
-	cb->args[0] = (long)resource;
+	cb->args[0] = (intptr_t)resource;
 	genlmsg_end(skb, dh);
 	err = 0;
 

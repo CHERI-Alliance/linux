@@ -200,7 +200,7 @@ struct ublksrv_ctrl_cmd {
 	 * cmd specific buffer, can be IN or OUT.
 	 */
 	__u16	len;
-	__u64	addr;
+	__kernel_uintptr_t	addr;
 
 	/* inline data */
 	__u64	data[1];

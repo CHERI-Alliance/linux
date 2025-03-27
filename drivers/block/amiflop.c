@@ -1533,7 +1533,7 @@ static int fd_getgeo(struct block_device *bdev, struct hd_geometry *geo)
 }
 
 static int fd_locked_ioctl(struct block_device *bdev, blk_mode_t mode,
-		    unsigned int cmd, unsigned long param)
+		    unsigned int cmd, user_uintptr_t param)
 {
 	struct amiga_floppy_struct *p = bdev->bd_disk->private_data;
 	int drive = p - unit;
@@ -1607,7 +1607,7 @@ static int fd_locked_ioctl(struct block_device *bdev, blk_mode_t mode,
 }
 
 static int fd_ioctl(struct block_device *bdev, blk_mode_t mode,
-			     unsigned int cmd, unsigned long param)
+			     unsigned int cmd, user_uintptr_t param)
 {
 	int ret;
 

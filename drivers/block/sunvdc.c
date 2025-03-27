@@ -140,7 +140,7 @@ static int vdc_getgeo(struct block_device *bdev, struct hd_geometry *geo)
  * Needed to be able to install inside an ldom from an iso image.
  */
 static int vdc_ioctl(struct block_device *bdev, blk_mode_t mode,
-		     unsigned command, unsigned long argument)
+		     unsigned command, user_uintptr_t argument)
 {
 	struct vdc_port *port = bdev->bd_disk->private_data;
 	int i;

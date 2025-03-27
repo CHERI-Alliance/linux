@@ -3399,7 +3399,7 @@ static bool valid_floppy_drive_params(const short autodetect[FD_AUTODETECT_SIZE]
 }
 
 static int fd_locked_ioctl(struct block_device *bdev, blk_mode_t mode,
-		unsigned int cmd, unsigned long param)
+		unsigned int cmd, user_uintptr_t param)
 {
 	int drive = (long)bdev->bd_disk->private_data;
 	int type = ITYPE(drive_state[drive].fd_device);
@@ -3572,7 +3572,7 @@ static int fd_locked_ioctl(struct block_device *bdev, blk_mode_t mode,
 }
 
 static int fd_ioctl(struct block_device *bdev, blk_mode_t mode,
-			     unsigned int cmd, unsigned long param)
+			     unsigned int cmd, user_uintptr_t param)
 {
 	int ret;
 
