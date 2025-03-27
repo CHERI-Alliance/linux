@@ -238,7 +238,7 @@ static int dvb_ca_ioctl(struct file *file, unsigned int cmd, void *parg)
 {
 	struct dvb_device *dvbdev = file->private_data;
 	struct av7110 *av7110 = dvbdev->priv;
-	uintptr_t arg = (uintptr_t)parg;
+	unsigned long arg = __c_pa(parg);
 	int ret = 0;
 
 	dprintk(8, "av7110:%p\n", av7110);
