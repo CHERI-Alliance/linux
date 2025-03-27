@@ -328,7 +328,7 @@ void ubi_debugfs_exit(void)
 static ssize_t dfs_file_read(struct file *file, char __user *user_buf,
 			     size_t count, loff_t *ppos)
 {
-	unsigned long ubi_num = (unsigned long)file->private_data;
+	unsigned long ubi_num = __c_pa(file->private_data);
 	struct dentry *dent = file->f_path.dentry;
 	struct ubi_device *ubi;
 	struct ubi_debug_info *d;
@@ -395,7 +395,7 @@ out:
 static ssize_t dfs_file_write(struct file *file, const char __user *user_buf,
 			      size_t count, loff_t *ppos)
 {
-	unsigned long ubi_num = (unsigned long)file->private_data;
+	unsigned long ubi_num = __c_pa(file->private_data);
 	struct dentry *dent = file->f_path.dentry;
 	struct ubi_device *ubi;
 	struct ubi_debug_info *d;
@@ -555,7 +555,7 @@ static int eraseblk_count_open(struct inode *inode, struct file *f)
 		return err;
 
 	s = f->private_data;
-	s->private = ubi_get_device((unsigned long)inode->i_private);
+	s->private = ubi_get_device(__c_pa(inode->i_private));
 
 	if (!s->private)
 		return -ENODEV;
@@ -608,49 +608,49 @@ int ubi_debugfs_init_dev(struct ubi_device *ubi)
 	d->dfs_dir = debugfs_create_dir(d->dfs_dir_name, dfs_rootdir);
 
 	d->dfs_chk_gen = debugfs_create_file("chk_gen", mode, d->dfs_dir,
-					     (void *)ubi_num, &dfs_fops);
+					     __c_fakep(ubi_num), &dfs_fops);
 
 	d->dfs_chk_io = debugfs_create_file("chk_io", mode, d->dfs_dir,
-					    (void *)ubi_num, &dfs_fops);
+					    __c_fakep(ubi_num), &dfs_fops);
 
 	d->dfs_chk_fastmap = debugfs_create_file("chk_fastmap", mode,
-						 d->dfs_dir, (void *)ubi_num,
+						 d->dfs_dir, __c_fakep(ubi_num),
 						 &dfs_fops);
 
 	d->dfs_disable_bgt = debugfs_create_file("tst_disable_bgt", mode,
-						 d->dfs_dir, (void *)ubi_num,
+						 d->dfs_dir, __c_fakep(ubi_num),
 						 &dfs_fops);
 
 	d->dfs_emulate_bitflips = debugfs_create_file("tst_emulate_bitflips",
 						      mode, d->dfs_dir,
-						      (void *)ubi_num,
+						      __c_fakep(ubi_num),
 						      &dfs_fops);
 
 	d->dfs_emulate_io_failures = debugfs_create_file("tst_emulate_io_failures",
 							 mode, d->dfs_dir,
-							 (void *)ubi_num,
+							 __c_fakep(ubi_num),
 							 &dfs_fops);
 
 	d->dfs_emulate_power_cut = debugfs_create_file("tst_emulate_power_cut",
 						       mode, d->dfs_dir,
-						       (void *)ubi_num,
+						       __c_fakep(ubi_num),
 						       &dfs_fops);
 
 	d->dfs_power_cut_min = debugfs_create_file("tst_emulate_power_cut_min",
 						   mode, d->dfs_dir,
-						   (void *)ubi_num, &dfs_fops);
+						   __c_fakep(ubi_num), &dfs_fops);
 
 	d->dfs_power_cut_max = debugfs_create_file("tst_emulate_power_cut_max",
 						   mode, d->dfs_dir,
-						   (void *)ubi_num, &dfs_fops);
+						   __c_fakep(ubi_num), &dfs_fops);
 
 	debugfs_create_file("detailed_erase_block_info", S_IRUSR, d->dfs_dir,
-			    (void *)ubi_num, &eraseblk_count_fops);
+			    __c_fakep(ubi_num), &eraseblk_count_fops);
 
 #ifdef CONFIG_MTD_UBI_FAULT_INJECTION
 	d->dfs_emulate_failures = debugfs_create_file("emulate_failures",
 						       mode, d->dfs_dir,
-						       (void *)ubi_num,
+						       __c_fakep(ubi_num),
 						       &dfs_fops);
 #endif
 	return 0;

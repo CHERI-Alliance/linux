@@ -555,7 +555,7 @@ cadence_nand_dma_buf_ok(struct cdns_nand_ctrl *cdns_ctrl, const void *buf,
 	u8 data_dma_width = cdns_ctrl->caps2.data_dma_width;
 
 	return buf && virt_addr_valid(buf) &&
-		likely(IS_ALIGNED((uintptr_t)buf, data_dma_width)) &&
+		likely(IS_ALIGNED(__c_pa(buf), data_dma_width)) &&
 		likely(IS_ALIGNED(buf_len, DMA_DATA_SIZE_ALIGN));
 }
 

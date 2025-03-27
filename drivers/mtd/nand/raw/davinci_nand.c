@@ -604,7 +604,7 @@ static int davinci_nand_attach_chip(struct nand_chip *chip)
 static void nand_davinci_data_in(struct davinci_nand_info *info, void *buf,
 				 unsigned int len, bool force_8bit)
 {
-	u32 alignment = ((uintptr_t)buf | len) & 3;
+	u32 alignment = (__c_pa(buf) | len) & 3;
 
 	if (force_8bit || (alignment & 1))
 		ioread8_rep(info->current_cs, buf, len);
@@ -618,7 +618,7 @@ static void nand_davinci_data_out(struct davinci_nand_info *info,
 				  const void *buf, unsigned int len,
 				  bool force_8bit)
 {
-	u32 alignment = ((uintptr_t)buf | len) & 3;
+	u32 alignment = (__c_pa(buf) | len) & 3;
 
 	if (force_8bit || (alignment & 1))
 		iowrite8_rep(info->current_cs, buf, len);

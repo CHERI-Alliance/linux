@@ -376,7 +376,7 @@ static ssize_t vol_cdev_write(struct file *file, const char __user *buf,
 }
 
 static long vol_cdev_ioctl(struct file *file, unsigned int cmd,
-			   unsigned long arg)
+			   user_uintptr_t arg)
 {
 	int err = 0;
 	struct ubi_volume_desc *desc = file->private_data;
@@ -829,7 +829,7 @@ out_free:
 }
 
 static long ubi_cdev_ioctl(struct file *file, unsigned int cmd,
-			   unsigned long arg)
+			   user_uintptr_t arg)
 {
 	int err = 0;
 	struct ubi_device *ubi;
@@ -1001,7 +1001,7 @@ static long ubi_cdev_ioctl(struct file *file, unsigned int cmd,
 }
 
 static long ctrl_cdev_ioctl(struct file *file, unsigned int cmd,
-			    unsigned long arg)
+			    user_uintptr_t arg)
 {
 	int err = 0;
 	void __user *argp = (void __user *)arg;

@@ -107,7 +107,7 @@ intel_iq80310_init(struct pci_dev *dev, struct map_pci_info *map)
 	pci_read_config_dword(dev, 0x44, &win_base);
 	pci_write_config_dword(dev, 0x44, 0);
 
-	map->map.map_priv_2 = win_base;
+	map->map.map_priv_2 = __c_fakeu(win_base);
 
 	return 0;
 }
@@ -117,7 +117,7 @@ intel_iq80310_exit(struct pci_dev *dev, struct map_pci_info *map)
 {
 	if (map->base)
 		iounmap(map->base);
-	pci_write_config_dword(dev, 0x44, map->map.map_priv_2);
+	pci_write_config_dword(dev, 0x44, __c_ua(map->map.map_priv_2));
 }
 
 static unsigned long

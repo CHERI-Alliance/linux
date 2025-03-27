@@ -189,7 +189,7 @@ static void r852_do_dma(struct r852_device *dev, uint8_t *buf, int do_read)
 	dev->dma_state = do_read ? DMA_INTERNAL : DMA_MEMORY;
 
 	/* if incoming buffer is not page aligned, we should do bounce */
-	if ((unsigned long)buf & (R852_DMA_LEN-1))
+	if (__c_pa(buf) & (R852_DMA_LEN-1))
 		bounce = 1;
 
 	if (!bounce) {

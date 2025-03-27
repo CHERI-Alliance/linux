@@ -248,7 +248,7 @@ static unsigned short s3c_onenand_readw(void __iomem *addr)
 	}
 
 	/* BootRAM access control */
-	if ((unsigned long)addr < ONENAND_DATARAM && onenand->bootram_command) {
+	if (__c_pa(addr) < ONENAND_DATARAM && onenand->bootram_command) {
 		if (word_addr == 0)
 			return s3c_read_reg(MANUFACT_ID_OFFSET);
 		if (word_addr == 1)
@@ -289,7 +289,7 @@ static void s3c_onenand_writew(unsigned short value, void __iomem *addr)
 	}
 
 	/* BootRAM access control */
-	if ((unsigned long)addr < ONENAND_DATARAM) {
+	if (__c_pa(addr) < ONENAND_DATARAM) {
 		if (value == ONENAND_CMD_READID) {
 			onenand->bootram_command = 1;
 			return;
@@ -631,7 +631,7 @@ static int s5pc110_read_bufferram(struct mtd_info *mtd, int area,
 			p += mtd->oobsize;
 	}
 
-	if (offset & 3 || (size_t) buf & 3 ||
+	if (offset & 3 || __c_pa(buf) & 3 ||
 		!onenand->dma_addr || count != mtd->writesize)
 		goto normal;
 
@@ -639,15 +639,15 @@ static int s5pc110_read_bufferram(struct mtd_info *mtd, int area,
 	if (buf >= high_memory) {
 		struct page *page;
 
-		if (((size_t) buf & PAGE_MASK) !=
-		    ((size_t) (buf + count - 1) & PAGE_MASK))
+		if ((__c_pa(buf) & PAGE_MASK) !=
+		    (__c_pa(buf + count - 1) & PAGE_MASK))
 			goto normal;
 		page = vmalloc_to_page(buf);
 		if (!page)
 			goto normal;
 
 		/* Page offset */
-		ofs = ((size_t) buf & ~PAGE_MASK);
+		ofs = (__c_pa(buf) & ~PAGE_MASK);
 		page_dma = 1;
 
 		/* DMA routine */
@@ -856,7 +856,7 @@ static int s3c_onenand_probe(struct platform_device *pdev)
 	mtd->priv = this;
 	mtd->dev.parent = &pdev->dev;
 	onenand->pdev = pdev;
-	onenand->type = platform_get_device_id(pdev)->driver_data;
+	onenand->type = __c_ua(platform_get_device_id(pdev)->driver_data);
 
 	s3c_onenand_setup(mtd);
 

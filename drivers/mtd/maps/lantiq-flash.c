@@ -50,7 +50,7 @@ ltq_read16(struct map_info *map, unsigned long adr)
 	unsigned long flags;
 	map_word temp;
 
-	if (map->map_priv_1 == LTQ_NOR_PROBING)
+	if (__c_ua(map->map_priv_1) == LTQ_NOR_PROBING)
 		adr ^= 2;
 	spin_lock_irqsave(&ebu_lock, flags);
 	temp.x[0] = *(u16 *)(map->virt + adr);
@@ -63,7 +63,7 @@ ltq_write16(struct map_info *map, map_word d, unsigned long adr)
 {
 	unsigned long flags;
 
-	if (map->map_priv_1 == LTQ_NOR_PROBING)
+	if (__c_ua(map->map_priv_1) == LTQ_NOR_PROBING)
 		adr ^= 2;
 	spin_lock_irqsave(&ebu_lock, flags);
 	*(u16 *)(map->virt + adr) = d.x[0];

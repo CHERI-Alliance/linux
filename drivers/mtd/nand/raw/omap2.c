@@ -2077,7 +2077,7 @@ static void omap_nand_data_in(struct nand_chip *chip, void *buf,
 			      unsigned int len, bool force_8bit)
 {
 	struct omap_nand_info *info = mtd_to_omap(nand_to_mtd(chip));
-	u32 alignment = ((uintptr_t)buf | len) & 3;
+	u32 alignment = (__c_pa(buf) | len) & 3;
 
 	if (force_8bit || (alignment & 1))
 		ioread8_rep(info->fifo, buf, len);
@@ -2092,7 +2092,7 @@ static void omap_nand_data_out(struct nand_chip *chip,
 			       bool force_8bit)
 {
 	struct omap_nand_info *info = mtd_to_omap(nand_to_mtd(chip));
-	u32 alignment = ((uintptr_t)buf | len) & 3;
+	u32 alignment = (__c_pa(buf) | len) & 3;
 
 	if (force_8bit || (alignment & 1))
 		iowrite8_rep(info->fifo, buf, len);

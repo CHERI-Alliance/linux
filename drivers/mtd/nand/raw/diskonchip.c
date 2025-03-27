@@ -328,7 +328,7 @@ static void doc2000_readbuf(struct nand_chip *this, u_char *buf, int len)
 		printk("readbuf of %d bytes: ", len);
 
 	if (!doc->supports_32b_reads ||
-	    ((((unsigned long)buf) | len) & 3)) {
+	    ((__c_pa(buf) | len) & 3)) {
 		for (i = 0; i < len; i++)
 			buf[i] = ReadDOC(docptr, 2k_CDSN_IO + i);
 	} else {
