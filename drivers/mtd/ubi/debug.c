@@ -589,7 +589,7 @@ static const struct file_operations eraseblk_count_fops = {
  */
 int ubi_debugfs_init_dev(struct ubi_device *ubi)
 {
-	unsigned long ubi_num = ubi->ubi_num;
+	uintptr_t ubi_num = __c_fakeu(ubi->ubi_num);
 	struct ubi_debug_info *d = &ubi->dbg;
 	umode_t mode = S_IRUSR | S_IWUSR;
 	int n;
