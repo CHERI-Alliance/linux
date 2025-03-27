@@ -443,7 +443,7 @@ static void finish_fdc( void );
 static void finish_fdc_done( int dummy );
 static void setup_req_params( int drive );
 static int fd_locked_ioctl(struct block_device *bdev, blk_mode_t mode,
-		unsigned int cmd, unsigned long param);
+		unsigned int cmd, user_uintptr_t param);
 static void fd_probe( int drive );
 static int fd_test_drive_present( int drive );
 static void config_types( void );
@@ -1583,7 +1583,7 @@ out:
 }
 
 static int fd_locked_ioctl(struct block_device *bdev, blk_mode_t mode,
-		    unsigned int cmd, unsigned long param)
+		    unsigned int cmd, user_uintptr_t param)
 {
 	struct gendisk *disk = bdev->bd_disk;
 	struct atari_floppy_struct *floppy = disk->private_data;
@@ -1772,7 +1772,7 @@ static int fd_locked_ioctl(struct block_device *bdev, blk_mode_t mode,
 }
 
 static int fd_ioctl(struct block_device *bdev, blk_mode_t mode,
-			     unsigned int cmd, unsigned long arg)
+			     unsigned int cmd, user_uintptr_t arg)
 {
 	int ret;
 

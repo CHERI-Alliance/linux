@@ -260,20 +260,20 @@ static DEFINE_XARRAY(ublk_zoned_report_descs);
 static int ublk_zoned_insert_report_desc(const struct request *req,
 		struct ublk_zoned_report_desc *desc)
 {
-	return xa_insert(&ublk_zoned_report_descs, (uintptr_t)req,
+	return xa_insert(&ublk_zoned_report_descs, __c_pa(req),
 			    desc, GFP_KERNEL);
 }
 
 static struct ublk_zoned_report_desc *ublk_zoned_erase_report_desc(
 		const struct request *req)
 {
-	return xa_erase(&ublk_zoned_report_descs, (uintptr_t)req);
+	return xa_erase(&ublk_zoned_report_descs, __c_pa(req));
 }
 
 static struct ublk_zoned_report_desc *ublk_zoned_get_report_desc(
 		const struct request *req)
 {
-	return xa_load(&ublk_zoned_report_descs, (uintptr_t)req);
+	return xa_load(&ublk_zoned_report_descs, __c_pa(req));
 }
 
 static int ublk_get_nr_zones(const struct ublk_device *ub)
@@ -1994,7 +1994,7 @@ static inline int ublk_set_auto_buf_reg(struct io_uring_cmd *cmd)
 {
 	struct ublk_uring_cmd_pdu *pdu = ublk_get_uring_cmd_pdu(cmd);
 
-	pdu->buf = ublk_sqe_addr_to_auto_buf_reg(READ_ONCE(cmd->sqe->addr));
+	pdu->buf = ublk_sqe_addr_to_auto_buf_reg(__c_ua(READ_ONCE(cmd->sqe->addr)));
 
 	if (pdu->buf.reserved0 || pdu->buf.reserved1)
 		return -EINVAL;
@@ -2784,7 +2784,7 @@ out_unlock:
 static int ublk_ctrl_get_queue_affinity(struct ublk_device *ub,
 		const struct ublksrv_ctrl_cmd *header)
 {
-	void __user *argp = (void __user *)(unsigned long)header->addr;
+	void __user *argp = (void __user *)(uintptr_t)header->addr;
 	cpumask_var_t cpumask;
 	unsigned long queue;
 	unsigned int retlen;
@@ -2834,7 +2834,7 @@ static inline void ublk_dump_dev_info(struct ublksrv_ctrl_dev_info *info)
 
 static int ublk_ctrl_add_dev(const struct ublksrv_ctrl_cmd *header)
 {
-	void __user *argp = (void __user *)(unsigned long)header->addr;
+	void __user *argp = (void __user *)(uintptr_t)header->addr;
 	struct ublksrv_ctrl_dev_info info;
 	struct ublk_device *ub;
 	int ret = -EINVAL;
@@ -3063,7 +3063,7 @@ static inline void ublk_ctrl_cmd_dump(struct io_uring_cmd *cmd)
 {
 	const struct ublksrv_ctrl_cmd *header = io_uring_sqe_cmd(cmd->sqe);
 
-	pr_devel("%s: cmd_op %x, dev id %d qid %d data %llx buf %llx len %u\n",
+	pr_devel("%s: cmd_op %x, dev id %d qid %d data %llx buf %lx len %u\n",
 			__func__, cmd->cmd_op, header->dev_id, header->queue_id,
 			header->data[0], (unsigned long)header->addr, header->len);
 }
@@ -3077,7 +3077,7 @@ static int ublk_ctrl_stop_dev(struct ublk_device *ub)
 static int ublk_ctrl_get_dev_info(struct ublk_device *ub,
 		const struct ublksrv_ctrl_cmd *header)
 {
-	void __user *argp = (void __user *)(unsigned long)header->addr;
+	void __user *argp = (void __user *)(uintptr_t)header->addr;
 
 	if (header->len < sizeof(struct ublksrv_ctrl_dev_info) || !header->addr)
 		return -EINVAL;
@@ -3107,7 +3107,7 @@ static void ublk_ctrl_fill_params_devt(struct ublk_device *ub)
 static int ublk_ctrl_get_params(struct ublk_device *ub,
 		const struct ublksrv_ctrl_cmd *header)
 {
-	void __user *argp = (void __user *)(unsigned long)header->addr;
+	void __user *argp = (void __user *)(uintptr_t)header->addr;
 	struct ublk_params_header ph;
 	int ret;
 
@@ -3137,7 +3137,7 @@ static int ublk_ctrl_get_params(struct ublk_device *ub,
 static int ublk_ctrl_set_params(struct ublk_device *ub,
 		const struct ublksrv_ctrl_cmd *header)
 {
-	void __user *argp = (void __user *)(unsigned long)header->addr;
+	void __user *argp = (void __user *)(uintptr_t)header->addr;
 	struct ublk_params_header ph;
 	int ret = -EFAULT;
 
@@ -3248,7 +3248,7 @@ static int ublk_ctrl_end_recovery(struct ublk_device *ub,
 
 static int ublk_ctrl_get_features(const struct ublksrv_ctrl_cmd *header)
 {
-	void __user *argp = (void __user *)(unsigned long)header->addr;
+	void __user *argp = (void __user *)(uintptr_t)header->addr;
 	u64 features = UBLK_F_ALL;
 
 	if (header->len != UBLK_FEATURES_LEN || !header->addr)
@@ -3416,7 +3416,7 @@ static int ublk_ctrl_uring_cmd_permission(struct ublk_device *ub,
 {
 	struct ublksrv_ctrl_cmd *header = (struct ublksrv_ctrl_cmd *)io_uring_sqe_cmd(cmd->sqe);
 	bool unprivileged = ub->dev_info.flags & UBLK_F_UNPRIVILEGED_DEV;
-	void __user *argp = (void __user *)(unsigned long)header->addr;
+	void __user *argp = (void __user *)(uintptr_t)header->addr;
 	char *dev_path = NULL;
 	int ret = 0;
 	int mask;

@@ -226,7 +226,7 @@ aoechr_read(struct file *filp, char __user *buf, size_t cnt, loff_t *off)
 	ssize_t len;
 	ulong flags;
 
-	n = (uintptr_t) filp->private_data;
+	n = __c_pa(filp->private_data);
 	if (n != MINOR_ERR)
 		return -EFAULT;
 

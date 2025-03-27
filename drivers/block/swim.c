@@ -685,7 +685,7 @@ static void floppy_release(struct gendisk *disk)
 }
 
 static int floppy_ioctl(struct block_device *bdev, blk_mode_t mode,
-			unsigned int cmd, unsigned long param)
+			unsigned int cmd, user_uintptr_t param)
 {
 	struct floppy_state *fs = bdev->bd_disk->private_data;
 	int err;

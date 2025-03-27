@@ -197,12 +197,12 @@ void drbd_bm_unlock(struct drbd_device *device)
 static void bm_store_page_idx(struct page *page, unsigned long idx)
 {
 	BUG_ON(0 != (idx & ~BM_PAGE_IDX_MASK));
-	set_page_private(page, idx);
+	set_page_private(page, __c_fakeu(idx));
 }
 
 static unsigned long bm_page_to_idx(struct page *page)
 {
-	return page_private(page) & BM_PAGE_IDX_MASK;
+	return __c_ua(page_private(page)) & BM_PAGE_IDX_MASK;
 }
 
 /* As is very unlikely that the same page is under IO from more than one
@@ -228,13 +228,13 @@ static void bm_page_unlock_io(struct drbd_device *device, int page_nr)
 static void bm_set_page_unchanged(struct page *page)
 {
 	/* use cmpxchg? */
-	clear_bit(BM_PAGE_NEED_WRITEOUT, &page_private(page));
-	clear_bit(BM_PAGE_LAZY_WRITEOUT, &page_private(page));
+	clear_bit(BM_PAGE_NEED_WRITEOUT, (unsigned long *)(void *)&page_private(page));
+	clear_bit(BM_PAGE_LAZY_WRITEOUT, (unsigned long *)(void *)&page_private(page));
 }
 
 static void bm_set_page_need_writeout(struct page *page)
 {
-	set_bit(BM_PAGE_NEED_WRITEOUT, &page_private(page));
+	set_bit(BM_PAGE_NEED_WRITEOUT, (unsigned long *)(void *)&page_private(page));
 }
 
 void drbd_bm_reset_al_hints(struct drbd_device *device)
@@ -262,34 +262,34 @@ void drbd_bm_mark_for_writeout(struct drbd_device *device, int page_nr)
 	}
 	page = device->bitmap->bm_pages[page_nr];
 	BUG_ON(b->n_bitmap_hints >= ARRAY_SIZE(b->al_bitmap_hints));
-	if (!test_and_set_bit(BM_PAGE_HINT_WRITEOUT, &page_private(page)))
+	if (!test_and_set_bit(BM_PAGE_HINT_WRITEOUT, (unsigned long *)(void *)&page_private(page)))
 		b->al_bitmap_hints[b->n_bitmap_hints++] = page_nr;
 }
 
 static int bm_test_page_unchanged(struct page *page)
 {
-	volatile const unsigned long *addr = &page_private(page);
+	volatile const unsigned long *addr = (unsigned long *)(void *)&page_private(page);
 	return (*addr & ((1UL<<BM_PAGE_NEED_WRITEOUT)|(1UL<<BM_PAGE_LAZY_WRITEOUT))) == 0;
 }
 
 static void bm_set_page_io_err(struct page *page)
 {
-	set_bit(BM_PAGE_IO_ERROR, &page_private(page));
+	set_bit(BM_PAGE_IO_ERROR, (unsigned long *)(void *)&page_private(page));
 }
 
 static void bm_clear_page_io_err(struct page *page)
 {
-	clear_bit(BM_PAGE_IO_ERROR, &page_private(page));
+	clear_bit(BM_PAGE_IO_ERROR, (unsigned long *)(void *)&page_private(page));
 }
 
 static void bm_set_page_lazy_writeout(struct page *page)
 {
-	set_bit(BM_PAGE_LAZY_WRITEOUT, &page_private(page));
+	set_bit(BM_PAGE_LAZY_WRITEOUT, (unsigned long *)(void *)&page_private(page));
 }
 
 static int bm_test_page_lazy_writeout(struct page *page)
 {
-	return test_bit(BM_PAGE_LAZY_WRITEOUT, &page_private(page));
+	return test_bit(BM_PAGE_LAZY_WRITEOUT, (unsigned long *)(void *)&page_private(page));
 }
 
 /* on a 32bit box, this would allow for exactly (2<<38) bits. */
@@ -1129,7 +1129,7 @@ static int bm_rw(struct drbd_device *device, const unsigned int flags, unsigned 
 				continue;
 			/* Several AL-extents may point to the same page. */
 			if (!test_and_clear_bit(BM_PAGE_HINT_WRITEOUT,
-			    &page_private(b->bm_pages[i])))
+			    (unsigned long *)(void *)&page_private(b->bm_pages[i])))
 				continue;
 			/* Has it even changed? */
 			if (bm_test_page_unchanged(b->bm_pages[i]))
