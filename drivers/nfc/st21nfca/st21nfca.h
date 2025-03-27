@@ -122,7 +122,7 @@ struct st21nfca_dep_info {
 	u8 bsi;
 	u8 bri;
 	u8 lri;
-} __packed;
+} __packed_if_not_cheri;
 
 struct st21nfca_se_info {
 	u8 atr[ST21NFCA_ESE_MAX_LENGTH];

@@ -564,12 +564,12 @@ static int pn533_usb_probe(struct usb_interface *interface,
 
 	default:
 		nfc_err(&interface->dev, "Unknown device type %lu\n",
-			id->driver_info);
+			__c_ua(id->driver_info));
 		rc = -EINVAL;
 		goto error;
 	}
 
-	priv = pn53x_common_init(id->driver_info, protocol_type,
+	priv = pn53x_common_init(__c_ua(id->driver_info), protocol_type,
 					phy, &usb_phy_ops, fops,
 					&phy->udev->dev);
 

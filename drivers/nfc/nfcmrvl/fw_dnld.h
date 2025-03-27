@@ -46,7 +46,7 @@ struct nfcmrvl_fw_binary_config {
 		struct nfcmrvl_fw_spi_config spi;
 		uint8_t reserved[64];
 	};
-} __packed;
+} __packed_if_not_cheri;
 
 struct nfcmrvl_fw {
 	uint32_t magic;
@@ -56,7 +56,7 @@ struct nfcmrvl_fw {
 	struct nfcmrvl_fw_binary_config helper;
 	struct nfcmrvl_fw_binary_config firmware;
 	uint8_t reserved[64];
-} __packed;
+} __packed_if_not_cheri;
 
 struct nfcmrvl_fw_dnld {
 	char name[NFC_FIRMWARE_NAME_MAXSIZE + 1];
