@@ -543,7 +543,7 @@ static int usbhsf_pio_try_push(struct usbhs_pkt *pkt, int *is_done)
 	 *
 	 * 32-bit access only
 	 */
-	if (len >= 4 && !((unsigned long)buf & 0x03)) {
+	if (len >= 4 && !(__c_pa(buf) & 0x03)) {
 		iowrite32_rep(addr, buf, len / 4);
 		len %= 4;
 		buf += total_len - len;
@@ -714,7 +714,7 @@ static int usbhsf_pio_try_pop(struct usbhs_pkt *pkt, int *is_done)
 	 *
 	 * 32-bit access only
 	 */
-	if (len >= 4 && !((unsigned long)buf & 0x03)) {
+	if (len >= 4 && !(__c_pa(buf) & 0x03)) {
 		ioread32_rep(addr, buf, len / 4);
 		len %= 4;
 		buf += total_len - len;
@@ -880,7 +880,7 @@ static int usbhsf_dma_prepare_push(struct usbhs_pkt *pkt, int *is_done)
 	struct usbhs_fifo *fifo;
 	int len = pkt->length - pkt->actual;
 	int ret;
-	uintptr_t align_mask;
+	unsigned long align_mask;
 
 	if (usbhs_pipe_is_busy(pipe))
 		return 0;

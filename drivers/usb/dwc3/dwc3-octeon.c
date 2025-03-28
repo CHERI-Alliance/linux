@@ -354,7 +354,7 @@ static int dwc3_octeon_setup(struct dwc3_octeon *octeon,
 		val &= ~USBDRD_UCTL_HOST_PPC_EN;
 	} else {
 		val |= USBDRD_UCTL_HOST_PPC_EN;
-		dwc3_octeon_config_gpio(((__force uintptr_t)octeon->base >> 24) & 1,
+		dwc3_octeon_config_gpio((__c_pa(octeon->base) >> 24) & 1,
 					power_gpio);
 		dev_dbg(dev, "power control is using gpio%d\n", power_gpio);
 	}

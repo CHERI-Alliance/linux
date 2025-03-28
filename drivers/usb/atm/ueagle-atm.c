@@ -238,9 +238,9 @@ enum {
 
 /* macros for both struct usb_device_id and struct uea_softc */
 #define UEA_IS_PREFIRM(x) \
-	(!((x)->driver_info & PSTFIRM))
+	(!(__c_a((x)->driver_info) & PSTFIRM))
 #define UEA_CHIP_VERSION(x) \
-	((x)->driver_info & 0xf)
+	(__c_a((x)->driver_info) & 0xf)
 
 #define IS_ISDN(x) \
 	((x)->annex & ANNEXB)
@@ -2523,7 +2523,7 @@ static int uea_bind(struct usbatm_data *usbatm, struct usb_interface *intf,
 	usbatm->driver_data = sc;
 	sc->usbatm = usbatm;
 	sc->modem_index = (modem_index < NB_MODEM) ? modem_index++ : 0;
-	sc->driver_info = id->driver_info;
+	sc->driver_info = __c_ua(id->driver_info);
 
 	/* first try to use module parameter */
 	if (annex[sc->modem_index] == 1)

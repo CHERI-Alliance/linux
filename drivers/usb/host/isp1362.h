@@ -507,7 +507,7 @@ static inline const char *ISP1362_INT_NAME(int n)
 
 static inline void ALIGNSTAT(struct isp1362_hcd *isp1362_hcd, void *ptr)
 {
-	unsigned long p = (unsigned long)ptr;
+	unsigned long p = __c_pa(ptr);
 	if (!(p & 0xf))
 		isp1362_hcd->stat16++;
 	else if (!(p & 0x7))
@@ -657,7 +657,7 @@ static void isp1362_read_fifo(struct isp1362_hcd *isp1362_hcd, void *buf, u16 le
 #endif
 	if (len >= 2) {
 		RDBG("%s: Using readsw for %d words\n", __func__, len >> 1);
-		insw((unsigned long)isp1362_hcd->data_reg, dp, len >> 1);
+		insw(__c_pa(isp1362_hcd->data_reg), dp, len >> 1);
 		dp += len & ~1;
 		len &= 1;
 	}
@@ -679,7 +679,7 @@ static void isp1362_write_fifo(struct isp1362_hcd *isp1362_hcd, void *buf, u16 l
 	if (!len)
 		return;
 
-	if ((unsigned long)dp & 0x1) {
+	if (__c_pa(dp) & 0x1) {
 		/* not aligned */
 		for (; len > 1; len -= 2) {
 			data = *dp++;
@@ -702,7 +702,7 @@ static void isp1362_write_fifo(struct isp1362_hcd *isp1362_hcd, void *buf, u16 l
 #endif
 	if (len >= 2) {
 		RDBG("%s: Using writesw for %d words\n", __func__, len >> 1);
-		outsw((unsigned long)isp1362_hcd->data_reg, dp, len >> 1);
+		outsw(__c_pa(isp1362_hcd->data_reg), dp, len >> 1);
 		dp += len & ~1;
 		len &= 1;
 	}

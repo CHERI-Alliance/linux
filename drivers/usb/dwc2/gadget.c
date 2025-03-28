@@ -1287,7 +1287,7 @@ static int dwc2_hsotg_handle_unaligned_buf_start(struct dwc2_hsotg *hsotg,
 	void *req_buf = hs_req->req.buf;
 
 	/* If dma is not being used or buffer is aligned */
-	if (!using_dma(hsotg) || !((long)req_buf & 3))
+	if (!using_dma(hsotg) || !(__c_pa(req_buf) & 3))
 		return 0;
 
 	WARN_ON(hs_req->saved_req_buf);

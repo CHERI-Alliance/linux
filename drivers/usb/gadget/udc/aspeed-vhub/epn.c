@@ -376,7 +376,7 @@ static int ast_vhub_epn_queue(struct usb_ep* u_ep, struct usb_request *u_req,
 	 * than the whole request.
 	 */
 	if (ep->epn.desc_mode ||
-	    ((((unsigned long)u_req->buf & 7) == 0) &&
+	    (((__c_pa(u_req->buf) & 7) == 0) &&
 	     (ep->epn.is_in || !(u_req->length & (u_ep->maxpacket - 1))))) {
 		rc = usb_gadget_map_request_by_dev(&vhub->pdev->dev, u_req,
 					    ep->epn.is_in);

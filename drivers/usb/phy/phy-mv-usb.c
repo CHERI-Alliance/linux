@@ -748,7 +748,7 @@ static int mv_otg_probe(struct platform_device *pdev)
 	}
 
 	mvotg->op_regs =
-		(struct mv_otg_regs __iomem *) ((unsigned long) mvotg->cap_regs
+		(struct mv_otg_regs __iomem *) ((uintptr_t) mvotg->cap_regs
 			+ (readl(mvotg->cap_regs) & CAPLENGTH_MASK));
 
 	if (pdata->id) {

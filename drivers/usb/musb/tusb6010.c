@@ -241,10 +241,10 @@ static void tusb_write_fifo(struct musb_hw_ep *hw_ep, u16 len, const u8 *buf)
 		musb_writel(ep_conf, 0, TUSB_EP0_CONFIG_DIR_TX |
 			TUSB_EP0_CONFIG_XFR_SIZE(len));
 
-	if (likely((0x01 & (unsigned long) buf) == 0)) {
+	if (likely((0x01 & __c_pa(buf)) == 0)) {
 
 		/* Best case is 32bit-aligned destination address */
-		if ((0x02 & (unsigned long) buf) == 0) {
+		if ((0x02 & __c_pa(buf)) == 0) {
 			if (len >= 4) {
 				iowrite32_rep(fifo, buf, len >> 2);
 				buf += (len & ~0x03);
@@ -288,10 +288,10 @@ static void tusb_read_fifo(struct musb_hw_ep *hw_ep, u16 len, u8 *buf)
 	else
 		musb_writel(ep_conf, 0, TUSB_EP0_CONFIG_XFR_SIZE(len));
 
-	if (likely((0x01 & (unsigned long) buf) == 0)) {
+	if (likely((0x01 & __c_pa(buf)) == 0)) {
 
 		/* Best case is 32bit-aligned destination address */
-		if ((0x02 & (unsigned long) buf) == 0) {
+		if ((0x02 & __c_pa(buf)) == 0) {
 			if (len >= 4) {
 				ioread32_rep(fifo, buf, len >> 2);
 				buf += (len & ~0x03);
