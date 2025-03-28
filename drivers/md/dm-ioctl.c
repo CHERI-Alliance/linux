@@ -544,7 +544,7 @@ static inline size_t align_val(size_t val)
 }
 static inline void *align_ptr(void *ptr)
 {
-	return (void *)align_val((uintptr_t)ptr);
+	return (void *)ALIGN((uintptr_t)ptr, (ALIGN_MASK + 1));
 }
 
 /*
