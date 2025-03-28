@@ -1231,7 +1231,7 @@ static int scmi_wait_for_reply(struct device *dev, const struct scmi_desc *desc,
 			if (ktime_after(ktime_get(), stop)) {
 				dev_err(dev,
 					"timed out in resp(caller: %pS) - polling\n",
-					(void *)_RET_IP_);
+					__c_fakep(_RET_IP_));
 				ret = -ETIMEDOUT;
 			}
 		}
@@ -1274,7 +1274,7 @@ static int scmi_wait_for_reply(struct device *dev, const struct scmi_desc *desc,
 		if (!wait_for_completion_timeout(&xfer->done,
 						 msecs_to_jiffies(timeout_ms))) {
 			dev_err(dev, "timed out in resp(caller: %pS)\n",
-				(void *)_RET_IP_);
+				__c_fakep(_RET_IP_));
 			ret = -ETIMEDOUT;
 		}
 	}
@@ -1471,7 +1471,7 @@ static int do_xfer_with_response(const struct scmi_protocol_handle *ph,
 		if (!wait_for_completion_timeout(xfer->async_done, timeout)) {
 			dev_err(ph->dev,
 				"timed out in delayed resp(caller: %pS)\n",
-				(void *)_RET_IP_);
+				__c_fakep(_RET_IP_));
 			ret = -ETIMEDOUT;
 		} else if (xfer->hdr.status) {
 			ret = scmi_to_linux_errno(xfer->hdr.status);
