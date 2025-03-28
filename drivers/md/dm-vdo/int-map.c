@@ -82,7 +82,7 @@ struct bucket {
 	u64 key;
 	/** @value: The value stored in this bucket (NULL if empty). */
 	void *value;
-} __packed;
+} __packed_if_not_cheri;
 
 /**
  * struct int_map - The concrete definition of the opaque int_map type.
