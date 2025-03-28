@@ -277,7 +277,7 @@ static int exynos_rng_probe(struct platform_device *pdev)
 	if (!rng)
 		return -ENOMEM;
 
-	rng->type = (uintptr_t)of_device_get_match_data(&pdev->dev);
+	rng->type = __c_pa(of_device_get_match_data(&pdev->dev));
 
 	mutex_init(&rng->lock);
 

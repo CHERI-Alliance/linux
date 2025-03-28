@@ -54,7 +54,7 @@ static irqreturn_t aspeed_hace_irq(int irq, void *dev)
 	return IRQ_HANDLED;
 }
 
-static void aspeed_hace_crypto_done_task(unsigned long data)
+static void aspeed_hace_crypto_done_task(uintptr_t data)
 {
 	struct aspeed_hace_dev *hace_dev = (struct aspeed_hace_dev *)data;
 	struct aspeed_engine_crypto *crypto_engine = &hace_dev->crypto_engine;
@@ -62,7 +62,7 @@ static void aspeed_hace_crypto_done_task(unsigned long data)
 	crypto_engine->resume(hace_dev);
 }
 
-static void aspeed_hace_hash_done_task(unsigned long data)
+static void aspeed_hace_hash_done_task(uintptr_t data)
 {
 	struct aspeed_hace_dev *hace_dev = (struct aspeed_hace_dev *)data;
 	struct aspeed_engine_hash *hash_engine = &hace_dev->hash_engine;
@@ -108,7 +108,7 @@ static int aspeed_hace_probe(struct platform_device *pdev)
 	if (!hace_dev)
 		return -ENOMEM;
 
-	hace_dev->version = (uintptr_t)device_get_match_data(&pdev->dev);
+	hace_dev->version = __c_pa(device_get_match_data(&pdev->dev));
 	if (!hace_dev->version) {
 		dev_err(&pdev->dev, "Failed to match hace dev id\n");
 		return -EINVAL;
@@ -162,7 +162,7 @@ static int aspeed_hace_probe(struct platform_device *pdev)
 		goto err_engine_hash_start;
 
 	tasklet_init(&hash_engine->done_task, aspeed_hace_hash_done_task,
-		     (unsigned long)hace_dev);
+		     (uintptr_t)hace_dev);
 
 	/* Initialize crypto hardware engine structure for crypto */
 	hace_dev->crypt_engine_crypto = crypto_engine_alloc_init(hace_dev->dev,
@@ -177,7 +177,7 @@ static int aspeed_hace_probe(struct platform_device *pdev)
 		goto err_engine_crypto_start;
 
 	tasklet_init(&crypto_engine->done_task, aspeed_hace_crypto_done_task,
-		     (unsigned long)hace_dev);
+		     (uintptr_t)hace_dev);
 
 	/* Allocate DMA buffer for hash engine input used */
 	hash_engine->ahash_src_addr =

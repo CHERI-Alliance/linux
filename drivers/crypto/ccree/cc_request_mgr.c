@@ -70,7 +70,7 @@ static const u32 cc_cpp_int_masks[CC_CPP_NUM_ALGS][CC_CPP_NUM_SLOTS] = {
 	  BIT(CC_HOST_IRR_REE_OP_ABORTED_SM_7_INT_BIT_SHIFT) }
 };
 
-static void comp_handler(unsigned long devarg);
+static void comp_handler(uintptr_t devarg);
 #ifdef COMP_IN_WQ
 static void comp_work_handler(struct work_struct *work);
 #endif
@@ -140,7 +140,7 @@ int cc_req_mgr_init(struct cc_drvdata *drvdata)
 #else
 	dev_dbg(dev, "Initializing completion tasklet\n");
 	tasklet_init(&req_mgr_h->comptask, comp_handler,
-		     (unsigned long)drvdata);
+		     (uintptr_t)drvdata);
 #endif
 	req_mgr_h->hw_queue_size = cc_ioread(drvdata,
 					     CC_REG(DSCRPTR_QUEUE_SRAM_SIZE));
@@ -548,7 +548,7 @@ static void comp_work_handler(struct work_struct *work)
 	struct cc_drvdata *drvdata =
 		container_of(work, struct cc_drvdata, compwork.work);
 
-	comp_handler((unsigned long)drvdata);
+	comp_handler((uintptr_t)drvdata);
 }
 #endif
 
@@ -610,7 +610,7 @@ static inline u32 cc_axi_comp_count(struct cc_drvdata *drvdata)
 }
 
 /* Deferred service handler, run as interrupt-fired tasklet */
-static void comp_handler(unsigned long devarg)
+static void comp_handler(uintptr_t devarg)
 {
 	struct cc_drvdata *drvdata = (struct cc_drvdata *)devarg;
 	struct cc_req_mgr_handle *request_mgr_handle =

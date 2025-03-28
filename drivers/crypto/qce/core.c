@@ -123,7 +123,7 @@ static int qce_handle_queue(struct qce_device *qce,
 	return ret;
 }
 
-static void qce_tasklet_req_done(unsigned long data)
+static void qce_tasklet_req_done(uintptr_t data)
 {
 	struct qce_device *qce = (struct qce_device *)data;
 	struct crypto_async_request *req;
@@ -251,7 +251,7 @@ static int qce_crypto_probe(struct platform_device *pdev)
 
 	spin_lock_init(&qce->lock);
 	tasklet_init(&qce->done_tasklet, qce_tasklet_req_done,
-		     (unsigned long)qce);
+		     (uintptr_t)qce);
 	crypto_init_queue(&qce->queue, QCE_QUEUE_LENGTH);
 
 	qce->async_req_enqueue = qce_async_request_enqueue;

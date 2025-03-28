@@ -845,14 +845,14 @@ static struct skcipher_alg tdes_algs[] = {
 },
 };
 
-static void atmel_tdes_queue_task(unsigned long data)
+static void atmel_tdes_queue_task(uintptr_t data)
 {
 	struct atmel_tdes_dev *dd = (struct atmel_tdes_dev *)data;
 
 	atmel_tdes_handle_queue(dd, NULL);
 }
 
-static void atmel_tdes_done_task(unsigned long data)
+static void atmel_tdes_done_task(uintptr_t data)
 {
 	struct atmel_tdes_dev *dd = (struct atmel_tdes_dev *) data;
 	int err;
@@ -971,9 +971,9 @@ static int atmel_tdes_probe(struct platform_device *pdev)
 	spin_lock_init(&tdes_dd->lock);
 
 	tasklet_init(&tdes_dd->done_task, atmel_tdes_done_task,
-					(unsigned long)tdes_dd);
+					(uintptr_t) tdes_dd);
 	tasklet_init(&tdes_dd->queue_task, atmel_tdes_queue_task,
-					(unsigned long)tdes_dd);
+					(uintptr_t) tdes_dd);
 
 	crypto_init_queue(&tdes_dd->queue, ATMEL_TDES_QUEUE_LENGTH);
 

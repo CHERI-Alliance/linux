@@ -2027,7 +2027,8 @@ static int sev_ioctl_do_snp_set_config(struct sev_issue_cmd *argp, bool writable
 	return __sev_do_cmd_locked(SEV_CMD_SNP_CONFIG, &config, &argp->error);
 }
 
-static long sev_ioctl(struct file *file, unsigned int ioctl, unsigned long arg)
+static long sev_ioctl(struct file *file, unsigned int ioctl,
+		      user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 	struct sev_issue_cmd input;

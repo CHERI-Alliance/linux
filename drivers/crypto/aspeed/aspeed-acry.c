@@ -692,7 +692,7 @@ static void aspeed_acry_sram_mapping(struct aspeed_acry_dev *acry_dev)
 	}
 }
 
-static void aspeed_acry_done_task(unsigned long data)
+static void aspeed_acry_done_task(uintptr_t data)
 {
 	struct aspeed_acry_dev *acry_dev = (struct aspeed_acry_dev *)data;
 
@@ -764,7 +764,7 @@ static int aspeed_acry_probe(struct platform_device *pdev)
 		goto err_engine_rsa_start;
 
 	tasklet_init(&acry_dev->done_task, aspeed_acry_done_task,
-		     (unsigned long)acry_dev);
+		     (uintptr_t)acry_dev);
 
 	/* Set Data Memory to AHB(CPU) Access Mode */
 	ast_acry_write(acry_dev, ACRY_CMD_DMEM_AHB, ASPEED_ACRY_DMA_CMD);

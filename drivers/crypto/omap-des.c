@@ -584,7 +584,7 @@ static int omap_des_crypt_req(struct crypto_engine *engine,
 	       omap_des_crypt_dma_start(dd);
 }
 
-static void omap_des_done_task(unsigned long data)
+static void omap_des_done_task(uintptr_t data)
 {
 	struct omap_des_dev *dd = (struct omap_des_dev *)data;
 	int i;
@@ -995,7 +995,7 @@ static int omap_des_probe(struct platform_device *pdev)
 		 (reg & dd->pdata->major_mask) >> dd->pdata->major_shift,
 		 (reg & dd->pdata->minor_mask) >> dd->pdata->minor_shift);
 
-	tasklet_init(&dd->done_task, omap_des_done_task, (unsigned long)dd);
+	tasklet_init(&dd->done_task, omap_des_done_task, (uintptr_t) dd);
 
 	err = omap_des_dma_init(dd);
 	if (err == -EPROBE_DEFER) {

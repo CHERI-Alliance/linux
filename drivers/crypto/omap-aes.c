@@ -496,7 +496,7 @@ static void omap_aes_copy_ivout(struct omap_aes_dev *dd, u8 *ivbuf)
 		((u32 *)ivbuf)[i] = omap_aes_read(dd, AES_REG_IV(dd, i));
 }
 
-static void omap_aes_done_task(unsigned long data)
+static void omap_aes_done_task(uintptr_t data)
 {
 	struct omap_aes_dev *dd = (struct omap_aes_dev *)data;
 
@@ -1150,7 +1150,7 @@ static int omap_aes_probe(struct platform_device *pdev)
 		 (reg & dd->pdata->major_mask) >> dd->pdata->major_shift,
 		 (reg & dd->pdata->minor_mask) >> dd->pdata->minor_shift);
 
-	tasklet_init(&dd->done_task, omap_aes_done_task, (unsigned long)dd);
+	tasklet_init(&dd->done_task, omap_aes_done_task, (uintptr_t) dd);
 
 	err = omap_aes_dma_init(dd);
 	if (err == -EPROBE_DEFER) {

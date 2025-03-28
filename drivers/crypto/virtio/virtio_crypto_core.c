@@ -70,7 +70,7 @@ int virtio_crypto_ctrl_vq_request(struct virtio_crypto *vcrypto, struct scatterl
 	return 0;
 }
 
-static void virtcrypto_done_task(unsigned long data)
+static void virtcrypto_done_task(uintptr_t data)
 {
 	struct data_queue *data_vq = (struct data_queue *)data;
 	struct virtqueue *vq = data_vq->vq;
@@ -150,7 +150,7 @@ static int virtcrypto_find_vqs(struct virtio_crypto *vi)
 			goto err_engine;
 		}
 		tasklet_init(&vi->data_vq[i].done_task, virtcrypto_done_task,
-				(unsigned long)&vi->data_vq[i]);
+				(uintptr_t)&vi->data_vq[i]);
 	}
 
 	kfree(names);

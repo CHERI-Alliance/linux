@@ -77,7 +77,7 @@ void zip_cmd_qbuf_free(struct zip_device *zip, int q)
 {
 	zip_dbg("Freeing cmd_qbuf 0x%lx\n", zip->iq[q].sw_tail);
 
-	free_pages((u64)zip->iq[q].sw_tail, get_order(ZIP_CMD_QBUF_SIZE));
+	free_pages((uintptr_t)zip->iq[q].sw_tail, get_order(ZIP_CMD_QBUF_SIZE));
 }
 
 /**
@@ -110,5 +110,5 @@ void zip_data_buf_free(u8 *ptr, u64 size)
 {
 	zip_dbg("Freeing data buffer 0x%lx\n", ptr);
 
-	free_pages((u64)ptr, get_order(size));
+	free_pages((uintptr_t)ptr, get_order(size));
 }

@@ -2403,7 +2403,7 @@ static void qm_set_sqctype(struct uacce_queue *q, u16 type)
 }
 
 static long hisi_qm_uacce_ioctl(struct uacce_queue *q, unsigned int cmd,
-				unsigned long arg)
+				user_uintptr_t arg)
 {
 	struct hisi_qp *qp = q->priv;
 	struct hisi_qp_info qp_info;

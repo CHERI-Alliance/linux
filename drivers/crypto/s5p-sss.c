@@ -1438,7 +1438,7 @@ out:
  * s5p_hash_tasklet_cb() - hash tasklet
  * @data:	ptr to s5p_aes_dev
  */
-static void s5p_hash_tasklet_cb(unsigned long data)
+static void s5p_hash_tasklet_cb(uintptr_t data)
 {
 	struct s5p_aes_dev *dd = (struct s5p_aes_dev *)data;
 
@@ -1965,7 +1965,7 @@ indata_error:
 	s5p_aes_complete(req, err);
 }
 
-static void s5p_tasklet_cb(unsigned long data)
+static void s5p_tasklet_cb(uintptr_t data)
 {
 	struct s5p_aes_dev *dev = (struct s5p_aes_dev *)data;
 	struct crypto_async_request *async_req, *backlog;
@@ -2250,7 +2250,7 @@ static int s5p_aes_probe(struct platform_device *pdev)
 	platform_set_drvdata(pdev, pdata);
 	s5p_dev = pdata;
 
-	tasklet_init(&pdata->tasklet, s5p_tasklet_cb, (unsigned long)pdata);
+	tasklet_init(&pdata->tasklet, s5p_tasklet_cb, (uintptr_t)pdata);
 	crypto_init_queue(&pdata->queue, CRYPTO_QUEUE_LEN);
 
 	for (i = 0; i < ARRAY_SIZE(algs); i++) {
@@ -2261,7 +2261,7 @@ static int s5p_aes_probe(struct platform_device *pdev)
 
 	if (pdata->use_hash) {
 		tasklet_init(&pdata->hash_tasklet, s5p_hash_tasklet_cb,
-			     (unsigned long)pdata);
+			     (uintptr_t)pdata);
 		crypto_init_queue(&pdata->hash_queue, SSS_HASH_QUEUE_LENGTH);
 
 		for (hash_i = 0; hash_i < ARRAY_SIZE(algs_sha1_md5_sha256);

@@ -297,7 +297,7 @@ static int cpt_ucode_load_fw(struct cpt_device *cpt, const u8 *fw, bool is_ae)
 	dev_dbg(dev, "mcode->code_size = %u\n", mcode->code_size);
 	dev_dbg(dev, "mcode->is_ae = %u\n", mcode->is_ae);
 	dev_dbg(dev, "mcode->num_cores = %u\n", mcode->num_cores);
-	dev_dbg(dev, "mcode->code = %llx\n", (u64)mcode->code);
+	dev_dbg(dev, "mcode->code = %llx\n", (u64)__c_pa(mcode->code));
 	dev_dbg(dev, "mcode->phys_base = %llx\n", mcode->phys_base);
 
 	ret = do_cpt_init(cpt, mcode);

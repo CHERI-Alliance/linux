@@ -50,7 +50,8 @@ static inline u64 otx2_atomic64_fetch_add(u64 incr, u64 *ptr)
 
 #else
 #define otx2_lmt_flush(ioaddr)          ({ 0; })
-#define cn10k_lmt_flush(val, addr)	({ addr = val; })
+/* FIXCHERI: This looks bogus even upstream. */
+#define cn10k_lmt_flush(val, addr)	({ addr = __c_fakeu(val); })
 #define otx2_atomic64_fetch_add(incr, ptr)	({ incr; })
 #endif
 

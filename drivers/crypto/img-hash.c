@@ -355,7 +355,7 @@ static int img_hash_dma_init(struct img_hash_dev *hdev)
 	return 0;
 }
 
-static void img_hash_dma_task(unsigned long d)
+static void img_hash_dma_task(uintptr_t d)
 {
 	struct img_hash_dev *hdev = (struct img_hash_dev *)d;
 	struct img_hash_request_ctx *ctx;
@@ -886,7 +886,7 @@ static int img_unregister_algs(struct img_hash_dev *hdev)
 	return 0;
 }
 
-static void img_hash_done_task(unsigned long data)
+static void img_hash_done_task(uintptr_t data)
 {
 	struct img_hash_dev *hdev = (struct img_hash_dev *)data;
 	int err = 0;
@@ -953,8 +953,8 @@ static int img_hash_probe(struct platform_device *pdev)
 
 	INIT_LIST_HEAD(&hdev->list);
 
-	tasklet_init(&hdev->done_task, img_hash_done_task, (unsigned long)hdev);
-	tasklet_init(&hdev->dma_task, img_hash_dma_task, (unsigned long)hdev);
+	tasklet_init(&hdev->done_task, img_hash_done_task, (uintptr_t) hdev);
+	tasklet_init(&hdev->dma_task, img_hash_dma_task, (uintptr_t) hdev);
 
 	crypto_init_queue(&hdev->queue, IMG_HASH_QUEUE_LENGTH);
 

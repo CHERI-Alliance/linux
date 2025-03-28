@@ -126,7 +126,7 @@ void dbc_dev_destroy(struct psp_device *psp)
 	psp->dbc_data = NULL;
 }
 
-static long dbc_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+static long dbc_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 {
 	struct psp_device *psp_master = psp_get_master_device();
 	void __user *argp = (void __user *)arg;

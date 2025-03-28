@@ -90,7 +90,7 @@ struct otx2_snd_queue {
 	u16			num_sqbs;
 	u16			sqe_thresh;
 	u8			sqe_per_sqb;
-	u64			 io_addr;
+	uintptr_t		 io_addr;
 	u64			*aura_fc_addr;
 	u64			*lmt_addr;
 	void			*sqe_base;

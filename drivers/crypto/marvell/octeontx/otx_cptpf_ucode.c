@@ -575,7 +575,7 @@ static void print_ucode_dbg_info(struct otx_cpt_ucode *ucode)
 		 ucode->ver_num.xx, ucode->ver_num.yy, ucode->ver_num.zz);
 	pr_debug("Ucode type %s\n", get_ucode_type_str(ucode->type));
 	pr_debug("Ucode size %d\n", ucode->size);
-	pr_debug("Ucode virt address %16.16llx\n", (u64)ucode->align_va);
+	pr_debug("Ucode virt address %16.16llx\n", (unsigned long long)__c_pa(ucode->align_va));
 	pr_debug("Ucode phys address %16.16llx\n", ucode->align_dma);
 }
 
@@ -871,7 +871,7 @@ static int copy_ucode_to_dma_mem(struct device *dev,
 		return -ENOMEM;
 	}
 	ucode->align_va = PTR_ALIGN(ucode->va, OTX_CPT_UCODE_ALIGNMENT);
-	ucode->align_dma = PTR_ALIGN(ucode->dma, OTX_CPT_UCODE_ALIGNMENT);
+	ucode->align_dma = ALIGN(ucode->dma, OTX_CPT_UCODE_ALIGNMENT);
 
 	memcpy((void *) ucode->align_va, (void *) ucode_data +
 	       sizeof(struct otx_cpt_ucode_hdr), ucode->size);

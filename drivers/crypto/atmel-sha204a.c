@@ -29,7 +29,7 @@ static void atmel_sha204a_rng_done(struct atmel_i2c_work_data *work_data,
 				     "i2c transaction failed (%d)\n",
 				     status);
 
-	rng->priv = (unsigned long)work_data;
+	rng->priv = (uintptr_t)work_data;
 	atomic_dec(&i2c_priv->tfm_count);
 }
 

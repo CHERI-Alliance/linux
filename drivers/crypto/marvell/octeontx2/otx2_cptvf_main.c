@@ -125,7 +125,7 @@ static void cptvf_pfvf_mbox_destroy(struct otx2_cptvf_dev *cptvf)
 	otx2_mbox_destroy(&cptvf->pfvf_mbox);
 }
 
-static void cptlf_work_handler(unsigned long data)
+static void cptlf_work_handler(uintptr_t data)
 {
 	otx2_cpt_post_process((struct otx2_cptlf_wqe *) data);
 }
@@ -156,7 +156,7 @@ static int init_tasklet_work(struct otx2_cptlfs_info *lfs)
 			goto cleanup_tasklet;
 		}
 
-		tasklet_init(&wqe->work, cptlf_work_handler, (u64) wqe);
+		tasklet_init(&wqe->work, cptlf_work_handler, (uintptr_t) wqe);
 		wqe->lfs = lfs;
 		wqe->lf_num = i;
 		lfs->lf[i].wqe = wqe;

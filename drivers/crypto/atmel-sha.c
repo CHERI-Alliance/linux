@@ -1312,7 +1312,7 @@ static struct ahash_alg sha_384_512_algs[] = {
 },
 };
 
-static void atmel_sha_queue_task(unsigned long data)
+static void atmel_sha_queue_task(uintptr_t data)
 {
 	struct atmel_sha_dev *dd = (struct atmel_sha_dev *)data;
 
@@ -1351,7 +1351,7 @@ finish:
 	return err;
 }
 
-static void atmel_sha_done_task(unsigned long data)
+static void atmel_sha_done_task(uintptr_t data)
 {
 	struct atmel_sha_dev *dd = (struct atmel_sha_dev *)data;
 
@@ -2595,9 +2595,9 @@ static int atmel_sha_probe(struct platform_device *pdev)
 	spin_lock_init(&sha_dd->lock);
 
 	tasklet_init(&sha_dd->done_task, atmel_sha_done_task,
-					(unsigned long)sha_dd);
+					(uintptr_t)sha_dd);
 	tasklet_init(&sha_dd->queue_task, atmel_sha_queue_task,
-					(unsigned long)sha_dd);
+					(uintptr_t)sha_dd);
 
 	crypto_init_queue(&sha_dd->queue, ATMEL_SHA_QUEUE_LENGTH);
 
