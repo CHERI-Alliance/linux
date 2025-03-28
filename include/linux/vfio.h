@@ -122,7 +122,7 @@ struct vfio_device_ops {
 	ssize_t	(*write)(struct vfio_device *vdev, const char __user *buf,
 			 size_t count, loff_t *size);
 	long	(*ioctl)(struct vfio_device *vdev, unsigned int cmd,
-			 unsigned long arg);
+			 user_uintptr_t arg);
 	int	(*mmap)(struct vfio_device *vdev, struct vm_area_struct *vma);
 	void	(*request)(struct vfio_device *vdev, unsigned int count);
 	int	(*match)(struct vfio_device *vdev, char *buf);

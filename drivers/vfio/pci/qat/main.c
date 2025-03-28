@@ -114,7 +114,7 @@ static void qat_vf_pci_close_device(struct vfio_device *core_vdev)
 }
 
 static long qat_vf_precopy_ioctl(struct file *filp, unsigned int cmd,
-				 unsigned long arg)
+				 user_uintptr_t arg)
 {
 	struct qat_vf_migration_file *migf = filp->private_data;
 	struct qat_vf_core_device *qat_vdev = migf->qat_vdev;

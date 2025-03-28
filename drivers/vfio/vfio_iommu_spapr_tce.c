@@ -313,7 +313,7 @@ static void tce_iommu_disable(struct tce_container *container)
 	account_locked_vm(container->mm, container->locked_pages, false);
 }
 
-static void *tce_iommu_open(unsigned long arg)
+static void *tce_iommu_open(user_uintptr_t arg)
 {
 	struct tce_container *container;
 
@@ -775,7 +775,7 @@ static long tce_iommu_create_default_window(struct tce_container *container)
 }
 
 static long vfio_spapr_ioctl_eeh_pe_op(struct iommu_group *group,
-				       unsigned long arg)
+				       user_uintptr_t arg)
 {
 	struct eeh_pe *pe;
 	struct vfio_eeh_pe_op op;
@@ -826,7 +826,7 @@ static long vfio_spapr_ioctl_eeh_pe_op(struct iommu_group *group,
 }
 
 static long tce_iommu_ioctl(void *iommu_data,
-				 unsigned int cmd, unsigned long arg)
+				 unsigned int cmd, user_uintptr_t arg)
 {
 	struct tce_container *container = iommu_data;
 	unsigned long minsz, ddwsz;
@@ -834,7 +834,7 @@ static long tce_iommu_ioctl(void *iommu_data,
 
 	switch (cmd) {
 	case VFIO_CHECK_EXTENSION:
-		switch (arg) {
+		switch (__c_ua(arg)) {
 		case VFIO_SPAPR_TCE_IOMMU:
 		case VFIO_SPAPR_TCE_v2_IOMMU:
 			return 1;

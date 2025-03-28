@@ -118,7 +118,7 @@ static void vfio_fsl_mc_close_device(struct vfio_device *core_vdev)
 }
 
 static long vfio_fsl_mc_ioctl(struct vfio_device *core_vdev,
-			      unsigned int cmd, unsigned long arg)
+			      unsigned int cmd, user_uintptr_t arg)
 {
 	unsigned long minsz;
 	struct vfio_fsl_mc_device *vdev =

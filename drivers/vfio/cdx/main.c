@@ -210,7 +210,7 @@ static int vfio_cdx_ioctl_set_irqs(struct vfio_cdx_device *vdev,
 }
 
 static long vfio_cdx_ioctl(struct vfio_device *core_vdev,
-			   unsigned int cmd, unsigned long arg)
+			   unsigned int cmd, user_uintptr_t arg)
 {
 	struct vfio_cdx_device *vdev =
 		container_of(core_vdev, struct vfio_cdx_device, vdev);

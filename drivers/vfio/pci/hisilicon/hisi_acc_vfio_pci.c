@@ -751,7 +751,7 @@ hisi_acc_vf_pci_resume(struct hisi_acc_vf_core_device *hisi_acc_vdev)
 }
 
 static long hisi_acc_vf_precopy_ioctl(struct file *filp,
-				      unsigned int cmd, unsigned long arg)
+				      unsigned int cmd, user_uintptr_t arg)
 {
 	struct hisi_acc_vf_migration_file *migf = filp->private_data;
 	struct hisi_acc_vf_core_device *hisi_acc_vdev = migf->hisi_acc_vdev;
@@ -1240,7 +1240,7 @@ static ssize_t hisi_acc_vfio_pci_read(struct vfio_device *core_vdev,
 }
 
 static long hisi_acc_vfio_pci_ioctl(struct vfio_device *core_vdev, unsigned int cmd,
-				    unsigned long arg)
+				    user_uintptr_t arg)
 {
 	if (cmd == VFIO_DEVICE_GET_REGION_INFO) {
 		struct vfio_pci_core_device *vdev =

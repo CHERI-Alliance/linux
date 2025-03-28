@@ -195,7 +195,7 @@ static int nvgrace_gpu_mmap(struct vfio_device *core_vdev,
 
 static long
 nvgrace_gpu_ioctl_get_region_info(struct vfio_device *core_vdev,
-				  unsigned long arg)
+				  user_uintptr_t arg)
 {
 	struct nvgrace_gpu_pci_core_device *nvdev =
 		container_of(core_vdev, struct nvgrace_gpu_pci_core_device,
@@ -278,7 +278,7 @@ nvgrace_gpu_ioctl_get_region_info(struct vfio_device *core_vdev,
 }
 
 static long nvgrace_gpu_ioctl(struct vfio_device *core_vdev,
-			      unsigned int cmd, unsigned long arg)
+			      unsigned int cmd, user_uintptr_t arg)
 {
 	switch (cmd) {
 	case VFIO_DEVICE_GET_REGION_INFO:

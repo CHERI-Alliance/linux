@@ -295,7 +295,7 @@ virtiovf_pci_core_write(struct vfio_device *core_vdev, const char __user *buf,
 
 static int
 virtiovf_pci_ioctl_get_region_info(struct vfio_device *core_vdev,
-				   unsigned int cmd, unsigned long arg)
+				   unsigned int cmd, user_uintptr_t arg)
 {
 	struct virtiovf_pci_core_device *virtvdev = container_of(
 		core_vdev, struct virtiovf_pci_core_device, core_device.vdev);
@@ -323,7 +323,7 @@ virtiovf_pci_ioctl_get_region_info(struct vfio_device *core_vdev,
 
 static long
 virtiovf_vfio_pci_core_ioctl(struct vfio_device *core_vdev, unsigned int cmd,
-			     unsigned long arg)
+			     user_uintptr_t arg)
 {
 	switch (cmd) {
 	case VFIO_DEVICE_GET_REGION_INFO:

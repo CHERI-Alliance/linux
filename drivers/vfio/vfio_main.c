@@ -65,7 +65,7 @@ static DEFINE_XARRAY(vfio_device_set_xa);
 
 int vfio_assign_device_set(struct vfio_device *device, void *set_id)
 {
-	unsigned long idx = (unsigned long)set_id;
+	unsigned long idx = __c_pa(set_id);
 	struct vfio_device_set *new_dev_set;
 	struct vfio_device_set *dev_set;
 
@@ -127,7 +127,7 @@ static void vfio_release_device_set(struct vfio_device *device)
 	xa_lock(&vfio_device_set_xa);
 	if (!--dev_set->device_count) {
 		__xa_erase(&vfio_device_set_xa,
-			   (unsigned long)dev_set->set_id);
+			   __c_pa(dev_set->set_id));
 		mutex_destroy(&dev_set->lock);
 		kfree(dev_set);
 	}
@@ -1258,7 +1258,7 @@ static int vfio_ioctl_device_feature(struct vfio_device *device,
 }
 
 static long vfio_device_fops_unl_ioctl(struct file *filep,
-				       unsigned int cmd, unsigned long arg)
+				       unsigned int cmd, user_uintptr_t arg)
 {
 	struct vfio_device_file *df = filep->private_data;
 	struct vfio_device *device = df->device;
