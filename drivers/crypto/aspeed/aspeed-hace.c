@@ -108,7 +108,7 @@ static int aspeed_hace_probe(struct platform_device *pdev)
 	if (!hace_dev)
 		return -ENOMEM;
 
-	hace_dev->version = (uintptr_t)device_get_match_data(&pdev->dev);
+	hace_dev->version = __c_pa(device_get_match_data(&pdev->dev));
 	if (!hace_dev->version) {
 		dev_err(&pdev->dev, "Failed to match hace dev id\n");
 		return -EINVAL;

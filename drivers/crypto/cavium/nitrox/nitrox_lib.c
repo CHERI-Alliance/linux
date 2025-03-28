@@ -33,7 +33,7 @@ static int nitrox_cmdq_init(struct nitrox_cmdq *cmdq, int align_bytes)
 	if (!cmdq->unalign_base)
 		return -ENOMEM;
 
-	cmdq->dma = PTR_ALIGN(cmdq->unalign_dma, align_bytes);
+	cmdq->dma = ALIGN(cmdq->unalign_dma, align_bytes);
 	cmdq->base = cmdq->unalign_base + (cmdq->dma - cmdq->unalign_dma);
 	cmdq->write_idx = 0;
 

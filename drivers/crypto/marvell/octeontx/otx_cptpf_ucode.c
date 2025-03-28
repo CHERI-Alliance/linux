@@ -861,7 +861,7 @@ static int copy_ucode_to_dma_mem(struct device *dev,
 		return -ENOMEM;
 	}
 	ucode->align_va = PTR_ALIGN(ucode->va, OTX_CPT_UCODE_ALIGNMENT);
-	ucode->align_dma = PTR_ALIGN(ucode->dma, OTX_CPT_UCODE_ALIGNMENT);
+	ucode->align_dma = ALIGN(ucode->dma, OTX_CPT_UCODE_ALIGNMENT);
 
 	memcpy((void *) ucode->align_va, (void *) ucode_data +
 	       sizeof(struct otx_cpt_ucode_hdr), ucode->size);

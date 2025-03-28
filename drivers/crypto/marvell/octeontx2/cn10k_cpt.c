@@ -30,10 +30,10 @@ static void cn10k_cpt_send_cmd(union otx2_cpt_inst_s *cptinst, u32 insts_num,
 {
 	void *lmtline = lf->lfs->lmt_info.base + (lf->slot * LMTLINE_SIZE);
 	u64 val = (lf->slot & 0x7FF);
-	u64 tar_addr = 0;
+	uintptr_t tar_addr = 0;
 
 	/* tar_addr<6:4> = Size of first LMTST - 1 in units of 128b. */
-	tar_addr |= (__force u64)lf->ioreg |
+	tar_addr = (uintptr_t)lf->ioreg |
 		    (((OTX2_CPT_INST_SIZE/16) - 1) & 0x7) << 4;
 	/*
 	 * Make sure memory areas pointed in CPT_INST_S
@@ -200,7 +200,7 @@ void cn10k_cpt_ctx_flush(struct pci_dev *pdev, u64 cptr, bool inval)
 	struct otx2_cptlfs_info *lfs = &cptvf->lfs;
 	u64 reg;
 
-	reg = (uintptr_t)cptr >> 7;
+	reg = cptr >> 7;
 	if (inval)
 		reg = reg | BIT_ULL(46);
 

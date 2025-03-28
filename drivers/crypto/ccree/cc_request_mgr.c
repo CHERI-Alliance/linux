@@ -548,7 +548,7 @@ static void comp_work_handler(struct work_struct *work)
 	struct cc_drvdata *drvdata =
 		container_of(work, struct cc_drvdata, compwork.work);
 
-	comp_handler((unsigned long)drvdata);
+	comp_handler((uintptr_t)drvdata);
 }
 #endif
 
