@@ -755,7 +755,7 @@ push_on_scq(struct idt77252_dev *card, struct vc_map *vc, struct sk_buff *skb)
 
 	write_sram(card, scq->scd,
 		   scq->paddr +
-		   (u32)((unsigned long)scq->next - (unsigned long)scq->base));
+		   (u32)(__c_pa(scq->next) - __c_pa(scq->base)));
 	spin_unlock_irqrestore(&scq->lock, flags);
 
 	scq->trans_start = jiffies;
@@ -984,12 +984,12 @@ init_rsq(struct idt77252_dev *card)
 	for (rsqe = card->rsq.base; rsqe <= card->rsq.last; rsqe++)
 		rsqe->word_4 = 0;
 
-	writel((unsigned long) card->rsq.last - (unsigned long) card->rsq.base,
+	writel(__c_pa(card->rsq.last) - __c_pa(card->rsq.base),
 	       SAR_REG_RSQH);
 	writel(card->rsq.paddr, SAR_REG_RSQB);
 
 	IPRINTK("%s: RSQ base at 0x%lx (0x%x).\n", card->name,
-		(unsigned long) card->rsq.base,
+		__c_pa(card->rsq.base),
 		readl(SAR_REG_RSQB));
 	IPRINTK("%s: RSQ head = 0x%x, base = 0x%x, tail = 0x%x.\n",
 		card->name,
@@ -1121,7 +1121,7 @@ dequeue_rx(struct idt77252_dev *card, struct rsq_entry *rsqe)
 		unsigned char *l1l2;
 		unsigned int len;
 
-		l1l2 = (unsigned char *) ((unsigned long) skb->data + skb->len - 6);
+		l1l2 = (unsigned char *) ((uintptr_t) skb->data + skb->len - 6);
 
 		len = (l1l2[0] << 8) | l1l2[1];
 		len = len ? len : 0x10000;
@@ -1229,7 +1229,7 @@ idt77252_rx(struct idt77252_dev *card)
 			rsqe = card->rsq.next + 1;
 	} while (le32_to_cpu(rsqe->word_4) & SAR_RSQE_VALID);
 
-	writel((unsigned long) card->rsq.next - (unsigned long) card->rsq.base,
+	writel(__c_pa(card->rsq.next) - __c_pa(card->rsq.base),
 	       SAR_REG_RSQH);
 }
 
@@ -1387,7 +1387,7 @@ init_tsq(struct idt77252_dev *card)
 		tsqe->word_2 = cpu_to_le32(SAR_TSQE_INVALID);
 
 	writel(card->tsq.paddr, SAR_REG_TSQB);
-	writel((unsigned long) card->tsq.next - (unsigned long) card->tsq.base,
+	writel(__c_pa(card->tsq.next) - __c_pa(card->tsq.base),
 	       SAR_REG_TSQH);
 
 	return 0;
@@ -1518,7 +1518,7 @@ idt77252_tx(struct idt77252_dev *card)
 
 	} while (!(stat & SAR_TSQE_INVALID));
 
-	writel((unsigned long)card->tsq.next - (unsigned long)card->tsq.base,
+	writel(__c_pa(card->tsq.next) - __c_pa(card->tsq.base),
 	       SAR_REG_TSQH);
 
 	XPRINTK("idt77252_tx-after writel%d: TSQ head = 0x%x, tail = 0x%x, next = 0x%p.\n",

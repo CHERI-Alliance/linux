@@ -362,7 +362,7 @@ static void lanai_buf_allocate(struct lanai_buffer *buf,
 /* size of buffer in bytes */
 static inline size_t lanai_buf_size(const struct lanai_buffer *buf)
 {
-	return ((unsigned long) buf->end) - ((unsigned long) buf->start);
+	return (__c_pa(buf->end) - __c_pa(buf->start));
 }
 
 static void lanai_buf_deallocate(struct lanai_buffer *buf,
@@ -1134,8 +1134,7 @@ static inline int vcc_tx_space(const struct lanai_vcc *lvcc, int endptr)
 {
 	int r;
 	r = endptr * 16;
-	r -= ((unsigned long) lvcc->tx.buf.ptr) -
-	    ((unsigned long) lvcc->tx.buf.start);
+	r -= (__c_pa(lvcc->tx.buf.ptr)) - (__c_pa(lvcc->tx.buf.start));
 	r -= 16;	/* Leave "bubble" - if start==end it looks empty */
 	if (r < 0)
 		r += lanai_buf_size(&lvcc->tx.buf);
@@ -1159,7 +1158,7 @@ static inline void vcc_tx_add_aal5_descriptor(struct lanai_vcc *lvcc,
 	u32 flags, int len)
 {
 	int pos;
-	APRINTK((((unsigned long) lvcc->tx.buf.ptr) & 15) == 0,
+	APRINTK(((__c_pa(lvcc->tx.buf.ptr)) & 15) == 0,
 	    "vcc_tx_add_aal5_descriptor: bad ptr=%p\n", lvcc->tx.buf.ptr);
 	lvcc->tx.buf.ptr += 4;	/* Hope the values REALLY don't matter */
 	pos = ((unsigned char *) lvcc->tx.buf.ptr) -
@@ -1185,7 +1184,7 @@ static inline void vcc_tx_add_aal5_descriptor(struct lanai_vcc *lvcc,
 static inline void vcc_tx_add_aal5_trailer(struct lanai_vcc *lvcc,
 	int len, int cpi, int uu)
 {
-	APRINTK((((unsigned long) lvcc->tx.buf.ptr) & 15) == 8,
+	APRINTK((__c_pa(lvcc->tx.buf.ptr) & 15) == 8,
 	    "vcc_tx_add_aal5_trailer: bad ptr=%p\n", lvcc->tx.buf.ptr);
 	lvcc->tx.buf.ptr += 2;
 	lvcc->tx.buf.ptr[-2] = cpu_to_be32((uu << 24) | (cpi << 16) | len);
@@ -1380,7 +1379,7 @@ static void vcc_rx_aal5(struct lanai_vcc *lvcc, int endptr)
 	struct sk_buff *skb;
 	const u32 *x;
 	u32 *end = &lvcc->rx.buf.start[endptr * 4];
-	int n = ((unsigned long) end) - ((unsigned long) lvcc->rx.buf.ptr);
+	int n = (__c_pa(end) - __c_pa(lvcc->rx.buf.ptr));
 	if (n < 0)
 		n += lanai_buf_size(&lvcc->rx.buf);
 	APRINTK(n >= 0 && n < lanai_buf_size(&lvcc->rx.buf) && !(n & 15),
@@ -1669,8 +1668,8 @@ static int handle_service(struct lanai_dev *lanai, u32 s)
 		atomic_inc(&lvcc->rx.atmvcc->stats->rx_err);
 		lvcc->stats.x.aal5.service_trash++;
 		bytes = (SERVICE_GET_END(s) * 16) -
-		    (((unsigned long) lvcc->rx.buf.ptr) -
-		    ((unsigned long) lvcc->rx.buf.start)) + 47;
+		    (__c_pa(lvcc->rx.buf.ptr) -
+		    __c_pa(lvcc->rx.buf.start)) + 47;
 		if (bytes < 0)
 			bytes += lanai_buf_size(&lvcc->rx.buf);
 		lanai->stats.ovfl_trash += (bytes / 48);

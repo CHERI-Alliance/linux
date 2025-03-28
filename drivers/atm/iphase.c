@@ -673,7 +673,7 @@ static void ia_tx_poll (IADEV *iadev) {
           {
              vcc->pop(vcc, skb1);
              IF_EVENT(printk("Transmit Done - skb 0x%lx return\n",
-                                                          (long)skb1);)
+                                                          __c_pa(skb1));)
           }
           else 
              dev_kfree_skb_any(skb1);
@@ -687,7 +687,7 @@ static void ia_tx_poll (IADEV *iadev) {
        if ((vcc->pop) && (skb->len != 0))
        {
           vcc->pop(vcc, skb);
-          IF_EVENT(printk("Tx Done - skb 0x%lx return\n",(long)skb);)
+          IF_EVENT(printk("Tx Done - skb 0x%lx return\n", __c_pa(skb));)
        }
        else 
           dev_kfree_skb_any(skb);
@@ -1443,7 +1443,7 @@ static int rx_init(struct atm_dev *dev)
 	iadev->rx_dle_q.start = (struct dle *)dle_addr;
 	iadev->rx_dle_q.read = iadev->rx_dle_q.start;  
 	iadev->rx_dle_q.write = iadev->rx_dle_q.start;  
-	iadev->rx_dle_q.end = (struct dle*)((unsigned long)dle_addr+sizeof(struct dle)*DLE_ENTRIES);
+	iadev->rx_dle_q.end = (struct dle*)((uintptr_t)dle_addr+sizeof(struct dle)*DLE_ENTRIES);
 	/* the end of the dle q points to the entry after the last  
 	DLE that can be used. */  
   
@@ -1930,7 +1930,7 @@ static int tx_init(struct atm_dev *dev)
 	iadev->tx_dle_q.start = (struct dle*)dle_addr;  
 	iadev->tx_dle_q.read = iadev->tx_dle_q.start;  
 	iadev->tx_dle_q.write = iadev->tx_dle_q.start;  
-	iadev->tx_dle_q.end = (struct dle*)((unsigned long)dle_addr+sizeof(struct dle)*DLE_ENTRIES);
+	iadev->tx_dle_q.end = (struct dle*)((uintptr_t)dle_addr+sizeof(struct dle)*DLE_ENTRIES);
 
 	/* write the upper 20 bits of the start address to tx list address register */  
 	writel(iadev->tx_dle_dma & 0xfffff000,
@@ -2913,7 +2913,7 @@ static int ia_pkt_tx (struct atm_vcc *vcc, struct sk_buff *skb) {
                  dev_kfree_skb_any(skb);
           return 0;
         }
-        if ((unsigned long)skb->data & 3) {
+        if (__c_pa(skb->data) & 3) {
            printk("Misaligned SKB\n");
            if (vcc->pop)
                  vcc->pop(vcc, skb);

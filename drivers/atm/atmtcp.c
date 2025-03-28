@@ -448,7 +448,8 @@ static int atmtcp_remove_persistent(int itf)
 	return 0;
 }
 
-static int atmtcp_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+static int atmtcp_ioctl(struct socket *sock, unsigned int cmd,
+			user_uintptr_t arg)
 {
 	int err = 0;
 	struct atm_vcc *vcc = ATM_SD(sock);
@@ -461,17 +462,17 @@ static int atmtcp_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg
 
 	switch (cmd) {
 		case SIOCSIFATMTCP:
-			err = atmtcp_attach(vcc, (int) arg);
+			err = atmtcp_attach(vcc, (int)__c_ua(arg));
 			if (err >= 0) {
 				sock->state = SS_CONNECTED;
 				__module_get(THIS_MODULE);
 			}
 			break;
 		case ATMTCP_CREATE:
-			err = atmtcp_create_persistent((int) arg);
+			err = atmtcp_create_persistent((int)__c_ua(arg));
 			break;
 		case ATMTCP_REMOVE:
-			err = atmtcp_remove_persistent((int) arg);
+			err = atmtcp_remove_persistent((int)__c_ua(arg));
 			break;
 	}
 	return err;

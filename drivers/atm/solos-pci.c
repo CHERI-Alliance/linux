@@ -137,7 +137,7 @@ struct solos_param {
 	struct sk_buff *response;
 };
 
-#define SOLOS_CHAN(atmdev) ((int)(unsigned long)(atmdev)->phy_data)
+#define SOLOS_CHAN(atmdev) ((int)__c_pa((atmdev)->phy_data))
 
 MODULE_AUTHOR("Traverse Technologies <support@traverse.com.au>");
 MODULE_DESCRIPTION("Solos PCI driver");
@@ -167,7 +167,7 @@ static struct atm_vcc* find_vcc(struct atm_dev *dev, short vpi, int vci);
 static int atm_init(struct solos_card *, struct device *);
 static void atm_remove(struct solos_card *);
 static int send_command(struct solos_card *card, int dev, const char *buf, size_t size);
-static void solos_bh(unsigned long);
+static void solos_bh(uintptr_t);
 static int print_buffer(struct sk_buff *buf);
 
 static inline void solos_pop(struct atm_vcc *vcc, struct sk_buff *skb)
@@ -754,7 +754,7 @@ static irqreturn_t solos_irq(int irq, void *dev_id)
 	return IRQ_RETVAL(handled);
 }
 
-static void solos_bh(unsigned long card_arg)
+static void solos_bh(uintptr_t card_arg)
 {
 	struct solos_card *card = (void *)card_arg;
 	uint32_t card_flags;
@@ -1087,7 +1087,7 @@ static uint32_t fpga_tx(struct solos_card *card)
 				oldskb = skb; /* We're done with this skb already */
 			} else if (skb && card->using_dma) {
 				unsigned char *data = skb->data;
-				if ((unsigned long)data & card->dma_alignment) {
+				if (__c_pa(data) & card->dma_alignment) {
 					data = card->dma_bounce + (BUF_SIZE * port);
 					memcpy(data, skb->data, skb->len);
 				}
@@ -1294,7 +1294,7 @@ static int fpga_probe(struct pci_dev *dev, const struct pci_device_id *id)
 
 	pci_set_drvdata(dev, card);
 
-	tasklet_init(&card->tlet, solos_bh, (unsigned long)card);
+	tasklet_init(&card->tlet, solos_bh, (uintptr_t) card);
 	spin_lock_init(&card->tx_lock);
 	spin_lock_init(&card->tx_queue_lock);
 	spin_lock_init(&card->cli_queue_lock);
@@ -1376,7 +1376,7 @@ static int atm_init(struct solos_card *card, struct device *parent)
 		card->atmdev[i]->ci_range.vpi_bits = 8;
 		card->atmdev[i]->ci_range.vci_bits = 16;
 		card->atmdev[i]->dev_data = card;
-		card->atmdev[i]->phy_data = (void *)(unsigned long)i;
+		card->atmdev[i]->phy_data = __c_fakep(i);
 		atm_dev_signal_change(card->atmdev[i], ATM_PHY_SIG_FOUND);
 
 		skb = alloc_skb(sizeof(*header), GFP_KERNEL);

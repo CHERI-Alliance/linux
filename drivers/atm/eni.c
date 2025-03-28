@@ -281,7 +281,7 @@ static void eni_free_mem(struct eni_dev *eni_dev, void __iomem *start,
 			DPRINTK("match[%d]: 0x%lx/0x%lx(0x%x), %d/%d\n",i,
 			    list[i].start,start,1 << order,list[i].order,order);
 			list[i] = list[--len];
-			start = (void __iomem *) ((unsigned long) start & ~(unsigned long) (1 << order));
+			start = (void __iomem *) ((uintptr_t) start & ~(unsigned long) (1 << order));
 			order++;
 			i = -1;
 			continue;
@@ -1523,7 +1523,7 @@ static irqreturn_t eni_int(int irq,void *dev_id)
 }
 
 
-static void eni_tasklet(unsigned long data)
+static void eni_tasklet(uintptr_t data)
 {
 	struct atm_dev *dev = (struct atm_dev *) data;
 	struct eni_dev *eni_dev = ENI_DEV(dev);
@@ -1840,7 +1840,7 @@ static int eni_start(struct atm_dev *dev)
 	     eni_dev->vci,eni_dev->rx_dma,eni_dev->tx_dma,
 	     eni_dev->service,buf);
 	spin_lock_init(&eni_dev->lock);
-	tasklet_init(&eni_dev->task,eni_tasklet,(unsigned long) dev);
+	tasklet_init(&eni_dev->task,eni_tasklet,(uintptr_t) dev);
 	eni_dev->events = 0;
 	/* initialize memory management */
 	buffer_mem = eni_dev->mem - (buf - eni_dev->ram);

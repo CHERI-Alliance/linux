@@ -52,20 +52,20 @@
 #define CONFIG_IRQ_THRESH	(CONFIG_IRQ_SIZE/2)
 
 #define CONFIG_TPDRQ_SIZE	512
-#define TPDRQ_MASK(x)		(((unsigned long)(x))&((CONFIG_TPDRQ_SIZE<<3)-1))
+#define TPDRQ_MASK(x)		((__c_a(x))&((CONFIG_TPDRQ_SIZE<<3)-1))
 
 #define CONFIG_RBRQ_SIZE	512
 #define CONFIG_RBRQ_THRESH	400
-#define RBRQ_MASK(x)		(((unsigned long)(x))&((CONFIG_RBRQ_SIZE<<3)-1))
+#define RBRQ_MASK(x)		((__c_a(x))&((CONFIG_RBRQ_SIZE<<3)-1))
 
 #define CONFIG_TBRQ_SIZE	512
 #define CONFIG_TBRQ_THRESH	400
-#define TBRQ_MASK(x)		(((unsigned long)(x))&((CONFIG_TBRQ_SIZE<<2)-1))
+#define TBRQ_MASK(x)		((__c_a(x))&((CONFIG_TBRQ_SIZE<<2)-1))
 
 #define CONFIG_RBPL_SIZE	512
 #define CONFIG_RBPL_THRESH	64
 #define CONFIG_RBPL_BUFSIZE	4096
-#define RBPL_MASK(x)		(((unsigned long)(x))&((CONFIG_RBPL_SIZE<<3)-1))
+#define RBPL_MASK(x)		((__c_a(x))&((CONFIG_RBPL_SIZE<<3)-1))
 
 /* 5.1.3 initialize connection memory */
 
@@ -92,7 +92,7 @@ struct he_irq {
 #define IRQ_ALIGNMENT		0x1000
 
 #define NEXT_ENTRY(base, tail, mask) \
-				(((unsigned long)base)|(((unsigned long)(tail+1))&mask))
+				(((uintptr_t)base)|((__c_pa(tail+1))&mask))
 
 #define ITYPE_INVALID		0xffffffff
 #define ITYPE_TBRQ_THRESH	(0<<3)
@@ -410,7 +410,7 @@ struct he_vcc
 #define IRQ0_BASE	0x80080
 #define  IRQ_BASE(x)		(x<<12)
 #define  IRQ_MASK		((CONFIG_IRQ_SIZE<<2)-1)	/* was 0x3ff */
-#define  IRQ_TAIL(x)		(((unsigned long)(x)) & IRQ_MASK)
+#define  IRQ_TAIL(x)		((__c_pa(x)) & IRQ_MASK)
 #define IRQ0_HEAD	0x80084
 #define  IRQ_SIZE(x)		(x<<22)
 #define  IRQ_THRESH(x)		(x<<12)

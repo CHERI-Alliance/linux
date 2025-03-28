@@ -106,14 +106,14 @@
 
 #define NS_DELAY mdelay(1)
 
-#define PTR_DIFF(a, b)	((u32)((unsigned long)(a) - (unsigned long)(b)))
+#define PTR_DIFF(a, b)	((u32)(__c_pa(a) - __c_pa(b)))
 
 #ifndef ATM_SKB
 #define ATM_SKB(s) (&(s)->atm)
 #endif
 
 #define scq_virt_to_bus(scq, p) \
-		(scq->dma + ((unsigned long)(p) - (unsigned long)(scq)->org))
+		(scq->dma + (__c_pa(p) - __c_pa((scq)->org)))
 
 /* Function declarations */
 
@@ -2577,7 +2577,7 @@ static int ns_ioctl(struct atm_dev *dev, unsigned int cmd, void __user * arg)
 	case NS_ADJBUFLEV:
 		if (!capable(CAP_NET_ADMIN))
 			return -EPERM;
-		btype = (long)arg;	/* a long is the same size as a pointer or bigger */
+		btype = (long)__c_pa(arg);
 		switch (btype) {
 		case NS_BUFTYPE_SMALL:
 			while (card->sbfqc < card->sbnr.init) {
