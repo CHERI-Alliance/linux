@@ -265,9 +265,9 @@ static void speakup_date(struct vc_data *vc)
 {
 	spk_x = spk_cx = vc->state.x;
 	spk_y = spk_cy = vc->state.y;
-	spk_pos = spk_cp = vc->vc_pos;
+	spk_pos = spk_cp = __c_ua(vc->vc_pos);
 	spk_old_attr = spk_attr;
-	spk_attr = get_attributes(vc, (u_short *)spk_pos);
+	spk_attr = get_attributes(vc, (u_short *)__c_fakep(spk_pos));
 }
 
 static void bleep(u_short val)
@@ -482,7 +482,7 @@ static void say_char(struct vc_data *vc)
 	u16 ch;
 
 	spk_old_attr = spk_attr;
-	ch = get_char(vc, (u_short *)spk_pos, &spk_attr);
+	ch = get_char(vc, (u_short *)__c_fakep(spk_pos), &spk_attr);
 	if (spk_attr != spk_old_attr) {
 		if (spk_attrib_bleep & 1)
 			bleep(spk_y);
@@ -497,7 +497,7 @@ static void say_phonetic_char(struct vc_data *vc)
 	u16 ch;
 
 	spk_old_attr = spk_attr;
-	ch = get_char(vc, (u_short *)spk_pos, &spk_attr);
+	ch = get_char(vc, (u_short *)__c_fakep(spk_pos), &spk_attr);
 	if (ch <= 0x7f && isalpha(ch)) {
 		ch &= 0x1f;
 		synth_printf("%s\n", phonetic[--ch]);
@@ -549,7 +549,7 @@ static u_long get_word(struct vc_data *vc)
 	u_char temp;
 
 	spk_old_attr = spk_attr;
-	ch = get_char(vc, (u_short *)tmp_pos, &temp);
+	ch = get_char(vc, (u_short *)__c_fakep(tmp_pos), &temp);
 
 /* decided to take out the sayword if on a space (mis-information */
 	if (spk_say_word_ctl && ch == SPACE) {
@@ -558,26 +558,26 @@ static u_long get_word(struct vc_data *vc)
 		return 0;
 	} else if (tmpx < vc->vc_cols - 2 &&
 		   (ch == SPACE || ch == 0 || (ch < 0x100 && IS_WDLM(ch))) &&
-		   get_char(vc, (u_short *)tmp_pos + 1, &temp) > SPACE) {
+		   get_char(vc, (u_short *)__c_fakep(tmp_pos) + 1, &temp) > SPACE) {
 		tmp_pos += 2;
 		tmpx++;
 	} else {
 		while (tmpx > 0) {
-			ch = get_char(vc, (u_short *)tmp_pos - 1, &temp);
+			ch = get_char(vc, (u_short *)__c_fakep(tmp_pos) - 1, &temp);
 			if ((ch == SPACE || ch == 0 ||
 			     (ch < 0x100 && IS_WDLM(ch))) &&
-			    get_char(vc, (u_short *)tmp_pos, &temp) > SPACE)
+			    get_char(vc, (u_short *)__c_fakep(tmp_pos), &temp) > SPACE)
 				break;
 			tmp_pos -= 2;
 			tmpx--;
 		}
 	}
-	attr_ch = get_char(vc, (u_short *)tmp_pos, &spk_attr);
+	attr_ch = get_char(vc, (u_short *)__c_fakep(tmp_pos), &spk_attr);
 	buf[cnt++] = attr_ch;
 	while (tmpx < vc->vc_cols - 1 && cnt < ARRAY_SIZE(buf) - 1) {
 		tmp_pos += 2;
 		tmpx++;
-		ch = get_char(vc, (u_short *)tmp_pos, &temp);
+		ch = get_char(vc, (u_short *)__c_fakep(tmp_pos), &temp);
 		if (ch == SPACE || ch == 0 ||
 		    (buf[cnt - 1] < 0x100 && IS_WDLM(buf[cnt - 1]) &&
 		     ch > SPACE))
@@ -635,7 +635,7 @@ static void say_prev_word(struct vc_data *vc)
 			spk_x--;
 		}
 		spk_pos -= 2;
-		ch = get_char(vc, (u_short *)spk_pos, &temp);
+		ch = get_char(vc, (u_short *)__c_fakep(spk_pos), &temp);
 		if (ch == SPACE || ch == 0)
 			state = 0;
 		else if (ch < 0x100 && IS_WDLM(ch))
@@ -669,7 +669,7 @@ static void say_next_word(struct vc_data *vc)
 		return;
 	}
 	while (1) {
-		ch = get_char(vc, (u_short *)spk_pos, &temp);
+		ch = get_char(vc, (u_short *)__c_fakep(spk_pos), &temp);
 		if (ch == SPACE || ch == 0)
 			state = 0;
 		else if (ch < 0x100 && IS_WDLM(ch))
@@ -755,9 +755,9 @@ static int get_line(struct vc_data *vc)
 	u_char tmp2;
 
 	spk_old_attr = spk_attr;
-	spk_attr = get_attributes(vc, (u_short *)spk_pos);
+	spk_attr = get_attributes(vc, (u_short *)__c_fakep(spk_pos));
 	for (i = 0; i < vc->vc_cols; i++) {
-		buf[i] = get_char(vc, (u_short *)tmp, &tmp2);
+		buf[i] = get_char(vc, (u_short *)__c_fakep(tmp), &tmp2);
 		tmp += 2;
 	}
 	for (--i; i >= 0; i--)
@@ -820,9 +820,9 @@ static int say_from_to(struct vc_data *vc, u_long from, u_long to,
 	u_short saved_punc_mask = spk_punc_mask;
 
 	spk_old_attr = spk_attr;
-	spk_attr = get_attributes(vc, (u_short *)from);
+	spk_attr = get_attributes(vc, (u_short *)__c_fakep(from));
 	while (from < to) {
-		buf[i++] = get_char(vc, (u_short *)from, &tmp);
+		buf[i++] = get_char(vc, (u_short *)__c_fakep(from), &tmp);
 		from += 2;
 		if (i >= vc->vc_size_row)
 			break;
@@ -845,7 +845,7 @@ static int say_from_to(struct vc_data *vc, u_long from, u_long to,
 static void say_line_from_to(struct vc_data *vc, u_long from, u_long to,
 			     int read_punc)
 {
-	u_long start = vc->vc_origin + (spk_y * vc->vc_size_row);
+	u_long start = __c_ua(vc->vc_origin) + (spk_y * vc->vc_size_row);
 	u_long end = start + (to * 2);
 
 	start += from * 2;
@@ -888,17 +888,17 @@ static int get_sentence_buf(struct vc_data *vc, int read_punc)
 	if (currbuf == 2)
 		currbuf = 0;
 	bn = currbuf;
-	start = vc->vc_origin + ((spk_y) * vc->vc_size_row);
-	end = vc->vc_origin + ((spk_y) * vc->vc_size_row) + vc->vc_cols * 2;
+	start = __c_ua(vc->vc_origin) + ((spk_y) * vc->vc_size_row);
+	end = __c_ua(vc->vc_origin) + ((spk_y) * vc->vc_size_row) + vc->vc_cols * 2;
 
 	numsentences[bn] = 0;
 	sentmarks[bn][0] = &sentbuf[bn][0];
 	i = 0;
 	spk_old_attr = spk_attr;
-	spk_attr = get_attributes(vc, (u_short *)start);
+	spk_attr = get_attributes(vc, (u_short *)__c_fakep(start));
 
 	while (start < end) {
-		sentbuf[bn][i] = get_char(vc, (u_short *)start, &tmp);
+		sentbuf[bn][i] = get_char(vc, (u_short *)__c_fakep(start), &tmp);
 		if (i > 0) {
 			if (sentbuf[bn][i] == SPACE &&
 			    sentbuf[bn][i - 1] == '.' &&
@@ -931,13 +931,13 @@ static int get_sentence_buf(struct vc_data *vc, int read_punc)
 
 static void say_screen_from_to(struct vc_data *vc, u_long from, u_long to)
 {
-	u_long start = vc->vc_origin, end;
+	u_long start = __c_ua(vc->vc_origin), end;
 
 	if (from > 0)
 		start += from * vc->vc_size_row;
 	if (to > vc->vc_rows)
 		to = vc->vc_rows;
-	end = vc->vc_origin + (to * vc->vc_size_row);
+	end = __c_ua(vc->vc_origin) + (to * vc->vc_size_row);
 	for (from = start; from < end; from = to) {
 		to = from + vc->vc_size_row;
 		say_from_to(vc, from, to, 1);
@@ -957,8 +957,8 @@ static void speakup_win_say(struct vc_data *vc)
 		synth_printf("%s\n", spk_msg_get(MSG_NO_WINDOW));
 		return;
 	}
-	start = vc->vc_origin + (win_top * vc->vc_size_row);
-	end = vc->vc_origin + (win_bottom * vc->vc_size_row);
+	start = __c_ua(vc->vc_origin) + (win_top * vc->vc_size_row);
+	end = __c_ua(vc->vc_origin) + (win_bottom * vc->vc_size_row);
 	while (start <= end) {
 		from = start + (win_left * 2);
 		to = start + (win_right * 2);
@@ -970,7 +970,7 @@ static void speakup_win_say(struct vc_data *vc)
 static void top_edge(struct vc_data *vc)
 {
 	spk_parked |= 0x01;
-	spk_pos = vc->vc_origin + 2 * spk_x;
+	spk_pos = __c_ua(vc->vc_origin) + 2 * spk_x;
 	spk_y = 0;
 	say_line(vc);
 }
@@ -1047,7 +1047,7 @@ static void say_position(struct vc_data *vc)
 static void say_char_num(struct vc_data *vc)
 {
 	u_char tmp;
-	u16 ch = get_char(vc, (u_short *)spk_pos, &tmp);
+	u16 ch = get_char(vc, (u_short *)__c_fakep(spk_pos), &tmp);
 
 	synth_printf(spk_msg_get(MSG_CHAR_INFO), ch, ch);
 }
@@ -1557,7 +1557,7 @@ static void do_handle_cursor(struct vc_data *vc, u_char value, char up_flag)
  * moves regardless of no_inter state
  */
 	is_cursor = value + 1;
-	old_cursor_pos = vc->vc_pos;
+	old_cursor_pos = __c_ua(vc->vc_pos);
 	old_cursor_x = vc->state.x;
 	old_cursor_y = vc->state.y;
 	speakup_console[vc->vc_num]->ht.cy = vc->state.y;
@@ -1580,7 +1580,7 @@ static void update_color_buffer(struct vc_data *vc, const u16 *ic, int len)
 
 	i = 0;
 	if (speakup_console[vc_num]->ht.highsize[bi] == 0) {
-		speakup_console[vc_num]->ht.rpos[bi] = vc->vc_pos;
+		speakup_console[vc_num]->ht.rpos[bi] = __c_ua(vc->vc_pos);
 		speakup_console[vc_num]->ht.rx[bi] = vc->state.x;
 		speakup_console[vc_num]->ht.ry[bi] = vc->state.y;
 	}
@@ -2026,7 +2026,7 @@ do_goto:
 		say_word(vc);
 	} else {
 		spk_y = goto_pos;
-		spk_pos = vc->vc_origin + (goto_pos * vc->vc_size_row);
+		spk_pos = __c_ua(vc->vc_origin) + (goto_pos * vc->vc_size_row);
 		say_line(vc);
 	}
 	return 1;
