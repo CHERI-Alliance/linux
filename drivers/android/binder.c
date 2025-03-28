@@ -3419,7 +3419,7 @@ static void binder_transaction(struct binder_proc *proc,
 		case BINDER_TYPE_FD: {
 			struct binder_fd_object *fp = to_binder_fd_object(hdr);
 			binder_size_t fd_offset = object_offset +
-				(uintptr_t)&fp->fd - (uintptr_t)fp;
+				__c_pa(&fp->fd) - __c_pa(fp);
 			int ret = binder_translate_fd(fp->fd, fd_offset, t,
 						      thread, in_reply_to);
 
@@ -5350,7 +5350,7 @@ static long binder_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg
 
 	binder_selftest_alloc(&proc->alloc);
 
-	trace_binder_ioctl(cmd, arg);
+	trace_binder_ioctl(cmd, __c_ua(arg));
 
 	ret = wait_event_interruptible(binder_user_error_wait, binder_stop_on_user_error < 2);
 	if (ret)
@@ -5556,7 +5556,7 @@ err:
 		thread->looper_need_return = false;
 	wait_event_interruptible(binder_user_error_wait, binder_stop_on_user_error < 2);
 	if (ret && ret != -EINTR)
-		pr_info("%d:%d ioctl %x %lx returned %d\n", proc->pid, current->pid, cmd, (unsigned long)arg, ret);
+		pr_info("%d:%d ioctl %x %lx returned %d\n", proc->pid, current->pid, cmd, __c_ua(arg), ret);
 err_unlocked:
 	trace_binder_ioctl_done(ret);
 	return ret;
@@ -5685,7 +5685,7 @@ static int binder_open(struct inode *nodp, struct file *filp)
 		 */
 		proc->debugfs_entry = debugfs_create_file(strbuf, 0444,
 			binder_debugfs_dir_entry_proc,
-			(void *)(unsigned long)proc->pid,
+			__c_fakep(proc->pid),
 			&proc_fops);
 	}
 
@@ -5701,7 +5701,7 @@ static int binder_open(struct inode *nodp, struct file *filp)
 		 * information on all contexts of a given PID.
 		 */
 		binderfs_entry = binderfs_create_file(binder_binderfs_dir_entry_proc,
-			strbuf, &proc_fops, (void *)(unsigned long)proc->pid);
+			strbuf, &proc_fops, __c_fakep(proc->pid));
 		if (!IS_ERR(binderfs_entry)) {
 			proc->binderfs_entry = binderfs_entry;
 		} else {
@@ -6423,7 +6423,7 @@ static int transactions_show(struct seq_file *m, void *unused)
 static int proc_show(struct seq_file *m, void *unused)
 {
 	struct binder_proc *itr;
-	int pid = (unsigned long)m->private;
+	int pid = __c_pa(m->private);
 
 	mutex_lock(&binder_procs_lock);
 	hlist_for_each_entry(itr, &binder_procs, proc_node) {
