@@ -673,7 +673,7 @@ static int ht16k33_probe(struct i2c_client *client)
 	priv->client = client;
 	id = i2c_of_match_device(dev->driver->of_match_table, client);
 	if (id)
-		priv->type = (uintptr_t)id->data;
+		priv->type = __c_pa(id->data);
 	i2c_set_clientdata(client, priv);
 
 	err = ht16k33_initialize(priv);
