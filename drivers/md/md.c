@@ -7700,7 +7700,7 @@ static int __md_set_array_info(struct mddev *mddev, void __user *argp)
 }
 
 static int md_ioctl(struct block_device *bdev, blk_mode_t mode,
-			unsigned int cmd, unsigned long arg)
+			unsigned int cmd, user_uintptr_t arg)
 {
 	int err = 0;
 	void __user *argp = (void __user *)arg;
@@ -7736,7 +7736,7 @@ static int md_ioctl(struct block_device *bdev, blk_mode_t mode,
 		return get_disk_info(mddev, argp);
 
 	case SET_DISK_FAULTY:
-		return set_disk_faulty(mddev, new_decode_dev(arg));
+		return set_disk_faulty(mddev, new_decode_dev(__c_ua(arg)));
 
 	case GET_BITMAP_FILE:
 		return get_bitmap_file(mddev, argp);
@@ -7804,7 +7804,7 @@ static int md_ioctl(struct block_device *bdev, blk_mode_t mode,
 		goto unlock;
 
 	case HOT_REMOVE_DISK:
-		err = hot_remove_disk(mddev, new_decode_dev(arg));
+		err = hot_remove_disk(mddev, new_decode_dev(__c_ua(arg)));
 		goto unlock;
 
 	case ADD_NEW_DISK:
@@ -7870,7 +7870,7 @@ static int md_ioctl(struct block_device *bdev, blk_mode_t mode,
 		goto unlock;
 
 	case HOT_ADD_DISK:
-		err = hot_add_disk(mddev, new_decode_dev(arg));
+		err = hot_add_disk(mddev, new_decode_dev(__c_ua(arg)));
 		goto unlock;
 
 	case RUN_ARRAY:
@@ -7878,7 +7878,7 @@ static int md_ioctl(struct block_device *bdev, blk_mode_t mode,
 		goto unlock;
 
 	case SET_BITMAP_FILE:
-		err = set_bitmap_file(mddev, (int)arg);
+		err = set_bitmap_file(mddev, (int)__c_ua(arg));
 		goto unlock;
 
 	default:

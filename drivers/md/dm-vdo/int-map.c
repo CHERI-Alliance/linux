@@ -70,7 +70,7 @@
  * it's crucial to keep the hop fields near the buckets that they use them so they'll tend to share
  * cache lines.
  */
-struct __packed bucket {
+struct __packed_if_not_cheri bucket {
 	/**
 	 * @first_hop: The biased offset of the first entry in the hop list of the neighborhood
 	 *             that hashes to this bucket.

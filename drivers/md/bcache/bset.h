@@ -249,7 +249,7 @@ static inline bool bkey_written(struct btree_keys *b, struct bkey *k)
 static inline unsigned int bset_byte_offset(struct btree_keys *b,
 					    struct bset *i)
 {
-	return ((size_t) i) - ((size_t) b->set->data);
+	return (__c_pa(i) - __c_pa(b->set->data));
 }
 
 static inline unsigned int bset_sector_offset(struct btree_keys *b,

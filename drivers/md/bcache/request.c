@@ -751,7 +751,7 @@ static inline struct search *search_alloc(struct bio *bio,
 	s->iop.c		= d->c;
 	s->iop.bio		= NULL;
 	s->iop.inode		= d->id;
-	s->iop.write_point	= hash_long((unsigned long) current, 16);
+	s->iop.write_point	= hash_long(__c_pa(current), 16);
 	s->iop.write_prio	= 0;
 	s->iop.status		= 0;
 	s->iop.flags		= 0;
@@ -1243,7 +1243,7 @@ void cached_dev_submit_bio(struct bio *bio)
 }
 
 static int cached_dev_ioctl(struct bcache_device *d, blk_mode_t mode,
-			    unsigned int cmd, unsigned long arg)
+			    unsigned int cmd, user_uintptr_t arg)
 {
 	struct cached_dev *dc = container_of(d, struct cached_dev, disk);
 
@@ -1333,7 +1333,7 @@ void flash_dev_submit_bio(struct bio *bio)
 }
 
 static int flash_dev_ioctl(struct bcache_device *d, blk_mode_t mode,
-			   unsigned int cmd, unsigned long arg)
+			   unsigned int cmd, user_uintptr_t arg)
 {
 	return -ENOTTY;
 }

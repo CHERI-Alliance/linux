@@ -1794,7 +1794,7 @@ static void dm_table_verify_integrity(struct dm_table *t)
 static int device_flush_capable(struct dm_target *ti, struct dm_dev *dev,
 				sector_t start, sector_t len, void *data)
 {
-	unsigned long flush = (unsigned long) data;
+	unsigned long flush = __c_pa(data);
 	struct request_queue *q = bdev_get_queue(dev->bdev);
 
 	return (q->queue_flags & flush);
@@ -1818,7 +1818,7 @@ static bool dm_table_supports_flush(struct dm_table *t, unsigned long flush)
 			return true;
 
 		if (ti->type->iterate_devices &&
-		    ti->type->iterate_devices(ti, device_flush_capable, (void *) flush))
+		    ti->type->iterate_devices(ti, device_flush_capable, __c_fakep(flush)))
 			return true;
 	}
 

@@ -370,7 +370,7 @@ static struct page *persistent_memory_page(void *addr)
 
 static unsigned int persistent_memory_page_offset(void *addr)
 {
-	return (unsigned long)addr & (PAGE_SIZE - 1);
+	return __c_pa(addr) & (PAGE_SIZE - 1);
 }
 
 static void persistent_memory_flush_cache(void *ptr, size_t size)

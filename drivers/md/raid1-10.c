@@ -20,7 +20,7 @@
  */
 #define IO_MADE_GOOD ((struct bio *)2)
 
-#define BIO_SPECIAL(bio) ((unsigned long)bio <= 2)
+#define BIO_SPECIAL(bio) (__c_pa(bio) <= 2)
 #define MAX_PLUG_BIO 32
 
 /* for managing resync I/O pages */

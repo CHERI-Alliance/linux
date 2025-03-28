@@ -374,7 +374,7 @@ static void do_btree_node_write(struct btree *b)
 
 	if (!bch_bio_alloc_pages(b->bio, __GFP_NOWARN|GFP_NOWAIT)) {
 		struct bio_vec *bv;
-		void *addr = (void *) ((unsigned long) i & ~(PAGE_SIZE - 1));
+		void *addr = (void *) ((uintptr_t) i & ~(PAGE_SIZE - 1));
 		struct bvec_iter_all iter_all;
 
 		bio_for_each_segment_all(bv, b->bio, iter_all) {

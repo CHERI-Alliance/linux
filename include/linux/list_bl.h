@@ -98,7 +98,7 @@ static inline void hlist_bl_add_before(struct hlist_bl_node *n,
 	/* pprev may be `first`, so be careful not to lose the lock bit */
 	WRITE_ONCE(*pprev,
 		   (struct hlist_bl_node *)
-			((uintptr_t)n | ((unsigned long)(uintptr_t)*pprev & LIST_BL_LOCKMASK)));
+			((uintptr_t)n | ((unsigned long __force)(uintptr_t)*pprev & LIST_BL_LOCKMASK)));
 }
 
 static inline void hlist_bl_add_behind(struct hlist_bl_node *n,
