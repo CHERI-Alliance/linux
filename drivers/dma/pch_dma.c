@@ -805,7 +805,7 @@ static int pch_dma_probe(struct pci_dev *pdev,
 	int err;
 	int i;
 
-	nr_channels = id->driver_data;
+	nr_channels = __c_ua(id->driver_data);
 	pd = kzalloc(sizeof(*pd), GFP_KERNEL);
 	if (!pd)
 		return -ENOMEM;

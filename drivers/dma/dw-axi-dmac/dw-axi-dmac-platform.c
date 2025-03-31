@@ -1491,7 +1491,7 @@ static int dw_probe(struct platform_device *pdev)
 	if (IS_ERR(chip->regs))
 		return PTR_ERR(chip->regs);
 
-	flags = (uintptr_t)of_device_get_match_data(&pdev->dev);
+	flags = __c_pa(of_device_get_match_data(&pdev->dev));
 	if (flags & AXI_DMA_FLAG_HAS_APB_REGS) {
 		chip->apb_regs = devm_platform_ioremap_resource(pdev, 1);
 		if (IS_ERR(chip->apb_regs))

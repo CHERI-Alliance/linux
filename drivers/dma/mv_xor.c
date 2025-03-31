@@ -1329,7 +1329,7 @@ static int mv_xor_probe(struct platform_device *pdev)
 	 */
 	xordev->xor_type = XOR_ORION;
 	if (pdev->dev.of_node)
-		xordev->xor_type = (uintptr_t)device_get_match_data(&pdev->dev);
+		xordev->xor_type = __c_pa(device_get_match_data(&pdev->dev));
 
 	/*
 	 * (Re-)program MBUS remapping windows if we are asked to.

@@ -275,7 +275,7 @@ bool shdma_chan_filter(struct dma_chan *chan, void *arg)
 {
 	struct shdma_chan *schan;
 	struct shdma_dev *sdev;
-	int slave_id = (long)arg;
+	int slave_id = (long)__c_pa(arg);
 	int ret;
 
 	/* Only support channels handled by this driver. */

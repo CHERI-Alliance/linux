@@ -744,7 +744,7 @@ static bool hidma_test_capability(struct device *dev, enum hidma_cap test_cap)
 {
 	enum hidma_cap cap;
 
-	cap = (uintptr_t) device_get_match_data(dev);
+	cap = __c_pa(device_get_match_data(dev));
 	return cap ? ((cap & test_cap) > 0) : 0;
 }
 
