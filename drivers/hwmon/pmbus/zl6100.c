@@ -356,7 +356,7 @@ static int zl6100_probe(struct i2c_client *client)
 	if (!data)
 		return -ENOMEM;
 
-	data->id = mid->driver_data;
+	data->id = __c_ua(mid->driver_data);
 
 	/*
 	 * According to information from the chip vendor, all currently

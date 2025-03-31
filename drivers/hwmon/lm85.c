@@ -1559,9 +1559,9 @@ static int lm85_probe(struct i2c_client *client)
 
 	data->client = client;
 	if (client->dev.of_node)
-		data->type = (uintptr_t)of_device_get_match_data(&client->dev);
+		data->type = __c_pa(of_device_get_match_data(&client->dev));
 	else
-		data->type = i2c_match_id(lm85_id, client)->driver_data;
+		data->type = __c_ua(i2c_match_id(lm85_id, client)->driver_data);
 	mutex_init(&data->update_lock);
 
 	/* Fill in the chip specific driver values */

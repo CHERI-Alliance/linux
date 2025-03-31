@@ -322,7 +322,7 @@ static int max16601_probe(struct i2c_client *client)
 	if (chip_id != id->driver_data)
 		dev_warn(&client->dev,
 			 "Device mismatch: Configured %s (%d), detected %d\n",
-			 id->name, (int) id->driver_data, chip_id);
+			 id->name, (int)__c_ua(id->driver_data), chip_id);
 
 	ret = i2c_smbus_read_byte_data(client, REG_PHASE_ID);
 	if (ret < 0)

@@ -139,9 +139,9 @@ static int ads7828_probe(struct i2c_client *client)
 	}
 
 	if (client->dev.of_node)
-		chip = (uintptr_t)of_device_get_match_data(&client->dev);
+		chip = __c_pa(of_device_get_match_data(&client->dev));
 	else
-		chip = i2c_match_id(ads7828_device_ids, client)->driver_data;
+		chip = __c_ua(i2c_match_id(ads7828_device_ids, client)->driver_data);
 
 	/* Bound Vref with min/max values */
 	vref_mv = clamp_val(vref_mv, ADS7828_EXT_VREF_MV_MIN,

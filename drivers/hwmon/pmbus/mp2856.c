@@ -404,7 +404,7 @@ static int mp2856_probe(struct i2c_client *client)
 	if (!data)
 		return -ENOMEM;
 
-	data->chip_id = (enum chips)(uintptr_t)i2c_get_match_data(client);
+	data->chip_id = (enum chips)__c_pa(i2c_get_match_data(client));
 
 	memcpy(data->max_phases, mp2856_max_phases[data->chip_id],
 	       sizeof(data->max_phases));

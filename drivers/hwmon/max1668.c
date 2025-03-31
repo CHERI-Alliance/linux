@@ -408,7 +408,7 @@ static int max1668_probe(struct i2c_client *client)
 		return -ENOMEM;
 
 	data->client = client;
-	data->type = i2c_match_id(max1668_id, client)->driver_data;
+	data->type = __c_ua(i2c_match_id(max1668_id, client)->driver_data);
 	mutex_init(&data->update_lock);
 
 	/* sysfs hooks */

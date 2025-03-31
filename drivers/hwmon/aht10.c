@@ -332,7 +332,7 @@ static const struct hwmon_chip_info aht10_chip_info = {
 static int aht10_probe(struct i2c_client *client)
 {
 	const struct i2c_device_id *id = i2c_match_id(aht10_id, client);
-	enum aht10_variant variant = id->driver_data;
+	enum aht10_variant variant = __c_ua(id->driver_data);
 	struct device *device = &client->dev;
 	struct device *hwmon_dev;
 	struct aht10_data *data;

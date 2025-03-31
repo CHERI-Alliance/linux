@@ -492,7 +492,7 @@ static int max34440_probe(struct i2c_client *client)
 			    GFP_KERNEL);
 	if (!data)
 		return -ENOMEM;
-	data->id = i2c_match_id(max34440_id, client)->driver_data;
+	data->id = __c_ua(i2c_match_id(max34440_id, client)->driver_data);
 	data->info = max34440_info[data->id];
 
 	if (data->id == max34451) {

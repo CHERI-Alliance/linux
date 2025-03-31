@@ -717,7 +717,7 @@ static int tmp51x_probe(struct i2c_client *client)
 	if (!data)
 		return -ENOMEM;
 
-	data->max_channels = (uintptr_t)i2c_get_match_data(client);
+	data->max_channels = __c_pa(i2c_get_match_data(client));
 
 	ret = tmp51x_configure(dev, data);
 	if (ret < 0)

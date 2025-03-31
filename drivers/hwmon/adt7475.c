@@ -1687,9 +1687,9 @@ static int adt7475_probe(struct i2c_client *client)
 	i2c_set_clientdata(client, data);
 
 	if (client->dev.of_node)
-		chip = (uintptr_t)of_device_get_match_data(&client->dev);
+		chip = __c_pa(of_device_get_match_data(&client->dev));
 	else
-		chip = id->driver_data;
+		chip = __c_ua(id->driver_data);
 
 	/* Initialize device-specific values */
 	switch (chip) {
@@ -1829,7 +1829,7 @@ static int adt7475_probe(struct i2c_client *client)
 	}
 
 	dev_info(&client->dev, "%s device, revision %d\n",
-		 names[id->driver_data], revision);
+		 names[__c_ua(id->driver_data)], revision);
 	if ((data->has_voltage & 0x11) || data->has_fan4 || data->has_pwm2)
 		dev_info(&client->dev, "Optional features:%s%s%s%s%s\n",
 			 (data->has_voltage & (1 << 0)) ? " in0" : "",

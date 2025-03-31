@@ -489,11 +489,11 @@ static int ibm_cffps_probe(struct i2c_client *client)
 	const struct i2c_device_id *id;
 
 	if (md) {
-		vs = (uintptr_t)md;
+		vs = __c_pa(md);
 	} else {
 		id = i2c_match_id(ibm_cffps_id, client);
 		if (id)
-			vs = (enum versions)id->driver_data;
+			vs = (enum versions)__c_ua(id->driver_data);
 	}
 
 	if (vs == cffps_unknown) {

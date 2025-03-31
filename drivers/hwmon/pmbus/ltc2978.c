@@ -617,7 +617,7 @@ static int ltc2978_get_id(struct i2c_client *client)
 			return ret;
 		for (id = &ltc2978_id[0]; strlen(id->name); id++) {
 			if (!strncasecmp(id->name, buf, strlen(id->name)))
-				return (int)id->driver_data;
+				return (int)__c_ua(id->driver_data);
 		}
 		return -ENODEV;
 	}
@@ -706,7 +706,7 @@ static int ltc2978_probe(struct i2c_client *client)
 		dev_warn(&client->dev,
 			 "Device mismatch: Configured %s (%d), detected %d\n",
 			 id->name,
-			 (int) id->driver_data,
+			 (int)__c_ua(id->driver_data),
 			 chip_id);
 
 	info = &data->info;

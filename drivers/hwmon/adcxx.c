@@ -150,7 +150,7 @@ static struct sensor_device_attribute ad_input[] = {
 
 static int adcxx_probe(struct spi_device *spi)
 {
-	int channels = spi_get_device_id(spi)->driver_data;
+	int channels = __c_ua(spi_get_device_id(spi)->driver_data);
 	struct adcxx *adc;
 	int status;
 	int i;

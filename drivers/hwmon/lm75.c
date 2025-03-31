@@ -636,9 +636,9 @@ static int lm75_probe(struct i2c_client *client)
 	enum lm75_type kind;
 
 	if (client->dev.of_node)
-		kind = (uintptr_t)of_device_get_match_data(&client->dev);
+		kind = __c_pa(of_device_get_match_data(&client->dev));
 	else
-		kind = i2c_match_id(lm75_ids, client)->driver_data;
+		kind = __c_ua(i2c_match_id(lm75_ids, client)->driver_data);
 
 	if (!i2c_check_functionality(client->adapter,
 			I2C_FUNC_SMBUS_BYTE_DATA | I2C_FUNC_SMBUS_WORD_DATA))

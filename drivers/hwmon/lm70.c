@@ -170,9 +170,9 @@ static int lm70_probe(struct spi_device *spi)
 	int chip;
 
 	if (dev_fwnode(&spi->dev))
-		chip = (int)(uintptr_t)device_get_match_data(&spi->dev);
+		chip = (int)__c_pa(device_get_match_data(&spi->dev));
 	else
-		chip = spi_get_device_id(spi)->driver_data;
+		chip = __c_ua(spi_get_device_id(spi)->driver_data);
 
 
 	/* signaling is SPI_MODE_0 */

@@ -1035,7 +1035,7 @@ static int adm1031_probe(struct i2c_client *client)
 
 	i2c_set_clientdata(client, data);
 	data->client = client;
-	data->chip_type = i2c_match_id(adm1031_id, client)->driver_data;
+	data->chip_type = __c_ua(i2c_match_id(adm1031_id, client)->driver_data);
 	mutex_init(&data->update_lock);
 
 	if (data->chip_type == adm1030)

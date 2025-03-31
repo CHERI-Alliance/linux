@@ -667,9 +667,9 @@ static int tmp464_probe(struct i2c_client *client)
 	mutex_init(&data->update_lock);
 
 	if (dev->of_node)
-		data->channels = (int)(unsigned long)of_device_get_match_data(&client->dev);
+		data->channels = (int)__c_pa(of_device_get_match_data(&client->dev));
 	else
-		data->channels = i2c_match_id(tmp464_id, client)->driver_data;
+		data->channels = __c_ua(i2c_match_id(tmp464_id, client)->driver_data);
 
 	data->regmap = devm_regmap_init_i2c(client, &tmp464_regmap_config);
 	if (IS_ERR(data->regmap))

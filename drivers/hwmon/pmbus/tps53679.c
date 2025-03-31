@@ -235,9 +235,9 @@ static int tps53679_probe(struct i2c_client *client)
 	enum chips chip_id;
 
 	if (dev->of_node)
-		chip_id = (uintptr_t)of_device_get_match_data(dev);
+		chip_id = __c_pa(of_device_get_match_data(dev));
 	else
-		chip_id = i2c_match_id(tps53679_id, client)->driver_data;
+		chip_id = __c_ua(i2c_match_id(tps53679_id, client)->driver_data);
 
 	info = devm_kmemdup(dev, &tps53679_info, sizeof(*info), GFP_KERNEL);
 	if (!info)

@@ -94,7 +94,7 @@ static int pfe_pmbus_probe(struct i2c_client *client)
 {
 	int model;
 
-	model = (int)i2c_match_id(pfe_device_id, client)->driver_data;
+	model = (int)__c_ua(i2c_match_id(pfe_device_id, client)->driver_data);
 	client->dev.platform_data = &pfe_plat_data;
 
 	/*

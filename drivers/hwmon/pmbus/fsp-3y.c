@@ -245,7 +245,7 @@ static int fsp3y_probe(struct i2c_client *client)
 	id = i2c_match_id(fsp3y_id, client);
 	if (data->chip != id->driver_data)
 		dev_warn(&client->dev, "Device mismatch: Configured %s (%d), detected %d\n",
-			 id->name, (int)id->driver_data, data->chip);
+			 id->name, (int)__c_ua(id->driver_data), data->chip);
 
 	rv = i2c_smbus_read_byte_data(client, PMBUS_PAGE);
 	if (rv < 0)

@@ -391,7 +391,7 @@ static int thmc50_probe(struct i2c_client *client)
 		return -ENOMEM;
 
 	data->client = client;
-	data->type = i2c_match_id(thmc50_id, client)->driver_data;
+	data->type = __c_ua(i2c_match_id(thmc50_id, client)->driver_data);
 	mutex_init(&data->update_lock);
 
 	thmc50_init_client(data);

@@ -581,7 +581,7 @@ static int adm1275_probe(struct i2c_client *client)
 	if (shunt == 0)
 		return -EINVAL;
 
-	data->id = mid->driver_data;
+	data->id = __c_ua(mid->driver_data);
 
 	info = &data->info;
 

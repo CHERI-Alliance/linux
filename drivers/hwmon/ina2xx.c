@@ -624,9 +624,9 @@ static int ina2xx_probe(struct i2c_client *client)
 	enum ina2xx_ids chip;
 
 	if (client->dev.of_node)
-		chip = (uintptr_t)of_device_get_match_data(&client->dev);
+		chip = __c_pa(of_device_get_match_data(&client->dev));
 	else
-		chip = i2c_match_id(ina2xx_id, client)->driver_data;
+		chip = __c_ua(i2c_match_id(ina2xx_id, client)->driver_data);
 
 	data = devm_kzalloc(dev, sizeof(*data), GFP_KERNEL);
 	if (!data)

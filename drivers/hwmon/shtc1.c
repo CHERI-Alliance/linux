@@ -195,7 +195,7 @@ static int shtc1_probe(struct i2c_client *client)
 	char id_reg_buf[2];
 	struct shtc1_data *data;
 	struct device *hwmon_dev;
-	enum shtcx_chips chip = i2c_match_id(shtc1_id, client)->driver_data;
+	enum shtcx_chips chip = __c_ua(i2c_match_id(shtc1_id, client)->driver_data);
 	struct i2c_adapter *adap = client->adapter;
 	struct device *dev = &client->dev;
 	struct device_node *np = dev->of_node;

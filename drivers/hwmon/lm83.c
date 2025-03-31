@@ -438,7 +438,7 @@ static int lm83_probe(struct i2c_client *client)
 	if (IS_ERR(data->regmap))
 		return PTR_ERR(data->regmap);
 
-	data->type = i2c_match_id(lm83_id, client)->driver_data;
+	data->type = __c_ua(i2c_match_id(lm83_id, client)->driver_data);
 
 	hwmon_dev = devm_hwmon_device_register_with_info(dev, client->name,
 							 data, &lm83_chip_info, NULL);

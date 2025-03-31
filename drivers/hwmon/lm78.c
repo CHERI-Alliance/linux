@@ -640,7 +640,7 @@ static int lm78_i2c_probe(struct i2c_client *client)
 		return -ENOMEM;
 
 	data->client = client;
-	data->type = i2c_match_id(lm78_i2c_id, client)->driver_data;
+	data->type = __c_ua(i2c_match_id(lm78_i2c_id, client)->driver_data);
 
 	/* Initialize the LM78 chip */
 	lm78_init_device(data);

@@ -588,9 +588,9 @@ static int ucd9000_probe(struct i2c_client *client)
 	}
 
 	if (client->dev.of_node)
-		chip = (uintptr_t)of_device_get_match_data(&client->dev);
+		chip = __c_pa(of_device_get_match_data(&client->dev));
 	else
-		chip = mid->driver_data;
+		chip = __c_ua(mid->driver_data);
 
 	if (chip != ucd9000 && strcmp(client->name, mid->name) != 0)
 		dev_notice(&client->dev,

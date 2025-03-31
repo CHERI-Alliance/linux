@@ -291,9 +291,9 @@ static int q54sj108a2_probe(struct i2c_client *client)
 		return -ENODEV;
 
 	if (client->dev.of_node)
-		chip_id = (enum chips)(unsigned long)of_device_get_match_data(dev);
+		chip_id = (enum chips)__c_pa(of_device_get_match_data(dev));
 	else
-		chip_id = i2c_match_id(q54sj108a2_id, client)->driver_data;
+		chip_id = __c_ua(i2c_match_id(q54sj108a2_id, client)->driver_data);
 
 	ret = i2c_smbus_read_block_data(client, PMBUS_MFR_ID, buf);
 	if (ret < 0) {

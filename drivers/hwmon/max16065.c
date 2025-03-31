@@ -518,9 +518,9 @@ static int max16065_probe(struct i2c_client *client)
 	data->client = client;
 	mutex_init(&data->update_lock);
 
-	data->num_adc = max16065_num_adc[id->driver_data];
-	data->have_current = max16065_have_current[id->driver_data];
-	have_secondary = max16065_have_secondary[id->driver_data];
+	data->num_adc = max16065_num_adc[__c_ua(id->driver_data)];
+	data->have_current = max16065_have_current[__c_ua(id->driver_data)];
+	have_secondary = max16065_have_secondary[__c_ua(id->driver_data)];
 
 	if (have_secondary) {
 		val = i2c_smbus_read_byte_data(client, MAX16065_SW_ENABLE);

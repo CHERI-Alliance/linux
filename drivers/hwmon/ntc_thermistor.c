@@ -633,12 +633,12 @@ static int ntc_thermistor_probe(struct platform_device *pdev)
 
 	if (pdev_id->driver_data >= ARRAY_SIZE(ntc_type)) {
 		dev_err(dev, "Unknown device type: %lu(%s)\n",
-				pdev_id->driver_data, pdev_id->name);
+				__c_ua(pdev_id->driver_data), pdev_id->name);
 		return -EINVAL;
 	}
 
-	data->comp   = ntc_type[pdev_id->driver_data].comp;
-	data->n_comp = ntc_type[pdev_id->driver_data].n_comp;
+	data->comp   = ntc_type[__c_ua(pdev_id->driver_data)].comp;
+	data->n_comp = ntc_type[__c_ua(pdev_id->driver_data)].n_comp;
 
 	hwmon_dev = devm_hwmon_device_register_with_info(dev, pdev_id->name,
 							 data, &ntc_chip_info,

@@ -693,7 +693,7 @@ static int tmp401_probe(struct i2c_client *client)
 
 	data->client = client;
 	mutex_init(&data->update_lock);
-	data->kind = i2c_match_id(tmp401_id, client)->driver_data;
+	data->kind = __c_ua(i2c_match_id(tmp401_id, client)->driver_data);
 
 	data->regmap = devm_regmap_init(dev, NULL, data, &tmp401_regmap_config);
 	if (IS_ERR(data->regmap))

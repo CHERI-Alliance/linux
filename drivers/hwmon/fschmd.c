@@ -877,7 +877,7 @@ static ssize_t watchdog_write(struct file *filp, const char __user *buf,
 }
 
 static long watchdog_ioctl(struct file *filp, unsigned int cmd,
-			   unsigned long arg)
+			   user_uintptr_t arg)
 {
 	struct watchdog_info ident = {
 		.options = WDIOF_KEEPALIVEPING | WDIOF_SETTIMEOUT |
@@ -1087,7 +1087,7 @@ static int fschmd_probe(struct i2c_client *client)
 				"Heracles", "Heimdall", "Hades", "Syleus" };
 	static const int watchdog_minors[] = { WATCHDOG_MINOR, 212, 213, 214, 215 };
 	int i, err;
-	enum chips kind = i2c_match_id(fschmd_id, client)->driver_data;
+	enum chips kind = __c_ua(i2c_match_id(fschmd_id, client)->driver_data);
 
 	data = kzalloc(sizeof(struct fschmd_data), GFP_KERNEL);
 	if (!data)

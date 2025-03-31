@@ -2149,7 +2149,7 @@ static int w83795_probe(struct i2c_client *client)
 		return -ENOMEM;
 
 	i2c_set_clientdata(client, data);
-	data->chip_type = i2c_match_id(w83795_id, client)->driver_data;
+	data->chip_type = __c_ua(i2c_match_id(w83795_id, client)->driver_data);
 	data->bank = i2c_smbus_read_byte_data(client, W83795_REG_BANKSEL);
 	mutex_init(&data->update_lock);
 

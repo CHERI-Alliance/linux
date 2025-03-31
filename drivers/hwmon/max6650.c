@@ -775,7 +775,7 @@ static int max6650_probe(struct i2c_client *client)
 	i2c_set_clientdata(client, data);
 	mutex_init(&data->update_lock);
 
-	data->nr_fans = (uintptr_t)i2c_get_match_data(client);
+	data->nr_fans = __c_pa(i2c_get_match_data(client));
 
 	/*
 	 * Initialize the max6650 chip

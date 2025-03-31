@@ -182,7 +182,7 @@ static int setup_transfer(struct max1111_data *data)
 
 static int max1111_probe(struct spi_device *spi)
 {
-	enum chips chip = spi_get_device_id(spi)->driver_data;
+	enum chips chip = __c_ua(spi_get_device_id(spi)->driver_data);
 	struct max1111_data *data;
 	int err;
 

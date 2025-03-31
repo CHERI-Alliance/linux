@@ -2474,7 +2474,7 @@ static int dme1737_i2c_probe(struct i2c_client *client)
 		return -ENOMEM;
 
 	i2c_set_clientdata(client, data);
-	data->type = i2c_match_id(dme1737_id, client)->driver_data;
+	data->type = __c_ua(i2c_match_id(dme1737_id, client)->driver_data);
 	data->client = client;
 	data->name = client->name;
 	mutex_init(&data->update_lock);

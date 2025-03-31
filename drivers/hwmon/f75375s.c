@@ -830,7 +830,7 @@ static int f75375_probe(struct i2c_client *client)
 
 	i2c_set_clientdata(client, data);
 	mutex_init(&data->update_lock);
-	data->kind = i2c_match_id(f75375_id, client)->driver_data;
+	data->kind = __c_ua(i2c_match_id(f75375_id, client)->driver_data);
 
 	err = sysfs_create_group(&client->dev.kobj, &f75375_group);
 	if (err)

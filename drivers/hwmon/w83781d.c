@@ -1208,7 +1208,7 @@ static int w83781d_probe(struct i2c_client *client)
 	mutex_init(&data->lock);
 	mutex_init(&data->update_lock);
 
-	data->type = i2c_match_id(w83781d_ids, client)->driver_data;
+	data->type = __c_ua(i2c_match_id(w83781d_ids, client)->driver_data);
 	data->client = client;
 
 	/* attach secondary i2c lm75-like clients */

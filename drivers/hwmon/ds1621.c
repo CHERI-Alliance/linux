@@ -356,7 +356,7 @@ static int ds1621_probe(struct i2c_client *client)
 
 	mutex_init(&data->update_lock);
 
-	data->kind = i2c_match_id(ds1621_id, client)->driver_data;
+	data->kind = __c_ua(i2c_match_id(ds1621_id, client)->driver_data);
 	data->client = client;
 
 	/* Initialize the DS1621 chip */

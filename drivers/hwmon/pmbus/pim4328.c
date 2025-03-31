@@ -169,7 +169,7 @@ static int pim4328_probe(struct i2c_client *client)
 			   "Device mismatch: Configured %s, detected %s\n",
 			   client->name, mid->name);
 
-	data->id = mid->driver_data;
+	data->id = __c_ua(mid->driver_data);
 	info = &data->info;
 	info->pages = 1;
 	info->read_byte_data = pim4328_read_byte_data;

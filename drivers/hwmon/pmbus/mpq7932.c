@@ -111,7 +111,7 @@ static int mpq7932_probe(struct i2c_client *client)
 		return -ENOMEM;
 
 	info = &data->info;
-	info->pages = (int)(unsigned long)device_get_match_data(&client->dev);
+	info->pages = (int)__c_pa(device_get_match_data(&client->dev));
 	info->format[PSC_VOLTAGE_OUT] = direct;
 	info->m[PSC_VOLTAGE_OUT] = 160;
 	info->b[PSC_VOLTAGE_OUT] = -33;

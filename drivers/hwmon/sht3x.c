@@ -920,7 +920,7 @@ static int sht3x_probe(struct i2c_client *client)
 	data->mode = 0;
 	data->last_update = jiffies - msecs_to_jiffies(3000);
 	data->client = client;
-	data->chip_id = i2c_match_id(sht3x_ids, client)->driver_data;
+	data->chip_id = __c_ua(i2c_match_id(sht3x_ids, client)->driver_data);
 	crc8_populate_msb(sht3x_crc8_table, SHT3X_CRC8_POLYNOMIAL);
 
 	sht3x_select_command(data);
