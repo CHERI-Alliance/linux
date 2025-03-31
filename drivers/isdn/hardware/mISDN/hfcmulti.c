@@ -3527,8 +3527,7 @@ static int
 channel_bctrl(struct bchannel *bch, struct mISDN_ctrl_req *cq)
 {
 	int			ret = 0;
-	struct dsp_features	*features =
-		(struct dsp_features *)(*((u_long *)&cq->p1));
+	struct dsp_features	*features = cq->data;
 	struct hfc_multi	*hc = bch->hw;
 	int			slot_tx;
 	int			bank_tx;

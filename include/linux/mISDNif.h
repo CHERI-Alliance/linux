@@ -399,8 +399,13 @@ clear_channelmap(u_int nr, u_char *map)
 struct mISDN_ctrl_req {
 	int		op;
 	int		channel;
-	int		p1;
-	int		p2;
+	union {
+		struct {
+			int		p1;
+			int		p2;
+		};
+		void *data;
+	};
 };
 
 /* muxer options */

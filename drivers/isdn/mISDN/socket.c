@@ -289,7 +289,7 @@ data_sock_ioctl_bound(struct sock *sk, unsigned int cmd, void __user *p)
 	}
 	switch (cmd) {
 	case IMCTRLREQ:
-		if (copy_from_user(&cq, p, sizeof(cq))) {
+		if (copy_from_user_with_ptr(&cq, p, sizeof(cq))) {
 			err = -EFAULT;
 			break;
 		}
@@ -307,7 +307,7 @@ data_sock_ioctl_bound(struct sock *sk, unsigned int cmd, void __user *p)
 						    CONTROL_CHANNEL, &cq);
 		if (err)
 			break;
-		if (copy_to_user(p, &cq, sizeof(cq)))
+		if (copy_to_user_with_ptr(p, &cq, sizeof(cq)))
 			err = -EFAULT;
 		break;
 	case IMCLEAR_L2:
