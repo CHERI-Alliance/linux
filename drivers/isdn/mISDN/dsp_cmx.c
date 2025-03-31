@@ -1224,7 +1224,7 @@ dsp_cmx_receive(struct dsp *dsp, struct sk_buff *skb)
 			printk(KERN_DEBUG
 			       "cmx_receive(dsp=%lx): UNDERRUN (or overrun the "
 			       "maximum delay), adjusting read pointer! "
-			       "(inst %s)\n", (u_long)dsp, dsp->name);
+			       "(inst %s)\n", __c_pa(dsp), dsp->name);
 		/* flush rx buffer and set delay to dsp_poll / 2 */
 		if (dsp->features.unordered) {
 			dsp->rx_R = (hh->id & CMX_BUFF_MASK);
@@ -1252,7 +1252,7 @@ dsp_cmx_receive(struct dsp *dsp, struct sk_buff *skb)
 				       "cmx_receive(dsp=%lx): OVERRUN (because "
 				       "twice the delay is reached), adjusting "
 				       "read pointer! (inst %s)\n",
-				       (u_long)dsp, dsp->name);
+				       __c_pa(dsp), dsp->name);
 			/* flush buffer */
 			if (dsp->features.unordered) {
 				dsp->rx_R = (hh->id & CMX_BUFF_MASK);

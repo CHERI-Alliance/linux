@@ -1084,7 +1084,7 @@ inf_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 		kfree(card);
 		return err;
 	}
-	card->ci = get_card_info(ent->driver_data);
+	card->ci = get_card_info(__c_ua(ent->driver_data));
 	if (!card->ci) {
 		pr_info("mISDN: do not have information about adapter at %s\n",
 			pci_name(pdev));

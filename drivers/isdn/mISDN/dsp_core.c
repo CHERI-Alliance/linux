@@ -649,7 +649,7 @@ get_features(struct mISDNchannel *ch)
 		return;
 	if ((cq.op & MISDN_CTRL_HW_FEATURES_OP)) {
 		cq.op = MISDN_CTRL_HW_FEATURES;
-		*((u_long *)&cq.p1) = (u_long)&dsp->features;
+		cq.data = &dsp->features;
 		if (ch->peer->ctrl(ch->peer, CONTROL_CHANNEL, &cq)) {
 			printk(KERN_DEBUG "%s: 2nd CONTROL_CHANNEL failed\n",
 			       __func__);

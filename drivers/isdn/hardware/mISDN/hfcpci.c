@@ -1534,12 +1534,12 @@ hfc_bctrl(struct mISDNchannel *ch, u_int cmd, void *arg)
 	switch (cmd) {
 	case HW_TESTRX_RAW:
 		spin_lock_irqsave(&hc->lock, flags);
-		ret = set_hfcpci_rxtest(bch, ISDN_P_B_RAW, (int)(long)arg);
+		ret = set_hfcpci_rxtest(bch, ISDN_P_B_RAW, (int)(long)__c_pa(arg));
 		spin_unlock_irqrestore(&hc->lock, flags);
 		break;
 	case HW_TESTRX_HDLC:
 		spin_lock_irqsave(&hc->lock, flags);
-		ret = set_hfcpci_rxtest(bch, ISDN_P_B_HDLC, (int)(long)arg);
+		ret = set_hfcpci_rxtest(bch, ISDN_P_B_HDLC, (int)(long)__c_pa(arg));
 		spin_unlock_irqrestore(&hc->lock, flags);
 		break;
 	case HW_TESTRX_OFF:
@@ -2002,7 +2002,7 @@ setup_hw(struct hfc_pci *hc)
 		return -EINVAL;
 	}
 	hc->hw.pci_io =
-		(char __iomem *)(unsigned long)hc->pdev->resource[1].start;
+		(char __iomem *)__c_fakep(hc->pdev->resource[1].start);
 
 	if (!hc->hw.pci_io) {
 		printk(KERN_WARNING "HFC-PCI: No IO-Mem for PCI card found\n");
@@ -2025,7 +2025,7 @@ setup_hw(struct hfc_pci *hc)
 	}
 	hc->hw.fifos = buffer;
 	pci_write_config_dword(hc->pdev, 0x80, hc->hw.dmahandle);
-	hc->hw.pci_io = ioremap((ulong) hc->hw.pci_io, 256);
+	hc->hw.pci_io = ioremap(__c_pa(hc->hw.pci_io), 256);
 	if (unlikely(!hc->hw.pci_io)) {
 		printk(KERN_WARNING
 		       "HFC-PCI: Error in ioremap for PCI!\n");
@@ -2036,7 +2036,7 @@ setup_hw(struct hfc_pci *hc)
 
 	printk(KERN_INFO
 	       "HFC-PCI: defined at mem %#lx fifo %p(%pad) IRQ %d HZ %d\n",
-	       (u_long) hc->hw.pci_io, hc->hw.fifos,
+	       __c_pa(hc->hw.pci_io), hc->hw.fifos,
 	       &hc->hw.dmahandle, hc->irq, HZ);
 
 	/* enable memory mapped ports, disable busmaster */

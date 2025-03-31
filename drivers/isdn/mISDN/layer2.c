@@ -301,7 +301,7 @@ l2_timeout(struct FsmInst *fi, int event, void *arg)
 
 static int
 l2mgr(struct layer2 *l2, u_int prim, void *arg) {
-	long c = (long)arg;
+	long c = (long)__c_pa(arg);
 
 	printk(KERN_WARNING "l2mgr: dev %s addr:%x prim %x %c\n",
 	       mISDNDevName4ch(&l2->ch), l2->id, prim, (char)c);
@@ -312,7 +312,7 @@ l2mgr(struct layer2 *l2, u_int prim, void *arg) {
 		case 'D':
 		case 'G':
 		case 'H':
-			l2_tei(l2, prim, (u_long)arg);
+			l2_tei(l2, prim, __c_pa(arg));
 			break;
 		}
 	}
@@ -1346,7 +1346,7 @@ l2_got_tei(struct FsmInst *fi, int event, void *arg)
 	struct layer2	*l2 = fi->userdata;
 	u_int		info;
 
-	l2->tei = (signed char)(long)arg;
+	l2->tei = (signed char)(long)__c_pa(arg);
 	set_channel_address(&l2->ch, l2->sapi, l2->tei);
 	info = DL_INFO_L2_CONNECT;
 	l2up_create(l2, DL_INFORMATION_IND, sizeof(info), &info);
@@ -1933,7 +1933,7 @@ ph_data_indication(struct layer2 *l2, struct mISDNhead *hh, struct sk_buff *skb)
 	if (c) {
 		printk(KERN_WARNING "%s:l2 D-channel frame error %c\n",
 		       mISDNDevName4ch(&l2->ch), c);
-		mISDN_FsmEvent(&l2->l2m, EV_L2_FRAME_ERROR, (void *)(long)c);
+		mISDN_FsmEvent(&l2->l2m, EV_L2_FRAME_ERROR, __c_fakep((long)c));
 	}
 	return ret;
 }
@@ -2040,7 +2040,7 @@ tei_l2(struct layer2 *l2, u_int cmd, u_long arg)
 		       mISDNDevName4ch(&l2->ch), cmd, __func__);
 	switch (cmd) {
 	case (MDL_ASSIGN_REQ):
-		ret = mISDN_FsmEvent(&l2->l2m, EV_L2_MDL_ASSIGN, (void *)arg);
+		ret = mISDN_FsmEvent(&l2->l2m, EV_L2_MDL_ASSIGN, __c_fakep((long)arg));
 		break;
 	case (MDL_REMOVE_REQ):
 		ret = mISDN_FsmEvent(&l2->l2m, EV_L2_MDL_REMOVE, NULL);
