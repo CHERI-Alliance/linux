@@ -331,7 +331,7 @@ static void zynqmp_dma_config_sg_ll_desc(struct zynqmp_dma_chan *chan,
 
 	if (prev) {
 		dma_addr_t addr = chan->desc_pool_p +
-			    ((uintptr_t)sdesc - (uintptr_t)chan->desc_pool_v);
+			    (__c_pa(sdesc) - __c_pa(chan->desc_pool_v));
 		ddesc = prev + 1;
 		prev->nxtdscraddr = addr;
 		ddesc->nxtdscraddr = addr + ZYNQMP_DMA_DESC_SIZE(chan);
