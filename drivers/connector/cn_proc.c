@@ -52,7 +52,7 @@ static int cn_filter(struct sock *dsk, struct sk_buff *skb, void *data)
 {
 	__u32 what, exit_code, *ptr;
 	enum proc_cn_mcast_op mc_op;
-	uintptr_t val;
+	unsigned long val;
 
 	if (!dsk || !dsk->sk_user_data || !data)
 		return 0;
