@@ -310,26 +310,26 @@ static void atp867x_check_ports(struct ata_port *ap, int port)
 		"  dp->eightb_piospd	=0x%lx\n"
 		"  dp->pci66mhz		=0x%lx\n",
 		port,
-		(unsigned long)ioaddr->cmd_addr,
-		(unsigned long)ATP867X_IO_PORTBASE(ap, port),
-		(unsigned long)ioaddr->ctl_addr,
-		(unsigned long)ATP867X_IO_ALTSTATUS(ap, port),
-		(unsigned long)ioaddr->bmdma_addr,
-		(unsigned long)ATP867X_IO_DMABASE(ap, port),
-		(unsigned long)ioaddr->data_addr,
-		(unsigned long)ioaddr->error_addr,
-		(unsigned long)ioaddr->feature_addr,
-		(unsigned long)ioaddr->nsect_addr,
-		(unsigned long)ioaddr->lbal_addr,
-		(unsigned long)ioaddr->lbam_addr,
-		(unsigned long)ioaddr->lbah_addr,
-		(unsigned long)ioaddr->device_addr,
-		(unsigned long)ioaddr->status_addr,
-		(unsigned long)ioaddr->command_addr,
-		(unsigned long)dp->dma_mode,
-		(unsigned long)dp->mstr_piospd,
-		(unsigned long)dp->slave_piospd,
-		(unsigned long)dp->eightb_piospd,
+		__c_pa(ioaddr->cmd_addr),
+		__c_pa(ATP867X_IO_PORTBASE(ap, port)),
+		__c_pa(ioaddr->ctl_addr),
+		__c_pa(ATP867X_IO_ALTSTATUS(ap, port)),
+		__c_pa(ioaddr->bmdma_addr),
+		__c_pa(ATP867X_IO_DMABASE(ap, port)),
+		__c_pa(ioaddr->data_addr),
+		__c_pa(ioaddr->error_addr),
+		__c_pa(ioaddr->feature_addr),
+		__c_pa(ioaddr->nsect_addr),
+		__c_pa(ioaddr->lbal_addr),
+		__c_pa(ioaddr->lbam_addr),
+		__c_pa(ioaddr->lbah_addr),
+		__c_pa(ioaddr->device_addr),
+		__c_pa(ioaddr->status_addr),
+		__c_pa(ioaddr->command_addr),
+		__c_pa(dp->dma_mode),
+		__c_pa(dp->mstr_piospd),
+		__c_pa(dp->slave_piospd),
+		__c_pa(dp->eightb_piospd),
 		(unsigned long)dp->pci66mhz);
 }
 
@@ -443,10 +443,10 @@ static int atp867x_ata_pci_sff_init_host(struct ata_host *host)
 		atp867x_check_ports(ap, i);
 
 		ata_port_desc(ap, "cmd 0x%lx ctl 0x%lx",
-			(unsigned long)ioaddr->cmd_addr,
-			(unsigned long)ioaddr->ctl_addr);
+			__c_pa(ioaddr->cmd_addr),
+			__c_pa(ioaddr->ctl_addr));
 		ata_port_desc(ap, "bmdma 0x%lx",
-			(unsigned long)ioaddr->bmdma_addr);
+			__c_pa(ioaddr->bmdma_addr));
 
 		mask |= 1 << i;
 	}

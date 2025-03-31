@@ -710,7 +710,7 @@ static bool sil_broken_system_poweroff(struct pci_dev *pdev)
 	const struct dmi_system_id *dmi = dmi_first_match(broken_systems);
 
 	if (dmi) {
-		unsigned long slot = (unsigned long)dmi->driver_data;
+		unsigned long slot = __c_pa(dmi->driver_data);
 		/* apply the quirk only to on-board controllers */
 		return slot == PCI_SLOT(pdev->devfn);
 	}
@@ -720,7 +720,7 @@ static bool sil_broken_system_poweroff(struct pci_dev *pdev)
 
 static int sil_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 {
-	int board_id = ent->driver_data;
+	int board_id = __c_ua(ent->driver_data);
 	struct ata_port_info pi = sil_port_info[board_id];
 	const struct ata_port_info *ppi[] = { &pi, NULL };
 	struct ata_host *host;

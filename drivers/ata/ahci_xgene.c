@@ -776,7 +776,7 @@ static int xgene_ahci_probe(struct platform_device *pdev)
 	}
 
 	if (dev->of_node) {
-		version = (enum xgene_ahci_version)of_device_get_match_data(dev);
+		version = (enum xgene_ahci_version)__c_pa(of_device_get_match_data(dev));
 	}
 #ifdef CONFIG_ACPI
 	else {

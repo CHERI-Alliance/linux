@@ -1148,7 +1148,7 @@ static void pdc_host_init(struct ata_host *host)
 static int pdc_ata_init_one(struct pci_dev *pdev,
 			    const struct pci_device_id *ent)
 {
-	const struct ata_port_info *pi = &pdc_port_info[ent->driver_data];
+	const struct ata_port_info *pi = &pdc_port_info[__c_ua(ent->driver_data)];
 	const struct ata_port_info *ppi[PDC_MAX_PORTS];
 	struct ata_host *host;
 	struct pdc_host_priv *hpriv;

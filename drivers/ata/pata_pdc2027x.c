@@ -683,7 +683,7 @@ static int pdc2027x_init_one(struct pci_dev *pdev,
 {
 	static const unsigned long cmd_offset[] = { 0x17c0, 0x15c0 };
 	static const unsigned long bmdma_offset[] = { 0x1000, 0x1008 };
-	unsigned int board_idx = (unsigned int) ent->driver_data;
+	unsigned int board_idx = __c_ua(ent->driver_data);
 	const struct ata_port_info *ppi[] =
 		{ &pdc2027x_port_info[board_idx], NULL };
 	struct ata_host *host;

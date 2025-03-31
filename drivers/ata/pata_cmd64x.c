@@ -424,8 +424,8 @@ static int cmd64x_init_one(struct pci_dev *pdev, const struct pci_device_id *id)
 		}
 	};
 	const struct ata_port_info *ppi[] = {
-		&cmd_info[id->driver_data],
-		&cmd_info[id->driver_data],
+		&cmd_info[__c_ua(id->driver_data)],
+		&cmd_info[__c_ua(id->driver_data)],
 		NULL
 	};
 	u8 reg;

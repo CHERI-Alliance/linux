@@ -540,7 +540,7 @@ static int qs_set_dma_masks(struct pci_dev *pdev, void __iomem *mmio_base)
 static int qs_ata_init_one(struct pci_dev *pdev,
 				const struct pci_device_id *ent)
 {
-	unsigned int board_idx = (unsigned int) ent->driver_data;
+	unsigned int board_idx = __c_ua(ent->driver_data);
 	const struct ata_port_info *ppi[] = { &qs_port_info[board_idx], NULL };
 	struct ata_host *host;
 	int rc, port_no;

@@ -145,7 +145,7 @@ static int cs5520_init_one(struct pci_dev *pdev, const struct pci_device_id *id)
 		pci_write_config_byte(pdev, 0x60, pcicfg | 0x40);
 	}
 
-	pi.mwdma_mask = id->driver_data;
+	pi.mwdma_mask = __c_ua(id->driver_data);
 
 	host = ata_host_alloc_pinfo(&pdev->dev, ppi, 2);
 	if (!host)

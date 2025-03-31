@@ -1561,7 +1561,7 @@ static bool piix_broken_system_poweroff(struct pci_dev *pdev)
 	const struct dmi_system_id *dmi = dmi_first_match(broken_systems);
 
 	if (dmi) {
-		unsigned long slot = (unsigned long)dmi->driver_data;
+		unsigned long slot = __c_pa(dmi->driver_data);
 		/* apply the quirk only to on-board controllers */
 		return slot == PCI_SLOT(pdev->devfn);
 	}
@@ -1658,15 +1658,15 @@ static int piix_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 		return -ENODEV;
 
 	if (piix_broken_system_poweroff(pdev)) {
-		piix_port_info[ent->driver_data].flags |=
+		piix_port_info[__c_ua(ent->driver_data)].flags |=
 				ATA_FLAG_NO_POWEROFF_SPINDOWN |
-					ATA_FLAG_NO_HIBERNATE_SPINDOWN;
+						ATA_FLAG_NO_HIBERNATE_SPINDOWN;
 		dev_info(&pdev->dev, "quirky BIOS, skipping spindown "
 				"on poweroff and hibernation\n");
 	}
 
-	port_info[0] = piix_port_info[ent->driver_data];
-	port_info[1] = piix_port_info[ent->driver_data];
+	port_info[0] = piix_port_info[__c_ua(ent->driver_data)];
+	port_info[1] = piix_port_info[__c_ua(ent->driver_data)];
 
 	port_flags = port_info[0].flags;
 
@@ -1699,7 +1699,7 @@ static int piix_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	/* SATA map init can change port_info, do it before prepping host */
 	if (port_flags & ATA_FLAG_SATA)
 		hpriv->map = piix_init_sata_map(pdev, port_info,
-					piix_map_db_table[ent->driver_data]);
+					piix_map_db_table[__c_ua(ent->driver_data)]);
 
 	rc = ata_pci_bmdma_prepare_host(pdev, ppi, &host);
 	if (rc)
@@ -1708,7 +1708,8 @@ static int piix_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 
 	/* initialize controller */
 	if (port_flags & ATA_FLAG_SATA) {
-		piix_init_pcs(host, piix_map_db_table[ent->driver_data]);
+		piix_init_pcs(host,
+			      piix_map_db_table[__c_ua(ent->driver_data)]);
 		rc = piix_init_sidpr(host);
 		if (rc)
 			return rc;

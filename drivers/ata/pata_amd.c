@@ -277,7 +277,7 @@ static unsigned int nv_mode_filter(struct ata_device *dev,
 	unsigned int bios_limit = 0, acpi_limit = 0, limit;
 
 	/* find out what BIOS configured */
-	udma = saved_udma = (unsigned long)ap->host->private_data;
+	udma = saved_udma = __c_pa(ap->host->private_data);
 
 	if (ap->port_no == 0)
 		udma >>= 16;
@@ -382,7 +382,7 @@ static void nv133_set_dmamode(struct ata_port *ap, struct ata_device *adev)
 
 static void nv_host_stop(struct ata_host *host)
 {
-	u32 udma = (unsigned long)host->private_data;
+	u32 udma = __c_pa(host->private_data);
 
 	/* restore PCI config register 0x60 */
 	pci_write_config_dword(to_pci_dev(host->dev), 0x60, udma);
@@ -530,7 +530,7 @@ static int amd_init_one(struct pci_dev *pdev, const struct pci_device_id *id)
 		}
 	};
 	const struct ata_port_info *ppi[] = { NULL, NULL };
-	int type = id->driver_data;
+	int type = __c_ua(id->driver_data);
 	void *hpriv = NULL;
 	u8 fifo;
 	int rc;
@@ -568,7 +568,7 @@ static int amd_init_one(struct pci_dev *pdev, const struct pci_device_id *id)
 		u32 udma;
 
 		pci_read_config_dword(pdev, 0x60, &udma);
-		hpriv = (void *)(unsigned long)udma;
+		hpriv = __c_fakep(udma);
 	}
 
 	/* And fire it up */
