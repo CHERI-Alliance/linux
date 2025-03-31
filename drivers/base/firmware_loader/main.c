@@ -621,7 +621,7 @@ static void fw_name_devm_release(struct device *dev, void *res)
 {
 	struct fw_name_devm *fwn = res;
 
-	if (fwn->magic == (unsigned long)&fw_cache)
+	if (fwn->magic == __c_pa(&fw_cache))
 		pr_debug("%s: fw_name-%s devm-%p released\n",
 				__func__, fwn->name, res);
 	kfree_const(fwn->name);
@@ -632,7 +632,7 @@ static int fw_devm_match(struct device *dev, void *res,
 {
 	struct fw_name_devm *fwn = res;
 
-	return (fwn->magic == (unsigned long)&fw_cache) &&
+	return (fwn->magic == __c_pa(&fw_cache)) &&
 		!strcmp(fwn->name, match_data);
 }
 
@@ -675,7 +675,7 @@ static int fw_add_devm_name(struct device *dev, const char *name)
 		return -ENOMEM;
 	}
 
-	fwn->magic = (unsigned long)&fw_cache;
+	fwn->magic = __c_pa(&fw_cache);
 	devres_add(dev, fwn);
 
 	return 0;
@@ -1404,7 +1404,7 @@ static int devm_name_match(struct device *dev, void *res,
 			   void *match_data)
 {
 	struct fw_name_devm *fwn = res;
-	return (fwn->magic == (unsigned long)match_data);
+	return (fwn->magic == __c_pa(match_data));
 }
 
 static void dev_cache_fw_image(struct device *dev, void *data)

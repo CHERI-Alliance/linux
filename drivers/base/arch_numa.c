@@ -183,7 +183,7 @@ void __init setup_per_cpu_areas(void)
 	if (rc < 0)
 		panic("Failed to initialize percpu areas (err=%d).", rc);
 
-	delta = (unsigned long)pcpu_base_addr - (unsigned long)__per_cpu_start;
+	delta = __c_pa(pcpu_base_addr) - __c_pa(__per_cpu_start);
 	for_each_possible_cpu(cpu)
 		__per_cpu_offset[cpu] = delta + pcpu_unit_offsets[cpu];
 }
