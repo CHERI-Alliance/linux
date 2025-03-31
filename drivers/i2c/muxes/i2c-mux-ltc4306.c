@@ -218,7 +218,7 @@ static int ltc4306_probe(struct i2c_client *client)
 	chip = of_device_get_match_data(&client->dev);
 
 	if (!chip)
-		chip = &chips[i2c_match_id(ltc4306_id, client)->driver_data];
+		chip = &chips[__c_ua(i2c_match_id(ltc4306_id, client)->driver_data)];
 
 	idle_disc = device_property_read_bool(&client->dev,
 					      "i2c-mux-idle-disconnect");

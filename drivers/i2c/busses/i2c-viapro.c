@@ -321,7 +321,7 @@ static int vt596_probe(struct pci_dev *pdev,
 		goto found;
 	}
 
-	if ((pci_read_config_word(pdev, id->driver_data, &vt596_smba)) ||
+	if ((pci_read_config_word(pdev, __c_ua(id->driver_data), &vt596_smba)) ||
 	    !(vt596_smba & 0x0001)) {
 		/* try 2nd address and config reg. for 596 */
 		if (id->device == PCI_DEVICE_ID_VIA_82C596_3 &&
@@ -360,7 +360,7 @@ found:
 	   sure, we disable the VT596 first. */
 	if (force_addr) {
 		pci_write_config_byte(pdev, SMBHSTCFG, temp & 0xfe);
-		pci_write_config_word(pdev, id->driver_data, vt596_smba);
+		pci_write_config_word(pdev, __c_ua(id->driver_data), vt596_smba);
 		pci_write_config_byte(pdev, SMBHSTCFG, temp | 0x01);
 		dev_warn(&pdev->dev, "WARNING: SMBus interface set to new "
 			 "address 0x%04x!\n", vt596_smba);

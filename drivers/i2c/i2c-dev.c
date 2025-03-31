@@ -395,7 +395,7 @@ static long i2cdev_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg
 	unsigned long funcs;
 
 	dev_dbg(&client->adapter->dev, "ioctl, cmd=0x%02x, arg=0x%02lx\n",
-		cmd, arg);
+		cmd, __c_ua(arg));
 
 	switch (cmd) {
 	case I2C_SLAVE:
@@ -403,10 +403,10 @@ static long i2cdev_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg
 		if ((arg > 0x3ff) ||
 		    (((client->flags & I2C_M_TEN) == 0) && arg > 0x7f))
 			return -EINVAL;
-		if (cmd == I2C_SLAVE && i2cdev_check_addr(client->adapter, arg))
+		if (cmd == I2C_SLAVE && i2cdev_check_addr(client->adapter, __c_ua(arg)))
 			return -EBUSY;
 		/* REVISIT: address could become busy later */
-		client->addr = arg;
+		client->addr = __c_ua(arg);
 		return 0;
 	case I2C_TENBIT:
 		if (arg)
@@ -473,7 +473,7 @@ static long i2cdev_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg
 		if (arg > INT_MAX)
 			return -EINVAL;
 
-		client->adapter->retries = arg;
+		client->adapter->retries = __c_ua(arg);
 		break;
 	case I2C_TIMEOUT:
 		if (arg > INT_MAX)
@@ -482,7 +482,7 @@ static long i2cdev_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg
 		/* For historical reasons, user-space sets the timeout
 		 * value in units of 10 ms.
 		 */
-		client->adapter->timeout = msecs_to_jiffies(arg * 10);
+		client->adapter->timeout = msecs_to_jiffies(__c_ua(arg) * 10);
 		break;
 	default:
 		/* NOTE:  returning a fault code here could cause trouble

@@ -537,7 +537,7 @@ static int gxp_i2c_probe(struct platform_device *pdev)
 		return PTR_ERR(drvdata->base);
 
 	/* Use physical memory address to determine which I2C engine this is. */
-	drvdata->engine = ((size_t)drvdata->base & 0xf00) >> 8;
+	drvdata->engine = ((size_t)__c_pa(drvdata->base) & 0xf00) >> 8;
 
 	if (drvdata->engine >= GXP_MAX_I2C_ENGINE) {
 		return dev_err_probe(&pdev->dev, -EINVAL, "i2c engine% is unsupported\n",

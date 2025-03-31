@@ -1659,7 +1659,7 @@ static int i801_probe(struct pci_dev *dev, const struct pci_device_id *id)
 	priv->adapter.retries = 3;
 
 	priv->pci_dev = dev;
-	priv->features = id->driver_data;
+	priv->features = __c_ua(id->driver_data);
 
 	/* Disable features on user request */
 	for (i = 0; i < ARRAY_SIZE(i801_feature_names); i++) {

@@ -211,7 +211,7 @@ struct bcm_iproc_i2c_dev {
 };
 
 /* tasklet to process slave rx data */
-static void slave_rx_tasklet_fn(unsigned long);
+static void slave_rx_tasklet_fn(uintptr_t);
 
 /*
  * Can be expanded in the future if more interrupt status bits are utilized
@@ -398,7 +398,7 @@ static void bcm_iproc_i2c_slave_read(struct bcm_iproc_i2c_dev *iproc_i2c)
 	}
 }
 
-static void slave_rx_tasklet_fn(unsigned long data)
+static void slave_rx_tasklet_fn(uintptr_t data)
 {
 	struct bcm_iproc_i2c_dev *iproc_i2c = (struct bcm_iproc_i2c_dev *)data;
 	u32 int_clr;
@@ -1053,7 +1053,7 @@ static int bcm_iproc_i2c_probe(struct platform_device *pdev)
 	platform_set_drvdata(pdev, iproc_i2c);
 	iproc_i2c->device = &pdev->dev;
 	iproc_i2c->type =
-		(enum bcm_iproc_i2c_type)of_device_get_match_data(&pdev->dev);
+		(enum bcm_iproc_i2c_type)__c_pa(of_device_get_match_data(&pdev->dev));
 	init_completion(&iproc_i2c->done);
 
 	iproc_i2c->base = devm_platform_ioremap_resource(pdev, 0);
@@ -1202,7 +1202,7 @@ static int bcm_iproc_i2c_reg_slave(struct i2c_client *slave)
 	iproc_i2c->slave = slave;
 
 	tasklet_init(&iproc_i2c->slave_rx_tasklet, slave_rx_tasklet_fn,
-		     (unsigned long)iproc_i2c);
+		     (uintptr_t)iproc_i2c);
 
 	bcm_iproc_i2c_slave_init(iproc_i2c, false);
 	return 0;

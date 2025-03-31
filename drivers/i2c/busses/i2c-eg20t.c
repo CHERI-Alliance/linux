@@ -763,7 +763,7 @@ static int pch_i2c_probe(struct pci_dev *pdev,
 	}
 
 	/* Set the number of I2C channel instance */
-	adap_info->ch_num = id->driver_data;
+	adap_info->ch_num = __c_ua(id->driver_data);
 
 	for (i = 0; i < adap_info->ch_num; i++) {
 		pch_adap = &adap_info->pch_data[i].pch_adapter;

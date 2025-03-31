@@ -1266,7 +1266,7 @@ static int i2c_pxa_probe_dt(struct platform_device *pdev, struct pxa_i2c *i2c,
 	i2c->use_pio = of_property_read_bool(np, "mrvl,i2c-polling");
 	i2c->fast_mode = of_property_read_bool(np, "mrvl,i2c-fast-mode");
 
-	*i2c_types = (enum pxa_i2c_types)device_get_match_data(&pdev->dev);
+	*i2c_types = (enum pxa_i2c_types)__c_pa(device_get_match_data(&pdev->dev));
 
 	return 0;
 }
@@ -1278,7 +1278,7 @@ static int i2c_pxa_probe_pdata(struct platform_device *pdev,
 	struct i2c_pxa_platform_data *plat = dev_get_platdata(&pdev->dev);
 	const struct platform_device_id *id = platform_get_device_id(pdev);
 
-	*i2c_types = id->driver_data;
+	*i2c_types = __c_ua(id->driver_data);
 	if (plat) {
 		i2c->use_pio = plat->use_pio;
 		i2c->fast_mode = plat->fast_mode;

@@ -145,8 +145,8 @@ static int i2c_slave_eeprom_probe(struct i2c_client *client)
 	const struct i2c_device_id *id = i2c_client_get_device_id(client);
 	struct eeprom_data *eeprom;
 	int ret;
-	unsigned int size = FIELD_GET(I2C_SLAVE_BYTELEN, id->driver_data) + 1;
-	unsigned int flag_addr16 = FIELD_GET(I2C_SLAVE_FLAG_ADDR16, id->driver_data);
+	unsigned int size = FIELD_GET(I2C_SLAVE_BYTELEN, __c_ua(id->driver_data)) + 1;
+	unsigned int flag_addr16 = FIELD_GET(I2C_SLAVE_FLAG_ADDR16, __c_ua(id->driver_data));
 
 	eeprom = devm_kzalloc(&client->dev, sizeof(struct eeprom_data) + size, GFP_KERNEL);
 	if (!eeprom)
@@ -154,7 +154,7 @@ static int i2c_slave_eeprom_probe(struct i2c_client *client)
 
 	eeprom->num_address_bytes = flag_addr16 ? 2 : 1;
 	eeprom->address_mask = size - 1;
-	eeprom->read_only = FIELD_GET(I2C_SLAVE_FLAG_RO, id->driver_data);
+	eeprom->read_only = FIELD_GET(I2C_SLAVE_FLAG_RO, __c_ua(id->driver_data));
 	spin_lock_init(&eeprom->buffer_lock);
 	i2c_set_clientdata(client, eeprom);
 
