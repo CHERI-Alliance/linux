@@ -2589,7 +2589,7 @@ void dev_net_set(struct net_device *dev, struct net *net)
  *
  * Get network device private data
  */
-static __maybe_unused void *netdev_priv(const struct net_device *dev)
+static inline void *netdev_priv(const struct net_device *dev)
 {
 	return (char *)dev + ALIGN(sizeof(struct net_device), NETDEV_ALIGN);
 }
