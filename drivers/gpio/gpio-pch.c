@@ -370,7 +370,7 @@ static int pch_gpio_probe(struct pci_dev *pdev,
 		return dev_err_probe(dev, ret, "Failed to request and map PCI regions\n");
 
 	chip->base = pcim_iomap_table(pdev)[1];
-	chip->ioh = id->driver_data;
+	chip->ioh = __c_ua(id->driver_data);
 	chip->reg = chip->base;
 	pci_set_drvdata(pdev, chip);
 	spin_lock_init(&chip->spinlock);

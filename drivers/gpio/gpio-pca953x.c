@@ -1102,7 +1102,7 @@ static int pca953x_probe(struct i2c_client *client)
 
 	i2c_set_clientdata(client, chip);
 
-	pca953x_setup_gpio(chip, chip->driver_data & PCA_GPIO_MASK);
+	pca953x_setup_gpio(chip, __c_ua(chip->driver_data) & PCA_GPIO_MASK);
 
 	if (NBANK(chip) > 2 || PCA_CHIP_TYPE(chip->driver_data) == PCA957X_TYPE) {
 		dev_info(dev, "using AI\n");

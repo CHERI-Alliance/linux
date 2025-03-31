@@ -295,7 +295,7 @@ static int pcf857x_probe(struct i2c_client *client)
 	gpio->chip.set_multiple		= pcf857x_set_multiple;
 	gpio->chip.direction_input	= pcf857x_input;
 	gpio->chip.direction_output	= pcf857x_output;
-	gpio->chip.ngpio		= (uintptr_t)i2c_get_match_data(client);
+	gpio->chip.ngpio		= __c_pa(i2c_get_match_data(client));
 
 	/* NOTE:  the OnSemi jlc1562b is also largely compatible with
 	 * these parts, notably for output.  It has a low-resolution

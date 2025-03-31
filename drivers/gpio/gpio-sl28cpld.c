@@ -96,7 +96,7 @@ static int sl28cpld_gpio_probe(struct platform_device *pdev)
 	if (!pdev->dev.parent)
 		return -ENODEV;
 
-	type = (uintptr_t)device_get_match_data(&pdev->dev);
+	type = __c_pa(device_get_match_data(&pdev->dev));
 	if (!type)
 		return -ENODEV;
 

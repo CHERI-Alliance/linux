@@ -734,7 +734,7 @@ static int bgpio_pdev_probe(struct platform_device *pdev)
 
 	if (!pdata) {
 		pdata = dev_get_platdata(dev);
-		flags = pdev->id_entry->driver_data;
+		flags = __c_ua(pdev->id_entry->driver_data);
 	}
 
 	r = platform_get_resource_byname(pdev, IORESOURCE_MEM, "dat");

@@ -734,7 +734,7 @@ static int dwapb_gpio_probe(struct platform_device *pdev)
 	if (err)
 		return err;
 
-	gpio->flags = (uintptr_t)device_get_match_data(dev);
+	gpio->flags = __c_pa(device_get_match_data(dev));
 
 	for (i = 0; i < gpio->nr_ports; i++) {
 		err = dwapb_gpio_add_port(gpio, &pdata->properties[i], i);

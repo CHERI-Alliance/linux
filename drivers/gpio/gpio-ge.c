@@ -76,7 +76,7 @@ static int __init gef_gpio_probe(struct platform_device *pdev)
 		return -ENOMEM;
 
 	gc->base = -1;
-	gc->ngpio = (uintptr_t)device_get_match_data(dev);
+	gc->ngpio = __c_pa(device_get_match_data(dev));
 
 	/* This function adds a memory mapped GPIO chip */
 	ret = devm_gpiochip_add_data(dev, gc, NULL);

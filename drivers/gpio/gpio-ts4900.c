@@ -153,7 +153,7 @@ static int ts4900_gpio_probe(struct i2c_client *client)
 	priv->gpio_chip.label = "ts4900-gpio";
 	priv->gpio_chip.ngpio = ngpio;
 	priv->gpio_chip.parent = &client->dev;
-	priv->input_bit = (uintptr_t)of_device_get_match_data(&client->dev);
+	priv->input_bit = __c_pa(of_device_get_match_data(&client->dev));
 
 	priv->regmap = devm_regmap_init_i2c(client, &ts4900_regmap_config);
 	if (IS_ERR(priv->regmap)) {

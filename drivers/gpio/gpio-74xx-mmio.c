@@ -117,7 +117,7 @@ static int mmio_74xx_gpio_probe(struct platform_device *pdev)
 	if (!priv)
 		return -ENOMEM;
 
-	priv->flags = (uintptr_t)device_get_match_data(&pdev->dev);
+	priv->flags = __c_pa(device_get_match_data(&pdev->dev));
 
 	dat = devm_platform_ioremap_resource(pdev, 0);
 	if (IS_ERR(dat))
