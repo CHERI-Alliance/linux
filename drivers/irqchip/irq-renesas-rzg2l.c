@@ -219,7 +219,7 @@ static int rzg2l_irq_set_type(struct irq_data *d, unsigned int type)
 static u32 rzg2l_disable_tint_and_set_tint_source(struct irq_data *d, struct rzg2l_irqc_priv *priv,
 						  u32 reg, u32 tssr_offset, u8 tssr_index)
 {
-	u32 tint = (u32)(uintptr_t)irq_data_get_irq_chip_data(d);
+	u32 tint = (u32)__c_pa(irq_data_get_irq_chip_data(d));
 	u32 tien = reg & (TIEN << TSSEL_SHIFT(tssr_offset));
 
 	/* Clear the relevant byte in reg */
@@ -370,7 +370,7 @@ static int rzg2l_irqc_alloc(struct irq_domain *domain, unsigned int virq,
 		return -EINVAL;
 
 	ret = irq_domain_set_hwirq_and_chip(domain, virq, hwirq, &irqc_chip,
-					    (void *)(uintptr_t)tint);
+					    __c_fakep(tint));
 	if (ret)
 		return ret;
 

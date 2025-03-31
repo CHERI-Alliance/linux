@@ -167,7 +167,7 @@ static int sp_intc_get_ext_irq(int ext_num)
 static void sp_intc_handle_ext_cascaded(struct irq_desc *desc)
 {
 	struct irq_chip *chip = irq_desc_get_chip(desc);
-	int ext_num = (uintptr_t)irq_desc_get_handler_data(desc);
+	int ext_num = __c_pa(irq_desc_get_handler_data(desc));
 	int hwirq;
 
 	chained_irq_enter(chip, desc);
@@ -215,7 +215,7 @@ static int sp_intc_irq_map(struct device_node *node, int i)
 	if (!irq)
 		return -ENOENT;
 
-	irq_set_chained_handler_and_data(irq, sp_intc_handle_ext_cascaded, (void *)(uintptr_t)i);
+	irq_set_chained_handler_and_data(irq, sp_intc_handle_ext_cascaded, __c_fakep(i));
 
 	return 0;
 }
