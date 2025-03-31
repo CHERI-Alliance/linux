@@ -93,7 +93,7 @@ typedef unsigned int comedi_8254_iocb_fn(struct comedi_8254 *i8254, int dir,
  */
 struct comedi_8254 {
 	comedi_8254_iocb_fn *iocb;
-	unsigned long context;
+	uintptr_t context;
 	unsigned int iosize;
 	unsigned int regshift;
 	unsigned int osc_base;

@@ -16,7 +16,7 @@ struct usb_interface *comedi_to_usb_interface(struct comedi_device *dev);
 struct usb_device *comedi_to_usb_dev(struct comedi_device *dev);
 
 int comedi_usb_auto_config(struct usb_interface *intf,
-			   struct comedi_driver *driver, unsigned long context);
+			   struct comedi_driver *driver, uintptr_t context);
 void comedi_usb_auto_unconfig(struct usb_interface *intf);
 
 int comedi_usb_driver_register(struct comedi_driver *comedi_driver,
