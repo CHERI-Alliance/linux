@@ -551,7 +551,7 @@ static void k90_cleanup_macro_functions(struct hid_device *dev)
 static int corsair_probe(struct hid_device *dev, const struct hid_device_id *id)
 {
 	int ret;
-	unsigned long quirks = id->driver_data;
+	unsigned long quirks = __c_ua(id->driver_data);
 	struct corsair_drvdata *drvdata;
 	struct usb_interface *usbif;
 

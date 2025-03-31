@@ -299,7 +299,7 @@ static void picolcd_fb_destroy(struct fb_info *info)
 	/* No thirdparty should ever unregister our framebuffer! */
 	WARN_ON(fbdata->picolcd != NULL);
 
-	vfree((u8 *)info->fix.smem_start);
+	vfree(fbdata->bitmap);
 	framebuffer_release(info);
 }
 
@@ -515,7 +515,7 @@ int picolcd_init_framebuffer(struct picolcd_data *data)
 	}
 	info->flags |= FBINFO_VIRTFB;
 	info->screen_buffer = fbdata->bitmap;
-	info->fix.smem_start = (uintptr_t)fbdata->bitmap;
+	info->fix.smem_start = __c_pa(fbdata->bitmap);
 	memset(fbdata->vbitmap, 0xff, PICOLCDFB_SIZE);
 	data->fb_info = info;
 
