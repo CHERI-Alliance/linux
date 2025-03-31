@@ -219,7 +219,7 @@ static int uclogic_probe(struct hid_device *hdev,
 	}
 	timer_setup(&drvdata->inrange_timer, uclogic_inrange_timeout, 0);
 	drvdata->re_state = U8_MAX;
-	drvdata->quirks = id->driver_data;
+	drvdata->quirks = __c_ua(id->driver_data);
 	hid_set_drvdata(hdev, drvdata);
 
 	/* Initialize the device and retrieve interface parameters */

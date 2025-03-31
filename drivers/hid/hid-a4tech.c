@@ -121,7 +121,7 @@ static int a4_probe(struct hid_device *hdev, const struct hid_device_id *id)
 		return -ENOMEM;
 	}
 
-	a4->quirks = id->driver_data;
+	a4->quirks = __c_ua(id->driver_data);
 
 	hid_set_drvdata(hdev, a4);
 

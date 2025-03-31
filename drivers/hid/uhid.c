@@ -455,7 +455,7 @@ static int uhid_event_from_user(const char __user *buffer, size_t len,
 			memcpy(event->u.create.uniq, compat->uniq,
 				sizeof(compat->uniq));
 
-			event->u.create.rd_data = compat_ptr(compat->rd_data);
+			event->u.create.rd_data = compat->rd_data;
 			event->u.create.rd_size = compat->rd_size;
 
 			event->u.create.bus = compat->bus;
@@ -557,7 +557,15 @@ static int uhid_dev_create(struct uhid_device *uhid,
 
 	if (orig.rd_size <= 0 || orig.rd_size > HID_MAX_DESCRIPTOR_SIZE)
 		return -EINVAL;
-	if (copy_from_user(&ev->u.create2.rd_data, orig.rd_data, orig.rd_size))
+	/*
+	 * FIXCHERI: For the time being we do not support the legcay
+	 * FIXCHERI: UHID_CREATE request on CHERI. Use UHID_CREATE2 instead.
+	 */
+	if (WARN_ON_ONCE(IS_ENABLED(CONFIG_CHERI_KERNEL)))
+		return -ENOSYS;
+	if (copy_from_user(&ev->u.create2.rd_data,
+			   (void __user * __force)__c_fakep(orig.rd_data),
+			   orig.rd_size))
 		return -EFAULT;
 
 	memcpy(ev->u.create2.name, orig.name, sizeof(orig.name));

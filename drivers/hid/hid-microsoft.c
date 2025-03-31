@@ -364,7 +364,7 @@ static void ms_remove_ff(struct hid_device *hdev)
 
 static int ms_probe(struct hid_device *hdev, const struct hid_device_id *id)
 {
-	unsigned long quirks = id->driver_data;
+	unsigned long quirks = __c_ua(id->driver_data);
 	struct ms_data *ms;
 	int ret;
 
