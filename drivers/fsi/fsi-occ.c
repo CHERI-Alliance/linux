@@ -642,7 +642,7 @@ static int occ_probe(struct platform_device *pdev)
 	if (!occ->buffer)
 		return -ENOMEM;
 
-	occ->version = (uintptr_t)of_device_get_match_data(dev);
+	occ->version = __c_pa(of_device_get_match_data(dev));
 	occ->dev = dev;
 	occ->sbefifo = dev->parent;
 	/*

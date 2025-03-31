@@ -1199,7 +1199,7 @@ static void fsi_master_acf_release(struct device *dev)
 	mutex_unlock(&master->lock);
 
 	/* Free resources */
-	gen_pool_free(master->sram_pool, (unsigned long)master->sram, SRAM_SIZE);
+	gen_pool_free(master->sram_pool, (uintptr_t)master->sram, SRAM_SIZE);
 	of_node_put(dev_of_node(master->dev));
 
 	kfree(master);
@@ -1357,7 +1357,7 @@ static int fsi_master_acf_probe(struct platform_device *pdev)
 	}
 	dev_dbg(&pdev->dev, "SRAM allocation @%lx\n",
 		(unsigned long)gen_pool_virt_to_phys(master->sram_pool,
-						     (unsigned long)master->sram));
+						     __c_pa(master->sram)));
 
 	/*
 	 * Hookup with the GPIO driver for arbitration of GPIO banks
@@ -1404,7 +1404,7 @@ static int fsi_master_acf_probe(struct platform_device *pdev)
 	fsi_master_acf_terminate(master);
  release_of_dev:
 	aspeed_gpio_copro_set_ops(NULL, NULL);
-	gen_pool_free(master->sram_pool, (unsigned long)master->sram, SRAM_SIZE);
+	gen_pool_free(master->sram_pool, (uintptr_t)master->sram, SRAM_SIZE);
 	of_node_put(dev_of_node(master->dev));
  err_free:
 	kfree(master);
