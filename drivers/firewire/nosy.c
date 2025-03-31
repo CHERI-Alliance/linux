@@ -343,7 +343,7 @@ nosy_read(struct file *file, char __user *buffer, size_t count, loff_t *offset)
 }
 
 static long
-nosy_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+nosy_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct client *client = file->private_data;
 	spinlock_t *client_list_lock = &client->lynx->client_list_lock;
@@ -382,7 +382,7 @@ nosy_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 
 	case NOSY_IOC_FILTER:
 		spin_lock_irq(client_list_lock);
-		client->tcode_mask = arg;
+		client->tcode_mask = __c_ua(arg);
 		spin_unlock_irq(client_list_lock);
 
 		return 0;

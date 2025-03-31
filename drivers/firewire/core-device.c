@@ -1050,7 +1050,7 @@ static void set_broadcast_channel(struct fw_device *device, int generation)
 int fw_device_set_broadcast_channel(struct device *dev, void *gen)
 {
 	if (is_fw_device(dev))
-		set_broadcast_channel(fw_device(dev), (long)gen);
+		set_broadcast_channel(fw_device(dev), (long)__c_pa(gen));
 
 	return 0;
 }

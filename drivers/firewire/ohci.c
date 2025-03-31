@@ -701,7 +701,7 @@ static int ohci_update_phy_reg(struct fw_card *card, int addr,
 
 static inline dma_addr_t ar_buffer_bus(struct ar_context *ctx, unsigned int i)
 {
-	return page_private(ctx->pages[i]);
+	return __c_ua(page_private(ctx->pages[i]));
 }
 
 static void ar_context_link_page(struct ar_context *ctx, unsigned int index)
@@ -972,7 +972,7 @@ static void ar_recycle_buffers(struct ar_context *ctx, unsigned int end_buffer)
 	}
 }
 
-static void ar_context_tasklet(unsigned long data)
+static void ar_context_tasklet(uintptr_t data)
 {
 	struct ar_context *ctx = (struct ar_context *)data;
 	unsigned int end_buffer_index, end_buffer_offset;
@@ -1029,14 +1029,14 @@ static int ar_context_init(struct ar_context *ctx, struct fw_ohci *ohci,
 
 	ctx->regs        = regs;
 	ctx->ohci        = ohci;
-	tasklet_init(&ctx->tasklet, ar_context_tasklet, (unsigned long)ctx);
+	tasklet_init(&ctx->tasklet, ar_context_tasklet, (uintptr_t) ctx);
 
 	for (i = 0; i < AR_BUFFERS; i++) {
 		ctx->pages[i] = dma_alloc_pages(dev, PAGE_SIZE, &dma_addr,
 						DMA_FROM_DEVICE, GFP_KERNEL);
 		if (!ctx->pages[i])
 			goto out_of_memory;
-		set_page_private(ctx->pages[i], dma_addr);
+		set_page_private(ctx->pages[i], __c_fakeu(dma_addr));
 		dma_sync_single_for_device(dev, dma_addr, PAGE_SIZE,
 					   DMA_FROM_DEVICE);
 	}
@@ -1097,7 +1097,7 @@ static struct descriptor *find_branch_descriptor(struct descriptor *d, int z)
 		return d + z - 1;
 }
 
-static void context_tasklet(unsigned long data)
+static void context_tasklet(uintptr_t data)
 {
 	struct context *ctx = (struct context *) data;
 	struct descriptor *d, *last;
@@ -1192,7 +1192,7 @@ static int context_init(struct context *ctx, struct fw_ohci *ohci,
 	ctx->buffer_tail = list_entry(ctx->buffer_list.next,
 			struct descriptor_buffer, list);
 
-	tasklet_init(&ctx->tasklet, context_tasklet, (unsigned long)ctx);
+	tasklet_init(&ctx->tasklet, context_tasklet, (uintptr_t) ctx);
 	ctx->callback = callback;
 
 	/*
@@ -1342,7 +1342,11 @@ static int at_context_queue_packet(struct context *ctx,
 	__le32 *header;
 	int z, tcode;
 
+#if __SIZEOF_POINTER__ > __SIZEOF_LONG__
+	d = context_get_descriptors(ctx, 5, &d_bus);
+#else
 	d = context_get_descriptors(ctx, 4, &d_bus);
+#endif
 	if (d == NULL) {
 		packet->ack = RCODE_SEND_ERROR;
 		return -1;
@@ -1407,7 +1411,11 @@ static int at_context_queue_packet(struct context *ctx,
 		return -1;
 	}
 
+#if __SIZEOF_POINTER__ > __SIZEOF_LONG__
+	BUILD_BUG_ON(sizeof(struct driver_data) > 2 * sizeof(struct descriptor));
+#else
 	BUILD_BUG_ON(sizeof(struct driver_data) > sizeof(struct descriptor));
+#endif
 	driver_data = (struct driver_data *) &d[3];
 	driver_data->packet = packet;
 	packet->driver_data = driver_data;
@@ -1452,7 +1460,11 @@ static int at_context_queue_packet(struct context *ctx,
 		return -1;
 	}
 
+#if __SIZEOF_POINTER__ > __SIZEOF_LONG__
+	context_append(ctx, d, z, 5 - z);
+#else
 	context_append(ctx, d, z, 4 - z);
+#endif
 
 	if (ctx->running)
 		reg_write(ohci, CONTROL_SET(ctx->regs), CONTEXT_WAKE);
@@ -1467,7 +1479,7 @@ static void at_context_flush(struct context *ctx)
 	tasklet_disable(&ctx->tasklet);
 
 	ctx->flushing = true;
-	context_tasklet((unsigned long)ctx);
+	context_tasklet((uintptr_t)ctx);
 	ctx->flushing = false;
 
 	tasklet_enable(&ctx->tasklet);
@@ -3325,7 +3337,7 @@ static int queue_iso_transmit(struct iso_context *ctx,
 			min(next_page_index, payload_end_index) - payload_index;
 		pd[i].req_count    = cpu_to_le16(length);
 
-		page_bus = page_private(buffer->pages[page]);
+		page_bus = __c_ua(page_private(buffer->pages[page]));
 		pd[i].data_address = cpu_to_le32(page_bus + offset);
 
 		dma_sync_single_range_for_device(ctx->context.ohci->card.device,
@@ -3408,7 +3420,7 @@ static int queue_iso_packet_per_buffer(struct iso_context *ctx,
 			pd->res_count = pd->req_count;
 			pd->transfer_status = 0;
 
-			page_bus = page_private(buffer->pages[page]);
+			page_bus = __c_ua(page_private(buffer->pages[page]));
 			pd->data_address = cpu_to_le32(page_bus + offset);
 
 			dma_sync_single_range_for_device(device, page_bus,
@@ -3471,7 +3483,7 @@ static int queue_iso_buffer_fill(struct iso_context *ctx,
 		d->res_count = d->req_count;
 		d->transfer_status = 0;
 
-		page_bus = page_private(buffer->pages[page]);
+		page_bus = __c_ua(page_private(buffer->pages[page]));
 		d->data_address = cpu_to_le32(page_bus + offset);
 
 		dma_sync_single_range_for_device(ctx->context.ohci->card.device,
@@ -3530,7 +3542,7 @@ static int ohci_flush_iso_completions(struct fw_iso_context *base)
 	tasklet_disable_in_atomic(&ctx->context.tasklet);
 
 	if (!test_and_set_bit_lock(0, &ctx->flushing_completions)) {
-		context_tasklet((unsigned long)&ctx->context);
+		context_tasklet((uintptr_t)&ctx->context);
 
 		switch (base->type) {
 		case FW_ISO_CONTEXT_TRANSMIT:

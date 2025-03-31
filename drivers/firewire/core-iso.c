@@ -65,7 +65,7 @@ int fw_iso_buffer_map_dma(struct fw_iso_buffer *buffer, struct fw_card *card,
 		if (dma_mapping_error(card->device, address))
 			break;
 
-		set_page_private(buffer->pages[i], address);
+		set_page_private(buffer->pages[i], __c_fakeu(address));
 	}
 	buffer->page_count_mapped = i;
 	if (i < buffer->page_count)
@@ -98,7 +98,7 @@ void fw_iso_buffer_destroy(struct fw_iso_buffer *buffer,
 	dma_addr_t address;
 
 	for (i = 0; i < buffer->page_count_mapped; i++) {
-		address = page_private(buffer->pages[i]);
+		address = __c_ua(page_private(buffer->pages[i]));
 		dma_unmap_page(card->device, address,
 			       PAGE_SIZE, buffer->direction);
 	}
@@ -120,7 +120,7 @@ size_t fw_iso_buffer_lookup(struct fw_iso_buffer *buffer, dma_addr_t completed)
 	ssize_t offset;
 
 	for (i = 0; i < buffer->page_count; i++) {
-		address = page_private(buffer->pages[i]);
+		address = __c_ua(page_private(buffer->pages[i]));
 		offset = (ssize_t)completed - (ssize_t)address;
 		if (offset > 0 && offset <= PAGE_SIZE)
 			return (i << PAGE_SHIFT) + offset;

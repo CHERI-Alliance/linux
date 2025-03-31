@@ -113,7 +113,7 @@ struct fw_cdev_event_bus_reset {
  * ABI version <= 5. It has the lack of time stamp field comparing to &fw_cdev_event_response2.
  */
 struct fw_cdev_event_response {
-	__u64 closure;
+	__kernel_uintptr_t closure;
 	__u32 type;
 	__u32 rcode;
 	__u32 length;
@@ -152,7 +152,7 @@ struct fw_cdev_event_response {
  * CYCLE_TIMER register.
  */
 struct fw_cdev_event_response2 {
-	__u64 closure;
+	__kernel_uintptr_t closure;
 	__u32 type;
 	__u32 rcode;
 	__u32 length;
@@ -621,8 +621,8 @@ union fw_cdev_event {
 struct fw_cdev_get_info {
 	__u32 version;
 	__u32 rom_length;
-	__u64 rom;
-	__u64 bus_reset;
+	__kernel_uintptr_t rom;
+	__kernel_uintptr_t bus_reset;
 	__u64 bus_reset_closure;
 	__u32 card;
 };
@@ -646,8 +646,8 @@ struct fw_cdev_send_request {
 	__u32 tcode;
 	__u32 length;
 	__u64 offset;
-	__u64 closure;
-	__u64 data;
+	__kernel_uintptr_t closure;
+	__kernel_uintptr_t data;
 	__u32 generation;
 };
 
@@ -667,7 +667,7 @@ struct fw_cdev_send_request {
 struct fw_cdev_send_response {
 	__u32 rcode;
 	__u32 length;
-	__u64 data;
+	__kernel_uintptr_t data;
 	__u32 handle;
 };
 
@@ -777,7 +777,7 @@ struct fw_cdev_initiate_bus_reset {
 struct fw_cdev_add_descriptor {
 	__u32 immediate;
 	__u32 key;
-	__u64 data;
+	__kernel_uintptr_t data;
 	__u32 length;
 	__u32 handle;
 };
@@ -962,7 +962,7 @@ struct fw_cdev_iso_packet {
  * relative to the buffer start.
  */
 struct fw_cdev_queue_iso {
-	__u64 packets;
+	__kernel_uintptr_t packets;
 	__u64 data;
 	__u32 size;
 	__u32 handle;
@@ -1132,8 +1132,8 @@ struct fw_cdev_send_stream_packet {
 	__u32 tag;
 	__u32 channel;
 	__u32 sy;
-	__u64 closure;
-	__u64 data;
+	__kernel_uintptr_t closure;
+	__kernel_uintptr_t data;
 	__u32 generation;
 	__u32 speed;
 };

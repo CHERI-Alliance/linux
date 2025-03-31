@@ -276,7 +276,7 @@ static void allocate_broadcast_channel(struct fw_card *card, int generation)
 		card->broadcast_channel_allocated = true;
 	}
 
-	device_for_each_child(card->device, (void *)(long)generation,
+	device_for_each_child(card->device, __c_fakep(generation),
 			      fw_device_set_broadcast_channel);
 }
 
