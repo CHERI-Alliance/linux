@@ -516,11 +516,11 @@ static int cap11xx_i2c_probe(struct i2c_client *i2c_client)
 	unsigned int val, rev;
 
 	if (id->driver_data >= ARRAY_SIZE(cap11xx_devices)) {
-		dev_err(dev, "Invalid device ID %lu\n", id->driver_data);
+		dev_err(dev, "Invalid device ID %lu\n", __c_ua(id->driver_data));
 		return -EINVAL;
 	}
 
-	cap = &cap11xx_devices[id->driver_data];
+	cap = &cap11xx_devices[__c_ua(id->driver_data)];
 	if (!cap || !cap->num_channels) {
 		dev_err(dev, "Invalid device configuration\n");
 		return -EINVAL;
@@ -566,7 +566,7 @@ static int cap11xx_i2c_probe(struct i2c_client *i2c_client)
 			 id->name, rev);
 
 	priv->model = cap;
-	priv->id = id->driver_data;
+	priv->id = __c_ua(id->driver_data);
 
 	dev_info(dev, "CAP11XX device detected, model %s, revision 0x%02x\n",
 		 id->name, rev);

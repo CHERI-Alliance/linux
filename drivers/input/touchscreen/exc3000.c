@@ -347,7 +347,7 @@ static int exc3000_probe(struct i2c_client *client)
 	data->info = device_get_match_data(&client->dev);
 	if (!data->info) {
 		enum eeti_dev_id eeti_dev_id =
-			i2c_match_id(exc3000_id, client)->driver_data;
+			__c_ua(i2c_match_id(exc3000_id, client)->driver_data);
 		data->info = &exc3000_info[eeti_dev_id];
 	}
 	timer_setup(&data->timer, exc3000_timer, 0);

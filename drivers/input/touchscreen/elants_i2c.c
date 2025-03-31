@@ -1431,7 +1431,7 @@ static int elants_i2c_probe(struct i2c_client *client)
 	init_completion(&ts->cmd_done);
 
 	ts->client = client;
-	ts->chip_id = (enum elants_chip_id)(uintptr_t)device_get_match_data(&client->dev);
+	ts->chip_id = (enum elants_chip_id)__c_pa(device_get_match_data(&client->dev));
 	i2c_set_clientdata(client, ts);
 
 	ts->vcc33 = devm_regulator_get(&client->dev, "vcc33");

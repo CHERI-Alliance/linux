@@ -1072,7 +1072,7 @@ static long uinput_ioctl_handler(struct file *file, unsigned int cmd,
 
 static long uinput_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
-	return uinput_ioctl_handler(file, cmd, arg, (void __user *)arg);
+	return uinput_ioctl_handler(file, cmd, __c_ua(arg), (void __user *)arg);
 }
 
 #ifdef CONFIG_COMPAT

@@ -207,7 +207,7 @@ static int tca6416_keypad_probe(struct i2c_client *client)
 
 	chip->client = client;
 	chip->input = input;
-	chip->io_size = id->driver_data;
+	chip->io_size = __c_ua(id->driver_data);
 	chip->pinmask = pdata->pinmask;
 	chip->use_polling = pdata->use_polling;
 

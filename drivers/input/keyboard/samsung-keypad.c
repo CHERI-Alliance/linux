@@ -385,7 +385,7 @@ static int samsung_keypad_probe(struct platform_device *pdev)
 		keypad->type = of_device_is_compatible(pdev->dev.of_node,
 					"samsung,s5pv210-keypad");
 	else
-		keypad->type = platform_get_device_id(pdev)->driver_data;
+		keypad->type = __c_ua(platform_get_device_id(pdev)->driver_data);
 
 	input_dev->name = pdev->name;
 	input_dev->id.bustype = BUS_HOST;

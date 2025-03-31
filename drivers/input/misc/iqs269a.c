@@ -1852,7 +1852,7 @@ static int iqs269_probe(struct i2c_client *client)
 	mutex_init(&iqs269->lock);
 	init_completion(&iqs269->ati_done);
 
-	iqs269->otp_option = (uintptr_t)device_get_match_data(&client->dev);
+	iqs269->otp_option = __c_pa(device_get_match_data(&client->dev));
 
 	error = regmap_raw_read(iqs269->regmap, IQS269_VER_INFO,
 				&iqs269->ver_info, sizeof(iqs269->ver_info));

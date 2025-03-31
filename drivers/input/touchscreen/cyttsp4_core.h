@@ -198,7 +198,7 @@ struct cyttsp4_sysinfo_ptr {
 	struct cyttsp4_opcfg *opcfg;
 	struct cyttsp4_ddata *ddata;
 	struct cyttsp4_mdata *mdata;
-} __packed;
+} __packed_if_not_cheri;
 
 struct cyttsp4_sysinfo_data {
 	u8 hst_mode;

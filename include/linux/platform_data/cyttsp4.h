@@ -25,7 +25,7 @@ struct touch_framework {
 	const uint16_t  *abs;
 	uint8_t         size;
 	uint8_t         enable_vkeys;
-} __packed;
+} __packed_if_not_cheri;
 
 struct cyttsp4_mt_platform_data {
 	struct touch_framework *frmwrk;
@@ -37,7 +37,7 @@ struct touch_settings {
 	const uint8_t *data;
 	uint32_t size;
 	uint8_t tag;
-} __packed;
+} __packed_if_not_cheri;
 
 struct cyttsp4_core_platform_data {
 	int irq_gpio;

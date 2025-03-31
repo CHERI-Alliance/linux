@@ -1130,7 +1130,7 @@ static const struct ads7846_platform_data *ads7846_get_props(struct device *dev)
 	if (!pdata)
 		return ERR_PTR(-ENOMEM);
 
-	pdata->model = (uintptr_t)device_get_match_data(dev);
+	pdata->model = __c_pa(device_get_match_data(dev));
 
 	device_property_read_u16(dev, "ti,vref-delay-usecs",
 				 &pdata->vref_delay_usecs);
