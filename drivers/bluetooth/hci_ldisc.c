@@ -742,7 +742,7 @@ static int hci_uart_set_flags(struct hci_uart *hu, unsigned long flags)
  * Return Value:    Command dependent
  */
 static int hci_uart_tty_ioctl(struct tty_struct *tty, unsigned int cmd,
-			      unsigned long arg)
+			      user_uintptr_t arg)
 {
 	struct hci_uart *hu = tty->disc_data;
 	int err = 0;
@@ -756,7 +756,7 @@ static int hci_uart_tty_ioctl(struct tty_struct *tty, unsigned int cmd,
 	switch (cmd) {
 	case HCIUARTSETPROTO:
 		if (!test_and_set_bit(HCI_UART_PROTO_SET, &hu->flags)) {
-			err = hci_uart_set_proto(hu, arg);
+			err = hci_uart_set_proto(hu, __c_ua(arg));
 			if (err)
 				clear_bit(HCI_UART_PROTO_SET, &hu->flags);
 		} else
@@ -782,7 +782,7 @@ static int hci_uart_tty_ioctl(struct tty_struct *tty, unsigned int cmd,
 		if (test_bit(HCI_UART_PROTO_SET, &hu->flags))
 			err = -EBUSY;
 		else
-			err = hci_uart_set_flags(hu, arg);
+			err = hci_uart_set_flags(hu, __c_ua(arg));
 		break;
 
 	case HCIUARTGETFLAGS:
@@ -822,7 +822,9 @@ static struct tty_ldisc_ops hci_uart_ldisc = {
 	.read		= hci_uart_tty_read,
 	.write		= hci_uart_tty_write,
 	.ioctl		= hci_uart_tty_ioctl,
+#ifndef CONFIG_CHERI_KERNEL
 	.compat_ioctl	= hci_uart_tty_ioctl,
+#endif
 	.receive_buf	= hci_uart_tty_receive,
 	.write_wakeup	= hci_uart_tty_wakeup,
 };

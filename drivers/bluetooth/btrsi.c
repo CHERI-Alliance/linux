@@ -70,13 +70,14 @@ static int rsi_hci_send_pkt(struct hci_dev *hdev, struct sk_buff *skb)
 		bt_cb(new_skb)->pkt_type = hci_skb_pkt_type(skb);
 		kfree_skb(skb);
 		skb = new_skb;
-		if (!IS_ALIGNED((unsigned long)skb->data, RSI_DMA_ALIGN)) {
+		if (!IS_ALIGNED(__c_pa(skb->data), RSI_DMA_ALIGN)) {
 			u8 *skb_data = skb->data;
 			int skb_len = skb->len;
 
 			skb_push(skb, RSI_DMA_ALIGN);
-			skb_pull(skb, PTR_ALIGN(skb->data,
-						RSI_DMA_ALIGN) - skb->data);
+			skb_pull(skb,
+				 __c_pa(PTR_ALIGN(skb->data, RSI_DMA_ALIGN)) -
+				 __c_pa(skb->data));
 			memmove(skb->data, skb_data, skb_len);
 			skb_trim(skb, skb_len);
 		}

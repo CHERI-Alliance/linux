@@ -690,7 +690,7 @@ static int bt3c_config(struct pcmcia_device *link)
 	 * Two tries: without IO aliases, then with aliases
 	 */
 	for (try = 0; try < 2; try++)
-		if (!pcmcia_loop_config(link, bt3c_check_config, (void *) try))
+		if (!pcmcia_loop_config(link, bt3c_check_config, __c_fakep(try)))
 			goto found_port;
 
 	/* Second pass: try to find an entry that isn't picky about
