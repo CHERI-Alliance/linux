@@ -525,9 +525,10 @@ static long iommufd_fops_ioctl(struct file *filp, unsigned int cmd,
 	if (ucmd.user_size < op->min_size)
 		return -EINVAL;
 
+	/* FIXCHERI: compat64 handling missing. */
 	ucmd.cmd = &buf;
-	ret = copy_struct_from_user(ucmd.cmd, op->size, ucmd.ubuffer,
-				    ucmd.user_size);
+	ret = copy_struct_from_user_with_ptr(ucmd.cmd, op->size, ucmd.ubuffer,
+					     ucmd.user_size);
 	if (ret)
 		return ret;
 	ret = op->execute(&ucmd);
