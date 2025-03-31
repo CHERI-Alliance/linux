@@ -2338,7 +2338,7 @@ static int cdrom_ioctl_media_changed(struct cdrom_device_info *cdi,
  * than the timestamp set by the caller.
  */
 static int cdrom_ioctl_timed_media_change(struct cdrom_device_info *cdi,
-		unsigned long arg)
+					  user_uintptr_t arg)
 {
 	int ret;
 	struct cdrom_timed_media_change_info __user *info;
@@ -3273,7 +3273,7 @@ static noinline int mmc_ioctl_cdrom_last_written(struct cdrom_device_info *cdi,
 }
 
 static int mmc_ioctl(struct cdrom_device_info *cdi, unsigned int cmd,
-		     unsigned long arg)
+		     user_uintptr_t arg)
 {
 	struct packet_command cgc;
 	void __user *userptr = (void __user *)arg;
@@ -3336,31 +3336,31 @@ int cdrom_ioctl(struct cdrom_device_info *cdi, struct block_device *bdev,
 	case CDROMCLOSETRAY:
 		return cdrom_ioctl_closetray(cdi);
 	case CDROMEJECT_SW:
-		return cdrom_ioctl_eject_sw(cdi, arg);
+		return cdrom_ioctl_eject_sw(cdi, __c_ua(arg));
 	case CDROM_MEDIA_CHANGED:
-		return cdrom_ioctl_media_changed(cdi, arg);
+		return cdrom_ioctl_media_changed(cdi, __c_ua(arg));
 	case CDROM_TIMED_MEDIA_CHANGE:
 		return cdrom_ioctl_timed_media_change(cdi, arg);
 	case CDROM_SET_OPTIONS:
-		return cdrom_ioctl_set_options(cdi, arg);
+		return cdrom_ioctl_set_options(cdi, __c_ua(arg));
 	case CDROM_CLEAR_OPTIONS:
-		return cdrom_ioctl_clear_options(cdi, arg);
+		return cdrom_ioctl_clear_options(cdi, __c_ua(arg));
 	case CDROM_SELECT_SPEED:
-		return cdrom_ioctl_select_speed(cdi, arg);
+		return cdrom_ioctl_select_speed(cdi, __c_ua(arg));
 	case CDROM_SELECT_DISC:
-		return cdrom_ioctl_select_disc(cdi, arg);
+		return cdrom_ioctl_select_disc(cdi, __c_ua(arg));
 	case CDROMRESET:
 		return cdrom_ioctl_reset(cdi, bdev);
 	case CDROM_LOCKDOOR:
-		return cdrom_ioctl_lock_door(cdi, arg);
+		return cdrom_ioctl_lock_door(cdi, __c_ua(arg));
 	case CDROM_DEBUG:
-		return cdrom_ioctl_debug(cdi, arg);
+		return cdrom_ioctl_debug(cdi, __c_ua(arg));
 	case CDROM_GET_CAPABILITY:
 		return cdrom_ioctl_get_capability(cdi);
 	case CDROM_GET_MCN:
 		return cdrom_ioctl_get_mcn(cdi, argp);
 	case CDROM_DRIVE_STATUS:
-		return cdrom_ioctl_drive_status(cdi, arg);
+		return cdrom_ioctl_drive_status(cdi, __c_ua(arg));
 	case CDROM_DISC_STATUS:
 		return cdrom_ioctl_disc_status(cdi);
 	case CDROM_CHANGER_NSLOTS:

@@ -500,7 +500,7 @@ static unsigned int gdrom_bdops_check_events(struct gendisk *disk,
 }
 
 static int gdrom_bdops_ioctl(struct block_device *bdev, blk_mode_t mode,
-	unsigned cmd, unsigned long arg)
+	unsigned cmd, user_uintptr_t arg)
 {
 	int ret;
 
