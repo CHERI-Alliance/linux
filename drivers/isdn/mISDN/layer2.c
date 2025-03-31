@@ -301,7 +301,7 @@ l2_timeout(struct FsmInst *fi, int event, void *arg)
 
 static int
 l2mgr(struct layer2 *l2, u_int prim, void *arg) {
-	intptr_t c = (intptr_t)arg;
+	long c = (long)__c_pa(arg);
 
 	printk(KERN_WARNING "l2mgr: dev %s addr:%x prim %x %c\n",
 	       mISDNDevName4ch(&l2->ch), l2->id, prim, (char)c);
@@ -312,7 +312,7 @@ l2mgr(struct layer2 *l2, u_int prim, void *arg) {
 		case 'D':
 		case 'G':
 		case 'H':
-			l2_tei(l2, prim, (uintptr_t)arg);
+			l2_tei(l2, prim, __c_pa(arg));
 			break;
 		}
 	}
@@ -2040,7 +2040,7 @@ tei_l2(struct layer2 *l2, u_int cmd, u_long arg)
 		       mISDNDevName4ch(&l2->ch), cmd, __func__);
 	switch (cmd) {
 	case (MDL_ASSIGN_REQ):
-		ret = mISDN_FsmEvent(&l2->l2m, EV_L2_MDL_ASSIGN, (void *)arg);
+		ret = mISDN_FsmEvent(&l2->l2m, EV_L2_MDL_ASSIGN, __c_fakep(arg));
 		break;
 	case (MDL_REMOVE_REQ):
 		ret = mISDN_FsmEvent(&l2->l2m, EV_L2_MDL_REMOVE, NULL);
