@@ -118,8 +118,8 @@ int __init goldfish_timer_init(int irq, void __iomem *base)
 
 	timerdrv->res = (struct resource){
 		.name  = "goldfish_timer",
-		.start = (unsigned long)base,
-		.end   = (unsigned long)base + 0xfff,
+		.start = __c_pa(base),
+		.end   = __c_pa(base) + 0xfff,
 	};
 
 	ret = request_resource(&iomem_resource, &timerdrv->res);

@@ -528,7 +528,7 @@ static int sh_tmu_setup(struct sh_tmu_device *tmu, struct platform_device *pdev)
 		const struct platform_device_id *id = pdev->id_entry;
 		struct sh_timer_config *cfg = pdev->dev.platform_data;
 
-		tmu->model = id->driver_data;
+		tmu->model = __c_ua(id->driver_data);
 		tmu->num_channels = hweight8(cfg->channels_mask);
 	} else {
 		dev_err(&tmu->pdev->dev, "missing platform data\n");
