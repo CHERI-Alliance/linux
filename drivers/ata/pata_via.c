@@ -578,7 +578,7 @@ static int via_init_one(struct pci_dev *pdev, const struct pci_device_id *id)
 	struct pci_dev *isa;
 	const struct via_isa_bridge *config;
 	u8 enable;
-	unsigned long flags = id->driver_data;
+	uintptr_t flags = id->driver_data;
 	int rc;
 
 	ata_print_version_once(&pdev->dev, DRV_VERSION);
