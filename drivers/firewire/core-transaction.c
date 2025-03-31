@@ -159,7 +159,7 @@ static void transmit_complete_callback(struct fw_packet *packet,
 	struct fw_transaction *t =
 	    container_of(packet, struct fw_transaction, packet);
 
-	trace_async_request_outbound_complete((uintptr_t)t, card->index, packet->generation,
+	trace_async_request_outbound_complete(__c_pa(t), card->index, packet->generation,
 					      packet->speed, status, packet->timestamp);
 
 	switch (status) {
@@ -396,7 +396,7 @@ void __fw_send_request(struct fw_card *card, struct fw_transaction *t, int tcode
 		list_add_tail(&t->link, &card->transactions.list);
 
 	// Safe with no lock, since the index field of fw_card is immutable once assigned.
-	trace_async_request_outbound_initiate((uintptr_t)t, card->index, generation, speed,
+	trace_async_request_outbound_initiate(__c_pa(t), card->index, generation, speed,
 					      t->packet.header, payload,
 					      tcode_is_read_request(tcode) ? 0 : length / 4);
 
@@ -462,7 +462,7 @@ static DECLARE_COMPLETION(phy_config_done);
 static void transmit_phy_packet_callback(struct fw_packet *packet,
 					 struct fw_card *card, int status)
 {
-	trace_async_phy_outbound_complete((uintptr_t)packet, card->index, packet->generation, status,
+	trace_async_phy_outbound_complete(__c_pa(packet), card->index, packet->generation, status,
 					  packet->timestamp);
 	complete(&phy_config_done);
 }
@@ -507,7 +507,7 @@ void fw_send_phy_config(struct fw_card *card,
 	phy_config_packet.generation = generation;
 	reinit_completion(&phy_config_done);
 
-	trace_async_phy_outbound_initiate((uintptr_t)&phy_config_packet, card->index,
+	trace_async_phy_outbound_initiate(__c_pa(&phy_config_packet), card->index,
 					  phy_config_packet.generation, phy_config_packet.header[1],
 					  phy_config_packet.header[2]);
 
@@ -697,7 +697,7 @@ static void free_response_callback(struct fw_packet *packet,
 {
 	struct fw_request *request = container_of(packet, struct fw_request, response);
 
-	trace_async_response_outbound_complete((uintptr_t)request, card->index, packet->generation,
+	trace_async_response_outbound_complete(__c_pa(request), card->index, packet->generation,
 					       packet->speed, status, packet->timestamp);
 
 	// Decrease the reference count since not at in-flight.
@@ -908,7 +908,7 @@ void fw_send_response(struct fw_card *card,
 	// Increase the reference count so that the object is kept during in-flight.
 	fw_request_get(request);
 
-	trace_async_response_outbound_initiate((uintptr_t)request, card->index,
+	trace_async_response_outbound_initiate(__c_pa(request), card->index,
 					       request->response.generation, request->response.speed,
 					       request->response.header, data,
 					       data ? data_length / 4 : 0);
@@ -1069,7 +1069,7 @@ void fw_core_handle_request(struct fw_card *card, struct fw_packet *p)
 
 	tcode = async_header_get_tcode(p->header);
 	if (tcode_is_link_internal(tcode)) {
-		trace_async_phy_inbound((uintptr_t)p, card->index, p->generation, p->ack, p->timestamp,
+		trace_async_phy_inbound(__c_pa(p), card->index, p->generation, p->ack, p->timestamp,
 					 p->header[1], p->header[2]);
 		fw_cdev_handle_phy_packet(card, p);
 		return;
@@ -1081,7 +1081,7 @@ void fw_core_handle_request(struct fw_card *card, struct fw_packet *p)
 		return;
 	}
 
-	trace_async_request_inbound((uintptr_t)request, card->index, p->generation, p->speed,
+	trace_async_request_inbound(__c_pa(request), card->index, p->generation, p->speed,
 				    p->ack, p->timestamp, p->header, request->data,
 				    tcode_is_read_request(tcode) ? 0 : request->length / 4);
 
@@ -1151,7 +1151,7 @@ void fw_core_handle_response(struct fw_card *card, struct fw_packet *p)
 		}
 	}
 
-	trace_async_response_inbound((uintptr_t)t, card->index, p->generation, p->speed, p->ack,
+	trace_async_response_inbound(__c_pa(t), card->index, p->generation, p->speed, p->ack,
 				     p->timestamp, p->header, data, data_length / 4);
 
 	if (!t) {

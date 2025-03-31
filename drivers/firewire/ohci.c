@@ -515,7 +515,7 @@ static int ohci_update_phy_reg(struct fw_card *card, int addr,
 
 static inline dma_addr_t ar_buffer_bus(struct ar_context *ctx, unsigned int i)
 {
-	return page_private(ctx->pages[i]);
+	return __c_ua(page_private(ctx->pages[i]));
 }
 
 static void ar_context_link_page(struct ar_context *ctx, unsigned int index)
@@ -858,7 +858,7 @@ static int ar_context_init(struct ar_context *ctx, struct fw_ohci *ohci,
 						DMA_FROM_DEVICE, GFP_KERNEL);
 		if (!ctx->pages[i])
 			goto out_of_memory;
-		set_page_private(ctx->pages[i], dma_addr);
+		set_page_private(ctx->pages[i], __c_fakeu(dma_addr));
 		dma_sync_single_for_device(dev, dma_addr, PAGE_SIZE,
 					   DMA_FROM_DEVICE);
 	}
@@ -1175,7 +1175,11 @@ static int at_context_queue_packet(struct at_context *ctx, struct fw_packet *pac
 	__le32 *header;
 	int z, tcode;
 
+#if __SIZEOF_POINTER__ > __SIZEOF_LONG__
+	d = context_get_descriptors(context, 5, &d_bus);
+#else
 	d = context_get_descriptors(context, 4, &d_bus);
+#endif
 	if (d == NULL) {
 		packet->ack = RCODE_SEND_ERROR;
 		return -1;
@@ -1249,7 +1253,11 @@ static int at_context_queue_packet(struct at_context *ctx, struct fw_packet *pac
 		return -1;
 	}
 
+#if __SIZEOF_POINTER__ > __SIZEOF_LONG__
+	BUILD_BUG_ON(sizeof(struct driver_data) > 2 * sizeof(struct descriptor));
+#else
 	BUILD_BUG_ON(sizeof(struct driver_data) > sizeof(struct descriptor));
+#endif
 	driver_data = (struct driver_data *) &d[3];
 	driver_data->packet = packet;
 	packet->driver_data = driver_data;
@@ -1294,7 +1302,11 @@ static int at_context_queue_packet(struct at_context *ctx, struct fw_packet *pac
 		return -1;
 	}
 
+#if __SIZEOF_POINTER__ > __SIZEOF_LONG__
+	context_append(context, d, z, 5 - z);
+#else
 	context_append(context, d, z, 4 - z);
+#endif
 
 	if (context->running)
 		reg_write(ohci, CONTROL_SET(context->regs), CONTEXT_WAKE);
@@ -3190,7 +3202,7 @@ static int queue_iso_transmit(struct iso_context *ctx,
 			min(next_page_index, payload_end_index) - payload_index;
 		pd[i].req_count    = cpu_to_le16(length);
 
-		page_bus = page_private(buffer->pages[page]);
+		page_bus = __c_ua(page_private(buffer->pages[page]));
 		pd[i].data_address = cpu_to_le32(page_bus + offset);
 
 		dma_sync_single_range_for_device(ctx->context.ohci->card.device,
@@ -3273,7 +3285,7 @@ static int queue_iso_packet_per_buffer(struct iso_context *ctx,
 			pd->res_count = pd->req_count;
 			pd->transfer_status = 0;
 
-			page_bus = page_private(buffer->pages[page]);
+			page_bus = __c_ua(page_private(buffer->pages[page]));
 			pd->data_address = cpu_to_le32(page_bus + offset);
 
 			dma_sync_single_range_for_device(device, page_bus,
@@ -3336,7 +3348,7 @@ static int queue_iso_buffer_fill(struct iso_context *ctx,
 		d->res_count = d->req_count;
 		d->transfer_status = 0;
 
-		page_bus = page_private(buffer->pages[page]);
+		page_bus = __c_ua(page_private(buffer->pages[page]));
 		d->data_address = cpu_to_le32(page_bus + offset);
 
 		dma_sync_single_range_for_device(ctx->context.ohci->card.device,
