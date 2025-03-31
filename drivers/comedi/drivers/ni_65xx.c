@@ -347,7 +347,7 @@ static int ni_65xx_dio_insn_config(struct comedi_device *dev,
 				   struct comedi_insn *insn,
 				   unsigned int *data)
 {
-	unsigned long base_port = (unsigned long)s->private;
+	unsigned long base_port = __c_pa(s->private);
 	unsigned int chan = CR_CHAN(insn->chanspec);
 	unsigned int chan_mask = NI_65XX_CHAN_TO_MASK(chan);
 	unsigned int port = base_port + NI_65XX_CHAN_TO_PORT(chan);
@@ -415,7 +415,7 @@ static int ni_65xx_dio_insn_bits(struct comedi_device *dev,
 				 struct comedi_insn *insn,
 				 unsigned int *data)
 {
-	unsigned long base_port = (unsigned long)s->private;
+	unsigned long base_port = __c_pa(s->private);
 	unsigned int base_chan = CR_CHAN(insn->chanspec);
 	int last_port_offset = NI_65XX_CHAN_TO_PORT(s->n_chan - 1);
 	unsigned int read_bits = 0;
@@ -697,7 +697,7 @@ static int ni_65xx_auto_attach(struct comedi_device *dev,
 		s->insn_bits	= ni_65xx_dio_insn_bits;
 
 		/* the output ports always start after the input ports */
-		s->private = (void *)(unsigned long)board->num_di_ports;
+		s->private = __c_fakep(board->num_di_ports);
 
 		/*
 		 * Use the io_bits to handle the inverted outputs.  Inverted
@@ -779,7 +779,8 @@ static struct comedi_driver ni_65xx_driver = {
 static int ni_65xx_pci_probe(struct pci_dev *dev,
 			     const struct pci_device_id *id)
 {
-	return comedi_pci_auto_config(dev, &ni_65xx_driver, id->driver_data);
+	return comedi_pci_auto_config(dev, &ni_65xx_driver,
+				      __c_ua(id->driver_data));
 }
 
 static const struct pci_device_id ni_65xx_pci_table[] = {

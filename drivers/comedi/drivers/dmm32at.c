@@ -189,11 +189,11 @@ static unsigned int dmm32at_ai_get_sample(struct comedi_device *dev,
 static int dmm32at_ai_status(struct comedi_device *dev,
 			     struct comedi_subdevice *s,
 			     struct comedi_insn *insn,
-			     unsigned long context)
+			     uintptr_t context)
 {
 	unsigned char status;
 
-	status = inb(dev->iobase + context);
+	status = inb(dev->iobase + __c_ua(context));
 	if ((status & DMM32AT_AI_STATUS_STS) == 0)
 		return 0;
 	return -EBUSY;
@@ -437,7 +437,7 @@ static irqreturn_t dmm32at_isr(int irq, void *d)
 static int dmm32at_ao_eoc(struct comedi_device *dev,
 			  struct comedi_subdevice *s,
 			  struct comedi_insn *insn,
-			  unsigned long context)
+			  uintptr_t context)
 {
 	unsigned char status;
 

@@ -87,7 +87,7 @@ static const char range_codes_analog[] = { 0x00, 0x20, 0x10, 0x30 };
 static int icp_multi_ai_eoc(struct comedi_device *dev,
 			    struct comedi_subdevice *s,
 			    struct comedi_insn *insn,
-			    unsigned long context)
+			    uintptr_t context)
 {
 	unsigned int status;
 
@@ -140,7 +140,7 @@ static int icp_multi_ai_insn_read(struct comedi_device *dev,
 static int icp_multi_ao_ready(struct comedi_device *dev,
 			      struct comedi_subdevice *s,
 			      struct comedi_insn *insn,
-			      unsigned long context)
+			      uintptr_t context)
 {
 	unsigned int status;
 
@@ -313,7 +313,8 @@ static struct comedi_driver icp_multi_driver = {
 static int icp_multi_pci_probe(struct pci_dev *dev,
 			       const struct pci_device_id *id)
 {
-	return comedi_pci_auto_config(dev, &icp_multi_driver, id->driver_data);
+	return comedi_pci_auto_config(dev, &icp_multi_driver,
+				      __c_ua(id->driver_data));
 }
 
 static const struct pci_device_id icp_multi_pci_table[] = {

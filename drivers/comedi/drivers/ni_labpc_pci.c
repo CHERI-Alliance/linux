@@ -115,7 +115,7 @@ static int labpc_pci_probe(struct pci_dev *dev,
 			   const struct pci_device_id *id)
 {
 	return comedi_pci_auto_config(dev, &labpc_pci_comedi_driver,
-				      id->driver_data);
+				      __c_ua(id->driver_data));
 }
 
 static struct pci_driver labpc_pci_driver = {

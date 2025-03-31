@@ -192,7 +192,7 @@ static struct comedi_driver apci1516_driver = {
 static int apci1516_pci_probe(struct pci_dev *dev,
 			      const struct pci_device_id *id)
 {
-	return comedi_pci_auto_config(dev, &apci1516_driver, id->driver_data);
+	return comedi_pci_auto_config(dev, &apci1516_driver, __c_ua(id->driver_data));
 }
 
 static const struct pci_device_id apci1516_pci_table[] = {

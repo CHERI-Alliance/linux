@@ -286,7 +286,7 @@ static void pci1710_ai_setup_chanlist(struct comedi_device *dev,
 static int pci1710_ai_eoc(struct comedi_device *dev,
 			  struct comedi_subdevice *s,
 			  struct comedi_insn *insn,
-			  unsigned long context)
+			  uintptr_t context)
 {
 	unsigned int status;
 
@@ -887,7 +887,7 @@ static int adv_pci1710_pci_probe(struct pci_dev *dev,
 				 const struct pci_device_id *id)
 {
 	return comedi_pci_auto_config(dev, &adv_pci1710_driver,
-				      id->driver_data);
+				      __c_ua(id->driver_data));
 }
 
 static const struct pci_device_id adv_pci1710_pci_table[] = {

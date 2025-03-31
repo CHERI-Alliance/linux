@@ -214,7 +214,7 @@ static int me_dio_insn_bits(struct comedi_device *dev,
 static int me_ai_eoc(struct comedi_device *dev,
 		     struct comedi_subdevice *s,
 		     struct comedi_insn *insn,
-		     unsigned long context)
+		     uintptr_t context)
 {
 	unsigned int status;
 
@@ -531,7 +531,8 @@ static struct comedi_driver me_daq_driver = {
 static int me_daq_pci_probe(struct pci_dev *dev,
 			    const struct pci_device_id *id)
 {
-	return comedi_pci_auto_config(dev, &me_daq_driver, id->driver_data);
+	return comedi_pci_auto_config(dev, &me_daq_driver,
+				      __c_ua(id->driver_data));
 }
 
 static const struct pci_device_id me_daq_pci_table[] = {

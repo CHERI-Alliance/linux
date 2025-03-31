@@ -589,7 +589,7 @@ static struct comedi_driver ni6501_driver = {
 static int ni6501_usb_probe(struct usb_interface *intf,
 			    const struct usb_device_id *id)
 {
-	return comedi_usb_auto_config(intf, &ni6501_driver, id->driver_info);
+	return comedi_usb_auto_config(intf, &ni6501_driver, __c_ua(id->driver_info));
 }
 
 static const struct usb_device_id ni6501_usb_table[] = {

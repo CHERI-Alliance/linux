@@ -41,7 +41,7 @@
 static int pci6208_ao_eoc(struct comedi_device *dev,
 			  struct comedi_subdevice *s,
 			  struct comedi_insn *insn,
-			  unsigned long context)
+			  uintptr_t context)
 {
 	unsigned int status;
 
@@ -176,7 +176,7 @@ static int adl_pci6208_pci_probe(struct pci_dev *dev,
 				 const struct pci_device_id *id)
 {
 	return comedi_pci_auto_config(dev, &adl_pci6208_driver,
-				      id->driver_data);
+				      __c_ua(id->driver_data));
 }
 
 static const struct pci_device_id adl_pci6208_pci_table[] = {

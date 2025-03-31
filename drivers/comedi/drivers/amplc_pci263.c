@@ -94,7 +94,7 @@ static int amplc_pci263_pci_probe(struct pci_dev *dev,
 				  const struct pci_device_id *id)
 {
 	return comedi_pci_auto_config(dev, &amplc_pci263_driver,
-				      id->driver_data);
+				      __c_ua(id->driver_data));
 }
 
 static struct pci_driver amplc_pci263_pci_driver = {

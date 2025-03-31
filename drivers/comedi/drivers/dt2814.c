@@ -49,7 +49,7 @@
 static int dt2814_ai_notbusy(struct comedi_device *dev,
 			     struct comedi_subdevice *s,
 			     struct comedi_insn *insn,
-			     unsigned long context)
+			     uintptr_t context)
 {
 	unsigned int status;
 
@@ -68,7 +68,7 @@ static int dt2814_ai_clear(struct comedi_device *dev)
 
 	/* Wait until not busy and get status register value. */
 	ret = comedi_timeout(dev, NULL, NULL, dt2814_ai_notbusy,
-			     (unsigned long)&status);
+			     (uintptr_t)&status);
 	if (ret)
 		return ret;
 
@@ -86,7 +86,7 @@ static int dt2814_ai_clear(struct comedi_device *dev)
 static int dt2814_ai_eoc(struct comedi_device *dev,
 			 struct comedi_subdevice *s,
 			 struct comedi_insn *insn,
-			 unsigned long context)
+			 uintptr_t context)
 {
 	unsigned int status;
 

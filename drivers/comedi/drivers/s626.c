@@ -227,7 +227,7 @@ static void s626_debi_replace(struct comedi_device *dev, unsigned int addr,
 static int s626_i2c_handshake_eoc(struct comedi_device *dev,
 				  struct comedi_subdevice *s,
 				  struct comedi_insn *insn,
-				  unsigned long context)
+				  uintptr_t context)
 {
 	bool status;
 
@@ -317,7 +317,7 @@ enum {
 static int s626_send_dac_eoc(struct comedi_device *dev,
 			     struct comedi_subdevice *s,
 			     struct comedi_insn *insn,
-			     unsigned long context)
+			     uintptr_t context)
 {
 	unsigned int status;
 
@@ -1372,8 +1372,8 @@ static void s626_reset_adc(struct comedi_device *dev, u8 *ppl)
 		 */
 		jmp_adrs =
 			(u32)devpriv->rps_buf.physical_base +
-			(u32)((unsigned long)rps -
-			      (unsigned long)devpriv->rps_buf.logical_base);
+			(u32)(__c_pa(rps) -
+			      __c_pa(devpriv->rps_buf.logical_base));
 		for (i = 0; i < (10 * S626_RPSCLK_PER_US / 2); i++) {
 			jmp_adrs += 8;	/* Repeat to implement time delay: */
 			/* Jump to next RPS instruction. */
@@ -1471,7 +1471,7 @@ static void s626_reset_adc(struct comedi_device *dev, u8 *ppl)
 static int s626_ai_eoc(struct comedi_device *dev,
 		       struct comedi_subdevice *s,
 		       struct comedi_insn *insn,
-		       unsigned long context)
+		       uintptr_t context)
 {
 	unsigned int status;
 
@@ -1973,7 +1973,7 @@ static int s626_dio_insn_bits(struct comedi_device *dev,
 			      struct comedi_insn *insn,
 			      unsigned int *data)
 {
-	unsigned long group = (unsigned long)s->private;
+	unsigned long group = __c_pa(s->private);
 
 	if (comedi_dio_update_state(s, data))
 		s626_debi_write(dev, S626_LP_WRDOUT(group), s->state);
@@ -1988,7 +1988,7 @@ static int s626_dio_insn_config(struct comedi_device *dev,
 				struct comedi_insn *insn,
 				unsigned int *data)
 {
-	unsigned long group = (unsigned long)s->private;
+	unsigned long group = __c_pa(s->private);
 	int ret;
 
 	ret = comedi_dio_insn_config(dev, s, insn, data, 0);
@@ -2576,7 +2576,8 @@ static struct comedi_driver s626_driver = {
 static int s626_pci_probe(struct pci_dev *dev,
 			  const struct pci_device_id *id)
 {
-	return comedi_pci_auto_config(dev, &s626_driver, id->driver_data);
+	return comedi_pci_auto_config(dev, &s626_driver,
+				      __c_ua(id->driver_data));
 }
 
 /*

@@ -418,7 +418,7 @@ static int apci3xxx_ai_setup(struct comedi_device *dev, unsigned int chanspec)
 static int apci3xxx_ai_eoc(struct comedi_device *dev,
 			   struct comedi_subdevice *s,
 			   struct comedi_insn *insn,
-			   unsigned long context)
+			   uintptr_t context)
 {
 	unsigned int status;
 
@@ -595,7 +595,7 @@ static int apci3xxx_ai_cancel(struct comedi_device *dev,
 static int apci3xxx_ao_eoc(struct comedi_device *dev,
 			   struct comedi_subdevice *s,
 			   struct comedi_insn *insn,
-			   unsigned long context)
+			   uintptr_t context)
 {
 	unsigned int status;
 
@@ -914,7 +914,8 @@ static struct comedi_driver apci3xxx_driver = {
 static int apci3xxx_pci_probe(struct pci_dev *dev,
 			      const struct pci_device_id *id)
 {
-	return comedi_pci_auto_config(dev, &apci3xxx_driver, id->driver_data);
+	return comedi_pci_auto_config(dev, &apci3xxx_driver,
+				      __c_ua(id->driver_data));
 }
 
 static const struct pci_device_id apci3xxx_pci_table[] = {

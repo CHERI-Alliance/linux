@@ -257,7 +257,8 @@ static struct comedi_driver ni_670x_driver = {
 static int ni_670x_pci_probe(struct pci_dev *dev,
 			     const struct pci_device_id *id)
 {
-	return comedi_pci_auto_config(dev, &ni_670x_driver, id->driver_data);
+	return comedi_pci_auto_config(dev, &ni_670x_driver,
+				      __c_ua(id->driver_data));
 }
 
 static const struct pci_device_id ni_670x_pci_table[] = {

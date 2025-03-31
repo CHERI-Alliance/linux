@@ -518,7 +518,7 @@ static int rtd520_probe_fifo_depth(struct comedi_device *dev)
 static int rtd_ai_eoc(struct comedi_device *dev,
 		      struct comedi_subdevice *s,
 		      struct comedi_insn *insn,
-		      unsigned long context)
+		      uintptr_t context)
 {
 	unsigned int status;
 
@@ -992,7 +992,7 @@ static int rtd_ai_cancel(struct comedi_device *dev, struct comedi_subdevice *s)
 static int rtd_ao_eoc(struct comedi_device *dev,
 		      struct comedi_subdevice *s,
 		      struct comedi_insn *insn,
-		      unsigned long context)
+		      uintptr_t context)
 {
 	unsigned int chan = CR_CHAN(insn->chanspec);
 	unsigned int bit = (chan == 0) ? FS_DAC1_NOT_EMPTY : FS_DAC2_NOT_EMPTY;
@@ -1341,7 +1341,8 @@ static struct comedi_driver rtd520_driver = {
 static int rtd520_pci_probe(struct pci_dev *dev,
 			    const struct pci_device_id *id)
 {
-	return comedi_pci_auto_config(dev, &rtd520_driver, id->driver_data);
+	return comedi_pci_auto_config(dev, &rtd520_driver,
+				      __c_ua(id->driver_data));
 }
 
 static const struct pci_device_id rtd520_pci_table[] = {

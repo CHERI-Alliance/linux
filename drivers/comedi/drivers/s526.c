@@ -416,14 +416,14 @@ static int s526_gpct_winsn(struct comedi_device *dev,
 static int s526_eoc(struct comedi_device *dev,
 		    struct comedi_subdevice *s,
 		    struct comedi_insn *insn,
-		    unsigned long context)
+		    uintptr_t context)
 {
 	unsigned int status;
 
 	status = inw(dev->iobase + S526_INT_STATUS_REG);
 	if (status & context) {
 		/* we got our eoc event, clear it */
-		outw(context, dev->iobase + S526_INT_STATUS_REG);
+		outw(__c_ua(context), dev->iobase + S526_INT_STATUS_REG);
 		return 0;
 	}
 	return -EBUSY;

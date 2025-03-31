@@ -156,7 +156,7 @@ struct cb_pcimdas_private {
 static int cb_pcimdas_ai_eoc(struct comedi_device *dev,
 			     struct comedi_subdevice *s,
 			     struct comedi_insn *insn,
-			     unsigned long context)
+			     uintptr_t context)
 {
 	struct cb_pcimdas_private *devpriv = dev->private;
 	unsigned int status;
@@ -451,7 +451,7 @@ static int cb_pcimdas_pci_probe(struct pci_dev *dev,
 				const struct pci_device_id *id)
 {
 	return comedi_pci_auto_config(dev, &cb_pcimdas_driver,
-				      id->driver_data);
+				      __c_ua(id->driver_data));
 }
 
 static const struct pci_device_id cb_pcimdas_pci_table[] = {

@@ -699,7 +699,8 @@ static struct comedi_driver gsc_hpdi_driver = {
 static int gsc_hpdi_pci_probe(struct pci_dev *dev,
 			      const struct pci_device_id *id)
 {
-	return comedi_pci_auto_config(dev, &gsc_hpdi_driver, id->driver_data);
+	return comedi_pci_auto_config(dev, &gsc_hpdi_driver,
+				      __c_ua(id->driver_data));
 }
 
 static const struct pci_device_id gsc_hpdi_pci_table[] = {

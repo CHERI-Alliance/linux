@@ -905,7 +905,7 @@ static struct comedi_driver dt9812_driver = {
 static int dt9812_usb_probe(struct usb_interface *intf,
 			    const struct usb_device_id *id)
 {
-	return comedi_usb_auto_config(intf, &dt9812_driver, id->driver_info);
+	return comedi_usb_auto_config(intf, &dt9812_driver, __c_ua(id->driver_info));
 }
 
 static const struct usb_device_id dt9812_usb_table[] = {

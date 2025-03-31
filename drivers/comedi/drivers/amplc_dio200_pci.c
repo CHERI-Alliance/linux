@@ -408,7 +408,7 @@ MODULE_DEVICE_TABLE(pci, dio200_pci_table);
 static int dio200_pci_probe(struct pci_dev *dev, const struct pci_device_id *id)
 {
 	return comedi_pci_auto_config(dev, &dio200_pci_comedi_driver,
-				      id->driver_data);
+				      __c_ua(id->driver_data));
 }
 
 static struct pci_driver dio200_pci_pci_driver = {

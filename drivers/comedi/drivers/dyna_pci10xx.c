@@ -48,7 +48,7 @@ struct dyna_pci10xx_private {
 static int dyna_pci10xx_ai_eoc(struct comedi_device *dev,
 			       struct comedi_subdevice *s,
 			       struct comedi_insn *insn,
-			       unsigned long context)
+			       uintptr_t context)
 {
 	unsigned int status;
 
@@ -242,7 +242,7 @@ static int dyna_pci10xx_pci_probe(struct pci_dev *dev,
 				  const struct pci_device_id *id)
 {
 	return comedi_pci_auto_config(dev, &dyna_pci10xx_driver,
-				      id->driver_data);
+				      __c_ua(id->driver_data));
 }
 
 static const struct pci_device_id dyna_pci10xx_pci_table[] = {

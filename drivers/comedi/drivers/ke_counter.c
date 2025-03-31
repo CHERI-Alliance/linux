@@ -209,7 +209,7 @@ static int ke_counter_pci_probe(struct pci_dev *dev,
 				const struct pci_device_id *id)
 {
 	return comedi_pci_auto_config(dev, &ke_counter_driver,
-				      id->driver_data);
+				      __c_ua(id->driver_data));
 }
 
 static const struct pci_device_id ke_counter_pci_table[] = {

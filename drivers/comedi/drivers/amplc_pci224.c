@@ -1118,7 +1118,7 @@ static int amplc_pci224_pci_probe(struct pci_dev *dev,
 				  const struct pci_device_id *id)
 {
 	return comedi_pci_auto_config(dev, &amplc_pci224_driver,
-				      id->driver_data);
+				      __c_ua(id->driver_data));
 }
 
 static const struct pci_device_id amplc_pci224_pci_table[] = {

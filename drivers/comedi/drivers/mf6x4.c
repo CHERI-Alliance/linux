@@ -106,7 +106,7 @@ static int mf6x4_do_insn_bits(struct comedi_device *dev,
 static int mf6x4_ai_eoc(struct comedi_device *dev,
 			struct comedi_subdevice *s,
 			struct comedi_insn *insn,
-			unsigned long context)
+			uintptr_t context)
 {
 	struct mf6x4_private *devpriv = dev->private;
 	unsigned int status;
@@ -286,7 +286,8 @@ static struct comedi_driver mf6x4_driver = {
 
 static int mf6x4_pci_probe(struct pci_dev *dev, const struct pci_device_id *id)
 {
-	return comedi_pci_auto_config(dev, &mf6x4_driver, id->driver_data);
+	return comedi_pci_auto_config(dev, &mf6x4_driver,
+				      __c_ua(id->driver_data));
 }
 
 static const struct pci_device_id mf6x4_pci_table[] = {

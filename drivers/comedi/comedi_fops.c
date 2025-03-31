@@ -2114,7 +2114,7 @@ static int do_setwsubd_ioctl(struct comedi_device *dev, unsigned long arg,
 }
 
 static long comedi_unlocked_ioctl(struct file *file, unsigned int cmd,
-				  unsigned long arg)
+				  user_uintptr_t arg)
 {
 	unsigned int minor = iminor(file_inode(file));
 	struct comedi_file *cfp = file->private_data;
@@ -2196,13 +2196,13 @@ static long comedi_unlocked_ioctl(struct file *file, unsigned int cmd,
 				      file);
 		break;
 	case COMEDI_LOCK:
-		rc = do_lock_ioctl(dev, arg, file);
+		rc = do_lock_ioctl(dev, __c_ua(arg), file);
 		break;
 	case COMEDI_UNLOCK:
-		rc = do_unlock_ioctl(dev, arg, file);
+		rc = do_unlock_ioctl(dev, __c_ua(arg), file);
 		break;
 	case COMEDI_CANCEL:
-		rc = do_cancel_ioctl(dev, arg, file);
+		rc = do_cancel_ioctl(dev, __c_ua(arg), file);
 		break;
 	case COMEDI_CMD: {
 		struct comedi_cmd cmd;
@@ -2264,13 +2264,13 @@ static long comedi_unlocked_ioctl(struct file *file, unsigned int cmd,
 		break;
 	}
 	case COMEDI_POLL:
-		rc = do_poll_ioctl(dev, arg, file);
+		rc = do_poll_ioctl(dev, __c_ua(arg), file);
 		break;
 	case COMEDI_SETRSUBD:
-		rc = do_setrsubd_ioctl(dev, arg, file);
+		rc = do_setrsubd_ioctl(dev, __c_ua(arg), file);
 		break;
 	case COMEDI_SETWSUBD:
-		rc = do_setwsubd_ioctl(dev, arg, file);
+		rc = do_setwsubd_ioctl(dev, __c_ua(arg), file);
 		break;
 	default:
 		rc = -ENOTTY;

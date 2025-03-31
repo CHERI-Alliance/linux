@@ -233,7 +233,7 @@ static void pcl711_set_changain(struct comedi_device *dev,
 static int pcl711_ai_eoc(struct comedi_device *dev,
 			 struct comedi_subdevice *s,
 			 struct comedi_insn *insn,
-			 unsigned long context)
+			 uintptr_t context)
 {
 	unsigned int status;
 

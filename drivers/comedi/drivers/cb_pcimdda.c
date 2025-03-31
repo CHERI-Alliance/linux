@@ -168,7 +168,7 @@ static int cb_pcimdda_pci_probe(struct pci_dev *dev,
 				const struct pci_device_id *id)
 {
 	return comedi_pci_auto_config(dev, &cb_pcimdda_driver,
-				      id->driver_data);
+				      __c_ua(id->driver_data));
 }
 
 static const struct pci_device_id cb_pcimdda_pci_table[] = {

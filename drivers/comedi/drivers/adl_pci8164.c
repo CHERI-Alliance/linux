@@ -32,7 +32,7 @@ static int adl_pci8164_insn_read(struct comedi_device *dev,
 				 struct comedi_insn *insn,
 				 unsigned int *data)
 {
-	unsigned long offset = (unsigned long)s->private;
+	unsigned long offset = __c_pa(s->private);
 	unsigned int chan = CR_CHAN(insn->chanspec);
 	int i;
 
@@ -47,7 +47,7 @@ static int adl_pci8164_insn_write(struct comedi_device *dev,
 				  struct comedi_insn *insn,
 				  unsigned int *data)
 {
-	unsigned long offset = (unsigned long)s->private;
+	unsigned long offset = __c_pa(s->private);
 	unsigned int chan = CR_CHAN(insn->chanspec);
 	int i;
 
@@ -131,7 +131,7 @@ static int adl_pci8164_pci_probe(struct pci_dev *dev,
 				 const struct pci_device_id *id)
 {
 	return comedi_pci_auto_config(dev, &adl_pci8164_driver,
-				      id->driver_data);
+				      __c_ua(id->driver_data));
 }
 
 static const struct pci_device_id adl_pci8164_pci_table[] = {

@@ -293,7 +293,7 @@ static int adl_pci7x3x_do_insn_bits(struct comedi_device *dev,
 				    struct comedi_insn *insn,
 				    unsigned int *data)
 {
-	unsigned long reg = (unsigned long)s->private;
+	unsigned long reg = __c_pa(s->private);
 
 	if (comedi_dio_update_state(s, data)) {
 		unsigned int val = s->state;
@@ -320,7 +320,7 @@ static int adl_pci7x3x_di_insn_bits(struct comedi_device *dev,
 				    struct comedi_insn *insn,
 				    unsigned int *data)
 {
-	unsigned long reg = (unsigned long)s->private;
+	unsigned long reg = __c_pa(s->private);
 
 	data[1] = inl(dev->iobase + reg);
 
@@ -514,7 +514,7 @@ static int adl_pci7x3x_pci_probe(struct pci_dev *dev,
 				 const struct pci_device_id *id)
 {
 	return comedi_pci_auto_config(dev, &adl_pci7x3x_driver,
-				      id->driver_data);
+				      __c_ua(id->driver_data));
 }
 
 static const struct pci_device_id adl_pci7x3x_pci_table[] = {

@@ -516,7 +516,7 @@ static int pcmmio_cmdtest(struct comedi_device *dev,
 static int pcmmio_ai_eoc(struct comedi_device *dev,
 			 struct comedi_subdevice *s,
 			 struct comedi_insn *insn,
-			 unsigned long context)
+			 uintptr_t context)
 {
 	unsigned char status;
 
@@ -599,7 +599,7 @@ static int pcmmio_ai_insn_read(struct comedi_device *dev,
 static int pcmmio_ao_eoc(struct comedi_device *dev,
 			 struct comedi_subdevice *s,
 			 struct comedi_insn *insn,
-			 unsigned long context)
+			 uintptr_t context)
 {
 	unsigned char status;
 

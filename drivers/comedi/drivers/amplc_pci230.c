@@ -706,7 +706,7 @@ static void pci230_cancel_ct(struct comedi_device *dev, unsigned int ct)
 static int pci230_ai_eoc(struct comedi_device *dev,
 			 struct comedi_subdevice *s,
 			 struct comedi_insn *insn,
-			 unsigned long context)
+			 uintptr_t context)
 {
 	struct pci230_private *devpriv = dev->private;
 	unsigned int status;
@@ -2550,7 +2550,7 @@ static int amplc_pci230_pci_probe(struct pci_dev *dev,
 				  const struct pci_device_id *id)
 {
 	return comedi_pci_auto_config(dev, &amplc_pci230_driver,
-				      id->driver_data);
+				      __c_ua(id->driver_data));
 }
 
 static const struct pci_device_id amplc_pci230_pci_table[] = {
