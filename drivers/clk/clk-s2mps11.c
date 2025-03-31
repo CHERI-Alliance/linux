@@ -124,7 +124,7 @@ static int s2mps11_clk_probe(struct platform_device *pdev)
 	struct clk_hw_onecell_data *clk_data;
 	unsigned int s2mps11_reg;
 	int i, ret = 0;
-	enum sec_device_type hwid = platform_get_device_id(pdev)->driver_data;
+	enum sec_device_type hwid = __c_ua(platform_get_device_id(pdev)->driver_data);
 
 	s2mps11_clks = devm_kcalloc(&pdev->dev, S2MPS11_CLKS_NUM,
 				sizeof(*s2mps11_clks), GFP_KERNEL);

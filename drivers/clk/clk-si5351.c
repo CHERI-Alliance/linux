@@ -1434,7 +1434,7 @@ static int si5351_i2c_probe(struct i2c_client *client)
 	u8 num_parents, num_clocks;
 	int ret, n;
 
-	variant = (enum si5351_variant)(uintptr_t)i2c_get_match_data(client);
+	variant = (enum si5351_variant)__c_pa(i2c_get_match_data(client));
 	ret = si5351_dt_parse(client, variant);
 	if (ret)
 		return ret;

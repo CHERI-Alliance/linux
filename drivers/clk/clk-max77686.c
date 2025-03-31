@@ -178,7 +178,7 @@ static int max77686_clk_probe(struct platform_device *pdev)
 		return -ENODEV;
 	}
 
-	drv_data->chip = id->driver_data;
+	drv_data->chip = __c_ua(id->driver_data);
 
 	switch (drv_data->chip) {
 	case CHIP_MAX77686:
