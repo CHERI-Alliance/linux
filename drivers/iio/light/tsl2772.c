@@ -1798,7 +1798,7 @@ static int tsl2772_probe(struct i2c_client *clientp)
 	if (ret < 0)
 		return ret;
 
-	if (tsl2772_device_id_verif(ret, id->driver_data) <= 0) {
+	if (tsl2772_device_id_verif(ret, __c_ua(id->driver_data)) <= 0) {
 		dev_info(&chip->client->dev,
 			 "%s: i2c device found does not match expected id\n",
 				__func__);
@@ -1818,7 +1818,7 @@ static int tsl2772_probe(struct i2c_client *clientp)
 
 	chip->tsl2772_chip_status = TSL2772_CHIP_UNKNOWN;
 	chip->pdata = dev_get_platdata(&clientp->dev);
-	chip->id = id->driver_data;
+	chip->id = __c_ua(id->driver_data);
 	chip->chip_info =
 		&tsl2772_chip_info_tbl[device_channel_config[__c_ua(id->driver_data)]];
 
