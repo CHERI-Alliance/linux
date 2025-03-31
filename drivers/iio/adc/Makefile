@@ -3,6 +3,8 @@
 # Makefile for IIO ADC drivers
 #
 
+KBUILD_CFLAGS += -Wno-tautological-compare
+
 obj-$(CONFIG_IIO_ADC_HELPER) += industrialio-adc.o
 
 # When adding new entries keep the list in alphabetical order
