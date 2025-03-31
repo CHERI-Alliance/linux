@@ -209,19 +209,19 @@ static void ixp4xx_setup_port(struct ata_port *ap,
 		 * ixp4xx in little endian mode.
 		 */
 
-		*(unsigned long *)&ioaddr->data_addr		^= 0x02;
-		*(unsigned long *)&ioaddr->cmd_addr		^= 0x03;
-		*(unsigned long *)&ioaddr->altstatus_addr	^= 0x03;
-		*(unsigned long *)&ioaddr->ctl_addr		^= 0x03;
-		*(unsigned long *)&ioaddr->error_addr		^= 0x03;
-		*(unsigned long *)&ioaddr->feature_addr		^= 0x03;
-		*(unsigned long *)&ioaddr->nsect_addr		^= 0x03;
-		*(unsigned long *)&ioaddr->lbal_addr		^= 0x03;
-		*(unsigned long *)&ioaddr->lbam_addr		^= 0x03;
-		*(unsigned long *)&ioaddr->lbah_addr		^= 0x03;
-		*(unsigned long *)&ioaddr->device_addr		^= 0x03;
-		*(unsigned long *)&ioaddr->status_addr		^= 0x03;
-		*(unsigned long *)&ioaddr->command_addr		^= 0x03;
+		*(uintptr_t *)&ioaddr->data_addr	^= 0x02;
+		*(uintptr_t *)&ioaddr->cmd_addr		^= 0x03;
+		*(uintptr_t *)&ioaddr->altstatus_addr	^= 0x03;
+		*(uintptr_t *)&ioaddr->ctl_addr		^= 0x03;
+		*(uintptr_t *)&ioaddr->error_addr	^= 0x03;
+		*(uintptr_t *)&ioaddr->feature_addr	^= 0x03;
+		*(uintptr_t *)&ioaddr->nsect_addr	^= 0x03;
+		*(uintptr_t *)&ioaddr->lbal_addr	^= 0x03;
+		*(uintptr_t *)&ioaddr->lbam_addr	^= 0x03;
+		*(uintptr_t *)&ioaddr->lbah_addr	^= 0x03;
+		*(uintptr_t *)&ioaddr->device_addr	^= 0x03;
+		*(uintptr_t *)&ioaddr->status_addr	^= 0x03;
+		*(uintptr_t *)&ioaddr->command_addr	^= 0x03;
 
 		raw_cmd ^= 0x03;
 		raw_ctl ^= 0x03;
