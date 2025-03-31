@@ -74,7 +74,7 @@ static void ax45mp_cpu_cache_operation(unsigned long start, unsigned long end,
 		csr_write(AX45MP_CCTL_REG_UCCTLBEGINADDR_NUM, start);
 		csr_write(AX45MP_CCTL_REG_UCCTLCOMMAND_NUM, l1_op);
 
-		pa = virt_to_phys((void *)start);
+		pa = virt_to_phys(__c_fakep(start));
 		writel(pa, base + AX45MP_L2C_REG_CN_ACC_OFFSET(mhartid));
 		writel(l2_op, base + AX45MP_L2C_REG_CN_CMD_OFFSET(mhartid));
 		while ((ax45mp_cpu_l2c_get_cctl_status() &
@@ -102,7 +102,7 @@ static inline void ax45mp_cpu_dcache_inval_range(unsigned long start, unsigned l
 
 static void ax45mp_dma_cache_inv(phys_addr_t paddr, size_t size)
 {
-	uintptr_t start = (uintptr_t)phys_to_virt(paddr);
+	unsigned long start = phys_to_virt_a(paddr);
 	unsigned long end = start + size;
 	unsigned long line_size;
 	unsigned long flags;
@@ -124,7 +124,7 @@ static void ax45mp_dma_cache_inv(phys_addr_t paddr, size_t size)
 
 static void ax45mp_dma_cache_wback(phys_addr_t paddr, size_t size)
 {
-	uintptr_t start = (uintptr_t)phys_to_virt(paddr);
+	unsigned long start = phys_to_virt_a(paddr);
 	unsigned long end = start + size;
 	unsigned long line_size;
 	unsigned long flags;

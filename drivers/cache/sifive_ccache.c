@@ -257,7 +257,7 @@ static int sifive_ccache_probe(struct platform_device *pdev)
 	unsigned long quirks;
 	int intr_num, rc;
 
-	quirks = (uintptr_t)device_get_match_data(dev);
+	quirks = __c_pa(device_get_match_data(dev));
 
 	intr_num = platform_irq_count(pdev);
 	if (!intr_num)
@@ -299,7 +299,7 @@ static int __init sifive_ccache_init(void)
 	if (!np)
 		return -ENODEV;
 
-	quirks = (uintptr_t)match->data;
+	quirks = __c_pa(match->data);
 
 	if (of_address_to_resource(np, 0, &res)) {
 		rc = -ENODEV;
