@@ -524,7 +524,7 @@ static int of_get_devfreq_events(struct device_node *np,
 	}
 	info->num_events = count;
 
-	info->ppmu_type = (enum exynos_ppmu_type)device_get_match_data(dev);
+	info->ppmu_type = (enum exynos_ppmu_type)__c_pa(device_get_match_data(dev));
 
 	j = 0;
 	for_each_child_of_node(events_np, node) {
