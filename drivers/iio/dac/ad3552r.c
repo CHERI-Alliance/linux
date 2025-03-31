@@ -1053,7 +1053,7 @@ static int ad3552r_probe(struct spi_device *spi)
 
 	dac = iio_priv(indio_dev);
 	dac->spi = spi;
-	dac->chip_id = id->driver_data;
+	dac->chip_id = __c_ua(id->driver_data);
 
 	mutex_init(&dac->lock);
 

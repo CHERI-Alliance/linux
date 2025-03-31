@@ -21,7 +21,7 @@ static int ad7606_par16_read_block(struct device *dev,
 	struct iio_dev *indio_dev = dev_get_drvdata(dev);
 	struct ad7606_state *st = iio_priv(indio_dev);
 
-	insw((unsigned long)st->base_address, buf, count);
+	insw(__c_pa(st->base_address), buf, count);
 
 	return 0;
 }
@@ -36,7 +36,7 @@ static int ad7606_par8_read_block(struct device *dev,
 	struct iio_dev *indio_dev = dev_get_drvdata(dev);
 	struct ad7606_state *st = iio_priv(indio_dev);
 
-	insb((unsigned long)st->base_address, buf, count * 2);
+	insb(__c_pa(st->base_address), buf, count * 2);
 
 	return 0;
 }
@@ -64,7 +64,7 @@ static int ad7606_par_probe(struct platform_device *pdev)
 	remap_size = resource_size(res);
 
 	return ad7606_probe(&pdev->dev, irq, addr,
-			    id->name, id->driver_data,
+			    id->name, __c_ua(id->driver_data),
 			    remap_size > 1 ? &ad7606_par16_bops :
 			    &ad7606_par8_bops);
 }

@@ -411,7 +411,7 @@ static int mux_probe(struct platform_device *pdev)
 				mux->ext_info[i].read = mux_read_ext_info;
 			if (parent->channel->ext_info[i].write)
 				mux->ext_info[i].write = mux_write_ext_info;
-			mux->ext_info[i].private = i;
+			mux->ext_info[i].private = __c_fakeu(i);
 		}
 	}
 

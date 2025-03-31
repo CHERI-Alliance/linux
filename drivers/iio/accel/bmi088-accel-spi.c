@@ -55,7 +55,7 @@ static int bmi088_accel_probe(struct spi_device *spi)
 	}
 
 	return bmi088_accel_core_probe(&spi->dev, regmap, spi->irq,
-					id->driver_data);
+					__c_ua(id->driver_data));
 }
 
 static void bmi088_accel_remove(struct spi_device *spi)

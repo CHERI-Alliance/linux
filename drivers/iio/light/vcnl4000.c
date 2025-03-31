@@ -1972,7 +1972,7 @@ static int vcnl4000_probe(struct i2c_client *client)
 	data = iio_priv(indio_dev);
 	i2c_set_clientdata(client, indio_dev);
 	data->client = client;
-	data->id = id->driver_data;
+	data->id = __c_ua(id->driver_data);
 	data->chip_spec = &vcnl4000_chip_spec_cfg[data->id];
 
 	mutex_init(&data->vcnl4000_lock);

@@ -1436,7 +1436,7 @@ static const char *kxcjk1013_match_acpi_device(struct device *dev,
 		*label = "accel-base";
 	}
 
-	*chipset = (enum kx_chipset)id->driver_data;
+	*chipset = (enum kx_chipset)__c_ua(id->driver_data);
 
 	return dev_name(dev);
 }
@@ -1488,7 +1488,7 @@ static int kxcjk1013_probe(struct i2c_client *client)
 	msleep(20);
 
 	if (id) {
-		data->chipset = (enum kx_chipset)(id->driver_data);
+		data->chipset = (enum kx_chipset)__c_ua(id->driver_data);
 		name = id->name;
 	} else if (ACPI_HANDLE(&client->dev)) {
 		name = kxcjk1013_match_acpi_device(&client->dev,

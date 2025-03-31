@@ -383,7 +383,7 @@ static ssize_t ltc2688_reg_bool_get(struct iio_dev *indio_dev,
 	int ret;
 	u32 val;
 
-	ret = regmap_read(st->regmap, private, &val);
+	ret = regmap_read(st->regmap, __c_ua(private), &val);
 	if (ret)
 		return ret;
 
@@ -403,7 +403,7 @@ static ssize_t ltc2688_reg_bool_set(struct iio_dev *indio_dev,
 	if (ret)
 		return ret;
 
-	ret = regmap_update_bits(st->regmap, private, BIT(chan->channel),
+	ret = regmap_update_bits(st->regmap, __c_ua(private), BIT(chan->channel),
 				 en << chan->channel);
 	if (ret)
 		return ret;
@@ -504,7 +504,7 @@ static ssize_t ltc2688_dac_input_read(struct iio_dev *indio_dev,
 	if (private == LTC2688_DITHER_OFF)
 		return sysfs_emit(buf, "0\n");
 
-	ret = ltc2688_dac_code_read(st, chan->channel, private, &val);
+	ret = ltc2688_dac_code_read(st, chan->channel, __c_ua(private), &val);
 	if (ret)
 		return ret;
 
@@ -527,7 +527,7 @@ static ssize_t ltc2688_dac_input_write(struct iio_dev *indio_dev,
 	if (ret)
 		return ret;
 
-	ret = ltc2688_dac_code_write(st, chan->channel, private, val);
+	ret = ltc2688_dac_code_write(st, chan->channel, __c_ua(private), val);
 	if (ret)
 		return ret;
 

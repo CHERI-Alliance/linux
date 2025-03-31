@@ -399,7 +399,7 @@ static int rockchip_saradc_volt_notify(struct notifier_block *nb,
 			container_of(nb, struct rockchip_saradc, nb);
 
 	if (event & REGULATOR_EVENT_VOLTAGE_CHANGE)
-		info->uv_vref = (unsigned long)data;
+		info->uv_vref = __c_pa(data);
 
 	return NOTIFY_OK;
 }

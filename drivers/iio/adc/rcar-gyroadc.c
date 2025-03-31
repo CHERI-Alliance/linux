@@ -333,7 +333,7 @@ static int rcar_gyroadc_parse_subdevs(struct iio_dev *indio_dev)
 			continue;
 		}
 
-		childmode = (uintptr_t)of_id->data;
+		childmode = __c_pa(of_id->data);
 		switch (childmode) {
 		case RCAR_GYROADC_MODE_SELECT_1_MB88101A:
 			sample_width = 12;
@@ -502,7 +502,7 @@ static int rcar_gyroadc_probe(struct platform_device *pdev)
 	if (ret)
 		return ret;
 
-	priv->model = (uintptr_t)of_device_get_match_data(&pdev->dev);
+	priv->model = __c_pa(of_device_get_match_data(&pdev->dev));
 
 	platform_set_drvdata(pdev, indio_dev);
 

@@ -696,7 +696,7 @@ static const char *isl29018_match_acpi_device(struct device *dev, int *data)
 	if (!id)
 		return NULL;
 
-	*data = (int)id->driver_data;
+	*data = (int)__c_ua(id->driver_data);
 
 	return dev_name(dev);
 }
@@ -730,7 +730,7 @@ static int isl29018_probe(struct i2c_client *client)
 
 	if (id) {
 		name = id->name;
-		dev_id = id->driver_data;
+		dev_id = __c_ua(id->driver_data);
 	}
 
 	if (ACPI_HANDLE(&client->dev))

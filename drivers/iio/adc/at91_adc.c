@@ -868,8 +868,7 @@ static int at91_ts_hw_init(struct iio_dev *idev, u32 adc_clk_khz)
 	 * pen detect noise.
 	 * The formula is : Pen Detect Debounce Time = (2 ^ pendbc) / ADCClock
 	 */
-	st->ts_pendbc = round_up(TOUCH_PEN_DETECT_DEBOUNCE_US * adc_clk_khz /
-				 1000, 1);
+	st->ts_pendbc = TOUCH_PEN_DETECT_DEBOUNCE_US * adc_clk_khz / 1000;
 
 	while (st->ts_pendbc >> ++i)
 		;	/* Empty! Find the shift offset */
@@ -888,8 +887,7 @@ static int at91_ts_hw_init(struct iio_dev *idev, u32 adc_clk_khz)
 		reg = AT91_ADC_TSR_SHTIM_(TOUCH_SHTIM) & AT91_ADC_TSR_SHTIM;
 		at91_adc_writel(st, AT91_ADC_TSR, reg);
 
-		st->ts_sample_period_val = round_up((TOUCH_SAMPLE_PERIOD_US_RL *
-						    adc_clk_khz / 1000) - 1, 1);
+		st->ts_sample_period_val = (TOUCH_SAMPLE_PERIOD_US_RL * adc_clk_khz / 1000) - 1;
 
 		return 0;
 	}
@@ -926,8 +924,7 @@ static int at91_ts_hw_init(struct iio_dev *idev, u32 adc_clk_khz)
 			& AT91_ADC_ACR_PENDETSENS);
 
 	/* Sample Period Time = (TRGPER + 1) / ADCClock */
-	st->ts_sample_period_val = round_up((TOUCH_SAMPLE_PERIOD_US *
-			adc_clk_khz / 1000) - 1, 1);
+	st->ts_sample_period_val = (TOUCH_SAMPLE_PERIOD_US * adc_clk_khz / 1000) - 1;
 
 	return 0;
 }
@@ -1119,8 +1116,7 @@ static int at91_adc_probe(struct platform_device *pdev)
 	 * The formula thus is : Sample and Hold Time = (shtim + 1) / ADCClock
 	 */
 	if (st->sample_hold_time > 0)
-		shtim = round_up((st->sample_hold_time * adc_clk_khz / 1000)
-				 - 1, 1);
+		shtim = (st->sample_hold_time * adc_clk_khz / 1000) - 1;
 	else
 		shtim = 0;
 

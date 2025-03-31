@@ -331,7 +331,7 @@ static ssize_t adf4371_read(struct iio_dev *indio_dev,
 	unsigned int readval, reg, bit;
 	int ret;
 
-	switch ((u32)private) {
+	switch ((u32)__c_ua(private)) {
 	case ADF4371_FREQ:
 		val = adf4371_pll_fract_n_get_rate(st, chan->channel);
 		ret = regmap_read(st->regmap, ADF4371_REG(0x7C), &readval);
@@ -376,7 +376,7 @@ static ssize_t adf4371_write(struct iio_dev *indio_dev,
 	int ret;
 
 	mutex_lock(&st->lock);
-	switch ((u32)private) {
+	switch ((u32)__c_ua(private)) {
 	case ADF4371_FREQ:
 		ret = kstrtoull(buf, 10, &freq);
 		if (ret)
@@ -565,7 +565,7 @@ static int adf4371_probe(struct spi_device *spi)
 	st->regmap = regmap;
 	mutex_init(&st->lock);
 
-	st->chip_info = &adf4371_chip_info[id->driver_data];
+	st->chip_info = &adf4371_chip_info[__c_ua(id->driver_data)];
 	indio_dev->name = id->name;
 	indio_dev->info = &adf4371_info;
 	indio_dev->modes = INDIO_DIRECT_MODE;

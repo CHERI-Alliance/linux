@@ -272,7 +272,7 @@ static const struct iio_info ad5764_info = {
 
 static int ad5764_probe(struct spi_device *spi)
 {
-	enum ad5764_type type = spi_get_device_id(spi)->driver_data;
+	enum ad5764_type type = __c_ua(spi_get_device_id(spi)->driver_data);
 	struct iio_dev *indio_dev;
 	struct ad5764_state *st;
 	int ret;

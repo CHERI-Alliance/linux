@@ -260,7 +260,7 @@ static int ad5624r_probe(struct spi_device *spi)
 
 	spi_set_drvdata(spi, indio_dev);
 	st->chip_info =
-		&ad5624r_chip_info_tbl[spi_get_device_id(spi)->driver_data];
+		&ad5624r_chip_info_tbl[__c_ua(spi_get_device_id(spi)->driver_data)];
 
 	if (voltage_uv)
 		st->vref_mv = voltage_uv / 1000;

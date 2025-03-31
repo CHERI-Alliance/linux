@@ -532,7 +532,7 @@ static int max30102_probe(struct i2c_client *client)
 	data = iio_priv(indio_dev);
 	data->indio_dev = indio_dev;
 	data->client = client;
-	data->chip_id = id->driver_data;
+	data->chip_id = __c_ua(id->driver_data);
 
 	mutex_init(&data->lock);
 	i2c_set_clientdata(client, indio_dev);

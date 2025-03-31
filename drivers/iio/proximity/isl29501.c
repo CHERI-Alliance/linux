@@ -261,7 +261,7 @@ static ssize_t isl29501_read_ext(struct iio_dev *indio_dev,
 				 char *buf)
 {
 	struct isl29501_private *isl29501 = iio_priv(indio_dev);
-	enum isl29501_register_name reg = private;
+	enum isl29501_register_name reg = __c_ua(private);
 	int ret;
 	u32 value, gain, coeff, exp;
 
@@ -383,7 +383,7 @@ static ssize_t isl29501_write_ext(struct iio_dev *indio_dev,
 				  const char *buf, size_t len)
 {
 	struct isl29501_private *isl29501 = iio_priv(indio_dev);
-	enum isl29501_register_name reg = private;
+	enum isl29501_register_name reg = __c_ua(private);
 	unsigned int val;
 	int max_exp = 0;
 	int ret;

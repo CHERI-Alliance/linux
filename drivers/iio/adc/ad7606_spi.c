@@ -322,7 +322,7 @@ static int ad7606_spi_probe(struct spi_device *spi)
 	}
 
 	return ad7606_probe(&spi->dev, spi->irq, NULL,
-			    id->name, id->driver_data,
+			    id->name, __c_ua(id->driver_data),
 			    bops);
 }
 

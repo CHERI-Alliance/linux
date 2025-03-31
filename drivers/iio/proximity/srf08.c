@@ -463,7 +463,7 @@ static int srf08_probe(struct i2c_client *client)
 	data = iio_priv(indio_dev);
 	i2c_set_clientdata(client, indio_dev);
 	data->client = client;
-	data->sensor_type = (enum srf08_sensor_type)id->driver_data;
+	data->sensor_type = (enum srf08_sensor_type)__c_ua(id->driver_data);
 
 	switch (data->sensor_type) {
 	case SRF02:

@@ -304,7 +304,7 @@ static int dlh_probe(struct i2c_client *client)
 	i2c_set_clientdata(client, indio_dev);
 
 	st = iio_priv(indio_dev);
-	st->info = dlh_info_tbl[id->driver_data];
+	st->info = dlh_info_tbl[__c_ua(id->driver_data)];
 	st->client = client;
 	st->use_interrupt = false;
 

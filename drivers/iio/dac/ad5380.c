@@ -483,7 +483,7 @@ static int ad5380_spi_probe(struct spi_device *spi)
 	if (IS_ERR(regmap))
 		return PTR_ERR(regmap);
 
-	return ad5380_probe(&spi->dev, regmap, id->driver_data, id->name);
+	return ad5380_probe(&spi->dev, regmap, __c_ua(id->driver_data), id->name);
 }
 
 static void ad5380_spi_remove(struct spi_device *spi)
@@ -556,7 +556,7 @@ static int ad5380_i2c_probe(struct i2c_client *i2c)
 	if (IS_ERR(regmap))
 		return PTR_ERR(regmap);
 
-	return ad5380_probe(&i2c->dev, regmap, id->driver_data, id->name);
+	return ad5380_probe(&i2c->dev, regmap, __c_ua(id->driver_data), id->name);
 }
 
 static void ad5380_i2c_remove(struct i2c_client *i2c)

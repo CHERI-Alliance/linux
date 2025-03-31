@@ -347,7 +347,7 @@ static int mcp3422_probe(struct i2c_client *client)
 
 	adc = iio_priv(indio_dev);
 	adc->i2c = client;
-	adc->id = (u8)(id->driver_data);
+	adc->id = (u8)__c_ua(id->driver_data);
 
 	mutex_init(&adc->lock);
 

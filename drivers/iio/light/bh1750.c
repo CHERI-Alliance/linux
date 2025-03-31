@@ -246,7 +246,7 @@ static int bh1750_probe(struct i2c_client *client)
 	data = iio_priv(indio_dev);
 	i2c_set_clientdata(client, indio_dev);
 	data->client = client;
-	data->chip_info = &bh1750_chip_info_tbl[id->driver_data];
+	data->chip_info = &bh1750_chip_info_tbl[__c_ua(id->driver_data)];
 
 	usec = data->chip_info->mtreg_to_usec * data->chip_info->mtreg_default;
 	ret = bh1750_change_int_time(data, usec);

@@ -38,7 +38,7 @@ static int st_lsm6dsx_i3c_probe(struct i3c_device *i3cdev)
 		return PTR_ERR(regmap);
 	}
 
-	return st_lsm6dsx_probe(&i3cdev->dev, 0, (uintptr_t)id->data, regmap);
+	return st_lsm6dsx_probe(&i3cdev->dev, 0, __c_pa(id->data), regmap);
 }
 
 static struct i3c_driver st_lsm6dsx_driver = {

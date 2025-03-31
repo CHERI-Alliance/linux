@@ -201,7 +201,7 @@ static int mcp320x_read_raw(struct iio_dev *indio_dev,
 
 	mutex_lock(&adc->lock);
 
-	device_index = spi_get_device_id(adc->spi)->driver_data;
+	device_index = __c_ua(spi_get_device_id(adc->spi)->driver_data);
 
 	switch (mask) {
 	case IIO_CHAN_INFO_RAW:
@@ -394,7 +394,7 @@ static int mcp320x_probe(struct spi_device *spi)
 	indio_dev->modes = INDIO_DIRECT_MODE;
 	indio_dev->info = &mcp320x_info;
 
-	device_index = spi_get_device_id(spi)->driver_data;
+	device_index = __c_ua(spi_get_device_id(spi)->driver_data);
 	chip_info = &mcp320x_chip_infos[device_index];
 	indio_dev->channels = chip_info->channels;
 	indio_dev->num_channels = chip_info->num_channels;

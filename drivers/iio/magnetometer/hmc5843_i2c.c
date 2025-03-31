@@ -62,7 +62,7 @@ static int hmc5843_i2c_probe(struct i2c_client *cli)
 
 	return hmc5843_common_probe(&cli->dev,
 			regmap,
-			id->driver_data, id->name);
+			__c_ua(id->driver_data), id->name);
 }
 
 static void hmc5843_i2c_remove(struct i2c_client *client)

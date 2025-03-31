@@ -26,9 +26,9 @@ static int st_lsm6dsx_i2c_probe(struct i2c_client *client)
 	int hw_id;
 	struct regmap *regmap;
 
-	hw_id = (kernel_ulong_t)device_get_match_data(&client->dev);
+	hw_id = __c_pa(device_get_match_data(&client->dev));
 	if (!hw_id)
-		hw_id = i2c_client_get_device_id(client)->driver_data;
+		hw_id = __c_ua(i2c_client_get_device_id(client)->driver_data);
 	if (!hw_id)
 		return -EINVAL;
 

@@ -321,7 +321,7 @@ static int ad7780_probe(struct spi_device *spi)
 	ad_sd_init(&st->sd, indio_dev, spi, &ad7780_sigma_delta_info);
 
 	st->chip_info =
-		&ad7780_chip_info_tbl[spi_get_device_id(spi)->driver_data];
+		&ad7780_chip_info_tbl[__c_ua(spi_get_device_id(spi)->driver_data)];
 
 	indio_dev->name = spi_get_device_id(spi)->name;
 	indio_dev->modes = INDIO_DIRECT_MODE;

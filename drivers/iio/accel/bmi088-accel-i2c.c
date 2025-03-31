@@ -28,7 +28,7 @@ static int bmi088_accel_probe(struct i2c_client *i2c)
 	}
 
 	return bmi088_accel_core_probe(&i2c->dev, regmap, i2c->irq,
-					id->driver_data);
+					__c_ua(id->driver_data));
 }
 
 static void bmi088_accel_remove(struct i2c_client *i2c)

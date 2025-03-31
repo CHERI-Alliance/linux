@@ -458,7 +458,7 @@ static int ad5360_alloc_channels(struct iio_dev *indio_dev)
 
 static int ad5360_probe(struct spi_device *spi)
 {
-	enum ad5360_type type = spi_get_device_id(spi)->driver_data;
+	enum ad5360_type type = __c_ua(spi_get_device_id(spi)->driver_data);
 	struct iio_dev *indio_dev;
 	struct ad5360_state *st;
 	unsigned int i;

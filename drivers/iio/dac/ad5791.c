@@ -400,8 +400,8 @@ static int ad5791_probe(struct spi_device *spi)
 	if (ret)
 		goto error_disable_reg_neg;
 
-	st->chip_info =	&ad5791_chip_info_tbl[spi_get_device_id(spi)
-					      ->driver_data];
+	st->chip_info =	&ad5791_chip_info_tbl[__c_ua(spi_get_device_id(spi)
+					      ->driver_data)];
 
 
 	st->ctrl = AD5761_CTRL_LINCOMP(st->chip_info->get_lin_comp(st->vref_mv))
@@ -417,7 +417,7 @@ static int ad5791_probe(struct spi_device *spi)
 	indio_dev->info = &ad5791_info;
 	indio_dev->modes = INDIO_DIRECT_MODE;
 	indio_dev->channels
-		= &ad5791_channels[spi_get_device_id(spi)->driver_data];
+		= &ad5791_channels[__c_ua(spi_get_device_id(spi)->driver_data)];
 	indio_dev->num_channels = 1;
 	indio_dev->name = spi_get_device_id(st->spi)->name;
 	ret = iio_device_register(indio_dev);

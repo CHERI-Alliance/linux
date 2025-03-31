@@ -406,15 +406,15 @@ static int axi_dac_ext_info_get(struct iio_backend *back, uintptr_t private,
 	case AXI_DAC_FREQ_TONE_1:
 	case AXI_DAC_FREQ_TONE_2:
 		return axi_dac_frequency_get(st, chan, buf,
-					     private - AXI_DAC_FREQ_TONE_1);
+					     __c_ua(private) - AXI_DAC_FREQ_TONE_1);
 	case AXI_DAC_SCALE_TONE_1:
 	case AXI_DAC_SCALE_TONE_2:
 		return axi_dac_scale_get(st, chan, buf,
-					 private - AXI_DAC_SCALE_TONE_1);
+					 __c_ua(private) - AXI_DAC_SCALE_TONE_1);
 	case AXI_DAC_PHASE_TONE_1:
 	case AXI_DAC_PHASE_TONE_2:
 		return axi_dac_phase_get(st, chan, buf,
-					 private - AXI_DAC_PHASE_TONE_1);
+					 __c_ua(private) - AXI_DAC_PHASE_TONE_1);
 	default:
 		return -EOPNOTSUPP;
 	}

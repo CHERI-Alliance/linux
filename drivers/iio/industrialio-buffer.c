@@ -1517,7 +1517,7 @@ static const struct file_operations iio_buffer_chrdev_fileops = {
 	.release = iio_buffer_chrdev_release,
 };
 
-static long iio_device_buffer_getfd(struct iio_dev *indio_dev, unsigned long arg)
+static long iio_device_buffer_getfd(struct iio_dev *indio_dev, user_uintptr_t arg)
 {
 	struct iio_dev_opaque *iio_dev_opaque = to_iio_dev_opaque(indio_dev);
 	int __user *ival = (int __user *)arg;
@@ -1582,7 +1582,7 @@ error_iio_dev_put:
 }
 
 static long iio_device_buffer_ioctl(struct iio_dev *indio_dev, struct file *filp,
-				    unsigned int cmd, unsigned long arg)
+				    unsigned int cmd, user_uintptr_t arg)
 {
 	switch (cmd) {
 	case IIO_BUFFER_GET_FD_IOCTL:

@@ -191,7 +191,7 @@ static int bmc150_accel_probe(struct i2c_client *client)
 
 	if (id) {
 		name = id->name;
-		type = id->driver_data;
+		type = __c_ua(id->driver_data);
 	}
 
 	ret = bmc150_accel_core_probe(&client->dev, regmap, client->irq,

@@ -439,7 +439,7 @@ static int ads8688_probe(struct spi_device *spi)
 		st->vref_mv = ADS8688_VREF_MV;
 	}
 
-	st->chip_info =	&ads8688_chip_info_tbl[spi_get_device_id(spi)->driver_data];
+	st->chip_info =	&ads8688_chip_info_tbl[__c_ua(spi_get_device_id(spi)->driver_data)];
 
 	spi->mode = SPI_MODE_1;
 

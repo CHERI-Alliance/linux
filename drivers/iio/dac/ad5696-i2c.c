@@ -61,7 +61,7 @@ static int ad5686_i2c_write(struct ad5686_state *st,
 static int ad5686_i2c_probe(struct i2c_client *i2c)
 {
 	const struct i2c_device_id *id = i2c_client_get_device_id(i2c);
-	return ad5686_probe(&i2c->dev, id->driver_data, id->name,
+	return ad5686_probe(&i2c->dev, __c_ua(id->driver_data), id->name,
 			    ad5686_i2c_write, ad5686_i2c_read);
 }
 

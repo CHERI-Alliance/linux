@@ -586,7 +586,7 @@ static int rescale_probe(struct platform_device *pdev)
 				ext_info->read = rescale_read_ext_info;
 			if (source->channel->ext_info[i].write)
 				ext_info->write = rescale_write_ext_info;
-			ext_info->private = i;
+			ext_info->private = __c_fakeu(i);
 		}
 	}
 

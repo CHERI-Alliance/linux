@@ -262,7 +262,7 @@ static ssize_t adf4350_write(struct iio_dev *indio_dev,
 		return ret;
 
 	mutex_lock(&st->lock);
-	switch ((u32)private) {
+	switch ((u32)__c_ua(private)) {
 	case ADF4350_FREQ:
 		ret = adf4350_set_freq(st, readin);
 		break;
@@ -317,7 +317,7 @@ static ssize_t adf4350_read(struct iio_dev *indio_dev,
 	int ret = 0;
 
 	mutex_lock(&st->lock);
-	switch ((u32)private) {
+	switch ((u32)__c_ua(private)) {
 	case ADF4350_FREQ:
 		val = (u64)((st->r0_int * st->r1_mod) + st->r0_fract) *
 			(u64)st->fpfd;

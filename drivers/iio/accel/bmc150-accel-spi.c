@@ -27,7 +27,7 @@ static int bmc150_accel_probe(struct spi_device *spi)
 
 	if (id) {
 		name = id->name;
-		type = id->driver_data;
+		type = __c_ua(id->driver_data);
 	}
 
 	return bmc150_accel_core_probe(&spi->dev, regmap, spi->irq, type, name,

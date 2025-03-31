@@ -803,7 +803,7 @@ static ssize_t adf4377_read(struct iio_dev *indio_dev, uintptr_t private,
 	u64 val = 0;
 	int ret;
 
-	switch ((u32)private) {
+	switch ((u32)__c_ua(private)) {
 	case ADF4377_FREQ:
 		ret = adf4377_get_freq(st, &val);
 		if (ret)
@@ -823,7 +823,7 @@ static ssize_t adf4377_write(struct iio_dev *indio_dev, uintptr_t private,
 	unsigned long long freq;
 	int ret;
 
-	switch ((u32)private) {
+	switch ((u32)__c_ua(private)) {
 	case ADF4377_FREQ:
 		ret = kstrtoull(buf, 10, &freq);
 		if (ret)

@@ -71,7 +71,7 @@ static int hmc5843_spi_probe(struct spi_device *spi)
 
 	return hmc5843_common_probe(&spi->dev,
 			regmap,
-			id->driver_data, id->name);
+			__c_ua(id->driver_data), id->name);
 }
 
 static void hmc5843_spi_remove(struct spi_device *spi)

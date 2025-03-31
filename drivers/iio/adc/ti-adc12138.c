@@ -409,7 +409,7 @@ static int adc12138_probe(struct spi_device *spi)
 
 	adc = iio_priv(indio_dev);
 	adc->spi = spi;
-	adc->id = spi_get_device_id(spi)->driver_data;
+	adc->id = __c_ua(spi_get_device_id(spi)->driver_data);
 	mutex_init(&adc->lock);
 	init_completion(&adc->complete);
 

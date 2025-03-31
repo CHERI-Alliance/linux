@@ -1429,7 +1429,7 @@ static const char *ltr501_match_acpi_device(struct device *dev, int *chip_idx)
 	id = acpi_match_device(dev->driver->acpi_match_table, dev);
 	if (!id)
 		return NULL;
-	*chip_idx = id->driver_data;
+	*chip_idx = __c_ua(id->driver_data);
 	return dev_name(dev);
 }
 
@@ -1522,7 +1522,7 @@ static int ltr501_probe(struct i2c_client *client)
 
 	if (id) {
 		name = id->name;
-		chip_idx = id->driver_data;
+		chip_idx = __c_ua(id->driver_data);
 	} else  if (ACPI_HANDLE(&client->dev)) {
 		name = ltr501_match_acpi_device(&client->dev, &chip_idx);
 	} else {

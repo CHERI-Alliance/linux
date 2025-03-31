@@ -313,7 +313,7 @@ static int ad7476_probe(struct spi_device *spi)
 
 	st = iio_priv(indio_dev);
 	st->chip_info =
-		&ad7476_chip_info_tbl[spi_get_device_id(spi)->driver_data];
+		&ad7476_chip_info_tbl[__c_ua(spi_get_device_id(spi)->driver_data)];
 
 	reg = devm_regulator_get(&spi->dev, "vcc");
 	if (IS_ERR(reg))

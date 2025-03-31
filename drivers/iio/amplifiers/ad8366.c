@@ -265,7 +265,7 @@ static int ad8366_probe(struct spi_device *spi)
 	spi_set_drvdata(spi, indio_dev);
 	mutex_init(&st->lock);
 	st->spi = spi;
-	st->type = spi_get_device_id(spi)->driver_data;
+	st->type = __c_ua(spi_get_device_id(spi)->driver_data);
 
 	switch (st->type) {
 	case ID_AD8366:

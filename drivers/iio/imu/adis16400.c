@@ -1169,7 +1169,7 @@ static int adis16400_probe(struct spi_device *spi)
 	st = iio_priv(indio_dev);
 
 	/* setup the industrialio driver allocated elements */
-	st->variant = &adis16400_chips[spi_get_device_id(spi)->driver_data];
+	st->variant = &adis16400_chips[__c_ua(spi_get_device_id(spi)->driver_data)];
 	indio_dev->name = spi_get_device_id(spi)->name;
 	indio_dev->channels = st->variant->channels;
 	indio_dev->num_channels = st->variant->num_channels;

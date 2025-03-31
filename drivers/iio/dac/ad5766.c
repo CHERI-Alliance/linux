@@ -615,7 +615,7 @@ static int ad5766_probe(struct spi_device *spi)
 	mutex_init(&st->lock);
 
 	st->spi = spi;
-	type = spi_get_device_id(spi)->driver_data;
+	type = __c_ua(spi_get_device_id(spi)->driver_data);
 	st->chip_info = &ad5766_chip_infos[type];
 
 	indio_dev->channels = st->chip_info->channels;

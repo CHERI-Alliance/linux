@@ -24,7 +24,7 @@ static const struct regmap_config st_lsm6dsx_spi_regmap_config = {
 static int st_lsm6dsx_spi_probe(struct spi_device *spi)
 {
 	const struct spi_device_id *id = spi_get_device_id(spi);
-	int hw_id = id->driver_data;
+	int hw_id = __c_ua(id->driver_data);
 	struct regmap *regmap;
 
 	regmap = devm_regmap_init_spi(spi, &st_lsm6dsx_spi_regmap_config);

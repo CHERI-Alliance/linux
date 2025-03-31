@@ -219,7 +219,7 @@ static int axp288_adc_initialize(struct axp288_adc_info *info)
 	if (bias_override) {
 		ret = regmap_update_bits(info->regmap, AXP288_ADC_TS_PIN_CTRL,
 					 AXP288_ADC_TS_BIAS_MASK,
-					 (uintptr_t)bias_override->driver_data);
+					 __c_pa(bias_override->driver_data));
 		if (ret)
 			return ret;
 	}

@@ -96,7 +96,7 @@ static int max5487_spi_probe(struct spi_device *spi)
 	data = iio_priv(indio_dev);
 
 	data->spi = spi;
-	data->kohms = id->driver_data;
+	data->kohms = __c_ua(id->driver_data);
 
 	indio_dev->info = &max5487_info;
 	indio_dev->name = id->name;

@@ -265,7 +265,7 @@ static ssize_t admv1013_read(struct iio_dev *indio_dev,
 	unsigned int data, addr;
 	int ret;
 
-	switch ((u32)private) {
+	switch ((u32)__c_ua(private)) {
 	case ADMV1013_RFMOD_I_CALIBPHASE:
 		addr = ADMV1013_REG_LO_AMP_I;
 		break;
@@ -300,7 +300,7 @@ static ssize_t admv1013_write(struct iio_dev *indio_dev,
 
 	data = FIELD_PREP(ADMV1013_LOAMP_PH_ADJ_FINE_MSK, data);
 
-	switch ((u32)private) {
+	switch ((u32)__c_ua(private)) {
 	case ADMV1013_RFMOD_I_CALIBPHASE:
 		ret = admv1013_spi_update_bits(st, ADMV1013_REG_LO_AMP_I,
 					       ADMV1013_LOAMP_PH_ADJ_FINE_MSK,

@@ -976,8 +976,7 @@ static int at91_adc_configure_touch(struct at91_adc_state *st, bool state)
 	 * multiply with kilohertz, so, divide by 1000, but after the multiply.
 	 * round up to make sure pendbc is at least 1
 	 */
-	pendbc = round_up(AT91_SAMA5D2_TOUCH_PEN_DETECT_DEBOUNCE_US *
-			  clk_khz / 1000, 1);
+	pendbc = AT91_SAMA5D2_TOUCH_PEN_DETECT_DEBOUNCE_US * clk_khz / 1000;
 
 	/* get the required exponent */
 	while (pendbc >> i++)
@@ -1002,9 +1001,7 @@ static int at91_adc_configure_touch(struct at91_adc_state *st, bool state)
 	at91_adc_writel(st, ACR, acr);
 
 	/* Sample Period Time = (TRGPER + 1) / ADCClock */
-	st->touch_st.sample_period_val =
-				 round_up((AT91_SAMA5D2_TOUCH_SAMPLE_PERIOD_US *
-				 clk_khz / 1000) - 1, 1);
+	st->touch_st.sample_period_val = (AT91_SAMA5D2_TOUCH_SAMPLE_PERIOD_US * clk_khz / 1000) - 1;
 	/* enable pen detect IRQ */
 	at91_adc_writel(st, IER, AT91_SAMA5D2_IER_PEN);
 

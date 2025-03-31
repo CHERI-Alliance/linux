@@ -784,7 +784,7 @@ static int ad799x_probe(struct i2c_client *client)
 	struct ad799x_state *st;
 	struct iio_dev *indio_dev;
 	const struct ad799x_chip_info *chip_info =
-		&ad799x_chip_info_tbl[id->driver_data];
+		&ad799x_chip_info_tbl[__c_ua(id->driver_data)];
 
 	indio_dev = devm_iio_device_alloc(&client->dev, sizeof(*st));
 	if (indio_dev == NULL)
@@ -794,7 +794,7 @@ static int ad799x_probe(struct i2c_client *client)
 	/* this is only used for device removal purposes */
 	i2c_set_clientdata(client, indio_dev);
 
-	st->id = id->driver_data;
+	st->id = __c_ua(id->driver_data);
 	if (client->irq > 0 && chip_info->irq_config.info)
 		st->chip_config = &chip_info->irq_config;
 	else
