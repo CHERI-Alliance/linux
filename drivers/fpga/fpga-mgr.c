@@ -484,8 +484,8 @@ static int fpga_mgr_buf_load(struct fpga_manager *mgr,
 	 * Convert the linear kernel pointer into a sg_table of pages for use
 	 * by the driver.
 	 */
-	nr_pages = DIV_ROUND_UP((unsigned long)buf + count, PAGE_SIZE) -
-		   (unsigned long)buf / PAGE_SIZE;
+	nr_pages = DIV_ROUND_UP(__c_pa(buf) + count, PAGE_SIZE) -
+		   __c_pa(buf) / PAGE_SIZE;
 	pages = kmalloc_array(nr_pages, sizeof(struct page *), GFP_KERNEL);
 	if (!pages)
 		return -ENOMEM;

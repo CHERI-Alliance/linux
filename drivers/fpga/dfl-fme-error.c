@@ -352,7 +352,7 @@ static void fme_global_err_uinit(struct platform_device *pdev,
 static long
 fme_global_error_ioctl(struct platform_device *pdev,
 		       struct dfl_feature *feature,
-		       unsigned int cmd, unsigned long arg)
+		       unsigned int cmd, user_uintptr_t arg)
 {
 	switch (cmd) {
 	case DFL_FPGA_FME_ERR_GET_IRQ_NUM:

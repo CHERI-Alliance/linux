@@ -360,7 +360,7 @@ int cxl_fd_release(struct inode *inode, struct file *file)
 	return afu_release(inode, file);
 }
 EXPORT_SYMBOL_GPL(cxl_fd_release);
-long cxl_fd_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+long cxl_fd_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	return afu_ioctl(file, cmd, arg);
 }

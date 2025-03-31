@@ -63,7 +63,7 @@ static struct fpga_region *dfl_fme_region_find(struct dfl_fme *fme, int port_id)
 	return region;
 }
 
-static int fme_pr(struct platform_device *pdev, unsigned long arg)
+static int fme_pr(struct platform_device *pdev, user_uintptr_t arg)
 {
 	struct dfl_feature_platform_data *pdata = dev_get_platdata(&pdev->dev);
 	void __user *argp = (void __user *)arg;
@@ -451,7 +451,7 @@ static void pr_mgmt_uinit(struct platform_device *pdev,
 
 static long fme_pr_ioctl(struct platform_device *pdev,
 			 struct dfl_feature *feature,
-			 unsigned int cmd, unsigned long arg)
+			 unsigned int cmd, user_uintptr_t arg)
 {
 	long ret;
 
