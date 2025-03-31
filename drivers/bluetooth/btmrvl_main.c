@@ -385,8 +385,8 @@ static void btmrvl_init_adapter(struct btmrvl_private *priv)
 		BT_ERR("Unable to allocate buffer for hw_regs.");
 	} else {
 		priv->adapter->hw_regs =
-			(u8 *)ALIGN_ADDR(priv->adapter->hw_regs_buf,
-					 BTSDIO_DMA_ALIGN);
+			(u8 *)PTR_ALIGN(priv->adapter->hw_regs_buf,
+					BTSDIO_DMA_ALIGN);
 		BT_DBG("hw_regs_buf=%p hw_regs=%p",
 		       priv->adapter->hw_regs_buf, priv->adapter->hw_regs);
 	}
