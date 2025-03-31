@@ -155,7 +155,7 @@ static int omap2_iommu_enable(struct omap_iommu *obj)
 {
 	u32 l, pa;
 
-	if (!obj->iopgd || !IS_ALIGNED((unsigned long)obj->iopgd,  SZ_16K))
+	if (!obj->iopgd || !IS_ALIGNED(__c_pa(obj->iopgd),  SZ_16K))
 		return -EINVAL;
 
 	pa = virt_to_phys(obj->iopgd);
@@ -1425,7 +1425,7 @@ static int omap_iommu_attach_init(struct device *dev,
 		 * should never fail, but please keep this around to ensure
 		 * we keep the hardware happy
 		 */
-		if (WARN_ON(!IS_ALIGNED((long)iommu->pgtable,
+		if (WARN_ON(!IS_ALIGNED(__c_pa(iommu->pgtable),
 					IOPGD_TABLE_SIZE)))
 			return -EINVAL;
 	}

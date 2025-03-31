@@ -253,7 +253,7 @@ int iommu_device_register(struct iommu_device *iommu,
 	int err = 0;
 
 	/* We need to be able to take module references appropriately */
-	if (WARN_ON(is_module_address((unsigned long)ops) && !ops->owner))
+	if (WARN_ON(is_module_address(__c_pa(ops)) && !ops->owner))
 		return -EINVAL;
 
 	iommu->ops = ops;

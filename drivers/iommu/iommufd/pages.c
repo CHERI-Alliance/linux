@@ -778,14 +778,14 @@ static int pfn_reader_user_pin(struct pfn_reader_user *user,
 
 	uptr = (uintptr_t)(pages->uptr + start_index * PAGE_SIZE);
 	if (!remote_mm)
-		rc = pin_user_pages_fast(uptr, npages, user->gup_flags,
+		rc = pin_user_pages_fast(__c_ua(uptr), npages, user->gup_flags,
 					 user->upages);
 	else {
 		if (!user->locked) {
 			mmap_read_lock(pages->source_mm);
 			user->locked = 1;
 		}
-		rc = pin_user_pages_remote(pages->source_mm, uptr, npages,
+		rc = pin_user_pages_remote(pages->source_mm, __c_ua(uptr), npages,
 					   user->gup_flags, user->upages,
 					   &user->locked);
 	}
@@ -1151,7 +1151,7 @@ struct iopt_pages *iopt_alloc_pages(void __user *uptr, unsigned long length,
 	if (length > SIZE_MAX - PAGE_SIZE || length == 0)
 		return ERR_PTR(-EINVAL);
 
-	if (check_add_overflow((unsigned long)uptr, length, &end))
+	if (check_add_overflow(__c_pa(uptr), length, &end))
 		return ERR_PTR(-EOVERFLOW);
 
 	pages = kzalloc(sizeof(*pages), GFP_KERNEL_ACCOUNT);
@@ -1799,7 +1799,7 @@ static int iopt_pages_rw_page(struct iopt_pages *pages, unsigned long index,
 
 	mmap_read_lock(pages->source_mm);
 	rc = pin_user_pages_remote(
-		pages->source_mm, (uintptr_t)(pages->uptr + index * PAGE_SIZE),
+		pages->source_mm, __c_pa(pages->uptr + index * PAGE_SIZE),
 		1, (flags & IOMMUFD_ACCESS_RW_WRITE) ? FOLL_WRITE : 0, &page,
 		NULL);
 	mmap_read_unlock(pages->source_mm);

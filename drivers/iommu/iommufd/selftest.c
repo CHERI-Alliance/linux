@@ -826,12 +826,12 @@ static int iommufd_test_md_check_pa(struct iommufd_ucmd *ucmd,
 {
 	struct iommufd_hw_pagetable *hwpt;
 	struct mock_iommu_domain *mock;
-	uintptr_t end;
+	unsigned long end;
 	int rc;
 
 	if (iova % MOCK_IO_PAGE_SIZE || length % MOCK_IO_PAGE_SIZE ||
 	    (uintptr_t)uptr % MOCK_IO_PAGE_SIZE ||
-	    check_add_overflow((uintptr_t)uptr, (uintptr_t)length, &end))
+	    check_add_overflow(__c_pa(uptr), length, &end))
 		return -EINVAL;
 
 	hwpt = get_md_pagetable(ucmd, mockpt_id, &mock);
@@ -844,7 +844,7 @@ static int iommufd_test_md_check_pa(struct iommufd_ucmd *ucmd,
 		long npages;
 		void *ent;
 
-		npages = get_user_pages_fast((uintptr_t)uptr & PAGE_MASK, 1, 0,
+		npages = get_user_pages_fast(__c_pa(uptr) & PAGE_MASK, 1, 0,
 					     pages);
 		if (npages < 0) {
 			rc = npages;
@@ -879,17 +879,17 @@ static int iommufd_test_md_check_refs(struct iommufd_ucmd *ucmd,
 				      void __user *uptr, size_t length,
 				      unsigned int refs)
 {
-	uintptr_t end;
+	unsigned long end;
 
 	if (length % PAGE_SIZE || (uintptr_t)uptr % PAGE_SIZE ||
-	    check_add_overflow((uintptr_t)uptr, (uintptr_t)length, &end))
+	    check_add_overflow(__c_pa(uptr), length, &end))
 		return -EINVAL;
 
 	for (; length; length -= PAGE_SIZE) {
 		struct page *pages[1];
 		long npages;
 
-		npages = get_user_pages_fast((uintptr_t)uptr, 1, 0, pages);
+		npages = get_user_pages_fast(__c_pa(uptr), 1, 0, pages);
 		if (npages < 0)
 			return npages;
 		if (WARN_ON(npages != 1))
@@ -1140,7 +1140,7 @@ static int iommufd_test_check_pages(void __user *uptr, struct page **pages,
 		struct page *tmp_pages[1];
 		long rc;
 
-		rc = get_user_pages_fast((uintptr_t)uptr, 1, 0, tmp_pages);
+		rc = get_user_pages_fast(__c_pa(uptr), 1, 0, tmp_pages);
 		if (rc < 0)
 			return rc;
 		if (WARN_ON(rc != 1))
