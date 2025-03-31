@@ -317,7 +317,7 @@ static int u2fzero_probe(struct hid_device *hdev,
 	if (dev == NULL)
 		return -ENOMEM;
 
-	dev->hw_revision = id->driver_data;
+	dev->hw_revision = __c_ua(id->driver_data);
 
 	dev->buf_out = devm_kmalloc(&hdev->dev,
 		sizeof(struct u2f_hid_report), GFP_KERNEL);

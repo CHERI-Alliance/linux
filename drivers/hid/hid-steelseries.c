@@ -520,7 +520,7 @@ static int steelseries_probe(struct hid_device *hdev, const struct hid_device_id
 		return -ENOMEM;
 	hid_set_drvdata(hdev, sd);
 	sd->hdev = hdev;
-	sd->quirks = id->driver_data;
+	sd->quirks = __c_ua(id->driver_data);
 
 	if (sd->quirks & STEELSERIES_SRWS1) {
 #if IS_BUILTIN(CONFIG_LEDS_CLASS) || \

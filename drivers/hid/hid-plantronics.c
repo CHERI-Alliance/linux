@@ -183,7 +183,7 @@ static int plantronics_probe(struct hid_device *hdev,
 	}
 
 	drv_data->device_type = plantronics_device_type(hdev);
-	drv_data->quirks = id->driver_data;
+	drv_data->quirks = __c_ua(id->driver_data);
 	drv_data->last_volume_key_ts = jiffies - msecs_to_jiffies(PLT_DOUBLE_KEY_TIMEOUT);
 
 	hid_set_drvdata(hdev, drv_data);

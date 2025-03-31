@@ -427,7 +427,7 @@ static unsigned find_battery_quirk(struct hid_device *hdev)
 
 	match = hid_match_id(hdev, hid_battery_quirks);
 	if (match != NULL)
-		quirks = match->driver_data;
+		quirks = __c_ua(match->driver_data);
 
 	return quirks;
 }

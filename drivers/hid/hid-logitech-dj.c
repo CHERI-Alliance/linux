@@ -1815,7 +1815,7 @@ static int logi_dj_probe(struct hid_device *hdev,
 
 	/* get the current application attached to the node */
 	rep = list_first_entry(&rep_enum->report_list, struct hid_report, list);
-	djrcv_dev = dj_get_receiver_dev(hdev, id->driver_data,
+	djrcv_dev = dj_get_receiver_dev(hdev, __c_ua(id->driver_data),
 					rep->application, has_hidpp);
 	if (!djrcv_dev) {
 		hid_err(hdev, "%s: dj_get_receiver_dev failed\n", __func__);

@@ -373,7 +373,7 @@ static int hidraw_release(struct inode * inode, struct file * file)
 }
 
 static long hidraw_ioctl(struct file *file, unsigned int cmd,
-							unsigned long arg)
+							user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(file);
 	unsigned int minor = iminor(inode);

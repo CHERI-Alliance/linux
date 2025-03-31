@@ -667,7 +667,7 @@ static int rmi_probe(struct hid_device *hdev, const struct hid_device_id *id)
 	}
 
 	if (id->driver_data)
-		data->device_flags = id->driver_data;
+		data->device_flags = __c_ua(id->driver_data);
 
 	/*
 	 * Check for the RMI specific report ids. If they are misisng

@@ -825,7 +825,7 @@ cleanup_and_exit:
 static int apple_probe(struct hid_device *hdev,
 		const struct hid_device_id *id)
 {
-	uintptr_t quirks = id->driver_data;
+	unsigned long quirks = __c_ua(id->driver_data);
 	struct apple_sc *asc;
 	int ret;
 

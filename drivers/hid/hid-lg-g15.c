@@ -788,7 +788,7 @@ static int lg_g15_probe(struct hid_device *hdev, const struct hid_device_id *id)
 		return -ENOMEM;
 
 	g15->hdev = hdev;
-	g15->model = id->driver_data;
+	g15->model = __c_ua(id->driver_data);
 	g15->input = input;
 	input_set_drvdata(input, hdev);
 	hid_set_drvdata(hdev, (void *)g15);
