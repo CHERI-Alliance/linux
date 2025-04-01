@@ -59,9 +59,9 @@ static int adgs1408_probe(struct spi_device *spi)
 	s32 idle_state;
 	int ret;
 
-	chip_id = (enum adgs1408_chip_id)device_get_match_data(dev);
+	chip_id = (enum adgs1408_chip_id)__c_pa(device_get_match_data(dev));
 	if (!chip_id)
-		chip_id = spi_get_device_id(spi)->driver_data;
+		chip_id = __c_ua(spi_get_device_id(spi)->driver_data);
 
 	mux_chip = devm_mux_chip_alloc(dev, 1, 0);
 	if (IS_ERR(mux_chip))
