@@ -426,7 +426,7 @@ static void protmem_pool_op_static_free(struct tee_protmem_pool *pool,
 	int i;
 
 	for_each_sgtable_sg(sgt, sg, i)
-		gen_pool_free(stp->gen_pool, sg_phys(sg), sg->length);
+		gen_pool_free(stp->gen_pool, __c_fakeu(sg_phys(sg)), sg->length);
 	sg_free_table(sgt);
 }
 

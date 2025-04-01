@@ -269,7 +269,7 @@ static int optee_ffa_to_msg_param(struct optee *optee,
 
 static int optee_ffa_shm_register(struct tee_context *ctx, struct tee_shm *shm,
 				  struct page **pages, size_t num_pages,
-				  unsigned long start)
+				  uintptr_t start)
 {
 	struct optee *optee = tee_get_drvdata(ctx->teedev);
 	struct ffa_device *ffa_dev = optee->ffa.ffa_dev;

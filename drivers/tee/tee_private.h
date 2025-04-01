@@ -25,7 +25,7 @@ int tee_shm_get_fd(struct tee_shm *shm);
 
 struct tee_shm *tee_shm_alloc_user_buf(struct tee_context *ctx, size_t size);
 struct tee_shm *tee_shm_register_user_buf(struct tee_context *ctx,
-					  unsigned long addr, size_t length);
+					  uintptr_t addr, size_t length);
 
 int tee_heap_update_from_dma_buf(struct tee_device *teedev,
 				 struct dma_buf *dmabuf, size_t *offset,
