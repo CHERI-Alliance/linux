@@ -78,7 +78,7 @@ static int netx_pci_probe(struct pci_dev *dev,
 	}
 
 	/* BAR0 or 2 points to the card's dual port memory */
-	info->mem[0].addr = pci_resource_start(dev, bar);
+	info->mem[0].addr = __c_fakeu(pci_resource_start(dev, bar));
 	if (!info->mem[0].addr)
 		goto out_release;
 	info->mem[0].internal_addr = ioremap(pci_resource_start(dev, bar),
