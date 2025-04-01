@@ -329,7 +329,7 @@ tee_ioctl_shm_register(struct tee_context *ctx,
 	struct tee_ioctl_shm_register_data data;
 	struct tee_shm *shm;
 
-	if (copy_from_user(&data, udata, sizeof(data)))
+	if (copy_from_user_with_ptr(&data, udata, sizeof(data)))
 		return -EFAULT;
 
 	/* Currently no input flags are supported */
@@ -818,7 +818,7 @@ out:
 	return rc;
 }
 
-static long tee_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+static long tee_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 {
 	struct tee_context *ctx = filp->private_data;
 	void __user *uarg = (void __user *)arg;
