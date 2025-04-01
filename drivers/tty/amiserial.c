@@ -1099,7 +1099,7 @@ static int rs_get_icount(struct tty_struct *tty,
 }
 
 static int rs_ioctl(struct tty_struct *tty,
-		    unsigned int cmd, unsigned long arg)
+		    unsigned int cmd, user_uintptr_t arg)
 {
 	struct serial_state *info = tty->driver_data;
 	struct async_icount cprev, cnow;	/* kernel counter temps */

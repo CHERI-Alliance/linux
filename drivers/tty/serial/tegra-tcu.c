@@ -54,7 +54,7 @@ static void tegra_tcu_write_one(struct tegra_tcu *tcu, u32 value,
 	void *msg;
 
 	value |= TCU_MBOX_NUM_BYTES(count);
-	msg = (void *)(unsigned long)value;
+	msg = __c_fakep(value);
 	mbox_send_message(tcu->tx, msg);
 	mbox_flush(tcu->tx, 1000);
 }
@@ -163,7 +163,7 @@ static void tegra_tcu_receive(struct mbox_client *cl, void *msg)
 {
 	struct tegra_tcu *tcu = container_of(cl, struct tegra_tcu, rx_client);
 	struct tty_port *port = &tcu->port.state->port;
-	u32 value = (u32)(unsigned long)msg;
+	u32 value = (u32)__c_pa(msg);
 	unsigned int num_bytes, i;
 
 	num_bytes = TCU_MBOX_NUM_BYTES_V(value);

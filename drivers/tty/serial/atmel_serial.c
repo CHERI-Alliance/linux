@@ -1033,7 +1033,7 @@ static int atmel_prepare_tx_dma(struct uart_port *port)
 
 	spin_lock_init(&atmel_port->lock_tx);
 	/* UART circular tx buffer is an aligned page. */
-	BUG_ON(!PAGE_ALIGNED(tport->xmit_buf));
+	BUG_ON(!PAGE_ALIGNED(__c_pa(tport->xmit_buf)));
 	atmel_port->tx_phys = dma_map_single(port->dev, tport->xmit_buf,
 					     UART_XMIT_SIZE, DMA_TO_DEVICE);
 
@@ -1202,7 +1202,7 @@ static int atmel_prepare_rx_dma(struct uart_port *port)
 
 	spin_lock_init(&atmel_port->lock_rx);
 	/* UART circular rx buffer is an aligned page. */
-	BUG_ON(!PAGE_ALIGNED(ring->buf));
+	BUG_ON(!PAGE_ALIGNED(__c_pa(ring->buf)));
 	atmel_port->rx_phys = dma_map_single(port->dev, ring->buf,
 					     ATMEL_SERIAL_RX_SIZE,
 					     DMA_FROM_DEVICE);

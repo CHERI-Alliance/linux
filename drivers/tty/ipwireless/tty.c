@@ -380,7 +380,7 @@ ipw_tiocmset(struct tty_struct *linux_tty,
 }
 
 static int ipw_ioctl(struct tty_struct *linux_tty,
-		     unsigned int cmd, unsigned long arg)
+		     unsigned int cmd, user_uintptr_t arg)
 {
 	struct ipw_tty *tty = linux_tty->driver_data;
 
@@ -426,7 +426,7 @@ static int ipw_ioctl(struct tty_struct *linux_tty,
 			}
 			return 0;
 		case TCFLSH:
-			return tty_perform_flush(linux_tty, arg);
+			return tty_perform_flush(linux_tty, __c_ua(arg));
 		}
 	}
 	return -ENOIOCTLCMD;

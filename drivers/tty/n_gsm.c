@@ -3818,7 +3818,7 @@ static __poll_t gsmld_poll(struct tty_struct *tty, struct file *file,
 }
 
 static int gsmld_ioctl(struct tty_struct *tty, unsigned int cmd,
-		       unsigned long arg)
+		       user_uintptr_t arg)
 {
 	struct gsm_config c;
 	struct gsm_config_ext ce;
@@ -4439,7 +4439,7 @@ static int gsmtty_tiocmset(struct tty_struct *tty,
 
 
 static int gsmtty_ioctl(struct tty_struct *tty,
-			unsigned int cmd, unsigned long arg)
+			unsigned int cmd, user_uintptr_t arg)
 {
 	struct gsm_dlci *dlci = tty->driver_data;
 	struct gsm_netconfig nc;
@@ -4485,7 +4485,7 @@ static int gsmtty_ioctl(struct tty_struct *tty,
 			return -EPERM;
 		return gsm_dlci_config(dlci, &dc, 1);
 	case TIOCMIWAIT:
-		return gsm_wait_modem_change(dlci, (u32)arg);
+		return gsm_wait_modem_change(dlci, (u32)__c_ua(arg));
 	default:
 		return -ENOIOCTLCMD;
 	}

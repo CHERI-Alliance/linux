@@ -154,7 +154,7 @@ static int ipwireless_ppp_start_xmit(struct ppp_channel *ppp_channel,
 
 /* Handle an ioctl call that has come in via ppp. (copy of ppp_async_ioctl() */
 static int ipwireless_ppp_ioctl(struct ppp_channel *ppp_channel,
-				unsigned int cmd, unsigned long arg)
+				unsigned int cmd, user_uintptr_t arg)
 {
 	struct ipw_network *network = ppp_channel->private;
 	int err, val;

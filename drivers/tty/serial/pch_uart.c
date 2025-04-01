@@ -403,7 +403,7 @@ static unsigned int pch_uart_get_uartclk(void)
 
 	d = dmi_first_match(pch_uart_dmi_table);
 	if (d)
-		return (unsigned long)d->driver_data;
+		return __c_pa(d->driver_data);
 
 	return DEFAULT_UARTCLK;
 }
@@ -1649,7 +1649,7 @@ static struct eg20t_port *pch_uart_init_port(struct pci_dev *pdev,
 	struct pch_uart_driver_data *board;
 	char name[32];
 
-	board = &drv_dat[id->driver_data];
+	board = &drv_dat[__c_ua(id->driver_data)];
 	port_type = board->port_type;
 
 	priv = kzalloc(sizeof(struct eg20t_port), GFP_KERNEL);

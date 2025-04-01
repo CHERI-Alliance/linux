@@ -1708,7 +1708,7 @@ static int ntty_tiocgicount(struct tty_struct *tty,
 }
 
 static int ntty_ioctl(struct tty_struct *tty,
-		      unsigned int cmd, unsigned long arg)
+		      unsigned int cmd, user_uintptr_t arg)
 {
 	struct port *port = tty->driver_data;
 	int rval = -ENOIOCTLCMD;
@@ -1718,7 +1718,7 @@ static int ntty_ioctl(struct tty_struct *tty,
 		struct async_icount cprev = port->tty_icount;
 
 		rval = wait_event_interruptible(port->tty_wait,
-				ntty_cflags_changed(port, arg, &cprev));
+				ntty_cflags_changed(port, __c_ua(arg), &cprev));
 		break;
 	}
 	default:

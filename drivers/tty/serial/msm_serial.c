@@ -1815,7 +1815,7 @@ static int msm_serial_probe(struct platform_device *pdev)
 
 	id = of_match_device(msm_uartdm_table, &pdev->dev);
 	if (id)
-		msm_port->is_uartdm = (unsigned long)id->data;
+		msm_port->is_uartdm = __c_pa(id->data);
 	else
 		msm_port->is_uartdm = 0;
 

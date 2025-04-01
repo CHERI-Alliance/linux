@@ -202,8 +202,8 @@ struct rp2_card {
 static inline void rp2_decode_cap(const struct pci_device_id *id,
 				  int *ports, int *smpte)
 {
-	*ports = id->driver_data >> 8;
-	*smpte = id->driver_data & 0xff;
+	*ports = __c_ua(id->driver_data) >> 8;
+	*smpte = __c_ua(id->driver_data) & 0xff;
 }
 
 static DEFINE_SPINLOCK(rp2_minor_lock);

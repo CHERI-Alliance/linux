@@ -57,7 +57,7 @@ static void do_rw_io(struct goldfish_tty *qtty, unsigned long address,
 	void __iomem *base = qtty->base;
 
 	spin_lock_irqsave(&qtty->lock, irq_flags);
-	gf_write_ptr((void *)address, base + GOLDFISH_TTY_REG_DATA_PTR,
+	gf_write_ptr(__c_fakep(address), base + GOLDFISH_TTY_REG_DATA_PTR,
 		     base + GOLDFISH_TTY_REG_DATA_PTR_HIGH);
 	gf_iowrite32(count, base + GOLDFISH_TTY_REG_DATA_LEN);
 
@@ -71,7 +71,7 @@ static void do_rw_io(struct goldfish_tty *qtty, unsigned long address,
 	spin_unlock_irqrestore(&qtty->lock, irq_flags);
 }
 
-static void goldfish_tty_rw(struct goldfish_tty *qtty, unsigned long addr,
+static void goldfish_tty_rw(struct goldfish_tty *qtty, uintptr_t addr,
 			    size_t count, bool is_write)
 {
 	dma_addr_t dma_handle;
@@ -83,13 +83,13 @@ static void goldfish_tty_rw(struct goldfish_tty *qtty, unsigned long addr,
 		 * Goldfish TTY for Ranchu platform uses
 		 * physical addresses and DMA for read/write operations
 		 */
-		unsigned long addr_end = addr + count;
+		unsigned long addr_end = __c_ua(addr) + count;
 
 		while (addr < addr_end) {
-			unsigned long pg_end = (addr & PAGE_MASK) + PAGE_SIZE;
+			unsigned long pg_end = (__c_ua(addr) & PAGE_MASK) + PAGE_SIZE;
 			unsigned long next =
 					pg_end < addr_end ? pg_end : addr_end;
-			unsigned long avail = next - addr;
+			unsigned long avail = next - __c_ua(addr);
 
 			/*
 			 * Map the buffer's virtual address to the DMA address
@@ -117,7 +117,7 @@ static void goldfish_tty_rw(struct goldfish_tty *qtty, unsigned long addr,
 		 * Old style Goldfish TTY used on the Goldfish platform
 		 * uses virtual addresses.
 		 */
-		do_rw_io(qtty, addr, count, is_write);
+		do_rw_io(qtty, __c_ua(addr), count, is_write);
 	}
 }
 
@@ -125,7 +125,7 @@ static void goldfish_tty_do_write(int line, const u8 *buf, size_t count)
 {
 	struct goldfish_tty *qtty = &goldfish_ttys[line];
 
-	goldfish_tty_rw(qtty, (unsigned long)buf, count, true);
+	goldfish_tty_rw(qtty, (uintptr_t)buf, count, true);
 }
 
 static irqreturn_t goldfish_tty_interrupt(int irq, void *dev_id)
@@ -141,7 +141,7 @@ static irqreturn_t goldfish_tty_interrupt(int irq, void *dev_id)
 
 	count = tty_prepare_flip_string(&qtty->port, &buf, count);
 
-	goldfish_tty_rw(qtty, (unsigned long)buf, count, false);
+	goldfish_tty_rw(qtty, (uintptr_t)buf, count, false);
 
 	tty_flip_buffer_push(&qtty->port);
 	return IRQ_HANDLED;

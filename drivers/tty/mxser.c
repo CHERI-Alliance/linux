@@ -186,7 +186,7 @@
 #define PCI_DEVICE_ID_MOXA_CP168U	0x1681
 #define PCI_DEVICE_ID_MOXA_CP168EL	0x1682
 
-#define MXSER_NPORTS(ddata)		((ddata) & 0xffU)
+#define MXSER_NPORTS(ddata)		(__c_a(ddata) & 0xffU)
 #define MXSER_HIGHBAUD			0x0100
 
 enum mxser_must_hwid {
@@ -1200,7 +1200,7 @@ static int mxser_ioctl_op_mode(struct mxser_port *port, int index, bool set,
 }
 
 static int mxser_ioctl(struct tty_struct *tty,
-		unsigned int cmd, unsigned long arg)
+		unsigned int cmd, user_uintptr_t arg)
 {
 	struct mxser_port *info = tty->driver_data;
 	struct async_icount cnow;
@@ -1229,7 +1229,7 @@ static int mxser_ioctl(struct tty_struct *tty,
 		spin_unlock_irqrestore(&info->slock, flags);
 
 		return wait_event_interruptible(info->port.delta_msr_wait,
-				mxser_cflags_changed(info, arg, &cnow));
+				mxser_cflags_changed(info, __c_ua(arg), &cnow));
 	default:
 		return -ENOIOCTLCMD;
 	}

@@ -2735,7 +2735,7 @@ static int sci_remap_port(struct uart_port *port)
 		 * need to do any remapping, just cast the cookie
 		 * directly.
 		 */
-		port->membase = (void __iomem *)(uintptr_t)port->mapbase;
+		port->membase = (void __iomem *)__c_fakep(port->mapbase);
 	}
 
 	return 0;
@@ -3208,8 +3208,8 @@ static void sci_remove(struct platform_device *dev)
 
 
 #define SCI_OF_DATA(type, regtype)	(void *)((type) << 16 | (regtype))
-#define SCI_OF_TYPE(data)		((unsigned long)(data) >> 16)
-#define SCI_OF_REGTYPE(data)		((unsigned long)(data) & 0xffff)
+#define SCI_OF_TYPE(data)		(__c_a(data) >> 16)
+#define SCI_OF_REGTYPE(data)		(__c_a(data) & 0xffff)
 
 static const struct of_device_id of_sci_match[] __maybe_unused = {
 	/* SoC-specific types */

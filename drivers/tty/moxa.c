@@ -584,7 +584,7 @@ static void moxa_low_water_check(void __iomem *ofsAddr)
  */
 
 static int moxa_ioctl(struct tty_struct *tty,
-		      unsigned int cmd, unsigned long arg)
+		      unsigned int cmd, user_uintptr_t arg)
 {
 	struct moxa_port *ch = tty->driver_data;
 	void __user *argp = (void __user *)arg;
@@ -604,7 +604,7 @@ static int moxa_ioctl(struct tty_struct *tty,
 			ret = -EFAULT;
 		break;
 	case MOXA_FLUSH_QUEUE:
-		MoxaPortFlushData(ch, arg);
+		MoxaPortFlushData(ch, __c_ua(arg));
 		break;
 	case MOXA_GET_IOQUEUE: {
 		struct moxaq_str __user *argm = argp;
@@ -1233,7 +1233,7 @@ static int moxa_pci_probe(struct pci_dev *pdev,
 {
 	struct moxa_board_conf *board;
 	unsigned int i;
-	int board_type = ent->driver_data;
+	int board_type = __c_ua(ent->driver_data);
 	int retval;
 
 	retval = pci_enable_device(pdev);
