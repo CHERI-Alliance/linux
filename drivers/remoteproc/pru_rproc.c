@@ -778,11 +778,11 @@ static int pru_rproc_memcpy(void *dest, const void *src, size_t count)
 	 * TODO: relax limitation of 4-byte aligned dest addresses and copy
 	 * sizes
 	 */
-	if ((long)dest % 4 || count % 4)
+	if (__c_pa(dest) % 4 || count % 4)
 		return -EINVAL;
 
 	/* src offsets in ELF firmware image can be non-aligned */
-	if ((long)src % 4) {
+	if (__c_pa(src) % 4) {
 		tmp_src = kmemdup(src, count, GFP_KERNEL);
 		if (!tmp_src)
 			return -ENOMEM;
