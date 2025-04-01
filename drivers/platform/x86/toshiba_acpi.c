@@ -2610,7 +2610,7 @@ static int toshiba_acpi_smm_bridge(SMMRegisters *regs)
 }
 
 static long toshiba_acpi_ioctl(struct file *fp, unsigned int cmd,
-			       unsigned long arg)
+			       user_uintptr_t arg)
 {
 	SMMRegisters __user *argp = (SMMRegisters __user *)arg;
 	SMMRegisters regs;

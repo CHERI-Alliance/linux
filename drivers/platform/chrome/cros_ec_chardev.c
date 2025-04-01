@@ -357,7 +357,7 @@ static long cros_ec_chardev_ioctl(struct file *filp, unsigned int cmd,
 	case CROS_EC_DEV_IOCRDMEM:
 		return cros_ec_chardev_ioctl_readmem(ec, (void __user *)arg);
 	case CROS_EC_DEV_IOCEVENTMASK:
-		priv->event_mask = arg;
+		priv->event_mask = __c_ua(arg);
 		return 0;
 	}
 

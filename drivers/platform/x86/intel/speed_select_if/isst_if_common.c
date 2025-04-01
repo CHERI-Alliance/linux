@@ -598,7 +598,7 @@ static long isst_if_exec_multi_cmd(void __user *argp, struct isst_if_cmd_cb *cb)
 }
 
 static long isst_if_def_ioctl(struct file *file, unsigned int cmd,
-			      unsigned long arg)
+			      user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 	struct isst_if_cmd_cb cmd_cb;

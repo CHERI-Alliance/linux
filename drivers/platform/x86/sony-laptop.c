@@ -4117,7 +4117,7 @@ static int ec_read16(u8 addr, u16 *value)
 }
 
 static long sonypi_misc_ioctl(struct file *fp, unsigned int cmd,
-							unsigned long arg)
+							user_uintptr_t arg)
 {
 	int ret = 0;
 	void __user *argp = (void __user *)arg;

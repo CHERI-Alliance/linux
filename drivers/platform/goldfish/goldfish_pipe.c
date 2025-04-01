@@ -406,7 +406,7 @@ static ssize_t goldfish_pipe_read_write(struct file *filp,
 	if (unlikely(!access_ok(buffer, bufflen)))
 		return -EFAULT;
 
-	address = (unsigned long)buffer;
+	address = __c_pa(buffer);
 	address_end = address + bufflen;
 	last_page = (address_end - 1) & PAGE_MASK;
 	last_page_size = ((address_end - 1) & ~PAGE_MASK) + 1;

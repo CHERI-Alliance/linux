@@ -170,7 +170,8 @@ static long dell_smbios_wmi_do_ioctl(struct wmi_smbios_priv *priv,
 	return 0;
 }
 
-static long dell_smbios_wmi_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+static long dell_smbios_wmi_ioctl(struct file *filp, unsigned int cmd,
+				  user_uintptr_t arg)
 {
 	struct dell_wmi_smbios_buffer __user *input = (struct dell_wmi_smbios_buffer __user *)arg;
 	struct wmi_smbios_priv *priv = filp->private_data;

@@ -525,7 +525,7 @@ static int ssam_cdev_device_release(struct inode *inode, struct file *filp)
 }
 
 static long __ssam_cdev_device_ioctl(struct ssam_cdev_client *client, unsigned int cmd,
-				     unsigned long arg)
+				     user_uintptr_t arg)
 {
 	lockdep_assert_held_read(&client->cdev->lock);
 
@@ -552,7 +552,8 @@ static long __ssam_cdev_device_ioctl(struct ssam_cdev_client *client, unsigned i
 	}
 }
 
-static long ssam_cdev_device_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long ssam_cdev_device_ioctl(struct file *file, unsigned int cmd,
+				   user_uintptr_t arg)
 {
 	struct ssam_cdev_client *client = file->private_data;
 	long status;

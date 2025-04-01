@@ -75,7 +75,7 @@ static int scu_reg_access(u32 cmd, struct scu_ipc_data  *data)
  *	Support the I/O and firmware flashing interfaces of the SCU
  */
 static long scu_ipc_ioctl(struct file *fp, unsigned int cmd,
-							unsigned long arg)
+							user_uintptr_t arg)
 {
 	int ret;
 	struct scu_ipc_data  data;

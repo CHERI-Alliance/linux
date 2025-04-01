@@ -328,7 +328,8 @@ static int sdtx_ioctl_get_latch_status(struct sdtx_device *ddev, u16 __user *buf
 	return put_user(sdtx_translate_latch_status(ddev, latch), buf);
 }
 
-static long __surface_dtx_ioctl(struct sdtx_client *client, unsigned int cmd, unsigned long arg)
+static long __surface_dtx_ioctl(struct sdtx_client *client, unsigned int cmd,
+				user_uintptr_t arg)
 {
 	struct sdtx_device *ddev = client->ddev;
 
@@ -375,7 +376,8 @@ static long __surface_dtx_ioctl(struct sdtx_client *client, unsigned int cmd, un
 	}
 }
 
-static long surface_dtx_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long surface_dtx_ioctl(struct file *file, unsigned int cmd,
+			      user_uintptr_t arg)
 {
 	struct sdtx_client *client = file->private_data;
 	long status;
