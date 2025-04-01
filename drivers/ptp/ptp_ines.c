@@ -192,7 +192,7 @@ static int ines_clock_init(struct ines_clock *clock, struct device *device,
 			   void __iomem *addr)
 {
 	struct device_node *node = device->of_node;
-	unsigned long port_addr;
+	uintptr_t port_addr;
 	struct ines_port *port;
 	int i, j;
 
