@@ -195,7 +195,7 @@ static void uctrl_get_event_status(struct uctrl_driver *);
 static void uctrl_get_external_status(struct uctrl_driver *);
 
 static long
-uctrl_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+uctrl_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	switch (cmd) {
 		default:

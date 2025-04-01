@@ -433,7 +433,7 @@ static void evtchn_unbind_from_user(struct per_user_data *u,
 }
 
 static long evtchn_ioctl(struct file *file,
-			 unsigned int cmd, unsigned long arg)
+			 unsigned int cmd, user_uintptr_t arg)
 {
 	int rc;
 	struct per_user_data *u = file->private_data;

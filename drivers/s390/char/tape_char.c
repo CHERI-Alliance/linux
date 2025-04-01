@@ -36,7 +36,7 @@ static ssize_t tapechar_read(struct file *, char __user *, size_t, loff_t *);
 static ssize_t tapechar_write(struct file *, const char __user *, size_t, loff_t *);
 static int tapechar_open(struct inode *,struct file *);
 static int tapechar_release(struct inode *,struct file *);
-static long tapechar_ioctl(struct file *, unsigned int, unsigned long);
+static long tapechar_ioctl(struct file *, unsigned int, user_uintptr_t);
 #ifdef CONFIG_COMPAT
 static long tapechar_compat_ioctl(struct file *, unsigned int, unsigned long);
 #endif
@@ -429,7 +429,7 @@ __tapechar_ioctl(struct tape_device *device,
 }
 
 static long
-tapechar_ioctl(struct file *filp, unsigned int no, unsigned long data)
+tapechar_ioctl(struct file *filp, unsigned int no, user_uintptr_t data)
 {
 	struct tape_device *device;
 	long rc;

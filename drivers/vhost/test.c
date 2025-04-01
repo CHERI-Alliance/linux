@@ -309,7 +309,7 @@ err:
 }
 
 static long vhost_test_ioctl(struct file *f, unsigned int ioctl,
-			     unsigned long arg)
+			     user_uintptr_t arg)
 {
 	struct vhost_vring_file backend;
 	struct vhost_test *n = f->private_data;

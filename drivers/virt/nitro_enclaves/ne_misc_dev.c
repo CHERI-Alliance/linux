@@ -61,7 +61,7 @@
  */
 #define NE_PARENT_VM_CID	(3)
 
-static long ne_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
+static long ne_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg);
 
 static const struct file_operations ne_fops = {
 	.owner		= THIS_MODULE,
@@ -1142,7 +1142,8 @@ static int ne_start_enclave_ioctl(struct ne_enclave *ne_enclave,
  * * 0 on success.
  * * Negative return value on failure.
  */
-static long ne_enclave_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long ne_enclave_ioctl(struct file *file, unsigned int cmd,
+			     user_uintptr_t arg)
 {
 	struct ne_enclave *ne_enclave = file->private_data;
 
@@ -1735,7 +1736,7 @@ free_ne_enclave:
  * * Ioctl result (e.g. enclave file descriptor) on success.
  * * Negative return value on failure.
  */
-static long ne_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long ne_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	switch (cmd) {
 	case NE_CREATE_VM: {

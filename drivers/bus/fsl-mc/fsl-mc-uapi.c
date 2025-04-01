@@ -541,7 +541,7 @@ static int fsl_mc_uapi_dev_release(struct inode *inode, struct file *filep)
 
 static long fsl_mc_uapi_dev_ioctl(struct file *file,
 				  unsigned int cmd,
-				  unsigned long arg)
+				  user_uintptr_t arg)
 {
 	struct uapi_priv_data *priv_data = file->private_data;
 	struct fsl_mc_device *root_mc_device;

@@ -1385,7 +1385,7 @@ static int dvb_net_add_if(struct dvb_net *dvbnet, u16 pid, u8 feedtype)
 	INIT_WORK(&priv->restart_net_feed_wq, wq_restart_net_feed);
 	mutex_init(&priv->mutex);
 
-	net->base_addr = pid;
+	net->base_addr = __c_fakeu(pid);
 
 	if ((result = register_netdev(net)) < 0) {
 		dvbnet->device[if_num] = NULL;

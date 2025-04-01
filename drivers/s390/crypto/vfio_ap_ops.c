@@ -2065,7 +2065,7 @@ static void vfio_ap_mdev_request(struct vfio_device *vdev, unsigned int count)
 	}
 }
 
-static int vfio_ap_mdev_get_device_info(unsigned long arg)
+static int vfio_ap_mdev_get_device_info(user_uintptr_t arg)
 {
 	unsigned long minsz;
 	struct vfio_device_info info;
@@ -2085,7 +2085,7 @@ static int vfio_ap_mdev_get_device_info(unsigned long arg)
 	return copy_to_user((void __user *)arg, &info, minsz) ? -EFAULT : 0;
 }
 
-static ssize_t vfio_ap_get_irq_info(unsigned long arg)
+static ssize_t vfio_ap_get_irq_info(user_uintptr_t arg)
 {
 	unsigned long minsz;
 	struct vfio_irq_info info;
@@ -2110,7 +2110,7 @@ static ssize_t vfio_ap_get_irq_info(unsigned long arg)
 	return copy_to_user((void __user *)arg, &info, minsz) ? -EFAULT : 0;
 }
 
-static int vfio_ap_irq_set_init(struct vfio_irq_set *irq_set, unsigned long arg)
+static int vfio_ap_irq_set_init(struct vfio_irq_set *irq_set, user_uintptr_t arg)
 {
 	int ret;
 	size_t data_size;
@@ -2133,7 +2133,7 @@ static int vfio_ap_irq_set_init(struct vfio_irq_set *irq_set, unsigned long arg)
 }
 
 static int vfio_ap_set_request_irq(struct ap_matrix_mdev *matrix_mdev,
-				   unsigned long arg)
+				   user_uintptr_t arg)
 {
 	s32 fd;
 	void __user *data;
@@ -2167,7 +2167,7 @@ static int vfio_ap_set_request_irq(struct ap_matrix_mdev *matrix_mdev,
 }
 
 static int vfio_ap_set_irqs(struct ap_matrix_mdev *matrix_mdev,
-			    unsigned long arg)
+			    user_uintptr_t arg)
 {
 	int ret;
 	struct vfio_irq_set irq_set;
@@ -2190,7 +2190,7 @@ static int vfio_ap_set_irqs(struct ap_matrix_mdev *matrix_mdev,
 }
 
 static ssize_t vfio_ap_mdev_ioctl(struct vfio_device *vdev,
-				    unsigned int cmd, unsigned long arg)
+				  unsigned int cmd, user_uintptr_t arg)
 {
 	struct ap_matrix_mdev *matrix_mdev =
 		container_of(vdev, struct ap_matrix_mdev, vdev);

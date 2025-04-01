@@ -405,7 +405,8 @@ static int uvio_copy_and_check_ioctl(struct uvio_ioctl_cb *ioctl, void __user *a
 /*
  * IOCTL entry point for the Ultravisor device.
  */
-static long uvio_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+static long uvio_ioctl(struct file *filp, unsigned int cmd,
+		       user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 	struct uvio_ioctl_cb uv_ioctl = { };

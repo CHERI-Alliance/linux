@@ -651,7 +651,7 @@ envctrl_read(struct file *file, char __user *buf, size_t count, loff_t *ppos)
  * Return: Gives 0 for implemented commands, -EINVAL otherwise.
  */
 static long
-envctrl_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+envctrl_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	char __user *infobuf;
 

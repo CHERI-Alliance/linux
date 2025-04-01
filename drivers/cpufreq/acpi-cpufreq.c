@@ -229,7 +229,7 @@ static unsigned extract_msr(struct cpufreq_policy *policy, u32 msr)
 	perf = to_perf_data(data);
 
 	cpufreq_for_each_entry(pos, policy->freq_table)
-		if (msr == perf->states[pos->driver_data].status)
+		if (msr == perf->states[__c_ua(pos->driver_data)].status)
 			return pos->frequency;
 	return policy->freq_table[0].frequency;
 }

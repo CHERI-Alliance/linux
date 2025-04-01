@@ -795,7 +795,7 @@ static int stm_char_policy_get_ioctl(struct stm_file *stmf, void __user *arg)
 }
 
 static long
-stm_char_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+stm_char_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct stm_file *stmf = file->private_data;
 	struct stm_data *stm_data = stmf->stm->data;

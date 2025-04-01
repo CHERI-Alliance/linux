@@ -1143,7 +1143,7 @@ static void vduse_vq_update_effective_cpu(struct vduse_virtqueue *vq)
 }
 
 static long vduse_dev_ioctl(struct file *file, unsigned int cmd,
-			    unsigned long arg)
+			    user_uintptr_t arg)
 {
 	struct vduse_dev *dev = file->private_data;
 	void __user *argp = (void __user *)arg;
@@ -1891,7 +1891,7 @@ err:
 }
 
 static long vduse_ioctl(struct file *file, unsigned int cmd,
-			unsigned long arg)
+			user_uintptr_t arg)
 {
 	int ret;
 	void __user *argp = (void __user *)arg;

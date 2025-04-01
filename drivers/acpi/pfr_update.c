@@ -390,7 +390,8 @@ free_acpi_buffer:
 	return ret;
 }
 
-static long pfru_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long pfru_ioctl(struct file *file, unsigned int cmd,
+		       user_uintptr_t arg)
 {
 	struct pfru_update_cap_info cap_hdr;
 	struct pfru_device *pfru_dev = to_pfru_dev(file);

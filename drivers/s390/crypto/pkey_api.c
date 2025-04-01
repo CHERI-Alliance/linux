@@ -1345,7 +1345,7 @@ static void *_copy_apqns_from_user(void __user *uapqns, size_t nr_apqns)
 }
 
 static long pkey_unlocked_ioctl(struct file *filp, unsigned int cmd,
-				unsigned long arg)
+				user_uintptr_t arg)
 {
 	int rc;
 

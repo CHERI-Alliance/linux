@@ -635,14 +635,14 @@ static void memcpy_fromio_readw(void *to,
 	const int maxw = (IS_ENABLED(CONFIG_64BIT)) ? 8 : 4;
 	u8 buf[2];
 
-	if (count && ((unsigned long)from & 1)) {
-		*(u16 *)buf = __raw_readw((void __iomem *)((unsigned long)from & ~1));
+	if (count && (__c_pa(from) & 1)) {
+		*(u16 *)buf = __raw_readw((void __iomem *)((uintptr_t)from & ~1));
 		*(u8 *)to = buf[1];
 		from++;
 		to++;
 		count--;
 	}
-	while (count >= 2 && !IS_ALIGNED((unsigned long)from, maxw)) {
+	while (count >= 2 && !IS_ALIGNED(__c_pa(from), maxw)) {
 		*(u16 *)to = __raw_readw(from);
 		from += 2;
 		to += 2;

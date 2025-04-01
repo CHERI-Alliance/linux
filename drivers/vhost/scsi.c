@@ -2028,7 +2028,7 @@ static int vhost_scsi_release(struct inode *inode, struct file *f)
 static long
 vhost_scsi_ioctl(struct file *f,
 		 unsigned int ioctl,
-		 unsigned long arg)
+		 user_uintptr_t arg)
 {
 	struct vhost_scsi *vs = f->private_data;
 	struct vhost_scsi_target backend;

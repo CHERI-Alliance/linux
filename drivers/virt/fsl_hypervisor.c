@@ -410,7 +410,7 @@ err_free_path:
  * Ioctl main entry point
  */
 static long fsl_hv_ioctl(struct file *file, unsigned int cmd,
-			 unsigned long argaddr)
+			 user_uintptr_t argaddr)
 {
 	void __user *arg = (void __user *)argaddr;
 	long ret;

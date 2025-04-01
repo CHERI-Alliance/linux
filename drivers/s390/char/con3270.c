@@ -1929,7 +1929,7 @@ static void tty3270_wait_until_sent(struct tty_struct *tty, int timeout)
 }
 
 static int tty3270_ioctl(struct tty_struct *tty, unsigned int cmd,
-			 unsigned long arg)
+			 user_uintptr_t arg)
 {
 	struct tty3270 *tp;
 

@@ -867,7 +867,8 @@ tape_34xx_irq(struct tape_device *device, struct tape_request *request,
  * ioctl_overload
  */
 static int
-tape_34xx_ioctl(struct tape_device *device, unsigned int cmd, unsigned long arg)
+tape_34xx_ioctl(struct tape_device *device, unsigned int cmd,
+		user_uintptr_t arg)
 {
 	if (cmd == TAPE390_DISPLAY) {
 		struct display_struct disp;

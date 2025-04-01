@@ -828,7 +828,7 @@ err:
 }
 
 static long vhost_vsock_dev_ioctl(struct file *f, unsigned int ioctl,
-				  unsigned long arg)
+				  user_uintptr_t arg)
 {
 	struct vhost_vsock *vsock = f->private_data;
 	void __user *argp = (void __user *)arg;

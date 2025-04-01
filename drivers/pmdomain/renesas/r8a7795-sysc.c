@@ -69,7 +69,7 @@ static int __init r8a7795_sysc_init(void)
 
 	attr = soc_device_match(r8a7795_quirks_match);
 	if (attr)
-		quirks = (uintptr_t)attr->data;
+		quirks = __c_pa(attr->data);
 
 	if (quirks & NO_EXTMASK)
 		r8a7795_sysc_info.extmask_val = 0;

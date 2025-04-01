@@ -105,7 +105,7 @@ static int pmcmd_ioctl(u64 cmd, void __user *uptr)
  * sanity check against the input parameters.
  */
 static long acrn_dev_ioctl(struct file *filp, unsigned int cmd,
-			   unsigned long ioctl_param)
+			   user_uintptr_t ioctl_param)
 {
 	struct acrn_vm *vm = filp->private_data;
 	struct acrn_vm_creation *vm_param;

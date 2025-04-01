@@ -948,8 +948,8 @@ static void ene_tune_bridge(struct pcmcia_socket *sock, struct pci_bus *bus)
 
 	test_c9 = old_c9 = config_readb(socket, ENE_TEST_C9);
 	if (id) {
-		mask = (id->driver_data >> 8) & 0xFF;
-		bits = id->driver_data & 0xFF;
+		mask = (__c_ua(id->driver_data) >> 8) & 0xFF;
+		bits = __c_ua(id->driver_data) & 0xFF;
 
 		test_c9 = (test_c9 & ~mask) | bits;
 	}

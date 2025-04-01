@@ -212,7 +212,7 @@ static int u_boot_env_probe(struct platform_device *pdev)
 		return -ENOMEM;
 	priv->dev = dev;
 
-	priv->format = (uintptr_t)of_device_get_match_data(dev);
+	priv->format = __c_pa(of_device_get_match_data(dev));
 
 	priv->mtd = of_get_mtd_device_by_node(np);
 	if (IS_ERR(priv->mtd)) {

@@ -163,7 +163,7 @@ static int hi6220_reset_probe(struct platform_device *pdev)
 	if (!data)
 		return -ENOMEM;
 
-	type = (uintptr_t)of_device_get_match_data(dev);
+	type = __c_pa(of_device_get_match_data(dev));
 
 	regmap = syscon_node_to_regmap(np);
 	if (IS_ERR(regmap)) {

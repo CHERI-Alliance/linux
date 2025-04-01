@@ -1197,7 +1197,7 @@ static ssize_t cs_char_write(struct file *file, const char __user *buf,
 }
 
 static long cs_char_ioctl(struct file *file, unsigned int cmd,
-				unsigned long arg)
+				user_uintptr_t arg)
 {
 	struct cs_char *csdata = file->private_data;
 	int r = 0;

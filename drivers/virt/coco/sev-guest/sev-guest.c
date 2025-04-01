@@ -646,7 +646,8 @@ e_free:
 	return ret;
 }
 
-static long snp_guest_ioctl(struct file *file, unsigned int ioctl, unsigned long arg)
+static long snp_guest_ioctl(struct file *file, unsigned int ioctl,
+			    user_uintptr_t arg)
 {
 	struct snp_guest_dev *snp_dev = to_snp_dev(file);
 	void __user *argp = (void __user *)arg;

@@ -99,7 +99,7 @@ static int d7s_release(struct inode *inode, struct file *f)
 	return 0;
 }
 
-static long d7s_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long d7s_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct d7s *p = d7s_device;
 	u8 regs = readb(p->regs);

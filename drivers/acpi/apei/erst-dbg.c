@@ -52,7 +52,8 @@ static int erst_dbg_release(struct inode *inode, struct file *file)
 	return 0;
 }
 
-static long erst_dbg_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
+static long erst_dbg_ioctl(struct file *f, unsigned int cmd,
+			   user_uintptr_t arg)
 {
 	int rc;
 	u64 record_id;

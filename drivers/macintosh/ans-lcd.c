@@ -80,7 +80,7 @@ anslcd_write( struct file * file, const char __user * buf,
 }
 
 static long
-anslcd_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+anslcd_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	char ch, __user *temp;
 	long ret = 0;

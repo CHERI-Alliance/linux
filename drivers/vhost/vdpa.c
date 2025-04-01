@@ -765,7 +765,7 @@ static long vhost_vdpa_vring_ioctl(struct vhost_vdpa *v, unsigned int cmd,
 }
 
 static long vhost_vdpa_unlocked_ioctl(struct file *filep,
-				      unsigned int cmd, unsigned long arg)
+				      unsigned int cmd, user_uintptr_t arg)
 {
 	struct vhost_vdpa *v = filep->private_data;
 	struct vhost_dev *d = &v->vdev;

@@ -1664,7 +1664,7 @@ out:
 }
 
 static long vhost_net_ioctl(struct file *f, unsigned int ioctl,
-			    unsigned long arg)
+			    user_uintptr_t arg)
 {
 	struct vhost_net *n = f->private_data;
 	void __user *argp = (void __user *)arg;

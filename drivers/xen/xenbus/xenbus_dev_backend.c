@@ -72,7 +72,7 @@ static long xenbus_alloc(domid_t domid)
 }
 
 static long xenbus_backend_ioctl(struct file *file, unsigned int cmd,
-				 unsigned long data)
+				 user_uintptr_t data)
 {
 	if (!capable(CAP_SYS_ADMIN))
 		return -EPERM;

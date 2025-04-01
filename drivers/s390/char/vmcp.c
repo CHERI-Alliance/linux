@@ -197,7 +197,8 @@ vmcp_write(struct file *file, const char __user *buff, size_t count,
  * let userspace to change the response size, if userspace expects a bigger
  * response
  */
-static long vmcp_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long vmcp_ioctl(struct file *file, unsigned int cmd,
+		       user_uintptr_t arg)
 {
 	struct vmcp_session *session;
 	int ret = -ENOTTY;

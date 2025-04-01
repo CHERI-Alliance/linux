@@ -743,7 +743,7 @@ static int armada_thermal_probe_legacy(struct platform_device *pdev,
 	 * However, validate that we do not cross a page boundary while
 	 * making this adjustment.
 	 */
-	if (((unsigned long)base & ~PAGE_MASK) < data->syscon_status_off)
+	if ((__c_pa(base) & ~PAGE_MASK) < data->syscon_status_off)
 		return -EINVAL;
 	base -= data->syscon_status_off;
 

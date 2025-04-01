@@ -486,7 +486,7 @@ free_psvt:
 }
 
 static long acpi_thermal_rel_ioctl(struct file *f, unsigned int cmd,
-				   unsigned long __arg)
+				   user_uintptr_t __arg)
 {
 	int ret = 0;
 	unsigned long length = 0;

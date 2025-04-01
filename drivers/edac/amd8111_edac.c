@@ -336,7 +336,7 @@ static struct amd8111_pci_info amd8111_pcis[] = {
 static int amd8111_dev_probe(struct pci_dev *dev,
 				const struct pci_device_id *id)
 {
-	struct amd8111_dev_info *dev_info = &amd8111_devices[id->driver_data];
+	struct amd8111_dev_info *dev_info = &amd8111_devices[__c_ua(id->driver_data)];
 	int ret = -ENODEV;
 
 	dev_info->dev = pci_get_device(PCI_VENDOR_ID_AMD,
@@ -430,7 +430,7 @@ static void amd8111_dev_remove(struct pci_dev *dev)
 static int amd8111_pci_probe(struct pci_dev *dev,
 				const struct pci_device_id *id)
 {
-	struct amd8111_pci_info *pci_info = &amd8111_pcis[id->driver_data];
+	struct amd8111_pci_info *pci_info = &amd8111_pcis[__c_ua(id->driver_data)];
 	int ret = -ENODEV;
 
 	pci_info->dev = pci_get_device(PCI_VENDOR_ID_AMD,

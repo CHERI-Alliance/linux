@@ -250,7 +250,7 @@ done:
 }
 
 static long tdx_guest_ioctl(struct file *file, unsigned int cmd,
-			    unsigned long arg)
+			    user_uintptr_t arg)
 {
 	switch (cmd) {
 	case TDX_CMD_GET_REPORT0:

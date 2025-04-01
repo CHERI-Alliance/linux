@@ -616,7 +616,7 @@ mptctl_fasync(int fd, struct file *filep, int mode)
  *  arg - data specific to the command. Must not be null.
  */
 static long
-__mptctl_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+__mptctl_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	mpt_ioctl_header __user *uhdr = (void __user *) arg;
 	mpt_ioctl_header	 khdr;
@@ -692,7 +692,7 @@ __mptctl_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 }
 
 static long
-mptctl_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+mptctl_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	long ret;
 	mutex_lock(&mpctl_mutex);

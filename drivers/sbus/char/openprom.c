@@ -525,7 +525,7 @@ static int opiocgetnext(unsigned int cmd, void __user *argp)
 }
 
 static int openprom_bsd_ioctl(struct file * file,
-			      unsigned int cmd, unsigned long arg)
+			      unsigned int cmd, user_uintptr_t arg)
 {
 	DATA *data = file->private_data;
 	void __user *argp = (void __user *)arg;
@@ -572,7 +572,7 @@ static int openprom_bsd_ioctl(struct file * file,
  *	Handoff control to the correct ioctl handler.
  */
 static long openprom_ioctl(struct file * file,
-			   unsigned int cmd, unsigned long arg)
+			   unsigned int cmd, user_uintptr_t arg)
 {
 	DATA *data = file->private_data;
 

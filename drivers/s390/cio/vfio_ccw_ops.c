@@ -315,7 +315,7 @@ static int vfio_ccw_mdev_get_device_info(struct vfio_ccw_private *private,
 
 static int vfio_ccw_mdev_get_region_info(struct vfio_ccw_private *private,
 					 struct vfio_region_info *info,
-					 unsigned long arg)
+					 user_uintptr_t arg)
 {
 	int i;
 
@@ -506,7 +506,7 @@ void vfio_ccw_unregister_dev_regions(struct vfio_ccw_private *private)
 
 static ssize_t vfio_ccw_mdev_ioctl(struct vfio_device *vdev,
 				   unsigned int cmd,
-				   unsigned long arg)
+				   user_uintptr_t arg)
 {
 	struct vfio_ccw_private *private =
 		container_of(vdev, struct vfio_ccw_private, vdev);

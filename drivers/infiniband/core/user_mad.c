@@ -950,7 +950,7 @@ static long ib_umad_enable_pkey(struct ib_umad_file *file)
 }
 
 static long ib_umad_ioctl(struct file *filp, unsigned int cmd,
-			  unsigned long arg)
+			  user_uintptr_t arg)
 {
 	switch (cmd) {
 	case IB_USER_MAD_REGISTER_AGENT:

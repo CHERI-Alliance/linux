@@ -840,7 +840,7 @@ out_free:
 }
 
 static long chsc_ioctl(struct file *filp, unsigned int cmd,
-		       unsigned long arg)
+		       user_uintptr_t arg)
 {
 	void __user *argp;
 

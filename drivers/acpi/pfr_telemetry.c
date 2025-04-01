@@ -239,7 +239,8 @@ static inline int valid_log_revid(u32 id)
 	return id == PFRT_REVID_1 || id == PFRT_REVID_2;
 }
 
-static long pfrt_log_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long pfrt_log_ioctl(struct file *file, unsigned int cmd,
+			   user_uintptr_t arg)
 {
 	struct pfrt_log_device *pfrt_log_dev = to_pfrt_log_dev(file);
 	struct pfrt_log_data_info data_info;

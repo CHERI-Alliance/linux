@@ -424,7 +424,7 @@ static long gntalloc_ioctl_unmap_notify(struct gntalloc_file_private_data *priv,
 }
 
 static long gntalloc_ioctl(struct file *filp, unsigned int cmd,
-		unsigned long arg)
+		user_uintptr_t arg)
 {
 	struct gntalloc_file_private_data *priv = filp->private_data;
 

@@ -987,7 +987,7 @@ static long gntdev_ioctl_grant_copy(struct gntdev_priv *priv, void __user *u)
 }
 
 static long gntdev_ioctl(struct file *flip,
-			 unsigned int cmd, unsigned long arg)
+			 unsigned int cmd, user_uintptr_t arg)
 {
 	struct gntdev_priv *priv = flip->private_data;
 	void __user *ptr = (void __user *)arg;

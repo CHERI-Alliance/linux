@@ -1487,7 +1487,7 @@ static inline void privcmd_ioeventfd_exit(void)
 #endif /* CONFIG_XEN_PRIVCMD_EVENTFD */
 
 static long privcmd_ioctl(struct file *file,
-			  unsigned int cmd, unsigned long data)
+			  unsigned int cmd, user_uintptr_t data)
 {
 	int ret = -ENOTTY;
 	void __user *udata = (void __user *) data;

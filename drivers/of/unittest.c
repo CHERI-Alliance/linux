@@ -3918,14 +3918,14 @@ static int testdrv_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 		return ret;
 
 	of_platform_default_populate(dn, NULL, &pdev->dev);
-	pci_set_drvdata(pdev, (void *)(uintptr_t)ovcs_id);
+	pci_set_drvdata(pdev, __c_fakep(ovcs_id));
 
 	return 0;
 }
 
 static void testdrv_remove(struct pci_dev *pdev)
 {
-	int ovcs_id = (int)(uintptr_t)pci_get_drvdata(pdev);
+	int ovcs_id = (int)__c_pa(pci_get_drvdata(pdev));
 
 	of_platform_depopulate(&pdev->dev);
 	of_overlay_remove(&ovcs_id);

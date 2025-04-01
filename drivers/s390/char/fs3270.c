@@ -320,7 +320,8 @@ static ssize_t fs3270_write(struct file *filp, const char __user *data,
 /*
  * process ioctl commands for the tube driver
  */
-static long fs3270_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+static long fs3270_ioctl(struct file *filp, unsigned int cmd,
+			 user_uintptr_t arg)
 {
 	char __user *argp;
 	struct fs3270 *fp;

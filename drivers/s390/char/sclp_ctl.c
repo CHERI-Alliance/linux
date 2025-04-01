@@ -91,7 +91,7 @@ out_free:
  * SCLP SCCB ioctl function
  */
 static long sclp_ctl_ioctl(struct file *filp, unsigned int cmd,
-			   unsigned long arg)
+			   user_uintptr_t arg)
 {
 	void __user *argp;
 

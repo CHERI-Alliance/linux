@@ -103,7 +103,7 @@ static int vbg_misc_device_close(struct inode *inode, struct file *filp)
  * Return: %0 on success, negated errno on failure.
  */
 static long vbg_misc_device_ioctl(struct file *filp, unsigned int req,
-				  unsigned long arg)
+				  user_uintptr_t arg)
 {
 	struct vbg_session *session = filp->private_data;
 	size_t returned_size, size;

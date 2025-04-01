@@ -57,7 +57,7 @@ static int s3c64xx_cpufreq_set_target(struct cpufreq_policy *policy,
 
 	old_freq = clk_get_rate(policy->clk) / 1000;
 	new_freq = s3c64xx_freq_table[index].frequency;
-	dvfs = &s3c64xx_dvfs_table[s3c64xx_freq_table[index].driver_data];
+	dvfs = &s3c64xx_dvfs_table[__c_ua(s3c64xx_freq_table[index].driver_data)];
 
 #ifdef CONFIG_REGULATOR
 	if (vddarm && new_freq > old_freq) {
@@ -117,7 +117,7 @@ static void s3c64xx_cpufreq_config_regulator(void)
 		goto out;
 
 	cpufreq_for_each_valid_entry(freq, s3c64xx_freq_table) {
-		dvfs = &s3c64xx_dvfs_table[freq->driver_data];
+		dvfs = &s3c64xx_dvfs_table[__c_ua(freq->driver_data)];
 		found = 0;
 
 		for (i = 0; i < count; i++) {
