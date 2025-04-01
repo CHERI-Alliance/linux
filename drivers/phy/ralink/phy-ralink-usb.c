@@ -177,7 +177,7 @@ static int ralink_usb_phy_probe(struct platform_device *pdev)
 	if (!phy)
 		return -ENOMEM;
 
-	phy->clk = (uintptr_t)device_get_match_data(&pdev->dev);
+	phy->clk = __c_pa(device_get_match_data(&pdev->dev));
 	phy->base = NULL;
 
 	phy->sysctl = syscon_regmap_lookup_by_phandle(dev->of_node, "ralink,sysctl");

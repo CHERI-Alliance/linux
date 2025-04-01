@@ -160,7 +160,7 @@ static int hisi_inno_phy_probe(struct platform_device *pdev)
 	if (IS_ERR(priv->por_rst))
 		return PTR_ERR(priv->por_rst);
 
-	priv->type = (uintptr_t) of_device_get_match_data(dev);
+	priv->type = __c_pa(of_device_get_match_data(dev));
 
 	for_each_child_of_node(np, child) {
 		struct reset_control *rst;
