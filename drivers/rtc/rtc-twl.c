@@ -490,13 +490,13 @@ static const struct rtc_class_ops twl_rtc_ops = {
 static int twl_nvram_read(void *priv, unsigned int offset, void *val,
 			  size_t bytes)
 {
-	return twl_i2c_read((long)priv, val, offset, bytes);
+	return twl_i2c_read(__c_pa(priv), val, offset, bytes);
 }
 
 static int twl_nvram_write(void *priv, unsigned int offset, void *val,
 			   size_t bytes)
 {
-	return twl_i2c_write((long)priv, val, offset, bytes);
+	return twl_i2c_write(__c_pa(priv), val, offset, bytes);
 }
 
 /*----------------------------------------------------------------------*/
