@@ -108,7 +108,7 @@ static int pca995x_probe(struct i2c_client *client)
 	struct pca995x_led *led;
 	int i, btype, reg, ret;
 
-	btype = (unsigned long)device_get_match_data(&client->dev);
+	btype = __c_pa(device_get_match_data(&client->dev));
 
 	np = dev_fwnode(dev);
 	if (!np)

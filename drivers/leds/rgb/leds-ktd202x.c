@@ -496,7 +496,7 @@ static int ktd202x_probe_dt(struct ktd202x *chip)
 	int count;
 	int i = 0;
 
-	chip->num_leds = (int)(unsigned long)of_device_get_match_data(chip->dev);
+	chip->num_leds = (int)__c_pa(of_device_get_match_data(chip->dev));
 
 	count = of_get_available_child_count(np);
 	if (!count || count > chip->num_leds)

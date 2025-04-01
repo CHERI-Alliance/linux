@@ -469,7 +469,7 @@ static int lm3692x_probe(struct i2c_client *client)
 	mutex_init(&led->lock);
 	led->client = client;
 	led->led_dev.brightness_set_blocking = lm3692x_brightness_set;
-	led->model_id = id->driver_data;
+	led->model_id = __c_ua(id->driver_data);
 	i2c_set_clientdata(client, led);
 
 	led->regmap = devm_regmap_init_i2c(client, &lm3692x_regmap_config);

@@ -420,7 +420,7 @@ static int lm355x_probe(struct i2c_client *client)
 		return -ENOMEM;
 
 	chip->dev = &client->dev;
-	chip->type = id->driver_data;
+	chip->type = __c_ua(id->driver_data);
 	switch (id->driver_data) {
 	case CHIP_LM3554:
 		chip->regs = lm3554_regs;
@@ -480,7 +480,7 @@ static int lm355x_probe(struct i2c_client *client)
 		goto err_create_indicator_file;
 
 	dev_info(&client->dev, "%s is initialized\n",
-		 lm355x_name[id->driver_data]);
+		 lm355x_name[__c_ua(id->driver_data)]);
 	return 0;
 
 err_create_indicator_file:

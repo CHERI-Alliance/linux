@@ -466,7 +466,7 @@ pca9532_of_populate_pdata(struct device *dev, struct device_node *np)
 	int i = 0;
 	const char *state;
 
-	devid = (int)(uintptr_t)of_device_get_match_data(dev);
+	devid = (int)__c_pa(of_device_get_match_data(dev));
 	maxleds = pca9532_chip_info_tbl[devid].num_leds;
 
 	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
@@ -521,9 +521,9 @@ static int pca9532_probe(struct i2c_client *client)
 			dev_err(&client->dev, "no platform data\n");
 			return -EINVAL;
 		}
-		devid = (int)(uintptr_t)of_device_get_match_data(&client->dev);
+		devid = (int)__c_pa(of_device_get_match_data(&client->dev));
 	} else {
-		devid = id->driver_data;
+		devid = __c_ua(id->driver_data);
 	}
 
 	if (!i2c_check_functionality(client->adapter,
