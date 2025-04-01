@@ -9,18 +9,18 @@
 #include "ddk750_mode.h"
 
 
-#define PEEK32(addr) readl((addr)+mmio750)
-#define POKE32(addr,data) writel((data),(addr)+mmio750)
+#define PEEK32(addr) readl((addr)+smi_mmio750)
+#define POKE32(addr,data) writel((data),(addr)+smi_mmio750)
 #define peekRegisterDWord PEEK32
 #define pokeRegisterDWord POKE32
 
 
-#define peekRegisterByte(addr) readb((addr)+mmio750)
-#define pokeRegisterByte(addr,data) writeb((data),(addr)+mmio750)
+#define peekRegisterByte(addr) readb((addr)+smi_mmio750)
+#define pokeRegisterByte(addr,data) writeb((data),(addr)+smi_mmio750)
 
 
 
-extern volatile unsigned  char __iomem * mmio750;
+extern volatile unsigned  char __iomem * smi_mmio750;
 
 void ddk750_set_mmio(volatile unsigned char *,unsigned short,char);
 
