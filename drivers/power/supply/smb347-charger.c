@@ -1541,7 +1541,7 @@ static int smb347_probe(struct i2c_client *client)
 	if (!smb)
 		return -ENOMEM;
 	smb->dev = &client->dev;
-	smb->id = id->driver_data;
+	smb->id = __c_ua(id->driver_data);
 	i2c_set_clientdata(client, smb);
 
 	smb347_dt_parse_dev_info(smb);

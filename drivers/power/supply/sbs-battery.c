@@ -1135,7 +1135,7 @@ static int sbs_probe(struct i2c_client *client)
 	if (!chip)
 		return -ENOMEM;
 
-	chip->flags = (uintptr_t)i2c_get_match_data(client);
+	chip->flags = __c_pa(i2c_get_match_data(client));
 	chip->client = client;
 	psy_cfg.of_node = client->dev.of_node;
 	psy_cfg.drv_data = chip;

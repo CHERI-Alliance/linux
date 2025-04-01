@@ -1048,13 +1048,13 @@ static int max17042_probe(struct i2c_client *client)
 
 	chip->client = client;
 	if (id) {
-		chip->chip_type = id->driver_data;
+		chip->chip_type = __c_ua(id->driver_data);
 	} else {
 		acpi_id = acpi_match_device(dev->driver->acpi_match_table, dev);
 		if (!acpi_id)
 			return -ENODEV;
 
-		chip->chip_type = acpi_id->driver_data;
+		chip->chip_type = __c_ua(acpi_id->driver_data);
 	}
 	chip->regmap = devm_regmap_init_i2c(client, &max17042_regmap_config);
 	if (IS_ERR(chip->regmap)) {

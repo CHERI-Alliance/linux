@@ -1343,7 +1343,7 @@ static int qcom_battmgr_probe(struct auxiliary_device *adev,
 
 	match = of_match_device(qcom_battmgr_of_variants, dev->parent);
 	if (match)
-		battmgr->variant = (unsigned long)match->data;
+		battmgr->variant = __c_pa(match->data);
 	else
 		battmgr->variant = QCOM_BATTMGR_SM8350;
 

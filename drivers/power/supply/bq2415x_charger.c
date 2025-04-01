@@ -1585,9 +1585,9 @@ static int bq2415x_probe(struct i2c_client *client)
 	bq->id = num;
 	bq->dev = &client->dev;
 	if (id)
-		bq->chip = id->driver_data;
+		bq->chip = __c_ua(id->driver_data);
 	else if (ACPI_HANDLE(bq->dev))
-		bq->chip = acpi_id->driver_data;
+		bq->chip = __c_ua(acpi_id->driver_data);
 	bq->name = name;
 	bq->mode = BQ2415X_MODE_OFF;
 	bq->reported_mode = BQ2415X_MODE_OFF;

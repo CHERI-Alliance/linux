@@ -226,7 +226,7 @@ static int max17040_get_of_data(struct max17040_chip *chip)
 {
 	struct device *dev = &chip->client->dev;
 	struct chip_data *data = &max17040_family[
-		(uintptr_t) of_device_get_match_data(dev)];
+		__c_pa(of_device_get_match_data(dev))];
 	int rcomp_len;
 	u8 rcomp[2];
 
@@ -467,7 +467,7 @@ static int max17040_probe(struct i2c_client *client)
 	chip->regmap = devm_regmap_init_i2c(client, &max17040_regmap);
 	if (IS_ERR(chip->regmap))
 		return PTR_ERR(chip->regmap);
-	chip_id = (enum chip_id) id->driver_data;
+	chip_id = (enum chip_id)__c_ua(id->driver_data);
 	if (client->dev.of_node) {
 		ret = max17040_get_of_data(chip);
 		if (ret)
