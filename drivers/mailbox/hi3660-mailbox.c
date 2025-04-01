@@ -260,7 +260,7 @@ static int hi3660_mbox_probe(struct platform_device *pdev)
 	/* Initialize mailbox channel data */
 	chan = mbox->chan;
 	for (ch = 0; ch < MBOX_CHAN_MAX; ch++)
-		chan[ch].con_priv = (void *)ch;
+		chan[ch].con_priv = __c_fakep(ch);
 
 	err = devm_mbox_controller_register(dev, &mbox->controller);
 	if (err) {

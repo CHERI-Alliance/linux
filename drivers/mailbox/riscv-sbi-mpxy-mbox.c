@@ -255,9 +255,9 @@ static int mpxy_send_message_with_resp(u32 channel_id, u32 msg_id,
 		memcpy(mpxy->shmem, tx, tx_len);
 
 	sret = sbi_ecall(SBI_EXT_MPXY, SBI_EXT_MPXY_SEND_MSG_WITH_RESP,
-			 channel_id, msg_id, tx_len, 0, 0, 0);
+			 channel_id, msg_id, __c_fakeu(tx_len), 0, 0, 0);
 	if (rx && !sret.error) {
-		rx_bytes = sret.value;
+		rx_bytes = __c_ua(sret.value);
 		if (rx_bytes > max_rx_len) {
 			put_cpu();
 			return -ENOSPC;
@@ -290,7 +290,7 @@ static int mpxy_send_message_without_resp(u32 channel_id, u32 msg_id,
 		memcpy(mpxy->shmem, tx, tx_len);
 
 	sret = sbi_ecall(SBI_EXT_MPXY, SBI_EXT_MPXY_SEND_MSG_WITHOUT_RESP,
-			 channel_id, msg_id, tx_len, 0, 0, 0);
+			 channel_id, msg_id, __c_fakeu(tx_len), 0, 0, 0);
 
 	put_cpu();
 	return sbi_err_map_linux_errno(sret.error);
@@ -315,8 +315,8 @@ static int mpxy_get_notifications(u32 channel_id,
 	if (sret.error)
 		goto err_put_cpu;
 
-	memcpy(notif_data, mpxy->shmem, sret.value + 16);
-	*events_data_len = sret.value;
+	memcpy(notif_data, mpxy->shmem, __c_ua(sret.value) + 16);
+	*events_data_len = __c_ua(sret.value);
 
 err_put_cpu:
 	put_cpu();
@@ -332,7 +332,7 @@ static int mpxy_get_shmem_size(unsigned long *shmem_size)
 	if (sret.error)
 		return sbi_err_map_linux_errno(sret.error);
 	if (shmem_size)
-		*shmem_size = sret.value;
+		*shmem_size = __c_ua(sret.value);
 	return 0;
 }
 
