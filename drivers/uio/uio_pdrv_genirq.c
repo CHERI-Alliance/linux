@@ -202,7 +202,7 @@ static int uio_pdrv_genirq_probe(struct platform_device *pdev)
 		}
 
 		uiomem->memtype = UIO_MEM_PHYS;
-		uiomem->addr = r->start & PAGE_MASK;
+		uiomem->addr = __c_fakeu(r->start & PAGE_MASK);
 		uiomem->offs = r->start & ~PAGE_MASK;
 		uiomem->size = (uiomem->offs + resource_size(r)
 				+ PAGE_SIZE - 1) & PAGE_MASK;

@@ -53,7 +53,7 @@ static int hilscher_pci_probe(struct pci_dev *dev,
 	if (pci_request_regions(dev, "hilscher"))
 		goto out_disable;
 
-	info->mem[0].addr = pci_resource_start(dev, 0);
+	info->mem[0].addr = __c_fakeu(pci_resource_start(dev, 0));
 	if (!info->mem[0].addr)
 		goto out_release;
 	info->mem[0].internal_addr = pci_ioremap_bar(dev, 0);
@@ -62,7 +62,7 @@ static int hilscher_pci_probe(struct pci_dev *dev,
 
 	info->mem[0].size = pci_resource_len(dev, 0);
 	info->mem[0].memtype = UIO_MEM_PHYS;
-	info->mem[1].addr = pci_resource_start(dev, 2);
+	info->mem[1].addr = __c_fakeu(pci_resource_start(dev, 2));
 	info->mem[1].size = pci_resource_len(dev, 2);
 	info->mem[1].memtype = UIO_MEM_PHYS;
 	switch (id->subdevice) {

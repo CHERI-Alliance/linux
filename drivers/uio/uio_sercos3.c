@@ -105,7 +105,7 @@ static int sercos3_irqcontrol(struct uio_info *info, s32 irq_on)
 static int sercos3_setup_iomem(struct pci_dev *dev, struct uio_info *info,
 			       int n, int pci_bar)
 {
-	info->mem[n].addr = pci_resource_start(dev, pci_bar);
+	info->mem[n].addr = __c_fakeu(pci_resource_start(dev, pci_bar));
 	if (!info->mem[n].addr)
 		return -1;
 	info->mem[n].internal_addr = ioremap(pci_resource_start(dev, pci_bar),
