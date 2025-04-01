@@ -65,7 +65,7 @@ static int qcom_apcs_ipc_send_data(struct mbox_chan *chan, void *data)
 {
 	struct qcom_apcs_ipc *apcs = container_of(chan->mbox,
 						  struct qcom_apcs_ipc, mbox);
-	unsigned long idx = (unsigned long)chan->con_priv;
+	unsigned long idx = __c_pa(chan->con_priv);
 
 	return regmap_write(apcs->regmap, apcs->offset, BIT(idx));
 }
@@ -102,7 +102,7 @@ static int qcom_apcs_ipc_probe(struct platform_device *pdev)
 
 	/* Initialize channel identifiers */
 	for (i = 0; i < ARRAY_SIZE(apcs->mbox_chans); i++)
-		apcs->mbox_chans[i].con_priv = (void *)i;
+		apcs->mbox_chans[i].con_priv = __c_fakep(i);
 
 	apcs->mbox.dev = &pdev->dev;
 	apcs->mbox.ops = &qcom_apcs_ipc_ops;
