@@ -273,7 +273,7 @@ enum {
 #define NTB_QP_DEF_NUM_ENTRIES	100
 #define NTB_LINK_DOWN_TIMEOUT	10
 
-static void ntb_transport_rxc_db(unsigned long data);
+static void ntb_transport_rxc_db(uintptr_t data);
 static const struct ntb_ctx_ops ntb_transport_ops;
 static struct ntb_client ntb_transport_client;
 static int ntb_async_tx_submit(struct ntb_transport_qp *qp,
@@ -1240,7 +1240,7 @@ static int ntb_transport_init_queue(struct ntb_transport_ctx *nt,
 	INIT_LIST_HEAD(&qp->tx_free_q);
 
 	tasklet_init(&qp->rxc_db_work, ntb_transport_rxc_db,
-		     (unsigned long)qp);
+		     (uintptr_t) qp);
 
 	return 0;
 }
@@ -1537,8 +1537,8 @@ static int ntb_async_rx_submit(struct ntb_queue_entry *entry, void *offset)
 
 	len = entry->len;
 	device = chan->device;
-	pay_off = (size_t)offset & ~PAGE_MASK;
-	buff_off = (size_t)buf & ~PAGE_MASK;
+	pay_off = (size_t)__c_pa(offset) & ~PAGE_MASK;
+	buff_off = (size_t)__c_pa(buf) & ~PAGE_MASK;
 
 	if (!is_dma_copy_aligned(device, pay_off, buff_off, len))
 		goto err;
@@ -1690,7 +1690,7 @@ static int ntb_process_rxc(struct ntb_transport_qp *qp)
 	return 0;
 }
 
-static void ntb_transport_rxc_db(unsigned long data)
+static void ntb_transport_rxc_db(uintptr_t data)
 {
 	struct ntb_transport_qp *qp = (void *)data;
 	int rc, i;
@@ -1818,7 +1818,7 @@ static int ntb_async_tx_submit(struct ntb_transport_qp *qp,
 
 	device = chan->device;
 	dest = qp->tx_mw_dma_addr + qp->tx_max_frame * entry->tx_index;
-	buff_off = (size_t)buf & ~PAGE_MASK;
+	buff_off = (size_t)__c_pa(buf) & ~PAGE_MASK;
 	dest_off = (size_t)dest & ~PAGE_MASK;
 
 	if (!is_dma_copy_aligned(device, buff_off, dest_off, len))
@@ -1961,7 +1961,7 @@ static void ntb_send_link_down(struct ntb_transport_qp *qp)
 
 static bool ntb_dma_filter_fn(struct dma_chan *chan, void *node)
 {
-	return dev_to_node(&chan->dev->device) == (int)(unsigned long)node;
+	return dev_to_node(&chan->dev->device) == (int)__c_pa(node);
 }
 
 /**
@@ -2022,13 +2022,13 @@ ntb_transport_create_queue(void *data, struct device *client_dev,
 	if (use_dma) {
 		qp->tx_dma_chan =
 			dma_request_channel(dma_mask, ntb_dma_filter_fn,
-					    (void *)(unsigned long)node);
+					    __c_fakep(node));
 		if (!qp->tx_dma_chan)
 			dev_info(&pdev->dev, "Unable to allocate TX DMA channel\n");
 
 		qp->rx_dma_chan =
 			dma_request_channel(dma_mask, ntb_dma_filter_fn,
-					    (void *)(unsigned long)node);
+					    __c_fakep(node));
 		if (!qp->rx_dma_chan)
 			dev_info(&pdev->dev, "Unable to allocate RX DMA channel\n");
 	} else {

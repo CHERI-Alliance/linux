@@ -697,7 +697,7 @@ static int switchtec_ntb_peer_db_addr(struct ntb_dev *ntb,
 		return -EINVAL;
 
 	offset = (unsigned long)sndev->mmio_peer_dbmsg->odb -
-		(unsigned long)sndev->stdev->mmio;
+		__c_pa(sndev->stdev->mmio);
 
 	offset += sndev->db_shift / 8;
 
@@ -801,8 +801,8 @@ static int switchtec_ntb_peer_spad_addr(struct ntb_dev *ntb, int pidx,
 	if (pidx != NTB_DEF_PEER_IDX)
 		return -EINVAL;
 
-	offset = (unsigned long)&sndev->peer_shared->spad[sidx] -
-		(unsigned long)sndev->stdev->mmio;
+	offset = __c_pa(&sndev->peer_shared->spad[sidx]) -
+		__c_pa(sndev->stdev->mmio);
 
 	if (spad_addr)
 		*spad_addr = pci_resource_start(ntb->pdev, 0) + offset;
