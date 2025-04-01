@@ -1101,7 +1101,7 @@ static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
 	if (host->use_dma == TRANS_MODE_IDMAC)
 		dev_vdbg(host->dev,
 			 "sd sg_cpu: %#lx sg_dma: %#lx sg_len: %d\n",
-			 (unsigned long)host->sg_cpu,
+			 __c_pa(host->sg_cpu),
 			 (unsigned long)host->sg_dma,
 			 sg_len);
 
@@ -2339,7 +2339,7 @@ static void dw_mci_push_data16(struct dw_mci *host, void *buf, int cnt)
 		}
 	}
 #ifndef CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS
-	if (unlikely((unsigned long)buf & 0x1)) {
+	if (unlikely(__c_pa(buf) & 0x1)) {
 		while (cnt >= 2) {
 			u16 aligned_buf[64];
 			int len = min(cnt & -2, (int)sizeof(aligned_buf));
@@ -2375,7 +2375,7 @@ static void dw_mci_push_data16(struct dw_mci *host, void *buf, int cnt)
 static void dw_mci_pull_data16(struct dw_mci *host, void *buf, int cnt)
 {
 #ifndef CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS
-	if (unlikely((unsigned long)buf & 0x1)) {
+	if (unlikely(__c_pa(buf) & 0x1)) {
 		while (cnt >= 2) {
 			/* pull data from fifo into aligned buffer */
 			u16 aligned_buf[64];
@@ -2422,7 +2422,7 @@ static void dw_mci_push_data32(struct dw_mci *host, void *buf, int cnt)
 		}
 	}
 #ifndef CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS
-	if (unlikely((unsigned long)buf & 0x3)) {
+	if (unlikely(__c_pa(buf) & 0x3)) {
 		while (cnt >= 4) {
 			u32 aligned_buf[32];
 			int len = min(cnt & -4, (int)sizeof(aligned_buf));
@@ -2458,7 +2458,7 @@ static void dw_mci_push_data32(struct dw_mci *host, void *buf, int cnt)
 static void dw_mci_pull_data32(struct dw_mci *host, void *buf, int cnt)
 {
 #ifndef CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS
-	if (unlikely((unsigned long)buf & 0x3)) {
+	if (unlikely(__c_pa(buf) & 0x3)) {
 		while (cnt >= 4) {
 			/* pull data from fifo into aligned buffer */
 			u32 aligned_buf[32];
@@ -2506,7 +2506,7 @@ static void dw_mci_push_data64(struct dw_mci *host, void *buf, int cnt)
 		}
 	}
 #ifndef CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS
-	if (unlikely((unsigned long)buf & 0x7)) {
+	if (unlikely(__c_pa(buf) & 0x7)) {
 		while (cnt >= 8) {
 			u64 aligned_buf[16];
 			int len = min(cnt & -8, (int)sizeof(aligned_buf));
@@ -2542,7 +2542,7 @@ static void dw_mci_push_data64(struct dw_mci *host, void *buf, int cnt)
 static void dw_mci_pull_data64(struct dw_mci *host, void *buf, int cnt)
 {
 #ifndef CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS
-	if (unlikely((unsigned long)buf & 0x7)) {
+	if (unlikely(__c_pa(buf) & 0x7)) {
 		while (cnt >= 8) {
 			/* pull data from fifo into aligned buffer */
 			u64 aligned_buf[16];

@@ -428,9 +428,9 @@ static void sh_mmcif_request_dma(struct sh_mmcif_host *host)
 		struct sh_mmcif_plat_data *pdata = dev->platform_data;
 
 		host->chan_tx = sh_mmcif_request_dma_pdata(host,
-							pdata->slave_id_tx);
+							__c_fakeu(pdata->slave_id_tx));
 		host->chan_rx = sh_mmcif_request_dma_pdata(host,
-							pdata->slave_id_rx);
+							__c_fakeu(pdata->slave_id_rx));
 	} else {
 		host->chan_tx = dma_request_chan(dev, "tx");
 		if (IS_ERR(host->chan_tx))

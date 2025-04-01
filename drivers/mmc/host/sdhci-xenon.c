@@ -522,7 +522,7 @@ static int xenon_probe(struct platform_device *pdev)
 	pltfm_host = sdhci_priv(host);
 	priv = sdhci_pltfm_priv(pltfm_host);
 
-	priv->hw_version = (unsigned long)device_get_match_data(&pdev->dev);
+	priv->hw_version = __c_pa(device_get_match_data(&pdev->dev));
 
 	/*
 	 * Link Xenon specific mmc_host_ops function,

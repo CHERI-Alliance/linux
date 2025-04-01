@@ -1266,7 +1266,7 @@ static int davinci_mmcsd_probe(struct platform_device *pdev)
 
 	id_entry = platform_get_device_id(pdev);
 	if (id_entry)
-		host->version = id_entry->driver_data;
+		host->version = __c_ua(id_entry->driver_data);
 
 	mmc->ops = &mmc_davinci_ops;
 	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;

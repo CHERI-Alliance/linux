@@ -312,7 +312,7 @@ static void renesas_sdhi_sys_dmac_start_dma(struct tmio_mmc_host *host,
 	}
 }
 
-static void renesas_sdhi_sys_dmac_issue_tasklet_fn(unsigned long priv)
+static void renesas_sdhi_sys_dmac_issue_tasklet_fn(uintptr_t priv)
 {
 	struct tmio_mmc_host *host = (struct tmio_mmc_host *)priv;
 	struct dma_chan *chan = NULL;
@@ -403,7 +403,7 @@ static void renesas_sdhi_sys_dmac_request_dma(struct tmio_mmc_host *host,
 		init_completion(&priv->dma_priv.dma_dataend);
 		tasklet_init(&host->dma_issue,
 			     renesas_sdhi_sys_dmac_issue_tasklet_fn,
-			     (unsigned long)host);
+			     (uintptr_t) host);
 	}
 
 	renesas_sdhi_sys_dmac_enable_dma(host, true);
