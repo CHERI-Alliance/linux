@@ -181,7 +181,7 @@ static const struct watchdog_info ath79_wdt_info = {
 };
 
 static long ath79_wdt_ioctl(struct file *file, unsigned int cmd,
-			    unsigned long arg)
+			    user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 	int __user *p = argp;

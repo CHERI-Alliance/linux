@@ -270,7 +270,7 @@ out:
  */
 
 static long wdrtas_ioctl(struct file *file, unsigned int cmd,
-							unsigned long arg)
+							user_uintptr_t arg)
 {
 	int __user *argp = (void __user *)arg;
 	int i;

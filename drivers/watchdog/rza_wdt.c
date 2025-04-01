@@ -193,7 +193,7 @@ static int rza_wdt_probe(struct platform_device *pdev)
 	priv->wdev.ops = &rza_wdt_ops;
 	priv->wdev.parent = dev;
 
-	priv->cks = (u8)(uintptr_t) of_device_get_match_data(dev);
+	priv->cks = (u8)__c_pa(of_device_get_match_data(dev));
 	if (priv->cks == CKS_4BIT) {
 		/* Assume slowest clock rate possible (CKS=0xF) */
 		priv->wdev.max_timeout = (DIVIDER_4BIT * U8_MAX) / rate;

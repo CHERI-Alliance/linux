@@ -173,7 +173,7 @@ static ssize_t ali_write(struct file *file, const char __user *data,
  *	we want an extension to enable irq ack monitoring and the like
  */
 
-static long ali_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long ali_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 	int __user *p = argp;

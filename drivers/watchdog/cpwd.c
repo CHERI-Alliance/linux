@@ -403,7 +403,8 @@ static int cpwd_release(struct inode *inode, struct file *file)
 	return 0;
 }
 
-static long cpwd_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long cpwd_ioctl(struct file *file, unsigned int cmd,
+		       user_uintptr_t arg)
 {
 	static const struct watchdog_info info = {
 		.options		= WDIOF_SETTIMEOUT,

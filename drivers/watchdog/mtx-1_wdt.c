@@ -127,7 +127,7 @@ static int mtx1_wdt_release(struct inode *inode, struct file *file)
 }
 
 static long mtx1_wdt_ioctl(struct file *file, unsigned int cmd,
-							unsigned long arg)
+							user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 	int __user *p = (int __user *)argp;

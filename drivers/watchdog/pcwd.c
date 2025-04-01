@@ -583,7 +583,8 @@ static int pcwd_get_temperature(int *temperature)
  *	/dev/watchdog handling
  */
 
-static long pcwd_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long pcwd_ioctl(struct file *file, unsigned int cmd,
+		       user_uintptr_t arg)
 {
 	int rv;
 	int status;

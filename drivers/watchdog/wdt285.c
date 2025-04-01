@@ -132,7 +132,7 @@ static const struct watchdog_info ident = {
 };
 
 static long watchdog_ioctl(struct file *file, unsigned int cmd,
-			   unsigned long arg)
+			   user_uintptr_t arg)
 {
 	int __user *int_arg = (int __user *)arg;
 	int new_margin, ret = -ENOTTY;

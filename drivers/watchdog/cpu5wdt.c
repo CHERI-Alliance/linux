@@ -136,7 +136,7 @@ static int cpu5wdt_release(struct inode *inode, struct file *file)
 }
 
 static long cpu5wdt_ioctl(struct file *file, unsigned int cmd,
-						unsigned long arg)
+						user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 	int __user *p = argp;

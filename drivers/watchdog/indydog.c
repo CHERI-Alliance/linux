@@ -96,7 +96,7 @@ static ssize_t indydog_write(struct file *file, const char *data,
 }
 
 static long indydog_ioctl(struct file *file, unsigned int cmd,
-							unsigned long arg)
+							user_uintptr_t arg)
 {
 	int options, retval = -EINVAL;
 	static const struct watchdog_info ident = {

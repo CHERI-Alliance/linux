@@ -167,7 +167,7 @@ static ssize_t sbwdog_write(struct file *file, const char __user *data,
 }
 
 static long sbwdog_ioctl(struct file *file, unsigned int cmd,
-						unsigned long arg)
+						user_uintptr_t arg)
 {
 	int ret = -ENOTTY;
 	unsigned long time;

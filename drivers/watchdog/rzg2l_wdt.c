@@ -277,7 +277,7 @@ static int rzg2l_wdt_probe(struct platform_device *pdev)
 	if (ret)
 		return dev_err_probe(dev, ret, "failed to deassert");
 
-	priv->devtype = (uintptr_t)of_device_get_match_data(dev);
+	priv->devtype = __c_pa(of_device_get_match_data(dev));
 
 	if (priv->devtype == WDT_RZV2M) {
 		priv->minimum_assertion_period = RZV2M_A_NSEC +

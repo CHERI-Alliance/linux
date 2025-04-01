@@ -190,7 +190,7 @@ static ssize_t mixcomwd_write(struct file *file, const char __user *data,
 }
 
 static long mixcomwd_ioctl(struct file *file,
-				unsigned int cmd, unsigned long arg)
+				unsigned int cmd, user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 	int __user *p = argp;

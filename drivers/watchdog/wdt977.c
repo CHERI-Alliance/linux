@@ -346,7 +346,7 @@ static const struct watchdog_info ident = {
  */
 
 static long wdt977_ioctl(struct file *file, unsigned int cmd,
-							unsigned long arg)
+							user_uintptr_t arg)
 {
 	int status;
 	int new_options, retval = -EINVAL;

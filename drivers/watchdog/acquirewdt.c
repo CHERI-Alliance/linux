@@ -141,7 +141,7 @@ static ssize_t acq_write(struct file *file, const char __user *buf,
 	return count;
 }
 
-static long acq_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long acq_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	int options, retval = -EINVAL;
 	void __user *argp = (void __user *)arg;

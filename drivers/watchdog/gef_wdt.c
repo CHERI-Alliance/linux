@@ -156,7 +156,7 @@ static ssize_t gef_wdt_write(struct file *file, const char __user *data,
 }
 
 static long gef_wdt_ioctl(struct file *file, unsigned int cmd,
-							unsigned long arg)
+							user_uintptr_t arg)
 {
 	int timeout;
 	int options;

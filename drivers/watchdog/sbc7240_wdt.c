@@ -153,7 +153,7 @@ static const struct watchdog_info ident = {
 };
 
 
-static long fop_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long fop_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	switch (cmd) {
 	case WDIOC_GETSUPPORT:

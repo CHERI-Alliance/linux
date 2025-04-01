@@ -186,7 +186,7 @@ static ssize_t rc32434_wdt_write(struct file *file, const char *data,
 }
 
 static long rc32434_wdt_ioctl(struct file *file, unsigned int cmd,
-				unsigned long arg)
+				user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 	int new_timeout;
