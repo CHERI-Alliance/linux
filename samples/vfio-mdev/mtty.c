@@ -831,7 +831,7 @@ static int mtty_release_migf(struct inode *inode, struct file *filp)
 }
 
 static long mtty_precopy_ioctl(struct file *filp, unsigned int cmd,
-			       unsigned long arg)
+			       user_uintptr_t arg)
 {
 	struct mtty_migration_file *migf = filp->private_data;
 	struct mdev_state *mdev_state = migf->mdev_state;
@@ -1788,7 +1788,7 @@ static int mtty_get_device_info(struct vfio_device_info *dev_info)
 }
 
 static long mtty_ioctl(struct vfio_device *vdev, unsigned int cmd,
-			unsigned long arg)
+			user_uintptr_t arg)
 {
 	struct mdev_state *mdev_state =
 		container_of(vdev, struct mdev_state, vdev);

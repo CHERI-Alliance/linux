@@ -5405,7 +5405,7 @@ bool file_is_kvm(struct file *file)
 }
 EXPORT_SYMBOL_GPL(file_is_kvm);
 
-static int kvm_dev_ioctl_create_vm(unsigned long type)
+static int kvm_dev_ioctl_create_vm(user_uintptr_t type)
 {
 	char fdname[ITOA_MAX_LEN + 1];
 	int r, fd;

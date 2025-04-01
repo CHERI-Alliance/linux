@@ -1420,7 +1420,7 @@ static int __init nr_proto_init(void)
 			goto fail;
 		}
 
-		dev->base_addr = i;
+		dev->base_addr = __c_fakeu(i);
 		rc = register_netdev(dev);
 		if (rc) {
 			free_netdev(dev);
