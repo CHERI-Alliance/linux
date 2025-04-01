@@ -147,7 +147,7 @@ struct sprd_adi {
 	struct device		*dev;
 	void __iomem		*base;
 	struct hwspinlock	*hwlock;
-	unsigned long		slave_vbase;
+	uintptr_t		slave_vbase;
 	unsigned long		slave_pbase;
 	const struct sprd_adi_data *data;
 };
