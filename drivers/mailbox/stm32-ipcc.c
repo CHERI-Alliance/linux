@@ -145,7 +145,7 @@ static irqreturn_t stm32_ipcc_tx_irq(int irq, void *data)
 
 static int stm32_ipcc_send_data(struct mbox_chan *link, void *data)
 {
-	uintptr_t chan = (uintptr_t)link->con_priv;
+	unsigned long chan = __c_pa(link->con_priv);
 	struct stm32_ipcc *ipcc = container_of(link->mbox, struct stm32_ipcc,
 					       controller);
 
@@ -164,7 +164,7 @@ static int stm32_ipcc_send_data(struct mbox_chan *link, void *data)
 
 static int stm32_ipcc_startup(struct mbox_chan *link)
 {
-	uintptr_t chan = (uintptr_t)link->con_priv;
+	unsigned long chan = __c_pa(link->con_priv);
 	struct stm32_ipcc *ipcc = container_of(link->mbox, struct stm32_ipcc,
 					       controller);
 	int ret;
@@ -184,7 +184,7 @@ static int stm32_ipcc_startup(struct mbox_chan *link)
 
 static void stm32_ipcc_shutdown(struct mbox_chan *link)
 {
-	uintptr_t chan = (uintptr_t)link->con_priv;
+	unsigned long chan = __c_pa(link->con_priv);
 	struct stm32_ipcc *ipcc = container_of(link->mbox, struct stm32_ipcc,
 					       controller);
 
@@ -303,7 +303,7 @@ static int stm32_ipcc_probe(struct platform_device *pdev)
 	}
 
 	for (i = 0; i < ipcc->controller.num_chans; i++)
-		ipcc->controller.chans[i].con_priv = (void *)i;
+		ipcc->controller.chans[i].con_priv = __c_fakep(i);
 
 	ret = devm_mbox_controller_register(dev, &ipcc->controller);
 	if (ret)
