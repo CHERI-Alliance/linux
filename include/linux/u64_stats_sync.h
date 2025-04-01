@@ -65,6 +65,9 @@ struct u64_stats_sync {
 #if BITS_PER_LONG == 32
 	seqcount_t	seq;
 #endif
+#ifdef CONFIG_CHERI_KERNEL
+	char dummy;
+#endif
 };
 
 #if BITS_PER_LONG == 64

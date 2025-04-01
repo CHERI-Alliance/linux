@@ -9,6 +9,7 @@
 
 #include <linux/module.h>
 #include <linux/scatterlist.h>
+#include <linux/empty_array.h>
 #include <crypto/akcipher.h>
 #include <crypto/algapi.h>
 #include <crypto/hash.h>
@@ -26,8 +27,7 @@
  *
  * https://www.rfc-editor.org/rfc/rfc9580#table-24
  */
-
-static const u8 hash_prefix_none[] = { };
+EMPTY_ARRAY(u8, hash_prefix_none)
 
 static const u8 hash_prefix_md5[] = {
 	0x30, 0x20, 0x30, 0x0c, 0x06, 0x08,	  /* SEQUENCE (SEQUENCE (OID */
