@@ -281,7 +281,7 @@ static size_t parport_pc_epp_read_data(struct parport *port, void *buf,
 		while (!(status & 0x08) && got < length) {
 			if (left >= 16 && (status & 0x20) && !(status & 0x08)) {
 				/* can grab 16 bytes from warp fifo */
-				if (!((long)buf & 0x03))
+				if (!(__c_pa(buf) & 0x03))
 					insl(EPPDATA(port), buf, 4);
 				else
 					insb(EPPDATA(port), buf, 16);
@@ -309,10 +309,10 @@ static size_t parport_pc_epp_read_data(struct parport *port, void *buf,
 			   || flags & PARPORT_EPP_FAST_16
 			   || flags & PARPORT_EPP_FAST_8)) {
 		if ((flags & PARPORT_EPP_FAST_32)
-		    && !(((long)buf | length) & 0x03))
+		    && !((__c_pa(buf) | length) & 0x03))
 			insl(EPPDATA(port), buf, (length >> 2));
 		else if ((flags & PARPORT_EPP_FAST_16)
-			 && !(((long)buf | length) & 0x01))
+			 && !((__c_pa(buf) | length) & 0x01))
 			insw(EPPDATA(port), buf, length >> 1);
 		else
 			insb(EPPDATA(port), buf, length);
@@ -344,10 +344,10 @@ static size_t parport_pc_epp_write_data(struct parport *port, const void *buf,
 			   || flags & PARPORT_EPP_FAST_16
 			   || flags & PARPORT_EPP_FAST_8)) {
 		if ((flags & PARPORT_EPP_FAST_32)
-		    && !(((long)buf | length) & 0x03))
+		    && !((__c_pa(buf) | length) & 0x03))
 			outsl(EPPDATA(port), buf, (length >> 2));
 		else if ((flags & PARPORT_EPP_FAST_16)
-			 && !(((long)buf | length) & 0x01))
+			 && !((__c_pa(buf) | length) & 0x01))
 			outsw(EPPDATA(port), buf, length >> 1);
 		else
 			outsb(EPPDATA(port), buf, length);
@@ -2866,7 +2866,7 @@ struct pci_parport_data {
 static int parport_pc_pci_probe(struct pci_dev *dev,
 					   const struct pci_device_id *id)
 {
-	int err, count, n, i = id->driver_data;
+	int err, count, n, i = __c_ua(id->driver_data);
 	struct pci_parport_data *data;
 
 	if (i < last_sio)
@@ -2969,9 +2969,9 @@ static int __init parport_pc_init_superio(int autoirq, int autodma)
 		if (id == NULL || id->driver_data >= last_sio)
 			continue;
 
-		if (parport_pc_superio_info[id->driver_data].probe(
-			pdev, autoirq, autodma,
-			parport_pc_superio_info[id->driver_data].via)) {
+		if (parport_pc_superio_info[__c_ua(id->driver_data)].probe(
+									   pdev, autoirq, autodma,
+									   parport_pc_superio_info[__c_ua(id->driver_data)].via)) {
 			ret++;
 		}
 	}
