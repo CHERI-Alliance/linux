@@ -172,9 +172,9 @@ struct bt1_pcie {
  */
 static int bt1_pcie_read_mmio(void __iomem *addr, int size, u32 *val)
 {
-	unsigned int ofs = (uintptr_t)addr & 0x3;
+	unsigned int ofs = __c_pa(addr) & 0x3;
 
-	if (!IS_ALIGNED((uintptr_t)addr, size))
+	if (!IS_ALIGNED(__c_pa(addr), size))
 		return -EINVAL;
 
 	*val = readl(addr - ofs) >> ofs * BITS_PER_BYTE;
@@ -193,10 +193,10 @@ static int bt1_pcie_read_mmio(void __iomem *addr, int size, u32 *val)
 
 static int bt1_pcie_write_mmio(void __iomem *addr, int size, u32 val)
 {
-	unsigned int ofs = (uintptr_t)addr & 0x3;
+	unsigned int ofs = __c_pa(addr) & 0x3;
 	u32 tmp, mask;
 
-	if (!IS_ALIGNED((uintptr_t)addr, size))
+	if (!IS_ALIGNED(__c_pa(addr), size))
 		return -EINVAL;
 
 	if (size == 4) {

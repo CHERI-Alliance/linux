@@ -104,7 +104,7 @@ static int rockchip_pcie_rd_own_conf(struct rockchip_pcie *rockchip,
 
 	addr = rockchip->apb_base + PCIE_RC_CONFIG_NORMAL_BASE + where;
 
-	if (!IS_ALIGNED((uintptr_t)addr, size)) {
+	if (!IS_ALIGNED(__c_pa(addr), size)) {
 		*val = 0;
 		return PCIBIOS_BAD_REGISTER_NUMBER;
 	}
@@ -158,7 +158,7 @@ static int rockchip_pcie_rd_other_conf(struct rockchip_pcie *rockchip,
 
 	addr = rockchip->reg_base + PCIE_ECAM_OFFSET(bus->number, devfn, where);
 
-	if (!IS_ALIGNED((uintptr_t)addr, size)) {
+	if (!IS_ALIGNED(__c_pa(addr), size)) {
 		*val = 0;
 		return PCIBIOS_BAD_REGISTER_NUMBER;
 	}
@@ -191,7 +191,7 @@ static int rockchip_pcie_wr_other_conf(struct rockchip_pcie *rockchip,
 
 	addr = rockchip->reg_base + PCIE_ECAM_OFFSET(bus->number, devfn, where);
 
-	if (!IS_ALIGNED((uintptr_t)addr, size))
+	if (!IS_ALIGNED(__c_pa(addr), size))
 		return PCIBIOS_BAD_REGISTER_NUMBER;
 
 	if (pci_is_root_bus(bus->parent))
