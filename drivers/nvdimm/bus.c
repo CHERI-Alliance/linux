@@ -1021,7 +1021,7 @@ static int nd_cmd_clear_to_send(struct nvdimm_bus *nvdimm_bus,
 }
 
 static int __nd_ioctl(struct nvdimm_bus *nvdimm_bus, struct nvdimm *nvdimm,
-		int read_only, unsigned int ioctl_cmd, unsigned long arg)
+		int read_only, unsigned int ioctl_cmd, user_uintptr_t arg)
 {
 	struct nvdimm_bus_descriptor *nd_desc = nvdimm_bus->nd_desc;
 	const struct nd_cmd_desc *desc = NULL;
@@ -1211,7 +1211,7 @@ enum nd_ioctl_mode {
 
 static int match_dimm(struct device *dev, void *data)
 {
-	long id = (long) data;
+	long id = (long)__c_pa(data);
 
 	if (is_nvdimm(dev)) {
 		struct nvdimm *nvdimm = to_nvdimm(dev);
@@ -1222,12 +1222,12 @@ static int match_dimm(struct device *dev, void *data)
 	return 0;
 }
 
-static long nd_ioctl(struct file *file, unsigned int cmd, unsigned long arg,
+static long nd_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg,
 		enum nd_ioctl_mode mode)
 
 {
 	struct nvdimm_bus *nvdimm_bus, *found = NULL;
-	long id = (long) file->private_data;
+	long id = __c_pa(file->private_data);
 	struct nvdimm *nvdimm = NULL;
 	int rc, ro;
 
@@ -1268,12 +1268,13 @@ static long nd_ioctl(struct file *file, unsigned int cmd, unsigned long arg,
 	return rc;
 }
 
-static long bus_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long bus_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	return nd_ioctl(file, cmd, arg, BUS_IOCTL);
 }
 
-static long dimm_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long dimm_ioctl(struct file *file, unsigned int cmd,
+		       user_uintptr_t arg)
 {
 	return nd_ioctl(file, cmd, arg, DIMM_IOCTL);
 }
@@ -1282,7 +1283,7 @@ static int nd_open(struct inode *inode, struct file *file)
 {
 	long minor = iminor(inode);
 
-	file->private_data = (void *) minor;
+	file->private_data = (void *)__c_fakep(minor);
 	return 0;
 }
 

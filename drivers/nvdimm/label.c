@@ -283,17 +283,17 @@ static int to_slot(struct nvdimm_drvdata *ndd,
 {
 	unsigned long label, base;
 
-	label = (unsigned long) nd_label;
-	base = (unsigned long) nd_label_base(ndd);
+	label = __c_pa(nd_label);
+	base = __c_pa(nd_label_base(ndd));
 
 	return (label - base) / sizeof_namespace_label(ndd);
 }
 
 static struct nd_namespace_label *to_label(struct nvdimm_drvdata *ndd, int slot)
 {
-	unsigned long label, base;
+	uintptr_t label, base;
 
-	base = (unsigned long) nd_label_base(ndd);
+	base = (uintptr_t) nd_label_base(ndd);
 	label = base + sizeof_namespace_label(ndd) * slot;
 
 	return (struct nd_namespace_label *) label;
@@ -675,16 +675,14 @@ static int nd_label_write_index(struct nvdimm_drvdata *ndd, int index, u32 seq,
 	memset(&nsindex->flags, 0, 3);
 	nsindex->labelsize = sizeof_namespace_label(ndd) >> 8;
 	nsindex->seq = __cpu_to_le32(seq);
-	offset = (unsigned long) nsindex
-		- (unsigned long) to_namespace_index(ndd, 0);
+	offset = __c_pa(nsindex) - __c_pa(to_namespace_index(ndd, 0));
 	nsindex->myoff = __cpu_to_le64(offset);
 	nsindex->mysize = __cpu_to_le64(sizeof_namespace_index(ndd));
-	offset = (unsigned long) to_namespace_index(ndd,
-			nd_label_next_nsindex(index))
-		- (unsigned long) to_namespace_index(ndd, 0);
+	offset = __c_pa(to_namespace_index(ndd, nd_label_next_nsindex(index)))
+		- __c_pa(to_namespace_index(ndd, 0));
 	nsindex->otheroff = __cpu_to_le64(offset);
-	offset = (unsigned long) nd_label_base(ndd)
-		- (unsigned long) to_namespace_index(ndd, 0);
+	offset = __c_pa(nd_label_base(ndd))
+		- __c_pa(to_namespace_index(ndd, 0));
 	nsindex->labeloff = __cpu_to_le64(offset);
 	nsindex->nslot = __cpu_to_le32(nslot);
 	nsindex->major = __cpu_to_le16(1);
@@ -725,8 +723,7 @@ static int nd_label_write_index(struct nvdimm_drvdata *ndd, int index, u32 seq,
 static unsigned long nd_label_offset(struct nvdimm_drvdata *ndd,
 		struct nd_namespace_label *nd_label)
 {
-	return (unsigned long) nd_label
-		- (unsigned long) to_namespace_index(ndd, 0);
+	return __c_pa(nd_label) - __c_pa(to_namespace_index(ndd, 0));
 }
 
 static enum nvdimm_claim_class guid_to_nvdimm_cclass(guid_t *guid)
