@@ -1069,7 +1069,7 @@ static int pmic_gpio_probe(struct platform_device *pdev)
 		return ret;
 	}
 
-	npins = (uintptr_t) device_get_match_data(&pdev->dev);
+	npins = __c_pa(device_get_match_data(&pdev->dev));
 
 	state = devm_kzalloc(dev, sizeof(*state), GFP_KERNEL);
 	if (!state)

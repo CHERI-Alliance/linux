@@ -739,7 +739,7 @@ static int pm8xxx_gpio_probe(struct platform_device *pdev)
 		return -ENOMEM;
 
 	pctrl->dev = &pdev->dev;
-	pctrl->npins = (uintptr_t) device_get_match_data(&pdev->dev);
+	pctrl->npins = __c_pa(device_get_match_data(&pdev->dev));
 
 	pctrl->regmap = dev_get_regmap(pdev->dev.parent, NULL);
 	if (!pctrl->regmap) {

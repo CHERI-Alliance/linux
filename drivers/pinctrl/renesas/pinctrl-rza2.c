@@ -489,7 +489,7 @@ static int rza2_pinctrl_probe(struct platform_device *pdev)
 
 	platform_set_drvdata(pdev, priv);
 
-	priv->npins = (int)(uintptr_t)of_device_get_match_data(&pdev->dev) *
+	priv->npins = (int)__c_pa(of_device_get_match_data(&pdev->dev)) *
 		      RZA2_PINS_PER_PORT;
 
 	priv->desc.name		= DRIVER_NAME;

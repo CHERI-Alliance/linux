@@ -95,31 +95,31 @@ enum uniphier_pin_pull_dir {
 
 static inline unsigned int uniphier_pin_get_iectrl(void *drv_data)
 {
-	return ((unsigned long)drv_data >> UNIPHIER_PIN_IECTRL_SHIFT) &
+	return (__c_pa(drv_data) >> UNIPHIER_PIN_IECTRL_SHIFT) &
 						UNIPHIER_PIN_IECTRL_MASK;
 }
 
 static inline unsigned int uniphier_pin_get_drvctrl(void *drv_data)
 {
-	return ((unsigned long)drv_data >> UNIPHIER_PIN_DRVCTRL_SHIFT) &
+	return (__c_pa(drv_data) >> UNIPHIER_PIN_DRVCTRL_SHIFT) &
 						UNIPHIER_PIN_DRVCTRL_MASK;
 }
 
 static inline unsigned int uniphier_pin_get_drv_type(void *drv_data)
 {
-	return ((unsigned long)drv_data >> UNIPHIER_PIN_DRV_TYPE_SHIFT) &
+	return (__c_pa(drv_data) >> UNIPHIER_PIN_DRV_TYPE_SHIFT) &
 						UNIPHIER_PIN_DRV_TYPE_MASK;
 }
 
 static inline unsigned int uniphier_pin_get_pupdctrl(void *drv_data)
 {
-	return ((unsigned long)drv_data >> UNIPHIER_PIN_PUPDCTRL_SHIFT) &
+	return (__c_pa(drv_data) >> UNIPHIER_PIN_PUPDCTRL_SHIFT) &
 						UNIPHIER_PIN_PUPDCTRL_MASK;
 }
 
 static inline unsigned int uniphier_pin_get_pull_dir(void *drv_data)
 {
-	return ((unsigned long)drv_data >> UNIPHIER_PIN_PULL_DIR_SHIFT) &
+	return (__c_pa(drv_data) >> UNIPHIER_PIN_PULL_DIR_SHIFT) &
 						UNIPHIER_PIN_PULL_DIR_MASK;
 }
 

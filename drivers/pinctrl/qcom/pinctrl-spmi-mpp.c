@@ -868,7 +868,7 @@ static int pmic_mpp_probe(struct platform_device *pdev)
 		return ret;
 	}
 
-	npins = (uintptr_t) device_get_match_data(&pdev->dev);
+	npins = __c_pa(device_get_match_data(&pdev->dev));
 
 	BUG_ON(npins > ARRAY_SIZE(pmic_mpp_groups));
 

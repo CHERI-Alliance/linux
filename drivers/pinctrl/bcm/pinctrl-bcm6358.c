@@ -261,7 +261,7 @@ static int bcm6358_pinctrl_set_mux(struct pinctrl_dev *pctldev,
 	unsigned pin;
 
 	for (pin = 0; pin < pg->grp.npins; pin++)
-		mask |= (unsigned long)bcm6358_pins[pin].drv_data;
+		mask |= __c_pa(bcm6358_pins[pin].drv_data);
 
 	regmap_field_update_bits(priv->overlays, mask, val);
 
@@ -291,7 +291,7 @@ static int bcm6358_gpio_request_enable(struct pinctrl_dev *pctldev,
 	struct bcm6358_priv *priv = pc->driver_data;
 	unsigned int mask;
 
-	mask = (unsigned long) bcm6358_pins[offset].drv_data;
+	mask = __c_pa(bcm6358_pins[offset].drv_data);
 	if (!mask)
 		return 0;
 

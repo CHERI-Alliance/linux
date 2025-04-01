@@ -483,7 +483,7 @@ static int bcm6362_pinctrl_get_groups(struct pinctrl_dev *pctldev,
 static void bcm6362_set_gpio(struct bcm63xx_pinctrl *pc, unsigned pin)
 {
 	const struct pinctrl_pin_desc *desc = &bcm6362_pins[pin];
-	unsigned int basemode = (uintptr_t)desc->drv_data;
+	unsigned int basemode = __c_pa(desc->drv_data);
 	unsigned int mask = bcm63xx_bank_pin(pin);
 
 	if (basemode)

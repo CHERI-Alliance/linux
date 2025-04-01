@@ -106,9 +106,9 @@ enum pin_func_sel {
  */
 struct sprd_pin {
 	const char *name;
+	uintptr_t reg;
 	unsigned int number;
 	enum pin_type type;
-	unsigned long reg;
 	unsigned long bit_offset;
 	unsigned long bit_width;
 };
@@ -1015,18 +1015,18 @@ static int sprd_pinctrl_add_pins(struct sprd_pinctrl *sprd_pctl,
 		pin->number = sprd_soc_pin_info[i].num;
 		reg = sprd_soc_pin_info[i].reg;
 		if (pin->type == GLOBAL_CTRL_PIN) {
-			pin->reg = (unsigned long)sprd_pctl->base +
+			pin->reg = (uintptr_t)sprd_pctl->base +
 				PINCTRL_REG_LEN * reg;
 			pin->bit_offset = sprd_soc_pin_info[i].bit_offset;
 			pin->bit_width = sprd_soc_pin_info[i].bit_width;
 			ctrl_pin++;
 		} else if (pin->type == COMMON_PIN) {
-			pin->reg = (unsigned long)sprd_pctl->base +
+			pin->reg = (uintptr_t)sprd_pctl->base +
 				PINCTRL_REG_OFFSET + PINCTRL_REG_LEN *
 				(i - ctrl_pin);
 			com_pin++;
 		} else if (pin->type == MISC_PIN) {
-			pin->reg = (unsigned long)sprd_pctl->base +
+			pin->reg = (uintptr_t)sprd_pctl->base +
 				PINCTRL_REG_MISC_OFFSET + PINCTRL_REG_LEN *
 				(i - ctrl_pin - com_pin);
 		}
@@ -1036,7 +1036,7 @@ static int sprd_pinctrl_add_pins(struct sprd_pinctrl *sprd_pctl,
 		dev_dbg(sprd_pctl->dev, "pin name[%s-%d], type = %d, "
 			"bit offset = %ld, bit width = %ld, reg = 0x%lx\n",
 			pin->name, pin->number, pin->type,
-			pin->bit_offset, pin->bit_width, pin->reg);
+			pin->bit_offset, pin->bit_width, __c_ua(pin->reg));
 	}
 
 	return 0;
