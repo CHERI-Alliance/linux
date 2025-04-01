@@ -704,8 +704,8 @@ static int pci1xxxx_spi_probe(struct pci_dev *pdev, const struct pci_device_id *
 	u32 regval;
 	int ret;
 
-	hw_inst_cnt = ent->driver_data & 0x0f;
-	start = (ent->driver_data & 0xf0) >> 4;
+	hw_inst_cnt = __c_ua(ent->driver_data) & 0x0f;
+	start = (__c_ua(ent->driver_data & 0xf0)) >> 4;
 	if (start == 1)
 		only_sec_inst = 1;
 	else

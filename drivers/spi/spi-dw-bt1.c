@@ -80,7 +80,7 @@ static void dw_spi_bt1_dirmap_copy_from_map(void *to, void __iomem *from, size_t
 	 * We split the copying up into the next three stages: unaligned head,
 	 * aligned body, unaligned tail.
 	 */
-	shift = (size_t)from & 0x3;
+	shift = __c_pa(from) & 0x3;
 	if (shift) {
 		chunk = min_t(size_t, 4 - shift, len);
 		data = readl_relaxed(from - shift);

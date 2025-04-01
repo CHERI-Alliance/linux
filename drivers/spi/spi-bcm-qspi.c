@@ -1220,7 +1220,7 @@ static int bcm_qspi_exec_mem_op(struct spi_mem *mem,
 	}
 
 	/* non-aligned and very short transfers are handled by MSPI */
-	if (!IS_ALIGNED((uintptr_t)addr, 4) || !IS_ALIGNED((uintptr_t)buf, 4) ||
+	if (!IS_ALIGNED(addr, 4) || !IS_ALIGNED(__c_pa(buf), 4) ||
 	    len < 4 || op->cmd.opcode == SPINOR_OP_RDSFDP)
 		mspi_read = true;
 

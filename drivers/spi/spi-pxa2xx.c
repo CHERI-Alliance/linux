@@ -1321,7 +1321,7 @@ pxa2xx_spi_init_pdata(struct platform_device *pdev)
 
 	match = device_get_match_data(dev);
 	if (match)
-		type = (uintptr_t)match;
+		type = __c_pa(match);
 	else if (is_lpss_priv) {
 		u32 value;
 

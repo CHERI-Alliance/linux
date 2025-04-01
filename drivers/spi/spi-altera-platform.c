@@ -74,7 +74,7 @@ static int altera_spi_probe(struct platform_device *pdev)
 	hw->dev = &pdev->dev;
 
 	if (platid)
-		type = platid->driver_data;
+		type = __c_ua(platid->driver_data);
 
 	/* find and map our resources */
 	if (type == ALTERA_SPI_TYPE_SUBDEV) {

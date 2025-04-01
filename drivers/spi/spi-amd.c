@@ -509,7 +509,7 @@ static int amd_spi_probe(struct platform_device *pdev)
 
 	dev_dbg(dev, "io_remap_address: %p\n", amd_spi->io_remap_addr);
 
-	amd_spi->version = (uintptr_t) device_get_match_data(dev);
+	amd_spi->version = __c_pa(device_get_match_data(dev));
 
 	/* Initialize the spi_controller fields */
 	host->bus_num = 0;

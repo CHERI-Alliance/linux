@@ -1544,8 +1544,8 @@ static int pch_spi_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 	}
 
 	board_dat->pdev = pdev;
-	board_dat->num = id->driver_data;
-	pd_dev_save->num = id->driver_data;
+	board_dat->num = __c_ua(id->driver_data);
+	pd_dev_save->num = __c_ua(id->driver_data);
 	pd_dev_save->board_dat = board_dat;
 
 	retval = pci_enable_device(pdev);

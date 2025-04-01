@@ -725,8 +725,8 @@ static bool mtk_spi_can_dma(struct spi_controller *host,
 {
 	/* Buffers for DMA transactions must be 4-byte aligned */
 	return (xfer->len > MTK_SPI_MAX_FIFO_SIZE &&
-		(unsigned long)xfer->tx_buf % 4 == 0 &&
-		(unsigned long)xfer->rx_buf % 4 == 0);
+		__c_pa(xfer->tx_buf) % 4 == 0 &&
+		__c_pa(xfer->rx_buf) % 4 == 0);
 }
 
 static int mtk_spi_setup(struct spi_device *spi)
@@ -1043,7 +1043,7 @@ static int mtk_spi_mem_exec_op(struct spi_mem *mem,
 	}
 
 	if (op->data.dir == SPI_MEM_DATA_IN) {
-		if (!IS_ALIGNED((size_t)op->data.buf.in, 4)) {
+		if (!IS_ALIGNED(__c_pa(op->data.buf.in), 4)) {
 			rx_tmp_buf = kzalloc(op->data.nbytes,
 					     GFP_KERNEL | GFP_DMA);
 			if (!rx_tmp_buf) {
@@ -1090,12 +1090,12 @@ unmap_rx_dma:
 	if (op->data.dir == SPI_MEM_DATA_IN) {
 		dma_unmap_single(mdata->dev, mdata->rx_dma,
 				 op->data.nbytes, DMA_FROM_DEVICE);
-		if (!IS_ALIGNED((size_t)op->data.buf.in, 4))
+		if (!IS_ALIGNED(__c_pa(op->data.buf.in), 4))
 			memcpy(op->data.buf.in, rx_tmp_buf, op->data.nbytes);
 	}
 kfree_rx_tmp_buf:
 	if (op->data.dir == SPI_MEM_DATA_IN &&
-	    !IS_ALIGNED((size_t)op->data.buf.in, 4))
+	    !IS_ALIGNED(__c_pa(op->data.buf.in), 4))
 		kfree(rx_tmp_buf);
 unmap_tx_dma:
 	dma_unmap_single(mdata->dev, mdata->tx_dma,

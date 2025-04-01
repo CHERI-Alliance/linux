@@ -147,7 +147,7 @@ struct sprd_adi {
 	struct device		*dev;
 	void __iomem		*base;
 	struct hwspinlock	*hwlock;
-	unsigned long		slave_vbase;
+	uintptr_t		slave_vbase;
 	unsigned long		slave_pbase;
 	const struct sprd_adi_data *data;
 };
@@ -541,8 +541,7 @@ static int sprd_adi_probe(struct platform_device *pdev)
 		goto put_ctlr;
 	}
 
-	sadi->slave_vbase = (unsigned long)sadi->base +
-			    data->slave_offset;
+	sadi->slave_vbase = (uintptr_t)sadi->base + data->slave_offset;
 	sadi->slave_pbase = res->start + data->slave_offset;
 	sadi->ctlr = ctlr;
 	sadi->dev = &pdev->dev;

@@ -921,7 +921,7 @@ static bool spi_qup_can_dma(struct spi_controller *host, struct spi_device *spi,
 	int n_words;
 
 	if (xfer->rx_buf) {
-		if (!IS_ALIGNED((size_t)xfer->rx_buf, dma_align) ||
+		if (!IS_ALIGNED(__c_pa(xfer->rx_buf), dma_align) ||
 		    IS_ERR_OR_NULL(host->dma_rx))
 			return false;
 		if (qup->qup_v1 && (xfer->len % qup->in_blk_sz))
@@ -929,7 +929,7 @@ static bool spi_qup_can_dma(struct spi_controller *host, struct spi_device *spi,
 	}
 
 	if (xfer->tx_buf) {
-		if (!IS_ALIGNED((size_t)xfer->tx_buf, dma_align) ||
+		if (!IS_ALIGNED(__c_pa(xfer->tx_buf), dma_align) ||
 		    IS_ERR_OR_NULL(host->dma_tx))
 			return false;
 		if (qup->qup_v1 && (xfer->len % qup->out_blk_sz))
@@ -1114,7 +1114,7 @@ static int spi_qup_probe(struct platform_device *pdev)
 	else if (!ret)
 		host->can_dma = spi_qup_can_dma;
 
-	controller->qup_v1 = (uintptr_t)of_device_get_match_data(dev);
+	controller->qup_v1 = __c_pa(of_device_get_match_data(dev));
 
 	if (!controller->qup_v1)
 		host->set_cs = spi_qup_set_cs;

@@ -866,12 +866,12 @@ no_dma_tx:
 static void copy_bswap32(u32 *dst, const u32 *src, unsigned int words)
 {
 	/* src or dst can be unaligned, but not both */
-	if ((unsigned long)src & 3) {
+	if (__c_pa(src) & 3) {
 		while (words--) {
 			*dst++ = swab32(get_unaligned(src));
 			src++;
 		}
-	} else if ((unsigned long)dst & 3) {
+	} else if (__c_pa(dst) & 3) {
 		while (words--) {
 			put_unaligned(swab32(*src++), dst);
 			dst++;
@@ -885,12 +885,12 @@ static void copy_bswap32(u32 *dst, const u32 *src, unsigned int words)
 static void copy_wswap32(u32 *dst, const u32 *src, unsigned int words)
 {
 	/* src or dst can be unaligned, but not both */
-	if ((unsigned long)src & 3) {
+	if (__c_pa(src) & 3) {
 		while (words--) {
 			*dst++ = swahw32(get_unaligned(src));
 			src++;
 		}
-	} else if ((unsigned long)dst & 3) {
+	} else if (__c_pa(dst) & 3) {
 		while (words--) {
 			put_unaligned(swahw32(*src++), dst);
 			dst++;
@@ -989,34 +989,34 @@ static int sh_msiof_transfer_one(struct spi_controller *ctlr,
 		rx_fifo = sh_msiof_spi_read_fifo_8;
 	} else if (bits <= 16) {
 		bytes_per_word = 2;
-		if ((unsigned long)tx_buf & 0x01)
+		if (__c_pa(tx_buf) & 0x01)
 			tx_fifo = sh_msiof_spi_write_fifo_16u;
 		else
 			tx_fifo = sh_msiof_spi_write_fifo_16;
 
-		if ((unsigned long)rx_buf & 0x01)
+		if (__c_pa(rx_buf) & 0x01)
 			rx_fifo = sh_msiof_spi_read_fifo_16u;
 		else
 			rx_fifo = sh_msiof_spi_read_fifo_16;
 	} else if (swab) {
 		bytes_per_word = 4;
-		if ((unsigned long)tx_buf & 0x03)
+		if (__c_pa(tx_buf) & 0x03)
 			tx_fifo = sh_msiof_spi_write_fifo_s32u;
 		else
 			tx_fifo = sh_msiof_spi_write_fifo_s32;
 
-		if ((unsigned long)rx_buf & 0x03)
+		if (__c_pa(rx_buf) & 0x03)
 			rx_fifo = sh_msiof_spi_read_fifo_s32u;
 		else
 			rx_fifo = sh_msiof_spi_read_fifo_s32;
 	} else {
 		bytes_per_word = 4;
-		if ((unsigned long)tx_buf & 0x03)
+		if (__c_pa(tx_buf) & 0x03)
 			tx_fifo = sh_msiof_spi_write_fifo_32u;
 		else
 			tx_fifo = sh_msiof_spi_write_fifo_32;
 
-		if ((unsigned long)rx_buf & 0x03)
+		if (__c_pa(rx_buf) & 0x03)
 			rx_fifo = sh_msiof_spi_read_fifo_32u;
 		else
 			rx_fifo = sh_msiof_spi_read_fifo_32;
@@ -1151,7 +1151,7 @@ static struct dma_chan *sh_msiof_request_dma_chan(struct device *dev,
 	dma_cap_set(DMA_SLAVE, mask);
 
 	chan = dma_request_slave_channel_compat(mask, shdma_chan_filter,
-				(void *)(unsigned long)id, dev,
+				__c_fakep(id), dev,
 				dir == DMA_MEM_TO_DEV ? "tx" : "rx");
 	if (!chan) {
 		dev_warn(dev, "dma_request_slave_channel_compat failed\n");
