@@ -372,7 +372,7 @@ struct tee_iocl_supp_send_arg {
  * This structure is used as argument for TEE_IOC_SHM_REGISTER below.
  */
 struct tee_ioctl_shm_register_data {
-	__u64 addr;
+	__kernel_uintptr_t addr;
 	__u64 length;
 	__u32 flags;
 	__s32 id;

@@ -327,7 +327,7 @@ tee_ioctl_shm_register(struct tee_context *ctx,
 	struct tee_ioctl_shm_register_data data;
 	struct tee_shm *shm;
 
-	if (copy_from_user(&data, udata, sizeof(data)))
+	if (copy_from_user_with_ptr(&data, udata, sizeof(data)))
 		return -EFAULT;
 
 	/* Currently no input flags are supported */
