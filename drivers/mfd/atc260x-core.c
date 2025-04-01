@@ -201,7 +201,7 @@ int atc260x_match_device(struct atc260x *atc260x, struct regmap_config *regmap_c
 	if (!of_data)
 		return -ENODEV;
 
-	atc260x->ic_type = (unsigned long)of_data;
+	atc260x->ic_type = __c_pa(of_data);
 
 	switch (atc260x->ic_type) {
 	case ATC2603C:

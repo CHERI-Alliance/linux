@@ -172,7 +172,7 @@ static int max77541_probe(struct i2c_client *client)
 	i2c_set_clientdata(client, max77541);
 	max77541->i2c = client;
 
-	max77541->id = (uintptr_t)i2c_get_match_data(client);
+	max77541->id = __c_pa(i2c_get_match_data(client));
 	if (!max77541->id)
 		return -EINVAL;
 

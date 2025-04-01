@@ -232,7 +232,7 @@ static int adp5520_probe(struct i2c_client *client)
 
 	chip->dev = &client->dev;
 	chip->irq = client->irq;
-	chip->id = id->driver_data;
+	chip->id = __c_ua(id->driver_data);
 	mutex_init(&chip->lock);
 
 	if (chip->irq) {

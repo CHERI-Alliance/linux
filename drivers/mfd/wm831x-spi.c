@@ -24,7 +24,7 @@ static int wm831x_spi_probe(struct spi_device *spi)
 	enum wm831x_parent type;
 	int ret;
 
-	type = (uintptr_t)spi_get_device_match_data(spi);
+	type = __c_pa(spi_get_device_match_data(spi));
 	if (!type) {
 		dev_err(&spi->dev, "Failed to match device\n");
 		return -ENODEV;

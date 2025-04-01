@@ -139,8 +139,7 @@ static int bd718xx_i2c_probe(struct i2c_client *i2c)
 		dev_err(&i2c->dev, "No IRQ configured\n");
 		return -EINVAL;
 	}
-	chip_type = (unsigned int)(uintptr_t)
-		    of_device_get_match_data(&i2c->dev);
+	chip_type = __c_pa(of_device_get_match_data(&i2c->dev));
 	switch (chip_type) {
 	case ROHM_CHIP_TYPE_BD71837:
 		mfd = bd71837_mfd_cells;

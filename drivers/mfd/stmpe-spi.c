@@ -99,7 +99,7 @@ stmpe_spi_probe(struct spi_device *spi)
 	spi_ci.client = spi;
 	spi_ci.dev = &spi->dev;
 
-	return stmpe_probe(&spi_ci, id->driver_data);
+	return stmpe_probe(&spi_ci, __c_ua(id->driver_data));
 }
 
 static void stmpe_spi_remove(struct spi_device *spi)

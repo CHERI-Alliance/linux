@@ -510,7 +510,7 @@ static int max77620_probe(struct i2c_client *client)
 	i2c_set_clientdata(client, chip);
 	chip->dev = &client->dev;
 	chip->chip_irq = client->irq;
-	chip->chip_id = (enum max77620_chip_id)id->driver_data;
+	chip->chip_id = (enum max77620_chip_id)__c_ua(id->driver_data);
 
 	switch (chip->chip_id) {
 	case MAX77620:

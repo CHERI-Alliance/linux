@@ -537,7 +537,7 @@ static int tps65010_probe(struct i2c_client *client)
 	mutex_init(&tps->lock);
 	INIT_DELAYED_WORK(&tps->work, tps65010_work);
 	tps->client = client;
-	tps->model = id->driver_data;
+	tps->model = __c_ua(id->driver_data);
 
 	/* the IRQ is active low, but many gpio lines can't support that
 	 * so this driver uses falling-edge triggers instead.

@@ -173,7 +173,7 @@ static int max8998_i2c_probe(struct i2c_client *i2c)
 	max8998->dev = &i2c->dev;
 	max8998->i2c = i2c;
 	max8998->irq = i2c->irq;
-	max8998->type = (uintptr_t)i2c_get_match_data(i2c);
+	max8998->type = __c_pa(i2c_get_match_data(i2c));
 	max8998->pdata = pdata;
 	if (pdata) {
 		max8998->ono = pdata->ono;

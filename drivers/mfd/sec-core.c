@@ -292,7 +292,7 @@ static int sec_pmic_probe(struct i2c_client *i2c)
 		return ret;
 	}
 
-	sec_pmic->device_type = (unsigned long)of_device_get_match_data(sec_pmic->dev);
+	sec_pmic->device_type = __c_pa(of_device_get_match_data(sec_pmic->dev));
 	sec_pmic->pdata = pdata;
 
 	switch (sec_pmic->device_type) {

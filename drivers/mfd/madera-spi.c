@@ -29,9 +29,9 @@ static int madera_spi_probe(struct spi_device *spi)
 
 	of_data = of_device_get_match_data(&spi->dev);
 	if (of_data)
-		type = (unsigned long)of_data;
+		type = __c_pa(of_data);
 	else
-		type = id->driver_data;
+		type = __c_ua(id->driver_data);
 
 	switch (type) {
 	case CS47L15:

@@ -85,9 +85,9 @@ stmpe_i2c_probe(struct i2c_client *i2c)
 		 * but no real compatible string has been given.
 		 */
 		dev_info(&i2c->dev, "matching on node name, compatible is preferred\n");
-		partnum = id->driver_data;
+		partnum = __c_ua(id->driver_data);
 	} else
-		partnum = (uintptr_t)of_id->data;
+		partnum = __c_pa(of_id->data);
 
 	return stmpe_probe(&i2c_ci, partnum);
 }

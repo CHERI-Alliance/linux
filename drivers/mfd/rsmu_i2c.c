@@ -285,7 +285,7 @@ static int rsmu_i2c_probe(struct i2c_client *client)
 	i2c_set_clientdata(client, rsmu);
 
 	rsmu->dev = &client->dev;
-	rsmu->type = (enum rsmu_type)id->driver_data;
+	rsmu->type = (enum rsmu_type)__c_ua(id->driver_data);
 
 	switch (rsmu->type) {
 	case RSMU_CM:

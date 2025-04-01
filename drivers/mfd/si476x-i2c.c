@@ -792,7 +792,7 @@ static int si476x_core_probe(struct i2c_client *client)
 		core->rds_fifo_depth = 5;
 	}
 
-	core->chip_id = id->driver_data;
+	core->chip_id = __c_ua(id->driver_data);
 
 	rval = si476x_core_get_revision_info(core);
 	if (rval < 0) {

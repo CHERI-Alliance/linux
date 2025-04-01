@@ -220,7 +220,7 @@ static int tps6594_i2c_probe(struct i2c_client *client)
 	match = of_match_device(tps6594_i2c_of_match_table, dev);
 	if (!match)
 		return dev_err_probe(dev, -EINVAL, "Failed to find matching chip ID\n");
-	tps->chip_id = (unsigned long)match->data;
+	tps->chip_id = __c_pa(match->data);
 
 	if (tps->chip_id == TPS65224)
 		tps6594_i2c_regmap_config.volatile_table = &tps65224_volatile_table;

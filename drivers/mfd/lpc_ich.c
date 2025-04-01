@@ -1381,7 +1381,7 @@ static int lpc_ich_probe(struct pci_dev *dev,
 	if (!priv)
 		return -ENOMEM;
 
-	priv->chipset = id->driver_data;
+	priv->chipset = __c_ua(id->driver_data);
 
 	priv->actrl_pbase_save = -1;
 	priv->abase_save = -1;

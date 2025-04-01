@@ -503,8 +503,7 @@ static int bd71828_i2c_probe(struct i2c_client *i2c)
 		return -EINVAL;
 	}
 
-	chip_type = (unsigned int)(uintptr_t)
-		    of_device_get_match_data(&i2c->dev);
+	chip_type = __c_pa(of_device_get_match_data(&i2c->dev));
 	switch (chip_type) {
 	case ROHM_CHIP_TYPE_BD71828:
 		mfd = bd71828_mfd_cells;

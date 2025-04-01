@@ -1012,7 +1012,8 @@ static void menelaus_rtc_update_work(struct menelaus_chip *m)
 	rtc_update_irq(m->rtc, 1, RTC_IRQF | RTC_UF);
 }
 
-static int menelaus_ioctl(struct device *dev, unsigned cmd, unsigned long arg)
+static int menelaus_ioctl(struct device *dev, unsigned cmd,
+			  user_uintptr_t arg)
 {
 	int	status;
 

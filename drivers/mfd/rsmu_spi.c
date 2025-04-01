@@ -209,7 +209,7 @@ static int rsmu_spi_probe(struct spi_device *client)
 	spi_set_drvdata(client, rsmu);
 
 	rsmu->dev = &client->dev;
-	rsmu->type = (enum rsmu_type)id->driver_data;
+	rsmu->type = (enum rsmu_type)__c_ua(id->driver_data);
 
 	/* Initialize regmap */
 	switch (rsmu->type) {

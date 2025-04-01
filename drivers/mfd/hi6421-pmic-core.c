@@ -56,7 +56,7 @@ static int hi6421_pmic_probe(struct platform_device *pdev)
 	void __iomem *base;
 	int n_subdevs, ret;
 
-	type = (uintptr_t)device_get_match_data(&pdev->dev);
+	type = __c_pa(device_get_match_data(&pdev->dev));
 
 	pmic = devm_kzalloc(&pdev->dev, sizeof(*pmic), GFP_KERNEL);
 	if (!pmic)

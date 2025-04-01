@@ -603,7 +603,7 @@ static int da9062_i2c_probe(struct i2c_client *i2c)
 	if (!chip)
 		return -ENOMEM;
 
-	chip->chip_type = (uintptr_t)i2c_get_match_data(i2c);
+	chip->chip_type = __c_pa(i2c_get_match_data(i2c));
 
 	i2c_set_clientdata(i2c, chip);
 	chip->dev = &i2c->dev;

@@ -89,7 +89,7 @@ static int lp87565_probe(struct i2c_client *client)
 	}
 
 	lp87565->rev = otpid & LP87565_OTP_REV_OTP_ID;
-	lp87565->dev_type = (uintptr_t)i2c_get_match_data(client);
+	lp87565->dev_type = __c_pa(i2c_get_match_data(client));
 
 	i2c_set_clientdata(client, lp87565);
 

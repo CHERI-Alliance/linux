@@ -340,7 +340,7 @@ tc3589x_of_probe(struct device *dev, enum tc3589x_version *version)
 	of_id = of_match_device(tc3589x_match, dev);
 	if (!of_id)
 		return ERR_PTR(-ENODEV);
-	*version = (uintptr_t) of_id->data;
+	*version = __c_pa(of_id->data);
 
 	for_each_child_of_node(np, child) {
 		if (of_device_is_compatible(child, "toshiba,tc3589x-gpio"))
@@ -369,7 +369,7 @@ static int tc3589x_probe(struct i2c_client *i2c)
 		}
 	} else {
 		/* When not probing from device tree we have this ID */
-		version = id->driver_data;
+		version = __c_ua(id->driver_data);
 	}
 
 	if (!i2c_check_functionality(i2c->adapter, I2C_FUNC_SMBUS_BYTE_DATA

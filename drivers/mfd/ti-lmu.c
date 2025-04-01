@@ -174,7 +174,7 @@ static int ti_lmu_probe(struct i2c_client *cl)
 		return ret;
 	}
 
-	ret = ti_lmu_enable_hw(lmu, id->driver_data);
+	ret = ti_lmu_enable_hw(lmu, __c_ua(id->driver_data));
 	if (ret)
 		return ret;
 

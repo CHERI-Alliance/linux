@@ -161,7 +161,7 @@ static int max77693_i2c_probe(struct i2c_client *i2c)
 	max77693->dev = &i2c->dev;
 	max77693->i2c = i2c;
 	max77693->irq = i2c->irq;
-	max77693->type = id->driver_data;
+	max77693->type = __c_ua(id->driver_data);
 
 	max77693->regmap = devm_regmap_init_i2c(i2c, &max77693_regmap_config);
 	if (IS_ERR(max77693->regmap)) {

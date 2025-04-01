@@ -267,7 +267,7 @@ static int pmic_spmi_probe(struct spmi_device *sdev)
 	if (!ctx)
 		return -ENOMEM;
 
-	ctx->num_usids = (uintptr_t)device_get_match_data(&sdev->dev);
+	ctx->num_usids = __c_pa(device_get_match_data(&sdev->dev));
 
 	/* Only the first slave id for a PMIC contains this information */
 	if (sdev->usid % ctx->num_usids == 0) {

@@ -27,7 +27,7 @@ static int arizona_i2c_probe(struct i2c_client *i2c)
 	unsigned long type;
 	int ret;
 
-	type = (uintptr_t)i2c_get_match_data(i2c);
+	type = __c_pa(i2c_get_match_data(i2c));
 	switch (type) {
 	case WM5102:
 		if (IS_ENABLED(CONFIG_MFD_WM5102))

@@ -27,7 +27,7 @@ static int wm831x_i2c_probe(struct i2c_client *i2c)
 	enum wm831x_parent type;
 	int ret;
 
-	type = (uintptr_t)i2c_get_match_data(i2c);
+	type = __c_pa(i2c_get_match_data(i2c));
 	if (!type) {
 		dev_err(&i2c->dev, "Failed to match device\n");
 		return -ENODEV;

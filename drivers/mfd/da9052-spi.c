@@ -52,7 +52,7 @@ static int da9052_spi_probe(struct spi_device *spi)
 		return ret;
 	}
 
-	return da9052_device_init(da9052, id->driver_data);
+	return da9052_device_init(da9052, __c_ua(id->driver_data));
 }
 
 static void da9052_spi_remove(struct spi_device *spi)

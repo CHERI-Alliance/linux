@@ -107,7 +107,7 @@ static int max77843_probe(struct i2c_client *i2c)
 	max77843->dev = &i2c->dev;
 	max77843->i2c = i2c;
 	max77843->irq = i2c->irq;
-	max77843->type = id->driver_data;
+	max77843->type = __c_ua(id->driver_data);
 
 	max77843->regmap = devm_regmap_init_i2c(i2c,
 			&max77843_regmap_config);

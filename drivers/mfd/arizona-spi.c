@@ -199,9 +199,9 @@ static int arizona_spi_probe(struct spi_device *spi)
 
 	match_data = device_get_match_data(&spi->dev);
 	if (match_data)
-		type = (unsigned long)match_data;
+		type = __c_pa(match_data);
 	else if (id)
-		type = id->driver_data;
+		type = __c_ua(id->driver_data);
 
 	switch (type) {
 	case WM5102:
