@@ -364,11 +364,11 @@ static const int cp1gpio5b_pins[] = { 98 };
 static const int cp1gpio6b_pins[] = { 97 };
 static const int cp1gpio7b_pins[] = { 96 };
 
-static const int cp1gpio0_pins[] = {  };
-static const int cp1gpio1_pins[] = {  };
-static const int cp1gpio2_pins[] = {  };
-static const int cp1gpio3_pins[] = {  };
-static const int cp1gpio4_pins[] = {  };
+static const int cp1gpio0_pins_empty[1] = {  };
+static const int cp1gpio1_pins_empty[1] = {  };
+static const int cp1gpio2_pins_empty[1] = {  };
+static const int cp1gpio3_pins_empty[1] = {  };
+static const int cp1gpio4_pins_empty[1] = {  };
 static const int cp1gpio5_pins[] = { 17 };
 static const int cp1gpio6_pins[] = { 91 };
 static const int cp1gpio7_pins[] = { 92 };
@@ -637,11 +637,11 @@ struct npcm8xx_pingroup {
 	NPCM8XX_GRP(cp1gpio5b), \
 	NPCM8XX_GRP(cp1gpio6b), \
 	NPCM8XX_GRP(cp1gpio7b), \
-	NPCM8XX_GRP(cp1gpio0), \
-	NPCM8XX_GRP(cp1gpio1), \
-	NPCM8XX_GRP(cp1gpio2), \
-	NPCM8XX_GRP(cp1gpio3), \
-	NPCM8XX_GRP(cp1gpio4), \
+	NPCM8XX_GRP_EMPTY(cp1gpio0), \
+	NPCM8XX_GRP_EMPTY(cp1gpio1), \
+	NPCM8XX_GRP_EMPTY(cp1gpio2), \
+	NPCM8XX_GRP_EMPTY(cp1gpio3), \
+	NPCM8XX_GRP_EMPTY(cp1gpio4), \
 	NPCM8XX_GRP(cp1gpio5), \
 	NPCM8XX_GRP(cp1gpio6), \
 	NPCM8XX_GRP(cp1gpio7), \
@@ -826,17 +826,22 @@ struct npcm8xx_pingroup {
 
 enum {
 #define NPCM8XX_GRP(x) fn_ ## x
+#define NPCM8XX_GRP_EMPTY(x) fn_ ## x
 	NPCM8XX_GRPS
 	NPCM8XX_GRP(none),
 	NPCM8XX_GRP(gpio),
 #undef NPCM8XX_GRP
+#undef NPCM8XX_GRP_EMPTY
 };
 
 static struct npcm8xx_pingroup npcm8xx_pingroups[] = {
 #define NPCM8XX_GRP(x) { .name = #x, .pins = x ## _pins, \
 			.npins = ARRAY_SIZE(x ## _pins) }
+#define NPCM8XX_GRP_EMPTY(x) { .name = #x, .pins = x ## _pins_empty, \
+			.npins = 0 }
 	NPCM8XX_GRPS
 #undef NPCM8XX_GRP
+#undef NPCM8XX_GRP_EMPTY
 };
 
 #define NPCM8XX_SFUNC(a) NPCM8XX_FUNC(a, #a)

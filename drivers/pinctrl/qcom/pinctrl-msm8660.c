@@ -561,13 +561,13 @@ static const char * const gp_mn_groups[] = {
 static const char * const gsbi1_groups[] = {
 	"gpio33", "gpio34", "gpio35", "gpio36"
 };
-static const char * const gsbi1_spi_cs1_n_groups[] = {
+static const char * const gsbi1_spi_cs1_n_groups_empty[1] = {
 };
-static const char * const gsbi1_spi_cs2a_n_groups[] = {
+static const char * const gsbi1_spi_cs2a_n_groups_empty[1] = {
 };
-static const char * const gsbi1_spi_cs2b_n_groups[] = {
+static const char * const gsbi1_spi_cs2b_n_groups_empty[1] = {
 };
-static const char * const gsbi1_spi_cs3_n_groups[] = {
+static const char * const gsbi1_spi_cs3_n_groups_empty[1] = {
 };
 static const char * const gsbi2_groups[] = {
 	"gpio37", "gpio38", "gpio39", "gpio40"
@@ -726,10 +726,10 @@ static const struct pinfunction msm8660_functions[] = {
 	MSM_PIN_FUNCTION(gp_clk_2b),
 	MSM_PIN_FUNCTION(gp_mn),
 	MSM_PIN_FUNCTION(gsbi1),
-	MSM_PIN_FUNCTION(gsbi1_spi_cs1_n),
-	MSM_PIN_FUNCTION(gsbi1_spi_cs2a_n),
-	MSM_PIN_FUNCTION(gsbi1_spi_cs2b_n),
-	MSM_PIN_FUNCTION(gsbi1_spi_cs3_n),
+	MSM_PIN_FUNCTION_EMPTY(gsbi1_spi_cs1_n),
+	MSM_PIN_FUNCTION_EMPTY(gsbi1_spi_cs2a_n),
+	MSM_PIN_FUNCTION_EMPTY(gsbi1_spi_cs2b_n),
+	MSM_PIN_FUNCTION_EMPTY(gsbi1_spi_cs3_n),
 	MSM_PIN_FUNCTION(gsbi2),
 	MSM_PIN_FUNCTION(gsbi2_spi_cs1_n),
 	MSM_PIN_FUNCTION(gsbi2_spi_cs2_n),

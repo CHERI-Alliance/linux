@@ -570,7 +570,7 @@ free_vqs:
 }
 #endif
 
-static const unsigned int features[] = {
+static const unsigned int features[1] = {
 	/* none */
 };
 
@@ -582,7 +582,7 @@ static const struct virtio_device_id id_table[] = {
 static struct virtio_driver virtio_crypto_driver = {
 	.driver.name         = KBUILD_MODNAME,
 	.feature_table       = features,
-	.feature_table_size  = ARRAY_SIZE(features),
+	.feature_table_size  = ARRAY_SIZE(features) - 1,
 	.id_table            = id_table,
 	.probe               = virtcrypto_probe,
 	.remove              = virtcrypto_remove,

@@ -2093,7 +2093,7 @@ static const struct virtio_device_id rproc_serial_id_table[] = {
 };
 MODULE_DEVICE_TABLE(virtio, rproc_serial_id_table);
 
-static const unsigned int rproc_serial_features[] = {
+static const unsigned int rproc_serial_features[1] = {
 };
 
 #ifdef CONFIG_PM_SLEEP
@@ -2185,7 +2185,7 @@ static struct virtio_driver virtio_console = {
 
 static struct virtio_driver virtio_rproc_serial = {
 	.feature_table = rproc_serial_features,
-	.feature_table_size = ARRAY_SIZE(rproc_serial_features),
+	.feature_table_size = ARRAY_SIZE(rproc_serial_features) - 1,
 	.driver.name =	"virtio_rproc_serial",
 	.id_table =	rproc_serial_id_table,
 	.probe =	virtcons_probe,

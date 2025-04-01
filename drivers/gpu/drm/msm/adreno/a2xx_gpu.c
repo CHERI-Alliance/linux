@@ -509,7 +509,7 @@ static const struct adreno_gpu_funcs funcs = {
 	},
 };
 
-static const struct msm_gpu_perfcntr perfcntrs[] = {
+static const struct msm_gpu_perfcntr perfcntrs[1] = {
 /* TODO */
 };
 
@@ -538,7 +538,7 @@ struct msm_gpu *a2xx_gpu_init(struct drm_device *dev)
 	gpu = &adreno_gpu->base;
 
 	gpu->perfcntrs = perfcntrs;
-	gpu->num_perfcntrs = ARRAY_SIZE(perfcntrs);
+	gpu->num_perfcntrs = ARRAY_SIZE(perfcntrs) - 1;
 
 	ret = adreno_gpu_init(dev, pdev, adreno_gpu, &funcs, 1);
 	if (ret)

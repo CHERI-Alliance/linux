@@ -412,7 +412,7 @@ static const struct soc15_reg_golden golden_settings_gc_10_1[] = {
 	SOC15_REG_GOLDEN_VALUE(GC, 0, mmUTCL1_CTRL, 0x00c00000, 0x00c00000)
 };
 
-static const struct soc15_reg_golden golden_settings_gc_10_0_nv10[] = {
+static const struct soc15_reg_golden golden_settings_gc_10_0_nv10[1] = {
 	/* Pending on emulation bring up */
 };
 
@@ -1557,7 +1557,7 @@ static const struct soc15_reg_golden golden_settings_gc_10_1_2[] = {
 	SOC15_REG_GOLDEN_VALUE(GC, 0, mmUTCL1_CTRL, 0xffffffff, 0x00c00000)
 };
 
-static const struct soc15_reg_golden golden_settings_gc_10_1_nv14[] = {
+static const struct soc15_reg_golden golden_settings_gc_10_1_nv14[1] = {
 	/* Pending on emulation bring up */
 };
 
@@ -2184,7 +2184,7 @@ static const struct soc15_reg_golden golden_settings_gc_rlc_spm_10_1_nv14[] = {
 	SOC15_REG_GOLDEN_VALUE(GC, 0, mmGRBM_GFX_INDEX, 0xFFFFFFFF, 0xe0000000)
 };
 
-static const struct soc15_reg_golden golden_settings_gc_10_1_2_nv12[] = {
+static const struct soc15_reg_golden golden_settings_gc_10_1_2_nv12[1] = {
 	/* Pending on emulation bring up */
 };
 
@@ -3289,7 +3289,7 @@ static const struct soc15_reg_golden golden_settings_gc_10_3[] = {
 	SOC15_REG_GOLDEN_VALUE(GC, 0, mmUTCL1_CTRL, 0xffbfffff, 0x00a00000)
 };
 
-static const struct soc15_reg_golden golden_settings_gc_10_3_sienna_cichlid[] = {
+static const struct soc15_reg_golden golden_settings_gc_10_3_sienna_cichlid[1] = {
 	/* Pending on emulation bring up */
 };
 
@@ -3760,7 +3760,7 @@ static void gfx_v10_0_init_golden_registers(struct amdgpu_device *adev)
 						(const u32)ARRAY_SIZE(golden_settings_gc_10_1));
 		soc15_program_register_sequence(adev,
 						golden_settings_gc_10_0_nv10,
-						(const u32)ARRAY_SIZE(golden_settings_gc_10_0_nv10));
+						(const u32)ARRAY_SIZE(golden_settings_gc_10_0_nv10) - 1);
 		break;
 	case IP_VERSION(10, 1, 1):
 		soc15_program_register_sequence(adev,
@@ -3768,7 +3768,7 @@ static void gfx_v10_0_init_golden_registers(struct amdgpu_device *adev)
 						(const u32)ARRAY_SIZE(golden_settings_gc_10_1_1));
 		soc15_program_register_sequence(adev,
 						golden_settings_gc_10_1_nv14,
-						(const u32)ARRAY_SIZE(golden_settings_gc_10_1_nv14));
+						(const u32)ARRAY_SIZE(golden_settings_gc_10_1_nv14) - 1);
 		break;
 	case IP_VERSION(10, 1, 2):
 		soc15_program_register_sequence(adev,
@@ -3776,7 +3776,7 @@ static void gfx_v10_0_init_golden_registers(struct amdgpu_device *adev)
 						(const u32)ARRAY_SIZE(golden_settings_gc_10_1_2));
 		soc15_program_register_sequence(adev,
 						golden_settings_gc_10_1_2_nv12,
-						(const u32)ARRAY_SIZE(golden_settings_gc_10_1_2_nv12));
+						(const u32)ARRAY_SIZE(golden_settings_gc_10_1_2_nv12) - 1);
 		break;
 	case IP_VERSION(10, 3, 0):
 		soc15_program_register_sequence(adev,
@@ -3784,7 +3784,7 @@ static void gfx_v10_0_init_golden_registers(struct amdgpu_device *adev)
 						(const u32)ARRAY_SIZE(golden_settings_gc_10_3));
 		soc15_program_register_sequence(adev,
 						golden_settings_gc_10_3_sienna_cichlid,
-						(const u32)ARRAY_SIZE(golden_settings_gc_10_3_sienna_cichlid));
+						(const u32)ARRAY_SIZE(golden_settings_gc_10_3_sienna_cichlid) - 1);
 		break;
 	case IP_VERSION(10, 3, 2):
 		soc15_program_register_sequence(adev,

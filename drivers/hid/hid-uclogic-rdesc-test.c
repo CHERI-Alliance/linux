@@ -35,7 +35,7 @@ static const s32 params_frame_all[UCLOGIC_RDESC_PH_ID_NUM] = {
 	[UCLOGIC_RDESC_FRAME_PH_ID_UM] = 0xFF,
 };
 
-static const __u8 template_empty[] = { };
+static const __u8 template_empty[1] = { };
 static const __u8 template_small[] = { 0x00 };
 static const __u8 template_no_ph[] = { 0xAA, 0xFE, 0xAA, 0xED, 0x1D };
 
@@ -99,7 +99,7 @@ static struct uclogic_template_case uclogic_template_cases[] = {
 	{
 		.name = "empty_template",
 		.template = template_empty,
-		.template_size = sizeof(template_empty),
+		.template_size = sizeof(template_empty) - 1,
 		.param_list = params_pen_all,
 		.param_num = ARRAY_SIZE(params_pen_all),
 		.expected = template_empty,

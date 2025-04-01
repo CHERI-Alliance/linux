@@ -10,6 +10,10 @@ revocation_certificate_list:
 __revocation_list_start:
 	.incbin "certs/x509_revocation_list"
 __revocation_list_end:
+	.byte 0
+.size revocation_certificate_list, . - revocation_certificate_list
+.size __revocation_list_start, . - __revocation_list_start
+.size __revocation_list_end, . - __revocation_list_end
 
 	.align 8
 	.globl revocation_certificate_list_size
@@ -19,3 +23,4 @@ revocation_certificate_list_size:
 #else
 	.long __revocation_list_end - __revocation_list_start
 #endif
+	.size revocation_certificate_list_size, . - revocation_certificate_list_size

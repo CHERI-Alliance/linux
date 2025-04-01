@@ -445,7 +445,8 @@
 	*(.data..ro_after_init)						\
 	JUMP_TABLE_DATA							\
 	STATIC_CALL_DATA						\
-	__end_ro_after_init = .;
+	__end_ro_after_init = .;					\
+	size$__end_ro_after_init = ABSOLUTE(1);
 #endif
 
 /*

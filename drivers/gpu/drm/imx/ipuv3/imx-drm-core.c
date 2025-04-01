@@ -139,8 +139,9 @@ int imx_drm_encoder_parse_of(struct drm_device *drm,
 }
 EXPORT_SYMBOL_GPL(imx_drm_encoder_parse_of);
 
-static const struct drm_ioctl_desc imx_drm_ioctls[] = {
+static const struct drm_ioctl_desc imx_drm_ioctls[1] = {
 	/* none so far */
+	{ }
 };
 
 static int imx_drm_dumb_create(struct drm_file *file_priv,
@@ -164,7 +165,7 @@ static const struct drm_driver imx_drm_driver = {
 	.driver_features	= DRIVER_MODESET | DRIVER_GEM | DRIVER_ATOMIC,
 	DRM_GEM_DMA_DRIVER_OPS_WITH_DUMB_CREATE(imx_drm_dumb_create),
 	.ioctls			= imx_drm_ioctls,
-	.num_ioctls		= ARRAY_SIZE(imx_drm_ioctls),
+	.num_ioctls		= ARRAY_SIZE(imx_drm_ioctls) - 1,
 	.fops			= &imx_drm_driver_fops,
 	.name			= "imx-drm",
 	.desc			= "i.MX DRM graphics",

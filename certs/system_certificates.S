@@ -26,6 +26,7 @@ system_extra_cert:
 	.globl system_extra_cert_used
 system_extra_cert_used:
 	.int 0
+	.size system_extra_cert_used, . - system_extra_cert_used
 
 #endif /* CONFIG_SYSTEM_EXTRA_CERTIFICATE */
 

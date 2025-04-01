@@ -29,6 +29,11 @@ struct pinctrl_pin_desc;
 					fname##_groups,		\
 					ARRAY_SIZE(fname##_groups))
 
+#define MSM_PIN_FUNCTION_EMPTY(fname) 				\
+	[msm_mux_##fname] = PINCTRL_PINFUNCTION(#fname,		\
+					fname##_groups_empty,	\
+					0)
+
 #define QCA_PIN_FUNCTION(fname)					\
 	[qca_mux_##fname] = PINCTRL_PINFUNCTION(#fname,		\
 					fname##_groups,		\

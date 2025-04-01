@@ -26,6 +26,7 @@ static inline void arch_kgdb_breakpoint(void)
 	asm(".global kgdb_compiled_break\n"
 	    ".option norvc\n"
 	    "kgdb_compiled_break: ebreak\n"
+	    ".size kgdb_compiled_break, . - kgdb_compiled_break\n"
 	    ".option rvc\n");
 }
 

@@ -455,7 +455,7 @@ static const struct dev_pm_ops tegra_vde_pm_ops = {
 				tegra_vde_pm_resume)
 };
 
-static const u32 tegra124_decoded_fmts[] = {
+static const u32 tegra124_decoded_fmts[1] = {
 	/* TBD: T124 supports only a non-standard Tegra tiled format */
 };
 
@@ -470,7 +470,7 @@ static const struct tegra_coded_fmt_desc tegra124_coded_fmts[] = {
 			.max_height = 2032,
 			.step_height = 16,
 		},
-		.num_decoded_fmts = ARRAY_SIZE(tegra124_decoded_fmts),
+		.num_decoded_fmts = ARRAY_SIZE(tegra124_decoded_fmts) - 1,
 		.decoded_fmts = tegra124_decoded_fmts,
 		.decode_run = tegra_vde_h264_decode_run,
 		.decode_wait = tegra_vde_h264_decode_wait,

@@ -438,7 +438,7 @@ static const struct etnaviv_pm_domain doms_2d[] = {
 	}
 };
 
-static const struct etnaviv_pm_domain doms_vg[] = {
+static const struct etnaviv_pm_domain doms_vg[1] = {
 };
 
 static const struct etnaviv_pm_domain_meta doms_meta[] = {
@@ -454,7 +454,7 @@ static const struct etnaviv_pm_domain_meta doms_meta[] = {
 	},
 	{
 		.feature = chipFeatures_PIPE_VG,
-		.nr_domains = ARRAY_SIZE(doms_vg),
+		.nr_domains = 0,
 		.domains = &doms_vg[0]
 	}
 };
