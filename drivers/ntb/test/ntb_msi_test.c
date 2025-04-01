@@ -60,7 +60,7 @@ static void ntb_msit_setup_work(struct work_struct *work)
 	int irq_count = 0;
 	int irq;
 	int ret;
-	uintptr_t i;
+	unsigned int i;
 
 	ret = ntb_msi_setup_mws(nm->ntb);
 	if (ret) {
