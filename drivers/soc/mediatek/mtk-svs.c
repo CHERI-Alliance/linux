@@ -744,8 +744,7 @@ static int svs_dump_debug_show(struct seq_file *m, void *p)
 				seq_puts(m, "mode = error\n");
 
 			for (j = DESCHAR; j < SVS_REG_MAX; j++) {
-				svs_reg_addr = (unsigned long)(svsp->base +
-							       svsp->regs[j]);
+				svs_reg_addr = __c_pa(svsp->base + svsp->regs[j]);
 				seq_printf(m, "0x%08lx = 0x%08x\n",
 					   svs_reg_addr, svsb->reg_data[i][j]);
 			}

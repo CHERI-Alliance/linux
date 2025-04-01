@@ -169,7 +169,7 @@ static int rockchip_iodomain_notify(struct notifier_block *nb,
 		uV = max_t(unsigned long, pvc_data->old_uV, pvc_data->max_uV);
 	} else if (event & (REGULATOR_EVENT_VOLTAGE_CHANGE |
 			    REGULATOR_EVENT_ABORT_VOLTAGE_CHANGE)) {
-		uV = (unsigned long)data;
+		uV = __c_pa(data);
 	} else {
 		return NOTIFY_OK;
 	}

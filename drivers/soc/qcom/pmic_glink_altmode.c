@@ -422,7 +422,7 @@ static int pmic_glink_altmode_probe(struct auxiliary_device *adev,
 
 	match = of_match_device(pmic_glink_altmode_of_quirks, dev->parent);
 	if (match)
-		altmode->owner_id = (unsigned long)match->data;
+		altmode->owner_id = __c_pa(match->data);
 	else
 		altmode->owner_id = PMIC_GLINK_OWNER_USBC_PAN;
 
