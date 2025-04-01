@@ -39,7 +39,7 @@ MODULE_LICENSE("GPL");
 #define UV_MMTIMER_VERSION "1.0"
 
 static long uv_mmtimer_ioctl(struct file *file, unsigned int cmd,
-						unsigned long arg);
+						user_uintptr_t arg);
 static int uv_mmtimer_mmap(struct file *file, struct vm_area_struct *vma);
 
 /*
@@ -82,7 +82,7 @@ static const struct file_operations uv_mmtimer_fops = {
  * in the address specified by @arg.
  */
 static long uv_mmtimer_ioctl(struct file *file, unsigned int cmd,
-						unsigned long arg)
+						user_uintptr_t arg)
 {
 	int ret = 0;
 

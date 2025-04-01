@@ -96,7 +96,7 @@ static __poll_t dtlk_poll(struct file *, poll_table *);
 static int dtlk_open(struct inode *, struct file *);
 static int dtlk_release(struct inode *, struct file *);
 static long dtlk_ioctl(struct file *file,
-		       unsigned int cmd, unsigned long arg);
+		       unsigned int cmd, user_uintptr_t arg);
 
 static const struct file_operations dtlk_fops =
 {
@@ -268,7 +268,7 @@ static void dtlk_timer_tick(struct timer_list *unused)
 
 static long dtlk_ioctl(struct file *file,
 		       unsigned int cmd,
-		       unsigned long arg)
+		       user_uintptr_t arg)
 {
 	char __user *argp = (char __user *)arg;
 	struct dtlk_settings *sp;

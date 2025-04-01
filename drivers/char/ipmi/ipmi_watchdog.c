@@ -667,7 +667,7 @@ static const struct watchdog_info ident = {
 };
 
 static int ipmi_ioctl(struct file *file,
-		      unsigned int cmd, unsigned long arg)
+		      unsigned int cmd, user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 	int i;
@@ -737,7 +737,7 @@ static int ipmi_ioctl(struct file *file,
 
 static long ipmi_unlocked_ioctl(struct file *file,
 				unsigned int cmd,
-				unsigned long arg)
+				user_uintptr_t arg)
 {
 	int ret;
 

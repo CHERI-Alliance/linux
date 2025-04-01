@@ -89,7 +89,7 @@ module_param_hw(mwave_uart_io, int, ioport, 0);
 static int mwave_open(struct inode *inode, struct file *file);
 static int mwave_close(struct inode *inode, struct file *file);
 static long mwave_ioctl(struct file *filp, unsigned int iocmd,
-							unsigned long ioarg);
+							user_uintptr_t ioarg);
 
 MWAVE_DEVICE_DATA mwave_s_mdd;
 
@@ -121,7 +121,7 @@ static int mwave_close(struct inode *inode, struct file *file)
 }
 
 static long mwave_ioctl(struct file *file, unsigned int iocmd,
-							unsigned long ioarg)
+							user_uintptr_t ioarg)
 {
 	unsigned int retval = 0;
 	pMWAVE_DEVICE_DATA pDrvData = &mwave_s_mdd;

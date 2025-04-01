@@ -935,7 +935,7 @@ static __poll_t sonypi_misc_poll(struct file *file, poll_table *wait)
 }
 
 static long sonypi_misc_ioctl(struct file *fp,
-			     unsigned int cmd, unsigned long arg)
+			     unsigned int cmd, user_uintptr_t arg)
 {
 	long ret = 0;
 	void __user *argp = (void __user *)arg;

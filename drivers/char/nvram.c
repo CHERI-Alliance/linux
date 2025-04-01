@@ -278,7 +278,7 @@ static ssize_t nvram_misc_write(struct file *file, const char __user *buf,
 }
 
 static long nvram_misc_ioctl(struct file *file, unsigned int cmd,
-			     unsigned long arg)
+			     user_uintptr_t arg)
 {
 	long ret = -ENOTTY;
 

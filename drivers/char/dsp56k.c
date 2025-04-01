@@ -306,7 +306,7 @@ static ssize_t dsp56k_write(struct file *file, const char __user *buf, size_t co
 }
 
 static long dsp56k_ioctl(struct file *file, unsigned int cmd,
-			 unsigned long arg)
+			 user_uintptr_t arg)
 {
 	int dev = iminor(file_inode(file)) & 0x0f;
 	void __user *argp = (void __user *)arg;

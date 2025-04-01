@@ -722,7 +722,7 @@ static int lp_set_timeout64(unsigned int minor, void __user *arg)
 }
 
 static long lp_ioctl(struct file *file, unsigned int cmd,
-			unsigned long arg)
+			user_uintptr_t arg)
 {
 	unsigned int minor;
 	int ret;
@@ -740,7 +740,7 @@ static long lp_ioctl(struct file *file, unsigned int cmd,
 		ret = lp_set_timeout64(minor, (void __user *)arg);
 		break;
 	default:
-		ret = lp_do_ioctl(minor, cmd, arg, (void __user *)arg);
+		ret = lp_do_ioctl(minor, cmd, __c_ua(arg), (void __user *)arg);
 		break;
 	}
 	mutex_unlock(&lp_mutex);

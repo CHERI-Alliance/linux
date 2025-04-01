@@ -234,7 +234,7 @@ ds1620_read(struct file *file, char __user *buf, size_t count, loff_t *ptr)
 }
 
 static int
-ds1620_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+ds1620_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct therm therm;
 	union {
@@ -319,7 +319,7 @@ ds1620_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 }
 
 static long
-ds1620_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+ds1620_unlocked_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	int ret;
 

@@ -93,7 +93,8 @@ static int get_flash_id(void)
 	return c2;
 }
 
-static long flash_ioctl(struct file *filep, unsigned int cmd, unsigned long arg)
+static long flash_ioctl(struct file *filep, unsigned int cmd,
+			user_uintptr_t arg)
 {
 	mutex_lock(&flash_mutex);
 	switch (cmd) {

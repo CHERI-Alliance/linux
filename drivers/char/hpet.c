@@ -639,7 +639,7 @@ hpet_ioctl_common(struct hpet_dev *devp, unsigned int cmd, unsigned long arg,
 }
 
 static long
-hpet_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+hpet_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct hpet_info info;
 	int err;
