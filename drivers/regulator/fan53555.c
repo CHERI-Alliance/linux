@@ -681,7 +681,7 @@ static int fan53555_regulator_probe(struct i2c_client *client)
 				     "Platform data not found!\n");
 
 	di->regulator = pdata->regulator;
-	di->vendor = (uintptr_t)i2c_get_match_data(client);
+	di->vendor = __c_pa(i2c_get_match_data(client));
 	if (!dev_fwnode(&client->dev)) {
 		/* if no ramp constraint set, get the pdata ramp_delay */
 		if (!di->regulator->constraints.ramp_delay) {

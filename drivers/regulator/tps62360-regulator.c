@@ -348,12 +348,12 @@ static int tps62360_probe(struct i2c_client *client)
 			dev_err(&client->dev, "Error: No device match found\n");
 			return -ENODEV;
 		}
-		chip_id = (int)(long)match->data;
+		chip_id = (int)__c_pa(match->data);
 		if (!pdata)
 			pdata = of_get_tps62360_platform_data(&client->dev,
 							      &tps->desc);
 	} else if (id) {
-		chip_id = id->driver_data;
+		chip_id = __c_ua(id->driver_data);
 	} else {
 		dev_err(&client->dev, "No device tree match or id table match found\n");
 		return -ENODEV;

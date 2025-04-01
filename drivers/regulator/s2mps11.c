@@ -1132,7 +1132,7 @@ static int s2mps11_pmic_probe(struct platform_device *pdev)
 	if (!s2mps11)
 		return -ENOMEM;
 
-	s2mps11->dev_type = platform_get_device_id(pdev)->driver_data;
+	s2mps11->dev_type = __c_ua(platform_get_device_id(pdev)->driver_data);
 	switch (s2mps11->dev_type) {
 	case S2MPS11X:
 		rdev_num = ARRAY_SIZE(s2mps11_regulators);

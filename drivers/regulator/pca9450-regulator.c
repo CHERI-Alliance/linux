@@ -882,8 +882,7 @@ static irqreturn_t pca9450_irq_handler(int irq, void *data)
 
 static int pca9450_i2c_probe(struct i2c_client *i2c)
 {
-	enum pca9450_chip_type type = (unsigned int)(uintptr_t)
-				      of_device_get_match_data(&i2c->dev);
+	enum pca9450_chip_type type = __c_pa(of_device_get_match_data(&i2c->dev));
 	const struct pca9450_regulator_desc	*regulator_desc;
 	struct regulator_config config = { };
 	struct pca9450 *pca9450;

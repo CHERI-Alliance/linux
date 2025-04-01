@@ -671,13 +671,13 @@ static int act8865_pmic_probe(struct i2c_client *client)
 		if (!id)
 			return -ENODEV;
 
-		type = (unsigned long) id->data;
+		type = __c_pa(id->data);
 
 		voltage_select = !!of_get_property(dev->of_node,
 						   "active-semi,vsel-high",
 						   NULL);
 	} else {
-		type = i2c_id->driver_data;
+		type = __c_ua(i2c_id->driver_data);
 		pdata = dev_get_platdata(dev);
 	}
 

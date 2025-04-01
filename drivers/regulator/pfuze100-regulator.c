@@ -704,9 +704,9 @@ static int pfuze100_regulator_probe(struct i2c_client *client)
 			dev_err(&client->dev, "Error: No device match found\n");
 			return -ENODEV;
 		}
-		pfuze_chip->chip_id = (int)(long)match->data;
+		pfuze_chip->chip_id = (int)__c_pa(match->data);
 	} else if (id) {
-		pfuze_chip->chip_id = id->driver_data;
+		pfuze_chip->chip_id = __c_ua(id->driver_data);
 	} else {
 		dev_err(&client->dev, "No dts match or id table match found\n");
 		return -ENODEV;

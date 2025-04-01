@@ -227,7 +227,7 @@ static const struct chg_reg_data max77843_chg_reg_data = {
 
 static int max77693_pmic_probe(struct platform_device *pdev)
 {
-	enum max77693_types type = platform_get_device_id(pdev)->driver_data;
+	enum max77693_types type = __c_ua(platform_get_device_id(pdev)->driver_data);
 	struct max77693_dev *iodev = dev_get_drvdata(pdev->dev.parent);
 	const struct regulator_desc *regulators;
 	unsigned int regulators_size;

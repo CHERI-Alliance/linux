@@ -1682,7 +1682,7 @@ static int bd718xx_probe(struct platform_device *pdev)
 	bool use_snvs;
 	struct bd718xx_regulator_data *reg_data;
 	unsigned int num_reg_data;
-	enum rohm_chip_type chip = platform_get_device_id(pdev)->driver_data;
+	enum rohm_chip_type chip = __c_ua(platform_get_device_id(pdev)->driver_data);
 	const struct regulator_ops **swops, **hwops;
 
 	regmap = dev_get_regmap(pdev->dev.parent, NULL);

@@ -927,7 +927,7 @@ static int bd957x_probe(struct platform_device *pdev)
 		.renable = bd9576_temp_renable,
 		.data = &bd957x_regulators,
 	};
-	enum rohm_chip_type chip = platform_get_device_id(pdev)->driver_data;
+	enum rohm_chip_type chip = __c_ua(platform_get_device_id(pdev)->driver_data);
 
 	num_reg_data = ARRAY_SIZE(bd957x_regulators.regulator_data);
 

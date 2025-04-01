@@ -863,8 +863,7 @@ static struct lp872x_platform_data
 		goto out;
 
 	for (i = 0; i < num_matches; i++) {
-		pdata->regulator_data[i].id =
-				(uintptr_t)match[i].driver_data;
+		pdata->regulator_data[i].id = __c_pa(match[i].driver_data);
 		pdata->regulator_data[i].init_data = match[i].init_data;
 	}
 out:
@@ -891,7 +890,7 @@ static int lp872x_probe(struct i2c_client *cl)
 
 	if (cl->dev.of_node) {
 		pdata = lp872x_populate_pdata_from_dt(&cl->dev,
-					      (enum lp872x_id)id->driver_data);
+					      (enum lp872x_id)__c_ua(id->driver_data));
 		if (IS_ERR(pdata))
 			return PTR_ERR(pdata);
 	} else {
@@ -902,7 +901,7 @@ static int lp872x_probe(struct i2c_client *cl)
 	if (!lp)
 		return -ENOMEM;
 
-	lp->num_regulators = lp872x_num_regulators[id->driver_data];
+	lp->num_regulators = lp872x_num_regulators[__c_ua(id->driver_data)];
 
 	lp->regmap = devm_regmap_init_i2c(cl, &lp872x_regmap_config);
 	if (IS_ERR(lp->regmap)) {
@@ -913,7 +912,7 @@ static int lp872x_probe(struct i2c_client *cl)
 
 	lp->dev = &cl->dev;
 	lp->pdata = pdata;
-	lp->chipid = id->driver_data;
+	lp->chipid = __c_ua(id->driver_data);
 	i2c_set_clientdata(cl, lp);
 
 	ret = lp872x_hw_enable(lp);
