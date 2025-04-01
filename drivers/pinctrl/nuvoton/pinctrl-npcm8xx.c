@@ -21,6 +21,7 @@
 #include <linux/platform_device.h>
 #include <linux/property.h>
 #include <linux/regmap.h>
+#include <linux/empty_array.h>
 
 /* GCR registers */
 #define NPCM8XX_GCR_SRCNT	0x068
@@ -362,11 +363,11 @@ static const int cp1gpio5b_pins[] = { 98 };
 static const int cp1gpio6b_pins[] = { 97 };
 static const int cp1gpio7b_pins[] = { 96 };
 
-static const int cp1gpio0_pins[] = {  };
-static const int cp1gpio1_pins[] = {  };
-static const int cp1gpio2_pins[] = {  };
-static const int cp1gpio3_pins[] = {  };
-static const int cp1gpio4_pins[] = {  };
+EMPTY_ARRAY(int, cp1gpio0_pins)
+EMPTY_ARRAY(int, cp1gpio1_pins)
+EMPTY_ARRAY(int, cp1gpio2_pins)
+EMPTY_ARRAY(int, cp1gpio3_pins)
+EMPTY_ARRAY(int, cp1gpio4_pins)
 static const int cp1gpio5_pins[] = { 17 };
 static const int cp1gpio6_pins[] = { 91 };
 static const int cp1gpio7_pins[] = { 92 };

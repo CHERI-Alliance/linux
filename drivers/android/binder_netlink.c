@@ -3,6 +3,8 @@
 /*	Documentation/netlink/specs/binder.yaml */
 /* YNL-GEN kernel source */
 
+#include <linux/empty_array.h>
+
 #include <net/netlink.h>
 #include <net/genetlink.h>
 
@@ -11,8 +13,7 @@
 #include <uapi/linux/android/binder_netlink.h>
 
 /* Ops table for binder */
-static const struct genl_split_ops binder_nl_ops[] = {
-};
+EMPTY_ARRAY(struct genl_split_ops, binder_nl_ops)
 
 static const struct genl_multicast_group binder_nl_mcgrps[] = {
 	[BINDER_NLGRP_REPORT] = { "report", },

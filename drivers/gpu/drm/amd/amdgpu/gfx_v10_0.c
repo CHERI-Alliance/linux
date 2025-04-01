@@ -26,6 +26,7 @@
 #include <linux/firmware.h>
 #include <linux/module.h>
 #include <linux/pci.h>
+#include <linux/empty_array.h>
 #include "amdgpu.h"
 #include "amdgpu_gfx.h"
 #include "amdgpu_psp.h"
@@ -523,9 +524,8 @@ static const struct soc15_reg_golden golden_settings_gc_10_1[] = {
 	SOC15_REG_GOLDEN_VALUE(GC, 0, mmUTCL1_CTRL, 0x00c00000, 0x00c00000)
 };
 
-static const struct soc15_reg_golden golden_settings_gc_10_0_nv10[] = {
-	/* Pending on emulation bring up */
-};
+/* Pending on emulation bring up */
+EMPTY_ARRAY(struct soc15_reg_golden, golden_settings_gc_10_0_nv10)
 
 static const struct soc15_reg_golden golden_settings_gc_rlc_spm_10_0_nv10[] = {
 	SOC15_REG_GOLDEN_VALUE(GC, 0, mmGRBM_GFX_INDEX, 0xe0000000, 0x0),
@@ -1668,9 +1668,8 @@ static const struct soc15_reg_golden golden_settings_gc_10_1_2[] = {
 	SOC15_REG_GOLDEN_VALUE(GC, 0, mmUTCL1_CTRL, 0xffffffff, 0x00c00000)
 };
 
-static const struct soc15_reg_golden golden_settings_gc_10_1_nv14[] = {
-	/* Pending on emulation bring up */
-};
+/* Pending on emulation bring up */
+EMPTY_ARRAY(struct soc15_reg_golden, golden_settings_gc_10_1_nv14)
 
 static const struct soc15_reg_golden golden_settings_gc_rlc_spm_10_1_nv14[] = {
 	SOC15_REG_GOLDEN_VALUE(GC, 0, mmGRBM_GFX_INDEX, 0xE0000000L, 0x0),
@@ -2295,9 +2294,8 @@ static const struct soc15_reg_golden golden_settings_gc_rlc_spm_10_1_nv14[] = {
 	SOC15_REG_GOLDEN_VALUE(GC, 0, mmGRBM_GFX_INDEX, 0xFFFFFFFF, 0xe0000000)
 };
 
-static const struct soc15_reg_golden golden_settings_gc_10_1_2_nv12[] = {
-	/* Pending on emulation bring up */
-};
+/* Pending on emulation bring up */
+EMPTY_ARRAY(struct soc15_reg_golden, golden_settings_gc_10_1_2_nv12)
 
 static const struct soc15_reg_golden golden_settings_gc_rlc_spm_10_1_2_nv12[] = {
 	SOC15_REG_GOLDEN_VALUE(GC, 0, mmGRBM_GFX_INDEX, 0xe0000000L, 0x0),
@@ -3400,9 +3398,8 @@ static const struct soc15_reg_golden golden_settings_gc_10_3[] = {
 	SOC15_REG_GOLDEN_VALUE(GC, 0, mmUTCL1_CTRL, 0xffbfffff, 0x00a00000)
 };
 
-static const struct soc15_reg_golden golden_settings_gc_10_3_sienna_cichlid[] = {
-	/* Pending on emulation bring up */
-};
+/* Pending on emulation bring up */
+EMPTY_ARRAY(struct soc15_reg_golden, golden_settings_gc_10_3_sienna_cichlid)
 
 static const struct soc15_reg_golden golden_settings_gc_10_3_2[] = {
 	SOC15_REG_GOLDEN_VALUE(GC, 0, mmCGTT_SPI_CS_CLK_CTRL, 0xff7f0fff, 0x78000100),

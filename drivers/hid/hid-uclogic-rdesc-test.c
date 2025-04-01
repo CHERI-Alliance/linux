@@ -9,6 +9,8 @@
 #include <kunit/test.h>
 #include "./hid-uclogic-rdesc.h"
 
+#include <linux/empty_array.h>
+
 MODULE_IMPORT_NS("EXPORTED_FOR_KUNIT_TESTING");
 
 struct uclogic_template_case {
@@ -37,7 +39,7 @@ static const s32 params_frame_all[UCLOGIC_RDESC_PH_ID_NUM] = {
 	[UCLOGIC_RDESC_FRAME_PH_ID_UM] = 0xFF,
 };
 
-static const __u8 template_empty[] = { };
+EMPTY_ARRAY(u8, template_empty)
 static const __u8 template_small[] = { 0x00 };
 static const __u8 template_no_ph[] = { 0xAA, 0xFE, 0xAA, 0xED, 0x1D };
 
