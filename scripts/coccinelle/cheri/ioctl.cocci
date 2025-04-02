@@ -8,7 +8,7 @@ virtual report
 identifier __type;
 identifier __name;
 identifier __f1;
-identifier __field =~ "^ioctl|unlocked_ioctl$";
+identifier __field =~ "^ioctl|unlocked_ioctl|fb_ioctl$";
 @@
 
 struct __type __name = {
