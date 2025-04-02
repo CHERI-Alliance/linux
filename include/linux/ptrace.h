@@ -252,7 +252,7 @@ static inline void ptrace_release_task(struct task_struct *task)
  * is an error value.  On some systems like ia64 and powerpc they have different
  * indicators of success/failure and must define their own.
  */
-#define is_syscall_success(regs) (!IS_ERR_VALUE((unsigned long)(regs_return_value(regs))))
+#define is_syscall_success(regs) (!IS_ERR_VALUE(__c_ua(regs_return_value(regs))))
 #endif
 
 /*

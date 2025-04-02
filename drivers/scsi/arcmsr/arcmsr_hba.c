@@ -655,7 +655,7 @@ static void arcmsr_hbaF_assign_regAddr(struct AdapterControlBlock *acb)
 	struct MessageUnit_F __iomem *pmuF;
 
 	memset(acb->dma_coherent2, 0xff, acb->completeQ_size);
-	acb->message_wbuffer = (uint32_t *)round_up((uintptr_t)acb->dma_coherent2 +
+	acb->message_wbuffer = (uint32_t *)round_up((void *)acb->dma_coherent2 +
 		acb->completeQ_size, 4);
 	acb->message_rbuffer = ((void *)acb->message_wbuffer) + 0x100;
 	acb->msgcode_rwbuffer = ((void *)acb->message_wbuffer) + 0x200;

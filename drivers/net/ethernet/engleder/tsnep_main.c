@@ -2574,8 +2574,8 @@ static int tsnep_probe(struct platform_device *pdev)
 	adapter->addr = devm_platform_get_and_ioremap_resource(pdev, 0, &io);
 	if (IS_ERR(adapter->addr))
 		return PTR_ERR(adapter->addr);
-	netdev->mem_start = io->start;
-	netdev->mem_end = io->end;
+	netdev->mem_start = __c_fakeu(io->start);
+	netdev->mem_end = __c_fakeu(io->end);
 
 	type = ioread32(adapter->addr + ECM_TYPE);
 	revision = (type & ECM_REVISION_MASK) >> ECM_REVISION_SHIFT;

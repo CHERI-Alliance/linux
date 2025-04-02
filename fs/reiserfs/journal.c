@@ -3406,7 +3406,7 @@ int journal_end(struct reiserfs_transaction_handle *th)
 		BUG_ON(cur_th->t_super != th->t_super);
 
 		if (th != cur_th) {
-			memcpy(current->journal_info, th, sizeof(*th));
+			memcpy((struct reiserfs_transaction_handle *)current->journal_info, th, sizeof(*th));
 			th->t_trans_id = 0;
 		}
 		return 0;

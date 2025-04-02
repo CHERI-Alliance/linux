@@ -513,7 +513,7 @@ static int nft_tunnel_obj_init(const struct nft_ctx *ctx,
 	if (!md)
 		return -ENOMEM;
 
-	memcpy(&md->u.tun_info, &info, sizeof(info));
+	memcpy((struct ip_tunnel_info *)&md->u.tun_info, &info, sizeof(info));
 #ifdef CONFIG_DST_CACHE
 	err = dst_cache_init(&md->u.tun_info.dst_cache, GFP_KERNEL);
 	if (err < 0) {

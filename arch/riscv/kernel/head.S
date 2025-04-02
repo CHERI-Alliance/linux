@@ -402,6 +402,7 @@ SYM_CODE_START(_start_kernel)
 	/* Restore C environment */
 	la tp, init_task
 #ifdef CONFIG_CHERI_KERNEL
+	scs_load_init_stack
 	li t0, TASK_STRUCT_SIZE
 	scbnds ctp, ctp, t0
 #endif
@@ -414,7 +415,6 @@ SYM_CODE_START(_start_kernel)
 	add csp, csp, t0
 #endif
 	CREG(addi) CREG(sp), CREG(sp), -PT_SIZE_ON_STACK
-	scs_load_current
 
 #ifdef CONFIG_CHERI_KERNEL
 	auipc ca0, 0
@@ -442,6 +442,7 @@ SYM_CODE_START(_start_kernel)
 	setup_cheri_regs t0
 	reset_gprs
 #endif
+	scs_load_current
 
 #ifdef CONFIG_KASAN
 	call kasan_early_init

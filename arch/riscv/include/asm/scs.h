@@ -4,6 +4,7 @@
 
 #ifdef __ASSEMBLY__
 #include <asm/asm-offsets.h>
+#include <asm/asmcheri.h>
 
 #ifdef CONFIG_SHADOW_CALL_STACK
 
