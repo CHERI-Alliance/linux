@@ -149,7 +149,6 @@ SYM_CODE_START(secondary_start_sbi)
 #ifdef CONFIG_CHERI_KERNEL
 	/* Setup environment. */
 	enter_capmode t0
-	detect_acperm_layout t1 t0 t2
 	find_infcap t0 t1 t2
 
 	/* Provide provenance for boot data. */
@@ -272,9 +271,6 @@ SYM_CODE_START(_start_kernel)
 	csrc CSR_STATUS, t0
 
 #ifdef CONFIG_CHERI_KERNEL
-	/* Detect acperm layout. Fills in t2 and t3. */
-	detect_acperm_layout t2 t3 t0
-
 	/* Install infinite capability in pcc. */
 	find_infcap t3 t1 t0
 
@@ -317,10 +313,6 @@ SYM_CODE_START(_start_kernel)
 #endif /* CONFIG_RISCV_BOOT_SPINWAIT */
 
 #ifdef CONFIG_CHERI_KERNEL
-	/* Store acperm_legcay after the infinite cap is set up. */
-	llc ct0, acperm_legacy
-	sb t2, (ct0)
-
 	/*
 	 * Detect zcherilevels if not legacy acperm.
 	 * Use kernel_data_cap as scratch.

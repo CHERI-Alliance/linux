@@ -25,17 +25,10 @@ static bool root_cap_valid = true;
 
 void __init riscv_cheri_init(void)
 {
-#ifdef __CHERI_BW_CAP_PERMISSION_CAPABILITY__
-	BUG_ON(!acperm_legacy);
-#else
-	BUG_ON(acperm_legacy);
-#endif
-
 	if (!root_cap_valid)
 		panic("CHERI: Invalid root cap\n");
 
-	pr_info("CHERI: riscv cheri support%s\n",
-		acperm_legacy ? " (legacy acperm)" : "");
+	pr_info("CHERI: riscv cheri support\n");
 
 	pr_info("CHERI: Selected SATP mode: 0x%lx PTE.CW support: %s\n",
 		(unsigned long)satp_mode, riscv_cheripte_cw ? "yes" : "no");

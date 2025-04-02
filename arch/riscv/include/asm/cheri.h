@@ -4,28 +4,8 @@
 
 
 #ifdef __CHERI_BW_CAP_PERMISSION_CAPABILITY__
-
-/**
- * We are compiling with a legacy compiler. Do not depend on
- * the compiler to get the permissions correct.
- */
-#define CHERI_PERM_CAP_RW		0x000001
-#define CHERI_PERM_STORE		0x000002
-#define CHERI_PERM_LOAD			0x000004
-#define CHERI_PERM_EXECUTE		0x000008
-#define CHERI_PERM_SYSTEM_REGS		0x000010
-
-#define CHERI_PERM_SW_00		0x010000
-#define CHERI_PERM_SW_01		0x020000
-#define CHERI_PERM_SW_02		0x040000
-#define CHERI_PERM_SW_03		0x080000
-
-#define CHERI_PERM_MUTABLE_LOAD		0x000000
-#define CHERI_PERM_STORE_LOCAL_CAP	0x000000
-#define CHERI_PERM_GLOBAL		0x000000
-#define CHERI_PERM_ELEVATED_LOAD	0x000000
-
-#else
+#error "Please update to a CHERI v9.5 compliant compiler."
+#endif
 
 #define CHERI_PERM_STORE		0x000001
 #define CHERI_PERM_MUTABLE_LOAD		0x000002
@@ -42,7 +22,6 @@
 #define CHERI_PERM_EXECUTE		0x020000
 #define CHERI_PERM_LOAD			0x040000
 
-#endif
 
 #define ZCHERILEVELS_PERMS \
 	(CHERI_PERM_ELEVATED_LOAD | CHERI_PERM_STORE_LOCAL_CAP \

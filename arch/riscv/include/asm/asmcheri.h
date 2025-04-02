@@ -142,53 +142,6 @@ _csrw \csr \gpr \@
 .endm
 
 /*
- * Detect the CHERI acperm layout
- * @param legacy Set to one if the legacy acperm bitmap layout
- *     is in use.
- * @param infperms Filled with the minimum capabilities requried
- *     for an infinite capability.
- * @param tmp A scratch register
- * Clobbers: CSR_TVEC, cra
- */
-.macro detect_acperm_layout legacy, infperms, tmp
-	/*
-	 * Setup exception vector. The jalr will trap for the new
-	 * acperm bitmask due to missing execute permissions.
-	 */
-	la \tmp, 2f
-	csrw CSR_TVEC, \tmp
-
-	/* Setup call to 1f, use \legacy as a second scratch. */
-	la \tmp, 1f
-	li \legacy, 0xff
-	acperm c\tmp, c\tmp, \legacy
-
-	/* Load v0.9 style acperm values. */
-	li \legacy, 1
-	li \infperms, 0x1001f
-
-	/*
-	 * Try to call 1f. We will return here for new ACPERM and jump to 
-	 * the trap vector for legacy. In both cases pcc permissions are
-	 * preserved.
-	 */
-	jalr c\tmp
-
-	/* We returned from jalr so we are done. */
-	j 3f
-
-	/* Call point for jalr above. */
-1:	ret
-
-.align 2
-2:	/* Trap vector: Load legacy values. */
-	li \legacy, 0
-	li \infperms, 0x70063	/* New ACPERM: R, W, X, ASR, LM, C, SDP:1 */
-
-3:	/* Continuation point. */
-.endm
-
-/*
  * Detect support for cheri levels.
  * Pre-requisites:
  * - New (v0.9+) permission layout
@@ -210,7 +163,7 @@ _csrw \csr \gpr \@
 
 	/*
 	 * Store the capability to the scratch memory location and
-	 * read it back. With zcherilevel this will clear the tag.
+	 * read it back. With zcherilevels this will clear the tag.
 	 */
 	sc c\tmp, (c\tmp)
 	lc c\tmp, (c\tmp)
@@ -262,17 +215,16 @@ _csrw \csr \gpr \@
 /*
  * Find the infinite capability in ca3 or ddc. If found install it
  * in pcc. Otherwise assume that the capability in pcc is ok.
- * @param perm A register that contains the minimum permission mask
- *     required for the infinite capability (not modified). Try x0
- *     if you don't know.
+ * @param tmp0 A temporary scratch register
  * @param tmp1 A temporary scratch register
  * @param tmp2 A temporary scratch register
  */
-.macro find_infcap perm tmp1 tmp2
+.macro find_infcap tmp0 tmp1 tmp2
+	li \tmp0, 0x1001f
 	mv c\tmp1, ca3
-	try_install_infcap \tmp1 \perm \tmp2 100f
+	try_install_infcap \tmp1 \tmp0 \tmp2 100f
 	ccsrr \tmp1, ddc
-	try_install_infcap \tmp1 \perm \tmp2 100f
+	try_install_infcap \tmp1 \tmp0 \tmp2 100f
 100:	enter_capmode \tmp1
 .endm
 
