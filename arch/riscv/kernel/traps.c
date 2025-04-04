@@ -472,10 +472,7 @@ asmlinkage __visible noinstr void do_trap_cheri(struct pt_regs *regs)
 			return;
 	}
 
-	if (has_xtval2)
-		xtval2 = csr_read(CSR_TVAL2);
-	else
-		xtval2 = csr_read(CSR_TVAL);
+	xtval2 = csr_read(CSR_TVAL2);
 	pr_err("===== CHERI exception: %#p %pS\n",
 	       (void *)regs->epc, (void *)regs->epc);
 	pr_err("===== CHERI exception: addr=%#lx xtval2=%#lx (%s, %s)\n",

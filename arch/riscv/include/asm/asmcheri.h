@@ -289,22 +289,6 @@ _csrw \csr \gpr \@
 .endm
 
 /*
- * Detect the presence of a CSR register by reading from it.
- * @param csr The CSR register
- * @param reg Set to 1 iff the register is supported.
- */
-.macro detect_csr csr reg
-	la \reg, 1f
-	csrw CSR_TVEC, \reg
-	csrr \reg, \csr
-	li \reg, 1
-	j 2f
-.align 2
-1:	li \reg, 0
-2:
-.endm
-
-/*
  * Reset all general purpose registers except sp and tp to zero.
  */
 .macro reset_gprs

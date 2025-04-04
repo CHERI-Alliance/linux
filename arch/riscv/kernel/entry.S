@@ -434,9 +434,6 @@ SYM_DATA_END(scmode_capmode_value)
 SYM_DATA_START(cheri_hybrid_support)
 	.byte 0
 SYM_DATA_END(cheri_hybrid_support)
-SYM_DATA_START(has_xtval2)
-	.byte 0
-SYM_DATA_END(has_xtval2)
 SYM_DATA_START(has_cheri_levels)
 	.byte 0
 SYM_DATA_END(has_cheri_levels)
