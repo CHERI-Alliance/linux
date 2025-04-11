@@ -31,7 +31,7 @@ build_riscv64_cheri_default:
     - echo "CHECKING sparse messages"
     - 'if grep "preserving" log; then echo ERROR: Unexpected sparse warnings; false; else echo "No unexpected sparse errors"; fi'
 
-build_riscv64_cheri_allyes:
+build_riscv64_cheri_full:
   stage: build
   script:
     - mkdir -p $CI_PROJECT_DIR
@@ -42,7 +42,24 @@ build_riscv64_cheri_allyes:
     - 'tar -C /opt/bin -xvzf /tmp/dl/sparse.tgz'
     - 'PATH="/opt/cherillvm/bin:/opt/bin:${PATH}"'
     - export PATH
-    - 'make LLVM=1 ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- CC="clang -target riscv64" HOSTCC=/usr/bin/gcc cheri_allyes_defconfig'
+    - 'make LLVM=1 ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- CC="clang -target riscv64" HOSTCC=/usr/bin/gcc cheri_full_defconfig'
+    - 'make -j $(nproc) LLVM=1 ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- CC="clang -target riscv64" HOSTCC=/usr/bin/gcc all modules'
+    - 'make -j $(nproc) LLVM=1 ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- CC="clang -target riscv64" HOSTCC=/usr/bin/gcc C=2 all modules >log 2>&1'
+    - echo "CHECKING sparse messages"
+    - 'if grep "preserving" log; then echo ERROR: Unexpected sparse warnings; false; else echo "No unexpected sparse errors"; fi'
+
+build_riscv64_cheri_compiletest:
+  stage: build
+  script:
+    - mkdir -p $CI_PROJECT_DIR
+    - cd $CI_PROJECT_DIR
+    - mkdir -p /tmp/dl
+    - mkdir -p /opt/bin
+    - 'curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" -o /tmp/dl/sparse.tgz "https://gitlab.codasip.com/api/v4/projects/1640/packages/generic/sparse/default/sparse.tgz"'
+    - 'tar -C /opt/bin -xvzf /tmp/dl/sparse.tgz'
+    - 'PATH="/opt/cherillvm/bin:/opt/bin:${PATH}"'
+    - export PATH
+    - 'make LLVM=1 ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- CC="clang -target riscv64" HOSTCC=/usr/bin/gcc cheri_compiletest_defconfig'
     - 'make -j $(nproc) LLVM=1 ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- CC="clang -target riscv64" HOSTCC=/usr/bin/gcc all modules'
     - 'make -j $(nproc) LLVM=1 ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- CC="clang -target riscv64" HOSTCC=/usr/bin/gcc C=2 all modules >log 2>&1'
     - echo "CHECKING sparse messages"
