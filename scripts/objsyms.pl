@@ -313,7 +313,7 @@ while (1) {
 }
 close($relocfh);
 
-open (my $dynfh, "llvm-objdump -R '$file' | ") or die "not found: $!";
+open (my $dynfh, "llvm-objdump -R '$file' 2>/dev/null |") or die "not found: $!";
 while (<$dynfh>) {
 	chomp;
 	next if m/^\s*$/;
