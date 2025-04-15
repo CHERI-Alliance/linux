@@ -92,6 +92,12 @@
  * is configured with CONFIG_SPARSEMEM_VMEMMAP enabled.
  */
 #define vmemmap		((struct page *)(uintptr_t)VMEMMAP_START - vmemmap_start_pfn)
+#ifdef CONFIG_CHERI_KERNEL
+#define vmemmap_ptr	__vmemmap_ptr
+#ifndef __ASSEMBLY__
+extern struct page * __vmemmap_ptr;
+#endif
+#endif
 
 #define PCI_IO_SIZE      SZ_16M
 #define PCI_IO_END       VMEMMAP_START

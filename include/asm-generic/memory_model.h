@@ -43,7 +43,15 @@ static inline int pfn_valid(unsigned long pfn)
 #elif defined(CONFIG_SPARSEMEM_VMEMMAP)
 
 /* memmap is virtually contiguous.  */
+#ifdef CONFIG_CHERI_KERNEL
+/*
+ * vmemmap_ptr - vmemmap == pfn of the first ram address
+ * vmemmap_ptr capability == VMEMMAP_START -> struct page for first ram addr
+ */
+#define __pfn_to_page(pfn)	(vmemmap_ptr + ((pfn) - (vmemmap_ptr - vmemmap)))
+#else
 #define __pfn_to_page(pfn)	(vmemmap + (pfn))
+#endif
 #define __page_to_pfn(page)	(unsigned long)((page) - vmemmap)
 
 #elif defined(CONFIG_SPARSEMEM)
