@@ -169,7 +169,7 @@ int kunwind_next_regs_pc(struct kunwind_state *state)
 	unsigned long fp = state->common.fp;
 	struct pt_regs *regs;
 
-	regs = container_of((u64 *)fp, struct pt_regs, stackframe.record.fp);
+	regs = container_of((user_uintptr_t *)fp, struct pt_regs, stackframe.record.fp);
 
 	info = unwind_find_stack(&state->common, (unsigned long)regs, sizeof(*regs));
 	if (!info)
