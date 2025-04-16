@@ -72,7 +72,7 @@ int io_epoll_wait_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 		return -EINVAL;
 
 	iew->maxevents = READ_ONCE(sqe->len);
-	iew->events = u64_to_user_ptr(READ_ONCE(sqe->addr));
+	iew->events = (void __user *)READ_ONCE(sqe->addr);
 	return 0;
 }
 
