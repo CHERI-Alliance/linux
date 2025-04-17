@@ -20,12 +20,14 @@
 #define __CAP_ALIGN(p, a)						\
 ({									\
 	typeof(p) __p = (p);						\
-	__builtin_cheri_address_set(__p, ALIGN(user_ptr_addr(__p), (a))); \
+	__builtin_cheri_address_set(__p,				\
+		ALIGN(user_ptr_addr(__p), ((unsigned long)(a)))); 	\
 })
-#define __CAP_ALIGN_DOWN(p, a)					\
+#define __CAP_ALIGN_DOWN(p, a)						\
 ({									\
 	typeof(p) __p = (p);						\
-	__builtin_cheri_address_set(__p, ALIGN_DOWN(user_ptr_addr(__p), (a))); \
+	__builtin_cheri_address_set(__p,				\
+		ALIGN_DOWN(user_ptr_addr(__p), ((unsigned long)(a))));	\
 })
 #endif /* CONFIG_CHERI_PURECAP_UABI */
 
