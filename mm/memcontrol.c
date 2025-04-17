@@ -3311,7 +3311,7 @@ __always_inline struct obj_cgroup *current_obj_cgroup(void)
 			goto from_memcg;
 
 		objcg = READ_ONCE(current->objcg);
-		if (unlikely((unsigned long)objcg & CURRENT_OBJCG_UPDATE_FLAG))
+		if (unlikely(__c_pa(objcg) & CURRENT_OBJCG_UPDATE_FLAG))
 			objcg = current_objcg_update();
 		/*
 		 * Objcg reference is kept by the task, so it's safe
@@ -6874,7 +6874,12 @@ static void mem_cgroup_kmem_attach(struct cgroup_taskset *tset)
 
 	cgroup_taskset_for_each(task, css, tset) {
 		/* atomically set the update bit */
+		/* FIXCHERI: HACK ALERT: Support proper bit operations on pointers. */
+#if __SIZEOF_POINTER__ > __SIZEOF_LONG__
+		atomic_ptr_or(1ULL << CURRENT_OBJCG_UPDATE_BIT, (atomic_ptr_t *)&task->objcg);
+#else
 		set_bit(CURRENT_OBJCG_UPDATE_BIT, (unsigned long *)&task->objcg);
+#endif
 	}
 }
 #else

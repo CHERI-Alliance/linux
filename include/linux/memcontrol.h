@@ -1595,7 +1595,7 @@ struct slabobj_ext {
 #ifdef CONFIG_MEM_ALLOC_PROFILING
 	union codetag_ref ref;
 #endif
-} __aligned(8);
+} __aligned(8) __cheri_pointer_align;
 
 static inline void __inc_lruvec_kmem_state(void *p, enum node_stat_item idx)
 {

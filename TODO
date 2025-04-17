@@ -8,6 +8,7 @@ FORTIFY_SOURCE
 TOMOYO
 LOCKDEP
 semaphore debugging
+Implement set_bit/clear_bit for pointers
 KCOV
 UBSAN
 KFENCE
