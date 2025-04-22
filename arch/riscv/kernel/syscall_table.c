@@ -10,12 +10,18 @@
 #include <asm/syscall.h>
 
 #define __SYSCALL_WITH_COMPAT(nr, native, compat) __SYSCALL(nr, native)
+#define __SYSCALL_WITH_COMPAT_RETPTR(nr, native, compat) __SYSCALL_RETPTR(nr, native)
 
 #undef __SYSCALL
+#undef __SYSCALL_RETPTR
 #define __SYSCALL(nr, call)	asmlinkage long __riscv_##call(const struct pt_regs *);
+#ifdef CONFIG_CHERI_PURECAP_UABI
+#define __SYSCALL_RETPTR(nr, call)	asmlinkage user_uintptr_t __riscv_##call(const struct pt_regs *);
+#endif /* CONFIG_CHERI_PURECAP_UABI */
 #include <asm/syscall_table.h>
 
 #undef __SYSCALL
+#undef __SYSCALL_RETPTR
 #define __SYSCALL(nr, call)	[nr] = __riscv_##call,
 
 void * const sys_call_table[__NR_syscalls] = {
