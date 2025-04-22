@@ -173,7 +173,7 @@
 137	time32	rt_sigtimedwait			sys_rt_sigtimedwait_time32	compat_sys_rt_sigtimedwait_time32
 137	64	rt_sigtimedwait			sys_rt_sigtimedwait
 138	common	rt_sigqueueinfo			sys_rt_sigqueueinfo		compat_sys_rt_sigqueueinfo
-139	common	rt_sigreturn			sys_rt_sigreturn		compat_sys_rt_sigreturn
+139	common	rt_sigreturn			sys_rt_sigreturn		compat_sys_rt_sigreturn			retptr
 140	common	setpriority			sys_setpriority
 141	common	getpriority			sys_getpriority
 142	common	reboot				sys_reboot
@@ -237,7 +237,7 @@
 193	common	semop				sys_semop
 194	common	shmget				sys_shmget
 195	common	shmctl				sys_shmctl			compat_sys_shmctl
-196	common	shmat				sys_shmat			compat_sys_shmat
+196	common	shmat				sys_shmat			compat_sys_shmat		retptr
 197	common	shmdt				sys_shmdt
 198	common	socket				sys_socket
 199	common	socketpair			sys_socketpair
@@ -257,14 +257,14 @@
 213	common	readahead			sys_readahead			compat_sys_readahead
 214	common	brk				sys_brk
 215	common	munmap				sys_munmap
-216	common	mremap				sys_mremap
+216	common	mremap				sys_mremap			-				retptr
 217	common	add_key				sys_add_key
 218	common	request_key			sys_request_key
 219	common	keyctl				sys_keyctl			compat_sys_keyctl
 220	common	clone				sys_clone
 221	common	execve				sys_execve			compat_sys_execve
-222	32	mmap2				sys_mmap2
-222	64	mmap				sys_mmap
+222	32	mmap2				sys_mmap2			-				retptr
+222	64	mmap				sys_mmap			-				retptr
 223	32	fadvise64_64			sys_fadvise64_64		compat_sys_fadvise64_64
 223	64	fadvise64			sys_fadvise64_64
 224	common	swapon				sys_swapon
