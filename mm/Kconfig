@@ -474,7 +474,7 @@ menuconfig MEMORY_HOTPLUG
 	select MEMORY_ISOLATION
 	depends on SPARSEMEM
 	depends on ARCH_ENABLE_MEMORY_HOTPLUG
-	depends on 64BIT
+	depends on 64BIT && !CHERI_KERNEL
 	select NUMA_KEEP_MEMINFO if NUMA
 
 if MEMORY_HOTPLUG
