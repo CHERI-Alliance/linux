@@ -4,6 +4,7 @@
 #include <linux/printk.h>
 #include <linux/numa.h>
 #include <linux/numa_memblks.h>
+#include <asm/io.h>
 
 struct pglist_data *node_data[MAX_NUMNODES];
 EXPORT_SYMBOL(node_data);
@@ -28,7 +29,7 @@ void __init alloc_node_data(int nid)
 	if (tnid != nid)
 		pr_info("    NODE_DATA(%d) on node %d\n", nid, tnid);
 
-	node_data[nid] = __va(nd_pa);
+	node_data[nid] = cheri_make_kernel_data_cap(__va_a(nd_pa), nd_size);
 	memset(NODE_DATA(nid), 0, sizeof(pg_data_t));
 }
 
