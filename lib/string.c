@@ -615,6 +615,18 @@ void *memset64(uint64_t *s, uint64_t v, size_t count)
 EXPORT_SYMBOL(memset64);
 #endif
 
+#ifndef __HAVE_ARCH_MEMSET_P
+extern void *memset_p(void **s, void *v, size_t count)
+{
+	void **xs = s;
+
+	while (count--)
+		*xs++ = v;
+	return s;
+}
+EXPORT_SYMBOL(memset_p);
+#endif
+
 #ifndef __HAVE_ARCH_MEMCPY
 /**
  * memcpy - Copy one area of memory to another
