@@ -17,6 +17,7 @@
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/msi.h>
+#include <linux/bitfield.h>
 #include <linux/of_address.h>
 #include <linux/of_pci.h>
 #include <linux/of_platform.h>
@@ -65,6 +66,10 @@
 
 /* Root Port Error FIFO Read Register definitions */
 #define XILINX_PCIE_RPEFR_ERR_VALID	BIT(18)
+#define XILINX_PCIE_RPEFR_ERR_TYPE	GENMASK(17, 16)
+#define   XILINX_PCIE_RPEFR_ERR_TYPE_CORRECTABLE	0
+#define   XILINX_PCIE_RPEFR_ERR_TYPE_NONFATAL		1
+#define   XILINX_PCIE_RPEFR_ERR_TYPE_FATAL		2
 #define XILINX_PCIE_RPEFR_REQ_ID	GENMASK(15, 0)
 #define XILINX_PCIE_RPEFR_ALL_MASK	0xFFFFFFFF
 
@@ -83,6 +88,7 @@
 #define XILINX_PCIE_RPIFR2_MSG_DATA	GENMASK(15, 0)
 
 /* Root Port Status/control Register definitions */
+#define XILINX_PCIE_REG_RPSC_EFNE	BIT(16)
 #define XILINX_PCIE_REG_RPSC_BEN	BIT(0)
 
 /* Phy Status/Control Register definitions */
@@ -134,11 +140,22 @@ static inline bool xilinx_pcie_link_up(struct xilinx_pcie *pcie)
 static void xilinx_pcie_clear_err_interrupts(struct xilinx_pcie *pcie)
 {
 	struct device *dev = pcie->dev;
-	unsigned long val = pcie_read(pcie, XILINX_PCIE_REG_RPEFR);
+	const char *type_names[4] = {
+		[XILINX_PCIE_RPEFR_ERR_TYPE_CORRECTABLE] = "Correctable",
+		[XILINX_PCIE_RPEFR_ERR_TYPE_NONFATAL] = "Non-Fatal",
+		[XILINX_PCIE_RPEFR_ERR_TYPE_FATAL] = "Fatal",
+	};
 
-	if (val & XILINX_PCIE_RPEFR_ERR_VALID) {
-		dev_dbg(dev, "Requester ID %lu\n",
-			val & XILINX_PCIE_RPEFR_REQ_ID);
+	while (pcie_read(pcie, XILINX_PCIE_REG_RPSC) &
+	       XILINX_PCIE_REG_RPSC_EFNE) {
+		unsigned long val = pcie_read(pcie, XILINX_PCIE_REG_RPEFR);
+		int type = FIELD_GET(XILINX_PCIE_RPEFR_ERR_TYPE, val);
+		u16 req_id = FIELD_GET(XILINX_PCIE_RPEFR_REQ_ID, val);
+
+		dev_warn(dev, "%s error message (requester %02x:%02x.%d)\n",
+			 type_names[type], PCI_BUS_NUM(req_id),
+			 PCI_SLOT(req_id), PCI_FUNC(req_id));
+
 		pcie_write(pcie, XILINX_PCIE_RPEFR_ALL_MASK,
 			   XILINX_PCIE_REG_RPEFR);
 	}
@@ -372,17 +389,14 @@ static irqreturn_t xilinx_pcie_intr_handler(int irq, void *data)
 		dev_warn(dev, "ECAM access timeout\n");
 
 	if (status & XILINX_PCIE_INTR_CORRECTABLE) {
-		dev_warn(dev, "Correctable error message\n");
 		xilinx_pcie_clear_err_interrupts(pcie);
 	}
 
 	if (status & XILINX_PCIE_INTR_NONFATAL) {
-		dev_warn(dev, "Non fatal error message\n");
 		xilinx_pcie_clear_err_interrupts(pcie);
 	}
 
 	if (status & XILINX_PCIE_INTR_FATAL) {
-		dev_warn(dev, "Fatal error message\n");
 		xilinx_pcie_clear_err_interrupts(pcie);
 	}
 
