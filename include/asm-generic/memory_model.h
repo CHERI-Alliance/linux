@@ -65,10 +65,13 @@ static inline int pfn_valid(unsigned long pfn)
 	(unsigned long)(__pg - __section_mem_map_addr(__nr_to_section(__sec)));	\
 })
 
-#define __pfn_to_page(pfn)				\
-({	unsigned long __pfn = (pfn);			\
-	struct mem_section *__sec = __pfn_to_section(__pfn);	\
-	__section_mem_map_addr(__sec) + __pfn;		\
+#define __pfn_to_page(pfn)						\
+({	unsigned long __pfn = (pfn);					\
+	struct mem_section *__sec = __pfn_to_section(__pfn);		\
+	struct page *__p = __section_mem_map_addr(__sec) + __pfn;	\
+	struct page *__b = __section_mem_map_addr(__sec) + SECTION_ALIGN_DOWN(__pfn);	\
+	(struct page *)cheri_build_kernel_data_cap(__c_pa(__b), __c_pa(__p),		\
+		sizeof(struct page) * PAGES_PER_SECTION);		\
 })
 #endif /* CONFIG_FLATMEM/SPARSEMEM */
 
