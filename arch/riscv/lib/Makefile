@@ -1,8 +1,13 @@
 # SPDX-License-Identifier: GPL-2.0-only
 lib-y			+= delay.o
-lib-y			+= memcpy.o
+ifeq ($(CONFIG_CHERI_KERNEL), y)
+  lib-y	+= memcpy_cheri.o
+  lib-y	+= memmove_cheri.o
+else
+  lib-y	+= memcpy.o
+  lib-y	+= memmove.o
+endif
 lib-y			+= memset.o
-lib-y			+= memmove.o
 ifeq ($(CONFIG_KASAN_GENERIC)$(CONFIG_KASAN_SW_TAGS),)
 lib-y			+= strcmp.o
 lib-y			+= strlen.o
