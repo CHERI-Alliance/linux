@@ -13,12 +13,14 @@
 	.endm
 
 SYM_FUNC_START(__asm_copy_to_user)
-#ifdef CONFIG_RISCV_ISA_V
+#if defined(CONFIG_RISCV_ISA_V) && !defined(CONFIG_CHERI_KERNEL)
 	ALTERNATIVE("j fallback_scalar_usercopy", "nop", 0, RISCV_ISA_EXT_ZVE32X, CONFIG_RISCV_ISA_V)
 	REG_L	t0, riscv_v_usercopy_threshold
 	bltu	a2, t0, fallback_scalar_usercopy
 	li	a3, 1
 	tail 	enter_vector_usercopy
+#elif defined(CONFIG_CHERI_KERNEL)
+	nop
 #endif
 SYM_FUNC_END(__asm_copy_to_user)
 EXPORT_SYMBOL(__asm_copy_to_user)
@@ -29,24 +31,26 @@ SYM_FUNC_START(fallback_scalar_usercopy)
 	/* Enable access to user memory */
 	li	t6, SR_SUM
 	csrs 	CSR_STATUS, t6
-	mv 	t6, ra
+	mv 	CREG(t6), CREG(ra)
 
-	call 	fallback_scalar_usercopy_sum_enabled
+	call	__asm_copy_to_user_sum_enabled
 
 	/* Disable access to user memory */
-	mv 	ra, t6
+	mv 	CREG(ra), CREG(t6)
 	li 	t6, SR_SUM
 	csrc 	CSR_STATUS, t6
 	ret
 SYM_FUNC_END(fallback_scalar_usercopy)
 
 SYM_FUNC_START(__asm_copy_to_user_sum_enabled)
-#ifdef CONFIG_RISCV_ISA_V
+#if defined(CONFIG_RISCV_ISA_V) && !defined(CONFIG_CHERI_KERNEL)
 	ALTERNATIVE("j fallback_scalar_usercopy_sum_enabled", "nop", 0, RISCV_ISA_EXT_ZVE32X, CONFIG_RISCV_ISA_V)
 	REG_L	t0, riscv_v_usercopy_threshold
 	bltu	a2, t0, fallback_scalar_usercopy_sum_enabled
 	li	a3, 0
 	tail 	enter_vector_usercopy
+#elif defined(CONFIG_CHERI_KERNEL)
+	nop
 #endif
 SYM_FUNC_END(__asm_copy_to_user_sum_enabled)
 SYM_FUNC_ALIAS(__asm_copy_from_user_sum_enabled, __asm_copy_to_user_sum_enabled)
@@ -54,6 +58,9 @@ EXPORT_SYMBOL(__asm_copy_from_user_sum_enabled)
 EXPORT_SYMBOL(__asm_copy_to_user_sum_enabled)
 
 SYM_FUNC_START(fallback_scalar_usercopy_sum_enabled)
+#ifdef CONFIG_CHERI_KERNEL
+	tail __cheri_usercopy_sum_enabled
+#endif
 	/*
 	 * Save the terminal address which will be used to compute the number
 	 * of bytes copied in case of a fixup exception.
@@ -87,10 +94,10 @@ SYM_FUNC_START(fallback_scalar_usercopy_sum_enabled)
 	beq	a0, t1, .Lskip_align_dst
 1:
 	/* a5 - one byte for copying data */
-	fixup lb      a5, 0(a1), 10f
-	addi	a1, a1, 1	/* src */
-	fixup sb      a5, 0(a0), 10f
-	addi	a0, a0, 1	/* dst */
+	fixup lb      a5, 0(CREG(a1)), 10f
+	CINSN(addi)	CREG(a1), CREG(a1), 1	/* src */
+	fixup sb      a5, 0(CREG(a0)), 10f
+	CINSN(addi)	CREG(a0), CREG(a0), 1	/* dst */
 	bltu	a0, t1, 1b	/* t1 - start of aligned dst */
 
 .Lskip_align_dst:
@@ -114,24 +121,24 @@ SYM_FUNC_START(fallback_scalar_usercopy_sum_enabled)
 	 */
 	addi	t0, t0, -(8*SZREG) /* not to over run */
 2:
-	fixup REG_L   a4,        0(a1), 10f
-	fixup REG_L   a5,    SZREG(a1), 10f
-	fixup REG_L   a6,  2*SZREG(a1), 10f
-	fixup REG_L   a7,  3*SZREG(a1), 10f
-	fixup REG_L   t1,  4*SZREG(a1), 10f
-	fixup REG_L   t2,  5*SZREG(a1), 10f
-	fixup REG_L   t3,  6*SZREG(a1), 10f
-	fixup REG_L   t4,  7*SZREG(a1), 10f
-	fixup REG_S   a4,        0(a0), 10f
-	fixup REG_S   a5,    SZREG(a0), 10f
-	fixup REG_S   a6,  2*SZREG(a0), 10f
-	fixup REG_S   a7,  3*SZREG(a0), 10f
-	fixup REG_S   t1,  4*SZREG(a0), 10f
-	fixup REG_S   t2,  5*SZREG(a0), 10f
-	fixup REG_S   t3,  6*SZREG(a0), 10f
-	fixup REG_S   t4,  7*SZREG(a0), 10f
-	addi	a0, a0, 8*SZREG
-	addi	a1, a1, 8*SZREG
+	fixup REG_L   a4,        0(CREG(a1)), 10f
+	fixup REG_L   a5,    SZREG(CREG(a1)), 10f
+	fixup REG_L   a6,  2*SZREG(CREG(a1)), 10f
+	fixup REG_L   a7,  3*SZREG(CREG(a1)), 10f
+	fixup REG_L   t1,  4*SZREG(CREG(a1)), 10f
+	fixup REG_L   t2,  5*SZREG(CREG(a1)), 10f
+	fixup REG_L   t3,  6*SZREG(CREG(a1)), 10f
+	fixup REG_L   t4,  7*SZREG(CREG(a1)), 10f
+	fixup REG_S   a4,        0(CREG(a0)), 10f
+	fixup REG_S   a5,    SZREG(CREG(a0)), 10f
+	fixup REG_S   a6,  2*SZREG(CREG(a0)), 10f
+	fixup REG_S   a7,  3*SZREG(CREG(a0)), 10f
+	fixup REG_S   t1,  4*SZREG(CREG(a0)), 10f
+	fixup REG_S   t2,  5*SZREG(CREG(a0)), 10f
+	fixup REG_S   t3,  6*SZREG(CREG(a0)), 10f
+	fixup REG_S   t4,  7*SZREG(CREG(a0)), 10f
+	CINSN(addi)	CREG(a0), CREG(a0), 8*SZREG
+	CINSN(addi)	CREG(a1), CREG(a1), 8*SZREG
 	bleu	a0, t0, 2b
 
 	addi	t0, t0, 8*SZREG /* revert to original value */
@@ -155,7 +162,12 @@ SYM_FUNC_START(fallback_scalar_usercopy_sum_enabled)
 	/* calculating aligned word boundary for dst */
 	andi	t1, t0, ~(SZREG-1)
 	/* Converting unaligned src to aligned src */
+#ifdef CONFIG_CHERI_KERNEL
+	andi	t3, a1, ~(SZREG-1)
+	scaddr	ca1, ca1, t3
+#else
 	andi	a1, a1, ~(SZREG-1)
+#endif
 
 	/*
 	 * Calculate shifts
@@ -167,7 +179,7 @@ SYM_FUNC_START(fallback_scalar_usercopy_sum_enabled)
 	sub	t4, a5, t3
 
 	/* Load the first word to combine with second word */
-	fixup REG_L   a5, 0(a1), 10f
+	fixup REG_L   a5, 0(CREG(a1)), 10f
 
 3:
 	/* Main shifting copy
@@ -179,16 +191,16 @@ SYM_FUNC_START(fallback_scalar_usercopy_sum_enabled)
 
 	/* At least one iteration will be executed */
 	srl	a4, a5, t3
-	fixup REG_L   a5, SZREG(a1), 10f
-	addi	a1, a1, SZREG
+	fixup REG_L   a5, SZREG(CREG(a1)), 10f
+	CINSN(addi)	CREG(a1), CREG(a1), SZREG
 	sll	a2, a5, t4
 	or	a2, a2, a4
-	fixup REG_S   a2, 0(a0), 10f
-	addi	a0, a0, SZREG
+	fixup REG_S   a2, 0(CREG(a0)), 10f
+	CINSN(addi)	CREG(a0), CREG(a0), SZREG
 	bltu	a0, t1, 3b
 
 	/* Revert src to original unaligned value  */
-	add	a1, a1, a3
+	add	CREG(a1), CREG(a1), a3
 
 .Lbyte_copy_tail:
 	/*
@@ -200,10 +212,10 @@ SYM_FUNC_START(fallback_scalar_usercopy_sum_enabled)
 	 */
 	bgeu	a0, t0, .Lout_copy_user  /* check if end of copy */
 4:
-	fixup lb      a5, 0(a1), 10f
-	addi	a1, a1, 1	/* src */
-	fixup sb      a5, 0(a0), 10f
-	addi	a0, a0, 1	/* dst */
+	fixup lb      a5, 0(CREG(a1)), 10f
+	CINSN(addi)	CREG(a1), CREG(a1), 1	/* src */
+	fixup sb      a5, 0(CREG(a0)), 10f
+	CINSN(addi)	CREG(a0), CREG(a0), 1	/* dst */
 	bltu	a0, t0, 4b	/* t0 - end of dst */
 
 .Lout_copy_user:
@@ -213,6 +225,73 @@ SYM_FUNC_START(fallback_scalar_usercopy_sum_enabled)
 	sub a0, t5, a0
 	ret
 SYM_FUNC_END(fallback_scalar_usercopy_sum_enabled)
+
+#ifdef CONFIG_CHERI_KERNEL
+SYM_FUNC_START(__asm_copy_to_user_with_captags)
+
+	/* If things are not aligned fall back to normal user copy. */
+	xor t6, a0, a1
+	andi t6, t6, CSZREG - 1
+	bnez t6, __asm_copy_to_user
+
+	/* Enable access to user memory */
+	li t6, SR_SUM
+	csrs CSR_STATUS, t6
+
+	/* Calculate end of dst in t0 and aligned down end of dst in t3 */
+	add t0, a0, a2
+	andi t3, t0, ~(CSZREG - 1)
+
+	/* Copy one byte at a time until we are capability aligned. */
+.Lcap_pre_loop:
+	/* Stop the pre-loop once we are aligned. */
+	andi t1, a0, CSZREG - 1
+	beqz t1, .Lcap_copy_loop
+
+	/* Copy one byte if there is something left. */
+	bgeu a0, t0, .Lcap_copy_out
+	fixup lb t2, 0(ca1), .Lcap_copy_out
+	fixup sb t2, 0(ca0), .Lcap_copy_out
+	caddi ca0, ca0, 1
+	caddi ca1, ca1, 1
+	j .Lcap_pre_loop
+
+.Lcap_copy_loop:
+	/*
+	 * Copy one cap if there is enough data left.
+	 * In case of and exception retry with byte copies.
+	 */
+	bgeu a0, t3, .Lcap_post_loop
+	fixup lc ct2, 0(ca1), .Lcap_post_loop
+	fixup sc ct2, 0(ca0), .Lcap_post_loop
+	caddi ca0, ca0, CSZREG
+	caddi ca1, ca1, CSZREG
+	j .Lcap_copy_loop
+
+.Lcap_post_loop:
+	/* Copy one byte if there is something left. */
+	bgeu a0, t0, .Lcap_copy_out
+	fixup lb t2, 0(ca1), .Lcap_copy_out
+	fixup sb t2, 0(ca0), .Lcap_copy_out
+	caddi ca0, ca0, 1
+	caddi ca1, ca1, 1
+	j .Lcap_post_loop
+
+.Lcap_copy_out:
+	/* Disable access to user memory */
+	csrc CSR_STATUS, t6
+
+	/* Calculate remaining data and return. */
+	sub a0, t0, a0
+	ret
+
+SYM_FUNC_END(__asm_copy_to_user_with_captags)
+EXPORT_SYMBOL(__asm_copy_to_user_with_captags)
+SYM_FUNC_ALIAS(__asm_copy_from_user_with_captags, __asm_copy_to_user_with_captags)
+EXPORT_SYMBOL(__asm_copy_from_user_with_captags)
+
+#endif
+
 
 SYM_FUNC_START(__clear_user)
 
@@ -232,8 +311,8 @@ SYM_FUNC_START(__clear_user)
 	bgeu t0, t1, 2f
 	bltu a0, t0, 4f
 1:
-	fixup REG_S, zero, (a0), 11f
-	addi a0, a0, SZREG
+	fixup REG_S, zero, (CREG(a0)), 11f
+	CINSN(addi) CREG(a0), CREG(a0), SZREG
 	bltu a0, t1, 1b
 2:
 	bltu a0, a3, 5f
@@ -244,13 +323,13 @@ SYM_FUNC_START(__clear_user)
 	li a0, 0
 	ret
 4: /* Edge case: unalignment */
-	fixup sb, zero, (a0), 11f
-	addi a0, a0, 1
+	fixup sb, zero, (CREG(a0)), 11f
+	CINSN(addi) CREG(a0), CREG(a0), 1
 	bltu a0, t0, 4b
 	j 1b
 5: /* Edge case: remainder */
-	fixup sb, zero, (a0), 11f
-	addi a0, a0, 1
+	fixup sb, zero, (CREG(a0)), 11f
+	CINSN(addi) CREG(a0), CREG(a0), 1
 	bltu a0, a3, 5b
 	j 3b
 
