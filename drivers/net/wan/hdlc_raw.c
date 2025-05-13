@@ -19,7 +19,7 @@
 #include <linux/skbuff.h>
 
 
-static int raw_ioctl(struct net_device *dev, struct if_settings *ifs);
+static int _raw_ioctl(struct net_device *dev, struct if_settings *ifs);
 
 static __be16 raw_type_trans(struct sk_buff *skb, struct net_device *dev)
 {
@@ -28,12 +28,12 @@ static __be16 raw_type_trans(struct sk_buff *skb, struct net_device *dev)
 
 static struct hdlc_proto proto = {
 	.type_trans	= raw_type_trans,
-	.ioctl		= raw_ioctl,
+	.ioctl		= _raw_ioctl,
 	.module		= THIS_MODULE,
 };
 
 
-static int raw_ioctl(struct net_device *dev, struct if_settings *ifs)
+static int _raw_ioctl(struct net_device *dev, struct if_settings *ifs)
 {
 	raw_hdlc_proto __user *raw_s = ifs->ifs_ifsu.raw_hdlc;
 	const size_t size = sizeof(raw_hdlc_proto);

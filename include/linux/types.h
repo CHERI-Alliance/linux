@@ -41,6 +41,13 @@ typedef __kernel_gid16_t        gid16_t;
 
 typedef unsigned long		uintptr_t;
 typedef long			intptr_t;
+typedef unsigned long		user_uintptr_t;
+typedef long			user_intptr_t;
+static inline unsigned long
+__c_ua(uintptr_t ptr)
+{
+	return (unsigned long __force)ptr;
+}
 
 #ifdef __PTRADDR_TYPE__
 typedef __PTRADDR_TYPE__	ptraddr_t;

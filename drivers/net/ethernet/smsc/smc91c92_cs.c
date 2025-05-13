@@ -270,7 +270,7 @@ static void smc91c92_release(struct pcmcia_device *link);
 
 static int smc_open(struct net_device *dev);
 static int smc_close(struct net_device *dev);
-static int smc_ioctl(struct net_device *dev, struct ifreq *rq, int cmd);
+static int _smc_ioctl(struct net_device *dev, struct ifreq *rq, int cmd);
 static void smc_tx_timeout(struct net_device *dev, unsigned int txqueue);
 static netdev_tx_t smc_start_xmit(struct sk_buff *skb,
 					struct net_device *dev);
@@ -294,7 +294,7 @@ static const struct net_device_ops smc_netdev_ops = {
 	.ndo_tx_timeout 	= smc_tx_timeout,
 	.ndo_set_config 	= s9k_config,
 	.ndo_set_rx_mode	= set_rx_mode,
-	.ndo_eth_ioctl		= smc_ioctl,
+	.ndo_eth_ioctl		= _smc_ioctl,
 	.ndo_set_mac_address 	= eth_mac_addr,
 	.ndo_validate_addr	= eth_validate_addr,
 };
@@ -1994,7 +1994,7 @@ static const struct ethtool_ops ethtool_ops = {
 	.set_link_ksettings = smc_set_link_ksettings,
 };
 
-static int smc_ioctl (struct net_device *dev, struct ifreq *rq, int cmd)
+static int _smc_ioctl (struct net_device *dev, struct ifreq *rq, int cmd)
 {
 	struct smc_private *smc = netdev_priv(dev);
 	struct mii_ioctl_data *mii = if_mii(rq);
