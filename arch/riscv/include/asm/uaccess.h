@@ -471,6 +471,38 @@ raw_copy_to_user(void __user *to, const void *from, unsigned long n)
 	return __asm_copy_to_user(untagged_addr(to), from, n);
 }
 
+#ifdef CONFIG_CHERI_KERNEL
+
+unsigned long __must_check __asm_copy_to_user_with_captags(void __user *to,
+	const void *from, unsigned long n);
+unsigned long __must_check __asm_copy_from_user_with_captags(void *to,
+	const void __user *from, unsigned long n);
+
+static inline unsigned long
+__raw_copy_from_user_with_captags(void *to, const void __user *from,
+				unsigned long n)
+{
+	return __asm_copy_from_user_with_captags(to, from, n);
+}
+#define raw_copy_from_user_with_captags(to, from, n) \
+	__raw_copy_from_user_with_captags(to, from, n)
+
+static inline unsigned long
+__raw_copy_to_user_with_captags(void __user *to, const void *from,
+			      unsigned long n)
+{
+	return __asm_copy_to_user_with_captags(to, from, n);
+}
+#define raw_copy_to_user_with_captags(to, from, n) \
+	__raw_copy_to_user_with_captags(to, from, n)
+
+#else /* CONFIG_CHERI_KERNEL */
+
+#define raw_copy_from_user_with_captags raw_copy_from_user
+#define __raw_copy_to_user_with_captags raw_copy_to_user
+
+#endif /* CONFIG_CHERI_KERNEL */
+
 extern long strncpy_from_user(char *dest, const char __user *src, long count);
 
 extern long __must_check strnlen_user(const char __user *str, long n);
