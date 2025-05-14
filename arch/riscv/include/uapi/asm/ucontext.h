@@ -9,6 +9,7 @@
 #define _UAPI_ASM_RISCV_UCONTEXT_H
 
 #include <linux/types.h>
+#include <asm/posix_types.h>
 
 /*
  * CHERI: Make sure that the offset of uc_mcontext is the same for CHERI
@@ -29,7 +30,7 @@ struct ucontext {
 #endif
 	struct ucontext	 *uc_link;
 	stack_t		  uc_stack;
-	sigset_t	  uc_sigmask;
+	__kernel_sigset_t	  uc_sigmask;
 	/*
 	 * There's some padding here to allow sigset_t to be expanded in the
 	 * future.  Though this is unlikely, other architectures put uc_sigmask
@@ -37,9 +38,9 @@ struct ucontext {
 	 * expanded, so we didn't want to box ourselves in here.
 	 */
 #if __SIZEOF_POINTER__ > __SIZEOF_LONG__
-	__u8		  __unused[1024 / 8 - sizeof(sigset_t) - 2 * __SIZEOF_LONG__];
+	__u8		  __unused[1024 / 8 - sizeof(__kernel_sigset_t) - 2 * __SIZEOF_LONG__];
 #else
-	__u8		  __unused[1024 / 8 - sizeof(sigset_t)];
+	__u8		  __unused[1024 / 8 - sizeof(__kernel_sigset_t)];
 #endif
 	/*
 	 * We can't put uc_sigmask at the end of this structure because we need
