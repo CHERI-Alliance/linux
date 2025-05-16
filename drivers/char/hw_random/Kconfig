@@ -615,6 +615,17 @@ config HW_RANDOM_ROCKCHIP
 
 	  If unsure, say Y.
 
+config HW_RANDOM_CODASIP
+	tristate "Codasip True Random Number Generator (TRNG) support"
+	depends on ARCH_CODASIP || COMPILE_TEST
+	help
+	  This driver provides support for the True Random Number
+	  Generator provided by Codasip as part of the Hobgoblin platform.
+
+	  To compile this driver as a module, choose M here.
+	  The module will be called codasip-trng.
+
+
 endif # HW_RANDOM
 
 config UML_RANDOM
