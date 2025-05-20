@@ -541,7 +541,7 @@ static inline void writesq(volatile void __iomem *addr, const void *buffer,
 #if !defined(inb) && !defined(_inb)
 #define _inb _inb
 #ifdef CONFIG_HAS_IOPORT
-static inline u8 _inb(unsigned long addr)
+static inline u8 _inb(__ptraddr_t addr)
 {
 	u8 val;
 
@@ -559,7 +559,7 @@ u8 _inb(unsigned long addr)
 #if !defined(inw) && !defined(_inw)
 #define _inw _inw
 #ifdef CONFIG_HAS_IOPORT
-static inline u16 _inw(unsigned long addr)
+static inline u16 _inw(__ptraddr_t addr)
 {
 	u16 val;
 
@@ -577,7 +577,7 @@ u16 _inw(unsigned long addr)
 #if !defined(inl) && !defined(_inl)
 #define _inl _inl
 #ifdef CONFIG_HAS_IOPORT
-static inline u32 _inl(unsigned long addr)
+static inline u32 _inl(__ptraddr_t addr)
 {
 	u32 val;
 
@@ -595,7 +595,7 @@ u32 _inl(unsigned long addr)
 #if !defined(outb) && !defined(_outb)
 #define _outb _outb
 #ifdef CONFIG_HAS_IOPORT
-static inline void _outb(u8 value, unsigned long addr)
+static inline void _outb(u8 value, __ptraddr_t addr)
 {
 	__io_pbw();
 	__raw_writeb(value, PCI_IOBASE + addr);
@@ -610,7 +610,7 @@ void _outb(u8 value, unsigned long addr)
 #if !defined(outw) && !defined(_outw)
 #define _outw _outw
 #ifdef CONFIG_HAS_IOPORT
-static inline void _outw(u16 value, unsigned long addr)
+static inline void _outw(u16 value, __ptraddr_t addr)
 {
 	__io_pbw();
 	__raw_writew((u16 __force)cpu_to_le16(value), PCI_IOBASE + addr);
@@ -625,7 +625,7 @@ void _outw(u16 value, unsigned long addr)
 #if !defined(outl) && !defined(_outl)
 #define _outl _outl
 #ifdef CONFIG_HAS_IOPORT
-static inline void _outl(u32 value, unsigned long addr)
+static inline void _outl(u32 value, __ptraddr_t addr)
 {
 	__io_pbw();
 	__raw_writel((u32 __force)cpu_to_le32(value), PCI_IOBASE + addr);
@@ -665,7 +665,7 @@ void _outl(u32 value, unsigned long addr)
 
 #ifndef inb_p
 #define inb_p inb_p
-static inline u8 inb_p(unsigned long addr)
+static inline u8 inb_p(__ptraddr_t addr)
 {
 	return inb(addr);
 }
@@ -673,7 +673,7 @@ static inline u8 inb_p(unsigned long addr)
 
 #ifndef inw_p
 #define inw_p inw_p
-static inline u16 inw_p(unsigned long addr)
+static inline u16 inw_p(__ptraddr_t addr)
 {
 	return inw(addr);
 }
@@ -681,7 +681,7 @@ static inline u16 inw_p(unsigned long addr)
 
 #ifndef inl_p
 #define inl_p inl_p
-static inline u32 inl_p(unsigned long addr)
+static inline u32 inl_p(__ptraddr_t addr)
 {
 	return inl(addr);
 }
@@ -689,7 +689,7 @@ static inline u32 inl_p(unsigned long addr)
 
 #ifndef outb_p
 #define outb_p outb_p
-static inline void outb_p(u8 value, unsigned long addr)
+static inline void outb_p(u8 value, __ptraddr_t addr)
 {
 	outb(value, addr);
 }
@@ -697,7 +697,7 @@ static inline void outb_p(u8 value, unsigned long addr)
 
 #ifndef outw_p
 #define outw_p outw_p
-static inline void outw_p(u16 value, unsigned long addr)
+static inline void outw_p(u16 value, __ptraddr_t addr)
 {
 	outw(value, addr);
 }
@@ -705,7 +705,7 @@ static inline void outw_p(u16 value, unsigned long addr)
 
 #ifndef outl_p
 #define outl_p outl_p
-static inline void outl_p(u32 value, unsigned long addr)
+static inline void outl_p(u32 value, __ptraddr_t addr)
 {
 	outl(value, addr);
 }
@@ -719,7 +719,7 @@ static inline void outl_p(u32 value, unsigned long addr)
 #ifndef insb
 #define insb insb
 #ifdef CONFIG_HAS_IOPORT
-static inline void insb(unsigned long addr, void *buffer, unsigned int count)
+static inline void insb(__ptraddr_t addr, void *buffer, unsigned int count)
 {
 	readsb(PCI_IOBASE + addr, buffer, count);
 }
@@ -732,7 +732,7 @@ void insb(unsigned long addr, void *buffer, unsigned int count)
 #ifndef insw
 #define insw insw
 #ifdef CONFIG_HAS_IOPORT
-static inline void insw(unsigned long addr, void *buffer, unsigned int count)
+static inline void insw(__ptraddr_t addr, void *buffer, unsigned int count)
 {
 	readsw(PCI_IOBASE + addr, buffer, count);
 }
@@ -745,7 +745,7 @@ void insw(unsigned long addr, void *buffer, unsigned int count)
 #ifndef insl
 #define insl insl
 #ifdef CONFIG_HAS_IOPORT
-static inline void insl(unsigned long addr, void *buffer, unsigned int count)
+static inline void insl(__ptraddr_t addr, void *buffer, unsigned int count)
 {
 	readsl(PCI_IOBASE + addr, buffer, count);
 }
@@ -758,7 +758,7 @@ void insl(unsigned long addr, void *buffer, unsigned int count)
 #ifndef outsb
 #define outsb outsb
 #ifdef CONFIG_HAS_IOPORT
-static inline void outsb(unsigned long addr, const void *buffer,
+static inline void outsb(__ptraddr_t addr, const void *buffer,
 			 unsigned int count)
 {
 	writesb(PCI_IOBASE + addr, buffer, count);
@@ -772,7 +772,7 @@ void outsb(unsigned long addr, const void *buffer, unsigned int count)
 #ifndef outsw
 #define outsw outsw
 #ifdef CONFIG_HAS_IOPORT
-static inline void outsw(unsigned long addr, const void *buffer,
+static inline void outsw(__ptraddr_t addr, const void *buffer,
 			 unsigned int count)
 {
 	writesw(PCI_IOBASE + addr, buffer, count);
@@ -786,7 +786,7 @@ void outsw(unsigned long addr, const void *buffer, unsigned int count)
 #ifndef outsl
 #define outsl outsl
 #ifdef CONFIG_HAS_IOPORT
-static inline void outsl(unsigned long addr, const void *buffer,
+static inline void outsl(__ptraddr_t addr, const void *buffer,
 			 unsigned int count)
 {
 	writesl(PCI_IOBASE + addr, buffer, count);
@@ -1169,7 +1169,7 @@ static inline void __iomem *ioremap_np(phys_addr_t offset, size_t size)
 #ifndef CONFIG_GENERIC_IOMAP
 #ifndef ioport_map
 #define ioport_map ioport_map
-static inline void __iomem *ioport_map(unsigned long port, unsigned int nr)
+static inline void __iomem *ioport_map(__ptraddr_t port, unsigned int nr)
 {
 	port &= IO_SPACE_LIMIT;
 	return (port > MMIO_UPPER_LIMIT) ? NULL : PCI_IOBASE + port;

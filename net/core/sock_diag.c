@@ -24,7 +24,7 @@ static struct workqueue_struct *broadcast_wq;
 
 DEFINE_COOKIE(sock_cookie);
 
-u64 __sock_gen_cookie(struct sock *sk)
+__ptraddr64_t __sock_gen_cookie(struct sock *sk)
 {
 	u64 res = atomic64_read(&sk->sk_cookie);
 

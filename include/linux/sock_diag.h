@@ -31,9 +31,9 @@ struct sock_diag_inet_compat {
 void sock_diag_register_inet_compat(const struct sock_diag_inet_compat *ptr);
 void sock_diag_unregister_inet_compat(const struct sock_diag_inet_compat *ptr);
 
-u64 __sock_gen_cookie(struct sock *sk);
+__ptraddr64_t __sock_gen_cookie(struct sock *sk);
 
-static inline u64 sock_gen_cookie(struct sock *sk)
+static inline __ptraddr64_t sock_gen_cookie(struct sock *sk)
 {
 	u64 cookie;
 

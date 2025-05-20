@@ -71,7 +71,7 @@ static inline u32 hash_32(u32 val, unsigned int bits)
 #ifndef HAVE_ARCH_HASH_64
 #define hash_64 hash_64_generic
 #endif
-static __always_inline u32 hash_64_generic(u64 val, unsigned int bits)
+static __always_inline u32 hash_64_generic(__ptraddr64_t val, __ptraddr64_t bits)
 {
 #if BITS_PER_LONG == 64
 	/* 64x64-bit multiply is efficient on all 64-bit processors */
@@ -90,7 +90,7 @@ static inline u32 hash_ptr(const void *ptr, unsigned int bits)
 /* This really should be called fold32_ptr; it does no hashing to speak of. */
 static inline u32 hash32_ptr(const void *ptr)
 {
-	unsigned long val = (unsigned long)ptr;
+	unsigned long val = (__ptraddr_t)ptr;
 
 #if BITS_PER_LONG == 64
 	val ^= (val >> 32);

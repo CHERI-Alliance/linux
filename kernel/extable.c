@@ -63,7 +63,7 @@ const struct exception_table_entry *search_exception_tables(unsigned long addr)
 	return e;
 }
 
-int notrace core_kernel_text(unsigned long addr)
+int notrace core_kernel_text(__ptraddr_t addr)
 {
 	if (is_kernel_text(addr))
 		return 1;
@@ -74,7 +74,7 @@ int notrace core_kernel_text(unsigned long addr)
 	return 0;
 }
 
-int __kernel_text_address(unsigned long addr)
+int __kernel_text_address(__ptraddr_t addr)
 {
 	if (kernel_text_address(addr))
 		return 1;
@@ -91,7 +91,7 @@ int __kernel_text_address(unsigned long addr)
 	return 0;
 }
 
-int kernel_text_address(unsigned long addr)
+int kernel_text_address(__ptraddr_t addr)
 {
 	bool no_rcu;
 	int ret = 1;

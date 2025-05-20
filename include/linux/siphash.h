@@ -30,11 +30,11 @@ static inline bool siphash_key_is_zero(const siphash_key_t *key)
 u64 __siphash_aligned(const void *data, size_t len, const siphash_key_t *key);
 u64 __siphash_unaligned(const void *data, size_t len, const siphash_key_t *key);
 
-u64 siphash_1u64(const u64 a, const siphash_key_t *key);
-u64 siphash_2u64(const u64 a, const u64 b, const siphash_key_t *key);
-u64 siphash_3u64(const u64 a, const u64 b, const u64 c,
+u64 siphash_1u64(const __ptraddr64_t a, const siphash_key_t *key);
+u64 siphash_2u64(const __ptraddr64_t a, const __ptraddr64_t b, const siphash_key_t *key);
+u64 siphash_3u64(const __ptraddr64_t a, const __ptraddr64_t b, const __ptraddr64_t c,
 		 const siphash_key_t *key);
-u64 siphash_4u64(const u64 a, const u64 b, const u64 c, const u64 d,
+u64 siphash_4u64(const __ptraddr64_t a, const __ptraddr64_t b, const __ptraddr64_t c, const __ptraddr64_t d,
 		 const siphash_key_t *key);
 u64 siphash_1u32(const u32 a, const siphash_key_t *key);
 u64 siphash_3u32(const u32 a, const u32 b, const u32 c,

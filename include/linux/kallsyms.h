@@ -38,7 +38,7 @@ static inline int is_kernel(unsigned long addr)
 	return in_gate_area_no_mm(addr);
 }
 
-static inline int is_ksym_addr(unsigned long addr)
+static inline int is_ksym_addr(__ptraddr_t addr)
 {
 	if (IS_ENABLED(CONFIG_KALLSYMS_ALL))
 		return is_kernel(addr);
@@ -82,7 +82,7 @@ extern int kallsyms_lookup_size_offset(unsigned long addr,
 				  unsigned long *offset);
 
 /* Lookup an address.  modname is set to NULL if it's in the kernel. */
-const char *kallsyms_lookup(unsigned long addr,
+const char *kallsyms_lookup(__ptraddr_t addr,
 			    unsigned long *symbolsize,
 			    unsigned long *offset,
 			    char **modname, char *namebuf);
@@ -110,7 +110,7 @@ static inline int kallsyms_lookup_size_offset(unsigned long addr,
 	return 0;
 }
 
-static inline const char *kallsyms_lookup(unsigned long addr,
+static inline const char *kallsyms_lookup(__ptraddr_t addr,
 					  unsigned long *symbolsize,
 					  unsigned long *offset,
 					  char **modname, char *namebuf)

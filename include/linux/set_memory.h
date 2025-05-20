@@ -8,14 +8,14 @@
 #ifdef CONFIG_ARCH_HAS_SET_MEMORY
 #include <asm/set_memory.h>
 #else
-static inline int __must_check set_memory_ro(unsigned long addr, int numpages) { return 0; }
-static inline int __must_check set_memory_rw(unsigned long addr, int numpages) { return 0; }
-static inline int __must_check set_memory_x(unsigned long addr,  int numpages) { return 0; }
-static inline int __must_check set_memory_nx(unsigned long addr, int numpages) { return 0; }
+static inline int __must_check set_memory_ro(__ptraddr_t addr, int numpages) { return 0; }
+static inline int __must_check set_memory_rw(__ptraddr_t addr, int numpages) { return 0; }
+static inline int __must_check set_memory_x(__ptraddr_t addr,  int numpages) { return 0; }
+static inline int __must_check set_memory_nx(__ptraddr_t addr, int numpages) { return 0; }
 #endif
 
 #ifndef set_memory_rox
-static inline int set_memory_rox(unsigned long addr, int numpages)
+static inline int set_memory_rox(__ptraddr_t addr, int numpages)
 {
 	int ret = set_memory_ro(addr, numpages);
 	if (ret)
@@ -73,12 +73,12 @@ static inline int clear_mce_nospec(unsigned long pfn)
 #endif
 
 #ifndef CONFIG_ARCH_HAS_MEM_ENCRYPT
-static inline int set_memory_encrypted(unsigned long addr, int numpages)
+static inline int set_memory_encrypted(__ptraddr_t addr, int numpages)
 {
 	return 0;
 }
 
-static inline int set_memory_decrypted(unsigned long addr, int numpages)
+static inline int set_memory_decrypted(__ptraddr_t addr, int numpages)
 {
 	return 0;
 }
