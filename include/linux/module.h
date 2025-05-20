@@ -622,14 +622,14 @@ static inline bool module_is_coming(struct module *mod)
         return mod->state == MODULE_STATE_COMING;
 }
 
-struct module *__module_text_address(unsigned long addr);
-struct module *__module_address(unsigned long addr);
-bool is_module_address(unsigned long addr);
-bool __is_module_percpu_address(unsigned long addr, unsigned long *can_addr);
-bool is_module_percpu_address(unsigned long addr);
-bool is_module_text_address(unsigned long addr);
+struct module *__module_text_address(__ptraddr_t addr);
+struct module *__module_address(__ptraddr_t addr);
+bool is_module_address(__ptraddr_t addr);
+bool __is_module_percpu_address(__ptraddr_t addr, unsigned long *can_addr);
+bool is_module_percpu_address(__ptraddr_t addr);
+bool is_module_text_address(__ptraddr_t addr);
 
-static inline bool within_module_mem_type(unsigned long addr,
+static inline bool within_module_mem_type(__ptraddr_t addr,
 					  const struct module *mod,
 					  enum mod_mem_type type)
 {
@@ -640,7 +640,7 @@ static inline bool within_module_mem_type(unsigned long addr,
 	return addr - base < size;
 }
 
-static inline bool within_module_core(unsigned long addr,
+static inline bool within_module_core(__ptraddr_t addr,
 				      const struct module *mod)
 {
 	for_class_mod_mem_type(type, core) {
@@ -650,7 +650,7 @@ static inline bool within_module_core(unsigned long addr,
 	return false;
 }
 
-static inline bool within_module_init(unsigned long addr,
+static inline bool within_module_init(__ptraddr_t addr,
 				      const struct module *mod)
 {
 	for_class_mod_mem_type(type, init) {
@@ -660,7 +660,7 @@ static inline bool within_module_init(unsigned long addr,
 	return false;
 }
 
-static inline bool within_module(unsigned long addr, const struct module *mod)
+static inline bool within_module(__ptraddr_t addr, const struct module *mod)
 {
 	return within_module_init(addr, mod) || within_module_core(addr, mod);
 }
@@ -775,49 +775,49 @@ void module_for_each_mod(int(*func)(struct module *mod, void *data), void *data)
 
 #else /* !CONFIG_MODULES... */
 
-static inline struct module *__module_address(unsigned long addr)
+static inline struct module *__module_address(__ptraddr_t addr)
 {
 	return NULL;
 }
 
-static inline struct module *__module_text_address(unsigned long addr)
+static inline struct module *__module_text_address(__ptraddr_t addr)
 {
 	return NULL;
 }
 
-static inline bool is_module_address(unsigned long addr)
+static inline bool is_module_address(__ptraddr_t addr)
 {
 	return false;
 }
 
-static inline bool is_module_percpu_address(unsigned long addr)
+static inline bool is_module_percpu_address(__ptraddr_t addr)
 {
 	return false;
 }
 
-static inline bool __is_module_percpu_address(unsigned long addr, unsigned long *can_addr)
+static inline bool __is_module_percpu_address(__ptraddr_t addr, unsigned long *can_addr)
 {
 	return false;
 }
 
-static inline bool is_module_text_address(unsigned long addr)
+static inline bool is_module_text_address(__ptraddr_t addr)
 {
 	return false;
 }
 
-static inline bool within_module_core(unsigned long addr,
+static inline bool within_module_core(__ptraddr_t addr,
 				      const struct module *mod)
 {
 	return false;
 }
 
-static inline bool within_module_init(unsigned long addr,
+static inline bool within_module_init(__ptraddr_t addr,
 				      const struct module *mod)
 {
 	return false;
 }
 
-static inline bool within_module(unsigned long addr, const struct module *mod)
+static inline bool within_module(__ptraddr_t addr, const struct module *mod)
 {
 	return false;
 }
@@ -949,13 +949,13 @@ int module_kallsyms_on_each_symbol(const char *modname,
  * least KSYM_NAME_LEN long: a pointer to namebuf is returned if
  * found, otherwise NULL.
  */
-int module_address_lookup(unsigned long addr,
+int module_address_lookup(__ptraddr_t addr,
 			  unsigned long *symbolsize,
 			  unsigned long *offset,
 			  char **modname, const unsigned char **modbuildid,
 			  char *namebuf);
-int lookup_module_symbol_name(unsigned long addr, char *symname);
-int lookup_module_symbol_attrs(unsigned long addr,
+int lookup_module_symbol_name(__ptraddr_t addr, char *symname);
+int lookup_module_symbol_attrs(__ptraddr_t addr,
 			       unsigned long *size,
 			       unsigned long *offset,
 			       char *modname,
@@ -982,7 +982,7 @@ static inline int module_kallsyms_on_each_symbol(const char *modname,
 }
 
 /* For kallsyms to ask for address resolution.  NULL means not found. */
-static inline int module_address_lookup(unsigned long addr,
+static inline int module_address_lookup(__ptraddr_t addr,
 						unsigned long *symbolsize,
 						unsigned long *offset,
 						char **modname,
@@ -992,7 +992,7 @@ static inline int module_address_lookup(unsigned long addr,
 	return 0;
 }
 
-static inline int lookup_module_symbol_name(unsigned long addr, char *symname)
+static inline int lookup_module_symbol_name(__ptraddr_t addr, char *symname)
 {
 	return -ERANGE;
 }

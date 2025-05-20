@@ -103,8 +103,8 @@ void __noreturn usercopy_abort(const char *name, const char *detail,
 }
 
 /* Returns true if any portion of [ptr,ptr+n) over laps with [low,high). */
-static bool overlaps(const unsigned long ptr, unsigned long n,
-		     unsigned long low, unsigned long high)
+static bool overlaps(const __ptraddr_t ptr, unsigned long n,
+		     __ptraddr_t low, __ptraddr_t high)
 {
 	const unsigned long check_low = ptr;
 	unsigned long check_high = check_low + n;
@@ -117,7 +117,7 @@ static bool overlaps(const unsigned long ptr, unsigned long n,
 }
 
 /* Is this address range in the kernel text area? */
-static inline void check_kernel_text_object(const unsigned long ptr,
+static inline void check_kernel_text_object(const __ptraddr_t ptr,
 					    unsigned long n, bool to_user)
 {
 	unsigned long textlow = (unsigned long)_stext;

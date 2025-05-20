@@ -2274,7 +2274,7 @@ void free_percpu(void __percpu *ptr)
 }
 EXPORT_SYMBOL_GPL(free_percpu);
 
-bool __is_kernel_percpu_address(unsigned long addr, unsigned long *can_addr)
+bool __is_kernel_percpu_address(__ptraddr_t addr, unsigned long *can_addr)
 {
 #ifdef CONFIG_SMP
 	const size_t static_size = __per_cpu_end - __per_cpu_start;
@@ -2310,7 +2310,7 @@ bool __is_kernel_percpu_address(unsigned long addr, unsigned long *can_addr)
  * RETURNS:
  * %true if @addr is from in-kernel static percpu area, %false otherwise.
  */
-bool is_kernel_percpu_address(unsigned long addr)
+bool is_kernel_percpu_address(__ptraddr_t addr)
 {
 	return __is_kernel_percpu_address(addr, NULL);
 }
