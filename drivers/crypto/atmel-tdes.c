@@ -845,14 +845,14 @@ static struct skcipher_alg tdes_algs[] = {
 },
 };
 
-static void atmel_tdes_queue_task(unsigned long data)
+static void atmel_tdes_queue_task(uintptr_t data)
 {
 	struct atmel_tdes_dev *dd = (struct atmel_tdes_dev *)data;
 
 	atmel_tdes_handle_queue(dd, NULL);
 }
 
-static void atmel_tdes_done_task(unsigned long data)
+static void atmel_tdes_done_task(uintptr_t data)
 {
 	struct atmel_tdes_dev *dd = (struct atmel_tdes_dev *) data;
 	int err;

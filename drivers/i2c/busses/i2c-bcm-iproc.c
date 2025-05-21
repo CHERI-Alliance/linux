@@ -211,7 +211,7 @@ struct bcm_iproc_i2c_dev {
 };
 
 /* tasklet to process slave rx data */
-static void slave_rx_tasklet_fn(unsigned long);
+static void slave_rx_tasklet_fn(uintptr_t);
 
 /*
  * Can be expanded in the future if more interrupt status bits are utilized
@@ -406,7 +406,7 @@ static void bcm_iproc_i2c_slave_read(struct bcm_iproc_i2c_dev *iproc_i2c)
 	}
 }
 
-static void slave_rx_tasklet_fn(unsigned long data)
+static void slave_rx_tasklet_fn(uintptr_t data)
 {
 	struct bcm_iproc_i2c_dev *iproc_i2c = (struct bcm_iproc_i2c_dev *)data;
 	u32 int_clr;

@@ -3315,7 +3315,7 @@ static int ibmvscsis_rdma(struct ibmvscsis_cmd *cmd, struct scatterlist *sg,
  *
  * Note: this is an edge triggered interrupt. It can not be shared.
  */
-static void ibmvscsis_handle_crq(unsigned long data)
+static void ibmvscsis_handle_crq(uintptr_t data)
 {
 	struct scsi_info *vscsi = (struct scsi_info *)data;
 	struct viosrp_crq *crq;
@@ -3528,7 +3528,7 @@ static int ibmvscsis_probe(struct vio_dev *vdev,
 		hrc, vscsi->client_data.partition_number);
 
 	tasklet_init(&vscsi->work_task, ibmvscsis_handle_crq,
-		     (unsigned long)vscsi);
+		     (uintptr_t) vscsi);
 
 	init_completion(&vscsi->wait_idle);
 	init_completion(&vscsi->unconfig);

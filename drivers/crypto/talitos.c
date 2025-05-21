@@ -3414,22 +3414,22 @@ static int talitos_probe(struct platform_device *ofdev)
 	if (has_ftr_sec1(priv)) {
 		if (priv->num_channels == 1)
 			tasklet_init(&priv->done_task[0], talitos1_done_ch0,
-				     (unsigned long)dev);
+				     (uintptr_t) dev);
 		else
 			tasklet_init(&priv->done_task[0], talitos1_done_4ch,
-				     (unsigned long)dev);
+				     (uintptr_t) dev);
 	} else {
 		if (priv->irq[1]) {
 			tasklet_init(&priv->done_task[0], talitos2_done_ch0_2,
-				     (unsigned long)dev);
+				     (uintptr_t) dev);
 			tasklet_init(&priv->done_task[1], talitos2_done_ch1_3,
-				     (unsigned long)dev);
+				     (uintptr_t) dev);
 		} else if (priv->num_channels == 1) {
 			tasklet_init(&priv->done_task[0], talitos2_done_ch0,
-				     (unsigned long)dev);
+				     (uintptr_t) dev);
 		} else {
 			tasklet_init(&priv->done_task[0], talitos2_done_4ch,
-				     (unsigned long)dev);
+				     (uintptr_t) dev);
 		}
 	}
 

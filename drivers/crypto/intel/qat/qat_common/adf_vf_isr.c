@@ -205,7 +205,7 @@ static int adf_setup_bh(struct adf_accel_dev *accel_dev)
 	struct adf_etr_data *priv_data = accel_dev->transport;
 
 	tasklet_init(&priv_data->banks[0].resp_handler, adf_response_handler,
-		     (unsigned long)priv_data->banks);
+		     (uintptr_t) priv_data->banks);
 	return 0;
 }
 

@@ -121,7 +121,7 @@ static void ccp_cleanup_desc_resources(struct ccp_device *ccp,
 	}
 }
 
-static void ccp_do_cleanup(unsigned long data)
+static void ccp_do_cleanup(uintptr_t data)
 {
 	struct ccp_dma_chan *chan = (struct ccp_dma_chan *)data;
 	unsigned long flags;
@@ -742,7 +742,7 @@ int ccp_dmaengine_register(struct ccp_device *ccp)
 		INIT_LIST_HEAD(&chan->complete);
 
 		tasklet_init(&chan->cleanup_tasklet, ccp_do_cleanup,
-			     (unsigned long)chan);
+			     (uintptr_t) chan);
 
 		dma_chan->device = dma_dev;
 		dma_cookie_init(dma_chan);

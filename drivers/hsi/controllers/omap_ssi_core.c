@@ -208,7 +208,7 @@ static void ssi_gdd_complete(struct hsi_controller *ssi, unsigned int lch)
 	msg->actual_len = sg_dma_len(msg->sgt.sgl);
 }
 
-static void ssi_gdd_tasklet(unsigned long dev)
+static void ssi_gdd_tasklet(uintptr_t dev)
 {
 	struct hsi_controller *ssi = (struct hsi_controller *)dev;
 	struct omap_ssi_controller *omap_ssi = hsi_controller_drvdata(ssi);
@@ -367,7 +367,7 @@ static int ssi_add_controller(struct hsi_controller *ssi,
 		goto out_err;
 	omap_ssi->gdd_irq = err;
 	tasklet_init(&omap_ssi->gdd_tasklet, ssi_gdd_tasklet,
-							(unsigned long)ssi);
+							(uintptr_t) ssi);
 	err = devm_request_irq(&ssi->device, omap_ssi->gdd_irq, ssi_gdd_isr,
 						0, "gdd_mpu", ssi);
 	if (err < 0) {

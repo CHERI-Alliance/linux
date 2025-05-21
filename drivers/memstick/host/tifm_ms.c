@@ -451,7 +451,7 @@ static void tifm_ms_card_event(struct tifm_dev *sock)
 	return;
 }
 
-static void tifm_ms_req_tasklet(unsigned long data)
+static void tifm_ms_req_tasklet(uintptr_t data)
 {
 	struct memstick_host *msh = (struct memstick_host *)data;
 	struct tifm_ms *host = memstick_priv(msh);

@@ -2166,14 +2166,14 @@ static void atmel_aes_dma_cleanup(struct atmel_aes_dev *dd)
 	dma_release_channel(dd->src.chan);
 }
 
-static void atmel_aes_queue_task(unsigned long data)
+static void atmel_aes_queue_task(uintptr_t data)
 {
 	struct atmel_aes_dev *dd = (struct atmel_aes_dev *)data;
 
 	atmel_aes_handle_queue(dd, NULL);
 }
 
-static void atmel_aes_done_task(unsigned long data)
+static void atmel_aes_done_task(uintptr_t data)
 {
 	struct atmel_aes_dev *dd = (struct atmel_aes_dev *)data;
 

@@ -302,7 +302,7 @@ static irqreturn_t hp_sdc_nmisr(int irq, void *dev_id)
 
 unsigned long hp_sdc_put(void);
 
-static void hp_sdc_tasklet(unsigned long foo)
+static void hp_sdc_tasklet(uintptr_t foo)
 {
 	write_lock_irq(&hp_sdc.rtq_lock);
 

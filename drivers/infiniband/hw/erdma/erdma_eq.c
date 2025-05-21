@@ -180,7 +180,7 @@ static irqreturn_t erdma_intr_ceq_handler(int irq, void *data)
 	return IRQ_HANDLED;
 }
 
-static void erdma_intr_ceq_task(unsigned long data)
+static void erdma_intr_ceq_task(uintptr_t data)
 {
 	erdma_ceq_completion_handler((struct erdma_eq_cb *)data);
 }
@@ -195,7 +195,7 @@ static int erdma_set_ceq_irq(struct erdma_dev *dev, u16 ceqn)
 	eqc->irq.msix_vector = pci_irq_vector(dev->pdev, ceqn + 1);
 
 	tasklet_init(&dev->ceqs[ceqn].tasklet, erdma_intr_ceq_task,
-		     (unsigned long)&dev->ceqs[ceqn]);
+		     (uintptr_t)&dev->ceqs[ceqn]);
 
 	cpumask_set_cpu(cpumask_local_spread(ceqn + 1, dev->attrs.numa_node),
 			&eqc->irq.affinity_hint_mask);

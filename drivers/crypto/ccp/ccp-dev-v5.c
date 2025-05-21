@@ -733,7 +733,7 @@ static void ccp5_enable_queue_interrupts(struct ccp_device *ccp)
 		iowrite32(SUPPORTED_INTERRUPTS, ccp->cmd_q[i].reg_int_enable);
 }
 
-static void ccp5_irq_bh(unsigned long data)
+static void ccp5_irq_bh(uintptr_t data)
 {
 	struct ccp_device *ccp = (struct ccp_device *)data;
 	u32 status;
@@ -895,7 +895,7 @@ static int ccp5_init(struct ccp_device *ccp)
 	/* Initialize the ISR tasklet */
 	if (ccp->use_tasklet)
 		tasklet_init(&ccp->irq_tasklet, ccp5_irq_bh,
-			     (unsigned long)ccp);
+			     (uintptr_t) ccp);
 
 	dev_dbg(dev, "Loading LSB map...\n");
 	/* Copy the private LSB mask to the public registers */
