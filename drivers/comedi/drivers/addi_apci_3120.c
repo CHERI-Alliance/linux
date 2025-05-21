@@ -690,7 +690,7 @@ static int apci3120_cancel(struct comedi_device *dev,
 static int apci3120_ai_eoc(struct comedi_device *dev,
 			   struct comedi_subdevice *s,
 			   struct comedi_insn *insn,
-			   unsigned long context)
+			   uintptr_t context)
 {
 	unsigned int status;
 
@@ -747,7 +747,7 @@ static int apci3120_ai_insn_read(struct comedi_device *dev,
 static int apci3120_ao_ready(struct comedi_device *dev,
 			     struct comedi_subdevice *s,
 			     struct comedi_insn *insn,
-			     unsigned long context)
+			     uintptr_t context)
 {
 	unsigned int status;
 

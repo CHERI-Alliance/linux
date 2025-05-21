@@ -304,7 +304,7 @@ static void db2k_setup_sampling(struct comedi_device *dev, int chan, int gain)
 }
 
 static int db2k_ai_status(struct comedi_device *dev, struct comedi_subdevice *s,
-			  struct comedi_insn *insn, unsigned long context)
+			  struct comedi_insn *insn, uintptr_t context)
 {
 	unsigned int status;
 
@@ -380,7 +380,7 @@ static int db2k_ai_insn_read(struct comedi_device *dev,
 }
 
 static int db2k_ao_eoc(struct comedi_device *dev, struct comedi_subdevice *s,
-		       struct comedi_insn *insn, unsigned long context)
+		       struct comedi_insn *insn, uintptr_t context)
 {
 	unsigned int chan = CR_CHAN(insn->chanspec);
 	unsigned int status;

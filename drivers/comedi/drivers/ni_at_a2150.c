@@ -563,7 +563,7 @@ static int a2150_ai_cmd(struct comedi_device *dev, struct comedi_subdevice *s)
 static int a2150_ai_eoc(struct comedi_device *dev,
 			struct comedi_subdevice *s,
 			struct comedi_insn *insn,
-			unsigned long context)
+			uintptr_t context)
 {
 	unsigned int status;
 

@@ -556,7 +556,7 @@ static void dt282x_load_changain(struct comedi_device *dev, int n,
 static int dt282x_ai_timeout(struct comedi_device *dev,
 			     struct comedi_subdevice *s,
 			     struct comedi_insn *insn,
-			     unsigned long context)
+			     uintptr_t context)
 {
 	unsigned int status;
 

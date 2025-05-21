@@ -168,7 +168,7 @@ static int ii20k_ao_insn_write(struct comedi_device *dev,
 static int ii20k_ai_eoc(struct comedi_device *dev,
 			struct comedi_subdevice *s,
 			struct comedi_insn *insn,
-			unsigned long context)
+			uintptr_t context)
 {
 	void __iomem *iobase = ii20k_module_iobase(dev, s);
 	unsigned char status;
