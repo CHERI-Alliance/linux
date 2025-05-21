@@ -130,7 +130,7 @@ static void mvs_free(struct mvs_info *mvi)
 }
 
 #ifdef CONFIG_SCSI_MVSAS_TASKLET
-static void mvs_tasklet(unsigned long opaque)
+static void mvs_tasklet(uintptr_t opaque)
 {
 	u32 stat;
 	u16 core_nr, i = 0;

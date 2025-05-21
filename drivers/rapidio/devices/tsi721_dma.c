@@ -568,7 +568,7 @@ static void tsi721_advance_work(struct tsi721_bdma_chan *bdma_chan,
 		  bdma_chan->id);
 }
 
-static void tsi721_dma_tasklet(unsigned long data)
+static void tsi721_dma_tasklet(uintptr_t data)
 {
 	struct tsi721_bdma_chan *bdma_chan = (struct tsi721_bdma_chan *)data;
 	u32 dmac_int, dmac_sts;

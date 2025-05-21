@@ -256,7 +256,7 @@ static irqreturn_t caam_jr_interrupt(int irq, void *st_dev)
 }
 
 /* Deferred service handler, run as interrupt-fired tasklet */
-static void caam_jr_dequeue(unsigned long devarg)
+static void caam_jr_dequeue(uintptr_t devarg)
 {
 	int hw_idx, sw_idx, i, head, tail;
 	struct caam_jr_dequeue_params *params = (void *)devarg;

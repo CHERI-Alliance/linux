@@ -355,7 +355,7 @@ static int img_hash_dma_init(struct img_hash_dev *hdev)
 	return 0;
 }
 
-static void img_hash_dma_task(unsigned long d)
+static void img_hash_dma_task(uintptr_t d)
 {
 	struct img_hash_dev *hdev = (struct img_hash_dev *)d;
 	struct img_hash_request_ctx *ctx;
@@ -891,7 +891,7 @@ static int img_unregister_algs(struct img_hash_dev *hdev)
 	return 0;
 }
 
-static void img_hash_done_task(unsigned long data)
+static void img_hash_done_task(uintptr_t data)
 {
 	struct img_hash_dev *hdev = (struct img_hash_dev *)data;
 	int err = 0;

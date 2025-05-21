@@ -258,7 +258,7 @@ get_more:
 	goto get_more;
 }
 
-static void eip93_done_task(unsigned long data)
+static void eip93_done_task(uintptr_t data)
 {
 	struct eip93_device *eip93 = (struct eip93_device *)data;
 

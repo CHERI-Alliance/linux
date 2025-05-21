@@ -690,7 +690,7 @@ static void aspeed_acry_sram_mapping(struct aspeed_acry_dev *acry_dev)
 	}
 }
 
-static void aspeed_acry_done_task(unsigned long data)
+static void aspeed_acry_done_task(uintptr_t data)
 {
 	struct aspeed_acry_dev *acry_dev = (struct aspeed_acry_dev *)data;
 

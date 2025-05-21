@@ -416,7 +416,7 @@ static struct ccp_cmd *ccp_dequeue_cmd(struct ccp_cmd_queue *cmd_q)
 	return cmd;
 }
 
-static void ccp_do_cmd_complete(unsigned long data)
+static void ccp_do_cmd_complete(uintptr_t data)
 {
 	struct ccp_tasklet_data *tdata = (struct ccp_tasklet_data *)data;
 	struct ccp_cmd *cmd = tdata->cmd;
@@ -438,7 +438,7 @@ int ccp_cmd_queue_thread(void *data)
 	struct ccp_tasklet_data tdata;
 	struct tasklet_struct tasklet;
 
-	tasklet_init(&tasklet, ccp_do_cmd_complete, (unsigned long)&tdata);
+	tasklet_init(&tasklet, ccp_do_cmd_complete, (uintptr_t)&tdata);
 
 	set_current_state(TASK_INTERRUPTIBLE);
 	while (!kthread_should_stop()) {

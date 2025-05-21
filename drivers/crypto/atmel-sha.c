@@ -1313,7 +1313,7 @@ static struct ahash_alg sha_384_512_algs[] = {
 },
 };
 
-static void atmel_sha_queue_task(unsigned long data)
+static void atmel_sha_queue_task(uintptr_t data)
 {
 	struct atmel_sha_dev *dd = (struct atmel_sha_dev *)data;
 
@@ -1352,7 +1352,7 @@ finish:
 	return err;
 }
 
-static void atmel_sha_done_task(unsigned long data)
+static void atmel_sha_done_task(uintptr_t data)
 {
 	struct atmel_sha_dev *dd = (struct atmel_sha_dev *)data;
 

@@ -494,7 +494,7 @@ static struct isci_host *isci_host_alloc(struct pci_dev *pdev, int id)
 	ihost->sas_ha.dev = &ihost->pdev->dev;
 	ihost->sas_ha.lldd_ha = ihost;
 	tasklet_init(&ihost->completion_tasklet,
-		     isci_host_completion_routine, (unsigned long)ihost);
+		     isci_host_completion_routine, (uintptr_t) ihost);
 
 	/* validate module parameters */
 	/* TODO: kill struct sci_user_parameters and reference directly */

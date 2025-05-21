@@ -583,7 +583,7 @@ static void process_response_list(struct nitrox_cmdq *cmdq)
 /*
  * pkt_slc_resp_tasklet - post processing of SE responses
  */
-void pkt_slc_resp_tasklet(unsigned long data)
+void pkt_slc_resp_tasklet(uintptr_t data)
 {
 	struct nitrox_q_vector *qvec = (void *)(uintptr_t)(data);
 	struct nitrox_cmdq *cmdq = qvec->cmdq;

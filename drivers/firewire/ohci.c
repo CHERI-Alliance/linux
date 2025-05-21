@@ -1016,7 +1016,7 @@ static void ar_recycle_buffers(struct ar_context *ctx, unsigned int end_buffer)
 	}
 }
 
-static void ar_context_tasklet(unsigned long data)
+static void ar_context_tasklet(uintptr_t data)
 {
 	struct ar_context *ctx = (struct ar_context *)data;
 	unsigned int end_buffer_index, end_buffer_offset;
@@ -1181,7 +1181,7 @@ static void context_retire_descriptors(struct context *ctx)
 	}
 }
 
-static void context_tasklet(unsigned long data)
+static void context_tasklet(uintptr_t data)
 {
 	struct context *ctx = (struct context *) data;
 

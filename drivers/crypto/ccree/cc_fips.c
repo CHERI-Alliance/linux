@@ -8,7 +8,7 @@
 #include "cc_driver.h"
 #include "cc_fips.h"
 
-static void fips_dsr(unsigned long devarg);
+static void fips_dsr(uintptr_t devarg);
 
 struct cc_fips_handle {
 	struct tasklet_struct tasklet;
@@ -109,7 +109,7 @@ void cc_tee_handle_fips_error(struct cc_drvdata *p_drvdata)
 }
 
 /* Deferred service handler, run as interrupt-fired tasklet */
-static void fips_dsr(unsigned long devarg)
+static void fips_dsr(uintptr_t devarg)
 {
 	struct cc_drvdata *drvdata = (struct cc_drvdata *)devarg;
 	u32 irq, val;
