@@ -216,7 +216,7 @@ static void labpc_clear_adc_fifo(struct comedi_device *dev)
 static int labpc_ai_eoc(struct comedi_device *dev,
 			struct comedi_subdevice *s,
 			struct comedi_insn *insn,
-			unsigned long context)
+			uintptr_t context)
 {
 	struct labpc_private *devpriv = dev->private;
 
@@ -1147,7 +1147,7 @@ static int labpc_calib_insn_write(struct comedi_device *dev,
 static int labpc_eeprom_ready(struct comedi_device *dev,
 			      struct comedi_subdevice *s,
 			      struct comedi_insn *insn,
-			      unsigned long context)
+			      uintptr_t context)
 {
 	unsigned int status;
 

@@ -41,7 +41,7 @@
 static int pci6208_ao_eoc(struct comedi_device *dev,
 			  struct comedi_subdevice *s,
 			  struct comedi_insn *insn,
-			  unsigned long context)
+			  uintptr_t context)
 {
 	unsigned int status;
 

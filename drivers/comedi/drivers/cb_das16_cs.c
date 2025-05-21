@@ -124,7 +124,7 @@ static const struct comedi_lrange das16cs_ai_range = {
 static int das16cs_ai_eoc(struct comedi_device *dev,
 			  struct comedi_subdevice *s,
 			  struct comedi_insn *insn,
-			  unsigned long context)
+			  uintptr_t context)
 {
 	unsigned int status;
 
