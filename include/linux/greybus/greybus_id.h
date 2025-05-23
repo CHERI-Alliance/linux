@@ -16,7 +16,7 @@ struct greybus_bundle_id {
 	__u32	product;
 	__u8	class;
 
-	uintptr_t	driver_info __aligned(sizeof(kernel_ulong_t));
+	uintptr_t	driver_info __aligned(sizeof(uintptr_t));
 };
 
 /* Used to match the greybus_bundle_id */
