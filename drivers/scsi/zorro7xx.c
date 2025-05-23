@@ -50,23 +50,23 @@ static struct zorro_driver_data {
 static struct zorro_device_id zorro7xx_zorro_tbl[] = {
 	{
 		.id = ZORRO_PROD_PHASE5_BLIZZARD_603E_PLUS,
-		.driver_data = (unsigned long)&zorro7xx_driver_data[0],
+		.driver_data = (uintptr_t)&zorro7xx_driver_data[0],
 	},
 	{
 		.id = ZORRO_PROD_MACROSYSTEMS_WARP_ENGINE_40xx,
-		.driver_data = (unsigned long)&zorro7xx_driver_data[1],
+		.driver_data = (uintptr_t)&zorro7xx_driver_data[1],
 	},
 	{
 		.id = ZORRO_PROD_CBM_A4091_1,
-		.driver_data = (unsigned long)&zorro7xx_driver_data[2],
+		.driver_data = (uintptr_t)&zorro7xx_driver_data[2],
 	},
 	{
 		.id = ZORRO_PROD_CBM_A4091_2,
-		.driver_data = (unsigned long)&zorro7xx_driver_data[2],
+		.driver_data = (uintptr_t)&zorro7xx_driver_data[2],
 	},
 	{
 		.id = ZORRO_PROD_GVP_GFORCE_040_060,
-		.driver_data = (unsigned long)&zorro7xx_driver_data[3],
+		.driver_data = (uintptr_t)&zorro7xx_driver_data[3],
 	},
 	{ 0 }
 };

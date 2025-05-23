@@ -716,23 +716,23 @@ static const struct of_device_id da8xx_cfgchip_of_match[] = {
 static const struct platform_device_id da8xx_cfgchip_id_table[] = {
 	{
 		.name = "da830-tbclksync",
-		.driver_data = (kernel_ulong_t)da8xx_cfgchip_register_tbclk,
+		.driver_data = (uintptr_t)da8xx_cfgchip_register_tbclk,
 	},
 	{
 		.name = "da830-div4p5ena",
-		.driver_data = (kernel_ulong_t)da8xx_cfgchip_register_div4p5,
+		.driver_data = (uintptr_t)da8xx_cfgchip_register_div4p5,
 	},
 	{
 		.name = "da850-async1-clksrc",
-		.driver_data = (kernel_ulong_t)da8xx_cfgchip_register_async1,
+		.driver_data = (uintptr_t)da8xx_cfgchip_register_async1,
 	},
 	{
 		.name = "da850-async3-clksrc",
-		.driver_data = (kernel_ulong_t)da850_cfgchip_register_async3,
+		.driver_data = (uintptr_t)da850_cfgchip_register_async3,
 	},
 	{
 		.name = "da830-usb-phy-clks",
-		.driver_data = (kernel_ulong_t)da8xx_cfgchip_register_usb_phy_clk,
+		.driver_data = (uintptr_t)da8xx_cfgchip_register_usb_phy_clk,
 	},
 	{ }
 };

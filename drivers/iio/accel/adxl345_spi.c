@@ -60,8 +60,8 @@ static const struct adxl345_chip_info adxl375_spi_info = {
 };
 
 static const struct spi_device_id adxl345_spi_id[] = {
-	{ "adxl345", (kernel_ulong_t)&adxl345_spi_info },
-	{ "adxl375", (kernel_ulong_t)&adxl375_spi_info },
+	{ "adxl345", (uintptr_t)&adxl345_spi_info },
+	{ "adxl375", (uintptr_t)&adxl375_spi_info },
 	{ }
 };
 MODULE_DEVICE_TABLE(spi, adxl345_spi_id);
@@ -74,7 +74,7 @@ static const struct of_device_id adxl345_of_match[] = {
 MODULE_DEVICE_TABLE(of, adxl345_of_match);
 
 static const struct acpi_device_id adxl345_acpi_match[] = {
-	{ "ADS0345", (kernel_ulong_t)&adxl345_spi_info },
+	{ "ADS0345", (uintptr_t)&adxl345_spi_info },
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, adxl345_acpi_match);

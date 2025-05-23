@@ -498,9 +498,9 @@ static void hisi_pa_pmu_remove(struct platform_device *pdev)
 }
 
 static const struct acpi_device_id hisi_pa_pmu_acpi_match[] = {
-	{ "HISI0273", (kernel_ulong_t)&hisi_h32pa_v2 },
-	{ "HISI0275", (kernel_ulong_t)&hisi_h32pa_v3 },
-	{ "HISI0274", (kernel_ulong_t)&hisi_h60pa },
+	{ "HISI0273", (uintptr_t)&hisi_h32pa_v2 },
+	{ "HISI0275", (uintptr_t)&hisi_h32pa_v3 },
+	{ "HISI0274", (uintptr_t)&hisi_h60pa },
 	{}
 };
 MODULE_DEVICE_TABLE(acpi, hisi_pa_pmu_acpi_match);
