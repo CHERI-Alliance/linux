@@ -117,13 +117,13 @@ static int mvebu_v7_cpuidle_probe(struct platform_device *pdev)
 static const struct platform_device_id mvebu_cpuidle_ids[] = {
 	{
 		.name = "cpuidle-armada-xp",
-		.driver_data = (unsigned long)&armadaxp_idle_driver,
+		.driver_data = (uintptr_t)&armadaxp_idle_driver,
 	}, {
 		.name = "cpuidle-armada-370",
-		.driver_data = (unsigned long)&armada370_idle_driver,
+		.driver_data = (uintptr_t)&armada370_idle_driver,
 	}, {
 		.name = "cpuidle-armada-38x",
-		.driver_data = (unsigned long)&armada38x_idle_driver,
+		.driver_data = (uintptr_t)&armada38x_idle_driver,
 	},
 	{}
 };
