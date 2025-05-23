@@ -58,7 +58,7 @@ enum {
 	.subvendor = sv, \
 	.subdevice = sd
 
-#define BROKEN_EEPROM_DRIVER_DATA ((unsigned long)-1)
+#define BROKEN_EEPROM_DRIVER_DATA ((uintptr_t)-1)
 #define OXYGEN_PCI_SUBID_BROKEN_EEPROM \
 	OXYGEN_PCI_SUBID(PCI_VENDOR_ID_CMEDIA, 0x8788), \
 	.driver_data = BROKEN_EEPROM_DRIVER_DATA
