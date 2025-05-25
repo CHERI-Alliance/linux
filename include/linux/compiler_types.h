@@ -85,6 +85,11 @@ static inline void __chk_io_ptr(const volatile void __iomem *ptr) { }
 
 #ifdef __KERNEL__
 
+#ifdef __clang_analyzer__
+#undef __user
+#define __user [[clang::annotate_type("user")]]
+#endif
+
 /* Attributes */
 #include <linux/compiler_attributes.h>
 

@@ -466,7 +466,7 @@ static int msm_ioctl_gem_info_set_iova(struct drm_device *dev,
 }
 
 static int msm_ioctl_gem_info_set_metadata(struct drm_gem_object *obj,
-					   __user void *metadata,
+					   void __user *metadata,
 					   u32 metadata_size)
 {
 	struct msm_gem_object *msm_obj = to_msm_bo(obj);
@@ -508,7 +508,7 @@ out:
 }
 
 static int msm_ioctl_gem_info_get_metadata(struct drm_gem_object *obj,
-					   __user void *metadata,
+					   void __user *metadata,
 					   u32 *metadata_size)
 {
 	struct msm_gem_object *msm_obj = to_msm_bo(obj);

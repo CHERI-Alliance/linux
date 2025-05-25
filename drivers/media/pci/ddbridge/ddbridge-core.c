@@ -661,7 +661,7 @@ static u32 ddb_input_avail(struct ddb_input *input)
 }
 
 static ssize_t ddb_input_read(struct ddb_input *input,
-			      __user u8 *buf, size_t count)
+			      u8 __user *buf, size_t count)
 {
 	struct ddb *dev = input->port->dev;
 	u32 left = count;
@@ -703,7 +703,7 @@ static ssize_t ddb_input_read(struct ddb_input *input,
 /****************************************************************************/
 /****************************************************************************/
 
-static ssize_t ts_write(struct file *file, const __user char *buf,
+static ssize_t ts_write(struct file *file, const char __user *buf,
 			size_t count, loff_t *ppos)
 {
 	struct dvb_device *dvbdev = file->private_data;
@@ -732,7 +732,7 @@ static ssize_t ts_write(struct file *file, const __user char *buf,
 	return (left == count) ? -EAGAIN : (count - left);
 }
 
-static ssize_t ts_read(struct file *file, __user char *buf,
+static ssize_t ts_read(struct file *file, char __user *buf,
 		       size_t count, loff_t *ppos)
 {
 	struct dvb_device *dvbdev = file->private_data;

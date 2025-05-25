@@ -651,7 +651,7 @@ int iio_dma_buffer_write(struct iio_buffer *buffer, size_t n,
 			 const char __user *user_buffer)
 {
 	return iio_dma_buffer_io(buffer, n,
-				 (__force __user char *)user_buffer, true);
+				 (char __force __user *)user_buffer, true);
 }
 EXPORT_SYMBOL_NS_GPL(iio_dma_buffer_write, "IIO_DMA_BUFFER");
 

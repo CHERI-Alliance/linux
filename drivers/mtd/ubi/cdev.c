@@ -168,7 +168,7 @@ static int vol_cdev_fsync(struct file *file, loff_t start, loff_t end,
 }
 
 
-static ssize_t vol_cdev_read(struct file *file, __user char *buf, size_t count,
+static ssize_t vol_cdev_read(struct file *file, char __user *buf, size_t count,
 			     loff_t *offp)
 {
 	struct ubi_volume_desc *desc = file->private_data;
@@ -464,7 +464,7 @@ static long vol_cdev_ioctl(struct file *file, unsigned int cmd,
 	{
 		int32_t lnum;
 
-		err = get_user(lnum, (__user int32_t *)argp);
+		err = get_user(lnum, (int32_t __user *)argp);
 		if (err) {
 			err = -EFAULT;
 			break;
@@ -509,7 +509,7 @@ static long vol_cdev_ioctl(struct file *file, unsigned int cmd,
 	{
 		int32_t lnum;
 
-		err = get_user(lnum, (__user int32_t *)argp);
+		err = get_user(lnum, (int32_t __user *)argp);
 		if (err) {
 			err = -EFAULT;
 			break;
@@ -523,7 +523,7 @@ static long vol_cdev_ioctl(struct file *file, unsigned int cmd,
 	{
 		int32_t lnum;
 
-		err = get_user(lnum, (__user int32_t *)argp);
+		err = get_user(lnum, (int32_t __user *)argp);
 		if (err) {
 			err = -EFAULT;
 			break;
@@ -930,7 +930,7 @@ static long ubi_cdev_ioctl(struct file *file, unsigned int cmd,
 		if (err)
 			break;
 
-		err = put_user(req.vol_id, (__user int32_t *)argp);
+		err = put_user(req.vol_id, (int32_t __user *)argp);
 		if (err)
 			err = -EFAULT;
 
@@ -943,7 +943,7 @@ static long ubi_cdev_ioctl(struct file *file, unsigned int cmd,
 		int vol_id;
 
 		dbg_gen("remove volume");
-		err = get_user(vol_id, (__user int32_t *)argp);
+		err = get_user(vol_id, (int32_t __user *)argp);
 		if (err) {
 			err = -EFAULT;
 			break;
@@ -1030,7 +1030,7 @@ static long ubi_cdev_ioctl(struct file *file, unsigned int cmd,
 	{
 		int pnum;
 
-		err = get_user(pnum, (__user int32_t *)argp);
+		err = get_user(pnum, (int32_t __user *)argp);
 		if (err) {
 			err = -EFAULT;
 			break;
@@ -1045,7 +1045,7 @@ static long ubi_cdev_ioctl(struct file *file, unsigned int cmd,
 	{
 		int pnum;
 
-		err = get_user(pnum, (__user int32_t *)argp);
+		err = get_user(pnum, (int32_t __user *)argp);
 		if (err) {
 			err = -EFAULT;
 			break;
@@ -1118,7 +1118,7 @@ static long ctrl_cdev_ioctl(struct file *file, unsigned int cmd,
 			put_mtd_device(mtd);
 		else
 			/* @err contains UBI device number */
-			err = put_user(err, (__user int32_t *)argp);
+			err = put_user(err, (int32_t __user *)argp);
 
 		break;
 	}
@@ -1129,7 +1129,7 @@ static long ctrl_cdev_ioctl(struct file *file, unsigned int cmd,
 		int ubi_num;
 
 		dbg_gen("detach MTD device");
-		err = get_user(ubi_num, (__user int32_t *)argp);
+		err = get_user(ubi_num, (int32_t __user *)argp);
 		if (err) {
 			err = -EFAULT;
 			break;

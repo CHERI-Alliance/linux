@@ -2178,7 +2178,7 @@ static struct audit_names *audit_alloc_name(struct audit_context *context,
  * associated with that audit_name. If not, return NULL.
  */
 struct filename *
-__audit_reusename(const __user char *uptr)
+__audit_reusename(const char __user *uptr)
 {
 	struct audit_context *context = audit_context();
 	struct audit_names *n;

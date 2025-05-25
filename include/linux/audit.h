@@ -316,7 +316,7 @@ extern void __audit_uring_exit(int success, long code);
 extern void __audit_syscall_entry(int major, unsigned long a0, unsigned long a1,
 				  unsigned long a2, unsigned long a3);
 extern void __audit_syscall_exit(int ret_success, long ret_value);
-extern struct filename *__audit_reusename(const __user char *uptr);
+extern struct filename *__audit_reusename(const char __user *uptr);
 extern void __audit_getname(struct filename *name);
 extern void __audit_inode(struct filename *name, const struct dentry *dentry,
 				unsigned int flags);
@@ -380,7 +380,7 @@ static inline void audit_syscall_exit(void *pt_regs)
 		__audit_syscall_exit(success, return_code);
 	}
 }
-static inline struct filename *audit_reusename(const __user char *name)
+static inline struct filename *audit_reusename(const char __user *name)
 {
 	if (unlikely(!audit_dummy_context()))
 		return __audit_reusename(name);
@@ -624,7 +624,7 @@ static inline struct audit_context *audit_context(void)
 {
 	return NULL;
 }
-static inline struct filename *audit_reusename(const __user char *name)
+static inline struct filename *audit_reusename(const char __user *name)
 {
 	return NULL;
 }

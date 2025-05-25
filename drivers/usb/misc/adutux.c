@@ -340,7 +340,7 @@ exit:
 	return retval;
 }
 
-static ssize_t adu_read(struct file *file, __user char *buffer, size_t count,
+static ssize_t adu_read(struct file *file, char __user *buffer, size_t count,
 			loff_t *ppos)
 {
 	struct adu_device *dev;
@@ -500,7 +500,7 @@ exit:
 	return retval;
 }
 
-static ssize_t adu_write(struct file *file, const __user char *buffer,
+static ssize_t adu_write(struct file *file, const char __user *buffer,
 			 size_t count, loff_t *ppos)
 {
 	DECLARE_WAITQUEUE(waita, current);
