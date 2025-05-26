@@ -337,7 +337,7 @@ static int gbcodec_mixer_ctl_put(struct snd_kcontrol *kcontrol,
 {	.iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname, \
 	.count = kcount, .info = gbcodec_mixer_ctl_info, \
 	.get = gbcodec_mixer_ctl_get, .put = gbcodec_mixer_ctl_put, \
-	.private_value = (unsigned long)data }
+	.private_value = (uintptr_t)data }
 
 /*
  * although below callback functions seems redundant to above functions.
@@ -488,7 +488,7 @@ exit:
 {	.iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname, \
 	.count = kcount, .info = gbcodec_mixer_dapm_ctl_info, \
 	.get = gbcodec_mixer_dapm_ctl_get, .put = gbcodec_mixer_dapm_ctl_put, \
-	.private_value = (unsigned long)data}
+	.private_value = (uintptr_t)data}
 
 static int gbcodec_event_spk(struct snd_soc_dapm_widget *w,
 			     struct snd_kcontrol *k, int event)

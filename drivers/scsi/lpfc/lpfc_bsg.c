@@ -118,7 +118,7 @@ enum ELX_LOOPBACK_CMD {
 };
 
 #define ELX_LOOPBACK_HEADER_SZ \
-	(size_t)(&((struct lpfc_sli_ct_request *)NULL)->un)
+	(size_t __force)(&((struct lpfc_sli_ct_request *)NULL)->un)
 
 /* For non-embedded read object command */
 #define READ_OBJ_EMB0_SCHEME_0 {1, 10, 256, 128}

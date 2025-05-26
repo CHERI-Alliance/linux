@@ -100,21 +100,21 @@
 #define SDHCI_PCI_DEVICE(vend, dev, cfg) { \
 	.vendor = _PCI_VEND(vend), .device = _PCI_DEV(vend, dev), \
 	.subvendor = PCI_ANY_ID, .subdevice = PCI_ANY_ID, \
-	.driver_data = (kernel_ulong_t)&(sdhci_##cfg) \
+	.driver_data = (uintptr_t)&(sdhci_##cfg) \
 }
 
 #define SDHCI_PCI_SUBDEVICE(vend, dev, subvend, subdev, cfg) { \
 	.vendor = _PCI_VEND(vend), .device = _PCI_DEV(vend, dev), \
 	.subvendor = _PCI_VEND(subvend), \
 	.subdevice = _PCI_SUBDEV(subvend, subdev), \
-	.driver_data = (kernel_ulong_t)&(sdhci_##cfg) \
+	.driver_data = (uintptr_t)&(sdhci_##cfg) \
 }
 
 #define SDHCI_PCI_DEVICE_CLASS(vend, cl, cl_msk, cfg) { \
 	.vendor = _PCI_VEND(vend), .device = PCI_ANY_ID, \
 	.subvendor = PCI_ANY_ID, .subdevice = PCI_ANY_ID, \
 	.class = (cl), .class_mask = (cl_msk), \
-	.driver_data = (kernel_ulong_t)&(sdhci_##cfg) \
+	.driver_data = (uintptr_t)&(sdhci_##cfg) \
 }
 
 /*

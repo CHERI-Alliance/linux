@@ -1099,7 +1099,7 @@ static const struct smi_cfg_info technotrend_s2_4200_cfg = {
 #define SMI_ID(_subvend, _subdev, _driverdata) {	\
 	.vendor      = SMI_VID,    .device    = SMI_PID, \
 	.subvendor   = _subvend, .subdevice = _subdev, \
-	.driver_data = (unsigned long)&_driverdata }
+	.driver_data = (uintptr_t)&_driverdata }
 
 static const struct pci_device_id smi_id_table[] = {
 	SMI_ID(0x4254, 0x0550, dvbsky_s950_cfg),

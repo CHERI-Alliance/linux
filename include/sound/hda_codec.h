@@ -82,7 +82,7 @@ typedef int (*hda_codec_patch_t)(struct hda_codec *);
 #define HDA_CODEC_REV_ENTRY(_vid, _rev, _name, _patch) \
 	{ .vendor_id = (_vid), .rev_id = (_rev), .name = (_name), \
 	  .api_version = HDA_DEV_LEGACY, \
-	  .driver_data = (unsigned long)(_patch) }
+	  .driver_data = (uintptr_t)(_patch) }
 #define HDA_CODEC_ENTRY(_vid, _name, _patch) \
 	HDA_CODEC_REV_ENTRY(_vid, 0, _name, _patch)
 

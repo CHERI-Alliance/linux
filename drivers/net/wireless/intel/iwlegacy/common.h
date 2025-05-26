@@ -1510,7 +1510,7 @@ il_free_pages(struct il_priv *il, unsigned long page)
 #define IL_PCI_DEVICE(dev, subdev, cfg) \
 	.vendor = PCI_VENDOR_ID_INTEL,  .device = (dev), \
 	.subvendor = PCI_ANY_ID, .subdevice = (subdev), \
-	.driver_data = (kernel_ulong_t)&(cfg)
+	.driver_data = (uintptr_t)&(cfg)
 
 #define TIME_UNIT		1024
 

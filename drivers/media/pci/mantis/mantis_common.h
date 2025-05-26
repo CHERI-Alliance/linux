@@ -62,7 +62,7 @@
 		.device		= MANTIS,				\
 		.subvendor	= (__subven),				\
 		.subdevice	= (__subdev),				\
-		.driver_data	= (unsigned long)			\
+		.driver_data	= (uintptr_t)				\
 			&(struct mantis_pci_drvdata){__configptr, __rc}	\
 }
 

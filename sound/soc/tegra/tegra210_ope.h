@@ -78,7 +78,7 @@ struct tegra_soc_bytes {
 	.info	= xinfo,						\
 	.get	= xhandler_get,						\
 	.put	= xhandler_put,						\
-	.private_value = ((unsigned long)&(struct tegra_soc_bytes)	\
+	.private_value = ((uintptr_t)&(struct tegra_soc_bytes)	\
 	{								\
 		.soc.base	= xbase,				\
 		.soc.num_regs	= xregs,				\

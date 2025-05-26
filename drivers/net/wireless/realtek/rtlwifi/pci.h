@@ -36,7 +36,7 @@
 	.device = (dev), \
 	.subvendor = PCI_ANY_ID, \
 	.subdevice = PCI_ANY_ID,\
-	.driver_data = (kernel_ulong_t)&(cfg)
+	.driver_data = (uintptr_t)&(cfg)
 
 #define INTEL_VENDOR_ID				0x8086
 #define SIS_VENDOR_ID				0x1039

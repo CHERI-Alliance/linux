@@ -11,7 +11,7 @@
 # define __NOKPROBE_SYMBOL(fname)				\
 static unsigned long __used					\
 	__section("_kprobe_blacklist")				\
-	_kbl_addr_##fname = (unsigned long)fname;
+	_kbl_addr_##fname = (unsigned long __force)fname;
 # define NOKPROBE_SYMBOL(fname)	__NOKPROBE_SYMBOL(fname)
 /* Use this to forbid a kprobes attach on very low level functions */
 # define __kprobes	__section(".kprobes.text")

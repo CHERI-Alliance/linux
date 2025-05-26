@@ -57,8 +57,8 @@
 #ifdef CONFIG_64BIT
 /* This is used to define the end of the KASAN shadow region */
 #define MODULES_LOWEST_VADDR	(KERNEL_LINK_ADDR - SZ_2G)
-#define MODULES_VADDR		(PFN_ALIGN((unsigned long)&_end) - SZ_2G)
-#define MODULES_END		(PFN_ALIGN((unsigned long)&_start))
+#define MODULES_VADDR		(PFN_ALIGN((unsigned long __force)&_end) - SZ_2G)
+#define MODULES_END		(PFN_ALIGN((unsigned long __force)&_start))
 #else
 #define MODULES_VADDR		VMALLOC_START
 #define MODULES_END		VMALLOC_END

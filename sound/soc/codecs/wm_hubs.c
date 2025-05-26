@@ -709,7 +709,7 @@ static int class_w_put_volsw(struct snd_kcontrol *kcontrol,
 	.info = snd_soc_info_enum_double, \
 	.get = snd_soc_dapm_get_enum_double, \
 	.put = class_w_put_double, \
-	.private_value = (unsigned long)&xenum }
+	.private_value = (uintptr_t)&xenum }
 
 static int class_w_put_double(struct snd_kcontrol *kcontrol,
 			      struct snd_ctl_elem_value *ucontrol)

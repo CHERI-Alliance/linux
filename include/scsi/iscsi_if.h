@@ -739,7 +739,7 @@ enum iscsi_ping_status_code {
 };
 
 #define iscsi_ptr(_handle) ((void*)(unsigned long)_handle)
-#define iscsi_handle(_ptr) ((uint64_t)(unsigned long)_ptr)
+#define iscsi_handle(_ptr) ((uint64_t)(uintptr_t)_ptr)
 
 /*
  * These flags presents iSCSI Data-Path capabilities.

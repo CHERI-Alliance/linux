@@ -39,7 +39,7 @@
  * put like QUIRK_DRIVER_INFO { ... } in each entry of the quirk table
  */
 #define QUIRK_DRIVER_INFO \
-	.driver_info = (unsigned long)&(const struct snd_usb_audio_quirk)
+	.driver_info = (uintptr_t)&(const struct snd_usb_audio_quirk)
 
 /*
  * Macros for quirk data entries
