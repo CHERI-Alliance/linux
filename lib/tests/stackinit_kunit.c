@@ -216,7 +216,7 @@ static noinline void test_ ## name (struct kunit *test)		\
 	/* Clear entire check buffer for 0xFF overlap test. */	\
 	memset(check_buf, 0x00, sizeof(check_buf));		\
 	/* Fill stack with FILL_BYTE. */			\
-	ignored = leaf_ ##name((unsigned long)&ignored, 1,	\
+	ignored = leaf_ ##name((uintptr_t)&ignored, 1,	\
 				FETCH_ARG_ ## which(zero));	\
 	/* Verify all bytes overwritten with FILL_BYTE. */	\
 	for (sum = 0, i = 0; i < target_size; i++)		\
@@ -224,7 +224,7 @@ static noinline void test_ ## name (struct kunit *test)		\
 	/* Clear entire check buffer for later bit tests. */	\
 	memset(check_buf, 0x00, sizeof(check_buf));		\
 	/* Extract stack-defined variable contents. */		\
-	ignored = leaf_ ##name((unsigned long)&ignored, 0,	\
+	ignored = leaf_ ##name((uintptr_t)&ignored, 0,	\
 				FETCH_ARG_ ## which(zero));	\
 	/*							\
 	 * Delay the sum test to here to do as little as	\

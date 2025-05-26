@@ -328,7 +328,7 @@ static inline pud_t *p4d_pgtable(p4d_t p4d)
 
 	return (pud_t *)pud_pgtable((pud_t) { p4d_val(p4d) });
 }
-#define p4d_page_vaddr(p4d)	((unsigned long)p4d_pgtable(p4d))
+#define p4d_page_vaddr(p4d)	((uintptr_t)p4d_pgtable(p4d))
 
 static inline struct page *p4d_page(p4d_t p4d)
 {
@@ -385,7 +385,7 @@ static inline p4d_t *pgd_pgtable(pgd_t pgd)
 
 	return (p4d_t *)p4d_pgtable((p4d_t) { pgd_val(pgd) });
 }
-#define pgd_page_vaddr(pgd)	((unsigned long)pgd_pgtable(pgd))
+#define pgd_page_vaddr(pgd)	((uintptr_t)pgd_pgtable(pgd))
 
 static inline struct page *pgd_page(pgd_t pgd)
 {

@@ -249,13 +249,13 @@ static int tda7419_vol_put(struct snd_kcontrol *kcontrol,
 }
 
 #define TDA7419_SINGLE_VALUE(xreg, xmask, xmin, xmax, xthresh, xinvert) \
-	((unsigned long)&(struct tda7419_vol_control) \
+	((uintptr_t)&(struct tda7419_vol_control) \
 	{.reg = xreg, .rreg = xreg, .mask = xmask, .min = xmin, \
 	 .max = xmax, .thresh = xthresh, .invert = xinvert})
 
 #define TDA7419_DOUBLE_R_VALUE(xregl, xregr, xmask, xmin, xmax, xthresh, \
 			       xinvert) \
-	((unsigned long)&(struct tda7419_vol_control) \
+	((uintptr_t)&(struct tda7419_vol_control) \
 	{.reg = xregl, .rreg = xregr, .mask = xmask, .min = xmin, \
 	 .max = xmax, .thresh = xthresh, .invert = xinvert})
 

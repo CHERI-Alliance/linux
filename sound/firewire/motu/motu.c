@@ -156,7 +156,7 @@ static void motu_bus_update(struct fw_unit *unit)
 	.vendor_id	= OUI_MOTU,			\
 	.specifier_id	= OUI_MOTU,			\
 	.version	= model,			\
-	.driver_data	= (kernel_ulong_t)data,		\
+	.driver_data	= (uintptr_t)data,		\
 }
 
 static const struct ieee1394_device_id motu_id_table[] = {

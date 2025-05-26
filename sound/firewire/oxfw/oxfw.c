@@ -321,7 +321,7 @@ static const struct compat_info lacie_speakers = {
 	.model_id     = model, \
 	.specifier_id = SPECIFIER_1394TA, \
 	.version      = VERSION_AVC, \
-	.driver_data  = (kernel_ulong_t)data, \
+	.driver_data  = (uintptr_t)data, \
 }
 
 static const struct ieee1394_device_id oxfw_id_table[] = {

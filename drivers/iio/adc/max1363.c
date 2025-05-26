@@ -1629,7 +1629,7 @@ static int max1363_probe(struct i2c_client *client)
 
 #define MAX1363_ID_TABLE(_name, cfg) {				\
 	.name = _name,						\
-	.driver_data = (kernel_ulong_t)&max1363_chip_info_tbl[cfg],	\
+	.driver_data = (uintptr_t)&max1363_chip_info_tbl[cfg],	\
 }
 
 static const struct i2c_device_id max1363_id[] = {

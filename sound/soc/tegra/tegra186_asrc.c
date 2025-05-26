@@ -660,7 +660,7 @@ ASRC_SOURCE_DECL(src_select6, 5);
 	.get	= xget,							\
 	.put	= xput,							\
 									\
-	.private_value = (unsigned long)&(struct soc_mreg_control)	\
+	.private_value = (uintptr_t)&(struct soc_mreg_control)	\
 	{								\
 		.regbase	= xregbase,				\
 		.regcount	= 1,					\

@@ -152,7 +152,7 @@ int mt8195_dai_pcm_register(struct mtk_base_afe *afe);
 	.info = snd_soc_info_enum_double, \
 	.get = xhandler_get, .put = xhandler_put, \
 	.device = id, \
-	.private_value = (unsigned long)&xenum, \
+	.private_value = (uintptr_t)&xenum, \
 }
 
 #endif

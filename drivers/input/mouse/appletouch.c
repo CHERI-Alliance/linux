@@ -102,7 +102,7 @@ static const struct atp_info geyser4_info = {
 	.idProduct = (prod),					\
 	.bInterfaceClass = 0x03,				\
 	.bInterfaceProtocol = 0x02,				\
-	.driver_info = (unsigned long) &info,			\
+	.driver_info = (uintptr_t) &info,			\
 }
 
 /*

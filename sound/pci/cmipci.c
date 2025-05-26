@@ -2393,7 +2393,7 @@ DEFINE_SWITCH_ARG(modem, CM_REG_MISC_CTRL, CM_FLINKON|CM_FLINKOFF, CM_FLINKON, 0
   .info = snd_cmipci_uswitch_info, \
   .get = snd_cmipci_uswitch_get, \
   .put = snd_cmipci_uswitch_put, \
-  .private_value = (unsigned long)&cmipci_switch_arg_##sarg,\
+  .private_value = (uintptr_t)&cmipci_switch_arg_##sarg,\
 }
 
 #define DEFINE_CARD_SWITCH(sname, sarg) DEFINE_SWITCH(sname, SNDRV_CTL_ELEM_IFACE_CARD, sarg)

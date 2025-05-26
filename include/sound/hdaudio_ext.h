@@ -14,7 +14,7 @@ void snd_hdac_ext_bus_device_remove(struct hdac_bus *bus);
 #define HDA_CODEC_REV_EXT_ENTRY(_vid, _rev, _name, drv_data) \
 	{ .vendor_id = (_vid), .rev_id = (_rev), .name = (_name), \
 	  .api_version = HDA_DEV_ASOC, \
-	  .driver_data = (unsigned long)(drv_data) }
+	  .driver_data = (uintptr_t)(drv_data) }
 #define HDA_CODEC_EXT_ENTRY(_vid, _revid, _name, _drv_data) \
 	HDA_CODEC_REV_EXT_ENTRY(_vid, _revid, _name, _drv_data)
 

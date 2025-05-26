@@ -11,7 +11,7 @@ enum {
 };
 
 struct error_injection_entry {
-	unsigned long	addr;
+	uintptr_t	addr;
 	int		etype;
 };
 
@@ -28,7 +28,7 @@ struct pt_regs;
 static struct error_injection_entry __used				\
 	__section("_error_injection_whitelist")				\
 	_eil_addr_##fname = {						\
-		.addr = (unsigned long)fname,				\
+		.addr = (uintptr_t)fname,				\
 		.etype = EI_ETYPE_##_etype,				\
 	}
 

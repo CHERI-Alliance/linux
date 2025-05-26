@@ -64,7 +64,7 @@ low before proceeding with the configuration sequence */
 {	.iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = (xname), \
 	.info = filter_control_info, \
 	.get = filter_control_get, .put = filter_control_put, \
-	.private_value = (unsigned long)&(struct filter_control) \
+	.private_value = (uintptr_t)&(struct filter_control) \
 		{.count = xcount, .min = xmin, .max = xmax} }
 
 struct filter_control {

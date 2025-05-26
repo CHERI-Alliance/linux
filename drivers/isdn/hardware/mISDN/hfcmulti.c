@@ -5308,7 +5308,7 @@ static const struct hm_map hfcm_map[] = {
 };
 
 #undef H
-#define H(x)	((unsigned long)&hfcm_map[x])
+#define H(x)	((uintptr_t)&hfcm_map[x])
 static const struct pci_device_id hfmultipci_ids[] = {
 
 	/* Cards with HFC-4S Chip */

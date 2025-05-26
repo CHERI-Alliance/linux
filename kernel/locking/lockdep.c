@@ -407,7 +407,7 @@ static struct delayed_free {
  */
 #define CLASSHASH_BITS		(MAX_LOCKDEP_KEYS_BITS - 1)
 #define CLASSHASH_SIZE		(1UL << CLASSHASH_BITS)
-#define __classhashfn(key)	hash_long((unsigned long)key, CLASSHASH_BITS)
+#define __classhashfn(key)	hash_long((uintptr_t)key, CLASSHASH_BITS)
 #define classhashentry(key)	(classhash_table + __classhashfn((key)))
 
 static struct hlist_head classhash_table[CLASSHASH_SIZE];

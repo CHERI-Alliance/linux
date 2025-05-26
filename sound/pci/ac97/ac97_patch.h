@@ -46,7 +46,7 @@ struct ac97_enum {
 { .iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname, \
   .info = snd_ac97_info_enum_double,		    \
   .get = snd_ac97_get_enum_double, .put = snd_ac97_put_enum_double, \
-  .private_value = (unsigned long)&xenum }
+  .private_value = (uintptr_t)&xenum }
 
 /* ac97_codec.c */
 static const struct snd_kcontrol_new snd_ac97_controls_3d[];

@@ -292,20 +292,20 @@ extern const unsigned int madera_mixer_values[MADERA_NUM_MIXER_INPUTS];
 {	.iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname,\
 	.info = snd_soc_info_enum_double, \
 	.get = snd_soc_get_enum_double, .put = madera_rate_put, \
-	.private_value = (unsigned long)&xenum }
+	.private_value = (uintptr_t)&xenum }
 
 #define MADERA_EQ_CONTROL(xname, xbase)				\
 {	.iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname,	\
 	.info = snd_soc_bytes_info, .get = snd_soc_bytes_get,	\
 	.put = madera_eq_coeff_put, .private_value =		\
-	((unsigned long)&(struct soc_bytes) { .base = xbase,	\
+	((uintptr_t)&(struct soc_bytes) { .base = xbase,	\
 	 .num_regs = 20, .mask = ~MADERA_EQ1_B1_MODE }) }
 
 #define MADERA_LHPF_CONTROL(xname, xbase)			\
 {	.iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname,	\
 	.info = snd_soc_bytes_info, .get = snd_soc_bytes_get,	\
 	.put = madera_lhpf_coeff_put, .private_value =		\
-	((unsigned long)&(struct soc_bytes) { .base = xbase,	\
+	((uintptr_t)&(struct soc_bytes) { .base = xbase,	\
 	 .num_regs = 1 }) }
 
 #define MADERA_RATES SNDRV_PCM_RATE_KNOT

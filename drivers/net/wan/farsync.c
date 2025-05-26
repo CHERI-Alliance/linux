@@ -487,7 +487,7 @@ struct fst_card_info {
  *      physical offsets so we have to convert. The only saving grace is that
  *      this should all collapse back to a simple indirection eventually.
  */
-#define WIN_OFFSET(X)   ((long)&(((struct fst_shared *)SMC_BASE)->X))
+#define WIN_OFFSET(X)   ((long __force)&(((struct fst_shared *)SMC_BASE)->X))
 
 #define FST_RDB(C, E)    (readb((C)->mem + WIN_OFFSET(E)))
 #define FST_RDW(C, E)    (readw((C)->mem + WIN_OFFSET(E)))

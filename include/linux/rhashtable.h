@@ -101,7 +101,7 @@ struct bucket_table {
  * Instead we store a NULL
  */
 #define	RHT_NULLS_MARKER(ptr)	\
-	((void *)NULLS_MARKER(((unsigned long) (ptr)) >> 1))
+	((void *)NULLS_MARKER(((uintptr_t) (ptr)) >> 1))
 #define INIT_RHT_NULLS_HEAD(ptr)	\
 	((ptr) = NULL)
 
