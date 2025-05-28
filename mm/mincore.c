@@ -257,7 +257,7 @@ static int check_pcuabi_mincore_ptr_arg(user_uintptr_t user_ptr,
 	 * however help to reject non-memory capabilities.
 	 */
 	if (!(cheri_is_valid(user_ptr) && cheri_is_unsealed(user_ptr) &&
-	      (perms & CHERI_PERM_GLOBAL) &&
+	      ((perms | cheri_unsupported_perms) & CHERI_PERM_GLOBAL) &&
 	      (perms & (CHERI_PERM_LOAD | CHERI_PERM_STORE | CHERI_PERM_EXECUTE))))
 		return -EINVAL;
 
