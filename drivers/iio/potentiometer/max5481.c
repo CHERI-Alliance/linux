@@ -147,7 +147,7 @@ static int max5481_probe(struct spi_device *spi)
 
 	data->cfg = device_get_match_data(&spi->dev);
 	if (!data->cfg)
-		data->cfg = &max5481_cfg[id->driver_data];
+		data->cfg = &max5481_cfg[__c_ua(id->driver_data)];
 
 	indio_dev->name = id->name;
 	indio_dev->modes = INDIO_DIRECT_MODE;

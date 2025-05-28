@@ -1258,7 +1258,7 @@ static void sil24_init_controller(struct ata_host *host)
 static int sil24_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 {
 	extern int __MARKER__sil24_cmd_block_is_sized_wrongly;
-	struct ata_port_info pi = sil24_port_info[ent->driver_data];
+	struct ata_port_info pi = sil24_port_info[__c_ua(ent->driver_data)];
 	const struct ata_port_info *ppi[] = { &pi, NULL };
 	void __iomem * const *iomap;
 	struct ata_host *host;

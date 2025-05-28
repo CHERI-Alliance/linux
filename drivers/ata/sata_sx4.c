@@ -1393,7 +1393,7 @@ static int pdc_sata_init_one(struct pci_dev *pdev,
 			     const struct pci_device_id *ent)
 {
 	const struct ata_port_info *ppi[] =
-		{ &pdc_port_info[ent->driver_data], NULL };
+		{ &pdc_port_info[__c_ua(ent->driver_data)], NULL };
 	struct ata_host *host;
 	struct pdc_host_priv *hpriv;
 	int i, rc;

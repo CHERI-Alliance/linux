@@ -228,7 +228,7 @@ static void fbnic_service_task(struct work_struct *work)
  **/
 static int fbnic_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 {
-	const struct fbnic_info *info = fbnic_info_tbl[ent->driver_data];
+	const struct fbnic_info *info = fbnic_info_tbl[__c_ua(ent->driver_data)];
 	struct net_device *netdev;
 	struct fbnic_dev *fbd;
 	int err;

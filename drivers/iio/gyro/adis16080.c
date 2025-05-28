@@ -200,7 +200,7 @@ static int adis16080_probe(struct spi_device *spi)
 
 	/* Allocate the comms buffers */
 	st->us = spi;
-	st->info = &adis16080_chip_info[id->driver_data];
+	st->info = &adis16080_chip_info[__c_ua(id->driver_data)];
 
 	indio_dev->name = spi->dev.driver->name;
 	indio_dev->channels = adis16080_channels;

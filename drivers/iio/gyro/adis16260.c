@@ -375,7 +375,7 @@ static int adis16260_probe(struct spi_device *spi)
 	/* this is only used for removal purposes */
 	spi_set_drvdata(spi, indio_dev);
 
-	adis16260->info = &adis16260_chip_info_table[id->driver_data];
+	adis16260->info = &adis16260_chip_info_table[__c_ua(id->driver_data)];
 
 	indio_dev->name = id->name;
 	indio_dev->info = &adis16260_info;

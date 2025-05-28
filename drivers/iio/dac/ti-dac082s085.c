@@ -281,7 +281,7 @@ static int ti_dac_probe(struct spi_device *spi)
 	spi_message_init_with_transfers(&ti_dac->mesg, &ti_dac->xfer, 1);
 	ti_dac->mesg.spi = spi;
 
-	spec = &ti_dac_spec[spi_get_device_id(spi)->driver_data];
+	spec = &ti_dac_spec[__c_ua(spi_get_device_id(spi)->driver_data)];
 	indio_dev->num_channels = spec->num_channels;
 	ti_dac->resolution = spec->resolution;
 

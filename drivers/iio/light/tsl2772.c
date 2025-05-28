@@ -1820,7 +1820,7 @@ static int tsl2772_probe(struct i2c_client *clientp)
 	chip->pdata = dev_get_platdata(&clientp->dev);
 	chip->id = id->driver_data;
 	chip->chip_info =
-		&tsl2772_chip_info_tbl[device_channel_config[id->driver_data]];
+		&tsl2772_chip_info_tbl[device_channel_config[__c_ua(id->driver_data)]];
 
 	indio_dev->info = chip->chip_info->info;
 	indio_dev->modes = INDIO_DIRECT_MODE;

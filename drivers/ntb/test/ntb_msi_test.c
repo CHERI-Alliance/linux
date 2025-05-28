@@ -70,27 +70,27 @@ static void ntb_msit_setup_work(struct work_struct *work)
 	}
 
 	for (i = 0; i < num_irqs; i++) {
-		nm->isr_ctx[i].irq_idx = i;
-		nm->isr_ctx[i].nm = nm;
+		nm->isr_ctx[__c_ua(i)].irq_idx = i;
+		nm->isr_ctx[__c_ua(i)].nm = nm;
 
-		if (!nm->isr_ctx[i].irq_num) {
+		if (!nm->isr_ctx[__c_ua(i)].irq_num) {
 			irq = ntbm_msi_request_irq(nm->ntb, ntb_msit_isr,
 						   KBUILD_MODNAME,
-						   &nm->isr_ctx[i],
-						   &nm->isr_ctx[i].desc);
+						   &nm->isr_ctx[__c_ua(i)],
+						   &nm->isr_ctx[__c_ua(i)].desc);
 			if (irq < 0)
 				break;
 
-			nm->isr_ctx[i].irq_num = irq;
+			nm->isr_ctx[__c_ua(i)].irq_num = irq;
 		}
 
 		ret = ntb_spad_write(nm->ntb, 2 * i + 1,
-				     nm->isr_ctx[i].desc.addr_offset);
+				     nm->isr_ctx[__c_ua(i)].desc.addr_offset);
 		if (ret)
 			break;
 
 		ret = ntb_spad_write(nm->ntb, 2 * i + 2,
-				     nm->isr_ctx[i].desc.data);
+				     nm->isr_ctx[__c_ua(i)].desc.data);
 		if (ret)
 			break;
 

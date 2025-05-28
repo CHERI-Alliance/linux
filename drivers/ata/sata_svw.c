@@ -411,7 +411,7 @@ static void k2_sata_setup_port(struct ata_ioports *port, void __iomem *base)
 static int k2_sata_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 {
 	const struct ata_port_info *ppi[] =
-		{ &k2_port_info[ent->driver_data], NULL };
+		{ &k2_port_info[__c_ua(ent->driver_data)], NULL };
 	struct ata_host *host;
 	void __iomem *mmio_base;
 	int n_ports, i, rc, bar_pos;

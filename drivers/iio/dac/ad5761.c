@@ -289,7 +289,7 @@ static int ad5761_probe(struct spi_device *spi)
 	struct ad5761_state *st;
 	int ret;
 	const struct ad5761_chip_info *chip_info =
-		&ad5761_chip_infos[spi_get_device_id(spi)->driver_data];
+		&ad5761_chip_infos[__c_ua(spi_get_device_id(spi)->driver_data)];
 	enum ad5761_voltage_range voltage_range = AD5761_VOLTAGE_RANGE_0V_5V;
 	struct ad5761_platform_data *pdata = dev_get_platdata(&spi->dev);
 

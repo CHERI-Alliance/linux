@@ -1908,7 +1908,7 @@ static int sis190_init_one(struct pci_dev *pdev,
 	if (netif_msg_probe(tp)) {
 		netdev_info(dev, "%s: %s at %p (IRQ: %d), %pM\n",
 			    pci_name(pdev),
-			    sis_chip_info[ent->driver_data].name,
+			    sis_chip_info[__c_ua(ent->driver_data)].name,
 			    ioaddr, pdev->irq, dev->dev_addr);
 		netdev_info(dev, "%s mode.\n",
 			    (tp->features & F_HAS_RGMII) ? "RGMII" : "GMII");

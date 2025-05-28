@@ -241,7 +241,7 @@ static int ad5624r_probe(struct spi_device *spi)
 	st->vref_mv = external_vref ? ret / 1000 : st->chip_info->int_vref_mv;
 
 	st->chip_info =
-		&ad5624r_chip_info_tbl[spi_get_device_id(spi)->driver_data];
+		&ad5624r_chip_info_tbl[__c_ua(spi_get_device_id(spi)->driver_data)];
 
 	st->us = spi;
 

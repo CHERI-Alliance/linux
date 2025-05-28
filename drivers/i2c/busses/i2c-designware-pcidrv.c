@@ -218,7 +218,7 @@ static int i2c_dw_pci_probe(struct pci_dev *pdev,
 		return dev_err_probe(device, -EINVAL, "Invalid driver data %ld\n",
 				     id->driver_data);
 
-	controller = &dw_pci_controllers[id->driver_data];
+	controller = &dw_pci_controllers[__c_ua(id->driver_data)];
 
 	r = pcim_enable_device(pdev);
 	if (r)

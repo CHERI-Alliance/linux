@@ -414,7 +414,7 @@ static int serverworks_init_one(struct pci_dev *pdev, const struct pci_device_id
 			.port_ops = &serverworks_csb_port_ops
 		}
 	};
-	const struct ata_port_info *ppi[] = { &info[id->driver_data], NULL };
+	const struct ata_port_info *ppi[] = { &info[__c_ua(id->driver_data)], NULL };
 	const struct scsi_host_template *sht = &serverworks_csb_sht;
 	int rc;
 

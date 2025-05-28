@@ -264,7 +264,7 @@ static int ad7887_probe(struct spi_device *spi)
 	}
 
 	st->chip_info =
-		&ad7887_chip_info_tbl[spi_get_device_id(spi)->driver_data];
+		&ad7887_chip_info_tbl[__c_ua(spi_get_device_id(spi)->driver_data)];
 
 	st->spi = spi;
 

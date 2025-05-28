@@ -480,7 +480,7 @@ static int lm355x_probe(struct i2c_client *client)
 		goto err_create_indicator_file;
 
 	dev_info(&client->dev, "%s is initialized\n",
-		 lm355x_name[id->driver_data]);
+		 lm355x_name[__c_ua(id->driver_data)]);
 	return 0;
 
 err_create_indicator_file:

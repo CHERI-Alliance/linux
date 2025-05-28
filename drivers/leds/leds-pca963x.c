@@ -419,7 +419,7 @@ static int pca963x_probe(struct i2c_client *client)
 	struct pca963x *chip;
 	int i, count;
 
-	chipdef = &pca963x_chipdefs[id->driver_data];
+	chipdef = &pca963x_chipdefs[__c_ua(id->driver_data)];
 
 	count = device_get_child_node_count(dev);
 	if (!count || count > chipdef->n_leds) {

@@ -626,7 +626,7 @@ static int serial_register(struct pci_dev *dev, const struct pci_device_id *id)
 	struct pciserial_board *board;
 	struct serial_private *serial;
 
-	board = &pci_parport_serial_boards[id->driver_data];
+	board = &pci_parport_serial_boards[__c_ua(id->driver_data)];
 	if (board->num_ports == 0)
 		return 0;
 
@@ -645,7 +645,7 @@ static int parport_register(struct pci_dev *dev, const struct pci_device_id *id)
 	struct parport_serial_private *priv = pci_get_drvdata (dev);
 	int n, success = 0;
 
-	priv->par = cards[id->driver_data];
+	priv->par = cards[__c_ua(id->driver_data)];
 	card = &priv->par;
 	if (card->preinit_hook &&
 	    card->preinit_hook (dev, card, PARPORT_IRQ_NONE, PARPORT_DMA_NONE))

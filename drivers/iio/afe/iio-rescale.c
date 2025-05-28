@@ -262,7 +262,7 @@ static ssize_t rescale_read_ext_info(struct iio_dev *indio_dev,
 	struct rescale *rescale = iio_priv(indio_dev);
 
 	return iio_read_channel_ext_info(rescale->source,
-					 rescale->ext_info[private].name,
+					 rescale->ext_info[__c_ua(private)].name,
 					 buf);
 }
 
@@ -274,7 +274,7 @@ static ssize_t rescale_write_ext_info(struct iio_dev *indio_dev,
 	struct rescale *rescale = iio_priv(indio_dev);
 
 	return iio_write_channel_ext_info(rescale->source,
-					  rescale->ext_info[private].name,
+					  rescale->ext_info[__c_ua(private)].name,
 					  buf, len);
 }
 
