@@ -346,7 +346,7 @@ static int pdc202xx_init_one(struct pci_dev *dev, const struct pci_device_id *id
 		}
 
 	};
-	const struct ata_port_info *ppi[] = { &info[id->driver_data], NULL };
+	const struct ata_port_info *ppi[] = { &info[__c_ua(id->driver_data)], NULL };
 
 	if (dev->device == PCI_DEVICE_ID_PROMISE_20265) {
 		struct pci_dev *bridge = dev->bus->self;

@@ -756,7 +756,7 @@ static void *next_object(struct seq_file *seq, void *v, loff_t *pos)
 
 static int show_object(struct seq_file *seq, void *v)
 {
-	struct kfence_metadata *meta = &kfence_metadata[(intptr_t)v - 1];
+	struct kfence_metadata *meta = &kfence_metadata[__c_ua((intptr_t)v - 1)];
 	unsigned long flags;
 
 	raw_spin_lock_irqsave(&meta->lock, flags);

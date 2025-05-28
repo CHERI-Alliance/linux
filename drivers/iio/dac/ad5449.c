@@ -279,7 +279,7 @@ static int ad5449_spi_probe(struct spi_device *spi)
 	st = iio_priv(indio_dev);
 	spi_set_drvdata(spi, indio_dev);
 
-	st->chip_info = &ad5449_chip_info[id->driver_data];
+	st->chip_info = &ad5449_chip_info[__c_ua(id->driver_data)];
 	st->spi = spi;
 
 	for (i = 0; i < st->chip_info->num_channels; ++i)

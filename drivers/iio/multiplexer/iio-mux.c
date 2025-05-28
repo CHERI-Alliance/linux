@@ -187,7 +187,7 @@ static ssize_t mux_read_ext_info(struct iio_dev *indio_dev, uintptr_t private,
 		return ret;
 
 	ret = iio_read_channel_ext_info(mux->parent,
-					mux->ext_info[private].name,
+					mux->ext_info[__c_ua(private)].name,
 					buf);
 
 	iio_mux_deselect(mux);
@@ -221,7 +221,7 @@ static ssize_t mux_write_ext_info(struct iio_dev *indio_dev, uintptr_t private,
 	new[len] = 0;
 
 	ret = iio_write_channel_ext_info(mux->parent,
-					 mux->ext_info[private].name,
+					 mux->ext_info[__c_ua(private)].name,
 					 buf, len);
 	if (ret < 0) {
 		iio_mux_deselect(mux);
@@ -229,9 +229,9 @@ static ssize_t mux_write_ext_info(struct iio_dev *indio_dev, uintptr_t private,
 		return ret;
 	}
 
-	devm_kfree(dev, mux->child[idx].ext_info_cache[private].data);
-	mux->child[idx].ext_info_cache[private].data = new;
-	mux->child[idx].ext_info_cache[private].size = len;
+	devm_kfree(dev, mux->child[idx].ext_info_cache[__c_ua(private)].data);
+	mux->child[idx].ext_info_cache[__c_ua(private)].data = new;
+	mux->child[idx].ext_info_cache[__c_ua(private)].size = len;
 
 	iio_mux_deselect(mux);
 

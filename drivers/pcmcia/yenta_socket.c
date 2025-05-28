@@ -1237,7 +1237,7 @@ static int yenta_probe(struct pci_dev *dev, const struct pci_device_id *id)
 	/* Do we have special options for the device? */
 	if (id->driver_data != CARDBUS_TYPE_DEFAULT &&
 	    id->driver_data < ARRAY_SIZE(cardbus_type)) {
-		socket->type = &cardbus_type[id->driver_data];
+		socket->type = &cardbus_type[__c_ua(id->driver_data)];
 
 		ret = socket->type->override(socket);
 		if (ret < 0)

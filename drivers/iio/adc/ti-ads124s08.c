@@ -323,7 +323,7 @@ static int ads124s_probe(struct spi_device *spi)
 	if (IS_ERR(ads124s_priv->reset_gpio))
 		dev_info(&spi->dev, "Reset GPIO not defined\n");
 
-	ads124s_priv->chip_info = &ads124s_chip_info_tbl[spi_id->driver_data];
+	ads124s_priv->chip_info = &ads124s_chip_info_tbl[__c_ua(spi_id->driver_data)];
 
 	ads124s_priv->spi = spi;
 

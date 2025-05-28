@@ -455,7 +455,7 @@ static int ad5446_spi_probe(struct spi_device *spi)
 	const struct spi_device_id *id = spi_get_device_id(spi);
 
 	return ad5446_probe(&spi->dev, id->name,
-		&ad5446_spi_chip_info[id->driver_data]);
+		&ad5446_spi_chip_info[__c_ua(id->driver_data)]);
 }
 
 static struct spi_driver ad5446_spi_driver = {
@@ -533,7 +533,7 @@ static int ad5446_i2c_probe(struct i2c_client *i2c)
 {
 	const struct i2c_device_id *id = i2c_client_get_device_id(i2c);
 	return ad5446_probe(&i2c->dev, id->name,
-		&ad5446_i2c_chip_info[id->driver_data]);
+		&ad5446_i2c_chip_info[__c_ua(id->driver_data)]);
 }
 
 static const struct i2c_device_id ad5446_i2c_ids[] = {

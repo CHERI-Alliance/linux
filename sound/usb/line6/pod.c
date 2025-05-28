@@ -520,7 +520,7 @@ static int pod_probe(struct usb_interface *interface,
 		     const struct usb_device_id *id)
 {
 	return line6_probe(interface, id, "Line6-POD",
-			   &pod_properties_table[id->driver_info],
+			   &pod_properties_table[__c_ua(id->driver_info)],
 			   pod_init, sizeof(struct usb_line6_pod));
 }
 

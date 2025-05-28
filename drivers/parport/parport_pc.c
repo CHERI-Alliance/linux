@@ -2969,9 +2969,9 @@ static int __init parport_pc_init_superio(int autoirq, int autodma)
 		if (id == NULL || id->driver_data >= last_sio)
 			continue;
 
-		if (parport_pc_superio_info[id->driver_data].probe(
+		if (parport_pc_superio_info[__c_ua(id->driver_data)].probe(
 			pdev, autoirq, autodma,
-			parport_pc_superio_info[id->driver_data].via)) {
+			parport_pc_superio_info[__c_ua(id->driver_data)].via)) {
 			ret++;
 		}
 	}

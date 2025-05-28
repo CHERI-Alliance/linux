@@ -6310,7 +6310,7 @@ static int mwl8k_probe(struct pci_dev *pdev,
 	priv = hw->priv;
 	priv->hw = hw;
 	priv->pdev = pdev;
-	priv->device_info = &mwl8k_info_tbl[id->driver_data];
+	priv->device_info = &mwl8k_info_tbl[__c_ua(id->driver_data)];
 
 	if (id->driver_data == MWL8764)
 		priv->is_8764 = true;

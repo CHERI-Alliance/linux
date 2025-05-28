@@ -422,7 +422,7 @@ static int adxrs450_probe(struct spi_device *spi)
 	indio_dev->info = &adxrs450_info;
 	indio_dev->modes = INDIO_DIRECT_MODE;
 	indio_dev->channels =
-		adxrs450_channels[spi_get_device_id(spi)->driver_data];
+		adxrs450_channels[__c_ua(spi_get_device_id(spi)->driver_data)];
 	indio_dev->num_channels = ARRAY_SIZE(adxrs450_channels);
 	indio_dev->name = spi->dev.driver->name;
 

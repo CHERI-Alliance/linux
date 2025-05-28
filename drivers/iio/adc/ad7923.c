@@ -319,7 +319,7 @@ static int ad7923_probe(struct spi_device *spi)
 	st->settings = AD7923_CODING | ad7923_range |
 			AD7923_PM_MODE_WRITE(AD7923_PM_MODE_OPS);
 
-	info = &ad7923_chip_info[spi_get_device_id(spi)->driver_data];
+	info = &ad7923_chip_info[__c_ua(spi_get_device_id(spi)->driver_data)];
 
 	indio_dev->name = spi_get_device_id(spi)->name;
 	indio_dev->modes = INDIO_DIRECT_MODE;

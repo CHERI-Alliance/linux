@@ -1967,7 +1967,7 @@ skip_tx_dma_drain:
 static int fm10k_sw_init(struct fm10k_intfc *interface,
 			 const struct pci_device_id *ent)
 {
-	const struct fm10k_info *fi = fm10k_info_tbl[ent->driver_data];
+	const struct fm10k_info *fi = fm10k_info_tbl[__c_ua(ent->driver_data)];
 	struct fm10k_hw *hw = &interface->hw;
 	struct pci_dev *pdev = interface->pdev;
 	struct net_device *netdev = interface->netdev;
@@ -2129,7 +2129,7 @@ static int fm10k_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	pci_set_master(pdev);
 	pci_save_state(pdev);
 
-	netdev = fm10k_alloc_netdev(fm10k_info_tbl[ent->driver_data]);
+	netdev = fm10k_alloc_netdev(fm10k_info_tbl[__c_ua(ent->driver_data)]);
 	if (!netdev) {
 		err = -ENOMEM;
 		goto err_alloc_netdev;

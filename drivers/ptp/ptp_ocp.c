@@ -3430,7 +3430,7 @@ ptp_ocp_tty_show(struct device *dev, struct device_attribute *attr, char *buf)
 	struct dev_ext_attribute *ea = to_ext_attr(attr);
 	struct ptp_ocp *bp = dev_get_drvdata(dev);
 
-	return sysfs_emit(buf, "ttyS%d", bp->port[(uintptr_t)ea->var].line);
+	return sysfs_emit(buf, "ttyS%d", bp->port[__c_ua((uintptr_t)ea->var)].line);
 }
 
 static umode_t
@@ -3446,7 +3446,7 @@ ptp_ocp_timecard_tty_is_visible(struct kobject *kobj, struct attribute *attr, in
 
 	dattr = container_of(attr, struct device_attribute, attr);
 	ea = container_of(dattr, struct dev_ext_attribute, attr);
-	port = &bp->port[(uintptr_t)ea->var];
+	port = &bp->port[__c_ua((uintptr_t)ea->var)];
 	return port->line == -1 ? 0 : 0444;
 }
 

@@ -141,7 +141,7 @@ static int mcp4922_probe(struct spi_device *spi)
 	id = spi_get_device_id(spi);
 	indio_dev->info = &mcp4922_info;
 	indio_dev->modes = INDIO_DIRECT_MODE;
-	indio_dev->channels = mcp4922_channels[id->driver_data];
+	indio_dev->channels = mcp4922_channels[__c_ua(id->driver_data)];
 	if (id->driver_data == ID_MCP4921)
 		indio_dev->num_channels = MCP4921_NUM_CHANNELS;
 	else
