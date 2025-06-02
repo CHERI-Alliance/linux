@@ -1127,7 +1127,7 @@ static void update_roland_altsetting(struct snd_usb_midi *umidi)
 	is_light_load = intf->cur_altsetting != intf->altsetting;
 	if (umidi->roland_load_ctl->private_value == is_light_load)
 		return;
-	hostif = &intf->altsetting[umidi->roland_load_ctl->private_value];
+	hostif = &intf->altsetting[__c_ua(umidi->roland_load_ctl->private_value)];
 	intfd = get_iface_desc(hostif);
 	snd_usbmidi_input_stop(&umidi->list);
 	usb_set_interface(umidi->dev, intfd->bInterfaceNumber,

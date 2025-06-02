@@ -233,7 +233,7 @@ static int snd_mpu401_uart_cmd(struct snd_mpu401 * mpu, unsigned char cmd,
 	if (!ok) {
 		dev_err(mpu->rmidi->dev,
 			"cmd: 0x%x failed at 0x%lx (status = 0x%x, data = 0x%x)\n",
-			cmd, mpu->port,
+			cmd, (unsigned long)mpu->port,
 			mpu->read(mpu, MPU401C(mpu)),
 			mpu->read(mpu, MPU401D(mpu)));
 		return 1;
@@ -537,7 +537,7 @@ int snd_mpu401_uart_new(struct snd_card *card, int device,
 		if (!mpu->res) {
 			dev_err(rmidi->dev,
 				"mpu401_uart: unable to grab port 0x%lx size %d\n",
-				port, res_size);
+				(unsigned long)port, res_size);
 			err = -EBUSY;
 			goto free_device;
 		}
