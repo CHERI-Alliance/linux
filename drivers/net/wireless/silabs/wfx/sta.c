@@ -79,7 +79,7 @@ static void wfx_filter_beacon(struct wfx_vif *wvif, bool filter_beacon)
 }
 
 void wfx_configure_filter(struct ieee80211_hw *hw, unsigned int changed_flags,
-			  unsigned int *total_flags, u64 unused)
+			  unsigned int *total_flags, uintptr_t unused)
 {
 	bool filter_bssid, filter_prbreq, filter_beacon;
 	struct ieee80211_vif *vif = NULL;
