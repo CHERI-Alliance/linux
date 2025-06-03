@@ -524,7 +524,7 @@ static long iowarrior_ioctl(struct file *file, unsigned int cmd,
 	}
 
 	dev_dbg(&dev->interface->dev, "minor %d, cmd 0x%.4x, arg %ld\n",
-		dev->minor, cmd, arg);
+		dev->minor, cmd, (unsigned long)arg);
 
 	retval = 0;
 	switch (cmd) {

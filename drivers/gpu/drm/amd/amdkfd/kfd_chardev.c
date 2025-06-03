@@ -3270,7 +3270,7 @@ static long kfd_ioctl(struct file *filep, unsigned int cmd, user_uintptr_t arg)
 	} else
 		goto err_i1;
 
-	dev_dbg(kfd_device, "ioctl cmd 0x%x (#0x%x), arg 0x%lx\n", cmd, nr, arg);
+	dev_dbg(kfd_device, "ioctl cmd 0x%x (#0x%x), arg 0x%lx\n", cmd, nr, (unsigned long)arg);
 
 	/* Get the process struct from the filep. Only the process
 	 * that opened /dev/kfd can use the file descriptor. Child
@@ -3352,7 +3352,7 @@ err_i1:
 
 	if (retcode)
 		dev_dbg(kfd_device, "ioctl cmd (#0x%x), arg 0x%lx, ret = %d\n",
-				nr, arg, retcode);
+				nr, (unsigned long)arg, retcode);
 
 	return retcode;
 }

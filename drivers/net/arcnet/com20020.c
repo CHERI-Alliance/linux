@@ -247,7 +247,7 @@ int com20020_found(struct net_device *dev, int shared)
 	}
 
 	arc_printk(D_NORMAL, dev, "%s: station %02Xh found at %03lXh, IRQ %d.\n",
-		   lp->card_name, dev->dev_addr[0], dev->base_addr, dev->irq);
+		   lp->card_name, dev->dev_addr[0], (unsigned long)dev->base_addr, dev->irq);
 
 	if (lp->backplane)
 		arc_printk(D_NORMAL, dev, "Using backplane mode.\n");

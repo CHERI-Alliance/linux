@@ -357,7 +357,7 @@ static int axnet_config(struct pcmcia_device *link)
 
     netdev_info(dev, "Asix AX88%d90: io %#3lx, irq %d, hw_addr %pM\n",
 		((info->flags & IS_AX88790) ? 7 : 1),
-		dev->base_addr, dev->irq, dev->dev_addr);
+		(unsigned long)dev->base_addr, dev->irq, dev->dev_addr);
     if (info->phy_id != -1) {
 	netdev_dbg(dev, "  MII transceiver at index %d, status %x\n",
 		   info->phy_id, j);

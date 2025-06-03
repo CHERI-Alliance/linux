@@ -1407,7 +1407,7 @@ static void netdev_get_drvinfo(struct net_device *dev,
 {
 	strscpy(info->driver, "xirc2ps_cs", sizeof(info->driver));
 	snprintf(info->bus_info, sizeof(info->bus_info), "PCMCIA 0x%lx",
-		 dev->base_addr);
+		 (unsigned long)dev->base_addr);
 }
 
 static const struct ethtool_ops netdev_ethtool_ops = {

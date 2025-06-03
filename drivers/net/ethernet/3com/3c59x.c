@@ -2969,7 +2969,7 @@ static void vortex_get_drvinfo(struct net_device *dev,
 				sizeof(info->bus_info));
 		else
 			snprintf(info->bus_info, sizeof(info->bus_info),
-				"EISA 0x%lx %d", dev->base_addr, dev->irq);
+				"EISA 0x%lx %d", (unsigned long)dev->base_addr, dev->irq);
 	}
 }
 

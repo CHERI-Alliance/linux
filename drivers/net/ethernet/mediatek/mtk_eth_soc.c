@@ -5215,7 +5215,7 @@ static int mtk_probe(struct platform_device *pdev)
 		} else
 			netif_info(eth, probe, eth->netdev[i],
 				   "mediatek frame engine at 0x%08lx, irq %d\n",
-				   eth->netdev[i]->base_addr, eth->irq[0]);
+				   (unsigned long)eth->netdev[i]->base_addr, eth->irq[0]);
 	}
 
 	/* we run 2 devices on the same DMA ring so we need a dummy device

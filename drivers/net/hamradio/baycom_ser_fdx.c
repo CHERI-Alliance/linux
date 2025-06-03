@@ -393,7 +393,7 @@ static int ser12_open(struct net_device *dev)
 	}
 	if (!request_region(dev->base_addr, SER12_EXTENT, "baycom_ser_fdx")) {
 		printk(KERN_WARNING "BAYCOM_SER_FSX: I/O port 0x%04lx busy\n",
-		       dev->base_addr);
+		       (unsigned long)dev->base_addr);
 		return -EACCES;
 	}
 	memset(&bc->modem, 0, sizeof(bc->modem));
@@ -432,7 +432,7 @@ static int ser12_open(struct net_device *dev)
 	outb(0x00, THR(dev->base_addr));
 	hdlcdrv_setdcd(&bc->hdrv, 0);
 	printk(KERN_INFO "%s: ser_fdx at iobase 0x%lx irq %u baud %u uart %s\n",
-	       bc_drvname, dev->base_addr, dev->irq, bc->baud, uart_str[u]);
+	       bc_drvname, (unsigned long)dev->base_addr, dev->irq, bc->baud, uart_str[u]);
 	return 0;
 }
 
@@ -452,7 +452,7 @@ static int ser12_close(struct net_device *dev)
 	free_irq(dev->irq, dev);
 	release_region(dev->base_addr, SER12_EXTENT);
 	printk(KERN_INFO "%s: close ser_fdx at iobase 0x%lx irq %u\n",
-	       bc_drvname, dev->base_addr, dev->irq);
+	       bc_drvname, (unsigned long)dev->base_addr, dev->irq);
 	return 0;
 }
 

@@ -1320,11 +1320,11 @@ static void plip_attach (struct parport *port)
 		if (dev->irq != -1)
 			printk(KERN_INFO "%s: Parallel port at %#3lx, "
 					 "using IRQ %d.\n",
-				         dev->name, dev->base_addr, dev->irq);
+				         dev->name, (unsigned long)dev->base_addr, dev->irq);
 		else
 			printk(KERN_INFO "%s: Parallel port at %#3lx, "
 					 "not using IRQ.\n",
-					 dev->name, dev->base_addr);
+					 dev->name, (unsigned long)dev->base_addr);
 		dev_plip[unit++] = dev;
 	}
 	return;

@@ -708,7 +708,7 @@ static ssize_t counter_comp_id_show(struct device *dev,
 {
 	const uintptr_t id = (uintptr_t)to_counter_attribute(attr)->comp.priv;
 
-	return sysfs_emit(buf, "%zu\n", id);
+	return sysfs_emit(buf, "%zu\n", (unsigned long)id);
 }
 
 static int counter_comp_id_attr_create(struct device *const dev,

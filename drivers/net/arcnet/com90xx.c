@@ -538,8 +538,8 @@ static int __init com90xx_found(int ioaddr, int airq, u_long shmem,
 
 	arc_printk(D_NORMAL, dev, "COM90xx station %02Xh found at %03lXh, IRQ %d, ShMem %lXh (%ld*%xh).\n",
 		   dev->dev_addr[0],
-		   dev->base_addr, dev->irq, dev->mem_start,
-		   (dev->mem_end - dev->mem_start + 1) / mirror_size,
+		   (unsigned long)dev->base_addr, dev->irq, (unsigned long)dev->mem_start,
+		   (unsigned long)(dev->mem_end - dev->mem_start + 1) / mirror_size,
 		   mirror_size);
 
 	if (register_netdev(dev))

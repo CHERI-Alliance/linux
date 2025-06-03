@@ -140,7 +140,7 @@ static void audmux_debugfs_init(void)
 	audmux_debugfs_root = debugfs_create_dir("audmux", NULL);
 
 	for (i = 0; i < MX31_AUDMUX_PORT7_SSI_PINS_7 + 1; i++) {
-		snprintf(buf, sizeof(buf), "ssi%lu", i);
+		snprintf(buf, sizeof(buf), "ssi%lu", (unsigned long)i);
 		debugfs_create_file(buf, 0444, audmux_debugfs_root,
 				    (void *)i, &audmux_debugfs_fops);
 	}
