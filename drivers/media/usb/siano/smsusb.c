@@ -510,7 +510,7 @@ static int smsusb_probe(struct usb_interface *intf,
 	int i, rc;
 
 	pr_info("board id=%lu, interface number %d\n",
-		 id->driver_info,
+		 (unsigned long)id->driver_info,
 		 intf->cur_altsetting->desc.bInterfaceNumber);
 
 	if (sms_get_board(id->driver_info)->intf_num !=

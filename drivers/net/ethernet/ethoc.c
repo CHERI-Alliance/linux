@@ -753,7 +753,7 @@ static int ethoc_open(struct net_device *dev)
 
 	if (netif_msg_ifup(priv)) {
 		dev_info(&dev->dev, "I/O: %08lx Memory: %08lx-%08lx\n",
-				dev->base_addr, dev->mem_start, dev->mem_end);
+				(unsigned long)dev->base_addr, (unsigned long)dev->mem_start, (unsigned long)dev->mem_end);
 	}
 
 	return 0;

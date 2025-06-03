@@ -630,7 +630,7 @@ static long usblp_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 
 			dev_dbg(&usblp->intf->dev,
 				"usblp%d requested/got HP channel %ld/%d\n",
-				usblp->minor, arg, newChannel);
+				usblp->minor, (unsigned long)arg, newChannel);
 			break;
 
 		case IOCNR_GET_BUS_ADDRESS:

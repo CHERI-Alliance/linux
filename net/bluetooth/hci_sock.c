@@ -1047,7 +1047,7 @@ static int hci_sock_ioctl(struct socket *sock, unsigned int cmd,
 	struct sock *sk = sock->sk;
 	int err;
 
-	BT_DBG("cmd %x arg %lx", cmd, arg);
+	BT_DBG("cmd %x arg %lx", cmd, (unsigned long)arg);
 
 	/* Make sure the cmd is valid before doing anything */
 	switch (cmd) {

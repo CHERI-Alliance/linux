@@ -264,7 +264,7 @@ static int __init com90io_found(struct net_device *dev)
 	}
 
 	arc_printk(D_NORMAL, dev, "COM90IO: station %02Xh found at %03lXh, IRQ %d.\n",
-		   dev->dev_addr[0], dev->base_addr, dev->irq);
+		   dev->dev_addr[0], (unsigned long)dev->base_addr, dev->irq);
 
 	return 0;
 }

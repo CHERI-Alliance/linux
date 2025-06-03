@@ -924,7 +924,7 @@ static int smc91c92_config(struct pcmcia_device *link)
     }
 
     netdev_info(dev, "smc91c%s rev %d: io %#3lx, irq %d, hw_addr %pM\n",
-		name, (rev & 0x0f), dev->base_addr, dev->irq, dev->dev_addr);
+		name, (rev & 0x0f), (unsigned long)dev->base_addr, dev->irq, dev->dev_addr);
 
     if (rev > 0) {
 	if (mir & 0x3ff)

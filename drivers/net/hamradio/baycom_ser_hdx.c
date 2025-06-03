@@ -490,7 +490,7 @@ static int ser12_open(struct net_device *dev)
 	 */
 	ser12_set_divisor(dev, bc->opt_dcd ? 6 : 4);
 	printk(KERN_INFO "%s: ser12 at iobase 0x%lx irq %u uart %s\n", 
-	       bc_drvname, dev->base_addr, dev->irq, uart_str[u]);
+	       bc_drvname, (unsigned long)dev->base_addr, dev->irq, uart_str[u]);
 	return 0;
 }
 
@@ -510,7 +510,7 @@ static int ser12_close(struct net_device *dev)
 	free_irq(dev->irq, dev);
 	release_region(dev->base_addr, SER12_EXTENT);
 	printk(KERN_INFO "%s: close ser12 at iobase 0x%lx irq %u\n",
-	       bc_drvname, dev->base_addr, dev->irq);
+	       bc_drvname, (unsigned long)dev->base_addr, dev->irq);
 	return 0;
 }
 

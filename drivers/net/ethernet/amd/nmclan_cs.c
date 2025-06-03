@@ -673,7 +673,7 @@ static int nmclan_config(struct pcmcia_device *link)
   }
 
   netdev_info(dev, "nmclan: port %#3lx, irq %d, %s port, hw_addr %pM\n",
-	      dev->base_addr, dev->irq, if_names[dev->if_port], dev->dev_addr);
+	      (unsigned long)dev->base_addr, dev->irq, if_names[dev->if_port], dev->dev_addr);
   return 0;
 
 failed:
@@ -817,7 +817,7 @@ static void netdev_get_drvinfo(struct net_device *dev,
 {
 	strscpy(info->driver, DRV_NAME, sizeof(info->driver));
 	snprintf(info->bus_info, sizeof(info->bus_info),
-		"PCMCIA 0x%lx", dev->base_addr);
+		"PCMCIA 0x%lx", (unsigned long)dev->base_addr);
 }
 
 static const struct ethtool_ops netdev_ethtool_ops = {

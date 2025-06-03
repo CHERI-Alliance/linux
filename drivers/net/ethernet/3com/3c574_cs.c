@@ -354,7 +354,7 @@ static int tc574_config(struct pcmcia_device *link)
 			addr[i] = htons(read_eeprom(ioaddr, i + 10));
 		if (addr[0] == htons(0x6060)) {
 			pr_notice("IO port conflict at 0x%03lx-0x%03lx\n",
-				  dev->base_addr, dev->base_addr+15);
+				  (unsigned long)dev->base_addr, (unsigned long)dev->base_addr+15);
 			goto failed;
 		}
 	}
@@ -427,7 +427,7 @@ static int tc574_config(struct pcmcia_device *link)
 	}
 
 	netdev_info(dev, "%s at io %#3lx, irq %d, hw_addr %pM\n",
-		    cardname, dev->base_addr, dev->irq, dev->dev_addr);
+		    cardname, (unsigned long)dev->base_addr, dev->irq, dev->dev_addr);
 	netdev_info(dev, " %dK FIFO split %s Rx:Tx, %sMII interface.\n",
 		    8 << (config & Ram_size),
 		    ram_split[(config & Ram_split) >> Ram_split_shift],

@@ -405,7 +405,7 @@ static int qcprobe(struct usb_serial *serial, const struct usb_device_id *id)
 		break;
 	default:
 		dev_err(dev, "unsupported device layout type: %lu\n",
-			id->driver_info);
+			(unsigned long)id->driver_info);
 		break;
 	}
 

@@ -301,7 +301,7 @@ static int tc589_config(struct pcmcia_device *link)
 			addr[i] = htons(read_eeprom(ioaddr, i));
 		if (addr[0] == htons(0x6060)) {
 			dev_err(&link->dev, "IO port conflict at 0x%03lx-0x%03lx\n",
-					dev->base_addr, dev->base_addr+15);
+					(unsigned long)dev->base_addr, (unsigned long)dev->base_addr+15);
 			goto failed;
 		}
 	}
@@ -328,7 +328,7 @@ static int tc589_config(struct pcmcia_device *link)
 	}
 
 	netdev_info(dev, "3Com 3c%s, io %#3lx, irq %d, hw_addr %pM\n",
-			(multi ? "562" : "589"), dev->base_addr, dev->irq,
+			(multi ? "562" : "589"), (unsigned long)dev->base_addr, dev->irq,
 			dev->dev_addr);
 	netdev_info(dev, "  %dK FIFO split %s Rx:Tx, %s xcvr\n",
 			(fifo & 7) ? 32 : 8, ram_split[(fifo >> 16) & 3],
@@ -491,7 +491,7 @@ static void netdev_get_drvinfo(struct net_device *dev,
 {
 	strscpy(info->driver, DRV_NAME, sizeof(info->driver));
 	snprintf(info->bus_info, sizeof(info->bus_info),
-		"PCMCIA 0x%lx", dev->base_addr);
+		"PCMCIA 0x%lx", (unsigned long)dev->base_addr);
 }
 
 static const struct ethtool_ops netdev_ethtool_ops = {

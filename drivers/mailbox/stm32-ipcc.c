@@ -149,7 +149,7 @@ static int stm32_ipcc_send_data(struct mbox_chan *link, void *data)
 	struct stm32_ipcc *ipcc = container_of(link->mbox, struct stm32_ipcc,
 					       controller);
 
-	dev_dbg(ipcc->controller.dev, "%s: chan:%lu\n", __func__, chan);
+	dev_dbg(ipcc->controller.dev, "%s: chan:%lu\n", __func__, (unsigned long)chan);
 
 	/* set channel n occupied */
 	stm32_ipcc_set_bits(&ipcc->lock, ipcc->reg_proc + IPCC_XSCR,
