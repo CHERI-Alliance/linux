@@ -98,7 +98,7 @@ static int mt7601u_config(struct ieee80211_hw *hw, int radio_idx, u32 changed)
 
 static void
 mt76_configure_filter(struct ieee80211_hw *hw, unsigned int changed_flags,
-		      unsigned int *total_flags, u64 multicast)
+		      unsigned int *total_flags, uintptr_t multicast)
 {
 	struct mt7601u_dev *dev = hw->priv;
 	u32 flags = 0;

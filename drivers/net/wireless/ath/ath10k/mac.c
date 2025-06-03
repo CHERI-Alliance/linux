@@ -6051,7 +6051,7 @@ out:
 static void ath10k_configure_filter(struct ieee80211_hw *hw,
 				    unsigned int changed_flags,
 				    unsigned int *total_flags,
-				    u64 multicast)
+				    uintptr_t multicast)
 {
 	struct ath10k *ar = hw->priv;
 	int ret;

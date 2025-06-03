@@ -351,7 +351,7 @@ static int lbtf_op_config(struct ieee80211_hw *hw, int radio_idx, u32 changed)
 	return 0;
 }
 
-static u64 lbtf_op_prepare_multicast(struct ieee80211_hw *hw,
+static uintptr_t lbtf_op_prepare_multicast(struct ieee80211_hw *hw,
 				     struct netdev_hw_addr_list *mc_list)
 {
 	struct lbtf_private *priv = hw->priv;
@@ -374,7 +374,7 @@ static u64 lbtf_op_prepare_multicast(struct ieee80211_hw *hw,
 static void lbtf_op_configure_filter(struct ieee80211_hw *hw,
 			unsigned int changed_flags,
 			unsigned int *new_flags,
-			u64 multicast)
+			uintptr_t multicast)
 {
 	struct lbtf_private *priv = hw->priv;
 	int old_mac_control = priv->mac_control;
