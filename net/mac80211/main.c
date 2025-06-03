@@ -36,7 +36,7 @@
 
 void ieee80211_configure_filter(struct ieee80211_local *local)
 {
-	u64 mc;
+	uintptr_t mc;
 	unsigned int changed_flags;
 	unsigned int new_flags = 0;
 
