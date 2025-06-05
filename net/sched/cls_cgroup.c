@@ -76,7 +76,7 @@ static void cls_cgroup_destroy_work(struct work_struct *work)
 }
 
 static int cls_cgroup_change(struct net *net, struct sk_buff *in_skb,
-			     struct tcf_proto *tp, unsigned long base,
+			     struct tcf_proto *tp, uintptr_t base,
 			     u32 handle, struct nlattr **tca,
 			     void **arg, u32 flags,
 			     struct netlink_ext_ack *extack)
