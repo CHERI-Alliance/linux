@@ -612,13 +612,13 @@ static int sfb_dump_stats(struct Qdisc *sch, struct gnet_dump *d)
 	return gnet_stats_copy_app(d, &st, sizeof(st));
 }
 
-static int sfb_dump_class(struct Qdisc *sch, unsigned long cl,
+static int sfb_dump_class(struct Qdisc *sch, uintptr_t cl,
 			  struct sk_buff *skb, struct tcmsg *tcm)
 {
 	return -ENOSYS;
 }
 
-static int sfb_graft(struct Qdisc *sch, unsigned long arg, struct Qdisc *new,
+static int sfb_graft(struct Qdisc *sch, uintptr_t arg, struct Qdisc *new,
 		     struct Qdisc **old, struct netlink_ext_ack *extack)
 {
 	struct sfb_sched_data *q = qdisc_priv(sch);
@@ -630,30 +630,30 @@ static int sfb_graft(struct Qdisc *sch, unsigned long arg, struct Qdisc *new,
 	return 0;
 }
 
-static struct Qdisc *sfb_leaf(struct Qdisc *sch, unsigned long arg)
+static struct Qdisc *sfb_leaf(struct Qdisc *sch, uintptr_t arg)
 {
 	struct sfb_sched_data *q = qdisc_priv(sch);
 
 	return q->qdisc;
 }
 
-static unsigned long sfb_find(struct Qdisc *sch, u32 classid)
+static uintptr_t sfb_find(struct Qdisc *sch, u32 classid)
 {
 	return 1;
 }
 
-static void sfb_unbind(struct Qdisc *sch, unsigned long arg)
+static void sfb_unbind(struct Qdisc *sch, uintptr_t arg)
 {
 }
 
 static int sfb_change_class(struct Qdisc *sch, u32 classid, u32 parentid,
-			    struct nlattr **tca, unsigned long *arg,
+			    struct nlattr **tca, uintptr_t *arg,
 			    struct netlink_ext_ack *extack)
 {
 	return -ENOSYS;
 }
 
-static int sfb_delete(struct Qdisc *sch, unsigned long cl,
+static int sfb_delete(struct Qdisc *sch, uintptr_t cl,
 		      struct netlink_ext_ack *extack)
 {
 	return -ENOSYS;
@@ -666,7 +666,7 @@ static void sfb_walk(struct Qdisc *sch, struct qdisc_walker *walker)
 	}
 }
 
-static struct tcf_block *sfb_tcf_block(struct Qdisc *sch, unsigned long cl,
+static struct tcf_block *sfb_tcf_block(struct Qdisc *sch, uintptr_t cl,
 				       struct netlink_ext_ack *extack)
 {
 	struct sfb_sched_data *q = qdisc_priv(sch);
@@ -676,7 +676,7 @@ static struct tcf_block *sfb_tcf_block(struct Qdisc *sch, unsigned long cl,
 	return q->block;
 }
 
-static unsigned long sfb_bind(struct Qdisc *sch, unsigned long parent,
+static uintptr_t sfb_bind(struct Qdisc *sch, uintptr_t parent,
 			      u32 classid)
 {
 	return 0;

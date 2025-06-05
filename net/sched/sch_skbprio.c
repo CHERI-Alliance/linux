@@ -229,25 +229,25 @@ static void skbprio_destroy(struct Qdisc *sch)
 		__skb_queue_purge(&q->qdiscs[prio]);
 }
 
-static struct Qdisc *skbprio_leaf(struct Qdisc *sch, unsigned long arg)
+static struct Qdisc *skbprio_leaf(struct Qdisc *sch, uintptr_t arg)
 {
 	return NULL;
 }
 
-static unsigned long skbprio_find(struct Qdisc *sch, u32 classid)
+static uintptr_t skbprio_find(struct Qdisc *sch, u32 classid)
 {
 	return 0;
 }
 
-static int skbprio_dump_class(struct Qdisc *sch, unsigned long cl,
-			     struct sk_buff *skb, struct tcmsg *tcm)
+static int skbprio_dump_class(struct Qdisc *sch, uintptr_t cl,
+			      struct sk_buff *skb, struct tcmsg *tcm)
 {
 	tcm->tcm_handle |= TC_H_MIN(cl);
 	return 0;
 }
 
-static int skbprio_dump_class_stats(struct Qdisc *sch, unsigned long cl,
-				   struct gnet_dump *d)
+static int skbprio_dump_class_stats(struct Qdisc *sch, uintptr_t cl,
+				    struct gnet_dump *d)
 {
 	struct skbprio_sched_data *q = qdisc_priv(sch);
 	if (gnet_stats_copy_queue(d, NULL, &q->qstats[cl - 1],

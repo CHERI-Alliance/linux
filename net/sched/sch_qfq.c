@@ -404,7 +404,7 @@ static int qfq_change_agg(struct Qdisc *sch, struct qfq_class *cl, u32 weight,
 }
 
 static int qfq_change_class(struct Qdisc *sch, u32 classid, u32 parentid,
-			    struct nlattr **tca, unsigned long *arg,
+			    struct nlattr **tca, uintptr_t *arg,
 			    struct netlink_ext_ack *extack)
 {
 	struct qfq_sched *q = qdisc_priv(sch);
@@ -541,7 +541,7 @@ static void qfq_destroy_class(struct Qdisc *sch, struct qfq_class *cl)
 	kfree(cl);
 }
 
-static int qfq_delete_class(struct Qdisc *sch, unsigned long arg,
+static int qfq_delete_class(struct Qdisc *sch, uintptr_t arg,
 			    struct netlink_ext_ack *extack)
 {
 	struct qfq_sched *q = qdisc_priv(sch);
@@ -564,12 +564,12 @@ static int qfq_delete_class(struct Qdisc *sch, unsigned long arg,
 	return 0;
 }
 
-static unsigned long qfq_search_class(struct Qdisc *sch, u32 classid)
+static uintptr_t qfq_search_class(struct Qdisc *sch, u32 classid)
 {
 	return (uintptr_t)qfq_find_class(sch, classid);
 }
 
-static struct tcf_block *qfq_tcf_block(struct Qdisc *sch, unsigned long cl,
+static struct tcf_block *qfq_tcf_block(struct Qdisc *sch, uintptr_t cl,
 				       struct netlink_ext_ack *extack)
 {
 	struct qfq_sched *q = qdisc_priv(sch);
@@ -580,7 +580,7 @@ static struct tcf_block *qfq_tcf_block(struct Qdisc *sch, unsigned long cl,
 	return q->block;
 }
 
-static unsigned long qfq_bind_tcf(struct Qdisc *sch, unsigned long parent,
+static uintptr_t qfq_bind_tcf(struct Qdisc *sch, uintptr_t parent,
 				  u32 classid)
 {
 	struct qfq_class *cl = qfq_find_class(sch, classid);
@@ -591,14 +591,14 @@ static unsigned long qfq_bind_tcf(struct Qdisc *sch, unsigned long parent,
 	return (uintptr_t)cl;
 }
 
-static void qfq_unbind_tcf(struct Qdisc *sch, unsigned long arg)
+static void qfq_unbind_tcf(struct Qdisc *sch, uintptr_t arg)
 {
 	struct qfq_class *cl = (struct qfq_class *)arg;
 
 	qdisc_class_put(&cl->common);
 }
 
-static int qfq_graft_class(struct Qdisc *sch, unsigned long arg,
+static int qfq_graft_class(struct Qdisc *sch, uintptr_t arg,
 			   struct Qdisc *new, struct Qdisc **old,
 			   struct netlink_ext_ack *extack)
 {
@@ -615,14 +615,14 @@ static int qfq_graft_class(struct Qdisc *sch, unsigned long arg,
 	return 0;
 }
 
-static struct Qdisc *qfq_class_leaf(struct Qdisc *sch, unsigned long arg)
+static struct Qdisc *qfq_class_leaf(struct Qdisc *sch, uintptr_t arg)
 {
 	struct qfq_class *cl = (struct qfq_class *)arg;
 
 	return cl->qdisc;
 }
 
-static int qfq_dump_class(struct Qdisc *sch, unsigned long arg,
+static int qfq_dump_class(struct Qdisc *sch, uintptr_t arg,
 			  struct sk_buff *skb, struct tcmsg *tcm)
 {
 	struct qfq_class *cl = (struct qfq_class *)arg;
@@ -651,7 +651,7 @@ nla_put_failure:
 	return -EMSGSIZE;
 }
 
-static int qfq_dump_class_stats(struct Qdisc *sch, unsigned long arg,
+static int qfq_dump_class_stats(struct Qdisc *sch, uintptr_t arg,
 				struct gnet_dump *d)
 {
 	struct qfq_class *cl = (struct qfq_class *)arg;
@@ -1424,7 +1424,7 @@ static void qfq_deactivate_agg(struct qfq_sched *q, struct qfq_aggregate *agg)
 	}
 }
 
-static void qfq_qlen_notify(struct Qdisc *sch, unsigned long arg)
+static void qfq_qlen_notify(struct Qdisc *sch, uintptr_t arg)
 {
 	struct qfq_sched *q = qdisc_priv(sch);
 	struct qfq_class *cl = (struct qfq_class *)arg;

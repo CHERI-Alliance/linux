@@ -56,7 +56,7 @@ static const struct nla_policy drr_policy[TCA_DRR_MAX + 1] = {
 };
 
 static int drr_change_class(struct Qdisc *sch, u32 classid, u32 parentid,
-			    struct nlattr **tca, unsigned long *arg,
+			    struct nlattr **tca, uintptr_t *arg,
 			    struct netlink_ext_ack *extack)
 {
 	struct drr_sched *q = qdisc_priv(sch);
@@ -149,7 +149,7 @@ static void drr_destroy_class(struct Qdisc *sch, struct drr_class *cl)
 	kfree(cl);
 }
 
-static int drr_delete_class(struct Qdisc *sch, unsigned long arg,
+static int drr_delete_class(struct Qdisc *sch, uintptr_t arg,
 			    struct netlink_ext_ack *extack)
 {
 	struct drr_sched *q = qdisc_priv(sch);
@@ -171,12 +171,12 @@ static int drr_delete_class(struct Qdisc *sch, unsigned long arg,
 	return 0;
 }
 
-static unsigned long drr_search_class(struct Qdisc *sch, u32 classid)
+static uintptr_t drr_search_class(struct Qdisc *sch, u32 classid)
 {
 	return (uintptr_t)drr_find_class(sch, classid);
 }
 
-static struct tcf_block *drr_tcf_block(struct Qdisc *sch, unsigned long cl,
+static struct tcf_block *drr_tcf_block(struct Qdisc *sch, uintptr_t cl,
 				       struct netlink_ext_ack *extack)
 {
 	struct drr_sched *q = qdisc_priv(sch);
@@ -189,7 +189,7 @@ static struct tcf_block *drr_tcf_block(struct Qdisc *sch, unsigned long cl,
 	return q->block;
 }
 
-static unsigned long drr_bind_tcf(struct Qdisc *sch, unsigned long parent,
+static uintptr_t drr_bind_tcf(struct Qdisc *sch, uintptr_t parent,
 				  u32 classid)
 {
 	struct drr_class *cl = drr_find_class(sch, classid);
@@ -200,14 +200,14 @@ static unsigned long drr_bind_tcf(struct Qdisc *sch, unsigned long parent,
 	return (uintptr_t)cl;
 }
 
-static void drr_unbind_tcf(struct Qdisc *sch, unsigned long arg)
+static void drr_unbind_tcf(struct Qdisc *sch, uintptr_t arg)
 {
 	struct drr_class *cl = (struct drr_class *)arg;
 
 	qdisc_class_put(&cl->common);
 }
 
-static int drr_graft_class(struct Qdisc *sch, unsigned long arg,
+static int drr_graft_class(struct Qdisc *sch, uintptr_t arg,
 			   struct Qdisc *new, struct Qdisc **old,
 			   struct netlink_ext_ack *extack)
 {
@@ -224,21 +224,21 @@ static int drr_graft_class(struct Qdisc *sch, unsigned long arg,
 	return 0;
 }
 
-static struct Qdisc *drr_class_leaf(struct Qdisc *sch, unsigned long arg)
+static struct Qdisc *drr_class_leaf(struct Qdisc *sch, uintptr_t arg)
 {
 	struct drr_class *cl = (struct drr_class *)arg;
 
 	return cl->qdisc;
 }
 
-static void drr_qlen_notify(struct Qdisc *csh, unsigned long arg)
+static void drr_qlen_notify(struct Qdisc *csh, uintptr_t arg)
 {
 	struct drr_class *cl = (struct drr_class *)arg;
 
 	list_del_init(&cl->alist);
 }
 
-static int drr_dump_class(struct Qdisc *sch, unsigned long arg,
+static int drr_dump_class(struct Qdisc *sch, uintptr_t arg,
 			  struct sk_buff *skb, struct tcmsg *tcm)
 {
 	struct drr_class *cl = (struct drr_class *)arg;
@@ -260,7 +260,7 @@ nla_put_failure:
 	return -EMSGSIZE;
 }
 
-static int drr_dump_class_stats(struct Qdisc *sch, unsigned long arg,
+static int drr_dump_class_stats(struct Qdisc *sch, uintptr_t arg,
 				struct gnet_dump *d)
 {
 	struct drr_class *cl = (struct drr_class *)arg;
