@@ -315,7 +315,7 @@ struct kasan_stack_ring {
 
 static __always_inline bool addr_in_shadow(const void *addr)
 {
-	return addr >= (void *)KASAN_SHADOW_START &&
+	return addr >= (void *)(uintptr_t)KASAN_SHADOW_START &&
 		addr < (void *)KASAN_SHADOW_END;
 }
 

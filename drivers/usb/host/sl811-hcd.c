@@ -1645,8 +1645,8 @@ sl811h_probe(struct platform_device *dev)
 		 * to avoid compiler warning, assuming that ->start
 		 * is always 32-bit for this case
 		 */
-		addr_reg = (void __iomem *) (unsigned long) addr->start;
-		data_reg = (void __iomem *) (unsigned long) data->start;
+		addr_reg = (void __iomem *) (uintptr_t) addr->start;
+		data_reg = (void __iomem *) (uintptr_t) data->start;
 	} else {
 		addr_reg = ioremap(addr->start, 1);
 		if (addr_reg == NULL) {

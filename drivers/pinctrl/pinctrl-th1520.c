@@ -529,7 +529,7 @@ static int th1520_pinctrl_dt_node_to_map(struct pinctrl_dev *pctldev,
 
 		if (funcname) {
 			ret = pinmux_generic_add_function(pctldev, funcname, pgnames,
-							  npins, (void *)muxtype);
+							  npins, (void *)(uintptr_t)muxtype);
 			if (ret < 0) {
 				dev_err(thp->pctl->dev, "error adding function %s\n", funcname);
 				goto free_map;

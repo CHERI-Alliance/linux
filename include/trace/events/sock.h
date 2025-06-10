@@ -258,7 +258,7 @@ TRACE_EVENT(sk_data_ready,
 	),
 
 	TP_printk("family=%u protocol=%u func=%ps",
-		  __entry->family, __entry->protocol, (void *)__entry->ip)
+		  __entry->family, __entry->protocol, (void *)(uintptr_t)__entry->ip)
 );
 
 /*

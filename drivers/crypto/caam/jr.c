@@ -657,7 +657,7 @@ static int caam_jr_probe(struct platform_device *pdev)
 	}
 
 	error = devm_add_action_or_reset(jrdev, caam_jr_irq_dispose_mapping,
-					 (void *)(unsigned long)jrpriv->irq);
+					 (void *)(uintptr_t)jrpriv->irq);
 	if (error)
 		return error;
 

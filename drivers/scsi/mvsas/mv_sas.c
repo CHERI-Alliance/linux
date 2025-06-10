@@ -1799,7 +1799,7 @@ void mvs_int_port(struct mvs_info *mvi, int phy_no, u32 events)
 			phy->phy_event |= PHY_PLUG_OUT;
 			MVS_CHIP_DISP->clear_srs_irq(mvi, 0, 1);
 			mvs_handle_event(mvi,
-				(void *)(unsigned long)phy_no,
+				(void *)(uintptr_t)phy_no,
 				PHY_PLUG_EVENT);
 			ready = mvs_is_phy_ready(mvi, phy_no);
 			if (ready || dev_sata) {
@@ -1856,7 +1856,7 @@ void mvs_int_port(struct mvs_info *mvi, int phy_no, u32 events)
 	} else if (phy->irq_status & PHYEV_BROAD_CH) {
 		mv_dprintk("phy %d broadcast change.\n",
 			phy_no + mvi->id*mvi->chip->n_phy);
-		mvs_handle_event(mvi, (void *)(unsigned long)phy_no,
+		mvs_handle_event(mvi, (void *)(uintptr_t)phy_no,
 				EXP_BRCT_CHG);
 	}
 }

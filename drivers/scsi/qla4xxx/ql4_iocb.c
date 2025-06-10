@@ -355,7 +355,7 @@ int qla4xxx_send_command_to_isp(struct scsi_qla_host *ha, struct srb * srb)
 	qla4xxx_build_scsi_iocbs(srb, cmd_entry, tot_dsds);
 	wmb();
 
-	srb->cmd->host_scribble = (unsigned char *)(unsigned long)index;
+	srb->cmd->host_scribble = (unsigned char *)(uintptr_t)index;
 
 	/* update counters */
 	srb->state = SRB_ACTIVE_STATE;

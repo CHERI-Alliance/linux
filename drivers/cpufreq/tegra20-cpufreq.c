@@ -78,7 +78,7 @@ static int tegra20_cpufreq_probe(struct platform_device *pdev)
 
 	err = devm_add_action_or_reset(&pdev->dev,
 				       tegra20_cpufreq_put_supported_hw,
-				       (void *)((unsigned long) err));
+				       (void *)((uintptr_t) err));
 	if (err)
 		return err;
 

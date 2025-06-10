@@ -244,7 +244,7 @@ static void end_report(unsigned long *flags, const void *addr, bool is_write)
 
 static void print_error_description(struct kasan_report_info *info)
 {
-	pr_err("BUG: KASAN: %s in %pS\n", info->bug_type, (void *)info->ip);
+	pr_err("BUG: KASAN: %s in %pS\n", info->bug_type, (void *)(uintptr_t)info->ip);
 
 	if (info->type != KASAN_REPORT_ACCESS) {
 		pr_err("Free of addr %px by task %s/%d\n",
@@ -329,7 +329,7 @@ static void describe_object_addr(const void *addr, struct kasan_report_info *inf
 	pr_err("The buggy address is located %d bytes %s of\n"
 	       " %s%zu-byte region [%px, %px)\n",
 	       rel_bytes, rel_type, region_state, info->alloc_size,
-	       (void *)object_addr, (void *)(object_addr + info->alloc_size));
+	       (void *)object_addr, (void *)(uintptr_t)(object_addr + info->alloc_size));
 }
 
 static void describe_object_stacks(struct kasan_report_info *info)

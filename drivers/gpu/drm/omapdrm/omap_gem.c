@@ -368,7 +368,7 @@ static vm_fault_t omap_gem_fault_1d(struct drm_gem_object *obj,
 		pfn = (omap_obj->dma_addr >> PAGE_SHIFT) + pgoff;
 	}
 
-	VERB("Inserting %p pfn %lx, pa %lx", (void *)vmf->address,
+	VERB("Inserting %p pfn %lx, pa %lx", (void *)(uintptr_t)vmf->address,
 			pfn, pfn << PAGE_SHIFT);
 
 	return vmf_insert_mixed(vma, vmf->address,
@@ -463,7 +463,7 @@ static vm_fault_t omap_gem_fault_2d(struct drm_gem_object *obj,
 
 	pfn = entry->dma_addr >> PAGE_SHIFT;
 
-	VERB("Inserting %p pfn %lx, pa %lx", (void *)vmf->address,
+	VERB("Inserting %p pfn %lx, pa %lx", (void *)(uintptr_t)vmf->address,
 			pfn, pfn << PAGE_SHIFT);
 
 	for (i = n; i > 0; i--) {

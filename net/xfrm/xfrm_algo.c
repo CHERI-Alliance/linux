@@ -711,21 +711,21 @@ static int xfrm_alg_id_match(const struct xfrm_algo_desc *entry,
 struct xfrm_algo_desc *xfrm_aalg_get_byid(int alg_id)
 {
 	return xfrm_find_algo(&xfrm_aalg_list, xfrm_alg_id_match,
-			      (void *)(unsigned long)alg_id, 1);
+			      (void *)(uintptr_t)alg_id, 1);
 }
 EXPORT_SYMBOL_GPL(xfrm_aalg_get_byid);
 
 struct xfrm_algo_desc *xfrm_ealg_get_byid(int alg_id)
 {
 	return xfrm_find_algo(&xfrm_ealg_list, xfrm_alg_id_match,
-			      (void *)(unsigned long)alg_id, 1);
+			      (void *)(uintptr_t)alg_id, 1);
 }
 EXPORT_SYMBOL_GPL(xfrm_ealg_get_byid);
 
 struct xfrm_algo_desc *xfrm_calg_get_byid(int alg_id)
 {
 	return xfrm_find_algo(&xfrm_calg_list, xfrm_alg_id_match,
-			      (void *)(unsigned long)alg_id, 1);
+			      (void *)(uintptr_t)alg_id, 1);
 }
 EXPORT_SYMBOL_GPL(xfrm_calg_get_byid);
 

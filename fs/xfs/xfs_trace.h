@@ -303,7 +303,7 @@ DECLARE_EVENT_CLASS(xfs_perag_class,
 		  __entry->agno,
 		  __entry->refcount,
 		  __entry->active_refcount,
-		  (char *)__entry->caller_ip)
+		  (char *)(uintptr_t)__entry->caller_ip)
 );
 
 #define DEFINE_PERAG_REF_EVENT(name)	\
@@ -342,7 +342,7 @@ DECLARE_EVENT_CLASS(xfs_group_class,
 		  __entry->agno,
 		  __entry->refcount,
 		  __entry->active_refcount,
-		  (char *)__entry->caller_ip)
+		  (char *)(uintptr_t)__entry->caller_ip)
 );
 
 #define DEFINE_GROUP_REF_EVENT(name)	\
@@ -702,7 +702,7 @@ DECLARE_EVENT_CLASS(xfs_bmap_class,
 		  (int64_t)__entry->startblock,
 		  __entry->blockcount,
 		  __entry->state,
-		  (char *)__entry->caller_ip)
+		  (char *)(uintptr_t)__entry->caller_ip)
 )
 
 #define DEFINE_BMAP_EVENT(name) \
@@ -752,7 +752,7 @@ DECLARE_EVENT_CLASS(xfs_buf_class,
 		  __entry->lockval,
 		  __print_flags(__entry->flags, "|", XFS_BUF_FLAGS),
 		  __entry->buf_ops,
-		  (void *)__entry->caller_ip)
+		  (void *)(uintptr_t)__entry->caller_ip)
 )
 
 #define DEFINE_BUF_EVENT(name) \
@@ -823,7 +823,7 @@ DECLARE_EVENT_CLASS(xfs_buf_flags_class,
 		  __entry->pincount,
 		  __entry->lockval,
 		  __print_flags(__entry->flags, "|", XFS_BUF_FLAGS),
-		  (void *)__entry->caller_ip)
+		  (void *)(uintptr_t)__entry->caller_ip)
 )
 
 #define DEFINE_BUF_FLAGS_EVENT(name) \
@@ -1022,7 +1022,7 @@ DECLARE_EVENT_CLASS(xfs_lock_class,
 		  MAJOR(__entry->dev), MINOR(__entry->dev),
 		  __entry->ino,
 		  __print_flags(__entry->lock_flags, "|", XFS_LOCK_FLAGS),
-		  (void *)__entry->caller_ip)
+		  (void *)(uintptr_t)__entry->caller_ip)
 )
 
 #define DEFINE_LOCK_EVENT(name) \
@@ -1160,7 +1160,7 @@ DECLARE_EVENT_CLASS(xfs_iref_class,
 		  __entry->count,
 		  __entry->pincount,
 		  __entry->iflags,
-		  (char *)__entry->caller_ip)
+		  (char *)(uintptr_t)__entry->caller_ip)
 )
 
 TRACE_EVENT(xfs_iomap_prealloc_size,
@@ -1641,7 +1641,7 @@ TRACE_EVENT(xfs_log_force,
 	),
 	TP_printk("dev %d:%d lsn 0x%llx caller %pS",
 		  MAJOR(__entry->dev), MINOR(__entry->dev),
-		  __entry->lsn, (void *)__entry->caller_ip)
+		  __entry->lsn, (void *)(uintptr_t)__entry->caller_ip)
 )
 
 #define DEFINE_LOG_ITEM_EVENT(name) \
@@ -1951,7 +1951,7 @@ TRACE_EVENT(xfs_bunmap,
 		  __entry->fileoff,
 		  __entry->len,
 		  __print_flags(__entry->flags, "|", XFS_BMAPI_FLAGS),
-		  (void *)__entry->caller_ip)
+		  (void *)(uintptr_t)__entry->caller_ip)
 
 );
 
@@ -2150,7 +2150,7 @@ DECLARE_EVENT_CLASS(xfs_agf_class,
 		  __entry->flcount,
 		  __entry->freeblks,
 		  __entry->longest,
-		  (void *)__entry->caller_ip)
+		  (void *)(uintptr_t)__entry->caller_ip)
 );
 #define DEFINE_AGF_EVENT(name) \
 DEFINE_EVENT(xfs_agf_class, name, \
@@ -2683,7 +2683,7 @@ DECLARE_EVENT_CLASS(xfs_log_recover_item_class,
 		  __entry->tid,
 		  __entry->lsn,
 		  __entry->pass,
-		  (void *)__entry->item,
+		  (void *)(uintptr_t)__entry->item,
 		  __print_symbolic(__entry->type, XFS_LI_TYPE_DESC),
 		  __entry->count,
 		  __entry->total)
@@ -3033,7 +3033,7 @@ DECLARE_EVENT_CLASS(xfs_defer_class,
 	TP_printk("dev %d:%d tp %p caller %pS",
 		  MAJOR(__entry->dev), MINOR(__entry->dev),
 		  __entry->tp,
-		  (char *)__entry->caller_ip)
+		  (char *)(uintptr_t)__entry->caller_ip)
 )
 #define DEFINE_DEFER_EVENT(name) \
 DEFINE_EVENT(xfs_defer_class, name, \
@@ -3272,7 +3272,7 @@ DECLARE_EVENT_CLASS(xfs_btree_error_class,
 		  __entry->agno,
 		  __entry->ino,
 		  __entry->error,
-		  (char *)__entry->caller_ip)
+		  (char *)(uintptr_t)__entry->caller_ip)
 );
 
 #define DEFINE_BTREE_ERROR_EVENT(name) \
@@ -3314,7 +3314,7 @@ TRACE_EVENT(xfs_rmap_convert_state,
 		  __print_symbolic(__entry->type, XG_TYPE_STRINGS),
 		  __entry->agno,
 		  __entry->state,
-		  (char *)__entry->caller_ip)
+		  (char *)(uintptr_t)__entry->caller_ip)
 );
 
 DECLARE_EVENT_CLASS(xfs_rmapbt_class,
@@ -3570,7 +3570,7 @@ TRACE_EVENT(xfs_ag_resv_init_error,
 		  MAJOR(__entry->dev), MINOR(__entry->dev),
 		  __entry->agno,
 		  __entry->error,
-		  (char *)__entry->caller_ip)
+		  (char *)(uintptr_t)__entry->caller_ip)
 );
 
 /* refcount tracepoint classes */
@@ -3984,7 +3984,7 @@ DECLARE_EVENT_CLASS(xfs_inode_error_class,
 		  MAJOR(__entry->dev), MINOR(__entry->dev),
 		  __entry->ino,
 		  __entry->error,
-		  (char *)__entry->caller_ip)
+		  (char *)(uintptr_t)__entry->caller_ip)
 );
 
 #define DEFINE_INODE_ERROR_EVENT(name) \
@@ -4481,7 +4481,7 @@ DECLARE_EVENT_CLASS(xfs_trans_class,
 		  MAJOR(__entry->dev), MINOR(__entry->dev),
 		  __entry->tid,
 		  __entry->flags,
-		  (char *)__entry->caller_ip)
+		  (char *)(uintptr_t)__entry->caller_ip)
 )
 
 #define DEFINE_TRANS_EVENT(name) \
@@ -4964,7 +4964,7 @@ DECLARE_EVENT_CLASS(xfs_icwalk_class,
 		  __entry->prid,
 		  __entry->min_file_size,
 		  __entry->scan_limit,
-		  (char *)__entry->caller_ip)
+		  (char *)(uintptr_t)__entry->caller_ip)
 );
 #define DEFINE_ICWALK_EVENT(name)	\
 DEFINE_EVENT(xfs_icwalk_class, name,	\
@@ -5009,7 +5009,7 @@ DECLARE_EVENT_CLASS(xlog_iclog_class,
 		  __entry->offset,
 		  __entry->lsn,
 		  __print_flags(__entry->flags, "|", XLOG_ICL_STRINGS),
-		  (char *)__entry->caller_ip)
+		  (char *)(uintptr_t)__entry->caller_ip)
 
 );
 
@@ -5965,7 +5965,7 @@ DECLARE_EVENT_CLASS(xfs_freeblocks_resv_class,
 		  __entry->delta,
 		  __entry->avail,
 		  __entry->total,
-		  (char *)__entry->caller_ip)
+		  (char *)(uintptr_t)__entry->caller_ip)
 )
 #define DEFINE_FREEBLOCKS_RESV_EVENT(name) \
 DEFINE_EVENT(xfs_freeblocks_resv_class, name, \

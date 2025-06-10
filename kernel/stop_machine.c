@@ -60,7 +60,7 @@ void print_stop_info(const char *log_lvl, struct task_struct *task)
 	if (task != stopper->thread)
 		return;
 
-	printk("%sStopper: %pS <- %pS\n", log_lvl, stopper->fn, (void *)stopper->caller);
+	printk("%sStopper: %pS <- %pS\n", log_lvl, stopper->fn, (void *)(uintptr_t)stopper->caller);
 }
 
 /* static data for stop_cpus */

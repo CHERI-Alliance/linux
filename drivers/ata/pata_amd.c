@@ -568,7 +568,7 @@ static int amd_init_one(struct pci_dev *pdev, const struct pci_device_id *id)
 		u32 udma;
 
 		pci_read_config_dword(pdev, 0x60, &udma);
-		hpriv = (void *)(unsigned long)udma;
+		hpriv = (void *)(uintptr_t)udma;
 	}
 
 	/* And fire it up */

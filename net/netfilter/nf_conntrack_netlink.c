@@ -1286,7 +1286,7 @@ out:
 	local_bh_enable();
 	if (last) {
 		/* nf ct hash resize happened, now clear the leftover. */
-		if ((struct nf_conn *)cb->args[1] == last)
+		if ((struct nf_conn *)(uintptr_t)cb->args[1] == last)
 			cb->args[1] = 0;
 
 		nf_ct_put(last);

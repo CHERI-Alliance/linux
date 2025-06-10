@@ -312,7 +312,7 @@ EXPORT_SYMBOL(__asan_alloca_poison);
 /* Emitted by compiler to unpoison alloca()ed areas when the stack unwinds. */
 void __asan_allocas_unpoison(void *stack_top, ssize_t stack_bottom)
 {
-	if (unlikely(!stack_top || stack_top > (void *)stack_bottom))
+	if (unlikely(!stack_top || stack_top > (void *)(uintptr_t)stack_bottom))
 		return;
 
 	kasan_unpoison(stack_top, (void *)stack_bottom - stack_top, false);

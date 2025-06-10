@@ -1296,7 +1296,7 @@ kfd_gtt_restart_search:
 					kfd->gtt_sa_chunk_size);
 
 	pr_debug("gpu_addr = %p, cpu_addr = %p\n",
-			(uint64_t *) (*mem_obj)->gpu_addr, (*mem_obj)->cpu_ptr);
+			(uint64_t *)(uintptr_t) (*mem_obj)->gpu_addr, (*mem_obj)->cpu_ptr);
 
 	/* If we need only one chunk, mark it as allocated and get out */
 	if (size <= kfd->gtt_sa_chunk_size) {

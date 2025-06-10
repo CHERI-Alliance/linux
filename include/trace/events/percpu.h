@@ -44,7 +44,7 @@ TRACE_EVENT(percpu_alloc_percpu,
 	),
 
 	TP_printk("call_site=%pS reserved=%d is_atomic=%d size=%zu align=%zu base_addr=%p off=%d ptr=%p bytes_alloc=%zu gfp_flags=%s",
-		  (void *)__entry->call_site,
+		  (void *)(uintptr_t)__entry->call_site,
 		  __entry->reserved, __entry->is_atomic,
 		  __entry->size, __entry->align,
 		  __entry->base_addr, __entry->off, __entry->ptr,
