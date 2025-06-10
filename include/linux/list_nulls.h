@@ -25,7 +25,7 @@ struct hlist_nulls_head {
 struct hlist_nulls_node {
 	struct hlist_nulls_node *next, **pprev;
 };
-#define NULLS_MARKER(value) (1UL | (((long)value) << 1))
+#define NULLS_MARKER(value) ((uintptr_t)1UL | (((intptr_t)value) << 1))
 #define INIT_HLIST_NULLS_HEAD(ptr, nulls) \
 	((ptr)->first = (struct hlist_nulls_node *) NULLS_MARKER(nulls))
 #define HLIST_NULLS_HEAD_INIT(nulls) {.first = (struct hlist_nulls_node *)NULLS_MARKER(nulls)}

@@ -25,7 +25,7 @@
  *
  * Like IS_ERR(), but does not generate a compiler warning if result is unused.
  */
-#define IS_ERR_VALUE(x) unlikely((unsigned long)(void *)(x) >= (unsigned long)-MAX_ERRNO)
+#define IS_ERR_VALUE(x) unlikely((unsigned long)(void *)(uintptr_t __force)(x) >= (unsigned long)-MAX_ERRNO)
 
 /**
  * ERR_PTR - Create an error pointer.

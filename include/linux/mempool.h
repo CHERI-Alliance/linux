@@ -92,10 +92,10 @@ void mempool_kfree(void *element, void *pool_data);
 
 #define mempool_init_kmalloc_pool(_pool, _min_nr, _size)		\
 	mempool_init(_pool, (_min_nr), mempool_kmalloc, mempool_kfree,	\
-		     (void *)(unsigned long)(_size))
+		     (void *)(uintptr_t)(_size))
 #define mempool_create_kmalloc_pool(_min_nr, _size)			\
 	mempool_create((_min_nr), mempool_kmalloc, mempool_kfree,	\
-		       (void *)(unsigned long)(_size))
+		       (void *)(uintptr_t)(_size))
 
 void *mempool_kvmalloc(gfp_t gfp_mask, void *pool_data);
 void mempool_kvfree(void *element, void *pool_data);
