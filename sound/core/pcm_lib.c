@@ -1465,7 +1465,7 @@ int snd_pcm_hw_constraint_msbits(struct snd_pcm_runtime *runtime,
 	unsigned long l = (msbits << 16) | width;
 	return snd_pcm_hw_rule_add(runtime, cond, -1,
 				    snd_pcm_hw_rule_msbits,
-				    (void*) l,
+				    (void*)(uintptr_t) l,
 				    SNDRV_PCM_HW_PARAM_SAMPLE_BITS, -1);
 }
 EXPORT_SYMBOL(snd_pcm_hw_constraint_msbits);
@@ -1492,7 +1492,7 @@ int snd_pcm_hw_constraint_step(struct snd_pcm_runtime *runtime,
 			       unsigned long step)
 {
 	return snd_pcm_hw_rule_add(runtime, cond, var, 
-				   snd_pcm_hw_rule_step, (void *) step,
+				   snd_pcm_hw_rule_step, (void *)(uintptr_t) step,
 				   var, -1);
 }
 EXPORT_SYMBOL(snd_pcm_hw_constraint_step);

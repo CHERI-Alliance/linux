@@ -1107,7 +1107,7 @@ fritzpci_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	}
 
 	pr_notice("mISDN: found adapter %s at %s\n",
-		  (char *) ent->driver_data, pci_name(pdev));
+		  (char *)(uintptr_t) ent->driver_data, pci_name(pdev));
 
 	card->addr = pci_resource_start(pdev, 1);
 	card->irq = pdev->irq;

@@ -46,7 +46,7 @@ extern char _end[];
 #define flush_cache_vmap flush_cache_vmap
 static inline void flush_cache_vmap(__ptraddr_t start, __ptraddr_t end)
 {
-	if (is_vmalloc_or_module_addr((void *)start)) {
+	if (is_vmalloc_or_module_addr((void *)(uintptr_t)start)) {
 		int i;
 
 		/*

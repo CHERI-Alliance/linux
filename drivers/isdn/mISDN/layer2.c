@@ -1933,7 +1933,7 @@ ph_data_indication(struct layer2 *l2, struct mISDNhead *hh, struct sk_buff *skb)
 	if (c) {
 		printk(KERN_WARNING "%s:l2 D-channel frame error %c\n",
 		       mISDNDevName4ch(&l2->ch), c);
-		mISDN_FsmEvent(&l2->l2m, EV_L2_FRAME_ERROR, (void *)(long)c);
+		mISDN_FsmEvent(&l2->l2m, EV_L2_FRAME_ERROR, (void *)(uintptr_t)c);
 	}
 	return ret;
 }

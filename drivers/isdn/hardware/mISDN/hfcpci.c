@@ -2004,7 +2004,7 @@ setup_hw(struct hfc_pci *hc)
 		return -EINVAL;
 	}
 	hc->hw.pci_io =
-		(char __iomem *)(unsigned long)hc->pdev->resource[1].start;
+		(char __iomem *)(uintptr_t)hc->pdev->resource[1].start;
 
 	if (!hc->hw.pci_io) {
 		printk(KERN_WARNING "HFC-PCI: No IO-Mem for PCI card found\n");

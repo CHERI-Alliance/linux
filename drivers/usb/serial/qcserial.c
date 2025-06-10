@@ -421,7 +421,7 @@ done:
 	}
 
 	if (!retval)
-		usb_set_serial_data(serial, (void *)(unsigned long)sendsetup);
+		usb_set_serial_data(serial, (void *)(uintptr_t)sendsetup);
 
 	return retval;
 }

@@ -150,7 +150,7 @@ badframe:
 		pr_info_ratelimited(
 			"%s[%d]: bad frame in %s: frame=%p pc=%p sp=%p\n",
 			task->comm, task_pid_nr(task), __func__,
-			frame, (void *)regs->epc, (void *)regs->sp);
+			frame, (void *)(uintptr_t)regs->epc, (void *)(uintptr_t)regs->sp);
 	}
 	force_sig(SIGSEGV);
 	return 0;

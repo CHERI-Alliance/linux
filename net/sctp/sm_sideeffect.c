@@ -295,7 +295,7 @@ static void sctp_generate_timeout_event(struct sctp_association *asoc,
 	error = sctp_do_sm(net, SCTP_EVENT_T_TIMEOUT,
 			   SCTP_ST_TIMEOUT(timeout_type),
 			   asoc->state, asoc->ep, asoc,
-			   (void *)timeout_type, GFP_ATOMIC);
+			   (void *)(uintptr_t)timeout_type, GFP_ATOMIC);
 
 	if (error)
 		sk->sk_err = -error;

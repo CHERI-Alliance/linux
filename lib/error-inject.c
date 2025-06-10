@@ -76,7 +76,7 @@ static void populate_error_injection_list(struct error_injection_entry *start,
 		if (!kernel_text_address(entry) ||
 		    !kallsyms_lookup_size_offset(entry, &size, &offset)) {
 			pr_err("Failed to find error inject entry at %p\n",
-				(void *)entry);
+				(void *)(uintptr_t)entry);
 			continue;
 		}
 
@@ -198,7 +198,7 @@ static int ei_seq_show(struct seq_file *m, void *v)
 {
 	struct ei_entry *ent = list_entry(v, struct ei_entry, list);
 
-	seq_printf(m, "%ps\t%s\n", (void *)ent->start_addr,
+	seq_printf(m, "%ps\t%s\n", (void *)(uintptr_t)ent->start_addr,
 		   error_type_string(ent->etype));
 	return 0;
 }

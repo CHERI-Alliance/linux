@@ -266,7 +266,7 @@ static int debug_show(struct seq_file *f, void *data)
 		int r = atomic_read(&cl->remaining);
 
 		seq_printf(f, "%p: %pS -> %pS p %p r %i ",
-			   cl, (void *) cl->ip, cl->fn, cl->parent,
+			   cl, (void *)(uintptr_t) cl->ip, cl->fn, cl->parent,
 			   r & CLOSURE_REMAINING_MASK);
 
 		seq_printf(f, "%s%s\n",
@@ -276,7 +276,7 @@ static int debug_show(struct seq_file *f, void *data)
 
 		if (r & CLOSURE_WAITING)
 			seq_printf(f, " W %pS\n",
-				   (void *) cl->waiting_on);
+				   (void *)(uintptr_t) cl->waiting_on);
 
 		seq_putc(f, '\n');
 	}

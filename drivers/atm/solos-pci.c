@@ -1376,7 +1376,7 @@ static int atm_init(struct solos_card *card, struct device *parent)
 		card->atmdev[i]->ci_range.vpi_bits = 8;
 		card->atmdev[i]->ci_range.vci_bits = 16;
 		card->atmdev[i]->dev_data = card;
-		card->atmdev[i]->phy_data = (void *)(unsigned long)i;
+		card->atmdev[i]->phy_data = (void *)(uintptr_t)i;
 		atm_dev_signal_change(card->atmdev[i], ATM_PHY_SIG_FOUND);
 
 		skb = alloc_skb(sizeof(*header), GFP_KERNEL);

@@ -457,7 +457,7 @@ sfaxpci_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	}
 
 	pr_notice("mISDN: Speedfax found adapter %s at %s\n",
-		  (char *)ent->driver_data, pci_name(pdev));
+		  (char *)(uintptr_t)ent->driver_data, pci_name(pdev));
 
 	card->cfg = pci_resource_start(pdev, 0);
 	card->irq = pdev->irq;

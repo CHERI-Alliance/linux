@@ -1539,7 +1539,7 @@ static noinline void __init check_root_expand(struct maple_tree *mt)
 	mas_set(&mas, 1);
 	ptr = mas_prev(&mas, 0);
 	MT_BUG_ON(mt, (mas.index != 0) && (mas.last != 0));
-	MT_BUG_ON(mt, ptr != (void *)((unsigned long) check_prev_entry | 1UL));
+	MT_BUG_ON(mt, ptr != (void *)(uintptr_t)((unsigned long) check_prev_entry | 1UL));
 
 	mas_unlock(&mas);
 
@@ -1557,7 +1557,7 @@ static noinline void __init check_root_expand(struct maple_tree *mt)
 	mas_set(&mas, 1);
 	ptr = mas_prev(&mas, 0);
 	MT_BUG_ON(mt, (mas.index != 0) && (mas.last != 0));
-	MT_BUG_ON(mt, ptr != (void *)((unsigned long) check_prev_entry | 2UL));
+	MT_BUG_ON(mt, ptr != (void *)(uintptr_t)((unsigned long) check_prev_entry | 2UL));
 
 
 	mas_unlock(&mas);

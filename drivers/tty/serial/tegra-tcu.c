@@ -54,7 +54,7 @@ static void tegra_tcu_write_one(struct tegra_tcu *tcu, u32 value,
 	void *msg;
 
 	value |= TCU_MBOX_NUM_BYTES(count);
-	msg = (void *)(unsigned long)value;
+	msg = (void *)(uintptr_t)value;
 	mbox_send_message(tcu->tx, msg);
 	mbox_flush(tcu->tx, 1000);
 }

@@ -160,7 +160,7 @@ static int __init init_lockevent_counts(void)
 		if (skip_lockevent(lockevent_names[i]))
 			continue;
 		if (IS_ERR(debugfs_create_file(lockevent_names[i], 0400, d_counts,
-					 (void *)(long)i, &fops_lockevent)))
+					 (void *)(uintptr_t)i, &fops_lockevent)))
 			goto fail_undo;
 	}
 

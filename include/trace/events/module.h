@@ -86,7 +86,7 @@ DECLARE_EVENT_CLASS(module_refcnt,
 	),
 
 	TP_printk("%s call_site=%ps refcnt=%d",
-		  __get_str(name), (void *)__entry->ip, __entry->refcnt)
+		  __get_str(name), (void *)(uintptr_t)__entry->ip, __entry->refcnt)
 );
 
 DEFINE_EVENT(module_refcnt, module_get,
@@ -123,7 +123,7 @@ TRACE_EVENT(module_request,
 	),
 
 	TP_printk("%s wait=%d call_site=%ps",
-		  __get_str(name), (int)__entry->wait, (void *)__entry->ip)
+		  __get_str(name), (int)__entry->wait, (void *)(uintptr_t)__entry->ip)
 );
 
 #endif /* CONFIG_MODULES */

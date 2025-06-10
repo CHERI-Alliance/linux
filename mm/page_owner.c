@@ -910,7 +910,7 @@ static int stack_print(struct seq_file *m, void *v)
 		return 0;
 
 	for (i = 0; i < nr_entries; i++)
-		seq_printf(m, " %pS\n", (void *)entries[i]);
+		seq_printf(m, " %pS\n", (void *)(uintptr_t)entries[i]);
 	seq_printf(m, "nr_base_pages: %d\n\n", nr_base_pages);
 
 	return 0;

@@ -28,8 +28,8 @@ DECLARE_EVENT_CLASS(preemptirq_template,
 	),
 
 	TP_printk("caller=%pS parent=%pS",
-		  (void *)((unsigned long)(_stext) + __entry->caller_offs),
-		  (void *)((unsigned long)(_stext) + __entry->parent_offs))
+		  (void *)(uintptr_t)((unsigned long)(_stext) + __entry->caller_offs),
+		  (void *)(uintptr_t)((unsigned long)(_stext) + __entry->parent_offs))
 );
 
 #ifdef CONFIG_TRACE_IRQFLAGS

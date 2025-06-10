@@ -55,7 +55,7 @@ static inline void _rtl_install_trx_info(struct rtl_usb *rtlusb,
 	struct ieee80211_tx_info *info = IEEE80211_SKB_CB(skb);
 
 	info->rate_driver_data[0] = rtlusb;
-	info->rate_driver_data[1] = (void *)(__kernel_size_t)ep_num;
+	info->rate_driver_data[1] = (void *)(uintptr_t)ep_num;
 }
 
 /*  Add suspend/resume later */

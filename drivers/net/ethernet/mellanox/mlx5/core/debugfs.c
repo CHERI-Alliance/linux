@@ -488,7 +488,7 @@ static ssize_t dbg_read(struct file *filp, char __user *buf, size_t count,
 	}
 
 	if (is_str)
-		ret = snprintf(tbuf, sizeof(tbuf), "%s\n", (const char *)(unsigned long)field);
+		ret = snprintf(tbuf, sizeof(tbuf), "%s\n", (const char *)(uintptr_t)field);
 	else
 		ret = snprintf(tbuf, sizeof(tbuf), "0x%llx\n", field);
 

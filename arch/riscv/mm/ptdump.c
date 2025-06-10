@@ -270,7 +270,7 @@ static void note_prot_wx(struct pg_state *st, unsigned long addr)
 		return;
 
 	WARN_ONCE(1, "riscv/mm: Found insecure W+X mapping at address %p/%pS\n",
-		  (void *)st->start_address, (void *)st->start_address);
+		  (void *)(uintptr_t)st->start_address, (void *)(uintptr_t)st->start_address);
 
 	st->wx_pages += (addr - st->start_address) / PAGE_SIZE;
 }

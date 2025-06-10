@@ -623,7 +623,7 @@ static int peak_pci_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 
 	/* Display commercial name (and, eventually, FW version) of the card */
 	dev_info(&pdev->dev, "%ux CAN %s%s\n",
-		 channels, (const char *)ent->driver_data, fw_str);
+		 channels, (const char *)(uintptr_t)ent->driver_data, fw_str);
 
 	icr = readw(cfg_base + PITA_ICR + 2);
 

@@ -927,7 +927,7 @@ static int ks8842_alloc_dma_bufs(struct net_device *netdev)
 	sg_init_table(&tx_ctl->sg, 1);
 
 	tx_ctl->chan = dma_request_channel(mask, ks8842_dma_filter_fn,
-					   (void *)(long)tx_ctl->channel);
+					   (void *)(uintptr_t)tx_ctl->channel);
 	if (!tx_ctl->chan) {
 		err = -ENODEV;
 		goto err;
@@ -949,7 +949,7 @@ static int ks8842_alloc_dma_bufs(struct net_device *netdev)
 	}
 
 	rx_ctl->chan = dma_request_channel(mask, ks8842_dma_filter_fn,
-					   (void *)(long)rx_ctl->channel);
+					   (void *)(uintptr_t)rx_ctl->channel);
 	if (!rx_ctl->chan) {
 		err = -ENODEV;
 		goto err;

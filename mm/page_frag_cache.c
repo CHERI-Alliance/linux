@@ -43,7 +43,7 @@ static void *encoded_page_decode_virt(unsigned long encoded_page)
 
 static struct page *encoded_page_decode_page(unsigned long encoded_page)
 {
-	return virt_to_page((void *)encoded_page);
+	return virt_to_page((void *)(uintptr_t)encoded_page);
 }
 
 static struct page *__page_frag_cache_refill(struct page_frag_cache *nc,
