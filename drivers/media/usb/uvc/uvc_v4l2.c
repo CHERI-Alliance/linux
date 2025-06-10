@@ -1435,7 +1435,7 @@ static long uvc_v4l2_compat_ioctl32(struct file *file,
 #endif
 
 static long uvc_v4l2_unlocked_ioctl(struct file *file,
-				    unsigned int cmd, unsigned long arg)
+				    unsigned int cmd, user_uintptr_t arg)
 {
 	struct uvc_fh *handle = file->private_data;
 	int ret;

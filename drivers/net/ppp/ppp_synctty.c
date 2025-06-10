@@ -89,7 +89,7 @@ struct syncppp {
 static struct sk_buff* ppp_sync_txmunge(struct syncppp *ap, struct sk_buff *);
 static int ppp_sync_send(struct ppp_channel *chan, struct sk_buff *skb);
 static int ppp_sync_ioctl(struct ppp_channel *chan, unsigned int cmd,
-			  unsigned long arg);
+			  user_uintptr_t arg);
 static void ppp_sync_process(struct tasklet_struct *t);
 static int ppp_sync_push(struct syncppp *ap);
 static void ppp_sync_flush_output(struct syncppp *ap);
@@ -273,7 +273,7 @@ ppp_sync_write(struct tty_struct *tty, struct file *file, const u8 *buf,
 }
 
 static int
-ppp_synctty_ioctl(struct tty_struct *tty, unsigned int cmd, unsigned long arg)
+ppp_synctty_ioctl(struct tty_struct *tty, unsigned int cmd, user_uintptr_t arg)
 {
 	struct syncppp *ap = sp_get(tty);
 	int __user *p = (int __user *)arg;
@@ -383,7 +383,7 @@ ppp_sync_init(void)
  * The following routines provide the PPP channel interface.
  */
 static int
-ppp_sync_ioctl(struct ppp_channel *chan, unsigned int cmd, unsigned long arg)
+ppp_sync_ioctl(struct ppp_channel *chan, unsigned int cmd, user_uintptr_t arg)
 {
 	struct syncppp *ap = chan->private;
 	int err, val;

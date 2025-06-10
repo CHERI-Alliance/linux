@@ -1381,7 +1381,7 @@ static ssize_t watchdog_write(struct file *filp, const char __user *buf,
 }
 
 static long watchdog_ioctl(struct file *filp, unsigned int cmd,
-			   unsigned long arg)
+			   user_uintptr_t arg)
 {
 	struct watchdog_info ident = {
 		.options = WDIOF_KEEPALIVEPING |

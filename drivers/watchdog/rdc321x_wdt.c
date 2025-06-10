@@ -138,7 +138,7 @@ static int rdc321x_wdt_release(struct inode *inode, struct file *file)
 }
 
 static long rdc321x_wdt_ioctl(struct file *file, unsigned int cmd,
-				unsigned long arg)
+				user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 	u32 value;

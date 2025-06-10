@@ -603,7 +603,7 @@ out:
 	return err;
 }
 
-static long procfs_procmap_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long procfs_procmap_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct seq_file *seq = file->private_data;
 	struct proc_maps_private *priv = seq->private;
@@ -2663,7 +2663,7 @@ static const struct mm_walk_ops pagemap_scan_ops = {
 };
 
 static int pagemap_scan_get_args(struct pm_scan_arg *arg,
-				 unsigned long uarg)
+				 user_uintptr_t uarg)
 {
 	if (copy_from_user(arg, (void __user *)uarg, sizeof(*arg)))
 		return -EFAULT;
@@ -2705,7 +2705,7 @@ static int pagemap_scan_get_args(struct pm_scan_arg *arg,
 }
 
 static int pagemap_scan_writeback_args(struct pm_scan_arg *arg,
-				       unsigned long uargl)
+				       user_uintptr_t uargl)
 {
 	struct pm_scan_arg __user *uarg	= (void __user *)uargl;
 
@@ -2760,7 +2760,7 @@ static long pagemap_scan_flush_buffer(struct pagemap_scan_private *p)
 	return n;
 }
 
-static long do_pagemap_scan(struct mm_struct *mm, unsigned long uarg)
+static long do_pagemap_scan(struct mm_struct *mm, user_uintptr_t uarg)
 {
 	struct pagemap_scan_private p = {0};
 	unsigned long walk_start;
@@ -2834,7 +2834,7 @@ static long do_pagemap_scan(struct mm_struct *mm, unsigned long uarg)
 }
 
 static long do_pagemap_cmd(struct file *file, unsigned int cmd,
-			   unsigned long arg)
+			   user_uintptr_t arg)
 {
 	struct mm_struct *mm = file->private_data;
 

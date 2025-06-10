@@ -356,7 +356,7 @@ static int pp_set_timeout(struct pardevice *pdev, long tv_sec, int tv_usec)
 	return 0;
 }
 
-static int pp_do_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static int pp_do_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	unsigned int minor = iminor(file_inode(file));
 	struct pp_struct *pp = file->private_data;
@@ -671,7 +671,7 @@ static int pp_do_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 	return 0;
 }
 
-static long pp_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long pp_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	long ret;
 

@@ -354,7 +354,7 @@ rpc_pipe_poll(struct file *filp, struct poll_table_struct *wait)
 }
 
 static long
-rpc_pipe_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+rpc_pipe_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	struct rpc_pipe *pipe;

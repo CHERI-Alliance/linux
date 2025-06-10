@@ -580,7 +580,7 @@ static int lp_release(struct inode *inode, struct file *file)
 }
 
 static int lp_do_ioctl(unsigned int minor, unsigned int cmd,
-	unsigned long arg, void __user *argp)
+	user_uintptr_t arg, void __user *argp)
 {
 	int status;
 	int retval = 0;
@@ -722,7 +722,7 @@ static int lp_set_timeout64(unsigned int minor, void __user *arg)
 }
 
 static long lp_ioctl(struct file *file, unsigned int cmd,
-			unsigned long arg)
+			user_uintptr_t arg)
 {
 	unsigned int minor;
 	int ret;

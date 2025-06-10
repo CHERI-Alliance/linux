@@ -50,7 +50,7 @@ static int pps_gen_cdev_fasync(int fd, struct file *file, int on)
 }
 
 static long pps_gen_cdev_ioctl(struct file *file,
-		unsigned int cmd, unsigned long arg)
+		unsigned int cmd, user_uintptr_t arg)
 {
 	struct pps_gen_device *pps_gen = file->private_data;
 	void __user *uarg = (void __user *) arg;

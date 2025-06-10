@@ -456,7 +456,7 @@ err:
 }
 
 static long mlx5vf_precopy_ioctl(struct file *filp, unsigned int cmd,
-				 unsigned long arg)
+				 user_uintptr_t arg)
 {
 	struct mlx5_vf_migration_file *migf = filp->private_data;
 	struct mlx5vf_pci_core_device *mvdev = migf->mvdev;

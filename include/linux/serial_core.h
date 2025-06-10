@@ -398,7 +398,7 @@ struct uart_ops {
 	int		(*request_port)(struct uart_port *);
 	void		(*config_port)(struct uart_port *, int);
 	int		(*verify_port)(struct uart_port *, struct serial_struct *);
-	int		(*ioctl)(struct uart_port *, unsigned int, unsigned long);
+	int		(*ioctl)(struct uart_port *, unsigned int, user_uintptr_t);
 #ifdef CONFIG_CONSOLE_POLL
 	int		(*poll_init)(struct uart_port *);
 	void		(*poll_put_char)(struct uart_port *, unsigned char);

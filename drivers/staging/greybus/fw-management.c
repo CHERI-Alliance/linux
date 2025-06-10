@@ -515,7 +515,7 @@ static int fw_mgmt_ioctl(struct fw_mgmt *fw_mgmt, unsigned int cmd,
 }
 
 static long fw_mgmt_ioctl_unlocked(struct file *file, unsigned int cmd,
-				   unsigned long arg)
+				   user_uintptr_t arg)
 {
 	struct fw_mgmt *fw_mgmt = file->private_data;
 	struct gb_bundle *bundle = fw_mgmt->connection->bundle;

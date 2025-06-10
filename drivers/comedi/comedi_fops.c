@@ -1921,7 +1921,7 @@ static int do_cmdtest_ioctl(struct comedi_device *dev,
  * writes:
  *	nothing
  */
-static int do_lock_ioctl(struct comedi_device *dev, unsigned long arg,
+static int do_lock_ioctl(struct comedi_device *dev, user_uintptr_t arg,
 			 void *file)
 {
 	int ret = 0;
@@ -1956,7 +1956,7 @@ static int do_lock_ioctl(struct comedi_device *dev, unsigned long arg,
  * writes:
  *	nothing
  */
-static int do_unlock_ioctl(struct comedi_device *dev, unsigned long arg,
+static int do_unlock_ioctl(struct comedi_device *dev, user_uintptr_t arg,
 			   void *file)
 {
 	struct comedi_subdevice *s;
@@ -1991,7 +1991,7 @@ static int do_unlock_ioctl(struct comedi_device *dev, unsigned long arg,
  * writes:
  *	nothing
  */
-static int do_cancel_ioctl(struct comedi_device *dev, unsigned long arg,
+static int do_cancel_ioctl(struct comedi_device *dev, user_uintptr_t arg,
 			   void *file)
 {
 	struct comedi_subdevice *s;
@@ -2025,7 +2025,7 @@ static int do_cancel_ioctl(struct comedi_device *dev, unsigned long arg,
  * writes:
  *	nothing
  */
-static int do_poll_ioctl(struct comedi_device *dev, unsigned long arg,
+static int do_poll_ioctl(struct comedi_device *dev, user_uintptr_t arg,
 			 void *file)
 {
 	struct comedi_subdevice *s;
@@ -2060,7 +2060,7 @@ static int do_poll_ioctl(struct comedi_device *dev, unsigned long arg,
  * writes:
  *	nothing
  */
-static int do_setrsubd_ioctl(struct comedi_device *dev, unsigned long arg,
+static int do_setrsubd_ioctl(struct comedi_device *dev, user_uintptr_t arg,
 			     struct file *file)
 {
 	struct comedi_file *cfp = file->private_data;
@@ -2103,7 +2103,7 @@ static int do_setrsubd_ioctl(struct comedi_device *dev, unsigned long arg,
  * writes:
  *	nothing
  */
-static int do_setwsubd_ioctl(struct comedi_device *dev, unsigned long arg,
+static int do_setwsubd_ioctl(struct comedi_device *dev, user_uintptr_t arg,
 			     struct file *file)
 {
 	struct comedi_file *cfp = file->private_data;
@@ -2134,7 +2134,7 @@ static int do_setwsubd_ioctl(struct comedi_device *dev, unsigned long arg,
 }
 
 static long comedi_unlocked_ioctl(struct file *file, unsigned int cmd,
-				  unsigned long arg)
+				  user_uintptr_t arg)
 {
 	unsigned int minor = iminor(file_inode(file));
 	struct comedi_file *cfp = file->private_data;

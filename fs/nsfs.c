@@ -20,7 +20,7 @@
 static struct vfsmount *nsfs_mnt;
 
 static long ns_ioctl(struct file *filp, unsigned int ioctl,
-			unsigned long arg);
+			user_uintptr_t arg);
 static const struct file_operations ns_file_operations = {
 	.unlocked_ioctl = ns_ioctl,
 	.compat_ioctl   = compat_ptr_ioctl,
@@ -178,7 +178,7 @@ static bool nsfs_ioctl_valid(unsigned int cmd)
 }
 
 static long ns_ioctl(struct file *filp, unsigned int ioctl,
-			unsigned long arg)
+			user_uintptr_t arg)
 {
 	struct user_namespace *user_ns;
 	struct pid_namespace *pid_ns;

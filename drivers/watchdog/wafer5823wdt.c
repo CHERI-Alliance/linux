@@ -120,7 +120,7 @@ static ssize_t wafwdt_write(struct file *file, const char __user *buf,
 }
 
 static long wafwdt_ioctl(struct file *file, unsigned int cmd,
-							unsigned long arg)
+							user_uintptr_t arg)
 {
 	int new_timeout;
 	void __user *argp = (void __user *)arg;

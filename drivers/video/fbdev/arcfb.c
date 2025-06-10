@@ -364,7 +364,7 @@ static void arcfb_lcd_update(struct arcfb_par *par, unsigned int dx,
 }
 
 static int arcfb_ioctl(struct fb_info *info,
-			  unsigned int cmd, unsigned long arg)
+			  unsigned int cmd, user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 	struct arcfb_par *par = info->par;

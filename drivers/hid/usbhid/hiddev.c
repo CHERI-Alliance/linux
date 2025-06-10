@@ -591,7 +591,7 @@ static noinline int hiddev_ioctl_string(struct hiddev *hiddev, unsigned int cmd,
 	return len;
 }
 
-static long hiddev_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long hiddev_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct hiddev_list *list = file->private_data;
 	struct hiddev *hiddev = list->hiddev;

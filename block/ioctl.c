@@ -118,7 +118,7 @@ static int blk_validate_byte_range(struct block_device *bdev,
 }
 
 static int blk_ioctl_discard(struct block_device *bdev, blk_mode_t mode,
-		unsigned long arg)
+		user_uintptr_t arg)
 {
 	uint64_t range[2], start, len;
 	struct bio *prev = NULL, *bio;
@@ -214,7 +214,7 @@ static int blk_ioctl_secure_erase(struct block_device *bdev, blk_mode_t mode,
 
 
 static int blk_ioctl_zeroout(struct block_device *bdev, blk_mode_t mode,
-		unsigned long arg)
+		user_uintptr_t arg)
 {
 	uint64_t range[2];
 	uint64_t start, end, len;
@@ -423,7 +423,7 @@ static int blkdev_pr_clear(struct block_device *bdev, blk_mode_t mode,
 }
 
 static int blkdev_flushbuf(struct block_device *bdev, unsigned cmd,
-		unsigned long arg)
+		user_uintptr_t arg)
 {
 	if (!capable(CAP_SYS_ADMIN))
 		return -EACCES;
@@ -441,7 +441,7 @@ static int blkdev_flushbuf(struct block_device *bdev, unsigned cmd,
 }
 
 static int blkdev_roset(struct block_device *bdev, unsigned cmd,
-		unsigned long arg)
+		user_uintptr_t arg)
 {
 	int ret, n;
 
@@ -561,7 +561,7 @@ static int blkdev_bszset(struct file *file, blk_mode_t mode,
  * to deal with the compat_ptr() conversion.
  */
 static int blkdev_common_ioctl(struct block_device *bdev, blk_mode_t mode,
-			       unsigned int cmd, unsigned long arg,
+			       unsigned int cmd, user_uintptr_t arg,
 			       void __user *argp)
 {
 	unsigned int max_sectors;
@@ -654,7 +654,7 @@ static int blkdev_common_ioctl(struct block_device *bdev, blk_mode_t mode,
  *
  * New commands must be compatible and go into blkdev_common_ioctl
  */
-long blkdev_ioctl(struct file *file, unsigned cmd, unsigned long arg)
+long blkdev_ioctl(struct file *file, unsigned cmd, user_uintptr_t arg)
 {
 	struct block_device *bdev = I_BDEV(file->f_mapping->host);
 	void __user *argp = (void __user *)arg;

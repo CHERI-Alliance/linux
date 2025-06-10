@@ -1531,7 +1531,7 @@ static void tiocmget_intr_callback(struct urb *urb)
  * Caller should use TIOCGICOUNT to see which one it was
  */
 static int
-hso_wait_modem_status(struct hso_serial *serial, unsigned long arg)
+hso_wait_modem_status(struct hso_serial *serial, user_uintptr_t arg)
 {
 	DECLARE_WAITQUEUE(wait, current);
 	struct uart_icount cprev, cnow;
@@ -1687,7 +1687,7 @@ static int hso_serial_tiocmset(struct tty_struct *tty,
 }
 
 static int hso_serial_ioctl(struct tty_struct *tty,
-			    unsigned int cmd, unsigned long arg)
+			    unsigned int cmd, user_uintptr_t arg)
 {
 	struct hso_serial *serial = tty->driver_data;
 	int ret = 0;

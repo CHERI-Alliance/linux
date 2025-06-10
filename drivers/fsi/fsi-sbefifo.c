@@ -980,7 +980,7 @@ static int sbefifo_read_timeout(struct sbefifo_user *user, void __user *argp)
 	return 0;
 }
 
-static long sbefifo_user_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long sbefifo_user_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct sbefifo_user *user = file->private_data;
 	int rc = -ENOTTY;

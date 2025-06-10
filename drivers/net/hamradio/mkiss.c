@@ -807,7 +807,7 @@ static void mkiss_close(struct tty_struct *tty)
 
 /* Perform I/O control on an active ax25 channel. */
 static int mkiss_ioctl(struct tty_struct *tty, unsigned int cmd,
-		unsigned long arg)
+		user_uintptr_t arg)
 {
 	struct mkiss *ax = mkiss_get(tty);
 	struct net_device *dev;

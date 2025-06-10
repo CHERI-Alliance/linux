@@ -82,7 +82,7 @@ static int snd_pcm_add(struct snd_pcm *newpcm)
 
 static int snd_pcm_control_ioctl(struct snd_card *card,
 				 struct snd_ctl_file *control,
-				 unsigned int cmd, unsigned long arg)
+				 unsigned int cmd, user_uintptr_t arg)
 {
 	switch (cmd) {
 	case SNDRV_CTL_IOCTL_PCM_NEXT_DEVICE:

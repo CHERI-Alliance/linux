@@ -446,7 +446,7 @@ static __poll_t snd_disconnect_poll(struct file * file, poll_table * wait)
 }
 
 static long snd_disconnect_ioctl(struct file *file,
-				 unsigned int cmd, unsigned long arg)
+				 unsigned int cmd, user_uintptr_t arg)
 {
 	return -ENODEV;
 }

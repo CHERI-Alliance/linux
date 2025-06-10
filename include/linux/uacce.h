@@ -46,7 +46,7 @@ struct uacce_ops {
 	int (*mmap)(struct uacce_queue *q, struct vm_area_struct *vma,
 		    struct uacce_qfile_region *qfr);
 	long (*ioctl)(struct uacce_queue *q, unsigned int cmd,
-		      unsigned long arg);
+		      user_uintptr_t arg);
 	enum uacce_dev_state (*get_isolate_state)(struct uacce_device *uacce);
 	int (*isolate_err_threshold_write)(struct uacce_device *uacce, u32 num);
 	u32 (*isolate_err_threshold_read)(struct uacce_device *uacce);

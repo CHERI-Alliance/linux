@@ -1205,7 +1205,7 @@ static int nr_recvmsg(struct socket *sock, struct msghdr *msg, size_t size,
 }
 
 
-static int nr_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+static int nr_ioctl(struct socket *sock, unsigned int cmd, user_uintptr_t arg)
 {
 	struct sock *sk = sock->sk;
 	void __user *argp = (void __user *)arg;

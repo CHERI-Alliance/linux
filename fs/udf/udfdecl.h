@@ -136,7 +136,7 @@ static inline unsigned int udf_dir_entry_len(struct fileIdentDesc *cfi)
 }
 
 /* file.c */
-extern long udf_ioctl(struct file *, unsigned int, unsigned long);
+extern long udf_ioctl(struct file *, unsigned int, user_uintptr_t);
 
 /* inode.c */
 extern struct inode *__udf_iget(struct super_block *, struct kernel_lb_addr *,

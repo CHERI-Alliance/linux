@@ -664,7 +664,7 @@ static int ntsync_obj_release(struct inode *inode, struct file *file)
 }
 
 static long ntsync_obj_ioctl(struct file *file, unsigned int cmd,
-			     unsigned long parm)
+			     user_uintptr_t parm)
 {
 	struct ntsync_obj *obj = file->private_data;
 	void __user *argp = (void __user *)parm;
@@ -1175,7 +1175,7 @@ static int ntsync_char_release(struct inode *inode, struct file *file)
 }
 
 static long ntsync_char_ioctl(struct file *file, unsigned int cmd,
-			      unsigned long parm)
+			      user_uintptr_t parm)
 {
 	struct ntsync_device *dev = file->private_data;
 	void __user *argp = (void __user *)parm;

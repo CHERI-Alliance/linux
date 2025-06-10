@@ -241,7 +241,7 @@ static ssize_t sch311x_wdt_write(struct file *file, const char __user *buf,
 }
 
 static long sch311x_wdt_ioctl(struct file *file, unsigned int cmd,
-							unsigned long arg)
+							user_uintptr_t arg)
 {
 	int status;
 	int new_timeout;

@@ -3530,7 +3530,7 @@ out:
 
 
 /* The ioctl command */
-static long st_ioctl(struct file *file, unsigned int cmd_in, unsigned long arg)
+static long st_ioctl(struct file *file, unsigned int cmd_in, user_uintptr_t arg)
 {
 	void __user *p = (void __user *)arg;
 	int i, cmd_nr, cmd_type, bt;

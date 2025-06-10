@@ -219,7 +219,7 @@ static inline void pin_longterm_test_stop(void)
 	}
 }
 
-static inline int pin_longterm_test_start(unsigned long arg)
+static inline int pin_longterm_test_start(user_uintptr_t arg)
 {
 	long nr_pages, cur_pages, addr, remaining_pages;
 	int gup_flags = FOLL_LONGTERM;
@@ -285,7 +285,7 @@ static inline int pin_longterm_test_start(unsigned long arg)
 	return ret;
 }
 
-static inline int pin_longterm_test_read(unsigned long arg)
+static inline int pin_longterm_test_read(user_uintptr_t arg)
 {
 	__u64 user_addr;
 	unsigned long i;
@@ -311,7 +311,7 @@ static inline int pin_longterm_test_read(unsigned long arg)
 }
 
 static long pin_longterm_test_ioctl(struct file *filep, unsigned int cmd,
-				    unsigned long arg)
+				    user_uintptr_t arg)
 {
 	int ret = -EINVAL;
 
@@ -336,7 +336,7 @@ static long pin_longterm_test_ioctl(struct file *filep, unsigned int cmd,
 }
 
 static long gup_test_ioctl(struct file *filep, unsigned int cmd,
-		unsigned long arg)
+		user_uintptr_t arg)
 {
 	struct gup_test gup;
 	int ret;

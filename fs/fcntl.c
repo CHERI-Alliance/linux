@@ -368,7 +368,7 @@ static long fcntl_get_rw_hint(struct file *file, unsigned int cmd,
 }
 
 static long fcntl_set_rw_hint(struct file *file, unsigned int cmd,
-			      unsigned long arg)
+			      user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(file);
 	u64 __user *argp = (u64 __user *)arg;

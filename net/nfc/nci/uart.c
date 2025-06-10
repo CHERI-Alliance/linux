@@ -323,7 +323,7 @@ static void nci_uart_tty_receive(struct tty_struct *tty, const u8 *data,
  * Return Value:    Command dependent
  */
 static int nci_uart_tty_ioctl(struct tty_struct *tty, unsigned int cmd,
-			      unsigned long arg)
+			      user_uintptr_t arg)
 {
 	struct nci_uart *nu = tty->disc_data;
 	int err = 0;

@@ -712,7 +712,7 @@ static void twl_load_sgl(TW_Device_Extension *tw_dev, TW_Command_Full *full_comm
 
 /* This function handles ioctl for the character device
    This interface is used by smartmontools open source software */
-static long twl_chrdev_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long twl_chrdev_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	long timeout;
 	unsigned long *cpu_addr, data_buffer_length_adjusted = 0, flags = 0;

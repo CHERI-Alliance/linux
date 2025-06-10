@@ -38,7 +38,7 @@ struct snd_seq_oss_callback {
 	struct module *owner;
 	int (*open)(struct snd_seq_oss_arg *p, void *closure);
 	int (*close)(struct snd_seq_oss_arg *p);
-	int (*ioctl)(struct snd_seq_oss_arg *p, unsigned int cmd, unsigned long arg);
+	int (*ioctl)(struct snd_seq_oss_arg *p, unsigned int cmd, user_uintptr_t arg);
 	int (*load_patch)(struct snd_seq_oss_arg *p, int format, const char __user *buf, int offs, int count);
 	int (*reset)(struct snd_seq_oss_arg *p);
 	int (*raw_event)(struct snd_seq_oss_arg *p, unsigned char *data);

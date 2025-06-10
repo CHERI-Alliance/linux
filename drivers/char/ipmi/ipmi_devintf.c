@@ -290,7 +290,7 @@ static int copyout_recv(struct ipmi_recv *rsp, void __user *to)
 
 static long ipmi_ioctl(struct file   *file,
 		       unsigned int  cmd,
-		       unsigned long data)
+		       user_uintptr_t data)
 {
 	int                      rv = -EINVAL;
 	struct ipmi_file_private *priv = file->private_data;

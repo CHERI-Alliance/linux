@@ -104,7 +104,7 @@ static __poll_t media_poll(struct file *filp,
 }
 
 static long
-__media_ioctl(struct file *filp, unsigned int cmd, unsigned long arg,
+__media_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg,
 	      long (*ioctl_func)(struct file *filp, unsigned int cmd,
 				 unsigned long arg))
 {
@@ -126,7 +126,7 @@ __media_ioctl(struct file *filp, unsigned int cmd, unsigned long arg,
 	return ioctl_func(filp, cmd, arg);	// NOLINT
 }
 
-static long media_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+static long media_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 {
 	struct media_devnode *devnode = media_devnode_data(filp);
 

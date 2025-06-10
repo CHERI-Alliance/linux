@@ -395,7 +395,7 @@ static int hidraw_revoke(struct hidraw_list *list)
 }
 
 static long hidraw_ioctl(struct file *file, unsigned int cmd,
-							unsigned long arg)
+							user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(file);
 	unsigned int minor = iminor(inode);

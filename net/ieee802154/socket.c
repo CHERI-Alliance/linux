@@ -150,7 +150,7 @@ static int ieee802154_dev_ioctl(struct sock *sk, struct ifreq __user *arg,
 }
 
 static int ieee802154_sock_ioctl(struct socket *sock, unsigned int cmd,
-				 unsigned long arg)
+				 user_uintptr_t arg)
 {
 	struct sock *sk = sock->sk;
 

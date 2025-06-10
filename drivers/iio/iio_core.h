@@ -27,7 +27,7 @@ struct iio_dev_buffer_pair {
 struct iio_ioctl_handler {
 	struct list_head entry;
 	long (*ioctl)(struct iio_dev *indio_dev, struct file *filp,
-		      unsigned int cmd, unsigned long arg);
+		      unsigned int cmd, user_uintptr_t arg);
 };
 
 void iio_device_ioctl_handler_register(struct iio_dev *indio_dev,

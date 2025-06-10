@@ -23,7 +23,7 @@
 #define DEVICE_NAME "qat_adf_ctl"
 
 static DEFINE_MUTEX(adf_ctl_lock);
-static long adf_ctl_ioctl(struct file *fp, unsigned int cmd, unsigned long arg);
+static long adf_ctl_ioctl(struct file *fp, unsigned int cmd, user_uintptr_t arg);
 
 static const struct file_operations adf_ctl_ops = {
 	.owner = THIS_MODULE,
@@ -90,7 +90,7 @@ err_chrdev_unreg:
 }
 
 static int adf_ctl_alloc_resources(struct adf_user_cfg_ctl_data **ctl_data,
-				   unsigned long arg)
+				   user_uintptr_t arg)
 {
 	struct adf_user_cfg_ctl_data *cfg_data;
 
@@ -186,7 +186,7 @@ out_err:
 }
 
 static int adf_ctl_ioctl_dev_config(struct file *fp, unsigned int cmd,
-				    unsigned long arg)
+				    user_uintptr_t arg)
 {
 	int ret;
 	struct adf_user_cfg_ctl_data *ctl_data;
@@ -262,7 +262,7 @@ static void adf_ctl_stop_devices(u32 id)
 }
 
 static int adf_ctl_ioctl_dev_stop(struct file *fp, unsigned int cmd,
-				  unsigned long arg)
+				  user_uintptr_t arg)
 {
 	int ret;
 	struct adf_user_cfg_ctl_data *ctl_data;
@@ -295,7 +295,7 @@ out:
 }
 
 static int adf_ctl_ioctl_dev_start(struct file *fp, unsigned int cmd,
-				   unsigned long arg)
+				   user_uintptr_t arg)
 {
 	int ret;
 	struct adf_user_cfg_ctl_data *ctl_data;
@@ -327,7 +327,7 @@ out:
 }
 
 static int adf_ctl_ioctl_get_num_devices(struct file *fp, unsigned int cmd,
-					 unsigned long arg)
+					 user_uintptr_t arg)
 {
 	u32 num_devices = 0;
 
@@ -339,7 +339,7 @@ static int adf_ctl_ioctl_get_num_devices(struct file *fp, unsigned int cmd,
 }
 
 static int adf_ctl_ioctl_get_status(struct file *fp, unsigned int cmd,
-				    unsigned long arg)
+				    user_uintptr_t arg)
 {
 	struct adf_hw_device_data *hw_data;
 	struct adf_dev_status_info dev_info;
@@ -377,7 +377,7 @@ static int adf_ctl_ioctl_get_status(struct file *fp, unsigned int cmd,
 	return 0;
 }
 
-static long adf_ctl_ioctl(struct file *fp, unsigned int cmd, unsigned long arg)
+static long adf_ctl_ioctl(struct file *fp, unsigned int cmd, user_uintptr_t arg)
 {
 	int ret;
 

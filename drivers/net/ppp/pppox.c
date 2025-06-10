@@ -64,7 +64,7 @@ EXPORT_SYMBOL(register_pppox_proto);
 EXPORT_SYMBOL(unregister_pppox_proto);
 EXPORT_SYMBOL(pppox_unbind_sock);
 
-int pppox_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+int pppox_ioctl(struct socket *sock, unsigned int cmd, user_uintptr_t arg)
 {
 	struct sock *sk = sock->sk;
 	struct pppox_sock *po = pppox_sk(sk);

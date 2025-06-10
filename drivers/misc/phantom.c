@@ -86,7 +86,7 @@ static int phantom_status(struct phantom_device *dev, unsigned long newstat)
  */
 
 static long phantom_ioctl(struct file *file, unsigned int cmd,
-		unsigned long arg)
+		user_uintptr_t arg)
 {
 	struct phantom_device *dev = file->private_data;
 	struct phm_regs rs;

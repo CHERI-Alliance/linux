@@ -442,7 +442,7 @@ static ssize_t ivtvfb_write(struct fb_info *info, const char __user *buf,
 	return (err) ? err : count;
 }
 
-static int ivtvfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg)
+static int ivtvfb_ioctl(struct fb_info *info, unsigned int cmd, user_uintptr_t arg)
 {
 	DEFINE_WAIT(wait);
 	struct ivtv *itv = (struct ivtv *)info->par;

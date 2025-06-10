@@ -353,7 +353,7 @@ static __poll_t pn_socket_poll(struct file *file, struct socket *sock,
 }
 
 static int pn_socket_ioctl(struct socket *sock, unsigned int cmd,
-				unsigned long arg)
+				user_uintptr_t arg)
 {
 	struct sock *sk = sock->sk;
 	struct pn_sock *pn = pn_sk(sk);

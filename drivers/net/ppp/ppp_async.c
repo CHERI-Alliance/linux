@@ -101,7 +101,7 @@ static void ppp_async_flush_output(struct asyncppp *ap);
 static void ppp_async_input(struct asyncppp *ap, const unsigned char *buf,
 			    const u8 *flags, int count);
 static int ppp_async_ioctl(struct ppp_channel *chan, unsigned int cmd,
-			   unsigned long arg);
+			   user_uintptr_t arg);
 static void ppp_async_process(struct tasklet_struct *t);
 
 static void async_lcp_peek(struct asyncppp *ap, unsigned char *data,
@@ -281,7 +281,7 @@ ppp_asynctty_write(struct tty_struct *tty, struct file *file, const u8 *buf,
  */
 
 static int
-ppp_asynctty_ioctl(struct tty_struct *tty, unsigned int cmd, unsigned long arg)
+ppp_asynctty_ioctl(struct tty_struct *tty, unsigned int cmd, user_uintptr_t arg)
 {
 	struct asyncppp *ap = ap_get(tty);
 	int err, val;
@@ -391,7 +391,7 @@ ppp_async_init(void)
  * The following routines provide the PPP channel interface.
  */
 static int
-ppp_async_ioctl(struct ppp_channel *chan, unsigned int cmd, unsigned long arg)
+ppp_async_ioctl(struct ppp_channel *chan, unsigned int cmd, user_uintptr_t arg)
 {
 	struct asyncppp *ap = chan->private;
 	void __user *argp = (void __user *)arg;

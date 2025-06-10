@@ -1772,7 +1772,7 @@ out:
 /*
  * AppleTalk ioctl calls.
  */
-static int atalk_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+static int atalk_ioctl(struct socket *sock, unsigned int cmd, user_uintptr_t arg)
 {
 	int rc = -ENOIOCTLCMD;
 	struct sock *sk = sock->sk;

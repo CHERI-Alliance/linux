@@ -570,7 +570,7 @@ err:
  * if not then tty == real_tty.
  */
 long tty_jobctrl_ioctl(struct tty_struct *tty, struct tty_struct *real_tty,
-		       struct file *file, unsigned int cmd, unsigned long arg)
+		       struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	void __user *p = (void __user *)arg;
 

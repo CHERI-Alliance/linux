@@ -438,7 +438,7 @@ static int apml_mcamsr_xfer(struct sbrmi_data *data, struct apml_mcamsr_msg __us
 	return ret;
 }
 
-static long sbrmi_ioctl(struct file *fp, unsigned int cmd, unsigned long arg)
+static long sbrmi_ioctl(struct file *fp, unsigned int cmd, user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 	struct sbrmi_data *data;

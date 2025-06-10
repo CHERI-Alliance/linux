@@ -553,7 +553,7 @@ static void iio_setup_ev_int(struct iio_event_interface *ev_int)
 }
 
 static long iio_event_ioctl(struct iio_dev *indio_dev, struct file *filp,
-			    unsigned int cmd, unsigned long arg)
+			    unsigned int cmd, user_uintptr_t arg)
 {
 	int __user *ip = (int __user *)arg;
 	int fd;

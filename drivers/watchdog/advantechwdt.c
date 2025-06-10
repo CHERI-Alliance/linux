@@ -128,7 +128,7 @@ static ssize_t advwdt_write(struct file *file, const char __user *buf,
 	return count;
 }
 
-static long advwdt_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long advwdt_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	int new_timeout;
 	void __user *argp = (void __user *)arg;

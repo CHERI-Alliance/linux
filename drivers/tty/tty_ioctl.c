@@ -762,7 +762,7 @@ static int tty_change_softcar(struct tty_struct *tty, bool enable)
  * to be called by line disciplines to ensure they provide consistent mode
  * setting.
  */
-int tty_mode_ioctl(struct tty_struct *tty, unsigned int cmd, unsigned long arg)
+int tty_mode_ioctl(struct tty_struct *tty, unsigned int cmd, user_uintptr_t arg)
 {
 	struct tty_struct *real_tty;
 	void __user *p = (void __user *)arg;
@@ -892,7 +892,7 @@ EXPORT_SYMBOL_GPL(tty_mode_ioctl);
 
 
 /* Caller guarantees ldisc reference is held */
-static int __tty_perform_flush(struct tty_struct *tty, unsigned long arg)
+static int __tty_perform_flush(struct tty_struct *tty, user_uintptr_t arg)
 {
 	struct tty_ldisc *ld = tty->ldisc;
 
@@ -918,7 +918,7 @@ static int __tty_perform_flush(struct tty_struct *tty, unsigned long arg)
 	return 0;
 }
 
-int tty_perform_flush(struct tty_struct *tty, unsigned long arg)
+int tty_perform_flush(struct tty_struct *tty, user_uintptr_t arg)
 {
 	struct tty_ldisc *ld;
 	int retval = tty_check_change(tty);
@@ -934,7 +934,7 @@ int tty_perform_flush(struct tty_struct *tty, unsigned long arg)
 EXPORT_SYMBOL_GPL(tty_perform_flush);
 
 int n_tty_ioctl_helper(struct tty_struct *tty, unsigned int cmd,
-		unsigned long arg)
+		user_uintptr_t arg)
 {
 	int retval;
 

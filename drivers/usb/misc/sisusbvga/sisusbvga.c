@@ -2597,7 +2597,7 @@ static loff_t sisusb_lseek(struct file *file, loff_t offset, int orig)
 }
 
 static int sisusb_handle_command(struct sisusb_usb_data *sisusb,
-		struct sisusb_command *y, unsigned long arg)
+		struct sisusb_command *y, user_uintptr_t arg)
 {
 	int	retval, length;
 	u32	port, address;
@@ -2668,7 +2668,7 @@ static int sisusb_handle_command(struct sisusb_usb_data *sisusb,
 	return retval;
 }
 
-static long sisusb_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long sisusb_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct sisusb_usb_data *sisusb;
 	struct sisusb_info x;

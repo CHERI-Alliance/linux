@@ -200,7 +200,7 @@ static const struct drm_ioctl_desc xe_ioctls[] = {
 	DRM_IOCTL_DEF_DRV(XE_OBSERVATION, xe_observation_ioctl, DRM_RENDER_ALLOW),
 };
 
-static long xe_drm_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long xe_drm_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct drm_file *file_priv = file->private_data;
 	struct xe_device *xe = to_xe_device(file_priv->minor->dev);

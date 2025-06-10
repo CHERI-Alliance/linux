@@ -551,7 +551,7 @@ static int dpi_engine_config(struct dpipf *dpi, void __user *arg)
 	return 0;
 }
 
-static long dpi_dev_ioctl(struct file *fptr, unsigned int cmd, unsigned long data)
+static long dpi_dev_ioctl(struct file *fptr, unsigned int cmd, user_uintptr_t data)
 {
 	void __user *arg = (void __user *)data;
 	struct dpipf *dpi;

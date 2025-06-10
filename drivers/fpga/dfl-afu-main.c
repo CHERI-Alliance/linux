@@ -427,7 +427,7 @@ static int port_hdr_init(struct platform_device *pdev,
 
 static long
 port_hdr_ioctl(struct platform_device *pdev, struct dfl_feature *feature,
-	       unsigned int cmd, unsigned long arg)
+	       unsigned int cmd, user_uintptr_t arg)
 {
 	long ret;
 
@@ -552,7 +552,7 @@ static const struct dfl_feature_ops port_stp_ops = {
 
 static long
 port_uint_ioctl(struct platform_device *pdev, struct dfl_feature *feature,
-		unsigned int cmd, unsigned long arg)
+		unsigned int cmd, user_uintptr_t arg)
 {
 	switch (cmd) {
 	case DFL_FPGA_PORT_UINT_GET_IRQ_NUM:
@@ -644,7 +644,7 @@ static int afu_release(struct inode *inode, struct file *filp)
 }
 
 static long afu_ioctl_check_extension(struct dfl_feature_dev_data *fdata,
-				      unsigned long arg)
+				      user_uintptr_t arg)
 {
 	/* No extension support for now */
 	return 0;
@@ -757,7 +757,7 @@ afu_ioctl_dma_unmap(struct dfl_feature_dev_data *fdata, void __user *arg)
 	return afu_dma_unmap_region(fdata, unmap.iova);
 }
 
-static long afu_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+static long afu_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 {
 	struct platform_device *pdev = filp->private_data;
 	struct dfl_feature_dev_data *fdata;

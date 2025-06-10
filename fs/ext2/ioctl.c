@@ -51,7 +51,7 @@ int ext2_fileattr_set(struct mnt_idmap *idmap,
 }
 
 
-long ext2_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+long ext2_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	struct ext2_inode_info *ei = EXT2_I(inode);

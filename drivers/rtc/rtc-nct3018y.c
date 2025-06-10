@@ -317,7 +317,7 @@ static int nct3018y_irq_enable(struct device *dev, unsigned int enabled)
 	return nct3018y_set_alarm_mode(to_i2c_client(dev), enabled);
 }
 
-static int nct3018y_ioctl(struct device *dev, unsigned int cmd, unsigned long arg)
+static int nct3018y_ioctl(struct device *dev, unsigned int cmd, user_uintptr_t arg)
 {
 	struct i2c_client *client = to_i2c_client(dev);
 	int status, flags = 0;

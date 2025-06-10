@@ -273,7 +273,7 @@ err_irq:
 EXPORT_SYMBOL_GPL(vfio_platform_open_device);
 
 long vfio_platform_ioctl(struct vfio_device *core_vdev,
-			 unsigned int cmd, unsigned long arg)
+			 unsigned int cmd, user_uintptr_t arg)
 {
 	struct vfio_platform_device *vdev =
 		container_of(core_vdev, struct vfio_platform_device, vdev);

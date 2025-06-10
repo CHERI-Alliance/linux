@@ -166,7 +166,7 @@ static const struct fwctl_ioctl_op fwctl_ioctl_ops[] = {
 };
 
 static long fwctl_fops_ioctl(struct file *filp, unsigned int cmd,
-			       unsigned long arg)
+			       user_uintptr_t arg)
 {
 	struct fwctl_uctx *uctx = filp->private_data;
 	const struct fwctl_ioctl_op *op;

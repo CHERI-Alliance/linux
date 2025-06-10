@@ -159,7 +159,7 @@ out_up_io:
 	return retval;
 }
 
-static long lcd_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long lcd_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct usb_lcd *dev;
 	u16 bcdDevice;

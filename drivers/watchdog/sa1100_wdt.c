@@ -115,7 +115,7 @@ static const struct watchdog_info ident = {
 };
 
 static long sa1100dog_ioctl(struct file *file, unsigned int cmd,
-							unsigned long arg)
+							user_uintptr_t arg)
 {
 	int ret = -ENOTTY;
 	int time;

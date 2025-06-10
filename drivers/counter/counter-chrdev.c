@@ -262,7 +262,7 @@ static int counter_get_ext(const struct counter_comp *const ext,
 }
 
 static int counter_add_watch(struct counter_device *const counter,
-			     const unsigned long arg)
+			     const user_uintptr_t arg)
 {
 	void __user *const uwatch = (void __user *)arg;
 	struct counter_watch watch;
@@ -380,7 +380,7 @@ err_exit:
 }
 
 static long counter_chrdev_ioctl(struct file *filp, unsigned int cmd,
-				 unsigned long arg)
+				 user_uintptr_t arg)
 {
 	struct counter_device *const counter = filp->private_data;
 	int ret = -ENODEV;

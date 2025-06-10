@@ -811,7 +811,7 @@ static int dlfb_get_edid(struct dlfb_data *dlfb, char *edid, int len)
 }
 
 static int dlfb_ops_ioctl(struct fb_info *info, unsigned int cmd,
-				unsigned long arg)
+				user_uintptr_t arg)
 {
 
 	struct dlfb_data *dlfb = info->par;

@@ -58,7 +58,7 @@ static int snd_seq_oss_oob_user(struct seq_oss_devinfo *dp, void __user *arg)
 }
 
 int
-snd_seq_oss_ioctl(struct seq_oss_devinfo *dp, unsigned int cmd, unsigned long carg)
+snd_seq_oss_ioctl(struct seq_oss_devinfo *dp, unsigned int cmd, user_uintptr_t carg)
 {
 	int dev, val;
 	void __user *arg = (void __user *)carg;

@@ -749,7 +749,7 @@ static ssize_t wdt_read(struct file *file, char __user *buf,
  *	querying capabilities and current status.
  */
 static int wdt_ioctl(struct file *file, unsigned int cmd,
-		     unsigned long arg)
+		     user_uintptr_t arg)
 {
 	int new_margin, rv;
 	static struct watchdog_info ident = {
@@ -802,7 +802,7 @@ static int wdt_ioctl(struct file *file, unsigned int cmd,
 }
 
 static long wdt_unlocked_ioctl(struct file *file, unsigned int cmd,
-			       unsigned long arg)
+			       user_uintptr_t arg)
 {
 	int ret;
 

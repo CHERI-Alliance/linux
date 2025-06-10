@@ -1896,7 +1896,7 @@ static int snd_ctl_tlv_ioctl(struct snd_ctl_file *file,
 	return -ENXIO;
 }
 
-static long snd_ctl_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long snd_ctl_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct snd_ctl_file *ctl;
 	struct snd_card *card;
