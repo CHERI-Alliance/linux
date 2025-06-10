@@ -158,7 +158,7 @@ int jffs2_fsync(struct file *, loff_t, loff_t, int);
 int __jffs2_read_folio(struct file *file, struct folio *folio);
 
 /* ioctl.c */
-long jffs2_ioctl(struct file *, unsigned int, unsigned long);
+long jffs2_ioctl(struct file *, unsigned int, user_uintptr_t);
 
 /* symlink.c */
 extern const struct inode_operations jffs2_symlink_inode_operations;

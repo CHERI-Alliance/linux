@@ -633,7 +633,7 @@ static int set_serial_info(struct tty_struct *tty,
 	return retval;
 }
 
-static int wait_serial_change(struct gb_tty *gb_tty, unsigned long arg)
+static int wait_serial_change(struct gb_tty *gb_tty, user_uintptr_t arg)
 {
 	int retval = 0;
 	DECLARE_WAITQUEUE(wait, current);
@@ -690,7 +690,7 @@ static int gb_tty_get_icount(struct tty_struct *tty,
 }
 
 static int gb_tty_ioctl(struct tty_struct *tty, unsigned int cmd,
-			unsigned long arg)
+			user_uintptr_t arg)
 {
 	struct gb_tty *gb_tty = tty->driver_data;
 

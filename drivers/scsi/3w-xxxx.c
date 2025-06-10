@@ -872,7 +872,7 @@ static int tw_allocate_memory(TW_Device_Extension *tw_dev, int size, int which)
 } /* End tw_allocate_memory() */
 
 /* This function handles ioctl for the character device */
-static long tw_chrdev_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long tw_chrdev_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	int request_id;
 	dma_addr_t dma_handle;

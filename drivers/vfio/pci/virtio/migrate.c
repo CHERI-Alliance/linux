@@ -436,7 +436,7 @@ out_unlock:
 }
 
 static long virtiovf_precopy_ioctl(struct file *filp, unsigned int cmd,
-				   unsigned long arg)
+				   user_uintptr_t arg)
 {
 	struct virtiovf_migration_file *migf = filp->private_data;
 	struct virtiovf_pci_core_device *virtvdev = migf->virtvdev;

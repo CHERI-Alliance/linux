@@ -697,7 +697,7 @@ static int f_hidg_get_report(struct file *file, struct usb_hidg_report __user *b
 	return 0;
 }
 
-static long f_hidg_ioctl(struct file *file, unsigned int code, unsigned long arg)
+static long f_hidg_ioctl(struct file *file, unsigned int code, user_uintptr_t arg)
 {
 	switch (code) {
 	case GADGET_HID_READ_GET_REPORT_ID:

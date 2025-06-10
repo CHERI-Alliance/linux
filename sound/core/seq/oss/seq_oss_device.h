@@ -108,7 +108,7 @@ int snd_seq_oss_delete_client(void);
 /* device file interface */
 int snd_seq_oss_open(struct file *file, int level);
 void snd_seq_oss_release(struct seq_oss_devinfo *dp);
-int snd_seq_oss_ioctl(struct seq_oss_devinfo *dp, unsigned int cmd, unsigned long arg);
+int snd_seq_oss_ioctl(struct seq_oss_devinfo *dp, unsigned int cmd, user_uintptr_t arg);
 int snd_seq_oss_read(struct seq_oss_devinfo *dev, char __user *buf, int count);
 int snd_seq_oss_write(struct seq_oss_devinfo *dp, const char __user *buf, int count, struct file *opt);
 __poll_t snd_seq_oss_poll(struct seq_oss_devinfo *dp, struct file *file, poll_table * wait);

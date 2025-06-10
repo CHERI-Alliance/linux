@@ -377,7 +377,7 @@ static int viafb_blank(int blank_mode, struct fb_info *info)
 	return 0;
 }
 
-static int viafb_ioctl(struct fb_info *info, u_int cmd, u_long arg)
+static int viafb_ioctl(struct fb_info *info, u_int cmd, user_uintptr_t arg)
 {
 	union {
 		struct viafb_ioctl_mode viamode;

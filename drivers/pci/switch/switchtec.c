@@ -1200,7 +1200,7 @@ static int ioctl_port_to_pff(struct switchtec_dev *stdev,
 }
 
 static long switchtec_dev_ioctl(struct file *filp, unsigned int cmd,
-				unsigned long arg)
+				user_uintptr_t arg)
 {
 	struct switchtec_user *stuser = filp->private_data;
 	struct switchtec_dev *stdev = stuser->stdev;

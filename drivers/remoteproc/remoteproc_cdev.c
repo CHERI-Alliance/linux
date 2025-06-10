@@ -45,7 +45,7 @@ static ssize_t rproc_cdev_write(struct file *filp, const char __user *buf, size_
 	return ret ? ret : len;
 }
 
-static long rproc_device_ioctl(struct file *filp, unsigned int ioctl, unsigned long arg)
+static long rproc_device_ioctl(struct file *filp, unsigned int ioctl, user_uintptr_t arg)
 {
 	struct rproc *rproc = container_of(filp->f_inode->i_cdev, struct rproc, cdev);
 	void __user *argp = (void __user *)arg;

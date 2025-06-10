@@ -492,7 +492,7 @@ static int rs5c372_rtc_proc(struct device *dev, struct seq_file *seq)
 #endif
 
 #ifdef CONFIG_RTC_INTF_DEV
-static int rs5c372_ioctl(struct device *dev, unsigned int cmd, unsigned long arg)
+static int rs5c372_ioctl(struct device *dev, unsigned int cmd, user_uintptr_t arg)
 {
 	struct rs5c372	*rs5c = i2c_get_clientdata(to_i2c_client(dev));
 	unsigned char	ctrl2;

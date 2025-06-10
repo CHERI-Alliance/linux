@@ -897,7 +897,7 @@ static void slcan_close(struct tty_struct *tty)
 
 /* Perform I/O control on an active SLCAN channel. */
 static int slcan_ioctl(struct tty_struct *tty, unsigned int cmd,
-		       unsigned long arg)
+		       user_uintptr_t arg)
 {
 	struct slcan *sl = tty->disc_data;
 	unsigned int tmp;

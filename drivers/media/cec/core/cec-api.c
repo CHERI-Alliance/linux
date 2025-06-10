@@ -501,7 +501,7 @@ static long cec_s_mode(struct cec_adapter *adap, struct cec_fh *fh,
 	return 0;
 }
 
-static long cec_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+static long cec_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 {
 	struct cec_fh *fh = filp->private_data;
 	struct cec_adapter *adap = fh->adap;

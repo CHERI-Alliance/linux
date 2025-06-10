@@ -1113,7 +1113,7 @@ static int mxser_tiocmset(struct tty_struct *tty,
 	return 0;
 }
 
-static int mxser_cflags_changed(struct mxser_port *info, unsigned long arg,
+static int mxser_cflags_changed(struct mxser_port *info, user_uintptr_t arg,
 		struct async_icount *cprev)
 {
 	struct async_icount cnow;
@@ -1167,7 +1167,7 @@ static int mxser_ioctl_op_mode(struct mxser_port *port, int index, bool set,
 }
 
 static int mxser_ioctl(struct tty_struct *tty,
-		unsigned int cmd, unsigned long arg)
+		unsigned int cmd, user_uintptr_t arg)
 {
 	struct mxser_port *info = tty->driver_data;
 	struct async_icount cnow;

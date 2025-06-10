@@ -467,7 +467,7 @@ err_noinit:
 	return ret;
 }
 
-static long udmabuf_ioctl_create(struct file *filp, unsigned long arg)
+static long udmabuf_ioctl_create(struct file *filp, user_uintptr_t arg)
 {
 	struct udmabuf_create create;
 	struct udmabuf_create_list head;
@@ -486,7 +486,7 @@ static long udmabuf_ioctl_create(struct file *filp, unsigned long arg)
 	return udmabuf_create(filp->private_data, &head, &list);
 }
 
-static long udmabuf_ioctl_create_list(struct file *filp, unsigned long arg)
+static long udmabuf_ioctl_create_list(struct file *filp, user_uintptr_t arg)
 {
 	struct udmabuf_create_list head;
 	struct udmabuf_create_item *list;
@@ -508,7 +508,7 @@ static long udmabuf_ioctl_create_list(struct file *filp, unsigned long arg)
 }
 
 static long udmabuf_ioctl(struct file *filp, unsigned int ioctl,
-			  unsigned long arg)
+			  user_uintptr_t arg)
 {
 	long ret;
 

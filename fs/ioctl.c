@@ -41,7 +41,7 @@
  *
  * Returns 0 on success, -errno on error.
  */
-static int vfs_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+static int vfs_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 {
 	int error = -ENOTTY;
 
@@ -490,7 +490,7 @@ static int ioctl_get_fs_sysfs_path(struct file *file, void __user *argp)
  * changes, as specific LSMs may be affected.
  */
 static int do_vfs_ioctl(struct file *filp, unsigned int fd,
-			unsigned int cmd, unsigned long arg)
+			unsigned int cmd, user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 	struct inode *inode = file_inode(filp);
@@ -538,7 +538,7 @@ static int do_vfs_ioctl(struct file *filp, unsigned int fd,
 		return put_user(inode->i_sb->s_blocksize, (int __user *)argp);
 
 	case FICLONE:
-		return ioctl_file_clone(filp, arg, 0, 0, 0);
+		return ioctl_file_clone(filp, __c_ua(arg), 0, 0, 0);
 
 	case FICLONERANGE:
 		return ioctl_file_clone_range(filp, argp);

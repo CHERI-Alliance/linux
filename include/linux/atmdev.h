@@ -303,7 +303,7 @@ struct atm_ioctl {
 	struct module *owner;
 	/* A module reference is kept if appropriate over this call.
 	 * Return -ENOIOCTLCMD if you don't handle it. */
-	int (*ioctl)(struct socket *, unsigned int cmd, unsigned long arg);
+	int (*ioctl)(struct socket *, unsigned int cmd, user_uintptr_t arg);
 	struct list_head list;
 };
 

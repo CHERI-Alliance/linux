@@ -511,7 +511,7 @@ out_put:
 }
 
 int iommufd_vfio_ioctl(struct iommufd_ctx *ictx, unsigned int cmd,
-		       unsigned long arg)
+		       user_uintptr_t arg)
 {
 	void __user *uarg = (void __user *)arg;
 
@@ -519,9 +519,9 @@ int iommufd_vfio_ioctl(struct iommufd_ctx *ictx, unsigned int cmd,
 	case VFIO_GET_API_VERSION:
 		return VFIO_API_VERSION;
 	case VFIO_SET_IOMMU:
-		return iommufd_vfio_set_iommu(ictx, arg);
+		return iommufd_vfio_set_iommu(ictx, __c_ua(arg));
 	case VFIO_CHECK_EXTENSION:
-		return iommufd_vfio_check_extension(ictx, arg);
+		return iommufd_vfio_check_extension(ictx, __c_ua(arg));
 	case VFIO_IOMMU_GET_INFO:
 		return iommufd_vfio_iommu_get_info(ictx, uarg);
 	case VFIO_IOMMU_MAP_DMA:

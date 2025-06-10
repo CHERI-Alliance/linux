@@ -25,7 +25,7 @@ struct snd_hwdep_ops {
 	__poll_t (*poll)(struct snd_hwdep *hw, struct file *file,
 			     poll_table *wait);
 	int (*ioctl)(struct snd_hwdep *hw, struct file *file,
-		     unsigned int cmd, unsigned long arg);
+		     unsigned int cmd, user_uintptr_t arg);
 	int (*ioctl_compat)(struct snd_hwdep *hw, struct file *file,
 			    unsigned int cmd, unsigned long arg);
 	int (*mmap)(struct snd_hwdep *hw, struct file *file,

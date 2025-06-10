@@ -616,7 +616,7 @@ fifo_pipe_write(struct kiocb *iocb, struct iov_iter *from)
 	return ret;
 }
 
-static long pipe_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+static long pipe_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 {
 	struct pipe_inode_info *pipe = filp->private_data;
 	unsigned int count, head, tail;

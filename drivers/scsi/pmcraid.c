@@ -3460,7 +3460,7 @@ static int pmcraid_check_ioctl_buffer(
 static long pmcraid_chr_ioctl(
 	struct file *filep,
 	unsigned int cmd,
-	unsigned long arg
+	user_uintptr_t arg
 )
 {
 	struct pmcraid_instance *pinstance = NULL;

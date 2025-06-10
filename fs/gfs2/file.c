@@ -322,7 +322,7 @@ static int gfs2_getlabel(struct file *filp, char __user *label)
 	return 0;
 }
 
-static long gfs2_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+static long gfs2_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 {
 	switch(cmd) {
 	case FITRIM:

@@ -583,7 +583,7 @@ static int rv3028_param_set(struct device *dev, struct rtc_param *param)
 	return 0;
 }
 
-static int rv3028_ioctl(struct device *dev, unsigned int cmd, unsigned long arg)
+static int rv3028_ioctl(struct device *dev, unsigned int cmd, user_uintptr_t arg)
 {
 	struct rv3028_data *rv3028 = dev_get_drvdata(dev);
 	int status, ret = 0;

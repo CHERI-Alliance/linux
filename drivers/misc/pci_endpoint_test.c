@@ -477,7 +477,7 @@ static int pci_endpoint_test_validate_xfer_params(struct device *dev,
 }
 
 static int pci_endpoint_test_copy(struct pci_endpoint_test *test,
-				   unsigned long arg)
+				   user_uintptr_t arg)
 {
 	struct pci_endpoint_test_xfer_param param;
 	void *src_addr;
@@ -614,7 +614,7 @@ err_src_phys_addr:
 }
 
 static int pci_endpoint_test_write(struct pci_endpoint_test *test,
-				    unsigned long arg)
+				    user_uintptr_t arg)
 {
 	struct pci_endpoint_test_xfer_param param;
 	u32 flags = 0;
@@ -712,7 +712,7 @@ err_phys_addr:
 }
 
 static int pci_endpoint_test_read(struct pci_endpoint_test *test,
-				   unsigned long arg)
+				   user_uintptr_t arg)
 {
 	struct pci_endpoint_test_xfer_param param;
 	u32 flags = 0;
@@ -922,7 +922,7 @@ static int pci_endpoint_test_doorbell(struct pci_endpoint_test *test)
 }
 
 static long pci_endpoint_test_ioctl(struct file *file, unsigned int cmd,
-				    unsigned long arg)
+				    user_uintptr_t arg)
 {
 	int ret = -EINVAL;
 	enum pci_barno bar;

@@ -44,7 +44,7 @@
 extern const struct drm_driver amdgpu_partition_driver;
 
 long amdgpu_drm_ioctl(struct file *filp,
-		      unsigned int cmd, unsigned long arg);
+		      unsigned int cmd, user_uintptr_t arg);
 
 long amdgpu_kms_compat_ioctl(struct file *filp,
 			     unsigned int cmd, unsigned long arg);

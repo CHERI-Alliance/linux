@@ -57,7 +57,7 @@ static int hfsplus_ioctl_bless(struct file *file, int __user *user_flags)
 	return 0;
 }
 
-long hfsplus_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+long hfsplus_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 

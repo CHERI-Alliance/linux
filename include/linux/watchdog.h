@@ -56,7 +56,7 @@ struct watchdog_ops {
 	int (*set_pretimeout)(struct watchdog_device *, unsigned int);
 	unsigned int (*get_timeleft)(struct watchdog_device *);
 	int (*restart)(struct watchdog_device *, unsigned long, void *);
-	long (*ioctl)(struct watchdog_device *, unsigned int, unsigned long);
+	long (*ioctl)(struct watchdog_device *, unsigned int, user_uintptr_t);
 };
 
 /** struct watchdog_device - The structure that defines a watchdog device

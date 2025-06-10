@@ -623,7 +623,7 @@ static void vtpm_proxy_delete_device(struct proxy_dev *proxy_dev)
  * major and minor numbers for the TPM device.
  */
 static long vtpmx_ioc_new_dev(struct file *file, unsigned int ioctl,
-			      unsigned long arg)
+			      user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 	struct vtpm_proxy_new_dev __user *vtpm_new_dev_p;
@@ -661,7 +661,7 @@ static long vtpmx_ioc_new_dev(struct file *file, unsigned int ioctl,
  *      Returns 0 on success, a negative error code otherwise.
  */
 static long vtpmx_fops_ioctl(struct file *f, unsigned int ioctl,
-			     unsigned long arg)
+			     user_uintptr_t arg)
 {
 	switch (ioctl) {
 	case VTPM_PROXY_IOC_NEW_DEV:

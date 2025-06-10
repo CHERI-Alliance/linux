@@ -3826,7 +3826,7 @@ static __poll_t gsmld_poll(struct tty_struct *tty, struct file *file,
 }
 
 static int gsmld_ioctl(struct tty_struct *tty, unsigned int cmd,
-		       unsigned long arg)
+		       user_uintptr_t arg)
 {
 	struct gsm_config c;
 	struct gsm_config_ext ce;
@@ -4479,7 +4479,7 @@ static int gsmtty_tiocmset(struct tty_struct *tty,
 
 
 static int gsmtty_ioctl(struct tty_struct *tty,
-			unsigned int cmd, unsigned long arg)
+			unsigned int cmd, user_uintptr_t arg)
 {
 	struct gsm_dlci *dlci = tty->driver_data;
 	struct gsm_netconfig nc;

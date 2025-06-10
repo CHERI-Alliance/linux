@@ -653,7 +653,7 @@ static int bt_dev_ioctl(struct socket *sock, unsigned int cmd, void __user *arg)
 	return ret;
 }
 
-int bt_sock_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+int bt_sock_ioctl(struct socket *sock, unsigned int cmd, user_uintptr_t arg)
 {
 	struct sock *sk = sock->sk;
 	struct sk_buff *skb;

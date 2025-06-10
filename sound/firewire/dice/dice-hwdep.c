@@ -120,7 +120,7 @@ static int hwdep_release(struct snd_hwdep *hwdep, struct file *file)
 }
 
 static int hwdep_ioctl(struct snd_hwdep *hwdep, struct file *file,
-		       unsigned int cmd, unsigned long arg)
+		       unsigned int cmd, user_uintptr_t arg)
 {
 	struct snd_dice *dice = hwdep->private_data;
 

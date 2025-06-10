@@ -737,7 +737,7 @@ static int pppoe_getname(struct socket *sock, struct sockaddr *uaddr,
 }
 
 static int pppoe_ioctl(struct socket *sock, unsigned int cmd,
-		unsigned long arg)
+		user_uintptr_t arg)
 {
 	struct sock *sk = sock->sk;
 	struct pppox_sock *po = pppox_sk(sk);

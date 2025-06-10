@@ -1083,7 +1083,7 @@ static void can327_ldisc_close(struct tty_struct *tty)
 }
 
 static int can327_ldisc_ioctl(struct tty_struct *tty, unsigned int cmd,
-			      unsigned long arg)
+			      user_uintptr_t arg)
 {
 	struct can327 *elm = tty->disc_data;
 	unsigned int tmp;

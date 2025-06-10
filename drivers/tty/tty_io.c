@@ -432,7 +432,7 @@ static __poll_t hung_up_tty_poll(struct file *filp, poll_table *wait)
 }
 
 static long hung_up_tty_ioctl(struct file *file, unsigned int cmd,
-		unsigned long arg)
+		user_uintptr_t arg)
 {
 	return cmd == TIOCSPGRP ? -ENOTTY : -EIO;
 }
@@ -2665,7 +2665,7 @@ static struct tty_struct *tty_pair_get_tty(struct tty_struct *tty)
 /*
  * Split this up, as gcc can choke on it otherwise..
  */
-long tty_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+long tty_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct tty_struct *tty = file_tty(file);
 	struct tty_struct *real_tty;

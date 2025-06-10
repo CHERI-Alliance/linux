@@ -498,7 +498,7 @@ static long ptp_mask_en_single(struct timestamp_event_queue *tsevq, void __user 
 }
 
 long ptp_ioctl(struct posix_clock_context *pccontext, unsigned int cmd,
-	       unsigned long arg)
+	       user_uintptr_t arg)
 {
 	struct ptp_clock *ptp = container_of(pccontext->clk, struct ptp_clock, clock);
 	void __user *argptr;

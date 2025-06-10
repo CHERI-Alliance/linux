@@ -266,7 +266,7 @@ static ssize_t asr_write(struct file *file, const char __user *buf,
 	return count;
 }
 
-static long asr_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long asr_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	static const struct watchdog_info ident = {
 		.options =	WDIOF_KEEPALIVEPING |

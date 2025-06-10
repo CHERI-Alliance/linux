@@ -347,7 +347,7 @@ done:
 }
 
 static int
-data_sock_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+data_sock_ioctl(struct socket *sock, unsigned int cmd, user_uintptr_t arg)
 {
 	int			err = 0, id;
 	struct sock		*sk = sock->sk;
@@ -631,7 +631,7 @@ base_sock_release(struct socket *sock)
 }
 
 static int
-base_sock_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+base_sock_ioctl(struct socket *sock, unsigned int cmd, user_uintptr_t arg)
 {
 	int			err = 0, id;
 	struct mISDNdevice	*dev;

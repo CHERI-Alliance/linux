@@ -443,7 +443,7 @@ static int rv3029_set_time(struct device *dev, struct rtc_time *tm)
 				  RV3029_STATUS_PON | RV3029_STATUS_VLOW2, 0);
 }
 
-static int rv3029_ioctl(struct device *dev, unsigned int cmd, unsigned long arg)
+static int rv3029_ioctl(struct device *dev, unsigned int cmd, user_uintptr_t arg)
 {
 	struct rv3029_data *rv3029 = dev_get_drvdata(dev);
 	unsigned long vl = 0;

@@ -933,7 +933,7 @@ static int xsdfec_set_default_config(struct xsdfec_dev *xsdfec)
 }
 
 static long xsdfec_dev_ioctl(struct file *fptr, unsigned int cmd,
-			     unsigned long data)
+			     user_uintptr_t data)
 {
 	struct xsdfec_dev *xsdfec;
 	void __user *arg = (void __user *)data;

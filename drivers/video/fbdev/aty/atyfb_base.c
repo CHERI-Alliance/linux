@@ -244,7 +244,7 @@ static int atyfb_setcolreg(u_int regno, u_int red, u_int green, u_int blue,
 static int atyfb_pan_display(struct fb_var_screeninfo *var,
 			     struct fb_info *info);
 static int atyfb_blank(int blank, struct fb_info *info);
-static int atyfb_ioctl(struct fb_info *info, u_int cmd, u_long arg);
+static int atyfb_ioctl(struct fb_info *info, u_int cmd, user_uintptr_t arg);
 #ifdef CONFIG_COMPAT
 static int atyfb_compat_ioctl(struct fb_info *info, u_int cmd, u_long arg)
 {
@@ -1824,7 +1824,7 @@ struct atyclk {
 #define ATYIO_FEATW		0x41545903	/* ATY\03 */
 #endif
 
-static int atyfb_ioctl(struct fb_info *info, u_int cmd, u_long arg)
+static int atyfb_ioctl(struct fb_info *info, u_int cmd, user_uintptr_t arg)
 {
 	struct atyfb_par *par = (struct atyfb_par *) info->par;
 #ifdef __sparc__

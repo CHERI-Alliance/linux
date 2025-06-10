@@ -1765,7 +1765,7 @@ static int ax25_shutdown(struct socket *sk, int how)
 	return -EOPNOTSUPP;
 }
 
-static int ax25_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+static int ax25_ioctl(struct socket *sock, unsigned int cmd, user_uintptr_t arg)
 {
 	struct sock *sk = sock->sk;
 	void __user *argp = (void __user *)arg;

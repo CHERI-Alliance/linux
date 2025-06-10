@@ -197,7 +197,7 @@ out:
 }
 
 static long map_benchmark_ioctl(struct file *file, unsigned int cmd,
-		unsigned long arg)
+		user_uintptr_t arg)
 {
 	struct map_benchmark_data *map = file->private_data;
 	void __user *argp = (void __user *)arg;

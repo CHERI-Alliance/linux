@@ -201,7 +201,7 @@ static __poll_t rtc_dev_poll(struct file *file, poll_table *wait)
 }
 
 static long rtc_dev_ioctl(struct file *file,
-			  unsigned int cmd, unsigned long arg)
+			  unsigned int cmd, user_uintptr_t arg)
 {
 	int err = 0;
 	struct rtc_device *rtc = file->private_data;

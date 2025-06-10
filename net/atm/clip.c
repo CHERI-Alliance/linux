@@ -679,7 +679,7 @@ static int atm_init_atmarp(struct atm_vcc *vcc)
 	return 0;
 }
 
-static int clip_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+static int clip_ioctl(struct socket *sock, unsigned int cmd, user_uintptr_t arg)
 {
 	struct atm_vcc *vcc = ATM_SD(sock);
 	struct sock *sk = sock->sk;

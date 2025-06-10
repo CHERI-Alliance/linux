@@ -311,7 +311,7 @@ static int inotify_release(struct inode *ignored, struct file *file)
 }
 
 static long inotify_ioctl(struct file *file, unsigned int cmd,
-			  unsigned long arg)
+			  user_uintptr_t arg)
 {
 	struct fsnotify_group *group;
 	struct fsnotify_event *fsn_event;

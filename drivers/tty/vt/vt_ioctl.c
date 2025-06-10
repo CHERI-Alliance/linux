@@ -249,7 +249,7 @@ int vt_waitactive(int n)
  *
  * Called with the console lock held.
  */
-static int vt_kdsetmode(struct vc_data *vc, unsigned long mode)
+static int vt_kdsetmode(struct vc_data *vc, user_uintptr_t mode)
 {
 	switch (mode) {
 	case KD_GRAPHICS:
@@ -281,7 +281,7 @@ static int vt_kdsetmode(struct vc_data *vc, unsigned long mode)
 }
 
 static int vt_k_ioctl(struct tty_struct *tty, unsigned int cmd,
-		unsigned long arg, bool perm)
+		user_uintptr_t arg, bool perm)
 {
 	struct vc_data *vc = tty->driver_data;
 	void __user *up = (void __user *)arg;
@@ -452,7 +452,7 @@ static int vt_k_ioctl(struct tty_struct *tty, unsigned int cmd,
 	case KDSIGACCEPT:
 		if (!perm || !capable(CAP_KILL))
 			return -EPERM;
-		if (!valid_signal(arg) || arg < 1 || arg == SIGKILL)
+		if (!valid_signal(__c_ua(arg)) || arg < 1 || arg == SIGKILL)
 			return -EINVAL;
 
 		spin_lock_irq(&vt_spawn_con.lock);
@@ -725,7 +725,7 @@ static int vt_resizex(struct vc_data *vc, struct vt_consize __user *cs)
  * capability to modify any console, not just the fg_console.
  */
 int vt_ioctl(struct tty_struct *tty,
-	     unsigned int cmd, unsigned long arg)
+	     unsigned int cmd, user_uintptr_t arg)
 {
 	struct vc_data *vc = tty->driver_data;
 	void __user *up = (void __user *)arg;

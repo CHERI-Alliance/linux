@@ -262,7 +262,7 @@ static int cap_ioctl(struct gb_cap *cap, unsigned int cmd,
 }
 
 static long cap_ioctl_unlocked(struct file *file, unsigned int cmd,
-			       unsigned long arg)
+			       user_uintptr_t arg)
 {
 	struct gb_cap *cap = file->private_data;
 	struct gb_bundle *bundle = cap->connection->bundle;

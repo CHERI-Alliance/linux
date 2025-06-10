@@ -49,7 +49,7 @@ void deregister_atm_ioctl(struct atm_ioctl *ioctl)
 EXPORT_SYMBOL(deregister_atm_ioctl);
 
 static int do_vcc_ioctl(struct socket *sock, unsigned int cmd,
-			unsigned long arg, int compat)
+			user_uintptr_t arg, int compat)
 {
 	struct sock *sk = sock->sk;
 	struct atm_vcc *vcc;
@@ -215,7 +215,7 @@ done:
 	return error;
 }
 
-int vcc_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+int vcc_ioctl(struct socket *sock, unsigned int cmd, user_uintptr_t arg)
 {
 	return do_vcc_ioctl(sock, cmd, arg, 0);
 }

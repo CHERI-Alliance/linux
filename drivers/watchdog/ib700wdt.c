@@ -164,7 +164,7 @@ static ssize_t ibwdt_write(struct file *file, const char __user *buf,
 	return count;
 }
 
-static long ibwdt_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long ibwdt_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	int new_margin;
 	void __user *argp = (void __user *)arg;

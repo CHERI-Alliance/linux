@@ -68,7 +68,7 @@ static int aspeed_lpc_ctrl_mmap(struct file *file, struct vm_area_struct *vma)
 }
 
 static long aspeed_lpc_ctrl_ioctl(struct file *file, unsigned int cmd,
-		unsigned long param)
+		user_uintptr_t param)
 {
 	struct aspeed_lpc_ctrl *lpc_ctrl = file_aspeed_lpc_ctrl(file);
 	struct device *dev = file->private_data;

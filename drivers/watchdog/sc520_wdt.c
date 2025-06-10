@@ -270,7 +270,7 @@ static int fop_close(struct inode *inode, struct file *file)
 	return 0;
 }
 
-static long fop_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long fop_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 	int __user *p = argp;

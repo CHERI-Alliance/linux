@@ -295,7 +295,7 @@ out_unlock:
 }
 
 static long bt_bmc_ioctl(struct file *file, unsigned int cmd,
-			 unsigned long param)
+			 user_uintptr_t param)
 {
 	struct bt_bmc *bt_bmc = file_bt_bmc(file);
 

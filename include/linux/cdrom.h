@@ -104,7 +104,7 @@ int cdrom_read_tocentry(struct cdrom_device_info *cdi,
 int cdrom_open(struct cdrom_device_info *cdi, blk_mode_t mode);
 void cdrom_release(struct cdrom_device_info *cdi);
 int cdrom_ioctl(struct cdrom_device_info *cdi, struct block_device *bdev,
-		unsigned int cmd, unsigned long arg);
+		unsigned int cmd, user_uintptr_t arg);
 extern unsigned int cdrom_check_events(struct cdrom_device_info *cdi,
 				       unsigned int clearing);
 

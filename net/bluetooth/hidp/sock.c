@@ -123,7 +123,7 @@ static int do_hidp_sock_ioctl(struct socket *sock, unsigned int cmd, void __user
 	return -EINVAL;
 }
 
-static int hidp_sock_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+static int hidp_sock_ioctl(struct socket *sock, unsigned int cmd, user_uintptr_t arg)
 {
 	return do_hidp_sock_ioctl(sock, cmd, (void __user *)arg);
 }

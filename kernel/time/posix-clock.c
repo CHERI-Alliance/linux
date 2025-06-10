@@ -73,7 +73,7 @@ static __poll_t posix_clock_poll(struct file *fp, poll_table *wait)
 }
 
 static long posix_clock_ioctl(struct file *fp,
-			      unsigned int cmd, unsigned long arg)
+			      unsigned int cmd, user_uintptr_t arg)
 {
 	struct posix_clock_context *pccontext = fp->private_data;
 	struct posix_clock *clk = get_posix_clock(fp);

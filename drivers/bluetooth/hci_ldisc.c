@@ -754,7 +754,7 @@ static int hci_uart_set_flags(struct hci_uart *hu, unsigned long flags)
  * Return Value:    Command dependent
  */
 static int hci_uart_tty_ioctl(struct tty_struct *tty, unsigned int cmd,
-			      unsigned long arg)
+			      user_uintptr_t arg)
 {
 	struct hci_uart *hu = tty->disc_data;
 	int err = 0;
@@ -794,7 +794,7 @@ static int hci_uart_tty_ioctl(struct tty_struct *tty, unsigned int cmd,
 		if (test_bit(HCI_UART_PROTO_SET, &hu->flags))
 			err = -EBUSY;
 		else
-			err = hci_uart_set_flags(hu, arg);
+			err = hci_uart_set_flags(hu, __c_ua(arg));
 		break;
 
 	case HCIUARTGETFLAGS:

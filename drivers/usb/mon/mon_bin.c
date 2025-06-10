@@ -986,7 +986,7 @@ static int mon_bin_queued(struct mon_reader_bin *rp)
 
 /*
  */
-static long mon_bin_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long mon_bin_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct mon_reader_bin *rp = file->private_data;
 	// struct mon_bus* mbus = rp->r.m_bus;

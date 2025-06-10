@@ -1224,7 +1224,7 @@ static int bcm_vk_mmap(struct file *file, struct vm_area_struct *vma)
 				  vma->vm_page_prot);
 }
 
-static long bcm_vk_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long bcm_vk_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	long ret = -EINVAL;
 	struct bcm_vk_ctx *ctx = file->private_data;

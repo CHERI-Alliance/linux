@@ -84,7 +84,7 @@ void vfio_platform_release_common(struct vfio_platform_device *vdev);
 int vfio_platform_open_device(struct vfio_device *core_vdev);
 void vfio_platform_close_device(struct vfio_device *core_vdev);
 long vfio_platform_ioctl(struct vfio_device *core_vdev,
-			 unsigned int cmd, unsigned long arg);
+			 unsigned int cmd, user_uintptr_t arg);
 ssize_t vfio_platform_read(struct vfio_device *core_vdev,
 			   char __user *buf, size_t count,
 			   loff_t *ppos);

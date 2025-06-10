@@ -1181,7 +1181,7 @@ static int dvb_demux_do_ioctl(struct file *file,
 }
 
 static long dvb_demux_ioctl(struct file *file, unsigned int cmd,
-			    unsigned long arg)
+			    user_uintptr_t arg)
 {
 	return dvb_usercopy(file, cmd, arg, dvb_demux_do_ioctl);
 }
@@ -1329,7 +1329,7 @@ static int dvb_dvr_do_ioctl(struct file *file,
 }
 
 static long dvb_dvr_ioctl(struct file *file,
-			 unsigned int cmd, unsigned long arg)
+			 unsigned int cmd, user_uintptr_t arg)
 {
 	return dvb_usercopy(file, cmd, arg, dvb_dvr_do_ioctl);
 }

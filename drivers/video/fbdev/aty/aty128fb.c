@@ -469,7 +469,7 @@ static int aty128fb_setcolreg(u_int regno, u_int red, u_int green, u_int blue,
 static int aty128fb_pan_display(struct fb_var_screeninfo *var,
 			   struct fb_info *fb);
 static int aty128fb_blank(int blank, struct fb_info *fb);
-static int aty128fb_ioctl(struct fb_info *info, u_int cmd, unsigned long arg);
+static int aty128fb_ioctl(struct fb_info *info, u_int cmd, user_uintptr_t arg);
 static int aty128fb_sync(struct fb_info *info);
 
     /*
@@ -2296,7 +2296,7 @@ static int aty128fb_setcolreg(u_int regno, u_int red, u_int green, u_int blue,
 /* in param: u32*	backlight value: 0 to 15 */
 #define FBIO_ATY128_SET_MIRROR	_IOW('@', 2, __u32)
 
-static int aty128fb_ioctl(struct fb_info *info, u_int cmd, u_long arg)
+static int aty128fb_ioctl(struct fb_info *info, u_int cmd, user_uintptr_t arg)
 {
 	struct aty128fb_par *par = info->par;
 	u32 value;

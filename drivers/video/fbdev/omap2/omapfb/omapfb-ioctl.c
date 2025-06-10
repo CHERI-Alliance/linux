@@ -568,7 +568,7 @@ static int omapfb_wait_for_go(struct fb_info *fbi)
 	return r;
 }
 
-int omapfb_ioctl(struct fb_info *fbi, unsigned int cmd, unsigned long arg)
+int omapfb_ioctl(struct fb_info *fbi, unsigned int cmd, user_uintptr_t arg)
 {
 	struct omapfb_info *ofbi = FB2OFB(fbi);
 	struct omapfb2_device *fbdev = ofbi->fbdev;

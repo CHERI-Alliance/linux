@@ -1016,7 +1016,7 @@ static void dmz_io_hints(struct dm_target *ti, struct queue_limits *limits)
  * Pass on ioctl to the backend device.
  */
 static int dmz_prepare_ioctl(struct dm_target *ti, struct block_device **bdev,
-			     unsigned int cmd, unsigned long arg, bool *forward)
+			     unsigned int cmd, user_uintptr_t arg, bool *forward)
 {
 	struct dmz_target *dmz = ti->private;
 	struct dmz_dev *dev = &dmz->dev[0];

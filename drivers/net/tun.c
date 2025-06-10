@@ -3038,7 +3038,7 @@ static unsigned char tun_get_addr_len(unsigned short type)
 }
 
 static long __tun_chr_ioctl(struct file *file, unsigned int cmd,
-			    unsigned long arg, int ifreq_len)
+			    user_uintptr_t arg, int ifreq_len)
 {
 	struct tun_file *tfile = file->private_data;
 	struct net *net = sock_net(&tfile->sk);
@@ -3213,7 +3213,7 @@ static long __tun_chr_ioctl(struct file *file, unsigned int cmd,
 		break;
 
 	case TUNSETOFFLOAD:
-		ret = set_offload(tun, arg);
+		ret = set_offload(tun, __c_ua(arg));
 		break;
 
 	case TUNSETTXFILTER:
@@ -3332,7 +3332,7 @@ unlock:
 }
 
 static long tun_chr_ioctl(struct file *file,
-			  unsigned int cmd, unsigned long arg)
+			  unsigned int cmd, user_uintptr_t arg)
 {
 	return __tun_chr_ioctl(file, cmd, arg, sizeof (struct ifreq));
 }

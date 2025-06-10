@@ -585,7 +585,7 @@ out:
 	return error;
 }
 
-static int svc_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+static int svc_ioctl(struct socket *sock, unsigned int cmd, user_uintptr_t arg)
 {
 	int error, ep_ref;
 	struct sockaddr_atmsvc sa;
