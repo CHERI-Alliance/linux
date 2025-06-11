@@ -8,6 +8,7 @@
 
 #include <linux/errno.h>
 #include <linux/time.h>
+#include <linux/stat.h>
 #include "freestanding.h"
 #include "signal_common.h"
 
@@ -48,4 +49,25 @@ int sigaltstack(const stack_t *ss, stack_t *old_ss)
 int setitimer(int which, const struct itimerval *new_value, struct itimerval *old_value)
 {
 	return syscall(__NR_setitimer, which, new_value, old_value);
+}
+
+mqd_t mq_open(const char *name, int oflag)
+{
+	return syscall(__NR_mq_open, name, oflag, 0666, NULL);
+}
+
+int mq_unlink(const char *name)
+{
+	return syscall(__NR_mq_unlink, name);
+}
+
+int mq_notify(mqd_t mqdes, const struct sigevent *sevp)
+{
+	return syscall(__NR_mq_notify, mqdes, sevp);
+}
+
+int mq_timedsend(mqd_t mqdes, const char *msg, size_t len, unsigned int prio,
+		 const struct timespec *timeout)
+{
+	return syscall(__NR_mq_timedsend, mqdes, msg, len, prio, timeout);
 }
