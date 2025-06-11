@@ -2468,7 +2468,11 @@ set_status:
 }
 
 static int get_compat_pages_array(const void __user *chunk_pages[],
+#if defined(CONFIG_CHERI_PURECAP_UABI) && !defined(CONFIG_CHERI_KERNEL)
+				  const void * __capability * __capability pages,
+#else
 				  const void __user * __user *pages,
+#endif
 				  unsigned long chunk_offset,
 				  unsigned long chunk_nr)
 {
