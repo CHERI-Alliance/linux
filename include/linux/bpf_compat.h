@@ -1,6 +1,9 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /* Copyright (C) 2023 Arm Ltd */
 
+#define bpf_compat_ptr_field(dest, src, field) \
+	((dest)->field = (__kernel_aligned_uintptr_t)compat_ptr((src)->field))
+
 union compat_bpf_attr {
 	struct { /* anonymous struct used by BPF_MAP_CREATE command */
 		__u32	map_type;	/* one of enum bpf_map_type */
@@ -42,6 +45,12 @@ union compat_bpf_attr {
 		 * If provided, map_flags should have BPF_F_TOKEN_FD flag set.
 		 */
 		__s32	map_token_fd;
+
+		/* Hash of the program that has exclusive access to the map.
+		 */
+		__aligned_u64 excl_prog_hash;
+		/* Size of the passed excl_prog_hash. */
+		__u32 excl_prog_hash_size;
 	};
 
 	struct { /* anonymous struct used by BPF_MAP_*_ELEM commands */
@@ -125,6 +134,16 @@ union compat_bpf_attr {
 		 * continuous.
 		 */
 		__u32		fd_array_cnt;
+		/* Pointer to a buffer containing the signature of the BPF
+		 * program.
+		 */
+		__aligned_u64   signature;
+		/* Size of the signature buffer in bytes. */
+		__u32           signature_size;
+		/* ID of the kernel keyring to be used for signature
+		 * verification.
+		 */
+		__s32           keyring_id;
 	};
 
 	struct { /* anonymous struct used by BPF_OBJ_* commands */
@@ -332,6 +351,14 @@ union compat_bpf_attr {
 				};
 				__u64		expected_revision;
 			} netkit;
+			struct {
+				union {
+					__u32   relative_fd;
+					__u32   relative_id;
+				};
+				__u64           expected_revision;
+			} cgroup;
+
 		};
 	} link_create;
 
@@ -379,6 +406,13 @@ union compat_bpf_attr {
 		__u32		flags;
 		__u32		bpffs_fd;
 	} token_create;
+
+	struct {
+		__aligned_u64	stream_buf;
+		__u32		stream_buf_len;
+		__u32		stream_id;
+		__u32		prog_fd;
+	} prog_stream_read;
 
 } __attribute__((aligned(8)));
 
