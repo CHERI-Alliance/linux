@@ -1754,10 +1754,15 @@ static int copy_compat_semid_to_user(void __user *buf, struct semid64_ds *in,
 		struct compat_semid64_ds v;
 		memset(&v, 0, sizeof(v));
 		to_compat_ipc64_perm(&v.sem_perm, &in->sem_perm);
+#ifdef CONFIG_COMPAT64
+		v.sem_otime = in->sem_otime;
+		v.sem_ctime = in->sem_ctime;
+#else
 		v.sem_otime	 = lower_32_bits(in->sem_otime);
 		v.sem_otime_high = upper_32_bits(in->sem_otime);
 		v.sem_ctime	 = lower_32_bits(in->sem_ctime);
 		v.sem_ctime_high = upper_32_bits(in->sem_ctime);
+#endif
 		v.sem_nsems = in->sem_nsems;
 		return copy_to_user(buf, &v, sizeof(v));
 	} else {
@@ -1771,7 +1776,7 @@ static int copy_compat_semid_to_user(void __user *buf, struct semid64_ds *in,
 	}
 }
 
-static long compat_ksys_semctl(int semid, int semnum, int cmd, int arg, int version)
+static long compat_ksys_semctl(int semid, int semnum, int cmd, compat_ulong_t arg, int version)
 {
 	void __user *p = compat_ptr(arg);
 	struct ipc_namespace *ns;
@@ -1816,7 +1821,7 @@ static long compat_ksys_semctl(int semid, int semnum, int cmd, int arg, int vers
 	}
 }
 
-COMPAT_SYSCALL_DEFINE4(semctl, int, semid, int, semnum, int, cmd, int, arg)
+COMPAT_SYSCALL_DEFINE4(semctl, int, semid, int, semnum, int, cmd, compat_ulong_t, arg)
 {
 	return compat_ksys_semctl(semid, semnum, cmd, arg, IPC_64);
 }
