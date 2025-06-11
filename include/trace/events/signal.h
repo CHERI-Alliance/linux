@@ -103,14 +103,14 @@ TRACE_EVENT(signal_deliver,
 		__field(	int,		sig		)
 		__field(	int,		errno		)
 		__field(	int,		code		)
-		__field(	unsigned long,	sa_handler	)
+		__field(	ptraddr_t,	sa_handler	)
 		__field(	unsigned long,	sa_flags	)
 	),
 
 	TP_fast_assign(
 		__entry->sig	= sig;
 		TP_STORE_SIGINFO(__entry, info);
-		__entry->sa_handler	= (user_uintptr_t)ka->sa.sa_handler;
+		__entry->sa_handler	= __c_pa_u(ka->sa.sa_handler);
 		__entry->sa_flags	= ka->sa.sa_flags;
 	),
 
