@@ -435,6 +435,10 @@ HWCAP2_SME_SF8DP4
 HWCAP2_POE
     Functionality implied by ID_AA64MMFR3_EL1.S1POE == 0b0001.
 
+HWCAP2_MORELLO
+    Functionality implied by ID_AA64PFR1_EL1.CE == 0b0001, as described
+    by Documentation/arm64/morello.rst.
+
 4. Unused AT_HWCAP bits
 -----------------------
 
