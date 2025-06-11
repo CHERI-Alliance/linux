@@ -18,7 +18,7 @@ static __always_inline void arch_exit_to_user_mode_work(struct pt_regs *regs,
 {
 	if (ti_work & _TIF_MTE_ASYNC_FAULT) {
 		clear_thread_flag(TIF_MTE_ASYNC_FAULT);
-		send_sig_fault(SIGSEGV, SEGV_MTEAERR, (void __user *)NULL, current);
+		send_sig_fault(SIGSEGV, SEGV_MTEAERR, as_user_ptr(NULL), current);
 	}
 
 	if (ti_work & _TIF_FOREIGN_FPSTATE)
