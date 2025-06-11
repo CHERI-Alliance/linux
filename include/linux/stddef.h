@@ -12,6 +12,9 @@ enum {
 	true	= 1
 };
 
+#define copy_field(DEST, SRC, FIELD) \
+	((DEST)->FIELD = (SRC)->FIELD)
+
 #undef offsetof
 #define offsetof(TYPE, MEMBER)	__builtin_offsetof(TYPE, MEMBER)
 
