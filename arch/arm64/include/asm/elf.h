@@ -158,10 +158,16 @@ typedef struct user_fpsimd_state elf_fpregset_t;
  */
 #define ELF_PLAT_INIT(_r, load_addr)	(_r)->regs[0] = 0
 
+#define SET_PERSONALITY_AARCH64()					\
+({									\
+	current->personality &= ~READ_IMPLIES_EXEC;			\
+})
+
 #define SET_PERSONALITY(ex)						\
 ({									\
 	clear_thread_flag(TIF_32BIT);					\
-	current->personality &= ~READ_IMPLIES_EXEC;			\
+	clear_thread_flag(TIF_64BIT_COMPAT);				\
+	SET_PERSONALITY_AARCH64();					\
 })
 
 /* update AT_VECTOR_SIZE_ARCH if the number of NEW_AUX_ENT entries changes */
@@ -211,6 +217,12 @@ extern int arch_setup_additional_pages(struct linux_binprm *bprm,
 #define COMPAT_ELF_NGREG		ELF_NGREG
 typedef unsigned long			compat_elf_greg_t;
 typedef compat_elf_greg_t		compat_elf_gregset_t[COMPAT_ELF_NGREG];
+
+#define COMPAT_SET_PERSONALITY(ex)					\
+({									\
+	set_thread_flag(TIF_64BIT_COMPAT);				\
+	SET_PERSONALITY_AARCH64();					\
+})
 
 #else /* !CONFIG_COMPAT64 */
 
