@@ -80,16 +80,16 @@ typedef struct drm_version_32 {
 	int version_major;	  /* Major version */
 	int version_minor;	  /* Minor version */
 	int version_patchlevel;	   /* Patch level */
-	u32 name_len;		  /* Length of name buffer */
-	u32 name;		  /* Name of driver */
-	u32 date_len;		  /* Length of date buffer */
-	u32 date;		  /* User-space buffer to hold date */
-	u32 desc_len;		  /* Length of desc buffer */
-	u32 desc;		  /* User-space buffer to hold desc */
+	compat_size_t name_len;	  /* Length of name buffer */
+	compat_uptr_t name;	  /* Name of driver */
+	compat_size_t date_len;	  /* Length of date buffer */
+	compat_uptr_t date;	  /* User-space buffer to hold date */
+	compat_size_t desc_len;	  /* Length of desc buffer */
+	compat_uptr_t desc;	  /* User-space buffer to hold desc */
 } drm_version32_t;
 
 static int compat_drm_version(struct file *file, unsigned int cmd,
-			      unsigned long arg)
+			      user_uintptr_t arg)
 {
 	drm_version32_t v32;
 	struct drm_version v;
@@ -125,12 +125,12 @@ static int compat_drm_version(struct file *file, unsigned int cmd,
 }
 
 typedef struct drm_unique32 {
-	u32 unique_len;	/* Length of unique */
-	u32 unique;	/* Unique name for driver instantiation */
+	compat_size_t unique_len;	/* Length of unique */
+	compat_uptr_t unique;		/* Unique name for driver instantiation */
 } drm_unique32_t;
 
 static int compat_drm_getunique(struct file *file, unsigned int cmd,
-				unsigned long arg)
+				user_uintptr_t arg)
 {
 	drm_unique32_t uq32;
 	struct drm_unique uq;
@@ -157,23 +157,23 @@ static int compat_drm_getunique(struct file *file, unsigned int cmd,
 }
 
 static int compat_drm_setunique(struct file *file, unsigned int cmd,
-				unsigned long arg)
+				user_uintptr_t arg)
 {
 	/* it's dead */
 	return -EINVAL;
 }
 
 typedef struct drm_client32 {
-	int idx;	/* Which client desired? */
-	int auth;	/* Is client authenticated? */
-	u32 pid;	/* Process ID */
-	u32 uid;	/* User ID */
-	u32 magic;	/* Magic */
-	u32 iocs;	/* Ioctl count */
+	int idx;		/* Which client desired? */
+	int auth;		/* Is client authenticated? */
+	compat_ulong_t pid;	/* Process ID */
+	compat_ulong_t uid;	/* User ID */
+	compat_ulong_t magic;	/* Magic */
+	compat_ulong_t iocs;	/* Ioctl count */
 } drm_client32_t;
 
 static int compat_drm_getclient(struct file *file, unsigned int cmd,
-				unsigned long arg)
+				user_uintptr_t arg)
 {
 	drm_client32_t c32;
 	drm_client32_t __user *argp = (void __user *)arg;
@@ -204,15 +204,15 @@ static int compat_drm_getclient(struct file *file, unsigned int cmd,
 }
 
 typedef struct drm_stats32 {
-	u32 count;
+	compat_ulong_t count;
 	struct {
-		u32 value;
+		compat_ulong_t value;
 		enum drm_stat_type type;
 	} data[15];
 } drm_stats32_t;
 
 static int compat_drm_getstats(struct file *file, unsigned int cmd,
-			       unsigned long arg)
+			       user_uintptr_t arg)
 {
 	drm_stats32_t __user *argp = (void __user *)arg;
 
@@ -242,14 +242,14 @@ static int compat_drm_update_draw(struct file *file, unsigned int cmd,
 struct drm_wait_vblank_request32 {
 	enum drm_vblank_seq_type type;
 	unsigned int sequence;
-	u32 signal;
+	compat_ulong_t signal;
 };
 
 struct drm_wait_vblank_reply32 {
 	enum drm_vblank_seq_type type;
 	unsigned int sequence;
-	s32 tval_sec;
-	s32 tval_usec;
+	compat_long_t tval_sec;
+	compat_long_t tval_usec;
 };
 
 typedef union drm_wait_vblank32 {
@@ -258,7 +258,7 @@ typedef union drm_wait_vblank32 {
 } drm_wait_vblank32_t;
 
 static int compat_drm_wait_vblank(struct file *file, unsigned int cmd,
-				  unsigned long arg)
+				  user_uintptr_t arg)
 {
 	drm_wait_vblank32_t __user *argp = (void __user *)arg;
 	drm_wait_vblank32_t req32;
@@ -366,24 +366,25 @@ long drm_compat_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	struct drm_device *dev = file_priv->minor->dev;
 	drm_ioctl_compat_t *fn;
 	int ret;
+	user_uintptr_t argp = (user_uintptr_t)compat_ptr(arg);
 
 	/* Assume that ioctls without an explicit compat routine will just
 	 * work.  This may not always be a good assumption, but it's better
 	 * than always failing.
 	 */
 	if (nr >= ARRAY_SIZE(drm_compat_ioctls))
-		return drm_ioctl(filp, cmd, arg);
+		return drm_ioctl(filp, cmd, argp);
 
 	fn = drm_compat_ioctls[nr].fn;
 	if (!fn)
-		return drm_ioctl(filp, cmd, arg);
+		return drm_ioctl(filp, cmd, argp);
 
 	drm_dbg_core(dev, "comm=\"%s\", pid=%d, dev=0x%lx, auth=%d, %s\n",
 		     current->comm, task_pid_nr(current),
 		     (long)old_encode_dev(file_priv->minor->kdev->devt),
 		     file_priv->authenticated,
 		     drm_compat_ioctls[nr].name);
-	ret = (*fn)(filp, cmd, arg);
+	ret = (*fn)(filp, cmd, argp);
 	if (ret)
 		drm_dbg_core(dev, "ret = %d\n", ret);
 	return ret;
