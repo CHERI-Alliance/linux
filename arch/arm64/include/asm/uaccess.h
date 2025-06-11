@@ -32,21 +32,15 @@
 				".arch morello+c64\n"
 #define __ASM_SWITCH_TO_A64	"	bx	#4\n"	\
 				".arch morello\n"
-#define __ASM_RO_UPTR_CONSTR	"C"
-#define __ASM_RW_UPTR_CONSTR	"+C"
 #else
 #define __ASM_SWITCH_TO_C64
 #define __ASM_SWITCH_TO_A64
-#define __ASM_RO_UPTR_CONSTR	"r"
-#define __ASM_RW_UPTR_CONSTR	"+r"
 #endif
 
 #define __ASM_UACCESS_BEFORE	__ASM_SWITCH_TO_C64
 #define __ASM_UACCESS_AFTER	__ASM_SWITCH_TO_A64
 #define __ASM_KACCESS_BEFORE
 #define __ASM_KACCESS_AFTER
-#define __ASM_RO_KPTR_CONSTR	"r"
-#define __ASM_RW_KPTR_CONSTR	"+r"
 
 static inline int __access_ok(const void __user *ptr, unsigned long size);
 
@@ -238,7 +232,7 @@ static inline void __user *__uaccess_mask_ptr(const void __user *ptr)
 	__ASM_##type##ACCESS_AFTER					\
 	_ASM_EXTABLE_##type##ACCESS_ERR_ZERO(1b, 2b, %w0, %w1)		\
 	: "+r" (__gma_err), "=r" (x)					\
-	: __ASM_RO_##type##PTR_CONSTR (addr));				\
+	: "r" (addr));				\
 	if (__gma_err) goto label; } while (0)
 #endif
 
@@ -340,7 +334,7 @@ do {									\
 	"2:\n"								\
 	__ASM_##type##ACCESS_AFTER					\
 	_ASM_EXTABLE_##type##ACCESS(1b, %l2)				\
-	: : "rZ" (x), __ASM_RO_##type##PTR_CONSTR (addr) : : label)
+	: : "rZ" (x), "r" (addr) : : label)
 
 #define __raw_put_mem(str, x, ptr, label, type)					\
 do {										\
@@ -498,7 +492,7 @@ do {									\
 	__ASM_UACCESS_AFTER						\
 	_ASM_EXTABLE_UACCESS_ERR_ZERO(1b, 2b, %w0, %w1)			\
 	: "+r" (err), "=C" (x)						\
-	: __ASM_RO_UPTR_CONSTR (ptr));					\
+	: "r" (ptr));							\
 	uaccess_ttbr0_disable();					\
 } while (0)
 
@@ -535,7 +529,7 @@ do {									\
 	__ASM_UACCESS_AFTER						\
 	_ASM_EXTABLE_UACCESS_ERR(1b, 2b, %w0)				\
 	: "+r" (err)							\
-	: "CZ" (x), __ASM_RO_UPTR_CONSTR (ptr));			\
+	: "CZ" (x), "r" (ptr));						\
 	uaccess_ttbr0_disable();					\
 } while (0)
 
