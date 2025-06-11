@@ -348,3 +348,18 @@ accidentally providing capabilities to userspace in PCuABI.
 | routines suffixed with ``with_captags``. See ``<linux/uaccess.h>``    |
 | for details.                                                          |
 +-----------------------------------------------------------------------+
+
+Managing user pointers by mm subsystem
+======================================
+
+The user pointers created by the Linux mm subsystem are referred to as
+owning capabilities in PCuABI and have the owning permission bit
+CHERI_PERM_SW_VMEM set. CHERI bounds representability is also considered for
+user pointer bounds. The APIs below consider those requirements while
+creating and checking user pointers.
+
+* ``check_user_ptr_owning(ptr, len)``
+* ``make_user_ptr_owning(reserv, len)``
+* ``user_ptr_owning_perms_from_prot(prot, vm_flags)``
+
+See ``<linux/user_ptr.h>`` for details on how to use them.
