@@ -105,6 +105,7 @@
 #include <uapi/linux/pidfd.h>
 #include <linux/pidfs.h>
 #include <linux/tick.h>
+#include <linux/mm_reserv.h>
 
 #include <asm/pgalloc.h>
 #include <linux/uaccess.h>
