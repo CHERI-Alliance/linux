@@ -4,11 +4,13 @@
 # lib.mk sets CC. This switch triggers it to clang
 LLVM := 1
 
+CLANG_FLAGS = --target=aarch64-linux-gnu
 CFLAGS_PURECAP = -march=morello+c64 -mabi=purecap
-CFLAGS_COMMON = -g -static -nostdlib -ffreestanding -Wall -Wextra -MMD
-CFLAGS_CLANG = --target=aarch64-linux-gnu -integrated-as
-LDFLAGS := -fuse-ld=lld
+CFLAGS_COMMON = -g -ffreestanding -Wall -Wextra -MMD
+CFLAGS_COMMON += -nostdinc -isystem $(shell $(CC) -print-file-name=include 2>/dev/null)
+CFLAGS_CLANG = $(CLANG_FLAGS) -integrated-as
 CFLAGS += $(CFLAGS_CLANG) $(CFLAGS_PURECAP) $(CFLAGS_COMMON)
+LDFLAGS := -fuse-ld=lld $(CLANG_FLAGS) -nostdlib -static
 
 SRCS := $(wildcard *.c) $(wildcard *.S)
 PROGS := bootstrap clone exit mmap read_write sched signal
@@ -32,6 +34,6 @@ $(OUTPUT)/%.o:%.c $(DEPS)
 	$(CC) $< -o $@ $(CFLAGS) -c
 
 $(OUTPUT)/%: $(OUTPUT)/%.o $(OUTPUT)/freestanding_start.o $(OUTPUT)/freestanding_init_globals.o $(OUTPUT)/freestanding.o
-	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
+	$(CC) $^ -o $@ $(LDFLAGS)
 
 $(OUTPUT)/signal: $(OUTPUT)/signal_common.o
