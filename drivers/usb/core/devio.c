@@ -2245,7 +2245,7 @@ static int processcompl_compat(struct async *as, void __user *arg)
 		}
 	}
 
-	if (put_user(ptr_to_compat(addr), (u32 __user *)arg))
+	if (put_user(ptr_to_compat(addr), (compat_uptr_t __user *)arg))
 		return -EFAULT;
 	return 0;
 }
