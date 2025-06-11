@@ -1,20 +1,12 @@
 // SPDX-License-Identifier: GPL-2.0
 // Copyright (C) 2021  Arm Limited
-#include <sys/mman.h>
+#include <linux/mman.h>
 #include <linux/sched.h>
 #include <errno.h>
 #include <cheriintrin.h>
 #include "freestanding.h"
 
-#define MAX_ERRNO       4095
-#define IS_ERR_VALUE(x) ((unsigned long)(x) >= (unsigned long)-MAX_ERRNO)
-
 #define STACK_SIZE	1024*1024
-#define STACK_REQ_PERM  (CHERI_PERM_LOAD | CHERI_PERM_STORE |		\
-			 CHERI_PERM_LOAD_CAP | CHERI_PERM_STORE_CAP |  	\
-			 ARM_CAP_PERMISSION_MUTABLE_LOAD | 		\
-			 CHERI_PERM_STORE_LOCAL_CAP | 			\
-			 CHERI_PERM_GLOBAL)
 
 #define in_restricted()	\
 	(!(cheri_perms_get(cheri_pcc_get()) & ARM_CAP_PERMISSION_EXECUTIVE))
@@ -89,49 +81,19 @@ done:
 	return 0;
 }
 
-
-static inline __attribute__((always_inline))
-void *allocate_mem(size_t size, unsigned int perms)
-{
-	void *addr =  (void *)syscall(__NR_mmap, NULL, size,
-					   PROT_READ | PROT_WRITE,
-					   MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
-
-	ASSERT_FALSE(IS_ERR_VALUE(addr)) {
-		TH_LOG("Failed to allocate memory: %p\n", addr);
-		addr = NULL;
-	}
-
-	EXPECT_TRUE(cheri_tag_get(addr)) {
-		TH_LOG("Invalid capability\n");
-		goto clean_up;
-	}
-
-	EXPECT_EQ(cheri_perms_get(addr) & perms, perms) {
-		TH_LOG("Insufficient permissions for capability\n");
-		goto clean_up;
-	}
-
-	return addr;
-clean_up:
-	syscall(__NR_munmap, addr, size);
-	return NULL;
-}
-
-/* To be used outside TEST cases */
-#define allocate_mem_raw(size)						\
-	(void*)syscall(__NR_mmap, NULL, size, PROT_READ | PROT_WRITE,	\
-		MAP_ANONYMOUS | MAP_PRIVATE, -1, 0)
-
 static inline __attribute__((always_inline))
 void run_single(struct clone_fixture *data)
 {
 	int ppid = 0, cpid = 0;
 	int result = -EINVAL;
 
-	void *new_stack = allocate_mem(STACK_SIZE, STACK_REQ_PERM);
-	void *tls	= data->flags & CLONE_TH_TLS ?
-			  allocate_mem(STACK_SIZE >> 10, STACK_REQ_PERM) : NULL;
+	void *new_stack = mmap_verified(NULL, STACK_SIZE, PROT_READ | PROT_WRITE,
+		  MAP_ANONYMOUS | MAP_PRIVATE, -1, 0, STACK_REQ_PERMS);
+	void *tls = data->flags & CLONE_TH_TLS ?
+		  mmap_verified(NULL, STACK_SIZE >> 10, PROT_READ | PROT_WRITE,
+			 MAP_ANONYMOUS | MAP_PRIVATE, -1, 0,
+			 CAP_LOAD_PERMS | CAP_STORE_PERMS) :
+		  NULL;
 
 	int clone_flags = CLONE_VM | CLONE_PARENT_SETTID | CLONE_CHILD_SETTID;
 
@@ -166,9 +128,9 @@ void run_single(struct clone_fixture *data)
 	 */
 	ASSERT_EQ(data->result, CTR_SUCCESS);
 leave:
-	syscall(__NR_munmap, new_stack, STACK_SIZE);
+	munmap(new_stack, STACK_SIZE);
 	if (tls)
-		syscall(__NR_munmap, tls, STACK_SIZE >> 10);
+		munmap(tls, STACK_SIZE >> 10);
 }
 
 #define RUN_WITH_FIXTURE(name, th_flags)		\
@@ -206,7 +168,7 @@ void run_restricted(uintcap_t entry_point)
 		__TH_LOG_ERROR("Failed to allocate memory");
 		return;
 	}
-	if (!cheri_perms_and(new_stack, STACK_REQ_PERM)) {
+	if (!cheri_perms_and(new_stack, STACK_REQ_PERMS)) {
 		__TH_LOG_ERROR("Insufficient permissions");
 		goto leave;
 	}
@@ -220,7 +182,7 @@ void run_restricted(uintcap_t entry_point)
 	 */
 	switch_to_restricted(entry_point, new_stack + STACK_SIZE);
 leave:
-	syscall(__NR_munmap, new_stack, STACK_SIZE);
+	munmap(new_stack, STACK_SIZE);
 }
 
 int main(void)
