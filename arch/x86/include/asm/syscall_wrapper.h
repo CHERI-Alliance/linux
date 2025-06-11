@@ -242,7 +242,7 @@ extern long __ia32_sys_ni_syscall(const struct pt_regs *regs);
  * to work correctly.
  */
 #define SYSCALL_DEFINE0(sname)						\
-	SYSCALL_METADATA(_##sname, 0);					\
+	SYSCALL_METADATA(0, _##sname);					\
 	static long __do_sys_##sname(const struct pt_regs *__unused);	\
 	__X64_SYS_STUB0(sname)						\
 	__IA32_SYS_STUB0(sname)						\

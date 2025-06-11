@@ -43,7 +43,7 @@
 	long __s390_compat_sys_##sname(void)
 
 #define SYSCALL_DEFINE0(sname)						\
-	SYSCALL_METADATA(_##sname, 0);					\
+	SYSCALL_METADATA(0, _##sname);					\
 	long __s390_sys_##sname(void);					\
 	ALLOW_ERROR_INJECTION(__s390_sys_##sname, ERRNO);		\
 	long __s390x_sys_##sname(void);					\
@@ -103,7 +103,7 @@
 #else /* CONFIG_COMPAT */
 
 #define SYSCALL_DEFINE0(sname)						\
-	SYSCALL_METADATA(_##sname, 0);					\
+	SYSCALL_METADATA(0, _##sname);					\
 	long __s390x_sys_##sname(void);					\
 	ALLOW_ERROR_INJECTION(__s390x_sys_##sname, ERRNO);		\
 	static inline long __do_sys_##sname(void);			\
