@@ -1,6 +1,9 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Copyright (C) 2020 Arm Ltd.
+ *
+ * TODO: most of the functions in this file should be reimplemented in C to
+ * improve readability.
  */
 
 #include <linux/linkage.h>
@@ -10,13 +13,7 @@
 #include <asm/morello.h>
 #include <asm/sysreg.h>
 
-SYM_FUNC_START(morello_cap_get_lo_val)
-	ldr	c0, [x0]
-	ret
-SYM_FUNC_END(morello_cap_get_lo_val)
-
 SYM_FUNC_START(morello_cap_get_val_tag)
-	ldr	c0, [x0]
 	gctag	x3, c0
 	clrtag	c0, c0			// Store the 128-bit value without the tag
 	str	c0, [x1]
@@ -26,14 +23,14 @@ SYM_FUNC_START(morello_cap_get_val_tag)
 SYM_FUNC_END(morello_cap_get_val_tag)
 
 SYM_FUNC_START(morello_build_cap_from_root_cap)
-	ldr	c1, [x1]
-	cbz	w2, 1f
+	ldr	c0, [x0]
+	cbz	w1, 1f
 	/*
 	 * The tag should be set, build a valid capability from the root
 	 * capability.
-	 * In case c1 is sealed (non-zero object type), we need to extract the
+	 * In case c0 is sealed (non-zero object type), we need to extract the
 	 * object type first to be able to reseal it after BUILD. The CSEAL
-	 * instruction is used to cover the case where c1 was not sealed.
+	 * instruction is used to cover the case where c0 was not sealed.
 	 *
 	 * TODO [PCuABI] - the user root capability should be used, not the
 	 * kernel one.
@@ -41,16 +38,14 @@ SYM_FUNC_START(morello_build_cap_from_root_cap)
 	adr_l	x3, morello_root_cap
 	ldr	c3, [x3]
 
-	cpytype	c4, c3, c1
-	build	c1, c1, c3
-	cseal	c1, c1, c4
+	cpytype	c4, c3, c0
+	build	c0, c0, c3
+	cseal	c0, c0, c4
 	b	2f
 1:
 	/* The tag should be cleared, make sure it is. */
-	clrtag	c1, c1
+	clrtag	c0, c0
 2:
-	str	c1, [x0]
-
 	ret
 SYM_FUNC_END(morello_build_cap_from_root_cap)
 
@@ -214,7 +209,6 @@ SYM_FUNC_END(__morello_put_user_cap_asm)
 
 
 SYM_FUNC_START(__morello_cap_lo_hi_tag)
-	ldr	c0, [x0]
 	str	x0, [x1]
 	cfhi	x4, c0			// Extract upper 64 bits
 	str	x4, [x2]
@@ -223,12 +217,6 @@ SYM_FUNC_START(__morello_cap_lo_hi_tag)
 
 	ret
 SYM_FUNC_END(__morello_cap_lo_hi_tag)
-
-SYM_FUNC_START(__morello_cap_cpy)
-	ldr	c2, [x1]
-	str	c2, [x0]
-	ret
-SYM_FUNC_END(__morello_cap_cpy)
 
 SYM_FUNC_START(__morello_merge_c_x)
 	ldr	c2, [x0]
@@ -241,14 +229,7 @@ SYM_FUNC_START(__morello_merge_c_x)
 SYM_FUNC_END(__morello_merge_c_x)
 
 SYM_FUNC_START(__morello_cap_has_executive)
-	ldr	c0, [x0]
 	gcperm	x0, c0
 	ubfx	x0, x0, #MORELLO_CAP_PERM_EXECUTIVE_BIT, #1
 	ret
 SYM_FUNC_END(__morello_cap_has_executive)
-
-SYM_FUNC_START(__morello_get_ddc)
-	mrs	c1, ddc
-	str	c1, [x0]
-	ret
-SYM_FUNC_END(__morello_get_ddc)
