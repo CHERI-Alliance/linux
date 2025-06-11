@@ -374,7 +374,14 @@ static int io_register_clock(struct io_ring_ctx *ctx,
  */
 struct io_ring_ctx_rings {
 	struct io_rings *rings;
-	struct io_uring_sqe *sq_sqes;
+	union {
+		struct io_uring_sqe *sq_sqes;
+		struct compat_io_uring_sqe *sq_sqes_compat;
+	};
+	union {
+		struct io_uring_cqe *cq_cqes;
+		struct compat_io_uring_cqe *cq_cqes_compat;
+	};
 
 	struct io_mapped_region sq_region;
 	struct io_mapped_region ring_region;
@@ -433,7 +440,7 @@ static int io_register_resize_rings(struct io_ring_ctx *ctx, void __user *arg)
 		return 0;
 	}
 
-	size = rings_size(p.flags, p.sq_entries, p.cq_entries,
+	size = rings_size(ctx, p.flags, p.sq_entries, p.cq_entries,
 				&sq_array_offset);
 	if (size == SIZE_MAX)
 		return -EOVERFLOW;
@@ -490,6 +497,7 @@ static int io_register_resize_rings(struct io_ring_ctx *ctx, void __user *arg)
 		return ret;
 	}
 	n.sq_sqes = io_region_get_ptr(&n.sq_region);
+	n.cq_cqes = (struct io_uring_cqe *)((char *)n.rings + io_uring_cq_offset());
 
 	/*
 	 * If using SQPOLL, park the thread
@@ -515,6 +523,8 @@ static int io_register_resize_rings(struct io_ring_ctx *ctx, void __user *arg)
 	ctx->rings = NULL;
 	o.sq_sqes = ctx->sq_sqes;
 	ctx->sq_sqes = NULL;
+	o.cq_cqes = ctx->cq_cqes;
+	ctx->cq_cqes = NULL;
 
 	/*
 	 * Now copy SQ and CQ entries, if any. If either of the destination
@@ -528,7 +538,10 @@ static int io_register_resize_rings(struct io_ring_ctx *ctx, void __user *arg)
 		unsigned src_head = i & (ctx->sq_entries - 1);
 		unsigned dst_head = i & (p.sq_entries - 1);
 
-		n.sq_sqes[dst_head] = o.sq_sqes[src_head];
+		if (io_in_compat64(ctx))
+			n.sq_sqes[dst_head] = o.sq_sqes[src_head];
+		else
+			n.sq_sqes[dst_head] = o.sq_sqes[src_head];
 	}
 	WRITE_ONCE(n.rings->sq.head, old_head);
 	WRITE_ONCE(n.rings->sq.tail, tail);
@@ -540,6 +553,7 @@ overflow:
 		/* restore old rings, and return -EOVERFLOW via cleanup path */
 		ctx->rings = o.rings;
 		ctx->sq_sqes = o.sq_sqes;
+		ctx->cq_cqes = o.cq_cqes;
 		to_free = &n;
 		ret = -EOVERFLOW;
 		goto out;
@@ -548,12 +562,15 @@ overflow:
 		unsigned src_head = i & (ctx->cq_entries - 1);
 		unsigned dst_head = i & (p.cq_entries - 1);
 
-		n.rings->cqes[dst_head] = o.rings->cqes[src_head];
+		if (io_in_compat64(ctx))
+			n.cq_cqes_compat[dst_head] = o.cq_cqes_compat[src_head];
+		else
+			n.cq_cqes[dst_head] = o.cq_cqes[src_head];
 	}
 	WRITE_ONCE(n.rings->cq.head, old_head);
 	WRITE_ONCE(n.rings->cq.tail, tail);
 	/* invalidate cached cqe refill */
-	ctx->cqe_cached = ctx->cqe_sentinel = NULL;
+	ctx->cqe_cached = ctx->cqe_sentinel = 0;
 
 	WRITE_ONCE(n.rings->sq_dropped, READ_ONCE(o.rings->sq_dropped));
 	atomic_set(&n.rings->sq_flags, atomic_read(&o.rings->sq_flags));
@@ -561,7 +578,6 @@ overflow:
 	WRITE_ONCE(n.rings->cq_overflow, READ_ONCE(o.rings->cq_overflow));
 
 	/* all done, store old pointers and assign new ones */
-	ctx->cqes = (struct io_uring_cqe *)((char *)rings + io_uring_cq_offset());
 	if (!(ctx->flags & IORING_SETUP_NO_SQARRAY))
 		ctx->sq_array = (u32 *)((char *)n.rings + sq_array_offset);
 
@@ -570,6 +586,7 @@ overflow:
 
 	ctx->rings = n.rings;
 	ctx->sq_sqes = n.sq_sqes;
+	ctx->cq_cqes = n.cq_cqes;
 	swap_old(ctx, o, n, ring_region);
 	swap_old(ctx, o, n, sq_region);
 	to_free = &o;

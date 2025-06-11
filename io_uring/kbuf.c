@@ -17,6 +17,10 @@
 #include "kbuf.h"
 #include "memmap.h"
 
+#define IO_BUFFER_LIST_BUF_PER_PAGE (PAGE_SIZE / sizeof(struct io_uring_buf))
+#define IO_BUFFER_LIST_COMPAT_BUF_PER_PAGE (PAGE_SIZE / sizeof(struct compat_io_uring_buf))
+
+
 /* BIDs are addressed by a 16-bit field in a CQE */
 #define MAX_BIDS_PER_BGID (1 << 16)
 
@@ -65,6 +69,32 @@ bool io_kbuf_commit(struct io_kiocb *req,
 		return io_kbuf_inc_commit(bl, len);
 	bl->head += nr;
 	return true;
+}
+
+static int get_compat64_io_uring_buf_reg(struct io_uring_buf_reg *reg,
+					 const void __user *user_reg)
+{
+	struct compat_io_uring_buf_reg compat_reg;
+
+	if (copy_from_user(&compat_reg, user_reg, sizeof(compat_reg)))
+		return -EFAULT;
+	reg->ring_addr = compat_reg.ring_addr;
+	reg->ring_entries = compat_reg.ring_entries;
+	reg->bgid = compat_reg.bgid;
+	reg->flags = compat_reg.flags;
+	memcpy(reg->resv, compat_reg.resv, sizeof(reg->resv));
+	return 0;
+}
+
+static int copy_io_uring_buf_reg_from_user(struct io_ring_ctx *ctx,
+					   struct io_uring_buf_reg *reg,
+					   const void __user *arg)
+{
+	if (io_in_compat64(ctx))
+		return get_compat64_io_uring_buf_reg(reg, arg);
+	if (copy_from_user(reg, arg, sizeof(*reg)))
+		return -EFAULT;
+	return 0;
 }
 
 static inline struct io_buffer_list *io_buffer_get_list(struct io_ring_ctx *ctx,
@@ -151,6 +181,35 @@ static int io_provided_buffers_select(struct io_kiocb *req, size_t *len,
 	return 1;
 }
 
+static void __user *io_ring_buffer_select_compat64(struct io_kiocb *req, size_t *len,
+						   struct io_buffer_list *bl,
+						   unsigned int issue_flags)
+{
+	struct compat_io_uring_buf_ring *br = bl->buf_ring_compat;
+	struct compat_io_uring_buf *buf;
+	__u16 head = bl->head;
+
+	if (unlikely(smp_load_acquire(&br->tail) == head))
+		return NULL;
+
+	head &= bl->mask;
+	if (head < IO_BUFFER_LIST_COMPAT_BUF_PER_PAGE) {
+		buf = &br->bufs[head];
+	} else {
+		int off = head & (IO_BUFFER_LIST_COMPAT_BUF_PER_PAGE - 1);
+		int index = head / IO_BUFFER_LIST_COMPAT_BUF_PER_PAGE;
+		buf = page_address(bl->buf_pages[index]);
+		buf += off;
+	}
+	if (*len == 0 || *len > buf->len)
+		*len = buf->len;
+	req->flags |= REQ_F_BUFFER_RING;
+	req->buf_list = bl;
+	req->buf_index = buf->bid;
+
+	return compat_ptr(buf->addr);
+}
+
 static void __user *io_ring_buffer_select(struct io_kiocb *req, size_t *len,
 					  struct io_buffer_list *bl,
 					  unsigned int issue_flags)
@@ -158,7 +217,6 @@ static void __user *io_ring_buffer_select(struct io_kiocb *req, size_t *len,
 	struct io_uring_buf_ring *br = bl->buf_ring;
 	__u16 tail, head = bl->head;
 	struct io_uring_buf *buf;
-	void __user *ret;
 
 	tail = smp_load_acquire(&br->tail);
 	if (unlikely(tail == head))
@@ -173,7 +231,23 @@ static void __user *io_ring_buffer_select(struct io_kiocb *req, size_t *len,
 	req->flags |= REQ_F_BUFFER_RING | REQ_F_BUFFERS_COMMIT;
 	req->buf_list = bl;
 	req->buf_index = buf->bid;
-	ret = u64_to_user_ptr(buf->addr);
+
+	return u64_to_user_ptr(buf->addr);
+}
+
+static void __user *io_ring_buffer_select_any(struct io_kiocb *req, size_t *len,
+					      struct io_buffer_list *bl,
+					      unsigned int issue_flags)
+{
+	void __user *ret;
+
+	if (io_in_compat64(req->ctx))
+		ret = io_ring_buffer_select_compat64(req, len, bl, issue_flags);
+	else
+		ret = io_ring_buffer_select(req, len, bl, issue_flags);
+
+	if (!ret)
+		return ret;
 
 	if (issue_flags & IO_URING_F_UNLOCKED || !io_file_can_poll(req)) {
 		/*
@@ -204,7 +278,7 @@ void __user *io_buffer_select(struct io_kiocb *req, size_t *len,
 	bl = io_buffer_get_list(ctx, buf_group);
 	if (likely(bl)) {
 		if (bl->flags & IOBL_BUF_RING)
-			ret = io_ring_buffer_select(req, len, bl, issue_flags);
+			ret = io_ring_buffer_select_any(req, len, bl, issue_flags);
 		else
 			ret = io_provided_buffer_select(req, len, bl);
 	}
@@ -586,7 +660,7 @@ int io_register_pbuf_ring(struct io_ring_ctx *ctx, void __user *arg)
 
 	lockdep_assert_held(&ctx->uring_lock);
 
-	if (copy_from_user(&reg, arg, sizeof(reg)))
+	if (copy_io_uring_buf_reg_from_user(ctx, &reg, arg))
 		return -EFAULT;
 	if (!mem_is_zero(reg.resv, sizeof(reg.resv)))
 		return -EINVAL;
@@ -611,7 +685,9 @@ int io_register_pbuf_ring(struct io_ring_ctx *ctx, void __user *arg)
 		return -ENOMEM;
 
 	mmap_offset = (unsigned long)reg.bgid << IORING_OFF_PBUF_SHIFT;
-	ring_size = flex_array_size(br, bufs, reg.ring_entries);
+	ring_size = reg.ring_entries * (io_in_compat64(ctx) ?
+					sizeof(struct compat_io_uring_buf) :
+					sizeof(struct io_uring_buf));
 
 	memset(&rd, 0, sizeof(rd));
 	rd.size = PAGE_ALIGN(ring_size);
@@ -662,7 +738,7 @@ int io_unregister_pbuf_ring(struct io_ring_ctx *ctx, void __user *arg)
 
 	lockdep_assert_held(&ctx->uring_lock);
 
-	if (copy_from_user(&reg, arg, sizeof(reg)))
+	if (copy_io_uring_buf_reg_from_user(ctx, &reg, arg))
 		return -EFAULT;
 	if (!mem_is_zero(reg.resv, sizeof(reg.resv)) || reg.flags)
 		return -EINVAL;

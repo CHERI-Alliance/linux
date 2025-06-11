@@ -110,7 +110,7 @@ static int __io_import_rw_buffer(int ddir, struct io_kiocb *req,
 {
 	const struct io_issue_def *def = &io_issue_defs[req->opcode];
 	struct io_rw *rw = io_kiocb_to_cmd(req, struct io_rw);
-	void __user *buf = u64_to_user_ptr(rw->addr);
+	void __user *buf = rw->addr;
 	size_t sqe_len = rw->len;
 
 	if (def->vectored && !(req->flags & REQ_F_BUFFER_SELECT))
@@ -409,7 +409,7 @@ static int io_rw_prep_reg_vec(struct io_kiocb *req)
 	struct io_async_rw *io = req->async_data;
 	const struct iovec __user *uvec;
 
-	uvec = u64_to_user_ptr(rw->addr);
+	uvec = rw->addr;
 	return io_prep_reg_iovec(req, &io->vec, uvec, rw->len);
 }
 
