@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-/* 32-bit compatibility syscall for 64-bit systems
- *
+/*
  * Copyright (C) 2004-5 Red Hat, Inc. All Rights Reserved.
  * Written by David Howells (dhowells@redhat.com)
  */
@@ -12,10 +11,11 @@
 #include "internal.h"
 
 /*
- * The key control system call, 32-bit compatibility version for 64-bit archs
+ * The key control system call, compatibility version
  */
 COMPAT_SYSCALL_DEFINE5(keyctl, u32, option,
-		       u32, arg2, u32, arg3, u32, arg4, u32, arg5)
+		       compat_ulong_t, arg2, compat_ulong_t, arg3,
+		       compat_ulong_t, arg4, compat_ulong_t, arg5)
 {
 	switch (option) {
 	case KEYCTL_GET_KEYRING_ID:
