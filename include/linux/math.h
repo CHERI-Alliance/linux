@@ -6,6 +6,10 @@
 #include <asm/div64.h>
 #include <uapi/linux/kernel.h>
 
+#if __has_builtin(__builtin_align_up) && __has_builtin(__builtin_align_down)
+#define round_up(x, y) __builtin_align_up((x), (y))
+#define round_down(x, y) __builtin_align_down((x), (y))
+#else
 /*
  * This looks more complex than it should be. But we need to
  * get the type for the ~ right in round_down (it needs to be
@@ -33,6 +37,7 @@
  * To perform arbitrary rounding down, use rounddown() below.
  */
 #define round_down(x, y) ((x) & ~__round_mask(x, y))
+#endif /* __has_builtin(__builtin_align_up) && __has_builtin(__builtin_align_down) */
 
 /**
  * DIV_ROUND_UP_POW2 - divide and round up
@@ -67,11 +72,17 @@
  *
  * Rounds @x up to next multiple of @y. If @y will always be a power
  * of 2, consider using the faster round_up().
+ *
+ * CHERI:
+ * Do not use divison/multiplication because that kill provenance
+ * when operating on pointers.
  */
 #define roundup(x, y) (					\
 {							\
 	typeof(y) __y = y;				\
-	(((x) + (__y - 1)) / __y) * __y;		\
+	typeof(x) __x = x;				\
+	typeof(__y) __rem = (__x + __y - 1) % __y;	\
+	((__x) + (__y - 1 - __rem));			\
 }							\
 )
 /**
