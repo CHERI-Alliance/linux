@@ -39,6 +39,7 @@ mmu-$(CONFIG_MMU)	:= highmem.o memory.o mincore.o \
 			   msync.o page_vma_mapped.o pagewalk.o \
 			   pgtable-generic.o rmap.o vmalloc.o vma.o vma_exec.o
 
+mmu-$(CONFIG_CHERI_PURECAP_UABI) += reserv.o
 
 ifdef CONFIG_CROSS_MEMORY_ATTACH
 mmu-$(CONFIG_MMU)	+= process_vm_access.o
