@@ -169,12 +169,23 @@ static inline void __user *__uaccess_mask_ptr(const void __user *ptr)
 {
 	void __user *safe_ptr;
 
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	asm volatile(
+	"	tst	%2, %3\n"
+	"	csel	%0, %1, czr, eq\n"
+	: "=&C" (safe_ptr)
+	: "C" (ptr),
+	  "r" (user_ptr_addr(ptr)),
+	  "i" (BIT(55))
+	: "cc");
+#else
 	asm volatile(
 	"	bic	%0, %1, %2\n"
 	: "=r" (safe_ptr)
 	: "r" (ptr),
 	  "i" (BIT(55))
 	);
+#endif
 
 	return safe_ptr;
 }
