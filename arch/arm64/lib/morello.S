@@ -178,6 +178,16 @@ SYM_FUNC_START(__morello_cap_cpy)
 	ret
 SYM_FUNC_END(__morello_cap_cpy)
 
+SYM_FUNC_START(__morello_merge_c_x)
+	ldr	c2, [x0]
+	cmp	x2, x1
+	b.eq	1f
+	scvalue	c2, c2, x1
+	str	c2, [x0]
+1:
+	ret
+SYM_FUNC_END(__morello_merge_c_x)
+
 SYM_FUNC_START(__morello_get_ddc)
 	mrs	c1, ddc
 	str	c1, [x0]
