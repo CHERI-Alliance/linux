@@ -63,7 +63,7 @@ static long cmm_alloc_pages(long nr, long *counter,
 			    struct cmm_page_array **list)
 {
 	struct cmm_page_array *pa, *npa;
-	unsigned long addr;
+	uintptr_t addr;
 
 	while (nr) {
 		addr = __get_free_page(GFP_NOIO);

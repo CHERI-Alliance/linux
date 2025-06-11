@@ -2732,7 +2732,7 @@ int jfs_readdir(struct file *file, struct dir_context *ctx)
 	struct ldtentry *d;
 	struct dtslot *t;
 	int d_namleft, len, outlen;
-	unsigned long dirent_buf;
+	uintptr_t dirent_buf;
 	char *name_ptr;
 	u32 dir_index;
 	int do_index = 0;

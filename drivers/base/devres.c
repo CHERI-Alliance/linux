@@ -1175,7 +1175,7 @@ unsigned long devm_get_free_pages(struct device *dev,
 				  gfp_t gfp_mask, unsigned int order)
 {
 	struct pages_devres *devres;
-	unsigned long addr;
+	uintptr_t addr;
 
 	addr = __get_free_pages(gfp_mask, order);
 

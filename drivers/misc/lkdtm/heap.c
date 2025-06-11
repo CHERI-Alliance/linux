@@ -193,7 +193,7 @@ static void lkdtm_KFENCE_READ_AFTER_FREE(void)
 
 static void lkdtm_WRITE_BUDDY_AFTER_FREE(void)
 {
-	unsigned long p = __get_free_page(GFP_KERNEL);
+	uintptr_t p = __get_free_page(GFP_KERNEL);
 	if (!p) {
 		pr_info("Unable to allocate free page\n");
 		return;
@@ -213,7 +213,7 @@ static void lkdtm_WRITE_BUDDY_AFTER_FREE(void)
 
 static void lkdtm_READ_BUDDY_AFTER_FREE(void)
 {
-	unsigned long p = __get_free_page(GFP_KERNEL);
+	uintptr_t p = __get_free_page(GFP_KERNEL);
 	int saw, *val;
 	int *base;
 
@@ -348,7 +348,7 @@ static void lkdtm_SLAB_FREE_CROSS(void)
 
 static void lkdtm_SLAB_FREE_PAGE(void)
 {
-	unsigned long p = __get_free_page(GFP_KERNEL);
+	uintptr_t p = __get_free_page(GFP_KERNEL);
 
 	pr_info("Attempting non-Slab slab free ...\n");
 	kmem_cache_free(NULL, (void *)p);

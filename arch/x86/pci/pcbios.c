@@ -368,7 +368,7 @@ struct irq_routing_table * pcibios_get_irq_routing_table(void)
 	struct irq_routing_options opt;
 	struct irq_routing_table *rt = NULL;
 	int ret, map;
-	unsigned long page;
+	uintptr_t page;
 
 	if (!pci_bios_present)
 		return NULL;

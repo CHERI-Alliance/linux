@@ -26,7 +26,7 @@ static struct list_head mm_list;
 int init_new_context(struct task_struct *task, struct mm_struct *mm)
 {
 	struct mm_id *new_id = &mm->context.id;
-	unsigned long stack = 0;
+	uintptr_t stack = 0;
 	int ret = -ENOMEM;
 
 	stack = __get_free_pages(GFP_KERNEL | __GFP_ZERO, ilog2(STUB_DATA_PAGES));
