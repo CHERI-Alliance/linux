@@ -25,6 +25,10 @@ typedef __kernel_mode_t mode_t;
 typedef __uintcap_t uintcap_t;
 #endif
 
+#ifndef INT_MAX
+#define INT_MAX __INT_MAX__
+#endif
+
 #define EXIT_SUCCESS 0
 
 struct __test_meta {
