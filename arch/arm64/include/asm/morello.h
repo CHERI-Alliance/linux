@@ -42,9 +42,14 @@ void morello_cap_get_val_tag(const cap128_t *cap, __uint128_t *val, u8 *tag);
 void morello_build_cap_from_root_cap(cap128_t *cap, const __uint128_t *val,
 				    u8 tag);
 
-/* Reads a capability from tsk's address space */
-int morello_ptrace_read_remote_cap(struct task_struct *tsk, unsigned long addr,
-				   struct user_cap *user_cap);
+/*
+ * Reads or writes a capability from/to tsk's address space (depending on
+ * gup_flags & FOLL_WRITE).
+ */
+int morello_ptrace_access_remote_cap(struct task_struct *tsk,
+				     unsigned long addr,
+				     struct user_cap *user_cap,
+				     unsigned int gup_flags);
 
 /* Low-level uacces helpers, must not be called directly */
 void __morello_get_user_cap_asm(cap128_t *x, const cap128_t __user *ptr, int *err);
