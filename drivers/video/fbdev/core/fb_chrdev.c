@@ -277,6 +277,7 @@ static long fb_compat_ioctl(struct file *file, unsigned int cmd,
 	struct fb_info *info = file_fb_info(file);
 	const struct fb_ops *fb;
 	long ret = -ENOIOCTLCMD;
+	user_uintptr_t argp;
 
 	if (!info)
 		return -ENODEV;
@@ -287,8 +288,9 @@ static long fb_compat_ioctl(struct file *file, unsigned int cmd,
 	case FBIOPAN_DISPLAY:
 	case FBIOGET_CON2FBMAP:
 	case FBIOPUT_CON2FBMAP:
-		arg = (unsigned long) compat_ptr(arg);
-		fallthrough;
+		argp = (user_uintptr_t) compat_ptr(arg);
+		ret = do_fb_ioctl(info, cmd, argp);
+		break;
 	case FBIOBLANK:
 		ret = do_fb_ioctl(info, cmd, arg);
 		break;
