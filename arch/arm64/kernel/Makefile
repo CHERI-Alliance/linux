@@ -36,7 +36,7 @@ obj-y			:= debug-monitors.o entry.o irq.o fpsimd.o		\
 			   syscall.o proton-pack.o idle.o patching.o pi/	\
 			   rsi.o jump_label.o
 
-obj-$(CONFIG_COMPAT64)			+= sys_compat64.o
+obj-$(CONFIG_COMPAT64)			+= sys_compat64.o signal_compat64.o
 obj-$(CONFIG_COMPAT32)			+= sys32.o sys_compat.o signal32.o sigreturn32.o
 obj-$(CONFIG_COMPAT_ALIGNMENT_FIXUPS)	+= compat_alignment.o
 obj-$(CONFIG_KUSER_HELPERS)		+= kuser32.o
