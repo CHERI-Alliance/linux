@@ -2180,7 +2180,8 @@ EXPORT_SYMBOL(fault_in_subpage_writeable);
  */
 size_t fault_in_safe_writeable(const char __user *uaddr, size_t size)
 {
-	const user_uintptr_t start = (user_uintptr_t)uaddr;
+	/* TODO [PCuABI] - capability checks for uaccess */
+	unsigned long start = user_ptr_addr(uaddr), end;
 	const unsigned long end = start + size;
 	unsigned long cur;
 	struct mm_struct *mm = current->mm;
@@ -2204,7 +2205,6 @@ EXPORT_SYMBOL(fault_in_safe_writeable);
 
 /**
  * fault_in_readable - fault in userspace address range for reading
- * @uaddr: start of user address range
  * @size: size of user address range
  *
  * Returns the number of bytes not faulted in (like copy_to_user() and
