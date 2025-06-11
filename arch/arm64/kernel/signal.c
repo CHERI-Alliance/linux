@@ -96,15 +96,25 @@ static user_uintptr_t signal_sp(struct pt_regs *regs)
 {
 #ifdef CONFIG_ARM64_MORELLO
 	/*
-	 * If the interrupted context was in Restricted, regs->csp is actually
-	 * RCSP_EL0, which is usually what we want but not here, because signal
-	 * handlers are always executed in Executive and therefore on the
-	 * Executive stack. Read the actual (Executive) CSP_EL0 instead.
+	 * Callers of this function want a valid user pointer to the stack.
+	 * There are a number of situations to consider:
+	 * - In PCuABI, CSP is expected to be a valid capability to access the
+	 *   stack, so we just return that.
+	 * - In compat64, userspace uses only SP; we create a valid user pointer
+	 *   from SP using compat_ptr().
+	 * - In the standard ABI (PCuABI not selected), user pointers are still
+	 *   64-bit integers so we just need to return SP.
+	 *
+	 * Signal handlers are always run in Executive. We therefore need to
+	 * return a pointer to the Executive stack. As a result we cannot use
+	 * regs->sp, as it is actually RSP_EL0 if the interrupted context was in
+	 * Restricted. For this reason we use regs->csp even when we just want
+	 * the (64-bit) SP.
 	 */
 #ifndef SIGNAL_COMPAT64
 	return (user_uintptr_t)regs->csp;
 #else /* SIGNAL_COMPAT64 */
-	return (user_uintptr_t)uaddr_to_user_ptr_safe(regs->sp);
+	return (user_uintptr_t)compat_ptr((ptraddr_t)regs->csp);
 #endif /* SIGNAL_COMPAT64 */
 #else /* !CONFIG_ARM64_MORELLO */
 	return regs->sp;
