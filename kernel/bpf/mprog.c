@@ -417,10 +417,10 @@ int bpf_mprog_query(const union bpf_attr *attr, union bpf_attr __user *uattr,
 		return -EFAULT;
 	if (copy_to_user(&uattr->query.count, &count, sizeof(count)))
 		return -EFAULT;
-	uprog_id = u64_to_user_ptr(attr->query.prog_ids);
-	uprog_flags = u64_to_user_ptr(attr->query.prog_attach_flags);
-	ulink_id = u64_to_user_ptr(attr->query.link_ids);
-	ulink_flags = u64_to_user_ptr(attr->query.link_attach_flags);
+	uprog_id = (u32 __user *)attr->query.prog_ids;
+	uprog_flags = (u32 __user *)attr->query.prog_attach_flags;
+	ulink_id = (u32 __user *)attr->query.link_ids;
+	ulink_flags = (u32 __user *)attr->query.link_attach_flags;
 	if (attr->query.count == 0 || !uprog_id || !count)
 		return 0;
 	if (attr->query.count < count) {
