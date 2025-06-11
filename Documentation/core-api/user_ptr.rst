@@ -263,6 +263,9 @@ Note that the address of a user pointer should not be directly compared
 with these bounds, as it may be tagged.  ``untagged_addr(p)`` should be
 used instead of ``user_ptr_addr(p)`` to obtain a comparable value.
 
+The lower and upper bounds of a user pointer can also be set using
+``user_ptr_set_bounds(p, l)``.
+
 Other functions handling user pointers
 --------------------------------------
 
