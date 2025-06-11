@@ -5,8 +5,10 @@
 
 #include <stdbool.h>
 
+#include <linux/mman.h>
 #include <linux/signal.h>
 #include <linux/time.h>
+#include <linux/wait.h>
 #include <asm/fcntl.h>
 #include <asm/sigcontext.h>
 #include <asm/siginfo.h>
@@ -172,6 +174,49 @@ static void test_timer_create_signal(void)
 	ASSERT_EQ(timer_delete(timerid), 0);
 }
 
+static void setup_siginfo_same_process(siginfo_t *siginfo)
+{
+	signal_status = false;
+	siginfo_params.ptr = &siginfo_params;
+	ASSERT_EQ(1, cheri_tag_get(siginfo_params.ptr)) {
+		__TH_LOG_ERROR("Check if application compiled in purecap");
+	}
+	siginfo_params.cap = true;
+	siginfo_params.si_code = SI_QUEUE;
+	siginfo->si_signo = SIGUSR1;
+	siginfo->si_code = SI_QUEUE;
+	siginfo->si_pid = getpid();
+	siginfo->si_uid = getuid();
+	siginfo->si_ptr = siginfo_params.ptr;
+}
+
+static int sigqueueinfo_child(__attribute__((__unused__)) void *data)
+{
+	struct sigaction sa;
+
+	setup_sigusr1_handler(&sa, SIG_UNBLOCK);
+	/* wait for some time till the sigusr1 handler is called */
+	wait(DELAY * 1000);
+	ASSERT_TRUE(signal_status);
+	return 0;
+}
+
+static pid_t setup_siginfo_diff_process(siginfo_t *siginfo)
+{
+	pid_t cpid;
+
+	setup_siginfo_same_process(siginfo);
+	siginfo_params.cap = false;
+	siginfo_params.ptr = cheri_tag_clear(siginfo_params.ptr);
+	siginfo->si_ptr = siginfo_params.ptr;
+
+	cpid = __clone(sigqueueinfo_child, 0, SIGCHLD, NULL, NULL, NULL, NULL);
+	ASSERT_GT(cpid, 0) {
+		__TH_LOG_ERROR("Failed to clone");
+	}
+	return cpid;
+}
+
 TEST(test_signal_basic)
 {
 	struct sigaction sa;
@@ -225,10 +270,72 @@ TEST(test_timer_create)
 	ASSERT_TRUE(signal_status);
 }
 
+TEST(test_rt_sigqueueinfo)
+{
+	siginfo_t si, wait_si;
+	pid_t cpid;
+	struct sigaction sa;
+	int ret;
+
+	setup_sigusr1_handler(&sa, SIG_UNBLOCK);
+
+	TH_LOG("test_rt_sigqueueinfo: Signal to the same process");
+	setup_siginfo_same_process(&si);
+	ret = rt_sigqueueinfo(si.si_pid, SIGUSR1, &si);
+	ASSERT_EQ(ret, 0) {
+		__TH_LOG_ERROR("rt_sigqueueinfo syscall failed");
+	}
+	wait(DELAY * 1000);
+	ASSERT_TRUE(signal_status);
+
+	TH_LOG("test_rt_sigqueueinfo: Signal to a different process");
+	cpid = setup_siginfo_diff_process(&si);
+	ret = rt_sigqueueinfo(cpid, SIGUSR1, &si);
+	ASSERT_EQ(ret, 0) {
+		__TH_LOG_ERROR("rt_sigqueueinfo syscall failed");
+	}
+	ret = waitid(P_PID, cpid, &wait_si, WEXITED, NULL);
+	ASSERT_EQ(ret, 0) {
+		__TH_LOG_ERROR("test_rt_sigqueueinfo: Failed on wait");
+	}
+}
+
+TEST(test_rt_tgsigqueueinfo)
+{
+	siginfo_t si, wait_si;
+	pid_t cpid;
+	struct sigaction sa;
+	int ret;
+
+	setup_sigusr1_handler(&sa, SIG_UNBLOCK);
+
+	TH_LOG("test_rt_tgsigqueueinfo: Signal to the same process");
+	setup_siginfo_same_process(&si);
+	ret = rt_tgsigqueueinfo(si.si_pid, si.si_pid, SIGUSR1, &si);
+	ASSERT_EQ(ret, 0) {
+		__TH_LOG_ERROR("rt_tgsigqueueinfo syscall failed");
+	}
+	wait(DELAY * 1000);
+	ASSERT_TRUE(signal_status);
+
+	TH_LOG("test_rt_tgsigqueueinfo: Signal to a different process");
+	cpid = setup_siginfo_diff_process(&si);
+	ret = rt_tgsigqueueinfo(cpid, cpid, SIGUSR1, &si);
+	ASSERT_EQ(ret, 0) {
+		__TH_LOG_ERROR("rt_tgsigqueueinfo syscall failed");
+	}
+	ret = waitid(P_PID, cpid, &wait_si, WEXITED, NULL);
+	ASSERT_EQ(ret, 0) {
+		__TH_LOG_ERROR("test_rt_tgsigqueueinfo: Failed on wait");
+	}
+}
+
 int main(void)
 {
 	test_signal_basic();
 	test_mq_notify();
 	test_timer_create();
+	test_rt_sigqueueinfo();
+	test_rt_tgsigqueueinfo();
 	return 0;
 }
