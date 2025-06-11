@@ -13,6 +13,9 @@ struct mmap_state {
 
 	unsigned long addr;
 	unsigned long end;
+	unsigned long port;
+	struct reserv_struct *reserv_info;
+	unsigned long prot;
 	pgoff_t pgoff;
 	unsigned long pglen;
 	vm_flags_t vm_flags;
@@ -421,7 +424,9 @@ static bool can_vma_merge_left(struct vma_merge_struct *vmg)
 
 {
 	return vmg->prev && vmg->prev->vm_end == vmg->start &&
-		can_vma_merge_after(vmg);
+		can_vma_merge_after(vmg)
+		&& reserv_vma_range_within_reserv(vmg->prev, vmg->start,
+						  vmg->end - vmg->start);
 }
 
 /*
@@ -438,6 +443,10 @@ static bool can_vma_merge_right(struct vma_merge_struct *vmg,
 	struct vm_area_struct *prev;
 
 	if (!next || vmg->end != next->vm_start || !can_vma_merge_before(vmg))
+		return false;
+
+	if (!reserv_vma_range_within_reserv(vmg->next, vmg->start,
+					    vmg->end - vmg->start))
 		return false;
 
 	if (!can_merge_left)
@@ -1806,7 +1815,7 @@ int vma_link(struct mm_struct *mm, struct vm_area_struct *vma)
  */
 struct vm_area_struct *copy_vma(struct vm_area_struct **vmap,
 	unsigned long addr, unsigned long len, pgoff_t pgoff,
-	bool *need_rmap_locks)
+	bool *need_rmap_locks, struct reserv_struct *reserv_info)
 {
 	struct vm_area_struct *vma = *vmap;
 	unsigned long vma_start = vma->vm_start;
@@ -1869,6 +1878,10 @@ struct vm_area_struct *copy_vma(struct vm_area_struct **vmap,
 		if (!new_vma)
 			goto out;
 		vma_set_range(new_vma, addr, addr + len, pgoff);
+		if (reserv_info)
+			reserv_vma_set_reserv_data(new_vma, reserv_info);
+		else
+			reserv_vma_set_reserv_start_len(new_vma, addr, len);
 		if (vma_dup_policy(vma, new_vma))
 			goto out_free_vma;
 		if (anon_vma_clone(new_vma, vma))
@@ -2492,6 +2505,10 @@ static int __mmap_new_vma(struct mmap_state *map, struct vm_area_struct **vmap)
 	WARN_ON_ONCE(!arch_validate_flags(map->vm_flags));
 #endif
 
+	if (map->reserv_info)
+		reserv_vma_set_reserv_data(vma, map->reserv_info);
+	else
+		reserv_vma_set_reserv(vma, map->addr, map->end - map->addr, map->prot);
 	/* Lock the VMA since it is modified after insertion into VMA tree */
 	vma_start_write(vma);
 	vma_iter_store_new(vmi, vma);
@@ -2638,15 +2655,19 @@ static bool can_set_ksm_flags_early(struct mmap_state *map)
 
 static unsigned long __mmap_region(struct file *file, unsigned long addr,
 		unsigned long len, vm_flags_t vm_flags, unsigned long pgoff,
-		struct list_head *uf)
+		struct list_head *uf, unsigned long prot)
 {
 	struct mm_struct *mm = current->mm;
 	struct vm_area_struct *vma = NULL;
 	int error;
 	bool have_mmap_prepare = file && file->f_op->mmap_prepare;
+	struct reserv_struct reserv_info;
 	VMA_ITERATOR(vmi, mm, addr);
 	MMAP_STATE(map, mm, &vmi, addr, len, pgoff, vm_flags, file);
 
+	if (reserv_find_reserv_info_range(addr, len, true, &reserv_info))
+		map.reserv_info = &reserv_info;
+	map.prot = prot;
 	map.check_ksm_early = can_set_ksm_flags_early(&map);
 
 	error = __mmap_prepare(&map, uf);
@@ -2713,7 +2734,7 @@ abort_munmap:
  */
 unsigned long mmap_region(struct file *file, unsigned long addr,
 			  unsigned long len, vm_flags_t vm_flags, unsigned long pgoff,
-			  struct list_head *uf)
+			  struct list_head *uf, unsigned long prot)
 {
 	unsigned long ret;
 	bool writable_file_mapping = false;
@@ -2737,7 +2758,7 @@ unsigned long mmap_region(struct file *file, unsigned long addr,
 		writable_file_mapping = true;
 	}
 
-	ret = __mmap_region(file, addr, len, vm_flags, pgoff, uf);
+	ret = __mmap_region(file, addr, len, vm_flags, pgoff, uf, prot);
 
 	/* Clear our write mapping regardless of error. */
 	if (writable_file_mapping)
