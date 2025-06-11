@@ -259,7 +259,7 @@ static void tls_thread_flush(void)
 	if (system_supports_tpidr2())
 		write_sysreg_s(0, SYS_TPIDR2_EL0);
 
-	if (is_compat_task()) {
+	if (is_32bit_compat_task()) {
 		current->thread.uw.tp_value = 0;
 
 		/*
@@ -866,7 +866,7 @@ void arch_setup_new_exec(void)
 {
 	unsigned long mmflags = 0;
 
-	if (is_compat_task()) {
+	if (is_32bit_compat_task()) {
 		mmflags = MMCF_AARCH32;
 
 		/*
