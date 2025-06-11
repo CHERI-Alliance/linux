@@ -144,4 +144,6 @@
  * HWCAP3 flags - for AT_HWCAP3
  */
 
+#define HWCAP3_MORELLO		(1UL << 63)
+
 #endif /* _UAPI__ASM_HWCAP_H */

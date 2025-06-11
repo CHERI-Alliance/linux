@@ -848,6 +848,12 @@ static inline bool system_supports_pmuv3(void)
 	return cpus_have_final_cap(ARM64_HAS_PMUV3);
 }
 
+static inline bool system_supports_morello(void)
+{
+	return IS_ENABLED(CONFIG_ARM64_MORELLO) &&
+		cpus_have_const_cap(ARM64_MORELLO);
+}
+
 int do_emulate_mrs(struct pt_regs *regs, u32 sys_reg, u32 rt);
 bool try_emulate_mrs(struct pt_regs *regs, u32 isn);
 
