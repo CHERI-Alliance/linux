@@ -707,8 +707,8 @@ static int ptrace_setsiginfo(struct task_struct *child, const kernel_siginfo_t *
 }
 
 static int ptrace_peek_siginfo(struct task_struct *child,
-				unsigned long addr,
-				unsigned long data)
+				user_uintptr_t addr,
+				user_uintptr_t data)
 {
 	struct ptrace_peeksiginfo_args arg;
 	struct sigpending *pending;
@@ -1134,7 +1134,7 @@ ptrace_set_syscall_info(struct task_struct *child, unsigned long user_size,
 #endif /* CONFIG_HAVE_ARCH_TRACEHOOK */
 
 int ptrace_request(struct task_struct *child, long request,
-		   unsigned long addr, unsigned long data)
+		   user_uintptr_t addr, user_uintptr_t data)
 {
 	bool seized = child->ptrace & PT_SEIZED;
 	int ret = -EIO;
@@ -1336,7 +1336,7 @@ int ptrace_request(struct task_struct *child, long request,
 		if (!access_ok(uiov, sizeof(*uiov)))
 			return -EFAULT;
 
-		if (__get_user(kiov.iov_base, &uiov->iov_base) ||
+		if (__get_user_ptr(kiov.iov_base, &uiov->iov_base) ||
 		    __get_user(kiov.iov_len, &uiov->iov_len))
 			return -EFAULT;
 
@@ -1384,8 +1384,8 @@ int ptrace_request(struct task_struct *child, long request,
 	return ret;
 }
 
-SYSCALL_DEFINE4(ptrace, long, request, long, pid, unsigned long, addr,
-		unsigned long, data)
+SYSCALL_DEFINE4(ptrace, long, request, long, pid, user_uintptr_t, addr,
+		user_uintptr_t, data)
 {
 	struct task_struct *child;
 	long ret;
@@ -1422,7 +1422,7 @@ SYSCALL_DEFINE4(ptrace, long, request, long, pid, unsigned long, addr,
 }
 
 int generic_ptrace_peekdata(struct task_struct *tsk, unsigned long addr,
-			    unsigned long data)
+			    user_uintptr_t data)
 {
 	unsigned long tmp;
 	int copied;
@@ -1434,7 +1434,7 @@ int generic_ptrace_peekdata(struct task_struct *tsk, unsigned long addr,
 }
 
 int generic_ptrace_pokedata(struct task_struct *tsk, unsigned long addr,
-			    unsigned long data)
+			    user_uintptr_t data)
 {
 	int copied;
 
