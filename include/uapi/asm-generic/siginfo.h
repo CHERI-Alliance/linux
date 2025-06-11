@@ -69,8 +69,8 @@ union __sifields {
 	struct {
 		void __user *_addr; /* faulting insn/memory ref. */
 
-#define __ADDR_BND_PKEY_PAD  (__alignof__(void *) < sizeof(short) ? \
-			      sizeof(short) : __alignof__(void *))
+#define __ADDR_BND_PKEY_PAD  (__alignof__(void __user *) < sizeof(short) ? \
+			      sizeof(short) : __alignof__(void __user *))
 		union {
 			/* used on alpha and sparc */
 			int _trapno;	/* TRAP # which caused the signal */
