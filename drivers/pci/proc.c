@@ -326,7 +326,7 @@ static const struct proc_ops proc_bus_pci_ops = {
 	.proc_write	= proc_bus_pci_write,
 	.proc_ioctl	= proc_bus_pci_ioctl,
 #ifdef CONFIG_COMPAT
-	.proc_compat_ioctl = proc_bus_pci_ioctl,
+	.proc_compat_ioctl = compat_noptr_ioctl,
 #endif
 #ifdef HAVE_PCI_MMAP
 	.proc_open	= proc_bus_pci_open,
