@@ -138,12 +138,12 @@ TEST(test_c64)
 {
 	uintcap_t cap;
 
-	asm volatile("mov %w0, c30" : "=r"(cap));
+	asm volatile("mov %0, c30" : "=C"(cap));
 	/* LSB is set on LR if we came from C64 */
 	ASSERT_TRUE(cap & 0x1) TH_LOG("we did not come from C64");
 
 	/* will write to Cn register in C64 and Xn in A64, clearing the tag */
-	asm volatile("adr %w0, #0" : "=r"(cap));
+	asm volatile("adr %0, #0" : "=C"(cap));
 	ASSERT_TRUE(cheri_tag_get(cap)) TH_LOG("not running in C64");
 }
 
