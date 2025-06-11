@@ -56,8 +56,7 @@ int io_madvise(struct io_kiocb *req, unsigned int issue_flags)
 
 	WARN_ON_ONCE(issue_flags & IO_URING_F_NONBLOCK);
 
-	/* TODO [PCuABI] - capability checks for uaccess */
-	ret = do_madvise(current->mm, user_ptr_addr(ma->addr), ma->len, ma->advice);
+	ret = do_madvise(current->mm, (user_uintptr_t)ma->addr, ma->len, ma->advice, false);
 	io_req_set_res(req, ret, 0);
 	return IOU_COMPLETE;
 #else
