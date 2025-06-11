@@ -1710,6 +1710,20 @@ static unsigned long mremap_at(struct vma_remap_struct *vrm)
 	BUG();
 }
 
+static int check_mremap_user_ptr_perms(user_uintptr_t user_ptr, user_uintptr_t new_user_ptr,
+				unsigned long flags)
+{
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	if (!reserv_is_supported(current->mm) || !(flags & MREMAP_FIXED))
+		return 0;
+
+	if ((cheri_perms_get(user_ptr) | cheri_perms_get(new_user_ptr))
+	    != cheri_perms_get(user_ptr))
+		return -EINVAL;
+#endif
+	return 0;
+}
+
 static user_uintptr_t do_mremap(struct vma_remap_struct *vrm)
 {
 	struct mm_struct *mm = current->mm;
@@ -1719,7 +1733,7 @@ static user_uintptr_t do_mremap(struct vma_remap_struct *vrm)
 
 	ret = check_mremap_params(vrm);
 	if (ret)
-		return ret;
+		return __c_fakeu(ret);
 
 	vrm->old_len = PAGE_ALIGN(vrm->old_len);
 	vrm->new_len = PAGE_ALIGN(vrm->new_len);
@@ -1736,14 +1750,20 @@ static user_uintptr_t do_mremap(struct vma_remap_struct *vrm)
 	}
 
 	if (reserv_is_supported(mm) &&
-	    !check_user_ptr_owning(vrm->addr, vrm->old_len ? vrm->old_len : vrm->new_len)) {
+	    !check_user_ptr_owning(vrm->old_ptr, vrm->old_len ? vrm->old_len : vrm->new_len)) {
 		ret = -EINVAL;
 		goto out;
 	}
-	if (!reserv_cap_within_reserv(vrm->addr, true)) {
+	if (!reserv_cap_within_reserv(vrm->old_ptr, true)) {
 		ret = -ERESERVATION;
 		goto out;
 	}
+	ret = check_pcuabi_map_ptr_arg(vrm->new_ptr, vrm->new_len, vrm->flags & MREMAP_FIXED, true);
+	if (ret)
+		goto out;
+	ret = check_mremap_user_ptr_perms(vrm->old_ptr, vrm->new_ptr, vrm->flags);
+	if (ret)
+		goto out;
 
 	/* If mseal()'d, mremap() is prohibited. */
 	if (!can_modify_vma(vma)) {
@@ -1817,10 +1837,12 @@ SYSCALL_DEFINE5(__retptr__(mremap), user_uintptr_t, user_ptr, unsigned long, old
 	 */
 	struct vma_remap_struct vrm = {
 		.addr = untagged_addr(addr),
+		.old_ptr = user_ptr,
 		.old_len = old_len,
 		.new_len = new_len,
 		.flags = flags,
 		.new_addr = new_addr,
+		.new_ptr = new_user_ptr,
 
 		.uf = &uf,
 		.uf_unmap_early = &uf_unmap_early,
