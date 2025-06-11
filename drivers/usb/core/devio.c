@@ -2040,7 +2040,7 @@ static void compute_isochronous_actual_length(struct urb *urb)
 	}
 }
 
-static int processcompl(struct async *as, void __user * __user *arg)
+static int processcompl(struct async *as, void __user *arg)
 {
 	struct urb *urb = as->urb;
 	struct usbdevfs_urb __user *userurb = as->userurb;
@@ -2070,7 +2070,11 @@ static int processcompl(struct async *as, void __user * __user *arg)
 		}
 	}
 
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	if (put_user(addr, (void * __capability * __capability)arg))
+#else
 	if (put_user(addr, (void __user * __user *)arg))
+#endif
 		return -EFAULT;
 	return 0;
 
@@ -2109,7 +2113,7 @@ static int proc_reapurb(struct usb_dev_state *ps, void __user *arg)
 		int retval;
 
 		snoop(&ps->dev->dev, "reap %px\n", as->userurb);
-		retval = processcompl(as, (void __user * __user *)arg);
+		retval = processcompl(as, arg);
 		free_async(as);
 		return retval;
 	}
@@ -2126,7 +2130,7 @@ static int proc_reapurbnonblock(struct usb_dev_state *ps, void __user *arg)
 	as = async_getcompleted(ps);
 	if (as) {
 		snoop(&ps->dev->dev, "reap %px\n", as->userurb);
-		retval = processcompl(as, (void __user * __user *)arg);
+		retval = processcompl(as, arg);
 		free_async(as);
 	} else {
 		retval = (connected(ps) ? -EAGAIN : -ENODEV);
@@ -2211,7 +2215,7 @@ static int proc_submiturb_compat(struct usb_dev_state *ps, void __user *arg)
 			arg, userurb_sigval);
 }
 
-static int processcompl_compat(struct async *as, void __user * __user *arg)
+static int processcompl_compat(struct async *as, void __user *arg)
 {
 	struct urb *urb = as->urb;
 	struct usbdevfs_urb32 __user *userurb = as->userurb;
@@ -2254,7 +2258,7 @@ static int proc_reapurb_compat(struct usb_dev_state *ps, void __user *arg)
 		int retval;
 
 		snoop(&ps->dev->dev, "reap %px\n", as->userurb);
-		retval = processcompl_compat(as, (void __user * __user *)arg);
+		retval = processcompl_compat(as, arg);
 		free_async(as);
 		return retval;
 	}
@@ -2271,7 +2275,7 @@ static int proc_reapurbnonblock_compat(struct usb_dev_state *ps, void __user *ar
 	as = async_getcompleted(ps);
 	if (as) {
 		snoop(&ps->dev->dev, "reap %px\n", as->userurb);
-		retval = processcompl_compat(as, (void __user * __user *)arg);
+		retval = processcompl_compat(as, arg);
 		free_async(as);
 	} else {
 		retval = (connected(ps) ? -EAGAIN : -ENODEV);
