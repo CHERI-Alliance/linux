@@ -354,6 +354,17 @@ static long inotify_ioctl(struct file *file, unsigned int cmd,
 	return ret;
 }
 
+#ifdef CONFIG_COMPAT
+static long compat_inotify_ioctl(struct file *file, unsigned int cmd,
+				 unsigned long arg)
+{
+	user_uintptr_t cmd_arg = (cmd == FIONREAD) ?
+				(user_uintptr_t)compat_ptr(arg) :
+				(user_uintptr_t)arg;
+	return inotify_ioctl(file, cmd, cmd_arg);
+}
+#endif
+
 static const struct file_operations inotify_fops = {
 	.show_fdinfo	= inotify_show_fdinfo,
 	.poll		= inotify_poll,
@@ -362,7 +373,7 @@ static const struct file_operations inotify_fops = {
 	.release	= inotify_release,
 	.unlocked_ioctl	= inotify_ioctl,
 #ifdef CONFIG_COMPAT
-	.compat_ioctl	= inotify_ioctl,
+	.compat_ioctl	= compat_inotify_ioctl,
 #endif
 	.llseek		= noop_llseek,
 };
