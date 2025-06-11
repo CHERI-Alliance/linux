@@ -30,8 +30,8 @@
  * A standard AAPCS64 frame record.
  */
 struct frame_record {
-	u64 fp;
-	u64 lr;
+	user_uintptr_t fp;
+	user_uintptr_t lr;
 };
 
 /*
