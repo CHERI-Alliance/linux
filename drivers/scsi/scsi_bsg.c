@@ -7,7 +7,7 @@
 #include <scsi/sg.h>
 #include "scsi_priv.h"
 
-#define uptr64(val) ((void __user *)(uintptr_t)(val))
+#define uptr64(val) uaddr_to_user_ptr(val)
 
 static int scsi_bsg_sg_io_fn(struct request_queue *q, struct sg_io_v4 *hdr,
 		bool open_for_write, unsigned int timeout)
