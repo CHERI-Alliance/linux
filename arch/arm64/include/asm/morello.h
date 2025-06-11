@@ -5,6 +5,10 @@
 #ifndef __ASM_MORELLO_H
 #define __ASM_MORELLO_H
 
+/* Architectural definitions */
+#define MORELLO_CAP_PERM_EXECUTIVE_BIT	1
+#define MORELLO_CAP_PERM_EXECUTIVE_MASK	(1 << MORELLO_CAP_PERM_EXECUTIVE_BIT)
+
 #ifndef __ASSEMBLY__
 
 struct pt_regs;
@@ -22,13 +26,17 @@ typedef struct {
 /* Morello registers to be saved in thread_struct */
 struct morello_state {
 	cap128_t	ctpidr;
+	cap128_t	rctpidr;
 	cap128_t	ddc;
+	cap128_t	rddc;
 	cap128_t	cid;
 	unsigned long	cctlr;
 };
 
 /* Must be called with IRQs disabled */
 void morello_cpu_setup(void);
+
+u64 morello_cap_get_lo_val(const cap128_t *cap);
 
 /* Low-level uacces helpers, must not be called directly */
 void __morello_get_user_cap_asm(cap128_t *x, const cap128_t __user *ptr, int *err);
@@ -73,6 +81,15 @@ void morello_merge_cap_regs(struct pt_regs *regs);
 	b.eq	3000f
 	scvalue	c\cnr, c\cnr, \x
 3000:
+.endm
+
+/*
+ * Clear the Z flag if the capability has the Executive permission, set it
+ * otherwise.
+ */
+.macro morello_tst_cap_has_executive, c:req, tmp:req
+	gcperm	\tmp, \c
+	tst	\tmp, #MORELLO_CAP_PERM_EXECUTIVE_MASK
 .endm
 
 #endif /* __ASSEMBLY__ */

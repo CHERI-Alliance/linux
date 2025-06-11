@@ -17,6 +17,7 @@ void __morello_cap_lo_hi_tag(const cap128_t *cap, u64 *lo_val, u64 *hi_val,
 			     u8 *tag);
 void __morello_cap_cpy(cap128_t *dst, const cap128_t *src);
 void __morello_merge_c_x(cap128_t *creg, u64 xreg);
+bool __morello_cap_has_executive(const cap128_t *cap);
 void __morello_get_ddc(cap128_t *dst);
 
 /* Not defined as static because morello.S refers to it */
@@ -70,11 +71,17 @@ void morello_setup_signal_return(struct pt_regs *regs)
 void morello_merge_cap_regs(struct pt_regs *regs)
 {
 	int i;
+	cap128_t *active_csp;
+
+	if (__morello_cap_has_executive(&regs->pcc))
+		active_csp = &regs->csp;
+	else
+		active_csp = &regs->rcsp;
 
 	for (i = 0; i < ARRAY_SIZE(regs->cregs); i++)
 		__morello_merge_c_x(&regs->cregs[i], regs->regs[i]);
 
-	__morello_merge_c_x(&regs->csp, regs->sp);
+	__morello_merge_c_x(active_csp, regs->sp);
 	__morello_merge_c_x(&regs->pcc, regs->pc);
 }
 
