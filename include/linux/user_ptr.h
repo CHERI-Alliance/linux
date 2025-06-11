@@ -222,7 +222,7 @@ static inline bool user_ptr_is_same(const void __user *p1, const void __user *p2
 }
 
 /**
- * user_ptr_set_bounds() - Extract the lower and upper bounds of a user pointer.
+ * user_ptr_set_bounds() - Set the lower and upper bounds of a user pointer.
  * @ptr: The input user pointer.
  * @len: The length of the new bounds.
  *
