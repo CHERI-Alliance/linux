@@ -31,6 +31,7 @@
 #include <linux/memcontrol.h>
 #include <linux/cfi.h>
 #include <asm/rqspinlock.h>
+#include <linux/bpf_compat.h>
 
 struct bpf_verifier_env;
 struct bpf_verifier_log;
