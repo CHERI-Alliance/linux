@@ -21,7 +21,7 @@
 
 struct ucontext {
 	unsigned long	  uc_flags;
-	struct ucontext	 *uc_link;
+	struct ucontext	__user *uc_link;
 	stack_t		  uc_stack;
 	sigset_t	  uc_sigmask;
 	/* glibc uses a 1024-bit sigset_t */
