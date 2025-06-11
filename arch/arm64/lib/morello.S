@@ -37,6 +37,16 @@ SYM_FUNC_START(morello_cap_get_lo_val)
 	ret
 SYM_FUNC_END(morello_cap_get_lo_val)
 
+SYM_FUNC_START(morello_cap_get_val_tag)
+	ldr	c0, [x0]
+	gctag	x3, c0
+	clrtag	c0, c0			// Store the 128-bit value without the tag
+	str	c0, [x1]
+	strb	w3, [x2]
+
+	ret
+SYM_FUNC_END(morello_cap_get_val_tag)
+
 SYM_FUNC_START(morello_capcpy)
 	mov	x3, x0
 	and	x4, x2, #0x10		// Bytes to reach 32-byte alignment (0 or 16)
