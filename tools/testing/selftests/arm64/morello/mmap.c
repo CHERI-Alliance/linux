@@ -73,7 +73,7 @@ void syscall_mmap2(void)
 
 	ASSERT_GE(fd, 0);
 
-	retval = syscall(__NR_lseek, fd, MMAP_SIZE, SEEK_SET);
+	retval = lseek(fd, MMAP_SIZE, SEEK_SET);
 	ASSERT_EQ(retval, MMAP_SIZE);
 
 	/* attempt to write arbitrary data to file */
@@ -90,18 +90,17 @@ void syscall_mmap2(void)
 				      PROBE_MODE_TOUCH | PROBE_MODE_VERIFY));
 
 	/* Attempt to change bounds of memory mapping, shrink by factor of 2 */
-	addr = (void *)syscall(__NR_mremap, addr, MMAP_SIZE,
-			      MMAP_SIZE_REDUCED, 0, 0);
+	addr = mremap(addr, MMAP_SIZE, MMAP_SIZE_REDUCED, 0, 0);
 
 	ASSERT_FALSE(IS_ERR_VALUE(addr));
 	/* advise kernel about how to handle paging of mapped memory.*/
-	retval = syscall(__NR_madvise, addr, MMAP_SIZE_REDUCED, MADV_WILLNEED);
+	retval = madvise(addr, MMAP_SIZE_REDUCED, MADV_WILLNEED);
 	ASSERT_EQ(retval, 0);
 
 	EXPECT_EQ(0, probe_mem_range(addr, MMAP_SIZE_REDUCED,
 				     PROBE_MODE_TOUCH | PROBE_MODE_VERIFY));
 	/* An attempt to change permissions to RO */
-	retval = syscall(__NR_mprotect, addr, MMAP_SIZE_REDUCED, PROT_READ);
+	retval = mprotect(addr, MMAP_SIZE_REDUCED, PROT_READ);
 	ASSERT_EQ(retval, 0);
 	/* Write permission should be revoked - verify mode only */
 	/* To be extended when signals are fully supported */
