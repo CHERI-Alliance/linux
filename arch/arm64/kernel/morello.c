@@ -28,9 +28,7 @@ bool __morello_cap_has_executive(uintcap_t cap);
 
 /* Not defined as static because morello.S refers to it */
 uintcap_t morello_root_cap __ro_after_init;
-#ifdef CONFIG_CHERI_PURECAP_UABI
 static uintcap_t morello_sentry_unsealcap __ro_after_init;
-#endif
 
 /* DDC_ELx reset value (low/high 64 bits), as defined in the Morello spec */
 #define DDC_RESET_VAL_LOW_64	0x0
@@ -43,14 +41,9 @@ uintcap_t morello_get_root_cap(void)
 	return morello_root_cap;
 }
 
-static void init_pcc(struct pt_regs *regs)
+static bool is_pure_task(void)
 {
-	/*
-	 * Set PCC to the root capability. There is no need to set its value to
-	 * pc, this will be taken care of when PC is merged into PCC during
-	 * ret_to_user.
-	 */
-	regs->pcc = morello_root_cap;
+	return IS_ENABLED(CONFIG_CHERI_PURECAP_UABI) && !is_compat_task();
 }
 
 static void update_regs_c64(struct pt_regs *regs, unsigned long pc)
@@ -66,21 +59,24 @@ static void update_regs_c64(struct pt_regs *regs, unsigned long pc)
 	}
 }
 
-static void init_csp(struct pt_regs *regs)
-{
-	/*
-	 * TODO [PCuABI] - Adjust the bounds/permissions properly
-	 * This should also be somehow hooked up for stack limit changes
-	 */
-	/* The actual value for CSP will be set during ret_to_user */
-	regs->csp = morello_root_cap;
-}
-
 void morello_thread_start(struct pt_regs *regs, unsigned long pc)
 {
-	init_pcc(regs);
 	update_regs_c64(regs, pc);
-	init_csp(regs);
+
+	/*
+	 * Note: there is no need to explicitly set the address of PCC/CSP as
+	 * PC/SP are already set to the appropriate values in regs, and X/C
+	 * register merging automatically happens during ret_to_user.
+	 */
+	if (is_pure_task()) {
+		/* TODO [PCuABI] - Adjust the bounds/permissions properly */
+		regs->pcc = cheri_user_root_cap;
+
+		regs->csp = cheri_user_root_cap;
+	} else /* Hybrid */ {
+		regs->pcc = cheri_user_root_allperms_cap;
+		/* CSP is null-derived in hybrid */
+	}
 }
 
 #ifdef CONFIG_CHERI_PURECAP_UABI
@@ -99,22 +95,25 @@ void morello_setup_signal_return(struct pt_regs *regs)
 	 * point (this means in particular that the signal handler is invoked in
 	 * Executive).
 	 */
-#ifdef CONFIG_CHERI_PURECAP_UABI
-	if (is_compat_task())
-		init_pcc(regs);
-	/* Unseal if the pcc has sentry object type */
-	else if (cheri_is_sentry(regs->pcc))
-		regs->pcc = cheri_unseal(regs->pcc, morello_sentry_unsealcap);
-#else
-	init_pcc(regs);
-#endif
 	update_regs_c64(regs, regs->pc);
 
-	/*
-	 * Also set CLR to a valid capability, to allow a C64 handler to return
-	 * to the trampoline using `ret clr`.
-	 */
-	regs->cregs[30] = morello_root_cap;
+	if (is_pure_task()) {
+		/* Unseal if the pcc has sentry object type */
+		if (cheri_is_sentry(regs->pcc))
+			regs->pcc = cheri_unseal(regs->pcc,
+						 morello_sentry_unsealcap);
+
+		/* TODO [PCuABI] - Adjust the bounds/permissions properly */
+		regs->cregs[30] = cheri_user_root_cap;
+	} else /* Hybrid */ {
+		regs->pcc = cheri_user_root_allperms_cap;
+
+		/*
+		 * Also set CLR to a valid capability, to allow a C64 handler
+		 * to return to the trampoline using `ret clr`.
+		 */
+		regs->cregs[30] = cheri_user_root_allperms_cap;
+	}
 }
 
 static char *format_cap(char *buf, size_t size, uintcap_t cap)
@@ -351,12 +350,10 @@ static int __init morello_cap_init(void)
 	/* Initialise Morello-specific root capabilities. */
 	morello_root_cap = root_cap;
 
-#ifdef CONFIG_CHERI_PURECAP_UABI
 	/* Initialize a capability able to unseal sentry capabilities. */
 	perms = CHERI_PERM_GLOBAL | CHERI_PERM_UNSEAL;
 	morello_sentry_unsealcap = cheri_address_set(root_cap, CHERI_OTYPE_SENTRY);
 	morello_sentry_unsealcap = build_cap(morello_sentry_unsealcap, perms, 1);
-#endif
 
 	return 0;
 }
