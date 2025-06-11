@@ -12,13 +12,15 @@ regions:
 These two categories of pointers are not interchangeable and, in
 particular, the kernel should never directly dereference a user pointer.
 
-The introduction of the pure-capability kernel-user ABI (PCuABI) has
+The introduction of the `pure-capability kernel-user ABI`_ (PCuABI) has
 made this distinction even more important, as in that configuration user
 pointers are of a different type altogether and cannot be represented by
 kernel pointers or most integer types.
 
 This document outlines the available API to represent and manipulate
 user pointers in a way that is safe in any kernel-user ABI.
+
+.. _pure-capability kernel-user ABI: Documentation/cheri/pcuabi.rst
 
 Representing user pointers
 ==========================
@@ -52,27 +54,6 @@ This is the reason why user **pointers** may not be represented by
 integer types such as ``long``. User **addresses** may however still be
 represented like kernel addresses, e.g. using ``long``. The recommended
 type for addresses when writing new code is ``ptraddr_t``.
-
-PCuABI-specific changes
------------------------
-
-When PCuABI is targeted by selecting the ``CONFIG_CHERI_PURECAP_UABI``
-option, user pointers are turned into capabilities by making the
-``__user`` annotation expand to ``__capability``. Unfortunately,
-``_user`` precedes ``*`` and using ``__capability`` as a prefix of ``*``
-is deprecated. It does work in most cases, but in more complex
-situations, such as double pointers, it becomes ambiguous and fails to
-compile.
-
-It is therefore occasionally necessary to have PCuABI-specific fixup
-blocks to solve that ambiguity by moving ``__capability`` as a suffix of
-``*``. It is typically done as follows::
-
-  #ifdef CONFIG_CHERI_PURECAP_UABI
-  void * __capability * __capability p;
-  #else
-  void __user * __user *p;
-  #endif
 
 
 Converting user pointers
