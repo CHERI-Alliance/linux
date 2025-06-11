@@ -100,6 +100,18 @@ static inline bool has_syscall_work(unsigned long flags)
 	return unlikely(flags & _TIF_SYSCALL_WORK);
 }
 
+#if defined(CONFIG_FTRACE_SYSCALLS) && defined(CONFIG_CHERI_PURECAP_UABI)
+unsigned long __init arch_syscall_addr(int nr)
+{
+	/*
+	 * In this particular case, it makes no difference,
+	 * which member of the syscall_entry_t instance is being
+	 * provided - the address is all that matters here
+	 */
+	return (unsigned long)sys_call_table[nr].syscall_fn;
+}
+#endif
+
 static void el0_svc_common(struct pt_regs *regs, int scno, int sc_nr,
 			   const syscall_entry_t syscall_table[])
 {
