@@ -22,6 +22,7 @@ static volatile unsigned int signal_status;
 
 struct siginfo_data {
 	bool cap;
+	int si_code;
 	union {
 		int val;
 		void *ptr;
@@ -79,7 +80,7 @@ static void sigusr1_handler(int n, siginfo_t *si,
 {
 	ASSERT_EQ(n, SIGUSR1)
 	ASSERT_EQ(si->si_signo, SIGUSR1);
-	ASSERT_EQ(si->si_code, SI_MESGQ);
+	ASSERT_EQ(si->si_code, siginfo_params.si_code);
 	if (siginfo_params.cap) {
 		ASSERT_TRUE(cheri_is_equal_exact(si->si_value.sival_ptr,
 						 siginfo_params.ptr));
@@ -89,14 +90,14 @@ static void sigusr1_handler(int n, siginfo_t *si,
 	signal_status = true;
 }
 
-static void setup_sigusr1_handler(struct sigaction *sa)
+static void setup_sigusr1_handler(struct sigaction *sa, int mask_how)
 {
 	ASSERT_EQ(sigemptyset(&sa->sa_mask), 0);
 	sa->sa_handler = (sighandler_t)sigusr1_handler;
 	sa->sa_flags = SA_SIGINFO;
 	ASSERT_EQ(sigaction(SIGUSR1, sa, NULL), 0);
 	ASSERT_EQ(sigaddset(&sa->sa_mask, SIGUSR1), 0);
-	ASSERT_EQ(sigprocmask(SIG_UNBLOCK, &sa->sa_mask, NULL), 0);
+	ASSERT_EQ(sigprocmask(mask_how, &sa->sa_mask, NULL), 0);
 }
 
 static void test_mq_notify_signal(bool param_cap_type)
@@ -120,6 +121,7 @@ static void test_mq_notify_signal(bool param_cap_type)
 		siginfo_params.cap = false;
 		ev.sigev_value.sival_int = siginfo_params.val;
 	}
+	siginfo_params.si_code = SI_MESGQ;
 	mqdes = mq_open(MQUEUE_FILENAME, O_CREAT | O_RDWR);
 	ASSERT_NE(mqdes, -1) {
 		__TH_LOG_ERROR("test_mq_notify: Failed on mq_open");
@@ -133,6 +135,41 @@ static void test_mq_notify_signal(bool param_cap_type)
 	wait(DELAY * 1000);
 	close(mqdes);
 	ASSERT_EQ(mq_unlink(MQUEUE_FILENAME), 0);
+}
+
+static void test_timer_create_signal(void)
+{
+	struct sigevent ev;
+	timer_t timerid;
+	struct itimerspec its;
+	struct sigaction sa;
+
+	/* register a masked signal handler */
+	setup_sigusr1_handler(&sa, SIG_SETMASK);
+
+	/* Create the timer */
+	signal_status = false;
+	siginfo_params.ptr = &ev;
+	ASSERT_TRUE(cheri_tag_get(siginfo_params.ptr)) {
+		__TH_LOG_ERROR("Check if application in purecap");
+	}
+	siginfo_params.cap = true;
+	siginfo_params.si_code = SI_TIMER;
+	ev.sigev_notify = SIGEV_SIGNAL;
+	ev.sigev_signo = SIGUSR1;
+	ev.sigev_value.sival_ptr = siginfo_params.ptr;
+	ASSERT_EQ(timer_create(CLOCK_REALTIME, &ev, &timerid), 0);
+
+	/* Start the timer */
+	its.it_value.tv_sec = 0;
+	its.it_value.tv_nsec = DELAY * 1000;
+	its.it_interval.tv_sec = 0;
+	its.it_interval.tv_nsec = 0;
+	ASSERT_EQ(timer_settime(timerid, 0, &its, NULL), 0);
+	ASSERT_EQ(sigprocmask(SIG_UNBLOCK, &sa.sa_mask, NULL), 0);
+	wait(DELAY * 2000);
+	/* Delete the timer */
+	ASSERT_EQ(timer_delete(timerid), 0);
 }
 
 TEST(test_signal_basic)
@@ -171,7 +208,7 @@ TEST(test_mq_notify)
 {
 	struct sigaction sa;
 
-	setup_sigusr1_handler(&sa);
+	setup_sigusr1_handler(&sa, SIG_UNBLOCK);
 	TH_LOG("test_mq_notify: Send sigevent with pointer data");
 	test_mq_notify_signal(true);
 	ASSERT_TRUE(signal_status);
@@ -181,9 +218,17 @@ TEST(test_mq_notify)
 	ASSERT_TRUE(signal_status);
 }
 
+TEST(test_timer_create)
+{
+	TH_LOG("test_timer_create: Set timer with pointer data");
+	test_timer_create_signal();
+	ASSERT_TRUE(signal_status);
+}
+
 int main(void)
 {
 	test_signal_basic();
 	test_mq_notify();
+	test_timer_create();
 	return 0;
 }
