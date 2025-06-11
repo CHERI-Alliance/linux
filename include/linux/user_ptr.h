@@ -65,22 +65,6 @@ static inline void __user *uaddr_to_user_ptr_safe(ptraddr_t addr)
 }
 #endif
 
-#ifndef kaddr_to_user_ptr
-/**
- * kaddr_to_user_ptr - convert a kernel address to a user pointer
- * @addr: the address to set the pointer to
- *
- * Returns a user pointer with its address set to @addr.
- *
- * This function should be used when kernel memory needs to be accessed via a
- * user pointer. There should be no use for it after the removal of set_fs().
- */
-static inline void __user *kaddr_to_user_ptr(ptraddr_t addr)
-{
-	return as_user_ptr(addr);
-}
-#endif
-
 /**
  * user_ptr_addr - extract the address of a user pointer
  * @ptr: the user pointer to extract the address from
