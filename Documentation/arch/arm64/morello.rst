@@ -5,7 +5,7 @@ Morello in AArch64 Linux
 Author: Kevin Brodsky <kevin.brodsky@arm.com>
 
 | Original date: 2020-09-07
-| Last updated: 2022-12-07
+| Last updated: 2024-04-25
 |
 
 This document describes the provision of Morello functionalities to
@@ -13,15 +13,9 @@ userspace by Linux.
 
 **Disclaimer**
   Support for Morello in Linux is experimental, just like the
-  Morello architecture itself. Any aspect of the kernel-user ABI
-  introduced for Morello may be later modified or removed, without
-  guaranteeing backwards-compatibility. Additionally, no claim or
+  Morello architecture itself. Additionally, no claim or
   guarantee is made regarding the security properties of this
-  implementation; the kernel-user interface is currently entirely
-  unrestricted w.r.t. capabilities held by the user context. This means
-  notably that capability-based sandboxes in userspace are
-  straightforward to escape, for instance by issuing syscalls. More
-  details can be found in the Limitations_ section.
+  implementation. More details can be found in the Limitations_ section.
 
 Architecture overview
 =====================
@@ -264,23 +258,23 @@ configuration is untested.
 Please note that the following caveats and limitations currently apply
 when ``CONFIG_CHERI_PURECAP_UABI`` is selected:
 
-* A **transitional** variation of PCuABI is provided by the kernel.
-  The transitional ABI is specified separately in [5]_. Only **a limited
-  set of syscalls** is supported in this ABI.
-
-* Only a **fixed configuration** is supported when
-  ``CONFIG_CHERI_PURECAP_UABI`` is selected:
-  ``morello_transitional_pcuabi_defconfig``.
+* Only a **fixed configuration** is supported when ``CONFIG_CHERI_PURECAP_UABI``
+  is selected: ``morello_pcuabi_defconfig``.
   In other words, configuring the kernel with PCuABI support should be
-  done by using ``make morello_transitional_pcuabi_defconfig``.
+  done by using ``make morello_pcuabi_defconfig``.
   Selecting additional options may cause build and/or runtime errors.
+
+* Several aspects of the PCuABI specification [5]_ are not fully
+  implemented. Please refer to the `PCuABI documentation`_ for more
+  information.
 
 The rest of this document specifies **extensions to the standard AArch64
 ABI**. These extensions are also available in PCuABI, with a number of
-differences. The transitional PCuABI specification [5]_ takes precedence
-where it differs from the present document.
+differences. The PCuABI specification [5]_ takes precedence where it
+differs from the present document.
 
 .. _pure-capability kernel-user ABI: Documentation/cheri/pcuabi.rst
+.. _PCuABI documentation: Documentation/cheri/pcuabi.rst
 
 Register handling
 -----------------
@@ -685,24 +679,18 @@ Note
 Limitations
 ===========
 
-* **No capability-based restriction is enforced at the kernel-user
-  interface.** This means in particular that:
+* In the **standard AArch64 ABI** with Morello extensions (also known as
+  "hybrid"), the kernel-user interface is generally unrestricted w.r.t.
+  capabilities. In particular:
 
   - Accesses by the kernel to user memory (uaccess) are not checked
     against the user's active DDC, allowing syscalls such as ``read()`` or
     ``write()`` to access memory that the user thread may not otherwise be
-    able to access through the capabilities it has access to. This
-    limitation is to be investigated as part of the support for the
-    pure-capability ABI.
-  - Syscalls in the ``mmap()`` family allow to modify the entire address
-    space without restriction.
+    able to access through the capabilities it has access to.
   - A user context running in Restricted is able to register arbitrary
     signal handlers, which are always invoked in Executive. As a result,
     a Restricted context can easily cause arbitrary code to be run in
     Executive.
-  - Any user context (whether running in Executive or Restricted) is
-    able to access the entire address space of the process through the
-    ptrace interface (by forking a child process for that purpose).
 
 * No particular support for the DDCBO and PCCBO bits of CCTLR_EL0 is
   provided. If either of these bits is set in CCTLR_EL0 and the base of
@@ -722,6 +710,9 @@ Limitations
     available registers when entering / exiting the kernel.
   - Capability tags in memory are not included in core dumps.
 
+* perf samples of type ``PERF_SAMPLE_CALLCHAIN`` are not supported if
+  PCuABI is selected.
+
 References
 ==========
 
@@ -729,4 +720,4 @@ References
 .. [2] https://www.cl.cam.ac.uk/research/security/ctsrd/cheri/
 .. [3] https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-941.pdf
 .. [4] https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-947.pdf
-.. [5] https://git.morello-project.org/morello/kernel/linux/-/wikis/Transitional-Morello-pure-capability-kernel-user-Linux-ABI-specification
+.. [5] https://git.morello-project.org/morello/kernel/linux/-/wikis/Morello-pure-capability-kernel-user-Linux-ABI-specification
