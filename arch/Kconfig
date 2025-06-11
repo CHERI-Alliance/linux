@@ -1792,9 +1792,6 @@ config HAVE_GENERIC_TIF_BITS
 config HAVE_ARCH_CHERI_H
 	bool
 
-config ARCH_HAS_USER_PTR_H
-	bool
-
 config ARCH_HAS_CHERI_CAPABILITIES
 	bool
 
