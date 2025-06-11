@@ -22,6 +22,12 @@
 #define tmp		v17
 #define rot8		v18
 
+#if __SIZEOF_POINTER__ > __SIZEOF_LONG__
+#define CREG(NUM)	c ## NUM
+#else
+#define CREG(NUM)	x ## NUM
+#endif
+
 /*
  * ARM64 ChaCha20 implementation meant for vDSO.  Produces a given positive
  * number of blocks of output with nonce 0, taking an input key and 8-bytes
@@ -49,9 +55,9 @@ SYM_FUNC_START(__arch_chacha20_blocks_nostack)
 	mov		copy0.d[1], x9
 
 	/* copy1,copy2 = key */
-	ld1		{ copy1.4s, copy2.4s }, [x1]
+	ld1		{ copy1.4s, copy2.4s }, [CREG(1)]
 	/* copy3 = counter || zero nonce  */
-	ld1		{ copy3.2s }, [x2]
+	ld1		{ copy3.2s }, [CREG(2)]
 
 	movi		one_v.2s, #1
 	uzp1		one_v.4s, one_v.4s, one_v.4s
@@ -143,7 +149,7 @@ SYM_FUNC_START(__arch_chacha20_blocks_nostack)
 	add		state2.4s, state2.4s, copy2.4s
 	/* output2 = state3 + state3 */
 	add		state3.4s, state3.4s, copy3.4s
-	st1		{ state0.16b - state3.16b }, [x0]
+	st1		{ state0.16b - state3.16b }, [CREG(0)]
 
 	/*
 	 * ++copy3.counter, the 'add' clears the upper half of the SIMD register
@@ -157,7 +163,7 @@ SYM_FUNC_START(__arch_chacha20_blocks_nostack)
 	b.ne		.Lblock
 
 	/* counter = copy3.counter */
-	st1		{ copy3.2s }, [x2]
+	st1		{ copy3.2s }, [CREG(2)]
 
 	/* Zero out the potentially sensitive regs, in case nothing uses these again. */
 	movi		state0.16b, #0
