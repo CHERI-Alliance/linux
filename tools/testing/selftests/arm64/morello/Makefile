@@ -11,7 +11,7 @@ LDFLAGS := -fuse-ld=lld
 CFLAGS += $(CFLAGS_CLANG) $(CFLAGS_PURECAP) $(CFLAGS_COMMON)
 
 SRCS := $(wildcard *.c) $(wildcard *.S)
-PROGS := bootstrap clone exit read_write
+PROGS := bootstrap clone exit read_write signal
 DEPS := $(wildcard *.h)
 
 # these are the final executables
@@ -33,3 +33,5 @@ $(OUTPUT)/%.o:%.c $(DEPS)
 
 $(OUTPUT)/%: $(OUTPUT)/%.o $(OUTPUT)/freestanding_start.o $(OUTPUT)/freestanding_init_globals.o $(OUTPUT)/freestanding.o
 	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
+
+$(OUTPUT)/signal: $(OUTPUT)/signal_common.o
