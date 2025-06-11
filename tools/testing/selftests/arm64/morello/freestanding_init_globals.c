@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include "freestanding.h"
 
 struct cap_reloc {
 	size_t capability_location;
