@@ -8,7 +8,7 @@
 
 static inline void __user *sqe_get_optval(const struct io_uring_sqe *sqe)
 {
-	if (IS_ENABLED(CONFIG_COMPAT64) && in_compat_syscall()) {
+	if (in_compat64_syscall()) {
 		const __u64 *val = io_uring_sqe_cmd(sqe);
 		return compat_ptr(READ_ONCE(*val));
 	} else {
