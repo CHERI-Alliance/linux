@@ -20,6 +20,10 @@
 #include <asm/morello.h>
 #include <asm/ptrace.h>
 
+#ifdef CONFIG_CHERI_PURECAP_UABI
+#include <cheriintrin.h>
+#endif
+
 /* Private functions implemented in morello.S */
 void __morello_cap_lo_hi_tag(uintcap_t cap, u64 *lo_val, u64 *hi_val,
 			     u8 *tag);
@@ -28,6 +32,9 @@ bool __morello_cap_has_executive(uintcap_t cap);
 
 /* Not defined as static because morello.S refers to it */
 uintcap_t morello_root_cap __ro_after_init;
+#ifdef CONFIG_CHERI_PURECAP_UABI
+static uintcap_t morello_sentry_unsealcap __ro_after_init;
+#endif
 
 /* DDC_ELx reset value (low/high 64 bits), as defined in the Morello spec */
 #define DDC_RESET_VAL_LOW_64	0x0
@@ -94,7 +101,13 @@ void morello_setup_signal_return(struct pt_regs *regs)
 	 * point (this means in particular that the signal handler is invoked in
 	 * Executive).
 	 */
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	/* Unseal if the pcc has sentry object type */
+	if (cheri_is_sentry(regs->pcc))
+		regs->pcc = cheri_unseal(regs->pcc, morello_sentry_unsealcap);
+#else
 	init_pcc(regs);
+#endif
 	update_regs_c64(regs, regs->pc);
 
 	/*
@@ -290,9 +303,21 @@ static void __init check_root_cap(uintcap_t cap)
 
 static int __init morello_cap_init(void)
 {
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	uintcap_t ctemp;
+#endif
+
 	morello_root_cap = (uintcap_t)cheri_ddc_get();
 
 	check_root_cap(morello_root_cap);
+
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	/* Initialize a capability able to unseal sentry capabilities. */
+	ctemp = cheri_address_set(morello_root_cap, CHERI_OTYPE_SENTRY);
+	ctemp = cheri_bounds_set(ctemp, 1);
+	ctemp = cheri_perms_and(ctemp, CHERI_PERM_GLOBAL | CHERI_PERM_UNSEAL);
+	morello_sentry_unsealcap = ctemp;
+#endif
 
 	return 0;
 }
