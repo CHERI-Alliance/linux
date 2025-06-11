@@ -1,18 +1,38 @@
 # SPDX-License-Identifier: GPL-2.0
 # Copyright (C) 2021  Arm Limited
 
-CFLAGS_PURECAP = -march=morello+c64 -mabi=purecap
-CFLAGS_COMMON = -O2 -g -static -nostdlib -ffreestanding -Wall -Wextra -MMD -I../../../../include -I../../../../arch/arm64/include/uapi -I../../../../include/uapi
-CFLAGS_CLANG = --target=aarch64-target -integrated-as
-CFLAGS := $(CFLAGS_CLANG) $(CFLAGS_PURECAP) $(CFLAGS_COMMON)
-CLANG ?= clang
+# lib.mk sets CC. This switch triggers it to clang
+LLVM := 1
 
-SRCS := start.S
-PROGS := purecap_syscall_test
+CFLAGS_PURECAP = -march=morello+c64 -mabi=purecap
+CFLAGS_COMMON = -g -static -nostdlib -ffreestanding -Wall -Wextra -MMD
+CFLAGS_CLANG = --target=aarch64-linux-gnu -integrated-as
+LDFLAGS := -fuse-ld=lld
+CFLAGS += $(CFLAGS_CLANG) $(CFLAGS_PURECAP) $(CFLAGS_COMMON)
+
+SRCS := $(wildcard *.c) $(wildcard *.S)
+PROGS := purecap_syscall_test tester
+DEPS := $(wildcard *.h)
+
+# these are the final executables
 TEST_GEN_PROGS := $(PROGS)
-EXTRA_CLEAN := $(PROGS).d
+# substitute twice to cover both .S and .c files
+TEST_GEN_FILES := $(patsubst %.S,%.o,$(patsubst %.c,%.o,$(SRCS)))
+EXTRA_CLEAN := $(patsubst %.o,%.d,$(TEST_GEN_FILES))
+
+# disable default targets, as we set our own
+OVERRIDE_TARGETS := 1
 
 include ../../lib.mk
 
-$(TEST_GEN_PROGS): $(SRCS)
-	$(CLANG) $^ -o $@ $(CFLAGS)
+$(OUTPUT)/%.o:%.S $(DEPS)
+	$(CC) $< -o $@ $(CFLAGS) -c
+
+$(OUTPUT)/%.o:%.c $(DEPS)
+	$(CC) $< -o $@ $(CFLAGS) -c
+
+$(OUTPUT)/tester: $(OUTPUT)/freestanding_start.o $(OUTPUT)/freestanding_init_globals.o $(OUTPUT)/tester.o
+	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
+
+$(OUTPUT)/purecap_syscall_test: $(OUTPUT)/start.o
+	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
