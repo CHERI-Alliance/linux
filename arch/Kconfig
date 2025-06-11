@@ -1789,6 +1789,9 @@ config ARCH_VMLINUX_NEEDS_RELOCS
 config HAVE_GENERIC_TIF_BITS
        bool
 
+config ARCH_HAS_USER_PTR_H
+	bool
+
 config ARCH_HAS_CHERI_CAPABILITIES
 	bool
 
