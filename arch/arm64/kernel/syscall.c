@@ -63,12 +63,15 @@ static void invoke_syscall(struct pt_regs *regs, unsigned int scno,
 			__invoke_syscall(regs, entry->syscall_fn);
 
 		/*
-		 * Upon ret_to_user general-purpose registers will get merged
-		 * back to capability registers, which is why regs->reg[0] and
-		 * regs->creg[0] need to be aligned here.
+		 * In PCuABI, upon ret_to_user, general-purpose registers will
+		 * get merged back to capability registers, which is why
+		 * regs->reg[0] and regs->creg[0] need to be aligned here.
+		 * This doesn't apply to compat tasks.
 		 */
 		ret = (ptraddr_t)__ret;
-		regs->cregs[0] = __ret;
+		if (!is_compat_task()) {
+			regs->cregs[0] = __ret;
+		}
 #else
 		syscall_fn_t syscall_fn;
 		syscall_fn = syscall_table[array_index_nospec(scno, sc_nr)];
