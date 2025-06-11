@@ -1593,9 +1593,9 @@ int sock_map_bpf_prog_query(const union bpf_attr *attr,
 end:
 	rcu_read_unlock();
 
-	if (copy_to_user(&uattr->query.attach_flags, &flags, sizeof(flags)) ||
+	if (bpf_put_uattr(flags, uattr, query.attach_flags) ||
 	    (id != 0 && copy_to_user(prog_ids, &id, sizeof(u32))) ||
-	    copy_to_user(&uattr->query.prog_cnt, &prog_cnt, sizeof(prog_cnt)))
+	    bpf_put_uattr(prog_cnt, uattr, query.prog_cnt))
 		ret = -EFAULT;
 
 	return ret;
