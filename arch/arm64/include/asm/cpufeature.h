@@ -878,10 +878,13 @@ static inline bool system_supports_bbml2_noabort(void)
 	return alternative_has_cap_unlikely(ARM64_HAS_BBML2_NOABORT);
 }
 
+/*
+ * There is no runtime detection for Morello support; this is only a
+ * convenience function that is equivalent to #ifdef CONFIG_ARM64_MORELLO.
+ */
 static inline bool system_supports_morello(void)
 {
-	return IS_ENABLED(CONFIG_ARM64_MORELLO) &&
-		cpus_have_const_cap(ARM64_MORELLO);
+	return IS_ENABLED(CONFIG_ARM64_MORELLO);
 }
 
 int do_emulate_mrs(struct pt_regs *regs, u32 sys_reg, u32 rt);

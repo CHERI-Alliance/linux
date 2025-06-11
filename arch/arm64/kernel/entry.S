@@ -219,10 +219,6 @@ alternative_cb_end
 	stp	x28, x29, [sp, #16 * 14]
 
 #ifdef CONFIG_ARM64_MORELLO
-alternative_if_not ARM64_MORELLO
-	b	1f
-alternative_else_nop_endif
-
 	stp	c0, c1, [sp, #S_CREGS + 32 * 0]
 	stp	c2, c3, [sp, #S_CREGS + 32 * 1]
 	stp	c4, c5, [sp, #S_CREGS + 32 * 2]
@@ -242,16 +238,11 @@ alternative_else_nop_endif
 
 	mrs	c26, celr_el1
 	str	c26, [sp, #S_PCC]
-1:
 #endif
 
 	.if	\el == 0
 	clear_gp_regs
 #ifdef CONFIG_ARM64_MORELLO
-alternative_if_not ARM64_MORELLO
-	b	1f
-alternative_else_nop_endif
-
 	mrs	c21, csp_el0
 	mrs	c22, rcsp_el0
 	stp	c21, c22, [sp, #S_CSP]
@@ -259,11 +250,9 @@ alternative_else_nop_endif
 	mrs	c26, celr_el1			// Reload PCC (c26 got cleared by clear_gp_regs)
 	morello_tst_cap_has_executive c26, x27	// Was the interrupted context in Executive?
 	csel	x21, x21, x22, ne		// If not, save RSP_EL0 as SP_EL0
-	b	2f
-1:
-#endif
+#else
 	mrs	x21, sp_el0
-2:
+#endif
 	ldr_this_cpu	tsk, __entry_task, x20
 	msr	sp_el0, tsk
 
@@ -424,19 +413,13 @@ alternative_else_nop_endif
 #endif
 
 #ifdef CONFIG_ARM64_MORELLO
-alternative_if ARM64_MORELLO
 	/* We will need PCC in multiple places thereafter, so load it now */
 	ldr	c26, [sp, #S_PCC]
-alternative_else_nop_endif
 #endif
 
 	.if	\el == 0
 	ldr	x23, [sp, #S_SP]		// load return stack pointer
 #ifdef CONFIG_ARM64_MORELLO
-alternative_if_not ARM64_MORELLO
-	b	1f
-alternative_else_nop_endif
-
 	ldp	c24, c25, [sp, #S_CSP]		// load the saved CSP and RCSP
 	morello_tst_cap_has_executive c26, x27	// are we restoring an Executive context?
 	b.eq	10f				// if not, merge into RCSP instead of CSP
@@ -447,11 +430,9 @@ alternative_else_nop_endif
 11:
 	msr	csp_el0, c24
 	msr	rcsp_el0, c25
-	b	2f
-1:
-#endif
+#else
 	msr	sp_el0, x23
-2:
+#endif
 	tst	x22, #PSR_MODE32_BIT		// native task?
 	b.eq	3f
 
@@ -500,10 +481,6 @@ alternative_else_nop_endif
 	msr	spsr_el1, x22
 
 #ifdef CONFIG_ARM64_MORELLO
-alternative_if_not ARM64_MORELLO
-	b	1f
-alternative_else_nop_endif
-
 	morello_merge_c_x 26, x21		// merge PC into PCC
 	msr	celr_el1, c26
 
@@ -542,9 +519,7 @@ alternative_else_nop_endif
 	add	sp, sp, #PT_REGS_SIZE		// restore sp
 	eret
 	sb
-1:
-#endif /* CONFIG_ARM64_MORELLO */
-
+#else /* CONFIG_ARM64_MORELLO */
 	msr	elr_el1, x21			// set up the return data
 
 	ldp	x0, x1, [sp, #16 * 0]
@@ -596,6 +571,7 @@ alternative_else_nop_endif
 
 	eret
 	sb
+#endif /* CONFIG_ARM64_MORELLO */
 	.endm
 
 #ifdef CONFIG_ARM64_SW_TTBR0_PAN
