@@ -238,7 +238,12 @@ typedef struct siginfo {
 #define SEGV_MTEAERR	8	/* Asynchronous ARM MTE error */
 #define SEGV_MTESERR	9	/* Synchronous ARM MTE exception */
 #define SEGV_CPERR	10	/* Control protection fault */
-#define NSIGSEGV	10
+#define SEGV_CAPTAGERR		10	/* Capability tag fault */
+#define SEGV_CAPSEALEDERR	11	/* Capability sealed fault */
+#define SEGV_CAPBOUNDSERR	12	/* Capability bounds fault */
+#define SEGV_CAPPERMERR		13	/* Capability permission fault */
+#define SEGV_CAPACCESSERR	14	/* Capability access fault */
+#define NSIGSEGV	14
 
 /*
  * SIGBUS si_codes
