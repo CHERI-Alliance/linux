@@ -34,12 +34,12 @@ int ext4_inode_journal_mode(struct inode *inode)
 static handle_t *ext4_get_nojournal(void)
 {
 	handle_t *handle = current->journal_info;
-	uintptr_t ref_cnt = (uintptr_t)handle;
+	unsigned long ref_cnt = __c_pa(handle);
 
 	BUG_ON(ref_cnt >= EXT4_NOJOURNAL_MAX_REF_COUNT);
 
 	ref_cnt++;
-	handle = (handle_t *)ref_cnt;
+	handle = __c_fakep(ref_cnt);
 
 	current->journal_info = handle;
 	return handle;
@@ -49,12 +49,12 @@ static handle_t *ext4_get_nojournal(void)
 /* Decrement the non-pointer handle value */
 static void ext4_put_nojournal(handle_t *handle)
 {
-	uintptr_t ref_cnt = (uintptr_t)handle;
+	unsigned long ref_cnt = __c_pa(handle);
 
 	BUG_ON(ref_cnt == 0);
 
 	ref_cnt--;
-	handle = (handle_t *)ref_cnt;
+	handle = __c_fakep(ref_cnt);
 
 	current->journal_info = handle;
 }

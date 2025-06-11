@@ -468,7 +468,7 @@ static inline void *mb_correct_addr_and_bit(int *bit, void *addr)
 	addr = (void *) ((uintptr_t) addr & ~7UL);
 #elif BITS_PER_LONG == 32
 	*bit += ((unsigned long) addr & 3UL) << 3;
-	addr = (void *) ((unsigned long) addr & ~3UL);
+	addr = (void *) ((uintptr_t) addr & ~3UL);
 #else
 #error "how many bits you are?!"
 #endif
