@@ -89,7 +89,7 @@ struct iocb {
 	__s16	aio_reqprio;
 	__u32	aio_fildes;
 
-	__u64	aio_buf;
+	__kernel_uintptr_t aio_buf;
 	__u64	aio_nbytes;
 	__s64	aio_offset;
 
