@@ -95,7 +95,7 @@ TEST(test_readv)
 
 TEST(test_close)
 {
-	int ret = syscall(__NR_close, fd);
+	int ret = close(fd);
 	ASSERT_EQ(0, ret) TH_LOG("close failed");
 }
 
