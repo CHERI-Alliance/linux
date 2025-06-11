@@ -29,7 +29,7 @@ static void io_complete_rw_iopoll(struct kiocb *kiocb, long res);
 struct io_rw {
 	/* NOTE: kiocb has the file as the first member, so don't do it here */
 	struct kiocb			kiocb;
-	u64				addr;
+	void __user			*addr;
 	u32				len;
 	rwf_t				flags;
 };
@@ -51,7 +51,7 @@ static bool io_file_supports_nowait(struct io_kiocb *req, __poll_t mask)
 
 static int io_iov_compat_buffer_select_prep(struct io_rw *rw)
 {
-	struct compat_iovec __user *uiov = u64_to_user_ptr(rw->addr);
+	struct compat_iovec __user *uiov = rw->addr;
 	struct compat_iovec iov;
 
 	if (copy_from_user(&iov, uiov, sizeof(iov)))
@@ -71,7 +71,7 @@ static int io_iov_buffer_select_prep(struct io_kiocb *req)
 	if (io_is_compat(req->ctx))
 		return io_iov_compat_buffer_select_prep(rw);
 
-	uiov = u64_to_user_ptr(rw->addr);
+	uiov = rw->addr;
 	if (get_user(rw->len, &uiov->iov_len))
 		return -EFAULT;
 	return 0;
@@ -120,7 +120,7 @@ static int __io_import_rw_buffer(int ddir, struct io_kiocb *req,
 		buf = io_buffer_select(req, &sqe_len, io->buf_group, issue_flags);
 		if (!buf)
 			return -ENOBUFS;
-		rw->addr = (user_uintptr_t) buf;
+		rw->addr = buf;
 		rw->len = sqe_len;
 	}
 	return import_ubuf(ddir, buf, sqe_len, &io->iter);
@@ -221,13 +221,13 @@ static inline void io_meta_restore(struct io_async_rw *io, struct kiocb *kiocb)
 }
 
 static int io_prep_rw_pi(struct io_kiocb *req, struct io_rw *rw, int ddir,
-			 u64 attr_ptr, u64 attr_type_mask)
+			 __kernel_uintptr_t attr_ptr, u64 attr_type_mask)
 {
 	struct io_uring_attr_pi pi_attr;
 	struct io_async_rw *io;
 	int ret;
 
-	if (copy_from_user(&pi_attr, u64_to_user_ptr(attr_ptr),
+	if (copy_from_user(&pi_attr, (void __user *)attr_ptr,
 	    sizeof(pi_attr)))
 		return -EFAULT;
 
@@ -238,7 +238,7 @@ static int io_prep_rw_pi(struct io_kiocb *req, struct io_rw *rw, int ddir,
 	io->meta.flags = pi_attr.flags;
 	io->meta.app_tag = pi_attr.app_tag;
 	io->meta.seed = pi_attr.seed;
-	ret = import_ubuf(ddir, u64_to_user_ptr(pi_attr.addr),
+	ret = import_ubuf(ddir, (void __user *)pi_attr.addr,
 			  pi_attr.len, &io->meta.iter);
 	if (unlikely(ret < 0))
 		return ret;
@@ -284,13 +284,13 @@ static int __io_prep_rw(struct io_kiocb *req, const struct io_uring_sqe *sqe,
 	else
 		rw->kiocb.ki_complete = io_complete_rw;
 
-	rw->addr = READ_ONCE(sqe->addr);
+	rw->addr = (void __user *)READ_ONCE(sqe->addr);
 	rw->len = READ_ONCE(sqe->len);
 	rw->flags = READ_ONCE(sqe->rw_flags);
 
 	attr_type_mask = READ_ONCE(sqe->attr_type_mask);
 	if (attr_type_mask) {
-		u64 attr_ptr;
+		__kernel_uintptr_t attr_ptr;
 
 		/* only PI attribute is supported currently */
 		if (attr_type_mask != IORING_RW_ATTR_FLAG_PI)
@@ -711,7 +711,7 @@ static ssize_t loop_rw_iter(int ddir, struct io_rw *rw, struct iov_iter *iter)
 			addr = iter_iov_addr(iter);
 			len = iter_iov_len(iter);
 		} else {
-			addr = u64_to_user_ptr(rw->addr);
+			addr = rw->addr;
 			len = rw->len;
 		}
 

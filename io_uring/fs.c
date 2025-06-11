@@ -58,8 +58,8 @@ int io_renameat_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 		return -EBADF;
 
 	ren->old_dfd = READ_ONCE(sqe->fd);
-	oldf = u64_to_user_ptr(READ_ONCE(sqe->addr));
-	newf = u64_to_user_ptr(READ_ONCE(sqe->addr2));
+	oldf = (char __user *)READ_ONCE(sqe->addr);
+	newf = (char __user *)READ_ONCE(sqe->addr2);
 	ren->new_dfd = READ_ONCE(sqe->len);
 	ren->flags = READ_ONCE(sqe->rename_flags);
 
@@ -117,7 +117,7 @@ int io_unlinkat_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	if (un->flags & ~AT_REMOVEDIR)
 		return -EINVAL;
 
-	fname = u64_to_user_ptr(READ_ONCE(sqe->addr));
+	fname = (char __user *)READ_ONCE(sqe->addr);
 	un->filename = getname(fname);
 	if (IS_ERR(un->filename))
 		return PTR_ERR(un->filename);
@@ -164,7 +164,7 @@ int io_mkdirat_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	mkd->dfd = READ_ONCE(sqe->fd);
 	mkd->mode = READ_ONCE(sqe->len);
 
-	fname = u64_to_user_ptr(READ_ONCE(sqe->addr));
+	fname = (char __user *)READ_ONCE(sqe->addr);
 	mkd->filename = getname(fname);
 	if (IS_ERR(mkd->filename))
 		return PTR_ERR(mkd->filename);
@@ -206,8 +206,8 @@ int io_symlinkat_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 		return -EBADF;
 
 	sl->new_dfd = READ_ONCE(sqe->fd);
-	oldpath = u64_to_user_ptr(READ_ONCE(sqe->addr));
-	newpath = u64_to_user_ptr(READ_ONCE(sqe->addr2));
+	oldpath = (char __user *)READ_ONCE(sqe->addr);
+	newpath = (char __user *)READ_ONCE(sqe->addr2);
 
 	sl->oldpath = getname(oldpath);
 	if (IS_ERR(sl->oldpath))
@@ -250,8 +250,8 @@ int io_linkat_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 
 	lnk->old_dfd = READ_ONCE(sqe->fd);
 	lnk->new_dfd = READ_ONCE(sqe->len);
-	oldf = u64_to_user_ptr(READ_ONCE(sqe->addr));
-	newf = u64_to_user_ptr(READ_ONCE(sqe->addr2));
+	oldf = (char __user *)READ_ONCE(sqe->addr);
+	newf = (char __user *)READ_ONCE(sqe->addr2);
 	lnk->flags = READ_ONCE(sqe->hardlink_flags);
 
 	lnk->oldpath = getname_uflags(oldf, lnk->flags);
