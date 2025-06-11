@@ -1069,13 +1069,17 @@ static ssize_t iter_xarray_get_pages(struct iov_iter *i,
 }
 
 /* must be done on non-empty ITER_UBUF or ITER_IOVEC one */
-static unsigned long first_iovec_segment(const struct iov_iter *i, size_t *size)
+static void __user *first_iovec_segment(const struct iov_iter *i, size_t *size)
 {
+	bool is_source = iov_iter_rw(i) == ITER_SOURCE;
+	void __user *seg;
 	size_t skip;
 	long k;
 
-	if (iter_is_ubuf(i))
-		return (user_uintptr_t)i->ubuf + i->iov_offset;
+	if (iter_is_ubuf(i)) {
+		seg = i->ubuf + i->iov_offset;
+		goto ptr_check;
+	}
 
 	for (k = 0, skip = i->iov_offset; k < i->nr_segs; k++, skip = 0) {
 		const struct iovec *iov = iter_iov(i) + k;
@@ -1085,9 +1089,18 @@ static unsigned long first_iovec_segment(const struct iov_iter *i, size_t *size)
 			continue;
 		if (*size > len)
 			*size = len;
-		return (user_uintptr_t)iov->iov_base + skip;
+
+		seg = iov->iov_base + skip;
+		goto ptr_check;
 	}
 	BUG(); // if it had been empty, we wouldn't get called
+
+ptr_check:
+	if ((is_source && !check_user_ptr_read(seg, *size)) ||
+	    (!is_source && !check_user_ptr_write(seg, *size)))
+		return ERR_USER_PTR(-EFAULT);
+
+	return seg;
 }
 
 /* must be done on non-empty ITER_BVEC one */
@@ -1128,7 +1141,10 @@ static ssize_t __iov_iter_get_pages_alloc(struct iov_iter *i,
 		if (i->nofault)
 			gup_flags |= FOLL_NOFAULT;
 
-		addr = first_iovec_segment(i, &maxsize);
+		addr = user_ptr_addr(first_iovec_segment(i, &maxsize));
+		if (IS_ERR_VALUE(addr))
+			return addr;
+
 		*start = addr % PAGE_SIZE;
 		addr &= PAGE_MASK;
 		n = want_pages_array(pages, maxsize, *start, maxpages);
@@ -1824,7 +1840,9 @@ static ssize_t iov_iter_extract_user_pages(struct iov_iter *i,
 	if (i->nofault)
 		gup_flags |= FOLL_NOFAULT;
 
-	addr = first_iovec_segment(i, &maxsize);
+	addr = user_ptr_addr(first_iovec_segment(i, &maxsize));
+	if (IS_ERR_VALUE(addr))
+		return addr;
 	*offset0 = offset = addr % PAGE_SIZE;
 	addr &= PAGE_MASK;
 	maxpages = want_pages_array(pages, maxsize, offset, maxpages);
