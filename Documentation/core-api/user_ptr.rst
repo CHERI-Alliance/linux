@@ -31,7 +31,8 @@ errors are likely to occur in PCuABI if it is omitted.
 In certain situations, it is more convenient to represent user pointers
 as integers. The type ``user_uintptr_t`` must be used for that purpose.
 It is **the only integer type** that may be directly cast to and from a
-user pointer, for instance ``user_uintptr_t u = (user_uintptr_t)uptr``.
+user pointer, for instance ``user_uintptr_t uint = (user_uintptr_t)uptr``
+or ``void __user *uptr = (void __user *)uint``.
 
 Note that ``(u)intptr_t`` is the recommended type to represent kernel
 pointers, but it cannot represent user pointers.
@@ -106,6 +107,13 @@ Each function covers a particular category of input integer:
   - Integer of any type: ``as_user_ptr()``
   - ``u64`` (deprecated): ``u64_to_user_ptr()``
 
+Note: ``as_user_ptr()`` nullifies any capability and is not a
+replacement for most uses of ``u64_to_user_ptr()``. To convert an
+integer representation of a user pointer i.e. ``user_uintptr_t`` back to
+pointer type, a simple cast such as ``(void __user *)`` is sufficient.
+See `Representing user pointers`_ and notes for ``as_user_ptr()`` and
+``u64_to_user_ptr()`` below.
+
 These functions are available in ``<linux/user_ptr.h>``, except
 ``compat_ptr()`` (``<linux/compat.h>``).
 
@@ -142,8 +150,10 @@ derived from in the PCuABI case.
 |                              |                    | ``compat_*`` struct    |                                   |                                                      |
 +------------------------------+--------------------+------------------------+-----------------------------------+------------------------------------------------------+
 | ``as_user_ptr()``            | Arbitrary integer  | Error code             | Null capability                   | This is a pure representation change, as suggested   |
-|                              |                    |                        |                                   | by the ``as_`` prefix. The resulting pointer cannot  |
-|                              |                    |                        |                                   | be dereferenced.                                     |
+|                              |                    |                        |                                   | by the ``as_`` prefix. Returns up to 64 bits of an   |
+|                              |                    |                        |                                   | arbitrary integer represented as a user pointer. The |
+|                              |                    |                        |                                   | result is not a valid pointer and cannot be          |
+|                              |                    |                        |                                   | dereferenced.                                        |
 +------------------------------+--------------------+------------------------+-----------------------------------+------------------------------------------------------+
 | ``u64_to_user_ptr()``        | ``u64`` integer    | [Deprecated]           | Null capability                   | Legacy function, new callers should not be added.    |
 |                              |                    |                        |                                   | Existing callers should move to either               |
