@@ -19,7 +19,7 @@
 
 typedef struct {
 	atomic64_t	id;
-#ifdef CONFIG_COMPAT
+#ifdef CONFIG_COMPAT32
 	void		*sigpage;
 #endif
 	refcount_t	pinned;

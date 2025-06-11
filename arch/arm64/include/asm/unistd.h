@@ -2,7 +2,7 @@
 /*
  * Copyright (C) 2012 ARM Ltd.
  */
-#ifdef CONFIG_COMPAT
+#ifdef CONFIG_COMPAT32
 #define __ARCH_WANT_COMPAT_STAT
 #define __ARCH_WANT_COMPAT_STAT64
 #define __ARCH_WANT_SYS_GETHOSTNAME
@@ -23,6 +23,10 @@
 #define __ARM_NR_compat_cacheflush	(__ARM_NR_COMPAT_BASE + 2)
 #define __ARM_NR_compat_set_tls		(__ARM_NR_COMPAT_BASE + 5)
 #define __ARM_NR_COMPAT_END		(__ARM_NR_COMPAT_BASE + 0x800)
+#endif
+
+#ifdef CONFIG_COMPAT64
+#define __NR_compat_syscalls		__NR_syscalls
 #endif
 
 #define __ARCH_WANT_SYS_CLONE
