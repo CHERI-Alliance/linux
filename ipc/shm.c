@@ -1347,8 +1347,10 @@ struct compat_shm_info {
 static int copy_compat_shminfo_to_user(void __user *buf, struct shminfo64 *in,
 					int version)
 {
+#ifdef CONFIG_COMPAT32
 	if (in->shmmax > INT_MAX)
 		in->shmmax = INT_MAX;
+#endif
 	if (version == IPC_64) {
 		struct compat_shminfo64 info;
 		memset(&info, 0, sizeof(info));
@@ -1392,12 +1394,18 @@ static int copy_compat_shmid_to_user(void __user *buf, struct shmid64_ds *in,
 		struct compat_shmid64_ds v;
 		memset(&v, 0, sizeof(v));
 		to_compat_ipc64_perm(&v.shm_perm, &in->shm_perm);
+#ifdef CONFIG_COMPAT64
+		v.shm_atime = in->shm_atime;
+		v.shm_dtime = in->shm_dtime;
+		v.shm_ctime = in->shm_ctime;
+#else
 		v.shm_atime	 = lower_32_bits(in->shm_atime);
 		v.shm_atime_high = upper_32_bits(in->shm_atime);
 		v.shm_dtime	 = lower_32_bits(in->shm_dtime);
 		v.shm_dtime_high = upper_32_bits(in->shm_dtime);
 		v.shm_ctime	 = lower_32_bits(in->shm_ctime);
 		v.shm_ctime_high = upper_32_bits(in->shm_ctime);
+#endif
 		v.shm_segsz = in->shm_segsz;
 		v.shm_nattch = in->shm_nattch;
 		v.shm_cpid = in->shm_cpid;
