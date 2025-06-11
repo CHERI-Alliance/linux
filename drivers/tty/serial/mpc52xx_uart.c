@@ -1331,7 +1331,7 @@ mpc52xx_uart_verify_port(struct uart_port *port, struct serial_struct *ser)
 	if ((ser->irq != port->irq) ||
 	    (ser->io_type != UPIO_MEM) ||
 	    (ser->baud_base != port->uartclk)  ||
-	    (ser->iomem_base != (void *)port->mapbase) ||
+	    (ser->iomem_base != port->mapbase) ||
 	    (ser->hub6 != 0))
 		return -EINVAL;
 
