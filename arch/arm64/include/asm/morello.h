@@ -34,9 +34,6 @@ struct morello_state {
 	unsigned long	cctlr;
 };
 
-/* Must be called with IRQs disabled */
-void morello_cpu_setup(void);
-
 u64 morello_cap_get_lo_val(const cap128_t *cap);
 void morello_cap_get_val_tag(const cap128_t *cap, __uint128_t *val, u8 *tag);
 void morello_build_cap_from_root_cap(cap128_t *cap, const __uint128_t *val,
