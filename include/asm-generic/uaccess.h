@@ -205,6 +205,89 @@ static inline int __get_user_fn(size_t size, const void __user *ptr, void *x)
 extern int __get_user_bad(void) __attribute__((noreturn));
 
 /*
+ * Variants of {get,put}_user that transfer a single user pointer (void __user *),
+ * which {get,put}_user may not be able to transfer on certain architectures.
+ */
+#define __put_user_ptr(x, ptr)					\
+({								\
+	void __user *__x = (x);					\
+	__chk_user_ptr(ptr);					\
+	__put_user_ptr_fn(ptr, &__x);				\
+})
+
+#define put_user_ptr(x, ptr)					\
+({								\
+	__typeof__(*(ptr)) __user *__p = (ptr);			\
+	might_fault();						\
+	access_ok(__p, sizeof(*ptr)) ?				\
+		__put_user_ptr((x), __p) :			\
+		-EFAULT;					\
+})
+
+#ifndef __put_user_ptr_fn
+#ifdef CONFIG_CHERI_PURECAP_UABI
+static __always_inline int
+__put_user_ptr_fn(const void * __capability * __capability ptr,
+		  void * __capability *x)
+{
+	return unlikely(raw_copy_to_user_with_captags(ptr, x, sizeof(*x))) ?
+		-EFAULT : 0;
+}
+#else
+static __always_inline int
+__put_user_ptr_fn(const void __user * __user *ptr,
+		  void __user **x)
+{
+	return __put_user_fn(sizeof(*x), ptr, x);
+}
+#endif
+
+#define __put_user_ptr_fn(u, k)	__put_user_ptr_fn(u, k)
+
+#endif /* ! __put_user_ptr_fn */
+
+#define __get_user_ptr(x, ptr)					\
+({								\
+	int __gu_err;						\
+	void __user *__x;					\
+	__chk_user_ptr(ptr);					\
+	__gu_err = __get_user_ptr_fn(ptr, &__x);		\
+	(x) = __x;						\
+	__gu_err;						\
+})
+
+#define get_user_ptr(x, ptr)					\
+({								\
+	__typeof__(*(ptr)) __user *__p = (ptr);			\
+	might_fault();						\
+	access_ok(__p, sizeof(*ptr)) ?				\
+		__get_user_ptr((x), __p) :			\
+		((x) = NULL, -EFAULT);				\
+})
+
+#ifndef __get_user_ptr_fn
+#ifdef CONFIG_CHERI_PURECAP_UABI
+static __always_inline int
+__get_user_ptr_fn(const void * __capability * __capability ptr,
+		  void * __capability *x)
+{
+	return unlikely(raw_copy_from_user_with_captags(x, ptr, sizeof(*x))) ?
+		-EFAULT : 0;
+}
+#else
+static __always_inline int
+__get_user_ptr_fn(const void __user * __user *ptr,
+		  void __user **x)
+{
+	return __get_user_fn(sizeof(*x), ptr, x);
+}
+#endif
+
+#define __get_user_ptr_fn(u, k)	__get_user_ptr_fn(u, k)
+
+#endif /* ! __get_user_ptr_fn */
+
+/*
  * Zero Userspace
  */
 #ifndef __clear_user
