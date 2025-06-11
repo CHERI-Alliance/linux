@@ -30,10 +30,14 @@
 
 #ifdef __SYSCALL_COMPAT
 #define __SC_COMP(_nr, _sys, _comp) __SYSCALL(_nr, _comp)
+#define __SC_COMP_RETPTR(_nr, _sys, _comp) __SYSCALL_RETPTR(_nr, _comp)
 #define __SC_COMP_3264(_nr, _32, _64, _comp) __SYSCALL(_nr, _comp)
+#define __SC_COMP_3264_RETPTR(_nr, _32, _64, _comp) __SYSCALL_RETPTR(_nr, _comp)
 #else
 #define __SC_COMP(_nr, _sys, _comp) __SYSCALL(_nr, _sys)
+#define __SC_COMP_RETPTR(_nr, _sys, _comp) __SYSCALL_RETPTR(_nr, _sys)
 #define __SC_COMP_3264(_nr, _32, _64, _comp) __SC_3264(_nr, _32, _64)
+#define __SC_COMP_3264_RETPTR(_nr, _32, _64, _comp) __SC_3264_RETPTR(_nr, _32, _64)
 #endif
 
 #define __NR_io_setup 0
