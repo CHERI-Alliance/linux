@@ -3,6 +3,7 @@
 #define _UAPI_ASM_GENERIC_SIGINFO_H
 
 #include <linux/compiler.h>
+#include <linux/const.h>
 #include <linux/types.h>
 
 typedef union sigval {
@@ -326,7 +327,9 @@ typedef struct siginfo {
  * but we leave open this being overridden in the future
  */
 #ifndef __ARCH_SIGEV_PREAMBLE_SIZE
-#define __ARCH_SIGEV_PREAMBLE_SIZE	(sizeof(int) * 2 + sizeof(sigval_t))
+#define __ARCH_SIGEV_PREAMBLE_SIZE				\
+	__ALIGN_KERNEL((sizeof(int) * 2 + sizeof(sigval_t)),	\
+		       __alignof__(void __user *))
 #endif
 
 #define SIGEV_MAX_SIZE	64
