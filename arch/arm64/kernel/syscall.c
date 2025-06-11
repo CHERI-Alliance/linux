@@ -175,7 +175,14 @@ trace_exit:
 
 void do_el0_svc(struct pt_regs *regs)
 {
-	el0_svc_common(regs, regs->regs[8], __NR_syscalls, sys_call_table);
+	const syscall_entry_t *table = sys_call_table;
+
+#ifdef CONFIG_COMPAT64
+	if (test_thread_flag(TIF_64BIT_COMPAT))
+		table = compat_sys_call_table;
+#endif
+
+	el0_svc_common(regs, regs->regs[8], __NR_syscalls, table);
 }
 
 #ifdef CONFIG_COMPAT
