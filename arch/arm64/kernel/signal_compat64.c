@@ -34,7 +34,7 @@ struct compat_frame_record {
 #define siginfo_t		compat_siginfo_t
 #define __save_altstack		__compat_save_altstack
 #define restore_altstack	compat_restore_altstack
-#define copy_siginfo_to_user	copy_siginfo_to_user32
+#define copy_siginfo_to_user_with_ptr	copy_siginfo_to_user32
 #undef SYSCALL_DEFINE0
 #define SYSCALL_DEFINE0		COMPAT_SYSCALL_DEFINE0
 
