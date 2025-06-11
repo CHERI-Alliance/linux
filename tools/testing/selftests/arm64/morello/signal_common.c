@@ -107,3 +107,9 @@ int pidfd_send_signal(int pidfd, int sig, siginfo_t *uinfo, unsigned int flags)
 {
 	return syscall(__NR_pidfd_send_signal, pidfd, sig, uinfo, flags);
 }
+
+int rt_sigtimedwait(const sigset_t *set, siginfo_t *info,
+		    const struct timespec *timeout, size_t sigsetsize)
+{
+	return syscall(__NR_rt_sigtimedwait, set, info, timeout, sigsetsize);
+}
