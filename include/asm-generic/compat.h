@@ -7,12 +7,20 @@
 #endif
 
 #ifndef COMPAT_RLIM_INFINITY
+#ifdef CONFIG_COMPAT64
+#define COMPAT_RLIM_INFINITY	RLIM_INFINITY
+#else
 #define COMPAT_RLIM_INFINITY	0xffffffff
-#endif
+#endif /* CONFIG_COMPAT64 */
+#endif /* COMPAT_RLIM_INFINITY */
 
 #ifndef COMPAT_OFF_T_MAX
+#ifdef CONFIG_COMPAT64
+#define COMPAT_OFF_T_MAX	LONG_MAX
+#else
 #define COMPAT_OFF_T_MAX	0x7fffffff
-#endif
+#endif /* CONFIG_COMPAT64 */
+#endif /* COMPAT_OFF_T_MAX */
 
 #ifndef compat_arg_u64
 #ifndef CONFIG_CPU_BIG_ENDIAN
