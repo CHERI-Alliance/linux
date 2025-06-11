@@ -141,7 +141,7 @@ static void do_notify_resume(struct pt_regs *regs, unsigned long thread_flags)
 		if (thread_flags & _TIF_MTE_ASYNC_FAULT) {
 			clear_thread_flag(TIF_MTE_ASYNC_FAULT);
 			send_sig_fault(SIGSEGV, SEGV_MTEAERR,
-				       (void __user *)NULL, current);
+				       as_user_ptr(NULL), current);
 		}
 
 		if (thread_flags & (_TIF_SIGPENDING | _TIF_NOTIFY_SIGNAL))
