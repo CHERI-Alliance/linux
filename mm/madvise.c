@@ -1723,6 +1723,7 @@ static int madvise_do_behavior(struct mm_struct *mm,
 
 	if (is_memory_failure(behavior))
 		return madvise_inject_error(behavior, start, start + len_in);
+	/* TODO [PCuABI] - capability checks for uaccess */
 	start = untagged_addr_remote(mm, start);
 	end = start + PAGE_ALIGN(len_in);
 
@@ -1830,7 +1831,7 @@ int do_madvise(struct mm_struct *mm, unsigned long start, size_t len_in, int beh
 	return error;
 }
 
-SYSCALL_DEFINE3(madvise, unsigned long, start, size_t, len_in, int, behavior)
+SYSCALL_DEFINE3(madvise, user_uintptr_t, start, size_t, len_in, int, behavior)
 {
 	return do_madvise(current->mm, start, len_in, behavior);
 }
