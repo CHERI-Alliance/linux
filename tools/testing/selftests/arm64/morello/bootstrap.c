@@ -43,6 +43,15 @@ struct morello_auxv {
 	uintcap_t a_val;
 };
 
+struct initial_data {
+	int argc;
+	char **argv;
+	char **envp;
+	struct morello_auxv *auxv;
+};
+
+static struct initial_data reg_data;
+
 int clear_child_tid;
 
 void verify_string(char *str)
@@ -70,6 +79,9 @@ int verify_auxval(struct morello_auxv *auxv)
 	switch (auxv->a_type) {
 	case AT_NULL:
 		return 0;
+	case AT_CHERI_EXEC_RW_CAP:
+	case AT_CHERI_INTERP_RW_CAP:
+	case AT_CHERI_INTERP_RX_CAP:
 	case AT_BASE:
 		/* Fall through if not null, abi allows it */
 		if ((void *)auxv->a_val == NULL)
@@ -79,6 +91,12 @@ int verify_auxval(struct morello_auxv *auxv)
 	case AT_PLATFORM:
 	case AT_RANDOM:
 	case AT_PHDR:
+	case AT_CHERI_EXEC_RX_CAP:
+	case AT_CHERI_STACK_CAP:
+	case AT_CHERI_SEAL_CAP:
+	case AT_CHERI_CID_CAP:
+	case AT_ARGV:
+	case AT_ENVP:
 		/* valid and unsealed */
 		ASSERT_TRUE(cheri_tag_get(auxv->a_val))
 			TH_LOG("auxv (%ld) value is invalid", auxv->a_type);
@@ -133,46 +151,50 @@ TEST(test_stack)
 {
 	/* copy the pointer so we can modify it */
 	char **stack = stack_from_kernel;
-	int argc;
+	int argc_stack;
 	/* start with an argc check */
 	VERIFY_CAP(stack, sizeof(void *), STACK_PERMS, "argc");
 
 	/* dereference and go past argc */
-	argc = *(int *)stack;
+	argc_stack = *(int *)stack;
+	ASSERT_EQ(argc_stack, reg_data.argc);
 	stack += 1;
 
 	/* argv + null */
-	VERIFY_CAP(stack, sizeof(void *) * (argc + 1), STACK_PERMS, "argv");
+	VERIFY_CAP(stack, sizeof(void *) * (argc_stack + 1), STACK_PERMS, "argv_stack");
+	ASSERT_CAP_EQ(reg_data.argv, stack);
 
 	/* we are clear to dereference all argv */
-	for (int i = 0; i < argc; i++) {
+	for (int i = 0; i < argc_stack; i++) {
 		char *arg = *(stack + i);
 		verify_string(arg);
 	}
 
 	/* go past argv */
-	stack += argc;
-	ASSERT_NULL(*stack) TH_LOG("argv was not null terminated");
+	stack += argc_stack;
+	ASSERT_NULL(*stack) TH_LOG("argv was not null terminated on stack");
 	/* go past the null terminator */
 	stack += 1;
 
 	/* progressively check bounds for envp and dereference */
+	ASSERT_CAP_EQ(reg_data.envp, stack);
 	while (1) {
-		char *envp = *stack;
+		char *envp_stack = *stack;
 
 		VERIFY_CAP(stack, sizeof(void *), STACK_PERMS, "envp");
 		stack += 1;
-		if (envp == NULL)
+		if (envp_stack == NULL)
 			break;
-		verify_string(envp);
+		verify_string(envp_stack);
 	}
 
 	/* finally, go through auxv */
+	ASSERT_CAP_EQ(reg_data.auxv, stack);
 	while (1) {
-		struct morello_auxv *auxv = ((struct morello_auxv *) stack);
+		struct morello_auxv *auxv_stack = ((struct morello_auxv *) stack);
 
-		VERIFY_CAP(auxv, sizeof(struct morello_auxv), STACK_PERMS, "auxv");
-		if (verify_auxval(auxv) == 0)
+		VERIFY_CAP(auxv_stack, sizeof(struct morello_auxv), STACK_PERMS, "auxv");
+		if (verify_auxval(auxv_stack) == 0)
 			break;
 		stack += 2;
 	}
@@ -192,8 +214,13 @@ TEST(test_set_tid_address_initial)
  * exit test. We assume exit() works and we progressively build a known working
  * test environment.
  */
-int main(void)
+int main(int argc, char **argv, char **envp, struct morello_auxv *auxv)
 {
+	reg_data.argc = argc;
+	reg_data.argv = argv;
+	reg_data.envp = envp;
+	reg_data.auxv = auxv;
+
 	test_write();
 	/* from now on write and exit work, so go wild */
 	test_c64();
