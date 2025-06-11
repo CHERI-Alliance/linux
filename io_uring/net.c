@@ -365,7 +365,7 @@ static int io_send_setup(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	u16 addr_len;
 	int ret;
 
-	sr->buf = (void __user *)READ_ONCE(sqe->addr);
+	sr->buf = u64_to_user_ptr(READ_ONCE(sqe->addr));
 
 	if (READ_ONCE(sqe->__pad3[0]))
 		return -EINVAL;
@@ -376,7 +376,7 @@ static int io_send_setup(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	kmsg->msg.msg_controllen = 0;
 	kmsg->msg.msg_ubuf = NULL;
 
-	addr = (void __user *)READ_ONCE(sqe->addr2);
+	addr = u64_to_user_ptr(READ_ONCE(sqe->addr2));
 	addr_len = READ_ONCE(sqe->addr_len);
 	if (addr) {
 		ret = move_addr_to_kernel(addr, addr_len, &kmsg->addr);
@@ -794,7 +794,7 @@ int io_recvmsg_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	if (unlikely(sqe->addr2))
 		return -EINVAL;
 
-	sr->umsg = (struct user_msghdr __user *)READ_ONCE(sqe->addr);
+	sr->umsg = u64_to_user_ptr(READ_ONCE(sqe->addr));
 	sr->len = READ_ONCE(sqe->len);
 	sr->flags = READ_ONCE(sqe->ioprio);
 	if (sr->flags & ~RECVMSG_FLAGS)
@@ -1460,9 +1460,8 @@ static int io_send_zc_import(struct io_kiocb *req, unsigned int issue_flags)
 	WARN_ON_ONCE(!(sr->flags & IORING_RECVSEND_FIXED_BUF));
 
 	sr->notif->buf_index = req->buf_index;
-	/* TODO [PCuABI] - capability checks for uaccess */
 	return io_import_reg_buf(sr->notif, &kmsg->msg.msg_iter,
-				(u64)(user_uintptr_t)sr->buf, sr->len,
+				sr->buf, sr->len,
 				ITER_SOURCE, issue_flags);
 }
 
@@ -1629,8 +1628,8 @@ int io_accept_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	if (sqe->len || sqe->buf_index)
 		return -EINVAL;
 
-	accept->addr = (void __user *)READ_ONCE(sqe->addr);
-	accept->addr_len = (int __user *)READ_ONCE(sqe->addr2);
+	accept->addr = u64_to_user_ptr(READ_ONCE(sqe->addr));
+	accept->addr_len = u64_to_user_ptr(READ_ONCE(sqe->addr2));
 	accept->flags = READ_ONCE(sqe->accept_flags);
 	accept->nofile = rlimit(RLIMIT_NOFILE);
 	accept->iou_flags = READ_ONCE(sqe->ioprio);
@@ -1779,7 +1778,7 @@ int io_connect_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	if (sqe->len || sqe->buf_index || sqe->rw_flags || sqe->splice_fd_in)
 		return -EINVAL;
 
-	conn->addr = (void __user *)READ_ONCE(sqe->addr);
+	conn->addr = u64_to_user_ptr(READ_ONCE(sqe->addr));
 	conn->addr_len = READ_ONCE(sqe->off);
 	conn->in_progress = conn->seen_econnaborted = false;
 
@@ -1851,7 +1850,7 @@ int io_bind_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	if (sqe->len || sqe->buf_index || sqe->rw_flags || sqe->splice_fd_in)
 		return -EINVAL;
 
-	uaddr = (void __user *)READ_ONCE(sqe->addr);
+	uaddr = u64_to_user_ptr(READ_ONCE(sqe->addr));
 	bind->addr_len =  READ_ONCE(sqe->addr2);
 
 	io = io_msg_alloc_async(req);
