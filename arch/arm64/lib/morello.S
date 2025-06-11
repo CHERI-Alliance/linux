@@ -47,6 +47,35 @@ SYM_FUNC_START(morello_cap_get_val_tag)
 	ret
 SYM_FUNC_END(morello_cap_get_val_tag)
 
+SYM_FUNC_START(morello_build_cap_from_root_cap)
+	ldr	c1, [x1]
+	cbz	w2, 1f
+	/*
+	 * The tag should be set, build a valid capability from the root
+	 * capability.
+	 * In case c1 is sealed (non-zero object type), we need to extract the
+	 * object type first to be able to reseal it after BUILD. The CSEAL
+	 * instruction is used to cover the case where c1 was not sealed.
+	 *
+	 * TODO [PCuABI] - the user root capability should be used, not the
+	 * kernel one.
+	 */
+	adr_l	x3, morello_root_cap
+	ldr	c3, [x3]
+
+	cpytype	c4, c3, c1
+	build	c1, c1, c3
+	cseal	c1, c1, c4
+	b	2f
+1:
+	/* The tag should be cleared, make sure it is. */
+	clrtag	c1, c1
+2:
+	str	c1, [x0]
+
+	ret
+SYM_FUNC_END(morello_build_cap_from_root_cap)
+
 SYM_FUNC_START(morello_capcpy)
 	mov	x3, x0
 	and	x4, x2, #0x10		// Bytes to reach 32-byte alignment (0 or 16)
