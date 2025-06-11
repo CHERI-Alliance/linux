@@ -444,6 +444,9 @@ HWCAP3_MTE_STORE_ONLY
 HWCAP3_LSFE
     Functionality implied by ID_AA64ISAR3_EL1.LSFE == 0b0001
 
+HWCAP2_MORELLO
+    Functionality implied by ID_AA64PFR1_EL1.CE == 0b0001, as described
+    by Documentation/arm64/morello.rst.
 
 4. Unused AT_HWCAP bits
 -----------------------
