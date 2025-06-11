@@ -74,7 +74,7 @@ struct compat_sg_io_hdr {
 	unsigned char mx_sb_len;	/* [i] max length to write to sbp */
 	unsigned short iovec_count;	/* [i] 0 implies no scatter gather */
 	compat_uint_t dxfer_len;	/* [i] byte count of data transfer */
-	compat_uint_t dxferp;		/* [i], [*io] points to data transfer memory
+	compat_uptr_t dxferp;		/* [i], [*io] points to data transfer memory
 						or scatter gather list */
 	compat_uptr_t cmdp;		/* [i], [*i] points to command to perform */
 	compat_uptr_t sbp;		/* [i], [*o] points to sense_buffer memory */
