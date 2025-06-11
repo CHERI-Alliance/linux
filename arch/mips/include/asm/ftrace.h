@@ -10,6 +10,10 @@
 #ifndef _ASM_MIPS_FTRACE_H
 #define _ASM_MIPS_FTRACE_H
 
+#ifdef CONFIG_FTRACE_SYSCALLS
+#define ARCH_HAS_SYSCALL_ADDR
+#endif
+
 #ifdef CONFIG_FUNCTION_TRACER
 
 #define MCOUNT_ADDR ((unsigned long)(_mcount))
