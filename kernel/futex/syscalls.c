@@ -46,7 +46,11 @@ SYSCALL_DEFINE2(set_robust_list, struct robust_list_head __user *, head,
  * @len_ptr:	pointer to a length field, the kernel fills in the header size
  */
 SYSCALL_DEFINE3(get_robust_list, int, pid,
+#ifdef CONFIG_CHERI_PURECAP_UABI
+		struct robust_list_head * __capability * __capability, head_ptr,
+#else
 		struct robust_list_head __user * __user *, head_ptr,
+#endif
 		size_t __user *, len_ptr)
 {
 	struct robust_list_head __user *head;
