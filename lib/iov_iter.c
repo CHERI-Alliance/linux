@@ -798,7 +798,7 @@ static bool iov_iter_aligned_iovec(const struct iov_iter *i, unsigned addr_mask,
 			len = size;
 		if (len & len_mask)
 			return false;
-		if ((unsigned long)(iov->iov_base + skip) & addr_mask)
+		if ((user_ptr_addr(iov->iov_base) + skip) & addr_mask)
 			return false;
 
 		iov++;
@@ -850,7 +850,7 @@ bool iov_iter_is_aligned(const struct iov_iter *i, unsigned addr_mask,
 	if (likely(iter_is_ubuf(i))) {
 		if (i->count & len_mask)
 			return false;
-		if ((unsigned long)(i->ubuf + i->iov_offset) & addr_mask)
+		if ((user_ptr_addr(i->ubuf) + i->iov_offset) & addr_mask)
 			return false;
 		return true;
 	}
@@ -1244,7 +1244,7 @@ static int iov_npages(const struct iov_iter *i, int maxpages)
 	int npages = 0;
 
 	for (p = iter_iov(i); size; skip = 0, p++) {
-		unsigned offs = offset_in_page(p->iov_base + skip);
+		unsigned offs = offset_in_page(user_ptr_addr(p->iov_base) + skip);
 		size_t len = min(p->iov_len - skip, size);
 
 		if (len) {
