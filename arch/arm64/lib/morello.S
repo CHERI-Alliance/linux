@@ -67,11 +67,9 @@ SYM_FUNC_START(morello_capcpy)
 	ret
 SYM_FUNC_END(morello_capcpy)
 
-SYM_FUNC_START(morello_thread_init_user)
+SYM_FUNC_START(__morello_thread_init_user)
 	mov	x9, #THREAD_MORELLO_USER_STATE
 	add	x0, x0, x9		// x0 = tsk->thread.morello_user_state
-	adr_l	x1, morello_root_cap
-	ldr	c1, [x1]
 
 	/*
 	 * CTPIDR doesn't need to be initialised explicitly:
@@ -86,7 +84,7 @@ SYM_FUNC_START(morello_thread_init_user)
 	 */
 	msr	rctpidr_el0, czr
 
-	/* DDC: initialised to the root capability (like PCC) */
+	/* DDC: initialised to the specified value */
 	msr	ddc_el0, c1
 	/* RDDC: null capability (processes are always started in Executive) */
 	msr	rddc_el0, czr
@@ -99,7 +97,7 @@ SYM_FUNC_START(morello_thread_init_user)
 	str	xzr, [x0, #MORELLO_STATE_CCTLR]
 
 	ret
-SYM_FUNC_END(morello_thread_init_user)
+SYM_FUNC_END(__morello_thread_init_user)
 
 SYM_FUNC_START(morello_thread_save_user_state)
 	mov	x9, #THREAD_MORELLO_USER_STATE

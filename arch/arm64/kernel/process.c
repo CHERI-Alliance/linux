@@ -895,7 +895,7 @@ void arch_setup_new_exec(void)
 	}
 
 	if (system_supports_morello())
-		morello_thread_init_user(current);
+		morello_thread_init_user();
 }
 
 #ifdef CONFIG_ARM64_TAGGED_ADDR_ABI

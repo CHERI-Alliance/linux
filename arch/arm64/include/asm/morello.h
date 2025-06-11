@@ -63,7 +63,7 @@ void morello_thread_set_csp(struct pt_regs *regs, user_uintptr_t sp);
 void *morello_capcpy(void *dst, const void *src, size_t len);
 
 void morello_thread_start(struct pt_regs *regs, unsigned long pc);
-void morello_thread_init_user(struct task_struct *tsk);
+void morello_thread_init_user(void);
 void morello_thread_save_user_state(struct task_struct *tsk);
 void morello_thread_restore_user_state(struct task_struct *tsk);
 void morello_task_save_user_tls(struct task_struct *tsk, user_uintptr_t *tp_ptr);
