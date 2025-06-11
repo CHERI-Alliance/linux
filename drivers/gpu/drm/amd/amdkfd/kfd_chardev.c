@@ -133,7 +133,7 @@ static int kfd_open(struct inode *inode, struct file *filep)
 	if (iminor(inode) != 0)
 		return -ENODEV;
 
-	is_32bit_user_mode = in_compat_syscall();
+	is_32bit_user_mode = in_32bit_compat_syscall();
 
 	if (is_32bit_user_mode) {
 		dev_warn(kfd_device,
