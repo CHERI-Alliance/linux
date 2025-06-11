@@ -316,7 +316,7 @@ static ssize_t proc_dev_atm_read(struct file *file, char __user *buf,
 				 size_t count, loff_t *pos)
 {
 	struct atm_dev *dev;
-	unsigned long page;
+	uintptr_t page;
 	int length;
 
 	if (count == 0)

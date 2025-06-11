@@ -139,7 +139,7 @@ static struct rds_cong_map *rds_cong_from_addr(const struct in6_addr *addr)
 {
 	struct rds_cong_map *map;
 	struct rds_cong_map *ret = NULL;
-	unsigned long zp;
+	uintptr_t zp;
 	unsigned long i;
 	unsigned long flags;
 

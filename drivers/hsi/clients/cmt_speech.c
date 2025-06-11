@@ -1274,7 +1274,7 @@ static int cs_char_mmap(struct file *file, struct vm_area_struct *vma)
 static int cs_char_open(struct inode *unused, struct file *file)
 {
 	int ret = 0;
-	unsigned long p;
+	uintptr_t p;
 
 	spin_lock_bh(&cs_char_data.lock);
 	if (cs_char_data.opened) {

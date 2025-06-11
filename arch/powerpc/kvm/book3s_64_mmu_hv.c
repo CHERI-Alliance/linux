@@ -71,7 +71,7 @@ struct kvm_resize_hpt {
 
 int kvmppc_allocate_hpt(struct kvm_hpt_info *info, u32 order)
 {
-	unsigned long hpt = 0;
+	uintptr_t hpt = 0;
 	int cma = 0;
 	struct page *page = NULL;
 	struct revmap_entry *rev;

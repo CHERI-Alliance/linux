@@ -1017,7 +1017,7 @@ static void __init alloc_one_queue(unsigned long *pa_ptr, unsigned long qmask)
 {
 	unsigned long size = PAGE_ALIGN(qmask + 1);
 	unsigned long order = get_order(size);
-	unsigned long p;
+	uintptr_t p;
 
 	p = __get_free_pages(GFP_KERNEL | __GFP_ZERO, order);
 	if (!p) {
@@ -1031,7 +1031,7 @@ static void __init alloc_one_queue(unsigned long *pa_ptr, unsigned long qmask)
 static void __init init_cpu_send_mondo_info(struct trap_per_cpu *tb)
 {
 #ifdef CONFIG_SMP
-	unsigned long page;
+	uintptr_t page;
 	void *mondo, *p;
 
 	BUILD_BUG_ON((NR_CPUS * sizeof(u16)) > PAGE_SIZE);

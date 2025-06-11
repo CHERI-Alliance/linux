@@ -1727,7 +1727,7 @@ static int kvmppc_set_one_reg_pr(struct kvm_vcpu *vcpu, u64 id,
 static int kvmppc_core_vcpu_create_pr(struct kvm_vcpu *vcpu)
 {
 	struct kvmppc_vcpu_book3s *vcpu_book3s;
-	unsigned long p;
+	uintptr_t p;
 	int err;
 
 	err = -ENOMEM;
