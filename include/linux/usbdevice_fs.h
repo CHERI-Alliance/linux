@@ -77,5 +77,14 @@ struct usbdevfs_ioctl32 {
 	s32 ioctl_code;
 	compat_caddr_t data;
 };
+
+#define USBDEVFS_CONTROL32         _IOWR('U', 0, struct usbdevfs_ctrltransfer32)
+#define USBDEVFS_BULK32            _IOWR('U', 2, struct usbdevfs_bulktransfer32)
+#define USBDEVFS_SUBMITURB32       _IOR('U', 10, struct usbdevfs_urb32)
+#define USBDEVFS_REAPURB32         _IOW('U', 12, __u32)
+#define USBDEVFS_REAPURBNDELAY32   _IOW('U', 13, __u32)
+#define USBDEVFS_DISCSIGNAL32      _IOR('U', 14, struct usbdevfs_disconnectsignal32)
+#define USBDEVFS_IOCTL32           _IOWR('U', 18, struct usbdevfs_ioctl32)
+
 #endif
 #endif /* _LINUX_USBDEVICE_FS_H */
