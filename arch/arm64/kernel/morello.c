@@ -186,14 +186,13 @@ static int access_remote_cap(struct task_struct *tsk, struct mm_struct *mm,
 
 	if (write) {
 		/*
-		 * Disallow writing a valid (tagged) capability to an untagged
-		 * mapping (currently all shared mappings are untagged, this may
-		 * change in the future).
+		 * Disallow writing a valid (tagged) capability to a mapping
+		 * without store capability permission.
 		 *
 		 * Reading/writing an untagged capability is always allowed
 		 * (just like regular load and store instructions).
 		 */
-		if (user_cap->tag && (vma->vm_flags & VM_SHARED)) {
+		if (user_cap->tag && !(vma->vm_flags & VM_WRITE_CAPS)) {
 			ret = -EOPNOTSUPP;
 			goto out_put;
 		}
