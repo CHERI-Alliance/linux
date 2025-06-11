@@ -105,9 +105,12 @@ struct clone_args {
 };
 #endif
 
-#define CLONE_ARGS_SIZE_VER0 64 /* sizeof first published struct */
-#define CLONE_ARGS_SIZE_VER1 80 /* sizeof second published struct */
-#define CLONE_ARGS_SIZE_VER2 88 /* sizeof third published struct */
+#define CLONE_ARGS_SIZE_VER0  /* sizeof first published struct */	\
+	((sizeof(__u64ptr) > sizeof(__u64)) ? 128 : 64)
+#define CLONE_ARGS_SIZE_VER1  /* sizeof second published struct */	\
+	((sizeof(__u64ptr) > sizeof(__u64)) ? 152 : 80)
+#define CLONE_ARGS_SIZE_VER2  /* sizeof third published struct */	\
+	((sizeof(__u64ptr) > sizeof(__u64)) ? 160 : 88)
 
 /*
  * Scheduling policies
