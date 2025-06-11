@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: GPL-2.0
 // Copyright (C) 2021  Arm Limited
 #include <linux/mman.h>
-#include <sys/resource.h>
-#include <sys/wait.h>
+#include <linux/resource.h>
+#include <linux/wait.h>
+#include <linux/signal.h>
 #include <linux/sched.h>
-#include <errno.h>
+#include <linux/errno.h>
 #include <cheriintrin.h>
 #include "freestanding.h"
 
