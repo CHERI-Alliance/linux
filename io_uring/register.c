@@ -372,7 +372,14 @@ static int io_register_clock(struct io_ring_ctx *ctx,
  */
 struct io_ring_ctx_rings {
 	struct io_rings *rings;
-	struct io_uring_sqe *sq_sqes;
+	union {
+		struct io_uring_sqe *sq_sqes;
+		struct __c64_io_uring_sqe *sq_sqes_compat;
+	};
+	union {
+		struct io_uring_cqe *cq_cqes;
+		struct __c64_io_uring_cqe *cq_cqes_compat;
+	};
 
 	struct io_mapped_region sq_region;
 	struct io_mapped_region ring_region;
@@ -401,7 +408,7 @@ static int io_register_resize_rings(struct io_ring_ctx *ctx, void __user *arg)
 {
 	struct io_uring_region_desc rd;
 	struct io_ring_ctx_rings o = { }, n = { }, *to_free = NULL;
-	size_t size, sq_array_offset;
+	size_t size, sq_array_offset, sqe_size;
 	unsigned i, tail, old_head;
 	struct io_uring_params p;
 	int ret;
@@ -409,7 +416,7 @@ static int io_register_resize_rings(struct io_ring_ctx *ctx, void __user *arg)
 	/* limited to DEFER_TASKRUN for now */
 	if (!(ctx->flags & IORING_SETUP_DEFER_TASKRUN))
 		return -EINVAL;
-	if (copy_from_user_with_ptr(&p, arg, sizeof(p)))
+	if (__c64c_copy_from_user_with_ptr(io_is_compat(ctx), io_uring_params, &p, arg))
 		return -EFAULT;
 	if (p.flags & ~RESIZE_FLAGS)
 		return -EINVAL;
@@ -421,7 +428,7 @@ static int io_register_resize_rings(struct io_ring_ctx *ctx, void __user *arg)
 	if (unlikely(ret))
 		return ret;
 
-	size = rings_size(p.flags, p.sq_entries, p.cq_entries,
+	size = rings_size(ctx, p.flags, p.sq_entries, p.cq_entries,
 				&sq_array_offset);
 	if (size == SIZE_MAX)
 		return -EOVERFLOW;
@@ -452,15 +459,16 @@ static int io_register_resize_rings(struct io_ring_ctx *ctx, void __user *arg)
 	WRITE_ONCE(n.rings->sq_ring_entries, p.sq_entries);
 	WRITE_ONCE(n.rings->cq_ring_entries, p.cq_entries);
 
-	if (copy_to_user_with_ptr(arg, &p, sizeof(p))) {
+	if (__c64c_copy_to_user_with_ptr(io_is_compat(ctx), io_uring_params, arg, &p)) {
 		io_register_free_rings(ctx, &p, &n);
 		return -EFAULT;
 	}
 
+	sqe_size = __c64c_sizeof(io_is_compat(ctx), io_uring_sqe);
 	if (p.flags & IORING_SETUP_SQE128)
-		size = array_size(2 * sizeof(struct io_uring_sqe), p.sq_entries);
+		size = array_size(2 * sqe_size, p.sq_entries);
 	else
-		size = array_size(sizeof(struct io_uring_sqe), p.sq_entries);
+		size = array_size(sqe_size, p.sq_entries);
 	if (size == SIZE_MAX) {
 		io_register_free_rings(ctx, &p, &n);
 		return -EOVERFLOW;
@@ -478,6 +486,7 @@ static int io_register_resize_rings(struct io_ring_ctx *ctx, void __user *arg)
 		return ret;
 	}
 	n.sq_sqes = io_region_get_ptr(&n.sq_region);
+	n.cq_cqes = (struct io_uring_cqe *)((char *)n.rings + io_uring_cq_offset());
 
 	/*
 	 * If using SQPOLL, park the thread
@@ -503,6 +512,8 @@ static int io_register_resize_rings(struct io_ring_ctx *ctx, void __user *arg)
 	ctx->rings = NULL;
 	o.sq_sqes = ctx->sq_sqes;
 	ctx->sq_sqes = NULL;
+	o.cq_cqes = ctx->cq_cqes;
+	ctx->cq_cqes = NULL;
 
 	/*
 	 * Now copy SQ and CQ entries, if any. If either of the destination
@@ -516,7 +527,10 @@ static int io_register_resize_rings(struct io_ring_ctx *ctx, void __user *arg)
 		unsigned src_head = i & (ctx->sq_entries - 1);
 		unsigned dst_head = i & (p.sq_entries - 1);
 
-		n.sq_sqes[dst_head] = o.sq_sqes[src_head];
+		if (io_in_compat64(ctx))
+			n.sq_sqes_compat[dst_head] = o.sq_sqes_compat[src_head];
+		else
+			n.sq_sqes[dst_head] = o.sq_sqes[src_head];
 	}
 	WRITE_ONCE(n.rings->sq.head, old_head);
 	WRITE_ONCE(n.rings->sq.tail, tail);
@@ -528,6 +542,7 @@ overflow:
 		/* restore old rings, and return -EOVERFLOW via cleanup path */
 		ctx->rings = o.rings;
 		ctx->sq_sqes = o.sq_sqes;
+		ctx->cq_cqes = o.cq_cqes;
 		to_free = &n;
 		ret = -EOVERFLOW;
 		goto out;
@@ -536,12 +551,15 @@ overflow:
 		unsigned src_head = i & (ctx->cq_entries - 1);
 		unsigned dst_head = i & (p.cq_entries - 1);
 
-		n.rings->cqes[dst_head] = o.rings->cqes[src_head];
+		if (io_in_compat64(ctx))
+			n.cq_cqes_compat[dst_head] = o.cq_cqes_compat[src_head];
+		else
+			n.cq_cqes[dst_head] = o.cq_cqes[src_head];
 	}
 	WRITE_ONCE(n.rings->cq.head, old_head);
 	WRITE_ONCE(n.rings->cq.tail, tail);
 	/* invalidate cached cqe refill */
-	ctx->cqe_cached = ctx->cqe_sentinel = NULL;
+	ctx->cqe_cached = ctx->cqe_sentinel = 0;
 
 	WRITE_ONCE(n.rings->sq_dropped, READ_ONCE(o.rings->sq_dropped));
 	atomic_set(&n.rings->sq_flags, atomic_read(&o.rings->sq_flags));
@@ -549,7 +567,6 @@ overflow:
 	WRITE_ONCE(n.rings->cq_overflow, READ_ONCE(o.rings->cq_overflow));
 
 	/* all done, store old pointers and assign new ones */
-	ctx->cqes = (struct io_uring_cqe *)((char *)rings + io_uring_cq_offset());
 	if (!(ctx->flags & IORING_SETUP_NO_SQARRAY))
 		ctx->sq_array = (u32 *)((char *)n.rings + sq_array_offset);
 
@@ -558,6 +575,7 @@ overflow:
 
 	ctx->rings = n.rings;
 	ctx->sq_sqes = n.sq_sqes;
+	ctx->cq_cqes = n.cq_cqes;
 	swap_old(ctx, o, n, ring_region);
 	swap_old(ctx, o, n, sq_region);
 	to_free = &o;
@@ -575,18 +593,17 @@ out:
 
 static int io_register_mem_region(struct io_ring_ctx *ctx, void __user *uarg)
 {
-	struct io_uring_mem_region_reg __user *reg_uptr = uarg;
 	struct io_uring_mem_region_reg reg;
-	struct io_uring_region_desc __user *rd_uptr;
 	struct io_uring_region_desc rd;
+	void __user *rd_uptr;
 	int ret;
 
 	if (io_region_is_set(&ctx->param_region))
 		return -EBUSY;
-	if (copy_from_user_with_ptr(&reg, reg_uptr, sizeof(reg)))
+	if (__c64c_copy_from_user_with_ptr(io_in_compat64(ctx), io_uring_mem_region_reg, &reg, uarg))
 		return -EFAULT;
 	rd_uptr = u64_to_user_ptr(reg.region_uptr);
-	if (copy_from_user_with_ptr(&rd, rd_uptr, sizeof(rd)))
+	if (__c64c_copy_from_user_with_ptr(io_in_compat64(ctx), io_uring_region_desc, &rd, rd_uptr))
 		return -EFAULT;
 	if (memchr_inv(&reg.__resv, 0, sizeof(reg.__resv)))
 		return -EINVAL;
@@ -606,7 +623,8 @@ static int io_register_mem_region(struct io_ring_ctx *ctx, void __user *uarg)
 					 IORING_MAP_OFF_PARAM_REGION);
 	if (ret)
 		return ret;
-	if (copy_to_user_with_ptr(rd_uptr, &rd, sizeof(rd))) {
+
+	if (__c64c_copy_to_user_with_ptr_safe(io_in_compat64(ctx), io_uring_region_desc, rd_uptr, &rd)) {
 		guard(mutex)(&ctx->mmap_lock);
 		io_free_region(ctx, &ctx->param_region);
 		return -EFAULT;
@@ -873,11 +891,19 @@ struct file *io_uring_register_get_file(unsigned int fd, bool registered)
 static int io_uring_register_send_msg_ring(void __user *arg, unsigned int nr_args)
 {
 	struct io_uring_sqe sqe;
+	struct __c64_io_uring_sqe csqe;
+	int ret;
+	bool c64 = in_compat64_syscall();
 
 	if (!arg || nr_args != 1)
 		return -EINVAL;
-	if (copy_from_user_with_ptr(&sqe, arg, sizeof(sqe)))
+	ret = likely(!c64) ? copy_from_user_with_ptr(&sqe, arg, sizeof(sqe)) :
+			     copy_from_user_no_ptr(&csqe, arg, sizeof(csqe));
+	if (ret)
 		return -EFAULT;
+	if (unlikely(c64))
+		convert_compat64_io_uring_sqe(NULL, &sqe, &csqe);
+
 	/* no flags supported */
 	if (sqe.flags)
 		return -EINVAL;
