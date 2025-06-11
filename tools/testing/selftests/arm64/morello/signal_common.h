@@ -27,5 +27,9 @@ int mq_unlink(const char *name);
 int mq_notify(mqd_t mqdes, const struct sigevent *sevp);
 int mq_timedsend(mqd_t mqdes, const char *msg, size_t len, unsigned int prio,
 		 const struct timespec *timeout);
+int timer_create(clockid_t clockid, struct sigevent *sevp, timer_t *timerid);
+int timer_delete(timer_t timerid);
+int timer_settime(timer_t timerid, int flags, const struct itimerspec *new_value,
+		  struct itimerspec *old_value);
 
 #endif /* ! SIGNAL_COMMON_H */

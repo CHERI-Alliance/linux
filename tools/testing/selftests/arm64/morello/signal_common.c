@@ -71,3 +71,19 @@ int mq_timedsend(mqd_t mqdes, const char *msg, size_t len, unsigned int prio,
 {
 	return syscall(__NR_mq_timedsend, mqdes, msg, len, prio, timeout);
 }
+
+int timer_create(clockid_t clockid, struct sigevent *sevp, timer_t *timerid)
+{
+	return syscall(__NR_timer_create, clockid, sevp, timerid);
+}
+
+int timer_delete(timer_t timerid)
+{
+	return syscall(__NR_timer_delete, timerid);
+}
+
+int timer_settime(timer_t timerid, int flags, const struct itimerspec *new_value,
+		  struct itimerspec *old_value)
+{
+	return syscall(__NR_timer_settime, timerid, flags, new_value, old_value);
+}
