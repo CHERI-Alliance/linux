@@ -9,11 +9,11 @@
 #endif
 
 /**
- * as_user_ptr - convert an arbitrary integer value to a user pointer
- * @x: the integer value to convert
+ * as_user_ptr() - Convert an arbitrary integer value to a user pointer.
+ * @x: The integer value to convert.
  *
- * Returns up to 64 bits of @x represented as a user pointer. The result is
- * not a valid pointer and shall not be dereferenced.
+ * Return: Up to 64 bits of @x represented as a user pointer. The result is
+ *         not a valid pointer and shall not be dereferenced.
  */
 #define as_user_ptr(x) ((void __user *)(user_uintptr_t)(u64)(x))
 
@@ -30,10 +30,10 @@
 
 #ifndef uaddr_to_user_ptr
 /**
- * uaddr_to_user_ptr - convert a user-provided address to a user pointer
- * @addr: the address to set the pointer to
+ * uaddr_to_user_ptr() - Convert a user-provided address to a user pointer.
+ * @addr: The address to set the pointer to.
  *
- * Returns a user pointer with its address set to @addr.
+ * Return: A user pointer with its address set to @addr.
  *
  * This function should be used when a user pointer is required because userspace
  * provided a raw address (e.g. via a __u64 member of a struct), and the memory
@@ -50,10 +50,11 @@ static inline void __user *uaddr_to_user_ptr(ptraddr_t addr)
 
 #ifndef uaddr_to_user_ptr_safe
 /**
- * uaddr_to_user_ptr_safe - convert a kernel-generated user address to a user pointer
- * @addr: the address to set the pointer to
+ * uaddr_to_user_ptr_safe() - Convert a kernel-generated user address to a
+ *   user pointer.
+ * @addr: The address to set the pointer to.
  *
- * Returns a user pointer with its address set to @addr.
+ * Return: A user pointer with its address set to @addr.
  *
  * This function should be used when a user pointer is required because user
  * memory at a certain address needs to be accessed, and that address originates
@@ -66,10 +67,10 @@ static inline void __user *uaddr_to_user_ptr_safe(ptraddr_t addr)
 #endif
 
 /**
- * user_ptr_addr - extract the address of a user pointer
- * @ptr: the user pointer to extract the address from
+ * user_ptr_addr() - Extract the address of a user pointer.
+ * @ptr: The user pointer to extract the address from.
  *
- * Returns the address @ptr points to.
+ * Return: The address @ptr points to.
  */
 static inline ptraddr_t user_ptr_addr(const void __user *ptr)
 {
@@ -77,9 +78,11 @@ static inline ptraddr_t user_ptr_addr(const void __user *ptr)
 }
 
 /**
- * user_ptr_is_same - checks where two user pointers are exactly the same
+ * user_ptr_is_same() - Checks where two user pointers are exactly the same.
+ * @p1: The first user pointer to check.
+ * @p2: The second user pointer to check.
  *
- * Returns true if @p1 and @p2 are exactly the same user pointers.
+ * Return: true if @p1 and @p2 are exactly the same user pointers.
  *
  * Only use this function if you need to know that two user pointers are
  * interchangeable, not to check that their address is the same (use the ==
