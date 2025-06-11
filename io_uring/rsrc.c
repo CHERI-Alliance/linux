@@ -22,7 +22,7 @@
 
 struct io_rsrc_update {
 	struct file			*file;
-	u64				arg;
+	__s32 __user			*arg;
 	u32				nr_args;
 	u32				offset;
 };
@@ -225,8 +225,8 @@ static int __io_sqe_files_update(struct io_ring_ctx *ctx,
 				 struct io_uring_rsrc_update2 *up,
 				 unsigned nr_args)
 {
-	u64 __user *tags = u64_to_user_ptr(up->tags);
-	__s32 __user *fds = u64_to_user_ptr(up->data);
+	u64 __user *tags = (u64 __user *)up->tags;
+	__s32 __user *fds = (__s32 __user *)up->data;
 	int fd, i, err = 0;
 	unsigned int done;
 
@@ -290,7 +290,7 @@ static int __io_sqe_buffers_update(struct io_ring_ctx *ctx,
 				   struct io_uring_rsrc_update2 *up,
 				   unsigned int nr_args)
 {
-	u64 __user *tags = u64_to_user_ptr(up->tags);
+	u64 __user *tags = (u64 __user *)up->tags;
 	struct iovec fast_iov, *iov;
 	struct page *last_hpage = NULL;
 	struct iovec __user *uvec;
@@ -415,8 +415,8 @@ __cold int io_register_rsrc(struct io_ring_ctx *ctx, void __user *arg,
 	case IORING_RSRC_BUFFER:
 		if (rr.flags & IORING_RSRC_REGISTER_SPARSE && rr.data)
 			break;
-		return io_sqe_buffers_register(ctx, u64_to_user_ptr(rr.data),
-					       rr.nr, u64_to_user_ptr(rr.tags));
+		return io_sqe_buffers_register(ctx, (void __user *)rr.data,
+					       rr.nr, (u64 __user *)rr.tags);
 	}
 	return -EINVAL;
 }
@@ -434,7 +434,7 @@ int io_files_update_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	up->nr_args = READ_ONCE(sqe->len);
 	if (!up->nr_args)
 		return -EINVAL;
-	up->arg = READ_ONCE(sqe->addr);
+	up->arg = (__s32 __user *)READ_ONCE(sqe->addr);
 	return 0;
 }
 
@@ -442,7 +442,7 @@ static int io_files_update_with_index_alloc(struct io_kiocb *req,
 					    unsigned int issue_flags)
 {
 	struct io_rsrc_update *up = io_kiocb_to_cmd(req, struct io_rsrc_update);
-	__s32 __user *fds = u64_to_user_ptr(up->arg);
+	__s32 __user *fds = up->arg;
 	unsigned int done;
 	struct file *file;
 	int ret, fd;
@@ -485,7 +485,7 @@ int io_files_update(struct io_kiocb *req, unsigned int issue_flags)
 	int ret;
 
 	up2.offset = up->offset;
-	up2.data = up->arg;
+	up2.data = (__kernel_uintptr_t)up->arg;
 	up2.nr = 0;
 	up2.tags = 0;
 	up2.resv = 0;

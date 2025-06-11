@@ -64,7 +64,7 @@ static inline void napi_show_fdinfo(struct io_ring_ctx *ctx,
 			   (sq_idx), io_uring_get_opcode((sqe)->opcode), (sqe)->fd,	\
 			   (sqe)->flags, (unsigned long long) (sqe)->off,		\
 			   (unsigned long long) (sqe)->addr, (sqe)->rw_flags,		\
-			   (sqe)->buf_index, (sqe)->user_data);				\
+			   (sqe)->buf_index, (unsigned long long) (sqe)->user_data);	\
 		if (sq_shift) {								\
 			u64 *sqeb = (void *) ((sqe) + 1);				\
 			int size = sizeof(*(sqe)) / sizeof(u64);			\
@@ -81,8 +81,8 @@ static inline void napi_show_fdinfo(struct io_ring_ctx *ctx,
 #define print_cqe(m, cqe, cq_idx, cqe32)					\
 	do {									\
 		seq_printf(m, "%5u: user_data:%llu, res:%d, flag:%x",		\
-			   (cq_idx), (cqe)->user_data, (cqe)->res,		\
-			   (cqe)->flags);					\
+			   (cq_idx), (unsigned long long) (cqe)->user_data,	\
+			   (cqe)->res, (cqe)->flags);				\
 		if (cqe32)							\
 			seq_printf(m, ", extra1:%llu, extra2:%llu\n",		\
 				   (cqe)->big_cqe[0], (cqe)->big_cqe[1]);	\
@@ -212,7 +212,7 @@ static void __io_uring_show_fdinfo(struct io_ring_ctx *ctx, struct seq_file *m)
 		if (ctx->buf_table.nodes[i])
 			buf = ctx->buf_table.nodes[i]->buf;
 		if (buf)
-			seq_printf(m, "%5u: 0x%llx/%u\n", i, buf->ubuf, buf->len);
+			seq_printf(m, "%5u: 0x%llx/%u\n", i, (u64)buf->ubuf, buf->len);
 		else
 			seq_printf(m, "%5u: <none>\n", i);
 	}
@@ -233,8 +233,8 @@ static void __io_uring_show_fdinfo(struct io_ring_ctx *ctx, struct seq_file *m)
 		struct io_uring_cqe *cqe = &ocqe->cqe;
 
 		seq_printf(m, "  user_data=%llu, res=%d, flags=%x\n",
-			   cqe->user_data, cqe->res, cqe->flags);
-
+			   (unsigned long long) cqe->user_data, cqe->res,
+			   cqe->flags);
 	}
 	spin_unlock(&ctx->completion_lock);
 	napi_show_fdinfo(ctx, m);

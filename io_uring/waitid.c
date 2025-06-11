@@ -257,7 +257,7 @@ int io_waitid_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	iw->which = READ_ONCE(sqe->len);
 	iw->upid = READ_ONCE(sqe->fd);
 	iw->options = READ_ONCE(sqe->file_index);
-	iw->infop = u64_to_user_ptr(READ_ONCE(sqe->addr2));
+	iw->infop = (struct siginfo __user *)READ_ONCE(sqe->addr2);
 	return 0;
 }
 

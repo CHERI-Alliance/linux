@@ -239,7 +239,12 @@ static int io_net_import_vec(struct io_kiocb *req, struct io_async_msghdr *iomsg
 static int io_compat_msg_copy_hdr(struct io_kiocb *req,
 				  struct io_async_msghdr *iomsg,
 				  struct compat_msghdr *msg, int ddir,
-				  struct sockaddr __user **save_addr)
+#if defined(CONFIG_CHERI_PURECAP_UABI) && !defined(CONFIG_CHERI_KERNEL)
+				  struct sockaddr *__capability*save_addr
+#else
+				  struct sockaddr __user **save_addr
+#endif
+				  )
 {
 	struct io_sr_msg *sr = io_kiocb_to_cmd(req, struct io_sr_msg);
 	struct compat_iovec __user *uiov;
@@ -274,11 +279,11 @@ static int io_copy_msghdr_from_user(struct user_msghdr *msg,
 {
 	if (!user_access_begin(umsg, sizeof(*umsg)))
 		return -EFAULT;
-	unsafe_get_user(msg->msg_name, &umsg->msg_name, ua_end);
+	unsafe_get_user_ptr(msg->msg_name, &umsg->msg_name, ua_end);
 	unsafe_get_user(msg->msg_namelen, &umsg->msg_namelen, ua_end);
-	unsafe_get_user(msg->msg_iov, &umsg->msg_iov, ua_end);
+	unsafe_get_user_ptr(msg->msg_iov, &umsg->msg_iov, ua_end);
 	unsafe_get_user(msg->msg_iovlen, &umsg->msg_iovlen, ua_end);
-	unsafe_get_user(msg->msg_control, &umsg->msg_control, ua_end);
+	unsafe_get_user_ptr(msg->msg_control, &umsg->msg_control, ua_end);
 	unsafe_get_user(msg->msg_controllen, &umsg->msg_controllen, ua_end);
 	user_access_end();
 	return 0;
@@ -289,7 +294,12 @@ ua_end:
 
 static int io_msg_copy_hdr(struct io_kiocb *req, struct io_async_msghdr *iomsg,
 			   struct user_msghdr *msg, int ddir,
-			   struct sockaddr __user **save_addr)
+#if defined(CONFIG_CHERI_PURECAP_UABI) && !defined(CONFIG_CHERI_KERNEL)
+			   struct sockaddr *__capability*save_addr
+#else
+			   struct sockaddr __user **save_addr
+#endif
+			  )
 {
 	struct io_sr_msg *sr = io_kiocb_to_cmd(req, struct io_sr_msg);
 	struct user_msghdr __user *umsg = sr->umsg;
@@ -355,7 +365,7 @@ static int io_send_setup(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	u16 addr_len;
 	int ret;
 
-	sr->buf = u64_to_user_ptr(READ_ONCE(sqe->addr));
+	sr->buf = (void __user *)READ_ONCE(sqe->addr);
 
 	if (READ_ONCE(sqe->__pad3[0]))
 		return -EINVAL;
@@ -366,7 +376,7 @@ static int io_send_setup(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	kmsg->msg.msg_controllen = 0;
 	kmsg->msg.msg_ubuf = NULL;
 
-	addr = u64_to_user_ptr(READ_ONCE(sqe->addr2));
+	addr = (void __user *)READ_ONCE(sqe->addr2);
 	addr_len = READ_ONCE(sqe->addr_len);
 	if (addr) {
 		ret = move_addr_to_kernel(addr, addr_len, &kmsg->addr);
@@ -784,7 +794,7 @@ int io_recvmsg_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	if (unlikely(sqe->addr2))
 		return -EINVAL;
 
-	sr->umsg = u64_to_user_ptr(READ_ONCE(sqe->addr));
+	sr->umsg = (struct user_msghdr __user *)READ_ONCE(sqe->addr);
 	sr->len = READ_ONCE(sqe->len);
 	sr->flags = READ_ONCE(sqe->ioprio);
 	if (sr->flags & ~RECVMSG_FLAGS)
@@ -1619,8 +1629,8 @@ int io_accept_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	if (sqe->len || sqe->buf_index)
 		return -EINVAL;
 
-	accept->addr = u64_to_user_ptr(READ_ONCE(sqe->addr));
-	accept->addr_len = u64_to_user_ptr(READ_ONCE(sqe->addr2));
+	accept->addr = (void __user *)READ_ONCE(sqe->addr);
+	accept->addr_len = (int __user *)READ_ONCE(sqe->addr2);
 	accept->flags = READ_ONCE(sqe->accept_flags);
 	accept->nofile = rlimit(RLIMIT_NOFILE);
 	accept->iou_flags = READ_ONCE(sqe->ioprio);
@@ -1769,8 +1779,8 @@ int io_connect_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	if (sqe->len || sqe->buf_index || sqe->rw_flags || sqe->splice_fd_in)
 		return -EINVAL;
 
-	conn->addr = u64_to_user_ptr(READ_ONCE(sqe->addr));
-	conn->addr_len =  READ_ONCE(sqe->addr2);
+	conn->addr = (void __user *)READ_ONCE(sqe->addr);
+	conn->addr_len = READ_ONCE(sqe->off);
 	conn->in_progress = conn->seen_econnaborted = false;
 
 	io = io_msg_alloc_async(req);
@@ -1841,7 +1851,7 @@ int io_bind_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	if (sqe->len || sqe->buf_index || sqe->rw_flags || sqe->splice_fd_in)
 		return -EINVAL;
 
-	uaddr = u64_to_user_ptr(READ_ONCE(sqe->addr));
+	uaddr = (void __user *)READ_ONCE(sqe->addr);
 	bind->addr_len =  READ_ONCE(sqe->addr2);
 
 	io = io_msg_alloc_async(req);

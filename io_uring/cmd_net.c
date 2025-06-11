@@ -19,7 +19,7 @@ static inline int io_uring_cmd_getsockopt(struct socket *sock,
 	if (level != SOL_SOCKET)
 		return -EOPNOTSUPP;
 
-	optval = u64_to_user_ptr(READ_ONCE(sqe->optval));
+	optval = (void __user *)READ_ONCE(sqe->optval);
 	optname = READ_ONCE(sqe->optname);
 	optlen = READ_ONCE(sqe->optlen);
 
@@ -43,7 +43,7 @@ static inline int io_uring_cmd_setsockopt(struct socket *sock,
 	void __user *optval;
 	sockptr_t optval_s;
 
-	optval = u64_to_user_ptr(READ_ONCE(sqe->optval));
+	optval = (void __user *)READ_ONCE(sqe->optval);
 	optname = READ_ONCE(sqe->optname);
 	optlen = READ_ONCE(sqe->optlen);
 	level = READ_ONCE(sqe->level);
