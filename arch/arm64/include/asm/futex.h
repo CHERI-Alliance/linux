@@ -19,10 +19,10 @@ do {									\
 	uaccess_enable_privileged();					\
 	asm volatile(							\
 	__ASM_UACCESS_BEFORE						\
-"	prfm	pstl1strm, [%2]\n"					\
-"1:	ldxr	%w1, [%2]\n"						\
+"	prfm	pstl1strm, %2\n"					\
+"1:	ldxr	%w1, %2\n"						\
 	insn "\n"							\
-"2:	stlxr	%w0, %w3, [%2]\n"					\
+"2:	stlxr	%w0, %w3, %2\n"						\
 "	cbz	%w0, 3f\n"						\
 "	sub	%w4, %w4, %w0\n"					\
 "	cbnz	%w4, 1b\n"						\
@@ -32,10 +32,8 @@ do {									\
 	__ASM_UACCESS_AFTER						\
 	_ASM_EXTABLE_UACCESS_ERR(1b, 3b, %w0)				\
 	_ASM_EXTABLE_UACCESS_ERR(2b, 3b, %w0)				\
-	/* TODO [PCuABI]: temporary solution for uaddr. Should be reverted to +Q
-	 *        once LLVM supports it for capabilities. */		\
-	: "=&r" (ret), "=&r" (oldval), __ASM_RW_UPTR_CONSTR (uaddr),	\
-	  "=&r" (tmp), "+r" (loops)					\
+	: "=&r" (ret), "=&r" (oldval), "+Q" (*uaddr), "=&r" (tmp),	\
+	  "+r" (loops)							\
 	: "r" (oparg), "Ir" (-EAGAIN)					\
 	: "memory");							\
 	uaccess_disable_privileged();					\
@@ -97,11 +95,11 @@ futex_atomic_cmpxchg_inatomic(u32 *uval, u32 __user *_uaddr,
 	uaccess_enable_privileged();
 	asm volatile("// futex_atomic_cmpxchg_inatomic\n"
 	__ASM_UACCESS_BEFORE
-"	prfm	pstl1strm, [%2]\n"
-"1:	ldxr	%w1, [%2]\n"
+"	prfm	pstl1strm, %2\n"
+"1:	ldxr	%w1, %2\n"
 "	sub	%w3, %w1, %w5\n"
 "	cbnz	%w3, 4f\n"
-"2:	stlxr	%w3, %w6, [%2]\n"
+"2:	stlxr	%w3, %w6, %2\n"
 "	cbz	%w3, 3f\n"
 "	sub	%w4, %w4, %w3\n"
 "	cbnz	%w4, 1b\n"
@@ -112,10 +110,7 @@ futex_atomic_cmpxchg_inatomic(u32 *uval, u32 __user *_uaddr,
 	__ASM_UACCESS_AFTER
 	_ASM_EXTABLE_UACCESS_ERR(1b, 4b, %w0)
 	_ASM_EXTABLE_UACCESS_ERR(2b, 4b, %w0)
-	/* TODO [PCuABI]: temporary solution for uaddr. Should be reverted to +Q once
-	 *        LLVM supports it for capabilities. */
-	: "+r" (ret), "=&r" (val), __ASM_RW_UPTR_CONSTR (uaddr), "=&r" (tmp),
-	  "+r" (loops)
+	: "+r" (ret), "=&r" (val), "+Q" (*uaddr), "=&r" (tmp), "+r" (loops)
 	: "r" (oldval), "r" (newval), "Ir" (-EAGAIN)
 	: "memory");
 	uaccess_disable_privileged();
