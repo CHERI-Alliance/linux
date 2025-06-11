@@ -41,7 +41,8 @@ static inline int
 arch_futex_atomic_op_inuser(int op, int oparg, int *oval, u32 __user *_uaddr)
 {
 	int oldval = 0, ret, tmp;
-	u32 __user *uaddr = __uaccess_mask_ptr(_uaddr);
+	/* TODO [PCuABI] - perform the access via the user capability */
+	u32 *uaddr = (u32 *)user_ptr_addr(__uaccess_mask_ptr(_uaddr));
 
 	if (!access_ok(_uaddr, sizeof(u32)))
 		return -EFAULT;
@@ -84,12 +85,13 @@ futex_atomic_cmpxchg_inatomic(u32 *uval, u32 __user *_uaddr,
 	int ret = 0;
 	unsigned int loops = FUTEX_MAX_LOOPS;
 	u32 val, tmp;
-	u32 __user *uaddr;
+	u32 *uaddr;
 
 	if (!access_ok(_uaddr, sizeof(u32)))
 		return -EFAULT;
 
-	uaddr = __uaccess_mask_ptr(_uaddr);
+	/* TODO [PCuABI] - perform the access via the user capability */
+	uaddr = (u32 *)user_ptr_addr(__uaccess_mask_ptr(_uaddr));
 	uaccess_enable_privileged();
 	asm volatile("// futex_atomic_cmpxchg_inatomic\n"
 "	prfm	pstl1strm, %2\n"
