@@ -492,4 +492,7 @@ config COMPAT
 	select ARCH_WANT_OLD_COMPAT_IPC
 	select COMPAT_OLD_SIGACTION
 
+config COMPAT32
+	def_bool y if COMPAT
+
 source "drivers/sbus/char/Kconfig"
