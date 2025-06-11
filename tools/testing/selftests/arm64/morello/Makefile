@@ -11,7 +11,7 @@ LDFLAGS := -fuse-ld=lld
 CFLAGS += $(CFLAGS_CLANG) $(CFLAGS_PURECAP) $(CFLAGS_COMMON)
 
 SRCS := $(wildcard *.c) $(wildcard *.S)
-PROGS := purecap_syscall_test tester
+PROGS := read_write tester
 DEPS := $(wildcard *.h)
 
 # these are the final executables
@@ -31,8 +31,5 @@ $(OUTPUT)/%.o:%.S $(DEPS)
 $(OUTPUT)/%.o:%.c $(DEPS)
 	$(CC) $< -o $@ $(CFLAGS) -c
 
-$(OUTPUT)/tester: $(OUTPUT)/freestanding_start.o $(OUTPUT)/freestanding_init_globals.o $(OUTPUT)/freestanding.o $(OUTPUT)/tester.o
-	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
-
-$(OUTPUT)/purecap_syscall_test: $(OUTPUT)/start.o
+$(OUTPUT)/%: $(OUTPUT)/%.o $(OUTPUT)/freestanding_start.o $(OUTPUT)/freestanding_init_globals.o $(OUTPUT)/freestanding.o
 	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
