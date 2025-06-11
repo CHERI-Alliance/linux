@@ -79,6 +79,8 @@
 #define __arm64_compatentry_compat_sys_wait4			__arm64_compatentry_sys_wait4
 #define __arm64_compatentry_sys_clock_adjtime32			__arm64_compatentry_sys_clock_adjtime
 #define __arm64_compatentry_compat_sys_io_pgetevents		__arm64_compatentry_compat_sys_io_pgetevents_time64
+#define __arm64_compatentry_compat_sys_getitimer		__arm64_compatentry_sys_getitimer
+#define __arm64_compatentry_compat_sys_setitimer		__arm64_compatentry_sys_setitimer
 
 /*
  * Assign native handler to compat rt_sigreturn syscall till the full
