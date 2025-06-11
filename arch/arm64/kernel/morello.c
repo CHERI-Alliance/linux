@@ -9,6 +9,7 @@
 
 #include <linux/cache.h>
 #include <linux/capability.h>
+#include <linux/compat.h>
 #include <linux/mm.h>
 #include <linux/printk.h>
 #include <linux/sched/coredump.h>
@@ -102,8 +103,10 @@ void morello_setup_signal_return(struct pt_regs *regs)
 	 * Executive).
 	 */
 #ifdef CONFIG_CHERI_PURECAP_UABI
+	if (is_compat_task())
+		init_pcc(regs);
 	/* Unseal if the pcc has sentry object type */
-	if (cheri_is_sentry(regs->pcc))
+	else if (cheri_is_sentry(regs->pcc))
 		regs->pcc = cheri_unseal(regs->pcc, morello_sentry_unsealcap);
 #else
 	init_pcc(regs);
