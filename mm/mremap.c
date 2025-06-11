@@ -25,6 +25,7 @@
 #include <linux/uaccess.h>
 #include <linux/userfaultfd_k.h>
 #include <linux/mempolicy.h>
+#include <linux/mm_reserv.h>
 
 #include <asm/cacheflush.h>
 #include <asm/tlb.h>
@@ -50,10 +51,12 @@ enum mremap_type {
 struct vma_remap_struct {
 	/* User-provided state. */
 	unsigned long addr;	/* User-specified address from which we remap. */
+	user_uintptr_t old_ptr;	/* User specified capability. */
 	unsigned long old_len;	/* Length of range being remapped. */
 	unsigned long new_len;	/* Desired new length of mapping. */
 	unsigned long flags;	/* user-specified MREMAP_* flags. */
 	unsigned long new_addr;	/* Optionally, desired new address. */
+	user_uintptr_t new_ptr;	/* Capability for new address. */
 
 	/* uffd state. */
 	struct vm_userfaultfd_ctx *uf;
@@ -1339,6 +1342,22 @@ static int resize_is_valid(struct vma_remap_struct *vrm)
 	return 0;
 }
 
+static user_uintptr_t make_new_user_ptr_owning(ptraddr_t new_vma_addr,
+					       user_uintptr_t old_user_ptr, bool locked)
+{
+	user_uintptr_t ret;
+
+	ret = reserv_make_user_ptr_owning(new_vma_addr, locked);
+	if (IS_ERR_VALUE(ret))
+		return ret;
+
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	if (reserv_is_supported(current->mm))
+		ret = cheri_perms_and(ret, cheri_perms_get(old_user_ptr));
+#endif
+	return ret;
+}
+
 /*
  * The user has requested that the VMA be shrunk (i.e., old_len > new_len), so
  * execute this, optionally dropping the mmap lock when we do so.
@@ -1695,7 +1714,8 @@ static user_uintptr_t do_mremap(struct vma_remap_struct *vrm)
 {
 	struct mm_struct *mm = current->mm;
 	struct vm_area_struct *vma;
-	user_uintptr_t ret;
+	unsigned long ret = 0;
+	user_uintptr_t ret_ptr = 0;
 
 	ret = check_mremap_params(vrm);
 	if (ret)
@@ -1715,6 +1735,16 @@ static user_uintptr_t do_mremap(struct vma_remap_struct *vrm)
 		goto out;
 	}
 
+	if (reserv_is_supported(mm) &&
+	    !check_user_ptr_owning(vrm->addr, vrm->old_len ? vrm->old_len : vrm->new_len)) {
+		ret = -EINVAL;
+		goto out;
+	}
+	if (!reserv_cap_within_reserv(vrm->addr, true)) {
+		ret = -ERESERVATION;
+		goto out;
+	}
+
 	/* If mseal()'d, mremap() is prohibited. */
 	if (!can_modify_vma(vma)) {
 		ret = -EPERM;
@@ -1731,6 +1761,15 @@ static user_uintptr_t do_mremap(struct vma_remap_struct *vrm)
 
 	/* Actually execute mremap. */
 	ret = vrm_implies_new_addr(vrm) ? mremap_to(vrm) : mremap_at(vrm);
+	if (!IS_ERR_VALUE(ret) && reserv_is_supported(mm)) {
+		if ((vrm->flags & MREMAP_FIXED) &&
+		    user_ptr_is_valid((const void __user *)vrm->new_ptr))
+			ret_ptr = vrm->new_ptr;
+		else
+			ret_ptr = make_new_user_ptr_owning(ret, vrm->old_ptr,
+							   vrm->mmap_locked);
+		ret = __c_ua(ret_ptr);
+	}
 
 out:
 	if (vrm->mmap_locked) {
@@ -1745,11 +1784,7 @@ out:
 	mremap_userfaultfd_complete(vrm->uf, vrm->addr, ret, vrm->old_len);
 	userfaultfd_unmap_complete(mm, vrm->uf_unmap);
 
-	/* TODO [PCuABI] - derive proper capability */
-	return IS_ERR_VALUE(ret) ?
-		ret :
-		(user_intptr_t)uaddr_to_user_ptr_safe((ptraddr_t)ret);
-	return ret;
+	return ret_ptr ? ret_ptr : __c_fakeu(ret);
 }
 
 /*
@@ -1759,11 +1794,13 @@ out:
  * MREMAP_FIXED option added 5-Dec-1999 by Benjamin LaHaise
  * This option implies MREMAP_MAYMOVE.
  */
-SYSCALL_DEFINE5(__retptr__(mremap), user_uintptr_t, addr, unsigned long, old_len,
+SYSCALL_DEFINE5(__retptr__(mremap), user_uintptr_t, user_ptr, unsigned long, old_len,
 		unsigned long, new_len, unsigned long, flags,
-		user_uintptr_t, new_addr)
+		user_uintptr_t, new_user_ptr)
 {
 	struct vm_userfaultfd_ctx uf = NULL_VM_UFFD_CTX;
+	ptraddr_t addr = __c_ua(user_ptr);
+	ptraddr_t new_addr = __c_ua(new_user_ptr);
 	LIST_HEAD(uf_unmap_early);
 	LIST_HEAD(uf_unmap);
 
