@@ -77,7 +77,7 @@ SYSCALL_DEFINE3(get_robust_list, int, pid,
 
 	if (put_user(sizeof(*head), len_ptr))
 		return -EFAULT;
-	return put_user(head, head_ptr);
+	return put_user_ptr(head, head_ptr);
 
 err_unlock:
 	rcu_read_unlock();
@@ -180,7 +180,7 @@ SYSCALL_DEFINE6(futex, u32 __user *, uaddr, int, op, u32, val,
 		tp = &t;
 	}
 
-	return do_futex(uaddr, op, val, tp, uaddr2, (unsigned long)utime, val3);
+	return do_futex(uaddr, op, val, tp, uaddr2, (user_uintptr_t)utime, val3);
 }
 
 /**
@@ -510,7 +510,7 @@ SYSCALL_DEFINE6(futex_time32, u32 __user *, uaddr, int, op, u32, val,
 		tp = &t;
 	}
 
-	return do_futex(uaddr, op, val, tp, uaddr2, (unsigned long)utime, val3);
+	return do_futex(uaddr, op, val, tp, uaddr2, (user_uintptr_t)utime, val3);
 }
 #endif /* CONFIG_COMPAT_32BIT_TIME */
 
