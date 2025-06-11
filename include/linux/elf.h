@@ -23,8 +23,11 @@
 #endif
 
 #ifndef START_THREAD
-#define START_THREAD(elf_ex, regs, elf_entry, start_stack)	\
-	start_thread(regs, elf_entry, start_stack)
+#define START_THREAD(elf_ex, regs, elf_entry, bprm)	\
+({							\
+	start_thread(regs, elf_entry, bprm->p);		\
+	0; /* binfmt_elf return value */		\
+})
 #endif
 
 #if defined(ARCH_HAS_SETUP_ADDITIONAL_PAGES) && !defined(ARCH_SETUP_ADDITIONAL_PAGES)
