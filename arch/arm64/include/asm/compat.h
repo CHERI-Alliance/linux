@@ -89,11 +89,15 @@ struct compat_statfs {
 #ifdef CONFIG_CHERI_PURECAP_UABI
 static inline void __user *compat_ptr(compat_uptr_t uptr)
 {
+	ptraddr_t addr = untagged_addr(uptr);
+
 	/*
 	 * TODO [Morello] - this should be done using the current user DDC, not
 	 * the root user capability.
 	 */
-	return (void __user *)cheri_address_set(cheri_user_root_allperms_cap, uptr);
+	return likely(addr >= PAGE_SIZE && addr < TASK_SIZE_MAX) ?
+		(void __user *)cheri_address_set(cheri_user_root_allperms_cap, uptr) :
+		as_user_ptr(uptr);
 }
 #define compat_ptr(uptr) compat_ptr(uptr)
 #endif
