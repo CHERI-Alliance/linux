@@ -105,12 +105,12 @@ SYSCALL_DEFINE3(get_robust_list, int, pid,
 {
 	struct robust_list_head __user *head = futex_get_robust_list_common(pid, false);
 
-	if (IS_ERR(head))
-		return PTR_ERR(head);
+	if (USER_PTR_IS_ERR(head))
+		return USER_PTR_ERR(head);
 
 	if (put_user(sizeof(*head), len_ptr))
 		return -EFAULT;
-	return put_user(head, head_ptr);
+	return put_user_ptr(head, head_ptr);
 }
 
 long do_futex(u32 __user *uaddr, int op, u32 val, ktime_t *timeout,
@@ -208,7 +208,7 @@ SYSCALL_DEFINE6(futex, u32 __user *, uaddr, int, op, u32, val,
 		tp = &t;
 	}
 
-	return do_futex(uaddr, op, val, tp, uaddr2, (unsigned long)utime, val3);
+	return do_futex(uaddr, op, val, tp, uaddr2, (user_uintptr_t)utime, val3);
 }
 
 /**
@@ -489,8 +489,8 @@ COMPAT_SYSCALL_DEFINE3(get_robust_list, int, pid,
 {
 	struct compat_robust_list_head __user *head = futex_get_robust_list_common(pid, true);
 
-	if (IS_ERR(head))
-		return PTR_ERR(head);
+	if (USER_PTR_IS_ERR(head))
+		return USER_PTR_ERR(head);
 
 	if (put_user(sizeof(*head), len_ptr))
 		return -EFAULT;
@@ -516,7 +516,7 @@ SYSCALL_DEFINE6(futex_time32, u32 __user *, uaddr, int, op, u32, val,
 		tp = &t;
 	}
 
-	return do_futex(uaddr, op, val, tp, uaddr2, (unsigned long)utime, val3);
+	return do_futex(uaddr, op, val, tp, uaddr2, (user_uintptr_t)utime, val3);
 }
 #endif /* CONFIG_COMPAT_32BIT_TIME */
 
