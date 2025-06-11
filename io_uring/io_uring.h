@@ -130,6 +130,16 @@ static inline bool io_should_wake(struct io_wait_queue *iowq)
 
 unsigned long rings_size(unsigned int flags, unsigned int sq_entries,
 			 unsigned int cq_entries, size_t *sq_offset);
+static inline size_t io_uring_cq_offset(void)
+{
+	size_t ret = sizeof(struct io_rings);
+
+#ifdef CONFIG_SMP
+	ret = ALIGN(ret, SMP_CACHE_BYTES);
+#endif
+
+	return ret;
+}
 int io_uring_fill_params(unsigned entries, struct io_uring_params *p);
 bool io_cqe_cache_refill(struct io_ring_ctx *ctx, bool overflow, bool cqe32);
 int io_run_task_work_sig(struct io_ring_ctx *ctx);

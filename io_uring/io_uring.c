@@ -798,7 +798,6 @@ static bool io_fill_nop_cqe(struct io_ring_ctx *ctx, unsigned int off)
  */
 bool io_cqe_cache_refill(struct io_ring_ctx *ctx, bool overflow, bool cqe32)
 {
-	struct io_rings *rings = ctx->rings;
 	unsigned int off = ctx->cached_cq_tail & (ctx->cq_entries - 1);
 	unsigned int free, queued, len;
 
@@ -833,7 +832,7 @@ bool io_cqe_cache_refill(struct io_ring_ctx *ctx, bool overflow, bool cqe32)
 		len <<= 1;
 	}
 
-	ctx->cqe_cached = &rings->cqes[off];
+	ctx->cqe_cached = &ctx->cqes[off];
 	ctx->cqe_sentinel = ctx->cqe_cached + len;
 	return true;
 }
@@ -2778,10 +2777,14 @@ unsigned long rings_size(unsigned int flags, unsigned int sq_entries,
 			 unsigned int cq_entries, size_t *sq_offset)
 {
 	struct io_rings *rings;
-	size_t off, sq_array_size;
+	size_t off, cq_array_size, sq_array_size;
 
-	off = struct_size(rings, cqes, cq_entries);
-	if (off == SIZE_MAX)
+	off = io_uring_cq_offset();
+	cq_array_size = array_size(sizeof(struct io_uring_cqe), cq_entries);
+	if (cq_array_size == SIZE_MAX)
+		return SIZE_MAX;
+
+	if (check_add_overflow(off, cq_array_size, &off))
 		return SIZE_MAX;
 	if (flags & IORING_SETUP_CQE32) {
 		if (check_shl_overflow(off, 1, &off))
@@ -3619,8 +3622,13 @@ static __cold int io_allocate_scq_urings(struct io_ring_ctx *ctx,
 	ret = io_create_region(ctx, &ctx->ring_region, &rd, IORING_OFF_CQ_RING);
 	if (ret)
 		return ret;
-	ctx->rings = rings = io_region_get_ptr(&ctx->ring_region);
+	rings = io_region_get_ptr(&ctx->ring_region);
 
+	if (IS_ERR(rings))
+		return PTR_ERR(rings);
+
+	ctx->rings = rings;
+	ctx->cqes = (struct io_uring_cqe *)((char *)rings + io_uring_cq_offset());
 	if (!(ctx->flags & IORING_SETUP_NO_SQARRAY))
 		ctx->sq_array = (u32 *)((char *)rings + sq_array_offset);
 	rings->sq_ring_mask = p->sq_entries - 1;
@@ -3775,7 +3783,7 @@ int io_uring_fill_params(unsigned entries, struct io_uring_params *p)
 	p->cq_off.ring_mask = offsetof(struct io_rings, cq_ring_mask);
 	p->cq_off.ring_entries = offsetof(struct io_rings, cq_ring_entries);
 	p->cq_off.overflow = offsetof(struct io_rings, cq_overflow);
-	p->cq_off.cqes = offsetof(struct io_rings, cqes);
+	p->cq_off.cqes = io_uring_cq_offset();
 	p->cq_off.flags = offsetof(struct io_rings, cq_flags);
 	p->cq_off.resv1 = 0;
 	if (!(p->flags & IORING_SETUP_NO_MMAP))
