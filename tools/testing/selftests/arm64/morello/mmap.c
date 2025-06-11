@@ -7,7 +7,6 @@
 #include <linux/mman.h>
 #include <linux/errno.h>
 #include <linux/fs.h>
-#include <linux/fcntl.h>
 #include <cheriintrin.h>
 #include "freestanding.h"
 
@@ -65,13 +64,12 @@ void syscall_mmap2(void)
 {
 	const char msg[] = "foo";
 	unsigned int msg_len = sizeof(msg); /* No need for the terminator */
-	const char *sample_file = "/limbo.dat";
 	void *addr;
 	int fd;
 	int retval;
 
 	/* create a sample file to map onto with mmap */
-	fd = syscall(__NR_openat, 0, sample_file, O_RDWR | O_CREAT, FILE_PERM);
+	fd = tmpfd();
 
 	ASSERT_GE(fd, 0);
 

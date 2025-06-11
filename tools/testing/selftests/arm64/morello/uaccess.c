@@ -5,11 +5,8 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#include <asm/fcntl.h>
-#include <asm-generic/errno-base.h>
 #include <cheriintrin.h>
 #include <linux/errno.h>
-#include <linux/fs.h>
 #include <linux/futex.h>
 #include <linux/mman.h>
 #include <linux/signal.h>
@@ -22,13 +19,10 @@
 
 #define MSG_LEN 16
 
-static const char file[] = "/my_file.txt";
-
 static inline int fsopen(const char *string)
 {
 	return syscall(__NR_fsopen, string);
 }
-
 
 static inline int futex_wake_op(uint32_t *uaddr, uint32_t *uaddr2, uint32_t val3)
 {
@@ -46,11 +40,6 @@ struct sockaddr {
 static int getsockname(int socket, struct sockaddr *sockaddr, int *socklen)
 {
 	return syscall(__NR_getsockname, socket, sockaddr, socklen);
-}
-
-static int open_file(void)
-{
-	return syscall(__NR_openat, 0, file, O_RDWR | O_CREAT, 0666);
 }
 
 static inline int preadv(int fd, struct iovec *iov, int iovcnt)
@@ -181,7 +170,7 @@ TEST(test_explicit_iov_iter)
 	int iovcnt = sizeof(iov) / sizeof(struct iovec);
 	int fd;
 
-	fd = open_file();
+	fd = tmpfd();
 	ASSERT_NE(fd, -1);
 
 	iov[0].iov_base = (void *)write_buf0;
