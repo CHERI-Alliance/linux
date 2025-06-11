@@ -7,6 +7,13 @@
 
 #ifdef CONFIG_ARM64_MORELLO
 
+/* Opaque type representing a capability, should not be accessed directly */
+typedef struct {
+	__uint128_t __val;
+} cap128_t;
+
+#define ZERO_CAP (cap128_t){ .__val = 0 }
+
 /* Must be called with IRQs disabled */
 void morello_cpu_setup(void);
 
