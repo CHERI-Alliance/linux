@@ -600,6 +600,19 @@ SYSCALL_DEFINE3(ioctl, unsigned int, fd, unsigned int, cmd, user_uintptr_t, arg)
 }
 
 #ifdef CONFIG_COMPAT
+static inline long compat_ioctl(struct file *file, unsigned int cmd,
+				unsigned long arg, bool is_pointer_arg)
+{
+	user_uintptr_t __arg = is_pointer_arg ?
+				(user_uintptr_t)compat_ptr(arg) :
+				(user_uintptr_t)arg;
+
+	if (!file->f_op->unlocked_ioctl)
+		return -ENOIOCTLCMD;
+
+	return file->f_op->unlocked_ioctl(file, cmd, __arg);
+}
+
 /**
  * compat_ptr_ioctl - generic implementation of .compat_ioctl file operation
  * @file: The file to operate on.
@@ -628,12 +641,15 @@ SYSCALL_DEFINE3(ioctl, unsigned int, fd, unsigned int, cmd, user_uintptr_t, arg)
  */
 long compat_ptr_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
-	if (!file->f_op->unlocked_ioctl)
-		return -ENOIOCTLCMD;
-
-	return file->f_op->unlocked_ioctl(file, cmd, (user_uintptr_t)compat_ptr(arg));
+	return compat_ioctl(file, cmd, arg, true);
 }
 EXPORT_SYMBOL(compat_ptr_ioctl);
+
+long compat_noptr_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+{
+	return compat_ioctl(file, cmd, arg, false);
+}
+EXPORT_SYMBOL(compat_noptr_ioctl);
 
 COMPAT_SYSCALL_DEFINE3(ioctl, unsigned int, fd, unsigned int, cmd,
 		       compat_ulong_t, arg)
