@@ -2071,9 +2071,9 @@ static int processcompl(struct async *as, void __user *arg)
 	}
 
 #ifdef CONFIG_CHERI_PURECAP_UABI
-	if (put_user(addr, (void * __capability * __capability)arg))
+	if (put_user_ptr(addr, (void * __capability * __capability)arg))
 #else
-	if (put_user(addr, (void __user * __user *)arg))
+	if (put_user_ptr(addr, (void __user * __user *)arg))
 #endif
 		return -EFAULT;
 	return 0;
