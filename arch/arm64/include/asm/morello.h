@@ -17,26 +17,19 @@ struct user_cap;
 
 #ifdef CONFIG_ARM64_MORELLO
 
-/* Opaque type representing a capability, should not be accessed directly */
-typedef struct {
-	__uint128_t __val;
-} cap128_t;
-
-#define ZERO_CAP (cap128_t){ .__val = 0 }
-
 /* Morello registers to be saved in thread_struct */
 struct morello_state {
-	cap128_t	ctpidr;
-	cap128_t	rctpidr;
-	cap128_t	ddc;
-	cap128_t	rddc;
-	cap128_t	cid;
+	uintcap_t	ctpidr;
+	uintcap_t	rctpidr;
+	uintcap_t	ddc;
+	uintcap_t	rddc;
+	uintcap_t	cid;
 	unsigned long	cctlr;
 };
 
-u64 morello_cap_get_lo_val(const cap128_t *cap);
-void morello_cap_get_val_tag(const cap128_t *cap, __uint128_t *val, u8 *tag);
-void morello_build_cap_from_root_cap(cap128_t *cap, const __uint128_t *val,
+u64 morello_cap_get_lo_val(const uintcap_t *cap);
+void morello_cap_get_val_tag(const uintcap_t *cap, __uint128_t *val, u8 *tag);
+void morello_build_cap_from_root_cap(uintcap_t *cap, const __uint128_t *val,
 				    u8 tag);
 
 /*
@@ -49,8 +42,8 @@ int morello_ptrace_access_remote_cap(struct task_struct *tsk,
 				     unsigned int gup_flags);
 
 /* Low-level uacces helpers, must not be called directly */
-void __morello_get_user_cap_asm(cap128_t *x, const cap128_t __user *ptr, int *err);
-void __morello_put_user_cap_asm(const cap128_t *x, cap128_t __user *ptr, int *err);
+void __morello_get_user_cap_asm(uintcap_t *x, const uintcap_t __user *ptr, int *err);
+void __morello_put_user_cap_asm(const uintcap_t *x, uintcap_t __user *ptr, int *err);
 
 #endif /* CONFIG_ARM64_MORELLO */
 

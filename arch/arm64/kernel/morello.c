@@ -19,15 +19,15 @@
 #include <asm/ptrace.h>
 
 /* Private functions implemented in morello.S */
-void __morello_cap_lo_hi_tag(const cap128_t *cap, u64 *lo_val, u64 *hi_val,
+void __morello_cap_lo_hi_tag(const uintcap_t *cap, u64 *lo_val, u64 *hi_val,
 			     u8 *tag);
-void __morello_cap_cpy(cap128_t *dst, const cap128_t *src);
-void __morello_merge_c_x(cap128_t *creg, u64 xreg);
-bool __morello_cap_has_executive(const cap128_t *cap);
-void __morello_get_ddc(cap128_t *dst);
+void __morello_cap_cpy(uintcap_t *dst, const uintcap_t *src);
+void __morello_merge_c_x(uintcap_t *creg, u64 xreg);
+bool __morello_cap_has_executive(const uintcap_t *cap);
+void __morello_get_ddc(uintcap_t *dst);
 
 /* Not defined as static because morello.S refers to it */
-cap128_t morello_root_cap __ro_after_init;
+uintcap_t morello_root_cap __ro_after_init;
 
 /* DDC_ELx reset value (low/high 64 bits), as defined in the Morello spec */
 #define DDC_RESET_VAL_LOW_64	0x0
@@ -74,7 +74,7 @@ void morello_setup_signal_return(struct pt_regs *regs)
 	__morello_cap_cpy(&regs->cregs[30], &morello_root_cap);
 }
 
-static char *format_cap(char *buf, size_t size, const cap128_t *cap)
+static char *format_cap(char *buf, size_t size, const uintcap_t *cap)
 {
 	u64 lo_val, hi_val;
 	u8 tag;
@@ -120,11 +120,11 @@ static int access_remote_cap(struct task_struct *tsk, struct mm_struct *mm,
 	int write = gup_flags & FOLL_WRITE;
 	struct vm_area_struct *vma;
 	struct page *page;
-	cap128_t *kaddr;
+	uintcap_t *kaddr;
 	int ret;
 
 	/* This guarantees that the access will not cross pages */
-	if ((addr & (sizeof(cap128_t) - 1)) != 0)
+	if ((addr & (sizeof(uintcap_t) - 1)) != 0)
 		return -EINVAL;
 
 	if (mmap_read_lock_killable(mm))
@@ -136,7 +136,7 @@ static int access_remote_cap(struct task_struct *tsk, struct mm_struct *mm,
 		goto out_unlock;
 	}
 
-	kaddr = (cap128_t *)(page_address(page) + offset_in_page(addr));
+	kaddr = (uintcap_t *)(page_address(page) + offset_in_page(addr));
 
 	if (write) {
 		/*
@@ -155,7 +155,7 @@ static int access_remote_cap(struct task_struct *tsk, struct mm_struct *mm,
 		morello_build_cap_from_root_cap(kaddr, &user_cap->val,
 						user_cap->tag);
 		flush_ptrace_access(vma, (unsigned long)kaddr,
-				    (unsigned long)kaddr + sizeof(cap128_t));
+				    (unsigned long)kaddr + sizeof(uintcap_t));
 		set_page_dirty_lock(page);
 	} else {
 		morello_cap_get_val_tag(kaddr, &user_cap->val, &user_cap->tag);
@@ -199,7 +199,7 @@ int morello_ptrace_access_remote_cap(struct task_struct *tsk,
 void morello_merge_cap_regs(struct pt_regs *regs)
 {
 	int i;
-	cap128_t *active_csp;
+	uintcap_t *active_csp;
 
 	if (__morello_cap_has_executive(&regs->pcc))
 		active_csp = &regs->csp;
@@ -218,8 +218,8 @@ void morello_flush_cap_regs_to_64_regs(struct task_struct *tsk)
 	struct pt_regs *regs = task_pt_regs(tsk);
 	struct morello_state *morello_state =
 		&tsk->thread.morello_user_state;
-	const cap128_t *active_csp;
-	const cap128_t *active_ctpidr;
+	const uintcap_t *active_csp;
+	const uintcap_t *active_ctpidr;
 	int i;
 
 	if (__morello_cap_has_executive(&regs->pcc)) {
@@ -240,7 +240,7 @@ void morello_flush_cap_regs_to_64_regs(struct task_struct *tsk)
 }
 
 
-static void __init check_root_cap(const cap128_t *cap)
+static void __init check_root_cap(const uintcap_t *cap)
 {
 	u64 lo_val, hi_val;
 	u8 tag;
