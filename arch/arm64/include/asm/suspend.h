@@ -2,7 +2,10 @@
 #ifndef __ASM_SUSPEND_H
 #define __ASM_SUSPEND_H
 
+#include <asm/morello.h>
+
 #define NR_CTX_REGS 13
+#define NR_CTX_CREGS 6
 #define NR_CALLEE_SAVED_REGS 12
 
 /*
@@ -16,6 +19,9 @@ struct cpu_suspend_ctx {
 	 */
 	u64 ctx_regs[NR_CTX_REGS];
 	u64 sp;
+#ifdef CONFIG_ARM64_MORELLO
+	cap128_t ctx_cregs[NR_CTX_CREGS];
+#endif
 } __aligned(16);
 
 /*
