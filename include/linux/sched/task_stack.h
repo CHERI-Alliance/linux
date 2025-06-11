@@ -28,7 +28,7 @@ static __always_inline void *task_stack_page(const struct task_struct *task)
 static __always_inline unsigned long *end_of_stack(const struct task_struct *task)
 {
 #ifdef CONFIG_STACK_GROWSUP
-	return (unsigned long *)((unsigned long)task->stack + THREAD_SIZE) - 1;
+	return (unsigned long *)((uintptr_t)task->stack + THREAD_SIZE) - 1;
 #else
 	return task->stack;
 #endif
@@ -56,7 +56,7 @@ static inline void setup_thread_stack(struct task_struct *p, struct task_struct 
 static inline unsigned long *end_of_stack(const struct task_struct *p)
 {
 #ifdef CONFIG_STACK_GROWSUP
-	return (unsigned long *)((unsigned long)task_thread_info(p) + THREAD_SIZE) - 1;
+	return (unsigned long *)((uintptr_t)task_thread_info(p) + THREAD_SIZE) - 1;
 #else
 	return (unsigned long *)(task_thread_info(p) + 1);
 #endif
