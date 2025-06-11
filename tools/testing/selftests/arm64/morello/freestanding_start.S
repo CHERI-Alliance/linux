@@ -60,6 +60,8 @@
 /* store the initial stack pointer here (with argv, envp, etc) */
 VARIABLE(stack_from_kernel, 16)
 VARIABLE(temp_stack, TEMP_STACK_SIZE)
+/* this allows ASSERTs in nested functions (unlike kselftest) */
+VARIABLE(__cur_test, 16)
 
 
 .text
