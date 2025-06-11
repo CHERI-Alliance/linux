@@ -51,23 +51,13 @@ typedef __kernel_gid32_t	gid_t;
 typedef __kernel_uid16_t        uid16_t;
 typedef __kernel_gid16_t        gid16_t;
 
+#ifdef __CHERI_PURE_CAPABILITY__
+typedef __uintcap_t		uintptr_t;
+typedef __intcap_t		intptr_t;
+#else
 typedef unsigned long		uintptr_t;
 typedef long			intptr_t;
-typedef unsigned long		user_uintptr_t;
-typedef long			user_intptr_t;
-static inline unsigned long
-__c_ua(uintptr_t ptr)
-{
-	return (unsigned long __force)ptr;
-}
-
-#ifdef __PTRADDR_TYPE__
-typedef __PTRADDR_TYPE__	ptraddr_t;
-#else
-typedef unsigned long		ptraddr_t;
 #endif
-typedef unsigned long		__ptraddr_t;
-typedef u64			__ptraddr64_t;
 
 #ifdef CONFIG_CHERI_PURECAP_UABI
 typedef __uintcap_t		user_uintptr_t;
@@ -82,10 +72,18 @@ typedef __PTRADDR_TYPE__	ptraddr_t;
 #else
 typedef unsigned long		ptraddr_t;
 #endif
+typedef unsigned long		__ptraddr_t;
+typedef u64			__ptraddr64_t;
 
 #ifdef __CHERI__
 typedef __uintcap_t		uintcap_t;
 #endif
+
+static inline unsigned long
+__c_ua(uintptr_t ptr)
+{
+	return (unsigned long __force)ptr;
+}
 
 #ifdef CONFIG_HAVE_UID16
 /* This is defined by arch/{arch}/include/asm/posix_types.h */
