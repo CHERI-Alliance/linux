@@ -129,11 +129,14 @@ void morello_thread_init_user(void)
 {
 	struct morello_state *morello_state = &current->thread.morello_user_state;
 	uintcap_t ddc;
+	u64 cctlr;
 
 	if (is_pure_task()) {
 		ddc = 0;
+		cctlr = CCTLR_ELx_SBL;
 	} else {
 		ddc = cheri_user_root_allperms_cap;
+		cctlr = 0;
 	}
 
 	/*
@@ -159,8 +162,8 @@ void morello_thread_init_user(void)
 	write_cap_sysreg(0, cid_el0);
 	morello_state->cid = (uintcap_t)0;
 
-	write_sysreg(0, cctlr_el0);
-	morello_state->cctlr = 0;
+	write_sysreg(cctlr, cctlr_el0);
+	morello_state->cctlr = cctlr;
 }
 
 void morello_thread_save_user_state(struct task_struct *tsk)
