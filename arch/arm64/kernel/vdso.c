@@ -143,7 +143,7 @@ up_fail:
 	return PTR_ERR(ret);
 }
 
-#ifdef CONFIG_COMPAT
+#ifdef CONFIG_COMPAT32
 /*
  * Create and map the vectors page for AArch32 tasks.
  */
@@ -317,7 +317,7 @@ out:
 	mmap_write_unlock(mm);
 	return ret;
 }
-#endif /* CONFIG_COMPAT */
+#endif /* CONFIG_COMPAT32 */
 
 static struct vm_special_mapping aarch64_vdso_map __ro_after_init = {
 	.name	= "[vdso]",
