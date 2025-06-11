@@ -260,10 +260,10 @@ struct drm_mode_modeinfo {
 };
 
 struct drm_mode_card_res {
-	__u64 fb_id_ptr;
-	__u64 crtc_id_ptr;
-	__u64 connector_id_ptr;
-	__u64 encoder_id_ptr;
+	__kernel_uintptr_t fb_id_ptr;
+	__kernel_uintptr_t crtc_id_ptr;
+	__kernel_uintptr_t connector_id_ptr;
+	__kernel_uintptr_t encoder_id_ptr;
 	__u32 count_fbs;
 	__u32 count_crtcs;
 	__u32 count_connectors;
@@ -354,11 +354,11 @@ struct drm_mode_get_plane {
 	 * @format_type_ptr: Pointer to ``__u32`` array of formats that are
 	 * supported by the plane. These formats do not require modifiers.
 	 */
-	__u64 format_type_ptr;
+	__kernel_uintptr_t format_type_ptr;
 };
 
 struct drm_mode_get_plane_res {
-	__u64 plane_id_ptr;
+	__kernel_uintptr_t plane_id_ptr;
 	__u32 count_planes;
 };
 
@@ -457,13 +457,13 @@ enum drm_mode_subconnector {
  */
 struct drm_mode_get_connector {
 	/** @encoders_ptr: Pointer to ``__u32`` array of object IDs. */
-	__u64 encoders_ptr;
+	__kernel_uintptr_t encoders_ptr;
 	/** @modes_ptr: Pointer to struct drm_mode_modeinfo array. */
-	__u64 modes_ptr;
+	__kernel_uintptr_t modes_ptr;
 	/** @props_ptr: Pointer to ``__u32`` array of property IDs. */
-	__u64 props_ptr;
+	__kernel_uintptr_t props_ptr;
 	/** @prop_values_ptr: Pointer to ``__u64`` array of property values. */
-	__u64 prop_values_ptr;
+	__kernel_uintptr_t prop_values_ptr;
 
 	/** @count_modes: Number of modes. */
 	__u32 count_modes;
@@ -589,9 +589,9 @@ struct drm_mode_property_enum {
  */
 struct drm_mode_get_property {
 	/** @values_ptr: Pointer to a ``__u64`` array. */
-	__u64 values_ptr;
+	__kernel_uintptr_t values_ptr;
 	/** @enum_blob_ptr: Pointer to a struct drm_mode_property_enum array. */
-	__u64 enum_blob_ptr;
+	__kernel_uintptr_t enum_blob_ptr;
 
 	/**
 	 * @prop_id: Object ID of the property which should be retrieved. Set
@@ -632,8 +632,8 @@ struct drm_mode_connector_set_property {
 #define DRM_MODE_OBJECT_ANY 0
 
 struct drm_mode_obj_get_properties {
-	__u64 props_ptr;
-	__u64 prop_values_ptr;
+	__kernel_uintptr_t props_ptr;
+	__kernel_uintptr_t prop_values_ptr;
 	__u32 count_props;
 	__u32 obj_id;
 	__u32 obj_type;
@@ -649,7 +649,7 @@ struct drm_mode_obj_set_property {
 struct drm_mode_get_blob {
 	__u32 blob_id;
 	__u32 length;
-	__u64 data;
+	__kernel_uintptr_t data;
 };
 
 struct drm_mode_fb_cmd {
