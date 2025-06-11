@@ -590,7 +590,7 @@ int drm_mode_list_lessees_ioctl(struct drm_device *dev,
 			       void *data, struct drm_file *lessor_priv)
 {
 	struct drm_mode_list_lessees *arg = data;
-	__u32 __user *lessee_ids = (__u32 __user *) (uintptr_t) (arg->lessees_ptr);
+	__u32 __user *lessee_ids = uaddr_to_user_ptr(arg->lessees_ptr);
 	__u32 count_lessees = arg->count_lessees;
 	struct drm_master *lessor, *lessee;
 	int count;
@@ -638,7 +638,7 @@ int drm_mode_get_lease_ioctl(struct drm_device *dev,
 			     void *data, struct drm_file *lessee_priv)
 {
 	struct drm_mode_get_lease *arg = data;
-	__u32 __user *object_ids = (__u32 __user *) (uintptr_t) (arg->objects_ptr);
+	__u32 __user *object_ids = uaddr_to_user_ptr(arg->objects_ptr);
 	__u32 count_objects = arg->count_objects;
 	struct drm_master *lessee;
 	struct idr *object_idr;
