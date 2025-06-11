@@ -612,10 +612,10 @@ static int io_register_mem_region(struct io_ring_ctx *ctx, void __user *uarg)
 
 	if (io_region_is_set(&ctx->param_region))
 		return -EBUSY;
-	if (copy_from_user(&reg, reg_uptr, sizeof(reg)))
+	if (copy_from_user_with_ptr(&reg, reg_uptr, sizeof(reg)))
 		return -EFAULT;
-	rd_uptr = u64_to_user_ptr(reg.region_uptr);
-	if (copy_from_user(&rd, rd_uptr, sizeof(rd)))
+	rd_uptr = (struct io_uring_region_desc __user *)reg.region_uptr;
+	if (copy_from_user_with_ptr(&rd, rd_uptr, sizeof(rd)))
 		return -EFAULT;
 	if (memchr_inv(&reg.__resv, 0, sizeof(reg.__resv)))
 		return -EINVAL;
@@ -635,7 +635,7 @@ static int io_register_mem_region(struct io_ring_ctx *ctx, void __user *uarg)
 					 IORING_MAP_OFF_PARAM_REGION);
 	if (ret)
 		return ret;
-	if (copy_to_user(rd_uptr, &rd, sizeof(rd))) {
+	if (copy_to_user_with_ptr(rd_uptr, &rd, sizeof(rd))) {
 		io_free_region(ctx, &ctx->param_region);
 		return -EFAULT;
 	}

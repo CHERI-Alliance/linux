@@ -62,6 +62,43 @@ struct compat_io_uring_cqe {
 	__u64 big_cqe[];
 };
 
+struct compat_io_sqring_offsets {
+	__u32 head;
+	__u32 tail;
+	__u32 ring_mask;
+	__u32 ring_entries;
+	__u32 flags;
+	__u32 dropped;
+	__u32 array;
+	__u32 resv1;
+	__u64 user_addr;
+};
+
+struct compat_io_cqring_offsets {
+	__u32 head;
+	__u32 tail;
+	__u32 ring_mask;
+	__u32 ring_entries;
+	__u32 overflow;
+	__u32 cqes;
+	__u32 flags;
+	__u32 resv1;
+	__u64 user_addr;
+};
+
+struct compat_io_uring_params {
+	__u32 sq_entries;
+	__u32 cq_entries;
+	__u32 flags;
+	__u32 sq_thread_cpu;
+	__u32 sq_thread_idle;
+	__u32 features;
+	__u32 wq_fd;
+	__u32 resv[3];
+	struct compat_io_sqring_offsets sq_off;
+	struct compat_io_cqring_offsets cq_off;
+};
+
 struct compat_io_uring_files_update {
 	__u32 offset;
 	__u32 resv;

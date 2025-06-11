@@ -521,7 +521,7 @@ struct io_sqring_offsets {
 	__u32 dropped;
 	__u32 array;
 	__u32 resv1;
-	__u64 user_addr;
+	__kernel_uintptr_t user_addr;
 };
 
 /*
@@ -540,7 +540,7 @@ struct io_cqring_offsets {
 	__u32 cqes;
 	__u32 flags;
 	__u32 resv1;
-	__u64 user_addr;
+	__kernel_uintptr_t user_addr;
 };
 
 /*
@@ -694,7 +694,7 @@ enum {
 };
 
 struct io_uring_region_desc {
-	__u64 user_addr;
+	__kernel_uintptr_t user_addr;
 	__u64 size;
 	__u32 flags;
 	__u32 id;
@@ -708,7 +708,7 @@ enum {
 };
 
 struct io_uring_mem_region_reg {
-	__u64 region_uptr; /* struct io_uring_region_desc * */
+	__kernel_uintptr_t region_uptr; /* struct io_uring_region_desc * */
 	__u64 flags;
 	__u64 __resv[2];
 };
