@@ -456,8 +456,9 @@ void run_clone3(struct clone3_fixture *data)
 		ASSERT_NE(parent_tid, 0);
 	}
 
-	if (args->flags & CLONE_CHILD_CLEARTID)
+	if (args->flags & CLONE_CHILD_CLEARTID) {
 		ASSERT_EQ(child_tid, 0);
+	}
 
 	munmap((void *)args->stack, STACK_SIZE);
 	if (args->flags & CLONE_SETTLS)
