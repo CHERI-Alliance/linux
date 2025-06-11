@@ -28,7 +28,7 @@ extern const syscall_entry_t sys_call_table[];
 
 
 #ifdef CONFIG_COMPAT
-extern const syscall_fn_t compat_sys_call_table[];
+extern const syscall_entry_t compat_sys_call_table[];
 #endif
 
 static inline int syscall_get_nr(struct task_struct *task,
