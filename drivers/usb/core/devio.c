@@ -1790,6 +1790,13 @@ static int proc_do_submiturb(struct usb_dev_state *ps, struct usbdevfs_urb *uurb
 		goto error;
 	}
 
+	if (as->usbm && (
+	    (is_in && !check_user_ptr_write(uurb->buffer, uurb->buffer_length)) ||
+	    (!is_in && !check_user_ptr_read(uurb->buffer, uurb->buffer_length)))) {
+		ret = -EFAULT;
+		goto error;
+	}
+
 	/* do not use SG buffers when memory mapped segments
 	 * are in use
 	 */
