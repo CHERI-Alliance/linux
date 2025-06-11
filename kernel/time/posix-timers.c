@@ -90,7 +90,7 @@ DEFINE_CLASS_IS_COND_GUARD(lock_timer);
 
 static struct timer_hash_bucket *hash_bucket(struct signal_struct *sig, unsigned int nr)
 {
-	return &timer_buckets[jhash2((u32 *)&sig, sizeof(sig) / sizeof(u32), nr) & timer_hashmask];
+	return &timer_buckets[jhash2((u32 *)(void *)&sig, sizeof(sig) / sizeof(u32), nr) & timer_hashmask];
 }
 
 static struct k_itimer *posix_timer_by_id(timer_t id)
@@ -578,7 +578,7 @@ SYSCALL_DEFINE3(timer_create, const clockid_t, which_clock,
 	if (timer_event_spec) {
 		sigevent_t event;
 
-		if (copy_from_user(&event, timer_event_spec, sizeof (event)))
+		if (copy_from_user_with_ptr(&event, timer_event_spec, sizeof(event)))
 			return -EFAULT;
 		return do_timer_create(which_clock, &event, created_timer_id);
 	}
@@ -1041,7 +1041,7 @@ static void posix_timer_delete(struct k_itimer *timer)
 	timer->it_signal_seq++;
 
 	scoped_guard (spinlock, &current->sighand->siglock) {
-		unsigned long sig = (uintptr_t)timer->it_signal | 1UL;
+		uintptr_t sig = (uintptr_t)timer->it_signal | 1UL;
 
 		WRITE_ONCE(timer->it_signal, (struct signal_struct *)sig);
 		hlist_del_rcu(&timer->list);
