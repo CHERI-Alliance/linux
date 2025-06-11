@@ -177,29 +177,6 @@ SYM_FUNC_START(morello_task_restore_user_tls)
 	ret
 SYM_FUNC_END(morello_task_restore_user_tls)
 
-SYM_FUNC_START(__morello_get_user_cap_asm)
-	user_ldst 1f, ldtr, c3, x1, 0
-	str	c3, [x0]
-	ret
-
-	// Exception fixups
-1:	mov	w3, #-EFAULT
-	str	w3, [x2]
-	str	czr, [x0]
-	ret
-SYM_FUNC_END(__morello_get_user_cap_asm)
-
-SYM_FUNC_START(__morello_put_user_cap_asm)
-	ldr	c3, [x0]
-	user_ldst 1f, sttr, c3, x1, 0
-	ret
-
-	// Exception fixups
-1:	mov	w3, #-EFAULT
-	str	w3, [x2]
-	ret
-SYM_FUNC_END(__morello_put_user_cap_asm)
-
 
 SYM_FUNC_START(__morello_cap_lo_hi_tag)
 	str	x0, [x1]
