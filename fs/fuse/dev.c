@@ -2667,7 +2667,7 @@ static long fuse_dev_ioctl_sync_init(struct file *file)
 }
 
 static long fuse_dev_ioctl(struct file *file, unsigned int cmd,
-			   unsigned long arg)
+			   user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 
