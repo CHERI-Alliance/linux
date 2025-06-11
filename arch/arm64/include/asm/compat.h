@@ -29,6 +29,7 @@ typedef u16		compat_ipc_pid_t;
 #include <linux/types.h>
 #include <linux/sched.h>
 #include <linux/sched/task_stack.h>
+#include <linux/cheri.h>
 
 #ifdef __AARCH64EB__
 #define COMPAT_UTS_MACHINE	"armv8b\0\0"
@@ -85,15 +86,17 @@ struct compat_statfs {
 	compat_long_t	f_spare[4];
 };
 
+#ifdef CONFIG_CHERI_PURECAP_UABI
 static inline void __user *compat_ptr(compat_uptr_t uptr)
 {
 	/*
-	 * TODO [PCuABI] - this should be done using the current user DDC, not
-	 * the root kernel one.
+	 * TODO [Morello] - this should be done using the current user DDC, not
+	 * the root user capability.
 	 */
-	return uaddr_to_user_ptr_safe(uptr);
+	return (void __user *)cheri_address_set(cheri_user_root_allperms_cap, uptr);
 }
 #define compat_ptr(uptr) compat_ptr(uptr)
+#endif
 
 #define compat_user_stack_pointer() (user_stack_pointer(task_pt_regs(current)))
 #ifdef CONFIG_COMPAT32
