@@ -27,10 +27,17 @@ struct compat_elf_prstatus_common
 	compat_pid_t			pr_ppid;
 	compat_pid_t			pr_pgrp;
 	compat_pid_t			pr_sid;
+#ifdef CONFIG_COMPAT64
+	struct __kernel_old_timeval	pr_utime;
+	struct __kernel_old_timeval	pr_stime;
+	struct __kernel_old_timeval	pr_cutime;
+	struct __kernel_old_timeval	pr_cstime;
+#else
 	struct old_timeval32		pr_utime;
 	struct old_timeval32		pr_stime;
 	struct old_timeval32		pr_cutime;
 	struct old_timeval32		pr_cstime;
+#endif
 };
 
 struct compat_elf_prpsinfo
