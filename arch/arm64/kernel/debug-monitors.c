@@ -282,7 +282,8 @@ bool try_handle_aarch32_break(struct pt_regs *regs)
 	u32 arm_instr;
 	u16 thumb_instr;
 	bool bp = false;
-	void __user *pc = uaddr_to_user_ptr_safe(instruction_pointer(regs));
+	const void __user *pc = make_user_ptr_for_read_uaccess(
+		instruction_pointer(regs), sizeof(arm_instr));
 
 	if (!compat_user_mode(regs))
 		return false;
