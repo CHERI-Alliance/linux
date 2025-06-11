@@ -38,7 +38,7 @@ uintcap_t morello_get_root_cap(void)
 	return morello_root_cap;
 }
 
-static void init_pc_pcc(struct pt_regs *regs, unsigned long pc)
+static void init_pcc(struct pt_regs *regs)
 {
 	/*
 	 * Set PCC to the root capability. There is no need to set its value to
@@ -46,7 +46,10 @@ static void init_pc_pcc(struct pt_regs *regs, unsigned long pc)
 	 * ret_to_user.
 	 */
 	regs->pcc = morello_root_cap;
+}
 
+static void update_regs_c64(struct pt_regs *regs, unsigned long pc)
+{
 	if (pc & 0x1) {
 		/*
 		 * The LSB of the entry point is set, start the thread in the
@@ -70,7 +73,8 @@ static void init_csp(struct pt_regs *regs)
 
 void morello_thread_start(struct pt_regs *regs, unsigned long pc)
 {
-	init_pc_pcc(regs, pc);
+	init_pcc(regs);
+	update_regs_c64(regs, pc);
 	init_csp(regs);
 }
 
@@ -90,7 +94,8 @@ void morello_setup_signal_return(struct pt_regs *regs)
 	 * point (this means in particular that the signal handler is invoked in
 	 * Executive).
 	 */
-	init_pc_pcc(regs, regs->pc);
+	init_pcc(regs);
+	update_regs_c64(regs, regs->pc);
 
 	/*
 	 * Also set CLR to a valid capability, to allow a C64 handler to return
