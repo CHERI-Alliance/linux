@@ -16,10 +16,16 @@
 #define __SYSCALL(x, y)
 #endif
 
+#ifndef __SYSCALL_RETPTR
+#define __SYSCALL_RETPTR __SYSCALL
+#endif
+
 #if __BITS_PER_LONG == 32 || defined(__SYSCALL_COMPAT)
 #define __SC_3264(_nr, _32, _64) __SYSCALL(_nr, _32)
+#define __SC_3264_RETPTR(_nr, _32, _64) __SYSCALL_RETPTR(_nr, _32)
 #else
 #define __SC_3264(_nr, _32, _64) __SYSCALL(_nr, _64)
+#define __SC_3264_RETPTR(_nr, _32, _64) __SYSCALL_RETPTR(_nr, _64)
 #endif
 
 #ifdef __SYSCALL_COMPAT
