@@ -147,4 +147,6 @@
 #define HWCAP3_MTE_STORE_ONLY		(1UL << 1)
 #define HWCAP3_LSFE		(1UL << 2)
 
+#define HWCAP3_MORELLO		(1UL << 63)
+
 #endif /* _UAPI__ASM_HWCAP_H */

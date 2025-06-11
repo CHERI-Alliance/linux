@@ -409,7 +409,18 @@ alternative_else_nop_endif
 	apply_ssbd 0, x0, x1
 	.endif
 
+#ifdef CONFIG_ARM64_MORELLO
+alternative_if_not ARM64_MORELLO
+	b	1f
+alternative_else_nop_endif
+
+	cvtp	c26, x21			// merge PC into PCC
+	msr	celr_el1, c26
+	b	2f
+1:
+#endif
 	msr	elr_el1, x21			// set up the return data
+2:
 	msr	spsr_el1, x22
 	ldp	x0, x1, [sp, #16 * 0]
 	ldp	x2, x3, [sp, #16 * 1]

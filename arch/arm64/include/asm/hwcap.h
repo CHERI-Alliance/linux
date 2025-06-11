@@ -180,6 +180,8 @@
 #define KERNEL_HWCAP_MTE_STORE_ONLY	__khwcap3_feature(MTE_STORE_ONLY)
 #define KERNEL_HWCAP_LSFE		__khwcap3_feature(LSFE)
 
+#define KERNEL_HWCAP_MORELLO		__khwcap3_feature(MORELLO)
+
 /*
  * This yields a mask that user programs can use to figure out what
  * instruction set this cpu supports.
