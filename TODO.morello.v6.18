@@ -1,0 +1,37 @@
+fault_info:
+	Conflicts with other ARM features
+NT_ARM_MORELLO:
+	New value
+HWCAP2_MORELLO:
+	New value HWCAP3_MORELLO
+CONFIG_AS_HAS_MOPS:
+	Needs fixing
+CONFIG_ARM64_GCS:
+	Crashes the morello compiler
+CONFIG_VMAP_STACK:
+	This is mandatory on arm64, now. However, the entry code does
+	magic trick (e.g. to detect stack overflows) that will invalidate
+	tags on capabilities.
+Conflicts ignored:
+	arch/arm64/lib/copy_page.S
+	arch/arm64/lib/copy_from_user.S
+	arch/arm64/lib/copy_to_user.S
+	arch/arm64/lib/copy_template.S
+arch/arm64/include/asm/uaccess.h:
+	Verify merge conflict resolution
+drivers/android/binder:
+	Conflicts ignored.
+arch/arm64/kernel/sys.c:
+	Check conflict resolution wrt. __SYSCALL_WITH_COMPAT
+lib/test_printf.c:
+	Dropped capability printing test. Must be converted to kunit.
+arch/arm64/boot/dts/arm:
+	Conflicts with upstream ignored.
+arch/arm64/Makefile:
+	VDSO build needs checking
+vdso linking:
+	Relocations are created. This likely needs fixing.
+MMF_PCUABI_RESERV:
+	Conflict with MMF_TOPDOWN, only works for 64-bit unsigned long
+unsafe_get_user_ptr/unsafe_put_user_ptr:
+	Implement them properly
