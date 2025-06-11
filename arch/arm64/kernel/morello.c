@@ -5,6 +5,7 @@
 
 #define pr_fmt(fmt) "morello: " fmt
 
+#include <linux/binfmts.h>
 #include <linux/cache.h>
 #include <linux/capability.h>
 #include <linux/cheri.h>
@@ -59,6 +60,14 @@ static void update_regs_c64(struct pt_regs *regs, unsigned long pc)
 	}
 }
 
+#ifdef CONFIG_CHERI_PURECAP_UABI
+static void set_creg_user_ptr(struct pt_regs *regs, int r, void __user *val)
+{
+	regs->regs[r] = user_ptr_addr(val);
+	regs->cregs[r] = (uintcap_t)val;
+}
+#endif
+
 void morello_cap_get_val_tag(uintcap_t cap, __uint128_t *val, u8 *tag)
 {
 	*((uintcap_t *)val) = cheri_tag_clear(cap);
@@ -86,8 +95,11 @@ uintcap_t morello_build_any_user_cap(const __uint128_t *val, u8 tag)
 	return cap;
 }
 
-void morello_thread_start(struct pt_regs *regs, unsigned long pc)
+int morello_thread_start(struct pt_regs *regs, unsigned long pc,
+			  struct linux_binprm *bprm)
 {
+	int ret = 0;
+
 	update_regs_c64(regs, pc);
 
 	/*
@@ -96,14 +108,21 @@ void morello_thread_start(struct pt_regs *regs, unsigned long pc)
 	 * register merging automatically happens during ret_to_user.
 	 */
 	if (is_pure_task()) {
-		/* TODO [PCuABI] - Adjust the bounds/permissions properly */
-		regs->pcc = cheri_user_root_cap;
+#ifdef CONFIG_CHERI_PURECAP_UABI
+		regs->pcc = (uintcap_t)bprm->pcuabi.pcc;
+		regs->csp = (uintcap_t)bprm->pcuabi.csp;
 
-		regs->csp = cheri_user_root_cap;
+		ret = bprm->argc; /* Set x0 */
+		set_creg_user_ptr(regs, 1, bprm->pcuabi.argv);
+		set_creg_user_ptr(regs, 2, bprm->pcuabi.envp);
+		set_creg_user_ptr(regs, 3, bprm->pcuabi.auxv);
+#endif
 	} else /* Hybrid */ {
 		regs->pcc = cheri_user_root_allperms_cap;
 		/* CSP is null-derived in hybrid */
 	}
+
+	return ret;
 }
 
 void morello_thread_init_user(void)

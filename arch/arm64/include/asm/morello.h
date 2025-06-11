@@ -10,6 +10,7 @@
 struct pt_regs;
 struct task_struct;
 struct user_cap;
+struct linux_binprm;
 
 #ifdef CONFIG_ARM64_MORELLO
 
@@ -60,7 +61,8 @@ void morello_thread_set_csp(struct pt_regs *regs, user_uintptr_t sp);
  * Any invalid usage will result in an error at link time.
  */
 
-void morello_thread_start(struct pt_regs *regs, unsigned long pc);
+int morello_thread_start(struct pt_regs *regs, unsigned long pc,
+			  struct linux_binprm *bprm);
 void morello_thread_init_user(void);
 void morello_thread_save_user_state(struct task_struct *tsk);
 void morello_thread_restore_user_state(struct task_struct *tsk);
