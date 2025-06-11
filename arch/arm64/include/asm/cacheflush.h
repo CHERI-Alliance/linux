@@ -104,6 +104,9 @@ static inline void flush_icache_range(unsigned long start, unsigned long end)
 }
 #define flush_icache_range flush_icache_range
 
+extern void flush_ptrace_access(struct vm_area_struct *vma, unsigned long start,
+                                unsigned long end);
+
 /*
  * Copy user data from/to a page which is mapped into a different
  * processes address space.  Really, we want to allow our "user
