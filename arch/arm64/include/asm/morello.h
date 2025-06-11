@@ -28,7 +28,15 @@ struct morello_state {
 };
 
 void morello_cap_get_val_tag(uintcap_t cap, __uint128_t *val, u8 *tag);
-uintcap_t morello_build_cap_from_root_cap(const __uint128_t *val, u8 tag);
+
+/*
+ * Builds a user capability from a 128-bit pattern + tag. The capability will
+ * be derived from cheri_user_root_allperms_cap and the object type will be
+ * preserved.
+ *
+ * This function should only be used for privileged operations (e.g. debug).
+ */
+uintcap_t morello_build_any_user_cap(const __uint128_t *val, u8 tag);
 
 uintcap_t morello_get_root_cap(void);
 

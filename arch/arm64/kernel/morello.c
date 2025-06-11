@@ -203,8 +203,8 @@ static int access_remote_cap(struct task_struct *tsk, struct mm_struct *mm,
 			goto out_put;
 		}
 
-		*kaddr = morello_build_cap_from_root_cap(&user_cap->val,
-							 user_cap->tag);
+		*kaddr = morello_build_any_user_cap(&user_cap->val,
+						    user_cap->tag);
 		flush_ptrace_access(vma, (unsigned long)kaddr,
 				    (unsigned long)kaddr + sizeof(uintcap_t));
 		set_page_dirty_lock(page);

@@ -22,7 +22,7 @@ SYM_FUNC_START(morello_cap_get_val_tag)
 	ret
 SYM_FUNC_END(morello_cap_get_val_tag)
 
-SYM_FUNC_START(morello_build_cap_from_root_cap)
+SYM_FUNC_START(morello_build_any_user_cap)
 	ldr	c0, [x0]
 	cbz	w1, 1f
 	/*
@@ -31,11 +31,8 @@ SYM_FUNC_START(morello_build_cap_from_root_cap)
 	 * In case c0 is sealed (non-zero object type), we need to extract the
 	 * object type first to be able to reseal it after BUILD. The CSEAL
 	 * instruction is used to cover the case where c0 was not sealed.
-	 *
-	 * TODO [PCuABI] - the user root capability should be used, not the
-	 * kernel one.
 	 */
-	adr_l	x3, morello_root_cap
+	adr_l	x3, cheri_user_root_allperms_cap
 	ldr	c3, [x3]
 
 	cpytype	c4, c3, c0
@@ -47,7 +44,7 @@ SYM_FUNC_START(morello_build_cap_from_root_cap)
 	clrtag	c0, c0
 2:
 	ret
-SYM_FUNC_END(morello_build_cap_from_root_cap)
+SYM_FUNC_END(morello_build_any_user_cap)
 
 SYM_FUNC_START(morello_capcpy)
 	mov	x3, x0
