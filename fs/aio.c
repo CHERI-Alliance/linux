@@ -481,6 +481,10 @@ static int aio_ring_mmap_prepare(struct vm_area_desc *desc)
 {
 	desc->vm_flags |= VM_DONTEXPAND;
 	desc->vm_ops = &aio_ring_vm_ops;
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	desc->vm_flags |= VM_READ_CAPS | VM_WRITE_CAPS;
+#endif
+
 	return 0;
 }
 
