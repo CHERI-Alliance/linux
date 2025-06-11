@@ -72,7 +72,8 @@ FUNCTION_START(_start)
 	mov	c22, c2
 	mov	c23, c3
 
-	/* call void __morello_process_cap_relocs(void) */
+	/* call void __morello_process_cap_relocs(char *auxv) */
+	mov	c0, c23
 	bl	__morello_process_cap_relocs
 	/* call void __morello_process_dynamic_relocs(char *auxv) */
 	mov	c0, c23
