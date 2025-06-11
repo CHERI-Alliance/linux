@@ -44,7 +44,7 @@
 #define elf_copy_to_user_stack(to, from, len)	copy_to_user(to, from, len)
 
 #undef elf_stack_put_user_ptr
-#define elf_stack_put_user_ptr(val, ptr)	put_user((elf_addr_t)val, ptr)
+#define elf_stack_put_user_ptr(val, ptr)	put_user(user_ptr_addr(val), ptr)
 
 #undef elf_stack_put_user
 #define elf_stack_put_user(val, ptr)		put_user(val, ptr)

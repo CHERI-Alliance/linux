@@ -69,13 +69,12 @@ extern Elf64_Dyn _DYNAMIC [];
 #define elf_copy_to_user_stack(to, from, len)	copy_to_user_with_ptr(to, from, len)
 #ifdef CONFIG_CHERI_PURECAP_UABI
 #define elf_stack_put_user_ptr(val, ptr)			\
-		put_user_ptr(elf_uaddr_to_user_ptr(val),	\
-			     (void * __capability * __capability)ptr)
+		put_user_ptr((val), (void * __capability * __capability)ptr)
 #define elf_stack_put_user(val, ptr)				\
 		put_user_ptr(as_user_ptr(val),			\
 			     (void * __capability * __capability)ptr)
 #else
-#define elf_stack_put_user_ptr(val, ptr)	put_user((elf_addr_t)val, ptr)
+#define elf_stack_put_user_ptr(val, ptr)	put_user(user_ptr_addr(val), ptr)
 #define elf_stack_put_user(val, ptr)		put_user(val, ptr)
 #endif
 
