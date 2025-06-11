@@ -98,7 +98,7 @@ static void paicrypt_event_destroy_cpu(struct perf_event *event, int cpu)
 		debug_sprintf_event(cfm_dbg, 4, "%s page %#lx save %p\n",
 				    __func__, (unsigned long)cpump->page,
 				    cpump->save);
-		free_page((unsigned long)cpump->page);
+		free_page((uintptr_t)cpump->page);
 		kvfree(cpump->save);
 		kfree(cpump);
 		mp->mapptr = NULL;
@@ -216,7 +216,7 @@ static struct paicrypt_map *paicrypt_busy(struct perf_event *event, int cpu)
 	cpump->save = kvmalloc_array(paicrypt_cnt + 1,
 				     sizeof(struct pai_userdata), GFP_KERNEL);
 	if (!cpump->save) {
-		free_page((unsigned long)cpump->page);
+		free_page((uintptr_t)cpump->page);
 		cpump->page = NULL;
 		goto free_paicrypt_map;
 	}

@@ -240,7 +240,7 @@ static ssize_t lkdtm_debugfs_entry(struct file *f,
 	if (!buf)
 		return -ENOMEM;
 	if (copy_from_user(buf, user_buf, count)) {
-		free_page((unsigned long) buf);
+		free_page((uintptr_t) buf);
 		return -EFAULT;
 	}
 	/* NULL-terminate and remove enter */
@@ -248,7 +248,7 @@ static ssize_t lkdtm_debugfs_entry(struct file *f,
 	strim(buf);
 
 	crashtype = find_crashtype(buf);
-	free_page((unsigned long)buf);
+	free_page((uintptr_t)buf);
 
 	if (!crashtype)
 		return -EINVAL;
@@ -290,7 +290,7 @@ static ssize_t lkdtm_debugfs_read(struct file *f, char __user *user_buf,
 
 	out = simple_read_from_buffer(user_buf, count, off,
 				      buf, n);
-	free_page((unsigned long) buf);
+	free_page((uintptr_t) buf);
 
 	return out;
 }
@@ -317,7 +317,7 @@ static ssize_t direct_entry(struct file *f, const char __user *user_buf,
 	if (!buf)
 		return -ENOMEM;
 	if (copy_from_user(buf, user_buf, count)) {
-		free_page((unsigned long) buf);
+		free_page((uintptr_t) buf);
 		return -EFAULT;
 	}
 	/* NULL-terminate and remove enter */
@@ -325,7 +325,7 @@ static ssize_t direct_entry(struct file *f, const char __user *user_buf,
 	strim(buf);
 
 	crashtype = find_crashtype(buf);
-	free_page((unsigned long) buf);
+	free_page((uintptr_t) buf);
 	if (!crashtype)
 		return -EINVAL;
 

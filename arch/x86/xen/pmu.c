@@ -531,7 +531,7 @@ fail:
 	else
 		pr_info_once("Could not initialize VPMU for cpu %d, error %d\n",
 			cpu, err);
-	free_pages((unsigned long)xenpmu_data, 0);
+	free_pages((uintptr_t)xenpmu_data, 0);
 }
 
 void xen_pmu_finish(int cpu)
@@ -547,6 +547,6 @@ void xen_pmu_finish(int cpu)
 
 	(void)HYPERVISOR_xenpmu_op(XENPMU_finish, &xp);
 
-	free_pages((unsigned long)per_cpu(xenpmu_shared, cpu).xenpmu_data, 0);
+	free_pages((uintptr_t)per_cpu(xenpmu_shared, cpu).xenpmu_data, 0);
 	per_cpu(xenpmu_shared, cpu).xenpmu_data = NULL;
 }

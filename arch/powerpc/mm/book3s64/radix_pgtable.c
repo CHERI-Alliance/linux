@@ -780,7 +780,7 @@ static void __meminit free_vmemmap_pages(struct page *page,
 		while (nr_pages--)
 			free_reserved_page(page++);
 	} else
-		free_pages((unsigned long)page_address(page), order);
+		free_pages((uintptr_t)page_address(page), order);
 }
 
 static void __meminit remove_pte_table(pte_t *pte_start, unsigned long addr,

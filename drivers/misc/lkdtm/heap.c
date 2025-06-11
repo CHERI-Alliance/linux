@@ -292,7 +292,7 @@ static void lkdtm_BUDDY_INIT_ON_ALLOC(void)
 	}
 
 	memset(first, 0xAB, PAGE_SIZE);
-	free_page((unsigned long)first);
+	free_page((uintptr_t)first);
 
 	val = (u8 *)__get_free_page(GFP_KERNEL);
 	if (!val) {
@@ -310,7 +310,7 @@ static void lkdtm_BUDDY_INIT_ON_ALLOC(void)
 		pr_err("FAIL: Slab was not initialized\n");
 		pr_expected_config_param(CONFIG_INIT_ON_ALLOC_DEFAULT_ON, "init_on_alloc");
 	}
-	free_page((unsigned long)val);
+	free_page((uintptr_t)val);
 }
 
 static void lkdtm_SLAB_FREE_DOUBLE(void)

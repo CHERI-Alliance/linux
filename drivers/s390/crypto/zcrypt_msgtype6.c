@@ -993,7 +993,7 @@ static long zcrypt_msgtype6_modexpo(struct zcrypt_queue *zq,
 	}
 
 out_free:
-	free_page((unsigned long)ap_msg->msg);
+	free_page((uintptr_t)ap_msg->msg);
 	ap_msg->msg = NULL;
 	return rc;
 }
@@ -1040,7 +1040,7 @@ static long zcrypt_msgtype6_modexpo_crt(struct zcrypt_queue *zq,
 	}
 
 out_free:
-	free_page((unsigned long)ap_msg->msg);
+	free_page((uintptr_t)ap_msg->msg);
 	ap_msg->msg = NULL;
 	return rc;
 }

@@ -467,7 +467,7 @@ dasd_diag_check_device(struct dasd_device *device)
 out_bio:
 	kfree(bio);
 out_label:
-	free_page((long) label);
+	free_page((uintptr_t) label);
 out:
 	if (rc) {
 		device->block = NULL;

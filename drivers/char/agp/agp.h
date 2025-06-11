@@ -230,7 +230,7 @@ void agp3_generic_cleanup(void);
 #define alloc_gatt_pages(order)		\
 	((char *)__get_free_pages(GFP_KERNEL, (order)))
 #define free_gatt_pages(table, order)	\
-	free_pages((unsigned long)(table), (order))
+	free_pages((uintptr_t)(table), (order))
 
 /* aperture sizes have been standardised since v3 */
 #define AGP_GENERIC_SIZES_ENTRIES 11

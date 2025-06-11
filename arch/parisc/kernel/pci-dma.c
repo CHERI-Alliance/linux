@@ -432,7 +432,7 @@ void arch_dma_free(struct device *dev, size_t size, void *vaddr,
 	unmap_uncached_pages((unsigned long)vaddr, size);
 	pcxl_free_range((unsigned long)vaddr, size);
 
-	free_pages((unsigned long)__va(dma_handle), order);
+	free_pages((uintptr_t)__va(dma_handle), order);
 }
 
 void arch_sync_dma_for_device(phys_addr_t paddr, size_t size,

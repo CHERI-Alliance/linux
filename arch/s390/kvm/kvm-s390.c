@@ -3319,7 +3319,7 @@ static void sca_dispose(struct kvm *kvm)
 	if (kvm->arch.use_esca)
 		free_pages_exact(kvm->arch.sca, sizeof(struct esca_block));
 	else
-		free_page((unsigned long)(kvm->arch.sca));
+		free_page((uintptr_t)(kvm->arch.sca));
 	kvm->arch.sca = NULL;
 }
 
@@ -3472,7 +3472,7 @@ int kvm_arch_init_vm(struct kvm *kvm, unsigned long type)
 
 	return 0;
 out_err:
-	free_page((unsigned long)kvm->arch.sie_page2);
+	free_page((uintptr_t)kvm->arch.sie_page2);
 	debug_unregister(kvm->arch.dbf);
 	sca_dispose(kvm);
 	KVM_EVENT(3, "creation of vm failed: %d", rc);
@@ -3499,7 +3499,7 @@ void kvm_arch_vcpu_destroy(struct kvm_vcpu *vcpu)
 	/* We can not hold the vcpu mutex here, we are already dying */
 	if (kvm_s390_pv_cpu_get_handle(vcpu))
 		kvm_s390_pv_destroy_cpu(vcpu, &rc, &rrc);
-	free_page((unsigned long)(vcpu->arch.sie_block));
+	free_page((uintptr_t)(vcpu->arch.sie_block));
 }
 
 void kvm_arch_destroy_vm(struct kvm *kvm)
@@ -3525,7 +3525,7 @@ void kvm_arch_destroy_vm(struct kvm *kvm)
 		mmu_notifier_unregister(&kvm->arch.pv.mmu_notifier, kvm->mm);
 
 	debug_unregister(kvm->arch.dbf);
-	free_page((unsigned long)kvm->arch.sie_page2);
+	free_page((uintptr_t)kvm->arch.sie_page2);
 	if (!kvm_is_ucontrol(kvm))
 		gmap_remove(kvm->arch.gmap);
 	kvm_s390_destroy_adapters(kvm);
@@ -3650,7 +3650,7 @@ static int sca_switch_to_extended(struct kvm *kvm)
 	write_unlock(&kvm->arch.sca_lock);
 	kvm_s390_vcpu_unblock_all(kvm);
 
-	free_page((unsigned long)old_sca);
+	free_page((uintptr_t)old_sca);
 
 	VM_EVENT(kvm, 2, "Switched to ESCA (0x%p -> 0x%p)",
 		 old_sca, kvm->arch.sca);
@@ -3856,7 +3856,7 @@ static void kvm_s390_vcpu_crypto_setup(struct kvm_vcpu *vcpu)
 
 void kvm_s390_vcpu_unsetup_cmma(struct kvm_vcpu *vcpu)
 {
-	free_page((unsigned long)phys_to_virt(vcpu->arch.sie_block->cbrlo));
+	free_page((uintptr_t)phys_to_virt(vcpu->arch.sie_block->cbrlo));
 	vcpu->arch.sie_block->cbrlo = 0;
 }
 
@@ -4044,7 +4044,7 @@ out_ucontrol_uninit:
 	if (kvm_is_ucontrol(vcpu->kvm))
 		gmap_remove(vcpu->arch.gmap);
 out_free_sie_block:
-	free_page((unsigned long)(vcpu->arch.sie_block));
+	free_page((uintptr_t)(vcpu->arch.sie_block));
 	return rc;
 }
 

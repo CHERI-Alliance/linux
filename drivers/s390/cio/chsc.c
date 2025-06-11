@@ -949,11 +949,11 @@ static void cub_free(struct channel_subsystem *css)
 	int i;
 
 	for (i = 0; i < CSS_NUM_CUB_PAGES; i++) {
-		free_page((unsigned long)css->cub[i]);
+		free_page((uintptr_t)css->cub[i]);
 		css->cub[i] = NULL;
 	}
 	for (i = 0; i < CSS_NUM_ECUB_PAGES; i++) {
-		free_page((unsigned long)css->ecub[i]);
+		free_page((uintptr_t)css->ecub[i]);
 		css->ecub[i] = NULL;
 	}
 }
@@ -1153,16 +1153,16 @@ int __init chsc_init(void)
 		goto out_err;
 	return ret;
 out_err:
-	free_page((unsigned long)chsc_page);
-	free_page((unsigned long)sei_page);
+	free_page((uintptr_t)chsc_page);
+	free_page((uintptr_t)sei_page);
 	return ret;
 }
 
 void __init chsc_init_cleanup(void)
 {
 	crw_unregister_handler(CRW_RSC_CSS);
-	free_page((unsigned long)chsc_page);
-	free_page((unsigned long)sei_page);
+	free_page((uintptr_t)chsc_page);
+	free_page((uintptr_t)sei_page);
 }
 
 int __chsc_enable_facility(struct chsc_sda_area *sda_area, int operation_code)

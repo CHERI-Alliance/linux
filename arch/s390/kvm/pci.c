@@ -87,7 +87,7 @@ static int zpci_setup_aipb(u8 nisc)
 	return 0;
 
 free_gait:
-	free_pages((unsigned long)aift->gait, size);
+	free_pages((uintptr_t)aift->gait, size);
 free_sbv:
 	airq_iv_release(aift->sbv);
 	zpci_aif_sbv = NULL;

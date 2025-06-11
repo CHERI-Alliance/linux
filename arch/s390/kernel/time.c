@@ -457,7 +457,7 @@ static void __init stp_reset(void)
 		set_bit(CLOCK_SYNC_HAS_STP, &clock_sync_flags);
 	else if (stp_online) {
 		pr_warn("The real or virtual hardware system does not provide an STP interface\n");
-		free_page((unsigned long) stp_page);
+		free_page((uintptr_t) stp_page);
 		stp_page = NULL;
 		stp_online = false;
 	}

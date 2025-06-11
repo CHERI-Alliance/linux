@@ -280,7 +280,7 @@ static int handle_encls_ecreate(struct kvm_vcpu *vcpu)
 
 	/* Exit to userspace if copying from a host userspace address fails. */
 	if (sgx_read_hva(vcpu, contents_hva, (void *)contents, PAGE_SIZE)) {
-		free_page((unsigned long)contents);
+		free_page((uintptr_t)contents);
 		return 0;
 	}
 
@@ -289,7 +289,7 @@ static int handle_encls_ecreate(struct kvm_vcpu *vcpu)
 
 	r = __handle_encls_ecreate(vcpu, &pageinfo, secs_hva, secs_gva);
 
-	free_page((unsigned long)contents);
+	free_page((uintptr_t)contents);
 
 	return r;
 }

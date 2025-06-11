@@ -440,7 +440,7 @@ static void free_ldt_struct(struct ldt_struct *ldt)
 	if (ldt->nr_entries * LDT_ENTRY_SIZE > PAGE_SIZE)
 		vfree_atomic(ldt->entries);
 	else
-		free_page((unsigned long)ldt->entries);
+		free_page((uintptr_t)ldt->entries);
 	kfree(ldt);
 }
 
