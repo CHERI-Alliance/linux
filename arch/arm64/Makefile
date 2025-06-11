@@ -111,6 +111,16 @@ KBUILD_CFLAGS	+= -Wa,-march=$(asm-arch) \
 		   -DARM64_ASM_ARCH='"$(asm-arch)"'
 endif
 
+ifeq ($(CONFIG_ARM64_MORELLO), y)
+ifeq ($(LLVM_IAS),1)
+# Clang does not pass down -Wa,-march to its integrated assembler, we
+# need to use -march directly.
+KBUILD_AFLAGS	+= -march=morello
+else
+KBUILD_AFLAGS	+= -Wa,-march=morello
+endif
+endif
+
 ifeq ($(CONFIG_SHADOW_CALL_STACK), y)
 KBUILD_CFLAGS	+= -ffixed-x18
 KBUILD_RUSTFLAGS += -Zfixed-x18
