@@ -25,6 +25,7 @@
 #include <linux/memcontrol.h>
 #include <linux/mm_inline.h>
 #include <linux/secretmem.h>
+#include <linux/mm_reserv.h>
 
 #include "internal.h"
 
@@ -609,13 +610,12 @@ static int __mlock_posix_error_return(long retval)
 	return retval;
 }
 
-static __must_check int do_mlock(unsigned long start, size_t len, vm_flags_t flags)
+static __must_check int do_mlock(user_uintptr_t user_ptr, size_t len, vm_flags_t flags)
 {
 	unsigned long locked;
 	unsigned long lock_limit;
 	int error = -ENOMEM;
-
-	start = untagged_addr(start);
+	unsigned long start = untagged_addr(user_ptr);
 
 	if (!can_do_mlock())
 		return -EPERM;
@@ -623,12 +623,21 @@ static __must_check int do_mlock(unsigned long start, size_t len, vm_flags_t fla
 	len = PAGE_ALIGN(len + (offset_in_page(start)));
 	start &= PAGE_MASK;
 
+	if (reserv_is_supported(current->mm) && !check_user_ptr_owning(user_ptr, len))
+		return -EINVAL;
+
 	lock_limit = rlimit(RLIMIT_MEMLOCK);
 	lock_limit >>= PAGE_SHIFT;
 	locked = len >> PAGE_SHIFT;
 
 	if (mmap_write_lock_killable(current->mm))
 		return -EINTR;
+
+	/* Check if the range exists within the reservation with mmap lock. */
+	if (!reserv_cap_within_reserv(user_ptr, true)) {
+		mmap_write_unlock(current->mm);
+		return -ERESERVATION;
+	}
 
 	locked += current->mm->locked_vm;
 	if ((locked > lock_limit) && (!capable(CAP_IPC_LOCK))) {
@@ -656,12 +665,12 @@ static __must_check int do_mlock(unsigned long start, size_t len, vm_flags_t fla
 	return 0;
 }
 
-SYSCALL_DEFINE2(mlock, unsigned long, start, size_t, len)
+SYSCALL_DEFINE2(mlock, user_uintptr_t, user_ptr, size_t, len)
 {
-	return do_mlock(start, len, VM_LOCKED);
+	return do_mlock(user_ptr, len, VM_LOCKED);
 }
 
-SYSCALL_DEFINE3(mlock2, unsigned long, start, size_t, len, int, flags)
+SYSCALL_DEFINE3(mlock2, user_uintptr_t, user_ptr, size_t, len, int, flags)
 {
 	vm_flags_t vm_flags = VM_LOCKED;
 
@@ -671,20 +680,27 @@ SYSCALL_DEFINE3(mlock2, unsigned long, start, size_t, len, int, flags)
 	if (flags & MLOCK_ONFAULT)
 		vm_flags |= VM_LOCKONFAULT;
 
-	return do_mlock(start, len, vm_flags);
+	return do_mlock(user_ptr, len, vm_flags);
 }
 
-SYSCALL_DEFINE2(munlock, unsigned long, start, size_t, len)
+SYSCALL_DEFINE2(munlock, user_uintptr_t, user_ptr, size_t, len)
 {
 	int ret;
-
-	start = untagged_addr(start);
+	unsigned long start = untagged_addr(user_ptr);
 
 	len = PAGE_ALIGN(len + (offset_in_page(start)));
 	start &= PAGE_MASK;
 
+	if (reserv_is_supported(current->mm) && !check_user_ptr_owning(user_ptr, len))
+		return -EINVAL;
+
 	if (mmap_write_lock_killable(current->mm))
 		return -EINTR;
+	/* Check if the range exists within the reservation with mmap lock. */
+	if (!reserv_cap_within_reserv(user_ptr, true)) {
+		mmap_write_unlock(current->mm);
+		return -ERESERVATION;
+	}
 	ret = apply_vma_lock_flags(start, len, 0);
 	mmap_write_unlock(current->mm);
 
