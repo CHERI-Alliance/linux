@@ -37,12 +37,6 @@
 #define ASSERT_CAP_EQ(exp, seen) \
 	ASSERT_TRUE(__builtin_cheri_equal_exact(exp, seen))
 
-struct morello_auxv {
-	long a_type;
-	long _padding;
-	uintcap_t a_val;
-};
-
 struct initial_data {
 	int argc;
 	char **argv;

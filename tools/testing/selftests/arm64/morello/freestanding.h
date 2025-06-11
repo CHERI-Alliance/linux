@@ -33,6 +33,7 @@ typedef __uintcap_t uintcap_t;
 #endif
 
 #define EXIT_SUCCESS 0
+#define __maybe_unused	__attribute__((__unused__))
 
 #ifndef WIFEXITED
 #define WIFEXITED(status) (((status) & 0x7f) == 0)
@@ -44,6 +45,14 @@ typedef __uintcap_t uintcap_t;
 struct __test_meta {
 	int message;
 };
+
+struct morello_auxv {
+	long a_type;
+	long _padding;
+	uintcap_t a_val;
+};
+
+unsigned long get_pagesize(struct morello_auxv *auxv);
 
 void install_kernel_stack(void);
 uintcap_t __syscall(uintcap_t, uintcap_t, uintcap_t, uintcap_t, uintcap_t, uintcap_t, uintcap_t);
