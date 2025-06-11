@@ -31,6 +31,13 @@ typedef __uintcap_t uintcap_t;
 
 #define EXIT_SUCCESS 0
 
+#ifndef WIFEXITED
+#define WIFEXITED(status) (((status) & 0x7f) == 0)
+#endif
+#ifndef WEXITSTATUS
+#define WEXITSTATUS(status) (((status) & 0xff00) >> 8)
+#endif
+
 struct __test_meta {
 	int message;
 };

@@ -18,16 +18,13 @@
 #define in_restricted()	\
 	(!(cheri_perms_get(cheri_pcc_get()) & ARM_CAP_PERMISSION_EXECUTIVE))
 
-
-#define MAGIC_NR	0x3562 /* whatever really ..... */
-
 #ifndef MAX_PID_NS_LEVEL
 #define MAX_PID_NS_LEVEL 32
 #endif
 
 /* Cloned thread result */
-#define CTR_SUCCESS  	 1
-#define CTR_FAILED	-1
+#define CTR_SUCCESS	0
+#define CTR_FAILED	1
 
 #define BIT(nr) ((1U) << (nr))
 /* Test flags */
@@ -36,10 +33,8 @@
 #define CLONE_TH_RUSAGE		BIT(3)
 
 struct test_fixture {
-	int status;
 	int flags;
 	void *sp;
-	int result;
 };
 
 #define PROBE_INTERVAL (1 << 12)
@@ -76,27 +71,21 @@ static int clone_base_fn(void *data)
 
 		asm("mrs %0, ctpidr_el0" : "=C" (tls));
 
-		if (!tls) {
-			__data->result = CTR_FAILED;
-			goto done;
-		}
+		if (!tls)
+			return CTR_FAILED;
 
 		probe_addr_range(tls, STACK_SIZE >> 10, 64);
 	}
 
 	/* If things didn't explode by now .... */
-	__data->result =
-		!!(__data->flags & CLONE_TH_RESTRICTED) != in_restricted() ?
-		 CTR_FAILED : CTR_SUCCESS;
-done:
-	__data->status = MAGIC_NR;
-	return 0;
+	return !!(__data->flags & CLONE_TH_RESTRICTED) != in_restricted() ?
+	       CTR_FAILED : CTR_SUCCESS;
 }
 
 static inline __attribute__((always_inline))
 void clone_single(struct test_fixture *data)
 {
-	int ppid = 0, cpid = 0;
+	int ppid = 0, cpid = 0, wstatus;
 	int result = -EINVAL;
 
 	void *new_stack = mmap_verified(NULL, STACK_SIZE, PROT_READ | PROT_WRITE,
@@ -107,7 +96,7 @@ void clone_single(struct test_fixture *data)
 			 CAP_LOAD_PERMS | CAP_STORE_PERMS) :
 		  NULL;
 
-	int clone_flags = CLONE_VM | CLONE_PARENT_SETTID | CLONE_CHILD_SETTID;
+	int clone_flags = CLONE_VM | CLONE_PARENT_SETTID | CLONE_CHILD_SETTID | SIGCHLD;
 
 	int (*clone_fn_ptr)(void *) = clone_base_fn;
 
@@ -142,18 +131,10 @@ void clone_single(struct test_fixture *data)
 		goto leave;
 	}
 
-	/* Wait substitute ... */
-	while (data->status != MAGIC_NR) {
-		asm("");
-	}
-	/*
-	 * CLONE_CHILD_SETTID sets child's thread ID to provided child's
-	 * memory but as VM is being shared, it's all good at this point.
-	 * Also, the thread id is being set when the child is scheduled.
-	 * Either way if this point has been reached - all went 'supposedly'
-	 * well.
-	 */
-	ASSERT_EQ(data->result, CTR_SUCCESS);
+	/* Wait for the child to exit */
+	result = waitpid(cpid, &wstatus, 0);
+	ASSERT_EQ(result, cpid);
+	ASSERT_TRUE(WIFEXITED(wstatus) && (WEXITSTATUS(wstatus) == CTR_SUCCESS));
 leave:
 	munmap(new_stack, STACK_SIZE);
 	if (tls)
