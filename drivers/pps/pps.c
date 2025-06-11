@@ -249,12 +249,13 @@ static long pps_cdev_ioctl(struct file *file,
 static long pps_cdev_compat_ioctl(struct file *file,
 		unsigned int cmd, unsigned long arg)
 {
-	struct pps_device *pps = file->private_data;
-	void __user *uarg = (void __user *) arg;
+	void __user *uarg = compat_ptr(arg);
 
 	cmd = _IOC(_IOC_DIR(cmd), _IOC_TYPE(cmd), _IOC_NR(cmd), sizeof(void *));
 
+#ifdef CONFIG_COMPAT32
 	if (cmd == PPS_FETCH) {
+		struct pps_device *pps = file->private_data;
 		struct pps_fdata_compat compat;
 		struct pps_fdata fdata;
 		int err;
@@ -289,8 +290,9 @@ static long pps_cdev_compat_ioctl(struct file *file,
 		return copy_to_user(uarg, &compat,
 				sizeof(struct pps_fdata_compat)) ? -EFAULT : 0;
 	}
+#endif /* CONFIG_COMPAT32 */
 
-	return pps_cdev_ioctl(file, cmd, arg);
+	return pps_cdev_ioctl(file, cmd, (user_uintptr_t)uarg);
 }
 #else
 #define pps_cdev_compat_ioctl	NULL
