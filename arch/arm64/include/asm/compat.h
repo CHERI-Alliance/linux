@@ -96,7 +96,9 @@ static inline void __user *compat_ptr(compat_uptr_t uptr)
 #define compat_ptr(uptr) compat_ptr(uptr)
 
 #define compat_user_stack_pointer() (user_stack_pointer(task_pt_regs(current)))
+#ifdef CONFIG_COMPAT32
 #define COMPAT_MINSIGSTKSZ	2048
+#endif
 
 #ifdef CONFIG_COMPAT64
 #define COMPAT_USE_64BIT_TIME	1
