@@ -134,7 +134,7 @@ static inline int is_compat_task(void)
 {
 	return test_thread_flag(TIF_31BIT);
 }
-#define is_32bit_compat_task is_compat_task
+#define is_compat32_task is_compat_task
 
 #endif
 
