@@ -120,6 +120,12 @@ pgprot_t vm_get_page_prot(unsigned long vm_flags)
 	}
 #endif
 
+	if (vm_flags & VM_READ_CAPS)
+		prot |= PTE_LOAD_CAPS;
+
+	if (vm_flags & VM_WRITE_CAPS)
+		prot |= PTE_STORE_CAPS;
+
 	return __pgprot(prot);
 }
 EXPORT_SYMBOL(vm_get_page_prot);
