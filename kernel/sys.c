@@ -2060,7 +2060,7 @@ out:
 static int prctl_set_mm_map(int opt, const void __user *addr, unsigned long data_size)
 {
 	struct prctl_mm_map prctl_map = { .exe_fd = (u32)-1, };
-	unsigned long user_auxv[AT_VECTOR_SIZE];
+	user_uintptr_t user_auxv[AT_VECTOR_SIZE];
 	struct mm_struct *mm = current->mm;
 	int error;
 
@@ -2090,9 +2090,12 @@ static int prctl_set_mm_map(int opt, const void __user *addr, unsigned long data
 			return -EINVAL;
 
 		memset(user_auxv, 0, sizeof(user_auxv));
-		if (copy_from_user(user_auxv,
-				   (const void __user *)prctl_map.auxv,
-				   prctl_map.auxv_size))
+		if (IS_ENABLED(CONFIG_CHERI_PURECAP_UABI)
+		    ? copy_from_user_with_captags(user_auxv,
+						  (const void __user *)prctl_map.auxv,
+						   prctl_map.auxv_size)
+		    : copy_from_user(user_auxv, (const void __user *)prctl_map.auxv,
+				     prctl_map.auxv_size))
 			return -EFAULT;
 
 		/* Last entry must be AT_NULL as specification requires */
@@ -2174,12 +2177,13 @@ static int prctl_set_auxv(struct mm_struct *mm, user_uintptr_t addr,
 	 * up to the caller to provide sane values here, otherwise userspace
 	 * tools which use this vector might be unhappy.
 	 */
-	unsigned long user_auxv[AT_VECTOR_SIZE] = {};
+	user_uintptr_t user_auxv[AT_VECTOR_SIZE] = {};
 
 	if (len > sizeof(user_auxv))
 		return -EINVAL;
-
-	if (copy_from_user(user_auxv, (const void __user *)addr, len))
+	if (IS_ENABLED(CONFIG_CHERI_PURECAP_UABI)
+	    ? copy_from_user_with_captags(user_auxv, (const void __user *)addr, len)
+	    : copy_from_user(user_auxv, (const void __user *)addr, len))
 		return -EFAULT;
 
 	/* Make sure the last entry is always AT_NULL */
