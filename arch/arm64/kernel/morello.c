@@ -16,6 +16,7 @@
 void __morello_cap_lo_hi_tag(const cap128_t *cap, u64 *lo_val, u64 *hi_val,
 			     u8 *tag);
 void __morello_cap_cpy(cap128_t *dst, const cap128_t *src);
+void __morello_merge_c_x(cap128_t *creg, u64 xreg);
 void __morello_get_ddc(cap128_t *dst);
 
 /* Not defined as static because morello.S refers to it */
@@ -48,6 +49,33 @@ static void init_pc_pcc(struct pt_regs *regs, unsigned long pc)
 void morello_thread_start(struct pt_regs *regs, unsigned long pc)
 {
 	init_pc_pcc(regs, pc);
+}
+
+void morello_setup_signal_return(struct pt_regs *regs)
+{
+	/*
+	 * Setup PC/PCC for the signal handler like for the program's entry
+	 * point (this means in particular that the signal handler is invoked in
+	 * Executive).
+	 */
+	init_pc_pcc(regs, regs->pc);
+
+	/*
+	 * Also set CLR to a valid capability, to allow a C64 handler to return
+	 * to the trampoline using `ret clr`.
+	 */
+	__morello_cap_cpy(&regs->cregs[30], &morello_root_cap);
+}
+
+void morello_merge_cap_regs(struct pt_regs *regs)
+{
+	int i;
+
+	for (i = 0; i < ARRAY_SIZE(regs->cregs); i++)
+		__morello_merge_c_x(&regs->cregs[i], regs->regs[i]);
+
+	__morello_merge_c_x(&regs->csp, regs->sp);
+	__morello_merge_c_x(&regs->pcc, regs->pc);
 }
 
 
