@@ -562,7 +562,7 @@ __SYSCALL(__NR_brk, sys_brk)
 #define __NR_munmap 215
 __SYSCALL(__NR_munmap, sys_munmap)
 #define __NR_mremap 216
-__SYSCALL(__NR_mremap, sys_mremap)
+__SYSCALL_RETPTR(__NR_mremap, sys_mremap)
 #define __NR_add_key 217
 __SYSCALL(__NR_add_key, sys_add_key)
 #define __NR_request_key 218
@@ -574,7 +574,7 @@ __SYSCALL(__NR_clone, sys_clone)
 #define __NR_execve 221
 __SC_COMP(__NR_execve, sys_execve, compat_sys_execve)
 #define __NR3264_mmap 222
-__SC_3264(__NR3264_mmap, sys_mmap2, sys_mmap)
+__SC_3264_RETPTR(__NR3264_mmap, sys_mmap2, sys_mmap)
 #define __NR3264_fadvise64 223
 __SC_COMP(__NR3264_fadvise64, sys_fadvise64_64, compat_sys_fadvise64_64)
 

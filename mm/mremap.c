@@ -1683,11 +1683,11 @@ static unsigned long mremap_at(struct vma_remap_struct *vrm)
 	BUG();
 }
 
-static unsigned long do_mremap(struct vma_remap_struct *vrm)
+static user_uintptr_t do_mremap(struct vma_remap_struct *vrm)
 {
 	struct mm_struct *mm = current->mm;
 	struct vm_area_struct *vma;
-	unsigned long ret;
+	user_uintptr_t ret;
 
 	ret = check_mremap_params(vrm);
 	if (ret)
@@ -1737,6 +1737,10 @@ out:
 	mremap_userfaultfd_complete(vrm->uf, vrm->addr, ret, vrm->old_len);
 	userfaultfd_unmap_complete(mm, vrm->uf_unmap);
 
+	/* TODO [PCuABI] - derive proper capability */
+	return IS_ERR_VALUE(ret) ?
+		ret :
+		(user_intptr_t)uaddr_to_user_ptr_safe((ptraddr_t)ret);
 	return ret;
 }
 
@@ -1747,13 +1751,14 @@ out:
  * MREMAP_FIXED option added 5-Dec-1999 by Benjamin LaHaise
  * This option implies MREMAP_MAYMOVE.
  */
-SYSCALL_DEFINE5(mremap, unsigned long, addr, unsigned long, old_len,
+SYSCALL_DEFINE5(__retptr__(mremap), user_uintptr_t, addr, unsigned long, old_len,
 		unsigned long, new_len, unsigned long, flags,
-		unsigned long, new_addr)
+		user_uintptr_t, new_addr)
 {
 	struct vm_userfaultfd_ctx uf = NULL_VM_UFFD_CTX;
 	LIST_HEAD(uf_unmap_early);
 	LIST_HEAD(uf_unmap);
+	/* @TODO [PCuABI] - capability validation */
 	/*
 	 * There is a deliberate asymmetry here: we strip the pointer tag
 	 * from the old address but leave the new address alone. This is
