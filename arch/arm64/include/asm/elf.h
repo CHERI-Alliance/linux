@@ -222,6 +222,8 @@ extern int arch_setup_additional_pages(struct linux_binprm *bprm,
 #define COMPAT_ELF_PLATFORM		("v8l")
 #endif
 
+#define compat_start_thread		compat_start_thread
+
 #ifdef CONFIG_COMPAT64
 
 #define compat_elf_check_arch(x)	((x)->e_machine == EM_AARCH64 && \
@@ -267,7 +269,6 @@ typedef compat_elf_greg_t		compat_elf_gregset_t[COMPAT_ELF_NGREG];
 #define EF_ARM_EABI_MASK		0xff000000
 int compat_elf_check_arch(const struct elf32_hdr *);
 #define compat_elf_check_arch		compat_elf_check_arch
-#define compat_start_thread		compat_start_thread
 /*
  * Unlike the native SET_PERSONALITY macro, the compat version maintains
  * READ_IMPLIES_EXEC across an execve() since this is the behaviour on
