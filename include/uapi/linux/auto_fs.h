@@ -79,7 +79,7 @@ enum {
 				     AUTOFS_IOC_PROTOVER_CMD, int)
 #define AUTOFS_IOC_SETTIMEOUT32 _IOWR(AUTOFS_IOCTL, \
 				      AUTOFS_IOC_SETTIMEOUT_CMD, \
-				      compat_ulong_t)
+				      unsigned int)
 #define AUTOFS_IOC_SETTIMEOUT   _IOWR(AUTOFS_IOCTL, \
 				      AUTOFS_IOC_SETTIMEOUT_CMD, \
 				      unsigned long)
