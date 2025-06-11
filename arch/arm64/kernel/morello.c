@@ -33,6 +33,11 @@ uintcap_t morello_root_cap __ro_after_init;
 #define DDC_RESET_VAL_LOW_64	0x0
 #define DDC_RESET_VAL_HIGH_64	0xffffc00000010005ULL
 
+uintcap_t morello_get_root_cap(void)
+{
+	return morello_root_cap;
+}
+
 static void init_pc_pcc(struct pt_regs *regs, unsigned long pc)
 {
 	/*
