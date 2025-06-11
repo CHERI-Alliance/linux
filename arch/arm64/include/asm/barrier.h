@@ -113,6 +113,18 @@ static inline unsigned long array_index_mask_nospec(unsigned long idx,
  *
  * https://lore.kernel.org/r/alpine.DEB.2.21.1902081950260.1662@nanos.tec.linutronix.de/
  */
+#ifdef __CHERI_PURE_CAPABILITY__
+#define arch_counter_enforce_ordering(val) do {				\
+	u64 tmp, _val = (val);						\
+	void *ptr;							\
+									\
+	asm volatile(							\
+	"	eor	%0, %2, %2\n"					\
+	"	add	%1, csp, %0\n"					\
+	"	ldr	xzr, [%1]"					\
+	: "=r" (tmp), "=r"(ptr) : "r" (_val));				\
+} while (0)
+#else /* __CHERI_PURE_CAPABILITY__ */
 #define arch_counter_enforce_ordering(val) do {				\
 	u64 tmp, _val = (val);						\
 									\
@@ -122,6 +134,7 @@ static inline unsigned long array_index_mask_nospec(unsigned long idx,
 	"	ldr	xzr, [%0]"					\
 	: "=r" (tmp) : "r" (_val));					\
 } while (0)
+#endif /* __CHERI_PURE_CAPABILITY__ */
 
 #define __smp_mb()	dmb(ish)
 #define __smp_rmb()	dmb(ishld)
