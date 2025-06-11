@@ -213,7 +213,7 @@ static void gmap_free_crst(unsigned long *table, bool free_ptes)
 	}
 
 out:
-	free_pages((unsigned long)table, CRST_ALLOC_ORDER);
+	free_pages((uintptr_t)table, CRST_ALLOC_ORDER);
 }
 
 /**

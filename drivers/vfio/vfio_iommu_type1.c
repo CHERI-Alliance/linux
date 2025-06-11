@@ -535,7 +535,7 @@ static void vfio_batch_unpin(struct vfio_batch *batch, struct vfio_dma *dma)
 static void vfio_batch_fini(struct vfio_batch *batch)
 {
 	if (batch->capacity == VFIO_BATCH_MAX_CAPACITY)
-		free_page((unsigned long)batch->pages);
+		free_page((uintptr_t)batch->pages);
 }
 
 static int follow_fault_pfn(struct vm_area_struct *vma, struct mm_struct *mm,

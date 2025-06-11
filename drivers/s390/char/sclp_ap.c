@@ -46,7 +46,7 @@ static int do_ap_configure(sclp_cmdw_t cmd, u32 apid)
 		break;
 	}
 out:
-	free_page((unsigned long) sccb);
+	free_page((uintptr_t) sccb);
 	return rc;
 }
 

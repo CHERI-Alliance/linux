@@ -5655,7 +5655,7 @@ static void dasd_eckd_dump_sense_ccw(struct dasd_device *device,
 		}
 		dasd_eckd_dump_ccw_range(device, from, last, page + len);
 	}
-	free_page((unsigned long) page);
+	free_page((uintptr_t) page);
 }
 
 
@@ -5770,7 +5770,7 @@ static void dasd_eckd_dump_sense_tcw(struct dasd_device *device,
 		sprintf(page + len, "SORRY - NO TSB DATA AVAILABLE\n");
 	}
 	dev_err(&device->cdev->dev, "%s", page);
-	free_page((unsigned long) page);
+	free_page((uintptr_t) page);
 }
 
 static void dasd_eckd_dump_sense(struct dasd_device *device,
@@ -6946,7 +6946,7 @@ dasd_eckd_init(void)
 		kfree(pe_handler_worker);
 		kfree(dasd_reserve_req);
 		kfree(dasd_vol_info_req);
-		free_page((unsigned long)rawpadpage);
+		free_page((uintptr_t)rawpadpage);
 	}
 	return ret;
 }
@@ -6957,7 +6957,7 @@ dasd_eckd_cleanup(void)
 	ccw_driver_unregister(&dasd_eckd_driver);
 	kfree(pe_handler_worker);
 	kfree(dasd_reserve_req);
-	free_page((unsigned long)rawpadpage);
+	free_page((uintptr_t)rawpadpage);
 }
 
 module_init(dasd_eckd_init);

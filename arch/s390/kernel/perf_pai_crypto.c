@@ -83,7 +83,7 @@ static DEFINE_MUTEX(pai_reserve_mutex);
 /* Free all memory allocated for event counting/sampling setup */
 static void paicrypt_free(struct paicrypt_mapptr *mp)
 {
-	free_page((unsigned long)mp->mapptr->page);
+	free_page((uintptr_t)mp->mapptr->page);
 	kvfree(mp->mapptr->save);
 	kfree(mp->mapptr);
 	mp->mapptr = NULL;

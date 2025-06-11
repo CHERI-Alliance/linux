@@ -338,7 +338,7 @@ static void kvmppc_core_vcpu_free_e500mc(struct kvm_vcpu *vcpu)
 {
 	struct kvmppc_vcpu_e500 *vcpu_e500 = to_e500(vcpu);
 
-	free_page((unsigned long)vcpu->arch.shared);
+	free_page((uintptr_t)vcpu->arch.shared);
 	kvmppc_e500_tlb_uninit(vcpu_e500);
 }
 

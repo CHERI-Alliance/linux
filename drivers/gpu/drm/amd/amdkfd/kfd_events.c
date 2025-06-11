@@ -300,7 +300,7 @@ static void shutdown_signal_page(struct kfd_process *p)
 
 	if (page) {
 		if (page->need_to_free_pages)
-			free_pages((unsigned long)page->kernel_address,
+			free_pages((uintptr_t)page->kernel_address,
 				   get_order(KFD_SIGNAL_EVENT_LIMIT * 8));
 		kfree(page);
 	}

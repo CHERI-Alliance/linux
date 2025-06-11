@@ -190,5 +190,5 @@ out:
 void unxlate_dev_mem_ptr(phys_addr_t addr, void *ptr)
 {
 	if (addr != virt_to_phys(ptr))
-		free_page((unsigned long)ptr);
+		free_page((uintptr_t)ptr);
 }

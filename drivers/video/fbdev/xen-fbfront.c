@@ -514,7 +514,7 @@ static void xenfb_remove(struct xenbus_device *dev)
 		fb_dealloc_cmap(&info->fb_info->cmap);
 		framebuffer_release(info->fb_info);
 	}
-	free_page((unsigned long)info->page);
+	free_page((uintptr_t)info->page);
 	vfree(info->gfns);
 	vfree(info->fb);
 	kfree(info);

@@ -227,7 +227,7 @@ out_5:
 out_4:
 	xpc_gru_mq_watchlist_free_uv(mq);
 out_3:
-	free_pages((unsigned long)mq->address, pg_order);
+	free_pages((uintptr_t)mq->address, pg_order);
 out_2:
 	kfree(mq->gru_mq_desc);
 out_1:
@@ -256,7 +256,7 @@ xpc_destroy_gru_mq_uv(struct xpc_gru_mq_uv *mq)
 	xpc_gru_mq_watchlist_free_uv(mq);
 
 	pg_order = mq->order - PAGE_SHIFT;
-	free_pages((unsigned long)mq->address, pg_order);
+	free_pages((uintptr_t)mq->address, pg_order);
 
 	kfree(mq);
 }

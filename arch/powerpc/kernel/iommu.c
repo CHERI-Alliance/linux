@@ -951,7 +951,7 @@ void *iommu_alloc_coherent(struct device *dev, struct iommu_table *tbl,
 	mapping = iommu_alloc(dev, tbl, ret, nio_pages, DMA_BIDIRECTIONAL,
 			      mask >> tbl->it_page_shift, io_order, 0);
 	if (mapping == DMA_MAPPING_ERROR) {
-		free_pages((unsigned long)ret, order);
+		free_pages((uintptr_t)ret, order);
 		return NULL;
 	}
 
@@ -969,7 +969,7 @@ void iommu_free_coherent(struct iommu_table *tbl, size_t size,
 		nio_pages = IOMMU_PAGE_ALIGN(size, tbl) >> tbl->it_page_shift;
 		iommu_free(tbl, dma_handle, nio_pages);
 		size = PAGE_ALIGN(size);
-		free_pages((unsigned long)vaddr, get_order(size));
+		free_pages((uintptr_t)vaddr, get_order(size));
 	}
 }
 

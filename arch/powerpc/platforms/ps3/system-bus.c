@@ -546,7 +546,7 @@ static void ps3_free_coherent(struct device *_dev, size_t size, void *vaddr,
 	struct ps3_system_bus_device *dev = ps3_dev_to_system_bus_dev(_dev);
 
 	ps3_dma_unmap(dev->d_region, dma_handle, size);
-	free_pages((unsigned long)vaddr, get_order(size));
+	free_pages((uintptr_t)vaddr, get_order(size));
 }
 
 /* Creates TCEs for a user provided buffer.  The user buffer must be

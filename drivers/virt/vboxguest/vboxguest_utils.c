@@ -91,7 +91,7 @@ void vbg_req_free(void *req, size_t len)
 	if (!req)
 		return;
 
-	free_pages((unsigned long)req, get_order(PAGE_ALIGN(len)));
+	free_pages((uintptr_t)req, get_order(PAGE_ALIGN(len)));
 }
 
 /* Note this function returns a VBox status code, not a negative errno!! */

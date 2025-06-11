@@ -53,7 +53,7 @@ static void tee_free_ring(struct psp_tee_device *tee)
 	if (!rb_mgr->ring_start)
 		return;
 
-	free_pages((unsigned long)rb_mgr->ring_start,
+	free_pages((uintptr_t)rb_mgr->ring_start,
 		   get_order(rb_mgr->ring_size));
 
 	rb_mgr->ring_start = NULL;

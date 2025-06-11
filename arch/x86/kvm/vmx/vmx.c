@@ -2912,7 +2912,7 @@ struct vmcs *alloc_vmcs_cpu(bool shadow, int cpu, gfp_t flags)
 
 void free_vmcs(struct vmcs *vmcs)
 {
-	free_page((unsigned long)vmcs);
+	free_page((uintptr_t)vmcs);
 }
 
 /*
@@ -2926,7 +2926,7 @@ void free_loaded_vmcs(struct loaded_vmcs *loaded_vmcs)
 	free_vmcs(loaded_vmcs->vmcs);
 	loaded_vmcs->vmcs = NULL;
 	if (loaded_vmcs->msr_bitmap)
-		free_page((unsigned long)loaded_vmcs->msr_bitmap);
+		free_page((uintptr_t)loaded_vmcs->msr_bitmap);
 	WARN_ON(loaded_vmcs->shadow_vmcs != NULL);
 }
 
@@ -7541,7 +7541,7 @@ void vmx_vcpu_free(struct kvm_vcpu *vcpu)
 	free_vpid(vmx->vpid);
 	nested_vmx_free_vcpu(vcpu);
 	free_loaded_vmcs(vmx->loaded_vmcs);
-	free_page((unsigned long)vmx->ve_info);
+	free_page((uintptr_t)vmx->ve_info);
 }
 
 int vmx_vcpu_create(struct kvm_vcpu *vcpu)
@@ -8349,7 +8349,8 @@ void vmx_vm_destroy(struct kvm *kvm)
 {
 	struct kvm_vmx *kvm_vmx = to_kvm_vmx(kvm);
 
-	free_pages((unsigned long)kvm_vmx->pid_table, vmx_get_pid_table_order(kvm));
+	free_pages((uintptr_t)kvm_vmx->pid_table,
+		   vmx_get_pid_table_order(kvm));
 }
 
 /*
@@ -8682,7 +8683,7 @@ __init int vmx_hardware_setup(void)
 static void vmx_cleanup_l1d_flush(void)
 {
 	if (vmx_l1d_flush_pages) {
-		free_pages((unsigned long)vmx_l1d_flush_pages, L1D_CACHE_ORDER);
+		free_pages((uintptr_t)vmx_l1d_flush_pages, L1D_CACHE_ORDER);
 		vmx_l1d_flush_pages = NULL;
 	}
 	/* Restore state so sysfs ignores VMX */

@@ -350,7 +350,7 @@ static void free_active_ring(struct sock_mapping *map)
 
 	free_pages_exact(map->active.data.in,
 			 PAGE_SIZE << map->active.ring->ring_order);
-	free_page((unsigned long)map->active.ring);
+	free_page((uintptr_t)map->active.ring);
 }
 
 static int alloc_active_ring(struct sock_mapping *map)

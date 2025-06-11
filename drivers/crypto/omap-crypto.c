@@ -214,7 +214,7 @@ void omap_crypto_cleanup(struct scatterlist *sg, struct scatterlist *orig,
 		omap_crypto_copy_data(sg, orig, offset, len);
 
 	if (flags & OMAP_CRYPTO_DATA_COPIED)
-		free_pages((unsigned long)buf, pages);
+		free_pages((uintptr_t)buf, pages);
 	else if (flags & OMAP_CRYPTO_SG_COPIED)
 		kfree(sg);
 }

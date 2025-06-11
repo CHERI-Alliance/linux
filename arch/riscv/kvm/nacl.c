@@ -92,7 +92,7 @@ void kvm_riscv_nacl_exit(void)
 		if (!nacl->shmem)
 			continue;
 
-		free_pages((unsigned long)nacl->shmem,
+		free_pages((uintptr_t)nacl->shmem,
 			   get_order(SBI_NACL_SHMEM_SIZE));
 		nacl->shmem = NULL;
 		nacl->shmem_phys = 0;
