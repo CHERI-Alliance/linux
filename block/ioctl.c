@@ -70,7 +70,7 @@ static int blkpg_ioctl(struct block_device *bdev,
 	struct blkpg_partition __user *udata;
 	int op;
 
-	if (get_user(op, &arg->op) || get_user(udata, &arg->data))
+	if (get_user(op, &arg->op) || get_user_ptr(udata, &arg->data))
 		return -EFAULT;
 
 	return blkpg_do_ioctl(bdev, udata, op);
