@@ -160,3 +160,92 @@ FUNCTION_START(__syscall)
 	svc	#0
 	ret
 FUNCTION_END(__syscall)
+
+/* Set of syscalls that might require special handling */
+
+/*
+ * int clone(int (*fn)(void *), void *stack, int flags, void *arg, ...
+ *	     pid_t *parent_tid, void *tls, pid_t *child_tid  );
+ */
+FUNCTION_START(__clone)
+	alignd	c1, c1,#7 /* stack alignment */
+	mov	c9, c0
+	mov	c10, c3
+
+	/* Shuffle few regs .... */
+	mov	c0, c2
+	mov	c2, c4
+	mov	c3, c5
+	mov	c4, c6
+	mov	x8, #__NR_clone
+	svc	#0
+
+	cbz	x0,1f
+	ret
+1:
+	mov	c0, c10
+	mov	c1, c9
+	blr	c1
+	mov	x8, #__NR_exit
+	svc	#0
+FUNCTION_END(__clone)
+
+/*
+ * Switching to Restrictive mode:
+ * Sets the restricted registers (RDDC_EL0 & RCTPIDR_EL0 are initialized
+ * based on their executive counterparts, RCSP_EL0 is set with provided
+ * stack pointer) and uses branch with link(restricted) instruction to
+ * provided entry point (capability) with requested set of permissions
+ * being cleared (note: at lease Executive permission needs to be cleared
+ * in order to actually switch to restrictive mode
+ *
+ * Note: This does not intend to provide a secure way of switching the modes
+ * so there are no security countermeasures in place.
+ *
+ * void switch_to_restricted(uintcap_t addr, void * stack);
+ * addr:  address to start execution in Restricted from
+ * stack: stack pointer for Restricted
+ */
+FUNCTION_START(switch_to_restricted)
+	sub	csp, csp, #80
+	stp	c29,c30, [csp]
+
+	/* Save current values for restricted registers */
+	mrs	c3, rcsp_el0
+	mrs	c4, rddc_el0
+	stp	c3, c4, [csp, #32]
+	mrs	c3, rctpidr_el0
+	str	c3, [csp, #64]
+
+	/* Setup regs for restricted mode */
+	msr	rcsp_el0, c1
+
+	mrs	c3, ddc
+	msr	rddc_el0, c3
+	msr	rctpidr_el0, czr
+
+	/* Create restricted cap */
+	mov	x3, #__ARM_CAP_PERMISSION_EXECUTIVE__
+	clrperm	c0, c0, x3
+	/*
+	 * Function pointers are sealed so clrperm untagged c0 - rebuild a valid
+	 * capability from PCC
+	 */
+	adr	c1, #0
+	build	c0, c0, c1
+	/* Branch (restricted) */
+	blrr	c0
+
+	/* Done - restore restricted registers */
+	ldr	c3, [csp, #64]
+	msr	rctpidr_el0, c3
+	ldp	c3, c4, [csp, #32]
+	msr	rcsp_el0, c3
+	msr	rddc_el0, c4
+
+	ldp	c29, c30, [csp]
+	add	csp, csp, #80
+
+	ret	c30
+
+FUNCTION_END(switch_to_restricted)
