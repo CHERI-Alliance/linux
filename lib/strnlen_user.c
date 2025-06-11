@@ -21,6 +21,9 @@ static __always_inline long find_zero_aligned(const unsigned long __user *src,
 	long res = 0;
 	unsigned long c;
 
+	if (max == 0)
+		return 0;
+
 	unsafe_get_user(c, src++, efault);
 	c |= aligned_byte_mask(align);
 
@@ -46,6 +49,27 @@ efault:
 }
 
 /*
+ * Returns the *index* of '\0' in src, or max if not found.
+ */
+static __always_inline long find_zero_unaligned(const char __user *src,
+						unsigned long max)
+{
+	long res;
+
+	for (res = 0; res < max; res++) {
+		char c;
+
+		unsafe_get_user(c, src++, efault);
+		if (c == '\0')
+			break;
+	}
+
+	return res;
+efault:
+	return -EFAULT;
+}
+
+/*
  * Do a strnlen, return length of string *with* final '\0'.
  * 'count' is the user-supplied count, while 'max' is the
  * address space maximum.
@@ -60,23 +84,81 @@ efault:
  */
 static __always_inline long do_strnlen_user(const char __user *src, long count, unsigned long max)
 {
-	unsigned long align;
-	long res;
+	unsigned long align, tail = 0;
+	long ret, res = 0;
+	ptraddr_t src_addr = untagged_addr(src);
+	ptraddr_t src_base = user_ptr_base(src);
+	ptraddr_t src_limit = user_ptr_limit(src);
 
 	/*
-	 * Do everything aligned. But that means that we
-	 * need to also expand the maximum..
+	 * First check that the pointer's address is within its bounds.
+	 * If not, uaccess would fail, so return 0. Checking this now
+	 * ensures that further calculations are valid.
 	 */
-	align = (sizeof(unsigned long) - 1) & user_ptr_addr(src);
-	src -= align;
-	max += align;
+	if (src_base > src_addr || src_limit <= src_addr)
+	    return 0;
 
-	res = find_zero_aligned((unsigned long __user *)src, max, align);
+	align = (sizeof(unsigned long) - 1) & src_addr;
 
-	if (res < 0)
+	if (src_limit < ALIGN(src_addr + max, sizeof(unsigned long))) {
+		/*
+		 * We cannot read all the words until src + max. Reduce max
+		 * accordingly and calculate how many tail characters will need
+		 * to be read byte by byte.
+		 */
+		max = src_limit - src_addr;
+		tail = (sizeof(unsigned long) - 1) & (src_addr + max);
+	}
+
+	if (src_base > src_addr - align || max + align == tail) {
+		/*
+		 * We cannot read the entire first aligned word, as part of it
+		 * cannot be accessed.
+		 */
+		unsigned long head;
+
+		if (max + align == tail) {
+			/*
+			 * Less than a word can be read (see limit check above)
+			 * - read everything byte by byte.
+			 */
+			head = max;
+		} else {
+			/*
+			 * Read byte by byte until the next word (or return
+			 * right away if we have already reached max).
+			 */
+			head = min(sizeof(unsigned long) - align, max);
+		}
+
+		ret = find_zero_unaligned(src, head);
+		res += ret;
+		if (ret < head || max == head)
+			goto out;
+
+		align = 0;
+		src += head;
+		max -= head;
+	} else {
+		/* Read the entire first aligned word, adjust max accordingly. */
+		src -= align;
+		max += align;
+	}
+
+	max -= tail;
+	ret = find_zero_aligned((unsigned long __user *)src, max, align);
+	res += ret - align;
+	if (ret < max)
+		goto out;
+
+	if (tail) {
+		ret = find_zero_unaligned(src + max, tail);
+		res += ret;
+	}
+
+out:
+	if (ret < 0)
 		return 0;
-
-	res -= align;
 
 	/*
 	 * find_zero_aligned() may end up reading more than count bytes.
