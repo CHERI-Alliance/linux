@@ -1714,6 +1714,9 @@ config ARCH_VMLINUX_NEEDS_RELOCS
 	  relocations preserved. This is used by some architectures to
 	  construct bespoke relocation tables for KASLR.
 
+config ARCH_HAS_USER_PTR_H
+	bool
+
 config ARCH_HAS_CHERI_CAPABILITIES
 	bool
 
