@@ -117,7 +117,7 @@ static int br_dev_read_uargs(user_uintptr_t *args, size_t nr_args,
 		return -EINVAL;
 
 	if (in_compat_syscall()) {
-		unsigned int cargs[BR_UARGS_MAX];
+		compat_uptr_t cargs[BR_UARGS_MAX];
 		int i;
 
 		ret = copy_from_user(cargs, data, nr_args * sizeof(*cargs));
