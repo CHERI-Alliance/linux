@@ -782,7 +782,11 @@ EXPORT_SYMBOL_GPL(xt_compat_match_from_user);
 			COMPAT_XT_ALIGN(C_SIZE))
 
 int xt_compat_match_to_user(const struct xt_entry_match *m,
+#ifdef CONFIG_CHERI_PURECAP_UABI
+			    void * __capability *dstptr, unsigned int *size)
+#else
 			    void __user **dstptr, unsigned int *size)
+#endif
 {
 	const struct xt_match *match = m->u.kernel.match;
 	struct compat_xt_entry_match __user *cm = *dstptr;
@@ -1157,7 +1161,11 @@ void xt_compat_target_from_user(struct xt_entry_target *t, void **dstptr,
 EXPORT_SYMBOL_GPL(xt_compat_target_from_user);
 
 int xt_compat_target_to_user(const struct xt_entry_target *t,
+#ifdef CONFIG_CHERI_PURECAP_UABI
+			     void * __capability * dstptr, unsigned int *size)
+#else
 			     void __user **dstptr, unsigned int *size)
+#endif
 {
 	const struct xt_target *target = t->u.kernel.target;
 	struct compat_xt_entry_target __user *ct = *dstptr;

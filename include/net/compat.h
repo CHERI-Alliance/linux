@@ -47,9 +47,17 @@ struct compat_rtentry {
 };
 
 int __get_compat_msghdr(struct msghdr *kmsg, struct compat_msghdr *msg,
+#ifdef CONFIG_CHERI_PURECAP_UABI
+			struct sockaddr * __capability *save_addr);
+#else
 			struct sockaddr __user **save_addr);
+#endif
 int get_compat_msghdr(struct msghdr *, struct compat_msghdr __user *,
+#ifdef CONFIG_CHERI_PURECAP_UABI
+		      struct sockaddr * __capability *, struct iovec **);
+#else
 		      struct sockaddr __user **, struct iovec **);
+#endif
 int put_cmsg_compat(struct msghdr*, int, int, int, void *);
 
 int cmsghdr_from_user_compat_to_kern(struct msghdr *, struct sock *,

@@ -1231,7 +1231,11 @@ struct compat_ip6t_replace {
 };
 
 static int
+#ifdef CONFIG_CHERI_PURECAP_UABI
+compat_copy_entry_to_user(struct ip6t_entry *e, void * __capability *dstptr,
+#else
 compat_copy_entry_to_user(struct ip6t_entry *e, void __user **dstptr,
+#endif
 			  unsigned int *size, struct xt_counters *counters,
 			  unsigned int i)
 {
