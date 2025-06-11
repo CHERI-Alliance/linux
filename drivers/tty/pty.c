@@ -478,7 +478,7 @@ static long pty_bsd_compat_ioctl(struct tty_struct *tty,
 	 * PTY ioctls don't require any special translation between 32-bit and
 	 * 64-bit userspace, they are already compatible.
 	 */
-	return pty_bsd_ioctl(tty, cmd, (unsigned long)compat_ptr(arg));
+	return pty_bsd_ioctl(tty, cmd, (user_uintptr_t)compat_ptr(arg));
 }
 #else
 #define pty_bsd_compat_ioctl NULL
@@ -669,7 +669,7 @@ static long pty_unix98_compat_ioctl(struct tty_struct *tty,
 	 * 64-bit userspace, they are already compatible.
 	 */
 	return pty_unix98_ioctl(tty, cmd,
-		cmd == TIOCSIG ? arg : (unsigned long)compat_ptr(arg));
+		cmd == TIOCSIG ? arg : (user_uintptr_t)compat_ptr(arg));
 }
 #else
 #define pty_unix98_compat_ioctl NULL
