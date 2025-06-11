@@ -250,6 +250,19 @@ This can be done using the ``check_user_ptr_*()`` functions, see
 Note that these functions are no-ops (always succeed) when PCuABI is not
 selected, as there is no user pointer metadata to check in that case.
 
+Bounds
+------
+
+In very specific cases, it may be useful to query the lower and upper
+bounds (base and limit) of a given user pointer. This is done using
+``user_ptr_base(p)`` and ``user_ptr_limit(p)`` (``<linux/user_ptr.h>``).
+When user pointers do not carry such information, the start and end of
+the address space are returned, respectively.
+
+Note that the address of a user pointer should not be directly compared
+with these bounds, as it may be tagged.  ``untagged_addr(p)`` should be
+used instead of ``user_ptr_addr(p)`` to obtain a comparable value.
+
 Other functions handling user pointers
 --------------------------------------
 
