@@ -39,7 +39,7 @@
 	\name	.req	\pcuabi_reg
 #else
 	\name	.req	\default_reg
-+#endif
+#endif
 	.endm
 
 	.macro disable_daif
