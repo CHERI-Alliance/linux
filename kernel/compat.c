@@ -202,15 +202,24 @@ long compat_get_bitmap(unsigned long *mask, const compat_ulong_t __user *umask,
 	if (!user_read_access_begin(umask, bitmap_size / 8))
 		return -EFAULT;
 
-	while (nr_compat_longs > 1) {
-		compat_ulong_t l1, l2;
-		unsafe_get_user(l1, umask++, Efault);
-		unsafe_get_user(l2, umask++, Efault);
-		*mask++ = ((unsigned long)l2 << BITS_PER_COMPAT_LONG) | l1;
-		nr_compat_longs -= 2;
+	BUILD_BUG_ON(BITS_PER_COMPAT_LONG != BITS_PER_LONG &&
+		     BITS_PER_COMPAT_LONG * 2 != BITS_PER_LONG);
+
+	if (BITS_PER_COMPAT_LONG == BITS_PER_LONG) {
+		while (nr_compat_longs--)
+			unsafe_get_user(*mask++, umask++, Efault);
+	} else {
+		while (nr_compat_longs > 1) {
+			compat_ulong_t l1, l2;
+			unsafe_get_user(l1, umask++, Efault);
+			unsafe_get_user(l2, umask++, Efault);
+			*mask++ = ((unsigned long)l2 << BITS_PER_COMPAT_LONG) | l1;
+			nr_compat_longs -= 2;
+		}
+		if (nr_compat_longs)
+			unsafe_get_user(*mask, umask++, Efault);
 	}
-	if (nr_compat_longs)
-		unsafe_get_user(*mask, umask++, Efault);
+
 	user_read_access_end();
 	return 0;
 
@@ -231,14 +240,23 @@ long compat_put_bitmap(compat_ulong_t __user *umask, unsigned long *mask,
 	if (!user_write_access_begin(umask, bitmap_size / 8))
 		return -EFAULT;
 
-	while (nr_compat_longs > 1) {
-		unsigned long m = *mask++;
-		unsafe_put_user((compat_ulong_t)m, umask++, Efault);
-		unsafe_put_user(m >> BITS_PER_COMPAT_LONG, umask++, Efault);
-		nr_compat_longs -= 2;
+	BUILD_BUG_ON(BITS_PER_COMPAT_LONG != BITS_PER_LONG &&
+		     BITS_PER_COMPAT_LONG * 2 != BITS_PER_LONG);
+
+	if (BITS_PER_COMPAT_LONG == BITS_PER_LONG) {
+		while (nr_compat_longs--)
+			unsafe_put_user(*mask++, umask++, Efault);
+	} else {
+		while (nr_compat_longs > 1) {
+			unsigned long m = *mask++;
+			unsafe_put_user((compat_ulong_t)m, umask++, Efault);
+			unsafe_put_user(m >> BITS_PER_COMPAT_LONG, umask++, Efault);
+			nr_compat_longs -= 2;
+		}
+		if (nr_compat_longs)
+			unsafe_put_user((compat_ulong_t)*mask, umask++, Efault);
 	}
-	if (nr_compat_longs)
-		unsafe_put_user((compat_ulong_t)*mask, umask++, Efault);
+
 	user_write_access_end();
 	return 0;
 Efault:
