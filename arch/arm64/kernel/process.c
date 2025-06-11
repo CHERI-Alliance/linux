@@ -421,14 +421,20 @@ static void task_save_user_tls(struct task_struct *tsk)
 {
 	unsigned long *user_tls = task_user_tls(tsk);
 
-	*user_tls = read_sysreg(tpidr_el0);
+	if (!system_supports_morello())
+		*user_tls = read_sysreg(tpidr_el0);
+	else
+		morello_task_save_user_tls(tsk, user_tls);
 }
 
 static void task_restore_user_tls(struct task_struct *tsk)
 {
 	unsigned long *user_tls = task_user_tls(tsk);
 
-	write_sysreg(*user_tls, tpidr_el0);
+	if (!system_supports_morello())
+		write_sysreg(*user_tls, tpidr_el0);
+	else
+		morello_task_restore_user_tls(tsk, user_tls);
 }
 
 int copy_thread(struct task_struct *p, const struct kernel_clone_args *args)
@@ -517,6 +523,8 @@ int copy_thread(struct task_struct *p, const struct kernel_clone_args *args)
 		ret = copy_thread_gcs(p, args);
 		if (ret != 0)
 			return ret;
+		if (system_supports_morello())
+			morello_thread_save_user_state(p);
 	} else {
 		/*
 		 * A kthread has no context to ERET to, so ensure any buggy
@@ -749,6 +757,13 @@ struct task_struct *__switch_to(struct task_struct *prev,
 	permission_overlay_switch(next);
 	gcs_thread_switch(next);
 
+	if (system_supports_morello()) {
+		if (likely(!(current->flags & PF_KTHREAD)))
+			morello_thread_save_user_state(current);
+		if (likely(!(next->flags & PF_KTHREAD)))
+			morello_thread_restore_user_state(next);
+	}
+
 	/*
 	 * Complete any pending TLB or cache maintenance on this CPU in case the
 	 * thread migrates to a different CPU. This full barrier is also
@@ -870,6 +885,9 @@ void arch_setup_new_exec(void)
 		arch_prctl_spec_ctrl_set(current, PR_SPEC_STORE_BYPASS,
 					 PR_SPEC_ENABLE);
 	}
+
+	if (system_supports_morello())
+		morello_thread_init_user(current);
 }
 
 #ifdef CONFIG_ARM64_TAGGED_ADDR_ABI
