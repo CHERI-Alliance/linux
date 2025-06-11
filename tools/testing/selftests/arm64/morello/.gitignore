@@ -1,0 +1,6 @@
+# SPDX-License-Identifier: GPL-2.0
+# Copyright (C) 2021  Arm Limited
+
+*.d
+purecap_syscall_test
+tester
