@@ -31,7 +31,7 @@ $(OUTPUT)/%.o:%.S $(DEPS)
 $(OUTPUT)/%.o:%.c $(DEPS)
 	$(CC) $< -o $@ $(CFLAGS) -c
 
-$(OUTPUT)/tester: $(OUTPUT)/freestanding_start.o $(OUTPUT)/freestanding_init_globals.o $(OUTPUT)/tester.o
+$(OUTPUT)/tester: $(OUTPUT)/freestanding_start.o $(OUTPUT)/freestanding_init_globals.o $(OUTPUT)/freestanding.o $(OUTPUT)/tester.o
 	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
 
 $(OUTPUT)/purecap_syscall_test: $(OUTPUT)/start.o
