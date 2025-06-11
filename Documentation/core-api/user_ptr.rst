@@ -361,5 +361,6 @@ creating and checking user pointers.
 * ``check_user_ptr_owning(ptr, len)``
 * ``make_user_ptr_owning(reserv, len)``
 * ``user_ptr_owning_perms_from_prot(prot, vm_flags)``
+* ``user_ptr_may_set_prot(ptr, prot)``
 
 See ``<linux/user_ptr.h>`` for details on how to use them.

@@ -152,6 +152,17 @@ user_uintptr_t make_user_ptr_owning(const struct reserv_struct *reserv,
  */
 user_ptr_perms_t user_ptr_owning_perms_from_prot(int prot, unsigned long vm_flags);
 
+/**
+ * user_ptr_may_set_prot() - Check if the user pointer allows setting the given
+ *   memory protection flags.
+ * @user_ptr: User pointer.
+ * @prot: Memory protection flags.
+ *
+ * Return: True if the capability permissions allow setting the protection flags
+ *   or false otherwise.
+ */
+bool user_ptr_may_set_prot(user_uintptr_t user_ptr, int prot);
+
 #else /* CONFIG_CHERI_PURECAP_UABI */
 
 typedef int user_ptr_perms_t;
@@ -208,6 +219,11 @@ static inline user_ptr_perms_t user_ptr_owning_perms_from_prot(int prot,
 							       unsigned long vm_flags)
 {
 	return 0;
+}
+
+static inline bool user_ptr_may_set_prot(user_uintptr_t user_ptr, int prot)
+{
+	return true;
 }
 
 #endif /* CONFIG_CHERI_PURECAP_UABI */
