@@ -299,7 +299,9 @@ registers. Such operations include (but are not limited to):
   details.
 
 * When a process is traced and stopped, setting registers on behalf of
-  a tracer issuing a ``ptrace(PTRACE_SETREGSET)`` request.
+  a tracer issuing a ``ptrace(PTRACE_SETREGSET)`` request (with the
+  exception of the ``NT_ARM_MORELLO`` regset, in which case the
+  capability registers are explicitly set).
 
 Note: write coalescing
   To facilitate the implementation of this scheme, the following
@@ -515,11 +517,12 @@ ptrace extensions
 Two extensions are added to the ptrace interface to enable remote access
 to the tracee's Morello state:
 
-* A new ``NT_ARM_MORELLO`` regset is added, providing read-only access
-  to the tracee's Morello registers.
+* A new ``NT_ARM_MORELLO`` regset is added, providing access to the
+  tracee's Morello registers.
 
-* A new ``PTRACE_PEEKCAP`` request is added, allowing capabilities to be
-  read from the tracee's memory mappings.
+* A set of new requests, ``PTRACE_PEEKCAP`` and ``PTRACE_POKECAP``, is
+  added, allowing capabilities in the tracee's memory mappings to be
+  accessed.
 
 Usage details are provided in the following subsections. In both cases:
 
@@ -529,21 +532,29 @@ Usage details are provided in the following subsections. In both cases:
   capabilities are tied to their address space of origin (here the
   tracee's).
 
-* No direct write access to the capabilities is provided. The creation
-  of arbitrary valid capabilities in the tracee is a highly privileged
-  operation, and allowing such an operation through ptrace without
-  restrictions would fundamentally undermine the CHERI software model (as
-  described in [3]_). Options are being explored to allow the tracee's
-  capabilities to be manipulated, with restrictions.
+* Direct write access to capabilities is provided as an experimental and
+  privileged feature. It is disabled on startup, and can be enabled by
+  setting the ``cheri.ptrace_forge_cap`` sysctl parameter to ``1``.
+  This explicit opt-in is required because allowing the creation of
+  arbitrary valid capabilities in the tracee bypasses the capability
+  model, notably by enabling the tracee to be provided with capabilities
+  it would otherwise never have had access to. When the sysctl parameter
+  is enabled and the tracer requests a capability write with the tag
+  set, the kernel derives a new capability from an appropriate root
+  capability; the resulting capability may therefore be untagged if the
+  input 128-bit pattern is invalid. Options are being explored
+  separately to allow the tracee's capabilities to be manipulated safely
+  (without any privilege escalation).
 
-* Notwithstanding the previous note, it is possible to modify the value
+* Independently from the previous note, it is possible to modify the value
   (address) of the tracee's capability registers by setting the 64-bit
   register values via the standard regsets. The new 64-bit value will be
   merged into the corresponding capability register according to the
   `register merging principle`_ (and `Executive / Restricted aliasing`_
   for SP and TPIDR_EL0); note that this may result in the capability
   register's tag getting cleared. Additionally, the tracee's memory
-  remains writable via the usual mechanisms, but **any write will clear
+  remains writable via the usual mechanisms, but with the exception of
+  the new ``PTRACE_POKECAP`` request, **any write will clear
   the tags in the corresponding 128-bit granule(s)**.
 
 Morello regset
@@ -559,6 +570,13 @@ integer, and its tag is stored in the ``tag_map`` bitfield, at the index
 returned by ``MORELLO_PT_TAG_MAP_REG_BIT(<regname>)``. See
 ``arch/arm64/include/uapi/asm/ptrace.h`` for the definition of the
 struct and macros.
+
+Similarly, the Morello registers can be written using::
+
+  ptrace(PTRACE_SETREGSET, pid, NT_ARM_MORELLO, &iov);
+
+Unless the ``cheri.ptrace_forge_cap`` sysctl parameter is set, the call
+fails with ``-EPERM``. The layout is the same as for the read operation.
 
 Note
   Like the other regsets, the ``NT_ARM_MORELLO`` regset will be written
@@ -576,10 +594,27 @@ space, and ``user_cap`` is a ``struct user_cap``, as defined in
 ``arch/arm64/include/uapi/asm/ptrace.h``. ``addr`` must be
 capability-aligned (16-byte alignment).
 
-This request may be used on all mappings, whether or not capability
-tag access is enabled (as described in the `Capabilities in memory`_
-section). If capability tag access is disabled for the target mapping,
-then the returned tag will be 0.
+Similarly, a capability can be written using::
+
+  ptrace(PTRACE_POKECAP, pid, addr, &user_cap);
+
+Unless the ``cheri.ptrace_forge_cap`` sysctl parameter is set, the call
+fails with ``-EPERM``. The layout is the same as for the read operation.
+Any non-zero value for ``user_cap->tag`` is interpreted as 1 (intention
+to set the tag).
+
+Note
+  If the target mapping (at address ``addr``) does not have capability
+  tag access enabled (as described in the `Capabilities in memory`_
+  section), then:
+
+  * ``PTRACE_PEEKCAP`` always returns a cleared tag (and the 128-bit
+    data is read as normal).
+  * ``PTRACE_POKECAP`` only allows clearing the tag (in which case the
+    128-bit data is written as normal). If setting the tag is requested,
+    then the call fails with ``-EOPNOTSUPP``, and nothing is written.
+
+  This mirrors the behaviour of load and store instructions.
 
 
 Limitations
