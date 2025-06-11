@@ -3341,28 +3341,14 @@ static long tun_chr_ioctl(struct file *file,
 static long tun_chr_compat_ioctl(struct file *file,
 			 unsigned int cmd, unsigned long arg)
 {
-	switch (cmd) {
-	case TUNSETIFF:
-	case TUNGETIFF:
-	case TUNSETTXFILTER:
-	case TUNGETSNDBUF:
-	case TUNSETSNDBUF:
-	case SIOCGIFHWADDR:
-	case SIOCSIFHWADDR:
-		arg = (user_uintptr_t)compat_ptr(arg);
-		break;
-	default:
-		arg = (compat_ulong_t)arg;
-		break;
-	}
-
 	/*
 	 * compat_ifreq is shorter than ifreq, so we must not access beyond
 	 * the end of that structure. All fields that are used in this
 	 * driver are compatible though, we don't need to convert the
 	 * contents.
 	 */
-	return __tun_chr_ioctl(file, cmd, arg, sizeof(struct compat_ifreq));
+	return __tun_chr_ioctl(file, cmd, (user_uintptr_t)compat_ptr(arg),
+			       sizeof(struct compat_ifreq));
 }
 #endif /* CONFIG_COMPAT */
 
