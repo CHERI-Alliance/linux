@@ -217,7 +217,7 @@ static inline int arch_timer_arch_init(void)
 static inline void arch_timer_set_evtstrm_feature(void)
 {
 	cpu_set_named_feature(EVTSTRM);
-#ifdef CONFIG_COMPAT
+#ifdef CONFIG_COMPAT32
 	compat_elf_hwcap |= COMPAT_HWCAP_EVTSTRM;
 #endif
 }
