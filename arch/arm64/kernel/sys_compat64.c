@@ -34,6 +34,11 @@
 #define __arm64_compatentry_sys_mmap2				__arm64_compatentry_sys_mmap
 
 /*
+ * 64-bit tasks use lseek (not llseek).
+ */
+#define __arm64_compatentry_sys_llseek				__arm64_compatentry_compat_sys_lseek
+
+/*
  * Use the same 'struct stat' as native AArch64.
  */
 #define __arm64_compatentry_sys_fstatat64			__arm64_compatentry_sys_newfstatat
