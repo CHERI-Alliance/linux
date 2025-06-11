@@ -1813,6 +1813,9 @@ config CHERI_PURECAP_UABI
 	  availability of CHERI capabilities at compile-time; the resulting
 	  kernel image will not boot on incompatible hardware.
 
+config HAVE_ARCH_USER_PTR_H
+	bool
+
 source "kernel/gcov/Kconfig"
 
 source "scripts/gcc-plugins/Kconfig"
