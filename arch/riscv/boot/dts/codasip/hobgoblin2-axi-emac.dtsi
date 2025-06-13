@@ -34,6 +34,7 @@
 	 * axi_ethernet above. The kernel does support it though
 	 */
 	axistream_dma: axistream_dma@100a0000  {
+		compatible = "xlnx,eth-dma";
 		reg = <0x100a0000 0x10000>;
 		interrupts-extended = <&plic 11>, <&plic 12>;
 	};
