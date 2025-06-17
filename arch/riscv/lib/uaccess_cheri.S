@@ -10,6 +10,7 @@
 #include <asm/csr.h>
 #include <asm/hwcap.h>
 #include <asm/alternative-macros.h>
+#include <asm/cheri.h>
 
 	.macro fixup op reg addr lbl
 100:
@@ -24,6 +25,15 @@
 SYM_FUNC_START(__cheri_usercopy_sum_enabled)
 	beqz	a2, .Lexit_copy_user
 	add	a4, a0, a2
+
+	/*
+	 * Clear the C permission on ca1 (*from). The data loaded via ca1 will
+	 * have its tag bit unset, preventing tagged capability
+	 * from inadvertently propagating into user space, which could lead to
+	 * security vulnerabilities.
+	 */
+	li	a2, ~CHERI_PERM_CAP_RW
+	acperm	ca1, ca1, a2
 
 .Lbyte_copy_until_dest_aligned_forward:
 	andi	t0, a0, CSZREG-1
@@ -46,7 +56,6 @@ SYM_FUNC_START(__cheri_usercopy_sum_enabled)
 .Lcap_aligned_bulk_copy_forward:
 	addi	a5, a4, -(8*CSZREG-1)
 	bgeu	a0, a5, .Lcap_aligned_copy_forward
-	li		a2, 0
 1:
 	fixup lc	ct0, 0*CSZREG(ca1), .Ltail_byte_copy_forward
 	fixup lc	ct1, 1*CSZREG(ca1), .Ltail_byte_copy_forward
@@ -56,19 +65,6 @@ SYM_FUNC_START(__cheri_usercopy_sum_enabled)
 	fixup lc	ct5, 5*CSZREG(ca1), .Ltail_byte_copy_forward
 	fixup lc	ca3, 6*CSZREG(ca1), .Ltail_byte_copy_forward
 	fixup lc	ca6, 7*CSZREG(ca1), .Ltail_byte_copy_forward
-	/*
-	 * Explicitly clear the capability tag bit to prevent tagged capability
-	 * from inadvertently propagating into user space, which could lead to
-	 * security vulnerabilities.
-	 */
-	cbld	ct0, ca2, ct0
-	cbld	ct1, ca2, ct1
-	cbld	ct2, ca2, ct2
-	cbld	ct3, ca2, ct3
-	cbld	ct4, ca2, ct4
-	cbld	ct5, ca2, ct5
-	cbld	ct6, ca2, ct6
-	cbld	ca6, ca2, ca6
 	fixup sc	ct0, 0*CSZREG(ca0), .Ltail_byte_copy_forward
 	fixup sc	ct1, 1*CSZREG(ca0), .Ltail_byte_copy_forward
 	fixup sc	ct2, 2*CSZREG(ca0), .Ltail_byte_copy_forward
@@ -91,15 +87,8 @@ SYM_FUNC_START(__cheri_usercopy_sum_enabled)
 #else
 	bgeu	a0, a5, .Ltail_word_aligned_copy_forward
 #endif
-	li		a2, 0
 1:
 	fixup lc	ct0, 0(ca1), .Ltail_byte_copy_forward
-	/*
-	 * Explicitly clear the capability tag bit to prevent tagged capability
-	 * from inadvertently propagating into user space, which could lead to
-	 * security vulnerabilities.
-	 */
-	cbld	ct0, ca2, ct0
 	fixup sc	ct0, 0(ca0), .Ltail_byte_copy_forward
 	add	ca1, ca1, CSZREG
 	add	ca0, ca0, CSZREG
