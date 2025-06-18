@@ -33,7 +33,12 @@
 #endif
 
 #define THREAD_SHIFT            (PAGE_SHIFT + THREAD_SIZE_ORDER)
+
+#ifdef CONFIG_CHERI_KERNEL
+#define OVERFLOW_STACK_SIZE     SZ_8K
+#else
 #define OVERFLOW_STACK_SIZE     SZ_4K
+#endif
 
 #define IRQ_STACK_SIZE		THREAD_SIZE
 
