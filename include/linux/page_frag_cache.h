@@ -22,7 +22,7 @@
 
 #define PAGE_FRAG_CACHE_PFMEMALLOC_BIT		(PAGE_FRAG_CACHE_ORDER_MASK + 1)
 
-static inline bool encoded_page_decode_pfmemalloc(unsigned long encoded_page)
+static inline bool encoded_page_decode_pfmemalloc(uintptr_t encoded_page)
 {
 	return !!(encoded_page & PAGE_FRAG_CACHE_PFMEMALLOC_BIT);
 }
