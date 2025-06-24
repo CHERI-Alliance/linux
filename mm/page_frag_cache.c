@@ -20,7 +20,7 @@
 #include <linux/page_frag_cache.h>
 #include "internal.h"
 
-static unsigned long encoded_page_create(struct page *page, unsigned int order,
+static uintptr_t encoded_page_create(struct page *page, unsigned int order,
 					 bool pfmemalloc)
 {
 	BUILD_BUG_ON(PAGE_FRAG_CACHE_MAX_ORDER > PAGE_FRAG_CACHE_ORDER_MASK);
@@ -31,17 +31,17 @@ static unsigned long encoded_page_create(struct page *page, unsigned int order,
 		((unsigned long)pfmemalloc * PAGE_FRAG_CACHE_PFMEMALLOC_BIT);
 }
 
-static unsigned long encoded_page_decode_order(unsigned long encoded_page)
+static unsigned long encoded_page_decode_order(uintptr_t encoded_page)
 {
 	return encoded_page & PAGE_FRAG_CACHE_ORDER_MASK;
 }
 
-static void *encoded_page_decode_virt(unsigned long encoded_page)
+static void *encoded_page_decode_virt(uintptr_t encoded_page)
 {
 	return (void *)(encoded_page & PAGE_MASK);
 }
 
-static struct page *encoded_page_decode_page(unsigned long encoded_page)
+static struct page *encoded_page_decode_page(uintptr_t encoded_page)
 {
 	return virt_to_page((void *)(uintptr_t)encoded_page);
 }
@@ -94,7 +94,7 @@ void *__page_frag_alloc_align(struct page_frag_cache *nc,
 			      unsigned int fragsz, gfp_t gfp_mask,
 			      unsigned int align_mask)
 {
-	unsigned long encoded_page = nc->encoded_page;
+	uintptr_t encoded_page = nc->encoded_page;
 	unsigned int size, offset;
 	struct page *page;
 
@@ -154,7 +154,7 @@ refill:
 	nc->pagecnt_bias--;
 	nc->offset = offset + fragsz;
 
-	return encoded_page_decode_virt(encoded_page) + offset;
+	return cheri_bounds_set_kernel(encoded_page_decode_virt(encoded_page) + offset, fragsz);
 }
 EXPORT_SYMBOL(__page_frag_alloc_align);
 

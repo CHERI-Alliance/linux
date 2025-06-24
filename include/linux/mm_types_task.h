@@ -50,7 +50,7 @@ struct page_frag_cache {
 	/* encoded_page consists of the virtual address, pfmemalloc bit and
 	 * order of a page.
 	 */
-	unsigned long encoded_page;
+	uintptr_t encoded_page;
 
 	/* we maintain a pagecount bias, so that we dont dirty cache line
 	 * containing page->_refcount every time we allocate a fragment.
