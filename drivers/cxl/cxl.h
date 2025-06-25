@@ -660,7 +660,7 @@ struct cxl_root_ops {
 static inline struct cxl_dport *
 cxl_find_dport_by_dev(struct cxl_port *port, const struct device *dport_dev)
 {
-	return xa_load(&port->dports, (uintptr_t)dport_dev);
+	return xa_load(&port->dports, __c_pa(dport_dev));
 }
 
 struct cxl_rcrb_info {
