@@ -131,13 +131,46 @@
 	la    \dst, __per_cpu_offset
 #endif
 	add   \dst, \dst, \tmp
+	/* tmp = __per_cpu_offset[our cpu] */
 	REG_L \tmp, 0(\dst)
 #ifdef CONFIG_CHERI_KERNEL
-	lgc   \dst, \sym
+	/*
+	 * Build the following result capability
+	 *     address = address(sym) + __per_cpu_offset[our cpu]
+	 *     permissions = permissions(sym)
+	 *     len of valid range = len(sym)
+	 *     base = address(result)
+	 *
+	 * Please note that the C implementation of this_cpu_ptr sets base =
+	 * base(sym) + __per_cpu_offset[our cpu]. Doing this in assembler would
+	 * require a second tmp register.
+	 *
+	 * For cheri, sym must be a capability. We have to use lgc to load
+	 * sym's address and metadata. lgc is translated into auipcc + lc.
+	 * llc CREG(\dst), \sym would be translated into auipcc + cadd,
+	 * we'd get a capability with sym's address and pcc's metadata.
+	 */
+	lgc    \dst, \sym
+
+	/*
+	 * address(dst) = address(sym) + __per_cpu_offset[our cpu]
+	 * This may clear the tag if the address is unrepresentable.
+	 */
+	cadd   \dst, \dst, \tmp
+
+	/* set base and length of valid range */
+	lgc    c\tmp, \sym
+	gclen  \tmp, c\tmp
+	scbnds \dst, \dst, \tmp
+
+	/* Set the tag again, authorized by kernel_data_cap */
+	llc    c\tmp, kernel_data_cap
+	lc     c\tmp, 0(c\tmp)
+	cbld   \dst, c\tmp, \dst
 #else
 	la    \dst, \sym
-#endif
 	add   \dst, \dst, \tmp
+#endif
 .endm
 #else /* CONFIG_SMP */
 .macro asm_per_cpu dst sym tmp
