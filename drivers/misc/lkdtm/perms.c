@@ -241,13 +241,18 @@ static void lkdtm_ACCESS_USERSPACE(void)
 		return;
 	}
 
-	if (copy_to_user((void __user *)user_addr, &tmp, sizeof(tmp))) {
+#ifdef CONFIG_CHERI_KERNEL
+	ptr = (unsigned long *)cheri_build_user_cap(user_addr, PAGE_SIZE, CHERI_PERMS_READ |
+						    CHERI_PERMS_WRITE | CHERI_PERMS_EXEC);
+#else
+	ptr = (unsigned long *)user_addr;
+#endif
+
+	if (copy_to_user((void __user *)ptr, &tmp, sizeof(tmp))) {
 		pr_warn("copy_to_user failed\n");
 		vm_munmap(user_addr, PAGE_SIZE);
 		return;
 	}
-
-	ptr = (unsigned long *)user_addr;
 
 	pr_info("attempting bad read at %px\n", ptr);
 	tmp = *ptr;
