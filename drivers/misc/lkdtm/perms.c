@@ -104,6 +104,10 @@ static void execute_user_location(void *dst)
 	pr_info("attempting ok execution at %px\n", do_nothing_text);
 	do_nothing();
 
+	/*
+	 * On a cheri system, do_nothing_text is a sealed capability. Copying
+	 * to dst will trigger a cheri exception.
+	 */
 	copied = access_process_vm(current, (unsigned long)dst, do_nothing_text,
 				   EXEC_SIZE, FOLL_WRITE);
 	if (copied < EXEC_SIZE)
@@ -211,6 +215,7 @@ static void lkdtm_EXEC_RODATA(void)
 static void lkdtm_EXEC_USERSPACE(void)
 {
 	unsigned long user_addr;
+	void *user_ptr;
 
 	user_addr = vm_mmap(NULL, 0, PAGE_SIZE,
 			    PROT_READ | PROT_WRITE | PROT_EXEC,
@@ -219,7 +224,13 @@ static void lkdtm_EXEC_USERSPACE(void)
 		pr_warn("Failed to allocate user memory\n");
 		return;
 	}
-	execute_user_location((void *)user_addr);
+#ifdef CONFIG_CHERI_KERNEL
+	user_ptr = cheri_build_user_cap(user_addr, PAGE_SIZE, CHERI_PERMS_READ |
+					CHERI_PERMS_WRITE | CHERI_PERMS_EXEC);
+#else
+	user_ptr = (void *)user_addr;
+#endif
+	execute_user_location(user_ptr);
 	vm_munmap(user_addr, PAGE_SIZE);
 }
 
