@@ -55,6 +55,7 @@ static noinline unsigned char *do_usercopy_stack_callee(int value)
 static noinline void do_usercopy_stack(bool to_user, bool bad_frame)
 {
 	unsigned long user_addr;
+	void *user_ptr;
 	unsigned char good_stack[32];
 	unsigned char *bad_stack;
 	int i;
@@ -85,17 +86,23 @@ static noinline void do_usercopy_stack(bool to_user, bool bad_frame)
 		pr_warn("Failed to allocate user memory\n");
 		return;
 	}
+#ifdef CONFIG_CHERI_KERNEL
+	user_ptr = cheri_build_user_cap(user_addr, PAGE_SIZE, CHERI_PERMS_READ |
+					CHERI_PERMS_WRITE | CHERI_PERMS_EXEC);
+#else
+	user_ptr = (void *)user_addr;
+#endif
 
 	if (to_user) {
 		pr_info("attempting good copy_to_user of local stack\n");
-		if (copy_to_user((void __user *)user_addr, good_stack,
+		if (copy_to_user((void __user *)user_ptr, good_stack,
 				 unconst + sizeof(good_stack))) {
 			pr_warn("copy_to_user failed unexpectedly?!\n");
 			goto free_user;
 		}
 
 		pr_info("attempting bad copy_to_user of distant stack\n");
-		if (copy_to_user((void __user *)user_addr, bad_stack,
+		if (copy_to_user((void __user *)user_ptr, bad_stack,
 				 unconst + sizeof(good_stack))) {
 			pr_warn("copy_to_user failed, but lacked Oops\n");
 			goto free_user;
@@ -109,14 +116,14 @@ static noinline void do_usercopy_stack(bool to_user, bool bad_frame)
 			goto free_user;
 
 		pr_info("attempting good copy_from_user of local stack\n");
-		if (copy_from_user(good_stack, (void __user *)user_addr,
+		if (copy_from_user(good_stack, (void __user *)user_ptr,
 				   unconst + sizeof(good_stack))) {
 			pr_warn("copy_from_user failed unexpectedly?!\n");
 			goto free_user;
 		}
 
 		pr_info("attempting bad copy_from_user of distant stack\n");
-		if (copy_from_user(bad_stack, (void __user *)user_addr,
+		if (copy_from_user(bad_stack, (void __user *)user_ptr,
 				   unconst + sizeof(good_stack))) {
 			pr_warn("copy_from_user failed, but lacked Oops\n");
 			goto free_user;
@@ -134,6 +141,7 @@ free_user:
 static void do_usercopy_slab_size(bool to_user)
 {
 	unsigned long user_addr;
+	void *user_ptr;
 	unsigned char *one, *two;
 	void __user *test_user_addr;
 	void *test_kern_addr;
@@ -153,11 +161,17 @@ static void do_usercopy_slab_size(bool to_user)
 		pr_warn("Failed to allocate user memory\n");
 		goto free_kernel;
 	}
+#ifdef CONFIG_CHERI_KERNEL
+	user_ptr = cheri_build_user_cap(user_addr, PAGE_SIZE, CHERI_PERMS_EXEC|
+					CHERI_PERMS_WRITE|CHERI_PERMS_READ);
+#else
+	user_ptr = (void *)user_addr;
+#endif
 
 	memset(one, 'A', size);
 	memset(two, 'B', size);
 
-	test_user_addr = (void __user *)(user_addr + 16);
+	test_user_addr = (void __user *)(user_ptr + 16);
 	test_kern_addr = one + 16;
 
 	if (to_user) {
@@ -229,7 +243,12 @@ static void do_usercopy_slab_whitelist(bool to_user)
 		pr_warn("Failed to allocate user memory\n");
 		goto free_alloc;
 	}
+#ifdef CONFIG_CHERI_KERNEL
+	user_addr = (void __user *)cheri_build_user_cap(user_alloc, PAGE_SIZE, CHERI_PERMS_READ |
+							CHERI_PERMS_WRITE | CHERI_PERMS_EXEC);
+#else
 	user_addr = (void __user *)user_alloc;
+#endif
 
 	memset(buf, 'B', cache_size);
 
@@ -311,6 +330,7 @@ static void lkdtm_USERCOPY_STACK_BEYOND(void)
 static void lkdtm_USERCOPY_KERNEL(void)
 {
 	unsigned long user_addr;
+	void *user_ptr;
 
 	user_addr = vm_mmap(NULL, 0, PAGE_SIZE,
 			    PROT_READ | PROT_WRITE | PROT_EXEC,
@@ -319,10 +339,16 @@ static void lkdtm_USERCOPY_KERNEL(void)
 		pr_warn("Failed to allocate user memory\n");
 		return;
 	}
+#ifdef CONFIG_CHERI_KERNEL
+	user_ptr = cheri_build_user_cap(user_addr, PAGE_SIZE, CHERI_PERMS_READ |
+					CHERI_PERMS_WRITE | CHERI_PERMS_EXEC);
+#else
+	user_ptr = (void *)user_addr;
+#endif
 
 	pr_info("attempting good copy_to_user from kernel rodata: %px\n",
 		test_text);
-	if (copy_to_user((void __user *)user_addr, test_text,
+	if (copy_to_user((void __user *)user_ptr, test_text,
 			 unconst + sizeof(test_text))) {
 		pr_warn("copy_to_user failed unexpectedly?!\n");
 		goto free_user;
@@ -330,8 +356,7 @@ static void lkdtm_USERCOPY_KERNEL(void)
 
 	pr_info("attempting bad copy_to_user from kernel text: %px\n",
 		vm_mmap);
-	if (copy_to_user((void __user *)user_addr, vm_mmap,
-			 unconst + PAGE_SIZE)) {
+	if (copy_to_user((void __user *)user_ptr, vm_mmap, unconst + PAGE_SIZE)) {
 		pr_warn("copy_to_user failed, but lacked Oops\n");
 		goto free_user;
 	}
@@ -351,6 +376,7 @@ free_user:
 static void do_usercopy_page_span(const char *name, void *kaddr)
 {
 	unsigned long uaddr;
+	void *uptr;
 
 	uaddr = vm_mmap(NULL, 0, PAGE_SIZE, PROT_READ | PROT_WRITE,
 			MAP_ANONYMOUS | MAP_PRIVATE, 0);
@@ -358,6 +384,11 @@ static void do_usercopy_page_span(const char *name, void *kaddr)
 		pr_warn("Failed to allocate user memory\n");
 		return;
 	}
+#ifdef CONFIG_CHERI_KERNEL
+	uptr = cheri_build_user_cap(uaddr, PAGE_SIZE, CHERI_PERMS_WRITE|CHERI_PERMS_READ);
+#else
+	uptr = (void *)uaddr;
+#endif
 
 	/* Initialize contents. */
 	memset(kaddr, 0xAA, PAGE_SIZE);
@@ -367,7 +398,7 @@ static void do_usercopy_page_span(const char *name, void *kaddr)
 
 	pr_info("attempting good copy_to_user() from kernel %s: %px\n",
 		name, kaddr);
-	if (copy_to_user((void __user *)uaddr, kaddr,
+	if (copy_to_user((void __user *)uptr, kaddr,
 			 unconst + (PAGE_SIZE / 2))) {
 		pr_err("copy_to_user() failed unexpectedly?!\n");
 		goto free_user;
@@ -375,7 +406,7 @@ static void do_usercopy_page_span(const char *name, void *kaddr)
 
 	pr_info("attempting bad copy_to_user() from kernel %s: %px\n",
 		name, kaddr);
-	if (copy_to_user((void __user *)uaddr, kaddr, unconst + PAGE_SIZE)) {
+	if (copy_to_user((void __user *)uptr, kaddr, unconst + PAGE_SIZE)) {
 		pr_warn("Good, copy_to_user() failed, but lacked Oops(?!)\n");
 		goto free_user;
 	}
