@@ -63,7 +63,7 @@ static void *setup_function_descriptor(func_desc_t *fdesc, void *dst)
 		return dst;
 
 	memcpy(fdesc, do_nothing, sizeof(*fdesc));
-	fdesc->addr = (unsigned long)dst;
+	fdesc->addr = __c_pa(dst);
 	barrier();
 
 	return fdesc;
@@ -108,7 +108,7 @@ static void execute_user_location(void *dst)
 	 * On a cheri system, do_nothing_text is a sealed capability. Copying
 	 * to dst will trigger a cheri exception.
 	 */
-	copied = access_process_vm(current, (unsigned long)dst, do_nothing_text,
+	copied = access_process_vm(current, __c_pa(dst), do_nothing_text,
 				   EXEC_SIZE, FOLL_WRITE);
 	if (copied < EXEC_SIZE)
 		return;
