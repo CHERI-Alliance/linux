@@ -225,10 +225,10 @@ static void lkdtm_REPORT_STACK(void)
 	if (pid != stack_pid) {
 		pr_info("Starting stack offset tracking for pid %d\n", pid);
 		stack_pid = pid;
-		stack_addr = (uintptr_t)&magic;
+		stack_addr = __c_pa(&magic);
 	}
 
-	pr_info("Stack offset: %d\n", (int)(stack_addr - (uintptr_t)&magic));
+	pr_info("Stack offset: %d\n", (int)(stack_addr - __c_pa(&magic)));
 }
 
 static pid_t stack_canary_pid;
