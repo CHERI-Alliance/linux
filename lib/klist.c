@@ -66,7 +66,7 @@ static void knode_kill(struct klist_node *knode)
 {
 	/* and no knode should die twice ever either, see we're very humane */
 	WARN_ON(knode_dead(knode));
-	*(unsigned long *)&knode->n_klist |= KNODE_DEAD;
+	*(uintptr_t*)&knode->n_klist |= KNODE_DEAD;
 }
 
 /**

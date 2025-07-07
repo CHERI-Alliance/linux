@@ -58,7 +58,7 @@ struct list_lru;
 static inline void *xa_mk_value(unsigned long v)
 {
 	WARN_ON((long)v < 0);
-	return (void *)((v << 1) | 1);
+	return __c_fakep((v << 1) | 1);
 }
 
 /**
@@ -70,7 +70,7 @@ static inline void *xa_mk_value(unsigned long v)
  */
 static inline unsigned long xa_to_value(const void *entry)
 {
-	return (uintptr_t)entry >> 1;
+	return __c_pa(entry) >> 1;
 }
 
 /**
@@ -148,7 +148,7 @@ static inline unsigned int xa_pointer_tag(void *entry)
  */
 static inline void *xa_mk_internal(unsigned long v)
 {
-	return (void *)((v << 2) | 2);
+	return __c_fakep((v << 2) | 2);
 }
 
 /*
@@ -160,7 +160,7 @@ static inline void *xa_mk_internal(unsigned long v)
  */
 static inline unsigned long xa_to_internal(const void *entry)
 {
-	return (uintptr_t)entry >> 2;
+	return __c_pa(entry) >> 2;
 }
 
 /*
@@ -1368,7 +1368,7 @@ struct xa_state {
  * We encode errnos in the xas->xa_node.  If an error has happened, we need to
  * drop the lock to fix it, and once we've done so the xa_state is invalid.
  */
-#define XA_ERROR(errno) ((struct xa_node *)(((unsigned long)errno << 2) | 2UL))
+#define XA_ERROR(errno) ((struct xa_node *)__c_fakep(((unsigned long)errno << 2) | 2UL))
 #define XAS_BOUNDS	((struct xa_node *)1UL)
 #define XAS_RESTART	((struct xa_node *)3UL)
 
