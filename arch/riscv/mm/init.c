@@ -1302,7 +1302,7 @@ static void __init create_linear_mapping_page_table(void)
 	BUG_ON(!kfence_pool);
 
 	memblock_mark_nomap(kfence_pool, KFENCE_POOL_SIZE);
-	__kfence_pool = __va(kfence_pool);
+	__kfence_pool = cheri_make_kernel_data_cap(__va_a(kfence_pool), KFENCE_POOL_SIZE);
 #endif
 
 	/* Map all memory banks in the linear mapping */

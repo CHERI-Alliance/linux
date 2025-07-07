@@ -461,7 +461,7 @@ int kasan_populate_vmalloc(unsigned long addr, unsigned long size)
 static int kasan_depopulate_vmalloc_pte(pte_t *ptep, unsigned long addr,
 					void *unused)
 {
-	unsigned long page;
+	uintptr_t page;
 
 	page = (uintptr_t)__va(pte_pfn(ptep_get(ptep)) << PAGE_SHIFT);
 
