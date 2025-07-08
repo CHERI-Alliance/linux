@@ -27,7 +27,7 @@ int riscv_patch_in_stop_machine = false;
 
 #ifdef CONFIG_MMU
 
-static inline bool is_kernel_exittext(uintptr_t addr)
+static inline bool is_kernel_exittext(__ptraddr_t addr)
 {
 	return system_state < SYSTEM_RUNNING &&
 		addr >= (uintptr_t)__exittext_begin &&
