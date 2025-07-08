@@ -210,6 +210,7 @@
 #define ENVCFG_PMM_PMLEN_0		(_AC(0x0, ULL) << 32)
 #define ENVCFG_PMM_PMLEN_7		(_AC(0x2, ULL) << 32)
 #define ENVCFG_PMM_PMLEN_16		(_AC(0x3, ULL) << 32)
+#define ENVCFG_CRE			(_AC(0x1, ULL) << 28)
 #define ENVCFG_CBZE			(_AC(1, UL) << 7)
 #define ENVCFG_CBCFE			(_AC(1, UL) << 6)
 #define ENVCFG_CBIE_SHIFT		4
@@ -316,6 +317,7 @@
 #define CSR_SCAUSE		0x142
 #define CSR_STVAL		0x143
 #define CSR_SIP			0x144
+#define CSR_STVAL2		0x14b
 #define CSR_SATP		0x180
 
 #define CSR_STIMECMP		0x14D
@@ -353,6 +355,9 @@
 #define CSR_VSATP		0x280
 #define CSR_VSTIMECMP		0x24D
 #define CSR_VSTIMECMPH		0x25D
+
+/* CHERI default data capability. */
+#define CSR_DDC			0x416
 
 #define CSR_HSTATUS		0x600
 #define CSR_HEDELEG		0x602
@@ -410,6 +415,7 @@
 #define CSR_MCAUSE		0x342
 #define CSR_MTVAL		0x343
 #define CSR_MIP			0x344
+#define CSR_MTVAL2		0x34b
 #define CSR_PMPCFG0		0x3a0
 #define CSR_PMPADDR0		0x3b0
 #define CSR_MSECCFG		0x747
@@ -462,6 +468,7 @@
 # define CSR_EPC	CSR_MEPC
 # define CSR_CAUSE	CSR_MCAUSE
 # define CSR_TVAL	CSR_MTVAL
+# define CSR_TVAL2	CSR_MTVAL2
 # define CSR_IP		CSR_MIP
 
 # define CSR_IEH		CSR_MIEH
@@ -487,6 +494,7 @@
 # define CSR_EPC	CSR_SEPC
 # define CSR_CAUSE	CSR_SCAUSE
 # define CSR_TVAL	CSR_STVAL
+# define CSR_TVAL2	CSR_STVAL2
 # define CSR_IP		CSR_SIP
 
 # define CSR_IEH		CSR_SIEH
@@ -533,6 +541,19 @@
 	__v;							\
 })
 
+#ifdef CONFIG_CHERI_KERNEL
+#define csr_cread(csr)						\
+({								\
+	register uintptr_t __v;				\
+	__asm__ __volatile__ ("csrr %0, " __ASM_STR(csr)	\
+			      : "=C" (__v) :			\
+			      : "memory");			\
+	__v;							\
+})
+#else
+#define csr_cread(csr) csr_read(csr)
+#endif
+
 #define csr_write(csr, val)					\
 ({								\
 	unsigned long __v = (unsigned long)(val);		\
@@ -540,6 +561,18 @@
 			      : : "rK" (__v)			\
 			      : "memory");			\
 })
+
+#ifdef CONFIG_CHERI_KERNEL
+#define csr_cwrite(csr, val)					\
+({								\
+	uintptr_t __v = (uintptr_t)(val);			\
+	__asm__ __volatile__ ("csrw " __ASM_STR(csr) ", %0"	\
+			      : : "C" (__v)			\
+			      : "memory");			\
+})
+#else
+#define csr_cwrite(csr, val) csr_write(csr, val)
+#endif
 
 #define csr_read_set(csr, val)					\
 ({								\
