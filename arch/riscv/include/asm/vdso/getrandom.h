@@ -13,7 +13,7 @@ static __always_inline ssize_t getrandom_syscall(void *_buffer, size_t _len, uns
 {
 	register long ret asm("a0");
 	register long nr asm("a7") = __NR_getrandom;
-	register void *buffer asm("a0") = _buffer;
+	register void *buffer asm(CREG(a0)) = _buffer;
 	register size_t len asm("a1") = _len;
 	register unsigned int flags asm("a2") = _flags;
 

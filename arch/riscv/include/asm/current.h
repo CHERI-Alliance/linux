@@ -12,12 +12,13 @@
 
 #include <linux/bug.h>
 #include <linux/compiler.h>
+#include <asm/asm.h>
 
 #ifndef __ASSEMBLER__
 
 struct task_struct;
 
-register struct task_struct *riscv_current_is_tp __asm__("tp");
+register struct task_struct *riscv_current_is_tp __asm__(CREG(tp));
 
 /*
  * This only works because "struct thread_info" is at offset 0 from "struct
@@ -33,7 +34,7 @@ static __always_inline struct task_struct *get_current(void)
 
 #define current get_current()
 
-register unsigned long current_stack_pointer __asm__("sp");
+register uintptr_t current_stack_pointer __asm__(CREG(sp));
 
 #endif /* __ASSEMBLER__ */
 
