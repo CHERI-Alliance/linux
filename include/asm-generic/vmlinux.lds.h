@@ -186,11 +186,15 @@ defined(CONFIG_AUTOFDO_CLANG) || defined(CONFIG_PROPELLER_CLANG)
 			KEEP_PATCHABLE				\
 			__stop_mcount_loc = .;			\
 			FTRACE_STUB_HACK			\
-			ftrace_ops_list_func = arch_ftrace_ops_list_func;
+			__lst_f_start = .;			\
+			ftrace_ops_list_func = arch_ftrace_ops_list_func; \
+			size$ftrace_ops_list_func = ABSOLUTE(. - __lst_f_start);
 #else
 # ifdef CONFIG_FUNCTION_TRACER
 #  define MCOUNT_REC()	FTRACE_STUB_HACK			\
-			ftrace_ops_list_func = arch_ftrace_ops_list_func;
+			__lst_f_start = .;			\
+			ftrace_ops_list_func = arch_ftrace_ops_list_func; \
+			size$ftrace_ops_list_func = ABSOLUTE(. - __lst_f_start);
 # else
 #  define MCOUNT_REC()
 # endif
