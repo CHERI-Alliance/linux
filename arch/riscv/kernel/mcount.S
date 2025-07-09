@@ -117,11 +117,15 @@ SYM_FUNC_START(_mcount)
 
 /*
  * A pseudo representation for the function tracer:
- * (*ftrace_trace_function)(ra_to_caller, ra_to_caller_of_caller)
+ * (*ftrace_trace_function)(ra_to_caller, ra_to_caller_of_caller, ops, fregs)
  */
 .Ldo_trace:
 	CREG_L	CREG(a1), -CSZREG(CREG(s0))
 	mv	CREG(a0), CREG(ra)
+	CINSN(la)	CREG(a2), function_trace_op
+	CREG_L	CREG(a2), 0(CREG(a2))
+	/* fregs = NULL */
+	mv	CREG(a3), CREG(null)
 
 	SAVE_ABI_STATE
 	jalr	CREG(t5)
