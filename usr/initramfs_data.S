@@ -34,3 +34,4 @@ __initramfs_size:
 #else
 	.long __irf_end - __irf_start
 #endif
+.size __initramfs_size, . - __initramfs_size

@@ -23,6 +23,9 @@ asm (
 "	.incbin \"kernel/kheaders_data.tar.xz\"	\n"
 "	.global kernel_headers_data_end		\n"
 "kernel_headers_data_end:			\n"
+"	.size kernel_headers_data, . - kernel_headers_data\n"
+"	.size kernel_headers_data_end, 1	\n"
+"	.byte 0					\n"
 "	.popsection				\n"
 );
 
