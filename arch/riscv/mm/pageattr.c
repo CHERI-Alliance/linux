@@ -259,14 +259,14 @@ static int split_linear_mapping(unsigned long start, unsigned long end)
 }
 #endif	/* CONFIG_64BIT */
 
-static int __set_memory(unsigned long addr, int numpages, pgprot_t set_mask,
+static int __set_memory(__ptraddr_t addr, int numpages, pgprot_t set_mask,
 			pgprot_t clear_mask)
 {
 	int ret;
-	unsigned long start = addr;
-	unsigned long end = start + PAGE_SIZE * numpages;
-	unsigned long __maybe_unused lm_start;
-	unsigned long __maybe_unused lm_end;
+	__ptraddr_t start = addr;
+	__ptraddr_t end = start + PAGE_SIZE * numpages;
+	__ptraddr_t __maybe_unused lm_start;
+	__ptraddr_t __maybe_unused lm_end;
 	struct pageattr_masks masks = {
 		.set_mask = set_mask,
 		.clear_mask = clear_mask
@@ -284,11 +284,11 @@ static int __set_memory(unsigned long addr, int numpages, pgprot_t set_mask,
 	 * splitting a huge mapping.
 	 */
 
-	if (is_vmalloc_or_module_addr((void *)start)) {
+	if (is_vmalloc_or_module_addr((void *)(uintptr_t)start)) {
 		struct vm_struct *area = NULL;
 		int i, page_start;
 
-		area = find_vm_area((void *)start);
+		area = find_vm_area((void *)(uintptr_t)start);
 		page_start = (start - (uintptr_t)area->addr) >> PAGE_SHIFT;
 
 		for (i = page_start; i < page_start + numpages; ++i) {
@@ -423,7 +423,7 @@ void __kernel_map_pages(struct page *page, int numpages, int enable)
 	if (!debug_pagealloc_enabled())
 		return;
 
-	uintptr_t start = (uintptr_t)page_address(page);
+	__ptraddr_t start = (uintptr_t)page_address(page);
 	unsigned long size = PAGE_SIZE * numpages;
 
 	apply_to_existing_page_range(&init_mm, start, size, debug_pagealloc_set_page, &enable);
@@ -434,7 +434,7 @@ void __kernel_map_pages(struct page *page, int numpages, int enable)
 
 bool kernel_page_present(struct page *page)
 {
-	uintptr_t addr = (uintptr_t)page_address(page);
+	__ptraddr_t addr = (uintptr_t)page_address(page);
 	pgd_t *pgd;
 	pud_t *pud;
 	p4d_t *p4d;
