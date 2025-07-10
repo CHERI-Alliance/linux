@@ -51,7 +51,7 @@ static void __kprobes arch_simulate_insn(struct kprobe *p, struct pt_regs *regs)
 
 static bool __kprobes arch_check_kprobe(struct kprobe *p)
 {
-	unsigned long tmp  = (uintptr_t)p->addr - p->offset;
+	uintptr_t tmp  = (uintptr_t)p->addr - p->offset;
 	uintptr_t addr = (uintptr_t)p->addr;
 
 	while (tmp <= addr) {
@@ -167,7 +167,7 @@ static void __kprobes setup_singlestep(struct kprobe *p,
 				       struct pt_regs *regs,
 				       struct kprobe_ctlblk *kcb, int reenter)
 {
-	unsigned long slot;
+	uintptr_t slot;
 
 	if (reenter) {
 		save_previous_kprobe(kcb);
@@ -283,7 +283,7 @@ kprobe_breakpoint_handler(struct pt_regs *regs)
 {
 	struct kprobe *p, *cur_kprobe;
 	struct kprobe_ctlblk *kcb;
-	unsigned long addr = instruction_pointer(regs);
+	uintptr_t addr = instruction_pointer(regs);
 
 	kcb = get_kprobe_ctlblk();
 	cur_kprobe = kprobe_running();
@@ -332,7 +332,7 @@ bool __kprobes
 kprobe_single_step_handler(struct pt_regs *regs)
 {
 	struct kprobe_ctlblk *kcb = get_kprobe_ctlblk();
-	unsigned long addr = instruction_pointer(regs);
+	uintptr_t addr = instruction_pointer(regs);
 	struct kprobe *cur = kprobe_running();
 
 	if (cur && (kcb->kprobe_status & (KPROBE_HIT_SS | KPROBE_REENTER)) &&
@@ -353,8 +353,8 @@ int __init arch_populate_kprobe_blacklist(void)
 {
 	int ret;
 
-	ret = kprobe_add_area_blacklist((uintptr_t)__irqentry_text_start,
-					(uintptr_t)__irqentry_text_end);
+	ret = kprobe_add_area_blacklist(__c_pa(__irqentry_text_start),
+					__c_pa(__irqentry_text_end));
 	return ret;
 }
 
