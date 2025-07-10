@@ -13,7 +13,7 @@
 
 struct rethook_node;
 
-typedef void (*rethook_handler_t) (struct rethook_node *, void *, unsigned long, struct pt_regs *);
+typedef void (*rethook_handler_t) (struct rethook_node *, void *, uintptr_t, struct pt_regs *);
 
 /**
  * struct rethook - The rethook management data structure.
@@ -33,7 +33,7 @@ struct rethook {
 	 * __rcu, instead of rethook_handler_t. But this must be same as
 	 * rethook_handler_t.
 	 */
-	void (__rcu *handler) (struct rethook_node *, void *, unsigned long, struct pt_regs *);
+	void (__rcu *handler) (struct rethook_node *, void *, uintptr_t, struct pt_regs *);
 	struct objpool_head	pool;
 	struct rcu_head		rcu;
 };
@@ -53,8 +53,8 @@ struct rethook_node {
 	struct rcu_head		rcu;
 	struct llist_node	llist;
 	struct rethook		*rethook;
-	unsigned long		ret_addr;
-	unsigned long		frame;
+	uintptr_t		ret_addr;
+	uintptr_t		frame;
 };
 
 struct rethook *rethook_alloc(void *data, rethook_handler_t handler, int size, int num);
@@ -63,8 +63,8 @@ void rethook_free(struct rethook *rh);
 struct rethook_node *rethook_try_get(struct rethook *rh);
 void rethook_recycle(struct rethook_node *node);
 void rethook_hook(struct rethook_node *node, struct pt_regs *regs, bool mcount);
-unsigned long rethook_find_ret_addr(struct task_struct *tsk, unsigned long frame,
-				    struct llist_node **cur);
+uintptr_t rethook_find_ret_addr(struct task_struct *tsk, uintptr_t frame,
+				struct llist_node **cur);
 
 /* Arch dependent code must implement arch_* and trampoline code */
 void arch_rethook_prepare(struct rethook_node *node, struct pt_regs *regs, bool mcount);
@@ -78,16 +78,15 @@ void arch_rethook_trampoline(void);
  */
 static inline bool is_rethook_trampoline(unsigned long addr)
 {
-	return addr == (unsigned long)dereference_symbol_descriptor(arch_rethook_trampoline);
+	return addr == (uintptr_t)dereference_symbol_descriptor(arch_rethook_trampoline);
 }
 
 /* If the architecture needs to fixup the return address, implement it. */
 void arch_rethook_fixup_return(struct pt_regs *regs,
-			       unsigned long correct_ret_addr);
+			       uintptr_t correct_ret_addr);
 
 /* Generic trampoline handler, arch code must prepare asm stub */
-unsigned long rethook_trampoline_handler(struct pt_regs *regs,
-					 unsigned long frame);
+uintptr_t rethook_trampoline_handler(struct pt_regs *regs, uintptr_t frame);
 
 #ifdef CONFIG_RETHOOK
 void rethook_flush_task(struct task_struct *tk);
