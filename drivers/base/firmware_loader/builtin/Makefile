@@ -21,11 +21,13 @@ filechk_fwbin = \
 	echo "    .p2align 4"					;\
 	echo "_fw_$(FWSTR)_bin:"				;\
 	echo "    .incbin \"$(fwdir)/$(FWNAME)\""		;\
+	echo "    .size _fw_$(FWSTR)_bin, . - _fw_$(FWSTR)_bin"	;\
 	echo "_fw_end:"						;\
 	echo "    .section .rodata.str,\"aMS\",$(PROGBITS),1"	;\
 	echo "    .p2align $(ASM_ALIGN)"			;\
 	echo "_fw_$(FWSTR)_name:"				;\
 	echo "    .string \"$(FWNAME)\""			;\
+	echo "    .size _fw_$(FWSTR)_name, . - _fw_$(FWSTR)_name";\
 	echo "    .section .builtin_fw,\"a\",$(PROGBITS)"	;\
 	echo "    .p2align $(ASM_ALIGN)"			;\
 	echo "    $(ASM_WORD) _fw_$(FWSTR)_name"		;\

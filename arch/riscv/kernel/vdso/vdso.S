@@ -19,5 +19,7 @@ vdso_start:
 	.incbin __VDSO_PATH
 	.balign PAGE_SIZE
 vdso_end:
+.size vdso_start, vdso_end - vdso_start
+.size vdso_end, 1
 
 	.previous
