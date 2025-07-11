@@ -9,6 +9,7 @@
 #include <linux/cpumask.h>
 #include <linux/irqflags.h>
 #include <linux/smp.h>
+#include <linux/cheri.h>
 
 /*
  * objpool: ring-array based lockless MPMC queue
@@ -56,7 +57,7 @@ struct objpool_slot {
 	uint32_t            last;
 	uint32_t            mask;
 	void               *entries[];
-} __packed;
+} __packed __cheri_pointer_align;
 
 struct objpool_head;
 
