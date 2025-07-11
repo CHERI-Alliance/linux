@@ -1529,7 +1529,7 @@ long do_shmat(int shmid, char __user *shmaddr, int shmflg,
 	      user_uintptr_t *ruser_ptr, unsigned long shmlba)
 {
 	struct shmid_kernel *shp;
-	user_uintptr_t addr = (user_uintptr_t)shmaddr;
+	unsigned long addr = __c_pa_u(shmaddr);
 	unsigned long size;
 	struct file *file, *base;
 	int    err;
@@ -1680,12 +1680,12 @@ long do_shmat(int shmid, char __user *shmaddr, int shmflg,
 		if (!user_ptr_is_valid((const void __user *)user_ptr))
 			user_ptr = reserv_make_user_ptr_owning(addr, true);
 	} else {
-		user_ptr = addr;
+		user_ptr = __c_fakeu(addr);
 	}
 	*ruser_ptr = user_ptr;
 	err = 0;
 	if (IS_ERR_VALUE(user_ptr))
-		err = (long)user_ptr;
+		err = (long)__c_ua(user_ptr);
 invalid:
 	mmap_write_unlock(current->mm);
 	if (populate)
@@ -1719,7 +1719,7 @@ SYSCALL_DEFINE3(__retptr__(shmat), int, shmid, char __user *, shmaddr, int, shmf
 
 	err = do_shmat(shmid, shmaddr, shmflg, &ret, SHMLBA);
 	if (err)
-		return err;
+		return __c_fakeu(err);
 	force_successful_syscall_return();
 	return ret;
 }
@@ -1751,7 +1751,7 @@ long ksys_shmdt(char __user *shmaddr)
 {
 	struct mm_struct *mm = current->mm;
 	struct vm_area_struct *vma;
-	user_uintptr_t addr = (user_uintptr_t)shmaddr;
+	unsigned long addr = __c_pa_u(shmaddr);
 	int retval = -EINVAL;
 #ifdef CONFIG_MMU
 	loff_t size = 0;
