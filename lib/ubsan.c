@@ -165,11 +165,11 @@ static s_max get_signed_val(struct type_descriptor *type, void *val)
 		unsigned extra_bits = sizeof(s_max)*8 - type_bit_width(type);
 		uintptr_t ulong_val = (uintptr_t)val;
 
-		return ((s_max)ulong_val) << extra_bits >> extra_bits;
+		return ((s_max __force)ulong_val) << extra_bits >> extra_bits;
 	}
 
 	if (type_bit_width(type) == 64)
-		return *(s64 *)val;
+		return (s_max __force)*(s64 *)val;
 
 	return *(s_max *)val;
 }
@@ -182,10 +182,10 @@ static bool val_is_negative(struct type_descriptor *type, void *val)
 static u_max get_unsigned_val(struct type_descriptor *type, void *val)
 {
 	if (is_inline_int(type))
-		return (uintptr_t)val;
+		return (u_max __force)__c_pa(val);
 
 	if (type_bit_width(type) == 64)
-		return *(u64 *)val;
+		return (u_max __force)*(u64 *)val;
 
 	return *(u_max *)val;
 }
@@ -367,7 +367,7 @@ static void handle_null_ptr_deref(struct type_mismatch_data_common *data)
 }
 
 static void handle_misaligned_access(struct type_mismatch_data_common *data,
-				unsigned long ptr)
+				     uintptr_t ptr)
 {
 	if (suppress_report(data->location))
 		return;
@@ -383,7 +383,7 @@ static void handle_misaligned_access(struct type_mismatch_data_common *data,
 }
 
 static void handle_object_size_mismatch(struct type_mismatch_data_common *data,
-					unsigned long ptr)
+					uintptr_t ptr)
 {
 	if (suppress_report(data->location))
 		return;
@@ -397,7 +397,7 @@ static void handle_object_size_mismatch(struct type_mismatch_data_common *data,
 }
 
 static void ubsan_type_mismatch_common(struct type_mismatch_data_common *data,
-				unsigned long ptr)
+				uintptr_t ptr)
 {
 	unsigned long flags = user_access_save();
 
