@@ -179,9 +179,9 @@ user_uintptr_t reserv_make_user_ptr_owning(ptraddr_t vma_addr, bool locked)
 	struct reserv_struct reserv;
 
 	if (!reserv_is_supported(mm))
-		return vma_addr;
+		return __c_fakeu(vma_addr);
 	if (!locked && mmap_read_lock_killable(mm))
-		return vma_addr;
+		return __c_fakeu(vma_addr);
 
 	vma = find_vma(mm, vma_addr);
 
@@ -202,7 +202,7 @@ user_uintptr_t reserv_make_user_ptr_owning(ptraddr_t vma_addr, bool locked)
 user_uintptr_t reserv_vma_make_user_ptr_owning(struct vm_area_struct *vma)
 {
 	if (!reserv_is_supported(vma->vm_mm))
-		return vma->vm_start;
+		return __c_fakeu(vma->vm_start);
 
 	return make_user_ptr_owning(&vma->reserv_data, vma->vm_start);
 }
