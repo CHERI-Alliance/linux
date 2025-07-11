@@ -141,7 +141,7 @@ static __initdata struct lsm_info *exclusive;
  * in early init.
  */
 struct lsm_static_calls_table
-	static_calls_table __ro_after_init __aligned(sizeof(u64)) = {
+	static_calls_table __ro_after_init __aligned(sizeof(u64)) __cheri_pointer_align = {
 #define INIT_LSM_STATIC_CALL(NUM, NAME)					\
 	(struct lsm_static_call) {					\
 		.key = &STATIC_CALL_KEY(LSM_STATIC_CALL(NAME, NUM)),	\
