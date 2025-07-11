@@ -178,8 +178,8 @@ int ring_buffer_print_entry_header(struct trace_seq *s)
 #define RINGBUF_TYPE_DATA 0 ... RINGBUF_TYPE_DATA_TYPE_LEN_MAX
 
 enum {
-	RB_LEN_TIME_EXTEND = 8,
-	RB_LEN_TIME_STAMP =  8,
+	RB_LEN_TIME_EXTEND = RB_EVNT_MIN_SIZE,
+	RB_LEN_TIME_STAMP =  RB_EVNT_MIN_SIZE,
 };
 
 #define skip_time_extend(event) \
@@ -3196,8 +3196,8 @@ rb_iter_head_event(struct ring_buffer_iter *iter)
 	commit = rb_page_commit(iter_head_page);
 	smp_rmb();
 
-	/* An event needs to be at least 8 bytes in size */
-	if (iter->head > commit - 8)
+	/* An event needs to be at least RB_EVNT_MIN_SIZE bytes in size */
+	if (iter->head > commit - RB_EVNT_MIN_SIZE)
 		goto reset;
 
 	event = __rb_page_index(iter_head_page, iter->head);
