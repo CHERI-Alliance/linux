@@ -71,7 +71,7 @@ static void populate_error_injection_list(struct error_injection_entry *start,
 
 	mutex_lock(&ei_mutex);
 	for (iter = start; iter < end; iter++) {
-		entry = (uintptr_t)dereference_symbol_descriptor((void *)iter->addr);
+		entry = __c_pa(dereference_symbol_descriptor((void *)iter->addr));
 
 		if (!kernel_text_address(entry) ||
 		    !kallsyms_lookup_size_offset(entry, &size, &offset)) {
