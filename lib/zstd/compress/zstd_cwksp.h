@@ -246,7 +246,7 @@ MEM_STATIC size_t ZSTD_cwksp_slack_space_required(void) {
  */
 MEM_STATIC size_t ZSTD_cwksp_bytes_to_align_ptr(void* ptr, const size_t alignBytes) {
     size_t const alignBytesMask = alignBytes - 1;
-    size_t const bytes = (alignBytes - ((uintptr_t)ptr & (alignBytesMask))) & alignBytesMask;
+    size_t const bytes = (alignBytes - ((size_t __force)(uintptr_t)ptr & (alignBytesMask))) & alignBytesMask;
     assert(ZSTD_isPower2(alignBytes));
     assert(bytes < alignBytes);
     return bytes;

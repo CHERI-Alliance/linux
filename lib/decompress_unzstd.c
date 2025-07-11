@@ -186,7 +186,7 @@ static int INIT __unzstd(unsigned char *in_buf, long in_len,
 	 * it as big as possible without having the end address overflow.
 	 */
 	if (out_len == 0)
-		out_len = UINTPTR_MAX - (uintptr_t)out_buf;
+		out_len = UINTPTR_MAX - __c_pa(out_buf);
 
 	if (fill == NULL && flush == NULL)
 		/*

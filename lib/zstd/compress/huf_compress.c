@@ -110,7 +110,7 @@ static size_t showHNodeBits(const nodeElt* hnode, size_t size)
 static void* HUF_alignUpWorkspace(void* workspace, size_t* workspaceSizePtr, size_t align)
 {
     size_t const mask = align - 1;
-    size_t const rem = (uintptr_t)workspace & mask;
+    size_t const rem = (size_t __force)(uintptr_t)workspace & mask;
     size_t const add = (align - rem) & mask;
     BYTE* const aligned = (BYTE*)workspace + add;
     assert((align & (align - 1)) == 0); /* pow 2 */
