@@ -406,13 +406,13 @@ enum tomoyo_pref_index {
 struct tomoyo_acl_head {
 	struct list_head list;
 	s8 is_deleted; /* true or false or TOMOYO_GC_IN_PROGRESS */
-} __packed;
+} __packed __cheri_pointer_align;
 
 /* Common header for shared entries. */
 struct tomoyo_shared_acl_head {
 	struct list_head list;
 	atomic_t users;
-} __packed;
+} __packed __cheri_pointer_align;
 
 struct tomoyo_policy_namespace;
 
@@ -674,7 +674,7 @@ struct tomoyo_acl_info {
 	struct tomoyo_condition *cond; /* Maybe NULL. */
 	s8 is_deleted; /* true or false or TOMOYO_GC_IN_PROGRESS */
 	u8 type; /* One of values in "enum tomoyo_acl_entry_type_index". */
-} __packed;
+} __packed __cheri_pointer_align;
 
 /* Structure for domain information. */
 struct tomoyo_domain_info {

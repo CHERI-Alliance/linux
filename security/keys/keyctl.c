@@ -1885,7 +1885,7 @@ SYSCALL_DEFINE5(keyctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 	case KEYCTL_UPDATE:
 		return keyctl_update_key((key_serial_t) arg2,
 					 (const void __user *) arg3,
-					 (size_t) arg4);
+					 (size_t) __c_ua(arg4));
 
 	case KEYCTL_REVOKE:
 		return keyctl_revoke_key((key_serial_t) arg2);
@@ -1915,7 +1915,7 @@ SYSCALL_DEFINE5(keyctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 	case KEYCTL_READ:
 		return keyctl_read_key((key_serial_t) arg2,
 				       (char __user *) arg3,
-				       (size_t) arg4);
+				       (size_t) __c_ua(arg4));
 
 	case KEYCTL_CHOWN:
 		return keyctl_chown_key((key_serial_t) arg2,
@@ -1929,7 +1929,7 @@ SYSCALL_DEFINE5(keyctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 	case KEYCTL_INSTANTIATE:
 		return keyctl_instantiate_key((key_serial_t) arg2,
 					      (const void __user *) arg3,
-					      (size_t) arg4,
+					      (size_t) __c_ua(arg4),
 					      (key_serial_t) arg5);
 
 	case KEYCTL_NEGATE:
@@ -1950,7 +1950,7 @@ SYSCALL_DEFINE5(keyctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 	case KEYCTL_GET_SECURITY:
 		return keyctl_get_security((key_serial_t) arg2,
 					   (char __user *) arg3,
-					   (size_t) arg4);
+					   (size_t) __c_ua(arg4));
 
 	case KEYCTL_SESSION_TO_PARENT:
 		return keyctl_session_to_parent();
@@ -1976,7 +1976,7 @@ SYSCALL_DEFINE5(keyctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 
 	case KEYCTL_DH_COMPUTE:
 		return keyctl_dh_compute((struct keyctl_dh_params __user *) arg2,
-					 (char __user *) arg3, (size_t) arg4,
+					 (char __user *) arg3, (size_t) __c_ua(arg4),
 					 (struct keyctl_kdf_params __user *) arg5);
 
 	case KEYCTL_RESTRICT_KEYRING:
@@ -2015,7 +2015,7 @@ SYSCALL_DEFINE5(keyctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 					   (unsigned int)arg5);
 
 	case KEYCTL_CAPABILITIES:
-		return keyctl_capabilities((unsigned char __user *)arg2, (size_t)arg3);
+		return keyctl_capabilities((unsigned char __user *)arg2, (size_t)__c_ua(arg3));
 
 	case KEYCTL_WATCH_KEY:
 		return keyctl_watch_key((key_serial_t)arg2, (int)arg3, (int)arg4);
