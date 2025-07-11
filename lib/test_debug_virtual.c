@@ -24,7 +24,7 @@ static int __init test_debug_virtual_init(void)
 	phys_addr_t pa;
 	void *va;
 
-	va = (void *)VMALLOC_START;
+	va = __c_fakep(VMALLOC_START);
 	pa = virt_to_phys(va);
 
 	pr_info("PA: %pa for VA: 0x%lx\n", &pa, (unsigned long)va);
