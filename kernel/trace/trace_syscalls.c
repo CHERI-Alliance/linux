@@ -159,7 +159,7 @@ print_syscall_enter(struct trace_iterator *iter, int flags,
 
 		/* parameter values */
 		trace_seq_printf(s, "%s: %lx%s", entry->args[i],
-				 trace->args[i],
+				 __c_ua(trace->args[i]),
 				 i == entry->nb_args - 1 ? "" : ", ");
 	}
 
@@ -278,11 +278,11 @@ static int __init syscall_enter_define_fields(struct trace_event_call *call)
 	for (i = 0; i < meta->nb_args; i++) {
 		ret = trace_define_field(call, meta->types[i],
 					 meta->args[i], offset,
-					 sizeof(unsigned long), 0,
+					 sizeof(uintptr_t), 0,
 					 FILTER_OTHER);
 		if (ret)
 			break;
-		offset += sizeof(unsigned long);
+		offset += sizeof(uintptr_t);
 	}
 
 	return ret;
@@ -295,7 +295,7 @@ static void ftrace_syscall_enter(void *data, struct pt_regs *regs, long id)
 	struct syscall_trace_enter *entry;
 	struct syscall_metadata *sys_data;
 	struct trace_event_buffer fbuffer;
-	unsigned long args[6];
+	uintptr_t args[6];
 	int syscall_nr;
 	int size;
 
@@ -322,7 +322,7 @@ static void ftrace_syscall_enter(void *data, struct pt_regs *regs, long id)
 	if (!sys_data)
 		return;
 
-	size = sizeof(*entry) + sizeof(unsigned long) * sys_data->nb_args;
+	size = sizeof(*entry) + sizeof(uintptr_t) * sys_data->nb_args;
 
 	entry = trace_event_buffer_reserve(&fbuffer, trace_file, size);
 	if (!entry)
@@ -331,7 +331,7 @@ static void ftrace_syscall_enter(void *data, struct pt_regs *regs, long id)
 	entry = ring_buffer_event_data(fbuffer.event);
 	entry->nr = syscall_nr;
 	syscall_get_arguments(current, regs, args);
-	memcpy(entry->args, args, sizeof(unsigned long) * sys_data->nb_args);
+	memcpy(entry->args, args, sizeof(uintptr_t) * sys_data->nb_args);
 
 	trace_event_buffer_commit(&fbuffer);
 }
@@ -374,7 +374,7 @@ static void ftrace_syscall_exit(void *data, struct pt_regs *regs, long ret)
 
 	entry = ring_buffer_event_data(fbuffer.event);
 	entry->nr = syscall_nr;
-	entry->ret = syscall_get_return_value(current, regs);
+	entry->ret = __c_ua(syscall_get_return_value(current, regs));
 
 	trace_event_buffer_commit(&fbuffer);
 }
@@ -573,8 +573,8 @@ static int perf_call_bpf_enter(struct trace_event_call *call, struct pt_regs *re
 	struct syscall_tp_t {
 		struct trace_entry ent;
 		int syscall_nr;
-		unsigned long args[SYSCALL_DEFINE_MAXARGS];
-	} __aligned(8) param;
+		uintptr_t args[SYSCALL_DEFINE_MAXARGS];
+	} __aligned(8) __cheri_pointer_align param;
 	int i;
 
 	BUILD_BUG_ON(sizeof(param.ent) < sizeof(void *));
@@ -594,7 +594,7 @@ static void perf_syscall_enter(void *ignore, struct pt_regs *regs, long id)
 	struct syscall_trace_enter *rec;
 	struct pt_regs *fake_regs;
 	struct hlist_head *head;
-	unsigned long args[6];
+	uintptr_t args[6];
 	bool valid_prog_array;
 	int syscall_nr;
 	int rctx;
@@ -623,7 +623,7 @@ static void perf_syscall_enter(void *ignore, struct pt_regs *regs, long id)
 		return;
 
 	/* get the size after alignment with the u32 buffer size field */
-	size = sizeof(unsigned long) * sys_data->nb_args + sizeof(*rec);
+	size = sizeof(uintptr_t) * sys_data->nb_args + sizeof(*rec);
 	size = ALIGN(size + sizeof(u32), sizeof(u64));
 	size -= sizeof(u32);
 
@@ -633,7 +633,7 @@ static void perf_syscall_enter(void *ignore, struct pt_regs *regs, long id)
 
 	rec->nr = syscall_nr;
 	syscall_get_arguments(current, regs, args);
-	memcpy(&rec->args, args, sizeof(unsigned long) * sys_data->nb_args);
+	memcpy(&rec->args, args, sizeof(uintptr_t) * sys_data->nb_args);
 
 	if ((valid_prog_array &&
 	     !perf_call_bpf_enter(sys_data->enter_event, fake_regs, sys_data, rec)) ||
@@ -740,7 +740,7 @@ static void perf_syscall_exit(void *ignore, struct pt_regs *regs, long ret)
 		return;
 
 	rec->nr = syscall_nr;
-	rec->ret = syscall_get_return_value(current, regs);
+	rec->ret = __c_ua(syscall_get_return_value(current, regs));
 
 	if ((valid_prog_array &&
 	     !perf_call_bpf_exit(sys_data->exit_event, fake_regs, rec)) ||
