@@ -739,7 +739,7 @@ void trace_filter_add_remove_task(struct trace_pid_list *pid_list,
  */
 void *trace_pid_next(struct trace_pid_list *pid_list, void *v, loff_t *pos)
 {
-	long pid = (uintptr_t)v;
+	long pid = __c_pa(v);
 	unsigned int next;
 
 	(*pos)++;
@@ -751,7 +751,7 @@ void *trace_pid_next(struct trace_pid_list *pid_list, void *v, loff_t *pos)
 	pid = next;
 
 	/* Return pid + 1 to allow zero to be represented */
-	return (void *)(pid + 1);
+	return __c_fakep(pid + 1);
 }
 
 /**
@@ -778,9 +778,9 @@ void *trace_pid_start(struct trace_pid_list *pid_list, loff_t *pos)
 
 	/* Return pid + 1 so that zero can be the exit value */
 	for (pid++; pid && l < *pos;
-	     pid = (uintptr_t)trace_pid_next(pid_list, (void *)pid, &l))
+	     pid = __c_pa(trace_pid_next(pid_list, __c_fakep(pid), &l)))
 		;
-	return (void *)pid;
+	return __c_fakep(pid);
 }
 
 /**
@@ -793,7 +793,7 @@ void *trace_pid_start(struct trace_pid_list *pid_list, loff_t *pos)
  */
 int trace_pid_show(struct seq_file *m, void *v)
 {
-	unsigned long pid = (uintptr_t)v - 1;
+	unsigned long pid = __c_pa(v) - 1;
 
 	seq_printf(m, "%lu\n", pid);
 	return 0;
@@ -2965,7 +2965,7 @@ trace_function(struct trace_array *tr, unsigned long ip, unsigned long
 #ifdef CONFIG_HAVE_FUNCTION_ARG_ACCESS_API
 	if (fregs) {
 		for (int i = 0; i < FTRACE_REGS_MAX_ARGS; i++)
-			entry->args[i] = ftrace_regs_get_argument(fregs, i);
+			entry->args[i] = __c_ua(ftrace_regs_get_argument(fregs, i));
 	}
 #endif
 
@@ -4575,7 +4575,7 @@ static int s_show(struct seq_file *m, void *v)
 static inline int tracing_get_cpu(struct inode *inode)
 {
 	if (inode->i_cdev) /* See trace_create_cpu_file() */
-		return (long)inode->i_cdev - 1;
+		return __c_pa(inode->i_cdev) - 1;
 	return RING_BUFFER_ALL_CPUS;
 }
 
@@ -6052,7 +6052,7 @@ static DEFINE_MUTEX(scratch_mutex);
 
 static int cmp_mod_entry(const void *key, const void *pivot)
 {
-	uintptr_t addr = (uintptr_t)key;
+	unsigned long addr = __c_pa(key);
 	const struct trace_mod_entry *ent = pivot;
 
 	if (addr >= ent[0].mod_addr && addr < ent[1].mod_addr)
@@ -6096,7 +6096,7 @@ unsigned long trace_adjust_address(struct trace_array *tr, unsigned long addr)
 	    tscratch->entries[nr_entries - 1].mod_addr < addr)
 		idx = nr_entries - 1;
 	else {
-		entry = __inline_bsearch((void *)addr,
+		entry = __inline_bsearch(__c_fakep(addr),
 				tscratch->entries,
 				nr_entries - 1,
 				sizeof(tscratch->entries[0]),
@@ -6187,7 +6187,7 @@ static void update_last_data(struct trace_array *tr)
 	kfree_rcu(module_delta, rcu);
 
 	/* Set the persistent ring buffer meta data to this address */
-	tscratch->text_addr = (uintptr_t)_text;
+	tscratch->text_addr = __c_pa(_text);
 }
 
 /**
@@ -9142,7 +9142,7 @@ trace_create_cpu_file(const char *name, umode_t mode, struct dentry *parent,
 	struct dentry *ret = trace_create_file(name, mode, parent, data, fops);
 
 	if (ret) /* See tracing_get_cpu() */
-		d_inode(ret)->i_cdev = (void *)(cpu + 1);
+		d_inode(ret)->i_cdev = __c_fakep(cpu + 1);
 	return ret;
 }
 
@@ -9769,7 +9769,7 @@ static void setup_trace_scratch(struct trace_array *tr,
 	tr->scratch_size = size;
 
 	if (tscratch->text_addr)
-		tr->text_delta = (uintptr_t)_text - tscratch->text_addr;
+		tr->text_delta = __c_pa(_text) - tscratch->text_addr;
 
 	if (struct_size(tscratch, entries, tscratch->nr_entries) > size)
 		goto reset;
@@ -9992,7 +9992,7 @@ static int trace_array_create_dir(struct trace_array *tr)
 
 static struct trace_array *
 trace_array_create_systems(const char *name, const char *systems,
-			   unsigned long range_addr_start,
+			   uintptr_t range_addr_start,
 			   unsigned long range_addr_size)
 {
 	struct trace_array *tr;
@@ -10109,9 +10109,9 @@ static int instance_mkdir(const char *name)
 }
 
 #ifdef CONFIG_MMU
-static u64 map_pages(unsigned long start, unsigned long size)
+static uintptr_t map_pages(unsigned long start, unsigned long size)
 {
-	unsigned long vmap_start, vmap_end;
+	uintptr_t vmap_start, vmap_end;
 	struct vm_struct *area;
 	int ret;
 
@@ -10122,14 +10122,14 @@ static u64 map_pages(unsigned long start, unsigned long size)
 	vmap_start = (uintptr_t) area->addr;
 	vmap_end = vmap_start + size;
 
-	ret = vmap_page_range(vmap_start, vmap_end,
+	ret = vmap_page_range(__c_ua(vmap_start), __c_ua(vmap_end),
 			      start, pgprot_nx(PAGE_KERNEL));
 	if (ret < 0) {
 		free_vm_area(area);
 		return 0;
 	}
 
-	return (u64)vmap_start;
+	return (uintptr_t)vmap_start;
 }
 #else
 static inline u64 map_pages(unsigned long start, unsigned long size)
@@ -11034,7 +11034,7 @@ __init static void enable_instances(void)
 	while ((curr_str = strsep(&str, "\t"))) {
 		phys_addr_t start = 0;
 		phys_addr_t size = 0;
-		unsigned long addr = 0;
+		uintptr_t addr = 0;
 		bool traceprintk = false;
 		bool traceoff = false;
 		char *flag_delim;

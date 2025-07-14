@@ -90,7 +90,7 @@ struct trace_buffer *
 __ring_buffer_alloc(unsigned long size, unsigned flags, struct lock_class_key *key);
 
 struct trace_buffer *__ring_buffer_alloc_range(unsigned long size, unsigned flags,
-					       int order, unsigned long start,
+					       int order, uintptr_t start,
 					       unsigned long range_size,
 					       unsigned long scratch_size,
 					       struct lock_class_key *key);

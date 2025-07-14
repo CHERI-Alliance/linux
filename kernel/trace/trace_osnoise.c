@@ -2723,7 +2723,7 @@ static int osnoise_create_cpu_timerlat_fd(struct dentry *top_dir)
 			goto out_clean;
 
 		/* Record the CPU */
-		d_inode(timerlat_fd)->i_cdev = (void *)(cpu);
+		d_inode(timerlat_fd)->i_cdev = __c_fakep(cpu);
 	}
 
 	return 0;

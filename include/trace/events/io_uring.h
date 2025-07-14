@@ -121,7 +121,7 @@ TRACE_EVENT(io_uring_file_get,
 	TP_fast_assign(
 		__entry->ctx		= req->ctx;
 		__entry->req		= req;
-		__entry->user_data	= req->cqe.user_data;
+		__entry->user_data	= __c_ua(req->cqe.user_data);
 		__entry->fd		= fd;
 	),
 
@@ -158,7 +158,7 @@ TRACE_EVENT(io_uring_queue_async_work,
 	TP_fast_assign(
 		__entry->ctx		= req->ctx;
 		__entry->req		= req;
-		__entry->user_data	= req->cqe.user_data;
+		__entry->user_data	= __c_ua(req->cqe.user_data);
 		__entry->flags		= (__force unsigned long long) req->flags;
 		__entry->opcode		= req->opcode;
 		__entry->work		= &req->work;
@@ -199,7 +199,7 @@ TRACE_EVENT(io_uring_defer,
 	TP_fast_assign(
 		__entry->ctx	= req->ctx;
 		__entry->req	= req;
-		__entry->data	= req->cqe.user_data;
+		__entry->data	= __c_ua(req->cqe.user_data);
 		__entry->opcode	= req->opcode;
 
 		__assign_str(op_str);
@@ -299,7 +299,7 @@ TRACE_EVENT(io_uring_fail_link,
 	TP_fast_assign(
 		__entry->ctx		= req->ctx;
 		__entry->req		= req;
-		__entry->user_data	= req->cqe.user_data;
+		__entry->user_data	= __c_ua(req->cqe.user_data);
 		__entry->opcode		= req->opcode;
 		__entry->link		= link;
 
@@ -337,7 +337,7 @@ TP_PROTO(struct io_ring_ctx *ctx, void *req, struct io_uring_cqe *cqe),
 	TP_fast_assign(
 		__entry->ctx		= ctx;
 		__entry->req		= req;
-		__entry->user_data	= cqe->user_data;
+		__entry->user_data	= __c_ua(cqe->user_data);
 		__entry->res		= cqe->res;
 		__entry->cflags		= cqe->flags;
 		__entry->extra1		= ctx->flags & IORING_SETUP_CQE32 || cqe->flags & IORING_CQE_F_32 ? cqe->big_cqe[0] : 0;
@@ -381,7 +381,7 @@ TRACE_EVENT(io_uring_submit_req,
 	TP_fast_assign(
 		__entry->ctx		= req->ctx;
 		__entry->req		= req;
-		__entry->user_data	= req->cqe.user_data;
+		__entry->user_data	= __c_ua(req->cqe.user_data);
 		__entry->opcode		= req->opcode;
 		__entry->flags		= (__force unsigned long long) req->flags;
 		__entry->sq_thread	= req->ctx->flags & IORING_SETUP_SQPOLL;
@@ -425,7 +425,7 @@ TRACE_EVENT(io_uring_poll_arm,
 	TP_fast_assign(
 		__entry->ctx		= req->ctx;
 		__entry->req		= req;
-		__entry->user_data	= req->cqe.user_data;
+		__entry->user_data	= __c_ua(req->cqe.user_data);
 		__entry->opcode		= req->opcode;
 		__entry->mask		= mask;
 		__entry->events		= events;
@@ -465,7 +465,7 @@ TRACE_EVENT(io_uring_task_add,
 	TP_fast_assign(
 		__entry->ctx		= req->ctx;
 		__entry->req		= req;
-		__entry->user_data	= req->cqe.user_data;
+		__entry->user_data	= __c_ua(req->cqe.user_data);
 		__entry->opcode		= req->opcode;
 		__entry->mask		= mask;
 
@@ -517,19 +517,19 @@ TRACE_EVENT(io_uring_req_failed,
 	TP_fast_assign(
 		__entry->ctx		= req->ctx;
 		__entry->req		= req;
-		__entry->user_data	= sqe->user_data;
+		__entry->user_data	= __c_ua(sqe->user_data);
 		__entry->opcode		= sqe->opcode;
 		__entry->flags		= sqe->flags;
 		__entry->ioprio		= sqe->ioprio;
 		__entry->off		= sqe->off;
-		__entry->addr		= sqe->addr;
+		__entry->addr		= __c_ua(sqe->addr);
 		__entry->len		= sqe->len;
 		__entry->op_flags	= sqe->poll32_events;
 		__entry->buf_index	= sqe->buf_index;
 		__entry->personality	= sqe->personality;
 		__entry->file_index	= sqe->file_index;
-		__entry->pad1		= sqe->__pad2[0];
-		__entry->addr3		= sqe->addr3;
+		__entry->pad1		= __c_ua(sqe->__pad2[0]);
+		__entry->addr3		= __c_ua(sqe->addr3);
 		__entry->error		= error;
 
 		__assign_str(op_str);
@@ -543,7 +543,7 @@ TRACE_EVENT(io_uring_req_failed,
 		  __entry->ctx, __entry->req, __entry->user_data,
 		  __get_str(op_str),
 		  __entry->flags, __entry->ioprio,
-		  (unsigned long long)__entry->off,
+		  (unsigned long long) __entry->off,
 		  (unsigned long long) __entry->addr, __entry->len,
 		  __entry->op_flags,
 		  __entry->buf_index, __entry->personality, __entry->file_index,
