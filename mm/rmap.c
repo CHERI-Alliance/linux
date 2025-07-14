@@ -499,7 +499,7 @@ void __init anon_vma_init(void)
 struct anon_vma *folio_get_anon_vma(const struct folio *folio)
 {
 	struct anon_vma *anon_vma = NULL;
-	unsigned long anon_mapping;
+	uintptr_t anon_mapping;
 
 	rcu_read_lock();
 	anon_mapping = (uintptr_t)READ_ONCE(folio->mapping);
@@ -545,7 +545,7 @@ struct anon_vma *folio_lock_anon_vma_read(const struct folio *folio,
 {
 	struct anon_vma *anon_vma = NULL;
 	struct anon_vma *root_anon_vma;
-	unsigned long anon_mapping;
+	uintptr_t anon_mapping;
 
 retry:
 	rcu_read_lock();
@@ -562,7 +562,7 @@ retry:
 		 * folio_move_anon_rmap() might have changed the anon_vma as we
 		 * might not hold the folio lock here.
 		 */
-		if (unlikely((unsigned long)READ_ONCE(folio->mapping) !=
+		if (unlikely((uintptr_t)READ_ONCE(folio->mapping) !=
 			     anon_mapping)) {
 			up_read(&root_anon_vma->rwsem);
 			rcu_read_unlock();
@@ -607,7 +607,7 @@ retry:
 	 * folio_move_anon_rmap() might have changed the anon_vma as we might
 	 * not hold the folio lock here.
 	 */
-	if (unlikely((unsigned long)READ_ONCE(folio->mapping) !=
+	if (unlikely((uintptr_t)READ_ONCE(folio->mapping) !=
 		     anon_mapping)) {
 		anon_vma_unlock_read(anon_vma);
 		put_anon_vma(anon_vma);
@@ -2288,7 +2288,7 @@ static bool try_to_migrate_one(struct folio *folio, struct vm_area_struct *vma,
 	pte_t pteval;
 	struct page *subpage;
 	struct mmu_notifier_range range;
-	enum ttu_flags flags = (enum ttu_flags)(long)arg;
+	enum ttu_flags flags = (enum ttu_flags)__c_pa(arg);
 	unsigned long pfn;
 	unsigned long hsz = 0;
 
