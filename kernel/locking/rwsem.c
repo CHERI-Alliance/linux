@@ -171,8 +171,8 @@ static inline bool rwsem_test_oflags(struct rw_semaphore *sem, long flags)
 static inline void __rwsem_set_reader_owned(struct rw_semaphore *sem,
 					    struct task_struct *owner)
 {
-	unsigned long val = (uintptr_t)owner | RWSEM_READER_OWNED |
-		(atomic_ptr_read(&sem->owner) & RWSEM_NONSPINNABLE);
+	uintptr_t val = (uintptr_t)owner | RWSEM_READER_OWNED |
+		(__c_ua(atomic_ptr_read(&sem->owner)) & RWSEM_NONSPINNABLE);
 
 	atomic_ptr_set(&sem->owner, val);
 }

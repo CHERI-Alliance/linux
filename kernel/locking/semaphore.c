@@ -50,11 +50,11 @@ static inline void hung_task_sem_set_holder(struct semaphore *sem)
 
 static inline void hung_task_sem_clear_if_holder(struct semaphore *sem)
 {
-	if (READ_ONCE((sem)->last_holder) == (unsigned long)current)
+	if (READ_ONCE((sem)->last_holder) == (uintptr_t)current)
 		WRITE_ONCE((sem)->last_holder, 0UL);
 }
 
-unsigned long sem_last_holder(struct semaphore *sem)
+uintptr_t sem_last_holder(struct semaphore *sem)
 {
 	return READ_ONCE(sem->last_holder);
 }
@@ -65,7 +65,7 @@ static inline void hung_task_sem_set_holder(struct semaphore *sem)
 static inline void hung_task_sem_clear_if_holder(struct semaphore *sem)
 {
 }
-unsigned long sem_last_holder(struct semaphore *sem)
+uintptr_t sem_last_holder(struct semaphore *sem)
 {
 	return 0UL;
 }

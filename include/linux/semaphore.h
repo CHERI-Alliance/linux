@@ -18,7 +18,7 @@ struct semaphore {
 	struct list_head	wait_list;
 
 #ifdef CONFIG_DETECT_HUNG_TASK_BLOCKER
-	unsigned long		last_holder;
+	uintptr_t		last_holder;
 #endif
 };
 
@@ -59,6 +59,6 @@ extern int __must_check down_killable(struct semaphore *sem);
 extern int __must_check down_trylock(struct semaphore *sem);
 extern int __must_check down_timeout(struct semaphore *sem, long jiffies);
 extern void up(struct semaphore *sem);
-extern unsigned long sem_last_holder(struct semaphore *sem);
+extern uintptr_t sem_last_holder(struct semaphore *sem);
 
 #endif /* __LINUX_SEMAPHORE_H */
