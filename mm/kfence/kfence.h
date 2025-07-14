@@ -74,7 +74,7 @@ struct kfence_metadata {
 	 *
 	 * Invariant: ALIGN_DOWN(addr, PAGE_SIZE) is constant.
 	 */
-	unsigned long addr;
+	uintptr_t addr;
 
 	/*
 	 * The size of the original allocation.
@@ -114,7 +114,7 @@ static inline struct kfence_metadata *addr_to_metadata(unsigned long addr)
 
 	/* The checks do not affect performance; only called from slow-paths. */
 
-	if (!is_kfence_address((void *)addr))
+	if (!is_kfence_address(__c_fakep(addr)))
 		return NULL;
 
 	/*
