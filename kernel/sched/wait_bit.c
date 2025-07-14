@@ -15,7 +15,7 @@ static wait_queue_head_t bit_wait_table[WAIT_TABLE_SIZE] __cacheline_aligned;
 wait_queue_head_t *bit_waitqueue(unsigned long *word, int bit)
 {
 	const int shift = BITS_PER_LONG == 32 ? 5 : 6;
-	unsigned long val = (uintptr_t)word << shift | bit;
+	unsigned long val = __c_pa(word) << shift | bit;
 
 	return bit_wait_table + hash_long(val, WAIT_TABLE_BITS);
 }
