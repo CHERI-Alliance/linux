@@ -1525,7 +1525,7 @@ static void kasan_memchr(struct kunit *test)
 	KASAN_TEST_NEEDS_CONFIG_OFF(test, CONFIG_AMD_MEM_ENCRYPT);
 
 	if (OOB_TAG_OFF)
-		size = round_up(size, OOB_TAG_OFF);
+		size = round_up(size, OOB_TAG_OFF ?:2);
 
 	ptr = kmalloc(size, GFP_KERNEL | __GFP_ZERO);
 	KUNIT_ASSERT_NOT_ERR_OR_NULL(test, ptr);
@@ -1551,7 +1551,7 @@ static void kasan_memcmp(struct kunit *test)
 	KASAN_TEST_NEEDS_CONFIG_OFF(test, CONFIG_AMD_MEM_ENCRYPT);
 
 	if (OOB_TAG_OFF)
-		size = round_up(size, OOB_TAG_OFF);
+		size = round_up(size, OOB_TAG_OFF?:2);
 
 	ptr = kmalloc(size, GFP_KERNEL | __GFP_ZERO);
 	KUNIT_ASSERT_NOT_ERR_OR_NULL(test, ptr);
