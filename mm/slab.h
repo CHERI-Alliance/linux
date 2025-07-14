@@ -16,6 +16,14 @@
  * Internal slab definitions
  */
 
+#ifdef CONFIG_CHERI_KERNEL
+extern bool __this_cpu_try_cmpxchg_freelist_undefined_for_cheri(void);
+#define this_cpu_try_cmpxchg_freelist(A, B, C) ({			\
+	(void)(A); (void)(B); (void)(C);				\
+	__this_cpu_try_cmpxchg_freelist_undefined_for_cheri();		\
+})
+typedef struct { void * freelist; unsigned long counter; }	freelist_full_t;
+#else /* CONFIG_CHERI_KERNEL */
 #ifdef CONFIG_64BIT
 # ifdef system_has_cmpxchg128
 # define system_has_freelist_aba()	system_has_cmpxchg128()
@@ -35,6 +43,7 @@ typedef u64 freelist_full_t;
 #if defined(system_has_freelist_aba) && !defined(CONFIG_HAVE_ALIGNED_STRUCT_PAGE)
 #undef system_has_freelist_aba
 #endif
+#endif /*CONFIG_CHERI_KERNEL */
 
 /*
  * Freelist pointer and counter to cmpxchg together, avoids the typical ABA
@@ -96,8 +105,11 @@ struct slab {
 
 	unsigned int __page_type;
 	atomic_t __page_refcount;
+#ifdef CONFIG_CHERI_KERNEL
+	unsigned short _pad;
+#endif
 #ifdef CONFIG_SLAB_OBJ_EXT
-	unsigned long obj_exts;
+	uintptr_t obj_exts;
 #endif
 };
 
@@ -533,7 +545,7 @@ static inline bool slab_in_kunit_test(void) { return false; }
  */
 static inline struct slabobj_ext *slab_obj_exts(struct slab *slab)
 {
-	unsigned long obj_exts = READ_ONCE(slab->obj_exts);
+	uintptr_t obj_exts = READ_ONCE(slab->obj_exts);
 
 #ifdef CONFIG_MEMCG
 	/*
