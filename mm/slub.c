@@ -190,7 +190,11 @@
 #ifndef CONFIG_PREEMPT_RT
 #define slub_get_cpu_ptr(var)		get_cpu_ptr(var)
 #define slub_put_cpu_ptr(var)		put_cpu_ptr(var)
+#ifdef CONFIG_CHERI_KERNEL
+#define USE_LOCKLESS_FAST_PATH()	(false)
+#else
 #define USE_LOCKLESS_FAST_PATH()	(true)
+#endif
 #else
 #define slub_get_cpu_ptr(var)		\
 ({					\
@@ -470,12 +474,12 @@ static struct workqueue_struct *flushwq;
  * random number.
  */
 static inline freeptr_t freelist_ptr_encode(const struct kmem_cache *s,
-					    void *ptr, unsigned long ptr_addr)
+					    void *ptr, uintptr_t ptr_addr)
 {
-	unsigned long encoded;
+	uintptr_t encoded;
 
 #ifdef CONFIG_SLAB_FREELIST_HARDENED
-	encoded = (unsigned long)ptr ^ s->random ^ swab(ptr_addr);
+	encoded = (uintptr_t)ptr ^ s->random ^ swab(ptr_addr);
 #else
 	encoded = (uintptr_t)ptr;
 #endif
@@ -483,7 +487,7 @@ static inline freeptr_t freelist_ptr_encode(const struct kmem_cache *s,
 }
 
 static inline void *freelist_ptr_decode(const struct kmem_cache *s,
-					freeptr_t ptr, unsigned long ptr_addr)
+					freeptr_t ptr, uintptr_t ptr_addr)
 {
 	void *decoded;
 
@@ -497,7 +501,7 @@ static inline void *freelist_ptr_decode(const struct kmem_cache *s,
 
 static inline void *get_freepointer(struct kmem_cache *s, void *object)
 {
-	unsigned long ptr_addr;
+	uintptr_t ptr_addr;
 	freeptr_t p;
 
 	object = kasan_reset_tag(object);
@@ -526,7 +530,7 @@ static void prefetch_freepointer(const struct kmem_cache *s, void *object)
 __no_kmsan_checks
 static inline void *get_freepointer_safe(struct kmem_cache *s, void *object)
 {
-	unsigned long freepointer_addr;
+	uintptr_t freepointer_addr;
 	freeptr_t p;
 
 	if (!debug_pagealloc_enabled_static())
@@ -540,7 +544,7 @@ static inline void *get_freepointer_safe(struct kmem_cache *s, void *object)
 
 static inline void set_freepointer(struct kmem_cache *s, void *object, void *fp)
 {
-	unsigned long freeptr_addr = (uintptr_t)object + s->offset;
+	uintptr_t freeptr_addr = (uintptr_t)object + s->offset;
 
 #ifdef CONFIG_SLAB_FREELIST_HARDENED
 	BUG_ON(object == fp); /* naive detection of double free or corruption */
@@ -1940,7 +1944,7 @@ static inline void mark_failed_objexts_alloc(struct slab *slab)
 	slab->obj_exts = OBJEXTS_ALLOC_FAIL;
 }
 
-static inline void handle_failed_objexts_alloc(unsigned long obj_exts,
+static inline void handle_failed_objexts_alloc(uintptr_t obj_exts,
 			struct slabobj_ext *vec, unsigned int objects)
 {
 	/*
@@ -1960,7 +1964,7 @@ static inline void handle_failed_objexts_alloc(unsigned long obj_exts,
 
 static inline void mark_objexts_empty(struct slabobj_ext *obj_exts) {}
 static inline void mark_failed_objexts_alloc(struct slab *slab) {}
-static inline void handle_failed_objexts_alloc(unsigned long obj_exts,
+static inline void handle_failed_objexts_alloc(uintptr_t obj_exts,
 			struct slabobj_ext *vec, unsigned int objects) {}
 
 #endif /* CONFIG_MEM_ALLOC_PROFILING_DEBUG */
@@ -1982,8 +1986,8 @@ int alloc_slab_obj_exts(struct slab *slab, struct kmem_cache *s,
 		        gfp_t gfp, bool new_slab)
 {
 	unsigned int objects = objs_per_slab(s, slab);
-	unsigned long new_exts;
-	unsigned long old_exts;
+	uintptr_t new_exts;
+	uintptr_t old_exts;
 	struct slabobj_ext *vec;
 
 	gfp &= ~OBJCGS_CLEAR_MASK;
@@ -4196,7 +4200,7 @@ out:
 	 */
 	slab_post_alloc_hook(s, lru, gfpflags, 1, &object, init, orig_size);
 
-	return object;
+	return cheri_bounds_set_kernel(object, s->size);
 }
 
 void *kmem_cache_alloc_noprof(struct kmem_cache *s, gfp_t gfpflags)
@@ -5356,7 +5360,7 @@ error:
 int kmem_cache_alloc_bulk_noprof(struct kmem_cache *s, gfp_t flags, size_t size,
 				 void **p)
 {
-	int i;
+	int i, k;
 
 	if (!size)
 		return 0;
@@ -5368,6 +5372,10 @@ int kmem_cache_alloc_bulk_noprof(struct kmem_cache *s, gfp_t flags, size_t size,
 	i = __kmem_cache_alloc_bulk(s, flags, size, p);
 	if (unlikely(i == 0))
 		return 0;
+
+	/* Apply bounds for CHERI. */
+	for (k = 0; k < i; ++k)
+		p[k] = cheri_bounds_set_kernel(p[k], s->size);
 
 	/*
 	 * memcg and kmem_cache debug support and memory initialization.
@@ -5935,7 +5943,7 @@ void __kmem_obj_info(struct kmem_obj_info *kpp, void *object, struct slab *slab)
 #ifdef CONFIG_SLUB_DEBUG
 	objp = fixup_red_left(s, objp);
 	trackp = get_track(s, objp, TRACK_ALLOC);
-	kpp->kp_ret = (void *)trackp->addr;
+	kpp->kp_ret = __c_fakep(trackp->addr);
 #ifdef CONFIG_STACKDEPOT
 	{
 		depot_stack_handle_t handle;
@@ -5946,7 +5954,7 @@ void __kmem_obj_info(struct kmem_obj_info *kpp, void *object, struct slab *slab)
 		if (handle) {
 			nr_entries = stack_depot_fetch(handle, &entries);
 			for (i = 0; i < KS_ADDRS_COUNT && i < nr_entries; i++)
-				kpp->kp_stack[i] = (void *)entries[i];
+				kpp->kp_stack[i] = __c_fakep(entries[i]);
 		}
 
 		trackp = get_track(s, objp, TRACK_FREE);
@@ -5954,7 +5962,7 @@ void __kmem_obj_info(struct kmem_obj_info *kpp, void *object, struct slab *slab)
 		if (handle) {
 			nr_entries = stack_depot_fetch(handle, &entries);
 			for (i = 0; i < KS_ADDRS_COUNT && i < nr_entries; i++)
-				kpp->kp_free_stack[i] = (void *)entries[i];
+				kpp->kp_free_stack[i] = __c_fakep(entries[i]);
 		}
 	}
 #endif
