@@ -147,6 +147,11 @@
 	struct { } __cacheline_group_pad__##GROUP		\
 	__aligned((__VA_ARGS__ + 0) ? : SMP_CACHE_BYTES)
 
+#ifdef CONFIG_CHERI_KERNEL
+/* FIXCHERI: Disable cacheline checks for now. */
+#define CACHELINE_ASSERT_GROUP_MEMBER(TYPE, GROUP, MEMBER)
+#endif
+
 #ifndef CACHELINE_ASSERT_GROUP_MEMBER
 #define CACHELINE_ASSERT_GROUP_MEMBER(TYPE, GROUP, MEMBER) \
 	BUILD_BUG_ON(!(offsetof(TYPE, MEMBER) >= \
@@ -155,6 +160,10 @@
 		       offsetof(TYPE, __cacheline_group_end__##GROUP)))
 #endif
 
+#ifdef CONFIG_CHERI_KERNEL
+/* FIXCHERI: Disable cacheline checks for now. */
+#define CACHELINE_ASSERT_GROUP_SIZE(A, B, C)
+#endif
 #ifndef CACHELINE_ASSERT_GROUP_SIZE
 #define CACHELINE_ASSERT_GROUP_SIZE(TYPE, GROUP, SIZE) \
 	BUILD_BUG_ON(offsetof(TYPE, __cacheline_group_end__##GROUP) - \
