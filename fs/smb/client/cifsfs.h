@@ -30,12 +30,12 @@ cifs_uniqueid_to_ino_t(u64 fileid)
 
 static inline void cifs_set_time(struct dentry *dentry, unsigned long time)
 {
-	dentry->d_fsdata = (void *) time;
+	dentry->d_fsdata = __c_fakep(time);
 }
 
 static inline unsigned long cifs_get_time(struct dentry *dentry)
 {
-	return (uintptr_t) dentry->d_fsdata;
+	return __c_pa(dentry->d_fsdata);
 }
 
 extern struct file_system_type cifs_fs_type, smb3_fs_type;
