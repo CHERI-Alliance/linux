@@ -239,16 +239,16 @@ efault:
 /*
  * Get the user-space pointer value stored in the 'rseq_cs' field.
  */
-static int rseq_get_rseq_cs_ptr_val(struct rseq __user *rseq, u64 *rseq_cs)
+static int rseq_get_rseq_cs_ptr_val(struct rseq __user *rseq, __u64ptr *rseq_cs)
 {
 	if (!rseq_cs)
 		return -EFAULT;
 
 #ifdef CONFIG_64BIT
-	if (get_user(*rseq_cs, &rseq->rseq_cs))
+	if (get_user_ptr(*rseq_cs, &rseq->rseq_cs))
 		return -EFAULT;
 #else
-	if (copy_from_user(rseq_cs, &rseq->rseq_cs, sizeof(*rseq_cs)))
+	if (copy_from_user_with_ptr(rseq_cs, &rseq->rseq_cs, sizeof(*rseq_cs)))
 		return -EFAULT;
 #endif
 
@@ -262,7 +262,7 @@ static int rseq_get_rseq_cs_ptr_val(struct rseq __user *rseq, u64 *rseq_cs)
 static int rseq_get_rseq_cs(struct task_struct *t, struct rseq_cs *rseq_cs)
 {
 	struct rseq_cs __user *urseq_cs;
-	u64 ptr;
+	__u64ptr ptr;
 	u32 __user *usig;
 	u32 sig;
 	int ret;
@@ -279,7 +279,7 @@ static int rseq_get_rseq_cs(struct task_struct *t, struct rseq_cs *rseq_cs)
 	/* Check that the pointer value fits in the user-space process space. */
 	if (ptr >= TASK_SIZE)
 		return -EINVAL;
-	urseq_cs = (struct rseq_cs __user *)(unsigned long)ptr;
+	urseq_cs = (struct rseq_cs __user *)(user_uintptr_t)ptr;
 	if (copy_from_user_with_ptr(rseq_cs, urseq_cs, sizeof(*rseq_cs)))
 		return -EFAULT;
 
@@ -363,7 +363,7 @@ static int clear_rseq_cs(struct rseq __user *rseq)
 	 * Set rseq_cs to NULL.
 	 */
 #ifdef CONFIG_64BIT
-	return put_user(0UL, &rseq->rseq_cs);
+	return put_user_ptr((__u64ptr)0, &rseq->rseq_cs);
 #else
 	if (clear_user(&rseq->rseq_cs, sizeof(rseq->rseq_cs)))
 		return -EFAULT;
@@ -382,7 +382,7 @@ static bool in_rseq_cs(unsigned long ip, struct rseq_cs *rseq_cs)
 
 static int rseq_ip_fixup(struct pt_regs *regs)
 {
-	unsigned long ip = instruction_pointer(regs);
+	uintptr_t ip = instruction_pointer(regs);
 	struct task_struct *t = current;
 	struct rseq_cs rseq_cs;
 	int ret;
@@ -396,7 +396,7 @@ static int rseq_ip_fixup(struct pt_regs *regs)
 	 * If not nested over a rseq critical section, restart is useless.
 	 * Clear the rseq_cs pointer and return.
 	 */
-	if (!in_rseq_cs(ip, &rseq_cs))
+	if (!in_rseq_cs(__c_ua(ip), &rseq_cs))
 		return clear_rseq_cs(t->rseq);
 	ret = rseq_need_restart(t, rseq_cs.flags);
 	if (ret <= 0)
@@ -406,7 +406,7 @@ static int rseq_ip_fixup(struct pt_regs *regs)
 		return ret;
 	trace_rseq_ip_fixup(ip, rseq_cs.start_ip, rseq_cs.post_commit_offset,
 			    rseq_cs.abort_ip);
-	instruction_pointer_set(regs, (unsigned long)rseq_cs.abort_ip);
+	instruction_pointer_set(regs, (user_uintptr_t)rseq_cs.abort_ip);
 	return 0;
 }
 
@@ -456,13 +456,13 @@ error:
  */
 void rseq_syscall(struct pt_regs *regs)
 {
-	unsigned long ip = instruction_pointer(regs);
+	uintptr_t ip = instruction_pointer(regs);
 	struct task_struct *t = current;
 	struct rseq_cs rseq_cs;
 
 	if (!t->rseq)
 		return;
-	if (rseq_get_rseq_cs(t, &rseq_cs) || in_rseq_cs(ip, &rseq_cs))
+	if (rseq_get_rseq_cs(t, &rseq_cs) || in_rseq_cs(__c_ua(ip), &rseq_cs))
 		force_sig(SIGSEGV);
 }
 
@@ -475,7 +475,7 @@ SYSCALL_DEFINE4(rseq, struct rseq __user *, rseq, u32, rseq_len,
 		int, flags, u32, sig)
 {
 	int ret;
-	u64 rseq_cs;
+	__u64ptr rseq_cs;
 
 	if (flags & RSEQ_FLAG_UNREGISTER) {
 		if (flags & ~RSEQ_FLAG_UNREGISTER)
