@@ -2598,7 +2598,7 @@ struct data_blob {
 	__u8 *data;
 	size_t length;
 	void (*free) (struct data_blob *data_blob);
-} __attribute__((packed));
+};
 
 
 #ifdef CONFIG_CIFS_POSIX
