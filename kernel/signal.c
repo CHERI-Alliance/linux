@@ -1088,7 +1088,7 @@ static int __send_signal_locked(int sig, struct kernel_siginfo *info,
 
 	if (q) {
 		list_add_tail(&q->list, &pending->list);
-		switch ((uintptr_t) info) {
+		switch (__c_pa(info)) {
 		case (unsigned long) SEND_SIG_NOINFO:
 			clear_siginfo(&q->info);
 			q->info.si_signo = sig;
@@ -1815,7 +1815,7 @@ int force_sig_seccomp(int syscall, int reason, bool force_coredump)
 	clear_siginfo(&info);
 	info.si_signo = SIGSYS;
 	info.si_code = SYS_SECCOMP;
-	info.si_call_addr = as_user_ptr(KSTK_EIP(current));
+	info.si_call_addr = (void __user *)KSTK_EIP(current);
 	info.si_errno = reason;
 	info.si_arch = syscall_get_arch(current);
 	info.si_syscall = syscall;

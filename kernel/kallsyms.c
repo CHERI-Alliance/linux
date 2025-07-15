@@ -314,11 +314,11 @@ static unsigned long get_symbol_pos(unsigned long addr,
 	/* If we found no next symbol, we use the end of the section. */
 	if (!symbol_end) {
 		if (is_kernel_inittext(addr))
-			symbol_end = (uintptr_t)_einittext;
+			symbol_end = __c_pa(_einittext);
 		else if (IS_ENABLED(CONFIG_KALLSYMS_ALL))
-			symbol_end = (uintptr_t)_end;
+			symbol_end = __c_pa(_end);
 		else
-			symbol_end = (uintptr_t)_etext;
+			symbol_end = __c_pa(_etext);
 	}
 
 	if (symbolsize)
@@ -726,7 +726,7 @@ static int s_show(struct seq_file *m, void *p)
 	if (!iter->name[0])
 		return 0;
 
-	value = iter->show_value ? (void *)iter->value : NULL;
+	value = iter->show_value ? __c_fakep(iter->value) : NULL;
 
 	if (iter->module_name[0]) {
 		char type;

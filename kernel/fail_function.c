@@ -122,8 +122,7 @@ static int fei_retval_set(void *data, u64 val)
 	}
 
 	if (attr->kp.addr) {
-		if (adjust_error_retval((uintptr_t)attr->kp.addr,
-					val) != retv)
+		if (adjust_error_retval(__c_pa(attr->kp.addr), val) != retv)
 			err = -EINVAL;
 	}
 	if (!err)
@@ -171,7 +170,8 @@ static int fei_kprobe_handler(struct kprobe *kp, struct pt_regs *regs)
 	struct fei_attr *attr = container_of(kp, struct fei_attr, kp);
 
 	if (should_fail(&fei_fault_attr, 1)) {
-		regs_set_return_value(regs, attr->retval);
+		/* Canont inject capabilities as return values. */
+		regs_set_return_value(regs, __c_fakeu(attr->retval));
 		override_function_with_return(regs);
 		return 1;
 	}
