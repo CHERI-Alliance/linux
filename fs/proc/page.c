@@ -135,7 +135,7 @@ u64 stable_page_flags(const struct page *page)
 {
 	const struct folio *folio;
 	unsigned long k;
-	unsigned long mapping;
+	uintptr_t mapping;
 	bool is_anon;
 	u64 u = 0;
 
