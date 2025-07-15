@@ -736,7 +736,7 @@ SYSCALL_DEFINE6(setxattrat, int, dfd, const char __user *, pathname, unsigned in
 		return error;
 
 	return path_setxattrat(dfd, pathname, at_flags, name,
-			       u64_to_user_ptr(args.value), args.size,
+			       (void __user *)args.value, args.size,
 			       args.flags);
 }
 
@@ -882,7 +882,7 @@ SYSCALL_DEFINE6(getxattrat, int, dfd, const char __user *, pathname, unsigned in
 		return -EINVAL;
 
 	return path_getxattrat(dfd, pathname, at_flags, name,
-			       u64_to_user_ptr(args.value), args.size);
+			       (void __user *)args.value, args.size);
 }
 
 SYSCALL_DEFINE4(getxattr, const char __user *, pathname,

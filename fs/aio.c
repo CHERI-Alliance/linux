@@ -385,8 +385,8 @@ static void copy_io_event_to_ring(struct kioctx *ctx,
 		folio = ctx->ring_folios[pos / AIO_COMPAT_EVENTS_PER_PAGE];
 		compat_ring_event = folio_address(folio);
 		compat_ring_event += pos % AIO_COMPAT_EVENTS_PER_PAGE;
-		compat_ring_event->data = (u64)native_event->data;
-		compat_ring_event->obj = (u64)native_event->obj;
+		compat_ring_event->data = __c_ua(native_event->data);
+		compat_ring_event->obj = __c_ua(native_event->obj);
 		compat_ring_event->res = native_event->res;
 		compat_ring_event->res2 = native_event->res2;
 	} else {
@@ -704,7 +704,7 @@ static int aio_setup_ring(struct kioctx *ctx, unsigned int nr_events)
 				 PROT_READ | PROT_WRITE,
 				 MAP_SHARED, 0, 0, &unused, NULL);
 	mmap_write_unlock(mm);
-	if (IS_ERR((void *)ctx->mmap_base)) {
+	if (IS_ERR(__c_fakep(ctx->mmap_base))) {
 		ctx->mmap_size = 0;
 		aio_free_ring(ctx);
 		return -ENOMEM;
@@ -1569,7 +1569,7 @@ COMPAT_SYSCALL_DEFINE2(io_setup, unsigned, nr_events, compat_aio_context_t __use
 	ret = -EINVAL;
 	if (unlikely(ctx || nr_events == 0)) {
 		pr_debug("EINVAL: ctx %lu nr_events %u\n",
-		         ctx, nr_events);
+		         (unsigned long)ctx, nr_events);
 		goto out;
 	}
 
@@ -2170,7 +2170,7 @@ static int get_compat_iocb(struct iocb *iocb, const struct iocb __user *user_ioc
 	struct compat_iocb compat_iocb;
 	if (unlikely(copy_from_user(&compat_iocb, user_iocb, sizeof(struct compat_iocb))))
 		return -EFAULT;
-	iocb->aio_data = (__kernel_uintptr_t)compat_iocb.aio_data;
+	iocb->aio_data = __c_fakeu(compat_iocb.aio_data);
 	iocb->aio_key = compat_iocb.aio_key;
 	iocb->aio_rw_flags = compat_iocb.aio_rw_flags;
 	iocb->aio_lio_opcode = compat_iocb.aio_lio_opcode;
