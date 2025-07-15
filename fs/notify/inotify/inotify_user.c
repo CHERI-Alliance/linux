@@ -343,7 +343,7 @@ static long inotify_ioctl(struct file *file, unsigned int cmd,
 
 			data = &group->inotify_data;
 			spin_lock(&data->idr_lock);
-			idr_set_cursor(&data->idr, (unsigned int)arg);
+			idr_set_cursor(&data->idr, __c_ua(arg));
 			spin_unlock(&data->idr_lock);
 			ret = 0;
 		}
