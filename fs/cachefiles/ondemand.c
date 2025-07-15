@@ -119,7 +119,7 @@ static long cachefiles_ondemand_fd_ioctl(struct file *filp, unsigned int ioctl,
 	struct cachefiles_object *object = filp->private_data;
 	struct cachefiles_cache *cache = object->volume->cache;
 	struct cachefiles_req *req;
-	XA_STATE(xas, &cache->reqs, id);
+	XA_STATE(xas, &cache->reqs, __c_ua(id));
 
 	if (ioctl != CACHEFILES_IOC_READ_COMPLETE)
 		return -EINVAL;
@@ -137,7 +137,7 @@ static long cachefiles_ondemand_fd_ioctl(struct file *filp, unsigned int ioctl,
 	xas_store(&xas, NULL);
 	xa_unlock(&cache->reqs);
 
-	trace_cachefiles_ondemand_cread(object, id);
+	trace_cachefiles_ondemand_cread(object, __c_ua(id));
 	complete(&req->done);
 	return 0;
 }
