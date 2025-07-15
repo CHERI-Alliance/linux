@@ -959,6 +959,7 @@ struct xfs_getparents {
 	__u64				gp_buffer;
 };
 
+#if 0
 static inline struct xfs_getparents_rec *
 xfs_getparents_first_rec(struct xfs_getparents *gp)
 {
@@ -977,6 +978,7 @@ xfs_getparents_next_rec(struct xfs_getparents *gp,
 
 	return (struct xfs_getparents_rec *)next;
 }
+#endif
 
 /* Iterate through this file handle's directory parent pointers. */
 struct xfs_getparents_by_handle {
