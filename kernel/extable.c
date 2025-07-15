@@ -138,6 +138,10 @@ out:
  * real function address. As a result, to find if a function
  * pointer is part of the kernel text, we need to do some
  * special dereferencing first.
+ * FIXCHERI: This function is fed with fake pointers from various
+ * FIXCHERI: places (e.g. kprobes) and will fail if it actually
+ * FIXHCERI: tries to deref the pointer. This will need fixing for
+ * FIXCHERI: parisc/powerpc with CHERI.
  */
 #ifdef CONFIG_HAVE_FUNCTION_DESCRIPTORS
 void *dereference_function_descriptor(void *ptr)
@@ -162,7 +166,7 @@ void *dereference_kernel_function_descriptor(void *ptr)
 
 int func_ptr_is_kernel_text(void *ptr)
 {
-	unsigned long addr;
+	uintptr_t addr;
 	addr = (uintptr_t) dereference_function_descriptor(ptr);
 	if (core_kernel_text(addr))
 		return 1;

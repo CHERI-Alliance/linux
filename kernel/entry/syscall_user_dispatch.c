@@ -150,7 +150,7 @@ int syscall_user_dispatch_get_config(struct task_struct *task, unsigned long siz
 
 	cfg.offset = sd->offset;
 	cfg.len = sd->len;
-	cfg.selector = (__u64)(user_uintptr_t)sd->selector;
+	cfg.selector = (user_uintptr_t)sd->selector;
 
 	if (copy_to_user_with_ptr(data, &cfg, sizeof(cfg)))
 		return -EFAULT;
