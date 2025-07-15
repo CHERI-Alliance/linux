@@ -3279,7 +3279,7 @@ static void *ext4_mb_seq_structs_summary_start(struct seq_file *seq, loff_t *pos
 	if (*pos < 0 || *pos >= 2*MB_NUM_ORDERS(sb))
 		return NULL;
 	position = *pos + 1;
-	return (void *) ((unsigned long) position);
+	return __c_fakep(position);
 }
 
 static void *ext4_mb_seq_structs_summary_next(struct seq_file *seq, void *v, loff_t *pos)
@@ -3291,14 +3291,14 @@ static void *ext4_mb_seq_structs_summary_next(struct seq_file *seq, void *v, lof
 	if (*pos < 0 || *pos >= 2*MB_NUM_ORDERS(sb))
 		return NULL;
 	position = *pos + 1;
-	return (void *) ((unsigned long) position);
+	return __c_fakep(position);
 }
 
 static int ext4_mb_seq_structs_summary_show(struct seq_file *seq, void *v)
 {
 	struct super_block *sb = pde_data(file_inode(seq->file));
 	struct ext4_sb_info *sbi = EXT4_SB(sb);
-	unsigned long position = ((uintptr_t) v);
+	unsigned long position = __c_pa(v);
 	struct ext4_group_info *grp;
 	unsigned int count;
 	unsigned long idx;
