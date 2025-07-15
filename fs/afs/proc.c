@@ -532,7 +532,7 @@ static void *afs_proc_sysname_start(struct seq_file *m, loff_t *pos)
 	names = net->sysnames;
 	if (*pos >= names->nr)
 		return NULL;
-	return (void *)(unsigned long)(*pos + 1);
+	return __c_fakep(*pos + 1);
 }
 
 static void *afs_proc_sysname_next(struct seq_file *m, void *v, loff_t *pos)
@@ -543,7 +543,7 @@ static void *afs_proc_sysname_next(struct seq_file *m, void *v, loff_t *pos)
 	*pos += 1;
 	if (*pos >= names->nr)
 		return NULL;
-	return (void *)(unsigned long)(*pos + 1);
+	return __c_fakep(*pos + 1);
 }
 
 static void afs_proc_sysname_stop(struct seq_file *m, void *v)

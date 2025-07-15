@@ -264,7 +264,7 @@ error_release_sock:
  */
 enum rxrpc_oob_type rxrpc_kernel_query_oob(struct sk_buff *oob,
 					   struct rxrpc_peer **_peer,
-					   unsigned long *_peer_appdata)
+					   uintptr_t *_peer_appdata)
 {
 	struct rxrpc_skb_priv *sp = rxrpc_skb(oob);
 	enum rxrpc_oob_type type = oob->mark;
@@ -341,7 +341,7 @@ EXPORT_SYMBOL(rxrpc_kernel_free_oob);
  */
 void rxrpc_kernel_query_challenge(struct sk_buff *challenge,
 				  struct rxrpc_peer **_peer,
-				  unsigned long *_peer_appdata,
+				  uintptr_t *_peer_appdata,
 				  u16 *_service_id, u8 *_security_index)
 {
 	struct rxrpc_skb_priv *sp = rxrpc_skb(challenge);

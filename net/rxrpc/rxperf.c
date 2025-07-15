@@ -97,13 +97,13 @@ static inline void rxperf_set_call_complete(struct rxperf_call *call,
 }
 
 static void rxperf_rx_discard_new_call(struct rxrpc_call *rxcall,
-				       unsigned long user_call_ID)
+				       uintptr_t user_call_ID)
 {
 	kfree((struct rxperf_call *)user_call_ID);
 }
 
 static void rxperf_rx_new_call(struct sock *sk, struct rxrpc_call *rxcall,
-			       unsigned long user_call_ID)
+			       uintptr_t user_call_ID)
 {
 	queue_work(rxperf_workqueue, &rxperf_charge_preallocation_work);
 }
@@ -114,7 +114,7 @@ static void rxperf_queue_call_work(struct rxperf_call *call)
 }
 
 static void rxperf_notify_rx(struct sock *sk, struct rxrpc_call *rxcall,
-			     unsigned long call_user_ID)
+			     uintptr_t call_user_ID)
 {
 	struct rxperf_call *call = (struct rxperf_call *)call_user_ID;
 
@@ -122,7 +122,7 @@ static void rxperf_notify_rx(struct sock *sk, struct rxrpc_call *rxcall,
 		rxperf_queue_call_work(call);
 }
 
-static void rxperf_rx_attach(struct rxrpc_call *rxcall, unsigned long user_call_ID)
+static void rxperf_rx_attach(struct rxrpc_call *rxcall, uintptr_t user_call_ID)
 {
 	struct rxperf_call *call = (struct rxperf_call *)user_call_ID;
 
@@ -131,7 +131,7 @@ static void rxperf_rx_attach(struct rxrpc_call *rxcall, unsigned long user_call_
 
 static void rxperf_notify_end_reply_tx(struct sock *sock,
 				       struct rxrpc_call *rxcall,
-				       unsigned long call_user_ID)
+				       uintptr_t call_user_ID)
 {
 	rxperf_set_call_state((struct rxperf_call *)call_user_ID,
 			      RXPERF_CALL_SV_AWAIT_ACK);
