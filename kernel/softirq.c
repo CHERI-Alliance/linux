@@ -972,7 +972,7 @@ void tasklet_setup(struct tasklet_struct *t,
 EXPORT_SYMBOL(tasklet_setup);
 
 void tasklet_init(struct tasklet_struct *t,
-		  void (*func)(unsigned long), unsigned long data)
+		  void (*func)(uintptr_t), uintptr_t data)
 {
 	t->next = NULL;
 	t->state = 0;
