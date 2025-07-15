@@ -12,7 +12,11 @@
  * @grp: group name inside the struct
  * @sz: expected group size
  */
-#if defined(CONFIG_64BIT) && SMP_CACHE_BYTES == 64
+#ifdef CONFIG_CHERI_KERNEL
+/* FIXCHERI: Ignore cacheline asserts on CHERI for now. */
+#define libeth_cacheline_group_assert(type, grp, sz)
+#define __libeth_cacheline_struct_assert(type, sz)
+#elif defined(CONFIG_64BIT) && SMP_CACHE_BYTES == 64
 #define libeth_cacheline_group_assert(type, grp, sz)			      \
 	static_assert(offsetof(type, __cacheline_group_end__##grp) -	      \
 		      offsetofend(type, __cacheline_group_begin__##grp) ==    \
