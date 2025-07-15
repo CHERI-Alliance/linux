@@ -500,8 +500,8 @@ static int do_task_stat(struct seq_file *m, struct pid_namespace *ns,
 		 */
 		if (permitted && (task->flags & (PF_EXITING|PF_DUMPCORE|PF_POSTCOREDUMP))) {
 			if (try_get_task_stack(task)) {
-				eip = KSTK_EIP(task);
-				esp = KSTK_ESP(task);
+				eip = __c_ua(KSTK_EIP(task));
+				esp = __c_ua(KSTK_ESP(task));
 				put_task_stack(task);
 			}
 		}
