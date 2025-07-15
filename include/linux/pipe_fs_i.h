@@ -28,7 +28,7 @@ struct pipe_buffer {
 	unsigned int offset, len;
 	const struct pipe_buf_operations *ops;
 	unsigned int flags;
-	unsigned long private;
+	uintptr_t private;
 };
 
 /*

@@ -588,7 +588,8 @@ SYSCALL_DEFINE3(ioctl, unsigned int, fd, unsigned int, cmd, user_uintptr_t, arg)
 	if (fd_empty(f))
 		return -EBADF;
 
-	error = security_file_ioctl(fd_file(f), cmd, arg);
+	/* FIXCHERI: Hook cannot deref potential pointer in arg. */
+	error = security_file_ioctl(fd_file(f), cmd, __c_ua(arg));
 	if (error)
 		return error;
 
@@ -639,7 +640,7 @@ static inline long compat_ioctl(struct file *file, unsigned int cmd,
  * is incompatible between 32-bit and 64-bit architectures, a proper
  * handler is required instead of compat_ptr_ioctl.
  */
-long compat_ptr_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+long compat_ptr_ioctl(struct file *file, unsigned int cmd, uintptr_t arg)
 {
 	return compat_ioctl(file, cmd, arg, true);
 }
