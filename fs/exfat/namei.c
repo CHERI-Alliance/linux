@@ -14,13 +14,13 @@
 
 static inline unsigned long exfat_d_version(struct dentry *dentry)
 {
-	return (uintptr_t) dentry->d_fsdata;
+	return __c_pa(dentry->d_fsdata);
 }
 
 static inline void exfat_d_version_set(struct dentry *dentry,
 		unsigned long version)
 {
-	dentry->d_fsdata = (void *) version;
+	dentry->d_fsdata = __c_fakep(version);
 }
 
 /*
