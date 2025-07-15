@@ -312,7 +312,7 @@ static __maybe_unused const bool class_##_name##_is_conditional = _is_cond
 
 #define __DEFINE_GUARD_LOCK_PTR(_name, _exp) \
 	static inline void * class_##_name##_lock_ptr(class_##_name##_t *_T) \
-	{ return (void *)(__force unsigned long)*(_exp); }
+	{ return (void *)(__force uintptr_t)*(_exp); }
 
 #define DEFINE_CLASS_IS_GUARD(_name) \
 	__DEFINE_CLASS_IS_CONDITIONAL(_name, false); \
