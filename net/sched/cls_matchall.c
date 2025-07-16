@@ -67,7 +67,7 @@ static void mall_destroy_work(struct work_struct *work)
 
 static void mall_destroy_hw_filter(struct tcf_proto *tp,
 				   struct cls_mall_head *head,
-				   unsigned long cookie,
+				   uintptr_t cookie,
 				   struct netlink_ext_ack *extack)
 {
 	struct tc_cls_matchall_offload cls_mall = {};
@@ -83,7 +83,7 @@ static void mall_destroy_hw_filter(struct tcf_proto *tp,
 
 static int mall_replace_hw_filter(struct tcf_proto *tp,
 				  struct cls_mall_head *head,
-				  unsigned long cookie,
+				  uintptr_t cookie,
 				  struct netlink_ext_ack *extack)
 {
 	struct tc_cls_matchall_offload cls_mall = {};
@@ -311,7 +311,7 @@ static int mall_reoffload(struct tcf_proto *tp, bool add, flow_setup_cb_t *cb,
 
 static void mall_stats_hw_filter(struct tcf_proto *tp,
 				 struct cls_mall_head *head,
-				 unsigned long cookie)
+				 uintptr_t cookie)
 {
 	struct tc_cls_matchall_offload cls_mall = {};
 	struct tcf_block *block = tp->chain->block;
