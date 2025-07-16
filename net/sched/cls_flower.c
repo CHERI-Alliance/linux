@@ -2627,7 +2627,7 @@ static void fl_walk(struct tcf_proto *tp, struct tcf_walker *arg,
 		    bool rtnl_held)
 {
 	struct cls_fl_head *head = fl_head_dereference(tp);
-	unsigned long id = arg->cookie, tmp;
+	unsigned long id = __c_ua(arg->cookie), tmp;
 	struct cls_fl_filter *f;
 
 	arg->count = arg->skip;
@@ -2650,7 +2650,7 @@ static void fl_walk(struct tcf_proto *tp, struct tcf_walker *arg,
 		rcu_read_lock();
 	}
 	rcu_read_unlock();
-	arg->cookie = id;
+	arg->cookie = __c_fakeu(id);
 }
 
 static struct cls_fl_filter *
