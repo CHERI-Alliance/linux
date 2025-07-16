@@ -492,7 +492,7 @@ static inline int check_entry_size_and_hooks(struct arpt_entry *e,
 	}
 
 	/* Clear counters and comefrom */
-	e->counters = ((struct xt_counters) { 0, 0 });
+	e->counters = ((struct xt_counters) { .pcnt = 0, .bcnt = 0 });
 	e->comefrom = 0;
 	return 0;
 }
