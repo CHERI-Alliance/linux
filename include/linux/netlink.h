@@ -34,7 +34,11 @@ struct netlink_skb_parms {
 
 #define NETLINK_CB(skb)		(*(struct netlink_skb_parms*)&((skb)->cb))
 #define NETLINK_CREDS(skb)	(&NETLINK_CB((skb)).creds)
+#ifdef CONFIG_CHERI_KERNEL
+#define NETLINK_CTX_SIZE	96
+#else
 #define NETLINK_CTX_SIZE	48
+#endif
 
 
 void netlink_table_grab(void);
@@ -295,12 +299,11 @@ struct netlink_callback {
 	int			flags;
 	bool			strict_check;
 	union {
-		u8		ctx[NETLINK_CTX_SIZE];
-
+		u8		ctx[NETLINK_CTX_SIZE] __cheri_pointer_align;
 		/* args is deprecated. Cast a struct over ctx instead
 		 * for proper type safety.
 		 */
-		long		args[6];
+		intptr_t	args[6];
 	};
 };
 
