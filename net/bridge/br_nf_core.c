@@ -32,7 +32,7 @@ static void fake_redirect(struct dst_entry *dst, struct sock *sk,
 {
 }
 
-static u32 *fake_cow_metrics(struct dst_entry *dst, unsigned long old)
+static u32 *fake_cow_metrics(struct dst_entry *dst, uintptr_t old)
 {
 	return NULL;
 }
