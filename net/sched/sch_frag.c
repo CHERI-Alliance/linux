@@ -8,7 +8,7 @@
 #include <net/ip6_fib.h>
 
 struct sch_frag_data {
-	unsigned long dst;
+	uintptr_t dst;
 	struct qdisc_skb_cb cb;
 	__be16 inner_protocol;
 	u16 vlan_tci;
@@ -97,7 +97,7 @@ static int sch_fragment(struct net *net, struct sk_buff *skb,
 
 	if (skb_protocol(skb, true) == htons(ETH_P_IP)) {
 		struct rtable sch_frag_rt = { 0 };
-		unsigned long orig_dst;
+		uintptr_t orig_dst;
 
 		local_lock_nested_bh(&sch_frag_data_storage.bh_lock);
 		sch_frag_prepare_frag(skb, xmit);
@@ -113,7 +113,7 @@ static int sch_fragment(struct net *net, struct sk_buff *skb,
 		local_unlock_nested_bh(&sch_frag_data_storage.bh_lock);
 		refdst_drop(orig_dst);
 	} else if (skb_protocol(skb, true) == htons(ETH_P_IPV6)) {
-		unsigned long orig_dst;
+		uintptr_t orig_dst;
 		struct rt6_info sch_frag_rt;
 
 		local_lock_nested_bh(&sch_frag_data_storage.bh_lock);

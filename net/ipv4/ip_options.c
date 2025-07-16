@@ -591,7 +591,7 @@ int ip_options_rcv_srr(struct sk_buff *skb, struct net_device *dev)
 	unsigned char *optptr = skb_network_header(skb) + opt->srr;
 	struct rtable *rt = skb_rtable(skb);
 	struct rtable *rt2;
-	unsigned long orefdst;
+	uintptr_t orefdst;
 	int err;
 
 	if (!rt)
