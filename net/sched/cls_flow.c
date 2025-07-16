@@ -59,7 +59,7 @@ struct flow_filter {
 
 static inline u32 addr_fold(void *addr)
 {
-	uintptr_t a = (uintptr_t)addr;
+	unsigned long a = __c_pa(addr);
 
 	return (a & 0xFFFFFFFF) ^ (BITS_PER_LONG > 32 ? a >> 32 : 0);
 }
@@ -388,7 +388,7 @@ static void flow_destroy_filter_work(struct work_struct *work)
 }
 
 static int flow_change(struct net *net, struct sk_buff *in_skb,
-		       struct tcf_proto *tp, unsigned long base,
+		       struct tcf_proto *tp, uintptr_t base,
 		       u32 handle, struct nlattr **tca,
 		       void **arg, u32 flags,
 		       struct netlink_ext_ack *extack)

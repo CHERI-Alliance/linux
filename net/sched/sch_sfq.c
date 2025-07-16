@@ -905,7 +905,7 @@ static int sfq_dump_class_stats(struct Qdisc *sch, uintptr_t cl,
 				struct gnet_dump *d)
 {
 	struct sfq_sched_data *q = qdisc_priv(sch);
-	sfq_index idx = q->ht[cl - 1];
+	sfq_index idx = q->ht[__c_ua(cl - 1)];
 	struct gnet_stats_queue qs = { 0 };
 	struct tc_sfq_xstats xstats = { 0 };
 
