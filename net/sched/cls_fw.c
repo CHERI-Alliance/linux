@@ -26,9 +26,9 @@
 #define HTSIZE 256
 
 struct fw_head {
+	struct rcu_head		rcu;
 	u32			mask;
 	struct fw_filter __rcu	*ht[HTSIZE];
-	struct rcu_head		rcu;
 };
 
 struct fw_filter {
