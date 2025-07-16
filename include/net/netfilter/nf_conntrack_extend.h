@@ -34,12 +34,19 @@ enum nf_ct_ext_id {
 	NF_CT_EXT_NUM,
 };
 
+extern const u8 nf_ct_ext_type_len[NF_CT_EXT_NUM];
+
 /* Extensions: optional stuff which isn't permanently in struct. */
 struct nf_ct_ext {
+#ifdef CONFIG_CHERI_KERNEL
+	u16 offset[NF_CT_EXT_NUM];
+	u16 len;
+#else
 	u8 offset[NF_CT_EXT_NUM];
 	u8 len;
+#endif
 	unsigned int gen_id;
-	char data[] __aligned(8);
+	char data[] __aligned(8) __cheri_pointer_align;
 };
 
 static inline bool __nf_ct_ext_exist(const struct nf_ct_ext *ext, u8 id)
@@ -64,7 +71,8 @@ static inline void *nf_ct_ext_find(const struct nf_conn *ct, u8 id)
 	if (unlikely(ext->gen_id))
 		return __nf_ct_ext_find(ext, id);
 
-	return (void *)ct->ext + ct->ext->offset[id];
+	return cheri_bounds_set_kernel((void *)ct->ext + ct->ext->offset[id],
+				       nf_ct_ext_type_len[id]);
 }
 
 /* Add this type, returns pointer to data or NULL. */
