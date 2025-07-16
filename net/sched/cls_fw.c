@@ -200,7 +200,7 @@ static const struct nla_policy fw_policy[TCA_FW_MAX + 1] = {
 
 static int fw_set_parms(struct net *net, struct tcf_proto *tp,
 			struct fw_filter *f, struct nlattr **tb,
-			struct nlattr **tca, unsigned long base, u32 flags,
+			struct nlattr **tca, uintptr_t base, u32 flags,
 			struct netlink_ext_ack *extack)
 {
 	struct fw_head *head = rtnl_dereference(tp->root);

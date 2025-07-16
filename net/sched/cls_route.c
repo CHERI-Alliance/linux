@@ -381,7 +381,7 @@ static const struct nla_policy route4_policy[TCA_ROUTE4_MAX + 1] = {
 };
 
 static int route4_set_parms(struct net *net, struct tcf_proto *tp,
-			    unsigned long base, struct route4_filter *f,
+			    uintptr_t base, struct route4_filter *f,
 			    u32 handle, struct route4_head *head,
 			    struct nlattr **tb, struct nlattr *est, int new,
 			    u32 flags, struct netlink_ext_ack *extack)

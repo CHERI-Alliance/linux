@@ -145,7 +145,7 @@ static const struct nla_policy basic_policy[TCA_BASIC_MAX + 1] = {
 };
 
 static int basic_set_parms(struct net *net, struct tcf_proto *tp,
-			   struct basic_filter *f, unsigned long base,
+			   struct basic_filter *f, uintptr_t base,
 			   struct nlattr **tb,
 			   struct nlattr *est, u32 flags,
 			   struct netlink_ext_ack *extack)

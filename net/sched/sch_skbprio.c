@@ -250,8 +250,8 @@ static int skbprio_dump_class_stats(struct Qdisc *sch, uintptr_t cl,
 				    struct gnet_dump *d)
 {
 	struct skbprio_sched_data *q = qdisc_priv(sch);
-	if (gnet_stats_copy_queue(d, NULL, &q->qstats[cl - 1],
-		q->qstats[cl - 1].qlen) < 0)
+	if (gnet_stats_copy_queue(d, NULL, &q->qstats[__c_ua(cl) - 1],
+		q->qstats[__c_ua(cl) - 1].qlen) < 0)
 		return -1;
 	return 0;
 }
