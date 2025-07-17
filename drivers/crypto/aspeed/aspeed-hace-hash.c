@@ -834,7 +834,7 @@ static int aspeed_sham_export(struct ahash_request *req, void *out)
 {
 	struct aspeed_sham_reqctx *rctx = ahash_request_ctx(req);
 
-	memcpy(out, rctx, sizeof(*rctx));
+	memcpy((struct aspeed_sham_reqctx *)out, rctx, sizeof(*rctx));
 
 	return 0;
 }

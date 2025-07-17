@@ -174,7 +174,13 @@ static int ufs_bsg_request(struct bsg_job *job)
 		if (ret)
 			dev_err(hba->dev, "send uic cmd: error code %d\n", ret);
 
-		memcpy(&bsg_reply->upiu_rsp.uc, &uc, UIC_CMD_SIZE);
+		/*
+		 * CHERI:
+		 * The in kernel struct uic_command does contain pointers
+		 * but the copy operation only includes integer data.
+		 * Cast the source to "void *" to hide the capability from LLVM.
+		 */
+		memcpy(&bsg_reply->upiu_rsp.uc, (void *)&uc, UIC_CMD_SIZE);
 
 		break;
 	case UPIU_TRANSACTION_ARPMB_CMD:

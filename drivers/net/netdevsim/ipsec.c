@@ -85,6 +85,8 @@ static int nsim_ipsec_find_empty_idx(struct nsim_ipsec *ipsec)
 	return -ENOSPC;
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcheri-inefficient"
 static int nsim_ipsec_parse_proto_keys(struct net_device *dev,
 				       struct xfrm_state *xs,
 				       u32 *mykey, u32 *mysalt)
@@ -128,7 +130,10 @@ static int nsim_ipsec_parse_proto_keys(struct net_device *dev,
 
 	return 0;
 }
+#pragma clang diagnostic pop
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcheri-inefficient"
 static int nsim_ipsec_add_sa(struct net_device *dev,
 			     struct xfrm_state *xs,
 			     struct netlink_ext_ack *extack)
@@ -198,6 +203,7 @@ static int nsim_ipsec_add_sa(struct net_device *dev,
 
 	return 0;
 }
+#pragma clang diagnostic pop
 
 static void nsim_ipsec_del_sa(struct net_device *dev, struct xfrm_state *xs)
 {
