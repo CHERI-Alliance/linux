@@ -22,7 +22,7 @@ struct nci_data {
 	u8 cmd;
 	const u8 *data;
 	u32 data_len;
-} __packed;
+} __packed_if_not_cherry;
 
 struct nci_hci_create_pipe_params {
 	u8 src_gate;
