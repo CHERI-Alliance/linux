@@ -768,6 +768,7 @@ int tty_mode_ioctl(struct tty_struct *tty, unsigned int cmd, user_uintptr_t arg)
 	void __user *p = (void __user *)arg;
 	int ret = 0;
 	struct ktermios kterm;
+	unsigned long val;
 
 	if (tty->driver->type == TTY_DRIVER_TYPE_PTY &&
 	    tty->driver->subtype == PTY_TYPE_MASTER)
@@ -881,9 +882,9 @@ int tty_mode_ioctl(struct tty_struct *tty, unsigned int cmd, user_uintptr_t arg)
 						(int __user *)arg);
 		return ret;
 	case TIOCSSOFTCAR:
-		if (get_user(arg, (unsigned int __user *) arg))
+		if (get_user(val, (unsigned int __user *) arg))
 			return -EFAULT;
-		return tty_change_softcar(real_tty, arg);
+		return tty_change_softcar(real_tty, val);
 	default:
 		return -ENOIOCTLCMD;
 	}

@@ -578,7 +578,7 @@ static void tegra_uart_start_next_tx(struct tegra_uart_port *tup)
 	if (!count)
 		return;
 
-	tail = (uintptr_t)tail_ptr;
+	tail = __c_pa(tail_ptr);
 
 	if (tup->use_tx_pio || count < TEGRA_UART_MIN_DMA)
 		tegra_uart_start_pio_tx(tup, count);
