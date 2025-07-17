@@ -5641,6 +5641,8 @@ size_t ZSTD_freeCDict(ZSTD_CDict* cdict)
  *  Note : there is no corresponding "free" function.
  *         Since workspace was allocated externally, it must be freed externally.
  */
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcheri-inefficient"
 const ZSTD_CDict* ZSTD_initStaticCDict(
                                  void* workspace, size_t workspaceSize,
                            const void* dict, size_t dictSize,
@@ -5686,6 +5688,7 @@ const ZSTD_CDict* ZSTD_initStaticCDict(
 
     return cdict;
 }
+#pragma clang diagnostic pop
 
 ZSTD_compressionParameters ZSTD_getCParamsFromCDict(const ZSTD_CDict* cdict)
 {

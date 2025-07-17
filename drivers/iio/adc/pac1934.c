@@ -1360,7 +1360,7 @@ static int pac1934_prep_iio_channels(struct pac1934_chip_info *info, struct iio_
 		if (!info->active_channels[cnt])
 			continue;
 
-		memcpy(tmp_data, pac1934_single_channel, sizeof(pac1934_single_channel));
+		memcpy((struct iio_chan_spec *)tmp_data, pac1934_single_channel, sizeof(pac1934_single_channel));
 		ch_sp = (struct iio_chan_spec *)tmp_data;
 		ch_sp[PAC1934_CH_ENERGY].channel = cnt + 1;
 		ch_sp[PAC1934_CH_ENERGY].scan_index = cnt;

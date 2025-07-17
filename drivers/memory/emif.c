@@ -1004,7 +1004,7 @@ static struct emif_data *get_device_details(
 	if (!emif || !temp || !dev_info)
 		goto error;
 
-	memcpy(temp, pd, sizeof(*pd));
+	memcpy((struct emif_platform_data *)temp, pd, sizeof(*pd));
 	pd = temp;
 	memcpy(dev_info, pd->device_info, sizeof(*dev_info));
 

@@ -1892,7 +1892,7 @@ static int tegra_cmac_export(struct ahash_request *req, void *out)
 {
 	struct tegra_cmac_reqctx *rctx = ahash_request_ctx(req);
 
-	memcpy(out, rctx, sizeof(*rctx));
+	memcpy((struct tegra_cmac_reqctx *)out, rctx, sizeof(*rctx));
 
 	return 0;
 }
