@@ -88,7 +88,7 @@ struct htable {
 	struct hbucket __rcu *bucket[]; /* hashtable buckets */
 };
 
-#define hbucket(h, i)		((h)->bucket[i])
+#define hbucket(h, i)		((h)->bucket[(unsigned long __force)(i)])
 #define ext_size(n, dsize)	\
 	(sizeof(struct hbucket) + (n) * (dsize))
 
