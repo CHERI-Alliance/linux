@@ -79,7 +79,7 @@ struct sw_flow *ovs_flow_alloc(void)
 		return ERR_PTR(-ENOMEM);
 
 	flow->stats_last_writer = -1;
-	flow->cpu_used_mask = (struct cpumask *)&flow->stats[nr_cpu_ids];
+	flow->cpu_used_mask = (struct cpumask *)(void *)&flow->stats[nr_cpu_ids];
 
 	/* Initialize the default stat node. */
 	stats = kmem_cache_alloc_node(flow_stats_cache,
