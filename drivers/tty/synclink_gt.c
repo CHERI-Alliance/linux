@@ -955,7 +955,7 @@ static void tx_release(struct tty_struct *tty)
  * Return 0 if success, otherwise error code
  */
 static int ioctl(struct tty_struct *tty,
-		 unsigned int cmd, unsigned long arg)
+		 unsigned int cmd, user_uintptr_t arg)
 {
 	struct slgt_info *info = tty->driver_data;
 	void __user *argp = (void __user *)arg;
