@@ -4183,7 +4183,7 @@ unsigned long __weak pci_address_to_pio(phys_addr_t address)
 int pci_remap_iospace(const struct resource *res, phys_addr_t phys_addr)
 {
 #if defined(PCI_IOBASE)
-	unsigned long vaddr = (unsigned long)PCI_IOBASE + res->start;
+	unsigned long vaddr = __c_pa(PCI_IOBASE) + res->start;
 
 	if (!(res->flags & IORESOURCE_IO))
 		return -EINVAL;
@@ -4216,7 +4216,7 @@ EXPORT_SYMBOL(pci_remap_iospace);
 void pci_unmap_iospace(struct resource *res)
 {
 #if defined(PCI_IOBASE)
-	unsigned long vaddr = (unsigned long)PCI_IOBASE + res->start;
+	unsigned long vaddr = __c_pa(PCI_IOBASE) + res->start;
 
 	vunmap_range(vaddr, vaddr + resource_size(res));
 #endif
