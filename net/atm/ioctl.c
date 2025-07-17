@@ -180,7 +180,7 @@ static int do_vcc_ioctl(struct socket *sock, unsigned int cmd,
 		} else {
 			struct atm_iobuf __user *iobuf = argp;
 			len = &iobuf->length;
-			if (get_user(buf, &iobuf->buffer))
+			if (get_user_ptr(buf, &iobuf->buffer))
 				return -EFAULT;
 		}
 		error = atm_getnames(buf, len);
@@ -203,7 +203,7 @@ static int do_vcc_ioctl(struct socket *sock, unsigned int cmd,
 			struct atmif_sioc __user *sioc = argp;
 
 			len = &sioc->length;
-			if (get_user(buf, &sioc->arg))
+			if (get_user_ptr(buf, &sioc->arg))
 				return -EFAULT;
 			if (get_user(number, &sioc->number))
 				return -EFAULT;

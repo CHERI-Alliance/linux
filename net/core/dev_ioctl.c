@@ -101,9 +101,9 @@ static int dev_getifmap(struct net_device *dev, struct ifreq *ifr)
 		return 0;
 	}
 
-	ifmap->mem_start  = dev->mem_start;
-	ifmap->mem_end    = dev->mem_end;
-	ifmap->base_addr  = dev->base_addr;
+	ifmap->mem_start  = __c_ua(dev->mem_start);
+	ifmap->mem_end    = __c_ua(dev->mem_end);
+	ifmap->base_addr  = __c_ua(dev->base_addr);
 	ifmap->irq        = dev->irq;
 	ifmap->dma        = dev->dma;
 	ifmap->port       = dev->if_port;
