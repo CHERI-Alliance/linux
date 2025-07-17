@@ -96,8 +96,8 @@ devm_kvasprintf(struct device *dev, gfp_t gfp, const char *fmt, va_list ap);
 char * __printf(3, 4) __malloc
 devm_kasprintf(struct device *dev, gfp_t gfp, const char *fmt, ...);
 
-unsigned long devm_get_free_pages(struct device *dev, gfp_t gfp_mask, unsigned int order);
-void devm_free_pages(struct device *dev, unsigned long addr);
+uintptr_t devm_get_free_pages(struct device *dev, gfp_t gfp_mask, unsigned int order);
+void devm_free_pages(struct device *dev, uintptr_t addr);
 
 #ifdef CONFIG_HAS_IOMEM
 

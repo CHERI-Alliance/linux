@@ -1139,7 +1139,7 @@ devm_kmemdup_const(struct device *dev, const void *src, size_t len, gfp_t gfp)
 EXPORT_SYMBOL_GPL(devm_kmemdup_const);
 
 struct pages_devres {
-	unsigned long addr;
+	uintptr_t addr;
 	unsigned int order;
 };
 
@@ -1171,7 +1171,7 @@ static void devm_pages_release(struct device *dev, void *res)
  * Address of allocated memory on success, 0 on failure.
  */
 
-unsigned long devm_get_free_pages(struct device *dev,
+uintptr_t devm_get_free_pages(struct device *dev,
 				  gfp_t gfp_mask, unsigned int order)
 {
 	struct pages_devres *devres;
@@ -1205,7 +1205,7 @@ EXPORT_SYMBOL_GPL(devm_get_free_pages);
  * Free memory allocated with devm_get_free_pages(). Unlike free_pages,
  * there is no need to supply the @order.
  */
-void devm_free_pages(struct device *dev, unsigned long addr)
+void devm_free_pages(struct device *dev, uintptr_t addr)
 {
 	struct pages_devres devres = { .addr = addr };
 
@@ -1279,6 +1279,6 @@ void devm_free_percpu(struct device *dev, void __percpu *pdata)
 	 * devm_free_pages() does.
 	 */
 	WARN_ON(devres_release(dev, devm_percpu_release, devm_percpu_match,
-			       (void *)(__force unsigned long)pdata));
+			       (void *)(__force uintptr_t)pdata));
 }
 EXPORT_SYMBOL_GPL(devm_free_percpu);
