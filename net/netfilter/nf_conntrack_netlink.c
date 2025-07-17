@@ -1218,7 +1218,7 @@ ctnetlink_dump_table(struct sk_buff *skb, struct netlink_callback *cb)
 {
 	unsigned int flags = cb->data ? NLM_F_DUMP_FILTERED : 0;
 	struct net *net = sock_net(skb->sk);
-	unsigned long last_id = cb->args[1];
+	unsigned long last_id = __c_ua(cb->args[1]);
 	struct nf_conntrack_tuple_hash *h;
 	struct hlist_nulls_node *n;
 	struct nf_conn *nf_ct_evict[8];
@@ -1275,7 +1275,7 @@ restart:
 					    NFNL_MSG_TYPE(cb->nlh->nlmsg_type),
 					    ct, true, flags);
 			if (res < 0) {
-				cb->args[1] = ctnetlink_get_id(ct);
+				cb->args[1] = __c_fakeu(ctnetlink_get_id(ct));
 				spin_unlock(lockp);
 				goto out;
 			}
@@ -3154,7 +3154,7 @@ errout:
 
 static unsigned long ctnetlink_exp_id(const struct nf_conntrack_expect *exp)
 {
-	uintptr_t id = (uintptr_t)exp;
+	unsigned long id = __c_pa(exp);
 
 	id += nf_ct_get_id(exp->master);
 	id += exp->class;
@@ -3168,7 +3168,7 @@ ctnetlink_exp_dump_table(struct sk_buff *skb, struct netlink_callback *cb)
 	struct net *net = sock_net(skb->sk);
 	struct nfgenmsg *nfmsg = nlmsg_data(cb->nlh);
 	u_int8_t l3proto = nfmsg->nfgen_family;
-	unsigned long last_id = cb->args[1];
+	unsigned long last_id = __c_ua(cb->args[1]);
 	struct nf_conntrack_expect *exp;
 
 	rcu_read_lock();
@@ -3192,7 +3192,7 @@ restart:
 						    cb->nlh->nlmsg_seq,
 						    IPCTNL_MSG_EXP_NEW,
 						    exp) < 0) {
-				cb->args[1] = ctnetlink_exp_id(exp);
+				cb->args[1] = __c_fakeu(ctnetlink_exp_id(exp));
 				goto out;
 			}
 		}
@@ -3213,7 +3213,7 @@ ctnetlink_exp_ct_dump_table(struct sk_buff *skb, struct netlink_callback *cb)
 	struct nf_conn *ct = cb->data;
 	struct nf_conn_help *help = nfct_help(ct);
 	u_int8_t l3proto = nfmsg->nfgen_family;
-	unsigned long last_id = cb->args[1];
+	unsigned long last_id = __c_ua(cb->args[1]);
 	struct nf_conntrack_expect *exp;
 
 	if (cb->args[0])
@@ -3234,7 +3234,7 @@ restart:
 					    cb->nlh->nlmsg_seq,
 					    IPCTNL_MSG_EXP_NEW,
 					    exp) < 0) {
-			cb->args[1] = ctnetlink_exp_id(exp);
+			cb->args[1] = __c_fakeu(ctnetlink_exp_id(exp));
 			goto out;
 		}
 	}
