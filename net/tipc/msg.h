@@ -114,15 +114,15 @@ struct tipc_skb_cb {
 			u16 chain_imp;
 			u16 ackers;
 			u16 retr_cnt;
-		} __packed;
+		} __packed __cheri_pointer_align;
 #ifdef CONFIG_TIPC_CRYPTO
 		struct {
 			struct tipc_crypto *rx;
 			struct tipc_aead *last;
 			u8 recurs;
-		} tx_clone_ctx __packed;
+		} tx_clone_ctx __packed __cheri_pointer_align;
 #endif
-	} __packed;
+	} __packed __cheri_pointer_align;
 	union {
 		struct {
 			u8 validated:1;
@@ -139,9 +139,9 @@ struct tipc_skb_cb {
 	};
 	u8 reserved;
 #ifdef CONFIG_TIPC_CRYPTO
-	void *crypto_ctx;
+	void *crypto_ctx __cheri_pointer_align;
 #endif
-} __packed;
+} __packed __cheri_pointer_align;
 
 #define TIPC_SKB_CB(__skb) ((struct tipc_skb_cb *)&((__skb)->cb[0]))
 
