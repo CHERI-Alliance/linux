@@ -77,7 +77,11 @@ struct nf_conn_help {
 	u8 expecting[NF_CT_MAX_EXPECT_CLASSES];
 
 	/* private helper information. */
+#ifdef CONFIG_CHERI_KERNEL
+	char data[48] __aligned(__SIZEOF_POINTER__);
+#else
 	char data[32] __aligned(8);
+#endif
 };
 
 #define NF_CT_HELPER_BUILD_BUG_ON(structsize) \
