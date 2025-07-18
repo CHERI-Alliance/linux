@@ -479,7 +479,7 @@ static void *dma_ringalloc(struct dma_info *di, u32 boundary, uint size,
 	if (NULL == va)
 		return NULL;
 
-	desc_strtaddr = (u32) roundup((unsigned long)va, alignbytes);
+	desc_strtaddr = (u32) roundup((uintptr_t)va, alignbytes);
 	if (((desc_strtaddr + size - 1) & boundary) != (desc_strtaddr
 							& boundary)) {
 		*alignbits = dma_align_sizetobits(size);
@@ -516,7 +516,7 @@ static bool dma64_alloc(struct dma_info *di, uint direction)
 		}
 		align = (1 << align_bits);
 		di->txd64 = (struct dma64desc *)
-					roundup((unsigned long)va, align);
+					roundup((uintptr_t)va, align);
 		di->txdalign = (uint) ((s8 *)di->txd64 - (s8 *) va);
 		di->txdpa = di->txdpaorig + di->txdalign;
 		di->txdalloc = alloced;
@@ -531,7 +531,7 @@ static bool dma64_alloc(struct dma_info *di, uint direction)
 		}
 		align = (1 << align_bits);
 		di->rxd64 = (struct dma64desc *)
-					roundup((unsigned long)va, align);
+					roundup((uintptr_t)va, align);
 		di->rxdalign = (uint) ((s8 *)di->rxd64 - (s8 *) va);
 		di->rxdpa = di->rxdpaorig + di->rxdalign;
 		di->rxdalloc = alloced;
