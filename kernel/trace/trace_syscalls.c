@@ -1329,7 +1329,11 @@ struct trace_event_class __refdata event_class_syscall_exit = {
 #ifndef ARCH_HAS_SYSCALL_ADDR
 unsigned long __init arch_syscall_addr(int nr)
 {
-	return (unsigned long)sys_call_table[nr];
+	/*
+	 * sys_call_table[nr] is unsigned long or a pointer, depending on the
+	 * arch. open code __c_pa for this special case.
+	 */
+	return (unsigned long __force)(uintptr_t)sys_call_table[nr];
 }
 #endif
 
