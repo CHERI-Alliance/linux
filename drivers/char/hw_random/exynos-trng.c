@@ -193,7 +193,7 @@ static int exynos_trng_probe(struct platform_device *pdev)
 	platform_set_drvdata(pdev, trng);
 	trng->dev = &pdev->dev;
 
-	trng->flags = (uintptr_t)device_get_match_data(&pdev->dev);
+	trng->flags = __c_pa(device_get_match_data(&pdev->dev));
 
 	trng->rng.name = devm_kstrdup(&pdev->dev, dev_name(&pdev->dev),
 				      GFP_KERNEL);
