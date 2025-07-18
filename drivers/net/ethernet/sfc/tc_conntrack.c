@@ -377,7 +377,7 @@ static int efx_tc_ct_replace(struct efx_tc_ct_zone *ct_zone,
 		goto release;
 	} else if (old) {
 		netif_dbg(efx, drv, efx->net_dev,
-			  "Already offloaded conntrack (cookie %lx)\n", tc->cookie);
+			  "Already offloaded conntrack (cookie %lx)\n", (unsigned long)tc->cookie);
 		rc = -EEXIST;
 		goto release;
 	}
@@ -492,7 +492,7 @@ static int efx_tc_ct_destroy(struct efx_tc_ct_zone *ct_zone,
 				      efx_tc_ct_ht_params);
 	if (!conn) {
 		netif_warn(efx, drv, efx->net_dev,
-			   "Conntrack %lx not found to remove\n", tc->cookie);
+			   "Conntrack %lx not found to remove\n", (unsigned long)tc->cookie);
 		return -ENOENT;
 	}
 
@@ -517,7 +517,7 @@ static int efx_tc_ct_stats(struct efx_tc_ct_zone *ct_zone,
 				      efx_tc_ct_ht_params);
 	if (!conn) {
 		netif_warn(efx, drv, efx->net_dev,
-			   "Conntrack %lx not found for stats\n", tc->cookie);
+			   "Conntrack %lx not found for stats\n", (unsigned long)tc->cookie);
 		rcu_read_unlock();
 		return -ENOENT;
 	}

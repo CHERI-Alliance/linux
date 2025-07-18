@@ -3268,7 +3268,7 @@ static inline void ublk_ctrl_cmd_dump(struct io_uring_cmd *cmd)
 
 	pr_devel("%s: cmd_op %x, dev id %d qid %d data %llx buf %llx len %u\n",
 			__func__, cmd->cmd_op, header->dev_id, header->queue_id,
-			header->data[0], header->addr, header->len);
+			header->data[0], (unsigned long)header->addr, header->len);
 }
 
 static int ublk_ctrl_stop_dev(struct ublk_device *ub)

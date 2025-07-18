@@ -1197,7 +1197,7 @@ static int otx2_tc_del_flow(struct otx2_nic *nic,
 	flow_node = otx2_tc_get_entry_by_cookie(flow_cfg, tc_flow_cmd->cookie);
 	if (!flow_node) {
 		netdev_err(nic->netdev, "tc flow not found for cookie 0x%lx\n",
-			   tc_flow_cmd->cookie);
+			   (unsigned long)tc_flow_cmd->cookie);
 		return -EINVAL;
 	}
 
@@ -1362,7 +1362,7 @@ static int otx2_tc_get_flow_stats(struct otx2_nic *nic,
 	flow_node = otx2_tc_get_entry_by_cookie(nic->flow_cfg, tc_flow_cmd->cookie);
 	if (!flow_node) {
 		netdev_info(nic->netdev, "tc flow not found for cookie %lx",
-			    tc_flow_cmd->cookie);
+			    (unsigned long)tc_flow_cmd->cookie);
 		return -EINVAL;
 	}
 
