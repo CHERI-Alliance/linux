@@ -195,7 +195,7 @@ static int arizona_spi_probe(struct spi_device *spi)
 	unsigned long type = 0;
 	int ret;
 
-	type = (uintptr_t)spi_get_device_match_data(spi);
+	type = __c_pa(spi_get_device_match_data(spi));
 	switch (type) {
 	case WM5102:
 		if (IS_ENABLED(CONFIG_MFD_WM5102))

@@ -187,7 +187,7 @@ static int rn5t618_i2c_probe(struct i2c_client *i2c)
 		return -ENOMEM;
 
 	i2c_set_clientdata(i2c, priv);
-	priv->variant = (intptr_t)i2c_get_match_data(i2c);
+	priv->variant = (long)__c_pa(i2c_get_match_data(i2c));
 	priv->irq = i2c->irq;
 	priv->dev = &i2c->dev;
 
