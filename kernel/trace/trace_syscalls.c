@@ -520,7 +520,7 @@ struct trace_event_class __refdata event_class_syscall_exit = {
 #ifndef ARCH_HAS_SYSCALL_ADDR
 unsigned long __init arch_syscall_addr(int nr)
 {
-	return (unsigned long)sys_call_table[nr];
+	return (unsigned long)__c_pa(sys_call_table[nr]);
 }
 #endif
 
