@@ -376,7 +376,7 @@ static struct tps65910_board *tps65910_parse_dt(struct i2c_client *client,
 	unsigned int prop;
 	int ret;
 
-	*chip_id  = (uintptr_t)device_get_match_data(&client->dev);
+	*chip_id  = __c_pa(device_get_match_data(&client->dev));
 
 	board_info = devm_kzalloc(&client->dev, sizeof(*board_info),
 			GFP_KERNEL);
@@ -416,7 +416,7 @@ static struct tps65910_board *tps65910_parse_dt(struct i2c_client *client,
 #else
 static inline
 struct tps65910_board *tps65910_parse_dt(struct i2c_client *client,
-					 unsigned long *chip_id)
+					 uintptr_t *chip_id)
 {
 	return NULL;
 }
@@ -441,7 +441,7 @@ static int tps65910_i2c_probe(struct i2c_client *i2c)
 	struct tps65910_board *pmic_plat_data;
 	struct tps65910_board *of_pmic_plat_data = NULL;
 	struct tps65910_platform_data *init_data;
-	unsigned long chip_id = id->driver_data;
+	unsigned long chip_id = __c_ua(id->driver_data);
 	int ret;
 
 	pmic_plat_data = dev_get_platdata(&i2c->dev);
