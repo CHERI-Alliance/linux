@@ -15,9 +15,9 @@ struct nvme_user_io {
 	__u16	control;
 	__u16	nblocks;
 	__u16	rsvd;
-	__u64	metadata;
-	__u64	addr;
 	__u64	slba;
+	__kernel_uintptr_t	metadata;
+	__kernel_uintptr_t	addr;
 	__u32	dsmgmt;
 	__u32	reftag;
 	__u16	apptag;
@@ -31,8 +31,8 @@ struct nvme_passthru_cmd {
 	__u32	nsid;
 	__u32	cdw2;
 	__u32	cdw3;
-	__u64	metadata;
-	__u64	addr;
+	__kernel_uintptr_t	metadata;
+	__kernel_uintptr_t	addr;
 	__u32	metadata_len;
 	__u32	data_len;
 	__u32	cdw10;
@@ -52,8 +52,8 @@ struct nvme_passthru_cmd64 {
 	__u32	nsid;
 	__u32	cdw2;
 	__u32	cdw3;
-	__u64	metadata;
-	__u64	addr;
+	__kernel_uintptr_t	metadata;
+	__kernel_uintptr_t	addr;
 	__u32	metadata_len;
 	union {
 		__u32	data_len; /* for non-vectored io */
@@ -78,8 +78,8 @@ struct nvme_uring_cmd {
 	__u32	nsid;
 	__u32	cdw2;
 	__u32	cdw3;
-	__u64	metadata;
-	__u64	addr;
+	__kernel_uintptr_t	metadata;
+	__kernel_uintptr_t	addr;
 	__u32	metadata_len;
 	__u32	data_len;
 	__u32	cdw10;
