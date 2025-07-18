@@ -448,7 +448,7 @@ register_shm_helper(struct tee_context *ctx, struct iov_iter *iter, u32 flags,
 	shm->flags = flags;
 	shm->ctx = ctx;
 	shm->id = id;
-	addr = untagged_addr((unsigned long)iter_iov_addr(iter));
+	addr = untagged_addr((user_uintptr_t)iter_iov_addr(iter));
 	start = rounddown(addr, PAGE_SIZE);
 	num_pages = iov_iter_npages(iter, INT_MAX);
 	if (!num_pages) {

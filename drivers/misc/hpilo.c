@@ -283,7 +283,7 @@ static int ilo_ccb_setup(struct ilo_hwinfo *hw, struct ccb_data *data, int slot)
 	dma_va = (char *)data->dma_va;
 	dma_pa = data->dma_pa;
 
-	dma_va = (char *)roundup((unsigned long)dma_va, ILO_START_ALIGN);
+	dma_va = (char *)roundup((uintptr_t)dma_va, ILO_START_ALIGN);
 	dma_pa = roundup(dma_pa, ILO_START_ALIGN);
 
 	/*
@@ -299,7 +299,7 @@ static int ilo_ccb_setup(struct ilo_hwinfo *hw, struct ccb_data *data, int slot)
 	dma_va += fifo_sz(NR_QENTRY);
 	dma_pa += fifo_sz(NR_QENTRY);
 
-	dma_va = (char *)roundup((unsigned long)dma_va, ILO_CACHE_SZ);
+	dma_va = (char *)roundup((uintptr_t)dma_va, ILO_CACHE_SZ);
 	dma_pa = roundup(dma_pa, ILO_CACHE_SZ);
 
 	fifo_setup(dma_va, NR_QENTRY);
