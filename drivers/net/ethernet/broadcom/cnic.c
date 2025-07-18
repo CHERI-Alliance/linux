@@ -1106,7 +1106,7 @@ static int cnic_init_uio(struct cnic_dev *dev)
 	if (test_bit(CNIC_F_BNX2_CLASS, &dev->flags)) {
 		uinfo->mem[0].size = MB_GET_CID_ADDR(TX_TSS_CID +
 						     TX_MAX_TSS_RINGS + 1);
-		uinfo->mem[1].addr = (unsigned long) cp->status_blk.gen &
+		uinfo->mem[1].addr = (uintptr_t) cp->status_blk.gen &
 					CNIC_PAGE_MASK;
 		uinfo->mem[1].dma_addr = cp->status_blk_map;
 		if (cp->ethdev->drv_state & CNIC_DRV_STATE_USING_MSIX)
@@ -1118,7 +1118,7 @@ static int cnic_init_uio(struct cnic_dev *dev)
 	} else if (test_bit(CNIC_F_BNX2X_CLASS, &dev->flags)) {
 		uinfo->mem[0].size = pci_resource_len(dev->pcidev, 0);
 
-		uinfo->mem[1].addr = (unsigned long) cp->bnx2x_def_status_blk &
+		uinfo->mem[1].addr = (uintptr_t) cp->bnx2x_def_status_blk &
 			CNIC_PAGE_MASK;
 		uinfo->mem[1].dma_addr = cp->status_blk_map;
 		uinfo->mem[1].size = PAGE_ALIGN(sizeof(*cp->bnx2x_def_status_blk));
@@ -1129,13 +1129,13 @@ static int cnic_init_uio(struct cnic_dev *dev)
 	uinfo->mem[1].dma_device = &dev->pcidev->dev;
 	uinfo->mem[1].memtype = UIO_MEM_DMA_COHERENT;
 
-	uinfo->mem[2].addr = (unsigned long) udev->l2_ring;
+	uinfo->mem[2].addr = (uintptr_t) udev->l2_ring;
 	uinfo->mem[2].dma_addr = udev->l2_ring_map;
 	uinfo->mem[2].size = PAGE_ALIGN(udev->l2_ring_size);
 	uinfo->mem[2].dma_device = &dev->pcidev->dev;
 	uinfo->mem[2].memtype = UIO_MEM_DMA_COHERENT;
 
-	uinfo->mem[3].addr = (unsigned long) udev->l2_buf;
+	uinfo->mem[3].addr = (uintptr_t) udev->l2_buf;
 	uinfo->mem[3].dma_addr = udev->l2_buf_map;
 	uinfo->mem[3].size = PAGE_ALIGN(udev->l2_buf_size);
 	uinfo->mem[3].dma_device = &dev->pcidev->dev;

@@ -410,7 +410,7 @@ static void ixgbevf_ipsec_del_sa(struct net_device *dev,
 
 		if (!ipsec->rx_tbl[sa_idx].used) {
 			netdev_err(dev, "Invalid Rx SA selected sa_idx=%d offload_handle=%lu\n",
-				   sa_idx, xs->xso.offload_handle);
+				   sa_idx, (unsigned long)xs->xso.offload_handle);
 			return;
 		}
 
@@ -423,7 +423,7 @@ static void ixgbevf_ipsec_del_sa(struct net_device *dev,
 
 		if (!ipsec->tx_tbl[sa_idx].used) {
 			netdev_err(dev, "Invalid Tx SA selected sa_idx=%d offload_handle=%lu\n",
-				   sa_idx, xs->xso.offload_handle);
+				   sa_idx, (unsigned long)xs->xso.offload_handle);
 			return;
 		}
 
@@ -472,7 +472,7 @@ int ixgbevf_ipsec_tx(struct ixgbevf_ring *tx_ring,
 	sa_idx = xs->xso.offload_handle - IXGBE_IPSEC_BASE_TX_INDEX;
 	if (unlikely(sa_idx >= IXGBE_IPSEC_MAX_SA_COUNT)) {
 		netdev_err(tx_ring->netdev, "%s: bad sa_idx=%d handle=%lu\n",
-			   __func__, sa_idx, xs->xso.offload_handle);
+			   __func__, sa_idx, (unsigned long)xs->xso.offload_handle);
 		return 0;
 	}
 

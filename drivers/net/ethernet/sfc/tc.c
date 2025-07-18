@@ -1517,7 +1517,7 @@ static int efx_tc_flower_replace_foreign_lhs_ar(struct efx_nic *efx,
 						efx_tc_lhs_rule_ht_params);
 	if (old) {
 		netif_dbg(efx, drv, efx->net_dev,
-			  "Already offloaded rule (cookie %lx)\n", tc->cookie);
+			  "Already offloaded rule (cookie %lx)\n", (unsigned long)tc->cookie);
 		rc = -EEXIST;
 		NL_SET_ERR_MSG_MOD(extack, "Rule already offloaded");
 		goto release;
@@ -1538,7 +1538,7 @@ static int efx_tc_flower_replace_foreign_lhs_ar(struct efx_nic *efx,
 	}
 	netif_dbg(efx, drv, efx->net_dev,
 		  "Successfully parsed lhs rule (cookie %lx)\n",
-		  tc->cookie);
+		  (unsigned long)tc->cookie);
 	return 0;
 
 release:
@@ -1629,7 +1629,7 @@ static int efx_tc_flower_replace_foreign_lhs(struct efx_nic *efx,
 						efx_tc_lhs_rule_ht_params);
 	if (old) {
 		netif_dbg(efx, drv, efx->net_dev,
-			  "Already offloaded rule (cookie %lx)\n", tc->cookie);
+			  "Already offloaded rule (cookie %lx)\n", (unsigned long)tc->cookie);
 		rc = -EEXIST;
 		NL_SET_ERR_MSG_MOD(extack, "Rule already offloaded");
 		goto release;
@@ -1650,7 +1650,7 @@ static int efx_tc_flower_replace_foreign_lhs(struct efx_nic *efx,
 	}
 	netif_dbg(efx, drv, efx->net_dev,
 		  "Successfully parsed lhs rule (cookie %lx)\n",
-		  tc->cookie);
+		  (unsigned long)tc->cookie);
 	return 0;
 
 release:
@@ -1810,7 +1810,7 @@ static int efx_tc_flower_replace_foreign(struct efx_nic *efx,
 	} else if (old) {
 		netif_dbg(efx, drv, efx->net_dev,
 			  "Ignoring already-offloaded rule (cookie %lx)\n",
-			  tc->cookie);
+			  (unsigned long)tc->cookie);
 		rc = -EEXIST;
 		goto release;
 	}
@@ -1950,7 +1950,7 @@ static int efx_tc_flower_replace_foreign(struct efx_nic *efx,
 
 	netif_dbg(efx, drv, efx->net_dev,
 		  "Successfully parsed foreign filter (cookie %lx)\n",
-		  tc->cookie);
+		  (unsigned long)tc->cookie);
 
 	rc = efx_mae_alloc_action_set_list(efx, &rule->acts);
 	if (rc) {
@@ -2028,7 +2028,7 @@ static int efx_tc_flower_replace_lhs(struct efx_nic *efx,
 		goto release;
 	} else if (old) {
 		netif_dbg(efx, drv, efx->net_dev,
-			  "Already offloaded rule (cookie %lx)\n", tc->cookie);
+			  "Already offloaded rule (cookie %lx)\n", (unsigned long)tc->cookie);
 		rc = -EEXIST;
 		NL_SET_ERR_MSG_MOD(extack, "Rule already offloaded");
 		goto release;
@@ -2051,7 +2051,7 @@ static int efx_tc_flower_replace_lhs(struct efx_nic *efx,
 	}
 	netif_dbg(efx, drv, efx->net_dev,
 		  "Successfully parsed lhs rule (cookie %lx)\n",
-		  tc->cookie);
+		  (unsigned long)tc->cookie);
 	return 0;
 
 release:
@@ -2192,7 +2192,7 @@ static int efx_tc_flower_replace(struct efx_nic *efx,
 		goto release;
 	} else if (old) {
 		netif_dbg(efx, drv, efx->net_dev,
-			  "Already offloaded rule (cookie %lx)\n", tc->cookie);
+			  "Already offloaded rule (cookie %lx)\n", (unsigned long)tc->cookie);
 		NL_SET_ERR_MSG_MOD(extack, "Rule already offloaded");
 		rc = -EEXIST;
 		goto release;
@@ -2498,7 +2498,7 @@ static int efx_tc_flower_replace(struct efx_nic *efx,
 
 	netif_dbg(efx, drv, efx->net_dev,
 		  "Successfully parsed filter (cookie %lx)\n",
-		  tc->cookie);
+		  (unsigned long)tc->cookie);
 
 	rule->match = match;
 
@@ -2584,7 +2584,7 @@ static int efx_tc_flower_destroy(struct efx_nic *efx,
 		 */
 		if (!IS_ERR(efx_tc_flower_lookup_efv(efx, net_dev)))
 			netif_warn(efx, drv, efx->net_dev,
-				   "Filter %lx not found to remove\n", tc->cookie);
+				   "Filter %lx not found to remove\n", (unsigned long)tc->cookie);
 		NL_SET_ERR_MSG_MOD(extack, "Flow cookie not found in offloaded rules");
 		return -ENOENT;
 	}
@@ -2614,7 +2614,7 @@ static int efx_tc_flower_stats(struct efx_nic *efx, struct net_device *net_dev,
 			if (net_ratelimit())
 				netif_warn(efx, drv, efx->net_dev,
 					   "Filter %lx not found for stats\n",
-					   tc->cookie);
+					   (unsigned long)tc->cookie);
 		NL_SET_ERR_MSG_MOD(extack, "Flow cookie not found in offloaded rules");
 		return -ENOENT;
 	}
