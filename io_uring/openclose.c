@@ -321,7 +321,7 @@ int io_pipe_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	if (sqe->fd || sqe->off || sqe->addr3)
 		return -EINVAL;
 
-	p->fds = u64_to_user_ptr(READ_ONCE(sqe->addr));
+	p->fds = (void __user *)READ_ONCE(sqe->addr);
 	p->flags = READ_ONCE(sqe->pipe_flags);
 	if (p->flags & ~(O_CLOEXEC | O_NONBLOCK | O_DIRECT | O_NOTIFICATION_PIPE))
 		return -EINVAL;

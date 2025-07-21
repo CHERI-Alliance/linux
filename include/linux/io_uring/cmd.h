@@ -21,7 +21,11 @@ struct io_uring_cmd {
 	io_uring_cmd_tw_t task_work_cb;
 	u32		cmd_op;
 	u32		flags;
+#ifndef CONFIG_CHERI_KERNEL
 	u8		pdu[32]; /* available inline for free use */
+#else
+	u8		pdu[48];
+#endif
 };
 
 static inline const void *io_uring_sqe_cmd(const struct io_uring_sqe *sqe)
