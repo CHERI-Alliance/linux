@@ -4156,7 +4156,7 @@ static inline bool ib_dma_pci_p2p_dma_supported(struct ib_device *dev)
 static inline void *ib_virt_dma_to_ptr(u64 dma_addr)
 {
 	/* virt_dma mode maps the kvs's directly into the dma addr */
-	return (void *)(uintptr_t)dma_addr;
+	return (void *)(uintptr_t)dma_addr;	// FIXCHERI NOLINT
 }
 
 /**
@@ -4195,7 +4195,7 @@ static inline u64 ib_dma_map_single(struct ib_device *dev,
 				    enum dma_data_direction direction)
 {
 	if (ib_uses_virt_dma(dev))
-		return (uintptr_t)cpu_addr;
+		return __c_ua((uintptr_t)cpu_addr);
 	return dma_map_single(dev->dma_device, cpu_addr, size, direction);
 }
 
@@ -4229,7 +4229,7 @@ static inline u64 ib_dma_map_page(struct ib_device *dev,
 					 enum dma_data_direction direction)
 {
 	if (ib_uses_virt_dma(dev))
-		return (uintptr_t)(page_address(page) + offset);
+		return __c_ua((uintptr_t)(page_address(page) + offset));
 	return dma_map_page(dev->dma_device, page, offset, size, direction);
 }
 
