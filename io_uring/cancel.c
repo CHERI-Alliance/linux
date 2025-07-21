@@ -72,7 +72,7 @@ static int get_compat64_io_uring_sync_cancel_reg(struct io_uring_sync_cancel_reg
 
 	if (copy_from_user(&compat_sc, user_sc, sizeof(compat_sc)))
 		return -EFAULT;
-	sc->addr = (__kernel_uintptr_t)compat_sc.addr;
+	sc->addr = (__kernel_uintptr_t)compat_ptr(compat_sc.addr);
 	sc->fd = compat_sc.fd;
 	sc->flags = compat_sc.flags;
 	sc->timeout = compat_sc.timeout;

@@ -5,6 +5,7 @@
 #include <linux/slab.h>
 #include <linux/net.h>
 #include <linux/compat.h>
+#include <linux/uaccess.h>
 #include <net/compat.h>
 #include <linux/io_uring.h>
 
@@ -388,7 +389,7 @@ static int io_sendmsg_setup(struct io_kiocb *req, const struct io_uring_sqe *sqe
 	struct user_msghdr msg;
 	int ret;
 
-	sr->umsg = u64_to_user_ptr(READ_ONCE(sqe->addr));
+	sr->umsg = (struct user_msghdr __user *)READ_ONCE(sqe->addr);
 	ret = io_msg_copy_hdr(req, kmsg, &msg, ITER_SOURCE, NULL);
 	if (unlikely(ret))
 		return ret;

@@ -1016,7 +1016,7 @@ enum io_uring_zcrx_area_flags {
 };
 
 struct io_uring_zcrx_area_reg {
-	__u64	addr;
+	__kernel_uintptr_t	addr;
 	__u64	len;
 	__u64	rq_area_token;
 	__u32	flags;

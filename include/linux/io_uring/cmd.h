@@ -16,7 +16,11 @@ struct io_uring_cmd {
 	void (*task_work_cb)(struct io_uring_cmd *cmd, unsigned);
 	u32		cmd_op;
 	u32		flags;
+#ifndef CONFIG_CHERI_KERNEL
 	u8		pdu[32]; /* available inline for free use */
+#else
+	u8		pdu[48];
+#endif
 };
 
 struct io_uring_cmd_data {

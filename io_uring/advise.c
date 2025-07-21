@@ -84,7 +84,7 @@ int io_fadvise_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 		return -EINVAL;
 
 	fa->offset = READ_ONCE(sqe->off);
-	fa->len = READ_ONCE(sqe->addr);
+	fa->len = __c_ua(READ_ONCE(sqe->addr));
 	if (!fa->len)
 		fa->len = READ_ONCE(sqe->len);
 	fa->advice = READ_ONCE(sqe->fadvise_advice);

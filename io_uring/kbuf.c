@@ -352,8 +352,8 @@ static int io_ring_buffers_peek(struct io_kiocb *req, struct buf_sel_arg *arg,
 			}
 		}
 
-		iov->iov_base = u64_to_user_ptr(buf->addr);
-		iov->iov_len = len;
+		iov->iov_base = (void __user *)buf->addr;
+		iov->iov_len = buf->len;
 		iov++;
 
 		arg->out_len += len;
