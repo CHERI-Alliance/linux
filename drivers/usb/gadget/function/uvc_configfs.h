@@ -176,7 +176,7 @@ struct uvcg_extension_unit_descriptor {
 	u8 bControlSize;
 	u8 *bmControls;
 	u8 iExtension;
-} __packed;
+} __packed_if_not_cheri;
 
 struct uvcg_extension {
 	struct config_item item;

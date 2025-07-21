@@ -3019,7 +3019,7 @@ static const struct usb_device_id id_table[] = {
 	/* Keyspan 19qi uses an21xx (original EZ-USB) */
 	/* this does not coexist with the real Keyspan 19qi driver! */
 	{ USB_DEVICE(0x06cd, 0x010b),
-		.driver_info = (unsigned long) &ez1_info,
+		.driver_info = (uintptr_t) &ez1_info,
 	},
 #endif
 
@@ -3029,7 +3029,7 @@ static const struct usb_device_id id_table[] = {
 	/* iBOT2 makes a nice source of high speed bulk-in data */
 	/* this does not coexist with a real iBOT2 driver! */
 	{ USB_DEVICE(0x0b62, 0x0059),
-		.driver_info = (unsigned long) &ibot2_info,
+		.driver_info = (uintptr_t) &ibot2_info,
 	},
 #endif
 

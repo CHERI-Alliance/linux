@@ -59,7 +59,7 @@ static int uas_use_uas_driver(struct usb_interface *intf,
 	struct usb_host_endpoint *eps[4] = { };
 	struct usb_device *udev = interface_to_usbdev(intf);
 	struct usb_hcd *hcd = bus_to_hcd(udev->bus);
-	u64 flags = id->driver_info;
+	u64 flags = __c_ua(id->driver_info);
 	struct usb_host_interface *alt;
 	int r;
 

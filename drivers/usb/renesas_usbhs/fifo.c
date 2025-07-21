@@ -880,7 +880,7 @@ static int usbhsf_dma_prepare_push(struct usbhs_pkt *pkt, int *is_done)
 	struct usbhs_fifo *fifo;
 	int len = pkt->length - pkt->actual;
 	int ret;
-	uintptr_t align_mask;
+	unsigned long align_mask;
 
 	if (usbhs_pipe_is_busy(pipe))
 		return 0;
