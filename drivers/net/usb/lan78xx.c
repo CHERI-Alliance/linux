@@ -453,7 +453,7 @@ struct lan78xx_net {
 	unsigned int		maxpacket;
 	struct timer_list	stat_monitor;
 
-	unsigned long		data[5];
+	uintptr_t		data[5];
 
 	int			link_on;
 	u8			mdix_ctrl;

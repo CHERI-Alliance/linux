@@ -83,7 +83,7 @@ static int ctucan_pci_probe(struct pci_dev *pdev,
 			    const struct pci_device_id *ent)
 {
 	struct device	*dev = &pdev->dev;
-	unsigned long driver_data = ent->driver_data;
+	uintptr_t driver_data = ent->driver_data;
 	struct ctucan_pci_board_data *bdata;
 	void __iomem *addr;
 	void __iomem *cra_addr;

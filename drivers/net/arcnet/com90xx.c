@@ -496,8 +496,8 @@ static int __init com90xx_found(int ioaddr, int airq, u_long shmem,
 		last_mirror += mirror_size;
 	last_mirror -= mirror_size;
 
-	dev->mem_start = first_mirror;
-	dev->mem_end = last_mirror + MIRROR_SIZE - 1;
+	dev->mem_start = __c_fakeu(first_mirror);
+	dev->mem_end = __c_fakeu(last_mirror + MIRROR_SIZE - 1);
 
 	iounmap(p);
 	release_mem_region(shmem, MIRROR_SIZE);
@@ -524,7 +524,7 @@ static int __init com90xx_found(int ioaddr, int airq, u_long shmem,
 	lp->hw.copy_to_card = com90xx_copy_to_card;
 	lp->hw.copy_from_card = com90xx_copy_from_card;
 	lp->mem_start = ioremap(dev->mem_start,
-				dev->mem_end - dev->mem_start + 1);
+				__c_ua(dev->mem_end - dev->mem_start + 1));
 	if (!lp->mem_start) {
 		arc_printk(D_NORMAL, dev, "Can't remap device memory!\n");
 		goto err_free_irq;
