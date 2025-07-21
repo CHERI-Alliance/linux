@@ -96,7 +96,7 @@ void dma_txresume(struct dma_pub *pub);
 void dma_txreclaim(struct dma_pub *pub, enum txd_range range);
 void dma_rxreclaim(struct dma_pub *pub);
 void dma_detach(struct dma_pub *pub);
-unsigned long dma_getvar(struct dma_pub *pub, const char *name);
+uintptr_t dma_getvar(struct dma_pub *pub, const char *name);
 struct sk_buff *dma_getnexttxp(struct dma_pub *pub, enum txd_range range);
 void dma_counterreset(struct dma_pub *pub);
 
