@@ -446,7 +446,7 @@ static int si544_probe(struct i2c_client *client)
 	init.num_parents = 0;
 	data->hw.init = &init;
 	data->i2c_client = client;
-	data->max_freq = (uintptr_t)i2c_get_match_data(client);
+	data->max_freq = __c_pa(i2c_get_match_data(client));
 
 	if (of_property_read_string(client->dev.of_node, "clock-output-names",
 			&init.name))

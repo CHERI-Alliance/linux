@@ -8,7 +8,6 @@
  * This code is licenced under the GPL.
  */
 
-#include "linux/percpu-defs.h"
 #include <linux/clockchips.h>
 #include <linux/kernel.h>
 #include <linux/mutex.h>

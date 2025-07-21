@@ -1261,7 +1261,7 @@ static int nd_open(struct inode *inode, struct file *file)
 {
 	long minor = iminor(inode);
 
-	file->private_data = (void *) minor;
+	file->private_data = (void *)__c_fakep(minor);
 	return 0;
 }
 

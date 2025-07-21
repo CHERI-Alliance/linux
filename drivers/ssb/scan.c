@@ -241,7 +241,7 @@ static void __iomem *ssb_ioremap(struct ssb_bus *bus,
 		break;
 	case SSB_BUSTYPE_SDIO:
 		/* Nothing to ioremap in the SDIO case, just fake it */
-		mmio = (void __iomem *)baseaddr;
+		mmio = (void __iomem *)__c_fakep(baseaddr);
 		break;
 	}
 
