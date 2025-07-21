@@ -270,7 +270,7 @@ struct ipw2100_cmd_header {
 	u32 reserved1[3];
 	u32 *ordinal1_ptr;
 	u32 *ordinal2_ptr;
-} __packed;
+} __packed __cheri_pointer_align;
 
 struct ipw2100_data_header {
 	u32 host_command_reg;
@@ -788,7 +788,7 @@ struct ipw2100_rx {
 		struct ipw2100_notification notification;
 		struct ipw2100_cmd_header command;
 	} rx_data;
-} __packed;
+} __packed __cheri_pointer_align;
 
 /* Bit 0-7 are for 802.11b tx rates - .  Bit 5-7 are reserved */
 #define TX_RATE_1_MBIT              0x0001

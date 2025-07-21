@@ -275,7 +275,7 @@ struct iwl_fw_ini_dump_entry {
 	struct list_head list;
 	u32 size;
 	u8 data[];
-} __packed;
+} __packed __cheri_pointer_align;
 
 /**
  * struct iwl_fw_ini_dump_file_hdr - header of dump file

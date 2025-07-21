@@ -387,7 +387,7 @@ struct iwl_lq_sta {
 #define RS_DRV_DATA_LQ_COLOR_GET(_f) (((_f) & RS_DRV_DATA_LQ_COLOR_MSK) >>\
 				      RS_DRV_DATA_LQ_COLOR_POS)
 #define RS_DRV_DATA_PACK(_c, _p) ((void *)(uintptr_t)\
-				  (((uintptr_t)_p) |\
+				  (((uintptr_t __force)_p) |\
 				   ((_c) << RS_DRV_DATA_LQ_COLOR_POS)))
 
 /* Initialize station's rate scaling information after adding station */

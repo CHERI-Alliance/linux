@@ -213,7 +213,7 @@ enum iwl_error_event_table_status {
 struct iwl_host_cmd {
 	const void *data[IWL_MAX_CMD_TBS_PER_TFD];
 	struct iwl_rx_packet *resp_pkt;
-	unsigned long _rx_page_addr;
+	uintptr_t _rx_page_addr;
 	u32 _rx_page_order;
 
 	u32 flags;
