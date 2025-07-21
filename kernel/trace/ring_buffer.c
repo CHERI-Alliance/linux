@@ -293,11 +293,28 @@ rb_event_data(struct ring_buffer_event *event)
 	if (extended_time(event))
 		event = skip_time_extend(event);
 	WARN_ON_ONCE(event->type_len > RINGBUF_TYPE_DATA_TYPE_LEN_MAX);
-	/* If length is in len field, then array[0] has the data */
+	/*
+	 * If length is in len field, then array[0] has the data
+	 *
+	 * TODO: Revisit the two cheri_bounds_set_kernel calls when we
+	 * start using sub-object bounds. We might have to derive the
+	 * capabilities from kernel_data_cap or exclude event->array from
+	 * using sub-object bounds.
+	 */
 	if (event->type_len)
-		return (void *)&event->array[0];
-	/* Otherwise length is in array[0] and array[1] has the data */
-	return (void *)&event->array[1];
+		return cheri_bounds_set_kernel(&event->array[0],
+					       event->type_len * RB_ALIGNMENT);
+	/*
+	 * Otherwise length is in array[0] and array[1] has the data
+	 *
+	 * The value in array[0] is the length of the entire array[],
+	 * including array[0] itself, see rb_update_event.
+	 * For cheri, we must not increase the bounds past the end of array[]
+	 * or the tag will be cleared.
+	 */
+	WARN_ON_ONCE(event->array[0] < sizeof(event->array[0]));
+	return cheri_bounds_set_kernel(&event->array[1],
+				       event->array[0] - sizeof(event->array[0]));
 }
 
 /**
