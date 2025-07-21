@@ -148,7 +148,7 @@ static int bq27xxx_battery_i2c_bulk_write(struct bq27xxx_device_info *di,
 
 static void bq27xxx_battery_i2c_devm_ida_free(void *data)
 {
-	int num = (long)data;
+	int num = __c_pa(data);
 
 	ida_free(&battery_id, num);
 }
@@ -167,7 +167,7 @@ static int bq27xxx_battery_i2c_probe(struct i2c_client *client)
 		return num;
 	ret = devm_add_action_or_reset(&client->dev,
 				       bq27xxx_battery_i2c_devm_ida_free,
-				       (void *)num);
+				       __c_fakep(num));
 	if (ret)
 		return ret;
 
@@ -180,7 +180,7 @@ static int bq27xxx_battery_i2c_probe(struct i2c_client *client)
 		return -ENOMEM;
 
 	di->dev = &client->dev;
-	di->chip = id->driver_data;
+	di->chip = __c_ua(id->driver_data);
 	di->name = name;
 
 	di->bus.read = bq27xxx_battery_i2c_read;

@@ -706,7 +706,7 @@ static int counter_name_attr_create(struct device *const dev,
 static ssize_t counter_comp_id_show(struct device *dev,
 				    struct device_attribute *attr, char *buf)
 {
-	const uintptr_t id = (uintptr_t)to_counter_attribute(attr)->comp.priv;
+	const size_t id = (size_t)__c_pa(to_counter_attribute(attr)->comp.priv);
 
 	return sysfs_emit(buf, "%zu\n", (unsigned long)id);
 }
@@ -728,7 +728,7 @@ static int counter_comp_id_attr_create(struct device *const dev,
 		return -ENOMEM;
 
 	/* Configure Counter attribute */
-	counter_attr->comp.priv = (void *)id;
+	counter_attr->comp.priv = __c_fakep(id);
 
 	/* Configure device attribute */
 	sysfs_attr_init(&counter_attr->dev_attr.attr);

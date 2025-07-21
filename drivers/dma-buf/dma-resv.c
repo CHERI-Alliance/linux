@@ -71,7 +71,7 @@ static void dma_resv_list_entry(struct dma_resv_list *list, unsigned int index,
 				struct dma_resv *resv, struct dma_fence **fence,
 				enum dma_resv_usage *usage)
 {
-	long tmp;
+	uintptr_t tmp;
 
 	tmp = (intptr_t)rcu_dereference_check(list->table[index],
 					  resv ? dma_resv_held(resv) : true);
@@ -86,7 +86,7 @@ static void dma_resv_list_set(struct dma_resv_list *list,
 			      struct dma_fence *fence,
 			      enum dma_resv_usage usage)
 {
-	long tmp = ((intptr_t)fence) | usage;
+	intptr_t tmp = ((intptr_t)fence) | usage;
 
 	RCU_INIT_POINTER(list->table[index], (struct dma_fence *)tmp);
 }
