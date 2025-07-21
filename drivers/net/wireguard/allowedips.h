@@ -19,7 +19,7 @@ struct allowedips_node {
 	u8 bits[16] __aligned(__alignof(u64));
 
 	/* Keep rarely used members at bottom to be beyond cache line. */
-	unsigned long parent_bit_packed;
+	uintptr_t parent_bit_packed;
 	union {
 		struct list_head peer_list;
 		struct rcu_head rcu;

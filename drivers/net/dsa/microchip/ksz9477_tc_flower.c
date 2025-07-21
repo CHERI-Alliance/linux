@@ -234,7 +234,8 @@ int ksz9477_cls_flower_add(struct dsa_switch *ds, int port,
 	 */
 	action_entry_idx = acl->acles.entries_count;
 
-	ret = ksz9477_flower_parse_key(dev, port, extack, rule, cls->cookie,
+	ret = ksz9477_flower_parse_key(dev, port, extack, rule,
+				       __c_ua(cls->cookie),
 				       cls->common.prio);
 	if (ret)
 		return ret;
@@ -269,7 +270,7 @@ int ksz9477_cls_flower_add(struct dsa_switch *ds, int port,
 int ksz9477_cls_flower_del(struct dsa_switch *ds, int port,
 			   struct flow_cls_offload *cls, bool ingress)
 {
-	unsigned long cookie = cls->cookie;
+	unsigned long cookie = __c_ua(cls->cookie);
 	struct ksz_device *dev = ds->priv;
 	struct ksz9477_acl_priv *acl;
 

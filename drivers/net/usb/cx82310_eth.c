@@ -251,15 +251,15 @@ static int cx82310_rx_fixup(struct usbnet *dev, struct sk_buff *skb)
 	 * end of that packet at the beginning.
 	 */
 	if (dev->partial_rem) {
-		len = dev->partial_len + dev->partial_rem;
+		len = __c_ua(dev->partial_len) + __c_ua(dev->partial_rem);
 		skb2 = alloc_skb(len, GFP_ATOMIC);
 		if (!skb2)
 			return 0;
 		skb_put(skb2, len);
 		memcpy(skb2->data, (void *)dev->partial_data,
-		       dev->partial_len);
-		memcpy(skb2->data + dev->partial_len, skb->data,
-		       dev->partial_rem);
+		       __c_ua(dev->partial_len));
+		memcpy(skb2->data + __c_ua(dev->partial_len), skb->data,
+		       __c_ua(dev->partial_rem));
 		usbnet_skb_return(dev, skb2);
 		skb_pull(skb, (dev->partial_rem + 1) & ~1);
 		dev->partial_rem = 0;
@@ -292,7 +292,7 @@ static int cx82310_rx_fixup(struct usbnet *dev, struct sk_buff *skb)
 			dev->partial_len = skb->len;
 			dev->partial_rem = len - skb->len;
 			memcpy((void *)dev->partial_data, skb->data,
-			       dev->partial_len);
+			       __c_ua(dev->partial_len));
 			skb_pull(skb, skb->len);
 			break;
 		}

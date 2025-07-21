@@ -196,12 +196,12 @@ static inline void xsk_buff_set_size(struct xdp_buff *xdp, u32 size)
 }
 
 static inline dma_addr_t xsk_buff_raw_get_dma(struct xsk_buff_pool *pool,
-					      u64 addr)
+					      __ptraddr_t addr)
 {
 	return xp_raw_get_dma(pool, addr);
 }
 
-static inline void *xsk_buff_raw_get_data(struct xsk_buff_pool *pool, u64 addr)
+static inline void *xsk_buff_raw_get_data(struct xsk_buff_pool *pool, __ptraddr_t addr)
 {
 	return xp_raw_get_data(pool, addr);
 }
@@ -251,7 +251,7 @@ __xsk_buff_get_metadata(const struct xsk_buff_pool *pool, void *data)
 }
 
 static inline struct xsk_tx_metadata *
-xsk_buff_get_metadata(struct xsk_buff_pool *pool, u64 addr)
+xsk_buff_get_metadata(struct xsk_buff_pool *pool, __ptraddr_t addr)
 {
 	return __xsk_buff_get_metadata(pool, xp_raw_get_data(pool, addr));
 }
@@ -418,12 +418,12 @@ static inline void xsk_buff_set_size(struct xdp_buff *xdp, u32 size)
 }
 
 static inline dma_addr_t xsk_buff_raw_get_dma(struct xsk_buff_pool *pool,
-					      u64 addr)
+					      __ptraddr_t addr)
 {
 	return 0;
 }
 
-static inline void *xsk_buff_raw_get_data(struct xsk_buff_pool *pool, u64 addr)
+static inline void *xsk_buff_raw_get_data(struct xsk_buff_pool *pool, __ptraddr_t addr)
 {
 	return NULL;
 }
@@ -446,7 +446,7 @@ __xsk_buff_get_metadata(const struct xsk_buff_pool *pool, void *data)
 }
 
 static inline struct xsk_tx_metadata *
-xsk_buff_get_metadata(struct xsk_buff_pool *pool, u64 addr)
+xsk_buff_get_metadata(struct xsk_buff_pool *pool, __ptraddr_t addr)
 {
 	return NULL;
 }

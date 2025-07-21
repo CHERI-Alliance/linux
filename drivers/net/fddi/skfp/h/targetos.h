@@ -121,7 +121,7 @@ struct s_smt_os {
 	u32	bus_type;		/* bus type (0 == PCI, 1 == EISA) */
 	struct pci_dev 	pdev;		/* PCI device structure */
 	
-	unsigned long base_addr;
+	uintptr_t base_addr;
 	unsigned char factory_mac_addr[8];
 	ulong	SharedMemSize;
 	ulong	SharedMemHeap;
