@@ -1340,7 +1340,7 @@ static uintptr_t adm8211_prepare_multicast(struct ieee80211_hw *hw,
 		mc_filter[bit_nr >> 5] |= 1 << (bit_nr & 31);
 	}
 
-	return mc_filter[0] | ((u64)(mc_filter[1]) << 32);
+	return __c_fakeu(mc_filter[0] | ((u64)(mc_filter[1]) << 32));
 }
 
 static void adm8211_configure_filter(struct ieee80211_hw *dev,
@@ -1353,8 +1353,8 @@ static void adm8211_configure_filter(struct ieee80211_hw *dev,
 	unsigned int new_flags;
 	u32 mc_filter[2];
 
-	mc_filter[0] = multicast;
-	mc_filter[1] = multicast >> 32;
+	mc_filter[0] = __c_ua(multicast);
+	mc_filter[1] = __c_ua(multicast ) >> 32;
 
 	new_flags = 0;
 
