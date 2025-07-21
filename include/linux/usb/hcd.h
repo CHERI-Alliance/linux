@@ -216,8 +216,7 @@ struct usb_hcd {
 	/* The HC driver's private data is stored at the end of
 	 * this structure.
 	 */
-	unsigned long hcd_priv[]
-			__attribute__ ((aligned(sizeof(s64))));
+	uintptr_t hcd_priv[] __attribute__ ((aligned(sizeof(void *))));
 };
 
 /* 2.4 does this a bit differently ... */

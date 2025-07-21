@@ -1208,7 +1208,7 @@ static int acm_probe(struct usb_interface *intf,
 	int res;
 
 	/* normal quirks */
-	quirks = (unsigned long)id->driver_info;
+	quirks = __c_ua(id->driver_info);
 
 	if (quirks == IGNORE_DEVICE)
 		return -ENODEV;
