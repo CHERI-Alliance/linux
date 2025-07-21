@@ -574,7 +574,7 @@ struct il_device_cmd_huge {
 
 struct il_host_cmd {
 	const void *data;
-	unsigned long reply_page;
+	uintptr_t reply_page;
 	void (*callback) (struct il_priv *il, struct il_device_cmd *cmd,
 			  struct il_rx_pkt *pkt);
 	u32 flags;
@@ -1497,7 +1497,7 @@ __il_free_pages(struct il_priv *il, struct page *page)
 }
 
 static inline void
-il_free_pages(struct il_priv *il, unsigned long page)
+il_free_pages(struct il_priv *il, uintptr_t page)
 {
 	free_pages(page, il->hw_params.rx_page_order);
 	il->alloc_rxb_page--;
