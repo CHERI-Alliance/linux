@@ -219,9 +219,9 @@ static const struct mcp23s08_info mcp23s18_spi = {
 };
 
 static const struct spi_device_id mcp23s08_ids[] = {
-	{ "mcp23s08", (kernel_ulong_t)&mcp23s08_spi },
-	{ "mcp23s17", (kernel_ulong_t)&mcp23s17_spi },
-	{ "mcp23s18", (kernel_ulong_t)&mcp23s18_spi },
+	{ "mcp23s08", (uintptr_t)&mcp23s08_spi },
+	{ "mcp23s17", (uintptr_t)&mcp23s17_spi },
+	{ "mcp23s18", (uintptr_t)&mcp23s18_spi },
 	{ }
 };
 MODULE_DEVICE_TABLE(spi, mcp23s08_ids);

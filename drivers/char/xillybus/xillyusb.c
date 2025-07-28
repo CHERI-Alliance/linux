@@ -417,7 +417,7 @@ retry:
 
 memfail:
 	for (i--; i >= 0; i--)
-		free_pages((unsigned long)fifo->mem[i], buf_order);
+		free_pages((uintptr_t)fifo->mem[i], buf_order);
 
 	kfree(fifo->mem);
 	fifo->mem = NULL;
@@ -438,7 +438,7 @@ static void fifo_mem_release(struct xillyfifo *fifo)
 		return;
 
 	for (i = 0; i < fifo->bufnum; i++)
-		free_pages((unsigned long)fifo->mem[i], fifo->buf_order);
+		free_pages((uintptr_t)fifo->mem[i], fifo->buf_order);
 
 	kfree(fifo->mem);
 }
@@ -477,7 +477,7 @@ static void endpoint_dealloc(struct xillyusb_endpoint *ep)
 		struct xillybuffer *xb =
 			list_entry(this, struct xillybuffer, entry);
 
-		free_pages((unsigned long)xb->buf, ep->order);
+		free_pages((uintptr_t)xb->buf, ep->order);
 		kfree(xb);
 	}
 

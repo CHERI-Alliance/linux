@@ -12,7 +12,7 @@
 static bool check_setget_bounds(const struct extent_buffer *eb,
 				const void *ptr, unsigned off, int size)
 {
-	const unsigned long member_offset = (unsigned long)ptr + off;
+	const unsigned long member_offset = (uintptr_t)ptr + off;
 
 	if (unlikely(member_offset + size > eb->len)) {
 		btrfs_warn(eb->fs_info,

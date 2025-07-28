@@ -432,7 +432,7 @@ static int eip93_crypto_probe(struct platform_device *pdev)
 	if (ret)
 		return ret;
 
-	tasklet_init(&eip93->ring->done_task, eip93_done_task, (unsigned long)eip93);
+	tasklet_init(&eip93->ring->done_task, eip93_done_task, (uintptr_t)eip93);
 
 	spin_lock_init(&eip93->ring->read_lock);
 	spin_lock_init(&eip93->ring->write_lock);

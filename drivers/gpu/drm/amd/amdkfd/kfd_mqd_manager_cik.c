@@ -192,7 +192,7 @@ static void __update_mqd(struct mqd_manager *mm, void *mqd,
 	m->cp_hqd_pq_base_lo = lower_32_bits((uint64_t)q->queue_address >> 8);
 	m->cp_hqd_pq_base_hi = upper_32_bits((uint64_t)q->queue_address >> 8);
 	m->cp_hqd_pq_rptr_report_addr_lo = lower_32_bits((uint64_t)q->read_ptr);
-	m->cp_hqd_pq_rptr_report_addr_hi = upper_32_bits((uint64_t)q->read_ptr);
+	m->cp_hqd_pq_rptr_report_addr_hi = upper_32_bits((user_uintptr_t)q->read_ptr);
 	m->cp_hqd_pq_doorbell_control = DOORBELL_OFFSET(q->doorbell_off);
 
 	m->cp_hqd_vmid = q->vmid;
@@ -236,7 +236,7 @@ static void update_mqd_sdma(struct mqd_manager *mm, void *mqd,
 	m->sdma_rlc_rb_base = lower_32_bits(q->queue_address >> 8);
 	m->sdma_rlc_rb_base_hi = upper_32_bits(q->queue_address >> 8);
 	m->sdma_rlc_rb_rptr_addr_lo = lower_32_bits((uint64_t)q->read_ptr);
-	m->sdma_rlc_rb_rptr_addr_hi = upper_32_bits((uint64_t)q->read_ptr);
+	m->sdma_rlc_rb_rptr_addr_hi = upper_32_bits((user_uintptr_t)q->read_ptr);
 	m->sdma_rlc_doorbell =
 		q->doorbell_off << SDMA0_RLC0_DOORBELL__OFFSET__SHIFT;
 
@@ -352,7 +352,7 @@ static void update_mqd_hiq(struct mqd_manager *mm, void *mqd,
 	m->cp_hqd_pq_base_lo = lower_32_bits((uint64_t)q->queue_address >> 8);
 	m->cp_hqd_pq_base_hi = upper_32_bits((uint64_t)q->queue_address >> 8);
 	m->cp_hqd_pq_rptr_report_addr_lo = lower_32_bits((uint64_t)q->read_ptr);
-	m->cp_hqd_pq_rptr_report_addr_hi = upper_32_bits((uint64_t)q->read_ptr);
+	m->cp_hqd_pq_rptr_report_addr_hi = upper_32_bits((user_uintptr_t)q->read_ptr);
 	m->cp_hqd_pq_doorbell_control = DOORBELL_OFFSET(q->doorbell_off);
 
 	m->cp_hqd_vmid = q->vmid;

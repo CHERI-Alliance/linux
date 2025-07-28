@@ -29,7 +29,7 @@ struct fbnic_xmit_cb {
 
 static u32 __iomem *fbnic_ring_csr_base(const struct fbnic_ring *ring)
 {
-	unsigned long csr_base = (unsigned long)ring->doorbell;
+	uintptr_t csr_base = (uintptr_t)ring->doorbell;
 
 	csr_base &= ~(FBNIC_QUEUE_STRIDE * sizeof(u32) - 1);
 

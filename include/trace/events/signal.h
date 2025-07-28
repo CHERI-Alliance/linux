@@ -110,7 +110,7 @@ TRACE_EVENT(signal_deliver,
 	TP_fast_assign(
 		__entry->sig	= sig;
 		TP_STORE_SIGINFO(__entry, info);
-		__entry->sa_handler	= (unsigned long)ka->sa.sa_handler;
+		__entry->sa_handler	= (user_uintptr_t)ka->sa.sa_handler;
 		__entry->sa_flags	= ka->sa.sa_flags;
 	),
 

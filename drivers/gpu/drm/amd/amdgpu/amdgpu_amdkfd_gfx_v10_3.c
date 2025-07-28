@@ -253,7 +253,7 @@ static int hqd_load_v10_3(struct amdgpu_device *adev, void *mqd,
 		WREG32_SOC15(GC, 0, mmCP_HQD_PQ_WPTR_POLL_ADDR,
 		       lower_32_bits((uint64_t)wptr));
 		WREG32_SOC15(GC, 0, mmCP_HQD_PQ_WPTR_POLL_ADDR_HI,
-		       upper_32_bits((uint64_t)wptr));
+		       upper_32_bits((user_uintptr_t)wptr));
 		pr_debug("%s setting CP_PQ_WPTR_POLL_CNTL1 to %x\n", __func__,
 			 (uint32_t)get_queue_mask(adev, pipe_id, queue_id));
 		WREG32_SOC15(GC, 0, mmCP_PQ_WPTR_POLL_CNTL1,

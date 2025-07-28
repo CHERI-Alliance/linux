@@ -18,7 +18,7 @@
 static inline void gf_write_ptr(const void *ptr, void __iomem *portl,
 				void __iomem *porth)
 {
-	const unsigned long addr = (unsigned long)ptr;
+	const uintptr_t addr = (uintptr_t)ptr;
 
 	gf_iowrite32(lower_32_bits(addr), portl);
 #ifdef CONFIG_64BIT

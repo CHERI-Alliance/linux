@@ -85,7 +85,7 @@ static __always_inline unsigned long bytes_is_nonzero(const u8 *start,
 {
 	while (size) {
 		if (unlikely(*start))
-			return (unsigned long)start;
+			return (uintptr_t)start;
 		start++;
 		size--;
 	}

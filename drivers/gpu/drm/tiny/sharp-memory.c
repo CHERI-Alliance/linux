@@ -422,16 +422,16 @@ static const struct drm_display_mode sharp_memory_ls044q7dh01_mode = {
 };
 
 static const struct spi_device_id sharp_memory_ids[] = {
-	{"ls010b7dh04", (kernel_ulong_t)&sharp_memory_ls010b7dh04_mode},
-	{"ls011b7dh03", (kernel_ulong_t)&sharp_memory_ls011b7dh03_mode},
-	{"ls012b7dd01", (kernel_ulong_t)&sharp_memory_ls012b7dd01_mode},
-	{"ls013b7dh03", (kernel_ulong_t)&sharp_memory_ls013b7dh03_mode},
-	{"ls013b7dh05", (kernel_ulong_t)&sharp_memory_ls013b7dh05_mode},
-	{"ls018b7dh02", (kernel_ulong_t)&sharp_memory_ls018b7dh02_mode},
-	{"ls027b7dh01", (kernel_ulong_t)&sharp_memory_ls027b7dh01_mode},
-	{"ls027b7dh01a", (kernel_ulong_t)&sharp_memory_ls027b7dh01_mode},
-	{"ls032b7dd02", (kernel_ulong_t)&sharp_memory_ls032b7dd02_mode},
-	{"ls044q7dh01", (kernel_ulong_t)&sharp_memory_ls044q7dh01_mode},
+	{"ls010b7dh04", (uintptr_t)&sharp_memory_ls010b7dh04_mode},
+	{"ls011b7dh03", (uintptr_t)&sharp_memory_ls011b7dh03_mode},
+	{"ls012b7dd01", (uintptr_t)&sharp_memory_ls012b7dd01_mode},
+	{"ls013b7dh03", (uintptr_t)&sharp_memory_ls013b7dh03_mode},
+	{"ls013b7dh05", (uintptr_t)&sharp_memory_ls013b7dh05_mode},
+	{"ls018b7dh02", (uintptr_t)&sharp_memory_ls018b7dh02_mode},
+	{"ls027b7dh01", (uintptr_t)&sharp_memory_ls027b7dh01_mode},
+	{"ls027b7dh01a", (uintptr_t)&sharp_memory_ls027b7dh01_mode},
+	{"ls032b7dd02", (uintptr_t)&sharp_memory_ls032b7dd02_mode},
+	{"ls044q7dh01", (uintptr_t)&sharp_memory_ls044q7dh01_mode},
 	{},
 };
 MODULE_DEVICE_TABLE(spi, sharp_memory_ids);

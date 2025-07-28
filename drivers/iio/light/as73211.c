@@ -878,8 +878,8 @@ static const struct of_device_id as73211_of_match[] = {
 MODULE_DEVICE_TABLE(of, as73211_of_match);
 
 static const struct i2c_device_id as73211_id[] = {
-	{ "as73211", (kernel_ulong_t)&as73211_spec },
-	{ "as7331", (kernel_ulong_t)&as7331_spec },
+	{ "as73211", (uintptr_t)&as73211_spec },
+	{ "as7331", (uintptr_t)&as7331_spec },
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, as73211_id);

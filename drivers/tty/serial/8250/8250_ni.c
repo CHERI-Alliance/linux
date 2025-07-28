@@ -422,10 +422,10 @@ static const struct ni16550_device_info nic7a69 = {
 };
 
 static const struct acpi_device_id ni16550_acpi_match[] = {
-	{ "NIC7750",	(kernel_ulong_t)&nic7750 },
-	{ "NIC7772",	(kernel_ulong_t)&nic7772 },
-	{ "NIC792B",	(kernel_ulong_t)&nic792b },
-	{ "NIC7A69",	(kernel_ulong_t)&nic7a69 },
+	{ "NIC7750",	(uintptr_t)&nic7750 },
+	{ "NIC7772",	(uintptr_t)&nic7772 },
+	{ "NIC792B",	(uintptr_t)&nic792b },
+	{ "NIC7A69",	(uintptr_t)&nic7a69 },
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, ni16550_acpi_match);

@@ -97,7 +97,7 @@ static int cvm_oct_fill_hw_memory(int pool, int size, int elements)
 				elements * size, pool);
 			break;
 		}
-		fpa = (char *)(((unsigned long)memory + 256) & ~0x7fUL);
+		fpa = (char *)(((uintptr_t)memory + 256) & ~0x7fUL);
 		*((char **)fpa - 1) = memory;
 		cvmx_fpa_free(fpa, pool, 0);
 		freed--;

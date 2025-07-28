@@ -777,7 +777,7 @@ static int init_shared_mem(struct s2io_nic *nic)
 
 			pre_rxd_blk = tmp_v_addr;
 			pre_rxd_blk->reserved_2_pNext_RxD_block =
-				(unsigned long)tmp_v_addr_next;
+				(uintptr_t)tmp_v_addr_next;
 			pre_rxd_blk->pNext_RxD_Blk_physical =
 				(u64)tmp_p_addr_next;
 		}
@@ -814,7 +814,7 @@ static int init_shared_mem(struct s2io_nic *nic)
 					if (!ba->ba_0_org)
 						return -ENOMEM;
 					mem_allocated += size;
-					tmp = (unsigned long)ba->ba_0_org;
+					tmp = (uintptr_t)ba->ba_0_org;
 					tmp += ALIGN_SIZE;
 					tmp &= ~((unsigned long)ALIGN_SIZE);
 					ba->ba_0 = (void *)tmp;
@@ -824,7 +824,7 @@ static int init_shared_mem(struct s2io_nic *nic)
 					if (!ba->ba_1_org)
 						return -ENOMEM;
 					mem_allocated += size;
-					tmp = (unsigned long)ba->ba_1_org;
+					tmp = (uintptr_t)ba->ba_1_org;
 					tmp += ALIGN_SIZE;
 					tmp &= ~((unsigned long)ALIGN_SIZE);
 					ba->ba_1 = (void *)tmp;
@@ -2542,7 +2542,7 @@ static int fill_rx_buffers(struct s2io_nic *nic, struct ring_info *ring,
 
 			rxdp->Control_2 =
 				SET_BUFFER0_SIZE_1(size - NET_IP_ALIGN);
-			rxdp->Host_Control = (unsigned long)skb;
+			rxdp->Host_Control = (uintptr_t)skb;
 		} else if (ring->rxd_mode == RXD_MODE_3B) {
 			/*
 			 * 2 buffer mode -
@@ -2561,7 +2561,7 @@ static int fill_rx_buffers(struct s2io_nic *nic, struct ring_info *ring,
 
 			ba = &ring->ba[block_no][off];
 			skb_reserve(skb, BUF0_LEN);
-			tmp = (u64)(unsigned long)skb->data;
+			tmp = (u64)(uintptr_t)skb->data;
 			tmp += ALIGN_SIZE;
 			tmp &= ~ALIGN_SIZE;
 			skb->data = (void *) (unsigned long)tmp;
@@ -2606,7 +2606,7 @@ static int fill_rx_buffers(struct s2io_nic *nic, struct ring_info *ring,
 					if (dma_mapping_error(&nic->pdev->dev,
 							      rxdp3->Buffer1_ptr)) {
 						dma_unmap_single(&ring->pdev->dev,
-								 (dma_addr_t)(unsigned long)
+								 (dma_addr_t)(uintptr_t)
 								 skb->data,
 								 ring->mtu + 4,
 								 DMA_FROM_DEVICE);
@@ -2618,7 +2618,7 @@ static int fill_rx_buffers(struct s2io_nic *nic, struct ring_info *ring,
 					(ring->mtu + 4);
 			}
 			rxdp->Control_2 |= s2BIT(0);
-			rxdp->Host_Control = (unsigned long) (skb);
+			rxdp->Host_Control = (uintptr_t) (skb);
 		}
 		if (alloc_tab & ((1 << rxsync_frequency) - 1))
 			rxdp->Control_1 |= RXD_OWN_XENA;
@@ -4132,7 +4132,7 @@ static netdev_tx_t s2io_xmit(struct sk_buff *skb, struct net_device *dev)
 	if (dma_mapping_error(&sp->pdev->dev, txdp->Buffer_Pointer))
 		goto pci_map_failed;
 
-	txdp->Host_Control = (unsigned long)skb;
+	txdp->Host_Control = (uintptr_t)skb;
 	txdp->Control_1 |= TXD_BUFFER0_SIZE(frg_len);
 
 	frg_cnt = skb_shinfo(skb)->nr_frags;
@@ -6780,7 +6780,7 @@ static int set_rxd_buffer_pointer(struct s2io_nic *sp, struct RxD_t *rxdp,
 					       DMA_FROM_DEVICE);
 			if (dma_mapping_error(&sp->pdev->dev, rxdp1->Buffer0_ptr))
 				goto memalloc_failed;
-			rxdp->Host_Control = (unsigned long) (*skb);
+			rxdp->Host_Control = (uintptr_t) (*skb);
 		}
 	} else if ((sp->rxd_mode == RXD_MODE_3B) && (rxdp->Host_Control == 0)) {
 		struct RxD3 *rxdp3 = (struct RxD3 *)rxdp;
@@ -6815,7 +6815,7 @@ static int set_rxd_buffer_pointer(struct s2io_nic *sp, struct RxD_t *rxdp,
 						 DMA_FROM_DEVICE);
 				goto memalloc_failed;
 			}
-			rxdp->Host_Control = (unsigned long) (*skb);
+			rxdp->Host_Control = (uintptr_t) (*skb);
 
 			/* Buffer-1 will be dummy buffer not used */
 			rxdp3->Buffer1_ptr = *temp1 =
@@ -8194,7 +8194,7 @@ static int check_L2_lro_capable(u8 *buffer, struct iphdr **ip,
 	*ip = (struct iphdr *)(buffer + ip_off);
 	ip_len = (u8)((*ip)->ihl);
 	ip_len <<= 2;
-	*tcp = (struct tcphdr *)((unsigned long)*ip + ip_len);
+	*tcp = (struct tcphdr *)((uintptr_t)*ip + ip_len);
 
 	return 0;
 }

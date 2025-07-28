@@ -200,7 +200,7 @@ int kfd_queue_buffer_get(struct amdgpu_vm *vm, void __user *addr, struct amdgpu_
 	u64 user_addr;
 	u64 size;
 
-	user_addr = (u64)addr >> AMDGPU_GPU_PAGE_SHIFT;
+	user_addr = (user_uintptr_t)addr >> AMDGPU_GPU_PAGE_SHIFT;
 	size = expected_size >> AMDGPU_GPU_PAGE_SHIFT;
 
 	mapping = amdgpu_vm_bo_lookup_mapping(vm, user_addr);

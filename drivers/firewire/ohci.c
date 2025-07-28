@@ -1073,7 +1073,7 @@ static int ar_context_init(struct ar_context *ctx, struct fw_ohci *ohci,
 
 	ctx->regs        = regs;
 	ctx->ohci        = ohci;
-	tasklet_init(&ctx->tasklet, ar_context_tasklet, (unsigned long)ctx);
+	tasklet_init(&ctx->tasklet, ar_context_tasklet, (uintptr_t)ctx);
 
 	for (i = 0; i < AR_BUFFERS; i++) {
 		ctx->pages[i] = dma_alloc_pages(dev, PAGE_SIZE, &dma_addr,
@@ -1248,7 +1248,7 @@ static int context_init(struct context *ctx, struct fw_ohci *ohci,
 	ctx->buffer_tail = list_entry(ctx->buffer_list.next,
 			struct descriptor_buffer, list);
 
-	tasklet_init(&ctx->tasklet, context_tasklet, (unsigned long)ctx);
+	tasklet_init(&ctx->tasklet, context_tasklet, (uintptr_t)ctx);
 	ctx->callback = callback;
 
 	/*
@@ -1532,7 +1532,7 @@ static void at_context_flush(struct context *ctx)
 	tasklet_disable(&ctx->tasklet);
 
 	ctx->flushing = true;
-	context_tasklet((unsigned long)ctx);
+	context_tasklet((uintptr_t)ctx);
 	ctx->flushing = false;
 
 	tasklet_enable(&ctx->tasklet);
@@ -3152,7 +3152,7 @@ static struct fw_iso_context *ohci_allocate_iso_context(struct fw_card *card,
 	return &ctx->base;
 
  out_with_header:
-	free_page((unsigned long)ctx->header);
+	free_page((uintptr_t)ctx->header);
  out:
 	scoped_guard(spinlock_irq, &ohci->lock) {
 		switch (type) {
@@ -3252,7 +3252,7 @@ static void ohci_free_iso_context(struct fw_iso_context *base)
 
 	ohci_stop_iso(base);
 	context_release(&ctx->context);
-	free_page((unsigned long)ctx->header);
+	free_page((uintptr_t)ctx->header);
 
 	guard(spinlock_irqsave)(&ohci->lock);
 

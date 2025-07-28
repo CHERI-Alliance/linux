@@ -1992,10 +1992,10 @@ static int ad4695_probe(struct spi_device *spi)
 }
 
 static const struct spi_device_id ad4695_spi_id_table[] = {
-	{ .name = "ad4695", .driver_data = (kernel_ulong_t)&ad4695_chip_info },
-	{ .name = "ad4696", .driver_data = (kernel_ulong_t)&ad4696_chip_info },
-	{ .name = "ad4697", .driver_data = (kernel_ulong_t)&ad4697_chip_info },
-	{ .name = "ad4698", .driver_data = (kernel_ulong_t)&ad4698_chip_info },
+	{ .name = "ad4695", .driver_data = (uintptr_t)&ad4695_chip_info },
+	{ .name = "ad4696", .driver_data = (uintptr_t)&ad4696_chip_info },
+	{ .name = "ad4697", .driver_data = (uintptr_t)&ad4697_chip_info },
+	{ .name = "ad4698", .driver_data = (uintptr_t)&ad4698_chip_info },
 	{ }
 };
 MODULE_DEVICE_TABLE(spi, ad4695_spi_id_table);

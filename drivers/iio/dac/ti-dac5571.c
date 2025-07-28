@@ -403,17 +403,17 @@ static const struct of_device_id dac5571_of_id[] = {
 MODULE_DEVICE_TABLE(of, dac5571_of_id);
 
 static const struct i2c_device_id dac5571_id[] = {
-	{"dac081c081", (kernel_ulong_t)&dac5571_spec[single_8bit] },
-	{"dac121c081", (kernel_ulong_t)&dac5571_spec[single_12bit] },
-	{"dac5571", (kernel_ulong_t)&dac5571_spec[single_8bit] },
-	{"dac6571", (kernel_ulong_t)&dac5571_spec[single_10bit] },
-	{"dac7571", (kernel_ulong_t)&dac5571_spec[single_12bit] },
-	{"dac5574", (kernel_ulong_t)&dac5571_spec[quad_8bit] },
-	{"dac6574", (kernel_ulong_t)&dac5571_spec[quad_10bit] },
-	{"dac7574", (kernel_ulong_t)&dac5571_spec[quad_12bit] },
-	{"dac5573", (kernel_ulong_t)&dac5571_spec[quad_8bit] },
-	{"dac6573", (kernel_ulong_t)&dac5571_spec[quad_10bit] },
-	{"dac7573", (kernel_ulong_t)&dac5571_spec[quad_12bit] },
+	{"dac081c081", (uintptr_t)&dac5571_spec[single_8bit] },
+	{"dac121c081", (uintptr_t)&dac5571_spec[single_12bit] },
+	{"dac5571", (uintptr_t)&dac5571_spec[single_8bit] },
+	{"dac6571", (uintptr_t)&dac5571_spec[single_10bit] },
+	{"dac7571", (uintptr_t)&dac5571_spec[single_12bit] },
+	{"dac5574", (uintptr_t)&dac5571_spec[quad_8bit] },
+	{"dac6574", (uintptr_t)&dac5571_spec[quad_10bit] },
+	{"dac7574", (uintptr_t)&dac5571_spec[quad_12bit] },
+	{"dac5573", (uintptr_t)&dac5571_spec[quad_8bit] },
+	{"dac6573", (uintptr_t)&dac5571_spec[quad_10bit] },
+	{"dac7573", (uintptr_t)&dac5571_spec[quad_12bit] },
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, dac5571_id);

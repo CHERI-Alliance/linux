@@ -230,8 +230,8 @@ static int __ref zero_p4d_populate(pgd_t *pgd, unsigned long addr,
 int __ref kasan_populate_early_shadow(const void *shadow_start,
 					const void *shadow_end)
 {
-	unsigned long addr = (unsigned long)shadow_start;
-	unsigned long end = (unsigned long)shadow_end;
+	uintptr_t addr = (uintptr_t)shadow_start;
+	uintptr_t end = (uintptr_t)shadow_end;
 	pgd_t *pgd = pgd_offset_k(addr);
 	unsigned long next;
 
@@ -449,7 +449,7 @@ void kasan_remove_zero_shadow(void *start, unsigned long size)
 	unsigned long addr, end, next;
 	pgd_t *pgd;
 
-	addr = (unsigned long)kasan_mem_to_shadow(start);
+	addr = (uintptr_t)kasan_mem_to_shadow(start);
 	end = addr + (size >> KASAN_SHADOW_SCALE_SHIFT);
 
 	if (WARN_ON((unsigned long)start % KASAN_MEMORY_PER_SHADOW_PAGE) ||

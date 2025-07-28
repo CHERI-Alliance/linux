@@ -341,79 +341,79 @@ static const char *HFC_NT_LAYER1_STATES[HFC_MAX_NT_LAYER1_STATE + 1] = {
 static const struct usb_device_id hfcsusb_idtab[] = {
 	{
 		USB_DEVICE(0x0959, 0x2bd0),
-		.driver_info = (unsigned long) &((struct hfcsusb_vdata)
+		.driver_info = (uintptr_t) &((struct hfcsusb_vdata)
 			{LED_OFF, {4, 0, 2, 1},
 					"ISDN USB TA (Cologne Chip HFC-S USB based)"}),
 	},
 	{
 		USB_DEVICE(0x0675, 0x1688),
-		.driver_info = (unsigned long) &((struct hfcsusb_vdata)
+		.driver_info = (uintptr_t) &((struct hfcsusb_vdata)
 			{LED_SCHEME1, {1, 2, 0, 0},
 					"DrayTek miniVigor 128 USB ISDN TA"}),
 	},
 	{
 		USB_DEVICE(0x07b0, 0x0007),
-		.driver_info = (unsigned long) &((struct hfcsusb_vdata)
+		.driver_info = (uintptr_t) &((struct hfcsusb_vdata)
 			{LED_SCHEME1, {0x80, -64, -32, -16},
 					"Billion tiny USB ISDN TA 128"}),
 	},
 	{
 		USB_DEVICE(0x0742, 0x2008),
-		.driver_info = (unsigned long) &((struct hfcsusb_vdata)
+		.driver_info = (uintptr_t) &((struct hfcsusb_vdata)
 			{LED_SCHEME1, {4, 0, 2, 1},
 					"Stollmann USB TA"}),
 	},
 	{
 		USB_DEVICE(0x0742, 0x2009),
-		.driver_info = (unsigned long) &((struct hfcsusb_vdata)
+		.driver_info = (uintptr_t) &((struct hfcsusb_vdata)
 			{LED_SCHEME1, {4, 0, 2, 1},
 					"Aceex USB ISDN TA"}),
 	},
 	{
 		USB_DEVICE(0x0742, 0x200A),
-		.driver_info = (unsigned long) &((struct hfcsusb_vdata)
+		.driver_info = (uintptr_t) &((struct hfcsusb_vdata)
 			{LED_SCHEME1, {4, 0, 2, 1},
 					"OEM USB ISDN TA"}),
 	},
 	{
 		USB_DEVICE(0x08e3, 0x0301),
-		.driver_info = (unsigned long) &((struct hfcsusb_vdata)
+		.driver_info = (uintptr_t) &((struct hfcsusb_vdata)
 			{LED_SCHEME1, {2, 0, 1, 4},
 					"Olitec USB RNIS"}),
 	},
 	{
 		USB_DEVICE(0x07fa, 0x0846),
-		.driver_info = (unsigned long) &((struct hfcsusb_vdata)
+		.driver_info = (uintptr_t) &((struct hfcsusb_vdata)
 			{LED_SCHEME1, {0x80, -64, -32, -16},
 					"Bewan Modem RNIS USB"}),
 	},
 	{
 		USB_DEVICE(0x07fa, 0x0847),
-		.driver_info = (unsigned long) &((struct hfcsusb_vdata)
+		.driver_info = (uintptr_t) &((struct hfcsusb_vdata)
 			{LED_SCHEME1, {0x80, -64, -32, -16},
 					"Djinn Numeris USB"}),
 	},
 	{
 		USB_DEVICE(0x07b0, 0x0006),
-		.driver_info = (unsigned long) &((struct hfcsusb_vdata)
+		.driver_info = (uintptr_t) &((struct hfcsusb_vdata)
 			{LED_SCHEME1, {0x80, -64, -32, -16},
 					"Twister ISDN TA"}),
 	},
 	{
 		USB_DEVICE(0x071d, 0x1005),
-		.driver_info = (unsigned long) &((struct hfcsusb_vdata)
+		.driver_info = (uintptr_t) &((struct hfcsusb_vdata)
 			{LED_SCHEME1, {0x02, 0, 0x01, 0x04},
 					"Eicon DIVA USB 4.0"}),
 	},
 	{
 		USB_DEVICE(0x0586, 0x0102),
-		.driver_info = (unsigned long) &((struct hfcsusb_vdata)
+		.driver_info = (uintptr_t) &((struct hfcsusb_vdata)
 			{LED_SCHEME1, {0x88, -64, -32, -16},
 					"ZyXEL OMNI.NET USB II"}),
 	},
 	{
 		USB_DEVICE(0x1ae7, 0x0525),
-		.driver_info = (unsigned long) &((struct hfcsusb_vdata)
+		.driver_info = (uintptr_t) &((struct hfcsusb_vdata)
 			{LED_SCHEME1, {0x88, -64, -32, -16},
 					"X-Tensions USB ISDN TA XC-525"}),
 	},

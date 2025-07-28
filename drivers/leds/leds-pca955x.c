@@ -764,11 +764,11 @@ static int pca955x_probe(struct i2c_client *client)
 }
 
 static const struct i2c_device_id pca955x_id[] = {
-	{ "pca9550", (kernel_ulong_t)&pca955x_chipdefs[pca9550] },
-	{ "pca9551", (kernel_ulong_t)&pca955x_chipdefs[pca9551] },
-	{ "pca9552", (kernel_ulong_t)&pca955x_chipdefs[pca9552] },
-	{ "ibm-pca9552", (kernel_ulong_t)&pca955x_chipdefs[ibm_pca9552] },
-	{ "pca9553", (kernel_ulong_t)&pca955x_chipdefs[pca9553] },
+	{ "pca9550", (uintptr_t)&pca955x_chipdefs[pca9550] },
+	{ "pca9551", (uintptr_t)&pca955x_chipdefs[pca9551] },
+	{ "pca9552", (uintptr_t)&pca955x_chipdefs[pca9552] },
+	{ "ibm-pca9552", (uintptr_t)&pca955x_chipdefs[ibm_pca9552] },
+	{ "pca9553", (uintptr_t)&pca955x_chipdefs[pca9553] },
 	{}
 };
 MODULE_DEVICE_TABLE(i2c, pca955x_id);

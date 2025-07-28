@@ -168,7 +168,7 @@ static void rxperf_charge_preallocation(struct work_struct *work)
 
 		if (rxrpc_kernel_charge_accept(rxperf_socket,
 					       rxperf_notify_rx,
-					       (unsigned long)call,
+					       (uintptr_t)call,
 					       GFP_KERNEL,
 					       call->debug_id) < 0)
 			break;

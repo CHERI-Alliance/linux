@@ -452,8 +452,8 @@ static const struct of_device_id apple_z2_of_match[] = {
 MODULE_DEVICE_TABLE(of, apple_z2_of_match);
 
 static struct spi_device_id apple_z2_of_id[] = {
-	{ .name = "j293-touchbar", .driver_data = (kernel_ulong_t)"MacBookPro17,1 Touch Bar" },
-	{ .name = "j493-touchbar", .driver_data = (kernel_ulong_t)"Mac14,7 Touch Bar" },
+	{ .name = "j293-touchbar", .driver_data = (uintptr_t)"MacBookPro17,1 Touch Bar" },
+	{ .name = "j493-touchbar", .driver_data = (uintptr_t)"Mac14,7 Touch Bar" },
 	{}
 };
 MODULE_DEVICE_TABLE(spi, apple_z2_of_id);

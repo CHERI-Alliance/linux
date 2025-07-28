@@ -368,8 +368,8 @@ void __init kasan_swapper_init(void)
 
 static void __init kasan_populate(void *start, void *end)
 {
-	unsigned long vaddr = (unsigned long)start & PAGE_MASK;
-	unsigned long vend = PAGE_ALIGN((unsigned long)end);
+	unsigned long vaddr = (uintptr_t)start & PAGE_MASK;
+	unsigned long vend = PAGE_ALIGN((uintptr_t)end);
 
 	kasan_populate_pgd(pgd_offset_k(vaddr), vaddr, vend);
 }
@@ -435,8 +435,8 @@ static void __init kasan_shallow_populate_pgd(unsigned long vaddr, unsigned long
 
 static void __init kasan_shallow_populate(void *start, void *end)
 {
-	unsigned long vaddr = (unsigned long)start & PAGE_MASK;
-	unsigned long vend = PAGE_ALIGN((unsigned long)end);
+	unsigned long vaddr = (uintptr_t)start & PAGE_MASK;
+	unsigned long vend = PAGE_ALIGN((uintptr_t)end);
 
 	kasan_shallow_populate_pgd(vaddr, vend);
 }

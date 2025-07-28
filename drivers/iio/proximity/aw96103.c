@@ -825,8 +825,8 @@ static const struct of_device_id aw96103_dt_match[] = {
 MODULE_DEVICE_TABLE(of, aw96103_dt_match);
 
 static const struct i2c_device_id aw96103_i2c_id[] = {
-	{ "aw96103", (kernel_ulong_t)&aw_chip_info_tbl[AW96103_VAL] },
-	{ "aw96105", (kernel_ulong_t)&aw_chip_info_tbl[AW96105_VAL] },
+	{ "aw96103", (uintptr_t)&aw_chip_info_tbl[AW96103_VAL] },
+	{ "aw96105", (uintptr_t)&aw_chip_info_tbl[AW96105_VAL] },
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, aw96103_i2c_id);

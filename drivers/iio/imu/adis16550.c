@@ -1117,7 +1117,7 @@ static int adis16550_probe(struct spi_device *spi)
 }
 
 static const struct spi_device_id adis16550_id[] = {
-	{ "adis16550",  (kernel_ulong_t)&adis16550_chip_info},
+	{ "adis16550",  (uintptr_t)&adis16550_chip_info},
 	{ }
 };
 MODULE_DEVICE_TABLE(spi, adis16550_id);

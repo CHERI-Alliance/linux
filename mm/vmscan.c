@@ -1034,14 +1034,14 @@ struct folio *alloc_migrate_folio(struct folio *src, unsigned long private)
 	 */
 	mtc->nmask = NULL;
 	mtc->gfp_mask |= __GFP_THISNODE;
-	dst = alloc_migration_target(src, (unsigned long)mtc);
+	dst = alloc_migration_target(src, (uintptr_t)mtc);
 	if (dst)
 		return dst;
 
 	mtc->gfp_mask &= ~__GFP_THISNODE;
 	mtc->nmask = allowed_mask;
 
-	return alloc_migration_target(src, (unsigned long)mtc);
+	return alloc_migration_target(src, (uintptr_t)mtc);
 }
 
 /*
@@ -1078,7 +1078,7 @@ static unsigned int demote_folio_list(struct list_head *demote_folios,
 
 	/* Demotion ignores all cpuset and mempolicy settings */
 	migrate_pages(demote_folios, alloc_migrate_folio, NULL,
-		      (unsigned long)&mtc, MIGRATE_ASYNC, MR_DEMOTION,
+		      (uintptr_t)&mtc, MIGRATE_ASYNC, MR_DEMOTION,
 		      &nr_succeeded);
 
 	return nr_succeeded;

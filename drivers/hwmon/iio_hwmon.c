@@ -184,7 +184,7 @@ static int iio_hwmon_probe(struct platform_device *pdev)
 		st->attrs[attr++] = &a->dev_attr.attr;
 	}
 
-	devm_free_pages(dev, (unsigned long)buf);
+	devm_free_pages(dev, (uintptr_t)buf);
 
 	st->attr_group.attrs = st->attrs;
 	st->groups[0] = &st->attr_group;

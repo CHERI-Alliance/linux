@@ -1663,7 +1663,7 @@ struct rt6_exception_bucket *fib6_nh_get_excptn_bucket(const struct fib6_nh *nh,
 
 	/* remove bucket flushed bit if set */
 	if (bucket) {
-		unsigned long p = (unsigned long)bucket;
+		uintptr_t p = (uintptr_t)bucket;
 
 		p &= ~FIB6_EXCEPTION_BUCKET_FLUSHED;
 		bucket = (struct rt6_exception_bucket *)p;
@@ -1674,7 +1674,7 @@ struct rt6_exception_bucket *fib6_nh_get_excptn_bucket(const struct fib6_nh *nh,
 
 static bool fib6_nh_excptn_bucket_flushed(struct rt6_exception_bucket *bucket)
 {
-	unsigned long p = (unsigned long)bucket;
+	uintptr_t p = (uintptr_t)bucket;
 
 	return !!(p & FIB6_EXCEPTION_BUCKET_FLUSHED);
 }
@@ -1689,7 +1689,7 @@ static void fib6_nh_excptn_bucket_set_flushed(struct fib6_nh *nh,
 	bucket = rcu_dereference_protected(nh->rt6i_exception_bucket,
 					   lockdep_is_held(lock));
 
-	p = (unsigned long)bucket;
+	p = (uintptr_t)bucket;
 	p |= FIB6_EXCEPTION_BUCKET_FLUSHED;
 	bucket = (struct rt6_exception_bucket *)p;
 	rcu_assign_pointer(nh->rt6i_exception_bucket, bucket);

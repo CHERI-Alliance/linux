@@ -322,7 +322,7 @@ static __always_inline bool addr_in_shadow(const void *addr)
 #ifndef kasan_shadow_to_mem
 static inline const void *kasan_shadow_to_mem(const void *shadow_addr)
 {
-	return (void *)(((unsigned long)shadow_addr - KASAN_SHADOW_OFFSET)
+	return (void *)(((uintptr_t)shadow_addr - KASAN_SHADOW_OFFSET)
 		<< KASAN_SHADOW_SCALE_SHIFT);
 }
 #endif

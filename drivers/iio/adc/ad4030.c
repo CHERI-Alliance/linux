@@ -1194,11 +1194,11 @@ static const struct ad4030_chip_info ad4632_24_chip_info = {
 };
 
 static const struct spi_device_id ad4030_id_table[] = {
-	{ "ad4030-24", (kernel_ulong_t)&ad4030_24_chip_info },
-	{ "ad4630-16", (kernel_ulong_t)&ad4630_16_chip_info },
-	{ "ad4630-24", (kernel_ulong_t)&ad4630_24_chip_info },
-	{ "ad4632-16", (kernel_ulong_t)&ad4632_16_chip_info },
-	{ "ad4632-24", (kernel_ulong_t)&ad4632_24_chip_info },
+	{ "ad4030-24", (uintptr_t)&ad4030_24_chip_info },
+	{ "ad4630-16", (uintptr_t)&ad4630_16_chip_info },
+	{ "ad4630-24", (uintptr_t)&ad4630_24_chip_info },
+	{ "ad4632-16", (uintptr_t)&ad4632_16_chip_info },
+	{ "ad4632-24", (uintptr_t)&ad4632_24_chip_info },
 	{ }
 };
 MODULE_DEVICE_TABLE(spi, ad4030_id_table);

@@ -609,7 +609,7 @@ static const struct sg2044_pll_desc_data sg2044_pll_desc_data = {
 
 static const struct platform_device_id sg2044_pll_match[] = {
 	{ .name = "sg2044-pll",
-	  .driver_data = (unsigned long)&sg2044_pll_desc_data },
+	  .driver_data = (uintptr_t)&sg2044_pll_desc_data },
 	{ /* sentinel */ }
 };
 MODULE_DEVICE_TABLE(platform, sg2044_pll_match);

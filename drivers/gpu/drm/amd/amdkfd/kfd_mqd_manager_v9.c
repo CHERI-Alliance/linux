@@ -256,9 +256,9 @@ static void update_mqd(struct mqd_manager *mm, void *mqd,
 	m->cp_hqd_pq_base_hi = upper_32_bits((uint64_t)q->queue_address >> 8);
 
 	m->cp_hqd_pq_rptr_report_addr_lo = lower_32_bits((uint64_t)q->read_ptr);
-	m->cp_hqd_pq_rptr_report_addr_hi = upper_32_bits((uint64_t)q->read_ptr);
+	m->cp_hqd_pq_rptr_report_addr_hi = upper_32_bits((user_uintptr_t)q->read_ptr);
 	m->cp_hqd_pq_wptr_poll_addr_lo = lower_32_bits((uint64_t)q->write_ptr);
-	m->cp_hqd_pq_wptr_poll_addr_hi = upper_32_bits((uint64_t)q->write_ptr);
+	m->cp_hqd_pq_wptr_poll_addr_hi = upper_32_bits((user_uintptr_t)q->write_ptr);
 
 	m->cp_hqd_pq_doorbell_control =
 		q->doorbell_off <<
@@ -488,7 +488,7 @@ static void update_mqd_sdma(struct mqd_manager *mm, void *mqd,
 	m->sdmax_rlcx_rb_base = lower_32_bits(q->queue_address >> 8);
 	m->sdmax_rlcx_rb_base_hi = upper_32_bits(q->queue_address >> 8);
 	m->sdmax_rlcx_rb_rptr_addr_lo = lower_32_bits((uint64_t)q->read_ptr);
-	m->sdmax_rlcx_rb_rptr_addr_hi = upper_32_bits((uint64_t)q->read_ptr);
+	m->sdmax_rlcx_rb_rptr_addr_hi = upper_32_bits((user_uintptr_t)q->read_ptr);
 	m->sdmax_rlcx_doorbell_offset =
 		q->doorbell_off << SDMA0_RLC0_DOORBELL_OFFSET__OFFSET__SHIFT;
 
@@ -842,7 +842,7 @@ static int get_wave_state_v9_4_3(struct mqd_manager *mm, void *mqd,
 
 	for (xcc = 0; xcc < NUM_XCC(mm->dev->xcc_mask); xcc++) {
 		xcc_mqd = mqd + mqd_stride_size * xcc;
-		xcc_ctl_stack = (void __user *)((uintptr_t)ctl_stack +
+		xcc_ctl_stack = (void __user *)((user_uintptr_t)ctl_stack +
 					q->ctx_save_restore_area_size * xcc);
 
 		err = get_wave_state(mm, xcc_mqd, q, xcc_ctl_stack,

@@ -90,7 +90,7 @@ void scp_memcpy_aligned(void __iomem *dst, const void *src, unsigned int len)
 	unsigned int i = 0, remain;
 
 	if (!IS_ALIGNED((unsigned long)dst, 4)) {
-		ptr = (void __iomem *)ALIGN_DOWN((unsigned long)dst, 4);
+		ptr = (void __iomem *)ALIGN_DOWN((uintptr_t)dst, 4);
 		i = 4 - (dst - ptr);
 		val = readl_relaxed(ptr);
 		memcpy((u8 *)&val + (4 - i), src, i);

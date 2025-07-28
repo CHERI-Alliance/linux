@@ -30,7 +30,7 @@ enum bug_trap_type report_cfi_failure(struct pt_regs *regs, unsigned long addr,
 #ifdef CONFIG_ARCH_USES_CFI_TRAPS
 static inline unsigned long trap_address(s32 *p)
 {
-	return (unsigned long)((long)p + (long)*p);
+	return (unsigned long)((intptr_t)p + (long)*p);
 }
 
 static bool is_trap(unsigned long addr, s32 *start, s32 *end)

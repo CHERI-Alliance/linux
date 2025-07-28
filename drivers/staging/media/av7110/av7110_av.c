@@ -1131,7 +1131,7 @@ static int dvb_video_ioctl(struct file *file,
 {
 	struct dvb_device *dvbdev = file->private_data;
 	struct av7110 *av7110 = dvbdev->priv;
-	unsigned long arg = (unsigned long)parg;
+	uintptr_t arg = (uintptr_t)parg;
 	int ret = 0;
 
 	dprintk(1, "av7110:%p, cmd=%04x\n", av7110, cmd);
@@ -1363,7 +1363,7 @@ static int dvb_audio_ioctl(struct file *file,
 {
 	struct dvb_device *dvbdev = file->private_data;
 	struct av7110 *av7110 = dvbdev->priv;
-	unsigned long arg = (unsigned long)parg;
+	uintptr_t arg = (uintptr_t)parg;
 	int ret = 0;
 
 	dprintk(1, "av7110:%p, cmd=%04x\n", av7110, cmd);

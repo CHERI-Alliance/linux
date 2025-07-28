@@ -72,7 +72,7 @@ out:
 
 static int cxgbit_np_hashfn(const struct cxgbit_np *cnp)
 {
-	return ((unsigned long)cnp >> 10) & (NP_INFO_HASH_SIZE - 1);
+	return ((uintptr_t)cnp >> 10) & (NP_INFO_HASH_SIZE - 1);
 }
 
 static struct np_info *

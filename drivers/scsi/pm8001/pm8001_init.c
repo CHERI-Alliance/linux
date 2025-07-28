@@ -229,12 +229,12 @@ static void pm8001_init_tasklet(struct pm8001_hba_info *pm8001_ha)
 	if ((!pm8001_ha->pdev->msix_cap || !pci_msi_enabled()) ||
 	    (pm8001_ha->chip_id == chip_8001)) {
 		tasklet_init(&pm8001_ha->tasklet[0], pm8001_tasklet,
-			     (unsigned long)&(pm8001_ha->irq_vector[0]));
+			     (uintptr_t)&(pm8001_ha->irq_vector[0]));
 		return;
 	}
 	for (i = 0; i < PM8001_MAX_MSIX_VEC; i++)
 		tasklet_init(&pm8001_ha->tasklet[i], pm8001_tasklet,
-			     (unsigned long)&(pm8001_ha->irq_vector[i]));
+			     (uintptr_t)&(pm8001_ha->irq_vector[i]));
 }
 
 static void pm8001_kill_tasklet(struct pm8001_hba_info *pm8001_ha)

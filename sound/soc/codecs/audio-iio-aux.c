@@ -109,7 +109,7 @@ static int audio_iio_aux_add_controls(struct snd_soc_component *component,
 		.info = audio_iio_aux_info_volsw,
 		.get = audio_iio_aux_get_volsw,
 		.put = audio_iio_aux_put_volsw,
-		.private_value = (unsigned long)chan,
+		.private_value = (uintptr_t)chan,
 	};
 
 	return snd_soc_add_component_controls(component, &control, 1);

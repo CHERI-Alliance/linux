@@ -82,7 +82,7 @@ static ssize_t proc_scsi_host_write(struct file *file, const char __user *buf,
 		ret = shost->hostt->write_info(shost, page, count);
 	}
 out:
-	free_page((unsigned long)page);
+	free_page((uintptr_t)page);
 	return ret;
 }
 
@@ -467,7 +467,7 @@ static ssize_t proc_scsi_write(struct file *file, const char __user *buf,
 		err = length;
 
  out:
-	free_page((unsigned long)buffer);
+	free_page((uintptr_t)buffer);
 	return err;
 }
 

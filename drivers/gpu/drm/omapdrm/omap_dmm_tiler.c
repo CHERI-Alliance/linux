@@ -213,7 +213,7 @@ static void *alloc_dma(struct dmm_txn *txn, size_t sz, dma_addr_t *pa)
 
 	/* dmm programming requires 16 byte aligned addresses */
 	txn->current_pa = round_up(txn->current_pa, 16);
-	txn->current_va = (void *)round_up((long)txn->current_va, 16);
+	txn->current_va = (void *)round_up((intptr_t)txn->current_va, 16);
 
 	ptr = txn->current_va;
 	*pa = txn->current_pa;

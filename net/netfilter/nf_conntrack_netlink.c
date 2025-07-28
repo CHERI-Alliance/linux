@@ -1271,7 +1271,7 @@ restart:
 					    ct, true, flags);
 			if (res < 0) {
 				nf_conntrack_get(&ct->ct_general);
-				cb->args[1] = (unsigned long)ct;
+				cb->args[1] = (uintptr_t)ct;
 				spin_unlock(lockp);
 				goto out;
 			}
@@ -3011,9 +3011,9 @@ static __be32 nf_expect_get_id(const struct nf_conntrack_expect *exp)
 
 	net_get_random_once(&exp_id_seed, sizeof(exp_id_seed));
 
-	a = (unsigned long)exp;
-	b = (unsigned long)exp->helper;
-	c = (unsigned long)exp->master;
+	a = (uintptr_t)exp;
+	b = (uintptr_t)exp->helper;
+	c = (uintptr_t)exp->master;
 	d = (unsigned long)siphash(&exp->tuple, sizeof(exp->tuple), &exp_id_seed);
 
 #ifdef CONFIG_64BIT
@@ -3208,7 +3208,7 @@ restart:
 						    exp) < 0) {
 				if (!refcount_inc_not_zero(&exp->use))
 					continue;
-				cb->args[1] = (unsigned long)exp;
+				cb->args[1] = (uintptr_t)exp;
 				goto out;
 			}
 		}
@@ -3254,7 +3254,7 @@ restart:
 					    exp) < 0) {
 			if (!refcount_inc_not_zero(&exp->use))
 				continue;
-			cb->args[1] = (unsigned long)exp;
+			cb->args[1] = (uintptr_t)exp;
 			goto out;
 		}
 	}

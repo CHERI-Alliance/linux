@@ -1913,7 +1913,7 @@ static int smc_probe(struct net_device *dev, void __iomem *ioaddr,
 	pr_info_once("%s\n", version);
 
 	/* fill in some of the fields */
-	dev->base_addr = (unsigned long)ioaddr;
+	dev->base_addr = (uintptr_t)ioaddr;
 	lp->base = ioaddr;
 	lp->version = revision_register & 0xff;
 	spin_lock_init(&lp->lock);

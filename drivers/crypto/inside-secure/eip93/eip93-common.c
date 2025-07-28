@@ -142,7 +142,7 @@ static void eip93_free_sg_copy(const int len, struct scatterlist **sg)
 	if (!*sg || !len)
 		return;
 
-	free_pages((unsigned long)sg_virt(*sg), get_order(len));
+	free_pages((uintptr_t)sg_virt(*sg), get_order(len));
 	kfree(*sg);
 	*sg = NULL;
 }

@@ -90,19 +90,19 @@ static struct at91_twi_pdata at91sam9g10_config = {
 static const struct platform_device_id at91_twi_devtypes[] = {
 	{
 		.name = "i2c-at91rm9200",
-		.driver_data = (unsigned long) &at91rm9200_config,
+		.driver_data = (uintptr_t) &at91rm9200_config,
 	}, {
 		.name = "i2c-at91sam9261",
-		.driver_data = (unsigned long) &at91sam9261_config,
+		.driver_data = (uintptr_t) &at91sam9261_config,
 	}, {
 		.name = "i2c-at91sam9260",
-		.driver_data = (unsigned long) &at91sam9260_config,
+		.driver_data = (uintptr_t) &at91sam9260_config,
 	}, {
 		.name = "i2c-at91sam9g20",
-		.driver_data = (unsigned long) &at91sam9g20_config,
+		.driver_data = (uintptr_t) &at91sam9g20_config,
 	}, {
 		.name = "i2c-at91sam9g10",
-		.driver_data = (unsigned long) &at91sam9g10_config,
+		.driver_data = (uintptr_t) &at91sam9g10_config,
 	}, {
 		/* sentinel */
 	}

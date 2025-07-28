@@ -891,15 +891,15 @@ static const struct ad7779_chip_info ad7779_chip_info = {
 static const struct spi_device_id ad7779_id[] = {
 	{
 		.name = "ad7770",
-		.driver_data = (kernel_ulong_t)&ad7770_chip_info,
+		.driver_data = (uintptr_t)&ad7770_chip_info,
 	},
 	{
 		.name = "ad7771",
-		.driver_data = (kernel_ulong_t)&ad7771_chip_info,
+		.driver_data = (uintptr_t)&ad7771_chip_info,
 	},
 	{
 		.name = "ad7779",
-		.driver_data = (kernel_ulong_t)&ad7779_chip_info,
+		.driver_data = (uintptr_t)&ad7779_chip_info,
 	},
 	{ }
 };

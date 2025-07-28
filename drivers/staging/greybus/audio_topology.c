@@ -1328,7 +1328,7 @@ static int gbaudio_tplg_process_header(struct gbaudio_module_info *module,
 	module->num_dapm_routes = tplg_data->num_routes;
 
 	/* update block offset */
-	module->dai_offset = (unsigned long)&tplg_data->data;
+	module->dai_offset = (uintptr_t)&tplg_data->data;
 	module->control_offset = module->dai_offset +
 					le32_to_cpu(tplg_data->size_dais);
 	module->widget_offset = module->control_offset +

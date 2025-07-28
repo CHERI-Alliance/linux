@@ -409,7 +409,7 @@ static void mv_cesa_put_sram(struct platform_device *pdev, int idx)
 	struct mv_cesa_engine *engine = &cesa->engines[idx];
 
 	if (engine->pool)
-		gen_pool_free(engine->pool, (unsigned long)engine->sram_pool,
+		gen_pool_free(engine->pool, (uintptr_t)engine->sram_pool,
 			      cesa->sram_size);
 	else
 		dma_unmap_resource(cesa->dev, engine->sram_dma,

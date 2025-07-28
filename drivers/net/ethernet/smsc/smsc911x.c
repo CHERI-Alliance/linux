@@ -732,7 +732,7 @@ static int smsc911x_phy_check_loopbackpkt(struct smsc911x_data *pdata)
 		smsc911x_reg_write(pdata, TX_DATA_FIFO, txcmd_a);
 		smsc911x_reg_write(pdata, TX_DATA_FIFO, txcmd_b);
 
-		bufp = (ulong)pdata->loopback_tx_pkt & (~0x3);
+		bufp = (uintptr_t)pdata->loopback_tx_pkt & (~0x3);
 		wrsz = MIN_PACKET_SIZE + 3;
 		wrsz += (u32)((ulong)pdata->loopback_tx_pkt & 0x3);
 		wrsz >>= 2;
@@ -776,7 +776,7 @@ static int smsc911x_phy_check_loopbackpkt(struct smsc911x_data *pdata)
 		}
 
 		pktlength = ((status & 0x3FFF0000UL) >> 16);
-		bufp = (ulong)pdata->loopback_rx_pkt;
+		bufp = (uintptr_t)pdata->loopback_rx_pkt;
 		rdsz = pktlength + 3;
 		rdsz += (u32)((ulong)pdata->loopback_rx_pkt & 0x3);
 		rdsz >>= 2;
@@ -1810,7 +1810,7 @@ smsc911x_hard_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	smsc911x_reg_write(pdata, TX_DATA_FIFO, tx_cmd_a);
 	smsc911x_reg_write(pdata, TX_DATA_FIFO, tx_cmd_b);
 
-	bufp = (ulong)skb->data & (~0x3);
+	bufp = (uintptr_t)skb->data & (~0x3);
 	wrsz = (u32)skb->len + 3;
 	wrsz += (u32)((ulong)skb->data & 0x3);
 	wrsz >>= 2;

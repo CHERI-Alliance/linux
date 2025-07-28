@@ -134,7 +134,7 @@ static void cc770_isa_port_write_reg(const struct cc770_priv *priv,
 static u8 cc770_isa_port_read_reg_indirect(const struct cc770_priv *priv,
 					     int reg)
 {
-	unsigned long base = (unsigned long)priv->reg_base;
+	uintptr_t base = (uintptr_t)priv->reg_base;
 	unsigned long flags;
 	u8 val;
 
@@ -149,7 +149,7 @@ static u8 cc770_isa_port_read_reg_indirect(const struct cc770_priv *priv,
 static void cc770_isa_port_write_reg_indirect(const struct cc770_priv *priv,
 						int reg, u8 val)
 {
-	unsigned long base = (unsigned long)priv->reg_base;
+	uintptr_t base = (uintptr_t)priv->reg_base;
 	unsigned long flags;
 
 	spin_lock_irqsave(&cc770_isa_port_lock, flags);

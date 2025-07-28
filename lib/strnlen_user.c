@@ -106,7 +106,7 @@ long strnlen_user(const char __user *str, long count)
 	}
 
 	max_addr = TASK_SIZE_MAX;
-	src_addr = (unsigned long)untagged_addr(str);
+	src_addr = (user_uintptr_t)untagged_addr(str);
 	if (likely(src_addr < max_addr)) {
 		unsigned long max = max_addr - src_addr;
 		long retval;

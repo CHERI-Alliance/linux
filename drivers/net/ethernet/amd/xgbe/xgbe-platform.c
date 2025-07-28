@@ -431,7 +431,7 @@ static const struct xgbe_version_data xgbe_v1 = {
 
 static const struct acpi_device_id xgbe_acpi_match[] = {
 	{ .id = "AMDI8001",
-	  .driver_data = (kernel_ulong_t)&xgbe_v1 },
+	  .driver_data = (uintptr_t)&xgbe_v1 },
 	{},
 };
 

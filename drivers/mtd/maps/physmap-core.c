@@ -523,7 +523,7 @@ static int physmap_flash_probe(struct platform_device *dev)
 					 (info->gpios ?
 					  info->gpios->ndescs : 0));
 
-		info->maps[i].map_priv_1 = (unsigned long)dev;
+		info->maps[i].map_priv_1 = (uintptr_t)dev;
 
 		if (info->gpios) {
 			err = physmap_addr_gpios_map_init(&info->maps[i]);

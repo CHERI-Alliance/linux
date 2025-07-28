@@ -193,7 +193,7 @@ static int pm_map_queues_vi(struct packet_manager *pm, uint32_t *buffer,
 			lower_32_bits((uint64_t)q->properties.write_ptr);
 
 	packet->wptr_addr_hi =
-			upper_32_bits((uint64_t)q->properties.write_ptr);
+			upper_32_bits((user_uintptr_t)q->properties.write_ptr);
 
 	return 0;
 }

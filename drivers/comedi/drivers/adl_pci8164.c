@@ -32,7 +32,7 @@ static int adl_pci8164_insn_read(struct comedi_device *dev,
 				 struct comedi_insn *insn,
 				 unsigned int *data)
 {
-	unsigned long offset = (unsigned long)s->private;
+	uintptr_t offset = (uintptr_t)s->private;
 	unsigned int chan = CR_CHAN(insn->chanspec);
 	int i;
 
@@ -47,7 +47,7 @@ static int adl_pci8164_insn_write(struct comedi_device *dev,
 				  struct comedi_insn *insn,
 				  unsigned int *data)
 {
-	unsigned long offset = (unsigned long)s->private;
+	uintptr_t offset = (uintptr_t)s->private;
 	unsigned int chan = CR_CHAN(insn->chanspec);
 	int i;
 

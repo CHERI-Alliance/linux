@@ -203,16 +203,16 @@ static int adc081c_probe(struct i2c_client *client)
 }
 
 static const struct i2c_device_id adc081c_id[] = {
-	{ "adc081c", (kernel_ulong_t)&adcxx1c_models[ADC081C] },
-	{ "adc101c", (kernel_ulong_t)&adcxx1c_models[ADC101C] },
-	{ "adc121c", (kernel_ulong_t)&adcxx1c_models[ADC121C] },
+	{ "adc081c", (uintptr_t)&adcxx1c_models[ADC081C] },
+	{ "adc101c", (uintptr_t)&adcxx1c_models[ADC101C] },
+	{ "adc121c", (uintptr_t)&adcxx1c_models[ADC121C] },
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, adc081c_id);
 
 static const struct acpi_device_id adc081c_acpi_match[] = {
 	/* Used on some AAEON boards */
-	{ "ADC081C", (kernel_ulong_t)&adcxx1c_models[ADC081C] },
+	{ "ADC081C", (uintptr_t)&adcxx1c_models[ADC081C] },
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, adc081c_acpi_match);

@@ -2749,7 +2749,7 @@ static inline int cas_xmit_tx_ringN(struct cas *cp, int ring,
 			       offset_in_page(skb->data), len, DMA_TO_DEVICE);
 
 	tentry = entry;
-	tabort = cas_calc_tabort(cp, (unsigned long) skb->data, len);
+	tabort = cas_calc_tabort(cp, (uintptr_t) skb->data, len);
 	if (unlikely(tabort)) {
 		/* NOTE: len is always >  tabort */
 		cas_write_txd(cp, ring, entry, mapping, len - tabort,

@@ -120,22 +120,22 @@ static int create_flat_tables(struct linux_binprm *bprm, unsigned long arg_start
 		sp -= 2; /* argvp + envp */
 	sp -= 1;  /* &argc */
 
-	current->mm->start_stack = (unsigned long)sp & -FLAT_STACK_ALIGN;
+	current->mm->start_stack = (user_uintptr_t)sp & -FLAT_STACK_ALIGN;
 	sp = (unsigned long __user *)current->mm->start_stack;
 
 	if (put_user(bprm->argc, sp++))
 		return -EFAULT;
 	if (IS_ENABLED(CONFIG_BINFMT_FLAT_ARGVP_ENVP_ON_STACK)) {
 		unsigned long argv, envp;
-		argv = (unsigned long)(sp + 2);
-		envp = (unsigned long)(sp + 2 + bprm->argc + 1);
+		argv = (user_uintptr_t)(sp + 2);
+		envp = (user_uintptr_t)(sp + 2 + bprm->argc + 1);
 		if (put_user(argv, sp++) || put_user(envp, sp++))
 			return -EFAULT;
 	}
 
-	current->mm->arg_start = (unsigned long)p;
+	current->mm->arg_start = (user_uintptr_t)p;
 	for (i = bprm->argc; i > 0; i--) {
-		if (put_user((unsigned long)p, sp++))
+		if (put_user((user_uintptr_t)p, sp++))
 			return -EFAULT;
 		len = strnlen_user(p, MAX_ARG_STRLEN);
 		if (!len || len > MAX_ARG_STRLEN)
@@ -144,11 +144,11 @@ static int create_flat_tables(struct linux_binprm *bprm, unsigned long arg_start
 	}
 	if (put_user(0, sp++))
 		return -EFAULT;
-	current->mm->arg_end = (unsigned long)p;
+	current->mm->arg_end = (user_uintptr_t)p;
 
-	current->mm->env_start = (unsigned long) p;
+	current->mm->env_start = (user_uintptr_t) p;
 	for (i = bprm->envc; i > 0; i--) {
-		if (put_user((unsigned long)p, sp++))
+		if (put_user((user_uintptr_t)p, sp++))
 			return -EFAULT;
 		len = strnlen_user(p, MAX_ARG_STRLEN);
 		if (!len || len > MAX_ARG_STRLEN)
@@ -157,7 +157,7 @@ static int create_flat_tables(struct linux_binprm *bprm, unsigned long arg_start
 	}
 	if (put_user(0, sp++))
 		return -EFAULT;
-	current->mm->env_end = (unsigned long)p;
+	current->mm->env_end = (user_uintptr_t)p;
 
 	return 0;
 }

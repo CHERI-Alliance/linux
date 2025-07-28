@@ -437,7 +437,7 @@ static void soc_ops_test_info(struct kunit *test)
 	struct snd_ctl_elem_info result;
 	struct snd_kcontrol kctl = {
 		.private_data = &priv->component,
-		.private_value = (unsigned long)&param->mc,
+		.private_value = (uintptr_t)&param->mc,
 	};
 	int ret;
 
@@ -479,7 +479,7 @@ static void soc_ops_test_access(struct kunit *test)
 	const struct access_test_param *param = test->param_value;
 	struct snd_kcontrol kctl = {
 		.private_data = &priv->component,
-		.private_value = (unsigned long)&param->mc,
+		.private_value = (uintptr_t)&param->mc,
 	};
 	struct snd_ctl_elem_value result;
 	unsigned int val;

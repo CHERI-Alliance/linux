@@ -163,7 +163,7 @@ void *dereference_kernel_function_descriptor(void *ptr)
 int func_ptr_is_kernel_text(void *ptr)
 {
 	unsigned long addr;
-	addr = (unsigned long) dereference_function_descriptor(ptr);
+	addr = (uintptr_t) dereference_function_descriptor(ptr);
 	if (core_kernel_text(addr))
 		return 1;
 	return is_module_text_address(addr);

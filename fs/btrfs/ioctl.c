@@ -1796,7 +1796,7 @@ static noinline int btrfs_search_path_in_tree(struct btrfs_fs_info *info,
 		}
 
 		*(ptr + len) = '/';
-		read_extent_buffer(l, ptr, (unsigned long)(iref + 1), len);
+		read_extent_buffer(l, ptr, (uintptr_t)(iref + 1), len);
 
 		if (key.offset == BTRFS_FIRST_FREE_OBJECTID)
 			break;
@@ -1882,7 +1882,7 @@ static int btrfs_search_path_in_tree_user(struct mnt_idmap *idmap,
 
 			*(ptr + len) = '/';
 			read_extent_buffer(leaf, ptr,
-					(unsigned long)(iref + 1), len);
+					(uintptr_t)(iref + 1), len);
 
 			/* Check the read+exec permission of this directory */
 			ret = btrfs_previous_item(root, path, dirid,
@@ -3329,7 +3329,7 @@ static long btrfs_ioctl_ino_to_path(struct btrfs_root *root, void __user *arg)
 
 	for (i = 0; i < ipath->fspath->elem_cnt; ++i) {
 		rel_ptr = ipath->fspath->val[i] -
-			  (u64)(unsigned long)ipath->fspath->val;
+			  (u64)(uintptr_t)ipath->fspath->val;
 		ipath->fspath->val[i] = rel_ptr;
 	}
 

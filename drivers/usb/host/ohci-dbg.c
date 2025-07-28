@@ -731,7 +731,7 @@ static int debug_close(struct inode *inode, struct file *file)
 
 	if (buf) {
 		if (buf->page)
-			free_page((unsigned long)buf->page);
+			free_page((uintptr_t)buf->page);
 		kfree(buf);
 	}
 

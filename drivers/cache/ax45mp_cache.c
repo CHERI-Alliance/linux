@@ -102,7 +102,7 @@ static inline void ax45mp_cpu_dcache_inval_range(unsigned long start, unsigned l
 
 static void ax45mp_dma_cache_inv(phys_addr_t paddr, size_t size)
 {
-	unsigned long start = (unsigned long)phys_to_virt(paddr);
+	uintptr_t start = (uintptr_t)phys_to_virt(paddr);
 	unsigned long end = start + size;
 	unsigned long line_size;
 	unsigned long flags;
@@ -124,7 +124,7 @@ static void ax45mp_dma_cache_inv(phys_addr_t paddr, size_t size)
 
 static void ax45mp_dma_cache_wback(phys_addr_t paddr, size_t size)
 {
-	unsigned long start = (unsigned long)phys_to_virt(paddr);
+	uintptr_t start = (uintptr_t)phys_to_virt(paddr);
 	unsigned long end = start + size;
 	unsigned long line_size;
 	unsigned long flags;

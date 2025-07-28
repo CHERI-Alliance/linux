@@ -54,7 +54,7 @@ extern struct bug_entry __start___bug_table[], __stop___bug_table[];
 static inline unsigned long bug_addr(const struct bug_entry *bug)
 {
 #ifdef CONFIG_GENERIC_BUG_RELATIVE_POINTERS
-	return (unsigned long)&bug->bug_addr_disp + bug->bug_addr_disp;
+	return (uintptr_t)&bug->bug_addr_disp + bug->bug_addr_disp;
 #else
 	return bug->bug_addr;
 #endif

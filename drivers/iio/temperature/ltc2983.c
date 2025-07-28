@@ -1660,10 +1660,10 @@ static const struct ltc2983_chip_info ltm2985_chip_info_data = {
 };
 
 static const struct spi_device_id ltc2983_id_table[] = {
-	{ "ltc2983", (kernel_ulong_t)&ltc2983_chip_info_data },
-	{ "ltc2984", (kernel_ulong_t)&ltc2984_chip_info_data },
-	{ "ltc2986", (kernel_ulong_t)&ltc2986_chip_info_data },
-	{ "ltm2985", (kernel_ulong_t)&ltm2985_chip_info_data },
+	{ "ltc2983", (uintptr_t)&ltc2983_chip_info_data },
+	{ "ltc2984", (uintptr_t)&ltc2984_chip_info_data },
+	{ "ltc2986", (uintptr_t)&ltc2986_chip_info_data },
+	{ "ltm2985", (uintptr_t)&ltm2985_chip_info_data },
 	{ }
 };
 MODULE_DEVICE_TABLE(spi, ltc2983_id_table);

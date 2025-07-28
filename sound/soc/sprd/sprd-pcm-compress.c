@@ -221,7 +221,7 @@ static int sprd_platform_compr_dma_config(struct snd_soc_component *component,
 	 * Configure the link-list address for the DMA engine link-list
 	 * mode.
 	 */
-	link.virt_addr = (unsigned long)dma->virt;
+	link.virt_addr = (uintptr_t)dma->virt;
 	link.phy_addr = dma->phys;
 
 	ret = dmaengine_slave_config(dma->chan, &config);

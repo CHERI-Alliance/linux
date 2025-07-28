@@ -341,7 +341,7 @@ static const struct usb_device_id products[] = {
 {
 	USB_INTERFACE_INFO(USB_CLASS_COMM, USB_CDC_SUBCLASS_EEM,
 			USB_CDC_PROTO_EEM),
-	.driver_info = (unsigned long) &eem_info,
+	.driver_info = (uintptr_t) &eem_info,
 },
 {
 	/* EMPTY == end of list */

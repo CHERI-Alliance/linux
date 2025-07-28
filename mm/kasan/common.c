@@ -362,9 +362,9 @@ static inline void poison_kmalloc_redzone(struct kmem_cache *cache,
 		kasan_poison_last_granule((void *)object, size);
 
 	/* Poison the aligned part of the redzone. */
-	redzone_start = round_up((unsigned long)(object + size),
+	redzone_start = round_up((uintptr_t)(object + size),
 				KASAN_GRANULE_SIZE);
-	redzone_end = round_up((unsigned long)(object + cache->object_size),
+	redzone_end = round_up((uintptr_t)(object + cache->object_size),
 				KASAN_GRANULE_SIZE);
 	kasan_poison((void *)redzone_start, redzone_end - redzone_start,
 			   KASAN_SLAB_REDZONE, false);
@@ -413,8 +413,8 @@ static inline void poison_kmalloc_large_redzone(const void *ptr, size_t size,
 		kasan_poison_last_granule(ptr, size);
 
 	/* Poison the aligned part of the redzone. */
-	redzone_start = round_up((unsigned long)(ptr + size), KASAN_GRANULE_SIZE);
-	redzone_end = (unsigned long)ptr + page_size(virt_to_page(ptr));
+	redzone_start = round_up((uintptr_t)(ptr + size), KASAN_GRANULE_SIZE);
+	redzone_end = (uintptr_t)ptr + page_size(virt_to_page(ptr));
 	kasan_poison((void *)redzone_start, redzone_end - redzone_start,
 		     KASAN_PAGE_REDZONE, false);
 }

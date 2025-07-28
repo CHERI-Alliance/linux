@@ -1130,7 +1130,7 @@ unsigned long dma_getvar(struct dma_pub *pub, const char *name)
 	struct dma_info *di = container_of(pub, struct dma_info, dma);
 
 	if (!strcmp(name, "&txavail"))
-		return (unsigned long)&(di->dma.txavail);
+		return (uintptr_t)&(di->dma.txavail);
 	return 0;
 }
 

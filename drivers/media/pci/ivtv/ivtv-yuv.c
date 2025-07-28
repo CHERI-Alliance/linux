@@ -58,8 +58,8 @@ static int ivtv_yuv_prep_user_dma(struct ivtv *itv, struct ivtv_user_dma *dma,
 		return -EBUSY;
 	}
 
-	ivtv_udma_get_page_info (&y_dma, (unsigned long)args->y_source, 720 * y_decode_height);
-	ivtv_udma_get_page_info (&uv_dma, (unsigned long)args->uv_source, 360 * uv_decode_height);
+	ivtv_udma_get_page_info (&y_dma, (user_uintptr_t)args->y_source, 720 * y_decode_height);
+	ivtv_udma_get_page_info (&uv_dma, (user_uintptr_t)args->uv_source, 360 * uv_decode_height);
 
 	/* Pin user pages for DMA Xfer */
 	y_pages = pin_user_pages_unlocked(y_dma.uaddr,

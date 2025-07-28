@@ -707,8 +707,8 @@ static int ltc2664_probe(struct spi_device *spi)
 }
 
 static const struct spi_device_id ltc2664_id[] = {
-	{ "ltc2664", (kernel_ulong_t)&ltc2664_chip },
-	{ "ltc2672", (kernel_ulong_t)&ltc2672_chip },
+	{ "ltc2664", (uintptr_t)&ltc2664_chip },
+	{ "ltc2672", (uintptr_t)&ltc2672_chip },
 	{ }
 };
 MODULE_DEVICE_TABLE(spi, ltc2664_id);

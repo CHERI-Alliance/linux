@@ -226,7 +226,7 @@ static int add_queue_mes(struct device_queue_manager *dqm, struct queue *q,
 					AMDGPU_MES_PRIORITY_LEVEL_NORMAL;
 	queue_input.doorbell_offset = q->properties.doorbell_off;
 	queue_input.mqd_addr = q->gart_mqd_addr;
-	queue_input.wptr_addr = (uint64_t)q->properties.write_ptr;
+	queue_input.wptr_addr = (user_uintptr_t)q->properties.write_ptr;
 
 	wptr_addr_off = (uint64_t)q->properties.write_ptr & (PAGE_SIZE - 1);
 	queue_input.wptr_mc_addr = amdgpu_bo_gpu_offset(q->properties.wptr_bo) + wptr_addr_off;
@@ -3573,8 +3573,8 @@ void set_queue_snapshot_entry(struct queue *q,
 			      struct kfd_queue_snapshot_entry *qss_entry)
 {
 	qss_entry->ring_base_address = q->properties.queue_address;
-	qss_entry->write_pointer_address = (uint64_t)q->properties.write_ptr;
-	qss_entry->read_pointer_address = (uint64_t)q->properties.read_ptr;
+	qss_entry->write_pointer_address = (user_uintptr_t)q->properties.write_ptr;
+	qss_entry->read_pointer_address = (user_uintptr_t)q->properties.read_ptr;
 	qss_entry->ctx_save_restore_address =
 				q->properties.ctx_save_restore_area_address;
 	qss_entry->ctx_save_restore_area_size =

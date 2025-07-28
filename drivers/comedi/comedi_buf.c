@@ -37,7 +37,7 @@ static void comedi_buf_map_kref_release(struct kref *kref)
 			for (i = 0; i < bm->n_pages; i++) {
 				buf = &bm->page_list[i];
 				ClearPageReserved(virt_to_page(buf->virt_addr));
-				free_page((unsigned long)buf->virt_addr);
+				free_page((uintptr_t)buf->virt_addr);
 			}
 		}
 		vfree(bm->page_list);

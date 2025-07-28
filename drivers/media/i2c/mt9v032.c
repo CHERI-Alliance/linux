@@ -1262,14 +1262,14 @@ static const struct mt9v032_model_info mt9v032_models[] = {
 };
 
 static const struct i2c_device_id mt9v032_id[] = {
-	{ "mt9v022", (kernel_ulong_t)&mt9v032_models[MT9V032_MODEL_V022_COLOR] },
-	{ "mt9v022m", (kernel_ulong_t)&mt9v032_models[MT9V032_MODEL_V022_MONO] },
-	{ "mt9v024", (kernel_ulong_t)&mt9v032_models[MT9V032_MODEL_V024_COLOR] },
-	{ "mt9v024m", (kernel_ulong_t)&mt9v032_models[MT9V032_MODEL_V024_MONO] },
-	{ "mt9v032", (kernel_ulong_t)&mt9v032_models[MT9V032_MODEL_V032_COLOR] },
-	{ "mt9v032m", (kernel_ulong_t)&mt9v032_models[MT9V032_MODEL_V032_MONO] },
-	{ "mt9v034", (kernel_ulong_t)&mt9v032_models[MT9V032_MODEL_V034_COLOR] },
-	{ "mt9v034m", (kernel_ulong_t)&mt9v032_models[MT9V032_MODEL_V034_MONO] },
+	{ "mt9v022", (uintptr_t)&mt9v032_models[MT9V032_MODEL_V022_COLOR] },
+	{ "mt9v022m", (uintptr_t)&mt9v032_models[MT9V032_MODEL_V022_MONO] },
+	{ "mt9v024", (uintptr_t)&mt9v032_models[MT9V032_MODEL_V024_COLOR] },
+	{ "mt9v024m", (uintptr_t)&mt9v032_models[MT9V032_MODEL_V024_MONO] },
+	{ "mt9v032", (uintptr_t)&mt9v032_models[MT9V032_MODEL_V032_COLOR] },
+	{ "mt9v032m", (uintptr_t)&mt9v032_models[MT9V032_MODEL_V032_MONO] },
+	{ "mt9v034", (uintptr_t)&mt9v032_models[MT9V032_MODEL_V034_COLOR] },
+	{ "mt9v034m", (uintptr_t)&mt9v032_models[MT9V032_MODEL_V034_MONO] },
 	{ /* Sentinel */ }
 };
 MODULE_DEVICE_TABLE(i2c, mt9v032_id);

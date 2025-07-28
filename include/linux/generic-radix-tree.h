@@ -79,7 +79,7 @@ static inline unsigned genradix_root_to_depth(struct genradix_root *r)
 
 static inline struct genradix_node *genradix_root_to_node(struct genradix_root *r)
 {
-	return (void *) ((unsigned long) r & ~GENRADIX_DEPTH_MASK);
+	return (void *) ((uintptr_t) r & ~GENRADIX_DEPTH_MASK);
 }
 
 struct __genradix {

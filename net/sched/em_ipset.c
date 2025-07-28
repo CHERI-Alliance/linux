@@ -30,7 +30,7 @@ static int em_ipset_change(struct net *net, void *data, int data_len,
 		return -ENOENT;
 
 	em->datalen = sizeof(*set);
-	em->data = (unsigned long)kmemdup(data, em->datalen, GFP_KERNEL);
+	em->data = (uintptr_t)kmemdup(data, em->datalen, GFP_KERNEL);
 	if (em->data)
 		return 0;
 

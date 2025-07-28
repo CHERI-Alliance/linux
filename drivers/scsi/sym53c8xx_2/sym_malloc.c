@@ -110,7 +110,7 @@ static void ___sym_mfree(m_pool_p mp, void *ptr, int size)
 		++i;
 	}
 
-	a = (unsigned long)ptr;
+	a = (uintptr_t)ptr;
 
 	while (1) {
 		if (s == SYM_MEM_CLUSTER_SIZE) {
@@ -347,7 +347,7 @@ dma_addr_t __vtobus(m_pool_ident_t dev_dmat, void *m)
 	m_pool_p mp;
 	int hc = VTOB_HASH_CODE(m);
 	m_vtob_p vp = NULL;
-	void *a = (void *)((unsigned long)m & ~SYM_MEM_CLUSTER_MASK);
+	void *a = (void *)((uintptr_t)m & ~SYM_MEM_CLUSTER_MASK);
 	dma_addr_t b;
 
 	spin_lock_irqsave(&sym53c8xx_lock, flags);

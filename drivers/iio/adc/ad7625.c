@@ -663,10 +663,10 @@ static const struct of_device_id ad7625_of_match[] = {
 MODULE_DEVICE_TABLE(of, ad7625_of_match);
 
 static const struct platform_device_id ad7625_device_ids[] = {
-	{ .name = "ad7625", .driver_data = (kernel_ulong_t)&ad7625_chip_info },
-	{ .name = "ad7626", .driver_data = (kernel_ulong_t)&ad7626_chip_info },
-	{ .name = "ad7960", .driver_data = (kernel_ulong_t)&ad7960_chip_info },
-	{ .name = "ad7961", .driver_data = (kernel_ulong_t)&ad7961_chip_info },
+	{ .name = "ad7625", .driver_data = (uintptr_t)&ad7625_chip_info },
+	{ .name = "ad7626", .driver_data = (uintptr_t)&ad7626_chip_info },
+	{ .name = "ad7960", .driver_data = (uintptr_t)&ad7960_chip_info },
+	{ .name = "ad7961", .driver_data = (uintptr_t)&ad7961_chip_info },
 	{ }
 };
 MODULE_DEVICE_TABLE(platform, ad7625_device_ids);

@@ -57,7 +57,7 @@ static inline bool  hlist_bl_unhashed(const struct hlist_bl_node *h)
 static inline struct hlist_bl_node *hlist_bl_first(struct hlist_bl_head *h)
 {
 	return (struct hlist_bl_node *)
-		((unsigned long)h->first & ~LIST_BL_LOCKMASK);
+		((uintptr_t)h->first & ~LIST_BL_LOCKMASK);
 }
 
 static inline void hlist_bl_set_first(struct hlist_bl_head *h,
@@ -66,7 +66,7 @@ static inline void hlist_bl_set_first(struct hlist_bl_head *h,
 	LIST_BL_BUG_ON((unsigned long)n & LIST_BL_LOCKMASK);
 	LIST_BL_BUG_ON(((unsigned long)h->first & LIST_BL_LOCKMASK) !=
 							LIST_BL_LOCKMASK);
-	h->first = (struct hlist_bl_node *)((unsigned long)n | LIST_BL_LOCKMASK);
+	h->first = (struct hlist_bl_node *)((uintptr_t)n | LIST_BL_LOCKMASK);
 }
 
 static inline bool hlist_bl_empty(const struct hlist_bl_head *h)
@@ -122,7 +122,7 @@ static inline void __hlist_bl_del(struct hlist_bl_node *n)
 	/* pprev may be `first`, so be careful not to lose the lock bit */
 	WRITE_ONCE(*pprev,
 		   (struct hlist_bl_node *)
-			((unsigned long)next |
+			((uintptr_t)next |
 			 ((unsigned long)*pprev & LIST_BL_LOCKMASK)));
 	if (next)
 		next->pprev = pprev;

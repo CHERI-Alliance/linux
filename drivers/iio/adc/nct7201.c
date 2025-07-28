@@ -467,8 +467,8 @@ static int nct7201_probe(struct i2c_client *client)
 }
 
 static const struct i2c_device_id nct7201_id[] = {
-	{ .name = "nct7201", .driver_data = (kernel_ulong_t)&nct7201_model_data },
-	{ .name = "nct7202", .driver_data = (kernel_ulong_t)&nct7202_model_data },
+	{ .name = "nct7201", .driver_data = (uintptr_t)&nct7201_model_data },
+	{ .name = "nct7202", .driver_data = (uintptr_t)&nct7202_model_data },
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, nct7201_id);

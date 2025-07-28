@@ -88,7 +88,7 @@ static int st_rng_probe(struct platform_device *pdev)
 	if (IS_ERR(clk))
 		return PTR_ERR(clk);
 
-	ddata->ops.priv	= (unsigned long)ddata;
+	ddata->ops.priv	= (uintptr_t)ddata;
 	ddata->ops.read	= st_rng_read;
 	ddata->ops.name	= pdev->name;
 	ddata->base	= base;

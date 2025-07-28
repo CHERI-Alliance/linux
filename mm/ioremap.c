@@ -37,7 +37,7 @@ void __iomem *generic_ioremap_prot(phys_addr_t phys_addr, size_t size,
 				    IOREMAP_END, __builtin_return_address(0));
 	if (!area)
 		return NULL;
-	vaddr = (unsigned long)area->addr;
+	vaddr = (uintptr_t)area->addr;
 	area->phys_addr = phys_addr;
 
 	if (ioremap_page_range(vaddr, vaddr + size, phys_addr, prot)) {
@@ -59,7 +59,7 @@ EXPORT_SYMBOL(ioremap_prot);
 
 void generic_iounmap(volatile void __iomem *addr)
 {
-	void *vaddr = (void *)((unsigned long)addr & PAGE_MASK);
+	void *vaddr = (void *)((uintptr_t)addr & PAGE_MASK);
 
 	if (is_ioremap_addr(vaddr))
 		vunmap(vaddr);

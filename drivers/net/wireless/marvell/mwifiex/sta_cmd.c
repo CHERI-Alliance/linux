@@ -226,7 +226,7 @@ static int mwifiex_cmd_tx_power_cfg(struct host_cmd_ds_command *cmd,
 	case HostCmd_ACT_GEN_SET:
 		if (txp->mode) {
 			pg_tlv = (struct mwifiex_types_power_group
-				  *) ((unsigned long) txp +
+				  *) ((uintptr_t) txp +
 				     sizeof(struct host_cmd_ds_txpwr_cfg));
 			memmove(cmd_txp_cfg, txp,
 				sizeof(struct host_cmd_ds_txpwr_cfg) +

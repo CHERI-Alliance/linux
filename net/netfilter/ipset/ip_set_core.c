@@ -1550,7 +1550,7 @@ ip_set_dump_start(struct netlink_callback *cb)
 
 		dump_type |= (f << 16);
 	}
-	cb->args[IPSET_CB_NET] = (unsigned long)inst;
+	cb->args[IPSET_CB_NET] = (uintptr_t)inst;
 	cb->args[IPSET_CB_DUMP] = dump_type;
 
 	return 0;

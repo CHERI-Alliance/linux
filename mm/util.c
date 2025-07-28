@@ -668,7 +668,7 @@ EXPORT_SYMBOL(vcalloc_noprof);
 
 struct anon_vma *folio_anon_vma(const struct folio *folio)
 {
-	unsigned long mapping = (unsigned long)folio->mapping;
+	uintptr_t mapping = (uintptr_t)folio->mapping;
 
 	if ((mapping & PAGE_MAPPING_FLAGS) != PAGE_MAPPING_ANON)
 		return NULL;

@@ -720,7 +720,7 @@ struct comedi_8254 *comedi_8254_mm_alloc(void __iomem *mmio,
 	default:
 		return ERR_PTR(-EINVAL);
 	}
-	return __i8254_init(iocb, (unsigned long)mmio, osc_base, iosize, regshift);
+	return __i8254_init(iocb, (uintptr_t)mmio, osc_base, iosize, regshift);
 }
 EXPORT_SYMBOL_GPL(comedi_8254_mm_alloc);
 

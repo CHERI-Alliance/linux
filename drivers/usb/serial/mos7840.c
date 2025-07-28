@@ -1486,7 +1486,7 @@ out:
 static int mos7840_calc_num_ports(struct usb_serial *serial,
 					struct usb_serial_endpoints *epds)
 {
-	unsigned long device_flags = (unsigned long)usb_get_serial_data(serial);
+	uintptr_t device_flags = (uintptr_t)usb_get_serial_data(serial);
 	int num_ports = MCS_PORTS(device_flags);
 
 	if (num_ports == 0 || num_ports > 4)
@@ -1520,7 +1520,7 @@ static int mos7840_attach(struct usb_serial *serial)
 static int mos7840_port_probe(struct usb_serial_port *port)
 {
 	struct usb_serial *serial = port->serial;
-	unsigned long device_flags = (unsigned long)usb_get_serial_data(serial);
+	uintptr_t device_flags = (uintptr_t)usb_get_serial_data(serial);
 	struct moschip_port *mos7840_port;
 	int status;
 	int pnum;

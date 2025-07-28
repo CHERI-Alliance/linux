@@ -1231,7 +1231,7 @@ static ssize_t sel_read_bool(struct file *filep, char __user *buf,
 	mutex_unlock(&selinux_state.policy_mutex);
 	ret = simple_read_from_buffer(buf, count, ppos, page, length);
 out_free:
-	free_page((unsigned long)page);
+	free_page((uintptr_t)page);
 	return ret;
 
 out_unlock:
@@ -1406,7 +1406,7 @@ static int sel_make_bools(struct selinux_policy *newpolicy, struct dentry *bool_
 		d_add(dentry, inode);
 	}
 out:
-	free_page((unsigned long)page);
+	free_page((uintptr_t)page);
 	return ret;
 }
 
@@ -1472,7 +1472,7 @@ static ssize_t sel_read_avc_hash_stats(struct file *filp, char __user *buf,
 	length = avc_get_hash_stats(page);
 	if (length >= 0)
 		length = simple_read_from_buffer(buf, count, ppos, page, length);
-	free_page((unsigned long)page);
+	free_page((uintptr_t)page);
 
 	return length;
 }
@@ -1491,7 +1491,7 @@ static ssize_t sel_read_sidtab_hash_stats(struct file *filp, char __user *buf,
 	if (length >= 0)
 		length = simple_read_from_buffer(buf, count, ppos, page,
 						length);
-	free_page((unsigned long)page);
+	free_page((uintptr_t)page);
 
 	return length;
 }

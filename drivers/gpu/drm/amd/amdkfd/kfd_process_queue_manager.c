@@ -840,8 +840,8 @@ static int criu_checkpoint_queue(struct kfd_process_device *pdd,
 	q_data->q_size = q->properties.queue_size;
 	q_data->priority = q->properties.priority;
 	q_data->q_percent = q->properties.queue_percent;
-	q_data->read_ptr_addr = (uint64_t)q->properties.read_ptr;
-	q_data->write_ptr_addr = (uint64_t)q->properties.write_ptr;
+	q_data->read_ptr_addr = (user_uintptr_t)q->properties.read_ptr;
+	q_data->write_ptr_addr = (user_uintptr_t)q->properties.write_ptr;
 	q_data->doorbell_id = q->doorbell_id;
 
 	q_data->sdma_id = q->sdma_id;

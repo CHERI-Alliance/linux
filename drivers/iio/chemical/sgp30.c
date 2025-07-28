@@ -562,8 +562,8 @@ static void sgp_remove(struct i2c_client *client)
 }
 
 static const struct i2c_device_id sgp_id[] = {
-	{ "sgp30", (kernel_ulong_t)&sgp_devices[SGP30] },
-	{ "sgpc3", (kernel_ulong_t)&sgp_devices[SGPC3] },
+	{ "sgp30", (uintptr_t)&sgp_devices[SGP30] },
+	{ "sgpc3", (uintptr_t)&sgp_devices[SGPC3] },
 	{ }
 };
 

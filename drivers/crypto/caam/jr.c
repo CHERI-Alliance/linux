@@ -562,7 +562,7 @@ static int caam_jr_init(struct device *dev)
 	jrp->tasklet_params.dev = dev;
 	jrp->tasklet_params.enable_itr = 1;
 	tasklet_init(&jrp->irqtask, caam_jr_dequeue,
-		     (unsigned long)&jrp->tasklet_params);
+		     (uintptr_t)&jrp->tasklet_params);
 
 	/* Connect job ring interrupt handler. */
 	error = devm_request_irq(dev, jrp->irq, caam_jr_interrupt, IRQF_SHARED,
@@ -723,7 +723,7 @@ static int caam_jr_suspend(struct device *dev)
 		}
 
 		/* Dequeing jobs flushed */
-		caam_jr_dequeue((unsigned long)&suspend_params);
+		caam_jr_dequeue((uintptr_t)&suspend_params);
 
 		/* Save state */
 		caam_jr_get_hw_state(dev);

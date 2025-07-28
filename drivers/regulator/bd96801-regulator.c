@@ -1329,10 +1329,10 @@ static int bd96801_probe(struct platform_device *pdev)
 }
 
 static const struct platform_device_id bd96801_pmic_id[] = {
-	{ "bd96801-regulator", (kernel_ulong_t)&bd96801_data },
-	{ "bd96802-regulator", (kernel_ulong_t)&bd96802_data },
-	{ "bd96805-regulator", (kernel_ulong_t)&bd96805_data },
-	{ "bd96806-regulator", (kernel_ulong_t)&bd96806_data },
+	{ "bd96801-regulator", (uintptr_t)&bd96801_data },
+	{ "bd96802-regulator", (uintptr_t)&bd96802_data },
+	{ "bd96805-regulator", (uintptr_t)&bd96805_data },
+	{ "bd96806-regulator", (uintptr_t)&bd96806_data },
 	{ },
 };
 MODULE_DEVICE_TABLE(platform, bd96801_pmic_id);

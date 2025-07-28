@@ -198,7 +198,7 @@ static int unix_recvq_lock_cmp_fn(const struct lockdep_map *_a,
 
 static unsigned int unix_unbound_hash(struct sock *sk)
 {
-	unsigned long hash = (unsigned long)sk;
+	uintptr_t hash = (uintptr_t)sk;
 
 	hash ^= hash >> 16;
 	hash ^= hash >> 8;

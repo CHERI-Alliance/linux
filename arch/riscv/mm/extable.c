@@ -17,7 +17,7 @@
 static inline unsigned long
 get_ex_fixup(const struct exception_table_entry *ex)
 {
-	return ((unsigned long)&ex->fixup + ex->fixup);
+	return ((uintptr_t)&ex->fixup + ex->fixup);
 }
 
 static bool ex_handler_fixup(const struct exception_table_entry *ex,
@@ -32,7 +32,7 @@ static inline unsigned long regs_get_gpr(struct pt_regs *regs, unsigned int offs
 	if (unlikely(!offset || offset > MAX_REG_OFFSET))
 		return 0;
 
-	return *(unsigned long *)((unsigned long)regs + offset);
+	return *(unsigned long *)((uintptr_t)regs + offset);
 }
 
 static inline void regs_set_gpr(struct pt_regs *regs, unsigned int offset,
@@ -42,7 +42,7 @@ static inline void regs_set_gpr(struct pt_regs *regs, unsigned int offset,
 		return;
 
 	if (offset)
-		*(unsigned long *)((unsigned long)regs + offset) = val;
+		*(unsigned long *)((uintptr_t)regs + offset) = val;
 }
 
 static bool ex_handler_uaccess_err_zero(const struct exception_table_entry *ex,

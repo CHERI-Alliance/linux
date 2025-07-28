@@ -156,7 +156,7 @@ static int init_tasklet_work(struct otx2_cptlfs_info *lfs)
 			goto cleanup_tasklet;
 		}
 
-		tasklet_init(&wqe->work, cptlf_work_handler, (u64) wqe);
+		tasklet_init(&wqe->work, cptlf_work_handler, (uintptr_t) wqe);
 		wqe->lfs = lfs;
 		wqe->lf_num = i;
 		lfs->lf[i].wqe = wqe;

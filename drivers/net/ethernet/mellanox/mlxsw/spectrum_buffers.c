@@ -312,7 +312,7 @@ static int mlxsw_sp_sb_pm_occ_query(struct mlxsw_sp *mlxsw_sp, u16 local_port,
 	return mlxsw_reg_trans_query(mlxsw_sp->core, MLXSW_REG(sbpm), sbpm_pl,
 				     bulk_list,
 				     mlxsw_sp_sb_pm_occ_query_cb,
-				     (unsigned long) pm);
+				     (uintptr_t) pm);
 }
 
 void mlxsw_sp_hdroom_prios_reset_buf_idx(struct mlxsw_sp_hdroom *hdroom)

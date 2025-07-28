@@ -46,7 +46,7 @@ static int init_worker_threads(struct cpt_vf *cptvf)
 
 	for (i = 0; i < cptvf->nr_queues; i++) {
 		tasklet_init(&cwqe_info->vq_wqe[i].twork, vq_work_handler,
-			     (u64)cwqe_info);
+			     (uintptr_t)cwqe_info);
 		cwqe_info->vq_wqe[i].qno = i;
 		cwqe_info->vq_wqe[i].cptvf = cptvf;
 	}

@@ -697,7 +697,7 @@ static int switchtec_ntb_peer_db_addr(struct ntb_dev *ntb,
 		return -EINVAL;
 
 	offset = (unsigned long)sndev->mmio_peer_dbmsg->odb -
-		(unsigned long)sndev->stdev->mmio;
+		(uintptr_t)sndev->stdev->mmio;
 
 	offset += sndev->db_shift / 8;
 

@@ -827,9 +827,9 @@ static SIMPLE_DEV_PM_OPS(sm5502_muic_pm_ops,
 			 sm5502_muic_suspend, sm5502_muic_resume);
 
 static const struct i2c_device_id sm5502_i2c_id[] = {
-	{ "sm5502", (kernel_ulong_t)&sm5502_data },
-	{ "sm5504", (kernel_ulong_t)&sm5504_data },
-	{ "sm5703-muic", (kernel_ulong_t)&sm5502_data },
+	{ "sm5502", (uintptr_t)&sm5502_data },
+	{ "sm5504", (uintptr_t)&sm5504_data },
+	{ "sm5703-muic", (uintptr_t)&sm5502_data },
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, sm5502_i2c_id);

@@ -301,7 +301,7 @@ l2_timeout(struct FsmInst *fi, int event, void *arg)
 
 static int
 l2mgr(struct layer2 *l2, u_int prim, void *arg) {
-	long c = (long)arg;
+	intptr_t c = (intptr_t)arg;
 
 	printk(KERN_WARNING "l2mgr: dev %s addr:%x prim %x %c\n",
 	       mISDNDevName4ch(&l2->ch), l2->id, prim, (char)c);
@@ -312,7 +312,7 @@ l2mgr(struct layer2 *l2, u_int prim, void *arg) {
 		case 'D':
 		case 'G':
 		case 'H':
-			l2_tei(l2, prim, (u_long)arg);
+			l2_tei(l2, prim, (uintptr_t)arg);
 			break;
 		}
 	}

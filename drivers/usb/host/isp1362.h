@@ -507,7 +507,7 @@ static inline const char *ISP1362_INT_NAME(int n)
 
 static inline void ALIGNSTAT(struct isp1362_hcd *isp1362_hcd, void *ptr)
 {
-	unsigned long p = (unsigned long)ptr;
+	uintptr_t p = (uintptr_t)ptr;
 	if (!(p & 0xf))
 		isp1362_hcd->stat16++;
 	else if (!(p & 0x7))

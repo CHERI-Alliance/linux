@@ -952,7 +952,7 @@ nfp_nfdk_tx_xdp_buf(struct nfp_net_dp *dp, struct nfp_net_rx_ring *rx_ring,
 
 	txbuf = &tx_ring->ktxbufs[wr_idx];
 
-	txbuf[0].val = (unsigned long)rxbuf->frag | NFDK_TX_BUF_INFO_SOP;
+	txbuf[0].val = (uintptr_t)rxbuf->frag | NFDK_TX_BUF_INFO_SOP;
 	txbuf[1].dma_addr = rxbuf->dma_addr;
 	/* Note: pkt len not stored */
 

@@ -32,14 +32,14 @@ static int bmi270_i2c_probe(struct i2c_client *client)
 }
 
 static const struct i2c_device_id bmi270_i2c_id[] = {
-	{ "bmi260", (kernel_ulong_t)&bmi260_chip_info },
-	{ "bmi270", (kernel_ulong_t)&bmi270_chip_info },
+	{ "bmi260", (uintptr_t)&bmi260_chip_info },
+	{ "bmi270", (uintptr_t)&bmi270_chip_info },
 	{ }
 };
 
 static const struct acpi_device_id bmi270_acpi_match[] = {
 	/* GPD Win Mini, Aya Neo AIR Pro, OXP Mini Pro, etc. */
-	{ "BMI0160",  (kernel_ulong_t)&bmi260_chip_info },
+	{ "BMI0160",  (uintptr_t)&bmi260_chip_info },
 	{ }
 };
 

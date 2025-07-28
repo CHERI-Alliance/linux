@@ -717,7 +717,7 @@ static int rockchip_sfc_probe(struct platform_device *pdev)
 
 	return 0;
 err_register:
-	free_pages((unsigned long)sfc->buffer, get_order(sfc->max_iosize));
+	free_pages((uintptr_t)sfc->buffer, get_order(sfc->max_iosize));
 err_dma:
 	pm_runtime_get_sync(dev);
 	pm_runtime_put_noidle(dev);
@@ -738,7 +738,7 @@ static void rockchip_sfc_remove(struct platform_device *pdev)
 	struct spi_controller *host = sfc->host;
 
 	spi_unregister_controller(host);
-	free_pages((unsigned long)sfc->buffer, get_order(sfc->max_iosize));
+	free_pages((uintptr_t)sfc->buffer, get_order(sfc->max_iosize));
 
 	clk_disable_unprepare(sfc->clk);
 	clk_disable_unprepare(sfc->hclk);

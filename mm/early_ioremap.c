@@ -187,7 +187,7 @@ void __init early_iounmap(void __iomem *addr, unsigned long size)
 	WARN(early_ioremap_debug, "%s(%p, %08lx) [%d]\n",
 	      __func__, addr, size, slot);
 
-	virt_addr = (unsigned long)addr;
+	virt_addr = (uintptr_t)addr;
 	if (WARN_ON(virt_addr < fix_to_virt(FIX_BTMAP_BEGIN)))
 		return;
 

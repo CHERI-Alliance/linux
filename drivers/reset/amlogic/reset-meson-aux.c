@@ -41,16 +41,16 @@ static const struct meson_reset_param meson_sm1_audio_param = {
 static const struct auxiliary_device_id meson_reset_aux_ids[] = {
 	{
 		.name = "a1-audio-clkc.rst-a1",
-		.driver_data = (kernel_ulong_t)&meson_a1_audio_param,
+		.driver_data = (uintptr_t)&meson_a1_audio_param,
 	}, {
 		.name = "a1-audio-clkc.rst-a1-vad",
-		.driver_data = (kernel_ulong_t)&meson_a1_audio_vad_param,
+		.driver_data = (uintptr_t)&meson_a1_audio_vad_param,
 	}, {
 		.name = "axg-audio-clkc.rst-g12a",
-		.driver_data = (kernel_ulong_t)&meson_g12a_audio_param,
+		.driver_data = (uintptr_t)&meson_g12a_audio_param,
 	}, {
 		.name = "axg-audio-clkc.rst-sm1",
-		.driver_data = (kernel_ulong_t)&meson_sm1_audio_param,
+		.driver_data = (uintptr_t)&meson_sm1_audio_param,
 	}, {}
 };
 MODULE_DEVICE_TABLE(auxiliary, meson_reset_aux_ids);

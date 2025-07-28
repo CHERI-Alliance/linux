@@ -91,7 +91,7 @@ static void sja1000_isa_port_write_reg(const struct sja1000_priv *priv,
 static u8 sja1000_isa_port_read_reg_indirect(const struct sja1000_priv *priv,
 					     int reg)
 {
-	unsigned long flags, base = (unsigned long)priv->reg_base;
+	uintptr_t flags, base = (uintptr_t)priv->reg_base;
 	u8 readval;
 
 	spin_lock_irqsave(&indirect_lock[priv->dev->dev_id], flags);
@@ -105,7 +105,7 @@ static u8 sja1000_isa_port_read_reg_indirect(const struct sja1000_priv *priv,
 static void sja1000_isa_port_write_reg_indirect(const struct sja1000_priv *priv,
 						int reg, u8 val)
 {
-	unsigned long flags, base = (unsigned long)priv->reg_base;
+	uintptr_t flags, base = (uintptr_t)priv->reg_base;
 
 	spin_lock_irqsave(&indirect_lock[priv->dev->dev_id], flags);
 	outb(reg, base);

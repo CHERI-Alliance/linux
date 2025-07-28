@@ -279,7 +279,7 @@ static const struct a030jtn01_info a030jtn01_info = {
 };
 
 static const struct spi_device_id a030jtn01_id[] = {
-	{ "a030jtn01", (kernel_ulong_t) &a030jtn01_info },
+	{ "a030jtn01", (uintptr_t) &a030jtn01_info },
 	{ /* sentinel */ }
 };
 MODULE_DEVICE_TABLE(spi, a030jtn01_id);

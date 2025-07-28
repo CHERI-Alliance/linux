@@ -1201,7 +1201,7 @@ static int ace_init(struct net_device *dev)
 	writel(0, &regs->CmdCsm);
 
 	tmp_ptr = ap->info_dma;
-	tmp_ptr += (unsigned long) &(((struct ace_info *)0)->s.stats);
+	tmp_ptr += (uintptr_t) &(((struct ace_info *)0)->s.stats);
 	set_aceaddr(&info->stats2_ptr, (dma_addr_t) tmp_ptr);
 
 	set_aceaddr(&info->rx_std_ctrl.rngptr, ap->rx_ring_base_dma);

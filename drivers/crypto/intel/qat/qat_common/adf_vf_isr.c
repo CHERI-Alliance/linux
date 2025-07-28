@@ -116,7 +116,7 @@ static void adf_pf2vf_bh_handler(void *data)
 static int adf_setup_pf2vf_bh(struct adf_accel_dev *accel_dev)
 {
 	tasklet_init(&accel_dev->vf.pf2vf_bh_tasklet,
-		     (void *)adf_pf2vf_bh_handler, (unsigned long)accel_dev);
+		     (void *)adf_pf2vf_bh_handler, (uintptr_t)accel_dev);
 
 	mutex_init(&accel_dev->vf.vf2pf_lock);
 	return 0;
@@ -205,7 +205,7 @@ static int adf_setup_bh(struct adf_accel_dev *accel_dev)
 	struct adf_etr_data *priv_data = accel_dev->transport;
 
 	tasklet_init(&priv_data->banks[0].resp_handler, adf_response_handler,
-		     (unsigned long)priv_data->banks);
+		     (uintptr_t)priv_data->banks);
 	return 0;
 }
 

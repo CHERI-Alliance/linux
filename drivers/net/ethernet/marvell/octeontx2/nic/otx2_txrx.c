@@ -699,7 +699,7 @@ static bool otx2_sqe_add_sg(struct otx2_nic *pfvf, struct otx2_snd_queue *sq,
 		sq->sg[sq->head].num_segs++;
 	}
 
-	sq->sg[sq->head].skb = (u64)skb;
+	sq->sg[sq->head].skb = (uintptr_t)skb;
 	return true;
 }
 
@@ -885,7 +885,7 @@ static u64 otx2_tso_frag_dma_addr(struct otx2_snd_queue *sq,
 	int offset;
 
 	if (seg < 0)
-		return sg->dma_addr[0] + (seg_addr - (u64)skb->data);
+		return sg->dma_addr[0] + (seg_addr - (uintptr_t)skb->data);
 
 	frag = &skb_shinfo(skb)->frags[seg];
 	offset = seg_addr - (u64)skb_frag_address(frag);
@@ -979,7 +979,7 @@ static void otx2_sq_append_tso(struct otx2_nic *pfvf, struct otx2_snd_queue *sq,
 			list.dma_addr[list.num_segs] =
 				otx2_tso_frag_dma_addr(sq, skb,
 						       tso.next_frag_idx - 1,
-						       (u64)tso.data, hdr_len,
+						       (uintptr_t)tso.data, hdr_len,
 						       first_sqe);
 			list.num_segs++;
 			pkt_len += size;
@@ -998,7 +998,7 @@ static void otx2_sq_append_tso(struct otx2_nic *pfvf, struct otx2_snd_queue *sq,
 		if (!tcp_data) {
 			sqe_hdr->pnc = 1;
 			sqe_hdr->sqe_id = first_sqe;
-			sq->sg[first_sqe].skb = (u64)skb;
+			sq->sg[first_sqe].skb = (uintptr_t)skb;
 		} else {
 			sqe_hdr->pnc = 0;
 		}
@@ -1433,7 +1433,7 @@ void otx2_xdp_sqe_add_sg(struct otx2_snd_queue *sq, struct xdp_frame *xdpf,
 	sq->sg[sq->head].size[0] = len;
 	sq->sg[sq->head].num_segs = 1;
 	sq->sg[sq->head].flags = flags;
-	sq->sg[sq->head].skb = (u64)xdpf;
+	sq->sg[sq->head].skb = (uintptr_t)xdpf;
 }
 
 int otx2_read_free_sqe(struct otx2_nic *pfvf, u16 qidx)

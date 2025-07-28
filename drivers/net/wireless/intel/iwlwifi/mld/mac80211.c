@@ -750,7 +750,7 @@ iwl_mld_mac80211_prepare_multicast(struct ieee80211_hw *hw,
 	}
 
 out:
-	return (u64)(unsigned long)cmd;
+	return (u64)(uintptr_t)cmd;
 }
 
 static

@@ -228,7 +228,7 @@ static ssize_t b43legacy_debugfs_read(struct file *file, char __user *userbuf,
 		} else
 			ret = dfops->read(dev, buf, bufsize);
 		if (ret <= 0) {
-			free_pages((unsigned long)buf, buforder);
+			free_pages((uintptr_t)buf, buforder);
 			err = ret;
 			goto out_unlock;
 		}
@@ -240,7 +240,7 @@ static ssize_t b43legacy_debugfs_read(struct file *file, char __user *userbuf,
 				      dfile->buffer,
 				      dfile->data_len);
 	if (*ppos >= dfile->data_len) {
-		free_pages((unsigned long)dfile->buffer, buforder);
+		free_pages((uintptr_t)dfile->buffer, buforder);
 		dfile->buffer = NULL;
 		dfile->data_len = 0;
 	}
@@ -298,7 +298,7 @@ static ssize_t b43legacy_debugfs_write(struct file *file,
 		goto out_freepage;
 
 out_freepage:
-	free_page((unsigned long)buf);
+	free_page((uintptr_t)buf);
 out_unlock:
 	mutex_unlock(&dev->wl->mutex);
 

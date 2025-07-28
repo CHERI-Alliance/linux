@@ -59,7 +59,7 @@ struct flow_filter {
 
 static inline u32 addr_fold(void *addr)
 {
-	unsigned long a = (unsigned long)addr;
+	uintptr_t a = (uintptr_t)addr;
 
 	return (a & 0xFFFFFFFF) ^ (BITS_PER_LONG > 32 ? a >> 32 : 0);
 }

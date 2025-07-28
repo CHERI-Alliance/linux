@@ -270,7 +270,7 @@ static inline void __user *u64_to_uptr(u64 value)
 
 static inline u64 uptr_to_u64(void __user *ptr)
 {
-	return (u64)(unsigned long)ptr;
+	return (u64)(user_uintptr_t)ptr;
 }
 #endif /* CONFIG_COMPAT */
 

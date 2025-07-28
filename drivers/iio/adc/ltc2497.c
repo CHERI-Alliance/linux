@@ -142,8 +142,8 @@ static const struct ltc2497_chip_info ltc2497_info[] = {
 };
 
 static const struct i2c_device_id ltc2497_id[] = {
-	{ "ltc2497", (kernel_ulong_t)&ltc2497_info[TYPE_LTC2497] },
-	{ "ltc2499", (kernel_ulong_t)&ltc2497_info[TYPE_LTC2499] },
+	{ "ltc2497", (uintptr_t)&ltc2497_info[TYPE_LTC2497] },
+	{ "ltc2499", (uintptr_t)&ltc2497_info[TYPE_LTC2499] },
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, ltc2497_id);

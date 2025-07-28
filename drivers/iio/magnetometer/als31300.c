@@ -446,15 +446,15 @@ static const struct als31300_variant_info al31300_variant_2000 = {
 static const struct i2c_device_id als31300_id[] = {
 	{
 		.name = "als31300-500",
-		.driver_data = (kernel_ulong_t)&al31300_variant_500,
+		.driver_data = (uintptr_t)&al31300_variant_500,
 	},
 	{
 		.name = "als31300-1000",
-		.driver_data = (kernel_ulong_t)&al31300_variant_1000,
+		.driver_data = (uintptr_t)&al31300_variant_1000,
 	},
 	{
 		.name = "als31300-2000",
-		.driver_data = (kernel_ulong_t)&al31300_variant_2000,
+		.driver_data = (uintptr_t)&al31300_variant_2000,
 	},
 	{ }
 };

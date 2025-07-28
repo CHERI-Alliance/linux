@@ -220,7 +220,7 @@ static void end_report(unsigned long *flags, const void *addr, bool is_write)
 {
 	if (addr)
 		trace_error_report_end(ERROR_DETECTOR_KASAN,
-				       (unsigned long)addr);
+				       (uintptr_t)addr);
 	pr_err("==================================================================\n");
 	raw_spin_unlock_irqrestore(&report_lock, *flags);
 	if (!test_bit(KASAN_BIT_MULTI_SHOT, &kasan_flags))
@@ -292,8 +292,8 @@ static inline struct page *addr_to_page(const void *addr)
 
 static void describe_object_addr(const void *addr, struct kasan_report_info *info)
 {
-	unsigned long access_addr = (unsigned long)addr;
-	unsigned long object_addr = (unsigned long)info->object;
+	uintptr_t access_addr = (uintptr_t)addr;
+	uintptr_t object_addr = (uintptr_t)info->object;
 	const char *rel_type, *region_state = "";
 	int rel_bytes;
 
@@ -356,7 +356,7 @@ static void describe_object(const void *addr, struct kasan_report_info *info)
 
 static inline bool kernel_or_module_addr(const void *addr)
 {
-	if (is_kernel((unsigned long)addr))
+	if (is_kernel((uintptr_t)addr))
 		return true;
 	if (is_module_address((unsigned long)addr))
 		return true;
@@ -438,7 +438,7 @@ static void print_memory_metadata(const void *addr)
 	int i;
 	void *row;
 
-	row = (void *)round_down((unsigned long)addr, META_MEM_BYTES_PER_ROW)
+	row = (void *)round_down((uintptr_t)addr, META_MEM_BYTES_PER_ROW)
 			- META_ROWS_AROUND_ADDR * META_MEM_BYTES_PER_ROW;
 
 	pr_err("Memory state around the buggy address:\n");
@@ -648,7 +648,7 @@ void kasan_non_canonical_hook(unsigned long addr)
 	if (addr < KASAN_SHADOW_OFFSET)
 		return;
 
-	orig_addr = (unsigned long)kasan_shadow_to_mem((void *)addr);
+	orig_addr = (uintptr_t)kasan_shadow_to_mem((void *)addr);
 
 	/*
 	 * For faults near the shadow address for NULL, we can be fairly certain

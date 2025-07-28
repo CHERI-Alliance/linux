@@ -232,11 +232,11 @@ MODULE_DEVICE_TABLE(of, mchp23k256_of_table);
 static const struct spi_device_id mchp23k256_spi_ids[] = {
 	{
 		.name = "mchp23k256",
-		.driver_data = (kernel_ulong_t)&mchp23k256_caps,
+		.driver_data = (uintptr_t)&mchp23k256_caps,
 	},
 	{
 		.name = "mchp23lcv1024",
-		.driver_data = (kernel_ulong_t)&mchp23lcv1024_caps,
+		.driver_data = (uintptr_t)&mchp23lcv1024_caps,
 	},
 	{}
 };

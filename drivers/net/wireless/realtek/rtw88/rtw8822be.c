@@ -10,7 +10,7 @@
 static const struct pci_device_id rtw_8822be_id_table[] = {
 	{
 		PCI_DEVICE(PCI_VENDOR_ID_REALTEK, 0xB822),
-		.driver_data = (kernel_ulong_t)&rtw8822b_hw_spec
+		.driver_data = (uintptr_t)&rtw8822b_hw_spec
 	},
 	{}
 };

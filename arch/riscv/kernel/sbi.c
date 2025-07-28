@@ -107,7 +107,7 @@ static void __sbi_send_ipi_v01(unsigned int cpu)
 {
 	unsigned long hart_mask =
 		__sbi_v01_cpumask_to_hartmask(cpumask_of(cpu));
-	sbi_ecall(SBI_EXT_0_1_SEND_IPI, 0, (unsigned long)(&hart_mask),
+	sbi_ecall(SBI_EXT_0_1_SEND_IPI, 0, (uintptr_t)(&hart_mask),
 		  0, 0, 0, 0, 0);
 }
 
@@ -126,16 +126,16 @@ static int __sbi_rfence_v01(int fid, const struct cpumask *cpu_mask,
 	switch (fid) {
 	case SBI_EXT_RFENCE_REMOTE_FENCE_I:
 		sbi_ecall(SBI_EXT_0_1_REMOTE_FENCE_I, 0,
-			  (unsigned long)&hart_mask, 0, 0, 0, 0, 0);
+			  (uintptr_t)&hart_mask, 0, 0, 0, 0, 0);
 		break;
 	case SBI_EXT_RFENCE_REMOTE_SFENCE_VMA:
 		sbi_ecall(SBI_EXT_0_1_REMOTE_SFENCE_VMA, 0,
-			  (unsigned long)&hart_mask, start, size,
+			  (uintptr_t)&hart_mask, start, size,
 			  0, 0, 0);
 		break;
 	case SBI_EXT_RFENCE_REMOTE_SFENCE_VMA_ASID:
 		sbi_ecall(SBI_EXT_0_1_REMOTE_SFENCE_VMA_ASID, 0,
-			  (unsigned long)&hart_mask, start, size,
+			  (uintptr_t)&hart_mask, start, size,
 			  arg4, 0, 0);
 		break;
 	default:

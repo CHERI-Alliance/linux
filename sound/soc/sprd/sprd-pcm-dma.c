@@ -260,7 +260,7 @@ static int sprd_pcm_hw_params(struct snd_soc_component *component,
 		 * Configure the link-list address for the DMA engine link-list
 		 * mode.
 		 */
-		link.virt_addr = (unsigned long)data->virt;
+		link.virt_addr = (uintptr_t)data->virt;
 		link.phy_addr = data->phys;
 
 		ret = dmaengine_slave_config(chan, &config);

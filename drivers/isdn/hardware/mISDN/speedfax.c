@@ -482,11 +482,11 @@ sfax_remove_pci(struct pci_dev *pdev)
 static struct pci_device_id sfaxpci_ids[] = {
 	{ PCI_VENDOR_ID_TIGERJET, PCI_DEVICE_ID_TIGERJET_100,
 	  PCI_SUBVENDOR_SPEEDFAX_PYRAMID, PCI_SUB_ID_SEDLBAUER,
-	  0, 0, (unsigned long) "Pyramid Speedfax + PCI"
+	  0, 0, (uintptr_t) "Pyramid Speedfax + PCI"
 	},
 	{ PCI_VENDOR_ID_TIGERJET, PCI_DEVICE_ID_TIGERJET_100,
 	  PCI_SUBVENDOR_SPEEDFAX_PCI, PCI_SUB_ID_SEDLBAUER,
-	  0, 0, (unsigned long) "Sedlbauer Speedfax + PCI"
+	  0, 0, (uintptr_t) "Sedlbauer Speedfax + PCI"
 	},
 	{ }
 };

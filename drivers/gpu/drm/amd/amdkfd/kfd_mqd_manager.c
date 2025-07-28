@@ -79,10 +79,10 @@ struct kfd_mem_obj *allocate_sdma_mqd(struct kfd_node *dev,
 	offset += dev->dqm->mqd_mgrs[KFD_MQD_TYPE_HIQ]->mqd_size *
 		  NUM_XCC(dev->xcc_mask);
 
-	mqd_mem_obj->gtt_mem = (void *)((uint64_t)dev->dqm->hiq_sdma_mqd.gtt_mem
+	mqd_mem_obj->gtt_mem = (void *)((uintptr_t)dev->dqm->hiq_sdma_mqd.gtt_mem
 				+ offset);
 	mqd_mem_obj->gpu_addr = dev->dqm->hiq_sdma_mqd.gpu_addr + offset;
-	mqd_mem_obj->cpu_ptr = (uint32_t *)((uint64_t)
+	mqd_mem_obj->cpu_ptr = (uint32_t *)((uintptr_t)
 				dev->dqm->hiq_sdma_mqd.cpu_ptr + offset);
 
 	return mqd_mem_obj;

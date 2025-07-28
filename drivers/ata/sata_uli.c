@@ -177,7 +177,7 @@ static int uli_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 		ioaddr->cmd_addr = iomap[0] + 8;
 		ioaddr->altstatus_addr =
 		ioaddr->ctl_addr = (void __iomem *)
-			((unsigned long)iomap[1] | ATA_PCI_CTL_OFS) + 4;
+			((uintptr_t)iomap[1] | ATA_PCI_CTL_OFS) + 4;
 		ioaddr->bmdma_addr = iomap[4] + 16;
 		hpriv->scr_cfg_addr[2] = ULI5287_BASE + ULI5287_OFFS*4;
 		ata_sff_std_ports(ioaddr);
@@ -192,7 +192,7 @@ static int uli_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 		ioaddr->cmd_addr = iomap[2] + 8;
 		ioaddr->altstatus_addr =
 		ioaddr->ctl_addr = (void __iomem *)
-			((unsigned long)iomap[3] | ATA_PCI_CTL_OFS) + 4;
+			((uintptr_t)iomap[3] | ATA_PCI_CTL_OFS) + 4;
 		ioaddr->bmdma_addr = iomap[4] + 24;
 		hpriv->scr_cfg_addr[3] = ULI5287_BASE + ULI5287_OFFS*5;
 		ata_sff_std_ports(ioaddr);

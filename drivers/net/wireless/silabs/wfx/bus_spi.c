@@ -288,10 +288,10 @@ static void wfx_spi_remove(struct spi_device *func)
  * stripped.
  */
 static const struct spi_device_id wfx_spi_id[] = {
-	{ "wf200",    (kernel_ulong_t)&pdata_wf200 },
-	{ "brd4001a", (kernel_ulong_t)&pdata_brd4001a },
-	{ "brd8022a", (kernel_ulong_t)&pdata_brd8022a },
-	{ "brd8023a", (kernel_ulong_t)&pdata_brd8023a },
+	{ "wf200",    (uintptr_t)&pdata_wf200 },
+	{ "brd4001a", (uintptr_t)&pdata_brd4001a },
+	{ "brd8022a", (uintptr_t)&pdata_brd8022a },
+	{ "brd8023a", (uintptr_t)&pdata_brd8023a },
 	{ },
 };
 MODULE_DEVICE_TABLE(spi, wfx_spi_id);

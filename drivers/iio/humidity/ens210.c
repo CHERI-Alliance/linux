@@ -314,12 +314,12 @@ static const struct of_device_id ens210_of_match[] = {
 MODULE_DEVICE_TABLE(of, ens210_of_match);
 
 static const struct i2c_device_id ens210_id_table[] = {
-	{ "ens210", (kernel_ulong_t)&ens210_chip_info_data },
-	{ "ens210a", (kernel_ulong_t)&ens210a_chip_info_data },
-	{ "ens211", (kernel_ulong_t)&ens211_chip_info_data },
-	{ "ens212", (kernel_ulong_t)&ens212_chip_info_data },
-	{ "ens213a", (kernel_ulong_t)&ens213a_chip_info_data },
-	{ "ens215", (kernel_ulong_t)&ens215_chip_info_data },
+	{ "ens210", (uintptr_t)&ens210_chip_info_data },
+	{ "ens210a", (uintptr_t)&ens210a_chip_info_data },
+	{ "ens211", (uintptr_t)&ens211_chip_info_data },
+	{ "ens212", (uintptr_t)&ens212_chip_info_data },
+	{ "ens213a", (uintptr_t)&ens213a_chip_info_data },
+	{ "ens215", (uintptr_t)&ens215_chip_info_data },
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, ens210_id_table);

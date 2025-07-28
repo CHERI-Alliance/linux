@@ -15,17 +15,17 @@
 
 static const struct pci_device_id mt7921_pci_device_table[] = {
 	{ PCI_DEVICE(PCI_VENDOR_ID_MEDIATEK, 0x7961),
-		.driver_data = (kernel_ulong_t)MT7921_FIRMWARE_WM },
+		.driver_data = (uintptr_t)MT7921_FIRMWARE_WM },
 	{ PCI_DEVICE(PCI_VENDOR_ID_MEDIATEK, 0x7922),
-		.driver_data = (kernel_ulong_t)MT7922_FIRMWARE_WM },
+		.driver_data = (uintptr_t)MT7922_FIRMWARE_WM },
 	{ PCI_DEVICE(PCI_VENDOR_ID_ITTIM, 0x7922),
-		.driver_data = (kernel_ulong_t)MT7922_FIRMWARE_WM },
+		.driver_data = (uintptr_t)MT7922_FIRMWARE_WM },
 	{ PCI_DEVICE(PCI_VENDOR_ID_MEDIATEK, 0x0608),
-		.driver_data = (kernel_ulong_t)MT7921_FIRMWARE_WM },
+		.driver_data = (uintptr_t)MT7921_FIRMWARE_WM },
 	{ PCI_DEVICE(PCI_VENDOR_ID_MEDIATEK, 0x0616),
-		.driver_data = (kernel_ulong_t)MT7922_FIRMWARE_WM },
+		.driver_data = (uintptr_t)MT7922_FIRMWARE_WM },
 	{ PCI_DEVICE(PCI_VENDOR_ID_MEDIATEK, 0x7920),
-		.driver_data = (kernel_ulong_t)MT7920_FIRMWARE_WM },
+		.driver_data = (uintptr_t)MT7920_FIRMWARE_WM },
 	{ },
 };
 
@@ -326,7 +326,7 @@ static int mt7921_pci_probe(struct pci_dev *pdev,
 	dev->hif_ops = &mt7921_pcie_ops;
 	dev->irq_map = &irq_map;
 	mt76_mmio_init(&dev->mt76, pcim_iomap_table(pdev)[0]);
-	tasklet_init(&mdev->irq_tasklet, mt792x_irq_tasklet, (unsigned long)dev);
+	tasklet_init(&mdev->irq_tasklet, mt792x_irq_tasklet, (uintptr_t)dev);
 
 	dev->phy.dev = dev;
 	dev->phy.mt76 = &dev->mt76.phy;

@@ -52,7 +52,7 @@ struct eisa_device {
 
 static inline int eisa_get_region_index (void *addr)
 {
-	unsigned long x = (unsigned long) addr;
+	uintptr_t x = (uintptr_t) addr;
 
 	x &= 0xc00;
 	return (x >> 12);

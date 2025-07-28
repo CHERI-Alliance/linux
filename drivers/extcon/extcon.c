@@ -494,7 +494,7 @@ int extcon_sync(struct extcon_dev *edev, unsigned int id)
 	/* Unlock early before uevent */
 	spin_unlock_irqrestore(&edev->lock, flags);
 	kobject_uevent_env(&edev->dev.kobj, KOBJ_CHANGE, envp);
-	free_page((unsigned long)prop_buf);
+	free_page((uintptr_t)prop_buf);
 
 	return 0;
 }

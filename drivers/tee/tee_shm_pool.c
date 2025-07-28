@@ -36,7 +36,7 @@ static int pool_op_gen_alloc(struct tee_shm_pool *pool, struct tee_shm *shm,
 
 static void pool_op_gen_free(struct tee_shm_pool *pool, struct tee_shm *shm)
 {
-	gen_pool_free(pool->private_data, (unsigned long)shm->kaddr,
+	gen_pool_free(pool->private_data, (uintptr_t)shm->kaddr,
 		      shm->size);
 	shm->kaddr = NULL;
 }

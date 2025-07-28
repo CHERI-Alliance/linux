@@ -1113,8 +1113,8 @@ static void qat_uclo_map_simg(struct icp_qat_fw_loader_handle *handle,
 
 	ae_mode = (struct icp_qat_simg_ae_mode *)(suof_img_hdr->css_simg);
 	suof_img_hdr->ae_mask = ae_mode->ae_mask;
-	suof_img_hdr->simg_name = (unsigned long)&ae_mode->simg_name;
-	suof_img_hdr->appmeta_data = (unsigned long)&ae_mode->appmeta_data;
+	suof_img_hdr->simg_name = (uintptr_t)&ae_mode->simg_name;
+	suof_img_hdr->appmeta_data = (uintptr_t)&ae_mode->appmeta_data;
 	suof_img_hdr->fw_type = ae_mode->fw_type;
 }
 

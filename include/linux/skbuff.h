@@ -1170,7 +1170,7 @@ static inline struct dst_entry *skb_dst(const struct sk_buff *skb)
 static inline void skb_dst_set(struct sk_buff *skb, struct dst_entry *dst)
 {
 	skb->slow_gro |= !!dst;
-	skb->_skb_refdst = (unsigned long)dst;
+	skb->_skb_refdst = (uintptr_t)dst;
 }
 
 /**
@@ -1187,7 +1187,7 @@ static inline void skb_dst_set_noref(struct sk_buff *skb, struct dst_entry *dst)
 {
 	WARN_ON(!rcu_read_lock_held() && !rcu_read_lock_bh_held());
 	skb->slow_gro |= !!dst;
-	skb->_skb_refdst = (unsigned long)dst | SKB_DST_NOREF;
+	skb->_skb_refdst = (uintptr_t)dst | SKB_DST_NOREF;
 }
 
 /**

@@ -140,7 +140,7 @@ static void page_chain_add(struct page **head,
 #endif
 
 	/* add chain to head */
-	set_page_private(chain_last, (unsigned long)*head);
+	set_page_private(chain_last, (uintptr_t)*head);
 	*head = chain_first;
 }
 
@@ -170,7 +170,7 @@ static struct page *__drbd_alloc_pages(struct drbd_device *device,
 		tmp = alloc_page(GFP_TRY);
 		if (!tmp)
 			break;
-		set_page_private(tmp, (unsigned long)page);
+		set_page_private(tmp, (uintptr_t)page);
 		page = tmp;
 	}
 

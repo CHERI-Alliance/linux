@@ -380,7 +380,7 @@ static int __kasan_populate_vmalloc(unsigned long start, unsigned long end)
 		nr_total -= nr_pages;
 	}
 
-	free_page((unsigned long)data.pages);
+	free_page((uintptr_t)data.pages);
 
 	return ret;
 }
@@ -396,8 +396,8 @@ int kasan_populate_vmalloc(unsigned long addr, unsigned long size)
 	if (!is_vmalloc_or_module_addr((void *)addr))
 		return 0;
 
-	shadow_start = (unsigned long)kasan_mem_to_shadow((void *)addr);
-	shadow_end = (unsigned long)kasan_mem_to_shadow((void *)addr + size);
+	shadow_start = (uintptr_t)kasan_mem_to_shadow((void *)addr);
+	shadow_end = (uintptr_t)kasan_mem_to_shadow((void *)addr + size);
 
 	/*
 	 * User Mode Linux maps enough shadow memory for all of virtual memory
@@ -463,7 +463,7 @@ static int kasan_depopulate_vmalloc_pte(pte_t *ptep, unsigned long addr,
 {
 	unsigned long page;
 
-	page = (unsigned long)__va(pte_pfn(ptep_get(ptep)) << PAGE_SHIFT);
+	page = (uintptr_t)__va(pte_pfn(ptep_get(ptep)) << PAGE_SHIFT);
 
 	spin_lock(&init_mm.page_table_lock);
 
@@ -591,7 +591,7 @@ void kasan_release_vmalloc(unsigned long start, unsigned long end,
 
 		if (flags & KASAN_VMALLOC_PAGE_RANGE)
 			apply_to_existing_page_range(&init_mm,
-					     (unsigned long)shadow_start,
+					     (uintptr_t)shadow_start,
 					     size, kasan_depopulate_vmalloc_pte,
 					     NULL);
 

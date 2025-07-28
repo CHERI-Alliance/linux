@@ -112,7 +112,7 @@ static bool set_cache_memory_policy_cik(struct device_queue_manager *dqm,
 		 * Additionally restrict APE1 to user-mode addresses.
 		 */
 
-		uint64_t base = (uintptr_t)alternate_aperture_base;
+		uint64_t base = (user_uintptr_t)alternate_aperture_base;
 		uint64_t limit = base + alternate_aperture_size - 1;
 
 		if (limit <= base || (base & APE1_FIXED_BITS_MASK) != 0 ||

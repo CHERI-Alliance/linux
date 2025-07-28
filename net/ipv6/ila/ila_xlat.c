@@ -516,7 +516,7 @@ int ila_xlat_nl_dump_start(struct netlink_callback *cb)
 	rhashtable_walk_enter(&ilan->xlat.rhash_table, &iter->rhiter);
 
 	iter->skip = 0;
-	cb->args[0] = (long)iter;
+	cb->args[0] = (intptr_t)iter;
 
 	return 0;
 }

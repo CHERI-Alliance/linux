@@ -260,20 +260,20 @@ static DEFINE_XARRAY(ublk_zoned_report_descs);
 static int ublk_zoned_insert_report_desc(const struct request *req,
 		struct ublk_zoned_report_desc *desc)
 {
-	return xa_insert(&ublk_zoned_report_descs, (unsigned long)req,
+	return xa_insert(&ublk_zoned_report_descs, (uintptr_t)req,
 			    desc, GFP_KERNEL);
 }
 
 static struct ublk_zoned_report_desc *ublk_zoned_erase_report_desc(
 		const struct request *req)
 {
-	return xa_erase(&ublk_zoned_report_descs, (unsigned long)req);
+	return xa_erase(&ublk_zoned_report_descs, (uintptr_t)req);
 }
 
 static struct ublk_zoned_report_desc *ublk_zoned_get_report_desc(
 		const struct request *req)
 {
-	return xa_load(&ublk_zoned_report_descs, (unsigned long)req);
+	return xa_load(&ublk_zoned_report_descs, (uintptr_t)req);
 }
 
 static int ublk_get_nr_zones(const struct ublk_device *ub)
@@ -2478,7 +2478,7 @@ static void ublk_deinit_queue(struct ublk_device *ub, int q_id)
 	}
 
 	if (ubq->io_cmd_buf)
-		free_pages((unsigned long)ubq->io_cmd_buf, get_order(size));
+		free_pages((uintptr_t)ubq->io_cmd_buf, get_order(size));
 }
 
 static int ublk_init_queue(struct ublk_device *ub, int q_id)
