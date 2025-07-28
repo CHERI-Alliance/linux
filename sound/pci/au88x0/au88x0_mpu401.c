@@ -77,7 +77,7 @@ static int snd_vortex_midi(vortex_t *vortex)
 		return temp;
 	}
 #else
-	port = (unsigned long)(vortex->mmio + VORTEX_MIDI_DATA);
+	port = (uintptr_t)(vortex->mmio + VORTEX_MIDI_DATA);
 	temp = snd_mpu401_uart_new(vortex->card, 0, MPU401_HW_AUREAL, port,
 				   MPU401_INFO_INTEGRATED | MPU401_INFO_MMIO |
 				   MPU401_INFO_IRQ_HOOK, -1, &rmidi);
@@ -88,7 +88,7 @@ static int snd_vortex_midi(vortex_t *vortex)
 		return temp;
 	}
 	mpu = rmidi->private_data;
-	mpu->cport = (unsigned long)(vortex->mmio + VORTEX_MIDI_CMD);
+	mpu->cport = (uintptr_t)(vortex->mmio + VORTEX_MIDI_CMD);
 #endif
 	/* Overwrite MIDI name */
 	snprintf(rmidi->name, sizeof(rmidi->name), "%s MIDI %d", CARD_NAME_SHORT , vortex->card->number);

@@ -1129,9 +1129,9 @@ static const struct ads1015_chip_data tla2024_data = {
 };
 
 static const struct i2c_device_id ads1015_id[] = {
-	{ "ads1015", (kernel_ulong_t)&ads1015_data },
-	{ "ads1115", (kernel_ulong_t)&ads1115_data },
-	{ "tla2024", (kernel_ulong_t)&tla2024_data },
+	{ "ads1015", (uintptr_t)&ads1015_data },
+	{ "ads1115", (uintptr_t)&ads1115_data },
+	{ "tla2024", (uintptr_t)&tla2024_data },
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, ads1015_id);

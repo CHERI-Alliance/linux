@@ -376,7 +376,7 @@ static struct tps65910_board *tps65910_parse_dt(struct i2c_client *client,
 	unsigned int prop;
 	int ret;
 
-	*chip_id  = (unsigned long)device_get_match_data(&client->dev);
+	*chip_id  = (uintptr_t)device_get_match_data(&client->dev);
 
 	board_info = devm_kzalloc(&client->dev, sizeof(*board_info),
 			GFP_KERNEL);

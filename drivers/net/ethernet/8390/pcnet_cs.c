@@ -1459,7 +1459,7 @@ static int setup_shmem_window(struct pcmcia_device *link, int start_pg,
 
     ei_status.mem = info->base + offset;
     ei_status.priv = resource_size(link->resource[3]);
-    dev->mem_start = (u_long)ei_status.mem;
+    dev->mem_start = (uintptr_t)ei_status.mem;
     dev->mem_end = dev->mem_start + resource_size(link->resource[3]);
 
     ei_status.tx_start_page = start_pg;

@@ -65,7 +65,7 @@ static inline int ulist_add_merge_ptr(struct ulist *ulist, u64 val, void *aux,
 	*old_aux = (void *)((uintptr_t)old64);
 	return ret;
 #else
-	return ulist_add_merge(ulist, val, (u64)aux, (u64 *)old_aux, gfp_mask);
+	return ulist_add_merge(ulist, val, (uintptr_t)aux, (u64 *)old_aux, gfp_mask);
 #endif
 }
 

@@ -208,7 +208,7 @@ static void mon_text_event(struct mon_reader_text *rp, struct urb *urb,
 	}
 
 	ep->type = ev_type;
-	ep->id = (unsigned long) urb;
+	ep->id = (uintptr_t) urb;
 	ep->busnum = urb->dev->bus->busnum;
 	ep->devnum = urb->dev->devnum;
 	ep->epnum = usb_endpoint_num(&urb->ep->desc);
@@ -280,7 +280,7 @@ static void mon_text_error(void *data, struct urb *urb, int error)
 	}
 
 	ep->type = 'E';
-	ep->id = (unsigned long) urb;
+	ep->id = (uintptr_t) urb;
 	ep->busnum = urb->dev->bus->busnum;
 	ep->devnum = urb->dev->devnum;
 	ep->epnum = usb_endpoint_num(&urb->ep->desc);

@@ -348,7 +348,7 @@ int nitrox_register_interrupts(struct nitrox_device *ndev)
 		irq_set_affinity_hint(vec, get_cpu_mask(cpu));
 
 		tasklet_init(&qvec->resp_tasklet, pkt_slc_resp_tasklet,
-			     (unsigned long)qvec);
+			     (uintptr_t)qvec);
 		qvec->valid = true;
 	}
 
@@ -369,7 +369,7 @@ int nitrox_register_interrupts(struct nitrox_device *ndev)
 	irq_set_affinity_hint(vec, get_cpu_mask(cpu));
 
 	tasklet_init(&qvec->resp_tasklet, nps_core_int_tasklet,
-		     (unsigned long)qvec);
+		     (uintptr_t)qvec);
 	qvec->valid = true;
 
 	return 0;
@@ -447,7 +447,7 @@ int nitrox_sriov_register_interupts(struct nitrox_device *ndev)
 	irq_set_affinity_hint(vec, get_cpu_mask(cpu));
 
 	tasklet_init(&qvec->resp_tasklet, nps_core_int_tasklet,
-		     (unsigned long)qvec);
+		     (uintptr_t)qvec);
 	qvec->valid = true;
 
 	return 0;

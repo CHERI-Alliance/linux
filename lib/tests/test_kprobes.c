@@ -76,14 +76,14 @@ static noinline u32 kprobe_target2(u32 value)
 static noinline unsigned long kprobe_stacktrace_internal_target(void)
 {
 	if (!target_return_address[0])
-		target_return_address[0] = (unsigned long)__builtin_return_address(0);
+		target_return_address[0] = (uintptr_t)__builtin_return_address(0);
 	return target_return_address[0];
 }
 
 static noinline unsigned long kprobe_stacktrace_target(void)
 {
 	if (!target_return_address[1])
-		target_return_address[1] = (unsigned long)__builtin_return_address(0);
+		target_return_address[1] = (uintptr_t)__builtin_return_address(0);
 
 	if (internal_target)
 		internal_target();
@@ -97,7 +97,7 @@ static noinline unsigned long kprobe_stacktrace_driver(void)
 		stacktrace_target();
 
 	/* This is for preventing inlining the function */
-	return (unsigned long)__builtin_return_address(0);
+	return (uintptr_t)__builtin_return_address(0);
 }
 
 static int kp_pre_handler2(struct kprobe *p, struct pt_regs *regs)

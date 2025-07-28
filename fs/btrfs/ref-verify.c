@@ -442,8 +442,8 @@ static int process_extent_item(struct btrfs_fs_info *fs_info,
 		iref = (struct btrfs_extent_inline_ref *)(ei + 1);
 	}
 
-	ptr = (unsigned long)iref;
-	end = (unsigned long)ei + item_size;
+	ptr = (uintptr_t)iref;
+	end = (uintptr_t)ei + item_size;
 	while (ptr < end) {
 		iref = (struct btrfs_extent_inline_ref *)ptr;
 		type = btrfs_extent_inline_ref_type(leaf, iref);

@@ -126,7 +126,7 @@ fail_pfnvec_create:
 static void vb2_vmalloc_put_userptr(void *buf_priv)
 {
 	struct vb2_vmalloc_buf *buf = buf_priv;
-	unsigned long vaddr = (unsigned long)buf->vaddr & PAGE_MASK;
+	unsigned long vaddr = (uintptr_t)buf->vaddr & PAGE_MASK;
 	unsigned int i;
 	struct page **pages;
 	unsigned int n_pages;

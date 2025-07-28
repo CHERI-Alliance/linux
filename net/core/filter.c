@@ -1889,7 +1889,7 @@ static const struct bpf_func_proto bpf_skb_pull_data_proto = {
 
 BPF_CALL_1(bpf_sk_fullsock, struct sock *, sk)
 {
-	return sk_fullsock(sk) ? (unsigned long)sk : (unsigned long)NULL;
+	return sk_fullsock(sk) ? (uintptr_t)sk : (unsigned long)NULL;
 }
 
 static const struct bpf_func_proto bpf_sk_fullsock_proto = {
@@ -6942,7 +6942,7 @@ bpf_sk_lookup(struct sk_buff *skb, struct bpf_sock_tuple *tuple, u32 len,
 BPF_CALL_5(bpf_skc_lookup_tcp, struct sk_buff *, skb,
 	   struct bpf_sock_tuple *, tuple, u32, len, u64, netns_id, u64, flags)
 {
-	return (unsigned long)bpf_skc_lookup(skb, tuple, len, IPPROTO_TCP,
+	return (uintptr_t)bpf_skc_lookup(skb, tuple, len, IPPROTO_TCP,
 					     netns_id, flags);
 }
 
@@ -6961,7 +6961,7 @@ static const struct bpf_func_proto bpf_skc_lookup_tcp_proto = {
 BPF_CALL_5(bpf_sk_lookup_tcp, struct sk_buff *, skb,
 	   struct bpf_sock_tuple *, tuple, u32, len, u64, netns_id, u64, flags)
 {
-	return (unsigned long)bpf_sk_lookup(skb, tuple, len, IPPROTO_TCP,
+	return (uintptr_t)bpf_sk_lookup(skb, tuple, len, IPPROTO_TCP,
 					    netns_id, flags);
 }
 
@@ -6980,7 +6980,7 @@ static const struct bpf_func_proto bpf_sk_lookup_tcp_proto = {
 BPF_CALL_5(bpf_sk_lookup_udp, struct sk_buff *, skb,
 	   struct bpf_sock_tuple *, tuple, u32, len, u64, netns_id, u64, flags)
 {
-	return (unsigned long)bpf_sk_lookup(skb, tuple, len, IPPROTO_UDP,
+	return (uintptr_t)bpf_sk_lookup(skb, tuple, len, IPPROTO_UDP,
 					    netns_id, flags);
 }
 
@@ -7003,7 +7003,7 @@ BPF_CALL_5(bpf_tc_skc_lookup_tcp, struct sk_buff *, skb,
 	int ifindex = dev->ifindex, sdif = dev_sdif(dev);
 	struct net *caller_net = dev_net(dev);
 
-	return (unsigned long)__bpf_skc_lookup(skb, tuple, len, caller_net,
+	return (uintptr_t)__bpf_skc_lookup(skb, tuple, len, caller_net,
 					       ifindex, IPPROTO_TCP, netns_id,
 					       flags, sdif);
 }
@@ -7027,7 +7027,7 @@ BPF_CALL_5(bpf_tc_sk_lookup_tcp, struct sk_buff *, skb,
 	int ifindex = dev->ifindex, sdif = dev_sdif(dev);
 	struct net *caller_net = dev_net(dev);
 
-	return (unsigned long)__bpf_sk_lookup(skb, tuple, len, caller_net,
+	return (uintptr_t)__bpf_sk_lookup(skb, tuple, len, caller_net,
 					      ifindex, IPPROTO_TCP, netns_id,
 					      flags, sdif);
 }
@@ -7051,7 +7051,7 @@ BPF_CALL_5(bpf_tc_sk_lookup_udp, struct sk_buff *, skb,
 	int ifindex = dev->ifindex, sdif = dev_sdif(dev);
 	struct net *caller_net = dev_net(dev);
 
-	return (unsigned long)__bpf_sk_lookup(skb, tuple, len, caller_net,
+	return (uintptr_t)__bpf_sk_lookup(skb, tuple, len, caller_net,
 					      ifindex, IPPROTO_UDP, netns_id,
 					      flags, sdif);
 }
@@ -7089,7 +7089,7 @@ BPF_CALL_5(bpf_xdp_sk_lookup_udp, struct xdp_buff *, ctx,
 	int ifindex = dev->ifindex, sdif = dev_sdif(dev);
 	struct net *caller_net = dev_net(dev);
 
-	return (unsigned long)__bpf_sk_lookup(NULL, tuple, len, caller_net,
+	return (uintptr_t)__bpf_sk_lookup(NULL, tuple, len, caller_net,
 					      ifindex, IPPROTO_UDP, netns_id,
 					      flags, sdif);
 }
@@ -7113,7 +7113,7 @@ BPF_CALL_5(bpf_xdp_skc_lookup_tcp, struct xdp_buff *, ctx,
 	int ifindex = dev->ifindex, sdif = dev_sdif(dev);
 	struct net *caller_net = dev_net(dev);
 
-	return (unsigned long)__bpf_skc_lookup(NULL, tuple, len, caller_net,
+	return (uintptr_t)__bpf_skc_lookup(NULL, tuple, len, caller_net,
 					       ifindex, IPPROTO_TCP, netns_id,
 					       flags, sdif);
 }
@@ -7137,7 +7137,7 @@ BPF_CALL_5(bpf_xdp_sk_lookup_tcp, struct xdp_buff *, ctx,
 	int ifindex = dev->ifindex, sdif = dev_sdif(dev);
 	struct net *caller_net = dev_net(dev);
 
-	return (unsigned long)__bpf_sk_lookup(NULL, tuple, len, caller_net,
+	return (uintptr_t)__bpf_sk_lookup(NULL, tuple, len, caller_net,
 					      ifindex, IPPROTO_TCP, netns_id,
 					      flags, sdif);
 }
@@ -7157,7 +7157,7 @@ static const struct bpf_func_proto bpf_xdp_sk_lookup_tcp_proto = {
 BPF_CALL_5(bpf_sock_addr_skc_lookup_tcp, struct bpf_sock_addr_kern *, ctx,
 	   struct bpf_sock_tuple *, tuple, u32, len, u64, netns_id, u64, flags)
 {
-	return (unsigned long)__bpf_skc_lookup(NULL, tuple, len,
+	return (uintptr_t)__bpf_skc_lookup(NULL, tuple, len,
 					       sock_net(ctx->sk), 0,
 					       IPPROTO_TCP, netns_id, flags,
 					       -1);
@@ -7177,7 +7177,7 @@ static const struct bpf_func_proto bpf_sock_addr_skc_lookup_tcp_proto = {
 BPF_CALL_5(bpf_sock_addr_sk_lookup_tcp, struct bpf_sock_addr_kern *, ctx,
 	   struct bpf_sock_tuple *, tuple, u32, len, u64, netns_id, u64, flags)
 {
-	return (unsigned long)__bpf_sk_lookup(NULL, tuple, len,
+	return (uintptr_t)__bpf_sk_lookup(NULL, tuple, len,
 					      sock_net(ctx->sk), 0, IPPROTO_TCP,
 					      netns_id, flags, -1);
 }
@@ -7196,7 +7196,7 @@ static const struct bpf_func_proto bpf_sock_addr_sk_lookup_tcp_proto = {
 BPF_CALL_5(bpf_sock_addr_sk_lookup_udp, struct bpf_sock_addr_kern *, ctx,
 	   struct bpf_sock_tuple *, tuple, u32, len, u64, netns_id, u64, flags)
 {
-	return (unsigned long)__bpf_sk_lookup(NULL, tuple, len,
+	return (uintptr_t)__bpf_sk_lookup(NULL, tuple, len,
 					      sock_net(ctx->sk), 0, IPPROTO_UDP,
 					      netns_id, flags, -1);
 }
@@ -7357,7 +7357,7 @@ u32 bpf_tcp_sock_convert_ctx_access(enum bpf_access_type type,
 BPF_CALL_1(bpf_tcp_sock, struct sock *, sk)
 {
 	if (sk_fullsock(sk) && sk->sk_protocol == IPPROTO_TCP)
-		return (unsigned long)sk;
+		return (uintptr_t)sk;
 
 	return (unsigned long)NULL;
 }
@@ -7374,7 +7374,7 @@ BPF_CALL_1(bpf_get_listener_sock, struct sock *, sk)
 	sk = sk_to_full_sk(sk);
 
 	if (sk && sk->sk_state == TCP_LISTEN && sock_flag(sk, SOCK_RCU_FREE))
-		return (unsigned long)sk;
+		return (uintptr_t)sk;
 
 	return (unsigned long)NULL;
 }
@@ -11813,7 +11813,7 @@ BPF_CALL_1(bpf_skc_to_tcp6_sock, struct sock *, sk)
 	BTF_TYPE_EMIT(struct tcp6_sock);
 	if (sk && sk_fullsock(sk) && sk->sk_protocol == IPPROTO_TCP &&
 	    sk->sk_family == AF_INET6)
-		return (unsigned long)sk;
+		return (uintptr_t)sk;
 
 	return (unsigned long)NULL;
 }
@@ -11829,7 +11829,7 @@ const struct bpf_func_proto bpf_skc_to_tcp6_sock_proto = {
 BPF_CALL_1(bpf_skc_to_tcp_sock, struct sock *, sk)
 {
 	if (sk && sk_fullsock(sk) && sk->sk_protocol == IPPROTO_TCP)
-		return (unsigned long)sk;
+		return (uintptr_t)sk;
 
 	return (unsigned long)NULL;
 }
@@ -11852,12 +11852,12 @@ BPF_CALL_1(bpf_skc_to_tcp_timewait_sock, struct sock *, sk)
 
 #ifdef CONFIG_INET
 	if (sk && sk->sk_prot == &tcp_prot && sk->sk_state == TCP_TIME_WAIT)
-		return (unsigned long)sk;
+		return (uintptr_t)sk;
 #endif
 
 #if IS_BUILTIN(CONFIG_IPV6)
 	if (sk && sk->sk_prot == &tcpv6_prot && sk->sk_state == TCP_TIME_WAIT)
-		return (unsigned long)sk;
+		return (uintptr_t)sk;
 #endif
 
 	return (unsigned long)NULL;
@@ -11875,12 +11875,12 @@ BPF_CALL_1(bpf_skc_to_tcp_request_sock, struct sock *, sk)
 {
 #ifdef CONFIG_INET
 	if (sk && sk->sk_prot == &tcp_prot && sk->sk_state == TCP_NEW_SYN_RECV)
-		return (unsigned long)sk;
+		return (uintptr_t)sk;
 #endif
 
 #if IS_BUILTIN(CONFIG_IPV6)
 	if (sk && sk->sk_prot == &tcpv6_prot && sk->sk_state == TCP_NEW_SYN_RECV)
-		return (unsigned long)sk;
+		return (uintptr_t)sk;
 #endif
 
 	return (unsigned long)NULL;
@@ -11902,7 +11902,7 @@ BPF_CALL_1(bpf_skc_to_udp6_sock, struct sock *, sk)
 	BTF_TYPE_EMIT(struct udp6_sock);
 	if (sk && sk_fullsock(sk) && sk->sk_protocol == IPPROTO_UDP &&
 	    sk->sk_type == SOCK_DGRAM && sk->sk_family == AF_INET6)
-		return (unsigned long)sk;
+		return (uintptr_t)sk;
 
 	return (unsigned long)NULL;
 }
@@ -11922,7 +11922,7 @@ BPF_CALL_1(bpf_skc_to_unix_sock, struct sock *, sk)
 	 */
 	BTF_TYPE_EMIT(struct unix_sock);
 	if (sk && sk_fullsock(sk) && sk->sk_family == AF_UNIX)
-		return (unsigned long)sk;
+		return (uintptr_t)sk;
 
 	return (unsigned long)NULL;
 }
@@ -11938,7 +11938,7 @@ const struct bpf_func_proto bpf_skc_to_unix_sock_proto = {
 BPF_CALL_1(bpf_skc_to_mptcp_sock, struct sock *, sk)
 {
 	BTF_TYPE_EMIT(struct mptcp_sock);
-	return (unsigned long)bpf_mptcp_sock_from_subflow(sk);
+	return (uintptr_t)bpf_mptcp_sock_from_subflow(sk);
 }
 
 const struct bpf_func_proto bpf_skc_to_mptcp_sock_proto = {
@@ -11951,7 +11951,7 @@ const struct bpf_func_proto bpf_skc_to_mptcp_sock_proto = {
 
 BPF_CALL_1(bpf_sock_from_file, struct file *, file)
 {
-	return (unsigned long)sock_from_file(file);
+	return (uintptr_t)sock_from_file(file);
 }
 
 BTF_ID_LIST(bpf_sock_from_file_btf_ids)

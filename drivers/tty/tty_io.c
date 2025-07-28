@@ -2863,7 +2863,7 @@ static int compat_tty_tiocgserial(struct tty_struct *tty,
 	err = tty->ops->get_serial(tty, &v);
 	if (!err) {
 		memcpy(&v32, &v, offsetof(struct serial_struct32, iomem_base));
-		v32.iomem_base = (unsigned long)v.iomem_base >> 32 ?
+		v32.iomem_base = (uintptr_t)v.iomem_base >> 32 ?
 			0xfffffff : ptr_to_compat(v.iomem_base);
 		v32.iomem_reg_shift = v.iomem_reg_shift;
 		v32.port_high = v.port_high;
@@ -2939,7 +2939,7 @@ static long tty_compat_ioctl(struct file *file, unsigned int cmd,
 
 	case PPPIOCGCHAN:
 	case PPPIOCGUNIT:
-		return tty_ioctl(file, cmd, (unsigned long)compat_ptr(arg));
+		return tty_ioctl(file, cmd, (user_uintptr_t)compat_ptr(arg));
 	case TIOCCONS:
 	case TIOCEXCL:
 	case TIOCNXCL:

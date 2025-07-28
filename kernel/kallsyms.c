@@ -314,11 +314,11 @@ static unsigned long get_symbol_pos(unsigned long addr,
 	/* If we found no next symbol, we use the end of the section. */
 	if (!symbol_end) {
 		if (is_kernel_inittext(addr))
-			symbol_end = (unsigned long)_einittext;
+			symbol_end = (uintptr_t)_einittext;
 		else if (IS_ENABLED(CONFIG_KALLSYMS_ALL))
-			symbol_end = (unsigned long)_end;
+			symbol_end = (uintptr_t)_end;
 		else
-			symbol_end = (unsigned long)_etext;
+			symbol_end = (uintptr_t)_etext;
 	}
 
 	if (symbolsize)

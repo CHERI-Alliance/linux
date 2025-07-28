@@ -82,7 +82,7 @@ static inline struct file *files_lookup_fd_raw(struct files_struct *files, unsig
 	 * Accessing fdt->fd[0] is ok, but needs masking of the result.
 	 */
 	needs_masking = rcu_dereference_raw(fdt->fd[fd&mask]);
-	return (struct file *)(mask & (unsigned long)needs_masking);
+	return (struct file *)(mask & (uintptr_t)needs_masking);
 }
 
 static inline struct file *files_lookup_fd_locked(struct files_struct *files, unsigned int fd)

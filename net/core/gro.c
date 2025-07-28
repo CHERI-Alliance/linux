@@ -355,7 +355,7 @@ static void gro_list_prepare(const struct list_head *head,
 			continue;
 		}
 
-		diffs = (unsigned long)p->dev ^ (unsigned long)skb->dev;
+		diffs = (uintptr_t)p->dev ^ (uintptr_t)skb->dev;
 		diffs |= p->vlan_all ^ skb->vlan_all;
 		diffs |= skb_metadata_differs(p, skb);
 		if (maclen == ETH_HLEN)

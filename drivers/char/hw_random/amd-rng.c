@@ -174,7 +174,7 @@ found:
 		goto err_iomap;
 	}
 
-	amd_rng.priv = (unsigned long)priv;
+	amd_rng.priv = (uintptr_t)priv;
 	priv->pmbase = pmbase;
 	priv->pcidev = pdev;
 

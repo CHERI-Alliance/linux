@@ -2381,7 +2381,7 @@ int ath12k_hal_srng_setup(struct ath12k_base *ab, enum hal_ring_type type,
 		if (srng_config->mac_type == ATH12K_HAL_SRNG_UMAC) {
 			if (!ab->hw_params->supports_shadow_regs)
 				srng->u.src_ring.hp_addr =
-					(u32 *)((unsigned long)ab->mem + reg_base);
+					(u32 *)((uintptr_t)ab->mem + reg_base);
 			else
 				ath12k_dbg(ab, ATH12K_DBG_HAL,
 					   "hal type %d ring_num %d reg_base 0x%x shadow 0x%lx\n",
@@ -2411,7 +2411,7 @@ int ath12k_hal_srng_setup(struct ath12k_base *ab, enum hal_ring_type type,
 		if (srng_config->mac_type == ATH12K_HAL_SRNG_UMAC) {
 			if (!ab->hw_params->supports_shadow_regs)
 				srng->u.dst_ring.tp_addr =
-					(u32 *)((unsigned long)ab->mem + reg_base +
+					(u32 *)((uintptr_t)ab->mem + reg_base +
 					(HAL_REO1_RING_TP - HAL_REO1_RING_HP));
 			else
 				ath12k_dbg(ab, ATH12K_DBG_HAL,
@@ -2462,10 +2462,10 @@ static void ath12k_hal_srng_update_hp_tp_addr(struct ath12k_base *ab,
 
 	if (srng_config->ring_dir == HAL_SRNG_DIR_DST)
 		srng->u.dst_ring.tp_addr = (u32 *)(HAL_SHADOW_REG(shadow_cfg_idx) +
-						   (unsigned long)ab->mem);
+						   (uintptr_t)ab->mem);
 	else
 		srng->u.src_ring.hp_addr = (u32 *)(HAL_SHADOW_REG(shadow_cfg_idx) +
-						   (unsigned long)ab->mem);
+						   (uintptr_t)ab->mem);
 }
 
 int ath12k_hal_srng_update_shadow_config(struct ath12k_base *ab,

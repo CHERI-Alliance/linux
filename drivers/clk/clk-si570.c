@@ -503,10 +503,10 @@ static const struct clk_si570_info clk_si590_info = {
 };
 
 static const struct i2c_device_id si570_id[] = {
-	{ "si570", (kernel_ulong_t)&clk_si570_info },
-	{ "si571", (kernel_ulong_t)&clk_si570_info },
-	{ "si598", (kernel_ulong_t)&clk_si590_info },
-	{ "si599", (kernel_ulong_t)&clk_si590_info },
+	{ "si570", (uintptr_t)&clk_si570_info },
+	{ "si571", (uintptr_t)&clk_si570_info },
+	{ "si598", (uintptr_t)&clk_si590_info },
+	{ "si599", (uintptr_t)&clk_si590_info },
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, si570_id);

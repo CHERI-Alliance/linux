@@ -173,7 +173,7 @@ static int max77686_i2c_probe(struct i2c_client *i2c)
 		return -ENOMEM;
 
 	i2c_set_clientdata(i2c, max77686);
-	max77686->type = (unsigned long)of_device_get_match_data(&i2c->dev);
+	max77686->type = (uintptr_t)of_device_get_match_data(&i2c->dev);
 	max77686->dev = &i2c->dev;
 	max77686->i2c = i2c;
 

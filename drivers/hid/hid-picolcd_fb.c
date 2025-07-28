@@ -515,7 +515,7 @@ int picolcd_init_framebuffer(struct picolcd_data *data)
 	}
 	info->flags |= FBINFO_VIRTFB;
 	info->screen_buffer = fbdata->bitmap;
-	info->fix.smem_start = (unsigned long)fbdata->bitmap;
+	info->fix.smem_start = (uintptr_t)fbdata->bitmap;
 	memset(fbdata->vbitmap, 0xff, PICOLCDFB_SIZE);
 	data->fb_info = info;
 

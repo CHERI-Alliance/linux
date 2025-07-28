@@ -1451,18 +1451,18 @@ static const struct of_device_id mcp3564_dt_ids[] = {
 MODULE_DEVICE_TABLE(of, mcp3564_dt_ids);
 
 static const struct spi_device_id mcp3564_id[] = {
-	{ "mcp3461", (kernel_ulong_t)&mcp3564_chip_infos_tbl[mcp3461] },
-	{ "mcp3462", (kernel_ulong_t)&mcp3564_chip_infos_tbl[mcp3462] },
-	{ "mcp3464", (kernel_ulong_t)&mcp3564_chip_infos_tbl[mcp3464] },
-	{ "mcp3561", (kernel_ulong_t)&mcp3564_chip_infos_tbl[mcp3561] },
-	{ "mcp3562", (kernel_ulong_t)&mcp3564_chip_infos_tbl[mcp3562] },
-	{ "mcp3564", (kernel_ulong_t)&mcp3564_chip_infos_tbl[mcp3564] },
-	{ "mcp3461r", (kernel_ulong_t)&mcp3564_chip_infos_tbl[mcp3461r] },
-	{ "mcp3462r", (kernel_ulong_t)&mcp3564_chip_infos_tbl[mcp3462r] },
-	{ "mcp3464r", (kernel_ulong_t)&mcp3564_chip_infos_tbl[mcp3464r] },
-	{ "mcp3561r", (kernel_ulong_t)&mcp3564_chip_infos_tbl[mcp3561r] },
-	{ "mcp3562r", (kernel_ulong_t)&mcp3564_chip_infos_tbl[mcp3562r] },
-	{ "mcp3564r", (kernel_ulong_t)&mcp3564_chip_infos_tbl[mcp3564r] },
+	{ "mcp3461", (uintptr_t)&mcp3564_chip_infos_tbl[mcp3461] },
+	{ "mcp3462", (uintptr_t)&mcp3564_chip_infos_tbl[mcp3462] },
+	{ "mcp3464", (uintptr_t)&mcp3564_chip_infos_tbl[mcp3464] },
+	{ "mcp3561", (uintptr_t)&mcp3564_chip_infos_tbl[mcp3561] },
+	{ "mcp3562", (uintptr_t)&mcp3564_chip_infos_tbl[mcp3562] },
+	{ "mcp3564", (uintptr_t)&mcp3564_chip_infos_tbl[mcp3564] },
+	{ "mcp3461r", (uintptr_t)&mcp3564_chip_infos_tbl[mcp3461r] },
+	{ "mcp3462r", (uintptr_t)&mcp3564_chip_infos_tbl[mcp3462r] },
+	{ "mcp3464r", (uintptr_t)&mcp3564_chip_infos_tbl[mcp3464r] },
+	{ "mcp3561r", (uintptr_t)&mcp3564_chip_infos_tbl[mcp3561r] },
+	{ "mcp3562r", (uintptr_t)&mcp3564_chip_infos_tbl[mcp3562r] },
+	{ "mcp3564r", (uintptr_t)&mcp3564_chip_infos_tbl[mcp3564r] },
 	{ }
 };
 MODULE_DEVICE_TABLE(spi, mcp3564_id);

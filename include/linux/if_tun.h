@@ -30,12 +30,12 @@ static inline bool tun_is_xdp_frame(void *ptr)
 
 static inline void *tun_xdp_to_ptr(struct xdp_frame *xdp)
 {
-	return (void *)((unsigned long)xdp | TUN_XDP_FLAG);
+	return (void *)((uintptr_t)xdp | TUN_XDP_FLAG);
 }
 
 static inline struct xdp_frame *tun_ptr_to_xdp(void *ptr)
 {
-	return (void *)((unsigned long)ptr & ~TUN_XDP_FLAG);
+	return (void *)((uintptr_t)ptr & ~TUN_XDP_FLAG);
 }
 
 void tun_ptr_free(void *ptr);

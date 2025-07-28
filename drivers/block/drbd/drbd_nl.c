@@ -3281,7 +3281,7 @@ put_result:
 	err = resource_statistics_to_skb(skb, &resource_statistics, !capable(CAP_SYS_ADMIN));
 	if (err)
 		goto out;
-	cb->args[0] = (long)resource;
+	cb->args[0] = (intptr_t)resource;
 	genlmsg_end(skb, dh);
 	err = 0;
 
@@ -3362,7 +3362,7 @@ int drbd_adm_dump_devices(struct sk_buff *skb, struct netlink_callback *cb)
 			resource = drbd_find_resource(nla_data(resource_filter));
 			if (!resource)
 				goto put_result;
-			cb->args[0] = (long)resource;
+			cb->args[0] = (intptr_t)resource;
 		}
 	}
 
@@ -3451,7 +3451,7 @@ int drbd_adm_dump_connections(struct sk_buff *skb, struct netlink_callback *cb)
 			resource = drbd_find_resource(nla_data(resource_filter));
 			if (!resource)
 				goto put_result;
-			cb->args[0] = (long)resource;
+			cb->args[0] = (intptr_t)resource;
 			cb->args[1] = SINGLE_RESOURCE;
 		}
 	}
@@ -3460,7 +3460,7 @@ int drbd_adm_dump_connections(struct sk_buff *skb, struct netlink_callback *cb)
 			goto out;
 		resource = list_first_entry(&drbd_resources, struct drbd_resource, resources);
 		kref_get(&resource->kref);
-		cb->args[0] = (long)resource;
+		cb->args[0] = (intptr_t)resource;
 		cb->args[1] = ITERATE_RESOURCES;
 	}
 
@@ -3501,7 +3501,7 @@ found_resource:
 		kref_put(&resource->kref, drbd_destroy_resource);
 		resource = next_resource;
 		kref_get(&resource->kref);
-		cb->args[0] = (long)resource;
+		cb->args[0] = (intptr_t)resource;
 		cb->args[2] = 0;
 		goto next_resource;
 	}
@@ -3536,7 +3536,7 @@ put_result:
 		err = connection_statistics_to_skb(skb, &connection_statistics, !capable(CAP_SYS_ADMIN));
 		if (err)
 			goto out;
-		cb->args[2] = (long)connection;
+		cb->args[2] = (intptr_t)connection;
 	}
 	genlmsg_end(skb, dh);
 	err = 0;
@@ -3613,7 +3613,7 @@ int drbd_adm_dump_peer_devices(struct sk_buff *skb, struct netlink_callback *cb)
 			if (!resource)
 				goto put_result;
 		}
-		cb->args[0] = (long)resource;
+		cb->args[0] = (intptr_t)resource;
 	}
 
 	rcu_read_lock();
@@ -3675,7 +3675,7 @@ put_result:
 		if (err)
 			goto out;
 		cb->args[1] = minor;
-		cb->args[2] = (long)peer_device;
+		cb->args[2] = (intptr_t)peer_device;
 	}
 	genlmsg_end(skb, dh);
 	err = 0;
@@ -3956,7 +3956,7 @@ done:
 out:
 	rcu_read_unlock();
 	/* where to start the next iteration */
-	cb->args[0] = (long)pos;
+	cb->args[0] = (intptr_t)pos;
 	cb->args[1] = (pos == resource) ? volume + 1 : 0;
 
 	/* No more resources/volumes/minors found results in an empty skb.
@@ -4018,9 +4018,9 @@ int drbd_adm_get_status_all(struct sk_buff *skb, struct netlink_callback *cb)
 
 	/* prime iterators, and set "filter" mode mark:
 	 * only dump this connection. */
-	cb->args[0] = (long)resource;
+	cb->args[0] = (intptr_t)resource;
 	/* cb->args[1] = 0; passed in this way. */
-	cb->args[2] = (long)resource;
+	cb->args[2] = (intptr_t)resource;
 
 dump:
 	return get_one_status(skb, cb);
@@ -4894,7 +4894,7 @@ next:
 		struct drbd_state_change *next_state_change =
 			list_entry(state_change->list.next,
 				   struct drbd_state_change, list);
-		cb->args[0] = (long)next_state_change;
+		cb->args[0] = (intptr_t)next_state_change;
 		cb->args[3] = notifications_for_state_change(next_state_change);
 		cb->args[4] = 0;
 	}
@@ -4945,7 +4945,7 @@ int drbd_adm_get_initial_state(struct sk_buff *skb, struct netlink_callback *cb)
 	if (!list_empty(&head)) {
 		struct drbd_state_change *state_change =
 			list_entry(head.next, struct drbd_state_change, list);
-		cb->args[0] = (long)state_change;
+		cb->args[0] = (intptr_t)state_change;
 		cb->args[3] = notifications_for_state_change(state_change);
 		list_del(&head);  /* detach list from head */
 	}

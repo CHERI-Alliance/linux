@@ -124,7 +124,7 @@ int snd_ice1712_akm4xxx_init(struct snd_akm4xxx *ak, const struct snd_akm4xxx *t
 	}
 	*ak = *temp;
 	ak->card = ice->card;
-        ak->private_value[0] = (unsigned long)priv;
+        ak->private_value[0] = (uintptr_t)priv;
 	ak->private_data[0] = ice;
 	if (ak->ops.lock == NULL)
 		ak->ops.lock = snd_ice1712_akm4xxx_lock;

@@ -162,7 +162,7 @@ static int aspeed_hace_probe(struct platform_device *pdev)
 		goto err_engine_hash_start;
 
 	tasklet_init(&hash_engine->done_task, aspeed_hace_hash_done_task,
-		     (unsigned long)hace_dev);
+		     (uintptr_t)hace_dev);
 
 	/* Initialize crypto hardware engine structure for crypto */
 	hace_dev->crypt_engine_crypto = crypto_engine_alloc_init(hace_dev->dev,
@@ -177,7 +177,7 @@ static int aspeed_hace_probe(struct platform_device *pdev)
 		goto err_engine_crypto_start;
 
 	tasklet_init(&crypto_engine->done_task, aspeed_hace_crypto_done_task,
-		     (unsigned long)hace_dev);
+		     (uintptr_t)hace_dev);
 
 	/* Allocate DMA buffer for hash engine input used */
 	hash_engine->ahash_src_addr =

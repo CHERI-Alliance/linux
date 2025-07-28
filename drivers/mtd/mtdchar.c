@@ -604,8 +604,8 @@ mtdchar_write_ioctl(struct mtd_info *mtd, struct mtd_write_req __user *argp)
 	if (copy_from_user_with_ptr(&req, argp, sizeof(req)))
 		return -EFAULT;
 
-	usr_data = (const void __user *)(uintptr_t)req.usr_data;
-	usr_oob = (const void __user *)(uintptr_t)req.usr_oob;
+	usr_data = (const void __user *)(user_uintptr_t)req.usr_data;
+	usr_oob = (const void __user *)(user_uintptr_t)req.usr_oob;
 
 	if (!master->_write_oob)
 		return -EOPNOTSUPP;
@@ -707,8 +707,8 @@ mtdchar_read_ioctl(struct mtd_info *mtd, struct mtd_read_req __user *argp)
 	orig_len = req.len;
 	orig_ooblen = req.ooblen;
 
-	usr_data = (void __user *)(uintptr_t)req.usr_data;
-	usr_oob = (void __user *)(uintptr_t)req.usr_oob;
+	usr_data = (void __user *)(user_uintptr_t)req.usr_data;
+	usr_oob = (void __user *)(user_uintptr_t)req.usr_oob;
 
 	if (!master->_read_oob)
 		return -EOPNOTSUPP;
@@ -992,7 +992,7 @@ static int mtdchar_ioctl(struct file *file, u_int cmd, user_uintptr_t arg)
 			ret = -EFAULT;
 		else
 			ret = mtdchar_writeoob(file, mtd, buf.start, buf.length,
-				(void __user *)(uintptr_t)buf.usr_ptr,
+				(void __user *)(user_uintptr_t)buf.usr_ptr,
 				&buf_user->length);
 		break;
 	}
@@ -1006,7 +1006,7 @@ static int mtdchar_ioctl(struct file *file, u_int cmd, user_uintptr_t arg)
 			ret = -EFAULT;
 		else
 			ret = mtdchar_readoob(file, mtd, buf.start, buf.length,
-				(void __user *)(uintptr_t)buf.usr_ptr,
+				(void __user *)(user_uintptr_t)buf.usr_ptr,
 				&buf_user->length);
 		break;
 	}
@@ -1324,7 +1324,7 @@ static long mtdchar_compat_ioctl(struct file *file, unsigned int cmd,
 	}
 
 	default:
-		ret = mtdchar_ioctl(file, cmd, (unsigned long)argp);
+		ret = mtdchar_ioctl(file, cmd, (user_uintptr_t)argp);
 	}
 
 	mutex_unlock(&master->master.chrdev_lock);

@@ -125,7 +125,7 @@ static void goldfish_tty_do_write(int line, const u8 *buf, size_t count)
 {
 	struct goldfish_tty *qtty = &goldfish_ttys[line];
 
-	goldfish_tty_rw(qtty, (unsigned long)buf, count, true);
+	goldfish_tty_rw(qtty, (uintptr_t)buf, count, true);
 }
 
 static irqreturn_t goldfish_tty_interrupt(int irq, void *dev_id)
@@ -141,7 +141,7 @@ static irqreturn_t goldfish_tty_interrupt(int irq, void *dev_id)
 
 	count = tty_prepare_flip_string(&qtty->port, &buf, count);
 
-	goldfish_tty_rw(qtty, (unsigned long)buf, count, false);
+	goldfish_tty_rw(qtty, (uintptr_t)buf, count, false);
 
 	tty_flip_buffer_push(&qtty->port);
 	return IRQ_HANDLED;

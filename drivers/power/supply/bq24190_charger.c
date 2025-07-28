@@ -2305,13 +2305,13 @@ static const struct dev_pm_ops bq24190_pm_ops = {
 };
 
 static const struct i2c_device_id bq24190_i2c_ids[] = {
-	{ "bq24190", (kernel_ulong_t)&bq24190_chip_info_tbl[BQ24190] },
-	{ "bq24192", (kernel_ulong_t)&bq24190_chip_info_tbl[BQ24192] },
-	{ "bq24192i", (kernel_ulong_t)&bq24190_chip_info_tbl[BQ24192i] },
-	{ "bq24193", (kernel_ulong_t)&bq24190_chip_info_tbl[BQ24193] },
-	{ "bq24196", (kernel_ulong_t)&bq24190_chip_info_tbl[BQ24196] },
-	{ "bq24296", (kernel_ulong_t)&bq24190_chip_info_tbl[BQ24296] },
-	{ "bq24297", (kernel_ulong_t)&bq24190_chip_info_tbl[BQ24297] },
+	{ "bq24190", (uintptr_t)&bq24190_chip_info_tbl[BQ24190] },
+	{ "bq24192", (uintptr_t)&bq24190_chip_info_tbl[BQ24192] },
+	{ "bq24192i", (uintptr_t)&bq24190_chip_info_tbl[BQ24192i] },
+	{ "bq24193", (uintptr_t)&bq24190_chip_info_tbl[BQ24193] },
+	{ "bq24196", (uintptr_t)&bq24190_chip_info_tbl[BQ24196] },
+	{ "bq24296", (uintptr_t)&bq24190_chip_info_tbl[BQ24296] },
+	{ "bq24297", (uintptr_t)&bq24190_chip_info_tbl[BQ24297] },
 	{ },
 };
 MODULE_DEVICE_TABLE(i2c, bq24190_i2c_ids);

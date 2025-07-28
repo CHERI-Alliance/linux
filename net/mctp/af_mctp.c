@@ -618,7 +618,7 @@ static int mctp_compat_ioctl(struct socket *sock, unsigned int cmd,
 	/* These have compatible ptr layouts */
 	case SIOCMCTPALLOCTAG:
 	case SIOCMCTPDROPTAG:
-		return mctp_ioctl(sock, cmd, (unsigned long)argp);
+		return mctp_ioctl(sock, cmd, (user_uintptr_t)argp);
 	}
 
 	return -ENOIOCTLCMD;

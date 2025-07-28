@@ -593,7 +593,7 @@ int power_supply_uevent(const struct device *dev, struct kobj_uevent_env *env)
 	}
 
 out:
-	free_page((unsigned long)prop_buf);
+	free_page((uintptr_t)prop_buf);
 
 	return ret;
 }

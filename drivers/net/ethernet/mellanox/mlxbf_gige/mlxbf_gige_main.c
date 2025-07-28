@@ -45,7 +45,7 @@ struct sk_buff *mlxbf_gige_alloc_skb(struct mlxbf_gige *priv,
 	/* Adjust the headroom so that skb->data is naturally aligned to
 	 * a 2KB boundary, which is the maximum packet size supported.
 	 */
-	addr = (long)skb->data;
+	addr = (intptr_t)skb->data;
 	offset = (addr + MLXBF_GIGE_DEFAULT_BUF_SZ - 1) &
 		~(MLXBF_GIGE_DEFAULT_BUF_SZ - 1);
 	offset -= addr;

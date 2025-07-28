@@ -204,7 +204,7 @@ static long phantom_compat_ioctl(struct file *filp, unsigned int cmd,
 		cmd &= ~(_IOC_SIZEMASK << _IOC_SIZESHIFT);
 		cmd |= sizeof(void *) << _IOC_SIZESHIFT;
 	}
-	return phantom_ioctl(filp, cmd, (unsigned long)compat_ptr(arg));
+	return phantom_ioctl(filp, cmd, (user_uintptr_t)compat_ptr(arg));
 }
 #else
 #define phantom_compat_ioctl NULL

@@ -79,7 +79,7 @@ static inline bool check_session_id(struct ksmbd_conn *conn, u64 id)
 
 struct channel *lookup_chann_list(struct ksmbd_session *sess, struct ksmbd_conn *conn)
 {
-	return xa_load(&sess->ksmbd_chann_list, (long)conn);
+	return xa_load(&sess->ksmbd_chann_list, (intptr_t)conn);
 }
 
 /**
@@ -1563,7 +1563,7 @@ binding_session:
 				return -ENOMEM;
 
 			chann->conn = conn;
-			old = xa_store(&sess->ksmbd_chann_list, (long)conn, chann,
+			old = xa_store(&sess->ksmbd_chann_list, (intptr_t)conn, chann,
 					KSMBD_DEFAULT_GFP);
 			if (xa_is_err(old)) {
 				kfree(chann);
@@ -1661,7 +1661,7 @@ binding_session:
 				return -ENOMEM;
 
 			chann->conn = conn;
-			old = xa_store(&sess->ksmbd_chann_list, (long)conn,
+			old = xa_store(&sess->ksmbd_chann_list, (intptr_t)conn,
 					chann, KSMBD_DEFAULT_GFP);
 			if (xa_is_err(old)) {
 				kfree(chann);

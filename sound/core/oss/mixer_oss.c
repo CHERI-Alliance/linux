@@ -397,7 +397,7 @@ static long snd_mixer_oss_ioctl_compat(struct file *file, unsigned int cmd,
 				       unsigned long arg)
 {
 	return snd_mixer_oss_ioctl1(file->private_data, cmd,
-				    (unsigned long)compat_ptr(arg));
+				    (user_uintptr_t)compat_ptr(arg));
 }
 #else
 #define snd_mixer_oss_ioctl_compat	NULL

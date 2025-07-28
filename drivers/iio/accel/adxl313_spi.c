@@ -94,9 +94,9 @@ static int adxl313_spi_probe(struct spi_device *spi)
 }
 
 static const struct spi_device_id adxl313_spi_id[] = {
-	{ .name = "adxl312", .driver_data = (kernel_ulong_t)&adxl31x_chip_info[ADXL312] },
-	{ .name = "adxl313", .driver_data = (kernel_ulong_t)&adxl31x_chip_info[ADXL313] },
-	{ .name = "adxl314", .driver_data = (kernel_ulong_t)&adxl31x_chip_info[ADXL314] },
+	{ .name = "adxl312", .driver_data = (uintptr_t)&adxl31x_chip_info[ADXL312] },
+	{ .name = "adxl313", .driver_data = (uintptr_t)&adxl31x_chip_info[ADXL313] },
+	{ .name = "adxl314", .driver_data = (uintptr_t)&adxl31x_chip_info[ADXL314] },
 	{ }
 };
 

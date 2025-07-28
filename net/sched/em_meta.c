@@ -150,7 +150,7 @@ static inline int var_dev(struct net_device *dev, struct meta_obj *dst)
 	if (unlikely(dev == NULL))
 		return -1;
 
-	dst->value = (unsigned long) dev->name;
+	dst->value = (uintptr_t) dev->name;
 	dst->len = strlen(dev->name);
 	return 0;
 }
@@ -320,7 +320,7 @@ META_COLLECTOR(var_sk_bound_if)
 
 	bound_dev_if = READ_ONCE(skb->sk->sk_bound_dev_if);
 	if (bound_dev_if == 0) {
-		dst->value = (unsigned long) "any";
+		dst->value = (uintptr_t) "any";
 		dst->len = 3;
 	} else {
 		struct net_device *dev;
@@ -696,7 +696,7 @@ static int meta_var_change(struct meta_value *dst, struct nlattr *nla)
 {
 	int len = nla_len(nla);
 
-	dst->val = (unsigned long)kmemdup(nla_data(nla), len, GFP_KERNEL);
+	dst->val = (uintptr_t)kmemdup(nla_data(nla), len, GFP_KERNEL);
 	if (dst->val == 0UL)
 		return -ENOMEM;
 	dst->len = len;
@@ -947,7 +947,7 @@ static int em_meta_change(struct net *net, void *data, int len,
 		goto errout;
 
 	m->datalen = sizeof(*meta);
-	m->data = (unsigned long) meta;
+	m->data = (uintptr_t) meta;
 
 	err = 0;
 errout:

@@ -562,7 +562,7 @@ struct page * __meminit __populate_section_memmap(unsigned long pfn,
 		unsigned long nr_pages, int nid, struct vmem_altmap *altmap,
 		struct dev_pagemap *pgmap)
 {
-	unsigned long start = (unsigned long) pfn_to_page(pfn);
+	uintptr_t start = (uintptr_t) pfn_to_page(pfn);
 	unsigned long end = start + nr_pages * sizeof(struct page);
 	int r;
 

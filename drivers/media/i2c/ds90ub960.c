@@ -5184,8 +5184,8 @@ static const struct ub960_hw_data ds90ub9702_hw = {
 };
 
 static const struct i2c_device_id ub960_id[] = {
-	{ "ds90ub960-q1", (kernel_ulong_t)&ds90ub960_hw },
-	{ "ds90ub9702-q1", (kernel_ulong_t)&ds90ub9702_hw },
+	{ "ds90ub960-q1", (uintptr_t)&ds90ub960_hw },
+	{ "ds90ub9702-q1", (uintptr_t)&ds90ub9702_hw },
 	{}
 };
 MODULE_DEVICE_TABLE(i2c, ub960_id);

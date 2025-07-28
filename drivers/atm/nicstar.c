@@ -2577,7 +2577,7 @@ static int _ns_ioctl(struct atm_dev *dev, unsigned int cmd, void __user * arg)
 	case NS_ADJBUFLEV:
 		if (!capable(CAP_NET_ADMIN))
 			return -EPERM;
-		btype = (long)arg;	/* a long is the same size as a pointer or bigger */
+		btype = (user_intptr_t)arg;	/* a long is the same size as a pointer or bigger */
 		switch (btype) {
 		case NS_BUFTYPE_SMALL:
 			while (card->sbfqc < card->sbnr.init) {

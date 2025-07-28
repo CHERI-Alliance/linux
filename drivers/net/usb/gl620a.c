@@ -200,7 +200,7 @@ static const struct usb_device_id	products [] = {
 
 {
 	USB_DEVICE(0x05e3, 0x0502),	// GL620USB-A
-	.driver_info =	(unsigned long) &genelink_info,
+	.driver_info =	(uintptr_t) &genelink_info,
 },
 	/* NOT: USB_DEVICE(0x05e3, 0x0501),	// GL620USB
 	 * that's half duplex, not currently supported

@@ -44,8 +44,8 @@ static int adxl355_spi_probe(struct spi_device *spi)
 }
 
 static const struct spi_device_id adxl355_spi_id[] = {
-	{ "adxl355", (kernel_ulong_t)&adxl35x_chip_info[ADXL355] },
-	{ "adxl359", (kernel_ulong_t)&adxl35x_chip_info[ADXL359] },
+	{ "adxl355", (uintptr_t)&adxl35x_chip_info[ADXL355] },
+	{ "adxl359", (uintptr_t)&adxl35x_chip_info[ADXL359] },
 	{ }
 };
 MODULE_DEVICE_TABLE(spi, adxl355_spi_id);

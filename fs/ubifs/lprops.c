@@ -174,7 +174,7 @@ static int add_to_lpt_heap(struct ubifs_info *c, struct ubifs_lprops *lprops,
 
 		/* Compare to some other LEB on the bottom of heap */
 		/* Pick a position kind of randomly */
-		cpos = (((size_t)lprops >> 4) & b) + b;
+		cpos = (((uintptr_t)lprops >> 4) & b) + b;
 		ubifs_assert(c, cpos >= b);
 		ubifs_assert(c, cpos < LPT_HEAP_SZ);
 		ubifs_assert(c, cpos < heap->cnt);

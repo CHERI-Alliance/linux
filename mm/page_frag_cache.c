@@ -26,7 +26,7 @@ static unsigned long encoded_page_create(struct page *page, unsigned int order,
 	BUILD_BUG_ON(PAGE_FRAG_CACHE_MAX_ORDER > PAGE_FRAG_CACHE_ORDER_MASK);
 	BUILD_BUG_ON(PAGE_FRAG_CACHE_PFMEMALLOC_BIT >= PAGE_SIZE);
 
-	return (unsigned long)page_address(page) |
+	return (uintptr_t)page_address(page) |
 		(order & PAGE_FRAG_CACHE_ORDER_MASK) |
 		((unsigned long)pfmemalloc * PAGE_FRAG_CACHE_PFMEMALLOC_BIT);
 }

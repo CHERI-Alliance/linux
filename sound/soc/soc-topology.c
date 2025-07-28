@@ -658,7 +658,7 @@ static int soc_tplg_control_dmixer_create(struct soc_tplg *tplg, struct snd_kcon
 	kc->name = devm_kstrdup(tplg->dev, mc->hdr.name, GFP_KERNEL);
 	if (!kc->name)
 		return -ENOMEM;
-	kc->private_value = (long)sm;
+	kc->private_value = (intptr_t)sm;
 	kc->iface = SNDRV_CTL_ELEM_IFACE_MIXER;
 	kc->access = le32_to_cpu(mc->hdr.access);
 
@@ -781,7 +781,7 @@ static int soc_tplg_control_denum_create(struct soc_tplg *tplg, struct snd_kcont
 	kc->name = devm_kstrdup(tplg->dev, ec->hdr.name, GFP_KERNEL);
 	if (!kc->name)
 		return -ENOMEM;
-	kc->private_value = (long)se;
+	kc->private_value = (intptr_t)se;
 	kc->iface = SNDRV_CTL_ELEM_IFACE_MIXER;
 	kc->access = le32_to_cpu(ec->hdr.access);
 
@@ -851,7 +851,7 @@ static int soc_tplg_control_dbytes_create(struct soc_tplg *tplg, struct snd_kcon
 	kc->name = devm_kstrdup(tplg->dev, be->hdr.name, GFP_KERNEL);
 	if (!kc->name)
 		return -ENOMEM;
-	kc->private_value = (long)sbe;
+	kc->private_value = (intptr_t)sbe;
 	kc->iface = SNDRV_CTL_ELEM_IFACE_MIXER;
 	kc->access = le32_to_cpu(be->hdr.access);
 

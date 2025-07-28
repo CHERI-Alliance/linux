@@ -40,7 +40,7 @@
 #ifdef CONFIG_DETECT_HUNG_TASK_BLOCKER
 static inline void hung_task_set_blocker(void *lock, unsigned long type)
 {
-	unsigned long lock_ptr = (unsigned long)lock;
+	uintptr_t lock_ptr = (uintptr_t)lock;
 
 	WARN_ON_ONCE(!lock_ptr);
 	WARN_ON_ONCE(READ_ONCE(current->blocker));

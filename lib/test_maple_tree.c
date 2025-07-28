@@ -1530,7 +1530,7 @@ static noinline void __init check_root_expand(struct maple_tree *mt)
 	mas_lock(&mas);
 
 	mas_set(&mas, 0);
-	ptr = (void *)((unsigned long) check_prev_entry | 1UL);
+	ptr = (void *)((uintptr_t) check_prev_entry | 1UL);
 	mas_store_gfp(&mas, ptr, GFP_KERNEL);
 	ptr = mas_next(&mas, ULONG_MAX);
 	MT_BUG_ON(mt, ptr != NULL);
@@ -1548,7 +1548,7 @@ static noinline void __init check_root_expand(struct maple_tree *mt)
 	mt_init_flags(mt, 0);
 	mas_lock(&mas);
 	mas_set(&mas, 0);
-	ptr = (void *)((unsigned long) check_prev_entry | 2UL);
+	ptr = (void *)((uintptr_t) check_prev_entry | 2UL);
 	mas_store_gfp(&mas, ptr, GFP_KERNEL);
 	ptr = mas_next(&mas, ULONG_MAX);
 	MT_BUG_ON(mt, ptr != NULL);

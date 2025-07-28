@@ -570,7 +570,7 @@ static int tifm_ms_probe(struct tifm_dev *sock)
 	host->timeout_jiffies = msecs_to_jiffies(1000);
 
 	timer_setup(&host->timer, tifm_ms_abort, 0);
-	tasklet_init(&host->notify, tifm_ms_req_tasklet, (unsigned long)msh);
+	tasklet_init(&host->notify, tifm_ms_req_tasklet, (uintptr_t)msh);
 
 	msh->request = tifm_ms_submit_req;
 	msh->set_param = tifm_ms_set_param;

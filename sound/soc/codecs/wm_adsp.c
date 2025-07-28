@@ -550,7 +550,7 @@ static void wm_adsp_ctl_work(struct work_struct *work)
 	kcontrol->info = wm_coeff_info;
 	kcontrol->iface = SNDRV_CTL_ELEM_IFACE_MIXER;
 	kcontrol->tlv.c = snd_soc_bytes_tlv_callback;
-	kcontrol->private_value = (unsigned long)&ctl->bytes_ext;
+	kcontrol->private_value = (uintptr_t)&ctl->bytes_ext;
 	kcontrol->access = wmfw_convert_flags(cs_ctl->flags, cs_ctl->len);
 
 	switch (cs_ctl->type) {

@@ -275,119 +275,119 @@ static const struct pci_device_id plx_pci_tbl[] = {
 		ADLINK_PCI_VENDOR_ID, ADLINK_PCI_DEVICE_ID,
 		PCI_ANY_ID, PCI_ANY_ID,
 		PCI_CLASS_NETWORK_OTHER << 8, ~0,
-		(kernel_ulong_t)&plx_pci_card_info_adlink
+		(uintptr_t)&plx_pci_card_info_adlink
 	},
 	{
 		/* Adlink PCI-7841/cPCI-7841 SE */
 		ADLINK_PCI_VENDOR_ID, ADLINK_PCI_DEVICE_ID,
 		PCI_ANY_ID, PCI_ANY_ID,
 		PCI_CLASS_COMMUNICATION_OTHER << 8, ~0,
-		(kernel_ulong_t)&plx_pci_card_info_adlink_se
+		(uintptr_t)&plx_pci_card_info_adlink_se
 	},
 	{
 		/* esd CAN-PCI/200 */
 		PCI_VENDOR_ID_PLX, PCI_DEVICE_ID_PLX_9050,
 		PCI_VENDOR_ID_ESDGMBH, ESD_PCI_SUB_SYS_ID_PCI200,
 		0, 0,
-		(kernel_ulong_t)&plx_pci_card_info_esd200
+		(uintptr_t)&plx_pci_card_info_esd200
 	},
 	{
 		/* esd CAN-CPCI/200 */
 		PCI_VENDOR_ID_PLX, PCI_DEVICE_ID_PLX_9030,
 		PCI_VENDOR_ID_ESDGMBH, ESD_PCI_SUB_SYS_ID_CPCI200,
 		0, 0,
-		(kernel_ulong_t)&plx_pci_card_info_esd200
+		(uintptr_t)&plx_pci_card_info_esd200
 	},
 	{
 		/* esd CAN-PCI104/200 */
 		PCI_VENDOR_ID_PLX, PCI_DEVICE_ID_PLX_9030,
 		PCI_VENDOR_ID_ESDGMBH, ESD_PCI_SUB_SYS_ID_PCI104200,
 		0, 0,
-		(kernel_ulong_t)&plx_pci_card_info_esd200
+		(uintptr_t)&plx_pci_card_info_esd200
 	},
 	{
 		/* esd CAN-PCI/266 */
 		PCI_VENDOR_ID_PLX, PCI_DEVICE_ID_PLX_9056,
 		PCI_VENDOR_ID_ESDGMBH, ESD_PCI_SUB_SYS_ID_PCI266,
 		0, 0,
-		(kernel_ulong_t)&plx_pci_card_info_esd266
+		(uintptr_t)&plx_pci_card_info_esd266
 	},
 	{
 		/* esd CAN-PMC/266 */
 		PCI_VENDOR_ID_PLX, PCI_DEVICE_ID_PLX_9056,
 		PCI_VENDOR_ID_ESDGMBH, ESD_PCI_SUB_SYS_ID_PMC266,
 		0, 0,
-		(kernel_ulong_t)&plx_pci_card_info_esd266
+		(uintptr_t)&plx_pci_card_info_esd266
 	},
 	{
 		/* esd CAN-PCIE/2000 */
 		PCI_VENDOR_ID_PLX, PCI_DEVICE_ID_PLX_9056,
 		PCI_VENDOR_ID_ESDGMBH, ESD_PCI_SUB_SYS_ID_PCIE2000,
 		0, 0,
-		(kernel_ulong_t)&plx_pci_card_info_esd2000
+		(uintptr_t)&plx_pci_card_info_esd2000
 	},
 	{
 		/* IXXAT PC-I 04/PCI card */
 		IXXAT_PCI_VENDOR_ID, IXXAT_PCI_DEVICE_ID,
 		PCI_ANY_ID, IXXAT_PCI_SUB_SYS_ID,
 		0, 0,
-		(kernel_ulong_t)&plx_pci_card_info_ixxat
+		(uintptr_t)&plx_pci_card_info_ixxat
 	},
 	{
 		/* Marathon CAN-bus-PCI card */
 		PCI_VENDOR_ID_PLX, MARATHON_PCI_DEVICE_ID,
 		PCI_ANY_ID, PCI_ANY_ID,
 		0, 0,
-		(kernel_ulong_t)&plx_pci_card_info_marathon_pci
+		(uintptr_t)&plx_pci_card_info_marathon_pci
 	},
 	{
 		/* Marathon CAN-bus-PCIe card */
 		PCI_VENDOR_ID_PLX, MARATHON_PCIE_DEVICE_ID,
 		PCI_ANY_ID, PCI_ANY_ID,
 		0, 0,
-		(kernel_ulong_t)&plx_pci_card_info_marathon_pcie
+		(uintptr_t)&plx_pci_card_info_marathon_pcie
 	},
 	{
 		/* TEWS TECHNOLOGIES TPMC810 card */
 		TEWS_PCI_VENDOR_ID, TEWS_PCI_DEVICE_ID_TMPC810,
 		PCI_ANY_ID, PCI_ANY_ID,
 		0, 0,
-		(kernel_ulong_t)&plx_pci_card_info_tews
+		(uintptr_t)&plx_pci_card_info_tews
 	},
 	{
 		/* Connect Tech Inc. CANpro/104-Plus Opto (CRG001) card */
 		PCI_VENDOR_ID_PLX, PCI_DEVICE_ID_PLX_9030,
 		PCI_SUBVENDOR_ID_CONNECT_TECH, CTI_PCI_DEVICE_ID_CRG001,
 		0, 0,
-		(kernel_ulong_t)&plx_pci_card_info_cti
+		(uintptr_t)&plx_pci_card_info_cti
 	},
 	{
 		/* Elcus CAN-200-PCI */
 		CAN200PCI_VENDOR_ID, CAN200PCI_DEVICE_ID,
 		CAN200PCI_SUB_VENDOR_ID, CAN200PCI_SUB_DEVICE_ID,
 		0, 0,
-		(kernel_ulong_t)&plx_pci_card_info_elcus
+		(uintptr_t)&plx_pci_card_info_elcus
 	},
 	{
 		/* moxa */
 		MOXA_PCI_VENDOR_ID, MOXA_PCI_DEVICE_ID,
 		PCI_ANY_ID, PCI_ANY_ID,
 		0, 0,
-		(kernel_ulong_t)&plx_pci_card_info_moxa
+		(uintptr_t)&plx_pci_card_info_moxa
 	},
 	{
 		/* ASEM Dual CAN raw */
 		ASEM_RAW_CAN_VENDOR_ID, ASEM_RAW_CAN_DEVICE_ID,
 		ASEM_RAW_CAN_SUB_VENDOR_ID, ASEM_RAW_CAN_SUB_DEVICE_ID,
 		0, 0,
-		(kernel_ulong_t)&plx_pci_card_info_asem_dual_can
+		(uintptr_t)&plx_pci_card_info_asem_dual_can
 	},
 	{
 		/* ASEM Dual CAN raw -new model */
 		ASEM_RAW_CAN_VENDOR_ID, ASEM_RAW_CAN_DEVICE_ID,
 		ASEM_RAW_CAN_SUB_VENDOR_ID, ASEM_RAW_CAN_SUB_DEVICE_ID_BIS,
 		0, 0,
-		(kernel_ulong_t)&plx_pci_card_info_asem_dual_can
+		(uintptr_t)&plx_pci_card_info_asem_dual_can
 	},
 	{ 0,}
 };

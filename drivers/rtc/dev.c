@@ -488,7 +488,7 @@ static long rtc_dev_compat_ioctl(struct file *file,
 		return rtc_dev_ioctl(file, RTC_EPOCH_SET, arg);
 	}
 
-	return rtc_dev_ioctl(file, cmd, (unsigned long)uarg);
+	return rtc_dev_ioctl(file, cmd, (user_uintptr_t)uarg);
 }
 #endif
 

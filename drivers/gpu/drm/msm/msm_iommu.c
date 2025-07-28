@@ -428,7 +428,7 @@ msm_iommu_pagetable_free_pt(void *cookie, void *data, size_t size)
 	struct msm_iommu_pagetable *pagetable = cookie;
 
 	if (unlikely(pagetable->root_page_table == data)) {
-		free_pages((unsigned long)data, get_order(size));
+		free_pages((uintptr_t)data, get_order(size));
 		pagetable->root_page_table = NULL;
 		return;
 	}

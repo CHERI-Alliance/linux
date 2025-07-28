@@ -798,7 +798,7 @@ static inline void set_work_data(struct work_struct *work, unsigned long data)
 static void set_work_pwq(struct work_struct *work, struct pool_workqueue *pwq,
 			 unsigned long flags)
 {
-	set_work_data(work, (unsigned long)pwq | WORK_STRUCT_PENDING |
+	set_work_data(work, (uintptr_t)pwq | WORK_STRUCT_PENDING |
 		      WORK_STRUCT_PWQ | flags);
 }
 
@@ -1118,7 +1118,7 @@ static struct worker *find_worker_executing_work(struct worker_pool *pool,
 	struct worker *worker;
 
 	hash_for_each_possible(pool->busy_hash, worker, hentry,
-			       (unsigned long)work)
+			       (uintptr_t)work)
 		if (worker->current_work == work &&
 		    worker->current_func == work->func)
 			return worker;
@@ -1318,7 +1318,7 @@ static struct wci_ent *wci_find_ent(work_func_t func)
 	struct wci_ent *ent;
 
 	hash_for_each_possible_rcu(wci_hash, ent, hash_node,
-				   (unsigned long)func) {
+				   (uintptr_t)func) {
 		if (ent->func == func)
 			return ent;
 	}
@@ -1371,7 +1371,7 @@ restart:
 	ent = &wci_ents[wci_nr_ents++];
 	ent->func = func;
 	atomic64_set(&ent->cnt, 0);
-	hash_add_rcu(wci_hash, &ent->hash_node, (unsigned long)func);
+	hash_add_rcu(wci_hash, &ent->hash_node, (uintptr_t)func);
 
 	raw_spin_unlock(&wci_lock);
 
@@ -3186,7 +3186,7 @@ __acquires(&pool->lock)
 
 	/* claim and dequeue */
 	debug_work_deactivate(work);
-	hash_add(pool->busy_hash, &worker->hentry, (unsigned long)work);
+	hash_add(pool->busy_hash, &worker->hentry, (uintptr_t)work);
 	worker->current_work = work;
 	worker->current_func = work->func;
 	worker->current_pwq = pwq;

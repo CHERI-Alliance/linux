@@ -794,7 +794,7 @@ static unsigned long iov_iter_alignment_iovec(const struct iov_iter *i)
 	do {
 		size_t len = iov->iov_len - skip;
 		if (len) {
-			res |= (unsigned long)iov->iov_base + skip;
+			res |= (user_uintptr_t)iov->iov_base + skip;
 			if (len > size)
 				len = size;
 			res |= len;
@@ -832,7 +832,7 @@ unsigned long iov_iter_alignment(const struct iov_iter *i)
 	if (likely(iter_is_ubuf(i))) {
 		size_t size = i->count;
 		if (size)
-			return ((unsigned long)i->ubuf + i->iov_offset) | size;
+			return ((user_uintptr_t)i->ubuf + i->iov_offset) | size;
 		return 0;
 	}
 
@@ -869,7 +869,7 @@ unsigned long iov_iter_gap_alignment(const struct iov_iter *i)
 	for (k = 0; k < i->nr_segs; k++) {
 		const struct iovec *iov = iter_iov(i) + k;
 		if (iov->iov_len) {
-			unsigned long base = (unsigned long)iov->iov_base;
+			user_uintptr_t base = (user_uintptr_t)iov->iov_base;
 			if (v) // if not the first one
 				res |= base | v; // this start | previous end
 			v = base + iov->iov_len;
@@ -1017,7 +1017,7 @@ static unsigned long first_iovec_segment(const struct iov_iter *i, size_t *size)
 	long k;
 
 	if (iter_is_ubuf(i))
-		return (unsigned long)i->ubuf + i->iov_offset;
+		return (user_uintptr_t)i->ubuf + i->iov_offset;
 
 	for (k = 0, skip = i->iov_offset; k < i->nr_segs; k++, skip = 0) {
 		const struct iovec *iov = iter_iov(i) + k;
@@ -1027,7 +1027,7 @@ static unsigned long first_iovec_segment(const struct iov_iter *i, size_t *size)
 			continue;
 		if (*size > len)
 			*size = len;
-		return (unsigned long)iov->iov_base + skip;
+		return (user_uintptr_t)iov->iov_base + skip;
 	}
 	BUG(); // if it had been empty, we wouldn't get called
 }

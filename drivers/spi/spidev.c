@@ -272,7 +272,7 @@ static int spidev_message(struct spidev_data *spidev,
 			}
 			k_tmp->tx_buf = tx_buf;
 			if (copy_from_user(tx_buf, (const u8 __user *)
-						(uintptr_t) u_tmp->tx_buf,
+						(user_uintptr_t) u_tmp->tx_buf,
 					u_tmp->len))
 				goto done;
 			tx_buf += len_aligned;
@@ -314,7 +314,7 @@ static int spidev_message(struct spidev_data *spidev,
 			n--, k_tmp++, u_tmp++) {
 		if (u_tmp->rx_buf) {
 			if (copy_to_user((u8 __user *)
-					(uintptr_t) u_tmp->rx_buf, k_tmp->rx_buf,
+					(user_uintptr_t) u_tmp->rx_buf, k_tmp->rx_buf,
 					u_tmp->len)) {
 				status = -EFAULT;
 				goto done;
@@ -555,8 +555,8 @@ spidev_compat_ioc_message(struct file *filp, unsigned int cmd,
 
 	/* Convert buffer pointers */
 	for (n = 0; n < n_ioc; n++) {
-		ioc[n].rx_buf = (uintptr_t) compat_ptr(ioc[n].rx_buf);
-		ioc[n].tx_buf = (uintptr_t) compat_ptr(ioc[n].tx_buf);
+		ioc[n].rx_buf = (user_uintptr_t) compat_ptr(ioc[n].rx_buf);
+		ioc[n].tx_buf = (user_uintptr_t) compat_ptr(ioc[n].tx_buf);
 	}
 
 	/* translate to spi_message, execute */
@@ -578,7 +578,7 @@ spidev_compat_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 			&& _IOC_DIR(cmd) == _IOC_WRITE)
 		return spidev_compat_ioc_message(filp, cmd, arg);
 
-	return spidev_ioctl(filp, cmd, (unsigned long)compat_ptr(arg));
+	return spidev_ioctl(filp, cmd, (user_uintptr_t)compat_ptr(arg));
 }
 #else
 #define spidev_compat_ioctl NULL
@@ -769,9 +769,9 @@ static const struct acpi_device_id spidev_acpi_ids[] = {
 	 * description of the connected peripheral and they should also use
 	 * a proper driver instead of poking directly to the SPI bus.
 	 */
-	{ "SPT0001", (kernel_ulong_t)&spidev_acpi_check },
-	{ "SPT0002", (kernel_ulong_t)&spidev_acpi_check },
-	{ "SPT0003", (kernel_ulong_t)&spidev_acpi_check },
+	{ "SPT0001", (uintptr_t)&spidev_acpi_check },
+	{ "SPT0002", (uintptr_t)&spidev_acpi_check },
+	{ "SPT0003", (uintptr_t)&spidev_acpi_check },
 	{},
 };
 MODULE_DEVICE_TABLE(acpi, spidev_acpi_ids);

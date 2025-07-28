@@ -628,7 +628,7 @@ static int xsdfec_table_write(struct xsdfec_dev *xsdfec, u32 offset,
 
 	nr_pages = n;
 
-	res = pin_user_pages_fast((unsigned long)src_ptr, nr_pages, 0, pages);
+	res = pin_user_pages_fast((uintptr_t)src_ptr, nr_pages, 0, pages);
 	if (res < nr_pages) {
 		if (res > 0)
 			unpin_user_pages(pages, res);

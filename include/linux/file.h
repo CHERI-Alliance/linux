@@ -50,11 +50,11 @@ static inline bool fd_empty(struct fd f)
 #define EMPTY_FD (struct fd){0}
 static inline struct fd BORROWED_FD(struct file *f)
 {
-	return (struct fd){(unsigned long)f};
+	return (struct fd){(uintptr_t)f};
 }
 static inline struct fd CLONED_FD(struct file *f)
 {
-	return (struct fd){(unsigned long)f | FDPUT_FPUT};
+	return (struct fd){(uintptr_t)f | FDPUT_FPUT};
 }
 
 static inline void fdput(struct fd fd)

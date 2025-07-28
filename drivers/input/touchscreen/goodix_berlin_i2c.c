@@ -55,7 +55,7 @@ static const struct goodix_berlin_ic_data gt9916_data = {
 };
 
 static const struct i2c_device_id goodix_berlin_i2c_id[] = {
-	{ .name = "gt9916", .driver_data = (long)&gt9916_data },
+	{ .name = "gt9916", .driver_data = (intptr_t)&gt9916_data },
 	{ }
 };
 

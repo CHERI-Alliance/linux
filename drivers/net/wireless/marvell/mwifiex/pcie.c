@@ -483,22 +483,22 @@ static const struct pci_device_id mwifiex_ids[] = {
 	{
 		PCIE_VENDOR_ID_MARVELL, PCIE_DEVICE_ID_MARVELL_88W8766P,
 		PCI_ANY_ID, PCI_ANY_ID, 0, 0,
-		.driver_data = (unsigned long)&mwifiex_pcie8766,
+		.driver_data = (uintptr_t)&mwifiex_pcie8766,
 	},
 	{
 		PCIE_VENDOR_ID_MARVELL, PCIE_DEVICE_ID_MARVELL_88W8897,
 		PCI_ANY_ID, PCI_ANY_ID, 0, 0,
-		.driver_data = (unsigned long)&mwifiex_pcie8897,
+		.driver_data = (uintptr_t)&mwifiex_pcie8897,
 	},
 	{
 		PCIE_VENDOR_ID_MARVELL, PCIE_DEVICE_ID_MARVELL_88W8997,
 		PCI_ANY_ID, PCI_ANY_ID, 0, 0,
-		.driver_data = (unsigned long)&mwifiex_pcie8997,
+		.driver_data = (uintptr_t)&mwifiex_pcie8997,
 	},
 	{
 		PCIE_VENDOR_ID_V2_MARVELL, PCIE_DEVICE_ID_MARVELL_88W8997,
 		PCI_ANY_ID, PCI_ANY_ID, 0, 0,
-		.driver_data = (unsigned long)&mwifiex_pcie8997,
+		.driver_data = (uintptr_t)&mwifiex_pcie8997,
 	},
 	{},
 };

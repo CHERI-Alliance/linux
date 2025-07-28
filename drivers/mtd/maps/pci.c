@@ -233,14 +233,14 @@ static const struct pci_device_id mtd_pci_ids[] = {
 		.subdevice =	PCI_ANY_ID,
 		.class =	PCI_CLASS_MEMORY_OTHER << 8,
 		.class_mask =	0xffff00,
-		.driver_data =	(unsigned long)&intel_iq80310_info,
+		.driver_data =	(uintptr_t)&intel_iq80310_info,
 	},
 	{
 		.vendor =	PCI_VENDOR_ID_DEC,
 		.device =	PCI_DEVICE_ID_DEC_21285,
 		.subvendor =	0,	/* DC21285 defaults to 0 on reset */
 		.subdevice =	0,	/* DC21285 defaults to 0 on reset */
-		.driver_data =	(unsigned long)&intel_dc21285_info,
+		.driver_data =	(uintptr_t)&intel_dc21285_info,
 	},
 	{ 0, }
 };

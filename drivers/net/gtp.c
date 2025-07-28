@@ -2308,7 +2308,7 @@ static int gtp_genl_dump_pdp(struct sk_buff *skb,
 					    cb->nlh->nlmsg_type, pctx)) {
 					cb->args[0] = i;
 					cb->args[1] = j;
-					cb->args[2] = (unsigned long)gtp;
+					cb->args[2] = (uintptr_t)gtp;
 					goto out;
 				}
 				j++;

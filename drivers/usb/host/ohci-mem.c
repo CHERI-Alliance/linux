@@ -121,7 +121,7 @@ td_free (struct ohci_hcd *hc, struct td *td)
 		ohci_dbg (hc, "no hash for td %p\n", td);
 
 	if (hcd->localmem_pool)
-		gen_pool_free(hcd->localmem_pool, (unsigned long)td,
+		gen_pool_free(hcd->localmem_pool, (uintptr_t)td,
 			      sizeof(*td));
 	else
 		dma_pool_free(hc->td_cache, td, td->td_dma);
@@ -155,7 +155,7 @@ ed_free (struct ohci_hcd *hc, struct ed *ed)
 	struct usb_hcd	*hcd = ohci_to_hcd(hc);
 
 	if (hcd->localmem_pool)
-		gen_pool_free(hcd->localmem_pool, (unsigned long)ed,
+		gen_pool_free(hcd->localmem_pool, (uintptr_t)ed,
 			      sizeof(*ed));
 	else
 		dma_pool_free(hc->ed_cache, ed, ed->dma);

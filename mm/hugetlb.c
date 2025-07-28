@@ -1082,7 +1082,7 @@ __weak unsigned long vma_mmu_pagesize(struct vm_area_struct *vma)
  */
 static unsigned long get_vma_private_data(struct vm_area_struct *vma)
 {
-	return (unsigned long)vma->vm_private_data;
+	return (uintptr_t)vma->vm_private_data;
 }
 
 static void set_vma_private_data(struct vm_area_struct *vma,
@@ -1195,7 +1195,7 @@ static void set_vma_resv_map(struct vm_area_struct *vma, struct resv_map *map)
 	VM_BUG_ON_VMA(!is_vm_hugetlb_page(vma), vma);
 	VM_BUG_ON_VMA(vma->vm_flags & VM_MAYSHARE, vma);
 
-	set_vma_private_data(vma, (unsigned long)map);
+	set_vma_private_data(vma, (uintptr_t)map);
 }
 
 static void set_vma_resv_flags(struct vm_area_struct *vma, unsigned long flags)
@@ -6647,7 +6647,7 @@ u32 hugetlb_fault_mutex_hash(struct address_space *mapping, pgoff_t idx)
 	unsigned long key[2];
 	u32 hash;
 
-	key[0] = (unsigned long) mapping;
+	key[0] = (uintptr_t) mapping;
 	key[1] = idx;
 
 	hash = jhash2((u32 *)&key, sizeof(key)/(sizeof(u32)), 0);
@@ -7586,7 +7586,7 @@ pte_t *huge_pmd_share(struct mm_struct *mm, struct vm_area_struct *vma,
 	spin_lock(&mm->page_table_lock);
 	if (pud_none(*pud)) {
 		pud_populate(mm, pud,
-				(pmd_t *)((unsigned long)spte & PAGE_MASK));
+				(pmd_t *)((uintptr_t)spte & PAGE_MASK));
 		mm_inc_nr_pmds(mm);
 	} else {
 		ptdesc_pmd_pts_dec(virt_to_ptdesc(spte));

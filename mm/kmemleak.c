@@ -421,14 +421,14 @@ static struct kmemleak_object *__lookup_object(unsigned long ptr, int alias,
 					       unsigned int objflags)
 {
 	struct rb_node *rb = object_tree(objflags)->rb_node;
-	unsigned long untagged_ptr = (unsigned long)kasan_reset_tag((void *)ptr);
+	uintptr_t untagged_ptr = (uintptr_t)kasan_reset_tag((void *)ptr);
 
 	while (rb) {
 		struct kmemleak_object *object;
 		unsigned long untagged_objp;
 
 		object = rb_entry(rb, struct kmemleak_object, rb_node);
-		untagged_objp = (unsigned long)kasan_reset_tag((void *)object->pointer);
+		untagged_objp = (uintptr_t)kasan_reset_tag((void *)object->pointer);
 
 		if (untagged_ptr < untagged_objp)
 			rb = object->rb_node.rb_left;
@@ -718,7 +718,7 @@ static int __link_object(struct kmemleak_object *object, unsigned long ptr,
 	object->min_count = min_count;
 	object->jiffies = jiffies;
 
-	untagged_ptr = (unsigned long)kasan_reset_tag((void *)ptr);
+	untagged_ptr = (uintptr_t)kasan_reset_tag((void *)ptr);
 	/*
 	 * Only update min_addr and max_addr with object storing virtual
 	 * address. And update min_percpu_addr max_percpu_addr for per-CPU
@@ -736,7 +736,7 @@ static int __link_object(struct kmemleak_object *object, unsigned long ptr,
 	while (*link) {
 		rb_parent = *link;
 		parent = rb_entry(rb_parent, struct kmemleak_object, rb_node);
-		untagged_objp = (unsigned long)kasan_reset_tag((void *)parent->pointer);
+		untagged_objp = (uintptr_t)kasan_reset_tag((void *)parent->pointer);
 		if (untagged_ptr + size <= untagged_objp)
 			link = &parent->rb_node.rb_left;
 		else if (untagged_objp + parent->size <= untagged_ptr)
@@ -996,8 +996,8 @@ static void add_scan_area(unsigned long ptr, size_t size, gfp_t gfp)
 		return;
 	}
 
-	untagged_ptr = (unsigned long)kasan_reset_tag((void *)ptr);
-	untagged_objp = (unsigned long)kasan_reset_tag((void *)object->pointer);
+	untagged_ptr = (uintptr_t)kasan_reset_tag((void *)ptr);
+	untagged_objp = (uintptr_t)kasan_reset_tag((void *)object->pointer);
 
 	if (scan_area_cache)
 		area = kmem_cache_alloc_noprof(scan_area_cache,
@@ -1095,7 +1095,7 @@ void __ref kmemleak_alloc(const void *ptr, size_t size, int min_count,
 	pr_debug("%s(0x%px, %zu, %d)\n", __func__, ptr, size, min_count);
 
 	if (kmemleak_enabled && ptr && !IS_ERR(ptr))
-		create_object((unsigned long)ptr, size, min_count, gfp);
+		create_object((uintptr_t)ptr, size, min_count, gfp);
 }
 EXPORT_SYMBOL_GPL(kmemleak_alloc);
 
@@ -1136,9 +1136,9 @@ void __ref kmemleak_vmalloc(const struct vm_struct *area, size_t size, gfp_t gfp
 	 * the virtual address of the vmalloc'ed block.
 	 */
 	if (kmemleak_enabled) {
-		create_object((unsigned long)area->addr, size, 2, gfp);
-		object_set_excess_ref((unsigned long)area,
-				      (unsigned long)area->addr);
+		create_object((uintptr_t)area->addr, size, 2, gfp);
+		object_set_excess_ref((uintptr_t)area,
+				      (uintptr_t)area->addr);
 	}
 }
 EXPORT_SYMBOL_GPL(kmemleak_vmalloc);
@@ -1155,7 +1155,7 @@ void __ref kmemleak_free(const void *ptr)
 	pr_debug("%s(0x%px)\n", __func__, ptr);
 
 	if (kmemleak_free_enabled && ptr && !IS_ERR(ptr))
-		delete_object_full((unsigned long)ptr, 0);
+		delete_object_full((uintptr_t)ptr, 0);
 }
 EXPORT_SYMBOL_GPL(kmemleak_free);
 
@@ -1173,7 +1173,7 @@ void __ref kmemleak_free_part(const void *ptr, size_t size)
 	pr_debug("%s(0x%px)\n", __func__, ptr);
 
 	if (kmemleak_enabled && ptr && !IS_ERR(ptr))
-		delete_object_part((unsigned long)ptr, size, 0);
+		delete_object_part((uintptr_t)ptr, size, 0);
 }
 EXPORT_SYMBOL_GPL(kmemleak_free_part);
 
@@ -1211,7 +1211,7 @@ void __ref kmemleak_update_trace(const void *ptr)
 	if (!kmemleak_enabled || IS_ERR_OR_NULL(ptr))
 		return;
 
-	object = find_and_get_object((unsigned long)ptr, 1);
+	object = find_and_get_object((uintptr_t)ptr, 1);
 	if (!object) {
 #ifdef DEBUG
 		kmemleak_warn("Updating stack trace for unknown object at %p\n",
@@ -1241,7 +1241,7 @@ void __ref kmemleak_not_leak(const void *ptr)
 	pr_debug("%s(0x%px)\n", __func__, ptr);
 
 	if (kmemleak_enabled && ptr && !IS_ERR(ptr))
-		make_gray_object((unsigned long)ptr);
+		make_gray_object((uintptr_t)ptr);
 }
 EXPORT_SYMBOL(kmemleak_not_leak);
 
@@ -1258,7 +1258,7 @@ void __ref kmemleak_transient_leak(const void *ptr)
 	pr_debug("%s(0x%px)\n", __func__, ptr);
 
 	if (kmemleak_enabled && ptr && !IS_ERR(ptr))
-		reset_checksum((unsigned long)ptr);
+		reset_checksum((uintptr_t)ptr);
 }
 EXPORT_SYMBOL(kmemleak_transient_leak);
 
@@ -1272,7 +1272,7 @@ void __ref kmemleak_ignore_percpu(const void __percpu *ptr)
 	pr_debug("%s(0x%px)\n", __func__, ptr);
 
 	if (kmemleak_enabled && ptr && !IS_ERR_PCPU(ptr))
-		make_black_object((unsigned long)ptr, OBJECT_PERCPU);
+		make_black_object((uintptr_t)ptr, OBJECT_PERCPU);
 }
 EXPORT_SYMBOL_GPL(kmemleak_ignore_percpu);
 
@@ -1290,7 +1290,7 @@ void __ref kmemleak_ignore(const void *ptr)
 	pr_debug("%s(0x%px)\n", __func__, ptr);
 
 	if (kmemleak_enabled && ptr && !IS_ERR(ptr))
-		make_black_object((unsigned long)ptr, 0);
+		make_black_object((uintptr_t)ptr, 0);
 }
 EXPORT_SYMBOL(kmemleak_ignore);
 
@@ -1310,7 +1310,7 @@ void __ref kmemleak_scan_area(const void *ptr, size_t size, gfp_t gfp)
 	pr_debug("%s(0x%px)\n", __func__, ptr);
 
 	if (kmemleak_enabled && ptr && size && !IS_ERR(ptr))
-		add_scan_area((unsigned long)ptr, size, gfp);
+		add_scan_area((uintptr_t)ptr, size, gfp);
 }
 EXPORT_SYMBOL(kmemleak_scan_area);
 
@@ -1328,7 +1328,7 @@ void __ref kmemleak_no_scan(const void *ptr)
 	pr_debug("%s(0x%px)\n", __func__, ptr);
 
 	if (kmemleak_enabled && ptr && !IS_ERR(ptr))
-		object_no_scan((unsigned long)ptr);
+		object_no_scan((uintptr_t)ptr);
 }
 EXPORT_SYMBOL(kmemleak_no_scan);
 
@@ -1443,7 +1443,7 @@ static void pointer_update_refs(struct kmemleak_object *scanned,
 	unsigned long untagged_ptr;
 	unsigned long excess_ref;
 
-	untagged_ptr = (unsigned long)kasan_reset_tag((void *)pointer);
+	untagged_ptr = (uintptr_t)kasan_reset_tag((void *)pointer);
 	if (objflags & OBJECT_PERCPU) {
 		if (untagged_ptr < min_percpu_addr || untagged_ptr >= max_percpu_addr)
 			return;
@@ -2303,13 +2303,13 @@ void __init kmemleak_init(void)
 	scan_area_cache = KMEM_CACHE(kmemleak_scan_area, SLAB_NOLEAKTRACE);
 
 	/* register the data/bss sections */
-	create_object((unsigned long)_sdata, _edata - _sdata,
+	create_object((uintptr_t)_sdata, _edata - _sdata,
 		      KMEMLEAK_GREY, GFP_ATOMIC);
-	create_object((unsigned long)__bss_start, __bss_stop - __bss_start,
+	create_object((uintptr_t)__bss_start, __bss_stop - __bss_start,
 		      KMEMLEAK_GREY, GFP_ATOMIC);
 	/* only register .data..ro_after_init if not within .data */
 	if (&__start_ro_after_init < &_sdata || &__end_ro_after_init > &_edata)
-		create_object((unsigned long)__start_ro_after_init,
+		create_object((uintptr_t)__start_ro_after_init,
 			      __end_ro_after_init - __start_ro_after_init,
 			      KMEMLEAK_GREY, GFP_ATOMIC);
 }

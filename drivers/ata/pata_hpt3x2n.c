@@ -294,7 +294,7 @@ static void hpt3x2n_set_clock(struct ata_port *ap, int source)
 
 static int hpt3x2n_use_dpll(struct ata_port *ap, int writing)
 {
-	long flags = (long)ap->host->private_data;
+	intptr_t flags = (intptr_t)ap->host->private_data;
 
 	/* See if we should use the DPLL */
 	if (writing)

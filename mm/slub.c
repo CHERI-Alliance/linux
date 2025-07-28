@@ -565,7 +565,7 @@ static inline freeptr_t freelist_ptr_encode(const struct kmem_cache *s,
 #ifdef CONFIG_SLAB_FREELIST_HARDENED
 	encoded = (unsigned long)ptr ^ s->random ^ swab(ptr_addr);
 #else
-	encoded = (unsigned long)ptr;
+	encoded = (uintptr_t)ptr;
 #endif
 	return (freeptr_t){.v = encoded};
 }
@@ -589,7 +589,7 @@ static inline void *get_freepointer(struct kmem_cache *s, void *object)
 	freeptr_t p;
 
 	object = kasan_reset_tag(object);
-	ptr_addr = (unsigned long)object + s->offset;
+	ptr_addr = (uintptr_t)object + s->offset;
 	p = *(freeptr_t *)(ptr_addr);
 	return freelist_ptr_decode(s, p, ptr_addr);
 }
@@ -621,20 +621,20 @@ static inline void *get_freepointer_safe(struct kmem_cache *s, void *object)
 		return get_freepointer(s, object);
 
 	object = kasan_reset_tag(object);
-	freepointer_addr = (unsigned long)object + s->offset;
+	freepointer_addr = (uintptr_t)object + s->offset;
 	copy_from_kernel_nofault(&p, (freeptr_t *)freepointer_addr, sizeof(p));
 	return freelist_ptr_decode(s, p, freepointer_addr);
 }
 
 static inline void set_freepointer(struct kmem_cache *s, void *object, void *fp)
 {
-	unsigned long freeptr_addr = (unsigned long)object + s->offset;
+	unsigned long freeptr_addr = (uintptr_t)object + s->offset;
 
 #ifdef CONFIG_SLAB_FREELIST_HARDENED
 	BUG_ON(object == fp); /* naive detection of double free or corruption */
 #endif
 
-	freeptr_addr = (unsigned long)kasan_reset_tag((void *)freeptr_addr);
+	freeptr_addr = (uintptr_t)kasan_reset_tag((void *)freeptr_addr);
 	*(freeptr_t *)freeptr_addr = freelist_ptr_encode(s, fp, freeptr_addr);
 }
 
@@ -2140,7 +2140,7 @@ int alloc_slab_obj_exts(struct slab *slab, struct kmem_cache *s,
 		return -ENOMEM;
 	}
 
-	new_exts = (unsigned long)vec;
+	new_exts = (uintptr_t)vec;
 	if (unlikely(!allow_spin))
 		new_exts |= OBJEXTS_NOSPIN_ALLOC;
 #ifdef CONFIG_MEMCG
@@ -6788,7 +6788,7 @@ void kvfree_rcu_cb(struct rcu_head *head)
 	void *slab_addr;
 
 	if (is_vmalloc_addr(obj)) {
-		obj = (void *) PAGE_ALIGN_DOWN((unsigned long)obj);
+		obj = (void *) PAGE_ALIGN_DOWN((uintptr_t)obj);
 		vfree(obj);
 		return;
 	}
@@ -6799,7 +6799,7 @@ void kvfree_rcu_cb(struct rcu_head *head)
 		 * rcu_head offset can be only less than page size so no need to
 		 * consider folio order
 		 */
-		obj = (void *) PAGE_ALIGN_DOWN((unsigned long)obj);
+		obj = (void *) PAGE_ALIGN_DOWN((uintptr_t)obj);
 		free_large_kmalloc(folio, obj);
 		return;
 	}
@@ -8781,7 +8781,7 @@ static struct dentry *slab_debugfs_root;
 static void free_loc_track(struct loc_track *t)
 {
 	if (t->max)
-		free_pages((unsigned long)t->loc,
+		free_pages((uintptr_t)t->loc,
 			get_order(sizeof(struct location) * t->max));
 }
 

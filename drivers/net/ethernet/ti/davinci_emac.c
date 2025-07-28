@@ -1876,7 +1876,7 @@ static int davinci_emac_probe(struct platform_device *pdev)
 	}
 
 	priv->emac_base = priv->remap_addr + pdata->ctrl_reg_offset;
-	ndev->base_addr = (unsigned long)priv->remap_addr;
+	ndev->base_addr = (uintptr_t)priv->remap_addr;
 
 	hw_ram_addr = pdata->hw_ram_addr;
 	if (!hw_ram_addr)

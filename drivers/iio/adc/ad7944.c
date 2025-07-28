@@ -865,9 +865,9 @@ static const struct of_device_id ad7944_of_match[] = {
 MODULE_DEVICE_TABLE(of, ad7944_of_match);
 
 static const struct spi_device_id ad7944_spi_id[] = {
-	{ "ad7944", (kernel_ulong_t)&ad7944_chip_info },
-	{ "ad7985", (kernel_ulong_t)&ad7985_chip_info },
-	{ "ad7986", (kernel_ulong_t)&ad7986_chip_info },
+	{ "ad7944", (uintptr_t)&ad7944_chip_info },
+	{ "ad7985", (uintptr_t)&ad7985_chip_info },
+	{ "ad7986", (uintptr_t)&ad7986_chip_info },
 	{ }
 
 };

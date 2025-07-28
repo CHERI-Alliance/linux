@@ -198,8 +198,8 @@ static const struct of_device_id x9250_of_match[] = {
 MODULE_DEVICE_TABLE(of, x9250_of_match);
 
 static const struct spi_device_id x9250_id_table[] = {
-	{ "x9250t", (kernel_ulong_t)&x9250_cfg[X9250T] },
-	{ "x9250u", (kernel_ulong_t)&x9250_cfg[X9250U] },
+	{ "x9250t", (uintptr_t)&x9250_cfg[X9250T] },
+	{ "x9250u", (uintptr_t)&x9250_cfg[X9250U] },
 	{ }
 };
 MODULE_DEVICE_TABLE(spi, x9250_id_table);

@@ -45,7 +45,7 @@ static noinline void __up(struct semaphore *sem, struct wake_q_head *wake_q);
 #ifdef CONFIG_DETECT_HUNG_TASK_BLOCKER
 static inline void hung_task_sem_set_holder(struct semaphore *sem)
 {
-	WRITE_ONCE((sem)->last_holder, (unsigned long)current);
+	WRITE_ONCE((sem)->last_holder, (uintptr_t)current);
 }
 
 static inline void hung_task_sem_clear_if_holder(struct semaphore *sem)

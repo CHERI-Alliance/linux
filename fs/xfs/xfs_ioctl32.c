@@ -513,6 +513,6 @@ xfs_file_compat_ioctl(
 		return xfs_compat_attrmulti_by_handle(filp, arg);
 	default:
 		/* try the native version */
-		return xfs_file_ioctl(filp, cmd, (unsigned long)arg);
+		return xfs_file_ioctl(filp, cmd, (user_uintptr_t)arg);
 	}
 }

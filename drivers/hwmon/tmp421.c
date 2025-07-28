@@ -443,7 +443,7 @@ static int tmp421_probe(struct i2c_client *client)
 		return -ENOMEM;
 
 	mutex_init(&data->update_lock);
-	data->channels = (unsigned long)i2c_get_match_data(client);
+	data->channels = (uintptr_t)i2c_get_match_data(client);
 	data->client = client;
 
 	for (i = 0; i < data->channels; i++) {

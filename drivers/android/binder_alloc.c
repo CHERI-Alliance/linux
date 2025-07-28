@@ -298,7 +298,7 @@ static struct page *binder_page_alloc(struct binder_alloc *alloc,
 	mdata->alloc = alloc;
 	mdata->page_index = index;
 	INIT_LIST_HEAD(&mdata->lru);
-	set_page_private(page, (unsigned long)mdata);
+	set_page_private(page, (uintptr_t)mdata);
 
 	return page;
 }

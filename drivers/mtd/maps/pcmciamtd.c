@@ -542,8 +542,8 @@ static int pcmciamtd_config(struct pcmcia_device *link)
 	      dev, link->resource[2], dev->win_base);
 
 	dev->offset = 0;
-	dev->pcmcia_map.map_priv_1 = (unsigned long)dev;
-	dev->pcmcia_map.map_priv_2 = (unsigned long)link->resource[2];
+	dev->pcmcia_map.map_priv_1 = (uintptr_t)dev;
+	dev->pcmcia_map.map_priv_2 = (uintptr_t)link->resource[2];
 
 	dev->vpp = (vpp) ? vpp : link->socket->socket.Vpp;
 	if(setvpp == 2) {
@@ -607,7 +607,7 @@ static int pcmciamtd_config(struct pcmcia_device *link)
 	   use the faster non-remapping read/write functions */
 	if(mtd->size <= dev->win_size) {
 		pr_debug("Using non remapping memory functions\n");
-		dev->pcmcia_map.map_priv_2 = (unsigned long)dev->win_base;
+		dev->pcmcia_map.map_priv_2 = (uintptr_t)dev->win_base;
 		if (dev->pcmcia_map.bankwidth == 1) {
 			dev->pcmcia_map.read = pcmcia_read8;
 			dev->pcmcia_map.write = pcmcia_write8;

@@ -98,7 +98,7 @@ static int bd957x_i2c_probe(struct i2c_client *i2c)
 	struct irq_domain *domain;
 	bool usable_irqs;
 
-	chip_type = (unsigned long)of_device_get_match_data(&i2c->dev);
+	chip_type = (uintptr_t)of_device_get_match_data(&i2c->dev);
 
 	switch (chip_type) {
 	case ROHM_CHIP_TYPE_BD9576:

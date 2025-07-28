@@ -344,7 +344,7 @@ static int xgene_rng_probe(struct platform_device *pdev)
 	if (IS_ERR(clk))
 		return dev_err_probe(&pdev->dev, PTR_ERR(clk), "Couldn't get the clock for RNG\n");
 
-	xgene_rng_func.priv = (unsigned long) ctx;
+	xgene_rng_func.priv = (uintptr_t) ctx;
 
 	rc = devm_hwrng_register(&pdev->dev, &xgene_rng_func);
 	if (rc)

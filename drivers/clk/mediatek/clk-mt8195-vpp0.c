@@ -92,7 +92,7 @@ static const struct mtk_clk_desc vpp0_desc = {
 };
 
 static const struct platform_device_id clk_mt8195_vpp0_id_table[] = {
-	{ .name = "clk-mt8195-vpp0", .driver_data = (kernel_ulong_t)&vpp0_desc },
+	{ .name = "clk-mt8195-vpp0", .driver_data = (uintptr_t)&vpp0_desc },
 	{ /* sentinel */ }
 };
 MODULE_DEVICE_TABLE(platform, clk_mt8195_vpp0_id_table);

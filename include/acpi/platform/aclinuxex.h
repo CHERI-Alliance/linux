@@ -66,7 +66,7 @@ static inline void acpi_os_free(void *memory)
 
 static inline acpi_thread_id acpi_os_get_thread_id(void)
 {
-	return (acpi_thread_id) (unsigned long)current;
+	return (acpi_thread_id) (uintptr_t)current;
 }
 
 /*

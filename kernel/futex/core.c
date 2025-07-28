@@ -548,7 +548,7 @@ static u64 get_inode_sequence_number(struct inode *inode)
 int get_futex_key(u32 __user *uaddr, unsigned int flags, union futex_key *key,
 		  enum futex_access rw)
 {
-	unsigned long address = (unsigned long)uaddr;
+	user_uintptr_t address = (user_uintptr_t)uaddr;
 	struct mm_struct *mm = current->mm;
 	struct page *page;
 	struct folio *folio;

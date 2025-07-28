@@ -280,7 +280,7 @@ hashfn(const struct super_block *sb, struct kqid qid)
 	int type = qid.type;
 	unsigned long tmp;
 
-	tmp = (((unsigned long)sb>>L1_CACHE_SHIFT) ^ id) * (MAXQUOTAS - type);
+	tmp = (((uintptr_t)sb>>L1_CACHE_SHIFT) ^ id) * (MAXQUOTAS - type);
 	return (tmp + (tmp >> dq_hash_bits)) & dq_hash_mask;
 }
 

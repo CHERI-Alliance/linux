@@ -359,8 +359,8 @@ static inline struct rhash_head *__rht_ptr(
 	struct rhash_lock_head *p, struct rhash_lock_head __rcu *const *bkt)
 {
 	return (struct rhash_head *)
-		((unsigned long)p & ~BIT(0) ?:
-		 (unsigned long)RHT_NULLS_MARKER(bkt));
+		((uintptr_t)p & ~BIT(0) ?:
+		 (uintptr_t)RHT_NULLS_MARKER(bkt));
 }
 
 /*
@@ -395,7 +395,7 @@ static inline void rht_assign_locked(struct rhash_lock_head __rcu **bkt,
 {
 	if (rht_is_a_nulls(obj))
 		obj = NULL;
-	rcu_assign_pointer(*bkt, (void *)((unsigned long)obj | BIT(0)));
+	rcu_assign_pointer(*bkt, (void *)((uintptr_t)obj | BIT(0)));
 }
 
 static inline void rht_assign_unlock(struct bucket_table *tbl,

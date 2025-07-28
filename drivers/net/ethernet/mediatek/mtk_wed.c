@@ -581,7 +581,7 @@ mtk_wed_amsdu_free_buffer(struct mtk_wed_device *dev)
 	for (i = 0; i < MTK_WED_AMSDU_NPAGES; i++) {
 		dma_unmap_single(dev->hw->dev, wed_amsdu[i].txd_phy,
 				 MTK_WED_AMSDU_BUF_SIZE, DMA_TO_DEVICE);
-		free_pages((unsigned long)wed_amsdu[i].txd,
+		free_pages((uintptr_t)wed_amsdu[i].txd,
 			   get_order(MTK_WED_AMSDU_BUF_SIZE));
 	}
 }

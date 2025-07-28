@@ -358,9 +358,9 @@ MODULE_DEVICE_TABLE(of, ektf2127_of_match);
 #endif
 
 static const struct i2c_device_id ektf2127_i2c_id[] = {
-	{ .name = "ektf2127", .driver_data = (long)&ektf2127_data },
-	{ .name = "ektf2132", .driver_data = (long)&ektf2127_data },
-	{ .name = "ektf2232", .driver_data = (long)&ektf2232_data },
+	{ .name = "ektf2127", .driver_data = (intptr_t)&ektf2127_data },
+	{ .name = "ektf2132", .driver_data = (intptr_t)&ektf2127_data },
+	{ .name = "ektf2232", .driver_data = (intptr_t)&ektf2232_data },
 	{}
 };
 MODULE_DEVICE_TABLE(i2c, ektf2127_i2c_id);

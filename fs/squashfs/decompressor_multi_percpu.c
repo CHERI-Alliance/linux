@@ -61,7 +61,7 @@ out:
 static void squashfs_decompressor_destroy(struct squashfs_sb_info *msblk)
 {
 	struct squashfs_stream __percpu *percpu =
-			(void __percpu *)(unsigned long) msblk->stream;
+			(void __percpu *)(uintptr_t) msblk->stream;
 	struct squashfs_stream *stream;
 	int cpu;
 
@@ -79,7 +79,7 @@ static int squashfs_decompress(struct squashfs_sb_info *msblk, struct bio *bio,
 {
 	struct squashfs_stream *stream;
 	struct squashfs_stream __percpu *percpu =
-			(void __percpu *)(unsigned long) msblk->stream;
+			(void __percpu *)(uintptr_t) msblk->stream;
 	int res;
 
 	local_lock(&percpu->lock);

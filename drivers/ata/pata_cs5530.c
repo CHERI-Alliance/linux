@@ -25,7 +25,7 @@
 
 static void __iomem *cs5530_port_base(struct ata_port *ap)
 {
-	unsigned long bmdma = (unsigned long)ap->ioaddr.bmdma_addr;
+	uintptr_t bmdma = (uintptr_t)ap->ioaddr.bmdma_addr;
 
 	return (void __iomem *)((bmdma & ~0x0F) + 0x20 + 0x10 * ap->port_no);
 }

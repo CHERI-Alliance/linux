@@ -936,7 +936,7 @@ static int sbefifo_user_release(struct inode *inode, struct file *file)
 		return -EINVAL;
 
 	sbefifo_release_command(user);
-	free_page((unsigned long)user->cmd_page);
+	free_page((uintptr_t)user->cmd_page);
 	kfree(user);
 
 	return 0;

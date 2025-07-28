@@ -1123,7 +1123,7 @@ dequeue_rx(struct idt77252_dev *card, struct rsq_entry *rsqe)
 		unsigned int len, truesize;
 		unsigned char *l1l2;
 
-		l1l2 = (unsigned char *) ((unsigned long) skb->data + skb->len - 6);
+		l1l2 = (unsigned char *) ((uintptr_t) skb->data + skb->len - 6);
 
 		len = (l1l2[0] << 8) | l1l2[1];
 		len = len ? len : 0x10000;

@@ -1181,7 +1181,7 @@ static int hci_sock_compat_ioctl(struct socket *sock, unsigned int cmd,
 		return hci_sock_ioctl(sock, cmd, arg);
 	}
 
-	return hci_sock_ioctl(sock, cmd, (unsigned long)compat_ptr(arg));
+	return hci_sock_ioctl(sock, cmd, (user_uintptr_t)compat_ptr(arg));
 }
 #endif
 

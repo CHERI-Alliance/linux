@@ -688,7 +688,7 @@ static void genl_sk_priv_free_by_sock(struct genl_family *family,
 
 	if (!family->sock_priv_size)
 		return;
-	priv = xa_erase(family->sock_privs, (unsigned long) sk);
+	priv = xa_erase(family->sock_privs, (uintptr_t) sk);
 	if (!priv)
 		return;
 	genl_sk_priv_free(family, priv);
@@ -724,7 +724,7 @@ void *__genl_sk_priv_get(struct genl_family *family, struct sock *sk)
 {
 	if (WARN_ON_ONCE(!family->sock_privs))
 		return ERR_PTR(-EINVAL);
-	return xa_load(family->sock_privs, (unsigned long) sk);
+	return xa_load(family->sock_privs, (uintptr_t) sk);
 }
 
 /**
@@ -753,7 +753,7 @@ void *genl_sk_priv_get(struct genl_family *family, struct sock *sk)
 	if (IS_ERR(priv))
 		return ERR_CAST(priv);
 
-	old_priv = xa_cmpxchg(family->sock_privs, (unsigned long) sk, NULL,
+	old_priv = xa_cmpxchg(family->sock_privs, (uintptr_t) sk, NULL,
 			      priv, GFP_KERNEL);
 	if (old_priv) {
 		genl_sk_priv_free(family, priv);

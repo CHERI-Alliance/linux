@@ -2031,7 +2031,7 @@ u64 iwl_mvm_prepare_multicast(struct ieee80211_hw *hw,
 
 	if (pass_all) {
 		cmd->pass_all = 1;
-		return (u64)(unsigned long)cmd;
+		return (u64)(uintptr_t)cmd;
 	}
 
 	netdev_hw_addr_list_for_each(addr, mc_list) {
@@ -2042,7 +2042,7 @@ u64 iwl_mvm_prepare_multicast(struct ieee80211_hw *hw,
 		cmd->count++;
 	}
 
-	return (u64)(unsigned long)cmd;
+	return (u64)(uintptr_t)cmd;
 }
 
 void iwl_mvm_configure_filter(struct ieee80211_hw *hw,

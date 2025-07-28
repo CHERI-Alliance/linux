@@ -141,7 +141,7 @@
 static inline void rwsem_set_owner(struct rw_semaphore *sem)
 {
 	lockdep_assert_preemption_disabled();
-	atomic_long_set(&sem->owner, (long)current);
+	atomic_long_set(&sem->owner, (intptr_t)current);
 }
 
 static inline void rwsem_clear_owner(struct rw_semaphore *sem)
@@ -171,7 +171,7 @@ static inline bool rwsem_test_oflags(struct rw_semaphore *sem, long flags)
 static inline void __rwsem_set_reader_owned(struct rw_semaphore *sem,
 					    struct task_struct *owner)
 {
-	unsigned long val = (unsigned long)owner | RWSEM_READER_OWNED |
+	unsigned long val = (uintptr_t)owner | RWSEM_READER_OWNED |
 		(atomic_long_read(&sem->owner) & RWSEM_NONSPINNABLE);
 
 	atomic_long_set(&sem->owner, val);

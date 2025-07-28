@@ -526,7 +526,7 @@ static int rionet_setup_netdev(struct rio_mport *mport, struct net_device *ndev)
 
 	rc = register_netdev(ndev);
 	if (rc != 0) {
-		free_pages((unsigned long)nets[mport->id].active,
+		free_pages((uintptr_t)nets[mport->id].active,
 			   get_order(rionet_active_bytes));
 		goto out;
 	}
@@ -680,7 +680,7 @@ static void rionet_remove_mport(struct device *dev)
 		netif_stop_queue(ndev);
 		unregister_netdev(ndev);
 
-		free_pages((unsigned long)nets[id].active,
+		free_pages((uintptr_t)nets[id].active,
 			   get_order(sizeof(void *) *
 			   RIO_MAX_ROUTE_ENTRIES(mport->sys_size)));
 		nets[id].active = NULL;

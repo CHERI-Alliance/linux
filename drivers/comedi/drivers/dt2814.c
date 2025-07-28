@@ -68,7 +68,7 @@ static int dt2814_ai_clear(struct comedi_device *dev)
 
 	/* Wait until not busy and get status register value. */
 	ret = comedi_timeout(dev, NULL, NULL, dt2814_ai_notbusy,
-			     (unsigned long)&status);
+			     (uintptr_t)&status);
 	if (ret)
 		return ret;
 

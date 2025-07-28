@@ -342,7 +342,7 @@ static unsigned long fair_server_period_min = (100) * NSEC_PER_USEC;     /* 100 
 static ssize_t sched_fair_server_write(struct file *filp, const char __user *ubuf,
 				       size_t cnt, loff_t *ppos, enum dl_param param)
 {
-	long cpu = (long) ((struct seq_file *) filp->private_data)->private;
+	intptr_t cpu = (intptr_t) ((struct seq_file *) filp->private_data)->private;
 	struct rq *rq = cpu_rq(cpu);
 	u64 runtime, period;
 	size_t err;
@@ -397,7 +397,7 @@ static ssize_t sched_fair_server_write(struct file *filp, const char __user *ubu
 
 static size_t sched_fair_server_show(struct seq_file *m, void *v, enum dl_param param)
 {
-	unsigned long cpu = (unsigned long) m->private;
+	uintptr_t cpu = (uintptr_t) m->private;
 	struct rq *rq = cpu_rq(cpu);
 	u64 value;
 

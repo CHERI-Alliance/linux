@@ -54,7 +54,7 @@ static inline int is_a_nulls(const struct hlist_nulls_node *ptr)
  */
 static inline unsigned long get_nulls_value(const struct hlist_nulls_node *ptr)
 {
-	return ((unsigned long)ptr) >> 1;
+	return ((uintptr_t)ptr) >> 1;
 }
 
 /**

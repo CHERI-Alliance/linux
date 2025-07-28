@@ -283,20 +283,20 @@ static DEFINE_XARRAY(ublk_zoned_report_descs);
 static int ublk_zoned_insert_report_desc(const struct request *req,
 		struct ublk_zoned_report_desc *desc)
 {
-	return xa_insert(&ublk_zoned_report_descs, (unsigned long)req,
+	return xa_insert(&ublk_zoned_report_descs, (uintptr_t)req,
 			    desc, GFP_KERNEL);
 }
 
 static struct ublk_zoned_report_desc *ublk_zoned_erase_report_desc(
 		const struct request *req)
 {
-	return xa_erase(&ublk_zoned_report_descs, (unsigned long)req);
+	return xa_erase(&ublk_zoned_report_descs, (uintptr_t)req);
 }
 
 static struct ublk_zoned_report_desc *ublk_zoned_get_report_desc(
 		const struct request *req)
 {
-	return xa_load(&ublk_zoned_report_descs, (unsigned long)req);
+	return xa_load(&ublk_zoned_report_descs, (uintptr_t)req);
 }
 
 static int ublk_get_nr_zones(const struct ublk_device *ub)
@@ -2675,7 +2675,7 @@ static void ublk_deinit_queue(struct ublk_device *ub, int q_id)
 	}
 
 	if (ubq->io_cmd_buf)
-		free_pages((unsigned long)ubq->io_cmd_buf, get_order(size));
+		free_pages((uintptr_t)ubq->io_cmd_buf, get_order(size));
 }
 
 static int ublk_init_queue(struct ublk_device *ub, int q_id)
@@ -2984,7 +2984,7 @@ out_unlock:
 static int ublk_ctrl_get_queue_affinity(struct ublk_device *ub,
 		const struct ublksrv_ctrl_cmd *header)
 {
-	void __user *argp = (void __user *)(unsigned long)header->addr;
+	void __user *argp = (void __user *)(user_uintptr_t)header->addr;
 	cpumask_var_t cpumask;
 	unsigned long queue;
 	unsigned int retlen;
@@ -3034,7 +3034,7 @@ static inline void ublk_dump_dev_info(struct ublksrv_ctrl_dev_info *info)
 
 static int ublk_ctrl_add_dev(const struct ublksrv_ctrl_cmd *header)
 {
-	void __user *argp = (void __user *)(unsigned long)header->addr;
+	void __user *argp = (void __user *)(user_uintptr_t)header->addr;
 	struct ublksrv_ctrl_dev_info info;
 	struct ublk_device *ub;
 	int ret = -EINVAL;
@@ -3280,7 +3280,7 @@ static int ublk_ctrl_stop_dev(struct ublk_device *ub)
 static int ublk_ctrl_get_dev_info(struct ublk_device *ub,
 		const struct ublksrv_ctrl_cmd *header)
 {
-	void __user *argp = (void __user *)(unsigned long)header->addr;
+	void __user *argp = (void __user *)(user_uintptr_t)header->addr;
 
 	if (header->len < sizeof(struct ublksrv_ctrl_dev_info) || !header->addr)
 		return -EINVAL;
@@ -3310,7 +3310,7 @@ static void ublk_ctrl_fill_params_devt(struct ublk_device *ub)
 static int ublk_ctrl_get_params(struct ublk_device *ub,
 		const struct ublksrv_ctrl_cmd *header)
 {
-	void __user *argp = (void __user *)(unsigned long)header->addr;
+	void __user *argp = (void __user *)(user_uintptr_t)header->addr;
 	struct ublk_params_header ph;
 	int ret;
 
@@ -3340,7 +3340,7 @@ static int ublk_ctrl_get_params(struct ublk_device *ub,
 static int ublk_ctrl_set_params(struct ublk_device *ub,
 		const struct ublksrv_ctrl_cmd *header)
 {
-	void __user *argp = (void __user *)(unsigned long)header->addr;
+	void __user *argp = (void __user *)(user_uintptr_t)header->addr;
 	struct ublk_params_header ph;
 	int ret = -EFAULT;
 
@@ -3454,7 +3454,7 @@ static int ublk_ctrl_end_recovery(struct ublk_device *ub,
 
 static int ublk_ctrl_get_features(const struct ublksrv_ctrl_cmd *header)
 {
-	void __user *argp = (void __user *)(unsigned long)header->addr;
+	void __user *argp = (void __user *)(user_uintptr_t)header->addr;
 	u64 features = UBLK_F_ALL;
 
 	if (header->len != UBLK_FEATURES_LEN || !header->addr)
@@ -3620,7 +3620,7 @@ static int ublk_ctrl_uring_cmd_permission(struct ublk_device *ub,
 {
 	struct ublksrv_ctrl_cmd *header = (struct ublksrv_ctrl_cmd *)io_uring_sqe_cmd(cmd->sqe);
 	bool unprivileged = ub->dev_info.flags & UBLK_F_UNPRIVILEGED_DEV;
-	void __user *argp = (void __user *)(unsigned long)header->addr;
+	void __user *argp = (void __user *)(user_uintptr_t)header->addr;
 	char *dev_path = NULL;
 	int ret = 0;
 	int mask;

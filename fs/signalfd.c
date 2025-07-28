@@ -94,7 +94,7 @@ static int signalfd_copyinfo(struct iov_iter *to, kernel_siginfo_t const *kinfo)
 	case SIL_TIMER:
 		new.ssi_tid = kinfo->si_tid;
 		new.ssi_overrun = kinfo->si_overrun;
-		new.ssi_ptr = (long) kinfo->si_ptr;
+		new.ssi_ptr = (user_intptr_t) kinfo->si_ptr;
 		new.ssi_int = kinfo->si_int;
 		break;
 	case SIL_POLL:
@@ -112,14 +112,14 @@ static int signalfd_copyinfo(struct iov_iter *to, kernel_siginfo_t const *kinfo)
 		 * and signalfd catches it treat it as SIL_FAULT.
 		 */
 	case SIL_FAULT:
-		new.ssi_addr = (long) kinfo->si_addr;
+		new.ssi_addr = (user_intptr_t) kinfo->si_addr;
 		break;
 	case SIL_FAULT_TRAPNO:
-		new.ssi_addr = (long) kinfo->si_addr;
+		new.ssi_addr = (user_intptr_t) kinfo->si_addr;
 		new.ssi_trapno = kinfo->si_trapno;
 		break;
 	case SIL_FAULT_MCEERR:
-		new.ssi_addr = (long) kinfo->si_addr;
+		new.ssi_addr = (user_intptr_t) kinfo->si_addr;
 		new.ssi_addr_lsb = (short) kinfo->si_addr_lsb;
 		break;
 	case SIL_CHLD:
@@ -135,11 +135,11 @@ static int signalfd_copyinfo(struct iov_iter *to, kernel_siginfo_t const *kinfo)
 		 */
 		new.ssi_pid = kinfo->si_pid;
 		new.ssi_uid = kinfo->si_uid;
-		new.ssi_ptr = (long) kinfo->si_ptr;
+		new.ssi_ptr = (user_intptr_t) kinfo->si_ptr;
 		new.ssi_int = kinfo->si_int;
 		break;
 	case SIL_SYS:
-		new.ssi_call_addr = (long) kinfo->si_call_addr;
+		new.ssi_call_addr = (user_intptr_t) kinfo->si_call_addr;
 		new.ssi_syscall   = kinfo->si_syscall;
 		new.ssi_arch      = kinfo->si_arch;
 		break;

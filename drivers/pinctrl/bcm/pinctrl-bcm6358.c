@@ -261,7 +261,7 @@ static int bcm6358_pinctrl_set_mux(struct pinctrl_dev *pctldev,
 	unsigned pin;
 
 	for (pin = 0; pin < pg->grp.npins; pin++)
-		mask |= (unsigned long)bcm6358_pins[pin].drv_data;
+		mask |= (uintptr_t)bcm6358_pins[pin].drv_data;
 
 	regmap_field_update_bits(priv->overlays, mask, val);
 

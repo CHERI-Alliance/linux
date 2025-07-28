@@ -639,7 +639,7 @@ void __init reserve_initrd_mem(void)
 
 	memblock_reserve(start, size);
 	/* Now convert initrd to virtual addresses */
-	initrd_start = (unsigned long)__va(phys_initrd_start);
+	initrd_start = (uintptr_t)__va(phys_initrd_start);
 	initrd_end = initrd_start + phys_initrd_size;
 	initrd_below_start_ok = 1;
 

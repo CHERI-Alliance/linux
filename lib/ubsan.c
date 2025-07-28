@@ -163,7 +163,7 @@ static s_max get_signed_val(struct type_descriptor *type, void *val)
 {
 	if (is_inline_int(type)) {
 		unsigned extra_bits = sizeof(s_max)*8 - type_bit_width(type);
-		unsigned long ulong_val = (unsigned long)val;
+		uintptr_t ulong_val = (uintptr_t)val;
 
 		return ((s_max)ulong_val) << extra_bits >> extra_bits;
 	}
@@ -182,7 +182,7 @@ static bool val_is_negative(struct type_descriptor *type, void *val)
 static u_max get_unsigned_val(struct type_descriptor *type, void *val)
 {
 	if (is_inline_int(type))
-		return (unsigned long)val;
+		return (uintptr_t)val;
 
 	if (type_bit_width(type) == 64)
 		return *(u64 *)val;
@@ -421,7 +421,7 @@ void __ubsan_handle_type_mismatch(struct type_mismatch_data *data,
 		.type_check_kind = data->type_check_kind
 	};
 
-	ubsan_type_mismatch_common(&common_data, (unsigned long)ptr);
+	ubsan_type_mismatch_common(&common_data, (uintptr_t)ptr);
 }
 EXPORT_SYMBOL(__ubsan_handle_type_mismatch);
 
@@ -435,7 +435,7 @@ void __ubsan_handle_type_mismatch_v1(void *_data, void *ptr)
 		.type_check_kind = data->type_check_kind
 	};
 
-	ubsan_type_mismatch_common(&common_data, (unsigned long)ptr);
+	ubsan_type_mismatch_common(&common_data, (uintptr_t)ptr);
 }
 EXPORT_SYMBOL(__ubsan_handle_type_mismatch_v1);
 

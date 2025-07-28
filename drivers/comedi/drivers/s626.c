@@ -1973,7 +1973,7 @@ static int s626_dio_insn_bits(struct comedi_device *dev,
 			      struct comedi_insn *insn,
 			      unsigned int *data)
 {
-	unsigned long group = (unsigned long)s->private;
+	uintptr_t group = (uintptr_t)s->private;
 
 	if (comedi_dio_update_state(s, data))
 		s626_debi_write(dev, S626_LP_WRDOUT(group), s->state);
@@ -1988,7 +1988,7 @@ static int s626_dio_insn_config(struct comedi_device *dev,
 				struct comedi_insn *insn,
 				unsigned int *data)
 {
-	unsigned long group = (unsigned long)s->private;
+	uintptr_t group = (uintptr_t)s->private;
 	int ret;
 
 	ret = comedi_dio_insn_config(dev, s, insn, data, 0);

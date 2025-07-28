@@ -70,7 +70,7 @@ static __u8 *va_logical_boundary_fixup(struct hid_device *hdev, __u8 *rdesc,
 static const __u8 *cp_report_fixup(struct hid_device *hdev, __u8 *rdesc,
 		unsigned int *rsize)
 {
-	unsigned long quirks = (unsigned long)hid_get_drvdata(hdev);
+	uintptr_t quirks = (uintptr_t)hid_get_drvdata(hdev);
 
 	if (quirks & CP_RDESC_SWAPPED_MIN_MAX)
 		rdesc = cp_rdesc_fixup(hdev, rdesc, rsize);
@@ -84,7 +84,7 @@ static int cp_input_mapped(struct hid_device *hdev, struct hid_input *hi,
 		struct hid_field *field, struct hid_usage *usage,
 		unsigned long **bit, int *max)
 {
-	unsigned long quirks = (unsigned long)hid_get_drvdata(hdev);
+	uintptr_t quirks = (uintptr_t)hid_get_drvdata(hdev);
 
 	if (!(quirks & CP_2WHEEL_MOUSE_HACK))
 		return 0;
@@ -100,7 +100,7 @@ static int cp_input_mapped(struct hid_device *hdev, struct hid_input *hi,
 static int cp_event(struct hid_device *hdev, struct hid_field *field,
 		struct hid_usage *usage, __s32 value)
 {
-	unsigned long quirks = (unsigned long)hid_get_drvdata(hdev);
+	uintptr_t quirks = (uintptr_t)hid_get_drvdata(hdev);
 
 	if (!(hdev->claimed & HID_CLAIMED_INPUT) || !field->hidinput ||
 			!usage->type || !(quirks & CP_2WHEEL_MOUSE_HACK))

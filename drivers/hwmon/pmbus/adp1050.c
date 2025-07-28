@@ -89,10 +89,10 @@ static int adp1050_probe(struct i2c_client *client)
 }
 
 static const struct i2c_device_id adp1050_id[] = {
-	{ .name = "adp1050", .driver_data = (kernel_ulong_t)&adp1050_info },
-	{ .name = "adp1051", .driver_data = (kernel_ulong_t)&adp1051_info },
-	{ .name = "adp1055", .driver_data = (kernel_ulong_t)&adp1055_info },
-	{ .name = "ltp8800", .driver_data = (kernel_ulong_t)&ltp8800_info },
+	{ .name = "adp1050", .driver_data = (uintptr_t)&adp1050_info },
+	{ .name = "adp1051", .driver_data = (uintptr_t)&adp1051_info },
+	{ .name = "adp1055", .driver_data = (uintptr_t)&adp1055_info },
+	{ .name = "ltp8800", .driver_data = (uintptr_t)&ltp8800_info },
 	{}
 };
 MODULE_DEVICE_TABLE(i2c, adp1050_id);

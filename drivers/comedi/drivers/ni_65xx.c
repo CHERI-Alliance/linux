@@ -347,7 +347,7 @@ static int ni_65xx_dio_insn_config(struct comedi_device *dev,
 				   struct comedi_insn *insn,
 				   unsigned int *data)
 {
-	unsigned long base_port = (unsigned long)s->private;
+	uintptr_t base_port = (uintptr_t)s->private;
 	unsigned int chan = CR_CHAN(insn->chanspec);
 	unsigned int chan_mask = NI_65XX_CHAN_TO_MASK(chan);
 	unsigned int port = base_port + NI_65XX_CHAN_TO_PORT(chan);
@@ -415,7 +415,7 @@ static int ni_65xx_dio_insn_bits(struct comedi_device *dev,
 				 struct comedi_insn *insn,
 				 unsigned int *data)
 {
-	unsigned long base_port = (unsigned long)s->private;
+	uintptr_t base_port = (uintptr_t)s->private;
 	unsigned int base_chan = CR_CHAN(insn->chanspec);
 	int last_port_offset = NI_65XX_CHAN_TO_PORT(s->n_chan - 1);
 	unsigned int read_bits = 0;

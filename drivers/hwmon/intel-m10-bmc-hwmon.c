@@ -757,19 +757,19 @@ static int m10bmc_hwmon_probe(struct platform_device *pdev)
 static const struct platform_device_id intel_m10bmc_hwmon_ids[] = {
 	{
 		.name = "n3000bmc-hwmon",
-		.driver_data = (unsigned long)&n3000bmc_hwmon_bdata,
+		.driver_data = (uintptr_t)&n3000bmc_hwmon_bdata,
 	},
 	{
 		.name = "d5005bmc-hwmon",
-		.driver_data = (unsigned long)&d5005bmc_hwmon_bdata,
+		.driver_data = (uintptr_t)&d5005bmc_hwmon_bdata,
 	},
 	{
 		.name = "n5010bmc-hwmon",
-		.driver_data = (unsigned long)&n5010bmc_hwmon_bdata,
+		.driver_data = (uintptr_t)&n5010bmc_hwmon_bdata,
 	},
 	{
 		.name = "n6000bmc-hwmon",
-		.driver_data = (unsigned long)&n6000bmc_hwmon_bdata,
+		.driver_data = (uintptr_t)&n6000bmc_hwmon_bdata,
 	},
 	{ }
 };

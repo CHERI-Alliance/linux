@@ -135,7 +135,7 @@ static void mall_destroy(struct tcf_proto *tp, bool rtnl_held,
 	tcf_unbind_filter(tp, &head->res);
 
 	if (!tc_skip_hw(head->flags))
-		mall_destroy_hw_filter(tp, head, (unsigned long) head, extack);
+		mall_destroy_hw_filter(tp, head, (uintptr_t) head, extack);
 
 	if (tcf_exts_get_net(&head->exts))
 		tcf_queue_work(&head->rwork, mall_destroy_work);
@@ -219,7 +219,7 @@ static int mall_change(struct net *net, struct sk_buff *in_skb,
 	}
 
 	if (!tc_skip_hw(new->flags)) {
-		err = mall_replace_hw_filter(tp, new, (unsigned long)new,
+		err = mall_replace_hw_filter(tp, new, (uintptr_t)new,
 					     extack);
 		if (err)
 			goto err_replace_hw_filter;
@@ -290,7 +290,7 @@ static int mall_reoffload(struct tcf_proto *tp, bool add, flow_setup_cb_t *cb,
 	tc_cls_common_offload_init(&cls_mall.common, tp, head->flags, extack);
 	cls_mall.command = add ?
 		TC_CLSMATCHALL_REPLACE : TC_CLSMATCHALL_DESTROY;
-	cls_mall.cookie = (unsigned long)head;
+	cls_mall.cookie = (uintptr_t)head;
 
 	err = tc_setup_offload_action(&cls_mall.rule->action, &head->exts,
 				      cls_mall.common.extack);
@@ -337,7 +337,7 @@ static int mall_dump(struct net *net, struct tcf_proto *tp, void *fh,
 		return skb->len;
 
 	if (!tc_skip_hw(head->flags))
-		mall_stats_hw_filter(tp, head, (unsigned long)head);
+		mall_stats_hw_filter(tp, head, (uintptr_t)head);
 
 	t->tcm_handle = head->handle;
 

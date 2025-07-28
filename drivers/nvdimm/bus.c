@@ -1190,7 +1190,7 @@ enum nd_ioctl_mode {
 
 static int match_dimm(struct device *dev, const void *data)
 {
-	long id = (long) data;
+	intptr_t id = (intptr_t) data;
 
 	if (is_nvdimm(dev)) {
 		struct nvdimm *nvdimm = to_nvdimm(dev);
@@ -1206,7 +1206,7 @@ static long nd_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg,
 
 {
 	struct nvdimm_bus *nvdimm_bus, *found = NULL;
-	long id = (long) file->private_data;
+	intptr_t id = (intptr_t) file->private_data;
 	struct nvdimm *nvdimm = NULL;
 	int rc, ro;
 

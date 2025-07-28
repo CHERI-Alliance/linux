@@ -369,7 +369,7 @@ static int mtk_btcvsd_read_from_bt(struct mtk_btcvsd_snd *bt,
 	unsigned long connsys_addr_rx, ap_addr_rx;
 
 	connsys_addr_rx = *bt->bt_reg_pkt_r;
-	ap_addr_rx = (unsigned long)bt->bt_sram_bank2_base +
+	ap_addr_rx = (uintptr_t)bt->bt_sram_bank2_base +
 		     (connsys_addr_rx & 0xFFFF);
 
 	if (connsys_addr_rx == 0xdeadfeed) {
@@ -420,7 +420,7 @@ static int mtk_btcvsd_write_to_bt(struct mtk_btcvsd_snd *bt,
 	bool new_ap_addr_tx = true;
 
 	connsys_addr_tx = *bt->bt_reg_pkt_w;
-	ap_addr_tx = (unsigned long)bt->bt_sram_bank2_base +
+	ap_addr_tx = (uintptr_t)bt->bt_sram_bank2_base +
 		     (connsys_addr_tx & 0xFFFF);
 
 	if (connsys_addr_tx == 0xdeadfeed) {
@@ -520,11 +520,11 @@ static irqreturn_t mtk_btcvsd_snd_irq_handler(int irq_id, void *dev)
 		unsigned long connsys_addr_tx, ap_addr_tx;
 
 		connsys_addr_rx = *bt->bt_reg_pkt_r;
-		ap_addr_rx = (unsigned long)bt->bt_sram_bank2_base +
+		ap_addr_rx = (uintptr_t)bt->bt_sram_bank2_base +
 			     (connsys_addr_rx & 0xFFFF);
 
 		connsys_addr_tx = *bt->bt_reg_pkt_w;
-		ap_addr_tx = (unsigned long)bt->bt_sram_bank2_base +
+		ap_addr_tx = (uintptr_t)bt->bt_sram_bank2_base +
 			     (connsys_addr_tx & 0xFFFF);
 
 		if (connsys_addr_tx == 0xdeadfeed ||

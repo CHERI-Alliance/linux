@@ -34,7 +34,7 @@ static unsigned long avs_rt5682_quirk = AVS_RT5682_MCLK_EN | AVS_RT5682_SSP_CODE
 
 static int avs_rt5682_quirk_cb(const struct dmi_system_id *id)
 {
-	avs_rt5682_quirk = (unsigned long)id->driver_data;
+	avs_rt5682_quirk = (uintptr_t)id->driver_data;
 	return 1;
 }
 

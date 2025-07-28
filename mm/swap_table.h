@@ -34,7 +34,7 @@ static inline unsigned long null_to_swp_tb(void)
 static inline unsigned long folio_to_swp_tb(struct folio *folio)
 {
 	BUILD_BUG_ON(sizeof(unsigned long) != sizeof(void *));
-	return (unsigned long)folio;
+	return (uintptr_t)folio;
 }
 
 static inline unsigned long shadow_swp_to_tb(void *shadow)
@@ -42,7 +42,7 @@ static inline unsigned long shadow_swp_to_tb(void *shadow)
 	BUILD_BUG_ON((BITS_PER_XA_VALUE + 1) !=
 		     BITS_PER_BYTE * sizeof(unsigned long));
 	VM_WARN_ON_ONCE(shadow && !xa_is_value(shadow));
-	return (unsigned long)shadow;
+	return (uintptr_t)shadow;
 }
 
 /*

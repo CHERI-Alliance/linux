@@ -123,7 +123,7 @@ static int __io_import_rw_buffer(int ddir, struct io_kiocb *req,
 		*sel = io_buffer_select(req, &sqe_len, io->buf_group, issue_flags);
 		if (!sel->addr)
 			return -ENOBUFS;
-		rw->addr = (unsigned long) sel->addr;
+		rw->addr = (user_uintptr_t) sel->addr;
 		rw->len = sqe_len;
 	}
 	return import_ubuf(ddir, sel->addr, sqe_len, &io->iter);

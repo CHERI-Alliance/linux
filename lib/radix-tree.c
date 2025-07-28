@@ -66,12 +66,12 @@ EXPORT_PER_CPU_SYMBOL_GPL(radix_tree_preloads);
 
 static inline struct radix_tree_node *entry_to_node(void *ptr)
 {
-	return (void *)((unsigned long)ptr & ~RADIX_TREE_INTERNAL_NODE);
+	return (void *)((uintptr_t)ptr & ~RADIX_TREE_INTERNAL_NODE);
 }
 
 static inline void *node_to_entry(void *ptr)
 {
-	return (void *)((unsigned long)ptr | RADIX_TREE_INTERNAL_NODE);
+	return (void *)((uintptr_t)ptr | RADIX_TREE_INTERNAL_NODE);
 }
 
 #define RADIX_TREE_RETRY	XA_RETRY_ENTRY

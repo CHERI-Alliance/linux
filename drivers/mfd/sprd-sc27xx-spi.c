@@ -248,8 +248,8 @@ static const struct of_device_id sprd_pmic_match[] = {
 MODULE_DEVICE_TABLE(of, sprd_pmic_match);
 
 static const struct spi_device_id sprd_pmic_spi_ids[] = {
-	{ .name = "sc2730", .driver_data = (unsigned long)&sc2730_data },
-	{ .name = "sc2731", .driver_data = (unsigned long)&sc2731_data },
+	{ .name = "sc2730", .driver_data = (uintptr_t)&sc2730_data },
+	{ .name = "sc2731", .driver_data = (uintptr_t)&sc2731_data },
 	{},
 };
 MODULE_DEVICE_TABLE(spi, sprd_pmic_spi_ids);

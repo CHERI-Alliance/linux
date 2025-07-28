@@ -3728,7 +3728,7 @@ static int lan78xx_bind(struct lan78xx_net *dev, struct usb_interface *intf)
 	int ret;
 	int i;
 
-	dev->data[0] = (unsigned long)kzalloc(sizeof(*pdata), GFP_KERNEL);
+	dev->data[0] = (uintptr_t)kzalloc(sizeof(*pdata), GFP_KERNEL);
 
 	pdata = (struct lan78xx_priv *)(dev->data[0]);
 	if (!pdata) {

@@ -628,7 +628,7 @@ static int uniphier_sd_probe(struct platform_device *pdev)
 	if (!priv)
 		return -ENOMEM;
 
-	priv->caps = (unsigned long)of_device_get_match_data(dev);
+	priv->caps = (uintptr_t)of_device_get_match_data(dev);
 
 	priv->clk = devm_clk_get(dev, NULL);
 	if (IS_ERR(priv->clk)) {

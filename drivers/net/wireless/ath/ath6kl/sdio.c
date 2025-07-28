@@ -373,7 +373,7 @@ static int ath6kl_sdio_alloc_prep_scat_req(struct ath6kl_sdio *ar_sdio,
 			}
 
 			s_req->virt_dma_buf =
-				(u8 *)L1_CACHE_ALIGN((unsigned long)virt_buf);
+				(u8 *)L1_CACHE_ALIGN((uintptr_t)virt_buf);
 		} else {
 			/* allocate sglist */
 			s_req->sgentries = kzalloc(size, GFP_KERNEL);

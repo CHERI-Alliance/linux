@@ -5256,7 +5256,7 @@ static u64 mwl8k_prepare_multicast(struct ieee80211_hw *hw,
 	 */
 	cmd = __mwl8k_cmd_mac_multicast_adr(hw, 0, mc_list);
 
-	return (unsigned long)cmd;
+	return (uintptr_t)cmd;
 }
 
 static int

@@ -373,7 +373,7 @@ finish:
 	if (walk->buffer != walk->page)
 		kfree(walk->buffer);
 	if (walk->page)
-		free_page((unsigned long)walk->page);
+		free_page((uintptr_t)walk->page);
 
 out:
 	return res;

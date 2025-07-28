@@ -213,7 +213,7 @@ int aty_init_cursor(struct fb_info *info, struct fb_ops *atyfb_ops)
 	addr = info->fix.smem_start - 0x800000 + info->fix.smem_len;
 	info->sprite.addr = (u8 *) ioremap(addr, 1024);
 #else
-	addr = (unsigned long) info->screen_base + info->fix.smem_len;
+	addr = (uintptr_t) info->screen_base + info->fix.smem_len;
 	info->sprite.addr = (u8 *) addr;
 #endif
 #endif

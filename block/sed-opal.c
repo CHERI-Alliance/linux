@@ -585,7 +585,7 @@ static int opal_discovery0_end(struct opal_dev *dev, void *data)
 	}
 
 	if (discv_out) {
-		buf_out = (u8 __user *)(uintptr_t)discv_out->data;
+		buf_out = (u8 __user *)(user_uintptr_t)discv_out->data;
 		len_out = min_t(u64, discv_out->size, hlen);
 		if (buf_out && copy_to_user(buf_out, dev->resp, len_out))
 			return -EFAULT;
@@ -2425,7 +2425,7 @@ static int read_table_data(struct opal_dev *dev, void *data)
 			break;
 		}
 
-		dst = (u8 __user *)(uintptr_t)read_tbl->data;
+		dst = (u8 __user *)(user_uintptr_t)read_tbl->data;
 		if (copy_to_user(dst + off, dev->prev_data, dev->prev_d_len)) {
 			pr_debug("Error copying data to userspace\n");
 			err = -EFAULT;

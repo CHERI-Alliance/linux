@@ -479,7 +479,7 @@ static u64 wcn36xx_prepare_multicast(struct ieee80211_hw *hw,
 		}
 	}
 
-	return (u64)(unsigned long)fp;
+	return (u64)(uintptr_t)fp;
 }
 
 static void wcn36xx_tx(struct ieee80211_hw *hw,

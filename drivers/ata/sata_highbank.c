@@ -487,7 +487,7 @@ static int ahci_highbank_probe(struct platform_device *pdev)
 	}
 
 	hpriv->irq = irq;
-	hpriv->flags |= (unsigned long)pi.private_data;
+	hpriv->flags |= (uintptr_t)pi.private_data;
 
 	hpriv->mmio = devm_ioremap(dev, mem->start, resource_size(mem));
 	if (!hpriv->mmio) {

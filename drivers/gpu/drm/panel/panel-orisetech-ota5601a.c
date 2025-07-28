@@ -332,7 +332,7 @@ static const struct ota5601a_panel_info gpt3_info = {
 };
 
 static const struct spi_device_id gpt3_id[] = {
-	{ "gpt3", (kernel_ulong_t)&gpt3_info },
+	{ "gpt3", (uintptr_t)&gpt3_info },
 	{ /* sentinel */ }
 };
 MODULE_DEVICE_TABLE(spi, gpt3_id);

@@ -96,7 +96,7 @@ retry:
 			goto out;
 		}
 
-		addr = (unsigned long)folio_address(folio);
+		addr = (uintptr_t)folio_address(folio);
 		flush_tlb_kernel_range(addr, addr + PAGE_SIZE);
 	}
 

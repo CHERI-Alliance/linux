@@ -311,7 +311,7 @@ int blkdev_compat_ptr_ioctl(struct block_device *bdev, blk_mode_t mode,
 
 	if (disk->fops->ioctl)
 		return disk->fops->ioctl(bdev, mode, cmd,
-					 (unsigned long)compat_ptr(arg));
+					 (user_uintptr_t)compat_ptr(arg));
 
 	return -ENOIOCTLCMD;
 }

@@ -1132,9 +1132,9 @@ fritz_remove_pci(struct pci_dev *pdev)
 
 static const struct pci_device_id fcpci_ids[] = {
 	{ PCI_VENDOR_ID_AVM, PCI_DEVICE_ID_AVM_A1, PCI_ANY_ID, PCI_ANY_ID,
-	  0, 0, (unsigned long) "Fritz!Card PCI"},
+	  0, 0, (uintptr_t) "Fritz!Card PCI"},
 	{ PCI_VENDOR_ID_AVM, PCI_DEVICE_ID_AVM_A1_V2, PCI_ANY_ID, PCI_ANY_ID,
-	  0, 0, (unsigned long) "Fritz!Card PCI v2" },
+	  0, 0, (uintptr_t) "Fritz!Card PCI v2" },
 	{ }
 };
 MODULE_DEVICE_TABLE(pci, fcpci_ids);

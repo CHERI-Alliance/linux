@@ -99,13 +99,13 @@ static struct atmel_ssc_platform_data at91sam9g45_config = {
 static const struct platform_device_id atmel_ssc_devtypes[] = {
 	{
 		.name = "at91rm9200_ssc",
-		.driver_data = (unsigned long) &at91rm9200_config,
+		.driver_data = (uintptr_t) &at91rm9200_config,
 	}, {
 		.name = "at91sam9rl_ssc",
-		.driver_data = (unsigned long) &at91sam9rl_config,
+		.driver_data = (uintptr_t) &at91sam9rl_config,
 	}, {
 		.name = "at91sam9g45_ssc",
-		.driver_data = (unsigned long) &at91sam9g45_config,
+		.driver_data = (uintptr_t) &at91sam9g45_config,
 	}, {
 		/* sentinel */
 	}

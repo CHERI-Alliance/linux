@@ -324,7 +324,7 @@ ip_vs_svc_hashkey(struct netns_ipvs *ipvs, int af, unsigned int proto,
 			    addr->ip6[2]^addr->ip6[3];
 #endif
 	ahash = ntohl(addr_fold);
-	ahash ^= ((size_t) ipvs >> 8);
+	ahash ^= ((uintptr_t) ipvs >> 8);
 
 	return (proto ^ ahash ^ (porth >> IP_VS_SVC_TAB_BITS) ^ porth) &
 	       IP_VS_SVC_TAB_MASK;
@@ -335,7 +335,7 @@ ip_vs_svc_hashkey(struct netns_ipvs *ipvs, int af, unsigned int proto,
  */
 static inline unsigned int ip_vs_svc_fwm_hashkey(struct netns_ipvs *ipvs, __u32 fwmark)
 {
-	return (((size_t)ipvs>>8) ^ fwmark) & IP_VS_SVC_TAB_MASK;
+	return (((uintptr_t)ipvs>>8) ^ fwmark) & IP_VS_SVC_TAB_MASK;
 }
 
 /*

@@ -195,7 +195,7 @@ static irqreturn_t sprd_mbox_inbox_isr(int irq, void *data)
 static int sprd_mbox_send_data(struct mbox_chan *chan, void *msg)
 {
 	struct sprd_mbox_priv *priv = to_sprd_mbox_priv(chan->mbox);
-	unsigned long id = (unsigned long)chan->con_priv;
+	uintptr_t id = (uintptr_t)chan->con_priv;
 	u32 *data = msg;
 
 	/* Write data into inbox FIFO, and only support 8 bytes every time */
@@ -214,7 +214,7 @@ static int sprd_mbox_send_data(struct mbox_chan *chan, void *msg)
 static int sprd_mbox_flush(struct mbox_chan *chan, unsigned long timeout)
 {
 	struct sprd_mbox_priv *priv = to_sprd_mbox_priv(chan->mbox);
-	unsigned long id = (unsigned long)chan->con_priv;
+	uintptr_t id = (uintptr_t)chan->con_priv;
 	u32 busy;
 
 	timeout = jiffies + msecs_to_jiffies(timeout);
@@ -362,7 +362,7 @@ static int sprd_mbox_probe(struct platform_device *pdev)
 			return ret;
 		}
 
-		supp = (unsigned long) of_device_get_match_data(dev);
+		supp = (uintptr_t) of_device_get_match_data(dev);
 		if (!supp) {
 			dev_err(dev, "no supplementary outbox specified\n");
 			return -ENODEV;

@@ -285,7 +285,7 @@ static __always_inline unsigned long _compound_head(const struct page *page)
 
 	if (unlikely(head & 1))
 		return head - 1;
-	return (unsigned long)page_fixed_fake_head(page);
+	return (uintptr_t)page_fixed_fake_head(page);
 }
 
 #define compound_head(page)	((typeof(page))_compound_head(page))
@@ -726,7 +726,7 @@ static __always_inline bool folio_test_anon(const struct folio *folio)
 
 static __always_inline bool PageAnonNotKsm(const struct page *page)
 {
-	unsigned long flags = (unsigned long)page_folio(page)->mapping;
+	uintptr_t flags = (uintptr_t)page_folio(page)->mapping;
 
 	return (flags & FOLIO_MAPPING_FLAGS) == FOLIO_MAPPING_ANON;
 }
@@ -867,7 +867,7 @@ static inline bool folio_test_large(const struct folio *folio)
 
 static __always_inline void set_compound_head(struct page *page, struct page *head)
 {
-	WRITE_ONCE(page->compound_head, (unsigned long)head + 1);
+	WRITE_ONCE(page->compound_head, (uintptr_t)head + 1);
 }
 
 static __always_inline void clear_compound_head(struct page *page)

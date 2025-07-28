@@ -1080,7 +1080,7 @@ static int nfp_fl_ct_add_offload(struct nfp_fl_nft_tc_merge *m_entry)
 	 * an already merged flow. This works since address alignment means
 	 * that the last bit for pointer addresses will be 0.
 	 */
-	flow_pay->tc_flower_cookie = ((unsigned long)flow_pay) | 0x1;
+	flow_pay->tc_flower_cookie = ((uintptr_t)flow_pay) | 0x1;
 	err = nfp_compile_flow_metadata(priv->app, flow_pay->tc_flower_cookie,
 					flow_pay, netdev, NULL);
 	if (err)
@@ -1526,7 +1526,7 @@ nfp_fl_ct_flow_entry *nfp_fl_ct_add_flow(struct nfp_fl_ct_zone_entry *zt,
 
 	entry->zt = zt;
 	entry->netdev = netdev;
-	entry->cookie = flow->cookie > 0 ? flow->cookie : (unsigned long)entry;
+	entry->cookie = flow->cookie > 0 ? flow->cookie : (uintptr_t)entry;
 	entry->chain_index = flow->common.chain_index;
 	entry->tun_offset = NFP_FL_CT_NO_TUN;
 

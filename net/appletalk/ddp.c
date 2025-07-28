@@ -1872,7 +1872,7 @@ static int atalk_compat_ioctl(struct socket *sock, unsigned int cmd, unsigned lo
 	 * handler.
 	 */
 	case SIOCATALKDIFADDR:
-		return atalk_ioctl(sock, cmd, (unsigned long)argp);
+		return atalk_ioctl(sock, cmd, (user_uintptr_t)argp);
 	default:
 		return -ENOIOCTLCMD;
 	}

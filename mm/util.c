@@ -670,7 +670,7 @@ EXPORT_SYMBOL(vcalloc_noprof);
 
 struct anon_vma *folio_anon_vma(const struct folio *folio)
 {
-	unsigned long mapping = (unsigned long)folio->mapping;
+	uintptr_t mapping = (uintptr_t)folio->mapping;
 
 	if ((mapping & FOLIO_MAPPING_FLAGS) != FOLIO_MAPPING_ANON)
 		return NULL;

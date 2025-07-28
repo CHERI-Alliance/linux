@@ -50,7 +50,7 @@ static int ixp4xx_rng_probe(struct platform_device *pdev)
 	if (IS_ERR(rng_base))
 		return PTR_ERR(rng_base);
 
-	ixp4xx_rng_ops.priv = (unsigned long)rng_base;
+	ixp4xx_rng_ops.priv = (uintptr_t)rng_base;
 	return devm_hwrng_register(dev, &ixp4xx_rng_ops);
 }
 

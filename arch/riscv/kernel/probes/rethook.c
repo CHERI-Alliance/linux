@@ -21,7 +21,7 @@ void arch_rethook_prepare(struct rethook_node *rhn, struct pt_regs *regs, bool m
 	rhn->frame = regs->s0;
 
 	/* replace return addr with trampoline */
-	regs->ra = (unsigned long)arch_rethook_trampoline;
+	regs->ra = (uintptr_t)arch_rethook_trampoline;
 }
 
 NOKPROBE_SYMBOL(arch_rethook_prepare);

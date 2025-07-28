@@ -214,7 +214,7 @@ static ssize_t process_vm_rw_core(pid_t pid, struct iov_iter *iter,
 
 	for (i = 0; i < riovcnt && iov_iter_count(iter) && !rc; i++)
 		rc = process_vm_rw_single_vec(
-			(unsigned long)rvec[i].iov_base, rvec[i].iov_len,
+			(user_uintptr_t)rvec[i].iov_base, rvec[i].iov_len,
 			iter, process_pages, mm, task, vm_write);
 
 	/* copied = space before - space after */

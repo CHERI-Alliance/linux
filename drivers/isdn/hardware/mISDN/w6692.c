@@ -1381,12 +1381,12 @@ w6692_remove_pci(struct pci_dev *pdev)
 
 static const struct pci_device_id w6692_ids[] = {
 	{ PCI_VENDOR_ID_DYNALINK, PCI_DEVICE_ID_DYNALINK_IS64PH,
-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, (ulong)&w6692_map[0]},
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, (uintptr_t)&w6692_map[0]},
 	{ PCI_VENDOR_ID_WINBOND2, PCI_DEVICE_ID_WINBOND2_6692,
 	  PCI_VENDOR_ID_USR, PCI_DEVICE_ID_USR_6692, 0, 0,
-	  (ulong)&w6692_map[2]},
+	  (uintptr_t)&w6692_map[2]},
 	{ PCI_VENDOR_ID_WINBOND2, PCI_DEVICE_ID_WINBOND2_6692,
-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, (ulong)&w6692_map[1]},
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, (uintptr_t)&w6692_map[1]},
 	{ }
 };
 MODULE_DEVICE_TABLE(pci, w6692_ids);

@@ -253,7 +253,7 @@ static inline void posixtimer_sigqueue_putref(struct sigqueue *q)
 
 static inline bool posixtimer_valid(const struct k_itimer *timer)
 {
-	unsigned long val = (unsigned long)timer->it_signal;
+	uintptr_t val = (uintptr_t)timer->it_signal;
 
 	return !(val & 0x1UL);
 }

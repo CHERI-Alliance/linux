@@ -330,11 +330,11 @@ static u64 qp_read_field(struct mlx5_core_dev *dev, struct mlx5_core_qp *qp,
 		break;
 	case QP_STATE:
 		state = MLX5_GET(qpc, qpc, state);
-		param = (unsigned long)mlx5_qp_state_str(state);
+		param = (uintptr_t)mlx5_qp_state_str(state);
 		*is_str = 1;
 		break;
 	case QP_XPORT:
-		param = (unsigned long)mlx5_qp_type_str(MLX5_GET(qpc, qpc, st));
+		param = (uintptr_t)mlx5_qp_type_str(MLX5_GET(qpc, qpc, st));
 		*is_str = 1;
 		break;
 	case QP_MTU:

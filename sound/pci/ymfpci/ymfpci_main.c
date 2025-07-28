@@ -1822,7 +1822,7 @@ int snd_ymfpci_mixer(struct snd_ymfpci *chip, int rear_switch)
 			return -ENOMEM;
 		kctl->id.device = chip->pcm->device;
 		kctl->id.subdevice = idx;
-		kctl->private_value = (unsigned long)substream;
+		kctl->private_value = (uintptr_t)substream;
 		err = snd_ctl_add(chip->card, kctl);
 		if (err < 0)
 			return err;
@@ -2090,7 +2090,7 @@ static int snd_ymfpci_memalloc(struct snd_ymfpci *chip)
 			ptr_addr += chip->bank_size_playback;
 		}
 	}
-	ptr = (char *)ALIGN((unsigned long)ptr, 0x100);
+	ptr = (char *)ALIGN((uintptr_t)ptr, 0x100);
 	ptr_addr = ALIGN(ptr_addr, 0x100);
 	chip->bank_base_capture = ptr;
 	chip->bank_base_capture_addr = ptr_addr;
@@ -2100,7 +2100,7 @@ static int snd_ymfpci_memalloc(struct snd_ymfpci *chip)
 			ptr += chip->bank_size_capture;
 			ptr_addr += chip->bank_size_capture;
 		}
-	ptr = (char *)ALIGN((unsigned long)ptr, 0x100);
+	ptr = (char *)ALIGN((uintptr_t)ptr, 0x100);
 	ptr_addr = ALIGN(ptr_addr, 0x100);
 	chip->bank_base_effect = ptr;
 	chip->bank_base_effect_addr = ptr_addr;
@@ -2110,7 +2110,7 @@ static int snd_ymfpci_memalloc(struct snd_ymfpci *chip)
 			ptr += chip->bank_size_effect;
 			ptr_addr += chip->bank_size_effect;
 		}
-	ptr = (char *)ALIGN((unsigned long)ptr, 0x100);
+	ptr = (char *)ALIGN((uintptr_t)ptr, 0x100);
 	ptr_addr = ALIGN(ptr_addr, 0x100);
 	chip->work_base = ptr;
 	chip->work_base_addr = ptr_addr;

@@ -615,7 +615,7 @@ nl802154_dump_wpan_phy(struct sk_buff *skb, struct netlink_callback *cb)
 			rtnl_unlock();
 			return ret;
 		}
-		cb->args[0] = (long)state;
+		cb->args[0] = (intptr_t)state;
 	}
 
 	list_for_each_entry(rdev, &cfg802154_rdev_list, list) {

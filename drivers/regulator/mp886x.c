@@ -348,8 +348,8 @@ static const struct of_device_id mp886x_dt_ids[] = {
 MODULE_DEVICE_TABLE(of, mp886x_dt_ids);
 
 static const struct i2c_device_id mp886x_id[] = {
-	{ "mp8867", (kernel_ulong_t)&mp8867_ci },
-	{ "mp8869", (kernel_ulong_t)&mp8869_ci },
+	{ "mp8867", (uintptr_t)&mp8867_ci },
+	{ "mp8869", (uintptr_t)&mp8869_ci },
 	{ },
 };
 MODULE_DEVICE_TABLE(i2c, mp886x_id);

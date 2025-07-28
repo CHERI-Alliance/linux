@@ -435,7 +435,7 @@ static int omap_rng_probe(struct platform_device *pdev)
 	priv->rng.cleanup = omap_rng_cleanup;
 	priv->rng.quality = 900;
 
-	priv->rng.priv = (unsigned long)priv;
+	priv->rng.priv = (uintptr_t)priv;
 	platform_set_drvdata(pdev, priv);
 	priv->dev = dev;
 

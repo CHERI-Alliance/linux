@@ -179,7 +179,7 @@ static int em_canid_change(struct net *net, void *data, int len,
 	}
 
 	m->datalen = sizeof(struct canid_match) + len;
-	m->data = (unsigned long)cm;
+	m->data = (uintptr_t)cm;
 	return 0;
 }
 

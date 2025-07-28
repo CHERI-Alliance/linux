@@ -225,7 +225,7 @@ mlxsw_sp2_mr_tcam_route_create(struct mlxsw_sp *mlxsw_sp, void *priv,
 		return -EINVAL;
 
 	rule = mlxsw_sp_acl_rule_create(mlxsw_sp, ruleset,
-					(unsigned long) route_priv, afa_block,
+					(uintptr_t) route_priv, afa_block,
 					NULL);
 	if (IS_ERR(rule))
 		return PTR_ERR(rule);
@@ -256,7 +256,7 @@ mlxsw_sp2_mr_tcam_route_destroy(struct mlxsw_sp *mlxsw_sp, void *priv,
 		return;
 
 	rule = mlxsw_sp_acl_rule_lookup(mlxsw_sp, ruleset,
-					(unsigned long) route_priv);
+					(uintptr_t) route_priv);
 	if (WARN_ON(!rule))
 		return;
 
@@ -280,7 +280,7 @@ mlxsw_sp2_mr_tcam_route_update(struct mlxsw_sp *mlxsw_sp,
 		return -EINVAL;
 
 	rule = mlxsw_sp_acl_rule_lookup(mlxsw_sp, ruleset,
-					(unsigned long) route_priv);
+					(uintptr_t) route_priv);
 	if (WARN_ON(!rule))
 		return -EINVAL;
 

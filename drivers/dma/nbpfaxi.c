@@ -1093,7 +1093,7 @@ static void nbpf_free_chan_resources(struct dma_chan *dchan)
 		     i++, ldesc++)
 			dma_unmap_single(dchan->device->dev, ldesc->hwdesc_dma_addr,
 					 sizeof(*ldesc->hwdesc), DMA_TO_DEVICE);
-		free_page((unsigned long)dpage);
+		free_page((uintptr_t)dpage);
 	}
 }
 
@@ -1487,15 +1487,15 @@ static void nbpf_remove(struct platform_device *pdev)
 }
 
 static const struct platform_device_id nbpf_ids[] = {
-	{"nbpfaxi64dmac1b4",	(kernel_ulong_t)&nbpf_cfg[NBPF1B4]},
-	{"nbpfaxi64dmac1b8",	(kernel_ulong_t)&nbpf_cfg[NBPF1B8]},
-	{"nbpfaxi64dmac1b16",	(kernel_ulong_t)&nbpf_cfg[NBPF1B16]},
-	{"nbpfaxi64dmac4b4",	(kernel_ulong_t)&nbpf_cfg[NBPF4B4]},
-	{"nbpfaxi64dmac4b8",	(kernel_ulong_t)&nbpf_cfg[NBPF4B8]},
-	{"nbpfaxi64dmac4b16",	(kernel_ulong_t)&nbpf_cfg[NBPF4B16]},
-	{"nbpfaxi64dmac8b4",	(kernel_ulong_t)&nbpf_cfg[NBPF8B4]},
-	{"nbpfaxi64dmac8b8",	(kernel_ulong_t)&nbpf_cfg[NBPF8B8]},
-	{"nbpfaxi64dmac8b16",	(kernel_ulong_t)&nbpf_cfg[NBPF8B16]},
+	{"nbpfaxi64dmac1b4",	(uintptr_t)&nbpf_cfg[NBPF1B4]},
+	{"nbpfaxi64dmac1b8",	(uintptr_t)&nbpf_cfg[NBPF1B8]},
+	{"nbpfaxi64dmac1b16",	(uintptr_t)&nbpf_cfg[NBPF1B16]},
+	{"nbpfaxi64dmac4b4",	(uintptr_t)&nbpf_cfg[NBPF4B4]},
+	{"nbpfaxi64dmac4b8",	(uintptr_t)&nbpf_cfg[NBPF4B8]},
+	{"nbpfaxi64dmac4b16",	(uintptr_t)&nbpf_cfg[NBPF4B16]},
+	{"nbpfaxi64dmac8b4",	(uintptr_t)&nbpf_cfg[NBPF8B4]},
+	{"nbpfaxi64dmac8b8",	(uintptr_t)&nbpf_cfg[NBPF8B8]},
+	{"nbpfaxi64dmac8b16",	(uintptr_t)&nbpf_cfg[NBPF8B16]},
 	{},
 };
 MODULE_DEVICE_TABLE(platform, nbpf_ids);

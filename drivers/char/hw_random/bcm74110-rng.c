@@ -90,7 +90,7 @@ static int bcm74110_rng_probe(struct platform_device *pdev)
 		return -ENOMEM;
 
 	bcm74110_hwrng.name = pdev->name;
-	bcm74110_hwrng.priv = (unsigned long)priv;
+	bcm74110_hwrng.priv = (uintptr_t)priv;
 
 	priv->base = devm_platform_ioremap_resource(pdev, 0);
 	if (IS_ERR(priv->base))

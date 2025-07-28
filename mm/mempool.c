@@ -145,7 +145,7 @@ static __always_inline bool kasan_poison_element(mempool_t *pool, void *element)
 static void kasan_unpoison_element(mempool_t *pool, void *element)
 {
 	if (pool->alloc == mempool_kmalloc)
-		kasan_mempool_unpoison_object(element, (size_t)pool->pool_data);
+		kasan_mempool_unpoison_object(element, (uintptr_t)pool->pool_data);
 	else if (pool->alloc == mempool_alloc_slab)
 		kasan_mempool_unpoison_object(element,
 					      kmem_cache_size(pool->pool_data));
@@ -621,7 +621,7 @@ EXPORT_SYMBOL(mempool_free_slab);
  */
 void *mempool_kmalloc(gfp_t gfp_mask, void *pool_data)
 {
-	size_t size = (size_t)pool_data;
+	uintptr_t size = (uintptr_t)pool_data;
 	return kmalloc_noprof(size, gfp_mask);
 }
 EXPORT_SYMBOL(mempool_kmalloc);
@@ -634,7 +634,7 @@ EXPORT_SYMBOL(mempool_kfree);
 
 void *mempool_kvmalloc(gfp_t gfp_mask, void *pool_data)
 {
-	size_t size = (size_t)pool_data;
+	uintptr_t size = (uintptr_t)pool_data;
 	return kvmalloc(size, gfp_mask);
 }
 EXPORT_SYMBOL(mempool_kvmalloc);

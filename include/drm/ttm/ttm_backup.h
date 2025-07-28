@@ -50,7 +50,7 @@ static inline unsigned long
 ttm_backup_page_ptr_to_handle(const struct page *page)
 {
 	WARN_ON(!ttm_backup_page_ptr_is_handle(page));
-	return (unsigned long)page >> 1;
+	return (uintptr_t)page >> 1;
 }
 
 void ttm_backup_drop(struct file *backup, pgoff_t handle);

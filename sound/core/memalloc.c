@@ -447,7 +447,7 @@ static void snd_dma_iram_free(struct snd_dma_buffer *dmab)
 	struct gen_pool *pool = dmab->private_data;
 
 	if (pool && dmab->area)
-		gen_pool_free(pool, (unsigned long)dmab->area, dmab->bytes);
+		gen_pool_free(pool, (uintptr_t)dmab->area, dmab->bytes);
 }
 
 static int snd_dma_iram_mmap(struct snd_dma_buffer *dmab,

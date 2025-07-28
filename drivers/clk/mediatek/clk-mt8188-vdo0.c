@@ -90,7 +90,7 @@ static const struct mtk_clk_desc vdo0_desc = {
 };
 
 static const struct platform_device_id clk_mt8188_vdo0_id_table[] = {
-	{ .name = "clk-mt8188-vdo0", .driver_data = (kernel_ulong_t)&vdo0_desc },
+	{ .name = "clk-mt8188-vdo0", .driver_data = (uintptr_t)&vdo0_desc },
 	{ /* sentinel */ }
 };
 MODULE_DEVICE_TABLE(platform, clk_mt8188_vdo0_id_table);

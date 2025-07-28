@@ -3601,12 +3601,12 @@ static int smu7_get_pp_table_entry_callback_func_v1(struct pp_hwmgr *hwmgr,
 			(ATOM_Tonga_POWERPLAYTABLE *)pp_table;
 	PPTable_Generic_SubTable_Header *sclk_dep_table =
 			(PPTable_Generic_SubTable_Header *)
-			(((unsigned long)powerplay_table) +
+			(((uintptr_t)powerplay_table) +
 				le16_to_cpu(powerplay_table->usSclkDependencyTableOffset));
 
 	ATOM_Tonga_MCLK_Dependency_Table *mclk_dep_table =
 			(ATOM_Tonga_MCLK_Dependency_Table *)
-			(((unsigned long)powerplay_table) +
+			(((uintptr_t)powerplay_table) +
 				le16_to_cpu(powerplay_table->usMclkDependencyTableOffset));
 
 	/* The following fields are not initialized here: id orderedList allStatesList */

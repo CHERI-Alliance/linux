@@ -199,7 +199,7 @@ static int iterate_object_props(struct btrfs_root *root,
 			const struct prop_handler *handler;
 
 			this_len = sizeof(*di) + name_len + data_len;
-			name_ptr = (unsigned long)(di + 1);
+			name_ptr = (uintptr_t)(di + 1);
 			data_ptr = name_ptr + name_len;
 
 			if (name_len <= XATTR_BTRFS_PREFIX_LEN ||

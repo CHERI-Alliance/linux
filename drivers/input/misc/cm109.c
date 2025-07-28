@@ -648,7 +648,7 @@ static const struct usb_device_id cm109_usb_table[] = {
 		.bInterfaceClass = USB_CLASS_HID,
 		.bInterfaceSubClass = 0,
 		.bInterfaceProtocol = 0,
-		.driver_info = (kernel_ulong_t) &info_cm109
+		.driver_info = (uintptr_t) &info_cm109
 	},
 	/* you can add more devices here with product ID 0x0008 - 0x000f */
 	{ }

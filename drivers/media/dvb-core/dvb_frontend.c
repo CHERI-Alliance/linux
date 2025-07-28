@@ -2251,7 +2251,7 @@ static long dvb_frontend_compat_ioctl(struct file *file, unsigned int cmd,
 		return err;
 	}
 
-	return dvb_frontend_ioctl(file, cmd, (unsigned long)compat_ptr(arg));
+	return dvb_frontend_ioctl(file, cmd, (user_uintptr_t)compat_ptr(arg));
 }
 #endif
 
@@ -2603,11 +2603,11 @@ static int dvb_frontend_handle_ioctl(struct file *file,
 
 	case FE_ENABLE_HIGH_LNB_VOLTAGE:
 		if (fe->ops.enable_high_lnb_voltage)
-			err = fe->ops.enable_high_lnb_voltage(fe, (long)parg);
+			err = fe->ops.enable_high_lnb_voltage(fe, (intptr_t)parg);
 		break;
 
 	case FE_SET_FRONTEND_TUNE_MODE:
-		fepriv->tune_mode_flags = (unsigned long)parg;
+		fepriv->tune_mode_flags = (uintptr_t)parg;
 		err = 0;
 		break;
 	/* DEPRECATED dish control ioctls */
@@ -2615,7 +2615,7 @@ static int dvb_frontend_handle_ioctl(struct file *file,
 	case FE_DISHNETWORK_SEND_LEGACY_CMD:
 		if (fe->ops.dishnetwork_send_legacy_command) {
 			err = fe->ops.dishnetwork_send_legacy_command(fe,
-							 (unsigned long)parg);
+							 (uintptr_t)parg);
 			fepriv->state = FESTATE_DISEQC;
 			fepriv->status = 0;
 		} else if (fe->ops.set_voltage) {
@@ -2635,7 +2635,7 @@ static int dvb_frontend_handle_ioctl(struct file *file,
 			 * initialization, so parg is 8 bits and does not
 			 * include the initialization or start bit
 			 */
-			unsigned long swcmd = ((unsigned long)parg) << 1;
+			unsigned long swcmd = ((uintptr_t)parg) << 1;
 			ktime_t nexttime;
 			ktime_t tv[10];
 			int i;

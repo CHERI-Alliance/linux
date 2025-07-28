@@ -35,7 +35,7 @@ static inline void cifs_set_time(struct dentry *dentry, unsigned long time)
 
 static inline unsigned long cifs_get_time(struct dentry *dentry)
 {
-	return (unsigned long) dentry->d_fsdata;
+	return (uintptr_t) dentry->d_fsdata;
 }
 
 extern struct file_system_type cifs_fs_type, smb3_fs_type;

@@ -387,7 +387,7 @@ int tee_dyn_shm_alloc_helper(struct tee_shm *shm, size_t size, size_t align,
 
 	if (shm_register) {
 		rc = shm_register(shm->ctx, shm, pages, nr_pages,
-				  (unsigned long)shm->kaddr);
+				  (uintptr_t)shm->kaddr);
 		if (rc)
 			goto err_kfree;
 	}

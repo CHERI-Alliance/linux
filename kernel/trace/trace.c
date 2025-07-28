@@ -739,7 +739,7 @@ void trace_filter_add_remove_task(struct trace_pid_list *pid_list,
  */
 void *trace_pid_next(struct trace_pid_list *pid_list, void *v, loff_t *pos)
 {
-	long pid = (unsigned long)v;
+	long pid = (uintptr_t)v;
 	unsigned int next;
 
 	(*pos)++;
@@ -778,7 +778,7 @@ void *trace_pid_start(struct trace_pid_list *pid_list, loff_t *pos)
 
 	/* Return pid + 1 so that zero can be the exit value */
 	for (pid++; pid && l < *pos;
-	     pid = (unsigned long)trace_pid_next(pid_list, (void *)pid, &l))
+	     pid = (uintptr_t)trace_pid_next(pid_list, (void *)pid, &l))
 		;
 	return (void *)pid;
 }
@@ -793,7 +793,7 @@ void *trace_pid_start(struct trace_pid_list *pid_list, loff_t *pos)
  */
 int trace_pid_show(struct seq_file *m, void *v)
 {
-	unsigned long pid = (unsigned long)v - 1;
+	unsigned long pid = (uintptr_t)v - 1;
 
 	seq_printf(m, "%lu\n", pid);
 	return 0;
@@ -2710,7 +2710,7 @@ void trace_buffered_event_disable(void)
 	synchronize_rcu();
 
 	for_each_tracing_cpu(cpu) {
-		free_page((unsigned long)per_cpu(trace_buffered_event, cpu));
+		free_page((uintptr_t)per_cpu(trace_buffered_event, cpu));
 		per_cpu(trace_buffered_event, cpu) = NULL;
 	}
 
@@ -3657,7 +3657,7 @@ char *trace_iter_expand_format(struct trace_iterator *iter)
 /* Returns true if the string is safe to dereference from an event */
 static bool trace_safe_str(struct trace_iterator *iter, const char *str)
 {
-	unsigned long addr = (unsigned long)str;
+	uintptr_t addr = (uintptr_t)str;
 	struct trace_event *trace_event;
 	struct trace_event_call *event;
 
@@ -6052,7 +6052,7 @@ static DEFINE_MUTEX(scratch_mutex);
 
 static int cmp_mod_entry(const void *key, const void *pivot)
 {
-	unsigned long addr = (unsigned long)key;
+	uintptr_t addr = (uintptr_t)key;
 	const struct trace_mod_entry *ent = pivot;
 
 	if (addr >= ent[0].mod_addr && addr < ent[1].mod_addr)
@@ -6128,7 +6128,7 @@ static int save_mod(struct module *mod, void *data)
 
 	tscratch->nr_entries++;
 
-	entry->mod_addr = (unsigned long)mod->mem[MOD_TEXT].base;
+	entry->mod_addr = (uintptr_t)mod->mem[MOD_TEXT].base;
 	strscpy(entry->mod_name, mod->name);
 
 	return 0;
@@ -6187,7 +6187,7 @@ static void update_last_data(struct trace_array *tr)
 	kfree_rcu(module_delta, rcu);
 
 	/* Set the persistent ring buffer meta data to this address */
-	tscratch->text_addr = (unsigned long)_text;
+	tscratch->text_addr = (uintptr_t)_text;
 }
 
 /**
@@ -8654,7 +8654,7 @@ tracing_buffers_splice_read(struct file *file, loff_t *ppos,
 		spd.pages[i] = page;
 		spd.partial[i].len = page_size;
 		spd.partial[i].offset = 0;
-		spd.partial[i].private = (unsigned long)ref;
+		spd.partial[i].private = (uintptr_t)ref;
 		spd.nr_pages++;
 		*ppos += page_size;
 
@@ -9734,7 +9734,7 @@ static int make_mod_delta(struct module *mod, void *data)
 		if (mod->state == MODULE_STATE_GOING)
 			module_delta->delta[i] = 0;
 		else
-			module_delta->delta[i] = (unsigned long)mod->mem[MOD_TEXT].base
+			module_delta->delta[i] = (uintptr_t)mod->mem[MOD_TEXT].base
 						 - entry->mod_addr;
 		break;
 	}
@@ -9769,7 +9769,7 @@ static void setup_trace_scratch(struct trace_array *tr,
 	tr->scratch_size = size;
 
 	if (tscratch->text_addr)
-		tr->text_delta = (unsigned long)_text - tscratch->text_addr;
+		tr->text_delta = (uintptr_t)_text - tscratch->text_addr;
 
 	if (struct_size(tscratch, entries, tscratch->nr_entries) > size)
 		goto reset;
@@ -10119,7 +10119,7 @@ static u64 map_pages(unsigned long start, unsigned long size)
 	if (!area)
 		return 0;
 
-	vmap_start = (unsigned long) area->addr;
+	vmap_start = (uintptr_t) area->addr;
 	vmap_end = vmap_start + size;
 
 	ret = vmap_page_range(vmap_start, vmap_end,
@@ -11114,7 +11114,7 @@ __init static void enable_instances(void)
 			if (memmap_area)
 				addr = map_pages(start, size);
 			else
-				addr = (unsigned long)phys_to_virt(start);
+				addr = (uintptr_t)phys_to_virt(start);
 			if (addr) {
 				pr_info("Tracing: mapped boot instance %s at physical memory %pa of size 0x%lx\n",
 					name, &start, (unsigned long)size);

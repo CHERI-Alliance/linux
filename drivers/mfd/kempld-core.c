@@ -471,8 +471,8 @@ static void kempld_remove(struct platform_device *pdev)
 }
 
 static const struct acpi_device_id kempld_acpi_table[] = {
-	{ "KEM0000", (kernel_ulong_t)&kempld_platform_data_generic },
-	{ "KEM0001", (kernel_ulong_t)&kempld_platform_data_generic },
+	{ "KEM0000", (uintptr_t)&kempld_platform_data_generic },
+	{ "KEM0001", (uintptr_t)&kempld_platform_data_generic },
 	{}
 };
 MODULE_DEVICE_TABLE(acpi, kempld_acpi_table);

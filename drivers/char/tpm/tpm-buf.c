@@ -80,7 +80,7 @@ EXPORT_SYMBOL_GPL(tpm_buf_reset_sized);
 
 void tpm_buf_destroy(struct tpm_buf *buf)
 {
-	free_page((unsigned long)buf->data);
+	free_page((uintptr_t)buf->data);
 }
 EXPORT_SYMBOL_GPL(tpm_buf_destroy);
 

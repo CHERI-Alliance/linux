@@ -247,7 +247,7 @@ static struct qcom_rng_match_data qcom_trng_match_data = {
 };
 
 static const struct acpi_device_id __maybe_unused qcom_rng_acpi_match[] = {
-	{ .id = "QCOM8160", .driver_data = (kernel_ulong_t)&qcom_prng_ee_match_data },
+	{ .id = "QCOM8160", .driver_data = (uintptr_t)&qcom_prng_ee_match_data },
 	{}
 };
 MODULE_DEVICE_TABLE(acpi, qcom_rng_acpi_match);

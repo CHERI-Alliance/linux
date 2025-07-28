@@ -91,7 +91,7 @@ static inline char **fanotify_fh_ext_buf_ptr(struct fanotify_fh *fh)
 	BUILD_BUG_ON(FANOTIFY_FH_HDR_LEN % 4);
 	BUILD_BUG_ON(__alignof__(char *) - 4 + sizeof(char *) >
 		     FANOTIFY_INLINE_FH_LEN);
-	return (char **)ALIGN((unsigned long)(fh + 1), __alignof__(char *));
+	return (char **)ALIGN((uintptr_t)(fh + 1), __alignof__(char *));
 }
 
 static inline void *fanotify_fh_ext_buf(struct fanotify_fh *fh)

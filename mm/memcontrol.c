@@ -2508,7 +2508,7 @@ static void commit_charge(struct folio *folio, struct mem_cgroup *memcg)
 	 * - LRU isolation
 	 * - exclusive reference
 	 */
-	folio->memcg_data = (unsigned long)memcg;
+	folio->memcg_data = (uintptr_t)memcg;
 }
 
 #ifdef CONFIG_MEMCG_NMI_SAFETY_REQUIRES_ATOMIC
@@ -2631,7 +2631,7 @@ static struct obj_cgroup *current_objcg_update(void)
 		old = xchg(&current->objcg, NULL);
 		if (old) {
 			old = (struct obj_cgroup *)
-				((unsigned long)old & ~CURRENT_OBJCG_UPDATE_FLAG);
+				((uintptr_t)old & ~CURRENT_OBJCG_UPDATE_FLAG);
 			obj_cgroup_put(old);
 
 			old = NULL;
@@ -2822,7 +2822,7 @@ static struct obj_cgroup *page_objcg(const struct page *page)
 
 static void page_set_objcg(struct page *page, const struct obj_cgroup *objcg)
 {
-	page->memcg_data = (unsigned long)objcg | MEMCG_DATA_KMEM;
+	page->memcg_data = (uintptr_t)objcg | MEMCG_DATA_KMEM;
 }
 
 /**
@@ -4140,7 +4140,7 @@ static void mem_cgroup_exit(struct task_struct *task)
 	struct obj_cgroup *objcg = task->objcg;
 
 	objcg = (struct obj_cgroup *)
-		((unsigned long)objcg & ~CURRENT_OBJCG_UPDATE_FLAG);
+		((uintptr_t)objcg & ~CURRENT_OBJCG_UPDATE_FLAG);
 	obj_cgroup_put(objcg);
 
 	/*

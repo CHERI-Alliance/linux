@@ -93,7 +93,7 @@ static void __disconnect(struct irq_bypass_producer *prod,
 int irq_bypass_register_producer(struct irq_bypass_producer *producer,
 				 struct eventfd_ctx *eventfd, int irq)
 {
-	unsigned long index = (unsigned long)eventfd;
+	uintptr_t index = (uintptr_t)eventfd;
 	struct irq_bypass_consumer *consumer;
 	int ret;
 
@@ -132,7 +132,7 @@ EXPORT_SYMBOL_GPL(irq_bypass_register_producer);
  */
 void irq_bypass_unregister_producer(struct irq_bypass_producer *producer)
 {
-	unsigned long index = (unsigned long)producer->eventfd;
+	uintptr_t index = (uintptr_t)producer->eventfd;
 
 	if (!producer->eventfd)
 		return;
@@ -158,7 +158,7 @@ EXPORT_SYMBOL_GPL(irq_bypass_unregister_producer);
 int irq_bypass_register_consumer(struct irq_bypass_consumer *consumer,
 				 struct eventfd_ctx *eventfd)
 {
-	unsigned long index = (unsigned long)eventfd;
+	uintptr_t index = (uintptr_t)eventfd;
 	struct irq_bypass_producer *producer;
 	int ret;
 
@@ -198,7 +198,7 @@ EXPORT_SYMBOL_GPL(irq_bypass_register_consumer);
  */
 void irq_bypass_unregister_consumer(struct irq_bypass_consumer *consumer)
 {
-	unsigned long index = (unsigned long)consumer->eventfd;
+	uintptr_t index = (uintptr_t)consumer->eventfd;
 
 	if (!consumer->eventfd)
 		return;

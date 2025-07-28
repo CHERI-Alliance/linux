@@ -663,10 +663,10 @@ static void st7789v_remove(struct spi_device *spi)
 }
 
 static const struct spi_device_id st7789v_spi_id[] = {
-	{ "st7789v", (unsigned long) &default_panel },
-	{ "t28cp45tn89-v17", (unsigned long) &t28cp45tn89_panel },
-	{ "et028013dma", (unsigned long) &et028013dma_panel },
-	{ "jt240mhqs-hwt-ek-e3", (unsigned long) &jt240mhqs_hwt_ek_e3_panel },
+	{ "st7789v", (uintptr_t) &default_panel },
+	{ "t28cp45tn89-v17", (uintptr_t) &t28cp45tn89_panel },
+	{ "et028013dma", (uintptr_t) &et028013dma_panel },
+	{ "jt240mhqs-hwt-ek-e3", (uintptr_t) &jt240mhqs_hwt_ek_e3_panel },
 	{ }
 };
 MODULE_DEVICE_TABLE(spi, st7789v_spi_id);

@@ -1630,11 +1630,11 @@ static const struct dev_pm_ops kxcjk1013_pm_ops = {
 };
 
 static const struct i2c_device_id kxcjk1013_id[] = {
-	{ "kxcjk1013",  (kernel_ulong_t)&kxcjk1013_info },
-	{ "kxcj91008",  (kernel_ulong_t)&kxcj91008_info },
-	{ "kxtj21009",  (kernel_ulong_t)&kxtj21009_info },
-	{ "kxtf9", (kernel_ulong_t)&kxtf9_info },
-	{ "kx023-1025", (kernel_ulong_t)&kx0231025_info },
+	{ "kxcjk1013",  (uintptr_t)&kxcjk1013_info },
+	{ "kxcj91008",  (uintptr_t)&kxcj91008_info },
+	{ "kxtj21009",  (uintptr_t)&kxtj21009_info },
+	{ "kxtf9", (uintptr_t)&kxtf9_info },
+	{ "kx023-1025", (uintptr_t)&kx0231025_info },
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, kxcjk1013_id);
@@ -1650,19 +1650,19 @@ static const struct of_device_id kxcjk1013_of_match[] = {
 MODULE_DEVICE_TABLE(of, kxcjk1013_of_match);
 
 static const struct acpi_device_id kx_acpi_match[] = {
-	{ "KIOX0008", (kernel_ulong_t)&kxcj91008_info },
-	{ "KIOX0009", (kernel_ulong_t)&kxtj21009_info },
-	{ "KIOX000A", (kernel_ulong_t)&kxcj91008_info },
+	{ "KIOX0008", (uintptr_t)&kxcj91008_info },
+	{ "KIOX0009", (uintptr_t)&kxtj21009_info },
+	{ "KIOX000A", (uintptr_t)&kxcj91008_info },
 	/* KXCJ91008 in the display of a yoga 2-in-1 */
-	{ "KIOX010A", (kernel_ulong_t)&kxcj91008_kiox010a_info },
+	{ "KIOX010A", (uintptr_t)&kxcj91008_kiox010a_info },
 	/* KXCJ91008 in the base of a yoga 2-in-1 */
-	{ "KIOX020A", (kernel_ulong_t)&kxcj91008_kiox020a_info },
-	{ "KXCJ1008", (kernel_ulong_t)&kxcj91008_info },
-	{ "KXCJ1013", (kernel_ulong_t)&kxcjk1013_info },
-	{ "KXCJ9000", (kernel_ulong_t)&kxcj91008_info },
-	{ "KXJ2109",  (kernel_ulong_t)&kxtj21009_info },
-	{ "KXTJ1009", (kernel_ulong_t)&kxtj21009_info },
-	{ "SMO8500",  (kernel_ulong_t)&kxcj91008_smo8500_info },
+	{ "KIOX020A", (uintptr_t)&kxcj91008_kiox020a_info },
+	{ "KXCJ1008", (uintptr_t)&kxcj91008_info },
+	{ "KXCJ1013", (uintptr_t)&kxcjk1013_info },
+	{ "KXCJ9000", (uintptr_t)&kxcj91008_info },
+	{ "KXJ2109",  (uintptr_t)&kxtj21009_info },
+	{ "KXTJ1009", (uintptr_t)&kxtj21009_info },
+	{ "SMO8500",  (uintptr_t)&kxcj91008_smo8500_info },
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, kx_acpi_match);

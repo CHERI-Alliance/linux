@@ -869,14 +869,14 @@ static int sccnxp_console_setup(struct console *co, char *options)
 #endif
 
 static const struct platform_device_id sccnxp_id_table[] = {
-	{ .name = "sc2681",	.driver_data = (kernel_ulong_t)&sc2681, },
-	{ .name = "sc2691",	.driver_data = (kernel_ulong_t)&sc2691, },
-	{ .name = "sc2692",	.driver_data = (kernel_ulong_t)&sc2692, },
-	{ .name = "sc2891",	.driver_data = (kernel_ulong_t)&sc2891, },
-	{ .name = "sc2892",	.driver_data = (kernel_ulong_t)&sc2892, },
-	{ .name = "sc28202",	.driver_data = (kernel_ulong_t)&sc28202, },
-	{ .name = "sc68681",	.driver_data = (kernel_ulong_t)&sc68681, },
-	{ .name = "sc68692",	.driver_data = (kernel_ulong_t)&sc68692, },
+	{ .name = "sc2681",	.driver_data = (uintptr_t)&sc2681, },
+	{ .name = "sc2691",	.driver_data = (uintptr_t)&sc2691, },
+	{ .name = "sc2692",	.driver_data = (uintptr_t)&sc2692, },
+	{ .name = "sc2891",	.driver_data = (uintptr_t)&sc2891, },
+	{ .name = "sc2892",	.driver_data = (uintptr_t)&sc2892, },
+	{ .name = "sc28202",	.driver_data = (uintptr_t)&sc28202, },
+	{ .name = "sc68681",	.driver_data = (uintptr_t)&sc68681, },
+	{ .name = "sc68692",	.driver_data = (uintptr_t)&sc68692, },
 	{ }
 };
 MODULE_DEVICE_TABLE(platform, sccnxp_id_table);

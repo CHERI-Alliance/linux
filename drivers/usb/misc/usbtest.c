@@ -2982,37 +2982,37 @@ static const struct usb_device_id id_table[] = {
 
 	/* generic EZ-USB FX controller */
 	{ USB_DEVICE(0x0547, 0x2235),
-		.driver_info = (unsigned long) &ez1_info,
+		.driver_info = (uintptr_t) &ez1_info,
 	},
 
 	/* CY3671 development board with EZ-USB FX */
 	{ USB_DEVICE(0x0547, 0x0080),
-		.driver_info = (unsigned long) &ez1_info,
+		.driver_info = (uintptr_t) &ez1_info,
 	},
 
 	/* generic EZ-USB FX2 controller (or development board) */
 	{ USB_DEVICE(0x04b4, 0x8613),
-		.driver_info = (unsigned long) &ez2_info,
+		.driver_info = (uintptr_t) &ez2_info,
 	},
 
 	/* re-enumerated usb test device firmware */
 	{ USB_DEVICE(0xfff0, 0xfff0),
-		.driver_info = (unsigned long) &fw_info,
+		.driver_info = (uintptr_t) &fw_info,
 	},
 
 	/* "Gadget Zero" firmware runs under Linux */
 	{ USB_DEVICE(0x0525, 0xa4a0),
-		.driver_info = (unsigned long) &gz_info,
+		.driver_info = (uintptr_t) &gz_info,
 	},
 
 	/* so does a user-mode variant */
 	{ USB_DEVICE(0x0525, 0xa4a4),
-		.driver_info = (unsigned long) &um_info,
+		.driver_info = (uintptr_t) &um_info,
 	},
 
 	/* ... and a user-mode variant that talks iso */
 	{ USB_DEVICE(0x0525, 0xa4a3),
-		.driver_info = (unsigned long) &um2_info,
+		.driver_info = (uintptr_t) &um2_info,
 	},
 
 #ifdef KEYSPAN_19Qi
@@ -3037,7 +3037,7 @@ static const struct usb_device_id id_table[] = {
 
 #ifdef GENERIC
 	/* module params can specify devices to use for control tests */
-	{ .driver_info = (unsigned long) &generic_info, },
+	{ .driver_info = (uintptr_t) &generic_info, },
 #endif
 
 	/*-------------------------------------------------------------*/

@@ -272,7 +272,7 @@ affs_evict_inode(struct inode *inode)
 	invalidate_inode_buffers(inode);
 	clear_inode(inode);
 	affs_free_prealloc(inode);
-	cache_page = (unsigned long)AFFS_I(inode)->i_lc;
+	cache_page = (uintptr_t)AFFS_I(inode)->i_lc;
 	if (cache_page) {
 		pr_debug("freeing ext cache\n");
 		AFFS_I(inode)->i_lc = NULL;

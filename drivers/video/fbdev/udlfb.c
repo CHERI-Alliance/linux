@@ -1202,7 +1202,7 @@ static int dlfb_realloc_framebuffer(struct dlfb_data *dlfb, struct fb_info *info
 
 		info->screen_buffer = new_fb;
 		info->fix.smem_len = new_len;
-		info->fix.smem_start = (unsigned long) new_fb;
+		info->fix.smem_start = (uintptr_t) new_fb;
 		info->flags = udlfb_info_flags;
 
 		/*

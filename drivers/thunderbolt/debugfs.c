@@ -142,7 +142,7 @@ static void *validate_and_copy_from_user(const void __user *user_buf,
 
 	nbytes = min_t(size_t, *count, PAGE_SIZE);
 	if (copy_from_user(buf, user_buf, nbytes)) {
-		free_page((unsigned long)buf);
+		free_page((uintptr_t)buf);
 		return ERR_PTR(-EFAULT);
 	}
 
@@ -265,7 +265,7 @@ static ssize_t regs_write(struct tb_switch *sw, struct tb_port *port,
 out:
 	pm_runtime_mark_last_busy(&sw->dev);
 	pm_runtime_put_autosuspend(&sw->dev);
-	free_page((unsigned long)buf);
+	free_page((uintptr_t)buf);
 
 	return ret < 0 ? ret : count;
 }
@@ -406,7 +406,7 @@ static ssize_t port_sb_regs_write(struct file *file, const char __user *user_buf
 out:
 	pm_runtime_mark_last_busy(&sw->dev);
 	pm_runtime_put_autosuspend(&sw->dev);
-	free_page((unsigned long)buf);
+	free_page((uintptr_t)buf);
 
 	return ret < 0 ? ret : count;
 }
@@ -439,7 +439,7 @@ static ssize_t retimer_sb_regs_write(struct file *file,
 out:
 	pm_runtime_mark_last_busy(&rt->dev);
 	pm_runtime_put_autosuspend(&rt->dev);
-	free_page((unsigned long)buf);
+	free_page((uintptr_t)buf);
 
 	return ret < 0 ? ret : count;
 }
@@ -652,7 +652,7 @@ margining_ber_level_write(struct file *file, const char __user *user_buf,
 	margining->ber_level = val;
 
 out_free:
-	free_page((unsigned long)buf);
+	free_page((uintptr_t)buf);
 out_unlock:
 	mutex_unlock(&tb->lock);
 
@@ -829,7 +829,7 @@ margining_lanes_write(struct file *file, const char __user *user_buf,
 		}
 	}
 
-	free_page((unsigned long)buf);
+	free_page((uintptr_t)buf);
 
 	if (lane == -1)
 		return -EINVAL;
@@ -1110,7 +1110,7 @@ static ssize_t margining_mode_write(struct file *file,
 	mutex_unlock(&tb->lock);
 
 out_free:
-	free_page((unsigned long)buf);
+	free_page((uintptr_t)buf);
 	return ret ? ret : count;
 }
 
@@ -1497,7 +1497,7 @@ static ssize_t margining_test_write(struct file *file,
 	mutex_unlock(&tb->lock);
 
 out_free:
-	free_page((unsigned long)buf);
+	free_page((uintptr_t)buf);
 	return ret ? ret : count;
 }
 
@@ -1563,7 +1563,7 @@ static ssize_t margining_margin_write(struct file *file,
 	mutex_unlock(&tb->lock);
 
 out_free:
-	free_page((unsigned long)buf);
+	free_page((uintptr_t)buf);
 	return ret ? ret : count;
 }
 
@@ -1618,7 +1618,7 @@ static ssize_t margining_eye_write(struct file *file,
 			ret = -EINVAL;
 	}
 
-	free_page((unsigned long)buf);
+	free_page((uintptr_t)buf);
 	return ret ? ret : count;
 }
 
@@ -1926,7 +1926,7 @@ static ssize_t counters_write(struct file *file, const char __user *user_buf,
 out:
 	pm_runtime_mark_last_busy(&sw->dev);
 	pm_runtime_put_autosuspend(&sw->dev);
-	free_page((unsigned long)buf);
+	free_page((uintptr_t)buf);
 
 	return ret < 0 ? ret : count;
 }

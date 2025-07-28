@@ -407,7 +407,7 @@ static const struct driver_info ch9200_info = {
 static const struct usb_device_id ch9200_products[] = {
 	{
 	 USB_DEVICE(0x1A86, 0xE092),
-	 .driver_info = (unsigned long)&ch9200_info,
+	 .driver_info = (uintptr_t)&ch9200_info,
 	 },
 	{},
 };

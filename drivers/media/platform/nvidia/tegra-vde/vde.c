@@ -373,7 +373,7 @@ err_pm_runtime:
 	tegra_vde_iommu_deinit(vde);
 
 err_gen_free:
-	gen_pool_free(vde->iram_pool, (unsigned long)vde->iram,
+	gen_pool_free(vde->iram_pool, (uintptr_t)vde->iram,
 		      gen_pool_size(vde->iram_pool));
 
 	return err;
@@ -406,7 +406,7 @@ static void tegra_vde_remove(struct platform_device *pdev)
 	tegra_vde_dmabuf_cache_unmap_all(vde);
 	tegra_vde_iommu_deinit(vde);
 
-	gen_pool_free(vde->iram_pool, (unsigned long)vde->iram,
+	gen_pool_free(vde->iram_pool, (uintptr_t)vde->iram,
 		      gen_pool_size(vde->iram_pool));
 }
 

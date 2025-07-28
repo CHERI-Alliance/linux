@@ -154,7 +154,7 @@ calibrate_xor_blocks(void)
 
 #undef xor_speed
 
-	free_pages((unsigned long)b1, 2);
+	free_pages((uintptr_t)b1, 2);
 out:
 	active_template = fastest;
 	return 0;

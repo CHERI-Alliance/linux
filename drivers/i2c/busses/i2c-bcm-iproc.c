@@ -996,7 +996,7 @@ static int bcm_iproc_i2c_reg_slave(struct i2c_client *slave)
 	iproc_i2c->slave = slave;
 
 	tasklet_init(&iproc_i2c->slave_rx_tasklet, slave_rx_tasklet_fn,
-		     (unsigned long)iproc_i2c);
+		     (uintptr_t)iproc_i2c);
 
 	bcm_iproc_i2c_slave_init(iproc_i2c, false);
 

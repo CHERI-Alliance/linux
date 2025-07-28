@@ -139,7 +139,7 @@ static int skcipher_setkey_unaligned(struct crypto_skcipher *tfm,
 	if (!buffer)
 		return -ENOMEM;
 
-	alignbuffer = (u8 *)ALIGN((unsigned long)buffer, alignmask + 1);
+	alignbuffer = (u8 *)ALIGN((uintptr_t)buffer, alignmask + 1);
 	memcpy(alignbuffer, key, keylen);
 	ret = cipher->setkey(tfm, alignbuffer, keylen);
 	kfree_sensitive(buffer);
