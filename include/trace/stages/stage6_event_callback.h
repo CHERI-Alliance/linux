@@ -1,5 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 
+#include <linux/cheri.h>
+
 /* Stage 6 definitions for creating trace events */
 
 /* Reuse some of the stage 3 macros */
@@ -13,6 +15,9 @@
 
 #undef __field_struct
 #define __field_struct(type, item)
+
+#undef __ptr
+#define __ptr(type, item)
 
 #undef __array
 #define __array(type, item, len)
@@ -39,6 +44,17 @@
 		       EVENT_NULL_STR, __len__);			\
 		__str__[__len__] = '\0';				\
 	} while (0)
+
+#undef __assign_ptr
+#ifdef CONFIG_CHERI_KERNEL
+#define __assign_ptr(item, src) \
+{ \
+	__entry->item = __c_pa(src); \
+	__entry->item##_tag_meta = cheri_tag_get(src) << TRACE_EVT_TAG | cheri_high_get(src); \
+}
+#else
+#define __assign_ptr(item, src)		__entry->item = src;
+#endif
 
 #undef __assign_vstr
 #define __assign_vstr(dst, fmt, va)					\
