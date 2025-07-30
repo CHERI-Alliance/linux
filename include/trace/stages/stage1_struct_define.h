@@ -14,6 +14,15 @@
 #undef __field_struct_ext
 #define __field_struct_ext(type, item, filter_type)	type	item;
 
+#undef __ptr
+#ifdef CONFIG_CHERI_KERNEL
+#define __ptr(type, item) \
+	ptraddr_t	item; \
+	ptraddr_t	item##_tag_meta;
+#else
+#define __ptr(type, item) __field(type, item)
+#endif
+
 #undef __array
 #define __array(type, item, len)	type	item[len];
 

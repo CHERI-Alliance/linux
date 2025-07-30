@@ -19,6 +19,20 @@
 #undef __get_str
 #define __get_str(field) ((char *)__get_dynamic_array(field))
 
+#undef __get_cap
+#ifdef CONFIG_CHERI_KERNEL
+#define __get_cap(x) trace_print_cap(p, __entry->x##_tag_meta, __entry->x)
+#else
+#define __get_cap(x) (__entry->x)
+#endif
+
+#undef __get_ptr
+#ifdef CONFIG_CHERI_KERNEL
+#define __get_ptr(x) __c_fakep(__entry->x)
+#else
+#define __get_ptr(x) (__entry->x)
+#endif
+
 #undef __get_rel_dynamic_array
 #define __get_rel_dynamic_array(field)					\
 		((void *)__entry + 					\

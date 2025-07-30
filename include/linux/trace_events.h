@@ -47,6 +47,10 @@ const char *trace_print_symbols_seq_u64(struct trace_seq *p,
 struct trace_iterator;
 struct trace_event;
 
+#ifdef CONFIG_CHERI_KERNEL
+const char *trace_print_cap(struct trace_seq *p, ptraddr_t tag_meta, ptraddr_t addr);
+#endif
+
 const char *trace_print_bitmask_seq(struct trace_iterator *iter, void *bitmask_ptr,
 				    unsigned int bitmask_size);
 
