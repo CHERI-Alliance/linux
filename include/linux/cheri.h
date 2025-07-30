@@ -74,6 +74,22 @@ typedef unsigned int cheri_perms_t;
 	(CHERI_PERM_GLOBAL | CHERI_PERM_SW_VMEM)
 #endif
 
+/*
+ * Trace events store capabilites as two separate fields: tag+metadata and
+ * address. TRACE_EVT_TAG points to a reserved-0 bit in the metadata that
+ * can be used for the tag.
+ * Put the defines here, they depend on the capability encoding. The defaults
+ * below work for the risc-v cheri encodings. Architectures with other
+ * encodings may overwrite them.
+ */
+#ifndef TRACE_EVT_TAG
+#ifdef CONFIG_64BIT
+#define TRACE_EVT_TAG 28
+#else
+#define TRACE_EVT_TAG 21
+#endif
+#endif
+
 /**
  * cheri_build_user_cap() - Create a userspace capability.
  * @addr: Requested capability address.

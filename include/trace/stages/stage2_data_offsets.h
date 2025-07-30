@@ -20,6 +20,9 @@
 #undef __field_struct_ext
 #define __field_struct_ext(type, item, filter_type)
 
+#undef __ptr
+#define __ptr(type, item)
+
 #undef __array
 #define __array(type, item, len)
 
