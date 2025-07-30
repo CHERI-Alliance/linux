@@ -44,6 +44,15 @@ static inline const char *__string_src(const char *str)
 #define __field_struct_ext(type, item, filter_type)		\
 	{ (void)sizeof(struct _test_no_array_##item *); }
 
+#undef __ptr
+#ifdef CONFIG_CHERI_KERNEL
+#define __ptr(type, item) \
+	__field(type, item) \
+	__field(type, item##_tag_meta)
+#else
+#define __ptr(type, item) __field(type, item)
+#endif
+
 #undef __array
 #define __array(type, item, len)
 

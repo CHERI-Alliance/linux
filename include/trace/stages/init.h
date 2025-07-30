@@ -35,3 +35,9 @@ TRACE_MAKE_SYSTEM_STR();
 	static struct trace_eval_map __used		\
 	__section("_ftrace_eval_map")			\
 	*TRACE_SYSTEM##_##a = &__##TRACE_SYSTEM##_##a
+
+#ifdef CONFIG_CHERI_KERNEL
+#define TRACE_CAP_FMT "%s"
+#else
+#define TRACE_CAP_FMT "%p"
+#endif
