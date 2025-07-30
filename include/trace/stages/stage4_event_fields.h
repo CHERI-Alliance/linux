@@ -22,6 +22,15 @@
 #undef __field_struct
 #define __field_struct(type, item) __field_struct_ext(type, item, FILTER_OTHER)
 
+#undef __ptr
+#ifdef CONFIG_CHERI_KERNEL
+#define __ptr(type, item) \
+	__field(ptraddr_t, item) \
+	__field(ptraddr_t, item##_tag_meta)
+#else
+#define __ptr(type, item) __field(type, item)
+#endif
+
 #undef __array
 #define __array(_type, _item, _len) {					\
 	.type = #_type"["__stringify(_len)"]", .name = #_item,		\

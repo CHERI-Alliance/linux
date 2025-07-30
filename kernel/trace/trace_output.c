@@ -6,6 +6,7 @@
  *
  */
 #include "trace.h"
+#include <linux/cheri.h>
 #include <linux/module.h>
 #include <linux/mutex.h>
 #include <linux/ftrace.h>
@@ -192,6 +193,29 @@ trace_print_symbols_seq_u64(struct trace_seq *p, unsigned long long val,
 	return ret;
 }
 EXPORT_SYMBOL(trace_print_symbols_seq_u64);
+#endif
+
+#ifdef CONFIG_CHERI_KERNEL
+const char *
+trace_print_cap(struct trace_seq *p, ptraddr_t tag_meta, ptraddr_t addr)
+{
+	const char *ret = trace_seq_buffer_ptr(p);
+	u8 tag = !!(tag_meta & BIT(TRACE_EVT_TAG));
+	void *c = NULL;
+	char buf[128];
+
+	c = cheri_address_set(c, addr);
+	tag_meta &= ~BIT(TRACE_EVT_TAG);
+	c = cheri_high_set(c, tag_meta);
+
+	snprintf(buf, sizeof(buf), "%#lp", c);
+	buf[strlen("0x") + 2*sizeof(ptraddr_t) + strlen("[")] = tag ? 'V' : 'I';
+	trace_seq_putmem(p, buf, strlen(buf));
+	trace_seq_putc(p, 0);
+
+	return ret;
+}
+EXPORT_SYMBOL(trace_print_cap);
 #endif
 
 const char *
