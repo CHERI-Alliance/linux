@@ -2822,9 +2822,9 @@ trace_event_buffer_lock_reserve(struct trace_buffer **current_rb,
 			 * change in the future, so let the ring buffer reserve
 			 * handle the failure in that case.
 			 */
-			if (val == 1 && likely(len <= max_len)) {
+			if (val == 1 && likely(len + sizeof(entry->array[0]) <= max_len)) {
+				entry->array[0] = len + sizeof(entry->array[0]);
 				trace_event_setup(entry, type, trace_ctx);
-				entry->array[0] = len;
 				/* Return with preemption disabled */
 				return entry;
 			}
