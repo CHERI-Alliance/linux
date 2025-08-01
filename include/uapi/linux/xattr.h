@@ -24,7 +24,7 @@
 
 struct xattr_args {
 	union {
-		__kernel_aligned_uintptr_t value;
+		__aligned_u64ptr value;
 		__u64 pad1[2];
 	};
 	__u32 size;

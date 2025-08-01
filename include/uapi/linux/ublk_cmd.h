@@ -318,7 +318,7 @@ struct ublksrv_ctrl_cmd {
 	 * cmd specific buffer, can be IN or OUT.
 	 */
 	__u16	len;
-	__kernel_uintptr_t	addr;
+	__u64ptr	addr;
 
 	/* inline data */
 	__u64	data[1];
@@ -419,7 +419,7 @@ struct ublksrv_io_desc {
 	__u64		start_sector;
 
 	/* buffer address in ublksrv daemon vm space, from ublk driver */
-	__u64		addr;
+	__u64ptr	addr;
 };
 
 static inline __u8 ublksrv_get_op(const struct ublksrv_io_desc *iod)
@@ -510,7 +510,7 @@ struct ublksrv_io_cmd {
 		 * UBLK_IO_OP_ZONE_APPEND which actually depends on
 		 * UBLK_F_USER_COPY
 		 */
-		__u64	addr;
+		__u64ptr	addr;
 		__u64	zone_append_lba;
 	};
 };

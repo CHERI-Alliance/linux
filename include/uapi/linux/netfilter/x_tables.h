@@ -113,7 +113,7 @@ struct xt_counters {
 			__u64 pcnt, bcnt;	/* Packet and byte counters */
 		};
 		/* FIXCHERI: Move this out of the UAPI. */
-		__kernel_uintptr_t percpu;
+		__uptr percpu;
 	};
 };
 

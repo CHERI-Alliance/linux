@@ -137,10 +137,10 @@ int drm_mode_getresources(struct drm_device *dev, void *data,
 		count_encoders   = card_res32->count_encoders;
 		count_connectors = card_res32->count_connectors;
 	} else {
-		fb_id        = (uint32_t __user *)(card_res->fb_id_ptr);
-		crtc_id      = (uint32_t __user *)(card_res->crtc_id_ptr);
-		encoder_id   = (uint32_t __user *)(card_res->encoder_id_ptr);
-		connector_id = (uint32_t __user *)(card_res->connector_id_ptr);
+		fb_id        = u64_to_user_ptr(card_res->fb_id_ptr);
+		crtc_id      = u64_to_user_ptr(card_res->crtc_id_ptr);
+		encoder_id   = u64_to_user_ptr(card_res->encoder_id_ptr);
+		connector_id = u64_to_user_ptr(card_res->connector_id_ptr);
 
 		count_fbs        = card_res->count_fbs;
 		count_crtcs      = card_res->count_crtcs;

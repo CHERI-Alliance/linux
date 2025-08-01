@@ -576,7 +576,8 @@ static int virtio_gpu_context_init_ioctl(struct drm_device *dev,
 {
 	int ret = 0;
 	uint32_t num_params, i;
-	uint64_t valid_ring_mask, param, value;
+	uint64_t valid_ring_mask, param;
+	__u64ptr value;
 	size_t len;
 	struct drm_virtgpu_context_set_param *ctx_set_params = NULL;
 	struct virtio_gpu_device *vgdev = dev->dev_private;
@@ -593,7 +594,7 @@ static int virtio_gpu_context_init_ioctl(struct drm_device *dev,
 	if (num_params > 4)
 		return -EINVAL;
 
-	ctx_set_params = memdup_user(u64_to_user_ptr(args->ctx_set_params),
+	ctx_set_params = memdup_user_with_ptr(u64_to_user_ptr(args->ctx_set_params),
 				     len);
 
 	if (IS_ERR(ctx_set_params))
@@ -616,7 +617,7 @@ static int virtio_gpu_context_init_ioctl(struct drm_device *dev,
 				goto out_unlock;
 			}
 
-			if ((vgdev->capset_id_mask & (1ULL << value)) == 0) {
+			if ((vgdev->capset_id_mask & (1ULL << __c_ua(value))) == 0) {
 				ret = -EINVAL;
 				goto out_unlock;
 			}
@@ -650,7 +651,7 @@ static int virtio_gpu_context_init_ioctl(struct drm_device *dev,
 				goto out_unlock;
 			}
 
-			vfpriv->ring_idx_mask = value;
+			vfpriv->ring_idx_mask = __c_ua(value);
 			break;
 		case VIRTGPU_CONTEXT_PARAM_DEBUG_NAME:
 			if (vfpriv->explicit_debug_name) {

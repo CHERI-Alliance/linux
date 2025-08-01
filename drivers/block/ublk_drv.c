@@ -157,7 +157,7 @@ struct ublk_uring_cmd_pdu {
 
 struct ublk_io {
 	/* userspace buffer address from io cmd */
-	__u64	addr;
+	__u64ptr addr;
 	unsigned int flags;
 	int res;
 
@@ -1273,7 +1273,7 @@ static void ublk_dispatch_req(struct ublk_queue *ubq,
 
 	pr_devel("%s: complete: qid %d tag %d io_flags %x addr %llx\n",
 			__func__, ubq->q_id, req->tag, io->flags,
-			ublk_get_iod(ubq, req->tag)->addr);
+			(__u64)ublk_get_iod(ubq, req->tag)->addr);
 
 	/*
 	 * Task is exiting if either:
@@ -1968,7 +1968,7 @@ static inline int ublk_check_cmd_op(u32 cmd_op)
 }
 
 static inline void ublk_fill_io_cmd(struct ublk_io *io,
-		struct io_uring_cmd *cmd, unsigned long buf_addr)
+		struct io_uring_cmd *cmd, __u64ptr buf_addr)
 {
 	io->cmd = cmd;
 	io->flags |= UBLK_IO_FLAG_ACTIVE;
@@ -2048,7 +2048,7 @@ static int ublk_unregister_io_buf(struct io_uring_cmd *cmd,
 }
 
 static int ublk_fetch(struct io_uring_cmd *cmd, struct ublk_queue *ubq,
-		      struct ublk_io *io, __u64 buf_addr)
+		      struct ublk_io *io, __u64ptr buf_addr)
 {
 	struct ublk_device *ub = ubq->dev;
 	int ret = 0;
@@ -2178,7 +2178,7 @@ static bool ublk_get_data(const struct ublk_queue *ubq, struct ublk_io *io,
 	ublk_get_iod(ubq, req->tag)->addr = io->addr;
 	pr_devel("%s: update iod->addr: qid %d tag %d io_flags %x addr %llx\n",
 			__func__, ubq->q_id, req->tag, io->flags,
-			ublk_get_iod(ubq, req->tag)->addr);
+			(__u64)ublk_get_iod(ubq, req->tag)->addr);
 
 	return ublk_start_io(ubq, req, io);
 }

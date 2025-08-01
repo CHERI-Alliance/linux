@@ -1691,7 +1691,7 @@ static ssize_t aio_setup_rw(int rw, const struct iocb *iocb,
 		struct iovec **iovec, bool vectored, bool compat,
 		struct iov_iter *iter)
 {
-	void __user *buf = (void __user *)iocb->aio_buf;
+	void __user *buf = u64_to_user_ptr(iocb->aio_buf);
 	size_t len = iocb->aio_nbytes;
 
 	if (!vectored) {
@@ -2139,7 +2139,7 @@ static int __io_submit_one(struct kioctx *ctx, const struct iocb *iocb,
 		return -EFAULT;
 	}
 
-	req->ki_res.obj = (__kernel_uintptr_t)user_iocb;
+	req->ki_res.obj = (user_uintptr_t)user_iocb;
 	req->ki_res.data = iocb->aio_data;
 	req->ki_res.res = 0;
 	req->ki_res.res2 = 0;
@@ -2176,7 +2176,7 @@ static int get_compat_iocb(struct iocb *iocb, const struct iocb __user *user_ioc
 	iocb->aio_lio_opcode = compat_iocb.aio_lio_opcode;
 	iocb->aio_reqprio = compat_iocb.aio_reqprio;
 	iocb->aio_fildes = compat_iocb.aio_fildes;
-	iocb->aio_buf = (__kernel_uintptr_t)compat_ptr(compat_iocb.aio_buf);
+	iocb->aio_buf = (user_uintptr_t)compat_ptr(compat_iocb.aio_buf);
 	iocb->aio_nbytes = compat_iocb.aio_nbytes;
 	iocb->aio_offset = compat_iocb.aio_offset;
 	iocb->aio_reserved2 = compat_iocb.aio_reserved2;
@@ -2371,7 +2371,7 @@ SYSCALL_DEFINE3(io_cancel, aio_context_t, ctx_id, struct iocb __user *, iocb,
 
 	spin_lock_irq(&ctx->ctx_lock);
 	list_for_each_entry(kiocb, &ctx->active_reqs, ki_list) {
-		if (user_ptr_is_same((struct iocb __user *)kiocb->ki_res.obj, iocb)) {
+		if (user_ptr_is_same(u64_to_user_ptr(kiocb->ki_res.obj), iocb)) {
 			ret = kiocb->ki_cancel(&kiocb->rw);
 			list_del_init(&kiocb->ki_list);
 			break;

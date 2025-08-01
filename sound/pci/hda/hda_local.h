@@ -656,15 +656,15 @@ void snd_hda_codec_shutdown(struct hda_codec *codec);
  * AMP control callbacks
  */
 /* retrieve parameters from private_value */
-#define get_amp_nid_(pv)	((pv) & 0xffff)
+#define get_amp_nid_(pv)	((unsigned long)(pv) & 0xffff)
 #define get_amp_nid(kc)		get_amp_nid_(__c_ua((kc)->private_value))
-#define get_amp_channels(kc)	((__c_ua((kc)->private_value) >> 16) & 0x3)
-#define get_amp_direction_(pv)	(((pv) >> 18) & 0x1)
+#define get_amp_channels(kc)	((unsigned long)(__c_ua((kc)->private_value) >> 16) & 0x3)
+#define get_amp_direction_(pv)	(((unsigned long)(pv) >> 18) & 0x1)
 #define get_amp_direction(kc)	get_amp_direction_(__c_ua((kc)->private_value))
-#define get_amp_index_(pv)	(((pv) >> 19) & 0xf)
+#define get_amp_index_(pv)	(((unsigned long)(pv) >> 19) & 0xf)
 #define get_amp_index(kc)	get_amp_index_(__c_ua((kc)->private_value))
-#define get_amp_offset(kc)	((__c_ua((kc)->private_value) >> 23) & 0x3f)
-#define get_amp_min_mute(kc)	((__c_ua((kc)->private_value) >> 29) & 0x1)
+#define get_amp_offset(kc)	((unsigned long)(__c_ua((kc)->private_value) >> 23) & 0x3f)
+#define get_amp_min_mute(kc)	((unsigned long)(__c_ua((kc)->private_value) >> 29) & 0x1)
 
 /*
  * enum control helper

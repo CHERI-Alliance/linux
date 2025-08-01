@@ -235,26 +235,18 @@ __c_pa_u(const volatile void __user *ptr)
 }
 
 /*
- * Downgrade a uintptr_t to its address.
+ * Downgrade a uintptr_t or similar to its address.
  *
- * Like __c_pa but takese a uintptr_t instead of a void * argument.
+ * This function is similar to __c_pa but takes a __u64ptr (or more
+ * commonly a promoted uintptr_t/user_uintptr_t and returns the
+ * address part. The explicit use of __u64ptr and __u64 ensures
+ * that a __u64ptr on 32-bit does not lose the higher bits.
  */
-static __always_inline ptraddr_t
-__c_ua(uintptr_t ptr)
+static __always_inline __u64
+__c_ua(__u64ptr ptr)
 {
-	return (unsigned long __force)ptr;
+	return (unsigned long long __force)ptr;
 }
-
-/*
- * Force cast a pointer, uintptr or other integer to an unsigned long.
- * The result cannot be dereferenced. If possible use __c_pa() or __c_ua()
- * as approriate instead.
- *
- * Valid uses of this macro are in a macro that implements things like
- * cmpxchg which might be instantiated with both real pointers or a
- * uintptr_t.
- */
-#define __c_a(x) ((unsigned long __force)((uintptr_t __force)(x)))
 
 /*
  * Generate a pointer from an unsigned long value. The resulting pointer
@@ -276,12 +268,14 @@ __c_fakep(ptraddr_t val)
 }
 
 /*
- * Like __c_fakep but creates a uintptr_t instead of a void * pointer.
+ * Like __c_fakep but creates a __u64ptr instead of a void * pointer.
+ * Similar to __c_ua() the input and output values are at least 64-bit
+ * even on 32-bit systems.
  */
-static __always_inline uintptr_t
-__c_fakeu(ptraddr_t val)
+static __always_inline __u64ptr
+__c_fakeu(__u64 val)
 {
-	return (uintptr_t __force)val;
+	return (__u64ptr __force)val;
 }
 
 /*

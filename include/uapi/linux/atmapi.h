@@ -24,11 +24,7 @@
  *
  * Convention: NULL pointers are passed as a field of all zeroes.
  */
-#if __SIZEOF_POINTER__ > 8
-typedef struct { unsigned char _[__SIZEOF_POINTER__]; }
-	__attribute__((aligned(__SIZEOF_POINTER__))) atm_kptr_t;
-#else
-typedef struct { unsigned char _[8]; } __ATM_API_ALIGN atm_kptr_t;
-#endif
+typedef struct { unsigned char _[sizeof(__u64ptr)]; }
+	__attribute__((aligned(sizeof(__u64ptr)))) atm_kptr_t;
 
 #endif

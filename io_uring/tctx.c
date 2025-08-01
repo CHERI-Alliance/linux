@@ -21,7 +21,7 @@ static int get_compat64_io_uring_rsrc_update(struct io_uring_rsrc_update *up,
 		return -EFAULT;
 	up->offset = compat_up.offset;
 	up->resv = compat_up.resv;
-	up->data = (__kernel_uintptr_t)compat_ptr(compat_up.data);
+	up->data = (user_uintptr_t)compat_ptr(compat_up.data);
 	return 0;
 }
 

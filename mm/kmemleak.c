@@ -734,7 +734,7 @@ static int __link_object(struct kmemleak_object *object, uintptr_t ptr,
 			link = &parent->rb_node.rb_right;
 		else {
 			kmemleak_stop("Cannot insert 0x%lx into the object search tree (overlaps existing)\n",
-				      __c_ua(ptr));
+				      (unsigned long)ptr);
 			/*
 			 * No need for parent->lock here since "parent" cannot
 			 * be freed while the kmemleak_lock is held.
@@ -978,7 +978,7 @@ static void add_scan_area(uintptr_t ptr, size_t size, gfp_t gfp)
 	object = find_and_get_object(__c_ua(ptr), 1);
 	if (!object) {
 		kmemleak_warn("Adding scan area to unknown object at 0x%08lx\n",
-			      __c_ua(ptr));
+			      (unsigned long)ptr);
 		return;
 	}
 
@@ -999,7 +999,7 @@ static void add_scan_area(uintptr_t ptr, size_t size, gfp_t gfp)
 	if (size == SIZE_MAX) {
 		size = untagged_objp + object->size - untagged_ptr;
 	} else if (untagged_ptr + size > untagged_objp + object->size) {
-		kmemleak_warn("Scan area larger than object 0x%08lx\n", __c_ua(ptr));
+		kmemleak_warn("Scan area larger than object 0x%08lx\n", (unsigned long)ptr);
 		dump_object_info(object);
 		kmem_cache_free(scan_area_cache, area);
 		goto out_unlock;

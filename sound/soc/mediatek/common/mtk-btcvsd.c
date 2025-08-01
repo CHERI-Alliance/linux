@@ -340,7 +340,7 @@ static int btcvsd_tx_clean_buffer(struct mtk_btcvsd_snd *bt)
 		void *dst;
 
 		dev_info(bt->dev, "%s(), clean addr 0x%lx\n", __func__,
-			 __c_ua(bt->tx->buffer_info.bt_sram_addr[i]));
+			 (unsigned long)bt->tx->buffer_info.bt_sram_addr[i]);
 
 		dst = (void *)bt->tx->buffer_info.bt_sram_addr[i];
 
@@ -470,7 +470,7 @@ static int mtk_btcvsd_write_to_bt(struct mtk_btcvsd_snd *bt,
 		bt->tx->buffer_info.bt_sram_addr[next_idx] = ap_addr_tx;
 		spin_unlock_irqrestore(&bt->tx_lock, flags);
 		dev_info(bt->dev, "%s(), new ap_addr_tx = 0x%lx, num_valid_addr %d\n",
-			 __func__, __c_ua(ap_addr_tx),
+			 __func__, (unsigned long)ap_addr_tx,
 			 bt->tx->buffer_info.num_valid_addr);
 	}
 

@@ -221,7 +221,7 @@ static inline void io_meta_restore(struct io_async_rw *io, struct kiocb *kiocb)
 }
 
 static int io_prep_rw_pi(struct io_kiocb *req, struct io_rw *rw, int ddir,
-			 __kernel_uintptr_t attr_ptr, u64 attr_type_mask)
+			 user_uintptr_t attr_ptr, u64 attr_type_mask)
 {
 	struct io_uring_attr_pi pi_attr;
 	struct io_async_rw *io;
@@ -238,7 +238,7 @@ static int io_prep_rw_pi(struct io_kiocb *req, struct io_rw *rw, int ddir,
 	io->meta.flags = pi_attr.flags;
 	io->meta.app_tag = pi_attr.app_tag;
 	io->meta.seed = pi_attr.seed;
-	ret = import_ubuf(ddir, (void __user *)pi_attr.addr,
+	ret = import_ubuf(ddir, u64_to_user_ptr(pi_attr.addr),
 			  pi_attr.len, &io->meta.iter);
 	if (unlikely(ret < 0))
 		return ret;
@@ -284,13 +284,13 @@ static int __io_prep_rw(struct io_kiocb *req, const struct io_uring_sqe *sqe,
 	else
 		rw->kiocb.ki_complete = io_complete_rw;
 
-	rw->addr = (void __user *)READ_ONCE(sqe->addr);
+	rw->addr = u64_to_user_ptr(READ_ONCE(sqe->addr));
 	rw->len = READ_ONCE(sqe->len);
 	rw->flags = READ_ONCE(sqe->rw_flags);
 
 	attr_type_mask = READ_ONCE(sqe->attr_type_mask);
 	if (attr_type_mask) {
-		__kernel_uintptr_t attr_ptr;
+		user_uintptr_t attr_ptr;
 
 		/* only PI attribute is supported currently */
 		if (attr_type_mask != IORING_RW_ATTR_FLAG_PI)

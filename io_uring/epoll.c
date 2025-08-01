@@ -40,7 +40,7 @@ int io_epoll_ctl_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	if (ep_op_has_event(epoll->op)) {
 		struct epoll_event __user *ev;
 
-		ev = (struct epoll_event __user *)READ_ONCE(sqe->addr);
+		ev = u64_to_user_ptr(READ_ONCE(sqe->addr));
 		if (copy_epoll_event_from_user(&epoll->event, ev, req->ctx->compat))
 			return -EFAULT;
 	}
@@ -72,7 +72,7 @@ int io_epoll_wait_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 		return -EINVAL;
 
 	iew->maxevents = READ_ONCE(sqe->len);
-	iew->events = (void __user *)READ_ONCE(sqe->addr);
+	iew->events = u64_to_user_ptr(READ_ONCE(sqe->addr));
 	return 0;
 }
 

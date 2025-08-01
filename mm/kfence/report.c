@@ -233,7 +233,7 @@ void kfence_report_error(unsigned long address, bool is_write, struct pt_regs *r
 		       (void *)(uintptr_t)stack_entries[skipnr]);
 		pr_err("Out-of-bounds %s at 0x%p (%luB %s of kfence-#%td):\n",
 		       get_access_type(is_write), (void *)(uintptr_t)address,
-		       left_of_object ? __c_ua(meta->addr) - address : address - __c_ua(meta->addr),
+		       left_of_object ? (unsigned long)meta->addr - address : address - (unsigned long)meta->addr,
 		       left_of_object ? "left" : "right", object_index);
 		break;
 	}

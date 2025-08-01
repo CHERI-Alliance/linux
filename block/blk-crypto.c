@@ -478,7 +478,7 @@ static int blk_crypto_ioctl_import_key(struct blk_crypto_profile *profile,
 	u8 lt_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE];
 	int ret;
 
-	if (copy_from_user(&arg, argp, sizeof(arg)))
+	if (copy_from_user_with_ptr(&arg, argp, sizeof(arg)))
 		return -EFAULT;
 
 	if (memchr_inv(arg.reserved, 0, sizeof(arg.reserved)))

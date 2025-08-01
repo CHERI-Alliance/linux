@@ -1120,7 +1120,7 @@ static int g2d_check_reg_offset(struct g2d_data *g2d,
 	return 0;
 
 err:
-	dev_err(g2d->dev, "Bad register offset: 0x%lx\n", __c_ua(cmdlist->data[index]));
+	dev_err(g2d->dev, "Bad register offset: 0x%lx\n", (unsigned long)cmdlist->data[index]);
 	return -EINVAL;
 }
 

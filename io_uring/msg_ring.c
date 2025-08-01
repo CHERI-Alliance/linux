@@ -22,7 +22,7 @@ struct io_msg {
 	struct file			*file;
 	struct file			*src_file;
 	struct callback_head		tw;
-	__kernel_uintptr_t user_data;
+	user_uintptr_t user_data;
 	u32 len;
 	u32 cmd;
 	u32 src_fd;

@@ -220,13 +220,13 @@ struct cxl_send_command {
 	struct {
 		__u32 size;
 		__u32 rsvd;
-		__u64 payload;
+		__u64ptr payload;
 	} in;
 
 	struct {
 		__u32 size;
 		__u32 rsvd;
-		__u64 payload;
+		__u64ptr payload;
 	} out;
 };
 

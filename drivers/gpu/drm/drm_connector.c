@@ -3321,10 +3321,10 @@ int drm_mode_getconnector(struct drm_device *dev, void *data,
 		count_encoders = out_resp->count_encoders;
 		count_modes = out_resp->count_modes;
 		count_props = out_resp->count_props;
-		encoder_ptr = (uint32_t __user *)(out_resp->encoders_ptr);
-		mode_ptr = (struct drm_mode_modeinfo __user *)(out_resp->modes_ptr);
-		prop_ptr = (uint32_t __user *)(out_resp->props_ptr);
-		prop_values = (uint64_t __user *)(out_resp->prop_values_ptr);
+		encoder_ptr = u64_to_user_ptr(out_resp->encoders_ptr);
+		mode_ptr = u64_to_user_ptr(out_resp->modes_ptr);
+		prop_ptr = u64_to_user_ptr(out_resp->props_ptr);
+		prop_values = u64_to_user_ptr(out_resp->prop_values_ptr);
 	}
 
 	if (!drm_core_check_feature(dev, DRIVER_MODESET))

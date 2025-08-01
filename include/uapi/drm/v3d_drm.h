@@ -75,7 +75,7 @@ extern "C" {
  * the extension type.
  */
 struct drm_v3d_extension {
-	__u64 next;
+	__u64ptr next;
 	__u32 id;
 #define DRM_V3D_EXT_ID_MULTI_SYNC			0x01
 #define DRM_V3D_EXT_ID_CPU_INDIRECT_CSD		0x02
@@ -122,8 +122,8 @@ enum v3d_queue {
 struct drm_v3d_multi_sync {
 	struct drm_v3d_extension base;
 	/* Array of wait and signal semaphores */
-	__u64 in_syncs;
-	__u64 out_syncs;
+	__u64ptr in_syncs;
+	__u64ptr out_syncs;
 
 	/* Number of entries */
 	__u32 in_sync_count;
@@ -206,7 +206,7 @@ struct drm_v3d_submit_cl {
 
 	/* Pointer to a u32 array of the BOs that are referenced by the job.
 	 */
-	__kernel_uintptr_t bo_handles;
+	__u64ptr bo_handles;
 
 	/* Number of BO handles passed in (size is that times 4). */
 	__u32 bo_handle_count;
@@ -220,7 +220,7 @@ struct drm_v3d_submit_cl {
 	__u32 pad;
 
 	/* Pointer to an array of ioctl extensions*/
-	__u64 extensions;
+	__u64ptr extensions;
 };
 
 /**
@@ -336,7 +336,7 @@ struct drm_v3d_submit_tfu {
 	__u32 flags;
 
 	/* Pointer to an array of ioctl extensions*/
-	__u64 extensions;
+	__u64ptr extensions;
 
 	struct {
 		__u32 ioc;
@@ -354,7 +354,7 @@ struct drm_v3d_submit_csd {
 
 	/* Pointer to a u32 array of the BOs that are referenced by the job.
 	 */
-	__kernel_uintptr_t bo_handles;
+	__u64ptr bo_handles;
 
 	/* Number of BO handles passed in (size is that times 4). */
 	__u32 bo_handle_count;
@@ -372,7 +372,7 @@ struct drm_v3d_submit_csd {
 	__u32 perfmon_id;
 
 	/* Pointer to an array of ioctl extensions*/
-	__u64 extensions;
+	__u64ptr extensions;
 
 	__u32 flags;
 
@@ -427,10 +427,10 @@ struct drm_v3d_timestamp_query {
 	struct drm_v3d_extension base;
 
 	/* Array of queries' offsets within the timestamp BO for their value */
-	__u64 offsets;
+	__u64ptr offsets;
 
 	/* Array of timestamp's syncobjs to indicate its availability */
-	__u64 syncs;
+	__u64ptr syncs;
 
 	/* Number of queries */
 	__u32 count;
@@ -453,7 +453,7 @@ struct drm_v3d_reset_timestamp_query {
 	struct drm_v3d_extension base;
 
 	/* Array of timestamp's syncobjs to indicate its availability */
-	__u64 syncs;
+	__u64ptr syncs;
 
 	/* Offset of the first query within the timestamp BO for its value */
 	__u32 offset;
@@ -496,10 +496,10 @@ struct drm_v3d_copy_timestamp_query {
 	__u32 count;
 
 	/* Array of queries' offsets within the timestamp BO for their value */
-	__u64 offsets;
+	__u64ptr offsets;
 
 	/* Array of timestamp's syncobjs to indicate its availability */
-	__u64 syncs;
+	__u64ptr syncs;
 };
 
 /**
@@ -516,7 +516,7 @@ struct drm_v3d_reset_performance_query {
 	struct drm_v3d_extension base;
 
 	/* Array of performance queries's syncobjs to indicate its availability */
-	__u64 syncs;
+	__u64ptr syncs;
 
 	/* Number of queries */
 	__u32 count;
@@ -525,7 +525,7 @@ struct drm_v3d_reset_performance_query {
 	__u32 nperfmons;
 
 	/* Array of u64 user-pointers that point to an array of kperfmon_ids */
-	__u64 kperfmon_ids;
+	__u64ptr kperfmon_ids;
 };
 
 /**
@@ -568,10 +568,10 @@ struct drm_v3d_copy_performance_query {
 	__u32 count;
 
 	/* Array of performance queries's syncobjs to indicate its availability */
-	__u64 syncs;
+	__u64ptr syncs;
 
 	/* Array of u64 user-pointers that point to an array of kperfmon_ids */
-	__u64 kperfmon_ids;
+	__u64ptr kperfmon_ids;
 };
 
 struct drm_v3d_submit_cpu {
@@ -596,7 +596,7 @@ struct drm_v3d_submit_cpu {
 	 * For DRM_V3D_EXT_ID_CPU_COPY_PERFORMANCE_QUERY, it must contain one
 	 * BO, where the performance queries will be written.
 	 */
-	__kernel_uintptr_t bo_handles;
+	__u64ptr bo_handles;
 
 	/* Number of BO handles passed in (size is that times 4). */
 	__u32 bo_handle_count;
@@ -604,7 +604,7 @@ struct drm_v3d_submit_cpu {
 	__u32 flags;
 
 	/* Pointer to an array of ioctl extensions*/
-	__u64 extensions;
+	__u64ptr extensions;
 };
 
 /* The performance counters index represented by this enum are deprecated and
@@ -732,7 +732,7 @@ struct drm_v3d_perfmon_destroy {
 struct drm_v3d_perfmon_get_values {
 	__u32 id;
 	__u32 pad;
-	__u64 values_ptr;
+	__u64ptr values_ptr;
 };
 
 #define DRM_V3D_PERFCNT_MAX_NAME 64

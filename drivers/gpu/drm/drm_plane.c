@@ -819,7 +819,7 @@ int drm_mode_getplane_res(struct drm_device *dev, void *data,
 		plane_ptr = compat_ptr(plane_resp32->plane_id_ptr);
 		count_planes = plane_resp32->count_planes;
 	} else {
-		plane_ptr = (uint32_t __user *)(plane_resp->plane_id_ptr);
+		plane_ptr = u64_to_user_ptr(plane_resp->plane_id_ptr);
 		count_planes = plane_resp->count_planes;
 	}
 
@@ -895,7 +895,7 @@ int drm_mode_getplane(struct drm_device *dev, void *data,
 		plane_id = plane_resp32->plane_id;
 		count_format_types = plane_resp32->count_format_types;
 	} else {
-		format_ptr = (uint32_t __user *)plane_resp->format_type_ptr;
+		format_ptr = u64_to_user_ptr(plane_resp->format_type_ptr);
 		plane_id = plane_resp->plane_id;
 		count_format_types = plane_resp->count_format_types;
 	}

@@ -25,9 +25,6 @@ struct reserv_struct;
 }					\
 )
 
-/* Legacy user pointer conversion macro, new code should use as_user_ptr() */
-#define u64_to_user_ptr(x) as_user_ptr_strict(u64, (x))
-
 #ifdef CONFIG_CHERI_PURECAP_UABI
 
 typedef cheri_perms_t user_ptr_perms_t;

@@ -625,7 +625,7 @@ static inline void mas_set_alloc_req(struct ma_state *mas, unsigned long count)
 		if (!count)
 			mas->alloc = NULL;
 		else
-			mas->alloc = (struct maple_alloc *)__c_fakeu(((count) << 1U) | 1U);
+			mas->alloc = (struct maple_alloc *)__c_fakep(((count) << 1U) | 1U);
 		return;
 	}
 

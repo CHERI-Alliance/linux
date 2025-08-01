@@ -114,14 +114,9 @@ struct mptcp_full_info {
 						 *  size_arrays * size_tcpinfo_user
 						 * bytes wide
 						 */
-#if __SIZEOF_POINTER__ <= 8
-	__aligned_u64		subflow_info;
-	__aligned_u64		tcp_info;
-#else
-	__u64			_pad;
-	__kernel_uintptr_t	subflow_info;
-	__kernel_uintptr_t	tcp_info;
-#endif
+	/* CHERI: 64-bit padding here if sizeof(__uptr) > sizeof(ptr). */
+	__aligned_u64ptr	subflow_info;
+	__aligned_u64ptr	tcp_info;
 	struct mptcp_info	mptcp_info;
 };
 

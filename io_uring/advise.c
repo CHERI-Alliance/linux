@@ -36,7 +36,7 @@ int io_madvise_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	if (sqe->buf_index || sqe->splice_fd_in)
 		return -EINVAL;
 
-	ma->addr = (void __user *)READ_ONCE(sqe->addr);
+	ma->addr = u64_to_user_ptr(READ_ONCE(sqe->addr));
 	ma->len = READ_ONCE(sqe->off);
 	if (!ma->len)
 		ma->len = READ_ONCE(sqe->len);

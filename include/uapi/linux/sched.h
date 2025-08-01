@@ -89,34 +89,31 @@
  * New struct members must go at the end of the struct and
  * must be properly aligned on at least 64bit boundary.
  * Mind implicit padding when:
- * ((sizeof(__kernel_uintptr_t) > sizeof(__u64))
+ * ((sizeof(__u64ptr) > sizeof(__u64))
  *
  */
 
 struct clone_args {
 	__aligned_u64 flags;
-	__kernel_aligned_uintptr_t pidfd;
-	__kernel_aligned_uintptr_t child_tid;
-	__kernel_aligned_uintptr_t parent_tid;
+	__aligned_u64ptr pidfd;
+	__aligned_u64ptr child_tid;
+	__aligned_u64ptr parent_tid;
 	__aligned_u64 exit_signal;
-	__kernel_aligned_uintptr_t stack;
+	__aligned_u64ptr stack;
 	__aligned_u64 stack_size;
-	__kernel_aligned_uintptr_t tls;
-	/* VER0 boundary */
-	__kernel_aligned_uintptr_t set_tid;
+	__aligned_u64ptr tls;
+	__aligned_u64ptr set_tid;
 	__aligned_u64 set_tid_size;
-	/* VER1 boundary */
 	__aligned_u64 cgroup;
-	/* VER2 boundary */
 };
 #endif
 
 #define CLONE_ARGS_SIZE_VER0  /* sizeof first published struct */	\
-	((sizeof(__kernel_uintptr_t) > sizeof(__u64)) ? 128 : 64)
+	((sizeof(__u64ptr) > sizeof(__u64)) ? 128 : 64)
 #define CLONE_ARGS_SIZE_VER1  /* sizeof second published struct */	\
-	((sizeof(__kernel_uintptr_t) > sizeof(__u64)) ? 152 : 80)
+	((sizeof(__u64ptr) > sizeof(__u64)) ? 152 : 80)
 #define CLONE_ARGS_SIZE_VER2  /* sizeof third published struct */	\
-	((sizeof(__kernel_uintptr_t) > sizeof(__u64)) ? 160 : 88)
+	((sizeof(__u64ptr) > sizeof(__u64)) ? 160 : 88)
 
 /*
  * Scheduling policies

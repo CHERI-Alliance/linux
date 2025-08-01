@@ -78,7 +78,7 @@ static int get_compat64_io_uring_buf_reg(struct io_uring_buf_reg *reg,
 
 	if (copy_from_user(&compat_reg, user_reg, sizeof(compat_reg)))
 		return -EFAULT;
-	reg->ring_addr = (__kernel_uintptr_t)compat_ptr(compat_reg.ring_addr);
+	reg->ring_addr = (user_uintptr_t)compat_ptr(compat_reg.ring_addr);
 	reg->ring_entries = compat_reg.ring_entries;
 	reg->bgid = compat_reg.bgid;
 	reg->flags = compat_reg.flags;
@@ -232,7 +232,7 @@ static void __user *io_ring_buffer_select(struct io_kiocb *req, size_t *len,
 	req->buf_list = bl;
 	req->buf_index = buf->bid;
 
-	return (void __user *)buf->addr;
+	return u64_to_user_ptr(buf->addr);
 }
 
 static void __user *io_ring_buffer_select_any(struct io_kiocb *req, size_t *len,
@@ -352,7 +352,7 @@ static int io_ring_buffers_peek(struct io_kiocb *req, struct buf_sel_arg *arg,
 			}
 		}
 
-		iov->iov_base = (void __user *)buf->addr;
+		iov->iov_base = u64_to_user_ptr(buf->addr);
 		iov->iov_len = buf->len;
 		iov++;
 
@@ -544,7 +544,7 @@ int io_provide_buffers_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe
 	if (!tmp || tmp > MAX_BIDS_PER_BGID)
 		return -E2BIG;
 	p->nbufs = tmp;
-	p->addr = (void __user *)READ_ONCE(sqe->addr);
+	p->addr = u64_to_user_ptr(READ_ONCE(sqe->addr));
 	p->len = READ_ONCE(sqe->len);
 	if (!p->len)
 		return -EINVAL;

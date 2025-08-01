@@ -1859,10 +1859,15 @@ struct v4l2_control {
 	__s32		     value;
 };
 
+#if defined(__ARCH_WANT_PURECAP) || defined(__CHERI_PURE_CAPABILITY__)
+#define __v4l2_ext_control_pack
+#else
+#define __v4l2_ext_control_pack __attribute__ ((packed))
+#endif
 struct v4l2_ext_control {
 	__u32 id;
 	__u32 size;
-	__u32 reserved2[2];
+	__u32 reserved2[1];
 	union {
 		__s32 value;
 		__s64 value64;
@@ -1899,8 +1904,8 @@ struct v4l2_ext_control {
 		struct v4l2_ctrl_hdr10_cll_info __user *p_hdr10_cll_info;
 		struct v4l2_ctrl_hdr10_mastering_display __user *p_hdr10_mastering_display;
 		void __user *ptr;
-	} __attribute__ ((packed)) __attribute__ ((aligned(__SIZEOF_POINTER__)));
-} __attribute__ ((packed)) __attribute__ ((aligned(__SIZEOF_POINTER__)));
+	} __v4l2_ext_control_pack;
+} __v4l2_ext_control_pack;
 
 struct v4l2_ext_controls {
 	union {

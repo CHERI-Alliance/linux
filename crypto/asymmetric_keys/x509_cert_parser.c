@@ -149,7 +149,7 @@ int x509_note_OID(void *context, size_t hdrlen,
 		char buffer[50];
 		sprint_oid(value, vlen, buffer, sizeof(buffer));
 		pr_debug("Unknown OID: [%lu] %s\n",
-			 (unsigned long)value - __c_ua(ctx->data), buffer);
+			 (unsigned long)value - (unsigned long)ctx->data, buffer);
 	}
 	return 0;
 }
@@ -165,7 +165,7 @@ int x509_note_tbs_certificate(void *context, size_t hdrlen,
 	struct x509_parse_context *ctx = context;
 
 	pr_debug("x509_note_tbs_certificate(,%zu,%02x,%ld,%zu)!\n",
-		 hdrlen, tag, (unsigned long)value - __c_ua(ctx->data), vlen);
+		 hdrlen, tag, (unsigned long)value - (unsigned long)ctx->data, vlen);
 
 	ctx->cert->tbs = value - hdrlen;
 	ctx->cert->tbs_size = vlen + hdrlen;

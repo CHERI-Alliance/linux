@@ -466,8 +466,8 @@ int drm_mode_obj_get_properties_ioctl(struct drm_device *dev, void *data,
 		count_props = arg->count_props;
 		obj_id = arg->obj_id;
 		obj_type = arg->obj_type;
-		props_ptr = (uint32_t __user *)(arg->props_ptr);
-		prop_values_ptr = (uint64_t __user *)(arg->prop_values_ptr);
+		props_ptr = u64_to_user_ptr(arg->props_ptr);
+		prop_values_ptr = u64_to_user_ptr(arg->prop_values_ptr);
 	}
 
 	obj = drm_mode_object_find(dev, file_priv, obj_id, obj_type);

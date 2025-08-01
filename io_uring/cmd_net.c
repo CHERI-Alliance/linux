@@ -10,7 +10,7 @@ static inline void __user *sqe_get_optval(const struct io_uring_sqe *sqe)
 		const __u64 *val = io_uring_sqe_cmd(sqe);
 		return compat_ptr(READ_ONCE(*val));
 	} else {
-		const __kernel_uintptr_t *val = io_uring_sqe_cmd(sqe);
+		const user_uintptr_t *val = io_uring_sqe_cmd(sqe);
 		return (void __user *)READ_ONCE(*val);
 	}
 }
@@ -53,7 +53,6 @@ static inline int io_uring_cmd_setsockopt(struct socket *sock,
 	sockptr_t optval_s;
 
 	optval = sqe_get_optval(sqe);
-	optval = (void __user *)READ_ONCE(sqe->optval);
 	optname = READ_ONCE(sqe->optname);
 	optlen = READ_ONCE(sqe->optlen);
 	level = READ_ONCE(sqe->level);

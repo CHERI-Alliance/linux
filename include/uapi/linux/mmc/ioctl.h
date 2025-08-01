@@ -49,9 +49,9 @@ struct mmc_ioc_cmd {
 	__u32 __pad;
 
 	/* DAT buffer */
-	__kernel_uintptr_t data_ptr;
+	__u64ptr data_ptr;
 };
-#define mmc_ioc_cmd_set_data(ic, ptr) ic.data_ptr = (uintptr_t) ptr
+#define mmc_ioc_cmd_set_data(ic, ptr) ic.data_ptr = (__u64ptr) ptr
 
 /**
  * struct mmc_ioc_multi_cmd - multi command information

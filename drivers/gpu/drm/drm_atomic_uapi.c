@@ -40,6 +40,7 @@
 #include <linux/uaccess.h>
 #include <linux/sync_file.h>
 #include <linux/file.h>
+#include <linux/cheri.h>
 
 #include "drm_crtc_internal.h"
 
@@ -407,7 +408,13 @@ static int drm_atomic_crtc_set_property(struct drm_crtc *crtc,
 		state->color_mgmt_changed |= replaced;
 		return ret;
 	} else if (property == config->prop_out_fence_ptr) {
+#ifdef __CHERI__
+		/* FIXCHERI: Need to get the provenance from userspace. */
+		s32 __user *fence_ptr = cheri_build_user_cap(val, sizeof(s32), CHERI_PERMS_READ | CHERI_PERMS_WRITE);
+		WARN_ONCE(1, "CHERI: %s: Need to fabricate user capability", __func__);
+#else
 		s32 __user *fence_ptr = u64_to_user_ptr(val);
+#endif
 
 		if (!fence_ptr)
 			return 0;
@@ -769,7 +776,13 @@ static int drm_atomic_connector_set_property(struct drm_connector *connector,
 			drm_framebuffer_put(fb);
 		return ret;
 	} else if (property == config->writeback_out_fence_ptr_property) {
+#ifdef __CHERI__
+		/* FIXCHERI: Need to get the provenance from userspace. */
+		s32 __user *fence_ptr = cheri_build_user_cap(val, sizeof(s32), CHERI_PERMS_READ | CHERI_PERMS_WRITE);
+		WARN_ONCE(1, "CHERI: %s: Need to fabricate user capability", __func__);
+#else
 		s32 __user *fence_ptr = u64_to_user_ptr(val);
+#endif
 
 		return set_out_fence_for_connector(state->state, connector,
 						   fence_ptr);
@@ -924,7 +937,7 @@ int drm_atomic_get_property(struct drm_mode_object *obj,
 
 static struct drm_pending_vblank_event *create_vblank_event(
 		struct drm_crtc *crtc,
-		__kernel_uintptr_t user_data,
+		user_uintptr_t user_data,
 		bool compat)
 {
 	struct drm_pending_vblank_event *e = NULL;
@@ -1226,7 +1239,7 @@ static int prepare_signaling(struct drm_device *dev,
 	struct drm_connector_state *conn_state;
 	int i, c = 0, ret;
 	__u32 flags;
-	__kernel_uintptr_t user_data;
+	user_uintptr_t user_data;
 
 	if (in_compat64_syscall()) {
 		flags = arg32->flags;
@@ -1458,11 +1471,11 @@ int drm_mode_atomic_ioctl(struct drm_device *dev,
 	} else {
 		flags = arg->flags;
 		count_objs = arg->count_objs;
-		objs_ptr = (uint32_t __user *)arg->objs_ptr;
-		count_props_ptr = (uint32_t __user *)arg->count_props_ptr;
-		props_ptr = (uint32_t __user *)arg->props_ptr;
-		prop_values_ptr = (uint64_t __user *)arg->prop_values_ptr;
-		if (user_ptr_is_same((void __user *)arg->reserved, NULL)) {
+		objs_ptr = u64_to_user_ptr(arg->objs_ptr);
+		count_props_ptr = u64_to_user_ptr(arg->count_props_ptr);
+		props_ptr = u64_to_user_ptr(arg->props_ptr);
+		prop_values_ptr = u64_to_user_ptr(arg->prop_values_ptr);
+		if (user_ptr_is_same(u64_to_user_ptr(arg->reserved), NULL)) {
 			drm_dbg_atomic(dev, "commit failed: reserved field set\n");
 			return -EINVAL;
 		}

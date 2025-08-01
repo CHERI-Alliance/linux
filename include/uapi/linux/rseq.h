@@ -50,7 +50,7 @@ struct rseq_cs {
 	__u64 start_ip;
 	/* Offset from start_ip. */
 	__u64 post_commit_offset;
-	__kernel_uintptr_t abort_ip;
+	__u64ptr abort_ip;
 } __attribute__((aligned(4 * sizeof(__u64))));
 
 /*
@@ -109,7 +109,7 @@ struct rseq {
 	 * 32-bit architectures should update the low order bits of the
 	 * rseq_cs field, leaving the high order bits initialized to 0.
 	 */
-	__kernel_uintptr_t rseq_cs;
+	__u64ptr rseq_cs;
 
 	/*
 	 * Restartable sequences flags field.

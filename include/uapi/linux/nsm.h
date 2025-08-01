@@ -15,7 +15,7 @@
 #define NSM_RESPONSE_MAX_SIZE	0x3000
 
 struct nsm_iovec {
-	__u64 addr; /* Virtual address of target buffer */
+	__u64ptr addr; /* Virtual address of target buffer */
 	__u64 len;  /* Length of target buffer */
 };
 

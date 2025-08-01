@@ -95,7 +95,7 @@
  */
 struct futex_waitv {
 	__u64 val;
-	__kernel_uintptr_t uaddr;
+	__u64ptr uaddr;
 	__u32 flags;
 	__u32 __reserved;
 };

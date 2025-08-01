@@ -178,14 +178,14 @@ static int amdgpu_cs_pass1(struct amdgpu_cs_parser *p,
 	struct amdgpu_fpriv *fpriv = p->filp->driver_priv;
 	unsigned int num_ibs[AMDGPU_CS_GANG_SIZE] = { };
 	struct amdgpu_vm *vm = &fpriv->vm;
-	uint64_t *chunk_array_user;
-	uint64_t *chunk_array;
+	__u64ptr __user *chunk_array_user;
+	__u64ptr *chunk_array;
 	uint32_t uf_offset = 0;
 	size_t size;
 	int ret;
 	int i;
 
-	chunk_array = kvmalloc_array(cs->in.num_chunks, sizeof(uint64_t),
+	chunk_array = kvmalloc_array(cs->in.num_chunks, sizeof(__u64ptr),
 				     GFP_KERNEL);
 	if (!chunk_array)
 		return -ENOMEM;
@@ -193,7 +193,7 @@ static int amdgpu_cs_pass1(struct amdgpu_cs_parser *p,
 	/* get chunks */
 	chunk_array_user = u64_to_user_ptr(cs->in.chunks);
 	if (copy_from_user(chunk_array, chunk_array_user,
-			   sizeof(uint64_t)*cs->in.num_chunks)) {
+			   sizeof(__u64ptr)*cs->in.num_chunks)) {
 		ret = -EFAULT;
 		goto free_chunk;
 	}
@@ -1764,7 +1764,7 @@ int amdgpu_cs_wait_fences_ioctl(struct drm_device *dev, void *data,
 	struct amdgpu_device *adev = drm_to_adev(dev);
 	union drm_amdgpu_wait_fences *wait = data;
 	uint32_t fence_count = wait->in.fence_count;
-	struct drm_amdgpu_fence *fences_user;
+	struct drm_amdgpu_fence __user *fences_user;
 	struct drm_amdgpu_fence *fences;
 	int r;
 

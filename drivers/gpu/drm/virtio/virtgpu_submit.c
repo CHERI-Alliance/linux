@@ -109,7 +109,7 @@ virtio_gpu_parse_deps(struct virtio_gpu_submit *submit)
 		return -ENOMEM;
 
 	for (i = 0; i < num_in_syncobjs; i++) {
-		u64 address = exbuf->in_syncobjs + i * syncobj_stride;
+		__u64ptr address = exbuf->in_syncobjs + i * syncobj_stride;
 		struct dma_fence *fence;
 
 		memset(&syncobj_desc, 0, sizeof(syncobj_desc));
@@ -200,7 +200,7 @@ static int virtio_gpu_parse_post_deps(struct virtio_gpu_submit *submit)
 		return -ENOMEM;
 
 	for (i = 0; i < num_out_syncobjs; i++) {
-		u64 address = exbuf->out_syncobjs + i * syncobj_stride;
+		__u64ptr address = exbuf->out_syncobjs + i * syncobj_stride;
 
 		memset(&syncobj_desc, 0, sizeof(syncobj_desc));
 

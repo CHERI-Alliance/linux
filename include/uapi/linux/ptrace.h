@@ -85,12 +85,12 @@ struct ptrace_syscall_info {
 	__u8 reserved;
 	__u16 flags;
 	__u32 arch;
-	__kernel_uintptr_t instruction_pointer;
-	__kernel_uintptr_t stack_pointer;
+	__u64ptr instruction_pointer;
+	__u64ptr stack_pointer;
 	union {
 		struct {
 			__u64 nr;
-			__kernel_uintptr_t args[6];
+			__u64ptr args[6];
 		} entry;
 		struct {
 			__s64 rval;
@@ -98,7 +98,7 @@ struct ptrace_syscall_info {
 		} exit;
 		struct {
 			__u64 nr;
-			__kernel_uintptr_t args[6];
+			__u64ptr args[6];
 			__u32 ret_data;
 			__u32 reserved2;
 		} seccomp;
@@ -139,8 +139,9 @@ struct ptrace_rseq_configuration {
  * dispatch.
  */
 struct ptrace_sud_config {
-	__kernel_uintptr_t selector;
 	__u64 mode;
+	/* Implicit padding if sizeof(__u64ptr) > sizeof(__u64) */
+	__u64ptr selector;
 	__u64 offset;
 	__u64 len;
 };

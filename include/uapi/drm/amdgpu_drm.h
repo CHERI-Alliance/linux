@@ -219,7 +219,7 @@ struct drm_amdgpu_bo_list_in {
 	/** Size of each element describing BO */
 	__u32 bo_info_size;
 	/** Pointer to array describing BOs */
-	__u64 bo_info_ptr;
+	__u64ptr bo_info_ptr;
 };
 
 struct drm_amdgpu_bo_list_entry {
@@ -401,7 +401,7 @@ struct drm_amdgpu_userq_in {
 	 * their respective versions/revisions, so this points to a __u64 *
 	 * which holds IP specific MQD of this usermode queue.
 	 */
-	__u64 mqd;
+	__u64ptr mqd;
 	/**
 	 * @size: size of MQD data in bytes, it must match the MQD structure
 	 * size of the respective engine/revision defined in UAPI for ex, for
@@ -472,7 +472,7 @@ struct drm_amdgpu_userq_signal {
 	 * @syncobj_handles: The list of syncobj handles submitted by the user queue
 	 * job to be signaled.
 	 */
-	__u64	syncobj_handles;
+	__u64ptr	syncobj_handles;
 	/**
 	 * @num_syncobj_handles: A count that represents the number of syncobj handles in
 	 * @syncobj_handles.
@@ -482,12 +482,12 @@ struct drm_amdgpu_userq_signal {
 	 * @bo_read_handles: The list of BO handles that the submitted user queue job
 	 * is using for read only. This will update BO fences in the kernel.
 	 */
-	__u64	bo_read_handles;
+	__u64ptr	bo_read_handles;
 	/**
 	 * @bo_write_handles: The list of BO handles that the submitted user queue job
 	 * is using for write only. This will update BO fences in the kernel.
 	 */
-	__u64	bo_write_handles;
+	__u64ptr	bo_write_handles;
 	/**
 	 * @num_bo_read_handles: A count that represents the number of read BO handles in
 	 * @bo_read_handles.
@@ -525,27 +525,27 @@ struct drm_amdgpu_userq_wait {
 	 * @syncobj_handles: The list of syncobj handles submitted by the user queue
 	 * job to get the va/value pairs.
 	 */
-	__u64	syncobj_handles;
+	__u64ptr	syncobj_handles;
 	/**
 	 * @syncobj_timeline_handles: The list of timeline syncobj handles submitted by
 	 * the user queue job to get the va/value pairs at given @syncobj_timeline_points.
 	 */
-	__u64	syncobj_timeline_handles;
+	__u64ptr	syncobj_timeline_handles;
 	/**
 	 * @syncobj_timeline_points: The list of timeline syncobj points submitted by the
 	 * user queue job for the corresponding @syncobj_timeline_handles.
 	 */
-	__u64	syncobj_timeline_points;
+	__u64ptr	syncobj_timeline_points;
 	/**
 	 * @bo_read_handles: The list of read BO handles submitted by the user queue
 	 * job to get the va/value pairs.
 	 */
-	__u64	bo_read_handles;
+	__u64ptr	bo_read_handles;
 	/**
 	 * @bo_write_handles: The list of write BO handles submitted by the user queue
 	 * job to get the va/value pairs.
 	 */
-	__u64	bo_write_handles;
+	__u64ptr	bo_write_handles;
 	/**
 	 * @num_syncobj_timeline_handles: A count that represents the number of timeline
 	 * syncobj handles in @syncobj_timeline_handles.
@@ -576,7 +576,7 @@ struct drm_amdgpu_userq_wait {
 	 * @out_fences: The field is a return value from the ioctl containing the list of
 	 * address/value pairs to wait for.
 	 */
-	__u64	out_fences;
+	__u64ptr	out_fences;
 };
 
 /* vm ioctl */
@@ -782,7 +782,7 @@ struct drm_amdgpu_fence {
 
 struct drm_amdgpu_wait_fences_in {
 	/** This points to uint64_t * which points to fences */
-	__u64 fences;
+	__u64ptr fences;
 	__u32 fence_count;
 	__u32 wait_all;
 	__u64 timeout_ns;
@@ -808,7 +808,7 @@ struct drm_amdgpu_gem_op {
 	/** AMDGPU_GEM_OP_* */
 	__u32	op;
 	/** Input or return value */
-	__u64	value;
+	__u64ptr	value;
 };
 
 #define AMDGPU_VA_OP_MAP			1
@@ -871,7 +871,7 @@ struct drm_amdgpu_gem_va {
 	/** the number of syncobj handles in @input_fence_syncobj_handles */
 	__u32 num_syncobj_handles;
 	/** Array of sync object handle to wait for given input fences */
-	__u64 input_fence_syncobj_handles;
+	__u64ptr input_fence_syncobj_handles;
 };
 
 #define AMDGPU_HW_IP_GFX          0
@@ -906,7 +906,7 @@ struct drm_amdgpu_gem_va {
 struct drm_amdgpu_cs_chunk {
 	__u32		chunk_id;
 	__u32		length_dw;
-	__u64		chunk_data;
+	__u64ptr	chunk_data;
 };
 
 struct drm_amdgpu_cs_in {
@@ -917,7 +917,7 @@ struct drm_amdgpu_cs_in {
 	__u32		num_chunks;
 	__u32		flags;
 	/** this points to __u64 * which point to cs chunks */
-	__u64		chunks;
+	__u64ptr	chunks;
 };
 
 struct drm_amdgpu_cs_out {
@@ -1240,7 +1240,7 @@ struct drm_amdgpu_query_fw {
 /* Input structure for the INFO ioctl */
 struct drm_amdgpu_info {
 	/* Where the return value will be stored */
-	__kernel_uintptr_t return_pointer;
+	__u64ptr return_pointer;
 	/* The size of the return value. Just like "size" in "snprintf",
 	 * it limits how many bytes the kernel can write. */
 	__u32 return_size;

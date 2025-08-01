@@ -72,6 +72,14 @@ build_arm64:
     - 'make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- defconfig'
     - 'make -j $(nproc) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- all modules'
 
+build_i386:
+  stage: build
+  script:
+    - mkdir -p $CI_PROJECT_DIR
+    - cd $CI_PROJECT_DIR
+    - make i386_defconfig
+    - make -j $(nproc) all modules
+
 build_x64:
   stage: build
   script:

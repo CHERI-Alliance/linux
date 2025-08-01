@@ -490,8 +490,8 @@ int drm_mode_getproperty_ioctl(struct drm_device *dev,
 		count_values = out_resp32->count_values;
 		count_enum_blobs = out_resp32->count_enum_blobs;
 	} else {
-		values_ptr = (uint64_t __user *)out_resp->values_ptr;
-		enum_ptr = (struct drm_mode_property_enum __user *)out_resp->enum_blob_ptr;
+		values_ptr = u64_to_user_ptr(out_resp->values_ptr);
+		enum_ptr = u64_to_user_ptr(out_resp->enum_blob_ptr);
 		prop_id = out_resp->prop_id;
 		name = out_resp->name;
 		count_values = out_resp->count_values;
@@ -871,7 +871,7 @@ int drm_mode_getblob_ioctl(struct drm_device *dev,
 	} else {
 		blob_id = out_resp->blob_id;
 		length = out_resp->length;
-		blob_data = (uint8_t __user *)(out_resp->data);
+		blob_data = u64_to_user_ptr(out_resp->data);
 	}
 
 	if (!drm_core_check_feature(dev, DRIVER_MODESET))

@@ -7,7 +7,7 @@
 struct io_cancel_data {
 	struct io_ring_ctx *ctx;
 	union {
-		__kernel_uintptr_t data;
+		user_uintptr_t data;
 		struct file *file;
 	};
 	u8 opcode;

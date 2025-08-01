@@ -487,7 +487,7 @@ struct msm_submit_post_dep {
 
 static struct drm_syncobj **msm_parse_deps(struct msm_gem_submit *submit,
                                            struct drm_file *file,
-                                           uint64_t in_syncobjs_addr,
+                                           __u64ptr in_syncobjs_addr,
                                            uint32_t nr_in_syncobjs,
                                            size_t syncobj_stride)
 {
@@ -502,7 +502,7 @@ static struct drm_syncobj **msm_parse_deps(struct msm_gem_submit *submit,
 		return ERR_PTR(-ENOMEM);
 
 	for (i = 0; i < nr_in_syncobjs; ++i) {
-		uint64_t address = in_syncobjs_addr + i * syncobj_stride;
+		__u64ptr address = in_syncobjs_addr + i * syncobj_stride;
 
 		if (copy_from_user(&syncobj_desc,
 			           u64_to_user_ptr(address),
@@ -561,7 +561,7 @@ static void msm_reset_syncobjs(struct drm_syncobj **syncobjs,
 
 static struct msm_submit_post_dep *msm_parse_post_deps(struct drm_device *dev,
                                                        struct drm_file *file,
-                                                       uint64_t syncobjs_addr,
+                                                       __u64ptr syncobjs_addr,
                                                        uint32_t nr_syncobjs,
                                                        size_t syncobj_stride)
 {
@@ -576,7 +576,7 @@ static struct msm_submit_post_dep *msm_parse_post_deps(struct drm_device *dev,
 		return ERR_PTR(-ENOMEM);
 
 	for (i = 0; i < nr_syncobjs; ++i) {
-		uint64_t address = syncobjs_addr + i * syncobj_stride;
+		__u64ptr address = syncobjs_addr + i * syncobj_stride;
 
 		if (copy_from_user(&syncobj_desc,
 			           u64_to_user_ptr(address),

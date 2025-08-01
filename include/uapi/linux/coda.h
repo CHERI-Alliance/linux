@@ -77,11 +77,7 @@ typedef unsigned int u_int;
 typedef unsigned short u_short;
 typedef u_long ino_t;
 typedef u_long dev_t;
-#if __SIZEOF_POINTER__ > __SIZEOF_LONG__
-typedef unsigned long caddr_t;
-#else
-typedef void * caddr_t;
-#endif
+typedef __kernel_ptraddr_t caddr_t;
 #ifdef DOS
 typedef unsigned __int64 u_quad_t;
 #else 

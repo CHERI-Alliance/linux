@@ -19,11 +19,7 @@
 #define PTRACE_GETFDPIC_EXEC	0
 #define PTRACE_GETFDPIC_INTERP	1
 
-#ifdef __CHERI_PURE_CAPABILITY__
-typedef __kernel_uintptr_t register_t;
-#else
-typedef unsigned long register_t;
-#endif
+typedef __uptr register_t;
 
 /*
  * User-mode register state for core dumps, ptrace, sigcontext
@@ -70,9 +66,9 @@ struct user_regs_struct {
 };
 
 struct user_cap {
-	__kernel_uintptr_t val;
+	__uptr val;
 	__u8 tag;
-	__u8 _pad[sizeof(__kernel_uintptr_t) - 1];
+	__u8 _pad[sizeof(__uptr) - 1];
 };
 
 struct __riscv_f_ext_state {

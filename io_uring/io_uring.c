@@ -186,10 +186,10 @@ static int get_compat64_io_uring_getevents_arg(struct io_uring_getevents_arg *ar
 
 	if (copy_from_user(&compat_arg, user_arg, sizeof(compat_arg)))
 		return -EFAULT;
-	arg->sigmask = (__kernel_uintptr_t)compat_ptr(compat_arg.sigmask);
+	arg->sigmask = (user_uintptr_t)compat_ptr(compat_arg.sigmask);
 	arg->sigmask_sz = compat_arg.sigmask_sz;
 	arg->min_wait_usec = compat_arg.min_wait_usec;
-	arg->ts = (__kernel_uintptr_t)compat_ptr(compat_arg.ts);
+	arg->ts = (user_uintptr_t)compat_ptr(compat_arg.ts);
 	return 0;
 }
 
@@ -235,7 +235,7 @@ static int get_compat64_io_uring_params(struct io_uring_params *params,
 	params->sq_off.dropped = compat_params.sq_off.dropped;
 	params->sq_off.array = compat_params.sq_off.array;
 	params->sq_off.resv1 = compat_params.sq_off.resv1;
-	params->sq_off.user_addr = (__kernel_uintptr_t)compat_ptr(compat_params.sq_off.user_addr);
+	params->sq_off.user_addr = (user_uintptr_t)compat_ptr(compat_params.sq_off.user_addr);
 
 	params->cq_off.head = compat_params.cq_off.head;
 	params->cq_off.tail = compat_params.cq_off.tail;
@@ -245,7 +245,7 @@ static int get_compat64_io_uring_params(struct io_uring_params *params,
 	params->cq_off.cqes = compat_params.cq_off.cqes;
 	params->cq_off.flags = compat_params.cq_off.flags;
 	params->cq_off.resv1 = compat_params.cq_off.resv1;
-	params->cq_off.user_addr = (__kernel_uintptr_t)compat_ptr(compat_params.cq_off.user_addr);
+	params->cq_off.user_addr = (user_uintptr_t)compat_ptr(compat_params.cq_off.user_addr);
 
 	return 0;
 }
@@ -940,7 +940,7 @@ struct io_uring_cqe *__io_get_ith_cqe(struct io_ring_ctx *ctx, unsigned int i)
 }
 
 static bool io_fill_cqe_aux(struct io_ring_ctx *ctx,
-			    __kernel_uintptr_t user_data, s32 res, u32 cflags)
+			    user_uintptr_t user_data, s32 res, u32 cflags)
 {
 	struct io_uring_cqe *cqe;
 
@@ -952,7 +952,7 @@ static bool io_fill_cqe_aux(struct io_ring_ctx *ctx,
 	return false;
 }
 
-static inline struct io_cqe io_init_cqe(__kernel_uintptr_t user_data, s32 res, u32 cflags)
+static inline struct io_cqe io_init_cqe(user_uintptr_t user_data, s32 res, u32 cflags)
 {
 	return (struct io_cqe) { .user_data = user_data, .res = res, .flags = cflags };
 }
@@ -978,7 +978,7 @@ static __cold bool io_cqe_overflow_locked(struct io_ring_ctx *ctx,
 	return io_cqring_add_overflow(ctx, ocqe);
 }
 
-bool io_post_aux_cqe(struct io_ring_ctx *ctx, __kernel_uintptr_t user_data, s32 res, u32 cflags)
+bool io_post_aux_cqe(struct io_ring_ctx *ctx, user_uintptr_t user_data, s32 res, u32 cflags)
 {
 	bool filled;
 
@@ -997,7 +997,7 @@ bool io_post_aux_cqe(struct io_ring_ctx *ctx, __kernel_uintptr_t user_data, s32 
  * Must be called from inline task_work so we now a flush will happen later,
  * and obviously with ctx->uring_lock held (tw always has that).
  */
-void io_add_aux_cqe(struct io_ring_ctx *ctx, __kernel_uintptr_t user_data, s32 res, u32 cflags)
+void io_add_aux_cqe(struct io_ring_ctx *ctx, user_uintptr_t user_data, s32 res, u32 cflags)
 {
 	lockdep_assert_held(&ctx->uring_lock);
 	lockdep_assert(ctx->lockless_cq);
@@ -3443,10 +3443,10 @@ static int io_get_ext_arg(struct io_ring_ctx *ctx, unsigned flags,
 			return -EINVAL;
 		ext_arg->min_time = READ_ONCE(w->min_wait_usec) * NSEC_PER_USEC;
 		if (IS_ENABLED(CONFIG_CHERI_PURECAP_UABI) && !io_in_compat64(ctx)) {
-			ext_arg->sig = (sigset_t __user *)READ_ONCE(w->sigmask128);
+			ext_arg->sig = u64_to_user_ptr(READ_ONCE(w->sigmask128));
 			ext_arg->argsz = READ_ONCE(w->sigmask_sz128);
 		} else {
-			ext_arg->sig = u64_to_user_ptr(READ_ONCE(w->sigmask64));
+			ext_arg->sig = (void __user *)(user_uintptr_t __force)READ_ONCE(w->sigmask64);
 			ext_arg->argsz = READ_ONCE(w->sigmask_sz64);
 		}
 		if (w->flags & IORING_REG_WAIT_TS) {
@@ -3479,10 +3479,10 @@ static int io_get_ext_arg(struct io_ring_ctx *ctx, unsigned flags,
 	}
 #endif
 	ext_arg->min_time = arg.min_wait_usec * NSEC_PER_USEC;
-	ext_arg->sig = (sigset_t __user *)arg.sigmask;
+	ext_arg->sig = u64_to_user_ptr(arg.sigmask);
 	ext_arg->argsz = arg.sigmask_sz;
 	if (arg.ts) {
-		if (get_timespec64(&ext_arg->ts, (struct __kernel_timespec __user *)arg.ts))
+		if (get_timespec64(&ext_arg->ts, u64_to_user_ptr(arg.ts)))
 			return -EFAULT;
 		ext_arg->ts_set = true;
 	}

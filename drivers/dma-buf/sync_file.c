@@ -287,7 +287,7 @@ static long sync_file_ioctl_fence_info(struct sync_file *sync_file,
 	int ret;
 	__u32 size;
 
-	if (copy_from_user(&info, (void __user *)arg, sizeof(info)))
+	if (copy_from_user_with_ptr(&info, (void __user *)arg, sizeof(info)))
 		return -EFAULT;
 
 	if (info.flags || info.pad)

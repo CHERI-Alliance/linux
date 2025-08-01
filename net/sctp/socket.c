@@ -1411,7 +1411,7 @@ static int sctp_getsockopt_connectx3(struct sock *sk, int len,
 	{
 		if (len < sizeof(param))
 			return -EINVAL;
-		if (copy_from_user(&param, optval, sizeof(param)))
+		if (copy_from_user_with_ptr(&param, optval, sizeof(param)))
 			return -EFAULT;
 	}
 

@@ -2,22 +2,24 @@
 #ifndef _LINUX_TYPES_H
 #define _LINUX_TYPES_H
 
+/*
+ * By default the UAPI headers define __kernel_uintptr_t as a capability
+ * iff __CHERI_PURE_CAPABILITY__ is defined. For userspace this is fine
+ * as the define determines if the program will use the puercap UABI.
+ * However, the morello kernel can be compiled to run in hybrid
+ * (integer compatibility mode) while still handling capabilities
+ * in the purecap userspace UABI. Thus force the UABI types to be
+ * capabilities if we use the purecap UABI even if the kernel itself
+ * is compiled in hybrid mode.
+ */
+#ifdef CONFIG_CHERI_PURECAP_UABI
+#define __ARCH_WANT_PURECAP
+#endif
+
 #define __EXPORTED_HEADERS__
 #include <uapi/linux/types.h>
 
 #ifndef __ASSEMBLY__
-
-/*
- * Define UAPI pointer types differently for the kernel, to allow a hybrid
- * CHERI kernel to handle pointers from a purecap CHERI userspace.
- */
-#ifdef CONFIG_CHERI_PURECAP_UABI
-typedef __uintcap_t		__kernel_uintptr_t;
-typedef __uintcap_t		__kernel_aligned_uintptr_t;
-#else
-typedef __u64			__kernel_uintptr_t;
-typedef __aligned_u64		__kernel_aligned_uintptr_t;
-#endif
 
 #define DECLARE_BITMAP(name,bits) \
 	unsigned long name[BITS_TO_LONGS(bits)]
@@ -59,21 +61,10 @@ typedef unsigned long		uintptr_t;
 typedef long			intptr_t;
 #endif
 
-#ifdef CONFIG_CHERI_PURECAP_UABI
-typedef __uintcap_t		user_uintptr_t;
-typedef __intcap_t		user_intptr_t;
-#else
-typedef unsigned long		user_uintptr_t;
-typedef long			user_intptr_t;
-#endif
+typedef __kernel_uintptr_t	user_uintptr_t;
+typedef __kernel_intptr_t	user_intptr_t;
 
-#ifdef __PTRADDR_TYPE__
-typedef __PTRADDR_TYPE__	ptraddr_t;
-#else
-typedef unsigned long		ptraddr_t;
-#endif
-typedef unsigned long		__ptraddr_t;
-typedef u64			__ptraddr64_t;
+typedef __kernel_ptraddr_t	ptraddr_t;
 
 #ifdef __CHERI__
 typedef __uintcap_t		uintcap_t;

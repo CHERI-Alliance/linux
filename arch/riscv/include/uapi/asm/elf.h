@@ -15,7 +15,7 @@
 #include <asm/ptrace.h>
 
 /* ELF register definitions */
-typedef __kernel_uintptr_t elf_greg_t;
+typedef __uptr elf_greg_t;
 #ifdef __CHERI_PURE_CAPABILITY__
 /* Add one for the tags bitmap. */
 #define __ELF_NGREG ((sizeof(struct user_regs_struct) / sizeof(elf_greg_t)))

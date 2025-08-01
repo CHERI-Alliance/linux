@@ -164,7 +164,7 @@ struct qaic_manage_trans_status_from_dev {
 struct qaic_manage_msg {
 	__u32 len;
 	__u32 count;
-	__u64 data;
+	__u64ptr data;
 };
 
 /**
@@ -259,7 +259,7 @@ struct qaic_attach_slice_hdr {
  */
 struct qaic_attach_slice {
 	struct qaic_attach_slice_hdr hdr;
-	__u64 data;
+	__u64ptr data;
 };
 
 /**
@@ -303,7 +303,7 @@ struct qaic_execute_hdr {
  */
 struct qaic_execute {
 	struct qaic_execute_hdr hdr;
-	__u64 data;
+	__u64ptr data;
 };
 
 /**
@@ -339,7 +339,7 @@ struct qaic_perf_stats_hdr {
  */
 struct qaic_perf_stats {
 	struct qaic_perf_stats_hdr hdr;
-	__u64 data;
+	__u64ptr data;
 };
 
 /**

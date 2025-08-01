@@ -136,6 +136,20 @@
 #define PTR_IF(cond, ptr)	((cond) ? (ptr) : NULL)
 
 /**
+ * to_user_ptr - cast a pointer passed as __u64ptr from user space
+ * to void __user *. For CHERI the integer value must be a capability.
+ * @x: The u64 value from user space, usually via IOCTL
+ *
+ * u64_to_user_ptr() simply casts a pointer passed as u64 from user space to void
+ * __user * correctly. Using this lets us get rid of all the tiresome casts.
+ */
+#define u64_to_user_ptr(x)		\
+({					\
+	typecheck(__u64ptr, (x));	\
+	(void __user *)(user_uintptr_t)(x);	\
+})
+
+/**
  * is_insidevar - check if the @ptr points inside the @var memory range.
  * @ptr:	the pointer to a memory address.
  * @var:	the variable which address and size identify the memory range.

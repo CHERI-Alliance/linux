@@ -212,7 +212,7 @@ int pkcs7_note_OID(void *context, size_t hdrlen,
 		char buffer[50];
 		sprint_oid(value, vlen, buffer, sizeof(buffer));
 		printk("PKCS7: Unknown OID: [%lu] %s\n",
-		       (unsigned long)value - __c_ua(ctx->data), buffer);
+		       (unsigned long)value - (unsigned long)ctx->data, buffer);
 	}
 	return 0;
 }
@@ -410,7 +410,7 @@ int pkcs7_extract_cert(void *context, size_t hdrlen,
 
 	if (tag != ((ASN1_UNIV << 6) | ASN1_CONS_BIT | ASN1_SEQ)) {
 		pr_debug("Cert began with tag %02x at %lu\n",
-			 tag, (unsigned long)ctx - __c_ua(ctx->data));
+			 tag, (unsigned long)ctx - (unsigned long)ctx->data);
 		return -EBADMSG;
 	}
 

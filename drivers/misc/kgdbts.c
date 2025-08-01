@@ -312,7 +312,7 @@ static int check_and_rewind_pc(char *put_str, char *arg)
 		 NUMREGBYTES);
 	gdb_regs_to_pt_regs(kgdbts_gdb_regs, &kgdbts_regs);
 	ip = instruction_pointer(&kgdbts_regs);
-	v2printk("Stopped at IP: %lx\n", __c_ua(ip));
+	v2printk("Stopped at IP: %lx\n", (unsigned long)ip);
 #ifdef GDB_ADJUSTS_BREAK_OFFSET
 	/* On some arches, a breakpoint stop requires it to be decremented */
 	if (addr + BREAK_INSTR_SIZE == ip)
@@ -327,7 +327,7 @@ static int check_and_rewind_pc(char *put_str, char *arg)
 		restart_from_top_after_write = 1;
 	} else if (strcmp(arg, "silent") && ip + offset != addr) {
 		eprintk("kgdbts: BP mismatch %lx expected %lx\n",
-			   __c_ua(ip + offset), addr);
+			   (unsigned long)(ip + offset), addr);
 		return 1;
 	}
 	/* Readjust the instruction pointer if needed */

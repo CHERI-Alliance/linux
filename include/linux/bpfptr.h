@@ -32,7 +32,7 @@ static inline bpfptr_t USER_BPFPTR(void __user *p)
 	return (bpfptr_t) { .user = p };
 }
 
-static inline bpfptr_t make_bpfptr(__kernel_uintptr_t ptr, bool is_kernel)
+static inline bpfptr_t make_bpfptr(user_uintptr_t ptr, bool is_kernel)
 {
 	if (is_kernel)
 		return KERNEL_BPFPTR((void *)(uintptr_t)ptr);

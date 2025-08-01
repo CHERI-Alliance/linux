@@ -91,9 +91,9 @@ int io_uring_fill_params(unsigned entries, struct io_uring_params *p);
 bool io_cqe_cache_refill(struct io_ring_ctx *ctx, bool overflow);
 int io_run_task_work_sig(struct io_ring_ctx *ctx);
 void io_req_defer_failed(struct io_kiocb *req, s32 res);
-bool io_post_aux_cqe(struct io_ring_ctx *ctx, __kernel_uintptr_t user_data,
+bool io_post_aux_cqe(struct io_ring_ctx *ctx, user_uintptr_t user_data,
 		     s32 res, u32 cflags);
-void io_add_aux_cqe(struct io_ring_ctx *ctx, __kernel_uintptr_t user_data, s32 res, u32 cflags);
+void io_add_aux_cqe(struct io_ring_ctx *ctx, user_uintptr_t user_data, s32 res, u32 cflags);
 bool io_req_post_cqe(struct io_kiocb *req, s32 res, u32 cflags);
 void __io_commit_cqring_flush(struct io_ring_ctx *ctx);
 
@@ -185,8 +185,8 @@ static inline bool io_in_compat64(struct io_ring_ctx *ctx)
 	return IS_ENABLED(CONFIG_COMPAT64) && ctx->compat;
 }
 
-static inline bool io_user_data_is_same(__kernel_uintptr_t d1,
-					__kernel_uintptr_t d2)
+static inline bool io_user_data_is_same(user_uintptr_t d1,
+					user_uintptr_t d2)
 {
 #ifdef CONFIG_CHERI_PURECAP_UABI
 	return __builtin_cheri_equal_exact(d1, d2);
@@ -227,7 +227,7 @@ static inline void convert_compat64_io_uring_sqe(struct io_ring_ctx *ctx,
 		sqe->addr2 = __c_fakeu(READ_ONCE(compat_sqe->addr2));
 		break;
 	default:
-		sqe->addr2 = (__kernel_uintptr_t)compat_ptr(READ_ONCE(compat_sqe->addr2));
+		sqe->addr2 = (user_uintptr_t)compat_ptr(READ_ONCE(compat_sqe->addr2));
 		break;
 	}
 
@@ -244,14 +244,14 @@ static inline void convert_compat64_io_uring_sqe(struct io_ring_ctx *ctx,
 		sqe->addr = __c_fakeu(READ_ONCE(compat_sqe->addr));
 		break;
 	default:
-		sqe->addr = (__kernel_uintptr_t)compat_ptr(READ_ONCE(compat_sqe->addr));
+		sqe->addr = (user_uintptr_t)compat_ptr(READ_ONCE(compat_sqe->addr));
 		break;
 	}
 
 	sqe->len = READ_ONCE(compat_sqe->len);
 	BUILD_BUG_COMPAT_SQE_UNION_ELEM(rw_flags, user_data);
 	sqe->rw_flags = READ_ONCE(compat_sqe->rw_flags);
-	sqe->user_data = (__kernel_uintptr_t)__c_fakeu(READ_ONCE(compat_sqe->user_data));
+	sqe->user_data = (user_uintptr_t)__c_fakeu(READ_ONCE(compat_sqe->user_data));
 	BUILD_BUG_COMPAT_SQE_UNION_ELEM(buf_index, personality);
 	sqe->buf_index = READ_ONCE(compat_sqe->buf_index);
 	sqe->personality = READ_ONCE(compat_sqe->personality);
@@ -272,7 +272,7 @@ static inline void convert_compat64_io_uring_sqe(struct io_ring_ctx *ctx,
 		memcpy_and_pad(sqe->cmd, native_cmd_size,
 			       compat_sqe->cmd, compat_cmd_size, 0);
 	} else {
-		sqe->addr3 = (__kernel_uintptr_t)compat_ptr(READ_ONCE(compat_sqe->addr3));
+		sqe->addr3 = (user_uintptr_t)compat_ptr(READ_ONCE(compat_sqe->addr3));
 		sqe->__pad2[0] = __c_fakeu(READ_ONCE(compat_sqe->__pad2[0]));
 	}
 #undef BUILD_BUG_COMPAT_SQE_UNION_ELEM
@@ -311,7 +311,7 @@ static inline bool io_defer_get_uncommited_cqe(struct io_ring_ctx *ctx,
 }
 
 static inline void __io_fill_cqe(struct io_ring_ctx *ctx, struct io_uring_cqe *cqe,
-				 __kernel_uintptr_t user_data, s32 res, u32 cflags,
+				 user_uintptr_t user_data, s32 res, u32 cflags,
 				 u64 extra1, u64 extra2)
 {
 	if (io_in_compat64(ctx)) {

@@ -239,7 +239,7 @@ efault:
 /*
  * Get the user-space pointer value stored in the 'rseq_cs' field.
  */
-static int rseq_get_rseq_cs_ptr_val(struct rseq __user *rseq, __kernel_uintptr_t *rseq_cs)
+static int rseq_get_rseq_cs_ptr_val(struct rseq __user *rseq, user_uintptr_t *rseq_cs)
 {
 	if (!rseq_cs)
 		return -EFAULT;
@@ -262,7 +262,7 @@ static int rseq_get_rseq_cs_ptr_val(struct rseq __user *rseq, __kernel_uintptr_t
 static int rseq_get_rseq_cs(struct task_struct *t, struct rseq_cs *rseq_cs)
 {
 	struct rseq_cs __user *urseq_cs;
-	__kernel_uintptr_t ptr;
+	user_uintptr_t ptr;
 	u32 __user *usig;
 	u32 sig;
 	int ret;
@@ -295,7 +295,7 @@ static int rseq_get_rseq_cs(struct task_struct *t, struct rseq_cs *rseq_cs)
 	if (rseq_cs->abort_ip - rseq_cs->start_ip < rseq_cs->post_commit_offset)
 		return -EINVAL;
 
-	usig = (void __user *)rseq_cs->abort_ip - sizeof(u32);
+	usig = u64_to_user_ptr(rseq_cs->abort_ip) - sizeof(u32);
 	ret = get_user(sig, usig);
 	if (ret)
 		return ret;
@@ -475,7 +475,7 @@ SYSCALL_DEFINE4(rseq, struct rseq __user *, rseq, u32, rseq_len,
 		int, flags, u32, sig)
 {
 	int ret;
-	__kernel_uintptr_t rseq_cs;
+	user_uintptr_t rseq_cs;
 
 	if (flags & RSEQ_FLAG_UNREGISTER) {
 		if (flags & ~RSEQ_FLAG_UNREGISTER)

@@ -138,7 +138,7 @@ struct iommu_ioas_iova_ranges {
 	__u32 ioas_id;
 	__u32 num_iovas;
 	__u32 __reserved;
-	__aligned_u64 allowed_iovas;
+	__aligned_u64ptr allowed_iovas;
 	__aligned_u64 out_iova_alignment;
 };
 #define IOMMU_IOAS_IOVA_RANGES _IO(IOMMUFD_TYPE, IOMMUFD_CMD_IOAS_IOVA_RANGES)
@@ -171,7 +171,7 @@ struct iommu_ioas_allow_iovas {
 	__u32 ioas_id;
 	__u32 num_iovas;
 	__u32 __reserved;
-	__aligned_u64 allowed_iovas;
+	__aligned_u64ptr allowed_iovas;
 };
 #define IOMMU_IOAS_ALLOW_IOVAS _IO(IOMMUFD_TYPE, IOMMUFD_CMD_IOAS_ALLOW_IOVAS)
 
@@ -212,7 +212,7 @@ struct iommu_ioas_map {
 	__u32 flags;
 	__u32 ioas_id;
 	__u32 __reserved;
-	__aligned_u64 user_va;
+	__aligned_u64ptr user_va;
 	__aligned_u64 length;
 	__aligned_u64 iova;
 };
@@ -511,7 +511,7 @@ struct iommu_hwpt_alloc {
 	__u32 __reserved;
 	__u32 data_type;
 	__u32 data_len;
-	__aligned_u64 data_uptr;
+	__aligned_u64ptr data_uptr;
 	__u32 fault_id;
 	__u32 __reserved2;
 };
@@ -662,7 +662,7 @@ struct iommu_hw_info {
 	__u32 flags;
 	__u32 dev_id;
 	__u32 data_len;
-	__aligned_u64 data_uptr;
+	__aligned_u64ptr data_uptr;
 	__u32 out_data_type;
 	__u8 out_max_pasid_log2;
 	__u8 __reserved[3];
@@ -738,7 +738,7 @@ struct iommu_hwpt_get_dirty_bitmap {
 	__aligned_u64 iova;
 	__aligned_u64 length;
 	__aligned_u64 page_size;
-	__aligned_u64 data;
+	__aligned_u64ptr data;
 };
 #define IOMMU_HWPT_GET_DIRTY_BITMAP _IO(IOMMUFD_TYPE, \
 					IOMMUFD_CMD_HWPT_GET_DIRTY_BITMAP)
@@ -841,7 +841,7 @@ struct iommu_viommu_arm_smmuv3_invalidate {
 struct iommu_hwpt_invalidate {
 	__u32 size;
 	__u32 hwpt_id;
-	__aligned_u64 data_uptr;
+	__aligned_u64ptr data_uptr;
 	__u32 data_type;
 	__u32 entry_len;
 	__u32 entry_num;
