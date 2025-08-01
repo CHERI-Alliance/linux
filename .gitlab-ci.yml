@@ -26,7 +26,9 @@ stages:
   - 'make -j $(nproc) LLVM=1 ARCH=riscv CC="clang -target riscv64" HOSTCC=/usr/bin/gcc compile_commands.json all modules'
   - 'grep "file.:.*\.c.$" compile_commands.json | sed "s/.*file.:..//; s/.$//" | xargs -n 10 -P 12 -- clang-tidy --checks="-*,cheri-*" --header-filter=".*" -system-headers 2>&1 | tee tidy.log'
   - echo "CHECKING clang-tidy messages"
-  - 'if egrep "(warning|error):" tidy.log; then echo ERROR: Unexpected clang-tidy warnings; false; else echo "No unexpected clang-tidy errors"; fi'
+  - 'egrep "(warning|error):" tidy.log | tee tidyerr.log || true'
+  - touch .clang-tidy-ignore
+  - 'if grep -v -f .clang-tidy-ignore tidyerr.log >/dev/null; then echo ERROR: Unexpected clang-tidy warnings; false; else echo "No unexpected clang-tidy errors"; fi'
 
 build_riscv64_cheri_default:
   stage: build
