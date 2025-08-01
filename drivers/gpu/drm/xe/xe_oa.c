@@ -1172,44 +1172,44 @@ static struct xe_oa_unit *xe_oa_lookup_oa_unit(struct xe_oa *oa, u32 oa_unit_id)
 	return NULL;
 }
 
-static int xe_oa_set_prop_oa_unit_id(struct xe_oa *oa, u64 value,
+static int xe_oa_set_prop_oa_unit_id(struct xe_oa *oa, __u64ptr value,
 				     struct xe_oa_open_param *param)
 {
 	param->oa_unit = xe_oa_lookup_oa_unit(oa, value);
 	if (!param->oa_unit) {
-		drm_dbg(&oa->xe->drm, "OA unit ID out of range %lld\n", value);
+		drm_dbg(&oa->xe->drm, "OA unit ID out of range %lld\n", (uint64_t)value);
 		return -EINVAL;
 	}
 	return 0;
 }
 
-static int xe_oa_set_prop_sample_oa(struct xe_oa *oa, u64 value,
+static int xe_oa_set_prop_sample_oa(struct xe_oa *oa, __u64ptr value,
 				    struct xe_oa_open_param *param)
 {
 	param->sample = value;
 	return 0;
 }
 
-static int xe_oa_set_prop_metric_set(struct xe_oa *oa, u64 value,
+static int xe_oa_set_prop_metric_set(struct xe_oa *oa, __u64ptr value,
 				     struct xe_oa_open_param *param)
 {
 	param->metric_set = value;
 	return 0;
 }
 
-static int xe_oa_set_prop_oa_format(struct xe_oa *oa, u64 value,
+static int xe_oa_set_prop_oa_format(struct xe_oa *oa, __u64ptr value,
 				    struct xe_oa_open_param *param)
 {
-	int ret = decode_oa_format(oa, value, &param->oa_format);
+	int ret = decode_oa_format(oa, __c_ua(value), &param->oa_format);
 
 	if (ret) {
-		drm_dbg(&oa->xe->drm, "Unsupported OA report format %#llx\n", value);
+		drm_dbg(&oa->xe->drm, "Unsupported OA report format %#llx\n", (uint64_t)value);
 		return ret;
 	}
 	return 0;
 }
 
-static int xe_oa_set_prop_oa_exponent(struct xe_oa *oa, u64 value,
+static int xe_oa_set_prop_oa_exponent(struct xe_oa *oa, __u64ptr value,
 				      struct xe_oa_open_param *param)
 {
 #define OA_EXPONENT_MAX 31
@@ -1222,77 +1222,79 @@ static int xe_oa_set_prop_oa_exponent(struct xe_oa *oa, u64 value,
 	return 0;
 }
 
-static int xe_oa_set_prop_disabled(struct xe_oa *oa, u64 value,
+static int xe_oa_set_prop_disabled(struct xe_oa *oa, __u64ptr value,
 				   struct xe_oa_open_param *param)
 {
 	param->disabled = value;
 	return 0;
 }
 
-static int xe_oa_set_prop_exec_queue_id(struct xe_oa *oa, u64 value,
+static int xe_oa_set_prop_exec_queue_id(struct xe_oa *oa, __u64ptr value,
 					struct xe_oa_open_param *param)
 {
 	param->exec_queue_id = value;
 	return 0;
 }
 
-static int xe_oa_set_prop_engine_instance(struct xe_oa *oa, u64 value,
+static int xe_oa_set_prop_engine_instance(struct xe_oa *oa, __u64ptr value,
 					  struct xe_oa_open_param *param)
 {
 	param->engine_instance = value;
 	return 0;
 }
 
-static int xe_oa_set_no_preempt(struct xe_oa *oa, u64 value,
+static int xe_oa_set_no_preempt(struct xe_oa *oa, __u64ptr value,
 				struct xe_oa_open_param *param)
 {
 	param->no_preempt = value;
 	return 0;
 }
 
-static int xe_oa_set_prop_num_syncs(struct xe_oa *oa, u64 value,
+static int xe_oa_set_prop_num_syncs(struct xe_oa *oa, __u64ptr value,
 				    struct xe_oa_open_param *param)
 {
 	param->num_syncs = value;
 	return 0;
 }
 
-static int xe_oa_set_prop_syncs_user(struct xe_oa *oa, u64 value,
+static int xe_oa_set_prop_syncs_user(struct xe_oa *oa, __u64ptr value,
 				     struct xe_oa_open_param *param)
 {
 	param->syncs_user = u64_to_user_ptr(value);
 	return 0;
 }
 
-static int xe_oa_set_prop_oa_buffer_size(struct xe_oa *oa, u64 value,
+static int xe_oa_set_prop_oa_buffer_size(struct xe_oa *oa, __u64ptr _value,
 					 struct xe_oa_open_param *param)
 {
+	u64 value = __c_ua(_value);
+
 	if (!is_power_of_2(value) || value < SZ_128K || value > SZ_128M) {
-		drm_dbg(&oa->xe->drm, "OA buffer size invalid %llu\n", value);
+		drm_dbg(&oa->xe->drm, "OA buffer size invalid %llu\n", (uint64_t)value);
 		return -EINVAL;
 	}
 	param->oa_buffer_size = value;
 	return 0;
 }
 
-static int xe_oa_set_prop_wait_num_reports(struct xe_oa *oa, u64 value,
+static int xe_oa_set_prop_wait_num_reports(struct xe_oa *oa, __u64ptr value,
 					   struct xe_oa_open_param *param)
 {
 	if (!value) {
-		drm_dbg(&oa->xe->drm, "wait_num_reports %llu\n", value);
+		drm_dbg(&oa->xe->drm, "wait_num_reports %llu\n", (uint64_t)value);
 		return -EINVAL;
 	}
 	param->wait_num_reports = value;
 	return 0;
 }
 
-static int xe_oa_set_prop_ret_inval(struct xe_oa *oa, u64 value,
+static int xe_oa_set_prop_ret_inval(struct xe_oa *oa, __u64ptr value,
 				    struct xe_oa_open_param *param)
 {
 	return -EINVAL;
 }
 
-typedef int (*xe_oa_set_property_fn)(struct xe_oa *oa, u64 value,
+typedef int (*xe_oa_set_property_fn)(struct xe_oa *oa, __u64ptr value,
 				     struct xe_oa_open_param *param);
 static const xe_oa_set_property_fn xe_oa_set_property_funcs_open[] = {
 	[DRM_XE_OA_PROPERTY_OA_UNIT_ID] = xe_oa_set_prop_oa_unit_id,

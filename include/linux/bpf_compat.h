@@ -2,7 +2,7 @@
 /* Copyright (C) 2023 Arm Ltd */
 
 #define bpf_compat_ptr_field(dest, src, field) \
-	((dest)->field = (__kernel_aligned_uintptr_t)compat_ptr((src)->field))
+	((dest)->field = (__uptr)compat_ptr((src)->field))
 
 union compat_bpf_attr {
 	struct { /* anonymous struct used by BPF_MAP_CREATE command */

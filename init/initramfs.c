@@ -711,7 +711,7 @@ static void __init populate_initrd_image(char *err)
 			&pos);
 	if (written != initrd_end - initrd_start)
 		pr_err("/initrd.image: incomplete write (%zd != %ld)\n",
-		       written, __c_ua(initrd_end - initrd_start));
+		       written, (unsigned long)(initrd_end - initrd_start));
 	fput(file);
 }
 #endif /* CONFIG_BLK_DEV_RAM */

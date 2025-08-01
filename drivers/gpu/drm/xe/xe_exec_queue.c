@@ -421,7 +421,7 @@ xe_exec_queue_device_get_max_priority(struct xe_device *xe)
 }
 
 static int exec_queue_set_priority(struct xe_device *xe, struct xe_exec_queue *q,
-				   u64 value)
+				   __u64ptr value)
 {
 	if (XE_IOCTL_DBG(xe, value > XE_EXEC_QUEUE_PRIORITY_HIGH))
 		return -EINVAL;
@@ -486,7 +486,7 @@ xe_exec_queue_get_prop_minmax(struct xe_hw_engine_class_intf *eclass,
 }
 
 static int exec_queue_set_timeslice(struct xe_device *xe, struct xe_exec_queue *q,
-				    u64 value)
+				    __u64ptr value)
 {
 	u32 min = 0, max = 0;
 
@@ -494,15 +494,15 @@ static int exec_queue_set_timeslice(struct xe_device *xe, struct xe_exec_queue *
 				      XE_EXEC_QUEUE_TIMESLICE, &min, &max);
 
 	if (xe_exec_queue_enforce_schedule_limit() &&
-	    !xe_hw_engine_timeout_in_range(value, min, max))
+	    !xe_hw_engine_timeout_in_range(__c_ua(value), min, max))
 		return -EINVAL;
 
-	q->sched_props.timeslice_us = value;
+	q->sched_props.timeslice_us = __c_ua(value);
 	return 0;
 }
 
 static int
-exec_queue_set_pxp_type(struct xe_device *xe, struct xe_exec_queue *q, u64 value)
+exec_queue_set_pxp_type(struct xe_device *xe, struct xe_exec_queue *q, __u64ptr value)
 {
 	if (value == DRM_XE_PXP_TYPE_NONE)
 		return 0;
@@ -519,7 +519,7 @@ exec_queue_set_pxp_type(struct xe_device *xe, struct xe_exec_queue *q, u64 value
 
 typedef int (*xe_exec_queue_set_property_fn)(struct xe_device *xe,
 					     struct xe_exec_queue *q,
-					     u64 value);
+					     __u64ptr value);
 
 static const xe_exec_queue_set_property_fn exec_queue_set_property_funcs[] = {
 	[DRM_XE_EXEC_QUEUE_SET_PROPERTY_PRIORITY] = exec_queue_set_priority,

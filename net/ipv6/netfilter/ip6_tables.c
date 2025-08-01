@@ -1025,7 +1025,7 @@ get_entries(struct net *net, struct ip6t_get_entries __user *uptr,
 
 	if (*len < sizeof(get))
 		return -EINVAL;
-	if (copy_from_user(&get, uptr, sizeof(get)) != 0)
+	if (copy_from_user_with_ptr(&get, uptr, sizeof(get)) != 0)
 		return -EFAULT;
 	if (*len != sizeof(struct ip6t_get_entries) + get.size)
 		return -EINVAL;

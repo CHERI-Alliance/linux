@@ -473,7 +473,7 @@ static int get_mmc_ioc_cmd_from_compat64(struct mmc_ioc_cmd *native_cmd,
 	native_cmd->data_timeout_ns = compat_cmd.data_timeout_ns;
 	native_cmd->cmd_timeout_ms = compat_cmd.cmd_timeout_ms;
 	native_cmd->__pad = compat_cmd.__pad;
-	native_cmd->data_ptr = compat_cmd.data_ptr;
+	native_cmd->data_ptr = (user_uintptr_t)compat_ptr(compat_cmd.data_ptr);
 
 	return 0;
 }

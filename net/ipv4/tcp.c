@@ -1929,15 +1929,15 @@ static int get_compat64_tcp_zerocopy_receive(struct tcp_zerocopy_receive *zc,
 	if (copy_from_sockptr(&compat_zc, src, size))
 		return -EFAULT;
 
-	zc->address = (__kernel_uintptr_t)compat_ptr(compat_zc.address);
+	zc->address = (user_uintptr_t)compat_ptr(compat_zc.address);
 	zc->length = compat_zc.length;
 	zc->recv_skip_hint = compat_zc.recv_skip_hint;
 	zc->inq = compat_zc.inq;
 	zc->err = compat_zc.err;
-	zc->copybuf_address = (__kernel_uintptr_t)compat_ptr(compat_zc.copybuf_address);
+	zc->copybuf_address = (user_uintptr_t)compat_ptr(compat_zc.copybuf_address);
 	zc->copybuf_len = compat_zc.copybuf_len;
 	zc->flags = compat_zc.flags;
-	zc->msg_control = (__kernel_uintptr_t)compat_ptr(compat_zc.msg_control);
+	zc->msg_control = (user_uintptr_t)compat_ptr(compat_zc.msg_control);
 	zc->msg_controllen = compat_zc.msg_controllen;
 	zc->msg_flags = compat_zc.msg_flags;
 	zc->reserved = compat_zc.reserved;
@@ -2214,7 +2214,7 @@ static void tcp_zc_finalize_rx_tstamp(struct sock *sk,
 	    zc->msg_controllen == cmsg_dummy.msg_controllen) {
 		tcp_recv_timestamp(&cmsg_dummy, sk, tss);
 		zc->msg_control =
-			(__kernel_uintptr_t)cmsg_dummy.msg_control_user;
+			(user_uintptr_t)cmsg_dummy.msg_control_user;
 		zc->msg_controllen =
 			(__u64)cmsg_dummy.msg_controllen;
 		zc->msg_flags = (__u32)cmsg_dummy.msg_flags;

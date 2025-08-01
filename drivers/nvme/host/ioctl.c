@@ -374,8 +374,8 @@ static int nvme_user_cmd64(struct nvme_ctrl *ctrl, struct nvme_ns *ns,
 }
 
 struct nvme_uring_data {
-	__kernel_uintptr_t	metadata;
-	__kernel_uintptr_t	addr;
+	user_uintptr_t	metadata;
+	user_uintptr_t	addr;
 	__u32	data_len;
 	__u32	metadata_len;
 	__u32	timeout_ms;

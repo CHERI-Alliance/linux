@@ -46,7 +46,7 @@ struct xe_sched_job {
 		/** @user_fence.used: user fence is used */
 		bool used;
 		/** @user_fence.addr: address to write to */
-		__kernel_uintptr_t addr;
+		user_uintptr_t addr;
 		/** @user_fence.value: write back value */
 		u64 value;
 	} user_fence;

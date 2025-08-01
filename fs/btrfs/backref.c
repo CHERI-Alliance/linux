@@ -2498,7 +2498,7 @@ int iterate_extent_inodes(struct btrfs_backref_walk_ctx *ctx,
 			btrfs_debug(ctx->fs_info,
 				    "root %llu references leaf %llu, data list %#lx",
 				    root_node->val, ref_node->val,
-				    __c_ua(ref_node->aux));
+				    (unsigned long)ref_node->aux);
 			ret = iterate_leaf_refs(ctx->fs_info, inode_list,
 						root_node->val, ctx->bytenr,
 						iterate, user_ctx);

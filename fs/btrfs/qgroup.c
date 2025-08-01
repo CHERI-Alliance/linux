@@ -4612,7 +4612,7 @@ void btrfs_qgroup_check_reserved_leak(struct btrfs_inode *inode)
 		while ((unode = ulist_next(&changeset.range_changed, &iter))) {
 			btrfs_warn(inode->root->fs_info,
 		"leaking qgroup reserved space, ino: %llu, start: %llu, end: %lu",
-				btrfs_ino(inode), unode->val, __c_ua(unode->aux));
+				btrfs_ino(inode), unode->val, (unsigned long)unode->aux);
 		}
 		btrfs_qgroup_free_refroot(inode->root->fs_info,
 				btrfs_root_id(inode->root),

@@ -88,7 +88,7 @@ struct rxrpc_call *rxrpc_find_call_by_user_ID(struct rxrpc_sock *rx,
 	struct rxrpc_call *call;
 	struct rb_node *p;
 
-	_enter("%p,%lx", rx, __c_ua(user_call_ID));
+	_enter("%p,%lx", rx, (unsigned long)user_call_ID);
 
 	read_lock(&rx->call_lock);
 
@@ -293,7 +293,7 @@ static int rxrpc_connect_call(struct rxrpc_call *call, gfp_t gfp)
 	struct rxrpc_local *local = call->local;
 	int ret = -ENOMEM;
 
-	_enter("{%d,%lx},", call->debug_id, __c_ua(call->user_call_ID));
+	_enter("{%d,%lx},", call->debug_id, (unsigned long)call->user_call_ID);
 
 	ret = rxrpc_look_up_bundle(call, gfp);
 	if (ret < 0)
@@ -331,7 +331,7 @@ struct rxrpc_call *rxrpc_new_client_call(struct rxrpc_sock *rx,
 	struct rb_node *parent, **pp;
 	int ret;
 
-	_enter("%p,%lx", rx, __c_ua(p->user_call_ID));
+	_enter("%p,%lx", rx, (unsigned long)p->user_call_ID);
 
 	if (WARN_ON_ONCE(!cp->peer)) {
 		release_sock(&rx->sk);

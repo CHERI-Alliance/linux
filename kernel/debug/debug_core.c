@@ -304,7 +304,7 @@ int dbg_activate_sw_breakpoints(void)
 		if (error) {
 			ret = error;
 			pr_info("BP install failed: %lx\n",
-				__c_ua(kgdb_break[i].bpt_addr));
+				(unsigned long)kgdb_break[i].bpt_addr);
 			continue;
 		}
 
@@ -368,7 +368,7 @@ int dbg_deactivate_sw_breakpoints(void)
 		error = kgdb_arch_remove_breakpoint(&kgdb_break[i]);
 		if (error) {
 			pr_info("BP remove failed: %lx\n",
-				__c_ua(kgdb_break[i].bpt_addr));
+				(unsigned long)kgdb_break[i].bpt_addr);
 			ret = error;
 		}
 
@@ -429,7 +429,7 @@ int dbg_remove_all_break(void)
 		error = kgdb_arch_remove_breakpoint(&kgdb_break[i]);
 		if (error)
 			pr_err("breakpoint remove failed: %lx\n",
-			       __c_ua(kgdb_break[i].bpt_addr));
+			       (unsigned long)kgdb_break[i].bpt_addr);
 setundefined:
 		kgdb_break[i].state = BP_UNDEFINED;
 	}

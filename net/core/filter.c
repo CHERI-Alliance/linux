@@ -10003,7 +10003,7 @@ static u32 bpf_convert_ctx_access(enum bpf_access_type type,
 		*insn++ = BPF_LDX_MEM(BPF_DW,
 				      si->dst_reg, si->dst_reg,
 				      bpf_target_off(struct skb_shared_info,
-						     hwtstamps, sizeof(uintptr_t),
+						     hwtstamps.hwtstamp, 8,
 						     target_size));
 		break;
 	}
@@ -10858,7 +10858,7 @@ static u32 sock_ops_convert_ctx_access(enum bpf_access_type type,
 		insn = bpf_convert_shinfo_access(si->dst_reg, si->dst_reg, insn);
 		*insn++ = BPF_LDX_MEM(BPF_DW, si->dst_reg, si->dst_reg,
 				      bpf_target_off(struct skb_shared_info,
-						     hwtstamps, sizeof(uintptr_t),
+						     hwtstamps.hwtstamp, 8,
 						     target_size));
 		*jmp_on_null_skb = BPF_JMP_IMM(BPF_JEQ, si->dst_reg, 0,
 					       insn - jmp_on_null_skb - 1);

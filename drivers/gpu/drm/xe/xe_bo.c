@@ -3020,7 +3020,7 @@ void xe_bo_vunmap(struct xe_bo *bo)
 	__xe_bo_vunmap(bo);
 }
 
-static int gem_create_set_pxp_type(struct xe_device *xe, struct xe_bo *bo, u64 value)
+static int gem_create_set_pxp_type(struct xe_device *xe, struct xe_bo *bo, __u64ptr value)
 {
 	if (value == DRM_XE_PXP_TYPE_NONE)
 		return 0;
@@ -3034,7 +3034,7 @@ static int gem_create_set_pxp_type(struct xe_device *xe, struct xe_bo *bo, u64 v
 
 typedef int (*xe_gem_create_set_property_fn)(struct xe_device *xe,
 					     struct xe_bo *bo,
-					     u64 value);
+					     __u64ptr value);
 
 static const xe_gem_create_set_property_fn gem_create_set_property_funcs[] = {
 	[DRM_XE_GEM_CREATE_SET_PROPERTY_PXP_TYPE] = gem_create_set_pxp_type,

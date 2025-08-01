@@ -144,7 +144,7 @@ static int rxrpc_service_prealloc_one(struct rxrpc_sock *rx,
 
 	b->call_backlog[call_head] = call;
 	smp_store_release(&b->call_backlog_head, (call_head + 1) & (size - 1));
-	_leave(" = 0 [%d -> %lx]", call->debug_id, __c_ua(user_call_ID));
+	_leave(" = 0 [%d -> %lx]", call->debug_id, (unsigned long)user_call_ID);
 	return 0;
 
 id_in_use:
@@ -223,7 +223,7 @@ void rxrpc_discard_prealloc(struct rxrpc_sock *rx)
 		rcu_assign_pointer(call->socket, rx);
 		if (rx->app_ops &&
 		    rx->app_ops->discard_new_call) {
-			_debug("discard %lx", __c_ua(call->user_call_ID));
+			_debug("discard %lx", (unsigned long)call->user_call_ID);
 			rx->app_ops->discard_new_call(call, call->user_call_ID);
 			if (call->notify_rx)
 				call->notify_rx = rxrpc_dummy_notify;

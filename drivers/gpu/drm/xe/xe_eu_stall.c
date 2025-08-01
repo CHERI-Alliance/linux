@@ -235,10 +235,10 @@ exit:
 	return ret;
 }
 
-static int set_prop_eu_stall_sampling_rate(struct xe_device *xe, u64 value,
+static int set_prop_eu_stall_sampling_rate(struct xe_device *xe, __u64ptr _value,
 					   struct eu_stall_open_properties *props)
 {
-	value = div_u64(value, 251);
+	uint64_t value = div_u64(__c_ua(_value), 251);
 	if (value == 0 || value > 7) {
 		drm_dbg(&xe->drm, "Invalid EU stall sampling rate %llu\n", value);
 		return -EINVAL;
@@ -247,7 +247,7 @@ static int set_prop_eu_stall_sampling_rate(struct xe_device *xe, u64 value,
 	return 0;
 }
 
-static int set_prop_eu_stall_wait_num_reports(struct xe_device *xe, u64 value,
+static int set_prop_eu_stall_wait_num_reports(struct xe_device *xe, __u64ptr value,
 					      struct eu_stall_open_properties *props)
 {
 	props->wait_num_reports = value;
@@ -255,20 +255,20 @@ static int set_prop_eu_stall_wait_num_reports(struct xe_device *xe, u64 value,
 	return 0;
 }
 
-static int set_prop_eu_stall_gt_id(struct xe_device *xe, u64 value,
+static int set_prop_eu_stall_gt_id(struct xe_device *xe, __u64ptr value,
 				   struct eu_stall_open_properties *props)
 {
 	struct xe_gt *gt = xe_device_get_gt(xe, value);
 
 	if (!gt) {
-		drm_dbg(&xe->drm, "Invalid GT ID %llu for EU stall sampling\n", value);
+		drm_dbg(&xe->drm, "Invalid GT ID %llu for EU stall sampling\n", (uint64_t)value);
 		return -EINVAL;
 	}
 	props->gt = gt;
 	return 0;
 }
 
-typedef int (*set_eu_stall_property_fn)(struct xe_device *xe, u64 value,
+typedef int (*set_eu_stall_property_fn)(struct xe_device *xe, __u64ptr value,
 					struct eu_stall_open_properties *props);
 
 static const set_eu_stall_property_fn xe_set_eu_stall_property_funcs[] = {

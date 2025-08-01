@@ -352,7 +352,7 @@ struct rxrpc_call *rxrpc_kernel_begin_call(struct socket *sock,
 	struct rxrpc_call *call;
 	struct rxrpc_sock *rx = rxrpc_sk(sock->sk);
 
-	_enter(",,%x,%lx", key_serial(key), __c_ua(user_call_ID));
+	_enter(",,%x,%lx", key_serial(key), (unsigned long)user_call_ID);
 
 	if (WARN_ON_ONCE(peer->local != rx->local))
 		return ERR_PTR(-EIO);

@@ -231,7 +231,7 @@ static int copy_futex_waitv_from_user(struct futex_waitv *aux,
 			return -EFAULT;
 
 		aux->val = compat_aux.val;
-		aux->uaddr = (__kernel_uintptr_t)compat_ptr(compat_aux.uaddr);
+		aux->uaddr = (user_uintptr_t)compat_ptr(compat_aux.uaddr);
 		aux->flags = compat_aux.flags;
 		aux->__reserved = compat_aux.__reserved;
 
@@ -495,8 +495,8 @@ SYSCALL_DEFINE4(futex_requeue,
 
 	cmpval = futexes[0].w.val;
 
-	return futex_requeue((u32 __user *)futexes[0].w.uaddr, futexes[0].w.flags,
-			     (u32 __user *)futexes[1].w.uaddr, futexes[1].w.flags,
+	return futex_requeue(u64_to_user_ptr(futexes[0].w.uaddr), futexes[0].w.flags,
+			     u64_to_user_ptr(futexes[1].w.uaddr), futexes[1].w.flags,
 			     nr_wake, nr_requeue, &cmpval, 0);
 }
 

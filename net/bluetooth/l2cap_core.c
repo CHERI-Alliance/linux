@@ -3066,7 +3066,7 @@ static inline int l2cap_get_conf_opt(void **ptr, int *type, int *olen,
 		break;
 	}
 
-	BT_DBG("type 0x%2.2x len %u val 0x%lx", *type, opt->len, __c_ua(*val));
+	BT_DBG("type 0x%2.2x len %u val 0x%lx", *type, opt->len, (unsigned long)(*val));
 	return len;
 }
 
@@ -3074,7 +3074,7 @@ static void l2cap_add_conf_opt(void **ptr, u8 type, u8 len, uintptr_t val, size_
 {
 	struct l2cap_conf_opt *opt = *ptr;
 
-	BT_DBG("type 0x%2.2x len %u val 0x%lx", type, len, __c_ua(val));
+	BT_DBG("type 0x%2.2x len %u val 0x%lx", type, len, (unsigned long)val);
 
 	if (size < L2CAP_CONF_OPT_SIZE + len)
 		return;

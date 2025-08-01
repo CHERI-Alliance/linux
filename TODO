@@ -14,6 +14,8 @@ that do not work with CHERI for some reason.
 - runtime-const.h
 - semaphore debugging
 - Implement set_bit/clear_bit for pointers
+- xattr.h has non-CHERI ABI breakage.
+- Implement copy_struct_{from,to}_user
 - KCOV
 - UBSAN
 - KFENCE
