@@ -2,6 +2,8 @@
 #ifndef _LINUX_CHERI_H
 #define _LINUX_CHERI_H
 
+#include <linux/types.h>
+
 #ifdef __CHECKER__
 #define __capability
 #endif
@@ -42,8 +44,6 @@ typedef unsigned int cheri_perms_t;
 #define cheri_perms_get(__c) ~0U
 
 #endif /* __CHECKER__ */
-
-#include <linux/types.h>
 
 #include <uapi/asm/cheri.h>
 #ifdef CONFIG_HAVE_ARCH_CHERI_H
