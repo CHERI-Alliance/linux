@@ -31,7 +31,6 @@
 #define ALT_ALT_PTR(a)			__ALT_PTR(a, alt_offset)
 
 void __init apply_boot_alternatives(void);
-void __init apply_early_boot_alternatives(void);
 void apply_module_alternatives(void *start, size_t length);
 
 void riscv_alternative_fix_offsets(void *alt_ptr, unsigned int len,
@@ -64,10 +63,15 @@ void riscv_cpufeature_patch_func(struct alt_entry *begin, struct alt_entry *end,
 #else /* CONFIG_RISCV_ALTERNATIVE */
 
 static inline void apply_boot_alternatives(void) { }
-static inline void apply_early_boot_alternatives(void) { }
 static inline void apply_module_alternatives(void *start, size_t length) { }
 
 #endif /* CONFIG_RISCV_ALTERNATIVE */
+
+#ifdef CONFIG_RISCV_ALTERNATIVE_EARLY
+void __init apply_early_boot_alternatives(void);
+#else
+static inline void apply_early_boot_alternatives(void) { }
+#endif /* CONFIG_RISCV_ALTERNATIVE_EARLY */
 
 #endif
 #endif
