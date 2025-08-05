@@ -18,6 +18,57 @@
 	_asm_extable	100b, \lbl
 	.endm
 
+#ifdef CONFIG_RISCV_CHERI_DEBUG_USER_COPY
+/*
+ * Special calling conventions:
+ * - CSR_SSTATUS.SUM is already enabled.
+ * - Preserve ca0, ca1 and ca2
+ * - Additionally preserv ct6 as this is used by the caller
+ *   to store its return address.
+ * Avoid use of the stack unless we have to issue a warning.
+ */
+SYM_FUNC_START(__cheri_check_tags)
+	/* Calculate limit */
+	add t2, a1, a2
+	addi t2, t2, -CSZREG
+
+	/* Align address to capability boundary*/
+	addi t1, a1, CSZREG-1
+	andi t1, t1, ~(CSZREG-1)
+	scaddr ct1, ca1, t1
+
+	/* Loop */
+.Lcheck_tags_loop:
+	bgt t1, t2, .Lcheck_tags_loop_done
+	fixup lc ct0, (ct1), .Lcheck_tags_loop_done
+	gctag t0, ct0
+	bnez t0, .Lwarn_tags
+	caddi ct1, ct1, CSZREG
+	j .Lcheck_tags_loop
+.Lcheck_tags_loop_done:
+
+	/* Success */
+	ret
+
+.Lwarn_tags:
+	caddi csp, csp, -4*CSZREG
+	sc ca0, (csp)
+	sc ca1, CSZREG(csp)
+	sc ca2, 2*CSZREG(csp)
+	sc cra, 3*CSZREG(csp)
+	sc ct6, 4*CSZREG(csp)
+	mv ca3, ct1
+	call do_warn_tags
+	lc ca0, (csp)
+	lc ca1, CSZREG(csp)
+	lc ca2, 2*CSZREG(csp)
+	lc cra, 3*CSZREG(csp)
+	lc ct6, 4*CSZREG(csp)
+	caddi csp, csp, 4*CSZREG
+	ret
+SYM_FUNC_END(__cheri_check_tags)
+#endif
+
 /*
  * NOTE: Must preserve ct6 because fallback_scalar_usercopy saves its
  * return address there.
