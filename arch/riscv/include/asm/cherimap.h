@@ -268,6 +268,10 @@
 #define __CAPINSN_caddi	caddi
 #define __INTINSN_addi	addi
 #define __INTINSN_caddi	addi
+#define __CAPINSN_la	lgc
+#define __CAPINSN_lgc	lgc
+#define __INTINSN_la	la
+#define __INTINSN_lgc	la
 
 #ifdef CONFIG_CHERI_KERNEL
 #define __CREG(X)	__CAPREG_##X

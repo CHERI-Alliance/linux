@@ -37,6 +37,7 @@ my @gprs = (
 
 my @insns = (
 	[ qw (addi caddi) ],
+	[ qw (la lgc) ],
 );
 
 print <<'EOF';
