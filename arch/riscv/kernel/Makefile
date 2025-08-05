@@ -42,6 +42,7 @@ CFLAGS_REMOVE_patch.o	= $(CC_FLAGS_FTRACE)
 CFLAGS_REMOVE_sbi.o	= $(CC_FLAGS_FTRACE)
 CFLAGS_REMOVE_return_address.o	= $(CC_FLAGS_FTRACE)
 CFLAGS_REMOVE_sbi_ecall.o = $(CC_FLAGS_FTRACE)
+CFLAGS_REMOVE_riscvcheri.o = $(CC_FLAGS_FTRACE)
 endif
 
 always-$(KBUILD_BUILTIN) += vmlinux.lds
