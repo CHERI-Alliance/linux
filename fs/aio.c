@@ -2168,7 +2168,7 @@ static int __io_submit_one(struct kioctx *ctx, const struct iocb *iocb,
 static int get_compat_iocb(struct iocb *iocb, const struct iocb __user *user_iocb)
 {
 	struct compat_iocb compat_iocb;
-	if (unlikely(copy_from_user(&compat_iocb, user_iocb, sizeof(struct compat_iocb))))
+	if (unlikely(copy_from_user_no_ptr(&compat_iocb, user_iocb, sizeof(struct compat_iocb))))
 		return -EFAULT;
 	iocb->aio_data = __c_fakeu(compat_iocb.aio_data);
 	iocb->aio_key = compat_iocb.aio_key;

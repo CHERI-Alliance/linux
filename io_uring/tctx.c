@@ -31,7 +31,7 @@ static int copy_io_uring_rsrc_update_ringfd_from_user(struct io_ring_ctx *ctx,
 {
 	if (io_in_compat64(ctx))
 		return get_compat64_io_uring_rsrc_update(up, arg);
-	if (copy_from_user(up, arg, sizeof(struct io_uring_rsrc_update)))
+	if (copy_from_user_with_ptr(up, arg, sizeof(struct io_uring_rsrc_update)))
 		return -EFAULT;
 	return 0;
 }

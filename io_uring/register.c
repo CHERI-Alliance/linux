@@ -421,7 +421,7 @@ static int io_register_resize_rings(struct io_ring_ctx *ctx, void __user *arg)
 	/* limited to DEFER_TASKRUN for now */
 	if (!(ctx->flags & IORING_SETUP_DEFER_TASKRUN))
 		return -EINVAL;
-	if (copy_from_user(&p, arg, sizeof(p)))
+	if (copy_from_user_with_ptr(&p, arg, sizeof(p)))
 		return -EFAULT;
 	if (p.flags & ~RESIZE_FLAGS)
 		return -EINVAL;
@@ -435,7 +435,7 @@ static int io_register_resize_rings(struct io_ring_ctx *ctx, void __user *arg)
 
 	/* nothing to do, but copy params back */
 	if (p.sq_entries == ctx->sq_entries && p.cq_entries == ctx->cq_entries) {
-		if (copy_to_user(arg, &p, sizeof(p)))
+		if (copy_to_user_with_ptr(arg, &p, sizeof(p)))
 			return -EFAULT;
 		return 0;
 	}
@@ -471,7 +471,7 @@ static int io_register_resize_rings(struct io_ring_ctx *ctx, void __user *arg)
 	WRITE_ONCE(n.rings->sq_ring_entries, p.sq_entries);
 	WRITE_ONCE(n.rings->cq_ring_entries, p.cq_entries);
 
-	if (copy_to_user(arg, &p, sizeof(p))) {
+	if (copy_to_user_with_ptr(arg, &p, sizeof(p))) {
 		io_register_free_rings(ctx, &p, &n);
 		return -EFAULT;
 	}
@@ -908,7 +908,7 @@ static int io_uring_register_blind(unsigned int opcode, void __user *arg,
 
 		if (!arg || nr_args != 1)
 			return -EINVAL;
-		if (copy_from_user(&sqe, arg, sizeof(sqe)))
+		if (copy_from_user_with_ptr(&sqe, arg, sizeof(sqe)))
 			return -EFAULT;
 		/* no flags supported */
 		if (sqe.flags)

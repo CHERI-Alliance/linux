@@ -192,7 +192,7 @@ static int amdgpu_cs_pass1(struct amdgpu_cs_parser *p,
 
 	/* get chunks */
 	chunk_array_user = u64_to_user_ptr(cs->in.chunks);
-	if (copy_from_user(chunk_array, chunk_array_user,
+	if (copy_from_user_with_ptr(chunk_array, chunk_array_user,
 			   sizeof(__u64ptr)*cs->in.num_chunks)) {
 		ret = -EFAULT;
 		goto free_chunk;
@@ -212,7 +212,7 @@ static int amdgpu_cs_pass1(struct amdgpu_cs_parser *p,
 		uint32_t __user *cdata;
 
 		chunk_ptr = u64_to_user_ptr(chunk_array[i]);
-		if (copy_from_user(&user_chunk, chunk_ptr,
+		if (copy_from_user_with_ptr(&user_chunk, chunk_ptr,
 				       sizeof(struct drm_amdgpu_cs_chunk))) {
 			ret = -EFAULT;
 			i--;

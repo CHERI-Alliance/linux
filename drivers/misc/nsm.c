@@ -388,7 +388,7 @@ static long nsm_dev_ioctl(struct file *file, unsigned int cmd,
 
 	/* Copy kernel argument struct back to user argument struct */
 	r = -EFAULT;
-	if (copy_to_user(argp, &raw, sizeof(raw)))
+	if (copy_to_user_with_ptr(argp, &raw, sizeof(raw)))
 		goto out;
 
 	r = 0;

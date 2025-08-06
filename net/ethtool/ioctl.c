@@ -2869,7 +2869,7 @@ static int ethtool_get_tunable(struct net_device *dev, void __user *useraddr)
 
 	if (!ops->get_tunable)
 		return -EOPNOTSUPP;
-	if (copy_from_user(&tuna, useraddr, sizeof(tuna)))
+	if (copy_from_user_with_ptr(&tuna, useraddr, sizeof(tuna)))
 		return -EFAULT;
 	ret = ethtool_tunable_valid(&tuna);
 	if (ret)
@@ -2900,7 +2900,7 @@ static int ethtool_set_tunable(struct net_device *dev, void __user *useraddr)
 
 	if (!ops->set_tunable)
 		return -EOPNOTSUPP;
-	if (copy_from_user(&tuna, useraddr, sizeof(tuna)))
+	if (copy_from_user_with_ptr(&tuna, useraddr, sizeof(tuna)))
 		return -EFAULT;
 	ret = ethtool_tunable_valid(&tuna);
 	if (ret)
@@ -3061,7 +3061,7 @@ static int get_phy_tunable(struct net_device *dev, void __user *useraddr)
 	phy_drv_tunable = phydev && phydev->drv && phydev->drv->get_tunable;
 	if (!phy_drv_tunable && !dev->ethtool_ops->get_phy_tunable)
 		return -EOPNOTSUPP;
-	if (copy_from_user(&tuna, useraddr, sizeof(tuna)))
+	if (copy_from_user_with_ptr(&tuna, useraddr, sizeof(tuna)))
 		return -EFAULT;
 	ret = ethtool_phy_tunable_valid(&tuna);
 	if (ret)
@@ -3100,7 +3100,7 @@ static int set_phy_tunable(struct net_device *dev, void __user *useraddr)
 	phy_drv_tunable = phydev && phydev->drv && phydev->drv->get_tunable;
 	if (!phy_drv_tunable && !dev->ethtool_ops->set_phy_tunable)
 		return -EOPNOTSUPP;
-	if (copy_from_user(&tuna, useraddr, sizeof(tuna)))
+	if (copy_from_user_with_ptr(&tuna, useraddr, sizeof(tuna)))
 		return -EFAULT;
 	ret = ethtool_phy_tunable_valid(&tuna);
 	if (ret)

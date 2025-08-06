@@ -905,7 +905,7 @@ static int atrtr_ioctl(unsigned int cmd, void __user *arg)
 {
 	struct rtentry rt;
 
-	if (copy_from_user(&rt, arg, sizeof(rt)))
+	if (copy_from_user_with_ptr(&rt, arg, sizeof(rt)))
 		return -EFAULT;
 
 	switch (cmd) {

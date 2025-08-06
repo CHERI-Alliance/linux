@@ -227,7 +227,7 @@ static int io_prep_rw_pi(struct io_kiocb *req, struct io_rw *rw, int ddir,
 	struct io_async_rw *io;
 	int ret;
 
-	if (copy_from_user(&pi_attr, (void __user *)attr_ptr,
+	if (copy_from_user_with_ptr(&pi_attr, (void __user *)attr_ptr,
 	    sizeof(pi_attr)))
 		return -EFAULT;
 

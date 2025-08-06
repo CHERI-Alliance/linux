@@ -965,7 +965,7 @@ static int skfp_siocdevprivate(struct net_device *dev, struct ifreq *rq, void __
 	struct s_skfp_ioctl ioc;
 	int status = 0;
 
-	if (copy_from_user(&ioc, data, sizeof(struct s_skfp_ioctl)))
+	if (copy_from_user_with_ptr(&ioc, data, sizeof(struct s_skfp_ioctl)))
 		return -EFAULT;
 
 	if (in_compat_syscall())

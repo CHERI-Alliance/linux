@@ -401,7 +401,7 @@ int snd_seq_event_dup(struct snd_seq_pool *pool, struct snd_seq_event *event,
 				tmp->event = src->event;
 				src = src->next;
 			} else if (is_usrptr) {
-				if (copy_from_user(&tmp->event, (char __force __user *)buf, size)) {
+				if (copy_from_user_with_ptr(&tmp->event, (char __force __user *)buf, size)) {
 					err = -EFAULT;
 					goto __error;
 				}

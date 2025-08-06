@@ -347,6 +347,46 @@ copy_to_user_with_captags(void __user *to, const void *from, unsigned long n)
 #define copy_to_user_with_ptr			copy_to_user
 #endif /* CONFIG_CHERI_PURECAP_UABI */
 
+/*
+ * Wrappers around usercopy macros that make it clear that tags are
+ * intentionally stripped during the copy..
+ */
+static __always_inline unsigned long __must_check
+__copy_from_user_inatomic_no_ptr(void *to, const void __user *from, unsigned long n)
+{
+	return __copy_from_user_inatomic(to, from, n);
+}
+
+static __always_inline unsigned long __must_check
+__copy_from_user_no_ptr(void *to, const void __user *from, unsigned long n)
+{
+	return __copy_from_user(to, from, n);
+}
+
+static __always_inline unsigned long __must_check
+copy_from_user_no_ptr(void *to, const void __user *from, unsigned long n)
+{
+	return copy_from_user(to, from, n);
+}
+
+static __always_inline unsigned long __must_check
+__copy_to_user_inatomic_no_ptr(void __user *to, const void *from, unsigned long n)
+{
+	return __copy_to_user_inatomic(to, from, n);
+}
+
+static __always_inline unsigned long __must_check
+__copy_to_user_no_ptr(void __user *to, const void *from, unsigned long n)
+{
+	return __copy_to_user(to, from, n);
+}
+
+static __always_inline unsigned long __must_check
+copy_to_user_no_ptr(void __user *to, const void *from, unsigned long n)
+{
+	return copy_to_user(to, from, n);
+}
+
 #ifndef copy_mc_to_kernel
 /*
  * Without arch opt-in this generic copy_mc_to_kernel() will not handle

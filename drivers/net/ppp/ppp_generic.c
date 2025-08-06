@@ -614,7 +614,7 @@ static struct bpf_prog *ppp_get_filter(struct sock_fprog __user *p)
 {
 	struct sock_fprog uprog;
 
-	if (copy_from_user(&uprog, p, sizeof(struct sock_fprog)))
+	if (copy_from_user_with_ptr(&uprog, p, sizeof(struct sock_fprog)))
 		return ERR_PTR(-EFAULT);
 	return get_filter(&uprog);
 }
@@ -855,7 +855,7 @@ static long ppp_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 	case PPPIOCSCOMPRESS:
 	{
 		struct ppp_option_data data;
-		if (copy_from_user(&data, argp, sizeof(data)))
+		if (copy_from_user_with_ptr(&data, argp, sizeof(data)))
 			err = -EFAULT;
 		else
 			err = ppp_set_compress(ppp, &data);

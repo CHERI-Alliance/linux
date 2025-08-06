@@ -336,7 +336,7 @@ no_fences:
 	sync_file_get_name(sync_file, info.name, sizeof(info.name));
 	info.num_fences = num_fences;
 
-	if (copy_to_user((void __user *)arg, &info, sizeof(info)))
+	if (copy_to_user_with_ptr((void __user *)arg, &info, sizeof(info)))
 		ret = -EFAULT;
 	else
 		ret = 0;

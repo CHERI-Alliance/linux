@@ -6639,13 +6639,13 @@ static int hpsa_ioctl(struct scsi_device *dev, unsigned int cmd,
 
 		if (!argp)
 			return -EINVAL;
-		if (copy_from_user(&iocommand, argp, sizeof(iocommand)))
+		if (copy_from_user_with_ptr(&iocommand, argp, sizeof(iocommand)))
 			return -EFAULT;
 		if (atomic_dec_if_positive(&h->passthru_cmds_avail) < 0)
 			return -EAGAIN;
 		rc = hpsa_passthru_ioctl(h, &iocommand);
 		atomic_inc(&h->passthru_cmds_avail);
-		if (!rc && copy_to_user(argp, &iocommand, sizeof(iocommand)))
+		if (!rc && copy_to_user_with_ptr(argp, &iocommand, sizeof(iocommand)))
 			rc = -EFAULT;
 		return rc;
 	}
@@ -6653,13 +6653,13 @@ static int hpsa_ioctl(struct scsi_device *dev, unsigned int cmd,
 		BIG_IOCTL_Command_struct ioc;
 		if (!argp)
 			return -EINVAL;
-		if (copy_from_user(&ioc, argp, sizeof(ioc)))
+		if (copy_from_user_with_ptr(&ioc, argp, sizeof(ioc)))
 			return -EFAULT;
 		if (atomic_dec_if_positive(&h->passthru_cmds_avail) < 0)
 			return -EAGAIN;
 		rc = hpsa_big_passthru_ioctl(h, &ioc);
 		atomic_inc(&h->passthru_cmds_avail);
-		if (!rc && copy_to_user(argp, &ioc, sizeof(ioc)))
+		if (!rc && copy_to_user_with_ptr(argp, &ioc, sizeof(ioc)))
 			rc = -EFAULT;
 		return rc;
 	}

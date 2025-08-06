@@ -341,7 +341,7 @@ tee_ioctl_shm_register(struct tee_context *ctx,
 	data.id = shm->id;
 	data.length = shm->size;
 
-	if (copy_to_user(udata, &data, sizeof(data)))
+	if (copy_to_user_with_ptr(udata, &data, sizeof(data)))
 		ret = -EFAULT;
 	else
 		ret = tee_shm_get_fd(shm);
@@ -477,7 +477,7 @@ static int tee_ioctl_open_session(struct tee_context *ctx,
 	if (!ctx->teedev->desc->ops->open_session)
 		return -EINVAL;
 
-	if (copy_from_user(&buf, ubuf, sizeof(buf)))
+	if (copy_from_user_with_ptr(&buf, ubuf, sizeof(buf)))
 		return -EFAULT;
 
 	if (buf.buf_len > TEE_MAX_ARG_SIZE ||
@@ -555,7 +555,7 @@ static int tee_ioctl_invoke(struct tee_context *ctx,
 	if (!ctx->teedev->desc->ops->invoke_func)
 		return -EINVAL;
 
-	if (copy_from_user(&buf, ubuf, sizeof(buf)))
+	if (copy_from_user_with_ptr(&buf, ubuf, sizeof(buf)))
 		return -EFAULT;
 
 	if (buf.buf_len > TEE_MAX_ARG_SIZE ||
@@ -689,7 +689,7 @@ static int tee_ioctl_supp_recv(struct tee_context *ctx,
 	if (!ctx->teedev->desc->ops->supp_recv)
 		return -EINVAL;
 
-	if (copy_from_user(&buf, ubuf, sizeof(buf)))
+	if (copy_from_user_with_ptr(&buf, ubuf, sizeof(buf)))
 		return -EFAULT;
 
 	if (buf.buf_len > TEE_MAX_ARG_SIZE ||
@@ -787,7 +787,7 @@ static int tee_ioctl_supp_send(struct tee_context *ctx,
 	if (!ctx->teedev->desc->ops->supp_send)
 		return -EINVAL;
 
-	if (copy_from_user(&buf, ubuf, sizeof(buf)))
+	if (copy_from_user_with_ptr(&buf, ubuf, sizeof(buf)))
 		return -EFAULT;
 
 	if (buf.buf_len > TEE_MAX_ARG_SIZE ||

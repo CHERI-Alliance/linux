@@ -715,7 +715,7 @@ static int ccdc_config(struct isp_ccdc_device *ccdc,
 		ccdc->fpc_en = !!(OMAP3ISP_CCDC_FPC & ccdc_struct->flag);
 
 		if (ccdc->fpc_en) {
-			if (copy_from_user_with_ptr(&fpc, ccdc_struct->fpc, sizeof(fpc)))
+			if (copy_from_user(&fpc, ccdc_struct->fpc, sizeof(fpc)))
 				return -EFAULT;
 
 			size = fpc.fpnum * 4;

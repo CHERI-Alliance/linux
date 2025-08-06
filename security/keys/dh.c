@@ -306,7 +306,7 @@ long keyctl_dh_compute(struct keyctl_dh_params __user *params,
 	if (!kdf)
 		return __keyctl_dh_compute(params, buffer, buflen, NULL);
 
-	if (copy_from_user(&kdfcopy, kdf, sizeof(kdfcopy)) != 0)
+	if (copy_from_user_with_ptr(&kdfcopy, kdf, sizeof(kdfcopy)) != 0)
 		return -EFAULT;
 
 	return __keyctl_dh_compute(params, buffer, buflen, &kdfcopy);

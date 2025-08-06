@@ -3506,7 +3506,7 @@ static inline char __user *si_expansion(const siginfo_t __user *info)
 int copy_siginfo_to_user(siginfo_t __user *to, const kernel_siginfo_t *from)
 {
 	char __user *expansion = si_expansion(to);
-	if (copy_to_user(to, from , sizeof(struct kernel_siginfo)))
+	if (copy_to_user_with_ptr(to, from , sizeof(struct kernel_siginfo)))
 		return -EFAULT;
 	if (clear_user(expansion, SI_EXPANSION_SIZE))
 		return -EFAULT;
@@ -3557,7 +3557,7 @@ static int __copy_siginfo_from_user(int signo, kernel_siginfo_t *to,
 	 * as an error(-EINVAL) for PCuABI.
 	 */
 	if (current_pid ? copy_from_user_with_ptr(to, from, sizeof(struct kernel_siginfo))
-			: copy_from_user(to, from, sizeof(struct kernel_siginfo)))
+			: copy_from_user_no_ptr(to, from, sizeof(struct kernel_siginfo)))
 		return -EFAULT;
 	to->si_signo = signo;
 	return post_copy_siginfo_from_user(to, from);
@@ -3565,7 +3565,7 @@ static int __copy_siginfo_from_user(int signo, kernel_siginfo_t *to,
 
 int copy_siginfo_from_user(kernel_siginfo_t *to, const siginfo_t __user *from)
 {
-	if (copy_from_user(to, from, sizeof(struct kernel_siginfo)))
+	if (copy_from_user_with_ptr(to, from, sizeof(struct kernel_siginfo)))
 		return -EFAULT;
 	return post_copy_siginfo_from_user(to, from);
 }

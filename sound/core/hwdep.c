@@ -227,7 +227,7 @@ static int snd_hwdep_dsp_load_user(struct snd_hwdep *hw,
 {
 	struct snd_hwdep_dsp_image info = {};
 
-	if (copy_from_user(&info, _info, sizeof(info)))
+	if (copy_from_user_with_ptr(&info, _info, sizeof(info)))
 		return -EFAULT;
 	return snd_hwdep_dsp_load(hw, &info);
 }
