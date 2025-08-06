@@ -1063,7 +1063,7 @@ ptrace_get_syscall_info(struct task_struct *child, unsigned long user_size,
 	}
 
 	write_size = min(actual_size, user_size);
-	return copy_to_user(datavp, &info, write_size) ? -EFAULT : actual_size;
+	return copy_to_user_with_ptr(datavp, &info, write_size) ? -EFAULT : actual_size;
 }
 
 static int
@@ -1154,7 +1154,7 @@ ptrace_set_syscall_info(struct task_struct *child, unsigned long user_size,
 	 * does not instruct us to use unknown extra bits from future versions
 	 * of ptrace_syscall_info, we are not going to read them either.
 	 */
-	if (copy_from_user(&info, datavp, sizeof(info)))
+	if (copy_from_user_with_ptr(&info, datavp, sizeof(info)))
 		return -EFAULT;
 
 	/* Reserved for future use. */

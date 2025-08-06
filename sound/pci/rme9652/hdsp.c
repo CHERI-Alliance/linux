@@ -4794,7 +4794,7 @@ static int snd_hdsp_hwdep_ioctl(struct snd_hwdep *hw, struct file *file, unsigne
 
 		dev_info(hdsp->card->dev,
 			 "initializing firmware upload\n");
-		if (copy_from_user(&firmware, argp, sizeof(firmware)))
+		if (copy_from_user_with_ptr(&firmware, argp, sizeof(firmware)))
 			return -EFAULT;
 		firmware_data = (u32 __user *)firmware.firmware_data;
 

@@ -143,7 +143,7 @@ int input_ff_effect_from_user(const char __user *buffer, size_t size,
 	if (size != sizeof(struct ff_effect))
 		return -EINVAL;
 
-	if (copy_from_user(effect, buffer, sizeof(struct ff_effect)))
+	if (copy_from_user_with_ptr(effect, buffer, sizeof(struct ff_effect)))
 		return -EFAULT;
 
 	return 0;

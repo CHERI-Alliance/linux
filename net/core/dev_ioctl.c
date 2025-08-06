@@ -48,7 +48,7 @@ int dev_ifconf(struct net *net, struct ifconf __user *uifc)
 	if (in_compat_syscall()) {
 		struct compat_ifconf ifc32;
 
-		if (copy_from_user(&ifc32, uifc, sizeof(struct compat_ifconf)))
+		if (copy_from_user_with_ptr(&ifc32, uifc, sizeof(struct compat_ifconf)))
 			return -EFAULT;
 
 		pos = compat_ptr(ifc32.ifcbuf);
