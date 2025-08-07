@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 #if __has_feature(capabilities)
 
+#include <linux/export.h>
 #include <linux/bug.h>
 #include <linux/cheri.h>
 #include <linux/mm.h>
@@ -10,6 +11,12 @@ uintcap_t cheri_user_root_seal_cap __ro_after_init;
 uintcap_t cheri_user_root_cid_cap __ro_after_init;
 uintcap_t cheri_user_root_allperms_cap __ro_after_init;
 cheri_perms_t cheri_unsupported_perms = 0;
+
+#ifdef CONFIG_CHERI_KERNEL
+EXPORT_SYMBOL(kernel_data_cap);
+EXPORT_SYMBOL(kernel_code_cap);
+EXPORT_SYMBOL(kernel_ro_cap);
+#endif
 
 static void __user *
 build_user_cap(ptraddr_t addr, size_t len, cheri_perms_t perms, bool exact_bounds)
