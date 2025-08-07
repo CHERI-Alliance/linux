@@ -1534,6 +1534,9 @@ static int simplify_symbols(struct module *mod, const struct load_info *info)
 				void *value = kernel_symbol_value(ksym);
 
 				sym[i].st_value = __c_pa(value);
+#ifdef CONFIG_CHERI_KERNEL
+				sym[i].st_size = cheri_length_get(value);
+#endif
 				break;
 			}
 
