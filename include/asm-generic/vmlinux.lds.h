@@ -185,6 +185,7 @@ defined(CONFIG_AUTOFDO_CLANG) || defined(CONFIG_PROPELLER_CLANG)
 			KEEP(*(__mcount_loc))			\
 			KEEP_PATCHABLE				\
 			__stop_mcount_loc = .;			\
+			size$__start_mcount_loc = ABSOLUTE(. - __start_mcount_loc); \
 			FTRACE_STUB_HACK			\
 			__lst_f_start = .;			\
 			ftrace_ops_list_func = arch_ftrace_ops_list_func; \
