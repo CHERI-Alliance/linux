@@ -462,6 +462,11 @@ config MODULE_SECTIONS
 	bool
 	select HAVE_MOD_ARCH_SPECIFIC
 
+config MODULE_CHERI
+       bool
+       depends on !MODULE_SECTIONS
+       select HAVE_MOD_ARCH_SPECIFIC
+
 config SMP
 	bool "Symmetric Multi-Processing"
 	help
@@ -1374,6 +1379,7 @@ config RISCV_CHERI
 	select ARCH_HAS_CHERI_CAPABILITIES
 	select ARCH_HAS_CHERI_UABI_AND_KERNEL
 	select ARCH_USES_HIGH_VMA_FLAGS
+	select MODULE_CHERI if MODULES
 	help
 	  RISCV CHERI is an implementation of the CHERI capability
 	  architecture for RISCV.
