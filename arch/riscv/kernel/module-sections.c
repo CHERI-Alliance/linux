@@ -112,7 +112,7 @@ static bool rela_needs_plt_got_entry(const Elf_Rela *rela)
 	}
 }
 
-int module_frob_arch_sections(Elf_Ehdr *ehdr, Elf_Shdr *sechdrs,
+int module_frob_arch_sections_module_sections(Elf_Ehdr *ehdr, Elf_Shdr *sechdrs,
 			      char *secstrings, struct module *mod)
 {
 	size_t num_scratch_relas = 0;
