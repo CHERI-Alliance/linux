@@ -783,7 +783,7 @@ int apply_relocate_add(Elf_Shdr *sechdrs, const char *strtab,
 		       unsigned int symindex, unsigned int relsec,
 		       struct module *me)
 {
-	Elf_Rela *rel = (void *) sechdrs[relsec].sh_addr;
+	Elf_Rela *rel = shdr_addr(&sechdrs[relsec]);
 	int (*handler)(struct module *me, void *location, Elf_Addr v);
 	Elf_Sym *sym;
 	void *location;
@@ -807,10 +807,10 @@ int apply_relocate_add(Elf_Shdr *sechdrs, const char *strtab,
 
 	for (i = 0; i < num_relocations; i++) {
 		/* This is where to make the change */
-		location = (void *)sechdrs[sechdrs[relsec].sh_info].sh_addr
+		location = (void *)shdr_addr(&sechdrs[sechdrs[relsec].sh_info])
 			+ rel[i].r_offset;
 		/* This is the symbol it is referring to */
-		sym = (Elf_Sym *)sechdrs[symindex].sh_addr
+		sym = (Elf_Sym *)shdr_addr(&sechdrs[symindex])
 			+ ELF_RISCV_R_SYM(rel[i].r_info);
 		if (IS_ERR_VALUE(sym->st_value)) {
 			/* Ignore unresolved weak symbol */
@@ -852,7 +852,7 @@ int apply_relocate_add(Elf_Shdr *sechdrs, const char *strtab,
 					|| hi20_type == R_RISCV_GOT_HI20)) {
 					s32 hi20, lo12;
 					Elf_Sym *hi20_sym =
-						(Elf_Sym *)sechdrs[symindex].sh_addr
+						(Elf_Sym *)(shdr_addr(&sechdrs[symindex]))
 						+ ELF_RISCV_R_SYM(rel[j].r_info);
 					unsigned long hi20_sym_val =
 						hi20_sym->st_value
@@ -916,7 +916,7 @@ int module_finalize(const Elf_Ehdr *hdr,
 
 	s = find_section(hdr, sechdrs, ".alternative");
 	if (s)
-		apply_module_alternatives((void *)s->sh_addr, s->sh_size);
+		apply_module_alternatives(shdr_addr((Elf_Shdr *)s), s->sh_size);
 
 	return 0;
 }

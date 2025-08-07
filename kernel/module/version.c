@@ -45,7 +45,7 @@ int check_version(const struct load_info *info,
 	if (versindex == 0)
 		return try_to_force_load(mod, symname) == 0;
 
-	versions = (void *)sechdrs[versindex].sh_addr;
+	versions = shdr_addr(&sechdrs[versindex]);
 	num_versions = sechdrs[versindex].sh_size
 		/ sizeof(struct modversion_info);
 
@@ -120,8 +120,8 @@ void modversion_ext_start(const struct load_info *info,
 		return;
 	}
 
-	start->crc = (const u32 *)sechdrs[crc_idx].sh_addr;
-	start->name = (const char *)sechdrs[name_idx].sh_addr;
+	start->crc = shdr_addr(&sechdrs[crc_idx]);
+	start->name = shdr_addr(&sechdrs[name_idx]);
 	start->remaining = sechdrs[crc_idx].sh_size / sizeof(*start->crc);
 }
 

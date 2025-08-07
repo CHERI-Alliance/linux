@@ -9,6 +9,7 @@
 #ifndef _LINUX_MODULE_H
 #define _LINUX_MODULE_H
 
+#include <linux/cheri.h>
 #include <linux/list.h>
 #include <linux/stat.h>
 #include <linux/buildid.h>
@@ -66,6 +67,11 @@ struct module_version_attribute {
 	const char *module_name;
 	const char *version;
 };
+
+static inline void *shdr_addr(const Elf_Shdr *shdr)
+{
+	return cheri_make_kernel_data_cap(shdr->sh_addr, shdr->sh_size);
+}
 
 extern ssize_t __modver_version_show(const struct module_attribute *,
 				     struct module_kobject *, char *);

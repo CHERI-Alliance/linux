@@ -255,7 +255,7 @@ static int find_any_unique_sec(const struct load_info *info, const char *name)
 static void *section_addr(const struct load_info *info, const char *name)
 {
 	/* Section 0 has sh_addr 0. */
-	return (void *)info->sechdrs[find_sec(info, name)].sh_addr;
+	return shdr_addr(&info->sechdrs[find_sec(info, name)]);
 }
 
 /* Find a module section, or NULL.  Fill in number of "objects" in section. */
@@ -268,7 +268,7 @@ static void *section_objs(const struct load_info *info,
 
 	/* Section 0 has sh_addr 0 and sh_size 0. */
 	*num = info->sechdrs[sec].sh_size / object_size;
-	return (void *)info->sechdrs[sec].sh_addr;
+	return shdr_addr(&info->sechdrs[sec]);
 }
 
 /* Find a module section: 0 means not found. Ignores SHF_ALLOC flag. */
@@ -297,7 +297,7 @@ static __maybe_unused void *any_section_objs(const struct load_info *info,
 
 	/* Section 0 has sh_addr 0 and sh_size 0. */
 	*num = info->sechdrs[sec].sh_size / object_size;
-	return (void *)info->sechdrs[sec].sh_addr;
+	return shdr_addr(&info->sechdrs[sec]);
 }
 
 #ifndef CONFIG_MODVERSIONS
@@ -1492,7 +1492,7 @@ static bool ignore_undef_symbol(Elf_Half emachine, const char *name)
 static int simplify_symbols(struct module *mod, const struct load_info *info)
 {
 	Elf_Shdr *symsec = &info->sechdrs[info->index.sym];
-	Elf_Sym *sym = (void *)symsec->sh_addr;
+	Elf_Sym *sym = shdr_addr(symsec);
 	unsigned long secbase;
 	unsigned int i;
 	int ret = 0;
@@ -2769,7 +2769,7 @@ static int move_module(struct module *mod, struct load_info *info)
 				ret = -ENOEXEC;
 				goto out_err;
 			}
-			memcpy(dest, (void *)shdr->sh_addr, shdr->sh_size);
+			memcpy(dest, shdr_addr(shdr), shdr->sh_size);
 		}
 		/*
 		 * Update the userspace copy's ELF section address to point to
@@ -2896,7 +2896,7 @@ static struct module *layout_and_allocate(struct load_info *info, int flags)
 		return ERR_PTR(err);
 
 	/* Module has been copied to its final place now: return it. */
-	mod = (void *)info->sechdrs[info->index.mod].sh_addr;
+	mod = shdr_addr(&info->sechdrs[info->index.mod]);
 	kmemleak_load_module(mod, info);
 	codetag_module_replaced(info->mod, mod);
 
@@ -2926,7 +2926,7 @@ static int post_relocation(struct module *mod, const struct load_info *info)
 	sort_extable(mod->extable, mod->extable + mod->num_exentries);
 
 	/* Copy relocated percpu area over. */
-	percpu_modcopy(mod, (void *)info->sechdrs[info->index.pcpu].sh_addr,
+	percpu_modcopy(mod, shdr_addr(&info->sechdrs[info->index.pcpu]),
 		       info->sechdrs[info->index.pcpu].sh_size);
 
 	/* Setup kallsyms-specific fields. */

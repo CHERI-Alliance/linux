@@ -102,7 +102,7 @@ static int add_sect_attrs(struct module *mod, const struct load_info *info)
 			goto out;
 		}
 		sattr->read_new = module_sect_read;
-		sattr->private = (void *)sec->sh_addr;
+		sattr->private = shdr_addr(sec);
 		sattr->size = MODULE_SECT_READ_SIZE;
 		sattr->attr.mode = 0400;
 		*(gattr++) = sattr++;
@@ -189,7 +189,7 @@ static int add_notes_attrs(struct module *mod, const struct load_info *info)
 			nattr->attr.name = mod->sect_attrs->attrs[loaded].attr.name;
 			nattr->attr.mode = 0444;
 			nattr->size = info->sechdrs[i].sh_size;
-			nattr->private = (void *)info->sechdrs[i].sh_addr;
+			nattr->private = shdr_addr(&info->sechdrs[i]);
 			nattr->read_new = sysfs_bin_attr_simple_read;
 			*(gattr++) = nattr++;
 		}
