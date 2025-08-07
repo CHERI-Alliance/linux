@@ -97,7 +97,7 @@ static int apply_r_riscv_64_rela(struct module *me, void *location, Elf_Addr v)
 static int apply_r_riscv_branch_rela(struct module *me, void *location,
 				     Elf_Addr v)
 {
-	ptrdiff_t offset = (void *)v - location;
+	ptrdiff_t offset = v - __c_pa(location);
 	u32 imm12 = (offset & 0x1000) << (31 - 12);
 	u32 imm11 = (offset & 0x800) >> (11 - 7);
 	u32 imm10_5 = (offset & 0x7e0) << (30 - 10);
@@ -109,7 +109,7 @@ static int apply_r_riscv_branch_rela(struct module *me, void *location,
 static int apply_r_riscv_jal_rela(struct module *me, void *location,
 				  Elf_Addr v)
 {
-	ptrdiff_t offset = (void *)v - location;
+	ptrdiff_t offset = v - __c_pa(location);
 	u32 imm20 = (offset & 0x100000) << (31 - 20);
 	u32 imm19_12 = (offset & 0xff000);
 	u32 imm11 = (offset & 0x800) << (20 - 11);
@@ -121,7 +121,7 @@ static int apply_r_riscv_jal_rela(struct module *me, void *location,
 static int apply_r_riscv_rvc_branch_rela(struct module *me, void *location,
 					 Elf_Addr v)
 {
-	ptrdiff_t offset = (void *)v - location;
+	ptrdiff_t offset = v - __c_pa(location);
 	u16 imm8 = (offset & 0x100) << (12 - 8);
 	u16 imm7_6 = (offset & 0xc0) >> (6 - 5);
 	u16 imm5 = (offset & 0x20) >> (5 - 2);
@@ -135,7 +135,7 @@ static int apply_r_riscv_rvc_branch_rela(struct module *me, void *location,
 static int apply_r_riscv_rvc_jump_rela(struct module *me, void *location,
 				       Elf_Addr v)
 {
-	ptrdiff_t offset = (void *)v - location;
+	ptrdiff_t offset = v - __c_pa(location);
 	u16 imm11 = (offset & 0x800) << (12 - 11);
 	u16 imm10 = (offset & 0x400) >> (10 - 8);
 	u16 imm9_8 = (offset & 0x300) << (12 - 11);
@@ -152,7 +152,7 @@ static int apply_r_riscv_rvc_jump_rela(struct module *me, void *location,
 static int apply_r_riscv_pcrel_hi20_rela(struct module *me, void *location,
 					 Elf_Addr v)
 {
-	ptrdiff_t offset = (void *)v - location;
+	ptrdiff_t offset = v - __c_pa(location);
 
 	if (!riscv_insn_valid_32bit_offset(offset)) {
 		pr_err(
@@ -225,11 +225,11 @@ static int apply_r_riscv_lo12_s_rela(struct module *me, void *location,
 static int apply_r_riscv_got_hi20_rela(struct module *me, void *location,
 				       Elf_Addr v)
 {
-	ptrdiff_t offset = (void *)v - location;
+	ptrdiff_t offset = v - __c_pa(location);
 
 	/* Always emit the got entry */
 	if (IS_ENABLED(CONFIG_MODULE_SECTIONS)) {
-		offset = (void *)module_emit_got_entry(me, v) - location;
+		offset = module_emit_got_entry(me, v) - __c_pa(location);
 	} else {
 		pr_err(
 		  "%s: can not generate the GOT entry for symbol = %016llx from PC = %p\n",
@@ -243,13 +243,13 @@ static int apply_r_riscv_got_hi20_rela(struct module *me, void *location,
 static int apply_r_riscv_call_plt_rela(struct module *me, void *location,
 				       Elf_Addr v)
 {
-	ptrdiff_t offset = (void *)v - location;
+	ptrdiff_t offset = v - __c_pa(location);
 	u32 hi20, lo12;
 
 	if (!riscv_insn_valid_32bit_offset(offset)) {
 		/* Only emit the plt entry if offset over 32-bit range */
 		if (IS_ENABLED(CONFIG_MODULE_SECTIONS)) {
-			offset = (void *)module_emit_plt_entry(me, v) - location;
+			offset = module_emit_plt_entry(me, v) - __c_pa(location);
 		} else {
 			pr_err(
 			  "%s: target %016llx can not be addressed by the 32-bit offset from PC = %p\n",
@@ -267,7 +267,7 @@ static int apply_r_riscv_call_plt_rela(struct module *me, void *location,
 static int apply_r_riscv_call_rela(struct module *me, void *location,
 				   Elf_Addr v)
 {
-	ptrdiff_t offset = (void *)v - location;
+	ptrdiff_t offset = v - __c_pa(location);
 	u32 hi20, lo12;
 
 	if (!riscv_insn_valid_32bit_offset(offset)) {
@@ -408,19 +408,19 @@ static int apply_r_riscv_set32_rela(struct module *me, void *location,
 static int apply_r_riscv_32_pcrel_rela(struct module *me, void *location,
 				       Elf_Addr v)
 {
-	*(u32 *)location = v - (uintptr_t)location;
+	*(u32 *)location = v - __c_pa(location);
 	return 0;
 }
 
 static int apply_r_riscv_plt32_rela(struct module *me, void *location,
 				    Elf_Addr v)
 {
-	ptrdiff_t offset = (void *)v - location;
+	ptrdiff_t offset = v - __c_pa(location);
 
 	if (!riscv_insn_valid_32bit_offset(offset)) {
 		/* Only emit the plt entry if offset over 32-bit range */
 		if (IS_ENABLED(CONFIG_MODULE_SECTIONS)) {
-			offset = (void *)module_emit_plt_entry(me, v) - location;
+			offset = module_emit_plt_entry(me, v) - __c_pa(location);
 		} else {
 			pr_err("%s: target %016llx can not be addressed by the 32-bit offset from PC = %p\n",
 			       me->name, (long long)v, location);
