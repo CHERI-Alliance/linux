@@ -11,6 +11,8 @@
 #include <linux/types.h>
 
 #if defined(CONFIG_HAVE_ARCH_PREL32_RELOCATIONS)
+
+// FIXCHERI: Handle the HAVE_ARCH_PREL32_RELOCATIONS case.
 /*
  * relative reference: this reduces the size by half on 64-bit architectures,
  * and eliminates the need for absolute relocations that require runtime
@@ -18,12 +20,34 @@
  */
 #define __KSYM_ALIGN		".balign 4"
 #define __KSYM_REF(sym)		".long " #sym "- ."
+
 #elif defined(CONFIG_64BIT)
+
+#ifdef CONFIG_CHERI_KERNEL
+#define __KSYM_ALIGN		".balign 16"
+#define __KSYM_REF(sym)		".chericap " #sym
+#else
 #define __KSYM_ALIGN		".balign 8"
 #define __KSYM_REF(sym)		".quad " #sym
+#endif
+
+#else
+
+#ifdef CONFIG_CHERI_KERNEL
+#define __KSYM_ALIGN		".balign 8"
+#define __KSYM_REF(sym)		".chericap " #sym
 #else
 #define __KSYM_ALIGN		".balign 4"
 #define __KSYM_REF(sym)		".long " #sym
+#endif
+
+#endif
+
+#ifdef CONFIG_CHERI_KERNEL
+// Needs to be writeable to perform the .chericap relocations
+#define __KSYMTAB_SEC_FLAGS "aw"
+#else
+#define __KSYMTAB_SEC_FLAGS "a"
 #endif
 
 /*
@@ -41,10 +65,12 @@
 	asm("	.section \"__ksymtab_strings\",\"aMS\",%progbits,1"	"\n"	\
 	    "__kstrtab_" #name ":"					"\n"	\
 	    "	.asciz \"" #name "\""					"\n"	\
+	    "	.size __kstrtab_" #name ", . - __kstrtab_" #name	"\n"	\
 	    "__kstrtabns_" #name ":"					"\n"	\
 	    "	.asciz \"" ns "\""					"\n"	\
+	    "	.size __kstrtabns_" #name ", . - __kstrtabns_" #name	"\n"	\
 	    "	.previous"						"\n"	\
-	    "	.section \"___ksymtab" sec "+" #name "\", \"a\""	"\n"	\
+	    "	.section \"___ksymtab" sec "+" #name "\", \"" __KSYMTAB_SEC_FLAGS "\""	"\n"	\
 		__KSYM_ALIGN						"\n"	\
 	    "__ksymtab_" #name ":"					"\n"	\
 		__KSYM_REF(sym)						"\n"	\
