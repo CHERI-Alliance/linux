@@ -905,3 +905,24 @@ int module_finalize(const Elf_Ehdr *hdr,
 
 	return 0;
 }
+
+
+int __weak module_frob_arch_sections_module_sections(Elf_Ehdr *hdr,
+				     Elf_Shdr *sechdrs,
+				     char *secstrings,
+				     struct module *mod)
+{
+	return 0;
+}
+
+int module_frob_arch_sections(Elf_Ehdr *ehdr, Elf_Shdr *sechdrs,
+			      char *secstrings, struct module *mod)
+{
+	int res;
+
+	res = module_frob_arch_sections_module_sections(ehdr, sechdrs, secstrings, mod);
+	if (res)
+		return res;
+
+	return 0;
+}
