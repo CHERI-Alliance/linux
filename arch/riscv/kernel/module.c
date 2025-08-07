@@ -241,6 +241,7 @@ static int apply_r_riscv_lo12_s_rela(struct module *me, void *location,
 	return riscv_insn_rmw(location, 0x1fff07f, imm11_5 | imm4_0);
 }
 
+#ifndef CONFIG_MODULE_CHERI
 static int apply_r_riscv_got_hi20_rela(struct module *me, void *location,
 				       Elf_Addr v, Elf_Sym *sym)
 {
@@ -258,6 +259,7 @@ static int apply_r_riscv_got_hi20_rela(struct module *me, void *location,
 
 	return riscv_insn_rmw(location, 0xfff, (offset + 0x800) & 0xfffff000);
 }
+#endif
 
 static int apply_r_riscv_call_plt_rela(struct module *me, void *location,
 				       Elf_Addr v, Elf_Sym *sym)
@@ -267,7 +269,7 @@ static int apply_r_riscv_call_plt_rela(struct module *me, void *location,
 
 	if (!riscv_insn_valid_32bit_offset(offset)) {
 		/* Only emit the plt entry if offset over 32-bit range */
-		if (IS_ENABLED(CONFIG_MODULE_SECTIONS)) {
+		if (IS_ENABLED(CONFIG_MODULE_SECTIONS) && !IS_ENABLED(CONFIG_MODULE_CHERI)) {
 			offset = module_emit_plt_entry(me, v) - __c_pa(location);
 		} else {
 			pr_err(
@@ -544,6 +546,131 @@ static int apply_uleb128_accumulation(struct module *me, void *location, long bu
 	return 0;
 }
 
+#ifdef CONFIG_MODULE_CHERI
+
+struct memtype_search {
+	Elf_Addr addr;
+	enum mod_mem_type *res;
+};
+
+static int get_mem_type_for_addr(struct module *mod, void *data)
+{
+	struct memtype_search *mems = data;
+
+	for_each_mod_mem_type(type) {
+		if (within_module_mem_type(mems->addr, mod, type)) {
+			*(mems->res) = type;
+			return 1;
+		}
+	}
+
+	if (mems->addr - __c_pa(mod->percpu) < mod->percpu_size) {
+		*(mems->res) = MOD_DATA;
+		return 1;
+	}
+
+	return 0;
+}
+
+static int get_kmem_type_for_addr(struct memtype_search *mems)
+{
+	ptraddr_t addr = mems->addr;
+
+	if (is_kernel_core_data(addr)) {
+		*(mems->res) = MOD_DATA;
+		return 1;
+	}
+
+	if (is_kernel_rodata(addr) ||
+	    is_kernel_ro_after_init(addr)) {
+		*(mems->res) = MOD_RODATA;
+		return 1;
+	}
+
+	if (__is_kernel_text(addr)) {
+		*(mems->res) = MOD_TEXT;
+		return 1;
+	}
+
+	if (addr >= (ptraddr_t) __per_cpu_start &&
+	    addr < (ptraddr_t) __per_cpu_end) {
+		*(mems->res) = MOD_DATA;
+		return 1;
+	}
+
+	return 0;
+}
+
+static int derive_capability(struct module *me, bool is_init,
+			     Elf_Addr v, Elf_Sym *sym, uintptr_t *cap_buf)
+{
+	uintptr_t cap;
+	enum mod_mem_type cap_mem_type = MOD_INVALID;
+	struct memtype_search mems = { v, &cap_mem_type };
+
+	if (!get_mem_type_for_addr(me, &mems)
+	    && !get_kmem_type_for_addr(&mems)) {
+		module_for_each_mod(get_mem_type_for_addr, &mems);
+
+		if (cap_mem_type == MOD_INVALID) {
+			pr_err("%s: Could not determine mod_mem_type\n", me->name);
+			return -EINVAL;
+		}
+	}
+
+	pr_debug("Materializing %s capability for %llx (mem_type %d) ELF symbol %llx with size %llu\n",
+		 is_init ? "in-init" : "non-init", v, cap_mem_type, sym->st_value, sym->st_size);
+
+	if (mod_mem_type_is_data(cap_mem_type)) {
+		if (!sym->st_size) {
+			pr_err("%s: Can not create capability for symbol with size 0\n", me->name);
+			return -EINVAL;
+		}
+
+		cap = (uintptr_t)cheri_make_kernel_data_cap(sym->st_value, sym->st_size);
+		cap = cheri_address_set(cap, v);
+		if (cap_mem_type == MOD_RODATA ||
+		    cap_mem_type == MOD_INIT_RODATA ||
+		    (!is_init && cap_mem_type == MOD_RO_AFTER_INIT))
+			cap = cheri_perms_and(cap, ~CHERI_PERMS_WRITE);
+	} else
+		cap = (uintptr_t)cheri_make_kernel_code_cap(v);
+
+
+	*cap_buf = cap;
+
+	return 0;
+}
+
+static int apply_r_riscv_got_hi20_rela(struct module *me, void *location,
+					 Elf_Addr v, Elf_Sym *sym)
+{
+	int res;
+	uintptr_t cap;
+	bool is_init;
+	ptrdiff_t offset;
+	struct captable_entry *cap_entry;
+
+	is_init = within_module_init(__c_pa(location), me);
+	res = derive_capability(me, is_init, v, sym, &cap);
+	if (res < 0)
+		return res;
+
+	cap_entry = module_emit_captable_entry(me, cap, is_init);
+	offset = __c_pa(cap_entry) - __c_pa(location);
+	return riscv_insn_rmw(location, 0xfff, (offset + 0x800) & 0xfffff000);
+}
+
+static int apply_r_riscv_cheri_capability(struct module *me, void *location, Elf_Addr v,
+					  Elf_Sym *sym)
+{
+	bool is_init;
+
+	is_init = within_module_init(__c_pa(location), me);
+	return derive_capability(me, is_init, v, sym, location);
+}
+#endif
+
 /*
  * Relocations defined in the riscv-elf-psabi-doc.
  * This handles static linking only.
@@ -619,6 +746,9 @@ static const struct relocation_handlers reloc_handlers[] = {
 				    .accumulate_handler = apply_uleb128_accumulation },
 	/* 62-191 reserved for future standard use */
 	/* 192-255 nonstandard ABI extensions  */
+#ifdef CONFIG_MODULE_CHERI
+	[R_RISCV_CHERI_CAPABILITY] = { .reloc_handler = apply_r_riscv_cheri_capability },
+#endif
 };
 
 static void
@@ -822,7 +952,7 @@ int apply_relocate_add(Elf_Shdr *sechdrs, const char *strtab,
 
 	for (i = 0; i < num_relocations; i++) {
 		/* This is where to make the change */
-		location = (void *)shdr_addr(&sechdrs[sechdrs[relsec].sh_info])
+		location = shdr_addr(&sechdrs[sechdrs[relsec].sh_info])
 			+ rel[i].r_offset;
 		/* This is the symbol it is referring to */
 		sym = (Elf_Sym *)shdr_addr(&sechdrs[symindex])
@@ -865,6 +995,7 @@ int apply_relocate_add(Elf_Shdr *sechdrs, const char *strtab,
 				if (hi20_loc == sym->st_value
 				    && (hi20_type == R_RISCV_PCREL_HI20
 					|| hi20_type == R_RISCV_GOT_HI20)) {
+					size_t offset;
 					s32 hi20, lo12;
 					Elf_Sym *hi20_sym =
 						(Elf_Sym *)(shdr_addr(&sechdrs[symindex]))
@@ -873,14 +1004,30 @@ int apply_relocate_add(Elf_Shdr *sechdrs, const char *strtab,
 						hi20_sym->st_value
 						+ rel[j].r_addend;
 
+#ifndef CONFIG_MODULE_CHERI
 					/* Calculate lo12 */
-					size_t offset = hi20_sym_val - hi20_loc;
+					offset = hi20_sym_val - hi20_loc;
 					if (IS_ENABLED(CONFIG_MODULE_SECTIONS)
 					    && hi20_type == R_RISCV_GOT_HI20) {
 						offset = module_emit_got_entry(
 							 me, hi20_sym_val);
 						offset = offset - hi20_loc;
 					}
+#else
+					bool is_init;
+					uintptr_t cap;
+					struct captable_entry *cap_entry;
+
+					is_init = within_module_init(__c_pa(location), me);
+					res = derive_capability(me, is_init,
+								hi20_sym_val, hi20_sym,
+								&cap);
+					if (res < 0)
+						return res;
+					cap_entry = module_emit_captable_entry(me, cap,
+									       is_init);
+					offset = __c_pa(cap_entry) - hi20_loc;
+#endif
 					hi20 = (offset + 0x800) & 0xfffff000;
 					lo12 = offset - hi20;
 					v = lo12;
@@ -946,12 +1093,24 @@ int __weak module_frob_arch_sections_module_sections(Elf_Ehdr *hdr,
 	return 0;
 }
 
+int __weak module_frob_arch_sections_module_cheri(Elf_Ehdr *hdr,
+				     Elf_Shdr *sechdrs,
+				     char *secstrings,
+				     struct module *mod)
+{
+	return 0;
+}
+
 int module_frob_arch_sections(Elf_Ehdr *ehdr, Elf_Shdr *sechdrs,
 			      char *secstrings, struct module *mod)
 {
 	int res;
 
 	res = module_frob_arch_sections_module_sections(ehdr, sechdrs, secstrings, mod);
+	if (res)
+		return res;
+
+	res = module_frob_arch_sections_module_cheri(ehdr, sechdrs, secstrings, mod);
 	if (res)
 		return res;
 

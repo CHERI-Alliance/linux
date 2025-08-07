@@ -17,6 +17,11 @@ int module_frob_arch_sections_module_sections(Elf_Ehdr *hdr,
 					      char *secstrings,
 					      struct module *mod);
 
+int module_frob_arch_sections_module_cheri(Elf_Ehdr *hdr,
+					   Elf_Shdr *sechdrs,
+					   char *secstrings,
+					   struct module *mod);
+
 #ifdef CONFIG_HAVE_MOD_ARCH_SPECIFIC
 struct mod_section {
 	Elf_Shdr *shdr;
@@ -29,6 +34,10 @@ struct mod_arch_specific {
 	struct mod_section got;
 	struct mod_section plt;
 	struct mod_section got_plt;
+#endif
+#ifdef CONFIG_MODULE_CHERI
+	struct mod_section captable;
+	struct mod_section init_captable;
 #endif
 };
 #endif
@@ -121,6 +130,35 @@ static inline struct plt_entry *get_plt_entry(unsigned long val,
 }
 
 #endif /* CONFIG_MODULE_SECTIONS */
+
+#ifdef CONFIG_MODULE_CHERI
+
+struct captable_entry {
+	uintptr_t cap;
+};
+
+struct captable_entry *module_emit_captable_entry(struct module *mod, uintptr_t val,
+						  bool is_init);
+
+static inline struct captable_entry emit_captable_entry(uintptr_t val)
+{
+	return (struct captable_entry) {val};
+}
+
+static inline struct captable_entry *get_captable_entry(uintptr_t val,
+					      const struct mod_section *sec)
+{
+	struct captable_entry *captable = shdr_addr(sec->shdr);
+	int i;
+
+	for (i = 0; i < sec->num_entries; i++) {
+		if (cheri_is_equal_exact(captable[i].cap, val))
+			return &captable[i];
+	}
+	return NULL;
+}
+
+#endif /* CONFIG_MODULE_CHERI */
 
 static inline const Elf_Shdr *find_section(const Elf_Ehdr *hdr,
 					   const Elf_Shdr *sechdrs,
