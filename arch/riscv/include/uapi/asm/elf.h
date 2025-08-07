@@ -104,5 +104,12 @@ typedef union __riscv_fp_state elf_fpregset_t;
 #define R_RISCV_SET_ULEB128	60
 #define R_RISCV_SUB_ULEB128	61
 
+#define R_RISCV_CHERI_CAPABILITY               193
+
+/*
+ * RISC-V e_flags
+ */
+#define EF_RISCV_CHERIABI 0x00010000
+#define EF_RISCV_CAP_MODE 0x00020000
 
 #endif /* _UAPI_ASM_RISCV_ELF_H */
