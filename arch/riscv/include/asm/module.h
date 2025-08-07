@@ -11,7 +11,12 @@ struct module;
 unsigned long module_emit_got_entry(struct module *mod, unsigned long val);
 unsigned long module_emit_plt_entry(struct module *mod, unsigned long val);
 
-#ifdef CONFIG_MODULE_SECTIONS
+int module_frob_arch_sections_module_sections(Elf_Ehdr *hdr,
+					      Elf_Shdr *sechdrs,
+					      char *secstrings,
+					      struct module *mod);
+
+#ifdef CONFIG_HAVE_MOD_ARCH_SPECIFIC
 struct mod_section {
 	Elf_Shdr *shdr;
 	int num_entries;
@@ -19,11 +24,15 @@ struct mod_section {
 };
 
 struct mod_arch_specific {
+#ifdef CONFIG_MODULE_SECTIONS
 	struct mod_section got;
 	struct mod_section plt;
 	struct mod_section got_plt;
+#endif
 };
+#endif
 
+#ifdef CONFIG_MODULE_SECTIONS
 struct got_entry {
 	unsigned long symbol_addr;	/* the real variable address */
 };
