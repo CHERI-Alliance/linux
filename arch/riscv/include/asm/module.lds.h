@@ -7,3 +7,9 @@ SECTIONS {
 	.got.plt : { BYTE(0) }
 }
 #endif
+#ifdef CONFIG_CHERI_KERNEL
+SECTIONS {
+	.captable : { BYTE(0) }
+	.init.captable : { BYTE(0) }
+}
+#endif
