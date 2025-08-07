@@ -181,10 +181,10 @@ void add_kallsyms(struct module *mod, const struct load_info *info)
 
 	kallsyms = init_data_base + info->mod_kallsyms_init_off;
 
-	kallsyms->symtab = (void *)symsec->sh_addr;
+	kallsyms->symtab = shdr_addr(symsec);
 	kallsyms->num_symtab = symsec->sh_size / sizeof(Elf_Sym);
 	/* Make sure we get permanent strtab: don't use info->strtab. */
-	kallsyms->strtab = (void *)info->sechdrs[info->index.str].sh_addr;
+	kallsyms->strtab = shdr_addr(&info->sechdrs[info->index.str]);
 	kallsyms->typetab = init_data_base + info->init_typeoffs;
 
 	/*
@@ -230,7 +230,7 @@ void init_build_id(struct module *mod, const struct load_info *info)
 	for (i = 0; i < info->hdr->e_shnum; i++) {
 		sechdr = &info->sechdrs[i];
 		if (!sect_empty(sechdr) && sechdr->sh_type == SHT_NOTE &&
-		    !build_id_parse_buf((void *)sechdr->sh_addr, mod->build_id,
+		    !build_id_parse_buf(shdr_addr(sechdr), mod->build_id,
 					sechdr->sh_size))
 			break;
 	}

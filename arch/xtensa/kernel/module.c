@@ -51,7 +51,7 @@ int apply_relocate_add(Elf32_Shdr *sechdrs,
 		       struct module *mod)
 {
 	unsigned int i;
-	Elf32_Rela *rela = (void *)sechdrs[relsec].sh_addr;
+	Elf32_Rela *rela = shdr_addr(&sechdrs[relsec]);
 	Elf32_Sym *sym;
 	unsigned char *location;
 	uint32_t value;
