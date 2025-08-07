@@ -16,6 +16,21 @@
 #include <asm/alternative.h>
 #include <asm/sections.h>
 
+bool module_elf_check_arch(Elf_Ehdr *hdr)
+{
+	bool res = true;
+
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	res &= !!(hdr->e_flags & EF_RISCV_CHERIABI);
+#endif
+
+#ifdef CONFIG_CHERI_KERNEL
+	res &= !!(hdr->e_flags & EF_RISCV_CAP_MODE);
+#endif
+
+	return res;
+}
+
 struct used_bucket {
 	struct list_head head;
 	struct hlist_head *bucket;
