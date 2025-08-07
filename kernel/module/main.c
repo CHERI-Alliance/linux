@@ -482,7 +482,7 @@ bool __is_module_percpu_address(__ptraddr_t addr, unsigned long *can_addr)
 			continue;
 		for_each_possible_cpu(cpu) {
 			void *start = per_cpu_ptr(mod->percpu, cpu);
-			void *va = (void *)addr;
+			void *va = __c_fakep(addr);
 
 			if (va >= start && va < start + mod->percpu_size) {
 				if (can_addr) {
