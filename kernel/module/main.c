@@ -1433,7 +1433,7 @@ void *__symbol_get(const char *symbol)
 		if (strong_try_module_get(fsa.owner))
 			return NULL;
 	}
-	return (void *)kernel_symbol_value(fsa.sym);
+	return cheri_make_kernel_code_cap(__c_pa(kernel_symbol_value(fsa.sym)));
 }
 EXPORT_SYMBOL_GPL(__symbol_get);
 
@@ -1531,7 +1531,9 @@ static int simplify_symbols(struct module *mod, const struct load_info *info)
 			ksym = resolve_symbol_wait(mod, info, name);
 			/* Ok if resolved.  */
 			if (ksym && !IS_ERR(ksym)) {
-				sym[i].st_value = kernel_symbol_value(ksym);
+				void *value = kernel_symbol_value(ksym);
+
+				sym[i].st_value = __c_pa(value);
 				break;
 			}
 

@@ -38,7 +38,7 @@ struct kernel_symbol {
 	int name_offset;
 	int namespace_offset;
 #else
-	unsigned long value;
+	void *value;
 	const char *name;
 	const char *namespace;
 #endif
@@ -124,10 +124,10 @@ char *module_next_tag_pair(char *string, unsigned long *secsize);
 #define for_each_modinfo_entry(entry, info, name) \
 	for (entry = get_modinfo(info, name); entry; entry = get_next_modinfo(info, name, entry))
 
-static inline unsigned long kernel_symbol_value(const struct kernel_symbol *sym)
+static inline void *kernel_symbol_value(const struct kernel_symbol *sym)
 {
 #ifdef CONFIG_HAVE_ARCH_PREL32_RELOCATIONS
-	return (unsigned long)offset_to_ptr(&sym->value_offset);
+	return offset_to_ptr(&sym->value_offset);
 #else
 	return sym->value;
 #endif

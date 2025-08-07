@@ -31,7 +31,7 @@ static int is_exported(const char *name, unsigned long value,
 	else
 		ks = lookup_exported_symbol(name, mod->syms, mod->syms + mod->num_syms);
 
-	return ks && kernel_symbol_value(ks) == value;
+	return ks && __c_pa(kernel_symbol_value(ks)) == value;
 }
 
 /* As per nm */
