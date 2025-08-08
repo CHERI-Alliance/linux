@@ -635,9 +635,10 @@ static inline bool within_module_mem_type(__ptraddr_t addr,
 					  const struct module *mod,
 					  enum mod_mem_type type)
 {
-	unsigned long base, size;
+	ptraddr_t base;
+	unsigned int size;
 
-	base = (unsigned long)mod->mem[type].base;
+	base = __c_pa(mod->mem[type].base);
 	size = mod->mem[type].size;
 	return addr - base < size;
 }
