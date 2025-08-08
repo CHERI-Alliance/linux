@@ -6,6 +6,7 @@
 #include <linux/cfi_types.h>
 #include <linux/export.h>
 #include <asm/asm.h>
+#include <asm/asmcheri.h>
 #include <asm/csr.h>
 #include <asm/unistd.h>
 #include <asm/thread_info.h>
@@ -15,10 +16,10 @@
 	.text
 
 	.macro SAVE_ABI_STATE
-	addi	sp, sp, -16
-	REG_S	s0, 0*SZREG(sp)
-	REG_S	ra, 1*SZREG(sp)
-	addi	s0, sp, 16
+	CINSN(addi)	CREG(sp), CREG(sp), -2*CSZREG
+	CREG_S		CREG(s0), 0*CSZREG(CREG(sp))
+	CREG_S		CREG(ra), 1*CSZREG(CREG(sp))
+	CINSN(addi)	CREG(s0), CREG(sp), 2*CSZREG
 	.endm
 
 	/*
@@ -35,9 +36,9 @@
 	.endm
 
 	.macro RESTORE_ABI_STATE
-	REG_L	ra, 1*SZREG(sp)
-	REG_L	s0, 0*SZREG(sp)
-	addi	sp, sp, 16
+	CREG_L		CREG(ra), 1*CSZREG(CREG(sp))
+	CREG_L		CREG(s0), 0*CSZREG(CREG(sp))
+	CINSN(addi)	CREG(sp), CREG(sp), 2*CSZREG
 	.endm
 
 	.macro RESTORE_RET_ABI_STATE
@@ -81,7 +82,7 @@ SYM_FUNC_END(return_to_handler)
 
 #ifndef CONFIG_DYNAMIC_FTRACE
 SYM_FUNC_START(_mcount)
-	la	t4, ftrace_stub
+	CINSN(la)	CREG(t4), ftrace_stub
 #ifdef CONFIG_FUNCTION_GRAPH_TRACER
 	la	t0, ftrace_graph_return
 	REG_L	t1, 0(t0)
@@ -93,7 +94,7 @@ SYM_FUNC_START(_mcount)
 	bne	t2, t6, .Ldo_ftrace_graph_caller
 #endif
 	la	t3, ftrace_trace_function
-	REG_L	t5, 0(t3)
+	CREG_L	CREG(t5), 0(CREG(t3))
 	bne	t5, t4, .Ldo_trace
 	ret
 
@@ -119,11 +120,11 @@ SYM_FUNC_START(_mcount)
  * (*ftrace_trace_function)(ra_to_caller, ra_to_caller_of_caller)
  */
 .Ldo_trace:
-	REG_L	a1, -SZREG(s0)
-	mv	a0, ra
+	CREG_L	CREG(a1), -CSZREG(CREG(s0))
+	mv	CREG(a0), CREG(ra)
 
 	SAVE_ABI_STATE
-	jalr	t5
+	jalr	CREG(t5)
 	RESTORE_ABI_STATE
 	ret
 SYM_FUNC_END(_mcount)
