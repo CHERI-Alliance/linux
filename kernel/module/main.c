@@ -98,7 +98,7 @@ struct symsearch {
 static void __mod_update_bounds(enum mod_mem_type type __maybe_unused, void *base,
 				unsigned int size, struct mod_tree_root *tree)
 {
-	uintptr_t min = (uintptr_t)base;
+	unsigned long min = __c_pa(base);
 	unsigned long max = min + size;
 
 #ifdef CONFIG_ARCH_WANTS_MODULES_DATA_IN_VMALLOC
@@ -495,7 +495,7 @@ static void percpu_modcopy(struct module *mod,
 		memcpy(per_cpu_ptr(mod->percpu, cpu), from, size);
 }
 
-bool __is_module_percpu_address(__ptraddr_t addr, unsigned long *can_addr)
+bool __is_module_percpu_address(__ptraddr_t addr, __ptraddr_t *can_addr)
 {
 	struct module *mod;
 	unsigned int cpu;
@@ -513,9 +513,9 @@ bool __is_module_percpu_address(__ptraddr_t addr, unsigned long *can_addr)
 			if (va >= start && va < start + mod->percpu_size) {
 				if (can_addr) {
 					*can_addr = (unsigned long) (va - start);
-					*can_addr += (uintptr_t)
+					*can_addr += __c_pa(
 						per_cpu_ptr(mod->percpu,
-							    get_boot_cpu_id());
+							    get_boot_cpu_id()));
 				}
 				return true;
 			}
@@ -568,7 +568,7 @@ bool is_module_percpu_address(__ptraddr_t addr)
 	return false;
 }
 
-bool __is_module_percpu_address(__ptraddr_t addr, unsigned long *can_addr)
+bool __is_module_percpu_address(__ptraddr_t addr, __ptraddr_t *can_addr)
 {
 	return false;
 }
@@ -898,7 +898,7 @@ EXPORT_SYMBOL(__symbol_put);
 void symbol_put_addr(void *addr)
 {
 	struct module *modaddr;
-	uintptr_t a = (uintptr_t)dereference_function_descriptor(addr);
+	unsigned long a = __c_pa(dereference_function_descriptor(addr));
 
 	if (core_kernel_text(a))
 		return;
@@ -1594,7 +1594,7 @@ static int simplify_symbols(struct module *mod, const struct load_info *info)
 
 			/* Divert to percpu allocation if a percpu var. */
 			if (sym[i].st_shndx == info->index.pcpu)
-				secbase = (uintptr_t)mod_percpu(mod);
+				secbase = __c_pa(mod_percpu(mod));
 			else
 				secbase = info->sechdrs[sym[i].st_shndx].sh_addr;
 			sym[i].st_value += secbase;
@@ -2544,7 +2544,7 @@ static int rewrite_section_headers(struct load_info *info, int flags)
 		 * Mark all sections sh_addr with their address in the
 		 * temporary image.
 		 */
-		shdr->sh_addr = (uintptr_t)info->hdr + shdr->sh_offset;
+		shdr->sh_addr = __c_pa(info->hdr) + shdr->sh_offset;
 
 	}
 
@@ -2860,7 +2860,7 @@ static int move_module(struct module *mod, struct load_info *info)
 		 * users of info can keep taking advantage and using the newly
 		 * minted official memory area.
 		 */
-		shdr->sh_addr = (uintptr_t)dest;
+		shdr->sh_addr = __c_pa(dest);
 		pr_debug("\t0x%lx 0x%.8lx %s\n", (long)shdr->sh_addr,
 			 (long)shdr->sh_size, info->secstrings + shdr->sh_name);
 	}
@@ -3643,8 +3643,8 @@ SYSCALL_DEFINE3(init_module, void __user *, umod,
 	if (err)
 		return err;
 
-	pr_debug("init_module: umod=%p, len=%lu, uargs=%p\n",
-	       umod, len, uargs);
+	pr_debug("init_module: umod=0x%lx, len=%lu, uargs=0x%lx\n",
+	       __c_pa_u(umod), len, __c_pa_u(uargs));
 
 	err = copy_module_from_user(umod, len, &info);
 	if (err) {
@@ -3804,7 +3804,7 @@ SYSCALL_DEFINE3(finit_module, int, fd, const char __user *, uargs, int, flags)
 	if (err)
 		return err;
 
-	pr_debug("finit_module: fd=%d, uargs=%p, flags=%i\n", fd, uargs, flags);
+	pr_debug("finit_module: fd=%d, uargs=0x%lx, flags=%i\n", fd, __c_pa_u(uargs), flags);
 
 	if (flags & ~(MODULE_INIT_IGNORE_MODVERSIONS
 		      |MODULE_INIT_IGNORE_VERMAGIC
