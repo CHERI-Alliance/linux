@@ -627,7 +627,7 @@ static inline bool module_is_coming(struct module *mod)
 struct module *__module_text_address(__ptraddr_t addr);
 struct module *__module_address(__ptraddr_t addr);
 bool is_module_address(__ptraddr_t addr);
-bool __is_module_percpu_address(__ptraddr_t addr, unsigned long *can_addr);
+bool __is_module_percpu_address(__ptraddr_t addr, __ptraddr_t *can_addr);
 bool is_module_percpu_address(__ptraddr_t addr);
 bool is_module_text_address(__ptraddr_t addr);
 
@@ -797,7 +797,7 @@ static inline bool is_module_percpu_address(__ptraddr_t addr)
 	return false;
 }
 
-static inline bool __is_module_percpu_address(__ptraddr_t addr, unsigned long *can_addr)
+static inline bool __is_module_percpu_address(__ptraddr_t addr, __ptraddr_t *can_addr)
 {
 	return false;
 }

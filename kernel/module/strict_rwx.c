@@ -13,7 +13,7 @@
 #include "internal.h"
 
 static int module_set_memory(const struct module *mod, enum mod_mem_type type,
-			     int (*set_memory)(unsigned long start, int num_pages))
+			     int (*set_memory)(__ptraddr_t start, int num_pages))
 {
 	const struct module_memory *mod_mem = &mod->mem[type];
 

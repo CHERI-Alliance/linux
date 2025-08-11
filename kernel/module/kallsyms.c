@@ -266,7 +266,7 @@ static const char *find_kallsyms_symbol(struct module *mod,
 	else
 		mod_mem = &mod->mem[MOD_TEXT];
 
-	nextval = (unsigned long)mod_mem->base + mod_mem->size;
+	nextval = __c_pa(mod_mem->base) + mod_mem->size;
 
 	bestval = kallsyms_symbol_value(&kallsyms->symtab[best]);
 

@@ -97,7 +97,7 @@ struct symsearch {
 static void __mod_update_bounds(enum mod_mem_type type __maybe_unused, void *base,
 				unsigned int size, struct mod_tree_root *tree)
 {
-	unsigned long min = (unsigned long)base;
+	unsigned long min = __c_pa(base);
 	unsigned long max = min + size;
 
 #ifdef CONFIG_ARCH_WANTS_MODULES_DATA_IN_VMALLOC
@@ -469,7 +469,7 @@ static void percpu_modcopy(struct module *mod,
 		memcpy(per_cpu_ptr(mod->percpu, cpu), from, size);
 }
 
-bool __is_module_percpu_address(__ptraddr_t addr, unsigned long *can_addr)
+bool __is_module_percpu_address(__ptraddr_t addr, __ptraddr_t *can_addr)
 {
 	struct module *mod;
 	unsigned int cpu;
@@ -487,9 +487,9 @@ bool __is_module_percpu_address(__ptraddr_t addr, unsigned long *can_addr)
 			if (va >= start && va < start + mod->percpu_size) {
 				if (can_addr) {
 					*can_addr = (unsigned long) (va - start);
-					*can_addr += (unsigned long)
+					*can_addr += __c_pa(
 						per_cpu_ptr(mod->percpu,
-							    get_boot_cpu_id());
+							    get_boot_cpu_id()));
 				}
 				return true;
 			}
@@ -542,7 +542,7 @@ bool is_module_percpu_address(__ptraddr_t addr)
 	return false;
 }
 
-bool __is_module_percpu_address(__ptraddr_t addr, unsigned long *can_addr)
+bool __is_module_percpu_address(__ptraddr_t addr, __ptraddr_t *can_addr)
 {
 	return false;
 }
@@ -840,7 +840,7 @@ EXPORT_SYMBOL(__symbol_put);
 void symbol_put_addr(void *addr)
 {
 	struct module *modaddr;
-	unsigned long a = (unsigned long)dereference_function_descriptor(addr);
+	unsigned long a = __c_pa(dereference_function_descriptor(addr));
 
 	if (core_kernel_text(a))
 		return;
@@ -1549,7 +1549,7 @@ static int simplify_symbols(struct module *mod, const struct load_info *info)
 		default:
 			/* Divert to percpu allocation if a percpu var. */
 			if (sym[i].st_shndx == info->index.pcpu)
-				secbase = (unsigned long)mod_percpu(mod);
+				secbase = __c_pa(mod_percpu(mod));
 			else
 				secbase = info->sechdrs[sym[i].st_shndx].sh_addr;
 			sym[i].st_value += secbase;
@@ -2463,7 +2463,7 @@ static int rewrite_section_headers(struct load_info *info, int flags)
 		 * Mark all sections sh_addr with their address in the
 		 * temporary image.
 		 */
-		shdr->sh_addr = (size_t)info->hdr + shdr->sh_offset;
+		shdr->sh_addr = __c_pa(info->hdr) + shdr->sh_offset;
 
 	}
 
@@ -2775,7 +2775,7 @@ static int move_module(struct module *mod, struct load_info *info)
 		 * users of info can keep taking advantage and using the newly
 		 * minted official memory area.
 		 */
-		shdr->sh_addr = (unsigned long)dest;
+		shdr->sh_addr = __c_pa(dest);
 		pr_debug("\t0x%lx 0x%.8lx %s\n", (long)shdr->sh_addr,
 			 (long)shdr->sh_size, info->secstrings + shdr->sh_name);
 	}
