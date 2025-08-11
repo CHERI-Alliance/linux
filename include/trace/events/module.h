@@ -19,6 +19,8 @@
 
 #ifdef CONFIG_MODULES
 
+#include <linux/cheri.h>
+
 struct module;
 
 #define show_module_flags(flags) __print_flags(flags, "",	\
@@ -86,7 +88,7 @@ DECLARE_EVENT_CLASS(module_refcnt,
 	),
 
 	TP_printk("%s call_site=%ps refcnt=%d",
-		  __get_str(name), (void *)__entry->ip, __entry->refcnt)
+		  __get_str(name), __c_fakep(__entry->ip), __entry->refcnt)
 );
 
 DEFINE_EVENT(module_refcnt, module_get,
@@ -123,7 +125,7 @@ TRACE_EVENT(module_request,
 	),
 
 	TP_printk("%s wait=%d call_site=%ps",
-		  __get_str(name), (int)__entry->wait, (void *)__entry->ip)
+		  __get_str(name), (int)__entry->wait, __c_fakep(__entry->ip))
 );
 
 #endif /* CONFIG_MODULES */
