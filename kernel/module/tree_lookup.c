@@ -6,6 +6,7 @@
  * Copyright (C) 2015 Rusty Russell
  */
 
+#include <linux/cheri.h>
 #include <linux/module.h>
 #include <linux/rbtree_latch.h>
 #include "internal.h"
@@ -104,7 +105,7 @@ struct module *mod_find(unsigned long addr, struct mod_tree_root *tree)
 {
 	struct latch_tree_node *ltn;
 
-	ltn = latch_tree_find((void *)addr, &tree->root, &mod_tree_ops);
+	ltn = latch_tree_find(__c_fakep(addr), &tree->root, &mod_tree_ops);
 	if (!ltn)
 		return NULL;
 
