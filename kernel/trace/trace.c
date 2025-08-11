@@ -6187,7 +6187,7 @@ static int save_mod(struct module *mod, void *data)
 
 	tscratch->nr_entries++;
 
-	entry->mod_addr = (unsigned long)mod->mem[MOD_TEXT].base;
+	entry->mod_addr = __c_pa(mod->mem[MOD_TEXT].base);
 	strscpy(entry->mod_name, mod->name);
 
 	return 0;
@@ -9615,7 +9615,7 @@ static int make_mod_delta(struct module *mod, void *data)
 		if (mod->state == MODULE_STATE_GOING)
 			module_delta->delta[i] = 0;
 		else
-			module_delta->delta[i] = (unsigned long)mod->mem[MOD_TEXT].base
+			module_delta->delta[i] = __c_pa(mod->mem[MOD_TEXT].base)
 						 - entry->mod_addr;
 		break;
 	}
