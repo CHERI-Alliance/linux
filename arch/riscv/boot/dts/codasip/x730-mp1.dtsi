@@ -1,0 +1,15 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (c) 2024 Codasip GmbH
+ *
+ * X730 MP1 CPU default configuration dtsi file.
+ */
+
+#include "a730-mp1.dtsi"
+
+&cpu0 {
+	riscv,isa = "rv64imafdc_svpbmt_zicbom_zicboz_zicbop_zcheripurecap_zcherihybrid";
+	riscv,isa-extensions = "i", "m", "a", "f", "d", "c",
+			       "svpbmt", "zicbom", "zicboz", "zicbop",
+			       "zcheripurecap", "zcherihybrid";
+};

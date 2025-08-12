@@ -1,0 +1,186 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (c) 2024 Codasip GmbH
+ *
+ * A730 Hobgoblin FPGA platform base description. This dts includes all the
+ * hardware that is not dependent the particular FPGA platform. Depending on
+ * the board, some of this hardware may not actually be connected to anything
+ * sensible, but the registers and controllers will exist. Note that this
+ * means that the DDR is *not* included in here since that is board specific.
+ *
+ */
+
+#include "dt-bindings/gpio/gpio.h"
+
+/ {
+	#address-cells = <2>;
+	#size-cells = <2>;
+	compatible = "codasip,a730";
+
+	aliases {
+		serial0 = &uart0;
+		spi0 = &spi0;
+	};
+
+	soc: soc@0 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "simple-bus";
+		/* child-bus-address parent-bus-address*2 length */
+		ranges = <0x0 0x0 0x0 0x80000000>;
+		dma-noncoherent;
+
+		plic: interrupt-controller@18000000 {
+			compatible = "codasip,plic", "sifive,plic-1.0.0", "riscv,plic0";
+			reg = <0x18000000 0x400000>;
+			#address-cells = <0>;
+
+			/* Downstream interrupts - how are they specified/how many are available */
+			interrupt-controller;
+			#interrupt-cells = <1>;
+			riscv,ndev = <63>; /* 1 to 63 inclusive */
+			#if NUM_CORES == 1
+			interrupts-extended = < &cpu0_intc 11 &cpu0_intc 9 >;
+			#elif NUM_CORES == 4
+			interrupts-extended = < &cpu0_intc 11 &cpu0_intc 9
+						&cpu1_intc 11 &cpu1_intc 9
+						&cpu2_intc 11 &cpu2_intc 9
+						&cpu3_intc 11 &cpu3_intc 9
+					      >;
+			#else
+			#error "Unsupported number of cores"
+			#endif
+		};
+
+		clint: timer@10804000 {
+			compatible = "codasip,clint", "sifive,clint0",  "riscv,clint0";
+			reg = <0x10804000 0xC000>;
+			/*
+			 * You don't actually need to change this for Linux
+			 * from the single processor version, since the code
+			 * just finds the first match and then assumes that
+			 * all the other CPUs have the same numbers.
+			 */
+			#if NUM_CORES == 1
+			interrupts-extended = < &cpu0_intc 3 &cpu0_intc 7 >;
+			#elif NUM_CORES == 4
+			interrupts-extended = < &cpu0_intc 3 &cpu0_intc 7
+						&cpu1_intc 3 &cpu1_intc 7
+						&cpu2_intc 3 &cpu2_intc 7
+						&cpu3_intc 3 &cpu3_intc 7
+					      >;
+			#else
+			#error "Unsupported number of cores"
+			#endif
+		};
+
+		uart0: serial@10100000 {
+			compatible = "ns16550a";
+			reg = <0x10100000 0x1020>;
+
+			/* Required by OpenSBI */
+			/* UART clock frequency */
+			clock-frequency = <100000000>;
+			current-speed = <115200>;
+			reg-shift = <2>;
+			reg-offset = <0x1000>;
+
+			/* Upstream interrupts */
+			interrupts-extended = <&plic 1>;
+		};
+
+		spi0: spi@10210000 {
+			compatible = "xlnx,xps-spi-2.00.a";
+			reg = <0x10210000 0x1000>;
+			xlnx,num-ss-bits = <1>;
+			xlnx,num-transfer-bits = <8>;
+			clock-frequency = <100000000>;
+			interrupts-extended = <&plic 4>;
+			fifo-size = <256>;	/* Needed for U-Boot */
+
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			mmc@0 {
+				compatible = "mmc-spi-slot";
+				reg = <0>;
+				spi-max-frequency = <20000000>;
+				voltage-ranges = <3300 3300>;
+				disable-wp;
+				/* card-detect, write-protect */
+				gpios = <&gpio_sd 0 GPIO_ACTIVE_LOW>;
+			};
+		};
+
+		gpio_io: gpio@10300000 {
+			compatible = "xlnx,xps-gpio-1.00.a";
+			reg = <0x10300000 0x10000>;
+			#gpio-cells = <2>;
+			#interrupt-cells = <0x2>;
+			#address-cells = <0>;
+			/* clocks = <&zynqmp_clk 71>; */
+			gpio-controller;
+			interrupt-controller;
+			interrupts-extended = <&plic 7>;
+			xlnx,all-inputs = <0x0>;
+			xlnx,all-outputs = <0x0>;
+			xlnx,dout-default = <0x0>;
+			xlnx,gpio-width = <0x20>;
+			xlnx,interrupt-present = <0x1>;
+			xlnx,is-dual = <0x0>;
+			xlnx,tri-default = <0xfe>;
+		};
+
+		gpio_sd: gpio@10310000 {
+			compatible = "xlnx,xps-gpio-1.00.a";
+			reg = <0x10310000 0x10000>;
+			#gpio-cells = <2>;
+			#interrupt-cells = <0x2>;
+			#address-cells = <0>;
+			/* clocks = <&zynqmp_clk 71>; */
+			gpio-controller;
+			interrupt-controller;
+			interrupts-extended = <&plic 8>;
+			xlnx,all-inputs = <0x0>;
+			xlnx,all-outputs = <0x0>;
+			xlnx,dout-default = <0x0>;
+			xlnx,gpio-width = <0x20>;
+			xlnx,interrupt-present = <0x1>;
+			xlnx,is-dual = <0x0>;
+			xlnx,tri-default = <0x01>;
+
+			sdcard_hog {
+				gpio-hog;
+				gpios = <2 GPIO_ACTIVE_HIGH>;
+				output-high;
+				line-name = "sdcard-fast-gpio";
+			};
+		};
+
+		trng: trng@10510000 {
+			compatible = "codasip,codasip-rng";
+			reg = <0x10510000 0x1000>;
+		};
+
+		user_timer: timer@10600000 {
+			compatible = "xlnx,axi-timer-2.0", "xlnx,xps-timer-1.00.a";
+			reg = <0x10600000 0x1000>;
+			clock-frequency = <100000000>; /* 100 MHz */
+			interrupts-extended = <&plic 9>;
+			xlnx,one-timer-only = <0x01>;
+			xlnx,count-width = <0x20>;
+		};
+	};
+
+	/* Interconnect runs off this clock */
+	clk_100m: clock {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <100000000>;
+	};
+
+	gpio-restart {
+		compatible = "gpio-restart";
+		gpios = <&gpio_sd 3 GPIO_ACTIVE_HIGH>;
+	};
+};
