@@ -2,6 +2,7 @@
 subdir-y += allwinner
 subdir-y += andes
 subdir-y += canaan
+subdir-y += codasip
 subdir-y += eswin
 subdir-y += microchip
 subdir-y += sail

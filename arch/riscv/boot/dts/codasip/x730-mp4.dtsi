@@ -1,0 +1,36 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (c) 2024 Codasip GmbH
+ *
+ * X730 MP4 CPU default configuration dtsi file.
+ */
+
+#include "a730-mp4.dtsi"
+
+&cpu0 {
+	riscv,isa = "rv64imafdc_svpbmt_zicbom_zicboz_zicbop_zcheripurecap_zcherihybrid";
+	riscv,isa-extensions = "i", "m", "a", "f", "d", "c",
+			       "svpbmt", "zicbom", "zicboz", "zicbop",
+			       "zcheripurecap", "zcherihybrid";
+};
+
+&cpu1 {
+	riscv,isa = "rv64imafdc_svpbmt_zicbom_zicboz_zicbop_zcheripurecap_zcherihybrid";
+	riscv,isa-extensions = "i", "m", "a", "f", "d", "c",
+			       "svpbmt", "zicbom", "zicboz", "zicbop",
+			       "zcheripurecap", "zcherihybrid";
+};
+
+&cpu2 {
+	riscv,isa = "rv64imafdc_svpbmt_zicbom_zicboz_zicbop_zcheripurecap_zcherihybrid";
+	riscv,isa-extensions = "i", "m", "a", "f", "d", "c",
+			       "svpbmt", "zicbom", "zicboz", "zicbop",
+			       "zcheripurecap", "zcherihybrid";
+};
+
+&cpu3 {
+	riscv,isa = "rv64imafdc_svpbmt_zicbom_zicboz_zicbop_zcheripurecap_zcherihybrid";
+	riscv,isa-extensions = "i", "m", "a", "f", "d", "c",
+			       "svpbmt", "zicbom", "zicboz", "zicbop",
+			       "zcheripurecap", "zcherihybrid";
+};

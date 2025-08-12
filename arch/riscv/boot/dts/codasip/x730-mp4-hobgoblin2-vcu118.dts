@@ -1,0 +1,20 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (c) 2024 Codasip GmbH
+ *
+ * X730 MP4 Hobgoblin FPGA platform for VCU118
+ */
+
+/dts-v1/;
+
+/{
+	chosen {
+		stdout-path = "serial0:115200n8";
+		bootargs = "earlycon console=ttyS0,115200n8";
+	};
+};
+
+#include "x730-mp4.dtsi"
+#include "hobgoblin2-base.dtsi"
+#include "hobgoblin2-vcu118-base.dtsi"
+#include "hobgoblin2-vcu118-cmu.dtsi"

@@ -1,0 +1,147 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (c) 2024 Codasip GmbH
+ *
+ * A730 Hobgoblin FPGA vcu118 base description. This dts includes all the
+ * hardware that is dependent on the board itself. So things like DDR,
+ * buttons, LEDS, etc go here. Components that are optional or configurable
+ * will be described in the board dts itself.
+ *
+ */
+
+/ {
+	ddr: memory@80000000 {
+		device_type = "memory";
+		reg = <0x0 0x80000000 0x1 0x00000000>;
+	};
+};
+
+&soc {
+	uart1: serial@10110000 {
+		compatible = "xlnx,xps-uartlite-1.00.a";
+		reg = <0x10110000 0x10>;
+		interrupts-extended = <&plic 2>;
+		current-speed = <115200>;
+		xlnx,data-bits = <8>;
+		xlnx,use-parity = <0>;
+	};
+};
+
+/*
+ * The on board Ethernet on the VCU118 uses an SGMII interface, so it cannot
+ * be changed to an Ethernet lite style of system, so it is included here in
+ * the base dtsi
+ */
+
+#include "hobgoblin2-axi-emac.dtsi"
+
+/*
+ * Uses a TI dp83867 phy in SGMII mode. The RXCTRL pin is not strapped which
+ * results in an invalid configuration, so we need the quirk. The AXI emac
+ * only supports synchronous operation, it does not do clock recovery, so we
+ * need the clock which is not on by default.
+ *
+ * Phy address 1 is actually the phy that does an GMII to SGMII conversion
+ * inside the Ethernet block itself.
+ */
+
+&axi_ethernet {
+	phy-mode = "sgmii";
+};
+
+&phy0 {
+	reg = <3>;
+	ti,dp83867-rxctrl-strap-quirk;
+	ti,sgmii-ref-clock-output-enable;
+};
+
+
+/*
+ * We have to have the FMC card anyway on the VCU118 to get an SD card, so we
+ * may as well include the Ethernet in the base as well.
+ */
+#include "hobgoblin2-axi-emac-fmc.dtsi"
+
+#include "dt-bindings/input/input.h"
+
+/ {
+	gpio-keys {
+		compatible = "gpio-keys";
+
+		key-enter {
+			label = "BTNC";
+			linux,code = <KEY_ENTER>;
+			gpios = <&gpio_io 16 GPIO_ACTIVE_HIGH>;
+		};
+
+		key-down {
+			label = "BTND";
+			linux,code = <KEY_DOWN>;
+			gpios = <&gpio_io 17 GPIO_ACTIVE_HIGH>;
+		};
+
+		key-left {
+			label = "BTNL";
+			linux,code = <KEY_LEFT>;
+			gpios = <&gpio_io 18 GPIO_ACTIVE_HIGH>;
+		};
+
+		key-right {
+			label = "BTNR";
+			linux,code = <KEY_RIGHT>;
+			gpios = <&gpio_io 19 GPIO_ACTIVE_HIGH>;
+		};
+
+		key-up {
+			label = "BTNU";
+			linux,code = <KEY_UP>;
+			gpios = <&gpio_io 20 GPIO_ACTIVE_HIGH>;
+		};
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		led-0 {
+			label = "LD0";
+			gpios = <&gpio_io 0 GPIO_ACTIVE_HIGH>;
+			linux,default-trigger = "heartbeat";
+		};
+
+		led-1 {
+			label = "LD1";
+			gpios = <&gpio_io 1 GPIO_ACTIVE_HIGH>;
+			linux,default-trigger = "mmc0";
+		};
+
+		led-2 {
+			label = "LD2";
+			gpios = <&gpio_io 2 GPIO_ACTIVE_HIGH>;
+		};
+
+		led-3 {
+			label = "LD3";
+			gpios = <&gpio_io 3 GPIO_ACTIVE_HIGH>;
+		};
+
+		led-4 {
+			label = "LD4";
+			gpios = <&gpio_io 4 GPIO_ACTIVE_HIGH>;
+		};
+
+		led-5 {
+			label = "LD5";
+			gpios = <&gpio_io 5 GPIO_ACTIVE_HIGH>;
+		};
+
+		led-6 {
+			label = "LD6";
+			gpios = <&gpio_io 6 GPIO_ACTIVE_HIGH>;
+		};
+
+		led-7 {
+			label = "LD7";
+			gpios = <&gpio_io 7 GPIO_ACTIVE_HIGH>;
+		};
+	};
+};
