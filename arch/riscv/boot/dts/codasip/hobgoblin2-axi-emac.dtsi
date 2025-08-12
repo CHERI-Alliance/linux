@@ -1,0 +1,40 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (c) 2024 Codasip GmbH
+ *
+ * Hobgoblin FPGA platform, AXI ethernet description. This is a gigabit
+ * capable Ethernet controller that does DMA and TCP checksum offload.
+ */
+
+&soc {
+	axi_ethernet: ethernet@100c0000 {
+		compatible = "xlnx,axi-ethernet-1.00.a";
+		interrupts-extended = <&plic 10>;
+		clock-names = "s_axi_lite_clk";
+		clocks = <&clk_100m>;
+		phy-mode = "rgmii";
+		reg = <0x100c0000 0x40000>;
+		xlnx,rxcsum = <2>;
+		xlnx,rxmem = <0x4000>;
+		xlnx,txcsum = <2>;
+		phy-handle = <&phy0>;
+		axistream-connected = <&axistream_dma>;
+
+		mdio {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			phy0: ethernet-phy@0 {
+				device_type = "ethernet-phy";
+				reg = <1>;
+				interrupts-extended = <&plic 13>;
+			};
+		};
+	};
+	/* U-boot does not support specifying the DMA directly in the
+	 * axi_ethernet above. The kernel does support it though
+	 */
+	axistream_dma: axistream_dma@100a0000  {
+		reg = <0x100a0000 0x10000>;
+		interrupts-extended = <&plic 11>, <&plic 12>;
+	};
+};
