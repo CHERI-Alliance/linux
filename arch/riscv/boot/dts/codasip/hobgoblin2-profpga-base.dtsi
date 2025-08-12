@@ -1,0 +1,18 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (c) 2024 Codasip GmbH
+ *
+ * A730 Hobgoblin FPGA proFPGA base description. This dts includes all the
+ * hardware that is dependent on the board itself. So things like DDR,
+ * buttons, LEDS, etc go here. Components that are optional or configurable
+ * will be described in the board dts itself. For example, the type of
+ * Ethernet controller used is switchable, so that will not be included here.
+ *
+ */
+
+/ {
+	ddr: memory@2000000000 {
+		device_type = "memory";
+		reg = <0x20 0x00000000 0x4 0x00000000>;
+	};
+};

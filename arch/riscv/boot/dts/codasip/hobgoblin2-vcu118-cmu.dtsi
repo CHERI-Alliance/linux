@@ -1,0 +1,26 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (c) 2025 Codasip GmbH
+ *
+ * Additions to the Hobgoblin FPGA VCU118 base description for systems
+ * with a CMU. Currently this is only needed for the DRAM which is
+ * reserved by the CMU for tag memory.
+ */
+
+/ {
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		cmu0: cmu@ff000000 {
+			reg = <0x0 0xff000000 0x0 0x01000000>;
+			no-map;
+		};
+
+		cmu1: cmu@17f000000 {
+			reg = <0x1 0x7f000000 0x0 0x01000000>;
+			no-map;
+		};
+	};
+};
