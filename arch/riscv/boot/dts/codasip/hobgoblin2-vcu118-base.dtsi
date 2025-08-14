@@ -62,6 +62,148 @@
  */
 #include "hobgoblin2-axi-emac-fmc.dtsi"
 
+
+&soc {
+	/* Main board I2C chain */
+	i2c_mboard: i2c_mboard@10400000 {
+		compatible = "xlnx,axi-iic-2.1";
+		clocks = <&clk_100m>;
+		interrupts-extended = <&plic 6>;
+		reg = < 0x10400000 0x1000 >;
+	};
+
+	/* FMC Lite connected I2c bus */
+	i2c_fmclite: i2c_fmclite@10410000 {
+		compatible = "xlnx,axi-iic-2.1";
+		clocks = <&clk_100m>;
+		interrupts-extended = <&plic 20>;
+		reg = < 0x10410000 0x1000 >;
+	};
+};
+
+
+/*
+ * Main I2C chain on motherboard, all I2c chips are hooked up via a pair of
+ * I2C multiplexor chips, so there are a lot of busses!
+ */
+&i2c_mboard {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	/* First multiplexor */
+	i2c-mux-0@74 {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		compatible = "nxp,pca9548";
+		reg = <0x74>;
+
+		/* SI570 programmable clock generator */
+		i2c_user_si570_1: i2c@0  {
+			reg  = <0>;
+		};
+
+		/* Bus 1 N/C */
+
+		/* Goes to QSFP 1 */
+		i2c_qsfp1: i2c@2  {
+			reg  = <2>;
+		};
+
+		/* Goes to QSFP 2  */
+		i2c_qsfp2: i2c@3  {
+			reg  = <3>;
+		};
+
+		/* SI5328 clock multiplier - sync Ethernet */
+		i2c_si5328: i2c@4  {
+			reg  = <4>;
+		};
+
+		/* SI570 programmable clock generator */
+		i2c_user_si570_0: i2c@5  {
+			reg  = <5>;
+		};
+
+		/* FPGA system monitor */
+		i2c_sysmon: i2c@6  {
+			reg  = <6>;
+		};
+
+		/* Firefly connector */
+		i2c_firefly: i2c@7 {
+			reg = <7>;
+		};
+	};
+	/* Second multiplexor */
+	i2c-mux-1@75 {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		compatible = "nxp,pca9548";
+		reg = <0x75>;
+
+		/* Power management, MAX20571 */
+		i2c_pmbus: i2c@0  {
+			reg  = <0>;
+		};
+
+		/* Connected to Opsero PCIe board usually */
+		i2c_fmcp_hspc: i2c@1  {
+			reg  = <1>;
+
+		};
+
+		/* Nothing here as FMC Lite uses wrong pins */
+		i2c_fmcp_hpc1: i2c@2  {
+			reg  = <2>;
+		};
+
+		/* On board EEPROM, holds MAC address */
+		i2c_eeprom: i2c@3  {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg  = <3>;
+
+			vcu118_eeprom: eeprom@54 {
+				compatible = "atmel,24c08";
+				reg = <0x54>;
+				read-only;
+			};
+		};
+
+		/* Power management, INA226 */
+		i2c_ina_pmbus: i2c@4  {
+			reg  = <4>;
+		};
+
+		/* SI570 programmable clock generator */
+		i2c_user_si570_2: i2c@5  {
+			reg  = <5>;
+		};
+
+		/* Bus 6 and 7 N/C */
+	};
+};
+
+
+/*
+ * I2C bus connected directly to FMC connector. This is used for the FMCLite
+ * board which unfortunately does not use the standard FMC pins for the I2c
+ * bus.
+ */
+&i2c_fmclite {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	fmc_eeprom: eeprom@50 {
+		compatible = "atmel,24c64";
+		reg = <0x50>;
+		size = <8192>;
+		pagesize = <32>;
+		read-only;
+	};
+};
+
 #include "dt-bindings/input/input.h"
 
 / {
