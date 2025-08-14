@@ -511,6 +511,8 @@ defined(CONFIG_AUTOFDO_CLANG) || defined(CONFIG_PROPELLER_CLANG)
 	__ksymtab         : AT(ADDR(__ksymtab) - LOAD_OFFSET) {		\
 		__start___ksymtab = .;					\
 		KEEP(*(SORT(___ksymtab+*)))				\
+		size$__start___ksymtab =				\
+			ABSOLUTE(. - __start___ksymtab);		\
 		__stop___ksymtab = .;					\
 	}								\
 									\
@@ -518,6 +520,8 @@ defined(CONFIG_AUTOFDO_CLANG) || defined(CONFIG_PROPELLER_CLANG)
 	__ksymtab_gpl     : AT(ADDR(__ksymtab_gpl) - LOAD_OFFSET) {	\
 		__start___ksymtab_gpl = .;				\
 		KEEP(*(SORT(___ksymtab_gpl+*)))				\
+		size$__start___ksymtab_gpl =				\
+			ABSOLUTE(. - __start___ksymtab_gpl);		\
 		__stop___ksymtab_gpl = .;				\
 	}								\
 									\
@@ -525,6 +529,8 @@ defined(CONFIG_AUTOFDO_CLANG) || defined(CONFIG_PROPELLER_CLANG)
 	__kcrctab         : AT(ADDR(__kcrctab) - LOAD_OFFSET) {		\
 		__start___kcrctab = .;					\
 		KEEP(*(SORT(___kcrctab+*)))				\
+		size$__start___kcrctab =				\
+			ABSOLUTE(. - __start___kcrctab);		\
 		__stop___kcrctab = .;					\
 	}								\
 									\
@@ -532,6 +538,8 @@ defined(CONFIG_AUTOFDO_CLANG) || defined(CONFIG_PROPELLER_CLANG)
 	__kcrctab_gpl     : AT(ADDR(__kcrctab_gpl) - LOAD_OFFSET) {	\
 		__start___kcrctab_gpl = .;				\
 		KEEP(*(SORT(___kcrctab_gpl+*)))				\
+		size$__start___kcrctab_gpl =				\
+			ABSOLUTE(. - __start___kcrctab_gpl);		\
 		__stop___kcrctab_gpl = .;				\
 	}								\
 									\
