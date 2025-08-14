@@ -24,6 +24,7 @@
 			riscv,isa-extensions = "i", "m", "a", "f", "d", "c",
 					       "svpbmt", "zicbom", "zicboz", "zicbop";
 			riscv,cbom-block-size = <64>;
+			riscv,cbop-block-size = <64>;
 			riscv,cboz-block-size = <64>;
 			mmu-type = "riscv,sv39";
 
