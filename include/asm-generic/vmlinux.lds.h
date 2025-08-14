@@ -529,6 +529,8 @@
 	__ksymtab         : AT(ADDR(__ksymtab) - LOAD_OFFSET) {		\
 		__start___ksymtab = .;					\
 		KEEP(*(SORT(___ksymtab+*)))				\
+		size$__start___ksymtab =				\
+			ABSOLUTE(. - __start___ksymtab);		\
 		__stop___ksymtab = .;					\
 	}								\
 									\
@@ -536,6 +538,8 @@
 	__kcrctab         : AT(ADDR(__kcrctab) - LOAD_OFFSET) {		\
 		__start___kcrctab = .;					\
 		KEEP(*(SORT(___kcrctab+*)))				\
+		size$__start___kcrctab =				\
+			ABSOLUTE(. - __start___kcrctab);		\
 		__stop___kcrctab = .;					\
 	}								\
 									\
