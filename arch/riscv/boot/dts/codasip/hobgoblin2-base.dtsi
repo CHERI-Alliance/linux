@@ -172,6 +172,20 @@
 		};
 	};
 
+	/*
+	 * PCIe has some address space in 64 bit memory space, so we need to
+	 * create a 64 bit address space to put them in
+	 */
+	soc64: soc64@0  {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		compatible = "simple-bus";
+		/* child-bus-address parent-bus-address*2 length */
+		ranges = <0x00 0x0 0x00 0x0 0x40 0x0>;
+		dma-noncoherent;
+	};
+
+
 	/* Interconnect runs off this clock */
 	clk_100m: clock {
 		compatible = "fixed-clock";
