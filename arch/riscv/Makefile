@@ -15,9 +15,17 @@ ifeq ($(CONFIG_DYNAMIC_FTRACE),y)
 	LDFLAGS_vmlinux += --no-relax
 	KBUILD_CPPFLAGS += -DCC_USING_PATCHABLE_FUNCTION_ENTRY
 ifeq ($(CONFIG_RISCV_ISA_C),y)
+ifeq ($(CONFIG_CHERI_KERNEL),y)
+	CC_FLAGS_FTRACE := -fpatchable-function-entry=12,8
+else
 	CC_FLAGS_FTRACE := -fpatchable-function-entry=8,4
+endif
+else
+ifeq ($(CONFIG_CHERI_KERNEL),y)
+	CC_FLAGS_FTRACE := -fpatchable-function-entry=6,4
 else
 	CC_FLAGS_FTRACE := -fpatchable-function-entry=4,2
+endif
 endif
 endif
 
