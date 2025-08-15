@@ -63,8 +63,8 @@
 * 0(sp) stores the PC of the traced function which can be accessed
 * by &(fregs)->epc in tracing function.
 *
-* 8(sp) stores the function return address (i.e. parent IP) that
-* can be accessed by &(fregs)->ra in tracing function.
+* 8(sp) (or 16(sp) for cheri) stores the function return address (i.e. parent
+* IP) that can be accessed by &(fregs)->ra in tracing function.
 *
 * The other regs are saved at the respective localtion and accessed
 * by the respective ftrace_regs member.
@@ -82,96 +82,109 @@
 *                       +++++++++
 **/
 	.macro SAVE_ABI_REGS
-	addi	sp, sp, -FREGS_SIZE_ON_STACK
-	REG_S	t0,  FREGS_EPC(sp)
-	REG_S	x1,  FREGS_RA(sp)
+	CINSN(addi)	CREG(sp), CREG(sp), -FREGS_SIZE_ON_STACK
+	CREG_S	CREG(t0),  FREGS_EPC(CREG(sp))
+	CREG_S	CREG(x1),  FREGS_RA(CREG(sp))
 #ifdef HAVE_FUNCTION_GRAPH_FP_TEST
-	REG_S	x8,  FREGS_S0(sp)
+	CREG_S	CREG(x8),  FREGS_S0(CREG(sp))
 #endif
-	REG_S	x6,  FREGS_T1(sp)
+	CREG_S	CREG(x6),  FREGS_T1(CREG(sp))
 #ifdef CONFIG_CC_IS_CLANG
-	REG_S	x7,  FREGS_T2(sp)
-	REG_S	x28, FREGS_T3(sp)
-	REG_S	x29, FREGS_T4(sp)
-	REG_S	x30, FREGS_T5(sp)
-	REG_S	x31, FREGS_T6(sp)
+	CREG_S	CREG(x7),  FREGS_T2(CREG(sp))
+	CREG_S	CREG(x28), FREGS_T3(CREG(sp))
+	CREG_S	CREG(x29), FREGS_T4(CREG(sp))
+	CREG_S	CREG(x30), FREGS_T5(CREG(sp))
+	CREG_S	CREG(x31), FREGS_T6(CREG(sp))
 #endif
 	// save the arguments
-	REG_S	x10, FREGS_A0(sp)
-	REG_S	x11, FREGS_A1(sp)
-	REG_S	x12, FREGS_A2(sp)
-	REG_S	x13, FREGS_A3(sp)
-	REG_S	x14, FREGS_A4(sp)
-	REG_S	x15, FREGS_A5(sp)
-	REG_S	x16, FREGS_A6(sp)
-	REG_S	x17, FREGS_A7(sp)
-	mv	a0, sp
-	addi	a0, a0, FREGS_SIZE_ON_STACK
-	REG_S	a0, FREGS_SP(sp)	// Put original SP on stack
+	CREG_S	CREG(x10), FREGS_A0(CREG(sp))
+	CREG_S	CREG(x11), FREGS_A1(CREG(sp))
+	CREG_S	CREG(x12), FREGS_A2(CREG(sp))
+	CREG_S	CREG(x13), FREGS_A3(CREG(sp))
+	CREG_S	CREG(x14), FREGS_A4(CREG(sp))
+	CREG_S	CREG(x15), FREGS_A5(CREG(sp))
+	CREG_S	CREG(x16), FREGS_A6(CREG(sp))
+	CREG_S	CREG(x17), FREGS_A7(CREG(sp))
+	mv	CREG(a0), CREG(sp)
+	CINSN(addi)	CREG(a0), CREG(a0), FREGS_SIZE_ON_STACK
+	CREG_S	CREG(a0), FREGS_SP(CREG(sp))	// Put original SP on stack
 	.endm
 
 	.macro RESTORE_ABI_REGS
-	REG_L	t0, FREGS_EPC(sp)
-	REG_L	x1, FREGS_RA(sp)
+	CREG_L	CREG(t0), FREGS_EPC(CREG(sp))
+	CREG_L	CREG(x1), FREGS_RA(CREG(sp))
 #ifdef HAVE_FUNCTION_GRAPH_FP_TEST
-	REG_L	x8, FREGS_S0(sp)
+	CREG_L	CREG(x8), FREGS_S0(CREG(sp))
 #endif
-	REG_L	x6,  FREGS_T1(sp)
+	CREG_L	CREG(x6),  FREGS_T1(CREG(sp))
 #ifdef CONFIG_CC_IS_CLANG
-	REG_L	x7,  FREGS_T2(sp)
-	REG_L	x28, FREGS_T3(sp)
-	REG_L	x29, FREGS_T4(sp)
-	REG_L	x30, FREGS_T5(sp)
-	REG_L	x31, FREGS_T6(sp)
+	CREG_L	CREG(x7),  FREGS_T2(CREG(sp))
+	CREG_L	CREG(x28), FREGS_T3(CREG(sp))
+	CREG_L	CREG(x29), FREGS_T4(CREG(sp))
+	CREG_L	CREG(x30), FREGS_T5(CREG(sp))
+	CREG_L	CREG(x31), FREGS_T6(CREG(sp))
 #endif
 	// restore the arguments
-	REG_L	x10, FREGS_A0(sp)
-	REG_L	x11, FREGS_A1(sp)
-	REG_L	x12, FREGS_A2(sp)
-	REG_L	x13, FREGS_A3(sp)
-	REG_L	x14, FREGS_A4(sp)
-	REG_L	x15, FREGS_A5(sp)
-	REG_L	x16, FREGS_A6(sp)
-	REG_L	x17, FREGS_A7(sp)
+	CREG_L	CREG(x10), FREGS_A0(CREG(sp))
+	CREG_L	CREG(x11), FREGS_A1(CREG(sp))
+	CREG_L	CREG(x12), FREGS_A2(CREG(sp))
+	CREG_L	CREG(x13), FREGS_A3(CREG(sp))
+	CREG_L	CREG(x14), FREGS_A4(CREG(sp))
+	CREG_L	CREG(x15), FREGS_A5(CREG(sp))
+	CREG_L	CREG(x16), FREGS_A6(CREG(sp))
+	CREG_L	CREG(x17), FREGS_A7(CREG(sp))
 
-	addi	sp, sp, FREGS_SIZE_ON_STACK
+	CINSN(addi)	CREG(sp), CREG(sp), FREGS_SIZE_ON_STACK
 	.endm
 
 	.macro PREPARE_ARGS
-	addi	a0, t0, -MCOUNT_JALR_SIZE	// ip (callsite's jalr insn)
+	CINSN(addi)	CREG(a0), CREG(t0), -MCOUNT_JALR_SIZE	// ip (callsite's jalr insn)
 #ifdef CONFIG_DYNAMIC_FTRACE_WITH_CALL_OPS
-	mv 	a1, ra				// parent_ip
-	REG_L   a2, -16(t0)			// op
-	REG_L   ra, FTRACE_OPS_FUNC(a2)		// op->func
+	mv	CREG(a1), CREG(ra)			// parent_ip
+	CREG_L	CREG(a2), FTRACE_CALLER_OP(CREG(t0))	// op
+	CREG_L	CREG(ra), FTRACE_OPS_FUNC(CREG(a2))	// op->func
 #else
 	la	a1, function_trace_op
 	REG_L	a2, 0(a1)			// op
 	mv	a1, ra				// parent_ip
 #endif
-	mv	a3, sp				// regs
+	mv	CREG(a3), CREG(sp)		// regs
 	.endm
 
 SYM_FUNC_START(ftrace_caller)
 #ifdef CONFIG_DYNAMIC_FTRACE_WITH_CALL_OPS
+
 	/*
-	 * When CALL_OPS is enabled (2 or 4) nops [8B] are placed before the
-	 * function entry, these are later overwritten with the pointer to the
-	 * associated struct ftrace_ops.
+	 * When CALL_OPS is enabled (2, 4 or 8) nops [8B or 16B] are placed
+	 * before the function entry, these are later overwritten with the
+	 * pointer/capability of the associated struct ftrace_ops.
 	 *
-	 * -8: &ftrace_ops of the associated tracer function.
+	 * -8 / -16: &ftrace_ops of the associated tracer function.
 	 *<ftrace enable>:
 	 *  0: auipc  t0/ra, 0x?
 	 *  4: jalr   t0/ra, ?(t0/ra)
 	 *
-	 * -8: &ftrace_nop_ops
+	 * -8 / -16: &ftrace_nop_ops
 	 *<ftrace disable>:
 	 *  0: nop
 	 *  4: nop
 	 *
-	 * t0 is set to ip+8 after the jalr is executed at the callsite,
-	 * so we find the associated op at t0-16.
+	 * t0 is set to ip+8 after the jalr is executed at the callsite, so we
+	 * find the associated op at t0-16 (non-cheri) or t0-24 (cheri).
 	 */
-	REG_L	t1, -16(t0) // op Should be SZ_REG instead of 16
+#ifdef CONFIG_CHERI_KERNEL
+	/*
+	 * ct0 is sealed, it can't be used for reading the ops struct.
+	 * Create new capability with t0's address and pcc's permissions
+	 * (assuming pcc grants read permission and covers the data sections).
+	 * Use ct1 as temp register for this "unsealing". llvm may use ct2-ct6
+	 * for function parameters, see commit f8693f6dffcd ("riscv: ftrace:
+	 * support fastcc in Clang for WITH_ARGS").
+	 */
+	auipc ct1, 0
+	scaddr ct0, ct1, t0
+#endif
+	CREG_L CREG(t1), FTRACE_CALLER_OP(CREG(t0))
 
 #ifdef CONFIG_DYNAMIC_FTRACE_WITH_DIRECT_CALLS
 	/*
@@ -186,7 +199,7 @@ SYM_FUNC_START(ftrace_caller)
 	PREPARE_ARGS
 
 #ifdef CONFIG_DYNAMIC_FTRACE_WITH_CALL_OPS
-	jalr	ra
+	jalr	0(CREG(ra))
 #else
 SYM_INNER_LABEL(ftrace_call, SYM_L_GLOBAL)
 	REG_L	ra, ftrace_call_dest
@@ -196,7 +209,7 @@ SYM_INNER_LABEL(ftrace_call, SYM_L_GLOBAL)
 #ifdef CONFIG_DYNAMIC_FTRACE_WITH_DIRECT_CALLS
 	bnez	t1, ftrace_caller_direct
 #endif
-	jr	t0
+	jr	CREG(t0)
 #ifdef CONFIG_DYNAMIC_FTRACE_WITH_DIRECT_CALLS
 SYM_INNER_LABEL(ftrace_caller_direct, SYM_L_LOCAL)
 	jr	t1

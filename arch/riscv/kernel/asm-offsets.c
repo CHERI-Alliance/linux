@@ -512,9 +512,12 @@ void asm_offsets(void)
 	OFFSET(STACKFRAME_RA, stackframe, ra);
 #ifdef CONFIG_FUNCTION_TRACER
 	DEFINE(FTRACE_OPS_FUNC,		offsetof(struct ftrace_ops, func));
+#ifdef CONFIG_DYNAMIC_FTRACE
+	DEFINE(FTRACE_CALLER_OP,	-(MCOUNT_AUIPC_SIZE + MCOUNT_JALR_SIZE + sizeof(__u64ptr)));
 #ifdef CONFIG_DYNAMIC_FTRACE_WITH_DIRECT_CALLS
 	DEFINE(FTRACE_OPS_DIRECT_CALL,	offsetof(struct ftrace_ops, direct_call));
 #endif /* CONFIG_DYNAMIC_FTRACE_WITH_DIRECT_CALLS */
+#endif /* CONFIG_DYNAMIC_FTRACE */
 #endif
 
 #ifdef CONFIG_DYNAMIC_FTRACE_WITH_ARGS
