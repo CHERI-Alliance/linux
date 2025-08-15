@@ -1,0 +1,56 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (c) 2024 Codasip GmbH
+ *
+ * X730 MP4 CPU default configuration dtsi file.
+ */
+
+#include "a730-mp4.dtsi"
+
+#define LUX_CPU(n) &cpu##n {									\
+	riscv,isa = "rv64imafdc_sdext_sdtrig_sscofpmf_sstc_svinval_svpbmt_svvptc_zabhlrsc_zba_zbb_zbkc_zbs_zcb_zcherihybrid_zcherilevels_zcheripurecap_zfhmin_zicbom_zicbop_zicboz_ziccrse_zicntr_zicsr_zifencei_zihintpause_zihpm_zish4add"; \
+	riscv,isa-extensions = "i", "m", "a", "f", "d", "c",					\
+			       "sdext", "sdtrig", "sscofpmf", "sstc",				\
+			       "svinval", "svpbmt", "svvptc",					\
+			       "zabhlrsc", "zba", "zbb", "zbkc", "zbs", "zcb",			\
+			       "zcherihybrid", "zcherilevels", "zcheripurecap",			\
+			       "zfhmin", "zicbom", "zicbop", "zicboz", "ziccrse",		\
+			       "zicntr", "zicsr", "zifencei", "zihintpause", "zihpm",		\
+			       "zish4add";							\
+												\
+	/* 32K 4 way associative */								\
+	i-cache-block-size = <64>;								\
+	i-cache-sets = <128>;									\
+	i-cache-size = <32768>;									\
+	/* 32 entries, fully asssociative */							\
+	i-tlb-sets = <1>;									\
+	i-tlb-size = <32>;									\
+												\
+	/* 32K 4 way associative */								\
+	d-cache-block-size = <64>;								\
+	d-cache-sets = <128>;									\
+	d-cache-size = <32768>;									\
+	/* 32 entries, fully asssociative */							\
+	d-tlb-sets = <1>;									\
+	d-tlb-size = <32>;									\
+												\
+	next-level-cache = <&l2cache>;								\
+	tlb-split;										\
+};
+
+LUX_CPU(0)
+LUX_CPU(1)
+LUX_CPU(2)
+LUX_CPU(3)
+
+/ {
+	/* The L2 has an AXI interface, but it is not mapped in for Lux */
+	l2cache: l2-cache {
+		compatible = "cache";
+		cache-block-size = <64>;
+		cache-level = <2>;
+		cache-sets = <4096>;
+		cache-size = <2097152>;
+		cache-unified;
+	};
+};
