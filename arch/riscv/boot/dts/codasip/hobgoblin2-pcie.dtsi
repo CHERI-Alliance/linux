@@ -1,0 +1,93 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (c) 2025 Codasip GmbH
+ *
+ * Hobgoblin FPGA platform, PCIe express device tree.
+ *
+ * Adds in PCIE, there are two controllers. The memory map looks like:
+ *
+ * PCIe 0:
+ *
+ * 0x40000000  : 256 Meg ECAM
+ * 0x50000000  : 256 Meg Non-prefetchable window
+ * 0x100000000 : 4G prefetchable window
+ *
+ * PCIe 1:
+ *
+ * 0x60000000  : 256 Meg ECAM
+ * 0x70000000  : 256 Meg Non-prefetchable window
+ * 0x110000000 : 4G prefetchable window
+ *
+ * MSI decode mode is used, since the legacy FIFO mode was not able to handle
+ * the interrupt rate.
+ *
+ */
+
+&soc64 {
+
+	pcie0: pcie@40000000 {
+		compatible = "xlnx,axi-pcie-host-1.00.a";
+		reg = <0x0 0x40000000 0x0 0x10000000>;
+		#address-cells = <3>;
+		#size-cells = <2>;
+		#interrupt-cells = <1>;
+		device_type = "pci";
+		bus-range = <0x00 0xff>;
+
+		interrupts-extended = <&plic 41> , <&plic 42>, <&plic 43>;
+
+		/*
+		 * The first number in the ranges tells the PCIe subsystem
+		 * what the properties of the region are.
+		 */
+		ranges = <0x02000000 0x0  0x50000000 0x0  0x50000000 0x0 0x10000000
+			  0x43000000 0x10 0x00000000 0x10 0x00000000 0x1 0x00000000>;
+
+		interrupt-map-mask = <0 0 0 7>;
+		interrupt-map = <0 0 0 1 &pcie_intc0 1>,
+				<0 0 0 2 &pcie_intc0 2>,
+				<0 0 0 3 &pcie_intc0 3>,
+				<0 0 0 4 &pcie_intc0 4>;
+
+		xlnx,msi-decode; /* We do not use the FIFO mode */
+
+		pcie_intc0: interrupt-controller {
+			interrupt-controller;
+			#address-cells = <0>;
+			#interrupt-cells = <1>;
+		};
+	};
+
+	pcie1: pcie@60000000 {
+		compatible = "xlnx,axi-pcie-host-1.00.a";
+		reg = <0x0 0x60000000 0x0 0x10000000>;
+		#address-cells = <3>;
+		#size-cells = <2>;
+		#interrupt-cells = <1>;
+		device_type = "pci";
+		bus-range = <0x00 0xff>;
+
+		interrupts-extended = <&plic 44> , <&plic 45>, <&plic 46>;
+
+		/*
+		 * The first number in the ranges tells the PCIe subsystem
+		 * what the properties of the region are.
+		 */
+		ranges = <0x02000000 0x0  0x70000000 0x0  0x70000000 0x0 0x10000000
+			  0x43000000 0x11 0x00000000 0x11 0x00000000 0x1 0x00000000>;
+
+		interrupt-map-mask = <0 0 0 7>;
+		interrupt-map = <0 0 0 1 &pcie_intc1 1>,
+				<0 0 0 2 &pcie_intc1 2>,
+				<0 0 0 3 &pcie_intc1 3>,
+				<0 0 0 4 &pcie_intc1 4>;
+
+		xlnx,msi-decode;
+
+		pcie_intc1: interrupt-controller {
+			interrupt-controller;
+			#address-cells = <0>;
+			#interrupt-cells = <1>;
+		};
+	};
+};
