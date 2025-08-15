@@ -29,7 +29,7 @@ void ftrace_arch_code_modify_post_process(void)
 unsigned long ftrace_call_adjust(unsigned long addr)
 {
 	if (IS_ENABLED(CONFIG_DYNAMIC_FTRACE_WITH_CALL_OPS))
-		return addr + 8 + MCOUNT_AUIPC_SIZE;
+		return addr + sizeof(__u64ptr) + MCOUNT_AUIPC_SIZE;
 
 	return addr + MCOUNT_AUIPC_SIZE;
 }
