@@ -169,6 +169,13 @@
 				compatible = "atmel,24c08";
 				reg = <0x54>;
 				read-only;
+
+				#address-cells = <1>;
+				#size-cells = <1>;
+				/* Mac address at offset 0x20 */
+				vcu118_macaddr: macaddr@20 {
+					reg = <0x20 0x6>;
+				};
 			};
 		};
 
@@ -186,6 +193,11 @@
 	};
 };
 
+/* Mac address comes from on board EEPROM */
+&axi_ethernet {
+	nvmem-cells = <&vcu118_macaddr>;
+	nvmem-cell-names = "mac-address";
+};
 
 /*
  * I2C bus connected directly to FMC connector. This is used for the FMCLite
@@ -201,6 +213,31 @@
 		size = <8192>;
 		pagesize = <32>;
 		read-only;
+
+		#address-cells = <1>;
+		#size-cells = <1>;
+		/* Mac address at offset 0xc */
+		fmc_macaddr: macaddr@c {
+			reg = <0x0c 0x6>;
+		};
+	};
+};
+
+
+/* Mac address comes from on board EEPROM */
+&axi_ethernet_fmc {
+	nvmem-cells = <&fmc_macaddr>;
+	nvmem-cell-names = "mac-address";
+};
+
+/ {
+	/*
+	 * Which Ethernet device is which is board specific, so this
+	 * information belongs here rather than in the ethernet dt files
+	 */
+	aliases {
+		ethernet0 = &axi_ethernet;
+		ethernet1 = &axi_ethernet_fmc;
 	};
 };
 
