@@ -125,59 +125,59 @@ struct ftrace_regs;
 #define arch_ftrace_regs(fregs) ((struct __arch_ftrace_regs *)(fregs))
 
 struct __arch_ftrace_regs {
-	unsigned long epc;
-	unsigned long ra;
-	unsigned long sp;
-	unsigned long s0;
-	unsigned long t1;
+	register_t epc;
+	register_t ra;
+	register_t sp;
+	register_t s0;
+	register_t t1;
 #ifdef CONFIG_DYNAMIC_FTRACE_WITH_DIRECT_CALLS
-	unsigned long direct_tramp;
+	register_t direct_tramp;
 #endif
 	union {
-		unsigned long args[8];
+		register_t args[8];
 		struct {
-			unsigned long a0;
-			unsigned long a1;
-			unsigned long a2;
-			unsigned long a3;
-			unsigned long a4;
-			unsigned long a5;
-			unsigned long a6;
-			unsigned long a7;
+			register_t a0;
+			register_t a1;
+			register_t a2;
+			register_t a3;
+			register_t a4;
+			register_t a5;
+			register_t a6;
+			register_t a7;
 #ifdef CONFIG_CC_IS_CLANG
-			unsigned long t2;
-			unsigned long t3;
-			unsigned long t4;
-			unsigned long t5;
-			unsigned long t6;
+			register_t t2;
+			register_t t3;
+			register_t t4;
+			register_t t5;
+			register_t t6;
 #endif
 		};
 	};
 };
 
-static __always_inline unsigned long ftrace_regs_get_instruction_pointer(const struct ftrace_regs
+static __always_inline register_t ftrace_regs_get_instruction_pointer(const struct ftrace_regs
 									 *fregs)
 {
 	return arch_ftrace_regs(fregs)->epc;
 }
 
 static __always_inline void ftrace_regs_set_instruction_pointer(struct ftrace_regs *fregs,
-								unsigned long pc)
+								register_t pc)
 {
 	arch_ftrace_regs(fregs)->epc = pc;
 }
 
-static __always_inline unsigned long ftrace_regs_get_stack_pointer(const struct ftrace_regs *fregs)
+static __always_inline register_t ftrace_regs_get_stack_pointer(const struct ftrace_regs *fregs)
 {
 	return arch_ftrace_regs(fregs)->sp;
 }
 
-static __always_inline unsigned long ftrace_regs_get_frame_pointer(const struct ftrace_regs *fregs)
+static __always_inline register_t ftrace_regs_get_frame_pointer(const struct ftrace_regs *fregs)
 {
 	return arch_ftrace_regs(fregs)->s0;
 }
 
-static __always_inline unsigned long ftrace_regs_get_argument(struct ftrace_regs *fregs,
+static __always_inline register_t ftrace_regs_get_argument(struct ftrace_regs *fregs,
 							      unsigned int n)
 {
 	if (n < 8)
@@ -185,18 +185,18 @@ static __always_inline unsigned long ftrace_regs_get_argument(struct ftrace_regs
 	return 0;
 }
 
-static __always_inline unsigned long ftrace_regs_get_return_value(const struct ftrace_regs *fregs)
+static __always_inline register_t ftrace_regs_get_return_value(const struct ftrace_regs *fregs)
 {
 	return arch_ftrace_regs(fregs)->a0;
 }
 
-static __always_inline unsigned long ftrace_regs_get_return_address(const struct ftrace_regs *fregs)
+static __always_inline register_t ftrace_regs_get_return_address(const struct ftrace_regs *fregs)
 {
 	return arch_ftrace_regs(fregs)->ra;
 }
 
 static __always_inline void ftrace_regs_set_return_value(struct ftrace_regs *fregs,
-							 unsigned long ret)
+							 register_t ret)
 {
 	arch_ftrace_regs(fregs)->a0 = ret;
 }
