@@ -560,7 +560,7 @@ static int function_stat_show(struct seq_file *m, void *v)
 
 		if (core_kernel_text(rec->ip)) {
 			refsymbol = "_text";
-			offset = rec->ip - (unsigned long)_text;
+			offset = rec->ip - __c_pa(_text);
 		} else {
 			struct module *mod;
 
@@ -569,7 +569,7 @@ static int function_stat_show(struct seq_file *m, void *v)
 			if (mod) {
 				refsymbol = mod->name;
 				/* Calculate offset from module's text entry address. */
-				offset = rec->ip - (unsigned long)mod->mem[MOD_TEXT].base;
+				offset = rec->ip - __c_pa(mod->mem[MOD_TEXT].base);
 			}
 		}
 		if (refsymbol)
@@ -671,7 +671,7 @@ static int ftrace_profile_pages_init(struct ftrace_profile_stat *stat)
  out_free:
 	pg = stat->start;
 	while (pg) {
-		unsigned long tmp = (unsigned long)pg;
+		uintptr_t tmp = (uintptr_t)pg;
 
 		pg = pg->next;
 		free_page(tmp);
@@ -1708,8 +1708,8 @@ int ftrace_text_reserved(const void *start, const void *end)
 {
 	unsigned long ret;
 
-	ret = ftrace_location_range((unsigned long)start,
-				    (unsigned long)end);
+	ret = ftrace_location_range((__ptraddr_t)start,
+				    (__ptraddr_t)end);
 
 	return (int)!!ret;
 }
@@ -8255,8 +8255,8 @@ static void add_to_clear_hash_list(struct list_head *clear_list,
 
 void ftrace_free_mem(struct module *mod, void *start_ptr, void *end_ptr)
 {
-	unsigned long start = (unsigned long)(start_ptr);
-	unsigned long end = (unsigned long)(end_ptr);
+	ptraddr_t start = __c_pa(start_ptr);
+	ptraddr_t end = __c_pa(end_ptr);
 	struct ftrace_page **last_pg = &ftrace_pages_start;
 	struct ftrace_page *tmp_page = NULL;
 	struct ftrace_page *pg;
