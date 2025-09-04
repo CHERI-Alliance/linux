@@ -51,7 +51,7 @@ SYM_FUNC_START(__cheri_check_tags)
 	ret
 
 .Lwarn_tags:
-	caddi csp, csp, -4*CSZREG
+	caddi csp, csp, -5*CSZREG
 	sc ca0, (csp)
 	sc ca1, CSZREG(csp)
 	sc ca2, 2*CSZREG(csp)
@@ -64,7 +64,7 @@ SYM_FUNC_START(__cheri_check_tags)
 	lc ca2, 2*CSZREG(csp)
 	lc cra, 3*CSZREG(csp)
 	lc ct6, 4*CSZREG(csp)
-	caddi csp, csp, 4*CSZREG
+	caddi csp, csp, 5*CSZREG
 	ret
 SYM_FUNC_END(__cheri_check_tags)
 #endif
