@@ -208,7 +208,8 @@ unsigned long ftrace_call_adjust(unsigned long addr)
 }
 #endif /* CONFIG_DYNAMIC_FTRACE */
 
-#ifdef CONFIG_DYNAMIC_FTRACE_WITH_DIRECT_CALLS
+#if defined(CONFIG_DYNAMIC_FTRACE_WITH_CALL_OPS) || \
+	defined(CONFIG_DYNAMIC_FTRACE_WITH_DIRECT_CALLS)
 int ftrace_modify_call(struct dyn_ftrace *rec, unsigned long old_addr,
 		       unsigned long addr)
 {
