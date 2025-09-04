@@ -506,8 +506,8 @@ static void update_traceon_count(struct ftrace_probe_ops *ops,
 				 void *data)
 {
 	struct ftrace_func_mapper *mapper = data;
-	long *count;
-	long old_count;
+	intptr_t *count;
+	intptr_t old_count;
 
 	/*
 	 * Tracing gets disabled (or enabled) once per count.
@@ -538,10 +538,10 @@ static void update_traceon_count(struct ftrace_probe_ops *ops,
 	 * setting the tracing_on file. But we currently don't care
 	 * about that.
 	 */
-	count = (long *)ftrace_func_mapper_find_ip(mapper, ip);
+	count = (intptr_t *)ftrace_func_mapper_find_ip(mapper, ip);
 	old_count = *count;
 
-	if (old_count <= 0)
+	if ((long __force)old_count <= 0)
 		return;
 
 	/* Make sure we see count before checking tracing state */
@@ -640,9 +640,9 @@ ftrace_stacktrace_count(unsigned long ip, unsigned long parent_ip,
 			void *data)
 {
 	struct ftrace_func_mapper *mapper = data;
-	long *count;
-	long old_count;
-	long new_count;
+	intptr_t *count;
+	intptr_t old_count;
+	intptr_t new_count;
 
 	if (!tracing_is_on())
 		return;
@@ -653,7 +653,7 @@ ftrace_stacktrace_count(unsigned long ip, unsigned long parent_ip,
 		return;
 	}
 
-	count = (long *)ftrace_func_mapper_find_ip(mapper, ip);
+	count = (intptr_t *)ftrace_func_mapper_find_ip(mapper, ip);
 
 	/*
 	 * Stack traces should only execute the number of times the
@@ -680,10 +680,10 @@ static int update_count(struct ftrace_probe_ops *ops, unsigned long ip,
 			void *data)
 {
 	struct ftrace_func_mapper *mapper = data;
-	long *count = NULL;
+	intptr_t *count = NULL;
 
 	if (mapper)
-		count = (long *)ftrace_func_mapper_find_ip(mapper, ip);
+		count = (intptr_t *)ftrace_func_mapper_find_ip(mapper, ip);
 
 	if (count) {
 		if (*count <= 0)
@@ -719,15 +719,15 @@ ftrace_probe_print(const char *name, struct seq_file *m,
 		   void *data)
 {
 	struct ftrace_func_mapper *mapper = data;
-	long *count = NULL;
+	intptr_t *count = NULL;
 
 	seq_printf(m, "%ps:%s", (void *)ip, name);
 
 	if (mapper)
-		count = (long *)ftrace_func_mapper_find_ip(mapper, ip);
+		count = (intptr_t *)ftrace_func_mapper_find_ip(mapper, ip);
 
 	if (count)
-		seq_printf(m, ":count=%ld\n", *count);
+		seq_printf(m, ":count=%ld\n", (long)*count);
 	else
 		seq_puts(m, ":unlimited\n");
 
@@ -856,6 +856,7 @@ ftrace_trace_probe_callback(struct trace_array *tr,
 			    char *cmd, char *param, int enable)
 {
 	void *count = (void *)-1;
+	unsigned long tmp;
 	char *number;
 	int ret;
 
@@ -878,9 +879,10 @@ ftrace_trace_probe_callback(struct trace_array *tr,
 	 * We use the callback data field (which is a pointer)
 	 * as our counter.
 	 */
-	ret = kstrtoul(number, 0, (unsigned long *)&count);
+	ret = kstrtoul(number, 0, &tmp);
 	if (ret)
 		return ret;
+	count = __c_fakep(tmp);
 
  out_reg:
 	ret = register_ftrace_function_probe(glob, tr, ops, count);
