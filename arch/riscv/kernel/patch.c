@@ -30,8 +30,8 @@ int riscv_patch_in_stop_machine = false;
 static inline bool is_kernel_exittext(__ptraddr_t addr)
 {
 	return system_state < SYSTEM_RUNNING &&
-		addr >= (uintptr_t)__exittext_begin &&
-		addr < (uintptr_t)__exittext_end;
+		addr >= (__ptraddr_t)__exittext_begin &&
+		addr < (__ptraddr_t)__exittext_end;
 }
 
 /*
@@ -41,7 +41,7 @@ static inline bool is_kernel_exittext(__ptraddr_t addr)
  */
 static __always_inline void *patch_map(void *addr, const unsigned int fixmap)
 {
-	uintptr_t uintaddr = (uintptr_t) addr;
+	__ptraddr_t uintaddr = (__ptraddr_t) addr;
 	phys_addr_t phys;
 
 	if (core_kernel_text(uintaddr) || is_kernel_exittext(uintaddr)) {
