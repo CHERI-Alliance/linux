@@ -48,6 +48,7 @@ void arch_ftrace_update_code(int command)
 
 static int __ftrace_modify_call(unsigned long source, unsigned long target, bool validate)
 {
+	void *src_cap = cheri_make_kernel_data_cap(source, 2 * MCOUNT_INSN_SIZE);
 	unsigned int call[2], offset;
 	unsigned int replaced[2];
 
@@ -60,18 +61,18 @@ static int __ftrace_modify_call(unsigned long source, unsigned long target, bool
 		 * Read the text we want to modify;
 		 * return must be -EFAULT on read error
 		 */
-		if (copy_from_kernel_nofault(replaced, (void *)source, 2 * MCOUNT_INSN_SIZE))
+		if (copy_from_kernel_nofault(replaced, src_cap, 2 * MCOUNT_INSN_SIZE))
 			return -EFAULT;
 
 		if (replaced[0] != call[0]) {
 			pr_err("%p: expected (%08x) but got (%08x)\n",
-			       (void *)source, call[0], replaced[0]);
+			       src_cap, call[0], replaced[0]);
 			return -EINVAL;
 		}
 	}
 
 	/* Replace the jalr at once. Return -EPERM on write error. */
-	if (patch_insn_write((void *)(source + MCOUNT_AUIPC_SIZE), call + 1, MCOUNT_JALR_SIZE))
+	if (patch_insn_write((void *)(src_cap + MCOUNT_AUIPC_SIZE), call + 1, MCOUNT_JALR_SIZE))
 		return -EPERM;
 
 	return 0;
@@ -95,9 +96,10 @@ static const struct ftrace_ops *riscv64_rec_get_ops(struct dyn_ftrace *rec)
 
 static int ftrace_rec_set_ops(const struct dyn_ftrace *rec, const struct ftrace_ops *ops)
 {
-	unsigned long literal = ALIGN_DOWN(rec->ip - 12, 8);
+	void *literal = cheri_make_kernel_data_cap(ALIGN_DOWN(rec->ip - MCOUNT_AUIPC_SIZE - sizeof(__u64ptr),
+							      sizeof(ops)), sizeof(ops));
 
-	return patch_text_nosync((void *)literal, &ops, sizeof(ops));
+	return patch_text_nosync(literal, &ops, sizeof(ops));
 }
 
 static int ftrace_rec_set_nop_ops(struct dyn_ftrace *rec)
@@ -123,7 +125,7 @@ int ftrace_make_call(struct dyn_ftrace *rec, unsigned long addr)
 	if (ret)
 		return ret;
 
-	orig_addr = (unsigned long)&ftrace_caller;
+	orig_addr = __c_pa(&ftrace_caller);
 	distance = addr > orig_addr ? addr - orig_addr : orig_addr - addr;
 	if (distance > JALR_RANGE)
 		addr = FTRACE_ADDR;
@@ -133,6 +135,7 @@ int ftrace_make_call(struct dyn_ftrace *rec, unsigned long addr)
 
 int ftrace_make_nop(struct module *mod, struct dyn_ftrace *rec, unsigned long addr)
 {
+	void *ip = cheri_make_kernel_data_cap(rec->ip, MCOUNT_NOP4_SIZE);
 	u32 nop4 = RISCV_INSN_NOP4;
 	int ret;
 
@@ -140,7 +143,7 @@ int ftrace_make_nop(struct module *mod, struct dyn_ftrace *rec, unsigned long ad
 	if (ret)
 		return ret;
 
-	if (patch_insn_write((void *)rec->ip, &nop4, MCOUNT_NOP4_SIZE))
+	if (patch_insn_write(ip, &nop4, MCOUNT_NOP4_SIZE))
 		return -EPERM;
 
 	return 0;
@@ -156,6 +159,7 @@ int ftrace_make_nop(struct module *mod, struct dyn_ftrace *rec, unsigned long ad
 int ftrace_init_nop(struct module *mod, struct dyn_ftrace *rec)
 {
 	unsigned long pc = rec->ip - MCOUNT_AUIPC_SIZE;
+	void *pc_cap = cheri_make_kernel_data_cap(pc, 2 * MCOUNT_INSN_SIZE);
 	unsigned int nops[2], offset;
 	int ret;
 
@@ -169,7 +173,7 @@ int ftrace_init_nop(struct module *mod, struct dyn_ftrace *rec)
 	nops[0] = to_auipc_t0(offset);
 	nops[1] = RISCV_INSN_NOP4;
 
-	ret = patch_insn_write((void *)pc, nops, 2 * MCOUNT_INSN_SIZE);
+	ret = patch_insn_write(pc_cap, nops, 2 * MCOUNT_INSN_SIZE);
 
 	return ret;
 }

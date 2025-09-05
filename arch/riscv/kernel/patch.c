@@ -141,6 +141,14 @@ static int __patch_insn_write(void *addr, const void *insn, size_t len)
 		patch_map(addr + PAGE_SIZE, FIX_TEXT_POKE1);
 
 	waddr = patch_map(addr, FIX_TEXT_POKE0);
+	/*
+	 * patch_map may return a capability whose bounds are start and end of
+	 * the page that contains addr (created by __fix_to_virt).
+	 * If we cross a page boundary, we have to fix up the bounds to ensure
+	 * that waddr + len is accessible.
+	 */
+	if (across_pages)
+		waddr = cheri_make_kernel_data_cap((__ptraddr_t)waddr, len);
 
 	ret = copy_to_kernel_nofault(waddr, insn, len);
 
