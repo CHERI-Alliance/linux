@@ -721,7 +721,7 @@ ftrace_probe_print(const char *name, struct seq_file *m,
 	struct ftrace_func_mapper *mapper = data;
 	intptr_t *count = NULL;
 
-	seq_printf(m, "%ps:%s", (void *)ip, name);
+	seq_printf(m, "%ps:%s", __c_fakep(ip), name);
 
 	if (mapper)
 		count = (intptr_t *)ftrace_func_mapper_find_ip(mapper, ip);

@@ -4204,7 +4204,7 @@ event_enable_print(struct seq_file *m, unsigned long ip,
 
 	edata = *pdata;
 
-	seq_printf(m, "%ps:", (void *)ip);
+	seq_printf(m, "%ps:", __c_fakep(ip));
 
 	seq_printf(m, "%s:%s:%s",
 		   edata->enable ? ENABLE_EVENT_STR : DISABLE_EVENT_STR,
