@@ -882,7 +882,7 @@ extern void mcount_call(void);
 void ftrace_modify_all_code(int command);
 
 #ifndef FTRACE_ADDR
-#define FTRACE_ADDR ((unsigned long)ftrace_caller)
+#define FTRACE_ADDR (__c_pa(ftrace_caller))
 #endif
 
 #ifndef FTRACE_GRAPH_ADDR
