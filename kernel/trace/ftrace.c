@@ -2179,7 +2179,7 @@ void ftrace_bug(int failed, struct dyn_ftrace *rec)
 	case -EINVAL:
 		pr_info("ftrace failed to modify ");
 		print_ip_sym(KERN_INFO, ip);
-		print_ip_ins(" actual:   ", (unsigned char *)ip);
+		print_ip_ins(" actual:   ", __c_fakep(ip));
 		pr_cont("\n");
 		if (ftrace_expected) {
 			print_ip_ins(" expected: ", ftrace_expected);
@@ -2207,7 +2207,7 @@ void ftrace_bug(int failed, struct dyn_ftrace *rec)
 			if (ops) {
 				do {
 					pr_cont("\ttramp: %pS (%pS)",
-						(void *)ops->trampoline,
+						__c_fakep(ops->trampoline),
 						(void *)ops->func);
 					ops = ftrace_find_tramp_ops_next(rec, ops);
 				} while (ops);
@@ -2636,7 +2636,7 @@ unsigned long ftrace_get_addr_new(struct dyn_ftrace *rec)
 		ops = ftrace_find_tramp_ops_new(rec);
 		if (FTRACE_WARN_ON(!ops || !ops->trampoline)) {
 			pr_warn("Bad trampoline accounting at: %p (%pS) (%lx)\n",
-				(void *)rec->ip, (void *)rec->ip, rec->flags);
+				__c_fakep(rec->ip), __c_fakep(rec->ip), rec->flags);
 			/* Ftrace is shutting down, return anything */
 			return (unsigned long)FTRACE_ADDR;
 		}
@@ -2677,7 +2677,7 @@ unsigned long ftrace_get_addr_curr(struct dyn_ftrace *rec)
 		ops = ftrace_find_tramp_ops_curr(rec);
 		if (FTRACE_WARN_ON(!ops)) {
 			pr_warn("Bad trampoline accounting at: %p (%pS)\n",
-				(void *)rec->ip, (void *)rec->ip);
+				__c_fakep(rec->ip), __c_fakep(rec->ip));
 			/* Ftrace is shutting down, return anything */
 			return (unsigned long)FTRACE_ADDR;
 		}
@@ -3165,7 +3165,7 @@ int ftrace_shutdown(struct ftrace_ops *ops, int command)
 		do_for_each_ftrace_rec(pg, rec) {
 			if (FTRACE_WARN_ON_ONCE(rec->flags & ~FTRACE_NOCLEAR_FLAGS))
 				pr_warn("  %pS flags:%lx\n",
-					(void *)rec->ip, rec->flags);
+					__c_fakep(rec->ip), rec->flags);
 		} while_for_each_ftrace_rec();
 	}
 
@@ -4048,7 +4048,7 @@ t_probe_show(struct seq_file *m, struct ftrace_iterator *iter)
 	if (probe_ops->print)
 		return probe_ops->print(m, probe_entry->ip, probe_ops, probe->data);
 
-	seq_printf(m, "%ps:%ps\n", (void *)probe_entry->ip,
+	seq_printf(m, "%ps:%ps\n", __c_fakep(probe_entry->ip),
 		   (void *)probe_ops->func);
 
 	return 0;
@@ -4377,7 +4377,7 @@ static inline int test_for_valid_rec(struct dyn_ftrace *rec)
 
 static inline int print_rec(struct seq_file *m, unsigned long ip)
 {
-	seq_printf(m, "%ps", (void *)ip);
+	seq_printf(m, "%ps", __c_fakep(ip));
 	return 0;
 }
 #endif
@@ -4408,7 +4408,7 @@ static void print_subops(struct seq_file *m, struct ftrace_ops *ops, struct dyn_
 #endif
 		if (subops->trampoline) {
 			seq_printf(m, " {%pS (%pS)}",
-				   (void *)subops->trampoline,
+				   __c_fakep(subops->trampoline),
 				   (void *)subops->func);
 			add_trampoline_func(m, subops, rec);
 		} else {
@@ -4467,7 +4467,7 @@ static int t_show(struct seq_file *m, void *v)
 			if (ops) {
 				do {
 					seq_printf(m, "\ttramp: %pS (%pS)",
-						   (void *)ops->trampoline,
+						   __c_fakep(ops->trampoline),
 						   (void *)ops->func);
 					add_trampoline_func(m, ops, rec);
 					print_subops(m, ops, rec);
@@ -4493,7 +4493,7 @@ static int t_show(struct seq_file *m, void *v)
 
 			direct = ftrace_find_rec_direct(rec->ip);
 			if (direct)
-				seq_printf(m, "\n\tdirect-->%pS", (void *)direct);
+				seq_printf(m, "\n\tdirect-->%pS", __c_fakep(direct));
 		}
 	}
 
@@ -6738,7 +6738,7 @@ static int g_show(struct seq_file *m, void *v)
 		return 0;
 	}
 
-	seq_printf(m, "%ps\n", (void *)entry->ip);
+	seq_printf(m, "%ps\n", __c_fakep(entry->ip));
 
 	return 0;
 }
