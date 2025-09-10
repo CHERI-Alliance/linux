@@ -970,7 +970,7 @@ ptrace_get_syscall_info_entry(struct task_struct *child, struct pt_regs *regs,
 	info->entry.nr = syscall_get_nr(child, regs);
 	syscall_get_arguments(child, regs, args);
 	for (i = 0; i < ARRAY_SIZE(args); i++)
-		info->entry.args[i] = args[i];
+		info->entry.args[i] = __c_ua(args[i]);
 
 	/* args is the last field in struct ptrace_syscall_info.entry */
 	return offsetofend(struct ptrace_syscall_info, entry.args);
@@ -1044,8 +1044,8 @@ ptrace_get_syscall_info(struct task_struct *child, unsigned long user_size,
 	struct ptrace_syscall_info info = {
 		.op = ptrace_get_syscall_info_op(child),
 		.arch = syscall_get_arch(child),
-		.instruction_pointer = instruction_pointer(regs),
-		.stack_pointer = user_stack_pointer(regs),
+		.instruction_pointer = __c_ua(instruction_pointer(regs)),
+		.stack_pointer = __c_ua(user_stack_pointer(regs)),
 	};
 	unsigned long actual_size = offsetof(struct ptrace_syscall_info, entry);
 	unsigned long write_size;
@@ -1063,7 +1063,7 @@ ptrace_get_syscall_info(struct task_struct *child, unsigned long user_size,
 	}
 
 	write_size = min(actual_size, user_size);
-	return copy_to_user_with_ptr(datavp, &info, write_size) ? -EFAULT : actual_size;
+	return copy_to_user(datavp, &info, write_size) ? -EFAULT : actual_size;
 }
 
 static int
@@ -1083,7 +1083,7 @@ ptrace_set_syscall_info_entry(struct task_struct *child, struct pt_regs *regs,
 		return -ERANGE;
 
 	for (i = 0; i < ARRAY_SIZE(args); i++) {
-		args[i] = info->entry.args[i];
+		args[i] = __c_fakeu(info->entry.args[i]);
 		/*
 		 * Check that the syscall argument specified in
 		 * info->entry.args[i] is either a value of type
@@ -1154,7 +1154,7 @@ ptrace_set_syscall_info(struct task_struct *child, unsigned long user_size,
 	 * does not instruct us to use unknown extra bits from future versions
 	 * of ptrace_syscall_info, we are not going to read them either.
 	 */
-	if (copy_from_user_with_ptr(&info, datavp, sizeof(info)))
+	if (copy_from_user(&info, datavp, sizeof(info)))
 		return -EFAULT;
 
 	/* Reserved for future use. */
