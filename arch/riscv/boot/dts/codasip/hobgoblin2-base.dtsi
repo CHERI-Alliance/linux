@@ -74,16 +74,15 @@
 			#endif
 		};
 
-		uart0: serial@10100000 {
+		uart0: serial@10101000 {
 			compatible = "ns16550a";
-			reg = <0x10100000 0x1020>;
+			reg = <0x10101000 0x1000>;
 
 			/* Required by OpenSBI */
 			/* UART clock frequency */
 			clock-frequency = <100000000>;
 			current-speed = <115200>;
 			reg-shift = <2>;
-			reg-offset = <0x1000>;
 
 			/* Upstream interrupts */
 			interrupts-extended = <&plic 1>;
