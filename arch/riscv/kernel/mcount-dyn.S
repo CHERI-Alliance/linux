@@ -191,7 +191,7 @@ SYM_FUNC_START(ftrace_caller)
 	 * If the op has a direct call, handle it immediately without
 	 * saving/restoring registers.
 	 */
-	REG_L	t1, FTRACE_OPS_DIRECT_CALL(t1)
+	CREG_L	CREG(t1), FTRACE_OPS_DIRECT_CALL(CREG(t1))
 	bnez	t1, ftrace_caller_direct
 #endif
 #endif
@@ -212,12 +212,18 @@ SYM_INNER_LABEL(ftrace_call, SYM_L_GLOBAL)
 	jr	CREG(t0)
 #if defined(CONFIG_DYNAMIC_FTRACE_WITH_CALL_OPS) && defined(CONFIG_DYNAMIC_FTRACE_WITH_DIRECT_CALLS)
 SYM_INNER_LABEL(ftrace_caller_direct, SYM_L_LOCAL)
-	jr	t1
+	jr	CREG(t1)
 #endif
 SYM_FUNC_END(ftrace_caller)
 
 #ifdef CONFIG_DYNAMIC_FTRACE_WITH_DIRECT_CALLS
-SYM_CODE_START(ftrace_stub_direct_tramp)
-	jr	t0
-SYM_CODE_END(ftrace_stub_direct_tramp)
+/*
+ * use SYM_FUNC_... to get an executable capability
+ *
+ * when objtool adds support for risc-v stack frame checking, we have to skip
+ * such checks by setting STACK_FRAME_NON_STANDARD(ftrace_stub_direct_tramp)
+ */
+SYM_FUNC_START(ftrace_stub_direct_tramp)
+	jr	CREG(t0)
+SYM_FUNC_END(ftrace_stub_direct_tramp)
 #endif /* CONFIG_DYNAMIC_FTRACE_WITH_DIRECT_CALLS */
