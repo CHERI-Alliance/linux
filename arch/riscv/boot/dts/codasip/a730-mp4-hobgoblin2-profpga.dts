@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: GPL-2.0
+// SPDX-License-Identifier: (GPL-2.0 OR MIT)
 /*
- * Copyright (c) 2024 Codasip GmbH
+ * Copyright (c) 2025 Codasip GmbH
  *
  * A730 MP4 Hobgoblin FPGA platform for proFPGA board
  */
