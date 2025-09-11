@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: GPL-2.0
+// SPDX-License-Identifier: (GPL-2.0 OR MIT)
 /*
- * Copyright (c) 2024 Codasip GmbH
+ * Copyright (c) 2025 Codasip GmbH
  *
  * A730 Hobgoblin FPGA platform base description. This dts includes all the
  * hardware that is not dependent the particular FPGA platform. Depending on
