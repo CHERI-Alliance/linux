@@ -144,9 +144,9 @@
 	CREG_L	CREG(a2), FTRACE_CALLER_OP(CREG(t0))	// op
 	CREG_L	CREG(ra), FTRACE_OPS_FUNC(CREG(a2))	// op->func
 #else
-	la	a1, function_trace_op
-	REG_L	a2, 0(a1)			// op
-	mv	a1, ra				// parent_ip
+	CINSN(la)	CREG(a1), function_trace_op
+	CREG_L	CREG(a2), 0(CREG(a1))		// op
+	mv	CREG(a1), CREG(ra)		// parent_ip
 #endif
 	mv	CREG(a3), CREG(sp)		// regs
 	.endm
@@ -202,8 +202,13 @@ SYM_FUNC_START(ftrace_caller)
 	jalr	0(CREG(ra))
 #else
 SYM_INNER_LABEL(ftrace_call, SYM_L_GLOBAL)
-	REG_L	ra, ftrace_call_dest
-	jalr	ra, 0(ra)
+#ifdef CONFIG_CHERI_KERNEL
+	CINSN(la) CREG(ra), ftrace_call_dest
+	CREG_L CREG(ra), 0(CREG(ra))
+#else
+	REG_L   ra, ftrace_call_dest
+#endif
+	jalr	CREG(ra), 0(CREG(ra))
 #endif
 	RESTORE_ABI_REGS
 #if defined(CONFIG_DYNAMIC_FTRACE_WITH_CALL_OPS) && defined(CONFIG_DYNAMIC_FTRACE_WITH_DIRECT_CALLS)
