@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: GPL-2.0
+// SPDX-License-Identifier: (GPL-2.0 OR MIT)
 /*
- * Copyright (c) 2024 Codasip GmbH
+ * Copyright (c) 2025 Codasip GmbH
  *
  * A730 Hobgoblin FPGA vcu118 base description. This dts includes all the
  * hardware that is dependent on the board itself. So things like DDR,
