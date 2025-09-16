@@ -227,9 +227,9 @@ void ftrace_graph_func(unsigned long ip, unsigned long parent_ip,
 #define ftrace_graph_func ftrace_graph_func
 
 #ifdef CONFIG_DYNAMIC_FTRACE_WITH_DIRECT_CALLS
-static inline void arch_ftrace_set_direct_caller(struct ftrace_regs *fregs, unsigned long addr)
+static inline void arch_ftrace_set_direct_caller(struct ftrace_regs *fregs, uintptr_t addr)
 {
-	arch_ftrace_regs(fregs)->t1 = addr;
+	arch_ftrace_regs(fregs)->t1 = (register_t)addr;
 }
 #endif /* CONFIG_DYNAMIC_FTRACE_WITH_DIRECT_CALLS */
 
