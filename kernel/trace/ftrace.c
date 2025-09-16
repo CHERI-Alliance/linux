@@ -2631,7 +2631,7 @@ unsigned long ftrace_find_rec_direct(unsigned long ip)
 static void call_direct_funcs(unsigned long ip, unsigned long pip,
 			      struct ftrace_ops *ops, struct ftrace_regs *fregs)
 {
-	unsigned long addr;
+	uintptr_t addr;
 
 #ifdef CONFIG_HAVE_SINGLE_FTRACE_DIRECT_OPS
 	addr = ftrace_find_rec_direct(ip);
@@ -6044,7 +6044,7 @@ static void reset_direct(struct ftrace_ops *ops, unsigned long addr)
  *  -ENODEV  - @ip does not point to a ftrace nop location (or not supported)
  *  -ENOMEM  - There was an allocation failure.
  */
-int register_ftrace_direct(struct ftrace_ops *ops, unsigned long addr)
+int register_ftrace_direct(struct ftrace_ops *ops, uintptr_t addr)
 {
 	struct ftrace_hash *hash, *new_hash = NULL, *free_hash = NULL;
 	struct ftrace_func_entry *entry, *new;
@@ -6102,8 +6102,8 @@ int register_ftrace_direct(struct ftrace_ops *ops, unsigned long addr)
 			if (!new)
 				goto out_unlock;
 			/* Update both the copy and the hash entry */
-			new->direct = addr;
-			entry->direct = addr;
+			new->direct = __c_ua(addr);
+			entry->direct = __c_ua(addr);
 		}
 	}
 
@@ -6118,7 +6118,7 @@ int register_ftrace_direct(struct ftrace_ops *ops, unsigned long addr)
 
 	err = register_ftrace_function_nolock(ops);
 	if (err)
-		reset_direct(ops, addr);
+		reset_direct(ops, __c_ua(addr));
 
  out_unlock:
 	mutex_unlock(&direct_mutex);
@@ -6170,7 +6170,7 @@ int unregister_ftrace_direct(struct ftrace_ops *ops, unsigned long addr,
 EXPORT_SYMBOL_GPL(unregister_ftrace_direct);
 
 static int
-__modify_ftrace_direct(struct ftrace_ops *ops, unsigned long addr)
+__modify_ftrace_direct(struct ftrace_ops *ops, uintptr_t addr)
 {
 	struct ftrace_hash *hash = ops->func_hash->filter_hash;
 	struct ftrace_func_entry *entry, *iter;
@@ -6213,7 +6213,7 @@ __modify_ftrace_direct(struct ftrace_ops *ops, unsigned long addr)
 			entry = __ftrace_lookup_ip(direct_functions, iter->ip);
 			if (!entry)
 				continue;
-			entry->direct = addr;
+			entry->direct = __c_ua(addr);
 		}
 	}
 	/* Prevent store tearing if a trampoline concurrently accesses the value */
@@ -6246,7 +6246,7 @@ out:
  * Returns: zero on success. Non zero on error, which includes:
  *  -EINVAL - The @ops object was not properly registered.
  */
-int modify_ftrace_direct_nolock(struct ftrace_ops *ops, unsigned long addr)
+int modify_ftrace_direct_nolock(struct ftrace_ops *ops, uintptr_t addr)
 {
 	if (check_direct_multi(ops))
 		return -EINVAL;
@@ -6272,7 +6272,7 @@ EXPORT_SYMBOL_GPL(modify_ftrace_direct_nolock);
  * Returns: zero on success. Non zero on error, which includes:
  *  -EINVAL - The @ops object was not properly registered.
  */
-int modify_ftrace_direct(struct ftrace_ops *ops, unsigned long addr)
+int modify_ftrace_direct(struct ftrace_ops *ops, uintptr_t addr)
 {
 	int err;
 

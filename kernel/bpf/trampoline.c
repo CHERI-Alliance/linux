@@ -194,7 +194,8 @@ static void direct_ops_free(struct bpf_trampoline *tr) { }
 
 static struct ftrace_hash *hash_from_ip(struct bpf_trampoline *tr, void *ptr)
 {
-	unsigned long ip, addr = (unsigned long) ptr;
+	unsigned long ip;
+	uintptr_t addr = (uintptr_t) ptr;
 	struct ftrace_hash *hash;
 
 	ip = ftrace_location(tr->ip);
@@ -294,7 +295,7 @@ static int direct_ops_del(struct bpf_trampoline *tr, void *addr)
 
 static int direct_ops_mod(struct bpf_trampoline *tr, void *ptr, bool lock_direct_mutex)
 {
-	unsigned long addr = (unsigned long) ptr;
+	uintptr_t addr = (uintptr_t) ptr;
 	struct ftrace_ops *ops = tr->fops;
 
 	if (bpf_trampoline_use_jmp(tr->flags))

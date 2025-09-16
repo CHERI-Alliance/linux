@@ -461,7 +461,7 @@ struct ftrace_ops {
 	ftrace_ops_func_t		ops_func;
 	struct ftrace_ops		*managed;
 #ifdef CONFIG_DYNAMIC_FTRACE_WITH_DIRECT_CALLS
-	unsigned long			direct_call;
+	uintptr_t			direct_call;
 #endif
 #endif
 };
@@ -539,11 +539,11 @@ struct ftrace_func_entry {
 
 #ifdef CONFIG_DYNAMIC_FTRACE_WITH_DIRECT_CALLS
 unsigned long ftrace_find_rec_direct(unsigned long ip);
-int register_ftrace_direct(struct ftrace_ops *ops, unsigned long addr);
+int register_ftrace_direct(struct ftrace_ops *ops, uintptr_t addr);
 int unregister_ftrace_direct(struct ftrace_ops *ops, unsigned long addr,
 			     bool free_filters);
-int modify_ftrace_direct(struct ftrace_ops *ops, unsigned long addr);
-int modify_ftrace_direct_nolock(struct ftrace_ops *ops, unsigned long addr);
+int modify_ftrace_direct(struct ftrace_ops *ops, uintptr_t addr);
+int modify_ftrace_direct_nolock(struct ftrace_ops *ops, uintptr_t addr);
 
 int update_ftrace_direct_add(struct ftrace_ops *ops, struct ftrace_hash *hash);
 int update_ftrace_direct_del(struct ftrace_ops *ops, struct ftrace_hash *hash);
@@ -557,7 +557,7 @@ static inline unsigned long ftrace_find_rec_direct(unsigned long ip)
 {
 	return 0;
 }
-static inline int register_ftrace_direct(struct ftrace_ops *ops, unsigned long addr)
+static inline int register_ftrace_direct(struct ftrace_ops *ops, uintptr_t addr)
 {
 	return -ENODEV;
 }
@@ -566,11 +566,11 @@ static inline int unregister_ftrace_direct(struct ftrace_ops *ops, unsigned long
 {
 	return -ENODEV;
 }
-static inline int modify_ftrace_direct(struct ftrace_ops *ops, unsigned long addr)
+static inline int modify_ftrace_direct(struct ftrace_ops *ops, uintptr_t addr)
 {
 	return -ENODEV;
 }
-static inline int modify_ftrace_direct_nolock(struct ftrace_ops *ops, unsigned long addr)
+static inline int modify_ftrace_direct_nolock(struct ftrace_ops *ops, uintptr_t addr)
 {
 	return -ENODEV;
 }
@@ -604,7 +604,7 @@ static inline int update_ftrace_direct_mod(struct ftrace_ops *ops, struct ftrace
  * instead of going back to the function it just traced.
  */
 static inline void arch_ftrace_set_direct_caller(struct ftrace_regs *fregs,
-						 unsigned long addr) { }
+						 uintptr_t addr) { }
 #endif /* CONFIG_DYNAMIC_FTRACE_WITH_DIRECT_CALLS */
 
 #ifdef CONFIG_DYNAMIC_FTRACE_WITH_JMP
