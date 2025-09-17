@@ -157,7 +157,8 @@ static void gso_test_func(struct kunit *test)
 
 	page = alloc_page(GFP_KERNEL);
 	KUNIT_ASSERT_NOT_NULL(test, page);
-	skb = build_skb(page_address(page), sizeof(hdr) + tcase->linear_len + shinfo_size);
+	skb = build_skb(page_address(page),
+			SKB_DATA_ALIGN(sizeof(hdr) + tcase->linear_len + shinfo_size));
 	KUNIT_ASSERT_NOT_NULL(test, skb);
 	__skb_put(skb, sizeof(hdr) + tcase->linear_len);
 
@@ -194,7 +195,7 @@ static void gso_test_func(struct kunit *test)
 
 			frag_size = tcase->frag_skbs[i];
 			frag_skb = build_skb(page_address(page),
-					     frag_size + shinfo_size);
+					     SKB_DATA_ALIGN(frag_size + shinfo_size));
 			KUNIT_ASSERT_NOT_NULL(test, frag_skb);
 			__skb_put(frag_skb, frag_size);
 
