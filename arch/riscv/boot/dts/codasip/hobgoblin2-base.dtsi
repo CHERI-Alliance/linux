@@ -15,7 +15,6 @@
 / {
 	#address-cells = <2>;
 	#size-cells = <2>;
-	compatible = "codasip,a730";
 
 	aliases {
 		serial0 = &uart0;

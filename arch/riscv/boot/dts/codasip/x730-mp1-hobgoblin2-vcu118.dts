@@ -8,6 +8,8 @@
 /dts-v1/;
 
 /{
+	model = "Codasip Hobgoblin2 VCU118 X730-MP1";
+	compatible = "codasip,hobgoblin2-vcu118", "codasip,x730", "codasip,a730";
 	chosen {
 		stdout-path = "serial0:115200n8";
 		bootargs = "earlycon console=ttyS0,115200n8";
