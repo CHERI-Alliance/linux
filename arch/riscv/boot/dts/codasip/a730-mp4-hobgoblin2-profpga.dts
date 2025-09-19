@@ -8,6 +8,8 @@
 /dts-v1/;
 
 /{
+	model = "Codasip Hobgoblin2 proFPGA A730-MP4";
+	compatible = "codasip,hobgoblin2-profpga", "codasip,a730";
 	chosen {
 		stdout-path = "serial0:115200n8";
 		bootargs = "earlycon console=ttyS0,115200n8";
