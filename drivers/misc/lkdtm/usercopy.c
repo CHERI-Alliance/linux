@@ -86,12 +86,9 @@ static noinline void do_usercopy_stack(bool to_user, bool bad_frame)
 		pr_warn("Failed to allocate user memory\n");
 		return;
 	}
-#ifdef CONFIG_CHERI_KERNEL
+
 	user_ptr = cheri_build_user_cap(user_addr, PAGE_SIZE, CHERI_PERMS_READ |
 					CHERI_PERMS_WRITE | CHERI_PERMS_EXEC);
-#else
-	user_ptr = (void *)user_addr;
-#endif
 
 	if (to_user) {
 		pr_info("attempting good copy_to_user of local stack\n");
@@ -161,12 +158,9 @@ static void do_usercopy_slab_size(bool to_user)
 		pr_warn("Failed to allocate user memory\n");
 		goto free_kernel;
 	}
-#ifdef CONFIG_CHERI_KERNEL
+
 	user_ptr = cheri_build_user_cap(user_addr, PAGE_SIZE, CHERI_PERMS_EXEC|
 					CHERI_PERMS_WRITE|CHERI_PERMS_READ);
-#else
-	user_ptr = (void *)user_addr;
-#endif
 
 	memset(one, 'A', size);
 	memset(two, 'B', size);
@@ -243,12 +237,9 @@ static void do_usercopy_slab_whitelist(bool to_user)
 		pr_warn("Failed to allocate user memory\n");
 		goto free_alloc;
 	}
-#ifdef CONFIG_CHERI_KERNEL
+
 	user_addr = (void __user *)cheri_build_user_cap(user_alloc, PAGE_SIZE, CHERI_PERMS_READ |
 							CHERI_PERMS_WRITE | CHERI_PERMS_EXEC);
-#else
-	user_addr = (void __user *)user_alloc;
-#endif
 
 	memset(buf, 'B', cache_size);
 
@@ -339,12 +330,9 @@ static void lkdtm_USERCOPY_KERNEL(void)
 		pr_warn("Failed to allocate user memory\n");
 		return;
 	}
-#ifdef CONFIG_CHERI_KERNEL
+
 	user_ptr = cheri_build_user_cap(user_addr, PAGE_SIZE, CHERI_PERMS_READ |
 					CHERI_PERMS_WRITE | CHERI_PERMS_EXEC);
-#else
-	user_ptr = (void *)user_addr;
-#endif
 
 	pr_info("attempting good copy_to_user from kernel rodata: %px\n",
 		test_text);
@@ -384,11 +372,8 @@ static void do_usercopy_page_span(const char *name, void *kaddr)
 		pr_warn("Failed to allocate user memory\n");
 		return;
 	}
-#ifdef CONFIG_CHERI_KERNEL
+
 	uptr = cheri_build_user_cap(uaddr, PAGE_SIZE, CHERI_PERMS_WRITE|CHERI_PERMS_READ);
-#else
-	uptr = (void *)uaddr;
-#endif
 
 	/* Initialize contents. */
 	memset(kaddr, 0xAA, PAGE_SIZE);
