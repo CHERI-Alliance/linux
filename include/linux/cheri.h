@@ -183,6 +183,8 @@ extern cheri_perms_t cheri_unsupported_perms;	/* Permission bits not supported b
 
 #else
 
+#define cheri_build_user_cap(__c, __l, __p) ((void *)(__c))
+#define cheri_build_user_cap_inexact_bounds(__c, __l, __p) ((void *)(__c))
 #define cheri_check_cap(cap, len, perms) (true)
 #define cheri_address_set(cap, addr) ((void *)(addr))
 #define cheri_bounds_set(__c, __l) (__c)
