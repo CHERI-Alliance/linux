@@ -930,10 +930,10 @@ static void swiotlb_bounce(struct device *dev, phys_addr_t tlb_addr, size_t size
 		 * callers may map uninitialized buffers that will be written
 		 * by the device, causing false positives.
 		 */
-		memcpy(vaddr, phys_to_virt(orig_addr), size);
+		memcpy(vaddr, phys_to_virt_sz(orig_addr, size), size);
 	} else {
 		kmsan_unpoison_memory(vaddr, size);
-		memcpy(phys_to_virt(orig_addr), vaddr, size);
+		memcpy(phys_to_virt_sz(orig_addr, size), vaddr, size);
 	}
 }
 
