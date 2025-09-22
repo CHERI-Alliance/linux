@@ -224,12 +224,8 @@ static void lkdtm_EXEC_USERSPACE(void)
 		pr_warn("Failed to allocate user memory\n");
 		return;
 	}
-#ifdef CONFIG_CHERI_KERNEL
 	user_ptr = cheri_build_user_cap(user_addr, PAGE_SIZE, CHERI_PERMS_READ |
 					CHERI_PERMS_WRITE | CHERI_PERMS_EXEC);
-#else
-	user_ptr = (void *)user_addr;
-#endif
 	execute_user_location(user_ptr);
 	vm_munmap(user_addr, PAGE_SIZE);
 }
@@ -252,12 +248,8 @@ static void lkdtm_ACCESS_USERSPACE(void)
 		return;
 	}
 
-#ifdef CONFIG_CHERI_KERNEL
 	ptr = (unsigned long *)cheri_build_user_cap(user_addr, PAGE_SIZE, CHERI_PERMS_READ |
 						    CHERI_PERMS_WRITE | CHERI_PERMS_EXEC);
-#else
-	ptr = (unsigned long *)user_addr;
-#endif
 
 	if (copy_to_user((void __user *)ptr, &tmp, sizeof(tmp))) {
 		pr_warn("copy_to_user failed\n");
