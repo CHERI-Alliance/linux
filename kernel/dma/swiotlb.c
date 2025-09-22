@@ -916,9 +916,9 @@ static void swiotlb_bounce(struct device *dev, phys_addr_t tlb_addr, size_t size
 			offset = 0;
 		}
 	} else if (dir == DMA_TO_DEVICE) {
-		memcpy(vaddr, phys_to_virt(orig_addr), size);
+		memcpy(vaddr, phys_to_virt_sz(orig_addr, size), size);
 	} else {
-		memcpy(phys_to_virt(orig_addr), vaddr, size);
+		memcpy(phys_to_virt_sz(orig_addr, size), vaddr, size);
 	}
 }
 
