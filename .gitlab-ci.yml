@@ -54,6 +54,29 @@ build_riscv64_cheri_compiletest:
     - CONFIG=cheri_compiletest_defconfig
     - *riscv64_cheri_script
 
+build_x730:
+  stage: build
+  rules:
+    - if: $SCHEDULE == "weekly"
+    - if: $SCHEDULE == "all"
+  script:
+    - CONFIG=codasip-x730-hobgoblin2_defconfig
+    - *riscv64_cheri_script
+
+build_a730:
+  stage: build
+  rules:
+    - if: $SCHEDULE == "weekly"
+    - if: $SCHEDULE == "all"
+  script:
+    - CONFIG=codasip-a730-hobgoblin2_defconfig
+    - mkdir -p $CI_PROJECT_DIR
+    - cd $CI_PROJECT_DIR
+    - 'PATH="/opt/cherillvm/bin:${PATH}"'
+    - export PATH
+    - 'make LLVM=1 ARCH=riscv CC="clang -target riscv64" HOSTCC=/usr/bin/gcc "${CONFIG}"'
+    - 'make -j $(nproc) LLVM=1 ARCH=riscv CC="clang -target riscv64" HOSTCC=/usr/bin/gcc all modules'
+
 build_morello:
   stage: build
   script:
