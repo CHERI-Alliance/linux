@@ -33,8 +33,8 @@
 
 #ifdef CONFIG_CHERI_KERNEL
 
-#define CREG_L		lc
-#define CREG_S		sc
+#define CREG_L		__ASM_STR(lc)
+#define CREG_S		__ASM_STR(sc)
 #define CREG_ASM	__REG_SEL(.chericap, .dword)
 #define CSZREG		__REG_SEL(16, 8)
 #define CLGREG		__REG_SEL(4, 3)
