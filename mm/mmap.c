@@ -787,8 +787,8 @@ generic_get_unmapped_area(struct file *filp, unsigned long addr,
 		    (!prev || aligned_addr >= vm_end_gap(prev)))
 			return addr;
 		else if (flags & MAP_FIXED) {
-			if ((vma && reserv_vma_range_within_reserv(vma, aligned_addr, aligned_len)) ||
-			    (prev && reserv_vma_range_within_reserv(prev, aligned_addr, aligned_len)))
+			if ((vma && reserv_vma_range_within_reserv(vma, addr, len)) ||
+			    (prev && reserv_vma_range_within_reserv(prev, addr, len)))
 				return addr;
 			return -ERESERVATION;
 		}
@@ -855,8 +855,8 @@ generic_get_unmapped_area_topdown(struct file *filp, unsigned long addr,
 				(!prev || aligned_addr >= vm_end_gap(prev)))
 			return addr;
 		else if (flags & MAP_FIXED) {
-			if ((vma && reserv_vma_range_within_reserv(vma, aligned_addr, aligned_len)) ||
-			    (prev && reserv_vma_range_within_reserv(prev, aligned_addr, aligned_len))) {
+			if ((vma && reserv_vma_range_within_reserv(vma, addr, len)) ||
+			    (prev && reserv_vma_range_within_reserv(prev, addr, len))) {
 				return addr;
 			}
 			return -ERESERVATION;
