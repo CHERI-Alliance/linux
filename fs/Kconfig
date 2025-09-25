@@ -7,6 +7,7 @@ menu "File systems"
 
 # Use unaligned word dcache accesses
 config DCACHE_WORD_ACCESS
+	depends on !CHERI_KERNEL
        bool
 
 config VALIDATE_FS_PARSER
