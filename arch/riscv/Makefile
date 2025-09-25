@@ -116,6 +116,11 @@ riscv-march-$(CONFIG_TOOLCHAIN_HAS_ZABHA) := $(riscv-march-y)_zabha
 # Enable RISCV CHERI support if requested
 riscv-march-$(CONFIG_CHERI_KERNEL) := $(riscv-march-y)_zcherihybrid
 
+# Enable RISCV ZCB support if requested
+riscv-march-$(CONFIG_RISCV_ISA_ZCB) := $(riscv-march-y)_zcb
+
+# Enable RISCV ZISH4ADD support if requested
+riscv-march-$(CONFIG_RISCV_ISA_ZISH4ADD) := $(riscv-march-y)_zish4add
 
 # Remove F,D,V from isa string for all. Keep extensions between "fd" and "v" by
 # matching non-v and non-multi-letter extensions out with the filter ([^v_]*)
