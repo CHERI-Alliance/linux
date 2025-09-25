@@ -987,8 +987,7 @@ config RISCV_SLOW_UNALIGNED_ACCESS
 config RISCV_EFFICIENT_UNALIGNED_ACCESS
 	bool "Assume the system supports fast unaligned memory accesses"
 	depends on NONPORTABLE
-	depends on !RISCV_CHERI
-	select DCACHE_WORD_ACCESS if MMU
+	select DCACHE_WORD_ACCESS if MMU && !CHERI_KERNEL
 	select HAVE_EFFICIENT_UNALIGNED_ACCESS
 	help
 	  Assume that the system supports fast unaligned memory accesses. When

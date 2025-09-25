@@ -30,7 +30,8 @@ long copy_from_kernel_nofault(void *dst, const void *src, size_t size)
 {
 	unsigned long align = 0;
 
-	if (!IS_ENABLED(CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS))
+	if (!IS_ENABLED(CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS)
+	    || IS_ENABLED(CONFIG_CHERI_KERNEL))
 		align = __c_pa(dst) | __c_pa(src);
 
 	if (!copy_from_kernel_nofault_allowed(src, size))
@@ -39,6 +40,8 @@ long copy_from_kernel_nofault(void *dst, const void *src, size_t size)
 	pagefault_disable();
 	if (align % __SIZEOF_POINTER__ == 0)
 		copy_from_kernel_nofault_loop(dst, src, size, uintptr_t, Efault);
+	if (IS_ENABLED(CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS))
+		align = 0;
 	if (!(align & 7))
 		copy_from_kernel_nofault_loop(dst, src, size, u64, Efault);
 	if (!(align & 3))
@@ -67,12 +70,15 @@ long copy_to_kernel_nofault(void *dst, const void *src, size_t size)
 {
 	unsigned long align = 0;
 
-	if (!IS_ENABLED(CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS))
+	if (!IS_ENABLED(CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS)
+	    || IS_ENABLED(CONFIG_CHERI_KERNEL))
 		align = __c_pa(dst) | __c_pa(src);
 
 	pagefault_disable();
 	if (align % __SIZEOF_POINTER__ == 0)
 		copy_to_kernel_nofault_loop(dst, src, size, uintptr_t, Efault);
+	if (IS_ENABLED(CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS))
+		align = 0;
 	if (!(align & 7))
 		copy_to_kernel_nofault_loop(dst, src, size, u64, Efault);
 	if (!(align & 3))

@@ -66,7 +66,7 @@ static inline unsigned long load_unaligned_zeropad(const void *addr)
 	"2:\n"
 	_ASM_EXTABLE_LOAD_UNALIGNED_ZEROPAD(1b, 2b, %0, %1)
 	: "=&r" (ret)
-	: "r" (addr), "m" (*(unsigned long *)addr));
+	: PTRC (addr), "m" (*(unsigned long *)addr));
 
 	return ret;
 }
