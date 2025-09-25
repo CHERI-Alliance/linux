@@ -22,7 +22,7 @@ void my_direct_func2(void)
 extern void my_tramp1(void *);
 extern void my_tramp2(void *);
 
-static unsigned long my_ip = (unsigned long)schedule;
+static uintptr_t my_ip = (uintptr_t)schedule;
 
 #ifdef CONFIG_RISCV
 #include <asm/asm.h>
@@ -32,27 +32,27 @@ asm (
 "	.type		my_tramp1, @function\n"
 "	.globl		my_tramp1\n"
 "   my_tramp1:\n"
-"	addi	sp,sp,-2*"SZREG"\n"
-"	"REG_S"	t0,0*"SZREG"(sp)\n"
-"	"REG_S"	ra,1*"SZREG"(sp)\n"
+"	"CINSN(addi)"	"CREG(sp)","CREG(sp)",-2*"CSZREG"\n"
+"	"CREG_S"	"CREG(t0)",0*"CSZREG"("CREG(sp)")\n"
+"	"CREG_S"	"CREG(ra)",1*"CSZREG"("CREG(sp)")\n"
 "	call	my_direct_func1\n"
-"	"REG_L"	t0,0*"SZREG"(sp)\n"
-"	"REG_L"	ra,1*"SZREG"(sp)\n"
-"	addi	sp,sp,2*"SZREG"\n"
-"	jr	t0\n"
+"	"CREG_L"	"CREG(t0)",0*"CSZREG"("CREG(sp)")\n"
+"	"CREG_L"	"CREG(ra)",1*"CSZREG"("CREG(sp)")\n"
+"	"CINSN(addi)"	"CREG(sp)","CREG(sp)",2*"CSZREG"\n"
+"	jr	"CREG(t0)"\n"
 "	.size		my_tramp1, .-my_tramp1\n"
 "	.type		my_tramp2, @function\n"
 "	.globl		my_tramp2\n"
 
 "   my_tramp2:\n"
-"	addi	sp,sp,-2*"SZREG"\n"
-"	"REG_S"	t0,0*"SZREG"(sp)\n"
-"	"REG_S"	ra,1*"SZREG"(sp)\n"
+"	"CINSN(addi)"	"CREG(sp)","CREG(sp)",-2*"CSZREG"\n"
+"	"CREG_S"	"CREG(t0)",0*"CSZREG"("CREG(sp)")\n"
+"	"CREG_S"	"CREG(ra)",1*"CSZREG"("CREG(sp)")\n"
 "	call	my_direct_func2\n"
-"	"REG_L"	t0,0*"SZREG"(sp)\n"
-"	"REG_L"	ra,1*"SZREG"(sp)\n"
-"	addi	sp,sp,2*"SZREG"\n"
-"	jr	t0\n"
+"	"CREG_L"	"CREG(t0)",0*"CSZREG"("CREG(sp)")\n"
+"	"CREG_L"	"CREG(ra)",1*"CSZREG"("CREG(sp)")\n"
+"	"CINSN(addi)"	"CREG(sp)","CREG(sp)",2*"CSZREG"\n"
+"	jr	"CREG(t0)"\n"
 "	.size		my_tramp2, .-my_tramp2\n"
 "	.popsection\n"
 );
@@ -284,10 +284,10 @@ asm (
 
 static struct ftrace_ops direct;
 
-static unsigned long my_tramp = (unsigned long)my_tramp1;
-static unsigned long tramps[2] = {
-	(unsigned long)my_tramp1,
-	(unsigned long)my_tramp2,
+static uintptr_t my_tramp = (uintptr_t)my_tramp1;
+static uintptr_t tramps[2] = {
+	(uintptr_t)my_tramp1,
+	(uintptr_t)my_tramp2,
 };
 
 static int simple_thread(void *arg)
@@ -317,7 +317,7 @@ static int __init ftrace_direct_init(void)
 {
 	int ret;
 
-	ftrace_set_filter_ip(&direct, (unsigned long) my_ip, 0, 0);
+	ftrace_set_filter_ip(&direct, __c_ua(my_ip), 0, 0);
 	ret = register_ftrace_direct(&direct, my_tramp);
 
 	if (!ret)
@@ -328,7 +328,7 @@ static int __init ftrace_direct_init(void)
 static void __exit ftrace_direct_exit(void)
 {
 	kthread_stop(simple_tsk);
-	unregister_ftrace_direct(&direct, my_tramp, true);
+	unregister_ftrace_direct(&direct, __c_ua(my_tramp), true);
 }
 
 module_init(ftrace_direct_init);
