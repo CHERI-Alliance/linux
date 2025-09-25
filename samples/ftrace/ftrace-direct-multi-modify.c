@@ -30,33 +30,33 @@ asm (
 "	.type		my_tramp1, @function\n"
 "	.globl		my_tramp1\n"
 "   my_tramp1:\n"
-"       addi	sp,sp,-3*"SZREG"\n"
-"       "REG_S"	a0,0*"SZREG"(sp)\n"
-"       "REG_S"	t0,1*"SZREG"(sp)\n"
-"       "REG_S"	ra,2*"SZREG"(sp)\n"
-"       mv	a0,t0\n"
+"       "CINSN(addi)"	"CREG(sp)","CREG(sp)",-3*"CSZREG"\n"
+"       "CREG_S"	"CREG(a0)",0*"CSZREG"("CREG(sp)")\n"
+"       "CREG_S"	"CREG(t0)",1*"CSZREG"("CREG(sp)")\n"
+"       "CREG_S"	"CREG(ra)",2*"CSZREG"("CREG(sp)")\n"
+"       mv	"CREG(a0)","CREG(t0)"\n"
 "       call	my_direct_func1\n"
-"       "REG_L"	a0,0*"SZREG"(sp)\n"
-"       "REG_L"	t0,1*"SZREG"(sp)\n"
-"       "REG_L"	ra,2*"SZREG"(sp)\n"
-"       addi	sp,sp,3*"SZREG"\n"
-"	jr	t0\n"
+"       "CREG_L"	"CREG(a0)",0*"CSZREG"("CREG(sp)")\n"
+"       "CREG_L"	"CREG(t0)",1*"CSZREG"("CREG(sp)")\n"
+"       "CREG_L"	"CREG(ra)",2*"CSZREG"("CREG(sp)")\n"
+"       "CINSN(addi)"	"CREG(sp)","CREG(sp)",3*"CSZREG"\n"
+"       jr	"CREG(t0)"\n"
 "	.size		my_tramp1, .-my_tramp1\n"
 
 "	.type		my_tramp2, @function\n"
 "	.globl		my_tramp2\n"
 "   my_tramp2:\n"
-"       addi	sp,sp,-3*"SZREG"\n"
-"       "REG_S"	a0,0*"SZREG"(sp)\n"
-"       "REG_S"	t0,1*"SZREG"(sp)\n"
-"       "REG_S"	ra,2*"SZREG"(sp)\n"
-"       mv	a0,t0\n"
+"       "CINSN(addi)"	"CREG(sp)","CREG(sp)",-3*"CSZREG"\n"
+"       "CREG_S"	"CREG(a0)",0*"CSZREG"("CREG(sp)")\n"
+"       "CREG_S"	"CREG(t0)",1*"CSZREG"("CREG(sp)")\n"
+"       "CREG_S"	"CREG(ra)",2*"CSZREG"("CREG(sp)")\n"
+"       mv	"CREG(a0)","CREG(t0)"\n"
 "       call	my_direct_func2\n"
-"       "REG_L"	a0,0*"SZREG"(sp)\n"
-"       "REG_L"	t0,1*"SZREG"(sp)\n"
-"       "REG_L"	ra,2*"SZREG"(sp)\n"
-"       addi	sp,sp,3*"SZREG"\n"
-"	jr	t0\n"
+"       "CREG_L"	"CREG(a0)",0*"CSZREG"("CREG(sp)")\n"
+"       "CREG_L"	"CREG(t0)",1*"CSZREG"("CREG(sp)")\n"
+"       "CREG_L"	"CREG(ra)",2*"CSZREG"("CREG(sp)")\n"
+"       "CINSN(addi)"	"CREG(sp)","CREG(sp)",3*"CSZREG"\n"
+"       jr	"CREG(t0)"\n"
 "	.size		my_tramp2, .-my_tramp2\n"
 "	.popsection\n"
 );
@@ -324,10 +324,10 @@ asm (
 
 #endif /* CONFIG_PPC */
 
-static unsigned long my_tramp = (unsigned long)my_tramp1;
-static unsigned long tramps[2] = {
-	(unsigned long)my_tramp1,
-	(unsigned long)my_tramp2,
+static uintptr_t my_tramp = (uintptr_t)my_tramp1;
+static uintptr_t tramps[2] = {
+	(uintptr_t)my_tramp1,
+	(uintptr_t)my_tramp2,
 };
 
 static struct ftrace_ops direct;
@@ -359,8 +359,8 @@ static int __init ftrace_direct_multi_init(void)
 {
 	int ret;
 
-	ftrace_set_filter_ip(&direct, (unsigned long) wake_up_process, 0, 0);
-	ftrace_set_filter_ip(&direct, (unsigned long) schedule, 0, 0);
+	ftrace_set_filter_ip(&direct, __c_pa(wake_up_process), 0, 0);
+	ftrace_set_filter_ip(&direct, __c_pa(schedule), 0, 0);
 
 	ret = register_ftrace_direct(&direct, my_tramp);
 
@@ -372,7 +372,7 @@ static int __init ftrace_direct_multi_init(void)
 static void __exit ftrace_direct_multi_exit(void)
 {
 	kthread_stop(simple_tsk);
-	unregister_ftrace_direct(&direct, my_tramp, true);
+	unregister_ftrace_direct(&direct, __c_ua(my_tramp), true);
 }
 
 module_init(ftrace_direct_multi_init);
