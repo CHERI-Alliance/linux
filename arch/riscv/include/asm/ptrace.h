@@ -138,7 +138,7 @@ extern int regs_query_register_offset(const char *name);
 extern unsigned long regs_get_kernel_stack_nth(struct pt_regs *regs,
 					       unsigned int n);
 
-void prepare_ftrace_return(unsigned long *parent, unsigned long self_addr,
+void prepare_ftrace_return(uintptr_t *parent, unsigned long self_addr,
 			   unsigned long frame_pointer);
 
 /**

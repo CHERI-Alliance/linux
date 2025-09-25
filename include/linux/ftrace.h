@@ -44,7 +44,7 @@ struct dyn_ftrace;
 char *arch_ftrace_match_adjust(char *str, const char *search);
 
 #ifdef CONFIG_HAVE_FUNCTION_GRAPH_FREGS
-unsigned long ftrace_return_to_handler(struct ftrace_regs *fregs);
+uintptr_t ftrace_return_to_handler(struct ftrace_regs *fregs);
 #else
 unsigned long ftrace_return_to_handler(unsigned long frame_pointer);
 #endif
@@ -1191,12 +1191,12 @@ void *fgraph_retrieve_parent_data(int idx, int *size_bytes, int depth);
  * Used in struct thread_info
  */
 struct ftrace_ret_stack {
-	unsigned long ret;
+	uintptr_t ret;
 	unsigned long func;
 #ifdef HAVE_FUNCTION_GRAPH_FP_TEST
 	unsigned long fp;
 #endif
-	unsigned long *retp;
+	uintptr_t *retp;
 };
 
 /*
@@ -1207,12 +1207,12 @@ struct ftrace_ret_stack {
 extern void return_to_handler(void);
 
 extern int
-function_graph_enter_regs(unsigned long ret, unsigned long func,
-			  unsigned long frame_pointer, unsigned long *retp,
+function_graph_enter_regs(uintptr_t ret, unsigned long func,
+			  unsigned long frame_pointer, uintptr_t *retp,
 			  struct ftrace_regs *fregs);
 
-static inline int function_graph_enter(unsigned long ret, unsigned long func,
-				       unsigned long fp, unsigned long *retp)
+static inline int function_graph_enter(uintptr_t ret, unsigned long func,
+				       unsigned long fp, uintptr_t *retp)
 {
 	return function_graph_enter_regs(ret, func, fp, retp, NULL);
 }
@@ -1222,8 +1222,8 @@ ftrace_graph_get_ret_stack(struct task_struct *task, int skip);
 unsigned long ftrace_graph_top_ret_addr(struct task_struct *task);
 
 unsigned long ftrace_graph_ret_addr(struct task_struct *task, int *idx,
-				    unsigned long ret, unsigned long *retp);
-unsigned long *fgraph_get_task_var(struct fgraph_ops *gops);
+				    unsigned long ret, uintptr_t *retp);
+uintptr_t *fgraph_get_task_var(struct fgraph_ops *gops);
 
 /*
  * Sometimes we don't want to trace a function with the function

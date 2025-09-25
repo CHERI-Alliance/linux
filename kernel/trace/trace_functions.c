@@ -193,7 +193,7 @@ function_get_true_parent_ip(unsigned long parent_ip, struct ftrace_regs *fregs)
 	true_parent_ip = parent_ip;
 	if (unlikely(parent_ip == (unsigned long)&return_to_handler) && fregs)
 		true_parent_ip = ftrace_graph_ret_addr(current, &idx, parent_ip,
-				(unsigned long *)ftrace_regs_get_stack_pointer(fregs));
+			        (uintptr_t *)ftrace_regs_get_stack_pointer(fregs));
 	return true_parent_ip;
 }
 #else

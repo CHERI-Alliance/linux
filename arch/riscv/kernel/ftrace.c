@@ -232,11 +232,11 @@ int ftrace_modify_call(struct dyn_ftrace *rec, unsigned long old_addr,
 /*
  * Most of this function is copied from arm64.
  */
-void prepare_ftrace_return(unsigned long *parent, unsigned long self_addr,
+void prepare_ftrace_return(uintptr_t *parent, unsigned long self_addr,
 			   unsigned long frame_pointer)
 {
-	unsigned long return_hooker = (unsigned long)&return_to_handler;
-	unsigned long old;
+	uintptr_t return_hooker = (uintptr_t)&return_to_handler;
+	register_t old;
 
 	if (unlikely(atomic_read(&current->tracing_graph_pause)))
 		return;
@@ -255,10 +255,10 @@ void prepare_ftrace_return(unsigned long *parent, unsigned long self_addr,
 void ftrace_graph_func(unsigned long ip, unsigned long parent_ip,
 		       struct ftrace_ops *op, struct ftrace_regs *fregs)
 {
-	unsigned long return_hooker = (unsigned long)&return_to_handler;
-	unsigned long frame_pointer = arch_ftrace_regs(fregs)->s0;
-	unsigned long *parent = &arch_ftrace_regs(fregs)->ra;
-	unsigned long old;
+	register_t return_hooker = (register_t)&return_to_handler;
+	unsigned long frame_pointer = __c_ua(arch_ftrace_regs(fregs)->s0);
+	register_t *parent = &arch_ftrace_regs(fregs)->ra;
+	register_t old;
 
 	if (unlikely(atomic_read(&current->tracing_graph_pause)))
 		return;

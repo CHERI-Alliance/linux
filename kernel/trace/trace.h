@@ -1000,12 +1000,12 @@ enum {
 
 #define TRACE_GRAPH_NOTRACE		(1 << TRACE_GRAPH_NOTRACE_BIT)
 
-static inline unsigned long ftrace_graph_depth(unsigned long *task_var)
+static inline unsigned long ftrace_graph_depth(uintptr_t *task_var)
 {
 	return (*task_var >> TRACE_GRAPH_DEPTH_START_BIT) & 3;
 }
 
-static inline void ftrace_graph_set_depth(unsigned long *task_var, int depth)
+static inline void ftrace_graph_set_depth(uintptr_t *task_var, int depth)
 {
 	*task_var &= ~(3 << TRACE_GRAPH_DEPTH_START_BIT);
 	*task_var |= (depth & 3) << TRACE_GRAPH_DEPTH_START_BIT;
@@ -1016,7 +1016,7 @@ extern struct ftrace_hash __rcu *ftrace_graph_hash;
 extern struct ftrace_hash __rcu *ftrace_graph_notrace_hash;
 
 static inline int
-ftrace_graph_addr(unsigned long *task_var, struct ftrace_graph_ent *trace)
+ftrace_graph_addr(uintptr_t *task_var, struct ftrace_graph_ent *trace)
 {
 	unsigned long addr = trace->func;
 	int ret = 0;
@@ -1065,9 +1065,9 @@ out:
 static inline void
 ftrace_graph_addr_finish(struct fgraph_ops *gops, struct ftrace_graph_ret *trace)
 {
-	unsigned long *task_var = fgraph_get_task_var(gops);
+	uintptr_t *task_var = fgraph_get_task_var(gops);
 
-	if ((*task_var & TRACE_GRAPH_FL) &&
+	if ((__c_ua(*task_var) & TRACE_GRAPH_FL) &&
 	    trace->depth == ftrace_graph_depth(task_var))
 		*task_var &= ~TRACE_GRAPH_FL;
 }
@@ -1114,10 +1114,10 @@ extern bool fgraph_sleep_time;
 static inline bool
 ftrace_graph_ignore_func(struct fgraph_ops *gops, struct ftrace_graph_ent *trace)
 {
-	unsigned long *task_var = fgraph_get_task_var(gops);
+	uintptr_t *task_var = fgraph_get_task_var(gops);
 
 	/* trace it when it is-nested-in or is a function enabled. */
-	return !((*task_var & TRACE_GRAPH_FL) ||
+	return !((__c_ua(*task_var) & TRACE_GRAPH_FL) ||
 		 ftrace_graph_addr(task_var, trace)) ||
 		(trace->depth < 0) ||
 		(fgraph_max_depth && trace->depth >= fgraph_max_depth);
