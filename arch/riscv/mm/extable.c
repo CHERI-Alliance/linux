@@ -67,17 +67,29 @@ ex_handler_load_unaligned_zeropad(const struct exception_table_entry *ex,
 {
 	int reg_data = FIELD_GET(EX_DATA_REG_DATA, ex->data);
 	int reg_addr = FIELD_GET(EX_DATA_REG_ADDR, ex->data);
-	unsigned long offset;
-	uintptr_t data, addr;
+	long offset;
+	unsigned long data;
+	uintptr_t addr;
 
 	addr = regs_get_gpr(regs, reg_addr * sizeof(uintptr_t));
 
+#ifdef CONFIG_CHERI_KERNEL
+	/* For CHERI make sure that we do not overrun the capability bounds. */
+	data = 0;
+	offset = cheri_base_get(addr) + cheri_length_get(addr) - __c_ua(addr);
+	while (offset > 0 && offset <= sizeof(data)) {
+		offset--;
+		data <<= 8;
+		data |= *(u8 *)(addr + offset);
+	}
+#else
 	offset = __c_ua(addr) & 0x7UL;
 	addr &= ~0x7UL;
 
-	data = __c_fakeu(*(unsigned long *)addr >> (offset * 8));
+	data = (*(unsigned long *)addr >> (offset * 8));
+#endif
 
-	regs_set_gpr(regs, reg_data * sizeof(uintptr_t), data);
+	regs_set_gpr(regs, reg_data * sizeof(uintptr_t), __c_fakeu(data));
 
 	regs->epc = get_ex_fixup(ex, regs);
 	return true;
