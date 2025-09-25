@@ -27,20 +27,20 @@ asm (
 "       .type           my_tramp, @function\n"
 "       .globl          my_tramp\n"
 "   my_tramp:\n"
-"       addi	sp,sp,-5*"SZREG"\n"
-"       "REG_S"	a0,0*"SZREG"(sp)\n"
-"       "REG_S"	a1,1*"SZREG"(sp)\n"
-"       "REG_S"	a2,2*"SZREG"(sp)\n"
-"       "REG_S"	t0,3*"SZREG"(sp)\n"
-"       "REG_S"	ra,4*"SZREG"(sp)\n"
+"       "CINSN(addi)"	"CREG(sp)","CREG(sp)",-5*"CSZREG"\n"
+"       "CREG_S"	"CREG(a0)",0*"CSZREG"("CREG(sp)")\n"
+"       "CREG_S"	"CREG(a1)",1*"CSZREG"("CREG(sp)")\n"
+"       "CREG_S"	"CREG(a2)",2*"CSZREG"("CREG(sp)")\n"
+"       "CREG_S"	"CREG(t0)",3*"CSZREG"("CREG(sp)")\n"
+"       "CREG_S"	"CREG(ra)",4*"CSZREG"("CREG(sp)")\n"
 "       call	my_direct_func\n"
-"       "REG_L"	a0,0*"SZREG"(sp)\n"
-"       "REG_L"	a1,1*"SZREG"(sp)\n"
-"       "REG_L"	a2,2*"SZREG"(sp)\n"
-"       "REG_L"	t0,3*"SZREG"(sp)\n"
-"       "REG_L"	ra,4*"SZREG"(sp)\n"
-"       addi	sp,sp,5*"SZREG"\n"
-"       jr	t0\n"
+"       "CREG_L"	"CREG(a0)",0*"CSZREG"("CREG(sp)")\n"
+"       "CREG_L"	"CREG(a1)",1*"CSZREG"("CREG(sp)")\n"
+"       "CREG_L"	"CREG(a2)",2*"CSZREG"("CREG(sp)")\n"
+"       "CREG_L"	"CREG(t0)",3*"CSZREG"("CREG(sp)")\n"
+"       "CREG_L"	"CREG(ra)",4*"CSZREG"("CREG(sp)")\n"
+"       "CINSN(addi)"	"CREG(sp)","CREG(sp)",5*"CSZREG"\n"
+"       jr	"CREG(t0)"\n"
 "       .size           my_tramp, .-my_tramp\n"
 "       .popsection\n"
 );
@@ -238,14 +238,14 @@ static struct ftrace_ops direct;
 
 static int __init ftrace_direct_init(void)
 {
-	ftrace_set_filter_ip(&direct, (unsigned long) handle_mm_fault, 0, 0);
+	ftrace_set_filter_ip(&direct, __c_pa(handle_mm_fault), 0, 0);
 
-	return register_ftrace_direct(&direct, (unsigned long) my_tramp);
+	return register_ftrace_direct(&direct, (uintptr_t)my_tramp);
 }
 
 static void __exit ftrace_direct_exit(void)
 {
-	unregister_ftrace_direct(&direct, (unsigned long)my_tramp, true);
+	unregister_ftrace_direct(&direct, __c_pa(my_tramp), true);
 }
 
 module_init(ftrace_direct_init);
