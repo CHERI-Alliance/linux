@@ -116,6 +116,12 @@ riscv-march-$(CONFIG_TOOLCHAIN_HAS_ZABHA) := $(riscv-march-y)_zabha
 # Enable RISCV CHERI support if requested
 riscv-march-$(CONFIG_CHERI_KERNEL) := $(riscv-march-y)_zcherihybrid
 
+# Enable RISCV ZCB support if requested
+riscv-march-$(CONFIG_RISCV_ISA_ZCB) := $(riscv-march-y)_zcb
+
+# Enable RISCV ZISH4ADD support if requested
+riscv-march-$(CONFIG_RISCV_ISA_ZISH4ADD) := $(riscv-march-y)_zish4add
+
 KBUILD_BASE_ISA = -march=$(shell echo $(riscv-march-y) | sed -E 's/(rv32ima|rv64ima)fd([^v_]*)v?/\1\2/')
 export KBUILD_BASE_ISA
 
