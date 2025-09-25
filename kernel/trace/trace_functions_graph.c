@@ -142,7 +142,7 @@ static int __graph_entry(struct trace_array *tr, struct ftrace_graph_ent *trace,
 #ifdef CONFIG_HAVE_FUNCTION_ARG_ACCESS_API
 	if (fregs) {
 		for (int i = 0; i < FTRACE_REGS_MAX_ARGS; i++)
-			entry->args[i] = ftrace_regs_get_argument(fregs, i);
+			entry->args[i] = __c_ua(ftrace_regs_get_argument(fregs, i));
 	}
 #endif
 
@@ -207,13 +207,13 @@ static int graph_entry(struct ftrace_graph_ent *trace,
 		       struct fgraph_ops *gops,
 		       struct ftrace_regs *fregs)
 {
-	unsigned long *task_var = fgraph_get_task_var(gops);
+	uintptr_t *task_var = fgraph_get_task_var(gops);
 	struct trace_array *tr = gops->private;
 	struct fgraph_times *ftimes;
 	unsigned int trace_ctx;
 	int ret = 0;
 
-	if (*task_var & TRACE_GRAPH_NOTRACE)
+	if (__c_ua(*task_var) & TRACE_GRAPH_NOTRACE)
 		return 0;
 
 	/*
@@ -346,7 +346,7 @@ static void handle_nosleeptime(struct ftrace_graph_ret *trace,
 void trace_graph_return(struct ftrace_graph_ret *trace,
 			struct fgraph_ops *gops, struct ftrace_regs *fregs)
 {
-	unsigned long *task_var = fgraph_get_task_var(gops);
+	uintptr_t *task_var = fgraph_get_task_var(gops);
 	struct trace_array *tr = gops->private;
 	struct fgraph_times *ftimes;
 	unsigned int trace_ctx;
@@ -961,7 +961,7 @@ print_graph_entry_leaf(struct trace_iterator *iter,
 				   (void *)graph_ret->func + iter->tr->text_delta,
 				   flags, tr->trace_flags, args_size);
 	} else {
-		trace_seq_printf(s, "%ps", (void *)ret_func);
+		trace_seq_printf(s, "%ps", __c_fakep(ret_func));
 
 		if (args_size >= FTRACE_REGS_MAX_ARGS * sizeof(long)) {
 			print_function_args(s, entry->args, ret_func);
@@ -1011,7 +1011,7 @@ print_graph_entry_nested(struct trace_iterator *iter,
 
 	func = call->func + iter->tr->text_delta;
 
-	trace_seq_printf(s, "%ps", (void *)func);
+	trace_seq_printf(s, "%ps", __c_fakep(func));
 
 	args_size = iter->ent_size - offsetof(struct ftrace_graph_ent_entry, args);
 
@@ -1309,7 +1309,7 @@ print_graph_return(struct ftrace_graph_ret_entry *retentry, struct trace_seq *s,
 		if (func_match && !(flags & TRACE_GRAPH_PRINT_TAIL))
 			trace_seq_puts(s, "}");
 		else
-			trace_seq_printf(s, "} /* %ps */", (void *)func);
+			trace_seq_printf(s, "} /* %ps */", __c_fakep(func));
 	}
 	trace_seq_putc(s, '\n');
 

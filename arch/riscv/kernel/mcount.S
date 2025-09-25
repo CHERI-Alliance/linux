@@ -27,12 +27,12 @@
 	 * register if a0 was not saved.
 	 */
 	.macro SAVE_RET_ABI_STATE
-	addi	sp, sp, -FREGS_SIZE_ON_STACK
-	REG_S	ra, FREGS_RA(sp)
-	REG_S	s0, FREGS_S0(sp)
-	REG_S	a0, FREGS_A0(sp)
-	REG_S	a1, FREGS_A1(sp)
-	addi	s0, sp, FREGS_SIZE_ON_STACK
+	CINSN(addi)	CREG(sp), CREG(sp), -FREGS_SIZE_ON_STACK
+	CREG_S	CREG(ra), FREGS_RA(CREG(sp))
+	CREG_S	CREG(s0), FREGS_S0(CREG(sp))
+	CREG_S	CREG(a0), FREGS_A0(CREG(sp))
+	CREG_S	CREG(a1), FREGS_A1(CREG(sp))
+	CINSN(addi)	CREG(s0), CREG(sp), FREGS_SIZE_ON_STACK
 	.endm
 
 	.macro RESTORE_ABI_STATE
@@ -42,11 +42,11 @@
 	.endm
 
 	.macro RESTORE_RET_ABI_STATE
-	REG_L	ra, FREGS_RA(sp)
-	REG_L	s0, FREGS_S0(sp)
-	REG_L	a0, FREGS_A0(sp)
-	REG_L	a1, FREGS_A1(sp)
-	addi	sp, sp, FREGS_SIZE_ON_STACK
+	CREG_L	CREG(ra), FREGS_RA(CREG(sp))
+	CREG_L	CREG(s0), FREGS_S0(CREG(sp))
+	CREG_L	CREG(a0), FREGS_A0(CREG(sp))
+	CREG_L	CREG(a1), FREGS_A1(CREG(sp))
+	CINSN(addi)	CREG(sp), CREG(sp), FREGS_SIZE_ON_STACK
 	.endm
 
 SYM_TYPED_FUNC_START(ftrace_stub)
@@ -72,11 +72,11 @@ SYM_FUNC_START(return_to_handler)
  * value stored in -16(s0) on entry, and the s0 on return.
  */
 	SAVE_RET_ABI_STATE
-	mv	a0, sp
+	mv	CREG(a0), CREG(sp)
 	call	ftrace_return_to_handler
-	mv	a2, a0
+	mv	CREG(a2), CREG(a0)
 	RESTORE_RET_ABI_STATE
-	jalr	a2
+	jalr	0(CREG(a2))
 SYM_FUNC_END(return_to_handler)
 #endif
 
