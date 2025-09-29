@@ -205,7 +205,7 @@ extern phys_addr_t __phys_addr_symbol(unsigned long x);
 #define page_to_virt(page) \
 ({ \
 	unsigned long addr = __va_a(pfn_to_phys(page_to_pfn(page))); \
-	long order = (long)(page)->alloc_order; \
+	long order = (page)->alloc_order; \
 	void * __ret = __c_fakep(addr); \
 	if (likely(order >= 0)) { \
 		unsigned long sz = PAGE_SIZE << order; \
