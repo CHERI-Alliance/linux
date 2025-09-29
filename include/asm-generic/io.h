@@ -1096,12 +1096,19 @@ static inline void iowrite64_rep(volatile void __iomem *addr,
 static inline void *__va_bounded(unsigned long address)
 {
 	struct page *page = phys_to_page(address);
+	long order = page->alloc_order;
 	unsigned long addr = __va_a(address);
 	unsigned long sz;
 
-	if (page->alloc_order < 0)
+	if (unlikely(order == -1))
 		return __c_fakep(addr);
-	sz = PAGE_SIZE << page->alloc_order;
+
+	if (order < 0) {
+		sz = (unsigned long)-order;
+		return cheri_build_kernel_data_cap(addr & PAGE_MASK, addr, sz);
+	}
+
+	sz = PAGE_SIZE << order;
 	return cheri_build_kernel_data_cap(ALIGN_DOWN(addr, sz), addr, sz);
 }
 #else
