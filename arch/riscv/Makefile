@@ -110,8 +110,9 @@ endif
 # Check if the toolchain supports Zacas
 riscv-march-$(CONFIG_TOOLCHAIN_HAS_ZACAS) := $(riscv-march-y)_zacas
 
-# Check if the toolchain supports Zabha
+# Check if the toolchain supports Zabha/Zabhlrsc
 riscv-march-$(CONFIG_TOOLCHAIN_HAS_ZABHA) := $(riscv-march-y)_zabha
+riscv-march-$(CONFIG_TOOLCHAIN_HAS_ZABHLRSC) := $(riscv-march-y)_zabhlrsc
 
 # Enable RISCV CHERI support if requested
 riscv-march-$(CONFIG_CHERI_KERNEL) := $(riscv-march-y)_zcherihybrid
