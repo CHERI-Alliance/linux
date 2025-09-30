@@ -108,6 +108,7 @@ static void hwprobe_isa_ext0(struct riscv_hwprobe *pair,
 		 */
 		EXT_KEY(ZAAMO);
 		EXT_KEY(ZABHA);
+		EXT_KEY(ZABHLRSC);
 		EXT_KEY(ZACAS);
 		EXT_KEY(ZALRSC);
 		EXT_KEY(ZAWRS);
