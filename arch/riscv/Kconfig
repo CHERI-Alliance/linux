@@ -424,6 +424,19 @@ config ARCH_RV64I
 
 endchoice
 
+config RISCV_ISA_APPEND
+	string "Append extensions to the ISA string"
+	depends on NONPORTABLE
+	default ""
+	help
+	  Append an arbitrary string to the default ISA string when
+	  compiling the kernel. This can be used to allow the compiler
+	  to use various extension when building the kernel itself.
+
+	  You must make sure that your toolchain and hardware support
+	  all of the extensions. The resulting kernel will not run on
+	  hardware that does not have all of the extensions.
+
 # We must be able to map all physical memory into the kernel, but the compiler
 # is still a bit more efficient when generating code if it's setup in a manner
 # such that it can only map 2GiB of memory.
@@ -811,40 +824,6 @@ config RISCV_ISA_ZBKB
 	   of common cryptography operations (pack, zip, etc).
 
 	   If you don't know what to do here, say Y.
-
-config TOOLCHAIN_HAS_ZCB
-	bool
-	default y
-	depends on !64BIT || $(cc-option,-mabi=lp64 -march=rv64ima_zcb)
-	depends on !32BIT || $(cc-option,-mabi=ilp32 -march=rv32ima_zcb)
-	depends on LLD_VERSION >= 150000 || LD_VERSION >= 23900
-	depends on AS_HAS_OPTION_ARCH
-
-config RISCV_ISA_ZCB
-	bool "Unconditionally make usr of the Zcb extension"
-	depends on TOOLCHAIN_HAS_ZCB
-	depends on NONPORTABLE
-	default n
-	help
-	  Unconditionally make use of the Zcb extension for compressed
-	  instructions.
-
-config TOOLCHAIN_HAS_ZISH4ADD
-	bool
-	default y
-	depends on !64BIT || $(cc-option,-mabi=lp64 -march=rv64ima_zish4add)
-	depends on !32BIT || $(cc-option,-mabi=ilp32 -march=rv32ima_zish4add)
-	depends on LLD_VERSION >= 150000 || LD_VERSION >= 23900
-	depends on AS_HAS_OPTION_ARCH
-
-config RISCV_ISA_ZISH4ADD
-	bool "Unconditionally make use of the Zish4add extension"
-	depends on TOOLCHAIN_HAS_ZISH4ADD
-	depends on NONPORTABLE
-	default n
-	help
-	  Unconditionally make use of the Zish4add extension for
-	  shfit+add instructions.
 
 config RISCV_ISA_ZICBOM
 	bool "Zicbom extension support for non-coherent DMA operation"
