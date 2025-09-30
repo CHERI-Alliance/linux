@@ -713,6 +713,13 @@ config RISCV_ISA_ZABHA
 
 	  If you don't know what to do here, say Y.
 
+config TOOLCHAIN_HAS_ZABHLRSC
+	bool
+	default y
+	depends on !64BIT || $(cc-option,-mabi=lp64 -march=rv64ima_zabhlrsc)
+	depends on !32BIT || $(cc-option,-mabi=ilp32 -march=rv32ima_zabhlrsc)
+	depends on AS_HAS_OPTION_ARCH
+
 config TOOLCHAIN_HAS_ZACAS
 	bool
 	default y

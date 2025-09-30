@@ -31,18 +31,30 @@
 
 #define SIZEOF_SAFE(X) ((sizeof(X) > __SIZEOF_LONG__) ? __SIZEOF_LONG__ : sizeof(X))
 
-#define __arch_xchg_masked(sc_sfx, swap_sfx, prepend, sc_append,		\
+#define __arch_xchg_masked(sc_sfx, sz, swap_sfx, prepend, sc_append,		\
 			   swap_append, r, p, n)				\
 ({										\
 	if (IS_ENABLED(CONFIG_RISCV_ISA_ZABHA) &&				\
 	    riscv_has_extension_unlikely(RISCV_ISA_EXT_ZABHA)) {		\
 		__asm__ __volatile__ (						\
 			prepend							\
-			"	amoswap" swap_sfx " %0, %z2, %1\n"		\
+			"	amoswap" sz swap_sfx " %0, %z2, %1\n"	\
 			swap_append						\
 			: "=&r" (r), "+A" (*(p))				\
 			: "rJ" (n)						\
 			: "memory");						\
+	} else if (IS_ENABLED(CONFIG_CHERI_KERNEL)) {				\
+		ulong __rc;							\
+		__asm__ __volatile__ (						\
+		       prepend							\
+		       PREFETCHW_ASM(%4)					\
+		       "0:	lr" sz " %0, %2\n"				\
+		       "	sc" sz sc_sfx " %1, %3, %2\n"			\
+		       "	bnez %1, 0b\n"					\
+		       sc_append						\
+		       : "=&r" (r), "=&r" (__rc), "+A" (*(p))			\
+		       : "rJ" (n), PTRC"J" (p)					\
+		       : "memory");						\
 	} else {								\
 		u32 *__ptr32b = (u32 *)((uintptr_t)(p) & ~0x3);			\
 		ulong __s = ((ulong __force)(p) & (0x4 - sizeof(*p))) * BITS_PER_BYTE;	\
@@ -97,12 +109,12 @@
 									\
 	switch (sizeof(*__ptr)) {					\
 	case 1:								\
-		__arch_xchg_masked(sc_sfx, ".b" swap_sfx,		\
+		__arch_xchg_masked(sc_sfx, ".b", swap_sfx,		\
 				   prepend, sc_append, swap_append,	\
 				   __ret, __ptr, __new);		\
 		break;							\
 	case 2:								\
-		__arch_xchg_masked(sc_sfx, ".h" swap_sfx,		\
+		__arch_xchg_masked(sc_sfx, ".h", swap_sfx,		\
 				   prepend, sc_append, swap_append,	\
 				   __ret, __ptr, __new);		\
 		break;							\
@@ -154,7 +166,7 @@
  * store NEW in MEM.  Return the initial value in MEM.  Success is
  * indicated by comparing RETURN with OLD.
  */
-#define __arch_cmpxchg_masked(sc_sfx, cas_sfx,					\
+#define __arch_cmpxchg_masked(sc_sfx, sz, cas_sfx,				\
 			      sc_prepend, sc_append,				\
 			      cas_prepend, cas_append,				\
 			      r, p, o, n)					\
@@ -168,11 +180,16 @@
 										\
 		__asm__ __volatile__ (						\
 			cas_prepend							\
-			"	amocas" cas_sfx " %0, %z2, %1\n"		\
+			"	amocas" sz cas_sfx " %0, %z2, %1\n"		\
 			cas_append							\
 			: "+&r" (r), "+A" (*(p))				\
 			: "rJ" (n)						\
 			: "memory");						\
+	} else if (IS_ENABLED(CONFIG_CHERI_KERNEL)) {				\
+		__arch_cmpxchg(sz, sz sc_sfx, sz cas_sfx,			\
+			       sc_prepend, sc_append,				\
+			       cas_prepend, cas_append,				\
+			       r, p, (long)(int)(long), o, n);			\
 	} else {								\
 		u32 *__ptr32b = (u32 *)((uintptr_t)(p) & ~0x3);			\
 		ulong __s = ((ulong __force)(p) & (0x4 - sizeof(*p))) * BITS_PER_BYTE;	\
@@ -271,13 +288,13 @@
 									\
 	switch (sizeof(*__ptr)) {					\
 	case 1:								\
-		__arch_cmpxchg_masked(sc_sfx, ".b" cas_sfx,		\
+		__arch_cmpxchg_masked(sc_sfx, ".b", cas_sfx,		\
 				      sc_prepend, sc_append,		\
 				      cas_prepend, cas_append,		\
 				      __ret, __ptr, __old, __new);	\
 		break;							\
 	case 2:								\
-		__arch_cmpxchg_masked(sc_sfx, ".h" cas_sfx,		\
+		__arch_cmpxchg_masked(sc_sfx, ".h", cas_sfx,		\
 				      sc_prepend, sc_append,		\
 				      cas_prepend, cas_append,		\
 				      __ret, __ptr, __old, __new);	\
