@@ -1142,6 +1142,13 @@ static inline void *phys_to_virt(unsigned long address)
 #define phys_to_virt_a(x) (__c_pa(phys_to_virt(x)))
 #endif
 
+static inline void *phys_to_virt_sz(unsigned long address, size_t sz)
+{
+	unsigned long addr = __va_a(address);
+
+	return cheri_build_kernel_data_cap(addr, addr, sz);
+}
+
 /**
  * DOC: ioremap() and ioremap_*() variants
  *
