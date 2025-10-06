@@ -7,6 +7,7 @@
 
 #include <linux/dma-direct.h>
 #include <linux/dma-map-ops.h>
+#include <linux/io.h>
 #include <linux/mm.h>
 #include <asm/cacheflush.h>
 #include <asm/dma-noncoherent.h>
@@ -14,13 +15,6 @@
 static bool noncoherent_supported __ro_after_init;
 int dma_cache_alignment __ro_after_init = ARCH_DMA_MINALIGN;
 EXPORT_SYMBOL_GPL(dma_cache_alignment);
-
-static inline void *phys_to_virt_sz(unsigned long address, size_t sz)
-{
-	unsigned long addr = __va_a(address);
-
-	return cheri_build_kernel_data_cap(addr, addr, sz);
-}
 
 static inline void arch_dma_cache_wback(phys_addr_t paddr, size_t size)
 {
