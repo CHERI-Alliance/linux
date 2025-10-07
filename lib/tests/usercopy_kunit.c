@@ -10,6 +10,7 @@
 
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
+#include <linux/cheri.h>
 #include <linux/mman.h>
 #include <linux/module.h>
 #include <linux/sched.h>
@@ -289,7 +290,7 @@ static void usercopy_test_invalid(struct kunit *test)
 static int usercopy_test_init(struct kunit *test)
 {
 	struct usercopy_test_priv *priv;
-	unsigned long user_addr;
+	void *user_addr;
 
 	if (!IS_ENABLED(CONFIG_MMU)) {
 		kunit_skip(test, "Userspace allocation testing not available on non-MMU systems");
@@ -307,11 +308,11 @@ static int usercopy_test_init(struct kunit *test)
 	user_addr = kunit_vm_mmap(test, NULL, 0, priv->size,
 			    PROT_READ | PROT_WRITE | PROT_EXEC,
 			    MAP_ANONYMOUS | MAP_PRIVATE, 0);
-	KUNIT_ASSERT_NE_MSG(test, user_addr, 0,
+	KUNIT_ASSERT_NE_MSG(test, __c_pa_u(user_addr), 0,
 		"Could not create userspace mm");
-	KUNIT_ASSERT_LT_MSG(test, user_addr, (unsigned long)TASK_SIZE,
+	KUNIT_ASSERT_LT_MSG(test, __c_pa_u(user_addr), (unsigned long)TASK_SIZE,
 		"Failed to allocate user memory");
-	priv->umem = (char __user *)user_addr;
+	priv->umem = user_addr;
 
 	return 0;
 }
