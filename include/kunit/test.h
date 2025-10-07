@@ -543,7 +543,7 @@ const char *kunit_kstrdup_const(struct kunit *test, const char *str, gfp_t gfp);
  *
  * See vm_mmap() for more information.
  */
-unsigned long kunit_vm_mmap(struct kunit *test, struct file *file,
+void __user *kunit_vm_mmap(struct kunit *test, struct file *file,
 			    unsigned long addr, unsigned long len,
 			    unsigned long prot, unsigned long flag,
 			    unsigned long offset);
