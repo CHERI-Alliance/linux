@@ -1041,7 +1041,7 @@ iov_kunit_iter_to_sg_init(struct kunit *test, size_t bufsize, bool user,
 {
 	struct page **spages;
 	struct scatterlist *sg;
-	unsigned long uaddr;
+	void __user *uaddr;
 	size_t i;
 
 	data->npages = bufsize / PAGE_SIZE;
@@ -1059,8 +1059,8 @@ iov_kunit_iter_to_sg_init(struct kunit *test, size_t bufsize, bool user,
 		uaddr = kunit_vm_mmap(test, NULL, 0, bufsize,
 				      PROT_READ | PROT_WRITE,
 				      MAP_ANONYMOUS | MAP_PRIVATE, 0);
-		KUNIT_ASSERT_NE(test, uaddr, 0);
-		data->ubuf = (u8 __user *)uaddr;
+		KUNIT_ASSERT_NE(test, __c_pa_u(uaddr), 0);
+		data->ubuf = uaddr;
 		for (i = 0; i < bufsize; ++i)
 			put_user(pattern(i), data->ubuf + i);
 	} else {
