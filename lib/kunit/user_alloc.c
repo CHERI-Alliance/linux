@@ -4,6 +4,7 @@
  */
 #include <kunit/resource.h>
 #include <kunit/test.h>
+#include <linux/cheri.h>
 #include <linux/kthread.h>
 #include <linux/mm.h>
 
@@ -88,7 +89,7 @@ static void kunit_vm_mmap_free(struct kunit_resource *res)
 	res->data = NULL;
 }
 
-unsigned long kunit_vm_mmap(struct kunit *test, struct file *file,
+void __user *kunit_vm_mmap(struct kunit *test, struct file *file,
 			    unsigned long addr, unsigned long len,
 			    unsigned long prot, unsigned long flag,
 			    unsigned long offset)
@@ -109,7 +110,8 @@ unsigned long kunit_vm_mmap(struct kunit *test, struct file *file,
 				    GFP_KERNEL,
 				    &params);
 	if (vres)
-		return vres->addr;
+		return cheri_build_user_cap(vres->addr, len,
+					    CHERI_PERMS_READ | CHERI_PERMS_WRITE);
 	return 0;
 }
 EXPORT_SYMBOL_GPL(kunit_vm_mmap);
