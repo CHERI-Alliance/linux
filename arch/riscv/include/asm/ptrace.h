@@ -12,6 +12,8 @@
 
 #ifndef __ASSEMBLY__
 
+typedef __kernel_register_t register_t;
+
 struct pt_regs {
 	register_t epc;
 	register_t ra;

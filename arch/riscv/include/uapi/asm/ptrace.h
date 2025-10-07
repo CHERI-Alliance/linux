@@ -19,7 +19,7 @@
 #define PTRACE_GETFDPIC_EXEC	0
 #define PTRACE_GETFDPIC_INTERP	1
 
-typedef __uptr register_t;
+typedef __uptr __kernel_register_t;
 
 /*
  * User-mode register state for core dumps, ptrace, sigcontext
@@ -28,40 +28,40 @@ typedef __uptr register_t;
  * struct user_regs_struct must form a prefix of struct pt_regs.
  */
 struct user_regs_struct {
-	register_t pc;
-	register_t ra;
-	register_t sp;
-	register_t gp;
-	register_t tp;
-	register_t t0;
-	register_t t1;
-	register_t t2;
-	register_t s0;
-	register_t s1;
-	register_t a0;
-	register_t a1;
-	register_t a2;
-	register_t a3;
-	register_t a4;
-	register_t a5;
-	register_t a6;
-	register_t a7;
-	register_t s2;
-	register_t s3;
-	register_t s4;
-	register_t s5;
-	register_t s6;
-	register_t s7;
-	register_t s8;
-	register_t s9;
-	register_t s10;
-	register_t s11;
-	register_t t3;
-	register_t t4;
-	register_t t5;
-	register_t t6;
+	__kernel_register_t pc;
+	__kernel_register_t ra;
+	__kernel_register_t sp;
+	__kernel_register_t gp;
+	__kernel_register_t tp;
+	__kernel_register_t t0;
+	__kernel_register_t t1;
+	__kernel_register_t t2;
+	__kernel_register_t s0;
+	__kernel_register_t s1;
+	__kernel_register_t a0;
+	__kernel_register_t a1;
+	__kernel_register_t a2;
+	__kernel_register_t a3;
+	__kernel_register_t a4;
+	__kernel_register_t a5;
+	__kernel_register_t a6;
+	__kernel_register_t a7;
+	__kernel_register_t s2;
+	__kernel_register_t s3;
+	__kernel_register_t s4;
+	__kernel_register_t s5;
+	__kernel_register_t s6;
+	__kernel_register_t s7;
+	__kernel_register_t s8;
+	__kernel_register_t s9;
+	__kernel_register_t s10;
+	__kernel_register_t s11;
+	__kernel_register_t t3;
+	__kernel_register_t t4;
+	__kernel_register_t t5;
+	__kernel_register_t t6;
 #ifdef __CHERI_PURE_CAPABILITY__
-	register_t ddc;
+	__kernel_register_t ddc;
 #endif
 };
 
