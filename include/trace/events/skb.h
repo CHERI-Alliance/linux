@@ -29,24 +29,24 @@ TRACE_EVENT(kfree_skb,
 	TP_ARGS(skb, location, reason, rx_sk),
 
 	TP_STRUCT__entry(
-		__field(void *,		skbaddr)
-		__field(void *,		location)
-		__field(void *,		rx_sk)
+		__ptr(void *,		skbaddr)
+		__ptr(void *,		location)
+		__ptr(void *,		rx_sk)
 		__field(unsigned short,	protocol)
 		__field(enum skb_drop_reason,	reason)
 	),
 
 	TP_fast_assign(
-		__entry->skbaddr = skb;
-		__entry->location = location;
-		__entry->rx_sk = rx_sk;
+		__assign_ptr(skbaddr, skb);
+		__assign_ptr(location, location);
+		__assign_ptr(rx_sk, rx_sk);
 		__entry->protocol = ntohs(skb->protocol);
 		__entry->reason = reason;
 	),
 
-	TP_printk("skbaddr=%p rx_sk=%p protocol=%u location=%pS reason: %s",
-		  __entry->skbaddr, __entry->rx_sk, __entry->protocol,
-		  __entry->location,
+	TP_printk("skbaddr=" TRACE_CAP_FMT " rx_sk=" TRACE_CAP_FMT " protocol=%u location=%pS reason: %s",
+		  __get_cap(skbaddr), __get_cap(rx_sk), __entry->protocol,
+		  __get_ptr(location),
 		  __print_symbolic(__entry->reason,
 				   DEFINE_DROP_REASON(FN, FNe)))
 );
@@ -61,16 +61,16 @@ TRACE_EVENT(consume_skb,
 	TP_ARGS(skb, location),
 
 	TP_STRUCT__entry(
-		__field(	void *,	skbaddr)
-		__field(	void *,	location)
+		__ptr(		void *,	skbaddr)
+		__ptr(		void *,	location)
 	),
 
 	TP_fast_assign(
-		__entry->skbaddr = skb;
-		__entry->location = location;
+		__assign_ptr(skbaddr, skb);
+		__assign_ptr(location, location);
 	),
 
-	TP_printk("skbaddr=%p location=%pS", __entry->skbaddr, __entry->location)
+	TP_printk("skbaddr=" TRACE_CAP_FMT " location=%pS", __get_cap(skbaddr), __get_ptr(location))
 );
 
 TRACE_EVENT(skb_copy_datagram_iovec,
@@ -80,16 +80,16 @@ TRACE_EVENT(skb_copy_datagram_iovec,
 	TP_ARGS(skb, len),
 
 	TP_STRUCT__entry(
-		__field(	const void *,		skbaddr		)
+		__ptr(		const void *,		skbaddr		)
 		__field(	int,			len		)
 	),
 
 	TP_fast_assign(
-		__entry->skbaddr = skb;
+		__assign_ptr(skbaddr, skb);
 		__entry->len = len;
 	),
 
-	TP_printk("skbaddr=%p len=%d", __entry->skbaddr, __entry->len)
+	TP_printk("skbaddr=" TRACE_CAP_FMT " len=%d", __get_cap(skbaddr), __entry->len)
 );
 
 #endif /* _TRACE_SKB_H */
