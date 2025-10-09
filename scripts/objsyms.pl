@@ -78,10 +78,18 @@ sub decode_insn
 
 		$a =~ s{,$}{};
 		$a =~ s{^,}{};
-		$imm = $1 if ($a =~ s{(^-?\d+)}{});
-		$imm = 0 if ($a =~ s{^\((.*)\)}{$1} and !defined($imm));
-			if ($a ne "") {
+		$imm = -hex($1) if ($a =~ s{^\-(0x[\da-fA-F]+)}{})
+		    and !defined($imm);
+		$imm = hex($1) if ($a =~ s{(^0x[\da-fA-F]+)}{})
+		    and !defined($imm);
+		$imm = $1 if ($a =~ s{(^-?\d+)}{})
+		    and !defined($imm);
+		$imm = 0 if ($a =~ s{^\((.*)\)}{$1}
+		    and !defined($imm));
+		if ($a ne "") {
 			return undef unless $a =~ m{^[a-z][\w\.]+$};
+			# Canonicalize capability register names
+			$a =~ s/^c//;
 			$reg = $a;
 		}
 		push @args, {
@@ -181,9 +189,45 @@ sub handle_caddi
 	return 1;
 }
 
+sub handle_li
+{
+	my ($i, $m) = @_;
+
+	my @args = @{$i->{args}};
+	return 0 unless scalar @args == 2;
+	return 0 unless isreg($args[0]);
+	return 0 unless isimm($args[1]);
+
+	$addrs{$args[0]->{reg}} = $m * $args[1]->{imm};
+
+	return 1;
+}
+
+sub handle_scbnds
+{
+	my ($i) = @_;
+
+	my @args = @{$i->{args}};
+	return 0 unless scalar @args == 3;
+	return 0 unless isreg($args[0]) and isreg($args[1]) and isreg($args[2]);
+
+	if (exists($addrs{$args[2]->{reg}})) {
+		annotate($args[2]->{reg}, 0, 1);
+	}
+
+	if (exists($addrs{$args[1]->{reg}})) {
+		$addrs{$args[0]->{reg}} = $addrs{$args[1]->{reg}};
+		annotate($args[0]->{reg}, 0);
+	} else {
+		delete $addrs{$args[0]->{reg}};
+	}
+
+	return 1;
+}
+
 sub annotate
 {
-	my ($reg, $off) = @_;
+	my ($reg, $off, $nosym) = @_;
 
 	return unless exists($addrs{$reg});
 
@@ -192,7 +236,7 @@ sub annotate
 	printf("+%ld", $off) if ($off > 0);
 	printf("%ld", $off) if ($off < 0);
 	printf(" = %llx", $addr);
-	my $sym = symbolize($addr);
+	symbolize($addr) unless defined($nosym);
 
 	if (exists($relocs{$addr})) {
 		my $r = $relocs{$addr};
@@ -375,7 +419,7 @@ while (<$fh>) {
 		next;
 	}
 
-	if ($i->{insn} eq "caddi") {
+	if ($i->{insn} eq "caddi" or $i->{insn} eq "addi") {
 		handle_caddi($i)
 		    or die "INVALID caddi >>>$_<<<";
 		next;
@@ -385,6 +429,32 @@ while (<$fh>) {
 		handle_farjump($i)
 		    or die "INVALID far jump >>>$_<<<";
 		next;
+	}
+
+	if ($i->{insn} eq "li") {
+		handle_li($i, 1)
+		    or die "INVALID li >>>$_<<<";
+		next;
+	}
+
+	if ($i->{insn} eq "lui") {
+		handle_li($i, 4096)
+		    or die "INVALID lui >>>$_<<<";
+		next;
+	}
+
+	if ($i->{insn} eq "scbnds" or $i->{insn} eq "scbndsr") {
+		handle_scbnds($i)
+		    or die "INVALID scbnds >>>$_<<<";
+		next;
+	}
+
+	# On an unhandled branch or jump throw away registers
+	# We want to do this on jump targets as well but some of
+	# these are not easily visible.
+	if (exists($no_decode_args->{$i->{insn}}) and
+	    $i->{insn} =~ m{^[bj]}) {
+		%addrs = ();
 	}
 
 	# Default handling:
