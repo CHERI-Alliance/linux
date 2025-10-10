@@ -248,33 +248,33 @@
 		compatible = "gpio-keys";
 
 		key-enter {
-			label = "BTNC";
-			linux,code = <KEY_ENTER>;
-			gpios = <&gpio_io 16 GPIO_ACTIVE_HIGH>;
+			label = "SW7";
+			linux,code = <BTN_SELECT>;
+			gpios = <&gpio_io 12 GPIO_ACTIVE_HIGH>;
 		};
 
 		key-down {
-			label = "BTND";
-			linux,code = <KEY_DOWN>;
-			gpios = <&gpio_io 17 GPIO_ACTIVE_HIGH>;
+			label = "SW17";
+			linux,code = <BTN_SOUTH>;
+			gpios = <&gpio_io 13 GPIO_ACTIVE_HIGH>;
 		};
 
 		key-left {
-			label = "BTNL";
-			linux,code = <KEY_LEFT>;
-			gpios = <&gpio_io 18 GPIO_ACTIVE_HIGH>;
+			label = "SW6";
+			linux,code = <BTN_WEST>;
+			gpios = <&gpio_io 14 GPIO_ACTIVE_HIGH>;
 		};
 
 		key-right {
-			label = "BTNR";
-			linux,code = <KEY_RIGHT>;
-			gpios = <&gpio_io 19 GPIO_ACTIVE_HIGH>;
+			label = "SW9";
+			linux,code = <BTN_EAST>;
+			gpios = <&gpio_io 15 GPIO_ACTIVE_HIGH>;
 		};
 
 		key-up {
-			label = "BTNU";
-			linux,code = <KEY_UP>;
-			gpios = <&gpio_io 20 GPIO_ACTIVE_HIGH>;
+			label = "SW10";
+			linux,code = <BTN_NORTH>;
+			gpios = <&gpio_io 16 GPIO_ACTIVE_HIGH>;
 		};
 	};
 
