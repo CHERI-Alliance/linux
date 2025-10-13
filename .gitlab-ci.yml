@@ -30,6 +30,14 @@ stages:
   - touch .clang-tidy-ignore
   - 'if grep -v -f .clang-tidy-ignore tidyerr.log >/dev/null; then echo ERROR: Unexpected clang-tidy warnings; false; else echo "No unexpected clang-tidy errors"; fi'
 
+.riscv64_noncheri_script: &riscv64_noncheri_script
+    - mkdir -p $CI_PROJECT_DIR
+    - cd $CI_PROJECT_DIR
+    - 'PATH="/opt/cherillvm/bin:${PATH}"'
+    - export PATH
+    - 'make LLVM=1 ARCH=riscv CC="clang -target riscv64" HOSTCC=/usr/bin/gcc "${CONFIG}"'
+    - 'make -j $(nproc) LLVM=1 ARCH=riscv CC="clang -target riscv64" HOSTCC=/usr/bin/gcc all modules'
+
 build_riscv64_cheri_default:
   stage: build
   script:
@@ -54,7 +62,13 @@ build_riscv64_cheri_compiletest:
     - CONFIG=cheri_compiletest_defconfig
     - *riscv64_cheri_script
 
-build_x730:
+build_x730_prime:
+  stage: build
+  script:
+    - CONFIG=codasip-x730-prime_defconfig
+    - *riscv64_cheri_script
+
+build_x730_hogoblin2:
   stage: build
   rules:
     - if: $SCHEDULE == "weekly"
@@ -63,19 +77,23 @@ build_x730:
     - CONFIG=codasip-x730-hobgoblin2_defconfig
     - *riscv64_cheri_script
 
-build_a730:
+build_a730_prime:
+  stage: build
+  rules:
+    - if: $SCHEDULE == "weekly"
+    - if: $SCHEDULE == "all"
+  script:
+    - CONFIG=codasip-a730-prime_defconfig
+    - *riscv64_noncheri_script
+
+build_a730_hogoblin2:
   stage: build
   rules:
     - if: $SCHEDULE == "weekly"
     - if: $SCHEDULE == "all"
   script:
     - CONFIG=codasip-a730-hobgoblin2_defconfig
-    - mkdir -p $CI_PROJECT_DIR
-    - cd $CI_PROJECT_DIR
-    - 'PATH="/opt/cherillvm/bin:${PATH}"'
-    - export PATH
-    - 'make LLVM=1 ARCH=riscv CC="clang -target riscv64" HOSTCC=/usr/bin/gcc "${CONFIG}"'
-    - 'make -j $(nproc) LLVM=1 ARCH=riscv CC="clang -target riscv64" HOSTCC=/usr/bin/gcc all modules'
+    - *riscv64_noncheri_script
 
 build_morello:
   stage: build
