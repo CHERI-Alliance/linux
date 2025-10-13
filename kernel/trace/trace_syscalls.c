@@ -289,10 +289,10 @@ print_syscall_enter(struct trace_iterator *iter, int flags,
 		/* parameter values */
 		if (trace->args[i] < 10)
 			trace_seq_printf(s, "%s: %lu", entry->args[i],
-					 __c_ua(trace->args[i]));
+					 trace->args[i]);
 		else
 			trace_seq_printf(s, "%s: 0x%lx", entry->args[i],
-					 __c_ua(trace->args[i]));
+					 trace->args[i]);
 
 		if (!(BIT(i) & entry->user_mask))
 			continue;
@@ -536,11 +536,11 @@ static int __init syscall_enter_define_fields(struct trace_event_call *call)
 	for (i = 0; i < meta->nb_args; i++) {
 		ret = trace_define_field(call, meta->types[i],
 					 meta->args[i], offset,
-					 sizeof(uintptr_t), 0,
+					 sizeof(ptraddr_t), 0,
 					 FILTER_OTHER);
 		if (ret)
 			break;
-		offset += sizeof(uintptr_t);
+		offset += sizeof(ptraddr_t);
 	}
 
 	if (ret || !meta->user_mask)
@@ -871,6 +871,7 @@ static void ftrace_syscall_enter(void *data, struct pt_regs *regs, long id)
 	int size = 0;
 	int uargs = 0;
 	bool mayfault;
+	u8 i;
 
 	/*
 	 * Syscall probe called with preemption enabled, but the ring
@@ -906,7 +907,7 @@ static void ftrace_syscall_enter(void *data, struct pt_regs *regs, long id)
 			return;
 	}
 
-	size += sizeof(*entry) + sizeof(uintptr_t) * sys_data->nb_args;
+	size += sizeof(*entry) + sizeof(ptraddr_t) * sys_data->nb_args;
 
 	entry = trace_event_buffer_reserve(&fbuffer, trace_file, size);
 	if (!entry)
@@ -915,7 +916,9 @@ static void ftrace_syscall_enter(void *data, struct pt_regs *regs, long id)
 	entry = ring_buffer_event_data(fbuffer.event);
 	entry->nr = syscall_nr;
 
-	memcpy(entry->args, args, sizeof(uintptr_t) * sys_data->nb_args);
+	syscall_get_arguments(current, regs, args);
+	for (i = 0; i < sys_data->nb_args; i++)
+		entry->args[i] = __c_ua(args[i]);
 
 	if (mayfault)
 		syscall_put_data(sys_data, entry, user_ptr, size, user_sizes, uargs);
