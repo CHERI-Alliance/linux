@@ -23,18 +23,24 @@ TRACE_EVENT_SYSCALL(sys_enter,
 
 	TP_STRUCT__entry(
 		__field(	long,		id		)
-		__array(	uintptr_t,	args,	6	)
+		__array(	ptraddr_t,	args,	6	)
 	),
 
 	TP_fast_assign(
+		uintptr_t args[6];
+		u8 i;
+
 		__entry->id	= id;
-		syscall_get_arguments(current, regs, __entry->args);
+
+		syscall_get_arguments(current, regs, args);
+		for (i = 0; i < ARRAY_SIZE(args); i++)
+			__entry->args[i] = __c_ua(args[i]);
 	),
 
 	TP_printk("NR %ld (%p, %p, %p, %p, %p, %p)",
 		  __entry->id,
-		  (void *)__entry->args[0], (void *)__entry->args[1], (void *)__entry->args[2],
-		  (void *)__entry->args[3], (void *)__entry->args[4], (void *)__entry->args[5]),
+		  __c_fakep(__entry->args[0]), __c_fakep(__entry->args[1]), __c_fakep(__entry->args[2]),
+		  __c_fakep(__entry->args[3]), __c_fakep(__entry->args[4]), __c_fakep(__entry->args[5])),
 
 	syscall_regfunc, syscall_unregfunc
 );
