@@ -1,0 +1,22 @@
+// SPDX-License-Identifier: (GPL-2.0 OR MIT)
+/*
+ * Copyright (c) 2025 Codasip GmbH
+ *
+ * X730 MP4 Hobgoblin FPGA platform for proFPGA board
+ */
+
+/dts-v1/;
+
+/{
+	model = "Codasip Hobgoblin2 proFPGA X730-MP4";
+	compatible = "codasip,hobgoblin2-profpga", "codasip,x730", "codasip,a730";
+	chosen {
+		stdout-path = "serial0:115200n8";
+		bootargs = "earlycon console=ttyS0,115200n8";
+	};
+};
+
+#include "x730-mp4.dtsi"
+#include "hobgoblin2-base.dtsi"
+#include "hobgoblin2-profpga-base.dtsi"
+#include "hobgoblin2-axi-emac.dtsi"
