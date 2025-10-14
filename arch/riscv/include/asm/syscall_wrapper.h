@@ -124,6 +124,8 @@ asmlinkage long __riscv_sys_ni_syscall(const struct pt_regs *);
 	}									\
 	static inline ret_type __do_sys##name(__MAP(x,__SC_DECL,__VA_ARGS__))
 
+#define SYSCALL_METADATA(x, sname, ret_type, ...) \
+	__SYSCALL_METADATA(x, sname, __VA_ARGS__)
 /*
  * Some syscalls with no parameters return valid capabilities, so __SYSCALL_DEFINE0
  * is added to handle such cases.
@@ -135,7 +137,7 @@ asmlinkage long __riscv_sys_ni_syscall(const struct pt_regs *);
  * allow SYSCALL_PREP(name) to be expanded.
  */
 #define __SYSCALL_DEFINE0(sname, ret_type)				       	\
-	SYSCALL_METADATA(0, sname);						\
+	SYSCALL_METADATA(0, sname, ret_tpye);					\
 	asmlinkage ret_type __riscv_sys##sname(const struct pt_regs *__unused);	\
 	ALLOW_ERROR_INJECTION(__riscv_sys##sname, ERRNO);			\
 	asmlinkage ret_type __riscv_sys##sname(const struct pt_regs *__unused)
