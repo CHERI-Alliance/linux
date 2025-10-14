@@ -17,7 +17,7 @@ long trace_syscall_enter(struct pt_regs *regs, long syscall)
 	return syscall_get_nr(current, regs);
 }
 
-void trace_syscall_exit(struct pt_regs *regs, long ret)
+void trace_syscall_exit(struct pt_regs *regs, intptr_t ret)
 {
 	trace_sys_exit(regs, ret);
 }
