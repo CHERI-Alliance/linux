@@ -49,7 +49,7 @@ TRACE_EVENT_FLAGS(sys_enter, TRACE_EVENT_FL_CAP_ANY)
 
 TRACE_EVENT_SYSCALL(sys_exit,
 
-	TP_PROTO(struct pt_regs *regs, long ret),
+	TP_PROTO(struct pt_regs *regs, intptr_t ret),
 
 	TP_ARGS(regs, ret),
 
@@ -60,7 +60,7 @@ TRACE_EVENT_SYSCALL(sys_exit,
 
 	TP_fast_assign(
 		__entry->id	= syscall_get_nr(current, regs);
-		__entry->ret	= ret;
+		__entry->ret	= __c_ua(ret);
 	),
 
 	TP_printk("NR %ld = %ld",
