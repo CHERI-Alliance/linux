@@ -338,7 +338,7 @@ static void ftrace_syscall_enter(void *data, struct pt_regs *regs, long id)
 	trace_event_buffer_commit(&fbuffer);
 }
 
-static void ftrace_syscall_exit(void *data, struct pt_regs *regs, long ret)
+static void ftrace_syscall_exit(void *data, struct pt_regs *regs, intptr_t ret)
 {
 	struct trace_array *tr = data;
 	struct trace_event_file *trace_file;
