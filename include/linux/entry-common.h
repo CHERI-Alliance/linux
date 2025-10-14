@@ -57,7 +57,7 @@ static __always_inline int arch_ptrace_report_syscall_entry(struct pt_regs *regs
 
 bool syscall_user_dispatch(struct pt_regs *regs);
 long trace_syscall_enter(struct pt_regs *regs, long syscall);
-void trace_syscall_exit(struct pt_regs *regs, long ret);
+void trace_syscall_exit(struct pt_regs *regs, intptr_t ret);
 
 static inline void syscall_enter_audit(struct pt_regs *regs, long syscall)
 {
