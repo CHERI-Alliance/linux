@@ -30,6 +30,22 @@ struct io_rsrc_update {
 static struct io_rsrc_node *io_sqe_buffer_register(struct io_ring_ctx *ctx,
 			struct iovec *iov, struct page **last_hpage);
 
+static int copy_io_uring_tag_with_index_from_user(struct io_ring_ctx *ctx,
+					     __u64ptr *tag, const void __user *tags, size_t i)
+{
+	if (io_in_compat64(ctx)) {
+		__c64_ptr64 compat_tag;
+		if (copy_from_user_no_ptr(&compat_tag, ((__c64_ptr64 __user *)tags) + i, sizeof(compat_tag)))
+			return -EFAULT;
+		*tag = __c_fakeu(compat_tag);
+	} else {
+		if (copy_from_user_with_ptr(tag, ((__u64ptr __user *)tags) + i, sizeof(*tag)))
+			return -EFAULT;
+	}
+
+	return 0;
+}
+
 /* only define max */
 #define IORING_MAX_FIXED_FILES	(1U << 20)
 #define IORING_MAX_REG_BUFFERS	(1U << 14)
@@ -212,7 +228,7 @@ static int __io_sqe_files_update(struct io_ring_ctx *ctx,
 				 struct io_uring_rsrc_update2 *up,
 				 unsigned nr_args)
 {
-	user_uintptr_t __user *tags = u64_to_user_ptr(up->tags);
+	void __user *tags = u64_to_user_ptr(up->tags);
 	__s32 __user *fds = u64_to_user_ptr(up->data);
 	int fd, i, err = 0;
 	unsigned int done;
@@ -223,9 +239,9 @@ static int __io_sqe_files_update(struct io_ring_ctx *ctx,
 		return -EINVAL;
 
 	for (done = 0; done < nr_args; done++) {
-		user_uintptr_t tag = 0;
+		__u64ptr tag = 0;
 
-		if ((tags && copy_from_user_with_ptr(&tag, &tags[done], sizeof(tag))) ||
+		if ((tags && copy_io_uring_tag_with_index_from_user(ctx, &tag, tags, done)) ||
 		    copy_from_user(&fd, &fds[done], sizeof(fd))) {
 			err = -EFAULT;
 			break;
@@ -280,7 +296,7 @@ static int __io_sqe_buffers_update(struct io_ring_ctx *ctx,
 				   struct io_uring_rsrc_update2 *up,
 				   unsigned int nr_args)
 {
-	user_uintptr_t __user *tags = u64_to_user_ptr(up->tags);
+	void __user *tags = u64_to_user_ptr(up->tags);
 	struct iovec fast_iov, *iov;
 	struct page *last_hpage = NULL;
 	struct iovec __user *uvec;
@@ -295,7 +311,7 @@ static int __io_sqe_buffers_update(struct io_ring_ctx *ctx,
 
 	for (done = 0; done < nr_args; done++) {
 		struct io_rsrc_node *node;
-		user_uintptr_t tag = 0;
+		__u64ptr tag = 0;
 
 		uvec = u64_to_user_ptr(user_data);
 		iov = iovec_from_user(uvec, 1, 1, &fast_iov, io_is_compat(ctx));
@@ -303,7 +319,7 @@ static int __io_sqe_buffers_update(struct io_ring_ctx *ctx,
 			err = PTR_ERR(iov);
 			break;
 		}
-		if (tags && copy_from_user_with_ptr(&tag, &tags[done], sizeof(tag))) {
+		if (tags && copy_io_uring_tag_with_index_from_user(ctx, &tag, tags, done)) {
 			err = -EFAULT;
 			break;
 		}
@@ -524,7 +540,7 @@ int io_sqe_files_unregister(struct io_ring_ctx *ctx)
 }
 
 int io_sqe_files_register(struct io_ring_ctx *ctx, void __user *arg,
-			  unsigned nr_args, user_uintptr_t __user *tags)
+			  unsigned nr_args, void __user *tags)
 {
 	__s32 __user *fds = (__s32 __user *) arg;
 	struct file *file;
@@ -544,10 +560,10 @@ int io_sqe_files_register(struct io_ring_ctx *ctx, void __user *arg,
 
 	for (i = 0; i < nr_args; i++) {
 		struct io_rsrc_node *node;
-		user_uintptr_t tag = 0;
+		__u64ptr tag = 0;
 
 		ret = -EFAULT;
-		if (tags && copy_from_user_with_ptr(&tag, &tags[i], sizeof(tag)))
+		if (tags && copy_io_uring_tag_with_index_from_user(ctx, &tag, tags, i))
 			goto fail;
 		if (fds && copy_from_user(&fd, &fds[i], sizeof(fd)))
 			goto fail;
@@ -863,7 +879,7 @@ done:
 }
 
 int io_sqe_buffers_register(struct io_ring_ctx *ctx, void __user *arg,
-			    unsigned int nr_args, u64 __user *tags)
+			    unsigned int nr_args, void __user *tags)
 {
 	struct page *last_hpage = NULL;
 	struct io_rsrc_data data;
@@ -886,7 +902,7 @@ int io_sqe_buffers_register(struct io_ring_ctx *ctx, void __user *arg,
 
 	for (i = 0; i < nr_args; i++) {
 		struct io_rsrc_node *node;
-		user_uintptr_t tag = 0;
+		__u64ptr tag = 0;
 
 		if (arg) {
 			uvec = (struct iovec __user *) arg;
@@ -902,7 +918,7 @@ int io_sqe_buffers_register(struct io_ring_ctx *ctx, void __user *arg,
 		}
 
 		if (tags) {
-			if (copy_from_user_with_ptr(&tag, &tags[i], sizeof(tag))) {
+			if (copy_io_uring_tag_with_index_from_user(ctx, &tag, tags, i)) {
 				ret = -EFAULT;
 				break;
 			}
