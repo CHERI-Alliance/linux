@@ -16,7 +16,7 @@ struct io_rsrc_node {
 	unsigned char			type;
 	int				refs;
 
-	uintptr_t tag;
+	__u64ptr tag;
 	union {
 		uintptr_t file_ptr;
 		struct io_mapped_ubuf *buf;
@@ -77,10 +77,10 @@ int io_prep_reg_iovec(struct io_kiocb *req, struct iou_vec *iv,
 int io_register_clone_buffers(struct io_ring_ctx *ctx, void __user *arg);
 int io_sqe_buffers_unregister(struct io_ring_ctx *ctx);
 int io_sqe_buffers_register(struct io_ring_ctx *ctx, void __user *arg,
-			    unsigned int nr_args, u64 __user *tags);
+			    unsigned int nr_args, void __user *tags);
 int io_sqe_files_unregister(struct io_ring_ctx *ctx);
 int io_sqe_files_register(struct io_ring_ctx *ctx, void __user *arg,
-			  unsigned nr_args, u64 __user *tags);
+			  unsigned nr_args, void __user *tags);
 
 int io_register_files_update(struct io_ring_ctx *ctx, void __user *arg,
 			     unsigned nr_args);
