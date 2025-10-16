@@ -83,7 +83,7 @@ int io_account_mem(struct user_struct *user, struct mm_struct *mm_account,
 	return 0;
 }
 
-int io_validate_user_buf_range(user_uintptr_t uaddr, u64 ulen)
+int io_validate_user_buf_range(__u64ptr uaddr, u64 ulen)
 {
 	unsigned long tmp, base = __c_ua(uaddr);
 	unsigned long acct_len = (unsigned long)PAGE_ALIGN(ulen);
@@ -281,7 +281,7 @@ static int __io_sqe_buffers_update(struct io_ring_ctx *ctx,
 	struct iovec fast_iov, *iov;
 	struct page *last_hpage = NULL;
 	struct iovec __user *uvec;
-	user_uintptr_t user_data = up->data;
+	__u64ptr user_data = up->data;
 	__u32 done;
 	int i, err;
 
@@ -294,7 +294,7 @@ static int __io_sqe_buffers_update(struct io_ring_ctx *ctx,
 		struct io_rsrc_node *node;
 		user_uintptr_t tag = 0;
 
-		uvec = (void __user *)user_data;
+		uvec = u64_to_user_ptr(user_data);
 		iov = iovec_from_user(uvec, 1, 1, &fast_iov, ctx->compat);
 		if (IS_ERR(iov)) {
 			err = PTR_ERR(iov);

@@ -27,7 +27,7 @@ struct io_timeout {
 
 struct io_timeout_rem {
 	struct file			*file;
-	user_uintptr_t			addr;
+	__u64ptr			addr;
 
 	/* timeout update */
 	struct timespec64		ts;
@@ -394,7 +394,7 @@ static clockid_t io_timeout_get_clock(struct io_timeout_data *data)
 	}
 }
 
-static int io_linked_timeout_update(struct io_ring_ctx *ctx, user_uintptr_t user_data,
+static int io_linked_timeout_update(struct io_ring_ctx *ctx, __u64ptr user_data,
 				    struct timespec64 *ts, enum hrtimer_mode mode)
 	__must_hold(&ctx->timeout_lock)
 {
@@ -421,7 +421,7 @@ static int io_linked_timeout_update(struct io_ring_ctx *ctx, user_uintptr_t user
 	return 0;
 }
 
-static int io_timeout_update(struct io_ring_ctx *ctx, user_uintptr_t user_data,
+static int io_timeout_update(struct io_ring_ctx *ctx, __u64ptr user_data,
 			     struct timespec64 *ts, enum hrtimer_mode mode)
 	__must_hold(&ctx->timeout_lock)
 {
