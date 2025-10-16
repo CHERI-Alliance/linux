@@ -83,7 +83,7 @@ int io_account_mem(struct user_struct *user, struct mm_struct *mm_account,
 	return 0;
 }
 
-int io_validate_user_buf_range(user_uintptr_t uaddr, u64 ulen)
+int io_validate_user_buf_range(__u64ptr uaddr, u64 ulen)
 {
 	unsigned long tmp, base = __c_ua(uaddr);
 	unsigned long acct_len = (unsigned long)PAGE_ALIGN(ulen);

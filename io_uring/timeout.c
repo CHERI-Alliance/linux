@@ -28,7 +28,7 @@ struct io_timeout {
 
 struct io_timeout_rem {
 	struct file			*file;
-	user_uintptr_t			addr;
+	__u64ptr			addr;
 
 	/* timeout update */
 	ktime_t				time;
@@ -52,12 +52,12 @@ static clockid_t io_flags_to_clock(unsigned flags)
 	}
 }
 
-static int io_parse_user_time(ktime_t *time, u64 arg, unsigned flags)
+static int io_parse_user_time(ktime_t *time, __u64ptr arg, unsigned flags)
 {
 	struct timespec64 ts;
 
 	if (flags & IORING_TIMEOUT_IMMEDIATE_ARG) {
-		*time = ns_to_ktime(arg);
+		*time = ns_to_ktime(__c_ua(arg));
 		if (*time < 0)
 			return -EINVAL;
 		goto out;
@@ -436,7 +436,7 @@ static clockid_t io_timeout_get_clock(struct io_timeout_data *data)
 	return io_flags_to_clock(data->flags);
 }
 
-static int io_linked_timeout_update(struct io_ring_ctx *ctx, user_uintptr_t user_data,
+static int io_linked_timeout_update(struct io_ring_ctx *ctx, __u64ptr user_data,
 				    ktime_t ts, enum hrtimer_mode mode)
 	__must_hold(&ctx->timeout_lock)
 {
@@ -463,7 +463,7 @@ static int io_linked_timeout_update(struct io_ring_ctx *ctx, user_uintptr_t user
 	return 0;
 }
 
-static int io_timeout_update(struct io_ring_ctx *ctx, user_uintptr_t user_data,
+static int io_timeout_update(struct io_ring_ctx *ctx, __u64ptr user_data,
 			     ktime_t time, enum hrtimer_mode mode)
 	__must_hold(&ctx->timeout_lock)
 {

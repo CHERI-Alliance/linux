@@ -811,7 +811,7 @@ static bool io_fill_cqe_aux32(struct io_ring_ctx *ctx,
 }
 
 static bool io_fill_cqe_aux(struct io_ring_ctx *ctx,
-			    user_uintptr_t, s32 res, u32 cflags)
+			    __u64ptr user_data, s32 res, u32 cflags)
 {
 	bool cqe32 = cflags & IORING_CQE_F_32;
 	struct io_uring_cqe *cqe;
@@ -824,7 +824,7 @@ static bool io_fill_cqe_aux(struct io_ring_ctx *ctx,
 	return false;
 }
 
-static inline struct io_cqe io_init_cqe(user_uintptr_t user_data, s32 res, u32 cflags)
+static inline struct io_cqe io_init_cqe(__u64ptr user_data, s32 res, u32 cflags)
 {
 	return (struct io_cqe) { .user_data = user_data, .res = res, .flags = cflags };
 }
@@ -850,7 +850,7 @@ static __cold bool io_cqe_overflow_locked(struct io_ring_ctx *ctx,
 	return io_cqring_add_overflow(ctx, ocqe);
 }
 
-bool io_post_aux_cqe(struct io_ring_ctx *ctx, user_uintptr_t user_data, s32 res, u32 cflags)
+bool io_post_aux_cqe(struct io_ring_ctx *ctx, __u64ptr user_data, s32 res, u32 cflags)
 {
 	bool filled;
 
@@ -869,7 +869,7 @@ bool io_post_aux_cqe(struct io_ring_ctx *ctx, user_uintptr_t user_data, s32 res,
  * Must be called from inline task_work so we know a flush will happen later,
  * and obviously with ctx->uring_lock held (tw always has that).
  */
-void io_add_aux_cqe(struct io_ring_ctx *ctx, user_uintptr_t user_data, s32 res, u32 cflags)
+void io_add_aux_cqe(struct io_ring_ctx *ctx, __u64ptr user_data, s32 res, u32 cflags)
 {
 	lockdep_assert_held(&ctx->uring_lock);
 	lockdep_assert(ctx->int_flags & IO_RING_F_LOCKLESS_CQ);

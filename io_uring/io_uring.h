@@ -187,9 +187,9 @@ static inline size_t io_uring_cq_offset(void)
 struct io_uring_cqe *__io_get_ith_cqe(struct io_ring_ctx *ctx, unsigned int i);
 bool io_cqe_cache_refill(struct io_ring_ctx *ctx, bool overflow, bool cqe32);
 void io_req_defer_failed(struct io_kiocb *req, s32 res);
-bool io_post_aux_cqe(struct io_ring_ctx *ctx, user_uintptr_t user_data,
+bool io_post_aux_cqe(struct io_ring_ctx *ctx, __u64ptr user_data,
 		     s32 res, u32 cflags);
-void io_add_aux_cqe(struct io_ring_ctx *ctx, user_uintptr_t user_data, s32 res, u32 cflags);
+void io_add_aux_cqe(struct io_ring_ctx *ctx, __u64ptr user_data, s32 res, u32 cflags);
 bool io_req_post_cqe(struct io_kiocb *req, s32 res, u32 cflags);
 bool io_req_post_cqe32(struct io_kiocb *req, struct io_uring_cqe src_cqe[2]);
 void __io_commit_cqring_flush(struct io_ring_ctx *ctx);
@@ -273,8 +273,7 @@ static inline bool io_in_compat64(struct io_ring_ctx *ctx)
 	return IS_ENABLED(CONFIG_COMPAT64) && (ctx->flags & IO_RING_F_COMPAT);
 }
 
-static inline bool io_user_data_is_same(user_uintptr_t d1,
-					user_uintptr_t d2)
+static inline bool io_user_data_is_same(__u64ptr d1, __u64ptr d2)
 {
 #ifdef CONFIG_CHERI_PURECAP_UABI
 	return __builtin_cheri_equal_exact(d1, d2);
@@ -408,7 +407,7 @@ static inline bool io_defer_get_uncommited_cqe(struct io_ring_ctx *ctx,
 }
 
 static inline void __io_fill_cqe(struct io_ring_ctx *ctx, struct io_uring_cqe *cqe,
-				 user_uintptr_t user_data, s32 res, u32 cflags,
+				 __u64ptr user_data, s32 res, u32 cflags,
 				 u64 extra1, u64 extra2)
 {
 	bool is_cqe32 = (ctx->flags & IORING_SETUP_CQE32) || cflags & IORING_CQE_F_32;
