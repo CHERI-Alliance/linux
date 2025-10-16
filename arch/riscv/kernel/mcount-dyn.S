@@ -174,12 +174,15 @@ SYM_FUNC_START(ftrace_caller)
 	 */
 #ifdef CONFIG_CHERI_KERNEL
 	/*
-	 * ct0 is sealed, can't be used for reading the ops struct
-	 * create new capability with t0's address and pcc's permission
-	 * (assuming pcc grants read permission and covers the data sections)
+	 * ct0 is sealed, it can't be used for reading the ops struct.
+	 * Create new capability with t0's address and pcc's permissions
+	 * (assuming pcc grants read permission and covers the data sections).
+	 * Use ct1 as temp register for this "unsealing". llvm may use ct2-ct6
+	 * for function parameters, see commit f8693f6dffcd ("riscv: ftrace:
+	 * support fastcc in Clang for WITH_ARGS").
 	 */
-	auipc ct2, 0
-	scaddr ct0, ct2, t0
+	auipc ct1, 0
+	scaddr ct0, ct1, t0
 #endif
 	CREG_L CREG(t1), FTRACE_CALLER_OP(CREG(t0))
 
