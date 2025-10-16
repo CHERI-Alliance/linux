@@ -611,7 +611,7 @@ struct io_task_work {
 };
 
 struct io_cqe {
-	user_uintptr_t	user_data;
+	__u64ptr	user_data;
 	__s32		res;
 	/* fd initially, then cflags for completion */
 	union {

@@ -21,7 +21,7 @@
 
 struct io_cancel {
 	struct file			*file;
-	user_uintptr_t			addr;
+	__u64ptr			addr;
 	u32				flags;
 	s32				fd;
 	u8				opcode;

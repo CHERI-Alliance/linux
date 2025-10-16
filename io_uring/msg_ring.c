@@ -22,7 +22,7 @@ struct io_msg {
 	struct file			*file;
 	struct file			*src_file;
 	struct callback_head		tw;
-	user_uintptr_t user_data;
+	__u64ptr user_data;
 	u32 len;
 	u32 cmd;
 	u32 src_fd;
@@ -87,7 +87,7 @@ static void io_msg_tw_complete(struct io_kiocb *req, io_tw_token_t tw)
 }
 
 static int io_msg_remote_post(struct io_ring_ctx *ctx, struct io_kiocb *req,
-			      int res, u32 cflags, user_uintptr_t user_data)
+			      int res, u32 cflags, __u64ptr user_data)
 {
 	if (!READ_ONCE(ctx->submitter_task)) {
 		kfree_rcu(req, rcu_head);
