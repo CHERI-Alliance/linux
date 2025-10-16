@@ -24,8 +24,8 @@
 
 struct io_poll_update {
 	struct file			*file;
-	user_uintptr_t			old_user_data;
-	user_uintptr_t			new_user_data;
+	__u64ptr			old_user_data;
+	__u64ptr			new_user_data;
 	__poll_t			events;
 	bool				update_events;
 	bool				update_user_data;
