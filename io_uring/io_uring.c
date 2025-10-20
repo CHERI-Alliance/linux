@@ -746,8 +746,8 @@ static void __io_cqring_overflow_flush(struct io_ring_ctx *ctx, bool dying)
 	while (!list_empty(&ctx->cq_overflow_list)) {
 		struct io_uring_cqe *cqe;
 		struct io_overflow_cqe *ocqe;
-		u64 extra1 = 0;
-		u64 extra2 = 0;
+		__u64ptr extra1 = 0;
+		__u64ptr extra2 = 0;
 
 		ocqe = list_first_entry(&ctx->cq_overflow_list,
 					struct io_overflow_cqe, list);

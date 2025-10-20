@@ -470,7 +470,7 @@ struct io_uring_cqe {
 	 * doubles the size of the CQE, i.e. contains 16 bytes, or in PCuABI,
 	 * 32 bytes of padding.
 	 */
-	__u64 big_cqe[];
+	__u64ptr big_cqe[];
 };
 
 /*

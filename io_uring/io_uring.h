@@ -311,7 +311,7 @@ static inline bool io_defer_get_uncommited_cqe(struct io_ring_ctx *ctx,
 
 static inline void __io_fill_cqe(struct io_ring_ctx *ctx, struct io_uring_cqe *cqe,
 				 __u64ptr user_data, s32 res, u32 cflags,
-				 u64 extra1, u64 extra2)
+				 __u64ptr extra1, __u64ptr extra2)
 {
 	if (io_in_compat64(ctx)) {
 		struct compat_io_uring_cqe *compat_cqe = (struct compat_io_uring_cqe *)cqe;
@@ -321,8 +321,8 @@ static inline void __io_fill_cqe(struct io_ring_ctx *ctx, struct io_uring_cqe *c
 		WRITE_ONCE(compat_cqe->flags, cflags);
 
 		if (ctx->flags & IORING_SETUP_CQE32) {
-			WRITE_ONCE(compat_cqe->big_cqe[0], extra1);
-			WRITE_ONCE(compat_cqe->big_cqe[1], extra2);
+			WRITE_ONCE(compat_cqe->big_cqe[0], __c_ua(extra1));
+			WRITE_ONCE(compat_cqe->big_cqe[1], __c_ua(extra2));
 		}
 		return;
 	}

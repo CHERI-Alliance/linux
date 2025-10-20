@@ -728,8 +728,8 @@ struct io_kiocb {
 	struct io_wq_work		work;
 
 	struct io_big_cqe {
-		u64			extra1;
-		u64			extra2;
+		__u64ptr			extra1;
+		__u64ptr			extra2;
 	} big_cqe;
 };
 
