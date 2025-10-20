@@ -87,7 +87,8 @@ static inline void napi_show_fdinfo(struct io_ring_ctx *ctx,
 			   (cqe)->res, (cqe)->flags);				\
 		if (cqe32)							\
 			seq_printf(m, ", extra1:%llu, extra2:%llu",		\
-				   (cqe)->big_cqe[0], (cqe)->big_cqe[1]);	\
+				   (unsigned long long) (cqe)->big_cqe[0], 	\
+				   (unsigned long long) (cqe)->big_cqe[1]);	\
 	} while (0)
 
 /*
