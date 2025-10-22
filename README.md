@@ -1,8 +1,8 @@
 
 # LINUX-CHERI
 
-This repository contains a version of the Linux with CHERI support for
-riscv. It is based on upstream Linux Kernel v6.10 and the CHERI
+This repository contains a version of the Linux Kernel with CHERI support
+for riscv. It is based on upstream Linux Kernel v6.16 and the CHERI
 modifications made by the ARM morello project
 [https://git.morello-project.org/morello/kernel/linux].
 
@@ -17,14 +17,14 @@ re-writes.
 
 ## Building
 
-You will need a version of LLVM that supports at least Version 0.9
+You will need a version of LLVM that supports at least Version 0.9.5
 of the riscv CHERI specification. Make sure that this compiler is
 in your path before other versions of clang.
 
 ```
 $ PATH=/path/to/cherillvm:$PATH
 $ git checkout codasip-cheri-riscv
-$ make LLVM=1 ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- HOSTCC=/usr/bin/gcc qemu_riscv64cheripc_defconfig
-$ make LLVM=1 ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- HOSTCC=/usr/bin/gcc all
+$ make LLVM=1 ARCH=riscv HOSTCC=/usr/bin/gcc qemu_riscv64cheripc_defconfig
+$ make LLVM=1 ARCH=riscv HOSTCC=/usr/bin/gcc all
 ```
 
