@@ -127,13 +127,13 @@ TRACE_EVENT(9p_client_req,
 	    TP_ARGS(clnt, type, tag),
 
 	    TP_STRUCT__entry(
-		    __field(    void *,		clnt			     )
+		    __ptr(    void *,		clnt			     )
 		    __field(	__u8,		type			     )
 		    __field(	__u32,		tag			     )
 		    ),
 
 	    TP_fast_assign(
-		    __entry->clnt    =  clnt;
+		    __assign_ptr(clnt, clnt);
 		    __entry->type    =  type;
 		    __entry->tag     =  tag;
 		    ),
@@ -149,14 +149,14 @@ TRACE_EVENT(9p_client_res,
 	    TP_ARGS(clnt, type, tag, err),
 
 	    TP_STRUCT__entry(
-		    __field(    void *,		clnt			     )
+		    __ptr(    void *,		clnt			     )
 		    __field(	__u8,		type			     )
 		    __field(	__u32,		tag			     )
 		    __field(	__u32,		err			     )
 		    ),
 
 	    TP_fast_assign(
-		    __entry->clnt    =  clnt;
+		    __assign_ptr(clnt, clnt);
 		    __entry->type    =  type;
 		    __entry->tag     =  tag;
 		    __entry->err     =  err;
@@ -175,7 +175,7 @@ TRACE_EVENT(9p_protocol_dump,
 	    TP_ARGS(clnt, pdu),
 
 	    TP_STRUCT__entry(
-		    __field(	void *,		clnt				)
+		    __ptr(	void *,		clnt				)
 		    __field(	__u8,		type				)
 		    __field(	__u16,		tag				)
 		    __dynamic_array(unsigned char, line,
@@ -183,7 +183,7 @@ TRACE_EVENT(9p_protocol_dump,
 		    ),
 
 	    TP_fast_assign(
-		    __entry->clnt   =  clnt;
+		    __assign_ptr(clnt, clnt);
 		    __entry->type   =  pdu->id;
 		    __entry->tag    =  pdu->tag;
 		    memcpy(__get_dynamic_array(line), pdu->sdata,
