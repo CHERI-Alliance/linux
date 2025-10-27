@@ -49,17 +49,17 @@ TRACE_EVENT(exit_mmap,
 	TP_ARGS(mm),
 
 	TP_STRUCT__entry(
-			__field(struct mm_struct *, mm)
-			__field(struct maple_tree *, mt)
+			__ptr(struct mm_struct *, mm)
+			__ptr(struct maple_tree *, mt)
 	),
 
 	TP_fast_assign(
-		       __entry->mm		= mm;
-		       __entry->mt		= &mm->mm_mt;
+		       __assign_ptr(mm, mm);
+		       __assign_ptr(mt, &mm->mm_mt);
 	),
 
-	TP_printk("mt_mod %p, DESTROY",
-		  __entry->mt
+	TP_printk("mt_mod " TRACE_CAP_FMT ", DESTROY",
+		  __get_cap(mt)
 	)
 );
 
