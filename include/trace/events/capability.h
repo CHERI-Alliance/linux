@@ -31,23 +31,23 @@ TRACE_EVENT(cap_capable,
 	TP_ARGS(cred, target_ns, capable_ns, cap, ret),
 
 	TP_STRUCT__entry(
-		__field(const struct cred *, cred)
-		__field(struct user_namespace *, target_ns)
-		__field(const struct user_namespace *, capable_ns)
+		__ptr(const struct cred *, cred)
+		__ptr(struct user_namespace *, target_ns)
+		__ptr(const struct user_namespace *, capable_ns)
 		__field(int, cap)
 		__field(int, ret)
 	),
 
 	TP_fast_assign(
-		__entry->cred       = cred;
-		__entry->target_ns    = target_ns;
-		__entry->capable_ns = ret == 0 ? capable_ns : NULL;
+		__assign_ptr(cred, cred);
+		__assign_ptr(target_ns, target_ns);
+		__assign_ptr(capable_ns, ret == 0 ? capable_ns : NULL);
 		__entry->cap        = cap;
 		__entry->ret        = ret;
 	),
 
-	TP_printk("cred %p, target_ns %p, capable_ns %p, cap %d, ret %d",
-		__entry->cred, __entry->target_ns, __entry->capable_ns, __entry->cap,
+	TP_printk("cred " TRACE_CAP_FMT ", target_ns " TRACE_CAP_FMT ", capable_ns " TRACE_CAP_FMT ", cap %d, ret %d",
+		__get_cap(cred), __get_cap(target_ns), __get_cap(capable_ns), __entry->cap,
 		__entry->ret)
 );
 
