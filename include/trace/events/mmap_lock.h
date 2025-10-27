@@ -18,20 +18,20 @@ DECLARE_EVENT_CLASS(mmap_lock,
 	TP_ARGS(mm, write),
 
 	TP_STRUCT__entry(
-		__field(struct mm_struct *, mm)
+		__ptr(struct mm_struct *, mm)
 		__field(u64, memcg_id)
 		__field(bool, write)
 	),
 
 	TP_fast_assign(
-		__entry->mm = mm;
+		__assign_ptr(mm, mm);
 		__entry->memcg_id = cgroup_id_from_mm(mm);
 		__entry->write = write;
 	),
 
 	TP_printk(
-		"mm=%p memcg_id=%llu write=%s",
-		__entry->mm, __entry->memcg_id,
+		"mm=" TRACE_CAP_FMT " memcg_id=%llu write=%s",
+		__get_cap(mm), __entry->memcg_id,
 		__entry->write ? "true" : "false"
 	)
 );
@@ -51,22 +51,22 @@ TRACE_EVENT(mmap_lock_acquire_returned,
 	TP_ARGS(mm, write, success),
 
 	TP_STRUCT__entry(
-		__field(struct mm_struct *, mm)
+		__ptr(struct mm_struct *, mm)
 		__field(u64, memcg_id)
 		__field(bool, write)
 		__field(bool, success)
 	),
 
 	TP_fast_assign(
-		__entry->mm = mm;
+		__assign_ptr(mm, mm);
 		__entry->memcg_id = cgroup_id_from_mm(mm);
 		__entry->write = write;
 		__entry->success = success;
 	),
 
 	TP_printk(
-		"mm=%p memcg_id=%llu write=%s success=%s",
-		__entry->mm,
+		"mm=" TRACE_CAP_FMT " memcg_id=%llu write=%s success=%s",
+		__get_cap(mm),
 		__entry->memcg_id,
 		__entry->write ? "true" : "false",
 		__entry->success ? "true" : "false"
