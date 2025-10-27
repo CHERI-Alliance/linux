@@ -60,7 +60,7 @@ TRACE_EVENT(mm_khugepaged_scan_pmd,
 	TP_ARGS(mm, folio, referenced, none_or_zero, status, unmapped),
 
 	TP_STRUCT__entry(
-		__field(struct mm_struct *, mm)
+		__ptr(struct mm_struct *, mm)
 		__field(unsigned long, pfn)
 		__field(int, referenced)
 		__field(int, none_or_zero)
@@ -69,7 +69,7 @@ TRACE_EVENT(mm_khugepaged_scan_pmd,
 	),
 
 	TP_fast_assign(
-		__entry->mm = mm;
+		__assign_ptr(mm, mm);
 		__entry->pfn = folio ? folio_pfn(folio) : -1;
 		__entry->referenced = referenced;
 		__entry->none_or_zero = none_or_zero;
@@ -77,8 +77,8 @@ TRACE_EVENT(mm_khugepaged_scan_pmd,
 		__entry->unmapped = unmapped;
 	),
 
-	TP_printk("mm=%p, scan_pfn=0x%lx, referenced=%d, none_or_zero=%d, status=%s, unmapped=%d",
-		__entry->mm,
+	TP_printk("mm=" TRACE_CAP_FMT ", scan_pfn=0x%lx, referenced=%d, none_or_zero=%d, status=%s, unmapped=%d",
+		__get_cap(mm),
 		__entry->pfn,
 		__entry->referenced,
 		__entry->none_or_zero,
@@ -93,19 +93,19 @@ TRACE_EVENT(mm_collapse_huge_page,
 	TP_ARGS(mm, isolated, status),
 
 	TP_STRUCT__entry(
-		__field(struct mm_struct *, mm)
+		__ptr(struct mm_struct *, mm)
 		__field(int, isolated)
 		__field(int, status)
 	),
 
 	TP_fast_assign(
-		__entry->mm = mm;
+		__assign_ptr(mm, mm);
 		__entry->isolated = isolated;
 		__entry->status = status;
 	),
 
-	TP_printk("mm=%p, isolated=%d, status=%s",
-		__entry->mm,
+	TP_printk("mm=" TRACE_CAP_FMT ", isolated=%d, status=%s",
+		__get_cap(mm),
 		__entry->isolated,
 		__print_symbolic(__entry->status, SCAN_STATUS))
 );
@@ -145,21 +145,21 @@ TRACE_EVENT(mm_collapse_huge_page_swapin,
 	TP_ARGS(mm, swapped_in, referenced, ret),
 
 	TP_STRUCT__entry(
-		__field(struct mm_struct *, mm)
+		__ptr(struct mm_struct *, mm)
 		__field(int, swapped_in)
 		__field(int, referenced)
 		__field(int, ret)
 	),
 
 	TP_fast_assign(
-		__entry->mm = mm;
+		__assign_ptr(mm, mm);
 		__entry->swapped_in = swapped_in;
 		__entry->referenced = referenced;
 		__entry->ret = ret;
 	),
 
-	TP_printk("mm=%p, swapped_in=%d, referenced=%d, ret=%d",
-		__entry->mm,
+	TP_printk("mm=" TRACE_CAP_FMT ", swapped_in=%d, referenced=%d, ret=%d",
+		__get_cap(mm),
 		__entry->swapped_in,
 		__entry->referenced,
 		__entry->ret)
@@ -173,7 +173,7 @@ TRACE_EVENT(mm_khugepaged_scan_file,
 	TP_ARGS(mm, folio, file, present, swap, result),
 
 	TP_STRUCT__entry(
-		__field(struct mm_struct *, mm)
+		__ptr(struct mm_struct *, mm)
 		__field(unsigned long, pfn)
 		__string(filename, file->f_path.dentry->d_iname)
 		__field(int, present)
@@ -182,7 +182,7 @@ TRACE_EVENT(mm_khugepaged_scan_file,
 	),
 
 	TP_fast_assign(
-		__entry->mm = mm;
+		__assign_ptr(mm, mm);
 		__entry->pfn = folio ? folio_pfn(folio) : -1;
 		__assign_str(filename);
 		__entry->present = present;
@@ -190,8 +190,8 @@ TRACE_EVENT(mm_khugepaged_scan_file,
 		__entry->result = result;
 	),
 
-	TP_printk("mm=%p, scan_pfn=0x%lx, filename=%s, present=%d, swap=%d, result=%s",
-		__entry->mm,
+	TP_printk("mm=" TRACE_CAP_FMT ", scan_pfn=0x%lx, filename=%s, present=%d, swap=%d, result=%s",
+		__get_cap(mm),
 		__entry->pfn,
 		__get_str(filename),
 		__entry->present,
@@ -205,7 +205,7 @@ TRACE_EVENT(mm_khugepaged_collapse_file,
 			int nr, int result),
 	TP_ARGS(mm, new_folio, index, addr, is_shmem, file, nr, result),
 	TP_STRUCT__entry(
-		__field(struct mm_struct *, mm)
+		__ptr(struct mm_struct *, mm)
 		__field(unsigned long, hpfn)
 		__field(pgoff_t, index)
 		__field(unsigned long, addr)
@@ -216,7 +216,7 @@ TRACE_EVENT(mm_khugepaged_collapse_file,
 	),
 
 	TP_fast_assign(
-		__entry->mm = mm;
+		__assign_ptr(mm, mm);
 		__entry->hpfn = new_folio ? folio_pfn(new_folio) : -1;
 		__entry->index = index;
 		__entry->addr = addr;
@@ -226,8 +226,8 @@ TRACE_EVENT(mm_khugepaged_collapse_file,
 		__entry->result = result;
 	),
 
-	TP_printk("mm=%p, hpage_pfn=0x%lx, index=%ld, addr=%lx, is_shmem=%d, filename=%s, nr=%d, result=%s",
-		__entry->mm,
+	TP_printk("mm=" TRACE_CAP_FMT ", hpage_pfn=0x%lx, index=%ld, addr=%lx, is_shmem=%d, filename=%s, nr=%d, result=%s",
+		__get_cap(mm),
 		__entry->hpfn,
 		__entry->index,
 		__entry->addr,
