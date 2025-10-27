@@ -19,7 +19,7 @@ TRACE_EVENT(page_pool_release,
 	TP_ARGS(pool, inflight, hold, release),
 
 	TP_STRUCT__entry(
-		__field(const struct page_pool *, pool)
+		__ptr(const struct page_pool *, pool)
 		__field(s32,	inflight)
 		__field(u32,	hold)
 		__field(u32,	release)
@@ -27,15 +27,15 @@ TRACE_EVENT(page_pool_release,
 	),
 
 	TP_fast_assign(
-		__entry->pool		= pool;
+		__assign_ptr(pool, pool);
 		__entry->inflight	= inflight;
 		__entry->hold		= hold;
 		__entry->release	= release;
 		__entry->cnt		= pool->destroy_cnt;
 	),
 
-	TP_printk("page_pool=%p inflight=%d hold=%u release=%u cnt=%llu",
-		__entry->pool, __entry->inflight, __entry->hold,
+	TP_printk("page_pool=" TRACE_CAP_FMT " inflight=%d hold=%u release=%u cnt=%llu",
+		__get_cap(pool), __entry->inflight, __entry->hold,
 		__entry->release, __entry->cnt)
 );
 
@@ -47,21 +47,21 @@ TRACE_EVENT(page_pool_state_release,
 	TP_ARGS(pool, netmem, release),
 
 	TP_STRUCT__entry(
-		__field(const struct page_pool *,	pool)
+		__ptr(const struct page_pool *,	pool)
 		__field(unsigned long,			netmem)
 		__field(u32,				release)
 		__field(unsigned long,			pfn)
 	),
 
 	TP_fast_assign(
-		__entry->pool		= pool;
+		__assign_ptr(pool, pool);
 		__entry->netmem		= (__force unsigned long)netmem;
 		__entry->release	= release;
 		__entry->pfn		= netmem_pfn_trace(netmem);
 	),
 
-	TP_printk("page_pool=%p netmem=%p is_net_iov=%lu pfn=0x%lx release=%u",
-		  __entry->pool, (void *)(uintptr_t)__entry->netmem,
+	TP_printk("page_pool=" TRACE_CAP_FMT " netmem=%p is_net_iov=%lu pfn=0x%lx release=%u",
+		  __get_cap(pool), (void *)(uintptr_t)__entry->netmem,
 		  __entry->netmem & NET_IOV, __entry->pfn, __entry->release)
 );
 
@@ -73,21 +73,21 @@ TRACE_EVENT(page_pool_state_hold,
 	TP_ARGS(pool, netmem, hold),
 
 	TP_STRUCT__entry(
-		__field(const struct page_pool *,	pool)
+		__ptr(const struct page_pool *,	pool)
 		__field(unsigned long,			netmem)
 		__field(u32,				hold)
 		__field(unsigned long,			pfn)
 	),
 
 	TP_fast_assign(
-		__entry->pool	= pool;
+		__assign_ptr(pool, pool);
 		__entry->netmem	= (__force unsigned long)netmem;
 		__entry->hold	= hold;
 		__entry->pfn	= netmem_pfn_trace(netmem);
 	),
 
-	TP_printk("page_pool=%p netmem=%p is_net_iov=%lu, pfn=0x%lx hold=%u",
-		  __entry->pool, (void *)(uintptr_t)__entry->netmem,
+	TP_printk("page_pool=" TRACE_CAP_FMT " netmem=%p is_net_iov=%lu, pfn=0x%lx hold=%u",
+		  __get_cap(pool), (void *)(uintptr_t)__entry->netmem,
 		  __entry->netmem & NET_IOV, __entry->pfn, __entry->hold)
 );
 
@@ -98,19 +98,19 @@ TRACE_EVENT(page_pool_update_nid,
 	TP_ARGS(pool, new_nid),
 
 	TP_STRUCT__entry(
-		__field(const struct page_pool *, pool)
+		__ptr(const struct page_pool *, pool)
 		__field(int,			  pool_nid)
 		__field(int,			  new_nid)
 	),
 
 	TP_fast_assign(
-		__entry->pool		= pool;
+		__assign_ptr(pool, pool);
 		__entry->pool_nid	= pool->p.nid;
 		__entry->new_nid	= new_nid;
 	),
 
-	TP_printk("page_pool=%p pool_nid=%d new_nid=%d",
-		  __entry->pool, __entry->pool_nid, __entry->new_nid)
+	TP_printk("page_pool=" TRACE_CAP_FMT " pool_nid=%d new_nid=%d",
+		  __get_cap(pool), __entry->pool_nid, __entry->new_nid)
 );
 
 #endif /* _TRACE_PAGE_POOL_H */
