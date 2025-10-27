@@ -21,7 +21,7 @@ TRACE_EVENT(kmem_cache_alloc,
 
 	TP_STRUCT__entry(
 		__field(	unsigned long,	call_site	)
-		__field(	const void *,	ptr		)
+		__ptr(		const void *,	ptr		)
 		__field(	size_t,		bytes_req	)
 		__field(	size_t,		bytes_alloc	)
 		__field(	unsigned long,	gfp_flags	)
@@ -31,7 +31,7 @@ TRACE_EVENT(kmem_cache_alloc,
 
 	TP_fast_assign(
 		__entry->call_site	= call_site;
-		__entry->ptr		= ptr;
+		__assign_ptr(ptr, ptr);
 		__entry->bytes_req	= s->object_size;
 		__entry->bytes_alloc	= s->size;
 		__entry->gfp_flags	= (__force unsigned long)gfp_flags;
@@ -41,9 +41,9 @@ TRACE_EVENT(kmem_cache_alloc,
 					  (s->flags & SLAB_ACCOUNT)) : false;
 	),
 
-	TP_printk("call_site=%pS ptr=%p bytes_req=%zu bytes_alloc=%zu gfp_flags=%s node=%d accounted=%s",
+	TP_printk("call_site=%pS ptr=" TRACE_CAP_FMT " bytes_req=%zu bytes_alloc=%zu gfp_flags=%s node=%d accounted=%s",
 		(void *)(uintptr_t)__entry->call_site,
-		__entry->ptr,
+		__get_cap(ptr),
 		__entry->bytes_req,
 		__entry->bytes_alloc,
 		show_gfp_flags(__entry->gfp_flags),
@@ -64,7 +64,7 @@ TRACE_EVENT(kmalloc,
 
 	TP_STRUCT__entry(
 		__field(	unsigned long,	call_site	)
-		__field(	const void *,	ptr		)
+		__ptr(		const void *,	ptr		)
 		__field(	size_t,		bytes_req	)
 		__field(	size_t,		bytes_alloc	)
 		__field(	unsigned long,	gfp_flags	)
@@ -73,16 +73,16 @@ TRACE_EVENT(kmalloc,
 
 	TP_fast_assign(
 		__entry->call_site	= call_site;
-		__entry->ptr		= ptr;
+		__assign_ptr(ptr, ptr);
 		__entry->bytes_req	= bytes_req;
 		__entry->bytes_alloc	= bytes_alloc;
 		__entry->gfp_flags	= (__force unsigned long)gfp_flags;
 		__entry->node		= node;
 	),
 
-	TP_printk("call_site=%pS ptr=%p bytes_req=%zu bytes_alloc=%zu gfp_flags=%s node=%d accounted=%s",
+	TP_printk("call_site=%pS ptr=" TRACE_CAP_FMT " bytes_req=%zu bytes_alloc=%zu gfp_flags=%s node=%d accounted=%s",
 		(void *)(uintptr_t)__entry->call_site,
-		__entry->ptr,
+		__get_cap(ptr),
 		__entry->bytes_req,
 		__entry->bytes_alloc,
 		show_gfp_flags(__entry->gfp_flags),
@@ -99,16 +99,16 @@ TRACE_EVENT(kfree,
 
 	TP_STRUCT__entry(
 		__field(	unsigned long,	call_site	)
-		__field(	const void *,	ptr		)
+		__ptr(		const void *,	ptr		)
 	),
 
 	TP_fast_assign(
 		__entry->call_site	= call_site;
-		__entry->ptr		= ptr;
+		__assign_ptr(ptr, ptr);
 	),
 
-	TP_printk("call_site=%pS ptr=%p",
-		  (void *)(uintptr_t)__entry->call_site, __entry->ptr)
+	TP_printk("call_site=%pS ptr=" TRACE_CAP_FMT "",
+		  (void *)(uintptr_t)__entry->call_site, __get_cap(ptr))
 );
 
 TRACE_EVENT(kmem_cache_free,
@@ -119,18 +119,18 @@ TRACE_EVENT(kmem_cache_free,
 
 	TP_STRUCT__entry(
 		__field(	unsigned long,	call_site	)
-		__field(	const void *,	ptr		)
+		__ptr(	const void *,	ptr		)
 		__string(	name,		s->name		)
 	),
 
 	TP_fast_assign(
 		__entry->call_site	= call_site;
-		__entry->ptr		= ptr;
+		__assign_ptr(ptr, ptr);
 		__assign_str(name);
 	),
 
-	TP_printk("call_site=%pS ptr=%p name=%s",
-		  (void *)(uintptr_t)__entry->call_site, __entry->ptr, __get_str(name))
+	TP_printk("call_site=%pS ptr=" TRACE_CAP_FMT " name=%s",
+		  (void *)(uintptr_t)__entry->call_site, __get_cap(ptr), __get_str(name))
 );
 
 TRACE_EVENT(mm_page_free,
