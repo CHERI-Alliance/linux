@@ -24,9 +24,9 @@ TRACE_EVENT(percpu_alloc_percpu,
 		__field(	bool,			is_atomic	)
 		__field(	size_t,			size		)
 		__field(	size_t,			align		)
-		__field(	void *,			base_addr	)
+		__ptr(		void *,			base_addr	)
 		__field(	int,			off		)
-		__field(	void __percpu *,	ptr		)
+		__ptr(		void __percpu *,	ptr		)
 		__field(	size_t,			bytes_alloc	)
 		__field(	unsigned long,		gfp_flags	)
 	),
@@ -36,18 +36,18 @@ TRACE_EVENT(percpu_alloc_percpu,
 		__entry->is_atomic	= is_atomic;
 		__entry->size		= size;
 		__entry->align		= align;
-		__entry->base_addr	= base_addr;
+		__assign_ptr(base_addr, base_addr);
 		__entry->off		= off;
-		__entry->ptr		= ptr;
+		__assign_ptr(ptr, ptr);
 		__entry->bytes_alloc	= bytes_alloc;
 		__entry->gfp_flags	= (__force unsigned long)gfp_flags;
 	),
 
-	TP_printk("call_site=%pS reserved=%d is_atomic=%d size=%zu align=%zu base_addr=%p off=%d ptr=%p bytes_alloc=%zu gfp_flags=%s",
+	TP_printk("call_site=%pS reserved=%d is_atomic=%d size=%zu align=%zu base_addr=" TRACE_CAP_FMT " off=%d ptr=" TRACE_CAP_FMT " bytes_alloc=%zu gfp_flags=%s",
 		  (void *)(uintptr_t)__entry->call_site,
 		  __entry->reserved, __entry->is_atomic,
 		  __entry->size, __entry->align,
-		  __entry->base_addr, __entry->off, __entry->ptr,
+		  __get_cap(base_addr), __entry->off, __get_cap(ptr),
 		  __entry->bytes_alloc, show_gfp_flags(__entry->gfp_flags))
 );
 
@@ -58,19 +58,19 @@ TRACE_EVENT(percpu_free_percpu,
 	TP_ARGS(base_addr, off, ptr),
 
 	TP_STRUCT__entry(
-		__field(	void *,			base_addr	)
+		__ptr(		void *,			base_addr	)
 		__field(	int,			off		)
-		__field(	void __percpu *,	ptr		)
+		__ptr(		void __percpu *,	ptr		)
 	),
 
 	TP_fast_assign(
-		__entry->base_addr	= base_addr;
+		__assign_ptr(base_addr, base_addr);
 		__entry->off		= off;
-		__entry->ptr		= ptr;
+		__assign_ptr(ptr, ptr);
 	),
 
-	TP_printk("base_addr=%p off=%d ptr=%p",
-		__entry->base_addr, __entry->off, __entry->ptr)
+	TP_printk("base_addr=" TRACE_CAP_FMT " off=%d ptr=" TRACE_CAP_FMT,
+		__get_cap(base_addr), __entry->off, __get_cap(ptr))
 );
 
 TRACE_EVENT(percpu_alloc_percpu_fail,
@@ -105,14 +105,14 @@ TRACE_EVENT(percpu_create_chunk,
 	TP_ARGS(base_addr),
 
 	TP_STRUCT__entry(
-		__field(	void *, base_addr	)
+		__ptr(		void *, base_addr	)
 	),
 
 	TP_fast_assign(
-		__entry->base_addr	= base_addr;
+		__assign_ptr(base_addr, base_addr);
 	),
 
-	TP_printk("base_addr=%p", __entry->base_addr)
+	TP_printk("base_addr=" TRACE_CAP_FMT, __get_cap(base_addr))
 );
 
 TRACE_EVENT(percpu_destroy_chunk,
@@ -122,14 +122,14 @@ TRACE_EVENT(percpu_destroy_chunk,
 	TP_ARGS(base_addr),
 
 	TP_STRUCT__entry(
-		__field(	void *,	base_addr	)
+		__ptr(	void *,	base_addr	)
 	),
 
 	TP_fast_assign(
-		__entry->base_addr	= base_addr;
+		__assign_ptr(base_addr, base_addr);
 	),
 
-	TP_printk("base_addr=%p", __entry->base_addr)
+	TP_printk("base_addr=" TRACE_CAP_FMT "", __get_cap(base_addr))
 );
 
 #endif /* _TRACE_PERCPU_H */
