@@ -14,14 +14,14 @@ DECLARE_EVENT_CLASS(notifier_info,
 	TP_ARGS(cb),
 
 	TP_STRUCT__entry(
-		__field(void *, cb)
+		__ptr(void *, cb)
 	),
 
 	TP_fast_assign(
-		__entry->cb = cb;
+		__assign_ptr(cb, cb);
 	),
 
-	TP_printk("%ps", __entry->cb)
+	TP_printk("%ps", __get_ptr(cb))
 );
 
 /*
