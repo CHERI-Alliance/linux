@@ -40,7 +40,7 @@ TRACE_EVENT(mmc_request_start,
 		__field(int,			need_retune)
 		__field(int,			hold_retune)
 		__field(unsigned int,		retune_period)
-		__field(struct mmc_request *,	mrq)
+		__ptr(struct mmc_request *,	mrq)
 		__string(name,			mmc_hostname(host))
 	),
 
@@ -69,17 +69,17 @@ TRACE_EVENT(mmc_request_start,
 		__entry->hold_retune = host->hold_retune;
 		__entry->retune_period = host->retune_period;
 		__assign_str(name);
-		__entry->mrq = mrq;
+		__assign_ptr(mrq, mrq);
 	),
 
-	TP_printk("%s: start struct mmc_request[%p]: "
+	TP_printk("%s: start struct mmc_request[" TRACE_CAP_FMT "]: "
 		  "cmd_opcode=%u cmd_arg=0x%x cmd_flags=0x%x cmd_retries=%u "
 		  "stop_opcode=%u stop_arg=0x%x stop_flags=0x%x stop_retries=%u "
 		  "sbc_opcode=%u sbc_arg=0x%x sbc_flags=0x%x sbc_retires=%u "
 		  "blocks=%u block_size=%u blk_addr=%u data_flags=0x%x "
 		  "tag=%d can_retune=%u doing_retune=%u retune_now=%u "
 		  "need_retune=%d hold_retune=%d retune_period=%u",
-		  __get_str(name), __entry->mrq,
+		  __get_str(name), __get_cap(mrq),
 		  __entry->cmd_opcode, __entry->cmd_arg,
 		  __entry->cmd_flags, __entry->cmd_retries,
 		  __entry->stop_opcode, __entry->stop_arg,
@@ -121,7 +121,7 @@ TRACE_EVENT(mmc_request_done,
 		__field(int,			need_retune)
 		__field(int,			hold_retune)
 		__field(unsigned int,		retune_period)
-		__field(struct mmc_request *,	mrq)
+		__ptr(struct mmc_request *,	mrq)
 		__string(name,			mmc_hostname(host))
 	),
 
@@ -157,10 +157,10 @@ TRACE_EVENT(mmc_request_done,
 		__entry->hold_retune = host->hold_retune;
 		__entry->retune_period = host->retune_period;
 		__assign_str(name);
-		__entry->mrq = mrq;
+		__assign_ptr(mrq, mrq);
 	),
 
-	TP_printk("%s: end struct mmc_request[%p]: "
+	TP_printk("%s: end struct mmc_request[" TRACE_CAP_FMT "]: "
 		  "cmd_opcode=%u cmd_err=%d cmd_resp=0x%x 0x%x 0x%x 0x%x "
 		  "cmd_retries=%u stop_opcode=%u stop_err=%d "
 		  "stop_resp=0x%x 0x%x 0x%x 0x%x stop_retries=%u "
@@ -168,7 +168,7 @@ TRACE_EVENT(mmc_request_done,
 		  "sbc_retries=%u bytes_xfered=%u data_err=%d tag=%d "
 		  "can_retune=%u doing_retune=%u retune_now=%u need_retune=%d "
 		  "hold_retune=%d retune_period=%u",
-		  __get_str(name), __entry->mrq,
+		  __get_str(name), __get_cap(mrq),
 		  __entry->cmd_opcode, __entry->cmd_err,
 		  __entry->cmd_resp[0], __entry->cmd_resp[1],
 		  __entry->cmd_resp[2], __entry->cmd_resp[3],
