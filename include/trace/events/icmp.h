@@ -15,7 +15,7 @@ TRACE_EVENT(icmp_send,
 		TP_ARGS(skb, type, code),
 
 		TP_STRUCT__entry(
-			__field(const void *, skbaddr)
+			__ptr(const void *, skbaddr)
 			__field(int, type)
 			__field(int, code)
 			__array(__u8, saddr, 4)
@@ -31,7 +31,7 @@ TRACE_EVENT(icmp_send,
 			int proto_4 = iph->protocol;
 			__be32 *p32;
 
-			__entry->skbaddr = skb;
+			__assign_ptr(skbaddr, skb);
 			__entry->type = type;
 			__entry->code = code;
 
@@ -54,10 +54,10 @@ TRACE_EVENT(icmp_send,
 			*p32 = iph->daddr;
 		),
 
-		TP_printk("icmp_send: type=%d, code=%d. From %pI4:%u to %pI4:%u ulen=%d skbaddr=%p",
+		TP_printk("icmp_send: type=%d, code=%d. From %pI4:%u to %pI4:%u ulen=%d skbaddr=" TRACE_CAP_FMT,
 			__entry->type, __entry->code,
 			__entry->saddr, __entry->sport, __entry->daddr,
-			__entry->dport, __entry->ulen, __entry->skbaddr)
+			__entry->dport, __entry->ulen, __get_cap(skbaddr))
 );
 
 #endif /* _TRACE_ICMP_H */
