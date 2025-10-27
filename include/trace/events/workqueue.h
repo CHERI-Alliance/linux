@@ -28,23 +28,23 @@ TRACE_EVENT(workqueue_queue_work,
 	TP_ARGS(req_cpu, pwq, work),
 
 	TP_STRUCT__entry(
-		__field( void *,	work	)
-		__field( void *,	function)
+		__ptr( void *,	work	)
+		__ptr( void *,	function)
 		__string( workqueue,	pwq->wq->name)
 		__field( int,	req_cpu	)
 		__field( int,	cpu	)
 	),
 
 	TP_fast_assign(
-		__entry->work		= work;
-		__entry->function	= work->func;
+		__assign_ptr(work, work);
+		__assign_ptr(function, work->func);
 		__assign_str(workqueue);
 		__entry->req_cpu	= req_cpu;
 		__entry->cpu		= pwq->pool->cpu;
 	),
 
-	TP_printk("work struct=%p function=%ps workqueue=%s req_cpu=%d cpu=%d",
-		  __entry->work, __entry->function, __get_str(workqueue),
+	TP_printk("work struct=" TRACE_CAP_FMT " function=%ps workqueue=%s req_cpu=%d cpu=%d",
+		  __get_cap(work), __get_ptr(function), __get_str(workqueue),
 		  __entry->req_cpu, __entry->cpu)
 );
 
@@ -63,16 +63,16 @@ TRACE_EVENT(workqueue_activate_work,
 	TP_ARGS(work),
 
 	TP_STRUCT__entry(
-		__field( void *,	work	)
-		__field( void *,	function)
+		__ptr( void *,	work	)
+		__ptr( void *,	function)
 	),
 
 	TP_fast_assign(
-		__entry->work		= work;
-		__entry->function	= work->func;
+		__assign_ptr(work, work);
+		__assign_ptr(function, work->func);
 	),
 
-	TP_printk("work struct %p function=%ps ", __entry->work, __entry->function)
+	TP_printk("work struct " TRACE_CAP_FMT " function=%ps ", __get_cap(work), __get_ptr(function))
 );
 
 /**
@@ -88,16 +88,16 @@ TRACE_EVENT(workqueue_execute_start,
 	TP_ARGS(work),
 
 	TP_STRUCT__entry(
-		__field( void *,	work	)
-		__field( void *,	function)
+		__ptr( void *,	work	)
+		__ptr( void *,	function)
 	),
 
 	TP_fast_assign(
-		__entry->work		= work;
-		__entry->function	= work->func;
+		__assign_ptr(work, work);
+		__assign_ptr(function, work->func);
 	),
 
-	TP_printk("work struct %p: function %ps", __entry->work, __entry->function)
+	TP_printk("work struct " TRACE_CAP_FMT ": function %ps", __get_cap(work), __get_ptr(function))
 );
 
 /**
@@ -114,16 +114,16 @@ TRACE_EVENT(workqueue_execute_end,
 	TP_ARGS(work, function),
 
 	TP_STRUCT__entry(
-		__field( void *,	work	)
-		__field( void *,	function)
+		__ptr( void *,	work	)
+		__ptr( void *,	function)
 	),
 
 	TP_fast_assign(
-		__entry->work		= work;
-		__entry->function	= function;
+		__assign_ptr(work, work);
+		__assign_ptr(function, function);
 	),
 
-	TP_printk("work struct %p: function %ps", __entry->work, __entry->function)
+	TP_printk("work struct " TRACE_CAP_FMT ": function %ps", __get_cap(work), __get_ptr(function))
 );
 
 #endif /*  _TRACE_WORKQUEUE_H */
