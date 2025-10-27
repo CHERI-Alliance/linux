@@ -163,19 +163,19 @@ DECLARE_EVENT_CLASS(rtc_timer_class,
 	TP_ARGS(timer),
 
 	TP_STRUCT__entry(
-		__field(struct rtc_timer *, timer)
+		__ptr(struct rtc_timer *, timer)
 		__field(ktime_t, expires)
 		__field(ktime_t, period)
 	),
 
 	TP_fast_assign(
-		__entry->timer = timer;
+		__assign_ptr(timer, timer);
 		__entry->expires = timer->node.expires;
 		__entry->period = timer->period;
 	),
 
-	TP_printk("RTC timer:(%p) expires:%lld period:%lld",
-		  __entry->timer, __entry->expires, __entry->period
+	TP_printk("RTC timer:(" TRACE_CAP_FMT ") expires:%lld period:%lld",
+		  __get_cap(timer), __entry->expires, __entry->period
 	)
 );
 
