@@ -67,7 +67,7 @@ TRACE_EVENT(nvmet_req_init,
 	TP_PROTO(struct nvmet_req *req, struct nvme_command *cmd),
 	TP_ARGS(req, cmd),
 	TP_STRUCT__entry(
-		__field(struct nvme_command *, cmd)
+		__ptr(struct nvme_command *, cmd)
 		__field(u16, ctrl_id)
 		__array(char, disk, DISK_NAME_LEN)
 		__field(int, qid)
@@ -80,7 +80,7 @@ TRACE_EVENT(nvmet_req_init,
 		__array(u8, cdw10, 24)
 	),
 	TP_fast_assign(
-		__entry->cmd = cmd;
+		__assign_ptr(cmd, cmd);
 		__entry->ctrl_id = nvmet_req_to_ctrl_id(req);
 		__assign_req_name(__entry->disk, req);
 		__entry->qid = req->sq->qid;
