@@ -32,16 +32,16 @@ TRACE_EVENT(lock_acquire,
 	TP_STRUCT__entry(
 		__field(unsigned int, flags)
 		__string(name, lock->name)
-		__field(void *, lockdep_addr)
+		__ptr(void *, lockdep_addr)
 	),
 
 	TP_fast_assign(
 		__entry->flags = (trylock ? 1 : 0) | (read ? 2 : 0);
 		__assign_str(name);
-		__entry->lockdep_addr = lock;
+		__assign_ptr(lockdep_addr, lock);
 	),
 
-	TP_printk("%p %s%s%s", __entry->lockdep_addr,
+	TP_printk(TRACE_CAP_FMT " %s%s%s", __get_cap(lockdep_addr),
 		  (__entry->flags & 1) ? "try " : "",
 		  (__entry->flags & 2) ? "read " : "",
 		  __get_str(name))
@@ -55,15 +55,15 @@ DECLARE_EVENT_CLASS(lock,
 
 	TP_STRUCT__entry(
 		__string(	name, 	lock->name	)
-		__field(	void *, lockdep_addr	)
+		__ptr(		void *, lockdep_addr	)
 	),
 
 	TP_fast_assign(
 		__assign_str(name);
-		__entry->lockdep_addr = lock;
+		__assign_ptr(lockdep_addr, lock);
 	),
 
-	TP_printk("%p %s",  __entry->lockdep_addr, __get_str(name))
+	TP_printk(TRACE_CAP_FMT " %s",  __get_cap(lockdep_addr), __get_str(name))
 );
 
 DEFINE_EVENT(lock, lock_release,
@@ -99,16 +99,16 @@ TRACE_EVENT(contention_begin,
 	TP_ARGS(lock, flags),
 
 	TP_STRUCT__entry(
-		__field(void *, lock_addr)
+		__ptr(void *, lock_addr)
 		__field(unsigned int, flags)
 	),
 
 	TP_fast_assign(
-		__entry->lock_addr = lock;
+		__assign_ptr(lock_addr, lock);
 		__entry->flags = flags;
 	),
 
-	TP_printk("%p (flags=%s)", __entry->lock_addr,
+	TP_printk(TRACE_CAP_FMT " (flags=%s)", __get_cap(lock_addr),
 		  __print_flags(__entry->flags, "|",
 				{ LCB_F_SPIN,		"SPIN" },
 				{ LCB_F_READ,		"READ" },
@@ -126,16 +126,16 @@ TRACE_EVENT(contention_end,
 	TP_ARGS(lock, ret),
 
 	TP_STRUCT__entry(
-		__field(void *, lock_addr)
+		__ptr(void *, lock_addr)
 		__field(int, ret)
 	),
 
 	TP_fast_assign(
-		__entry->lock_addr = lock;
+		__assign_ptr(lock_addr, lock);
 		__entry->ret = ret;
 	),
 
-	TP_printk("%p (ret=%d)", __entry->lock_addr, __entry->ret)
+	TP_printk(TRACE_CAP_FMT " (ret=%d)", __get_cap(lock_addr), __entry->ret)
 );
 
 #endif /* _TRACE_LOCK_H */
