@@ -32,22 +32,22 @@ TRACE_EVENT(mm_lru_insertion,
 	TP_ARGS(folio),
 
 	TP_STRUCT__entry(
-		__field(struct folio *,	folio	)
+		__ptr(struct folio *,	folio	)
 		__field(unsigned long,	pfn	)
 		__field(enum lru_list,	lru	)
 		__field(unsigned long,	flags	)
 	),
 
 	TP_fast_assign(
-		__entry->folio	= folio;
+		__assign_ptr(folio, folio);
 		__entry->pfn	= folio_pfn(folio);
 		__entry->lru	= folio_lru_list(folio);
 		__entry->flags	= trace_pagemap_flags(folio);
 	),
 
 	/* Flag format is based on page-types.c formatting for pagemap */
-	TP_printk("folio=%p pfn=0x%lx lru=%d flags=%s%s%s%s%s%s",
-			__entry->folio,
+	TP_printk("folio=" TRACE_CAP_FMT " pfn=0x%lx lru=%d flags=%s%s%s%s%s%s",
+			__get_cap(folio),
 			__entry->pfn,
 			__entry->lru,
 			__entry->flags & PAGEMAP_MAPPED		? "M" : " ",
@@ -65,16 +65,16 @@ TRACE_EVENT(mm_lru_activate,
 	TP_ARGS(folio),
 
 	TP_STRUCT__entry(
-		__field(struct folio *,	folio	)
+		__ptr(struct folio *,	folio	)
 		__field(unsigned long,	pfn	)
 	),
 
 	TP_fast_assign(
-		__entry->folio	= folio;
+		__assign_ptr(folio, folio);
 		__entry->pfn	= folio_pfn(folio);
 	),
 
-	TP_printk("folio=%p pfn=0x%lx", __entry->folio, __entry->pfn)
+	TP_printk("folio=" TRACE_CAP_FMT " pfn=0x%lx", __get_cap(folio), __entry->pfn)
 );
 
 #endif /* _TRACE_PAGEMAP_H */
