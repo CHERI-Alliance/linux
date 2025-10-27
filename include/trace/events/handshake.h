@@ -95,17 +95,17 @@ DECLARE_EVENT_CLASS(handshake_event_class,
 	),
 	TP_ARGS(net, req, sk),
 	TP_STRUCT__entry(
-		__field(const void *, req)
-		__field(const void *, sk)
+		__ptr(const void *, req)
+		__ptr(const void *, sk)
 		__field(unsigned int, netns_ino)
 	),
 	TP_fast_assign(
-		__entry->req = req;
-		__entry->sk = sk;
+		__assign_ptr(req, req);
+		__assign_ptr(sk, sk);
 		__entry->netns_ino = net->ns.inum;
 	),
-	TP_printk("req=%p sk=%p",
-		__entry->req, __entry->sk
+	TP_printk("req=" TRACE_CAP_FMT " sk=" TRACE_CAP_FMT "",
+		__get_cap(req), __get_cap(sk)
 	)
 );
 #define DEFINE_HANDSHAKE_EVENT(name)				\
@@ -126,19 +126,19 @@ DECLARE_EVENT_CLASS(handshake_fd_class,
 	),
 	TP_ARGS(net, req, sk, fd),
 	TP_STRUCT__entry(
-		__field(const void *, req)
-		__field(const void *, sk)
+		__ptr(const void *, req)
+		__ptr(const void *, sk)
 		__field(int, fd)
 		__field(unsigned int, netns_ino)
 	),
 	TP_fast_assign(
-		__entry->req = req;
-		__entry->sk = req->hr_sk;
+		__assign_ptr(req, req);
+		__assign_ptr(sk, req->hr_sk);
 		__entry->fd = fd;
 		__entry->netns_ino = net->ns.inum;
 	),
-	TP_printk("req=%p sk=%p fd=%d",
-		__entry->req, __entry->sk, __entry->fd
+	TP_printk("req=" TRACE_CAP_FMT " sk=" TRACE_CAP_FMT " fd=%d",
+		__get_cap(req), __get_cap(sk), __entry->fd
 	)
 );
 #define DEFINE_HANDSHAKE_FD_EVENT(name)				\
@@ -160,19 +160,19 @@ DECLARE_EVENT_CLASS(handshake_error_class,
 	),
 	TP_ARGS(net, req, sk, err),
 	TP_STRUCT__entry(
-		__field(const void *, req)
-		__field(const void *, sk)
+		__ptr(const void *, req)
+		__ptr(const void *, sk)
 		__field(int, err)
 		__field(unsigned int, netns_ino)
 	),
 	TP_fast_assign(
-		__entry->req = req;
-		__entry->sk = sk;
+		__assign_ptr(req, req);
+		__assign_ptr(sk, sk);
 		__entry->err = err;
 		__entry->netns_ino = net->ns.inum;
 	),
-	TP_printk("req=%p sk=%p err=%d",
-		__entry->req, __entry->sk, __entry->err
+	TP_printk("req=" TRACE_CAP_FMT " sk=" TRACE_CAP_FMT " err=%d",
+		__get_cap(req), __get_cap(sk), __entry->err
 	)
 );
 #define DEFINE_HANDSHAKE_ERROR(name)				\
@@ -248,19 +248,19 @@ TRACE_EVENT(handshake_complete,
 	),
 	TP_ARGS(net, req, sk, status),
 	TP_STRUCT__entry(
-		__field(const void *, req)
-		__field(const void *, sk)
+		__ptr(const void *, req)
+		__ptr(const void *, sk)
 		__field(int, status)
 		__field(unsigned int, netns_ino)
 	),
 	TP_fast_assign(
-		__entry->req = req;
-		__entry->sk = sk;
+		__assign_ptr(req, req);
+		__assign_ptr(sk, sk);
 		__entry->status = status;
 		__entry->netns_ino = net->ns.inum;
 	),
-	TP_printk("req=%p sk=%p status=%d",
-		__entry->req, __entry->sk, __entry->status
+	TP_printk("req=" TRACE_CAP_FMT " sk=" TRACE_CAP_FMT " status=%d",
+		__get_cap(req), __get_cap(sk), __entry->status
 	)
 );
 
