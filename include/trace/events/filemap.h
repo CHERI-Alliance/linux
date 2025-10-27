@@ -171,7 +171,7 @@ TRACE_EVENT(file_check_and_advance_wb_err,
 		TP_ARGS(file, old),
 
 		TP_STRUCT__entry(
-			__field(struct file *, file)
+			__ptr(struct file *, file)
 			__field(unsigned long, i_ino)
 			__field(dev_t, s_dev)
 			__field(errseq_t, old)
@@ -179,7 +179,7 @@ TRACE_EVENT(file_check_and_advance_wb_err,
 		),
 
 		TP_fast_assign(
-			__entry->file = file;
+			__assign_ptr(file, file);
 			__entry->i_ino = file->f_mapping->host->i_ino;
 			if (file->f_mapping->host->i_sb)
 				__entry->s_dev =
@@ -191,8 +191,8 @@ TRACE_EVENT(file_check_and_advance_wb_err,
 			__entry->new = file->f_wb_err;
 		),
 
-		TP_printk("file=%p dev=%d:%d ino=0x%lx old=0x%x new=0x%x",
-			__entry->file, MAJOR(__entry->s_dev),
+		TP_printk("file=" TRACE_CAP_FMT " dev=%d:%d ino=0x%lx old=0x%x new=0x%x",
+			__get_cap(file), MAJOR(__entry->s_dev),
 			MINOR(__entry->s_dev), __entry->i_ino, __entry->old,
 			__entry->new)
 );
