@@ -227,8 +227,8 @@ TRACE_EVENT(mm_shrink_slab_start,
 		priority, memcg),
 
 	TP_STRUCT__entry(
-		__field(struct shrinker *, shr)
-		__field(void *, shrink)
+		__ptr(struct shrinker *, shr)
+		__ptr(void *, shrink)
 		__field(long, nr_objects_to_shrink)
 		__field(unsigned long, gfp_flags)
 		__field(unsigned long, cache_items)
@@ -240,8 +240,8 @@ TRACE_EVENT(mm_shrink_slab_start,
 	),
 
 	TP_fast_assign(
-		__entry->shr = shr;
-		__entry->shrink = shr->scan_objects;
+		__assign_ptr(shr, shr);
+		__assign_ptr(shrink, shr->scan_objects);
 		__entry->nr_objects_to_shrink = nr_objects_to_shrink;
 		__entry->gfp_flags = (__force unsigned long)sc->gfp_mask;
 		__entry->cache_items = cache_items;
@@ -252,9 +252,9 @@ TRACE_EVENT(mm_shrink_slab_start,
 		__entry->memcg_id = mem_cgroup_id(memcg);
 	),
 
-	TP_printk("%pS %p: nid: %d pid: %d memcg_id: %llu objects to shrink %ld gfp_flags %s cache items %ld delta %lld total_scan %ld priority %d %s",
-		__entry->shrink,
-		__entry->shr,
+	TP_printk("%pS " TRACE_CAP_FMT ": nid: %d pid: %d memcg_id: %llu objects to shrink %ld gfp_flags %s cache items %ld delta %lld total_scan %ld priority %d %s",
+		__get_ptr(shrink),
+		__get_cap(shr),
 		__entry->nid,
 		__entry->ent.pid,
 		__entry->memcg_id,
@@ -275,8 +275,8 @@ TRACE_EVENT(mm_shrink_slab_end,
 		total_scan, memcg),
 
 	TP_STRUCT__entry(
-		__field(struct shrinker *, shr)
-		__field(void *, shrink)
+		__ptr(struct shrinker *, shr)
+		__ptr(void *, shrink)
 		__field(long, unused_scan)
 		__field(long, new_scan)
 		__field(long, total_scan)
@@ -286,8 +286,8 @@ TRACE_EVENT(mm_shrink_slab_end,
 	),
 
 	TP_fast_assign(
-		__entry->shr = shr;
-		__entry->shrink = shr->scan_objects;
+		__assign_ptr(shr, shr);
+		__assign_ptr(shrink, shr->scan_objects);
 		__entry->unused_scan = unused_scan_cnt;
 		__entry->new_scan = new_scan_cnt;
 		__entry->total_scan = total_scan;
@@ -296,9 +296,9 @@ TRACE_EVENT(mm_shrink_slab_end,
 		__entry->memcg_id = mem_cgroup_id(memcg);
 	),
 
-	TP_printk("%pS %p: nid: %d pid: %d memcg_id: %llu unused scan count %ld new scan count %ld total_scan %ld last shrinker return val %d %s",
-		__entry->shrink,
-		__entry->shr,
+	TP_printk("%pS " TRACE_CAP_FMT ": nid: %d pid: %d memcg_id: %llu unused scan count %ld new scan count %ld total_scan %ld last shrinker return val %d %s",
+		__get_ptr(shrink),
+		__get_cap(shr),
 		__entry->nid,
 		__entry->ent.pid,
 		__entry->memcg_id,
