@@ -21,7 +21,7 @@ DECLARE_EVENT_CLASS(page_ref_mod_template,
 		__field(unsigned long, flags)
 		__field(int, count)
 		__field(int, mapcount)
-		__field(void *, mapping)
+		__ptr(void *, mapping)
 		__field(int, mt)
 		__field(int, val)
 	),
@@ -31,16 +31,16 @@ DECLARE_EVENT_CLASS(page_ref_mod_template,
 		__entry->flags = page->flags;
 		__entry->count = page_ref_count(page);
 		__entry->mapcount = atomic_read(&page->_mapcount);
-		__entry->mapping = page->mapping;
+		__assign_ptr(mapping, page->mapping);
 		__entry->mt = get_pageblock_migratetype(page);
 		__entry->val = v;
 	),
 
-	TP_printk("pfn=0x%lx flags=%s count=%d mapcount=%d mapping=%p mt=%d val=%d",
+	TP_printk("pfn=0x%lx flags=%s count=%d mapcount=%d mapping=" TRACE_CAP_FMT " mt=%d val=%d",
 		__entry->pfn,
 		show_page_flags(__entry->flags & PAGEFLAGS_MASK),
 		__entry->count,
-		__entry->mapcount, __entry->mapping, __entry->mt,
+		__entry->mapcount, __get_cap(mapping), __entry->mt,
 		__entry->val)
 );
 
@@ -69,7 +69,7 @@ DECLARE_EVENT_CLASS(page_ref_mod_and_test_template,
 		__field(unsigned long, flags)
 		__field(int, count)
 		__field(int, mapcount)
-		__field(void *, mapping)
+		__ptr(void *, mapping)
 		__field(int, mt)
 		__field(int, val)
 		__field(int, ret)
@@ -80,17 +80,17 @@ DECLARE_EVENT_CLASS(page_ref_mod_and_test_template,
 		__entry->flags = page->flags;
 		__entry->count = page_ref_count(page);
 		__entry->mapcount = atomic_read(&page->_mapcount);
-		__entry->mapping = page->mapping;
+		__assign_ptr(mapping, page->mapping);
 		__entry->mt = get_pageblock_migratetype(page);
 		__entry->val = v;
 		__entry->ret = ret;
 	),
 
-	TP_printk("pfn=0x%lx flags=%s count=%d mapcount=%d mapping=%p mt=%d val=%d ret=%d",
+	TP_printk("pfn=0x%lx flags=%s count=%d mapcount=%d mapping=" TRACE_CAP_FMT " mt=%d val=%d ret=%d",
 		__entry->pfn,
 		show_page_flags(__entry->flags & PAGEFLAGS_MASK),
 		__entry->count,
-		__entry->mapcount, __entry->mapping, __entry->mt,
+		__entry->mapcount, __get_cap(mapping), __entry->mt,
 		__entry->val, __entry->ret)
 );
 
