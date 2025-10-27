@@ -167,16 +167,16 @@ DECLARE_EVENT_CLASS(tasklet,
 	TP_ARGS(t, func),
 
 	TP_STRUCT__entry(
-		__field(	void *,	tasklet)
-		__field(	void *,	func)
+		__ptr(		void *,	tasklet)
+		__ptr(		void *,	func)
 	),
 
 	TP_fast_assign(
-		__entry->tasklet = t;
-		__entry->func = func;
+		__assign_ptr(tasklet, t);
+		__assign_ptr(func, func);
 	),
 
-	TP_printk("tasklet=%ps function=%ps", __entry->tasklet, __entry->func)
+	TP_printk("tasklet=%ps function=%ps", __get_ptr(tasklet), __get_ptr(func))
 );
 
 /**
