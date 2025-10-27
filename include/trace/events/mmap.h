@@ -50,19 +50,19 @@ TRACE_EVENT(vma_mas_szero,
 	TP_ARGS(mt, start, end),
 
 	TP_STRUCT__entry(
-			__field(struct maple_tree *, mt)
+			__ptr(struct maple_tree *, mt)
 			__field(unsigned long, start)
 			__field(unsigned long, end)
 	),
 
 	TP_fast_assign(
-			__entry->mt		= mt;
+			__assign_ptr(mt, mt);
 			__entry->start		= start;
 			__entry->end		= end;
 	),
 
-	TP_printk("mt_mod %p, (NULL), SNULL, %lu, %lu,",
-		  __entry->mt,
+	TP_printk("mt_mod " TRACE_CAP_FMT ", (NULL), SNULL, %lu, %lu,",
+		  __get_cap(mt),
 		  (unsigned long) __entry->start,
 		  (unsigned long) __entry->end
 	)
@@ -74,21 +74,21 @@ TRACE_EVENT(vma_store,
 	TP_ARGS(mt, vma),
 
 	TP_STRUCT__entry(
-			__field(struct maple_tree *, mt)
-			__field(struct vm_area_struct *, vma)
+			__ptr(struct maple_tree *, mt)
+			__ptr(struct vm_area_struct *, vma)
 			__field(unsigned long, vm_start)
 			__field(unsigned long, vm_end)
 	),
 
 	TP_fast_assign(
-			__entry->mt		= mt;
-			__entry->vma		= vma;
+			__assign_ptr(mt, mt);
+			__assign_ptr(vma, vma);
 			__entry->vm_start	= vma->vm_start;
 			__entry->vm_end		= vma->vm_end - 1;
 	),
 
-	TP_printk("mt_mod %p, (%p), STORE, %lu, %lu,",
-		  __entry->mt, __entry->vma,
+	TP_printk("mt_mod " TRACE_CAP_FMT ", (" TRACE_CAP_FMT "), STORE, %lu, %lu,",
+		  __get_cap(mt), __get_cap(vma),
 		  (unsigned long) __entry->vm_start,
 		  (unsigned long) __entry->vm_end
 	)
@@ -101,17 +101,17 @@ TRACE_EVENT(exit_mmap,
 	TP_ARGS(mm),
 
 	TP_STRUCT__entry(
-			__field(struct mm_struct *, mm)
-			__field(struct maple_tree *, mt)
+			__ptr(struct mm_struct *, mm)
+			__ptr(struct maple_tree *, mt)
 	),
 
 	TP_fast_assign(
-		       __entry->mm		= mm;
-		       __entry->mt		= &mm->mm_mt;
+		       __assign_ptr(mm, mm);
+		       __assign_ptr(mt, &mm->mm_mt);
 	),
 
-	TP_printk("mt_mod %p, DESTROY",
-		  __entry->mt
+	TP_printk("mt_mod " TRACE_CAP_FMT ", DESTROY",
+		  __get_cap(mt)
 	)
 );
 
