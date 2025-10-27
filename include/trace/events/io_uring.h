@@ -32,7 +32,7 @@ TRACE_EVENT(io_uring_create,
 
 	TP_STRUCT__entry (
 		__field(  int,		fd		)
-		__field(  void *,	ctx		)
+		__ptr( void *,		ctx		)
 		__field(  u32,		sq_entries	)
 		__field(  u32,		cq_entries	)
 		__field(  u32,		flags		)
@@ -40,14 +40,14 @@ TRACE_EVENT(io_uring_create,
 
 	TP_fast_assign(
 		__entry->fd		= fd;
-		__entry->ctx		= ctx;
+		__assign_ptr(ctx, ctx);
 		__entry->sq_entries	= sq_entries;
 		__entry->cq_entries	= cq_entries;
 		__entry->flags		= flags;
 	),
 
-	TP_printk("ring %p, fd %d sq size %d, cq size %d, flags 0x%x",
-			  __entry->ctx, __entry->fd, __entry->sq_entries,
+	TP_printk("ring " TRACE_CAP_FMT ", fd %d sq size %d, cq size %d, flags 0x%x",
+			  __get_cap(ctx), __entry->fd, __entry->sq_entries,
 			  __entry->cq_entries, __entry->flags)
 );
 
@@ -74,7 +74,7 @@ TRACE_EVENT(io_uring_register,
 	TP_ARGS(ctx, opcode, nr_files, nr_bufs, ret),
 
 	TP_STRUCT__entry (
-		__field(  void *,	ctx	)
+		__ptr(      void *,	ctx	)
 		__field(  unsigned,	opcode	)
 		__field(  unsigned,	nr_files)
 		__field(  unsigned,	nr_bufs	)
@@ -82,16 +82,16 @@ TRACE_EVENT(io_uring_register,
 	),
 
 	TP_fast_assign(
-		__entry->ctx		= ctx;
+		__assign_ptr(ctx, ctx);
 		__entry->opcode		= opcode;
 		__entry->nr_files	= nr_files;
 		__entry->nr_bufs	= nr_bufs;
 		__entry->ret		= ret;
 	),
 
-	TP_printk("ring %p, opcode %d, nr_user_files %d, nr_user_bufs %d, "
+	TP_printk("ring " TRACE_CAP_FMT ", opcode %d, nr_user_files %d, nr_user_bufs %d, "
 			  "ret %ld",
-			  __entry->ctx, __entry->opcode, __entry->nr_files,
+			  __get_cap(ctx), __entry->opcode, __entry->nr_files,
 			  __entry->nr_bufs, __entry->ret)
 );
 
@@ -112,21 +112,21 @@ TRACE_EVENT(io_uring_file_get,
 	TP_ARGS(req, fd),
 
 	TP_STRUCT__entry (
-		__field(  void *,	ctx		)
-		__field(  void *,	req		)
+		__ptr( void *,		ctx		)
+		__ptr( void *,		req		)
 		__field(  u64,		user_data	)
 		__field(  int,		fd		)
 	),
 
 	TP_fast_assign(
-		__entry->ctx		= req->ctx;
-		__entry->req		= req;
+		__assign_ptr(ctx, req->ctx);
+		__assign_ptr(req, req);
 		__entry->user_data	= __c_ua(req->cqe.user_data);
 		__entry->fd		= fd;
 	),
 
-	TP_printk("ring %p, req %p, user_data 0x%llx, fd %d",
-		__entry->ctx, __entry->req, __entry->user_data, __entry->fd)
+	TP_printk("ring " TRACE_CAP_FMT ", req " TRACE_CAP_FMT ", user_data 0x%llx, fd %d",
+		__get_cap(ctx), __get_cap(req), __entry->user_data, __entry->fd)
 );
 
 /**
@@ -144,33 +144,33 @@ TRACE_EVENT(io_uring_queue_async_work,
 	TP_ARGS(req, rw),
 
 	TP_STRUCT__entry (
-		__field(  void *,			ctx		)
-		__field(  void *,			req		)
+		__ptr(  void *,				ctx		)
+		__ptr(  void *,				req		)
 		__field(  u64,				user_data	)
 		__field(  u8,				opcode		)
 		__field(  unsigned long long,		flags		)
-		__field(  struct io_wq_work *,		work		)
+		__ptr(  struct io_wq_work *,		work		)
 		__field(  int,				rw		)
 
 		__string( op_str, io_uring_get_opcode(req->opcode)	)
 	),
 
 	TP_fast_assign(
-		__entry->ctx		= req->ctx;
-		__entry->req		= req;
+		__assign_ptr(ctx, req->ctx);
+		__assign_ptr(req, req);
 		__entry->user_data	= __c_ua(req->cqe.user_data);
 		__entry->flags		= (__force unsigned long long) req->flags;
 		__entry->opcode		= req->opcode;
-		__entry->work		= &req->work;
+		__assign_ptr(work, &req->work);
 		__entry->rw		= rw;
 
 		__assign_str(op_str);
 	),
 
-	TP_printk("ring %p, request %p, user_data 0x%llx, opcode %s, flags 0x%llx, %s queue, work %p",
-		__entry->ctx, __entry->req, __entry->user_data,
+	TP_printk("ring " TRACE_CAP_FMT ", request " TRACE_CAP_FMT ", user_data 0x%llx, opcode %s, flags 0x%llx, %s queue, work " TRACE_CAP_FMT "",
+		__get_cap(ctx), __get_cap(req), __entry->user_data,
 		__get_str(op_str), __entry->flags,
-		__entry->rw ? "hashed" : "normal", __entry->work)
+		__entry->rw ? "hashed" : "normal", __get_cap(work))
 );
 
 /**
@@ -188,8 +188,8 @@ TRACE_EVENT(io_uring_defer,
 	TP_ARGS(req),
 
 	TP_STRUCT__entry (
-		__field(  void *,		ctx	)
-		__field(  void *,		req	)
+		__ptr(  void *,			ctx	)
+		__ptr(  void *,			req	)
 		__field(  unsigned long long,	data	)
 		__field(  u8,			opcode	)
 
@@ -197,16 +197,16 @@ TRACE_EVENT(io_uring_defer,
 	),
 
 	TP_fast_assign(
-		__entry->ctx	= req->ctx;
-		__entry->req	= req;
+		__assign_ptr(ctx, req->ctx);
+		__assign_ptr(req, req);
 		__entry->data	= __c_ua(req->cqe.user_data);
 		__entry->opcode	= req->opcode;
 
 		__assign_str(op_str);
 	),
 
-	TP_printk("ring %p, request %p, user_data 0x%llx, opcode %s",
-		__entry->ctx, __entry->req, __entry->data,
+	TP_printk("ring " TRACE_CAP_FMT ", request " TRACE_CAP_FMT ", user_data 0x%llx, opcode %s",
+		__get_cap(ctx), __get_cap(req), __entry->data,
 		__get_str(op_str))
 );
 
@@ -227,19 +227,19 @@ TRACE_EVENT(io_uring_link,
 	TP_ARGS(req, target_req),
 
 	TP_STRUCT__entry (
-		__field(  void *,	ctx		)
-		__field(  void *,	req		)
-		__field(  void *,	target_req	)
+		__ptr(  void *,	ctx		)
+		__ptr(  void *,	req		)
+		__ptr(  void *,	target_req	)
 	),
 
 	TP_fast_assign(
-		__entry->ctx		= req->ctx;
-		__entry->req		= req;
-		__entry->target_req	= target_req;
+		__assign_ptr(ctx, req->ctx);
+		__assign_ptr(req, req);
+		__assign_ptr(target_req, target_req);
 	),
 
-	TP_printk("ring %p, request %p linked after %p",
-			  __entry->ctx, __entry->req, __entry->target_req)
+	TP_printk("ring " TRACE_CAP_FMT ", request " TRACE_CAP_FMT " linked after " TRACE_CAP_FMT "",
+			  __get_cap(ctx), __get_cap(req), __get_cap(target_req))
 );
 
 /**
@@ -259,16 +259,16 @@ TRACE_EVENT(io_uring_cqring_wait,
 	TP_ARGS(ctx, min_events),
 
 	TP_STRUCT__entry (
-		__field(  void *,	ctx		)
+		__ptr( void *,		ctx		)
 		__field(  int,		min_events	)
 	),
 
 	TP_fast_assign(
-		__entry->ctx		= ctx;
+		__assign_ptr(ctx, ctx);
 		__entry->min_events	= min_events;
 	),
 
-	TP_printk("ring %p, min_events %d", __entry->ctx, __entry->min_events)
+	TP_printk("ring " TRACE_CAP_FMT ", min_events %d", __get_cap(ctx), __entry->min_events)
 );
 
 /**
@@ -287,28 +287,28 @@ TRACE_EVENT(io_uring_fail_link,
 	TP_ARGS(req, link),
 
 	TP_STRUCT__entry (
-		__field(  void *,		ctx		)
-		__field(  void *,		req		)
+		__ptr(  void *,			ctx		)
+		__ptr(  void *,			req		)
 		__field(  unsigned long long,	user_data	)
 		__field(  u8,			opcode		)
-		__field(  void *,		link		)
+		__ptr(  void *,			link		)
 
 		__string( op_str, io_uring_get_opcode(req->opcode) )
 	),
 
 	TP_fast_assign(
-		__entry->ctx		= req->ctx;
-		__entry->req		= req;
+		__assign_ptr(ctx, req->ctx);
+		__assign_ptr(req, req);
 		__entry->user_data	= __c_ua(req->cqe.user_data);
 		__entry->opcode		= req->opcode;
-		__entry->link		= link;
+		__assign_ptr(link, link);
 
 		__assign_str(op_str);
 	),
 
-	TP_printk("ring %p, request %p, user_data 0x%llx, opcode %s, link %p",
-		__entry->ctx, __entry->req, __entry->user_data,
-		__get_str(op_str), __entry->link)
+	TP_printk("ring " TRACE_CAP_FMT ", request " TRACE_CAP_FMT ", user_data 0x%llx, opcode %s, link " TRACE_CAP_FMT "",
+		__get_cap(ctx), __get_cap(req), __entry->user_data,
+		__get_str(op_str), __get_cap(link))
 );
 
 /**
@@ -325,8 +325,8 @@ TP_PROTO(struct io_ring_ctx *ctx, void *req, struct io_uring_cqe *cqe),
 	TP_ARGS(ctx, req, cqe),
 
 	TP_STRUCT__entry (
-		__field(  void *,	ctx		)
-		__field(  void *,	req		)
+		__ptr(  void *,		ctx		)
+		__ptr(  void *,		req		)
 		__field(  u64,		user_data	)
 		__field(  int,		res		)
 		__field(  unsigned,	cflags		)
@@ -335,8 +335,8 @@ TP_PROTO(struct io_ring_ctx *ctx, void *req, struct io_uring_cqe *cqe),
 	),
 
 	TP_fast_assign(
-		__entry->ctx		= ctx;
-		__entry->req		= req;
+		__assign_ptr(ctx, ctx);
+		__assign_ptr(req, req);
 		__entry->user_data	= __c_ua(cqe->user_data);
 		__entry->res		= cqe->res;
 		__entry->cflags		= cqe->flags;
@@ -344,9 +344,9 @@ TP_PROTO(struct io_ring_ctx *ctx, void *req, struct io_uring_cqe *cqe),
 		__entry->extra2		= io_ctx_cqe32(ctx) ? cqe->big_cqe[1] : 0;
 	),
 
-	TP_printk("ring %p, req %p, user_data 0x%llx, result %d, cflags 0x%x "
+	TP_printk("ring " TRACE_CAP_FMT ", req " TRACE_CAP_FMT ", user_data 0x%llx, result %d, cflags 0x%x "
 		  "extra1 %llu extra2 %llu ",
-		__entry->ctx, __entry->req,
+		__get_cap(ctx), __get_cap(req),
 		__entry->user_data,
 		__entry->res, __entry->cflags,
 		(unsigned long long) __entry->extra1,
@@ -368,8 +368,8 @@ TRACE_EVENT(io_uring_submit_req,
 	TP_ARGS(req),
 
 	TP_STRUCT__entry (
-		__field(  void *,		ctx		)
-		__field(  void *,		req		)
+		__ptr(  void *,			ctx		)
+		__ptr(  void *,			req		)
 		__field(  unsigned long long,	user_data	)
 		__field(  u8,			opcode		)
 		__field(  unsigned long long,	flags		)
@@ -379,8 +379,8 @@ TRACE_EVENT(io_uring_submit_req,
 	),
 
 	TP_fast_assign(
-		__entry->ctx		= req->ctx;
-		__entry->req		= req;
+		__assign_ptr(ctx, req->ctx);
+		__assign_ptr(req, req);
 		__entry->user_data	= __c_ua(req->cqe.user_data);
 		__entry->opcode		= req->opcode;
 		__entry->flags		= (__force unsigned long long) req->flags;
@@ -389,8 +389,8 @@ TRACE_EVENT(io_uring_submit_req,
 		__assign_str(op_str);
 	),
 
-	TP_printk("ring %p, req %p, user_data 0x%llx, opcode %s, flags 0x%llx, "
-		  "sq_thread %d", __entry->ctx, __entry->req,
+	TP_printk("ring " TRACE_CAP_FMT ", req " TRACE_CAP_FMT ", user_data 0x%llx, opcode %s, flags 0x%llx, "
+		  "sq_thread %d", __get_cap(ctx), __get_cap(req),
 		  __entry->user_data, __get_str(op_str), __entry->flags,
 		  __entry->sq_thread)
 );
@@ -412,8 +412,8 @@ TRACE_EVENT(io_uring_poll_arm,
 	TP_ARGS(req, mask, events),
 
 	TP_STRUCT__entry (
-		__field(  void *,		ctx		)
-		__field(  void *,		req		)
+		__ptr(  void *,			ctx		)
+		__ptr(  void *,			req		)
 		__field(  unsigned long long,	user_data	)
 		__field(  u8,			opcode		)
 		__field(  int,			mask		)
@@ -423,8 +423,8 @@ TRACE_EVENT(io_uring_poll_arm,
 	),
 
 	TP_fast_assign(
-		__entry->ctx		= req->ctx;
-		__entry->req		= req;
+		__assign_ptr(ctx, req->ctx);
+		__assign_ptr(req, req);
 		__entry->user_data	= __c_ua(req->cqe.user_data);
 		__entry->opcode		= req->opcode;
 		__entry->mask		= mask;
@@ -433,8 +433,8 @@ TRACE_EVENT(io_uring_poll_arm,
 		__assign_str(op_str);
 	),
 
-	TP_printk("ring %p, req %p, user_data 0x%llx, opcode %s, mask 0x%x, events 0x%x",
-		  __entry->ctx, __entry->req, __entry->user_data,
+	TP_printk("ring " TRACE_CAP_FMT ", req " TRACE_CAP_FMT ", user_data 0x%llx, opcode %s, mask 0x%x, events 0x%x",
+		  __get_cap(ctx), __get_cap(req), __entry->user_data,
 		  __get_str(op_str),
 		  __entry->mask, __entry->events)
 );
@@ -453,8 +453,8 @@ TRACE_EVENT(io_uring_task_add,
 	TP_ARGS(req, mask),
 
 	TP_STRUCT__entry (
-		__field(  void *,		ctx		)
-		__field(  void *,		req		)
+		__ptr(  void *,			ctx		)
+		__ptr(  void *,			req		)
 		__field(  unsigned long long,	user_data	)
 		__field(  u8,			opcode		)
 		__field(  int,			mask		)
@@ -463,8 +463,8 @@ TRACE_EVENT(io_uring_task_add,
 	),
 
 	TP_fast_assign(
-		__entry->ctx		= req->ctx;
-		__entry->req		= req;
+		__assign_ptr(ctx, req->ctx);
+		__assign_ptr(req, req);
 		__entry->user_data	= __c_ua(req->cqe.user_data);
 		__entry->opcode		= req->opcode;
 		__entry->mask		= mask;
@@ -472,8 +472,8 @@ TRACE_EVENT(io_uring_task_add,
 		__assign_str(op_str);
 	),
 
-	TP_printk("ring %p, req %p, user_data 0x%llx, opcode %s, mask %x",
-		__entry->ctx, __entry->req, __entry->user_data,
+	TP_printk("ring " TRACE_CAP_FMT ", req " TRACE_CAP_FMT ", user_data 0x%llx, opcode %s, mask %x",
+		__get_cap(ctx), __get_cap(req), __entry->user_data,
 		__get_str(op_str),
 		__entry->mask)
 );
@@ -494,8 +494,8 @@ TRACE_EVENT(io_uring_req_failed,
 	TP_ARGS(sqe, req, error),
 
 	TP_STRUCT__entry (
-		__field(  void *,		ctx		)
-		__field(  void *,		req		)
+		__ptr(  void *,			ctx		)
+		__ptr(  void *,			req		)
 		__field(  unsigned long long,	user_data	)
 		__field(  u8,			opcode		)
 		__field(  u8,			flags		)
@@ -515,8 +515,8 @@ TRACE_EVENT(io_uring_req_failed,
 	),
 
 	TP_fast_assign(
-		__entry->ctx		= req->ctx;
-		__entry->req		= req;
+		__assign_ptr(ctx, req->ctx);
+		__assign_ptr(req, req);
 		__entry->user_data	= __c_ua(sqe->user_data);
 		__entry->opcode		= sqe->opcode;
 		__entry->flags		= sqe->flags;
@@ -535,12 +535,12 @@ TRACE_EVENT(io_uring_req_failed,
 		__assign_str(op_str);
 	),
 
-	TP_printk("ring %p, req %p, user_data 0x%llx, "
+	TP_printk("ring " TRACE_CAP_FMT ", req " TRACE_CAP_FMT ", user_data 0x%llx, "
 		  "opcode %s, flags 0x%x, prio=%d, off=%llu, addr=%llu, "
 		  "len=%u, rw_flags=0x%x, buf_index=%d, "
 		  "personality=%d, file_index=%d, pad=0x%llx, addr3=%llx, "
 		  "error=%d",
-		  __entry->ctx, __entry->req, __entry->user_data,
+		  __get_cap(ctx), __get_cap(req), __entry->user_data,
 		  __get_str(op_str),
 		  __entry->flags, __entry->ioprio,
 		  (unsigned long long) __entry->off,
@@ -570,25 +570,25 @@ TRACE_EVENT(io_uring_cqe_overflow,
 	TP_ARGS(ctx, user_data, res, cflags, ocqe),
 
 	TP_STRUCT__entry (
-		__field(  void *,		ctx		)
+		__ptr(  void *,			ctx		)
 		__field(  unsigned long long,	user_data	)
 		__field(  s32,			res		)
 		__field(  u32,			cflags		)
-		__field(  void *,		ocqe		)
+		__ptr(  void *,			ocqe		)
 	),
 
 	TP_fast_assign(
-		__entry->ctx		= ctx;
+		__assign_ptr(ctx, ctx);
 		__entry->user_data	= user_data;
 		__entry->res		= res;
 		__entry->cflags		= cflags;
-		__entry->ocqe		= ocqe;
+		__assign_ptr(ocqe, ocqe);
 	),
 
-	TP_printk("ring %p, user_data 0x%llx, res %d, cflags 0x%x, "
-		  "overflow_cqe %p",
-		  __entry->ctx, __entry->user_data, __entry->res,
-		  __entry->cflags, __entry->ocqe)
+	TP_printk("ring " TRACE_CAP_FMT ", user_data 0x%llx, res %d, cflags 0x%x, "
+		  "overflow_cqe " TRACE_CAP_FMT "",
+		  __get_cap(ctx), __entry->user_data, __entry->res,
+		  __entry->cflags, __get_cap(ocqe))
 );
 
 /*
@@ -605,16 +605,16 @@ TRACE_EVENT(io_uring_task_work_run,
 	TP_ARGS(tctx, count),
 
 	TP_STRUCT__entry (
-		__field(  void *,		tctx		)
+		__ptr(  void *,			tctx		)
 		__field(  unsigned int,		count		)
 	),
 
 	TP_fast_assign(
-		__entry->tctx		= tctx;
+		__assign_ptr(tctx, tctx);
 		__entry->count		= count;
 	),
 
-	TP_printk("tctx %p, count %u", __entry->tctx, __entry->count)
+	TP_printk("tctx " TRACE_CAP_FMT ", count %u", __get_cap(tctx), __entry->count)
 );
 
 TRACE_EVENT(io_uring_short_write,
@@ -624,21 +624,21 @@ TRACE_EVENT(io_uring_short_write,
 	TP_ARGS(ctx, fpos, wanted, got),
 
 	TP_STRUCT__entry(
-		__field(void *,	ctx)
+		__ptr(void *,	ctx)
 		__field(u64,	fpos)
 		__field(u64,	wanted)
 		__field(u64,	got)
 	),
 
 	TP_fast_assign(
-		__entry->ctx	= ctx;
+		__assign_ptr(ctx, ctx);
 		__entry->fpos	= fpos;
 		__entry->wanted	= wanted;
 		__entry->got	= got;
 	),
 
-	TP_printk("ring %p, fpos %lld, wanted %lld, got %lld",
-			  __entry->ctx, __entry->fpos,
+	TP_printk("ring " TRACE_CAP_FMT ", fpos %lld, wanted %lld, got %lld",
+			  __get_cap(ctx), __entry->fpos,
 			  __entry->wanted, __entry->got)
 );
 
@@ -657,18 +657,18 @@ TRACE_EVENT(io_uring_local_work_run,
 	TP_ARGS(ctx, count, loops),
 
 	TP_STRUCT__entry (
-		__field(void *,		ctx	)
+		__ptr(void *,		ctx	)
 		__field(int,		count	)
 		__field(unsigned int,	loops	)
 	),
 
 	TP_fast_assign(
-		__entry->ctx		= ctx;
+		__assign_ptr(ctx, ctx);
 		__entry->count		= count;
 		__entry->loops		= loops;
 	),
 
-	TP_printk("ring %p, count %d, loops %u", __entry->ctx, __entry->count, __entry->loops)
+	TP_printk("ring " TRACE_CAP_FMT ", count %d, loops %u", __get_cap(ctx), __entry->count, __entry->loops)
 );
 
 #endif /* _TRACE_IO_URING_H */
