@@ -16,19 +16,19 @@ TRACE_EVENT(tmigr_group_set,
 	TP_ARGS(group),
 
 	TP_STRUCT__entry(
-		__field( void *,	group		)
+		__ptr( void *,		group		)
 		__field( unsigned int,	lvl		)
 		__field( unsigned int,	numa_node	)
 	),
 
 	TP_fast_assign(
-		__entry->group		= group;
+		__assign_ptr(group, group);
 		__entry->lvl		= group->level;
 		__entry->numa_node	= group->numa_node;
 	),
 
-	TP_printk("group=%p lvl=%d numa=%d",
-		  __entry->group, __entry->lvl, __entry->numa_node)
+	TP_printk("group=" TRACE_CAP_FMT " lvl=%d numa=%d",
+		  __get_cap(group), __entry->lvl, __entry->numa_node)
 );
 
 TRACE_EVENT(tmigr_connect_child_parent,
@@ -38,8 +38,8 @@ TRACE_EVENT(tmigr_connect_child_parent,
 	TP_ARGS(child),
 
 	TP_STRUCT__entry(
-		__field( void *,	child		)
-		__field( void *,	parent		)
+		__ptr( void *,		child		)
+		__ptr( void *,		parent		)
 		__field( unsigned int,	lvl		)
 		__field( unsigned int,	numa_node	)
 		__field( unsigned int,	num_children	)
@@ -47,16 +47,16 @@ TRACE_EVENT(tmigr_connect_child_parent,
 	),
 
 	TP_fast_assign(
-		__entry->child		= child;
-		__entry->parent		= child->parent;
+		__assign_ptr(child, child);
+		__assign_ptr(parent, child->parent);
 		__entry->lvl		= child->parent->level;
 		__entry->numa_node	= child->parent->numa_node;
 		__entry->num_children	= child->parent->num_children;
 		__entry->groupmask	= child->groupmask;
 	),
 
-	TP_printk("group=%p groupmask=%0x parent=%p lvl=%d numa=%d num_children=%d",
-		  __entry->child,  __entry->groupmask, __entry->parent,
+	TP_printk("group=" TRACE_CAP_FMT " groupmask=%0x parent=" TRACE_CAP_FMT " lvl=%d numa=%d num_children=%d",
+		  __get_cap(child),  __entry->groupmask, __get_cap(parent),
 		  __entry->lvl, __entry->numa_node, __entry->num_children)
 );
 
@@ -67,7 +67,7 @@ TRACE_EVENT(tmigr_connect_cpu_parent,
 	TP_ARGS(tmc),
 
 	TP_STRUCT__entry(
-		__field( void *,	parent		)
+		__ptr( void *,		parent		)
 		__field( unsigned int,	cpu		)
 		__field( unsigned int,	lvl		)
 		__field( unsigned int,	numa_node	)
@@ -76,7 +76,7 @@ TRACE_EVENT(tmigr_connect_cpu_parent,
 	),
 
 	TP_fast_assign(
-		__entry->parent		= tmc->tmgroup;
+		__assign_ptr(parent, tmc->tmgroup);
 		__entry->cpu		= tmc->cpuevt.cpu;
 		__entry->lvl		= tmc->tmgroup->level;
 		__entry->numa_node	= tmc->tmgroup->numa_node;
@@ -84,8 +84,8 @@ TRACE_EVENT(tmigr_connect_cpu_parent,
 		__entry->groupmask	= tmc->groupmask;
 	),
 
-	TP_printk("cpu=%d groupmask=%0x parent=%p lvl=%d numa=%d num_children=%d",
-		  __entry->cpu,	 __entry->groupmask, __entry->parent,
+	TP_printk("cpu=%d groupmask=%0x parent=" TRACE_CAP_FMT " lvl=%d numa=%d num_children=%d",
+		  __entry->cpu,	 __entry->groupmask, __get_cap(parent),
 		  __entry->lvl, __entry->numa_node, __entry->num_children)
 );
 
@@ -96,8 +96,8 @@ DECLARE_EVENT_CLASS(tmigr_group_and_cpu,
 	TP_ARGS(group, state, childmask),
 
 	TP_STRUCT__entry(
-		__field( void *,	group		)
-		__field( void *,	parent		)
+		__ptr( void *,		group		)
+		__ptr( void *,		parent		)
 		__field( unsigned int,	lvl		)
 		__field( unsigned int,	numa_node	)
 		__field( u32,		childmask	)
@@ -106,8 +106,8 @@ DECLARE_EVENT_CLASS(tmigr_group_and_cpu,
 	),
 
 	TP_fast_assign(
-		__entry->group		= group;
-		__entry->parent		= group->parent;
+		__assign_ptr(group, group);
+		__assign_ptr(parent, group->parent);
 		__entry->lvl		= group->level;
 		__entry->numa_node	= group->numa_node;
 		__entry->childmask	= childmask;
@@ -115,11 +115,11 @@ DECLARE_EVENT_CLASS(tmigr_group_and_cpu,
 		__entry->migrator	= state.migrator;
 	),
 
-	TP_printk("group=%p lvl=%d numa=%d active=%0x migrator=%0x "
-		  "parent=%p childmask=%0x",
-		  __entry->group, __entry->lvl, __entry->numa_node,
+	TP_printk("group=" TRACE_CAP_FMT " lvl=%d numa=%d active=%0x migrator=%0x "
+		  "parent=" TRACE_CAP_FMT " childmask=%0x",
+		  __get_cap(group), __entry->lvl, __entry->numa_node,
 		  __entry->active, __entry->migrator,
-		  __entry->parent, __entry->childmask)
+		  __get_cap(parent), __entry->childmask)
 );
 
 DEFINE_EVENT(tmigr_group_and_cpu, tmigr_group_set_cpu_inactive,
@@ -145,18 +145,18 @@ DECLARE_EVENT_CLASS(tmigr_cpugroup,
 
 	TP_STRUCT__entry(
 		__field( u64,		wakeup	)
-		__field( void *,	parent	)
+		__ptr( void *,		parent	)
 		__field( unsigned int,	cpu	)
 
 	),
 
 	TP_fast_assign(
 		__entry->wakeup		= tmc->wakeup;
-		__entry->parent		= tmc->tmgroup;
+		__assign_ptr(parent, tmc->tmgroup);
 		__entry->cpu		= tmc->cpuevt.cpu;
 	),
 
-	TP_printk("cpu=%d parent=%p wakeup=%llu", __entry->cpu, __entry->parent, __entry->wakeup)
+	TP_printk("cpu=%d parent=" TRACE_CAP_FMT " wakeup=%llu", __entry->cpu, __get_cap(parent), __entry->wakeup)
 );
 
 DEFINE_EVENT(tmigr_cpugroup, tmigr_cpu_new_timer,
@@ -203,19 +203,19 @@ DECLARE_EVENT_CLASS(tmigr_idle,
 	TP_STRUCT__entry(
 		__field( u64,		nextevt)
 		__field( u64,		wakeup)
-		__field( void *,	parent)
+		__ptr( void *,		parent)
 		__field( unsigned int,	cpu)
 	),
 
 	TP_fast_assign(
 		__entry->nextevt	= nextevt;
 		__entry->wakeup		= tmc->wakeup;
-		__entry->parent		= tmc->tmgroup;
+		__assign_ptr(parent, tmc->tmgroup);
 		__entry->cpu		= tmc->cpuevt.cpu;
 	),
 
-	TP_printk("cpu=%d parent=%p nextevt=%llu wakeup=%llu",
-		  __entry->cpu, __entry->parent, __entry->nextevt, __entry->wakeup)
+	TP_printk("cpu=%d parent=" TRACE_CAP_FMT " nextevt=%llu wakeup=%llu",
+		  __entry->cpu, __get_cap(parent), __entry->nextevt, __entry->wakeup)
 );
 
 DEFINE_EVENT(tmigr_idle, tmigr_cpu_idle,
@@ -241,8 +241,8 @@ TRACE_EVENT(tmigr_update_events,
 	TP_ARGS(child, group, childstate, groupstate, nextevt),
 
 	TP_STRUCT__entry(
-		__field( void *,	child			)
-		__field( void *,	group			)
+		__ptr( void *,		child			)
+		__ptr( void *,		group			)
 		__field( u64,		nextevt			)
 		__field( u64,		group_next_expiry	)
 		__field( u64,		child_evt_expiry	)
@@ -253,8 +253,8 @@ TRACE_EVENT(tmigr_update_events,
 	),
 
 	TP_fast_assign(
-		__entry->child			= child;
-		__entry->group			= group;
+		__assign_ptr(child, child);
+		__assign_ptr(group, group);
 		__entry->nextevt		= nextevt;
 		__entry->group_next_expiry	= group->next_expiry;
 		__entry->child_evt_expiry	= child ? child->groupevt.nextevt.expires : 0;
@@ -264,9 +264,9 @@ TRACE_EVENT(tmigr_update_events,
 		__entry->group_active		= groupstate.active;
 	),
 
-	TP_printk("child=%p group=%p group_lvl=%d child_active=%0x group_active=%0x "
+	TP_printk("child=" TRACE_CAP_FMT " group=" TRACE_CAP_FMT " group_lvl=%d child_active=%0x group_active=%0x "
 		  "nextevt=%llu next_expiry=%llu child_evt_expiry=%llu child_evtcpu=%d",
-		  __entry->child, __entry->group, __entry->group_lvl, __entry->child_active,
+		  __get_cap(child), __get_cap(group), __entry->group_lvl, __entry->child_active,
 		  __entry->group_active,
 		  __entry->nextevt, __entry->group_next_expiry, __entry->child_evt_expiry,
 		  __entry->child_evtcpu)
@@ -279,17 +279,17 @@ TRACE_EVENT(tmigr_handle_remote,
 	TP_ARGS(group),
 
 	TP_STRUCT__entry(
-		__field( void * ,	group	)
+		__ptr( void * ,		group	)
 		__field( unsigned int ,	lvl	)
 	),
 
 	TP_fast_assign(
-		__entry->group		= group;
+		__assign_ptr(group, group);
 		__entry->lvl		= group->level;
 	),
 
-	TP_printk("group=%p lvl=%d",
-		   __entry->group, __entry->lvl)
+	TP_printk("group=" TRACE_CAP_FMT " lvl=%d",
+		   __get_cap(group), __entry->lvl)
 );
 
 #endif /*  _TRACE_TIMER_MIGRATION_H */
