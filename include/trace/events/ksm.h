@@ -79,14 +79,14 @@ DECLARE_EVENT_CLASS(ksm_enter_exit_template,
 	TP_ARGS(mm),
 
 	TP_STRUCT__entry(
-		__field(void *,		mm)
+		__ptr(void *,		mm)
 	),
 
 	TP_fast_assign(
-		__entry->mm	= mm;
+		__assign_ptr(mm, mm);
 	),
 
-	TP_printk("mm %p", __entry->mm)
+	TP_printk("mm " TRACE_CAP_FMT "", __get_cap(mm))
 );
 
 /**
@@ -135,20 +135,20 @@ TRACE_EVENT(ksm_merge_one_page,
 
 	TP_STRUCT__entry(
 		__field(unsigned long,	pfn)
-		__field(void *,		rmap_item)
-		__field(void *,		mm)
+		__ptr(void *,		rmap_item)
+		__ptr(void *,		mm)
 		__field(int,		err)
 	),
 
 	TP_fast_assign(
 		__entry->pfn		= pfn;
-		__entry->rmap_item	= rmap_item;
-		__entry->mm		= mm;
+		__assign_ptr(rmap_item, rmap_item);
+		__assign_ptr(mm, mm);
 		__entry->err		= err;
 	),
 
-	TP_printk("ksm pfn %lu rmap_item %p mm %p error %d",
-			__entry->pfn, __entry->rmap_item, __entry->mm, __entry->err)
+	TP_printk("ksm pfn %lu rmap_item " TRACE_CAP_FMT " mm " TRACE_CAP_FMT " error %d",
+			__entry->pfn, __get_cap(rmap_item), __get_cap(mm), __entry->err)
 );
 
 /**
@@ -169,24 +169,24 @@ TRACE_EVENT(ksm_merge_with_ksm_page,
 	TP_ARGS(ksm_page, pfn, rmap_item, mm, err),
 
 	TP_STRUCT__entry(
-		__field(void *,		ksm_page)
+		__ptr(void *,		ksm_page)
 		__field(unsigned long,	pfn)
-		__field(void *,		rmap_item)
-		__field(void *,		mm)
+		__ptr(void *,		rmap_item)
+		__ptr(void *,		mm)
 		__field(int,		err)
 	),
 
 	TP_fast_assign(
-		__entry->ksm_page	= ksm_page;
+		__assign_ptr(ksm_page, ksm_page);
 		__entry->pfn		= pfn;
-		__entry->rmap_item	= rmap_item;
-		__entry->mm		= mm;
+		__assign_ptr(rmap_item, rmap_item);
+		__assign_ptr(mm, mm);
 		__entry->err		= err;
 	),
 
-	TP_printk("%spfn %lu rmap_item %p mm %p error %d",
+	TP_printk("%spfn %lu rmap_item " TRACE_CAP_FMT " mm " TRACE_CAP_FMT " error %d",
 		  (__entry->ksm_page ? "ksm " : ""),
-		  __entry->pfn, __entry->rmap_item, __entry->mm, __entry->err)
+		  __entry->pfn, __get_cap(rmap_item), __get_cap(mm), __entry->err)
 );
 
 /**
@@ -231,18 +231,18 @@ TRACE_EVENT(ksm_remove_rmap_item,
 
 	TP_STRUCT__entry(
 		__field(unsigned long,	pfn)
-		__field(void *,		rmap_item)
-		__field(void *,		mm)
+		__ptr(void *,		rmap_item)
+		__ptr(void *,		mm)
 	),
 
 	TP_fast_assign(
 		__entry->pfn		= pfn;
-		__entry->rmap_item	= rmap_item;
-		__entry->mm		= mm;
+		__assign_ptr(rmap_item, rmap_item);
+		__assign_ptr(mm, mm);
 	),
 
-	TP_printk("pfn %lu rmap_item %p mm %p",
-			__entry->pfn, __entry->rmap_item, __entry->mm)
+	TP_printk("pfn %lu rmap_item " TRACE_CAP_FMT " mm " TRACE_CAP_FMT "",
+			__entry->pfn, __get_cap(rmap_item), __get_cap(mm))
 );
 
 /**
