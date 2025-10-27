@@ -49,21 +49,21 @@ DECLARE_EVENT_CLASS(alarm_class,
 	TP_ARGS(alarm, now),
 
 	TP_STRUCT__entry(
-		__field(void *,	alarm)
+		__ptr(void *,	alarm)
 		__field(unsigned char, alarm_type)
 		__field(s64, expires)
 		__field(s64, now)
 	),
 
 	TP_fast_assign(
-		__entry->alarm = alarm;
+		__assign_ptr(alarm, alarm);
 		__entry->alarm_type = alarm->type;
 		__entry->expires = alarm->node.expires;
 		__entry->now = now;
 	),
 
-	TP_printk("alarmtimer:%p type:%s expires:%llu now:%llu",
-		  __entry->alarm,
+	TP_printk("alarmtimer:" TRACE_CAP_FMT " type:%s expires:%llu now:%llu",
+		  __get_cap(alarm),
 		  show_alarm_type((1 << __entry->alarm_type)),
 		  __entry->expires,
 		  __entry->now
