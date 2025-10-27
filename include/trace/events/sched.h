@@ -69,19 +69,19 @@ TRACE_EVENT(sched_kthread_work_queue_work,
 	TP_ARGS(worker, work),
 
 	TP_STRUCT__entry(
-		__field( void *,	work	)
-		__field( void *,	function)
-		__field( void *,	worker)
+		__ptr( void *,		work	)
+		__ptr( void *,		function)
+		__ptr( void *,		worker)
 	),
 
 	TP_fast_assign(
-		__entry->work		= work;
-		__entry->function	= work->func;
-		__entry->worker		= worker;
+		__assign_ptr(work, work);
+		__assign_ptr(function, work->func);
+		__assign_ptr(worker, worker);
 	),
 
-	TP_printk("work struct=%p function=%ps worker=%p",
-		  __entry->work, __entry->function, __entry->worker)
+	TP_printk("work struct=" TRACE_CAP_FMT " function=%ps worker=" TRACE_CAP_FMT,
+		  __get_cap(work), __get_ptr(function), __get_cap(worker))
 );
 
 /**
@@ -97,16 +97,16 @@ TRACE_EVENT(sched_kthread_work_execute_start,
 	TP_ARGS(work),
 
 	TP_STRUCT__entry(
-		__field( void *,	work	)
-		__field( void *,	function)
+		__ptr( void *,		work	)
+		__ptr( void *,		function)
 	),
 
 	TP_fast_assign(
-		__entry->work		= work;
-		__entry->function	= work->func;
+		__assign_ptr(work, work);
+		__assign_ptr(function, work->func);
 	),
 
-	TP_printk("work struct %p: function %ps", __entry->work, __entry->function)
+	TP_printk("work struct " TRACE_CAP_FMT ": function %ps", __get_cap(work), __get_ptr(function))
 );
 
 /**
@@ -123,16 +123,16 @@ TRACE_EVENT(sched_kthread_work_execute_end,
 	TP_ARGS(work, function),
 
 	TP_STRUCT__entry(
-		__field( void *,	work	)
-		__field( void *,	function)
+		__ptr( void *,		work	)
+		__ptr( void *,		function)
 	),
 
 	TP_fast_assign(
-		__entry->work		= work;
-		__entry->function	= function;
+		__assign_ptr(work, work);
+		__assign_ptr(function, function);
 	),
 
-	TP_printk("work struct %p: function %ps", __entry->work, __entry->function)
+	TP_printk("work struct " TRACE_CAP_FMT ": function %ps", __get_cap(work), __get_ptr(function))
 );
 
 /*
