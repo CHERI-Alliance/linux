@@ -16,14 +16,14 @@ DECLARE_EVENT_CLASS(timer_class,
 	TP_ARGS(timer),
 
 	TP_STRUCT__entry(
-		__field( void *,	timer	)
+		__ptr(   void *,	timer	)
 	),
 
 	TP_fast_assign(
-		__entry->timer	= timer;
+		__assign_ptr(timer, timer);
 	),
 
-	TP_printk("timer=%p", __entry->timer)
+	TP_printk("timer=" TRACE_CAP_FMT "", __get_cap(timer))
 );
 
 /**
@@ -57,8 +57,8 @@ TRACE_EVENT(timer_start,
 	TP_ARGS(timer, bucket_expiry),
 
 	TP_STRUCT__entry(
-		__field( void *,	timer		)
-		__field( void *,	function	)
+		__ptr(   void *,	timer		)
+		__ptr(   void *,	function	)
 		__field( unsigned long,	expires		)
 		__field( unsigned long,	bucket_expiry	)
 		__field( unsigned long,	now		)
@@ -66,16 +66,16 @@ TRACE_EVENT(timer_start,
 	),
 
 	TP_fast_assign(
-		__entry->timer		= timer;
-		__entry->function	= timer->function;
+		__assign_ptr(timer, timer);
+		__assign_ptr(function, timer->function);
 		__entry->expires	= timer->expires;
 		__entry->bucket_expiry	= bucket_expiry;
 		__entry->now		= jiffies;
 		__entry->flags		= timer->flags;
 	),
 
-	TP_printk("timer=%p function=%ps expires=%lu [timeout=%ld] bucket_expiry=%lu cpu=%u idx=%u flags=%s",
-		  __entry->timer, __entry->function, __entry->expires,
+	TP_printk("timer=" TRACE_CAP_FMT " function=%ps expires=%lu [timeout=%ld] bucket_expiry=%lu cpu=%u idx=%u flags=%s",
+		  __get_cap(timer), __get_ptr(function), __entry->expires,
 		  (long)__entry->expires - __entry->now,
 		  __entry->bucket_expiry, __entry->flags & TIMER_CPUMASK,
 		  __entry->flags >> TIMER_ARRAYSHIFT,
@@ -96,21 +96,21 @@ TRACE_EVENT(timer_expire_entry,
 	TP_ARGS(timer, baseclk),
 
 	TP_STRUCT__entry(
-		__field( void *,	timer	)
+		__ptr(   void *,	timer	)
 		__field( unsigned long,	now	)
-		__field( void *,	function)
+		__ptr(   void *,	function)
 		__field( unsigned long,	baseclk	)
 	),
 
 	TP_fast_assign(
-		__entry->timer		= timer;
+		__assign_ptr(timer, timer);
 		__entry->now		= jiffies;
-		__entry->function	= timer->function;
+		__assign_ptr(function, timer->function);
 		__entry->baseclk	= baseclk;
 	),
 
-	TP_printk("timer=%p function=%ps now=%lu baseclk=%lu",
-		  __entry->timer, __entry->function, __entry->now,
+	TP_printk("timer=" TRACE_CAP_FMT " function=%ps now=%lu baseclk=%lu",
+		  __get_cap(timer), __get_ptr(function), __entry->now,
 		  __entry->baseclk)
 );
 
@@ -198,18 +198,18 @@ TRACE_EVENT(hrtimer_setup,
 	TP_ARGS(hrtimer, clockid, mode),
 
 	TP_STRUCT__entry(
-		__field( void *,		hrtimer		)
+		__ptr( void *,			hrtimer		)
 		__field( clockid_t,		clockid		)
 		__field( enum hrtimer_mode,	mode		)
 	),
 
 	TP_fast_assign(
-		__entry->hrtimer	= hrtimer;
+		__assign_ptr(hrtimer, hrtimer);
 		__entry->clockid	= clockid;
 		__entry->mode		= mode;
 	),
 
-	TP_printk("hrtimer=%p clockid=%s mode=%s", __entry->hrtimer,
+	TP_printk("hrtimer=" TRACE_CAP_FMT " clockid=%s mode=%s", __get_cap(hrtimer),
 		  decode_clockid(__entry->clockid),
 		  decode_hrtimer_mode(__entry->mode))
 );
@@ -226,23 +226,23 @@ TRACE_EVENT(hrtimer_start,
 	TP_ARGS(hrtimer, mode),
 
 	TP_STRUCT__entry(
-		__field( void *,	hrtimer		)
-		__field( void *,	function	)
+		__ptr(   void *,	hrtimer		)
+		__ptr(   void *,	function	)
 		__field( s64,		expires		)
 		__field( s64,		softexpires	)
 		__field( enum hrtimer_mode,	mode	)
 	),
 
 	TP_fast_assign(
-		__entry->hrtimer	= hrtimer;
-		__entry->function	= ACCESS_PRIVATE(hrtimer, function);
+		__assign_ptr(hrtimer, hrtimer);
+		__assign_ptr(function, ACCESS_PRIVATE(hrtimer, function));
 		__entry->expires	= hrtimer_get_expires(hrtimer);
 		__entry->softexpires	= hrtimer_get_softexpires(hrtimer);
 		__entry->mode		= mode;
 	),
 
-	TP_printk("hrtimer=%p function=%ps expires=%llu softexpires=%llu "
-		  "mode=%s", __entry->hrtimer, __entry->function,
+	TP_printk("hrtimer=" TRACE_CAP_FMT " function=%ps expires=%llu softexpires=%llu "
+		  "mode=%s", __get_cap(hrtimer), __get_ptr(function),
 		  (unsigned long long) __entry->expires,
 		  (unsigned long long) __entry->softexpires,
 		  decode_hrtimer_mode(__entry->mode))
@@ -263,19 +263,19 @@ TRACE_EVENT(hrtimer_expire_entry,
 	TP_ARGS(hrtimer, now),
 
 	TP_STRUCT__entry(
-		__field( void *,	hrtimer	)
+		__ptr( void *,		hrtimer	)
 		__field( s64,		now	)
-		__field( void *,	function)
+		__ptr( void *,		function)
 	),
 
 	TP_fast_assign(
-		__entry->hrtimer	= hrtimer;
+		__assign_ptr(hrtimer, hrtimer);
 		__entry->now		= *now;
-		__entry->function	= ACCESS_PRIVATE(hrtimer, function);
+		__assign_ptr(function, ACCESS_PRIVATE(hrtimer, function));
 	),
 
-	TP_printk("hrtimer=%p function=%ps now=%llu",
-		  __entry->hrtimer, __entry->function,
+	TP_printk("hrtimer=" TRACE_CAP_FMT " function=%ps now=%llu",
+		  __get_cap(hrtimer), __get_ptr(function),
 		  (unsigned long long) __entry->now)
 );
 
@@ -286,14 +286,14 @@ DECLARE_EVENT_CLASS(hrtimer_class,
 	TP_ARGS(hrtimer),
 
 	TP_STRUCT__entry(
-		__field( void *,	hrtimer	)
+		__ptr( void *,		hrtimer	)
 	),
 
 	TP_fast_assign(
-		__entry->hrtimer	= hrtimer;
+		__assign_ptr(hrtimer, hrtimer);
 	),
 
-	TP_printk("hrtimer=%p", __entry->hrtimer)
+	TP_printk("hrtimer=" TRACE_CAP_FMT "", __get_cap(hrtimer))
 );
 
 /**
