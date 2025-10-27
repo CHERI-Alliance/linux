@@ -18,20 +18,20 @@ TRACE_EVENT(csd_queue_cpu,
 
 	TP_STRUCT__entry(
 		__field(unsigned int, cpu)
-		__field(void *, callsite)
-		__field(void *, func)
-		__field(void *, csd)
+		__ptr(void *, callsite)
+		__ptr(void *, func)
+		__ptr(void *, csd)
 		),
 
 	    TP_fast_assign(
 		__entry->cpu = cpu;
-		__entry->callsite = __c_fakep(callsite);
-		__entry->func = func;
-		__entry->csd  = csd;
+		__assign_ptr(callsite, __c_fakep(callsite));
+		__assign_ptr(func, func);
+		__assign_ptr(csd, csd);
 		),
 
-	TP_printk("cpu=%u callsite=%pS func=%ps csd=%p",
-		__entry->cpu, __entry->callsite, __entry->func, __entry->csd)
+	TP_printk("cpu=%u callsite=%pS func=%ps csd=" TRACE_CAP_FMT,
+		__entry->cpu, __get_ptr(callsite), __get_ptr(func), __get_cap(csd))
 	);
 
 /*
@@ -44,16 +44,16 @@ DECLARE_EVENT_CLASS(csd_function,
 	TP_ARGS(func, csd),
 
 	TP_STRUCT__entry(
-		__field(void *,	func)
-		__field(void *,	csd)
+		__ptr(void *,	func)
+		__ptr(void *,	csd)
 	),
 
 	TP_fast_assign(
-		__entry->func	= func;
-		__entry->csd	= csd;
+		__assign_ptr(func, func);
+		__assign_ptr(csd, csd);
 	),
 
-	TP_printk("func=%ps, csd=%p", __entry->func, __entry->csd)
+	TP_printk("func=%ps, csd=" TRACE_CAP_FMT, __get_ptr(func), __get_cap(csd))
 );
 
 DEFINE_EVENT(csd_function, csd_function_entry,
