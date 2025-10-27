@@ -108,18 +108,18 @@ DECLARE_EVENT_CLASS(spi_message,
 	TP_STRUCT__entry(
 		__field(        int,            bus_num         )
 		__field(        int,            chip_select     )
-		__field(        struct spi_message *,   msg     )
+		__ptr(        	struct spi_message *,   msg     )
 	),
 
 	TP_fast_assign(
 		__entry->bus_num = msg->spi->controller->bus_num;
 		__entry->chip_select = spi_get_chipselect(msg->spi, 0);
-		__entry->msg = msg;
+		__assign_ptr(msg, msg);
 	),
 
-        TP_printk("spi%d.%d %p", (int)__entry->bus_num,
+        TP_printk("spi%d.%d " TRACE_CAP_FMT "", (int)__entry->bus_num,
 		  (int)__entry->chip_select,
-		  (struct spi_message *)__entry->msg)
+		  __get_cap(msg))
 );
 
 DEFINE_EVENT(spi_message, spi_message_submit,
@@ -147,7 +147,7 @@ TRACE_EVENT(spi_message_done,
 	TP_STRUCT__entry(
 		__field(        int,            bus_num         )
 		__field(        int,            chip_select     )
-		__field(        struct spi_message *,   msg     )
+		__ptr(        	struct spi_message *,   msg     )
 		__field(        unsigned,       frame           )
 		__field(        unsigned,       actual          )
 	),
@@ -155,14 +155,14 @@ TRACE_EVENT(spi_message_done,
 	TP_fast_assign(
 		__entry->bus_num = msg->spi->controller->bus_num;
 		__entry->chip_select = spi_get_chipselect(msg->spi, 0);
-		__entry->msg = msg;
+		__assign_ptr(msg, msg);
 		__entry->frame = msg->frame_length;
 		__entry->actual = msg->actual_length;
 	),
 
-        TP_printk("spi%d.%d %p len=%u/%u", (int)__entry->bus_num,
+        TP_printk("spi%d.%d " TRACE_CAP_FMT " len=%u/%u", (int)__entry->bus_num,
 		  (int)__entry->chip_select,
-		  (struct spi_message *)__entry->msg,
+		  __get_cap(msg),
                   (unsigned)__entry->actual, (unsigned)__entry->frame)
 );
 
@@ -185,7 +185,7 @@ DECLARE_EVENT_CLASS(spi_transfer,
 	TP_STRUCT__entry(
 		__field(        int,            bus_num         )
 		__field(        int,            chip_select     )
-		__field(        struct spi_transfer *,   xfer   )
+		__ptr(        	struct spi_transfer *,   xfer   )
 		__field(        int,            len             )
 		__dynamic_array(u8, rx_buf,
 				spi_valid_rxbuf(msg, xfer) ?
@@ -198,7 +198,7 @@ DECLARE_EVENT_CLASS(spi_transfer,
 	TP_fast_assign(
 		__entry->bus_num = msg->spi->controller->bus_num;
 		__entry->chip_select = spi_get_chipselect(msg->spi, 0);
-		__entry->xfer = xfer;
+		__assign_ptr(xfer, xfer);
 		__entry->len = xfer->len;
 
 		if (spi_valid_txbuf(msg, xfer))
@@ -210,9 +210,9 @@ DECLARE_EVENT_CLASS(spi_transfer,
 			       xfer->rx_buf, __get_dynamic_array_len(rx_buf));
 	),
 
-	TP_printk("spi%d.%d %p len=%d tx=[%*phD] rx=[%*phD]",
+	TP_printk("spi%d.%d " TRACE_CAP_FMT " len=%d tx=[%*phD] rx=[%*phD]",
 		  __entry->bus_num, __entry->chip_select,
-		  __entry->xfer, __entry->len,
+		  __get_cap(xfer), __entry->len,
 		  __get_dynamic_array_len(tx_buf), __get_dynamic_array(tx_buf),
 		  __get_dynamic_array_len(rx_buf), __get_dynamic_array(rx_buf))
 );
