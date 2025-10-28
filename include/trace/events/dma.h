@@ -121,7 +121,7 @@ DECLARE_EVENT_CLASS(dma_alloc_class,
 
 	TP_STRUCT__entry(
 		__string(device, dev_name(dev))
-		__field(void *, virt_addr)
+		__ptr(void *, virt_addr)
 		__field(u64, dma_addr)
 		__field(size_t, size)
 		__field(gfp_t, flags)
@@ -131,7 +131,7 @@ DECLARE_EVENT_CLASS(dma_alloc_class,
 
 	TP_fast_assign(
 		__assign_str(device);
-		__entry->virt_addr = virt_addr;
+		__assign_ptr(virt_addr, virt_addr);
 		__entry->dma_addr = dma_addr;
 		__entry->size = size;
 		__entry->flags = flags;
@@ -139,12 +139,12 @@ DECLARE_EVENT_CLASS(dma_alloc_class,
 		__entry->attrs = attrs;
 	),
 
-	TP_printk("%s dir=%s dma_addr=%llx size=%zu virt_addr=%p flags=%s attrs=%s",
+	TP_printk("%s dir=%s dma_addr=%llx size=%zu virt_addr=" TRACE_CAP_FMT " flags=%s attrs=%s",
 		__get_str(device),
 		decode_dma_data_direction(__entry->dir),
 		__entry->dma_addr,
 		__entry->size,
-		__entry->virt_addr,
+		__get_cap(virt_addr),
 		show_gfp_flags(__entry->flags),
 		decode_dma_attrs(__entry->attrs))
 );
@@ -208,7 +208,7 @@ DECLARE_EVENT_CLASS(dma_free_class,
 
 	TP_STRUCT__entry(
 		__string(device, dev_name(dev))
-		__field(void *, virt_addr)
+		__ptr(void *, virt_addr)
 		__field(u64, dma_addr)
 		__field(size_t, size)
 		__field(enum dma_data_direction, dir)
@@ -217,19 +217,19 @@ DECLARE_EVENT_CLASS(dma_free_class,
 
 	TP_fast_assign(
 		__assign_str(device);
-		__entry->virt_addr = virt_addr;
+		__assign_ptr(virt_addr, virt_addr);
 		__entry->dma_addr = dma_addr;
 		__entry->size = size;
 		__entry->dir = dir;
 		__entry->attrs = attrs;
 	),
 
-	TP_printk("%s dir=%s dma_addr=%llx size=%zu virt_addr=%p attrs=%s",
+	TP_printk("%s dir=%s dma_addr=%llx size=%zu virt_addr=" TRACE_CAP_FMT " attrs=%s",
 		__get_str(device),
 		decode_dma_data_direction(__entry->dir),
 		__entry->dma_addr,
 		__entry->size,
-		__entry->virt_addr,
+		__get_cap(virt_addr),
 		decode_dma_attrs(__entry->attrs))
 );
 
