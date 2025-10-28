@@ -78,7 +78,7 @@ DECLARE_EVENT_CLASS(xhci_log_ctx,
 		__field(int, ctx_64)
 		__field(unsigned, ctx_type)
 		__field(dma_addr_t, ctx_dma)
-		__field(u8 *, ctx_va)
+		__ptr(u8 *, ctx_va)
 		__field(unsigned, ctx_ep_num)
 		__dynamic_array(u32, ctx_data,
 			((HCC_64BYTE_CONTEXT(xhci->hcc_params) + 1) * 8) *
@@ -89,15 +89,15 @@ DECLARE_EVENT_CLASS(xhci_log_ctx,
 		__entry->ctx_64 = HCC_64BYTE_CONTEXT(xhci->hcc_params);
 		__entry->ctx_type = ctx->type;
 		__entry->ctx_dma = ctx->dma;
-		__entry->ctx_va = ctx->bytes;
+		__assign_ptr(ctx_va, ctx->bytes);
 		__entry->ctx_ep_num = ep_num;
 		memcpy(__get_dynamic_array(ctx_data), ctx->bytes,
 			((HCC_64BYTE_CONTEXT(xhci->hcc_params) + 1) * 32) *
 			((ctx->type == XHCI_CTX_TYPE_INPUT) + ep_num + 1));
 	),
-	TP_printk("ctx_64=%d, ctx_type=%u, ctx_dma=@%llx, ctx_va=@%p",
+	TP_printk("ctx_64=%d, ctx_type=%u, ctx_dma=@%llx, ctx_va=@" TRACE_CAP_FMT,
 			__entry->ctx_64, __entry->ctx_type,
-			(unsigned long long) __entry->ctx_dma, __entry->ctx_va
+			(unsigned long long) __entry->ctx_dma, __get_cap(ctx_va)
 	)
 );
 
@@ -173,7 +173,7 @@ DECLARE_EVENT_CLASS(xhci_log_free_virt_dev,
 	TP_PROTO(struct xhci_virt_device *vdev),
 	TP_ARGS(vdev),
 	TP_STRUCT__entry(
-		__field(void *, vdev)
+		__ptr(void *, vdev)
 		__field(unsigned long long, out_ctx)
 		__field(unsigned long long, in_ctx)
 		__field(int, slot_id)
@@ -181,14 +181,14 @@ DECLARE_EVENT_CLASS(xhci_log_free_virt_dev,
 
 	),
 	TP_fast_assign(
-		__entry->vdev = vdev;
+		__assign_ptr(vdev, vdev);
 		__entry->in_ctx = (unsigned long long) vdev->in_ctx->dma;
 		__entry->out_ctx = (unsigned long long) vdev->out_ctx->dma;
 		__entry->slot_id = (int) vdev->slot_id;
 		__entry->current_mel = (u16) vdev->current_mel;
 		),
-	TP_printk("vdev %p slot %d ctx %llx | %llx current_mel %d",
-		__entry->vdev, __entry->slot_id, __entry->in_ctx,
+	TP_printk("vdev " TRACE_CAP_FMT " slot %d ctx %llx | %llx current_mel %d",
+		__get_cap(vdev), __entry->slot_id, __entry->in_ctx,
 		__entry->out_ctx, __entry->current_mel
 	)
 );
@@ -202,7 +202,7 @@ DECLARE_EVENT_CLASS(xhci_log_virt_dev,
 	TP_PROTO(struct xhci_virt_device *vdev),
 	TP_ARGS(vdev),
 	TP_STRUCT__entry(
-		__field(void *, vdev)
+		__ptr(void *, vdev)
 		__field(unsigned long long, out_ctx)
 		__field(unsigned long long, in_ctx)
 		__field(int, devnum)
@@ -213,7 +213,7 @@ DECLARE_EVENT_CLASS(xhci_log_virt_dev,
 		__field(int, slot_id)
 	),
 	TP_fast_assign(
-		__entry->vdev = vdev;
+		__assign_ptr(vdev, vdev);
 		__entry->in_ctx = (unsigned long long) vdev->in_ctx->dma;
 		__entry->out_ctx = (unsigned long long) vdev->out_ctx->dma;
 		__entry->devnum = vdev->udev->devnum;
@@ -223,8 +223,8 @@ DECLARE_EVENT_CLASS(xhci_log_virt_dev,
 		__entry->level = vdev->udev->level;
 		__entry->slot_id = vdev->udev->slot_id;
 	),
-	TP_printk("vdev %p ctx %llx | %llx num %d state %d speed %d port %d level %d slot %d",
-		__entry->vdev, __entry->in_ctx, __entry->out_ctx,
+	TP_printk("vdev " TRACE_CAP_FMT " ctx %llx | %llx num %d state %d speed %d port %d level %d slot %d",
+		__get_cap(vdev), __entry->in_ctx, __entry->out_ctx,
 		__entry->devnum, __entry->state, __entry->speed,
 		__entry->portnum, __entry->level, __entry->slot_id
 	)
@@ -255,7 +255,7 @@ DECLARE_EVENT_CLASS(xhci_log_urb,
 	TP_ARGS(urb),
 	TP_STRUCT__entry(
 		__string(devname, dev_name(&urb->dev->dev))
-		__field(void *, urb)
+		__ptr(void *, urb)
 		__field(unsigned int, pipe)
 		__field(unsigned int, stream)
 		__field(int, status)
@@ -271,7 +271,7 @@ DECLARE_EVENT_CLASS(xhci_log_urb,
 	),
 	TP_fast_assign(
 		__assign_str(devname);
-		__entry->urb = urb;
+		__assign_ptr(urb, urb);
 		__entry->pipe = urb->pipe;
 		__entry->stream = urb->stream_id;
 		__entry->status = urb->status;
@@ -285,7 +285,7 @@ DECLARE_EVENT_CLASS(xhci_log_urb,
 		__entry->type = usb_endpoint_type(&urb->ep->desc);
 		__entry->slot_id = urb->dev->slot_id;
 	),
-	TP_printk("%s ep%d%s-%s: urb %p pipe %u slot %d length %d/%d sgs %d/%d stream %d flags %08x",
+	TP_printk("%s ep%d%s-%s: urb " TRACE_CAP_FMT " pipe %u slot %d length %d/%d sgs %d/%d stream %d flags %08x",
 			__get_str(devname),
 			__entry->epnum, __entry->dir_in ? "in" : "out",
 			__print_symbolic(__entry->type,
@@ -293,7 +293,7 @@ DECLARE_EVENT_CLASS(xhci_log_urb,
 				   { USB_ENDPOINT_XFER_CONTROL,	"control" },
 				   { USB_ENDPOINT_XFER_BULK,	"bulk" },
 				   { USB_ENDPOINT_XFER_ISOC,	"isoc" }),
-			__entry->urb, __entry->pipe, __entry->slot_id,
+			__get_cap(urb), __entry->pipe, __entry->slot_id,
 			__entry->actual, __entry->length, __entry->num_mapped_sgs,
 			__entry->num_sgs, __entry->stream, __entry->flags
 		)
@@ -486,7 +486,7 @@ DECLARE_EVENT_CLASS(xhci_log_ring,
 	TP_ARGS(ring),
 	TP_STRUCT__entry(
 		__field(u32, type)
-		__field(void *, ring)
+		__ptr(void *, ring)
 		__field(dma_addr_t, enq)
 		__field(dma_addr_t, deq)
 		__field(unsigned int, num_segs)
@@ -495,7 +495,7 @@ DECLARE_EVENT_CLASS(xhci_log_ring,
 		__field(unsigned int, bounce_buf_len)
 	),
 	TP_fast_assign(
-		__entry->ring = ring;
+		__assign_ptr(ring, ring);
 		__entry->type = ring->type;
 		__entry->num_segs = ring->num_segs;
 		__entry->stream_id = ring->stream_id;
@@ -504,8 +504,8 @@ DECLARE_EVENT_CLASS(xhci_log_ring,
 		__entry->enq = xhci_trb_virt_to_dma(ring->enq_seg, ring->enqueue);
 		__entry->deq = xhci_trb_virt_to_dma(ring->deq_seg, ring->dequeue);
 	),
-	TP_printk("%s %p: enq %pad deq %pad segs %d stream %d bounce %d cycle %d",
-			xhci_ring_type_string(__entry->type), __entry->ring,
+	TP_printk("%s " TRACE_CAP_FMT ": enq %pad deq %pad segs %d stream %d bounce %d cycle %d",
+			xhci_ring_type_string(__entry->type), __get_cap(ring),
 			&__entry->enq,
 			&__entry->deq,
 			__entry->num_segs,
@@ -605,22 +605,22 @@ DECLARE_EVENT_CLASS(xhci_dbc_log_request,
 	TP_PROTO(struct dbc_request *req),
 	TP_ARGS(req),
 	TP_STRUCT__entry(
-		__field(struct dbc_request *, req)
+		__ptr(struct dbc_request *, req)
 		__field(bool, dir)
 		__field(unsigned int, actual)
 		__field(unsigned int, length)
 		__field(int, status)
 	),
 	TP_fast_assign(
-		__entry->req = req;
+		__assign_ptr(req, req);
 		__entry->dir = req->direction;
 		__entry->actual = req->actual;
 		__entry->length = req->length;
 		__entry->status = req->status;
 	),
-	TP_printk("%s: req %p length %u/%u ==> %d",
+	TP_printk("%s: req " TRACE_CAP_FMT " length %u/%u ==> %d",
 		__entry->dir ? "bulk-in" : "bulk-out",
-		__entry->req, __entry->actual,
+		__get_cap(req), __entry->actual,
 		__entry->length, __entry->status
 	)
 );
