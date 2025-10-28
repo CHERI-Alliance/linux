@@ -144,7 +144,7 @@ TRACE_EVENT(inet_sock_set_state,
 	TP_ARGS(sk, oldstate, newstate),
 
 	TP_STRUCT__entry(
-		__field(const void *, skaddr)
+		__ptr(const void *, skaddr)
 		__field(int, oldstate)
 		__field(int, newstate)
 		__field(__u16, sport)
@@ -161,7 +161,7 @@ TRACE_EVENT(inet_sock_set_state,
 		const struct inet_sock *inet = inet_sk(sk);
 		__be32 *p32;
 
-		__entry->skaddr = sk;
+		__assign_ptr(skaddr, sk);
 		__entry->oldstate = oldstate;
 		__entry->newstate = newstate;
 
@@ -244,14 +244,14 @@ TRACE_EVENT(sk_data_ready,
 	TP_ARGS(sk),
 
 	TP_STRUCT__entry(
-		__field(const void *, skaddr)
+		__ptr(const void *, skaddr)
 		__field(__u16, family)
 		__field(__u16, protocol)
 		__field(unsigned long, ip)
 	),
 
 	TP_fast_assign(
-		__entry->skaddr = sk;
+		__assign_ptr(skaddr, sk);
 		__entry->family = sk->sk_family;
 		__entry->protocol = sk->sk_protocol;
 		__entry->ip = _RET_IP_;
@@ -271,7 +271,7 @@ DECLARE_EVENT_CLASS(sock_msg_length,
 	TP_ARGS(sk, ret, flags),
 
 	TP_STRUCT__entry(
-		__field(void *, sk)
+		__ptr(void *, sk)
 		__field(__u16, family)
 		__field(__u16, protocol)
 		__field(int, ret)
@@ -279,15 +279,15 @@ DECLARE_EVENT_CLASS(sock_msg_length,
 	),
 
 	TP_fast_assign(
-		__entry->sk = sk;
+		__assign_ptr(sk, sk);
 		__entry->family = sk->sk_family;
 		__entry->protocol = sk->sk_protocol;
 		__entry->ret = ret;
 		__entry->flags = flags;
 	),
 
-	TP_printk("sk address = %p, family = %s protocol = %s, length = %d, error = %d, flags = 0x%x",
-		  __entry->sk, show_family_name(__entry->family),
+	TP_printk("sk address = " TRACE_CAP_FMT ", family = %s protocol = %s, length = %d, error = %d, flags = 0x%x",
+		  __get_cap(sk), show_family_name(__entry->family),
 		  show_inet_protocol_name(__entry->protocol),
 		  !(__entry->flags & MSG_PEEK) ?
 		  (__entry->ret > 0 ? __entry->ret : 0) : 0,
