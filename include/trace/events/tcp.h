@@ -26,8 +26,8 @@ DECLARE_EVENT_CLASS(tcp_event_sk_skb,
 	TP_ARGS(sk, skb),
 
 	TP_STRUCT__entry(
-		__field(const void *, skbaddr)
-		__field(const void *, skaddr)
+		__ptr(const void *, skbaddr)
+		__ptr(const void *, skaddr)
 		__field(int, state)
 		__field(__u16, sport)
 		__field(__u16, dport)
@@ -42,8 +42,8 @@ DECLARE_EVENT_CLASS(tcp_event_sk_skb,
 		const struct inet_sock *inet = inet_sk(sk);
 		__be32 *p32;
 
-		__entry->skbaddr = skb;
-		__entry->skaddr = sk;
+		__assign_ptr(skbaddr, skb);
+		__assign_ptr(skaddr, sk);
 		__entry->state = sk->sk_state;
 
 		__entry->sport = ntohs(inet->inet_sport);
@@ -60,8 +60,8 @@ DECLARE_EVENT_CLASS(tcp_event_sk_skb,
 			      sk->sk_v6_rcv_saddr, sk->sk_v6_daddr);
 	),
 
-	TP_printk("skbaddr=%p skaddr=%p family=%s sport=%hu dport=%hu saddr=%pI4 daddr=%pI4 saddrv6=%pI6c daddrv6=%pI6c state=%s",
-		  __entry->skbaddr, __entry->skaddr,
+	TP_printk("skbaddr=" TRACE_CAP_FMT " skaddr=" TRACE_CAP_FMT " family=%s sport=%hu dport=%hu saddr=%pI4 daddr=%pI4 saddrv6=%pI6c daddrv6=%pI6c state=%s",
+		  __get_cap(skbaddr), __get_cap(skaddr),
 		  show_family_name(__entry->family),
 		  __entry->sport, __entry->dport, __entry->saddr, __entry->daddr,
 		  __entry->saddr_v6, __entry->daddr_v6,
@@ -97,8 +97,8 @@ TRACE_EVENT(tcp_send_reset,
 	TP_ARGS(sk, skb__nullable, reason),
 
 	TP_STRUCT__entry(
-		__field(const void *, skbaddr)
-		__field(const void *, skaddr)
+		__ptr(const void *, skbaddr)
+		__ptr(const void *, skaddr)
 		__field(int, state)
 		__field(enum sk_rst_reason, reason)
 		__array(__u8, saddr, sizeof(struct sockaddr_in6))
@@ -106,8 +106,8 @@ TRACE_EVENT(tcp_send_reset,
 	),
 
 	TP_fast_assign(
-		__entry->skbaddr = skb__nullable;
-		__entry->skaddr = sk;
+		__assign_ptr(skbaddr, skb__nullable);
+		__assign_ptr(skaddr, sk);
 		/* Zero means unknown state. */
 		__entry->state = sk ? sk->sk_state : 0;
 
@@ -129,8 +129,8 @@ TRACE_EVENT(tcp_send_reset,
 		__entry->reason = reason;
 	),
 
-	TP_printk("skbaddr=%p skaddr=%p src=%pISpc dest=%pISpc state=%s reason=%s",
-		  __entry->skbaddr, __entry->skaddr,
+	TP_printk("skbaddr=" TRACE_CAP_FMT " skaddr=" TRACE_CAP_FMT " src=%pISpc dest=%pISpc state=%s reason=%s",
+		  __get_cap(skbaddr), __get_cap(skaddr),
 		  __entry->saddr, __entry->daddr,
 		  __entry->state ? show_tcp_state_name(__entry->state) : "UNKNOWN",
 		  __print_symbolic(__entry->reason, DEFINE_RST_REASON(FN, FNe)))
@@ -151,7 +151,7 @@ DECLARE_EVENT_CLASS(tcp_event_sk,
 	TP_ARGS(sk),
 
 	TP_STRUCT__entry(
-		__field(const void *, skaddr)
+		__ptr(const void *, skaddr)
 		__field(__u16, sport)
 		__field(__u16, dport)
 		__field(__u16, family)
@@ -166,7 +166,7 @@ DECLARE_EVENT_CLASS(tcp_event_sk,
 		struct inet_sock *inet = inet_sk(sk);
 		__be32 *p32;
 
-		__entry->skaddr = sk;
+		__assign_ptr(skaddr, sk);
 
 		__entry->sport = ntohs(inet->inet_sport);
 		__entry->dport = ntohs(inet->inet_dport);
@@ -235,7 +235,7 @@ TRACE_EVENT(tcp_rcvbuf_grow,
 		__array(__u8, daddr, 4)
 		__array(__u8, saddr_v6, 16)
 		__array(__u8, daddr_v6, 16)
-		__field(const void *, skaddr)
+		__ptr(const void *, skaddr)
 		__field(__u64, sock_cookie)
 	),
 
@@ -268,13 +268,13 @@ TRACE_EVENT(tcp_rcvbuf_grow,
 		TP_STORE_ADDRS(__entry, inet->inet_saddr, inet->inet_daddr,
 			       sk->sk_v6_rcv_saddr, sk->sk_v6_daddr);
 
-		__entry->skaddr = sk;
+		__assign_ptr(skaddr, sk);
 		__entry->sock_cookie = sock_gen_cookie(sk);
 	),
 
 	TP_printk("time=%u rtt_us=%u copied=%u inq=%u space=%u ooo=%u scaling_ratio=%u rcvbuf=%u "
 		  "family=%s sport=%hu dport=%hu saddr=%pI4 daddr=%pI4 "
-		  "saddrv6=%pI6c daddrv6=%pI6c skaddr=%p sock_cookie=%llx",
+		  "saddrv6=%pI6c daddrv6=%pI6c skaddr=" TRACE_CAP_FMT " sock_cookie=%llx",
 		  __entry->time, __entry->rtt_us, __entry->copied,
 		  __entry->inq, __entry->space, __entry->ooo_space,
 		  __entry->scaling_ratio, __entry->rcvbuf,
@@ -282,7 +282,7 @@ TRACE_EVENT(tcp_rcvbuf_grow,
 		  __entry->sport, __entry->dport,
 		  __entry->saddr, __entry->daddr,
 		  __entry->saddr_v6, __entry->daddr_v6,
-		  __entry->skaddr,
+		  __get_cap(skaddr),
 		  __entry->sock_cookie)
 );
 
@@ -293,8 +293,8 @@ TRACE_EVENT(tcp_retransmit_synack,
 	TP_ARGS(sk, req),
 
 	TP_STRUCT__entry(
-		__field(const void *, skaddr)
-		__field(const void *, req)
+		__ptr(const void *, skaddr)
+		__ptr(const void *, req)
 		__field(__u16, sport)
 		__field(__u16, dport)
 		__field(__u16, family)
@@ -308,8 +308,8 @@ TRACE_EVENT(tcp_retransmit_synack,
 		struct inet_request_sock *ireq = inet_rsk(req);
 		__be32 *p32;
 
-		__entry->skaddr = sk;
-		__entry->req = req;
+		__assign_ptr(skaddr, sk);
+		__assign_ptr(req, req);
 
 		__entry->sport = ireq->ir_num;
 		__entry->dport = ntohs(ireq->ir_rmt_port);
@@ -339,21 +339,21 @@ TRACE_EVENT(tcp_sendmsg_locked,
 	TP_ARGS(sk, msg, skb, size_goal),
 
 	TP_STRUCT__entry(
-		__field(const void *, skb_addr)
+		__ptr(const void *, skb_addr)
 		__field(int, skb_len)
 		__field(int, msg_left)
 		__field(int, size_goal)
 	),
 
 	TP_fast_assign(
-		__entry->skb_addr = skb;
+		__assign_ptr(skb_addr, skb);
 		__entry->skb_len = skb ? skb->len : 0;
 		__entry->msg_left = msg_data_left(msg);
 		__entry->size_goal = size_goal;
 	),
 
-	TP_printk("skb_addr %p skb_len %d msg_left %d size_goal %d",
-		  __entry->skb_addr, __entry->skb_len, __entry->msg_left,
+	TP_printk("skb_addr " TRACE_CAP_FMT " skb_len %d msg_left %d size_goal %d",
+		  __get_cap(skb_addr), __entry->skb_len, __entry->msg_left,
 		  __entry->size_goal));
 
 DECLARE_TRACE(tcp_cwnd_reduction,
@@ -387,8 +387,8 @@ TRACE_EVENT(tcp_probe,
 		__field(__u32, srtt)
 		__field(__u32, rcv_wnd)
 		__field(__u64, sock_cookie)
-		__field(const void *, skbaddr)
-		__field(const void *, skaddr)
+		__ptr(const void *, skbaddr)
+		__ptr(const void *, skaddr)
 	),
 
 	TP_fast_assign(
@@ -417,17 +417,17 @@ TRACE_EVENT(tcp_probe,
 		__entry->srtt = tp->srtt_us >> 3;
 		__entry->sock_cookie = sock_gen_cookie(sk);
 
-		__entry->skbaddr = skb;
-		__entry->skaddr = sk;
+		__assign_ptr(skbaddr, skb);
+		__assign_ptr(skaddr, sk);
 	),
 
-	TP_printk("family=%s src=%pISpc dest=%pISpc mark=%#x data_len=%d snd_nxt=%#x snd_una=%#x snd_cwnd=%u ssthresh=%u snd_wnd=%u srtt=%u rcv_wnd=%u sock_cookie=%llx skbaddr=%p skaddr=%p",
+	TP_printk("family=%s src=%pISpc dest=%pISpc mark=%#x data_len=%d snd_nxt=%#x snd_una=%#x snd_cwnd=%u ssthresh=%u snd_wnd=%u srtt=%u rcv_wnd=%u sock_cookie=%llx skbaddr=" TRACE_CAP_FMT " skaddr=" TRACE_CAP_FMT,
 		  show_family_name(__entry->family),
 		  __entry->saddr, __entry->daddr, __entry->mark,
 		  __entry->data_len, __entry->snd_nxt, __entry->snd_una,
 		  __entry->snd_cwnd, __entry->ssthresh, __entry->snd_wnd,
 		  __entry->srtt, __entry->rcv_wnd, __entry->sock_cookie,
-		  __entry->skbaddr, __entry->skaddr)
+		  __get_cap(skbaddr), __get_cap(skaddr))
 );
 
 /*
@@ -440,14 +440,14 @@ DECLARE_EVENT_CLASS(tcp_event_skb,
 	TP_ARGS(skb),
 
 	TP_STRUCT__entry(
-		__field(const void *, skbaddr)
+		__ptr(const void *, skbaddr)
 		__array(__u8, saddr, sizeof(struct sockaddr_in6))
 		__array(__u8, daddr, sizeof(struct sockaddr_in6))
 	),
 
 	TP_fast_assign(
 		const struct tcphdr *th = (const struct tcphdr *)skb->data;
-		__entry->skbaddr = skb;
+		__assign_ptr(skbaddr, skb);
 
 		memset(__entry->saddr, 0, sizeof(struct sockaddr_in6));
 		memset(__entry->daddr, 0, sizeof(struct sockaddr_in6));
@@ -455,8 +455,8 @@ DECLARE_EVENT_CLASS(tcp_event_skb,
 		TP_STORE_ADDR_PORTS_SKB(skb, th, __entry->saddr, __entry->daddr);
 	),
 
-	TP_printk("skbaddr=%p src=%pISpc dest=%pISpc",
-		  __entry->skbaddr, __entry->saddr, __entry->daddr)
+	TP_printk("skbaddr=" TRACE_CAP_FMT " src=%pISpc dest=%pISpc",
+		  __get_cap(skbaddr), __entry->saddr, __entry->daddr)
 );
 
 DEFINE_EVENT(tcp_event_skb, tcp_bad_csum,
@@ -473,7 +473,7 @@ TRACE_EVENT(tcp_cong_state_set,
 	TP_ARGS(sk, ca_state),
 
 	TP_STRUCT__entry(
-		__field(const void *, skaddr)
+		__ptr(const void *, skaddr)
 		__field(__u16, sport)
 		__field(__u16, dport)
 		__field(__u16, family)
@@ -488,7 +488,7 @@ TRACE_EVENT(tcp_cong_state_set,
 		struct inet_sock *inet = inet_sk(sk);
 		__be32 *p32;
 
-		__entry->skaddr = sk;
+		__assign_ptr(skaddr, sk);
 
 		__entry->sport = ntohs(inet->inet_sport);
 		__entry->dport = ntohs(inet->inet_dport);
@@ -522,8 +522,8 @@ DECLARE_EVENT_CLASS(tcp_hash_event,
 
 	TP_STRUCT__entry(
 		__field(__u64, net_cookie)
-		__field(const void *, skbaddr)
-		__field(const void *, skaddr)
+		__ptr(const void *, skbaddr)
+		__ptr(const void *, skaddr)
 		__field(int, state)
 
 		/* sockaddr_in6 is always bigger than sockaddr_in */
@@ -546,8 +546,8 @@ DECLARE_EVENT_CLASS(tcp_hash_event,
 		const struct tcphdr *th = (const struct tcphdr *)skb->data;
 
 		__entry->net_cookie = sock_net(sk)->net_cookie;
-		__entry->skbaddr = skb;
-		__entry->skaddr = sk;
+		__assign_ptr(skbaddr, skb);
+		__assign_ptr(skaddr, sk);
 		__entry->state = sk->sk_state;
 
 		memset(__entry->saddr, 0, sizeof(struct sockaddr_in6));
@@ -619,8 +619,8 @@ DECLARE_EVENT_CLASS(tcp_ao_event,
 
 	TP_STRUCT__entry(
 		__field(__u64, net_cookie)
-		__field(const void *, skbaddr)
-		__field(const void *, skaddr)
+		__ptr(const void *, skbaddr)
+		__ptr(const void *, skaddr)
 		__field(int, state)
 
 		/* sockaddr_in6 is always bigger than sockaddr_in */
@@ -647,8 +647,8 @@ DECLARE_EVENT_CLASS(tcp_ao_event,
 		const struct tcphdr *th = (const struct tcphdr *)skb->data;
 
 		__entry->net_cookie = sock_net(sk)->net_cookie;
-		__entry->skbaddr = skb;
-		__entry->skaddr = sk;
+		__assign_ptr(skbaddr, skb);
+		__assign_ptr(skaddr, sk);
 		__entry->state = sk->sk_state;
 
 		memset(__entry->saddr, 0, sizeof(struct sockaddr_in6));
@@ -724,7 +724,7 @@ DECLARE_EVENT_CLASS(tcp_ao_event_sk,
 
 	TP_STRUCT__entry(
 		__field(__u64, net_cookie)
-		__field(const void *, skaddr)
+		__ptr(const void *, skaddr)
 		__field(int, state)
 
 		/* sockaddr_in6 is always bigger than sockaddr_in */
@@ -743,7 +743,7 @@ DECLARE_EVENT_CLASS(tcp_ao_event_sk,
 		const struct inet_sock *inet = inet_sk(sk);
 
 		__entry->net_cookie = sock_net(sk)->net_cookie;
-		__entry->skaddr = sk;
+		__assign_ptr(skaddr, sk);
 		__entry->state = sk->sk_state;
 
 		memset(__entry->saddr, 0, sizeof(struct sockaddr_in6));
@@ -780,7 +780,7 @@ DECLARE_EVENT_CLASS(tcp_ao_event_sne,
 
 	TP_STRUCT__entry(
 		__field(__u64, net_cookie)
-		__field(const void *, skaddr)
+		__ptr(const void *, skaddr)
 		__field(int, state)
 
 		/* sockaddr_in6 is always bigger than sockaddr_in */
@@ -798,7 +798,7 @@ DECLARE_EVENT_CLASS(tcp_ao_event_sne,
 		const struct inet_sock *inet = inet_sk(sk);
 
 		__entry->net_cookie = sock_net(sk)->net_cookie;
-		__entry->skaddr = sk;
+		__assign_ptr(skaddr, sk);
 		__entry->state = sk->sk_state;
 
 		memset(__entry->saddr, 0, sizeof(struct sockaddr_in6));
