@@ -28,10 +28,10 @@
 #define STA_PR_FMT	" sta:%pM"
 #define STA_PR_ARG	__entry->sta_addr
 
-#define VIF_ENTRY	__field(enum nl80211_iftype, vif_type) __field(void *, sdata)	\
+#define VIF_ENTRY	__field(enum nl80211_iftype, vif_type) __ptr(void *, sdata)	\
 			__field(bool, p2p)						\
 			__string(vif_name, sdata->name)
-#define VIF_ASSIGN	__entry->vif_type = sdata->vif.type; __entry->sdata = sdata;	\
+#define VIF_ASSIGN	__entry->vif_type = sdata->vif.type; __assign_ptr(sdata, sdata);	\
 			__entry->p2p = sdata->vif.p2p;					\
 			__assign_str(vif_name)
 #define VIF_PR_FMT	" vif:%s(%d%s)"
