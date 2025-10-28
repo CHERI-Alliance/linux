@@ -20,7 +20,7 @@ TRACE_EVENT(net_dev_start_xmit,
 	TP_STRUCT__entry(
 		__string(	name,			dev->name	)
 		__field(	u16,			queue_mapping	)
-		__field(	const void *,		skbaddr		)
+		__ptr(		const void *,		skbaddr		)
 		__field(	bool,			vlan_tagged	)
 		__field(	u16,			vlan_proto	)
 		__field(	u16,			vlan_tci	)
@@ -41,7 +41,7 @@ TRACE_EVENT(net_dev_start_xmit,
 	TP_fast_assign(
 		__assign_str(name);
 		__entry->queue_mapping = skb->queue_mapping;
-		__entry->skbaddr = skb;
+		__assign_ptr(skbaddr, skb);
 		__entry->vlan_tagged = skb_vlan_tag_present(skb);
 		__entry->vlan_proto = ntohs(skb->vlan_proto);
 		__entry->vlan_tci = skb_vlan_tag_get(skb);
@@ -61,8 +61,8 @@ TRACE_EVENT(net_dev_start_xmit,
 		__entry->net_cookie = dev_net(dev)->net_cookie;
 	),
 
-	TP_printk("dev=%s queue_mapping=%u skbaddr=%p vlan_tagged=%d vlan_proto=0x%04x vlan_tci=0x%04x protocol=0x%04x ip_summed=%d len=%u data_len=%u network_offset=%d transport_offset_valid=%d transport_offset=%d tx_flags=%d gso_size=%d gso_segs=%d gso_type=%#x net_cookie=%llu",
-		  __get_str(name), __entry->queue_mapping, __entry->skbaddr,
+	TP_printk("dev=%s queue_mapping=%u skbaddr=" TRACE_CAP_FMT " vlan_tagged=%d vlan_proto=0x%04x vlan_tci=0x%04x protocol=0x%04x ip_summed=%d len=%u data_len=%u network_offset=%d transport_offset_valid=%d transport_offset=%d tx_flags=%d gso_size=%d gso_segs=%d gso_type=%#x net_cookie=%llu",
+		  __get_str(name), __entry->queue_mapping, __get_cap(skbaddr),
 		  __entry->vlan_tagged, __entry->vlan_proto, __entry->vlan_tci,
 		  __entry->protocol, __entry->ip_summed, __entry->len,
 		  __entry->data_len,
@@ -82,7 +82,7 @@ TRACE_EVENT(net_dev_xmit,
 	TP_ARGS(skb, rc, dev, skb_len),
 
 	TP_STRUCT__entry(
-		__field(	void *,		skbaddr		)
+		__ptr(		void *,		skbaddr		)
 		__field(	unsigned int,	len		)
 		__field(	int,		rc		)
 		__string(	name,		dev->name	)
@@ -90,15 +90,15 @@ TRACE_EVENT(net_dev_xmit,
 	),
 
 	TP_fast_assign(
-		__entry->skbaddr = skb;
+		__assign_ptr(skbaddr, skb);
 		__entry->len = skb_len;
 		__entry->rc = rc;
 		__entry->net_cookie = dev_net(dev)->net_cookie;
 		__assign_str(name);
 	),
 
-	TP_printk("dev=%s skbaddr=%p len=%u rc=%d net_cookie=%llu",
-		__get_str(name), __entry->skbaddr,
+	TP_printk("dev=%s skbaddr=" TRACE_CAP_FMT " len=%u rc=%d net_cookie=%llu",
+		__get_str(name), __get_cap(skbaddr),
 		__entry->len, __entry->rc,
 		__entry->net_cookie)
 );
@@ -136,21 +136,21 @@ DECLARE_EVENT_CLASS(net_dev_template,
 	TP_ARGS(skb),
 
 	TP_STRUCT__entry(
-		__field(	void *,		skbaddr		)
+		__ptr(	void *,		skbaddr		)
 		__field(	unsigned int,	len		)
 		__string(	name,		skb->dev->name	)
 		__field(	u64,		net_cookie	)
 	),
 
 	TP_fast_assign(
-		__entry->skbaddr = skb;
+		__assign_ptr(skbaddr, skb);
 		__entry->len = skb->len;
 		__entry->net_cookie = dev_net(skb->dev)->net_cookie;
 		__assign_str(name);
 	),
 
-	TP_printk("dev=%s skbaddr=%p len=%u net_cookie=%llu",
-		__get_str(name), __entry->skbaddr,
+	TP_printk("dev=%s skbaddr=" TRACE_CAP_FMT " len=%u net_cookie=%llu",
+		__get_str(name), __get_cap(skbaddr),
 		__entry->len,
 		__entry->net_cookie)
 )
@@ -186,7 +186,7 @@ DECLARE_EVENT_CLASS(net_dev_rx_verbose_template,
 		__string(	name,			skb->dev->name	)
 		__field(	unsigned int,		napi_id		)
 		__field(	u16,			queue_mapping	)
-		__field(	const void *,		skbaddr		)
+		__ptr(	const void *,		skbaddr		)
 		__field(	bool,			vlan_tagged	)
 		__field(	u16,			vlan_proto	)
 		__field(	u16,			vlan_tci	)
@@ -213,7 +213,7 @@ DECLARE_EVENT_CLASS(net_dev_rx_verbose_template,
 		__entry->napi_id = 0;
 #endif
 		__entry->queue_mapping = skb->queue_mapping;
-		__entry->skbaddr = skb;
+		__assign_ptr(skbaddr, skb);
 		__entry->vlan_tagged = skb_vlan_tag_present(skb);
 		__entry->vlan_proto = ntohs(skb->vlan_proto);
 		__entry->vlan_tci = skb_vlan_tag_get(skb);
@@ -232,9 +232,9 @@ DECLARE_EVENT_CLASS(net_dev_rx_verbose_template,
 		__entry->net_cookie = dev_net(skb->dev)->net_cookie;
 	),
 
-	TP_printk("dev=%s napi_id=%#x queue_mapping=%u skbaddr=%p vlan_tagged=%d vlan_proto=0x%04x vlan_tci=0x%04x protocol=0x%04x ip_summed=%d hash=0x%08x l4_hash=%d len=%u data_len=%u truesize=%u mac_header_valid=%d mac_header=%d nr_frags=%d gso_size=%d gso_type=%#x net_cookie=%llu",
+	TP_printk("dev=%s napi_id=%#x queue_mapping=%u skbaddr=" TRACE_CAP_FMT " vlan_tagged=%d vlan_proto=0x%04x vlan_tci=0x%04x protocol=0x%04x ip_summed=%d hash=0x%08x l4_hash=%d len=%u data_len=%u truesize=%u mac_header_valid=%d mac_header=%d nr_frags=%d gso_size=%d gso_type=%#x net_cookie=%llu",
 		  __get_str(name), __entry->napi_id, __entry->queue_mapping,
-		  __entry->skbaddr, __entry->vlan_tagged, __entry->vlan_proto,
+		  __get_cap(skbaddr), __entry->vlan_tagged, __entry->vlan_proto,
 		  __entry->vlan_tci, __entry->protocol, __entry->ip_summed,
 		  __entry->hash, __entry->l4_hash, __entry->len,
 		  __entry->data_len, __entry->truesize,
