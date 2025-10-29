@@ -15,18 +15,18 @@ TRACE_EVENT(ipi_send_cpu,
 
 	TP_STRUCT__entry(
 		__field(unsigned int, cpu)
-		__field(void *, callsite)
-		__field(void *, callback)
+		__ptr(void *, callsite)
+		__ptr(void *, callback)
 	),
 
 	TP_fast_assign(
 		__entry->cpu = cpu;
-		__entry->callsite = __c_fakep(callsite);
-		__entry->callback = callback;
+		__assign_ptr(callsite, __c_fakep(callsite));
+		__assign_ptr(callback, callback);
 	),
 
 	TP_printk("cpu=%u callsite=%pS callback=%pS",
-		  __entry->cpu, __entry->callsite, __entry->callback)
+		  __entry->cpu, __get_ptr(callsite), __get_ptr(callback))
 );
 
 TRACE_EVENT(ipi_send_cpumask,
@@ -37,18 +37,18 @@ TRACE_EVENT(ipi_send_cpumask,
 
 	TP_STRUCT__entry(
 		__cpumask(cpumask)
-		__field(void *, callsite)
-		__field(void *, callback)
+		__ptr(void *, callsite)
+		__ptr(void *, callback)
 	),
 
 	TP_fast_assign(
 		__assign_cpumask(cpumask, cpumask_bits(cpumask));
-		__entry->callsite = __c_fakep(callsite);
-		__entry->callback = callback;
+		__assign_ptr(callsite, __c_fakep(callsite));
+		__assign_ptr(callback, callback);
 	),
 
 	TP_printk("cpumask=%s callsite=%pS callback=%pS",
-		  __get_cpumask(cpumask), __entry->callsite, __entry->callback)
+		  __get_cpumask(cpumask), __get_ptr(callsite), __get_ptr(callback))
 );
 
 #ifdef CONFIG_HAVE_EXTRA_IPI_TRACEPOINTS
@@ -69,15 +69,15 @@ TRACE_EVENT(ipi_raise,
 
 	TP_STRUCT__entry(
 		__cpumask(target_cpus)
-		__field(const char *, reason)
+		__ptr(const char *, reason)
 	),
 
 	TP_fast_assign(
 		__assign_cpumask(target_cpus, cpumask_bits(mask));
-		__entry->reason = reason;
+		__assign_ptr(reason, reason);
 	),
 
-	TP_printk("target_mask=%s (%s)", __get_cpumask(target_cpus), __entry->reason)
+	TP_printk("target_mask=%s (%s)", __get_cpumask(target_cpus), __get_ptr_str(reason))
 );
 
 DECLARE_EVENT_CLASS(ipi_handler,
@@ -87,14 +87,14 @@ DECLARE_EVENT_CLASS(ipi_handler,
 	TP_ARGS(reason),
 
 	TP_STRUCT__entry(
-		__field(const char *, reason)
+		__ptr(const char *, reason)
 	),
 
 	TP_fast_assign(
-		__entry->reason = reason;
+		__assign_ptr(reason, reason);
 	),
 
-	TP_printk("(%s)", __entry->reason)
+	TP_printk("(%s)", __get_ptr_str(reason))
 );
 
 /**
