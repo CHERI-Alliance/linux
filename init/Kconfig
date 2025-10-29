@@ -100,9 +100,16 @@ config GCC_ASM_GOTO_OUTPUT_BROKEN
 	default y if GCC_VERSION >= 120000 && GCC_VERSION < 120400
 	default y if GCC_VERSION >= 130000 && GCC_VERSION < 130300
 
+config CLANG_ASM_GOTO_OUTPUT_BROKEN
+	bool
+	depends on CC_IS_CLANG
+	# https://github.com/llvm/llvm-project/issues/143795
+	default y if RISCV
+
 config CC_HAS_ASM_GOTO_OUTPUT
 	def_bool y
 	depends on !GCC_ASM_GOTO_OUTPUT_BROKEN
+	depends on !CLANG_ASM_GOTO_OUTPUT_BROKEN
 	# Detect basic support
 	depends on $(success,echo 'int foo(int x) { asm goto ("": "=r"(x) ::: bar); return x; bar: return 0; }' | $(CC) -x c - -c -o /dev/null)
 	# Detect clang (< v17) scoped label issues
