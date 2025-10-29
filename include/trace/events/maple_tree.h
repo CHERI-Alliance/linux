@@ -17,26 +17,26 @@ TRACE_EVENT(ma_op,
 	TP_ARGS(fn, mas),
 
 	TP_STRUCT__entry(
-			__field(const char *, fn)
+			__ptr(const char *, fn)
 			__field(unsigned long, min)
 			__field(unsigned long, max)
 			__field(unsigned long, index)
 			__field(unsigned long, last)
-			__field(void *, node)
+			__ptr(void *, node)
 	),
 
 	TP_fast_assign(
-			__entry->fn		= fn;
+			__assign_ptr(fn, fn);
 			__entry->min		= mas->min;
 			__entry->max		= mas->max;
 			__entry->index		= mas->index;
 			__entry->last		= mas->last;
-			__entry->node		= mas->node;
+			__assign_ptr(node, mas->node);
 	),
 
-	TP_printk("%s\tNode: %p (%lu %lu) range: %lu-%lu",
-		  __entry->fn,
-		  (void *) __entry->node,
+	TP_printk("%s\tNode: " TRACE_CAP_FMT " (%lu %lu) range: %lu-%lu",
+		  __get_ptr_str(fn),
+		  __get_cap(node),
 		  (unsigned long) __entry->min,
 		  (unsigned long) __entry->max,
 		  (unsigned long) __entry->index,
@@ -50,26 +50,26 @@ TRACE_EVENT(ma_read,
 	TP_ARGS(fn, mas),
 
 	TP_STRUCT__entry(
-			__field(const char *, fn)
+			__ptr(const char *, fn)
 			__field(unsigned long, min)
 			__field(unsigned long, max)
 			__field(unsigned long, index)
 			__field(unsigned long, last)
-			__field(void *, node)
+			__ptr(void *, node)
 	),
 
 	TP_fast_assign(
-			__entry->fn		= fn;
+			__assign_ptr(fn, fn);
 			__entry->min		= mas->min;
 			__entry->max		= mas->max;
 			__entry->index		= mas->index;
 			__entry->last		= mas->last;
-			__entry->node		= mas->node;
+			__assign_ptr(node, mas->node);
 	),
 
-	TP_printk("%s\tNode: %p (%lu %lu) range: %lu-%lu",
-		  __entry->fn,
-		  (void *) __entry->node,
+	TP_printk("%s\tNode: " TRACE_CAP_FMT " (%lu %lu) range: %lu-%lu",
+		  __get_ptr_str(fn),
+		  __get_cap(node),
 		  (unsigned long) __entry->min,
 		  (unsigned long) __entry->max,
 		  (unsigned long) __entry->index,
@@ -85,36 +85,36 @@ TRACE_EVENT(ma_write,
 	TP_ARGS(fn, mas, piv, val),
 
 	TP_STRUCT__entry(
-			__field(const char *, fn)
+			__ptr(const char *, fn)
 			__field(unsigned long, min)
 			__field(unsigned long, max)
 			__field(unsigned long, index)
 			__field(unsigned long, last)
 			__field(unsigned long, piv)
-			__field(void *, val)
-			__field(void *, node)
+			__ptr(void *, val)
+			__ptr(void *, node)
 	),
 
 	TP_fast_assign(
-			__entry->fn		= fn;
+			__assign_ptr(fn, fn);
 			__entry->min		= mas->min;
 			__entry->max		= mas->max;
 			__entry->index		= mas->index;
 			__entry->last		= mas->last;
 			__entry->piv		= piv;
-			__entry->val		= val;
-			__entry->node		= mas->node;
+			__assign_ptr(val, val);
+			__assign_ptr(node, mas->node);
 	),
 
-	TP_printk("%s\tNode %p (%lu %lu) range:%lu-%lu piv (%lu) val %p",
-		  __entry->fn,
-		  (void *) __entry->node,
+	TP_printk("%s\tNode " TRACE_CAP_FMT " (%lu %lu) range:%lu-%lu piv (%lu) val " TRACE_CAP_FMT,
+		  __get_ptr_str(fn),
+		  __get_cap(node),
 		  (unsigned long) __entry->min,
 		  (unsigned long) __entry->max,
 		  (unsigned long) __entry->index,
 		  (unsigned long) __entry->last,
 		  (unsigned long) __entry->piv,
-		  (void *) __entry->val
+		  __get_cap(val)
 	)
 )
 #endif /* _TRACE_MM_H */
