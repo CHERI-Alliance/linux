@@ -251,16 +251,16 @@ DECLARE_EVENT_CLASS(wiphy_work_event,
 	TP_ARGS(wiphy, work),
 	TP_STRUCT__entry(
 		WIPHY_ENTRY
-		__field(void *, instance)
-		__field(void *, func)
+		__ptr(void *, instance)
+		__ptr(void *, func)
 	),
 	TP_fast_assign(
 		WIPHY_ASSIGN;
-		__entry->instance = work;
-		__entry->func = work ? work->func : NULL;
+		__assign_ptr(instance, work);
+		__assign_ptr(func, work ? work->func : NULL);
 	),
-	TP_printk(WIPHY_PR_FMT " instance=%p func=%pS",
-		  WIPHY_PR_ARG, __entry->instance, __entry->func)
+	TP_printk(WIPHY_PR_FMT " instance=" TRACE_CAP_FMT " func=%pS",
+		  WIPHY_PR_ARG, __get_cap(instance), __get_ptr(func))
 );
 
 DEFINE_EVENT(wiphy_work_event, wiphy_work_queue,
@@ -289,18 +289,18 @@ TRACE_EVENT(wiphy_delayed_work_queue,
 	TP_ARGS(wiphy, work, delay),
 	TP_STRUCT__entry(
 		WIPHY_ENTRY
-		__field(void *, instance)
-		__field(void *, func)
+		__ptr(void *, instance)
+		__ptr(void *, func)
 		__field(unsigned long, delay)
 	),
 	TP_fast_assign(
 		WIPHY_ASSIGN;
-		__entry->instance = work;
-		__entry->func = work->func;
+		__assign_ptr(instance, work);
+		__assign_ptr(func, work->func);
 		__entry->delay = delay;
 	),
-	TP_printk(WIPHY_PR_FMT " instance=%p func=%pS delay=%ld",
-		  WIPHY_PR_ARG, __entry->instance, __entry->func,
+	TP_printk(WIPHY_PR_FMT " instance=" TRACE_CAP_FMT " func=%pS delay=%ld",
+		  WIPHY_PR_ARG, __get_cap(instance), __get_ptr(func),
 		  __entry->delay)
 );
 
