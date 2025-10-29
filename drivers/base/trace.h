@@ -21,21 +21,21 @@ DECLARE_EVENT_CLASS(devres,
 	TP_ARGS(dev, op, node, name, size),
 	TP_STRUCT__entry(
 		__string(devname, dev_name(dev))
-		__field(struct device *, dev)
-		__field(const char *, op)
-		__field(void *, node)
+		__ptr(struct device *, dev)
+		__ptr(const char *, op)
+		__ptr(void *, node)
 		__string(name, name)
 		__field(size_t, size)
 	),
 	TP_fast_assign(
 		__assign_str(devname);
-		__entry->op = op;
-		__entry->node = node;
+		__assign_ptr(op, op);
+		__assign_ptr(node, node);
 		__assign_str(name);
 		__entry->size = size;
 	),
-	TP_printk("%s %3s %p %s (%zu bytes)", __get_str(devname),
-		  __entry->op, __entry->node, __get_str(name), __entry->size)
+	TP_printk("%s %3s " TRACE_CAP_FMT " %s (%zu bytes)", __get_str(devname),
+		  __get_ptr_str(op), __get_cap(node), __get_str(name), __entry->size)
 );
 
 DEFINE_EVENT(devres, devres_log,
