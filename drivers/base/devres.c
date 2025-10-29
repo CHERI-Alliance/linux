@@ -153,7 +153,7 @@ static __always_inline struct devres *alloc_dr(dr_release_t release,
 
 static void add_dr(struct device *dev, struct devres_node *node)
 {
-	devres_log(dev, node, "ADD");
+	devres_log(dev, node, tracepoint_string("ADD"));
 	BUG_ON(!list_empty(&node->entry));
 	list_add_tail(&node->entry, &dev->devres_head);
 }
@@ -161,7 +161,7 @@ static void add_dr(struct device *dev, struct devres_node *node)
 static void replace_dr(struct device *dev,
 		       struct devres_node *old, struct devres_node *new)
 {
-	devres_log(dev, old, "REPLACE");
+	devres_log(dev, old, tracepoint_string("REPLACE"));
 	BUG_ON(!list_empty(&new->entry));
 	list_replace(&old->entry, &new->entry);
 }
@@ -405,7 +405,7 @@ void *devres_remove(struct device *dev, dr_release_t release,
 	dr = find_dr(dev, release, match, match_data);
 	if (dr) {
 		list_del_init(&dr->node.entry);
-		devres_log(dev, &dr->node, "REM");
+		devres_log(dev, &dr->node, tracepoint_string("REM"));
 		return dr->data;
 	}
 
@@ -542,7 +542,7 @@ static void release_nodes(struct device *dev, struct list_head *todo)
 	struct devres_node *node, *tmp;
 
 	list_for_each_entry_safe_reverse(node, tmp, todo, entry) {
-		devres_log(dev, node, "REL");
+		devres_log(dev, node, tracepoint_string("REL"));
 		node->release(dev, node);
 		free_node(node);
 	}
@@ -686,7 +686,7 @@ void devres_remove_group(struct device *dev, void *id)
 	if (grp) {
 		list_del_init(&grp->node[0].entry);
 		list_del_init(&grp->node[1].entry);
-		devres_log(dev, &grp->node[0], "REM");
+		devres_log(dev, &grp->node[0], tracepoint_string("REM"));
 	} else
 		WARN_ON(1);
 
