@@ -36,16 +36,16 @@ TRACE_EVENT(drm_vblank_event_queued,
 	    TP_PROTO(struct drm_file *file, int crtc, unsigned int seq),
 	    TP_ARGS(file, crtc, seq),
 	    TP_STRUCT__entry(
-		    __field(struct drm_file *, file)
+		    __ptr(struct drm_file *, file)
 		    __field(int, crtc)
 		    __field(unsigned int, seq)
 		    ),
 	    TP_fast_assign(
-		    __entry->file = file;
+		    __assign_ptr(file, file);
 		    __entry->crtc = crtc;
 		    __entry->seq = seq;
 		    ),
-	    TP_printk("file=%p, crtc=%d, seq=%u", __entry->file, __entry->crtc, \
+	    TP_printk("file=" TRACE_CAP_FMT ", crtc=%d, seq=%u", __get_cap(file), __entry->crtc, \
 		      __entry->seq)
 );
 
@@ -53,16 +53,16 @@ TRACE_EVENT(drm_vblank_event_delivered,
 	    TP_PROTO(struct drm_file *file, int crtc, unsigned int seq),
 	    TP_ARGS(file, crtc, seq),
 	    TP_STRUCT__entry(
-		    __field(struct drm_file *, file)
+		    __ptr(struct drm_file *, file)
 		    __field(int, crtc)
 		    __field(unsigned int, seq)
 		    ),
 	    TP_fast_assign(
-		    __entry->file = file;
+		    __assign_ptr(file, file);
 		    __entry->crtc = crtc;
 		    __entry->seq = seq;
 		    ),
-	    TP_printk("file=%p, crtc=%d, seq=%u", __entry->file, __entry->crtc, \
+	    TP_printk("file=" TRACE_CAP_FMT ", crtc=%d, seq=%u", __get_cap(file), __entry->crtc, \
 		      __entry->seq)
 );
 
