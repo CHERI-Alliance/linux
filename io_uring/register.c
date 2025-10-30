@@ -325,8 +325,8 @@ static __cold int io_register_iowq_aff(struct io_ring_ctx *ctx,
 	if (len > cpumask_size())
 		len = cpumask_size();
 
-#ifdef CONFIG_COMPAT
-	if (in_compat_syscall())
+#ifdef CONFIG_COMPAT32
+	if (in_compat32_syscall())
 		ret = compat_get_bitmap(cpumask_bits(new_mask),
 					(const compat_ulong_t __user *)arg,
 					len * 8 /* CHAR_BIT */);
