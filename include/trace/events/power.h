@@ -288,18 +288,18 @@ TRACE_EVENT(suspend_resume,
 	TP_ARGS(action, val, start),
 
 	TP_STRUCT__entry(
-		__field(const char *, action)
+		__ptr(const char *, action)
 		__field(int, val)
 		__field(bool, start)
 	),
 
 	TP_fast_assign(
-		__entry->action = action;
+		__assign_ptr(action, action);
 		__entry->val = val;
 		__entry->start = start;
 	),
 
-	TP_printk("%s[%u] %s", __entry->action, (unsigned int)__entry->val,
+	TP_printk("%s[%u] %s", __get_ptr_str(action), (unsigned int)__entry->val,
 		(__entry->start)?"begin":"end")
 );
 
