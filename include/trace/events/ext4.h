@@ -2617,19 +2617,19 @@ TRACE_EVENT(ext4_error,
 
 	TP_STRUCT__entry(
 		__field(	dev_t,	dev			)
-		__field( const char *,	function		)
+		__ptr(	 const char *,	function		)
 		__field(     unsigned,	line			)
 	),
 
 	TP_fast_assign(
 		__entry->dev	= sb->s_dev;
-		__entry->function = function;
+		__assign_ptr(function, function);
 		__entry->line	= line;
 	),
 
 	TP_printk("dev %d,%d function %s line %u",
 		  MAJOR(__entry->dev), MINOR(__entry->dev),
-		  __entry->function, __entry->line)
+		  __get_ptr_str(function), __entry->line)
 );
 
 TRACE_EVENT(ext4_prefetch_bitmaps,
