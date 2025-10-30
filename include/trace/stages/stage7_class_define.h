@@ -14,6 +14,7 @@
 #undef __get_str
 #undef __get_cap
 #undef __get_ptr
+#undef __get_ptr_str
 #undef __get_bitmask
 #undef __get_cpumask
 #undef __get_sockaddr
