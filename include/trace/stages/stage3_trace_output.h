@@ -33,6 +33,13 @@
 #define __get_ptr(x) (__entry->x)
 #endif
 
+#undef __get_ptr_str
+#ifdef CONFIG_CHERI_KERNEL
+#define __get_ptr_str(x) trace_print_ptr_string(p, __entry->x)
+#else
+#define __get_ptr_str(x) (__entry->x)
+#endif
+
 #undef __get_rel_dynamic_array
 #define __get_rel_dynamic_array(field)					\
 		((void *)__entry + 					\
