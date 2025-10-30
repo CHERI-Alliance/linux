@@ -51,6 +51,7 @@ struct trace_iterator;
 struct trace_event;
 
 #ifdef CONFIG_CHERI_KERNEL
+const char *trace_print_ptr_string(struct trace_seq *p, ptraddr_t addr);
 const char *trace_print_cap(struct trace_seq *p, ptraddr_t tag_meta, ptraddr_t addr);
 #endif
 
