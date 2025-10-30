@@ -2584,8 +2584,8 @@ static int io_cqring_wait(struct io_ring_ctx *ctx, int min_events, u32 flags,
 	}
 
 	if (ext_arg->sig) {
-#ifdef CONFIG_COMPAT
-		if (in_compat_syscall())
+#ifdef CONFIG_COMPAT32
+		if (in_compat32_syscall())
 			ret = set_compat_user_sigmask((const compat_sigset_t __user *)ext_arg->sig,
 						      ext_arg->argsz);
 		else
