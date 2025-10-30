@@ -196,6 +196,25 @@ EXPORT_SYMBOL(trace_print_symbols_seq_u64);
 #endif
 
 #ifdef CONFIG_CHERI_KERNEL
+const char *trace_print_ptr_string(struct trace_seq *p, ptraddr_t addr)
+{
+	const char **ptr = __start___tracepoint_str;
+	const char *ret = trace_seq_buffer_ptr(p);
+
+	for (ptr = __start___tracepoint_str; ptr < __stop___tracepoint_str; ptr++) {
+		if (addr == __c_pa(*ptr)) {
+			trace_seq_printf(p, "%s", *ptr);
+			goto out;
+		}
+	}
+
+	trace_seq_printf(p, "<UNKNOWN>");
+out:
+	trace_seq_putc(p, 0);
+	return ret;
+}
+EXPORT_SYMBOL(trace_print_ptr_string);
+
 const char *
 trace_print_cap(struct trace_seq *p, ptraddr_t tag_meta, ptraddr_t addr)
 {
