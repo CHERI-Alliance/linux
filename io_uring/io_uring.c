@@ -3251,7 +3251,7 @@ void __io_uring_cancel(bool cancel_all)
 static struct io_uring_reg_wait *io_get_ext_arg_reg(struct io_ring_ctx *ctx,
 			const struct io_uring_getevents_arg __user *uarg)
 {
-	unsigned long size = sizeof(struct io_uring_reg_wait);
+	unsigned long size = __c64c_sizeof(io_in_compat64(ctx), io_uring_reg_wait);
 	unsigned long offset = user_ptr_addr(uarg);
 	unsigned long end;
 
@@ -3303,7 +3303,7 @@ static int io_get_ext_arg(struct io_ring_ctx *ctx, unsigned flags,
 	if (flags & IORING_ENTER_EXT_ARG_REG) {
 		struct io_uring_reg_wait *w;
 
-		if (ext_arg->argsz != sizeof(struct io_uring_reg_wait))
+		if (ext_arg->argsz != __c64c_sizeof(io_in_compat64(ctx), io_uring_reg_wait))
 			return -EINVAL;
 		w = io_get_ext_arg_reg(ctx, argp);
 		if (IS_ERR(w))
@@ -3332,7 +3332,7 @@ static int io_get_ext_arg(struct io_ring_ctx *ctx, unsigned flags,
 	 * EXT_ARG is set - ensure we agree on the size of it and copy in our
 	 * timespec and sigset_t pointers if good.
 	 */
-	if (ext_arg->argsz != sizeof(arg))
+	if (ext_arg->argsz != __c64c_sizeof(io_in_compat64(ctx), io_uring_getevents_arg))
 		return -EINVAL;
 #if defined(CONFIG_64BIT) && !defined(CONFIG_CHERI_PURECAP_UABI)
 	if (!user_access_begin(uarg, sizeof(*uarg)))
