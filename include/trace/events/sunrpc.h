@@ -58,9 +58,9 @@ DECLARE_EVENT_CLASS(rpc_xdr_buf_class,
 	TP_STRUCT__entry(
 		__field(unsigned int, task_id)
 		__field(unsigned int, client_id)
-		__field(const void *, head_base)
+		__ptr(const void *, head_base)
 		__field(size_t, head_len)
-		__field(const void *, tail_base)
+		__ptr(const void *, tail_base)
 		__field(size_t, tail_len)
 		__field(unsigned int, page_base)
 		__field(unsigned int, page_len)
@@ -71,9 +71,9 @@ DECLARE_EVENT_CLASS(rpc_xdr_buf_class,
 		__entry->task_id = task->tk_pid;
 		__entry->client_id = task->tk_client ?
 				     task->tk_client->cl_clid : -1;
-		__entry->head_base = xdr->head[0].iov_base;
+		__assign_ptr(head_base, xdr->head[0].iov_base);
 		__entry->head_len = xdr->head[0].iov_len;
-		__entry->tail_base = xdr->tail[0].iov_base;
+		__assign_ptr(tail_base, xdr->tail[0].iov_base);
 		__entry->tail_len = xdr->tail[0].iov_len;
 		__entry->page_base = xdr->page_base;
 		__entry->page_len = xdr->page_len;
@@ -81,11 +81,11 @@ DECLARE_EVENT_CLASS(rpc_xdr_buf_class,
 	),
 
 	TP_printk(SUNRPC_TRACE_TASK_SPECIFIER
-		  " head=[%p,%zu] page=%u(%u) tail=[%p,%zu] len=%u",
+		  " head=[" TRACE_CAP_FMT ",%zu] page=%u(%u) tail=[" TRACE_CAP_FMT ",%zu] len=%u",
 		__entry->task_id, __entry->client_id,
-		__entry->head_base, __entry->head_len,
+		__get_cap(head_base), __entry->head_len,
 		__entry->page_len, __entry->page_base,
-		__entry->tail_base, __entry->tail_len,
+		__get_cap(tail_base), __entry->tail_len,
 		__entry->msg_len
 	)
 );
@@ -370,7 +370,7 @@ DECLARE_EVENT_CLASS(rpc_task_running,
 	TP_STRUCT__entry(
 		__field(unsigned int, task_id)
 		__field(unsigned int, client_id)
-		__field(const void *, action)
+		__ptr(const void *, action)
 		__field(unsigned long, runstate)
 		__field(int, status)
 		__field(unsigned short, flags)
@@ -380,7 +380,7 @@ DECLARE_EVENT_CLASS(rpc_task_running,
 		__entry->client_id = task->tk_client ?
 				     task->tk_client->cl_clid : -1;
 		__entry->task_id = task->tk_pid;
-		__entry->action = action;
+		__assign_ptr(action, action);
 		__entry->runstate = task->tk_runstate;
 		__entry->status = task->tk_status;
 		__entry->flags = task->tk_flags;
@@ -392,7 +392,7 @@ DECLARE_EVENT_CLASS(rpc_task_running,
 		rpc_show_task_flags(__entry->flags),
 		rpc_show_runstate(__entry->runstate),
 		__entry->status,
-		__entry->action
+		__get_ptr(action)
 		)
 );
 #define DEFINE_RPC_RUNNING_EVENT(name) \
@@ -675,11 +675,11 @@ TRACE_EVENT(rpc_xdr_overflow,
 		__field(unsigned int, client_id)
 		__field(int, version)
 		__field(size_t, requested)
-		__field(const void *, end)
-		__field(const void *, p)
-		__field(const void *, head_base)
+		__ptr(const void *, end)
+		__ptr(const void *, p)
+		__ptr(const void *, head_base)
 		__field(size_t, head_len)
-		__field(const void *, tail_base)
+		__ptr(const void *, tail_base)
 		__field(size_t, tail_len)
 		__field(unsigned int, page_len)
 		__field(unsigned int, len)
@@ -706,24 +706,24 @@ TRACE_EVENT(rpc_xdr_overflow,
 			__assign_str(procedure);
 		}
 		__entry->requested = requested;
-		__entry->end = xdr->end;
-		__entry->p = xdr->p;
-		__entry->head_base = xdr->buf->head[0].iov_base,
-		__entry->head_len = xdr->buf->head[0].iov_len,
-		__entry->page_len = xdr->buf->page_len,
-		__entry->tail_base = xdr->buf->tail[0].iov_base,
-		__entry->tail_len = xdr->buf->tail[0].iov_len,
+		__assign_ptr(end, xdr->end);
+		__assign_ptr(p, xdr->p);
+		__assign_ptr(head_base, xdr->buf->head[0].iov_base);
+		__entry->head_len = xdr->buf->head[0].iov_len;
+		__entry->page_len = xdr->buf->page_len;
+		__assign_ptr(tail_base, xdr->buf->tail[0].iov_base);
+		__entry->tail_len = xdr->buf->tail[0].iov_len;
 		__entry->len = xdr->buf->len;
 	),
 
 	TP_printk(SUNRPC_TRACE_TASK_SPECIFIER
-		  " %sv%d %s requested=%zu p=%p end=%p xdr=[%p,%zu]/%u/[%p,%zu]/%u",
+		  " %sv%d %s requested=%zu p=" TRACE_CAP_FMT " end=" TRACE_CAP_FMT " xdr=[" TRACE_CAP_FMT ",%zu]/%u/[" TRACE_CAP_FMT ",%zu]/%u",
 		__entry->task_id, __entry->client_id,
 		__get_str(progname), __entry->version, __get_str(procedure),
-		__entry->requested, __entry->p, __entry->end,
-		__entry->head_base, __entry->head_len,
+		__entry->requested, __get_cap(p), __get_cap(end),
+		__get_cap(head_base), __entry->head_len,
 		__entry->page_len,
-		__entry->tail_base, __entry->tail_len,
+		__get_cap(tail_base), __entry->tail_len,
 		__entry->len
 	)
 );
@@ -743,9 +743,9 @@ TRACE_EVENT(rpc_xdr_alignment,
 		__field(int, version)
 		__field(size_t, offset)
 		__field(unsigned int, copied)
-		__field(const void *, head_base)
+		__ptr(const void *, head_base)
 		__field(size_t, head_len)
-		__field(const void *, tail_base)
+		__ptr(const void *, tail_base)
 		__field(size_t, tail_len)
 		__field(unsigned int, page_len)
 		__field(unsigned int, len)
@@ -766,22 +766,22 @@ TRACE_EVENT(rpc_xdr_alignment,
 
 		__entry->offset = offset;
 		__entry->copied = copied;
-		__entry->head_base = xdr->buf->head[0].iov_base,
-		__entry->head_len = xdr->buf->head[0].iov_len,
-		__entry->page_len = xdr->buf->page_len,
-		__entry->tail_base = xdr->buf->tail[0].iov_base,
-		__entry->tail_len = xdr->buf->tail[0].iov_len,
+		__assign_ptr(head_base, xdr->buf->head[0].iov_base);
+		__entry->head_len = xdr->buf->head[0].iov_len;
+		__entry->page_len = xdr->buf->page_len;
+		__assign_ptr(tail_base, xdr->buf->tail[0].iov_base);
+		__entry->tail_len = xdr->buf->tail[0].iov_len;
 		__entry->len = xdr->buf->len;
 	),
 
 	TP_printk(SUNRPC_TRACE_TASK_SPECIFIER
-		  " %sv%d %s offset=%zu copied=%u xdr=[%p,%zu]/%u/[%p,%zu]/%u",
+		  " %sv%d %s offset=%zu copied=%u xdr=[" TRACE_CAP_FMT ",%zu]/%u/[" TRACE_CAP_FMT ",%zu]/%u",
 		__entry->task_id, __entry->client_id,
 		__get_str(progname), __entry->version, __get_str(procedure),
 		__entry->offset, __entry->copied,
-		__entry->head_base, __entry->head_len,
+		__get_cap(head_base), __entry->head_len,
 		__entry->page_len,
-		__entry->tail_base, __entry->tail_len,
+		__get_cap(tail_base), __entry->tail_len,
 		__entry->len
 	)
 );
@@ -1576,9 +1576,9 @@ DECLARE_EVENT_CLASS(svc_xdr_msg_class,
 
 	TP_STRUCT__entry(
 		__field(u32, xid)
-		__field(const void *, head_base)
+		__ptr(const void *, head_base)
 		__field(size_t, head_len)
-		__field(const void *, tail_base)
+		__ptr(const void *, tail_base)
 		__field(size_t, tail_len)
 		__field(unsigned int, page_len)
 		__field(unsigned int, msg_len)
@@ -1588,18 +1588,18 @@ DECLARE_EVENT_CLASS(svc_xdr_msg_class,
 		__be32 *p = (__be32 *)xdr->head[0].iov_base;
 
 		__entry->xid = be32_to_cpu(*p);
-		__entry->head_base = p;
+		__assign_ptr(head_base, p);
 		__entry->head_len = xdr->head[0].iov_len;
-		__entry->tail_base = xdr->tail[0].iov_base;
+		__assign_ptr(tail_base, xdr->tail[0].iov_base);
 		__entry->tail_len = xdr->tail[0].iov_len;
 		__entry->page_len = xdr->page_len;
 		__entry->msg_len = xdr->len;
 	),
 
-	TP_printk("xid=0x%08x head=[%p,%zu] page=%u tail=[%p,%zu] len=%u",
+	TP_printk("xid=0x%08x head=[" TRACE_CAP_FMT ",%zu] page=%u tail=[" TRACE_CAP_FMT ",%zu] len=%u",
 		__entry->xid,
-		__entry->head_base, __entry->head_len, __entry->page_len,
-		__entry->tail_base, __entry->tail_len, __entry->msg_len
+		__get_cap(head_base), __entry->head_len, __entry->page_len,
+		__get_cap(tail_base), __entry->tail_len, __entry->msg_len
 	)
 );
 
@@ -1624,9 +1624,9 @@ DECLARE_EVENT_CLASS(svc_xdr_buf_class,
 
 	TP_STRUCT__entry(
 		__field(u32, xid)
-		__field(const void *, head_base)
+		__ptr(const void *, head_base)
 		__field(size_t, head_len)
-		__field(const void *, tail_base)
+		__ptr(const void *, tail_base)
 		__field(size_t, tail_len)
 		__field(unsigned int, page_base)
 		__field(unsigned int, page_len)
@@ -1635,20 +1635,20 @@ DECLARE_EVENT_CLASS(svc_xdr_buf_class,
 
 	TP_fast_assign(
 		__entry->xid = be32_to_cpu(xid);
-		__entry->head_base = xdr->head[0].iov_base;
+		__assign_ptr(head_base, xdr->head[0].iov_base);
 		__entry->head_len = xdr->head[0].iov_len;
-		__entry->tail_base = xdr->tail[0].iov_base;
+		__assign_ptr(tail_base, xdr->tail[0].iov_base);
 		__entry->tail_len = xdr->tail[0].iov_len;
 		__entry->page_base = xdr->page_base;
 		__entry->page_len = xdr->page_len;
 		__entry->msg_len = xdr->len;
 	),
 
-	TP_printk("xid=0x%08x head=[%p,%zu] page=%u(%u) tail=[%p,%zu] len=%u",
+	TP_printk("xid=0x%08x head=[" TRACE_CAP_FMT ",%zu] page=%u(%u) tail=[" TRACE_CAP_FMT ",%zu] len=%u",
 		__entry->xid,
-		__entry->head_base, __entry->head_len,
+		__get_cap(head_base), __entry->head_len,
 		__entry->page_len, __entry->page_base,
-		__entry->tail_base, __entry->tail_len,
+		__get_cap(tail_base), __entry->tail_len,
 		__entry->msg_len
 	)
 );
@@ -1870,22 +1870,22 @@ TRACE_EVENT(svc_replace_page_err,
 	TP_STRUCT__entry(
 		SVC_RQST_ENDPOINT_FIELDS(rqst)
 
-		__field(const void *, begin)
-		__field(const void *, respages)
-		__field(const void *, nextpage)
+		__ptr(const void *, begin)
+		__ptr(const void *, respages)
+		__ptr(const void *, nextpage)
 	),
 
 	TP_fast_assign(
 		SVC_RQST_ENDPOINT_ASSIGNMENTS(rqst);
 
-		__entry->begin = rqst->rq_pages;
-		__entry->respages = rqst->rq_respages;
-		__entry->nextpage = rqst->rq_next_page;
+		__assign_ptr(begin, rqst->rq_pages);
+		__assign_ptr(respages, rqst->rq_respages);
+		__assign_ptr(nextpage, rqst->rq_next_page);
 	),
 
-	TP_printk(SVC_RQST_ENDPOINT_FORMAT " begin=%p respages=%p nextpage=%p",
+	TP_printk(SVC_RQST_ENDPOINT_FORMAT " begin=" TRACE_CAP_FMT " respages=" TRACE_CAP_FMT " nextpage=" TRACE_CAP_FMT,
 		SVC_RQST_ENDPOINT_VARARGS,
-		__entry->begin, __entry->respages, __entry->nextpage)
+		__get_cap(begin), __get_cap(respages), __get_cap(nextpage))
 );
 
 TRACE_EVENT(svc_stats_latency,
@@ -2169,19 +2169,19 @@ DECLARE_EVENT_CLASS(svc_deferred_event,
 	TP_ARGS(dr),
 
 	TP_STRUCT__entry(
-		__field(const void *, dr)
+		__ptr(const void *, dr)
 		__field(u32, xid)
 		__sockaddr(addr, dr->addrlen)
 	),
 
 	TP_fast_assign(
-		__entry->dr = dr;
+		__assign_ptr(dr, dr);
 		__entry->xid = be32_to_cpu(*(__be32 *)dr->args);
 		__assign_sockaddr(addr, &dr->addr, dr->addrlen);
 	),
 
-	TP_printk("addr=%pISpc dr=%p xid=0x%08x", __get_sockaddr(addr),
-		__entry->dr, __entry->xid)
+	TP_printk("addr=%pISpc dr=" TRACE_CAP_FMT " xid=0x%08x", __get_sockaddr(addr),
+		__get_cap(dr), __entry->xid)
 );
 
 #define DEFINE_SVC_DEFERRED_EVENT(name) \
@@ -2203,8 +2203,8 @@ DECLARE_EVENT_CLASS(svcsock_lifetime_class,
 	TP_ARGS(svsk, socket),
 	TP_STRUCT__entry(
 		__field(unsigned int, netns_ino)
-		__field(const void *, svsk)
-		__field(const void *, sk)
+		__ptr(const void *, svsk)
+		__ptr(const void *, sk)
 		__field(unsigned long, type)
 		__field(unsigned long, family)
 		__field(unsigned long, state)
@@ -2213,14 +2213,14 @@ DECLARE_EVENT_CLASS(svcsock_lifetime_class,
 		struct sock *sk = socket->sk;
 
 		__entry->netns_ino = sock_net(sk)->ns.inum;
-		__entry->svsk = svsk;
-		__entry->sk = sk;
+		__assign_ptr(svsk, svsk);
+		__assign_ptr(sk, sk);
 		__entry->type = socket->type;
 		__entry->family = sk->sk_family;
 		__entry->state = sk->sk_state;
 	),
-	TP_printk("svsk=%p type=%s family=%s%s",
-		__entry->svsk, show_socket_type(__entry->type),
+	TP_printk("svsk=" TRACE_CAP_FMT " type=%s family=%s%s",
+		__get_cap(svsk), show_socket_type(__entry->type),
 		rpc_show_address_family(__entry->family),
 		__entry->state == TCP_LISTEN ? " (listener)" : ""
 	)
@@ -2408,16 +2408,16 @@ DECLARE_EVENT_CLASS(cache_event,
 	TP_ARGS(cd, h),
 
 	TP_STRUCT__entry(
-		__field(const struct cache_head *, h)
+		__ptr(const struct cache_head *, h)
 		__string(name, cd->name)
 	),
 
 	TP_fast_assign(
-		__entry->h = h;
+		__assign_ptr(h, h);
 		__assign_str(name);
 	),
 
-	TP_printk("cache=%s entry=%p", __get_str(name), __entry->h)
+	TP_printk("cache=%s entry=" TRACE_CAP_FMT "", __get_str(name), __get_cap(h))
 );
 #define DEFINE_CACHE_EVENT(name) \
 	DEFINE_EVENT(cache_event, name, \
