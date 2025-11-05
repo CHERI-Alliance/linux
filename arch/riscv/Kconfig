@@ -713,6 +713,7 @@ config RISCV_ISA_ZAWRS
 config TOOLCHAIN_HAS_ZABHA
 	bool
 	default y
+	depends on !RISCV_CHERI || !CC_IS_CLANG || CLANG_VERSION >= 200000
 	depends on !64BIT || $(cc-option,-mabi=lp64 -march=rv64ima_zabha)
 	depends on !32BIT || $(cc-option,-mabi=ilp32 -march=rv32ima_zabha)
 	depends on AS_HAS_OPTION_ARCH
