@@ -278,6 +278,89 @@ void __user *io_buffer_select(struct io_kiocb *req, size_t *len,
 /* cap it at a reasonable 256, will be one page even for 4K */
 #define PEEK_MAX_IMPORT		256
 
+static int io_ring_buffers_peek_compat64(struct io_kiocb *req, struct buf_sel_arg *arg,
+				struct io_buffer_list *bl)
+{
+	struct __c64_io_uring_buf_ring *br = bl->buf_ring_compat64;
+	struct iovec *iov = arg->iovs;
+	int nr_iovs = arg->nr_iovs;
+	__u16 nr_avail, tail, head;
+	struct __c64_io_uring_buf *buf;
+
+	tail = smp_load_acquire(&br->tail);
+	head = bl->head;
+	nr_avail = min_t(__u16, tail - head, UIO_MAXIOV);
+	if (unlikely(!nr_avail))
+		return -ENOBUFS;
+
+	buf = io_ring_head_to_buf(br, head, bl->mask);
+	if (arg->max_len) {
+		u32 len = READ_ONCE(buf->len);
+		size_t needed;
+
+		if (unlikely(!len))
+			return -ENOBUFS;
+		needed = (arg->max_len + len - 1) / len;
+		needed = min_not_zero(needed, (size_t) PEEK_MAX_IMPORT);
+		if (nr_avail > needed)
+			nr_avail = needed;
+	}
+
+	/*
+	 * only alloc a bigger array if we know we have data to map, eg not
+	 * a speculative peek operation.
+	 */
+	if (arg->mode & KBUF_MODE_EXPAND && nr_avail > nr_iovs && arg->max_len) {
+		iov = kmalloc_array(nr_avail, sizeof(struct iovec), GFP_KERNEL);
+		if (unlikely(!iov))
+			return -ENOMEM;
+		if (arg->mode & KBUF_MODE_FREE)
+			kfree(arg->iovs);
+		arg->iovs = iov;
+		nr_iovs = nr_avail;
+	} else if (nr_avail < nr_iovs) {
+		nr_iovs = nr_avail;
+	}
+
+	/* set it to max, if not set, so we can use it unconditionally */
+	if (!arg->max_len)
+		arg->max_len = INT_MAX;
+
+	req->buf_index = buf->bid;
+	do {
+		u32 len = buf->len;
+
+		/* truncate end piece, if needed, for non partial buffers */
+		if (len > arg->max_len) {
+			len = arg->max_len;
+			if (!(bl->flags & IOBL_INC)) {
+				arg->partial_map = 1;
+				if (iov != arg->iovs)
+					break;
+				buf->len = len;
+			}
+		}
+
+		iov->iov_base = compat_ptr(buf->addr);
+		iov->iov_len = buf->len;
+		iov++;
+
+		arg->out_len += len;
+		arg->max_len -= len;
+		if (!arg->max_len)
+			break;
+
+		buf = io_ring_head_to_buf(br, ++head, bl->mask);
+	} while (--nr_iovs);
+
+	if (head == tail)
+		req->flags |= REQ_F_BL_EMPTY;
+
+	req->flags |= REQ_F_BUFFER_RING;
+	req->buf_list = bl;
+	return iov - arg->iovs;
+}
+
 static int io_ring_buffers_peek(struct io_kiocb *req, struct buf_sel_arg *arg,
 				struct io_buffer_list *bl)
 {
@@ -374,7 +457,10 @@ int io_buffers_select(struct io_kiocb *req, struct buf_sel_arg *arg,
 		goto out_unlock;
 
 	if (bl->flags & IOBL_BUF_RING) {
-		ret = io_ring_buffers_peek(req, arg, bl);
+		if (io_in_compat64(ctx))
+			ret = io_ring_buffers_peek_compat64(req, arg, bl);
+		else
+			ret = io_ring_buffers_peek(req, arg, bl);
 		/*
 		 * Don't recycle these buffers if we need to go through poll.
 		 * Nobody else can use them anyway, and holding on to provided
@@ -407,7 +493,11 @@ int io_buffers_peek(struct io_kiocb *req, struct buf_sel_arg *arg)
 		return -ENOENT;
 
 	if (bl->flags & IOBL_BUF_RING) {
-		ret = io_ring_buffers_peek(req, arg, bl);
+		if (io_in_compat64(ctx))
+			ret = io_ring_buffers_peek_compat64(req, arg, bl);
+		else
+			ret = io_ring_buffers_peek(req, arg, bl);
+
 		if (ret > 0)
 			req->flags |= REQ_F_BUFFERS_COMMIT;
 		return ret;
