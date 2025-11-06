@@ -409,7 +409,7 @@ static int io_register_resize_rings(struct io_ring_ctx *ctx, void __user *arg)
 {
 	struct io_uring_region_desc rd;
 	struct io_ring_ctx_rings o = { }, n = { }, *to_free = NULL;
-	size_t size, sq_array_offset;
+	size_t size, sq_array_offset, sqe_size;
 	unsigned i, tail, old_head;
 	struct io_uring_params p;
 	int ret;
@@ -421,7 +421,7 @@ static int io_register_resize_rings(struct io_ring_ctx *ctx, void __user *arg)
 	/* limited to DEFER_TASKRUN for now */
 	if (!(ctx->flags & IORING_SETUP_DEFER_TASKRUN))
 		return -EINVAL;
-	if (copy_from_user_with_ptr(&p, arg, sizeof(p)))
+	if (__c64c_copy_from_user_with_ptr(io_is_compat(ctx), io_uring_params, &p, arg))
 		return -EFAULT;
 	if (p.flags & ~RESIZE_FLAGS)
 		return -EINVAL;
@@ -435,7 +435,7 @@ static int io_register_resize_rings(struct io_ring_ctx *ctx, void __user *arg)
 
 	/* nothing to do, but copy params back */
 	if (p.sq_entries == ctx->sq_entries && p.cq_entries == ctx->cq_entries) {
-		if (copy_to_user_with_ptr(arg, &p, sizeof(p)))
+		if (__c64c_copy_to_user_with_ptr(io_is_compat(ctx), io_uring_params, arg, &p))
 			return -EFAULT;
 		return 0;
 	}
@@ -471,15 +471,16 @@ static int io_register_resize_rings(struct io_ring_ctx *ctx, void __user *arg)
 	WRITE_ONCE(n.rings->sq_ring_entries, p.sq_entries);
 	WRITE_ONCE(n.rings->cq_ring_entries, p.cq_entries);
 
-	if (copy_to_user_with_ptr(arg, &p, sizeof(p))) {
+	if (__c64c_copy_to_user_with_ptr(io_is_compat(ctx), io_uring_params, arg, &p)) {
 		io_register_free_rings(ctx, &p, &n);
 		return -EFAULT;
 	}
 
+	sqe_size = __c64c_sizeof(io_is_compat(ctx), io_uring_sqe);
 	if (p.flags & IORING_SETUP_SQE128)
-		size = array_size(2 * sizeof(struct io_uring_sqe), p.sq_entries);
+		size = array_size(2 * sqe_size, p.sq_entries);
 	else
-		size = array_size(sizeof(struct io_uring_sqe), p.sq_entries);
+		size = array_size(sqe_size, p.sq_entries);
 	if (size == SIZE_MAX) {
 		io_register_free_rings(ctx, &p, &n);
 		return -EOVERFLOW;
@@ -539,7 +540,7 @@ static int io_register_resize_rings(struct io_ring_ctx *ctx, void __user *arg)
 		unsigned dst_head = i & (p.sq_entries - 1);
 
 		if (io_in_compat64(ctx))
-			n.sq_sqes[dst_head] = o.sq_sqes[src_head];
+			n.sq_sqes_compat[dst_head] = o.sq_sqes_compat[src_head];
 		else
 			n.sq_sqes[dst_head] = o.sq_sqes[src_head];
 	}
