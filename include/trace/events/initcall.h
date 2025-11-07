@@ -31,18 +31,14 @@ TRACE_EVENT(initcall_start,
 	TP_ARGS(func),
 
 	TP_STRUCT__entry(
-		/*
-		 * Use field_struct to avoid is_signed_type()
-		 * comparison of a function pointer
-		 */
-		__field_struct(initcall_t, func)
+		__ptr(initcall_t, func)
 	),
 
 	TP_fast_assign(
-		__entry->func = func;
+		__assign_ptr(func, func);
 	),
 
-	TP_printk("func=%pS", __entry->func)
+	TP_printk("func=%pS", __get_ptr(func))
 );
 
 TRACE_EVENT(initcall_finish,
@@ -52,20 +48,16 @@ TRACE_EVENT(initcall_finish,
 	TP_ARGS(func, ret),
 
 	TP_STRUCT__entry(
-		/*
-		 * Use field_struct to avoid is_signed_type()
-		 * comparison of a function pointer
-		 */
-		__field_struct(initcall_t,	func)
+		__ptr(initcall_t,		func)
 		__field(int,			ret)
 	),
 
 	TP_fast_assign(
-		__entry->func = func;
+		__assign_ptr(func, func);
 		__entry->ret = ret;
 	),
 
-	TP_printk("func=%pS ret=%d", __entry->func, __entry->ret)
+	TP_printk("func=%pS ret=%d", __get_ptr(func), __entry->ret)
 );
 
 #endif /* if !defined(_TRACE_GPIO_H) || defined(TRACE_HEADER_MULTI_READ) */
