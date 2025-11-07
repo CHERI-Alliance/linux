@@ -32,6 +32,25 @@ struct io_provide_buf {
 	__u16				bid;
 };
 
+static bool io_kbuf_inc_commit_compat64(struct io_buffer_list *bl, int len)
+{
+	while (len) {
+		struct __c64_io_uring_buf *buf;
+		u32 this_len;
+
+		buf = io_ring_head_to_buf(bl->buf_ring_compat64, bl->head, bl->mask);
+		this_len = min_t(int, len, buf->len);
+		buf->len -= this_len;
+		if (buf->len) {
+			buf->addr += this_len;
+			return false;
+		}
+		bl->head++;
+		len -= this_len;
+	}
+	return true;
+}
+
 static bool io_kbuf_inc_commit(struct io_buffer_list *bl, int len)
 {
 	while (len) {
@@ -61,8 +80,12 @@ bool io_kbuf_commit(struct io_kiocb *req,
 
 	if (unlikely(len < 0))
 		return true;
-	if (bl->flags & IOBL_INC)
-		return io_kbuf_inc_commit(bl, len);
+	if (bl->flags & IOBL_INC) {
+		if (io_in_compat64(req->ctx))
+			return io_kbuf_inc_commit_compat64(bl, len);
+		else
+			return io_kbuf_inc_commit(bl, len);
+	}
 	bl->head += nr;
 	return true;
 }
