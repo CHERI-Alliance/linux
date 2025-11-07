@@ -17,10 +17,6 @@
 #include "kbuf.h"
 #include "memmap.h"
 
-#define IO_BUFFER_LIST_BUF_PER_PAGE (PAGE_SIZE / sizeof(struct io_uring_buf))
-#define IO_BUFFER_LIST_COMPAT_BUF_PER_PAGE (PAGE_SIZE / sizeof(struct compat_io_uring_buf))
-
-
 /* BIDs are addressed by a 16-bit field in a CQE */
 #define MAX_BIDS_PER_BGID (1 << 16)
 
@@ -159,25 +155,21 @@ static void __user *io_ring_buffer_select_compat64(struct io_kiocb *req, size_t 
 						   struct io_buffer_list *bl,
 						   unsigned int issue_flags)
 {
-	struct compat_io_uring_buf_ring *br = bl->buf_ring_compat;
-	struct compat_io_uring_buf *buf;
-	__u16 head = bl->head;
+	struct __c64_io_uring_buf_ring *br = bl->buf_ring_compat64;
+	struct __c64_io_uring_buf *buf;
+	__u16 tail, head = bl->head;
 
-	if (unlikely(smp_load_acquire(&br->tail) == head))
+	tail = smp_load_acquire(&br->tail);
+	if (unlikely(tail == head))
 		return NULL;
 
-	head &= bl->mask;
-	if (head < IO_BUFFER_LIST_COMPAT_BUF_PER_PAGE) {
-		buf = &br->bufs[head];
-	} else {
-		int off = head & (IO_BUFFER_LIST_COMPAT_BUF_PER_PAGE - 1);
-		int index = head / IO_BUFFER_LIST_COMPAT_BUF_PER_PAGE;
-		buf = page_address(bl->buf_pages[index]);
-		buf += off;
-	}
+	if (head + 1 == tail)
+		req->flags |= REQ_F_BL_EMPTY;
+
+	buf = io_ring_head_to_buf(br, head, bl->mask);
 	if (*len == 0 || *len > buf->len)
 		*len = buf->len;
-	req->flags |= REQ_F_BUFFER_RING;
+	req->flags |= REQ_F_BUFFER_RING | REQ_F_BUFFERS_COMMIT;
 	req->buf_list = bl;
 	req->buf_index = buf->bid;
 
