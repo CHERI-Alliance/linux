@@ -3076,6 +3076,10 @@ static noinline int do_init_module(struct module *mod)
 		mod->mem[type].size = 0;
 	}
 
+	if (mod->init)
+		/* Mark that we had a init function, but invalidate the capability  */
+		mod->init = __c_fakep(1);
+
 #ifdef CONFIG_DEBUG_INFO_BTF_MODULES
 	/* .BTF is not SHF_ALLOC and will get removed, so sanitize pointers */
 	mod->btf_data = NULL;
