@@ -456,7 +456,7 @@ static int drm_atomic_crtc_set_property(struct drm_crtc *crtc,
 		state->color_mgmt_changed |= replaced;
 		return ret;
 	} else if (property == config->prop_out_fence_ptr) {
-#ifdef __CHERI__
+#ifdef CONFIG_CHERI_PURECAP_UABI
 		/* FIXCHERI: Need to get the provenance from userspace. */
 		s32 __user *fence_ptr = cheri_build_user_cap(val, sizeof(s32), CHERI_PERMS_READ | CHERI_PERMS_WRITE);
 		WARN_ONCE(1, "CHERI: %s: Need to fabricate user capability", __func__);
@@ -928,7 +928,7 @@ static int drm_atomic_connector_set_property(struct drm_connector *connector,
 			drm_framebuffer_put(fb);
 		return ret;
 	} else if (property == config->writeback_out_fence_ptr_property) {
-#ifdef __CHERI__
+#ifdef CONFIG_CHERI_PURECAP_UABI
 		/* FIXCHERI: Need to get the provenance from userspace. */
 		s32 __user *fence_ptr = cheri_build_user_cap(val, sizeof(s32), CHERI_PERMS_READ | CHERI_PERMS_WRITE);
 		WARN_ONCE(1, "CHERI: %s: Need to fabricate user capability", __func__);

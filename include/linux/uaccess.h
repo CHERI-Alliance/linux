@@ -863,7 +863,7 @@ static inline unsigned long user_access_save(void) { return 0UL; }
 static inline void user_access_restore(unsigned long flags) { }
 #endif /* !user_access_begin */
 
-#ifndef __CHERI__
+#if !__has_feature(capabilities)
 #ifndef unsafe_get_user_ptr
 #define unsafe_get_user_ptr(x,p,e) unsafe_get_user(x,p,e)
 #endif
@@ -876,7 +876,7 @@ static inline void user_access_restore(unsigned long flags) { }
 #ifndef unsafe_copy_from_user_with_ptr
 #define unsafe_copy_from_user_with_ptr(d,s,l,e) unsafe_copy_from_user(d,s,l,e)
 #endif
-#endif /* __CHERI__ */
+#endif /* __has_feature(capabilities) */
 #ifndef user_write_access_begin
 #define user_write_access_begin user_access_begin
 #define user_write_access_end user_access_end
@@ -1111,7 +1111,7 @@ void __noreturn usercopy_abort(const char *name, const char *detail,
 			       unsigned long len);
 #endif
 
-#ifndef __CHERI__
+#if !__has_feature(capabilities)
 #ifndef __get_user_ptr
 #define __get_user_ptr(x,y) __get_user(x,y)
 #endif

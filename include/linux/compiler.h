@@ -163,7 +163,7 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
 
 #ifndef OPTIMIZER_HIDE_VAR
 /* Make the optimizer believe the variable can be manipulated arbitrarily. */
-#ifdef __CHERI__
+#if __has_feature(capabilities)
 #define OPTIMIZER_HIDE_VAR(var)						\
 do {									\
 	if (sizeof(var) > sizeof(unsigned long)) {			\
@@ -227,7 +227,7 @@ do {									\
 #define __must_be_byte_array(a)	__BUILD_BUG_ON_ZERO_MSG(!__is_byte_array(a), \
 							"must be byte array")
 
-#ifndef __CHERI__
+#if !__has_feature(capabilities)
 typedef long __intcap_t;
 typedef unsigned long __uintcap_t;
 #endif
