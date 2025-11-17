@@ -36,11 +36,7 @@ struct rtentry {
 	unsigned short	rt_flags;
 	short		rt_pad2;
 	unsigned long	rt_pad3;
-#if !__has_feature(capabilities)
-	void		*rt_pad4;
-#else
 	unsigned long	rt_pad4;	// it is actually 8 bytes
-#endif
 	short		rt_metric;	/* +1 for binary compatibility!	*/
 	char __user	*rt_dev;	/* forcing the device at add	*/
 	unsigned long	rt_mtu;		/* per route MTU/Window 	*/

@@ -2748,7 +2748,7 @@ char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
 
 #undef update_buf_single
 }
-#endif /* __CHERI__ */
+#endif /* __has_feature(capabilities) */
 
 struct fmt {
 	const char *str;
