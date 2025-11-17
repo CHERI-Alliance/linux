@@ -459,11 +459,11 @@ static void v4l_print_buffer(const void *arg, bool write_only)
 			printk(KERN_DEBUG
 				"plane %d: bytesused=%d, data_offset=0x%08x, offset/userptr=0x%lx, length=%d\n",
 				i, plane->bytesused, plane->data_offset,
-				plane->m.userptr, plane->length);
+				(unsigned long)plane->m.userptr, plane->length);
 		}
 	} else {
 		pr_cont(", bytesused=%d, offset/userptr=0x%lx, length=%d\n",
-			p->bytesused, p->m.userptr, p->length);
+			p->bytesused, (unsigned long)p->m.userptr, p->length);
 	}
 
 	printk(KERN_DEBUG "timecode=%02d:%02d:%02d type=%d, flags=0x%08x, frames=%d, userbits=0x%08x\n",

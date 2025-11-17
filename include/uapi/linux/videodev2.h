@@ -1121,7 +1121,7 @@ struct v4l2_plane {
 	__u32			length;
 	union {
 		__u32		mem_offset;
-		unsigned long	userptr;
+		__uptr		userptr;
 		__s32		fd;
 	} m;
 	__u32			data_offset;
@@ -1181,7 +1181,7 @@ struct v4l2_buffer {
 	__u32			memory;
 	union {
 		__u32           offset;
-		unsigned long   userptr;
+		__uptr          userptr;
 		struct v4l2_plane *planes;
 		__s32		fd;
 	} m;
@@ -1859,11 +1859,6 @@ struct v4l2_control {
 	__s32		     value;
 };
 
-#if defined(__ARCH_WANT_PURECAP) || defined(__CHERI_PURE_CAPABILITY__)
-#define __v4l2_ext_control_pack
-#else
-#define __v4l2_ext_control_pack __attribute__ ((packed))
-#endif
 struct v4l2_ext_control {
 	__u32 id;
 	__u32 size;
@@ -1904,8 +1899,8 @@ struct v4l2_ext_control {
 		struct v4l2_ctrl_hdr10_cll_info __user *p_hdr10_cll_info;
 		struct v4l2_ctrl_hdr10_mastering_display __user *p_hdr10_mastering_display;
 		void __user *ptr;
-	} __v4l2_ext_control_pack;
-} __v4l2_ext_control_pack;
+	} __PACKED_IF_NOT_CHERI;
+} __PACKED_IF_NOT_CHERI;
 
 struct v4l2_ext_controls {
 	union {

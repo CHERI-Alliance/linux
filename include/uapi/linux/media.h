@@ -364,7 +364,7 @@ struct media_v2_topology {
 	__u32 num_links;
 	__u32 reserved4;
 	__u64ptr ptr_links;
-};
+} __PACKED_IF_NOT_CHERI;
 
 /* ioctls */
 

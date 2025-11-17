@@ -51,9 +51,13 @@ typedef __kernel_intptr_t __sptr;
 #if defined(__ARCH_WANT_PURECAP) || defined(__CHERI_PURE_CAPABILITY__)
 typedef __kernel_uintptr_t __u64ptr;
 typedef __kernel_intptr_t __s64ptr;
+#define __PACKED_IF_NOT_CHERI
+#define __CHERI_POINTER_ALIGN __attribute__((aligned(__SIZEOF_UINTCAP__)))
 #else
 typedef __u64 __u64ptr;
 typedef __s64 __s64ptr;
+#define __PACKED_IF_NOT_CHERI __attribute__((packed))
+#define __CHERI_POINTER_ALIGN
 #endif
 
 /* At least 128-bit and large enough for a pointer. */
