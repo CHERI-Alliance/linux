@@ -2623,7 +2623,7 @@ char *pointer(const char *fmt, char *buf, char *end, void *ptr,
 	}
 }
 
-#ifdef __CHERI__
+#if __has_feature(capabilities)
 /*
  * Support for printing capabilities with %[#]lp[x] format.
  * It stands slightly in contradiction to kernel extensions
@@ -2821,7 +2821,7 @@ char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
 
 #undef update_buf_single
 }
-#endif /* __CHERI__ */
+#endif /* __has_feature(capabilities) */
 
 struct fmt {
 	const char *str;
@@ -3153,7 +3153,7 @@ int vsnprintf(char *buf, size_t size, const char *fmt_str, va_list args)
 			continue;
 
 		case FORMAT_STATE_PTR:
-#ifdef __CHERI__
+#if __has_feature(capabilities)
 			if (fmt.size == sizeof(long) || IS_ENABLED(CONFIG_CHERI_KERNEL))
 				str = capability(fmt.str, str, end,
 						 va_arg(args, void * __capability),
@@ -3466,7 +3466,7 @@ int vbin_printf(u32 *bin_buf, size_t size, const char *fmt_str, va_list args)
 					save_arg_p(void *);
 					break;
 				}
-#ifdef __CHERI__
+#if __has_feature(capabilities)
 				if (fmt.size == sizeof(long))
 					str = capability(fmt.str, str, end,
 							 va_arg(args, void * __capability),

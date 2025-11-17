@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
-#ifdef __CHERI__
+#if __has_feature(capabilities)
 
 #include <linux/bug.h>
 #include <linux/cheri.h>
@@ -72,4 +72,4 @@ bool cheri_check_cap(const void __user *cap, size_t len,
 	return true;
 }
 
-#endif /* __CHERI__ */
+#endif /* __has_feature(capabilities) */
