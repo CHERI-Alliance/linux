@@ -8,7 +8,7 @@
 #define __capability
 #endif
 
-#ifdef __CHERI__
+#if __has_feature(capabilities)
 
 #ifndef __CHECKER__
 
@@ -192,7 +192,7 @@ extern cheri_perms_t cheri_unsupported_perms;	/* Permission bits not supported b
 #define cheri_sentry_create(__c) (__c)
 #define cheri_restrict_len(C, L) (L)
 
-#endif /* __CHERI__ */
+#endif /* __has_feature(capabilities) */
 
 /*
  * Macros to correctly cast between unsigned long (aka ptraddr_t), void *
@@ -229,7 +229,7 @@ __c_pa(const volatile void *ptr)
 static __always_inline ptraddr_t
 __c_pa_u(const volatile void __user *ptr)
 {
-#ifdef __CHERI__
+#if __has_feature(capabilities)
 	return (ptraddr_t __force)(__kernel_uintptr_t)ptr;
 #else
 	return (ptraddr_t __force)ptr;

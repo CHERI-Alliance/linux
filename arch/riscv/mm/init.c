@@ -37,7 +37,7 @@
 
 #include "../kernel/head.h"
 
-#ifdef __CHERI__
+#if __has_feature(capabilities)
 #define __PI __attribute__((nocaprelocs))
 #else
 #define __PI
