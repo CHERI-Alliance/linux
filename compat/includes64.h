@@ -1,7 +1,6 @@
 #include <uapi/asm-generic/siginfo.h>
 #include <uapi/asm-generic/signal.h>
 #include <uapi/asm/bpf_perf_event.h>
-#include <uapi/asm/elf.h>
 #include <uapi/asm/ptrace.h>
 #include <uapi/asm/sigcontext.h>
 #include <uapi/asm/ucontext.h>
