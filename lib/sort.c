@@ -36,19 +36,27 @@ static bool is_aligned(const void *base, size_t size, unsigned char align)
 	(void)base;
 #ifndef CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS
 	lsbits |= (unsigned char)(uintptr_t)base;
+#elif defined(CONFIG_CHERI_KERNEL)
+	/* For CHERI, if the align size is a capability size, then we have to
+	 * check the base is aligned as well, as we will be copying using
+	 * capability load/store
+	 */
+	if (align >= __SIZEOF_POINTER__)
+		lsbits |= (unsigned char)(uintptr_t)base;
 #endif
 	return (lsbits & (align - 1)) == 0;
 }
 
 #ifdef CONFIG_CHERI_KERNEL
-static void swap_words_128(void *a, void *b, size_t n)
+static void swap_words_cap(void *a, void *b, size_t n)
 {
 	do {
-		uintptr_t t = *(uintptr_t *)(a + (n -= 16));
+		uintptr_t t = *(uintptr_t *)(a + (n -= __SIZEOF_POINTER__));
 		*(uintptr_t *)(a + n) = *(uintptr_t *)(b + n);
 		*(uintptr_t *)(b + n) = t;
 	} while (n);
 }
+#define swap_words_128 swap_words_cap
 
 #else
 
@@ -95,6 +103,9 @@ static void swap_words_32(void *a, void *b, size_t n)
  * but it's possible to have 64-bit loads without 64-bit pointers (e.g.
  * x32 ABI).  Are there any cases the kernel needs to worry about?
  */
+#if defined(CONFIG_CHERI_KERNEL) && (__SIZEOF_POINTER__ == 8)
+#define swap_words_64 swap_words_cap
+#else
 static void swap_words_64(void *a, void *b, size_t n)
 {
 	do {
@@ -114,6 +125,7 @@ static void swap_words_64(void *a, void *b, size_t n)
 #endif
 	} while (n);
 }
+#endif
 
 /**
  * swap_bytes - swap two elements a byte at a time
