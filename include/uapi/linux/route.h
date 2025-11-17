@@ -36,7 +36,7 @@ struct rtentry {
 	unsigned short	rt_flags;
 	short		rt_pad2;
 	unsigned long	rt_pad3;
-#ifndef __CHERI__
+#if !__has_feature(capabilities)
 	void		*rt_pad4;
 #else
 	unsigned long	rt_pad4;	// it is actually 8 bytes
