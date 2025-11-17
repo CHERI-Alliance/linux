@@ -105,7 +105,7 @@ struct drm_clip_rect {
  */
 struct drm_drawable_info {
 	unsigned int num_rects;
-	struct drm_clip_rect *rects;
+	struct drm_clip_rect __user *rects;
 };
 
 /*
@@ -210,7 +210,7 @@ enum drm_map_flags {
 
 struct drm_ctx_priv_map {
 	unsigned int ctx_id;	 /**< Context requesting private mapping */
-	void *handle;		 /**< Handle of map */
+	void __user *handle;	 /**< Handle of map */
 };
 
 /*
@@ -224,7 +224,7 @@ struct drm_map {
 	unsigned long size;	 /**< Requested physical size (bytes) */
 	enum drm_map_type type;	 /**< Type of memory to map */
 	enum drm_map_flags flags;	 /**< Flags */
-	void *handle;		 /**< User-space: "Handle" to pass to mmap() */
+	void __user *handle;	 /**< User-space: "Handle" to pass to mmap() */
 				 /**< Kernel-space: kernel-virtual address */
 	int mtrr;		 /**< MTRR slot used */
 	/*   Private data */
