@@ -12,7 +12,9 @@ struct xt_rateest_target_info {
 
 	/* Used internally by the kernel */
 	union {
+		/// UAPI: NoConvert: Kernel only
 		struct xt_rateest *est;
+		/// UAPI: NoConvert: Kernel only
 		__uptr __est;
 	} __attribute__((aligned(8)));
 };

@@ -25,7 +25,9 @@ struct xt_ct_target_info {
 
 	/* Used internally by the kernel */
 	union {
+		/// UAPI: NoConvert: Kernel only
 		struct nf_conn	*ct;
+		/// UAPI: NoConvert: Kernel only
 		__uptr __ct;
 	}  __attribute__((aligned(8)));
 };
@@ -40,7 +42,9 @@ struct xt_ct_target_info_v1 {
 
 	/* Used internally by the kernel */
 	union {
+		/// UAPI: NoConvert: Kernel only
 		struct nf_conn	*ct;
+		/// UAPI: NoConvert: Kernel only
 		__uptr __ct;
 	} __attribute__((aligned(8)));
 };

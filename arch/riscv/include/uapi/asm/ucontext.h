@@ -25,6 +25,7 @@
 struct ucontext {
 	unsigned long	  uc_flags;
 #if __SIZEOF_POINTER__ > __SIZEOF_LONG__
+	/// UAPI: NoConvert: Does not exist in compat version
 	unsigned long	  _uc_pad;
 #endif
 	struct ucontext	 *uc_link;
@@ -52,6 +53,7 @@ struct ucontext {
 	 * prioritizing this.
 	 */
 #if __SIZEOF_POINTER__ == __SIZEOF_LONG__
+	/// UAPI: NoConvert: Does not exist in compat version
 	unsigned long _uc_pad2;
 #endif
 	struct sigcontext uc_mcontext;

@@ -36,7 +36,7 @@
 		struct __struct_group_tag(TAG) { MEMBERS } ATTRS NAME; \
 	} ATTRS
 
-#ifdef __cplusplus
+#if defined(__cplusplus) || defined(__clang_analyzer__)
 /* sizeof(struct{}) is 1 in C++, not 0, can't use C version of the macro. */
 #define __DECLARE_FLEX_ARRAY(T, member)	\
 	T member[0]

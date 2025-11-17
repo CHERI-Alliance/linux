@@ -10,7 +10,9 @@ struct xt_tee_tginfo {
 
 	/* used internally by the kernel */
 	union {
+		/// UAPI: NoConvert: Kernel only
 		struct xt_tee_priv *priv;
+		/// UAPI: NoConvert: Kernel only
 		__uptr __priv;
 	} __attribute__((aligned(8)));
 };

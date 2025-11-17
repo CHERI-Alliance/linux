@@ -335,7 +335,7 @@ struct floppy_raw_cmd {
 #define FD_RAW_DISK_CHANGE 4 /* out: disk change flag was set */
 #define FD_RAW_INTR 8    /* wait for an interrupt */
 #define FD_RAW_SPIN 0x10 /* spin up the disk for this command */
-#define FD_RAW_NO_MOTOR_AFTER 0x20 /* switch the motor off after command
+#define FD_RAW_NO_MOTOR_AFTER 0x20 /* switch the motor off after command \
 				    * completion */
 #define FD_RAW_NEED_DISK 0x40  /* this command needs a disk to be present */
 #define FD_RAW_NEED_SEEK 0x80  /* this command uses an implied seek (soft) */
@@ -344,7 +344,7 @@ struct floppy_raw_cmd {
 #define FD_RAW_MORE 0x100  /* more records follow */
 #define FD_RAW_STOP_IF_FAILURE 0x200 /* stop if we encounter a failure */
 #define FD_RAW_STOP_IF_SUCCESS 0x400 /* stop if command successful */
-#define FD_RAW_SOFTFAILURE 0x800 /* consider the return value for failure
+#define FD_RAW_SOFTFAILURE 0x800 /* consider the return value for failure \
 				  * detection too */
 
 /* more "out" flags */

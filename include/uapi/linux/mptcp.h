@@ -82,15 +82,22 @@ struct mptcp_subflow_data {
 
 struct mptcp_subflow_addrs {
 	union {
+		/// UAPI: NoConvert: Convert ss_local instead
 		__kernel_sa_family_t sa_family;
+		/// UAPI: NoConvert: Convert ss_local instead
 		struct sockaddr sa_local;
+		/// UAPI: NoConvert: Convert ss_local instead
 		struct sockaddr_in sin_local;
+		/// UAPI: NoConvert: Convert ss_local instead
 		struct sockaddr_in6 sin6_local;
 		struct __kernel_sockaddr_storage ss_local;
 	};
 	union {
+		/// UAPI: NoConvert: Convert ss_remote instead
 		struct sockaddr sa_remote;
+		/// UAPI: NoConvert: Convert ss_remote instead
 		struct sockaddr_in sin_remote;
+		/// UAPI: NoConvert: Convert ss_remote instead
 		struct sockaddr_in6 sin6_remote;
 		struct __kernel_sockaddr_storage ss_remote;
 	};

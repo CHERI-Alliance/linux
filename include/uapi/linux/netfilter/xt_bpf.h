@@ -17,7 +17,9 @@ struct xt_bpf_info {
 
 	/* only used in the kernel */
 	union {
+		/// UAPI: NoConvert: Kernel only
 		struct bpf_prog *filter;
+		/// UAPI: NoConvert: Kernel only
 		__uptr __filter;
 	} __attribute__((aligned(8)));
 };
@@ -40,7 +42,9 @@ struct xt_bpf_info_v1 {
 
 	/* only used in the kernel */
 	union {
+		/// UAPI: NoConvert: Kernel only
 		struct bpf_prog *filter;
+		/// UAPI: NoConvert: Kernel only
 		__uptr __filter;
 	} __attribute__((aligned(8)));
 };

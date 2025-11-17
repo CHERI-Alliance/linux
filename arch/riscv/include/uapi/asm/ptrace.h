@@ -69,6 +69,7 @@ struct user_regs_struct {
 struct user_cap {
 	__uptr val;
 	__u8 tag;
+	/// UAPI: NoConvert: Padding
 	__u8 _pad[sizeof(__uptr) - 1];
 };
 

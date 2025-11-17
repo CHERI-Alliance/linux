@@ -211,6 +211,7 @@ struct drm_xe_ext_set_property {
 
 			/** @reserved: Reserved */
 		};
+		/// UAPI: NoConvert: Padding
 		__u64 reserved[3];
 	};
 };
@@ -1383,6 +1384,7 @@ struct drm_xe_sync {
 
 	union {
 		/** @handle: Handle for the object */
+		/// UAPI: NoConvert: Only convert as an u64
 		__u32 handle;
 
 		/**
@@ -1393,7 +1395,13 @@ struct drm_xe_sync {
 		 * mapped when the user fence is signalled. Must be qword
 		 * aligned.
 		 */
+#ifdef __KERNEL__
+		/// UAPI: NoConvert: Only convert as an u64
+		__u64ptr __c64_addr;
+		__u64 __c64_copy;
+#else
 		__u64ptr addr;
+#endif
 	};
 
 	/**

@@ -21,7 +21,9 @@ struct xt_rateinfo {
 	__u32 credit_cap, cost;
 
 	union {
+		/// UAPI: NoConvert: Kernel only
 		struct xt_limit_priv *master;
+		/// UAPI: NoConvert: Kernel only
 		__uptr __master;
 	};
 };

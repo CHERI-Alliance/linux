@@ -134,7 +134,7 @@ struct opal_mbr_done {
 
 struct opal_shadow_mbr {
 	struct opal_key key;
-	const __u64ptr data;
+	__u64ptr data;
 	__u64 offset;
 	__u64 size;
 };
@@ -148,8 +148,8 @@ enum opal_table_ops {
 #define OPAL_UID_LENGTH 8
 struct opal_read_write_table {
 	struct opal_key key;
-	const __u64ptr data;
-	const __u8 table_uid[OPAL_UID_LENGTH];
+	__u64ptr data;
+	__u8 table_uid[OPAL_UID_LENGTH];
 	__u64 offset;
 	__u64 size;
 #define OPAL_TABLE_READ (1 << OPAL_READ_TABLE)

@@ -903,6 +903,7 @@ struct dtv_property {
 			__u8 data[32];
 			__u32 len;
 			__u32 reserved1[3];
+			/// UAPI: NoConvert: Unused in kernel
 			void *reserved2;
 		} buffer;
 	} u;

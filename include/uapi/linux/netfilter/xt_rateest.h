@@ -33,11 +33,15 @@ struct xt_rateest_match_info {
 
 	/* Used internally by the kernel */
 	union {
+		/// UAPI: NoConvert: Kernel only
 		struct xt_rateest *est1;
+		/// UAPI: NoConvert: Kernel only
 		__uptr __est1;
 	} __attribute__((aligned(8)));
 	union {
+		/// UAPI: NoConvert: Kernel only
 		struct xt_rateest *est2;
+		/// UAPI: NoConvert: Kernel only
 		__uptr __est2;
 	} __attribute__((aligned(8)));
 };

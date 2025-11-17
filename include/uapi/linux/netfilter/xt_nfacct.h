@@ -9,7 +9,9 @@ struct nf_acct;
 struct xt_nfacct_match_info {
 	char		name[NFACCT_NAME_MAX];
 	union {
+		/// UAPI: NoConvert: Kernel only
 		struct nf_acct *nfacct;
+		/// UAPI: NoConvert: Kernel only
 		__uptr __nfacct;
 	};
 };
@@ -17,7 +19,9 @@ struct xt_nfacct_match_info {
 struct xt_nfacct_match_info_v1 {
 	char		name[NFACCT_NAME_MAX];
 	union {
+		/// UAPI: NoConvert: Kernel only
 		struct nf_acct *nfacct;
+		/// UAPI: NoConvert: Kernel only
 		__uptr __nfacct;
 	} __attribute__((aligned(8)));
 };

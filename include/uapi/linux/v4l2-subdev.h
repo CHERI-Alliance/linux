@@ -240,6 +240,7 @@ struct v4l2_subdev_routing {
 	__u32 len_routes;
 	__u64ptr routes;
 	__u32 num_routes;
+	/// UAPI: NoConvert: Padding
 	__u32 reserved[13 - sizeof(__u64ptr) / 4];
 };
 

@@ -550,10 +550,12 @@ struct __snd_pcm_sync_ptr {
 	unsigned int flags;
 	union {
 		struct __snd_pcm_mmap_status status;
+		/// UAPI: NoConvert: Padding
 		unsigned char reserved[64];
 	} s;
 	union {
 		struct __snd_pcm_mmap_control control;
+		/// UAPI: NoConvert: Padding
 		unsigned char reserved[64];
 	} c;
 };

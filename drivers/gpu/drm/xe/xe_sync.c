@@ -135,7 +135,7 @@ int xe_sync_entry_parse(struct xe_device *xe, struct xe_file *xef,
 		if (XE_IOCTL_DBG(xe, in_lr_mode && signal))
 			return -EOPNOTSUPP;
 
-		if (XE_IOCTL_DBG(xe, upper_32_bits(sync_in.addr)))
+		if (XE_IOCTL_DBG(xe, upper_32_bits(sync_in.__c64_copy)))
 			return -EINVAL;
 
 		sync->syncobj = drm_syncobj_find(xef->drm, sync_in.handle);
@@ -153,7 +153,7 @@ int xe_sync_entry_parse(struct xe_device *xe, struct xe_file *xef,
 		if (XE_IOCTL_DBG(xe, in_lr_mode && signal))
 			return -EOPNOTSUPP;
 
-		if (XE_IOCTL_DBG(xe, upper_32_bits(sync_in.addr)))
+		if (XE_IOCTL_DBG(xe, upper_32_bits(sync_in.__c64_copy)))
 			return -EINVAL;
 
 		if (XE_IOCTL_DBG(xe, sync_in.timeline_value == 0))
@@ -186,14 +186,18 @@ int xe_sync_entry_parse(struct xe_device *xe, struct xe_file *xef,
 		if (XE_IOCTL_DBG(xe, !signal))
 			return -EOPNOTSUPP;
 
-		if (XE_IOCTL_DBG(xe, sync_in.addr & 0x7))
+		if (XE_IOCTL_DBG(xe, sync_in.__c64_copy & 0x7))
 			return -EINVAL;
 
 		if (exec) {
-			sync->addr = sync_in.addr;
+			sync->addr = __c_fakeu(sync_in.__c64_copy);
 		} else {
-			sync->ufence = user_fence_create(xe, sync_in.addr,
-							 sync_in.timeline_value);
+			if (in_compat_syscall())
+				sync->ufence = user_fence_create(xe, (user_uintptr_t)compat_ptr(sync_in.__c64_copy),
+								 sync_in.timeline_value);
+			else
+				sync->ufence = user_fence_create(xe, sync_in.__c64_addr,
+								 sync_in.timeline_value);
 			if (XE_IOCTL_DBG(xe, IS_ERR(sync->ufence)))
 				return PTR_ERR(sync->ufence);
 		}

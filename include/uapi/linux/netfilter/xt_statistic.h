@@ -32,7 +32,9 @@ struct xt_statistic_info {
 		} nth;
 	} u;
 	union {
+		/// UAPI: NoConvert: Kernel only
 		struct xt_statistic_priv *master;
+		/// UAPI: NoConvert: Kernel only
 		__uptr __master;
 	} __attribute__((aligned(8)));
 };
