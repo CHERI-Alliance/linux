@@ -11,6 +11,14 @@
 #define __has_builtin(x) (0)
 #endif
 
+/*
+ * __has_feature is supported in Clang and GCC >= 14.
+ * For older GCC versions, define __has_feature manually.
+ */
+#ifndef __has_feature
+#define __has_feature(x) 0
+#endif
+
 #ifndef __ASSEMBLY__
 
 /*
