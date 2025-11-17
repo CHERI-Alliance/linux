@@ -544,7 +544,7 @@ struct ftrace_likely_data {
 			 default: (x)))
 
 /* Is this type a native word size -- useful for atomic operations */
-#ifdef __CHERI__
+#if __has_feature(capabilities)
 #define __native_word(t) \
 	(sizeof(t) == sizeof(char) || sizeof(t) == sizeof(short) || \
 	 sizeof(t) == sizeof(int) || sizeof(t) == sizeof(long) || \

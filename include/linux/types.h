@@ -66,7 +66,7 @@ typedef __kernel_intptr_t	user_intptr_t;
 
 typedef __kernel_ptraddr_t	ptraddr_t;
 
-#ifdef __CHERI__
+#if __has_feature(capabilities)
 typedef __uintcap_t		uintcap_t;
 #endif
 
