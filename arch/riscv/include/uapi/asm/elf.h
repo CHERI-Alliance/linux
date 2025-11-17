@@ -16,7 +16,7 @@
 
 /* ELF register definitions */
 typedef __uptr elf_greg_t;
-#ifdef __CHERI_PURE_CAPABILITY__
+#if defined(__ARCH_WANT_PURECAP) || defined(__CHERI_PURE_CAPABILITY__)
 /* Add one for the tags bitmap. */
 #define __ELF_NGREG ((sizeof(struct user_regs_struct) / sizeof(elf_greg_t)))
 #define ELF_NGREG (1 + __ELF_NGREG)	/* For the tags bitmap */

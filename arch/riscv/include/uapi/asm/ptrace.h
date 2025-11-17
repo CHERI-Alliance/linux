@@ -60,7 +60,8 @@ struct user_regs_struct {
 	__kernel_register_t t4;
 	__kernel_register_t t5;
 	__kernel_register_t t6;
-#ifdef __CHERI_PURE_CAPABILITY__
+#if defined(__ARCH_WANT_PURECAP) || defined(__CHERI_PURE_CAPABILITY__)
+	/// UAPI: NoConvert: Does not exist in compat version
 	__kernel_register_t ddc;
 #endif
 };
