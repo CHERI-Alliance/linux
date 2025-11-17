@@ -70,6 +70,13 @@ typedef u32 compat_caddr_t;
 typedef u32 compat_old_sigset_t;
 #endif
 
+typedef u32 __c32_ulong;
+typedef u32 __c32_uptr;
+typedef u64 __c32_ptr64;
+
+typedef unsigned long __c64_uptr;
+typedef u64 __c64_ptr64;
+
 typedef compat_uptr_t compat_aio_context_t;
 
 #ifndef __compat_uid_t

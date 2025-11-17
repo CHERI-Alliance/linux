@@ -34,9 +34,5 @@ struct __c64_user_regs_struct {
 	__c64_uptr t4;
 	__c64_uptr t5;
 	__c64_uptr t6;
-#if defined(__ARCH_WANT_PURECAP) || defined(__CHERI_PURE_CAPABILITY__)
-	/// UAPI: NoConvert: Does not exist in compat version
-	__c64_uptr ddc;
-#endif
 };
 

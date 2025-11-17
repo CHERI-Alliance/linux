@@ -7,10 +7,6 @@ struct __c64_io_uring_zcrx_area_reg {
 	__u64	rq_area_token;
 	__u32	flags;
 	__u32	dmabuf_fd;
-#if (defined(__ARCH_WANT_PURECAP) || defined(__CHERI_PURE_CAPABILITY__)) && (__SIZEOF_LONG__ == 8)
-	__u32	__resv2[2];
-#else
 	__u64	__resv2[2];
-#endif
 };
 
