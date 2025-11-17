@@ -65,7 +65,7 @@
  * The ioctl used to set @closure depends on the @type of event.
  */
 struct fw_cdev_event_common {
-	__u64 closure;
+	__u64ptr closure;
 	__u32 type;
 };
 
@@ -89,7 +89,7 @@ struct fw_cdev_event_common {
  * Kernels with ABI version < 4 do not set @bm_node_id.
  */
 struct fw_cdev_event_bus_reset {
-	__u64 closure;
+	__u64ptr closure;
 	__u32 type;
 	__u32 node_id;
 	__u32 local_node_id;
@@ -177,7 +177,7 @@ struct fw_cdev_event_response2 {
  * essential information; use &fw_cdev_event_request2 instead.
  */
 struct fw_cdev_event_request {
-	__u64 closure;
+	__u64ptr closure;
 	__u32 type;
 	__u32 tcode;
 	__u64 offset;
@@ -204,7 +204,7 @@ struct fw_cdev_event_request {
  * ABI version <= 5. It has the lack of time stamp field comparing to &fw_cdev_event_request3.
  */
 struct fw_cdev_event_request2 {
-	__u64 closure;
+	__u64ptr closure;
 	__u32 type;
 	__u32 tcode;
 	__u64 offset;
@@ -275,7 +275,7 @@ struct fw_cdev_event_request2 {
  * register and the rest 13 bits expresses cycle field.
  */
 struct fw_cdev_event_request3 {
-	__u64 closure;
+	__u64ptr closure;
 	__u32 type;
 	__u32 tcode;
 	__u64 offset;
@@ -343,7 +343,7 @@ struct fw_cdev_event_request3 {
  * Behaviour of ver. 1 of this ABI is no longer available since ABI ver. 2.
  */
 struct fw_cdev_event_iso_interrupt {
-	__u64 closure;
+	__u64ptr closure;
 	__u32 type;
 	__u32 cycle;
 	__u32 header_length;
@@ -382,7 +382,7 @@ struct fw_cdev_event_iso_interrupt {
  * re-queue any buffer chunks in which as yet unread packet parts reside.
  */
 struct fw_cdev_event_iso_interrupt_mc {
-	__u64 closure;
+	__u64ptr closure;
 	__u32 type;
 	__u32 completed;
 };
@@ -409,7 +409,7 @@ struct fw_cdev_event_iso_interrupt_mc {
  * @bandwidth is 0 if no bandwidth was (de)allocated or if reallocation failed.
  */
 struct fw_cdev_event_iso_resource {
-	__u64 closure;
+	__u64ptr closure;
 	__u32 type;
 	__u32 handle;
 	__s32 channel;
@@ -431,7 +431,7 @@ struct fw_cdev_event_iso_resource {
  * &fw_cdev_event_phy_packet2.
  */
 struct fw_cdev_event_phy_packet {
-	__u64 closure;
+	__u64ptr closure;
 	__u32 type;
 	__u32 rcode;
 	__u32 length;
@@ -472,7 +472,7 @@ struct fw_cdev_event_phy_packet {
  * resolution.
  */
 struct fw_cdev_event_phy_packet2 {
-	__u64 closure;
+	__u64ptr closure;
 	__u32 type;
 	__u32 rcode;
 	__u32 length;
@@ -624,7 +624,7 @@ struct fw_cdev_get_info {
 	__u32 rom_length;
 	__u64ptr rom;
 	__u64ptr bus_reset;
-	__u64 bus_reset_closure;
+	__u64ptr bus_reset_closure;
 	__u32 card;
 };
 
@@ -711,7 +711,7 @@ struct fw_cdev_send_response {
  */
 struct fw_cdev_allocate {
 	__u64 offset;
-	__u64 closure;
+	__u64ptr closure;
 	__u32 length;
 	__u32 handle;
 	__u64 region_end;	/* available since kernel version 2.6.36 */
@@ -839,7 +839,7 @@ struct fw_cdev_create_iso_context {
 	__u32 header_size;
 	__u32 channel;
 	__u32 speed;
-	__u64 closure;
+	__u64ptr closure;
 	__u32 handle;
 };
 
@@ -1107,7 +1107,7 @@ struct fw_cdev_get_cycle_timer2 {
  * one quadlet of data (payload or header data) at speed S1600.
  */
 struct fw_cdev_allocate_iso_resource {
-	__u64 closure;
+	__u64ptr closure;
 	__u64 channels;
 	__u32 bandwidth;
 	__u32 handle;
@@ -1156,7 +1156,7 @@ struct fw_cdev_send_stream_packet {
  * The ioctl is only permitted on device files which represent a local node.
  */
 struct fw_cdev_send_phy_packet {
-	__u64 closure;
+	__u64ptr closure;
 	__u32 data[2];
 	__u32 generation;
 };
@@ -1172,7 +1172,7 @@ struct fw_cdev_send_phy_packet {
  * The ioctl is only permitted on device files which represent a local node.
  */
 struct fw_cdev_receive_phy_packets {
-	__u64 closure;
+	__u64ptr closure;
 };
 
 #define FW_CDEV_VERSION 3 /* Meaningless legacy macro; don't use it. */

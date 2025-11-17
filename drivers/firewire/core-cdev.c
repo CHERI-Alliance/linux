@@ -57,16 +57,16 @@ struct client {
 	struct list_head event_list;
 	wait_queue_head_t wait;
 	wait_queue_head_t tx_flush_wait;
-	u64 bus_reset_closure;
+	__u64ptr bus_reset_closure;
 
 	struct fw_iso_context *iso_context;
-	u64 iso_closure;
+	__u64ptr iso_closure;
 	struct fw_iso_buffer buffer;
 	unsigned long vm_start;
 	bool buffer_is_mapped;
 
 	struct list_head phy_receiver_link;
-	u64 phy_receiver_closure;
+	__u64ptr phy_receiver_closure;
 
 	struct list_head link;
 	struct kref kref;
@@ -101,7 +101,7 @@ struct client_resource {
 struct address_handler_resource {
 	struct client_resource resource;
 	struct fw_address_handler handler;
-	__u64 closure;
+	__u64ptr closure;
 	struct client *client;
 };
 
@@ -247,12 +247,12 @@ struct inbound_phy_packet_event {
 };
 
 #ifdef CONFIG_COMPAT
-static void __user *u64_to_uptr(u64 value)
+static void __user *u64_to_uptr(__u64ptr value)
 {
 	if (in_compat_syscall())
-		return compat_ptr(value);
+		return compat_ptr(__c_ua(value));
 	else
-		return (void __user *)(unsigned long)value;
+		return (void __user *)(user_uintptr_t)value;
 }
 
 #else
@@ -481,7 +481,7 @@ static int ioctl_get_info(struct client *client, union ioctl_arg *arg)
 	if (a->bus_reset != 0) {
 		fill_bus_reset_event(&bus_reset, client);
 		/* unaligned size of bus_reset is 36 bytes */
-		ret = copy_to_user(u64_to_uptr(a->bus_reset), &bus_reset, 36);
+		ret = copy_to_user_with_ptr(u64_to_uptr(a->bus_reset), &bus_reset, 36);
 	}
 	if (ret == 0 && list_empty(&client->link))
 		list_add_tail(&client->link, &client->device->client_list);
@@ -1750,6 +1750,14 @@ static int dispatch_ioctl(struct client *client,
 	if (_IOC_TYPE(cmd) != '#' ||
 	    _IOC_NR(cmd) >= ARRAY_SIZE(ioctl_handlers) ||
 	    _IOC_SIZE(cmd) > sizeof(buffer))
+		return -ENOTTY;
+
+	/*
+	 * FIXCHERI:
+	 * All the structs are the same for 32-bit and 64-bit due to the use of
+	 * __u64. Compat64 handling must be implemented.
+	 */
+	if (WARN_ON_ONCE(in_compat64_syscall()), "NOT IMPLEMENTED FOR COMPAT64")
 		return -ENOTTY;
 
 	memset(&buffer, 0, sizeof(buffer));
