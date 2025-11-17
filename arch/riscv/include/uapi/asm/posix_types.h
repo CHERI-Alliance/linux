@@ -9,7 +9,7 @@
 #define __RISCV_POSIX_TYPES_H
 
 #define _KERNEL_NSIG		64
-#define _KERNEL_NSIG_BPW	__SIZEOF_LONG__
+#define _KERNEL_NSIG_BPW	(8 * __SIZEOF_LONG__)
 #define _KERNEL_NSIG_WORDS	(_KERNEL_NSIG / _KERNEL_NSIG_BPW)
 
 typedef struct {
