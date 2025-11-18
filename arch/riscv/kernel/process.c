@@ -117,7 +117,7 @@ unsigned long arch_align_stack(unsigned long sp)
 	return sp & ~0xf;
 }
 
-#ifdef CONFIG_COMPAT
+#ifdef CONFIG_COMPAT32
 static bool compat_mode_supported __read_mostly;
 
 bool compat_elf_check_arch(Elf32_Ehdr *hdr)
@@ -145,8 +145,7 @@ static int __init compat_mode_detect(void)
 early_initcall(compat_mode_detect);
 #endif
 
-int start_thread(struct pt_regs *regs, unsigned long pc,
-		 struct linux_binprm *bprm)
+static inline void start_thread_common(struct pt_regs *regs)
 {
 #ifdef CONFIG_CHERI_KERNEL
 	/*
@@ -154,6 +153,10 @@ int start_thread(struct pt_regs *regs, unsigned long pc,
 	 * capability data.
 	 */
 	memset(regs, 0, sizeof(*regs));
+	if (is_compat64_task())
+		envcfg_update_bits(current, ENVCFG_CRE, 0);
+	else
+		envcfg_update_bits(current, ENVCFG_CRE, ENVCFG_CRE);
 #endif
 	regs->status = SR_PIE;
 	if (has_fpu()) {
@@ -164,18 +167,6 @@ int start_thread(struct pt_regs *regs, unsigned long pc,
 		 */
 		fstate_restore(current, regs);
 	}
-#ifndef CONFIG_CHERI_KERNEL
-	regs->epc = pc;
-	regs->sp = bprm->p;
-#else
-	/* FIXCHERI: compat support missing */
-	regs->epc = (uintptr_t)riscv_cheri_set_capmode(bprm->pcuabi.pcc);
-	regs->sp = (user_uintptr_t)bprm->pcuabi.csp;
-	regs->a0  = __c_fakeu(bprm->argc);
-	regs->a1 = (user_uintptr_t)bprm->pcuabi.argv;
-	regs->a2 = (user_uintptr_t)bprm->pcuabi.envp;
-	regs->a3 = (user_uintptr_t)bprm->pcuabi.auxv;
-#endif
 
 	/*
 	 * clear shadow stack state on exec.
@@ -195,14 +186,49 @@ int start_thread(struct pt_regs *regs, unsigned long pc,
 #ifdef CONFIG_64BIT
 	regs->status &= ~SR_UXL;
 
-	if (is_compat_task())
+	if (is_compat32_task())
 		regs->status |= SR_UXL_32;
 	else
 		regs->status |= SR_UXL_64;
 #endif
+}
+
+int start_thread(struct pt_regs *regs, unsigned long pc,
+		 struct linux_binprm *bprm)
+{
+	start_thread_common(regs);
+
+#ifndef CONFIG_CHERI_KERNEL
+	regs->epc = pc;
+	regs->sp = bprm->p;
+#else
+	regs->epc = (uintptr_t)riscv_cheri_set_capmode(bprm->pcuabi.pcc);
+	regs->sp = (user_uintptr_t)bprm->pcuabi.csp;
+	regs->a1 = (user_uintptr_t)bprm->pcuabi.argv;
+	regs->a2 = (user_uintptr_t)bprm->pcuabi.envp;
+	regs->a3 = (user_uintptr_t)bprm->pcuabi.auxv;
+	regs->a0  = __c_fakeu(bprm->argc);
+	regs->ddc = 0;
+#endif
 
 	return bprm->argc;
 }
+
+#ifdef CONFIG_COMPAT64
+void compat_start_thread(struct pt_regs *regs, unsigned long pc,
+			unsigned long sp)
+{
+	void __user *pcc;
+
+	start_thread_common(regs);
+	pcc = (void __user *)cheri_user_root_allperms_cap;
+	pcc = riscv_cheri_clear_capmode(pcc);
+	regs->epc = (uintptr_t)cheri_address_set(pcc, pc);
+	regs->sp = __c_fakeu(sp);
+	regs->ddc = (uintptr_t)riscv_cheri_clear_capmode(
+			(void __user *)cheri_user_root_allperms_cap);
+}
+#endif
 
 void flush_thread(void)
 {

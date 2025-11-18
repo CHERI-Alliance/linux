@@ -127,6 +127,10 @@ int arch_dup_task_struct(struct task_struct *dst, struct task_struct *src);
 #define TIF_32BIT			16	/* compat-mode 32bit process */
 #define TIF_RISCV_V_DEFER_RESTORE	17	/* restore Vector before returing to user */
 
+#define TIF_64BIT			31	/* Use the 64-bit non-purecap UABI on a purecap system. */
+
 #define _TIF_RISCV_V_DEFER_RESTORE	BIT(TIF_RISCV_V_DEFER_RESTORE)
+
+#define _TIF_64BIT			BIT(TIF_64BIT)
 
 #endif /* _ASM_RISCV_THREAD_INFO_H */

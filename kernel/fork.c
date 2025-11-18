@@ -2833,8 +2833,8 @@ struct compat_clone_args {
 
 #define clone_args_get_user_ptr(args, member)					\
 	((args)->compat_mode ?							\
-		compat_ptr(clone_args_get(args, member)) :			\
-		(void __user *)(user_uintptr_t)(clone_args_get(args, member)))
+		compat_ptr((args)->__compat_args.member) :			\
+		(void __user *)(user_uintptr_t)((args)->__args.member))
 
 #else /* CONFIG_COMPAT64 */
 #define clone_args_size_ver(args, ver)	__clone_args_size_ver(ver, )
@@ -2936,9 +2936,9 @@ static noinline int copy_clone_args_from_user(struct kernel_clone_args *kargs,
 		.child_tid	= clone_args_get_user_ptr(&args, child_tid),
 		.parent_tid	= clone_args_get_user_ptr(&args, parent_tid),
 		.exit_signal	= clone_args_get(&args, exit_signal),
-		.stack		= clone_args_get(&args, stack),
+		.stack		= (user_uintptr_t)clone_args_get_user_ptr(&args, stack),
 		.stack_size	= clone_args_get(&args, stack_size),
-		.tls		= clone_args_get(&args, tls),
+		.tls		= (user_uintptr_t)clone_args_get_user_ptr(&args, tls),
 		.set_tid_size	= clone_args_get(&args, set_tid_size),
 		.cgroup		= clone_args_get(&args, cgroup),
 	};

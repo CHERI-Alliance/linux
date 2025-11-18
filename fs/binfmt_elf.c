@@ -437,12 +437,12 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 		return -EFAULT;
 
 	/* Create the ELF interpreter info */
-	elf_info = (elf_stack_item_t *)mm->saved_auxv;
+	elf_info = (elf_stack_item_t *)(void *)mm->saved_auxv;
 	/* update AT_VECTOR_SIZE_BASE if the number of NEW_AUX_ENT() changes */
 #define NEW_AUX_ENT(id, val) \
 	do { \
-		*elf_info++ = (elf_stack_item_t)id;	\
-		*elf_info++ = (elf_stack_item_t)val;	\
+		*elf_info++ = (elf_stack_item_t __force)id;	\
+		*elf_info++ = (elf_stack_item_t __force)val;	\
 	} while (0)
 
 #ifdef ARCH_DLINFO
@@ -534,7 +534,7 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	/* And advance past the AT_NULL entry.  */
 	elf_info += 2;
 
-	ei_index = elf_info - (elf_stack_item_t *)mm->saved_auxv;
+	ei_index = elf_info - (elf_stack_item_t *)(void *)mm->saved_auxv;
 	sp = STACK_ADD(sp, ei_index);
 
 	items = (argc + 1) + (envc + 1) + 1;
@@ -2429,7 +2429,7 @@ end_coredump:
 
 static int elf_auxv_size(struct mm_struct *mm)
 {
-	elf_stack_item_t *auxv = (elf_stack_item_t *) mm->saved_auxv;
+	elf_stack_item_t *auxv = (elf_stack_item_t *)(void *)mm->saved_auxv;
 	int nitems = 0;
 
 	do {

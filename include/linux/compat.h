@@ -42,8 +42,8 @@
 #ifdef CONFIG_CHERI_PURECAP_UABI
 #define __SC_DELOUSE(t, v)							\
 	((__force t)(__builtin_choose_expr(__TYPE_IS_USER_PTR(t),		\
-					   (user_uintptr_t)compat_ptr(v),	\
-					   (unsigned long)v)))
+					   (user_uintptr_t)compat_ptr((unsigned long __force)v),	\
+					   (unsigned long __force)v)))
 #else /* CONFIG_CHERI_PURECAP_UABI */
 #define __SC_DELOUSE(t,v) ((__force t)(unsigned long)(v))
 #endif /* CONFIG_CHERI_PURECAP_UABI */
