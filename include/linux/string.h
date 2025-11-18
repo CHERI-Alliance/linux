@@ -38,6 +38,7 @@ void *memdup_array_user(const void __user *src, size_t n, size_t size)
 
 	return memdup_user(src, nbytes);
 }
+#define memdup_array_user_with_ptr(SRC, N, SZ) memdup_array_user(SRC, N, SZ)
 
 /**
  * vmemdup_array_user - duplicate array from user space
@@ -58,6 +59,7 @@ void *vmemdup_array_user(const void __user *src, size_t n, size_t size)
 
 	return vmemdup_user(src, nbytes);
 }
+#define vmemdup_array_user_with_ptr(SRC, N, SZ) vmemdup_array_user(SRC, N, SZ)
 
 /*
  * Include machine specific inline routines

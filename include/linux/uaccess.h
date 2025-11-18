@@ -237,6 +237,54 @@ copy_to_user(void __user *to, const void *from, unsigned long n)
 #endif
 }
 
+#define __copy_from_user_inatomic_with_ptr	__copy_from_user_inatomic_no_ptr
+#define __copy_from_user_with_ptr		__copy_from_user_no_ptr
+#define copy_from_user_with_ptr			copy_from_user_no_ptr
+#define __copy_to_user_inatomic_with_ptr	__copy_to_user_inatomic_no_ptr
+#define __copy_to_user_with_ptr			__copy_to_user_no_ptr
+#define copy_to_user_with_ptr			copy_to_user_no_ptr
+#define copy_struct_from_user_with_ptr		copy_struct_from_user_no_ptr
+
+/*
+ * Wrappers around usercopy macros that make it clear that tags are
+ * intentionally stripped during the copy..
+ */
+static __always_inline unsigned long __must_check
+__copy_from_user_inatomic_no_ptr(void *to, const void __user *from, unsigned long n)
+{
+	return __copy_from_user_inatomic(to, from, n);
+}
+
+static __always_inline unsigned long __must_check
+__copy_from_user_no_ptr(void *to, const void __user *from, unsigned long n)
+{
+	return __copy_from_user(to, from, n);
+}
+
+static __always_inline unsigned long __must_check
+copy_from_user_no_ptr(void *to, const void __user *from, unsigned long n)
+{
+	return copy_from_user(to, from, n);
+}
+
+static __always_inline unsigned long __must_check
+__copy_to_user_inatomic_no_ptr(void __user *to, const void *from, unsigned long n)
+{
+	return __copy_to_user_inatomic(to, from, n);
+}
+
+static __always_inline unsigned long __must_check
+__copy_to_user_no_ptr(void __user *to, const void *from, unsigned long n)
+{
+	return __copy_to_user(to, from, n);
+}
+
+static __always_inline unsigned long __must_check
+copy_to_user_no_ptr(void __user *to, const void *from, unsigned long n)
+{
+	return copy_to_user(to, from, n);
+}
+
 #ifndef copy_mc_to_kernel
 /*
  * Without arch opt-in this generic copy_mc_to_kernel() will not handle
@@ -414,6 +462,13 @@ copy_struct_from_user(void *dst, size_t ksize, const void __user *src,
 	if (copy_from_user(dst, src, size))
 		return -EFAULT;
 	return 0;
+}
+
+static __always_inline __must_check int
+copy_struct_from_user_no_ptr(void *dst, size_t ksize, const void __user *src,
+			     size_t usize)
+{
+	return copy_struct_from_user(dst, ksize, src, usize);
 }
 
 /**
@@ -868,5 +923,8 @@ void __noreturn usercopy_abort(const char *name, const char *detail,
 			       bool to_user, unsigned long offset,
 			       unsigned long len);
 #endif
+
+#define get_user_ptr(x,y) __get_user(x,y)
+#define put_user_ptr(x,y) __put_user(x,y)
 
 #endif		/* __LINUX_UACCESS_H__ */
