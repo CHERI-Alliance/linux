@@ -640,7 +640,7 @@ static inline long compat_ioctl(struct file *file, unsigned int cmd,
  * is incompatible between 32-bit and 64-bit architectures, a proper
  * handler is required instead of compat_ptr_ioctl.
  */
-long compat_ptr_ioctl(struct file *file, unsigned int cmd, uintptr_t arg)
+long compat_ptr_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
 	return compat_ioctl(file, cmd, arg, true);
 }

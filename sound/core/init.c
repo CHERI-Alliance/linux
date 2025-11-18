@@ -476,7 +476,7 @@ static const struct file_operations snd_shutdown_f_ops =
 	.poll =		snd_disconnect_poll,
 	.unlocked_ioctl = snd_disconnect_ioctl,
 #ifdef CONFIG_COMPAT
-	.compat_ioctl = snd_disconnect_ioctl,
+	.compat_ioctl = compat_ptr_ioctl,
 #endif
 	.mmap =		snd_disconnect_mmap,
 	.fasync =	snd_disconnect_fasync

@@ -2,6 +2,7 @@
 menuconfig DLM
 	tristate "Distributed Lock Manager (DLM)"
 	depends on INET
+	depends on !COMPAT64
 	depends on SYSFS && CONFIGFS_FS
 	help
 	A general purpose distributed lock manager for kernel or userspace
