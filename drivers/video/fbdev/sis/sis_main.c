@@ -1653,6 +1653,11 @@ sisfb_blank(int blank, struct fb_info *info)
 }
 
 /* ----------- FBDev related routines for all series ---------- */
+static int	sisfb_compat_ioctl(struct fb_info *info, unsigned int cmd,
+				   unsigned long arg)
+{
+	return sisfb_ioctl(info, cmd, (user_uintptr_t)compat_ptr(arg));
+}
 
 static int	sisfb_ioctl(struct fb_info *info, unsigned int cmd,
 			    user_uintptr_t arg)
@@ -1893,7 +1898,7 @@ static const struct fb_ops sisfb_ops = {
 	.fb_imageblit	= cfb_imageblit,
 	.fb_sync	= fbcon_sis_sync,
 #ifdef SIS_NEW_CONFIG_COMPAT
-	.fb_compat_ioctl= sisfb_ioctl,
+	.fb_compat_ioctl= sisfb_compat_ioctl,
 #endif
 	.fb_ioctl	= sisfb_ioctl,
 	__FB_DEFAULT_IOMEM_OPS_MMAP,

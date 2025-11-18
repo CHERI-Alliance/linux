@@ -178,7 +178,7 @@ static int hidp_sock_compat_ioctl(struct socket *sock, unsigned int cmd, unsigne
 		if (!capable(CAP_NET_ADMIN))
 			return -EPERM;
 
-		if (copy_from_user(&ca32, (void __user *) arg, sizeof(ca32)))
+		if (copy_from_user(&ca32, compat_ptr(arg), sizeof(ca32)))
 			return -EFAULT;
 
 		ca.ctrl_sock = ca32.ctrl_sock;
@@ -216,7 +216,7 @@ static int hidp_sock_compat_ioctl(struct socket *sock, unsigned int cmd, unsigne
 		return err;
 	}
 
-	return hidp_sock_ioctl(sock, cmd, arg);
+	return hidp_sock_ioctl(sock, cmd, (user_uintptr_t)compat_ptr(arg));
 }
 #endif
 

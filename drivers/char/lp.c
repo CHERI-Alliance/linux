@@ -760,12 +760,12 @@ static long lp_compat_ioctl(struct file *file, unsigned int cmd,
 	switch (cmd) {
 	case LPSETTIMEOUT_OLD:
 		if (!COMPAT_USE_64BIT_TIME) {
-			ret = lp_set_timeout32(minor, (void __user *)arg);
+			ret = lp_set_timeout32(minor, compat_ptr(arg));
 			break;
 		}
 		fallthrough;	/* for x32 mode */
 	case LPSETTIMEOUT_NEW:
-		ret = lp_set_timeout64(minor, (void __user *)arg);
+		ret = lp_set_timeout64(minor, compat_ptr(arg));
 		break;
 #ifdef LP_STATS
 	case LPGETSTATS:
@@ -774,7 +774,7 @@ static long lp_compat_ioctl(struct file *file, unsigned int cmd,
 		break;
 #endif
 	default:
-		ret = lp_do_ioctl(minor, cmd, arg, compat_ptr(arg));
+		ret = lp_do_ioctl(minor, cmd, __c_fakeu(arg), compat_ptr(arg));
 		break;
 	}
 	mutex_unlock(&lp_mutex);

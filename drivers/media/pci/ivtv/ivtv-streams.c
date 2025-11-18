@@ -32,6 +32,16 @@
 #include "ivtv-firmware.h"
 #include <media/v4l2-event.h>
 
+#ifdef CONFIG_COMPAT64
+static long video_compat_ioctl(struct file * file, unsigned int cmd,
+			       unsigned long arg)
+{
+	return video_ioctl2(file, cmd, (user_uintptr_t)compat_ptr(arg));
+}
+#else
+#define video_compat_ioctl video_ioctl2
+#endif
+
 static const struct v4l2_file_operations ivtv_v4l2_enc_fops = {
 	.owner = THIS_MODULE,
 	.read = ivtv_v4l2_read,
@@ -39,7 +49,7 @@ static const struct v4l2_file_operations ivtv_v4l2_enc_fops = {
 	.open = ivtv_v4l2_open,
 	.unlocked_ioctl = video_ioctl2,
 #ifdef CONFIG_COMPAT
-	.compat_ioctl32 = video_ioctl2, /* for ivtv_default() */
+	.compat_ioctl32 = video_compat_ioctl, /* for ivtv_default() */
 #endif
 	.release = ivtv_v4l2_close,
 	.poll = ivtv_v4l2_enc_poll,
@@ -52,7 +62,7 @@ static const struct v4l2_file_operations ivtv_v4l2_dec_fops = {
 	.open = ivtv_v4l2_open,
 	.unlocked_ioctl = video_ioctl2,
 #ifdef CONFIG_COMPAT
-	.compat_ioctl32 = video_ioctl2, /* for ivtv_default() */
+	.compat_ioctl32 = video_compat_ioctl, /* for ivtv_default() */
 #endif
 	.release = ivtv_v4l2_close,
 	.poll = ivtv_v4l2_dec_poll,
@@ -63,7 +73,7 @@ static const struct v4l2_file_operations ivtv_v4l2_radio_fops = {
 	.open = ivtv_v4l2_open,
 	.unlocked_ioctl = video_ioctl2,
 #ifdef CONFIG_COMPAT
-	.compat_ioctl32 = video_ioctl2, /* for ivtv_default() */
+	.compat_ioctl32 = video_compat_ioctl, /* for ivtv_default() */
 #endif
 	.release = ivtv_v4l2_close,
 	.poll = ivtv_v4l2_enc_poll,

@@ -591,7 +591,7 @@ static int joydev_ioctl_common(struct joydev *joydev,
 	return -EINVAL;
 }
 
-#ifdef CONFIG_COMPAT
+#ifdef CONFIG_COMPAT32
 static long joydev_compat_ioctl(struct file *file,
 				unsigned int cmd, unsigned long arg)
 {
@@ -714,8 +714,11 @@ static const struct file_operations joydev_fops = {
 	.open		= joydev_open,
 	.release	= joydev_release,
 	.unlocked_ioctl	= joydev_ioctl,
-#ifdef CONFIG_COMPAT
+#ifdef CONFIG_COMPAT32
 	.compat_ioctl	= joydev_compat_ioctl,
+#endif
+#ifdef CONFIG_COMPAT64
+	.compat_ioctl	= compat_ptr_ioctl,
 #endif
 	.fasync		= joydev_fasync,
 };

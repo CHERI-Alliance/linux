@@ -84,3 +84,4 @@ that do not work with CHERI for some reason.
 - CONFIG_ARCNET_COM90xx
 - CONFIG_USB_CONFIGFS_F_UAC*
 - CONFIG_BCM2835_VCHIQ
+- CONFIG_DLM with COMPAT64
