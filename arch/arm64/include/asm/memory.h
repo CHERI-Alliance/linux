@@ -305,7 +305,7 @@ static inline bool kaslr_enabled(void) { return false; }
 
 static inline const void *__tag_set(const void *addr, u8 tag)
 {
-	u64 __addr = (u64)addr & ~__tag_shifted(0xff);
+	uintptr_t __addr = (uintptr_t)addr & ~__tag_shifted(0xff);
 	return (const void *)(__addr | __tag_shifted(tag));
 }
 

@@ -14,7 +14,7 @@ struct task_struct;
  */
 static __always_inline struct task_struct *get_current(void)
 {
-	unsigned long sp_el0;
+	void *sp_el0;
 
 	asm ("mrs %0, sp_el0" : "=r" (sp_el0));
 
@@ -26,4 +26,3 @@ static __always_inline struct task_struct *get_current(void)
 #endif /* __ASSEMBLER__ */
 
 #endif /* __ASM_CURRENT_H */
-
