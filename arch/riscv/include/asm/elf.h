@@ -33,12 +33,42 @@
 
 /*
  * This is used to ensure we don't load something for the wrong architecture.
+ *
+ * For CHERI we only support fully purecap binaries that have both of the
+ * flags set or compat binaries that have non of the bits set. There is
+ * no hybrid CHERI support at the moment.
+ * - The non-CHERI arch checks are in __elf_check_arch().
+ * - The elf_is_purecap() and elf_is_non_puercap() macros check that the
+ *   binary is fully purecap or completly non-purecap, respectively. This
+ *   is indepenent of the kernel configuration.
+ * - elf_check_purecap() is true if the binary matches the native ELF
+ *   format of the current kernel configuration. I.e. if the purecap
+ *   ABI is not enabled, it is true for a non-purecap binary.
  */
-#define elf_check_arch(x) (((x)->e_machine == EM_RISCV) && \
-			   ((x)->e_ident[EI_CLASS] == ELF_CLASS))
+#define EF_PURECAP_FLAGS	(EF_RISCV_CHERIABI | EF_RISCV_CAP_MODE)
+#define elf_is_purecap(x)	\
+	(((x)->e_flags & EF_PURECAP_FLAGS) == EF_PURECAP_FLAGS)
+#define elf_is_non_purecap(x)	\
+	(((x)->e_flags & EF_PURECAP_FLAGS) == 0)
+#ifdef CONFIG_CHERI_PURECAP_UABI
+#define elf_check_purecap(x) elf_is_purecap(x)
+#else
+#define elf_check_purecap(x) elf_is_non_purecap(x)
+#endif
+#define __elf_check_arch(x) (((x)->e_machine == EM_RISCV) && \
+			     ((x)->e_ident[EI_CLASS] == ELF_CLASS))
+#define elf_check_arch(x) (__elf_check_arch(x) && elf_check_purecap(x))
+
+#ifdef CONFIG_COMPAT64
+
+#define compat_elf_check_arch(x) (__elf_check_arch(x) && elf_is_non_purecap(x))
+
+#else
 
 extern bool compat_elf_check_arch(Elf32_Ehdr *hdr);
 #define compat_elf_check_arch	compat_elf_check_arch
+
+#endif /* CONFIG_COMPAT64 */
 
 #define CORE_DUMP_USE_REGSET
 #define ELF_FDPIC_CORE_EFLAGS	0
@@ -53,7 +83,7 @@ extern bool compat_elf_check_arch(Elf32_Ehdr *hdr);
 #define ELF_ET_DYN_BASE		((DEFAULT_MAP_WINDOW / 3) * 2)
 
 #ifdef CONFIG_64BIT
-#define STACK_RND_MASK		(is_compat_task() ? \
+#define STACK_RND_MASK		(is_compat32_task() ? \
 				 0x7ff >> (PAGE_SHIFT - 12) : \
 				 0x3ffff >> (PAGE_SHIFT - 12))
 #endif
@@ -135,7 +165,7 @@ do {							\
 		*(struct user_regs_struct *)regs;	\
 } while (0);
 
-#ifdef CONFIG_COMPAT
+#ifdef CONFIG_COMPAT32
 
 #define SET_PERSONALITY(ex)					\
 do {	set_compat_task((ex).e_ident[EI_CLASS] == ELFCLASS32);	\
@@ -147,13 +177,42 @@ do {	set_compat_task((ex).e_ident[EI_CLASS] == ELFCLASS32);	\
 #define COMPAT_ELF_ET_DYN_BASE		((TASK_SIZE_32 / 3) * 2)
 
 /* rv32 registers */
+#define COMPAT_ELF_NGREG		ELF_NGREG
 typedef compat_ulong_t			compat_elf_greg_t;
-typedef compat_elf_greg_t		compat_elf_gregset_t[ELF_NGREG];
+typedef compat_elf_greg_t		compat_elf_gregset_t[COMPAT_ELF_NGREG];
+
+#endif /* CONFIG_COMPAT32 */
+
+#ifdef CONFIG_COMPAT64
+
+#define SET_PERSONALITY(ex)					\
+do {								\
+	set_compat_task(0);					\
+	set_personality(PER_LINUX |				\
+			(current->personality & (~PER_MASK)));	\
+} while (0)
+
+#define COMPAT_SET_PERSONALITY(ex)				\
+do {								\
+	set_compat_task(1);					\
+	set_personality(PER_LINUX |				\
+			(current->personality & (~PER_MASK)));	\
+} while (0)
+
+typedef unsigned long			compat_elf_greg_t;
+#define COMPAT_ELF_NGREG		(sizeof(struct compat_user_regs_struct) / sizeof(compat_elf_greg_t))
+typedef compat_elf_greg_t		compat_elf_gregset_t[COMPAT_ELF_NGREG];
+
+#define compat_start_thread compat_start_thread
+extern void compat_start_thread(struct pt_regs *regs, unsigned long pc,
+				unsigned long sp);
+
+#endif /* CONFIG_COMPAT64 */
 
 extern int compat_arch_setup_additional_pages(struct linux_binprm *bprm,
 					      int uses_interp);
 #define compat_arch_setup_additional_pages \
 				compat_arch_setup_additional_pages
 
-#endif /* CONFIG_COMPAT */
+
 #endif /* _ASM_RISCV_ELF_H */

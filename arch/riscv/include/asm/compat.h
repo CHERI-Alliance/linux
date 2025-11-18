@@ -8,15 +8,34 @@
  * Architecture specific compatibility types
  */
 #include <linux/types.h>
+#include <linux/sched/task_stack.h>
 #include <linux/sched.h>
 #include <asm-generic/compat.h>
+#include <asm/processor.h>
 
-static inline int is_compat_task(void)
+#ifdef CONFIG_COMPAT64
+#define COMPAT_USE_64BIT_TIME 1
+#endif
+
+static inline int is_compat32_task(void)
 {
-	if (!IS_ENABLED(CONFIG_COMPAT))
+	if (!IS_ENABLED(CONFIG_COMPAT32))
 		return 0;
 
 	return test_thread_flag(TIF_32BIT);
+}
+
+static inline int is_compat64_task(void)
+{
+	if (!IS_ENABLED(CONFIG_COMPAT64))
+		return 0;
+
+	return test_thread_flag(TIF_64BIT);
+}
+
+static inline int is_compat_task(void)
+{
+	return is_compat32_task() || is_compat64_task();
 }
 
 static inline int is_compat_thread(struct thread_info *thread)
@@ -24,16 +43,38 @@ static inline int is_compat_thread(struct thread_info *thread)
 	if (!IS_ENABLED(CONFIG_COMPAT))
 		return 0;
 
-	return test_ti_thread_flag(thread, TIF_32BIT);
+	return test_ti_thread_flag(thread, TIF_32BIT) ||
+	       test_ti_thread_flag(thread, TIF_64BIT);
 }
 
 static inline void set_compat_task(bool is_compat)
 {
+#if (IS_ENABLED(CONFIG_COMPAT64))
+	if (is_compat)
+		set_thread_flag(TIF_64BIT);
+	else
+		clear_thread_flag(TIF_64BIT);
+#else
 	if (is_compat)
 		set_thread_flag(TIF_32BIT);
 	else
 		clear_thread_flag(TIF_32BIT);
+#endif
 }
+
+#ifdef CONFIG_CHERI_PURECAP_UABI
+static inline void __user *compat_ptr(compat_uptr_t uptr)
+{
+	/*
+	 * NOTE: We cannot blindly use current->ddc here. At least in the
+	 * context of io_uring, the thread that creates the compat ptr
+	 * might not be the user thread that initiated the request.
+	 */
+	return (void __user *)cheri_address_set(cheri_user_root_allperms_cap,
+						uptr);
+}
+#define compat_ptr compat_ptr
+#endif
 
 struct compat_user_regs_struct {
 	compat_ulong_t pc;
@@ -73,38 +114,38 @@ struct compat_user_regs_struct {
 static inline void regs_to_cregs(struct compat_user_regs_struct *cregs,
 				 struct pt_regs *regs)
 {
-	cregs->pc	= (compat_ulong_t) regs->epc;
-	cregs->ra	= (compat_ulong_t) regs->ra;
-	cregs->sp	= (compat_ulong_t) regs->sp;
-	cregs->gp	= (compat_ulong_t) regs->gp;
-	cregs->tp	= (compat_ulong_t) regs->tp;
-	cregs->t0	= (compat_ulong_t) regs->t0;
-	cregs->t1	= (compat_ulong_t) regs->t1;
-	cregs->t2	= (compat_ulong_t) regs->t2;
-	cregs->s0	= (compat_ulong_t) regs->s0;
-	cregs->s1	= (compat_ulong_t) regs->s1;
-	cregs->a0	= (compat_ulong_t) regs->a0;
-	cregs->a1	= (compat_ulong_t) regs->a1;
-	cregs->a2	= (compat_ulong_t) regs->a2;
-	cregs->a3	= (compat_ulong_t) regs->a3;
-	cregs->a4	= (compat_ulong_t) regs->a4;
-	cregs->a5	= (compat_ulong_t) regs->a5;
-	cregs->a6	= (compat_ulong_t) regs->a6;
-	cregs->a7	= (compat_ulong_t) regs->a7;
-	cregs->s2	= (compat_ulong_t) regs->s2;
-	cregs->s3	= (compat_ulong_t) regs->s3;
-	cregs->s4	= (compat_ulong_t) regs->s4;
-	cregs->s5	= (compat_ulong_t) regs->s5;
-	cregs->s6	= (compat_ulong_t) regs->s6;
-	cregs->s7	= (compat_ulong_t) regs->s7;
-	cregs->s8	= (compat_ulong_t) regs->s8;
-	cregs->s9	= (compat_ulong_t) regs->s9;
-	cregs->s10	= (compat_ulong_t) regs->s10;
-	cregs->s11	= (compat_ulong_t) regs->s11;
-	cregs->t3	= (compat_ulong_t) regs->t3;
-	cregs->t4	= (compat_ulong_t) regs->t4;
-	cregs->t5	= (compat_ulong_t) regs->t5;
-	cregs->t6	= (compat_ulong_t) regs->t6;
+	cregs->pc	= (compat_ulong_t __force) regs->epc;
+	cregs->ra	= (compat_ulong_t __force) regs->ra;
+	cregs->sp	= (compat_ulong_t __force) regs->sp;
+	cregs->gp	= (compat_ulong_t __force) regs->gp;
+	cregs->tp	= (compat_ulong_t __force) regs->tp;
+	cregs->t0	= (compat_ulong_t __force) regs->t0;
+	cregs->t1	= (compat_ulong_t __force) regs->t1;
+	cregs->t2	= (compat_ulong_t __force) regs->t2;
+	cregs->s0	= (compat_ulong_t __force) regs->s0;
+	cregs->s1	= (compat_ulong_t __force) regs->s1;
+	cregs->a0	= (compat_ulong_t __force) regs->a0;
+	cregs->a1	= (compat_ulong_t __force) regs->a1;
+	cregs->a2	= (compat_ulong_t __force) regs->a2;
+	cregs->a3	= (compat_ulong_t __force) regs->a3;
+	cregs->a4	= (compat_ulong_t __force) regs->a4;
+	cregs->a5	= (compat_ulong_t __force) regs->a5;
+	cregs->a6	= (compat_ulong_t __force) regs->a6;
+	cregs->a7	= (compat_ulong_t __force) regs->a7;
+	cregs->s2	= (compat_ulong_t __force) regs->s2;
+	cregs->s3	= (compat_ulong_t __force) regs->s3;
+	cregs->s4	= (compat_ulong_t __force) regs->s4;
+	cregs->s5	= (compat_ulong_t __force) regs->s5;
+	cregs->s6	= (compat_ulong_t __force) regs->s6;
+	cregs->s7	= (compat_ulong_t __force) regs->s7;
+	cregs->s8	= (compat_ulong_t __force) regs->s8;
+	cregs->s9	= (compat_ulong_t __force) regs->s9;
+	cregs->s10	= (compat_ulong_t __force) regs->s10;
+	cregs->s11	= (compat_ulong_t __force) regs->s11;
+	cregs->t3	= (compat_ulong_t __force) regs->t3;
+	cregs->t4	= (compat_ulong_t __force) regs->t4;
+	cregs->t5	= (compat_ulong_t __force) regs->t5;
+	cregs->t6	= (compat_ulong_t __force) regs->t6;
 };
 
 static inline void cregs_to_regs(struct compat_user_regs_struct *cregs,

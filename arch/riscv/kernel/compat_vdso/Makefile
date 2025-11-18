@@ -11,6 +11,10 @@ compat_vdso-syms += flush_icache
 COMPAT_CC := $(CC)
 COMPAT_LD := $(LD)
 
+ifdef CONFIG_COMPAT64
+COMPAT_CC_FLAGS := -march=rv64imafdc -mabi=lp64 -include $(srctree)/arch/riscv/kernel/compat_vdso/undef.h
+COMPAT_LD_FLAGS := -melf64lriscv
+else
 # binutils 2.35 does not support the zifencei extension, but in the ISA
 # spec 20191213, G stands for IMAFD_ZICSR_ZIFENCEI.
 ifdef CONFIG_TOOLCHAIN_NEEDS_EXPLICIT_ZICSR_ZIFENCEI
@@ -19,6 +23,7 @@ else
 	COMPAT_CC_FLAGS := -march=rv32imafd -mabi=ilp32
 endif
 COMPAT_LD_FLAGS := -melf32lriscv
+endif
 
 # Disable attributes, as they're useless and break the build.
 COMPAT_CC_FLAGS += $(call cc-option,-mno-riscv-attribute)

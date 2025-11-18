@@ -27,10 +27,10 @@
 #define elf_stack_item_t			elf_addr_t
 
 #undef elf_copy_to_user_stack
-#define elf_copy_to_user_stack(to, from, len)	copy_to_user(to, from, len)
+#define elf_copy_to_user_stack(to, from, len)	copy_to_user_no_ptr(to, from, len)
 
 #undef elf_stack_put_user
-#define elf_stack_put_user(val, ptr)		put_user((elf_addr_t)(user_uintptr_t)(val), (ptr))
+#define elf_stack_put_user(val, ptr)		put_user((elf_addr_t __force)(user_uintptr_t)(val), (ptr))
 
 #ifdef CONFIG_COMPAT32
 

@@ -11,6 +11,7 @@
 #define _ASM_RISCV_SYSCALL_H
 
 #include <asm/hwprobe.h>
+#include <asm/compat.h>
 #include <uapi/linux/audit.h>
 #include <linux/sched.h>
 #include <linux/err.h>
@@ -107,8 +108,13 @@ static inline void syscall_handler(struct pt_regs *regs, ulong syscall)
 {
 	syscall_t fn;
 
-#ifdef CONFIG_COMPAT
+#ifdef CONFIG_COMPAT32
 	if ((regs->status & SR_UXL) == SR_UXL_32)
+		fn = compat_sys_call_table[syscall];
+	else
+#endif
+#ifdef CONFIG_COMPAT64
+	if (is_compat64_task())
 		fn = compat_sys_call_table[syscall];
 	else
 #endif
