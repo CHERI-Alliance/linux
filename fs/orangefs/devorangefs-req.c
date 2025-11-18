@@ -712,7 +712,7 @@ static long orangefs_devreq_ioctl(struct file *file,
 #ifdef CONFIG_COMPAT		/* CONFIG_COMPAT is in .config */
 
 /*  Compat structure for the ORANGEFS_DEV_MAP ioctl */
-struct ORANGEFS_dev_map_desc32 {
+struct ORANGEFS_dev_map_desc_compat {
 	compat_uptr_t ptr;
 	__s32 total_size;
 	__s32 size;
@@ -734,19 +734,19 @@ static long orangefs_devreq_compat_ioctl(struct file *filp, unsigned int cmd,
 		return ret;
 	if (cmd == ORANGEFS_DEV_MAP) {
 		struct ORANGEFS_dev_map_desc desc;
-		struct ORANGEFS_dev_map_desc32 d32;
+		struct ORANGEFS_dev_map_desc_compat dcompat;
 
-		if (copy_from_user(&d32, (void __user *)args, sizeof(d32)))
+		if (copy_from_user(&dcompat, compat_ptr(args), sizeof(dcompat)))
 			return -EFAULT;
 
-		desc.ptr = compat_ptr(d32.ptr);
-		desc.total_size = d32.total_size;
-		desc.size = d32.size;
-		desc.count = d32.count;
+		desc.ptr = compat_ptr(dcompat.ptr);
+		desc.total_size = dcompat.total_size;
+		desc.size = dcompat.size;
+		desc.count = dcompat.count;
 		return orangefs_bufmap_initialize(&desc);
 	}
 	/* no other ioctl requires translation */
-	return dispatch_ioctl_command(cmd, args);
+	return dispatch_ioctl_command(cmd, (user_uintptr_t)compat_ptr(args));
 }
 
 #endif /* CONFIG_COMPAT is in .config */

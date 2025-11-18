@@ -1087,7 +1087,7 @@ static int play_iframe(struct av7110 *av7110, char __user *buf, unsigned int len
 		return 0;
 }
 
-#ifdef CONFIG_COMPAT
+#ifdef CONFIG_COMPAT32
 struct compat_video_still_picture {
 	compat_uptr_t iFrame;
 	s32 size;
@@ -1214,7 +1214,7 @@ static int dvb_video_ioctl(struct file *file,
 		memcpy(parg, &av7110->videostate, sizeof(struct video_status));
 		break;
 
-#ifdef CONFIG_COMPAT
+#ifdef CONFIG_COMPAT32
 	case VIDEO_GET_EVENT32:
 		ret = dvb_compat_video_get_event(av7110, parg, file->f_flags);
 		break;
@@ -1263,7 +1263,7 @@ static int dvb_video_ioctl(struct file *file,
 				    1, (u16)arg);
 		break;
 
-#ifdef CONFIG_COMPAT
+#ifdef CONFIG_COMPAT32
 	case VIDEO_STILLPICTURE32:
 	{
 		struct compat_video_still_picture *pic =
@@ -1582,9 +1582,7 @@ static const struct file_operations dvb_video_fops = {
 	.owner		= THIS_MODULE,
 	.write		= dvb_video_write,
 	.unlocked_ioctl	= dvb_generic_ioctl,
-#ifndef CONFIG_CHERI_KERNEL
-	.compat_ioctl	= dvb_generic_ioctl,
-#endif
+	.compat_ioctl	= compat_ptr_ioctl,
 	.open		= dvb_video_open,
 	.release	= dvb_video_release,
 	.poll		= dvb_video_poll,
@@ -1604,9 +1602,7 @@ static const struct file_operations dvb_audio_fops = {
 	.owner		= THIS_MODULE,
 	.write		= dvb_audio_write,
 	.unlocked_ioctl	= dvb_generic_ioctl,
-#ifndef CONFIG_CHERI_KERNEL
-	.compat_ioctl	= dvb_generic_ioctl,
-#endif
+	.compat_ioctl	= compat_ptr_ioctl,
 	.open		= dvb_audio_open,
 	.release	= dvb_audio_release,
 	.poll		= dvb_audio_poll,

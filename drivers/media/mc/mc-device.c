@@ -525,13 +525,12 @@ static long media_device_compat_ioctl(struct file *filp, unsigned int cmd,
 	switch (cmd) {
 	case MEDIA_IOC_ENUM_LINKS32:
 		mutex_lock(&dev->graph_mutex);
-		ret = media_device_enum_links32(dev,
-				(struct media_links_enum32 __user *)arg);
+		ret = media_device_enum_links32(dev, compat_ptr(arg));
 		mutex_unlock(&dev->graph_mutex);
 		break;
 
 	default:
-		return media_device_ioctl(filp, cmd, arg);
+		return media_device_ioctl(filp, cmd, (user_uintptr_t)compat_ptr(arg));
 	}
 
 	return ret;
