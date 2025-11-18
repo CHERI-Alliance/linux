@@ -989,7 +989,7 @@ static long ppp_compat_ioctl(struct file *file, unsigned int cmd, unsigned long 
 {
 	struct ppp_file *pf;
 	int err = -ENOIOCTLCMD;
-	void __user *argp = (void __user *)arg;
+	void __user *argp = compat_ptr(arg);
 
 	mutex_lock(&ppp_mutex);
 

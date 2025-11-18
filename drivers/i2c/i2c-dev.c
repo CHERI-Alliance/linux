@@ -534,7 +534,7 @@ static long compat_i2cdev_ioctl(struct file *file, unsigned int cmd, unsigned lo
 	switch (cmd) {
 	case I2C_FUNCS:
 		funcs = i2c_get_functionality(client->adapter);
-		return put_user(funcs, (compat_ulong_t __user *)arg);
+		return put_user(funcs, (compat_ulong_t __user *)compat_ptr(arg));
 	case I2C_RDWR: {
 		struct i2c_rdwr_ioctl_data32 rdwr_arg;
 		struct i2c_msg32 __user *p;
@@ -542,7 +542,7 @@ static long compat_i2cdev_ioctl(struct file *file, unsigned int cmd, unsigned lo
 		int i, res;
 
 		if (copy_from_user(&rdwr_arg,
-				   (struct i2c_rdwr_ioctl_data32 __user *)arg,
+				   (struct i2c_rdwr_ioctl_data32 __user *)compat_ptr(arg),
 				   sizeof(rdwr_arg)))
 			return -EFAULT;
 
@@ -578,7 +578,7 @@ static long compat_i2cdev_ioctl(struct file *file, unsigned int cmd, unsigned lo
 	case I2C_SMBUS: {
 		struct i2c_smbus_ioctl_data32	data32;
 		if (copy_from_user(&data32,
-				   (void __user *) arg,
+				   compat_ptr(arg),
 				   sizeof(data32)))
 			return -EFAULT;
 		return i2cdev_ioctl_smbus(client, data32.read_write,
@@ -587,7 +587,7 @@ static long compat_i2cdev_ioctl(struct file *file, unsigned int cmd, unsigned lo
 					  compat_ptr(data32.data));
 	}
 	default:
-		return i2cdev_ioctl(file, cmd, arg);
+		return i2cdev_ioctl(file, cmd, (user_uintptr_t)compat_ptr(arg));
 	}
 }
 #else

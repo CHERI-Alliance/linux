@@ -3110,7 +3110,7 @@ _ctl_ioctl_compat(struct file *file, unsigned cmd, unsigned long arg)
 {
 	long ret;
 
-	ret = _ctl_ioctl_main(file, cmd, (void __user *)arg, 1,
+	ret = _ctl_ioctl_main(file, cmd, compat_ptr(arg), 1,
 		MPI25_VERSION | MPI26_VERSION);
 	return ret;
 }
@@ -3128,7 +3128,7 @@ _ctl_mpt2_ioctl_compat(struct file *file, unsigned cmd, unsigned long arg)
 {
 	long ret;
 
-	ret = _ctl_ioctl_main(file, cmd, (void __user *)arg, 1, MPI2_VERSION);
+	ret = _ctl_ioctl_main(file, cmd, compat_ptr(arg), 1, MPI2_VERSION);
 	return ret;
 }
 #endif

@@ -245,7 +245,7 @@ static const struct file_operations request_fops = {
 	.poll = media_request_poll,
 	.unlocked_ioctl = media_request_ioctl,
 #ifdef CONFIG_COMPAT
-	.compat_ioctl = media_request_ioctl,
+	.compat_ioctl = compat_ptr_ioctl,
 #endif /* CONFIG_COMPAT */
 	.release = media_request_close,
 };

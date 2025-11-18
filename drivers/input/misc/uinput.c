@@ -805,9 +805,9 @@ static int uinput_ff_upload_to_user(char __user *buffer,
 		 * custom waveforms in uinput anyway we can just copy the whole
 		 * thing (to the compat size) and ignore the pointer.
 		 */
-		memcpy(&ff_up_compat.effect, &ff_up->effect,
+		memcpy(&ff_up_compat.effect, (void *)&ff_up->effect,
 			sizeof(struct ff_effect_compat));
-		memcpy(&ff_up_compat.old, &ff_up->old,
+		memcpy(&ff_up_compat.old, (void *)&ff_up->old,
 			sizeof(struct ff_effect_compat));
 
 		if (copy_to_user(buffer, &ff_up_compat,

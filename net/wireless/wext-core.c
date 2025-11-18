@@ -13,6 +13,7 @@
 #include <linux/rtnetlink.h>
 #include <linux/slab.h>
 #include <linux/wireless.h>
+#include <linux/compat64_wireless.h>
 #include <linux/uaccess.h>
 #include <linux/export.h>
 #include <net/cfg80211.h>
@@ -1121,13 +1122,26 @@ static int compat_standard_call(struct net_device	*dev,
 int compat_wext_handle_ioctl(struct net *net, unsigned int cmd,
 			     unsigned long arg)
 {
-	void __user *argp = (void __user *)arg;
+	void __user *argp = compat_ptr(arg);
 	struct iw_request_info info;
 	struct iwreq iwr;
+	size_t cplen = sizeof(struct iwreq);
 	char *colon;
 	int ret;
 
-	if (copy_from_user_with_ptr(&iwr, argp, sizeof(struct iwreq)))
+	/*
+	 * The only field in struct iwreq that needs compat handling
+	 * (either for COMPAT32 or for COMPAT64) is the pointer field
+	 * in struct iw_point that is part of the data union.
+	 * For 32-bit compat this does not change the size but for 64-bit
+	 * compat it does. So only copy the size of the compat structure
+	 * in the compat64 case. We don't do any conversion here, compat
+	 * conversion for iw_point itself can re-use the existing compat
+	 * support for compat32.
+	 */
+	if (in_compat64_syscall())
+		cplen = sizeof(struct __c64_iwreq);
+	if (copy_from_user_no_ptr(&iwr, argp, cplen))
 		return -EFAULT;
 
 	iwr.ifr_name[IFNAMSIZ-1] = 0;
@@ -1144,7 +1158,7 @@ int compat_wext_handle_ioctl(struct net *net, unsigned int cmd,
 
 	if (ret >= 0 &&
 	    IW_IS_GET(cmd) &&
-	    copy_to_user_with_ptr(argp, &iwr, sizeof(struct iwreq)))
+	    copy_to_user_no_ptr(argp, &iwr, cplen))
 		return -EFAULT;
 
 	return ret;
