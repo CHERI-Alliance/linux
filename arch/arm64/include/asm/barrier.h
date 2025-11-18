@@ -172,6 +172,13 @@ do {									\
 				: "rZ" (*(__u64 *)__u.__c)		\
 				: "memory");				\
 		break;							\
+	case 16:							\
+		BUILD_BUG_ON(sizeof(uintptr_t) != 16);			\
+		asm volatile ("stlr %x1, %0"				\
+				: "=Q" (*__p)				\
+				: "rZ" (*(uintptr_t *)__u.__c)		\
+				: "memory");				\
+		break;							\
 	}								\
 } while (0)
 
@@ -200,6 +207,12 @@ do {									\
 	case 8:								\
 		asm volatile ("ldar %0, %1"				\
 			: "=r" (*(__u64 *)__u.__c)			\
+			: "Q" (*__p) : "memory");			\
+		break;							\
+	case 16:							\
+		BUILD_BUG_ON(sizeof(uintptr_t) != 16);			\
+		asm volatile ("ldar %0, %1"				\
+			: "=r" (*(uintptr_t *)__u.__c)			\
 			: "Q" (*__p) : "memory");			\
 		break;							\
 	}								\
