@@ -527,7 +527,7 @@ do {									\
 	__ASM_UACCESS_AFTER						\
 	_ASM_EXTABLE_UACCESS_ERR(1b, 2b, %w0)				\
 	: "+r" (err)							\
-	: "CZ" (x), "r" (ptr));						\
+	: "rZ" (x), "r" (ptr));						\
 	uaccess_ttbr0_disable();					\
 } while (0)
 

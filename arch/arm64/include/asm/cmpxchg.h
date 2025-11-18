@@ -42,28 +42,32 @@ static inline u##sz __xchg_case_##name##sz(u##sz x, volatile void *ptr)		\
 	return ret;								\
 }
 
-__XCHG_CASE(w, b,     ,  8,        ,    ,  ,  ,  ,         )
-__XCHG_CASE(w, h,     , 16,        ,    ,  ,  ,  ,         )
-__XCHG_CASE(w,  ,     , 32,        ,    ,  ,  ,  ,         )
-__XCHG_CASE( ,  ,     , 64,        ,    ,  ,  ,  ,         )
-__XCHG_CASE(w, b, acq_,  8,        ,    , a, a,  , "memory")
-__XCHG_CASE(w, h, acq_, 16,        ,    , a, a,  , "memory")
-__XCHG_CASE(w,  , acq_, 32,        ,    , a, a,  , "memory")
-__XCHG_CASE( ,  , acq_, 64,        ,    , a, a,  , "memory")
-__XCHG_CASE(w, b, rel_,  8,        ,    ,  ,  , l, "memory")
-__XCHG_CASE(w, h, rel_, 16,        ,    ,  ,  , l, "memory")
-__XCHG_CASE(w,  , rel_, 32,        ,    ,  ,  , l, "memory")
-__XCHG_CASE( ,  , rel_, 64,        ,    ,  ,  , l, "memory")
-__XCHG_CASE(w, b,  mb_,  8, dmb ish, nop,  , a, l, "memory")
-__XCHG_CASE(w, h,  mb_, 16, dmb ish, nop,  , a, l, "memory")
-__XCHG_CASE(w,  ,  mb_, 32, dmb ish, nop,  , a, l, "memory")
-__XCHG_CASE( ,  ,  mb_, 64, dmb ish, nop,  , a, l, "memory")
+__XCHG_CASE(w, b,     ,  8      ,        ,    ,  ,  ,  ,         )
+__XCHG_CASE(w, h,     , 16      ,        ,    ,  ,  ,  ,         )
+__XCHG_CASE(w,  ,     , 32      ,        ,    ,  ,  ,  ,         )
+__XCHG_CASE( ,  ,     , 64      ,        ,    ,  ,  ,  ,         )
+__XCHG_CASE( ,  ,     , intptr_t,        ,    ,  ,  ,  ,         )
+__XCHG_CASE(w, b, acq_,  8      ,        ,    , a, a,  , "memory")
+__XCHG_CASE(w, h, acq_, 16      ,        ,    , a, a,  , "memory")
+__XCHG_CASE(w,  , acq_, 32      ,        ,    , a, a,  , "memory")
+__XCHG_CASE( ,  , acq_, 64      ,        ,    , a, a,  , "memory")
+__XCHG_CASE( ,  , acq_, intptr_t,        ,    , a, a,  , "memory")
+__XCHG_CASE(w, b, rel_,  8      ,        ,    ,  ,  , l, "memory")
+__XCHG_CASE(w, h, rel_, 16      ,        ,    ,  ,  , l, "memory")
+__XCHG_CASE(w,  , rel_, 32      ,        ,    ,  ,  , l, "memory")
+__XCHG_CASE( ,  , rel_, 64      ,        ,    ,  ,  , l, "memory")
+__XCHG_CASE( ,  , rel_, intptr_t,        ,    ,  ,  , l, "memory")
+__XCHG_CASE(w, b,  mb_,  8      , dmb ish, nop,  , a, l, "memory")
+__XCHG_CASE(w, h,  mb_, 16      , dmb ish, nop,  , a, l, "memory")
+__XCHG_CASE(w,  ,  mb_, 32      , dmb ish, nop,  , a, l, "memory")
+__XCHG_CASE( ,  ,  mb_, 64      , dmb ish, nop,  , a, l, "memory")
+__XCHG_CASE( ,  ,  mb_, intptr_t, dmb ish, nop,  , a, l, "memory")
 
 #undef __XCHG_CASE
 
 #define __XCHG_GEN(sfx)							\
-static __always_inline unsigned long					\
-__arch_xchg##sfx(unsigned long x, volatile void *ptr, int size)		\
+static __always_inline uintptr_t					\
+__arch_xchg##sfx(uintptr_t x, volatile void *ptr, int size)		\
 {									\
 	switch (size) {							\
 	case 1:								\
@@ -74,6 +78,9 @@ __arch_xchg##sfx(unsigned long x, volatile void *ptr, int size)		\
 		return __xchg_case##sfx##_32(x, ptr);			\
 	case 8:								\
 		return __xchg_case##sfx##_64(x, ptr);			\
+	case 16:							\
+		BUILD_BUG_ON(sizeof(uintptr_t) != 16);			\
+		return __xchg_case##sfx##_intptr_t(x, ptr);		\
 	default:							\
 		BUILD_BUG();						\
 	}								\
@@ -92,7 +99,7 @@ __XCHG_GEN(_mb)
 ({									\
 	__typeof__(*(ptr)) __ret;					\
 	__ret = (__force __typeof__(*(ptr)))				\
-		__arch_xchg##sfx((__force unsigned long)(x), (ptr),	\
+		__arch_xchg##sfx((__force uintptr_t)(x), (ptr),	\
 				  sizeof(*(ptr)));			\
 	__ret;								\
 })
@@ -116,18 +123,22 @@ __CMPXCHG_CASE(    ,  8)
 __CMPXCHG_CASE(    , 16)
 __CMPXCHG_CASE(    , 32)
 __CMPXCHG_CASE(    , 64)
+__CMPXCHG_CASE(    , intptr_t)
 __CMPXCHG_CASE(acq_,  8)
 __CMPXCHG_CASE(acq_, 16)
 __CMPXCHG_CASE(acq_, 32)
 __CMPXCHG_CASE(acq_, 64)
+__CMPXCHG_CASE(acq_, intptr_t)
 __CMPXCHG_CASE(rel_,  8)
 __CMPXCHG_CASE(rel_, 16)
 __CMPXCHG_CASE(rel_, 32)
 __CMPXCHG_CASE(rel_, 64)
+__CMPXCHG_CASE(rel_, intptr_t)
 __CMPXCHG_CASE(mb_,  8)
 __CMPXCHG_CASE(mb_, 16)
 __CMPXCHG_CASE(mb_, 32)
 __CMPXCHG_CASE(mb_, 64)
+__CMPXCHG_CASE(mb_, intptr_t)
 
 #undef __CMPXCHG_CASE
 
@@ -145,9 +156,9 @@ __CMPXCHG128(_mb)
 #undef __CMPXCHG128
 
 #define __CMPXCHG_GEN(sfx)						\
-static __always_inline unsigned long __cmpxchg##sfx(volatile void *ptr,	\
-					   unsigned long old,		\
-					   unsigned long new,		\
+static __always_inline uintptr_t __cmpxchg##sfx(volatile void *ptr,	\
+					   uintptr_t old,		\
+					   uintptr_t new,		\
 					   int size)			\
 {									\
 	switch (size) {							\
@@ -159,6 +170,9 @@ static __always_inline unsigned long __cmpxchg##sfx(volatile void *ptr,	\
 		return __cmpxchg_case##sfx##_32(ptr, old, new);		\
 	case 8:								\
 		return __cmpxchg_case##sfx##_64(ptr, old, new);		\
+	case 16:							\
+		BUILD_BUG_ON(sizeof(uintptr_t) != 16);			\
+		return __cmpxchg_case##sfx##_intptr_t(ptr, old, new);	\
 	default:							\
 		BUILD_BUG();						\
 	}								\
@@ -177,8 +191,8 @@ __CMPXCHG_GEN(_mb)
 ({									\
 	__typeof__(*(ptr)) __ret;					\
 	__ret = (__force __typeof__(*(ptr)))				\
-		__cmpxchg##sfx((ptr), (__force unsigned long)(o),	\
-				(__force unsigned long)(n),		\
+		__cmpxchg##sfx((ptr), (__force uintptr_t)(o),		\
+				(__force uintptr_t)(n),			\
 				sizeof(*(ptr)));			\
 	__ret;								\
 })
@@ -212,7 +226,7 @@ __CMPXCHG_GEN(_mb)
 
 #define __CMPWAIT_CASE(w, sfx, sz)					\
 static inline void __cmpwait_case_##sz(volatile void *ptr,		\
-				       unsigned long val)		\
+				       u##sz val)			\
 {									\
 	unsigned long tmp;						\
 									\
@@ -232,12 +246,13 @@ __CMPWAIT_CASE(w, b, 8);
 __CMPWAIT_CASE(w, h, 16);
 __CMPWAIT_CASE(w,  , 32);
 __CMPWAIT_CASE( ,  , 64);
+__CMPWAIT_CASE( ,  , intptr_t);
 
 #undef __CMPWAIT_CASE
 
 #define __CMPWAIT_GEN(sfx)						\
 static __always_inline void __cmpwait##sfx(volatile void *ptr,		\
-				  unsigned long val,			\
+				  uintptr_t val,			\
 				  int size)				\
 {									\
 	switch (size) {							\
@@ -249,6 +264,9 @@ static __always_inline void __cmpwait##sfx(volatile void *ptr,		\
 		return __cmpwait_case##sfx##_32(ptr, val);		\
 	case 8:								\
 		return __cmpwait_case##sfx##_64(ptr, val);		\
+	case 16:							\
+		BUILD_BUG_ON(sizeof(uintptr_t) != 16);			\
+		return __cmpwait_case##sfx##_intptr_t(ptr, val);	\
 	default:							\
 		BUILD_BUG();						\
 	}								\
@@ -261,6 +279,6 @@ __CMPWAIT_GEN()
 #undef __CMPWAIT_GEN
 
 #define __cmpwait_relaxed(ptr, val) \
-	__cmpwait((ptr), (unsigned long)(val), sizeof(*(ptr)))
+	__cmpwait((ptr), (uintptr_t)(val), sizeof(*(ptr)))
 
 #endif	/* __ASM_CMPXCHG_H */
