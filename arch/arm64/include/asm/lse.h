@@ -4,7 +4,14 @@
 
 #include <asm/atomic_ll_sc.h>
 
-#ifdef CONFIG_ARM64_LSE_ATOMICS
+#ifdef CONFIG_ARM64_MORELLO
+/* Morello always supports LSE */
+#define __LSE_PREAMBLE	"\n"
+#include <asm/atomic_lse.h>
+
+#define __lse_ll_sc_body(op, ...)		__lse_##op(__VA_ARGS__)
+#define ARM64_LSE_ATOMIC_INSN(llsc, lse)	lse
+#elif defined(CONFIG_ARM64_LSE_ATOMICS)
 
 #define __LSE_PREAMBLE	".arch_extension lse\n"
 
