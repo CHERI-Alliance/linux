@@ -285,7 +285,7 @@ __compiletime_error("Atomic operation not yet supported");
 #define arch_atomicuintptr_dec_if_positive	arch_atomicuintptr_dec_if_positive
 
 #define arch_atomicuintptr_fetch_add_unless arch_atomicuintptr_fetch_add_unless
-uintptr_t arch_atomicuintptr_fetch_add_unless(atomicuintptr_t *v, uintptr_t a, ptraddr_t u);
+uintptr_t arch_atomicuintptr_fetch_add_unless(atomicuintptr_t *v, uintptr_t a, ptraddr_t u)
 __compiletime_error("Atomic operation not yet supported");
 
 #endif /* __ASM_ATOMIC_H */
