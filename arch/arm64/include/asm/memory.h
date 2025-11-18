@@ -372,7 +372,11 @@ static inline phys_addr_t virt_to_phys(const volatile void *x)
 #define phys_to_virt phys_to_virt
 static inline void *phys_to_virt(phys_addr_t x)
 {
+#ifdef __CHERI_PURE_CAPABILITY__
+	return cheri_address_set(kernel_data_cap, __phys_to_virt(x));
+#else
 	return (void *)(__phys_to_virt(x));
+#endif
 }
 
 /* Needed already here for resolving __phys_to_pfn() in virt_to_pfn() */
