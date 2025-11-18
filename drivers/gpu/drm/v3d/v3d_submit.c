@@ -664,17 +664,16 @@ v3d_copy_query_info(struct v3d_performance_query_info *query_info,
 
 	for (i = 0; i < count; i++) {
 		struct v3d_performance_query *query = &query_info->queries[i];
-		/* FIXCHERI: The volatile avoids a compiler crash. */
-		u32 __user * volatile ids_pointer;
+		u32 __user * ids_pointer;
 		u32 sync, id;
-		void __user *ids;
+		__u64ptr ids;
 
 		if (get_user(sync, syncs++)) {
 			err = -EFAULT;
 			goto error;
 		}
 
-		if (get_user_ptr(ids, (user_uintptr_t *)kperfmon_ids++)) {
+		if (get_user_ptr(ids, kperfmon_ids++)) {
 			err = -EFAULT;
 			goto error;
 		}
@@ -688,7 +687,7 @@ v3d_copy_query_info(struct v3d_performance_query_info *query_info,
 			goto error;
 		}
 
-		ids_pointer = ids;
+		ids_pointer = u64_to_user_ptr(ids);
 
 		for (j = 0; j < nperfmons; j++) {
 			if (get_user(id, ids_pointer++)) {
