@@ -5,6 +5,11 @@
 /*
  * how to get the current stack pointer from C
  */
-register unsigned long current_stack_pointer asm ("sp");
+
+#ifdef __CHERI_PURE_CAPABILITY__
+register uintptr_t current_stack_pointer asm("csp");
+#else
+register uintptr_t current_stack_pointer asm ("sp");
+#endif
 
 #endif /* __ASM_STACK_POINTER_H */
