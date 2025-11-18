@@ -225,7 +225,7 @@ do {									\
 } while (0)
 
 #define PERCPU_PTR(__p)							\
-	(TYPEOF_UNQUAL(*(__p)) __force __kernel *)((__force unsigned long)(__p))
+	(TYPEOF_UNQUAL(*(__p)) __force __kernel *)((__force uintptr_t)(__p))
 
 #ifdef CONFIG_SMP
 
