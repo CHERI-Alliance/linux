@@ -2251,7 +2251,7 @@ static long dvb_frontend_compat_ioctl(struct file *file, unsigned int cmd,
 		return err;
 	}
 
-	return dvb_frontend_ioctl(file, cmd, (unsigned long)compat_ptr(arg));
+	return dvb_frontend_ioctl(file, cmd, (user_uintptr_t)compat_ptr(arg));
 }
 #endif
 

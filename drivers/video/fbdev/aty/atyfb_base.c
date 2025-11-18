@@ -248,7 +248,7 @@ static int atyfb_ioctl(struct fb_info *info, u_int cmd, user_uintptr_t arg);
 #ifdef CONFIG_COMPAT
 static int atyfb_compat_ioctl(struct fb_info *info, u_int cmd, u_long arg)
 {
-	return atyfb_ioctl(info, cmd, (u_long)compat_ptr(arg));
+	return atyfb_ioctl(info, cmd, (user_uintptr_t)compat_ptr(arg));
 }
 #endif
 

@@ -1322,7 +1322,7 @@ static long mtdchar_compat_ioctl(struct file *file, unsigned int cmd,
 	}
 
 	default:
-		ret = mtdchar_ioctl(file, cmd, (unsigned long)argp);
+		ret = mtdchar_ioctl(file, cmd, (user_uintptr_t)argp);
 	}
 
 	mutex_unlock(&master->master.chrdev_lock);

@@ -2824,7 +2824,7 @@ static long pkt_ctl_ioctl(struct file *file, unsigned int cmd, user_uintptr_t ar
 #ifdef CONFIG_COMPAT
 static long pkt_ctl_compat_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
-	return pkt_ctl_ioctl(file, cmd, (unsigned long)compat_ptr(arg));
+	return pkt_ctl_ioctl(file, cmd, (user_uintptr_t)compat_ptr(arg));
 }
 #endif
 

@@ -555,8 +555,8 @@ spidev_compat_ioc_message(struct file *filp, unsigned int cmd,
 
 	/* Convert buffer pointers */
 	for (n = 0; n < n_ioc; n++) {
-		ioc[n].rx_buf = (uintptr_t) compat_ptr(ioc[n].rx_buf);
-		ioc[n].tx_buf = (uintptr_t) compat_ptr(ioc[n].tx_buf);
+		ioc[n].rx_buf = (user_uintptr_t) compat_ptr(ioc[n].rx_buf);
+		ioc[n].tx_buf = (user_uintptr_t) compat_ptr(ioc[n].tx_buf);
 	}
 
 	/* translate to spi_message, execute */
@@ -578,7 +578,7 @@ spidev_compat_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 			&& _IOC_DIR(cmd) == _IOC_WRITE)
 		return spidev_compat_ioc_message(filp, cmd, arg);
 
-	return spidev_ioctl(filp, cmd, (unsigned long)compat_ptr(arg));
+	return spidev_ioctl(filp, cmd, (user_uintptr_t)compat_ptr(arg));
 }
 #else
 #define spidev_compat_ioctl NULL
