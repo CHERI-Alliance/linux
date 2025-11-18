@@ -92,6 +92,153 @@ struct compat_iovec {
 	compat_size_t	iov_len;
 };
 
+#define __c64c_sizeof(iscompat, type)					\
+	(unlikely(iscompat) ? sizeof(struct __c64_##type) :		\
+			      sizeof(struct type))
+#define __c64_sizeof(type) __c64c_sizeof(in_compat64_syscall(), type)
+#define __c64c_offsetof(iscompat, type, field)				\
+	(unlikely(iscompat) ?						\
+		offsetof(struct __c64_##type, field) :			\
+		offsetof(struct type, field))
+#define __c64_offsetof(type, field)					\
+	__c64c_offsetof(in_compat64_syscall(), type, field)
+#define __c64c_offsetofend(iscompat, type, field)			\
+	(unlikely(iscompat) ?						\
+		offsetofend(struct __c64_##type, field) :		\
+		offsetofend(struct type, field))
+#define __c64_offsetofend(type, field)					\
+	__c64c_offsetofend(in_compat64_syscall(), type, field)
+
+#define __c64c_copy_from_user_with_ptr(iscompat, type, dst, src) ({	\
+	BUILD_BUG_ON(!__same_type(*(dst), struct type));		\
+	unsigned long __r;						\
+	if (unlikely(iscompat)) {					\
+		__r = copy_from_user_no_ptr(dst, src,			\
+					sizeof(struct __c64_##type));	\
+		if (likely(__r == 0))					\
+			__from_c64_##type(dst);				\
+	} else {							\
+		__r = copy_from_user_with_ptr(dst, src,			\
+					      sizeof(struct type));     \
+	}								\
+	__r;								\
+})
+#define __c64_copy_from_user_with_ptr(type, dst, src)			\
+	__c64c_copy_from_user_with_ptr(in_compat64_syscall(), type, dst, src)
+
+#define __c64c_copy_to_user_with_ptr(iscompat, type, dst, src) ({	\
+	BUILD_BUG_ON(!__same_type(*(src), struct type));		\
+	unsigned long __r;						\
+	if (unlikely(iscompat)) {					\
+		__to_c64_##type(src);					\
+		__r = copy_to_user_no_ptr(dst, src,			\
+					  sizeof(struct __c64_##type));	\
+	} else {							\
+		__r = copy_to_user_with_ptr(dst, src,			\
+					    sizeof(struct type));	\
+	}								\
+	__r;								\
+})
+#define __c64_copy_to_user_with_ptr(type, dst, src)			\
+	__c64c_copy_to_user_with_ptr(in_compat64_syscall(), type, dst, src)
+
+#define __c64c_copy_to_user_with_ptr_safe(iscompat, type, dst, src) ({	\
+	BUILD_BUG_ON(!__same_type(*(src), struct type));		\
+	unsigned long __r;						\
+	if (unlikely(iscompat)) {					\
+		struct __c64_##type __tmp; 				\
+		__to_c64_##type##_2(&__tmp, src);			\
+		__r = copy_to_user_no_ptr(dst, &__tmp,			\
+					  sizeof(struct __c64_##type));	\
+	} else {							\
+		__r = copy_to_user_with_ptr(dst, src,			\
+					    sizeof(struct type));	\
+	}								\
+	__r;								\
+})
+#define __c64_copy_to_user_with_ptr_safe(type, dst, src)		\
+	__c64c_copy_to_user_with_ptr_safe(in_compat64_syscall(), type, dst, src)
+
+#define __c64c_copy_struct_from_user_with_ptr(iscompat, type, dst, src, usize) \
+({									\
+	BUILD_BUG_ON(!__same_type(*(dst), struct type));		\
+	int __r;							\
+	if (unlikely(iscompat)) {					\
+		__r = 							\
+		copy_struct_from_user_no_ptr(dst, sizeof(struct __c64_##type), \
+				      src, usize);			\
+		if (likely(__r == 0))					\
+			__from_c64_##type(dst);				\
+	} else {							\
+		__r = copy_struct_from_user_with_ptr(dst,		\
+		      sizeof(struct type), src, usize);			\
+	}								\
+	__r;								\
+})
+#define __c64_copy_struct_from_user_with_ptr(type, dst, src, usize)	\
+	__c64c_copy_struct_from_user_with_ptr(in_compat64_syscall(), type, dst, src, usize)
+
+#define __c64c_get_user(iscompat, type, x, p, field) ({			\
+	BUILD_BUG_ON(!__same_type(*(p), struct type));			\
+	long __gerr = -EFAULT;						\
+	if (unlikely(iscompat)) {					\
+		struct __c64_##type __user *cp = (void __user *)p;	\
+		__gerr = get_user(x, &cp->field);			\
+	} else {							\
+		__gerr = get_user(x, &(p)->field);			\
+	}								\
+	__gerr;								\
+})
+#define __c64_get_user(type, x, p, field)			\
+	__c64c_get_user(in_compat64_syscall(), type, x, p, field)
+
+#define __c64c_put_user(iscompat, type, x, p, field) ({			\
+	BUILD_BUG_ON(!__same_type(*(p), struct type));			\
+	long __gerr = -EFAULT;						\
+	if (unlikely(iscompat)) {					\
+		struct __c64_##type __user *cp = (void __user *)p;	\
+		__gerr = put_user(x, &cp->field);			\
+	} else {							\
+		__gerr = put_user(x, &(p)->field);			\
+	}								\
+	__gerr;								\
+})
+#define __c64_put_user(type, x, p, field)				\
+	__c64c_put_user(in_compat64_syscall(), type, x, p, field)
+
+#define __c64c_get_user_ptr(iscompat, type, x, p, field) ({		\
+	BUILD_BUG_ON(!__same_type(*(p), struct type));			\
+	long __gerr = -EFAULT;						\
+	if (unlikely(iscompat)) {					\
+		struct __c64_##type __user *cp = (void __user *)p;	\
+		__typeof__(cp->field) __tmp;				\
+		__gerr = get_user(__tmp, &cp->field);			\
+		x = (__typeof__(x))(user_uintptr_t)compat_ptr(__tmp);	\
+	} else {							\
+		__gerr = get_user_ptr(x, &(p)->field);			\
+	}								\
+	__gerr;								\
+})
+#define __c64_get_user_ptr(type, x, p, field)				\
+	__c64c_get_user_ptr(in_compat64_syscall(), type, x, p, field)
+
+#define __c64c_put_user_ptr(iscompat, type, x, p, field) ({		\
+	BUILD_BUG_ON(!__same_type(*(p), struct type));			\
+	long __gerr = -EFAULT;						\
+	if (unlikely(iscompat)) {					\
+		struct __c64_#type __user *cp = (void __user *)p;	\
+		__typeof__(cp->field) __tmp;				\
+		__tmp = (__typeof__(__tmp) __force)(user_uintptr_t)x;	\
+		__gerr = put_user(__tmp, &cp->field);			\
+	} else {							\
+		__gerr = put_user_ptr(x, &(p)->field);			\
+	}								\
+	__gerr;								\
+})
+#define __c64_put_user_ptr(type, x, p, field)				\
+	__c64c_put_user_ptr(in_compat64_syscall(), type, x, p, field)
+
+
 #ifndef compat_user_stack_pointer
 #define compat_user_stack_pointer() current_user_stack_pointer()
 #endif
@@ -983,5 +1130,28 @@ static inline compat_uptr_t ptr_to_compat(void __user *uptr)
 {
 	return (u32)(unsigned long)uptr;
 }
+
+static __always_inline __maybe_unused unsigned long
+__c64c_ptr64_array_from_user(bool iscompat, __u64ptr *dst, void __user *src,
+			   unsigned long cnt)
+{
+	unsigned long ret;
+	unsigned int i;
+	__c64_uptr *sp = (void *)dst;
+
+	if (likely(!iscompat))
+		return copy_from_user_with_ptr(dst, src,
+					       cnt * sizeof(__u64ptr));
+
+	ret = copy_from_user_no_ptr(dst, src, cnt * sizeof(__c64_uptr));
+	if (ret)
+		return ret;
+	for (i = cnt; i--;)
+		dst[i] = (__u64ptr)(user_uintptr_t)compat_ptr(sp[i]);
+
+	return 0;
+}
+#define __c64_ptr64_array_from_user(dst, src, cnt)			\
+	__c64c_ptr64_array_from_user(in_compat64_syscall(), dst, src, cnt)
 
 #endif /* _LINUX_COMPAT_H */
