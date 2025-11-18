@@ -39,7 +39,7 @@ SYSCALL_DEFINE6(__retptr__(mmap), user_uintptr_t, addr, unsigned long, len,
 }
 #endif
 
-#if defined(CONFIG_32BIT) || defined(CONFIG_COMPAT)
+#if defined(CONFIG_32BIT) || defined(CONFIG_COMPAT32)
 SYSCALL_DEFINE6(__retptr__(mmap2), user_uintptr_t, addr, unsigned long, len,
 	unsigned long, prot, unsigned long, flags,
 	unsigned long, fd, unsigned long, offset)
