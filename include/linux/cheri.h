@@ -156,7 +156,8 @@ bool cheri_check_cap(const void __user * __capability cap, size_t len,
 static __always_inline unsigned long
 cheri_restrict_len(const volatile void __user *c, ptraddr_t max)
 {
-	ptraddr_t l = cheri_base_get(c) + cheri_length_get(c) - (__ptraddr_t)c;
+	ptraddr_t l =
+		cheri_base_get(c) + cheri_length_get(c) - cheri_address_get(c);
 
 	return (l < max)  ? l : max;
 }
