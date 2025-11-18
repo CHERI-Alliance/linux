@@ -69,6 +69,12 @@
 			: "=r" (*(__u64 *)__u.__c)			\
 			: "Q" (*__x) : "memory");			\
 		break;							\
+	case 16:							\
+		BUILD_BUG_ON(sizeof(uintptr_t) != 16);			\
+		asm volatile(__LOAD_RCPC(, %0, %1)			\
+			: "=C" (*(uintptr_t *)__u.__c)			\
+			: "Q" (*__x) : "memory");			\
+		break;							\
 	default:							\
 		__u.__val = *(volatile typeof(*__x) *)__x;		\
 	}								\
