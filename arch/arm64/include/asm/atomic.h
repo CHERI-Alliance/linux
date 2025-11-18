@@ -195,4 +195,97 @@ static __always_inline long arch_atomic64_dec_if_positive(atomic64_t *v)
 
 #define arch_atomic64_dec_if_positive		arch_atomic64_dec_if_positive
 
+/*
+ * uintptr_t arch_atomic operations.
+ */
+
+#define ATOMIC_PTR_OP(op)					\
+	extern void arch_##op(uintptr_t i, atomicuintptr_t *v)	\
+	__compiletime_error("Atomic operation not yet supported");
+
+ATOMIC_PTR_OP(atomicuintptr_andnot)
+ATOMIC_PTR_OP(atomicuintptr_or)
+ATOMIC_PTR_OP(atomicuintptr_xor)
+ATOMIC_PTR_OP(atomicuintptr_add)
+ATOMIC_PTR_OP(atomicuintptr_and)
+ATOMIC_PTR_OP(atomicuintptr_sub)
+
+#undef ATOMIC_PTR_OP
+
+#define ATOMICUPTR_FETCH_OP(name, op)					\
+	extern uintptr_t arch_##op##name(uintptr_t i, atomicuintptr_t *v)	\
+	__compiletime_error("Atomic operation not yet supported");
+
+#define ATOMIC_PTR_FETCH_OPS(op)						\
+	ATOMICUPTR_FETCH_OP(_relaxed, op)					\
+	ATOMICUPTR_FETCH_OP(_acquire, op)					\
+	ATOMICUPTR_FETCH_OP(_release, op)					\
+	ATOMICUPTR_FETCH_OP(        , op)
+
+ATOMIC_PTR_FETCH_OPS(atomicuintptr_fetch_andnot)
+ATOMIC_PTR_FETCH_OPS(atomicuintptr_fetch_or)
+ATOMIC_PTR_FETCH_OPS(atomicuintptr_fetch_xor)
+ATOMIC_PTR_FETCH_OPS(atomicuintptr_fetch_add)
+ATOMIC_PTR_FETCH_OPS(atomicuintptr_fetch_and)
+ATOMIC_PTR_FETCH_OPS(atomicuintptr_fetch_sub)
+ATOMIC_PTR_FETCH_OPS(atomicuintptr_add_return)
+ATOMIC_PTR_FETCH_OPS(atomicuintptr_sub_return)
+
+#undef ATOMICUPTR_FETCH_OP
+#undef ATOMIC_PTR_FETCH_OPS
+
+extern uintptr_t arch_atomicuintptr_dec_if_positive(atomicuintptr_t *v)
+__compiletime_error("Atomic operation not yet supported");
+
+#define arch_atomicuintptr_read			arch_atomic_read
+#define arch_atomicuintptr_set			arch_atomic_set
+
+#define arch_atomicuintptr_add_return_relaxed	arch_atomicuintptr_add_return_relaxed
+#define arch_atomicuintptr_add_return_acquire	arch_atomicuintptr_add_return_acquire
+#define arch_atomicuintptr_add_return_release	arch_atomicuintptr_add_return_release
+#define arch_atomicuintptr_add_return		arch_atomicuintptr_add_return
+
+#define arch_atomicuintptr_sub_return_relaxed	arch_atomicuintptr_sub_return_relaxed
+#define arch_atomicuintptr_sub_return_acquire	arch_atomicuintptr_sub_return_acquire
+#define arch_atomicuintptr_sub_return_release	arch_atomicuintptr_sub_return_release
+#define arch_atomicuintptr_sub_return		arch_atomicuintptr_sub_return
+
+#define arch_atomicuintptr_fetch_add_relaxed	arch_atomicuintptr_fetch_add_relaxed
+#define arch_atomicuintptr_fetch_add_acquire	arch_atomicuintptr_fetch_add_acquire
+#define arch_atomicuintptr_fetch_add_release	arch_atomicuintptr_fetch_add_release
+#define arch_atomicuintptr_fetch_add		arch_atomicuintptr_fetch_add
+
+#define arch_atomicuintptr_fetch_sub_relaxed	arch_atomicuintptr_fetch_sub_relaxed
+#define arch_atomicuintptr_fetch_sub_acquire	arch_atomicuintptr_fetch_sub_acquire
+#define arch_atomicuintptr_fetch_sub_release	arch_atomicuintptr_fetch_sub_release
+#define arch_atomicuintptr_fetch_sub		arch_atomicuintptr_fetch_sub
+
+#define arch_atomicuintptr_fetch_and_relaxed	arch_atomicuintptr_fetch_and_relaxed
+#define arch_atomicuintptr_fetch_and_acquire	arch_atomicuintptr_fetch_and_acquire
+#define arch_atomicuintptr_fetch_and_release	arch_atomicuintptr_fetch_and_release
+#define arch_atomicuintptr_fetch_and		arch_atomicuintptr_fetch_and
+
+#define arch_atomicuintptr_fetch_andnot_relaxed	arch_atomicuintptr_fetch_andnot_relaxed
+#define arch_atomicuintptr_fetch_andnot_acquire	arch_atomicuintptr_fetch_andnot_acquire
+#define arch_atomicuintptr_fetch_andnot_release	arch_atomicuintptr_fetch_andnot_release
+#define arch_atomicuintptr_fetch_andnot		arch_atomicuintptr_fetch_andnot
+
+#define arch_atomicuintptr_fetch_or_relaxed	arch_atomicuintptr_fetch_or_relaxed
+#define arch_atomicuintptr_fetch_or_acquire	arch_atomicuintptr_fetch_or_acquire
+#define arch_atomicuintptr_fetch_or_release	arch_atomicuintptr_fetch_or_release
+#define arch_atomicuintptr_fetch_or		arch_atomicuintptr_fetch_or
+
+#define arch_atomicuintptr_fetch_xor_relaxed	arch_atomicuintptr_fetch_xor_relaxed
+#define arch_atomicuintptr_fetch_xor_acquire	arch_atomicuintptr_fetch_xor_acquire
+#define arch_atomicuintptr_fetch_xor_release	arch_atomicuintptr_fetch_xor_release
+#define arch_atomicuintptr_fetch_xor		arch_atomicuintptr_fetch_xor
+
+#define arch_atomicuintptr_andnot		arch_atomicuintptr_andnot
+
+#define arch_atomicuintptr_dec_if_positive	arch_atomicuintptr_dec_if_positive
+
+#define arch_atomicuintptr_fetch_add_unless arch_atomicuintptr_fetch_add_unless
+uintptr_t arch_atomicuintptr_fetch_add_unless(atomicuintptr_t *v, uintptr_t a, ptraddr_t u);
+__compiletime_error("Atomic operation not yet supported");
+
 #endif /* __ASM_ATOMIC_H */
