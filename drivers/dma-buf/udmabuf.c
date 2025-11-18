@@ -537,7 +537,7 @@ static const struct file_operations udmabuf_fops = {
 	.owner		= THIS_MODULE,
 	.unlocked_ioctl = udmabuf_ioctl,
 #ifdef CONFIG_COMPAT
-	.compat_ioctl   = udmabuf_ioctl,
+	.compat_ioctl   = compat_ptr_ioctl,
 #endif
 };
 

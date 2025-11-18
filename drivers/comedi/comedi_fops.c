@@ -3197,7 +3197,7 @@ static int compat_insn(struct file *file, unsigned long arg)
 	struct comedi_insn insn;
 	int rc;
 
-	rc = get_compat_insn(&insn, (void __user *)arg);
+	rc = get_compat_insn(&insn, (void __user *)compat_ptr(arg));
 	if (rc)
 		return rc;
 
@@ -3223,8 +3223,7 @@ static long comedi_compat_ioctl(struct file *file, unsigned int cmd, unsigned lo
 	case COMEDI_BUFCONFIG:
 	case COMEDI_BUFINFO:
 		/* Just need to translate the pointer argument. */
-		arg = (unsigned long)compat_ptr(arg);
-		rc = comedi_unlocked_ioctl(file, cmd, arg);
+		rc = comedi_unlocked_ioctl(file, cmd, (user_uintptr_t)compat_ptr(arg));
 		break;
 	case COMEDI_LOCK:
 	case COMEDI_UNLOCK:
@@ -3233,7 +3232,7 @@ static long comedi_compat_ioctl(struct file *file, unsigned int cmd, unsigned lo
 	case COMEDI_SETRSUBD:
 	case COMEDI_SETWSUBD:
 		/* No translation needed. */
-		rc = comedi_unlocked_ioctl(file, cmd, arg);
+		rc = comedi_unlocked_ioctl(file, cmd, __c_fakeu(arg));
 		break;
 	case COMEDI32_CHANINFO:
 		rc = compat_chaninfo(file, arg);

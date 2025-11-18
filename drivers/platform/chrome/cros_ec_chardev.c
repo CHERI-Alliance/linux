@@ -371,7 +371,7 @@ static const struct file_operations chardev_fops = {
 	.release	= cros_ec_chardev_release,
 	.unlocked_ioctl	= cros_ec_chardev_ioctl,
 #ifdef CONFIG_COMPAT
-	.compat_ioctl	= cros_ec_chardev_ioctl,
+	.compat_ioctl	= compat_ptr_ioctl,
 #endif
 };
 

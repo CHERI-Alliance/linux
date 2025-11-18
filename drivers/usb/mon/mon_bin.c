@@ -1147,7 +1147,7 @@ static long mon_bin_compat_ioctl(struct file *file,
 		{
 		struct mon_bin_get32 getb;
 
-		if (copy_from_user(&getb, (void __user *)arg,
+		if (copy_from_user(&getb, (void __user *)compat_ptr(arg),
 					    sizeof(struct mon_bin_get32)))
 			return -EFAULT;
 
@@ -1186,13 +1186,13 @@ static long mon_bin_compat_ioctl(struct file *file,
 		return 0;
 
 	case MON_IOCG_STATS:
-		return mon_bin_ioctl(file, cmd, (unsigned long) compat_ptr(arg));
+		return mon_bin_ioctl(file, cmd, (user_uintptr_t) compat_ptr(arg));
 
 	case MON_IOCQ_URB_LEN:
 	case MON_IOCQ_RING_SIZE:
 	case MON_IOCT_RING_SIZE:
 	case MON_IOCH_MFLUSH:
-		return mon_bin_ioctl(file, cmd, arg);
+		return mon_bin_ioctl(file, cmd, __c_fakeu(arg));
 
 	default:
 		;

@@ -3096,9 +3096,9 @@ static int mtip_block_compat_ioctl(struct block_device *dev,
 			sizeof(struct mtip_compat_ide_task_request_s);
 
 		compat_req_task =
-			(struct mtip_compat_ide_task_request_s __user *) arg;
+			(struct mtip_compat_ide_task_request_s __user *) compat_ptr(arg);
 
-		if (copy_from_user(&req_task, (void __user *) arg,
+		if (copy_from_user(&req_task, (void __user *) compat_ptr(arg),
 			compat_tasksize - (2 * sizeof(compat_long_t))))
 			return -EFAULT;
 
@@ -3110,10 +3110,10 @@ static int mtip_block_compat_ioctl(struct block_device *dev,
 
 		outtotal = sizeof(struct mtip_compat_ide_task_request_s);
 
-		ret = exec_drive_taskfile(dd, (void __user *) arg,
+		ret = exec_drive_taskfile(dd, (void __user *) compat_ptr(arg),
 						&req_task, outtotal);
 
-		if (copy_to_user((void __user *) arg, &req_task,
+		if (copy_to_user((void __user *) compat_ptr(arg), &req_task,
 				compat_tasksize -
 				(2 * sizeof(compat_long_t))))
 			return -EFAULT;
@@ -3127,7 +3127,7 @@ static int mtip_block_compat_ioctl(struct block_device *dev,
 		return ret;
 	}
 	default:
-		return mtip_hw_ioctl(dd, cmd, arg);
+		return mtip_hw_ioctl(dd, cmd, (user_uintptr_t)compat_ptr(arg));
 	}
 }
 #endif

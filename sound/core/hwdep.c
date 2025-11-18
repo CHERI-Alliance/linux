@@ -314,7 +314,17 @@ static int snd_hwdep_control_ioctl(struct snd_card *card,
 }
 
 #ifdef CONFIG_COMPAT
+#ifdef CONFIG_COMPAT64
+static long snd_hwdep_ioctl_compat(struct file * file, unsigned int cmd,
+				   unsigned long arg)
+{
+	/* FIXCHERI: Implement */
+	WARN_ONCE(1, "NOT IMPLEMENTED FOR COMPAT64");
+	return -ENOSYS;
+}
+#else
 #include "hwdep_compat.c"
+#endif
 #else
 #define snd_hwdep_ioctl_compat	NULL
 #endif

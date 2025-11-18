@@ -187,7 +187,7 @@ static const struct file_operations dma_heap_fops = {
 	.open		= dma_heap_open,
 	.unlocked_ioctl = dma_heap_ioctl,
 #ifdef CONFIG_COMPAT
-	.compat_ioctl	= dma_heap_ioctl,
+	.compat_ioctl	= compat_ptr_ioctl,
 #endif
 };
 
