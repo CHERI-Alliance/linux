@@ -5642,7 +5642,9 @@ size_t ZSTD_freeCDict(ZSTD_CDict* cdict)
  *         Since workspace was allocated externally, it must be freed externally.
  */
 #pragma clang diagnostic push
+#if __has_feature(cheri)
 #pragma clang diagnostic ignored "-Wcheri-inefficient"
+#endif
 const ZSTD_CDict* ZSTD_initStaticCDict(
                                  void* workspace, size_t workspaceSize,
                            const void* dict, size_t dictSize,
