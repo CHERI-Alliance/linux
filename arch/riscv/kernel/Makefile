@@ -5,6 +5,7 @@
 
 CFLAGS_syscall_table.o	+= $(call cc-disable-warning, override-init)
 CFLAGS_compat_syscall_table.o += $(call cc-disable-warning, override-init)
+CFLAGS_compat64_syscall_table.o += $(call cc-disable-warning, override-init)
 
 ifdef CONFIG_KEXEC_CORE
 AFLAGS_kexec_relocate.o := -mcmodel=medany $(call cc-option,-mno-relax)
@@ -121,7 +122,8 @@ obj-$(CONFIG_CFI)		+= cfi.o
 obj-$(CONFIG_CHERI_KERNEL)	+= riscvcheri.o
 
 obj-$(CONFIG_EFI)		+= efi.o
-obj-$(CONFIG_COMPAT)		+= compat_syscall_table.o
+obj-$(CONFIG_COMPAT32)		+= compat_syscall_table.o
+obj-$(CONFIG_COMPAT64)		+= compat64_syscall_table.o
 obj-$(CONFIG_COMPAT)		+= compat_signal.o
 obj-$(CONFIG_COMPAT)		+= compat_vdso/
 

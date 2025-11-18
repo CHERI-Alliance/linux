@@ -5,7 +5,7 @@
 
 #define __ARCH_WANT_SYS_CLONE
 
-#ifdef CONFIG_COMPAT
+#ifdef CONFIG_COMPAT32
 #define __ARCH_WANT_COMPAT_TRUNCATE64
 #define __ARCH_WANT_COMPAT_FTRUNCATE64
 #define __ARCH_WANT_COMPAT_FALLOCATE
@@ -16,7 +16,7 @@
 #define __ARCH_WANT_COMPAT_FADVISE64_64
 #endif
 
-#if (defined(__LP64__) || __has_feature(capabilities)) && !defined(__SYSCALL_COMPAT)
+#if (defined(__LP64__) || __has_feature(capabilities)) && (!defined(__SYSCALL_COMPAT) || defined(CONFIG_COMPAT64))
 #define __ARCH_WANT_NEW_STAT
 #define __ARCH_WANT_SET_GET_RLIMIT
 #endif /* __LP64__ */
