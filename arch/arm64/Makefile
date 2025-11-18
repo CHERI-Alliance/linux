@@ -213,8 +213,8 @@ vdso_prepare: prepare0
 	$(Q)$(MAKE) $(build)=arch/arm64/kernel/vdso \
 	include/generated/vdso-offsets.h arch/arm64/kernel/vdso/vdso.so
 ifdef CONFIG_CHERI_PURECAP_UABI
-	$(Q)$(MAKE) BUILD_PURECAP_VDSO=y $(build)=arch/arm64/kernel/vdso \
-	include/generated/vdso-purecap-offsets.h arch/arm64/kernel/vdso/purecap/vdso.so
+	$(Q)$(MAKE) $(build)=arch/arm64/kernel/vdso-purecap \
+	include/generated/vdso-purecap-offsets.h arch/arm64/kernel/vdso-purecap/vdso.so
 endif
 ifdef CONFIG_COMPAT_VDSO
 	$(Q)$(MAKE) $(build)=arch/arm64/kernel/vdso32 \
