@@ -443,7 +443,9 @@ static const struct nla_policy nft_tunnel_key_policy[NFTA_TUNNEL_KEY_MAX + 1] = 
 };
 
 #pragma clang diagnostic push
+#if __has_feature(cheri)
 #pragma clang diagnostic ignored "-Wcheri-inefficient"
+#endif
 static int nft_tunnel_obj_init(const struct nft_ctx *ctx,
 			       const struct nlattr * const tb[],
 			       struct nft_object *obj)

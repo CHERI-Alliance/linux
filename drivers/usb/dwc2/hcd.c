@@ -2452,7 +2452,9 @@ static int dwc2_alloc_split_dma_aligned_buf(struct dwc2_hsotg *hsotg,
 #define DWC2_USB_DMA_ALIGN 4
 
 #pragma clang diagnostic push
+#if __has_feature(cheri)
 #pragma clang diagnostic ignored "-Wcheri-inefficient"
+#endif
 static void dwc2_free_dma_aligned_buffer(struct urb *urb)
 {
 	void *stored_xfer_buffer;
@@ -2480,10 +2482,7 @@ static void dwc2_free_dma_aligned_buffer(struct urb *urb)
 
 	urb->transfer_flags &= ~URB_ALIGNED_TEMP_BUFFER;
 }
-#pragma clang diagnostic pop
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wcheri-inefficient"
 static int dwc2_alloc_dma_aligned_buffer(struct urb *urb, gfp_t mem_flags)
 {
 	void *kmalloc_ptr;

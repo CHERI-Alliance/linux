@@ -1071,7 +1071,9 @@ static void tda998x_configure_audio(struct tda998x_priv *priv)
 
 #ifdef CONFIG_SND_SOC_HDMI_CODEC
 #pragma clang diagnostic push
+#if __has_feature(cheri)
 #pragma clang diagnostic ignored "-Wcheri-inefficient"
+#endif
 static int tda998x_audio_hw_params(struct device *dev, void *data,
 				   struct hdmi_codec_daifmt *daifmt,
 				   struct hdmi_codec_params *params)
