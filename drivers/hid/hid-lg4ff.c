@@ -375,7 +375,9 @@ int lg4ff_raw_event(struct hid_device *hdev, struct hid_report *report,
 }
 
 #pragma clang diagnostic push
+#if __has_feature(cheri)
 #pragma clang diagnostic ignored "-Wcheri-inefficient"
+#endif
 static void lg4ff_init_wheel_data(struct lg4ff_wheel_data * const wdata, const struct lg4ff_wheel *wheel,
 				  const struct lg4ff_multimode_wheel *mmode_wheel,
 				  const u16 real_product_id)
@@ -1261,7 +1263,9 @@ static int lg4ff_handle_multimode_wheel(struct hid_device *hid, u16 *real_produc
 
 
 #pragma clang diagnostic push
+#if __has_feature(cheri)
 #pragma clang diagnostic ignored "-Wcheri-inefficient"
+#endif
 int lg4ff_init(struct hid_device *hid)
 {
 	struct hid_input *hidinput;
