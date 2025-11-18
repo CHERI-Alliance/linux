@@ -1147,8 +1147,12 @@ config COMPAT
 
 	  If you want to execute 32-bit userspace applications, say Y.
 
+config COMPAT64
+	bool
+	depends on COMPAT
+
 config COMPAT32
-	def_bool y if COMPAT
+	def_bool y if COMPAT && !COMPAT64
 
 config PARAVIRT
 	bool "Enable paravirtualization code"
@@ -1373,8 +1377,6 @@ config RISCV_CHERI
 	default n
 	depends on CC_HAS_RISCV_CHERI
 	depends on 64BIT
-	# FIXCHERI: Implement 64bit integer pointer mode support at least
-	depends on !COMPAT
 	select ARCH_NO_SWAP
 	select ARCH_HAS_CHERI_CAPABILITIES
 	select ARCH_HAS_CHERI_UABI_AND_KERNEL

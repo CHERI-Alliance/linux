@@ -21,7 +21,7 @@ struct compat_sigcontext {
 
 struct compat_ucontext {
 	compat_ulong_t		uc_flags;
-	struct compat_ucontext	*uc_link;
+	compat_uptr_t		uc_link;
 	compat_stack_t		uc_stack;
 	sigset_t		uc_sigmask;
 	/* There's some padding here to allow sigset_t to be expanded in the
@@ -104,11 +104,17 @@ static long compat_restore_sigcontext(struct pt_regs *regs,
 {
 	long err;
 	struct compat_user_regs_struct cregs;
+#ifdef CONFIG_CHERI_KERNEL
+	__kernel_register_t pcc = regs->epc;
+#endif
 
 	/* sc_regs is structured the same as the start of pt_regs */
 	err = __copy_from_user(&cregs, &sc->sc_regs, sizeof(sc->sc_regs));
 
 	cregs_to_regs(&cregs, regs);
+#ifdef CONFIG_CHERI_KERNEL
+	regs->epc = cheri_address_set(pcc, cregs.pc);
+#endif
 
 	/* Restore the floating-point state. */
 	if (has_fpu())
@@ -127,6 +133,9 @@ COMPAT_SYSCALL_DEFINE0(rt_sigreturn)
 	current->restart_block.fn = do_no_restart_syscall;
 
 	frame = (struct compat_rt_sigframe __user *)regs->sp;
+#ifdef CONFIG_COMPAT64
+	cheri_fixup_bounds((void __user *)regs->ddc, frame);
+#endif
 
 	if (!access_ok(frame, sizeof(*frame)))
 		goto badframe;
@@ -142,7 +151,7 @@ COMPAT_SYSCALL_DEFINE0(rt_sigreturn)
 	if (compat_restore_altstack(&frame->uc.uc_stack))
 		goto badframe;
 
-	return regs->a0;
+	return __c_ua(regs->a0);
 
 badframe:
 	task = current;
@@ -178,7 +187,7 @@ static inline void __user *compat_get_sigframe(struct ksignal *ksig,
 {
 	unsigned long sp;
 	/* Default to using normal stack */
-	sp = regs->sp;
+	sp = __c_ua(regs->sp);
 
 	/*
 	 * If we are on the alternate signal stack and would overflow it, don't.
@@ -188,12 +197,12 @@ static inline void __user *compat_get_sigframe(struct ksignal *ksig,
 		return (void __user __force *)(-1UL);
 
 	/* This is the X/Open sanctioned signal stack switching. */
-	sp = sigsp(sp, ksig) - framesize;
+	sp = __c_ua(sigsp(__c_fakeu(sp), ksig)) - framesize;
 
 	/* Align the stack frame. */
 	sp &= ~0xfUL;
 
-	return (void __user *)sp;
+	return compat_ptr(sp);
 }
 
 int compat_setup_rt_frame(struct ksignal *ksig, sigset_t *set,
@@ -210,15 +219,15 @@ int compat_setup_rt_frame(struct ksignal *ksig, sigset_t *set,
 
 	/* Create the ucontext. */
 	err |= __put_user(0, &frame->uc.uc_flags);
-	err |= __put_user(NULL, &frame->uc.uc_link);
-	err |= __compat_save_altstack(&frame->uc.uc_stack, regs->sp);
+	err |= __put_user(0, &frame->uc.uc_link);
+	err |= __compat_save_altstack(&frame->uc.uc_stack, __c_ua(regs->sp));
 	err |= compat_setup_sigcontext(frame, regs);
 	err |= __copy_to_user(&frame->uc.uc_sigmask, set, sizeof(*set));
 	if (err)
 		return -EFAULT;
 
-	regs->ra = (unsigned long)COMPAT_VDSO_SYMBOL(
-			current->mm->context.vdso, rt_sigreturn);
+	regs->ra = __c_fakeu(COMPAT_VDSO_SYMBOL(
+			current->mm->context.vdso, rt_sigreturn));
 
 	/*
 	 * Set up registers for signal handler.
@@ -227,11 +236,11 @@ int compat_setup_rt_frame(struct ksignal *ksig, sigset_t *set,
 	 * We always pass siginfo and mcontext, regardless of SA_SIGINFO,
 	 * since some things rely on this (e.g. glibc's debug/segfault.c).
 	 */
-	regs->epc = (unsigned long)ksig->ka.sa.sa_handler;
-	regs->sp = (unsigned long)frame;
-	regs->a0 = ksig->sig;                     /* a0: signal number */
-	regs->a1 = (unsigned long)(&frame->info); /* a1: siginfo pointer */
-	regs->a2 = (unsigned long)(&frame->uc);   /* a2: ucontext pointer */
+	regs->epc = (user_uintptr_t)ksig->ka.sa.sa_handler;
+	regs->sp = __c_fakeu(__c_pa_u(frame));
+	regs->a0 = ksig->sig;                        /* a0: signal number */
+	regs->a1 = __c_fakeu(__c_pa(&frame->info));  /* a1: siginfo pointer */
+	regs->a2 = __c_fakeu(__c_pa(&frame->uc));    /* a2: ucontext pointer */
 
 #if COMPAT_DEBUG_SIG
 	pr_info("SIG deliver (%s:%d): sig=%d pc=%p ra=%p sp=%p\n",

@@ -1768,6 +1768,7 @@ config CHERI_UABI_AND_KERNEL
 	bool "CHERI protection for kernel and userspace"
 	select CHERI_PURECAP_UABI
 	select CHERI_KERNEL
+	select COMPAT64 if COMPAT
 	depends on ARCH_HAS_CHERI_CAPABILITIES
 	depends on ARCH_HAS_CHERI_UABI_AND_KERNEL
 	help

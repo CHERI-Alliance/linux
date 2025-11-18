@@ -15,7 +15,7 @@ asmlinkage long __riscv_sys_ni_syscall(const struct pt_regs *);
 #ifdef CONFIG_64BIT
 
 #define __SYSCALL_SE_DEFINEx(x, prefix, name, ret_type, ...)				\
-	static ret_type __se_##prefix##name(__MAP(x,__SC_LONG,__VA_ARGS__));		\
+	static ret_type __se_##prefix##name(__MAP(x,__SC_LONG,__VA_ARGS__));	\
 	static ret_type __se_##prefix##name(__MAP(x,__SC_LONG,__VA_ARGS__))
 
 #define SC_RISCV_REGS_TO_ARGS(x, ...)							\
@@ -47,31 +47,62 @@ asmlinkage long __riscv_sys_ni_syscall(const struct pt_regs *);
 
 #ifdef CONFIG_COMPAT
 
-#define COMPAT_SYSCALL_DEFINEx(x, name, ...)						\
-	asmlinkage long __riscv_compat_sys##name(const struct pt_regs *regs);		\
-	ALLOW_ERROR_INJECTION(__riscv_compat_sys##name, ERRNO);				\
-	static inline long __do_compat_sys##name(__MAP(x,__SC_DECL,__VA_ARGS__));	\
-	__SYSCALL_SE_DEFINEx(x, compat_sys, name, long, __VA_ARGS__)			\
-	{										\
-		return __do_compat_sys##name(__MAP(x,__SC_DELOUSE,__VA_ARGS__));	\
-	}										\
-	asmlinkage long __riscv_compat_sys##name(const struct pt_regs *regs)		\
-	{										\
-		return __se_compat_sys##name(SC_RISCV_REGS_TO_ARGS(x,__VA_ARGS__));	\
-	}										\
-	static inline long __do_compat_sys##name(__MAP(x,__SC_DECL,__VA_ARGS__))
+#define COMPAT_SYSCALL_DEFINEx(x, name, ...)							\
+	asmlinkage long __riscv_compatentry_compat_sys##name(const struct pt_regs *regs);	\
+	ALLOW_ERROR_INJECTION(__riscv_compatentry_compat_sys##name, ERRNO);			\
+	static inline long __do_compatentry_compat_sys##name(__MAP(x,__SC_DECL,__VA_ARGS__));	\
+	__SYSCALL_SE_DEFINEx(x, compatentry_compat_sys, name, long, __VA_ARGS__)		\
+	{											\
+		return __do_compatentry_compat_sys##name(__MAP(x,__SC_DELOUSE,__VA_ARGS__));	\
+	}											\
+	asmlinkage long __riscv_compatentry_compat_sys##name(const struct pt_regs *regs)	\
+	{											\
+		return __se_compatentry_compat_sys##name(SC_RISCV_REGS_TO_ARGS(x,__VA_ARGS__));	\
+	}											\
+	static inline long __do_compatentry_compat_sys##name(__MAP(x,__SC_DECL,__VA_ARGS__))
 
-#define COMPAT_SYSCALL_DEFINE0(sname)							\
-	asmlinkage long __riscv_compat_sys_##sname(const struct pt_regs *__unused);	\
-	ALLOW_ERROR_INJECTION(__riscv_compat_sys_##sname, ERRNO);			\
-	asmlinkage long __riscv_compat_sys_##sname(const struct pt_regs *__unused)
+#define COMPAT_SYSCALL_DEFINE0(sname)								\
+	asmlinkage long __riscv_compatentry_compat_sys_##sname(const struct pt_regs *__unused);	\
+	ALLOW_ERROR_INJECTION(__riscv_compatentry_compat_sys_##sname, ERRNO);			\
+	asmlinkage long __riscv_compatentry_compat_sys_##sname(const struct pt_regs *__unused)
 
-#define COND_SYSCALL_COMPAT(name) 							\
-	asmlinkage long __weak __riscv_compat_sys_##name(const struct pt_regs *regs);	\
-	asmlinkage long __weak __riscv_compat_sys_##name(const struct pt_regs *regs)	\
+#define COND_SYSCALL_COMPAT(name) 									\
+	asmlinkage long __weak __riscv_compatentry_compat_sys_##name(const struct pt_regs *regs);	\
+	asmlinkage long __weak __riscv_compatentry_compat_sys_##name(const struct pt_regs *regs)	\
+	{												\
+		return sys_ni_syscall();								\
+	}
+
+#define __RISCV_SYS_STUB(x, name, ...)							\
+	asmlinkage long __riscv_compatentry_sys##name(const struct pt_regs *regs);	\
+	ALLOW_ERROR_INJECTION(__riscv_compatentry_sys##name, ERRNO);			\
+	__SYSCALL_SE_DEFINEx(x, compatentry_sys, name, long, __VA_ARGS__)		\
+	{										\
+		long ret = (long __force)__do_sys##name(__MAP(x,__SC_DELOUSE,__VA_ARGS__));\
+		__PROTECT(x, ret,__MAP(x,__SC_ARGS,__VA_ARGS__));			\
+		return ret;								\
+	}										\
+	asmlinkage long __riscv_compatentry_sys##name(const struct pt_regs *regs)	\
+	{										\
+		return __se_compatentry_sys##name(SC_RISCV_REGS_TO_ARGS(x,__VA_ARGS__));\
+	}
+
+#define __RISCV_SYS_STUB0(name)								\
+	asmlinkage long __riscv_compatentry_sys##name(const struct pt_regs *__unused)	\
+		__attribute__((alias(__stringify(__riscv_sys##name))));
+
+#define __RISCV_SYS_COND_STUB(name)							\
+	asmlinkage long __riscv_compatentry_sys_##name(const struct pt_regs *regs);	\
+	asmlinkage long __weak __riscv_compatentry_sys_##name(const struct pt_regs *regs)\
 	{										\
 		return sys_ni_syscall();						\
 	}
+
+#else
+
+#define __RISCV_SYS_STUB(x, name, ...)
+#define __RISCV_SYS_STUB0(name)
+#define __RISCV_SYS_COND_STUB(name)
 
 #endif /* CONFIG_COMPAT */
 
@@ -122,6 +153,7 @@ asmlinkage long __riscv_sys_ni_syscall(const struct pt_regs *);
 	{									\
 		return __se_sys##name(SC_RISCV_REGS_TO_ARGS(x,__VA_ARGS__));	\
 	}									\
+	__RISCV_SYS_STUB(x, name, __VA_ARGS__)					\
 	static inline ret_type __do_sys##name(__MAP(x,__SC_DECL,__VA_ARGS__))
 
 #define SYSCALL_METADATA(x, sname, ret_type, ...) \
@@ -140,6 +172,7 @@ asmlinkage long __riscv_sys_ni_syscall(const struct pt_regs *);
 	SYSCALL_METADATA(0, sname, ret_tpye);					\
 	asmlinkage ret_type __riscv_sys##sname(const struct pt_regs *__unused);	\
 	ALLOW_ERROR_INJECTION(__riscv_sys##sname, ERRNO);			\
+	__RISCV_SYS_STUB0(sname)						\
 	asmlinkage ret_type __riscv_sys##sname(const struct pt_regs *__unused)
 
 #define __SYSCALL_DEFINE0_ANNOTATED(name) __SYSCALL_DEFINE0(name)
@@ -150,6 +183,7 @@ asmlinkage long __riscv_sys_ni_syscall(const struct pt_regs *);
 	asmlinkage long __weak __riscv_sys_##name(const struct pt_regs *regs)	\
 	{									\
 		return sys_ni_syscall();					\
-	}
+	}									\
+	__RISCV_SYS_COND_STUB(name)
 
 #endif /* __ASM_SYSCALL_WRAPPER_H */

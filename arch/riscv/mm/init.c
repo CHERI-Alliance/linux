@@ -1169,9 +1169,9 @@ static void __init __PI pt_ops_set_early(void)
  */
 static void __init __PI pt_ops_set_fixmap(void)
 {
-#ifdef CONFIG_CHERI_KERNEL
 	/* FIXCHERI: split is wrong for 32-bit. */
 	void *base = NULL;
+#ifdef CONFIG_CHERI_KERNEL
 	ptraddr_t split = 1ULL << 63;
 	base = cheri_address_set(kernel_data_cap, split);
 	base = cheri_bounds_set(base, split);

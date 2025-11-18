@@ -26,7 +26,7 @@
 #include <generated/compat_vdso-offsets.h>
 
 #define COMPAT_VDSO_SYMBOL(base, name)						\
-	(void __user *)((unsigned long)(base) + compat__vdso_##name##_offset)
+	((unsigned long __force)(base) + compat__vdso_##name##_offset)
 
 extern char compat_vdso_start[], compat_vdso_end[];
 

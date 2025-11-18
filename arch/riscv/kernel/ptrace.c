@@ -458,10 +458,13 @@ static int compat_riscv_gpr_set(struct task_struct *target,
 {
 	int ret;
 	struct compat_user_regs_struct cregs;
+	struct pt_regs *regs = task_pt_regs(target);
 
 	ret = user_regset_copyin(&pos, &count, &kbuf, &ubuf, &cregs, 0, -1);
 
+	register_t pcc = regs->epc;
 	cregs_to_regs(&cregs, task_pt_regs(target));
+	regs->epc = (register_t)cheri_address_set(pcc, __c_ua(regs->epc));
 
 	return ret;
 }
@@ -469,7 +472,7 @@ static int compat_riscv_gpr_set(struct task_struct *target,
 static const struct user_regset compat_riscv_user_regset[] = {
 	[REGSET_X] = {
 		.core_note_type = NT_PRSTATUS,
-		.n = ELF_NGREG,
+		.n = COMPAT_ELF_NGREG,
 		.size = sizeof(compat_elf_greg_t),
 		.align = sizeof(compat_elf_greg_t),
 		.regset_get = compat_riscv_gpr_get,
