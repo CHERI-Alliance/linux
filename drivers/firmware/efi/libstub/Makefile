@@ -72,7 +72,7 @@ ifeq ($(CONFIG_ARM64_MORELLO),y)
 # In order to make it work, this needs to happen before processing
 # relevant headers included from within the stub sources,
 # but after the config options are set.
-LINUXINCLUDE += -include $(srctree)/$(src)/efistub_aarch64_mode.h
+LINUXINCLUDE += -include $(src)/efistub_aarch64_mode.h
 endif
 
 GCOV_PROFILE			:= n
