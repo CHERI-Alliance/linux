@@ -2152,7 +2152,7 @@ static int proc_control_compat(struct usb_dev_state *ps,
 	struct usbdevfs_ctrltransfer ctrl;
 	u32 udata;
 
-	if (copy_from_user(&ctrl, p32, sizeof(*p32) - sizeof(compat_caddr_t)) ||
+	if (copy_from_user_no_ptr(&ctrl, p32, sizeof(*p32) - sizeof(compat_caddr_t)) ||
 	    get_user(udata, &p32->data))
 		return -EFAULT;
 	ctrl.data = compat_ptr(udata);

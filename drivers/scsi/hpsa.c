@@ -6273,7 +6273,7 @@ static int hpsa_ioctl32_passthru(struct scsi_device *dev, unsigned int cmd,
 		return -EINVAL;
 
 	memset(&arg64, 0, sizeof(arg64));
-	if (copy_from_user(&arg64, arg32, offsetof(IOCTL_Command_struct, buf)))
+	if (copy_from_user_no_ptr(&arg64, arg32, offsetof(IOCTL_Command_struct, buf)))
 		return -EFAULT;
 	if (get_user(cp, &arg32->buf))
 		return -EFAULT;
@@ -6303,7 +6303,7 @@ static int hpsa_ioctl32_big_passthru(struct scsi_device *dev,
 	if (!arg)
 		return -EINVAL;
 	memset(&arg64, 0, sizeof(arg64));
-	if (copy_from_user(&arg64, arg32,
+	if (copy_from_user_no_ptr(&arg64, arg32,
 			   offsetof(BIG_IOCTL32_Command_struct, buf)))
 		return -EFAULT;
 	if (get_user(cp, &arg32->buf))

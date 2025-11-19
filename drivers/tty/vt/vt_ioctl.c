@@ -1028,7 +1028,7 @@ compat_kdfontop_ioctl(struct compat_console_font_op __user *fontop,
 {
 	int i;
 
-	if (copy_from_user(op, fontop, sizeof(struct compat_console_font_op)))
+	if (copy_from_user_no_ptr(op, fontop, sizeof(struct compat_console_font_op)))
 		return -EFAULT;
 	if (!perm && op->op != KD_FONT_OP_GET)
 		return -EPERM;
@@ -1037,7 +1037,7 @@ compat_kdfontop_ioctl(struct compat_console_font_op __user *fontop,
 	if (i)
 		return i;
 	((struct compat_console_font_op *)op)->data = ptr_to_compat(op->data);
-	if (copy_to_user(fontop, op, sizeof(struct compat_console_font_op)))
+	if (copy_to_user_no_ptr(fontop, op, sizeof(struct compat_console_font_op)))
 		return -EFAULT;
 	return 0;
 }
