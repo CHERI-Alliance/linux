@@ -1741,7 +1741,7 @@ COMPAT_SYSCALL_DEFINE3(shmat, int, shmid, compat_uptr_t, shmaddr, int, shmflg)
 	if (err)
 		return err;
 	force_successful_syscall_return();
-	return (long)ret;
+	return (long)__c_ua(ret);
 }
 #endif
 
