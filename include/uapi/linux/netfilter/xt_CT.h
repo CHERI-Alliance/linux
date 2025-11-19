@@ -24,7 +24,10 @@ struct xt_ct_target_info {
 	char helper[16];
 
 	/* Used internally by the kernel */
-	struct nf_conn	*ct __attribute__((aligned(8)));
+	union {
+		struct nf_conn	*ct;
+		__uptr __ct;
+	}  __attribute__((aligned(8)));
 };
 
 struct xt_ct_target_info_v1 {
@@ -36,7 +39,10 @@ struct xt_ct_target_info_v1 {
 	char timeout[32];
 
 	/* Used internally by the kernel */
-	struct nf_conn	*ct __attribute__((aligned(8)));
+	union {
+		struct nf_conn	*ct;
+		__uptr __ct;
+	} __attribute__((aligned(8)));
 };
 
 #endif /* _XT_CT_H */

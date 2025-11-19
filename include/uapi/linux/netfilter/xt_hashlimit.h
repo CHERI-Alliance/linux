@@ -101,7 +101,10 @@ struct xt_hashlimit_mtinfo1 {
 	struct hashlimit_cfg1 cfg;
 
 	/* Used internally by the kernel */
-	struct xt_hashlimit_htable *hinfo __attribute__((aligned(8)));
+	union {
+		struct xt_hashlimit_htable *hinfo;
+		__uptr __hinfo;
+	} __attribute__((aligned(8)));
 };
 
 struct xt_hashlimit_mtinfo2 {
@@ -109,7 +112,10 @@ struct xt_hashlimit_mtinfo2 {
 	struct hashlimit_cfg2 cfg;
 
 	/* Used internally by the kernel */
-	struct xt_hashlimit_htable *hinfo __attribute__((aligned(8)));
+	union {
+		struct xt_hashlimit_htable *hinfo;
+		__uptr __hinfo;
+	} __attribute__((aligned(8)));
 };
 
 struct xt_hashlimit_mtinfo3 {
@@ -117,7 +123,10 @@ struct xt_hashlimit_mtinfo3 {
 	struct hashlimit_cfg3 cfg;
 
 	/* Used internally by the kernel */
-	struct xt_hashlimit_htable *hinfo __attribute__((aligned(8)));
+	union {
+		struct xt_hashlimit_htable *hinfo;
+		__uptr __hinfo;
+	} __attribute__((aligned(8)));
 };
 
 #endif /* _UAPI_XT_HASHLIMIT_H */
