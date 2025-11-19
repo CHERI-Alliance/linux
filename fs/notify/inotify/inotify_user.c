@@ -360,7 +360,7 @@ static long compat_inotify_ioctl(struct file *file, unsigned int cmd,
 {
 	user_uintptr_t cmd_arg = (cmd == FIONREAD) ?
 				(user_uintptr_t)compat_ptr(arg) :
-				(user_uintptr_t)arg;
+				(user_uintptr_t)__c_fakeu(arg);
 	return inotify_ioctl(file, cmd, cmd_arg);
 }
 #endif
