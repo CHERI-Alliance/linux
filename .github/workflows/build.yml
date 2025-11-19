@@ -12,6 +12,7 @@ jobs:
     name: Build ${{ matrix.arch }} ${{ matrix.compiler }} ${{ matrix.config }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         arch: [ riscv64, aarch64 ]
         compiler: [ llvm-18, gcc ]
