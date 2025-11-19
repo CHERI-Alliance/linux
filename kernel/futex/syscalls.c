@@ -4,6 +4,7 @@
 #include <linux/time_namespace.h>
 
 #include "futex.h"
+#include <linux/compat64_futex.h>
 
 /*
  * Support for robust futexes: the kernel cleans up held futexes at
@@ -207,36 +208,6 @@ SYSCALL_DEFINE6(futex, u32 __user *, uaddr, int, op, u32, val,
 	return do_futex(uaddr, op, val, tp, uaddr2, (user_uintptr_t)utime, val3);
 }
 
-struct compat_futex_waitv {
-	__u64 val;
-	__u64 uaddr;
-	__u32 flags;
-	__u32 __reserved;
-};
-
-static int copy_futex_waitv_from_user(struct futex_waitv *aux,
-				      const struct futex_waitv __user *uwaitv,
-				      unsigned int i)
-{
-	if (in_compat64_syscall()) {
-		const struct compat_futex_waitv __user *compat_uwaitv =
-			(const struct compat_futex_waitv __user *)uwaitv;
-		struct compat_futex_waitv compat_aux;
-
-		if (copy_from_user(&compat_aux, &compat_uwaitv[i], sizeof(compat_aux)))
-			return -EFAULT;
-
-		aux->val = compat_aux.val;
-		aux->uaddr = (user_uintptr_t)compat_ptr(compat_aux.uaddr);
-		aux->flags = compat_aux.flags;
-		aux->__reserved = compat_aux.__reserved;
-
-		return 0;
-	}
-
-	return copy_from_user_with_ptr(aux, &uwaitv[i], sizeof(*aux));
-}
-
 /**
  * futex_parse_waitv - Parse a waitv array from userspace
  * @futexv:	Kernel side list of waiters to be filled
@@ -253,13 +224,15 @@ int futex_parse_waitv(struct futex_vector *futexv,
 		      void *wake_data)
 {
 	struct futex_waitv aux;
+	void __user *udata = uwaitv;
 	unsigned int i;
 
 	for (i = 0; i < nr_futexes; i++) {
 		unsigned int flags;
 
-		if (copy_futex_waitv_from_user(&aux, uwaitv, i))
+		if (__c64_copy_from_user_with_ptr(futex_waitv, &aux, udata))
 			return -EFAULT;
+		udata += __c64_sizeof(futex_waitv);
 
 		if ((aux.flags & ~FUTEX2_VALID_MASK) || aux.__reserved)
 			return -EINVAL;
