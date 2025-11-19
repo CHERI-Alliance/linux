@@ -1,0 +1,63 @@
+name: Build Kernel
+
+on:
+  push:
+    branches:
+      - main
+      - codasip-cheri-riscv
+  pull_request:
+
+jobs:
+  build:
+    name: Build ${{ matrix.arch }} ${{ matrix.compiler }} ${{ matrix.config }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [ riscv64, aarch64 ]
+        compiler: [ llvm-18, gcc ]
+        config: [ defconfig ]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential bc bison flex libelf-dev libssl-dev
+          if [[ "${{ matrix.compiler }}" == llvm* ]]; then
+            VER=${{ matrix.compiler }}
+            VER=${VER#llvm-}
+            sudo apt-get install -y clang-$VER lld-$VER llvm-$VER
+          elif [ "${{ matrix.compiler }}" == "gcc" ]; then
+            if [ "${{ matrix.arch }}" == "aarch64" ]; then
+              sudo apt-get install -y gcc-aarch64-linux-gnu
+            elif [ "${{ matrix.arch }}" == "riscv64" ]; then
+              sudo apt-get install -y gcc-riscv64-linux-gnu
+            fi
+          fi
+
+      - name: Setup Ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: kbuild-${{ matrix.arch }}-${{ matrix.compiler }}
+
+      - name: Build Kernel
+        env:
+          KCONFIG_NOSILENTUPDATE: 1
+        run: |
+          ARGS=""
+          if [ "${{ matrix.arch }}" = "aarch64" ]; then
+            ARGS="$ARGS ARCH=arm64"
+            CROSS="aarch64-linux-gnu-"
+          elif [ "${{ matrix.arch }}" = "riscv64" ]; then
+            ARGS="$ARGS ARCH=riscv"
+            CROSS="riscv64-linux-gnu-"
+          fi
+          if [[ "${{ matrix.compiler }}" == llvm* ]]; then
+            ARGS="$ARGS LLVM=/usr/lib/${{ matrix.compiler }}/bin/ CROSS_COMPILE=$CROSS"
+          else
+            ARGS="$ARGS CROSS_COMPILE=$CROSS"
+          fi
+          make $ARGS O=build ${{ matrix.config }}
+          make $ARGS O=build -j$(nproc)
