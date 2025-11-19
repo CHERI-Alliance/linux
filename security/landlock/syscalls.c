@@ -66,8 +66,7 @@ copy_min_struct_from_user(void *const dst, const size_t ksize,
 			  const size_t usize)
 {
 	/* Checks buffer inconsistencies. */
-	// FIXCHERI: CHERI llvm-18 does not understand that dst != NULL
-	// BUILD_BUG_ON(!dst);
+	BUILD_BUG_ON(!dst);
 	if (!src)
 		return -EFAULT;
 
