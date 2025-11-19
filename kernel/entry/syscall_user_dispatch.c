@@ -7,6 +7,7 @@
 #include <linux/sched.h>
 #include <linux/prctl.h>
 #include <linux/ptrace.h>
+#include <linux/compat64_ptrace.h>
 #include <linux/syscall_user_dispatch.h>
 #include <linux/uaccess.h>
 #include <linux/signal.h>
@@ -152,7 +153,7 @@ int syscall_user_dispatch_get_config(struct task_struct *task, unsigned long siz
 	cfg.len = sd->len;
 	cfg.selector = (user_uintptr_t)sd->selector;
 
-	if (copy_to_user_with_ptr(data, &cfg, sizeof(cfg)))
+	if (__c64_copy_to_user_with_ptr(ptrace_sud_config, data, &cfg))
 		return -EFAULT;
 
 	return 0;
@@ -166,7 +167,7 @@ int syscall_user_dispatch_set_config(struct task_struct *task, unsigned long siz
 	if (size != sizeof(cfg))
 		return -EINVAL;
 
-	if (copy_from_user_with_ptr(&cfg, data, sizeof(cfg)))
+	if (__c64_copy_from_user_with_ptr(ptrace_sud_config, &cfg, data))
 		return -EFAULT;
 
 	return task_set_syscall_user_dispatch(task, cfg.mode, cfg.offset, cfg.len,
