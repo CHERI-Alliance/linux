@@ -805,7 +805,7 @@ static long do_compat_fcntl64(unsigned int fd, unsigned int cmd,
 		err = do_fcntl(fd, cmd, (user_uintptr_t)compat_ptr(arg), fd_file(f));
 		break;
 	default:
-		err = do_fcntl(fd, cmd, arg, fd_file(f));
+		err = do_fcntl(fd, cmd, __c_fakeu(arg), fd_file(f));
 		break;
 	}
 	return err;

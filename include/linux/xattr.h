@@ -22,7 +22,6 @@
 
 /* List of all open_how "versions". */
 #define XATTR_ARGS_SIZE_VER0	16 /* sizeof first published struct */
-#define XATTR_ARGS_SIZE_LATEST	XATTR_ARGS_SIZE_VER0
 
 struct inode;
 struct dentry;

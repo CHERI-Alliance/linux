@@ -23,6 +23,7 @@
 #include <linux/vmalloc.h>
 #include <linux/posix_acl_xattr.h>
 #include <linux/rhashtable.h>
+#include <linux/compat64_xattr.h>
 
 #include <linux/uaccess.h>
 
@@ -737,14 +738,14 @@ SYSCALL_DEFINE6(setxattrat, int, dfd, const char __user *, pathname, unsigned in
 	int error;
 
 	BUILD_BUG_ON(sizeof(struct xattr_args) < XATTR_ARGS_SIZE_VER0);
-	BUILD_BUG_ON(sizeof(struct xattr_args) != XATTR_ARGS_SIZE_LATEST);
 
 	if (unlikely(usize < XATTR_ARGS_SIZE_VER0))
 		return -EINVAL;
 	if (usize > PAGE_SIZE)
 		return -E2BIG;
 
-	error = copy_struct_from_user_with_ptr(&args, sizeof(args), uargs, usize);
+	error = __c64_copy_struct_from_user_with_ptr(xattr_args, &args,
+						     uargs, usize);
 	if (error)
 		return error;
 
@@ -876,14 +877,14 @@ SYSCALL_DEFINE6(getxattrat, int, dfd, const char __user *, pathname, unsigned in
 	int error;
 
 	BUILD_BUG_ON(sizeof(struct xattr_args) < XATTR_ARGS_SIZE_VER0);
-	BUILD_BUG_ON(sizeof(struct xattr_args) != XATTR_ARGS_SIZE_LATEST);
 
 	if (unlikely(usize < XATTR_ARGS_SIZE_VER0))
 		return -EINVAL;
 	if (usize > PAGE_SIZE)
 		return -E2BIG;
 
-	error = copy_struct_from_user_with_ptr(&args, sizeof(args), uargs, usize);
+	error = __c64_copy_struct_from_user_with_ptr(xattr_args, &args,
+						     uargs, usize);
 	if (error)
 		return error;
 
