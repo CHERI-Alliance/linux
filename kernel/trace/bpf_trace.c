@@ -832,7 +832,7 @@ static int bpf_send_signal_common(u32 sig, enum pid_type type, struct task_struc
 		info.si_code = SI_KERNEL;
 		info.si_pid = 0;
 		info.si_uid = 0;
-		info.si_value.sival_ptr = __c_fakeu(value);
+		info.si_value.sival_ptr = __c_fakep(value);
 		siginfo = &info;
 	}
 
