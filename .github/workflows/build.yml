@@ -7,20 +7,42 @@ on:
       - codasip-cheri-riscv
   pull_request:
 
+permissions:
+  contents: read
+  pull-requests: write
+  actions: read
+
 jobs:
+  init-comment:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: kernel-warnings
+          message: |
+            ### 🚀 Kernel Build Started
+            _Builds are running... detailed status below:_
+            | Job | Status |
+            | :--- | :--- |
+
   build:
+    needs: init-comment
     name: Build ${{ matrix.arch }} ${{ matrix.compiler }} ${{ matrix.config }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        arch: [ riscv64, aarch64 ]
-        compiler: [ llvm-18, gcc ]
-        config: [ defconfig ]
+        arch: [riscv64, aarch64]
+        compiler: [llvm-18, gcc]
+        config: [defconfig]
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+
+      - name: Register GCC Problem Matcher
+        uses: ammaraskar/gcc-problem-matcher@master
 
       - name: Install Dependencies
         run: |
@@ -38,15 +60,43 @@ jobs:
             fi
           fi
 
+      - name: Get Job Link
+        id: job-link
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARCH: ${{ matrix.arch }}
+          COMP: ${{ matrix.compiler }}
+        run: |
+          JOBS_JSON=$(gh run view ${{ github.run_id }} --repo ${{ github.repository }} --json jobs)
+          JOB_URL=$(echo "$JOBS_JSON" | jq -r --arg a "$ARCH" --arg c "$COMP" '.jobs[] | select(.name | contains($a) and contains($c)) | .url' | head -n 1)
+          BUILD_STEP_NUM=$(echo "$JOBS_JSON" | jq -r --arg a "$ARCH" --arg c "$COMP" '.jobs[] | select(.name | contains($a) and contains($c)) | .steps[] | select(.name == "Process Logs (Errors & Warnings)") | .number' | head -n 1)
+          if [ -z "$JOB_URL" ] || [ "$JOB_URL" == "null" ]; then
+            JOB_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          fi
+          echo "JOB_URL=$JOB_URL BUILD_STEP_NUM=$BUILD_STEP_NUM"
+          echo "url=$JOB_URL" >> "$GITHUB_OUTPUT"
+          echo "build_step_num=$BUILD_STEP_NUM" >> "$GITHUB_OUTPUT"
+
+      - name: Notify Job Start
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: kernel-warnings
+          append: true
+          message: "| ${{ matrix.arch }} ${{ matrix.compiler }} | ⏳ [In Progress](${{ steps.job-link.outputs.url }}) |"
+
       - name: Setup Ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: kbuild-${{ matrix.arch }}-${{ matrix.compiler }}
 
       - name: Build Kernel
+        id: kbuild
         env:
           KCONFIG_NOSILENTUPDATE: 1
         run: |
+          # Set pipefail to fail if make fails, otherwise any error is squashed
+          set -o pipefail
           ARGS=""
           if [ "${{ matrix.arch }}" = "aarch64" ]; then
             ARGS="$ARGS ARCH=arm64"
@@ -61,4 +111,79 @@ jobs:
             ARGS="$ARGS CROSS_COMPILE=$CROSS"
           fi
           make $ARGS O=build ${{ matrix.config }}
-          make $ARGS O=build -j$(nproc)
+          # Pipe output to tee so we can see it and save it for counting warnings
+          make $ARGS O=build -j$(nproc) 2>&1 | tee build.log
+
+      - name: Process Logs (Errors & Warnings)
+        if: always()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_NAME: "Build ${{ matrix.arch }} ${{ matrix.compiler }} ${{ matrix.config }}"
+        run: |
+          echo "::group::📝 Build Issues (Errors & Warnings)"
+          if grep -iE "warning:|error:" build.log; then
+            echo "--------------------------------------------------"
+            echo "Full list above."
+          else
+            echo "🎉 Clean build - No warnings or errors found."
+          fi
+          echo "::endgroup::"
+          COUNT=$(grep -c -i "warning:" build.log || true)
+          OUTCOME="${{ steps.kbuild.outcome }}"
+          FULL_LINK="${{ steps.job-link.outputs.url }}#step:${{ steps.job-link.outputs.build_step_num }}:1"
+          COUNT_CLEAN=$(echo $COUNT | xargs)
+          if [ "$OUTCOME" != "success" ]; then
+            ICON="❌"
+          elif [ "$COUNT_CLEAN" -ne "0" ]; then
+            ICON="⚠️"
+          else
+            ICON="✅"
+          fi
+          echo "| ${{ matrix.arch }} | ${{ matrix.compiler }} | [**$COUNT_CLEAN**]($FULL_LINK) | $ICON |" > "warnings-${{ matrix.arch }}-${{ matrix.compiler }}.txt"
+
+      - name: Upload Warning Counts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: warnings-${{ matrix.arch }}-${{ matrix.compiler }}-${{ matrix.config }}
+          path: "warnings-${{ matrix.arch }}-${{ matrix.compiler }}.txt"
+
+  report-warnings:
+    needs: build
+    if: always() && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Download Warning Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: warnings-*
+          merge-multiple: true
+          path: warnings
+
+      - name: Generate Summary Markdown
+        run: |
+          echo "### 🛡️ Kernel Build Warnings Report" > comment.md
+          echo "" >> comment.md
+          echo "| Arch | Compiler | Warnings | Status |" >> comment.md
+          echo "| :--- | :--- | :---: | :---: |" >> comment.md
+          # Sort by Arch (col 2), then Compiler Version (col 3)
+          # -k 2,2b : sort 2nd column, ignore leading whitespace
+          # -k 3,3Vb: sort 3rd column, Version sort, ignore whitespace
+          cat warnings/*.txt | sort -t '|' -k 2,2b -k 3,3Vb >> comment.md
+          if grep -q "❌" warnings/*.txt; then
+            echo "" >> comment.md
+            echo "❌ **One or more builds failed.**" >> comment.md
+          fi
+          # Use awk to find '[**NUMBER**]' and sum up the values (m[1])
+          TOTAL=$(awk -F'|' 'match($4, /\[\*\*([0-9]+)\*\*\]/, m) { sum += m[1] } END { print sum+0 }' warnings/*.txt)
+          echo "" >> comment.md
+          echo "**Total Warnings: $TOTAL**" >> comment.md
+
+      - name: Post Sticky Comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: kernel-warnings
+          path: comment.md
