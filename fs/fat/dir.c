@@ -853,7 +853,7 @@ static long fat_compat_dir_ioctl(struct file *filp, unsigned cmd,
 		both = 1;
 		break;
 	default:
-		return fat_generic_ioctl(filp, cmd, (unsigned long)arg);
+		return fat_generic_ioctl(filp, cmd, (user_uintptr_t)compat_ptr(arg));
 	}
 
 	/*
