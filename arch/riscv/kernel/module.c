@@ -45,11 +45,13 @@ struct relocation_head {
 struct relocation_entry {
 	struct list_head head;
 	Elf_Addr value;
+	Elf_Sym *sym;
 	unsigned int type;
 };
 
 struct relocation_handlers {
-	int (*reloc_handler)(struct module *me, void *location, Elf_Addr v);
+	int (*reloc_handler)(struct module *me, void *location,
+			     Elf_Addr v, Elf_Sym *sym);
 	int (*accumulate_handler)(struct module *me, void *location,
 				  long buffer);
 };
@@ -92,7 +94,8 @@ static int riscv_insn_rvc_rmw(void *location, u16 keep, u16 set)
 	return 0;
 }
 
-static int apply_r_riscv_32_rela(struct module *me, void *location, Elf_Addr v)
+static int apply_r_riscv_32_rela(struct module *me, void *location, Elf_Addr v,
+				 Elf_Sym *sym)
 {
 	if (v != (u32)v) {
 		pr_err("%s: value %016llx out of range for 32-bit field\n",
@@ -103,14 +106,15 @@ static int apply_r_riscv_32_rela(struct module *me, void *location, Elf_Addr v)
 	return 0;
 }
 
-static int apply_r_riscv_64_rela(struct module *me, void *location, Elf_Addr v)
+static int apply_r_riscv_64_rela(struct module *me, void *location, Elf_Addr v,
+				 Elf_Sym *sym)
 {
 	*(u64 *)location = v;
 	return 0;
 }
 
 static int apply_r_riscv_branch_rela(struct module *me, void *location,
-				     Elf_Addr v)
+				     Elf_Addr v, Elf_Sym *sym)
 {
 	ptrdiff_t offset = v - __c_pa(location);
 	u32 imm12 = (offset & 0x1000) << (31 - 12);
@@ -122,7 +126,7 @@ static int apply_r_riscv_branch_rela(struct module *me, void *location,
 }
 
 static int apply_r_riscv_jal_rela(struct module *me, void *location,
-				  Elf_Addr v)
+				  Elf_Addr v, Elf_Sym *sym)
 {
 	ptrdiff_t offset = v - __c_pa(location);
 	u32 imm20 = (offset & 0x100000) << (31 - 20);
@@ -134,7 +138,7 @@ static int apply_r_riscv_jal_rela(struct module *me, void *location,
 }
 
 static int apply_r_riscv_rvc_branch_rela(struct module *me, void *location,
-					 Elf_Addr v)
+					 Elf_Addr v, Elf_Sym *sym)
 {
 	ptrdiff_t offset = v - __c_pa(location);
 	u16 imm8 = (offset & 0x100) << (12 - 8);
@@ -148,7 +152,7 @@ static int apply_r_riscv_rvc_branch_rela(struct module *me, void *location,
 }
 
 static int apply_r_riscv_rvc_jump_rela(struct module *me, void *location,
-				       Elf_Addr v)
+				       Elf_Addr v, Elf_Sym *sym)
 {
 	ptrdiff_t offset = v - __c_pa(location);
 	u16 imm11 = (offset & 0x800) << (12 - 11);
@@ -165,7 +169,7 @@ static int apply_r_riscv_rvc_jump_rela(struct module *me, void *location,
 }
 
 static int apply_r_riscv_pcrel_hi20_rela(struct module *me, void *location,
-					 Elf_Addr v)
+					 Elf_Addr v, Elf_Sym *sym)
 {
 	ptrdiff_t offset = v - __c_pa(location);
 
@@ -180,7 +184,7 @@ static int apply_r_riscv_pcrel_hi20_rela(struct module *me, void *location,
 }
 
 static int apply_r_riscv_pcrel_lo12_i_rela(struct module *me, void *location,
-					   Elf_Addr v)
+					   Elf_Addr v, Elf_Sym *sym)
 {
 	/*
 	 * v is the lo12 value to fill. It is calculated before calling this
@@ -190,7 +194,7 @@ static int apply_r_riscv_pcrel_lo12_i_rela(struct module *me, void *location,
 }
 
 static int apply_r_riscv_pcrel_lo12_s_rela(struct module *me, void *location,
-					   Elf_Addr v)
+					   Elf_Addr v, Elf_Sym *sym)
 {
 	/*
 	 * v is the lo12 value to fill. It is calculated before calling this
@@ -203,7 +207,7 @@ static int apply_r_riscv_pcrel_lo12_s_rela(struct module *me, void *location,
 }
 
 static int apply_r_riscv_hi20_rela(struct module *me, void *location,
-				   Elf_Addr v)
+				   Elf_Addr v, Elf_Sym *sym)
 {
 	if (IS_ENABLED(CONFIG_CMODEL_MEDLOW)) {
 		pr_err(
@@ -216,7 +220,7 @@ static int apply_r_riscv_hi20_rela(struct module *me, void *location,
 }
 
 static int apply_r_riscv_lo12_i_rela(struct module *me, void *location,
-				     Elf_Addr v)
+				     Elf_Addr v, Elf_Sym *sym)
 {
 	/* Skip medlow checking because of filtering by HI20 already */
 	s32 hi20 = ((s32)v + 0x800) & 0xfffff000;
@@ -226,7 +230,7 @@ static int apply_r_riscv_lo12_i_rela(struct module *me, void *location,
 }
 
 static int apply_r_riscv_lo12_s_rela(struct module *me, void *location,
-				     Elf_Addr v)
+				     Elf_Addr v, Elf_Sym *sym)
 {
 	/* Skip medlow checking because of filtering by HI20 already */
 	s32 hi20 = ((s32)v + 0x800) & 0xfffff000;
@@ -238,7 +242,7 @@ static int apply_r_riscv_lo12_s_rela(struct module *me, void *location,
 }
 
 static int apply_r_riscv_got_hi20_rela(struct module *me, void *location,
-				       Elf_Addr v)
+				       Elf_Addr v, Elf_Sym *sym)
 {
 	ptrdiff_t offset = v - __c_pa(location);
 
@@ -256,7 +260,7 @@ static int apply_r_riscv_got_hi20_rela(struct module *me, void *location,
 }
 
 static int apply_r_riscv_call_plt_rela(struct module *me, void *location,
-				       Elf_Addr v)
+				       Elf_Addr v, Elf_Sym *sym)
 {
 	ptrdiff_t offset = v - __c_pa(location);
 	u32 hi20, lo12;
@@ -280,7 +284,7 @@ static int apply_r_riscv_call_plt_rela(struct module *me, void *location,
 }
 
 static int apply_r_riscv_call_rela(struct module *me, void *location,
-				   Elf_Addr v)
+				   Elf_Addr v, Elf_Sym *sym)
 {
 	ptrdiff_t offset = v - __c_pa(location);
 	u32 hi20, lo12;
@@ -299,13 +303,13 @@ static int apply_r_riscv_call_rela(struct module *me, void *location,
 }
 
 static int apply_r_riscv_relax_rela(struct module *me, void *location,
-				    Elf_Addr v)
+				    Elf_Addr v, Elf_Sym *sym)
 {
 	return 0;
 }
 
 static int apply_r_riscv_align_rela(struct module *me, void *location,
-				    Elf_Addr v)
+				    Elf_Addr v, Elf_Sym *sym)
 {
 	pr_err(
 	  "%s: The unexpected relocation type 'R_RISCV_ALIGN' from PC = %p\n",
@@ -313,76 +317,80 @@ static int apply_r_riscv_align_rela(struct module *me, void *location,
 	return -EINVAL;
 }
 
-static int apply_r_riscv_add8_rela(struct module *me, void *location, Elf_Addr v)
+static int apply_r_riscv_add8_rela(struct module *me, void *location, Elf_Addr v,
+				   Elf_Sym *sym)
 {
 	*(u8 *)location += (u8)v;
 	return 0;
 }
 
 static int apply_r_riscv_add16_rela(struct module *me, void *location,
-				    Elf_Addr v)
+				    Elf_Addr v, Elf_Sym *sym)
 {
 	*(u16 *)location += (u16)v;
 	return 0;
 }
 
 static int apply_r_riscv_add32_rela(struct module *me, void *location,
-				    Elf_Addr v)
+				    Elf_Addr v, Elf_Sym *sym)
 {
 	*(u32 *)location += (u32)v;
 	return 0;
 }
 
 static int apply_r_riscv_add64_rela(struct module *me, void *location,
-				    Elf_Addr v)
+				    Elf_Addr v, Elf_Sym *sym)
 {
 	*(u64 *)location += (u64)v;
 	return 0;
 }
 
-static int apply_r_riscv_sub8_rela(struct module *me, void *location, Elf_Addr v)
+static int apply_r_riscv_sub8_rela(struct module *me, void *location, Elf_Addr v,
+				   Elf_Sym *sym)
 {
 	*(u8 *)location -= (u8)v;
 	return 0;
 }
 
 static int apply_r_riscv_sub16_rela(struct module *me, void *location,
-				    Elf_Addr v)
+				    Elf_Addr v, Elf_Sym *sym)
 {
 	*(u16 *)location -= (u16)v;
 	return 0;
 }
 
 static int apply_r_riscv_sub32_rela(struct module *me, void *location,
-				    Elf_Addr v)
+				    Elf_Addr v, Elf_Sym *sym)
 {
 	*(u32 *)location -= (u32)v;
 	return 0;
 }
 
 static int apply_r_riscv_sub64_rela(struct module *me, void *location,
-				    Elf_Addr v)
+				    Elf_Addr v, Elf_Sym *sym)
 {
 	*(u64 *)location -= (u64)v;
 	return 0;
 }
 
 static int dynamic_linking_not_supported(struct module *me, void *location,
-					 Elf_Addr v)
+					 Elf_Addr v, Elf_Sym *sym)
 {
 	pr_err("%s: Dynamic linking not supported in kernel modules PC = %p\n",
 	       me->name, location);
 	return -EINVAL;
 }
 
-static int tls_not_supported(struct module *me, void *location, Elf_Addr v)
+static int tls_not_supported(struct module *me, void *location, Elf_Addr v,
+			     Elf_Sym *sym)
 {
 	pr_err("%s: Thread local storage not supported in kernel modules PC = %p\n",
 	       me->name, location);
 	return -EINVAL;
 }
 
-static int apply_r_riscv_sub6_rela(struct module *me, void *location, Elf_Addr v)
+static int apply_r_riscv_sub6_rela(struct module *me, void *location, Elf_Addr v,
+				   Elf_Sym *sym)
 {
 	u8 *byte = location;
 	u8 value = v;
@@ -391,7 +399,8 @@ static int apply_r_riscv_sub6_rela(struct module *me, void *location, Elf_Addr v
 	return 0;
 }
 
-static int apply_r_riscv_set6_rela(struct module *me, void *location, Elf_Addr v)
+static int apply_r_riscv_set6_rela(struct module *me, void *location, Elf_Addr v,
+				   Elf_Sym *sym)
 {
 	u8 *byte = location;
 	u8 value = v;
@@ -400,35 +409,36 @@ static int apply_r_riscv_set6_rela(struct module *me, void *location, Elf_Addr v
 	return 0;
 }
 
-static int apply_r_riscv_set8_rela(struct module *me, void *location, Elf_Addr v)
+static int apply_r_riscv_set8_rela(struct module *me, void *location, Elf_Addr v,
+				   Elf_Sym *sym)
 {
 	*(u8 *)location = (u8)v;
 	return 0;
 }
 
 static int apply_r_riscv_set16_rela(struct module *me, void *location,
-				    Elf_Addr v)
+				    Elf_Addr v, Elf_Sym *sym)
 {
 	*(u16 *)location = (u16)v;
 	return 0;
 }
 
 static int apply_r_riscv_set32_rela(struct module *me, void *location,
-				    Elf_Addr v)
+				    Elf_Addr v, Elf_Sym *sym)
 {
 	*(u32 *)location = (u32)v;
 	return 0;
 }
 
 static int apply_r_riscv_32_pcrel_rela(struct module *me, void *location,
-				       Elf_Addr v)
+				       Elf_Addr v, Elf_Sym *sym)
 {
 	*(u32 *)location = v - __c_pa(location);
 	return 0;
 }
 
 static int apply_r_riscv_plt32_rela(struct module *me, void *location,
-				    Elf_Addr v)
+				    Elf_Addr v, Elf_Sym *sym)
 {
 	ptrdiff_t offset = v - __c_pa(location);
 
@@ -447,13 +457,15 @@ static int apply_r_riscv_plt32_rela(struct module *me, void *location,
 	return 0;
 }
 
-static int apply_r_riscv_set_uleb128(struct module *me, void *location, Elf_Addr v)
+static int apply_r_riscv_set_uleb128(struct module *me, void *location, Elf_Addr v,
+				     Elf_Sym *sym)
 {
 	*(long *)location = v;
 	return 0;
 }
 
-static int apply_r_riscv_sub_uleb128(struct module *me, void *location, Elf_Addr v)
+static int apply_r_riscv_sub_uleb128(struct module *me, void *location, Elf_Addr v,
+				     Elf_Sym *sym)
 {
 	*(long *)location -= v;
 	return 0;
@@ -653,7 +665,8 @@ process_accumulated_relocations(struct module *me,
 						 head) {
 				curr_type = rel_entry_iter->type;
 				reloc_handlers[curr_type].reloc_handler(
-					me, &buffer, rel_entry_iter->value);
+					me, &buffer, rel_entry_iter->value,
+					rel_entry_iter->sym);
 				kfree(rel_entry_iter);
 			}
 			reloc_handlers[curr_type].accumulate_handler(
@@ -669,6 +682,7 @@ process_accumulated_relocations(struct module *me,
 static int add_relocation_to_accumulate(struct module *me, int type,
 					void *location,
 					unsigned int hashtable_bits, Elf_Addr v,
+					Elf_Sym *sym,
 					struct hlist_head *relocation_hashtable,
 					struct list_head *used_buckets_list)
 {
@@ -686,6 +700,7 @@ static int add_relocation_to_accumulate(struct module *me, int type,
 	INIT_LIST_HEAD(&entry->head);
 	entry->type = type;
 	entry->value = v;
+	entry->sym = sym;
 
 	hash = hash_min((uintptr_t)location, hashtable_bits);
 
@@ -784,7 +799,7 @@ int apply_relocate_add(Elf_Shdr *sechdrs, const char *strtab,
 		       struct module *me)
 {
 	Elf_Rela *rel = shdr_addr(&sechdrs[relsec]);
-	int (*handler)(struct module *me, void *location, Elf_Addr v);
+	int (*handler)(struct module *me, void *location, Elf_Addr v, Elf_Sym *sym);
 	Elf_Sym *sym;
 	void *location;
 	unsigned int i, type;
@@ -894,10 +909,11 @@ int apply_relocate_add(Elf_Shdr *sechdrs, const char *strtab,
 		if (reloc_handlers[type].accumulate_handler)
 			res = add_relocation_to_accumulate(me, type, location,
 							   hashtable_bits, v,
+							   sym,
 							   relocation_hashtable,
 							   &used_buckets_list);
 		else
-			res = handler(me, location, v);
+			res = handler(me, location, v, sym);
 		if (res)
 			return res;
 	}
