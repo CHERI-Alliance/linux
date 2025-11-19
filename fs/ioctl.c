@@ -606,7 +606,7 @@ static inline long compat_ioctl(struct file *file, unsigned int cmd,
 {
 	user_uintptr_t __arg = is_pointer_arg ?
 				(user_uintptr_t)compat_ptr(arg) :
-				(user_uintptr_t)arg;
+				__c_fakeu(arg);
 
 	if (!file->f_op->unlocked_ioctl)
 		return -ENOIOCTLCMD;

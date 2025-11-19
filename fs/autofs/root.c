@@ -918,7 +918,7 @@ static long autofs_root_compat_ioctl(struct file *filp,
 	int ret;
 
 	if (cmd == AUTOFS_IOC_READY || cmd == AUTOFS_IOC_FAIL)
-		ret = autofs_root_ioctl_unlocked(inode, filp, cmd, arg);
+		ret = autofs_root_ioctl_unlocked(inode, filp, cmd, __c_fakeu(arg));
 	else
 		ret = autofs_root_ioctl_unlocked(inode, filp, cmd,
 					      (user_uintptr_t) compat_ptr(arg));
