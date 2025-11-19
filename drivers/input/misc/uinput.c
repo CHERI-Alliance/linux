@@ -810,7 +810,7 @@ static int uinput_ff_upload_to_user(char __user *buffer,
 		memcpy(&ff_up_compat.old, (void *)&ff_up->old,
 			sizeof(struct ff_effect_compat));
 
-		if (copy_to_user(buffer, &ff_up_compat,
+		if (copy_to_user_no_ptr(buffer, &ff_up_compat,
 				 sizeof(struct uinput_ff_upload_compat)))
 			return -EFAULT;
 	} else {

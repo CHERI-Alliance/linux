@@ -1099,7 +1099,7 @@ static int uvc_v4l2_get_xu_mapping(struct uvc_xu_control_mapping *kp,
 static int uvc_v4l2_put_xu_mapping(const struct uvc_xu_control_mapping *kp,
 			struct uvc_xu_control_mapping32 __user *up)
 {
-	if (copy_to_user_with_ptr(up, kp, offsetof(typeof(*up), menu_info)) ||
+	if (copy_to_user_no_ptr(up, kp, offsetof(typeof(*up), menu_info)) ||
 	    put_user(kp->menu_count, &up->menu_count))
 		return -EFAULT;
 
