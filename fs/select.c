@@ -786,14 +786,48 @@ Efault:
 	return -EFAULT;
 }
 
+#ifdef CONFIG_COMPAT64
+struct sigset_argpack64 {
+	unsigned long p;
+	size_t size;
+};
+
+static inline int get_compat64_sigset_argpack(struct sigset_argpack *to,
+					      struct sigset_argpack64 __user *from)
+{
+	// the path is hot enough for overhead of copy_from_user() to matter
+	unsigned long tmp;
+	if (from) {
+		if (can_do_masked_user_access())
+			from = masked_user_access_begin(from);
+		else if (!user_read_access_begin(from, sizeof(*from)))
+			return -EFAULT;
+		unsafe_get_user(tmp, &from->p, Efault);
+		to->p = compat_ptr(tmp);
+		unsafe_get_user(to->size, &from->size, Efault);
+		user_read_access_end();
+	}
+	return 0;
+Efault:
+	user_read_access_end();
+	return -EFAULT;
+}
+#endif
+
 SYSCALL_DEFINE6(pselect6, int, n, fd_set __user *, inp, fd_set __user *, outp,
 		fd_set __user *, exp, struct __kernel_timespec __user *, tsp,
 		void __user *, sig)
 {
 	struct sigset_argpack x = {NULL, 0};
 
-	if (get_sigset_argpack(&x, sig))
-		return -EFAULT;
+#ifdef CONFIG_COMPAT64
+	if (in_compat64_syscall()) {
+		if (get_compat64_sigset_argpack(&x, sig))
+			return -EFAULT;
+	} else
+#endif
+		if (get_sigset_argpack(&x, sig))
+			return -EFAULT;
 
 	return do_pselect(n, inp, outp, exp, tsp, x.p, x.size, PT_TIMESPEC);
 }
