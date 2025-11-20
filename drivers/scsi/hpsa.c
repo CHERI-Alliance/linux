@@ -6267,7 +6267,7 @@ static int hpsa_ioctl32_passthru(struct scsi_device *dev, unsigned int cmd,
 	IOCTL32_Command_struct __user *arg32 = arg;
 	IOCTL_Command_struct arg64;
 	int err;
-	u32 cp;
+	compat_caddr_t cp;
 
 	if (!arg)
 		return -EINVAL;
@@ -6298,7 +6298,7 @@ static int hpsa_ioctl32_big_passthru(struct scsi_device *dev,
 	BIG_IOCTL32_Command_struct __user *arg32 = arg;
 	BIG_IOCTL_Command_struct arg64;
 	int err;
-	u32 cp;
+	compat_caddr_t cp;
 
 	if (!arg)
 		return -EINVAL;
