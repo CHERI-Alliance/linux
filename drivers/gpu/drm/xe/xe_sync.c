@@ -13,6 +13,7 @@
 #include <drm/drm_print.h>
 #include <drm/drm_syncobj.h>
 #include <uapi/drm/xe_drm.h>
+#include <drm/compat64_xe_drm.h>
 
 #include "xe_device.h"
 #include "xe_exec_queue.h"
@@ -113,6 +114,7 @@ static void user_fence_cb(struct dma_fence *fence, struct dma_fence_cb *cb)
 int xe_sync_entry_parse(struct xe_device *xe, struct xe_file *xef,
 			struct xe_sync_entry *sync,
 			struct drm_xe_sync __user *sync_user,
+			unsigned int sidx,
 			struct drm_syncobj *ufence_syncobj,
 			u64 ufence_timeline_value,
 			unsigned int flags)
@@ -124,7 +126,9 @@ int xe_sync_entry_parse(struct xe_device *xe, struct xe_file *xef,
 	bool disallow_user_fence = flags & SYNC_PARSE_FLAG_DISALLOW_USER_FENCE;
 	bool signal;
 
-	if (copy_from_user_with_ptr(&sync_in, sync_user, sizeof(*sync_user)))
+	sync_user = (void __user *)sync_user + sidx * __c64_sizeof(drm_xe_sync);
+
+	if (__c64_copy_from_user_with_ptr(drm_xe_sync, &sync_in, sync_user))
 		return -EFAULT;
 
 	if (XE_IOCTL_DBG(xe, sync_in.flags & ~DRM_XE_SYNC_FLAG_SIGNAL) ||
@@ -198,11 +202,15 @@ int xe_sync_entry_parse(struct xe_device *xe, struct xe_file *xef,
 			return -EINVAL;
 
 		if (exec) {
-			sync->addr = sync_in.__c64_copy;
+			sync->addr = __c_fakeu(sync_in.__c64_copy);
 		} else {
 			sync->ufence_timeline_value = ufence_timeline_value;
-			sync->ufence = user_fence_create(xe, sync_in.__c64_addr,
-							 sync_in.timeline_value);
+			if (in_compat_syscall())
+				sync->ufence = user_fence_create(xe, (user_uintptr_t)compat_ptr(sync_in.__c64_copy),
+								 sync_in.timeline_value);
+			else
+				sync->ufence = user_fence_create(xe, sync_in.__c64_addr,
+								 sync_in.timeline_value);
 			if (XE_IOCTL_DBG(xe, IS_ERR(sync->ufence)))
 				return PTR_ERR(sync->ufence);
 			sync->ufence_chain_fence = dma_fence_chain_alloc();
