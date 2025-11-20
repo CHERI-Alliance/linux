@@ -625,7 +625,7 @@ static int svc_compat_ioctl(struct socket *sock, unsigned int cmd,
 		cmd = ATM_ADDPARTY;
 
 	if (cmd == ATM_ADDPARTY || cmd == ATM_DROPPARTY)
-		return svc_ioctl(sock, cmd, arg);
+		return svc_ioctl(sock, cmd, (user_uintptr_t)compat_ptr(arg));
 	else
 		return vcc_compat_ioctl(sock, cmd, arg);
 }
