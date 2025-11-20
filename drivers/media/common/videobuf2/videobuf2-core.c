@@ -1309,10 +1309,11 @@ static int __prepare_userptr(struct vb2_buffer *vb)
 		vb->planes[plane].data_offset = 0;
 
 		/* Acquire each plane's memory */
+		/* FIXCHERI: Check user pointer capability bounds? */
 		mem_priv = call_ptr_memop(get_userptr,
 					  vb,
 					  q->alloc_devs[plane] ? : q->dev,
-					  planes[plane].m.userptr,
+					  __c_ua(planes[plane].m.userptr),
 					  planes[plane].length);
 		if (IS_ERR(mem_priv)) {
 			dprintk(q, 1, "failed acquiring userspace memory for plane %d\n",
