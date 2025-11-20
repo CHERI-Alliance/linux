@@ -1126,7 +1126,7 @@ fail:
 static long f_hidg_compat_ioctl(struct file *file, unsigned int code,
 		unsigned long value)
 {
-	return f_hidg_ioctl(file, code, value);
+	return f_hidg_ioctl(file, code, (user_uintptr_t)compat_ptr(value));
 }
 #endif
 
