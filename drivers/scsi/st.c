@@ -3908,6 +3908,7 @@ static long st_ioctl(struct file *file, unsigned int cmd_in, user_uintptr_t arg)
 static long st_compat_ioctl(struct file *file, unsigned int cmd_in, unsigned long arg)
 {
 	/* argument conversion is handled using put_user_mtpos/put_user_mtget */
+#ifdef CONFIG_COMPAT32
 	switch (cmd_in) {
 	case MTIOCPOS32:
 		cmd_in = MTIOCPOS;
@@ -3916,8 +3917,9 @@ static long st_compat_ioctl(struct file *file, unsigned int cmd_in, unsigned lon
 		cmd_in = MTIOCGET;
 		break;
 	}
+#endif
 
-	return st_ioctl(file, cmd_in, arg);
+	return st_ioctl(file, cmd_in, (user_uintptr_t)compat_ptr(arg));
 }
 #endif
 

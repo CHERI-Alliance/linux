@@ -41,7 +41,7 @@ static inline int put_user_mtget(void __user *u, struct mtget *k)
 	};
 	int ret;
 
-	if (in_compat_syscall())
+	if (in_compat32_syscall())
 		ret = copy_to_user(u, &k32, sizeof(k32));
 	else
 		ret = copy_to_user(u, k, sizeof(*k));
@@ -51,7 +51,7 @@ static inline int put_user_mtget(void __user *u, struct mtget *k)
 
 static inline int put_user_mtpos(void __user *u, struct mtpos *k)
 {
-	if (in_compat_syscall())
+	if (in_compat32_syscall())
 		return put_user(k->mt_blkno, (u32 __user *)u);
 	else
 		return put_user(k->mt_blkno, (long __user *)u);
