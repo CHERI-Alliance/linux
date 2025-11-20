@@ -481,11 +481,11 @@ static long rtc_dev_compat_ioctl(struct file *file,
 
 	case RTC_IRQP_SET32:
 		/* arg is a plain integer, not pointer */
-		return rtc_dev_ioctl(file, RTC_IRQP_SET, arg);
+		return rtc_dev_ioctl(file, RTC_IRQP_SET, (user_uintptr_t)compat_ptr(arg));
 
 	case RTC_EPOCH_SET32:
 		/* arg is a plain integer, not pointer */
-		return rtc_dev_ioctl(file, RTC_EPOCH_SET, arg);
+		return rtc_dev_ioctl(file, RTC_EPOCH_SET, (user_uintptr_t)compat_ptr(arg));
 	}
 
 	return rtc_dev_ioctl(file, cmd, (user_uintptr_t)uarg);
