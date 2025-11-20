@@ -384,7 +384,7 @@ static int put_v4l2_plane32(struct v4l2_plane *p64,
 		plane32.m.mem_offset = p64->m.mem_offset;
 		break;
 	case V4L2_MEMORY_USERPTR:
-		plane32.m.userptr = (uintptr_t)(p64->m.userptr);
+		plane32.m.userptr = __c_ua(p64->m.userptr);
 		break;
 	case V4L2_MEMORY_DMABUF:
 		plane32.m.fd = p64->m.fd;
@@ -515,7 +515,7 @@ static int put_v4l2_buffer32(struct v4l2_buffer *vb,
 		vb32.m.offset = vb->m.offset;
 		break;
 	case V4L2_MEMORY_USERPTR:
-		vb32.m.userptr = (uintptr_t)(vb->m.userptr);
+		vb32.m.userptr = __c_ua(vb->m.userptr);
 		break;
 	case V4L2_MEMORY_DMABUF:
 		vb32.m.fd = vb->m.fd;
@@ -523,7 +523,7 @@ static int put_v4l2_buffer32(struct v4l2_buffer *vb,
 	}
 
 	if (V4L2_TYPE_IS_MULTIPLANAR(vb->type))
-		vb32.m.planes = (uintptr_t)vb->m.planes;
+		vb32.m.planes = __c_pa(vb->m.planes);
 
 	if (copy_to_user(arg, &vb32, sizeof(vb32)))
 		return -EFAULT;
@@ -607,7 +607,7 @@ static int get_v4l2_framebuffer32(struct v4l2_framebuffer *p64,
 static int put_v4l2_framebuffer32(struct v4l2_framebuffer *p64,
 				  struct v4l2_framebuffer32 __user *p32)
 {
-	if (put_user((uintptr_t)p64->base, &p32->base) ||
+	if (put_user(__c_pa(p64->base), &p32->base) ||
 	    put_user(p64->capability, &p32->capability) ||
 	    put_user(p64->flags, &p32->flags) ||
 	    copy_to_user(&p32->fmt, &p64->fmt, sizeof(p64->fmt)))
@@ -730,7 +730,7 @@ static int put_v4l2_ext_controls32(struct v4l2_ext_controls *p64,
 		.error_idx	= p64->error_idx,
 		.request_fd	= p64->request_fd,
 		.reserved[0]	= p64->reserved[0],
-		.controls	= (uintptr_t)p64->controls,
+		.controls	= __c_pa(p64->controls),
 	};
 
 	if (copy_to_user(p32, &ec32, sizeof(ec32)))

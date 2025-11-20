@@ -187,7 +187,7 @@ struct vb2_plane {
 	unsigned int		min_length;
 	union {
 		unsigned int	offset;
-		unsigned long	userptr;
+		__uptr		userptr;
 		int		fd;
 	} m;
 	unsigned int		data_offset;
