@@ -12,6 +12,7 @@
 #include <linux/bio.h>
 #include <linux/blkdev.h>
 #include <linux/blk-crypto-profile.h>
+#include <linux/compat64_blk-crypto.h>
 #include <linux/module.h>
 #include <linux/ratelimit.h>
 #include <linux/slab.h>
@@ -446,7 +447,8 @@ static int blk_crypto_ioctl_import_key(struct blk_crypto_profile *profile,
 	u8 lt_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE];
 	int ret;
 
-	if (copy_from_user_with_ptr(&arg, argp, sizeof(arg)))
+	if (__c64_copy_from_user_with_ptr(blk_crypto_import_key_arg,
+					  &arg, argp))
 		return -EFAULT;
 
 	if (memchr_inv(arg.reserved, 0, sizeof(arg.reserved)))
@@ -470,7 +472,7 @@ static int blk_crypto_ioctl_import_key(struct blk_crypto_profile *profile,
 	arg.lt_key_size = ret;
 	if (copy_to_user(u64_to_user_ptr(arg.lt_key_ptr), lt_key,
 			 arg.lt_key_size) ||
-	    copy_to_user_with_ptr(argp, &arg, sizeof(arg))) {
+	    __c64_copy_to_user_with_ptr(blk_crypto_import_key_arg, argp, &arg)) {
 		ret = -EFAULT;
 		goto out;
 	}
@@ -489,7 +491,8 @@ static int blk_crypto_ioctl_generate_key(struct blk_crypto_profile *profile,
 	u8 lt_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE];
 	int ret;
 
-	if (copy_from_user_with_ptr(&arg, argp, sizeof(arg)))
+	if (__c64_copy_from_user_with_ptr(blk_crypto_generate_key_arg,
+					  &arg, argp))
 		return -EFAULT;
 
 	if (memchr_inv(arg.reserved, 0, sizeof(arg.reserved)))
@@ -505,7 +508,7 @@ static int blk_crypto_ioctl_generate_key(struct blk_crypto_profile *profile,
 	arg.lt_key_size = ret;
 	if (copy_to_user(u64_to_user_ptr(arg.lt_key_ptr), lt_key,
 			 arg.lt_key_size) ||
-	    copy_to_user_with_ptr(argp, &arg, sizeof(arg))) {
+	    __c64_copy_to_user_with_ptr(blk_crypto_generate_key_arg, argp, &arg)) {
 		ret = -EFAULT;
 		goto out;
 	}
@@ -524,7 +527,8 @@ static int blk_crypto_ioctl_prepare_key(struct blk_crypto_profile *profile,
 	u8 eph_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE];
 	int ret;
 
-	if (copy_from_user_with_ptr(&arg, argp, sizeof(arg)))
+	if (__c64_copy_from_user_with_ptr(blk_crypto_prepare_key_arg,
+					  &arg, argp))
 		return -EFAULT;
 
 	if (memchr_inv(arg.reserved, 0, sizeof(arg.reserved)))
@@ -548,7 +552,7 @@ static int blk_crypto_ioctl_prepare_key(struct blk_crypto_profile *profile,
 	arg.eph_key_size = ret;
 	if (copy_to_user(u64_to_user_ptr(arg.eph_key_ptr), eph_key,
 			 arg.eph_key_size) ||
-	    copy_to_user_with_ptr(argp, &arg, sizeof(arg))) {
+	    __c64_copy_to_user_with_ptr(blk_crypto_prepare_key_arg, argp, &arg)) {
 		ret = -EFAULT;
 		goto out;
 	}
