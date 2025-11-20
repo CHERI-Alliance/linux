@@ -25,6 +25,7 @@
 #include <linux/virtio.h>
 #include <linux/wait.h>
 #include <uapi/linux/nsm.h>
+#include <linux/compat64_nsm.h>
 
 /* Timeout for NSM virtqueue respose in milliseconds. */
 #define NSM_DEFAULT_TIMEOUT_MSECS (120000) /* 2 minutes */
@@ -350,6 +351,11 @@ out:
 	return rc;
 }
 
+#ifdef CONFIG_COMPAT64
+#define __C64_NSM_IOCTL_RAW _IOWR(NSM_MAGIC, 0x0, struct __c64_nsm_raw)
+#else
+#define __C64_NSM_IOCTL_RAW NSM_IOCTL_RAW
+#endif
 static long nsm_dev_ioctl(struct file *file, unsigned int cmd,
 	user_uintptr_t arg)
 {
@@ -358,15 +364,15 @@ static long nsm_dev_ioctl(struct file *file, unsigned int cmd,
 	struct nsm_raw raw;
 	int r = 0;
 
-	if (cmd != NSM_IOCTL_RAW)
+	if (cmd != NSM_IOCTL_RAW && cmd != __C64_NSM_IOCTL_RAW)
 		return -EINVAL;
 
-	if (_IOC_SIZE(cmd) != sizeof(raw))
+	if (_IOC_SIZE(cmd) != __c64_sizeof(nsm_raw))
 		return -EINVAL;
 
 	/* Copy user argument struct to kernel argument struct */
 	r = -EFAULT;
-	if (copy_from_user_with_ptr(&raw, argp, _IOC_SIZE(cmd)))
+	if (__c64_copy_from_user_with_ptr(nsm_raw, &raw, argp))
 		goto out;
 
 	mutex_lock(&nsm->lock);
@@ -388,7 +394,7 @@ static long nsm_dev_ioctl(struct file *file, unsigned int cmd,
 
 	/* Copy kernel argument struct back to user argument struct */
 	r = -EFAULT;
-	if (copy_to_user_with_ptr(argp, &raw, sizeof(raw)))
+	if (__c64_copy_to_user_with_ptr(nsm_raw, argp, &raw))
 		goto out;
 
 	r = 0;
