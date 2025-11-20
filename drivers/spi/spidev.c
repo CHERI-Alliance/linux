@@ -23,6 +23,7 @@
 
 #include <linux/spi/spi.h>
 #include <linux/spi/spidev.h>
+#include <linux/spi/compat64_spidev.h>
 
 #include <linux/uaccess.h>
 
@@ -333,6 +334,7 @@ spidev_get_ioc_message(unsigned int cmd, struct spi_ioc_transfer __user *u_ioc,
 		unsigned *n_ioc)
 {
 	u32	tmp;
+	size_t	iocsize = __c64_sizeof(spi_ioc_transfer);
 
 	/* Check type, command number and direction */
 	if (_IOC_TYPE(cmd) != SPI_IOC_MAGIC
@@ -341,14 +343,14 @@ spidev_get_ioc_message(unsigned int cmd, struct spi_ioc_transfer __user *u_ioc,
 		return ERR_PTR(-ENOTTY);
 
 	tmp = _IOC_SIZE(cmd);
-	if ((tmp % sizeof(struct spi_ioc_transfer)) != 0)
+	if ((tmp % iocsize) != 0)
 		return ERR_PTR(-EINVAL);
-	*n_ioc = tmp / sizeof(struct spi_ioc_transfer);
+	*n_ioc = tmp / iocsize;
 	if (*n_ioc == 0)
 		return NULL;
 
 	/* copy into scratch area */
-	return memdup_user(u_ioc, tmp);
+	return memdup_user_with_ptr(u_ioc, tmp);
 }
 
 static long
@@ -553,10 +555,24 @@ spidev_compat_ioc_message(struct file *filp, unsigned int cmd,
 	if (!ioc)
 		goto done;	/* n_ioc is also 0 */
 
-	/* Convert buffer pointers */
-	for (n = 0; n < n_ioc; n++) {
-		ioc[n].rx_buf = (user_uintptr_t) compat_ptr(ioc[n].rx_buf);
-		ioc[n].tx_buf = (user_uintptr_t) compat_ptr(ioc[n].tx_buf);
+	if (in_compat64_syscall()) {
+		struct __c64_spi_ioc_transfer *compat = (void *)ioc;
+		ioc = kmalloc(n_ioc * sizeof(*ioc), GFP_KERNEL);
+		if (!ioc) {
+			retval = -ENOMEM;
+			kfree(compat);
+			goto done;
+		}
+		for (n = 0; n < n_ioc; ++n)
+			__from_c64_spi_ioc_transfer_2(&ioc[n], &compat[n]);
+
+		kfree(compat);
+	} else {
+		/* Convert buffer pointers */
+		for (n = 0; n < n_ioc; n++) {
+			ioc[n].rx_buf = (user_uintptr_t) compat_ptr(__c_ua(ioc[n].rx_buf));
+			ioc[n].tx_buf = (user_uintptr_t) compat_ptr(__c_ua(ioc[n].tx_buf));
+		}
 	}
 
 	/* translate to spi_message, execute */
