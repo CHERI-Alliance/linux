@@ -8,6 +8,7 @@
 
 #include <linux/compat.h>
 #include <linux/slab.h>
+#include <sound/compat64_asequencer.h>
 
 struct snd_seq_port_info32 {
 	struct snd_seq_addr addr;	/* client/port numbers */
@@ -22,7 +23,7 @@ struct snd_seq_port_info32 {
 	s32 read_use;			/* R/O: subscribers for output (from this port) */
 	s32 write_use;			/* R/O: subscribers for input (to this port) */
 
-	u32 kernel;			/* reserved for kernel use (must be NULL) */
+	compat_caddr_t kernel;		/* reserved for kernel use (must be NULL) */
 	u32 flags;		/* misc. conditioning */
 	unsigned char time_queue;	/* queue # for timestamping */
 	char reserved[59];		/* for future use */
@@ -38,7 +39,11 @@ static int snd_seq_call_port_info_ioctl(struct snd_seq_client *client, unsigned 
 	if (!data)
 		return -ENOMEM;
 
-	if (copy_from_user_no_ptr(data, data32, sizeof(*data32)) ||
+	if (in_compat64_syscall()) {
+		if (__c64_copy_from_user_with_ptr(snd_seq_port_info,
+						  data, (void __user *)data32))
+			return -EFAULT;
+	} else if (copy_from_user_no_ptr(data, data32, sizeof(*data32)) ||
 	    get_user(data->flags, &data32->flags) ||
 	    get_user(data->time_queue, &data32->time_queue))
 		return -EFAULT;
@@ -48,7 +53,11 @@ static int snd_seq_call_port_info_ioctl(struct snd_seq_client *client, unsigned 
 	if (err < 0)
 		return err;
 
-	if (copy_to_user_no_ptr(data32, data, sizeof(*data32)) ||
+	if (in_compat64_syscall()) {
+		if (__c64_copy_to_user_with_ptr(snd_seq_port_info,
+						data32, data))
+			return -EFAULT;
+	} else if (copy_to_user_no_ptr(data32, data, sizeof(*data32)) ||
 	    put_user(data->flags, &data32->flags) ||
 	    put_user(data->time_queue, &data32->time_queue))
 		return -EFAULT;
@@ -107,7 +116,7 @@ static long snd_seq_ioctl_compat(struct file *file, unsigned int cmd, unsigned l
 	case SNDRV_SEQ_IOCTL_GET_SUBSCRIPTION:
 	case SNDRV_SEQ_IOCTL_QUERY_NEXT_CLIENT:
 	case SNDRV_SEQ_IOCTL_RUNNING_MODE:
-		return snd_seq_ioctl(file, cmd, arg);
+		return snd_seq_ioctl(file, cmd, (user_uintptr_t)argp);
 	case SNDRV_SEQ_IOCTL_CREATE_PORT32:
 		return snd_seq_call_port_info_ioctl(client, SNDRV_SEQ_IOCTL_CREATE_PORT, argp);
 	case SNDRV_SEQ_IOCTL_DELETE_PORT32:
