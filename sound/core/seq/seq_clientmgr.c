@@ -23,6 +23,7 @@
 #include "seq_system.h"
 #include "seq_ump_convert.h"
 #include <sound/seq_device.h>
+#include <sound/compat64_asequencer.h>
 #ifdef CONFIG_COMPAT
 #include <linux/compat.h>
 #endif
@@ -466,9 +467,9 @@ static ssize_t snd_seq_read(struct file *file, char __user *buf, size_t count,
 	snd_seq_fifo_lock(fifo);
 
 	if (IS_ENABLED(CONFIG_SND_SEQ_UMP) && client->midi_version > 0)
-		aligned_size = sizeof(struct snd_seq_ump_event);
+		aligned_size = __c64_sizeof(snd_seq_ump_event);
 	else
-		aligned_size = sizeof(struct snd_seq_event);
+		aligned_size = __c64_sizeof(snd_seq_event);
 
 	/* while data available in queue */
 	while (count >= aligned_size) {
@@ -1054,23 +1055,23 @@ static ssize_t snd_seq_write(struct file *file, const char __user *buf,
 
 	/* only process whole events */
 	err = -EINVAL;
-	while (count >= sizeof(struct snd_seq_event)) {
+	while (count >= __c64_sizeof(snd_seq_event)) {
 		/* Read in the event header from the user */
-		len = sizeof(struct snd_seq_event);
+		len = __c64_sizeof(snd_seq_event);
 		if (copy_from_user_with_ptr(ev, buf, len)) {
 			err = -EFAULT;
 			break;
 		}
 		/* read in the rest bytes for UMP events */
 		if (snd_seq_ev_is_ump(ev)) {
-			if (count < sizeof(struct snd_seq_ump_event))
+			if (count < __c64_sizeof(snd_seq_ump_event))
 				break;
 			if (copy_from_user((char *)ev + len, buf + len,
-					   sizeof(struct snd_seq_ump_event) - len)) {
+					   __c64_sizeof(snd_seq_ump_event) - len)) {
 				err = -EFAULT;
 				break;
 			}
-			len = sizeof(struct snd_seq_ump_event);
+			len = __c64_sizeof(snd_seq_ump_event);
 		}
 
 		ev->source.client = client->number;	/* fill in client number */
@@ -1107,7 +1108,7 @@ static ssize_t snd_seq_write(struct file *file, const char __user *buf,
 			ev->data.ext.ptr = (char __force *)buf + len;
 			len += extlen; /* increment data length */
 		} else {
-#ifdef CONFIG_COMPAT
+#ifdef CONFIG_COMPAT32
 			if (client->convert32 && snd_seq_ev_is_varusr(ev))
 				ev->data.ext.ptr =
 					(void __force *)compat_ptr(ev->data.raw32.d[1]);

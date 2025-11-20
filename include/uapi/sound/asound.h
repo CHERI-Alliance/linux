@@ -1162,6 +1162,13 @@ struct snd_ctl_elem_info {
 			__u64ptr names_ptr;	/* W: names list (ELEM_ADD only) */
 			unsigned int names_length;
 		} enumerated;
+		struct {
+			unsigned int items;	/* R: number of items */
+			unsigned int item;	/* W: item number */
+			char name[64];		/* R: value name */
+			__u64 names_ptr;	/* W: names list (ELEM_ADD only) */
+			unsigned int names_length;
+		} enumerated_c64;
 		unsigned char reserved[128];
 	} value;
 	unsigned char reserved[64];
@@ -1173,18 +1180,22 @@ struct snd_ctl_elem_value {
 	union {
 		union {
 			long value[128];
+			/// UAPI: NoConvert: Unsed by the kernel
 			long *value_ptr;	/* obsoleted */
 		} integer;
 		union {
 			long long value[64];
+			/// UAPI: NoConvert: Unsed by the kernel
 			long long *value_ptr;	/* obsoleted */
 		} integer64;
 		union {
 			unsigned int item[128];
+			/// UAPI: NoConvert: Unsed by the kernel
 			unsigned int *item_ptr;	/* obsoleted */
 		} enumerated;
 		union {
 			unsigned char data[512];
+			/// UAPI: NoConvert: Unsed by the kernel
 			unsigned char *data_ptr;	/* obsoleted */
 		} bytes;
 		struct snd_aes_iec958 iec958;
