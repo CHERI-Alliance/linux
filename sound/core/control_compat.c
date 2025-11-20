@@ -15,7 +15,7 @@ struct snd_ctl_elem_list32 {
 	u32 space;
 	u32 used;
 	u32 count;
-	u32 pids;
+	compat_caddr_t pids;
 	unsigned char reserved[50];
 } /* don't set packed attribute here */;
 
@@ -55,9 +55,9 @@ struct snd_ctl_elem_info32 {
 	s32 owner;
 	union {
 		struct {
-			s32 min;
-			s32 max;
-			s32 step;
+			compat_long_t min;
+			compat_long_t max;
+			compat_long_t step;
 		} integer;
 		struct {
 			u64 min;
@@ -141,7 +141,7 @@ struct snd_ctl_elem_value32 {
 	struct snd_ctl_elem_id id;
 	unsigned int indirect;	/* bit-field causes misalignment */
         union {
-		s32 integer[128];
+		compat_long_t integer[128];
 		unsigned char data[512];
 #ifndef CONFIG_X86_64
 		s64 integer64[64];
@@ -156,7 +156,7 @@ struct snd_ctl_elem_value_x32 {
 	struct snd_ctl_elem_id id;
 	unsigned int indirect;	/* bit-field causes misalignment */
 	union {
-		s32 integer[128];
+		compat_long_t integer[128];
 		unsigned char data[512];
 		s64 integer64[64];
 	} value;
@@ -410,8 +410,13 @@ static int snd_ctl_elem_add_compat(struct snd_ctl_file *file,
 				   &data32->value.enumerated,
 				   sizeof(data->value.enumerated)))
 			return -EFAULT;
+		/* For compat64 the size of names_ptr changes. */
+		if (in_compat64_syscall()) {
+			data->value.enumerated.names_length =
+				data->value.enumerated_c64.names_length;
+		}
 		data->value.enumerated.names_ptr =
-			(user_uintptr_t)compat_ptr(data->value.enumerated.names_ptr);
+			(user_uintptr_t)compat_ptr(data->value.enumerated_c64.names_ptr);
 		break;
 	default:
 		break;
@@ -479,7 +484,8 @@ static inline long snd_ctl_ioctl_compat(struct file *file, unsigned int cmd, uns
 	guard(rwsem_read)(&snd_ioctl_rwsem);
 	list_for_each_entry(p, &snd_control_compat_ioctls, list) {
 		if (p->fioctl) {
-			err = p->fioctl(ctl->card, ctl, cmd, arg);
+			err = p->fioctl(ctl->card, ctl, cmd,
+					(user_uintptr_t)argp);
 			if (err != -ENOIOCTLCMD)
 				return err;
 		}
