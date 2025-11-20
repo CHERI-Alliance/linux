@@ -1162,6 +1162,13 @@ struct snd_ctl_elem_info {
 			__u64ptr names_ptr;	/* W: names list (ELEM_ADD only) */
 			unsigned int names_length;
 		} enumerated;
+		struct {
+			unsigned int items;	/* R: number of items */
+			unsigned int item;	/* W: item number */
+			char name[64];		/* R: value name */
+			__u64 names_ptr;	/* W: names list (ELEM_ADD only) */
+			unsigned int names_length;
+		} enumerated_c64;
 		unsigned char reserved[128];
 	} value;
 	unsigned char reserved[64];
