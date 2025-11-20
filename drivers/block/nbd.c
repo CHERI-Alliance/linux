@@ -1667,6 +1667,12 @@ static int nbd_ioctl(struct block_device *bdev, blk_mode_t mode,
 	return error;
 }
 
+static int compat_nbd_ioctl(struct block_device *bdev, blk_mode_t mode,
+                            unsigned int cmd, unsigned long arg)
+{
+	return nbd_ioctl(bdev, mode, cmd, __c_fakeu(arg));
+}
+
 static int nbd_alloc_and_init_config(struct nbd_device *nbd)
 {
 	struct nbd_config *config;
@@ -1770,9 +1776,7 @@ static const struct block_device_operations nbd_fops =
 	.open =		nbd_open,
 	.release =	nbd_release,
 	.ioctl =	nbd_ioctl,
-#ifndef CONFIG_CHERI_KERNEL
-	.compat_ioctl =	nbd_ioctl,
-#endif
+	.compat_ioctl =	compat_nbd_ioctl,
 	.free_disk =	nbd_free_disk,
 };
 
