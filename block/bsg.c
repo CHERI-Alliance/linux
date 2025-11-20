@@ -11,6 +11,7 @@
 #include <linux/percpu.h>
 #include <linux/idr.h>
 #include <linux/bsg.h>
+#include <linux/compat64_bsg.h>
 #include <linux/slab.h>
 
 #include <scsi/scsi.h>
@@ -60,13 +61,13 @@ static int bsg_sg_io(struct bsg_device *bd, bool open_for_write,
 	struct sg_io_v4 hdr;
 	int ret;
 
-	if (copy_from_user_with_ptr(&hdr, uarg, sizeof(hdr)))
+	if (__c64_copy_from_user_with_ptr(sg_io_v4, &hdr, uarg))
 		return -EFAULT;
 	if (hdr.guard != 'Q')
 		return -EINVAL;
 	ret = bd->sg_io_fn(bd->queue, &hdr, open_for_write,
 			   bsg_timeout(bd, &hdr));
-	if (!ret && copy_to_user_with_ptr(uarg, &hdr, sizeof(hdr)))
+	if (!ret && __c64_copy_to_user_with_ptr(sg_io_v4, uarg, &hdr))
 		return -EFAULT;
 	return ret;
 }
