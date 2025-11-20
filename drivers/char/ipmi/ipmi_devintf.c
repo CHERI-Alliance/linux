@@ -768,7 +768,7 @@ static long compat_ipmi_ioctl(struct file *filep, unsigned int cmd,
 				 &recv64, copyout_recv32, compat_ptr(arg));
 	}
 	default:
-		return ipmi_ioctl(filep, cmd, arg);
+		return ipmi_ioctl(filep, cmd, (user_uintptr_t)compat_ptr(arg));
 	}
 }
 #endif
