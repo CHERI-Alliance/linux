@@ -125,9 +125,9 @@ static int br_dev_read_uargs(user_uintptr_t *args, size_t nr_args,
 			goto fault;
 
 		for (i = 0; i < nr_args; ++i)
-			args[i] = cargs[i];
+			args[i] = __c_fakeu(cargs[i]);
 
-		*argp = compat_ptr(args[1]);
+		*argp = compat_ptr(__c_ua(args[1]));
 	} else {
 		ret = copy_from_user_with_ptr(args, data, nr_args * sizeof(*args));
 		if (ret)

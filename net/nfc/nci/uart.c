@@ -343,6 +343,13 @@ static int nci_uart_tty_ioctl(struct tty_struct *tty, unsigned int cmd,
 	return err;
 }
 
+static int compat_nci_uart_tty_ioctl(struct tty_struct *tty, unsigned int cmd,
+				     unsigned long arg)
+{
+	return nci_uart_tty_ioctl(tty, cmd, (user_uintptr_t)compat_ptr(arg));
+}
+
+
 /* We don't provide read/write/poll interface for user space. */
 static ssize_t nci_uart_tty_read(struct tty_struct *tty, struct file *file,
 				 u8 *buf, size_t nr, void **cookie,
@@ -432,9 +439,7 @@ static struct tty_ldisc_ops nci_uart_ldisc = {
 	.receive_buf	= nci_uart_tty_receive,
 	.write_wakeup	= nci_uart_tty_wakeup,
 	.ioctl		= nci_uart_tty_ioctl,
-#ifndef CONFIG_CHERI_KERNEL
-	.compat_ioctl	= nci_uart_tty_ioctl,
-#endif
+	.compat_ioctl	= compat_nci_uart_tty_ioctl,
 };
 
 static int __init nci_uart_init(void)

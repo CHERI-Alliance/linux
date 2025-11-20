@@ -1178,7 +1178,7 @@ static int hci_sock_compat_ioctl(struct socket *sock, unsigned int cmd,
 	case HCIDEVDOWN:
 	case HCIDEVRESET:
 	case HCIDEVRESTAT:
-		return hci_sock_ioctl(sock, cmd, arg);
+		return hci_sock_ioctl(sock, cmd, __c_fakeu(arg));
 	}
 
 	return hci_sock_ioctl(sock, cmd, (user_uintptr_t)compat_ptr(arg));
