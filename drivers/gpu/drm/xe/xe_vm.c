@@ -3731,7 +3731,7 @@ int xe_vm_bind_ioctl(struct drm_device *dev, void *data, struct drm_file *file)
 		struct xe_exec_queue *__q = q ?: vm->q[0];
 
 		err = xe_sync_entry_parse(xe, xef, &syncs[num_syncs],
-					  &syncs_user[num_syncs],
+					  syncs_user, num_syncs,
 					  __q->ufence_syncobj,
 					  ++__q->ufence_timeline_value,
 					  (xe_vm_in_lr_mode(vm) ?

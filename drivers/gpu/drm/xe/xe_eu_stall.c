@@ -11,6 +11,7 @@
 #include <drm/drm_drv.h>
 #include <generated/xe_wa_oob.h>
 #include <uapi/drm/xe_drm.h>
+#include <drm/compat64_xe_drm.h>
 
 #include "xe_bo.h"
 #include "xe_device.h"
@@ -314,7 +315,7 @@ static int xe_eu_stall_user_ext_set_property(struct xe_device *xe, user_uintptr_
 	int err;
 	u32 idx;
 
-	err = copy_from_user_with_ptr(&ext, address, sizeof(ext));
+	err = __c64_copy_from_user_with_ptr(drm_xe_ext_set_property, &ext, address);
 	if (XE_IOCTL_DBG(xe, err))
 		return -EFAULT;
 
@@ -344,7 +345,7 @@ static int xe_eu_stall_user_extensions(struct xe_device *xe, user_uintptr_t exte
 	if (XE_IOCTL_DBG(xe, ext_number >= MAX_USER_EXTENSIONS))
 		return -E2BIG;
 
-	err = copy_from_user_with_ptr(&ext, address, sizeof(ext));
+	err = __c64_copy_from_user_with_ptr(drm_xe_user_extension, &ext, address);
 	if (XE_IOCTL_DBG(xe, err))
 		return -EFAULT;
 
@@ -891,9 +892,7 @@ static const struct file_operations fops_eu_stall = {
 	.poll		= xe_eu_stall_stream_poll,
 	.read		= xe_eu_stall_stream_read,
 	.unlocked_ioctl = xe_eu_stall_stream_ioctl,
-#ifndef CONFIG_CHERI_KERNEL
-	.compat_ioctl   = xe_eu_stall_stream_ioctl,
-#endif
+	.compat_ioctl   = compat_noptr_ioctl,
 };
 
 static int xe_eu_stall_stream_open_locked(struct drm_device *dev,

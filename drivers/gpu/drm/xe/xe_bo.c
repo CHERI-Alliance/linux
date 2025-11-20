@@ -17,6 +17,7 @@
 #include <drm/ttm/ttm_placement.h>
 #include <drm/ttm/ttm_tt.h>
 #include <uapi/drm/xe_drm.h>
+#include <drm/compat64_xe_drm.h>
 
 #include <kunit/static_stub.h>
 
@@ -3096,7 +3097,8 @@ static int gem_create_user_ext_set_property(struct xe_device *xe,
 	int err;
 	u32 idx;
 
-	err = copy_from_user_with_ptr(&ext, address, sizeof(ext));
+	err = __c64_copy_from_user_with_ptr(drm_xe_ext_set_property, &ext,
+					    address);
 	if (XE_IOCTL_DBG(xe, err))
 		return -EFAULT;
 
@@ -3133,7 +3135,8 @@ static int gem_create_user_extensions(struct xe_device *xe, struct xe_bo *bo,
 	if (XE_IOCTL_DBG(xe, ext_number >= MAX_USER_EXTENSIONS))
 		return -E2BIG;
 
-	err = copy_from_user_with_ptr(&ext, address, sizeof(ext));
+	err = __c64_copy_from_user_with_ptr(drm_xe_user_extension, &ext,
+					    address);
 	if (XE_IOCTL_DBG(xe, err))
 		return -EFAULT;
 
