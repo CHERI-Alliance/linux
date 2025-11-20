@@ -7952,19 +7952,21 @@ out:
 static int md_compat_ioctl(struct block_device *bdev, blk_mode_t mode,
 		    unsigned int cmd, unsigned long arg)
 {
+	user_uintptr_t argu;
 	switch (cmd) {
 	case HOT_REMOVE_DISK:
 	case HOT_ADD_DISK:
 	case SET_DISK_FAULTY:
 	case SET_BITMAP_FILE:
-		/* These take in integer arg, do not convert */
+		/* These take in integer arg, do not convert to pointer */
+		argu = __c_fakeu(arg);
 		break;
 	default:
-		arg = (user_uintptr_t)compat_ptr(arg);
+		argu = (user_uintptr_t)compat_ptr(arg);
 		break;
 	}
 
-	return md_ioctl(bdev, mode, cmd, arg);
+	return md_ioctl(bdev, mode, cmd, argu);
 }
 #endif /* CONFIG_COMPAT */
 
