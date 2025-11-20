@@ -34,6 +34,7 @@
 #include <linux/string.h>
 #include <linux/uaccess.h>
 #include <linux/vfio.h>
+#include <linux/compat64_vfio.h>
 #include <linux/wait.h>
 #include <linux/sched/signal.h>
 #include <linux/pm_runtime.h>
@@ -1049,9 +1050,6 @@ vfio_ioctl_device_feature_logging_start(struct vfio_device *device,
 					u32 flags, void __user *arg,
 					size_t argsz)
 {
-	size_t minsz =
-		offsetofend(struct vfio_device_feature_dma_logging_control,
-			    ranges);
 	struct vfio_device_feature_dma_logging_range __user *ranges;
 	struct vfio_device_feature_dma_logging_control control;
 	struct vfio_device_feature_dma_logging_range range;
@@ -1070,7 +1068,8 @@ vfio_ioctl_device_feature_logging_start(struct vfio_device *device,
 	if (ret != 1)
 		return ret;
 
-	if (copy_from_user_with_ptr(&control, arg, minsz))
+	if (__c64_copy_from_user_with_ptr(vfio_device_feature_dma_logging_control,
+					  &control, arg))
 		return -EFAULT;
 
 	nnodes = control.num_ranges;
@@ -1119,7 +1118,8 @@ vfio_ioctl_device_feature_logging_start(struct vfio_device *device,
 	if (ret)
 		goto end;
 
-	if (copy_to_user_with_ptr(arg, &control, sizeof(control))) {
+	if (__c64_copy_to_user_with_ptr(vfio_device_feature_dma_logging_control,
+					arg, &control)) {
 		ret = -EFAULT;
 		device->log_ops->log_stop(device);
 	}
@@ -1161,9 +1161,6 @@ vfio_ioctl_device_feature_logging_report(struct vfio_device *device,
 					 u32 flags, void __user *arg,
 					 size_t argsz)
 {
-	size_t minsz =
-		offsetofend(struct vfio_device_feature_dma_logging_report,
-			    bitmap);
 	struct vfio_device_feature_dma_logging_report report;
 	struct iova_bitmap *iter;
 	u64 iova_end;
@@ -1178,7 +1175,8 @@ vfio_ioctl_device_feature_logging_report(struct vfio_device *device,
 	if (ret != 1)
 		return ret;
 
-	if (copy_from_user_with_ptr(&report, arg, minsz))
+	if (__c64_copy_from_user_with_ptr(vfio_device_feature_dma_logging_report,
+					  &report, arg))
 		return -EFAULT;
 
 	if (report.page_size < SZ_4K || !is_power_of_2(report.page_size))
