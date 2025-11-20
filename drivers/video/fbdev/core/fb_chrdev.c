@@ -292,7 +292,7 @@ static long fb_compat_ioctl(struct file *file, unsigned int cmd,
 		ret = do_fb_ioctl(info, cmd, argp);
 		break;
 	case FBIOBLANK:
-		ret = do_fb_ioctl(info, cmd, arg);
+		ret = do_fb_ioctl(info, cmd, __c_fakeu(arg));
 		break;
 
 	case FBIOGET_FSCREENINFO:
