@@ -11,6 +11,7 @@
 #include <drm/drm_drv.h>
 #include <drm/drm_managed.h>
 #include <uapi/drm/xe_drm.h>
+#include <drm/compat64_xe_drm.h>
 
 #include <generated/xe_wa_oob.h>
 
@@ -1303,7 +1304,7 @@ static int xe_oa_user_ext_set_property(struct xe_oa *oa, enum xe_oa_user_extn_fr
 	int err;
 	u32 idx;
 
-	err = copy_from_user_with_ptr(&ext, address, sizeof(ext));
+	err = __c64_copy_from_user_with_ptr(drm_xe_ext_set_property, &ext, address);
 	if (XE_IOCTL_DBG(oa->xe, err))
 		return -EFAULT;
 
@@ -1340,7 +1341,7 @@ static int xe_oa_user_extensions(struct xe_oa *oa, enum xe_oa_user_extn_from fro
 	if (XE_IOCTL_DBG(oa->xe, ext_number >= MAX_USER_EXTENSIONS))
 		return -E2BIG;
 
-	err = copy_from_user_with_ptr(&ext, address, sizeof(ext));
+	err = __c64_copy_from_user_with_ptr(drm_xe_user_extension, &ext, address);
 	if (XE_IOCTL_DBG(oa->xe, err))
 		return -EFAULT;
 
@@ -1379,7 +1380,7 @@ static int xe_oa_parse_syncs(struct xe_oa *oa, struct xe_oa_open_param *param)
 
 	for (num_syncs = 0; num_syncs < param->num_syncs; num_syncs++) {
 		ret = xe_sync_entry_parse(oa->xe, param->xef, &param->syncs[num_syncs],
-					  &param->syncs_user[num_syncs], 0);
+					  param->syncs_user, num_syncs, 0);
 		if (ret)
 			goto err_syncs;
 
@@ -1555,7 +1556,7 @@ static long xe_oa_info_locked(struct xe_oa_stream *stream, user_uintptr_t arg)
 	struct drm_xe_oa_stream_info info = { .oa_buf_size = stream->oa_buffer.bo->size, };
 	void __user *uaddr = (void __user *)arg;
 
-	if (copy_to_user_with_ptr(uaddr, &info, sizeof(info)))
+	if (__c64_copy_to_user_with_ptr(drm_xe_oa_stream_info, uaddr, &info))
 		return -EFAULT;
 
 	return 0;
@@ -2283,7 +2284,7 @@ int xe_oa_add_config_ioctl(struct drm_device *dev, user_uintptr_t data, struct d
 		return -EACCES;
 	}
 
-	err = copy_from_user_with_ptr(&param, (void __user *)data, sizeof(param));
+	err = __c64_copy_from_user_with_ptr(drm_xe_oa_config, &param, (void __user *)data);
 	if (XE_IOCTL_DBG(oa->xe, err))
 		return -EFAULT;
 
