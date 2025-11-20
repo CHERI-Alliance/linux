@@ -356,7 +356,7 @@ int vcc_compat_ioctl(struct socket *sock, unsigned int cmd,
 {
 	int ret;
 
-	ret = do_vcc_ioctl(sock, cmd, arg, 1);
+	ret = do_vcc_ioctl(sock, cmd, (user_uintptr_t)compat_ptr(arg), 1);
 	if (ret != -ENOIOCTLCMD)
 		return ret;
 

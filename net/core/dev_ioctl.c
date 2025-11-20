@@ -91,8 +91,8 @@ static int dev_getifmap(struct net_device *dev, struct ifreq *ifr)
 	if (in_compat_syscall()) {
 		struct compat_ifmap *cifmap = (struct compat_ifmap *)ifmap;
 
-		cifmap->mem_start = dev->mem_start;
-		cifmap->mem_end   = dev->mem_end;
+		cifmap->mem_start = __c_ua(dev->mem_start);
+		cifmap->mem_end   = __c_ua(dev->mem_end);
 		cifmap->base_addr = dev->base_addr;
 		cifmap->irq       = dev->irq;
 		cifmap->dma       = dev->dma;
