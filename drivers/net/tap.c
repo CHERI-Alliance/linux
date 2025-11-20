@@ -1037,7 +1037,7 @@ static long compat_tap_ioctl(struct file *file, unsigned int cmd,
 {
 	user_uintptr_t cmd_arg = (cmd != TUNSETOFFLOAD) ?
 				 (user_uintptr_t)compat_ptr(arg) :
-				 (user_uintptr_t)arg;
+				 __c_fakeu(arg);
 	return tap_ioctl(file, cmd, cmd_arg);
 }
 #endif
