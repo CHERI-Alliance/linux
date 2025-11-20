@@ -41,5 +41,5 @@ long amdgpu_kms_compat_ioctl(struct file *filp, unsigned int cmd, unsigned long 
 	if (nr < DRM_COMMAND_BASE)
 		return drm_compat_ioctl(filp, cmd, arg);
 
-	return amdgpu_drm_ioctl(filp, cmd, arg);
+	return amdgpu_drm_ioctl(filp, cmd, (user_uintptr_t)compat_ptr(arg));
 }
