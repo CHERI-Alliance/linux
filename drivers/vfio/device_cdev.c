@@ -3,6 +3,7 @@
  * Copyright (c) 2023 Intel Corporation.
  */
 #include <linux/vfio.h>
+#include <linux/compat64_vfio.h>
 #include <linux/iommufd.h>
 
 #include "vfio.h"
@@ -92,14 +93,14 @@ long vfio_df_ioctl_bind_iommufd(struct vfio_device_file *df,
 
 	static_assert(__same_type(arg->out_devid, df->devid));
 
-	minsz = offsetofend(struct vfio_device_bind_iommufd, out_devid);
+	minsz = __c64_offsetofend(vfio_device_bind_iommufd, out_devid);
 
 	ret = get_user(user_size, &arg->argsz);
 	if (ret)
 		return ret;
 	if (user_size < minsz)
 		return -EINVAL;
-	ret = copy_struct_from_user(&bind, sizeof(bind), arg, user_size);
+	ret = __c64_copy_struct_from_user_with_ptr(vfio_device_bind_iommufd, &bind, arg, user_size);
 	if (ret)
 		return ret;
 
