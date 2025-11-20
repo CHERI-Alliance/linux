@@ -12,7 +12,7 @@ typedef struct _IOCTL32_Command_struct {
   RequestBlock_struct      Request;
   ErrorInfo_struct  	   error_info;
   WORD			   buf_size;  /* size in bytes of the buf */
-  __u32			   buf; /* 32 bit pointer to data buffer */
+  compat_caddr_t	   buf;       /* compat pointer to data buffer */
 } IOCTL32_Command_struct;
 
 typedef struct _BIG_IOCTL32_Command_struct {
@@ -22,7 +22,7 @@ typedef struct _BIG_IOCTL32_Command_struct {
   DWORD			   malloc_size; /* < MAX_KMALLOC_SIZE in cciss.c */
   DWORD			   buf_size;    /* size in bytes of the buf */
   				        /* < malloc_size * MAXSGENTRIES */
-  __u32 		buf;	/* 32 bit pointer to data buffer */
+  compat_caddr_t 	   buf;         /* compat pointer to data buffer */
 } BIG_IOCTL32_Command_struct;
 
 #define CCISS_PASSTHRU32   _IOWR(CCISS_IOC_MAGIC, 11, IOCTL32_Command_struct)
