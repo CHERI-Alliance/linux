@@ -119,7 +119,7 @@ static inline struct drm_printer xe_tile_dbg_printer(struct xe_tile *tile)
 	struct drm_printer p = {
 		.printfn = __xe_tile_printfn_dbg,
 		.arg = tile,
-		.origin = (const void *)_THIS_IP_,
+		.origin = (const void *)__c_fakep(_THIS_IP_),
 	};
 	return p;
 }

@@ -805,6 +805,7 @@ struct __c64_drm_xe_sync {
 
 	union {
 		/** @handle: Handle for the object */
+		/// UAPI: NoConvert: Only convert as an u64
 		__u32 handle;
 
 		/**
@@ -815,7 +816,9 @@ struct __c64_drm_xe_sync {
 		 * mapped when the user fence is signalled. Must be qword
 		 * aligned.
 		 */
-		__c64_ptr64 addr;
+		/// UAPI: NoConvert: Only convert as an u64
+		__c64_ptr64 __c64_addr;
+		__u64 __c64_copy;
 	};
 
 	/**
@@ -828,6 +831,62 @@ struct __c64_drm_xe_sync {
 	__u64 reserved[2];
 };
 
+static __always_inline __maybe_unused void
+__from_c64_drm_xe_sync(struct drm_xe_sync *p)
+{
+	union {
+		struct drm_xe_sync native;
+		const struct __c64_drm_xe_sync compat;
+	} *u = (void *)p;
+
+	BUILD_BUG_ON(sizeof(u->compat.reserved) != sizeof(u->native.reserved));
+	memmove(&u->native.reserved, &u->compat.reserved, sizeof(u->native.reserved));
+	u->native.timeline_value = u->compat.timeline_value;
+	u->native.__c64_copy = u->compat.__c64_copy;
+	u->native.flags = u->compat.flags;
+	u->native.type = u->compat.type;
+	u->native.extensions = (user_uintptr_t)compat_ptr(u->compat.extensions);
+}
+static __always_inline __maybe_unused void
+__to_c64_drm_xe_sync(struct drm_xe_sync *p)
+{
+	union {
+		struct __c64_drm_xe_sync compat;
+		const struct drm_xe_sync native;
+	} *u = (void *)p;
+
+	u->compat.extensions = (__c64_ptr64 __force)u->native.extensions;
+	u->compat.type = u->native.type;
+	u->compat.flags = u->native.flags;
+	u->compat.__c64_copy = u->native.__c64_copy;
+	u->compat.timeline_value = u->native.timeline_value;
+	BUILD_BUG_ON(sizeof(u->native.reserved) != sizeof(u->compat.reserved));
+	memmove(&u->compat.reserved, &u->native.reserved, sizeof(u->compat.reserved));
+}
+static __always_inline __maybe_unused void
+__from_c64_drm_xe_sync_2(struct drm_xe_sync *native, const struct __c64_drm_xe_sync *compat)
+{
+
+	native->extensions = (user_uintptr_t)compat_ptr(compat->extensions);
+	native->type = compat->type;
+	native->flags = compat->flags;
+	native->__c64_copy = compat->__c64_copy;
+	native->timeline_value = compat->timeline_value;
+	BUILD_BUG_ON(sizeof(compat->reserved) != sizeof(native->reserved));
+	memcpy(&native->reserved, &compat->reserved, sizeof(native->reserved));
+}
+static __always_inline __maybe_unused void
+__to_c64_drm_xe_sync_2(struct __c64_drm_xe_sync *compat, const struct drm_xe_sync *native)
+{
+
+	compat->extensions = (__c64_ptr64 __force)native->extensions;
+	compat->type = native->type;
+	compat->flags = native->flags;
+	compat->__c64_copy = native->__c64_copy;
+	compat->timeline_value = native->timeline_value;
+	BUILD_BUG_ON(sizeof(native->reserved) != sizeof(compat->reserved));
+	memcpy(&compat->reserved, &native->reserved, sizeof(compat->reserved));
+}
 struct __c64_drm_xe_exec {
 	/** @extensions: Pointer to the first extension struct, if any */
 	__c64_ptr64 extensions;

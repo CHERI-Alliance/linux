@@ -22,6 +22,7 @@ struct xe_vm;
 int xe_sync_entry_parse(struct xe_device *xe, struct xe_file *xef,
 			struct xe_sync_entry *sync,
 			struct drm_xe_sync __user *sync_user,
+			unsigned int sidx,
 			struct drm_syncobj *ufence_syncobj,
 			u64 ufence_timeline_value,
 			unsigned int flags);
