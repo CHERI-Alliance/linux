@@ -6,6 +6,7 @@
 #include <linux/blk-integrity.h>
 #include <linux/ptrace.h>	/* for force_successful_syscall_return */
 #include <linux/nvme_ioctl.h>
+#include <linux/compat64_nvme_ioctl.h>
 #include <linux/io_uring/cmd.h>
 #include "nvme.h"
 
@@ -215,7 +216,7 @@ static int nvme_submit_io(struct nvme_ns *ns, struct nvme_user_io __user *uio)
 	unsigned length, meta_len;
 	void __user *metadata;
 
-	if (copy_from_user_with_ptr(&io, uio, sizeof(io)))
+	if (__c64_copy_from_user_with_ptr(nvme_user_io, &io, uio))
 		return -EFAULT;
 	if (io.flags)
 		return -EINVAL;
@@ -293,7 +294,7 @@ static int nvme_user_cmd(struct nvme_ctrl *ctrl, struct nvme_ns *ns,
 	u64 result;
 	int status;
 
-	if (copy_from_user_with_ptr(&cmd, ucmd, sizeof(cmd)))
+	if (__c64_copy_from_user_with_ptr(nvme_passthru_cmd, &cmd, ucmd))
 		return -EFAULT;
 	if (cmd.flags)
 		return -EINVAL;
@@ -340,7 +341,7 @@ static int nvme_user_cmd64(struct nvme_ctrl *ctrl, struct nvme_ns *ns,
 	unsigned timeout = 0;
 	int status;
 
-	if (copy_from_user_with_ptr(&cmd, ucmd, sizeof(cmd)))
+	if (__c64_copy_from_user_with_ptr(nvme_passthru_cmd64, &cmd, ucmd))
 		return -EFAULT;
 	if (cmd.flags)
 		return -EINVAL;
