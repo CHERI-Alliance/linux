@@ -1117,7 +1117,7 @@ static long uinput_compat_ioctl(struct file *file,
 		break;
 	}
 
-	return uinput_ioctl_handler(file, cmd, arg, compat_ptr(arg));
+	return uinput_ioctl_handler(file, cmd, __c_fakeu(arg), compat_ptr(arg));
 }
 #endif
 

@@ -24,6 +24,7 @@
 #include <linux/device.h>
 #include <linux/cdev.h>
 #include "input-compat.h"
+#include <linux/compat64_input.h>
 
 struct evdev {
 	int open;
@@ -1096,7 +1097,7 @@ static long evdev_do_ioctl(struct file *file, unsigned int cmd,
 	case EVIOCGMASK: {
 		void __user *codes_ptr;
 
-		if (copy_from_user_with_ptr(&mask, p, sizeof(mask)))
+		if (__c64_copy_from_user_with_ptr(input_mask, &mask, p))
 			return -EFAULT;
 
 		codes_ptr = u64_to_user_ptr(mask.codes_ptr);
@@ -1108,7 +1109,7 @@ static long evdev_do_ioctl(struct file *file, unsigned int cmd,
 	case EVIOCSMASK: {
 		const void __user *codes_ptr;
 
-		if (copy_from_user_with_ptr(&mask, p, sizeof(mask)))
+		if (__c64_copy_from_user_with_ptr(input_mask, &mask, p))
 			return -EFAULT;
 
 		codes_ptr = u64_to_user_ptr(mask.codes_ptr);
