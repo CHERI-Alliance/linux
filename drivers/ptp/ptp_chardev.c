@@ -178,7 +178,7 @@ long ptp_ioctl(struct posix_clock_context *pccontext, unsigned int cmd,
 	int enable, err = 0;
 
 	if (in_compat_syscall() && cmd != PTP_ENABLE_PPS && cmd != PTP_ENABLE_PPS2)
-		arg = (user_uintptr_t)compat_ptr(arg);
+		arg = (user_uintptr_t)compat_ptr(__c_ua(arg));
 
 	tsevq = pccontext->private_clkdata;
 
