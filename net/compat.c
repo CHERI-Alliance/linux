@@ -338,7 +338,11 @@ void scm_detach_fds_compat(struct msghdr *msg, struct scm_cookie *scm)
 }
 
 /* Argument list sizes for compat_sys_socketcall */
+#ifdef CONFIG_COMPAT64
+#define AL(x) ((x) * sizeof(unsigned long))
+#else
 #define AL(x) ((x) * sizeof(u32))
+#endif
 static unsigned char nas[21] = {
 	AL(0), AL(3), AL(3), AL(3), AL(2), AL(3),
 	AL(3), AL(3), AL(4), AL(4), AL(4), AL(6),
@@ -430,7 +434,11 @@ COMPAT_SYSCALL_DEFINE5(recvmmsg_time32, int, fd, struct compat_mmsghdr __user *,
 
 COMPAT_SYSCALL_DEFINE2(socketcall, int, call, u32 __user *, args)
 {
+#ifdef CONFIG_COMPAT64
+	unsigned long a[AUDITSC_ARGS];
+#else
 	u32 a[AUDITSC_ARGS];
+#endif
 	unsigned int len;
 	u32 a0, a1;
 	int ret;
