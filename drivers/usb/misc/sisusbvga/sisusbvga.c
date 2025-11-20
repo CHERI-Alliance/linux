@@ -2745,7 +2745,7 @@ static long sisusb_compat_ioctl(struct file *f, unsigned int cmd,
 	case SISUSB_GET_CONFIG_SIZE:
 	case SISUSB_GET_CONFIG:
 	case SISUSB_COMMAND:
-		return sisusb_ioctl(f, cmd, arg);
+		return sisusb_ioctl(f, cmd, (user_uintptr_t)compat_ptr(arg));
 
 	default:
 		return -ENOIOCTLCMD;
