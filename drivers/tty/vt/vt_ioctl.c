@@ -1102,7 +1102,7 @@ long vt_compat_ioctl(struct tty_struct *tty,
 	case VT_WAITACTIVE:
 	case VT_RELDISP:
 	case VT_DISALLOCATE:
-		return vt_ioctl(tty, cmd, arg);
+		return vt_ioctl(tty, cmd, __c_fakeu(arg));
 
 	/*
 	 * the rest has a compatible data structure behind arg,

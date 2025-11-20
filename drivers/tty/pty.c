@@ -650,7 +650,7 @@ static long pty_unix98_compat_ioctl(struct tty_struct *tty,
 	 * 64-bit userspace, they are already compatible.
 	 */
 	return pty_unix98_ioctl(tty, cmd,
-		cmd == TIOCSIG ? arg : (user_uintptr_t)compat_ptr(arg));
+		cmd == TIOCSIG ? __c_fakeu(arg) : (user_uintptr_t)compat_ptr(arg));
 }
 #else
 #define pty_unix98_compat_ioctl NULL
