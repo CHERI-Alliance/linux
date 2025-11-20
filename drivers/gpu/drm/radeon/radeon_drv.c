@@ -511,7 +511,7 @@ static long radeon_kms_compat_ioctl(struct file *filp, unsigned int cmd, unsigne
 	if (nr < DRM_COMMAND_BASE)
 		return drm_compat_ioctl(filp, cmd, arg);
 
-	return radeon_drm_ioctl(filp, cmd, arg);
+	return radeon_drm_ioctl(filp, cmd, (user_uintptr_t)compat_ptr(arg));
 }
 #endif
 

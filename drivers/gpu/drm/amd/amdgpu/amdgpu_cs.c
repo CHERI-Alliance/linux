@@ -31,6 +31,7 @@
 #include <linux/dma-buf.h>
 
 #include <drm/amdgpu_drm.h>
+#include <drm/compat64_amdgpu_drm.h>
 #include <drm/drm_syncobj.h>
 #include <drm/ttm/ttm_tt.h>
 
@@ -192,8 +193,8 @@ static int amdgpu_cs_pass1(struct amdgpu_cs_parser *p,
 
 	/* get chunks */
 	chunk_array_user = u64_to_user_ptr(cs->in.chunks);
-	if (copy_from_user_with_ptr(chunk_array, chunk_array_user,
-			   sizeof(__u64ptr)*cs->in.num_chunks)) {
+	if (__c64_ptr_array_from_user(chunk_array, chunk_array_user,
+				      cs->in.num_chunks)) {
 		ret = -EFAULT;
 		goto free_chunk;
 	}
