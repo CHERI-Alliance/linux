@@ -2814,7 +2814,7 @@ static int ____sys_recvmsg(struct socket *sock, struct msghdr *msg_sys,
 	if (err)
 		goto out;
 	if (MSG_CMSG_COMPAT & flags)
-		err = __put_user((unsigned long)msg_sys->msg_control - cmsg_ptr,
+		err = __put_user(__c_pa(msg_sys->msg_control) - __c_ua(cmsg_ptr),
 				 &msg_compat->msg_controllen);
 	else
 		err = __put_user(__c_pa(msg_sys->msg_control) - __c_ua(cmsg_ptr),

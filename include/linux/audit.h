@@ -451,7 +451,11 @@ static inline int audit_socketcall(int nargs, unsigned long *args)
 	return 0;
 }
 
+#ifdef CONFIG_COMPAT64
+static inline int audit_socketcall_compat(int nargs, unsigned long *args)
+#else
 static inline int audit_socketcall_compat(int nargs, u32 *args)
+#endif
 {
 	unsigned long a[AUDITSC_ARGS];
 	int i;
@@ -640,7 +644,11 @@ static inline int audit_socketcall(int nargs, unsigned long *args)
 	return 0;
 }
 
+#ifdef CONFIG_COMPAT64
+static inline int audit_socketcall_compat(int nargs, unsigned long *args)
+#else
 static inline int audit_socketcall_compat(int nargs, u32 *args)
+#endif
 {
 	return 0;
 }
