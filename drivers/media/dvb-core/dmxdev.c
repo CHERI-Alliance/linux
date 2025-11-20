@@ -1261,9 +1261,7 @@ static const struct file_operations dvb_demux_fops = {
 	.owner = THIS_MODULE,
 	.read = dvb_demux_read,
 	.unlocked_ioctl = dvb_demux_ioctl,
-#ifndef CONFIG_CHERI_KERNEL
-	.compat_ioctl = dvb_demux_ioctl,
-#endif
+	.compat_ioctl = compat_ptr_ioctl,
 	.open = dvb_demux_open,
 	.release = dvb_demux_release,
 	.poll = dvb_demux_poll,
