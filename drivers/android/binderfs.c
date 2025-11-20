@@ -380,9 +380,7 @@ static const struct file_operations binder_ctl_fops = {
 	.owner		= THIS_MODULE,
 	.open		= nonseekable_open,
 	.unlocked_ioctl	= binder_ctl_ioctl,
-#ifndef CONFIG_CHERI_KERNEL
-	.compat_ioctl	= binder_ctl_ioctl,
-#endif
+	.compat_ioctl	= compat_ptr_ioctl,
 	.llseek		= noop_llseek,
 };
 
