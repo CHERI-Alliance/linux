@@ -1055,10 +1055,15 @@ vm_bind_job_lookup_ops(struct msm_vm_bind_job *job, struct drm_msm_vm_bind *args
 		/* Single op case, the op is inlined: */
 		ret = lookup_op(job, &args->op);
 	} else {
+		void __user *argops;
+
+		if (in_compat64_syscall())
+			argops = compat_ptr(__c_ua(args->ops));
+		else
+ 			argops = u64_to_user_ptr(args->ops);
 		for (unsigned i = 0; i < args->nr_ops; i++) {
 			struct drm_msm_vm_bind_op op;
-			void __user *userptr =
-				u64_to_user_ptr(args->ops + (i * sizeof(op)));
+			void __user *userptr = argops + (i * sizeof(op));
 
 			/* make sure we don't have garbage flags, in case we hit
 			 * error path before flags is initialized:

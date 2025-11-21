@@ -201,14 +201,17 @@ static int submit_lookup_cmds(struct msm_gem_submit *submit,
 
 	for (i = 0; i < args->nr_cmds; i++) {
 		struct drm_msm_gem_submit_cmd submit_cmd;
-		void __user *userptr =
-			u64_to_user_ptr(args->cmds + (i * sizeof(submit_cmd)));
+		void __user *userptr = u64_to_user_ptr(args->cmds) +
+			i * __c64_sizeof(drm_msm_gem_submit_cmd);
 
-		ret = copy_from_user_with_ptr(&submit_cmd, userptr, sizeof(submit_cmd));
+		ret = __c64_copy_from_user_with_ptr(drm_msm_gem_submit_cmd,
+						    &submit_cmd, userptr);
 		if (ret) {
 			ret = -EFAULT;
 			goto out;
 		}
+		if (in_compat64_syscall() && submit_cmd.nr_relocs)
+			submit_cmd.relocs = (user_uintptr_t)compat_ptr(__c_ua(submit_cmd.relocs));
 
 		/* validate input from userspace: */
 		switch (submit_cmd.type) {
