@@ -27,6 +27,7 @@
 #include <drm/drm_managed.h>
 #include <drm/drm_print.h>
 #include <uapi/drm/v3d_drm.h>
+#include <drm/compat64_v3d_drm.h>
 
 #include "v3d_drv.h"
 #include "v3d_regs.h"
@@ -235,18 +236,23 @@ static const struct file_operations v3d_drm_fops = {
  * need to stay DRM_AUTH until we do buffer size/offset validation.
  */
 static const struct drm_ioctl_desc v3d_drm_ioctls[] = {
-	DRM_IOCTL_DEF_DRV(V3D_SUBMIT_CL, v3d_submit_cl_ioctl, DRM_RENDER_ALLOW | DRM_AUTH),
+	DRM_IOCTL_DEF_DRV_C64(V3D_SUBMIT_CL, v3d_submit_cl_ioctl,
+			      DRM_RENDER_ALLOW | DRM_AUTH, drm_v3d_submit_cl),
 	DRM_IOCTL_DEF_DRV(V3D_WAIT_BO, v3d_wait_bo_ioctl, DRM_RENDER_ALLOW),
 	DRM_IOCTL_DEF_DRV(V3D_CREATE_BO, v3d_create_bo_ioctl, DRM_RENDER_ALLOW),
 	DRM_IOCTL_DEF_DRV(V3D_MMAP_BO, v3d_mmap_bo_ioctl, DRM_RENDER_ALLOW),
 	DRM_IOCTL_DEF_DRV(V3D_GET_PARAM, v3d_get_param_ioctl, DRM_RENDER_ALLOW),
 	DRM_IOCTL_DEF_DRV(V3D_GET_BO_OFFSET, v3d_get_bo_offset_ioctl, DRM_RENDER_ALLOW),
-	DRM_IOCTL_DEF_DRV(V3D_SUBMIT_TFU, v3d_submit_tfu_ioctl, DRM_RENDER_ALLOW | DRM_AUTH),
-	DRM_IOCTL_DEF_DRV(V3D_SUBMIT_CSD, v3d_submit_csd_ioctl, DRM_RENDER_ALLOW | DRM_AUTH),
+	DRM_IOCTL_DEF_DRV_C64(V3D_SUBMIT_TFU, v3d_submit_tfu_ioctl,
+			      DRM_RENDER_ALLOW | DRM_AUTH, drm_v3d_submit_tfu),
+	DRM_IOCTL_DEF_DRV_C64(V3D_SUBMIT_CSD, v3d_submit_csd_ioctl,
+			      DRM_RENDER_ALLOW | DRM_AUTH, drm_v3d_submit_csd),
 	DRM_IOCTL_DEF_DRV(V3D_PERFMON_CREATE, v3d_perfmon_create_ioctl, DRM_RENDER_ALLOW),
 	DRM_IOCTL_DEF_DRV(V3D_PERFMON_DESTROY, v3d_perfmon_destroy_ioctl, DRM_RENDER_ALLOW),
-	DRM_IOCTL_DEF_DRV(V3D_PERFMON_GET_VALUES, v3d_perfmon_get_values_ioctl, DRM_RENDER_ALLOW),
-	DRM_IOCTL_DEF_DRV(V3D_SUBMIT_CPU, v3d_submit_cpu_ioctl, DRM_RENDER_ALLOW | DRM_AUTH),
+	DRM_IOCTL_DEF_DRV_C64(V3D_PERFMON_GET_VALUES, v3d_perfmon_get_values_ioctl,
+			      DRM_RENDER_ALLOW, drm_v3d_perfmon_get_values),
+	DRM_IOCTL_DEF_DRV_C64(V3D_SUBMIT_CPU, v3d_submit_cpu_ioctl,
+			      DRM_RENDER_ALLOW | DRM_AUTH, drm_v3d_submit_cpu),
 	DRM_IOCTL_DEF_DRV(V3D_PERFMON_GET_COUNTER, v3d_perfmon_get_counter_ioctl, DRM_RENDER_ALLOW),
 	DRM_IOCTL_DEF_DRV(V3D_PERFMON_SET_GLOBAL, v3d_perfmon_set_global_ioctl, DRM_RENDER_ALLOW),
 };

@@ -11,6 +11,8 @@
 #include "v3d_regs.h"
 #include "v3d_trace.h"
 
+#include <drm/compat64_v3d_drm.h>
+
 /* Takes the reservation lock on all the BOs being referenced, so that
  * we can attach fences and update the reservations after pushing the job
  * to the queue.
@@ -387,7 +389,7 @@ v3d_get_multisync_submit_deps(struct drm_file *file_priv,
 		return -EINVAL;
 	}
 
-	if (copy_from_user_with_ptr(&multisync, ext, sizeof(multisync)))
+	if (__c64_copy_from_user_with_ptr(drm_v3d_multi_sync, &multisync, ext))
 		return -EFAULT;
 
 	if (multisync.pad)
@@ -440,7 +442,7 @@ v3d_get_cpu_indirect_csd_params(struct drm_file *file_priv,
 	if (!v3d_validate_cpu_job(file_priv, job))
 		return -EINVAL;
 
-	if (copy_from_user_with_ptr(&indirect_csd, ext, sizeof(indirect_csd)))
+	if (__c64_copy_from_user_with_ptr(drm_v3d_indirect_csd, &indirect_csd, ext))
 		return -EFAULT;
 
 	if (!v3d_has_csd(v3d)) {
@@ -476,7 +478,7 @@ v3d_get_cpu_timestamp_query_params(struct drm_file *file_priv,
 	if (!v3d_validate_cpu_job(file_priv, job))
 		return -EINVAL;
 
-	if (copy_from_user_with_ptr(&timestamp, ext, sizeof(timestamp)))
+	if (__c64_copy_from_user_with_ptr(drm_v3d_timestamp_query, &timestamp, ext))
 		return -EFAULT;
 
 	if (timestamp.pad)
@@ -537,7 +539,7 @@ v3d_get_cpu_reset_timestamp_params(struct drm_file *file_priv,
 	if (!v3d_validate_cpu_job(file_priv, job))
 		return -EINVAL;
 
-	if (copy_from_user_with_ptr(&reset, ext, sizeof(reset)))
+	if (__c64_copy_from_user_with_ptr(drm_v3d_reset_timestamp_query, &reset, ext))
 		return -EFAULT;
 
 	job->job_type = V3D_CPU_JOB_TYPE_RESET_TIMESTAMP_QUERY;
@@ -590,7 +592,7 @@ v3d_get_cpu_copy_query_results_params(struct drm_file *file_priv,
 	if (!v3d_validate_cpu_job(file_priv, job))
 		return -EINVAL;
 
-	if (copy_from_user_with_ptr(&copy, ext, sizeof(copy)))
+	if (__c64_copy_from_user_with_ptr(drm_v3d_copy_timestamp_query, &copy, ext))
 		return -EFAULT;
 
 	if (copy.pad)
@@ -718,7 +720,7 @@ v3d_get_cpu_reset_performance_params(struct drm_file *file_priv,
 	if (!v3d_validate_cpu_job(file_priv, job))
 		return -EINVAL;
 
-	if (copy_from_user_with_ptr(&reset, ext, sizeof(reset)))
+	if (__c64_copy_from_user_with_ptr(drm_v3d_reset_performance_query, &reset, ext))
 		return -EFAULT;
 
 	job->job_type = V3D_CPU_JOB_TYPE_RESET_PERFORMANCE_QUERY;
@@ -755,7 +757,7 @@ v3d_get_cpu_copy_performance_query_params(struct drm_file *file_priv,
 	if (!v3d_validate_cpu_job(file_priv, job))
 		return -EINVAL;
 
-	if (copy_from_user_with_ptr(&copy, ext, sizeof(copy)))
+	if (__c64_copy_from_user_with_ptr(drm_v3d_copy_performance_query, &copy, ext))
 		return -EFAULT;
 
 	if (copy.pad)
@@ -808,7 +810,7 @@ v3d_get_extensions(struct drm_file *file_priv,
 	while (user_ext) {
 		struct drm_v3d_extension ext;
 
-		if (copy_from_user_with_ptr(&ext, user_ext, sizeof(ext))) {
+		if (__c64_copy_from_user_with_ptr(drm_v3d_extension, &ext, user_ext)) {
 			drm_dbg(&v3d->drm, "Failed to copy submit extension\n");
 			return -EFAULT;
 		}
