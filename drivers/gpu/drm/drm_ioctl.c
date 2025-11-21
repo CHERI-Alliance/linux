@@ -42,6 +42,7 @@
 
 #include "drm_crtc_internal.h"
 #include "drm_internal.h"
+#include "drm_c64.h"
 
 /**
  * DOC: getunique and setversion story
@@ -620,12 +621,16 @@ static int drm_ioctl_permit(u32 flags, struct drm_file *file_priv)
 	return 0;
 }
 
-#define DRM_IOCTL_DEF(ioctl, _func, _flags)	\
-	[DRM_IOCTL_NR(ioctl)] = {		\
-		.cmd = ioctl,			\
-		.func = _func,			\
-		.flags = _flags,		\
-		.name = #ioctl			\
+#define DRM_IOCTL_DEF(ioctl, _func, _flags)			\
+	[DRM_IOCTL_NR(ioctl)] = {				\
+		.cmd = ioctl,					\
+		.from = (void *)CONCATENATE(__from_c64_,	\
+					    STRUCT_##ioctl),	\
+		.to = (void *)CONCATENATE(__to_c64_,		\
+					  STRUCT_##ioctl),	\
+		.func = _func,					\
+		.flags = _flags,				\
+		.name = #ioctl					\
 	}
 
 /* Ioctl table */
@@ -828,7 +833,7 @@ long drm_ioctl(struct file *filp,
 	drm_ioctl_t *func;
 	unsigned int nr = DRM_IOCTL_NR(cmd);
 	int retcode = -EINVAL;
-	char stack_kdata[128];
+	char stack_kdata[128] __attribute__((aligned(__alignof__(user_uintptr_t))));
 	char *kdata = NULL;
 	unsigned int in_size, out_size, drv_size, ksize;
 	bool is_driver_ioctl;
@@ -891,16 +896,20 @@ long drm_ioctl(struct file *filp,
 		}
 	}
 
-	if (copy_from_user(kdata, (void __user *)arg, in_size) != 0) {
+	if (copy_from_user_with_ptr(kdata, (void __user *)arg, in_size) != 0) {
 		retcode = -EFAULT;
 		goto err_i1;
 	}
 
 	if (ksize > in_size)
 		memset(kdata + in_size, 0, ksize - in_size);
+	if (in_size && unlikely(in_compat64_syscall()) && ioctl->from)
+		ioctl->from(kdata);
 
 	retcode = drm_ioctl_kernel(filp, func, kdata, ioctl->flags);
-	if (copy_to_user((void __user *)arg, kdata, out_size) != 0)
+	if (out_size && unlikely(in_compat64_syscall()) && ioctl->to)
+		ioctl->to(kdata);
+	if (copy_to_user_with_ptr((void __user *)arg, kdata, out_size) != 0)
 		retcode = -EFAULT;
 
       err_i1:
