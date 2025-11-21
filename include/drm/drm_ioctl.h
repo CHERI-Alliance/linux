@@ -136,6 +136,8 @@ struct drm_ioctl_desc {
 	enum drm_ioctl_flags flags;
 	drm_ioctl_t *func;
 	const char *name;
+	void (*from)(void *);
+	void (*to)(void *);
 };
 
 /**
