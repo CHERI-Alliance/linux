@@ -28,6 +28,7 @@ jobs:
 
   build:
     needs: init-comment
+    if: always() && (needs.init-comment.result == 'success' || needs.init-comment.result == 'skipped')
     name: Build ${{ matrix.arch }} ${{ matrix.compiler }} ${{ matrix.config }}
     runs-on: ubuntu-latest
     strategy:
