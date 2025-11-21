@@ -38,6 +38,7 @@
 
 #include "drm_internal.h"
 #include "drm_trace.h"
+#include <drm/compat64_drm.h>
 
 /**
  * DOC: vblank handling
@@ -1054,11 +1055,19 @@ static void send_vblank_event(struct drm_device *dev,
 		 */
 		e->event.vbl.tv_sec = tv.tv_sec;
 		e->event.vbl.tv_usec = tv.tv_nsec / 1000;
+		if (e->compat) {
+			__to_c64_drm_event_vblank(&e->event.vbl);
+			e->event.base.length = __c64_sizeof(drm_event_vblank);
+		}
 		break;
 	case DRM_EVENT_CRTC_SEQUENCE:
 		if (seq)
 			e->event.seq.sequence = seq;
 		e->event.seq.time_ns = ktime_to_ns(now);
+		if (e->compat) {
+			__to_c64_drm_event_crtc_sequence(&e->event.seq);
+			e->event.seq.base.length = __c64_sizeof(drm_event_crtc_sequence);
+		}
 		break;
 	}
 	trace_drm_vblank_event_delivered(e->base.file_priv, e->pipe, seq);
@@ -1607,7 +1616,7 @@ EXPORT_SYMBOL(drm_crtc_vblank_restore);
 static int drm_queue_vblank_event(struct drm_device *dev, unsigned int pipe,
 				  u64 req_seq,
 				  union drm_wait_vblank *vblwait,
-				  struct drm_file *file_priv)
+				  struct drm_file *file_priv, bool compat)
 {
 	struct drm_vblank_crtc *vblank = drm_vblank_crtc(dev, pipe);
 	struct drm_pending_vblank_event *e;
@@ -1623,6 +1632,7 @@ static int drm_queue_vblank_event(struct drm_device *dev, unsigned int pipe,
 
 	e->pipe = pipe;
 	e->event.base.type = DRM_EVENT_VBLANK;
+	e->compat = compat;
 	e->event.base.length = sizeof(e->event.vbl);
 	e->event.vbl.user_data = vblwait->request.signal;
 	e->event.vbl.crtc_id = 0;
@@ -1830,7 +1840,8 @@ int drm_wait_vblank_ioctl(struct drm_device *dev, void *data,
 		/* must hold on to the vblank ref until the event fires
 		 * drm_vblank_put will be called asynchronously
 		 */
-		return drm_queue_vblank_event(dev, pipe, req_seq, vblwait, file_priv);
+		return drm_queue_vblank_event(dev, pipe, req_seq, vblwait,
+					      file_priv, in_compat64_syscall());
 	}
 
 	if (req_seq != seq) {
