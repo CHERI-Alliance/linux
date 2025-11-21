@@ -458,16 +458,6 @@ EXPORT_SYMBOL(drm_property_destroy);
 int drm_mode_getproperty_ioctl(struct drm_device *dev,
 			       void *data, struct drm_file *file_priv)
 {
-	struct drm_mode_get_property32 {
-		__u64 values_ptr;
-		__u64 enum_blob_ptr;
-		__u32 prop_id;
-		__u32 flags;
-		char name[DRM_PROP_NAME_LEN];
-		__u32 count_values;
-		__u32 count_enum_blobs;
-	};
-	struct drm_mode_get_property32 *out_resp32 = data;
 	struct drm_mode_get_property *out_resp = data;
 	struct drm_property *property;
 	int enum_count = 0;
@@ -476,52 +466,36 @@ int drm_mode_getproperty_ioctl(struct drm_device *dev,
 	struct drm_property_enum *prop_enum;
 	struct drm_mode_property_enum __user *enum_ptr;
 	uint64_t __user *values_ptr;
-	__u32 prop_id, flags, count_values, count_enum_blobs;
-	char *name;
 
 	if (!drm_core_check_feature(dev, DRIVER_MODESET))
 		return -EOPNOTSUPP;
 
-	if (in_compat64_syscall()) {
-		values_ptr = compat_ptr(out_resp32->values_ptr);
-		enum_ptr = compat_ptr(out_resp32->enum_blob_ptr);
-		prop_id = out_resp32->prop_id;
-		name = out_resp32->name;
-		count_values = out_resp32->count_values;
-		count_enum_blobs = out_resp32->count_enum_blobs;
-	} else {
-		values_ptr = u64_to_user_ptr(out_resp->values_ptr);
-		enum_ptr = u64_to_user_ptr(out_resp->enum_blob_ptr);
-		prop_id = out_resp->prop_id;
-		name = out_resp->name;
-		count_values = out_resp->count_values;
-		count_enum_blobs = out_resp->count_enum_blobs;
-	}
-
-	property = drm_property_find(dev, file_priv, prop_id);
+	property = drm_property_find(dev, file_priv, out_resp->prop_id);
 	if (!property)
 		return -ENOENT;
 
-	strscpy_pad(name, property->name, DRM_PROP_NAME_LEN);
-	flags = property->flags;
+	strscpy_pad(out_resp->name, property->name, DRM_PROP_NAME_LEN);
+	out_resp->flags = property->flags;
 
 	value_count = property->num_values;
+	values_ptr = u64_to_user_ptr(out_resp->values_ptr);
 
 	for (i = 0; i < value_count; i++) {
-		if (i < count_values &&
+		if (i < out_resp->count_values &&
 		    put_user(property->values[i], values_ptr + i)) {
 			return -EFAULT;
 		}
 	}
+	out_resp->count_values = value_count;
 
-	count_values = value_count;
 	copied = 0;
+	enum_ptr = u64_to_user_ptr(out_resp->enum_blob_ptr);
 
 	if (drm_property_type_is(property, DRM_MODE_PROP_ENUM) ||
 	    drm_property_type_is(property, DRM_MODE_PROP_BITMASK)) {
 		list_for_each_entry(prop_enum, &property->enum_list, head) {
 			enum_count++;
-			if (count_enum_blobs < enum_count)
+			if (out_resp->count_enum_blobs < enum_count)
 				continue;
 
 			if (copy_to_user(&enum_ptr[copied].value,
@@ -533,7 +507,7 @@ int drm_mode_getproperty_ioctl(struct drm_device *dev,
 				return -EFAULT;
 			copied++;
 		}
-		count_enum_blobs = enum_count;
+		out_resp->count_enum_blobs = enum_count;
 	}
 
 	/*
@@ -545,19 +519,7 @@ int drm_mode_getproperty_ioctl(struct drm_device *dev,
 	 * the property itself.
 	 */
 	if (drm_property_type_is(property, DRM_MODE_PROP_BLOB))
-		count_enum_blobs = 0;
-
-	if (in_compat64_syscall()) {
-		out_resp32->prop_id = prop_id;
-		out_resp32->flags = flags;
-		out_resp32->count_values = count_values;
-		out_resp32->count_enum_blobs = count_enum_blobs;
-	} else {
-		out_resp->prop_id = prop_id;
-		out_resp->flags = flags;
-		out_resp->count_values = count_values;
-		out_resp->count_enum_blobs = count_enum_blobs;
-	}
+		out_resp->count_enum_blobs = 0;
 
 	return 0;
 }
@@ -851,53 +813,29 @@ EXPORT_SYMBOL(drm_property_replace_blob_from_id);
 int drm_mode_getblob_ioctl(struct drm_device *dev,
 			   void *data, struct drm_file *file_priv)
 {
-	struct drm_mode_get_blob32 {
-		__u32 blob_id;
-		__u32 length;
-		__u64 data;
-	};
-	struct drm_mode_get_blob32 *out_resp32 = data;
 	struct drm_mode_get_blob *out_resp = data;
 	struct drm_property_blob *blob;
 	int ret = 0;
-	__u32 blob_id;
-	__u32 length;
-	uint8_t __user *blob_data;
-
-	if (in_compat64_syscall()) {
-		blob_id = out_resp32->blob_id;
-		length = out_resp32->length;
-		blob_data = compat_ptr(out_resp32->data);
-	} else {
-		blob_id = out_resp->blob_id;
-		length = out_resp->length;
-		blob_data = u64_to_user_ptr(out_resp->data);
-	}
 
 	if (!drm_core_check_feature(dev, DRIVER_MODESET))
 		return -EOPNOTSUPP;
 
-	blob = drm_property_lookup_blob(dev, blob_id);
+	blob = drm_property_lookup_blob(dev, out_resp->blob_id);
 	if (!blob)
 		return -ENOENT;
 
-	if (length == blob->length) {
-		if (copy_to_user(blob_data,
+	if (out_resp->length == blob->length) {
+		if (copy_to_user(u64_to_user_ptr(out_resp->data),
 				 blob->data,
 				 blob->length)) {
 			ret = -EFAULT;
 			goto unref;
 		}
 	}
-	length = blob->length;
+	out_resp->length = blob->length;
 unref:
 	drm_property_blob_put(blob);
 
-	if (in_compat64_syscall()) {
-		out_resp32->length = length;
-	} else {
-		out_resp->length = length;
-	}
 	return ret;
 }
 

@@ -726,7 +726,7 @@ int drm_mode_dirtyfb_ioctl(struct drm_device *dev,
 		return -ENOENT;
 
 	num_clips = r->num_clips;
-	clips_ptr = u64_to_user_ptr(r->clips_ptr);
+	clips_ptr = (struct drm_clip_rect __user *)(user_uintptr_t)r->clips_ptr;
 
 	if (!num_clips != !clips_ptr) {
 		ret = -EINVAL;
