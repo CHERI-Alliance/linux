@@ -31,12 +31,21 @@ jobs:
     if: always() && (needs.init-comment.result == 'success' || needs.init-comment.result == 'skipped')
     name: Build ${{ matrix.arch }} ${{ matrix.compiler }} ${{ matrix.config }}
     runs-on: ubuntu-latest
+    container:
+      image: ${{ matrix.container }}
+      # Work around https://github.com/actions/checkout/issues/1014
+      options: --user root
     strategy:
       fail-fast: false
       matrix:
-        arch: [riscv64, aarch64]
-        compiler: [llvm-18, gcc]
-        config: [defconfig]
+        arch: [ riscv64, aarch64 ]
+        compiler: [ llvm-18, gcc ]
+        config: [ defconfig ]
+        include:
+          - arch: morello
+            compiler: llvm-morello
+            config: morello_pcuabi_defconfig
+            container: docker.io/ctsrd/morello-sdk:latest
 
     steps:
       - name: Checkout code
@@ -46,20 +55,24 @@ jobs:
         uses: ammaraskar/gcc-problem-matcher@master
 
       - name: Install Dependencies
+        shell: bash
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential bc bison flex libelf-dev libssl-dev
+          packages=(build-essential bc bison flex libelf-dev libssl-dev)
           if [[ "${{ matrix.compiler }}" == llvm* ]]; then
             VER=${{ matrix.compiler }}
             VER=${VER#llvm-}
-            sudo apt-get install -y clang-$VER lld-$VER llvm-$VER
+            if [[ "${{ matrix.compiler }}" != llvm-morello ]]; then
+              packages+=(clang-$VER lld-$VER llvm-$VER)
+            fi
           elif [ "${{ matrix.compiler }}" == "gcc" ]; then
             if [ "${{ matrix.arch }}" == "aarch64" ]; then
-              sudo apt-get install -y gcc-aarch64-linux-gnu
+              packages+=(build-essential gcc-aarch64-linux-gnu)
             elif [ "${{ matrix.arch }}" == "riscv64" ]; then
-              sudo apt-get install -y gcc-riscv64-linux-gnu
+              packages+=(build-essential gcc-riscv64-linux-gnu)
             fi
           fi
+          sudo apt-get install -y --no-install-recommends "${packages[@]}"
 
       - name: Get Job Link
         id: job-link
@@ -68,6 +81,14 @@ jobs:
           ARCH: ${{ matrix.arch }}
           COMP: ${{ matrix.compiler }}
         run: |
+          # If gh is not available (e.g. in container), skip dynamic link generation
+          if ! command -v gh &> /dev/null; then
+             JOB_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+             echo "JOB_URL=$JOB_URL BUILD_STEP_NUM=1"
+             echo "url=$JOB_URL" >> "$GITHUB_OUTPUT"
+             echo "build_step_num=1" >> "$GITHUB_OUTPUT"
+             exit 0
+          fi
           JOBS_JSON=$(gh run view ${{ github.run_id }} --repo ${{ github.repository }} --json jobs)
           JOB_URL=$(echo "$JOBS_JSON" | jq -r --arg a "$ARCH" --arg c "$COMP" '.jobs[] | select(.name | contains($a) and contains($c)) | .url' | head -n 1)
           BUILD_STEP_NUM=$(echo "$JOBS_JSON" | jq -r --arg a "$ARCH" --arg c "$COMP" '.jobs[] | select(.name | contains($a) and contains($c)) | .steps[] | select(.name == "Process Logs (Errors & Warnings)") | .number' | head -n 1)
@@ -92,6 +113,7 @@ jobs:
           key: kbuild-${{ matrix.arch }}-${{ matrix.compiler }}
 
       - name: Build Kernel
+        shell: bash
         id: kbuild
         env:
           KCONFIG_NOSILENTUPDATE: 1
@@ -105,8 +127,14 @@ jobs:
           elif [ "${{ matrix.arch }}" = "riscv64" ]; then
             ARGS="$ARGS ARCH=riscv"
             CROSS="riscv64-linux-gnu-"
+          elif [ "${{ matrix.arch }}" = "morello" ]; then
+            ARGS="$ARGS ARCH=arm64"
           fi
-          if [[ "${{ matrix.compiler }}" == llvm* ]]; then
+
+          if [[ "${{ matrix.compiler }}" == "llvm-morello" ]]; then
+            # The docker image does not have gcc installed, use Morello clang as the host compiler.
+            ARGS="$ARGS LLVM=$(dirname $(which clang))/ HOSTCC=clang HOSTCXX=clang++"
+          elif [[ "${{ matrix.compiler }}" == llvm* ]]; then
             ARGS="$ARGS LLVM=/usr/lib/${{ matrix.compiler }}/bin/ CROSS_COMPILE=$CROSS"
           else
             ARGS="$ARGS CROSS_COMPILE=$CROSS"
