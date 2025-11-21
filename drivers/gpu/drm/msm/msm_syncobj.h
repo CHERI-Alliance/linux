@@ -27,7 +27,7 @@ void msm_syncobj_reset(struct drm_syncobj **syncobjs, uint32_t nr_syncobjs);
 struct msm_syncobj_post_dep *
 msm_syncobj_parse_post_deps(struct drm_device *dev,
 			    struct drm_file *file,
-			    uint64_t syncobjs_addr,
+			    __u64ptr syncobjs_addr,
 			    uint32_t nr_syncobjs,
 			    size_t syncobj_stride);
 
