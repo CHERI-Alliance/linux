@@ -197,10 +197,11 @@ static int submit_lookup_cmds(struct msm_gem_submit *submit,
 
 	for (i = 0; i < args->nr_cmds; i++) {
 		struct drm_msm_gem_submit_cmd submit_cmd;
-		void __user *userptr =
-			u64_to_user_ptr(args->cmds + (i * sizeof(submit_cmd)));
+		void __user *userptr = u64_to_user_ptr(args->cmds) +
+			i * __c64_sizeof(drm_msm_gem_submit_cmd);
 
-		ret = copy_from_user_with_ptr(&submit_cmd, userptr, sizeof(submit_cmd));
+		ret = __c64_copy_from_user_with_ptr(drm_msm_gem_submit_cmd,
+						    &submit_cmd, userptr);
 		if (ret) {
 			ret = -EFAULT;
 			goto out;
