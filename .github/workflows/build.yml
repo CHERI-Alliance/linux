@@ -48,6 +48,16 @@ jobs:
             container: docker.io/ctsrd/morello-sdk:latest
 
     steps:
+      # Install node.js in the docker container to allow testing this action with `gh act` locally.
+      # This is not needed in real GitHub action runs, so limit this to env.ACT being set.
+      - name: Install node.js
+        if: ${{ env.ACT && matrix.compiler == 'llvm-morello' }}
+        run: |
+          sudo apt-get update && sudo apt-get install -y curl
+          curl -fsSL https://deb.nodesource.com/setup_24.x | sudo bash -
+          sudo apt-get update && sudo apt-get install -y nodejs
+          node --version
+
       - name: Checkout code
         uses: actions/checkout@v6
 
