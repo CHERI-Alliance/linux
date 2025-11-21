@@ -150,13 +150,21 @@ struct drm_ioctl_desc {
  * command number is constructed by prepending ``DRM_IOCTL\_`` and passing that
  * to DRM_IOCTL_NR().
  */
-#define DRM_IOCTL_DEF_DRV(ioctl, _func, _flags)				\
+#define __DRM_IOCTL_DEF_DRV(ioctl, _func, _flags, _from, _to)		\
 	[DRM_IOCTL_NR(DRM_IOCTL_##ioctl) - DRM_COMMAND_BASE] = {	\
 		.cmd = DRM_IOCTL_##ioctl,				\
 		.func = _func,						\
 		.flags = _flags,					\
-		.name = #ioctl						\
+		.name = #ioctl,						\
+		.from = (void *)_from,					\
+		.to = (void *)_to,					\
 	}
+#define DRM_IOCTL_DEF_DRV(ioctl, _func, _flags)				\
+	__DRM_IOCTL_DEF_DRV(ioctl, _func, _flags, NULL, NULL)
+#define DRM_IOCTL_DEF_DRV_C64(ioctl, _func, _flags, _struct)		\
+	__DRM_IOCTL_DEF_DRV(ioctl, _func, _flags,			\
+		CONCATENATE(__from_c64_, _struct),			\
+		CONCATENATE(__to_c64_, _struct))
 
 long drm_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg);
 long drm_ioctl_kernel(struct file *, drm_ioctl_t, void *, u32);
