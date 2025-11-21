@@ -54,6 +54,10 @@ struct drm_pending_vblank_event {
 	 */
 	u64 sequence;
 	/**
+	 * @compat: This is a compat event
+	 */
+	bool compat;
+	/**
 	 * @event: Actual event which will be sent to userspace.
 	 */
 	union {
