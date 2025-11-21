@@ -36,22 +36,6 @@ struct drm_device;
 struct drm_crtc;
 struct drm_vblank_work;
 
-struct drm_event_vblank32 {
-	struct drm_event base;
-	__u64 user_data;
-	__u32 tv_sec;
-	__u32 tv_usec;
-	__u32 sequence;
-	__u32 crtc_id; /* 0 on older kernels that do not support this */
-};
-
-struct drm_event_crtc_sequence32 {
-	struct drm_event base;
-	__u64            user_data;
-	__s64            time_ns;
-	__u64            sequence;
-};
-
 /**
  * struct drm_pending_vblank_event - pending vblank event tracking
  */
@@ -95,9 +79,6 @@ struct drm_pending_vblank_event {
 		 * @event.seq: Event payload for the MODE_QUEUEU_SEQUENCE IOCTL.
 		 */
 		struct drm_event_crtc_sequence seq;
-
-		struct drm_event_vblank32 vbl32;
-		struct drm_event_crtc_sequence32 seq32;
 	} event;
 };
 

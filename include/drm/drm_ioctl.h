@@ -158,8 +158,10 @@ struct drm_ioctl_desc {
 
 long drm_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg);
 long drm_ioctl_kernel(struct file *, drm_ioctl_t, void *, u32);
-#ifdef CONFIG_COMPAT
+#ifdef CONFIG_COMPAT32
 long drm_compat_ioctl(struct file *filp, unsigned int cmd, unsigned long arg);
+#elif defined(CONFIG_COMPAT64)
+#define drm_compat_ioctl compat_ptr_ioctl
 #else
 /* Let drm_compat_ioctl be assigned to .compat_ioctl unconditionally */
 #define drm_compat_ioctl NULL
