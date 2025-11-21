@@ -29,6 +29,8 @@
 #include "qxl_drv.h"
 #include "qxl_object.h"
 
+#include <drm/compat64_qxl_drm.h>
+
 /*
  * TODO: allocating a new gem(in qxl_bo) for each request.
  * This is wasteful since bo's are page aligned.
@@ -279,9 +281,11 @@ int qxl_execbuffer_ioctl(struct drm_device *dev, void *data, struct drm_file *fi
 
 		struct drm_qxl_command __user *commands =
 			u64_to_user_ptr(execbuffer->commands);
+		struct drm_qxl_command __user *command = (void __user *)
+			commands + cmd_num * __c64_sizeof(drm_qxl_command);
 
-		if (copy_from_user_with_ptr(&user_cmd, commands + cmd_num,
-				       sizeof(user_cmd)))
+		if (__c64_copy_from_user_with_ptr(drm_qxl_command, &user_cmd,
+						  command))
 			return -EFAULT;
 
 		ret = qxl_process_single_command(qdev, &user_cmd, file_priv);
