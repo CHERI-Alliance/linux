@@ -6,6 +6,7 @@
  */
 
 #include <linux/cfi.h>
+#include <linux/module.h>
 
 bool cfi_warn __ro_after_init = IS_ENABLED(CONFIG_CFI_PERMISSIVE);
 
@@ -62,8 +63,8 @@ void module_cfi_finalize(const Elf_Ehdr *hdr, const Elf_Shdr *sechdrs,
 		if (strcmp(secstrings + sechdrs[i].sh_name, "__kcfi_traps"))
 			continue;
 
-		mod->kcfi_traps = (s32 *)sechdrs[i].sh_addr;
-		mod->kcfi_traps_end = (s32 *)(sechdrs[i].sh_addr + sechdrs[i].sh_size);
+		mod->kcfi_traps = shdr_addr(&sechdrs[i]);
+		mod->kcfi_traps_end = (s32 *)((void *)(mod->kcfi_traps) + sechdrs[i].sh_size);
 		break;
 	}
 }
