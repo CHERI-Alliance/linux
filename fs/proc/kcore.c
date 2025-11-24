@@ -711,7 +711,7 @@ static struct kcore_list kcore_modules;
 static void __init add_modules_range(void)
 {
 	if (MODULES_VADDR != VMALLOC_START && MODULES_END != VMALLOC_END) {
-		kclist_add(&kcore_modules, (void *)MODULES_VADDR,
+		kclist_add(&kcore_modules, __c_fakep(MODULES_VADDR),
 			MODULES_END - MODULES_VADDR, KCORE_VMALLOC);
 	}
 }
