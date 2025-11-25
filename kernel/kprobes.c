@@ -2541,13 +2541,13 @@ static void add_module_kprobe_blacklist(struct module *mod)
 			kprobe_add_ksym_blacklist(mod->kprobe_blacklist[i]);
 	}
 
-	start = (unsigned long)mod->kprobes_text_start;
+	start = __c_pa(mod->kprobes_text_start);
 	if (start) {
 		end = start + mod->kprobes_text_size;
 		kprobe_add_area_blacklist(start, end);
 	}
 
-	start = (unsigned long)mod->noinstr_text_start;
+	start = __c_pa(mod->noinstr_text_start);
 	if (start) {
 		end = start + mod->noinstr_text_size;
 		kprobe_add_area_blacklist(start, end);
@@ -2564,13 +2564,13 @@ static void remove_module_kprobe_blacklist(struct module *mod)
 			kprobe_remove_ksym_blacklist(mod->kprobe_blacklist[i]);
 	}
 
-	start = (unsigned long)mod->kprobes_text_start;
+	start = __c_pa(mod->kprobes_text_start);
 	if (start) {
 		end = start + mod->kprobes_text_size;
 		kprobe_remove_area_blacklist(start, end);
 	}
 
-	start = (unsigned long)mod->noinstr_text_start;
+	start = __c_pa(mod->noinstr_text_start);
 	if (start) {
 		end = start + mod->noinstr_text_size;
 		kprobe_remove_area_blacklist(start, end);
