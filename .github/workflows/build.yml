@@ -74,7 +74,7 @@ jobs:
         shell: bash
         run: |
           sudo apt-get update
-          packages=(build-essential bc bison flex libelf-dev libssl-dev)
+          packages=(build-essential bc bison flex libelf-dev libssl-dev ccache)
           if [[ "${{ matrix.compiler }}" == llvm* ]]; then
             VER=${{ matrix.compiler }}
             VER=${VER#llvm-}
@@ -137,8 +137,8 @@ jobs:
           # Set pipefail to fail if make fails, otherwise any error is squashed
           set -o pipefail
           ARGS=""
-          LLVM_DIR=
           TARGETS="all"
+          CCACHE=""
           if [ "${{ matrix.arch }}" = "aarch64" ]; then
             ARGS="$ARGS ARCH=arm64"
             CROSS="aarch64-linux-gnu-"
@@ -154,15 +154,21 @@ jobs:
 
           if [[ "${{ matrix.compiler }}" == "llvm-morello" ]]; then
             # The docker image does not have gcc installed, use Morello clang as the host compiler.
-            ARGS="$ARGS LLVM=$(dirname $(which clang))/ HOSTCC=clang HOSTCXX=clang++"
+
+            LLVM="$(dirname $(which clang))"
+            CCACHE="ccache $LLVM/clang"
+            ARGS="$ARGS LLVM=$LLVM/ HOSTCC=clang HOSTCXX=clang++"
           elif [[ "${{ matrix.compiler }}" == llvm* ]]; then
-            ARGS="$ARGS LLVM=/usr/lib/${{ matrix.compiler }}/bin/ CROSS_COMPILE=$CROSS"
+            LLVM=/usr/lib/${{ matrix.compiler }}/bin
+            CCACHE="ccache $LLVM/clang"
+            ARGS="$ARGS LLVM=$LLVM/ CROSS_COMPILE=$CROSS"
           else
             ARGS="$ARGS CROSS_COMPILE=$CROSS"
+            CCACHE="ccache ${CROSS}gcc"
           fi
           make $ARGS O=build ${{ matrix.config }}
           # Pipe output to tee so we can see it and save it for counting warnings
-          make $ARGS O=build -j$(nproc) ${TARGETS} 2>&1 | tee build.log
+          make $ARGS CC="$CCACHE" O=build -j$(nproc) ${TARGETS} 2>&1 | tee build.log
 
       - name: Run clang-tidy
         if: matrix.compiler == 'llvm-cheri'
