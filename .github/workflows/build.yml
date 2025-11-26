@@ -41,12 +41,18 @@ jobs:
         arch: [ riscv64, aarch64 ]
         compiler: [ llvm-18, gcc ]
         config: [ defconfig ]
+        install_compiler: [ true ]
         include:
           - arch: morello
             compiler: llvm-morello
             config: morello_pcuabi_defconfig
             container: docker.io/ctsrd/morello-sdk:latest
-
+            install_compiler: false
+          - arch: riscv64cheri
+            compiler: llvm-cheri
+            config: qemu_riscv64cheripc_defconfig
+            container: docker.io/chrehrhardt/riscvcheri-ubuntu-llvm18:latest
+            install_compiler: false
     steps:
       # Install node.js in the docker container to allow testing this action with `gh act` locally.
       # This is not needed in real GitHub action runs, so limit this to env.ACT being set.
@@ -72,7 +78,7 @@ jobs:
           if [[ "${{ matrix.compiler }}" == llvm* ]]; then
             VER=${{ matrix.compiler }}
             VER=${VER#llvm-}
-            if [[ "${{ matrix.compiler }}" != llvm-morello ]]; then
+            if [[ "${{ matrix.install_compiler }}" == "true" ]]; then
               packages+=(clang-$VER lld-$VER llvm-$VER)
             fi
           elif [ "${{ matrix.compiler }}" == "gcc" ]; then
@@ -131,6 +137,7 @@ jobs:
           # Set pipefail to fail if make fails, otherwise any error is squashed
           set -o pipefail
           ARGS=""
+          LLVM_DIR=
           if [ "${{ matrix.arch }}" = "aarch64" ]; then
             ARGS="$ARGS ARCH=arm64"
             CROSS="aarch64-linux-gnu-"
@@ -139,6 +146,8 @@ jobs:
             CROSS="riscv64-linux-gnu-"
           elif [ "${{ matrix.arch }}" = "morello" ]; then
             ARGS="$ARGS ARCH=arm64"
+          elif [ "${{ matrix.arch }}" = "riscv64cheri" ]; then
+            ARGS="$ARGS ARCH=riscv"
           fi
 
           if [[ "${{ matrix.compiler }}" == "llvm-morello" ]]; then
