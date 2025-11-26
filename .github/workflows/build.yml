@@ -53,6 +53,10 @@ jobs:
             config: qemu_riscv64cheripc_defconfig
             container: docker.io/chrehrhardt/riscvcheri-ubuntu-llvm18:latest
             install: false
+          - arch: x86_32
+            compiler: gcc
+            config: i386_defconfig
+            install: true
     steps:
       # Install node.js in the docker container to allow testing this action with `gh act` locally.
       # This is not needed in real GitHub action runs, so limit this to env.ACT being set.
