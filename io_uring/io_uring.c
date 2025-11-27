@@ -3442,13 +3442,8 @@ static int io_get_ext_arg(struct io_ring_ctx *ctx, unsigned flags,
 		if (w->flags & ~IORING_REG_WAIT_TS)
 			return -EINVAL;
 		ext_arg->min_time = READ_ONCE(w->min_wait_usec) * NSEC_PER_USEC;
-		if (IS_ENABLED(CONFIG_CHERI_PURECAP_UABI) && !io_in_compat64(ctx)) {
-			ext_arg->sig = u64_to_user_ptr(READ_ONCE(w->sigmask128));
-			ext_arg->argsz = READ_ONCE(w->sigmask_sz128);
-		} else {
-			ext_arg->sig = (void __user *)(user_uintptr_t __force)READ_ONCE(w->sigmask64);
-			ext_arg->argsz = READ_ONCE(w->sigmask_sz64);
-		}
+		ext_arg->sig = u64_to_user_ptr(READ_ONCE(w->sigmask));
+		ext_arg->argsz = READ_ONCE(w->sigmask_sz);
 		if (w->flags & IORING_REG_WAIT_TS) {
 			ext_arg->ts.tv_sec = READ_ONCE(w->ts.tv_sec);
 			ext_arg->ts.tv_nsec = READ_ONCE(w->ts.tv_nsec);

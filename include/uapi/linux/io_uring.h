@@ -917,19 +917,16 @@ enum {
  * the below structure.
  */
 struct io_uring_reg_wait {
-	struct __kernel_timespec	ts;
-	__u32				min_wait_usec;
-	__u32				flags;
 	union {
 		struct {
-			__u64ptr	sigmask128;
-			__u32		sigmask_sz128;
+			struct __kernel_timespec	ts;
+			__u32				min_wait_usec;
+			__u32				flags;
+			__u64ptr			sigmask;
+			__u32				sigmask_sz;
 		};
-		struct {
-			__u64		sigmask64;
-			__u32		sigmask_sz64;
-		};
-		__u64			pad[5];
+		/// UAPI: NoConvert: Padding only
+		__u64			pad[8];
 	};
 };
 
