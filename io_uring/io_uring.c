@@ -66,6 +66,7 @@
 #include <linux/fadvise.h>
 #include <linux/task_work.h>
 #include <linux/io_uring.h>
+#include <linux/compat64_io_uring.h>
 #include <linux/io_uring/cmd.h>
 #include <linux/audit.h>
 #include <linux/security.h>
@@ -3442,8 +3443,14 @@ static int io_get_ext_arg(struct io_ring_ctx *ctx, unsigned flags,
 		if (w->flags & ~IORING_REG_WAIT_TS)
 			return -EINVAL;
 		ext_arg->min_time = READ_ONCE(w->min_wait_usec) * NSEC_PER_USEC;
-		ext_arg->sig = u64_to_user_ptr(READ_ONCE(w->sigmask));
-		ext_arg->argsz = READ_ONCE(w->sigmask_sz);
+		if (IS_ENABLED(CONFIG_CHERI_PURECAP_UABI) && !io_in_compat64(ctx)) {
+			ext_arg->sig = u64_to_user_ptr(READ_ONCE(w->sigmask));
+			ext_arg->argsz = READ_ONCE(w->sigmask_sz);
+		} else {
+			struct __c64_io_uring_reg_wait *compat = (void *)w;
+			ext_arg->sig = compat_ptr(compat->sigmask);
+			ext_arg->argsz = READ_ONCE(compat->sigmask_sz);
+		}
 		if (w->flags & IORING_REG_WAIT_TS) {
 			ext_arg->ts.tv_sec = READ_ONCE(w->ts.tv_sec);
 			ext_arg->ts.tv_nsec = READ_ONCE(w->ts.tv_nsec);
