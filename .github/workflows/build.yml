@@ -20,6 +20,7 @@ jobs:
       - uses: marocchino/sticky-pull-request-comment@v2
         with:
           header: kernel-warnings
+          owner: {{ github.repository_owner }}
           message: |
             ### 🚀 Kernel Build Started
             _Builds are running... detailed status below:_
