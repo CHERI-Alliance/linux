@@ -151,7 +151,9 @@ void __init riscv_cheri_caps_init(uintcap_t inf)
 bool
 __riscv_cheri_is_capmode(void * __capability cap)
 {
-	return !(cheri_high_get(cap) & CHERI_MBIT_MASK);
+	unsigned long v;
+	asm volatile("gcmode %0, %1" : "=r"(v) : "C"(cap));
+	return !v;
 }
 
 void * __capability riscv_cheri_set_capmode(void * __capability cap)
