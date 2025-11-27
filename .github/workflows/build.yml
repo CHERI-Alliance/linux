@@ -13,22 +13,8 @@ permissions:
   actions: read
 
 jobs:
-  init-comment:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          header: kernel-warnings
-          message: |
-            ### 🚀 Kernel Build Started
-            _Builds are running... detailed status below:_
-            | Job | Status |
-            | :--- | :--- |
-
   build:
-    needs: init-comment
-    if: always() && (needs.init-comment.result == 'success' || needs.init-comment.result == 'skipped')
+    if: always()
     name: Build ${{ matrix.arch }} ${{ matrix.compiler }} ${{ matrix.config }}
     runs-on: ubuntu-latest
     container:
@@ -118,14 +104,6 @@ jobs:
           echo "JOB_URL=$JOB_URL BUILD_STEP_NUM=$BUILD_STEP_NUM"
           echo "url=$JOB_URL" >> "$GITHUB_OUTPUT"
           echo "build_step_num=$BUILD_STEP_NUM" >> "$GITHUB_OUTPUT"
-
-      - name: Notify Job Start
-        if: github.event_name == 'pull_request'
-        uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          header: kernel-warnings
-          append: true
-          message: "| ${{ matrix.arch }} ${{ matrix.compiler }} | ⏳ [In Progress](${{ steps.job-link.outputs.url }}) |"
 
       - name: Setup Ccache
         uses: hendrikmuhs/ccache-action@v1.2
@@ -229,41 +207,3 @@ jobs:
           name: warnings-${{ matrix.arch }}-${{ matrix.compiler }}-${{ matrix.config }}
           path: "warnings-${{ matrix.arch }}-${{ matrix.compiler }}.txt"
 
-  report-warnings:
-    needs: build
-    if: always() && github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-    steps:
-      - name: Download Warning Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          pattern: warnings-*
-          merge-multiple: true
-          path: warnings
-
-      - name: Generate Summary Markdown
-        run: |
-          echo "### 🛡️ Kernel Build Warnings Report" > comment.md
-          echo "" >> comment.md
-          echo "| Arch | Compiler | Warnings | Status |" >> comment.md
-          echo "| :--- | :--- | :---: | :---: |" >> comment.md
-          # Sort by Arch (col 2), then Compiler Version (col 3)
-          # -k 2,2b : sort 2nd column, ignore leading whitespace
-          # -k 3,3Vb: sort 3rd column, Version sort, ignore whitespace
-          cat warnings/*.txt | sort -t '|' -k 2,2b -k 3,3Vb >> comment.md
-          if grep -q "❌" warnings/*.txt; then
-            echo "" >> comment.md
-            echo "❌ **One or more builds failed.**" >> comment.md
-          fi
-          # Use awk to find '[**NUMBER**]' and sum up the values (m[1])
-          TOTAL=$(awk -F'|' 'match($4, /\[\*\*([0-9]+)\*\*\]/, m) { sum += m[1] } END { print sum+0 }' warnings/*.txt)
-          echo "" >> comment.md
-          echo "**Total Warnings: $TOTAL**" >> comment.md
-
-      - name: Post Sticky Comment
-        uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          header: kernel-warnings
-          path: comment.md
