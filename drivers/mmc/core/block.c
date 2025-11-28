@@ -44,6 +44,7 @@
 #include <linux/rpmb.h>
 
 #include <linux/mmc/ioctl.h>
+#include <linux/mmc/compat64_ioctl.h>
 #include <linux/mmc/card.h>
 #include <linux/mmc/host.h>
 #include <linux/mmc/mmc.h>
@@ -84,13 +85,13 @@ MODULE_ALIAS("mmc:block");
 #define CHECK_SIZE_ALIGNED(val) IS_ALIGNED((val), sizeof(struct rpmb_frame))
 
 /*
- * The compat_mmc_ioc_{multi_}cmd structs have different sizes in PCuABI and in
+ * The mmc_ioc_{multi_}cmd structs have different sizes in PCuABI and in
  * compat64, which affects the expected MMC_IOC_{MULTI_}CMD ioctl values. The
  * following ioctl values reflect the sizes of the compat64 structs defined in
  * this file.
  */
-#define MMC_IOC_CMD_COMPAT _IOWR(MMC_BLOCK_MAJOR, 0, struct compat_mmc_ioc_cmd)
-#define MMC_IOC_MULTI_CMD_COMPAT _IOWR(MMC_BLOCK_MAJOR, 1, struct compat_mmc_ioc_multi_cmd)
+#define MMC_IOC_CMD_COMPAT _IOWR(MMC_BLOCK_MAJOR, 0, struct __c64_mmc_ioc_cmd)
+#define MMC_IOC_MULTI_CMD_COMPAT _IOWR(MMC_BLOCK_MAJOR, 1, struct __c64_mmc_ioc_multi_cmd)
 
 static DEFINE_MUTEX(block_mutex);
 
@@ -115,28 +116,6 @@ static DEFINE_IDA(mmc_rpmb_ida);
 struct mmc_blk_busy_data {
 	struct mmc_card *card;
 	u32 status;
-};
-
-struct compat_mmc_ioc_cmd {
-	int write_flag;
-	int is_acmd;
-	__u32 opcode;
-	__u32 arg;
-	__u32 response[4];
-	unsigned int flags;
-	unsigned int blksz;
-	unsigned int blocks;
-	unsigned int postsleep_min_us;
-	unsigned int postsleep_max_us;
-	unsigned int data_timeout_ns;
-	unsigned int cmd_timeout_ms;
-	__u32 __pad;
-	__u64 data_ptr;
-};
-
-struct compat_mmc_ioc_multi_cmd {
-	__u64 num_of_cmds;
-	struct compat_mmc_ioc_cmd cmds[];
 };
 
 /*
@@ -447,47 +426,6 @@ struct mmc_blk_ioc_data {
 	struct mmc_rpmb_data *rpmb;
 };
 
-/*
- * Copy the data from a compat_mmc_ioc_cmd user pointer, src,
- * to kernel space, storing it in native_cmd. Returns 0 for
- * a successful copy.
- */
-static int get_mmc_ioc_cmd_from_compat64(struct mmc_ioc_cmd *native_cmd,
-					 void * __user src)
-{
-	struct compat_mmc_ioc_cmd compat_cmd;
-
-	if (copy_from_user(&compat_cmd, src, sizeof(struct compat_mmc_ioc_cmd)))
-		return -EFAULT;
-
-	native_cmd->arg = compat_cmd.arg;
-	native_cmd->is_acmd = compat_cmd.is_acmd;
-	native_cmd->opcode = compat_cmd.opcode;
-	native_cmd->arg = compat_cmd.arg;
-	memcpy(native_cmd->response, compat_cmd.response, sizeof(compat_cmd.response));
-	native_cmd->flags = compat_cmd.flags;
-	native_cmd->blksz = compat_cmd.blksz;
-	native_cmd->blocks = compat_cmd.blocks;
-	native_cmd->postsleep_min_us = compat_cmd.postsleep_min_us;
-	native_cmd->postsleep_max_us = compat_cmd.postsleep_max_us;
-	native_cmd->data_timeout_ns = compat_cmd.data_timeout_ns;
-	native_cmd->cmd_timeout_ms = compat_cmd.cmd_timeout_ms;
-	native_cmd->__pad = compat_cmd.__pad;
-	native_cmd->data_ptr = (user_uintptr_t)compat_ptr(compat_cmd.data_ptr);
-
-	return 0;
-}
-
-static int copy_mmc_ioc_cmd_from_user(struct mmc_ioc_cmd *to, void * __user src)
-{
-	if (in_compat64_syscall())
-		return get_mmc_ioc_cmd_from_compat64(to, src);
-
-	if (copy_from_user(to, src, sizeof(*to)))
-		return -EFAULT;
-	return 0;
-}
-
 static struct mmc_blk_ioc_data *mmc_blk_ioctl_copy_from_user(
 	struct mmc_ioc_cmd __user *user)
 {
@@ -500,7 +438,7 @@ static struct mmc_blk_ioc_data *mmc_blk_ioctl_copy_from_user(
 		goto out;
 	}
 
-	if (copy_mmc_ioc_cmd_from_user(&idata->ic, user)) {
+	if (__c64_copy_from_user_with_ptr(mmc_ioc_cmd, &idata->ic, user)) {
 		err = -EFAULT;
 		goto idata_err;
 	}
@@ -537,7 +475,7 @@ static int mmc_blk_ioctl_copy_to_user(struct mmc_ioc_cmd __user *ic_ptr,
 	struct mmc_ioc_cmd *ic = &idata->ic;
 
 	__u32 __user *response_uptr = in_compat64_syscall() ?
-			&((struct compat_mmc_ioc_cmd __user *)ic_ptr)->response[0] :
+			&((struct __c64_mmc_ioc_cmd __user *)ic_ptr)->response[0] :
 			&ic_ptr->response[0];
 
 	if (copy_to_user(response_uptr, ic->response, sizeof(ic->response)))
@@ -793,7 +731,7 @@ static inline struct mmc_ioc_cmd __user *get_ith_mmc_ioc_cmd_uptr(
 	unsigned int i)
 {
 	if (in_compat64_syscall())
-		return (struct mmc_ioc_cmd __user *)&((struct compat_mmc_ioc_multi_cmd __user *)user)->cmds[i];
+		return (struct mmc_ioc_cmd __user *)&((struct __c64_mmc_ioc_multi_cmd __user *)user)->cmds[i];
 	return &(user->cmds[i]);
 }
 
@@ -932,34 +870,17 @@ static int mmc_blk_ioctl(struct block_device *bdev, blk_mode_t mode,
 static int mmc_blk_compat_ioctl(struct block_device *bdev, blk_mode_t mode,
 	unsigned int cmd, unsigned long arg)
 {
-	struct mmc_blk_data *md;
-	int ret;
-	void __user *uarg = compat_ptr(arg);
-
 	switch (cmd) {
 	case MMC_IOC_CMD_COMPAT:
-		ret = mmc_blk_check_blkdev(bdev);
-		if (ret)
-			return ret;
-		md = mmc_blk_get(bdev->bd_disk);
-		if (!md)
-			return -EINVAL;
-		ret = mmc_blk_ioctl_cmd(md, uarg, NULL);
-		mmc_blk_put(md);
-		return ret;
+		cmd = MMC_IOC_CMD;
+		break;
 	case MMC_IOC_MULTI_CMD_COMPAT:
-		ret = mmc_blk_check_blkdev(bdev);
-		if (ret)
-			return ret;
-		md = mmc_blk_get(bdev->bd_disk);
-		if (!md)
-			return -EINVAL;
-		ret = mmc_blk_ioctl_multi_cmd(md, uarg, NULL);
-		mmc_blk_put(md);
-		return ret;
+		cmd = MMC_IOC_MULTI_CMD_COMPAT;
+		break;
 	default:
 		return -EINVAL;
 	}
+	return mmc_blk_ioctl(bdev, mode, cmd, (user_uintptr_t) compat_ptr(arg));
 }
 #endif
 
@@ -2849,23 +2770,17 @@ static long mmc_rpmb_ioctl(struct file *filp, unsigned int cmd,
 static long mmc_rpmb_ioctl_compat(struct file *filp, unsigned int cmd,
 			      unsigned long arg)
 {
-	struct mmc_rpmb_data *rpmb = filp->private_data;
-	int ret;
-	void __user *uarg = compat_ptr(arg);
-
 	switch (cmd) {
 	case MMC_IOC_CMD_COMPAT:
-		ret = mmc_blk_ioctl_cmd(rpmb->md, uarg, rpmb);
+		cmd = MMC_IOC_CMD;
 		break;
 	case MMC_IOC_MULTI_CMD_COMPAT:
-		ret = mmc_blk_ioctl_multi_cmd(rpmb->md, uarg, rpmb);
+		cmd = MMC_IOC_MULTI_CMD_COMPAT;
 		break;
 	default:
-		ret = -EINVAL;
-		break;
+		return -EINVAL;
 	}
-
-	return ret;
+	return mmc_rpmb_ioctl(filp, cmd, (user_uintptr_t)compat_ptr(arg));
 }
 #endif
 
