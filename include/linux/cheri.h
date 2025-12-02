@@ -4,6 +4,10 @@
 
 #include <linux/types.h>
 
+#if defined(__CHECKER__) || defined(__GENKSYMS__)
+typedef unsigned int cheri_perms_t;
+#endif
+
 #ifdef __CHECKER__
 #define __capability
 #endif
@@ -21,7 +25,6 @@
 
 #else /* __CHECKER */
 
-typedef unsigned int cheri_perms_t;
 #define cheri_address_set(__c, __a) ((__typeof__(__c))(uintptr_t __force)__a)
 #define cheri_bounds_set(__c, __l) (__c)
 #define cheri_bounds_set_exact(__c, __l) (__c)

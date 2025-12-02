@@ -221,7 +221,7 @@ do {									\
 #define __must_be_byte_array(a)	__BUILD_BUG_ON_ZERO_MSG(!__is_byte_array(a), \
 							"must be byte array")
 
-#if !__has_feature(capabilities)
+#if !__has_feature(capabilities) || defined(__GENKSYMS__)
 typedef long __intcap_t;
 typedef unsigned long __uintcap_t;
 #endif
