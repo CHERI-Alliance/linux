@@ -8425,10 +8425,10 @@ ftrace_count_snapshot(unsigned long ip, unsigned long parent_ip,
 		      void *data)
 {
 	struct ftrace_func_mapper *mapper = data;
-	long *count = NULL;
+	intptr_t *count = NULL;
 
 	if (mapper)
-		count = (long *)ftrace_func_mapper_find_ip(mapper, ip);
+		count = (intptr_t *)ftrace_func_mapper_find_ip(mapper, ip);
 
 	if (count) {
 
@@ -8446,17 +8446,17 @@ ftrace_snapshot_print(struct seq_file *m, unsigned long ip,
 		      struct ftrace_probe_ops *ops, void *data)
 {
 	struct ftrace_func_mapper *mapper = data;
-	long *count = NULL;
+	intptr_t *count = NULL;
 
-	seq_printf(m, "%ps:", (void *)ip);
+	seq_printf(m, "%ps:", __c_fakep(ip));
 
 	seq_puts(m, "snapshot");
 
 	if (mapper)
-		count = (long *)ftrace_func_mapper_find_ip(mapper, ip);
+		count = (intptr_t *)ftrace_func_mapper_find_ip(mapper, ip);
 
 	if (count)
-		seq_printf(m, ":count=%ld\n", *count);
+		seq_printf(m, ":count=%ld\n", (long)*count);
 	else
 		seq_puts(m, ":unlimited\n");
 
@@ -8512,7 +8512,8 @@ ftrace_trace_snapshot_callback(struct trace_array *tr, struct ftrace_hash *hash,
 			       char *glob, char *cmd, char *param, int enable)
 {
 	struct ftrace_probe_ops *ops;
-	void *count = (void *)-1;
+	unsigned long num_val;
+	void *count = __c_fakep(-1);
 	char *number;
 	int ret;
 
@@ -8545,7 +8546,8 @@ ftrace_trace_snapshot_callback(struct trace_array *tr, struct ftrace_hash *hash,
 	 * We use the callback data field (which is a pointer)
 	 * as our counter.
 	 */
-	ret = kstrtoul(number, 0, (unsigned long *)&count);
+	ret = kstrtoul(number, 0, &num_val);
+	count = __c_fakep(num_val);
 	if (ret)
 		return ret;
 
