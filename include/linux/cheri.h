@@ -23,7 +23,7 @@ typedef unsigned int cheri_perms_t;
 #define cheri_high_get(x) __builtin_cheri_copy_from_high(x)
 #endif
 
-#else /* __CHECKER */
+#else /* __CHECKER__ */
 
 #define cheri_address_set(__c, __a) ((__typeof__(__c))(uintptr_t __force)__a)
 #define cheri_bounds_set(__c, __l) (__c)
@@ -46,7 +46,7 @@ typedef unsigned int cheri_perms_t;
 #define cheri_perms_and(__c, __m) (__c)
 #define cheri_perms_get(__c) ~0U
 
-#endif /* __CHECKER */
+#endif /* __CHECKER__ */
 
 #include <uapi/asm/cheri.h>
 #ifdef CONFIG_HAVE_ARCH_CHERI_H
