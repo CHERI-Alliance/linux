@@ -277,7 +277,13 @@ int io_sync_cancel(struct io_ring_ctx *ctx, void __user *arg)
 		if (sc.pad2[i])
 			return -EINVAL;
 
-	cd.data = sc.addr;
+	/*
+	 * sc.addr is matched against the SQEs' user_data to find the transaction to
+	 * be cancelled. user_data is not dereferenced by the kernel, so it is not
+	 * converted into a capability in compat64. Thus, sc.addr also must not be a
+	 * capability.
+	 */
+	cd.data = !io_in_compat64(ctx) ? sc.addr : __c_fakeu(__c_ua(sc.addr));
 	cd.flags = sc.flags;
 	cd.opcode = sc.opcode;
 
