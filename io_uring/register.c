@@ -376,11 +376,11 @@ struct io_ring_ctx_rings {
 	struct io_rings *rings;
 	union {
 		struct io_uring_sqe *sq_sqes;
-		struct compat_io_uring_sqe *sq_sqes_compat;
+		struct __c64_io_uring_sqe *sq_sqes_compat;
 	};
 	union {
 		struct io_uring_cqe *cq_cqes;
-		struct compat_io_uring_cqe *cq_cqes_compat;
+		struct __c64_io_uring_cqe *cq_cqes_compat;
 	};
 
 	struct io_mapped_region sq_region;
