@@ -23,7 +23,7 @@ struct io_buffer_list {
 		struct page **buf_pages;
 		union {
 			struct io_uring_buf_ring *buf_ring;
-			struct compat_io_uring_buf_ring *buf_ring_compat;
+			struct __c64_io_uring_buf_ring *buf_ring_compat64;
 		};
 	};
 	/* count of classic/legacy buffers in buffer list */

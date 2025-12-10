@@ -71,32 +71,6 @@ bool io_kbuf_commit(struct io_kiocb *req,
 	return true;
 }
 
-static int get_compat64_io_uring_buf_reg(struct io_uring_buf_reg *reg,
-					 const void __user *user_reg)
-{
-	struct compat_io_uring_buf_reg compat_reg;
-
-	if (copy_from_user(&compat_reg, user_reg, sizeof(compat_reg)))
-		return -EFAULT;
-	reg->ring_addr = (user_uintptr_t)compat_ptr(compat_reg.ring_addr);
-	reg->ring_entries = compat_reg.ring_entries;
-	reg->bgid = compat_reg.bgid;
-	reg->flags = compat_reg.flags;
-	memcpy(reg->resv, compat_reg.resv, sizeof(reg->resv));
-	return 0;
-}
-
-static int copy_io_uring_buf_reg_from_user(struct io_ring_ctx *ctx,
-					   struct io_uring_buf_reg *reg,
-					   const void __user *arg)
-{
-	if (io_in_compat64(ctx))
-		return get_compat64_io_uring_buf_reg(reg, arg);
-	if (copy_from_user_with_ptr(reg, arg, sizeof(*reg)))
-		return -EFAULT;
-	return 0;
-}
-
 static inline struct io_buffer_list *io_buffer_get_list(struct io_ring_ctx *ctx,
 							unsigned int bgid)
 {
@@ -660,7 +634,7 @@ int io_register_pbuf_ring(struct io_ring_ctx *ctx, void __user *arg)
 
 	lockdep_assert_held(&ctx->uring_lock);
 
-	if (copy_io_uring_buf_reg_from_user(ctx, &reg, arg))
+	if (__c64c_copy_from_user_with_ptr(io_in_compat64(ctx), io_uring_buf_reg, &reg, arg))
 		return -EFAULT;
 	if (!mem_is_zero(reg.resv, sizeof(reg.resv)))
 		return -EINVAL;
@@ -685,9 +659,7 @@ int io_register_pbuf_ring(struct io_ring_ctx *ctx, void __user *arg)
 		return -ENOMEM;
 
 	mmap_offset = (unsigned long)reg.bgid << IORING_OFF_PBUF_SHIFT;
-	ring_size = reg.ring_entries * (io_in_compat64(ctx) ?
-					sizeof(struct compat_io_uring_buf) :
-					sizeof(struct io_uring_buf));
+	ring_size = reg.ring_entries * __c64c_sizeof(io_in_compat64(ctx), io_uring_buf);
 
 	memset(&rd, 0, sizeof(rd));
 	rd.size = PAGE_ALIGN(ring_size);
@@ -738,7 +710,7 @@ int io_unregister_pbuf_ring(struct io_ring_ctx *ctx, void __user *arg)
 
 	lockdep_assert_held(&ctx->uring_lock);
 
-	if (copy_io_uring_buf_reg_from_user(ctx, &reg, arg))
+	if (__c64c_copy_from_user_with_ptr(io_in_compat64(ctx), io_uring_buf_reg, &reg, arg))
 		return -EFAULT;
 	if (!mem_is_zero(reg.resv, sizeof(reg.resv)) || reg.flags)
 		return -EINVAL;
