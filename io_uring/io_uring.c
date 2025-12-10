@@ -55,7 +55,6 @@
 #include <linux/nospec.h>
 #include <linux/task_work.h>
 #include <linux/io_uring.h>
-#include <linux/compat64_io_uring.h>
 #include <linux/io_uring/cmd.h>
 #include <linux/audit.h>
 #include <linux/security.h>
