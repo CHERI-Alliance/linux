@@ -196,7 +196,7 @@ static inline bool io_user_data_is_same(__u64ptr d1, __u64ptr d2)
 
 static inline void convert_compat64_io_uring_sqe(struct io_ring_ctx *ctx,
 						 struct io_uring_sqe *sqe,
-						 const struct compat_io_uring_sqe *compat_sqe)
+						 const struct __c64_io_uring_sqe *compat_sqe)
 {
 /*
  * The struct io_uring_sqe contains anonymous unions and there is no field
@@ -206,9 +206,9 @@ static inline void convert_compat64_io_uring_sqe(struct io_ring_ctx *ctx,
  * to ensure that the union's members are not truncated during the conversion.
  */
 #define BUILD_BUG_COMPAT_SQE_UNION_ELEM(elem1, elem2) \
-	BUILD_BUG_ON(sizeof_field(struct compat_io_uring_sqe, elem1) != \
-		(offsetof(struct compat_io_uring_sqe, elem2) - \
-		 offsetof(struct compat_io_uring_sqe, elem1)))
+	BUILD_BUG_ON(sizeof_field(struct __c64_io_uring_sqe, elem1) != \
+		(offsetof(struct __c64_io_uring_sqe, elem2) - \
+		 offsetof(struct __c64_io_uring_sqe, elem1)))
 
 	sqe->opcode = READ_ONCE(compat_sqe->opcode);
 	sqe->flags = READ_ONCE(compat_sqe->flags);
@@ -261,11 +261,11 @@ static inline void convert_compat64_io_uring_sqe(struct io_ring_ctx *ctx,
 
 		native_cmd_size = sizeof(struct io_uring_sqe) -
 				  offsetof(struct io_uring_sqe, cmd);
-		compat_cmd_size = sizeof(struct compat_io_uring_sqe) -
-				  offsetof(struct compat_io_uring_sqe, cmd);
+		compat_cmd_size = sizeof(struct __c64_io_uring_sqe) -
+				  offsetof(struct __c64_io_uring_sqe, cmd);
 		if (ctx->flags & IORING_SETUP_SQE128) {
 			native_cmd_size += sizeof(struct io_uring_sqe);
-			compat_cmd_size += sizeof(struct compat_io_uring_sqe);
+			compat_cmd_size += sizeof(struct __c64_io_uring_sqe);
 		}
 
 		memcpy_and_pad(sqe->cmd, native_cmd_size,
@@ -314,7 +314,7 @@ static inline void __io_fill_cqe(struct io_ring_ctx *ctx, struct io_uring_cqe *c
 				 __u64ptr extra1, __u64ptr extra2)
 {
 	if (io_in_compat64(ctx)) {
-		struct compat_io_uring_cqe *compat_cqe = (struct compat_io_uring_cqe *)cqe;
+		struct __c64_io_uring_cqe *compat_cqe = (struct __c64_io_uring_cqe *)cqe;
 
 		WRITE_ONCE(compat_cqe->user_data, __c_ua(user_data));
 		WRITE_ONCE(compat_cqe->res, res);

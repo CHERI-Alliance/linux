@@ -6,8 +6,8 @@
 #include <linux/task_work.h>
 #include <linux/bitmap.h>
 #include <linux/llist.h>
-#include <linux/io_uring_compat.h>
 #include <uapi/linux/io_uring.h>
+#include <linux/compat64_io_uring.h>
 
 enum {
 	/*
@@ -273,7 +273,7 @@ struct io_ring_ctx {
 		 */
 		u32			*sq_array;
 		union {
-			struct compat_io_uring_sqe	*sq_sqes_compat;
+			struct __c64_io_uring_sqe	*sq_sqes_compat;
 			struct io_uring_sqe		*sq_sqes;
 		};
 		unsigned		cached_sq_head;
@@ -337,7 +337,7 @@ struct io_ring_ctx {
 		 * entries.
 		 */
 		union {
-			struct compat_io_uring_cqe	*cq_cqes_compat;
+			struct __c64_io_uring_cqe	*cq_cqes_compat;
 			struct io_uring_cqe		*cq_cqes;
 		};
 
