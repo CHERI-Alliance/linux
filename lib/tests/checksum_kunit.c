@@ -5,6 +5,7 @@
 
 #include <kunit/test.h>
 #include <asm/checksum.h>
+#include <linux/cheri.h>
 #include <net/ip6_checksum.h>
 
 #define MAX_LEN 512
@@ -478,6 +479,7 @@ static void assert_setup_correct(struct kunit *test)
  */
 static void test_csum_fixed_random_inputs(struct kunit *test)
 {
+	void *buf;
 	int len, align;
 	__wsum sum;
 	__sum16 result, expec;
@@ -492,7 +494,8 @@ static void test_csum_fixed_random_inputs(struct kunit *test)
 			 * Test the precomputed random input.
 			 */
 			sum = to_wsum(random_init_sum);
-			result = full_csum(&tmp_buf[align], len, sum);
+			buf = cheri_bounds_set(&tmp_buf[align], len);
+			result = full_csum(buf, len, sum);
 			expec = to_sum16(expected_results[len]);
 			CHECK_EQ(result, expec);
 		}
@@ -504,6 +507,7 @@ static void test_csum_fixed_random_inputs(struct kunit *test)
  */
 static void test_csum_all_carry_inputs(struct kunit *test)
 {
+	void *buf;
 	int len, align;
 	__wsum sum;
 	__sum16 result, expec;
@@ -517,7 +521,8 @@ static void test_csum_all_carry_inputs(struct kunit *test)
 			 * All carries from input and initial sum.
 			 */
 			sum = to_wsum(0xffffffff);
-			result = full_csum(&tmp_buf[align], len, sum);
+			buf = cheri_bounds_set(&tmp_buf[align], len);
+			result = full_csum(buf, len, sum);
 			expec = to_sum16((len & 1) ? 0xff00 : 0);
 			CHECK_EQ(result, expec);
 
@@ -525,7 +530,7 @@ static void test_csum_all_carry_inputs(struct kunit *test)
 			 * All carries from input.
 			 */
 			sum = 0;
-			result = full_csum(&tmp_buf[align], len, sum);
+			result = full_csum(buf, len, sum);
 			if (len & 1)
 				expec = to_sum16(0xff00);
 			else if (len)
@@ -544,6 +549,7 @@ static void test_csum_all_carry_inputs(struct kunit *test)
  */
 static void test_csum_no_carry_inputs(struct kunit *test)
 {
+	void *buf;
 	int len, align;
 	__wsum sum;
 	__sum16 result, expec;
@@ -553,11 +559,13 @@ static void test_csum_no_carry_inputs(struct kunit *test)
 	for (align = 0; align < TEST_BUFLEN; ++align) {
 		for (len = 0; len < MAX_LEN && (align + len) < TEST_BUFLEN;
 		     ++len) {
+			buf = cheri_bounds_set(&tmp_buf[align], len);
+
 			/*
 			 * Expect no carries.
 			 */
 			sum = to_wsum(init_sums_no_overflow[len]);
-			result = full_csum(&tmp_buf[align], len, sum);
+			result = full_csum(buf, len, sum);
 			expec = 0;
 			CHECK_EQ(result, expec);
 
@@ -565,7 +573,7 @@ static void test_csum_no_carry_inputs(struct kunit *test)
 			 * Expect one carry.
 			 */
 			sum = to_wsum(init_sums_no_overflow[len] + 1);
-			result = full_csum(&tmp_buf[align], len, sum);
+			result = full_csum(buf, len, sum);
 			expec = to_sum16(len ? 0xfffe : 0xffff);
 			CHECK_EQ(result, expec);
 		}
@@ -574,12 +582,14 @@ static void test_csum_no_carry_inputs(struct kunit *test)
 
 static void test_ip_fast_csum(struct kunit *test)
 {
+	const void *buf;
 	__sum16 csum_result;
 	u16 expected;
 
 	for (int len = IPv4_MIN_WORDS; len < IPv4_MAX_WORDS; len++) {
 		for (int index = 0; index < NUM_IP_FAST_CSUM_TESTS; index++) {
-			csum_result = ip_fast_csum(random_buf + index, len);
+			buf = cheri_bounds_set(random_buf + index, len * 4);
+			csum_result = ip_fast_csum(buf, len);
 			expected =
 				expected_fast_csum[(len - IPv4_MIN_WORDS) *
 						   NUM_IP_FAST_CSUM_TESTS +
