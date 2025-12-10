@@ -12,30 +12,6 @@
 #include "io_uring.h"
 #include "tctx.h"
 
-static int get_compat64_io_uring_rsrc_update(struct io_uring_rsrc_update *up,
-					     const void __user *user_up)
-{
-	struct compat_io_uring_rsrc_update compat_up;
-
-	if (copy_from_user(&compat_up, user_up, sizeof(compat_up)))
-		return -EFAULT;
-	up->offset = compat_up.offset;
-	up->resv = compat_up.resv;
-	up->data = (user_uintptr_t)compat_ptr(compat_up.data);
-	return 0;
-}
-
-static int copy_io_uring_rsrc_update_ringfd_from_user(struct io_ring_ctx *ctx,
-						      struct io_uring_rsrc_update *up,
-						      const void __user *arg)
-{
-	if (io_in_compat64(ctx))
-		return get_compat64_io_uring_rsrc_update(up, arg);
-	if (copy_from_user_with_ptr(up, arg, sizeof(struct io_uring_rsrc_update)))
-		return -EFAULT;
-	return 0;
-}
-
 static struct io_wq *io_init_wq_offload(struct io_ring_ctx *ctx,
 					struct task_struct *task)
 {
@@ -281,7 +257,7 @@ static void __user *get_ith_io_uring_rsrc_update(struct io_ring_ctx *ctx,
 						 int i)
 {
 	if (io_in_compat64(ctx))
-		return &((struct compat_io_uring_rsrc_update __user *)__arg)[i];
+		return &((struct __c64_io_uring_rsrc_update __user *)__arg)[i];
 	return &((struct io_uring_rsrc_update __user *)__arg)[i];
 }
 
@@ -311,13 +287,12 @@ int io_ringfd_register(struct io_ring_ctx *ctx, void __user *__arg,
 	tctx = current->io_uring;
 	for (i = 0; i < nr_args; i++) {
 		void __user *arg;
-		__u32 __user *arg_offset;
 		struct io_uring_rsrc_update reg;
 		int start, end;
 
 		arg = get_ith_io_uring_rsrc_update(ctx, __arg, i);
 
-		if (copy_io_uring_rsrc_update_ringfd_from_user(ctx, &reg, arg)) {
+		if (__c64c_copy_from_user_with_ptr(io_in_compat64(ctx), io_uring_rsrc_update, &reg, arg)) {
 			ret = -EFAULT;
 			break;
 		}
@@ -344,10 +319,7 @@ int io_ringfd_register(struct io_ring_ctx *ctx, void __user *__arg,
 			break;
 
 		reg.offset = ret;
-		arg_offset = io_in_compat64(ctx) ?
-			     &((struct compat_io_uring_rsrc_update __user *)arg)->offset :
-			     &((struct io_uring_rsrc_update __user *)arg)->offset;
-		if (put_user(reg.offset, arg_offset)) {
+		if (__c64c_put_user(io_in_compat64(ctx), io_uring_rsrc_update, reg.offset, (struct io_uring_rsrc_update __user *) arg, offset)) {
 			fput(tctx->registered_rings[reg.offset]);
 			tctx->registered_rings[reg.offset] = NULL;
 			ret = -EFAULT;
@@ -375,7 +347,7 @@ int io_ringfd_unregister(struct io_ring_ctx *ctx, void __user *__arg,
 
 		arg = get_ith_io_uring_rsrc_update(ctx, __arg, i);
 
-		if (copy_io_uring_rsrc_update_ringfd_from_user(ctx, &reg, arg)) {
+		if (__c64c_copy_from_user_with_ptr(io_in_compat64(ctx), io_uring_rsrc_update, &reg, arg)) {
 			ret = -EFAULT;
 			break;
 		}
