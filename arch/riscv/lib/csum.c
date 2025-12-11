@@ -80,7 +80,23 @@ EXPORT_SYMBOL(csum_ipv6_magic);
 #define OFFSET_MASK 7
 #endif
 
-static inline __no_sanitize_address unsigned long
+#ifdef CONFIG_CHERI_KERNEL
+/*
+ * The non-CHERI do_csum() implementation performs over-reads as
+ * performance optimization. However, on CHERI-systems these
+ * over-reads could triger CHERI faults due to out-of-bounds
+ * accesses. To avoid this, we replace the over-reads with memcpy()
+ * when building a CHERI kernel.
+ *
+ * As an additional benefit, we do not have to add
+ * __no_sanitize_address when building the CHERI variants.
+ */
+#define __csum_no_sanitize_address
+#else
+#define __csum_no_sanitize_address __no_sanitize_address
+#endif
+
+static inline __csum_no_sanitize_address unsigned long
 do_csum_common(const unsigned long *ptr, const unsigned long *end,
 	       unsigned long data)
 {
@@ -92,12 +108,25 @@ do_csum_common(const unsigned long *ptr, const unsigned long *end,
 	 * faster than doing 32-bit reads on architectures that support larger
 	 * reads.
 	 */
-	while (ptr < end) {
+#ifdef CONFIG_CHERI_KERNEL
+	while (ptr + 1 <= end)
+#else
+	while (ptr < end)
+#endif
+	{
 		csum += data;
 		carry += csum < data;
 		data = *(ptr++);
 	}
 
+#ifdef CONFIG_CHERI_KERNEL
+	if (ptr < end) {
+		csum += data;
+		carry += csum < data;
+
+		memcpy(&data, ptr, (void *)end - (void *)ptr);
+	}
+#endif
 	/*
 	 * Perform alignment (and over-read) bytes on the tail if any bytes
 	 * leftover.
@@ -121,7 +150,7 @@ do_csum_common(const unsigned long *ptr, const unsigned long *end,
  * If buff is not aligned, will over-read bytes but not use the bytes that it
  * shouldn't. The same thing will occur on the tail-end of the read.
  */
-static inline __no_sanitize_address unsigned int
+static inline __csum_no_sanitize_address unsigned int
 do_csum_with_alignment(const unsigned char *buff, int len)
 {
 	unsigned int offset, shift;
@@ -142,7 +171,13 @@ do_csum_with_alignment(const unsigned char *buff, int len)
 	 * aligned.
 	 */
 	shift = offset * 8;
+#ifdef CONFIG_CHERI_KERNEL
+	memcpy((void *)&data + offset, buff,
+	       min_t(size_t, len, sizeof(unsigned long) - offset));
+	ptr++;
+#else
 	data = *(ptr++);
+#endif
 #ifdef __LITTLE_ENDIAN
 	data = (data >> shift) << shift;
 #else
@@ -220,14 +255,20 @@ no_zbb:
  * Does not perform alignment, should only be used if machine has fast
  * misaligned accesses, or when buff is known to be aligned.
  */
-static inline __no_sanitize_address unsigned int
+static inline __csum_no_sanitize_address unsigned int
 do_csum_no_alignment(const unsigned char *buff, int len)
 {
 	unsigned long csum, data;
 	const unsigned long *ptr, *end;
 
 	ptr = (const unsigned long *)(buff);
-	data = *(ptr++);
+	if (!IS_ENABLED(CONFIG_CHERI_KERNEL) || likely(len >= sizeof(unsigned long))) {
+		data = *(ptr++);
+	} else {
+		data = 0;
+		memcpy(&data, buff, len);
+		ptr++;
+	}
 
 	kasan_check_read(buff, len);
 
