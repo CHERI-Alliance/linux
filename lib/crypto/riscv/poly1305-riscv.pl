@@ -34,6 +34,15 @@ $flavour = shift || "64";
 for (@ARGV) {   $output=$_ if (/\w[\w\-]*\.\w+$/);   }
 open STDOUT,">$output";
 
+sub creg
+{
+	my ($r) = @_;
+	$r =~ s{^x(\d+)$}{CREG\($1\)};
+	return $r;
+}
+
+$sp = creg($sp);
+
 $code.=<<___;
 #ifdef __KERNEL__
 # ifdef __riscv_zicfilp
@@ -53,14 +62,19 @@ if ($flavour =~ /64/) {{{
 my ($ctx,$inp,$len,$padbit) = ($a0,$a1,$a2,$a3);
 my ($in0,$in1,$tmp0,$tmp1,$tmp2,$tmp3,$tmp4) = ($a4,$a5,$a6,$a7,$t0,$t1,$t2);
 
+$ctx = creg($ctx);
+$inpcap = creg($inp);
+
 $code.=<<___;
 #if __riscv_xlen == 64
 # if __SIZEOF_POINTER__ == 16
 #  define PUSH	csc
 #  define POP	clc
+#  define CREG(X) c ## X
 # else
 #  define PUSH	sd
 #  define POP	ld
+#  define CREG(X) x ## X
 # endif
 #else
 # error "unsupported __riscv_xlen"
@@ -83,15 +97,16 @@ poly1305_init:
 
 #ifndef	__riscv_misaligned_fast
 	andi	$tmp0,$inp,7		# $inp % 8
-	andi	$inp,$inp,-8		# align $inp
+	neg	$in1, $tmp0
+	add	$inpcap,$inpcap,$in1	# align $inp
 	slli	$tmp0,$tmp0,3		# byte to bit offset
 #endif
-	ld	$in0,0($inp)
-	ld	$in1,8($inp)
+	ld	$in0,0($inpcap)
+	ld	$in1,8($inpcap)
 #ifndef	__riscv_misaligned_fast
 	beqz	$tmp0,.Laligned_key
 
-	ld	$tmp2,16($inp)
+	ld	$tmp2,16($inpcap)
 	neg	$tmp1,$tmp0		# implicit &63 in sll
 	srl	$in0,$in0,$tmp0
 	sll	$tmp3,$in1,$tmp1
@@ -139,14 +154,15 @@ poly1305_blocks:
 	beqz	$len,.Lno_data
 
 	caddi	$sp,$sp,-4*__SIZEOF_POINTER__
-	PUSH	$s0,3*__SIZEOF_POINTER__($sp)
-	PUSH	$s1,2*__SIZEOF_POINTER__($sp)
-	PUSH	$s2,1*__SIZEOF_POINTER__($sp)
-	PUSH	$s3,0*__SIZEOF_POINTER__($sp)
+	PUSH	CREG(s0),3*__SIZEOF_POINTER__($sp)
+	PUSH	CREG(s1),2*__SIZEOF_POINTER__($sp)
+	PUSH	CREG(s2),1*__SIZEOF_POINTER__($sp)
+	PUSH	CREG(s3),0*__SIZEOF_POINTER__($sp)
 
 #ifndef	__riscv_misaligned_fast
 	andi	$shr,$inp,7
-	andi	$inp,$inp,-8		# align $inp
+	neg	$shl,$shr
+	add	$inpcap,$inpcap,$shl	# align $inp
 	slli	$shr,$shr,3		# byte to bit offset
 	neg	$shl,$shr		# implicit &63 in sll
 #endif
@@ -162,12 +178,12 @@ poly1305_blocks:
 	add	$len,$len,$inp		# end of buffer
 
 .Loop:
-	ld	$in0,0($inp)		# load input
-	ld	$in1,8($inp)
+	ld	$in0,0($inpcap)		# load input
+	ld	$in1,8($inpcap)
 #ifndef	__riscv_misaligned_fast
 	beqz	$shr,.Laligned_inp
 
-	ld	$tmp2,16($inp)
+	ld	$tmp2,16($inpcap)
 	srl	$in0,$in0,$shr
 	sll	$tmp3,$in1,$shl
 	srl	$in1,$in1,$shr
@@ -177,7 +193,7 @@ poly1305_blocks:
 
 .Laligned_inp:
 #endif
-	caddi	$inp,$inp,16
+	caddi	$inpcap,$inpcap,16
 
 	andi	$tmp0,$h2,-4		# modulo-scheduled reduction
 	srli	$tmp1,$h2,2
@@ -235,10 +251,10 @@ poly1305_blocks:
 	sd	$h1,8($ctx)
 	sd	$h2,16($ctx)
 
-	POP	$s0,3*__SIZEOF_POINTER__($sp)		# epilogue
-	POP	$s1,2*__SIZEOF_POINTER__($sp)
-	POP	$s2,1*__SIZEOF_POINTER__($sp)
-	POP	$s3,0*__SIZEOF_POINTER__($sp)
+	POP	CREG(s0),3*__SIZEOF_POINTER__($sp)		# epilogue
+	POP	CREG(s1),2*__SIZEOF_POINTER__($sp)
+	POP	CREG(s2),1*__SIZEOF_POINTER__($sp)
+	POP	CREG(s3),0*__SIZEOF_POINTER__($sp)
 	caddi	$sp,$sp,4*__SIZEOF_POINTER__
 
 .Lno_data:
@@ -248,6 +264,10 @@ ___
 }
 {
 my ($ctx,$mac,$nonce) = ($a0,$a1,$a2);
+
+$ctx = creg($ctx);
+$nonce = creg($nonce);
+$mac = creg($mac);
 
 $code.=<<___;
 .globl	poly1305_emit
@@ -351,6 +371,9 @@ my ($ctx,$inp,$len,$padbit) = ($a0,$a1,$a2,$a3);
 my ($in0,$in1,$in2,$in3,$tmp0,$tmp1,$tmp2,$tmp3) =
    ($a4,$a5,$a6,$a7,$t0,$t1,$t2,$t3);
 
+$ctx = creg($ctx);
+$inpcap= creg($inp);
+
 $code.=<<___;
 #if __riscv_xlen == 32
 # if __SIZEOF_POINTER__ == 8
@@ -399,17 +422,18 @@ poly1305_init:
 
 #ifndef	__riscv_misaligned_fast
 	andi	$tmp0,$inp,3		# $inp % 4
-	sub	$inp,$inp,$tmp0		# align $inp
+	neg	$in1, $tmp0
+	add	$inpcap,$inpcap,$in1	# align $inp
 	sll	$tmp0,$tmp0,3		# byte to bit offset
 #endif
-	lw	$in0,0($inp)
-	lw	$in1,4($inp)
-	lw	$in2,8($inp)
-	lw	$in3,12($inp)
+	lw	$in0,0($inpcap)
+	lw	$in1,4($inpcap)
+	lw	$in2,8($inpcap)
+	lw	$in3,12($inpcap)
 #ifndef	__riscv_misaligned_fast
 	beqz	$tmp0,.Laligned_key
 
-	lw	$tmp2,16($inp)
+	lw	$tmp2,16($inpcap)
 	sub	$tmp1,$zero,$tmp0
 	srlw	$in0,$in0,$tmp0
 	sllw	$tmp3,$in1,$tmp1
@@ -474,21 +498,22 @@ poly1305_blocks:
 	cm.push	{ra,s0-s8}, -48
 #else
 	caddi	$sp,$sp,-__SIZEOF_POINTER__*12
-	PUSH	$ra, __SIZEOF_POINTER__*11($sp)
-	PUSH	$s0, __SIZEOF_POINTER__*10($sp)
-	PUSH	$s1, __SIZEOF_POINTER__*9($sp)
-	PUSH	$s2, __SIZEOF_POINTER__*8($sp)
-	PUSH	$s3, __SIZEOF_POINTER__*7($sp)
-	PUSH	$s4, __SIZEOF_POINTER__*6($sp)
-	PUSH	$s5, __SIZEOF_POINTER__*5($sp)
-	PUSH	$s6, __SIZEOF_POINTER__*4($sp)
-	PUSH	$s7, __SIZEOF_POINTER__*3($sp)
-	PUSH	$s8, __SIZEOF_POINTER__*2($sp)
+	PUSH	CREG(ra), __SIZEOF_POINTER__*11($sp)
+	PUSH	CREG(s0), __SIZEOF_POINTER__*10($sp)
+	PUSH	CREG(s1), __SIZEOF_POINTER__*9($sp)
+	PUSH	CREG(s2), __SIZEOF_POINTER__*8($sp)
+	PUSH	CREG(s3), __SIZEOF_POINTER__*7($sp)
+	PUSH	CREG(s4), __SIZEOF_POINTER__*6($sp)
+	PUSH	CREG(s5), __SIZEOF_POINTER__*5($sp)
+	PUSH	CREG(s6), __SIZEOF_POINTER__*4($sp)
+	PUSH	CREG(s7), __SIZEOF_POINTER__*3($sp)
+	PUSH	CREG(s8), __SIZEOF_POINTER__*2($sp)
 #endif
 
 #ifndef	__riscv_misaligned_fast
 	andi	$shr,$inp,3
-	andi	$inp,$inp,-4		# align $inp
+	neg	$h0,$shr
+	add	$inpcap,$inpcap,$h0	# align $inp
 	slli	$shr,$shr,3		# byte to bit offset
 #endif
 
@@ -509,14 +534,14 @@ poly1305_blocks:
 	add	$len,$len,$inp		# end of buffer
 
 .Loop:
-	lw	$d0,0($inp)		# load input
-	lw	$d1,4($inp)
-	lw	$d2,8($inp)
-	lw	$d3,12($inp)
+	lw	$d0,0($inpcap)		# load input
+	lw	$d1,4($inpcap)
+	lw	$d2,8($inpcap)
+	lw	$d3,12($inpcap)
 #ifndef	__riscv_misaligned_fast
 	beqz	$shr,.Laligned_inp
 
-	lw	$t4,16($inp)
+	lw	$t4,16($inpcap)
 	sub	$t5,$zero,$shr
 	srlw	$d0,$d0,$shr
 	sllw	$t3,$d1,$t5
@@ -568,7 +593,7 @@ poly1305_blocks:
 	MULX	($t4,$t3,$rs3,$d1)	# d1*s3
 
 	 addw	$h4,$h4,$padbit
-	 caddi	$inp,$inp,16
+	 caddi	$inpcap,$inpcap,16
 	 addw	$h4,$h4,$h3
 
 	MULX	($t6,$a3,$rs2,$d2)	# d2*s2
@@ -691,16 +716,16 @@ poly1305_blocks:
 #ifdef	__riscv_zcmp
 	cm.popret	{ra,s0-s8}, 48
 #else
-	POP	$ra, __SIZEOF_POINTER__*11($sp)
-	POP	$s0, __SIZEOF_POINTER__*10($sp)
-	POP	$s1, __SIZEOF_POINTER__*9($sp)
-	POP	$s2, __SIZEOF_POINTER__*8($sp)
-	POP	$s3, __SIZEOF_POINTER__*7($sp)
-	POP	$s4, __SIZEOF_POINTER__*6($sp)
-	POP	$s5, __SIZEOF_POINTER__*5($sp)
-	POP	$s6, __SIZEOF_POINTER__*4($sp)
-	POP	$s7, __SIZEOF_POINTER__*3($sp)
-	POP	$s8, __SIZEOF_POINTER__*2($sp)
+	POP	CREG(ra), __SIZEOF_POINTER__*11($sp)
+	POP	CREG(s0), __SIZEOF_POINTER__*10($sp)
+	POP	CREG(s1), __SIZEOF_POINTER__*9($sp)
+	POP	CREG(s2), __SIZEOF_POINTER__*8($sp)
+	POP	CREG(s3), __SIZEOF_POINTER__*7($sp)
+	POP	CREG(s4), __SIZEOF_POINTER__*6($sp)
+	POP	CREG(s5), __SIZEOF_POINTER__*5($sp)
+	POP	CREG(s6), __SIZEOF_POINTER__*4($sp)
+	POP	CREG(s7), __SIZEOF_POINTER__*3($sp)
+	POP	CREG(s8), __SIZEOF_POINTER__*2($sp)
 	caddi	$sp,$sp,__SIZEOF_POINTER__*12
 #endif
 .Labort:
@@ -710,6 +735,9 @@ ___
 }
 {
 my ($ctx,$mac,$nonce,$tmp4) = ($a0,$a1,$a2,$a3);
+$ctxcap = creg($ctx);
+$nonce = creg($nonce);
+$mac = creg($mac);
 
 $code.=<<___;
 .globl	poly1305_emit
@@ -718,11 +746,11 @@ poly1305_emit:
 #ifdef	__riscv_zicfilp
 	lpad	0
 #endif
-	lw	$tmp4,16($ctx)
-	lw	$tmp0,0($ctx)
-	lw	$tmp1,4($ctx)
-	lw	$tmp2,8($ctx)
-	lw	$tmp3,12($ctx)
+	lw	$tmp4,16($ctxcap)
+	lw	$tmp0,0($ctxcap)
+	lw	$tmp1,4($ctxcap)
+	lw	$tmp2,8($ctxcap)
+	lw	$tmp3,12($ctxcap)
 
 	srliw	$ctx,$tmp4,2		# final reduction
 	andi	$in0,$tmp4,-4
