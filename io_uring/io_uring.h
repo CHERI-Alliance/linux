@@ -191,7 +191,7 @@ bool io_post_aux_cqe(struct io_ring_ctx *ctx, __u64ptr user_data,
 		     s32 res, u32 cflags);
 void io_add_aux_cqe(struct io_ring_ctx *ctx, __u64ptr user_data, s32 res, u32 cflags);
 bool io_req_post_cqe(struct io_kiocb *req, s32 res, u32 cflags);
-bool io_req_post_cqe32(struct io_kiocb *req, struct io_uring_cqe src_cqe[2]);
+bool io_req_post_cqe32(struct io_kiocb *req, struct io_uring_cqe *src_cqe, void *data);
 void __io_commit_cqring_flush(struct io_ring_ctx *ctx);
 
 unsigned io_linked_nr(struct io_kiocb *req);
