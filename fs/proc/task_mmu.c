@@ -23,6 +23,7 @@
 #include <linux/minmax.h>
 #include <linux/overflow.h>
 #include <linux/buildid.h>
+#include <linux/compat64_fs.h>
 
 #include <asm/elf.h>
 #include <asm/tlb.h>
@@ -31,6 +32,10 @@
 
 #define SENTINEL_VMA_END	-1
 #define SENTINEL_VMA_GATE	-2
+
+#ifdef CONFIG_COMPAT64
+#define PROCMAP_QUERY_COMPAT _IOWR(PROCFS_IOCTL_MAGIC, 17, struct __c64_procmap_query)
+#endif
 
 #define SEQ_PUT_DEC(str, val) \
 		seq_put_decimal_ull_width(m, str, (val) << (PAGE_SHIFT-10), 8)
@@ -668,9 +673,9 @@ static int do_procmap_query(struct mm_struct *mm, void __user *uarg)
 	if (usize > PAGE_SIZE)
 		return -E2BIG;
 	/* argument struct should have at least query_flags and query_addr fields */
-	if (usize < offsetofend(struct procmap_query, query_addr))
+	if (usize < __c64_offsetofend(procmap_query, query_addr))
 		return -EINVAL;
-	err = copy_struct_from_user_with_ptr(&karg, sizeof(karg), uarg, usize);
+	err = __c64_copy_struct_from_user_with_ptr(procmap_query, &karg, uarg, usize);
 	if (err)
 		return err;
 
@@ -800,7 +805,13 @@ static int do_procmap_query(struct mm_struct *mm, void __user *uarg)
 					       build_id_buf, karg.build_id_size))
 		return -EFAULT;
 
-	if (copy_to_user_with_ptr(uarg, &karg, min_t(size_t, sizeof(karg), usize)))
+	if (unlikely(in_compat64_syscall())) {
+		__to_c64_procmap_query(&karg);
+		err = copy_to_user_no_ptr(uarg, &karg, min_t(size_t, sizeof(struct __c64_procmap_query), usize));
+	} else
+		err = copy_to_user_with_ptr(uarg, &karg, min_t(size_t, sizeof(karg), usize));
+
+	if (err)
 		return -EFAULT;
 
 	return 0;
@@ -821,6 +832,9 @@ static long procfs_procmap_ioctl(struct file *file, unsigned int cmd, user_uintp
 	struct proc_maps_private *priv = seq->private;
 
 	switch (cmd) {
+#ifdef CONFIG_COMPAT64
+	case PROCMAP_QUERY_COMPAT:
+#endif
 	case PROCMAP_QUERY:
 		/* priv->lock_ctx.mm is set during file open operation */
 		return do_procmap_query(priv->lock_ctx.mm, (void __user *)arg);
