@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0
 
 #include "linux/io_uring/query.h"
+#include "linux/io_uring/compat64_query.h"
+#include "linux/compat.h"
 
 #include "query.h"
 #include "io_uring.h"
@@ -54,14 +56,14 @@ static ssize_t io_query_scq(union io_query_data *data)
 }
 
 static int io_handle_query_entry(union io_query_data *data, void __user *uhdr,
-				 u64 *next_entry)
+				 __u64ptr *next_entry)
 {
 	struct io_uring_query_hdr hdr;
 	size_t usize, res_size = 0;
 	ssize_t ret = -EINVAL;
 	void __user *udata;
 
-	if (copy_from_user_with_ptr(&hdr, uhdr, sizeof(hdr)))
+	if (__c64_copy_from_user_with_ptr(io_uring_query_hdr, &hdr, uhdr))
 		return -EFAULT;
 	usize = hdr.size;
 	hdr.size = min(hdr.size, IO_MAX_QUERY_SIZE);
@@ -100,7 +102,7 @@ out:
 
 	if (copy_struct_to_user(udata, usize, data, hdr.size, NULL))
 		return -EFAULT;
-	if (copy_to_user_with_ptr(uhdr, &hdr, sizeof(hdr)))
+	if (__c64_copy_to_user_with_ptr_safe(io_uring_query_hdr, uhdr, &hdr))
 		return -EFAULT;
 	*next_entry = hdr.next_entry;
 	return 0;
@@ -118,7 +120,7 @@ int io_query(void __user *arg, unsigned nr_args)
 		return -EINVAL;
 
 	while (uhdr) {
-		u64 next_hdr;
+		__u64ptr next_hdr;
 
 		ret = io_handle_query_entry(&entry_buffer, uhdr, &next_hdr);
 		if (ret)
