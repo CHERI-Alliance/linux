@@ -79,7 +79,7 @@ static bool io_process_timestamp_skb(struct io_uring_cmd *cmd, struct sock *sk,
 	u32 tstype, tskey;
 	int ret;
 
-	BUILD_BUG_ON(sizeof(struct io_uring_cqe) != sizeof(struct io_timespec));
+	BUILD_BUG_ON(sizeof(struct __c64_io_uring_cqe) < sizeof(struct io_timespec));
 
 	ret = skb_get_tx_timestamp(skb, sk, &ts);
 	if (ret < 0)
@@ -95,10 +95,11 @@ static bool io_process_timestamp_skb(struct io_uring_cmd *cmd, struct sock *sk,
 	if (ret == SOF_TIMESTAMPING_TX_HARDWARE)
 		cqe->flags |= IORING_CQE_F_TSTAMP_HW;
 
+	memset(&cqe[1], 0, sizeof(cqe[1]));
 	iots = (struct io_timespec *)&cqe[1];
 	iots->tv_sec = ts.tv_sec;
 	iots->tv_nsec = ts.tv_nsec;
-	return io_uring_cmd_post_mshot_cqe32(cmd, issue_flags, cqe);
+	return io_uring_cmd_post_mshot_cqe32(cmd, issue_flags, cqe, cqe + 1);
 }
 
 static int io_uring_cmd_timestamp(struct socket *sock,
