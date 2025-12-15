@@ -18,7 +18,7 @@ bool io_uring_try_cancel_uring_cmd(struct io_ring_ctx *ctx,
 
 bool io_uring_cmd_post_mshot_cqe32(struct io_uring_cmd *cmd,
 				   unsigned int issue_flags,
-				   struct io_uring_cqe cqe[2]);
+				   struct io_uring_cqe *cqe, void *data);
 
 void io_cmd_cache_free(const void *entry);
 
