@@ -697,7 +697,7 @@ static struct io_overflow_cqe *io_alloc_ocqe(struct io_ring_ctx *ctx,
 static bool io_fill_nop_cqe(struct io_ring_ctx *ctx, unsigned int off)
 {
 	if (__io_cqring_events(ctx) < ctx->cq_entries) {
-		struct io_uring_cqe *cqe = &ctx->rings->cqes[off];
+		struct io_uring_cqe *cqe = __io_get_ith_cqe(ctx, off);
 
 		cqe->user_data = 0;
 		cqe->res = 0;
@@ -765,7 +765,7 @@ struct io_uring_cqe *__io_get_ith_cqe(struct io_ring_ctx *ctx, unsigned int i)
 }
 
 static bool io_fill_cqe_aux32(struct io_ring_ctx *ctx,
-			      struct io_uring_cqe src_cqe[2])
+			      struct io_uring_cqe *src_cqe, void *data)
 {
 	struct io_uring_cqe *cqe;
 
@@ -774,18 +774,19 @@ static bool io_fill_cqe_aux32(struct io_ring_ctx *ctx,
 	if (unlikely(!io_get_cqe(ctx, &cqe, true)))
 		return false;
 
+	/*
+	 * Cannot user __io_fill_cqe because we _never_ fill the big_cqe
+	 * data of the first cqe.
+	 */
 	if (io_in_compat64(ctx)) {
-		/* FIXCHERI: Implement this properly */
-		WARN_ONCE(1, "NOT IMPLEMENTED FOR COMPAT64\n");
-#ifdef NOTYET
-		/* Probably something like this: */
 		struct __c64_io_uring_cqe *compat = (void *)cqe;
-		__to_c64_io_uring_cqe_2(compat, src_sqe);
-		/* Expect that the caller converts the additional payload. */
-		memcpy(&compat[1], &src_sqe[1], sizeof(compat[1]));
-#endif
+		compat[0].user_data = __c_ua(src_cqe->user_data);
+		compat[0].res = src_cqe->res;
+		compat[0].flags = src_cqe->flags;
+		memcpy(&compat[1], data, sizeof(compat[1]));
 	} else {
-		memcpy(cqe, src_cqe, 2 * sizeof(*cqe));
+		memcpy(cqe, src_cqe, sizeof(*cqe));
+		memcpy(cqe + 1, data, sizeof(*cqe));
 	}
 	trace_io_uring_complete(ctx, NULL, cqe);
 	return true;
@@ -899,7 +900,7 @@ bool io_req_post_cqe(struct io_kiocb *req, s32 res, u32 cflags)
  * A helper for multishot requests posting additional CQEs.
  * Should only be used from a task_work including IO_URING_F_MULTISHOT.
  */
-bool io_req_post_cqe32(struct io_kiocb *req, struct io_uring_cqe cqe[2])
+bool io_req_post_cqe32(struct io_kiocb *req, struct io_uring_cqe *cqe, void *data)
 {
 	struct io_ring_ctx *ctx = req->ctx;
 	bool posted;
@@ -910,10 +911,10 @@ bool io_req_post_cqe32(struct io_kiocb *req, struct io_uring_cqe cqe[2])
 	cqe[0].user_data = req->cqe.user_data;
 	if (!ctx->lockless_cq) {
 		spin_lock(&ctx->completion_lock);
-		posted = io_fill_cqe_aux32(ctx, cqe);
+		posted = io_fill_cqe_aux32(ctx, cqe, data);
 		spin_unlock(&ctx->completion_lock);
 	} else {
-		posted = io_fill_cqe_aux32(ctx, cqe);
+		posted = io_fill_cqe_aux32(ctx, cqe, data);
 	}
 
 	ctx->submit_state.cq_flush = true;
