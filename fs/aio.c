@@ -31,6 +31,7 @@
 #include <linux/slab.h>
 #include <linux/timer.h>
 #include <linux/aio.h>
+#include <linux/compat64_aio_abi.h>
 #include <linux/highmem.h>
 #include <linux/workqueue.h>
 #include <linux/security.h>
@@ -2355,19 +2356,14 @@ SYSCALL_DEFINE3(io_cancel, aio_context_t, ctx_id, struct iocb __user *, iocb,
 	int ret = -EINVAL;
 	u32 key;
 
+	if (unlikely(__c64_get_user(iocb, key, iocb, aio_key)))
+		return -EFAULT;
+	if (unlikely(key != KIOCB_KEY))
+		return -EINVAL;
+
 	ctx = lookup_ioctx(ctx_id);
 	if (unlikely(!ctx))
 		return -EINVAL;
-
-	if (unlikely(get_user(key, aio_key_uptr(ctx, iocb)))) {
-		ret = -EFAULT;
-		goto out;
-	}
-
-	if (unlikely(key != KIOCB_KEY)) {
-		ret = -EINVAL;
-		goto out;
-	}
 
 	spin_lock_irq(&ctx->ctx_lock);
 	list_for_each_entry(kiocb, &ctx->active_reqs, ki_list) {
@@ -2388,7 +2384,6 @@ SYSCALL_DEFINE3(io_cancel, aio_context_t, ctx_id, struct iocb __user *, iocb,
 		ret = -EINPROGRESS;
 	}
 
-out:
 	percpu_ref_put(&ctx->users);
 
 	return ret;
