@@ -2328,7 +2328,6 @@ SYSCALL_DEFINE3(io_cancel, aio_context_t, ctx_id, struct iocb __user *, iocb,
 		ret = -EINPROGRESS;
 	}
 
-out:
 	percpu_ref_put(&ctx->users);
 
 	return ret;
