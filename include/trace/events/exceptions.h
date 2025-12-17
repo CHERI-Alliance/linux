@@ -22,7 +22,7 @@ DECLARE_EVENT_CLASS(exceptions,
 
 	TP_fast_assign(
 		__entry->address = address;
-		__entry->ip = instruction_pointer(regs);
+		__entry->ip = __c_ua(instruction_pointer(regs));
 		__entry->error_code = error_code;
 	),
 
