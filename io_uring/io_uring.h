@@ -481,7 +481,7 @@ static inline u32 ctx_cqe32_flags(struct io_ring_ctx *ctx)
 }
 
 static inline void io_req_set_res32(struct io_kiocb *req, s32 res, u32 cflags,
-				    __u64 extra1, __u64 extra2)
+				    __u64ptr extra1, __u64ptr extra2)
 {
 	req->cqe.res = res;
 	req->cqe.flags = cflags | ctx_cqe32_flags(req->ctx);
