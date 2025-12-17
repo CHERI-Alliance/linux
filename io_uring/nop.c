@@ -17,8 +17,8 @@ struct io_nop {
 	int             result;
 	int		fd;
 	unsigned int	flags;
-	__u64		extra1;
-	__u64		extra2;
+	__u64ptr	extra1;
+	__u64ptr	extra2;
 };
 
 #define NOP_FLAGS	(IORING_NOP_INJECT_RESULT | IORING_NOP_FIXED_FILE | \
@@ -48,7 +48,7 @@ int io_nop_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 
 		if (!(ctx->flags & (IORING_SETUP_CQE32|IORING_SETUP_CQE_MIXED)))
 			return -EINVAL;
-		nop->extra1 = READ_ONCE(sqe->off);
+		nop->extra1 = __c_fakeu(READ_ONCE(sqe->off));
 		nop->extra2 = READ_ONCE(sqe->addr);
 	}
 	return 0;
