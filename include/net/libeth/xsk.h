@@ -110,7 +110,7 @@ out:
  */
 static inline struct libeth_xdp_tx_desc
 libeth_xsk_tx_fill_buf(struct libeth_xdp_tx_frame frm, u32 i,
-		       const struct libeth_xdpsq *sq, u64 priv)
+		       const struct libeth_xdpsq *sq, uintptr_t priv)
 {
 	struct libeth_xdp_buff *xdp = frm.xsk;
 	struct libeth_xdp_tx_desc desc = {
@@ -190,13 +190,13 @@ static const struct xsk_tx_metadata_ops __libeth_xsktmo = {
 static __always_inline struct libeth_xdp_tx_desc
 __libeth_xsk_xmit_fill_buf_md(const struct xdp_desc *xdesc,
 			      const struct libeth_xdpsq *sq,
-			      u64 priv)
+			      uintptr_t priv)
 {
 	const struct xsk_tx_metadata_ops *tmo = libeth_xdp_priv_to_ptr(priv);
 	struct libeth_xdp_tx_desc desc;
 	struct xdp_desc_ctx ctx;
 
-	ctx = xsk_buff_raw_get_ctx(sq->pool, xdesc->addr);
+	ctx = xsk_buff_raw_get_ctx(sq->pool, __c_ua(xdesc->addr));
 	desc = (typeof(desc)){
 		.addr	= ctx.dma,
 		__libeth_xdp_tx_len(xdesc->len),
@@ -245,7 +245,7 @@ __libeth_xsk_xmit_fill_buf(const struct xdp_desc *xdesc,
  */
 static __always_inline struct libeth_xdp_tx_desc
 libeth_xsk_xmit_fill_buf(struct libeth_xdp_tx_frame frm, u32 i,
-			 const struct libeth_xdpsq *sq, u64 priv)
+			 const struct libeth_xdpsq *sq, uintptr_t priv)
 {
 	struct libeth_xdp_tx_desc desc;
 
@@ -286,7 +286,7 @@ libeth_xsk_xmit_do_bulk(struct xsk_buff_pool *pool, void *xdpsq, u32 budget,
 			const struct xsk_tx_metadata_ops *tmo,
 			u32 (*prep)(void *xdpsq, struct libeth_xdpsq *sq),
 			void (*xmit)(struct libeth_xdp_tx_desc desc, u32 i,
-				     const struct libeth_xdpsq *sq, u64 priv),
+				     const struct libeth_xdpsq *sq, uintptr_t priv),
 			void (*finalize)(void *xdpsq, bool sent, bool flush))
 {
 	const struct libeth_xdp_tx_frame *bulk;
