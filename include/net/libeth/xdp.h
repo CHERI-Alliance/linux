@@ -452,18 +452,18 @@ struct libeth_xdp_tx_desc {
 } __aligned_largest;
 
 /**
- * libeth_xdp_ptr_to_priv - convert pointer to a libeth_xdp u64 priv
+ * libeth_xdp_ptr_to_priv - convert pointer to a libeth_xdp uintptr_t priv
  * @ptr: pointer to convert
  *
  * The main sending function passes private data as the largest scalar, u64.
  * Use this helper when you want to pass a pointer there.
  */
-#define libeth_xdp_ptr_to_priv(ptr) ({					      \
-	typecheck_pointer(ptr);						      \
-	((u64)(uintptr_t)(ptr));					      \
+#define libeth_xdp_ptr_to_priv(ptr) ({				      \
+	typecheck_pointer(ptr);					      \
+	((uintptr_t)(ptr));					      \
 })
 /**
- * libeth_xdp_priv_to_ptr - convert libeth_xdp u64 priv to a pointer
+ * libeth_xdp_priv_to_ptr - convert libeth_xdp uintptr_t priv to a pointer
  * @priv: private data to convert
  *
  * The main sending function passes private data as the largest scalar, u64.
@@ -471,7 +471,7 @@ struct libeth_xdp_tx_desc {
  * it back to a pointer.
  */
 #define libeth_xdp_priv_to_ptr(priv) ({					      \
-	static_assert(__same_type(priv, u64));				      \
+	static_assert(__same_type(priv, uintptr_t));			      \
 	((const void *)(uintptr_t)(priv));				      \
 })
 
@@ -515,13 +515,13 @@ struct libeth_xdp_tx_desc {
  */
 static __always_inline __nocfi_generic u32
 libeth_xdp_tx_xmit_bulk(const struct libeth_xdp_tx_frame *bulk, void *xdpsq,
-			u32 n, bool unroll, u64 priv,
+			u32 n, bool unroll, uintptr_t priv,
 			u32 (*prep)(void *xdpsq, struct libeth_xdpsq *sq),
 			struct libeth_xdp_tx_desc
 			(*fill)(struct libeth_xdp_tx_frame frm, u32 i,
-				const struct libeth_xdpsq *sq, u64 priv),
+				const struct libeth_xdpsq *sq, uintptr_t priv),
 			void (*xmit)(struct libeth_xdp_tx_desc desc, u32 i,
-				     const struct libeth_xdpsq *sq, u64 priv))
+				     const struct libeth_xdpsq *sq, uintptr_t priv))
 {
 	struct libeth_xdpsq sq __uninitialized;
 	u32 this, batched, off = 0;
@@ -712,7 +712,7 @@ out:
  */
 static inline struct libeth_xdp_tx_desc
 libeth_xdp_tx_fill_buf(struct libeth_xdp_tx_frame frm, u32 i,
-		       const struct libeth_xdpsq *sq, u64 priv)
+		       const struct libeth_xdpsq *sq, uintptr_t priv)
 {
 	struct libeth_xdp_tx_desc desc;
 	struct skb_shared_info *sinfo;
@@ -772,10 +772,10 @@ __libeth_xdp_tx_flush_bulk(struct libeth_xdp_tx_bulk *bq, u32 flags,
 			   u32 (*prep)(void *xdpsq, struct libeth_xdpsq *sq),
 			   struct libeth_xdp_tx_desc
 			   (*fill)(struct libeth_xdp_tx_frame frm, u32 i,
-				   const struct libeth_xdpsq *sq, u64 priv),
+				   const struct libeth_xdpsq *sq, uintptr_t priv),
 			   void (*xmit)(struct libeth_xdp_tx_desc desc, u32 i,
 					const struct libeth_xdpsq *sq,
-					u64 priv))
+					uintptr_t priv))
 {
 	u32 sent, drops;
 	int err = 0;
@@ -985,7 +985,7 @@ out:
  */
 static inline struct libeth_xdp_tx_desc
 libeth_xdp_xmit_fill_buf(struct libeth_xdp_tx_frame frm, u32 i,
-			 const struct libeth_xdpsq *sq, u64 priv)
+			 const struct libeth_xdpsq *sq, uintptr_t priv)
 {
 	struct libeth_xdp_tx_desc desc;
 	struct libeth_sqe *sqe;
