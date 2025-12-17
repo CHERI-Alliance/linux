@@ -172,7 +172,7 @@ struct compat_iovec {
 	int __r;							\
 	if (unlikely(iscompat)) {					\
 		__r = 							\
-		copy_struct_from_user(dst, sizeof(struct __c64_##type), \
+		copy_struct_from_user_no_ptr(dst, sizeof(struct __c64_##type), \
 				      src, usize);			\
 		if (likely(__r == 0))					\
 			__from_c64_##type(dst);				\
