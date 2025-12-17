@@ -731,11 +731,10 @@ SYSCALL_DEFINE6(setxattrat, int, dfd, const char __user *, pathname, unsigned in
 	if (usize > PAGE_SIZE)
 		return -E2BIG;
 
-	error = copy_struct_from_user_with_ptr(&args, sizeof(args), uargs, usize);
+	error = __c64_copy_struct_from_user_with_ptr(xattr_args, &args,
+						     uargs, usize);
 	if (error)
 		return error;
-	if (unlikely(in_compat64_syscall()))
-		__from_c64_xattr_args(&args);
 
 	return path_setxattrat(dfd, pathname, at_flags, name,
 			       u64_to_user_ptr(args.value), args.size,
@@ -875,11 +874,10 @@ SYSCALL_DEFINE6(getxattrat, int, dfd, const char __user *, pathname, unsigned in
 	if (usize > PAGE_SIZE)
 		return -E2BIG;
 
-	error = copy_struct_from_user(&args, sizeof(args), uargs, usize);
+	error = __c64_copy_struct_from_user_with_ptr(xattr_args, &args,
+						     uargs, usize);
 	if (error)
 		return error;
-	if (unlikely(in_compat64_syscall()))
-		__from_c64_xattr_args(&args);
 
 	if (args.flags != 0)
 		return -EINVAL;
