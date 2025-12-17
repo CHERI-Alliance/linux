@@ -906,11 +906,20 @@ static int io_uring_register_blind(unsigned int opcode, void __user *arg,
 	switch (opcode) {
 	case IORING_REGISTER_SEND_MSG_RING: {
 		struct io_uring_sqe sqe;
+		struct __c64_io_uring_sqe csqe;
+		int ret;
+		bool c64 = in_compat64_syscall();
 
 		if (!arg || nr_args != 1)
 			return -EINVAL;
-		if (copy_from_user_with_ptr(&sqe, arg, sizeof(sqe)))
+
+		ret = likely(!c64) ? copy_from_user_with_ptr(&sqe, arg, sizeof(sqe)) :
+				     copy_from_user_no_ptr(&csqe, arg, sizeof(csqe));
+		if (ret)
 			return -EFAULT;
+		if (unlikely(c64))
+			convert_compat64_io_uring_sqe(NULL, &sqe, &csqe);
+
 		/* no flags supported */
 		if (sqe.flags)
 			return -EINVAL;
