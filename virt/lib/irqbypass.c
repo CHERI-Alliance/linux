@@ -104,15 +104,15 @@ int irq_bypass_register_producer(struct irq_bypass_producer *producer,
 
 	guard(mutex)(&lock);
 
-	ret = xa_insert(&producers, index, producer, GFP_KERNEL);
+	ret = xa_insert(&producers, __c_ua(index), producer, GFP_KERNEL);
 	if (ret)
 		return ret;
 
-	consumer = xa_load(&consumers, index);
+	consumer = xa_load(&consumers, __c_ua(index));
 	if (consumer) {
 		ret = __connect(producer, consumer);
 		if (ret) {
-			WARN_ON_ONCE(xa_erase(&producers, index) != producer);
+			WARN_ON_ONCE(xa_erase(&producers, __c_ua(index)) != producer);
 			return ret;
 		}
 	}
@@ -142,7 +142,7 @@ void irq_bypass_unregister_producer(struct irq_bypass_producer *producer)
 	if (producer->consumer)
 		__disconnect(producer, producer->consumer);
 
-	WARN_ON_ONCE(xa_erase(&producers, index) != producer);
+	WARN_ON_ONCE(xa_erase(&producers, __c_ua(index)) != producer);
 	producer->eventfd = NULL;
 }
 EXPORT_SYMBOL_GPL(irq_bypass_unregister_producer);
@@ -170,15 +170,15 @@ int irq_bypass_register_consumer(struct irq_bypass_consumer *consumer,
 
 	guard(mutex)(&lock);
 
-	ret = xa_insert(&consumers, index, consumer, GFP_KERNEL);
+	ret = xa_insert(&consumers, __c_ua(index), consumer, GFP_KERNEL);
 	if (ret)
 		return ret;
 
-	producer = xa_load(&producers, index);
+	producer = xa_load(&producers, __c_ua(index));
 	if (producer) {
 		ret = __connect(producer, consumer);
 		if (ret) {
-			WARN_ON_ONCE(xa_erase(&consumers, index) != consumer);
+			WARN_ON_ONCE(xa_erase(&consumers, __c_ua(index)) != consumer);
 			return ret;
 		}
 	}
@@ -208,7 +208,7 @@ void irq_bypass_unregister_consumer(struct irq_bypass_consumer *consumer)
 	if (consumer->producer)
 		__disconnect(consumer->producer, consumer);
 
-	WARN_ON_ONCE(xa_erase(&consumers, index) != consumer);
+	WARN_ON_ONCE(xa_erase(&consumers, __c_ua(index)) != consumer);
 	consumer->eventfd = NULL;
 }
 EXPORT_SYMBOL_GPL(irq_bypass_unregister_consumer);
