@@ -263,7 +263,7 @@ static inline void convert_compat64_io_uring_sqe(struct io_ring_ctx *ctx,
 				  offsetof(struct io_uring_sqe, cmd);
 		compat_cmd_size = sizeof(struct __c64_io_uring_sqe) -
 				  offsetof(struct __c64_io_uring_sqe, cmd);
-		if (ctx->flags & IORING_SETUP_SQE128) {
+		if (ctx && ctx->flags & IORING_SETUP_SQE128) {
 			native_cmd_size += sizeof(struct io_uring_sqe);
 			compat_cmd_size += sizeof(struct __c64_io_uring_sqe);
 		}
