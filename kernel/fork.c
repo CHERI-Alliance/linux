@@ -2840,7 +2840,7 @@ noinline static int copy_clone_args_from_user(struct kernel_clone_args *kargs,
 
 #ifdef CONFIG_COMPAT64
 	if (args.compat_mode)
-		err = copy_struct_from_user(&args.__compat_args,
+		err = copy_struct_from_user_no_ptr(&args.__compat_args,
 					    sizeof(args.__compat_args),
 					    uargs, usize);
 	else
