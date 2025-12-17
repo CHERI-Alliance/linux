@@ -29,7 +29,7 @@ bool idpf_xdp_tx_flush_bulk(struct libeth_xdp_tx_bulk *bq, u32 flags);
  * @priv: &xsk_tx_metadata_ops on XSk xmit or %NULL
  */
 static inline void idpf_xdp_tx_xmit(struct libeth_xdp_tx_desc desc, u32 i,
-				    const struct libeth_xdpsq *sq, u64 priv)
+				    const struct libeth_xdpsq *sq, uintptr_t priv)
 {
 	struct idpf_flex_tx_desc *tx_desc = sq->descs;
 	u32 cmd;
