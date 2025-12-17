@@ -2214,6 +2214,8 @@ config ARM64_GCS
 	default y
 	select ARCH_HAS_USER_SHADOW_STACK
 	select ARCH_USES_HIGH_VMA_FLAGS
+	# FIXCHERI: Crashes the morello compiler
+	depends on !ARM64_MORELLO
 	help
 	  Guarded Control Stack (GCS) provides support for a separate
 	  stack with restricted access which contains only return
