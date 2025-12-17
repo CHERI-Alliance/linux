@@ -573,6 +573,13 @@ copy_struct_from_user(void *dst, size_t ksize, const void __user *src,
 	return ret ?: (copy_from_user(dst, src, size) ? -EFAULT : 0);
 }
 
+static __always_inline __must_check int
+copy_struct_from_user_no_ptr(void *dst, size_t ksize, const void __user *src,
+		      size_t usize)
+{
+	return copy_struct_from_user(dst, ksize, src, usize);
+}
+
 /**
  * copy_struct_from_user_with_ptr: copy a struct from userspace
  *
