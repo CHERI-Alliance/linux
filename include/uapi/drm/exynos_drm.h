@@ -121,8 +121,8 @@ struct drm_exynos_g2d_userptr {
 };
 
 struct drm_exynos_g2d_set_cmdlist {
-	__u64					cmd;
-	__u64					cmd_buf;
+	__u64ptr				cmd;
+	__u64ptr				cmd_buf;
 	__u32					cmd_nr;
 	__u32					cmd_buf_nr;
 
@@ -147,7 +147,7 @@ struct drm_exynos_g2d_exec {
 struct drm_exynos_ioctl_ipp_get_res {
 	__u32 count_ipps;
 	__u32 reserved;
-	__u64 ipp_id_ptr;
+	__u64ptr ipp_id_ptr;
 };
 
 enum drm_exynos_ipp_format_type {
@@ -183,7 +183,7 @@ struct drm_exynos_ioctl_ipp_get_caps {
 	__u32 capabilities;
 	__u32 reserved;
 	__u32 formats_count;
-	__u64 formats_ptr;
+	__u64ptr formats_ptr;
 };
 
 enum drm_exynos_ipp_limit_type {
@@ -242,7 +242,7 @@ struct drm_exynos_ioctl_ipp_get_limits {
 	__u64 modifier;
 	__u32 type;
 	__u32 limits_count;
-	__u64 limits_ptr;
+	__u64ptr limits_ptr;
 };
 
 enum drm_exynos_ipp_task_id {
@@ -344,7 +344,7 @@ struct drm_exynos_ioctl_ipp_commit {
 	__u32 flags;
 	__u32 reserved;
 	__u32 params_size;
-	__u64 params_ptr;
+	__u64ptr params_ptr;
 	__u64 user_data;
 };
 

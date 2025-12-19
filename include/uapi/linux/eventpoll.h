@@ -82,7 +82,7 @@
 
 struct epoll_event {
 	__poll_t events;
-	__u64 data;
+	__u64ptr data;
 } EPOLL_PACKED;
 
 struct epoll_params {

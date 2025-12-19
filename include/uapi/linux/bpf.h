@@ -1551,28 +1551,28 @@ union bpf_attr {
 
 		/* Hash of the program that has exclusive access to the map.
 		 */
-		__aligned_u64 excl_prog_hash;
+		__aligned_u64ptr excl_prog_hash;
 		/* Size of the passed excl_prog_hash. */
 		__u32 excl_prog_hash_size;
 	};
 
 	struct { /* anonymous struct used by BPF_MAP_*_ELEM and BPF_MAP_FREEZE commands */
 		__u32		map_fd;
-		__aligned_u64	key;
+		__aligned_u64ptr key;
 		union {
-			__aligned_u64 value;
-			__aligned_u64 next_key;
+			__aligned_u64ptr value;
+			__aligned_u64ptr next_key;
 		};
 		__u64		flags;
 	};
 
 	struct { /* struct used by BPF_MAP_*_BATCH commands */
-		__aligned_u64	in_batch;	/* start batch,
-						 * NULL to start from beginning
-						 */
-		__aligned_u64	out_batch;	/* output: next start batch */
-		__aligned_u64	keys;
-		__aligned_u64	values;
+		/* start batch, NULL to start from beginning */
+		__aligned_u64ptr in_batch;
+		/* output: next start batch */
+		__aligned_u64ptr out_batch;
+		__aligned_u64ptr keys;
+		__aligned_u64ptr values;
 		__u32		count;		/* input/output:
 						 * input: # of key/value
 						 * elements
@@ -1586,11 +1586,11 @@ union bpf_attr {
 	struct { /* anonymous struct used by BPF_PROG_LOAD command */
 		__u32		prog_type;	/* one of enum bpf_prog_type */
 		__u32		insn_cnt;
-		__aligned_u64	insns;
-		__aligned_u64	license;
+		__aligned_u64ptr	insns;
+		__aligned_u64ptr	license;
 		__u32		log_level;	/* verbosity level of verifier */
 		__u32		log_size;	/* size of user buffer */
-		__aligned_u64	log_buf;	/* user supplied buffer */
+		__aligned_u64ptr	log_buf;	/* user supplied buffer */
 		__u32		kern_version;	/* not used */
 		__u32		prog_flags;
 		char		prog_name[BPF_OBJ_NAME_LEN];
@@ -1602,10 +1602,10 @@ union bpf_attr {
 		__u32		expected_attach_type;
 		__u32		prog_btf_fd;	/* fd pointing to BTF type data */
 		__u32		func_info_rec_size;	/* userspace bpf_func_info size */
-		__aligned_u64	func_info;	/* func info */
+		__aligned_u64ptr	func_info;	/* func info */
 		__u32		func_info_cnt;	/* number of bpf_func_info records */
 		__u32		line_info_rec_size;	/* userspace bpf_line_info size */
-		__aligned_u64	line_info;	/* line info */
+		__aligned_u64ptr	line_info;	/* line info */
 		__u32		line_info_cnt;	/* number of bpf_line_info records */
 		__u32		attach_btf_id;	/* in-kernel BTF type id to attach to */
 		union {
@@ -1615,8 +1615,8 @@ union bpf_attr {
 			__u32		attach_btf_obj_fd;
 		};
 		__u32		core_relo_cnt;	/* number of bpf_core_relo */
-		__aligned_u64	fd_array;	/* array of FDs */
-		__aligned_u64	core_relos;
+		__aligned_u64ptr	fd_array;	/* array of FDs */
+		__aligned_u64ptr	core_relos;
 		__u32		core_relo_rec_size; /* sizeof(struct bpf_core_relo) */
 		/* output: actual total log contents size (including termintaing zero).
 		 * It could be both larger than original log_size (if log was
@@ -1640,7 +1640,7 @@ union bpf_attr {
 		/* Pointer to a buffer containing the signature of the BPF
 		 * program.
 		 */
-		__aligned_u64   signature;
+		__aligned_u64ptr signature;
 		/* Size of the signature buffer in bytes. */
 		__u32 		signature_size;
 		/* ID of the kernel keyring to be used for signature
@@ -1650,7 +1650,7 @@ union bpf_attr {
 	};
 
 	struct { /* anonymous struct used by BPF_OBJ_* commands */
-		__aligned_u64	pathname;
+		__aligned_u64ptr pathname;
 		__u32		bpf_fd;
 		__u32		file_flags;
 		/* Same as dirfd in openat() syscall; see openat(2)
@@ -1686,8 +1686,8 @@ union bpf_attr {
 						 *   returns ENOSPC if data_out
 						 *   is too small.
 						 */
-		__aligned_u64	data_in;
-		__aligned_u64	data_out;
+		__aligned_u64ptr data_in;
+		__aligned_u64ptr data_out;
 		__u32		repeat;
 		__u32		duration;
 		__u32		ctx_size_in;	/* input: len of ctx_in */
@@ -1695,8 +1695,8 @@ union bpf_attr {
 						 *   returns ENOSPC if ctx_out
 						 *   is too small.
 						 */
-		__aligned_u64	ctx_in;
-		__aligned_u64	ctx_out;
+		__aligned_u64ptr ctx_in;
+		__aligned_u64ptr ctx_out;
 		__u32		flags;
 		__u32		cpu;
 		__u32		batch_size;
@@ -1718,7 +1718,7 @@ union bpf_attr {
 	struct { /* anonymous struct used by BPF_OBJ_GET_INFO_BY_FD */
 		__u32		bpf_fd;
 		__u32		info_len;
-		__aligned_u64	info;
+		__aligned_u64ptr info;
 	} info;
 
 	struct { /* anonymous struct used by BPF_PROG_QUERY command */
@@ -1729,7 +1729,7 @@ union bpf_attr {
 		__u32		attach_type;
 		__u32		query_flags;
 		__u32		attach_flags;
-		__aligned_u64	prog_ids;
+		__aligned_u64ptr prog_ids;
 		union {
 			__u32	prog_cnt;
 			__u32	count;
@@ -1738,22 +1738,22 @@ union bpf_attr {
 		/* output: per-program attach_flags.
 		 * not allowed to be set during effective query.
 		 */
-		__aligned_u64	prog_attach_flags;
-		__aligned_u64	link_ids;
-		__aligned_u64	link_attach_flags;
+		__aligned_u64ptr prog_attach_flags;
+		__aligned_u64ptr link_ids;
+		__aligned_u64ptr link_attach_flags;
 		__u64		revision;
 	} query;
 
 	struct { /* anonymous struct used by BPF_RAW_TRACEPOINT_OPEN command */
-		__u64		name;
+		__aligned_u64ptr name;
 		__u32		prog_fd;
 		__u32		:32;
 		__aligned_u64	cookie;
 	} raw_tracepoint;
 
 	struct { /* anonymous struct for BPF_BTF_LOAD */
-		__aligned_u64	btf;
-		__aligned_u64	btf_log_buf;
+		__aligned_u64ptr btf;
+		__aligned_u64ptr btf_log_buf;
 		__u32		btf_size;
 		__u32		btf_log_size;
 		__u32		btf_log_level;
@@ -1774,7 +1774,7 @@ union bpf_attr {
 		__u32		fd;		/* input: fd */
 		__u32		flags;		/* input: flags */
 		__u32		buf_len;	/* input/output: buf len */
-		__aligned_u64	buf;		/* input/output:
+		__aligned_u64ptr buf;	/* input/output:
 						 *   tp_name for tracepoint
 						 *   symbol for kprobe
 						 *   filename for uprobe
@@ -1799,8 +1799,10 @@ union bpf_attr {
 		union {
 			__u32	target_btf_id;	/* btf_id of target to attach to */
 			struct {
-				__aligned_u64	iter_info;	/* extra bpf_iter_link_info */
-				__u32		iter_info_len;	/* iter_info length */
+				/* extra bpf_iter_link_info */
+				__aligned_u64ptr	iter_info;
+				/* iter_info length */
+				__u32				iter_info_len;
 			};
 			struct {
 				/* black box user-provided value passed through
@@ -1812,9 +1814,9 @@ union bpf_attr {
 			struct {
 				__u32		flags;
 				__u32		cnt;
-				__aligned_u64	syms;
-				__aligned_u64	addrs;
-				__aligned_u64	cookies;
+				__aligned_u64ptr	syms;
+				__aligned_u64ptr	addrs;
+				__aligned_u64ptr	cookies;
 			} kprobe_multi;
 			struct {
 				/* this is overlaid with the target_btf_id above. */
@@ -1839,10 +1841,10 @@ union bpf_attr {
 				__u64		expected_revision;
 			} tcx;
 			struct {
-				__aligned_u64	path;
-				__aligned_u64	offsets;
-				__aligned_u64	ref_ctr_offsets;
-				__aligned_u64	cookies;
+				__aligned_u64ptr	path;
+				__aligned_u64ptr	offsets;
+				__aligned_u64ptr	ref_ctr_offsets;
+				__aligned_u64ptr	cookies;
 				__u32		cnt;
 				__u32		flags;
 				__u32		pid;
@@ -1910,7 +1912,7 @@ union bpf_attr {
 	} token_create;
 
 	struct {
-		__aligned_u64	stream_buf;
+		__aligned_u64ptr	stream_buf;
 		__u32		stream_buf_len;
 		__u32		stream_id;
 		__u32		prog_fd;
@@ -6662,12 +6664,12 @@ struct bpf_prog_info {
 	__u8  tag[BPF_TAG_SIZE];
 	__u32 jited_prog_len;
 	__u32 xlated_prog_len;
-	__aligned_u64 jited_prog_insns;
-	__aligned_u64 xlated_prog_insns;
+	__aligned_u64ptr jited_prog_insns;
+	__aligned_u64ptr xlated_prog_insns;
 	__u64 load_time;	/* ns since boottime */
 	__u32 created_by_uid;
 	__u32 nr_map_ids;
-	__aligned_u64 map_ids;
+	__aligned_u64ptr map_ids;
 	char name[BPF_OBJ_NAME_LEN];
 	__u32 ifindex;
 	__u32 gpl_compatible:1;
@@ -6676,20 +6678,20 @@ struct bpf_prog_info {
 	__u64 netns_ino;
 	__u32 nr_jited_ksyms;
 	__u32 nr_jited_func_lens;
-	__aligned_u64 jited_ksyms;
-	__aligned_u64 jited_func_lens;
+	__aligned_u64ptr jited_ksyms;
+	__aligned_u64ptr jited_func_lens;
 	__u32 btf_id;
 	__u32 func_info_rec_size;
-	__aligned_u64 func_info;
+	__aligned_u64ptr func_info;
 	__u32 nr_func_info;
 	__u32 nr_line_info;
-	__aligned_u64 line_info;
-	__aligned_u64 jited_line_info;
+	__aligned_u64ptr line_info;
+	__aligned_u64ptr jited_line_info;
 	__u32 nr_jited_line_info;
 	__u32 line_info_rec_size;
 	__u32 jited_line_info_rec_size;
 	__u32 nr_prog_tags;
-	__aligned_u64 prog_tags;
+	__aligned_u64ptr prog_tags;
 	__u64 run_time_ns;
 	__u64 run_cnt;
 	__u64 recursion_misses;
@@ -6720,10 +6722,10 @@ struct bpf_map_info {
 } __attribute__((aligned(8)));
 
 struct bpf_btf_info {
-	__aligned_u64 btf;
+	__aligned_u64ptr btf;
 	__u32 btf_size;
 	__u32 id;
-	__aligned_u64 name;
+	__aligned_u64ptr name;
 	__u32 name_len;
 	__u32 kernel_btf;
 } __attribute__((aligned(8)));
@@ -6734,7 +6736,7 @@ struct bpf_link_info {
 	__u32 prog_id;
 	union {
 		struct {
-			__aligned_u64 tp_name; /* in/out: tp_name buffer ptr */
+			__aligned_u64ptr tp_name; /* in/out: tp_name buffer ptr */
 			__u32 tp_name_len;     /* in/out: tp_name buffer len */
 			__u32 :32;
 			__u64 cookie;
@@ -6751,7 +6753,7 @@ struct bpf_link_info {
 			__u32 attach_type;
 		} cgroup;
 		struct {
-			__aligned_u64 target_name; /* in/out: target_name buffer ptr */
+			__aligned_u64ptr target_name; /* in/out: target_name buffer ptr */
 			__u32 target_name_len;	   /* in/out: target_name buffer len */
 
 			/* If the iter specific field is 32 bits, it can be put
@@ -6791,11 +6793,11 @@ struct bpf_link_info {
 			__u32 flags;
 		} netfilter;
 		struct {
-			__aligned_u64 addrs;
+			__aligned_u64ptr addrs;
 			__u32 count; /* in/out: kprobe_multi function count */
 			__u32 flags;
 			__u64 missed;
-			__aligned_u64 cookies;
+			__aligned_u64ptr cookies;
 		} kprobe_multi;
 		struct {
 			__aligned_u64 path;
@@ -6812,14 +6814,14 @@ struct bpf_link_info {
 			__u32 :32;
 			union {
 				struct {
-					__aligned_u64 file_name; /* in/out */
+					__aligned_u64ptr file_name; /* in/out */
 					__u32 name_len;
 					__u32 offset; /* offset from file_name */
 					__u64 cookie;
 					__u64 ref_ctr_offset;
 				} uprobe; /* BPF_PERF_EVENT_UPROBE, BPF_PERF_EVENT_URETPROBE */
 				struct {
-					__aligned_u64 func_name; /* in/out */
+					__aligned_u64ptr func_name; /* in/out */
 					__u32 name_len;
 					__u32 offset; /* offset from func_name */
 					__u64 addr;
@@ -6827,7 +6829,7 @@ struct bpf_link_info {
 					__u64 cookie;
 				} kprobe; /* BPF_PERF_EVENT_KPROBE, BPF_PERF_EVENT_KRETPROBE */
 				struct {
-					__aligned_u64 tp_name;   /* in/out */
+					__aligned_u64ptr tp_name;   /* in/out */
 					__u32 name_len;
 					__u32 :32;
 					__u64 cookie;

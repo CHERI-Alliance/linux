@@ -72,7 +72,7 @@ struct io_event {
 
 struct iocb {
 	/* these are internal to the kernel/libc. */
-	__u64	aio_data;	/* data to be returned in event's data */
+	__u64ptr	aio_data;	/* data to be returned in event's data */
 
 #if defined(__BYTE_ORDER) ? __BYTE_ORDER == __LITTLE_ENDIAN : defined(__LITTLE_ENDIAN)
 	__u32	aio_key;	/* the kernel sets aio_key to the req # */
@@ -89,7 +89,7 @@ struct iocb {
 	__s16	aio_reqprio;
 	__u32	aio_fildes;
 
-	__u64	aio_buf;
+	__u64ptr	aio_buf;
 	__u64	aio_nbytes;
 	__s64	aio_offset;
 

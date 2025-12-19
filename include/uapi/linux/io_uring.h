@@ -34,14 +34,14 @@ struct io_uring_sqe {
 	__s32	fd;		/* file descriptor to do IO on */
 	union {
 		__u64	off;	/* offset into file */
-		__u64	addr2;
+		__u64ptr	addr2;
 		struct {
 			__u32	cmd_op;
 			__u32	__pad1;
 		};
 	};
 	union {
-		__u64	addr;	/* pointer to buffer or iovecs */
+		__u64ptr	addr;	/* pointer to buffer or iovecs */
 		__u64	splice_off_in;
 		struct {
 			__u32	level;
@@ -75,7 +75,7 @@ struct io_uring_sqe {
 		__u32		nop_flags;
 		__u32		pipe_flags;
 	};
-	__u64	user_data;	/* data to be passed back at completion time */
+	__u64ptr	user_data;	/* data to be passed back at completion time */
 	/* pack this to avoid bogus arm OABI complaints */
 	union {
 		/* index into fixed buffers, if used */
@@ -124,7 +124,7 @@ struct io_uring_attr_pi {
 		__u16	flags;
 		__u16	app_tag;
 		__u32	len;
-		__u64	addr;
+		__u64ptr	addr;
 		__u64	seed;
 		__u64	rsvd;
 };
@@ -560,7 +560,7 @@ struct io_sqring_offsets {
 	__u32 dropped;
 	__u32 array;
 	__u32 resv1;
-	__u64 user_addr;
+	__u64ptr user_addr;
 };
 
 /*
@@ -579,7 +579,7 @@ struct io_cqring_offsets {
 	__u32 cqes;
 	__u32 flags;
 	__u32 resv1;
-	__u64 user_addr;
+	__u64ptr user_addr;
 };
 
 /*
@@ -733,7 +733,7 @@ enum io_wq_type {
 struct io_uring_files_update {
 	__u32 offset;
 	__u32 resv;
-	__aligned_u64 /* __s32 * */ fds;
+	__aligned_u64ptr /* __s32 * */ fds;
 };
 
 enum {
@@ -742,7 +742,7 @@ enum {
 };
 
 struct io_uring_region_desc {
-	__u64 user_addr;
+	__u64ptr user_addr;
 	__u64 size;
 	__u32 flags;
 	__u32 id;
@@ -756,7 +756,7 @@ enum {
 };
 
 struct io_uring_mem_region_reg {
-	__u64 region_uptr; /* struct io_uring_region_desc * */
+	__u64ptr region_uptr; /* struct io_uring_region_desc * */
 	__u64 flags;
 	__u64 __resv[2];
 };
@@ -771,21 +771,21 @@ struct io_uring_rsrc_register {
 	__u32 nr;
 	__u32 flags;
 	__u64 resv2;
-	__aligned_u64 data;
-	__aligned_u64 tags;
+	__aligned_u64ptr data;
+	__aligned_u64ptr tags;
 };
 
 struct io_uring_rsrc_update {
 	__u32 offset;
 	__u32 resv;
-	__aligned_u64 data;
+	__aligned_u64ptr data;
 };
 
 struct io_uring_rsrc_update2 {
 	__u32 offset;
 	__u32 resv;
-	__aligned_u64 data;
-	__aligned_u64 tags;
+	__aligned_u64ptr data;
+	__aligned_u64ptr tags;
 	__u32 nr;
 	__u32 resv2;
 };
@@ -848,7 +848,7 @@ struct io_uring_clone_buffers {
 };
 
 struct io_uring_buf {
-	__u64	addr;
+	__u64ptr	addr;
 	__u32	len;
 	__u16	bid;
 	__u16	resv;
@@ -894,7 +894,7 @@ enum io_uring_register_pbuf_ring_flags {
 
 /* argument for IORING_(UN)REGISTER_PBUF_RING */
 struct io_uring_buf_reg {
-	__u64	ring_addr;
+	__u64ptr	ring_addr;
 	__u32	ring_entries;
 	__u16	bgid;
 	__u16	flags;
@@ -987,17 +987,17 @@ struct io_uring_reg_wait {
  * Argument for io_uring_enter(2) with IORING_GETEVENTS | IORING_ENTER_EXT_ARG
  */
 struct io_uring_getevents_arg {
-	__u64	sigmask;
+	__u64ptr	sigmask;
 	__u32	sigmask_sz;
 	__u32	min_wait_usec;
-	__u64	ts;
+	__u64ptr	ts;
 };
 
 /*
  * Argument for IORING_REGISTER_SYNC_CANCEL
  */
 struct io_uring_sync_cancel_reg {
-	__u64				addr;
+	__u64ptr			addr;
 	__s32				fd;
 	__u32				flags;
 	struct __kernel_timespec	timeout;
@@ -1079,7 +1079,7 @@ enum io_uring_zcrx_area_flags {
 };
 
 struct io_uring_zcrx_area_reg {
-	__u64	addr;
+	__u64ptr	addr;
 	__u64	len;
 	__u64	rq_area_token;
 	__u32	flags;
@@ -1108,8 +1108,8 @@ struct io_uring_zcrx_ifq_reg {
 	__u32	rq_entries;
 	__u32	flags;
 
-	__u64	area_ptr; /* pointer to struct io_uring_zcrx_area_reg */
-	__u64	region_ptr; /* struct io_uring_region_desc * */
+	__u64ptr	area_ptr; /* pointer to struct io_uring_zcrx_area_reg */
+	__u64ptr	region_ptr; /* struct io_uring_region_desc * */
 
 	struct io_uring_zcrx_offsets offsets;
 	__u32	zcrx_id;

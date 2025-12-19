@@ -934,7 +934,7 @@ struct vfio_device_bind_iommufd {
 #define VFIO_DEVICE_BIND_FLAG_TOKEN (1 << 0)
 	__s32		iommufd;
 	__u32		out_devid;
-	__aligned_u64	token_uuid_ptr;
+	__aligned_u64ptr	token_uuid_ptr;
 };
 
 #define VFIO_DEVICE_BIND_IOMMUFD	_IO(VFIO_TYPE, VFIO_BASE + 18)
@@ -1398,7 +1398,7 @@ struct vfio_device_feature_dma_logging_control {
 	__aligned_u64 page_size;
 	__u32 num_ranges;
 	__u32 __reserved;
-	__aligned_u64 ranges;
+	__aligned_u64ptr ranges;
 };
 
 struct vfio_device_feature_dma_logging_range {
@@ -1444,7 +1444,7 @@ struct vfio_device_feature_dma_logging_report {
 	__aligned_u64 iova;
 	__aligned_u64 length;
 	__aligned_u64 page_size;
-	__aligned_u64 bitmap;
+	__aligned_u64ptr bitmap;
 };
 
 #define VFIO_DEVICE_FEATURE_DMA_LOGGING_REPORT 8
@@ -1612,7 +1612,7 @@ struct vfio_iommu_type1_dma_map {
 #define VFIO_DMA_MAP_FLAG_READ (1 << 0)		/* readable from device */
 #define VFIO_DMA_MAP_FLAG_WRITE (1 << 1)	/* writable from device */
 #define VFIO_DMA_MAP_FLAG_VADDR (1 << 2)
-	__u64	vaddr;				/* Process virtual address */
+	__u64ptr	vaddr;			/* Process virtual address */
 	__u64	iova;				/* IO virtual address */
 	__u64	size;				/* Size of mapping (bytes) */
 };

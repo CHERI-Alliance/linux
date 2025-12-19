@@ -105,7 +105,7 @@ struct i915_user_extension {
 	 *
 	 * Pointer to the next struct i915_user_extension, or zero if the end.
 	 */
-	__u64 next_extension;
+	__u64ptr next_extension;
 	/**
 	 * @name: Name of the extension.
 	 *
@@ -1375,7 +1375,7 @@ struct drm_i915_gem_execbuffer_ext_timeline_fences {
 	 * timeline drm_syncobj is invalid as it turns a drm_syncobj into a
 	 * binary one.
 	 */
-	__u64 values_ptr;
+	__u64ptr values_ptr;
 };
 
 /**

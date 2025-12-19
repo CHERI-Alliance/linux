@@ -494,7 +494,7 @@ struct pm_scan_arg {
 	__u64 start;
 	__u64 end;
 	__u64 walk_end;
-	__u64 vec;
+	__u64ptr vec;
 	__u64 vec_len;
 	__u64 max_pages;
 	__u64 category_inverted;
@@ -646,7 +646,7 @@ struct procmap_query {
 	 *
 	 * Should be set to zero if VMA name should not be returned.
 	 */
-	__u64 vma_name_addr;		/* in */
+	__u64ptr vma_name_addr;		/* in */
 	/*
 	 * User-supplied address of a buffer of at least build_id_size bytes
 	 * for kernel to fill with matched VMA's ELF build ID, if available
@@ -654,7 +654,7 @@ struct procmap_query {
 	 *
 	 * Should be set to zero if build ID should not be returned.
 	 */
-	__u64 build_id_addr;		/* in */
+	__u64ptr build_id_addr;		/* in */
 };
 
 #endif /* _UAPI_LINUX_FS_H */

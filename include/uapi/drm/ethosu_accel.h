@@ -106,7 +106,7 @@ struct drm_ethosu_dev_query {
 	 * actual structure size is returned. If not NULL, it must point to
 	 * a location that's large enough to hold size bytes.
 	 */
-	__u64 pointer;
+	__u64ptr pointer;
 };
 
 /**
@@ -180,7 +180,7 @@ struct drm_ethosu_cmdstream_bo_create {
 	__u32 flags;
 
 	/* Pointer to the data. */
-	__u64 data;
+	__u64ptr data;
 
 	/** Returned GEM handle for the BO. */
 	__u32 handle;
@@ -215,7 +215,7 @@ struct drm_ethosu_job {
  */
 struct drm_ethosu_submit {
 	/** Input: Pointer to an array of struct drm_ethosu_job. */
-	__u64 jobs;
+	__u64ptr jobs;
 
 	/** Input: Number of jobs passed in. */
 	__u32 job_count;

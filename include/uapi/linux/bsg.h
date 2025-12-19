@@ -26,13 +26,13 @@ struct sg_io_v4 {
 				   management function, .... */
 
 	__u32 request_len;	/* [i] in bytes */
-	__u64 request;		/* [i], [*i] {SCSI: cdb} */
+	__u64ptr request;	/* [i], [*i] {SCSI: cdb} */
 	__u64 request_tag;	/* [i] {SCSI: task tag (only if flagged)} */
 	__u32 request_attr;	/* [i] {SCSI: task attribute} */
 	__u32 request_priority;	/* [i] {SCSI: task priority} */
 	__u32 request_extra;	/* [i] {spare, for padding} */
 	__u32 max_response_len;	/* [i] in bytes */
-	__u64 response;		/* [i], [*o] {SCSI: (auto)sense data} */
+	__u64ptr response;	/* [i], [*o] {SCSI: (auto)sense data} */
 
         /* "dout_": data out (to device); "din_": data in (from device) */
 	__u32 dout_iovec_count;	/* [i] 0 -> "flat" dout transfer else
@@ -40,8 +40,8 @@ struct sg_io_v4 {
 	__u32 dout_xfer_len;	/* [i] bytes to be transferred to device */
 	__u32 din_iovec_count;	/* [i] 0 -> "flat" din transfer */
 	__u32 din_xfer_len;	/* [i] bytes to be transferred from device */
-	__u64 dout_xferp;	/* [i], [*i] */
-	__u64 din_xferp;	/* [i], [*o] */
+	__u64ptr dout_xferp;	/* [i], [*i] */
+	__u64ptr din_xferp;	/* [i], [*o] */
 
 	__u32 timeout;		/* [i] units: millisecond */
 	__u32 flags;		/* [i] bit mask */

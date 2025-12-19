@@ -73,7 +73,7 @@ struct sync_file_info {
 	__u32	num_fences;
 	__u32	pad;
 
-	__u64	sync_fence_info;
+	__u64ptr	sync_fence_info;
 };
 
 /**

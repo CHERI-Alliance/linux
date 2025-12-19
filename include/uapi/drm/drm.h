@@ -105,7 +105,7 @@ struct drm_clip_rect {
  */
 struct drm_drawable_info {
 	unsigned int num_rects;
-	struct drm_clip_rect *rects;
+	struct drm_clip_rect __user *rects;
 };
 
 /*
@@ -210,7 +210,7 @@ enum drm_map_flags {
 
 struct drm_ctx_priv_map {
 	unsigned int ctx_id;	 /**< Context requesting private mapping */
-	void *handle;		 /**< Handle of map */
+	void __user *handle;	 /**< Handle of map */
 };
 
 /*
@@ -224,7 +224,7 @@ struct drm_map {
 	unsigned long size;	 /**< Requested physical size (bytes) */
 	enum drm_map_type type;	 /**< Type of memory to map */
 	enum drm_map_flags flags;	 /**< Flags */
-	void *handle;		 /**< User-space: "Handle" to pass to mmap() */
+	void __user *handle;	 /**< User-space: "Handle" to pass to mmap() */
 				 /**< Kernel-space: kernel-virtual address */
 	int mtrr;		 /**< MTRR slot used */
 	/*   Private data */
@@ -494,7 +494,7 @@ enum drm_vblank_seq_type {
 struct drm_wait_vblank_request {
 	enum drm_vblank_seq_type type;
 	unsigned int sequence;
-	unsigned long signal;
+	__ulptr signal;
 };
 
 struct drm_wait_vblank_reply {
@@ -978,7 +978,7 @@ struct drm_syncobj_transfer {
 #define DRM_SYNCOBJ_WAIT_FLAGS_WAIT_AVAILABLE (1 << 2) /* wait for time point to become available */
 #define DRM_SYNCOBJ_WAIT_FLAGS_WAIT_DEADLINE (1 << 3) /* set fence deadline to deadline_nsec */
 struct drm_syncobj_wait {
-	__u64 handles;
+	__u64ptr handles;
 	/* absolute timeout */
 	__s64 timeout_nsec;
 	__u32 count_handles;
@@ -996,9 +996,9 @@ struct drm_syncobj_wait {
 };
 
 struct drm_syncobj_timeline_wait {
-	__u64 handles;
+	__u64ptr handles;
 	/* wait on specific timeline point for every handles*/
-	__u64 points;
+	__u64ptr points;
 	/* absolute timeout */
 	__s64 timeout_nsec;
 	__u32 count_handles;
@@ -1038,15 +1038,15 @@ struct drm_syncobj_eventfd {
 
 
 struct drm_syncobj_array {
-	__u64 handles;
+	__u64ptr handles;
 	__u32 count_handles;
 	__u32 pad;
 };
 
 #define DRM_SYNCOBJ_QUERY_FLAGS_LAST_SUBMITTED (1 << 0) /* last available point on timeline syncobj */
 struct drm_syncobj_timeline_array {
-	__u64 handles;
-	__u64 points;
+	__u64ptr handles;
+	__u64ptr points;
 	__u32 count_handles;
 	__u32 flags;
 };
@@ -1071,13 +1071,13 @@ struct drm_crtc_queue_sequence {
 	__u32 crtc_id;
 	__u32 flags;
 	__u64 sequence;		/* on input, target sequence. on output, actual sequence */
-	__u64 user_data;	/* user data passed to event */
+	__u64ptr user_data;	/* user data passed to event */
 };
 
 #define DRM_CLIENT_NAME_MAX_LEN		64
 struct drm_set_client_name {
 	__u64 name_len;
-	__u64 name;
+	__u64ptr name;
 };
 
 
@@ -1422,7 +1422,7 @@ struct drm_event {
 
 struct drm_event_vblank {
 	struct drm_event base;
-	__u64 user_data;
+	__u64ptr user_data;
 	__u32 tv_sec;
 	__u32 tv_usec;
 	__u32 sequence;
@@ -1434,7 +1434,7 @@ struct drm_event_vblank {
  */
 struct drm_event_crtc_sequence {
 	struct drm_event	base;
-	__u64			user_data;
+	__u64ptr		user_data;
 	__s64			time_ns;
 	__u64			sequence;
 };

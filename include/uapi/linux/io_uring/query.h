@@ -11,8 +11,8 @@
 #include <linux/types.h>
 
 struct io_uring_query_hdr {
-	__u64 next_entry;
-	__u64 query_data;
+	__u64ptr next_entry;
+	__u64ptr query_data;
 	__u32 query_op;
 	__u32 size;
 	__s32 result;

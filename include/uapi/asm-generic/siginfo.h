@@ -342,8 +342,8 @@ typedef struct sigevent {
 		 int _tid;
 
 		struct {
-			void (*_function)(sigval_t);
-			void *_attribute;	/* really pthread_attr_t */
+			void __user (*_function)(sigval_t);
+			void __user *_attribute;	/* really pthread_attr_t */
 		} _sigev_thread;
 	} _sigev_un;
 } sigevent_t;

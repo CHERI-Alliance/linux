@@ -201,12 +201,12 @@ struct drm_etnaviv_gem_submit {
 	__u32 nr_bos;         /* in, number of submit_bo's */
 	__u32 nr_relocs;      /* in, number of submit_reloc's */
 	__u32 stream_size;    /* in, cmdstream size */
-	__u64 bos;            /* in, ptr to array of submit_bo's */
-	__u64 relocs;         /* in, ptr to array of submit_reloc's */
-	__u64 stream;         /* in, ptr to cmdstream */
+	__u64ptr bos;            /* in, ptr to array of submit_bo's */
+	__u64ptr relocs;         /* in, ptr to array of submit_reloc's */
+	__u64ptr stream;         /* in, ptr to cmdstream */
 	__u32 flags;          /* in, mask of ETNA_SUBMIT_x */
 	__s32 fence_fd;       /* in/out, fence fd (see ETNA_SUBMIT_FENCE_FD_x) */
-	__u64 pmrs;           /* in, ptr to array of submit_pmr's */
+	__u64ptr pmrs;           /* in, ptr to array of submit_pmr's */
 	__u32 nr_pmrs;        /* in, number of submit_pmr's */
 	__u32 pad;
 };
@@ -230,7 +230,7 @@ struct drm_etnaviv_wait_fence {
 #define ETNA_USERPTR_READ	0x01
 #define ETNA_USERPTR_WRITE	0x02
 struct drm_etnaviv_gem_userptr {
-	__u64 user_ptr;	/* in, page aligned user pointer */
+	__u64ptr user_ptr;	/* in, page aligned user pointer */
 	__u64 user_size;	/* in, page aligned user size */
 	__u32 flags;		/* in, flags */
 	__u32 handle;	/* out, non-zero handle */
