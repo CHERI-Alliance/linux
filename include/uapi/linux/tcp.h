@@ -508,15 +508,15 @@ struct tcp_ao_repair { /* {s,g}etsockopt(TCP_AO_REPAIR) */
 
 #define TCP_RECEIVE_ZEROCOPY_FLAG_TLB_CLEAN_HINT 0x1
 struct tcp_zerocopy_receive {
-	__u64 address;		/* in: address of mapping */
+	__u64ptr address;	/* in: address of mapping */
 	__u32 length;		/* in/out: number of bytes to map/mapped */
 	__u32 recv_skip_hint;	/* out: amount of bytes to skip */
 	__u32 inq; /* out: amount of bytes in read queue */
 	__s32 err; /* out: socket error */
-	__u64 copybuf_address;	/* in: copybuf address (small reads) */
+	__u64ptr copybuf_address;	/* in: copybuf address (small reads) */
 	__s32 copybuf_len; /* in/out: copybuf bytes avail/used or error */
 	__u32 flags; /* in: flags */
-	__u64 msg_control; /* ancillary data */
+	__u64ptr msg_control; /* ancillary data */
 	__u64 msg_controllen;
 	__u32 msg_flags;
 	__u32 reserved; /* set to 0 for now */

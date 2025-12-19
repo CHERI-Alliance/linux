@@ -140,7 +140,8 @@ struct ptrace_rseq_configuration {
  */
 struct ptrace_sud_config {
 	__u64 mode;
-	__u64 selector;
+	/* Implicit padding if sizeof(__u64ptr) > sizeof(__u64) */
+	__u64ptr selector;
 	__u64 offset;
 	__u64 len;
 };

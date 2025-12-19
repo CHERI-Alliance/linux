@@ -267,10 +267,10 @@ struct drm_mode_modeinfo {
 };
 
 struct drm_mode_card_res {
-	__u64 fb_id_ptr;
-	__u64 crtc_id_ptr;
-	__u64 connector_id_ptr;
-	__u64 encoder_id_ptr;
+	__u64ptr fb_id_ptr;
+	__u64ptr crtc_id_ptr;
+	__u64ptr connector_id_ptr;
+	__u64ptr encoder_id_ptr;
 	__u32 count_fbs;
 	__u32 count_crtcs;
 	__u32 count_connectors;
@@ -282,7 +282,7 @@ struct drm_mode_card_res {
 };
 
 struct drm_mode_crtc {
-	__u64 set_connectors_ptr;
+	__u64ptr set_connectors_ptr;
 	__u32 count_connectors;
 
 	__u32 crtc_id; /**< Id */
@@ -361,11 +361,11 @@ struct drm_mode_get_plane {
 	 * @format_type_ptr: Pointer to ``__u32`` array of formats that are
 	 * supported by the plane. These formats do not require modifiers.
 	 */
-	__u64 format_type_ptr;
+	__u64ptr format_type_ptr;
 };
 
 struct drm_mode_get_plane_res {
-	__u64 plane_id_ptr;
+	__u64ptr plane_id_ptr;
 	__u32 count_planes;
 };
 
@@ -464,13 +464,13 @@ enum drm_mode_subconnector {
  */
 struct drm_mode_get_connector {
 	/** @encoders_ptr: Pointer to ``__u32`` array of object IDs. */
-	__u64 encoders_ptr;
+	__u64ptr encoders_ptr;
 	/** @modes_ptr: Pointer to struct drm_mode_modeinfo array. */
-	__u64 modes_ptr;
+	__u64ptr modes_ptr;
 	/** @props_ptr: Pointer to ``__u32`` array of property IDs. */
-	__u64 props_ptr;
+	__u64ptr props_ptr;
 	/** @prop_values_ptr: Pointer to ``__u64`` array of property values. */
-	__u64 prop_values_ptr;
+	__u64ptr prop_values_ptr;
 
 	/** @count_modes: Number of modes. */
 	__u32 count_modes;
@@ -596,9 +596,9 @@ struct drm_mode_property_enum {
  */
 struct drm_mode_get_property {
 	/** @values_ptr: Pointer to a ``__u64`` array. */
-	__u64 values_ptr;
+	__u64ptr values_ptr;
 	/** @enum_blob_ptr: Pointer to a struct drm_mode_property_enum array. */
-	__u64 enum_blob_ptr;
+	__u64ptr enum_blob_ptr;
 
 	/**
 	 * @prop_id: Object ID of the property which should be retrieved. Set
@@ -640,8 +640,8 @@ struct drm_mode_connector_set_property {
 #define DRM_MODE_OBJECT_ANY 0
 
 struct drm_mode_obj_get_properties {
-	__u64 props_ptr;
-	__u64 prop_values_ptr;
+	__u64ptr props_ptr;
+	__u64ptr prop_values_ptr;
 	__u32 count_props;
 	__u32 obj_id;
 	__u32 obj_type;
@@ -657,7 +657,7 @@ struct drm_mode_obj_set_property {
 struct drm_mode_get_blob {
 	__u32 blob_id;
 	__u32 length;
-	__u64 data;
+	__u64ptr data;
 };
 
 struct drm_mode_fb_cmd {
@@ -781,7 +781,7 @@ struct drm_mode_fb_dirty_cmd {
 	__u32 flags;
 	__u32 color;
 	__u32 num_clips;
-	__u64 clips_ptr;
+	__u64ptr clips_ptr;
 };
 
 struct drm_mode_mode_cmd {
@@ -836,9 +836,9 @@ struct drm_mode_crtc_lut {
 	__u32 gamma_size;
 
 	/* pointers to arrays */
-	__u64 red;
-	__u64 green;
-	__u64 blue;
+	__u64ptr red;
+	__u64ptr green;
+	__u64ptr blue;
 };
 
 struct drm_color_ctm {
@@ -1200,7 +1200,7 @@ struct drm_mode_crtc_page_flip_target {
 	__u32 fb_id;
 	__u32 flags;
 	__u32 sequence;
-	__u64 user_data;
+	__u64ptr user_data;
 };
 
 /**
@@ -1349,12 +1349,12 @@ struct drm_mode_destroy_dumb {
 struct drm_mode_atomic {
 	__u32 flags;
 	__u32 count_objs;
-	__u64 objs_ptr;
-	__u64 count_props_ptr;
-	__u64 props_ptr;
-	__u64 prop_values_ptr;
-	__u64 reserved;
-	__u64 user_data;
+	__u64ptr objs_ptr;
+	__u64ptr count_props_ptr;
+	__u64ptr props_ptr;
+	__u64ptr prop_values_ptr;
+	__u64ptr reserved;
+	__u64ptr user_data;
 };
 
 struct drm_format_modifier_blob {
@@ -1415,7 +1415,7 @@ struct drm_format_modifier {
  */
 struct drm_mode_create_blob {
 	/** @data: Pointer to data to copy. */
-	__u64 data;
+	__u64ptr data;
 	/** @length: Length of data to copy. */
 	__u32 length;
 	/** @blob_id: Return: new property ID. */
@@ -1449,7 +1449,7 @@ struct drm_mode_destroy_blob {
  */
 struct drm_mode_create_lease {
 	/** @object_ids: Pointer to array of object ids (__u32) */
-	__u64 object_ids;
+	__u64ptr object_ids;
 	/** @object_count: Number of object ids */
 	__u32 object_count;
 	/** @flags: flags for new FD (O_CLOEXEC, etc) */
@@ -1485,7 +1485,7 @@ struct drm_mode_list_lessees {
 	 *
 	 * Pointer to __u64 array of lessee ids
 	 */
-	__u64 lessees_ptr;
+	__u64ptr lessees_ptr;
 };
 
 /**
@@ -1512,7 +1512,7 @@ struct drm_mode_get_lease {
 	 *
 	 * Pointer to __u32 array of object ids.
 	 */
-	__u64 objects_ptr;
+	__u64ptr objects_ptr;
 };
 
 /**

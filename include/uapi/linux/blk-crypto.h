@@ -7,27 +7,27 @@
 
 struct blk_crypto_import_key_arg {
 	/* Raw key (input) */
-	__u64 raw_key_ptr;
+	__u64ptr raw_key_ptr;
 	__u64 raw_key_size;
 	/* Long-term wrapped key blob (output) */
-	__u64 lt_key_ptr;
+	__u64ptr lt_key_ptr;
 	__u64 lt_key_size;
 	__u64 reserved[4];
 };
 
 struct blk_crypto_generate_key_arg {
 	/* Long-term wrapped key blob (output) */
-	__u64 lt_key_ptr;
+	__u64ptr lt_key_ptr;
 	__u64 lt_key_size;
 	__u64 reserved[4];
 };
 
 struct blk_crypto_prepare_key_arg {
 	/* Long-term wrapped key blob (input) */
-	__u64 lt_key_ptr;
+	__u64ptr lt_key_ptr;
 	__u64 lt_key_size;
 	/* Ephemerally-wrapped key blob (output) */
-	__u64 eph_key_ptr;
+	__u64ptr eph_key_ptr;
 	__u64 eph_key_size;
 	__u64 reserved[4];
 };

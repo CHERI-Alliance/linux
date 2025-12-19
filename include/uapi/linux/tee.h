@@ -130,7 +130,7 @@ struct tee_ioctl_shm_alloc_data {
  * TEE_IOC_SUPPL_RECV, and TEE_IOC_SUPPL_SEND below.
  */
 struct tee_ioctl_buf_data {
-	__u64 buf_ptr;
+	__u64ptr buf_ptr;
 	__u64 buf_len;
 };
 
@@ -396,7 +396,7 @@ struct tee_iocl_supp_send_arg {
  * This structure is used as argument for TEE_IOC_SHM_REGISTER below.
  */
 struct tee_ioctl_shm_register_data {
-	__u64 addr;
+	__u64ptr addr;
 	__u64 length;
 	__u32 flags;
 	__s32 id;

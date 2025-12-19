@@ -178,7 +178,7 @@ struct drm_xe_user_extension {
 	 *
 	 * Pointer to the next struct drm_xe_user_extension, or zero if the end.
 	 */
-	__u64 next_extension;
+	__u64ptr next_extension;
 
 	/**
 	 * @name: Name of the extension.
@@ -747,7 +747,7 @@ struct drm_xe_query_pxp_status {
  */
 struct drm_xe_device_query {
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__u64ptr extensions;
 
 #define DRM_XE_DEVICE_QUERY_ENGINES		0
 #define DRM_XE_DEVICE_QUERY_MEM_REGIONS		1
@@ -767,7 +767,7 @@ struct drm_xe_device_query {
 	__u32 size;
 
 	/** @data: Queried data is placed here */
-	__u64 data;
+	__u64ptr data;
 
 	/** @reserved: Reserved */
 	__u64 reserved[2];
@@ -840,7 +840,7 @@ struct drm_xe_gem_create {
 #define DRM_XE_GEM_CREATE_EXTENSION_SET_PROPERTY	0
 #define   DRM_XE_GEM_CREATE_SET_PROPERTY_PXP_TYPE	0
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__u64ptr extensions;
 
 	/**
 	 * @size: Size of the object to be created, must match region
@@ -935,7 +935,7 @@ struct drm_xe_gem_create {
  */
 struct drm_xe_gem_mmap_offset {
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__u64ptr extensions;
 
 	/** @handle: Handle for the object being mapped. */
 	__u32 handle;
@@ -985,7 +985,7 @@ struct drm_xe_gem_mmap_offset {
  */
 struct drm_xe_vm_create {
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__u64ptr extensions;
 
 #define DRM_XE_VM_CREATE_FLAG_SCRATCH_PAGE	(1 << 0)
 #define DRM_XE_VM_CREATE_FLAG_LR_MODE	        (1 << 1)
@@ -1075,7 +1075,7 @@ struct drm_xe_vm_destroy {
  */
 struct drm_xe_vm_bind_op {
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__u64ptr extensions;
 
 	/**
 	 * @obj: GEM object to operate on, MBZ for MAP_USERPTR, MBZ for UNMAP
@@ -1143,7 +1143,7 @@ struct drm_xe_vm_bind_op {
 		__u64 obj_offset;
 
 		/** @userptr: user pointer to bind on */
-		__u64 userptr;
+		__u64ptr userptr;
 
 		/**
 		 * @cpu_addr_mirror_offset: Offset from GPU @addr to create
@@ -1225,7 +1225,7 @@ struct drm_xe_vm_bind_op {
  */
 struct drm_xe_vm_bind {
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__u64ptr extensions;
 
 	/** @vm_id: The ID of the VM to bind to */
 	__u32 vm_id;
@@ -1251,7 +1251,7 @@ struct drm_xe_vm_bind {
 		 * @vector_of_binds: userptr to array of struct
 		 * drm_xe_vm_bind_op if num_binds > 1
 		 */
-		__u64 vector_of_binds;
+		__u64ptr vector_of_binds;
 	};
 
 	/** @pad2: MBZ */
@@ -1261,7 +1261,7 @@ struct drm_xe_vm_bind {
 	__u32 num_syncs;
 
 	/** @syncs: pointer to struct drm_xe_sync array */
-	__u64 syncs;
+	__u64ptr syncs;
 
 	/** @reserved: Reserved */
 	__u64 reserved[2];
@@ -1341,7 +1341,7 @@ struct drm_xe_vm_get_property {
 
 	union {
 		/** @data: Pointer to user-defined array of flexible size and type */
-		__u64 data;
+		__u64ptr data;
 		/** @value: Return value for scalar queries */
 		__u64 value;
 	};
@@ -1435,7 +1435,7 @@ struct drm_xe_exec_queue_create {
 #define   DRM_XE_EXEC_QUEUE_SET_PROPERTY_MULTI_QUEUE_PRIORITY	5
 #define   DRM_XE_EXEC_QUEUE_SET_DISABLE_STATE_CACHE_PERF_FIX	6
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__u64ptr extensions;
 
 	/** @width: submission width (number BB per exec) for this exec queue */
 	__u16 width;
@@ -1460,7 +1460,7 @@ struct drm_xe_exec_queue_create {
 	 * length = width (i) * num_placements (j)
 	 * index = j + i * width
 	 */
-	__u64 instances;
+	__u64ptr instances;
 
 	/** @reserved: Reserved */
 	__u64 reserved[2];
@@ -1488,7 +1488,7 @@ struct drm_xe_exec_queue_destroy {
  */
 struct drm_xe_exec_queue_get_property {
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__u64ptr extensions;
 
 	/** @exec_queue_id: Exec queue ID */
 	__u32 exec_queue_id;
@@ -1541,7 +1541,7 @@ struct drm_xe_exec_queue_get_property {
  */
 struct drm_xe_sync {
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__u64ptr extensions;
 
 #define DRM_XE_SYNC_TYPE_SYNCOBJ		0x0
 #define DRM_XE_SYNC_TYPE_TIMELINE_SYNCOBJ	0x1
@@ -1565,7 +1565,7 @@ struct drm_xe_sync {
 		 * mapped when the user fence is signalled. Must be qword
 		 * aligned.
 		 */
-		__u64 addr;
+		__u64ptr addr;
 	};
 
 	/**
@@ -1600,7 +1600,7 @@ struct drm_xe_sync {
  */
 struct drm_xe_exec {
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__u64ptr extensions;
 
 	/** @exec_queue_id: Exec queue ID for the batch buffer */
 	__u32 exec_queue_id;
@@ -1610,13 +1610,13 @@ struct drm_xe_exec {
 	__u32 num_syncs;
 
 	/** @syncs: Pointer to struct drm_xe_sync array. */
-	__u64 syncs;
+	__u64ptr syncs;
 
 	/**
 	 * @address: address of batch buffer if num_batch_buffer == 1 or an
 	 * array of batch buffer addresses
 	 */
-	__u64 address;
+	__u64ptr address;
 
 	/**
 	 * @num_batch_buffer: number of batch buffer in this exec, must match
@@ -1661,12 +1661,12 @@ struct drm_xe_exec {
  */
 struct drm_xe_wait_user_fence {
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__u64ptr extensions;
 
 	/**
 	 * @addr: user pointer address to wait on, must qword aligned
 	 */
-	__u64 addr;
+	__u64ptr addr;
 
 #define DRM_XE_UFENCE_WAIT_OP_EQ	0x0
 #define DRM_XE_UFENCE_WAIT_OP_NEQ	0x1
@@ -1750,13 +1750,13 @@ enum drm_xe_observation_op {
  */
 struct drm_xe_observation_param {
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__u64ptr extensions;
 	/** @observation_type: observation stream type, of enum @drm_xe_observation_type */
 	__u64 observation_type;
 	/** @observation_op: observation stream op, of enum @drm_xe_observation_op */
 	__u64 observation_op;
 	/** @param: Pointer to actual stream params */
-	__u64 param;
+	__u64ptr param;
 };
 
 /**
@@ -1807,7 +1807,7 @@ enum drm_xe_oa_unit_type {
  */
 struct drm_xe_oa_unit {
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__u64ptr extensions;
 
 	/** @oa_unit_id: OA unit ID */
 	__u32 oa_unit_id;
@@ -1869,7 +1869,7 @@ struct drm_xe_oa_unit {
  */
 struct drm_xe_query_oa_units {
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__u64ptr extensions;
 	/** @num_oa_units: number of OA units returned in oau[] */
 	__u32 num_oa_units;
 	/** @pad: MBZ */
@@ -2019,7 +2019,7 @@ enum drm_xe_oa_property_id {
  */
 struct drm_xe_oa_config {
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__u64ptr extensions;
 
 	/** @uuid: String formatted like "%\08x-%\04x-%\04x-%\04x-%\012x" */
 	char uuid[36];
@@ -2031,7 +2031,7 @@ struct drm_xe_oa_config {
 	 * @regs_ptr: Pointer to (register address, value) pairs for OA config
 	 * registers. Expected length of buffer is: (2 * sizeof(u32) * @n_regs).
 	 */
-	__u64 regs_ptr;
+	__u64ptr regs_ptr;
 };
 
 /**
@@ -2042,7 +2042,7 @@ struct drm_xe_oa_config {
  */
 struct drm_xe_oa_stream_status {
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__u64ptr extensions;
 
 	/** @oa_status: OA stream status (see Bspec 46717/61226) */
 	__u64 oa_status;
@@ -2061,7 +2061,7 @@ struct drm_xe_oa_stream_status {
  */
 struct drm_xe_oa_stream_info {
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__u64ptr extensions;
 
 	/** @oa_buf_size: OA buffer size */
 	__u64 oa_buf_size;
@@ -2135,7 +2135,7 @@ enum drm_xe_eu_stall_property_id {
  */
 struct drm_xe_query_eu_stall {
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__u64ptr extensions;
 
 	/** @capabilities: EU stall capabilities bit-mask */
 	__u64 capabilities;
@@ -2191,7 +2191,7 @@ struct drm_xe_query_eu_stall {
  */
 struct drm_xe_madvise {
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__u64ptr extensions;
 
 	/** @start: start of the virtual address range */
 	__u64 start;
@@ -2360,7 +2360,7 @@ struct drm_xe_madvise {
 			 *
 			 * Similar to i915's drm_i915_gem_madvise.retained field.
 			 */
-			__u64 retained_ptr;
+			__u64ptr retained_ptr;
 		} purge_state_val;
 	};
 
@@ -2387,7 +2387,7 @@ struct drm_xe_madvise {
  */
 struct drm_xe_mem_range_attr {
 	 /** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__u64ptr extensions;
 
 	/** @start: start of the memory range */
 	__u64 start;
@@ -2481,7 +2481,7 @@ struct drm_xe_mem_range_attr {
  */
 struct drm_xe_vm_query_mem_range_attr {
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__u64ptr extensions;
 
 	/** @vm_id: vm_id of the virtual range */
 	__u32 vm_id;
@@ -2499,7 +2499,7 @@ struct drm_xe_vm_query_mem_range_attr {
 	__u64 sizeof_mem_range_attr;
 
 	/** @vector_of_mem_attr: userptr to array of struct drm_xe_mem_range_attr */
-	__u64 vector_of_mem_attr;
+	__u64ptr vector_of_mem_attr;
 
 	/** @reserved: Reserved */
 	__u64 reserved[2];
@@ -2515,7 +2515,7 @@ struct drm_xe_vm_query_mem_range_attr {
  */
 struct drm_xe_exec_queue_set_property {
 	/** @extensions: Pointer to the first extension struct, if any */
-	__u64 extensions;
+	__u64ptr extensions;
 
 	/** @exec_queue_id: Exec queue ID */
 	__u32 exec_queue_id;

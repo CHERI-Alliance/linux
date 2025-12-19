@@ -335,7 +335,7 @@ enum genwqe_card_state {
 
 /* common struct for chip image exchange */
 struct genwqe_bitstream {
-	__u64 data_addr;		/* pointer to image data */
+	__u64ptr data_addr;		/* pointer to image data */
 	__u32 size;			/* size of image file */
 	__u32 crc;			/* crc of this image */
 	__u64 target_addr;		/* starting address in Flash */

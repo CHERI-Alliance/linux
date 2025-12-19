@@ -40,7 +40,7 @@ enum io_uring_zcrx_area_flags {
 };
 
 struct io_uring_zcrx_area_reg {
-	__u64	addr;
+	__u64ptr	addr;
 	__u64	len;
 	__u64	rq_area_token;
 	__u32	flags;
@@ -76,8 +76,8 @@ struct io_uring_zcrx_ifq_reg {
 	__u32	rq_entries;
 	__u32	flags;
 
-	__u64	area_ptr; /* pointer to struct io_uring_zcrx_area_reg */
-	__u64	region_ptr; /* struct io_uring_region_desc * */
+	__u64ptr	area_ptr; /* pointer to struct io_uring_zcrx_area_reg */
+	__u64ptr	region_ptr; /* struct io_uring_region_desc * */
 
 	struct io_uring_zcrx_offsets offsets;
 	__u32	zcrx_id;

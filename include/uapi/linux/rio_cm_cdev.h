@@ -52,7 +52,7 @@ struct rio_cm_msg {
 	__u16 ch_num;
 	__u16 size;
 	__u32 rxto;	/* receive timeout in mSec. 0 = blocking */
-	__u64 msg;
+	__u64ptr msg;
 };
 
 struct rio_cm_accept {

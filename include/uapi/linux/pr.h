@@ -59,7 +59,7 @@ struct pr_clear {
 struct pr_read_keys {
 	__u32	generation;
 	__u32	num_keys;
-	__u64	keys_ptr;
+	__u64ptr	keys_ptr;
 };
 
 struct pr_read_reservation {

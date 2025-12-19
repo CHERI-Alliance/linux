@@ -903,11 +903,11 @@ struct dtv_property {
 			__u8 data[32];
 			__u32 len;
 			__u32 reserved1[3];
-			void *reserved2;
+			void __user *reserved2;
 		} buffer;
 	} u;
 	int result;
-} __attribute__ ((packed));
+} __attribute__ ((packed)) __CHERI_POINTER_ALIGN;
 
 /* num of properties cannot exceed DTV_IOCTL_MAX_MSGS per ioctl */
 #define DTV_IOCTL_MAX_MSGS 64

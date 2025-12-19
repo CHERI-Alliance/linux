@@ -68,8 +68,8 @@
  * last transfer might write some register values.
  */
 struct spi_ioc_transfer {
-	__u64		tx_buf;
-	__u64		rx_buf;
+	__u64ptr	tx_buf;
+	__u64ptr	rx_buf;
 
 	__u32		len;
 	__u32		speed_hz;

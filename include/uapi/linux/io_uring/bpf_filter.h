@@ -11,7 +11,7 @@
  * Struct passed to filters.
  */
 struct io_uring_bpf_ctx {
-	__u64	user_data;
+	__u64ptr user_data;
 	__u8	opcode;
 	__u8	sqe_flags;
 	__u8	pdu_size;	/* size of aux data for filter */
@@ -48,7 +48,7 @@ struct io_uring_bpf_filter {
 	__u32	filter_len;	/* number of BPF instructions */
 	__u8	pdu_size;	/* expected pdu size for opcode */
 	__u8	resv[3];
-	__u64	filter_ptr;	/* pointer to BPF filter */
+	__u64ptr filter_ptr;	/* pointer to BPF filter */
 	__u64	resv2[5];
 };
 

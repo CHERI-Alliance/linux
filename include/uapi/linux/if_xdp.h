@@ -164,7 +164,7 @@ struct xsk_tx_metadata {
 
 /* Rx/Tx descriptor */
 struct xdp_desc {
-	__u64 addr;
+	__u64ptr addr;
 	__u32 len;
 	__u32 options;
 };

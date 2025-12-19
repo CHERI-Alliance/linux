@@ -52,7 +52,7 @@ struct usbtmc_request {
 struct usbtmc_ctrlrequest {
 	struct usbtmc_request req;
 	void __user *data; /* pointer to user space */
-} __attribute__ ((packed));
+} __PACKED_IF_NOT_CHERI;
 
 struct usbtmc_termchar {
 	__u8 term_char;
@@ -71,7 +71,7 @@ struct usbtmc_message {
 	__u32 transferred; /* size of received/written bytes */
 	__u32 flags; /* bit 0: 0 = synchronous; 1 = asynchronous */
 	void __user *message; /* pointer to header and data in user space */
-} __attribute__ ((packed));
+} __PACKED_IF_NOT_CHERI;
 
 /* Request values for USBTMC driver's ioctl entry point */
 #define USBTMC_IOC_NR			91
