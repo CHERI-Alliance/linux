@@ -41,6 +41,12 @@ typedef __kernel_gid16_t        gid16_t;
 typedef unsigned long		uintptr_t;
 typedef long			intptr_t;
 
+typedef __kernel_uintptr_t	user_uintptr_t;
+typedef __kernel_intptr_t	user_intptr_t;
+
+typedef __kernel_ptraddr_t	ptraddr_t;
+typedef __u64			ptraddr64_t;
+
 #ifdef CONFIG_HAVE_UID16
 /* This is defined by arch/{arch}/include/asm/posix_types.h */
 typedef __kernel_old_uid_t	old_uid_t;

@@ -16,6 +16,19 @@ typedef long		__kernel_long_t;
 typedef unsigned long	__kernel_ulong_t;
 #endif
 
+#ifndef __kernel_uintptr_t
+typedef unsigned long	__kernel_uintptr_t;
+typedef long		__kernel_intptr_t;
+#endif
+
+#ifndef __kernel_ptraddr_t
+#ifdef __PTRADDR_TYPE__
+typedef __PTRADDR_TYPE__ __kernel_ptraddr_t;
+#else
+typedef unsigned long __kernel_ptraddr_t;
+#endif
+#endif
+
 #ifndef __kernel_ino_t
 typedef __kernel_ulong_t __kernel_ino_t;
 #endif
