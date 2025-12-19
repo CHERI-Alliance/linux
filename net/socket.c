@@ -3151,6 +3151,9 @@ SYSCALL_DEFINE5(recvmmsg, int, fd, struct mmsghdr __user *, mmsg,
 	if (flags & MSG_CMSG_COMPAT)
 		return -EINVAL;
 
+	if (in_compat64_syscall())
+		flags |= MSG_CMSG_COMPAT;
+
 	return __sys_recvmmsg(fd, mmsg, vlen, flags, timeout, NULL);
 }
 
