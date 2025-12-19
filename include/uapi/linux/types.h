@@ -43,6 +43,19 @@ typedef __u64 __bitwise __be64;
 typedef __u16 __bitwise __sum16;
 typedef __u32 __bitwise __wsum;
 
+/* An integer that can hold a pointer. */
+typedef __kernel_uintptr_t __ulptr;
+typedef __kernel_intptr_t __slptr;
+
+/* At least 64-bit and large enough for a pointer. */
+typedef __u64 __u64ptr;
+typedef __s64 __s64ptr;
+#define __PACKED_IF_NOT_CHERI __attribute__((packed))
+#define __CHERI_POINTER_ALIGN
+
+typedef __kernel_ptraddr_t __ptraddr_t;
+typedef __u64 __ptraddr64_t;
+
 /*
  * aligned_u64 should be used in defining kernel<->userspace ABIs to avoid
  * common 32/64-bit compat problems.
@@ -56,6 +69,9 @@ typedef __u32 __bitwise __wsum;
 #define __aligned_s64 __s64 __attribute__((aligned(8)))
 #define __aligned_be64 __be64 __attribute__((aligned(8)))
 #define __aligned_le64 __le64 __attribute__((aligned(8)))
+
+#define __aligned_u64ptr __u64ptr __attribute__((aligned(8)))
+#define __aligned_s64ptr __s64ptr __attribute__((aligned(8)))
 
 typedef unsigned __bitwise __poll_t;
 
