@@ -967,7 +967,7 @@ struct drm_radeon_gem_va {
 struct drm_radeon_cs_chunk {
 	__u32		chunk_id;
 	__u32		length_dw;
-	__u64		chunk_data;
+	__u64ptr	chunk_data;
 };
 
 /* drm_radeon_cs_reloc.flags */
@@ -984,7 +984,7 @@ struct drm_radeon_cs {
 	__u32		num_chunks;
 	__u32		cs_id;
 	/* this points to __u64 * which point to cs chunks */
-	__u64		chunks;
+	__u64ptr	chunks;
 	/* updates to the limits after this CS ioctl */
 	__u64		gart_limit;
 	__u64		vram_limit;
@@ -1048,7 +1048,7 @@ struct drm_radeon_cs {
 struct drm_radeon_info {
 	__u32		request;
 	__u32		pad;
-	__u64		value;
+	__u64ptr	value;
 };
 
 /* Those correspond to the tile index to use, this is to explicitly state

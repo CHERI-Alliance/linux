@@ -126,7 +126,7 @@ struct input_keymap_entry {
 struct input_mask {
 	__u32 type;
 	__u32 codes_size;
-	__u64 codes_ptr;
+	__u64ptr codes_ptr;
 };
 
 #define EVIOCGVERSION		_IOR('E', 0x01, int)			/* get driver version */

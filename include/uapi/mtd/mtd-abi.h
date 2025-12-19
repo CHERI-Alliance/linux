@@ -43,7 +43,7 @@ struct mtd_oob_buf64 {
 	__u64 start;
 	__u32 pad;
 	__u32 length;
-	__u64 usr_ptr;
+	__u64ptr usr_ptr;
 };
 
 /**
@@ -85,8 +85,8 @@ struct mtd_write_req {
 	__u64 start;
 	__u64 len;
 	__u64 ooblen;
-	__u64 usr_data;
-	__u64 usr_oob;
+	__u64ptr usr_data;
+	__u64ptr usr_oob;
 	__u8 mode;
 	__u8 padding[7];
 };
@@ -131,8 +131,8 @@ struct mtd_read_req {
 	__u64 start;
 	__u64 len;
 	__u64 ooblen;
-	__u64 usr_data;
-	__u64 usr_oob;
+	__u64ptr usr_data;
+	__u64ptr usr_oob;
 	__u8 mode;
 	__u8 padding[7];
 	struct mtd_read_req_ecc_stats ecc_stats;

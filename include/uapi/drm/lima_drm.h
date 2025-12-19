@@ -118,8 +118,8 @@ struct drm_lima_gem_submit {
 	__u32 pipe;        /* in, which pipe to use, GP/PP */
 	__u32 nr_bos;      /* in, array length of bos field */
 	__u32 frame_size;  /* in, size of frame field */
-	__u64 bos;         /* in, array of drm_lima_gem_submit_bo */
-	__u64 frame;       /* in, GP/PP frame */
+	__u64ptr bos;         /* in, array of drm_lima_gem_submit_bo */
+	__u64ptr frame;       /* in, GP/PP frame */
 	__u32 flags;       /* in, submit flags */
 	__u32 out_sync;    /* in, drm_syncobj handle used to wait task finish after submission */
 	__u32 in_sync[2];  /* in, drm_syncobj handle used to wait before start this task */

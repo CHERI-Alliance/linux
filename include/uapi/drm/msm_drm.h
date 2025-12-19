@@ -129,7 +129,7 @@ struct drm_msm_timespec {
 struct drm_msm_param {
 	__u32 pipe;           /* in, MSM_PIPE_x */
 	__u32 param;          /* in, MSM_PARAM_x */
-	__u64 value;          /* out (get_param) or in (set_param) */
+	__u64ptr value;          /* out (get_param) or in (set_param) */
 	__u32 len;            /* zero for non-pointer params */
 	__u32 pad;            /* must be zero */
 };
@@ -190,7 +190,7 @@ struct drm_msm_gem_new {
 struct drm_msm_gem_info {
 	__u32 handle;         /* in */
 	__u32 info;           /* in - one of MSM_INFO_* */
-	__u64 value;          /* in or out */
+	__u64ptr value;          /* in or out */
 	__u32 len;            /* in or out */
 	__u32 pad;
 };
@@ -273,7 +273,7 @@ struct drm_msm_gem_submit_cmd {
 	__u32 pad;
 	__u32 nr_relocs;      /* in, number of submit_reloc's */
 	union {
-		__u64 relocs; /* in, ptr to array of submit_reloc's */
+		__u64ptr relocs;         /* in, ptr to array of submit_reloc's */
 		__u64 iova;   /* cmdstream address (for VM_BIND contexts) */
 	};
 };
@@ -332,12 +332,12 @@ struct drm_msm_gem_submit {
 	__u32 fence;          /* out (or in with MSM_SUBMIT_FENCE_SN_IN flag) */
 	__u32 nr_bos;         /* in, number of submit_bo's */
 	__u32 nr_cmds;        /* in, number of submit_cmd's */
-	__u64 bos;            /* in, ptr to array of submit_bo's */
-	__u64 cmds;           /* in, ptr to array of submit_cmd's */
+	__u64ptr bos;            /* in, ptr to array of submit_bo's */
+	__u64ptr cmds;           /* in, ptr to array of submit_cmd's */
 	__s32 fence_fd;       /* in/out fence fd (see MSM_SUBMIT_FENCE_FD_IN/OUT) */
 	__u32 queueid;        /* in, submitqueue id */
-	__u64 in_syncobjs;    /* in, ptr to array of drm_msm_syncobj */
-	__u64 out_syncobjs;   /* in, ptr to array of drm_msm_syncobj */
+	__u64ptr in_syncobjs;    /* in, ptr to array of drm_msm_syncobj */
+	__u64ptr out_syncobjs;   /* in, ptr to array of drm_msm_syncobj */
 	__u32 nr_in_syncobjs; /* in, number of entries in in_syncobj */
 	__u32 nr_out_syncobjs; /* in, number of entries in out_syncobj. */
 	__u32 syncobj_stride; /* in, stride of syncobj arrays. */
@@ -393,9 +393,9 @@ struct drm_msm_vm_bind {
 	/** @queue_id: in, submitqueue id */
 	__u32 queue_id;
 	/** @in_syncobjs: in, ptr to array of drm_msm_gem_syncobj */
-	__u64 in_syncobjs;
+	__u64ptr in_syncobjs;
 	/** @out_syncobjs: in, ptr to array of drm_msm_gem_syncobj */
-	__u64 out_syncobjs;
+	__u64ptr out_syncobjs;
 	/** @nr_in_syncobjs: in, number of entries in in_syncobj */
 	__u32 nr_in_syncobjs;
 	/** @nr_out_syncobjs: in, number of entries in out_syncobj */
@@ -408,7 +408,7 @@ struct drm_msm_vm_bind {
 		/** @op: used if num_ops == 1 */
 		struct drm_msm_vm_bind_op op;
 		/** @ops: userptr to array of drm_msm_vm_bind_op if num_ops > 1 */
-		__u64 ops;
+		__u64ptr ops;
 	};
 };
 
@@ -483,7 +483,7 @@ struct drm_msm_submitqueue {
 #define MSM_SUBMITQUEUE_PARAM_FAULTS   0
 
 struct drm_msm_submitqueue_query {
-	__u64 data;
+	__u64ptr data;
 	__u32 id;
 	__u32 param;
 	__u32 len;

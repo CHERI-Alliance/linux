@@ -87,18 +87,19 @@
  *
  * The structure is versioned by size and thus extensible.
  * New struct members must go at the end of the struct and
- * must be properly 64bit aligned.
+ * must be properly aligned on at least 64bit boundary.
+ * Mind implicit padding when ((sizeof(__u64ptr) > sizeof(__u64)).
  */
 struct clone_args {
 	__aligned_u64 flags;
-	__aligned_u64 pidfd;
-	__aligned_u64 child_tid;
-	__aligned_u64 parent_tid;
+	__aligned_u64ptr pidfd;
+	__aligned_u64ptr child_tid;
+	__aligned_u64ptr parent_tid;
 	__aligned_u64 exit_signal;
-	__aligned_u64 stack;
+	__aligned_u64ptr stack;
 	__aligned_u64 stack_size;
-	__aligned_u64 tls;
-	__aligned_u64 set_tid;
+	__aligned_u64ptr tls;
+	__aligned_u64ptr set_tid;
 	__aligned_u64 set_tid_size;
 	__aligned_u64 cgroup;
 };

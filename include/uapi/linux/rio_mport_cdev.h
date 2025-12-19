@@ -49,7 +49,7 @@ struct rio_mport_maint_io {
 	__u8  pad0[5];
 	__u32 offset;		/* offset in register space */
 	__u32 length;		/* length in bytes */
-	__u64 buffer;		/* pointer to data buffer */
+	__u64ptr buffer;	/* pointer to data buffer */
 };
 
 /*
@@ -200,7 +200,7 @@ struct rio_transfer_io {
 };
 
 struct rio_transaction {
-	__u64 block;	/* Pointer to array of <count> transfers */
+	__u64ptr block;	/* Pointer to array of <count> transfers */
 	__u32 count;	/* Number of transfers */
 	__u32 transfer_mode;	/* Data transfer mode */
 	__u16 sync;	/* Synch method, one of rio_transfer_sync enum */

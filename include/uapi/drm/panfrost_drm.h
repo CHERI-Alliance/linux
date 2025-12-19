@@ -55,7 +55,7 @@ struct drm_panfrost_submit {
 	__u64 jc;
 
 	/** An optional array of sync objects to wait on before starting this job. */
-	__u64 in_syncs;
+	__u64ptr in_syncs;
 
 	/** Number of sync objects to wait on before starting this job. */
 	__u32 in_sync_count;
@@ -64,7 +64,7 @@ struct drm_panfrost_submit {
 	__u32 out_sync;
 
 	/** Pointer to a u32 array of the BOs that are referenced by the job. */
-	__u64 bo_handles;
+	__u64ptr bo_handles;
 
 	/** Number of BO handles passed in (size is that times 4). */
 	__u32 bo_handle_count;
@@ -206,7 +206,7 @@ struct drm_panfrost_perfcnt_enable {
 };
 
 struct drm_panfrost_perfcnt_dump {
-	__u64 buf_ptr;
+	__u64ptr buf_ptr;
 };
 
 /* madvise provides a way to tell the kernel in case a buffers contents
@@ -245,7 +245,7 @@ struct drm_panfrost_set_label_bo {
 	 * Length cannot be greater than 4096.
 	 * NULL is permitted and means clear the label.
 	 */
-	__u64 label;
+	__u64ptr label;
 };
 
 /* Definitions for coredump decoding in user space */

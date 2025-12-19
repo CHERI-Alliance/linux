@@ -454,7 +454,7 @@ struct drm_tegra_submit {
 	 * The number of elements in the array must be equal to the value
 	 * given by @num_syncpts.
 	 */
-	__u64 syncpts;
+	__u64ptr syncpts;
 
 	/**
 	 * @cmdbufs:
@@ -464,7 +464,7 @@ struct drm_tegra_submit {
 	 * number of elements in the array must be equal to the value given
 	 * by @num_syncpts.
 	 */
-	__u64 cmdbufs;
+	__u64ptr cmdbufs;
 
 	/**
 	 * @relocs:
@@ -474,7 +474,7 @@ struct drm_tegra_submit {
 	 * this job. The number of elements in the array must be equal to the
 	 * value given by @num_relocs.
 	 */
-	__u64 relocs;
+	__u64ptr relocs;
 
 	/**
 	 * @waitchks:
@@ -484,7 +484,7 @@ struct drm_tegra_submit {
 	 * The number of elements in the array must be equal to the value
 	 * given by @num_waitchks.
 	 */
-	__u64 waitchks;
+	__u64ptr waitchks;
 
 	/**
 	 * @fence:
@@ -950,14 +950,14 @@ struct drm_tegra_channel_submit {
 	 *
 	 * Pointer to an array of drm_tegra_submit_buf structures.
 	 */
-	__u64 bufs_ptr;
+	__u64ptr bufs_ptr;
 
 	/**
 	 * @cmds_ptr: [in]
 	 *
 	 * Pointer to an array of drm_tegra_submit_cmd structures.
 	 */
-	__u64 cmds_ptr;
+	__u64ptr cmds_ptr;
 
 	/**
 	 * @gather_data_ptr: [in]
@@ -965,7 +965,7 @@ struct drm_tegra_channel_submit {
 	 * Pointer to an array of Host1x opcodes to be used by GATHER_UPTR
 	 * commands.
 	 */
-	__u64 gather_data_ptr;
+	__u64ptr gather_data_ptr;
 
 	/**
 	 * @syncobj_in: [in]

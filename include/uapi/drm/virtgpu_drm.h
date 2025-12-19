@@ -78,16 +78,16 @@ struct drm_virtgpu_execbuffer_syncobj {
 struct drm_virtgpu_execbuffer {
 	__u32 flags;
 	__u32 size;
-	__u64 command; /* void* */
-	__u64 bo_handles;
+	__u64ptr command; /* void* */
+	__u64ptr bo_handles;
 	__u32 num_bo_handles;
 	__s32 fence_fd; /* in/out fence fd (see VIRTGPU_EXECBUF_FENCE_FD_IN/OUT) */
 	__u32 ring_idx; /* command ring index (see VIRTGPU_EXECBUF_RING_IDX) */
 	__u32 syncobj_stride; /* size of @drm_virtgpu_execbuffer_syncobj */
 	__u32 num_in_syncobjs;
 	__u32 num_out_syncobjs;
-	__u64 in_syncobjs;
-	__u64 out_syncobjs;
+	__u64ptr in_syncobjs;
+	__u64ptr out_syncobjs;
 };
 
 #define VIRTGPU_PARAM_3D_FEATURES 1 /* do we have 3D features in the hw */
@@ -101,7 +101,7 @@ struct drm_virtgpu_execbuffer {
 
 struct drm_virtgpu_getparam {
 	__u64 param;
-	__u64 value;
+	__u64ptr value;
 };
 
 /* NO_BO flags? NO resource flag? */
@@ -172,7 +172,7 @@ struct drm_virtgpu_3d_wait {
 struct drm_virtgpu_get_caps {
 	__u32 cap_set_id;
 	__u32 cap_set_ver;
-	__u64 addr;
+	__u64ptr addr;
 	__u32 size;
 	__u32 pad;
 };
@@ -198,7 +198,7 @@ struct drm_virtgpu_resource_create_blob {
 	 */
 	__u32 pad;
 	__u32 cmd_size;
-	__u64 cmd;
+	__u64ptr cmd;
 	__u64 blob_id;
 };
 
@@ -208,7 +208,7 @@ struct drm_virtgpu_resource_create_blob {
 #define VIRTGPU_CONTEXT_PARAM_DEBUG_NAME      0x0004
 struct drm_virtgpu_context_set_param {
 	__u64 param;
-	__u64 value;
+	__u64ptr value;
 };
 
 struct drm_virtgpu_context_init {
@@ -216,7 +216,7 @@ struct drm_virtgpu_context_init {
 	__u32 pad;
 
 	/* pointer to drm_virtgpu_context_set_param array */
-	__u64 ctx_set_params;
+	__u64ptr ctx_set_params;
 };
 
 /*

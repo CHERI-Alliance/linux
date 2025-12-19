@@ -169,7 +169,7 @@ struct drm_panthor_obj_array {
 	__u32 count;
 
 	/** @array: User pointer to an array of objects. */
-	__u64 array;
+	__u64ptr array;
 };
 
 /**
@@ -427,7 +427,7 @@ struct drm_panthor_dev_query {
 	 * actual structure size is returned. If not NULL, it must point to
 	 * a location that's large enough to hold size bytes.
 	 */
-	__u64 pointer;
+	__u64ptr pointer;
 };
 
 /**
@@ -1015,7 +1015,7 @@ struct drm_panthor_bo_set_label {
 	 *
 	 * Length cannot be greater than 4096
 	 */
-	__u64 label;
+	__u64ptr label;
 };
 
 /**

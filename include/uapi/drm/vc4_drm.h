@@ -96,7 +96,7 @@ struct drm_vc4_submit_cl {
 	 * then writes out the state updates and draw calls necessary per tile
 	 * to the tile allocation BO.
 	 */
-	__u64 bin_cl;
+	__u64ptr bin_cl;
 
 	/* Pointer to the shader records.
 	 *
@@ -107,7 +107,7 @@ struct drm_vc4_submit_cl {
 	 * and an attribute count), so those BO indices into bo_handles are
 	 * just stored as __u32s before each shader record passed in.
 	 */
-	__u64 shader_rec;
+	__u64ptr shader_rec;
 
 	/* Pointer to uniform data and texture handles for the textures
 	 * referenced by the shader.
@@ -123,8 +123,8 @@ struct drm_vc4_submit_cl {
 	 * because the kernel has to determine the sizes anyway during shader
 	 * code validation.
 	 */
-	__u64 uniforms;
-	__u64 bo_handles;
+	__u64ptr uniforms;
+	__u64ptr bo_handles;
 
 	/* Size in bytes of the binner command list. */
 	__u32 bin_cl_size;
@@ -271,7 +271,7 @@ struct drm_vc4_create_shader_bo {
 	__u32 flags;
 
 	/* Pointer to the data. */
-	__u64 data;
+	__u64ptr data;
 
 	/** Returned GEM handle for the BO. */
 	__u32 handle;
@@ -292,7 +292,7 @@ struct drm_vc4_get_hang_state_bo {
 */
 struct drm_vc4_get_hang_state {
 	/** Pointer to array of struct drm_vc4_get_hang_state_bo. */
-	__u64 bo;
+	__u64ptr bo;
 	/**
 	 * On input, the size of the bo array.  Output is the number
 	 * of bos to be returned.
@@ -356,7 +356,7 @@ struct drm_vc4_set_tiling {
 struct drm_vc4_label_bo {
 	__u32 handle;
 	__u32 len;
-	__u64 name;
+	__u64ptr name;
 };
 
 /*
@@ -432,7 +432,7 @@ struct drm_vc4_perfmon_destroy {
  */
 struct drm_vc4_perfmon_get_values {
 	__u32 id;
-	__u64 values_ptr;
+	__u64ptr values_ptr;
 };
 
 #if defined(__cplusplus)
