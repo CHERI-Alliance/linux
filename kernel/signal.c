@@ -3604,7 +3604,7 @@ void copy_siginfo_to_external32(struct compat_siginfo *to,
 	case SIL_TIMER:
 		to->si_tid     = from->si_tid;
 		to->si_overrun = from->si_overrun;
-		to->si_int     = from->si_int;
+		to->si_ptr     = __c_pa_u(from->si_ptr);
 		break;
 	case SIL_POLL:
 		to->si_band = from->si_band;
@@ -3646,7 +3646,7 @@ void copy_siginfo_to_external32(struct compat_siginfo *to,
 	case SIL_RT:
 		to->si_pid = from->si_pid;
 		to->si_uid = from->si_uid;
-		to->si_int = from->si_int;
+		to->si_ptr = __c_pa_u(from->si_ptr);
 		break;
 	case SIL_SYS:
 		to->si_call_addr = ptr_to_compat(from->si_call_addr);
@@ -3682,7 +3682,7 @@ static int post_copy_siginfo_from_user32(kernel_siginfo_t *to,
 	case SIL_TIMER:
 		to->si_tid     = from->si_tid;
 		to->si_overrun = from->si_overrun;
-		to->si_int     = from->si_int;
+		to->si_ptr     = __c_fakep(from->si_ptr);
 		break;
 	case SIL_POLL:
 		to->si_band = from->si_band;
@@ -3732,7 +3732,7 @@ static int post_copy_siginfo_from_user32(kernel_siginfo_t *to,
 	case SIL_RT:
 		to->si_pid = from->si_pid;
 		to->si_uid = from->si_uid;
-		to->si_int = from->si_int;
+		to->si_ptr = __c_fakep(from->si_ptr);
 		break;
 	case SIL_SYS:
 		to->si_call_addr = compat_ptr(from->si_call_addr);
