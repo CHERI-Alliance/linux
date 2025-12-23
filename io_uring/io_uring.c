@@ -698,10 +698,7 @@ static bool io_fill_nop_cqe(struct io_ring_ctx *ctx, unsigned int off)
 {
 	if (__io_cqring_events(ctx) < ctx->cq_entries) {
 		struct io_uring_cqe *cqe = __io_get_ith_cqe(ctx, off);
-
-		cqe->user_data = 0;
-		cqe->res = 0;
-		cqe->flags = IORING_CQE_F_SKIP;
+		__io_fill_cqe(ctx, cqe, 0, 0, IORING_CQE_F_SKIP, 0, 0);
 		ctx->cached_cq_tail++;
 		return true;
 	}
