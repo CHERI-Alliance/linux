@@ -2335,7 +2335,8 @@ void __init hash_pointers_finalize(bool slub_debug)
 		break;
 	case HASH_PTR_AUTO:
 	default:
-		no_hash_pointers = slub_debug;
+		/* Keep value of no_hash_pointers if already set */
+		no_hash_pointers |= slub_debug;
 		break;
 	}
 
