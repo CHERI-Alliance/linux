@@ -22,7 +22,7 @@ struct __kernel_sockaddr_storage {
 				/* space to achieve desired size, */
 				/* _SS_MAXSIZE value minus size of ss_family */
 		};
-		void *__align; /* implementation specific desired alignment */
+		unsigned long __align; /* implementation specific desired alignment */
 	};
 };
 
