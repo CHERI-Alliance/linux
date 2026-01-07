@@ -9,7 +9,10 @@ struct xt_tee_tginfo {
 	char oif[16];
 
 	/* used internally by the kernel */
-	struct xt_tee_priv *priv __attribute__((aligned(8)));
+	union {
+		struct xt_tee_priv *priv;
+		__uptr __priv;
+	} __attribute__((aligned(8)));
 };
 
 #endif /* _XT_TEE_TARGET_H */

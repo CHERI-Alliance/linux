@@ -20,6 +20,9 @@ struct xt_rateinfo {
 	__u32 credit; /* moved to xt_limit_priv */
 	__u32 credit_cap, cost;
 
-	struct xt_limit_priv *master;
+	union {
+		struct xt_limit_priv *master;
+		__uptr __master;
+	};
 };
 #endif /*_XT_RATE_H*/

@@ -16,7 +16,10 @@ struct xt_bpf_info {
 	struct sock_filter bpf_program[XT_BPF_MAX_NUM_INSTR];
 
 	/* only used in the kernel */
-	struct bpf_prog *filter __attribute__((aligned(8)));
+	union {
+		struct bpf_prog *filter;
+		__uptr __filter;
+	} __attribute__((aligned(8)));
 };
 
 enum xt_bpf_modes {
@@ -36,7 +39,10 @@ struct xt_bpf_info_v1 {
 	};
 
 	/* only used in the kernel */
-	struct bpf_prog *filter __attribute__((aligned(8)));
+	union {
+		struct bpf_prog *filter;
+		__uptr __filter;
+	} __attribute__((aligned(8)));
 };
 
 #endif /*_XT_BPF_H */

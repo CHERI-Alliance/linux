@@ -125,7 +125,10 @@ struct ebt_entry_match {
 			char name[EBT_EXTENSION_MAXNAMELEN];
 			__u8 revision;
 		};
-		struct xt_match *match;
+		union {
+			struct xt_match *match;
+			__uptr __match;
+		};
 	} u;
 	/* size of data */
 	unsigned int match_size;
@@ -138,7 +141,10 @@ struct ebt_entry_watcher {
 			char name[EBT_EXTENSION_MAXNAMELEN];
 			__u8 revision;
 		};
-		struct xt_target *watcher;
+		union {
+			struct xt_target *watcher;
+			__uptr __watcher;
+		};
 	} u;
 	/* size of data */
 	unsigned int watcher_size;
@@ -151,7 +157,10 @@ struct ebt_entry_target {
 			char name[EBT_EXTENSION_MAXNAMELEN];
 			__u8 revision;
 		};
-		struct xt_target *target;
+		union {
+			struct xt_target *target;
+			__uptr __target;
+		};
 	} u;
 	/* size of data */
 	unsigned int target_size;

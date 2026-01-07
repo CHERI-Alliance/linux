@@ -25,7 +25,10 @@ struct idletimer_tg_info {
 	char label[MAX_IDLETIMER_LABEL_SIZE];
 
 	/* for kernel module internal use only */
-	struct idletimer_tg *timer __attribute__((aligned(8)));
+	union {
+		struct idletimer_tg *timer;
+		__uptr __timer;
+	} __attribute__((aligned(8)));
 };
 
 struct idletimer_tg_info_v1 {
@@ -37,6 +40,9 @@ struct idletimer_tg_info_v1 {
 	__u8 timer_type;
 
 	/* for kernel module internal use only */
-	struct idletimer_tg *timer __attribute__((aligned(8)));
+	union {
+		struct idletimer_tg *timer;
+		__uptr __timer;
+	} __attribute__((aligned(8)));
 };
 #endif

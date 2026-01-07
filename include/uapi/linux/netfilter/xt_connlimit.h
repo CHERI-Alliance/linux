@@ -27,7 +27,10 @@ struct xt_connlimit_info {
 	__u32 flags;
 
 	/* Used internally by the kernel */
-	struct nf_conncount_data *data __attribute__((aligned(8)));
+	union {
+		struct nf_conncount_data *data;
+		__uptr __data;
+	} __attribute__((aligned(8)));
 };
 
 #endif /* _XT_CONNLIMIT_H */
