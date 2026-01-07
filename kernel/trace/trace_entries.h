@@ -131,7 +131,7 @@ FTRACE_ENTRY_PACKED(funcgraph_exit, ftrace_graph_ret_entry,
 	),
 
 	F_printk("<-- %ps (%u) (start: %llx  end: %llx) over: %u retval: %lx",
-		 (void *)__entry->func, __entry->depth,
+		 __c_fakep(__entry->func), __entry->depth,
 		 __entry->calltime, __entry->rettime,
 		 __entry->depth, __entry->retval)
 );

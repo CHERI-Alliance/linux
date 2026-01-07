@@ -840,7 +840,7 @@ __ftrace_return_to_handler(struct ftrace_regs *fregs, __ptraddr_t frame_pointer)
 		goto out;
 
 #ifdef CONFIG_FUNCTION_GRAPH_RETVAL
-	trace.retval = ftrace_regs_get_return_value(fregs);
+	trace.retval = __c_ua(ftrace_regs_get_return_value(fregs));
 #endif
 
 	bitmap = get_bitmap_bits(current, offset);

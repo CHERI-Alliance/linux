@@ -1152,6 +1152,10 @@ struct fgraph_retaddr_ent {
  * Structure that defines a return function trace.
  * It's already packed but the attribute "packed" is needed
  * to remove extra padding at the end.
+ *
+ * This struct is stored in the ringbuffer as part of ftrace_graph_ret_entry,
+ * capability components are not allowed. retval metatdata would require a
+ * separate field.
  */
 struct ftrace_graph_ret {
 	unsigned long func; /* Current function */
