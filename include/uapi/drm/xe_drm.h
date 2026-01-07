@@ -210,11 +210,15 @@ struct drm_xe_ext_set_property {
 	/** @pad: MBZ */
 	__u32 pad;
 
-	/** @value: property value */
-	__u64 value;
+	union {
+		struct {
+			/** @value: property value */
+			__u64ptr value;
 
-	/** @reserved: Reserved */
-	__u64 reserved[2];
+			/** @reserved: Reserved */
+		};
+		__u64 reserved[3];
+	};
 };
 
 /**
