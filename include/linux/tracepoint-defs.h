@@ -89,7 +89,7 @@ struct bpf_raw_event_map {
 
 #ifdef CONFIG_TRACEPOINTS
 # define tracepoint_enabled(tp) \
-	static_branch_unlikely(&(__tracepoint_##tp).key)
+	__static_branch_unlikely(&__tracepoint_##tp, &(__tracepoint_##tp).key)
 #else
 # define tracepoint_enabled(tracepoint) false
 #endif
