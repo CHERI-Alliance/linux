@@ -32,7 +32,7 @@ struct serial_struct {
 	int	hub6;
 	unsigned short	closing_wait; /* time to wait before closing */
 	unsigned short	closing_wait2; /* no longer used... */
-	unsigned char	*iomem_base;
+	unsigned long	iomem_base;
 	unsigned short	iomem_reg_shift;
 	unsigned int	port_high;
 	unsigned long	iomap_base;	/* cookie passed into ioremap */
