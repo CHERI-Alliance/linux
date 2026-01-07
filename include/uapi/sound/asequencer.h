@@ -492,7 +492,10 @@ struct snd_seq_port_info {
 	int read_use;			/* R/O: subscribers for output (from this port) */
 	int write_use;			/* R/O: subscribers for input (to this port) */
 
-	void *kernel;			/* reserved for kernel use (must be NULL) */
+	union {
+		void *kernel;		/* reserved for kernel use (must be NULL) */
+		__ulptr _kernel;	/* Enforce purecap alignment. */
+	};
 	unsigned int flags;		/* misc. conditioning */
 	unsigned char time_queue;	/* queue # for timestamping */
 	unsigned char direction;	/* port usage direction (r/w/bidir) */
