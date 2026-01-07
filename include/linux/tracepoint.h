@@ -263,7 +263,7 @@ static inline struct tracepoint *tracepoint_ptr_deref(tracepoint_ptr_t *p)
 	static inline bool						\
 	trace_##name##_enabled(void)					\
 	{								\
-		return static_branch_unlikely(&__tracepoint_##name.key);\
+		return __static_branch_unlikely(&__tracepoint_##name, &__tracepoint_##name.key); \
 	}
 
 #define __DECLARE_TRACE(name, proto, args, cond, data_proto)		\
@@ -277,7 +277,7 @@ static inline struct tracepoint *tracepoint_ptr_deref(tracepoint_ptr_t *p)
 	}								\
 	static inline void trace_##name(proto)				\
 	{								\
-		if (static_branch_unlikely(&__tracepoint_##name.key))	\
+		if (__static_branch_unlikely(&__tracepoint_##name, &__tracepoint_##name.key))	\
 			__do_trace_##name(args);			\
 		if (IS_ENABLED(CONFIG_LOCKDEP) && (cond)) {		\
 			WARN_ONCE(!rcu_is_watching(),			\
@@ -295,7 +295,7 @@ static inline struct tracepoint *tracepoint_ptr_deref(tracepoint_ptr_t *p)
 	static inline void trace_##name(proto)				\
 	{								\
 		might_fault();						\
-		if (static_branch_unlikely(&__tracepoint_##name.key))	\
+		if (__static_branch_unlikely(&__tracepoint_##name, &__tracepoint_##name.key))	\
 			__do_trace_##name(args);			\
 		if (IS_ENABLED(CONFIG_LOCKDEP)) {			\
 			WARN_ONCE(!rcu_is_watching(),			\
