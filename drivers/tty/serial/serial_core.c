@@ -819,7 +819,7 @@ static int uart_get_info(struct tty_port *port, struct serial_struct *retinfo)
 	retinfo->hub6	    = uport->hub6;
 	retinfo->io_type         = uport->iotype;
 	retinfo->iomem_reg_shift = uport->regshift;
-	retinfo->iomem_base      = (void *)(unsigned long)uport->mapbase;
+	retinfo->iomem_base      = uport->mapbase;
 
 	return 0;
 }

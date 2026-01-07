@@ -2840,7 +2840,7 @@ static int compat_tty_tiocsserial(struct tty_struct *tty,
 		return -EFAULT;
 
 	memcpy(&v, &v32, offsetof(struct serial_struct32, iomem_base));
-	v.iomem_base = compat_ptr(v32.iomem_base);
+	v.iomem_base = (unsigned long)v32.iomem_base;
 	v.iomem_reg_shift = v32.iomem_reg_shift;
 	v.port_high = v32.port_high;
 	v.iomap_base = 0;
@@ -2863,8 +2863,8 @@ static int compat_tty_tiocgserial(struct tty_struct *tty,
 	err = tty->ops->get_serial(tty, &v);
 	if (!err) {
 		memcpy(&v32, &v, offsetof(struct serial_struct32, iomem_base));
-		v32.iomem_base = (unsigned long)v.iomem_base >> 32 ?
-			0xfffffff : ptr_to_compat(v.iomem_base);
+		v32.iomem_base = v.iomem_base >> 32 ?
+			0xfffffff : (compat_uint_t)v.iomem_base;
 		v32.iomem_reg_shift = v.iomem_reg_shift;
 		v32.port_high = v.port_high;
 		if (copy_to_user(ss, &v32, sizeof(v32)))
