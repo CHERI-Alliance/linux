@@ -238,9 +238,9 @@ struct v4l2_subdev_route {
 struct v4l2_subdev_routing {
 	__u32 which;
 	__u32 len_routes;
-	__u64 routes;
+	__u64ptr routes;
 	__u32 num_routes;
-	__u32 reserved[11];
+	__u32 reserved[13 - sizeof(__u64ptr) / sizeof(__u32)];
 };
 
 /*
