@@ -234,7 +234,10 @@ struct tee_ioctl_buf_data {
  */
 struct tee_ioctl_param {
 	__u64 attr;
-	__u64 a;
+	union {
+		__u64 a;
+		__u64ptr aptr;
+	};
 	__u64 b;
 	__u64 c;
 };
