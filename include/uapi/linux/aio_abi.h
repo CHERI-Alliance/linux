@@ -31,7 +31,7 @@
 #include <linux/fs.h>
 #include <asm/byteorder.h>
 
-typedef __kernel_ulong_t aio_context_t;
+typedef __ulptr aio_context_t;
 
 enum {
 	IOCB_CMD_PREAD = 0,
@@ -58,10 +58,15 @@ enum {
 
 /* read() from /dev/aio returns these structures. */
 struct io_event {
-	__u64		data;		/* the data field from the iocb */
-	__u64		obj;		/* what iocb this event came from */
-	__s64		res;		/* result code for this event */
-	__s64		res2;		/* secondary result */
+	union {
+		struct {
+			__u64ptr	data;		/* the data field from the iocb */
+			__u64ptr	obj;		/* what iocb this event came from */
+			__s64		res;		/* result code for this event */
+			__s64		res2;		/* secondary result */
+		};
+		__u64ptr	pad[4];
+	};
 };
 
 /*
