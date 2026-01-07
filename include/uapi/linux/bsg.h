@@ -67,19 +67,19 @@ struct sg_io_v4 {
 };
 
 struct bsg_uring_cmd {
-	__u64 request;		/* [i], [*i] command descriptor address */
+	__u64ptr request;	/* [i], [*i] command descriptor address */
 	__u32 request_len;	/* [i] command descriptor length in bytes */
 	__u32 protocol;		/* [i] protocol type (BSG_PROTOCOL_*) */
 	__u32 subprotocol;	/* [i] subprotocol type (BSG_SUB_PROTOCOL_*) */
 	__u32 max_response_len;	/* [i] response buffer size in bytes */
 
-	__u64 response;		/* [i], [*o] response data address */
-	__u64 dout_xferp;	/* [i], [*i] */
+	__u64ptr response;		/* [i], [*o] response data address */
+	__u64ptr dout_xferp;	/* [i], [*i] */
 	__u32 dout_xfer_len;	/* [i] bytes to be transferred to device */
 	__u32 dout_iovec_count;	/* [i] 0 -> "flat" dout transfer else
 				 * dout_xferp points to array of iovec
 				 */
-	__u64 din_xferp;	/* [i], [*o] */
+	__u64ptr din_xferp;	/* [i], [*o] */
 	__u32 din_xfer_len;	/* [i] bytes to be transferred from device */
 	__u32 din_iovec_count;	/* [i] 0 -> "flat" din transfer */
 
@@ -89,7 +89,11 @@ struct bsg_uring_cmd {
 
 #ifdef __KERNEL__
 /* Must match IORING_OP_URING_CMD payload size (e.g. SQE128). */
+#if defined(__ARCH_WANT_PURECAP) || defined(__CHERI_PURE_CAPABILITY__)
+static_assert(sizeof(struct bsg_uring_cmd) <= 160);
+#else
 static_assert(sizeof(struct bsg_uring_cmd) == 80);
+#endif
 #endif /* __KERNEL__ */
 
 
