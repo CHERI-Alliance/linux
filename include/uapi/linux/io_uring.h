@@ -19,6 +19,11 @@
 #ifndef UAPI_LINUX_IO_URING_H_SKIP_LINUX_TIME_TYPES_H
 #include <linux/time_types.h>
 #endif
+#ifdef __KERNEL__
+#include <linux/stddef.h>	/* for offsetof */
+#else
+#include <stddef.h>		/* for offsetof */
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -101,17 +106,25 @@ struct io_uring_sqe {
 	};
 	union {
 		struct {
-			__u64	addr3;
-			__u64	__pad2[1];
+			__u64ptr	addr3;
+			__u64ptr	__pad2[1];
 		};
 		struct {
-			__u64	attr_ptr; /* pointer to attribute information */
+			__u64ptr	attr_ptr; /* pointer to attribute information */
 			__u64	attr_type_mask; /* bit mask of attributes */
 		};
-		__u64	optval;
+		__u64ptr	optval;
+#ifdef __KERNEL__
+		/* Unconverted compat64 uintptrs */
+		__u64	__c64_addr3;
+		__u64	__c64_attr_ptr;
+		__u64	__c64_optval;
+#endif
 		/*
 		 * If the ring is initialized with IORING_SETUP_SQE128, then
-		 * this field is used for 80 bytes of arbitrary command data
+		 * this field is used to double the size of the
+		 * struct io_uring_sqe to store bytes of arbitrary
+		 * command data, i.e. 80 bytes or 160 bytes in PCuABI
 		 */
 		__u8	cmd[0];
 	};
@@ -491,15 +504,16 @@ enum io_uring_msg_ring_flags {
  * IO completion data structure (Completion Queue Entry)
  */
 struct io_uring_cqe {
-	__u64	user_data;	/* sqe->user_data value passed back */
+	__u64ptr	user_data;	/* sqe->user_data value passed back */
 	__s32	res;		/* result code for this event */
 	__u32	flags;
 
 	/*
 	 * If the ring is initialized with IORING_SETUP_CQE32, then this field
-	 * contains 16-bytes of padding, doubling the size of the CQE.
+	 * doubles the size of the CQE, i.e. contains 16 bytes, or in PCuABI,
+	 * 32 bytes of padding.
 	 */
-	__u64 big_cqe[];
+	__u64ptr big_cqe[];
 };
 
 /*
@@ -861,9 +875,7 @@ struct io_uring_buf_ring {
 		 * ring tail is overlaid with the io_uring_buf->resv field.
 		 */
 		struct {
-			__u64	resv1;
-			__u32	resv2;
-			__u16	resv3;
+			__u8	resv[offsetof(struct io_uring_buf, resv)];
 			__u16	tail;
 		};
 		__DECLARE_FLEX_ARRAY(struct io_uring_buf, bufs);
@@ -974,13 +986,16 @@ enum {
  * the below structure.
  */
 struct io_uring_reg_wait {
-	struct __kernel_timespec	ts;
-	__u32				min_wait_usec;
-	__u32				flags;
-	__u64				sigmask;
-	__u32				sigmask_sz;
-	__u32				pad[3];
-	__u64				pad2[2];
+	union {
+		struct {
+			struct __kernel_timespec	ts;
+			__u32				min_wait_usec;
+			__u32				flags;
+			__u64ptr			sigmask;
+			__u32				sigmask_sz;
+		};
+		__u64			pad[8];
+	};
 };
 
 /*
@@ -1084,7 +1099,11 @@ struct io_uring_zcrx_area_reg {
 	__u64	rq_area_token;
 	__u32	flags;
 	__u32	dmabuf_fd;
+#if defined(__CHERI_PURE_CAPABILITY__) && (__SIZEOF_LONG__ == 8)
+	__u32	__resv2[2];
+#else
 	__u64	__resv2[2];
+#endif
 };
 
 enum zcrx_reg_flags {
