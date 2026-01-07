@@ -187,7 +187,7 @@ int __trace_graph_retaddr_entry(struct trace_array *tr,
 #ifdef CONFIG_HAVE_FUNCTION_ARG_ACCESS_API
 	if (fregs) {
 		for (int i = 0; i < FTRACE_REGS_MAX_ARGS; i++)
-			entry->args[i] = ftrace_regs_get_argument(fregs, i);
+			entry->args[i] = __c_ua(ftrace_regs_get_argument(fregs, i));
 	}
 #endif
 
@@ -908,7 +908,7 @@ static void print_graph_retval(struct trace_seq *s, struct ftrace_graph_ent_entr
 		trace_seq_printf(s, "%ps", func);
 
 		if (args_size >= FTRACE_REGS_MAX_ARGS * sizeof(long)) {
-			print_function_args(s, FGRAPH_ENTRY_ARGS(entry), (unsigned long)func);
+			print_function_args(s, FGRAPH_ENTRY_ARGS(entry), __c_pa(func));
 			trace_seq_putc(s, ';');
 		} else
 			trace_seq_puts(s, "();");
@@ -997,7 +997,7 @@ print_graph_entry_leaf(struct trace_iterator *iter,
 	 */
 	if (flags & (__TRACE_GRAPH_PRINT_RETVAL | __TRACE_GRAPH_PRINT_RETADDR)) {
 		print_graph_retval(s, entry, graph_ret,
-				   (void *)graph_ret->func + iter->tr->text_delta,
+				   __c_fakep(graph_ret->func + iter->tr->text_delta),
 				   flags, tr->trace_flags, args_size);
 	} else {
 		trace_seq_printf(s, "%ps", __c_fakep(ret_func));
@@ -1338,7 +1338,7 @@ print_graph_return(struct ftrace_graph_ret_entry *retentry, struct trace_seq *s,
 	 * funcgraph-retval option is enabled.
 	 */
 	if (flags & __TRACE_GRAPH_PRINT_RETVAL) {
-		print_graph_retval(s, NULL, trace, (void *)func, flags,
+		print_graph_retval(s, NULL, trace, __c_fakep(func), flags,
 				   tr->trace_flags, 0);
 	} else {
 		/*
