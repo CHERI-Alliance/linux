@@ -28,7 +28,9 @@ struct xt_connlimit_info {
 
 	/* Used internally by the kernel */
 	union {
+		/// UAPI: NoConvert: Kernel only
 		struct nf_conncount_data *data;
+		/// UAPI: NoConvert: Kernel only
 		__uptr __data;
 	} __attribute__((aligned(8)));
 };

@@ -18,7 +18,9 @@ struct xt_quota_info {
 
 	/* Used internally by the kernel */
 	union {
+		/// UAPI: NoConvert: Kernel only
 		struct xt_quota_priv *master;
+		/// UAPI: NoConvert: Kernel only
 		__uptr __master;
 	};
 };

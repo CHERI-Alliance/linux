@@ -217,6 +217,7 @@ struct drm_xe_ext_set_property {
 
 			/** @reserved: Reserved */
 		};
+		/// UAPI: NoConvert: Padding
 		__u64 reserved[3];
 	};
 };

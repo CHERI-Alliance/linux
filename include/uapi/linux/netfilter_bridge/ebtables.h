@@ -126,7 +126,9 @@ struct ebt_entry_match {
 			__u8 revision;
 		};
 		union {
+			/// UAPI: NoConvert: Kernel only
 			struct xt_match *match;
+			/// UAPI: NoConvert: Kernel only
 			__uptr __match;
 		};
 	} u;
@@ -142,7 +144,9 @@ struct ebt_entry_watcher {
 			__u8 revision;
 		};
 		union {
+			/// UAPI: NoConvert: Kernel only
 			struct xt_target *watcher;
+			/// UAPI: NoConvert: Kernel only
 			__uptr __watcher;
 		};
 	} u;
@@ -158,7 +162,9 @@ struct ebt_entry_target {
 			__u8 revision;
 		};
 		union {
+			/// UAPI: NoConvert: Kernel only
 			struct xt_target *target;
+			/// UAPI: NoConvert: Kernel only
 			__uptr __target;
 		};
 	} u;

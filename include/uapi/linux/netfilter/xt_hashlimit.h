@@ -102,7 +102,9 @@ struct xt_hashlimit_mtinfo1 {
 
 	/* Used internally by the kernel */
 	union {
+		/// UAPI: NoConvert: Kernel only
 		struct xt_hashlimit_htable *hinfo;
+		/// UAPI: NoConvert: Kernel only
 		__uptr __hinfo;
 	} __attribute__((aligned(8)));
 };
@@ -113,7 +115,9 @@ struct xt_hashlimit_mtinfo2 {
 
 	/* Used internally by the kernel */
 	union {
+		/// UAPI: NoConvert: Kernel only
 		struct xt_hashlimit_htable *hinfo;
+		/// UAPI: NoConvert: Kernel only
 		__uptr __hinfo;
 	} __attribute__((aligned(8)));
 };
@@ -124,7 +128,9 @@ struct xt_hashlimit_mtinfo3 {
 
 	/* Used internally by the kernel */
 	union {
+		/// UAPI: NoConvert: Kernel only
 		struct xt_hashlimit_htable *hinfo;
+		/// UAPI: NoConvert: Kernel only
 		__uptr __hinfo;
 	} __attribute__((aligned(8)));
 };

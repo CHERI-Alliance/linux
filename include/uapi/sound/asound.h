@@ -550,10 +550,12 @@ struct __snd_pcm_sync_ptr {
 	unsigned int flags;
 	union {
 		struct __snd_pcm_mmap_status status;
+		/// UAPI: NoConvert: Padding
 		unsigned char reserved[64];
 	} s;
 	union {
 		struct __snd_pcm_mmap_control control;
+		/// UAPI: NoConvert: Padding
 		unsigned char reserved[64];
 	} c;
 };
@@ -1171,18 +1173,22 @@ struct snd_ctl_elem_value {
 	union {
 		union {
 			long value[128];
+			/// UAPI: NoConvert: Unsed by the kernel
 			long *value_ptr;	/* obsoleted */
 		} integer;
 		union {
 			long long value[64];
+			/// UAPI: NoConvert: Unsed by the kernel
 			long long *value_ptr;	/* obsoleted */
 		} integer64;
 		union {
 			unsigned int item[128];
+			/// UAPI: NoConvert: Unsed by the kernel
 			unsigned int *item_ptr;	/* obsoleted */
 		} enumerated;
 		union {
 			unsigned char data[512];
+			/// UAPI: NoConvert: Unsed by the kernel
 			unsigned char *data_ptr;	/* obsoleted */
 		} bytes;
 		struct snd_aes_iec958 iec958;

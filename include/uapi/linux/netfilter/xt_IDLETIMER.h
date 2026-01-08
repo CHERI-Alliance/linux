@@ -26,7 +26,9 @@ struct idletimer_tg_info {
 
 	/* for kernel module internal use only */
 	union {
+		/// UAPI: NoConvert: Kernel only
 		struct idletimer_tg *timer;
+		/// UAPI: NoConvert: Kernel only
 		__uptr __timer;
 	} __attribute__((aligned(8)));
 };
@@ -41,7 +43,9 @@ struct idletimer_tg_info_v1 {
 
 	/* for kernel module internal use only */
 	union {
+		/// UAPI: NoConvert: Kernel only
 		struct idletimer_tg *timer;
+		/// UAPI: NoConvert: Kernel only
 		__uptr __timer;
 	} __attribute__((aligned(8)));
 };

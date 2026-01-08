@@ -292,6 +292,7 @@ struct cdrom_generic_command
 	int			quiet;
 	int			timeout;
 	union {
+		/// UAPI: NoConvert: Unused in the kernel
 		void		__user *reserved[1];	/* unused, actually */
 		void            __user *unused;
 	};

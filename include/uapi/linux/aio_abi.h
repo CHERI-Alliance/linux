@@ -65,6 +65,7 @@ struct io_event {
 			__s64		res;		/* result code for this event */
 			__s64		res2;		/* secondary result */
 		};
+		/// UAPI: NoConvert: Padding
 		__u64ptr	pad[4];
 	};
 };
