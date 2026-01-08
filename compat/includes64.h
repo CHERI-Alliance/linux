@@ -109,6 +109,7 @@
 #include <uapi/linux/omapfb.h>
 #include <uapi/linux/phonet.h>
 #include <uapi/linux/ppp-ioctl.h>
+#include <uapi/linux/pr.h>
 #include <uapi/linux/prctl.h>
 #include <uapi/linux/ptrace.h>
 #include <uapi/linux/raid/md_p.h>
