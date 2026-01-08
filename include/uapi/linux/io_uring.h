@@ -1002,6 +1002,7 @@ struct io_uring_reg_wait {
 			__u64ptr			sigmask;
 			__u32				sigmask_sz;
 		};
+		/// UAPI: NoConvert: Padding only
 		__u64			pad[8];
 	};
 };
