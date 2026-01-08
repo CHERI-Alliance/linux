@@ -17,8 +17,13 @@ typedef unsigned long	__kernel_ulong_t;
 #endif
 
 #ifndef __kernel_uintptr_t
+#if defined(__ARCH_WANT_PURECAP) || defined(__CHERI_PURE_CAPABILITY__)
+typedef __uintcap_t	__kernel_uintptr_t;
+typedef __intcap_t	__kernel_intptr_t;
+#else
 typedef unsigned long	__kernel_uintptr_t;
 typedef long		__kernel_intptr_t;
+#endif
 #endif
 
 #ifndef __kernel_ptraddr_t
