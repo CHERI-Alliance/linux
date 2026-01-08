@@ -48,6 +48,14 @@ typedef u32 compat_caddr_t;
 typedef u32 compat_aio_context_t;
 typedef u32 compat_old_sigset_t;
 
+/* Type definitions for auto generated compat64 headers. */
+typedef u32 __c32_ulong;
+typedef u32 __c32_uptr;
+typedef u64 __c32_ptr64;
+
+typedef unsigned long __c64_uptr;
+typedef u64 __c64_ptr64;
+
 #ifndef __compat_uid_t
 typedef u32 __compat_uid_t;
 typedef u32 __compat_gid_t;
