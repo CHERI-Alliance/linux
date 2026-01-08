@@ -48,10 +48,17 @@ typedef __kernel_uintptr_t __ulptr;
 typedef __kernel_intptr_t __slptr;
 
 /* At least 64-bit and large enough for a pointer. */
+#if defined(__ARCH_WANT_PURECAP) || defined(__CHERI_PURE_CAPABILITY__)
+typedef __kernel_uintptr_t __u64ptr;
+typedef __kernel_intptr_t __s64ptr;
+#define __PACKED_IF_NOT_CHERI
+#define __CHERI_POINTER_ALIGN __attribute__((aligned(__SIZEOF_UINTCAP__)))
+#else
 typedef __u64 __u64ptr;
 typedef __s64 __s64ptr;
 #define __PACKED_IF_NOT_CHERI __attribute__((packed))
 #define __CHERI_POINTER_ALIGN
+#endif
 
 typedef __kernel_ptraddr_t __ptraddr_t;
 typedef __u64 __ptraddr64_t;
@@ -70,8 +77,17 @@ typedef __u64 __ptraddr64_t;
 #define __aligned_be64 __be64 __attribute__((aligned(8)))
 #define __aligned_le64 __le64 __attribute__((aligned(8)))
 
+/*
+ * If the CHERI types are capabilities they are naturally aligned to
+ * at least 64-bit or more.
+ */
+#if defined(__ARCH_WANT_PURECAP) || defined(__CHERI_PURE_CAPABILITY__)
+#define __aligned_u64ptr __u64ptr
+#define __aligned_s64ptr __s64ptr
+#else
 #define __aligned_u64ptr __u64ptr __attribute__((aligned(8)))
 #define __aligned_s64ptr __s64ptr __attribute__((aligned(8)))
+#endif
 
 typedef unsigned __bitwise __poll_t;
 
