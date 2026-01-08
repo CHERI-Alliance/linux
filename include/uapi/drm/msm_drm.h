@@ -273,6 +273,7 @@ struct drm_msm_gem_submit_cmd {
 	__u32 pad;
 	__u32 nr_relocs;      /* in, number of submit_reloc's */
 	union {
+		/// UAPI: NoConvert: Copy as __u64
 		__u64ptr relocs;         /* in, ptr to array of submit_reloc's */
 		__u64 iova;   /* cmdstream address (for VM_BIND contexts) */
 	};
@@ -408,6 +409,7 @@ struct drm_msm_vm_bind {
 		/** @op: used if num_ops == 1 */
 		struct drm_msm_vm_bind_op op;
 		/** @ops: userptr to array of drm_msm_vm_bind_op if num_ops > 1 */
+		/// UAPI: NoConvert: Only convert this on demand
 		__u64ptr ops;
 	};
 };

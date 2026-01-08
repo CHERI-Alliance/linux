@@ -493,7 +493,9 @@ struct snd_seq_port_info {
 	int write_use;			/* R/O: subscribers for input (to this port) */
 
 	union {
+		/// UAPI: NoConvert: Kernel only.
 		void *kernel;		/* reserved for kernel use (must be NULL) */
+		/// UAPI: NoConvert: Kernel only.
 		__ulptr _kernel;	/* Enforce purecap alignment. */
 	};
 	unsigned int flags;		/* misc. conditioning */

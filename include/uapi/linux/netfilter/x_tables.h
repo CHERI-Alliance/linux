@@ -22,7 +22,9 @@ struct xt_entry_match {
 
 			/* Used inside the kernel */
 			union {
+				/// UAPI: NoConvert: Kernel only
 				struct xt_match *match;
+				/// UAPI: NoConvert: Kernel only
 				__ulptr __match;
 			};
 		} kernel;
@@ -48,7 +50,9 @@ struct xt_entry_target {
 
 			/* Used inside the kernel */
 			union {
+				/// UAPI: NoConvert: Kernel only
 				struct xt_target *target;
+				/// UAPI: NoConvert: Kernel only
 				__ulptr __target;
 			};
 		} kernel;
@@ -119,6 +123,7 @@ struct xt_counters {
 			__u64 pcnt, bcnt;	/* Packet and byte counters */
 		};
 #ifdef __KERNEL__
+		/// UAPI: NoConvert: Kernel only
 		void * percpu;
 #endif
 	};

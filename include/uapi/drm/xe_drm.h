@@ -216,8 +216,10 @@ struct drm_xe_ext_set_property {
 		/** @value: property value */
 		__u64 value;
 		/** @ptr: pointer to user value */
+		/// UAPI: NoConvert: Just copy as __u64
 		__u64ptr ptr;
 		/** @reserved: Reserved */
+		/// UAPI: NoConvert: Padding
 		__u64 reserved[3];
 	};
 };
@@ -1449,6 +1451,7 @@ struct drm_xe_sync {
 
 	union {
 		/** @handle: Handle for the object */
+		/// UAPI: NoConvert: Only convert as an u64
 		__u32 handle;
 
 		/**
@@ -1459,7 +1462,13 @@ struct drm_xe_sync {
 		 * mapped when the user fence is signalled. Must be qword
 		 * aligned.
 		 */
+#ifdef __KERNEL__
+		/// UAPI: NoConvert: Only convert as an u64
+		__u64ptr __c64_addr;
+		__u64 __c64_copy;
+#else
 		__u64ptr addr;
+#endif
 	};
 
 	/**
@@ -2354,9 +2363,11 @@ struct drm_xe_exec_queue_set_property {
 		__u64 value;
 
 		/** @ptr: pointer to user value */
+		/// UAPI: NoConvert: Just copy as __u64
 		__u64ptr ptr;
 
 		/** @reserved: Reserved */
+		/// UAPI: NoConvert: Padding
 		__u64 reserved[3];
 	};
 };
