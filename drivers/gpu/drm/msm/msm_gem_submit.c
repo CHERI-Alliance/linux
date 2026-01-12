@@ -204,7 +204,7 @@ static int submit_lookup_cmds(struct msm_gem_submit *submit,
 		void __user *userptr =
 			u64_to_user_ptr(args->cmds + (i * sizeof(submit_cmd)));
 
-		ret = copy_from_user(&submit_cmd, userptr, sizeof(submit_cmd));
+		ret = copy_from_user_with_ptr(&submit_cmd, userptr, sizeof(submit_cmd));
 		if (ret) {
 			ret = -EFAULT;
 			goto out;

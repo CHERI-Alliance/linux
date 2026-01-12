@@ -384,7 +384,7 @@ v3d_get_multisync_submit_deps(struct drm_file *file_priv,
 		return -EINVAL;
 	}
 
-	if (copy_from_user(&multisync, ext, sizeof(multisync)))
+	if (copy_from_user_with_ptr(&multisync, ext, sizeof(multisync)))
 		return -EFAULT;
 
 	if (multisync.pad)
@@ -424,7 +424,7 @@ v3d_get_cpu_indirect_csd_params(struct drm_file *file_priv,
 		return -EINVAL;
 	}
 
-	if (copy_from_user(&indirect_csd, ext, sizeof(indirect_csd)))
+	if (copy_from_user_with_ptr(&indirect_csd, ext, sizeof(indirect_csd)))
 		return -EFAULT;
 
 	if (!v3d_has_csd(v3d)) {
@@ -467,7 +467,7 @@ v3d_get_cpu_timestamp_query_params(struct drm_file *file_priv,
 		return -EINVAL;
 	}
 
-	if (copy_from_user(&timestamp, ext, sizeof(timestamp)))
+	if (copy_from_user_with_ptr(&timestamp, ext, sizeof(timestamp)))
 		return -EFAULT;
 
 	if (timestamp.pad)
@@ -536,7 +536,7 @@ v3d_get_cpu_reset_timestamp_params(struct drm_file *file_priv,
 		return -EINVAL;
 	}
 
-	if (copy_from_user(&reset, ext, sizeof(reset)))
+	if (copy_from_user_with_ptr(&reset, ext, sizeof(reset)))
 		return -EFAULT;
 
 	job->job_type = V3D_CPU_JOB_TYPE_RESET_TIMESTAMP_QUERY;
@@ -597,7 +597,7 @@ v3d_get_cpu_copy_query_results_params(struct drm_file *file_priv,
 		return -EINVAL;
 	}
 
-	if (copy_from_user(&copy, ext, sizeof(copy)))
+	if (copy_from_user_with_ptr(&copy, ext, sizeof(copy)))
 		return -EFAULT;
 
 	if (copy.pad)
@@ -733,7 +733,7 @@ v3d_get_cpu_reset_performance_params(struct drm_file *file_priv,
 		return -EINVAL;
 	}
 
-	if (copy_from_user(&reset, ext, sizeof(reset)))
+	if (copy_from_user_with_ptr(&reset, ext, sizeof(reset)))
 		return -EFAULT;
 
 	job->job_type = V3D_CPU_JOB_TYPE_RESET_PERFORMANCE_QUERY;
@@ -779,7 +779,7 @@ v3d_get_cpu_copy_performance_query_params(struct drm_file *file_priv,
 		return -EINVAL;
 	}
 
-	if (copy_from_user(&copy, ext, sizeof(copy)))
+	if (copy_from_user_with_ptr(&copy, ext, sizeof(copy)))
 		return -EFAULT;
 
 	if (copy.pad)
@@ -832,7 +832,7 @@ v3d_get_extensions(struct drm_file *file_priv,
 	while (user_ext) {
 		struct drm_v3d_extension ext;
 
-		if (copy_from_user(&ext, user_ext, sizeof(ext))) {
+		if (copy_from_user_with_ptr(&ext, user_ext, sizeof(ext))) {
 			DRM_DEBUG("Failed to copy submit extension\n");
 			return -EFAULT;
 		}

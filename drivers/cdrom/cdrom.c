@@ -3007,7 +3007,7 @@ static noinline int mmc_ioctl_cdrom_read_audio(struct cdrom_device_info *cdi,
 	} else
 #endif
 	{
-		if (copy_from_user(&ra, (struct cdrom_read_audio __user *)arg,
+		if (copy_from_user_with_ptr(&ra, (struct cdrom_read_audio __user *)arg,
 				   sizeof(ra)))
 			return -EFAULT;
 	}

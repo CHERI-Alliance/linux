@@ -285,7 +285,7 @@ recv_err:
 
 static int copyout_recv(struct ipmi_recv *rsp, void __user *to)
 {
-	return copy_to_user(to, rsp, sizeof(struct ipmi_recv)) ? -EFAULT : 0;
+	return copy_to_user_with_ptr(to, rsp, sizeof(struct ipmi_recv)) ? -EFAULT : 0;
 }
 
 static long ipmi_ioctl(struct file   *file,
@@ -304,7 +304,7 @@ static long ipmi_ioctl(struct file   *file,
 		int retries;
 		unsigned int retry_time_ms;
 
-		if (copy_from_user(&req, arg, sizeof(req))) {
+		if (copy_from_user_with_ptr(&req, arg, sizeof(req))) {
 			rv = -EFAULT;
 			break;
 		}
@@ -322,7 +322,7 @@ static long ipmi_ioctl(struct file   *file,
 	{
 		struct ipmi_req_settime req;
 
-		if (copy_from_user(&req, arg, sizeof(req))) {
+		if (copy_from_user_with_ptr(&req, arg, sizeof(req))) {
 			rv = -EFAULT;
 			break;
 		}
@@ -339,7 +339,7 @@ static long ipmi_ioctl(struct file   *file,
 	{
 		struct ipmi_recv      rsp;
 
-		if (copy_from_user(&rsp, arg, sizeof(rsp)))
+		if (copy_from_user_with_ptr(&rsp, arg, sizeof(rsp)))
 			rv = -EFAULT;
 		else
 			rv = handle_recv(priv, cmd == IPMICTL_RECEIVE_MSG_TRUNC,

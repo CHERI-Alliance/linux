@@ -2773,7 +2773,7 @@ _ctl_ioctl_main(struct file *file, unsigned int cmd, void __user *arg,
 			break;
 		}
 #endif
-		if (copy_from_user(&karg, arg, sizeof(karg))) {
+		if (copy_from_user_with_ptr(&karg, arg, sizeof(karg))) {
 			pr_err("failure at %s:%d/%s()!\n",
 			    __FILE__, __LINE__, __func__);
 			ret = -EFAULT;

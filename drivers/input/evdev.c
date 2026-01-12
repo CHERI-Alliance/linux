@@ -1096,7 +1096,7 @@ static long evdev_do_ioctl(struct file *file, unsigned int cmd,
 	case EVIOCGMASK: {
 		void __user *codes_ptr;
 
-		if (copy_from_user(&mask, p, sizeof(mask)))
+		if (copy_from_user_with_ptr(&mask, p, sizeof(mask)))
 			return -EFAULT;
 
 		codes_ptr = (void __user *)(unsigned long)mask.codes_ptr;
@@ -1108,7 +1108,7 @@ static long evdev_do_ioctl(struct file *file, unsigned int cmd,
 	case EVIOCSMASK: {
 		const void __user *codes_ptr;
 
-		if (copy_from_user(&mask, p, sizeof(mask)))
+		if (copy_from_user_with_ptr(&mask, p, sizeof(mask)))
 			return -EFAULT;
 
 		codes_ptr = (const void __user *)(unsigned long)mask.codes_ptr;

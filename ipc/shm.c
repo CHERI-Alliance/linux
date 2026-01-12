@@ -868,7 +868,7 @@ static inline unsigned long copy_shmid_to_user(void __user *buf, struct shmid64_
 		out.shm_lpid	= in->shm_lpid;
 		out.shm_nattch	= in->shm_nattch;
 
-		return copy_to_user(buf, &out, sizeof(out));
+		return copy_to_user_with_ptr(buf, &out, sizeof(out));
 	    }
 	default:
 		return -EINVAL;
@@ -887,7 +887,7 @@ copy_shmid_from_user(struct shmid64_ds *out, void __user *buf, int version)
 	    {
 		struct shmid_ds tbuf_old;
 
-		if (copy_from_user(&tbuf_old, buf, sizeof(tbuf_old)))
+		if (copy_from_user_with_ptr(&tbuf_old, buf, sizeof(tbuf_old)))
 			return -EFAULT;
 
 		out->shm_perm.uid	= tbuf_old.shm_perm.uid;
@@ -1265,7 +1265,7 @@ static long ksys_shmctl(int shmid, int cmd, struct shmid_ds __user *buf, int ver
 		err = shmctl_shm_info(ns, &shm_info);
 		if (err < 0)
 			return err;
-		if (copy_to_user(buf, &shm_info, sizeof(shm_info)))
+		if (copy_to_user_with_ptr(buf, &shm_info, sizeof(shm_info)))
 			err = -EFAULT;
 		return err;
 	}

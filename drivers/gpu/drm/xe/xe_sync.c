@@ -124,7 +124,7 @@ int xe_sync_entry_parse(struct xe_device *xe, struct xe_file *xef,
 	bool disallow_user_fence = flags & SYNC_PARSE_FLAG_DISALLOW_USER_FENCE;
 	bool signal;
 
-	if (copy_from_user(&sync_in, sync_user, sizeof(*sync_user)))
+	if (copy_from_user_with_ptr(&sync_in, sync_user, sizeof(*sync_user)))
 		return -EFAULT;
 
 	if (XE_IOCTL_DBG(xe, sync_in.flags & ~DRM_XE_SYNC_FLAG_SIGNAL) ||

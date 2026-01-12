@@ -470,7 +470,7 @@ static int uhid_event_from_user(const char __user *buffer, size_t len,
 		/* All others can be copied directly */
 	}
 
-	if (copy_from_user(event, buffer, min(len, sizeof(*event))))
+	if (copy_from_user_with_ptr(event, buffer, min(len, sizeof(*event))))
 		return -EFAULT;
 
 	return 0;
@@ -701,7 +701,7 @@ try_again:
 		goto try_again;
 	} else {
 		len = min(count, sizeof(**uhid->outq));
-		if (copy_to_user(buffer, uhid->outq[uhid->tail], len)) {
+		if (copy_to_user_with_ptr(buffer, uhid->outq[uhid->tail], len)) {
 			ret = -EFAULT;
 		} else {
 			kfree(uhid->outq[uhid->tail]);

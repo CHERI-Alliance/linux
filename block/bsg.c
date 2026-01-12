@@ -60,13 +60,13 @@ static int bsg_sg_io(struct bsg_device *bd, bool open_for_write,
 	struct sg_io_v4 hdr;
 	int ret;
 
-	if (copy_from_user(&hdr, uarg, sizeof(hdr)))
+	if (copy_from_user_with_ptr(&hdr, uarg, sizeof(hdr)))
 		return -EFAULT;
 	if (hdr.guard != 'Q')
 		return -EINVAL;
 	ret = bd->sg_io_fn(bd->queue, &hdr, open_for_write,
 			   bsg_timeout(bd, &hdr));
-	if (!ret && copy_to_user(uarg, &hdr, sizeof(hdr)))
+	if (!ret && copy_to_user_with_ptr(uarg, &hdr, sizeof(hdr)))
 		return -EFAULT;
 	return ret;
 }

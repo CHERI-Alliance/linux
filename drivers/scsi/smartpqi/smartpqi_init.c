@@ -6754,7 +6754,7 @@ static int pqi_passthru_ioctl(struct pqi_ctrl_info *ctrl_info, void __user *arg)
 		return -EINVAL;
 	if (!capable(CAP_SYS_RAWIO))
 		return -EPERM;
-	if (copy_from_user(&iocommand, arg, sizeof(iocommand)))
+	if (copy_from_user_with_ptr(&iocommand, arg, sizeof(iocommand)))
 		return -EFAULT;
 	if (iocommand.buf_size < 1 &&
 		iocommand.Request.Type.Direction != XFER_NONE)
@@ -6857,7 +6857,7 @@ static int pqi_passthru_ioctl(struct pqi_ctrl_info *ctrl_info, void __user *arg)
 		}
 	}
 
-	if (copy_to_user(arg, &iocommand, sizeof(iocommand))) {
+	if (copy_to_user_with_ptr(arg, &iocommand, sizeof(iocommand))) {
 		rc = -EFAULT;
 		goto out;
 	}

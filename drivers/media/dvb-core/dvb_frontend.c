@@ -2399,7 +2399,7 @@ static int dvb_get_property(struct dvb_frontend *fe, struct file *file,
 			goto out;
 	}
 
-	if (copy_to_user((void __user *)tvps->props, tvp,
+	if (copy_to_user_with_ptr((void __user *)tvps->props, tvp,
 			 tvps->num * sizeof(struct dtv_property))) {
 		err = -EFAULT;
 		goto out;

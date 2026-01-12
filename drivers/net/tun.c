@@ -3055,7 +3055,7 @@ static long __tun_chr_ioctl(struct file *file, unsigned int cmd,
 
 	if (cmd == TUNSETIFF || cmd == TUNSETQUEUE ||
 	    (_IOC_TYPE(cmd) == SOCK_IOC_TYPE && cmd != SIOCGSKNS)) {
-		if (copy_from_user(&ifr, argp, ifreq_len))
+		if (copy_from_user_with_ptr(&ifr, argp, ifreq_len))
 			return -EFAULT;
 	} else {
 		memset(&ifr, 0, sizeof(ifr));
@@ -3090,7 +3090,7 @@ static long __tun_chr_ioctl(struct file *file, unsigned int cmd,
 		if (ret)
 			goto unlock;
 
-		if (copy_to_user(argp, &ifr, ifreq_len))
+		if (copy_to_user_with_ptr(argp, &ifr, ifreq_len))
 			ret = -EFAULT;
 		goto unlock;
 	}
@@ -3127,7 +3127,7 @@ static long __tun_chr_ioctl(struct file *file, unsigned int cmd,
 		if (!tfile->socket.sk->sk_filter)
 			ifr.ifr_flags |= IFF_NOFILTER;
 
-		if (copy_to_user(argp, &ifr, ifreq_len))
+		if (copy_to_user_with_ptr(argp, &ifr, ifreq_len))
 			ret = -EFAULT;
 		break;
 
@@ -3227,7 +3227,7 @@ static long __tun_chr_ioctl(struct file *file, unsigned int cmd,
 	case SIOCGIFHWADDR:
 		/* Get hw address */
 		netif_get_mac_address(&ifr.ifr_hwaddr, net, tun->dev->name);
-		if (copy_to_user(argp, &ifr, ifreq_len))
+		if (copy_to_user_with_ptr(argp, &ifr, ifreq_len))
 			ret = -EFAULT;
 		break;
 
@@ -3268,7 +3268,7 @@ static long __tun_chr_ioctl(struct file *file, unsigned int cmd,
 		if ((tun->flags & TUN_TYPE_MASK) != IFF_TAP)
 			break;
 		ret = -EFAULT;
-		if (copy_from_user(&tun->fprog, argp, sizeof(tun->fprog)))
+		if (copy_from_user_with_ptr(&tun->fprog, argp, sizeof(tun->fprog)))
 			break;
 
 		ret = tun_attach_filter(tun);
@@ -3288,7 +3288,7 @@ static long __tun_chr_ioctl(struct file *file, unsigned int cmd,
 		if ((tun->flags & TUN_TYPE_MASK) != IFF_TAP)
 			break;
 		ret = -EFAULT;
-		if (copy_to_user(argp, &tun->fprog, sizeof(tun->fprog)))
+		if (copy_to_user_with_ptr(argp, &tun->fprog, sizeof(tun->fprog)))
 			break;
 		ret = 0;
 		break;

@@ -1329,7 +1329,7 @@ int inet_gifconf(struct net_device *dev, char __user *buf, int len, int size)
 		(*(struct sockaddr_in *)&ifr.ifr_addr).sin_addr.s_addr =
 								ifa->ifa_local;
 
-		if (copy_to_user(buf + done, &ifr, size)) {
+		if (copy_to_user_with_ptr(buf + done, &ifr, size)) {
 			done = -EFAULT;
 			break;
 		}

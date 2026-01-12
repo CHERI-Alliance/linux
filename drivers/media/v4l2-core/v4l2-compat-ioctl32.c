@@ -817,7 +817,7 @@ static int get_v4l2_edid32(struct v4l2_edid *p64,
 {
 	compat_uptr_t edid;
 
-	if (copy_from_user(p64, p32, offsetof(struct v4l2_edid32, edid)) ||
+	if (copy_from_user_with_ptr(p64, p32, offsetof(struct v4l2_edid32, edid)) ||
 	    get_user(edid, &p32->edid))
 		return -EFAULT;
 
@@ -828,7 +828,7 @@ static int get_v4l2_edid32(struct v4l2_edid *p64,
 static int put_v4l2_edid32(struct v4l2_edid *p64,
 			   struct v4l2_edid32 __user *p32)
 {
-	if (copy_to_user(p32, p64, offsetof(struct v4l2_edid32, edid)))
+	if (copy_to_user_with_ptr(p32, p64, offsetof(struct v4l2_edid32, edid)))
 		return -EFAULT;
 	return 0;
 }
@@ -1071,7 +1071,7 @@ int v4l2_compat_get_array_args(struct file *file, void *mbuf,
 		int n;
 
 		for (n = 0; n < ecs64->count; n++) {
-			if (copy_from_user(ec64, ec32, sizeof(*ec32)))
+			if (copy_from_user_with_ptr(ec64, ec32, sizeof(*ec32)))
 				return -EFAULT;
 
 			if (ctrl_is_pointer(file, ec64->id)) {
@@ -1151,7 +1151,7 @@ int v4l2_compat_put_array_args(struct file *file, void __user *user_ptr,
 			if (ctrl_is_pointer(file, ec64->id))
 				size -= sizeof(ec32->value64);
 
-			if (copy_to_user(ec32, ec64, size))
+			if (copy_to_user_with_ptr(ec32, ec64, size))
 				return -EFAULT;
 
 			ec32++;

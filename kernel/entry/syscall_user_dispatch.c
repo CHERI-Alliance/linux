@@ -152,7 +152,7 @@ int syscall_user_dispatch_get_config(struct task_struct *task, unsigned long siz
 	cfg.len = sd->len;
 	cfg.selector = (__u64)(uintptr_t)sd->selector;
 
-	if (copy_to_user(data, &cfg, sizeof(cfg)))
+	if (copy_to_user_with_ptr(data, &cfg, sizeof(cfg)))
 		return -EFAULT;
 
 	return 0;
@@ -166,7 +166,7 @@ int syscall_user_dispatch_set_config(struct task_struct *task, unsigned long siz
 	if (size != sizeof(cfg))
 		return -EINVAL;
 
-	if (copy_from_user(&cfg, data, sizeof(cfg)))
+	if (copy_from_user_with_ptr(&cfg, data, sizeof(cfg)))
 		return -EFAULT;
 
 	return task_set_syscall_user_dispatch(task, cfg.mode, cfg.offset, cfg.len,

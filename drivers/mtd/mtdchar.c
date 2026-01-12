@@ -601,7 +601,7 @@ mtdchar_write_ioctl(struct mtd_info *mtd, struct mtd_write_req __user *argp)
 	int ret = 0;
 	u64 end;
 
-	if (copy_from_user(&req, argp, sizeof(req)))
+	if (copy_from_user_with_ptr(&req, argp, sizeof(req)))
 		return -EFAULT;
 
 	usr_data = (const void __user *)(uintptr_t)req.usr_data;
@@ -701,7 +701,7 @@ mtdchar_read_ioctl(struct mtd_info *mtd, struct mtd_read_req __user *argp)
 	int ret = 0;
 	u64 end;
 
-	if (copy_from_user(&req, argp, sizeof(req)))
+	if (copy_from_user_with_ptr(&req, argp, sizeof(req)))
 		return -EFAULT;
 
 	orig_len = req.len;
@@ -812,7 +812,7 @@ out:
 	req.len = orig_len - req.len;
 	req.ooblen = orig_ooblen - req.ooblen;
 
-	if (copy_to_user(argp, &req, sizeof(req)))
+	if (copy_to_user_with_ptr(argp, &req, sizeof(req)))
 		ret = -EFAULT;
 
 	kvfree(datbuf);
@@ -961,7 +961,7 @@ static int mtdchar_ioctl(struct file *file, u_int cmd, u_long arg)
 		struct mtd_oob_buf __user *buf_user = argp;
 
 		/* NOTE: writes return length to buf_user->length */
-		if (copy_from_user(&buf, argp, sizeof(buf)))
+		if (copy_from_user_with_ptr(&buf, argp, sizeof(buf)))
 			ret = -EFAULT;
 		else
 			ret = mtdchar_writeoob(file, mtd, buf.start, buf.length,
@@ -975,7 +975,7 @@ static int mtdchar_ioctl(struct file *file, u_int cmd, u_long arg)
 		struct mtd_oob_buf __user *buf_user = argp;
 
 		/* NOTE: writes return length to buf_user->start */
-		if (copy_from_user(&buf, argp, sizeof(buf)))
+		if (copy_from_user_with_ptr(&buf, argp, sizeof(buf)))
 			ret = -EFAULT;
 		else
 			ret = mtdchar_readoob(file, mtd, buf.start, buf.length,
@@ -988,7 +988,7 @@ static int mtdchar_ioctl(struct file *file, u_int cmd, u_long arg)
 		struct mtd_oob_buf64 buf;
 		struct mtd_oob_buf64 __user *buf_user = argp;
 
-		if (copy_from_user(&buf, argp, sizeof(buf)))
+		if (copy_from_user_with_ptr(&buf, argp, sizeof(buf)))
 			ret = -EFAULT;
 		else
 			ret = mtdchar_writeoob(file, mtd, buf.start, buf.length,
@@ -1002,7 +1002,7 @@ static int mtdchar_ioctl(struct file *file, u_int cmd, u_long arg)
 		struct mtd_oob_buf64 buf;
 		struct mtd_oob_buf64 __user *buf_user = argp;
 
-		if (copy_from_user(&buf, argp, sizeof(buf)))
+		if (copy_from_user_with_ptr(&buf, argp, sizeof(buf)))
 			ret = -EFAULT;
 		else
 			ret = mtdchar_readoob(file, mtd, buf.start, buf.length,
@@ -1212,7 +1212,7 @@ static int mtdchar_ioctl(struct file *file, u_int cmd, u_long arg)
 		struct blkpg_ioctl_arg __user *blk_arg = argp;
 		struct blkpg_ioctl_arg a;
 
-		if (copy_from_user(&a, blk_arg, sizeof(a)))
+		if (copy_from_user_with_ptr(&a, blk_arg, sizeof(a)))
 			ret = -EFAULT;
 		else
 			ret = mtdchar_blkpg_ioctl(mtd, &a);

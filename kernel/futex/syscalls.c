@@ -228,7 +228,7 @@ int futex_parse_waitv(struct futex_vector *futexv,
 	for (i = 0; i < nr_futexes; i++) {
 		unsigned int flags;
 
-		if (copy_from_user(&aux, &uwaitv[i], sizeof(aux)))
+		if (copy_from_user_with_ptr(&aux, &uwaitv[i], sizeof(aux)))
 			return -EFAULT;
 
 		if ((aux.flags & ~FUTEX2_VALID_MASK) || aux.__reserved)

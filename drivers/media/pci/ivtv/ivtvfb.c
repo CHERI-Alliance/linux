@@ -483,7 +483,7 @@ static int ivtvfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long ar
 			struct ivtvfb_dma_frame args;
 
 			IVTVFB_DEBUG_INFO("IVTVFB_IOC_DMA_FRAME\n");
-			if (copy_from_user(&args, (void __user *)arg, sizeof(args)))
+			if (copy_from_user_with_ptr(&args, (void __user *)arg, sizeof(args)))
 				return -EFAULT;
 
 			return ivtvfb_prep_frame(itv, cmd, args.source, args.dest_offset, args.count);

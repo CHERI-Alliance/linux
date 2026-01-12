@@ -64,7 +64,7 @@ static int do_hidp_sock_ioctl(struct socket *sock, unsigned int cmd, void __user
 		if (!capable(CAP_NET_ADMIN))
 			return -EPERM;
 
-		if (copy_from_user(&ca, argp, sizeof(ca)))
+		if (copy_from_user_with_ptr(&ca, argp, sizeof(ca)))
 			return -EFAULT;
 
 		csock = sockfd_lookup(ca.ctrl_sock, &err);
@@ -79,7 +79,7 @@ static int do_hidp_sock_ioctl(struct socket *sock, unsigned int cmd, void __user
 		ca.name[sizeof(ca.name)-1] = 0;
 
 		err = hidp_connection_add(&ca, csock, isock);
-		if (!err && copy_to_user(argp, &ca, sizeof(ca)))
+		if (!err && copy_to_user_with_ptr(argp, &ca, sizeof(ca)))
 			err = -EFAULT;
 
 		sockfd_put(csock);
@@ -97,14 +97,14 @@ static int do_hidp_sock_ioctl(struct socket *sock, unsigned int cmd, void __user
 		return hidp_connection_del(&cd);
 
 	case HIDPGETCONNLIST:
-		if (copy_from_user(&cl, argp, sizeof(cl)))
+		if (copy_from_user_with_ptr(&cl, argp, sizeof(cl)))
 			return -EFAULT;
 
 		if (cl.cnum <= 0)
 			return -EINVAL;
 
 		err = hidp_get_connlist(&cl);
-		if (!err && copy_to_user(argp, &cl, sizeof(cl)))
+		if (!err && copy_to_user_with_ptr(argp, &cl, sizeof(cl)))
 			return -EFAULT;
 
 		return err;

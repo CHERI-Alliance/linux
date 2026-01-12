@@ -280,7 +280,7 @@ static int rseq_get_rseq_cs(struct task_struct *t, struct rseq_cs *rseq_cs)
 	if (ptr >= TASK_SIZE)
 		return -EINVAL;
 	urseq_cs = (struct rseq_cs __user *)(unsigned long)ptr;
-	if (copy_from_user(rseq_cs, urseq_cs, sizeof(*rseq_cs)))
+	if (copy_from_user_with_ptr(rseq_cs, urseq_cs, sizeof(*rseq_cs)))
 		return -EFAULT;
 
 	if (rseq_cs->start_ip >= TASK_SIZE ||
