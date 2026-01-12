@@ -11,6 +11,7 @@
 
 #include <linux/pfn.h>
 #include <linux/const.h>
+#include <linux/types.h>
 
 #include <vdso/page.h>
 
@@ -46,7 +47,8 @@ void clear_page(void *page);
 #else
 #define clear_page(pgaddr)			memset((pgaddr), 0, PAGE_SIZE)
 #endif
-#define copy_page(to, from)			memcpy((to), (from), PAGE_SIZE)
+#define copy_page(to, from) \
+	memcpy((uintptr_t *)(void *)(to), (uintptr_t *)(void *)(from), PAGE_SIZE)
 
 #define copy_user_page(vto, vfrom, vaddr, topg) copy_page(vto, vfrom)
 
