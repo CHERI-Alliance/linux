@@ -51,8 +51,8 @@ void clear_page(void *page);
 #else
 #define clear_page(pgaddr)			memset((pgaddr), 0, PAGE_SIZE)
 #endif
-#define copy_page(to, from)					\
-			memcpy((uintptr_t *) (to), (uintptr_t *) (from), PAGE_SIZE)
+#define copy_page(to, from) \
+	memcpy((uintptr_t *)(void *)(to), (uintptr_t *)(void *)(from), PAGE_SIZE)
 
 #define clear_user_page(pgaddr, vaddr, page)	clear_page(pgaddr)
 #define copy_user_page(vto, vfrom, vaddr, topg) copy_page(vto, vfrom)
