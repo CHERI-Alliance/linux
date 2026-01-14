@@ -31,6 +31,7 @@
 
 #include <drm/drm_file.h>
 #include <drm/virtgpu_drm.h>
+#include <drm/compat64_virtgpu_drm.h>
 
 #include "virtgpu_drv.h"
 
@@ -576,15 +577,17 @@ static int virtio_gpu_context_init_ioctl(struct drm_device *dev,
 {
 	int ret = 0;
 	uint32_t num_params, i;
-	uint64_t valid_ring_mask, param, value;
-	size_t len;
+	uint64_t valid_ring_mask, param;
+	__u64ptr value;
+	size_t alloclen;
 	struct drm_virtgpu_context_set_param *ctx_set_params = NULL;
 	struct virtio_gpu_device *vgdev = dev->dev_private;
 	struct virtio_gpu_fpriv *vfpriv = file->driver_priv;
 	struct drm_virtgpu_context_init *args = data;
+	void __user *uparams;
 
 	num_params = args->num_params;
-	len = num_params * sizeof(struct drm_virtgpu_context_set_param);
+	alloclen = num_params * sizeof(struct drm_virtgpu_context_set_param);
 
 	if (!vgdev->has_context_init || !vgdev->has_virgl_3d)
 		return -EINVAL;
@@ -593,11 +596,20 @@ static int virtio_gpu_context_init_ioctl(struct drm_device *dev,
 	if (num_params > 4)
 		return -EINVAL;
 
-	ctx_set_params = memdup_user(u64_to_user_ptr(args->ctx_set_params),
-				     len);
+	uparams = u64_to_user_ptr(args->ctx_set_params);
+	ctx_set_params = kmem_buckets_alloc(user_buckets, alloclen,
+					    GFP_USER | __GFP_NOWARN);
+	if (!ctx_set_params)
+		return -ENOMEM;
+	for (i = 0; i < num_params; ++i) {
+		if (__c64_copy_from_user_with_ptr(drm_virtgpu_context_set_param,
+						  &ctx_set_params[i], uparams)) {
+			ret = -EFAULT;
+			goto out_free;
+		}
+		uparams += __c64_sizeof(drm_virtgpu_context_set_param);
+	}
 
-	if (IS_ERR(ctx_set_params))
-		return PTR_ERR(ctx_set_params);
 
 	mutex_lock(&vfpriv->context_lock);
 	if (vfpriv->context_created) {
@@ -616,7 +628,7 @@ static int virtio_gpu_context_init_ioctl(struct drm_device *dev,
 				goto out_unlock;
 			}
 
-			if ((vgdev->capset_id_mask & (1ULL << value)) == 0) {
+			if ((vgdev->capset_id_mask & (1ULL << __c_ua(value))) == 0) {
 				ret = -EINVAL;
 				goto out_unlock;
 			}
@@ -650,7 +662,7 @@ static int virtio_gpu_context_init_ioctl(struct drm_device *dev,
 				goto out_unlock;
 			}
 
-			vfpriv->ring_idx_mask = value;
+			vfpriv->ring_idx_mask = __c_ua(value);
 			break;
 		case VIRTGPU_CONTEXT_PARAM_DEBUG_NAME:
 			if (vfpriv->explicit_debug_name) {
@@ -689,6 +701,7 @@ static int virtio_gpu_context_init_ioctl(struct drm_device *dev,
 
 out_unlock:
 	mutex_unlock(&vfpriv->context_lock);
+out_free:
 	kfree(ctx_set_params);
 	return ret;
 }
@@ -697,11 +710,11 @@ struct drm_ioctl_desc virtio_gpu_ioctls[DRM_VIRTIO_NUM_IOCTLS] = {
 	DRM_IOCTL_DEF_DRV(VIRTGPU_MAP, virtio_gpu_map_ioctl,
 			  DRM_RENDER_ALLOW),
 
-	DRM_IOCTL_DEF_DRV(VIRTGPU_EXECBUFFER, virtio_gpu_execbuffer_ioctl,
-			  DRM_RENDER_ALLOW),
+	DRM_IOCTL_DEF_DRV_C64(VIRTGPU_EXECBUFFER, virtio_gpu_execbuffer_ioctl,
+			      DRM_RENDER_ALLOW, drm_virtgpu_execbuffer),
 
-	DRM_IOCTL_DEF_DRV(VIRTGPU_GETPARAM, virtio_gpu_getparam_ioctl,
-			  DRM_RENDER_ALLOW),
+	DRM_IOCTL_DEF_DRV_C64(VIRTGPU_GETPARAM, virtio_gpu_getparam_ioctl,
+			      DRM_RENDER_ALLOW, drm_virtgpu_getparam),
 
 	DRM_IOCTL_DEF_DRV(VIRTGPU_RESOURCE_CREATE,
 			  virtio_gpu_resource_create_ioctl,
@@ -723,13 +736,15 @@ struct drm_ioctl_desc virtio_gpu_ioctls[DRM_VIRTIO_NUM_IOCTLS] = {
 	DRM_IOCTL_DEF_DRV(VIRTGPU_WAIT, virtio_gpu_wait_ioctl,
 			  DRM_RENDER_ALLOW),
 
-	DRM_IOCTL_DEF_DRV(VIRTGPU_GET_CAPS, virtio_gpu_get_caps_ioctl,
-			  DRM_RENDER_ALLOW),
+	DRM_IOCTL_DEF_DRV_C64(VIRTGPU_GET_CAPS, virtio_gpu_get_caps_ioctl,
+			      DRM_RENDER_ALLOW, drm_virtgpu_get_caps),
 
-	DRM_IOCTL_DEF_DRV(VIRTGPU_RESOURCE_CREATE_BLOB,
-			  virtio_gpu_resource_create_blob_ioctl,
-			  DRM_RENDER_ALLOW),
+	DRM_IOCTL_DEF_DRV_C64(VIRTGPU_RESOURCE_CREATE_BLOB,
+			     virtio_gpu_resource_create_blob_ioctl,
+			     DRM_RENDER_ALLOW,
+			     drm_virtgpu_resource_create_blob),
 
-	DRM_IOCTL_DEF_DRV(VIRTGPU_CONTEXT_INIT, virtio_gpu_context_init_ioctl,
-			  DRM_RENDER_ALLOW),
+	DRM_IOCTL_DEF_DRV_C64(VIRTGPU_CONTEXT_INIT,
+			      virtio_gpu_context_init_ioctl,
+			      DRM_RENDER_ALLOW, drm_virtgpu_context_init),
 };
