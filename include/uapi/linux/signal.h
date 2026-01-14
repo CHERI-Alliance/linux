@@ -13,4 +13,9 @@
 /* mask for all SS_xxx flags */
 #define SS_FLAG_BITS	SS_AUTODISARM
 
+struct __sigset_argpack {
+	void __user *sigmask;
+	size_t sigsetsize;
+};
+
 #endif /* _UAPI_LINUX_SIGNAL_H */

@@ -122,6 +122,7 @@
 #include <uapi/linux/compat64_sed-opal.h>
 #include <uapi/linux/compat64_sem.h>
 #include <uapi/linux/compat64_shm.h>
+#include <uapi/linux/compat64_signal.h>
 #include <uapi/linux/compat64_soundcard.h>
 #include <uapi/linux/spi/compat64_spidev.h>
 #include <uapi/linux/compat64_sync_file.h>
