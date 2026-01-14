@@ -23,6 +23,7 @@
 #include <linux/uio.h>
 
 #include <linux/sched/signal.h>
+#include <linux/compat64_signal.h>
 #include <linux/fs.h>
 #include <linux/file.h>
 #include <linux/mm.h>
@@ -56,25 +57,17 @@
 #define AIO_RING_COMPAT_FEATURES	1
 #define AIO_RING_INCOMPAT_FEATURES	0
 struct aio_ring {
-	union {
-		struct {
-			unsigned	id;	/* kernel internal index number */
-			unsigned	nr;	/* number of io_events */
-			unsigned	head;	/* Written to by userland or under ring_lock
-						 * mutex by aio_read_events_ring(). */
-			unsigned	tail;
+	unsigned	id;	/* kernel internal index number */
+	unsigned	nr;	/* number of io_events */
+	unsigned	head;	/* Written to by userland or under ring_lock
+				 * mutex by aio_read_events_ring(). */
+	unsigned	tail;
 
-			unsigned	magic;
-			unsigned	compat_features;
-			unsigned	incompat_features;
-			unsigned	header_length;	/* size of aio_ring */
-		};
-		struct io_event pad;
-	};
-
-
-	struct io_event		io_events[];
-}; /* 128 bytes + ring size */
+	unsigned	magic;
+	unsigned	compat_features;
+	unsigned	incompat_features;
+	unsigned	header_length;	/* size of aio_ring */
+};
 
 /*
  * Plugging is meant to work with larger batches of IOs. If we don't
@@ -733,7 +726,9 @@ static int aio_setup_ring(struct kioctx *ctx, unsigned int nr_events)
 	ring->magic = AIO_RING_MAGIC;
 	ring->compat_features = AIO_RING_COMPAT_FEATURES;
 	ring->incompat_features = AIO_RING_INCOMPAT_FEATURES;
-	ring->header_length = sizeof(struct aio_ring);
+	BUILD_BUG_ON(sizeof(struct aio_ring) > sizeof(struct io_event));
+	BUILD_BUG_ON(sizeof(struct aio_ring) > sizeof(struct __c64_io_event));
+	ring->header_length = __c64c_sizeof(aio_in_compat64(ctx), io_event);
 	flush_dcache_folio(ctx->ring_folios[0]);
 
 	return 0;
@@ -2441,20 +2436,15 @@ SYSCALL_DEFINE5(io_getevents, aio_context_t, ctx_id,
 
 #endif
 
-struct __aio_sigset {
-	const sigset_t __user	*sigmask;
-	size_t		sigsetsize;
-};
-
 SYSCALL_DEFINE6(io_pgetevents,
 		aio_context_t, ctx_id,
 		long, min_nr,
 		long, nr,
 		struct io_event __user *, events,
 		struct __kernel_timespec __user *, timeout,
-		const struct __aio_sigset __user *, usig)
+		const struct __sigset_argpack __user *, usig)
 {
-	struct __aio_sigset	ksig = { NULL, };
+	struct __sigset_argpack	ksig = { NULL, };
 	struct timespec64	ts;
 	bool interrupted;
 	int ret;
@@ -2462,8 +2452,8 @@ SYSCALL_DEFINE6(io_pgetevents,
 	if (timeout && unlikely(get_timespec64(&ts, timeout)))
 		return -EFAULT;
 
-	if (usig && copy_from_user_with_ptr(&ksig, usig, sizeof(ksig)))
-		return -EFAULT;
+	if (usig && __c64_copy_from_user_with_ptr(__sigset_argpack, &ksig, usig))
+			return -EFAULT;
 
 	ret = set_user_sigmask(ksig.sigmask, ksig.sigsetsize);
 	if (ret)
@@ -2487,9 +2477,9 @@ SYSCALL_DEFINE6(io_pgetevents_time32,
 		long, nr,
 		struct io_event __user *, events,
 		struct old_timespec32 __user *, timeout,
-		const struct __aio_sigset __user *, usig)
+		const struct __sigset_argpack __user *, usig)
 {
-	struct __aio_sigset	ksig = { NULL, };
+	struct __sigset_argpack	ksig = { NULL, };
 	struct timespec64	ts;
 	bool interrupted;
 	int ret;

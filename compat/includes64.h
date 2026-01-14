@@ -123,6 +123,7 @@
 #include <uapi/linux/sed-opal.h>
 #include <uapi/linux/sem.h>
 #include <uapi/linux/shm.h>
+#include <uapi/linux/signal.h>
 #include <uapi/linux/soundcard.h>
 #include <uapi/linux/spi/spidev.h>
 #include <uapi/linux/sync_file.h>
