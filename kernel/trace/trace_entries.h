@@ -101,8 +101,8 @@ FTRACE_ENTRY_PACKED(fgraph_retaddr_entry, fgraph_retaddr_ent_entry,
 		__field_packed(	unsigned long,	graph_ent,	retaddr		)
 	),
 
-	F_printk("--> %ps (%u) <- %ps", (void *)__entry->func, __entry->depth,
-		(void *)__entry->retaddr)
+	F_printk("--> %ps (%u) <- %ps", __c_fakep(__entry->func), __entry->depth,
+		__c_fakep(__entry->retaddr))
 );
 
 #else
