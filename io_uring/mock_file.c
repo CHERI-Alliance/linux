@@ -70,7 +70,15 @@ static int io_cmd_copy_regbuf(struct io_uring_cmd *cmd, unsigned int issue_flags
 	void __user *ubuf;
 	int dir, ret;
 
-	ubuf = u64_to_user_ptr(READ_ONCE(sqe->addr3));
+	/*
+	 * The compat64 SQE conversion function stores compat_sqe->addr3 in the
+	 * raw cmd data of the native SQE. Retrieve it from there as compat cap.
+	 */
+	if (unlikely(issue_flags & IO_URING_F_COMPAT))
+		ubuf = compat_ptr(READ_ONCE(*((u64 *)sqe->cmd)));
+	else
+		ubuf = u64_to_user_ptr(READ_ONCE(sqe->addr3));
+
 	iovec = u64_to_user_ptr(READ_ONCE(sqe->addr));
 	iovec_len = READ_ONCE(sqe->len);
 	flags = READ_ONCE(sqe->file_index);
