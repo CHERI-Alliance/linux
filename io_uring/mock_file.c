@@ -71,7 +71,16 @@ static int io_cmd_copy_regbuf(struct io_uring_cmd *cmd, unsigned int issue_flags
 	void __user *ubuf;
 	int dir, ret;
 
-	ubuf = u64_to_user_ptr(READ_ONCE(sqe->addr3));
+	/*
+	 * The compat64 SQE conversion function stores compat_sqe->addr3 in
+	 * sqe->__c64_addr3 of the CHERI SQE via the raw cmd copy. We have
+	 * to convert it as compat cap.
+	 */
+	if (unlikely(IS_ENABLED(CONFIG_COMPAT64) && (issue_flags & IO_URING_F_COMPAT)))
+		ubuf = compat_ptr(READ_ONCE(sqe->__c64_addr3));
+	else
+		ubuf = u64_to_user_ptr(READ_ONCE(sqe->addr3));
+
 	iovec = u64_to_user_ptr(READ_ONCE(sqe->addr));
 	iovec_len = READ_ONCE(sqe->len);
 	flags = READ_ONCE(sqe->file_index);
