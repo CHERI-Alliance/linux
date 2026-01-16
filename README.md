@@ -1,6 +1,17 @@
 
 # LINUX-CHERI
 
+#######################################################################
+
+THIS BRANCH IS NO LONGER MAINTAINED
+
+Switch to codaip-riscv-7.0
+
+To migrate rebase your codasip-riscv-6.18 based changes onto this
+commit and then cherry pick onto codasip-risv-7.0.
+
+#######################################################################
+
 This repository contains a version of the Linux Kernel with CHERI support
 for riscv. It is based on the upstream Linux Kernel and the CHERI
 modifications made by the ARM morello project
