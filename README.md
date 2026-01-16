@@ -2,7 +2,7 @@
 # LINUX-CHERI
 
 This repository contains a version of the Linux Kernel with CHERI support
-for riscv. It is based on upstream Linux Kernel v6.16 and the CHERI
+for riscv. It is based on the upstream Linux Kernel and the CHERI
 modifications made by the ARM morello project
 [https://git.morello-project.org/morello/kernel/linux].
 
