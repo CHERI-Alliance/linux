@@ -1,6 +1,7 @@
 This is a (probably incomplete) list of things (mainly config options)
 that do not work with CHERI for some reason.
 - section_mem_map	=> Some sparse memory models not supported yet
+- Port PROT_CAP/PROT_NO_CAP for mmap and friends from CheriBSD
 - ptrace(): Deal with capability writes
 - CONFIG_ERRATA_SIFIVE_CIP_453
 - CONFIG_RELOCATABLE
