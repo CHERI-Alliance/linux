@@ -96,7 +96,7 @@ TRACE_EVENT(wbt_step,
 
 	TP_STRUCT__entry(
 		__array(char, name, 32)
-		__field(const char *, msg)
+		__ptr(const char *, msg)
 		__field(int, step)
 		__field(unsigned long, window)
 		__field(unsigned int, bg)
@@ -107,7 +107,7 @@ TRACE_EVENT(wbt_step,
 	TP_fast_assign(
 		strscpy(__entry->name, bdi_dev_name(bdi),
 			ARRAY_SIZE(__entry->name));
-		__entry->msg	= msg;
+		__assign_ptr(msg, msg);
 		__entry->step	= step;
 		__entry->window	= div_u64(window, 1000);
 		__entry->bg	= bg;
@@ -116,7 +116,7 @@ TRACE_EVENT(wbt_step,
 	),
 
 	TP_printk("%s: %s: step=%d, window=%luus, background=%u, normal=%u, max=%u",
-		  __entry->name, __entry->msg, __entry->step, __entry->window,
+		  __entry->name, __get_ptr_str(msg), __entry->step, __entry->window,
 		  __entry->bg, __entry->normal, __entry->max)
 );
 
