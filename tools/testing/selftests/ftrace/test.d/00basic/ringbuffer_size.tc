@@ -6,11 +6,11 @@
 rb_size_test() {
 ORIG=`cat buffer_size_kb`
 
-expr $ORIG / 2 > buffer_size_kb
+echo -n $(( $ORIG / 2 )) > buffer_size_kb
 
-expr $ORIG \* 2 > buffer_size_kb
+echo -n $(( $ORIG * 2 )) > buffer_size_kb
 
-echo $ORIG > buffer_size_kb
+echo -n $ORIG > buffer_size_kb
 }
 
 rb_size_test
