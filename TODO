@@ -1,6 +1,5 @@
 This is a (probably incomplete) list of things (mainly config options)
 that do not work with CHERI for some reason.
-- section_mem_map	=> Some sparse memory models not supported yet
 - Port PROT_CAP/PROT_NO_CAP for mmap and friends from CheriBSD
 - ptrace(): Deal with capability writes
 - CONFIG_ERRATA_SIFIVE_CIP_453
@@ -15,22 +14,19 @@ that do not work with CHERI for some reason.
 - runtime-const.h
 - semaphore debugging
 - Implement set_bit/clear_bit for pointers
-- xattr.h has non-CHERI ABI breakage.
-- Implement copy_struct_{from,to}_user
 - KCOV
 - UBSAN
 - KFENCE
 - CONFIG_NUMA
 - Sanitizers
-- CONFIG_CFI_CLANG
+- CONFIG_CFI
 - KEXEC
 - CONFIG_KVM, VIRTUALIZATION
 - JUMP_LABEL
 - BPF
-- MODULE
 - GCOV
 - PERF_EVENTS
-- TRACE
+- TRACE (in progress)
 - USERFAULTFD
 - STACK_AUTO_INIT, CONFIG_INIT_STACK_...
 - CONFIG_ZRAM
@@ -38,7 +34,6 @@ that do not work with CHERI for some reason.
 - NILFS2	=> Uses a bmap tree with fixed __u64 value that must store a pointer
 - OCFS2	=> The ioctl API uses nested pointers
 - F2FS	=> Strange bit operation magic on page_private() pointer.
-- BCACHEFS	=> Version structure with a fixed width __u64 that contains a pointer?
 - DCACHE_WORD_ACCESS	=> Disabled for CHERI, try to enable it!
 - BTREE	=> Doable but only used by 3 drivers and uses arrays of longs to store pointers.
 - CRYPTO_842	=> Compress has a failing assertion
