@@ -135,8 +135,9 @@ config RISCV
 	select HAVE_ARCH_AUDITSYSCALL
 	select HAVE_ARCH_HUGE_VMALLOC if HAVE_ARCH_HUGE_VMAP
 	select HAVE_ARCH_HUGE_VMAP if MMU && 64BIT
-	select HAVE_ARCH_JUMP_LABEL if !XIP_KERNEL && !RISCV_CHERI
+	select HAVE_ARCH_JUMP_LABEL if (!XIP_KERNEL && CC_SUPPORTS_INLINE_ASM_S)
 	select HAVE_ARCH_JUMP_LABEL_RELATIVE if HAVE_ARCH_JUMP_LABEL
+	select HAVE_ARCH_STATIC_BRANCH_BASE
 	select HAVE_ARCH_KASAN if MMU && 64BIT
 	select HAVE_ARCH_KASAN_VMALLOC if MMU && 64BIT
 	select HAVE_ARCH_KFENCE if MMU && 64BIT
@@ -248,6 +249,12 @@ config GCC_SUPPORTS_DYNAMIC_FTRACE
 	def_bool CC_IS_GCC
 	depends on $(cc-option,-fpatchable-function-entry=8)
 	depends on CC_HAS_MIN_FUNCTION_ALIGNMENT || !RISCV_ISA_C
+
+config CC_SUPPORTS_INLINE_ASM_S
+	def_bool y
+	# S constraint (symbol address) works reliably in gcc >= 12.5 and llvm >= 19
+	# (S support in earlier llvm versions seems unstable)
+	depends on (CC_IS_GCC && GCC_VERSION >= 120500) || (CC_IS_CLANG && CLANG_VERSION >= 190000)
 
 config HAVE_SHADOW_CALL_STACK
 	def_bool $(cc-option,-fsanitize=shadow-call-stack)

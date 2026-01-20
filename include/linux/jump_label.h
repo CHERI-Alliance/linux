@@ -203,14 +203,24 @@ struct module;
 #define JUMP_TYPE_LINKED	2UL
 #define JUMP_TYPE_MASK		3UL
 
+#if IS_ENABLED(CONFIG_HAVE_ARCH_STATIC_BRANCH_BASE)
+#define ARCH_STATIC_BRANCH(base, key, branch)	\
+	arch_static_branch(base, (char * const)key - (char * const)base, branch)
+#define ARCH_STATIC_BRANCH_JUMP(base, key, branch)	\
+	arch_static_branch_jump(base, (char * const)key - (char * const)base, branch)
+#else
+#define ARCH_STATIC_BRANCH(base, key, branch)		arch_static_branch(key, branch)
+#define ARCH_STATIC_BRANCH_JUMP(base, key, branch)	arch_static_branch_jump(key, branch)
+#endif
+
 static __always_inline bool static_key_false(struct static_key *key)
 {
-	return arch_static_branch(key, false);
+	return ARCH_STATIC_BRANCH(key, key, false);
 }
 
 static __always_inline bool static_key_true(struct static_key *key)
 {
-	return !arch_static_branch(key, true);
+	return !ARCH_STATIC_BRANCH(key, key, true);
 }
 
 extern struct jump_entry __start___jump_table[];
@@ -485,36 +495,39 @@ extern bool ____wrong_branch_error(void);
  * See jump_label_type() / jump_label_init_type().
  */
 
-#define static_branch_likely(x)							\
+#define __static_branch_likely(base, x)						\
 ({										\
 	bool branch;								\
 	if (__builtin_types_compatible_p(typeof(*x), struct static_key_true))	\
-		branch = !arch_static_branch(&(x)->key, true);			\
+		branch = !ARCH_STATIC_BRANCH(base, &(x)->key, true);		\
 	else if (__builtin_types_compatible_p(typeof(*x), struct static_key_false)) \
-		branch = !arch_static_branch_jump(&(x)->key, true);		\
+		branch = !ARCH_STATIC_BRANCH_JUMP(base, &(x)->key, true);	\
 	else									\
 		branch = ____wrong_branch_error();				\
-	likely_notrace(branch);								\
+	likely_notrace(branch);							\
 })
 
-#define static_branch_unlikely(x)						\
+#define __static_branch_unlikely(base, x)					\
 ({										\
 	bool branch;								\
 	if (__builtin_types_compatible_p(typeof(*x), struct static_key_true))	\
-		branch = arch_static_branch_jump(&(x)->key, false);		\
+		branch = ARCH_STATIC_BRANCH_JUMP(base, &(x)->key, false);	\
 	else if (__builtin_types_compatible_p(typeof(*x), struct static_key_false)) \
-		branch = arch_static_branch(&(x)->key, false);			\
+		branch = ARCH_STATIC_BRANCH(base, &(x)->key, false);		\
 	else									\
 		branch = ____wrong_branch_error();				\
-	unlikely_notrace(branch);							\
+	unlikely_notrace(branch);						\
 })
 
 #else /* !CONFIG_JUMP_LABEL */
 
-#define static_branch_likely(x)		likely_notrace(static_key_enabled(&(x)->key))
-#define static_branch_unlikely(x)	unlikely_notrace(static_key_enabled(&(x)->key))
+#define __static_branch_likely(base, x)		likely_notrace(static_key_enabled(&(x)->key))
+#define __static_branch_unlikely(base, x)	unlikely_notrace(static_key_enabled(&(x)->key))
 
 #endif /* CONFIG_JUMP_LABEL */
+
+#define static_branch_likely(x)		__static_branch_likely(x, x)
+#define static_branch_unlikely(x)	__static_branch_unlikely(x, x)
 
 #define static_branch_maybe(config, x)					\
 	(IS_ENABLED(config) ? static_branch_likely(x)			\
