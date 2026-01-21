@@ -19,6 +19,7 @@
 #include <linux/highmem.h>
 #include <linux/cleanup.h>
 #include <linux/uio.h>
+#include <linux/empty_array.h>
 #include "fuse_i.h"
 #include "fuse_dev_i.h"
 
@@ -1216,7 +1217,7 @@ static const struct virtio_device_id id_table[] = {
 	{},
 };
 
-static const unsigned int feature_table[] = {};
+EMPTY_ARRAY(unsigned int, feature_table);
 
 static struct virtio_driver virtio_fs_driver = {
 	.driver.name		= KBUILD_MODNAME,
