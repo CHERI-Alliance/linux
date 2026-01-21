@@ -1474,7 +1474,7 @@ out:
 
 static inline uintptr_t fuse_get_user_addr(const struct iov_iter *ii)
 {
-	return (unsigned long)iter_iov(ii)->iov_base + ii->iov_offset;
+	return (user_uintptr_t)iter_iov(ii)->iov_base + ii->iov_offset;
 }
 
 static inline size_t fuse_get_frag_size(const struct iov_iter *ii,

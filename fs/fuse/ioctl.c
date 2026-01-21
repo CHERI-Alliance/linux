@@ -9,6 +9,7 @@
 #include <linux/compat.h>
 #include <linux/fileattr.h>
 #include <linux/fsverity.h>
+#include <linux/compat64_fsverity.h>
 
 #define FUSE_VERITY_ENABLE_ARG_MAX_PAGES 256
 
@@ -31,6 +32,8 @@ static ssize_t fuse_send_ioctl(struct fuse_mount *fm, struct fuse_args *args,
 
 	return ret;
 }
+
+#ifndef CONFIG_CHERI_KERNEL
 
 /*
  * CUSE servers compiled on 32bit broke on 64bit kernels because the
@@ -70,6 +73,8 @@ static int fuse_copy_ioctl_iovec_old(struct iovec *dst, void *src,
 	return 0;
 }
 
+#endif	/* CONFIG_CHERI_KERNEL */
+
 /* Make sure iov_length() won't overflow */
 static int fuse_verify_ioctl_iov(struct fuse_conn *fc, struct iovec *iov,
 				 size_t count)
@@ -84,6 +89,8 @@ static int fuse_verify_ioctl_iov(struct fuse_conn *fc, struct iovec *iov,
 	}
 	return 0;
 }
+
+#ifndef CONFIG_CHERI_PURECAP_UABI
 
 static int fuse_copy_ioctl_iovec(struct fuse_conn *fc, struct iovec *dst,
 				 void *src, size_t transferred, unsigned count,
@@ -106,7 +113,7 @@ static int fuse_copy_ioctl_iovec(struct fuse_conn *fc, struct iovec *dst,
 		    fiov[i].len != (unsigned long) fiov[i].len)
 			return -EIO;
 
-		dst[i].iov_base = (void __user *) (uintptr_t) fiov[i].base;
+		dst[i].iov_base = (void __user *) (user_uintptr_t) fiov[i].base;
 		dst[i].iov_len = (size_t) fiov[i].len;
 
 #ifdef CONFIG_COMPAT
@@ -120,8 +127,19 @@ static int fuse_copy_ioctl_iovec(struct fuse_conn *fc, struct iovec *dst,
 	return 0;
 }
 
+#else	/* CONFIG_CHERI_PURECAP_UABI */
+
+static int fuse_copy_ioctl_iovec(struct fuse_conn *fc, struct iovec *dst,
+				 void *src, size_t transferred, unsigned count,
+				 bool is_compat)
+{
+	return -EIO;
+}
+
+#endif	/* CONFIG_CHERI_PURECAP_UABI */
+
 /* For fs-verity, determine iov lengths from input */
-static int fuse_setup_measure_verity(unsigned long arg, struct iovec *iov)
+static int fuse_setup_measure_verity(user_uintptr_t arg, struct iovec *iov)
 {
 	__u16 digest_size;
 	struct fsverity_digest __user *uarg = (void __user *)arg;
@@ -137,14 +155,14 @@ static int fuse_setup_measure_verity(unsigned long arg, struct iovec *iov)
 	return 0;
 }
 
-static int fuse_setup_enable_verity(unsigned long arg, struct iovec *iov,
+static int fuse_setup_enable_verity(user_uintptr_t arg, struct iovec *iov,
 				    unsigned int *in_iovs)
 {
 	struct fsverity_enable_arg enable;
 	struct fsverity_enable_arg __user *uarg = (void __user *)arg;
 	const __u32 max_buffer_len = FUSE_VERITY_ENABLE_ARG_MAX_PAGES * PAGE_SIZE;
 
-	if (copy_from_user(&enable, uarg, sizeof(enable)))
+	if (__c64_copy_from_user_with_ptr(fsverity_enable_arg, &enable, uarg))
 		return -EFAULT;
 
 	if (enable.salt_size > max_buffer_len || enable.sig_size > max_buffer_len)
@@ -222,7 +240,7 @@ long fuse_do_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg,
 	struct fuse_ioctl_in inarg = {
 		.fh = ff->fh,
 		.cmd = cmd,
-		.arg = arg,
+		.arg = __c_ua(arg),
 		.flags = flags
 	};
 	struct fuse_ioctl_out outarg;
@@ -352,6 +370,10 @@ long fuse_do_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg,
 		if (!(flags & FUSE_IOCTL_UNRESTRICTED))
 			goto out;
 
+		/* Cannot support unrestricted ioctls/retries in purecap. */
+		if (IS_ENABLED(CONFIG_CHERI_PURECAP_UABI))
+			goto out;
+
 		in_iovs = outarg.in_iovs;
 		out_iovs = outarg.out_iovs;
 
@@ -433,7 +455,8 @@ long fuse_file_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 long fuse_file_compat_ioctl(struct file *file, unsigned int cmd,
 			    unsigned long arg)
 {
-	return fuse_ioctl_common(file, cmd, arg, FUSE_IOCTL_COMPAT);
+	return fuse_ioctl_common(file, cmd, (user_uintptr_t)compat_ptr(arg),
+				 in_compat64_syscall() ? 0 : FUSE_IOCTL_COMPAT);
 }
 #endif
 

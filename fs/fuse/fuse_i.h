@@ -1507,7 +1507,7 @@ bool fuse_dax_check_alignment(struct fuse_conn *fc, unsigned int map_alignment);
 void fuse_dax_cancel_work(struct fuse_conn *fc);
 
 /* ioctl.c */
-long fuse_file_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
+long fuse_file_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg);
 long fuse_file_compat_ioctl(struct file *file, unsigned int cmd,
 			    unsigned long arg);
 int fuse_fileattr_get(struct dentry *dentry, struct file_kattr *fa);

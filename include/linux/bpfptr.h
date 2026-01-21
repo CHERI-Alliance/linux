@@ -35,7 +35,7 @@ static inline bpfptr_t USER_BPFPTR(void __user *p)
 static inline bpfptr_t make_bpfptr(user_uintptr_t ptr, bool is_kernel)
 {
 	if (is_kernel)
-		return KERNEL_BPFPTR((void *)(uintptr_t)ptr);
+		return KERNEL_BPFPTR((void *)(user_uintptr_t)ptr);
 	else
 		return USER_BPFPTR((void __user *)ptr);
 }
