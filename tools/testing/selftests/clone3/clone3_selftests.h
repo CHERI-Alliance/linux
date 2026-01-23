@@ -13,7 +13,7 @@
 
 #include "../kselftest.h"
 
-#define ptr_to_u64(ptr) ((__u64)((uintptr_t)(ptr)))
+#define ptr_to_u64(ptr) ((__u64ptr)((uintptr_t)(ptr)))
 
 #ifndef __NR_clone3
 #define __NR_clone3 435
@@ -21,14 +21,14 @@
 
 struct __clone_args {
 	__aligned_u64 flags;
-	__aligned_u64 pidfd;
-	__aligned_u64 child_tid;
-	__aligned_u64 parent_tid;
+	__aligned_u64ptr pidfd;
+	__aligned_u64ptr child_tid;
+	__aligned_u64ptr parent_tid;
 	__aligned_u64 exit_signal;
-	__aligned_u64 stack;
+	__aligned_u64ptr stack;
 	__aligned_u64 stack_size;
-	__aligned_u64 tls;
-	__aligned_u64 set_tid;
+	__aligned_u64ptr tls;
+	__aligned_u64ptr set_tid;
 	__aligned_u64 set_tid_size;
 	__aligned_u64 cgroup;
 };
