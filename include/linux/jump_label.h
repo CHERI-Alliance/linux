@@ -76,6 +76,7 @@
 #include <linux/types.h>
 #include <linux/compiler.h>
 #include <linux/cleanup.h>
+#include <linux/cheri.h>
 
 extern bool static_key_initialized;
 
@@ -100,6 +101,7 @@ struct static_key {
  *	    0 if points to struct jump_entry
  */
 	union {
+		/* for cheri, writing type clears the tag of entries/next */
 		unsigned long type;
 		struct jump_entry *entries;
 		struct static_key_mod *next;
@@ -123,19 +125,20 @@ struct jump_entry {
 
 static inline unsigned long jump_entry_code(const struct jump_entry *entry)
 {
-	return (uintptr_t)&entry->code + entry->code;
+	return __c_pa(&entry->code) + entry->code;
 }
 
 static inline unsigned long jump_entry_target(const struct jump_entry *entry)
 {
-	return (uintptr_t)&entry->target + entry->target;
+	return __c_pa(&entry->target) + entry->target;
 }
 
 static inline struct static_key *jump_entry_key(const struct jump_entry *entry)
 {
 	long offset = entry->key & ~3L;
 
-	return (struct static_key *)((uintptr_t)&entry->key + offset);
+	return (struct static_key *)cheri_make_kernel_data_cap(__c_pa(&entry->key) +
+							       offset, sizeof(struct static_key));
 }
 
 #else

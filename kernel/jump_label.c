@@ -62,7 +62,7 @@ static int jump_label_cmp(const void *a, const void *b)
 
 static void jump_label_swap(void *a, void *b, int size)
 {
-	long delta = (unsigned long)a - (unsigned long)b;
+	long delta = __c_pa(a) - __c_pa(b);
 	struct jump_entry *jea = a;
 	struct jump_entry *jeb = b;
 	struct jump_entry tmp = *jea;
@@ -85,8 +85,7 @@ jump_label_sort_entries(struct jump_entry *start, struct jump_entry *stop)
 	if (IS_ENABLED(CONFIG_HAVE_ARCH_JUMP_LABEL_RELATIVE))
 		swapfn = jump_label_swap;
 
-	size = (((unsigned long)stop - (unsigned long)start)
-					/ sizeof(struct jump_entry));
+	size = ((__c_pa(stop) - __c_pa(start)) / sizeof(struct jump_entry));
 	sort(start, size, sizeof(struct jump_entry), jump_label_cmp, swapfn);
 }
 
@@ -374,8 +373,8 @@ EXPORT_SYMBOL_GPL(jump_label_rate_limit);
 
 static int addr_conflict(struct jump_entry *entry, void *start, void *end)
 {
-	if (jump_entry_code(entry) <= (unsigned long)end &&
-	    jump_entry_code(entry) + jump_entry_size(entry) > (unsigned long)start)
+	if (jump_entry_code(entry) <= __c_pa(end) &&
+	    jump_entry_code(entry) + jump_entry_size(entry) > __c_pa(start))
 		return 1;
 
 	return 0;
@@ -408,8 +407,15 @@ static void arch_jump_label_transform_static(struct jump_entry *entry,
 
 static inline struct jump_entry *static_key_entries(struct static_key *key)
 {
+	ptraddr_t addr;
+
 	WARN_ON_ONCE(key->type & JUMP_TYPE_LINKED);
-	return (struct jump_entry *)(key->type & ~JUMP_TYPE_MASK);
+	addr = key->type & ~JUMP_TYPE_MASK;
+#ifdef CONFIG_CHERI_KERNEL
+	return (struct jump_entry *)cheri_address_set(__start___jump_table, addr);
+#else
+	return (struct jump_entry *)addr;
+#endif
 }
 
 static inline bool static_key_type(struct static_key *key)
@@ -424,12 +430,16 @@ static inline bool static_key_linked(struct static_key *key)
 
 static inline void static_key_clear_linked(struct static_key *key)
 {
-	key->type &= ~JUMP_TYPE_LINKED;
+	/* key->next was cleared, key->entries was populated */
+	uintptr_t tmp = (uintptr_t)key->entries;
+	key->entries = (struct jump_entry *)(tmp & ~JUMP_TYPE_LINKED);
 }
 
 static inline void static_key_set_linked(struct static_key *key)
 {
-	key->type |= JUMP_TYPE_LINKED;
+	/* this is called after key->next was populated */
+	uintptr_t tmp = (uintptr_t)key->next;
+	key->next = (struct static_key_mod *)(tmp | JUMP_TYPE_LINKED);
 }
 
 /***
@@ -446,10 +456,9 @@ static void static_key_set_entries(struct static_key *key,
 {
 	unsigned long type;
 
-	WARN_ON_ONCE((unsigned long)entries & JUMP_TYPE_MASK);
+	WARN_ON_ONCE(__c_pa(entries) & JUMP_TYPE_MASK);
 	type = key->type & JUMP_TYPE_MASK;
-	key->entries = entries;
-	key->type |= type;
+	key->entries = (struct jump_entry *)((uintptr_t)entries | type);
 }
 
 static enum jump_label_type jump_label_type(struct jump_entry *entry)
@@ -481,7 +490,7 @@ static bool jump_label_can_update(struct jump_entry *entry, bool init)
 		 */
 		WARN_ONCE(!jump_entry_is_init(entry),
 			  "can't patch jump_label at %pS",
-			  (void *)(uintptr_t)jump_entry_code(entry));
+			  __c_fakep(jump_entry_code(entry)));
 		return false;
 	}
 
@@ -553,7 +562,7 @@ void __init jump_label_init(void)
 		if (jump_label_type(iter) == JUMP_LABEL_NOP)
 			arch_jump_label_transform_static(iter, JUMP_LABEL_NOP);
 
-		in_init = init_section_contains((void *)jump_entry_code(iter), 1);
+		in_init = init_section_contains(__c_fakep(jump_entry_code(iter)), 1);
 		jump_entry_set_init(iter, in_init);
 
 		iterk = jump_entry_key(iter);
@@ -575,8 +584,10 @@ static inline bool static_key_sealed(struct static_key *key)
 
 static inline void static_key_seal(struct static_key *key)
 {
-	unsigned long type = key->type & JUMP_TYPE_TRUE;
-	key->type = JUMP_TYPE_LINKED | type;
+	unsigned long type = (key->type & JUMP_TYPE_TRUE) | JUMP_TYPE_LINKED;
+	uintptr_t tmp = (uintptr_t)key->entries & ~JUMP_TYPE_MASK;
+
+	key->entries = (struct jump_entry *)(tmp | type);
 }
 
 void jump_label_init_ro(void)
@@ -594,7 +605,7 @@ void jump_label_init_ro(void)
 	for (iter = iter_start; iter < iter_stop; iter++) {
 		struct static_key *iterk = jump_entry_key(iter);
 
-		if (!is_kernel_ro_after_init((unsigned long)iterk))
+		if (!is_kernel_ro_after_init(__c_pa(iterk)))
 			continue;
 
 		if (static_key_sealed(iterk))
@@ -627,8 +638,11 @@ struct static_key_mod {
 
 static inline struct static_key_mod *static_key_mod(struct static_key *key)
 {
+	uintptr_t tmp = (uintptr_t)key->next;
+
 	WARN_ON_ONCE(!static_key_linked(key));
-	return (struct static_key_mod *)(key->type & ~JUMP_TYPE_MASK);
+
+	return (struct static_key_mod *)(tmp & ~JUMP_TYPE_MASK);
 }
 
 /***
@@ -642,10 +656,9 @@ static void static_key_set_mod(struct static_key *key,
 {
 	unsigned long type;
 
-	WARN_ON_ONCE((unsigned long)mod & JUMP_TYPE_MASK);
+	WARN_ON_ONCE(__c_pa(mod) & JUMP_TYPE_MASK);
 	type = key->type & JUMP_TYPE_MASK;
-	key->next = mod;
-	key->type |= type;
+	key->next = (struct static_key_mod *)((uintptr_t)mod | type);
 }
 
 static int __jump_label_mod_text_reserved(void *start, void *end)
@@ -654,8 +667,8 @@ static int __jump_label_mod_text_reserved(void *start, void *end)
 	int ret;
 
 	scoped_guard(rcu) {
-		mod = __module_text_address((unsigned long)start);
-		WARN_ON_ONCE(__module_text_address((unsigned long)end) != mod);
+		mod = __module_text_address(__c_pa(start));
+		WARN_ON_ONCE(__module_text_address(__c_pa(end)) != mod);
 		if (!try_module_get(mod))
 			mod = NULL;
 	}
@@ -722,7 +735,7 @@ static int jump_label_add_module(struct module *mod)
 			continue;
 
 		key = iterk;
-		if (within_module((unsigned long)key, mod)) {
+		if (within_module(__c_pa(key), mod)) {
 			static_key_set_entries(key, iter);
 			continue;
 		}
@@ -746,7 +759,7 @@ static int jump_label_add_module(struct module *mod)
 				return -ENOMEM;
 			}
 			scoped_guard(rcu)
-				jlm2->mod = __module_address((unsigned long)key);
+				jlm2->mod = __module_address(__c_pa(key));
 
 			jlm2->entries = static_key_entries(key);
 			jlm2->next = NULL;
@@ -782,7 +795,7 @@ static void jump_label_del_module(struct module *mod)
 
 		key = jump_entry_key(iter);
 
-		if (within_module((unsigned long)key, mod))
+		if (within_module(__c_pa(key), mod))
 			continue;
 
 		/* No @jlm allocated because key was sealed at init. */
@@ -906,7 +919,7 @@ static void jump_label_update(struct static_key *key)
 	}
 
 	scoped_guard(rcu) {
-		mod = __module_address((unsigned long)key);
+		mod = __module_address(__c_pa(key));
 		if (mod) {
 			stop = mod->jump_entries + mod->num_jump_entries;
 			init = mod->state == MODULE_STATE_COMING;
