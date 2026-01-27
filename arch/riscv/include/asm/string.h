@@ -28,6 +28,25 @@ extern asmlinkage __kernel_size_t strlen(const char *);
 
 #define __HAVE_ARCH_STRNCMP
 extern asmlinkage int strncmp(const char *cs, const char *ct, size_t count);
+
+#define __HAVE_ARCH_STRNLEN
+extern asmlinkage __kernel_size_t strnlen(const char *, __kernel_size_t);
+
+#define __HAVE_ARCH_STRCHR
+extern asmlinkage char *strchr(const char *s, int c);
+
+#define __HAVE_ARCH_STRRCHR
+extern asmlinkage char *strrchr(const char *s, int c);
+
+#define __HAVE_ARCH_STRCHRNUL
+extern asmlinkage char *strchrnul(const char *s, int c);
+
+#define __HAVE_ARCH_STRNCHR
+extern asmlinkage char *strnchr(const char *s, size_t count, int c);
+
+#define __HAVE_ARCH_STRNCHRNUL
+extern asmlinkage char *strnchrnul(const char *s, size_t count, int c);
+
 #endif
 
 /* For those files which don't want to check by kasan. */

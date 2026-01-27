@@ -2,7 +2,15 @@
 
 purgatory-y := purgatory.o sha256.o entry.o string.o ctype.o memcpy.o memset.o
 ifeq ($(CONFIG_KASAN_GENERIC)$(CONFIG_KASAN_SW_TAGS),)
-purgatory-y += strcmp.o strlen.o strncmp.o
+purgatory-y += strcmp.o strncmp.o
+ifeq ($(CONFIG_CHERI_KERNEL), y)
+purgatory-y += strlen_cheri.o
+else
+purgatory-y += strlen.o
+endif
+purgatory-y += strnlen_cheri.o
+purgatory-y += strchr_cheri.o strrchr_cheri.o strnchr_cheri.o
+purgatory-y += strchrnul_cheri.o strnchrnul_cheri.o
 endif
 
 targets += $(purgatory-y)
@@ -27,6 +35,9 @@ $(obj)/strlen.o: $(srctree)/arch/riscv/lib/strlen.S FORCE
 	$(call if_changed_rule,as_o_S)
 
 $(obj)/strncmp.o: $(srctree)/arch/riscv/lib/strncmp.S FORCE
+	$(call if_changed_rule,as_o_S)
+
+$(obj)/%_cheri.o: $(srctree)/arch/riscv/lib/%_cheri.S FORCE
 	$(call if_changed_rule,as_o_S)
 
 $(obj)/sha256.o: $(srctree)/lib/crypto/sha256.c FORCE
