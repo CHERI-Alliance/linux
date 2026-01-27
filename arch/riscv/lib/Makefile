@@ -13,11 +13,24 @@ lib-y			+= memmove.o
 endif
 ifeq ($(CONFIG_KASAN_GENERIC)$(CONFIG_KASAN_SW_TAGS),)
 lib-y			+= strcmp.o
+ifeq ($(CONFIG_CHERI_KERNEL), y)
+lib-y			+= strlen_cheri.o
+else
 lib-y			+= strlen.o
+endif
 lib-y			+= strncmp.o
+ifeq ($(CONFIG_CHERI_KERNEL), y)
+lib-y			+= strnlen_cheri.o
+lib-y			+= strchr_cheri.o
+lib-y			+= strrchr_cheri.o
+else
 lib-y			+= strnlen.o
 lib-y			+= strchr.o
 lib-y			+= strrchr.o
+endif
+lib-y			+= strnchr_cheri.o
+lib-y			+= strchrnul_cheri.o
+lib-y			+= strnchrnul_cheri.o
 endif
 lib-y			+= csum.o
 ifeq ($(CONFIG_MMU), y)
