@@ -37,6 +37,16 @@ extern asmlinkage char *strchr(const char *, int);
 
 #define __HAVE_ARCH_STRRCHR
 extern asmlinkage char *strrchr(const char *, int);
+
+#define __HAVE_ARCH_STRCHRNUL
+extern asmlinkage char *strchrnul(const char *s, int c);
+
+#define __HAVE_ARCH_STRNCHR
+extern asmlinkage char *strnchr(const char *s, size_t count, int c);
+
+#define __HAVE_ARCH_STRNCHRNUL
+extern asmlinkage char *strnchrnul(const char *s, size_t count, int c);
+
 #endif
 
 /* For those files which don't want to check by kasan. */
