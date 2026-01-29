@@ -62,7 +62,7 @@ static inline void set_compat_task(bool is_compat)
 #endif
 }
 
-#ifdef CONFIG_CHERI_PURECAP_UABI
+#ifdef CONFIG_COMPAT64
 static inline void __user *compat_ptr(compat_uptr_t uptr)
 {
 	/*

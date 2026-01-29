@@ -18,6 +18,10 @@ EXPORT_SYMBOL(kernel_code_cap);
 EXPORT_SYMBOL(kernel_ro_cap);
 #endif
 
+#ifdef CONFIG_COMPAT64
+EXPORT_SYMBOL(cheri_user_root_allperms_cap);
+#endif
+
 static void __user *
 build_user_cap(ptraddr_t addr, size_t len, cheri_perms_t perms, bool exact_bounds)
 {
