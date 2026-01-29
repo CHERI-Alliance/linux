@@ -8,9 +8,12 @@
 #include <linux/elf.h>
 
 struct module;
+struct captable_entry;
 static void *shdr_addr(const Elf_Shdr *shdr);
 unsigned long module_emit_got_entry(struct module *mod, unsigned long val);
 unsigned long module_emit_plt_entry(struct module *mod, unsigned long val);
+struct captable_entry *module_emit_captable_entry(struct module *mod, uintptr_t val,
+						  bool is_init);
 
 int module_frob_arch_sections_module_sections(Elf_Ehdr *hdr,
 					      Elf_Shdr *sechdrs,
@@ -136,9 +139,6 @@ static inline struct plt_entry *get_plt_entry(unsigned long val,
 struct captable_entry {
 	uintptr_t cap;
 };
-
-struct captable_entry *module_emit_captable_entry(struct module *mod, uintptr_t val,
-						  bool is_init);
 
 static inline struct captable_entry emit_captable_entry(uintptr_t val)
 {

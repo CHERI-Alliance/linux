@@ -669,6 +669,12 @@ static int apply_r_riscv_cheri_capability(struct module *me, void *location, Elf
 	is_init = within_module_init(__c_pa(location), me);
 	return derive_capability(me, is_init, v, sym, location);
 }
+#else
+static int derive_capability(struct module *me, bool is_init,
+			     Elf_Addr v, Elf_Sym *sym, uintptr_t *cap_buf)
+{
+	return 0;
+}
 #endif
 
 /*
@@ -995,7 +1001,6 @@ int apply_relocate_add(Elf_Shdr *sechdrs, const char *strtab,
 				if (hi20_loc == sym->st_value
 				    && (hi20_type == R_RISCV_PCREL_HI20
 					|| hi20_type == R_RISCV_GOT_HI20)) {
-					size_t offset;
 					s32 hi20, lo12;
 					Elf_Sym *hi20_sym =
 						(Elf_Sym *)(shdr_addr(&sechdrs[symindex]))
@@ -1004,30 +1009,29 @@ int apply_relocate_add(Elf_Shdr *sechdrs, const char *strtab,
 						hi20_sym->st_value
 						+ rel[j].r_addend;
 
-#ifndef CONFIG_MODULE_CHERI
 					/* Calculate lo12 */
-					offset = hi20_sym_val - hi20_loc;
+					size_t offset = hi20_sym_val - hi20_loc;
 					if (IS_ENABLED(CONFIG_MODULE_SECTIONS)
 					    && hi20_type == R_RISCV_GOT_HI20) {
 						offset = module_emit_got_entry(
 							 me, hi20_sym_val);
 						offset = offset - hi20_loc;
-					}
-#else
-					bool is_init;
-					uintptr_t cap;
-					struct captable_entry *cap_entry;
+					} else if (IS_ENABLED(CONFIG_MODULE_CHERI)
+						 && hi20_type == R_RISCV_GOT_HI20) {
+						bool is_init;
+						uintptr_t cap;
+						struct captable_entry *cap_entry;
 
-					is_init = within_module_init(__c_pa(location), me);
-					res = derive_capability(me, is_init,
-								hi20_sym_val, hi20_sym,
-								&cap);
-					if (res < 0)
-						return res;
-					cap_entry = module_emit_captable_entry(me, cap,
-									       is_init);
-					offset = __c_pa(cap_entry) - hi20_loc;
-#endif
+						is_init = within_module_init(__c_pa(location), me);
+						res = derive_capability(me, is_init,
+									hi20_sym_val, hi20_sym,
+									&cap);
+						if (res < 0)
+							return res;
+						cap_entry = module_emit_captable_entry(me, cap,
+										       is_init);
+						offset = __c_pa(cap_entry) - hi20_loc;
+					}
 					hi20 = (offset + 0x800) & 0xfffff000;
 					lo12 = offset - hi20;
 					v = lo12;
