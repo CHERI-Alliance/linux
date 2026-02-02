@@ -507,7 +507,7 @@ static const struct irq_domain_ops intx_domain_ops = {
 static void xilinx_pcie_handle_msi_decode_irq(struct xilinx_pcie *pcie,
 					      u32 status_reg)
 {
-	struct irq_domain *domain = pcie->msi_domain->parent;
+	struct irq_domain *domain = pcie->msi_domain;
 	bool high = (status_reg == XILINX_PCIE_REG_MSI_HI);
 	unsigned long status;
 	unsigned int hwirq;
