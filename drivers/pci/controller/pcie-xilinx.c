@@ -265,18 +265,6 @@ static void xilinx_msi_fifo_top_irq_ack(struct irq_data *d)
 	 */
 }
 
-static void xilinx_msi_decode_top_irq_mask(struct irq_data *d)
-{
-	pci_msi_mask_irq(d);
-	irq_chip_mask_parent(d);
-}
-
-static void xilinx_msi_decode_top_irq_unmask(struct irq_data *d)
-{
-	pci_msi_unmask_irq(d);
-	irq_chip_unmask_parent(d);
-}
-
 static void xilinx_compose_msi_msg(struct irq_data *data, struct msi_msg *msg)
 {
 	struct xilinx_pcie *pcie = irq_data_get_irq_chip_data(data);
@@ -421,13 +409,9 @@ static bool xilinx_init_dev_msi_info(struct device *dev, struct irq_domain *doma
 	if (!msi_lib_init_dev_msi_info(dev, domain, real_parent, info))
 		return false;
 
-	if (pcie->msi_decode) {
-		chip->irq_ack = irq_chip_ack_parent;
-		chip->irq_mask = xilinx_msi_decode_top_irq_mask;
-		chip->irq_unmask = xilinx_msi_decode_top_irq_unmask;
-	} else {
+	if (!pcie->msi_decode)
 		chip->irq_ack = xilinx_msi_fifo_top_irq_ack;
-	}
+
 	return true;
 }
 
@@ -439,6 +423,7 @@ static const struct msi_parent_ops xilinx_msi_parent_ops = {
 	.required_flags		= XILINX_MSI_FLAGS_REQUIRED,
 	.supported_flags	= MSI_GENERIC_FLAGS_MASK,
 	.bus_select_token	= DOMAIN_BUS_PCI_MSI,
+	.chip_flags		= MSI_CHIP_FLAG_SET_ACK,
 	.prefix			= "xilinx-",
 	.init_dev_msi_info	= xilinx_init_dev_msi_info,
 };
