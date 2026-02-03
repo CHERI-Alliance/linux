@@ -3,7 +3,7 @@
 purgatory-y := purgatory.o sha256.o entry.o string.o ctype.o memcpy.o memset.o
 ifeq ($(CONFIG_KASAN_GENERIC)$(CONFIG_KASAN_SW_TAGS),)
 ifeq ($(CONFIG_CHERI_KERNEL), y)
-purgatory-y += strcmp.o strlen_cheri.o strncmp.o strnlen_cheri.o strchr_cheri.o strrchr_cheri.o
+purgatory-y += strcmp_cheri.o strlen_cheri.o strncmp_cheri.o strnlen_cheri.o strchr_cheri.o strrchr_cheri.o
 else
 purgatory-y += strcmp.o strlen.o strncmp.o strnlen.o strchr.o strrchr.o
 endif
