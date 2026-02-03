@@ -12,13 +12,15 @@ else
 lib-y			+= memmove.o
 endif
 ifeq ($(CONFIG_KASAN_GENERIC)$(CONFIG_KASAN_SW_TAGS),)
-lib-y			+= strcmp.o
 ifeq ($(CONFIG_CHERI_KERNEL), y)
+lib-y			+= strcmp_cheri.o
 lib-y			+= strlen_cheri.o
+lib-y			+= strncmp_cheri.o
 else
+lib-y			+= strcmp.o
 lib-y			+= strlen.o
-endif
 lib-y			+= strncmp.o
+endif
 lib-y			+= strnlen_cheri.o
 lib-y			+= strchr_cheri.o
 lib-y			+= strrchr_cheri.o

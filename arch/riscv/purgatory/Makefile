@@ -2,11 +2,10 @@
 
 purgatory-y := purgatory.o sha256.o entry.o string.o ctype.o memcpy.o memset.o
 ifeq ($(CONFIG_KASAN_GENERIC)$(CONFIG_KASAN_SW_TAGS),)
-purgatory-y += strcmp.o strncmp.o
 ifeq ($(CONFIG_CHERI_KERNEL), y)
-purgatory-y += strlen_cheri.o
+purgatory-y += strcmp_cheri.o strlen_cheri.o strncmp_cheri.o
 else
-purgatory-y += strlen.o
+purgatory-y += strcmp.o strlen.o strncmp.o
 endif
 purgatory-y += strnlen_cheri.o
 purgatory-y += strchr_cheri.o strrchr_cheri.o strnchr_cheri.o
