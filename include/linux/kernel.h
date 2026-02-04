@@ -279,22 +279,15 @@ do {							\
 		trace_puts(fmt);			\
 } while (0)
 
-/* Drop the optimisations that would store capabilities in the ringbuffer. */
-#ifdef CONFIG_CHERI_KERNEL
-#define __CONST_PTR(x) false
-#else
-#define __CONST_PTR(x) __builtin_constant_p(x)
-#endif
-
 #define do_trace_printk(fmt, args...)					\
 do {									\
 	static const char *trace_printk_fmt __used			\
 		__section("__trace_printk_fmt") =			\
-		__CONST_PTR(fmt) ? fmt : NULL;				\
+		__builtin_constant_p(fmt) ? fmt : NULL;			\
 									\
 	__trace_printk_check_format(fmt, ##args);			\
 									\
-	if (__CONST_PTR(fmt))						\
+	if (__builtin_constant_p(fmt))					\
 		__trace_bprintk(_THIS_IP_, trace_printk_fmt, ##args);	\
 	else								\
 		__trace_printk(_THIS_IP_, fmt, ##args);			\
@@ -334,9 +327,9 @@ int __trace_printk(unsigned long ip, const char *fmt, ...);
 #define trace_puts(str) ({						\
 	static const char *trace_printk_fmt __used			\
 		__section("__trace_printk_fmt") =			\
-		__CONST_PTR(str) ? str : NULL;				\
+		__builtin_constant_p(str) ? str : NULL;			\
 									\
-	if (__CONST_PTR(str))						\
+	if (__builtin_constant_p(str))					\
 		__trace_bputs(_THIS_IP_, trace_printk_fmt);		\
 	else								\
 		__trace_puts(_THIS_IP_, str, strlen(str));		\
