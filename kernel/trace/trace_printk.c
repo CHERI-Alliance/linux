@@ -378,6 +378,14 @@ static const struct file_operations ftrace_formats_fops = {
 
 static __always_inline bool printk_binsafe(struct trace_array *tr)
 {
+#ifdef CONFIG_CHERI_KERNEL
+	/*
+	 * Binary trace_printk would store capabilities in the ringbuffer. This
+	 * is not supported for cheri, the ringbuffer is not capability-aligned.
+	 */
+	return false;
+#endif
+
 	/*
 	 * The binary format of traceprintk can cause a crash if used
 	 * by a buffer from another boot. Force the use of the
