@@ -195,6 +195,7 @@ ssize_t sized_strscpy(char *dest, const char *src, size_t count)
 }
 EXPORT_SYMBOL(sized_strscpy);
 
+#ifndef __HAVE_ARCH_STPCPY
 /**
  * stpcpy - copy a string from src to dest returning a pointer to the new end
  *          of dest, including src's %NUL-terminator. May overrun dest.
@@ -218,6 +219,7 @@ char *stpcpy(char *__restrict__ dest, const char *__restrict__ src)
 	return --dest;
 }
 EXPORT_SYMBOL(stpcpy);
+#endif
 
 #ifndef __HAVE_ARCH_STRCAT
 char *strcat(char *dest, const char *src)

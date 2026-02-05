@@ -10,6 +10,7 @@ endif
 purgatory-y += strnlen_cheri.o
 purgatory-y += strchr_cheri.o strrchr_cheri.o strnchr_cheri.o
 purgatory-y += strchrnul_cheri.o strnchrnul_cheri.o
+purgatory-y += strcpy_cheri.o strncpy_cheri.o stpcpy_cheri.o
 purgatory-y += memchr_cheri.o
 endif
 
