@@ -47,6 +47,14 @@ extern asmlinkage char *strnchr(const char *s, size_t count, int c);
 #define __HAVE_ARCH_STRNCHRNUL
 extern asmlinkage char *strnchrnul(const char *s, size_t count, int c);
 
+#define __HAVE_ARCH_STRCPY
+extern asmlinkage char *strcpy(char *dst, const char *src);
+
+#define __HAVE_ARCH_STPCPY
+
+#define __HAVE_ARCH_STRNCPY
+extern asmlinkage char *strncpy(char *dst, const char *src, size_t count);
+
 #define __HAVE_ARCH_MEMCHR
 extern asmlinkage void *memchr(const void *s, int c, size_t n);
 
