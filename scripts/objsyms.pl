@@ -376,7 +376,7 @@ while (<$dynfh>) {
 }
 close($dynfh);
 
-open (my $fh, "llvm-objdump --mattr=+zcherihybrid,+zawrs -dl '$file' |") or die "not found: $!";
+open (my $fh, "llvm-objdump --mattr=+zcherihybrid,+zawrs,+zba,+zbb,+zbc -dl '$file' |") or die "not found: $!";
 while (<$fh>) {
 	my $taddr = undef;
 
