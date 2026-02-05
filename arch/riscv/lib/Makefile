@@ -33,6 +33,9 @@ endif
 lib-y			+= strnchr_cheri.o
 lib-y			+= strchrnul_cheri.o
 lib-y			+= strnchrnul_cheri.o
+lib-y			+= strcpy_cheri.o
+lib-y			+= stpcpy_cheri.o
+lib-y			+= strncpy_cheri.o
 lib-y			+= memchr_cheri.o
 endif
 lib-y			+= csum.o

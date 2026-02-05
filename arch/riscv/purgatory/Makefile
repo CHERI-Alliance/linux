@@ -9,6 +9,7 @@ purgatory-y += strcmp.o strlen.o strncmp.o strnlen.o strchr.o strrchr.o
 endif
 purgatory-y += strchrnul_cheri.o strnchr_cheri.o strnchrnul_cheri.o
 purgatory-y += memchr_cheri.o
+purgatory-y += strcpy_cheri.o strncpy_cheri.o stpcpy_cheri.o
 endif
 
 targets += $(purgatory-y)
