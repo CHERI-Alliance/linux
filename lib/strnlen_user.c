@@ -8,6 +8,34 @@
 #include <asm/word-at-a-time.h>
 
 /*
+ * Wrapper to get an unsigned long on CHERI where only some of the
+ * bytes are within bounds.
+ */
+#define unsafe_get_user_long(result, ptr, offset, limit, label)	do {	\
+	typecheck(unsigned long, (result));				\
+	if (!IS_ENABLED(CONFIG_CHERI_PURECAP_UABI) || 			\
+	    likely(!(offset) && (limit) >= sizeof(unsigned long))) {	\
+		unsafe_get_user(result, (unsigned long __user *)(ptr),	\
+				label);					\
+	} else {							\
+		unsigned int i;						\
+		union {							\
+			unsigned long val;				\
+			uint8_t bytes[sizeof(unsigned long)];		\
+		} __u = {						\
+			.val = ~0UL					\
+		};							\
+		for (i = offset;					\
+		     i < sizeof(unsigned long) && i < limit; ++i)	\
+			unsafe_get_user(__u.bytes[i],			\
+					(uint8_t __user *)(ptr) + i, 	\
+					label);				\
+		result = __u.val;					\
+	}								\
+} while(0)
+
+
+/*
  * Do a strnlen, return length of string *with* final '\0'.
  * 'count' is the user-supplied count, while 'max' is the
  * address space maximum.
@@ -26,15 +54,18 @@ static __always_inline long do_strnlen_user(const char __user *src, unsigned lon
 	unsigned long align, res = 0;
 	unsigned long c;
 
+	/* Limit access to capability bounds. */
+	max = cheri_restrict_len(src, max);
+
 	/*
 	 * Do everything aligned. But that means that we
 	 * need to also expand the maximum..
 	 */
-	align = (sizeof(unsigned long) - 1) & (unsigned long)src;
+	align = (sizeof(unsigned long) - 1) & user_ptr_addr(src);
 	src -= align;
 	max += align;
 
-	unsafe_get_user(c, (unsigned long __user *)src, efault);
+	unsafe_get_user_long(c, (unsigned long __user *)src, align, max, efault);
 	c |= aligned_byte_mask(align);
 
 	for (;;) {
@@ -49,7 +80,8 @@ static __always_inline long do_strnlen_user(const char __user *src, unsigned lon
 		if (unlikely(max <= sizeof(unsigned long)))
 			break;
 		max -= sizeof(unsigned long);
-		unsafe_get_user(c, (unsigned long __user *)(src+res), efault);
+		unsafe_get_user_long(c, (unsigned long __user *)(src+res),
+				     0, max, efault);
 	}
 	res -= align;
 
@@ -106,7 +138,7 @@ long strnlen_user(const char __user *str, long count)
 	}
 
 	max_addr = TASK_SIZE_MAX;
-	src_addr = (unsigned long)untagged_addr(str);
+	src_addr = untagged_addr(__c_pa_u(str));
 	if (likely(src_addr < max_addr)) {
 		unsigned long max = max_addr - src_addr;
 		long retval;
