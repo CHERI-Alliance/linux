@@ -25,6 +25,7 @@ lib-y			+= strrchr_cheri.o
 lib-y			+= strnchr_cheri.o
 lib-y			+= strchrnul_cheri.o
 lib-y			+= strnchrnul_cheri.o
+lib-y			+= memchr_cheri.o
 endif
 lib-y			+= csum.o
 ifeq ($(CONFIG_MMU), y)
