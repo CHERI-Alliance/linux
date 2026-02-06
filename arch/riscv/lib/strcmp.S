@@ -8,11 +8,8 @@
 /* int strcmp(const char *cs, const char *ct) */
 SYM_FUNC_START(strcmp)
 
-#ifndef CONFIG_CHERI_KERNEL
-	/* ZBB implementation may overrun the buffer. */
 	__ALTERNATIVE_CFG("nop", "j strcmp_zbb", 0, RISCV_ISA_EXT_ZBB,
 		IS_ENABLED(CONFIG_RISCV_ISA_ZBB) && IS_ENABLED(CONFIG_TOOLCHAIN_HAS_ZBB))
-#endif
 
 	/*
 	 * Returns
@@ -26,10 +23,10 @@ SYM_FUNC_START(strcmp)
 	 *   t0, t1
 	 */
 1:
-	lbu	t0, 0(CREG(a0))
-	lbu	t1, 0(CREG(a1))
-	CINSN(addi)	CREG(a0), CREG(a0), 1
-	CINSN(addi)	CREG(a1), CREG(a1), 1
+	lbu	t0, 0(a0)
+	lbu	t1, 0(a1)
+	addi	a0, a0, 1
+	addi	a1, a1, 1
 	bne	t0, t1, 2f
 	bnez	t0, 1b
 	li	a0, 0
@@ -73,12 +70,12 @@ strcmp_zbb:
 	/* Main loop for aligned string.  */
 	.p2align 3
 1:
-	REG_L	t0, 0(CREG(a0))
-	REG_L	t1, 0(CREG(a1))
+	REG_L	t0, 0(a0)
+	REG_L	t1, 0(a1)
 	orc.b	t3, t0
 	bne	t3, t4, 2f
-	CINSN(addi)	CREG(a0), CREG(a0), SZREG
-	CINSN(addi)	CREG(a1), CREG(a1), SZREG
+	addi	a0, a0, SZREG
+	addi	a1, a1, SZREG
 	beq	t0, t1, 1b
 
 	/*
@@ -110,10 +107,10 @@ strcmp_zbb:
 	/* Simple loop for misaligned strings. */
 	.p2align 3
 3:
-	lbu	t0, 0(CREG(a0))
-	lbu	t1, 0(CREG(a1))
-	CINSN(addi)	CREG(a0), CREG(a0), 1
-	CINSN(addi)	CREG(a1), CREG(a1), 1
+	lbu	t0, 0(a0)
+	lbu	t1, 0(a1)
+	addi	a0, a0, 1
+	addi	a1, a1, 1
 	bne	t0, t1, 4f
 	bnez	t0, 3b
 

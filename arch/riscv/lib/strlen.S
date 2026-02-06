@@ -8,11 +8,8 @@
 /* int strlen(const char *s) */
 SYM_FUNC_START(strlen)
 
-#ifndef CONFIG_CHERI_KERNEL
-	/* ZBB implementation contains out of bounds accesses. */
 	__ALTERNATIVE_CFG("nop", "j strlen_zbb", 0, RISCV_ISA_EXT_ZBB,
 		IS_ENABLED(CONFIG_RISCV_ISA_ZBB) && IS_ENABLED(CONFIG_TOOLCHAIN_HAS_ZBB))
-#endif
 
 	/*
 	 * Returns
@@ -24,11 +21,11 @@ SYM_FUNC_START(strlen)
 	 * Clobbers:
 	 *   t0, t1
 	 */
-	mv	CREG(t1), CREG(a0)
+	mv	t1, a0
 1:
-	lbu	t0, 0(CREG(t1))
+	lbu	t0, 0(t1)
 	beqz	t0, 2f
-	CINSN(addi)	CREG(t1), CREG(t1), 1
+	addi	t1, t1, 1
 	j	1b
 2:
 	sub	a0, t1, a0
@@ -66,19 +63,14 @@ strlen_zbb:
 	andi	t2, a0, SZREG-1
 
 	/* Align pointer. */
-#ifdef CONFIG_CHERI_KERNEL
-	andi	t3, a0, -SZREG
-	scaddr	ct0, ca0, t3
-#else
 	andi	t0, a0, -SZREG
-#endif
 
 	li	t3, SZREG
 	sub	t3, t3, t2
 	slli	t2, t2, 3
 
 	/* Get the first word.  */
-	REG_L	t1, 0(CREG(t0))
+	REG_L	t1, 0(t0)
 
 	/*
 	 * Shift away the partial data we loaded to remove the irrelevant bytes
@@ -116,7 +108,7 @@ strlen_zbb:
 	 */
 	.p2align 3
 1:
-	REG_L	t1, SZREG(CREG(t0))
+	REG_L	t1, SZREG(t0)
 	addi	t0, t0, SZREG
 	orc.b	t1, t1
 	beq	t1, t3, 1b
