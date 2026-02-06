@@ -10,6 +10,7 @@
 #include <linux/printk.h>
 #include <linux/slab.h>
 #include <linux/string.h>
+#include <linux/minmax.h>
 
 #define STRCMP_LARGE_BUF_LEN 2048
 #define STRCMP_CHANGE_POINT 1337
@@ -126,6 +127,412 @@ static void string_test_strchr(struct kunit *test)
 	result = strchr(test_string, 'z');
 	KUNIT_ASSERT_NULL(test, result);
 }
+
+static int string_test_strchr_nextp(char *ptr, int patternlen)
+{
+	int i = 0;
+
+	while (1) {
+		if (i >= patternlen)
+			return 0;
+		if (ptr[i] == 'X') {
+			ptr[i] = 0;
+			return 1;
+		}
+		if (ptr[i] == 0) {
+			ptr[i] = 'A';
+			i++;
+			continue;
+		}
+		ptr[i] = 'X';
+		return 1;
+	}
+}
+
+static void string_test_strchr_test_one(struct kunit *test, char *buf,
+					char *orig_foundptr, char *endptr,
+					char *lastfound, size_t off)
+{
+	size_t maxlen;
+	char *foundptr = min_t(char *, endptr, orig_foundptr);
+	char *buf1 = cheri_bounds_set(buf, endptr - buf + 1);
+	char *buf2 = cheri_bounds_set(buf, foundptr - buf + 1);
+	char *foundptrnull = (*foundptr) ? foundptr : NULL;
+
+	KUNIT_ASSERT_EQ(test, strlen(buf), endptr - buf);
+	KUNIT_ASSERT_EQ(test, strlen(buf1), endptr - buf);
+
+	KUNIT_ASSERT_EQ(test, __c_pa(strchr(buf, 'X')), __c_pa(foundptrnull));
+	KUNIT_ASSERT_EQ(test, __c_pa(strchr(buf1, 'X')), __c_pa(foundptrnull));
+	KUNIT_ASSERT_EQ(test, __c_pa(strchr(buf2, 'X')), __c_pa(foundptrnull));
+	KUNIT_ASSERT_EQ(test, __c_pa(strchr(buf, 0)), __c_pa(endptr));
+	KUNIT_ASSERT_EQ(test, __c_pa(strchr(buf1, 0)), __c_pa(endptr));
+
+	/* buf is never suitable for strrchr. It will access up to the NUL byte. */
+	KUNIT_ASSERT_EQ(test, __c_pa(strrchr(buf, 'X')), __c_pa(lastfound));
+	KUNIT_ASSERT_EQ(test, __c_pa(strrchr(buf1, 'X')), __c_pa(lastfound));
+	KUNIT_ASSERT_EQ(test, __c_pa(strrchr(buf, 0)), __c_pa(endptr));
+	KUNIT_ASSERT_EQ(test, __c_pa(strrchr(buf1, 0)), __c_pa(endptr));
+
+	KUNIT_ASSERT_EQ(test, __c_pa(strchrnul(buf, 'X')), __c_pa(foundptr));
+	KUNIT_ASSERT_EQ(test, __c_pa(strchrnul(buf1, 'X')), __c_pa(foundptr));
+	KUNIT_ASSERT_EQ(test, __c_pa(strchrnul(buf2, 'X')), __c_pa(foundptr));
+	KUNIT_ASSERT_EQ(test, __c_pa(strchrnul(buf, 0)), __c_pa(endptr));
+	KUNIT_ASSERT_EQ(test, __c_pa(strchrnul(buf1, 0)), __c_pa(endptr));
+
+	for (maxlen = off - 4; maxlen <= off+12; ++maxlen) {
+		char *buf3 = cheri_bounds_set(buf, maxlen);
+		char *found = min_t(void *, foundptr, buf + maxlen);
+		char *foundnull = (found < buf + maxlen && *found) ? found : NULL;
+		char *end = min_t(void *, endptr, buf + maxlen);
+		char *endnull = (end < buf + maxlen) ? end : NULL;
+		char *memchrfound = (orig_foundptr < buf + maxlen) ? orig_foundptr : NULL;
+		char *bufm = cheri_bounds_set(buf, orig_foundptr - buf + 1);
+
+		KUNIT_ASSERT_EQ(test, strnlen(buf, maxlen), end - buf);
+		KUNIT_ASSERT_EQ(test, strnlen(buf1, maxlen), end - buf);
+		KUNIT_ASSERT_EQ(test, strnlen(buf3, maxlen), end - buf);
+
+		KUNIT_ASSERT_EQ(test, __c_pa(strnchr(buf, maxlen, 'X')), __c_pa(foundnull));
+		KUNIT_ASSERT_EQ(test, __c_pa(strnchr(buf1, maxlen, 'X')), __c_pa(foundnull));
+		KUNIT_ASSERT_EQ(test, __c_pa(strnchr(buf2, maxlen, 'X')), __c_pa(foundnull));
+		KUNIT_ASSERT_EQ(test, __c_pa(strnchr(buf3, maxlen, 'X')), __c_pa(foundnull));
+		KUNIT_ASSERT_EQ(test, __c_pa(strnchr(buf, maxlen, 0)), __c_pa(endnull));
+		KUNIT_ASSERT_EQ(test, __c_pa(strnchr(buf1, maxlen, 0)), __c_pa(endnull));
+		KUNIT_ASSERT_EQ(test, __c_pa(strnchr(buf3, maxlen, 0)), __c_pa(endnull));
+
+		KUNIT_ASSERT_EQ(test, __c_pa(memchr(buf, 'X', maxlen)), __c_pa(memchrfound));
+		KUNIT_ASSERT_EQ(test, __c_pa(memchr(bufm, 'X', maxlen)), __c_pa(memchrfound));
+		KUNIT_ASSERT_EQ(test, __c_pa(memchr(buf3, 'X', maxlen)), __c_pa(memchrfound));
+		KUNIT_ASSERT_EQ(test, __c_pa(memchr(buf, 0, maxlen)), __c_pa(endnull));
+		KUNIT_ASSERT_EQ(test, __c_pa(memchr(buf1, 0, maxlen)), __c_pa(endnull));
+		KUNIT_ASSERT_EQ(test, __c_pa(memchr(buf3, 0, maxlen)), __c_pa(endnull));
+
+		KUNIT_ASSERT_EQ(test, __c_pa(strnchrnul(buf, maxlen, 'X')), __c_pa(found));
+		KUNIT_ASSERT_EQ(test, __c_pa(strnchrnul(buf1, maxlen, 'X')), __c_pa(found));
+		KUNIT_ASSERT_EQ(test, __c_pa(strnchrnul(buf2, maxlen, 'X')), __c_pa(found));
+		KUNIT_ASSERT_EQ(test, __c_pa(strnchrnul(buf3, maxlen, 'X')), __c_pa(found));
+		KUNIT_ASSERT_EQ(test, __c_pa(strnchrnul(buf, maxlen, 0)), __c_pa(end));
+		KUNIT_ASSERT_EQ(test, __c_pa(strnchrnul(buf1, maxlen, 0)), __c_pa(end));
+		KUNIT_ASSERT_EQ(test, __c_pa(strnchrnul(buf3, maxlen, 0)), __c_pa(end));
+	}
+}
+
+static void string_test_strchr_stress(struct kunit *test)
+{
+	static const int plen = 7;
+	unsigned int align, off;
+	union {
+		char buf[256];
+		unsigned long dummy;
+	} u;
+	char *base = u.buf;
+	char *buf, *p;
+	char *endptr, *foundptr, *lastfound;
+	memset(base, 'A', sizeof(u));
+	base[sizeof(u)-1] = 0;
+
+	for (align = 0; align < 16; ++align) {
+		buf = base + align;
+		for (off = 0; off < 130; ++off) {
+			if (off == 16)
+				off = 120;
+			kunit_info(test, "%s: Testing %d/%d: off=%d\n",
+				   __func__, align + 1, 17, off);
+			do {
+				endptr = NULL;
+				foundptr = NULL;
+				lastfound = NULL;
+				for (p = buf + off;
+				     p < buf + off + plen; ++p)
+				{
+					if (*p == 'X' && !foundptr)
+						foundptr = p;
+					if (!endptr && *p == 'X')
+						lastfound = p;
+					if (*p == 0 && !endptr)
+						endptr = p;
+				}
+				if (!endptr)
+					endptr = base + sizeof(u) - 1;
+				if (!foundptr)
+					foundptr = base + sizeof(u) - 1;
+
+				string_test_strchr_test_one(test, buf,
+							    foundptr, endptr,
+							    lastfound, off);
+				cond_resched();
+			} while (string_test_strchr_nextp(buf + off, plen));
+		}
+	}
+}
+
+/*
+ * Patterns to iterate through:
+ */
+static int string_test_strcmp_nextp(char *a, char *b, int patternlen)
+{
+	int i = 0;
+
+	/*
+	 * Possible patterns are:
+	 * (A,A), (A,X), (A,0)
+	 * (X,A), (X,X), (X,0)
+	 * (0,A), (0,X), (0,0)
+	 * But for each of the following pairs one is redundant:
+	 * - (X,X) and (A,A)
+	 * - (A,0) and (X,0)
+	 *  -(0,A) and (X,A)
+	 */
+	while (1) {
+		while (1) {
+			if (i >= patternlen)
+				return 0;
+			if (b[i] == 'A') {
+				b[i] = 'X';
+				break;
+			}
+			if (b[i] == 'X') {
+				b[i] = 0;
+				break;
+			}
+			b[i] = 'A';
+
+			if (a[i] == 'A') {
+				a[i] = 'X';
+				break;
+			}
+			if (a[i] == 'X') {
+				a[i] = 0;
+				break;
+			}
+			a[i] = 'A';
+			i++;
+		}
+		if (a[i] == 'X' && b[i] == 'X')
+			continue;
+		if (a[i] == 0 && b[i] == 'A')
+			continue;
+		if (a[i] == 'A' && b[i] == 0)
+			continue;
+		return 1;
+	}
+}
+
+static void string_test_strcmp_test_one(struct kunit *test, char *s1,
+					char *s2, int e, size_t off)
+{
+	size_t maxlen;
+	char *s1b = cheri_bounds_set(s1, e + 1);
+	char *s2b = cheri_bounds_set(s2, e + 1);
+	int r = 0;
+
+	if (s1[e] < s2[e])
+		r = -1;
+	if (s1[e] > s2[e])
+		r = 1;
+
+#define N(X) ({			\
+	int __ret = (X);	\
+	if (__ret < 0)		\
+		__ret = -1;	\
+	if (__ret > 0)		\
+		__ret = 1;	\
+	__ret;			\
+})
+	KUNIT_ASSERT_EQ(test, N(strcmp(s1,  s2 )), r);
+	KUNIT_ASSERT_EQ(test, N(strcmp(s1,  s2b)), r);
+	KUNIT_ASSERT_EQ(test, N(strcmp(s1b, s2 )), r);
+	KUNIT_ASSERT_EQ(test, N(strcmp(s1b, s2b)), r);
+
+	for (maxlen = off - 4; maxlen <= off+12; ++maxlen) {
+		char *s1l = cheri_bounds_set(s1, maxlen);
+		char *s2l = cheri_bounds_set(s2, maxlen);
+		int r2 = (e < maxlen) ? r : 0;
+
+		KUNIT_ASSERT_EQ(test, N(strncmp(s1,  s2,  maxlen)), r2);
+		KUNIT_ASSERT_EQ(test, N(strncmp(s1,  s2b, maxlen)), r2);
+		KUNIT_ASSERT_EQ(test, N(strncmp(s1,  s2l, maxlen)), r2);
+		KUNIT_ASSERT_EQ(test, N(strncmp(s1b, s2,  maxlen)), r2);
+		KUNIT_ASSERT_EQ(test, N(strncmp(s1b, s2b, maxlen)), r2);
+		KUNIT_ASSERT_EQ(test, N(strncmp(s1b, s2l, maxlen)), r2);
+		KUNIT_ASSERT_EQ(test, N(strncmp(s1l, s2,  maxlen)), r2);
+		KUNIT_ASSERT_EQ(test, N(strncmp(s1l, s2b, maxlen)), r2);
+		KUNIT_ASSERT_EQ(test, N(strncmp(s1l, s2l, maxlen)), r2);
+	}
+#undef N
+}
+
+static void string_test_strcmp_stress(struct kunit *test)
+{
+	static const int amax = 9;
+	static const int plen = 5;
+	unsigned int a1, a2, off, end, kase = 0;
+	union {
+		char buf[256];
+		unsigned long dummy;
+	} u1, u2;
+	char *b1 = u1.buf;
+	char *b2 = u2.buf;
+	char *s1, *s2;
+
+	memset(b1, 'A', sizeof(u1));
+	memset(b2, 'A', sizeof(u2));
+	b1[sizeof(u1)-1] = 0;
+	b2[sizeof(u2)-1] = 0;
+
+	for (a1 = 0; a1 < amax; ++ a1) {
+		s1 = b1 + 8 + a1;
+		for (a2 = 0; a2 < amax; ++a2) {
+			s2 = b2 + 8 + a2;
+			++kase;
+			for (off = 0; off < 130; ++off) {
+				if (off == 16)
+					off = 120;
+				kunit_info(test, "%s: Testing %d/%d: off=%d\n",
+					   __func__, kase, amax * amax, off);
+				do {
+					int i;
+					end = min_t(size_t,
+						    sizeof(u1) - (s1 - b1),
+						    sizeof(u2) - (s2 - b2));
+					end--;
+					for (i = off; i <= off + plen; ++i) {
+						if (s1[i] != s2[i]) {
+							end = i;
+							break;
+						}
+						if (s1[i] == 0) {
+							end = i;
+							break;
+						}
+					}
+					string_test_strcmp_test_one(test, s1,
+								    s2, end,
+								    off);
+					cond_resched();
+				} while (string_test_strcmp_nextp(s1 + off,
+								  s2 + off,
+								  plen));
+			}
+		}
+	}
+}
+
+/* This restores the contents of the destionation buffer as a side effect. */
+static void string_test_strcpy_validate(struct kunit *test,
+					char *buf, size_t buflen,
+					const char *ref, size_t reflen,
+					size_t off)
+{
+	size_t tail = min_t(size_t, buflen - off - reflen, 32);
+	char diff = 0;
+
+	while (off--)
+		diff |= (*buf++) ^ '.';
+	while (reflen--) {
+		diff |= (*buf) ^ (*ref++);
+		*buf++ = '.';
+	}
+	while (tail--)
+		diff |= (*buf++) ^ '.';
+
+	KUNIT_ASSERT_EQ(test, diff, 0);
+}
+
+/* Linux has no prototype for this. */
+char *stpcpy(char *__restrict__ dest, const char *__restrict__ src);
+
+static void string_test_strcpy_test_one(struct kunit *test, char *buf,
+					size_t len, size_t off)
+{
+	char *buf1 = cheri_bounds_set(buf, len);
+	char dst[300];
+	size_t maxlen;
+	int dstoff;
+
+	memset(dst, '.', sizeof(dst));
+
+#define V(LEN)	string_test_strcpy_validate(test, dst, sizeof(dst),	\
+					    buf, (LEN), dstoff)
+	for (dstoff = 8; dstoff <= 16; dstoff++) {
+		void * dstp = dst + dstoff;
+		void * dstp1 = cheri_bounds_set(dstp, len);
+		void * ret;
+
+		strcpy(dstp,  buf);  V(len);
+		strcpy(dstp,  buf);  V(len);
+		strcpy(dstp1, buf1); V(len);
+		strcpy(dstp1, buf1); V(len);
+
+		ret = stpcpy(dstp,  buf);  V(len);
+		KUNIT_ASSERT_EQ(test, (unsigned long)(ret - dstp), len - 1);
+		ret = stpcpy(dstp,  buf);  V(len);
+		KUNIT_ASSERT_EQ(test, (unsigned long)(ret - dstp), len - 1);
+		ret = stpcpy(dstp1, buf1); V(len);
+		KUNIT_ASSERT_EQ(test, (unsigned long)(ret - dstp1), len - 1);
+		ret = stpcpy(dstp1, buf1); V(len);
+		KUNIT_ASSERT_EQ(test, (unsigned long)(ret - dstp1), len - 1);
+
+		for (maxlen = off - 4; maxlen <= off+12; ++maxlen) {
+			void *buf2 = cheri_bounds_set(buf, maxlen);
+			void *dstp2 = cheri_bounds_set(dstp, maxlen);
+			size_t len2 = min_t(size_t, len, maxlen);
+
+			strncpy(dstp,  buf,  maxlen); V(len2);
+			strncpy(dstp,  buf1, maxlen); V(len2);
+			strncpy(dstp,  buf2, maxlen); V(len2);
+
+			strncpy(dstp1, buf,  maxlen); V(len2);
+			strncpy(dstp1, buf1, maxlen); V(len2);
+			strncpy(dstp1, buf2, maxlen); V(len2);
+
+			strncpy(dstp2, buf,  maxlen); V(len2);
+			strncpy(dstp2, buf1, maxlen); V(len2);
+			strncpy(dstp2, buf2, maxlen); V(len2);
+		}
+	}
+#undef V
+}
+
+/* Uses the same pattern generation for the source as strlen(). */
+static void string_test_strcpy_stress(struct kunit *test)
+{
+	static const int plen = 5;
+	unsigned int align, off;
+	union {
+		char buf[256];
+		unsigned long dummy;
+	} u;
+	char *base = u.buf;
+	char *buf, *p;
+	size_t len;
+	memset(base, 'A', sizeof(u));
+	base[sizeof(u)-1] = 0;
+
+	for (align = 0; align <= 16; ++align) {
+		buf = base + align;
+		for (off = 0; off < 130; ++off) {
+			if (off == 16)
+				off = 120;
+			kunit_info(test, "%s: Testing %d/%d: off=%d\n",
+				   __func__, align + 1, 17, off);
+			do {
+				len = sizeof(u) - (buf - base);
+				for (p = buf + off; p < buf + off + plen; ++p) {
+					if (*p == 0) {
+						len = p + 1 - buf;
+						break;
+					}
+				}
+				string_test_strcpy_test_one(test, buf, len,
+							    off);
+				cond_resched();
+			} while (string_test_strchr_nextp(buf + off, plen));
+		}
+	}
+}
+
 
 static void string_test_strnchr(struct kunit *test)
 {
@@ -623,6 +1030,9 @@ static struct kunit_case string_test_cases[] = {
 	KUNIT_CASE(string_test_strlcat),
 	KUNIT_CASE(string_test_strtomem),
 	KUNIT_CASE(string_test_memtostr),
+	KUNIT_CASE_SLOW(string_test_strchr_stress),
+	KUNIT_CASE_SLOW(string_test_strcmp_stress),
+	KUNIT_CASE_SLOW(string_test_strcpy_stress),
 	{}
 };
 
