@@ -137,12 +137,10 @@ ssize_t sized_strscpy(char *dest, const char *src, size_t count)
 #endif
 #endif
 
-	/*
-	 * Force byte access in CHERI mode as we might hit capability
-	 * bounds at any time.
-	 */
-	if (IS_ENABLED(CONFIG_CHERI_KERNEL))
-		max = 0;
+#ifdef CONFIG_CHERI_KERNEL
+	/* Limit access to the capability bounds on CHERI. */
+	max = cheri_restrict_len(src, max);
+#endif
 
 	/*
 	 * load_unaligned_zeropad() or read_word_at_a_time() below may read
@@ -361,6 +359,7 @@ char *strchrnul(const char *s, int c)
 EXPORT_SYMBOL(strchrnul);
 #endif
 
+#ifndef __HAVE_ARCH_STRNCHRNUL
 /**
  * strnchrnul - Find and return a character in a length limited string,
  * or end of string
@@ -377,6 +376,7 @@ char *strnchrnul(const char *s, size_t count, int c)
 		s++;
 	return (char *)s;
 }
+#endif
 
 #ifndef __HAVE_ARCH_STRRCHR
 /**
@@ -616,7 +616,7 @@ EXPORT_SYMBOL(memset64);
 #endif
 
 #ifndef __HAVE_ARCH_MEMSET_P
-extern void *memset_p(void **s, void *v, size_t count)
+void *memset_p(void **s, void *v, size_t count)
 {
 	void **xs = s;
 
