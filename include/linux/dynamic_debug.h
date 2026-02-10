@@ -185,12 +185,12 @@ void __dynamic_ibdev_dbg(struct _ddebug *descriptor,
 #define _DPRINTK_KEY_INIT .key.dd_key_true = (STATIC_KEY_TRUE_INIT)
 
 #define DYNAMIC_DEBUG_BRANCH(descriptor) \
-	static_branch_likely(&descriptor.key.dd_key_true)
+	__static_branch_likely(&descriptor, &descriptor.key.dd_key_true)
 #else
 #define _DPRINTK_KEY_INIT .key.dd_key_false = (STATIC_KEY_FALSE_INIT)
 
 #define DYNAMIC_DEBUG_BRANCH(descriptor) \
-	static_branch_unlikely(&descriptor.key.dd_key_false)
+	__static_branch_unlikely(&descriptor, &descriptor.key.dd_key_false)
 #endif
 
 #else /* !CONFIG_JUMP_LABEL */
