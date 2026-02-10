@@ -107,14 +107,14 @@ static inline bool lru_gen_enabled(void)
 {
 	DECLARE_STATIC_KEY_TRUE(lru_gen_caps[NR_LRU_GEN_CAPS]);
 
-	return static_branch_likely(&lru_gen_caps[LRU_GEN_CORE]);
+	return __static_branch_likely(lru_gen_caps, &lru_gen_caps[LRU_GEN_CORE]);
 }
 #else
 static inline bool lru_gen_enabled(void)
 {
 	DECLARE_STATIC_KEY_FALSE(lru_gen_caps[NR_LRU_GEN_CAPS]);
 
-	return static_branch_unlikely(&lru_gen_caps[LRU_GEN_CORE]);
+	return __static_branch_unlikely(lru_gen_caps, &lru_gen_caps[LRU_GEN_CORE]);
 }
 #endif
 
