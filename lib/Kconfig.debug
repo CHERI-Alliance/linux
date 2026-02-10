@@ -2468,6 +2468,10 @@ config STRING_KUNIT_TEST
 	depends on KUNIT
 	default KUNIT_ALL_TESTS
 
+config STRPERF
+	tristate "Adaption of strperf"
+	default n
+
 config STRING_HELPERS_KUNIT_TEST
 	tristate "KUnit test string helpers at runtime" if !KUNIT_ALL_TESTS
 	depends on KUNIT
