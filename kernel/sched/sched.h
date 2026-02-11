@@ -2234,16 +2234,17 @@ extern __read_mostly unsigned int sysctl_sched_features;
 
 #ifdef CONFIG_JUMP_LABEL
 
+extern struct static_key sched_feat_keys[__SCHED_FEAT_NR];
+
 #define SCHED_FEAT(name, enabled)					\
 static __always_inline bool static_branch_##name(struct static_key *key) \
 {									\
-	return static_key_##enabled(key);				\
+	return __static_key_##enabled(sched_feat_keys, key);		\
 }
 
 #include "features.h"
 #undef SCHED_FEAT
 
-extern struct static_key sched_feat_keys[__SCHED_FEAT_NR];
 #define sched_feat(x) (static_branch_##x(&sched_feat_keys[__SCHED_FEAT_##x]))
 
 #else /* !CONFIG_JUMP_LABEL: */
