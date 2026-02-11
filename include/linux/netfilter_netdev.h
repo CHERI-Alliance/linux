@@ -9,7 +9,8 @@
 static inline bool nf_hook_ingress_active(const struct sk_buff *skb)
 {
 #ifdef CONFIG_JUMP_LABEL
-	if (!static_key_false(&nf_hooks_needed[NFPROTO_NETDEV][NF_NETDEV_INGRESS]))
+	if (!__static_key_false(nf_hooks_needed,
+				&nf_hooks_needed[NFPROTO_NETDEV][NF_NETDEV_INGRESS]))
 		return false;
 #endif
 	return rcu_access_pointer(skb->dev->nf_hooks_ingress);
@@ -54,7 +55,8 @@ static inline int nf_hook_ingress(struct sk_buff *skb)
 static inline bool nf_hook_egress_active(void)
 {
 #ifdef CONFIG_JUMP_LABEL
-	if (!static_key_false(&nf_hooks_needed[NFPROTO_NETDEV][NF_NETDEV_EGRESS]))
+	if (!__static_key_false(nf_hooks_needed,
+				&nf_hooks_needed[NFPROTO_NETDEV][NF_NETDEV_EGRESS]))
 		return false;
 #endif
 	return true;
