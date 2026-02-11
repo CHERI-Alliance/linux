@@ -60,30 +60,36 @@
 #if __SIZEOF_POINTER__ == 16
 #ifdef __ASSEMBLER__
 #define RISCV_PTR		.chericap
+#define RISCV_PTRADDR		.dword
 #define RISCV_SZPTR		16
 #define RISCV_LGPTR		4
 #else
 #define RISCV_PTR		".chericap"
+#define RISCV_PTRADDR		".dword"
 #define RISCV_SZPTR		"16"
 #define RISCV_LGPTR		"4"
 #endif
 #elif __SIZEOF_POINTER__ == 8
 #ifdef __ASSEMBLER__
 #define RISCV_PTR		.dword
+#define RISCV_PTRADDR		.dword
 #define RISCV_SZPTR		8
 #define RISCV_LGPTR		3
 #else
 #define RISCV_PTR		".dword"
+#define RISCV_PTRADDR		".dword"
 #define RISCV_SZPTR		"8"
 #define RISCV_LGPTR		"3"
 #endif
 #elif __SIZEOF_POINTER__ == 4
 #ifdef __ASSEMBLER__
 #define RISCV_PTR		.word
+#define RISCV_PTRADDR		.word
 #define RISCV_SZPTR		4
 #define RISCV_LGPTR		2
 #else
 #define RISCV_PTR		".word"
+#define RISCV_PTRADDR		".word"
 #define RISCV_SZPTR		"4"
 #define RISCV_LGPTR		"2"
 #endif
