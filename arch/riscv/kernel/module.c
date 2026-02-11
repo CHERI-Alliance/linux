@@ -241,7 +241,9 @@ static int apply_r_riscv_lo12_s_rela(struct module *me, void *location,
 	return riscv_insn_rmw(location, 0x1fff07f, imm11_5 | imm4_0);
 }
 
-#ifndef CONFIG_MODULE_CHERI
+static int derive_capability(struct module *me, bool is_init,
+			     Elf_Addr v, Elf_Sym *sym, uintptr_t *cap_buf);
+
 static int apply_r_riscv_got_hi20_rela(struct module *me, void *location,
 				       Elf_Addr v, Elf_Sym *sym)
 {
@@ -249,7 +251,13 @@ static int apply_r_riscv_got_hi20_rela(struct module *me, void *location,
 
 	/* Always emit the got entry */
 	if (IS_ENABLED(CONFIG_MODULE_SECTIONS)) {
-		offset = module_emit_got_entry(me, v) - __c_pa(location);
+		uintptr_t vptr;
+		int ret = derive_capability(me, false, v, sym, &vptr);
+		if (ret < 0) {
+			pr_err("%s: Cannot derive capability\n", me->name);
+			return ret;
+		}
+		offset = (void *)module_emit_got_entry(me, vptr) - location;
 	} else {
 		pr_err(
 		  "%s: can not generate the GOT entry for symbol = %016llx from PC = %p\n",
@@ -259,7 +267,6 @@ static int apply_r_riscv_got_hi20_rela(struct module *me, void *location,
 
 	return riscv_insn_rmw(location, 0xfff, (offset + 0x800) & 0xfffff000);
 }
-#endif
 
 static int apply_r_riscv_call_plt_rela(struct module *me, void *location,
 				       Elf_Addr v, Elf_Sym *sym)
@@ -269,8 +276,8 @@ static int apply_r_riscv_call_plt_rela(struct module *me, void *location,
 
 	if (!riscv_insn_valid_32bit_offset(offset)) {
 		/* Only emit the plt entry if offset over 32-bit range */
-		if (IS_ENABLED(CONFIG_MODULE_SECTIONS) && !IS_ENABLED(CONFIG_MODULE_CHERI)) {
-			offset = module_emit_plt_entry(me, v) - __c_pa(location);
+		if (IS_ENABLED(CONFIG_MODULE_SECTIONS)) {
+			offset = (void *)module_emit_plt_entry(me, v) - location;
 		} else {
 			pr_err(
 			  "%s: target %016llx can not be addressed by the 32-bit offset from PC = %p\n",
@@ -447,7 +454,7 @@ static int apply_r_riscv_plt32_rela(struct module *me, void *location,
 	if (!riscv_insn_valid_32bit_offset(offset)) {
 		/* Only emit the plt entry if offset over 32-bit range */
 		if (IS_ENABLED(CONFIG_MODULE_SECTIONS)) {
-			offset = module_emit_plt_entry(me, v) - __c_pa(location);
+			offset = (void *)module_emit_plt_entry(me, v) - location;
 		} else {
 			pr_err("%s: target %016llx can not be addressed by the 32-bit offset from PC = %p\n",
 			       me->name, (long long)v, location);
@@ -546,7 +553,7 @@ static int apply_uleb128_accumulation(struct module *me, void *location, long bu
 	return 0;
 }
 
-#ifdef CONFIG_MODULE_CHERI
+#ifdef CONFIG_CHERI_KERNEL
 
 struct memtype_search {
 	Elf_Addr addr;
@@ -642,37 +649,19 @@ static int derive_capability(struct module *me, bool is_init,
 	return 0;
 }
 
-static int apply_r_riscv_got_hi20_rela(struct module *me, void *location,
-					 Elf_Addr v, Elf_Sym *sym)
-{
-	int res;
-	uintptr_t cap;
-	bool is_init;
-	ptrdiff_t offset;
-	struct captable_entry *cap_entry;
-
-	is_init = within_module_init(__c_pa(location), me);
-	res = derive_capability(me, is_init, v, sym, &cap);
-	if (res < 0)
-		return res;
-
-	cap_entry = module_emit_captable_entry(me, cap, is_init);
-	offset = __c_pa(cap_entry) - __c_pa(location);
-	return riscv_insn_rmw(location, 0xfff, (offset + 0x800) & 0xfffff000);
-}
-
 static int apply_r_riscv_cheri_capability(struct module *me, void *location, Elf_Addr v,
 					  Elf_Sym *sym)
 {
 	bool is_init;
 
 	is_init = within_module_init(__c_pa(location), me);
-	return derive_capability(me, is_init, v, sym, location);
+	return derive_capability(me, false /* XXX is_init */, v, sym, location);
 }
 #else
 static int derive_capability(struct module *me, bool is_init,
 			     Elf_Addr v, Elf_Sym *sym, uintptr_t *cap_buf)
 {
+	(*cap_buf) = v;
 	return 0;
 }
 #endif
@@ -752,7 +741,7 @@ static const struct relocation_handlers reloc_handlers[] = {
 				    .accumulate_handler = apply_uleb128_accumulation },
 	/* 62-191 reserved for future standard use */
 	/* 192-255 nonstandard ABI extensions  */
-#ifdef CONFIG_MODULE_CHERI
+#ifdef CONFIG_CHERI_KERNEL
 	[R_RISCV_CHERI_CAPABILITY] = { .reloc_handler = apply_r_riscv_cheri_capability },
 #endif
 };
@@ -1013,24 +1002,16 @@ int apply_relocate_add(Elf_Shdr *sechdrs, const char *strtab,
 					size_t offset = hi20_sym_val - hi20_loc;
 					if (IS_ENABLED(CONFIG_MODULE_SECTIONS)
 					    && hi20_type == R_RISCV_GOT_HI20) {
-						offset = module_emit_got_entry(
-							 me, hi20_sym_val);
+#ifdef CONFIG_CHERI_KERNEL
+						uintptr_t vptr;
+						int ret = derive_capability(me, false, hi20_sym_val, hi20_sym, &vptr);
+						if (ret < 0)
+							return ret;
+#else
+						uintptr_t vptr = v;
+#endif
+						offset = __c_ua(module_emit_got_entry(me, vptr));
 						offset = offset - hi20_loc;
-					} else if (IS_ENABLED(CONFIG_MODULE_CHERI)
-						 && hi20_type == R_RISCV_GOT_HI20) {
-						bool is_init;
-						uintptr_t cap;
-						struct captable_entry *cap_entry;
-
-						is_init = within_module_init(__c_pa(location), me);
-						res = derive_capability(me, is_init,
-									hi20_sym_val, hi20_sym,
-									&cap);
-						if (res < 0)
-							return res;
-						cap_entry = module_emit_captable_entry(me, cap,
-										       is_init);
-						offset = __c_pa(cap_entry) - hi20_loc;
 					}
 					hi20 = (offset + 0x800) & 0xfffff000;
 					lo12 = offset - hi20;
@@ -1084,39 +1065,6 @@ int module_finalize(const Elf_Ehdr *hdr,
 	s = find_section(hdr, sechdrs, ".alternative");
 	if (s)
 		apply_module_alternatives(shdr_addr((Elf_Shdr *)s), s->sh_size);
-
-	return 0;
-}
-
-
-int __weak module_frob_arch_sections_module_sections(Elf_Ehdr *hdr,
-				     Elf_Shdr *sechdrs,
-				     char *secstrings,
-				     struct module *mod)
-{
-	return 0;
-}
-
-int __weak module_frob_arch_sections_module_cheri(Elf_Ehdr *hdr,
-				     Elf_Shdr *sechdrs,
-				     char *secstrings,
-				     struct module *mod)
-{
-	return 0;
-}
-
-int module_frob_arch_sections(Elf_Ehdr *ehdr, Elf_Shdr *sechdrs,
-			      char *secstrings, struct module *mod)
-{
-	int res;
-
-	res = module_frob_arch_sections_module_sections(ehdr, sechdrs, secstrings, mod);
-	if (res)
-		return res;
-
-	res = module_frob_arch_sections_module_cheri(ehdr, sechdrs, secstrings, mod);
-	if (res)
-		return res;
 
 	return 0;
 }

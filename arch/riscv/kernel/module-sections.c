@@ -11,26 +11,26 @@
 #include <linux/moduleloader.h>
 #include <linux/sort.h>
 
-unsigned long module_emit_got_entry(struct module *mod, unsigned long val)
+uintptr_t module_emit_got_entry(struct module *mod, uintptr_t val)
 {
 	struct mod_section *got_sec = &mod->arch.got;
 	int i = got_sec->num_entries;
 	struct got_entry *got = get_got_entry(val, got_sec);
 
 	if (got)
-		return (unsigned long)got;
+		return (uintptr_t)got;
 
 	/* There is no duplicate entry, create a new one */
-	got = (struct got_entry *)got_sec->shdr->sh_addr;
+	got = (struct got_entry *)shdr_addr(got_sec->shdr);
 	got[i] = emit_got_entry(val);
 
 	got_sec->num_entries++;
 	BUG_ON(got_sec->num_entries > got_sec->max_entries);
 
-	return (unsigned long)&got[i];
+	return (uintptr_t)&got[i];
 }
 
-unsigned long module_emit_plt_entry(struct module *mod, unsigned long val)
+uintptr_t module_emit_plt_entry(struct module *mod, uintptr_t val)
 {
 	struct mod_section *got_plt_sec = &mod->arch.got_plt;
 	struct got_entry *got_plt;
@@ -39,21 +39,21 @@ unsigned long module_emit_plt_entry(struct module *mod, unsigned long val)
 	int i = plt_sec->num_entries;
 
 	if (plt)
-		return (unsigned long)plt;
+		return (uintptr_t)plt;
 
 	/* There is no duplicate entry, create a new one */
-	got_plt = (struct got_entry *)got_plt_sec->shdr->sh_addr;
+	got_plt = (struct got_entry *)shdr_addr(got_plt_sec->shdr);
 	got_plt[i] = emit_got_entry(val);
-	plt = (struct plt_entry *)plt_sec->shdr->sh_addr;
+	plt = (struct plt_entry *)shdr_addr(plt_sec->shdr);
 	plt[i] = emit_plt_entry(val,
-				(unsigned long)&plt[i],
-				(unsigned long)&got_plt[i]);
+				(uintptr_t)&plt[i],
+				(uintptr_t)&got_plt[i]);
 
 	plt_sec->num_entries++;
 	got_plt_sec->num_entries++;
 	BUG_ON(plt_sec->num_entries > plt_sec->max_entries);
 
-	return (unsigned long)&plt[i];
+	return (uintptr_t)&plt[i];
 }
 
 #define cmp_3way(a, b)	((a) < (b) ? -1 : (a) > (b))
@@ -112,7 +112,7 @@ static bool rela_needs_plt_got_entry(const Elf_Rela *rela)
 	}
 }
 
-int module_frob_arch_sections_module_sections(Elf_Ehdr *ehdr, Elf_Shdr *sechdrs,
+int module_frob_arch_sections(Elf_Ehdr *ehdr, Elf_Shdr *sechdrs,
 			      char *secstrings, struct module *mod)
 {
 	size_t num_scratch_relas = 0;
