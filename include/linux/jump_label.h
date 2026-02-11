@@ -216,14 +216,14 @@ struct module;
 #define ARCH_STATIC_BRANCH_JUMP(base, key, branch)	arch_static_branch_jump(key, branch)
 #endif
 
-static __always_inline bool static_key_false(struct static_key *key)
+static __always_inline bool __static_key_false(void * const base, struct static_key *key)
 {
-	return ARCH_STATIC_BRANCH(key, key, false);
+	return ARCH_STATIC_BRANCH(base, key, false);
 }
 
-static __always_inline bool static_key_true(struct static_key *key)
+static __always_inline bool __static_key_true(void * const base, struct static_key *key)
 {
-	return !ARCH_STATIC_BRANCH(key, key, true);
+	return !ARCH_STATIC_BRANCH(base, key, true);
 }
 
 extern struct jump_entry __start___jump_table[];
@@ -282,14 +282,16 @@ static __always_inline void jump_label_init(void)
 
 static __always_inline void jump_label_init_ro(void) { }
 
-static __always_inline bool static_key_false(struct static_key *key)
+static __always_inline bool __static_key_false(void * const base __always_unused,
+					       struct static_key *key)
 {
 	if (unlikely_notrace(static_key_count(key) > 0))
 		return true;
 	return false;
 }
 
-static __always_inline bool static_key_true(struct static_key *key)
+static __always_inline bool __static_key_true(void * const base __always_unused,
+					      struct static_key *key)
 {
 	if (likely_notrace(static_key_count(key) > 0))
 		return true;
@@ -365,6 +367,9 @@ DEFINE_LOCK_GUARD_0(jump_label_lock, jump_label_lock(), jump_label_unlock())
 
 #define STATIC_KEY_INIT STATIC_KEY_INIT_FALSE
 #define jump_label_enabled static_key_enabled
+
+#define static_key_true(key)	__static_key_true(key, key)
+#define static_key_false(key)	__static_key_false(key, key)
 
 /* -------------------------------------------------------------------------- */
 
