@@ -317,6 +317,7 @@ __c_fakeu(__u64 val)
 
 #define __cheri_pointer_align __attribute__((aligned(__SIZEOF_POINTER__)))
 #define __packed_if_not_cheri
+#define cheri_address_set_kernel(cap, addr) cheri_address_set(cap, addr)
 #define cheri_bounds_set_kernel(__c, __l) cheri_bounds_set(__c, __l)
 
 /* Kernel root capabilities. Use with care. */
@@ -375,6 +376,7 @@ cheri_build_kernel_data_cap(ptraddr_t base, ptraddr_t addr, size_t len)
 
 #define __cheri_pointer_align
 #define __packed_if_not_cheri __packed
+#define cheri_address_set_kernel(cap, addr) ((void *)addr)
 #define cheri_bounds_set_kernel(__c, __l) (__c)
 
 static __always_inline void *
