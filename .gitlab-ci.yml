@@ -68,7 +68,7 @@ build_x730_prime:
     - CONFIG=codasip-x730-prime_defconfig
     - *riscv64_cheri_script
 
-build_x730_hogoblin2:
+build_x730_hobgoblin2:
   stage: build
   rules:
     - if: $SCHEDULE == "weekly"
@@ -86,7 +86,7 @@ build_a730_prime:
     - CONFIG=codasip-a730-prime_defconfig
     - *riscv64_noncheri_script
 
-build_a730_hogoblin2:
+build_a730_hobgoblin2:
   stage: build
   rules:
     - if: $SCHEDULE == "weekly"
