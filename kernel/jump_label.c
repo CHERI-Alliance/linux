@@ -411,11 +411,7 @@ static inline struct jump_entry *static_key_entries(struct static_key *key)
 
 	WARN_ON_ONCE(key->type & JUMP_TYPE_LINKED);
 	addr = key->type & ~JUMP_TYPE_MASK;
-#ifdef CONFIG_CHERI_KERNEL
-	return (struct jump_entry *)cheri_address_set(__start___jump_table, addr);
-#else
-	return (struct jump_entry *)addr;
-#endif
+	return (struct jump_entry *)cheri_address_set_kernel(__start___jump_table, addr);
 }
 
 static inline bool static_key_type(struct static_key *key)
