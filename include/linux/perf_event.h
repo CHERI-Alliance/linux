@@ -1592,7 +1592,7 @@ static inline void perf_fetch_caller_regs(struct pt_regs *regs)
 static __always_inline void
 perf_sw_event(u32 event_id, u64 nr, struct pt_regs *regs, u64 addr)
 {
-	if (static_key_false(&perf_swevent_enabled[event_id]))
+	if (__static_key_false(perf_swevent_enabled, &perf_swevent_enabled[event_id]))
 		__perf_sw_event(event_id, nr, regs, addr);
 }
 
@@ -1615,7 +1615,7 @@ extern struct static_key_false perf_sched_events;
 
 static __always_inline bool __perf_sw_enabled(int swevt)
 {
-	return static_key_false(&perf_swevent_enabled[swevt]);
+	return __static_key_false(perf_swevent_enabled, &perf_swevent_enabled[swevt]);
 }
 
 static inline void perf_event_task_migrate(struct task_struct *task)
