@@ -577,13 +577,16 @@ static int perf_call_bpf_enter(struct trace_event_call *call, struct pt_regs *re
 			       struct syscall_trace_enter *rec)
 {
 	struct syscall_tp_t {
-		struct trace_entry ent;
+		union {
+			struct trace_entry ent;
+			void *padding;
+		} __ent;
 		int syscall_nr;
 		uintptr_t args[SYSCALL_DEFINE_MAXARGS];
 	} __aligned(8) __cheri_pointer_align param;
 	int i;
 
-	BUILD_BUG_ON(sizeof(param.ent) < sizeof(void *));
+	BUILD_BUG_ON(sizeof(param.__ent) < sizeof(void *));
 
 	/* bpf prog requires 'regs' to be the first member in the ctx (a.k.a. &param) */
 	perf_fetch_caller_regs(regs);
@@ -691,10 +694,13 @@ static int perf_call_bpf_exit(struct trace_event_call *call, struct pt_regs *reg
 			      struct syscall_trace_exit *rec)
 {
 	struct syscall_tp_t {
-		struct trace_entry ent;
+		union {
+			struct trace_entry ent;
+			void *padding;
+		} __ent;
 		int syscall_nr;
 		unsigned long ret;
-	} __aligned(8) param;
+	} __aligned(8) __cheri_pointer_align param;
 
 	/* bpf prog requires 'regs' to be the first member in the ctx (a.k.a. &param) */
 	perf_fetch_caller_regs(regs);
