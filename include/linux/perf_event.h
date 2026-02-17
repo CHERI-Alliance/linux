@@ -714,8 +714,8 @@ typedef void (*perf_overflow_handler_t)(struct perf_event *,
 #define SWEVENT_HLIST_SIZE		(1 << SWEVENT_HLIST_BITS)
 
 struct swevent_hlist {
-	struct hlist_head		heads[SWEVENT_HLIST_SIZE];
 	struct rcu_head			rcu_head;
+	struct hlist_head		heads[SWEVENT_HLIST_SIZE];
 };
 
 #define PERF_ATTACH_CONTEXT		0x0001
