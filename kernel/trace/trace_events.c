@@ -2932,7 +2932,7 @@ static int event_callback(const char *name, umode_t *mode, void **data,
 	if (call->event.type && call->class->reg &&
 	    strcmp(name, "id") == 0) {
 		*mode = TRACE_MODE_READ;
-		*data = (void *)(long)call->event.type;
+		*data = __c_fakep(call->event.type);
 		*fops = &ftrace_event_id_fops;
 		return 1;
 	}

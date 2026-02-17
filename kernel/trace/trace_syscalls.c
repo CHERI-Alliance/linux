@@ -582,7 +582,7 @@ static int perf_call_bpf_enter(struct trace_event_call *call, struct pt_regs *re
 			void *padding;
 		} __ent;
 		int syscall_nr;
-		uintptr_t args[SYSCALL_DEFINE_MAXARGS];
+		ptraddr_t args[SYSCALL_DEFINE_MAXARGS];
 	} __aligned(8) __cheri_pointer_align param;
 	int i;
 
@@ -710,7 +710,7 @@ static int perf_call_bpf_exit(struct trace_event_call *call, struct pt_regs *reg
 	return trace_call_bpf(call, &param);
 }
 
-static void perf_syscall_exit(void *ignore, struct pt_regs *regs, long ret)
+static void perf_syscall_exit(void *ignore, struct pt_regs *regs, intptr_t ret)
 {
 	struct syscall_metadata *sys_data;
 	struct syscall_trace_exit *rec;

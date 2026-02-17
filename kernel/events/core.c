@@ -2482,7 +2482,7 @@ __perf_remove_from_context(struct perf_event *event,
 {
 	struct perf_event_pmu_context *pmu_ctx = event->pmu_ctx;
 	enum perf_event_state state = PERF_EVENT_STATE_OFF;
-	unsigned long flags = (unsigned long)info;
+	unsigned long flags = __c_pa(info);
 
 	ctx_time_update(cpuctx, ctx);
 
@@ -2557,13 +2557,13 @@ static void perf_remove_from_context(struct perf_event *event, unsigned long fla
 	raw_spin_lock_irq(&ctx->lock);
 	if (!ctx->is_active) {
 		__perf_remove_from_context(event, this_cpu_ptr(&perf_cpu_context),
-					   ctx, (void *)flags);
+					   ctx, __c_fakep(flags));
 		raw_spin_unlock_irq(&ctx->lock);
 		return;
 	}
 	raw_spin_unlock_irq(&ctx->lock);
 
-	event_function_call(event, __perf_remove_from_context, (void *)flags);
+	event_function_call(event, __perf_remove_from_context, __c_fakep(flags));
 }
 
 static void __event_disable(struct perf_event *event,
@@ -6456,7 +6456,7 @@ static long perf_compat_ioctl(struct file *file, unsigned int cmd,
 		}
 		break;
 	}
-	return perf_ioctl(file, cmd, arg);
+	return perf_ioctl(file, cmd, (user_uintptr_t)compat_ptr(arg));
 }
 #else
 # define perf_compat_ioctl NULL
@@ -7427,7 +7427,7 @@ unsigned long perf_instruction_pointer(struct perf_event *event,
 	if (should_sample_guest(event))
 		return perf_guest_get_ip();
 
-	return perf_arch_instruction_pointer(regs);
+	return __c_ua(perf_arch_instruction_pointer(regs));
 }
 
 static void
@@ -7477,7 +7477,7 @@ static void perf_sample_regs_intr(struct perf_regs *regs_intr,
  */
 static u64 perf_ustack_task_size(struct pt_regs *regs)
 {
-	unsigned long addr = perf_user_stack_pointer(regs);
+	unsigned long addr = __c_ua(perf_user_stack_pointer(regs));
 
 	if (!addr || addr >= TASK_SIZE)
 		return 0;
@@ -8081,9 +8081,9 @@ static u64 perf_virt_to_phys(u64 virt)
 
 	if (virt >= TASK_SIZE) {
 		/* If it's vmalloc()d memory, leave phys_addr as 0 */
-		if (virt_addr_valid((void *)(uintptr_t)virt) &&
+		if (virt_addr_valid(__c_fakep(virt)) &&
 		    !(virt >= VMALLOC_START && virt < VMALLOC_END))
-			phys_addr = (u64)virt_to_phys((void *)(uintptr_t)virt);
+			phys_addr = (u64)virt_to_phys(__c_fakep(virt));
 	} else {
 		/*
 		 * Walking the pages tables for user address.
@@ -9950,7 +9950,7 @@ static void perf_event_bpf_emit_ksymbols(struct bpf_prog *prog,
 	int i;
 
 	perf_event_ksymbol(PERF_RECORD_KSYMBOL_TYPE_BPF,
-			   (u64)(unsigned long)prog->bpf_func,
+			   __c_pa(prog->bpf_func),
 			   prog->jited_len, unregister,
 			   prog->aux->ksym.name);
 
@@ -9959,7 +9959,7 @@ static void perf_event_bpf_emit_ksymbols(struct bpf_prog *prog,
 
 		perf_event_ksymbol(
 			PERF_RECORD_KSYMBOL_TYPE_BPF,
-			(u64)(unsigned long)subprog->bpf_func,
+			__c_pa(subprog->bpf_func),
 			subprog->jited_len, unregister,
 			subprog->aux->ksym.name);
 	}
@@ -10080,7 +10080,7 @@ void perf_event_text_poke(const void *addr, const void *old_bytes,
 				.misc = PERF_RECORD_MISC_KERNEL,
 				.size = sizeof(text_poke_event.event_id) + tot + pad,
 			},
-			.addr = (unsigned long)addr,
+			.addr = __c_pa(addr),
 		},
 	};
 
