@@ -1084,7 +1084,8 @@ static inline void __ftrace_enabled_restore(int enabled)
 # endif
 #endif
 
-#define CALLER_ADDR0 ((unsigned long __force)ftrace_return_address0)
+#define CALLER_CAP0 (uintptr_t)ftrace_return_address0
+#define CALLER_ADDR0 ((unsigned long __force)CALLER_CAP0)
 #define CALLER_ADDR1 ((unsigned long __force)ftrace_return_address(1))
 #define CALLER_ADDR2 ((unsigned long __force)ftrace_return_address(2))
 #define CALLER_ADDR3 ((unsigned long __force)ftrace_return_address(3))

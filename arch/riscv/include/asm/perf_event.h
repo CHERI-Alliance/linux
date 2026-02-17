@@ -14,7 +14,7 @@
 
 #define perf_arch_fetch_caller_regs(regs, __ip) { \
 	(regs)->epc = (__ip); \
-	(regs)->s0 = (unsigned long) __builtin_frame_address(0); \
+	(regs)->s0 = (uintptr_t)__builtin_frame_address(0); \
 	(regs)->sp = current_stack_pointer; \
 	(regs)->status = SR_PP; \
 }

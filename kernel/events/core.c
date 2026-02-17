@@ -7537,7 +7537,7 @@ perf_output_sample_ustack(struct perf_output_handle *handle, u64 dump_size,
 		u64 size = 0;
 		perf_output_put(handle, size);
 	} else {
-		unsigned long sp;
+		uintptr_t sp;
 		unsigned int rem;
 		u64 dyn_size;
 
