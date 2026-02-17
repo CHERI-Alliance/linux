@@ -489,7 +489,7 @@ static int perf_ftrace_function_register(struct perf_event *event)
 	struct ftrace_ops *ops = &event->ftrace_ops;
 
 	ops->func    = perf_ftrace_function_call;
-	ops->private = (void *)(unsigned long)nr_cpu_ids;
+	ops->private = __c_fakep(nr_cpu_ids);
 
 	return register_ftrace_function(ops);
 }
@@ -519,10 +519,10 @@ int perf_ftrace_event_register(struct trace_event_call *call,
 	case TRACE_REG_PERF_CLOSE:
 		return perf_ftrace_function_unregister(data);
 	case TRACE_REG_PERF_ADD:
-		event->ftrace_ops.private = (void *)(unsigned long)smp_processor_id();
+		event->ftrace_ops.private = __c_fakep(smp_processor_id());
 		return 1;
 	case TRACE_REG_PERF_DEL:
-		event->ftrace_ops.private = (void *)(unsigned long)nr_cpu_ids;
+		event->ftrace_ops.private = __c_fakep(nr_cpu_ids);
 		return 1;
 	}
 
