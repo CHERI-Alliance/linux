@@ -369,7 +369,7 @@ static void pmu_sbi_check_event(struct sbi_pmu_event_data *edata)
 			__c_fakeu(edata->event_idx), 0, 0);
 	if (!ret.error) {
 		sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_COUNTER_STOP,
-			  __c_fakeu(ret.value), 0x1, SBI_PMU_STOP_FLAG_RESET,
+			  ret.value, 0x1, SBI_PMU_STOP_FLAG_RESET,
 			  0, 0, 0);
 	} else if (ret.error == SBI_ERR_NOT_SUPPORTED) {
 		/* This event cannot be monitored by any counter */
@@ -765,12 +765,12 @@ static u64 pmu_sbi_ctr_read(struct perf_event *event)
 		if (ret.error)
 			return 0;
 
-		val = ret.value;
+		val = __c_ua(ret.value);
 		if (IS_ENABLED(CONFIG_32BIT) && sbi_v2_available && info.width >= 32) {
 			ret = sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_COUNTER_FW_READ_HI,
 					__c_fakeu(hwc->idx), 0, 0, 0, 0, 0);
 			if (!ret.error)
-				val |= ((u64)ret.value << 32);
+				val |= (__c_ua(ret.value) << 32);
 			else
 				WARN_ONCE(1, "Unable to read upper 32 bits of firmware counter error: %ld\n",
 					  ret.error);
@@ -894,7 +894,7 @@ static int pmu_sbi_get_ctrinfo(int nctr, unsigned long *mask)
 
 		*mask |= BIT(i);
 
-		cinfo.value = ret.value;
+		cinfo.value = __c_ua(ret.value);
 		if (cinfo.type == SBI_PMU_CTR_TYPE_FW)
 			num_fw_ctr++;
 		else
