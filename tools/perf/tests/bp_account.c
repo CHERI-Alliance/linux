@@ -5,6 +5,7 @@
  */
 #define __SANE_USERSPACE_TYPES__
 
+#include <inttypes.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -50,7 +51,7 @@ static int __event(bool is_x, void *addr, struct perf_event_attr *attr)
 
 	attr->config = 0;
 	attr->bp_type = is_x ? HW_BREAKPOINT_X : HW_BREAKPOINT_W;
-	attr->bp_addr = (unsigned long) addr;
+	attr->bp_addr = (unsigned long)(uintptr_t) addr;
 	attr->bp_len = is_x ? default_breakpoint_len() : sizeof(long);
 
 	attr->sample_period = 1;

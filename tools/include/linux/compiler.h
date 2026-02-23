@@ -78,8 +78,13 @@
  * a constant expression, most importantly without evaluating the argument.
  * Glory to Martin Uecker <Martin.Uecker@med.uni-goettingen.de>
  */
+#if defined(__CHERI_PURE_CAPABILITY__)
 #define __is_constexpr(x) \
-	(sizeof(int) == sizeof(*(8 ? ((void *)((long)(x) * 0l)) : (int *)8)))
+	(sizeof(int) == sizeof(*(8 ? ((void * __force)(__uintcap_t __force)((long __force)(x) * 0l)) : (int *)8)))
+#else
+#define __is_constexpr(x) \
+	(sizeof(int) == sizeof(*(8 ? ((void * __force)(unsigned long __force)((long __force)(x) * 0l)) : (int *)8)))
+#endif
 
 /*
  * Similar to statically_true() but produces a constant expression
