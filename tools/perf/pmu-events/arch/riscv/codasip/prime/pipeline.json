@@ -1,0 +1,18 @@
+[
+  {
+    "EventName": "LSU_STALL",
+    "EventCode": "0x00000905",
+    "BriefDescription": "LSU stall cycle"
+  },
+  {
+    "EventName": "SINGLE_CLASS_STALL",
+    "EventCode": "0x00000906",
+    "BriefDescription": "SINGLE class pipelined stalls"
+  },
+  {
+    "EventName": "BRANCH_TO_NEXT_PC_CHERI_TAG_CLR",
+    "EventCode": "0x00000908",
+    "BriefDescription": "Branch to next PC due to CHERI tag clear"
+  }
+]
+

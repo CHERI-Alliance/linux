@@ -1,0 +1,57 @@
+[
+  {
+    "EventName": "ISSUE_CYCLE_0_INST_FROM_QUEUE",
+    "EventCode": "0x00000800",
+    "BriefDescription": "Cycles with zero instructions available from the Instruction Queue"
+  },
+  {
+    "EventName": "ISSUE_CYCLE_1_INST_FROM_QUEUE",
+    "EventCode": "0x00000801",
+    "BriefDescription": "Cycles with one instruction available from the Instruction Queue"
+  },
+  {
+    "EventName": "ISSUE_CYCLE_2_INST_FROM_QUEUE",
+    "EventCode": "0x00000802",
+    "BriefDescription": "Cycles with two instructions available from the Instruction Queue"
+  },
+  {
+    "EventName": "ISSUE_CYCLE_0_INST",
+    "EventCode": "0x00000803",
+    "BriefDescription": "Cycles with zero instructions issued"
+  },
+  {
+    "EventName": "ISSUE_CYCLE_1_INST",
+    "EventCode": "0x00000804",
+    "BriefDescription": "Cycles with one instruction issued"
+  },
+  {
+    "EventName": "ISSUE_CYCLE_2_INST",
+    "EventCode": "0x00000805",
+    "BriefDescription": "Cycles with two instructions issued"
+  },
+  {
+    "EventName": "ISSUE_STALL_RAW_HAZARD_I0",
+    "EventCode": "0x00000806",
+    "BriefDescription": "i0 Issue stall due to RAW hazard"
+  },
+  {
+    "EventName": "ISSUE_STALL_RAW_HAZARD_I1",
+    "EventCode": "0x00000807",
+    "BriefDescription": "i1 Issue stall due to RAW hazard"
+  },
+  {
+    "EventName": "ISSUE_STALL_AGU_HAZARD_I0",
+    "EventCode": "0x00000808",
+    "BriefDescription": "i0 Issue stall due to AGU hazard (subset of RAW hazard)"
+  },
+  {
+    "EventName": "ISSUE_STALL_AGU_HAZARD_I1",
+    "EventCode": "0x00000809",
+    "BriefDescription": "i1 Issue stall due to AGU hazard (subset of RAW hazard)"
+  },
+  {
+    "EventName": "ISSUE_STALL_I1_FOR_I0_INST",
+    "EventCode": "0x0000080a",
+    "BriefDescription": "i1 not issued due to instruction mapping to i0 only"
+  }
+]

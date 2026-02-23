@@ -1,0 +1,57 @@
+[
+  {
+    "EventName": "RISCV_EXCEPTION",
+    "EventCode": "0x00000001",
+    "BriefDescription": "RISC-V Exception taken"
+  },
+  {
+    "EventName": "CHERI_EXCEPTION",
+    "EventCode": "0x00000002",
+    "BriefDescription": "CHERI Exception taken"
+  },
+  {
+    "EventName": "INTERRUPT",
+    "EventCode": "0x00000003",
+    "BriefDescription": "Interrupt taken"
+  },
+  {
+    "EventName": "LOAD_COMMITED",
+    "EventCode": "0x00000004",
+    "BriefDescription": "Integer/FP Load committed"
+  },
+  {
+    "EventName": "STORE_COMMITED",
+    "EventCode": "0x00000005",
+    "BriefDescription": "Integer/FP Store committed"
+  },
+  {
+    "EventName": "ATOMIC_COMMITED",
+    "EventCode": "0x00000006",
+    "BriefDescription": "Integer/FP Atomic committed"
+  },
+  {
+    "EventName": "CAP_LOAD_COMMITED",
+    "EventCode": "0x00000007",
+    "BriefDescription": "Capability Load committed"
+  },
+  {
+    "EventName": "CAP_STORE_COMMITED",
+    "EventCode": "0x00000008",
+    "BriefDescription": "Capability Store committed"
+  },
+  {
+    "EventName": "CAP_ATOMIC_COMMITED",
+    "EventCode": "0x00000009",
+    "BriefDescription": "Capability Atomic committed"
+  },
+  {
+    "EventName": "INT_INST_COMMITED",
+    "EventCode": "0x0000000a",
+    "BriefDescription": "Any instruction committed in Integer Pointer Mode"
+  },
+  {
+    "EventName": "CAP_INST_COMMITED",
+    "EventCode": "0x0000000b",
+    "BriefDescription": "Any instruction committed in Capability Pointer Mode"
+  }
+]

@@ -1,0 +1,262 @@
+[
+  {
+    "EventName": "CCU_I0_ALU_I1_INST",
+    "EventCode": "0x00000100",
+    "BriefDescription": "CCU_I0_ALU_I1 class instruction committed in Integer Pointer Mode"
+  },
+  {
+    "EventName": "CSR_I0_ALU_I1_INST",
+    "EventCode": "0x00000101",
+    "BriefDescription": "CSR_I0_ALU_I1 class instruction committed in Integer Pointer Mode"
+  },
+  {
+    "EventName": "EARLY_ALU_DUAL_INST",
+    "EventCode": "0x00000102",
+    "BriefDescription": "EARLY_ALU_DUAL class instruction committed in Integer Pointer Mode"
+  },
+  {
+    "EventName": "EARLY_ALU_DUAL_SINGLE_INST",
+    "EventCode": "0x00000103",
+    "BriefDescription": "EARLY_ALU_DUAL_SINGLE class instruction committed in Integer Pointer Mode"
+  },
+  {
+    "EventName": "EARLY_LATE_ALU_DUAL_INST",
+    "EventCode": "0x00000104",
+    "BriefDescription": "EARLY_LATE_ALU_DUAL class instruction committed in Integer Pointer Mode"
+  },
+  {
+    "EventName": "FPU_I0_ALU_I1_INST",
+    "EventCode": "0x00000105",
+    "BriefDescription": "FPU_I0_ALU_I1 class instruction committed in Integer Pointer Mode"
+  },
+  {
+    "EventName": "LSU_ALU_DUAL_INST",
+    "EventCode": "0x00000106",
+    "BriefDescription": "LSU_ALU_DUAL class instruction committed in Integer Pointer Mode"
+  },
+  {
+    "EventName": "MUL_ALU_DUAL_INST",
+    "EventCode": "0x00000107",
+    "BriefDescription": "MUL_ALU_DUAL class instruction committed in Integer Pointer Mode"
+  },
+  {
+    "EventName": "SINGLE_INST",
+    "EventCode": "0x00000108",
+    "BriefDescription": "SINGLE class instruction committed in Integer Pointer Mode"
+  },
+  {
+    "EventName": "CCU_I0_ALU_I1_CHERI_INST",
+    "EventCode": "0x00000200",
+    "BriefDescription": "CCU_I0_ALU_I1 class instruction committed in CHERI mode"
+  },
+  {
+    "EventName": "CSR_I0_ALU_I1_CHERI_INST",
+    "EventCode": "0x00000201",
+    "BriefDescription": "CSR_I0_ALU_I1 class instruction committed in CHERI mode"
+  },
+  {
+    "EventName": "EARLY_ALU_DUAL_CHERI_INST",
+    "EventCode": "0x00000202",
+    "BriefDescription": "EARLY_ALU_DUAL class instruction committed in CHERI mode"
+  },
+  {
+    "EventName": "EARLY_ALU_DUAL_SINGLE_CHERI_INST",
+    "EventCode": "0x00000203",
+    "BriefDescription": "EARLY_ALU_DUAL_SINGLE class instruction committed in CHERI mode"
+  },
+  {
+    "EventName": "EARLY_LATE_ALU_DUAL_CHERI_INST",
+    "EventCode": "0x00000204",
+    "BriefDescription": "EARLY_LATE_ALU_DUAL class instruction committed in CHERI mode"
+  },
+  {
+    "EventName": "FPU_I0_ALU_I1_CHERI_INST",
+    "EventCode": "0x00000205",
+    "BriefDescription": "FPU_I0_ALU_I1 class instruction committed in CHERI mode"
+  },
+  {
+    "EventName": "LSU_ALU_DUAL_CHERI_INST",
+    "EventCode": "0x00000206",
+    "BriefDescription": "LSU_ALU_DUAL class instruction committed in CHERI mode"
+  },
+  {
+    "EventName": "MUL_ALU_DUAL_CHERI_INST",
+    "EventCode": "0x00000207",
+    "BriefDescription": "MUL_ALU_DUAL class instruction committed in CHERI mode"
+  },
+  {
+    "EventName": "SINGLE_CHERI_INST_CHERI_INST",
+    "EventCode": "0x00000208",
+    "BriefDescription": "SINGLE class instruction committed in CHERI mode"
+  },
+  {
+    "EventName": "BRANCH_JUMP_NOT_TAKEN_I0_INST",
+    "EventCode": "0x00000300",
+    "BriefDescription": "Committed not taken conditional branch on i0"
+  },
+  {
+    "EventName": "BRANCH_JUMP_TAKEN_I0_INST",
+    "EventCode": "0x00000301",
+    "BriefDescription": "Committed taken conditional branch on i0"
+  },
+  {
+    "EventName": "BRANCH_JUMP_INFERABLE_CALL_I0_INST",
+    "EventCode": "0x00000302",
+    "BriefDescription": "Committed inferable call on i0"
+  },
+  {
+    "EventName": "BRANCH_JUMP_UNINFERABLE_CALL_I0_INST",
+    "EventCode": "0x00000303",
+    "BriefDescription": "Committed uninferable call on i0"
+  },
+  {
+    "EventName": "BRANCH_JUMP_UNINFERABLE_TAIL_CALL_I0_INST",
+    "EventCode": "0x00000304",
+    "BriefDescription": "Committed uninferable tail-call on i0"
+  },
+  {
+    "EventName": "BRANCH_JUMP_INFERABLE_TAIL_CALL_I0_INST",
+    "EventCode": "0x00000305",
+    "BriefDescription": "Committed inferable tail-call on i0"
+  },
+  {
+    "EventName": "BRANCH_JUMP_CO_ROUTINE_SWAP_I0_INST",
+    "EventCode": "0x00000306",
+    "BriefDescription": "Committed co-routine swap on i0"
+  },
+  {
+    "EventName": "BRANCH_JUMP_RETURN_I0_INST",
+    "EventCode": "0x00000307",
+    "BriefDescription": "Committed return on i0"
+  },
+  {
+    "EventName": "BRANCH_JUMP_OTHER_UNINFERABLE_JUMP_I0_INST",
+    "EventCode": "0x00000308",
+    "BriefDescription": "Committed other uninferable jump on i0"
+  },
+  {
+    "EventName": "BRANCH_JUMP_OTHER_INFERABLE_JUMP_I0_INST",
+    "EventCode": "0x00000309",
+    "BriefDescription": "Committed other inferable jump on i0"
+  },
+  {
+    "EventName": "BRANCH_JUMP_NOT_TAKEN_I1_INST",
+    "EventCode": "0x00000310",
+    "BriefDescription": "Committed not taken conditional branch on i1"
+  },
+  {
+    "EventName": "BRANCH_JUMP_TAKEN_I1_INST",
+    "EventCode": "0x00000311",
+    "BriefDescription": "Committed taken conditional branch on i1"
+  },
+  {
+    "EventName": "BRANCH_JUMP_INFERABLE_CALL_I1_INST",
+    "EventCode": "0x00000312",
+    "BriefDescription": "Committed inferable call on i1"
+  },
+  {
+    "EventName": "BRANCH_JUMP_UNINFERABLE_CALL_I1_INST",
+    "EventCode": "0x00000313",
+    "BriefDescription": "Committed uninferable call on i1"
+  },
+  {
+    "EventName": "BRANCH_JUMP_UNINFERABLE_TAIL_CALL_I1_INST",
+    "EventCode": "0x00000314",
+    "BriefDescription": "Committed uninferable tail-call on i1"
+  },
+  {
+    "EventName": "BRANCH_JUMP_INFERABLE_TAIL_CALL_I1_INST",
+    "EventCode": "0x00000315",
+    "BriefDescription": "Committed inferable tail-call on i1"
+  },
+  {
+    "EventName": "BRANCH_JUMP_CO_ROUTINE_SWAP_I1_INST",
+    "EventCode": "0x00000316",
+    "BriefDescription": "Committed co-routine swap on i1"
+  },
+  {
+    "EventName": "BRANCH_JUMP_RETURN_I1_INST",
+    "EventCode": "0x00000317",
+    "BriefDescription": "Committed return on i1"
+  },
+  {
+    "EventName": "BRANCH_JUMP_OTHER_UNINFERABLE_JUMP_I1_INST",
+    "EventCode": "0x00000318",
+    "BriefDescription": "Committed other uninferable jump on i1"
+  },
+  {
+    "EventName": "BRANCH_JUMP_OTHER_INFERABLE_JUMP_I1_INST",
+    "EventCode": "0x00000319",
+    "BriefDescription": "Committed other inferable jump on i1"
+  },
+  {
+    "EventName": "BRANCH_JUMP_MISPREDICTED_NOT_TAKEN_I0_INST",
+    "EventCode": "0x00000330",
+    "BriefDescription": "Committed and mispredicted not taken conditional branch on i0"
+  },
+  {
+    "EventName": "BRANCH_JUMP_MISPREDICTED_TAKEN_I0_INST",
+    "EventCode": "0x00000331",
+    "BriefDescription": "Committed and mispredicted taken conditional branch on i0"
+  },
+  {
+    "EventName": "BRANCH_JUMP_MISPREDICTED_UNINFERABLE_CALL_I0_INST",
+    "EventCode": "0x00000332",
+    "BriefDescription": "Committed and mispredicted uninferable call on i0"
+  },
+  {
+    "EventName": "BRANCH_JUMP_MISPREDICTED_UNINFERABLE_TAIL_CALL_I0_INST",
+    "EventCode": "0x00000333",
+    "BriefDescription": "Committed and mispredicted uninferable tail-call on i0"
+  },
+  {
+    "EventName": "BRANCH_JUMP_MISPREDICTED_CO_ROUTINE_SWAP_I0_INST",
+    "EventCode": "0x00000334",
+    "BriefDescription": "Committed and mispredicted co-routine swap on i0"
+  },
+  {
+    "EventName": "BRANCH_JUMP_MISPREDICTED_RETURN_I0_INST",
+    "EventCode": "0x00000335",
+    "BriefDescription": "Committed and mispredicted return on i0"
+  },
+  {
+    "EventName": "BRANCH_JUMP_MISPREDICTED_OTHER_UNINFERABLE_JUMP_I0_INST",
+    "EventCode": "0x00000336",
+    "BriefDescription": "Committed and mispredicted other uninferable jump on i0"
+  },
+  {
+    "EventName": "BRANCH_JUMP_MISPREDICTED_NOT_TAKEN_I1_INST",
+    "EventCode": "0x00000340",
+    "BriefDescription": "Committed and mispredicted not taken conditional branch on i1"
+  },
+  {
+    "EventName": "BRANCH_JUMP_MISPREDICTED_TAKEN_I1_INST",
+    "EventCode": "0x00000341",
+    "BriefDescription": "Committed and mispredicted taken conditional branch on i1"
+  },
+  {
+    "EventName": "BRANCH_JUMP_MISPREDICTED_UNINFERABLE_CALL_I1_INST",
+    "EventCode": "0x00000342",
+    "BriefDescription": "Committed and mispredicted uninferable call on i1"
+  },
+  {
+    "EventName": "BRANCH_JUMP_MISPREDICTED_UNINFERABLE_TAIL_CALL_I1_INST",
+    "EventCode": "0x00000343",
+    "BriefDescription": "Committed and mispredicted uninferable tail-call on i1"
+  },
+  {
+    "EventName": "BRANCH_JUMP_MISPREDICTED_CO_ROUTINE_SWAP_I1_INST",
+    "EventCode": "0x00000344",
+    "BriefDescription": "Committed and mispredicted co-routine swap on i1"
+  },
+  {
+    "EventName": "BRANCH_JUMP_MISPREDICTED_RETURN_I1_INST",
+    "EventCode": "0x00000345",
+    "BriefDescription": "Committed and mispredicted return on i1"
+  },
+  {
+    "EventName": "BRANCH_JUMP_MISPREDICTED_OTHER_UNINFERABLE_JUMP_I1_INST",
+    "EventCode": "0x00000346",
+    "BriefDescription": "Committed and mispredicted other uninferable jump on i1"
+  }
+]
