@@ -931,6 +931,8 @@ int __init_memblock __memblock_reserve(phys_addr_t base, phys_addr_t size,
 {
 	phys_addr_t end = base + size - 1;
 
+	WARN(memblock_is_region_reserved(base, size),
+	     "Memory Region %pa/%pa already reserved?!", &base, &size);
 	memblock_dbg("%s: [%pa-%pa] nid=%d flags=%x %pS\n", __func__,
 		     &base, &end, nid, flags, __c_fakep(_RET_IP_));
 
