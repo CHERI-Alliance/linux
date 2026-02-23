@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <errno.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include "metricgroup.h"
@@ -45,7 +46,7 @@ struct expr_id_data {
 	} kind;
 };
 
-static size_t key_hash(long key, void *ctx __maybe_unused)
+static size_t key_hash(intptr_t key, void *ctx __maybe_unused)
 {
 	const char *str = (const char *)key;
 	size_t hash = 0;
@@ -58,7 +59,7 @@ static size_t key_hash(long key, void *ctx __maybe_unused)
 	return hash;
 }
 
-static bool key_equal(long key1, long key2, void *ctx __maybe_unused)
+static bool key_equal(intptr_t key1, intptr_t key2, void *ctx __maybe_unused)
 {
 	return !strcmp((const char *)key1, (const char *)key2);
 }
