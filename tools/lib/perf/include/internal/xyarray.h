@@ -2,6 +2,7 @@
 #ifndef __LIBPERF_INTERNAL_XYARRAY_H
 #define __LIBPERF_INTERNAL_XYARRAY_H
 
+#include <stdalign.h>
 #include <linux/compiler.h>
 #include <sys/types.h>
 
@@ -11,7 +12,7 @@ struct xyarray {
 	size_t entries;
 	size_t max_x;
 	size_t max_y;
-	char contents[] __aligned(8);
+	char contents[] __aligned(alignof(void *) > 8 ? alignof(void *) : 8);
 };
 
 struct xyarray *xyarray__new(int xlen, int ylen, size_t entry_size);
