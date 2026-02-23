@@ -1,0 +1,42 @@
+[
+  {
+    "EventName": "DCACHE_MISS",
+    "EventCode": "0x00000b00",
+    "BriefDescription": "D$ miss when D$ is enabled"
+  },
+  {
+    "EventName": "DTLB_MISS",
+    "EventCode": "0x00000b01",
+    "BriefDescription": "DTLB miss"
+  },
+  {
+    "EventName": "MAIN_TLB_MISS",
+    "EventCode": "0x00000b02",
+    "BriefDescription": "Main TLB miss"
+  },
+  {
+    "EventName": "DTLB_MISS_1GB_LEAF",
+    "EventCode": "0x00000b03",
+    "BriefDescription": "A PTW triggered by an DTLB miss that found a 1GB leaf page"
+  },
+  {
+    "EventName": "DTLB_MISS_2MB_LEAF",
+    "EventCode": "0x00000b04",
+    "BriefDescription": "A PTW triggered by an DTLB miss that found a 2MB leaf page"
+  },
+  {
+    "EventName": "DTLB_MISS_4KB_LEAF",
+    "EventCode": "0x00000b05",
+    "BriefDescription": "A PTW triggered by an DTLB miss that found a 4KB leaf page"
+   },
+  {
+    "EventName": "DCACHE_INDEX_PREDICTOR_HIT",
+    "EventCode": "0x00000b10",
+    "BriefDescription": "D$ physical index predictor hit"
+  },
+  {
+    "EventName": "DCACHE_INDEX_PREDICTOR_MISS",
+    "EventCode": "0x00000b11",
+    "BriefDescription": "D$ physical index predictor miss"
+  }
+]
