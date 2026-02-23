@@ -194,7 +194,7 @@ static int do_test(size_t i, bool with_pmu, bool with_alias)
 			pr_debug("FAILED %s:%d Unexpected config for '%s', %lld != %ld\n",
 				__FILE__, __LINE__, str,
 				evsel->core.attr.config,
-				test_events[i].key.type_and_num);
+				(long)test_events[i].key.type_and_num);
 			ret = TEST_FAIL;
 			goto out;
 		}

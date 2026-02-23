@@ -13,6 +13,7 @@
 #include <ctype.h>
 #include <fcntl.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <api/fs/fs.h>
@@ -135,12 +136,12 @@ bool evsel__is_hwmon(const struct evsel *evsel)
 	return perf_pmu__is_hwmon(evsel->pmu);
 }
 
-static size_t hwmon_pmu__event_hashmap_hash(long key, void *ctx __maybe_unused)
+static size_t hwmon_pmu__event_hashmap_hash(intptr_t key, void *ctx __maybe_unused)
 {
 	return ((union hwmon_pmu_event_key)key).type_and_num;
 }
 
-static bool hwmon_pmu__event_hashmap_equal(long key1, long key2, void *ctx __maybe_unused)
+static bool hwmon_pmu__event_hashmap_equal(intptr_t key1, intptr_t key2, void *ctx __maybe_unused)
 {
 	return ((union hwmon_pmu_event_key)key1).type_and_num ==
 	       ((union hwmon_pmu_event_key)key2).type_and_num;
@@ -533,7 +534,7 @@ int hwmon_pmu__for_each_event(struct perf_pmu *pmu, void *state, pmu_event_callb
 						key, value->alarm_items, /*is_alarm=*/true);
 
 		snprintf(encoding_buf, sizeof(encoding_buf), "%s/config=0x%lx/",
-			 pmu->name, cur->key);
+			 pmu->name, (long)cur->key);
 
 		ret = cb(state, &info);
 		if (ret)

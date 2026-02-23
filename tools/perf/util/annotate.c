@@ -90,12 +90,12 @@ struct annotated_data_type canary_type = {
 #define NO_TYPE ((struct annotated_data_type *)-1UL)
 
 /* symbol histogram: key = offset << 16 | evsel->core.idx */
-static size_t sym_hist_hash(long key, void *ctx __maybe_unused)
+static size_t sym_hist_hash(intptr_t key, void *ctx __maybe_unused)
 {
-	return (key >> 16) + (key & 0xffff);
+	return ((size_t)key >> 16) + ((size_t)key & 0xffff);
 }
 
-static bool sym_hist_equal(long key1, long key2, void *ctx __maybe_unused)
+static bool sym_hist_equal(intptr_t key1, intptr_t key2, void *ctx __maybe_unused)
 {
 	return key1 == key2;
 }

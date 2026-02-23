@@ -128,12 +128,12 @@ static int nodecmp(const void *a, const void *b)
 	return na->stats.total_time > nb->stats.total_time ? -1 : 1;
 }
 
-static size_t sc_node_hash(long key, void *ctx __maybe_unused)
+static size_t sc_node_hash(intptr_t key, void *ctx __maybe_unused)
 {
 	return key;
 }
 
-static bool sc_node_equal(long key1, long key2, void *ctx __maybe_unused)
+static bool sc_node_equal(intptr_t key1, intptr_t key2, void *ctx __maybe_unused)
 {
 	return key1 == key2;
 }

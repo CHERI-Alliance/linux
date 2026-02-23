@@ -1553,12 +1553,12 @@ struct thread_trace {
 	struct hashmap *syscall_stats;
 };
 
-static size_t syscall_id_hash(long key, void *ctx __maybe_unused)
+static size_t syscall_id_hash(intptr_t key, void *ctx __maybe_unused)
 {
 	return key;
 }
 
-static bool syscall_id_equal(long key1, long key2, void *ctx __maybe_unused)
+static bool syscall_id_equal(intptr_t key1, intptr_t key2, void *ctx __maybe_unused)
 {
 	return key1 == key2;
 }

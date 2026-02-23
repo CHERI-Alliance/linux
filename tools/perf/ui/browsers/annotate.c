@@ -46,12 +46,12 @@ struct annotate_browser {
 /* A copy of target hist_entry for perf top. */
 static struct hist_entry annotate_he;
 
-static size_t type_hash(long key, void *ctx __maybe_unused)
+static size_t type_hash(intptr_t key, void *ctx __maybe_unused)
 {
 	return key;
 }
 
-static bool type_equal(long key1, long key2, void *ctx __maybe_unused)
+static bool type_equal(intptr_t key1, intptr_t key2, void *ctx __maybe_unused)
 {
 	return key1 == key2;
 }

@@ -1192,12 +1192,12 @@ out:
 	return (done && !workload_exec_errno) ? 0 : -1;
 }
 
-static size_t profile_hash(long func, void *ctx __maybe_unused)
+static size_t profile_hash(intptr_t func, void *ctx __maybe_unused)
 {
 	return str_hash((char *)func);
 }
 
-static bool profile_equal(long func1, long func2, void *ctx __maybe_unused)
+static bool profile_equal(intptr_t func1, intptr_t func2, void *ctx __maybe_unused)
 {
 	return !strcmp((char *)func1, (char *)func2);
 }

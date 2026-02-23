@@ -4,6 +4,7 @@
 
 #include "pmu.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 struct list_head;
 struct perf_thread_map;
@@ -100,7 +101,7 @@ enum hwmon_item {
  * Related hwmon files start <type><number> that this key represents.
  */
 union hwmon_pmu_event_key {
-	long type_and_num;
+	intptr_t type_and_num;
 	struct {
 		int num :16;
 		enum hwmon_type type :8;

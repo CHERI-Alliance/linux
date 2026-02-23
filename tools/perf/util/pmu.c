@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <dirent.h>
@@ -1148,7 +1149,7 @@ perf_pmu__arch_init(struct perf_pmu *pmu)
 }
 
 /* Variant of str_hash that does tolower on each character. */
-static size_t aliases__hash(long key, void *ctx __maybe_unused)
+static size_t aliases__hash(intptr_t key, void *ctx __maybe_unused)
 {
 	const char *s = (const char *)key;
 	size_t h = 0;
@@ -1160,7 +1161,7 @@ static size_t aliases__hash(long key, void *ctx __maybe_unused)
 	return h;
 }
 
-static bool aliases__equal(long key1, long key2, void *ctx __maybe_unused)
+static bool aliases__equal(intptr_t key1, intptr_t key2, void *ctx __maybe_unused)
 {
 	return strcasecmp((const char *)key1, (const char *)key2) == 0;
 }

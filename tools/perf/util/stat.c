@@ -286,14 +286,14 @@ void evlist__copy_res_stats(struct perf_stat_config *config, struct evlist *evli
 		evsel__copy_res_stats(evsel);
 }
 
-static size_t pkg_id_hash(long __key, void *ctx __maybe_unused)
+static size_t pkg_id_hash(intptr_t __key, void *ctx __maybe_unused)
 {
 	uint64_t *key = (uint64_t *) __key;
 
 	return *key & 0xffffffff;
 }
 
-static bool pkg_id_equal(long __key1, long __key2, void *ctx __maybe_unused)
+static bool pkg_id_equal(intptr_t __key1, intptr_t __key2, void *ctx __maybe_unused)
 {
 	uint64_t *key1 = (uint64_t *) __key1;
 	uint64_t *key2 = (uint64_t *) __key2;
