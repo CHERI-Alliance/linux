@@ -1,0 +1,128 @@
+// SPDX-License-Identifier: (GPL-2.0 OR MIT)
+/*
+ * Copyright (c) 2026 Codasip GmbH
+ *
+ * A730 CPU pmu dtsi file.
+ *
+ * This is usually added to enable the perf pmu
+ */
+
+/ {
+    pmu {
+        compatible = "riscv,pmu";
+        riscv,event-to-mhpmevent =
+                <0x10001 0x00000000 0x00000b00>, /* L1D_READ_MISS -> D$ miss when D$ is enabled */
+                <0x10019 0x00000000 0x00000b01>, /* DTLB_READ_MISS -> DTLB miss */
+                <0x10009 0x00000000 0x00000a00>, /* L1I_READ_MISS -> I$ miss when I$ is enabled */
+                <0x10021 0x00000000 0x00000a01>; /* ITLB READ_MISS -> ITLB miss */
+        riscv,event-to-mhpmcounters =
+                <0x00001 0x00001 0x01>,
+                <0x00002 0x00002 0x04>,
+                <0x10001 0x10001 0x78>,
+                <0x10009 0x10009 0x78>,
+                <0x10019 0x10019 0x78>,
+                <0x10021 0x10021 0x78>;
+        riscv,raw-event-to-mhpmcounters =
+                <0x00000000 0x00000001 0xffffffff 0xffffffff 0x78>, /* RISC-V Exception taken */
+                <0x00000000 0x00000002 0xffffffff 0xffffffff 0x78>, /* CHERI Exception taken */
+                <0x00000000 0x00000003 0xffffffff 0xffffffff 0x78>, /* Interrupt taken */
+                <0x00000000 0x00000004 0xffffffff 0xffffffff 0x78>, /* Integer/FP Load committed */
+                <0x00000000 0x00000005 0xffffffff 0xffffffff 0x78>, /* Integer/FP Store committed */
+                <0x00000000 0x00000006 0xffffffff 0xffffffff 0x78>, /* Integer/FP Atomic committed */
+                <0x00000000 0x00000007 0xffffffff 0xffffffff 0x78>, /* Capability (XLEN*2-1 width) Load committed */
+                <0x00000000 0x00000008 0xffffffff 0xffffffff 0x78>, /* Capability (XLEN*2-1 width) Store committed */
+                <0x00000000 0x00000009 0xffffffff 0xffffffff 0x78>, /* Capability (XLEN*2-1 width) Atomic committed */
+                <0x00000000 0x0000000a 0xffffffff 0xffffffff 0x78>, /* Any instruction committed in Integer Pointer Mode */
+                <0x00000000 0x0000000b 0xffffffff 0xffffffff 0x78>, /* Any instruction committed in Capability Pointer Mode */
+                <0x00000000 0x00000100 0xffffffff 0xffffffff 0x78>, /* CCU_I0_ALU_I1 class instruction committed in Integer Pointer Mode */
+                <0x00000000 0x00000101 0xffffffff 0xffffffff 0x78>, /* CSR_I0_ALU_I1 class instruction committed in Integer Pointer Mode */
+                <0x00000000 0x00000102 0xffffffff 0xffffffff 0x78>, /* EARLY_ALU_DUAL class instruction committed in Integer Pointer Mode */
+                <0x00000000 0x00000103 0xffffffff 0xffffffff 0x78>, /* EARLY_ALU_DUAL_SINGLE class instruction committed in Integer Pointer Mode */
+                <0x00000000 0x00000104 0xffffffff 0xffffffff 0x78>, /* EARLY_LATE_ALU_DUAL class instruction committed in Integer Pointer Mode */
+                <0x00000000 0x00000105 0xffffffff 0xffffffff 0x78>, /* FPU_I0_ALU_I1 class instruction committed in Integer Pointer Mode */
+                <0x00000000 0x00000106 0xffffffff 0xffffffff 0x78>, /* LSU_ALU_DUAL class instruction committed in Integer Pointer Mode */
+                <0x00000000 0x00000107 0xffffffff 0xffffffff 0x78>, /* MUL_ALU_DUAL class instruction committed in Integer Pointer Mode */
+                <0x00000000 0x00000108 0xffffffff 0xffffffff 0x78>, /* SINGLE class instruction committed in Integer Pointer Mode */
+                <0x00000000 0x00000200 0xffffffff 0xffffffff 0x78>, /* CCU_I0_ALU_I1 class instruction committed in CHERI mode */
+                <0x00000000 0x00000201 0xffffffff 0xffffffff 0x78>, /* CSR_I0_ALU_I1 class instruction committed in CHERI mode */
+                <0x00000000 0x00000202 0xffffffff 0xffffffff 0x78>, /* EARLY_ALU_DUAL class instruction committed in CHERI mode */
+                <0x00000000 0x00000203 0xffffffff 0xffffffff 0x78>, /* EARLY_ALU_DUAL_SINGLE class instruction committed in CHERI mode */
+                <0x00000000 0x00000204 0xffffffff 0xffffffff 0x78>, /* EARLY_LATE_ALU_DUAL class instruction committed in CHERI mode */
+                <0x00000000 0x00000205 0xffffffff 0xffffffff 0x78>, /* FPU_I0_ALU_I1 class instruction committed in CHERI mode */
+                <0x00000000 0x00000206 0xffffffff 0xffffffff 0x78>, /* LSU_ALU_DUAL class instruction committed in CHERI mode */
+                <0x00000000 0x00000207 0xffffffff 0xffffffff 0x78>, /* MUL_ALU_DUAL class instruction committed in CHERI mode */
+                <0x00000000 0x00000208 0xffffffff 0xffffffff 0x78>, /* SINGLE class instruction committed in CHERI mode */
+                <0x00000000 0x00000300 0xffffffff 0xffffffff 0x78>, /* Committed not taken conditional branch on i0 */
+                <0x00000000 0x00000301 0xffffffff 0xffffffff 0x78>, /* Committed taken conditional branch on i0 */
+                <0x00000000 0x00000302 0xffffffff 0xffffffff 0x78>, /* Committed inferable call on i0 */
+                <0x00000000 0x00000303 0xffffffff 0xffffffff 0x78>, /* Committed uninferable call on i0 */
+                <0x00000000 0x00000304 0xffffffff 0xffffffff 0x78>, /* Committed uninferable tail-call on i0 */
+                <0x00000000 0x00000305 0xffffffff 0xffffffff 0x78>, /* Committed inferable tail-call on i0 */
+                <0x00000000 0x00000306 0xffffffff 0xffffffff 0x78>, /* Committed co-routine swap on i0 */
+                <0x00000000 0x00000307 0xffffffff 0xffffffff 0x78>, /* Committed return on i0 */
+                <0x00000000 0x00000308 0xffffffff 0xffffffff 0x78>, /* Committed other uninferable jump on i0 */
+                <0x00000000 0x00000309 0xffffffff 0xffffffff 0x78>, /* Committed other inferable jump on i0 */
+                <0x00000000 0x00000310 0xffffffff 0xffffffff 0x78>, /* Committed not taken conditional branch on i1 */
+                <0x00000000 0x00000311 0xffffffff 0xffffffff 0x78>, /* Committed taken conditional branch on i1 */
+                <0x00000000 0x00000312 0xffffffff 0xffffffff 0x78>, /* Committed inferable call on i1 */
+                <0x00000000 0x00000313 0xffffffff 0xffffffff 0x78>, /* Committed uninferable call on i1 */
+                <0x00000000 0x00000314 0xffffffff 0xffffffff 0x78>, /* Committed uninferable tail-call on i1 */
+                <0x00000000 0x00000315 0xffffffff 0xffffffff 0x78>, /* Committed inferable tail-call on i1 */
+                <0x00000000 0x00000316 0xffffffff 0xffffffff 0x78>, /* Committed co-routine swap on i1 */
+                <0x00000000 0x00000317 0xffffffff 0xffffffff 0x78>, /* Committed return on i1 */
+                <0x00000000 0x00000318 0xffffffff 0xffffffff 0x78>, /* Committed other uninferable jump on i1 */
+                <0x00000000 0x00000319 0xffffffff 0xffffffff 0x78>, /* Committed other inferable jump on i1 */
+                <0x00000000 0x00000330 0xffffffff 0xffffffff 0x78>, /* Committed and mispredicted not taken conditional branch on i0 */
+                <0x00000000 0x00000331 0xffffffff 0xffffffff 0x78>, /* Committed and mispredicted taken conditional branch on i0 */
+                <0x00000000 0x00000332 0xffffffff 0xffffffff 0x78>, /* Committed and mispredicted uninferable call on i0 */
+                <0x00000000 0x00000333 0xffffffff 0xffffffff 0x78>, /* Committed and mispredicted uninferable tail-call on i0 */
+                <0x00000000 0x00000334 0xffffffff 0xffffffff 0x78>, /* Committed and mispredicted co-routine swap on i0 */
+                <0x00000000 0x00000335 0xffffffff 0xffffffff 0x78>, /* Committed and mispredicted return on i0 */
+                <0x00000000 0x00000336 0xffffffff 0xffffffff 0x78>, /* Committed and mispredicted other uninferable jump on i0 */
+                <0x00000000 0x00000340 0xffffffff 0xffffffff 0x78>, /* Committed and mispredicted not taken conditional branch on i1 */
+                <0x00000000 0x00000341 0xffffffff 0xffffffff 0x78>, /* Committed and mispredicted taken conditional branch on i1 */
+                <0x00000000 0x00000342 0xffffffff 0xffffffff 0x78>, /* Committed and mispredicted uninferable call on i1 */
+                <0x00000000 0x00000343 0xffffffff 0xffffffff 0x78>, /* Committed and mispredicted uninferable tail-call on i1 */
+                <0x00000000 0x00000344 0xffffffff 0xffffffff 0x78>, /* Committed and mispredicted co-routine swap on i1 */
+                <0x00000000 0x00000345 0xffffffff 0xffffffff 0x78>, /* Committed and mispredicted return on i1 */
+                <0x00000000 0x00000346 0xffffffff 0xffffffff 0x78>, /* Committed and mispredicted other uninferable jump on i1 */
+                <0x00000000 0x00000800 0xffffffff 0xffffffff 0x78>, /* Cycles with zero instructions available from the Instruction Queue */
+                <0x00000000 0x00000801 0xffffffff 0xffffffff 0x78>, /* Cycles with one instruction available from the Instruction Queue */
+                <0x00000000 0x00000802 0xffffffff 0xffffffff 0x78>, /* Cycles with two instructions available from the Instruction Queue */
+                <0x00000000 0x00000803 0xffffffff 0xffffffff 0x78>, /* Cycles with zero instructions issued */
+                <0x00000000 0x00000804 0xffffffff 0xffffffff 0x78>, /* Cycles with one instruction issued */
+                <0x00000000 0x00000805 0xffffffff 0xffffffff 0x78>, /* Cycles with two instructions issued */
+                <0x00000000 0x00000806 0xffffffff 0xffffffff 0x78>, /* i0 Issue stall due to RAW hazard */
+                <0x00000000 0x00000807 0xffffffff 0xffffffff 0x78>, /* i1 Issue stall due to RAW hazard */
+                <0x00000000 0x00000808 0xffffffff 0xffffffff 0x78>, /* i0 Issue stall due to AGU hazard (subset of RAW hazard) */
+                <0x00000000 0x00000809 0xffffffff 0xffffffff 0x78>, /* i1 Issue stall due to AGU hazard (subset of RAW hazard) */
+                <0x00000000 0x0000080a 0xffffffff 0xffffffff 0x78>, /* i1 not issued due to instruction mapping to i0 only */
+                <0x00000000 0x00000905 0xffffffff 0xffffffff 0x78>, /* LSU stall cycle */
+                <0x00000000 0x00000906 0xffffffff 0xffffffff 0x78>, /* SINGLE class pipelined stalls */
+                <0x00000000 0x00000908 0xffffffff 0xffffffff 0x78>, /* Branch to next PC due to CHERI tag clear */
+                <0x00000000 0x00000a00 0xffffffff 0xffffffff 0x78>, /* I$ miss when I$ is enabled */
+                <0x00000000 0x00000a01 0xffffffff 0xffffffff 0x78>, /* ITLB miss */
+                <0x00000000 0x00000a03 0xffffffff 0xffffffff 0x78>, /* A PTW triggered by an ITLB miss that found a 1GB leaf page */
+                <0x00000000 0x00000a04 0xffffffff 0xffffffff 0x78>, /* A PTW triggered by an ITLB miss that found a 2MB leaf page */
+                <0x00000000 0x00000a05 0xffffffff 0xffffffff 0x78>, /* A PTW triggered by an ITLB miss that found a 4KB leaf page */
+                <0x00000000 0x00000a07 0xffffffff 0xffffffff 0x78>, /* IQ underflow */
+                <0x00000000 0x00000a08 0xffffffff 0xffffffff 0x78>, /* IQ full */
+                <0x00000000 0x00000a10 0xffffffff 0xffffffff 0x78>, /* Fetch stall due to BPU RAM contention */
+                <0x00000000 0x00000a11 0xffffffff 0xffffffff 0x78>, /* Speculative prediction originating from the Static Branch Predictor 0 */
+                <0x00000000 0x00000a12 0xffffffff 0xffffffff 0x78>, /* Speculative prediction originating from the Static Branch Predictor 1 */
+                <0x00000000 0x00000a13 0xffffffff 0xffffffff 0x78>, /* Speculative prediction originating from the Static Branch Predictor 2 */
+                <0x00000000 0x00000a14 0xffffffff 0xffffffff 0x78>, /* Speculative prediction originating from the Static Branch Predictor 3 */
+                <0x00000000 0x00000a15 0xffffffff 0xffffffff 0x78>, /* Speculative prediction originating from the RAS */
+                <0x00000000 0x00000a16 0xffffffff 0xffffffff 0x78>, /* Speculative prediction originating from the ITB */
+                <0x00000000 0x00000a17 0xffffffff 0xffffffff 0x78>, /* Speculative prediction originating from the BTB */
+                <0x00000000 0x00000a18 0xffffffff 0xffffffff 0x78>, /* Speculative prediction originating from the uPredictor */
+                <0x00000000 0x00000b00 0xffffffff 0xffffffff 0x78>, /* D$ miss when D$ is enabled */
+                <0x00000000 0x00000b01 0xffffffff 0xffffffff 0x78>, /* DTLB miss */
+                <0x00000000 0x00000b02 0xffffffff 0xffffffff 0x78>, /* Main TLB miss */
+                <0x00000000 0x00000b03 0xffffffff 0xffffffff 0x78>, /* A PTW triggered by a DTLB miss that found a 1GB leaf page */
+                <0x00000000 0x00000b04 0xffffffff 0xffffffff 0x78>, /* A PTW triggered by a DTLB miss that found a 2MB leaf page */
+                <0x00000000 0x00000b05 0xffffffff 0xffffffff 0x78>, /* A PTW triggered by a DTLB miss that found a 4KB leaf page */
+                <0x00000000 0x00000b10 0xffffffff 0xffffffff 0x78>, /* D$ physical index predictor hit */
+                <0x00000000 0x00000b11 0xffffffff 0xffffffff 0x78>; /* D$ physical index predictor miss */
+    };
+};
