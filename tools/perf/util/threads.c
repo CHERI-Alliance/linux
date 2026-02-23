@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0
+#include <stdint.h>
 #include "threads.h"
 #include "machine.h"
 #include "thread.h"
@@ -9,13 +10,13 @@ static struct threads_table_entry *threads__table(struct threads *threads, pid_t
 	return &threads->table[(unsigned int)tid % THREADS__TABLE_SIZE];
 }
 
-static size_t key_hash(long key, void *ctx __maybe_unused)
+static size_t key_hash(intptr_t key, void *ctx __maybe_unused)
 {
 	/* The table lookup removes low bit entropy, but this is just ignored here. */
 	return key;
 }
 
-static bool key_equal(long key1, long key2, void *ctx __maybe_unused)
+static bool key_equal(intptr_t key1, intptr_t key2, void *ctx __maybe_unused)
 {
 	return key1 == key2;
 }

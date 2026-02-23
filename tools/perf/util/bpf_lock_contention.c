@@ -24,12 +24,12 @@ static struct lock_contention_bpf *skel;
 static bool has_slab_iter;
 static struct hashmap slab_hash;
 
-static size_t slab_cache_hash(long key, void *ctx __maybe_unused)
+static size_t slab_cache_hash(intptr_t key, void *ctx __maybe_unused)
 {
 	return key;
 }
 
-static bool slab_cache_equal(long key1, long key2, void *ctx __maybe_unused)
+static bool slab_cache_equal(intptr_t key1, intptr_t key2, void *ctx __maybe_unused)
 {
 	return key1 == key2;
 }
