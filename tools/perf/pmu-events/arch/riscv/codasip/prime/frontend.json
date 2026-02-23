@@ -1,0 +1,82 @@
+[
+  {
+    "EventName": "ICACHE_MISS",
+    "EventCode": "0x00000a00",
+    "BriefDescription": "I$ miss when I$ is enabled"
+  },
+  {
+    "EventName": "ITLB_MISS",
+    "EventCode": "0x00000a01",
+    "BriefDescription": "ITLB miss"
+  },
+  {
+    "EventName": "ITLB_MISS_1GB_LEAF",
+    "EventCode": "0x00000a03",
+    "BriefDescription": "A PTW triggered by an ITLB miss that found a 1GB leaf page"
+  },
+  {
+    "EventName": "ITLB_MISS_2MB_LEAF",
+    "EventCode": "0x00000a04",
+    "BriefDescription": "A PTW triggered by an ITLB miss that found a 2MB leaf page"
+  },
+  {
+    "EventName": "ITLB_MISS_4KB_LEAF",
+    "EventCode": "0x00000a05",
+    "BriefDescription": "A PTW triggered by an ITLB miss that found a 4KB leaf page"
+   },
+  {
+    "EventName": "IQ_UNDERFLOW",
+    "EventCode": "0x00000a07",
+    "BriefDescription": "IQ underflow"
+  },
+  {
+    "EventName": "IQ_FULL",
+    "EventCode": "0x00000a08",
+    "BriefDescription": "IQ full"
+  },
+  {
+    "EventName": "FATCH_STALL",
+    "EventCode": "0x00000a10",
+    "BriefDescription": "Fetch stall due to BPU RAM contention"
+  },
+  {
+    "EventName": "SPECULATIVE_PREDICTION_FROM_SBR0",
+    "EventCode": "0x00000a11",
+    "BriefDescription": "Speculative prediction originating from the Static Branch Predictor 0"
+  },
+  {
+    "EventName": "SPECULATIVE_PREDICTION_FROM_SBR1",
+    "EventCode": "0x00000a12",
+    "BriefDescription": "Speculative prediction originating from the Static Branch Predictor 1"
+  },
+  {
+    "EventName": "SPECULATIVE_PREDICTION_FROM_SBR2",
+    "EventCode": "0x00000a13",
+    "BriefDescription": "Speculative prediction originating from the Static Branch Predictor 2"
+  },
+  {
+    "EventName": "SPECULATIVE_PREDICTION_FROM_SBR3",
+    "EventCode": "0x00000a14",
+    "BriefDescription": "Speculative prediction originating from the Static Branch Predictor 3"
+  },
+  {
+    "EventName": "SPECULATIVE_PREDICTION_FROM_RAS",
+    "EventCode": "0x00000a15",
+    "BriefDescription": "Speculative prediction originating from the RAS"
+  },
+  {
+    "EventName": "SPECULATIVE_PREDICTION_FROM_ITB",
+    "EventCode": "0x00000a16",
+    "BriefDescription": "Speculative prediction originating from the ITB"
+  },
+  {
+    "EventName": "SPECULATIVE_PREDICTION_FROM_BTB",
+    "EventCode": "0x00000a17",
+    "BriefDescription": "Speculative prediction originating from the BTB"
+  },
+  {
+    "EventName": "SPECULATIVE_PREDICTION_FROM_uPREDICTOR",
+    "EventCode": "0x00000a18",
+    "BriefDescription": "Speculative prediction originating from the uPredictor"
+  }
+]
