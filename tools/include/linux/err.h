@@ -34,7 +34,7 @@
 
 static inline void * __must_check ERR_PTR(long error_)
 {
-	return (void *) error_;
+	return (void *)(intptr_t)error_;
 }
 
 static inline long __must_check PTR_ERR(__force const void *ptr)

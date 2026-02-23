@@ -5,6 +5,7 @@
  */
 
 #include <errno.h>
+#include <inttypes.h>
 #include <stdlib.h>
 #include <linux/compiler.h>
 
@@ -54,7 +55,7 @@ static int intlist__node_cmp(struct rb_node *rb_node, const void *entry)
 
 int intlist__add(struct intlist *ilist, unsigned long i)
 {
-	return rblist__add_node(&ilist->rblist, (void *)i);
+	return rblist__add_node(&ilist->rblist, (void *)(uintptr_t)i);
 }
 
 void intlist__remove(struct intlist *ilist, struct int_node *node)
@@ -72,9 +73,9 @@ static struct int_node *__intlist__findnew(struct intlist *ilist,
 		return NULL;
 
 	if (create)
-		rb_node = rblist__findnew(&ilist->rblist, (void *)i);
+		rb_node = rblist__findnew(&ilist->rblist, (void *)(uintptr_t)i);
 	else
-		rb_node = rblist__find(&ilist->rblist, (void *)i);
+		rb_node = rblist__find(&ilist->rblist, (void *)(uintptr_t)i);
 
 	if (rb_node)
 		node = container_of(rb_node, struct int_node, rb_node);

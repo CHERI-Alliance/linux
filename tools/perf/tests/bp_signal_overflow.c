@@ -10,6 +10,7 @@
  */
 #define __SANE_USERSPACE_TYPES__
 
+#include <inttypes.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -88,7 +89,7 @@ static int test__bp_signal_overflow(struct test_suite *test __maybe_unused, int 
 
 	pe.config = 0;
 	pe.bp_type = HW_BREAKPOINT_X;
-	pe.bp_addr = (unsigned long) test_function;
+	pe.bp_addr = (unsigned long)(uintptr_t) test_function;
 	pe.bp_len = default_breakpoint_len();
 
 	pe.sample_period = THRESHOLD;
