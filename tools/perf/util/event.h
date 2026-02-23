@@ -17,7 +17,7 @@ struct machine;
 struct perf_event_attr;
 struct perf_sample;
 
-#ifdef __LP64__
+#if defined(__LP64__) || (__SIZEOF_LONG__ == 8)
 /*
  * /usr/include/inttypes.h uses just 'lu' for PRIu64, but we end up defining
  * __u64 as long long unsigned int, and then -Werror=format= kicks in and
