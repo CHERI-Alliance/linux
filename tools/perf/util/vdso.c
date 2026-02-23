@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/auxv.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -81,6 +82,15 @@ static char *get_file(struct vdso_file *vdso_file)
 
 	if (vdso_file->error || find_map(&start, &end, VDSO__MAP_NAME))
 		return NULL;
+
+#ifdef __CHERI_PURE_CAPABILITY__
+	/* A valid capability pointer is needed */
+	start = getauxptr(AT_SYSINFO_EHDR);
+	if (!start) {
+		pr_err("Could not get a valid pointer for the vDSO\n");
+		return NULL;
+	}
+#endif
 
 	size = end - start;
 
