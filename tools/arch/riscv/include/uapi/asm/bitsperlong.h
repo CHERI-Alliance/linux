@@ -7,7 +7,11 @@
 #ifndef _UAPI_ASM_RISCV_BITSPERLONG_H
 #define _UAPI_ASM_RISCV_BITSPERLONG_H
 
+#if defined(__CHERI_PURE_CAPABILITY__)
+#define __BITS_PER_LONG (__SIZEOF_LONG__ * 8)
+#else
 #define __BITS_PER_LONG (__SIZEOF_POINTER__ * 8)
+#endif
 
 #include <asm-generic/bitsperlong.h>
 
