@@ -9,6 +9,8 @@
  * preprocessor.
  */
 
+#include "a730-pmu.dtsi"
+
 #define NUM_CORES 4
 
 / {

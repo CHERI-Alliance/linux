@@ -5,6 +5,8 @@
  * A730 CPU default configuration dtsi file.
  */
 
+#include "a730-pmu.dtsi"
+
 #define NUM_CORES 1
 
 / {
