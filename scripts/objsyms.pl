@@ -63,7 +63,7 @@ sub decode_insn
 	my $insn = undef;
 	while (scalar @line) {
 		$insn = shift @line;
-		last unless $insn =~ m{^[\da-f][\da-f]$}
+		last unless $insn =~ m{^[\da-f][\da-f]+$}
 	}
 	return undef unless defined($insn);
 	return undef unless $insn =~ m{^[a-z][\w\d\.]*$};
