@@ -44,14 +44,12 @@ struct relocation_head {
 
 struct relocation_entry {
 	struct list_head head;
-	Elf_Addr value;
-	Elf_Sym *sym;
+	uintptr_t value;
 	unsigned int type;
 };
 
 struct relocation_handlers {
-	int (*reloc_handler)(struct module *me, void *location,
-			     Elf_Addr v, Elf_Sym *sym);
+	int (*reloc_handler)(struct module *me, void *location, uintptr_t v);
 	int (*accumulate_handler)(struct module *me, void *location,
 				  long buffer);
 };
@@ -94,8 +92,7 @@ static int riscv_insn_rvc_rmw(void *location, u16 keep, u16 set)
 	return 0;
 }
 
-static int apply_r_riscv_32_rela(struct module *me, void *location, Elf_Addr v,
-				 Elf_Sym *sym)
+static int apply_r_riscv_32_rela(struct module *me, void *location, uintptr_t v)
 {
 	if (v != (u32)v) {
 		pr_err("%s: value %016llx out of range for 32-bit field\n",
@@ -106,17 +103,16 @@ static int apply_r_riscv_32_rela(struct module *me, void *location, Elf_Addr v,
 	return 0;
 }
 
-static int apply_r_riscv_64_rela(struct module *me, void *location, Elf_Addr v,
-				 Elf_Sym *sym)
+static int apply_r_riscv_64_rela(struct module *me, void *location, uintptr_t v)
 {
-	*(u64 *)location = v;
+	*(u64 *)location = __c_ua(v);
 	return 0;
 }
 
 static int apply_r_riscv_branch_rela(struct module *me, void *location,
-				     Elf_Addr v, Elf_Sym *sym)
+				     uintptr_t v)
 {
-	ptrdiff_t offset = v - __c_pa(location);
+	ptrdiff_t offset = (void *)v - location;
 	u32 imm12 = (offset & 0x1000) << (31 - 12);
 	u32 imm11 = (offset & 0x800) >> (11 - 7);
 	u32 imm10_5 = (offset & 0x7e0) << (30 - 10);
@@ -126,9 +122,9 @@ static int apply_r_riscv_branch_rela(struct module *me, void *location,
 }
 
 static int apply_r_riscv_jal_rela(struct module *me, void *location,
-				  Elf_Addr v, Elf_Sym *sym)
+				  uintptr_t v)
 {
-	ptrdiff_t offset = v - __c_pa(location);
+	ptrdiff_t offset = (void *)v - location;
 	u32 imm20 = (offset & 0x100000) << (31 - 20);
 	u32 imm19_12 = (offset & 0xff000);
 	u32 imm11 = (offset & 0x800) << (20 - 11);
@@ -138,9 +134,9 @@ static int apply_r_riscv_jal_rela(struct module *me, void *location,
 }
 
 static int apply_r_riscv_rvc_branch_rela(struct module *me, void *location,
-					 Elf_Addr v, Elf_Sym *sym)
+					 uintptr_t v)
 {
-	ptrdiff_t offset = v - __c_pa(location);
+	ptrdiff_t offset = (void *)v - location;
 	u16 imm8 = (offset & 0x100) << (12 - 8);
 	u16 imm7_6 = (offset & 0xc0) >> (6 - 5);
 	u16 imm5 = (offset & 0x20) >> (5 - 2);
@@ -152,9 +148,9 @@ static int apply_r_riscv_rvc_branch_rela(struct module *me, void *location,
 }
 
 static int apply_r_riscv_rvc_jump_rela(struct module *me, void *location,
-				       Elf_Addr v, Elf_Sym *sym)
+				       uintptr_t v)
 {
-	ptrdiff_t offset = v - __c_pa(location);
+	ptrdiff_t offset = (void *)v - location;
 	u16 imm11 = (offset & 0x800) << (12 - 11);
 	u16 imm10 = (offset & 0x400) >> (10 - 8);
 	u16 imm9_8 = (offset & 0x300) << (12 - 11);
@@ -169,9 +165,9 @@ static int apply_r_riscv_rvc_jump_rela(struct module *me, void *location,
 }
 
 static int apply_r_riscv_pcrel_hi20_rela(struct module *me, void *location,
-					 Elf_Addr v, Elf_Sym *sym)
+					 uintptr_t v)
 {
-	ptrdiff_t offset = v - __c_pa(location);
+	ptrdiff_t offset = (void *)v - location;
 
 	if (!riscv_insn_valid_32bit_offset(offset)) {
 		pr_err(
@@ -184,7 +180,7 @@ static int apply_r_riscv_pcrel_hi20_rela(struct module *me, void *location,
 }
 
 static int apply_r_riscv_pcrel_lo12_i_rela(struct module *me, void *location,
-					   Elf_Addr v, Elf_Sym *sym)
+					   uintptr_t v)
 {
 	/*
 	 * v is the lo12 value to fill. It is calculated before calling this
@@ -194,7 +190,7 @@ static int apply_r_riscv_pcrel_lo12_i_rela(struct module *me, void *location,
 }
 
 static int apply_r_riscv_pcrel_lo12_s_rela(struct module *me, void *location,
-					   Elf_Addr v, Elf_Sym *sym)
+					   uintptr_t v)
 {
 	/*
 	 * v is the lo12 value to fill. It is calculated before calling this
@@ -207,7 +203,7 @@ static int apply_r_riscv_pcrel_lo12_s_rela(struct module *me, void *location,
 }
 
 static int apply_r_riscv_hi20_rela(struct module *me, void *location,
-				   Elf_Addr v, Elf_Sym *sym)
+				   uintptr_t v)
 {
 	if (IS_ENABLED(CONFIG_CMODEL_MEDLOW)) {
 		pr_err(
@@ -220,7 +216,7 @@ static int apply_r_riscv_hi20_rela(struct module *me, void *location,
 }
 
 static int apply_r_riscv_lo12_i_rela(struct module *me, void *location,
-				     Elf_Addr v, Elf_Sym *sym)
+				     uintptr_t v)
 {
 	/* Skip medlow checking because of filtering by HI20 already */
 	s32 hi20 = ((s32)v + 0x800) & 0xfffff000;
@@ -230,7 +226,7 @@ static int apply_r_riscv_lo12_i_rela(struct module *me, void *location,
 }
 
 static int apply_r_riscv_lo12_s_rela(struct module *me, void *location,
-				     Elf_Addr v, Elf_Sym *sym)
+				     uintptr_t v)
 {
 	/* Skip medlow checking because of filtering by HI20 already */
 	s32 hi20 = ((s32)v + 0x800) & 0xfffff000;
@@ -241,23 +237,15 @@ static int apply_r_riscv_lo12_s_rela(struct module *me, void *location,
 	return riscv_insn_rmw(location, 0x1fff07f, imm11_5 | imm4_0);
 }
 
-static int derive_capability(struct module *me, bool is_init,
-			     Elf_Addr v, Elf_Sym *sym, uintptr_t *cap_buf);
-
 static int apply_r_riscv_got_hi20_rela(struct module *me, void *location,
-				       Elf_Addr v, Elf_Sym *sym)
+				       uintptr_t v)
 {
-	ptrdiff_t offset = v - __c_pa(location);
+	ptrdiff_t offset = (void *)v - location;
 
 	/* Always emit the got entry */
 	if (IS_ENABLED(CONFIG_MODULE_SECTIONS)) {
-		uintptr_t vptr;
-		int ret = derive_capability(me, false, v, sym, &vptr);
-		if (ret < 0) {
-			pr_err("%s: Cannot derive capability\n", me->name);
-			return ret;
-		}
-		offset = (void *)module_emit_got_entry(me, vptr) - location;
+		bool init = within_module_init(__c_pa(location), me);
+		offset = (void *)module_emit_got_entry(me, v, init) - location;
 	} else {
 		pr_err(
 		  "%s: can not generate the GOT entry for symbol = %016llx from PC = %p\n",
@@ -269,15 +257,16 @@ static int apply_r_riscv_got_hi20_rela(struct module *me, void *location,
 }
 
 static int apply_r_riscv_call_plt_rela(struct module *me, void *location,
-				       Elf_Addr v, Elf_Sym *sym)
+				       uintptr_t v)
 {
-	ptrdiff_t offset = v - __c_pa(location);
+	ptrdiff_t offset = (void *)v - location;
 	u32 hi20, lo12;
 
 	if (!riscv_insn_valid_32bit_offset(offset)) {
 		/* Only emit the plt entry if offset over 32-bit range */
 		if (IS_ENABLED(CONFIG_MODULE_SECTIONS)) {
-			offset = (void *)module_emit_plt_entry(me, v) - location;
+			bool init = within_module_init(__c_pa(location), me);
+			offset = (void *)module_emit_plt_entry(me, v, init) - location;
 		} else {
 			pr_err(
 			  "%s: target %016llx can not be addressed by the 32-bit offset from PC = %p\n",
@@ -293,9 +282,9 @@ static int apply_r_riscv_call_plt_rela(struct module *me, void *location,
 }
 
 static int apply_r_riscv_call_rela(struct module *me, void *location,
-				   Elf_Addr v, Elf_Sym *sym)
+				   uintptr_t v)
 {
-	ptrdiff_t offset = v - __c_pa(location);
+	ptrdiff_t offset = (void *)v - location;
 	u32 hi20, lo12;
 
 	if (!riscv_insn_valid_32bit_offset(offset)) {
@@ -312,13 +301,13 @@ static int apply_r_riscv_call_rela(struct module *me, void *location,
 }
 
 static int apply_r_riscv_relax_rela(struct module *me, void *location,
-				    Elf_Addr v, Elf_Sym *sym)
+				    uintptr_t v)
 {
 	return 0;
 }
 
 static int apply_r_riscv_align_rela(struct module *me, void *location,
-				    Elf_Addr v, Elf_Sym *sym)
+				    uintptr_t v)
 {
 	pr_err(
 	  "%s: The unexpected relocation type 'R_RISCV_ALIGN' from PC = %p\n",
@@ -326,80 +315,76 @@ static int apply_r_riscv_align_rela(struct module *me, void *location,
 	return -EINVAL;
 }
 
-static int apply_r_riscv_add8_rela(struct module *me, void *location, Elf_Addr v,
-				   Elf_Sym *sym)
+static int apply_r_riscv_add8_rela(struct module *me, void *location, uintptr_t v)
 {
 	*(u8 *)location += (u8)v;
 	return 0;
 }
 
 static int apply_r_riscv_add16_rela(struct module *me, void *location,
-				    Elf_Addr v, Elf_Sym *sym)
+				    uintptr_t v)
 {
 	*(u16 *)location += (u16)v;
 	return 0;
 }
 
 static int apply_r_riscv_add32_rela(struct module *me, void *location,
-				    Elf_Addr v, Elf_Sym *sym)
+				    uintptr_t v)
 {
 	*(u32 *)location += (u32)v;
 	return 0;
 }
 
 static int apply_r_riscv_add64_rela(struct module *me, void *location,
-				    Elf_Addr v, Elf_Sym *sym)
+				    uintptr_t v)
 {
-	*(u64 *)location += (u64)v;
+	*(u64 *)location += (u64)__c_ua(v);
 	return 0;
 }
 
-static int apply_r_riscv_sub8_rela(struct module *me, void *location, Elf_Addr v,
-				   Elf_Sym *sym)
+static int apply_r_riscv_sub8_rela(struct module *me, void *location, uintptr_t v)
 {
 	*(u8 *)location -= (u8)v;
 	return 0;
 }
 
 static int apply_r_riscv_sub16_rela(struct module *me, void *location,
-				    Elf_Addr v, Elf_Sym *sym)
+				    uintptr_t v)
 {
 	*(u16 *)location -= (u16)v;
 	return 0;
 }
 
 static int apply_r_riscv_sub32_rela(struct module *me, void *location,
-				    Elf_Addr v, Elf_Sym *sym)
+				    uintptr_t v)
 {
 	*(u32 *)location -= (u32)v;
 	return 0;
 }
 
 static int apply_r_riscv_sub64_rela(struct module *me, void *location,
-				    Elf_Addr v, Elf_Sym *sym)
+				    uintptr_t v)
 {
-	*(u64 *)location -= (u64)v;
+	*(u64 *)location -= (u64)__c_ua(v);
 	return 0;
 }
 
 static int dynamic_linking_not_supported(struct module *me, void *location,
-					 Elf_Addr v, Elf_Sym *sym)
+					 uintptr_t v)
 {
 	pr_err("%s: Dynamic linking not supported in kernel modules PC = %p\n",
 	       me->name, location);
 	return -EINVAL;
 }
 
-static int tls_not_supported(struct module *me, void *location, Elf_Addr v,
-			     Elf_Sym *sym)
+static int tls_not_supported(struct module *me, void *location, uintptr_t v)
 {
 	pr_err("%s: Thread local storage not supported in kernel modules PC = %p\n",
 	       me->name, location);
 	return -EINVAL;
 }
 
-static int apply_r_riscv_sub6_rela(struct module *me, void *location, Elf_Addr v,
-				   Elf_Sym *sym)
+static int apply_r_riscv_sub6_rela(struct module *me, void *location, uintptr_t v)
 {
 	u8 *byte = location;
 	u8 value = v;
@@ -408,8 +393,7 @@ static int apply_r_riscv_sub6_rela(struct module *me, void *location, Elf_Addr v
 	return 0;
 }
 
-static int apply_r_riscv_set6_rela(struct module *me, void *location, Elf_Addr v,
-				   Elf_Sym *sym)
+static int apply_r_riscv_set6_rela(struct module *me, void *location, uintptr_t v)
 {
 	u8 *byte = location;
 	u8 value = v;
@@ -418,43 +402,43 @@ static int apply_r_riscv_set6_rela(struct module *me, void *location, Elf_Addr v
 	return 0;
 }
 
-static int apply_r_riscv_set8_rela(struct module *me, void *location, Elf_Addr v,
-				   Elf_Sym *sym)
+static int apply_r_riscv_set8_rela(struct module *me, void *location, uintptr_t v)
 {
 	*(u8 *)location = (u8)v;
 	return 0;
 }
 
 static int apply_r_riscv_set16_rela(struct module *me, void *location,
-				    Elf_Addr v, Elf_Sym *sym)
+				    uintptr_t v)
 {
 	*(u16 *)location = (u16)v;
 	return 0;
 }
 
 static int apply_r_riscv_set32_rela(struct module *me, void *location,
-				    Elf_Addr v, Elf_Sym *sym)
+				    uintptr_t v)
 {
 	*(u32 *)location = (u32)v;
 	return 0;
 }
 
 static int apply_r_riscv_32_pcrel_rela(struct module *me, void *location,
-				       Elf_Addr v, Elf_Sym *sym)
+				       uintptr_t v)
 {
 	*(u32 *)location = v - __c_pa(location);
 	return 0;
 }
 
 static int apply_r_riscv_plt32_rela(struct module *me, void *location,
-				    Elf_Addr v, Elf_Sym *sym)
+				    uintptr_t v)
 {
-	ptrdiff_t offset = v - __c_pa(location);
+	ptrdiff_t offset = (void *)v - location;
 
 	if (!riscv_insn_valid_32bit_offset(offset)) {
 		/* Only emit the plt entry if offset over 32-bit range */
 		if (IS_ENABLED(CONFIG_MODULE_SECTIONS)) {
-			offset = (void *)module_emit_plt_entry(me, v) - location;
+			bool init = within_module_init(__c_pa(location), me);
+			offset = (void *)module_emit_plt_entry(me, v, init) - location;
 		} else {
 			pr_err("%s: target %016llx can not be addressed by the 32-bit offset from PC = %p\n",
 			       me->name, (long long)v, location);
@@ -466,15 +450,13 @@ static int apply_r_riscv_plt32_rela(struct module *me, void *location,
 	return 0;
 }
 
-static int apply_r_riscv_set_uleb128(struct module *me, void *location, Elf_Addr v,
-				     Elf_Sym *sym)
+static int apply_r_riscv_set_uleb128(struct module *me, void *location, uintptr_t v)
 {
-	*(long *)location = v;
+	*(long *)location = __c_ua(v);
 	return 0;
 }
 
-static int apply_r_riscv_sub_uleb128(struct module *me, void *location, Elf_Addr v,
-				     Elf_Sym *sym)
+static int apply_r_riscv_sub_uleb128(struct module *me, void *location, uintptr_t v)
 {
 	*(long *)location -= v;
 	return 0;
@@ -555,115 +537,13 @@ static int apply_uleb128_accumulation(struct module *me, void *location, long bu
 
 #ifdef CONFIG_CHERI_KERNEL
 
-struct memtype_search {
-	Elf_Addr addr;
-	enum mod_mem_type *res;
-};
-
-static int get_mem_type_for_addr(struct module *mod, void *data)
+static int apply_r_riscv_cheri_capability(struct module *me, void *location, uintptr_t v)
 {
-	struct memtype_search *mems = data;
-
-	for_each_mod_mem_type(type) {
-		if (within_module_mem_type(mems->addr, mod, type)) {
-			*(mems->res) = type;
-			return 1;
-		}
-	}
-
-	if (mems->addr - __c_pa(mod->percpu) < mod->percpu_size) {
-		*(mems->res) = MOD_DATA;
-		return 1;
-	}
+	*(uintptr_t *)location = v;
 
 	return 0;
 }
 
-static int get_kmem_type_for_addr(struct memtype_search *mems)
-{
-	ptraddr_t addr = mems->addr;
-
-	if (is_kernel_core_data(addr)) {
-		*(mems->res) = MOD_DATA;
-		return 1;
-	}
-
-	if (is_kernel_rodata(addr) ||
-	    is_kernel_ro_after_init(addr)) {
-		*(mems->res) = MOD_RODATA;
-		return 1;
-	}
-
-	if (__is_kernel_text(addr)) {
-		*(mems->res) = MOD_TEXT;
-		return 1;
-	}
-
-	if (addr >= (ptraddr_t) __per_cpu_start &&
-	    addr < (ptraddr_t) __per_cpu_end) {
-		*(mems->res) = MOD_DATA;
-		return 1;
-	}
-
-	return 0;
-}
-
-static int derive_capability(struct module *me, bool is_init,
-			     Elf_Addr v, Elf_Sym *sym, uintptr_t *cap_buf)
-{
-	uintptr_t cap;
-	enum mod_mem_type cap_mem_type = MOD_INVALID;
-	struct memtype_search mems = { v, &cap_mem_type };
-
-	if (!get_mem_type_for_addr(me, &mems)
-	    && !get_kmem_type_for_addr(&mems)) {
-		module_for_each_mod(get_mem_type_for_addr, &mems);
-
-		if (cap_mem_type == MOD_INVALID) {
-			pr_err("%s: Could not determine mod_mem_type\n", me->name);
-			return -EINVAL;
-		}
-	}
-
-	pr_debug("Materializing %s capability for %llx (mem_type %d) ELF symbol %llx with size %llu\n",
-		 is_init ? "in-init" : "non-init", v, cap_mem_type, sym->st_value, sym->st_size);
-
-	if (mod_mem_type_is_data(cap_mem_type)) {
-		if (!sym->st_size) {
-			pr_err("%s: Can not create capability for symbol with size 0\n", me->name);
-			return -EINVAL;
-		}
-
-		cap = (uintptr_t)cheri_make_kernel_data_cap(sym->st_value, sym->st_size);
-		cap = cheri_address_set(cap, v);
-		if (cap_mem_type == MOD_RODATA ||
-		    cap_mem_type == MOD_INIT_RODATA ||
-		    (!is_init && cap_mem_type == MOD_RO_AFTER_INIT))
-			cap = cheri_perms_and(cap, ~CHERI_PERMS_WRITE);
-	} else
-		cap = (uintptr_t)cheri_make_kernel_code_cap(v);
-
-
-	*cap_buf = cap;
-
-	return 0;
-}
-
-static int apply_r_riscv_cheri_capability(struct module *me, void *location, Elf_Addr v,
-					  Elf_Sym *sym)
-{
-	bool is_init;
-
-	is_init = within_module_init(__c_pa(location), me);
-	return derive_capability(me, false /* XXX is_init */, v, sym, location);
-}
-#else
-static int derive_capability(struct module *me, bool is_init,
-			     Elf_Addr v, Elf_Sym *sym, uintptr_t *cap_buf)
-{
-	(*cap_buf) = v;
-	return 0;
-}
 #endif
 
 /*
@@ -790,8 +670,7 @@ process_accumulated_relocations(struct module *me,
 						 head) {
 				curr_type = rel_entry_iter->type;
 				reloc_handlers[curr_type].reloc_handler(
-					me, &buffer, rel_entry_iter->value,
-					rel_entry_iter->sym);
+					me, &buffer, rel_entry_iter->value);
 				kfree(rel_entry_iter);
 			}
 			reloc_handlers[curr_type].accumulate_handler(
@@ -806,8 +685,7 @@ process_accumulated_relocations(struct module *me,
 
 static int add_relocation_to_accumulate(struct module *me, int type,
 					void *location,
-					unsigned int hashtable_bits, Elf_Addr v,
-					Elf_Sym *sym,
+					unsigned int hashtable_bits, uintptr_t v,
 					struct hlist_head *relocation_hashtable,
 					struct list_head *used_buckets_list)
 {
@@ -825,7 +703,6 @@ static int add_relocation_to_accumulate(struct module *me, int type,
 	INIT_LIST_HEAD(&entry->head);
 	entry->type = type;
 	entry->value = v;
-	entry->sym = sym;
 
 	hash = hash_min((uintptr_t)location, hashtable_bits);
 
@@ -919,17 +796,80 @@ initialize_relocation_hashtable(unsigned int num_relocations,
 	return hashtable_bits;
 }
 
-int apply_relocate_add(Elf_Shdr *sechdrs, const char *strtab,
-		       unsigned int symindex, unsigned int relsec,
-		       struct module *me)
+/*
+ * FIXCHERI:
+ * The compiler assumes that it can optimize away the if in
+ * 	if (addend)
+ * 		cap += addend;
+ * but this is not true for CHERI because cap might be sealed and
+ * adding zero will clear the tag on the capability. Use ADD_ADDEND()
+ * to hide this from the compiler.
+ */
+#ifdef CONFIG_CHERI_KERNEL
+#define ADD_ADDEND(cap, addend)	\
+	if (addend) { \
+		asm volatile("cadd %0, %0, %2" : "=C"(cap) \
+			     : "0"(cap), "r"(rel[i].r_addend)); \
+	}
+#else
+#define ADD_ADDEND(val, addend) do { val += addend; } while (0)
+#endif
+
+#ifdef CONFIG_CHERI_KERNEL
+
+static uintptr_t fixup_symcap_permissions(uintptr_t symval, void *location,
+					  enum mod_mem_type memtype,
+					  struct module *me)
+{
+	/* Don't touch sealed or untagged values. */
+	if (!cheri_tag_get(symval) || cheri_is_sealed(symval))
+		return symval;
+
+	/*
+	 * We only know the memtype if this is one of our symbols
+	 * (local or exported). Check if the symbol references read-only
+	 * data/
+	 */
+	if (memtype != MOD_RODATA && memtype != MOD_INIT_RODATA
+	    && memtype != MOD_RO_AFTER_INIT)
+		return symval;
+
+	/*
+	 * If this is for an init section and data is MOD_RO_AFTER_INIT
+	 * keep it read-write.
+	 */
+	if (within_module_init(__c_pa(location), me)
+	    && memtype == MOD_RO_AFTER_INIT)
+		return symval;
+
+	return (uintptr_t)cheri_perms_clear(symval, CHERI_PERM_STORE);
+}
+
+#else
+
+static inline uintptr_t fixup_symcap_permissions(uintptr_t symval,
+						 void *location,
+						 enum mod_mem_type memtype,
+						 struct module *me)
+{
+	return symval;
+}
+
+#endif
+
+
+int apply_relocate_add_sym(Elf_Shdr *sechdrs, const char *strtab,
+			   unsigned int symindex, unsigned int relsec,
+			   struct mod_sym_info *syms, struct module *me)
 {
 	Elf_Rela *rel = shdr_addr(&sechdrs[relsec]);
-	int (*handler)(struct module *me, void *location, Elf_Addr v, Elf_Sym *sym);
+	int (*handler)(struct module *me, void *location, uintptr_t v);
 	Elf_Sym *sym;
+	struct mod_sym_info *syminfo;
 	void *location;
 	unsigned int i, type;
 	unsigned int j_idx = 0;
-	Elf_Addr v;
+	uintptr_t v;
 	int res;
 	unsigned int num_relocations = sechdrs[relsec].sh_size / sizeof(*rel);
 	struct hlist_head *relocation_hashtable;
@@ -952,14 +892,14 @@ int apply_relocate_add(Elf_Shdr *sechdrs, const char *strtab,
 		/* This is the symbol it is referring to */
 		sym = (Elf_Sym *)shdr_addr(&sechdrs[symindex])
 			+ ELF_RISCV_R_SYM(rel[i].r_info);
-		if (IS_ERR_VALUE(sym->st_value)) {
-			/* Ignore unresolved weak symbol */
-			if (ELF_ST_BIND(sym->st_info) == STB_WEAK)
-				continue;
+		syminfo = &syms[ELF_RISCV_R_SYM(rel[i].r_info)];
+		if (syminfo->error) {
 			pr_warn("%s: Unknown symbol %s\n",
 				me->name, strtab + sym->st_name);
-			return -ENOENT;
+			return syminfo->error;
 		}
+		v = syminfo->symval;
+		BUG_ON(v != sym->st_value);
 
 		type = ELF_RISCV_R_TYPE(rel[i].r_info);
 
@@ -974,7 +914,8 @@ int apply_relocate_add(Elf_Shdr *sechdrs, const char *strtab,
 			return -EINVAL;
 		}
 
-		v = sym->st_value + rel[i].r_addend;
+		ADD_ADDEND(v, rel[i].r_addend);
+		v = fixup_symcap_permissions(v, location, syminfo->memtype, me);
 
 		if (type == R_RISCV_PCREL_LO12_I || type == R_RISCV_PCREL_LO12_S) {
 			unsigned int j = j_idx;
@@ -991,26 +932,25 @@ int apply_relocate_add(Elf_Shdr *sechdrs, const char *strtab,
 				    && (hi20_type == R_RISCV_PCREL_HI20
 					|| hi20_type == R_RISCV_GOT_HI20)) {
 					s32 hi20, lo12;
-					Elf_Sym *hi20_sym =
-						(Elf_Sym *)(shdr_addr(&sechdrs[symindex]))
-						+ ELF_RISCV_R_SYM(rel[j].r_info);
-					unsigned long hi20_sym_val =
-						hi20_sym->st_value
-						+ rel[j].r_addend;
+					struct mod_sym_info *hi20_sym =
+					  &syms[ELF_RISCV_R_SYM(rel[j].r_info)];
+					uintptr_t hi20_sym_val =
+						hi20_sym->symval;
+
+					/* Don't add if not necessary. sym might be sealed! */
+					ADD_ADDEND(hi20_sym_val, rel[j].r_addend);
+					hi20_sym_val = fixup_symcap_permissions(
+						hi20_sym_val, location,
+						hi20_sym->memtype, me);
 
 					/* Calculate lo12 */
-					size_t offset = hi20_sym_val - hi20_loc;
+					size_t offset = __c_ua(hi20_sym_val) - hi20_loc;
+					bool init = within_module_init(
+						    __c_pa(location), me);
 					if (IS_ENABLED(CONFIG_MODULE_SECTIONS)
 					    && hi20_type == R_RISCV_GOT_HI20) {
-#ifdef CONFIG_CHERI_KERNEL
-						uintptr_t vptr;
-						int ret = derive_capability(me, false, hi20_sym_val, hi20_sym, &vptr);
-						if (ret < 0)
-							return ret;
-#else
-						uintptr_t vptr = v;
-#endif
-						offset = __c_ua(module_emit_got_entry(me, vptr));
+						offset = __c_ua(module_emit_got_entry(
+							 me, hi20_sym_val, init));
 						offset = offset - hi20_loc;
 					}
 					hi20 = (offset + 0x800) & 0xfffff000;
@@ -1041,11 +981,10 @@ int apply_relocate_add(Elf_Shdr *sechdrs, const char *strtab,
 		if (reloc_handlers[type].accumulate_handler)
 			res = add_relocation_to_accumulate(me, type, location,
 							   hashtable_bits, v,
-							   sym,
 							   relocation_hashtable,
 							   &used_buckets_list);
 		else
-			res = handler(me, location, v, sym);
+			res = handler(me, location, v);
 		if (res)
 			return res;
 	}

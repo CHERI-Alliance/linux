@@ -1454,7 +1454,7 @@ void *__symbol_get(const char *symbol)
 		if (strong_try_module_get(fsa.owner))
 			return NULL;
 	}
-	return cheri_make_kernel_code_cap(__c_pa(kernel_symbol_value(fsa.sym)));
+	return kernel_symbol_value(fsa.sym);
 }
 EXPORT_SYMBOL_GPL(__symbol_get);
 
@@ -1509,6 +1509,50 @@ static bool ignore_undef_symbol(Elf_Half emachine, const char *name)
 	return false;
 }
 
+#ifdef CONFIG_CHERI_KERNEL
+
+static void derive_capability(struct module *me, const struct load_info *info,
+			      Elf_Sym *sym, struct mod_sym_info *syminfo)
+{
+	if (sym->st_shndx == info->index.pcpu) {
+		syminfo->symval = (uintptr_t)cheri_address_set(mod_percpu(me),
+							       sym->st_value);
+		syminfo->symval = cheri_bounds_set(syminfo->symval,
+						   sym->st_size);
+		syminfo->memtype = MOD_DATA;
+		syminfo->error = 0;
+		return;
+	}
+
+	for_each_mod_mem_type(type) {
+		if (within_module_mem_type(sym->st_value, me, type)) {
+			syminfo->memtype = type;
+			break;
+		}
+	}
+
+	if (syminfo->memtype == MOD_INVALID)
+		return;
+	if (mod_mem_type_is_text(syminfo->memtype))
+		syminfo->symval = (uintptr_t)cheri_sentry_create(
+				cheri_make_kernel_code_cap(sym->st_value));
+	else
+		syminfo->symval = (uintptr_t)cheri_make_kernel_data_cap(sym->st_value,
+									sym->st_size);
+	syminfo->error = 0;
+}
+
+#else
+
+static void derive_capability(struct module *me, const struct load_info *info,
+			      Elf_Sym *sym, struct mod_sym_info *syminfo)
+{
+	syminfo->symval = sym->st_value;
+	syminfo->error = 0;
+}
+
+#endif
+
 /* Change all symbols so that st_value encodes the pointer directly. */
 static int simplify_symbols(struct module *mod, const struct load_info *info)
 {
@@ -1542,6 +1586,8 @@ static int simplify_symbols(struct module *mod, const struct load_info *info)
 			/* Don't need to do anything */
 			pr_debug("Absolute symbol: 0x%08lx %s\n",
 				 (long)sym[i].st_value, name);
+			info->symtab[i].symval = __c_fakeu(sym[i].st_value);
+			info->symtab[i].error = 0;
 			break;
 
 		case SHN_LIVEPATCH:
@@ -1555,17 +1601,22 @@ static int simplify_symbols(struct module *mod, const struct load_info *info)
 				void *value = kernel_symbol_value(ksym);
 
 				sym[i].st_value = __c_pa(value);
-#ifdef CONFIG_CHERI_KERNEL
-				sym[i].st_size = cheri_length_get(value);
-#endif
+				info->symtab[i].symval = (uintptr_t)value;
+				info->symtab[i].error = 0;
 				break;
 			}
 
 			/* Ok if weak or ignored.  */
-			if (!ksym &&
-			    (ELF_ST_BIND(sym[i].st_info) == STB_WEAK ||
-			     ignore_undef_symbol(info->hdr->e_machine, name)))
-				break;
+			if (!ksym) {
+				if (ignore_undef_symbol(info->hdr->e_machine, name))
+					break;
+				if (ELF_ST_BIND(sym[i].st_info) == STB_WEAK) {
+					/* A weak undefined symbol is zero. */
+					info->symtab[i].symval = __c_fakeu(0);
+					info->symtab[i].error = 0;
+					break;
+				}
+			}
 
 			ret = PTR_ERR(ksym) ?: -ENOENT;
 			pr_warn("%s: Unknown symbol %s (err %d)\n",
@@ -1579,6 +1630,7 @@ static int simplify_symbols(struct module *mod, const struct load_info *info)
 			else
 				secbase = info->sechdrs[sym[i].st_shndx].sh_addr;
 			sym[i].st_value += secbase;
+			derive_capability(mod, info, &sym[i], &info->symtab[i]);
 			break;
 		}
 	}
@@ -1616,11 +1668,15 @@ static int apply_relocations(struct module *mod, const struct load_info *info)
 						       info->index.sym, i,
 						       NULL);
 		else if (info->sechdrs[i].sh_type == SHT_REL)
-			err = apply_relocate(info->sechdrs, info->strtab,
-					     info->index.sym, i, mod);
+			err = apply_relocate_sym(info->sechdrs, info->strtab,
+						 info->index.sym, i,
+						 info->symtab, mod);
 		else if (info->sechdrs[i].sh_type == SHT_RELA)
-			err = apply_relocate_add(info->sechdrs, info->strtab,
-						 info->index.sym, i, mod);
+			err = apply_relocate_add_sym(info->sechdrs,
+						     info->strtab,
+						     info->index.sym, i,
+						     info->symtab,
+						     info->mod);
 		if (err < 0)
 			break;
 	}
@@ -2123,12 +2179,14 @@ static int elf_validity_cache_index_mod(struct load_info *info)
 static int elf_validity_cache_index_sym(struct load_info *info)
 {
 	unsigned int sym_idx;
+	unsigned int nsyms = 0;
 	unsigned int num_sym_secs = 0;
 	int i;
 
 	for (i = 1; i < info->hdr->e_shnum; i++) {
 		if (info->sechdrs[i].sh_type == SHT_SYMTAB) {
 			num_sym_secs++;
+			nsyms += info->sechdrs[i].sh_size / sizeof(Elf_Sym);
 			sym_idx = i;
 		}
 	}
@@ -2140,6 +2198,13 @@ static int elf_validity_cache_index_sym(struct load_info *info)
 	}
 
 	info->index.sym = sym_idx;
+	info->symtab = kmalloc(nsyms * sizeof(struct mod_sym_info), GFP_KERNEL);
+	if (info->symtab == NULL)
+		return -ENOMEM;
+	for (i = 0; i < nsyms; ++i) {
+		info->symtab[i].memtype = MOD_INVALID;
+		info->symtab[i].error = -ENOENT;
+	}
 
 	return 0;
 }
@@ -2473,6 +2538,7 @@ static void free_copy(struct load_info *info, int flags)
 		module_decompress_cleanup(info);
 	else
 		vfree(info->hdr);
+	kfree(info->symtab);
 }
 
 static int rewrite_section_headers(struct load_info *info, int flags)

@@ -320,7 +320,12 @@ static int klp_write_section_relocs(struct module *pmod, Elf_Shdr *sechdrs,
 		if (ret)
 			return ret;
 
-		return apply_relocate_add(sechdrs, strtab, symndx, secndx, pmod);
+		/*
+		 * FIXCHERI: Must pass a valid symtab once RISCV
+		 * supports livepatch.
+		 */
+		return apply_relocate_add_sym(sechdrs, strtab, symndx, secndx,
+					      NULL, pmod);
 	}
 
 	clear_relocate_add(sechdrs, strtab, symndx, secndx, pmod);
