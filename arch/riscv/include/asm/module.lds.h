@@ -5,5 +5,8 @@ SECTIONS {
 	.plt : { BYTE(0) }
 	.got : { BYTE(0) }
 	.got.plt : { BYTE(0) }
+	.init.plt : { BYTE(0) }
+	.init.got : { BYTE(0) }
+	.init.got.plt : { BYTE(0) }
 }
 #endif
