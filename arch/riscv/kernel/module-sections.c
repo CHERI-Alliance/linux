@@ -11,7 +11,9 @@
 #include <linux/moduleloader.h>
 #include <linux/sort.h>
 
-uintptr_t module_emit_got_entry(struct module *mod, uintptr_t val)
+#define arch arch.sections[init]
+
+uintptr_t module_emit_got_entry(struct module *mod, uintptr_t val, bool init)
 {
 	struct mod_section *got_sec = &mod->arch.got;
 	int i = got_sec->num_entries;
@@ -30,7 +32,7 @@ uintptr_t module_emit_got_entry(struct module *mod, uintptr_t val)
 	return (uintptr_t)&got[i];
 }
 
-uintptr_t module_emit_plt_entry(struct module *mod, uintptr_t val)
+uintptr_t module_emit_plt_entry(struct module *mod, uintptr_t val, bool init)
 {
 	struct mod_section *got_plt_sec = &mod->arch.got_plt;
 	struct got_entry *got_plt;
@@ -112,8 +114,9 @@ static bool rela_needs_plt_got_entry(const Elf_Rela *rela)
 	}
 }
 
-int module_frob_arch_sections(Elf_Ehdr *ehdr, Elf_Shdr *sechdrs,
-			      char *secstrings, struct module *mod)
+static int __module_frob_arch_sections(Elf_Ehdr *ehdr, Elf_Shdr *sechdrs,
+				       char *secstrings, struct module *mod,
+				       bool init)
 {
 	size_t num_scratch_relas = 0;
 	unsigned int num_plts = 0;
@@ -126,14 +129,16 @@ int module_frob_arch_sections(Elf_Ehdr *ehdr, Elf_Shdr *sechdrs,
 	/*
 	 * Find the empty .got and .plt sections.
 	 */
+#define N(X) (init ? ".init" X : X)
 	for (i = 0; i < ehdr->e_shnum; i++) {
-		if (!strcmp(secstrings + sechdrs[i].sh_name, ".plt"))
+		if (!strcmp(secstrings + sechdrs[i].sh_name, N(".plt")))
 			mod->arch.plt.shdr = sechdrs + i;
-		else if (!strcmp(secstrings + sechdrs[i].sh_name, ".got"))
+		else if (!strcmp(secstrings + sechdrs[i].sh_name, N(".got")))
 			mod->arch.got.shdr = sechdrs + i;
-		else if (!strcmp(secstrings + sechdrs[i].sh_name, ".got.plt"))
+		else if (!strcmp(secstrings + sechdrs[i].sh_name, N(".got.plt")))
 			mod->arch.got_plt.shdr = sechdrs + i;
 	}
+#undef N
 
 	if (!mod->arch.plt.shdr) {
 		pr_err("%s: module PLT section(s) missing\n", mod->name);
@@ -156,6 +161,8 @@ int module_frob_arch_sections(Elf_Ehdr *ehdr, Elf_Shdr *sechdrs,
 		size_t scratch_size_needed;
 
 		if (sechdrs[i].sh_type != SHT_RELA)
+			continue;
+		if (module_init_section(secstrings + dst_sec->sh_name) != init)
 			continue;
 
 		/* ignore relocations that operate on non-exec sections */
@@ -210,4 +217,15 @@ int module_frob_arch_sections(Elf_Ehdr *ehdr, Elf_Shdr *sechdrs,
 	mod->arch.got_plt.num_entries = 0;
 	mod->arch.got_plt.max_entries = num_plts;
 	return 0;
+}
+
+int module_frob_arch_sections(Elf_Ehdr *ehdr, Elf_Shdr *sechdrs,
+			      char *secstrings, struct module *mod)
+{
+	int ret;
+
+	ret = __module_frob_arch_sections(ehdr, sechdrs, secstrings, mod, false);
+	if (ret)
+		return ret;
+	return __module_frob_arch_sections(ehdr, sechdrs, secstrings, mod, true);
 }
