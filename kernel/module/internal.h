@@ -69,6 +69,7 @@ struct load_info {
 	unsigned long len;
 	Elf_Shdr *sechdrs;
 	char *secstrings, *strtab;
+	struct mod_sym_info *symtab;
 	unsigned long symoffs, stroffs, init_typeoffs, core_typeoffs;
 	bool sig_ok;
 #ifdef CONFIG_KALLSYMS

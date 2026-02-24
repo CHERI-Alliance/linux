@@ -8,9 +8,16 @@
 #include <linux/elf.h>
 
 struct module;
+struct mod_sym_info;
 static void *shdr_addr(const Elf_Shdr *shdr);
-uintptr_t module_emit_got_entry(struct module *mod, uintptr_t val);
-uintptr_t module_emit_plt_entry(struct module *mod, uintptr_t val);
+uintptr_t module_emit_got_entry(struct module *mod, uintptr_t val, bool init);
+uintptr_t module_emit_plt_entry(struct module *mod, uintptr_t val, bool init);
+
+/* We want the symbol table. */
+#define apply_relocate_add_sym apply_relocate_add_sym
+
+/* We want the symbol table. */
+#define apply_relocate_add_sym apply_relocate_add_sym
 
 #ifdef CONFIG_MODULE_SECTIONS
 struct mod_section {
@@ -20,9 +27,11 @@ struct mod_section {
 };
 
 struct mod_arch_specific {
-	struct mod_section got;
-	struct mod_section plt;
-	struct mod_section got_plt;
+	struct {
+		struct mod_section got;
+		struct mod_section plt;
+		struct mod_section got_plt;
+	} sections[2];
 };
 
 struct got_entry {

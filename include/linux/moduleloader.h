@@ -13,6 +13,37 @@
  * must be implemented by each architecture.
  */
 
+/*
+ * More elaborate information about the resolved symbols. This is
+ * mainly used if CONFIG_CHERI_KERNEL is set.
+ * symval: Contains a full capability for the symbol (if the symbol
+ *     references a memory object, i.e. it is not absolute).
+ *     For symbols provided by the kernel or other modules this is
+ *     directly taken from the symbol table and permissions should
+ *     not be modified. For symbols provided by this module bounds
+ *     are set correctly and permissions are either read/write for
+ *     data or a sentry if the object is a function. In this case
+ *     memtype is provided to allow for refinement of the permission
+ *     for read-only data.
+ *     For symbols that do not resolve to a capability (e.g. absolute
+ *     symbols) this field contains just the symbol value and the
+ *     memtype field is MOD_INVALID. In all cases the address part
+ *     of the capability must be equal to the value of the symbol.
+ * memtype: If the symbol resolves to a capability and the object is
+ *     provided by this module this field contains the module memory
+ *     type of the object (i.e. the type of section that the symbol is
+ *     in. This should be used during relocation to remove write permissions
+ *     from data capabilities as necessary.
+ * error: If not zero it indicates an error that occured while trying
+ *     to resolve the symbol. In some cases this error can be ignored
+ *     but it is fatal if the symbol is required for a relocation.
+ */
+struct mod_sym_info {
+	uintptr_t symval;
+	enum mod_mem_type memtype;
+	int error;
+};
+
 /* arch may override to do additional checking of ELF header architecture */
 bool module_elf_check_arch(Elf_Ehdr *hdr);
 
@@ -50,6 +81,12 @@ int apply_relocate(Elf_Shdr *sechdrs,
 		   unsigned int symindex,
 		   unsigned int relsec,
 		   struct module *mod);
+int apply_relocate_sym(Elf_Shdr *sechdrs,
+		       const char *strtab,
+		       unsigned int symindex,
+		       unsigned int relsec,
+		       struct mod_sym_info *syms,
+		       struct module *mod);
 #else
 static inline int apply_relocate(Elf_Shdr *sechdrs,
 				 const char *strtab,
@@ -63,6 +100,11 @@ static inline int apply_relocate(Elf_Shdr *sechdrs,
 }
 #endif
 
+#ifndef apply_relocate_sym
+#define apply_relocate_sym(secs, strtab, symidx, relsec, symtab, mod) \
+	apply_relocate(secs, strtab, symidx, relsec, mod)
+#endif
+
 /*
  * Apply the given add relocation to the (simplified) ELF.  Return
  * -error or 0
@@ -73,6 +115,12 @@ int apply_relocate_add(Elf_Shdr *sechdrs,
 		       unsigned int symindex,
 		       unsigned int relsec,
 		       struct module *mod);
+int apply_relocate_add_sym(Elf_Shdr *sechdrs,
+			   const char *strtab,
+			   unsigned int symindex,
+			   unsigned int relsec,
+			   struct mod_sym_info *syms,
+			   struct module *mod);
 #ifdef CONFIG_LIVEPATCH
 /*
  * Some architectures (namely x86_64 and ppc64) perform sanity checks when
@@ -101,6 +149,11 @@ static inline int apply_relocate_add(Elf_Shdr *sechdrs,
 	       module_name(me));
 	return -ENOEXEC;
 }
+#endif
+
+#ifndef apply_relocate_add_sym
+#define apply_relocate_add_sym(secs, strtab, symidx, relsec, symtab, mod) \
+	apply_relocate(secs, strtab, symidx, relsec, mod)
 #endif
 
 /* Any final processing of module before access.  Return -error or 0. */
