@@ -22,7 +22,6 @@ that do not work with CHERI for some reason.
 - CONFIG_CFI
 - KEXEC
 - CONFIG_KVM, VIRTUALIZATION
-- JUMP_LABEL
 - BPF
 - GCOV
 - PERF_EVENTS
