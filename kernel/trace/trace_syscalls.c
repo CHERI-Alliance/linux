@@ -608,6 +608,7 @@ static void perf_syscall_enter(void *ignore, struct pt_regs *regs, long id)
 	int syscall_nr;
 	int rctx;
 	int size;
+	int i;
 
 	/*
 	 * Syscall probe called with preemption enabled, but the ring
@@ -632,7 +633,7 @@ static void perf_syscall_enter(void *ignore, struct pt_regs *regs, long id)
 		return;
 
 	/* get the size after alignment with the u32 buffer size field */
-	size = sizeof(uintptr_t) * sys_data->nb_args + sizeof(*rec);
+	size = sizeof(ptraddr_t) * sys_data->nb_args + sizeof(*rec);
 	size = ALIGN(size + sizeof(u32), sizeof(u64));
 	size -= sizeof(u32);
 
@@ -642,7 +643,8 @@ static void perf_syscall_enter(void *ignore, struct pt_regs *regs, long id)
 
 	rec->nr = syscall_nr;
 	syscall_get_arguments(current, regs, args);
-	memcpy(&rec->args, args, sizeof(uintptr_t) * sys_data->nb_args);
+	for(i = 0; i < sys_data->nb_args; i++)
+		rec->args[i] = __c_ua(args[i]);
 
 	if ((valid_prog_array &&
 	     !perf_call_bpf_enter(sys_data->enter_event, fake_regs, sys_data, rec)) ||
