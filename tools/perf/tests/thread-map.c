@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0
+#include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
@@ -18,7 +19,7 @@ struct perf_tool;
 struct machine;
 
 #define NAME	(const char *) "perf"
-#define NAMEUL	(unsigned long) NAME
+#define NAMEUL	(uintptr_t) NAME
 
 static int test__thread_map(struct test_suite *test __maybe_unused, int subtest __maybe_unused)
 {

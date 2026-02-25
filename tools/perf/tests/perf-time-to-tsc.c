@@ -136,12 +136,12 @@ static int test__perf_time_to_tsc(struct test_suite *test __maybe_unused, int su
 	evlist__enable(evlist);
 
 	comm1 = "Test COMM 1";
-	CHECK__(prctl(PR_SET_NAME, (unsigned long)comm1, 0, 0, 0));
+	CHECK__(prctl(PR_SET_NAME, (uintptr_t)comm1, 0, 0, 0));
 
 	test_tsc = rdtsc();
 
 	comm2 = "Test COMM 2";
-	CHECK__(prctl(PR_SET_NAME, (unsigned long)comm2, 0, 0, 0));
+	CHECK__(prctl(PR_SET_NAME, (uintptr_t)comm2, 0, 0, 0));
 
 	evlist__disable(evlist);
 

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 #include <linux/types.h>
+#include <inttypes.h>
 #include <limits.h>
 #include <unistd.h>
 #include <sys/prctl.h>
@@ -116,7 +117,7 @@ static int test__keep_tracking(struct test_suite *test __maybe_unused, int subte
 	evlist__enable(evlist);
 
 	comm = "Test COMM 1";
-	CHECK__(prctl(PR_SET_NAME, (unsigned long)comm, 0, 0, 0));
+	CHECK__(prctl(PR_SET_NAME, (uintptr_t)comm, 0, 0, 0));
 
 	evlist__disable(evlist);
 
@@ -138,7 +139,7 @@ static int test__keep_tracking(struct test_suite *test __maybe_unused, int subte
 	CHECK__(evsel__disable(evsel));
 
 	comm = "Test COMM 2";
-	CHECK__(prctl(PR_SET_NAME, (unsigned long)comm, 0, 0, 0));
+	CHECK__(prctl(PR_SET_NAME, (uintptr_t)comm, 0, 0, 0));
 
 	evlist__disable(evlist);
 
