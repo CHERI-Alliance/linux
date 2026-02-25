@@ -2399,7 +2399,7 @@ int symbol__init(struct perf_env *env)
 	if (symbol_conf.initialized)
 		return 0;
 
-	symbol_conf.priv_size = PERF_ALIGN(symbol_conf.priv_size, sizeof(u64));
+	symbol_conf.priv_size = PERF_ALIGN(symbol_conf.priv_size, sizeof(void *) > sizeof(u64) ? sizeof(void *) : sizeof(u64));
 
 	symbol__elf_init();
 
