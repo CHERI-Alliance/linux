@@ -2,6 +2,7 @@
 #include <sys/time.h>
 #include <sys/prctl.h>
 #include <errno.h>
+#include <inttypes.h>
 #include <limits.h>
 #include <time.h>
 #include <stdlib.h>
@@ -489,7 +490,7 @@ static int test__switch_tracking(struct test_suite *test __maybe_unused, int sub
 	}
 
 	comm = "Test COMM 1";
-	err = prctl(PR_SET_NAME, (unsigned long)comm, 0, 0, 0);
+	err = prctl(PR_SET_NAME, (uintptr_t)comm, 0, 0, 0);
 	if (err) {
 		pr_debug("PR_SET_NAME failed!\n");
 		goto out_err;
@@ -502,7 +503,7 @@ static int test__switch_tracking(struct test_suite *test __maybe_unused, int sub
 	}
 
 	comm = "Test COMM 2";
-	err = prctl(PR_SET_NAME, (unsigned long)comm, 0, 0, 0);
+	err = prctl(PR_SET_NAME, (uintptr_t)comm, 0, 0, 0);
 	if (err) {
 		pr_debug("PR_SET_NAME failed!\n");
 		goto out_err;
@@ -515,7 +516,7 @@ static int test__switch_tracking(struct test_suite *test __maybe_unused, int sub
 	}
 
 	comm = "Test COMM 3";
-	err = prctl(PR_SET_NAME, (unsigned long)comm, 0, 0, 0);
+	err = prctl(PR_SET_NAME, (uintptr_t)comm, 0, 0, 0);
 	if (err) {
 		pr_debug("PR_SET_NAME failed!\n");
 		goto out_err;
@@ -528,7 +529,7 @@ static int test__switch_tracking(struct test_suite *test __maybe_unused, int sub
 	}
 
 	comm = "Test COMM 4";
-	err = prctl(PR_SET_NAME, (unsigned long)comm, 0, 0, 0);
+	err = prctl(PR_SET_NAME, (uintptr_t)comm, 0, 0, 0);
 	if (err) {
 		pr_debug("PR_SET_NAME failed!\n");
 		goto out_err;
