@@ -1163,7 +1163,6 @@ config PARAVIRT_TIME_ACCOUNTING
 config RELOCATABLE
 	bool "Build a relocatable kernel"
 	depends on !XIP_KERNEL
-	depends on !RISCV_CHERI
 	select MODULE_SECTIONS if MODULES
 	select ARCH_VMLINUX_NEEDS_RELOCS
 	help
@@ -1181,7 +1180,6 @@ config RANDOMIZE_BASE
         bool "Randomize the address of the kernel image"
         select RELOCATABLE
         depends on MMU && 64BIT && !XIP_KERNEL
-	depends on !RISCV_CHERI
         help
           Randomizes the virtual address at which the kernel image is
           loaded, as a security feature that deters exploit attempts

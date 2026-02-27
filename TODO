@@ -3,7 +3,6 @@ that do not work with CHERI for some reason.
 - Port PROT_CAP/PROT_NO_CAP for mmap and friends from CheriBSD
 - ptrace(): Deal with capability writes
 - CONFIG_ERRATA_SIFIVE_CIP_453
-- CONFIG_RELOCATABLE
 - CONFIG_RISCV_ISA_SUPM
 - SHADOW_CALL_STACK
 - RANDSTRUCT

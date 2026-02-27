@@ -100,6 +100,13 @@ static inline __init uintcap_t __build_cap(uintcap_t root, cheri_perms_t perms,
 	return cheri_perms_and(root, perms);
 }
 
+/* Determine if we can set tight bounds on code. */
+#if defined(__CHERI_CAPABILITY_TABLE__) && (__CHERI_CAPABILITY_TABLE__ > 3)
+#define CAPRELOC_TIGHT_BOUNDS   1
+#else
+#define CAPRELOC_TIGHT_BOUNDS   0
+#endif
+
 void __init __PI init_cap_relocs(uintcap_t inf)
 {
 	uintcap_t rw, ro, rx;
@@ -111,8 +118,13 @@ void __init __PI init_cap_relocs(uintcap_t inf)
 			 split, split);
 	ro = __build_cap(inf, CHERI_PERMS_READ, split, split);
 
-	cheri_init_globals_3((void * __capability)rw, (void * __capability)rx,
-			     (void * __capability)ro);
+	cheri_init_globals_impl(__start___cap_relocs,
+				__stop___cap_relocs,
+				(void * __capability)rw,
+				(void * __capability)rx,
+				(void * __capability)ro,
+				CAPRELOC_TIGHT_BOUNDS,
+				kernel_map.virt_offset);
 
 	kernel_data_cap = (void * __capability)rw;
 	kernel_code_cap = (void * __capability)rx;

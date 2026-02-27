@@ -334,7 +334,7 @@ static void __init setup_bootmem(void)
 #ifdef CONFIG_RELOCATABLE
 extern unsigned long __rela_dyn_start, __rela_dyn_end;
 
-static void __init relocate_kernel(void)
+static void __init __PI relocate_kernel(void)
 {
 	Elf_Rela *rela = (Elf_Rela *)&__rela_dyn_start;
 	/*
@@ -351,10 +351,10 @@ static void __init relocate_kernel(void)
 	for ( ; rela < (Elf_Rela *)&__rela_dyn_end; rela++) {
 		Elf_Addr addr = (rela->r_offset - va_kernel_link_pa_offset);
 		Elf_Addr relocated_addr = rela->r_addend;
+		Elf_Addr *paddr;
 
 		if (rela->r_info != R_RISCV_RELATIVE)
 			continue;
-
 		/*
 		 * Make sure to not relocate vdso symbols like rt_sigreturn
 		 * which are linked from the address 0 in vmlinux since
@@ -364,7 +364,8 @@ static void __init relocate_kernel(void)
 		if (relocated_addr >= KERNEL_LINK_ADDR)
 			relocated_addr += reloc_offset;
 
-		*(Elf_Addr *)addr = relocated_addr;
+		paddr = cheri_make_kernel_data_cap(addr, sizeof(Elf_Addr));
+		*paddr = relocated_addr;
 	}
 }
 #endif /* CONFIG_RELOCATABLE */
