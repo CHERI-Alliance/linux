@@ -157,6 +157,7 @@ static void check_stack(unsigned long ip, unsigned long *stack)
 	unsigned long this_size, flags; unsigned long *p, *top, *start;
 	static int tracer_frame;
 	int frame_size = READ_ONCE(tracer_frame);
+	int shadow_idx = 0;
 	int i, x;
 
 	this_size = ((unsigned long)stack) & (THREAD_SIZE-1);
@@ -231,7 +232,9 @@ static void check_stack(unsigned long ip, unsigned long *stack)
 			 * The READ_ONCE_NOCHECK is used to let KASAN know that
 			 * this is not a stack-out-of-bounds error.
 			 */
-			if ((READ_ONCE_NOCHECK(*p)) == stack_dump_trace[i]) {
+			if (stack_dump_trace[i] == ftrace_graph_ret_addr(current, &shadow_idx,
+									 (READ_ONCE_NOCHECK(*p)),
+									 NULL)) {
 				stack_dump_trace[x] = stack_dump_trace[i++];
 				this_size = stack_trace_index[x++] =
 					(top - p) * sizeof(unsigned long);
