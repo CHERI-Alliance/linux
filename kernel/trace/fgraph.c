@@ -988,7 +988,7 @@ unsigned long ftrace_graph_ret_addr(struct task_struct *task, int *idx,
 		 * reuses the return address on the stack and jump to the next function.
 		 * Thus we will continue to find real return address.
 		 */
-		if (ret_stack->retp == retp &&
+		if ((!retp || ret_stack->retp == retp) &&
 		    ret_stack->ret != return_handler) {
 			*idx = i;
 			return __c_ua(ret_stack->ret);
