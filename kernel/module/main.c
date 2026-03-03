@@ -1534,11 +1534,11 @@ static void derive_capability(struct module *me, const struct load_info *info,
 	if (syminfo->memtype == MOD_INVALID)
 		return;
 	if (mod_mem_type_is_text(syminfo->memtype))
-		syminfo->symval = (uintptr_t)cheri_sentry_create(
-				cheri_make_kernel_code_cap(sym->st_value));
+		syminfo->symval = (uintptr_t)cheri_make_kernel_code_cap(
+						sym->st_value);
 	else
-		syminfo->symval = (uintptr_t)cheri_make_kernel_data_cap(sym->st_value,
-									sym->st_size);
+		syminfo->symval = (uintptr_t)cheri_make_kernel_data_cap(
+						sym->st_value, sym->st_size);
 	syminfo->error = 0;
 }
 

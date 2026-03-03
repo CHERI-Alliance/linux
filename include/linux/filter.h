@@ -1157,8 +1157,8 @@ typedef uintptr_t (*__bpf_call_base_args_t)(uintptr_t r1, uintptr_t r2,
 					    const struct bpf_insn *);
 uintptr_t __bpf_call_base(uintptr_t r1, uintptr_t r2, uintptr_t r3, uintptr_t r4, uintptr_t r5);
 
-/* FIXCHERI: Maybe we can do better than cheri_make_kernel_code_cap here... */
-#define BPF_FUNC_CALL_BASE (cheri_make_kernel_code_cap(__c_pa(__bpf_call_base)))
+/* FIXCHERI: Maybe we can do better than cheri_address_set_kernel here... */
+#define BPF_FUNC_CALL_BASE ((void *)cheri_address_set_kernel(kernel_code_cap, __c_pa(__bpf_call_base)))
 #define BPF_FUNC_CALL(OFF) ((__bpf_call_base_t)BPF_FUNC_CALL_BASE + (OFF))
 #define BPF_FUNC_CALL_ARGS(OFF) ((__bpf_call_base_args_t)BPF_FUNC_CALL_BASE + (OFF))
 
