@@ -356,14 +356,14 @@ cheri_make_kernel_data_cap(ptraddr_t addr, size_t len)
 }
 
 /*
- * Create a capbility for kernel read-only data and/or code.
- * The capability is derived from kernel_code_cap and thus will
- * allow read/exec and (if used as a pcc) access to system registers.
+ * Create a capbility for kernel code. The capability is derived from
+ * kernel_code_cap and sealed. Once unsealed it allows read and execute
+ * but not write. Additionally, it grants access to system registers.
  */
 static __always_inline void *
 cheri_make_kernel_code_cap(ptraddr_t addr)
 {
-	return cheri_address_set(kernel_code_cap, addr);
+	return cheri_sentry_create(cheri_address_set(kernel_code_cap, addr));
 }
 
 static __maybe_unused void *
