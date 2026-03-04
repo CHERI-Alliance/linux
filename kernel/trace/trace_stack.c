@@ -50,7 +50,7 @@ static void print_max_stack(void)
 			size = stack_trace_index[i] - stack_trace_index[i+1];
 
 		pr_emerg("%3ld) %8d   %5d   %pS\n", i, stack_trace_index[i],
-				size, (void *)stack_dump_trace[i]);
+				size, __c_fakep(stack_dump_trace[i]));
 	}
 }
 
@@ -160,7 +160,9 @@ static void check_stack(unsigned long ip, unsigned long *stack)
 	int shadow_idx = 0;
 	int i, x;
 
-	this_size = ((unsigned long)stack) & (THREAD_SIZE-1);
+	stack = (unsigned long *)cheri_address_set(current->stack, __c_pa(stack));
+
+	this_size = (__c_pa(stack)) & (THREAD_SIZE-1);
 	this_size = THREAD_SIZE - this_size;
 	/* Remove the frame of the tracer */
 	this_size -= frame_size;
@@ -212,7 +214,7 @@ static void check_stack(unsigned long ip, unsigned long *stack)
 	x = 0;
 	start = stack;
 	top = (unsigned long *)
-		(((unsigned long)start & ~(THREAD_SIZE-1)) + THREAD_SIZE);
+		(((uintptr_t)start & ~(THREAD_SIZE-1)) + THREAD_SIZE);
 
 	/*
 	 * Loop through all the entries. One of the entries may
@@ -383,7 +385,7 @@ __next(struct seq_file *m, loff_t *pos)
 	if (n >= stack_trace_nr_entries)
 		return NULL;
 
-	m->private = (void *)n;
+	m->private = __c_fakep(n);
 	return &m->private;
 }
 
@@ -421,7 +423,7 @@ static void trace_lookup_stack(struct seq_file *m, long i)
 {
 	unsigned long addr = stack_dump_trace[i];
 
-	seq_printf(m, "%pS\n", (void *)addr);
+	seq_printf(m, "%pS\n", __c_fakep(addr));
 }
 
 static void print_disabled(struct seq_file *m)
