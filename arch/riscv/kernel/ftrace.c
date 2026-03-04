@@ -212,6 +212,21 @@ unsigned long ftrace_call_adjust(unsigned long addr)
 }
 #endif /* CONFIG_DYNAMIC_FTRACE */
 
+bool ftrace_bt_trampoline(uintptr_t sp, unsigned long *pc, uintptr_t *fp)
+{
+	unsigned long ftr_sz;
+
+	if (!kallsyms_lookup_size_offset(FTRACE_ADDR, &ftr_sz, NULL))
+		return false;
+
+	if (*pc < FTRACE_ADDR || *pc >= FTRACE_ADDR + ftr_sz)
+		return false;
+
+	*pc = __c_ua(arch_ftrace_regs(sp)->epc);
+	*fp = arch_ftrace_regs(sp)->s0;
+	return true;
+}
+
 #if defined(CONFIG_DYNAMIC_FTRACE_WITH_CALL_OPS) || \
 	defined(CONFIG_DYNAMIC_FTRACE_WITH_DIRECT_CALLS)
 int ftrace_modify_call(struct dyn_ftrace *rec, unsigned long old_addr,
