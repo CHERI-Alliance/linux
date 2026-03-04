@@ -1084,6 +1084,10 @@ static inline void __ftrace_enabled_restore(int enabled)
 # endif
 #endif
 
+#ifndef ftrace_bt_trampoline
+#define ftrace_bt_trampoline(sp, pc, fp) 0
+#endif
+
 #define CALLER_CAP0 (uintptr_t)ftrace_return_address0
 #define CALLER_ADDR0 ((unsigned long __force)CALLER_CAP0)
 #define CALLER_ADDR1 ((unsigned long __force)ftrace_return_address(1))

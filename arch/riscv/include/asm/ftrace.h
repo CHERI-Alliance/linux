@@ -226,6 +226,9 @@ void ftrace_graph_func(unsigned long ip, unsigned long parent_ip,
 		       struct ftrace_ops *op, struct ftrace_regs *fregs);
 #define ftrace_graph_func ftrace_graph_func
 
+bool ftrace_bt_trampoline(uintptr_t sp, unsigned long *pc, uintptr_t *fp);
+#define ftrace_bt_trampoline ftrace_bt_trampoline
+
 #ifdef CONFIG_DYNAMIC_FTRACE_WITH_DIRECT_CALLS
 static inline void arch_ftrace_set_direct_caller(struct ftrace_regs *fregs, uintptr_t addr)
 {
