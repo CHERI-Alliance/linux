@@ -12,6 +12,7 @@
 #include <linux/stacktrace.h>
 #include <linux/ftrace.h>
 
+#include <asm/ftrace.h>
 #include <asm/stacktrace.h>
 
 #ifdef CONFIG_FRAME_POINTER
@@ -89,8 +90,10 @@ void notrace walk_stackframe(struct task_struct *task, struct pt_regs *regs,
 			fp = READ_ONCE_TASK_STACK(task, frame->fp);
 			pc = __c_ua(READ_ONCE_TASK_STACK(task, frame->ra));
 			pc = ftrace_graph_ret_addr(current, &graph_idx, pc, NULL);
-			if (pc >= (unsigned long)handle_exception &&
-			    pc < (unsigned long)&ret_from_exception_end) {
+			if (ftrace_bt_trampoline(sp, &pc, &fp))
+			    continue;
+			if (pc >= __c_pa(handle_exception) &&
+			    pc < __c_pa(&ret_from_exception_end)) {
 				if (unlikely(!fn(arg, pc)))
 					break;
 
