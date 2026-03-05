@@ -9,13 +9,25 @@
 /*
  * Template for the efficient ZBB based implementation
  * of string copy functions:
- * strcpy(), strncpy()
+ * strcpy(), strncpy(), stpcpy(), stpncpy()
  *
  * Template arguments:
  * - FUNCNAME: The name of the function to implement.
  * - LIMITREG: If defined the register that contains the maximum
  *       number of bytes to look at. If not defined only the NUL
  *       byte terminates the loop.
+ * - RETEND: If defined return a pointer to the end of the string,
+ *       i.e. a pointer to the terminating NUL byte (if any) or
+ *       one byte after the end of the buffer. Otherwise the
+ *       return value points to the start of the original buffer.
+ * - ZEROPAD: If defined LIMITREG must be defined as well and the
+ *       remainder of the buffer is padded with zeros (even after
+ *       the first NUL byte. This is the required behaviour for
+ *       strncpy() and stpncpy().
+ *
+ * Stack usage:
+ * If ZEROPAD is defined the function must be called with a valid
+ * stack.
  *
  * Result:
  * The template implements the entire function. If a limit is given
@@ -25,6 +37,10 @@
  * Registers:
  * All temporary and all argument registers may be clobbered.
  */
+
+#if defined(ZEROPAD) && !defined(LIMITREG)
+#error "Cannot ZEROPAD without LIMITREG"
+#endif
 
 #if defined(CONFIG_CHERI_KERNEL) || defined(LIMITREG)
 #define HAS_WORDLOOP_LIMIT	1
@@ -112,6 +128,19 @@ SYM_FUNC_START(FUNCNAME)
 	 * original value of a0 when done.
 	 */
 	mv		CREG(t0), CREG(a0)
+
+#if defined(ZEROPAD)
+	/*
+	 * We will call memset and thus must save the origin return
+	 * address. If RETEND is not defined we must also save the
+	 * original value of ca0 because we need that as the return value.
+	 */
+	CINSN(addi)	CREG(sp), CREG(sp), -2*CSZREG
+#ifndef RETEND
+	CREG_S		CREG(a0), (CREG(sp))
+#endif
+	CREG_S		CREG(ra), CSZREG(CREG(sp))
+#endif
 
 #ifdef LIMITREG
 	/*
@@ -297,8 +326,34 @@ SYM_FUNC_START(FUNCNAME)
 	byte_loop	HAS_BYTELOOP_LIMIT, t2
 
 .Ldone:
-#ifdef RETEND
+#if defined(ZEROPAD) || defined(RETEND)
 	mv		CREG(a0), CREG(t0)
+#endif
+
+#if defined(ZEROPAD)
+	/*
+	 * Call memset. a0 is already set. Assume that we can do a
+	 * relative call to memset here. This is required for the __pi
+	 * version, too.
+	 */
+	sub		a2, t2, a0
+	beqz		a2, .Lpad_done
+	mv		a1, x0
+	call		memset
+.Lpad_done:
+#endif	/* ZEROPAD */
+
+#if defined(ZEROPAD)
+	/*
+	 * Restore original value of ca0 as the return value if globbered
+	 * by memset. For the RETEND version, the return value of
+	 * memset is the correct return value of this function, too.
+	 */
+	CREG_L		CREG(ra), CSZREG(CREG(sp))
+#ifndef RETEND
+	CREG_L		CREG(a0), (CREG(sp))
+#endif
+	CINSN(addi)	CREG(sp), CREG(sp), 2*CSZREG
 #endif
 	ret
 
