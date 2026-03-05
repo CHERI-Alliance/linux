@@ -423,15 +423,19 @@ static void string_test_strcmp_stress(struct kunit *test)
 static void string_test_strcpy_validate(struct kunit *test,
 					char *buf, size_t buflen,
 					const char *ref, size_t reflen,
-					size_t off)
+					size_t padlen, size_t off)
 {
-	size_t tail = min_t(size_t, buflen - off - reflen, 32);
+	size_t tail = min_t(size_t, buflen - off - reflen - padlen, 32);
 	char diff = 0;
 
 	while (off--)
 		diff |= (*buf++) ^ '.';
 	while (reflen--) {
 		diff |= (*buf) ^ (*ref++);
+		*buf++ = '.';
+	}
+	while (padlen--) {
+		diff |= (*buf);
 		*buf++ = '.';
 	}
 	while (tail--)
@@ -453,17 +457,25 @@ static void string_test_strcpy_test_one(struct kunit *test, char *buf,
 
 	memset(dst, '.', sizeof(dst));
 
-#define V(LEN)	string_test_strcpy_validate(test, dst, sizeof(dst),	\
-					    buf, (LEN), dstoff)
+#define V(LEN) \
+	string_test_strcpy_validate(test, dst, sizeof(dst),	\
+				    buf, (LEN), 0, dstoff)
+#define V2(LEN, PADLEN) \
+	string_test_strcpy_validate(test, dst, sizeof(dst),	\
+				    buf, (LEN), (PADLEN), dstoff)
 	for (dstoff = 8; dstoff <= 16; dstoff++) {
 		void * dstp = dst + dstoff;
 		void * dstp1 = cheri_bounds_set(dstp, len);
 		void * ret;
 
-		strcpy(dstp,  buf);  V(len);
-		strcpy(dstp,  buf);  V(len);
-		strcpy(dstp1, buf1); V(len);
-		strcpy(dstp1, buf1); V(len);
+		ret = strcpy(dstp,  buf);  V(len);
+		KUNIT_ASSERT_EQ(test, __c_pa(ret), __c_pa(dstp));
+		ret = strcpy(dstp,  buf);  V(len);
+		KUNIT_ASSERT_EQ(test, __c_pa(ret), __c_pa(dstp));
+		ret = strcpy(dstp1, buf1); V(len);
+		KUNIT_ASSERT_EQ(test, __c_pa(ret), __c_pa(dstp1));
+		ret = strcpy(dstp1, buf1); V(len);
+		KUNIT_ASSERT_EQ(test, __c_pa(ret), __c_pa(dstp1));
 
 		ret = stpcpy(dstp,  buf);  V(len);
 		KUNIT_ASSERT_EQ(test, (unsigned long)(ret - dstp), len - 1);
@@ -479,20 +491,29 @@ static void string_test_strcpy_test_one(struct kunit *test, char *buf,
 			void *dstp2 = cheri_bounds_set(dstp, maxlen);
 			size_t len2 = min_t(size_t, len, maxlen);
 
-			strncpy(dstp,  buf,  maxlen); V(len2);
-			strncpy(dstp,  buf1, maxlen); V(len2);
-			strncpy(dstp,  buf2, maxlen); V(len2);
+			ret = strncpy(dstp,  buf,  maxlen);
+			KUNIT_ASSERT_EQ(test, __c_pa(ret), __c_pa(dstp));
+			V2(len2, maxlen - len2);
+			ret = strncpy(dstp,  buf1, maxlen);
+			KUNIT_ASSERT_EQ(test, __c_pa(ret), __c_pa(dstp));
+			V2(len2, maxlen - len2);
+			ret = strncpy(dstp,  buf2, maxlen);
+			KUNIT_ASSERT_EQ(test, __c_pa(ret), __c_pa(dstp));
+			V2(len2, maxlen - len2);
 
-			strncpy(dstp1, buf,  maxlen); V(len2);
-			strncpy(dstp1, buf1, maxlen); V(len2);
-			strncpy(dstp1, buf2, maxlen); V(len2);
-
-			strncpy(dstp2, buf,  maxlen); V(len2);
-			strncpy(dstp2, buf1, maxlen); V(len2);
-			strncpy(dstp2, buf2, maxlen); V(len2);
+			ret = strncpy(dstp2, buf,  maxlen);
+			KUNIT_ASSERT_EQ(test, __c_pa(ret), __c_pa(dstp2));
+			V2(len2, maxlen - len2);
+			ret = strncpy(dstp2, buf1, maxlen);
+			KUNIT_ASSERT_EQ(test, __c_pa(ret), __c_pa(dstp2));
+			V2(len2, maxlen - len2);
+			ret = strncpy(dstp2, buf2, maxlen);
+			KUNIT_ASSERT_EQ(test, __c_pa(ret), __c_pa(dstp2));
+			V2(len2, maxlen - len2);
 		}
 	}
 #undef V
+#undef V2
 }
 
 /* Uses the same pattern generation for the source as strlen(). */
