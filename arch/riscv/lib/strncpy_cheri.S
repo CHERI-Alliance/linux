@@ -2,5 +2,6 @@
 
 #define FUNCNAME	strncpy
 #define LIMITREG	a2
+#define ZEROPAD
 
 #include "strcpy_template.h"
