@@ -59,7 +59,11 @@
 	 */
 	srli	a1, a2, 6
 	slli	a1, a1, 3
+#ifdef CONFIG_CHERI_KERNEL
+	lgc	ca0, new_vmalloc
+#else
 	la	a0, new_vmalloc
+#endif
 	add	CREG(a0), CREG(a0), a1
 	/*
 	 * Compute the bit position in the new_vmalloc element:
