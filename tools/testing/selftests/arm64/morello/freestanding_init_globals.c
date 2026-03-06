@@ -38,6 +38,9 @@
 #ifndef R_MORELLO_RELATIVE
 #define R_MORELLO_RELATIVE		59395
 #endif
+#ifndef R_MORELLO_FUNC_RELATIVE
+#define R_MORELLO_FUNC_RELATIVE		59400
+#endif
 
 struct cap_reloc {
 	size_t capability_location;
@@ -181,7 +184,8 @@ void __morello_process_dynamic_relocs(void *auxv)
 	for (reloc = rela_dyn_start; reloc < rela_dyn_end; ++reloc) {
 		uintptr_t *reloc_addr, value;
 
-		if (reloc->r_info != R_MORELLO_RELATIVE)
+		if (reloc->r_info != R_MORELLO_RELATIVE &&
+		    reloc->r_info != R_MORELLO_FUNC_RELATIVE)
 			continue;
 		reloc_addr = (uintptr_t *)cheri_address_set(cap_rw, reloc->r_offset);
 		value = morello_relative(0, cap_rx, cap_rw, reloc, reloc_addr);
