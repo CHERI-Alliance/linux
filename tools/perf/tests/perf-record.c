@@ -335,11 +335,11 @@ found_exit:
 	if (!found_libc_mmap) {
 		pr_debug("PERF_RECORD_MMAP for %s missing!\n", "libc");
 		++errs;
-	}
 
-	if (!found_ld_mmap) {
-		pr_debug("PERF_RECORD_MMAP for %s missing!\n", "ld");
-		++errs;
+		if (!found_ld_mmap) {
+			pr_debug("PERF_RECORD_MMAP for %s missing!\n", "ld");
+			++errs;
+		}
 	}
 
 	if (!found_vdso_mmap) {
