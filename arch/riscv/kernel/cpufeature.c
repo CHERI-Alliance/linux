@@ -493,6 +493,7 @@ const struct riscv_isa_ext_data riscv_isa_ext[] = {
 	__RISCV_ISA_EXT_DATA(zbs, RISCV_ISA_EXT_ZBS),
 	__RISCV_ISA_EXT_SUPERSET(zcherihybrid, RISCV_ISA_EXT_ZCHERIHYBRID, riscv_xlinuxenvcfg_exts),
 	__RISCV_ISA_EXT_DATA(zcheripte, RISCV_ISA_EXT_ZCHERIPTE),
+	__RISCV_ISA_EXT_DATA(zcherilevels, RISCV_ISA_EXT_ZCHERILEVELS),
 	__RISCV_ISA_EXT_SUPERSET(zcheripurecap, RISCV_ISA_EXT_ZCHERIPURECAP, riscv_xlinuxenvcfg_exts),
 	__RISCV_ISA_EXT_BUNDLE(zk, riscv_zk_bundled_exts),
 	__RISCV_ISA_EXT_BUNDLE(zkn, riscv_zkn_bundled_exts),
