@@ -9,7 +9,11 @@ typedef unsigned short __kernel_old_gid_t;
 #if __has_feature(capabilities)
 typedef __uintcap_t __kernel_uintcap_t;
 #else
+#if __SIZEOF_POINTER__ == 8
 typedef __uint128_t __kernel_uintcap_t;
+#else
+typedef unsigned long long __kernel_uintcap_t;
+#endif
 #endif
 
 #include <asm-generic/posix_types.h>
