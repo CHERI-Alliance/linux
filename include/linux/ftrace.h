@@ -1216,6 +1216,8 @@ struct ftrace_ret_stack {
 	uintptr_t *retp;
 };
 
+#define RET_STACK_WORD_SIZE	sizeof(typeof(*current->ret_stack))
+
 /*
  * Primary handler of a function return.
  * It relays on ftrace_return_to_handler.

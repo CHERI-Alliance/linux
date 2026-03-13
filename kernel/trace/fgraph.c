@@ -137,7 +137,7 @@ enum {
 #define FGRAPH_DATA_BITS	5
 #define FGRAPH_DATA_MASK	GENMASK(FGRAPH_DATA_BITS - 1, 0)
 #define FGRAPH_DATA_SHIFT	(FGRAPH_TYPE_SHIFT + FGRAPH_TYPE_BITS)
-#define FGRAPH_MAX_DATA_SIZE (sizeof(long) * (1 << FGRAPH_DATA_BITS))
+#define FGRAPH_MAX_DATA_SIZE (RET_STACK_WORD_SIZE * (1 << FGRAPH_DATA_BITS))
 
 #define FGRAPH_DATA_INDEX_BITS	4
 #define FGRAPH_DATA_INDEX_MASK	GENMASK(FGRAPH_DATA_INDEX_BITS - 1, 0)
@@ -353,8 +353,8 @@ void *fgraph_reserve_data(int idx, int size_bytes)
 	if (size_bytes > FGRAPH_MAX_DATA_SIZE)
 		return NULL;
 
-	/* Convert the data size to number of longs. */
-	data_size = DIV_ROUND_UP(size_bytes, sizeof(long));
+	/* Convert the data size to number of stack words. */
+	data_size = DIV_ROUND_UP(size_bytes, RET_STACK_WORD_SIZE);
 
 	val = get_fgraph_entry(current, curr_ret_stack - 1);
 	data = &current->ret_stack[curr_ret_stack];
@@ -494,7 +494,7 @@ void *fgraph_retrieve_parent_data(int idx, int *size_bytes, int depth)
 	return NULL;
 found:
 	if (size_bytes)
-		*size_bytes = __get_data_size(val) * sizeof(long);
+		*size_bytes = __get_data_size(val) * RET_STACK_WORD_SIZE;
 	return get_data_type_data(current, offset);
 }
 
@@ -573,7 +573,7 @@ ftrace_push_return_trace(uintptr_t ret, unsigned long func,
 	if (!current->ret_stack)
 		return -EBUSY;
 
-	BUILD_BUG_ON(SHADOW_STACK_SIZE % sizeof(long));
+	BUILD_BUG_ON(SHADOW_STACK_SIZE % RET_STACK_WORD_SIZE);
 
 	/* Set val to "reserved" with the delta to the new fgraph frame */
 	val = (FGRAPH_TYPE_RESERVED << FGRAPH_TYPE_SHIFT) | FGRAPH_FRAME_OFFSET;
