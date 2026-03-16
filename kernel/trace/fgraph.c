@@ -354,7 +354,7 @@ void *fgraph_reserve_data(int idx, int size_bytes)
 		return NULL;
 
 	/* Convert the data size to number of longs. */
-	data_size = (size_bytes + sizeof(long) - 1) >> (sizeof(long) == 4 ? 2 : 3);
+	data_size = DIV_ROUND_UP(size_bytes, sizeof(long));
 
 	val = get_fgraph_entry(current, curr_ret_stack - 1);
 	data = &current->ret_stack[curr_ret_stack];
