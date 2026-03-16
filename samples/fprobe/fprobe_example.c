@@ -57,9 +57,9 @@ static int sample_entry_handler(struct fprobe *fp, unsigned long ip,
 		 * This is just an example, no kernel code should call
 		 * trace_printk() except when actively debugging.
 		 */
-		trace_printk("Enter <%pS> ip = 0x%p\n", (void *)ip, (void *)ip);
+		trace_printk("Enter <%pS> ip = 0x%p\n", __c_fakep(ip), __c_fakep(ip));
 	else
-		pr_info("Enter <%pS> ip = 0x%p\n", (void *)ip, (void *)ip);
+		pr_info("Enter <%pS> ip = 0x%p\n", __c_fakep(ip), __c_fakep(ip));
 	nhit++;
 	if (stackdump)
 		show_backtrace();
@@ -78,10 +78,10 @@ static void sample_exit_handler(struct fprobe *fp, unsigned long ip,
 		 * trace_printk() except when actively debugging.
 		 */
 		trace_printk("Return from <%pS> ip = 0x%p to rip = 0x%p (%pS)\n",
-			(void *)ip, (void *)ip, (void *)rip, (void *)rip);
+			__c_fakep(ip), __c_fakep(ip), __c_fakep(rip), __c_fakep(rip));
 	else
 		pr_info("Return from <%pS> ip = 0x%p to rip = 0x%p (%pS)\n",
-			(void *)ip, (void *)ip, (void *)rip, (void *)rip);
+			__c_fakep(ip), __c_fakep(ip), __c_fakep(rip), __c_fakep(rip));
 	nhit++;
 	if (stackdump)
 		show_backtrace();
