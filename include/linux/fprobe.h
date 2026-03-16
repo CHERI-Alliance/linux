@@ -147,9 +147,9 @@ static inline void enable_fprobe(struct fprobe *fp)
 		fp->flags &= ~FPROBE_FL_DISABLED;
 }
 
-/* The entry data size is 4 bits (=16) * sizeof(long) in maximum */
+/* The entry data size is 4 bits (=16) * <return stack's word size> in maximum */
 #define FPROBE_DATA_SIZE_BITS		4
 #define MAX_FPROBE_DATA_SIZE_WORD	((1L << FPROBE_DATA_SIZE_BITS) - 1)
-#define MAX_FPROBE_DATA_SIZE		(MAX_FPROBE_DATA_SIZE_WORD * sizeof(long))
+#define MAX_FPROBE_DATA_SIZE		(MAX_FPROBE_DATA_SIZE_WORD * RET_STACK_WORD_SIZE)
 
 #endif
