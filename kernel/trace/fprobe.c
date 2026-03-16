@@ -22,8 +22,7 @@
 
 #define FPROBE_HASH_BITS 6
 #define FPROBE_TABLE_SIZE (1 << FPROBE_HASH_BITS)
-
-#define SIZE_IN_LONG(x) ((x + sizeof(long) - 1) >> (sizeof(long) == 8 ? 3 : 2))
+#define SIZE_IN_LONG(x) DIV_ROUND_UP(x, sizeof(long))
 
 /*
  * fprobe_table: hold 'fprobe_hlist::hlist' for checking the fprobe still
