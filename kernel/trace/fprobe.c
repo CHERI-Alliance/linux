@@ -22,7 +22,7 @@
 
 #define FPROBE_HASH_BITS 6
 #define FPROBE_TABLE_SIZE (1 << FPROBE_HASH_BITS)
-#define SIZE_IN_LONG(x) DIV_ROUND_UP(x, sizeof(long))
+#define SIZE_IN_LONG(x) DIV_ROUND_UP(x, RET_STACK_WORD_SIZE)
 
 /*
  * fprobe_table: hold 'fprobe_hlist::hlist' for checking the fprobe still
@@ -55,7 +55,7 @@ static struct fprobe_hlist_node *find_first_fprobe_node(unsigned long ip)
 	struct fprobe_hlist_node *node;
 	struct hlist_head *head;
 
-	head = &fprobe_ip_table[hash_ptr((void *)ip, FPROBE_IP_HASH_BITS)];
+	head = &fprobe_ip_table[hash_ptr(__c_fakep(ip), FPROBE_IP_HASH_BITS)];
 	hlist_for_each_entry_rcu(node, head, hlist,
 				 lockdep_is_held(&fprobe_mutex)) {
 		if (node->addr == ip)
@@ -79,7 +79,7 @@ static void insert_fprobe_node(struct fprobe_hlist_node *node)
 		hlist_add_before_rcu(&node->hlist, &next->hlist);
 		return;
 	}
-	head = &fprobe_ip_table[hash_ptr((void *)ip, FPROBE_IP_HASH_BITS)];
+	head = &fprobe_ip_table[hash_ptr(__c_fakep(ip), FPROBE_IP_HASH_BITS)];
 	hlist_add_head_rcu(&node->hlist, head);
 }
 
@@ -152,7 +152,7 @@ static int del_fprobe_hash(struct fprobe *fp)
 /* The arch should encode fprobe_header info into one unsigned long */
 #define FPROBE_HEADER_SIZE_IN_LONG	1
 
-static inline bool write_fprobe_header(unsigned long *stack,
+static inline bool write_fprobe_header(uintptr_t *stack,
 					struct fprobe *fp, unsigned int size_words)
 {
 	if (WARN_ON_ONCE(size_words > MAX_FPROBE_DATA_SIZE_WORD ||
@@ -163,7 +163,7 @@ static inline bool write_fprobe_header(unsigned long *stack,
 	return true;
 }
 
-static inline void read_fprobe_header(unsigned long *stack,
+static inline void read_fprobe_header(uintptr_t *stack,
 					struct fprobe **fp, unsigned int *size_words)
 {
 	*fp = arch_decode_fprobe_header_fp(*stack);
@@ -176,11 +176,11 @@ static inline void read_fprobe_header(unsigned long *stack,
 struct __fprobe_header {
 	struct fprobe *fp;
 	unsigned long size_words;
-} __packed;
+} __packed_if_not_cheri;
 
 #define FPROBE_HEADER_SIZE_IN_LONG	SIZE_IN_LONG(sizeof(struct __fprobe_header))
 
-static inline bool write_fprobe_header(unsigned long *stack,
+static inline bool write_fprobe_header(uintptr_t *stack,
 					struct fprobe *fp, unsigned int size_words)
 {
 	struct __fprobe_header *fph = (struct __fprobe_header *)stack;
@@ -193,7 +193,7 @@ static inline bool write_fprobe_header(unsigned long *stack,
 	return true;
 }
 
-static inline void read_fprobe_header(unsigned long *stack,
+static inline void read_fprobe_header(uintptr_t *stack,
 					struct fprobe **fp, unsigned int *size_words)
 {
 	struct __fprobe_header *fph = (struct __fprobe_header *)stack;
@@ -213,7 +213,7 @@ static inline void read_fprobe_header(unsigned long *stack,
  * the shadow stack with its entry data size.
  *
  */
-static inline int __fprobe_handler(unsigned long ip, unsigned long parent_ip,
+static inline int __fprobe_handler(unsigned long ip, uintptr_t parent_ip,
 				   struct fprobe *fp, struct ftrace_regs *fregs,
 				   void *data)
 {
@@ -223,7 +223,7 @@ static inline int __fprobe_handler(unsigned long ip, unsigned long parent_ip,
 	return fp->entry_handler(fp, ip, parent_ip, fregs, data);
 }
 
-static inline int __fprobe_kprobe_handler(unsigned long ip, unsigned long parent_ip,
+static inline int __fprobe_kprobe_handler(unsigned long ip, uintptr_t parent_ip,
 					  struct fprobe *fp, struct ftrace_regs *fregs,
 					  void *data)
 {
@@ -249,9 +249,9 @@ static int fprobe_entry(struct ftrace_graph_ent *trace, struct fgraph_ops *gops,
 			struct ftrace_regs *fregs)
 {
 	struct fprobe_hlist_node *node, *first;
-	unsigned long *fgraph_data = NULL;
+	uintptr_t *fgraph_data = NULL;
 	unsigned long func = trace->func;
-	unsigned long ret_ip;
+	uintptr_t ret_ip;
 	int reserved_words;
 	struct fprobe *fp;
 	int used, ret;
@@ -279,7 +279,7 @@ static int fprobe_entry(struct ftrace_graph_ent *trace, struct fgraph_ops *gops,
 	}
 	node = first;
 	if (reserved_words) {
-		fgraph_data = fgraph_reserve_data(gops->idx, reserved_words * sizeof(long));
+		fgraph_data = fgraph_reserve_data(gops->idx, reserved_words * RET_STACK_WORD_SIZE);
 		if (unlikely(!fgraph_data)) {
 			hlist_for_each_entry_from_rcu(node, hlist) {
 				if (node->addr != func)
@@ -337,13 +337,13 @@ static void fprobe_return(struct ftrace_graph_ret *trace,
 			  struct fgraph_ops *gops,
 			  struct ftrace_regs *fregs)
 {
-	unsigned long *fgraph_data = NULL;
-	unsigned long ret_ip;
+	uintptr_t *fgraph_data = NULL;
+	uintptr_t ret_ip;
 	struct fprobe *fp;
 	int size, curr;
 	int size_words;
 
-	fgraph_data = (unsigned long *)fgraph_retrieve_data(gops->idx, &size);
+	fgraph_data = (uintptr_t *)fgraph_retrieve_data(gops->idx, &size);
 	if (WARN_ON_ONCE(!fgraph_data))
 		return;
 	size_words = SIZE_IN_LONG(size);
@@ -618,7 +618,7 @@ static int fprobe_init(struct fprobe *fp, unsigned long *addrs, int num)
 	if (!fp || !addrs || num <= 0)
 		return -EINVAL;
 
-	size = ALIGN(fp->entry_data_size, sizeof(long));
+	size = ALIGN(fp->entry_data_size, RET_STACK_WORD_SIZE);
 	if (size > MAX_FPROBE_DATA_SIZE)
 		return -E2BIG;
 	fp->entry_data_size = size;
