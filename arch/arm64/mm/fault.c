@@ -802,8 +802,8 @@ static int do_alignment_fault(unsigned long far, unsigned long esr,
 	return 0;
 }
 
-static int do_cap_fault(unsigned long far, unsigned long esr,
-			struct pt_regs *regs)
+static int __maybe_unused do_cap_fault(unsigned long far, unsigned long esr,
+				       struct pt_regs *regs)
 {
 	do_bad_area(far, esr, regs);
 	return 0;
