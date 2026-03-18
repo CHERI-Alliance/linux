@@ -176,3 +176,29 @@ checkpatch-mr:
     echo ./scripts/checkpatch.pl "${CHECKPATCH_ARGS[@]}"
     ./scripts/checkpatch.pl \
     	"${CHECKPATCH_ARGS[@]}"
+
+yci-mr:
+  stage: build
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_LABELS =~ /\byci\b/
+  variables:
+    TRIGGER_ONLY_CI: "true"
+    YCI_EXTRA_LOCAL_CONF: |
+      CODASIP_GIT_LINUX_HOBGOBLIN_REPO = "${CI_SERVER_HOST}/${CI_PROJECT_PATH}"
+      CODASIP_GIT_LINUX_HOBGOBLIN_BRANCH = "refs/merge-requests/${CI_MERGE_REQUEST_IID}/merge;nobranch=1"
+  trigger:
+    project: cheri/software/cherilinux/yocto/yocto-ci
+    strategy: depend
+
+yci-default-branch:
+  stage: build
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  variables:
+    TRIGGER_ONLY_CI: "true"
+    YCI_EXTRA_LOCAL_CONF: |
+      CODASIP_GIT_LINUX_HOBGOBLIN_REPO = "${CI_SERVER_HOST}/${CI_PROJECT_PATH}"
+      CODASIP_GIT_LINUX_HOBGOBLIN_BRANCH = "${CI_COMMIT_BRANCH}"
+  trigger:
+    project: cheri/software/cherilinux/yocto/yocto-ci
+    strategy: depend
