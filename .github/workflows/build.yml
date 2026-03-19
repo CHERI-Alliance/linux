@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - codasip-cheri-riscv
+      - codasip-*
   pull_request:
 
 permissions:
