@@ -1444,7 +1444,7 @@ retry:
 		val = regs_get_kernel_argument(regs, code->param);
 		break;
 	case FETCH_OP_EDATA:
-		val = *(unsigned long *)((unsigned long)edata + code->offset);
+		val = *(unsigned long *)((char *)edata + code->offset);
 		break;
 #endif
 	case FETCH_NOP_SYMBOL:	/* Ignore a place holder */

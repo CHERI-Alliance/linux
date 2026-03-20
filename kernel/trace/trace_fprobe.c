@@ -299,7 +299,7 @@ retry:
 		val = ftrace_regs_get_argument(fregs, code->param);
 		break;
 	case FETCH_OP_EDATA:
-		val = *(unsigned long *)((unsigned long)edata + code->offset);
+		val = *(unsigned long *)((char *)edata + code->offset);
 		break;
 #endif
 	case FETCH_NOP_SYMBOL:	/* Ignore a place holder */
@@ -377,7 +377,7 @@ void store_fprobe_entry_data(void *edata, struct trace_probe *tp, struct ftrace_
 			val = ftrace_regs_get_argument(fregs, code->param);
 			break;
 		case FETCH_OP_ST_EDATA:
-			*(unsigned long *)((unsigned long)edata + code->offset) = val;
+			*(unsigned long *)((char *)edata + code->offset) = val;
 			break;
 		case FETCH_OP_END:
 			goto end;
