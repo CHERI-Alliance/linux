@@ -10,6 +10,7 @@
 #include <linux/kprobes.h>
 #include <linux/list.h>
 #include <linux/mutex.h>
+#include <linux/cheri.h>
 #include <linux/slab.h>
 #include <linux/sort.h>
 
@@ -56,7 +57,7 @@ static struct fprobe_hlist_node *find_first_fprobe_node(unsigned long ip)
 	struct fprobe_hlist_node *node;
 	struct hlist_head *head;
 
-	head = &fprobe_ip_table[hash_ptr((void *)ip, FPROBE_IP_HASH_BITS)];
+	head = &fprobe_ip_table[hash_ptr(__c_fakep(ip), FPROBE_IP_HASH_BITS)];
 	hlist_for_each_entry_rcu(node, head, hlist,
 				 lockdep_is_held(&fprobe_mutex)) {
 		if (node->addr == ip)
@@ -80,7 +81,7 @@ static void insert_fprobe_node(struct fprobe_hlist_node *node)
 		hlist_add_before_rcu(&node->hlist, &next->hlist);
 		return;
 	}
-	head = &fprobe_ip_table[hash_ptr((void *)ip, FPROBE_IP_HASH_BITS)];
+	head = &fprobe_ip_table[hash_ptr(__c_fakep(ip), FPROBE_IP_HASH_BITS)];
 	hlist_add_head_rcu(&node->hlist, head);
 }
 
