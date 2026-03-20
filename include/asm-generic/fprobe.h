@@ -7,10 +7,13 @@
 
 #include <linux/bits.h>
 
-#ifdef CONFIG_64BIT
+#if defined(CONFIG_64BIT) && !defined(__CHERI__)
 /*
  * Encoding the size and the address of fprobe into one 64bit entry.
  * The 32bit architectures should use 2 entries to store those info.
+ * CHERI capabilities don't survive the encode/decode round-trip through
+ * unsigned long bitmask operations, so use 2-entries encoding for CHERI as
+ * well.
  */
 
 #define ARCH_DEFINE_ENCODE_FPROBE_HEADER
