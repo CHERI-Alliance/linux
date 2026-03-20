@@ -279,7 +279,7 @@ process_fetch_insn(struct fetch_insn *code, void *rec, void *edata,
 		   void *dest, void *base)
 {
 	struct ftrace_regs *fregs = rec;
-	unsigned long val;
+	uintptr_t val;
 	int ret;
 
 retry:
@@ -363,7 +363,7 @@ static nokprobe_inline
 void store_fprobe_entry_data(void *edata, struct trace_probe *tp, struct ftrace_regs *fregs)
 {
 	struct probe_entry_arg *earg = tp->entry_arg;
-	unsigned long val = 0;
+	uintptr_t val = 0;
 	int i;
 
 	if (!earg)

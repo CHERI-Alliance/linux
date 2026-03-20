@@ -10,7 +10,7 @@
  */
 /* Return the length of string -- including null terminal byte */
 static nokprobe_inline int
-fetch_store_strlen_user(unsigned long addr)
+fetch_store_strlen_user(uintptr_t addr)
 {
 	const void __user *uaddr =  (__force const void __user *)addr;
 
@@ -19,7 +19,7 @@ fetch_store_strlen_user(unsigned long addr)
 
 /* Return the length of string -- including null terminal byte */
 static nokprobe_inline int
-fetch_store_strlen(unsigned long addr)
+fetch_store_strlen(uintptr_t addr)
 {
 	int ret, len = 0;
 	u8 c;
@@ -49,7 +49,7 @@ static nokprobe_inline void set_data_loc(int ret, void *dest, void *__dest, void
  * with max length and relative data location.
  */
 static nokprobe_inline int
-fetch_store_string_user(unsigned long addr, void *dest, void *base)
+fetch_store_string_user(uintptr_t addr, void *dest, void *base)
 {
 	const void __user *uaddr =  (__force const void __user *)addr;
 	int maxlen = get_loc_len(*(u32 *)dest);
@@ -72,7 +72,7 @@ fetch_store_string_user(unsigned long addr, void *dest, void *base)
  * length and relative data location.
  */
 static nokprobe_inline int
-fetch_store_string(unsigned long addr, void *dest, void *base)
+fetch_store_string(uintptr_t addr, void *dest, void *base)
 {
 	int maxlen = get_loc_len(*(u32 *)dest);
 	void *__dest;

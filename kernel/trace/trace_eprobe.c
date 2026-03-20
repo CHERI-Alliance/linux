@@ -367,7 +367,7 @@ static int get_eprobe_size(struct trace_probe *tp, void *rec)
 	for (i = 0; i < tp->nr_args; i++) {
 		arg = tp->args + i;
 		if (arg->dynamic) {
-			unsigned long val;
+			uintptr_t val;
 
 			code = arg->code;
  retry:
@@ -399,7 +399,7 @@ static int
 process_fetch_insn(struct fetch_insn *code, void *rec, void *edata,
 		   void *dest, void *base)
 {
-	unsigned long val;
+	uintptr_t val;
 	int ret;
 
  retry:

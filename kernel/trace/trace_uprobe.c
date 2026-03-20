@@ -220,7 +220,7 @@ process_fetch_insn(struct fetch_insn *code, void *rec, void *edata,
 		   void *dest, void *base)
 {
 	struct pt_regs *regs = rec;
-	unsigned long val;
+	uintptr_t val;
 	int ret;
 
 	/* 1st stage: get value from context */

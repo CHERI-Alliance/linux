@@ -909,7 +909,7 @@ int traceprobe_get_entry_data_size(struct trace_probe *tp)
 void store_trace_entry_data(void *edata, struct trace_probe *tp, struct pt_regs *regs)
 {
 	struct probe_entry_arg *earg = tp->entry_arg;
-	unsigned long val = 0;
+	uintptr_t val = 0;
 	int i;
 
 	if (!earg)

@@ -56,12 +56,12 @@ fetch_apply_bitfield(struct fetch_insn *code, void *buf)
 static int
 process_fetch_insn(struct fetch_insn *code, void *rec, void *edata,
 		   void *dest, void *base);
-static nokprobe_inline int fetch_store_strlen(unsigned long addr);
+static nokprobe_inline int fetch_store_strlen(uintptr_t addr);
 static nokprobe_inline int
-fetch_store_string(unsigned long addr, void *dest, void *base);
-static nokprobe_inline int fetch_store_strlen_user(unsigned long addr);
+fetch_store_string(uintptr_t addr, void *dest, void *base);
+static nokprobe_inline int fetch_store_strlen_user(uintptr_t addr);
 static nokprobe_inline int
-fetch_store_string_user(unsigned long addr, void *dest, void *base);
+fetch_store_string_user(uintptr_t addr, void *dest, void *base);
 static nokprobe_inline int
 probe_mem_read(void *dest, void *src, size_t size);
 static nokprobe_inline int
@@ -100,17 +100,17 @@ fetch_store_symstring(unsigned long addr, void *dest, void *base)
 
 /* common part of process_fetch_insn*/
 static nokprobe_inline int
-process_common_fetch_insn(struct fetch_insn *code, unsigned long *val)
+process_common_fetch_insn(struct fetch_insn *code, uintptr_t *val)
 {
 	switch (code->op) {
 	case FETCH_OP_IMM:
 		*val = code->immediate;
 		break;
 	case FETCH_OP_COMM:
-		*val = (unsigned long)current->comm;
+		*val = (uintptr_t)current->comm;
 		break;
 	case FETCH_OP_DATA:
-		*val = (unsigned long)code->data;
+		*val = (uintptr_t)code->data;
 		break;
 	default:
 		return -EILSEQ;
@@ -120,13 +120,13 @@ process_common_fetch_insn(struct fetch_insn *code, unsigned long *val)
 
 /* From the 2nd stage, routine is same */
 static nokprobe_inline int
-process_fetch_insn_bottom(struct fetch_insn *code, unsigned long val,
+process_fetch_insn_bottom(struct fetch_insn *code, uintptr_t val,
 			   void *dest, void *base)
 {
 	struct fetch_insn *s3 = NULL;
 	int total = 0, ret = 0, i = 0;
 	u32 loc = 0;
-	unsigned long lval = val;
+	uintptr_t lval = val;
 
 stage2:
 	/* 2nd stage: dereference memory if needed */
