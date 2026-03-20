@@ -12,6 +12,7 @@
 #define pr_fmt(fmt)	"trace_probe: " fmt
 
 #include <linux/bpf.h>
+#include <linux/cheri.h>
 #include <linux/fs.h>
 
 #include "trace_btf.h"
@@ -58,7 +59,7 @@ DEFINE_BASIC_PRINT_TYPE_FUNC(char, u8, "'%c'")
 
 int PRINT_TYPE_FUNC_NAME(symbol)(struct trace_seq *s, void *data, void *ent)
 {
-	trace_seq_printf(s, "%pS", (void *)*(unsigned long *)data);
+	trace_seq_printf(s, "%pS", __c_fakep(*(unsigned long *)data));
 	return !trace_seq_has_overflowed(s);
 }
 const char PRINT_TYPE_FMT_NAME(symbol)[] = "%pS";
