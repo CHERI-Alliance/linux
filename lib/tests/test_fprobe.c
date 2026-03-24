@@ -55,7 +55,7 @@ static notrace void fp_exit_handler(struct fprobe *fp, unsigned long ip,
 				    uintptr_t ret_ip,
 				    struct ftrace_regs *fregs, void *data)
 {
-	unsigned long ret = ftrace_regs_get_return_value(fregs);
+	unsigned long ret = __c_ua(ftrace_regs_get_return_value(fregs));
 
 	KUNIT_EXPECT_FALSE(current_test, preemptible());
 	if (ip != target_ip) {
@@ -288,7 +288,7 @@ static void test_fprobe_multi(struct kunit *test)
 
 static unsigned long get_ftrace_location(void *func)
 {
-	unsigned long size, addr = (unsigned long)func;
+	unsigned long size, addr = __c_pa(func);
 
 	if (!kallsyms_lookup_size_offset(addr, &size, NULL) || !size)
 		return 0;
