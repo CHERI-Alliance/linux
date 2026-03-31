@@ -88,14 +88,31 @@ static nokprobe_inline int
 fetch_store_symstring(unsigned long addr, void *dest, void *base)
 {
 	int maxlen = get_loc_len(*(u32 *)dest);
+	char namebuf[KSYM_SYMBOL_LEN];
 	void *__dest;
+	int ret;
 
 	if (unlikely(!maxlen))
 		return -ENOMEM;
 
 	__dest = get_loc_data(dest, base);
 
-	return sprint_symbol(__dest, addr);
+	ret = sprint_symbol(namebuf, addr);
+	/*
+	 * namebuf is large enough to hold all possible symbol strings,
+	 * including the final \0. sprint_symbol returns the number of
+	 * characters without the \0.
+	 *
+	 * __dest must be \0-terminated.
+	 *
+	 * The caller has checked the required buffer length before, it's
+	 * unlikely that the caller-provided buffer is too small.
+	 */
+	if (unlikely(ret+1 > maxlen))
+		return -ENOMEM;
+
+	memcpy(__dest, namebuf, ret+1);
+	return ret;
 }
 
 /* common part of process_fetch_insn*/
