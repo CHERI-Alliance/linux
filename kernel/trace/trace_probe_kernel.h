@@ -10,18 +10,18 @@
  */
 /* Return the length of string -- including null terminal byte */
 static nokprobe_inline int
-fetch_store_strlen_user(unsigned long addr)
+fetch_store_strlen_user(ptraddr_t addr)
 {
-	const void __user *uaddr =  (__force const void __user *)addr;
-
-	return strnlen_user_nofault(uaddr, MAX_STRING_SIZE);
+	return strnlen_user_nofault((const void __user *)cheri_make_kernel_data_cap(addr, MAX_STRING_SIZE),
+				    MAX_STRING_SIZE);
 }
 
 /* Return the length of string -- including null terminal byte */
 static nokprobe_inline int
-fetch_store_strlen(unsigned long addr)
+fetch_store_strlen(ptraddr_t addr)
 {
 	int ret, len = 0;
+	void *addr_cap;
 	u8 c;
 
 #ifdef CONFIG_ARCH_HAS_NON_OVERLAPPING_ADDRESS_SPACE
@@ -29,8 +29,9 @@ fetch_store_strlen(unsigned long addr)
 		return fetch_store_strlen_user(addr);
 #endif
 
+	addr_cap = cheri_make_kernel_data_cap(addr, MAX_STRING_SIZE);
 	do {
-		ret = copy_from_kernel_nofault(&c, (u8 *)addr + len, 1);
+		ret = copy_from_kernel_nofault(&c, (u8 *)addr_cap + len, 1);
 		len++;
 	} while (c && ret == 0 && len < MAX_STRING_SIZE);
 
@@ -49,9 +50,8 @@ static nokprobe_inline void set_data_loc(int ret, void *dest, void *__dest, void
  * with max length and relative data location.
  */
 static nokprobe_inline int
-fetch_store_string_user(unsigned long addr, void *dest, void *base)
+fetch_store_string_user(ptraddr_t addr, void *dest, void *base)
 {
-	const void __user *uaddr =  (__force const void __user *)addr;
 	int maxlen = get_loc_len(*(u32 *)dest);
 	void *__dest;
 	long ret;
@@ -61,7 +61,9 @@ fetch_store_string_user(unsigned long addr, void *dest, void *base)
 
 	__dest = get_loc_data(dest, base);
 
-	ret = strncpy_from_user_nofault(__dest, uaddr, maxlen);
+	ret = strncpy_from_user_nofault(__dest,
+					(const void __user *)cheri_make_kernel_data_cap(addr, maxlen),
+					maxlen);
 	set_data_loc(ret, dest, __dest, base);
 
 	return ret;
@@ -72,7 +74,7 @@ fetch_store_string_user(unsigned long addr, void *dest, void *base)
  * length and relative data location.
  */
 static nokprobe_inline int
-fetch_store_string(unsigned long addr, void *dest, void *base)
+fetch_store_string(ptraddr_t addr, void *dest, void *base)
 {
 	int maxlen = get_loc_len(*(u32 *)dest);
 	void *__dest;
@@ -92,28 +94,30 @@ fetch_store_string(unsigned long addr, void *dest, void *base)
 	 * Try to get string again, since the string can be changed while
 	 * probing.
 	 */
-	ret = strncpy_from_kernel_nofault(__dest, (void *)addr, maxlen);
+	ret = strncpy_from_kernel_nofault(__dest,
+					  cheri_make_kernel_data_cap(addr, maxlen),
+					  maxlen);
 	set_data_loc(ret, dest, __dest, base);
 
 	return ret;
 }
 
 static nokprobe_inline int
-probe_mem_read_user(void *dest, void *src, size_t size)
+probe_mem_read_user(void *dest, ptraddr_t src, size_t size)
 {
-	const void __user *uaddr =  (__force const void __user *)src;
-
-	return copy_from_user_nofault(dest, uaddr, size);
+	return copy_from_user_nofault(dest,
+				      (const void __user *)cheri_make_kernel_data_cap(src, size),
+				      size);
 }
 
 static nokprobe_inline int
-probe_mem_read(void *dest, void *src, size_t size)
+probe_mem_read(void *dest, ptraddr_t src, size_t size)
 {
 #ifdef CONFIG_ARCH_HAS_NON_OVERLAPPING_ADDRESS_SPACE
 	if ((unsigned long)src < TASK_SIZE)
 		return probe_mem_read_user(dest, src, size);
 #endif
-	return copy_from_kernel_nofault(dest, src, size);
+	return copy_from_kernel_nofault(dest, cheri_make_kernel_data_cap(src, size), size);
 }
 
 #endif /* __TRACE_PROBE_KERNEL_H_ */
