@@ -165,13 +165,13 @@ struct kretprobe_trace_entry_head {
 
 struct fentry_trace_entry_head {
 	struct trace_entry	ent;
-	uintptr_t		ip;
+	ptraddr_t		ip;
 };
 
 struct fexit_trace_entry_head {
 	struct trace_entry	ent;
-	uintptr_t		func;
-	uintptr_t		ret_ip;
+	ptraddr_t		func;
+	ptraddr_t		ret_ip;
 };
 
 #define TRACE_BUF_SIZE		1024

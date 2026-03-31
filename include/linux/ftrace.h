@@ -259,14 +259,14 @@ static __always_inline bool ftrace_regs_has_args(struct ftrace_regs *fregs)
 }
 
 #ifdef CONFIG_HAVE_REGS_AND_STACK_ACCESS_API
-static __always_inline unsigned long
+static __always_inline uintptr_t
 ftrace_regs_get_kernel_stack_nth(struct ftrace_regs *fregs, unsigned int nth)
 {
-	unsigned long *stackp;
+	uintptr_t *stackp;
 
-	stackp = (unsigned long *)ftrace_regs_get_stack_pointer(fregs);
-	if (((unsigned long)(stackp + nth) & ~(THREAD_SIZE - 1)) ==
-	    ((unsigned long)stackp & ~(THREAD_SIZE - 1)))
+	stackp = (uintptr_t *)ftrace_regs_get_stack_pointer(fregs);
+	if (((uintptr_t)(stackp + nth) & ~(THREAD_SIZE - 1)) ==
+	    ((uintptr_t)stackp & ~(THREAD_SIZE - 1)))
 		return *(stackp + nth);
 
 	return 0;

@@ -81,7 +81,7 @@ static unsigned long tracepoint_user_ip(struct tracepoint_user *tuser)
 	if (!tuser->tpoint)
 		return 0UL;
 
-	return (unsigned long)tuser->tpoint->probestub;
+	return __c_pa(tuser->tpoint->probestub);
 }
 
 static void __tracepoint_user_free(struct tracepoint_user *tuser)
@@ -279,7 +279,7 @@ process_fetch_insn(struct fetch_insn *code, void *rec, void *edata,
 		   void *dest, void *base)
 {
 	struct ftrace_regs *fregs = rec;
-	unsigned long val;
+	uintptr_t val;
 	int ret;
 
 retry:
@@ -299,7 +299,7 @@ retry:
 		val = ftrace_regs_get_argument(fregs, code->param);
 		break;
 	case FETCH_OP_EDATA:
-		val = *(unsigned long *)((unsigned long)edata + code->offset);
+		val = *(uintptr_t *)((uintptr_t)edata + code->offset);
 		break;
 #endif
 	case FETCH_NOP_SYMBOL:	/* Ignore a place holder */
@@ -363,7 +363,7 @@ static nokprobe_inline
 void store_fprobe_entry_data(void *edata, struct trace_probe *tp, struct ftrace_regs *fregs)
 {
 	struct probe_entry_arg *earg = tp->entry_arg;
-	unsigned long val = 0;
+	uintptr_t val = 0;
 	int i;
 
 	if (!earg)
@@ -377,7 +377,7 @@ void store_fprobe_entry_data(void *edata, struct trace_probe *tp, struct ftrace_
 			val = ftrace_regs_get_argument(fregs, code->param);
 			break;
 		case FETCH_OP_ST_EDATA:
-			*(unsigned long *)((unsigned long)edata + code->offset) = val;
+			*(uintptr_t *)((uintptr_t)edata + code->offset) = val;
 			break;
 		case FETCH_OP_END:
 			goto end;
@@ -429,7 +429,7 @@ __fexit_trace_func(struct trace_fprobe *tf, unsigned long entry_ip,
 	fbuffer.regs = ftrace_get_regs(fregs);
 	entry = fbuffer.entry = ring_buffer_event_data(fbuffer.event);
 	entry->func = entry_ip;
-	entry->ret_ip = ret_ip;
+	entry->ret_ip = __c_ua(ret_ip);
 	store_trace_args(&entry[1], &tf->tp, fregs, entry_data, sizeof(*entry), dsize);
 
 	trace_event_buffer_commit(&fbuffer);
@@ -437,7 +437,7 @@ __fexit_trace_func(struct trace_fprobe *tf, unsigned long entry_ip,
 
 static void
 fexit_trace_func(struct trace_fprobe *tf, unsigned long entry_ip,
-		 unsigned long ret_ip, struct ftrace_regs *fregs, void *entry_data)
+		 uintptr_t ret_ip, struct ftrace_regs *fregs, void *entry_data)
 {
 	struct event_file_link *link;
 
@@ -484,7 +484,7 @@ NOKPROBE_SYMBOL(fentry_perf_func);
 
 static void
 fexit_perf_func(struct trace_fprobe *tf, unsigned long entry_ip,
-		unsigned long ret_ip, struct ftrace_regs *fregs,
+		uintptr_t ret_ip, struct ftrace_regs *fregs,
 		void *entry_data)
 {
 	struct trace_event_call *call = trace_probe_event_call(&tf->tp);
@@ -510,7 +510,7 @@ fexit_perf_func(struct trace_fprobe *tf, unsigned long entry_ip,
 	regs = ftrace_fill_perf_regs(fregs, regs);
 
 	entry->func = entry_ip;
-	entry->ret_ip = ret_ip;
+	entry->ret_ip = __c_ua(ret_ip);
 	store_trace_args(&entry[1], &tf->tp, fregs, entry_data, sizeof(*entry), dsize);
 	perf_trace_buf_submit(entry, size, rctx, call->event.type, 1, regs,
 			      head, NULL);
@@ -1318,7 +1318,7 @@ static int trace_fprobe_create_internal(int argc, const char *argv[],
 			sbuf = kmalloc(KSYM_NAME_LEN, GFP_KERNEL);
 			if (!sbuf)
 				return -ENOMEM;
-			ctx->funcname = kallsyms_lookup((unsigned long)tpoint->probestub,
+			ctx->funcname = kallsyms_lookup(__c_pa(tpoint->probestub),
 							NULL, NULL, NULL, sbuf);
 		}
 	}
@@ -1368,7 +1368,7 @@ static int trace_fprobe_create_internal(int argc, const char *argv[],
 	if (is_return && tf->tp.entry_arg) {
 		tf->fp.entry_handler = trace_fprobe_entry_handler;
 		tf->fp.entry_data_size = traceprobe_get_entry_data_size(&tf->tp);
-		if (ALIGN(tf->fp.entry_data_size, sizeof(long)) > MAX_FPROBE_DATA_SIZE) {
+		if (ALIGN(tf->fp.entry_data_size, RET_STACK_WORD_SIZE) > MAX_FPROBE_DATA_SIZE) {
 			trace_probe_log_set_index(2);
 			trace_probe_log_err(0, TOO_MANY_EARGS);
 			return -E2BIG;
