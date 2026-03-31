@@ -126,7 +126,7 @@ static unsigned long get_user_stack_nth(struct pt_regs *regs, unsigned int n)
  * Uprobes-specific fetch functions
  */
 static nokprobe_inline int
-probe_mem_read(void *dest, void *src, size_t size)
+probe_mem_read(void *dest, ptraddr_t src, size_t size)
 {
 	void __user *vaddr = (void __force __user *)src;
 
@@ -134,7 +134,7 @@ probe_mem_read(void *dest, void *src, size_t size)
 }
 
 static nokprobe_inline int
-probe_mem_read_user(void *dest, void *src, size_t size)
+probe_mem_read_user(void *dest, ptraddr_t src, size_t size)
 {
 	return probe_mem_read(dest, src, size);
 }
