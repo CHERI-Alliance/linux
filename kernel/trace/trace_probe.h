@@ -188,7 +188,7 @@ DECLARE_BASIC_PRINT_TYPE_FUNC(symbol);
 #define _ADDR_FETCH_TYPE(t) __ADDR_FETCH_TYPE(t)
 #define ADDR_FETCH_TYPE _ADDR_FETCH_TYPE(BITS_PER_LONG)
 
-#define __ASSIGN_FETCH_TYPE(_name, ptype, ftype, _size, sign, str, _fmttype)	\
+#define __ASSIGN_FETCH_TYPE(_name, ptype, _size, sign, str, _fmttype)	\
 	{.name = _name,					\
 	 .size = _size,					\
 	 .is_signed = (bool)sign,			\
@@ -199,14 +199,14 @@ DECLARE_BASIC_PRINT_TYPE_FUNC(symbol);
 	}
 
 /* Non string types can use these macros */
-#define _ASSIGN_FETCH_TYPE(_name, ptype, ftype, _size, sign, _fmttype)	\
-	__ASSIGN_FETCH_TYPE(_name, ptype, ftype, _size, sign, 0, #_fmttype)
+#define _ASSIGN_FETCH_TYPE(_name, ptype, _size, sign, _fmttype)	\
+	__ASSIGN_FETCH_TYPE(_name, ptype, _size, sign, 0, #_fmttype)
 #define ASSIGN_FETCH_TYPE(ptype, ftype, sign)			\
-	_ASSIGN_FETCH_TYPE(#ptype, ptype, ftype, sizeof(ftype), sign, ptype)
+	_ASSIGN_FETCH_TYPE(#ptype, ptype, sizeof(ftype), sign, ptype)
 
 /* If ptype is an alias of atype, use this macro (show atype in format) */
 #define ASSIGN_FETCH_TYPE_ALIAS(ptype, atype, ftype, sign)		\
-	_ASSIGN_FETCH_TYPE(#ptype, ptype, ftype, sizeof(ftype), sign, atype)
+	_ASSIGN_FETCH_TYPE(#ptype, ptype, sizeof(ftype), sign, atype)
 
 #define ASSIGN_FETCH_TYPE_END {}
 #define MAX_ARRAY_LEN	64
