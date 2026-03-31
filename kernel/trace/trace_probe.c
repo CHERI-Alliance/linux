@@ -81,11 +81,11 @@ const char PRINT_TYPE_FMT_NAME(string)[] = "\\\"%s\\\"";
 /* Fetch type information table */
 static const struct fetch_type probe_fetch_types[] = {
 	/* Special types */
-	__ASSIGN_FETCH_TYPE("string", string, string, sizeof(u32), 1, 1,
+	__ASSIGN_FETCH_TYPE("string", string, sizeof(u32), 1, 1,
 			    "__data_loc char[]"),
-	__ASSIGN_FETCH_TYPE("ustring", string, string, sizeof(u32), 1, 1,
+	__ASSIGN_FETCH_TYPE("ustring", string, sizeof(u32), 1, 1,
 			    "__data_loc char[]"),
-	__ASSIGN_FETCH_TYPE("symstr", string, string, sizeof(u32), 1, 1,
+	__ASSIGN_FETCH_TYPE("symstr", string, sizeof(u32), 1, 1,
 			    "__data_loc char[]"),
 	/* Basic types */
 	ASSIGN_FETCH_TYPE(u8,  u8,  0),
