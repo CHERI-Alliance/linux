@@ -56,19 +56,19 @@ fetch_apply_bitfield(struct fetch_insn *code, void *buf)
 static int
 process_fetch_insn(struct fetch_insn *code, void *rec, void *edata,
 		   void *dest, void *base);
-static nokprobe_inline int fetch_store_strlen(unsigned long addr);
+static nokprobe_inline int fetch_store_strlen(ptraddr_t addr);
 static nokprobe_inline int
-fetch_store_string(unsigned long addr, void *dest, void *base);
-static nokprobe_inline int fetch_store_strlen_user(unsigned long addr);
+fetch_store_string(ptraddr_t addr, void *dest, void *base);
+static nokprobe_inline int fetch_store_strlen_user(ptraddr_t addr);
 static nokprobe_inline int
-fetch_store_string_user(unsigned long addr, void *dest, void *base);
+fetch_store_string_user(ptraddr_t addr, void *dest, void *base);
 static nokprobe_inline int
-probe_mem_read(void *dest, void *src, size_t size);
+probe_mem_read(void *dest, ptraddr_t src, size_t size);
 static nokprobe_inline int
-probe_mem_read_user(void *dest, void *src, size_t size);
+probe_mem_read_user(void *dest, ptraddr_t src, size_t size);
 
 static nokprobe_inline int
-fetch_store_symstrlen(unsigned long addr)
+fetch_store_symstrlen(ptraddr_t addr)
 {
 	char namebuf[KSYM_SYMBOL_LEN];
 	int ret;
@@ -117,17 +117,17 @@ fetch_store_symstring(unsigned long addr, void *dest, void *base)
 
 /* common part of process_fetch_insn*/
 static nokprobe_inline int
-process_common_fetch_insn(struct fetch_insn *code, unsigned long *val)
+process_common_fetch_insn(struct fetch_insn *code, uintptr_t *val)
 {
 	switch (code->op) {
 	case FETCH_OP_IMM:
-		*val = code->immediate;
+		*val = __c_fakeu(code->immediate);
 		break;
 	case FETCH_OP_COMM:
-		*val = (unsigned long)current->comm;
+		*val = (uintptr_t)current->comm;
 		break;
 	case FETCH_OP_DATA:
-		*val = (unsigned long)code->data;
+		*val = (uintptr_t)code->data;
 		break;
 	default:
 		return -EILSEQ;
@@ -137,25 +137,25 @@ process_common_fetch_insn(struct fetch_insn *code, unsigned long *val)
 
 /* From the 2nd stage, routine is same */
 static nokprobe_inline int
-process_fetch_insn_bottom(struct fetch_insn *code, unsigned long val,
+process_fetch_insn_bottom(struct fetch_insn *code, uintptr_t val,
 			   void *dest, void *base)
 {
 	struct fetch_insn *s3 = NULL;
 	int total = 0, ret = 0, i = 0;
 	u32 loc = 0;
-	unsigned long lval = val;
+	uintptr_t lval = val;
 
 stage2:
 	/* 2nd stage: dereference memory if needed */
 	do {
 		if (code->op == FETCH_OP_DEREF) {
 			lval = val;
-			ret = probe_mem_read(&val, (void *)val + code->offset,
+			ret = probe_mem_read(&val, __c_ua(val) + code->offset,
 					     sizeof(val));
 		} else if (code->op == FETCH_OP_UDEREF) {
 			lval = val;
 			ret = probe_mem_read_user(&val,
-				 (void *)val + code->offset, sizeof(val));
+				 __c_ua(val) + code->offset, sizeof(val));
 		} else
 			break;
 		if (ret)
@@ -169,15 +169,16 @@ stage3:
 	if (unlikely(!dest)) {
 		switch (code->op) {
 		case FETCH_OP_ST_STRING:
-			ret = fetch_store_strlen(val + code->offset);
+			ret = fetch_store_strlen(__c_ua(val) + code->offset);
 			code++;
 			goto array;
 		case FETCH_OP_ST_USTRING:
-			ret = fetch_store_strlen_user(val + code->offset);
+			ret = fetch_store_strlen_user(__c_ua(val) + code->offset);
+			pr_crit("fetch_store_strlen_user ret %d\n", ret);
 			code++;
 			goto array;
 		case FETCH_OP_ST_SYMSTR:
-			ret = fetch_store_symstrlen(val + code->offset);
+			ret = fetch_store_symstrlen(__c_ua(val) + code->offset);
 			code++;
 			goto array;
 		default:
@@ -187,25 +188,25 @@ stage3:
 
 	switch (code->op) {
 	case FETCH_OP_ST_RAW:
-		fetch_store_raw(val, code, dest);
+		fetch_store_raw(__c_ua(val), code, dest);
 		break;
 	case FETCH_OP_ST_MEM:
-		probe_mem_read(dest, (void *)val + code->offset, code->size);
+		probe_mem_read(dest, __c_ua(val) + code->offset, code->size);
 		break;
 	case FETCH_OP_ST_UMEM:
-		probe_mem_read_user(dest, (void *)val + code->offset, code->size);
+		probe_mem_read_user(dest, __c_ua(val) + code->offset, code->size);
 		break;
 	case FETCH_OP_ST_STRING:
 		loc = *(u32 *)dest;
-		ret = fetch_store_string(val + code->offset, dest, base);
+		ret = fetch_store_string(__c_ua(val) + code->offset, dest, base);
 		break;
 	case FETCH_OP_ST_USTRING:
 		loc = *(u32 *)dest;
-		ret = fetch_store_string_user(val + code->offset, dest, base);
+		ret = fetch_store_string_user(__c_ua(val) + code->offset, dest, base);
 		break;
 	case FETCH_OP_ST_SYMSTR:
 		loc = *(u32 *)dest;
-		ret = fetch_store_symstring(val + code->offset, dest, base);
+		ret = fetch_store_symstring(__c_ua(val) + code->offset, dest, base);
 		break;
 	default:
 		return -EILSEQ;

@@ -58,7 +58,7 @@ DEFINE_BASIC_PRINT_TYPE_FUNC(char, u8, "'%c'")
 
 int PRINT_TYPE_FUNC_NAME(symbol)(struct trace_seq *s, void *data, void *ent)
 {
-	trace_seq_printf(s, "%pS", (void *)*(unsigned long *)data);
+	trace_seq_printf(s, "%pS", __c_fakep(*(unsigned long *)data));
 	return !trace_seq_has_overflowed(s);
 }
 const char PRINT_TYPE_FMT_NAME(symbol)[] = "%pS";
@@ -909,7 +909,7 @@ int traceprobe_get_entry_data_size(struct trace_probe *tp)
 void store_trace_entry_data(void *edata, struct trace_probe *tp, struct pt_regs *regs)
 {
 	struct probe_entry_arg *earg = tp->entry_arg;
-	unsigned long val = 0;
+	uintptr_t val = 0;
 	int i;
 
 	if (!earg)
@@ -923,7 +923,7 @@ void store_trace_entry_data(void *edata, struct trace_probe *tp, struct pt_regs 
 			val = regs_get_kernel_argument(regs, code->param);
 			break;
 		case FETCH_OP_ST_EDATA:
-			*(unsigned long *)((unsigned long)edata + code->offset) = val;
+			*(uintptr_t *)((uintptr_t)edata + code->offset) = val;
 			break;
 		case FETCH_OP_END:
 			goto end;
