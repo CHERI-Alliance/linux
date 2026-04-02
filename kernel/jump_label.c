@@ -407,11 +407,10 @@ static void arch_jump_label_transform_static(struct jump_entry *entry,
 
 static inline struct jump_entry *static_key_entries(struct static_key *key)
 {
-	ptraddr_t addr;
+	uintptr_t tmp = (uintptr_t)key->entries;
 
 	WARN_ON_ONCE(key->type & JUMP_TYPE_LINKED);
-	addr = key->type & ~JUMP_TYPE_MASK;
-	return (struct jump_entry *)cheri_address_set_kernel(__start___jump_table, addr);
+	return (struct jump_entry *)(tmp & ~JUMP_TYPE_MASK);
 }
 
 static inline bool static_key_type(struct static_key *key)
