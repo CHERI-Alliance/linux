@@ -282,6 +282,8 @@ while (<$symfh>) {
 	next if m{^\s*$};
 	next if m{file format elf};
 	next if m{^SYMBOL\s*TABLE:\s*$};
+	next if m{^\s*([a-f\d]+)\s(.......)\s(\S+)$};
+	next if m{^\s*\#};
 	s{^\s*([a-f\d]+)\s(.......)\s(\S+)\s+([\da-f]+)\s*}{}
 	    or die "BAD SYMBOL: >>>${orig}<<<";
 	my ($addr, $flags, $sect, $len) = ($1, $2, $3, $4);
