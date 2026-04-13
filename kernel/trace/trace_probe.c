@@ -13,6 +13,7 @@
 
 #include <linux/bpf.h>
 #include <linux/fs.h>
+#include <linux/trace_events.h>
 
 #include "trace_btf.h"
 #include "trace_probe.h"
@@ -78,6 +79,14 @@ int PRINT_TYPE_FUNC_NAME(string)(struct trace_seq *s, void *data, void *ent)
 
 const char PRINT_TYPE_FMT_NAME(string)[] = "\\\"%s\\\"";
 
+int PRINT_TYPE_FUNC_NAME(cap)(struct trace_seq *s, void *data, void *ent)
+{
+	ptraddr_t *p = data;
+	trace_print_cap(s, *(p+1), *p);
+	return !trace_seq_has_overflowed(s);
+}
+const char PRINT_TYPE_FMT_NAME(cap)[] = TRACE_CAP_FMT;
+
 /* Fetch type information table */
 static const struct fetch_type probe_fetch_types[] = {
 	/* Special types */
@@ -87,6 +96,10 @@ static const struct fetch_type probe_fetch_types[] = {
 			    "__data_loc char[]"),
 	__ASSIGN_FETCH_TYPE("symstr", string, sizeof(u32), 1, FC_STRING,
 			    "__data_loc char[]"),
+	/* a capability uses two ptraddr_t fields for addr, tag+meta */
+	__ASSIGN_FETCH_TYPE("cap", cap, 2*sizeof(ptraddr_t), 0, FC_CAP,
+			    "ptraddr_t"),
+
 	/* Basic types */
 	ASSIGN_FETCH_TYPE(u8,  u8,  0),
 	ASSIGN_FETCH_TYPE(u16, u16, 0),
@@ -1346,6 +1359,14 @@ static char *parse_probe_arg_type(char *arg, struct probe_arg *parg,
 		return ERR_PTR(-EINVAL);
 	}
 
+	if (parg->type->composite == FC_CAP) {
+		ctx->flags |= TPARG_FL_CAP_FIELD;
+		if (parg->count) {
+			trace_probe_log_err(ctx->offset + offs, UNSUPP_CAP_ARRAY);
+			return ERR_PTR(-EINVAL);
+		}
+	}
+
 	return t;
 }
 
@@ -1412,10 +1433,20 @@ static int finalize_fetch_insn(struct fetch_insn *code,
 	} else if (code->op == FETCH_OP_DEREF) {
 		code->op = FETCH_OP_ST_MEM;
 		code->size = parg->type->size;
+		code->is_cap = parg->type->composite == FC_CAP;
 	} else if (code->op == FETCH_OP_UDEREF) {
 		code->op = FETCH_OP_ST_UMEM;
 		code->size = parg->type->size;
+		if (parg->type->composite == FC_CAP) {
+			/* this hasn't been tested yet */
+			trace_probe_log_err(ctx->offset + type_offset, BAD_CAP_OP);
+			return -EINVAL;
+		}
 	} else {
+		/*
+		 * TODO: handle parg->type->composite == FC_CAP && code->op ==
+		 * FETCH_OP_FOFFS - should this be allowed?
+		 */
 		code++;
 		if (code->op != FETCH_OP_NOP) {
 			trace_probe_log_err(ctx->offset, TOO_MANY_OPS);
@@ -1423,6 +1454,7 @@ static int finalize_fetch_insn(struct fetch_insn *code,
 		}
 		code->op = FETCH_OP_ST_RAW;
 		code->size = parg->type->size;
+		code->is_cap = parg->type->composite == FC_CAP;
 	}
 
 	/* Save storing fetch_insn. */
@@ -1948,7 +1980,9 @@ static int __set_print_fmt(struct trace_probe *tp, char *buf, int len,
 				pos += snprintf(buf + pos, LEN_OR_ZERO,
 						fmt, parg->name, j);
 		} else {
-			if (parg->type->composite == FC_STRING)
+			if (parg->type->composite == FC_CAP)
+				fmt = ", __get_cap(%s)";
+			else if (parg->type->composite == FC_STRING)
 				fmt = ", __get_str(%s)";
 			else
 				fmt = ", REC->%s";
@@ -1992,6 +2026,8 @@ int traceprobe_define_arg_fields(struct trace_event_call *event_call,
 		const char *fmt = parg->type->fmttype;
 		int size = parg->type->size;
 
+		if (parg->type->composite == FC_CAP)
+			size /= 2;
 		if (parg->fmt)
 			fmt = parg->fmt;
 		if (parg->count)
@@ -2003,6 +2039,23 @@ int traceprobe_define_arg_fields(struct trace_event_call *event_call,
 					 FILTER_OTHER);
 		if (ret)
 			return ret;
+
+		if (parg->type->composite == FC_CAP) {
+			size_t len = strlen(parg->name) + strlen("_tag_meta") + 1;
+			char *tm_name = kmalloc(len, GFP_KERNEL);
+			if (!tm_name)
+				return -ENOMEM;
+			snprintf(tm_name, len, "%s_tag_meta", parg->name);
+			ret = trace_define_field(event_call, fmt, tm_name,
+						 offset + parg->offset + size,
+						 size,
+						 parg->type->is_signed,
+						 FILTER_OTHER);
+			if (ret) {
+				kfree(tm_name);
+				return ret;
+			}
+		}
 	}
 	return 0;
 }

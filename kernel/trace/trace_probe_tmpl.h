@@ -3,6 +3,17 @@
  * Traceprobe fetch helper inlines
  */
 
+static nokprobe_inline void fetch_store_cap(uintptr_t val, void *buf)
+{
+	ptraddr_t *cap_part = buf;
+
+	*cap_part++ = __c_ua(val);
+#ifdef CONFIG_CHERI_KERNEL
+	*cap_part = cheri_high_get(val);
+	*cap_part |= cheri_tag_get(val) ? BIT(TRACE_EVT_TAG) : 0;
+#endif
+}
+
 static nokprobe_inline void
 fetch_store_raw(unsigned long val, struct fetch_insn *code, void *buf)
 {
@@ -187,10 +198,17 @@ stage3:
 
 	switch (code->op) {
 	case FETCH_OP_ST_RAW:
-		fetch_store_raw(__c_ua(val), code, dest);
+		if (code->is_cap)
+			fetch_store_cap(val, dest);
+		else
+			fetch_store_raw(__c_ua(val), code, dest);
 		break;
 	case FETCH_OP_ST_MEM:
-		probe_mem_read(dest, __c_ua(val) + code->offset, code->size);
+		if (code->is_cap) {
+			if (!probe_mem_read((void *)&val, __c_ua(val) + code->offset, code->size))
+				fetch_store_cap(val, dest);
+		} else 
+			probe_mem_read(dest, __c_ua(val) + code->offset, code->size);
 		break;
 	case FETCH_OP_ST_UMEM:
 		probe_mem_read_user(dest, __c_ua(val) + code->offset, code->size);

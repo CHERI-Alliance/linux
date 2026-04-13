@@ -101,8 +101,8 @@ enum fetch_op {
 	FETCH_OP_DEREF,		/* Dereference: .offset */
 	FETCH_OP_UDEREF,	/* User-space Dereference: .offset */
 	// Stage 3 (store) ops
-	FETCH_OP_ST_RAW,	/* Raw: .size */
-	FETCH_OP_ST_MEM,	/* Mem: .offset, .size */
+	FETCH_OP_ST_RAW,	/* Raw: .size, .is_cap */
+	FETCH_OP_ST_MEM,	/* Mem: .offset, .size, .is_cap */
 	FETCH_OP_ST_UMEM,	/* Mem: .offset, .size */
 	FETCH_OP_ST_STRING,	/* String: .offset, .size */
 	FETCH_OP_ST_USTRING,	/* User String: .offset, .size */
@@ -124,6 +124,7 @@ struct fetch_insn {
 		struct {
 			unsigned int size;
 			int offset;
+			bool is_cap;
 		};
 		struct {
 			unsigned char basesize;
@@ -139,7 +140,8 @@ struct fetch_insn {
 #define FETCH_INSN_MAX	16
 #define FETCH_TOKEN_COMM	(-ECOMM)
 
-#define FC_STRING 1
+#define FC_STRING	1
+#define FC_CAP		2
 
 /* Fetch type information table */
 struct fetch_type {
@@ -180,6 +182,7 @@ DECLARE_BASIC_PRINT_TYPE_FUNC(x64);
 DECLARE_BASIC_PRINT_TYPE_FUNC(char);
 DECLARE_BASIC_PRINT_TYPE_FUNC(string);
 DECLARE_BASIC_PRINT_TYPE_FUNC(symbol);
+DECLARE_BASIC_PRINT_TYPE_FUNC(cap);
 
 /* Default (unsigned long) fetch type */
 #define __DEFAULT_FETCH_TYPE(t) x##t
@@ -566,7 +569,9 @@ extern int traceprobe_define_arg_fields(struct trace_event_call *event_call,
 	C(BAD_TYPE4STR,		"This type does not fit for string."),\
 	C(NEED_STRING_TYPE,	"$comm and immediate-string only accepts string type"),\
 	C(TOO_MANY_ARGS,	"Too many arguments are specified"),	\
-	C(TOO_MANY_EARGS,	"Too many entry arguments specified"),
+	C(TOO_MANY_EARGS,	"Too many entry arguments specified"),	\
+	C(BAD_CAP_OP,		"Capabilities are not supported for this operation"), \
+	C(UNSUPP_CAP_ARRAY,	"Capability arrays are not supported"),
 
 #undef C
 #define C(a, b)		TP_ERR_##a
