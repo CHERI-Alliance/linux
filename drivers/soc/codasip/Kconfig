@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: GPL-2.0-only
+
+menu "Codasip SoC drivers"
+
+config CODASIP_CMU
+	tristate "Codasip Capability Management Unit"
+	depends on (RISCV_CHERI && ARCH_CODASIP && OF)
+	select AUXILIARY_BUS
+	default ARCH_CODASIP
+	help
+	  Say y here to enable the Codasip Capability Management Unit
+	  support. This device is responsible on managing the tag bits
+	  associated with CHERI capabilities.
+
+endmenu
