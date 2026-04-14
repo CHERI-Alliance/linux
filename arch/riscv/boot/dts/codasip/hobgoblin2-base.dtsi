@@ -19,6 +19,8 @@
 	aliases {
 		serial0 = &uart0;
 		spi0 = &spi0;
+		cmu0 = &cmu0;
+		cmu1 = &cmu1;
 	};
 
 	soc: soc@0 {
@@ -167,6 +169,20 @@
 			interrupts-extended = <&plic 9>;
 			xlnx,one-timer-only = <0x01>;
 			xlnx,count-width = <0x20>;
+		};
+
+		cmu0: cmu@1069_0000 {
+			compatible = "codasip,codasip-cmu";
+			reg = <0x10690000 0x10000>;
+			interrupts-extended = <&plic 27 &plic 28>;
+			interrupt-names = "low", "high";
+		};
+
+		cmu1: cmu@106A_0000 {
+			compatible = "codasip,codasip-cmu";
+			reg = <0x106A0000 0x10000>;
+			interrupts-extended = <&plic 29 &plic 30>;
+			interrupt-names = "low", "high";
 		};
 	};
 
