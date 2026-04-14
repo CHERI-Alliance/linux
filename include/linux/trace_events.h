@@ -26,6 +26,12 @@ union bpf_attr;
 #define TRACE_EVENT_ALIGN	4
 #endif
 
+#ifdef CONFIG_CHERI_KERNEL
+#define TRACE_CAP_FMT "%s"
+#else
+#define TRACE_CAP_FMT "%p"
+#endif
+
 const char *trace_print_flags_seq(struct trace_seq *p, const char *delim,
 				  unsigned long flags,
 				  const struct trace_print_flags *flag_array);
