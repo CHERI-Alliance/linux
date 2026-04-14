@@ -13,12 +13,12 @@
 		#size-cells = <2>;
 		ranges;
 
-		cmu0: cmu@ff000000 {
+		cmu_tag_mem0: cmu-tag-mem@ff000000 {
 			reg = <0x0 0xff000000 0x0 0x01000000>;
 			no-map;
 		};
 
-		cmu1: cmu@17f000000 {
+		cmu_tag_mem1: cmu-tag-mem@17f000000 {
 			reg = <0x1 0x7f000000 0x0 0x01000000>;
 			no-map;
 		};
