@@ -748,7 +748,7 @@ static inline void init_trace_event_call(struct trace_fprobe *tf)
 		call->class->fields_array = fentry_fields_array;
 	}
 
-	call->flags = TRACE_EVENT_FL_FPROBE;
+	call->flags |= TRACE_EVENT_FL_FPROBE;
 	call->class->reg = fprobe_register;
 }
 
@@ -1380,6 +1380,10 @@ static int trace_fprobe_create_internal(int argc, const char *argv[],
 	if (ret < 0)
 		return ret;
 
+	if (ctx->flags & TPARG_FL_CAP_FIELD) {
+		struct trace_event_call *call = trace_probe_event_call(&tf->tp);
+		call->flags |= TRACE_EVENT_FL_DYN_NAMES;
+	}
 	ret = register_trace_fprobe_event(tf);
 	if (ret) {
 		trace_probe_log_set_index(1);

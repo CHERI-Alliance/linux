@@ -1996,7 +1996,8 @@ int traceprobe_define_arg_fields(struct trace_event_call *event_call,
 			fmt = parg->fmt;
 		if (parg->count)
 			size *= parg->count;
-		ret = trace_define_field(event_call, fmt, parg->name,
+		ret = trace_define_field(event_call, fmt, event_call->flags & TRACE_EVENT_FL_DYN_NAMES ?
+					 kstrdup(parg->name, GFP_KERNEL) : parg->name,
 					 offset + parg->offset, size,
 					 parg->type->is_signed,
 					 FILTER_OTHER);

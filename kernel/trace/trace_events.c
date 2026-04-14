@@ -224,6 +224,8 @@ static void trace_destroy_fields(struct trace_event_call *call)
 
 	head = trace_get_fields(call);
 	list_for_each_entry_safe(field, next, head, link) {
+		if (call->flags & TRACE_EVENT_FL_DYN_NAMES)
+			kfree(field->name);
 		list_del(&field->link);
 		kmem_cache_free(field_cachep, field);
 	}
