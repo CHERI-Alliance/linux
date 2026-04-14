@@ -1,0 +1,50 @@
+[
+   {
+           "BriefDescription": "CMU Requests not matching any filter",
+           "EventCode": "0x0001",
+           "EventName": "cmu.req_no_filter_match",
+           "Unit": "codasip_cmu_pmu"
+   },
+   {
+           "BriefDescription": "CMU Requests matching any filter",
+           "EventCode": "0x0002",
+           "EventName": "cmu.req_filter_match",
+           "Unit": "codasip_cmu_pmu"
+   },
+   {
+           "BriefDescription": "CMU Tag Cache hits",
+           "EventCode": "0x0003",
+           "EventName": "cmu.tag_cache_hits",
+           "Unit": "codasip_cmu_pmu"
+   },
+   {
+           "BriefDescription": "CMU Tag Cache allocations",
+           "EventCode": "0x0004",
+           "EventName": "cmu.tag_cache_allocations",
+           "Unit": "codasip_cmu_pmu"
+   },
+   {
+           "BriefDescription": "CMU Request maps to group containing no capabilities",
+           "EventCode": "0x0005",
+           "EventName": "cmu.req_no_cap_group",
+           "Unit": "codasip_cmu_pmu"
+   },
+   {
+           "BriefDescription": "CMU Request maps to group containing some capabilities",
+           "EventCode": "0x0006",
+           "EventName": "cmu.req_some_cap_group",
+           "Unit": "codasip_cmu_pmu"
+   },
+   {
+           "BriefDescription": "CMU Read transactions",
+           "EventCode": "0x0007",
+           "EventName": "cmu.read_transactions",
+           "Unit": "codasip_cmu_pmu"
+   },
+   {
+           "BriefDescription": "CMU Write transactions",
+           "EventCode": "0x0008",
+           "EventName": "cmu.write_transactions",
+           "Unit": "codasip_cmu_pmu"
+   }
+]
