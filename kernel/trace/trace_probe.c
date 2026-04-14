@@ -81,11 +81,11 @@ const char PRINT_TYPE_FMT_NAME(string)[] = "\\\"%s\\\"";
 /* Fetch type information table */
 static const struct fetch_type probe_fetch_types[] = {
 	/* Special types */
-	__ASSIGN_FETCH_TYPE("string", string, sizeof(u32), 1, 1,
+	__ASSIGN_FETCH_TYPE("string", string, sizeof(u32), 1, FC_STRING,
 			    "__data_loc char[]"),
-	__ASSIGN_FETCH_TYPE("ustring", string, sizeof(u32), 1, 1,
+	__ASSIGN_FETCH_TYPE("ustring", string, sizeof(u32), 1, FC_STRING,
 			    "__data_loc char[]"),
-	__ASSIGN_FETCH_TYPE("symstr", string, sizeof(u32), 1, 1,
+	__ASSIGN_FETCH_TYPE("symstr", string, sizeof(u32), 1, FC_STRING,
 			    "__data_loc char[]"),
 	/* Basic types */
 	ASSIGN_FETCH_TYPE(u8,  u8,  0),
@@ -1358,7 +1358,7 @@ static int finalize_fetch_insn(struct fetch_insn *code,
 	int ret;
 
 	/* Store operation */
-	if (parg->type->is_string) {
+	if (parg->type->composite == FC_STRING) {
 		/* Check bad combination of the type and the last fetch_insn. */
 		if (!strcmp(parg->type->name, "symstr")) {
 			if (code->op != FETCH_OP_REG && code->op != FETCH_OP_STACK &&
@@ -1944,7 +1944,7 @@ static int __set_print_fmt(struct trace_probe *tp, char *buf, int len,
 	for (i = 0; i < tp->nr_args; i++) {
 		parg = tp->args + i;
 		if (parg->count) {
-			if (parg->type->is_string)
+			if (parg->type->composite == FC_STRING)
 				fmt = ", __get_str(%s[%d])";
 			else
 				fmt = ", REC->%s[%d]";
@@ -1952,7 +1952,7 @@ static int __set_print_fmt(struct trace_probe *tp, char *buf, int len,
 				pos += snprintf(buf + pos, LEN_OR_ZERO,
 						fmt, parg->name, j);
 		} else {
-			if (parg->type->is_string)
+			if (parg->type->composite == FC_STRING)
 				fmt = ", __get_str(%s)";
 			else
 				fmt = ", REC->%s";
