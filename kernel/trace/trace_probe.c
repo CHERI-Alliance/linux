@@ -2002,7 +2002,7 @@ int traceprobe_define_arg_fields(struct trace_event_call *event_call,
 			size *= parg->count;
 		ret = trace_define_field(event_call, fmt, parg->name,
 					 offset + parg->offset, size,
-					 parg->type->is_signed,
+					 parg->type->is_signed, 0,
 					 FILTER_OTHER);
 		if (ret)
 			return ret;

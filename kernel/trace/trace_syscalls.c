@@ -536,7 +536,7 @@ static int __init syscall_enter_define_fields(struct trace_event_call *call)
 	for (i = 0; i < meta->nb_args; i++) {
 		ret = trace_define_field(call, meta->types[i],
 					 meta->args[i], offset,
-					 sizeof(ptraddr_t), 0,
+					 sizeof(ptraddr_t), 0, 0,
 					 FILTER_OTHER);
 		if (ret)
 			break;
@@ -568,7 +568,7 @@ static int __init syscall_enter_define_fields(struct trace_event_call *call)
 		snprintf(arg, len, "__%s_val", meta->args[idx]);
 
 		ret = trace_define_field(call, "__data_loc char[]",
-					 arg, offset, sizeof(int), 0,
+					 arg, offset, sizeof(int), 0, 0,
 					 FILTER_OTHER);
 		if (ret) {
 			kfree(arg);

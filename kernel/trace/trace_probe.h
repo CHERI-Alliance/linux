@@ -51,7 +51,7 @@
 		ret = trace_define_field(event_call, #type, name,	\
 					 offsetof(typeof(field), item),	\
 					 sizeof(field.item), is_signed, \
-					 FILTER_OTHER);			\
+					 0, FILTER_OTHER);		\
 		if (ret)						\
 			return ret;					\
 	} while (0)
