@@ -311,4 +311,13 @@ config MARVELL_PEM_PMU
 	  Enable support for PCIe Interface performance monitoring
 	  on Marvell platform.
 
+config CODASIP_CMU_PMU
+	tristate "Codasip Capability Management Unit Performance Monitor"
+	depends on CODASIP_CMU
+	default CODASIP_CMU
+	help
+	  Provides support for the Codasip Capability
+	  Management Unit performance monitor about CHERI
+	  tag cache management.
+
 endmenu
