@@ -137,12 +137,14 @@ struct fetch_insn {
 #define FETCH_INSN_MAX	16
 #define FETCH_TOKEN_COMM	(-ECOMM)
 
+#define FC_STRING 1
+
 /* Fetch type information table */
 struct fetch_type {
 	const char		*name;		/* Name of type */
 	size_t			size;		/* Byte size of type */
 	bool			is_signed;	/* Signed flag */
-	bool			is_string;	/* String flag */
+	u8			composite;	/* !=0 -> composite type (e.g. string) */
 	print_type_func_t	print;		/* Print functions */
 	const char		*fmt;		/* Format string */
 	const char		*fmttype;	/* Name in format file */
@@ -187,17 +189,17 @@ DECLARE_BASIC_PRINT_TYPE_FUNC(symbol);
 #define _ADDR_FETCH_TYPE(t) __ADDR_FETCH_TYPE(t)
 #define ADDR_FETCH_TYPE _ADDR_FETCH_TYPE(BITS_PER_LONG)
 
-#define __ASSIGN_FETCH_TYPE(_name, ptype, _size, sign, str, _fmttype)	\
+#define __ASSIGN_FETCH_TYPE(_name, ptype, _size, sign, comp, _fmttype)	\
 	{.name = _name,					\
 	 .size = _size,					\
 	 .is_signed = (bool)sign,			\
-	 .is_string = (bool)str,			\
+	 .composite = comp,				\
 	 .print = PRINT_TYPE_FUNC_NAME(ptype),		\
 	 .fmt = PRINT_TYPE_FMT_NAME(ptype),		\
 	 .fmttype = _fmttype,				\
 	}
 
-/* Non string types can use these macros */
+/* Elementary types can use these macros */
 #define _ASSIGN_FETCH_TYPE(_name, ptype, _size, sign, _fmttype)	\
 	__ASSIGN_FETCH_TYPE(_name, ptype, _size, sign, 0, #_fmttype)
 #define ASSIGN_FETCH_TYPE(ptype, ftype, sign)			\
