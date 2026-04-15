@@ -234,8 +234,17 @@ trace_print_cap(struct trace_seq *p, ptraddr_t tag_meta, ptraddr_t addr)
 
 	return ret;
 }
-EXPORT_SYMBOL(trace_print_cap);
+#else
+const char *
+trace_print_cap(struct trace_seq *p, ptraddr_t tag_meta __always_unused, ptraddr_t addr)
+{
+	const char *ret = trace_seq_buffer_ptr(p);
+	trace_seq_printf(p, "%p", __c_fakep(addr));
+	trace_seq_putc(p, 0);
+	return ret;
+}
 #endif
+EXPORT_SYMBOL(trace_print_cap);
 
 /**
  * trace_print_bitmask_seq - print a bitmask to a sequence buffer
