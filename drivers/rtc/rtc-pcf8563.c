@@ -222,7 +222,7 @@ static int pcf8563_rtc_set_time(struct device *dev, struct rtc_time *tm)
 				sizeof(buf) - PCF8563_REG_SC);
 }
 
-static int pcf8563_rtc_ioctl(struct device *dev, unsigned int cmd, unsigned long arg)
+static int pcf8563_rtc_ioctl(struct device *dev, unsigned int cmd, user_uintptr_t arg)
 {
 	struct pcf8563 *pcf8563 = dev_get_drvdata(dev);
 	int ret;

@@ -3492,7 +3492,7 @@ static int snd_pcm_common_ioctl(struct file *file,
 }
 
 static long snd_pcm_ioctl(struct file *file, unsigned int cmd,
-			  unsigned long arg)
+			  user_uintptr_t arg)
 {
 	struct snd_pcm_file *pcm_file;
 

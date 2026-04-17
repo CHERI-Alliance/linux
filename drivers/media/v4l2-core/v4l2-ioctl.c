@@ -3416,7 +3416,7 @@ static int video_put_user(void __user *arg, void *parg,
 }
 
 long
-video_usercopy(struct file *file, unsigned int orig_cmd, unsigned long arg,
+video_usercopy(struct file *file, unsigned int orig_cmd, user_uintptr_t arg,
 	       v4l2_kioctl func)
 {
 	char	sbuf[128];
@@ -3527,7 +3527,7 @@ out:
 }
 
 long video_ioctl2(struct file *file,
-	       unsigned int cmd, unsigned long arg)
+	       unsigned int cmd, user_uintptr_t arg)
 {
 	return video_usercopy(file, cmd, arg, __video_do_ioctl);
 }

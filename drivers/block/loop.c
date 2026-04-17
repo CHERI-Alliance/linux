@@ -1491,7 +1491,7 @@ abort_claim:
 }
 
 static int lo_simple_ioctl(struct loop_device *lo, unsigned int cmd,
-			   unsigned long arg)
+			   user_uintptr_t arg)
 {
 	int err;
 
@@ -1503,7 +1503,7 @@ static int lo_simple_ioctl(struct loop_device *lo, unsigned int cmd,
 		err = loop_set_capacity(lo);
 		break;
 	case LOOP_SET_DIRECT_IO:
-		err = loop_set_dio(lo, arg);
+		err = loop_set_dio(lo, __c_ua(arg));
 		break;
 	default:
 		err = -EINVAL;
@@ -1513,7 +1513,7 @@ static int lo_simple_ioctl(struct loop_device *lo, unsigned int cmd,
 }
 
 static int lo_ioctl(struct block_device *bdev, blk_mode_t mode,
-	unsigned int cmd, unsigned long arg)
+	unsigned int cmd, user_uintptr_t arg)
 {
 	struct loop_device *lo = bdev->bd_disk->private_data;
 	void __user *argp = (void __user *) arg;
@@ -1562,7 +1562,7 @@ static int lo_ioctl(struct block_device *bdev, blk_mode_t mode,
 	case LOOP_SET_BLOCK_SIZE:
 		if (!(mode & BLK_OPEN_WRITE) && !capable(CAP_SYS_ADMIN))
 			return -EPERM;
-		return loop_set_block_size(lo, mode, bdev, arg);
+		return loop_set_block_size(lo, mode, bdev, __c_ua(arg));
 	case LOOP_SET_CAPACITY:
 	case LOOP_SET_DIRECT_IO:
 		if (!(mode & BLK_OPEN_WRITE) && !capable(CAP_SYS_ADMIN))
@@ -2212,7 +2212,7 @@ found:
 }
 
 static long loop_control_ioctl(struct file *file, unsigned int cmd,
-			       unsigned long parm)
+			       user_uintptr_t parm)
 {
 	switch (cmd) {
 	case LOOP_CTL_ADD:

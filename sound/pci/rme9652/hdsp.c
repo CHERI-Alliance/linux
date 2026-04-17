@@ -4661,7 +4661,7 @@ static int hdsp_get_peak(struct hdsp *hdsp, struct hdsp_peak_rms __user *peak_rm
 	return 0;
 }
 
-static int snd_hdsp_hwdep_ioctl(struct snd_hwdep *hw, struct file *file, unsigned int cmd, unsigned long arg)
+static int snd_hdsp_hwdep_ioctl(struct snd_hwdep *hw, struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct hdsp *hdsp = hw->private_data;
 	void __user *argp = (void __user *)arg;

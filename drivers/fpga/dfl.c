@@ -1963,7 +1963,7 @@ EXPORT_SYMBOL_GPL(dfl_fpga_set_irq_triggers);
  */
 long dfl_feature_ioctl_get_num_irqs(struct platform_device *pdev,
 				    struct dfl_feature *feature,
-				    unsigned long arg)
+				    user_uintptr_t arg)
 {
 	return put_user(feature->nr_irqs, (__u32 __user *)arg);
 }
@@ -1979,7 +1979,7 @@ EXPORT_SYMBOL_GPL(dfl_feature_ioctl_get_num_irqs);
  */
 long dfl_feature_ioctl_set_irq(struct platform_device *pdev,
 			       struct dfl_feature *feature,
-			       unsigned long arg)
+			       user_uintptr_t arg)
 {
 	struct dfl_feature_dev_data *fdata = to_dfl_feature_dev_data(&pdev->dev);
 	struct dfl_fpga_irq_set hdr;

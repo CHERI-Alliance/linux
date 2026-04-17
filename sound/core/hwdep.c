@@ -234,7 +234,7 @@ static int snd_hwdep_dsp_load_user(struct snd_hwdep *hw,
 
 
 static long snd_hwdep_ioctl(struct file * file, unsigned int cmd,
-			    unsigned long arg)
+			    user_uintptr_t arg)
 {
 	struct snd_hwdep *hw = file->private_data;
 	void __user *argp = (void __user *)arg;
@@ -263,7 +263,7 @@ static int snd_hwdep_mmap(struct file * file, struct vm_area_struct * vma)
 
 static int snd_hwdep_control_ioctl(struct snd_card *card,
 				   struct snd_ctl_file * control,
-				   unsigned int cmd, unsigned long arg)
+				   unsigned int cmd, user_uintptr_t arg)
 {
 	switch (cmd) {
 	case SNDRV_CTL_IOCTL_HWDEP_NEXT_DEVICE:

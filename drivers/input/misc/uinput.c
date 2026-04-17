@@ -907,7 +907,7 @@ static int uinput_str_to_user(void __user *dest, const char *str,
 }
 
 static long uinput_ioctl_handler(struct file *file, unsigned int cmd,
-				 unsigned long arg, void __user *p)
+				 user_uintptr_t arg, void __user *p)
 {
 	int			retval;
 	struct uinput_device	*udev = file->private_data;
@@ -1106,7 +1106,7 @@ static long uinput_ioctl_handler(struct file *file, unsigned int cmd,
 	return retval;
 }
 
-static long uinput_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long uinput_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	return uinput_ioctl_handler(file, cmd, arg, (void __user *)arg);
 }

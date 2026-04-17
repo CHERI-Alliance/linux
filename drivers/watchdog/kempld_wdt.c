@@ -334,7 +334,7 @@ static int kempld_wdt_keepalive(struct watchdog_device *wdd)
 }
 
 static long kempld_wdt_ioctl(struct watchdog_device *wdd, unsigned int cmd,
-				unsigned long arg)
+				user_uintptr_t arg)
 {
 	struct kempld_wdt_data *wdt_data = watchdog_get_drvdata(wdd);
 	void __user *argp = (void __user *)arg;

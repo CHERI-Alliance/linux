@@ -23,7 +23,7 @@
 #include <linux/btrfs.h>
 
 static long cifs_ioctl_query_info(unsigned int xid, struct file *filep,
-				  unsigned long p)
+				  user_uintptr_t p)
 {
 	struct inode *inode = file_inode(filep);
 	struct cifs_sb_info *cifs_sb = CIFS_SB(inode->i_sb);
@@ -68,7 +68,7 @@ static long cifs_ioctl_query_info(unsigned int xid, struct file *filep,
 }
 
 static long cifs_ioctl_copychunk(unsigned int xid, struct file *dst_file,
-			unsigned long srcfd)
+			user_uintptr_t srcfd)
 {
 	int rc;
 	struct inode *src_inode;
@@ -163,7 +163,7 @@ static long smb_mnt_get_fsinfo(unsigned int xid, struct cifs_tcon *tcon,
 	return rc;
 }
 
-static int cifs_shutdown(struct super_block *sb, unsigned long arg)
+static int cifs_shutdown(struct super_block *sb, user_uintptr_t arg)
 {
 	struct cifs_sb_info *sbi = CIFS_SB(sb);
 	struct tcon_link *tlink;
@@ -345,7 +345,7 @@ out:
 	return rc;
 }
 
-long cifs_ioctl(struct file *filep, unsigned int command, unsigned long arg)
+long cifs_ioctl(struct file *filep, unsigned int command, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filep);
 	struct smb3_key_debug_info pkey_inf;

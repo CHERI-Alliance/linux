@@ -660,7 +660,7 @@ static long joydev_compat_ioctl(struct file *file,
 #endif /* CONFIG_COMPAT */
 
 static long joydev_ioctl(struct file *file,
-			 unsigned int cmd, unsigned long arg)
+			 unsigned int cmd, user_uintptr_t arg)
 {
 	struct joydev_client *client = file->private_data;
 	struct joydev *joydev = client->joydev;

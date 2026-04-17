@@ -102,7 +102,7 @@ int jfs_fileattr_set(struct mnt_idmap *idmap,
 	return 0;
 }
 
-long jfs_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+long jfs_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 

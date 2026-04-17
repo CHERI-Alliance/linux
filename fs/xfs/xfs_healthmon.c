@@ -1133,7 +1133,7 @@ STATIC long
 xfs_healthmon_ioctl(
 	struct file			*file,
 	unsigned int			cmd,
-	unsigned long			p)
+	user_uintptr_t			p)
 {
 	void __user			*arg = (void __user *)p;
 

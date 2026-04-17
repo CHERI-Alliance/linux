@@ -174,7 +174,7 @@ static int virtual_ncidev_close(struct inode *inode, struct file *file)
 }
 
 static long virtual_ncidev_ioctl(struct file *file, unsigned int cmd,
-				 unsigned long arg)
+				 user_uintptr_t arg)
 {
 	struct virtual_nci_dev *vdev = file->private_data;
 	const struct nfc_dev *nfc_dev = vdev->ndev->nfc_dev;

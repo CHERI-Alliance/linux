@@ -881,7 +881,7 @@ static int xr_set_rs485_config(struct tty_struct *tty,
 	return 0;
 }
 
-static int xr_ioctl(struct tty_struct *tty, unsigned int cmd, unsigned long arg)
+static int xr_ioctl(struct tty_struct *tty, unsigned int cmd, user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 

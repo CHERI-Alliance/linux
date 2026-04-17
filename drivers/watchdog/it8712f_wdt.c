@@ -251,7 +251,7 @@ static ssize_t it8712f_wdt_write(struct file *file, const char __user *data,
 }
 
 static long it8712f_wdt_ioctl(struct file *file, unsigned int cmd,
-							unsigned long arg)
+							user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 	int __user *p = argp;

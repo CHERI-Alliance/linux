@@ -2232,7 +2232,7 @@ static struct pwm_device *pwm_cdev_get_requested_pwm(struct pwm_cdev_data *cdata
 	return ERR_PTR(-EINVAL);
 }
 
-static long pwm_cdev_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long pwm_cdev_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	int ret = 0;
 	struct pwm_cdev_data *cdata = file->private_data;

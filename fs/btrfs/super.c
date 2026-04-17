@@ -2225,7 +2225,7 @@ static int btrfs_control_open(struct inode *inode, struct file *file)
  * Used by /dev/btrfs-control for devices ioctls.
  */
 static long btrfs_control_ioctl(struct file *file, unsigned int cmd,
-				unsigned long arg)
+				user_uintptr_t arg)
 {
 	struct btrfs_ioctl_vol_args *vol;
 	struct btrfs_device *device = NULL;

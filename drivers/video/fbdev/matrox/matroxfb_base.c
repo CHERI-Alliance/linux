@@ -874,7 +874,7 @@ static struct matrox_altout panellink_output = {
 };
 
 static int matroxfb_ioctl(struct fb_info *info,
-			  unsigned int cmd, unsigned long arg)
+			  unsigned int cmd, user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 	struct matrox_fb_info *minfo = info2minfo(info);

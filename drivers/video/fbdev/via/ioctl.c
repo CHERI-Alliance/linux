@@ -7,7 +7,7 @@
 
 #include "global.h"
 
-int viafb_ioctl_get_viafb_info(u_long arg)
+int viafb_ioctl_get_viafb_info(user_uintptr_t arg)
 {
 	struct viafb_ioctl_info viainfo;
 

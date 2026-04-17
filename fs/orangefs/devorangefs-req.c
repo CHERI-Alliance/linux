@@ -588,7 +588,7 @@ static inline long check_ioctl_command(unsigned int command)
 	return 0;
 }
 
-static long dispatch_ioctl_command(unsigned int command, unsigned long arg)
+static long dispatch_ioctl_command(unsigned int command, user_uintptr_t arg)
 {
 	static __s32 magic = ORANGEFS_DEVREQ_MAGIC;
 	static __s32 max_up_size = MAX_DEV_REQ_UPSIZE;
@@ -697,7 +697,7 @@ static long dispatch_ioctl_command(unsigned int command, unsigned long arg)
 }
 
 static long orangefs_devreq_ioctl(struct file *file,
-			       unsigned int command, unsigned long arg)
+			       unsigned int command, user_uintptr_t arg)
 {
 	long ret;
 

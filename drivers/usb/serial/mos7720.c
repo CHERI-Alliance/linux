@@ -1606,7 +1606,7 @@ static int mos7720_tiocmset(struct tty_struct *tty,
 }
 
 static int mos7720_ioctl(struct tty_struct *tty,
-			 unsigned int cmd, unsigned long arg)
+			 unsigned int cmd, user_uintptr_t arg)
 {
 	struct usb_serial_port *port = tty->driver_data;
 	struct moschip_port *mos7720_port;

@@ -226,7 +226,7 @@ static long media_request_ioctl_reinit(struct media_request *req)
 }
 
 static long media_request_ioctl(struct file *filp, unsigned int cmd,
-				unsigned long arg)
+				user_uintptr_t arg)
 {
 	struct media_request *req = filp->private_data;
 

@@ -412,7 +412,7 @@ static int dm_blk_getgeo(struct gendisk *disk, struct hd_geometry *geo)
 
 static int dm_prepare_ioctl(struct mapped_device *md, int *srcu_idx,
 			    struct block_device **bdev, unsigned int cmd,
-			    unsigned long arg, bool *forward)
+			    user_uintptr_t arg, bool *forward)
 {
 	struct dm_target *ti;
 	struct dm_table *map;
@@ -451,7 +451,7 @@ static void dm_unprepare_ioctl(struct mapped_device *md, int srcu_idx)
 }
 
 static int dm_blk_ioctl(struct block_device *bdev, blk_mode_t mode,
-			unsigned int cmd, unsigned long arg)
+			unsigned int cmd, user_uintptr_t arg)
 {
 	struct mapped_device *md = bdev->bd_disk->private_data;
 	int r, srcu_idx;

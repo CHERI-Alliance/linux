@@ -839,7 +839,7 @@ static int xe_eu_stall_disable_locked(struct xe_eu_stall_data_stream *stream)
 }
 
 static long xe_eu_stall_stream_ioctl_locked(struct xe_eu_stall_data_stream *stream,
-					    unsigned int cmd, unsigned long arg)
+					    unsigned int cmd, user_uintptr_t arg)
 {
 	switch (cmd) {
 	case DRM_XE_OBSERVATION_IOCTL_ENABLE:
@@ -851,7 +851,7 @@ static long xe_eu_stall_stream_ioctl_locked(struct xe_eu_stall_data_stream *stre
 	return -EINVAL;
 }
 
-static long xe_eu_stall_stream_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long xe_eu_stall_stream_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct xe_eu_stall_data_stream *stream = file->private_data;
 	struct xe_gt *gt = stream->gt;

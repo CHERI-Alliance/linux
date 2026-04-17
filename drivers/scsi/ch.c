@@ -630,7 +630,7 @@ struct changer_element_status32 {
 #define CHIOGSTATUS32  _IOW('c', 8, struct changer_element_status32)
 
 static long ch_ioctl(struct file *file,
-		    unsigned int cmd, unsigned long arg)
+		    unsigned int cmd, user_uintptr_t arg)
 {
 	scsi_changer *ch = file->private_data;
 	int retval;

@@ -344,7 +344,7 @@ struct usb_gadget_ops {
 	int	(*vbus_draw) (struct usb_gadget *, unsigned mA);
 	int	(*pullup) (struct usb_gadget *, int is_on);
 	int	(*ioctl)(struct usb_gadget *,
-				unsigned code, unsigned long param);
+				unsigned code, user_uintptr_t param);
 	void	(*get_config_params)(struct usb_gadget *,
 				     struct usb_dcd_config_params *);
 	int	(*udc_start)(struct usb_gadget *,

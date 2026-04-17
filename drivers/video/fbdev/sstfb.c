@@ -744,7 +744,7 @@ static struct device_attribute device_attrs[] = {
 #endif
 
 static int sstfb_ioctl(struct fb_info *info, unsigned int cmd,
-			unsigned long arg)
+			user_uintptr_t arg)
 {
 	struct sstfb_par *par;
 	u32 val;

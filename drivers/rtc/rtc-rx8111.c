@@ -266,7 +266,7 @@ static int rx8111_set_time(struct device *dev, struct rtc_time *tm)
 	return 0;
 }
 
-static int rx8111_ioctl(struct device *dev, unsigned int cmd, unsigned long arg)
+static int rx8111_ioctl(struct device *dev, unsigned int cmd, user_uintptr_t arg)
 {
 	struct rx8111_data *data = dev_get_drvdata(dev);
 	unsigned int regval;

@@ -356,7 +356,7 @@ static __poll_t v4l2_poll(struct file *filp, struct poll_table_struct *poll)
 	return res;
 }
 
-static long v4l2_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+static long v4l2_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 {
 	struct video_device *vdev = video_devdata(filp);
 	int ret = -ENODEV;

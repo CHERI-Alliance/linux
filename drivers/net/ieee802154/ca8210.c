@@ -2580,7 +2580,7 @@ static ssize_t ca8210_test_int_user_read(
 static long ca8210_test_int_ioctl(
 	struct file *filp,
 	unsigned int ioctl_num,
-	unsigned long ioctl_param
+	user_uintptr_t ioctl_param
 )
 {
 	struct ca8210_priv *priv = filp->private_data;

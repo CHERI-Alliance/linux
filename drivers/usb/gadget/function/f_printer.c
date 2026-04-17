@@ -774,7 +774,7 @@ printer_poll(struct file *fd, poll_table *wait)
 }
 
 static long
-printer_ioctl(struct file *fd, unsigned int code, unsigned long arg)
+printer_ioctl(struct file *fd, unsigned int code, user_uintptr_t arg)
 {
 	struct printer_dev	*dev = fd->private_data;
 	unsigned long		flags;

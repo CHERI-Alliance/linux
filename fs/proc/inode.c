@@ -367,7 +367,7 @@ static __poll_t proc_reg_poll(struct file *file, struct poll_table_struct *pts)
 	return rv;
 }
 
-static long pde_ioctl(struct proc_dir_entry *pde, struct file *file, unsigned int cmd, unsigned long arg)
+static long pde_ioctl(struct proc_dir_entry *pde, struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	const auto ioctl = pde->proc_ops->proc_ioctl;
 	if (ioctl)
@@ -375,7 +375,7 @@ static long pde_ioctl(struct proc_dir_entry *pde, struct file *file, unsigned in
 	return -ENOTTY;
 }
 
-static long proc_reg_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long proc_reg_unlocked_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct proc_dir_entry *pde = PDE(file_inode(file));
 	long rv = -ENOTTY;

@@ -335,7 +335,7 @@ static int rx8010_alarm_irq_enable(struct device *dev,
 	return 0;
 }
 
-static int rx8010_ioctl(struct device *dev, unsigned int cmd, unsigned long arg)
+static int rx8010_ioctl(struct device *dev, unsigned int cmd, user_uintptr_t arg)
 {
 	struct rx8010_data *rx8010 = dev_get_drvdata(dev);
 	int tmp, flagreg, err;

@@ -417,7 +417,7 @@ static ssize_t wb_smsc_wdt_write(struct file *file, const char __user *data,
 /* ioctl => control interface */
 
 static long wb_smsc_wdt_ioctl(struct file *file,
-					unsigned int cmd, unsigned long arg)
+					unsigned int cmd, user_uintptr_t arg)
 {
 	int new_timeout;
 

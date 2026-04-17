@@ -305,7 +305,7 @@ static int pcf8523_param_set(struct device *dev, struct rtc_param *param)
 }
 
 static int pcf8523_rtc_ioctl(struct device *dev, unsigned int cmd,
-			     unsigned long arg)
+			     user_uintptr_t arg)
 {
 	struct pcf8523 *pcf8523 = dev_get_drvdata(dev);
 	unsigned int flags = 0;

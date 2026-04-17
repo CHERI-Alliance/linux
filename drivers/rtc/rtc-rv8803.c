@@ -492,7 +492,7 @@ static int rv8803_alarm_irq_enable(struct device *dev, unsigned int enabled)
 	return 0;
 }
 
-static int rv8803_ioctl(struct device *dev, unsigned int cmd, unsigned long arg)
+static int rv8803_ioctl(struct device *dev, unsigned int cmd, user_uintptr_t arg)
 {
 	struct i2c_client *client = to_i2c_client(dev);
 	struct rv8803_data *rv8803 = dev_get_drvdata(dev);

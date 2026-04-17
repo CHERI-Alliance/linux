@@ -1178,7 +1178,7 @@ static long subdev_do_ioctl_lock(struct file *file, unsigned int cmd, void *arg)
 }
 
 static long subdev_ioctl(struct file *file, unsigned int cmd,
-	unsigned long arg)
+	user_uintptr_t arg)
 {
 	return video_usercopy(file, cmd, arg, subdev_do_ioctl_lock);
 }

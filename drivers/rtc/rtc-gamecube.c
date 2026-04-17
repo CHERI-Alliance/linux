@@ -186,7 +186,7 @@ static int gamecube_rtc_set_time(struct device *dev, struct rtc_time *t)
 	return regmap_write(d->regmap, RTC_COUNTER, timestamp - d->rtc_bias);
 }
 
-static int gamecube_rtc_ioctl(struct device *dev, unsigned int cmd, unsigned long arg)
+static int gamecube_rtc_ioctl(struct device *dev, unsigned int cmd, user_uintptr_t arg)
 {
 	struct priv *d = dev_get_drvdata(dev);
 	int value;

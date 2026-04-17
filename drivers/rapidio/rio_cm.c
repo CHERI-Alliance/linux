@@ -1893,7 +1893,7 @@ out:
  * riocm_cdev_ioctl() - IOCTL requests handler
  */
 static long
-riocm_cdev_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+riocm_cdev_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 {
 	switch (cmd) {
 	case RIO_CM_EP_GET_LIST_SIZE:

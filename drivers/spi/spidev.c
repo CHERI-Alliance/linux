@@ -347,7 +347,7 @@ spidev_get_ioc_message(unsigned int cmd, struct spi_ioc_transfer __user *u_ioc,
 }
 
 static long
-spidev_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+spidev_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 {
 	int			retval = 0;
 	struct spidev_data	*spidev;

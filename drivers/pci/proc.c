@@ -192,7 +192,7 @@ struct pci_filp_private {
 #endif /* HAVE_PCI_MMAP */
 
 static long proc_bus_pci_ioctl(struct file *file, unsigned int cmd,
-			       unsigned long arg)
+			       user_uintptr_t arg)
 {
 	struct pci_dev *dev = pde_data(file_inode(file));
 #ifdef HAVE_PCI_MMAP

@@ -29,7 +29,7 @@ static struct vfio {
 	struct mutex			iommu_drivers_lock;
 } vfio;
 
-static void *vfio_noiommu_open(unsigned long arg)
+static void *vfio_noiommu_open(user_uintptr_t arg)
 {
 	if (arg != VFIO_NOIOMMU_IOMMU)
 		return ERR_PTR(-EINVAL);
@@ -44,7 +44,7 @@ static void vfio_noiommu_release(void *iommu_data)
 }
 
 static long vfio_noiommu_ioctl(void *iommu_data,
-			       unsigned int cmd, unsigned long arg)
+			       unsigned int cmd, user_uintptr_t arg)
 {
 	if (cmd == VFIO_CHECK_EXTENSION)
 		return vfio_noiommu && (arg == VFIO_NOIOMMU_IOMMU) ? 1 : 0;
@@ -183,7 +183,7 @@ void vfio_device_container_unregister(struct vfio_device *device)
 
 static long
 vfio_container_ioctl_check_extension(struct vfio_container *container,
-				     unsigned long arg)
+				     user_uintptr_t arg)
 {
 	struct vfio_iommu_driver *driver;
 	long ret = 0;
@@ -258,7 +258,7 @@ unwind:
 }
 
 static long vfio_ioctl_set_iommu(struct vfio_container *container,
-				 unsigned long arg)
+				 user_uintptr_t arg)
 {
 	struct vfio_iommu_driver *driver;
 	long ret = -ENODEV;
@@ -325,7 +325,7 @@ static long vfio_ioctl_set_iommu(struct vfio_container *container,
 }
 
 static long vfio_fops_unl_ioctl(struct file *filep,
-				unsigned int cmd, unsigned long arg)
+				unsigned int cmd, user_uintptr_t arg)
 {
 	struct vfio_container *container = filep->private_data;
 	struct vfio_iommu_driver *driver;

@@ -724,7 +724,7 @@ err:
 }
 
 static long __cxl_memdev_ioctl(struct cxl_memdev *cxlmd, unsigned int cmd,
-			       unsigned long arg)
+			       user_uintptr_t arg)
 {
 	struct cxl_memdev_state *mds = to_cxl_memdev_state(cxlmd->cxlds);
 	struct cxl_mailbox *cxl_mbox = &mds->cxlds.cxl_mbox;
@@ -740,7 +740,7 @@ static long __cxl_memdev_ioctl(struct cxl_memdev *cxlmd, unsigned int cmd,
 }
 
 static long cxl_memdev_ioctl(struct file *file, unsigned int cmd,
-			     unsigned long arg)
+			     user_uintptr_t arg)
 {
 	struct cxl_memdev *cxlmd = file->private_data;
 	struct cxl_dev_state *cxlds;

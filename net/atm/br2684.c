@@ -720,7 +720,7 @@ static int br2684_create(void __user *arg)
  * -ENOIOCTLCMD for any unrecognized ioctl
  */
 static int br2684_ioctl(struct socket *sock, unsigned int cmd,
-			unsigned long arg)
+			user_uintptr_t arg)
 {
 	struct atm_vcc *atmvcc = ATM_SD(sock);
 	void __user *argp = (void __user *)arg;

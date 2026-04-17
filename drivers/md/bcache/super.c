@@ -751,7 +751,7 @@ static void release_dev(struct gendisk *b)
 }
 
 static int ioctl_dev(struct block_device *b, blk_mode_t mode,
-		     unsigned int cmd, unsigned long arg)
+		     unsigned int cmd, user_uintptr_t arg)
 {
 	struct bcache_device *d = b->bd_disk->private_data;
 

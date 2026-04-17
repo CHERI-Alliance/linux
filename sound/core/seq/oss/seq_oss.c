@@ -45,7 +45,7 @@ static int odev_open(struct inode *inode, struct file *file);
 static int odev_release(struct inode *inode, struct file *file);
 static ssize_t odev_read(struct file *file, char __user *buf, size_t count, loff_t *offset);
 static ssize_t odev_write(struct file *file, const char __user *buf, size_t count, loff_t *offset);
-static long odev_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
+static long odev_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg);
 static __poll_t odev_poll(struct file *file, poll_table * wait);
 
 
@@ -164,7 +164,7 @@ odev_write(struct file *file, const char __user *buf, size_t count, loff_t *offs
 }
 
 static long
-odev_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+odev_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct seq_oss_devinfo *dp;
 	long rc;

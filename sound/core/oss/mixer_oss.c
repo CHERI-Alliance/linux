@@ -303,7 +303,7 @@ static int snd_mixer_oss_set_volume(struct snd_mixer_oss_file *fmixer,
 	return result;
 }
 
-static int snd_mixer_oss_ioctl1(struct snd_mixer_oss_file *fmixer, unsigned int cmd, unsigned long arg)
+static int snd_mixer_oss_ioctl1(struct snd_mixer_oss_file *fmixer, unsigned int cmd, user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 	int __user *p = argp;
@@ -371,12 +371,12 @@ static int snd_mixer_oss_ioctl1(struct snd_mixer_oss_file *fmixer, unsigned int 
 	return -ENXIO;
 }
 
-static long snd_mixer_oss_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long snd_mixer_oss_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	return snd_mixer_oss_ioctl1(file->private_data, cmd, arg);
 }
 
-int snd_mixer_oss_ioctl_card(struct snd_card *card, unsigned int cmd, unsigned long arg)
+int snd_mixer_oss_ioctl_card(struct snd_card *card, unsigned int cmd, user_uintptr_t arg)
 {
 	struct snd_mixer_oss_file fmixer;
 	

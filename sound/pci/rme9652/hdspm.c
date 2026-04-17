@@ -6083,7 +6083,7 @@ static int snd_hdspm_hwdep_dummy_op(struct snd_hwdep *hw, struct file *file)
 }
 
 static int snd_hdspm_hwdep_ioctl(struct snd_hwdep *hw, struct file *file,
-		unsigned int cmd, unsigned long arg)
+		unsigned int cmd, user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 	struct hdspm *hdspm = hw->private_data;

@@ -623,7 +623,7 @@ static const struct proc_ops esas2r_proc_ops = {
 static struct Scsi_Host *esas2r_proc_host;
 static int esas2r_proc_major;
 
-long esas2r_proc_ioctl(struct file *fp, unsigned int cmd, unsigned long arg)
+long esas2r_proc_ioctl(struct file *fp, unsigned int cmd, user_uintptr_t arg)
 {
 	return esas2r_ioctl_handler(esas2r_proc_host->hostdata,
 				    cmd, (void __user *)arg);

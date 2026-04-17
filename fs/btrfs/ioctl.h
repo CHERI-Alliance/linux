@@ -14,7 +14,7 @@ struct btrfs_inode;
 struct btrfs_fs_info;
 struct btrfs_ioctl_balance_args;
 
-long btrfs_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
+long btrfs_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg);
 long btrfs_compat_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
 int btrfs_fileattr_get(struct dentry *dentry, struct file_kattr *fa);
 int btrfs_fileattr_set(struct mnt_idmap *idmap,

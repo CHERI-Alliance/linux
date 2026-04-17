@@ -71,7 +71,7 @@ static void uacce_put_queue(struct uacce_queue *q)
 }
 
 static long uacce_fops_unl_ioctl(struct file *filep,
-				 unsigned int cmd, unsigned long arg)
+				 unsigned int cmd, user_uintptr_t arg)
 {
 	struct uacce_queue *q = filep->private_data;
 	struct uacce_device *uacce = q->uacce;

@@ -495,7 +495,7 @@ void usb_serial_generic_unthrottle(struct tty_struct *tty)
 EXPORT_SYMBOL_GPL(usb_serial_generic_unthrottle);
 
 static bool usb_serial_generic_msr_changed(struct tty_struct *tty,
-				unsigned long arg, struct async_icount *cprev)
+				user_uintptr_t arg, struct async_icount *cprev)
 {
 	struct usb_serial_port *port = tty->driver_data;
 	struct async_icount cnow;
@@ -523,7 +523,7 @@ static bool usb_serial_generic_msr_changed(struct tty_struct *tty,
 	return ret;
 }
 
-int usb_serial_generic_tiocmiwait(struct tty_struct *tty, unsigned long arg)
+int usb_serial_generic_tiocmiwait(struct tty_struct *tty, user_uintptr_t arg)
 {
 	struct usb_serial_port *port = tty->driver_data;
 	struct async_icount cnow;

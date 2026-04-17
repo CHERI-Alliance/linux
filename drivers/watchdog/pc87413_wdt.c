@@ -376,7 +376,7 @@ static ssize_t pc87413_write(struct file *file, const char __user *data,
  */
 
 static long pc87413_ioctl(struct file *file, unsigned int cmd,
-						unsigned long arg)
+						user_uintptr_t arg)
 {
 	int new_timeout;
 

@@ -987,7 +987,7 @@ static __poll_t cache_poll(struct file *filp, poll_table *wait,
 }
 
 static int cache_ioctl(struct inode *ino, struct file *filp,
-		       unsigned int cmd, unsigned long arg,
+		       unsigned int cmd, user_uintptr_t arg,
 		       struct cache_detail *cd)
 {
 	int len = 0;
@@ -1566,7 +1566,7 @@ static __poll_t cache_poll_procfs(struct file *filp, poll_table *wait)
 }
 
 static long cache_ioctl_procfs(struct file *filp,
-			       unsigned int cmd, unsigned long arg)
+			       unsigned int cmd, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	struct cache_detail *cd = pde_data(inode);
@@ -1777,7 +1777,7 @@ static __poll_t cache_poll_pipefs(struct file *filp, poll_table *wait)
 }
 
 static long cache_ioctl_pipefs(struct file *filp,
-			      unsigned int cmd, unsigned long arg)
+			      unsigned int cmd, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	struct cache_detail *cd = RPC_I(inode)->private;

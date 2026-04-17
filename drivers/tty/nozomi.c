@@ -1671,7 +1671,7 @@ static int ntty_tiocmset(struct tty_struct *tty,
 	return 0;
 }
 
-static int ntty_cflags_changed(struct port *port, unsigned long flags,
+static int ntty_cflags_changed(struct port *port, user_uintptr_t flags,
 		struct async_icount *cprev)
 {
 	const struct async_icount cnow = port->tty_icount;
@@ -1708,7 +1708,7 @@ static int ntty_tiocgicount(struct tty_struct *tty,
 }
 
 static int ntty_ioctl(struct tty_struct *tty,
-		      unsigned int cmd, unsigned long arg)
+		      unsigned int cmd, user_uintptr_t arg)
 {
 	struct port *port = tty->driver_data;
 	int rval = -ENOIOCTLCMD;

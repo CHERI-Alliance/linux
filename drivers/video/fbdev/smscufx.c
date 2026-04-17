@@ -929,7 +929,7 @@ static void ufx_dpy_deferred_io(struct fb_info *info, struct list_head *pagerefl
 }
 
 static int ufx_ops_ioctl(struct fb_info *info, unsigned int cmd,
-			 unsigned long arg)
+			 user_uintptr_t arg)
 {
 	struct ufx_data *dev = info->par;
 

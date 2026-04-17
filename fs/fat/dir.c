@@ -799,7 +799,7 @@ static int fat_ioctl_readdir(struct inode *inode, struct file *file,
 }
 
 static long fat_dir_ioctl(struct file *filp, unsigned int cmd,
-			  unsigned long arg)
+			  user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	struct __fat_dirent __user *d1 = (struct __fat_dirent __user *)arg;

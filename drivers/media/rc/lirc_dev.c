@@ -359,7 +359,7 @@ out_unlock:
 	return ret;
 }
 
-static long lirc_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long lirc_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct lirc_fh *fh = file->private_data;
 	struct rc_dev *dev = fh->rc;

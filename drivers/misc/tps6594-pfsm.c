@@ -136,7 +136,7 @@ static int tps6594_pfsm_configure_ret_trig(struct regmap *regmap, u8 gpio_ret, u
 	return ret;
 }
 
-static long tps6594_pfsm_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
+static long tps6594_pfsm_ioctl(struct file *f, unsigned int cmd, user_uintptr_t arg)
 {
 	struct tps6594_pfsm *pfsm = TPS6594_FILE_TO_PFSM(f);
 	struct pmic_state_opt state_opt;

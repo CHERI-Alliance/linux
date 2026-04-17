@@ -578,7 +578,7 @@ static ssize_t n_hdlc_tty_write(struct tty_struct *tty, struct file *file,
  * Returns command dependent result.
  */
 static int n_hdlc_tty_ioctl(struct tty_struct *tty, unsigned int cmd,
-			    unsigned long arg)
+			    user_uintptr_t arg)
 {
 	struct n_hdlc *n_hdlc = tty->disc_data;
 	int count;

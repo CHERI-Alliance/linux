@@ -291,7 +291,7 @@ static loff_t vme_user_llseek(struct file *file, loff_t off, int whence)
  * already been defined.
  */
 static int vme_user_ioctl(struct inode *inode, struct file *file,
-			  unsigned int cmd, unsigned long arg)
+			  unsigned int cmd, user_uintptr_t arg)
 {
 	struct vme_master master;
 	struct vme_slave slave;
@@ -411,7 +411,7 @@ static int vme_user_ioctl(struct inode *inode, struct file *file,
 }
 
 static long
-vme_user_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+vme_user_unlocked_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	int ret;
 	struct inode *inode = file_inode(file);

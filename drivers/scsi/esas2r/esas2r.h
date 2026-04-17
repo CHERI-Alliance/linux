@@ -971,7 +971,7 @@ u8 handle_hba_ioctl(struct esas2r_adapter *a,
 enum scsi_qc_status esas2r_queuecommand(struct Scsi_Host *host,
 					struct scsi_cmnd *cmd);
 int esas2r_show_info(struct seq_file *m, struct Scsi_Host *sh);
-long esas2r_proc_ioctl(struct file *fp, unsigned int cmd, unsigned long arg);
+long esas2r_proc_ioctl(struct file *fp, unsigned int cmd, user_uintptr_t arg);
 
 /* SCSI error handler (eh) functions */
 int esas2r_eh_abort(struct scsi_cmnd *cmd);

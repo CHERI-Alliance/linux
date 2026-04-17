@@ -365,7 +365,7 @@ int dvb_generic_release(struct inode *inode, struct file *file);
  * If so, calls dvb_usercopy().
  */
 long dvb_generic_ioctl(struct file *file,
-		       unsigned int cmd, unsigned long arg);
+		       unsigned int cmd, user_uintptr_t arg);
 
 /**
  * dvb_usercopy - copies data from/to userspace memory when an ioctl is
@@ -380,7 +380,7 @@ long dvb_generic_ioctl(struct file *file,
  * userspace. Then, it calls @func, and, if needed, data is copied back
  * to userspace.
  */
-int dvb_usercopy(struct file *file, unsigned int cmd, unsigned long arg,
+int dvb_usercopy(struct file *file, unsigned int cmd, user_uintptr_t arg,
 		 int (*func)(struct file *file, unsigned int cmd, void *arg));
 
 #if IS_ENABLED(CONFIG_I2C)

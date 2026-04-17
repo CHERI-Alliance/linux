@@ -489,7 +489,7 @@ exit:
  *	iowarrior_ioctl
  */
 static long iowarrior_ioctl(struct file *file, unsigned int cmd,
-							unsigned long arg)
+							user_uintptr_t arg)
 {
 	struct iowarrior *dev = NULL;
 	__u8 *buffer;

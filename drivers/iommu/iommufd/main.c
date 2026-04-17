@@ -499,7 +499,7 @@ static const struct iommufd_ioctl_op iommufd_ioctl_ops[] = {
 };
 
 static long iommufd_fops_ioctl(struct file *filp, unsigned int cmd,
-			       unsigned long arg)
+			       user_uintptr_t arg)
 {
 	struct iommufd_ctx *ictx = filp->private_data;
 	const struct iommufd_ioctl_op *op;

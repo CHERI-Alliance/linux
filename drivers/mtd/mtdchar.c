@@ -821,7 +821,7 @@ out:
 	return ret;
 }
 
-static int mtdchar_ioctl(struct file *file, u_int cmd, u_long arg)
+static int mtdchar_ioctl(struct file *file, u_int cmd, user_uintptr_t arg)
 {
 	struct mtd_file_info *mfi = file->private_data;
 	struct mtd_info *mtd = mfi->mtd;
@@ -1230,7 +1230,7 @@ static int mtdchar_ioctl(struct file *file, u_int cmd, u_long arg)
 	return ret;
 } /* memory_ioctl */
 
-static long mtdchar_unlocked_ioctl(struct file *file, u_int cmd, u_long arg)
+static long mtdchar_unlocked_ioctl(struct file *file, u_int cmd, user_uintptr_t arg)
 {
 	struct mtd_file_info *mfi = file->private_data;
 	struct mtd_info *mtd = mfi->mtd;

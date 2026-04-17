@@ -5102,7 +5102,7 @@ static int btrfs_ioctl_subvol_sync(struct btrfs_fs_info *fs_info, void __user *a
 	return 0;
 }
 
-static int btrfs_ioctl_shutdown(struct btrfs_fs_info *fs_info, unsigned long arg)
+static int btrfs_ioctl_shutdown(struct btrfs_fs_info *fs_info, user_uintptr_t arg)
 {
 	int ret = 0;
 	u32 flags;
@@ -5141,7 +5141,7 @@ static int btrfs_ioctl_shutdown(struct btrfs_fs_info *fs_info, unsigned long arg
 }
 
 long btrfs_ioctl(struct file *file, unsigned int
-		cmd, unsigned long arg)
+		cmd, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(file);
 	struct btrfs_fs_info *fs_info = inode_to_fs_info(inode);

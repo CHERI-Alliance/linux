@@ -379,7 +379,7 @@ void roccat_disconnect(int minor)
 }
 EXPORT_SYMBOL_GPL(roccat_disconnect);
 
-static long roccat_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long roccat_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(file);
 	struct roccat_device *device;

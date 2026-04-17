@@ -132,7 +132,7 @@ struct vfio_device_ops {
 	ssize_t	(*write)(struct vfio_device *vdev, const char __user *buf,
 			 size_t count, loff_t *size);
 	long	(*ioctl)(struct vfio_device *vdev, unsigned int cmd,
-			 unsigned long arg);
+			 user_uintptr_t arg);
 	int	(*get_region_info_caps)(struct vfio_device *vdev,
 					struct vfio_region_info *info,
 					struct vfio_info_cap *caps);
@@ -299,7 +299,7 @@ static inline int vfio_check_feature(u32 flags, size_t argsz, u32 supported_ops,
 
 static inline int
 vfio_check_precopy_ioctl(struct vfio_device *vdev, unsigned int cmd,
-			 unsigned long arg, struct vfio_precopy_info *info)
+			 user_uintptr_t arg, struct vfio_precopy_info *info)
 {
 	unsigned long minsz;
 

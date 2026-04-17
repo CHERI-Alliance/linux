@@ -2104,7 +2104,7 @@ static int dvb_frontend_do_ioctl(struct file *file, unsigned int cmd,
 }
 
 static long dvb_frontend_ioctl(struct file *file, unsigned int cmd,
-			       unsigned long arg)
+			       user_uintptr_t arg)
 {
 	struct dvb_device *dvbdev = file->private_data;
 

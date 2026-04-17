@@ -173,7 +173,7 @@ int dvb_generic_release(struct inode *inode, struct file *file)
 EXPORT_SYMBOL(dvb_generic_release);
 
 long dvb_generic_ioctl(struct file *file,
-		       unsigned int cmd, unsigned long arg)
+		       unsigned int cmd, user_uintptr_t arg)
 {
 	struct dvb_device *dvbdev = file->private_data;
 
@@ -955,7 +955,7 @@ EXPORT_SYMBOL(dvb_unregister_adapter);
  * cards (ie. the budget dvb-cards don't need the v4l module...)
  */
 int dvb_usercopy(struct file *file,
-		 unsigned int cmd, unsigned long arg,
+		 unsigned int cmd, user_uintptr_t arg,
 		 int (*func)(struct file *file,
 			     unsigned int cmd, void *arg))
 {

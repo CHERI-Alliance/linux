@@ -351,7 +351,7 @@ int snd_opl3_hwdep_new(struct snd_opl3 * opl3, int device, int seq_device,
 /* opl3_synth */
 int snd_opl3_open(struct snd_hwdep * hw, struct file *file);
 int snd_opl3_ioctl(struct snd_hwdep * hw, struct file *file,
-		   unsigned int cmd, unsigned long arg);
+		   unsigned int cmd, user_uintptr_t arg);
 int snd_opl3_release(struct snd_hwdep * hw, struct file *file);
 
 void snd_opl3_reset(struct snd_opl3 * opl3);

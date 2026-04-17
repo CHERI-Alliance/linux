@@ -178,7 +178,7 @@ static int sc1200wdt_open(struct inode *inode, struct file *file)
 
 
 static long sc1200wdt_ioctl(struct file *file, unsigned int cmd,
-						unsigned long arg)
+						user_uintptr_t arg)
 {
 	int new_timeout;
 	void __user *argp = (void __user *)arg;

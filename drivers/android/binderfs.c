@@ -223,7 +223,7 @@ err:
  * Return: %0 on success, negative errno on failure.
  */
 static long binder_ctl_ioctl(struct file *file, unsigned int cmd,
-			     unsigned long arg)
+			     user_uintptr_t arg)
 {
 	int ret = -EINVAL;
 	struct inode *inode = file_inode(file);

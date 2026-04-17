@@ -366,7 +366,7 @@ static long fcntl_get_rw_hint(struct file *file, unsigned long arg)
 	return 0;
 }
 
-static long fcntl_set_rw_hint(struct file *file, unsigned long arg)
+static long fcntl_set_rw_hint(struct file *file, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(file);
 	u64 __user *argp = (u64 __user *)arg;

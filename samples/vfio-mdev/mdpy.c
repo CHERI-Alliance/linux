@@ -516,7 +516,7 @@ static int mdpy_query_gfx_plane(struct mdev_state *mdev_state,
 }
 
 static long mdpy_ioctl(struct vfio_device *vdev, unsigned int cmd,
-		       unsigned long arg)
+		       user_uintptr_t arg)
 {
 	int ret = 0;
 	unsigned long minsz;

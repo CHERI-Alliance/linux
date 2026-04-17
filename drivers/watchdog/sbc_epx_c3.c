@@ -99,7 +99,7 @@ static ssize_t epx_c3_write(struct file *file, const char __user *data,
 }
 
 static long epx_c3_ioctl(struct file *file, unsigned int cmd,
-						unsigned long arg)
+						user_uintptr_t arg)
 {
 	int options, retval = -EINVAL;
 	int __user *argp = (void __user *)arg;

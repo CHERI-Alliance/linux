@@ -1145,7 +1145,7 @@ sg_ioctl_common(struct file *filp, Sg_device *sdp, Sg_fd *sfp,
 }
 
 static long
-sg_ioctl(struct file *filp, unsigned int cmd_in, unsigned long arg)
+sg_ioctl(struct file *filp, unsigned int cmd_in, user_uintptr_t arg)
 {
 	void __user *p = (void __user *)arg;
 	Sg_device *sdp;

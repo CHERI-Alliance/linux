@@ -314,7 +314,7 @@ static __poll_t rpmsg_eptdev_poll(struct file *filp, poll_table *wait)
 }
 
 static long rpmsg_eptdev_ioctl(struct file *fp, unsigned int cmd,
-			       unsigned long arg)
+			       user_uintptr_t arg)
 {
 	struct rpmsg_eptdev *eptdev = fp->private_data;
 

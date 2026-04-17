@@ -83,9 +83,9 @@ void tty_buffer_flush_work(struct tty_port *port);
 speed_t tty_termios_input_baud_rate(const struct ktermios *termios);
 void tty_ldisc_hangup(struct tty_struct *tty, bool reset);
 int tty_ldisc_reinit(struct tty_struct *tty, int disc);
-long tty_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
+long tty_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg);
 long tty_jobctrl_ioctl(struct tty_struct *tty, struct tty_struct *real_tty,
-		       struct file *file, unsigned int cmd, unsigned long arg);
+		       struct file *file, unsigned int cmd, user_uintptr_t arg);
 void tty_default_fops(struct file_operations *fops);
 struct tty_struct *alloc_tty_struct(struct tty_driver *driver, int idx);
 int tty_alloc_file(struct file *file);

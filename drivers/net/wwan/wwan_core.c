@@ -969,7 +969,7 @@ static __poll_t wwan_port_fops_poll(struct file *filp, poll_table *wait)
 
 /* Implements minimalistic stub terminal IOCTLs support */
 static long wwan_port_fops_at_ioctl(struct wwan_port *port, unsigned int cmd,
-				    unsigned long arg)
+				    user_uintptr_t arg)
 {
 	int ret = 0;
 
@@ -1041,7 +1041,7 @@ static long wwan_port_fops_at_ioctl(struct wwan_port *port, unsigned int cmd,
 }
 
 static long wwan_port_fops_ioctl(struct file *filp, unsigned int cmd,
-				 unsigned long arg)
+				 user_uintptr_t arg)
 {
 	struct wwan_port *port = filp->private_data;
 	int res;

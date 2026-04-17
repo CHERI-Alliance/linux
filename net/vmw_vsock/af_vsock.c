@@ -1600,7 +1600,7 @@ static int vsock_do_ioctl(struct socket *sock, unsigned int cmd,
 }
 
 static int vsock_ioctl(struct socket *sock, unsigned int cmd,
-		       unsigned long arg)
+		       user_uintptr_t arg)
 {
 	int ret;
 
@@ -2766,7 +2766,7 @@ static long vsock_dev_do_ioctl(struct file *filp,
 }
 
 static long vsock_dev_ioctl(struct file *filp,
-			    unsigned int cmd, unsigned long arg)
+			    unsigned int cmd, user_uintptr_t arg)
 {
 	return vsock_dev_do_ioctl(filp, cmd, (void __user *)arg);
 }

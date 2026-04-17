@@ -261,7 +261,7 @@ struct ppp_net {
 
 /* Prototypes. */
 static int ppp_unattached_ioctl(struct net *net, struct ppp_file *pf,
-			struct file *file, unsigned int cmd, unsigned long arg);
+			struct file *file, unsigned int cmd, user_uintptr_t arg);
 static void ppp_xmit_process(struct ppp *ppp, struct sk_buff *skb);
 static int ppp_prepare_tx_skb(struct ppp *ppp, struct sk_buff **pskb);
 static int ppp_push(struct ppp *ppp, struct sk_buff *skb);
@@ -710,7 +710,7 @@ static int ppp_unbridge_channels(struct channel *pch)
 	return 0;
 }
 
-static long ppp_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long ppp_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct ppp_file *pf;
 	struct ppp *ppp;
@@ -1040,7 +1040,7 @@ static long ppp_compat_ioctl(struct file *file, unsigned int cmd, unsigned long 
 #endif
 
 static int ppp_unattached_ioctl(struct net *net, struct ppp_file *pf,
-			struct file *file, unsigned int cmd, unsigned long arg)
+			struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	int unit, err = -EFAULT;
 	struct ppp *ppp;

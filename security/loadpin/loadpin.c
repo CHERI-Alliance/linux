@@ -373,7 +373,7 @@ err:
 
 /******************************** securityfs ********************************/
 
-static long dm_verity_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+static long dm_verity_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 {
 	void __user *uarg = (void __user *)arg;
 	unsigned int fd;

@@ -491,7 +491,7 @@ snd_seq_oss_synth_addr(struct seq_oss_devinfo *dp, int dev, struct snd_seq_event
  * OSS compatible ioctl
  */
 int
-snd_seq_oss_synth_ioctl(struct seq_oss_devinfo *dp, int dev, unsigned int cmd, unsigned long addr)
+snd_seq_oss_synth_ioctl(struct seq_oss_devinfo *dp, int dev, unsigned int cmd, user_uintptr_t addr)
 {
 	struct seq_oss_synthinfo *info;
 

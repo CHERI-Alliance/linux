@@ -426,7 +426,7 @@ static int isl12022_setup_irq(struct device *dev, int irq)
 	return 0;
 }
 
-static int isl12022_rtc_ioctl(struct device *dev, unsigned int cmd, unsigned long arg)
+static int isl12022_rtc_ioctl(struct device *dev, unsigned int cmd, user_uintptr_t arg)
 {
 	struct isl12022 *isl12022 = dev_get_drvdata(dev);
 	struct regmap *regmap = isl12022->regmap;

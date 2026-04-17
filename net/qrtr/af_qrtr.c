@@ -1137,7 +1137,7 @@ static int qrtr_getname(struct socket *sock, struct sockaddr *saddr,
 	return sizeof(qaddr);
 }
 
-static int qrtr_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+static int qrtr_ioctl(struct socket *sock, unsigned int cmd, user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 	struct qrtr_sock *ipc = qrtr_sk(sock->sk);
