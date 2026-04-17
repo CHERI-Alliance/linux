@@ -342,7 +342,7 @@ static int sw_sync_debugfs_release(struct inode *inode, struct file *file)
 }
 
 static long sw_sync_ioctl_create_fence(struct sync_timeline *obj,
-				       unsigned long arg)
+				       user_uintptr_t arg)
 {
 	int fd = get_unused_fd_flags(O_CLOEXEC);
 	int err;
@@ -390,7 +390,7 @@ err:
 	return err;
 }
 
-static long sw_sync_ioctl_inc(struct sync_timeline *obj, unsigned long arg)
+static long sw_sync_ioctl_inc(struct sync_timeline *obj, user_uintptr_t arg)
 {
 	u32 value;
 
@@ -407,7 +407,7 @@ static long sw_sync_ioctl_inc(struct sync_timeline *obj, unsigned long arg)
 	return 0;
 }
 
-static int sw_sync_ioctl_get_deadline(struct sync_timeline *obj, unsigned long arg)
+static int sw_sync_ioctl_get_deadline(struct sync_timeline *obj, user_uintptr_t arg)
 {
 	struct sw_sync_get_deadline data;
 	struct dma_fence *fence;
@@ -458,7 +458,7 @@ put_fence:
 }
 
 static long sw_sync_ioctl(struct file *file, unsigned int cmd,
-			  unsigned long arg)
+			  user_uintptr_t arg)
 {
 	struct sync_timeline *obj = file->private_data;
 

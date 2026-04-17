@@ -2069,7 +2069,7 @@ static int usbtmc_ioctl_config_termc(struct usbtmc_file_data *file_data,
 	return 0;
 }
 
-static long usbtmc_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long usbtmc_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct usbtmc_file_data *file_data;
 	struct usbtmc_device_data *data;

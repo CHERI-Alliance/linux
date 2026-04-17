@@ -467,7 +467,7 @@ static int nvgrace_gpu_ioctl_get_region_info(struct vfio_device *core_vdev,
 }
 
 static long nvgrace_gpu_ioctl(struct vfio_device *core_vdev,
-			      unsigned int cmd, unsigned long arg)
+			      unsigned int cmd, user_uintptr_t arg)
 {
 	switch (cmd) {
 	case VFIO_DEVICE_IOEVENTFD:

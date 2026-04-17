@@ -1824,7 +1824,7 @@ out:
 }
 
 static long seccomp_notify_ioctl(struct file *file, unsigned int cmd,
-				 unsigned long arg)
+				 user_uintptr_t arg)
 {
 	struct seccomp_filter *filter = file->private_data;
 	void __user *buf = (void __user *)arg;
@@ -1839,7 +1839,7 @@ static long seccomp_notify_ioctl(struct file *file, unsigned int cmd,
 	case SECCOMP_IOCTL_NOTIF_ID_VALID:
 		return seccomp_notify_id_valid(filter, buf);
 	case SECCOMP_IOCTL_NOTIF_SET_FLAGS:
-		return seccomp_notify_set_flags(filter, arg);
+		return seccomp_notify_set_flags(filter, __c_ua(arg));
 	}
 
 	/* Extensible Argument ioctls */

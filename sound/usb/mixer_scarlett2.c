@@ -8887,7 +8887,7 @@ static int scarlett2_reboot(struct usb_mixer_interface *mixer)
 /* Select a flash segment for reading/erasing/writing */
 static int scarlett2_ioctl_select_flash_segment(
 	struct usb_mixer_interface *mixer,
-	unsigned long arg)
+	user_uintptr_t arg)
 {
 	struct scarlett2_data *private = mixer->private_data;
 	int segment_id, segment_num;
@@ -8969,7 +8969,7 @@ static int scarlett2_ioctl_erase_flash_segment(
 /* Get the erase progress from the device */
 static int scarlett2_ioctl_get_erase_progress(
 	struct usb_mixer_interface *mixer,
-	unsigned long arg)
+	user_uintptr_t arg)
 {
 	struct scarlett2_data *private = mixer->private_data;
 	struct scarlett2_flash_segment_erase_progress progress;
@@ -9038,7 +9038,7 @@ static int scarlett2_hwdep_open(struct snd_hwdep *hw, struct file *file)
 }
 
 static int scarlett2_hwdep_ioctl(struct snd_hwdep *hw, struct file *file,
-				 unsigned int cmd, unsigned long arg)
+				 unsigned int cmd, user_uintptr_t arg)
 {
 	struct usb_mixer_interface *mixer = hw->private_data;
 

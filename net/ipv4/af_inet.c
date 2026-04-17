@@ -968,7 +968,7 @@ EXPORT_SYMBOL(inet_shutdown);
  *	There's a good 20K of config code hanging around the kernel.
  */
 
-int inet_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+int inet_ioctl(struct socket *sock, unsigned int cmd, user_uintptr_t arg)
 {
 	struct sock *sk = sock->sk;
 	int err = 0;

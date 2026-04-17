@@ -135,7 +135,7 @@ ssize_t cifs_file_copychunk_range(unsigned int xid, struct file *src_file,
 				  loff_t destoff, size_t len,
 				  unsigned int flags);
 
-long cifs_ioctl(struct file *filep, unsigned int command, unsigned long arg);
+long cifs_ioctl(struct file *filep, unsigned int command, user_uintptr_t arg);
 void cifs_setsize(struct inode *inode, loff_t offset);
 
 struct smb3_fs_context;

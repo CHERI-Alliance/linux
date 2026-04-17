@@ -3513,7 +3513,7 @@ int sock_no_getname(struct socket *sock, struct sockaddr *saddr,
 }
 EXPORT_SYMBOL(sock_no_getname);
 
-int sock_no_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+int sock_no_ioctl(struct socket *sock, unsigned int cmd, user_uintptr_t arg)
 {
 	return -EOPNOTSUPP;
 }

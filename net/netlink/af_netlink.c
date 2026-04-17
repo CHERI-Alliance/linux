@@ -1126,7 +1126,7 @@ static int netlink_getname(struct socket *sock, struct sockaddr *addr,
 }
 
 static int netlink_ioctl(struct socket *sock, unsigned int cmd,
-			 unsigned long arg)
+			 user_uintptr_t arg)
 {
 	/* try to hand this ioctl down to the NIC drivers.
 	 */

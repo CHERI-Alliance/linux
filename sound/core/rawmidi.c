@@ -886,7 +886,7 @@ static int snd_rawmidi_ioctl_status64(struct snd_rawmidi_file *rfile,
 	return 0;
 }
 
-static long snd_rawmidi_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long snd_rawmidi_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct snd_rawmidi_file *rfile;
 	struct snd_rawmidi *rmidi;
@@ -1043,7 +1043,7 @@ static int snd_rawmidi_call_ump_ioctl(struct snd_card *card, int cmd,
 static int snd_rawmidi_control_ioctl(struct snd_card *card,
 				     struct snd_ctl_file *control,
 				     unsigned int cmd,
-				     unsigned long arg)
+				     user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 

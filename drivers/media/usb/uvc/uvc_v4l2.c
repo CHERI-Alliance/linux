@@ -1195,7 +1195,7 @@ static long uvc_v4l2_compat_ioctl32(struct file *file,
 #endif
 
 static long uvc_v4l2_unlocked_ioctl(struct file *file,
-				    unsigned int cmd, unsigned long arg)
+				    unsigned int cmd, user_uintptr_t arg)
 {
 	struct uvc_fh *handle = to_uvc_fh(file);
 	unsigned int converted_cmd = v4l2_translate_cmd(cmd);

@@ -472,7 +472,7 @@ static int scom_check(struct scom_device *scom, void __user *argp)
 	return put_user(SCOM_CHECK_SUPPORTED, (__u32 __user *)argp);
 }
 
-static long scom_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long scom_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct scom_device *scom = file->private_data;
 	void __user *argp = (void __user *)arg;

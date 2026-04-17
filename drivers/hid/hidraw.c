@@ -507,7 +507,7 @@ static long hidraw_ro_variable_size_ioctl(struct file *file, struct hidraw *dev,
 	return -EINVAL;
 }
 
-static long hidraw_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long hidraw_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(file);
 	unsigned int minor = iminor(inode);

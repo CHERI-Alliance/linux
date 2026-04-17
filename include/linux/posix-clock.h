@@ -52,7 +52,7 @@ struct posix_clock_operations {
 	 * Optional character device methods:
 	 */
 	long (*ioctl)(struct posix_clock_context *pccontext, unsigned int cmd,
-		      unsigned long arg);
+		      user_uintptr_t arg);
 
 	int (*open)(struct posix_clock_context *pccontext, fmode_t f_mode);
 

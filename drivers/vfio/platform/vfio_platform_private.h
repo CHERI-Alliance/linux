@@ -84,7 +84,7 @@ void vfio_platform_release_common(struct vfio_platform_device *vdev);
 int vfio_platform_open_device(struct vfio_device *core_vdev);
 void vfio_platform_close_device(struct vfio_device *core_vdev);
 long vfio_platform_ioctl(struct vfio_device *core_vdev,
-			 unsigned int cmd, unsigned long arg);
+			 unsigned int cmd, user_uintptr_t arg);
 int vfio_platform_ioctl_get_region_info(struct vfio_device *core_vdev,
 					struct vfio_region_info *info,
 					struct vfio_info_cap *caps);

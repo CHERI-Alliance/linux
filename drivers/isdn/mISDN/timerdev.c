@@ -217,7 +217,7 @@ misdn_del_timer(struct mISDNtimerdev *dev, int id)
 }
 
 static long
-mISDN_ioctl(struct file *filep, unsigned int cmd, unsigned long arg)
+mISDN_ioctl(struct file *filep, unsigned int cmd, user_uintptr_t arg)
 {
 	struct mISDNtimerdev	*dev = filep->private_data;
 	int			id, tout, ret = 0;

@@ -1202,7 +1202,7 @@ static void uart_enable_ms(struct uart_port *uport)
  * FIXME: This wants extracting into a common all driver implementation
  * of TIOCMWAIT using tty_port.
  */
-static int uart_wait_modem_status(struct uart_state *state, unsigned long arg)
+static int uart_wait_modem_status(struct uart_state *state, user_uintptr_t arg)
 {
 	struct uart_port *uport;
 	struct tty_port *port = &state->port;
@@ -1551,7 +1551,7 @@ static int uart_set_iso7816_config(struct uart_port *port,
  * Called via sys_ioctl.  We can use spin_lock_irq() here.
  */
 static int
-uart_ioctl(struct tty_struct *tty, unsigned int cmd, unsigned long arg)
+uart_ioctl(struct tty_struct *tty, unsigned int cmd, user_uintptr_t arg)
 {
 	struct uart_state *state = tty->driver_data;
 	struct tty_port *port = &state->port;

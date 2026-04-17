@@ -1462,7 +1462,7 @@ static int vfio_pci_ioctl_ioeventfd(struct vfio_pci_core_device *vdev,
 }
 
 long vfio_pci_core_ioctl(struct vfio_device *core_vdev, unsigned int cmd,
-			 unsigned long arg)
+			 user_uintptr_t arg)
 {
 	struct vfio_pci_core_device *vdev =
 		container_of(core_vdev, struct vfio_pci_core_device, vdev);

@@ -1364,7 +1364,7 @@ static const xe_oa_user_extension_fn xe_oa_user_extension_funcs[] = {
 };
 
 #define MAX_USER_EXTENSIONS	16
-static int xe_oa_user_extensions(struct xe_oa *oa, enum xe_oa_user_extn_from from, u64 extension,
+static int xe_oa_user_extensions(struct xe_oa *oa, enum xe_oa_user_extn_from from, user_uintptr_t extension,
 				 int ext_number, struct xe_oa_open_param *param)
 {
 	u64 __user *address = (void __user *)extension;
@@ -1536,7 +1536,7 @@ static int xe_oa_disable_locked(struct xe_oa_stream *stream)
 	return ret;
 }
 
-static long xe_oa_config_locked(struct xe_oa_stream *stream, u64 arg)
+static long xe_oa_config_locked(struct xe_oa_stream *stream, user_uintptr_t arg)
 {
 	struct xe_oa_open_param param = {};
 	long ret = stream->oa_config->id;
@@ -1572,7 +1572,7 @@ err_config_put:
 	return err ?: ret;
 }
 
-static long xe_oa_status_locked(struct xe_oa_stream *stream, unsigned long arg)
+static long xe_oa_status_locked(struct xe_oa_stream *stream, user_uintptr_t arg)
 {
 	struct drm_xe_oa_stream_status status = {};
 	void __user *uaddr = (void __user *)arg;
@@ -1593,7 +1593,7 @@ static long xe_oa_status_locked(struct xe_oa_stream *stream, unsigned long arg)
 	return 0;
 }
 
-static long xe_oa_info_locked(struct xe_oa_stream *stream, unsigned long arg)
+static long xe_oa_info_locked(struct xe_oa_stream *stream, user_uintptr_t arg)
 {
 	struct drm_xe_oa_stream_info info = { .oa_buf_size = xe_bo_size(stream->oa_buffer.bo), };
 	void __user *uaddr = (void __user *)arg;
@@ -1606,7 +1606,7 @@ static long xe_oa_info_locked(struct xe_oa_stream *stream, unsigned long arg)
 
 static long xe_oa_ioctl_locked(struct xe_oa_stream *stream,
 			       unsigned int cmd,
-			       unsigned long arg)
+			       user_uintptr_t arg)
 {
 	switch (cmd) {
 	case DRM_XE_OBSERVATION_IOCTL_ENABLE:
@@ -1626,7 +1626,7 @@ static long xe_oa_ioctl_locked(struct xe_oa_stream *stream,
 
 static long xe_oa_ioctl(struct file *file,
 			unsigned int cmd,
-			unsigned long arg)
+			user_uintptr_t arg)
 {
 	struct xe_oa_stream *stream = file->private_data;
 	long ret;
@@ -2014,7 +2014,7 @@ out:
  * properties, enables OA counter samples to be collected, either
  * periodically (time based sampling), or on request (using OA queries)
  */
-int xe_oa_stream_open_ioctl(struct drm_device *dev, u64 data, struct drm_file *file)
+int xe_oa_stream_open_ioctl(struct drm_device *dev, user_uintptr_t data, struct drm_file *file)
 {
 	struct xe_device *xe = to_xe_device(dev);
 	struct xe_oa *oa = &xe->oa;
@@ -2335,7 +2335,7 @@ static int create_dynamic_oa_sysfs_entry(struct xe_oa *oa,
  * the kernel. The config determines which OA metrics are collected for an
  * OA stream.
  */
-int xe_oa_add_config_ioctl(struct drm_device *dev, u64 data, struct drm_file *file)
+int xe_oa_add_config_ioctl(struct drm_device *dev, user_uintptr_t data, struct drm_file *file)
 {
 	struct xe_device *xe = to_xe_device(dev);
 	struct xe_oa *oa = &xe->oa;
@@ -2439,7 +2439,7 @@ reg_err:
  * @data: pointer to struct @drm_xe_observation_param
  * @file: @drm_file
  */
-int xe_oa_remove_config_ioctl(struct drm_device *dev, u64 data, struct drm_file *file)
+int xe_oa_remove_config_ioctl(struct drm_device *dev, user_uintptr_t data, struct drm_file *file)
 {
 	struct xe_device *xe = to_xe_device(dev);
 	struct xe_oa *oa = &xe->oa;

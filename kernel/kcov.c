@@ -544,7 +544,7 @@ static int kcov_close(struct inode *inode, struct file *filep)
 	return 0;
 }
 
-static int kcov_get_mode(unsigned long arg)
+static int kcov_get_mode(user_uintptr_t arg)
 {
 	if (arg == KCOV_TRACE_PC)
 		return KCOV_MODE_TRACE_PC;
@@ -592,7 +592,7 @@ static inline bool kcov_check_handle(u64 handle, bool common_valid,
 }
 
 static int kcov_ioctl_locked(struct kcov *kcov, unsigned int cmd,
-			     unsigned long arg)
+			     user_uintptr_t arg)
 	__must_hold(&kcov->lock)
 {
 	struct task_struct *t;
@@ -700,7 +700,7 @@ static int kcov_ioctl_locked(struct kcov *kcov, unsigned int cmd,
 	}
 }
 
-static long kcov_ioctl(struct file *filep, unsigned int cmd, unsigned long arg)
+static long kcov_ioctl(struct file *filep, unsigned int cmd, user_uintptr_t arg)
 {
 	struct kcov *kcov;
 	int res;

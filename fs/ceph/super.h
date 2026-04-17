@@ -1364,7 +1364,7 @@ extern unsigned ceph_dentry_hash(struct inode *dir, struct dentry *dn);
 extern void ceph_readdir_cache_release(struct ceph_readdir_cache_control *ctl);
 
 /* ioctl.c */
-extern long ceph_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
+extern long ceph_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg);
 
 /* export.c */
 extern const struct export_operations ceph_export_ops;

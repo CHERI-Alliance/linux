@@ -504,7 +504,7 @@ static inline void ep_set_busy_poll_napi_id(struct epitem *epi)
 }
 
 static long ep_eventpoll_bp_ioctl(struct file *file, unsigned int cmd,
-				  unsigned long arg)
+				  user_uintptr_t arg)
 {
 	struct eventpoll *ep = file->private_data;
 	void __user *uarg = (void __user *)arg;
@@ -942,7 +942,7 @@ static void ep_clear_and_put(struct eventpoll *ep)
 }
 
 static long ep_eventpoll_ioctl(struct file *file, unsigned int cmd,
-			       unsigned long arg)
+			       user_uintptr_t arg)
 {
 	int ret;
 

@@ -2986,7 +2986,7 @@ static int amdgpu_drm_release(struct inode *inode, struct file *filp)
 }
 
 long amdgpu_drm_ioctl(struct file *filp,
-		      unsigned int cmd, unsigned long arg)
+		      unsigned int cmd, user_uintptr_t arg)
 {
 	struct drm_file *file_priv = filp->private_data;
 	struct drm_device *dev;

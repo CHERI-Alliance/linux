@@ -1365,7 +1365,7 @@ rescan: /* The caller is holding a ref on this "priv" via j1939_priv_get_by_ndev
 }
 
 static int j1939_sk_no_ioctlcmd(struct socket *sock, unsigned int cmd,
-				unsigned long arg)
+				user_uintptr_t arg)
 {
 	/* no ioctls for socket layer -> hand it down to NIC layer */
 	return -ENOIOCTLCMD;

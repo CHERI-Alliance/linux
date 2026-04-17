@@ -1040,7 +1040,7 @@ static int pppol2tp_tunnel_copy_stats(struct pppol2tp_ioc_stats *stats,
 }
 
 static int pppol2tp_ioctl(struct socket *sock, unsigned int cmd,
-			  unsigned long arg)
+			  user_uintptr_t arg)
 {
 	struct pppol2tp_ioc_stats stats;
 	struct l2tp_session *session;

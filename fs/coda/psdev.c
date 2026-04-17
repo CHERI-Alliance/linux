@@ -69,7 +69,7 @@ static __poll_t coda_psdev_poll(struct file *file, poll_table * wait)
 	return mask;
 }
 
-static long coda_psdev_ioctl(struct file * filp, unsigned int cmd, unsigned long arg)
+static long coda_psdev_ioctl(struct file * filp, unsigned int cmd, user_uintptr_t arg)
 {
 	unsigned int data;
 

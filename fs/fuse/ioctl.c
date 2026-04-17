@@ -121,7 +121,7 @@ static int fuse_copy_ioctl_iovec(struct fuse_conn *fc, struct iovec *dst,
 }
 
 /* For fs-verity, determine iov lengths from input */
-static int fuse_setup_measure_verity(unsigned long arg, struct iovec *iov)
+static int fuse_setup_measure_verity(user_uintptr_t arg, struct iovec *iov)
 {
 	__u16 digest_size;
 	struct fsverity_digest __user *uarg = (void __user *)arg;
@@ -137,7 +137,7 @@ static int fuse_setup_measure_verity(unsigned long arg, struct iovec *iov)
 	return 0;
 }
 
-static int fuse_setup_enable_verity(unsigned long arg, struct iovec *iov,
+static int fuse_setup_enable_verity(user_uintptr_t arg, struct iovec *iov,
 				    unsigned int *in_iovs)
 {
 	struct fsverity_enable_arg enable;
@@ -214,7 +214,7 @@ static int fuse_setup_enable_verity(unsigned long arg, struct iovec *iov,
  * limits ioctl data transfers to well-formed ioctls and is the forced
  * behavior for all FUSE servers.
  */
-long fuse_do_ioctl(struct file *file, unsigned int cmd, unsigned long arg,
+long fuse_do_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg,
 		   unsigned int flags)
 {
 	struct fuse_file *ff = file->private_data;
@@ -410,7 +410,7 @@ long fuse_do_ioctl(struct file *file, unsigned int cmd, unsigned long arg,
 EXPORT_SYMBOL_GPL(fuse_do_ioctl);
 
 long fuse_ioctl_common(struct file *file, unsigned int cmd,
-		       unsigned long arg, unsigned int flags)
+		       user_uintptr_t arg, unsigned int flags)
 {
 	struct inode *inode = file_inode(file);
 	struct fuse_conn *fc = get_fuse_conn(inode);
@@ -424,7 +424,7 @@ long fuse_ioctl_common(struct file *file, unsigned int cmd,
 	return fuse_do_ioctl(file, cmd, arg, flags);
 }
 
-long fuse_file_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+long fuse_file_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	return fuse_ioctl_common(file, cmd, arg, 0);
 }

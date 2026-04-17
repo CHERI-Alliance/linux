@@ -208,7 +208,7 @@ static ssize_t nv_tco_write(struct file *file, const char __user *data,
 }
 
 static long nv_tco_ioctl(struct file *file, unsigned int cmd,
-			 unsigned long arg)
+			 user_uintptr_t arg)
 {
 	int new_options, retval = -EINVAL;
 	int new_heartbeat;

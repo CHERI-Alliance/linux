@@ -770,7 +770,7 @@ static int fcp_hwdep_open(struct snd_hwdep *hw, struct file *file)
 }
 
 static int fcp_hwdep_ioctl(struct snd_hwdep *hw, struct file *file,
-			   unsigned int cmd, unsigned long arg)
+			   unsigned int cmd, user_uintptr_t arg)
 {
 	struct usb_mixer_interface *mixer = hw->private_data;
 	struct fcp_data *private = mixer->private_data;

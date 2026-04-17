@@ -357,7 +357,7 @@ static int vfio_group_ioctl_get_status(struct vfio_group *group,
 }
 
 static long vfio_group_fops_unl_ioctl(struct file *filep,
-				      unsigned int cmd, unsigned long arg)
+				      unsigned int cmd, user_uintptr_t arg)
 {
 	struct vfio_group *group = filep->private_data;
 	void __user *uarg = (void __user *)arg;

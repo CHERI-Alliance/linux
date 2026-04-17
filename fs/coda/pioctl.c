@@ -27,7 +27,7 @@
 static int coda_ioctl_permission(struct mnt_idmap *idmap,
 				 struct inode *inode, int mask);
 static long coda_pioctl(struct file *filp, unsigned int cmd,
-			unsigned long user_data);
+			user_uintptr_t user_data);
 
 /* exported from this file */
 const struct inode_operations coda_ioctl_inode_operations = {
@@ -48,7 +48,7 @@ static int coda_ioctl_permission(struct mnt_idmap *idmap,
 }
 
 static long coda_pioctl(struct file *filp, unsigned int cmd,
-			unsigned long user_data)
+			user_uintptr_t user_data)
 {
 	struct path path;
 	int error;

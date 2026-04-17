@@ -405,7 +405,7 @@ struct dfl_feature_ops {
 	void (*uinit)(struct platform_device *pdev,
 		      struct dfl_feature *feature);
 	long (*ioctl)(struct platform_device *pdev, struct dfl_feature *feature,
-		      unsigned int cmd, unsigned long arg);
+		      unsigned int cmd, user_uintptr_t arg);
 };
 
 #define DFL_FPGA_FEATURE_DEV_FME		"dfl-fme"
@@ -576,9 +576,9 @@ int dfl_fpga_set_irq_triggers(struct dfl_feature *feature, unsigned int start,
 			      unsigned int count, int32_t *fds);
 long dfl_feature_ioctl_get_num_irqs(struct platform_device *pdev,
 				    struct dfl_feature *feature,
-				    unsigned long arg);
+				    user_uintptr_t arg);
 long dfl_feature_ioctl_set_irq(struct platform_device *pdev,
 			       struct dfl_feature *feature,
-			       unsigned long arg);
+			       user_uintptr_t arg);
 
 #endif /* __FPGA_DFL_H */

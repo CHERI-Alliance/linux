@@ -469,7 +469,7 @@ int exfat_getattr(struct mnt_idmap *idmap, const struct path *path,
 		  struct kstat *stat, unsigned int request_mask,
 		  unsigned int query_flags);
 int exfat_file_fsync(struct file *file, loff_t start, loff_t end, int datasync);
-long exfat_ioctl(struct file *filp, unsigned int cmd, unsigned long arg);
+long exfat_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg);
 long exfat_compat_ioctl(struct file *filp, unsigned int cmd,
 				unsigned long arg);
 int exfat_force_shutdown(struct super_block *sb, u32 flags);

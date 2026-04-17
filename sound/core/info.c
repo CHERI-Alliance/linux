@@ -200,7 +200,7 @@ static __poll_t snd_info_entry_poll(struct file *file, poll_table *wait)
 }
 
 static long snd_info_entry_ioctl(struct file *file, unsigned int cmd,
-				unsigned long arg)
+				user_uintptr_t arg)
 {
 	struct snd_info_private_data *data = file->private_data;
 	struct snd_info_entry *entry = data->entry;

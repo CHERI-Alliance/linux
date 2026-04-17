@@ -1340,7 +1340,7 @@ static int rose_recvmsg(struct socket *sock, struct msghdr *msg, size_t size,
 }
 
 
-static int rose_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+static int rose_ioctl(struct socket *sock, unsigned int cmd, user_uintptr_t arg)
 {
 	struct sock *sk = sock->sk;
 	struct rose_sock *rose = rose_sk(sk);

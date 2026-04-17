@@ -1545,7 +1545,7 @@ static int edge_tiocmget(struct tty_struct *tty)
  *	this function handles any ioctl calls to the driver
  *****************************************************************************/
 static int edge_ioctl(struct tty_struct *tty,
-					unsigned int cmd, unsigned long arg)
+					unsigned int cmd, user_uintptr_t arg)
 {
 	struct usb_serial_port *port = tty->driver_data;
 	struct edgeport_port *edge_port = usb_get_serial_port_data(port);

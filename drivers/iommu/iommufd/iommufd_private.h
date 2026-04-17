@@ -154,7 +154,7 @@ struct iommufd_ucmd {
 };
 
 int iommufd_vfio_ioctl(struct iommufd_ctx *ictx, unsigned int cmd,
-		       unsigned long arg);
+		       user_uintptr_t arg);
 
 /* Copy the response in ucmd->cmd back to userspace. */
 static inline int iommufd_ucmd_respond(struct iommufd_ucmd *ucmd,

@@ -1444,7 +1444,7 @@ static void mpc_cache_check(struct timer_list *unused)
 }
 
 static int atm_mpoa_ioctl(struct socket *sock, unsigned int cmd,
-			  unsigned long arg)
+			  user_uintptr_t arg)
 {
 	int err = 0;
 	struct atm_vcc *vcc = ATM_SD(sock);

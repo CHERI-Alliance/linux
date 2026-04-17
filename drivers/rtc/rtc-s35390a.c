@@ -380,7 +380,7 @@ static int s35390a_rtc_read_alarm(struct device *dev, struct rtc_wkalrm *alm)
 }
 
 static int s35390a_rtc_ioctl(struct device *dev, unsigned int cmd,
-			     unsigned long arg)
+			     user_uintptr_t arg)
 {
 	struct i2c_client *client = to_i2c_client(dev);
 	struct s35390a *s35390a = i2c_get_clientdata(client);

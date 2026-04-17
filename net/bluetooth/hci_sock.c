@@ -1001,7 +1001,7 @@ static int hci_sock_reject_list_del(struct hci_dev *hdev, void __user *arg)
 
 /* Ioctls that require bound socket */
 static int hci_sock_bound_ioctl(struct sock *sk, unsigned int cmd,
-				unsigned long arg)
+				user_uintptr_t arg)
 {
 	struct hci_dev *hdev = hci_hdev_from_sock(sk);
 
@@ -1041,7 +1041,7 @@ static int hci_sock_bound_ioctl(struct sock *sk, unsigned int cmd,
 }
 
 static int hci_sock_ioctl(struct socket *sock, unsigned int cmd,
-			  unsigned long arg)
+			  user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 	struct sock *sk = sock->sk;

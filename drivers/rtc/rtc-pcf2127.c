@@ -414,7 +414,7 @@ static int pcf2127_param_set(struct device *dev, struct rtc_param *param)
 }
 
 static int pcf2127_rtc_ioctl(struct device *dev,
-				unsigned int cmd, unsigned long arg)
+				unsigned int cmd, user_uintptr_t arg)
 {
 	struct pcf2127 *pcf2127 = dev_get_drvdata(dev);
 	int val, touser = 0;

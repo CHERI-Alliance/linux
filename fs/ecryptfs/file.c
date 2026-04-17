@@ -362,7 +362,7 @@ static int ecryptfs_fasync(int fd, struct file *file, int flag)
 }
 
 static long
-ecryptfs_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+ecryptfs_unlocked_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct file *lower_file = ecryptfs_file_to_lower(file);
 	long rc = -ENOTTY;

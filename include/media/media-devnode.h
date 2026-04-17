@@ -53,7 +53,7 @@ struct media_file_operations {
 	ssize_t (*read) (struct file *, char __user *, size_t, loff_t *);
 	ssize_t (*write) (struct file *, const char __user *, size_t, loff_t *);
 	__poll_t (*poll) (struct file *, struct poll_table_struct *);
-	long (*ioctl) (struct file *, unsigned int, unsigned long);
+	long (*ioctl) (struct file *, unsigned int, user_uintptr_t);
 	long (*compat_ioctl) (struct file *, unsigned int, unsigned long);
 	int (*open) (struct file *);
 	int (*release) (struct file *);

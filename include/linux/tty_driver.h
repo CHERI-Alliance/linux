@@ -454,7 +454,7 @@ struct tty_operations {
 	unsigned int (*write_room)(struct tty_struct *tty);
 	unsigned int (*chars_in_buffer)(struct tty_struct *tty);
 	int  (*ioctl)(struct tty_struct *tty,
-		    unsigned int cmd, unsigned long arg);
+		    unsigned int cmd, user_uintptr_t arg);
 	long (*compat_ioctl)(struct tty_struct *tty,
 			     unsigned int cmd, unsigned long arg);
 	void (*set_termios)(struct tty_struct *tty, const struct ktermios *old);

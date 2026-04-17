@@ -202,10 +202,10 @@ static inline bool vfio_device_is_noiommu(struct vfio_device *vdev)
 struct vfio_iommu_driver_ops {
 	char		*name;
 	struct module	*owner;
-	void		*(*open)(unsigned long arg);
+	void		*(*open)(user_uintptr_t arg);
 	void		(*release)(void *iommu_data);
 	long		(*ioctl)(void *iommu_data, unsigned int cmd,
-				 unsigned long arg);
+				 user_uintptr_t arg);
 	int		(*attach_group)(void *iommu_data,
 					struct iommu_group *group,
 					enum vfio_group_type);

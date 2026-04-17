@@ -170,7 +170,7 @@ static bool aspeed_p2a_region_acquire(struct aspeed_p2a_user *priv,
 }
 
 static long aspeed_p2a_ioctl(struct file *file, unsigned int cmd,
-		unsigned long data)
+		user_uintptr_t data)
 {
 	struct aspeed_p2a_user *priv = file->private_data;
 	struct aspeed_p2a_ctrl *ctrl = priv->parent;

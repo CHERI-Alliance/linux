@@ -1697,7 +1697,7 @@ static __poll_t isotp_poll(struct file *file, struct socket *sock, poll_table *w
 }
 
 static int isotp_sock_no_ioctlcmd(struct socket *sock, unsigned int cmd,
-				  unsigned long arg)
+				  user_uintptr_t arg)
 {
 	/* no ioctls for socket layer -> hand it down to NIC layer */
 	return -ENOIOCTLCMD;

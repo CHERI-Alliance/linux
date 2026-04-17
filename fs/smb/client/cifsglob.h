@@ -608,7 +608,7 @@ struct smb_version_operations {
 				struct cifs_tcon *tcon,
 				struct cifs_sb_info *cifs_sb,
 				__le16 *path, int is_dir,
-				unsigned long p);
+				user_uintptr_t p);
 	/* make unix special files (block, char, fifo, socket) */
 	int (*make_node)(unsigned int xid,
 			 struct inode *inode,

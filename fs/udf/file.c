@@ -126,7 +126,7 @@ out:
 	return retval;
 }
 
-long udf_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+long udf_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	long old_block, new_block;

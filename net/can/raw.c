@@ -1057,7 +1057,7 @@ static int raw_recvmsg(struct socket *sock, struct msghdr *msg, size_t size,
 }
 
 static int raw_sock_no_ioctlcmd(struct socket *sock, unsigned int cmd,
-				unsigned long arg)
+				user_uintptr_t arg)
 {
 	/* no ioctls for socket layer -> hand it down to NIC layer */
 	return -ENOIOCTLCMD;

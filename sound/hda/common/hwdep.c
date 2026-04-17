@@ -58,7 +58,7 @@ static int get_wcap_ioctl(struct hda_codec *codec,
 /*
  */
 static int hda_hwdep_ioctl(struct snd_hwdep *hw, struct file *file,
-			   unsigned int cmd, unsigned long arg)
+			   unsigned int cmd, user_uintptr_t arg)
 {
 	struct hda_codec *codec = hw->private_data;
 	void __user *argp = (void __user *)arg;

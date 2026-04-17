@@ -518,7 +518,7 @@ static __poll_t usblp_poll(struct file *file, struct poll_table_struct *wait)
 	return ret;
 }
 
-static long usblp_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long usblp_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct usblp *usblp = file->private_data;
 	int length, err, i;

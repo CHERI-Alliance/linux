@@ -461,7 +461,7 @@ static int atmtcp_remove_persistent(int itf)
 	return 0;
 }
 
-static int atmtcp_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+static int atmtcp_ioctl(struct socket *sock, unsigned int cmd, user_uintptr_t arg)
 {
 	int err = 0;
 	struct atm_vcc *vcc = ATM_SD(sock);

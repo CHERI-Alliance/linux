@@ -1567,7 +1567,7 @@ smb2_ioctl_query_info(const unsigned int xid,
 		      struct cifs_tcon *tcon,
 		      struct cifs_sb_info *cifs_sb,
 		      __le16 *path, int is_dir,
-		      unsigned long p)
+		      user_uintptr_t p)
 {
 	struct smb2_compound_vars *vars;
 	struct smb_rqst *rqst;

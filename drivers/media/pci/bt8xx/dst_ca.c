@@ -522,7 +522,7 @@ free_mem_and_exit:
 	return result;
 }
 
-static long dst_ca_ioctl(struct file *file, unsigned int cmd, unsigned long ioctl_arg)
+static long dst_ca_ioctl(struct file *file, unsigned int cmd, user_uintptr_t ioctl_arg)
 {
 	struct dvb_device *dvbdev;
 	struct dst_state *state;

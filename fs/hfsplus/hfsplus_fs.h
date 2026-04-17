@@ -465,7 +465,7 @@ int hfsplus_fileattr_set(struct mnt_idmap *idmap,
 			 struct dentry *dentry, struct file_kattr *fa);
 
 /* ioctl.c */
-long hfsplus_ioctl(struct file *filp, unsigned int cmd, unsigned long arg);
+long hfsplus_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg);
 
 /* options.c */
 void hfsplus_fill_defaults(struct hfsplus_sb_info *opts);

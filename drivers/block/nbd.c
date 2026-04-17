@@ -1591,7 +1591,7 @@ static void nbd_set_cmd_timeout(struct nbd_device *nbd, u64 timeout)
 
 /* Must be called with config_lock held */
 static int __nbd_ioctl(struct block_device *bdev, struct nbd_device *nbd,
-		       unsigned int cmd, unsigned long arg)
+		       unsigned int cmd, user_uintptr_t arg)
 {
 	struct nbd_config *config = nbd->config;
 	loff_t bytesize;
@@ -1603,17 +1603,17 @@ static int __nbd_ioctl(struct block_device *bdev, struct nbd_device *nbd,
 		nbd_clear_sock_ioctl(nbd);
 		return 0;
 	case NBD_SET_SOCK:
-		return nbd_add_socket(nbd, arg, false);
+		return nbd_add_socket(nbd, __c_ua(arg), false);
 	case NBD_SET_BLKSIZE:
-		return nbd_set_size(nbd, config->bytesize, arg);
+		return nbd_set_size(nbd, config->bytesize, __c_ua(arg));
 	case NBD_SET_SIZE:
-		return nbd_set_size(nbd, arg, nbd_blksize(config));
+		return nbd_set_size(nbd, __c_ua(arg), nbd_blksize(config));
 	case NBD_SET_SIZE_BLOCKS:
 		if (check_shl_overflow(arg, config->blksize_bits, &bytesize))
 			return -EINVAL;
 		return nbd_set_size(nbd, bytesize, nbd_blksize(config));
 	case NBD_SET_TIMEOUT:
-		nbd_set_cmd_timeout(nbd, arg);
+		nbd_set_cmd_timeout(nbd, __c_ua(arg));
 		return 0;
 
 	case NBD_SET_FLAGS:
@@ -1638,7 +1638,7 @@ static int __nbd_ioctl(struct block_device *bdev, struct nbd_device *nbd,
 }
 
 static int nbd_ioctl(struct block_device *bdev, blk_mode_t mode,
-		     unsigned int cmd, unsigned long arg)
+		     unsigned int cmd, user_uintptr_t arg)
 {
 	struct nbd_device *nbd = bdev->bd_disk->private_data;
 	struct nbd_config *config = nbd->config;

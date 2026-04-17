@@ -668,7 +668,7 @@ static int ffs_ep0_release(struct inode *inode, struct file *file)
 	return 0;
 }
 
-static long ffs_ep0_ioctl(struct file *file, unsigned code, unsigned long value)
+static long ffs_ep0_ioctl(struct file *file, unsigned code, user_uintptr_t value)
 {
 	struct ffs_data *ffs = file->private_data;
 	struct usb_gadget *gadget = ffs->gadget;
@@ -1730,7 +1730,7 @@ err_dmabuf_put:
 }
 
 static long ffs_epfile_ioctl(struct file *file, unsigned code,
-			     unsigned long value)
+			     user_uintptr_t value)
 {
 	struct ffs_epfile *epfile = file->private_data;
 	struct ffs_ep *ep;

@@ -449,7 +449,7 @@ out:
 	return err;
 }
 
-static int exfat_ioctl_fitrim(struct inode *inode, unsigned long arg)
+static int exfat_ioctl_fitrim(struct inode *inode, user_uintptr_t arg)
 {
 	struct fstrim_range range;
 	int ret = 0;
@@ -476,7 +476,7 @@ static int exfat_ioctl_fitrim(struct inode *inode, unsigned long arg)
 	return 0;
 }
 
-static int exfat_ioctl_shutdown(struct super_block *sb, unsigned long arg)
+static int exfat_ioctl_shutdown(struct super_block *sb, user_uintptr_t arg)
 {
 	u32 flags;
 
@@ -489,7 +489,7 @@ static int exfat_ioctl_shutdown(struct super_block *sb, unsigned long arg)
 	return exfat_force_shutdown(sb, flags);
 }
 
-static int exfat_ioctl_get_volume_label(struct super_block *sb, unsigned long arg)
+static int exfat_ioctl_get_volume_label(struct super_block *sb, user_uintptr_t arg)
 {
 	int ret;
 	char label[FSLABEL_MAX] = {0};
@@ -510,7 +510,7 @@ static int exfat_ioctl_get_volume_label(struct super_block *sb, unsigned long ar
 }
 
 static int exfat_ioctl_set_volume_label(struct super_block *sb,
-					unsigned long arg)
+					user_uintptr_t arg)
 {
 	int ret = 0, lossy, label_len;
 	char label[FSLABEL_MAX] = {0};
@@ -538,7 +538,7 @@ static int exfat_ioctl_set_volume_label(struct super_block *sb,
 	return exfat_write_volume_label(sb, &uniname);
 }
 
-long exfat_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+long exfat_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	u32 __user *user_attr = (u32 __user *)arg;

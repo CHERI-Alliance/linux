@@ -57,7 +57,7 @@ extern const struct class rtc_class;
  *   - the proc() hook for procfs
  */
 struct rtc_class_ops {
-	int (*ioctl)(struct device *, unsigned int, unsigned long);
+	int (*ioctl)(struct device *, unsigned int, user_uintptr_t);
 	int (*read_time)(struct device *, struct rtc_time *);
 	int (*set_time)(struct device *, struct rtc_time *);
 	int (*read_alarm)(struct device *, struct rtc_wkalrm *);

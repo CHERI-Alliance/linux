@@ -2585,7 +2585,7 @@ static int snd_pcm_oss_release(struct inode *inode, struct file *file)
 	return 0;
 }
 
-static long snd_pcm_oss_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long snd_pcm_oss_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct snd_pcm_oss_file *pcm_oss_file;
 	int __user *p = (int __user *)arg;

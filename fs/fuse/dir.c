@@ -1946,7 +1946,7 @@ static int fuse_dir_fsync(struct file *file, loff_t start, loff_t end,
 }
 
 static long fuse_dir_ioctl(struct file *file, unsigned int cmd,
-			    unsigned long arg)
+			    user_uintptr_t arg)
 {
 	struct fuse_conn *fc = get_fuse_conn(file->f_mapping->host);
 

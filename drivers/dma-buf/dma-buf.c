@@ -538,7 +538,7 @@ static long dma_buf_import_sync_file(struct dma_buf *dmabuf,
 #endif
 
 static long dma_buf_ioctl(struct file *file,
-			  unsigned int cmd, unsigned long arg)
+			  unsigned int cmd, user_uintptr_t arg)
 {
 	struct dma_buf *dmabuf;
 	struct dma_buf_sync sync;

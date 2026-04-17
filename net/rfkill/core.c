@@ -1357,7 +1357,7 @@ static int rfkill_fop_release(struct inode *inode, struct file *file)
 }
 
 static long rfkill_fop_ioctl(struct file *file, unsigned int cmd,
-			     unsigned long arg)
+			     user_uintptr_t arg)
 {
 	struct rfkill_data *data = file->private_data;
 	int ret = -ENOTTY;

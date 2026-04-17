@@ -55,7 +55,7 @@ static int  kobil_write(struct tty_struct *tty, struct usb_serial_port *port,
 			 const unsigned char *buf, int count);
 static unsigned int kobil_write_room(struct tty_struct *tty);
 static int  kobil_ioctl(struct tty_struct *tty,
-			unsigned int cmd, unsigned long arg);
+			unsigned int cmd, user_uintptr_t arg);
 static int  kobil_tiocmget(struct tty_struct *tty);
 static int  kobil_tiocmset(struct tty_struct *tty,
 			   unsigned int set, unsigned int clear);
@@ -483,7 +483,7 @@ static void kobil_set_termios(struct tty_struct *tty,
 }
 
 static int kobil_ioctl(struct tty_struct *tty,
-					unsigned int cmd, unsigned long arg)
+					unsigned int cmd, user_uintptr_t arg)
 {
 	struct usb_serial_port *port = tty->driver_data;
 	struct kobil_private *priv = usb_get_serial_port_data(port);

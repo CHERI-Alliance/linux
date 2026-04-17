@@ -1152,7 +1152,7 @@ static int fanotify_release(struct inode *ignored, struct file *file)
 	return 0;
 }
 
-static long fanotify_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long fanotify_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct fsnotify_group *group;
 	struct fsnotify_event *fsn_event;

@@ -293,7 +293,7 @@ static int pcf85063_set_offset(struct device *dev, long offset)
 }
 
 static int pcf85063_ioctl(struct device *dev, unsigned int cmd,
-			  unsigned long arg)
+			  user_uintptr_t arg)
 {
 	struct pcf85063 *pcf85063 = dev_get_drvdata(dev);
 	int status, ret = 0;

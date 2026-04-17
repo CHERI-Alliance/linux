@@ -290,7 +290,7 @@ struct fb_ops {
 
 	/* perform fb specific ioctl (optional) */
 	int (*fb_ioctl)(struct fb_info *info, unsigned int cmd,
-			unsigned long arg);
+			user_uintptr_t arg);
 
 	/* Handle 32bit compat ioctl (optional) */
 	int (*fb_compat_ioctl)(struct fb_info *info, unsigned cmd,

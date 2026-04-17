@@ -1428,7 +1428,7 @@ out_unlock:
  * return: 0 on success, <0 on error.
  */
 static long dvb_ca_en50221_io_ioctl(struct file *file,
-				    unsigned int cmd, unsigned long arg)
+				    unsigned int cmd, user_uintptr_t arg)
 {
 	return dvb_usercopy(file, cmd, arg, dvb_ca_en50221_io_do_ioctl);
 }

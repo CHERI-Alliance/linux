@@ -285,7 +285,7 @@ aoeblk_getgeo(struct gendisk *disk, struct hd_geometry *geo)
 }
 
 static int
-aoeblk_ioctl(struct block_device *bdev, blk_mode_t mode, uint cmd, ulong arg)
+aoeblk_ioctl(struct block_device *bdev, blk_mode_t mode, uint cmd, user_uintptr_t arg)
 {
 	struct aoedev *d;
 

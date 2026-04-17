@@ -203,7 +203,7 @@ static int hpfs_statfs(struct dentry *dentry, struct kstatfs *buf)
 }
 
 
-long hpfs_ioctl(struct file *file, unsigned cmd, unsigned long arg)
+long hpfs_ioctl(struct file *file, unsigned cmd, user_uintptr_t arg)
 {
 	switch (cmd) {
 		case FITRIM: {

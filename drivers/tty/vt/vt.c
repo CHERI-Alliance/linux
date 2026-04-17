@@ -3481,7 +3481,7 @@ static struct console vt_console_driver = {
  * set_selection_user has locking, and definitely needs it
  */
 
-int tioclinux(struct tty_struct *tty, unsigned long arg)
+int tioclinux(struct tty_struct *tty, user_uintptr_t arg)
 {
 	char type, data;
 	char __user *p = (char __user *)arg;

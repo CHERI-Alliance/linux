@@ -588,7 +588,7 @@ static int __init kyrofb_setup(char *options)
 #endif
 
 static int kyrofb_ioctl(struct fb_info *info,
-			unsigned int cmd, unsigned long arg)
+			unsigned int cmd, user_uintptr_t arg)
 {
 	overlay_create ol_create;
 	overlay_viewport_set ol_viewport_set;

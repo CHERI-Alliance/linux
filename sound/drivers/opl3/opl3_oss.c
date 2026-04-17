@@ -10,7 +10,7 @@
 
 static int snd_opl3_open_seq_oss(struct snd_seq_oss_arg *arg, void *closure);
 static int snd_opl3_close_seq_oss(struct snd_seq_oss_arg *arg);
-static int snd_opl3_ioctl_seq_oss(struct snd_seq_oss_arg *arg, unsigned int cmd, unsigned long ioarg);
+static int snd_opl3_ioctl_seq_oss(struct snd_seq_oss_arg *arg, unsigned int cmd, user_uintptr_t ioarg);
 static int snd_opl3_load_patch_seq_oss(struct snd_seq_oss_arg *arg, int format, const char __user *buf, int offs, int count);
 static int snd_opl3_reset_seq_oss(struct snd_seq_oss_arg *arg);
 
@@ -218,7 +218,7 @@ static int snd_opl3_load_patch_seq_oss(struct snd_seq_oss_arg *arg, int format,
 
 /* ioctl */
 static int snd_opl3_ioctl_seq_oss(struct snd_seq_oss_arg *arg, unsigned int cmd,
-				  unsigned long ioarg)
+				  user_uintptr_t ioarg)
 {
 	struct snd_opl3 *opl3;
 

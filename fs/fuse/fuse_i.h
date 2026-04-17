@@ -1457,10 +1457,10 @@ int fuse_do_open(struct fuse_mount *fm, u64 nodeid, struct file *file,
 
 ssize_t fuse_direct_io(struct fuse_io_priv *io, struct iov_iter *iter,
 		       loff_t *ppos, int flags);
-long fuse_do_ioctl(struct file *file, unsigned int cmd, unsigned long arg,
+long fuse_do_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg,
 		   unsigned int flags);
 long fuse_ioctl_common(struct file *file, unsigned int cmd,
-		       unsigned long arg, unsigned int flags);
+		       user_uintptr_t arg, unsigned int flags);
 __poll_t fuse_file_poll(struct file *file, poll_table *wait);
 int fuse_dev_release(struct inode *inode, struct file *file);
 
@@ -1525,7 +1525,7 @@ bool fuse_dax_check_alignment(struct fuse_conn *fc, unsigned int map_alignment);
 void fuse_dax_cancel_work(struct fuse_conn *fc);
 
 /* ioctl.c */
-long fuse_file_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
+long fuse_file_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg);
 long fuse_file_compat_ioctl(struct file *file, unsigned int cmd,
 			    unsigned long arg);
 int fuse_fileattr_get(struct dentry *dentry, struct file_kattr *fa);

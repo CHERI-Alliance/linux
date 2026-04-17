@@ -727,7 +727,7 @@ typedef long (*v4l2_kioctl)(struct file *file, unsigned int cmd, void *arg);
  *    This routine should be used only inside the V4L2 core.
  */
 long int video_usercopy(struct file *file, unsigned int cmd,
-			unsigned long int arg, v4l2_kioctl func);
+			user_uintptr_t arg, v4l2_kioctl func);
 
 /**
  * video_ioctl2 - Handles a V4L2 ioctl.
@@ -740,7 +740,7 @@ long int video_usercopy(struct file *file, unsigned int cmd,
  * &v4l2_ioctl_ops.unlocked_ioctl on all V4L2 drivers.
  */
 long int video_ioctl2(struct file *file,
-		      unsigned int cmd, unsigned long int arg);
+		      unsigned int cmd, user_uintptr_t arg);
 
 /*
  * The user space interpretation of the 'v4l2_event' differs

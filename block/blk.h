@@ -530,9 +530,9 @@ static inline void blk_zone_finish_request(struct request *rq)
 		blk_zone_write_plug_finish_request(rq);
 }
 int blkdev_report_zones_ioctl(struct block_device *bdev, unsigned int cmd,
-		unsigned long arg);
+		user_uintptr_t arg);
 int blkdev_zone_mgmt_ioctl(struct block_device *bdev, blk_mode_t mode,
-		unsigned int cmd, unsigned long arg);
+		unsigned int cmd, user_uintptr_t arg);
 #else /* CONFIG_BLK_DEV_ZONED */
 static inline void disk_init_zone_resources(struct gendisk *disk)
 {
@@ -566,12 +566,12 @@ static inline void blk_zone_finish_request(struct request *rq)
 {
 }
 static inline int blkdev_report_zones_ioctl(struct block_device *bdev,
-		unsigned int cmd, unsigned long arg)
+		unsigned int cmd, user_uintptr_t arg)
 {
 	return -ENOTTY;
 }
 static inline int blkdev_zone_mgmt_ioctl(struct block_device *bdev,
-		blk_mode_t mode, unsigned int cmd, unsigned long arg)
+		blk_mode_t mode, unsigned int cmd, user_uintptr_t arg)
 {
 	return -ENOTTY;
 }
@@ -619,7 +619,7 @@ extern struct attribute_group blk_trace_attr_group;
 blk_mode_t file_to_blk_mode(struct file *file);
 int truncate_bdev_range(struct block_device *bdev, blk_mode_t mode,
 		loff_t lstart, loff_t lend);
-long blkdev_ioctl(struct file *file, unsigned cmd, unsigned long arg);
+long blkdev_ioctl(struct file *file, unsigned cmd, user_uintptr_t arg);
 int blkdev_uring_cmd(struct io_uring_cmd *cmd, unsigned int issue_flags);
 long compat_blkdev_ioctl(struct file *file, unsigned cmd, unsigned long arg);
 

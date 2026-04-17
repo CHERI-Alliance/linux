@@ -914,7 +914,7 @@ static int set_offload(struct tap_queue *q, unsigned long arg)
  * provide compatibility with generic tun/tap interface
  */
 static long tap_ioctl(struct file *file, unsigned int cmd,
-		      unsigned long arg)
+		      user_uintptr_t arg)
 {
 	struct tap_queue *q = file->private_data;
 	struct tap_dev *tap;
@@ -988,7 +988,7 @@ static long tap_ioctl(struct file *file, unsigned int cmd,
 			return -EINVAL;
 
 		rtnl_lock();
-		ret = set_offload(q, arg);
+		ret = set_offload(q, __c_ua(arg));
 		rtnl_unlock();
 		return ret;
 

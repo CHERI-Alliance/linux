@@ -1230,7 +1230,7 @@ void cached_dev_submit_bio(struct bio *bio)
 }
 
 static int cached_dev_ioctl(struct bcache_device *d, blk_mode_t mode,
-			    unsigned int cmd, unsigned long arg)
+			    unsigned int cmd, user_uintptr_t arg)
 {
 	struct cached_dev *dc = container_of(d, struct cached_dev, disk);
 
@@ -1320,7 +1320,7 @@ void flash_dev_submit_bio(struct bio *bio)
 }
 
 static int flash_dev_ioctl(struct bcache_device *d, blk_mode_t mode,
-			   unsigned int cmd, unsigned long arg)
+			   unsigned int cmd, user_uintptr_t arg)
 {
 	return -ENOTTY;
 }

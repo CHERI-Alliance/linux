@@ -2046,7 +2046,7 @@ static int mport_cdev_release(struct inode *inode, struct file *filp)
  * mport_cdev_ioctl() - IOCTLs for character device
  */
 static long mport_cdev_ioctl(struct file *filp,
-		unsigned int cmd, unsigned long arg)
+		unsigned int cmd, user_uintptr_t arg)
 {
 	int err = -EINVAL;
 	struct mport_cdev_priv *data = filp->private_data;

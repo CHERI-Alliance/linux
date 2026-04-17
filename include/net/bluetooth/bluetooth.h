@@ -431,7 +431,7 @@ int  bt_sock_recvmsg(struct socket *sock, struct msghdr *msg, size_t len,
 int  bt_sock_stream_recvmsg(struct socket *sock, struct msghdr *msg,
 			    size_t len, int flags);
 __poll_t bt_sock_poll(struct file *file, struct socket *sock, poll_table *wait);
-int  bt_sock_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg);
+int  bt_sock_ioctl(struct socket *sock, unsigned int cmd, user_uintptr_t arg);
 int  bt_sock_wait_state(struct sock *sk, int state, unsigned long timeo);
 int  bt_sock_wait_ready(struct sock *sk, unsigned int msg_flags);
 

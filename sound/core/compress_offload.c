@@ -253,7 +253,7 @@ static void snd_compr_avail32_from_64(struct snd_compr_avail *avail32,
 }
 
 static int snd_compr_ioctl_avail(struct snd_compr_stream *stream,
-				 unsigned long arg, bool is_32bit)
+				 user_uintptr_t arg, bool is_32bit)
 {
 	struct snd_compr_avail64 ioctl_avail64;
 	struct snd_compr_avail ioctl_avail32;
@@ -491,7 +491,7 @@ static __poll_t snd_compr_poll(struct file *f, poll_table *wait)
 }
 
 static int
-snd_compr_get_caps(struct snd_compr_stream *stream, unsigned long arg)
+snd_compr_get_caps(struct snd_compr_stream *stream, user_uintptr_t arg)
 {
 	int retval;
 	struct snd_compr_caps caps;
@@ -511,7 +511,7 @@ out:
 
 #ifndef COMPR_CODEC_CAPS_OVERFLOW
 static int
-snd_compr_get_codec_caps(struct snd_compr_stream *stream, unsigned long arg)
+snd_compr_get_codec_caps(struct snd_compr_stream *stream, user_uintptr_t arg)
 {
 	int retval;
 
@@ -645,7 +645,7 @@ snd_compress_check_input(struct snd_compr_stream *stream, struct snd_compr_param
 }
 
 static int
-snd_compr_set_params(struct snd_compr_stream *stream, unsigned long arg)
+snd_compr_set_params(struct snd_compr_stream *stream, user_uintptr_t arg)
 {
 	int retval;
 
@@ -686,7 +686,7 @@ snd_compr_set_params(struct snd_compr_stream *stream, unsigned long arg)
 }
 
 static int
-snd_compr_get_params(struct snd_compr_stream *stream, unsigned long arg)
+snd_compr_get_params(struct snd_compr_stream *stream, user_uintptr_t arg)
 {
 	int retval;
 
@@ -706,7 +706,7 @@ snd_compr_get_params(struct snd_compr_stream *stream, unsigned long arg)
 }
 
 static int
-snd_compr_get_metadata(struct snd_compr_stream *stream, unsigned long arg)
+snd_compr_get_metadata(struct snd_compr_stream *stream, user_uintptr_t arg)
 {
 	struct snd_compr_metadata metadata;
 	int retval;
@@ -728,7 +728,7 @@ snd_compr_get_metadata(struct snd_compr_stream *stream, unsigned long arg)
 }
 
 static int
-snd_compr_set_metadata(struct snd_compr_stream *stream, unsigned long arg)
+snd_compr_set_metadata(struct snd_compr_stream *stream, user_uintptr_t arg)
 {
 	struct snd_compr_metadata metadata;
 	int retval;
@@ -749,7 +749,7 @@ snd_compr_set_metadata(struct snd_compr_stream *stream, unsigned long arg)
 }
 
 static inline int snd_compr_tstamp(struct snd_compr_stream *stream,
-				   unsigned long arg, bool is_32bit)
+				   user_uintptr_t arg, bool is_32bit)
 {
 	struct snd_compr_tstamp64 tstamp64 = { 0 };
 	struct snd_compr_tstamp tstamp32 = { 0 };
@@ -1103,7 +1103,7 @@ cleanup:
 	return retval;
 }
 
-static int snd_compr_task_create(struct snd_compr_stream *stream, unsigned long arg)
+static int snd_compr_task_create(struct snd_compr_stream *stream, user_uintptr_t arg)
 {
 	int retval;
 
@@ -1165,7 +1165,7 @@ static int snd_compr_task_start(struct snd_compr_stream *stream, struct snd_comp
 	return retval;
 }
 
-static int snd_compr_task_start_ioctl(struct snd_compr_stream *stream, unsigned long arg)
+static int snd_compr_task_start_ioctl(struct snd_compr_stream *stream, user_uintptr_t arg)
 {
 	int retval;
 
@@ -1216,7 +1216,7 @@ static void snd_compr_task_free_all(struct snd_compr_stream *stream)
 typedef void (*snd_compr_seq_func_t)(struct snd_compr_stream *stream,
 					struct snd_compr_task_runtime *task);
 
-static int snd_compr_task_seq(struct snd_compr_stream *stream, unsigned long arg,
+static int snd_compr_task_seq(struct snd_compr_stream *stream, user_uintptr_t arg,
 					snd_compr_seq_func_t fcn)
 {
 	struct snd_compr_task_runtime *task, *temp;
@@ -1257,7 +1257,7 @@ static int snd_compr_task_status(struct snd_compr_stream *stream,
 	return 0;
 }
 
-static int snd_compr_task_status_ioctl(struct snd_compr_stream *stream, unsigned long arg)
+static int snd_compr_task_status_ioctl(struct snd_compr_stream *stream, user_uintptr_t arg)
 {
 	int retval;
 
@@ -1296,7 +1296,7 @@ EXPORT_SYMBOL_GPL(snd_compr_task_finished);
 MODULE_IMPORT_NS("DMA_BUF");
 #endif /* CONFIG_SND_COMPRESS_ACCEL */
 
-static long snd_compr_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
+static long snd_compr_ioctl(struct file *f, unsigned int cmd, user_uintptr_t arg)
 {
 	struct snd_compr_file *data = f->private_data;
 	struct snd_compr_stream *stream;

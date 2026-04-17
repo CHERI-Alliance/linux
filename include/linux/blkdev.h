@@ -1652,7 +1652,7 @@ struct block_device_operations {
 	int (*open)(struct gendisk *disk, blk_mode_t mode);
 	void (*release)(struct gendisk *disk);
 	int (*ioctl)(struct block_device *bdev, blk_mode_t mode,
-			unsigned cmd, unsigned long arg);
+			unsigned cmd, user_uintptr_t arg);
 	int (*compat_ioctl)(struct block_device *bdev, blk_mode_t mode,
 			unsigned cmd, unsigned long arg);
 	unsigned int (*check_events) (struct gendisk *disk,

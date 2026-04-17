@@ -552,7 +552,7 @@ int inet6_getname(struct socket *sock, struct sockaddr *uaddr,
 }
 EXPORT_SYMBOL(inet6_getname);
 
-int inet6_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+int inet6_ioctl(struct socket *sock, unsigned int cmd, user_uintptr_t arg)
 {
 	void __user *argp = (void __user *)arg;
 	struct sock *sk = sock->sk;

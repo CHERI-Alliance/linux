@@ -447,7 +447,7 @@ static void pty_remove(struct tty_driver *driver, struct tty_struct *tty)
 }
 
 static int pty_bsd_ioctl(struct tty_struct *tty,
-			 unsigned int cmd, unsigned long arg)
+			 unsigned int cmd, user_uintptr_t arg)
 {
 	switch (cmd) {
 	case TIOCSPTLCK: /* Set PT Lock (disallow slave open) */
@@ -621,7 +621,7 @@ int ptm_open_peer(struct file *master, struct tty_struct *tty, int flags)
 }
 
 static int pty_unix98_ioctl(struct tty_struct *tty,
-			    unsigned int cmd, unsigned long arg)
+			    unsigned int cmd, user_uintptr_t arg)
 {
 	switch (cmd) {
 	case TIOCSPTLCK: /* Set PT Lock (disallow slave open) */

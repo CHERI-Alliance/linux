@@ -416,7 +416,7 @@ out_unlock:
 }
 
 static long kcs_bmc_ipmi_ioctl(struct file *filp, unsigned int cmd,
-			  unsigned long arg)
+			  user_uintptr_t arg)
 {
 	struct kcs_bmc_ipmi *priv = to_kcs_bmc(filp);
 	long ret = 0;

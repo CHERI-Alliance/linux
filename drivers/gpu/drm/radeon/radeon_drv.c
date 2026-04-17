@@ -493,7 +493,7 @@ static int radeon_pmops_runtime_idle(struct device *dev)
 }
 
 long radeon_drm_ioctl(struct file *filp,
-		      unsigned int cmd, unsigned long arg)
+		      unsigned int cmd, user_uintptr_t arg)
 {
 	struct drm_file *file_priv = filp->private_data;
 	struct drm_device *dev;

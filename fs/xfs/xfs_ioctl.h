@@ -29,7 +29,7 @@ extern long
 xfs_file_ioctl(
 	struct file		*filp,
 	unsigned int		cmd,
-	unsigned long		p);
+	user_uintptr_t		p);
 
 extern long
 xfs_file_compat_ioctl(

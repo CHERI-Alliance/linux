@@ -1013,7 +1013,7 @@ static int s3c_fb_wait_for_vsync(struct s3c_fb *sfb, u32 crtc)
 }
 
 static int s3c_fb_ioctl(struct fb_info *info, unsigned int cmd,
-			unsigned long arg)
+			user_uintptr_t arg)
 {
 	struct s3c_fb_win *win = info->par;
 	struct s3c_fb *sfb = win->parent;

@@ -964,7 +964,7 @@ static int radeonfb_pan_display (struct fb_var_screeninfo *var,
 
 
 static int radeonfb_ioctl (struct fb_info *info, unsigned int cmd,
-                           unsigned long arg)
+                           user_uintptr_t arg)
 {
         struct radeonfb_info *rinfo = info->par;
 	unsigned int tmp;

@@ -431,7 +431,7 @@ static int mctp_getsockopt(struct socket *sock, int level, int optname,
 /* helpers for reading/writing the tag ioc, handling compatibility across the
  * two versions, and some basic API error checking
  */
-static int mctp_ioctl_tag_copy_from_user(unsigned long arg,
+static int mctp_ioctl_tag_copy_from_user(user_uintptr_t arg,
 					 struct mctp_ioc_tag_ctl2 *ctl,
 					 bool tagv2)
 {
@@ -471,7 +471,7 @@ static int mctp_ioctl_tag_copy_from_user(unsigned long arg,
 	return 0;
 }
 
-static int mctp_ioctl_tag_copy_to_user(unsigned long arg,
+static int mctp_ioctl_tag_copy_to_user(user_uintptr_t arg,
 				       struct mctp_ioc_tag_ctl2 *ctl,
 				       bool tagv2)
 {
@@ -500,7 +500,7 @@ static int mctp_ioctl_tag_copy_to_user(unsigned long arg,
 }
 
 static int mctp_ioctl_alloctag(struct mctp_sock *msk, bool tagv2,
-			       unsigned long arg)
+			       user_uintptr_t arg)
 {
 	struct net *net = sock_net(&msk->sk);
 	struct mctp_sk_key *key = NULL;
@@ -543,7 +543,7 @@ static int mctp_ioctl_alloctag(struct mctp_sock *msk, bool tagv2,
 }
 
 static int mctp_ioctl_droptag(struct mctp_sock *msk, bool tagv2,
-			      unsigned long arg)
+			      user_uintptr_t arg)
 {
 	struct net *net = sock_net(&msk->sk);
 	struct mctp_ioc_tag_ctl2 ctl;
@@ -589,7 +589,7 @@ static int mctp_ioctl_droptag(struct mctp_sock *msk, bool tagv2,
 	return rc;
 }
 
-static int mctp_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+static int mctp_ioctl(struct socket *sock, unsigned int cmd, user_uintptr_t arg)
 {
 	struct mctp_sock *msk = container_of(sock->sk, struct mctp_sock, sk);
 	bool tagv2 = false;

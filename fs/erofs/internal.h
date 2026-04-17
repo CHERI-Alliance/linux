@@ -595,7 +595,7 @@ static inline struct inode *erofs_real_inode(struct inode *inode, bool *need_ipu
 }
 #endif
 
-long erofs_ioctl(struct file *filp, unsigned int cmd, unsigned long arg);
+long erofs_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg);
 long erofs_compat_ioctl(struct file *filp, unsigned int cmd,
 			unsigned long arg);
 

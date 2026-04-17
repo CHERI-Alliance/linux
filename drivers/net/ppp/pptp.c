@@ -578,7 +578,7 @@ out:
 }
 
 static int pptp_ppp_ioctl(struct ppp_channel *chan, unsigned int cmd,
-	unsigned long arg)
+	user_uintptr_t arg)
 {
 	struct sock *sk = chan->private;
 	struct pppox_sock *po = pppox_sk(sk);

@@ -2700,7 +2700,7 @@ static int ddb_open(struct inode *inode, struct file *file)
 	return 0;
 }
 
-static long ddb_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long ddb_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct ddb *dev = file->private_data;
 

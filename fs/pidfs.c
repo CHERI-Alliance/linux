@@ -333,7 +333,7 @@ static __u32 pidfs_coredump_mask(unsigned long mm_flags)
 			      PIDFD_INFO_SUPPORTED_MASK | \
 			      PIDFD_INFO_COREDUMP_SIGNAL)
 
-static long pidfd_info(struct file *file, unsigned int cmd, unsigned long arg)
+static long pidfd_info(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct pidfd_info __user *uinfo = (struct pidfd_info __user *)arg;
 	struct task_struct *task __free(put_task) = NULL;
@@ -502,7 +502,7 @@ static bool pidfs_ioctl_valid(unsigned int cmd)
 	return false;
 }
 
-static long pidfd_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long pidfd_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct task_struct *task __free(put_task) = NULL;
 	struct nsproxy *nsp __free(put_nsproxy) = NULL;

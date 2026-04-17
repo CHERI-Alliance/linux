@@ -2044,7 +2044,7 @@ int vt_do_kdgkb_ioctl(int cmd, struct kbsentry __user *user_kdgkb, int perm)
 	return 0;
 }
 
-int vt_do_kdskled(unsigned int console, int cmd, unsigned long arg, int perm)
+int vt_do_kdskled(unsigned int console, int cmd, user_uintptr_t arg, int perm)
 {
 	struct kbd_struct *kb = &kbd_table[console];
 	unsigned char ucval;

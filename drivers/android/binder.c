@@ -5451,7 +5451,7 @@ static __poll_t binder_poll(struct file *filp,
 	return 0;
 }
 
-static int binder_ioctl_write_read(struct file *filp, unsigned long arg,
+static int binder_ioctl_write_read(struct file *filp, user_uintptr_t arg,
 				struct binder_thread *thread)
 {
 	int ret = 0;
@@ -5770,14 +5770,14 @@ static int binder_ioctl_get_extended_error(struct binder_thread *thread,
 	return 0;
 }
 
-static long binder_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+static long binder_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 {
 	int ret;
 	struct binder_proc *proc = filp->private_data;
 	struct binder_thread *thread;
 	void __user *ubuf = (void __user *)arg;
 
-	trace_binder_ioctl(cmd, arg);
+	trace_binder_ioctl(cmd, __c_ua(arg));
 
 	ret = wait_event_interruptible(binder_user_error_wait, binder_stop_on_user_error < 2);
 	if (ret)

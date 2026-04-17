@@ -273,7 +273,7 @@ struct usb_serial_driver {
 	/* Called only by the tty layer */
 	unsigned int (*write_room)(struct tty_struct *tty);
 	int  (*ioctl)(struct tty_struct *tty,
-		      unsigned int cmd, unsigned long arg);
+		      unsigned int cmd, user_uintptr_t arg);
 	void (*get_serial)(struct tty_struct *tty, struct serial_struct *ss);
 	int  (*set_serial)(struct tty_struct *tty, struct serial_struct *ss);
 	void (*set_termios)(struct tty_struct *tty, struct usb_serial_port *port,
@@ -287,7 +287,7 @@ struct usb_serial_driver {
 	int  (*tiocmget)(struct tty_struct *tty);
 	int  (*tiocmset)(struct tty_struct *tty,
 			 unsigned int set, unsigned int clear);
-	int  (*tiocmiwait)(struct tty_struct *tty, unsigned long arg);
+	int  (*tiocmiwait)(struct tty_struct *tty, user_uintptr_t arg);
 	int  (*get_icount)(struct tty_struct *tty,
 			struct serial_icounter_struct *icount);
 	/* Called by the tty layer for port level work. There may or may not
@@ -352,7 +352,7 @@ void usb_serial_generic_read_bulk_callback(struct urb *urb);
 void usb_serial_generic_write_bulk_callback(struct urb *urb);
 void usb_serial_generic_throttle(struct tty_struct *tty);
 void usb_serial_generic_unthrottle(struct tty_struct *tty);
-int usb_serial_generic_tiocmiwait(struct tty_struct *tty, unsigned long arg);
+int usb_serial_generic_tiocmiwait(struct tty_struct *tty, user_uintptr_t arg);
 int usb_serial_generic_get_icount(struct tty_struct *tty, struct serial_icounter_struct *icount);
 int usb_serial_generic_register(void);
 void usb_serial_generic_deregister(void);

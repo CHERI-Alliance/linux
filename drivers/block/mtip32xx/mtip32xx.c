@@ -1940,7 +1940,7 @@ abort:
  *	-EIO	An error occurred while executing the command.
  */
 static int mtip_hw_ioctl(struct driver_data *dd, unsigned int cmd,
-			 unsigned long arg)
+			 user_uintptr_t arg)
 {
 	switch (cmd) {
 	case HDIO_GET_IDENTITY:
@@ -3038,7 +3038,7 @@ static int rssd_disk_name_format(char *prefix,
 static int mtip_block_ioctl(struct block_device *dev,
 			    blk_mode_t mode,
 			    unsigned cmd,
-			    unsigned long arg)
+			    user_uintptr_t arg)
 {
 	struct driver_data *dd = dev->bd_disk->private_data;
 

@@ -8156,7 +8156,7 @@ out:
 	return ret;
 }
 
-static long tracing_buffers_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long tracing_buffers_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct ftrace_buffer_info *info = file->private_data;
 	struct trace_iterator *iter = &info->iter;

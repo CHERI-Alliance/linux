@@ -1845,7 +1845,7 @@ void iio_device_ioctl_handler_unregister(struct iio_ioctl_handler *h)
 	list_del(&h->entry);
 }
 
-static long iio_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+static long iio_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 {
 	struct iio_dev_buffer_pair *ib = filp->private_data;
 	struct iio_dev *indio_dev = ib->indio_dev;

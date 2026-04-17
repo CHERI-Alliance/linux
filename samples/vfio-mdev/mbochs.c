@@ -1186,7 +1186,7 @@ static int mbochs_get_gfx_dmabuf(struct mdev_state *mdev_state, u32 id)
 }
 
 static long mbochs_ioctl(struct vfio_device *vdev, unsigned int cmd,
-			 unsigned long arg)
+			 user_uintptr_t arg)
 {
 	struct mdev_state *mdev_state =
 		container_of(vdev, struct mdev_state, vdev);

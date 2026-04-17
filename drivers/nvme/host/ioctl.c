@@ -609,7 +609,7 @@ static int nvme_ns_ioctl(struct nvme_ns *ns, unsigned int cmd,
 }
 
 int nvme_ioctl(struct block_device *bdev, blk_mode_t mode,
-		unsigned int cmd, unsigned long arg)
+		unsigned int cmd, user_uintptr_t arg)
 {
 	struct nvme_ns *ns = bdev->bd_disk->private_data;
 	bool open_for_write = mode & BLK_OPEN_WRITE;
@@ -624,7 +624,7 @@ int nvme_ioctl(struct block_device *bdev, blk_mode_t mode,
 	return nvme_ns_ioctl(ns, cmd, argp, flags, open_for_write);
 }
 
-long nvme_ns_chr_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+long nvme_ns_chr_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct nvme_ns *ns =
 		container_of(file_inode(file)->i_cdev, struct nvme_ns, cdev);
@@ -707,7 +707,7 @@ static int nvme_ns_head_ctrl_ioctl(struct nvme_ns *ns, unsigned int cmd,
 }
 
 int nvme_ns_head_ioctl(struct block_device *bdev, blk_mode_t mode,
-		unsigned int cmd, unsigned long arg)
+		unsigned int cmd, user_uintptr_t arg)
 {
 	struct nvme_ns_head *head = bdev->bd_disk->private_data;
 	bool open_for_write = mode & BLK_OPEN_WRITE;
@@ -740,7 +740,7 @@ out_unlock:
 }
 
 long nvme_ns_head_chr_ioctl(struct file *file, unsigned int cmd,
-		unsigned long arg)
+		user_uintptr_t arg)
 {
 	bool open_for_write = file->f_mode & FMODE_WRITE;
 	struct cdev *cdev = file_inode(file)->i_cdev;
@@ -846,7 +846,7 @@ out_unlock:
 }
 
 long nvme_dev_ioctl(struct file *file, unsigned int cmd,
-		unsigned long arg)
+		user_uintptr_t arg)
 {
 	bool open_for_write = file->f_mode & FMODE_WRITE;
 	struct nvme_ctrl *ctrl = file->private_data;

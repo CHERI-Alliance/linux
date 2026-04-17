@@ -348,7 +348,7 @@ static void timerfd_show(struct seq_file *m, struct file *file)
 #endif
 
 #ifdef CONFIG_CHECKPOINT_RESTORE
-static long timerfd_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long timerfd_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct timerfd_ctx *ctx = file->private_data;
 	int ret = 0;

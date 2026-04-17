@@ -303,7 +303,7 @@ static int mb862xxfb_blank(int mode, struct fb_info *fbi)
 }
 
 static int mb862xxfb_ioctl(struct fb_info *fbi, unsigned int cmd,
-			   unsigned long arg)
+			   user_uintptr_t arg)
 {
 	struct mb862xxfb_par *par = fbi->par;
 	struct mb862xx_l1_cfg *l1_cfg = &par->l1_cfg;

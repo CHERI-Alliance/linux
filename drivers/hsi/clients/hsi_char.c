@@ -522,7 +522,7 @@ out:
 	return ret;
 }
 
-static long hsc_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long hsc_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct hsc_channel *channel = file->private_data;
 	unsigned int state;

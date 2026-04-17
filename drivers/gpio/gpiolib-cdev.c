@@ -202,7 +202,7 @@ static long linehandle_set_config(struct linehandle_state *lh,
 }
 
 static long linehandle_ioctl(struct file *file, unsigned int cmd,
-			     unsigned long arg)
+			     user_uintptr_t arg)
 {
 	struct linehandle_state *lh = file->private_data;
 	void __user *ip = (void __user *)arg;
@@ -1428,7 +1428,7 @@ static long linereq_set_config(struct linereq *lr, void __user *ip)
 }
 
 static long linereq_ioctl(struct file *file, unsigned int cmd,
-			  unsigned long arg)
+			  user_uintptr_t arg)
 {
 	struct linereq *lr = file->private_data;
 	void __user *ip = (void __user *)arg;
@@ -1896,7 +1896,7 @@ static int lineevent_release(struct inode *inode, struct file *file)
 }
 
 static long lineevent_ioctl(struct file *file, unsigned int cmd,
-			    unsigned long arg)
+			    user_uintptr_t arg)
 {
 	struct lineevent_state *le = file->private_data;
 	void __user *ip = (void __user *)arg;
@@ -2429,7 +2429,7 @@ static int lineinfo_unwatch(struct gpio_chardev_data *cdev, void __user *ip)
 /*
  * gpio_ioctl() - ioctl handler for the GPIO chardev
  */
-static long gpio_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long gpio_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct gpio_chardev_data *cdev = file->private_data;
 	struct gpio_device *gdev = cdev->gdev;

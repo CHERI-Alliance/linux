@@ -1015,7 +1015,7 @@ static const struct seq_operations lec_seq_ops = {
 };
 #endif
 
-static int lane_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+static int lane_ioctl(struct socket *sock, unsigned int cmd, user_uintptr_t arg)
 {
 	struct atm_vcc *vcc = ATM_SD(sock);
 	int err = 0;

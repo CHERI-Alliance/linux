@@ -355,7 +355,7 @@ static int erofs_ioctl_get_volume_label(struct inode *inode, void __user *arg)
 	return ret ? -EFAULT : 0;
 }
 
-long erofs_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+long erofs_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	void __user *argp = (void __user *)arg;

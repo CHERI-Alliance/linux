@@ -663,7 +663,7 @@ static int mei_ioctl_client_notify_get(const struct file *file, u32 *notify_get)
  *
  * Return: 0 on success , <0 on error
  */
-static long mei_ioctl(struct file *file, unsigned int cmd, unsigned long data)
+static long mei_ioctl(struct file *file, unsigned int cmd, user_uintptr_t data)
 {
 	struct mei_device *dev;
 	struct mei_cl *cl = file->private_data;

@@ -2065,7 +2065,7 @@ static void dump_ump_info(struct snd_info_buffer *buffer,
 /* UMP-specific ioctls -- called directly without data copy */
 static int snd_seq_ioctl_client_ump_info(struct snd_seq_client *caller,
 					 unsigned int cmd,
-					 unsigned long arg)
+					 user_uintptr_t arg)
 {
 	struct snd_seq_client_ump_info __user *argp =
 		(struct snd_seq_client_ump_info __user *)arg;
@@ -2189,7 +2189,7 @@ static const struct ioctl_handler {
 };
 
 static long snd_seq_ioctl(struct file *file, unsigned int cmd,
-			  unsigned long arg)
+			  user_uintptr_t arg)
 {
 	struct snd_seq_client *client = file->private_data;
 	/* To use kernel stack for ioctl data. */

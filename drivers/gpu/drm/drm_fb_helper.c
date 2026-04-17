@@ -906,7 +906,7 @@ EXPORT_SYMBOL(drm_fb_helper_setcmap);
  * FBIO_WAITFORVSYNC is implemented for now.
  */
 int drm_fb_helper_ioctl(struct fb_info *info, unsigned int cmd,
-			unsigned long arg)
+			user_uintptr_t arg)
 {
 	struct drm_fb_helper *fb_helper = info->par;
 	int ret = 0;

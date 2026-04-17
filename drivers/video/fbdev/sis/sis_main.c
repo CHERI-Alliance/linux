@@ -64,7 +64,7 @@ static int	sisfb_get_fix(struct fb_fix_screeninfo *fix, int con,
 				struct fb_info *info);
 
 static int	sisfb_ioctl(struct fb_info *info, unsigned int cmd,
-			    unsigned long arg);
+			    user_uintptr_t arg);
 static int	sisfb_set_par(struct fb_info *info);
 static int	sisfb_blank(int blank,
 				struct fb_info *info);
@@ -1655,7 +1655,7 @@ sisfb_blank(int blank, struct fb_info *info)
 /* ----------- FBDev related routines for all series ---------- */
 
 static int	sisfb_ioctl(struct fb_info *info, unsigned int cmd,
-			    unsigned long arg)
+			    user_uintptr_t arg)
 {
 	struct sis_video_info	*ivideo = (struct sis_video_info *)info->par;
 	struct sis_memreq	sismemreq;

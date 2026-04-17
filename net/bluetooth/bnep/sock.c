@@ -134,7 +134,7 @@ static int do_bnep_sock_ioctl(struct socket *sock, unsigned int cmd, void __user
 	return 0;
 }
 
-static int bnep_sock_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+static int bnep_sock_ioctl(struct socket *sock, unsigned int cmd, user_uintptr_t arg)
 {
 	return do_bnep_sock_ioctl(sock, cmd, (void __user *)arg);
 }

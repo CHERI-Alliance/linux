@@ -18,7 +18,7 @@ int vcc_recvmsg(struct socket *sock, struct msghdr *msg, size_t size,
 		int flags);
 int vcc_sendmsg(struct socket *sock, struct msghdr *m, size_t total_len);
 __poll_t vcc_poll(struct file *file, struct socket *sock, poll_table *wait);
-int vcc_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg);
+int vcc_ioctl(struct socket *sock, unsigned int cmd, user_uintptr_t arg);
 int vcc_compat_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg);
 int vcc_setsockopt(struct socket *sock, int level, int optname,
 		   sockptr_t optval, unsigned int optlen);

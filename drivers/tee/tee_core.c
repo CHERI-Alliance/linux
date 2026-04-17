@@ -969,7 +969,7 @@ out:
 	return rc;
 }
 
-static long tee_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+static long tee_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 {
 	struct tee_context *ctx = filp->private_data;
 	void __user *uarg = (void __user *)arg;

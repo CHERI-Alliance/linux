@@ -1675,7 +1675,7 @@ static int sd_getgeo(struct gendisk *disk, struct hd_geometry *geo)
  *	down in the scsi subsystem.
  **/
 static int sd_ioctl(struct block_device *bdev, blk_mode_t mode,
-		    unsigned int cmd, unsigned long arg)
+		    unsigned int cmd, user_uintptr_t arg)
 {
 	struct gendisk *disk = bdev->bd_disk;
 	struct scsi_disk *sdkp = scsi_disk(disk);

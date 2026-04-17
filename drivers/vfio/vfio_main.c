@@ -1306,7 +1306,7 @@ out_free:
 }
 
 static long vfio_device_fops_unl_ioctl(struct file *filep,
-				       unsigned int cmd, unsigned long arg)
+				       unsigned int cmd, user_uintptr_t arg)
 {
 	struct vfio_device_file *df = filep->private_data;
 	struct vfio_device *device = df->device;

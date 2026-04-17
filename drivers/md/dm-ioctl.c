@@ -2113,7 +2113,7 @@ out:
 	return r;
 }
 
-static long dm_ctl_ioctl(struct file *file, uint command, ulong u)
+static long dm_ctl_ioctl(struct file *file, uint command, user_uintptr_t u)
 {
 	return (long)ctl_ioctl(file, command, (struct dm_ioctl __user *)u);
 }

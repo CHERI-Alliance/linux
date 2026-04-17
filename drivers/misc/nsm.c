@@ -351,7 +351,7 @@ out:
 }
 
 static long nsm_dev_ioctl(struct file *file, unsigned int cmd,
-	unsigned long arg)
+	user_uintptr_t arg)
 {
 	void __user *argp = u64_to_user_ptr((u64)arg);
 	struct nsm *nsm = file_to_nsm(file);

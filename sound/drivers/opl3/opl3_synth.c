@@ -77,7 +77,7 @@ int snd_opl3_open(struct snd_hwdep * hw, struct file *file)
  * ioctl for hwdep device:
  */
 int snd_opl3_ioctl(struct snd_hwdep * hw, struct file *file,
-		   unsigned int cmd, unsigned long arg)
+		   unsigned int cmd, user_uintptr_t arg)
 {
 	struct snd_opl3 *opl3 = hw->private_data;
 	void __user *argp = (void __user *)arg;

@@ -1179,7 +1179,7 @@ long
 xfs_file_ioctl(
 	struct file		*filp,
 	unsigned int		cmd,
-	unsigned long		p)
+	user_uintptr_t		p)
 {
 	struct inode		*inode = file_inode(filp);
 	struct xfs_inode	*ip = XFS_I(inode);

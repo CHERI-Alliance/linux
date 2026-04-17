@@ -1488,7 +1488,7 @@ static ssize_t random_read_iter(struct kiocb *kiocb, struct iov_iter *iter)
 	return get_random_bytes_user(iter);
 }
 
-static long random_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
+static long random_ioctl(struct file *f, unsigned int cmd, user_uintptr_t arg)
 {
 	int __user *p = (int __user *)arg;
 	int ent_count;

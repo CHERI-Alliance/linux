@@ -1375,7 +1375,7 @@ out:
 }
 
 
-static int x25_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+static int x25_ioctl(struct socket *sock, unsigned int cmd, user_uintptr_t arg)
 {
 	struct sock *sk = sock->sk;
 	struct x25_sock *x25 = x25_sk(sk);

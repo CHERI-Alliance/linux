@@ -106,7 +106,7 @@ static unsigned int DeviceErrorCount;	/* number of device error     */
 
 static ssize_t ac_read (struct file *, char __user *, size_t, loff_t *);
 static ssize_t ac_write (struct file *, const char __user *, size_t, loff_t *);
-static long ac_ioctl(struct file *, unsigned int, unsigned long);
+static long ac_ioctl(struct file *, unsigned int, user_uintptr_t);
 static irqreturn_t ac_interrupt(int, void *);
 
 static const struct file_operations ac_fops = {
@@ -694,7 +694,7 @@ static irqreturn_t ac_interrupt(int vec, void *dev_instance)
 
 
 
-static long ac_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long ac_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
      
 {				/* @ ADG ou ATO selon le cas */
 	int i;

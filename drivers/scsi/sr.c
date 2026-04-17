@@ -530,7 +530,7 @@ static void sr_block_release(struct gendisk *disk)
 }
 
 static int sr_block_ioctl(struct block_device *bdev, blk_mode_t mode,
-		unsigned cmd, unsigned long arg)
+		unsigned cmd, user_uintptr_t arg)
 {
 	struct scsi_cd *cd = scsi_cd(bdev->bd_disk);
 	struct scsi_device *sdev = cd->device;

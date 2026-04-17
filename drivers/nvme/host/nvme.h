@@ -982,14 +982,14 @@ int nvme_cdev_add(struct cdev *cdev, struct device *cdev_device,
 		const struct file_operations *fops, struct module *owner);
 void nvme_cdev_del(struct cdev *cdev, struct device *cdev_device);
 int nvme_ioctl(struct block_device *bdev, blk_mode_t mode,
-		unsigned int cmd, unsigned long arg);
-long nvme_ns_chr_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
+		unsigned int cmd, user_uintptr_t arg);
+long nvme_ns_chr_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg);
 int nvme_ns_head_ioctl(struct block_device *bdev, blk_mode_t mode,
-		unsigned int cmd, unsigned long arg);
+		unsigned int cmd, user_uintptr_t arg);
 long nvme_ns_head_chr_ioctl(struct file *file, unsigned int cmd,
-		unsigned long arg);
+		user_uintptr_t arg);
 long nvme_dev_ioctl(struct file *file, unsigned int cmd,
-		unsigned long arg);
+		user_uintptr_t arg);
 int nvme_ns_chr_uring_cmd_iopoll(struct io_uring_cmd *ioucmd,
 		struct io_comp_batch *iob, unsigned int poll_flags);
 int nvme_ns_chr_uring_cmd(struct io_uring_cmd *ioucmd,
