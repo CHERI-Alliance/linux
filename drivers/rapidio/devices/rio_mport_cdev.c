@@ -247,7 +247,7 @@ static int rio_mport_maint_rd(struct mport_cdev_priv *priv, void __user *arg,
 	size_t length;
 	int ret, i;
 
-	if (unlikely(copy_from_user(&maint_io, arg, sizeof(maint_io))))
+	if (unlikely(copy_from_user_with_ptr(&maint_io, arg, sizeof(maint_io))))
 		return -EFAULT;
 
 	if ((maint_io.offset % 4) ||
@@ -292,7 +292,7 @@ static int rio_mport_maint_wr(struct mport_cdev_priv *priv, void __user *arg,
 	size_t length;
 	int ret = -EINVAL, i;
 
-	if (unlikely(copy_from_user(&maint_io, arg, sizeof(maint_io))))
+	if (unlikely(copy_from_user_with_ptr(&maint_io, arg, sizeof(maint_io))))
 		return -EFAULT;
 
 	if ((maint_io.offset % 4) ||
@@ -948,7 +948,7 @@ static int rio_mport_transfer_ioctl(struct file *filp, void __user *arg)
 	int i, ret = 0;
 	size_t size;
 
-	if (unlikely(copy_from_user(&transaction, arg, sizeof(transaction))))
+	if (unlikely(copy_from_user_with_ptr(&transaction, arg, sizeof(transaction))))
 		return -EFAULT;
 
 	if (transaction.count != 1) /* only single transfer for now */

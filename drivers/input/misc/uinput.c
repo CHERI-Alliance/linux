@@ -814,7 +814,7 @@ static int uinput_ff_upload_to_user(char __user *buffer,
 				 sizeof(struct uinput_ff_upload_compat)))
 			return -EFAULT;
 	} else {
-		if (copy_to_user(buffer, ff_up,
+		if (copy_to_user_with_ptr(buffer, ff_up,
 				 sizeof(struct uinput_ff_upload)))
 			return -EFAULT;
 	}
@@ -840,7 +840,7 @@ static int uinput_ff_upload_from_user(const char __user *buffer,
 			sizeof(struct ff_effect_compat));
 
 	} else {
-		if (copy_from_user(ff_up, buffer,
+		if (copy_from_user_with_ptr(ff_up, buffer,
 				   sizeof(struct uinput_ff_upload)))
 			return -EFAULT;
 	}

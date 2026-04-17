@@ -1377,7 +1377,7 @@ SYSCALL_DEFINE2(mq_notify, mqd_t, mqdes,
 {
 	struct sigevent n, *p = NULL;
 	if (u_notification) {
-		if (copy_from_user(&n, u_notification, sizeof(struct sigevent)))
+		if (copy_from_user_with_ptr(&n, u_notification, sizeof(struct sigevent)))
 			return -EFAULT;
 		p = &n;
 	}

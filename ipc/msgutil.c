@@ -101,14 +101,14 @@ struct msg_msg *load_msg(const void __user *src, size_t len)
 		return ERR_PTR(-ENOMEM);
 
 	alen = min(len, DATALEN_MSG);
-	if (copy_from_user(msg + 1, src, alen))
+	if (copy_from_user_with_ptr(msg + 1, src, alen))
 		goto out_err;
 
 	for (seg = msg->next; seg != NULL; seg = seg->next) {
 		len -= alen;
 		src = (char __user *)src + alen;
 		alen = min(len, DATALEN_SEG);
-		if (copy_from_user(seg + 1, src, alen))
+		if (copy_from_user_with_ptr(seg + 1, src, alen))
 			goto out_err;
 	}
 
@@ -161,14 +161,14 @@ int store_msg(void __user *dest, struct msg_msg *msg, size_t len)
 	struct msg_msgseg *seg;
 
 	alen = min(len, DATALEN_MSG);
-	if (copy_to_user(dest, msg + 1, alen))
+	if (copy_to_user_with_ptr(dest, msg + 1, alen))
 		return -1;
 
 	for (seg = msg->next; seg != NULL; seg = seg->next) {
 		len -= alen;
 		dest = (char __user *)dest + alen;
 		alen = min(len, DATALEN_SEG);
-		if (copy_to_user(dest, seg + 1, alen))
+		if (copy_to_user_with_ptr(dest, seg + 1, alen))
 			return -1;
 	}
 	return 0;

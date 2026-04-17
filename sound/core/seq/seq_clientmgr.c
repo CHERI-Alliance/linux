@@ -441,7 +441,7 @@ static ssize_t snd_seq_read(struct file *file, char __user *buf, size_t count,
 
 			memcpy(&tmpev, &cell->event, aligned_size);
 			tmpev.data.ext.len &= ~SNDRV_SEQ_EXT_MASK;
-			if (copy_to_user(buf, &tmpev, aligned_size)) {
+			if (copy_to_user_with_ptr(buf, &tmpev, aligned_size)) {
 				err = -EFAULT;
 				break;
 			}
@@ -456,7 +456,7 @@ static ssize_t snd_seq_read(struct file *file, char __user *buf, size_t count,
 			count -= err;
 			buf += err;
 		} else {
-			if (copy_to_user(buf, &cell->event, aligned_size)) {
+			if (copy_to_user_with_ptr(buf, &cell->event, aligned_size)) {
 				err = -EFAULT;
 				break;
 			}
@@ -994,7 +994,7 @@ static ssize_t snd_seq_write(struct file *file, const char __user *buf,
 	while (count >= sizeof(struct snd_seq_event)) {
 		/* Read in the event header from the user */
 		len = sizeof(struct snd_seq_event);
-		if (copy_from_user(ev, buf, len)) {
+		if (copy_from_user_with_ptr(ev, buf, len)) {
 			err = -EFAULT;
 			break;
 		}
@@ -2241,7 +2241,7 @@ static long snd_seq_ioctl(struct file *file, unsigned int cmd,
 	 */
 	size = _IOC_SIZE(handler->cmd);
 	if (handler->cmd & IOC_IN) {
-		if (copy_from_user(&buf, (const void __user *)arg, size))
+		if (copy_from_user_with_ptr(&buf, (const void __user *)arg, size))
 			return -EFAULT;
 	}
 
@@ -2253,7 +2253,7 @@ static long snd_seq_ioctl(struct file *file, unsigned int cmd,
 		if (handler->cmd == SNDRV_SEQ_IOCTL_SET_QUEUE_CLIENT ||
 		    handler->cmd == SNDRV_SEQ_IOCTL_SET_CLIENT_POOL ||
 		    (handler->cmd & IOC_OUT))
-			if (copy_to_user((void __user *)arg, &buf, size))
+			if (copy_to_user_with_ptr((void __user *)arg, &buf, size))
 				return -EFAULT;
 	}
 

@@ -38,7 +38,7 @@ static int snd_seq_call_port_info_ioctl(struct snd_seq_client *client, unsigned 
 	if (!data)
 		return -ENOMEM;
 
-	if (copy_from_user(data, data32, sizeof(*data32)) ||
+	if (copy_from_user_with_ptr(data, data32, sizeof(*data32)) ||
 	    get_user(data->flags, &data32->flags) ||
 	    get_user(data->time_queue, &data32->time_queue))
 		return -EFAULT;
@@ -48,7 +48,7 @@ static int snd_seq_call_port_info_ioctl(struct snd_seq_client *client, unsigned 
 	if (err < 0)
 		return err;
 
-	if (copy_to_user(data32, data, sizeof(*data32)) ||
+	if (copy_to_user_with_ptr(data32, data, sizeof(*data32)) ||
 	    put_user(data->flags, &data32->flags) ||
 	    put_user(data->time_queue, &data32->time_queue))
 		return -EFAULT;

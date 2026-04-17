@@ -6266,7 +6266,7 @@ static int hpsa_ioctl32_passthru(struct scsi_device *dev, unsigned int cmd,
 		return -EINVAL;
 
 	memset(&arg64, 0, sizeof(arg64));
-	if (copy_from_user(&arg64, arg32, offsetof(IOCTL_Command_struct, buf)))
+	if (copy_from_user_with_ptr(&arg64, arg32, offsetof(IOCTL_Command_struct, buf)))
 		return -EFAULT;
 	if (get_user(cp, &arg32->buf))
 		return -EFAULT;
@@ -6296,7 +6296,7 @@ static int hpsa_ioctl32_big_passthru(struct scsi_device *dev,
 	if (!arg)
 		return -EINVAL;
 	memset(&arg64, 0, sizeof(arg64));
-	if (copy_from_user(&arg64, arg32,
+	if (copy_from_user_with_ptr(&arg64, arg32,
 			   offsetof(BIG_IOCTL32_Command_struct, buf)))
 		return -EFAULT;
 	if (get_user(cp, &arg32->buf))
@@ -6630,13 +6630,13 @@ static int hpsa_ioctl(struct scsi_device *dev, unsigned int cmd,
 
 		if (!argp)
 			return -EINVAL;
-		if (copy_from_user(&iocommand, argp, sizeof(iocommand)))
+		if (copy_from_user_with_ptr(&iocommand, argp, sizeof(iocommand)))
 			return -EFAULT;
 		if (atomic_dec_if_positive(&h->passthru_cmds_avail) < 0)
 			return -EAGAIN;
 		rc = hpsa_passthru_ioctl(h, &iocommand);
 		atomic_inc(&h->passthru_cmds_avail);
-		if (!rc && copy_to_user(argp, &iocommand, sizeof(iocommand)))
+		if (!rc && copy_to_user_with_ptr(argp, &iocommand, sizeof(iocommand)))
 			rc = -EFAULT;
 		return rc;
 	}
@@ -6644,13 +6644,13 @@ static int hpsa_ioctl(struct scsi_device *dev, unsigned int cmd,
 		BIG_IOCTL_Command_struct ioc;
 		if (!argp)
 			return -EINVAL;
-		if (copy_from_user(&ioc, argp, sizeof(ioc)))
+		if (copy_from_user_with_ptr(&ioc, argp, sizeof(ioc)))
 			return -EFAULT;
 		if (atomic_dec_if_positive(&h->passthru_cmds_avail) < 0)
 			return -EAGAIN;
 		rc = hpsa_big_passthru_ioctl(h, &ioc);
 		atomic_inc(&h->passthru_cmds_avail);
-		if (!rc && copy_to_user(argp, &ioc, sizeof(ioc)))
+		if (!rc && copy_to_user_with_ptr(argp, &ioc, sizeof(ioc)))
 			rc = -EFAULT;
 		return rc;
 	}

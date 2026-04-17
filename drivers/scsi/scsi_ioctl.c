@@ -666,7 +666,7 @@ int put_sg_io_hdr(const struct sg_io_hdr *hdr, void __user *argp)
 	}
 #endif
 
-	if (copy_to_user(argp, hdr, sizeof(*hdr)))
+	if (copy_to_user_with_ptr(argp, hdr, sizeof(*hdr)))
 		return -EFAULT;
 
 	return 0;
@@ -711,7 +711,7 @@ int get_sg_io_hdr(struct sg_io_hdr *hdr, const void __user *argp)
 	}
 #endif
 
-	if (copy_from_user(hdr, argp, sizeof(*hdr)))
+	if (copy_from_user_with_ptr(hdr, argp, sizeof(*hdr)))
 		return -EFAULT;
 
 	return 0;
@@ -757,7 +757,7 @@ static int scsi_get_cdrom_generic_arg(struct cdrom_generic_command *cgc,
 		return 0;
 	}
 #endif
-	if (copy_from_user(cgc, arg, sizeof(*cgc)))
+	if (copy_from_user_with_ptr(cgc, arg, sizeof(*cgc)))
 		return -EFAULT;
 
 	return 0;
@@ -786,7 +786,7 @@ static int scsi_put_cdrom_generic_arg(const struct cdrom_generic_command *cgc,
 		return 0;
 	}
 #endif
-	if (copy_to_user(arg, cgc, sizeof(*cgc)))
+	if (copy_to_user_with_ptr(arg, cgc, sizeof(*cgc)))
 		return -EFAULT;
 
 	return 0;

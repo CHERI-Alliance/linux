@@ -2341,7 +2341,7 @@ static long comedi_unlocked_ioctl(struct file *file, unsigned int cmd,
 	case COMEDI_CHANINFO: {
 		struct comedi_chaninfo it;
 
-		if (copy_from_user(&it, (void __user *)arg, sizeof(it)))
+		if (copy_from_user_with_ptr(&it, (void __user *)arg, sizeof(it)))
 			rc = -EFAULT;
 		else
 			rc = do_chaninfo_ioctl(dev, &it);
@@ -2350,7 +2350,7 @@ static long comedi_unlocked_ioctl(struct file *file, unsigned int cmd,
 	case COMEDI_RANGEINFO: {
 		struct comedi_rangeinfo it;
 
-		if (copy_from_user(&it, (void __user *)arg, sizeof(it)))
+		if (copy_from_user_with_ptr(&it, (void __user *)arg, sizeof(it)))
 			rc = -EFAULT;
 		else
 			rc = do_rangeinfo_ioctl(dev, &it);
@@ -2369,12 +2369,12 @@ static long comedi_unlocked_ioctl(struct file *file, unsigned int cmd,
 		struct comedi_cmd cmd;
 		bool copy = false;
 
-		if (copy_from_user(&cmd, (void __user *)arg, sizeof(cmd))) {
+		if (copy_from_user_with_ptr(&cmd, (void __user *)arg, sizeof(cmd))) {
 			rc = -EFAULT;
 			break;
 		}
 		rc = do_cmd_ioctl(dev, &cmd, &copy, file);
-		if (copy && copy_to_user((void __user *)arg, &cmd, sizeof(cmd)))
+		if (copy && copy_to_user_with_ptr((void __user *)arg, &cmd, sizeof(cmd)))
 			rc = -EFAULT;
 		break;
 	}
@@ -2382,12 +2382,12 @@ static long comedi_unlocked_ioctl(struct file *file, unsigned int cmd,
 		struct comedi_cmd cmd;
 		bool copy = false;
 
-		if (copy_from_user(&cmd, (void __user *)arg, sizeof(cmd))) {
+		if (copy_from_user_with_ptr(&cmd, (void __user *)arg, sizeof(cmd))) {
 			rc = -EFAULT;
 			break;
 		}
 		rc = do_cmdtest_ioctl(dev, &cmd, &copy, file);
-		if (copy && copy_to_user((void __user *)arg, &cmd, sizeof(cmd)))
+		if (copy && copy_to_user_with_ptr((void __user *)arg, &cmd, sizeof(cmd)))
 			rc = -EFAULT;
 		break;
 	}
@@ -2395,7 +2395,7 @@ static long comedi_unlocked_ioctl(struct file *file, unsigned int cmd,
 		struct comedi_insnlist insnlist;
 		struct comedi_insn *insns = NULL;
 
-		if (copy_from_user(&insnlist, (void __user *)arg,
+		if (copy_from_user_with_ptr(&insnlist, (void __user *)arg,
 				   sizeof(insnlist))) {
 			rc = -EFAULT;
 			break;
@@ -2416,7 +2416,7 @@ static long comedi_unlocked_ioctl(struct file *file, unsigned int cmd,
 	case COMEDI_INSN: {
 		struct comedi_insn insn;
 
-		if (copy_from_user(&insn, (void __user *)arg, sizeof(insn)))
+		if (copy_from_user_with_ptr(&insn, (void __user *)arg, sizeof(insn)))
 			rc = -EFAULT;
 		else
 			rc = do_insn_ioctl(dev, &insn, file);

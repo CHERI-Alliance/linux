@@ -2074,7 +2074,7 @@ static int prctl_set_mm_map(int opt, const void __user *addr, unsigned long data
 	if (data_size != sizeof(prctl_map))
 		return -EINVAL;
 
-	if (copy_from_user(&prctl_map, addr, sizeof(prctl_map)))
+	if (copy_from_user_with_ptr(&prctl_map, addr, sizeof(prctl_map)))
 		return -EFAULT;
 
 	error = validate_prctl_map_addr(&prctl_map);

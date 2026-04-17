@@ -444,7 +444,7 @@ static long i2cdev_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 		struct i2c_msg *rdwr_pa;
 		int res;
 
-		if (copy_from_user(&rdwr_arg,
+		if (copy_from_user_with_ptr(&rdwr_arg,
 				   (struct i2c_rdwr_ioctl_data __user *)arg,
 				   sizeof(rdwr_arg)))
 			return -EFAULT;
@@ -471,7 +471,7 @@ static long i2cdev_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 
 	case I2C_SMBUS: {
 		struct i2c_smbus_ioctl_data data_arg;
-		if (copy_from_user(&data_arg,
+		if (copy_from_user_with_ptr(&data_arg,
 				   (struct i2c_smbus_ioctl_data __user *) arg,
 				   sizeof(struct i2c_smbus_ioctl_data)))
 			return -EFAULT;

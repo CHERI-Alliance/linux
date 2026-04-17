@@ -174,7 +174,7 @@ int fsverity_ioctl_read_metadata(struct file *filp, const void __user *uarg)
 	 * reading, since verity files can only be opened for reading.
 	 */
 
-	if (copy_from_user(&arg, uarg, sizeof(arg)))
+	if (copy_from_user_with_ptr(&arg, uarg, sizeof(arg)))
 		return -EFAULT;
 
 	if (arg.__reserved)

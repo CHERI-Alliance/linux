@@ -1088,7 +1088,7 @@ sg_ioctl_common(struct file *filp, Sg_device *sdp, Sg_fd *sfp,
 				result = put_compat_request_table(p, rinfo);
 			else
 	#endif
-				result = copy_to_user(p, rinfo,
+				result = copy_to_user_with_ptr(p, rinfo,
 						      SZ_SG_REQ_INFO * SG_MAX_QUEUE);
 			result = result ? -EFAULT : 0;
 			kfree(rinfo);

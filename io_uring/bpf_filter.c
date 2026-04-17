@@ -316,7 +316,7 @@ static int io_bpf_filter_import(struct io_uring_bpf *reg,
 	const struct io_issue_def *def;
 	int ret;
 
-	if (copy_from_user(reg, arg, sizeof(*reg)))
+	if (copy_from_user_with_ptr(reg, arg, sizeof(*reg)))
 		return -EFAULT;
 	if (reg->cmd_type != IO_URING_BPF_CMD_FILTER)
 		return -EINVAL;
@@ -350,7 +350,7 @@ static int io_bpf_filter_import(struct io_uring_bpf *reg,
 
 	/* copy back kernel filter size */
 	reg->filter.pdu_size = def->filter_pdu_size;
-	if (copy_to_user(&arg->filter, &reg->filter, sizeof(reg->filter)))
+	if (copy_to_user_with_ptr(&arg->filter, &reg->filter, sizeof(reg->filter)))
 		return -EFAULT;
 
 	return ret;

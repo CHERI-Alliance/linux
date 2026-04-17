@@ -289,7 +289,7 @@ restart:
 		sizeof(__u64));
 	if (ret != 0)
 		goto error;
-	ret = copy_to_user(buf + 2 * sizeof(__s32) + sizeof(__u64),
+	ret = copy_to_user_with_ptr(buf + 2 * sizeof(__s32) + sizeof(__u64),
 		&cur_op->upcall,
 		sizeof(struct orangefs_upcall_s));
 	if (ret != 0)
@@ -616,7 +616,7 @@ static long dispatch_ioctl_command(unsigned int command, unsigned long arg)
 					-EIO :
 					0);
 	case ORANGEFS_DEV_MAP:
-		ret = copy_from_user(&user_desc,
+		ret = copy_from_user_with_ptr(&user_desc,
 				     (struct ORANGEFS_dev_map_desc __user *)
 				     arg,
 				     sizeof(struct ORANGEFS_dev_map_desc));

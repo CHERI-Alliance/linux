@@ -303,7 +303,7 @@ static long sync_file_ioctl_fence_info(struct sync_file *sync_file,
 	int ret;
 	__u32 size;
 
-	if (copy_from_user(&info, (void __user *)arg, sizeof(info)))
+	if (copy_from_user_with_ptr(&info, (void __user *)arg, sizeof(info)))
 		return -EFAULT;
 
 	if (info.flags || info.pad)
@@ -352,7 +352,7 @@ no_fences:
 	sync_file_get_name(sync_file, info.name, sizeof(info.name));
 	info.num_fences = num_fences;
 
-	if (copy_to_user((void __user *)arg, &info, sizeof(info)))
+	if (copy_to_user_with_ptr((void __user *)arg, &info, sizeof(info)))
 		ret = -EFAULT;
 	else
 		ret = 0;

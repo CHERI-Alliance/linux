@@ -465,14 +465,14 @@ static int vt_k_ioctl(struct tty_struct *tty, unsigned int cmd,
 	case KDFONTOP: {
 		struct console_font_op op;
 
-		if (copy_from_user(&op, up, sizeof(op)))
+		if (copy_from_user_with_ptr(&op, up, sizeof(op)))
 			return -EFAULT;
 		if (!perm && op.op != KD_FONT_OP_GET)
 			return -EPERM;
 		ret = con_font_op(vc, &op);
 		if (ret)
 			return ret;
-		if (copy_to_user(up, &op, sizeof(op)))
+		if (copy_to_user_with_ptr(up, &op, sizeof(op)))
 			return -EFAULT;
 		break;
 	}
@@ -489,7 +489,7 @@ static inline int do_unimap_ioctl(int cmd, struct unimapdesc __user *user_ud,
 {
 	struct unimapdesc tmp;
 
-	if (copy_from_user(&tmp, user_ud, sizeof tmp))
+	if (copy_from_user_with_ptr(&tmp, user_ud, sizeof tmp))
 		return -EFAULT;
 	switch (cmd) {
 	case PIO_UNIMAP:
@@ -1011,7 +1011,7 @@ compat_kdfontop_ioctl(struct compat_console_font_op __user *fontop,
 {
 	int i;
 
-	if (copy_from_user(op, fontop, sizeof(struct compat_console_font_op)))
+	if (copy_from_user_with_ptr(op, fontop, sizeof(struct compat_console_font_op)))
 		return -EFAULT;
 	if (!perm && op->op != KD_FONT_OP_GET)
 		return -EPERM;
@@ -1020,7 +1020,7 @@ compat_kdfontop_ioctl(struct compat_console_font_op __user *fontop,
 	if (i)
 		return i;
 	((struct compat_console_font_op *)op)->data = (unsigned long)op->data;
-	if (copy_to_user(fontop, op, sizeof(struct compat_console_font_op)))
+	if (copy_to_user_with_ptr(fontop, op, sizeof(struct compat_console_font_op)))
 		return -EFAULT;
 	return 0;
 }

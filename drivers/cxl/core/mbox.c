@@ -644,7 +644,7 @@ int cxl_send_cmd(struct cxl_mailbox *cxl_mbox, struct cxl_send_command __user *s
 
 	dev_dbg(dev, "Send IOCTL\n");
 
-	if (copy_from_user(&send, s, sizeof(send)))
+	if (copy_from_user_with_ptr(&send, s, sizeof(send)))
 		return -EFAULT;
 
 	rc = cxl_validate_cmd_from_user(&mbox_cmd, cxl_mbox, &send);
@@ -656,7 +656,7 @@ int cxl_send_cmd(struct cxl_mailbox *cxl_mbox, struct cxl_send_command __user *s
 	if (rc)
 		return rc;
 
-	if (copy_to_user(s, &send, sizeof(send)))
+	if (copy_to_user_with_ptr(s, &send, sizeof(send)))
 		return -EFAULT;
 
 	return 0;

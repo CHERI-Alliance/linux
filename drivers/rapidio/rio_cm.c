@@ -1835,7 +1835,7 @@ static int cm_chan_msg_send(void __user *arg)
 	void *buf;
 	int ret;
 
-	if (copy_from_user(&msg, arg, sizeof(msg)))
+	if (copy_from_user_with_ptr(&msg, arg, sizeof(msg)))
 		return -EFAULT;
 	if (msg.size > RIO_MAX_MSG_SIZE)
 		return -EINVAL;
@@ -1862,7 +1862,7 @@ static int cm_chan_msg_rcv(void __user *arg)
 	long rxto;
 	int ret = 0, msg_size;
 
-	if (copy_from_user(&msg, arg, sizeof(msg)))
+	if (copy_from_user_with_ptr(&msg, arg, sizeof(msg)))
 		return -EFAULT;
 
 	if (msg.ch_num == 0 || msg.size == 0)

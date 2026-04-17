@@ -306,7 +306,7 @@ int radeon_cs_parser_init(struct radeon_cs_parser *p, void *data)
 		uint32_t __user *cdata;
 
 		chunk_ptr = (void __user*)(unsigned long)p->chunks_array[i];
-		if (copy_from_user(&user_chunk, chunk_ptr,
+		if (copy_from_user_with_ptr(&user_chunk, chunk_ptr,
 				       sizeof(struct drm_radeon_cs_chunk))) {
 			return -EFAULT;
 		}

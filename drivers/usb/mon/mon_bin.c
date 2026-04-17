@@ -1069,7 +1069,7 @@ static long mon_bin_ioctl(struct file *file, unsigned int cmd, unsigned long arg
 		{
 		struct mon_bin_get getb;
 
-		if (copy_from_user(&getb, (void __user *)arg,
+		if (copy_from_user_with_ptr(&getb, (void __user *)arg,
 					    sizeof(struct mon_bin_get)))
 			return -EFAULT;
 
@@ -1088,7 +1088,7 @@ static long mon_bin_ioctl(struct file *file, unsigned int cmd, unsigned long arg
 
 		uptr = (struct mon_bin_mfetch __user *)arg;
 
-		if (copy_from_user(&mfetch, uptr, sizeof(mfetch)))
+		if (copy_from_user_with_ptr(&mfetch, uptr, sizeof(mfetch)))
 			return -EFAULT;
 
 		if (mfetch.nflush) {

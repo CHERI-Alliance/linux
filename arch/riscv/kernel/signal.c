@@ -94,7 +94,7 @@ static long save_v_state(struct pt_regs *regs, void __user *sc_vec)
 	put_cpu_vector_context();
 
 	/* Copy everything of vstate but datap. */
-	err = __copy_to_user(&state->v_state, &current->thread.vstate,
+	err = __copy_to_user_with_ptr(&state->v_state, &current->thread.vstate,
 			     offsetof(struct __riscv_v_ext_state, datap));
 	/* Copy the pointer datap itself. */
 	err |= __put_user((__force void *)datap, &state->v_state.datap);
@@ -126,7 +126,7 @@ static long __restore_v_state(struct pt_regs *regs, void __user *sc_vec)
 	riscv_v_vstate_set_restore(current, regs);
 
 	/* Copy everything of __sc_riscv_v_state except datap. */
-	err = __copy_from_user(&current->thread.vstate, &state->v_state,
+	err = __copy_from_user_with_ptr(&current->thread.vstate, &state->v_state,
 			       offsetof(struct __riscv_v_ext_state, datap));
 	if (unlikely(err))
 		return err;
@@ -223,7 +223,7 @@ static long restore_sigcontext(struct pt_regs *regs,
 	__u32 rsvd;
 	long err;
 	/* sc_regs is structured the same as the start of pt_regs */
-	err = __copy_from_user(regs, &sc->sc_regs, sizeof(sc->sc_regs));
+	err = __copy_from_user_with_ptr(regs, &sc->sc_regs, sizeof(sc->sc_regs));
 	if (unlikely(err))
 		return err;
 
@@ -359,7 +359,7 @@ static long setup_sigcontext(struct rt_sigframe __user *frame,
 	long err, i, ext_size;
 
 	/* sc_regs is structured the same as the start of pt_regs */
-	err = __copy_to_user(&sc->sc_regs, regs, sizeof(sc->sc_regs));
+	err = __copy_to_user_with_ptr(&sc->sc_regs, regs, sizeof(sc->sc_regs));
 	/* Save the floating-point state. */
 	if (has_fpu())
 		err |= save_fp_state(regs, &sc->sc_fpregs);

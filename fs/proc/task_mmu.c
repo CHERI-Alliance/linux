@@ -670,7 +670,7 @@ static int do_procmap_query(struct mm_struct *mm, void __user *uarg)
 	/* argument struct should have at least query_flags and query_addr fields */
 	if (usize < offsetofend(struct procmap_query, query_addr))
 		return -EINVAL;
-	err = copy_struct_from_user(&karg, sizeof(karg), uarg, usize);
+	err = copy_struct_from_user_with_ptr(&karg, sizeof(karg), uarg, usize);
 	if (err)
 		return err;
 
@@ -800,7 +800,7 @@ static int do_procmap_query(struct mm_struct *mm, void __user *uarg)
 					       build_id_buf, karg.build_id_size))
 		return -EFAULT;
 
-	if (copy_to_user(uarg, &karg, min_t(size_t, sizeof(karg), usize)))
+	if (copy_to_user_with_ptr(uarg, &karg, min_t(size_t, sizeof(karg), usize)))
 		return -EFAULT;
 
 	return 0;
@@ -2924,7 +2924,7 @@ static const struct mm_walk_ops pagemap_scan_ops = {
 static int pagemap_scan_get_args(struct pm_scan_arg *arg,
 				 unsigned long uarg)
 {
-	if (copy_from_user(arg, (void __user *)uarg, sizeof(*arg)))
+	if (copy_from_user_with_ptr(arg, (void __user *)uarg, sizeof(*arg)))
 		return -EFAULT;
 
 	if (arg->size != sizeof(struct pm_scan_arg))
