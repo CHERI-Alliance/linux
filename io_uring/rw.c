@@ -74,7 +74,7 @@ static int io_iov_buffer_select_prep(struct io_kiocb *req)
 		return io_iov_compat_buffer_select_prep(rw);
 
 	uiov = u64_to_user_ptr(rw->addr);
-	if (copy_from_user(&iov, uiov, sizeof(*uiov)))
+	if (copy_from_user_with_ptr(&iov, uiov, sizeof(*uiov)))
 		return -EFAULT;
 	rw->len = iov.iov_len;
 	return 0;
@@ -236,7 +236,7 @@ static int io_prep_rw_pi(struct io_kiocb *req, struct io_rw *rw, int ddir,
 	struct io_async_rw *io;
 	int ret;
 
-	if (copy_from_user(&pi_attr, u64_to_user_ptr(attr_ptr),
+	if (copy_from_user_with_ptr(&pi_attr, u64_to_user_ptr(attr_ptr),
 	    sizeof(pi_attr)))
 		return -EFAULT;
 

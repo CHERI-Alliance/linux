@@ -2756,7 +2756,7 @@ static int ia_ioctl(struct atm_dev *dev, unsigned int cmd, void __user *arg)
       if (!dev->phy->ioctl) return -EINVAL;
       return dev->phy->ioctl(dev,cmd,arg);
    }
-   if (copy_from_user(&ia_cmds, arg, sizeof ia_cmds)) return -EFAULT; 
+   if (copy_from_user_with_ptr(&ia_cmds, arg, sizeof ia_cmds)) return -EFAULT; 
    board = ia_cmds.status;
 
 	if ((board < 0) || (board > iadev_count))

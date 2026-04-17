@@ -2816,7 +2816,7 @@ static noinline int copy_clone_args_from_user(struct kernel_clone_args *kargs,
 	if (unlikely(usize < CLONE_ARGS_SIZE_VER0))
 		return -EINVAL;
 
-	err = copy_struct_from_user(&args, sizeof(args), uargs, usize);
+	err = copy_struct_from_user_with_ptr(&args, sizeof(args), uargs, usize);
 	if (err)
 		return err;
 

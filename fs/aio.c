@@ -1267,7 +1267,7 @@ static long aio_read_events_ring(struct kioctx *ctx,
 		avail = min_t(long, avail, AIO_EVENTS_PER_PAGE - pos);
 
 		ev = folio_address(folio);
-		copy_ret = copy_to_user(event + ret, ev + pos,
+		copy_ret = copy_to_user_with_ptr(event + ret, ev + pos,
 					sizeof(*ev) * avail);
 
 		if (unlikely(copy_ret)) {
@@ -2026,7 +2026,7 @@ static int io_submit_one(struct kioctx *ctx, struct iocb __user *user_iocb,
 	struct iocb iocb;
 	int err;
 
-	if (unlikely(copy_from_user(&iocb, user_iocb, sizeof(iocb))))
+	if (unlikely(copy_from_user_with_ptr(&iocb, user_iocb, sizeof(iocb))))
 		return -EFAULT;
 
 	/* enforce forwards compatibility on users */
@@ -2288,7 +2288,7 @@ SYSCALL_DEFINE6(io_pgetevents,
 	if (timeout && unlikely(get_timespec64(&ts, timeout)))
 		return -EFAULT;
 
-	if (usig && copy_from_user(&ksig, usig, sizeof(ksig)))
+	if (usig && copy_from_user_with_ptr(&ksig, usig, sizeof(ksig)))
 		return -EFAULT;
 
 	ret = set_user_sigmask(ksig.sigmask, ksig.sigsetsize);

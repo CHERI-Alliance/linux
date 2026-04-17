@@ -510,7 +510,7 @@ static int io_register_resize_rings(struct io_ring_ctx *ctx, void __user *arg)
 	/* limited to DEFER_TASKRUN for now */
 	if (!(ctx->flags & IORING_SETUP_DEFER_TASKRUN))
 		return -EINVAL;
-	if (copy_from_user(p, arg, sizeof(*p)))
+	if (copy_from_user_with_ptr(p, arg, sizeof(*p)))
 		return -EFAULT;
 	if (p->flags & ~RESIZE_FLAGS)
 		return -EINVAL;
@@ -547,7 +547,7 @@ static int io_register_resize_rings(struct io_ring_ctx *ctx, void __user *arg)
 	WRITE_ONCE(n.rings->sq_ring_entries, p->sq_entries);
 	WRITE_ONCE(n.rings->cq_ring_entries, p->cq_entries);
 
-	if (copy_to_user(arg, p, sizeof(*p))) {
+	if (copy_to_user_with_ptr(arg, p, sizeof(*p))) {
 		io_register_free_rings(ctx, &n);
 		return -EFAULT;
 	}
@@ -680,10 +680,10 @@ static int io_register_mem_region(struct io_ring_ctx *ctx, void __user *uarg)
 
 	if (io_region_is_set(&ctx->param_region))
 		return -EBUSY;
-	if (copy_from_user(&reg, reg_uptr, sizeof(reg)))
+	if (copy_from_user_with_ptr(&reg, reg_uptr, sizeof(reg)))
 		return -EFAULT;
 	rd_uptr = u64_to_user_ptr(reg.region_uptr);
-	if (copy_from_user(&rd, rd_uptr, sizeof(rd)))
+	if (copy_from_user_with_ptr(&rd, rd_uptr, sizeof(rd)))
 		return -EFAULT;
 	if (memchr_inv(&reg.__resv, 0, sizeof(reg.__resv)))
 		return -EINVAL;
@@ -702,7 +702,7 @@ static int io_register_mem_region(struct io_ring_ctx *ctx, void __user *uarg)
 	ret = io_create_region(ctx, &region, &rd, IORING_MAP_OFF_PARAM_REGION);
 	if (ret)
 		return ret;
-	if (copy_to_user(rd_uptr, &rd, sizeof(rd))) {
+	if (copy_to_user_with_ptr(rd_uptr, &rd, sizeof(rd))) {
 		io_free_region(ctx->user, &region);
 		return -EFAULT;
 	}
@@ -986,7 +986,7 @@ static int io_uring_register_send_msg_ring(void __user *arg, unsigned int nr_arg
 
 	if (!arg || nr_args != 1)
 		return -EINVAL;
-	if (copy_from_user(&sqe, arg, sizeof(sqe)))
+	if (copy_from_user_with_ptr(&sqe, arg, sizeof(sqe)))
 		return -EFAULT;
 	/* no flags supported */
 	if (sqe.flags)

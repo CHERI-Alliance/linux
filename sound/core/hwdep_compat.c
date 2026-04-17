@@ -22,7 +22,7 @@ static int snd_hwdep_dsp_load_compat(struct snd_hwdep *hw,
 	struct snd_hwdep_dsp_image info = {};
 	compat_caddr_t ptr;
 
-	if (copy_from_user(&info, src, 4 + 64) ||
+	if (copy_from_user_with_ptr(&info, src, 4 + 64) ||
 	    get_user(ptr, &src->image) ||
 	    get_user(info.length, &src->length) ||
 	    get_user(info.driver_data, &src->driver_data))

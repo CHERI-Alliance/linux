@@ -2506,7 +2506,7 @@ static int do_pages_stat(struct mm_struct *mm, unsigned long nr_pages,
 						   chunk_offset, chunk_nr))
 				break;
 		} else {
-			if (copy_from_user(chunk_pages, pages + chunk_offset,
+			if (copy_from_user_with_ptr(chunk_pages, pages + chunk_offset,
 				      chunk_nr * sizeof(*chunk_pages)))
 				break;
 		}

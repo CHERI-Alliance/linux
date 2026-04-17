@@ -99,7 +99,7 @@ xfs_ioc_fsbulkstat(
 	if (xfs_is_shutdown(mp))
 		return -EIO;
 
-	if (copy_from_user(&bulkreq, arg, sizeof(struct xfs_fsop_bulkreq)))
+	if (copy_from_user_with_ptr(&bulkreq, arg, sizeof(struct xfs_fsop_bulkreq)))
 		return -EFAULT;
 
 	if (copy_from_user(&lastino, bulkreq.lastip, sizeof(__s64)))
@@ -1274,14 +1274,14 @@ xfs_file_ioctl(
 	case XFS_IOC_PATH_TO_FSHANDLE: {
 		xfs_fsop_handlereq_t	hreq;
 
-		if (copy_from_user(&hreq, arg, sizeof(hreq)))
+		if (copy_from_user_with_ptr(&hreq, arg, sizeof(hreq)))
 			return -EFAULT;
 		return xfs_find_handle(cmd, &hreq);
 	}
 	case XFS_IOC_OPEN_BY_HANDLE: {
 		xfs_fsop_handlereq_t	hreq;
 
-		if (copy_from_user(&hreq, arg, sizeof(xfs_fsop_handlereq_t)))
+		if (copy_from_user_with_ptr(&hreq, arg, sizeof(xfs_fsop_handlereq_t)))
 			return -EFAULT;
 		return xfs_open_by_handle(filp, &hreq);
 	}
@@ -1289,7 +1289,7 @@ xfs_file_ioctl(
 	case XFS_IOC_READLINK_BY_HANDLE: {
 		xfs_fsop_handlereq_t	hreq;
 
-		if (copy_from_user(&hreq, arg, sizeof(xfs_fsop_handlereq_t)))
+		if (copy_from_user_with_ptr(&hreq, arg, sizeof(xfs_fsop_handlereq_t)))
 			return -EFAULT;
 		return xfs_readlink_by_handle(filp, &hreq);
 	}

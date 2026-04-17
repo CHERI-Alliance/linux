@@ -1067,7 +1067,7 @@ int wext_handle_ioctl(struct net *net, unsigned int cmd, void __user *arg)
 	struct iwreq iwr;
 	int ret;
 
-	if (copy_from_user(&iwr, arg, sizeof(iwr)))
+	if (copy_from_user_with_ptr(&iwr, arg, sizeof(iwr)))
 		return -EFAULT;
 
 	iwr.ifr_name[sizeof(iwr.ifr_name) - 1] = 0;
@@ -1077,7 +1077,7 @@ int wext_handle_ioctl(struct net *net, unsigned int cmd, void __user *arg)
 				  ioctl_private_call);
 	if (ret >= 0 &&
 	    IW_IS_GET(cmd) &&
-	    copy_to_user(arg, &iwr, sizeof(struct iwreq)))
+	    copy_to_user_with_ptr(arg, &iwr, sizeof(struct iwreq)))
 		return -EFAULT;
 
 	return ret;
@@ -1127,7 +1127,7 @@ int compat_wext_handle_ioctl(struct net *net, unsigned int cmd,
 	char *colon;
 	int ret;
 
-	if (copy_from_user(&iwr, argp, sizeof(struct iwreq)))
+	if (copy_from_user_with_ptr(&iwr, argp, sizeof(struct iwreq)))
 		return -EFAULT;
 
 	iwr.ifr_name[IFNAMSIZ-1] = 0;
@@ -1144,7 +1144,7 @@ int compat_wext_handle_ioctl(struct net *net, unsigned int cmd,
 
 	if (ret >= 0 &&
 	    IW_IS_GET(cmd) &&
-	    copy_to_user(argp, &iwr, sizeof(struct iwreq)))
+	    copy_to_user_with_ptr(argp, &iwr, sizeof(struct iwreq)))
 		return -EFAULT;
 
 	return ret;

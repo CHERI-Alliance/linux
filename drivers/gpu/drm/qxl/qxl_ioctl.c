@@ -281,7 +281,7 @@ int qxl_execbuffer_ioctl(struct drm_device *dev, void *data, struct drm_file *fi
 		struct drm_qxl_command __user *commands =
 			u64_to_user_ptr(execbuffer->commands);
 
-		if (copy_from_user(&user_cmd, commands + cmd_num,
+		if (copy_from_user_with_ptr(&user_cmd, commands + cmd_num,
 				       sizeof(user_cmd)))
 			return -EFAULT;
 

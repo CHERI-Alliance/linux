@@ -210,7 +210,7 @@ static int nvme_submit_io(struct nvme_ns *ns, struct nvme_user_io __user *uio)
 	unsigned length, meta_len;
 	void __user *metadata;
 
-	if (copy_from_user(&io, uio, sizeof(io)))
+	if (copy_from_user_with_ptr(&io, uio, sizeof(io)))
 		return -EFAULT;
 	if (io.flags)
 		return -EINVAL;
@@ -288,7 +288,7 @@ static int nvme_user_cmd(struct nvme_ctrl *ctrl, struct nvme_ns *ns,
 	u64 result;
 	int status;
 
-	if (copy_from_user(&cmd, ucmd, sizeof(cmd)))
+	if (copy_from_user_with_ptr(&cmd, ucmd, sizeof(cmd)))
 		return -EFAULT;
 	if (cmd.flags)
 		return -EINVAL;
@@ -335,7 +335,7 @@ static int nvme_user_cmd64(struct nvme_ctrl *ctrl, struct nvme_ns *ns,
 	unsigned timeout = 0;
 	int status;
 
-	if (copy_from_user(&cmd, ucmd, sizeof(cmd)))
+	if (copy_from_user_with_ptr(&cmd, ucmd, sizeof(cmd)))
 		return -EFAULT;
 	if (cmd.flags)
 		return -EINVAL;

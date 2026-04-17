@@ -331,7 +331,7 @@ static int io_msg_copy_hdr(struct io_kiocb *req, struct io_async_msghdr *iomsg,
 			struct iovec __user *uiov = msg->msg_iov;
 			struct iovec tmp_iov;
 
-			if (copy_from_user(&tmp_iov, uiov, sizeof(tmp_iov)))
+			if (copy_from_user_with_ptr(&tmp_iov, uiov, sizeof(tmp_iov)))
 				return -EFAULT;
 			sr->len = tmp_iov.iov_len;
 		}

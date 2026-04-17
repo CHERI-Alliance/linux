@@ -1275,7 +1275,7 @@ static int proc_control(struct usb_dev_state *ps, void __user *arg)
 {
 	struct usbdevfs_ctrltransfer ctrl;
 
-	if (copy_from_user(&ctrl, arg, sizeof(ctrl)))
+	if (copy_from_user_with_ptr(&ctrl, arg, sizeof(ctrl)))
 		return -EFAULT;
 	return do_proc_control(ps, &ctrl);
 }
@@ -1374,7 +1374,7 @@ static int proc_bulk(struct usb_dev_state *ps, void __user *arg)
 {
 	struct usbdevfs_bulktransfer bulk;
 
-	if (copy_from_user(&bulk, arg, sizeof(bulk)))
+	if (copy_from_user_with_ptr(&bulk, arg, sizeof(bulk)))
 		return -EFAULT;
 	return do_proc_bulk(ps, &bulk);
 }
@@ -1993,7 +1993,7 @@ static int proc_submiturb(struct usb_dev_state *ps, void __user *arg)
 	struct usbdevfs_urb uurb;
 	sigval_t userurb_sigval;
 
-	if (copy_from_user(&uurb, arg, sizeof(uurb)))
+	if (copy_from_user_with_ptr(&uurb, arg, sizeof(uurb)))
 		return -EFAULT;
 
 	memset(&userurb_sigval, 0, sizeof(userurb_sigval));
@@ -2285,7 +2285,7 @@ static int proc_disconnectsignal(struct usb_dev_state *ps, void __user *arg)
 {
 	struct usbdevfs_disconnectsignal ds;
 
-	if (copy_from_user(&ds, arg, sizeof(ds)))
+	if (copy_from_user_with_ptr(&ds, arg, sizeof(ds)))
 		return -EFAULT;
 	ps->discsignr = ds.signr;
 	ps->disccontext.sival_ptr = ds.context;
@@ -2397,7 +2397,7 @@ static int proc_ioctl_default(struct usb_dev_state *ps, void __user *arg)
 {
 	struct usbdevfs_ioctl	ctrl;
 
-	if (copy_from_user(&ctrl, arg, sizeof(ctrl)))
+	if (copy_from_user_with_ptr(&ctrl, arg, sizeof(ctrl)))
 		return -EFAULT;
 	return proc_ioctl(ps, &ctrl);
 }

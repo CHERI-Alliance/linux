@@ -428,7 +428,7 @@ static struct mmc_blk_ioc_data *mmc_blk_ioctl_copy_from_user(
 		goto out;
 	}
 
-	if (copy_from_user(&idata->ic, user, sizeof(idata->ic))) {
+	if (copy_from_user_with_ptr(&idata->ic, user, sizeof(idata->ic))) {
 		err = -EFAULT;
 		goto idata_err;
 	}

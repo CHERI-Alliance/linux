@@ -27,7 +27,7 @@ static int snd_ctl_elem_list_compat(struct snd_card *card,
 	int err;
 
 	/* offset, space, used, count */
-	if (copy_from_user(&data, data32, 4 * sizeof(u32)))
+	if (copy_from_user_with_ptr(&data, data32, 4 * sizeof(u32)))
 		return -EFAULT;
 	/* pids */
 	if (get_user(ptr, &data32->pids))
@@ -37,7 +37,7 @@ static int snd_ctl_elem_list_compat(struct snd_card *card,
 	if (err < 0)
 		return err;
 	/* copy the result */
-	if (copy_to_user(data32, &data, 4 * sizeof(u32)))
+	if (copy_to_user_with_ptr(data32, &data, 4 * sizeof(u32)))
 		return -EFAULT;
 	return 0;
 }
@@ -125,7 +125,7 @@ static int snd_ctl_elem_info_compat(struct snd_ctl_file *ctl,
 			return -EFAULT;
 		break;
 	case SNDRV_CTL_ELEM_TYPE_ENUMERATED:
-		if (copy_to_user(&data32->value.enumerated,
+		if (copy_to_user_with_ptr(&data32->value.enumerated,
 				 &data->value.enumerated,
 				 sizeof(data->value.enumerated)))
 			return -EFAULT;
@@ -406,7 +406,7 @@ static int snd_ctl_elem_add_compat(struct snd_ctl_file *file,
 			return -EFAULT;
 		break;
 	case SNDRV_CTL_ELEM_TYPE_ENUMERATED:
-		if (copy_from_user(&data->value.enumerated,
+		if (copy_from_user_with_ptr(&data->value.enumerated,
 				   &data32->value.enumerated,
 				   sizeof(data->value.enumerated)))
 			return -EFAULT;

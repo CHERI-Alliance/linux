@@ -980,7 +980,7 @@ int inet_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 	switch (cmd) {
 	case SIOCADDRT:
 	case SIOCDELRT:
-		if (copy_from_user(&rt, p, sizeof(struct rtentry)))
+		if (copy_from_user_with_ptr(&rt, p, sizeof(struct rtentry)))
 			return -EFAULT;
 		err = ip_rt_ioctl(net, cmd, &rt);
 		break;

@@ -2108,7 +2108,7 @@ int xe_vm_query_vmas_attrs_ioctl(struct drm_device *dev, void *data, struct drm_
 	if (err)
 		goto free_mem_attrs;
 
-	err = copy_to_user(attrs_user, mem_attrs,
+	err = copy_to_user_with_ptr(attrs_user, mem_attrs,
 			   args->sizeof_mem_range_attr * args->num_mem_ranges);
 	if (err)
 		err = -EFAULT;
@@ -3393,7 +3393,7 @@ static int vm_bind_ioctl_check_args(struct xe_device *xe, struct xe_vm *vm,
 		if (!*bind_ops)
 			return args->num_binds > 1 ? -ENOBUFS : -ENOMEM;
 
-		err = copy_from_user(*bind_ops, bind_user,
+		err = copy_from_user_with_ptr(*bind_ops, bind_user,
 				     sizeof(struct drm_xe_vm_bind_op) *
 				     args->num_binds);
 		if (XE_IOCTL_DBG(xe, err)) {

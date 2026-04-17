@@ -625,7 +625,7 @@ int io_register_pbuf_ring(struct io_ring_ctx *ctx, void __user *arg)
 
 	lockdep_assert_held(&ctx->uring_lock);
 
-	if (copy_from_user(&reg, arg, sizeof(reg)))
+	if (copy_from_user_with_ptr(&reg, arg, sizeof(reg)))
 		return -EFAULT;
 	if (!mem_is_zero(reg.resv, sizeof(reg.resv)))
 		return -EINVAL;
@@ -702,7 +702,7 @@ int io_unregister_pbuf_ring(struct io_ring_ctx *ctx, void __user *arg)
 
 	lockdep_assert_held(&ctx->uring_lock);
 
-	if (copy_from_user(&reg, arg, sizeof(reg)))
+	if (copy_from_user_with_ptr(&reg, arg, sizeof(reg)))
 		return -EFAULT;
 	if (!mem_is_zero(reg.resv, sizeof(reg.resv)) || reg.flags)
 		return -EINVAL;

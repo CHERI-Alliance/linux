@@ -295,7 +295,7 @@ tee_ioctl_shm_register(struct tee_context *ctx,
 	struct tee_ioctl_shm_register_data data;
 	struct tee_shm *shm;
 
-	if (copy_from_user(&data, udata, sizeof(data)))
+	if (copy_from_user_with_ptr(&data, udata, sizeof(data)))
 		return -EFAULT;
 
 	/* Currently no input flags are supported */
@@ -309,7 +309,7 @@ tee_ioctl_shm_register(struct tee_context *ctx,
 	data.id = shm->id;
 	data.length = shm->size;
 
-	if (copy_to_user(udata, &data, sizeof(data)))
+	if (copy_to_user_with_ptr(udata, &data, sizeof(data)))
 		ret = -EFAULT;
 	else
 		ret = tee_shm_get_fd(shm);
@@ -439,7 +439,7 @@ static int params_from_user(struct tee_context *ctx, struct tee_param *params,
 		struct tee_ioctl_param ip;
 		int rc;
 
-		if (copy_from_user(&ip, uparams + n, sizeof(ip)))
+		if (copy_from_user_with_ptr(&ip, uparams + n, sizeof(ip)))
 			return -EFAULT;
 
 		/* All unused attribute bits has to be zero */
@@ -545,7 +545,7 @@ static int tee_ioctl_open_session(struct tee_context *ctx,
 	if (!ctx->teedev->desc->ops->open_session)
 		return -EINVAL;
 
-	if (copy_from_user(&buf, ubuf, sizeof(buf)))
+	if (copy_from_user_with_ptr(&buf, ubuf, sizeof(buf)))
 		return -EFAULT;
 
 	if (buf.buf_len > TEE_MAX_ARG_SIZE ||
@@ -553,7 +553,7 @@ static int tee_ioctl_open_session(struct tee_context *ctx,
 		return -EINVAL;
 
 	uarg = u64_to_user_ptr(buf.buf_ptr);
-	if (copy_from_user(&arg, uarg, sizeof(arg)))
+	if (copy_from_user_with_ptr(&arg, uarg, sizeof(arg)))
 		return -EFAULT;
 
 	if (size_add(sizeof(arg), TEE_IOCTL_PARAM_SIZE(arg.num_params)) != buf.buf_len)
@@ -622,7 +622,7 @@ static int tee_ioctl_invoke(struct tee_context *ctx,
 	if (!ctx->teedev->desc->ops->invoke_func)
 		return -EINVAL;
 
-	if (copy_from_user(&buf, ubuf, sizeof(buf)))
+	if (copy_from_user_with_ptr(&buf, ubuf, sizeof(buf)))
 		return -EFAULT;
 
 	if (buf.buf_len > TEE_MAX_ARG_SIZE ||
@@ -630,7 +630,7 @@ static int tee_ioctl_invoke(struct tee_context *ctx,
 		return -EINVAL;
 
 	uarg = u64_to_user_ptr(buf.buf_ptr);
-	if (copy_from_user(&arg, uarg, sizeof(arg)))
+	if (copy_from_user_with_ptr(&arg, uarg, sizeof(arg)))
 		return -EFAULT;
 
 	if (size_add(sizeof(arg), TEE_IOCTL_PARAM_SIZE(arg.num_params)) != buf.buf_len)
@@ -682,7 +682,7 @@ static int tee_ioctl_object_invoke(struct tee_context *ctx,
 	if (!ctx->teedev->desc->ops->object_invoke_func)
 		return -EINVAL;
 
-	if (copy_from_user(&buf, ubuf, sizeof(buf)))
+	if (copy_from_user_with_ptr(&buf, ubuf, sizeof(buf)))
 		return -EFAULT;
 
 	if (buf.buf_len > TEE_MAX_ARG_SIZE ||
@@ -690,7 +690,7 @@ static int tee_ioctl_object_invoke(struct tee_context *ctx,
 		return -EINVAL;
 
 	uarg = u64_to_user_ptr(buf.buf_ptr);
-	if (copy_from_user(&arg, uarg, sizeof(arg)))
+	if (copy_from_user_with_ptr(&arg, uarg, sizeof(arg)))
 		return -EFAULT;
 
 	if (sizeof(arg) + TEE_IOCTL_PARAM_SIZE(arg.num_params) != buf.buf_len)
@@ -807,7 +807,7 @@ static int params_to_supp(struct tee_context *ctx,
 			break;
 		}
 
-		if (copy_to_user(uparams + n, &ip, sizeof(ip)))
+		if (copy_to_user_with_ptr(uparams + n, &ip, sizeof(ip)))
 			return -EFAULT;
 	}
 
@@ -827,7 +827,7 @@ static int tee_ioctl_supp_recv(struct tee_context *ctx,
 	if (!ctx->teedev->desc->ops->supp_recv)
 		return -EINVAL;
 
-	if (copy_from_user(&buf, ubuf, sizeof(buf)))
+	if (copy_from_user_with_ptr(&buf, ubuf, sizeof(buf)))
 		return -EFAULT;
 
 	if (buf.buf_len > TEE_MAX_ARG_SIZE ||
@@ -874,7 +874,7 @@ static int params_from_supp(struct tee_param *params, size_t num_params,
 		struct tee_param *p = params + n;
 		struct tee_ioctl_param ip;
 
-		if (copy_from_user(&ip, uparams + n, sizeof(ip)))
+		if (copy_from_user_with_ptr(&ip, uparams + n, sizeof(ip)))
 			return -EFAULT;
 
 		/* All unused attribute bits has to be zero */
@@ -940,7 +940,7 @@ static int tee_ioctl_supp_send(struct tee_context *ctx,
 	if (!ctx->teedev->desc->ops->supp_send)
 		return -EINVAL;
 
-	if (copy_from_user(&buf, ubuf, sizeof(buf)))
+	if (copy_from_user_with_ptr(&buf, ubuf, sizeof(buf)))
 		return -EFAULT;
 
 	if (buf.buf_len > TEE_MAX_ARG_SIZE ||

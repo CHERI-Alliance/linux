@@ -329,7 +329,7 @@ int fsverity_ioctl_enable(struct file *filp, const void __user *uarg)
 	struct fsverity_enable_arg arg;
 	int err;
 
-	if (copy_from_user(&arg, uarg, sizeof(arg)))
+	if (copy_from_user_with_ptr(&arg, uarg, sizeof(arg)))
 		return -EFAULT;
 
 	if (arg.version != 1)

@@ -705,7 +705,7 @@ static int query_oa_units(struct xe_device *xe,
 		}
 	}
 
-	ret = copy_to_user(query_ptr, qoa, size);
+	ret = copy_to_user_with_ptr(query_ptr, qoa, size);
 	kfree(qoa);
 
 	return ret ? -EFAULT : 0;
@@ -771,7 +771,7 @@ static int query_eu_stall(struct xe_device *xe,
 	info->per_xecore_buf_size = xe_eu_stall_get_per_xecore_buf_size();
 	memcpy(info->sampling_rates, rates, array_size);
 
-	ret = copy_to_user(query_ptr, info, size);
+	ret = copy_to_user_with_ptr(query_ptr, info, size);
 	kfree(info);
 
 	return ret ? -EFAULT : 0;

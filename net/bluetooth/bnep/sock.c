@@ -99,14 +99,14 @@ static int do_bnep_sock_ioctl(struct socket *sock, unsigned int cmd, void __user
 		return bnep_del_connection(&cd);
 
 	case BNEPGETCONNLIST:
-		if (copy_from_user(&cl, argp, sizeof(cl)))
+		if (copy_from_user_with_ptr(&cl, argp, sizeof(cl)))
 			return -EFAULT;
 
 		if (cl.cnum <= 0)
 			return -EINVAL;
 
 		err = bnep_get_connlist(&cl);
-		if (!err && copy_to_user(argp, &cl, sizeof(cl)))
+		if (!err && copy_to_user_with_ptr(argp, &cl, sizeof(cl)))
 			return -EFAULT;
 
 		return err;

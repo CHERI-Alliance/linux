@@ -2461,7 +2461,7 @@ static int io_validate_ext_arg(struct io_ring_ctx *ctx, unsigned flags,
 		return -EINVAL;
 	if (argsz != sizeof(arg))
 		return -EINVAL;
-	if (copy_from_user(&arg, argp, sizeof(arg)))
+	if (copy_from_user_with_ptr(&arg, argp, sizeof(arg)))
 		return -EFAULT;
 	return 0;
 }
@@ -3016,7 +3016,7 @@ static __cold int io_uring_create(struct io_ctx_config *config)
 
 	p->features = IORING_FEAT_FLAGS;
 
-	if (copy_to_user(config->uptr, p, sizeof(*p))) {
+	if (copy_to_user_with_ptr(config->uptr, p, sizeof(*p))) {
 		ret = -EFAULT;
 		goto err;
 	}
@@ -3068,7 +3068,7 @@ static long io_uring_setup(u32 entries, struct io_uring_params __user *params)
 
 	memset(&config, 0, sizeof(config));
 
-	if (copy_from_user(&config.p, params, sizeof(config.p)))
+	if (copy_from_user_with_ptr(&config.p, params, sizeof(config.p)))
 		return -EFAULT;
 
 	if (!mem_is_zero(&config.p.resv, sizeof(config.p.resv)))

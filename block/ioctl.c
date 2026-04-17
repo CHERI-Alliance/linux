@@ -451,7 +451,7 @@ static int blkdev_pr_read_keys(struct block_device *bdev, blk_mode_t mode,
 	if (!ops || !ops->pr_read_keys)
 		return -EOPNOTSUPP;
 
-	if (copy_from_user(&read_keys, arg, sizeof(read_keys)))
+	if (copy_from_user_with_ptr(&read_keys, arg, sizeof(read_keys)))
 		return -EFAULT;
 
 	if (read_keys.num_keys > PR_KEYS_MAX)
@@ -483,7 +483,7 @@ static int blkdev_pr_read_keys(struct block_device *bdev, blk_mode_t mode,
 	read_keys.generation = keys_info->generation;
 	read_keys.num_keys = keys_info->num_keys;
 
-	if (copy_to_user(arg, &read_keys, sizeof(read_keys)))
+	if (copy_to_user_with_ptr(arg, &read_keys, sizeof(read_keys)))
 		ret = -EFAULT;
 out:
 	kvfree(keys_info);

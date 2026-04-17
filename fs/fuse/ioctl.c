@@ -144,7 +144,7 @@ static int fuse_setup_enable_verity(unsigned long arg, struct iovec *iov,
 	struct fsverity_enable_arg __user *uarg = (void __user *)arg;
 	const __u32 max_buffer_len = FUSE_VERITY_ENABLE_ARG_MAX_PAGES * PAGE_SIZE;
 
-	if (copy_from_user(&enable, uarg, sizeof(enable)))
+	if (copy_from_user_with_ptr(&enable, uarg, sizeof(enable)))
 		return -EFAULT;
 
 	if (enable.salt_size > max_buffer_len || enable.sig_size > max_buffer_len)

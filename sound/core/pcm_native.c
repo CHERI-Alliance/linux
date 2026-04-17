@@ -3288,7 +3288,7 @@ static int snd_pcm_xferi_frames_ioctl(struct snd_pcm_substream *substream,
 		return -EBADFD;
 	if (put_user(0, &_xferi->result))
 		return -EFAULT;
-	if (copy_from_user(&xferi, _xferi, sizeof(xferi)))
+	if (copy_from_user_with_ptr(&xferi, _xferi, sizeof(xferi)))
 		return -EFAULT;
 	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK)
 		result = snd_pcm_lib_write(substream, xferi.buf, xferi.frames);
@@ -3313,7 +3313,7 @@ static int snd_pcm_xfern_frames_ioctl(struct snd_pcm_substream *substream,
 		return -EINVAL;
 	if (put_user(0, &_xfern->result))
 		return -EFAULT;
-	if (copy_from_user(&xfern, _xfern, sizeof(xfern)))
+	if (copy_from_user_with_ptr(&xfern, _xfern, sizeof(xfern)))
 		return -EFAULT;
 
 	bufs = memdup_array_user(xfern.bufs, runtime->channels, sizeof(void *));

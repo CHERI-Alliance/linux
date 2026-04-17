@@ -355,7 +355,7 @@ int io_register_files_update(struct io_ring_ctx *ctx, void __user *arg,
 	if (!nr_args)
 		return -EINVAL;
 	memset(&up, 0, sizeof(up));
-	if (copy_from_user(&up, arg, sizeof(struct io_uring_rsrc_update)))
+	if (copy_from_user_with_ptr(&up, arg, sizeof(struct io_uring_rsrc_update)))
 		return -EFAULT;
 	if (up.resv || up.resv2)
 		return -EINVAL;
@@ -369,7 +369,7 @@ int io_register_rsrc_update(struct io_ring_ctx *ctx, void __user *arg,
 
 	if (size != sizeof(up))
 		return -EINVAL;
-	if (copy_from_user(&up, arg, sizeof(up)))
+	if (copy_from_user_with_ptr(&up, arg, sizeof(up)))
 		return -EFAULT;
 	if (!up.nr || up.resv || up.resv2)
 		return -EINVAL;
@@ -386,7 +386,7 @@ __cold int io_register_rsrc(struct io_ring_ctx *ctx, void __user *arg,
 		return -EINVAL;
 
 	memset(&rr, 0, sizeof(rr));
-	if (copy_from_user(&rr, arg, size))
+	if (copy_from_user_with_ptr(&rr, arg, size))
 		return -EFAULT;
 	if (!rr.nr || rr.resv2)
 		return -EINVAL;

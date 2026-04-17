@@ -731,7 +731,7 @@ static int import_zcrx(struct io_ring_ctx *ctx,
 
 	reg->zcrx_id = id;
 	io_fill_zcrx_offsets(&reg->offsets);
-	if (copy_to_user(arg, reg, sizeof(*reg))) {
+	if (copy_to_user_with_ptr(arg, reg, sizeof(*reg))) {
 		ret = -EFAULT;
 		goto err_xa_erase;
 	}
@@ -774,13 +774,13 @@ int io_register_zcrx_ifq(struct io_ring_ctx *ctx,
 		return -EINVAL;
 	if (!(ctx->flags & (IORING_SETUP_CQE32|IORING_SETUP_CQE_MIXED)))
 		return -EINVAL;
-	if (copy_from_user(&reg, arg, sizeof(reg)))
+	if (copy_from_user_with_ptr(&reg, arg, sizeof(reg)))
 		return -EFAULT;
 	if (!mem_is_zero(&reg.__resv, sizeof(reg.__resv)) || reg.zcrx_id)
 		return -EINVAL;
 	if (reg.flags & ZCRX_REG_IMPORT)
 		return import_zcrx(ctx, arg, &reg);
-	if (copy_from_user(&rd, u64_to_user_ptr(reg.region_ptr), sizeof(rd)))
+	if (copy_from_user_with_ptr(&rd, u64_to_user_ptr(reg.region_ptr), sizeof(rd)))
 		return -EFAULT;
 	if (reg.if_rxq == -1 || !reg.rq_entries || reg.flags)
 		return -EINVAL;
@@ -791,7 +791,7 @@ int io_register_zcrx_ifq(struct io_ring_ctx *ctx,
 	}
 	reg.rq_entries = roundup_pow_of_two(reg.rq_entries);
 
-	if (copy_from_user(&area, u64_to_user_ptr(reg.area_ptr), sizeof(area)))
+	if (copy_from_user_with_ptr(&area, u64_to_user_ptr(reg.area_ptr), sizeof(area)))
 		return -EFAULT;
 
 	ifq = io_zcrx_ifq_alloc(ctx);
@@ -858,9 +858,9 @@ int io_register_zcrx_ifq(struct io_ring_ctx *ctx,
 
 	reg.rx_buf_len = 1U << ifq->niov_shift;
 
-	if (copy_to_user(arg, &reg, sizeof(reg)) ||
-	    copy_to_user(u64_to_user_ptr(reg.region_ptr), &rd, sizeof(rd)) ||
-	    copy_to_user(u64_to_user_ptr(reg.area_ptr), &area, sizeof(area))) {
+	if (copy_to_user_with_ptr(arg, &reg, sizeof(reg)) ||
+	    copy_to_user_with_ptr(u64_to_user_ptr(reg.region_ptr), &rd, sizeof(rd)) ||
+	    copy_to_user_with_ptr(u64_to_user_ptr(reg.area_ptr), &area, sizeof(area))) {
 		ret = -EFAULT;
 		goto err;
 	}

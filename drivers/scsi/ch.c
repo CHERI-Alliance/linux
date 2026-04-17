@@ -756,7 +756,7 @@ static long ch_ioctl(struct file *file,
 	{
 		struct changer_element_status ces;
 
-		if (copy_from_user(&ces, argp, sizeof (ces)))
+		if (copy_from_user_with_ptr(&ces, argp, sizeof (ces)))
 			return -EFAULT;
 		if (ces.ces_type < 0 || ces.ces_type >= CH_TYPES)
 			return -EINVAL;

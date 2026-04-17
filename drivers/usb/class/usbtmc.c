@@ -1068,7 +1068,7 @@ static ssize_t usbtmc_ioctl_generic_read(struct usbtmc_file_data *file_data,
 
 	/* mutex already locked */
 
-	if (copy_from_user(&msg, arg, sizeof(struct usbtmc_message)))
+	if (copy_from_user_with_ptr(&msg, arg, sizeof(struct usbtmc_message)))
 		return -EFAULT;
 
 	retval = usbtmc_generic_read(file_data, msg.message,
@@ -1279,7 +1279,7 @@ static ssize_t usbtmc_ioctl_generic_write(struct usbtmc_file_data *file_data,
 
 	/* mutex already locked */
 
-	if (copy_from_user(&msg, arg, sizeof(struct usbtmc_message)))
+	if (copy_from_user_with_ptr(&msg, arg, sizeof(struct usbtmc_message)))
 		return -EFAULT;
 
 	retval = usbtmc_generic_write(file_data, msg.message,
@@ -1940,7 +1940,7 @@ static int usbtmc_ioctl_request(struct usbtmc_device_data *data,
 	int rv;
 	unsigned int is_in, pipe;
 
-	if (copy_from_user(&request, arg, sizeof(struct usbtmc_ctrlrequest)))
+	if (copy_from_user_with_ptr(&request, arg, sizeof(struct usbtmc_ctrlrequest)))
 		return -EFAULT;
 
 	if (request.req.wLength > USBTMC_BUFSIZE)

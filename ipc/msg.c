@@ -355,7 +355,7 @@ copy_msqid_to_user(void __user *buf, struct msqid64_ds *in, int version)
 		out.msg_lspid		= in->msg_lspid;
 		out.msg_lrpid		= in->msg_lrpid;
 
-		return copy_to_user(buf, &out, sizeof(out));
+		return copy_to_user_with_ptr(buf, &out, sizeof(out));
 	}
 	default:
 		return -EINVAL;
@@ -374,7 +374,7 @@ copy_msqid_from_user(struct msqid64_ds *out, void __user *buf, int version)
 	{
 		struct msqid_ds tbuf_old;
 
-		if (copy_from_user(&tbuf_old, buf, sizeof(tbuf_old)))
+		if (copy_from_user_with_ptr(&tbuf_old, buf, sizeof(tbuf_old)))
 			return -EFAULT;
 
 		out->msg_perm.uid	= tbuf_old.msg_perm.uid;
@@ -612,7 +612,7 @@ static long ksys_msgctl(int msqid, int cmd, struct msqid_ds __user *buf, int ver
 		err = msgctl_info(ns, msqid, cmd, &msginfo);
 		if (err < 0)
 			return err;
-		if (copy_to_user(buf, &msginfo, sizeof(struct msginfo)))
+		if (copy_to_user_with_ptr(buf, &msginfo, sizeof(struct msginfo)))
 			err = -EFAULT;
 		return err;
 	}

@@ -476,7 +476,7 @@ xfs_attrlist_by_handle(
 
 	if (!capable(CAP_SYS_ADMIN))
 		return -EPERM;
-	if (copy_from_user(&al_hreq, p, sizeof(al_hreq)))
+	if (copy_from_user_with_ptr(&al_hreq, p, sizeof(al_hreq)))
 		return -EFAULT;
 
 	dentry = xfs_handlereq_to_dentry(parfilp, &al_hreq.hreq);
@@ -614,7 +614,7 @@ xfs_attrmulti_by_handle(
 
 	if (!capable(CAP_SYS_ADMIN))
 		return -EPERM;
-	if (copy_from_user(&am_hreq, arg, sizeof(xfs_fsop_attrmulti_handlereq_t)))
+	if (copy_from_user_with_ptr(&am_hreq, arg, sizeof(xfs_fsop_attrmulti_handlereq_t)))
 		return -EFAULT;
 
 	/* overflow check */
@@ -644,7 +644,7 @@ xfs_attrmulti_by_handle(
 				&ops[i].am_length, ops[i].am_flags);
 	}
 
-	if (copy_to_user(am_hreq.ops, ops, size))
+	if (copy_to_user_with_ptr(am_hreq.ops, ops, size))
 		error = -EFAULT;
 
 	kfree(ops);

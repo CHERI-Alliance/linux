@@ -1338,7 +1338,7 @@ static int xe_oa_user_ext_set_property(struct xe_oa *oa, enum xe_oa_user_extn_fr
 	int err;
 	u32 idx;
 
-	err = copy_from_user(&ext, address, sizeof(ext));
+	err = copy_from_user_with_ptr(&ext, address, sizeof(ext));
 	if (XE_IOCTL_DBG(oa->xe, err))
 		return -EFAULT;
 
@@ -1375,7 +1375,7 @@ static int xe_oa_user_extensions(struct xe_oa *oa, enum xe_oa_user_extn_from fro
 	if (XE_IOCTL_DBG(oa->xe, ext_number >= MAX_USER_EXTENSIONS))
 		return -E2BIG;
 
-	err = copy_from_user(&ext, address, sizeof(ext));
+	err = copy_from_user_with_ptr(&ext, address, sizeof(ext));
 	if (XE_IOCTL_DBG(oa->xe, err))
 		return -EFAULT;
 
@@ -1587,7 +1587,7 @@ static long xe_oa_status_locked(struct xe_oa_stream *stream, unsigned long arg)
 	if (stream->oa_status & OASTATUS_MMIO_TRG_Q_FULL)
 		status.oa_status |= DRM_XE_OASTATUS_MMIO_TRG_Q_FULL;
 
-	if (copy_to_user(uaddr, &status, sizeof(status)))
+	if (copy_to_user_with_ptr(uaddr, &status, sizeof(status)))
 		return -EFAULT;
 
 	return 0;
@@ -1598,7 +1598,7 @@ static long xe_oa_info_locked(struct xe_oa_stream *stream, unsigned long arg)
 	struct drm_xe_oa_stream_info info = { .oa_buf_size = xe_bo_size(stream->oa_buffer.bo), };
 	void __user *uaddr = (void __user *)arg;
 
-	if (copy_to_user(uaddr, &info, sizeof(info)))
+	if (copy_to_user_with_ptr(uaddr, &info, sizeof(info)))
 		return -EFAULT;
 
 	return 0;
@@ -2355,7 +2355,7 @@ int xe_oa_add_config_ioctl(struct drm_device *dev, u64 data, struct drm_file *fi
 		return -EACCES;
 	}
 
-	err = copy_from_user(&param, u64_to_user_ptr(data), sizeof(param));
+	err = copy_from_user_with_ptr(&param, u64_to_user_ptr(data), sizeof(param));
 	if (XE_IOCTL_DBG(oa->xe, err))
 		return -EFAULT;
 

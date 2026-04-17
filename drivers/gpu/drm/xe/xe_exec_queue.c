@@ -929,7 +929,7 @@ static int exec_queue_user_ext_set_property(struct xe_device *xe,
 	int err;
 	u32 idx;
 
-	err = copy_from_user(&ext, address, sizeof(ext));
+	err = copy_from_user_with_ptr(&ext, address, sizeof(ext));
 	if (XE_IOCTL_DBG(xe, err))
 		return -EFAULT;
 
@@ -976,7 +976,7 @@ static int __exec_queue_user_extensions(struct xe_device *xe, struct xe_exec_que
 	if (XE_IOCTL_DBG(xe, ext_number >= MAX_USER_EXTENSIONS))
 		return -E2BIG;
 
-	err = copy_from_user(&ext, address, sizeof(ext));
+	err = copy_from_user_with_ptr(&ext, address, sizeof(ext));
 	if (XE_IOCTL_DBG(xe, err))
 		return -EFAULT;
 

@@ -167,7 +167,7 @@ static int iommufd_vfio_map_dma(struct iommufd_ctx *ictx, unsigned int cmd,
 	unsigned long iova;
 	int rc;
 
-	if (copy_from_user(&map, arg, minsz))
+	if (copy_from_user_with_ptr(&map, arg, minsz))
 		return -EFAULT;
 
 	if (map.argsz < minsz || map.flags & ~supported_flags)

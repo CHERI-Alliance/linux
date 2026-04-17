@@ -4330,7 +4330,7 @@ static int btrfs_ioctl_encoded_read(struct file *file, void __user *argp,
 #endif
 	} else {
 		copy_end = copy_end_kernel;
-		if (copy_from_user(&args, argp, copy_end)) {
+		if (copy_from_user_with_ptr(&args, argp, copy_end)) {
 			ret = -EFAULT;
 			goto out_acct;
 		}
@@ -4442,7 +4442,7 @@ static int btrfs_ioctl_encoded_write(struct file *file, void __user *argp, bool 
 		return -ENOTTY;
 #endif
 	} else {
-		if (copy_from_user(&args, argp, sizeof(args))) {
+		if (copy_from_user_with_ptr(&args, argp, sizeof(args))) {
 			ret = -EFAULT;
 			goto out_acct;
 		}
@@ -4739,7 +4739,7 @@ static int btrfs_uring_encoded_read(struct io_uring_cmd *cmd, unsigned int issue
 			data->args.flags = args32.flags;
 #endif
 		} else {
-			if (copy_from_user(&data->args, sqe_addr, copy_end)) {
+			if (copy_from_user_with_ptr(&data->args, sqe_addr, copy_end)) {
 				ret = -EFAULT;
 				goto out_acct;
 			}
@@ -4883,7 +4883,7 @@ static int btrfs_uring_encoded_write(struct io_uring_cmd *cmd, unsigned int issu
 			goto out_acct;
 #endif
 		} else {
-			if (copy_from_user(&data->args, sqe_addr, sizeof(data->args))) {
+			if (copy_from_user_with_ptr(&data->args, sqe_addr, sizeof(data->args))) {
 				ret = -EFAULT;
 				goto out_acct;
 			}

@@ -203,7 +203,7 @@ static int amdgpu_cs_pass1(struct amdgpu_cs_parser *p,
 		struct drm_amdgpu_cs_chunk user_chunk;
 
 		chunk_ptr = u64_to_user_ptr(chunk_array[i]);
-		if (copy_from_user(&user_chunk, chunk_ptr,
+		if (copy_from_user_with_ptr(&user_chunk, chunk_ptr,
 				       sizeof(struct drm_amdgpu_cs_chunk))) {
 			ret = -EFAULT;
 			i--;

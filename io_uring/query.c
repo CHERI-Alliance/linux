@@ -61,7 +61,7 @@ static int io_handle_query_entry(union io_query_data *data, void __user *uhdr,
 	ssize_t ret = -EINVAL;
 	void __user *udata;
 
-	if (copy_from_user(&hdr, uhdr, sizeof(hdr)))
+	if (copy_from_user_with_ptr(&hdr, uhdr, sizeof(hdr)))
 		return -EFAULT;
 	usize = hdr.size;
 	hdr.size = min(hdr.size, IO_MAX_QUERY_SIZE);
@@ -100,7 +100,7 @@ out:
 
 	if (copy_struct_to_user(udata, usize, data, hdr.size, NULL))
 		return -EFAULT;
-	if (copy_to_user(uhdr, &hdr, sizeof(hdr)))
+	if (copy_to_user_with_ptr(uhdr, &hdr, sizeof(hdr)))
 		return -EFAULT;
 	*next_entry = hdr.next_entry;
 	return 0;

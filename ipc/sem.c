@@ -1209,7 +1209,7 @@ static unsigned long copy_semid_to_user(void __user *buf, struct semid64_ds *in,
 		out.sem_ctime	= in->sem_ctime;
 		out.sem_nsems	= in->sem_nsems;
 
-		return copy_to_user(buf, &out, sizeof(out));
+		return copy_to_user_with_ptr(buf, &out, sizeof(out));
 	    }
 	default:
 		return -EINVAL;
@@ -1579,7 +1579,7 @@ copy_semid_from_user(struct semid64_ds *out, void __user *buf, int version)
 	    {
 		struct semid_ds tbuf_old;
 
-		if (copy_from_user(&tbuf_old, buf, sizeof(tbuf_old)))
+		if (copy_from_user_with_ptr(&tbuf_old, buf, sizeof(tbuf_old)))
 			return -EFAULT;
 
 		out->sem_perm.uid	= tbuf_old.sem_perm.uid;

@@ -1072,7 +1072,7 @@ vfio_ioctl_device_feature_logging_start(struct vfio_device *device,
 	if (ret != 1)
 		return ret;
 
-	if (copy_from_user(&control, arg, minsz))
+	if (copy_from_user_with_ptr(&control, arg, minsz))
 		return -EFAULT;
 
 	nnodes = control.num_ranges;
@@ -1120,7 +1120,7 @@ vfio_ioctl_device_feature_logging_start(struct vfio_device *device,
 	if (ret)
 		goto end;
 
-	if (copy_to_user(arg, &control, sizeof(control))) {
+	if (copy_to_user_with_ptr(arg, &control, sizeof(control))) {
 		ret = -EFAULT;
 		device->log_ops->log_stop(device);
 	}
@@ -1179,7 +1179,7 @@ vfio_ioctl_device_feature_logging_report(struct vfio_device *device,
 	if (ret != 1)
 		return ret;
 
-	if (copy_from_user(&report, arg, minsz))
+	if (copy_from_user_with_ptr(&report, arg, minsz))
 		return -EFAULT;
 
 	if (report.page_size < SZ_4K || !is_power_of_2(report.page_size))

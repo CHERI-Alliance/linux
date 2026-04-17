@@ -1261,7 +1261,7 @@ static int mptcp_get_full_info(struct mptcp_full_info *mfi,
 		return -EINVAL;
 
 	memset(mfi, 0, sizeof(*mfi));
-	if (copy_from_user(mfi, optval, MIN_FULL_INFO_OPTLEN_SIZE))
+	if (copy_from_user_with_ptr(mfi, optval, MIN_FULL_INFO_OPTLEN_SIZE))
 		return -EFAULT;
 
 	if (mfi->size_tcpinfo_kernel ||
@@ -1285,7 +1285,7 @@ static int mptcp_put_full_info(struct mptcp_full_info *mfi,
 	if (put_user(copylen, optlen))
 		return -EFAULT;
 
-	if (copy_to_user(optval, mfi, copylen))
+	if (copy_to_user_with_ptr(optval, mfi, copylen))
 		return -EFAULT;
 	return 0;
 }

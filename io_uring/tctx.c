@@ -300,7 +300,7 @@ int io_ringfd_register(struct io_ring_ctx *ctx, void __user *__arg,
 	for (i = 0; i < nr_args; i++) {
 		int start, end;
 
-		if (copy_from_user(&reg, &arg[i], sizeof(reg))) {
+		if (copy_from_user_with_ptr(&reg, &arg[i], sizeof(reg))) {
 			ret = -EFAULT;
 			break;
 		}
@@ -327,7 +327,7 @@ int io_ringfd_register(struct io_ring_ctx *ctx, void __user *__arg,
 			break;
 
 		reg.offset = ret;
-		if (copy_to_user(&arg[i], &reg, sizeof(reg))) {
+		if (copy_to_user_with_ptr(&arg[i], &reg, sizeof(reg))) {
 			fput(tctx->registered_rings[reg.offset]);
 			tctx->registered_rings[reg.offset] = NULL;
 			ret = -EFAULT;
@@ -352,7 +352,7 @@ int io_ringfd_unregister(struct io_ring_ctx *ctx, void __user *__arg,
 		return 0;
 
 	for (i = 0; i < nr_args; i++) {
-		if (copy_from_user(&reg, &arg[i], sizeof(reg))) {
+		if (copy_from_user_with_ptr(&reg, &arg[i], sizeof(reg))) {
 			ret = -EFAULT;
 			break;
 		}

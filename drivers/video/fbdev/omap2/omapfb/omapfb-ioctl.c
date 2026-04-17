@@ -823,7 +823,7 @@ int omapfb_ioctl(struct fb_info *fbi, unsigned int cmd, unsigned long arg)
 	case OMAPFB_MEMORY_READ:
 		DBG("ioctl MEMORY_READ\n");
 
-		if (copy_from_user(&p.memory_read, (void __user *)arg,
+		if (copy_from_user_with_ptr(&p.memory_read, (void __user *)arg,
 					sizeof(p.memory_read))) {
 			r = -EFAULT;
 			break;

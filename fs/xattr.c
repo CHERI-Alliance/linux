@@ -726,7 +726,7 @@ SYSCALL_DEFINE6(setxattrat, int, dfd, const char __user *, pathname, unsigned in
 	if (usize > PAGE_SIZE)
 		return -E2BIG;
 
-	error = copy_struct_from_user(&args, sizeof(args), uargs, usize);
+	error = copy_struct_from_user_with_ptr(&args, sizeof(args), uargs, usize);
 	if (error)
 		return error;
 
@@ -865,7 +865,7 @@ SYSCALL_DEFINE6(getxattrat, int, dfd, const char __user *, pathname, unsigned in
 	if (usize > PAGE_SIZE)
 		return -E2BIG;
 
-	error = copy_struct_from_user(&args, sizeof(args), uargs, usize);
+	error = copy_struct_from_user_with_ptr(&args, sizeof(args), uargs, usize);
 	if (error)
 		return error;
 

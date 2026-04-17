@@ -2519,7 +2519,7 @@ static int copy_msghdr_from_user(struct msghdr *kmsg,
 	struct user_msghdr msg;
 	ssize_t err;
 
-	if (copy_from_user(&msg, umsg, sizeof(*umsg)))
+	if (copy_from_user_with_ptr(&msg, umsg, sizeof(*umsg)))
 		return -EFAULT;
 
 	err = __copy_msghdr(kmsg, &msg, save_addr);
@@ -3347,7 +3347,7 @@ int get_user_ifreq(struct ifreq *ifr, void __user2 * __capability *ifrdata, void
 		return 0;
 	}
 
-	if (copy_from_user(ifr, arg, sizeof(*ifr)))
+	if (copy_from_user_with_ptr(ifr, arg, sizeof(*ifr)))
 		return -EFAULT;
 
 	if (ifrdata)
@@ -3364,7 +3364,7 @@ int put_user_ifreq(struct ifreq *ifr, void __user *arg)
 	if (in_compat_syscall())
 		size = sizeof(struct compat_ifreq);
 
-	if (copy_to_user(arg, ifr, size))
+	if (copy_to_user_with_ptr(arg, ifr, size))
 		return -EFAULT;
 
 	return 0;

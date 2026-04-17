@@ -925,12 +925,12 @@ static int snd_ctl_elem_list_user(struct snd_card *card,
 	struct snd_ctl_elem_list list;
 	int err;
 
-	if (copy_from_user(&list, _list, sizeof(list)))
+	if (copy_from_user_with_ptr(&list, _list, sizeof(list)))
 		return -EFAULT;
 	err = snd_ctl_elem_list(card, &list);
 	if (err)
 		return err;
-	if (copy_to_user(_list, &list, sizeof(list)))
+	if (copy_to_user_with_ptr(_list, &list, sizeof(list)))
 		return -EFAULT;
 
 	return 0;
@@ -1176,7 +1176,7 @@ static int snd_ctl_elem_info_user(struct snd_ctl_file *ctl,
 	struct snd_ctl_elem_info info;
 	int result;
 
-	if (copy_from_user(&info, _info, sizeof(info)))
+	if (copy_from_user_with_ptr(&info, _info, sizeof(info)))
 		return -EFAULT;
 	result = snd_power_ref_and_wait(card);
 	if (result)
@@ -1188,7 +1188,7 @@ static int snd_ctl_elem_info_user(struct snd_ctl_file *ctl,
 	/* drop internal access flags */
 	info.access &= ~(SNDRV_CTL_ELEM_ACCESS_SKIP_CHECK|
 			 SNDRV_CTL_ELEM_ACCESS_LED_MASK);
-	if (copy_to_user(_info, &info, sizeof(info)))
+	if (copy_to_user_with_ptr(_info, &info, sizeof(info)))
 		return -EFAULT;
 	return result;
 }
@@ -1259,7 +1259,7 @@ static int snd_ctl_elem_read_user(struct snd_card *card,
 	if (result < 0)
 		return result;
 
-	if (copy_to_user(_control, control, sizeof(*control)))
+	if (copy_to_user_with_ptr(_control, control, sizeof(*control)))
 		return -EFAULT;
 	return result;
 }
@@ -1337,7 +1337,7 @@ static int snd_ctl_elem_write_user(struct snd_ctl_file *file,
 	if (result < 0)
 		return result;
 
-	if (copy_to_user(_control, control, sizeof(*control)))
+	if (copy_to_user_with_ptr(_control, control, sizeof(*control)))
 		return -EFAULT;
 	return result;
 }
@@ -1746,12 +1746,12 @@ static int snd_ctl_elem_add_user(struct snd_ctl_file *file,
 	struct snd_ctl_elem_info info;
 	int err;
 
-	if (copy_from_user(&info, _info, sizeof(info)))
+	if (copy_from_user_with_ptr(&info, _info, sizeof(info)))
 		return -EFAULT;
 	err = snd_ctl_elem_add(file, &info, replace);
 	if (err < 0)
 		return err;
-	if (copy_to_user(_info, &info, sizeof(info))) {
+	if (copy_to_user_with_ptr(_info, &info, sizeof(info))) {
 		snd_ctl_remove_user_ctl(file, &info.id);
 		return -EFAULT;
 	}
