@@ -6267,7 +6267,7 @@ base_alloc_rdpq_dma_pool(struct MPT3SAS_ADAPTER *ioc, int sz)
 		} else {
 			ioc->reply_post[i].reply_post_free =
 			    (Mpi2ReplyDescriptorsUnion_t *)
-			    ((long)ioc->reply_post[i-1].reply_post_free
+			    ((intptr_t)ioc->reply_post[i-1].reply_post_free
 			    + reply_post_free_sz);
 			ioc->reply_post[i].reply_post_free_dma =
 			    (dma_addr_t)

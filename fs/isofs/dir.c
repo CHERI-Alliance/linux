@@ -263,7 +263,7 @@ static int isofs_readdir(struct file *file, struct dir_context *ctx)
 
 	result = do_isofs_readdir(inode, file, ctx, tmpname, tmpde);
 
-	free_page((unsigned long) tmpname);
+	free_page((uintptr_t) tmpname);
 	return result;
 }
 

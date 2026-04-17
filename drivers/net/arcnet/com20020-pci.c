@@ -510,115 +510,115 @@ static const struct pci_device_id com20020pci_id_table[] = {
 		0x1571, 0xa009,
 		PCI_ANY_ID, PCI_ANY_ID,
 		0, 0,
-		(kernel_ulong_t)&card_info_5mbit
+		(uintptr_t)&card_info_5mbit
 	},
 	{
 		0x1571, 0xa00a,
 		PCI_ANY_ID, PCI_ANY_ID,
 		0, 0,
-		(kernel_ulong_t)&card_info_5mbit
+		(uintptr_t)&card_info_5mbit
 	},
 	{
 		0x1571, 0xa00b,
 		PCI_ANY_ID, PCI_ANY_ID,
 		0, 0,
-		(kernel_ulong_t)&card_info_5mbit
+		(uintptr_t)&card_info_5mbit
 	},
 	{
 		0x1571, 0xa00c,
 		PCI_ANY_ID, PCI_ANY_ID,
 		0, 0,
-		(kernel_ulong_t)&card_info_5mbit
+		(uintptr_t)&card_info_5mbit
 	},
 	{
 		0x1571, 0xa00d,
 		PCI_ANY_ID, PCI_ANY_ID,
 		0, 0,
-		(kernel_ulong_t)&card_info_5mbit
+		(uintptr_t)&card_info_5mbit
 	},
 	{
 		0x1571, 0xa00e,
 		PCI_ANY_ID, PCI_ANY_ID,
 		0, 0,
-		(kernel_ulong_t)&card_info_5mbit
+		(uintptr_t)&card_info_5mbit
 	},
 	{
 		0x1571, 0xa201,
 		PCI_ANY_ID, PCI_ANY_ID,
 		0, 0,
-		(kernel_ulong_t)&card_info_10mbit
+		(uintptr_t)&card_info_10mbit
 	},
 	{
 		0x1571, 0xa202,
 		PCI_ANY_ID, PCI_ANY_ID,
 		0, 0,
-		(kernel_ulong_t)&card_info_10mbit
+		(uintptr_t)&card_info_10mbit
 	},
 	{
 		0x1571, 0xa203,
 		PCI_ANY_ID, PCI_ANY_ID,
 		0, 0,
-		(kernel_ulong_t)&card_info_10mbit
+		(uintptr_t)&card_info_10mbit
 	},
 	{
 		0x1571, 0xa204,
 		PCI_ANY_ID, PCI_ANY_ID,
 		0, 0,
-		(kernel_ulong_t)&card_info_10mbit
+		(uintptr_t)&card_info_10mbit
 	},
 	{
 		0x1571, 0xa205,
 		PCI_ANY_ID, PCI_ANY_ID,
 		0, 0,
-		(kernel_ulong_t)&card_info_10mbit
+		(uintptr_t)&card_info_10mbit
 	},
 	{
 		0x1571, 0xa206,
 		PCI_ANY_ID, PCI_ANY_ID,
 		0, 0,
-		(kernel_ulong_t)&card_info_10mbit
+		(uintptr_t)&card_info_10mbit
 	},
 	{
 		0x10B5, 0x9030,
 		0x10B5, 0x2978,
 		0, 0,
-		(kernel_ulong_t)&card_info_sohard
+		(uintptr_t)&card_info_sohard
 	},
 	{
 		0x10B5, 0x9050,
 		0x10B5, 0x2273,
 		0, 0,
-		(kernel_ulong_t)&card_info_sohard
+		(uintptr_t)&card_info_sohard
 	},
 	{
 		0x10B5, 0x9050,
 		0x10B5, 0x3263,
 		0, 0,
-		(kernel_ulong_t)&card_info_eae_arc1
+		(uintptr_t)&card_info_eae_arc1
 	},
 	{
 		0x10B5, 0x9050,
 		0x10B5, 0x3292,
 		0, 0,
-		(kernel_ulong_t)&card_info_eae_ma1
+		(uintptr_t)&card_info_eae_ma1
 	},
 	{
 		0x10B5, 0x9050,
 		0x10B5, 0x3294,
 		0, 0,
-		(kernel_ulong_t)&card_info_eae_fb2
+		(uintptr_t)&card_info_eae_fb2
 	},
 	{
 		0x14BA, 0x6000,
 		PCI_ANY_ID, PCI_ANY_ID,
 		0, 0,
-		(kernel_ulong_t)&card_info_10mbit
+		(uintptr_t)&card_info_10mbit
 	},
 	{
 		0x10B5, 0x2200,
 		PCI_ANY_ID, PCI_ANY_ID,
 		0, 0,
-		(kernel_ulong_t)&card_info_10mbit
+		(uintptr_t)&card_info_10mbit
 	},
 	{ 0, }
 };

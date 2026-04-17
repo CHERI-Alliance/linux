@@ -144,7 +144,7 @@ static inline void dst_init_metrics(struct dst_entry *dst,
 				    const u32 *src_metrics,
 				    bool read_only)
 {
-	dst->_metrics = ((unsigned long) src_metrics) |
+	dst->_metrics = ((uintptr_t) src_metrics) |
 		(read_only ? DST_METRICS_READ_ONLY : 0);
 }
 
@@ -327,7 +327,7 @@ static inline bool skb_dst_force(struct sk_buff *skb)
 		if (!dst_hold_safe(dst))
 			dst = NULL;
 
-		skb->_skb_refdst = (unsigned long)dst;
+		skb->_skb_refdst = (uintptr_t)dst;
 		skb->slow_gro |= !!dst;
 	}
 

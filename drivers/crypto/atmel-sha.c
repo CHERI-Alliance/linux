@@ -2591,9 +2591,9 @@ static int atmel_sha_probe(struct platform_device *pdev)
 	spin_lock_init(&sha_dd->lock);
 
 	tasklet_init(&sha_dd->done_task, atmel_sha_done_task,
-					(unsigned long)sha_dd);
+					(uintptr_t)sha_dd);
 	tasklet_init(&sha_dd->queue_task, atmel_sha_queue_task,
-					(unsigned long)sha_dd);
+					(uintptr_t)sha_dd);
 
 	crypto_init_queue(&sha_dd->queue, ATMEL_SHA_QUEUE_LENGTH);
 

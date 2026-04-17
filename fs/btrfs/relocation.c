@@ -3061,14 +3061,14 @@ static int add_tree_block(struct reloc_control *rc,
 
 		ei = btrfs_item_ptr(eb, path->slots[0],
 				struct btrfs_extent_item);
-		end = (unsigned long)ei + item_size;
+		end = (uintptr_t)ei + item_size;
 		if (extent_key->type == BTRFS_EXTENT_ITEM_KEY) {
 			bi = (struct btrfs_tree_block_info *)(ei + 1);
 			level = btrfs_tree_block_level(eb, bi);
-			ptr = (unsigned long)(bi + 1);
+			ptr = (uintptr_t)(bi + 1);
 		} else {
 			level = (int)extent_key->offset;
-			ptr = (unsigned long)(ei + 1);
+			ptr = (uintptr_t)(ei + 1);
 		}
 		generation = btrfs_extent_generation(eb, ei);
 
@@ -3679,7 +3679,7 @@ static int __insert_orphan_inode(struct btrfs_trans_handle *trans,
 
 	leaf = path->nodes[0];
 	item = btrfs_item_ptr(leaf, path->slots[0], struct btrfs_inode_item);
-	memzero_extent_buffer(leaf, (unsigned long)item, sizeof(*item));
+	memzero_extent_buffer(leaf, (uintptr_t)item, sizeof(*item));
 	btrfs_set_inode_generation(leaf, item, 1);
 	btrfs_set_inode_size(leaf, item, 0);
 	btrfs_set_inode_mode(leaf, item, S_IFREG | 0600);

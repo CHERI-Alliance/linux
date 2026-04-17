@@ -186,7 +186,7 @@ odev_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 static long odev_ioctl_compat(struct file *file, unsigned int cmd,
 			      unsigned long arg)
 {
-	return odev_ioctl(file, cmd, (unsigned long)compat_ptr(arg));
+	return odev_ioctl(file, cmd, (user_uintptr_t)compat_ptr(arg));
 }
 #else
 #define odev_ioctl_compat	NULL

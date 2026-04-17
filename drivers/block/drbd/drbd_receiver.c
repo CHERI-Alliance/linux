@@ -77,7 +77,7 @@ static struct page *__drbd_alloc_pages(unsigned int number)
 		tmp = mempool_alloc(&drbd_buffer_page_pool, GFP_TRY);
 		if (!tmp)
 			goto fail;
-		set_page_private(tmp, (unsigned long)page);
+		set_page_private(tmp, (uintptr_t)page);
 		page = tmp;
 	}
 	return page;

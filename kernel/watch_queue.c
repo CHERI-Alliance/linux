@@ -125,7 +125,7 @@ static bool post_one_notification(struct watch_queue *wqueue,
 
 	buf = pipe_buf(pipe, head);
 	buf->page = page;
-	buf->private = (unsigned long)wqueue;
+	buf->private = (uintptr_t)wqueue;
 	buf->ops = &watch_queue_pipe_buf_ops;
 	buf->offset = offset;
 	buf->len = len;

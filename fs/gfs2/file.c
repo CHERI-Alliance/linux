@@ -346,7 +346,7 @@ static long gfs2_compat_ioctl(struct file *filp, unsigned int cmd, unsigned long
 		return -ENOIOCTLCMD;
 	}
 
-	return gfs2_ioctl(filp, cmd, (unsigned long)compat_ptr(arg));
+	return gfs2_ioctl(filp, cmd, (user_uintptr_t)compat_ptr(arg));
 }
 #else
 #define gfs2_compat_ioctl NULL

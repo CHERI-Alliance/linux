@@ -141,7 +141,7 @@ static int reset_bootlog(struct qaic_device *qdev)
 	mutex_lock(&qdev->bootlog_mutex);
 	list_for_each_entry_safe(page, i, &qdev->bootlog, node) {
 		list_del(&page->node);
-		devm_free_pages(&qdev->pdev->dev, (unsigned long)page);
+		devm_free_pages(&qdev->pdev->dev, (uintptr_t)page);
 	}
 
 	page = alloc_bootlog_page(qdev);

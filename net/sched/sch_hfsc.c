@@ -1083,7 +1083,7 @@ hfsc_change_class(struct Qdisc *sch, u32 classid, u32 parentid,
 
 	qdisc_class_hash_grow(sch, &q->clhash);
 
-	*arg = (unsigned long)cl;
+	*arg = (uintptr_t)cl;
 	return 0;
 }
 
@@ -1228,7 +1228,7 @@ hfsc_qlen_notify(struct Qdisc *sch, unsigned long arg)
 static unsigned long
 hfsc_search_class(struct Qdisc *sch, u32 classid)
 {
-	return (unsigned long)hfsc_find_class(classid, sch);
+	return (uintptr_t)hfsc_find_class(classid, sch);
 }
 
 static unsigned long
@@ -1243,7 +1243,7 @@ hfsc_bind_tcf(struct Qdisc *sch, unsigned long parent, u32 classid)
 		qdisc_class_get(&cl->cl_common);
 	}
 
-	return (unsigned long)cl;
+	return (uintptr_t)cl;
 }
 
 static void
@@ -1366,7 +1366,7 @@ hfsc_walk(struct Qdisc *sch, struct qdisc_walker *arg)
 	for (i = 0; i < q->clhash.hashsize; i++) {
 		hlist_for_each_entry(cl, &q->clhash.hash[i],
 				     cl_common.hnode) {
-			if (!tc_qdisc_stats_dump(sch, (unsigned long)cl, arg))
+			if (!tc_qdisc_stats_dump(sch, (uintptr_t)cl, arg))
 				return;
 		}
 	}

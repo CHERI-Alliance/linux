@@ -157,7 +157,7 @@ static int mlx5_fw_tracer_create_log_buf(struct mlx5_fw_tracer *tracer)
 	return 0;
 
 free_pages:
-	free_pages((unsigned long)tracer->buff.log_buf, get_order(tracer->buff.size));
+	free_pages((uintptr_t)tracer->buff.log_buf, get_order(tracer->buff.size));
 
 	return err;
 }
@@ -172,7 +172,7 @@ static void mlx5_fw_tracer_destroy_log_buf(struct mlx5_fw_tracer *tracer)
 
 	ddev = mlx5_core_dma_dev(dev);
 	dma_unmap_single(ddev, tracer->buff.dma, tracer->buff.size, DMA_FROM_DEVICE);
-	free_pages((unsigned long)tracer->buff.log_buf, get_order(tracer->buff.size));
+	free_pages((uintptr_t)tracer->buff.log_buf, get_order(tracer->buff.size));
 }
 
 static int mlx5_fw_tracer_create_mkey(struct mlx5_fw_tracer *tracer)

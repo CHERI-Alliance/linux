@@ -253,13 +253,13 @@ static inline bool test_write_hold(const struct mount *m)
 
 static inline void set_write_hold(struct mount *m)
 {
-	m->mnt_pprev_for_sb = (void *)((unsigned long)m->mnt_pprev_for_sb
+	m->mnt_pprev_for_sb = (void *)((uintptr_t)m->mnt_pprev_for_sb
 				       | WRITE_HOLD);
 }
 
 static inline void clear_write_hold(struct mount *m)
 {
-	m->mnt_pprev_for_sb = (void *)((unsigned long)m->mnt_pprev_for_sb
+	m->mnt_pprev_for_sb = (void *)((uintptr_t)m->mnt_pprev_for_sb
 				       & ~WRITE_HOLD);
 }
 

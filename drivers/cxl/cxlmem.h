@@ -132,7 +132,7 @@ static inline struct cxl_ep *cxl_ep_load(struct cxl_port *port,
 	if (!port)
 		return NULL;
 
-	return xa_load(&port->endpoints, (unsigned long)&cxlmd->dev);
+	return xa_load(&port->endpoints, (uintptr_t)&cxlmd->dev);
 }
 
 /*

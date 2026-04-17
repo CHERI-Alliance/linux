@@ -2030,7 +2030,7 @@ int skb_copy_ubufs(struct sk_buff *skb, gfp_t gfp_mask)
 			}
 			return -ENOMEM;
 		}
-		set_page_private(page, (unsigned long)head);
+		set_page_private(page, (uintptr_t)head);
 		head = page;
 	}
 

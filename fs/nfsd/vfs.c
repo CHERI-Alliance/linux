@@ -2458,7 +2458,7 @@ static __be32 nfsd_buffered_readdir(struct file *file, struct svc_fh *fhp,
 		offset = vfs_llseek(file, 0, SEEK_CUR);
 	}
 
-	free_page((unsigned long)(buf.dirent));
+	free_page((uintptr_t)(buf.dirent));
 
 	if (host_err)
 		return nfserrno(host_err);

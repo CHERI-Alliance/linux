@@ -184,8 +184,8 @@ static struct page *ttm_pool_alloc_page(struct ttm_pool *pool, gfp_t gfp_flags,
 	else
 		p = virt_to_page(vaddr);
 
-	dma->vaddr = (unsigned long)vaddr | order;
-	p->private = (unsigned long)dma;
+	dma->vaddr = (uintptr_t)vaddr | order;
+	p->private = (uintptr_t)dma;
 	return p;
 
 error_free:

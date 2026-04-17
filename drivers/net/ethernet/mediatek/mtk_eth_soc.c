@@ -1278,7 +1278,7 @@ static void *mtk_dma_ring_alloc(struct mtk_eth *eth, size_t size,
 		if (!dma_ring)
 			return dma_ring;
 		*dma_handle = gen_pool_virt_to_phys(eth->sram_pool,
-						    (unsigned long)dma_ring);
+						    (uintptr_t)dma_ring);
 	} else {
 		dma_ring = dma_alloc_coherent(eth->dma_dev, size, dma_handle,
 					      GFP_KERNEL);
@@ -1291,7 +1291,7 @@ static void mtk_dma_ring_free(struct mtk_eth *eth, size_t size, void *dma_ring,
 			      dma_addr_t dma_handle, bool in_sram)
 {
 	if (in_sram && eth->sram_pool)
-		gen_pool_free(eth->sram_pool, (unsigned long)dma_ring, size);
+		gen_pool_free(eth->sram_pool, (uintptr_t)dma_ring, size);
 	else
 		dma_free_coherent(eth->dma_dev, size, dma_ring, dma_handle);
 }
@@ -4932,7 +4932,7 @@ static int mtk_add_mac(struct mtk_eth *eth, struct device_node *np)
 	SET_NETDEV_DEV(eth->netdev[id], eth->dev);
 	eth->netdev[id]->watchdog_timeo = 5 * HZ;
 	eth->netdev[id]->netdev_ops = &mtk_netdev_ops;
-	eth->netdev[id]->base_addr = (unsigned long)eth->base;
+	eth->netdev[id]->base_addr = (uintptr_t)eth->base;
 
 	eth->netdev[id]->hw_features = eth->soc->hw_features;
 	if (eth->hwlro)
@@ -5041,7 +5041,7 @@ static int mtk_setup_legacy_sram(struct mtk_eth *eth, struct resource *res)
 		return PTR_ERR(eth->sram_pool);
 
 	return gen_pool_add_virt(eth->sram_pool,
-				 (unsigned long)eth->base + MTK_ETH_SRAM_OFFSET,
+				 (uintptr_t)eth->base + MTK_ETH_SRAM_OFFSET,
 				 res->start + MTK_ETH_SRAM_OFFSET,
 				 MTK_ETH_NETSYS_V2_SRAM_SIZE, NUMA_NO_NODE);
 }

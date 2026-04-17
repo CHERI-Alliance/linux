@@ -88,7 +88,7 @@ int cpu_suspend(unsigned long arg,
 	if (__cpu_suspend_enter(&context)) {
 		/* Call the finisher */
 		rc = finish(arg, __pa_symbol(__cpu_resume_enter),
-			    (ulong)&context);
+			    (uintptr_t)&context);
 
 		/*
 		 * Should never reach here, unless the suspend finisher

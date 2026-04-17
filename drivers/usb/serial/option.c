@@ -2615,7 +2615,7 @@ static int option_attach(struct usb_serial *serial)
 		return -ENOMEM;
 
 	/* Retrieve device flags stored at probe. */
-	device_flags = (unsigned long)usb_get_serial_data(serial);
+	device_flags = (uintptr_t)usb_get_serial_data(serial);
 
 	iface_desc = &serial->interface->cur_altsetting->desc;
 

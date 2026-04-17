@@ -894,7 +894,7 @@ static void nf_flow_offload_init(struct flow_cls_offload *cls_flow,
 	cls_flow->common.prio = priority;
 	cls_flow->common.extack = extack;
 	cls_flow->command = cmd;
-	cls_flow->cookie = (unsigned long)tuple;
+	cls_flow->cookie = (uintptr_t)tuple;
 }
 
 static int nf_flow_offload_tuple(struct nf_flowtable *flowtable,

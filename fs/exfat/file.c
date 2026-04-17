@@ -565,7 +565,7 @@ long exfat_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 long exfat_compat_ioctl(struct file *filp, unsigned int cmd,
 				unsigned long arg)
 {
-	return exfat_ioctl(filp, cmd, (unsigned long)compat_ptr(arg));
+	return exfat_ioctl(filp, cmd, (user_uintptr_t)compat_ptr(arg));
 }
 #endif
 

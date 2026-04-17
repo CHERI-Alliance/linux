@@ -145,7 +145,7 @@ static irqreturn_t stm32_ipcc_tx_irq(int irq, void *data)
 
 static int stm32_ipcc_send_data(struct mbox_chan *link, void *data)
 {
-	unsigned long chan = (unsigned long)link->con_priv;
+	uintptr_t chan = (uintptr_t)link->con_priv;
 	struct stm32_ipcc *ipcc = container_of(link->mbox, struct stm32_ipcc,
 					       controller);
 
@@ -164,7 +164,7 @@ static int stm32_ipcc_send_data(struct mbox_chan *link, void *data)
 
 static int stm32_ipcc_startup(struct mbox_chan *link)
 {
-	unsigned long chan = (unsigned long)link->con_priv;
+	uintptr_t chan = (uintptr_t)link->con_priv;
 	struct stm32_ipcc *ipcc = container_of(link->mbox, struct stm32_ipcc,
 					       controller);
 	int ret;
@@ -184,7 +184,7 @@ static int stm32_ipcc_startup(struct mbox_chan *link)
 
 static void stm32_ipcc_shutdown(struct mbox_chan *link)
 {
-	unsigned long chan = (unsigned long)link->con_priv;
+	uintptr_t chan = (uintptr_t)link->con_priv;
 	struct stm32_ipcc *ipcc = container_of(link->mbox, struct stm32_ipcc,
 					       controller);
 

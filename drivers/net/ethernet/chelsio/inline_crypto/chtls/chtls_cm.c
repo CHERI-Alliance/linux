@@ -541,7 +541,7 @@ static void chtls_disconnect_acceptq(struct sock *listen_sk)
 
 static int listen_hashfn(const struct sock *sk)
 {
-	return ((unsigned long)sk >> 10) & (LISTEN_INFO_HASH_SIZE - 1);
+	return ((uintptr_t)sk >> 10) & (LISTEN_INFO_HASH_SIZE - 1);
 }
 
 static struct listen_info *listen_hash_add(struct chtls_dev *cdev,

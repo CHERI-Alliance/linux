@@ -18,7 +18,7 @@
 
 static const struct sdio_device_id mt7921s_table[] = {
 	{ SDIO_DEVICE(SDIO_VENDOR_ID_MEDIATEK, 0x7901),
-		.driver_data = (kernel_ulong_t)MT7921_FIRMWARE_WM },
+		.driver_data = (uintptr_t)MT7921_FIRMWARE_WM },
 	{ }	/* Terminating entry */
 };
 

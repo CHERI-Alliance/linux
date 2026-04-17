@@ -74,7 +74,7 @@ static int xlgmac_init(struct xlgmac_pdata *pdata)
 
 	/* Set irq, base_addr, MAC address, */
 	netdev->irq = pdata->dev_irq;
-	netdev->base_addr = (unsigned long)pdata->mac_regs;
+	netdev->base_addr = (uintptr_t)pdata->mac_regs;
 	xlgmac_read_mac_addr(pdata);
 	eth_hw_addr_set(netdev, pdata->mac_addr);
 

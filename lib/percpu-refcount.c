@@ -68,7 +68,7 @@ int percpu_ref_init(struct percpu_ref *ref, percpu_ref_func_t *release,
 	unsigned long start_count = 0;
 	struct percpu_ref_data *data;
 
-	ref->percpu_count_ptr = (unsigned long)
+	ref->percpu_count_ptr = (uintptr_t)
 		__alloc_percpu_gfp(sizeof(unsigned long), align, gfp);
 	if (!ref->percpu_count_ptr)
 		return -ENOMEM;

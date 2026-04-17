@@ -2054,7 +2054,7 @@ static void *f_next(struct seq_file *m, void *v, loff_t *pos)
 
 	(*pos)++;
 
-	switch ((unsigned long)v) {
+	switch ((uintptr_t)v) {
 	case FORMAT_HEADER:
 		node = common_head;
 		break;
@@ -2084,7 +2084,7 @@ static int f_show(struct seq_file *m, void *v)
 	struct ftrace_event_field *field;
 	const char *array_descriptor;
 
-	switch ((unsigned long)v) {
+	switch ((uintptr_t)v) {
 	case FORMAT_HEADER:
 		seq_printf(m, "name: %s\n", trace_event_name(call));
 		seq_printf(m, "ID: %d\n", call->event.type);

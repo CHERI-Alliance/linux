@@ -1470,11 +1470,11 @@ static const struct adv7511_chip_info adv7535_chip_info = {
 };
 
 static const struct i2c_device_id adv7511_i2c_ids[] = {
-	{ "adv7511", (kernel_ulong_t)&adv7511_chip_info },
-	{ "adv7511w", (kernel_ulong_t)&adv7511_chip_info },
-	{ "adv7513", (kernel_ulong_t)&adv7511_chip_info },
-	{ "adv7533", (kernel_ulong_t)&adv7533_chip_info },
-	{ "adv7535", (kernel_ulong_t)&adv7535_chip_info },
+	{ "adv7511", (uintptr_t)&adv7511_chip_info },
+	{ "adv7511w", (uintptr_t)&adv7511_chip_info },
+	{ "adv7513", (uintptr_t)&adv7511_chip_info },
+	{ "adv7533", (uintptr_t)&adv7533_chip_info },
+	{ "adv7535", (uintptr_t)&adv7535_chip_info },
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, adv7511_i2c_ids);

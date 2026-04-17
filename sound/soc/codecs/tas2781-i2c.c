@@ -1434,7 +1434,7 @@ static int tasdevice_create_cali_ctrls(struct tasdevice_priv *priv)
 	cali_ctrls[i].info = snd_soc_bytes_info_ext;
 	cali_ctrls[i].get = tasdev_cali_data_get;
 	cali_ctrls[i].put = tasdev_cali_data_put;
-	cali_ctrls[i].private_value = (unsigned long)ext_cali_data;
+	cali_ctrls[i].private_value = (uintptr_t)ext_cali_data;
 	i++;
 
 	cali_data->data = devm_kzalloc(priv->dev, cali_data->total_sz,
@@ -1476,7 +1476,7 @@ static int tasdevice_create_cali_ctrls(struct tasdevice_priv *priv)
 		cali_ctrls[i].info = snd_soc_bytes_info_ext;
 		cali_ctrls[i].put = tas2781_calib_start_put;
 		cali_ctrls[i].get = tasdev_nop_get;
-		cali_ctrls[i].private_value = (unsigned long)ext_cali_start;
+		cali_ctrls[i].private_value = (uintptr_t)ext_cali_start;
 		i++;
 	}
 

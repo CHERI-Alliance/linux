@@ -1334,7 +1334,7 @@ mtype_uref(struct ip_set *set, struct netlink_callback *cb, bool start)
 		rcu_read_lock_bh();
 		t = ipset_dereference_bh_nfnl(h->table);
 		atomic_inc(&t->uref);
-		cb->args[IPSET_CB_PRIVATE] = (unsigned long)t;
+		cb->args[IPSET_CB_PRIVATE] = (uintptr_t)t;
 		rcu_read_unlock_bh();
 	} else if (cb->args[IPSET_CB_PRIVATE]) {
 		t = (struct htable *)cb->args[IPSET_CB_PRIVATE];

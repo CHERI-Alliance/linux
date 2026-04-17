@@ -31,7 +31,7 @@ static void balloon_page_insert(struct balloon_dev_info *balloon,
 	__SetPageOffline(page);
 	if (IS_ENABLED(CONFIG_BALLOON_MIGRATION)) {
 		SetPageMovableOps(page);
-		set_page_private(page, (unsigned long)balloon);
+		set_page_private(page, (uintptr_t)balloon);
 	}
 	list_add(&page->lru, &balloon->pages);
 }

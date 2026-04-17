@@ -142,7 +142,7 @@ static inline unsigned long regs_get_register(struct pt_regs *regs,
 	if (unlikely(offset > MAX_REG_OFFSET))
 		return 0;
 
-	return *(unsigned long *)((unsigned long)regs + offset);
+	return *(unsigned long *)((uintptr_t)regs + offset);
 }
 
 /**

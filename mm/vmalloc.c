@@ -78,7 +78,7 @@ static const bool vmap_allow_huge = false;
 
 bool is_vmalloc_addr(const void *x)
 {
-	unsigned long addr = (unsigned long)kasan_reset_tag(x);
+	uintptr_t addr = (uintptr_t)kasan_reset_tag(x);
 
 	return addr >= VMALLOC_START && addr < VMALLOC_END;
 }
@@ -783,7 +783,7 @@ int is_vmalloc_or_module_addr(const void *x)
 	 * just put it in the vmalloc space.
 	 */
 #if defined(CONFIG_EXECMEM) && defined(MODULES_VADDR)
-	unsigned long addr = (unsigned long)kasan_reset_tag(x);
+	uintptr_t addr = (uintptr_t)kasan_reset_tag(x);
 	if (addr >= MODULES_VADDR && addr < MODULES_END)
 		return 1;
 #endif
@@ -798,7 +798,7 @@ EXPORT_SYMBOL_GPL(is_vmalloc_or_module_addr);
  */
 struct page *vmalloc_to_page(const void *vmalloc_addr)
 {
-	unsigned long addr = (unsigned long) vmalloc_addr;
+	uintptr_t addr = (uintptr_t) vmalloc_addr;
 	struct page *page = NULL;
 	pgd_t *pgd = pgd_offset_k(addr);
 	p4d_t *p4d;
@@ -1080,7 +1080,7 @@ static struct vmap_area *__find_vmap_area(unsigned long addr, struct rb_root *ro
 {
 	struct rb_node *n = root->rb_node;
 
-	addr = (unsigned long)kasan_reset_tag((void *)addr);
+	addr = (uintptr_t)kasan_reset_tag((void *)addr);
 
 	while (n) {
 		struct vmap_area *va;
@@ -1104,7 +1104,7 @@ __find_vmap_area_exceed_addr(unsigned long addr, struct rb_root *root)
 	struct vmap_area *va = NULL;
 	struct rb_node *n = root->rb_node;
 
-	addr = (unsigned long)kasan_reset_tag((void *)addr);
+	addr = (uintptr_t)kasan_reset_tag((void *)addr);
 
 	while (n) {
 		struct vmap_area *tmp;
@@ -3025,7 +3025,7 @@ EXPORT_SYMBOL_GPL(vm_unmap_aliases);
 void vm_unmap_ram(const void *mem, unsigned int count)
 {
 	unsigned long size = (unsigned long)count << PAGE_SHIFT;
-	unsigned long addr = (unsigned long)kasan_reset_tag(mem);
+	uintptr_t addr = (uintptr_t)kasan_reset_tag(mem);
 	struct vmap_area *va;
 
 	might_sleep();
@@ -3075,7 +3075,7 @@ void *vm_map_ram(struct page **pages, unsigned int count, int node)
 		mem = vb_alloc(size, GFP_KERNEL);
 		if (IS_ERR(mem))
 			return NULL;
-		addr = (unsigned long)mem;
+		addr = (uintptr_t)mem;
 	} else {
 		struct vmap_area *va;
 		va = alloc_vmap_area(size, PAGE_SIZE,
@@ -3179,7 +3179,7 @@ void __init vm_area_register_early(struct vm_struct *vm, size_t align)
 	for (p = &vmlist; (cur = *p) != NULL; p = &cur->next) {
 		if ((unsigned long)cur->addr - addr >= vm->size)
 			break;
-		addr = ALIGN((unsigned long)cur->addr + cur->size, align);
+		addr = ALIGN((uintptr_t)cur->addr + cur->size, align);
 	}
 
 	BUG_ON(addr > VMALLOC_END - vm->size);
@@ -3299,7 +3299,7 @@ struct vm_struct *find_vm_area(const void *addr)
 {
 	struct vmap_area *va;
 
-	va = find_vmap_area((unsigned long)addr);
+	va = find_vmap_area((uintptr_t)addr);
 	if (!va)
 		return NULL;
 
@@ -3327,7 +3327,7 @@ struct vm_struct *remove_vm_area(const void *addr)
 			addr))
 		return NULL;
 
-	va = find_unlink_vmap_area((unsigned long)addr);
+	va = find_unlink_vmap_area((uintptr_t)addr);
 	if (!va || !va->vm)
 		return NULL;
 	vm = va->vm;
@@ -3367,7 +3367,7 @@ static void vm_reset_perms(struct vm_struct *area)
 	 * the vm_unmap_aliases() flush includes the direct map.
 	 */
 	for (i = 0; i < area->nr_pages; i += 1U << page_order) {
-		unsigned long addr = (unsigned long)page_address(area->pages[i]);
+		uintptr_t addr = (uintptr_t)page_address(area->pages[i]);
 
 		if (addr) {
 			unsigned long page_size;
@@ -3556,7 +3556,7 @@ void *vmap(struct page **pages, unsigned int count,
 	if (!area)
 		return NULL;
 
-	addr = (unsigned long)area->addr;
+	addr = (uintptr_t)area->addr;
 	if (vmap_pages_range(addr, addr + size, pgprot_nx(prot),
 				pages, PAGE_SHIFT) < 0) {
 		vunmap(area->addr);
@@ -3612,7 +3612,7 @@ void *vmap_pfn(unsigned long *pfns, unsigned int count, pgprot_t prot)
 			__builtin_return_address(0));
 	if (!area)
 		return NULL;
-	if (apply_to_page_range(&init_mm, (unsigned long)area->addr,
+	if (apply_to_page_range(&init_mm, (uintptr_t)area->addr,
 			count * PAGE_SIZE, vmap_pfn_apply, &data)) {
 		free_vm_area(area);
 		return NULL;
@@ -3830,7 +3830,7 @@ static void *__vmalloc_area_node(struct vm_struct *area, gfp_t gfp_mask,
 {
 	const gfp_t nested_gfp = (gfp_mask & GFP_RECLAIM_MASK) | __GFP_ZERO;
 	bool nofail = gfp_mask & __GFP_NOFAIL;
-	unsigned long addr = (unsigned long)area->addr;
+	uintptr_t addr = (uintptr_t)area->addr;
 	unsigned long size = get_vm_area_size(area);
 	unsigned long array_size;
 	unsigned int nr_small_pages = size >> PAGE_SHIFT;
@@ -4512,8 +4512,8 @@ static size_t vmap_ram_vread_iter(struct iov_iter *iter, const char *addr,
 	 * Area is split into regions and tracked with vmap_block, read out
 	 * each region and zero fill the hole between regions.
 	 */
-	xa = addr_to_vb_xa((unsigned long) addr);
-	vb = xa_load(xa, addr_to_vb_idx((unsigned long)addr));
+	xa = addr_to_vb_xa((uintptr_t) addr);
+	vb = xa_load(xa, addr_to_vb_idx((uintptr_t)addr));
 	if (!vb)
 		goto finished_zero;
 
@@ -4605,11 +4605,11 @@ long vread_iter(struct iov_iter *iter, const char *addr, size_t count)
 
 	/* Don't allow overflow */
 	if ((unsigned long) addr + count < count)
-		count = -(unsigned long) addr;
+		count = -(uintptr_t) addr;
 
 	remains = count;
 
-	vn = find_vmap_area_exceed_addr_lock((unsigned long) addr, &va);
+	vn = find_vmap_area_exceed_addr_lock((uintptr_t) addr, &va);
 	if (!vn)
 		goto finished_zero;
 
@@ -5146,7 +5146,7 @@ bool vmalloc_dump_obj(void *object)
 	unsigned long addr;
 	unsigned int nr_pages;
 
-	addr = PAGE_ALIGN((unsigned long) object);
+	addr = PAGE_ALIGN((uintptr_t) object);
 	vn = addr_to_node(addr);
 
 	if (!spin_trylock(&vn->busy.lock))
@@ -5159,7 +5159,7 @@ bool vmalloc_dump_obj(void *object)
 	}
 
 	vm = va->vm;
-	addr = (unsigned long) vm->addr;
+	addr = (uintptr_t) vm->addr;
 	caller = vm->caller;
 	nr_pages = vm->nr_pages;
 	spin_unlock(&vn->busy.lock);
@@ -5319,7 +5319,7 @@ static void __init vmap_init_free_space(void)
 			free = kmem_cache_zalloc(vmap_area_cachep, GFP_NOWAIT);
 			if (!WARN_ON_ONCE(!free)) {
 				free->va_start = vmap_start;
-				free->va_end = (unsigned long) busy->addr;
+				free->va_end = (uintptr_t) busy->addr;
 
 				insert_vmap_area_augment(free, NULL,
 					&free_vmap_area_root,
@@ -5327,7 +5327,7 @@ static void __init vmap_init_free_space(void)
 			}
 		}
 
-		vmap_start = (unsigned long) busy->addr + busy->size;
+		vmap_start = (uintptr_t) busy->addr + busy->size;
 	}
 
 	if (vmap_end - vmap_start > 0) {
@@ -5459,7 +5459,7 @@ void __init vmalloc_init(void)
 		if (WARN_ON_ONCE(!va))
 			continue;
 
-		va->va_start = (unsigned long)tmp->addr;
+		va->va_start = (uintptr_t)tmp->addr;
 		va->va_end = va->va_start + tmp->size;
 		va->vm = tmp;
 

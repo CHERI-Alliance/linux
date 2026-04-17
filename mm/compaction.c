@@ -2645,7 +2645,7 @@ rescan:
 		 */
 		nr_migratepages = cc->nr_migratepages;
 		err = migrate_pages(&cc->migratepages, compaction_alloc,
-				compaction_free, (unsigned long)cc, cc->mode,
+				compaction_free, (uintptr_t)cc, cc->mode,
 				MR_COMPACTION, &nr_succeeded);
 
 		trace_mm_compaction_migratepages(nr_migratepages, nr_succeeded);

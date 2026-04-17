@@ -452,10 +452,10 @@ MODULE_DEVICE_TABLE(of, sx8654_of_match);
 #endif
 
 static const struct i2c_device_id sx8654_id_table[] = {
-	{ .name = "semtech_sx8650", .driver_data = (long)&sx8650_data },
-	{ .name = "semtech_sx8654", .driver_data = (long)&sx8654_data },
-	{ .name = "semtech_sx8655", .driver_data = (long)&sx8654_data },
-	{ .name = "semtech_sx8656", .driver_data = (long)&sx8654_data },
+	{ .name = "semtech_sx8650", .driver_data = (intptr_t)&sx8650_data },
+	{ .name = "semtech_sx8654", .driver_data = (intptr_t)&sx8654_data },
+	{ .name = "semtech_sx8655", .driver_data = (intptr_t)&sx8654_data },
+	{ .name = "semtech_sx8656", .driver_data = (intptr_t)&sx8654_data },
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, sx8654_id_table);

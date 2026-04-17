@@ -138,14 +138,14 @@ int __io_uring_add_tctx_node(struct io_ring_ctx *ctx)
 	 */
 	if (tctx->io_wq)
 		io_wq_set_exit_on_idle(tctx->io_wq, false);
-	if (!xa_load(&tctx->xa, (unsigned long)ctx)) {
+	if (!xa_load(&tctx->xa, (uintptr_t)ctx)) {
 		node = kmalloc_obj(*node);
 		if (!node)
 			return -ENOMEM;
 		node->ctx = ctx;
 		node->task = current;
 
-		ret = xa_err(xa_store(&tctx->xa, (unsigned long)ctx,
+		ret = xa_err(xa_store(&tctx->xa, (uintptr_t)ctx,
 					node, GFP_KERNEL));
 		if (ret) {
 			kfree(node);

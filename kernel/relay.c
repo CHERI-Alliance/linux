@@ -121,7 +121,7 @@ static void *relay_alloc_buf(struct rchan_buf *buf, size_t *size)
 		buf->page_array[i] = alloc_page(GFP_KERNEL | __GFP_ZERO);
 		if (unlikely(!buf->page_array[i]))
 			goto depopulate;
-		set_page_private(buf->page_array[i], (unsigned long)buf);
+		set_page_private(buf->page_array[i], (uintptr_t)buf);
 	}
 	mem = vmap(buf->page_array, n_pages, VM_MAP, PAGE_KERNEL);
 	if (!mem)

@@ -763,7 +763,7 @@ static struct scatterlist *ksmbd_init_sg(struct kvec *iov, unsigned int nvec,
 		return NULL;
 
 	for (i = 0; i < nvec - 1; i++) {
-		unsigned long kaddr = (unsigned long)iov[i + 1].iov_base;
+		uintptr_t kaddr = (uintptr_t)iov[i + 1].iov_base;
 
 		if (is_vmalloc_addr(iov[i + 1].iov_base)) {
 			nr_entries[i] = ((kaddr + iov[i + 1].iov_len +

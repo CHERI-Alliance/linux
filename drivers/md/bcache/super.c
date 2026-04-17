@@ -1683,7 +1683,7 @@ static CLOSURE_CALLBACK(cache_set_free)
 
 	mutex_lock(&bch_register_lock);
 	bch_bset_sort_state_free(&c->sort);
-	free_pages((unsigned long) c->uuids, ilog2(meta_bucket_pages(&c->cache->sb)));
+	free_pages((uintptr_t) c->uuids, ilog2(meta_bucket_pages(&c->cache->sb)));
 
 	ca = c->cache;
 	if (ca) {
@@ -2213,7 +2213,7 @@ void bch_cache_release(struct kobject *kobj)
 		ca->set->cache = NULL;
 	}
 
-	free_pages((unsigned long) ca->disk_buckets, ilog2(meta_bucket_pages(&ca->sb)));
+	free_pages((uintptr_t) ca->disk_buckets, ilog2(meta_bucket_pages(&ca->sb)));
 	kfree(ca->prio_buckets);
 	vfree(ca->buckets);
 

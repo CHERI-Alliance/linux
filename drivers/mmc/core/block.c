@@ -444,7 +444,7 @@ static struct mmc_blk_ioc_data *mmc_blk_ioctl_copy_from_user(
 		return idata;
 	}
 
-	idata->buf = memdup_user((void __user *)(unsigned long)
+	idata->buf = memdup_user((void __user *)(user_uintptr_t)
 				 idata->ic.data_ptr, idata->buf_bytes);
 	if (IS_ERR(idata->buf)) {
 		err = PTR_ERR(idata->buf);
@@ -469,7 +469,7 @@ static int mmc_blk_ioctl_copy_to_user(struct mmc_ioc_cmd __user *ic_ptr,
 		return -EFAULT;
 
 	if (!idata->ic.write_flag) {
-		if (copy_to_user((void __user *)(unsigned long)ic->data_ptr,
+		if (copy_to_user((void __user *)(user_uintptr_t)ic->data_ptr,
 				 idata->buf, idata->buf_bytes))
 			return -EFAULT;
 	}
@@ -844,7 +844,7 @@ static int mmc_blk_ioctl(struct block_device *bdev, blk_mode_t mode,
 static int mmc_blk_compat_ioctl(struct block_device *bdev, blk_mode_t mode,
 	unsigned int cmd, unsigned long arg)
 {
-	return mmc_blk_ioctl(bdev, mode, cmd, (unsigned long) compat_ptr(arg));
+	return mmc_blk_ioctl(bdev, mode, cmd, (user_uintptr_t) compat_ptr(arg));
 }
 #endif
 
@@ -2734,7 +2734,7 @@ static long mmc_rpmb_ioctl(struct file *filp, unsigned int cmd,
 static long mmc_rpmb_ioctl_compat(struct file *filp, unsigned int cmd,
 			      unsigned long arg)
 {
-	return mmc_rpmb_ioctl(filp, cmd, (unsigned long)compat_ptr(arg));
+	return mmc_rpmb_ioctl(filp, cmd, (user_uintptr_t)compat_ptr(arg));
 }
 #endif
 

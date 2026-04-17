@@ -1384,7 +1384,7 @@ static void mlx5_destroy_clock_dev(struct mlx5_core_dev *mdev)
 	}
 
 	if (mdev->clock_info) {
-		free_page((unsigned long)mdev->clock_info);
+		free_page((uintptr_t)mdev->clock_info);
 		mdev->clock_info = NULL;
 	}
 

@@ -2798,7 +2798,7 @@ void jbd2_free(void *ptr, size_t size)
 	if (size < PAGE_SIZE)
 		kmem_cache_free(get_slab(size), ptr);
 	else
-		free_pages((unsigned long)ptr, get_order(size));
+		free_pages((uintptr_t)ptr, get_order(size));
 };
 
 /*

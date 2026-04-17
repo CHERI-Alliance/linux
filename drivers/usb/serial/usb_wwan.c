@@ -493,7 +493,7 @@ bail_out_error2:
 bail_out_error:
 	for (i = 0; i < N_IN_URB; i++) {
 		usb_free_urb(portdata->in_urbs[i]);
-		free_page((unsigned long)portdata->in_buffer[i]);
+		free_page((uintptr_t)portdata->in_buffer[i]);
 	}
 	kfree(portdata);
 
@@ -511,7 +511,7 @@ void usb_wwan_port_remove(struct usb_serial_port *port)
 
 	for (i = 0; i < N_IN_URB; i++) {
 		usb_free_urb(portdata->in_urbs[i]);
-		free_page((unsigned long)portdata->in_buffer[i]);
+		free_page((uintptr_t)portdata->in_buffer[i]);
 	}
 	for (i = 0; i < N_OUT_URB; i++) {
 		usb_free_urb(portdata->out_urbs[i]);

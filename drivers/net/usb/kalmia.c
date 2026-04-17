@@ -344,7 +344,7 @@ static const struct usb_device_id products[] = {
 	{ USB_DEVICE(0x04e8, 0x689a) },
 	/* The stick switched into modem (by e.g. usb_modeswitch): */
 	{ USB_DEVICE(0x04e8, 0x6889),
-		.driver_info = (unsigned long) &kalmia_info, },
+		.driver_info = (uintptr_t) &kalmia_info, },
 	{ /* EMPTY == end of list */} };
 MODULE_DEVICE_TABLE( usb, products);
 

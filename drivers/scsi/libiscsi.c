@@ -3224,7 +3224,7 @@ iscsi_conn_setup(struct iscsi_cls_session *cls_session, int dd_size,
 	return cls_conn;
 
 login_task_add_dev_fail:
-	free_pages((unsigned long) conn->data,
+	free_pages((uintptr_t) conn->data,
 		   get_order(ISCSI_DEF_MAX_RECV_SEG_LEN));
 
 login_task_data_alloc_fail:
@@ -3268,7 +3268,7 @@ void iscsi_conn_teardown(struct iscsi_cls_conn *cls_conn)
 	iscsi_suspend_tx(conn);
 
 	spin_lock_bh(&session->frwd_lock);
-	free_pages((unsigned long) conn->data,
+	free_pages((uintptr_t) conn->data,
 		   get_order(ISCSI_DEF_MAX_RECV_SEG_LEN));
 	kfree(conn->persistent_address);
 	kfree(conn->local_ipaddr);

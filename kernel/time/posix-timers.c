@@ -102,7 +102,7 @@ static struct k_itimer *posix_timer_by_id(timer_t id)
 
 static inline struct signal_struct *posix_sig_owner(const struct k_itimer *timer)
 {
-	unsigned long val = (unsigned long)timer->it_signal;
+	uintptr_t val = (uintptr_t)timer->it_signal;
 
 	/*
 	 * Mask out bit 0, which acts as invalid marker to prevent
@@ -146,7 +146,7 @@ static bool posix_timer_add_at(struct k_itimer *timer, struct signal_struct *sig
 			 * out.
 			 */
 			timer->it_id = (timer_t)id;
-			timer->it_signal = (struct signal_struct *)((unsigned long)sig | 1UL);
+			timer->it_signal = (struct signal_struct *)((uintptr_t)sig | 1UL);
 			hlist_add_head_rcu(&timer->t_hash, &bucket->head);
 			return true;
 		}
@@ -1033,7 +1033,7 @@ static void posix_timer_delete(struct k_itimer *timer)
 	timer->it_signal_seq++;
 
 	scoped_guard (spinlock, &current->sighand->siglock) {
-		unsigned long sig = (unsigned long)timer->it_signal | 1UL;
+		unsigned long sig = (uintptr_t)timer->it_signal | 1UL;
 
 		WRITE_ONCE(timer->it_signal, (struct signal_struct *)sig);
 		hlist_del_rcu(&timer->list);

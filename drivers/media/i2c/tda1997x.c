@@ -2274,8 +2274,8 @@ static int tda1997x_set_power(struct tda1997x_state *state, bool on)
 }
 
 static const struct i2c_device_id tda1997x_i2c_id[] = {
-	{"tda19971", (kernel_ulong_t)&tda1997x_chip_info[TDA19971]},
-	{"tda19973", (kernel_ulong_t)&tda1997x_chip_info[TDA19973]},
+	{"tda19971", (uintptr_t)&tda1997x_chip_info[TDA19971]},
+	{"tda19973", (uintptr_t)&tda1997x_chip_info[TDA19973]},
 	{ },
 };
 MODULE_DEVICE_TABLE(i2c, tda1997x_i2c_id);

@@ -1072,7 +1072,7 @@ static long evdev_do_ioctl(struct file *file, unsigned int cmd,
 		return 0;
 
 	case EVIOCRMFF:
-		return input_ff_erase(dev, (int)(unsigned long) p, file);
+		return input_ff_erase(dev, (int)(user_uintptr_t) p, file);
 
 	case EVIOCGEFFECTS:
 		i = test_bit(EV_FF, dev->evbit) ?
@@ -1099,7 +1099,7 @@ static long evdev_do_ioctl(struct file *file, unsigned int cmd,
 		if (copy_from_user_with_ptr(&mask, p, sizeof(mask)))
 			return -EFAULT;
 
-		codes_ptr = (void __user *)(unsigned long)mask.codes_ptr;
+		codes_ptr = (void __user *)(user_uintptr_t)mask.codes_ptr;
 		return evdev_get_mask(client,
 				      mask.type, codes_ptr, mask.codes_size,
 				      compat_mode);
@@ -1111,7 +1111,7 @@ static long evdev_do_ioctl(struct file *file, unsigned int cmd,
 		if (copy_from_user_with_ptr(&mask, p, sizeof(mask)))
 			return -EFAULT;
 
-		codes_ptr = (const void __user *)(unsigned long)mask.codes_ptr;
+		codes_ptr = (const void __user *)(user_uintptr_t)mask.codes_ptr;
 		return evdev_set_mask(client,
 				      mask.type, codes_ptr, mask.codes_size,
 				      compat_mode);

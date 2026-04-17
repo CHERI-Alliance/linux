@@ -1545,7 +1545,7 @@ static ssize_t aio_setup_rw(int rw, const struct iocb *iocb,
 		struct iovec **iovec, bool vectored, bool compat,
 		struct iov_iter *iter)
 {
-	void __user *buf = (void __user *)(uintptr_t)iocb->aio_buf;
+	void __user *buf = (void __user *)(user_uintptr_t)iocb->aio_buf;
 	size_t len = iocb->aio_nbytes;
 
 	if (!vectored) {
@@ -1993,7 +1993,7 @@ static int __io_submit_one(struct kioctx *ctx, const struct iocb *iocb,
 		return -EFAULT;
 	}
 
-	req->ki_res.obj = (u64)(unsigned long)user_iocb;
+	req->ki_res.obj = (u64)(user_uintptr_t)user_iocb;
 	req->ki_res.data = iocb->aio_data;
 	req->ki_res.res = 0;
 	req->ki_res.res2 = 0;
@@ -2179,7 +2179,7 @@ SYSCALL_DEFINE3(io_cancel, aio_context_t, ctx_id, struct iocb __user *, iocb,
 	struct aio_kiocb *kiocb;
 	int ret = -EINVAL;
 	u32 key;
-	u64 obj = (u64)(unsigned long)iocb;
+	u64 obj = (u64)(user_uintptr_t)iocb;
 
 	if (unlikely(get_user(key, &iocb->aio_key)))
 		return -EFAULT;

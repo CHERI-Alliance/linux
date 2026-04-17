@@ -1149,7 +1149,7 @@ static void __migrate_folio_extract(struct folio *dst,
 				   int *old_page_state,
 				   struct anon_vma **anon_vmap)
 {
-	unsigned long private = (unsigned long)dst->private;
+	uintptr_t private = (uintptr_t)dst->private;
 
 	*anon_vmap = (struct anon_vma *)(private & ~PAGE_OLD_STATES);
 	*old_page_state = private & PAGE_OLD_STATES;
@@ -2228,7 +2228,7 @@ static int do_move_pages_to_node(struct list_head *pagelist, int node)
 	};
 
 	err = migrate_pages(pagelist, alloc_migration_target, NULL,
-		(unsigned long)&mtc, MIGRATE_SYNC, MR_SYSCALL, NULL);
+		(uintptr_t)&mtc, MIGRATE_SYNC, MR_SYSCALL, NULL);
 	if (err)
 		putback_movable_pages(pagelist);
 	return err;
@@ -2281,7 +2281,7 @@ static int add_folio_for_migration(struct mm_struct *mm, const void __user *p,
 	int err = -EFAULT;
 
 	mmap_read_lock(mm);
-	addr = (unsigned long)untagged_addr_remote(mm, p);
+	addr = (user_uintptr_t)untagged_addr_remote(mm, p);
 
 	vma = vma_lookup(mm, addr);
 	if (vma && vma_migratable(vma)) {
@@ -2435,7 +2435,7 @@ static void do_pages_stat_array(struct mm_struct *mm, unsigned long nr_pages,
 	mmap_read_lock(mm);
 
 	for (i = 0; i < nr_pages; i++) {
-		unsigned long addr = (unsigned long)(*pages);
+		user_uintptr_t addr = (user_uintptr_t)(*pages);
 		struct vm_area_struct *vma;
 		struct folio_walk fw;
 		struct folio *folio;

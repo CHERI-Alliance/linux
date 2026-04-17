@@ -2825,7 +2825,7 @@ static int parse_audio_selector_unit(struct mixer_build *state, int unitid,
 		err = -ENOMEM;
 		goto error_name;
 	}
-	kctl->private_value = (unsigned long)namelist;
+	kctl->private_value = (uintptr_t)namelist;
 	kctl->private_free = usb_mixer_selector_elem_free;
 
 	/* check the static mapping table at first */

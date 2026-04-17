@@ -1091,7 +1091,7 @@ static void __debug_check_no_obj_freed(const void *address, unsigned long size)
 	struct debug_bucket *db;
 	struct hlist_node *tmp;
 
-	saddr = (unsigned long) address;
+	saddr = (uintptr_t) address;
 	eaddr = saddr + size;
 	paddr = saddr & ODEBUG_CHUNK_MASK;
 	chunks = ((eaddr - paddr) + (ODEBUG_CHUNK_SIZE - 1));
@@ -1105,7 +1105,7 @@ repeat:
 		raw_spin_lock_irqsave(&db->lock, flags);
 		hlist_for_each_entry_safe(obj, tmp, &db->list, node) {
 			cnt++;
-			oaddr = (unsigned long) obj->object;
+			oaddr = (uintptr_t) obj->object;
 			if (oaddr < saddr || oaddr >= eaddr)
 				continue;
 

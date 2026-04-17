@@ -4191,7 +4191,7 @@ static int pqi_alloc_operational_queues(struct pqi_ctrl_info *ctrl_info)
 		aligned_pointer += sizeof(pqi_index_t);
 	}
 
-	alloc_length = (size_t)aligned_pointer +
+	alloc_length = (uintptr_t)aligned_pointer +
 		PQI_QUEUE_ELEMENT_ARRAY_ALIGNMENT;
 
 	alloc_length += PQI_EXTRA_SGL_MEMORY;
@@ -7641,7 +7641,7 @@ static int pqi_register_scsi(struct pqi_ctrl_info *ctrl_info)
 	shost->unique_id = shost->irq;
 	shost->nr_hw_queues = ctrl_info->num_queue_groups;
 	shost->host_tagset = 1;
-	shost->hostdata[0] = (unsigned long)ctrl_info;
+	shost->hostdata[0] = (uintptr_t)ctrl_info;
 
 	rc = scsi_add_host(shost, &ctrl_info->pci_dev->dev);
 	if (rc) {

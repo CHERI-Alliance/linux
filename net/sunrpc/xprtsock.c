@@ -2976,7 +2976,7 @@ static void bc_free(struct rpc_task *task)
 	struct rpc_buffer *buf;
 
 	buf = container_of(buffer, struct rpc_buffer, data);
-	free_page((unsigned long)buf);
+	free_page((uintptr_t)buf);
 }
 
 static int bc_sendto(struct rpc_rqst *req)

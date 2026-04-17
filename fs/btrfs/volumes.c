@@ -3811,7 +3811,7 @@ static int insert_balance_item(struct btrfs_fs_info *fs_info,
 	leaf = path->nodes[0];
 	item = btrfs_item_ptr(leaf, path->slots[0], struct btrfs_balance_item);
 
-	memzero_extent_buffer(leaf, (unsigned long)item, sizeof(*item));
+	memzero_extent_buffer(leaf, (uintptr_t)item, sizeof(*item));
 
 	btrfs_cpu_balance_args_to_disk(&disk_bargs, &bctl->data);
 	btrfs_set_balance_data(leaf, item, &disk_bargs);
@@ -7406,7 +7406,7 @@ static int read_one_chunk(struct btrfs_key *key, struct extent_buffer *leaf,
 			btrfs_stripe_offset_nr(leaf, chunk, i);
 		devid = btrfs_stripe_devid_nr(leaf, chunk, i);
 		args.devid = devid;
-		read_extent_buffer(leaf, uuid, (unsigned long)
+		read_extent_buffer(leaf, uuid, (uintptr_t)
 				   btrfs_stripe_dev_uuid_nr(chunk, i),
 				   BTRFS_UUID_SIZE);
 		args.uuid = uuid;
@@ -7918,7 +7918,7 @@ static u64 btrfs_dev_stats_value(const struct extent_buffer *eb,
 
 	read_extent_buffer(eb, &val,
 			   offsetof(struct btrfs_dev_stats_item, values) +
-			    ((unsigned long)ptr) + (index * sizeof(u64)),
+			    ((uintptr_t)ptr) + (index * sizeof(u64)),
 			   sizeof(val));
 	return val;
 }
@@ -7929,7 +7929,7 @@ static void btrfs_set_dev_stats_value(struct extent_buffer *eb,
 {
 	write_extent_buffer(eb, &val,
 			    offsetof(struct btrfs_dev_stats_item, values) +
-			     ((unsigned long)ptr) + (index * sizeof(u64)),
+			     ((uintptr_t)ptr) + (index * sizeof(u64)),
 			    sizeof(val));
 }
 

@@ -19,10 +19,10 @@
 static const struct i2c_device_id mc13xxx_i2c_device_id[] = {
 	{
 		.name = "mc13892",
-		.driver_data = (kernel_ulong_t)&mc13xxx_variant_mc13892,
+		.driver_data = (uintptr_t)&mc13xxx_variant_mc13892,
 	}, {
 		.name = "mc34708",
-		.driver_data = (kernel_ulong_t)&mc13xxx_variant_mc34708,
+		.driver_data = (uintptr_t)&mc13xxx_variant_mc34708,
 	}, {
 		/* sentinel */
 	}

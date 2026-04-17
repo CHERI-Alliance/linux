@@ -1087,7 +1087,7 @@ struct inode *ovl_lookup_inode(struct super_block *sb, struct dentry *real,
 {
 	struct inode *inode, *key = d_inode(real);
 
-	inode = ilookup5(sb, (unsigned long) key, ovl_inode_test, key);
+	inode = ilookup5(sb, (uintptr_t) key, ovl_inode_test, key);
 	if (!inode)
 		return NULL;
 
@@ -1106,7 +1106,7 @@ bool ovl_lookup_trap_inode(struct super_block *sb, struct dentry *dir)
 	struct inode *trap;
 	bool res;
 
-	trap = ilookup5(sb, (unsigned long) key, ovl_inode_test, key);
+	trap = ilookup5(sb, (uintptr_t) key, ovl_inode_test, key);
 	if (!trap)
 		return false;
 
@@ -1130,7 +1130,7 @@ struct inode *ovl_get_trap_inode(struct super_block *sb, struct dentry *dir)
 	if (!d_is_dir(dir))
 		return ERR_PTR(-ENOTDIR);
 
-	trap = iget5_locked(sb, (unsigned long) key, ovl_inode_test,
+	trap = iget5_locked(sb, (uintptr_t) key, ovl_inode_test,
 			    ovl_inode_set, key);
 	if (!trap)
 		return ERR_PTR(-ENOMEM);
@@ -1184,9 +1184,9 @@ static bool ovl_hash_bylower(struct super_block *sb, struct dentry *upper,
 static struct inode *ovl_iget5(struct super_block *sb, struct inode *newinode,
 			       struct inode *key)
 {
-	return newinode ? inode_insert5(newinode, (unsigned long) key,
+	return newinode ? inode_insert5(newinode, (uintptr_t) key,
 					 ovl_inode_test, ovl_inode_set, key) :
-			  iget5_locked(sb, (unsigned long) key,
+			  iget5_locked(sb, (uintptr_t) key,
 				       ovl_inode_test, ovl_inode_set, key);
 }
 

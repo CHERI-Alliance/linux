@@ -185,7 +185,7 @@ int ipc_task_init(struct ipc_task *ipc_task)
 	spin_lock_init(&ipc_queue->q_lock);
 
 	tasklet_init(ipc_task->ipc_tasklet, ipc_task_queue_handler,
-		     (unsigned long)ipc_queue);
+		     (uintptr_t)ipc_queue);
 	return 0;
 }
 

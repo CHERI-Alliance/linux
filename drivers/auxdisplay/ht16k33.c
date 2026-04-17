@@ -636,7 +636,7 @@ static int ht16k33_fbdev_probe(struct device *dev, struct ht16k33_priv *priv,
 err_fbdev_info:
 	framebuffer_release(fbdev->info);
 err_fbdev_buffer:
-	free_page((unsigned long) fbdev->buffer);
+	free_page((uintptr_t) fbdev->buffer);
 
 	return err;
 }
@@ -731,7 +731,7 @@ static void ht16k33_remove(struct i2c_client *client)
 	case DISP_MATRIX:
 		unregister_framebuffer(fbdev->info);
 		framebuffer_release(fbdev->info);
-		free_page((unsigned long)fbdev->buffer);
+		free_page((uintptr_t)fbdev->buffer);
 		break;
 
 	case DISP_QUAD_7SEG:

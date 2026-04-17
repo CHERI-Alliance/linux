@@ -709,7 +709,7 @@ static int tlv_put_btrfs_timespec(struct send_ctx *sctx, u16 attr,
 				  struct btrfs_timespec *ts)
 {
 	struct btrfs_timespec bts;
-	read_extent_buffer(eb, &bts, (unsigned long)ts, sizeof(bts));
+	read_extent_buffer(eb, &bts, (uintptr_t)ts, sizeof(bts));
 	return tlv_put(sctx, attr, &bts, sizeof(bts));
 }
 
@@ -1005,7 +1005,7 @@ static int iterate_inode_ref(struct btrfs_root *root, struct btrfs_path *path,
 
 
 	if (found_key->type == BTRFS_INODE_REF_KEY) {
-		ptr = (unsigned long)btrfs_item_ptr(eb, slot,
+		ptr = (uintptr_t)btrfs_item_ptr(eb, slot,
 						    struct btrfs_inode_ref);
 		total = btrfs_item_size(eb, slot);
 		elem_size = sizeof(*iref);
@@ -1021,12 +1021,12 @@ static int iterate_inode_ref(struct btrfs_root *root, struct btrfs_path *path,
 		if (found_key->type == BTRFS_INODE_REF_KEY) {
 			iref = (struct btrfs_inode_ref *)(ptr + cur);
 			name_len = btrfs_inode_ref_name_len(eb, iref);
-			name_off = (unsigned long)(iref + 1);
+			name_off = (uintptr_t)(iref + 1);
 			dir = found_key->offset;
 		} else {
 			extref = (struct btrfs_inode_extref *)(ptr + cur);
 			name_len = btrfs_inode_extref_name_len(eb, extref);
-			name_off = (unsigned long)&extref->name;
+			name_off = (uintptr_t)&extref->name;
 			dir = btrfs_inode_extref_parent(eb, extref);
 		}
 
@@ -1176,7 +1176,7 @@ static int iterate_dir_item(struct btrfs_root *root, struct btrfs_path *path,
 			}
 		}
 
-		read_extent_buffer(eb, buf, (unsigned long)(di + 1),
+		read_extent_buffer(eb, buf, (uintptr_t)(di + 1),
 				name_len + data_len);
 
 		len = sizeof(*di) + name_len + data_len;
@@ -1996,7 +1996,7 @@ static int get_first_ref(struct btrfs_root *root, u64 ino,
 				      struct btrfs_inode_ref);
 		len = btrfs_inode_ref_name_len(path->nodes[0], iref);
 		ret = fs_path_add_from_extent_buffer(name, path->nodes[0],
-						     (unsigned long)(iref + 1),
+						     (uintptr_t)(iref + 1),
 						     len);
 		parent_dir = found_key.offset;
 	} else {
@@ -2005,7 +2005,7 @@ static int get_first_ref(struct btrfs_root *root, u64 ino,
 					struct btrfs_inode_extref);
 		len = btrfs_inode_extref_name_len(path->nodes[0], extref);
 		ret = fs_path_add_from_extent_buffer(name, path->nodes[0],
-					(unsigned long)&extref->name, len);
+					(uintptr_t)&extref->name, len);
 		parent_dir = btrfs_inode_extref_parent(path->nodes[0], extref);
 	}
 	if (ret < 0)
@@ -2489,7 +2489,7 @@ static int send_subvol_begin(struct send_ctx *sctx)
 	}
 	ref = btrfs_item_ptr(leaf, path->slots[0], struct btrfs_root_ref);
 	namelen = btrfs_root_ref_name_len(leaf, ref);
-	read_extent_buffer(leaf, name, (unsigned long)(ref + 1), namelen);
+	read_extent_buffer(leaf, name, (uintptr_t)(ref + 1), namelen);
 	btrfs_release_path(path);
 
 	if (parent_root) {
@@ -5777,7 +5777,7 @@ static int send_capabilities(struct send_ctx *sctx)
 	if (!buf)
 		return -ENOMEM;
 
-	data_ptr = (unsigned long)(di + 1) + btrfs_dir_name_len(leaf, di);
+	data_ptr = (uintptr_t)(di + 1) + btrfs_dir_name_len(leaf, di);
 	read_extent_buffer(leaf, buf, data_ptr, buf_len);
 
 	ret = send_set_xattr(sctx, XATTR_NAME_CAPS,

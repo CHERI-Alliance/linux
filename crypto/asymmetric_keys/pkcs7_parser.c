@@ -146,7 +146,7 @@ struct pkcs7_message *pkcs7_parse_message(const void *data, size_t datalen)
 	if (!ctx->sinfo->sig)
 		goto out_no_sig;
 
-	ctx->data = (unsigned long)data;
+	ctx->data = (uintptr_t)data;
 	ctx->ppcerts = &ctx->certs;
 	ctx->ppsinfo = &ctx->msg->signed_infos;
 

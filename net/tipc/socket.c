@@ -3601,7 +3601,7 @@ int __tipc_dump_start(struct netlink_callback *cb, struct net *net)
 		if (!iter)
 			return -ENOMEM;
 
-		cb->args[4] = (long)iter;
+		cb->args[4] = (intptr_t)iter;
 	}
 
 	rhashtable_walk_enter(&tn->sk_rht, iter);

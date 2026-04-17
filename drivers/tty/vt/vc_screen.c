@@ -53,7 +53,7 @@
 #define HEADER_SIZE	4u
 #define CON_BUF_SIZE (IS_ENABLED(CONFIG_BASE_SMALL) ? 256 : PAGE_SIZE)
 
-DEFINE_FREE(free_page_ptr, void *, if (_T) free_page((unsigned long)_T));
+DEFINE_FREE(free_page_ptr, void *, if (_T) free_page((uintptr_t)_T));
 
 /*
  * Our minor space:
@@ -682,7 +682,7 @@ vcs_write(struct file *file, const char __user *buf, size_t count, loff_t *ppos)
 		buf += this_round;
 		pos += this_round;
 		if (org)
-			update_region(vc, (unsigned long)(org0), org - org0);
+			update_region(vc, (uintptr_t)(org0), org - org0);
 	}
 	*ppos += written;
 	ret = written;

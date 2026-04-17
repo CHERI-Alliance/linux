@@ -746,7 +746,7 @@ static void prb_flush_block(struct tpacket_kbdq_core *pkc1,
 	/* Skip the block header(we know header WILL fit in 4K) */
 	start += PAGE_SIZE;
 
-	end = (u8 *)PAGE_ALIGN((unsigned long)pkc1->pkblk_end);
+	end = (u8 *)PAGE_ALIGN((uintptr_t)pkc1->pkblk_end);
 	for (; start < end; start += PAGE_SIZE)
 		flush_dcache_page(pgv_to_page(start));
 
@@ -2468,7 +2468,7 @@ static int tpacket_rcv(struct sk_buff *skb, struct net_device *dev,
 	if (po->tp_version <= TPACKET_V2) {
 		u8 *start, *end;
 
-		end = (u8 *) PAGE_ALIGN((unsigned long) h.raw +
+		end = (u8 *) PAGE_ALIGN((uintptr_t) h.raw +
 					macoff + snaplen);
 
 		for (start = h.raw; start < end; start += PAGE_SIZE)
@@ -4351,7 +4351,7 @@ static void free_pg_vec(struct pgv *pg_vec, unsigned int order,
 			if (is_vmalloc_addr(pg_vec[i].buffer))
 				vfree(pg_vec[i].buffer);
 			else
-				free_pages((unsigned long)pg_vec[i].buffer,
+				free_pages((uintptr_t)pg_vec[i].buffer,
 					   order);
 			pg_vec[i].buffer = NULL;
 		}

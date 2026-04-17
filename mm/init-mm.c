@@ -54,8 +54,8 @@ struct mm_struct init_mm = {
 void setup_initial_init_mm(void *start_code, void *end_code,
 			   void *end_data, void *brk)
 {
-	init_mm.start_code = (unsigned long)start_code;
-	init_mm.end_code = (unsigned long)end_code;
-	init_mm.end_data = (unsigned long)end_data;
-	init_mm.brk = (unsigned long)brk;
+	init_mm.start_code = (uintptr_t)start_code;
+	init_mm.end_code = (uintptr_t)end_code;
+	init_mm.end_data = (uintptr_t)end_data;
+	init_mm.brk = (uintptr_t)brk;
 }

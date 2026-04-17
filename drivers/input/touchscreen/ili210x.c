@@ -1049,10 +1049,10 @@ static int ili210x_i2c_probe(struct i2c_client *client)
 }
 
 static const struct i2c_device_id ili210x_i2c_id[] = {
-	{ "ili210x", (long)&ili210x_chip },
-	{ "ili2117", (long)&ili211x_chip },
-	{ "ili2120", (long)&ili212x_chip },
-	{ "ili251x", (long)&ili251x_chip },
+	{ "ili210x", (intptr_t)&ili210x_chip },
+	{ "ili2117", (intptr_t)&ili211x_chip },
+	{ "ili2120", (intptr_t)&ili212x_chip },
+	{ "ili251x", (intptr_t)&ili251x_chip },
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, ili210x_i2c_id);

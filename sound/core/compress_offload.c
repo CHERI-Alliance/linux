@@ -1378,7 +1378,7 @@ static long snd_compr_ioctl(struct file *f, unsigned int cmd, user_uintptr_t arg
 static long snd_compr_ioctl_compat(struct file *file, unsigned int cmd,
 						unsigned long arg)
 {
-	return snd_compr_ioctl(file, cmd, (unsigned long)compat_ptr(arg));
+	return snd_compr_ioctl(file, cmd, (user_uintptr_t)compat_ptr(arg));
 }
 #endif
 

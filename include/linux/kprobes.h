@@ -547,7 +547,7 @@ static nokprobe_inline
 unsigned long kretprobe_find_ret_addr(struct task_struct *tsk, void *fp,
 				      struct llist_node **cur)
 {
-	return rethook_find_ret_addr(tsk, (unsigned long)fp, cur);
+	return rethook_find_ret_addr(tsk, (uintptr_t)fp, cur);
 }
 #else
 static nokprobe_inline bool is_kretprobe_trampoline(unsigned long addr)

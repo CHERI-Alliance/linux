@@ -1080,11 +1080,11 @@ static const struct of_device_id axp20x_adc_of_match[] = {
 MODULE_DEVICE_TABLE(of, axp20x_adc_of_match);
 
 static const struct platform_device_id axp20x_adc_id_match[] = {
-	{ .name = "axp192-adc", .driver_data = (kernel_ulong_t)&axp192_data, },
-	{ .name = "axp20x-adc", .driver_data = (kernel_ulong_t)&axp20x_data, },
-	{ .name = "axp22x-adc", .driver_data = (kernel_ulong_t)&axp22x_data, },
-	{ .name = "axp717-adc", .driver_data = (kernel_ulong_t)&axp717_data, },
-	{ .name = "axp813-adc", .driver_data = (kernel_ulong_t)&axp813_data, },
+	{ .name = "axp192-adc", .driver_data = (uintptr_t)&axp192_data, },
+	{ .name = "axp20x-adc", .driver_data = (uintptr_t)&axp20x_data, },
+	{ .name = "axp22x-adc", .driver_data = (uintptr_t)&axp22x_data, },
+	{ .name = "axp717-adc", .driver_data = (uintptr_t)&axp717_data, },
+	{ .name = "axp813-adc", .driver_data = (uintptr_t)&axp813_data, },
 	{ }
 };
 MODULE_DEVICE_TABLE(platform, axp20x_adc_id_match);

@@ -1346,7 +1346,7 @@ static bool ahci_broken_system_poweroff(struct pci_dev *pdev)
 	const struct dmi_system_id *dmi = dmi_first_match(broken_systems);
 
 	if (dmi) {
-		unsigned long slot = (unsigned long)dmi->driver_data;
+		uintptr_t slot = (uintptr_t)dmi->driver_data;
 		/* apply the quirk only to on-board controllers */
 		return slot == PCI_SLOT(pdev->devfn);
 	}
@@ -1969,7 +1969,7 @@ static int ahci_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	hpriv = devm_kzalloc(dev, sizeof(*hpriv), GFP_KERNEL);
 	if (!hpriv)
 		return -ENOMEM;
-	hpriv->flags |= (unsigned long)pi.private_data;
+	hpriv->flags |= (uintptr_t)pi.private_data;
 
 	/* MCP65 revision A1 and A2 can't do MSI */
 	if (board_id == board_ahci_mcp65 &&

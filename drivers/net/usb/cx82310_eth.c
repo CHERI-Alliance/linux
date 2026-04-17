@@ -169,7 +169,7 @@ static int cx82310_bind(struct usbnet *dev, struct usb_interface *intf)
 	/* we can receive URBs up to 4KB from the device */
 	dev->rx_urb_size = 4096;
 
-	dev->partial_data = (unsigned long) kmalloc(dev->hard_mtu, GFP_KERNEL);
+	dev->partial_data = (uintptr_t) kmalloc(dev->hard_mtu, GFP_KERNEL);
 	if (!dev->partial_data)
 		return -ENOMEM;
 
@@ -352,7 +352,7 @@ static const struct driver_info	cx82310_info = {
 static const struct usb_device_id products[] = {
 	{
 		USB_DEVICE_CLASS(0x0572, 0xcb01, 0xff, 0, 0),
-		.driver_info = (unsigned long) &cx82310_info
+		.driver_info = (uintptr_t) &cx82310_info
 	},
 	{ },
 };

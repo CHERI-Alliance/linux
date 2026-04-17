@@ -382,7 +382,7 @@ static int he_init_one(struct pci_dev *pci_dev,
 	he_dev->atm_dev->dev_data = he_dev;
 	atm_dev->dev_data = he_dev;
 	he_dev->number = atm_dev->number;
-	tasklet_init(&he_dev->tasklet, he_tasklet, (unsigned long) he_dev);
+	tasklet_init(&he_dev->tasklet, he_tasklet, (uintptr_t) he_dev);
 	spin_lock_init(&he_dev->global_lock);
 
 	if (he_start(atm_dev)) {
@@ -1637,7 +1637,7 @@ static int
 he_service_rbrq(struct he_dev *he_dev, int group)
 {
 	struct he_rbrq *rbrq_tail = (struct he_rbrq *)
-				((unsigned long)he_dev->rbrq_base |
+				((uintptr_t)he_dev->rbrq_base |
 					he_dev->hsp->group[group].rbrq_tail);
 	unsigned cid, lastcid = -1;
 	struct sk_buff *skb;
@@ -1776,7 +1776,7 @@ return_host_buffers:
 
 next_rbrq_entry:
 		he_dev->rbrq_head = (struct he_rbrq *)
-				((unsigned long) he_dev->rbrq_base |
+				((uintptr_t) he_dev->rbrq_base |
 					RBRQ_MASK(he_dev->rbrq_head + 1));
 
 	}
@@ -1797,7 +1797,7 @@ static void
 he_service_tbrq(struct he_dev *he_dev, int group)
 {
 	struct he_tbrq *tbrq_tail = (struct he_tbrq *)
-				((unsigned long)he_dev->tbrq_base |
+				((uintptr_t)he_dev->tbrq_base |
 					he_dev->hsp->group[group].tbrq_tail);
 	struct he_tpd *tpd;
 	int slot, updated = 0;
@@ -1859,7 +1859,7 @@ next_tbrq_entry:
 		if (tpd)
 			dma_pool_free(he_dev->tpd_pool, tpd, TPD_ADDR(tpd->status));
 		he_dev->tbrq_head = (struct he_tbrq *)
-				((unsigned long) he_dev->tbrq_base |
+				((uintptr_t) he_dev->tbrq_base |
 					TBRQ_MASK(he_dev->tbrq_head + 1));
 	}
 
@@ -1882,11 +1882,11 @@ he_service_rbpl(struct he_dev *he_dev, int group)
 	int i;
 	int moved = 0;
 
-	rbpl_head = (struct he_rbp *) ((unsigned long)he_dev->rbpl_base |
+	rbpl_head = (struct he_rbp *) ((uintptr_t)he_dev->rbpl_base |
 					RBPL_MASK(he_readl(he_dev, G0_RBPL_S)));
 
 	for (;;) {
-		new_tail = (struct he_rbp *) ((unsigned long)he_dev->rbpl_base |
+		new_tail = (struct he_rbp *) ((uintptr_t)he_dev->rbpl_base |
 						RBPL_MASK(he_dev->rbpl_tail+1));
 
 		/* table 3.42 -- rbpl_tail should never be set to rbpl_head */
@@ -2018,12 +2018,12 @@ he_irq_handler(int irq, void *dev_id)
 
 	spin_lock_irqsave(&he_dev->global_lock, flags);
 
-	he_dev->irq_tail = (struct he_irq *) (((unsigned long)he_dev->irq_base) |
+	he_dev->irq_tail = (struct he_irq *) (((uintptr_t)he_dev->irq_base) |
 						(*he_dev->irq_tailoffset << 2));
 
 	if (he_dev->irq_tail == he_dev->irq_head) {
 		HPRINTK("tailoffset not updated?\n");
-		he_dev->irq_tail = (struct he_irq *) ((unsigned long)he_dev->irq_base |
+		he_dev->irq_tail = (struct he_irq *) ((uintptr_t)he_dev->irq_base |
 			((he_readl(he_dev, IRQ0_BASE) & IRQ_MASK) << 2));
 		(void) he_readl(he_dev, INT_FIFO);	/* 8.1.2 controller errata */
 	}
@@ -2053,7 +2053,7 @@ __enqueue_tpd(struct he_dev *he_dev, struct he_tpd *tpd, unsigned cid)
 					tpd, cid, he_dev->tpdrq_tail);
 
 	/* new_tail = he_dev->tpdrq_tail; */
-	new_tail = (struct he_tpdrq *) ((unsigned long) he_dev->tpdrq_base |
+	new_tail = (struct he_tpdrq *) ((uintptr_t) he_dev->tpdrq_base |
 					TPDRQ_MASK(he_dev->tpdrq_tail+1));
 
 	/*
@@ -2065,7 +2065,7 @@ __enqueue_tpd(struct he_dev *he_dev, struct he_tpd *tpd, unsigned cid)
 
 	if (new_tail == he_dev->tpdrq_head) {
 		he_dev->tpdrq_head = (struct he_tpdrq *)
-			(((unsigned long)he_dev->tpdrq_base) |
+			(((uintptr_t)he_dev->tpdrq_base) |
 				TPDRQ_MASK(he_readl(he_dev, TPDRQ_B_H)));
 
 		if (new_tail == he_dev->tpdrq_head) {

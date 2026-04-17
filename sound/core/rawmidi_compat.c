@@ -115,7 +115,7 @@ static long snd_rawmidi_ioctl_compat(struct file *file, unsigned int cmd, unsign
 	case SNDRV_UMP_IOCTL_ENDPOINT_INFO:
 	case SNDRV_UMP_IOCTL_BLOCK_INFO:
 #endif
-		return snd_rawmidi_ioctl(file, cmd, (unsigned long)argp);
+		return snd_rawmidi_ioctl(file, cmd, (user_uintptr_t)argp);
 	case SNDRV_RAWMIDI_IOCTL_PARAMS32:
 		return snd_rawmidi_ioctl_params_compat(rfile, argp);
 	case SNDRV_RAWMIDI_IOCTL_STATUS_COMPAT32:

@@ -3135,7 +3135,7 @@ int snd_soc_of_parse_pin_switches(struct snd_soc_card *card, const char *prop)
 		controls[i].info = snd_soc_dapm_info_pin_switch;
 		controls[i].get = snd_soc_dapm_get_pin_switch;
 		controls[i].put = snd_soc_dapm_put_pin_switch;
-		controls[i].private_value = (unsigned long)strings[i];
+		controls[i].private_value = (uintptr_t)strings[i];
 	}
 
 	card->controls = controls;

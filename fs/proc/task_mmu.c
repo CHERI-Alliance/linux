@@ -2986,7 +2986,7 @@ static int pagemap_scan_init_bounce_buffer(struct pagemap_scan_private *p)
 		return -ENOMEM;
 
 	p->vec_buf->start = p->vec_buf->end = 0;
-	p->vec_out = (struct page_region __user *)(long)p->arg.vec;
+	p->vec_out = (struct page_region __user *)(user_intptr_t)p->arg.vec;
 
 	return 0;
 }

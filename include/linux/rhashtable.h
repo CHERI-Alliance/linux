@@ -368,16 +368,16 @@ static __always_inline struct rhash_head *__rht_ptr(
 	struct rhash_lock_head *p, struct rhash_lock_head __rcu *const *bkt,
 	const enum rht_lookup_freq freq)
 {
-	unsigned long p_val = (unsigned long)p & ~BIT(0);
+	unsigned long p_val = (uintptr_t)p & ~BIT(0);
 
 	BUILD_BUG_ON(!__builtin_constant_p(freq));
 
 	if (freq == RHT_LOOKUP_LIKELY)
 		return (struct rhash_head *)
-			(likely(p_val) ? p_val : (unsigned long)RHT_NULLS_MARKER(bkt));
+			(likely(p_val) ? p_val : (uintptr_t)RHT_NULLS_MARKER(bkt));
 	else
 		return (struct rhash_head *)
-			(p_val ?: (unsigned long)RHT_NULLS_MARKER(bkt));
+			(p_val ?: (uintptr_t)RHT_NULLS_MARKER(bkt));
 }
 
 /*
@@ -421,7 +421,7 @@ static inline void rht_assign_locked(struct rhash_lock_head __rcu **bkt,
 {
 	if (rht_is_a_nulls(obj))
 		obj = NULL;
-	rcu_assign_pointer(*bkt, (void *)((unsigned long)obj | BIT(0)));
+	rcu_assign_pointer(*bkt, (void *)((uintptr_t)obj | BIT(0)));
 }
 
 static inline void rht_assign_unlock(struct bucket_table *tbl,

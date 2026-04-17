@@ -620,7 +620,7 @@ static inline void skb_bpf_set_ingress(struct sk_buff *skb)
 static inline void skb_bpf_set_redir(struct sk_buff *skb, struct sock *sk_redir,
 				     bool ingress)
 {
-	skb->_sk_redir = (unsigned long)sk_redir;
+	skb->_sk_redir = (uintptr_t)sk_redir;
 	if (ingress)
 		skb->_sk_redir |= BPF_F_INGRESS;
 }

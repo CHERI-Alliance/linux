@@ -3277,13 +3277,13 @@ static int __ffs_func_bind_do_descs(enum ffs_entity_type type, u8 *valuep,
 	 */
 	if (func->function.ss_descriptors) {
 		ep_desc_id = 2;
-		func->function.ss_descriptors[(long)valuep] = desc;
+		func->function.ss_descriptors[(intptr_t)valuep] = desc;
 	} else if (func->function.hs_descriptors) {
 		ep_desc_id = 1;
-		func->function.hs_descriptors[(long)valuep] = desc;
+		func->function.hs_descriptors[(intptr_t)valuep] = desc;
 	} else {
 		ep_desc_id = 0;
-		func->function.fs_descriptors[(long)valuep]    = desc;
+		func->function.fs_descriptors[(intptr_t)valuep]    = desc;
 	}
 
 	if (!desc || desc->bDescriptorType != USB_DT_ENDPOINT)

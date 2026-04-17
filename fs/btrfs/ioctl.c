@@ -1706,7 +1706,7 @@ static noinline int btrfs_search_path_in_tree(struct btrfs_fs_info *info,
 		}
 
 		*(ptr + len) = '/';
-		read_extent_buffer(l, ptr, (unsigned long)(iref + 1), len);
+		read_extent_buffer(l, ptr, (uintptr_t)(iref + 1), len);
 
 		if (key.offset == BTRFS_FIRST_FREE_OBJECTID)
 			break;
@@ -1789,7 +1789,7 @@ static int btrfs_search_path_in_tree_user(struct mnt_idmap *idmap,
 
 			*(ptr + len) = '/';
 			read_extent_buffer(leaf, ptr,
-					(unsigned long)(iref + 1), len);
+					(uintptr_t)(iref + 1), len);
 
 			/*
 			 * We don't need the path anymore, so release it and
@@ -3207,13 +3207,13 @@ static long btrfs_ioctl_ino_to_path(struct btrfs_root *root, void __user *arg)
 
 	for (i = 0; i < ipath->fspath->elem_cnt; ++i) {
 		rel_ptr = ipath->fspath->val[i] -
-			  (u64)(unsigned long)ipath->fspath->val;
+			  (u64)(uintptr_t)ipath->fspath->val;
 		ipath->fspath->val[i] = rel_ptr;
 	}
 
 	btrfs_free_path(path);
 	path = NULL;
-	ret = copy_to_user((void __user *)(unsigned long)ipa->fspath,
+	ret = copy_to_user((void __user *)(user_uintptr_t)ipa->fspath,
 			   ipath->fspath, size);
 	if (ret) {
 		ret = -EFAULT;
@@ -3273,7 +3273,7 @@ static long btrfs_ioctl_logical_to_ino(struct btrfs_fs_info *fs_info,
 	if (ret < 0)
 		goto out;
 
-	ret = copy_to_user((void __user *)(unsigned long)loi->inodes, inodes,
+	ret = copy_to_user((void __user *)(user_uintptr_t)loi->inodes, inodes,
 			   size);
 	if (ret)
 		ret = -EFAULT;
@@ -5315,6 +5315,6 @@ long btrfs_compat_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 		break;
 	}
 
-	return btrfs_ioctl(file, cmd, (unsigned long) compat_ptr(arg));
+	return btrfs_ioctl(file, cmd, (user_uintptr_t) compat_ptr(arg));
 }
 #endif

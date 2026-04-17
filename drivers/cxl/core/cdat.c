@@ -662,9 +662,9 @@ static int cxl_endpoint_gather_bandwidth(struct cxl_region *cxlr,
 	 * otherwise it's the parent switch upstream device.
 	 */
 	if (*gp_is_root)
-		index = (unsigned long)endpoint->parent_dport->dport_dev;
+		index = (uintptr_t)endpoint->parent_dport->dport_dev;
 	else
-		index = (unsigned long)parent_port->uport_dev;
+		index = (uintptr_t)parent_port->uport_dev;
 
 	perf_ctx = xa_load(usp_xa, index);
 	if (!perf_ctx) {
@@ -788,9 +788,9 @@ static struct xarray *cxl_switch_gather_bandwidth(struct cxl_region *cxlr,
 		 * otherwise it's the parent switch upstream device.
 		 */
 		if (is_root)
-			us_index = (unsigned long)port->parent_dport->dport_dev;
+			us_index = (uintptr_t)port->parent_dport->dport_dev;
 		else
-			us_index = (unsigned long)parent_port->uport_dev;
+			us_index = (uintptr_t)parent_port->uport_dev;
 
 		us_ctx = xa_load(res_xa, us_index);
 		if (!us_ctx) {
@@ -872,7 +872,7 @@ static struct xarray *cxl_rp_gather_bandwidth(struct xarray *xa)
 
 	xa_for_each(xa, index, ctx) {
 		struct cxl_port *port = ctx->port;
-		unsigned long hb_index = (unsigned long)port->uport_dev;
+		uintptr_t hb_index = (uintptr_t)port->uport_dev;
 		struct cxl_perf_ctx *hb_ctx;
 		void *ptr;
 
@@ -923,7 +923,7 @@ static struct xarray *cxl_hb_gather_bandwidth(struct xarray *xa)
 		void *ptr;
 
 		parent_port = to_cxl_port(port->dev.parent);
-		mw_index = (unsigned long)parent_port->uport_dev;
+		mw_index = (uintptr_t)parent_port->uport_dev;
 
 		mw_ctx = xa_load(mw_xa, mw_index);
 		if (!mw_ctx) {

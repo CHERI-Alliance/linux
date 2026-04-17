@@ -2393,7 +2393,7 @@ static inline unsigned int fold_hash(unsigned long x, unsigned long y)
  */
 unsigned int full_name_hash(const void *salt, const char *name, unsigned int len)
 {
-	unsigned long a, x = 0, y = (unsigned long)salt;
+	uintptr_t a, x = 0, y = (uintptr_t)salt;
 
 	for (;;) {
 		if (!len)
@@ -2414,7 +2414,7 @@ EXPORT_SYMBOL(full_name_hash);
 /* Return the "hash_len" (hash and length) of a null-terminated string */
 u64 hashlen_string(const void *salt, const char *name)
 {
-	unsigned long a = 0, x = 0, y = (unsigned long)salt;
+	uintptr_t a = 0, x = 0, y = (uintptr_t)salt;
 	unsigned long adata, mask, len;
 	const struct word_at_a_time constants = WORD_AT_A_TIME_CONSTANTS;
 
@@ -2450,7 +2450,7 @@ static inline const char *hash_name(struct nameidata *nd,
 				    const char *name,
 				    unsigned long *lastword)
 {
-	unsigned long a, b, x, y = (unsigned long)nd->path.dentry;
+	uintptr_t a, b, x, y = (uintptr_t)nd->path.dentry;
 	unsigned long adata, bdata, mask, len;
 	const struct word_at_a_time constants = WORD_AT_A_TIME_CONSTANTS;
 

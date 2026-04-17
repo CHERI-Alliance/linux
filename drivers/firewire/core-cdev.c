@@ -263,7 +263,7 @@ static u64 uptr_to_u64(void __user *ptr)
 	if (in_compat_syscall())
 		return ptr_to_compat(ptr);
 	else
-		return (u64)(unsigned long)ptr;
+		return (u64)(user_uintptr_t)ptr;
 }
 #else
 static inline void __user *u64_to_uptr(u64 value)

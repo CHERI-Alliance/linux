@@ -1042,7 +1042,7 @@ static long ppp_compat_ioctl(struct file *file, unsigned int cmd, unsigned long 
 
 	/* all other commands have compatible arguments */
 	if (err == -ENOIOCTLCMD)
-		err = ppp_ioctl(file, cmd, (unsigned long)compat_ptr(arg));
+		err = ppp_ioctl(file, cmd, (user_uintptr_t)compat_ptr(arg));
 
 	return err;
 }

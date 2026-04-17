@@ -70,7 +70,7 @@ static inline void *xa_mk_value(unsigned long v)
  */
 static inline unsigned long xa_to_value(const void *entry)
 {
-	return (unsigned long)entry >> 1;
+	return (uintptr_t)entry >> 1;
 }
 
 /**
@@ -100,7 +100,7 @@ static inline bool xa_is_value(const void *entry)
  */
 static inline void *xa_tag_pointer(void *p, unsigned long tag)
 {
-	return (void *)((unsigned long)p | tag);
+	return (void *)((uintptr_t)p | tag);
 }
 
 /**
@@ -115,7 +115,7 @@ static inline void *xa_tag_pointer(void *p, unsigned long tag)
  */
 static inline void *xa_untag_pointer(void *entry)
 {
-	return (void *)((unsigned long)entry & ~3UL);
+	return (void *)((uintptr_t)entry & ~3UL);
 }
 
 /**
@@ -160,7 +160,7 @@ static inline void *xa_mk_internal(unsigned long v)
  */
 static inline unsigned long xa_to_internal(const void *entry)
 {
-	return (unsigned long)entry >> 2;
+	return (uintptr_t)entry >> 2;
 }
 
 /*
@@ -224,7 +224,7 @@ static inline int xa_err(void *entry)
 {
 	/* xa_to_internal() would not do sign extension. */
 	if (xa_is_err(entry))
-		return (long)entry >> 2;
+		return (intptr_t)entry >> 2;
 	return 0;
 }
 
@@ -1255,13 +1255,13 @@ static inline struct xa_node *xa_parent_locked(const struct xarray *xa,
 /* Private */
 static inline void *xa_mk_node(const struct xa_node *node)
 {
-	return (void *)((unsigned long)node | 2);
+	return (void *)((uintptr_t)node | 2);
 }
 
 /* Private */
 static inline struct xa_node *xa_to_node(const void *entry)
 {
-	return (struct xa_node *)((unsigned long)entry - 2);
+	return (struct xa_node *)((uintptr_t)entry - 2);
 }
 
 /* Private */

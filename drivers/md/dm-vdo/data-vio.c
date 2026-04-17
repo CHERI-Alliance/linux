@@ -221,7 +221,7 @@ as_data_vio_pool(struct vdo_completion *completion)
 
 static inline u64 get_arrival_time(struct bio *bio)
 {
-	return (u64) bio->bi_private;
+	return (uintptr_t) bio->bi_private;
 }
 
 /**

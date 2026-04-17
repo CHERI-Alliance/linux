@@ -172,7 +172,7 @@ int liquidio_set_feature(struct net_device *netdev, int cmd, u16 param1)
 	nctrl.ncmd.s.cmd = cmd;
 	nctrl.ncmd.s.param1 = param1;
 	nctrl.iq_no = lio->linfo.txpciq[0].s.q_no;
-	nctrl.netpndev = (u64)netdev;
+	nctrl.netpndev = (uintptr_t)netdev;
 	nctrl.cb_fn = liquidio_link_ctrl_cmd_completion;
 
 	ret = octnet_send_nic_ctrl_pkt(lio->oct_dev, &nctrl);

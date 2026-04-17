@@ -3456,13 +3456,13 @@ static void blk_mq_clear_rq_mapping(struct blk_mq_tags *drv_tags,
 		return;
 
 	list_for_each_entry(page, &tags->page_list, lru) {
-		unsigned long start = (unsigned long)page_address(page);
+		uintptr_t start = (uintptr_t)page_address(page);
 		unsigned long end = start + order_to_size(page->private);
 		int i;
 
 		for (i = 0; i < drv_tags->nr_tags; i++) {
 			struct request *rq = drv_tags->rqs[i];
-			unsigned long rq_addr = (unsigned long)rq;
+			uintptr_t rq_addr = (uintptr_t)rq;
 
 			if (rq_addr >= start && rq_addr < end) {
 				WARN_ON_ONCE(req_ref_read(rq) != 0);

@@ -932,7 +932,7 @@ static int io_recvmsg_prep_multishot(struct io_async_msghdr *kmsg,
 				     struct io_sr_msg *sr, void __user2 * __capability *buf,
 				     size_t *len)
 {
-	unsigned long ubuf = (unsigned long) *buf;
+	user_uintptr_t ubuf = (user_uintptr_t) *buf;
 	unsigned long hdr;
 
 	hdr = sizeof(struct io_uring_recvmsg_out) + kmsg->namelen +
@@ -1454,7 +1454,7 @@ static int io_send_zc_import(struct io_kiocb *req, unsigned int issue_flags)
 
 	sr->notif->buf_index = req->buf_index;
 	return io_import_reg_buf(sr->notif, &kmsg->msg.msg_iter,
-				(u64)(uintptr_t)sr->buf, sr->len,
+				(u64)(user_uintptr_t)sr->buf, sr->len,
 				ITER_SOURCE, issue_flags);
 }
 

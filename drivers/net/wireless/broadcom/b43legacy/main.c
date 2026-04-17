@@ -2430,7 +2430,7 @@ static int b43legacy_rng_init(struct b43legacy_wl *wl)
 		 "%s_%s", KBUILD_MODNAME, wiphy_name(wl->hw->wiphy));
 	wl->rng.name = wl->rng_name;
 	wl->rng.data_read = b43legacy_rng_read;
-	wl->rng.priv = (unsigned long)wl;
+	wl->rng.priv = (uintptr_t)wl;
 	wl->rng_initialized = 1;
 	err = hwrng_register(&wl->rng);
 	if (err) {

@@ -2131,7 +2131,7 @@ static int atmel_aes_buff_init(struct atmel_aes_dev *dd)
 
 static void atmel_aes_buff_cleanup(struct atmel_aes_dev *dd)
 {
-	free_page((unsigned long)dd->buf);
+	free_page((uintptr_t)dd->buf);
 }
 
 static int atmel_aes_dma_init(struct atmel_aes_dev *dd)
@@ -2345,9 +2345,9 @@ static int atmel_aes_probe(struct platform_device *pdev)
 	spin_lock_init(&aes_dd->lock);
 
 	tasklet_init(&aes_dd->done_task, atmel_aes_done_task,
-					(unsigned long)aes_dd);
+					(uintptr_t)aes_dd);
 	tasklet_init(&aes_dd->queue_task, atmel_aes_queue_task,
-					(unsigned long)aes_dd);
+					(uintptr_t)aes_dd);
 
 	crypto_init_queue(&aes_dd->queue, ATMEL_AES_QUEUE_LENGTH);
 

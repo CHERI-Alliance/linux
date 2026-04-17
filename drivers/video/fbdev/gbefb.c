@@ -819,7 +819,7 @@ static void gbefb_encode_fix(struct fb_fix_screeninfo *fix,
 {
 	memset(fix, 0, sizeof(struct fb_fix_screeninfo));
 	strcpy(fix->id, "SGI GBE");
-	fix->smem_start = (unsigned long) gbe_mem;
+	fix->smem_start = (uintptr_t) gbe_mem;
 	fix->smem_len = gbe_mem_size;
 	fix->type = FB_TYPE_PACKED_PIXELS;
 	fix->type_aux = 0;

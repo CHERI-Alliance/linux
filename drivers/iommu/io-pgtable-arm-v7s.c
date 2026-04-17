@@ -289,7 +289,7 @@ out_unmap:
 	dma_unmap_single(dev, dma, size, DMA_TO_DEVICE);
 out_free:
 	if (lvl == 1)
-		free_pages((unsigned long)table, get_order(size));
+		free_pages((uintptr_t)table, get_order(size));
 	else
 		kmem_cache_free(data->l2_tables, table);
 	return NULL;
@@ -306,7 +306,7 @@ static void __arm_v7s_free_table(void *table, int lvl,
 		dma_unmap_single(dev, __arm_v7s_dma_addr(table), size,
 				 DMA_TO_DEVICE);
 	if (lvl == 1)
-		free_pages((unsigned long)table, get_order(size));
+		free_pages((uintptr_t)table, get_order(size));
 	else
 		kmem_cache_free(data->l2_tables, table);
 }

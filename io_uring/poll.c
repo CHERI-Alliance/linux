@@ -58,14 +58,14 @@ static int io_poll_wake(struct wait_queue_entry *wait, unsigned mode, int sync,
 
 static inline struct io_kiocb *wqe_to_req(struct wait_queue_entry *wqe)
 {
-	unsigned long priv = (unsigned long)wqe->private;
+	uintptr_t priv = (uintptr_t)wqe->private;
 
 	return (struct io_kiocb *)(priv & ~IO_WQE_F_DOUBLE);
 }
 
 static inline bool wqe_is_double(struct wait_queue_entry *wqe)
 {
-	unsigned long priv = (unsigned long)wqe->private;
+	uintptr_t priv = (uintptr_t)wqe->private;
 
 	return priv & IO_WQE_F_DOUBLE;
 }
@@ -462,7 +462,7 @@ static void __io_queue_proc(struct io_poll *poll, struct io_poll_table *pt,
 			    struct io_poll **poll_ptr)
 {
 	struct io_kiocb *req = pt->req;
-	unsigned long wqe_private = (unsigned long) req;
+	uintptr_t wqe_private = (uintptr_t) req;
 
 	/*
 	 * The file being polled uses multiple waitqueues for poll handling

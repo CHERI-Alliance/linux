@@ -146,12 +146,12 @@ BTRFS_SETGET_STACK_FUNCS(stack_device_generation, struct btrfs_dev_item,
 
 static inline unsigned long btrfs_device_uuid(struct btrfs_dev_item *d)
 {
-	return (unsigned long)d + offsetof(struct btrfs_dev_item, uuid);
+	return (uintptr_t)d + offsetof(struct btrfs_dev_item, uuid);
 }
 
 static inline unsigned long btrfs_device_fsid(struct btrfs_dev_item *d)
 {
-	return (unsigned long)d + offsetof(struct btrfs_dev_item, fsid);
+	return (uintptr_t)d + offsetof(struct btrfs_dev_item, fsid);
 }
 
 BTRFS_SETGET_FUNCS(chunk_length, struct btrfs_chunk, length, 64);
@@ -189,7 +189,7 @@ BTRFS_SETGET_STACK_FUNCS(stack_stripe_offset, struct btrfs_stripe, offset, 64);
 
 static inline struct btrfs_stripe *btrfs_stripe_nr(struct btrfs_chunk *c, int nr)
 {
-	unsigned long offset = (unsigned long)c;
+	uintptr_t offset = (uintptr_t)c;
 
 	offset += offsetof(struct btrfs_chunk, stripe);
 	offset += nr * sizeof(struct btrfs_stripe);

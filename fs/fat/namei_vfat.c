@@ -27,7 +27,7 @@
 
 static inline unsigned long vfat_d_version(struct dentry *dentry)
 {
-	return (unsigned long) dentry->d_fsdata;
+	return (uintptr_t) dentry->d_fsdata;
 }
 
 static inline void vfat_d_version_set(struct dentry *dentry,

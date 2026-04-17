@@ -2700,7 +2700,7 @@ int musb_host_alloc(struct musb *musb)
 	if (!musb->hcd)
 		return -EINVAL;
 
-	*musb->hcd->hcd_priv = (unsigned long) musb;
+	*musb->hcd->hcd_priv = (uintptr_t) musb;
 	musb->hcd->self.uses_pio_for_control = 1;
 	musb->hcd->uses_new_polling = 1;
 	musb->hcd->has_tt = 1;

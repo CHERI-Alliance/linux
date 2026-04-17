@@ -115,7 +115,7 @@ static struct pmcraid_chip_details pmcraid_chip_cfg[] = {
  */
 static const struct pci_device_id pmcraid_pci_table[] = {
 	{ PCI_DEVICE(PCI_VENDOR_ID_PMC, PCI_DEVICE_ID_PMC_MAXRAID),
-	  0, 0, (kernel_ulong_t)&pmcraid_chip_cfg[0]
+	  0, 0, (uintptr_t)&pmcraid_chip_cfg[0]
 	},
 	{}
 };
@@ -4431,7 +4431,7 @@ static void pmcraid_init_tasklets(struct pmcraid_instance *pinstance)
 	for (i = 0; i < pinstance->num_hrrq; i++)
 		tasklet_init(&pinstance->isr_tasklet[i],
 			     pmcraid_tasklet_function,
-			     (unsigned long)&pinstance->hrrq_vector[i]);
+			     (uintptr_t)&pinstance->hrrq_vector[i]);
 }
 
 /**

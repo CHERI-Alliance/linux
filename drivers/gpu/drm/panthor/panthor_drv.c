@@ -1366,7 +1366,7 @@ static int panthor_ioctl_bo_set_label(struct drm_device *ddev, void *data,
 		return -ENOENT;
 
 	if (args->label) {
-		label = strndup_user((const char __user *)(uintptr_t)args->label,
+		label = strndup_user((const char __user *)(user_uintptr_t)args->label,
 				     PANTHOR_BO_LABEL_MAXLEN);
 		if (IS_ERR(label)) {
 			ret = PTR_ERR(label);

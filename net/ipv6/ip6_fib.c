@@ -665,11 +665,11 @@ static int inet6_dump_fib(struct sk_buff *skb, struct netlink_callback *cb)
 			goto unlock;
 		}
 		w->func = fib6_dump_node;
-		cb->args[2] = (long)w;
+		cb->args[2] = (intptr_t)w;
 
 		/* 2. hook callback destructor.
 		 */
-		cb->args[3] = (long)cb->done;
+		cb->args[3] = (intptr_t)cb->done;
 		cb->done = fib6_dump_done;
 
 	}

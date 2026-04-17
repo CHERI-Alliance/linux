@@ -2181,7 +2181,7 @@ int ata_pci_sff_init_host(struct ata_host *host)
 		ap->ioaddr.cmd_addr = iomap[base];
 		ap->ioaddr.altstatus_addr =
 		ap->ioaddr.ctl_addr = (void __iomem *)
-			((unsigned long)iomap[base + 1] | ATA_PCI_CTL_OFS);
+			((uintptr_t)iomap[base + 1] | ATA_PCI_CTL_OFS);
 		ata_sff_std_ports(&ap->ioaddr);
 
 		ata_port_desc(ap, "cmd 0x%llx ctl 0x%llx",

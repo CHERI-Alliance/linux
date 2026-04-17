@@ -915,7 +915,7 @@ static void multi_transaction_kref(struct kref *kref)
 	struct multi_transaction *t;
 
 	t = container_of(kref, struct multi_transaction, count);
-	free_page((unsigned long) t);
+	free_page((uintptr_t) t);
 }
 
 static struct multi_transaction *

@@ -839,7 +839,7 @@ int cdc_ncm_bind_common(struct usbnet *dev, struct usb_interface *intf, u8 data_
 	spin_lock_init(&ctx->mtx);
 
 	/* store ctx pointer in device data field */
-	dev->data[0] = (unsigned long)ctx;
+	dev->data[0] = (uintptr_t)ctx;
 
 	/* only the control interface can be successfully probed */
 	ctx->control = intf;
@@ -1998,18 +1998,18 @@ static const struct driver_info wwan_noarp_info = {
 static const struct usb_device_id cdc_devs[] = {
 	/* iPhone */
 	{ USB_DEVICE_INTERFACE_NUMBER(0x05ac, 0x12a8, 2),
-		.driver_info = (unsigned long)&apple_tethering_interface_info,
+		.driver_info = (uintptr_t)&apple_tethering_interface_info,
 	},
 	{ USB_DEVICE_INTERFACE_NUMBER(0x05ac, 0x12a8, 4),
-		.driver_info = (unsigned long)&apple_private_interface_info,
+		.driver_info = (uintptr_t)&apple_private_interface_info,
 	},
 
 	/* iPad */
 	{ USB_DEVICE_INTERFACE_NUMBER(0x05ac, 0x12ab, 2),
-		.driver_info = (unsigned long)&apple_tethering_interface_info,
+		.driver_info = (uintptr_t)&apple_tethering_interface_info,
 	},
 	{ USB_DEVICE_INTERFACE_NUMBER(0x05ac, 0x12ab, 4),
-		.driver_info = (unsigned long)&apple_private_interface_info,
+		.driver_info = (uintptr_t)&apple_private_interface_info,
 	},
 
 	/* Ericsson MBM devices like F5521gw */
@@ -2019,14 +2019,14 @@ static const struct usb_device_id cdc_devs[] = {
 	  .bInterfaceClass = USB_CLASS_COMM,
 	  .bInterfaceSubClass = USB_CDC_SUBCLASS_NCM,
 	  .bInterfaceProtocol = USB_CDC_PROTO_NONE,
-	  .driver_info = (unsigned long) &wwan_info,
+	  .driver_info = (uintptr_t) &wwan_info,
 	},
 
 	/* Telit LE910 V2 */
 	{ USB_DEVICE_AND_INTERFACE_INFO(0x1bc7, 0x0036,
 		USB_CLASS_COMM,
 		USB_CDC_SUBCLASS_NCM, USB_CDC_PROTO_NONE),
-	  .driver_info = (unsigned long)&wwan_noarp_info,
+	  .driver_info = (uintptr_t)&wwan_noarp_info,
 	},
 
 	/* DW5812 LTE Verizon Mobile Broadband Card
@@ -2035,7 +2035,7 @@ static const struct usb_device_id cdc_devs[] = {
 	{ USB_DEVICE_AND_INTERFACE_INFO(0x413c, 0x81bb,
 		USB_CLASS_COMM,
 		USB_CDC_SUBCLASS_NCM, USB_CDC_PROTO_NONE),
-	  .driver_info = (unsigned long)&wwan_noarp_info,
+	  .driver_info = (uintptr_t)&wwan_noarp_info,
 	},
 
 	/* DW5813 LTE AT&T Mobile Broadband Card
@@ -2044,7 +2044,7 @@ static const struct usb_device_id cdc_devs[] = {
 	{ USB_DEVICE_AND_INTERFACE_INFO(0x413c, 0x81bc,
 		USB_CLASS_COMM,
 		USB_CDC_SUBCLASS_NCM, USB_CDC_PROTO_NONE),
-	  .driver_info = (unsigned long)&wwan_noarp_info,
+	  .driver_info = (uintptr_t)&wwan_noarp_info,
 	},
 
 	/* Dell branded MBM devices like DW5550 */
@@ -2054,7 +2054,7 @@ static const struct usb_device_id cdc_devs[] = {
 	  .bInterfaceClass = USB_CLASS_COMM,
 	  .bInterfaceSubClass = USB_CDC_SUBCLASS_NCM,
 	  .bInterfaceProtocol = USB_CDC_PROTO_NONE,
-	  .driver_info = (unsigned long) &wwan_info,
+	  .driver_info = (uintptr_t) &wwan_info,
 	},
 
 	/* Toshiba branded MBM devices */
@@ -2064,7 +2064,7 @@ static const struct usb_device_id cdc_devs[] = {
 	  .bInterfaceClass = USB_CLASS_COMM,
 	  .bInterfaceSubClass = USB_CDC_SUBCLASS_NCM,
 	  .bInterfaceProtocol = USB_CDC_PROTO_NONE,
-	  .driver_info = (unsigned long) &wwan_info,
+	  .driver_info = (uintptr_t) &wwan_info,
 	},
 
 	/* tag Huawei devices as wwan */
@@ -2072,28 +2072,28 @@ static const struct usb_device_id cdc_devs[] = {
 					USB_CLASS_COMM,
 					USB_CDC_SUBCLASS_NCM,
 					USB_CDC_PROTO_NONE),
-	  .driver_info = (unsigned long)&wwan_info,
+	  .driver_info = (uintptr_t)&wwan_info,
 	},
 
 	/* Infineon(now Intel) HSPA Modem platform */
 	{ USB_DEVICE_AND_INTERFACE_INFO(0x1519, 0x0443,
 		USB_CLASS_COMM,
 		USB_CDC_SUBCLASS_NCM, USB_CDC_PROTO_NONE),
-	  .driver_info = (unsigned long)&wwan_noarp_info,
+	  .driver_info = (uintptr_t)&wwan_noarp_info,
 	},
 
 	/* u-blox TOBY-L4 */
 	{ USB_DEVICE_AND_INTERFACE_INFO(0x1546, 0x1010,
 		USB_CLASS_COMM,
 		USB_CDC_SUBCLASS_NCM, USB_CDC_PROTO_NONE),
-	  .driver_info = (unsigned long)&wwan_info,
+	  .driver_info = (uintptr_t)&wwan_info,
 	},
 
 	/* Intel modem (label from OEM reads Fibocom L850-GL) */
 	{ USB_DEVICE_AND_INTERFACE_INFO(0x8087, 0x095a,
 		USB_CLASS_COMM,
 		USB_CDC_SUBCLASS_NCM, USB_CDC_PROTO_NONE),
-	  .driver_info = (unsigned long)&wwan_info,
+	  .driver_info = (uintptr_t)&wwan_info,
 	},
 
 	/* DisplayLink docking stations */
@@ -2103,13 +2103,13 @@ static const struct usb_device_id cdc_devs[] = {
 	  .bInterfaceClass = USB_CLASS_COMM,
 	  .bInterfaceSubClass = USB_CDC_SUBCLASS_NCM,
 	  .bInterfaceProtocol = USB_CDC_PROTO_NONE,
-	  .driver_info = (unsigned long)&cdc_ncm_zlp_info,
+	  .driver_info = (uintptr_t)&cdc_ncm_zlp_info,
 	},
 
 	/* Generic CDC-NCM devices */
 	{ USB_INTERFACE_INFO(USB_CLASS_COMM,
 		USB_CDC_SUBCLASS_NCM, USB_CDC_PROTO_NONE),
-		.driver_info = (unsigned long)&cdc_ncm_info,
+		.driver_info = (uintptr_t)&cdc_ncm_info,
 	},
 	{
 	},

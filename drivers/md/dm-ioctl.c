@@ -544,7 +544,7 @@ static inline size_t align_val(size_t val)
 }
 static inline void *align_ptr(void *ptr)
 {
-	return (void *)align_val((size_t)ptr);
+	return (void *)align_val((uintptr_t)ptr);
 }
 
 /*
@@ -2121,7 +2121,7 @@ static long dm_ctl_ioctl(struct file *file, uint command, user_uintptr_t u)
 #ifdef CONFIG_COMPAT
 static long dm_compat_ctl_ioctl(struct file *file, uint command, ulong u)
 {
-	return (long)dm_ctl_ioctl(file, command, (ulong) compat_ptr(u));
+	return (long)dm_ctl_ioctl(file, command, (user_uintptr_t) compat_ptr(u));
 }
 #else
 #define dm_compat_ctl_ioctl NULL

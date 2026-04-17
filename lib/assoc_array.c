@@ -50,7 +50,7 @@ begin_node:
 	has_meta = 0;
 	for (; slot < ASSOC_ARRAY_FAN_OUT; slot++) {
 		ptr = READ_ONCE(node->slots[slot]); /* Address dependency. */
-		has_meta |= (unsigned long)ptr;
+		has_meta |= (uintptr_t)ptr;
 		if (ptr && assoc_array_ptr_is_leaf(ptr)) {
 			/* We need a barrier between the read of the pointer,
 			 * which is supplied by the above READ_ONCE().

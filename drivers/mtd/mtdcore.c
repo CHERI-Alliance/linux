@@ -1535,7 +1535,7 @@ unsigned long mtd_get_unmapped_area(struct mtd_info *mtd, unsigned long len,
 		mtd_unpoint(mtd, offset, retlen);
 		return -ENOSYS;
 	}
-	return (unsigned long)virt;
+	return (uintptr_t)virt;
 }
 EXPORT_SYMBOL_GPL(mtd_get_unmapped_area);
 

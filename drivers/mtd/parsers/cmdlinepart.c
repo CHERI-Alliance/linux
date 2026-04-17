@@ -285,7 +285,7 @@ static int mtdpart_setup_real(char *s)
 
 		/* align this_mtd */
 		this_mtd = (struct cmdline_mtd_partition *)
-				ALIGN((unsigned long)this_mtd, sizeof(void *));
+				ALIGN((uintptr_t)this_mtd, sizeof(void *));
 		/* enter results */
 		this_mtd->parts = parts;
 		this_mtd->num_parts = num_parts;

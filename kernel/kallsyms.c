@@ -154,7 +154,7 @@ unsigned long kallsyms_sym_address(int idx)
 	/* non-relocatable 32-bit kernels just embed the value directly */
 	if (!IS_ENABLED(CONFIG_64BIT) && !IS_ENABLED(CONFIG_RELOCATABLE))
 		return (u32)kallsyms_offsets[idx];
-	return (unsigned long)offset_to_ptr(kallsyms_offsets + idx);
+	return (uintptr_t)offset_to_ptr(kallsyms_offsets + idx);
 }
 
 static unsigned int get_symbol_seq(int index)
@@ -319,11 +319,11 @@ static unsigned long get_symbol_pos(unsigned long addr,
 	/* If we found no next symbol, we use the end of the section. */
 	if (!symbol_end) {
 		if (is_kernel_inittext(addr))
-			symbol_end = (unsigned long)_einittext;
+			symbol_end = (uintptr_t)_einittext;
 		else if (IS_ENABLED(CONFIG_KALLSYMS_ALL))
-			symbol_end = (unsigned long)_end;
+			symbol_end = (uintptr_t)_end;
 		else
-			symbol_end = (unsigned long)_etext;
+			symbol_end = (uintptr_t)_etext;
 	}
 
 	if (symbolsize)

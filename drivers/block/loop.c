@@ -1696,7 +1696,7 @@ static int lo_compat_ioctl(struct block_device *bdev, blk_mode_t mode,
 	case LOOP_GET_STATUS64:
 	case LOOP_SET_STATUS64:
 	case LOOP_CONFIGURE:
-		arg = (unsigned long) compat_ptr(arg);
+		arg = (user_uintptr_t) compat_ptr(arg);
 		fallthrough;
 	case LOOP_SET_FD:
 	case LOOP_CHANGE_FD:

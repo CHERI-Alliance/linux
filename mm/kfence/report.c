@@ -298,7 +298,7 @@ static void kfence_to_kp_stack(const struct kfence_track *track, void **kp_stack
 
 bool __kfence_obj_info(struct kmem_obj_info *kpp, void *object, struct slab *slab)
 {
-	struct kfence_metadata *meta = addr_to_metadata((unsigned long)object);
+	struct kfence_metadata *meta = addr_to_metadata((uintptr_t)object);
 	unsigned long flags;
 
 	if (!meta)

@@ -692,7 +692,7 @@ static int cn10k_ipsec_outb_add_state(struct net_device *dev,
 		return err;
 	}
 
-	x->xso.offload_handle = (unsigned long)sa_info;
+	x->xso.offload_handle = (uintptr_t)sa_info;
 	/* Enable static branch when first SA setup */
 	if (!pf->ipsec.outb_sa_count)
 		static_branch_enable(&cn10k_ipsec_sa_enabled);
@@ -913,7 +913,7 @@ bool otx2_sqe_add_sg_ipsec(struct otx2_nic *pfvf, struct otx2_snd_queue *sq,
 		cpt_sg->rsvd_63_50 = 0;
 	}
 
-	sq->sg[sq->head].skb = (u64)skb;
+	sq->sg[sq->head].skb = (uintptr_t)skb;
 	return true;
 }
 

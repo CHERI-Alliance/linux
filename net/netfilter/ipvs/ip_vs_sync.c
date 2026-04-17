@@ -405,7 +405,7 @@ get_curr_sync_buff(struct netns_ipvs *ipvs, struct ipvs_master_sync_state *ms,
 static inline int
 select_master_thread_id(struct netns_ipvs *ipvs, struct ip_vs_conn *cp)
 {
-	return ((long) cp >> (1 + ilog2(sizeof(*cp)))) & ipvs->threads_mask;
+	return ((intptr_t) cp >> (1 + ilog2(sizeof(*cp)))) & ipvs->threads_mask;
 }
 
 /*

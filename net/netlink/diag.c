@@ -111,7 +111,7 @@ static int __netlink_diag_dump(struct sk_buff *skb, struct netlink_callback *cb,
 		if (!hti)
 			return -ENOMEM;
 
-		cb->args[2] = (long)hti;
+		cb->args[2] = (intptr_t)hti;
 	}
 
 	if (!s_num)

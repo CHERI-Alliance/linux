@@ -103,7 +103,7 @@ static inline bool netfs_is_folio_info(const void *priv)
 static inline struct netfs_folio *__netfs_folio_info(const void *priv)
 {
 	if (netfs_is_folio_info(priv))
-		return (struct netfs_folio *)((unsigned long)priv & ~NETFS_FOLIO_INFO);
+		return (struct netfs_folio *)((uintptr_t)priv & ~NETFS_FOLIO_INFO);
 	return NULL;
 }
 

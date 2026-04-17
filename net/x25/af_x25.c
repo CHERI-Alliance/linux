@@ -1684,7 +1684,7 @@ static int compat_x25_ioctl(struct socket *sock, unsigned int cmd,
 	switch(cmd) {
 	case TIOCOUTQ:
 	case TIOCINQ:
-		rc = x25_ioctl(sock, cmd, (unsigned long)argp);
+		rc = x25_ioctl(sock, cmd, (user_uintptr_t)argp);
 		break;
 	case SIOCGIFADDR:
 	case SIOCSIFADDR:
@@ -1725,7 +1725,7 @@ static int compat_x25_ioctl(struct socket *sock, unsigned int cmd,
 	case SIOCX25SCUDMATCHLEN:
 	case SIOCX25CALLACCPTAPPRV:
 	case SIOCX25SENDCALLACCPT:
-		rc = x25_ioctl(sock, cmd, (unsigned long)argp);
+		rc = x25_ioctl(sock, cmd, (user_uintptr_t)argp);
 		break;
 	default:
 		rc = -ENOIOCTLCMD;

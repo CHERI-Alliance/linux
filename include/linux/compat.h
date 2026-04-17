@@ -1128,7 +1128,7 @@ static inline void __user *compat_ptr(compat_uptr_t uptr)
 
 static inline compat_uptr_t ptr_to_compat(void __user *uptr)
 {
-	return (u32)(unsigned long)uptr;
+	return (u32)(user_uintptr_t)uptr;
 }
 
 static __always_inline __maybe_unused unsigned long

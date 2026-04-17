@@ -2532,7 +2532,7 @@ static int stm32_spi_probe(struct platform_device *pdev)
 					goto err_pool_free;
 				} else {
 					gen_pool_free(spi->sram_pool,
-						      (unsigned long)spi->sram_rx_buf,
+						      (uintptr_t)spi->sram_rx_buf,
 						      spi->sram_rx_buf_size);
 					dev_warn(&pdev->dev,
 						 "failed to request rx mdma channel, DMA only\n");
@@ -2572,7 +2572,7 @@ err_pm_disable:
 		dma_release_channel(spi->mdma_rx);
 err_pool_free:
 	if (spi->sram_pool)
-		gen_pool_free(spi->sram_pool, (unsigned long)spi->sram_rx_buf,
+		gen_pool_free(spi->sram_pool, (uintptr_t)spi->sram_rx_buf,
 			      spi->sram_rx_buf_size);
 err_dma_release:
 	if (spi->dma_tx)
@@ -2607,7 +2607,7 @@ static void stm32_spi_remove(struct platform_device *pdev)
 	if (spi->mdma_rx)
 		dma_release_channel(spi->mdma_rx);
 	if (spi->sram_rx_buf)
-		gen_pool_free(spi->sram_pool, (unsigned long)spi->sram_rx_buf,
+		gen_pool_free(spi->sram_pool, (uintptr_t)spi->sram_rx_buf,
 			      spi->sram_rx_buf_size);
 
 	clk_disable_unprepare(spi->clk);

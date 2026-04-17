@@ -732,7 +732,7 @@ exit:
 		if (!allow_spin)
 			free_pages_nolock(virt_to_page(prealloc), DEPOT_POOL_ORDER);
 		else
-			free_pages((unsigned long)prealloc, DEPOT_POOL_ORDER);
+			free_pages((uintptr_t)prealloc, DEPOT_POOL_ORDER);
 	}
 	if (found)
 		handle = found->handle.handle;

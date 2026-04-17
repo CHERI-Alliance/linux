@@ -21,7 +21,7 @@ static void pf_set_admin_mode(struct xe_device *xe, bool enable)
 
 static const void *num_vfs_gen_param(struct kunit *test, const void *prev, char *desc)
 {
-	unsigned long next = 1 + (unsigned long)prev;
+	unsigned long next = 1 + (uintptr_t)prev;
 
 	if (next > TEST_MAX_VFS)
 		return NULL;

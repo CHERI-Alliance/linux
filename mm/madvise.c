@@ -2058,7 +2058,7 @@ static ssize_t vector_madvise(struct mm_struct *mm, struct iov_iter *iter,
 	madvise_init_tlb(&madv_behavior);
 
 	while (iov_iter_count(iter)) {
-		unsigned long start = (unsigned long)iter_iov_addr(iter);
+		user_uintptr_t start = (user_uintptr_t)iter_iov_addr(iter);
 		size_t len_in = iter_iov_len(iter);
 		int error;
 

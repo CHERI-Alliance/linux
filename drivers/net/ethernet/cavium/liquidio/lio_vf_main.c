@@ -1053,7 +1053,7 @@ static void liquidio_set_uc_list(struct net_device *netdev)
 	nctrl.ncmd.s.more = lio->netdev_uc_count;
 	nctrl.ncmd.s.param1 = oct->vf_num;
 	nctrl.iq_no = lio->linfo.txpciq[0].s.q_no;
-	nctrl.netpndev = (u64)netdev;
+	nctrl.netpndev = (uintptr_t)netdev;
 	nctrl.cb_fn = liquidio_link_ctrl_cmd_completion;
 
 	/* copy all the addresses into the udd */
@@ -1088,7 +1088,7 @@ static void liquidio_set_mcast_list(struct net_device *netdev)
 	nctrl.ncmd.s.param1 = get_new_flags(netdev);
 	nctrl.ncmd.s.param2 = mc_count;
 	nctrl.ncmd.s.more = mc_count;
-	nctrl.netpndev = (u64)netdev;
+	nctrl.netpndev = (uintptr_t)netdev;
 	nctrl.cb_fn = liquidio_link_ctrl_cmd_completion;
 
 	/* copy all the addresses into the udd */
@@ -1145,7 +1145,7 @@ static int liquidio_set_mac(struct net_device *netdev, void *p)
 	nctrl.ncmd.s.param1 = 0;
 	nctrl.ncmd.s.more = 1;
 	nctrl.iq_no = lio->linfo.txpciq[0].s.q_no;
-	nctrl.netpndev = (u64)netdev;
+	nctrl.netpndev = (uintptr_t)netdev;
 
 	nctrl.udd[0] = 0;
 	/* The MAC Address is presented in network byte order. */
@@ -1650,7 +1650,7 @@ liquidio_vlan_rx_add_vid(struct net_device *netdev,
 	nctrl.ncmd.s.cmd = OCTNET_CMD_ADD_VLAN_FILTER;
 	nctrl.ncmd.s.param1 = vid;
 	nctrl.iq_no = lio->linfo.txpciq[0].s.q_no;
-	nctrl.netpndev = (u64)netdev;
+	nctrl.netpndev = (uintptr_t)netdev;
 	nctrl.cb_fn = liquidio_link_ctrl_cmd_completion;
 
 	ret = octnet_send_nic_ctrl_pkt(lio->oct_dev, &nctrl);
@@ -1678,7 +1678,7 @@ liquidio_vlan_rx_kill_vid(struct net_device *netdev,
 	nctrl.ncmd.s.cmd = OCTNET_CMD_DEL_VLAN_FILTER;
 	nctrl.ncmd.s.param1 = vid;
 	nctrl.iq_no = lio->linfo.txpciq[0].s.q_no;
-	nctrl.netpndev = (u64)netdev;
+	nctrl.netpndev = (uintptr_t)netdev;
 	nctrl.cb_fn = liquidio_link_ctrl_cmd_completion;
 
 	ret = octnet_send_nic_ctrl_pkt(lio->oct_dev, &nctrl);
@@ -1712,7 +1712,7 @@ static int liquidio_set_rxcsum_command(struct net_device *netdev, int command,
 	nctrl.ncmd.s.cmd = command;
 	nctrl.ncmd.s.param1 = rx_cmd;
 	nctrl.iq_no = lio->linfo.txpciq[0].s.q_no;
-	nctrl.netpndev = (u64)netdev;
+	nctrl.netpndev = (uintptr_t)netdev;
 	nctrl.cb_fn = liquidio_link_ctrl_cmd_completion;
 
 	ret = octnet_send_nic_ctrl_pkt(lio->oct_dev, &nctrl);
@@ -1748,7 +1748,7 @@ static int liquidio_vxlan_port_command(struct net_device *netdev, int command,
 	nctrl.ncmd.s.more = vxlan_cmd_bit;
 	nctrl.ncmd.s.param1 = vxlan_port;
 	nctrl.iq_no = lio->linfo.txpciq[0].s.q_no;
-	nctrl.netpndev = (u64)netdev;
+	nctrl.netpndev = (uintptr_t)netdev;
 	nctrl.cb_fn = liquidio_link_ctrl_cmd_completion;
 
 	ret = octnet_send_nic_ctrl_pkt(lio->oct_dev, &nctrl);

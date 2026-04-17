@@ -114,7 +114,7 @@ static int rxrpc_preparse_xdr_rxkad(struct key_preparsed_payload *prep,
 		       token->kad->ticket[6], token->kad->ticket[7]);
 
 	/* count the number of tokens attached */
-	prep->payload.data[1] = (void *)((unsigned long)prep->payload.data[1] + 1);
+	prep->payload.data[1] = (void *)((uintptr_t)prep->payload.data[1] + 1);
 
 	/* attach the data */
 	for (pptoken = (struct rxrpc_key_token **)&prep->payload.data[0];
@@ -259,7 +259,7 @@ static int rxrpc_preparse_xdr_yfs_rxgk(struct key_preparsed_payload *prep,
 	       min_t(u32, token->rxgk->ticket.len, 32), token->rxgk->ticket.data);
 
 	/* count the number of tokens attached */
-	prep->payload.data[1] = (void *)((unsigned long)prep->payload.data[1] + 1);
+	prep->payload.data[1] = (void *)((uintptr_t)prep->payload.data[1] + 1);
 
 	/* attach the data */
 	for (pptoken = (struct rxrpc_key_token **)&prep->payload.data[0];
@@ -521,7 +521,7 @@ static int rxrpc_preparse(struct key_preparsed_payload *prep)
 	memcpy(&token->kad->ticket, v1->ticket, v1->ticket_length);
 
 	/* count the number of tokens attached */
-	prep->payload.data[1] = (void *)((unsigned long)prep->payload.data[1] + 1);
+	prep->payload.data[1] = (void *)((uintptr_t)prep->payload.data[1] + 1);
 
 	/* attach the data */
 	pp = (struct rxrpc_key_token **)&prep->payload.data[0];

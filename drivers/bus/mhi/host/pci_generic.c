@@ -905,129 +905,129 @@ static const struct mhi_pci_dev_info mhi_netprisma_fcun69_info = {
 /* Keep the list sorted based on the PID. New VID should be added as the last entry */
 static const struct pci_device_id mhi_pci_id_table[] = {
 	{PCI_DEVICE(PCI_VENDOR_ID_QCOM, 0x0116),
-		.driver_data = (kernel_ulong_t) &mhi_qcom_sa8775p_info },
+		.driver_data = (uintptr_t) &mhi_qcom_sa8775p_info },
 	/* Telit FN920C04 (sdx35) */
 	{PCI_DEVICE_SUB(PCI_VENDOR_ID_QCOM, 0x011a, 0x1c5d, 0x2020),
-		.driver_data = (kernel_ulong_t) &mhi_telit_fn920c04_info },
+		.driver_data = (uintptr_t) &mhi_telit_fn920c04_info },
 	{ PCI_DEVICE(PCI_VENDOR_ID_QCOM, 0x0304),
-		.driver_data = (kernel_ulong_t) &mhi_qcom_sdx24_info },
+		.driver_data = (uintptr_t) &mhi_qcom_sdx24_info },
 	{ PCI_DEVICE_SUB(PCI_VENDOR_ID_QCOM, 0x0306, PCI_VENDOR_ID_QCOM, 0x010c),
-		.driver_data = (kernel_ulong_t) &mhi_foxconn_sdx55_info },
+		.driver_data = (uintptr_t) &mhi_foxconn_sdx55_info },
 	/* EM919x (sdx55), use the same vid:pid as qcom-sdx55m */
 	{ PCI_DEVICE_SUB(PCI_VENDOR_ID_QCOM, 0x0306, 0x18d7, 0x0200),
-		.driver_data = (kernel_ulong_t) &mhi_sierra_em919x_info },
+		.driver_data = (uintptr_t) &mhi_sierra_em919x_info },
 	/* EM929x (sdx65), use the same configuration as EM919x */
 	{ PCI_DEVICE_SUB(PCI_VENDOR_ID_QCOM, 0x0308, 0x18d7, 0x0301),
-		.driver_data = (kernel_ulong_t) &mhi_sierra_em919x_info },
+		.driver_data = (uintptr_t) &mhi_sierra_em919x_info },
 	/* Telit FN980 hardware revision v1 */
 	{ PCI_DEVICE_SUB(PCI_VENDOR_ID_QCOM, 0x0306, 0x1C5D, 0x2000),
-		.driver_data = (kernel_ulong_t) &mhi_telit_fn980_hw_v1_info },
+		.driver_data = (uintptr_t) &mhi_telit_fn980_hw_v1_info },
 	{ PCI_DEVICE(PCI_VENDOR_ID_QCOM, 0x0306),
-		.driver_data = (kernel_ulong_t) &mhi_qcom_sdx55_info },
+		.driver_data = (uintptr_t) &mhi_qcom_sdx55_info },
 	/* Telit FN990 */
 	{ PCI_DEVICE_SUB(PCI_VENDOR_ID_QCOM, 0x0308, 0x1c5d, 0x2010),
-		.driver_data = (kernel_ulong_t) &mhi_telit_fn990_info },
+		.driver_data = (uintptr_t) &mhi_telit_fn990_info },
 	/* Telit FE990A */
 	{ PCI_DEVICE_SUB(PCI_VENDOR_ID_QCOM, 0x0308, 0x1c5d, 0x2015),
-		.driver_data = (kernel_ulong_t) &mhi_telit_fe990a_info },
+		.driver_data = (uintptr_t) &mhi_telit_fe990a_info },
 	/* Foxconn T99W696, all variants */
 	{ PCI_DEVICE_SUB(PCI_VENDOR_ID_QCOM, 0x0308, PCI_VENDOR_ID_FOXCONN, PCI_ANY_ID),
-		.driver_data = (kernel_ulong_t) &mhi_foxconn_t99w696_info },
+		.driver_data = (uintptr_t) &mhi_foxconn_t99w696_info },
 	{ PCI_DEVICE(PCI_VENDOR_ID_QCOM, 0x0308),
-		.driver_data = (kernel_ulong_t) &mhi_qcom_sdx65_info },
+		.driver_data = (uintptr_t) &mhi_qcom_sdx65_info },
 	/* Telit FN990B40 (sdx72) */
 	{ PCI_DEVICE_SUB(PCI_VENDOR_ID_QCOM, 0x0309, 0x1c5d, 0x201a),
-		.driver_data = (kernel_ulong_t) &mhi_telit_fn990b40_info },
+		.driver_data = (uintptr_t) &mhi_telit_fn990b40_info },
 	/* Telit FE990B40 (sdx72) */
 	{ PCI_DEVICE_SUB(PCI_VENDOR_ID_QCOM, 0x0309, 0x1c5d, 0x2025),
-		.driver_data = (kernel_ulong_t) &mhi_telit_fe990b40_info },
+		.driver_data = (uintptr_t) &mhi_telit_fe990b40_info },
 	{ PCI_DEVICE(PCI_VENDOR_ID_QCOM, 0x0309),
-		.driver_data = (kernel_ulong_t) &mhi_qcom_sdx75_info },
+		.driver_data = (uintptr_t) &mhi_qcom_sdx75_info },
 	/* QDU100, x100-DU */
 	{ PCI_DEVICE(PCI_VENDOR_ID_QCOM, 0x0601),
-		.driver_data = (kernel_ulong_t) &mhi_qcom_qdu100_info },
+		.driver_data = (uintptr_t) &mhi_qcom_qdu100_info },
 	{ PCI_DEVICE(PCI_VENDOR_ID_QUECTEL, 0x1001), /* EM120R-GL (sdx24) */
-		.driver_data = (kernel_ulong_t) &mhi_quectel_em1xx_info },
+		.driver_data = (uintptr_t) &mhi_quectel_em1xx_info },
 	{ PCI_DEVICE(PCI_VENDOR_ID_QUECTEL, 0x1002), /* EM160R-GL (sdx24) */
-		.driver_data = (kernel_ulong_t) &mhi_quectel_em1xx_info },
+		.driver_data = (uintptr_t) &mhi_quectel_em1xx_info },
 	/* RM520N-GL (sdx6x), eSIM */
 	{ PCI_DEVICE(PCI_VENDOR_ID_QUECTEL, 0x1004),
-		.driver_data = (kernel_ulong_t) &mhi_quectel_rm5xx_info },
+		.driver_data = (uintptr_t) &mhi_quectel_rm5xx_info },
 	/* RM520N-GL (sdx6x), Lenovo variant */
 	{ PCI_DEVICE(PCI_VENDOR_ID_QUECTEL, 0x1007),
-		.driver_data = (kernel_ulong_t) &mhi_quectel_rm5xx_info },
+		.driver_data = (uintptr_t) &mhi_quectel_rm5xx_info },
 	{ PCI_DEVICE(PCI_VENDOR_ID_QUECTEL, 0x100d), /* EM160R-GL (sdx24) */
-		.driver_data = (kernel_ulong_t) &mhi_quectel_em1xx_info },
+		.driver_data = (uintptr_t) &mhi_quectel_em1xx_info },
 	{ PCI_DEVICE(PCI_VENDOR_ID_QUECTEL, 0x2001), /* EM120R-GL for FCCL (sdx24) */
-		.driver_data = (kernel_ulong_t) &mhi_quectel_em1xx_info },
+		.driver_data = (uintptr_t) &mhi_quectel_em1xx_info },
 	/* T99W175 (sdx55), Both for eSIM and Non-eSIM */
 	{ PCI_DEVICE(PCI_VENDOR_ID_FOXCONN, 0xe0ab),
-		.driver_data = (kernel_ulong_t) &mhi_foxconn_t99w175_info },
+		.driver_data = (uintptr_t) &mhi_foxconn_t99w175_info },
 	/* DW5930e (sdx55), With eSIM, It's also T99W175 */
 	{ PCI_DEVICE(PCI_VENDOR_ID_FOXCONN, 0xe0b0),
-		.driver_data = (kernel_ulong_t) &mhi_foxconn_dw5930e_info },
+		.driver_data = (uintptr_t) &mhi_foxconn_dw5930e_info },
 	/* DW5930e (sdx55), Non-eSIM, It's also T99W175 */
 	{ PCI_DEVICE(PCI_VENDOR_ID_FOXCONN, 0xe0b1),
-		.driver_data = (kernel_ulong_t) &mhi_foxconn_dw5930e_info },
+		.driver_data = (uintptr_t) &mhi_foxconn_dw5930e_info },
 	/* T99W175 (sdx55), Based on Qualcomm new baseline */
 	{ PCI_DEVICE(PCI_VENDOR_ID_FOXCONN, 0xe0bf),
-		.driver_data = (kernel_ulong_t) &mhi_foxconn_t99w175_info },
+		.driver_data = (uintptr_t) &mhi_foxconn_t99w175_info },
 	/* T99W175 (sdx55) */
 	{ PCI_DEVICE(PCI_VENDOR_ID_FOXCONN, 0xe0c3),
-		.driver_data = (kernel_ulong_t) &mhi_foxconn_t99w175_info },
+		.driver_data = (uintptr_t) &mhi_foxconn_t99w175_info },
 	/* T99W368 (sdx65) */
 	{ PCI_DEVICE(PCI_VENDOR_ID_FOXCONN, 0xe0d8),
-		.driver_data = (kernel_ulong_t) &mhi_foxconn_t99w368_info },
+		.driver_data = (uintptr_t) &mhi_foxconn_t99w368_info },
 	/* T99W373 (sdx62) */
 	{ PCI_DEVICE(PCI_VENDOR_ID_FOXCONN, 0xe0d9),
-		.driver_data = (kernel_ulong_t) &mhi_foxconn_t99w373_info },
+		.driver_data = (uintptr_t) &mhi_foxconn_t99w373_info },
 	/* T99W510 (sdx24), variant 1 */
 	{ PCI_DEVICE(PCI_VENDOR_ID_FOXCONN, 0xe0f0),
-		.driver_data = (kernel_ulong_t) &mhi_foxconn_t99w510_info },
+		.driver_data = (uintptr_t) &mhi_foxconn_t99w510_info },
 	/* T99W510 (sdx24), variant 2 */
 	{ PCI_DEVICE(PCI_VENDOR_ID_FOXCONN, 0xe0f1),
-		.driver_data = (kernel_ulong_t) &mhi_foxconn_t99w510_info },
+		.driver_data = (uintptr_t) &mhi_foxconn_t99w510_info },
 	/* T99W510 (sdx24), variant 3 */
 	{ PCI_DEVICE(PCI_VENDOR_ID_FOXCONN, 0xe0f2),
-		.driver_data = (kernel_ulong_t) &mhi_foxconn_t99w510_info },
+		.driver_data = (uintptr_t) &mhi_foxconn_t99w510_info },
 	/* DW5932e-eSIM (sdx62), With eSIM */
 	{ PCI_DEVICE(PCI_VENDOR_ID_FOXCONN, 0xe0f5),
-		.driver_data = (kernel_ulong_t) &mhi_foxconn_dw5932e_info },
+		.driver_data = (uintptr_t) &mhi_foxconn_dw5932e_info },
 	/* DW5932e (sdx62), Non-eSIM */
 	{ PCI_DEVICE(PCI_VENDOR_ID_FOXCONN, 0xe0f9),
-		.driver_data = (kernel_ulong_t) &mhi_foxconn_dw5932e_info },
+		.driver_data = (uintptr_t) &mhi_foxconn_dw5932e_info },
 	/* T99W640 (sdx72) */
 	{ PCI_DEVICE(PCI_VENDOR_ID_FOXCONN, 0xe118),
-		.driver_data = (kernel_ulong_t) &mhi_foxconn_t99w640_info },
+		.driver_data = (uintptr_t) &mhi_foxconn_t99w640_info },
 	/* DW5934e(sdx72), With eSIM */
 	{ PCI_DEVICE(PCI_VENDOR_ID_FOXCONN, 0xe11d),
-		.driver_data = (kernel_ulong_t) &mhi_foxconn_dw5934e_info },
+		.driver_data = (uintptr_t) &mhi_foxconn_dw5934e_info },
 	/* DW5934e(sdx72), Non-eSIM */
 	{ PCI_DEVICE(PCI_VENDOR_ID_FOXCONN, 0xe11e),
-		.driver_data = (kernel_ulong_t) &mhi_foxconn_dw5934e_info },
+		.driver_data = (uintptr_t) &mhi_foxconn_dw5934e_info },
 	{ PCI_DEVICE(PCI_VENDOR_ID_FOXCONN, 0xe123),
-		.driver_data = (kernel_ulong_t) &mhi_foxconn_t99w760_info },
+		.driver_data = (uintptr_t) &mhi_foxconn_t99w760_info },
 	/* MV31-W (Cinterion) */
 	{ PCI_DEVICE(PCI_VENDOR_ID_THALES, 0x00b3),
-		.driver_data = (kernel_ulong_t) &mhi_mv31_info },
+		.driver_data = (uintptr_t) &mhi_mv31_info },
 	/* MV31-W (Cinterion), based on new baseline */
 	{ PCI_DEVICE(PCI_VENDOR_ID_THALES, 0x00b4),
-		.driver_data = (kernel_ulong_t) &mhi_mv31_info },
+		.driver_data = (uintptr_t) &mhi_mv31_info },
 	/* MV32-WA (Cinterion) */
 	{ PCI_DEVICE(PCI_VENDOR_ID_THALES, 0x00ba),
-		.driver_data = (kernel_ulong_t) &mhi_mv32_info },
+		.driver_data = (uintptr_t) &mhi_mv32_info },
 	/* MV32-WB (Cinterion) */
 	{ PCI_DEVICE(PCI_VENDOR_ID_THALES, 0x00bb),
-		.driver_data = (kernel_ulong_t) &mhi_mv32_info },
+		.driver_data = (uintptr_t) &mhi_mv32_info },
 	/* T99W175 (sdx55), HP variant */
 	{ PCI_DEVICE(0x03f0, 0x0a6c),
-		.driver_data = (kernel_ulong_t) &mhi_foxconn_t99w175_info },
+		.driver_data = (uintptr_t) &mhi_foxconn_t99w175_info },
 	/* NETPRISMA LCUR57 (SDX24) */
 	{ PCI_DEVICE(PCI_VENDOR_ID_NETPRISMA, 0x1000),
-		.driver_data = (kernel_ulong_t) &mhi_netprisma_lcur57_info },
+		.driver_data = (uintptr_t) &mhi_netprisma_lcur57_info },
 	/* NETPRISMA FCUN69 (SDX6X) */
 	{ PCI_DEVICE(PCI_VENDOR_ID_NETPRISMA, 0x1001),
-		.driver_data = (kernel_ulong_t) &mhi_netprisma_fcun69_info },
+		.driver_data = (uintptr_t) &mhi_netprisma_fcun69_info },
 	{  }
 };
 MODULE_DEVICE_TABLE(pci, mhi_pci_id_table);

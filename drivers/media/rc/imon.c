@@ -375,7 +375,7 @@ static const struct usb_device_id imon_usb_id_table[] = {
 	 * SoundGraph iMON Knob (IR only)
 	 */
 	{ USB_DEVICE(0x15c2, 0xffdc),
-	  .driver_info = (unsigned long)&imon_default_table },
+	  .driver_info = (uintptr_t)&imon_default_table },
 
 	/*
 	 * Newer devices, all driven by the latest iMON Windows driver, full
@@ -384,61 +384,61 @@ static const struct usb_device_id imon_usb_id_table[] = {
 	 */
 	/* SoundGraph iMON OEM Touch LCD (IR & 7" VGA LCD) */
 	{ USB_DEVICE(0x15c2, 0x0034),
-	  .driver_info = (unsigned long)&imon_DH102 },
+	  .driver_info = (uintptr_t)&imon_DH102 },
 	/* SoundGraph iMON OEM Touch LCD (IR & 4.3" VGA LCD) */
 	{ USB_DEVICE(0x15c2, 0x0035),
-	  .driver_info = (unsigned long)&imon_default_table},
+	  .driver_info = (uintptr_t)&imon_default_table},
 	/* SoundGraph iMON OEM VFD (IR & VFD) */
 	{ USB_DEVICE(0x15c2, 0x0036),
-	  .driver_info = (unsigned long)&imon_OEM_VFD },
+	  .driver_info = (uintptr_t)&imon_OEM_VFD },
 	/* device specifics unknown */
 	{ USB_DEVICE(0x15c2, 0x0037),
-	  .driver_info = (unsigned long)&imon_default_table},
+	  .driver_info = (uintptr_t)&imon_default_table},
 	/* SoundGraph iMON OEM LCD (IR & LCD) */
 	{ USB_DEVICE(0x15c2, 0x0038),
-	  .driver_info = (unsigned long)&imon_default_table},
+	  .driver_info = (uintptr_t)&imon_default_table},
 	/* SoundGraph iMON UltraBay (IR & LCD) */
 	{ USB_DEVICE(0x15c2, 0x0039),
-	  .driver_info = (unsigned long)&imon_default_table},
+	  .driver_info = (uintptr_t)&imon_default_table},
 	/* device specifics unknown */
 	{ USB_DEVICE(0x15c2, 0x003a),
-	  .driver_info = (unsigned long)&imon_default_table},
+	  .driver_info = (uintptr_t)&imon_default_table},
 	/* device specifics unknown */
 	{ USB_DEVICE(0x15c2, 0x003b),
-	  .driver_info = (unsigned long)&imon_default_table},
+	  .driver_info = (uintptr_t)&imon_default_table},
 	/* SoundGraph iMON OEM Inside (IR only) */
 	{ USB_DEVICE(0x15c2, 0x003c),
-	  .driver_info = (unsigned long)&imon_default_table},
+	  .driver_info = (uintptr_t)&imon_default_table},
 	/* device specifics unknown */
 	{ USB_DEVICE(0x15c2, 0x003d),
-	  .driver_info = (unsigned long)&imon_default_table},
+	  .driver_info = (uintptr_t)&imon_default_table},
 	/* device specifics unknown */
 	{ USB_DEVICE(0x15c2, 0x003e),
-	  .driver_info = (unsigned long)&imon_default_table},
+	  .driver_info = (uintptr_t)&imon_default_table},
 	/* device specifics unknown */
 	{ USB_DEVICE(0x15c2, 0x003f),
-	  .driver_info = (unsigned long)&imon_default_table},
+	  .driver_info = (uintptr_t)&imon_default_table},
 	/* device specifics unknown */
 	{ USB_DEVICE(0x15c2, 0x0040),
-	  .driver_info = (unsigned long)&imon_default_table},
+	  .driver_info = (uintptr_t)&imon_default_table},
 	/* SoundGraph iMON MINI (IR only) */
 	{ USB_DEVICE(0x15c2, 0x0041),
-	  .driver_info = (unsigned long)&imon_default_table},
+	  .driver_info = (uintptr_t)&imon_default_table},
 	/* Antec Veris Multimedia Station EZ External (IR only) */
 	{ USB_DEVICE(0x15c2, 0x0042),
-	  .driver_info = (unsigned long)&imon_default_table},
+	  .driver_info = (uintptr_t)&imon_default_table},
 	/* Antec Veris Multimedia Station Basic Internal (IR only) */
 	{ USB_DEVICE(0x15c2, 0x0043),
-	  .driver_info = (unsigned long)&imon_default_table},
+	  .driver_info = (uintptr_t)&imon_default_table},
 	/* Antec Veris Multimedia Station Elite (IR & VFD) */
 	{ USB_DEVICE(0x15c2, 0x0044),
-	  .driver_info = (unsigned long)&imon_default_table},
+	  .driver_info = (uintptr_t)&imon_default_table},
 	/* Antec Veris Multimedia Station Premiere (IR & LCD) */
 	{ USB_DEVICE(0x15c2, 0x0045),
-	  .driver_info = (unsigned long)&imon_default_table},
+	  .driver_info = (uintptr_t)&imon_default_table},
 	/* device specifics unknown */
 	{ USB_DEVICE(0x15c2, 0x0046),
-	  .driver_info = (unsigned long)&imon_default_table},
+	  .driver_info = (uintptr_t)&imon_default_table},
 	{}
 };
 

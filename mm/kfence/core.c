@@ -258,7 +258,7 @@ static inline unsigned long metadata_to_pageaddr(const struct kfence_metadata *m
 	__must_hold(&meta->lock)
 {
 	unsigned long offset = (meta - kfence_metadata + 1) * PAGE_SIZE * 2;
-	unsigned long pageaddr = (unsigned long)&__kfence_pool[offset];
+	uintptr_t pageaddr = (uintptr_t)&__kfence_pool[offset];
 
 	/* The checks do not affect performance; only called from slow-paths. */
 
@@ -343,9 +343,9 @@ static check_canary_attributes bool check_canary_byte(u8 *addr)
 
 	atomic_long_inc(&counters[KFENCE_COUNTER_BUGS]);
 
-	meta = addr_to_metadata((unsigned long)addr);
+	meta = addr_to_metadata((uintptr_t)addr);
 	raw_spin_lock_irqsave(&meta->lock, flags);
-	kfence_report_error((unsigned long)addr, false, NULL, meta, KFENCE_ERROR_CORRUPTION);
+	kfence_report_error((uintptr_t)addr, false, NULL, meta, KFENCE_ERROR_CORRUPTION);
 	raw_spin_unlock_irqrestore(&meta->lock, flags);
 
 	return false;
@@ -527,19 +527,19 @@ static void kfence_guarded_free(void *addr, struct kfence_metadata *meta, bool z
 	if (!kfence_obj_allocated(meta) || meta->addr != (unsigned long)addr) {
 		/* Invalid or double-free, bail out. */
 		atomic_long_inc(&counters[KFENCE_COUNTER_BUGS]);
-		kfence_report_error((unsigned long)addr, false, NULL, meta,
+		kfence_report_error((uintptr_t)addr, false, NULL, meta,
 				    KFENCE_ERROR_INVALID_FREE);
 		raw_spin_unlock_irqrestore(&meta->lock, flags);
 		return;
 	}
 
 	/* Detect racy use-after-free, or incorrect reallocation of this page by KFENCE. */
-	kcsan_begin_scoped_access((void *)ALIGN_DOWN((unsigned long)addr, PAGE_SIZE), PAGE_SIZE,
+	kcsan_begin_scoped_access((void *)ALIGN_DOWN((uintptr_t)addr, PAGE_SIZE), PAGE_SIZE,
 				  KCSAN_ACCESS_SCOPED | KCSAN_ACCESS_WRITE | KCSAN_ACCESS_ASSERT,
 				  &assert_page_exclusive);
 
 	if (CONFIG_KFENCE_STRESS_TEST_FAULTS)
-		kfence_unprotect((unsigned long)addr); /* To check canary bytes. */
+		kfence_unprotect((uintptr_t)addr); /* To check canary bytes. */
 
 	/* Restore page protection if there was an OOB access. */
 	if (meta->unprotected_page) {
@@ -568,7 +568,7 @@ static void kfence_guarded_free(void *addr, struct kfence_metadata *meta, bool z
 		memzero_explicit(addr, meta->size);
 
 	/* Protect to detect use-after-frees. */
-	kfence_protect((unsigned long)addr);
+	kfence_protect((uintptr_t)addr);
 
 	kcsan_end_scoped_access(&assert_page_exclusive);
 	if (!zombie) {
@@ -605,9 +605,9 @@ static unsigned long kfence_init_pool(void)
 	int i, rand;
 
 	if (!arch_kfence_init_pool())
-		return (unsigned long)__kfence_pool;
+		return (uintptr_t)__kfence_pool;
 
-	addr = (unsigned long)__kfence_pool;
+	addr = (uintptr_t)__kfence_pool;
 	start_pfn = PHYS_PFN(virt_to_phys(__kfence_pool));
 
 	/*
@@ -628,7 +628,7 @@ static unsigned long kfence_init_pool(void)
 		__SetPageSlab(page);
 #ifdef CONFIG_MEMCG
 		struct slab *slab = page_slab(page);
-		slab->obj_exts = (unsigned long)&kfence_metadata_init[i / 2 - 1].obj_exts |
+		slab->obj_exts = (uintptr_t)&kfence_metadata_init[i / 2 - 1].obj_exts |
 				 MEMCG_DATA_OBJEXTS;
 #endif
 	}
@@ -780,7 +780,7 @@ static void *next_object(struct seq_file *seq, void *v, loff_t *pos)
 
 static int show_object(struct seq_file *seq, void *v)
 {
-	struct kfence_metadata *meta = &kfence_metadata[(long)v - 1];
+	struct kfence_metadata *meta = &kfence_metadata[(intptr_t)v - 1];
 	unsigned long flags;
 
 	raw_spin_lock_irqsave(&meta->lock, flags);
@@ -997,7 +997,7 @@ static int kfence_init_late(void)
 {
 	const unsigned long nr_pages_pool = KFENCE_POOL_SIZE / PAGE_SIZE;
 	const unsigned long nr_pages_meta = KFENCE_METADATA_SIZE / PAGE_SIZE;
-	unsigned long addr = (unsigned long)__kfence_pool;
+	uintptr_t addr = (uintptr_t)__kfence_pool;
 	unsigned long free_size = KFENCE_POOL_SIZE;
 	int err = -ENOMEM;
 
@@ -1042,7 +1042,7 @@ static int kfence_init_late(void)
 	}
 
 	pr_err("%s failed\n", __func__);
-	free_size = KFENCE_POOL_SIZE - (addr - (unsigned long)__kfence_pool);
+	free_size = KFENCE_POOL_SIZE - (addr - (uintptr_t)__kfence_pool);
 	err = -EBUSY;
 
 #ifdef CONFIG_CONTIG_ALLOC
@@ -1213,7 +1213,7 @@ void *__kfence_alloc(struct kmem_cache *s, size_t size, gfp_t flags)
 
 size_t kfence_ksize(const void *addr)
 {
-	const struct kfence_metadata *meta = addr_to_metadata((unsigned long)addr);
+	const struct kfence_metadata *meta = addr_to_metadata((uintptr_t)addr);
 
 	/*
 	 * Read locklessly -- if there is a race with __kfence_alloc(), this is
@@ -1224,7 +1224,7 @@ size_t kfence_ksize(const void *addr)
 
 void *kfence_object_start(const void *addr)
 {
-	const struct kfence_metadata *meta = addr_to_metadata((unsigned long)addr);
+	const struct kfence_metadata *meta = addr_to_metadata((uintptr_t)addr);
 
 	/*
 	 * Read locklessly -- if there is a race with __kfence_alloc(), this is
@@ -1235,7 +1235,7 @@ void *kfence_object_start(const void *addr)
 
 void __kfence_free(void *addr)
 {
-	struct kfence_metadata *meta = addr_to_metadata((unsigned long)addr);
+	struct kfence_metadata *meta = addr_to_metadata((uintptr_t)addr);
 
 #ifdef CONFIG_MEMCG
 	KFENCE_WARN_ON(meta->obj_exts.objcg);

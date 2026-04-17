@@ -1981,7 +1981,7 @@ static const struct pci_device_id safexcel_pci_ids[] = {
 	{
 		PCI_DEVICE_SUB(PCI_VENDOR_ID_XILINX, 0x9038,
 			       0x16ae, 0xc522),
-		.driver_data = (kernel_ulong_t)&eip197_devbrd_data,
+		.driver_data = (uintptr_t)&eip197_devbrd_data,
 	},
 	{},
 };

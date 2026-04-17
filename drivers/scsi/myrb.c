@@ -3508,7 +3508,7 @@ static const struct pci_device_id myrb_id_table[] = {
 			       PCI_DEVICE_ID_DEC_21285,
 			       PCI_VENDOR_ID_MYLEX,
 			       PCI_DEVICE_ID_MYLEX_DAC960_LA),
-		.driver_data	= (unsigned long) &DAC960_LA_privdata,
+		.driver_data	= (uintptr_t) &DAC960_LA_privdata,
 	},
 	{
 		PCI_DEVICE_DATA(MYLEX, DAC960_PG, &DAC960_PG_privdata),

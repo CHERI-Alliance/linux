@@ -150,7 +150,7 @@ int syscall_user_dispatch_get_config(struct task_struct *task, unsigned long siz
 
 	cfg.offset = sd->offset;
 	cfg.len = sd->len;
-	cfg.selector = (__u64)(uintptr_t)sd->selector;
+	cfg.selector = (__u64)(user_uintptr_t)sd->selector;
 
 	if (copy_to_user_with_ptr(data, &cfg, sizeof(cfg)))
 		return -EFAULT;
@@ -170,5 +170,5 @@ int syscall_user_dispatch_set_config(struct task_struct *task, unsigned long siz
 		return -EFAULT;
 
 	return task_set_syscall_user_dispatch(task, cfg.mode, cfg.offset, cfg.len,
-					      (char __user *)(uintptr_t)cfg.selector);
+					      (char __user *)(user_uintptr_t)cfg.selector);
 }

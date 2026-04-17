@@ -381,7 +381,7 @@ fwh_done:
 	mem = ioremap(INTEL_RNG_ADDR, INTEL_RNG_ADDR_LEN);
 	if (!mem)
 		goto out;
-	intel_rng.priv = (unsigned long)mem;
+	intel_rng.priv = (uintptr_t)mem;
 
 	/* Check for Random Number Generator */
 	err = -ENODEV;

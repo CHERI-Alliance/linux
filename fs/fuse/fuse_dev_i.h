@@ -50,7 +50,7 @@ static inline struct fuse_dev *__fuse_get_dev(struct file *file)
 	 */
 	struct fuse_dev *fud = READ_ONCE(file->private_data);
 
-	return (typeof(fud)) ((unsigned long) fud & FUSE_DEV_PTR_MASK);
+	return (typeof(fud)) ((uintptr_t) fud & FUSE_DEV_PTR_MASK);
 }
 
 struct fuse_dev *fuse_get_dev(struct file *file);

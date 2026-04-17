@@ -462,7 +462,7 @@ static bool compat_fillonedir(struct dir_context *ctx, const char *name,
 	dirent = buf->dirent;
 	if (!user_write_access_begin(dirent,
 			(unsigned long)(dirent->d_name + namlen + 1) -
-				(unsigned long)dirent))
+				(user_uintptr_t)dirent))
 		goto efault;
 	unsafe_put_user(d_ino, &dirent->d_ino, efault_end);
 	unsafe_put_user(offset, &dirent->d_offset, efault_end);

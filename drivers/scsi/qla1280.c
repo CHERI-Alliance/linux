@@ -4212,7 +4212,7 @@ qla1280_probe_one(struct pci_dev *pdev, const struct pci_device_id *id)
 		goto error_free_response_ring;
 	}
 
-	host->base = (unsigned long)ha->mmpbase;
+	host->base = (uintptr_t)ha->mmpbase;
 	ha->iobase = (struct device_reg __iomem *)ha->mmpbase;
 #else
 	host->io_port = pci_resource_start(ha->pdev, 0);

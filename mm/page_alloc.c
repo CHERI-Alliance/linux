@@ -5309,7 +5309,7 @@ unsigned long get_free_pages_noprof(gfp_t gfp_mask, unsigned int order)
 	page = alloc_pages_noprof(gfp_mask & ~__GFP_HIGHMEM, order);
 	if (!page)
 		return 0;
-	return (unsigned long) page_address(page);
+	return (uintptr_t) page_address(page);
 }
 EXPORT_SYMBOL(get_free_pages_noprof);
 
@@ -5468,7 +5468,7 @@ void * __meminit alloc_pages_exact_nid_noprof(int nid, size_t size, gfp_t gfp_ma
 	p = alloc_pages_node_noprof(nid, gfp_mask, order);
 	if (!p)
 		return NULL;
-	return make_alloc_exact((unsigned long)page_address(p), order, size);
+	return make_alloc_exact((uintptr_t)page_address(p), order, size);
 }
 
 /**
@@ -5480,7 +5480,7 @@ void * __meminit alloc_pages_exact_nid_noprof(int nid, size_t size, gfp_t gfp_ma
  */
 void free_pages_exact(void *virt, size_t size)
 {
-	unsigned long addr = (unsigned long)virt;
+	uintptr_t addr = (uintptr_t)virt;
 	unsigned long end = addr + PAGE_ALIGN(size);
 
 	while (addr < end) {
@@ -6239,8 +6239,8 @@ unsigned long free_reserved_area(void *start, void *end, int poison, const char 
 	void *pos;
 	unsigned long pages = 0;
 
-	start = (void *)PAGE_ALIGN((unsigned long)start);
-	end = (void *)((unsigned long)end & PAGE_MASK);
+	start = (void *)PAGE_ALIGN((uintptr_t)start);
+	end = (void *)((uintptr_t)end & PAGE_MASK);
 	for (pos = start; pos < end; pos += PAGE_SIZE, pages++) {
 		struct page *page = virt_to_page(pos);
 		void *direct_map_addr;
@@ -6879,7 +6879,7 @@ static int __alloc_contig_migrate_range(struct compact_control *cc,
 		cc->nr_migratepages -= nr_reclaimed;
 
 		ret = migrate_pages(&cc->migratepages, alloc_migration_target,
-			NULL, (unsigned long)&mtc, cc->mode, MR_CONTIG_RANGE, NULL);
+			NULL, (uintptr_t)&mtc, cc->mode, MR_CONTIG_RANGE, NULL);
 
 		/*
 		 * On -ENOMEM, migrate_pages() bails out right away. It is pointless

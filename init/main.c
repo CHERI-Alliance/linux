@@ -307,7 +307,7 @@ found:
 	}
 
 	/* Remove bootconfig from initramfs/initrd */
-	initrd_end = (unsigned long)data;
+	initrd_end = (uintptr_t)data;
 	if (_size)
 		*_size = size;
 
@@ -1274,7 +1274,7 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
 	if (list_empty(&blacklisted_initcalls))
 		return false;
 
-	addr = (unsigned long) dereference_function_descriptor(fn);
+	addr = (uintptr_t) dereference_function_descriptor(fn);
 	sprint_symbol_no_offset(fn_name, addr);
 
 	/*

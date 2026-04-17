@@ -1446,147 +1446,147 @@ static const struct usb_device_id	products [] = {
 {
 	// Linksys USB200M
 	USB_DEVICE (0x077b, 0x2226),
-	.driver_info =	(unsigned long) &ax8817x_info,
+	.driver_info =	(uintptr_t) &ax8817x_info,
 }, {
 	// Netgear FA120
 	USB_DEVICE (0x0846, 0x1040),
-	.driver_info =  (unsigned long) &netgear_fa120_info,
+	.driver_info =  (uintptr_t) &netgear_fa120_info,
 }, {
 	// DLink DUB-E100
 	USB_DEVICE (0x2001, 0x1a00),
-	.driver_info =  (unsigned long) &dlink_dub_e100_info,
+	.driver_info =  (uintptr_t) &dlink_dub_e100_info,
 }, {
 	// Intellinet, ST Lab USB Ethernet
 	USB_DEVICE (0x0b95, 0x1720),
-	.driver_info =  (unsigned long) &ax8817x_info,
+	.driver_info =  (uintptr_t) &ax8817x_info,
 }, {
 	// Hawking UF200, TrendNet TU2-ET100
 	USB_DEVICE (0x07b8, 0x420a),
-	.driver_info =  (unsigned long) &hawking_uf200_info,
+	.driver_info =  (uintptr_t) &hawking_uf200_info,
 }, {
 	// Billionton Systems, USB2AR
 	USB_DEVICE (0x08dd, 0x90ff),
-	.driver_info =  (unsigned long) &ax8817x_info,
+	.driver_info =  (uintptr_t) &ax8817x_info,
 }, {
 	// Billionton Systems, GUSB2AM-1G-B
 	USB_DEVICE(0x08dd, 0x0114),
-	.driver_info =  (unsigned long) &ax88178_info,
+	.driver_info =  (uintptr_t) &ax88178_info,
 }, {
 	// ATEN UC210T
 	USB_DEVICE (0x0557, 0x2009),
-	.driver_info =  (unsigned long) &ax8817x_info,
+	.driver_info =  (uintptr_t) &ax8817x_info,
 }, {
 	// Buffalo LUA-U2-KTX
 	USB_DEVICE (0x0411, 0x003d),
-	.driver_info =  (unsigned long) &ax8817x_info,
+	.driver_info =  (uintptr_t) &ax8817x_info,
 }, {
 	// Buffalo LUA-U2-GT 10/100/1000
 	USB_DEVICE (0x0411, 0x006e),
-	.driver_info =  (unsigned long) &ax88178_info,
+	.driver_info =  (uintptr_t) &ax88178_info,
 }, {
 	// Sitecom LN-029 "USB 2.0 10/100 Ethernet adapter"
 	USB_DEVICE (0x6189, 0x182d),
-	.driver_info =  (unsigned long) &ax8817x_info,
+	.driver_info =  (uintptr_t) &ax8817x_info,
 }, {
 	// Sitecom LN-031 "USB 2.0 10/100/1000 Ethernet adapter"
 	USB_DEVICE (0x0df6, 0x0056),
-	.driver_info =  (unsigned long) &ax88178_info,
+	.driver_info =  (uintptr_t) &ax88178_info,
 }, {
 	// Sitecom LN-028 "USB 2.0 10/100/1000 Ethernet adapter"
 	USB_DEVICE (0x0df6, 0x061c),
-	.driver_info =  (unsigned long) &ax88178_info,
+	.driver_info =  (uintptr_t) &ax88178_info,
 }, {
 	// corega FEther USB2-TX
 	USB_DEVICE (0x07aa, 0x0017),
-	.driver_info =  (unsigned long) &ax8817x_info,
+	.driver_info =  (uintptr_t) &ax8817x_info,
 }, {
 	// Surecom EP-1427X-2
 	USB_DEVICE (0x1189, 0x0893),
-	.driver_info = (unsigned long) &ax8817x_info,
+	.driver_info = (uintptr_t) &ax8817x_info,
 }, {
 	// goodway corp usb gwusb2e
 	USB_DEVICE (0x1631, 0x6200),
-	.driver_info = (unsigned long) &ax8817x_info,
+	.driver_info = (uintptr_t) &ax8817x_info,
 }, {
 	// JVC MP-PRX1 Port Replicator
 	USB_DEVICE (0x04f1, 0x3008),
-	.driver_info = (unsigned long) &ax8817x_info,
+	.driver_info = (uintptr_t) &ax8817x_info,
 }, {
 	// Lenovo U2L100P 10/100
 	USB_DEVICE (0x17ef, 0x7203),
-	.driver_info = (unsigned long)&ax88772b_info,
+	.driver_info = (uintptr_t)&ax88772b_info,
 }, {
 	// ASIX AX88772B 10/100
 	USB_DEVICE (0x0b95, 0x772b),
-	.driver_info = (unsigned long) &ax88772b_info,
+	.driver_info = (uintptr_t) &ax88772b_info,
 }, {
 	// ASIX AX88772 10/100
 	USB_DEVICE (0x0b95, 0x7720),
-	.driver_info = (unsigned long) &ax88772_info,
+	.driver_info = (uintptr_t) &ax88772_info,
 }, {
 	// ASIX AX88178 10/100/1000
 	USB_DEVICE (0x0b95, 0x1780),
-	.driver_info = (unsigned long) &ax88178_info,
+	.driver_info = (uintptr_t) &ax88178_info,
 }, {
 	// Logitec LAN-GTJ/U2A
 	USB_DEVICE (0x0789, 0x0160),
-	.driver_info = (unsigned long) &ax88178_info,
+	.driver_info = (uintptr_t) &ax88178_info,
 }, {
 	// Linksys USB200M Rev 2
 	USB_DEVICE (0x13b1, 0x0018),
-	.driver_info = (unsigned long) &ax88772_info,
+	.driver_info = (uintptr_t) &ax88772_info,
 }, {
 	// 0Q0 cable ethernet
 	USB_DEVICE (0x1557, 0x7720),
-	.driver_info = (unsigned long) &ax88772_info,
+	.driver_info = (uintptr_t) &ax88772_info,
 }, {
 	// DLink DUB-E100 H/W Ver B1
 	USB_DEVICE (0x07d1, 0x3c05),
-	.driver_info = (unsigned long) &ax88772_info,
+	.driver_info = (uintptr_t) &ax88772_info,
 }, {
 	// DLink DUB-E100 H/W Ver B1 Alternate
 	USB_DEVICE (0x2001, 0x3c05),
-	.driver_info = (unsigned long) &ax88772_info,
+	.driver_info = (uintptr_t) &ax88772_info,
 }, {
        // DLink DUB-E100 H/W Ver C1
        USB_DEVICE (0x2001, 0x1a02),
-       .driver_info = (unsigned long) &ax88772_info,
+       .driver_info = (uintptr_t) &ax88772_info,
 }, {
 	// Linksys USB1000
 	USB_DEVICE (0x1737, 0x0039),
-	.driver_info = (unsigned long) &ax88178_info,
+	.driver_info = (uintptr_t) &ax88178_info,
 }, {
 	// IO-DATA ETG-US2
 	USB_DEVICE (0x04bb, 0x0930),
-	.driver_info = (unsigned long) &ax88178_info,
+	.driver_info = (uintptr_t) &ax88178_info,
 }, {
 	// Belkin F5D5055
 	USB_DEVICE(0x050d, 0x5055),
-	.driver_info = (unsigned long) &ax88178_info,
+	.driver_info = (uintptr_t) &ax88178_info,
 }, {
 	// Apple USB Ethernet Adapter
 	USB_DEVICE(0x05ac, 0x1402),
-	.driver_info = (unsigned long) &ax88772_info,
+	.driver_info = (uintptr_t) &ax88772_info,
 }, {
 	// Cables-to-Go USB Ethernet Adapter
 	USB_DEVICE(0x0b95, 0x772a),
-	.driver_info = (unsigned long) &ax88772_info,
+	.driver_info = (uintptr_t) &ax88772_info,
 }, {
 	// ABOCOM for pci
 	USB_DEVICE(0x14ea, 0xab11),
-	.driver_info = (unsigned long) &ax88178_info,
+	.driver_info = (uintptr_t) &ax88178_info,
 }, {
 	// ASIX 88772a
 	USB_DEVICE(0x0db0, 0xa877),
-	.driver_info = (unsigned long) &ax88772_info,
+	.driver_info = (uintptr_t) &ax88772_info,
 }, {
 	// Asus USB Ethernet Adapter
 	USB_DEVICE (0x0b95, 0x7e2b),
-	.driver_info = (unsigned long)&ax88772b_info,
+	.driver_info = (uintptr_t)&ax88772b_info,
 }, {
 	/* ASIX 88172a demo board */
 	USB_DEVICE(0x0b95, 0x172a),
-	.driver_info = (unsigned long) &ax88172a_info,
+	.driver_info = (uintptr_t) &ax88172a_info,
 }, {
 	/*
 	 * USBLINK HG20F9 "USB 2.0 LAN"
@@ -1594,15 +1594,15 @@ static const struct usb_device_id	products [] = {
 	 * doesn't (yet) conflict with any known Linksys product.
 	 */
 	USB_DEVICE(0x066b, 0x20f9),
-	.driver_info = (unsigned long) &hg20f9_info,
+	.driver_info = (uintptr_t) &hg20f9_info,
 }, {
 	// Linux Automation GmbH USB 10Base-T1L
 	USB_DEVICE(0x33f7, 0x0004),
-	.driver_info = (unsigned long) &lxausb_t1l_info,
+	.driver_info = (uintptr_t) &lxausb_t1l_info,
 }, {
 	/* LyconSys FiberGecko 100 */
 	USB_DEVICE(0x1d2a, 0x0801),
-	.driver_info = (unsigned long) &lyconsys_fibergecko100_info,
+	.driver_info = (uintptr_t) &lyconsys_fibergecko100_info,
 },
 	{ },		// END
 };

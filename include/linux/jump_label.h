@@ -123,19 +123,19 @@ struct jump_entry {
 
 static inline unsigned long jump_entry_code(const struct jump_entry *entry)
 {
-	return (unsigned long)&entry->code + entry->code;
+	return (uintptr_t)&entry->code + entry->code;
 }
 
 static inline unsigned long jump_entry_target(const struct jump_entry *entry)
 {
-	return (unsigned long)&entry->target + entry->target;
+	return (uintptr_t)&entry->target + entry->target;
 }
 
 static inline struct static_key *jump_entry_key(const struct jump_entry *entry)
 {
 	long offset = entry->key & ~3L;
 
-	return (struct static_key *)((unsigned long)&entry->key + offset);
+	return (struct static_key *)((uintptr_t)&entry->key + offset);
 }
 
 #else

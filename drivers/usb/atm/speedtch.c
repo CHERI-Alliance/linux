@@ -340,7 +340,7 @@ static int speedtch_upload_firmware(struct speedtch_instance_data *instance,
 	ret = 0;
 
 out_free:
-	free_page((unsigned long)buffer);
+	free_page((uintptr_t)buffer);
 out:
 	return ret;
 }

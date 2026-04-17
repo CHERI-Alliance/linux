@@ -443,11 +443,11 @@ static struct xgbe_version_data xgbe_v2b = {
 
 static const struct pci_device_id xgbe_pci_table[] = {
 	{ PCI_VDEVICE(AMD, 0x1458),
-	  .driver_data = (kernel_ulong_t)&xgbe_v2a },
+	  .driver_data = (uintptr_t)&xgbe_v2a },
 	{ PCI_VDEVICE(AMD, 0x1459),
-	  .driver_data = (kernel_ulong_t)&xgbe_v2b },
+	  .driver_data = (uintptr_t)&xgbe_v2b },
 	{ PCI_VDEVICE(AMD, 0x1641),
-	  .driver_data = (kernel_ulong_t)&xgbe_v3 },
+	  .driver_data = (uintptr_t)&xgbe_v3 },
 	/* Last entry must be zero */
 	{ 0, }
 };

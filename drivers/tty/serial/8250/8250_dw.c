@@ -979,19 +979,19 @@ static const struct dw8250_platform_data dw8250_apmc0d08 = {
 };
 
 static const struct acpi_device_id dw8250_acpi_match[] = {
-	{ "80860F0A", (kernel_ulong_t)&dw8250_dw_apb },
-	{ "8086228A", (kernel_ulong_t)&dw8250_dw_apb },
-	{ "AMD0020", (kernel_ulong_t)&dw8250_dw_apb },
-	{ "AMDI0020", (kernel_ulong_t)&dw8250_dw_apb },
-	{ "AMDI0022", (kernel_ulong_t)&dw8250_dw_apb },
-	{ "APMC0D08", (kernel_ulong_t)&dw8250_apmc0d08 },
-	{ "BRCM2032", (kernel_ulong_t)&dw8250_dw_apb },
-	{ "HISI0031", (kernel_ulong_t)&dw8250_dw_apb },
-	{ "INT33C4", (kernel_ulong_t)&dw8250_dw_apb },
-	{ "INT33C5", (kernel_ulong_t)&dw8250_dw_apb },
-	{ "INT3434", (kernel_ulong_t)&dw8250_dw_apb },
-	{ "INT3435", (kernel_ulong_t)&dw8250_dw_apb },
-	{ "INTC10EE", (kernel_ulong_t)&dw8250_intc10ee },
+	{ "80860F0A", (uintptr_t)&dw8250_dw_apb },
+	{ "8086228A", (uintptr_t)&dw8250_dw_apb },
+	{ "AMD0020", (uintptr_t)&dw8250_dw_apb },
+	{ "AMDI0020", (uintptr_t)&dw8250_dw_apb },
+	{ "AMDI0022", (uintptr_t)&dw8250_dw_apb },
+	{ "APMC0D08", (uintptr_t)&dw8250_apmc0d08 },
+	{ "BRCM2032", (uintptr_t)&dw8250_dw_apb },
+	{ "HISI0031", (uintptr_t)&dw8250_dw_apb },
+	{ "INT33C4", (uintptr_t)&dw8250_dw_apb },
+	{ "INT33C5", (uintptr_t)&dw8250_dw_apb },
+	{ "INT3434", (uintptr_t)&dw8250_dw_apb },
+	{ "INT3435", (uintptr_t)&dw8250_dw_apb },
+	{ "INTC10EE", (uintptr_t)&dw8250_intc10ee },
 	{ },
 };
 MODULE_DEVICE_TABLE(acpi, dw8250_acpi_match);

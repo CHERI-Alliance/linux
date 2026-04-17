@@ -370,7 +370,7 @@ void afs_set_peer_appdata(struct afs_server *server,
 			  struct afs_addr_list *old_alist,
 			  struct afs_addr_list *new_alist)
 {
-	unsigned long data = (unsigned long)server;
+	uintptr_t data = (uintptr_t)server;
 	int n = 0, o = 0;
 
 	if (!old_alist) {

@@ -1654,129 +1654,129 @@ static const struct usb_device_id usbtouch_devices[] = {
 
 	/* normal device IDs */
 	{ USB_DEVICE(0x3823, 0x0001),
-		.driver_info = (kernel_ulong_t)&egalax_dev_info },
+		.driver_info = (uintptr_t)&egalax_dev_info },
 	{ USB_DEVICE(0x3823, 0x0002),
-		.driver_info = (kernel_ulong_t)&egalax_dev_info },
+		.driver_info = (uintptr_t)&egalax_dev_info },
 	{ USB_DEVICE(0x0123, 0x0001),
-		.driver_info = (kernel_ulong_t)&egalax_dev_info },
+		.driver_info = (uintptr_t)&egalax_dev_info },
 	{ USB_DEVICE(0x0eef, 0x0001),
-		.driver_info = (kernel_ulong_t)&egalax_dev_info },
+		.driver_info = (uintptr_t)&egalax_dev_info },
 	{ USB_DEVICE(0x0eef, 0x0002),
-		.driver_info = (kernel_ulong_t)&egalax_dev_info },
+		.driver_info = (uintptr_t)&egalax_dev_info },
 	{ USB_DEVICE(0x1234, 0x0001),
-		.driver_info = (kernel_ulong_t)&egalax_dev_info },
+		.driver_info = (uintptr_t)&egalax_dev_info },
 	{ USB_DEVICE(0x1234, 0x0002),
-		.driver_info = (kernel_ulong_t)&egalax_dev_info },
+		.driver_info = (uintptr_t)&egalax_dev_info },
 #endif
 
 #ifdef CONFIG_TOUCHSCREEN_USB_PANJIT
 	{ USB_DEVICE(0x134c, 0x0001),
-		.driver_info = (kernel_ulong_t)&panjit_dev_info },
+		.driver_info = (uintptr_t)&panjit_dev_info },
 	{ USB_DEVICE(0x134c, 0x0002),
-		.driver_info = (kernel_ulong_t)&panjit_dev_info },
+		.driver_info = (uintptr_t)&panjit_dev_info },
 	{ USB_DEVICE(0x134c, 0x0003),
-		.driver_info = (kernel_ulong_t)&panjit_dev_info },
+		.driver_info = (uintptr_t)&panjit_dev_info },
 	{ USB_DEVICE(0x134c, 0x0004),
-		.driver_info = (kernel_ulong_t)&panjit_dev_info },
+		.driver_info = (uintptr_t)&panjit_dev_info },
 #endif
 
 #ifdef CONFIG_TOUCHSCREEN_USB_3M
 	{ USB_DEVICE(0x0596, 0x0001),
-		.driver_info = (kernel_ulong_t)&mtouch_dev_info },
+		.driver_info = (uintptr_t)&mtouch_dev_info },
 #endif
 
 #ifdef CONFIG_TOUCHSCREEN_USB_ITM
 	{ USB_DEVICE(0x0403, 0xf9e9),
-		.driver_info = (kernel_ulong_t)&itm_dev_info },
+		.driver_info = (uintptr_t)&itm_dev_info },
 	{ USB_DEVICE(0x16e3, 0xf9e9),
-		.driver_info = (kernel_ulong_t)&itm_dev_info },
+		.driver_info = (uintptr_t)&itm_dev_info },
 #endif
 
 #ifdef CONFIG_TOUCHSCREEN_USB_ETURBO
 	{ USB_DEVICE(0x1234, 0x5678),
-		.driver_info = (kernel_ulong_t)&eturbo_dev_info },
+		.driver_info = (uintptr_t)&eturbo_dev_info },
 #endif
 
 #ifdef CONFIG_TOUCHSCREEN_USB_GUNZE
 	{ USB_DEVICE(0x0637, 0x0001),
-		.driver_info = (kernel_ulong_t)&gunze_dev_info },
+		.driver_info = (uintptr_t)&gunze_dev_info },
 #endif
 
 #ifdef CONFIG_TOUCHSCREEN_USB_DMC_TSC10
 	{ USB_DEVICE(0x0afa, 0x03e8),
-		.driver_info = (kernel_ulong_t)&dmc_tsc10_dev_info },
+		.driver_info = (uintptr_t)&dmc_tsc10_dev_info },
 #endif
 
 #ifdef CONFIG_TOUCHSCREEN_USB_IRTOUCH
 	{ USB_DEVICE(0x255e, 0x0001),
-		.driver_info = (kernel_ulong_t)&irtouch_dev_info },
+		.driver_info = (uintptr_t)&irtouch_dev_info },
 	{ USB_DEVICE(0x595a, 0x0001),
-		.driver_info = (kernel_ulong_t)&irtouch_dev_info },
+		.driver_info = (uintptr_t)&irtouch_dev_info },
 	{ USB_DEVICE(0x6615, 0x0001),
-		.driver_info = (kernel_ulong_t)&irtouch_dev_info },
+		.driver_info = (uintptr_t)&irtouch_dev_info },
 	{ USB_DEVICE(0x6615, 0x0012),
-		.driver_info = (kernel_ulong_t)&irtouch_hires_dev_info },
+		.driver_info = (uintptr_t)&irtouch_hires_dev_info },
 #endif
 
 #ifdef CONFIG_TOUCHSCREEN_USB_IDEALTEK
 	{ USB_DEVICE(0x1391, 0x1000),
-		.driver_info = (kernel_ulong_t)&idealtek_dev_info },
+		.driver_info = (uintptr_t)&idealtek_dev_info },
 #endif
 
 #ifdef CONFIG_TOUCHSCREEN_USB_GENERAL_TOUCH
 	{ USB_DEVICE(0x0dfc, 0x0001),
-		.driver_info = (kernel_ulong_t)&general_touch_dev_info },
+		.driver_info = (uintptr_t)&general_touch_dev_info },
 #endif
 
 #ifdef CONFIG_TOUCHSCREEN_USB_GOTOP
 	{ USB_DEVICE(0x08f2, 0x007f),
-		.driver_info = (kernel_ulong_t)&gotop_dev_info },
+		.driver_info = (uintptr_t)&gotop_dev_info },
 	{ USB_DEVICE(0x08f2, 0x00ce),
-		.driver_info = (kernel_ulong_t)&gotop_dev_info },
+		.driver_info = (uintptr_t)&gotop_dev_info },
 	{ USB_DEVICE(0x08f2, 0x00f4),
-		.driver_info = (kernel_ulong_t)&gotop_dev_info },
+		.driver_info = (uintptr_t)&gotop_dev_info },
 #endif
 
 #ifdef CONFIG_TOUCHSCREEN_USB_JASTEC
 	{ USB_DEVICE(0x0f92, 0x0001),
-		.driver_info = (kernel_ulong_t)&jastec_dev_info },
+		.driver_info = (uintptr_t)&jastec_dev_info },
 #endif
 
 #ifdef CONFIG_TOUCHSCREEN_USB_E2I
 	{ USB_DEVICE(0x1ac7, 0x0001),
-		.driver_info = (kernel_ulong_t)&e2i_dev_info },
+		.driver_info = (uintptr_t)&e2i_dev_info },
 #endif
 
 #ifdef CONFIG_TOUCHSCREEN_USB_ZYTRONIC
 	{ USB_DEVICE(0x14c8, 0x0003),
-		.driver_info = (kernel_ulong_t)&zytronic_dev_info },
+		.driver_info = (uintptr_t)&zytronic_dev_info },
 #endif
 
 #ifdef CONFIG_TOUCHSCREEN_USB_ETT_TC45USB
 	/* TC5UH */
 	{ USB_DEVICE(0x0664, 0x0309),
-		.driver_info = (kernel_ulong_t)&tc45usb_dev_info },
+		.driver_info = (uintptr_t)&tc45usb_dev_info },
 	/* TC4UM */
 	{ USB_DEVICE(0x0664, 0x0306),
-		.driver_info = (kernel_ulong_t)&tc45usb_dev_info },
+		.driver_info = (uintptr_t)&tc45usb_dev_info },
 #endif
 
 #ifdef CONFIG_TOUCHSCREEN_USB_NEXIO
 	/* data interface only */
 	{ USB_DEVICE_AND_INTERFACE_INFO(0x10f0, 0x2002, 0x0a, 0x00, 0x00),
-		.driver_info = (kernel_ulong_t)&nexio_dev_info },
+		.driver_info = (uintptr_t)&nexio_dev_info },
 	{ USB_DEVICE_AND_INTERFACE_INFO(0x1870, 0x0001, 0x0a, 0x00, 0x00),
-		.driver_info = (kernel_ulong_t)&nexio_dev_info },
+		.driver_info = (uintptr_t)&nexio_dev_info },
 #endif
 
 #ifdef CONFIG_TOUCHSCREEN_USB_ELO
 	{ USB_DEVICE(0x04e7, 0x0020),
-		.driver_info = (kernel_ulong_t)&elo_dev_info },
+		.driver_info = (uintptr_t)&elo_dev_info },
 #endif
 
 #ifdef CONFIG_TOUCHSCREEN_USB_EASYTOUCH
 	{ USB_DEVICE(0x7374, 0x0001),
-		.driver_info = (kernel_ulong_t)&etouch_dev_info },
+		.driver_info = (uintptr_t)&etouch_dev_info },
 #endif
 
 	{ }

@@ -45,7 +45,7 @@ static long snd_hwdep_ioctl_compat(struct file * file, unsigned int cmd,
 	case SNDRV_HWDEP_IOCTL_PVERSION:
 	case SNDRV_HWDEP_IOCTL_INFO:
 	case SNDRV_HWDEP_IOCTL_DSP_STATUS:
-		return snd_hwdep_ioctl(file, cmd, (unsigned long)argp);
+		return snd_hwdep_ioctl(file, cmd, (user_uintptr_t)argp);
 	case SNDRV_HWDEP_IOCTL_DSP_LOAD32:
 		return snd_hwdep_dsp_load_compat(hw, argp);
 	}

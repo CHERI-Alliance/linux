@@ -111,7 +111,7 @@ out_unlock:
 static long uacce_fops_compat_ioctl(struct file *filep,
 				   unsigned int cmd, unsigned long arg)
 {
-	arg = (unsigned long)compat_ptr(arg);
+	arg = (user_uintptr_t)compat_ptr(arg);
 
 	return uacce_fops_unl_ioctl(filep, cmd, arg);
 }

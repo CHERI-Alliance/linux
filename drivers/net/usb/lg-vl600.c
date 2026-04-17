@@ -312,7 +312,7 @@ static const struct usb_device_id products[] = {
 	{
 		USB_DEVICE_AND_INTERFACE_INFO(0x1004, 0x61aa, USB_CLASS_COMM,
 				USB_CDC_SUBCLASS_ETHERNET, USB_CDC_PROTO_NONE),
-		.driver_info	= (unsigned long) &vl600_info,
+		.driver_info	= (uintptr_t) &vl600_info,
 	},
 	{},	/* End */
 };

@@ -3143,15 +3143,15 @@ static int vega10_get_pp_table_entry_callback_func(struct pp_hwmgr *hwmgr,
 			(ATOM_Vega10_POWERPLAYTABLE *)pp_table;
 	ATOM_Vega10_SOCCLK_Dependency_Table *socclk_dep_table =
 			(ATOM_Vega10_SOCCLK_Dependency_Table *)
-			(((unsigned long)powerplay_table) +
+			(((uintptr_t)powerplay_table) +
 			le16_to_cpu(powerplay_table->usSocclkDependencyTableOffset));
 	ATOM_Vega10_GFXCLK_Dependency_Table *gfxclk_dep_table =
 			(ATOM_Vega10_GFXCLK_Dependency_Table *)
-			(((unsigned long)powerplay_table) +
+			(((uintptr_t)powerplay_table) +
 			le16_to_cpu(powerplay_table->usGfxclkDependencyTableOffset));
 	ATOM_Vega10_MCLK_Dependency_Table *mclk_dep_table =
 			(ATOM_Vega10_MCLK_Dependency_Table *)
-			(((unsigned long)powerplay_table) +
+			(((uintptr_t)powerplay_table) +
 			le16_to_cpu(powerplay_table->usMclkDependencyTableOffset));
 
 
@@ -5353,7 +5353,7 @@ static void vega10_odn_update_power_state(struct pp_hwmgr *hwmgr)
 	if (!hwmgr->ps)
 		return;
 
-	ps = (struct pp_power_state *)((unsigned long)(hwmgr->ps) + hwmgr->ps_size * (hwmgr->num_ps - 1));
+	ps = (struct pp_power_state *)((uintptr_t)(hwmgr->ps) + hwmgr->ps_size * (hwmgr->num_ps - 1));
 	vega10_ps = cast_phw_vega10_power_state(&ps->hardware);
 	if (vega10_ps == NULL)
 		return;

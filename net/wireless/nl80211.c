@@ -3430,7 +3430,7 @@ static int nl80211_dump_wiphy(struct sk_buff *skb, struct netlink_callback *cb)
 			rtnl_unlock();
 			return ret;
 		}
-		cb->args[0] = (long)state;
+		cb->args[0] = (intptr_t)state;
 	}
 
 	for_each_rdev(rdev) {
@@ -13131,7 +13131,7 @@ static int nl80211_testmode_dump(struct sk_buff *skb,
 		phy_idx = rdev->wiphy_idx;
 
 		if (attrbuf[NL80211_ATTR_TESTDATA])
-			cb->args[1] = (long)attrbuf[NL80211_ATTR_TESTDATA];
+			cb->args[1] = (intptr_t)attrbuf[NL80211_ATTR_TESTDATA];
 	}
 
 	if (cb->args[1]) {
@@ -16663,7 +16663,7 @@ static int nl80211_prepare_vendor_dump(struct sk_buff *skb,
 	/* add 1 to know if it was NULL */
 	cb->args[1] = *wdev ? (*wdev)->identifier + 1 : 0;
 	cb->args[2] = vcmd_idx;
-	cb->args[3] = (unsigned long)data;
+	cb->args[3] = (uintptr_t)data;
 	cb->args[4] = data_len;
 
 	/* keep rtnl locked in successful case */

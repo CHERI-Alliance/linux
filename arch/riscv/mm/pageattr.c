@@ -289,10 +289,10 @@ static int __set_memory(unsigned long addr, int numpages, pgprot_t set_mask,
 		int i, page_start;
 
 		area = find_vm_area((void *)start);
-		page_start = (start - (unsigned long)area->addr) >> PAGE_SHIFT;
+		page_start = (start - (uintptr_t)area->addr) >> PAGE_SHIFT;
 
 		for (i = page_start; i < page_start + numpages; ++i) {
-			lm_start = (unsigned long)page_address(area->pages[i]);
+			lm_start = (uintptr_t)page_address(area->pages[i]);
 			lm_end = lm_start + PAGE_SIZE;
 
 			ret = split_linear_mapping(lm_start, lm_end);
@@ -306,8 +306,8 @@ static int __set_memory(unsigned long addr, int numpages, pgprot_t set_mask,
 		}
 	} else if (is_kernel_mapping(start) || is_linear_mapping(start)) {
 		if (is_kernel_mapping(start)) {
-			lm_start = (unsigned long)lm_alias(start);
-			lm_end = (unsigned long)lm_alias(end);
+			lm_start = (uintptr_t)lm_alias(start);
+			lm_end = (uintptr_t)lm_alias(end);
 		} else {
 			lm_start = start;
 			lm_end = end;
@@ -376,13 +376,13 @@ int set_memory_nx(unsigned long addr, int numpages)
 
 int set_direct_map_invalid_noflush(struct page *page)
 {
-	return __set_memory((unsigned long)page_address(page), 1,
+	return __set_memory((uintptr_t)page_address(page), 1,
 			    __pgprot(0), __pgprot(_PAGE_PRESENT));
 }
 
 int set_direct_map_default_noflush(struct page *page)
 {
-	return __set_memory((unsigned long)page_address(page), 1,
+	return __set_memory((uintptr_t)page_address(page), 1,
 			    PAGE_KERNEL, __pgprot(_PAGE_EXEC));
 }
 
@@ -398,7 +398,7 @@ int set_direct_map_valid_noflush(struct page *page, unsigned nr, bool valid)
 		clear = __pgprot(_PAGE_PRESENT);
 	}
 
-	return __set_memory((unsigned long)page_address(page), nr, set, clear);
+	return __set_memory((uintptr_t)page_address(page), nr, set, clear);
 }
 
 #ifdef CONFIG_DEBUG_PAGEALLOC
@@ -423,7 +423,7 @@ void __kernel_map_pages(struct page *page, int numpages, int enable)
 	if (!debug_pagealloc_enabled())
 		return;
 
-	unsigned long start = (unsigned long)page_address(page);
+	uintptr_t start = (uintptr_t)page_address(page);
 	unsigned long size = PAGE_SIZE * numpages;
 
 	apply_to_existing_page_range(&init_mm, start, size, debug_pagealloc_set_page, &enable);
@@ -434,7 +434,7 @@ void __kernel_map_pages(struct page *page, int numpages, int enable)
 
 bool kernel_page_present(struct page *page)
 {
-	unsigned long addr = (unsigned long)page_address(page);
+	uintptr_t addr = (uintptr_t)page_address(page);
 	pgd_t *pgd;
 	pud_t *pud;
 	p4d_t *p4d;

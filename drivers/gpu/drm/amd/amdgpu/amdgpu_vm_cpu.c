@@ -82,7 +82,7 @@ static int amdgpu_vm_cpu_update(struct amdgpu_vm_update_params *p,
 	if (r < 0)
 		return r;
 
-	pe += (unsigned long)amdgpu_bo_kptr(&vmbo->bo);
+	pe += (uintptr_t)amdgpu_bo_kptr(&vmbo->bo);
 
 	trace_amdgpu_vm_set_ptes(pe, addr, count, incr, flags, p->immediate);
 

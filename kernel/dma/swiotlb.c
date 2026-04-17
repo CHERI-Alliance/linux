@@ -479,7 +479,7 @@ retry:
 	if (remap)
 		rc = remap(vstart, nslabs);
 	if (rc) {
-		free_pages((unsigned long)vstart, order);
+		free_pages((uintptr_t)vstart, order);
 
 		nslabs = ALIGN(nslabs >> 1, IO_TLB_SEGSIZE);
 		if (nslabs < IO_TLB_MIN_SLABS)
@@ -515,9 +515,9 @@ retry:
 	return 0;
 
 error_slots:
-	free_pages((unsigned long)mem->areas, area_order);
+	free_pages((uintptr_t)mem->areas, area_order);
 error_area:
-	free_pages((unsigned long)vstart, order);
+	free_pages((uintptr_t)vstart, order);
 	return -ENOMEM;
 }
 
@@ -535,7 +535,7 @@ void __init swiotlb_exit(void)
 		return;
 
 	pr_info("tearing down default memory pool\n");
-	tbl_vaddr = (unsigned long)phys_to_virt(mem->start);
+	tbl_vaddr = (uintptr_t)phys_to_virt(mem->start);
 	tbl_size = PAGE_ALIGN(mem->end - mem->start);
 	slots_size = PAGE_ALIGN(array_size(sizeof(*mem->slots), mem->nslabs));
 
@@ -543,9 +543,9 @@ void __init swiotlb_exit(void)
 	if (mem->late_alloc) {
 		area_order = get_order(array_size(sizeof(*mem->areas),
 			mem->nareas));
-		free_pages((unsigned long)mem->areas, area_order);
+		free_pages((uintptr_t)mem->areas, area_order);
 		free_pages(tbl_vaddr, get_order(tbl_size));
-		free_pages((unsigned long)mem->slots, get_order(slots_size));
+		free_pages((uintptr_t)mem->slots, get_order(slots_size));
 	} else {
 		memblock_free_late(__pa(mem->areas),
 			array_size(sizeof(*mem->areas), mem->nareas));
@@ -756,7 +756,7 @@ static void swiotlb_dyn_free(struct rcu_head *rcu)
 	size_t slots_size = array_size(sizeof(*pool->slots), pool->nslabs);
 	size_t tlb_size = pool->end - pool->start;
 
-	free_pages((unsigned long)pool->slots, get_order(slots_size));
+	free_pages((uintptr_t)pool->slots, get_order(slots_size));
 	swiotlb_free_tlb(pool->vaddr, tlb_size);
 	kfree(pool);
 }

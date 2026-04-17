@@ -48,7 +48,7 @@ void *__genradix_ptr_alloc(struct __genradix *radix, size_t offset,
 
 		new_node->children[0] = n;
 		new_root = ((struct genradix_root *)
-			    ((unsigned long) new_node | (n ? level + 1 : 0)));
+			    ((uintptr_t) new_node | (n ? level + 1 : 0)));
 
 		if ((v = cmpxchg_release(&radix->root, r, new_root)) == r) {
 			v = new_root;

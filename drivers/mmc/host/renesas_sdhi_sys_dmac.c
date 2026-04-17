@@ -436,7 +436,7 @@ static void renesas_sdhi_sys_dmac_release_dma(struct tmio_mmc_host *host)
 		dma_release_channel(chan);
 	}
 	if (host->bounce_buf) {
-		free_pages((unsigned long)host->bounce_buf, 0);
+		free_pages((uintptr_t)host->bounce_buf, 0);
 		host->bounce_buf = NULL;
 	}
 }

@@ -254,7 +254,7 @@ struct encoded_page;
 static __always_inline struct encoded_page *encode_page(struct page *page, unsigned long flags)
 {
 	BUILD_BUG_ON(flags > ENCODED_PAGE_BITS);
-	return (struct encoded_page *)(flags | (unsigned long)page);
+	return (struct encoded_page *)(flags | (uintptr_t)page);
 }
 
 static inline unsigned long encoded_page_flags(struct encoded_page *page)
@@ -264,7 +264,7 @@ static inline unsigned long encoded_page_flags(struct encoded_page *page)
 
 static inline struct page *encoded_page_ptr(struct encoded_page *page)
 {
-	return (struct page *)(~ENCODED_PAGE_BITS & (unsigned long)page);
+	return (struct page *)(~ENCODED_PAGE_BITS & (uintptr_t)page);
 }
 
 static __always_inline struct encoded_page *encode_nr_pages(unsigned long nr)
@@ -275,7 +275,7 @@ static __always_inline struct encoded_page *encode_nr_pages(unsigned long nr)
 
 static __always_inline unsigned long encoded_nr_pages(struct encoded_page *page)
 {
-	return ((unsigned long)page) >> 2;
+	return ((uintptr_t)page) >> 2;
 }
 
 /*
@@ -1422,7 +1422,7 @@ extern struct mm_struct init_mm;
 /* Pointer magic because the dynamic array size confuses some compilers. */
 static inline void mm_init_cpumask(struct mm_struct *mm)
 {
-	unsigned long cpu_bitmap = (unsigned long)mm;
+	uintptr_t cpu_bitmap = (uintptr_t)mm;
 
 	cpu_bitmap += offsetof(struct mm_struct, flexible_array);
 	cpumask_clear((struct cpumask *)cpu_bitmap);
@@ -1520,7 +1520,7 @@ static inline void vma_iter_init(struct vma_iterator *vmi,
  */
 static inline cpumask_t *mm_cpus_allowed(struct mm_struct *mm)
 {
-	unsigned long bitmap = (unsigned long)mm;
+	uintptr_t bitmap = (uintptr_t)mm;
 
 	bitmap += offsetof(struct mm_struct, flexible_array);
 	/* Skip cpu_bitmap */
@@ -1531,7 +1531,7 @@ static inline cpumask_t *mm_cpus_allowed(struct mm_struct *mm)
 /* Accessor for struct mm_struct's cidmask. */
 static inline unsigned long *mm_cidmask(struct mm_struct *mm)
 {
-	unsigned long cid_bitmap = (unsigned long)mm_cpus_allowed(mm);
+	uintptr_t cid_bitmap = (uintptr_t)mm_cpus_allowed(mm);
 
 	/* Skip mm_cpus_allowed */
 	cid_bitmap += cpumask_size();

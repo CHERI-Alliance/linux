@@ -546,35 +546,35 @@ static const struct cpu_info cpu_emr = {
 static const struct auxiliary_device_id peci_cputemp_ids[] = {
 	{
 		.name = "peci_cpu.cputemp.hsx",
-		.driver_data = (kernel_ulong_t)&cpu_hsx,
+		.driver_data = (uintptr_t)&cpu_hsx,
 	},
 	{
 		.name = "peci_cpu.cputemp.bdx",
-		.driver_data = (kernel_ulong_t)&cpu_hsx,
+		.driver_data = (uintptr_t)&cpu_hsx,
 	},
 	{
 		.name = "peci_cpu.cputemp.bdxd",
-		.driver_data = (kernel_ulong_t)&cpu_hsx,
+		.driver_data = (uintptr_t)&cpu_hsx,
 	},
 	{
 		.name = "peci_cpu.cputemp.skx",
-		.driver_data = (kernel_ulong_t)&cpu_skx,
+		.driver_data = (uintptr_t)&cpu_skx,
 	},
 	{
 		.name = "peci_cpu.cputemp.icx",
-		.driver_data = (kernel_ulong_t)&cpu_icx,
+		.driver_data = (uintptr_t)&cpu_icx,
 	},
 	{
 		.name = "peci_cpu.cputemp.icxd",
-		.driver_data = (kernel_ulong_t)&cpu_icx,
+		.driver_data = (uintptr_t)&cpu_icx,
 	},
 	{
 		.name = "peci_cpu.cputemp.spr",
-		.driver_data = (kernel_ulong_t)&cpu_spr,
+		.driver_data = (uintptr_t)&cpu_spr,
 	},
 	{
 		.name = "peci_cpu.cputemp.emr",
-		.driver_data = (kernel_ulong_t)&cpu_emr,
+		.driver_data = (uintptr_t)&cpu_emr,
 	},
 	{ }
 };

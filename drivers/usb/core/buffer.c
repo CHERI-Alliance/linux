@@ -155,7 +155,7 @@ void hcd_buffer_free(
 		return;
 
 	if (hcd->localmem_pool) {
-		gen_pool_free(hcd->localmem_pool, (unsigned long)addr, size);
+		gen_pool_free(hcd->localmem_pool, (uintptr_t)addr, size);
 		return;
 	}
 
@@ -202,12 +202,12 @@ void hcd_buffer_free_pages(struct usb_hcd *hcd,
 
 	if (hcd->localmem_pool) {
 		gen_pool_free(hcd->localmem_pool,
-				(unsigned long)addr, size);
+				(uintptr_t)addr, size);
 		return;
 	}
 
 	if (!hcd_uses_dma(hcd)) {
-		free_pages((unsigned long)addr, get_order(size));
+		free_pages((uintptr_t)addr, get_order(size));
 		return;
 	}
 

@@ -928,11 +928,11 @@ static int pfn_reader_user_pin(struct pfn_reader_user *user,
 		start = pages->start + (start_index * PAGE_SIZE);
 		rc = pin_memfd_pages(user, start, npages);
 	} else if (!remote_mm) {
-		uptr = (uintptr_t)(pages->uptr + start_index * PAGE_SIZE);
+		uptr = (user_uintptr_t)(pages->uptr + start_index * PAGE_SIZE);
 		rc = pin_user_pages_fast(uptr, npages, user->gup_flags,
 					 user->upages);
 	} else {
-		uptr = (uintptr_t)(pages->uptr + start_index * PAGE_SIZE);
+		uptr = (user_uintptr_t)(pages->uptr + start_index * PAGE_SIZE);
 		if (!user->locked) {
 			mmap_read_lock(pages->source_mm);
 			user->locked = 1;
@@ -1401,9 +1401,9 @@ struct iopt_pages *iopt_alloc_user_pages(void __user *uptr,
 	struct iopt_pages *pages;
 	unsigned long end;
 	void __user *uptr_down =
-		(void __user *)ALIGN_DOWN((uintptr_t)uptr, PAGE_SIZE);
+		(void __user *)ALIGN_DOWN((user_uintptr_t)uptr, PAGE_SIZE);
 
-	if (check_add_overflow((unsigned long)uptr, length, &end))
+	if (check_add_overflow((user_uintptr_t)uptr, length, &end))
 		return ERR_PTR(-EOVERFLOW);
 
 	pages = iopt_alloc_pages(uptr - uptr_down, length, writable);
@@ -2309,7 +2309,7 @@ static int iopt_pages_rw_page(struct iopt_pages *pages, unsigned long index,
 
 	mmap_read_lock(pages->source_mm);
 	rc = pin_user_pages_remote(
-		pages->source_mm, (uintptr_t)(pages->uptr + index * PAGE_SIZE),
+		pages->source_mm, (user_uintptr_t)(pages->uptr + index * PAGE_SIZE),
 		1, (flags & IOMMUFD_ACCESS_RW_WRITE) ? FOLL_WRITE : 0, &page,
 		NULL);
 	mmap_read_unlock(pages->source_mm);

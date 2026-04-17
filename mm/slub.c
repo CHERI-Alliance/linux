@@ -505,7 +505,7 @@ static inline freeptr_t freelist_ptr_encode(const struct kmem_cache *s,
 #ifdef CONFIG_SLAB_FREELIST_HARDENED
 	encoded = (unsigned long)ptr ^ s->random ^ swab(ptr_addr);
 #else
-	encoded = (unsigned long)ptr;
+	encoded = (uintptr_t)ptr;
 #endif
 	return (freeptr_t){.v = encoded};
 }
@@ -529,20 +529,20 @@ static inline void *get_freepointer(struct kmem_cache *s, void *object)
 	freeptr_t p;
 
 	object = kasan_reset_tag(object);
-	ptr_addr = (unsigned long)object + s->offset;
+	ptr_addr = (uintptr_t)object + s->offset;
 	p = *(freeptr_t *)(ptr_addr);
 	return freelist_ptr_decode(s, p, ptr_addr);
 }
 
 static inline void set_freepointer(struct kmem_cache *s, void *object, void *fp)
 {
-	unsigned long freeptr_addr = (unsigned long)object + s->offset;
+	unsigned long freeptr_addr = (uintptr_t)object + s->offset;
 
 #ifdef CONFIG_SLAB_FREELIST_HARDENED
 	BUG_ON(object == fp); /* naive detection of double free or corruption */
 #endif
 
-	freeptr_addr = (unsigned long)kasan_reset_tag((void *)freeptr_addr);
+	freeptr_addr = (uintptr_t)kasan_reset_tag((void *)freeptr_addr);
 	*(freeptr_t *)freeptr_addr = freelist_ptr_encode(s, fp, freeptr_addr);
 }
 
@@ -818,7 +818,7 @@ static inline bool obj_exts_in_slab(struct kmem_cache *s, struct slab *slab)
 	if (!obj_exts)
 		return false;
 
-	start = (unsigned long)slab_address(slab);
+	start = (uintptr_t)slab_address(slab);
 	end = start + slab_size(slab);
 	return (obj_exts >= start) && (obj_exts < end);
 }
@@ -2182,7 +2182,7 @@ int alloc_slab_obj_exts(struct slab *slab, struct kmem_cache *s,
 	VM_WARN_ON_ONCE(virt_to_slab(vec) != NULL &&
 			virt_to_slab(vec)->slab_cache == s);
 
-	new_exts = (unsigned long)vec;
+	new_exts = (uintptr_t)vec;
 #ifdef CONFIG_MEMCG
 	new_exts |= MEMCG_DATA_OBJEXTS;
 #endif
@@ -2273,7 +2273,7 @@ static void alloc_slab_obj_exts_early(struct kmem_cache *s, struct slab *slab)
 	if (obj_exts_fit_within_slab_leftover(s, slab)) {
 		addr = slab_address(slab) + obj_exts_offset_in_slab(s, slab);
 		addr = kasan_reset_tag(addr);
-		obj_exts = (unsigned long)addr;
+		obj_exts = (uintptr_t)addr;
 
 		get_slab_obj_exts(obj_exts);
 		memset(addr, 0, obj_exts_size_in_slab(slab));
@@ -2286,7 +2286,7 @@ static void alloc_slab_obj_exts_early(struct kmem_cache *s, struct slab *slab)
 	} else if (s->flags & SLAB_OBJ_EXT_IN_OBJ) {
 		unsigned int offset = obj_exts_offset_in_object(s);
 
-		obj_exts = (unsigned long)slab_address(slab);
+		obj_exts = (uintptr_t)slab_address(slab);
 		obj_exts += s->red_left_pad;
 		obj_exts += offset;
 
@@ -6421,7 +6421,7 @@ void kvfree_rcu_cb(struct rcu_head *head)
 	void *slab_addr;
 
 	if (is_vmalloc_addr(obj)) {
-		obj = (void *) PAGE_ALIGN_DOWN((unsigned long)obj);
+		obj = (void *) PAGE_ALIGN_DOWN((uintptr_t)obj);
 		vfree(obj);
 		return;
 	}
@@ -6433,7 +6433,7 @@ void kvfree_rcu_cb(struct rcu_head *head)
 		 * rcu_head offset can be only less than page size so no need to
 		 * consider allocation order
 		 */
-		obj = (void *) PAGE_ALIGN_DOWN((unsigned long)obj);
+		obj = (void *) PAGE_ALIGN_DOWN((uintptr_t)obj);
 		free_large_kmalloc(page, obj);
 		return;
 	}
@@ -8653,7 +8653,7 @@ static struct dentry *slab_debugfs_root;
 static void free_loc_track(struct loc_track *t)
 {
 	if (t->max)
-		free_pages((unsigned long)t->loc,
+		free_pages((uintptr_t)t->loc,
 			get_order(sizeof(struct location) * t->max));
 }
 

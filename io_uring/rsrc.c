@@ -779,7 +779,7 @@ static struct io_rsrc_node *io_sqe_buffer_register(struct io_ring_ctx *ctx,
 		return NULL;
 	}
 
-	ret = io_validate_user_buf_range((unsigned long)iov->iov_base,
+	ret = io_validate_user_buf_range((user_uintptr_t)iov->iov_base,
 					 iov->iov_len);
 	if (ret)
 		return ERR_PTR(ret);
@@ -789,7 +789,7 @@ static struct io_rsrc_node *io_sqe_buffer_register(struct io_ring_ctx *ctx,
 		return ERR_PTR(-ENOMEM);
 
 	ret = -ENOMEM;
-	pages = io_pin_pages((unsigned long) iov->iov_base, iov->iov_len,
+	pages = io_pin_pages((user_uintptr_t) iov->iov_base, iov->iov_len,
 				&nr_pages);
 	if (IS_ERR(pages)) {
 		ret = PTR_ERR(pages);
@@ -814,7 +814,7 @@ static struct io_rsrc_node *io_sqe_buffer_register(struct io_ring_ctx *ctx,
 
 	size = iov->iov_len;
 	/* store original address for later verification */
-	imu->ubuf = (unsigned long) iov->iov_base;
+	imu->ubuf = (user_uintptr_t) iov->iov_base;
 	imu->len = iov->iov_len;
 	imu->folio_shift = PAGE_SHIFT;
 	imu->release = io_release_ubuf;
@@ -825,7 +825,7 @@ static struct io_rsrc_node *io_sqe_buffer_register(struct io_ring_ctx *ctx,
 		imu->folio_shift = data.folio_shift;
 	refcount_set(&imu->refs, 1);
 
-	off = (unsigned long)iov->iov_base & ~PAGE_MASK;
+	off = (user_uintptr_t)iov->iov_base & ~PAGE_MASK;
 	if (coalesced)
 		off += data.first_folio_page_idx << PAGE_SHIFT;
 
@@ -1337,7 +1337,7 @@ static int io_vec_fill_bvec(int ddir, struct iov_iter *iter,
 
 	for (iov_idx = 0; iov_idx < nr_iovs; iov_idx++) {
 		size_t iov_len = iovec[iov_idx].iov_len;
-		u64 buf_addr = (u64)(uintptr_t)iovec[iov_idx].iov_base;
+		u64 buf_addr = (u64)(user_uintptr_t)iovec[iov_idx].iov_base;
 		struct bio_vec *src_bvec;
 		size_t offset;
 		int ret;
@@ -1404,7 +1404,7 @@ static int io_vec_fill_kern_bvec(int ddir, struct iov_iter *iter,
 	unsigned iov_idx;
 
 	for (iov_idx = 0; iov_idx < nr_iovs; iov_idx++) {
-		size_t offset = (size_t)(uintptr_t)iovec[iov_idx].iov_base;
+		size_t offset = (size_t)(user_uintptr_t)iovec[iov_idx].iov_base;
 		size_t iov_len = iovec[iov_idx].iov_len;
 		struct bvec_iter bi = {
 			.bi_size        = offset + iov_len,
@@ -1424,7 +1424,7 @@ static int iov_kern_bvec_size(const struct iovec *iov,
 			      const struct io_mapped_ubuf *imu,
 			      unsigned int *nr_seg)
 {
-	size_t offset = (size_t)(uintptr_t)iov->iov_base;
+	size_t offset = (size_t)(user_uintptr_t)iov->iov_base;
 	const struct bio_vec *bvec = imu->bvec;
 	int start = 0, i = 0;
 	size_t off = 0;

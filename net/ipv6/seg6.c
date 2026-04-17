@@ -343,7 +343,7 @@ static int seg6_genl_dumphmac_start(struct netlink_callback *cb)
 		if (!iter)
 			return -ENOMEM;
 
-		cb->args[0] = (long)iter;
+		cb->args[0] = (intptr_t)iter;
 	}
 
 	rhashtable_walk_enter(&sdata->hmac_infos, iter);

@@ -436,7 +436,7 @@ static int get_port_memory(struct icom_port *icom_port)
 	}
 
 	trace(icom_port, "GET_PORT_MEM",
-	      (unsigned long) icom_port->xmit_buf);
+	      (uintptr_t) icom_port->xmit_buf);
 
 	icom_port->recv_buf =
 	    dma_alloc_coherent(&dev->dev, 4096, &icom_port->recv_buf_pci,
@@ -447,7 +447,7 @@ static int get_port_memory(struct icom_port *icom_port)
 		return -ENOMEM;
 	}
 	trace(icom_port, "GET_PORT_MEM",
-	      (unsigned long) icom_port->recv_buf);
+	      (uintptr_t) icom_port->recv_buf);
 
 	icom_port->statStg =
 	    dma_alloc_coherent(&dev->dev, 4096, &icom_port->statStg_pci,
@@ -458,7 +458,7 @@ static int get_port_memory(struct icom_port *icom_port)
 		return -ENOMEM;
 	}
 	trace(icom_port, "GET_PORT_MEM",
-	      (unsigned long) icom_port->statStg);
+	      (uintptr_t) icom_port->statStg);
 
 	icom_port->xmitRestart =
 	    dma_alloc_coherent(&dev->dev, 4096, &icom_port->xmitRestart_pci,
@@ -474,7 +474,7 @@ static int get_port_memory(struct icom_port *icom_port)
            indicates that frames are to be transmitted
 	*/
 
-	stgAddr = (unsigned long) icom_port->statStg;
+	stgAddr = (uintptr_t) icom_port->statStg;
 	for (index = 0; index < NUM_XBUFFS; index++) {
 		trace(icom_port, "FOD_ADDR", stgAddr);
 		stgAddr = stgAddr + sizeof(icom_port->statStg->xmit[0]);
@@ -484,7 +484,7 @@ static int get_port_memory(struct icom_port *icom_port)
 			    cpu_to_le16(XMIT_BUFF_SZ);
 			trace(icom_port, "FOD_ADDR", stgAddr);
 			trace(icom_port, "FOD_XBUFF",
-			      (unsigned long) icom_port->xmit_buf);
+			      (uintptr_t) icom_port->xmit_buf);
 			icom_port->statStg->xmit[index].leBuffer =
 			    cpu_to_le32(icom_port->xmit_buf_pci);
 		} else if (index == (NUM_XBUFFS - 1)) {
@@ -492,7 +492,7 @@ static int get_port_memory(struct icom_port *icom_port)
 			icom_port->statStg->xmit[index].leLengthASD =
 			    cpu_to_le16(XMIT_BUFF_SZ);
 			trace(icom_port, "FOD_XBUFF",
-			      (unsigned long) icom_port->xmit_buf);
+			      (uintptr_t) icom_port->xmit_buf);
 			icom_port->statStg->xmit[index].leBuffer =
 			    cpu_to_le32(icom_port->xmit_buf_pci);
 		} else {
@@ -510,19 +510,19 @@ static int get_port_memory(struct icom_port *icom_port)
 		icom_port->statStg->rcv[index].WorkingLength =
 		    cpu_to_le16(RCV_BUFF_SZ);
 		if (index < (NUM_RBUFFS - 1) ) {
-			offset = stgAddr - (unsigned long) icom_port->statStg;
+			offset = stgAddr - (uintptr_t) icom_port->statStg;
 			icom_port->statStg->rcv[index].leNext =
 			      cpu_to_le32(icom_port-> statStg_pci + offset);
 			trace(icom_port, "FID_RBUFF",
-			      (unsigned long) icom_port->recv_buf);
+			      (uintptr_t) icom_port->recv_buf);
 			icom_port->statStg->rcv[index].leBuffer =
 			    cpu_to_le32(icom_port->recv_buf_pci);
 		} else if (index == (NUM_RBUFFS -1) ) {
-			offset = startStgAddr - (unsigned long) icom_port->statStg;
+			offset = startStgAddr - (uintptr_t) icom_port->statStg;
 			icom_port->statStg->rcv[index].leNext =
 			    cpu_to_le32(icom_port-> statStg_pci + offset);
 			trace(icom_port, "FID_RBUFF",
-			      (unsigned long) icom_port->recv_buf + 2048);
+			      (uintptr_t) icom_port->recv_buf + 2048);
 			icom_port->statStg->rcv[index].leBuffer =
 			    cpu_to_le32(icom_port->recv_buf_pci + 2048);
 		} else {

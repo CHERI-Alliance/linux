@@ -321,7 +321,7 @@ static unsigned int __damon_migrate_folio_list(
 
 	/* Migration ignores all cpuset and mempolicy settings */
 	migrate_pages(migrate_folios, alloc_migration_target, NULL,
-		      (unsigned long)&mtc, MIGRATE_ASYNC, MR_DAMON,
+		      (uintptr_t)&mtc, MIGRATE_ASYNC, MR_DAMON,
 		      &nr_succeeded);
 
 	return nr_succeeded;

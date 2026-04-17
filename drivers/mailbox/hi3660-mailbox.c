@@ -84,7 +84,7 @@ static struct hi3660_mbox *to_hi3660_mbox(struct mbox_controller *mbox)
 
 static int hi3660_mbox_check_state(struct mbox_chan *chan)
 {
-	unsigned long ch = (unsigned long)chan->con_priv;
+	uintptr_t ch = (uintptr_t)chan->con_priv;
 	struct hi3660_mbox *mbox = to_hi3660_mbox(chan->mbox);
 	struct hi3660_chan_info *mchan = &mbox->mchan[ch];
 	void __iomem *base = MBOX_BASE(mbox, ch);
@@ -132,7 +132,7 @@ static int hi3660_mbox_unlock(struct mbox_chan *chan)
 
 static int hi3660_mbox_acquire_channel(struct mbox_chan *chan)
 {
-	unsigned long ch = (unsigned long)chan->con_priv;
+	uintptr_t ch = (uintptr_t)chan->con_priv;
 	struct hi3660_mbox *mbox = to_hi3660_mbox(chan->mbox);
 	struct hi3660_chan_info *mchan = &mbox->mchan[ch];
 	void __iomem *base = MBOX_BASE(mbox, ch);
@@ -173,7 +173,7 @@ static int hi3660_mbox_startup(struct mbox_chan *chan)
 
 static int hi3660_mbox_send_data(struct mbox_chan *chan, void *msg)
 {
-	unsigned long ch = (unsigned long)chan->con_priv;
+	uintptr_t ch = (uintptr_t)chan->con_priv;
 	struct hi3660_mbox *mbox = to_hi3660_mbox(chan->mbox);
 	struct hi3660_chan_info *mchan = &mbox->mchan[ch];
 	void __iomem *base = MBOX_BASE(mbox, ch);

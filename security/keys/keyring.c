@@ -40,12 +40,12 @@ static inline bool keyring_ptr_is_keyring(const struct assoc_array_ptr *x)
 static inline struct key *keyring_ptr_to_key(const struct assoc_array_ptr *x)
 {
 	void *object = assoc_array_ptr_to_leaf(x);
-	return (struct key *)((unsigned long)object & ~KEYRING_PTR_SUBTYPE);
+	return (struct key *)((uintptr_t)object & ~KEYRING_PTR_SUBTYPE);
 }
 static inline void *keyring_key_to_ptr(struct key *key)
 {
 	if (key->type == &key_type_keyring)
-		return (void *)((unsigned long)key | KEYRING_PTR_SUBTYPE);
+		return (void *)((uintptr_t)key | KEYRING_PTR_SUBTYPE);
 	return key;
 }
 
@@ -170,7 +170,7 @@ static void hash_key_type_and_desc(struct keyring_index_key *index_key)
 	u64 acc;
 	int n, desc_len = index_key->desc_len;
 
-	type = (unsigned long)index_key->type;
+	type = (uintptr_t)index_key->type;
 	acc = mult_64x32_and_fold(type, desc_len + 13);
 	acc = mult_64x32_and_fold(acc, 9207);
 	piece = (unsigned long)index_key->domain_tag;
@@ -279,9 +279,9 @@ static unsigned long keyring_get_key_chunk(const void *data, int level)
 	case 1:
 		return index_key->x;
 	case 2:
-		return (unsigned long)index_key->type;
+		return (uintptr_t)index_key->type;
 	case 3:
-		return (unsigned long)index_key->domain_tag;
+		return (uintptr_t)index_key->domain_tag;
 	default:
 		level -= 4;
 		if (desc_len <= sizeof(index_key->desc))
@@ -348,14 +348,14 @@ static int keyring_diff_objects(const void *object, const void *data)
 	level += sizeof(unsigned long);
 
 	/* The next bit may not work on big endian */
-	seg_a = (unsigned long)a->type;
-	seg_b = (unsigned long)b->type;
+	seg_a = (uintptr_t)a->type;
+	seg_b = (uintptr_t)b->type;
 	if ((seg_a ^ seg_b) != 0)
 		goto differ;
 	level += sizeof(unsigned long);
 
-	seg_a = (unsigned long)a->domain_tag;
-	seg_b = (unsigned long)b->domain_tag;
+	seg_a = (uintptr_t)a->domain_tag;
+	seg_b = (uintptr_t)b->domain_tag;
 	if ((seg_a ^ seg_b) != 0)
 		goto differ;
 	level += sizeof(unsigned long);

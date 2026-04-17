@@ -3310,7 +3310,7 @@ static void mnt_warn_timestamp_expiry(const struct path *mountpoint,
 
 		sb->s_iflags |= SB_I_TS_EXPIRY_WARNED;
 		if (buf)
-			free_page((unsigned long)buf);
+			free_page((uintptr_t)buf);
 	}
 }
 

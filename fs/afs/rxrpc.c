@@ -372,7 +372,7 @@ void afs_make_call(struct afs_call *call, gfp_t gfp)
 
 	/* create a call */
 	rxcall = rxrpc_kernel_begin_call(call->net->socket, call->peer, call->key,
-					 (unsigned long)call,
+					 (uintptr_t)call,
 					 tx_total_len,
 					 call->max_lifespan,
 					 gfp,
@@ -757,7 +757,7 @@ void afs_charge_preallocation(struct work_struct *work)
 
 		if (rxrpc_kernel_charge_accept(net->socket,
 					       afs_wake_up_async_call,
-					       (unsigned long)call,
+					       (uintptr_t)call,
 					       GFP_KERNEL,
 					       call->debug_id) < 0)
 			break;

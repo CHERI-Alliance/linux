@@ -152,7 +152,7 @@ static void __init print_vm_layout(void)
 		(unsigned long)MODULES_END);
 #endif
 	print_ml("lowmem", (unsigned long)PAGE_OFFSET,
-		(unsigned long)high_memory);
+		(uintptr_t)high_memory);
 	if (IS_ENABLED(CONFIG_64BIT)) {
 #ifdef CONFIG_KASAN
 		print_ml("kasan", KASAN_SHADOW_START, KASAN_SHADOW_END);
@@ -858,7 +858,7 @@ static void __init set_mmap_rnd_bits_max(void)
 static __init void set_satp_mode(uintptr_t dtb_pa)
 {
 	u64 identity_satp, hw_satp;
-	uintptr_t set_satp_mode_pmd = ((unsigned long)set_satp_mode) & PMD_MASK;
+	uintptr_t set_satp_mode_pmd = ((uintptr_t)set_satp_mode) & PMD_MASK;
 	u64 satp_mode_limit = min_not_zero(__pi_set_satp_mode_from_cmdline(dtb_pa),
 					   __pi_set_satp_mode_from_fdt(dtb_pa));
 

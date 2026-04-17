@@ -696,7 +696,7 @@ static int read_alloc_one_name(struct extent_buffer *eb, void *start, int len,
 	if (!buf)
 		return -ENOMEM;
 
-	read_extent_buffer(eb, buf, (unsigned long)start, len);
+	read_extent_buffer(eb, buf, (uintptr_t)start, len);
 	name->name = buf;
 	name->len = len;
 	return 0;
@@ -785,7 +785,7 @@ static noinline int replay_one_extent(struct walk_control *wc)
 		 * we already have a pointer to this exact extent,
 		 * we don't have to do anything
 		 */
-		if (memcmp_extent_buffer(wc->log_leaf, &existing, (unsigned long)item,
+		if (memcmp_extent_buffer(wc->log_leaf, &existing, (uintptr_t)item,
 					 sizeof(existing)) == 0) {
 			btrfs_release_path(wc->subvol_path);
 			goto out;
@@ -837,7 +837,7 @@ static noinline int replay_one_extent(struct walk_control *wc)
 	dest_offset = btrfs_item_ptr_offset(wc->subvol_path->nodes[0],
 					    wc->subvol_path->slots[0]);
 	copy_extent_buffer(wc->subvol_path->nodes[0], wc->log_leaf, dest_offset,
-			   (unsigned long)item, sizeof(*item));
+			   (uintptr_t)item, sizeof(*item));
 
 	/*
 	 * We have an explicit hole and NO_HOLES is not enabled. We have added
@@ -1251,7 +1251,7 @@ static int unlink_refs_not_in_log(struct walk_control *wc,
 				return ret;
 			}
 			kfree(victim_name.name);
-			ptr = (unsigned long)(victim_ref + 1) + victim_name.len;
+			ptr = (uintptr_t)(victim_ref + 1) + victim_name.len;
 			continue;
 		}
 
@@ -1848,7 +1848,7 @@ process_slot:
 			ref = (struct btrfs_inode_ref *)ptr;
 			name_len = btrfs_inode_ref_name_len(path->nodes[0],
 							    ref);
-			ptr = (unsigned long)(ref + 1) + name_len;
+			ptr = (uintptr_t)(ref + 1) + name_len;
 			nlink++;
 		}
 
@@ -2571,7 +2571,7 @@ process_leaf:
 				goto out;
 			}
 			read_extent_buffer(wc->subvol_path->nodes[0], name,
-					   (unsigned long)(di + 1), name_len);
+					   (uintptr_t)(di + 1), name_len);
 
 			log_di = btrfs_lookup_xattr(NULL, log, log_path, ino,
 						    name, name_len, 0);
@@ -5774,7 +5774,7 @@ static int btrfs_check_ref_name_override(struct extent_buffer *eb,
 			iref = (struct btrfs_inode_ref *)(ptr + cur_offset);
 			parent = key->offset;
 			this_name_len = btrfs_inode_ref_name_len(eb, iref);
-			name_ptr = (unsigned long)(iref + 1);
+			name_ptr = (uintptr_t)(iref + 1);
 			this_len = sizeof(*iref) + this_name_len;
 		} else {
 			struct btrfs_inode_extref *extref;
@@ -5783,7 +5783,7 @@ static int btrfs_check_ref_name_override(struct extent_buffer *eb,
 							       cur_offset);
 			parent = btrfs_inode_extref_parent(eb, extref);
 			this_name_len = btrfs_inode_extref_name_len(eb, extref);
-			name_ptr = (unsigned long)&extref->name;
+			name_ptr = (uintptr_t)&extref->name;
 			this_len = sizeof(*extref) + this_name_len;
 		}
 
@@ -6531,7 +6531,7 @@ static int insert_delayed_items_batch(struct btrfs_trans_handle *trans,
 
 		data_ptr = btrfs_item_ptr(path->nodes[0], path->slots[0], char);
 		write_extent_buffer(path->nodes[0], &curr->data,
-				    (unsigned long)data_ptr, curr->data_len);
+				    (uintptr_t)data_ptr, curr->data_len);
 		curr = list_next_entry(curr, log_list);
 		path->slots[0]++;
 	}

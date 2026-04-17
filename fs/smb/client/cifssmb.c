@@ -6255,7 +6255,7 @@ QAllEAsRetry:
 	if ((char *)ea_response_data + list_len > end_of_smb) {
 		cifs_dbg(FYI, "EA list appears to go beyond SMB\n");
 		rc = smb_EIO2(smb_eio_trace_qalleas_overlong,
-			      (unsigned long)ea_response_data + list_len - (unsigned long)pSMBr,
+			      (uintptr_t)ea_response_data + list_len - (uintptr_t)pSMBr,
 			      (unsigned long)end_of_smb - (unsigned long)pSMBr);
 		goto QAllEAsOut;
 	}

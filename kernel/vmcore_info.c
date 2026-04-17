@@ -152,7 +152,7 @@ static int __init crash_save_vmcoreinfo_init(void)
 	vmcoreinfo_note = alloc_pages_exact(VMCOREINFO_NOTE_SIZE,
 						GFP_KERNEL | __GFP_ZERO);
 	if (!vmcoreinfo_note) {
-		free_pages((unsigned long)vmcoreinfo_data, order);
+		free_pages((uintptr_t)vmcoreinfo_data, order);
 		vmcoreinfo_data = NULL;
 		pr_warn("Memory allocation for vmcoreinfo_note failed\n");
 		return -ENOMEM;

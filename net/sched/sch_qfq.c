@@ -525,7 +525,7 @@ set_change_agg:
 	sch_tree_unlock(sch);
 	qdisc_class_hash_grow(sch, &q->clhash);
 
-	*arg = (unsigned long)cl;
+	*arg = (uintptr_t)cl;
 	return 0;
 
 destroy_class:
@@ -568,7 +568,7 @@ static int qfq_delete_class(struct Qdisc *sch, unsigned long arg,
 
 static unsigned long qfq_search_class(struct Qdisc *sch, u32 classid)
 {
-	return (unsigned long)qfq_find_class(sch, classid);
+	return (uintptr_t)qfq_find_class(sch, classid);
 }
 
 static struct tcf_block *qfq_tcf_block(struct Qdisc *sch, unsigned long cl,
@@ -590,7 +590,7 @@ static unsigned long qfq_bind_tcf(struct Qdisc *sch, unsigned long parent,
 	if (cl)
 		qdisc_class_get(&cl->common);
 
-	return (unsigned long)cl;
+	return (uintptr_t)cl;
 }
 
 static void qfq_unbind_tcf(struct Qdisc *sch, unsigned long arg)
@@ -685,7 +685,7 @@ static void qfq_walk(struct Qdisc *sch, struct qdisc_walker *arg)
 
 	for (i = 0; i < q->clhash.hashsize; i++) {
 		hlist_for_each_entry(cl, &q->clhash.hash[i], common.hnode) {
-			if (!tc_qdisc_stats_dump(sch, (unsigned long)cl, arg))
+			if (!tc_qdisc_stats_dump(sch, (uintptr_t)cl, arg))
 				return;
 		}
 	}

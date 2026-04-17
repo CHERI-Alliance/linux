@@ -2682,7 +2682,7 @@ static int wsa_macro_probe(struct platform_device *pdev)
 	void __iomem *base;
 	int ret, def_count;
 
-	flags = (kernel_ulong_t)device_get_match_data(dev);
+	flags = (uintptr_t)device_get_match_data(dev);
 
 	wsa = devm_kzalloc(dev, sizeof(*wsa), GFP_KERNEL);
 	if (!wsa)

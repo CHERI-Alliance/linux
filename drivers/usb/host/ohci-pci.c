@@ -197,27 +197,27 @@ static int ohci_quirk_qemu(struct usb_hcd *hcd)
 static const struct pci_device_id ohci_pci_quirks[] = {
 	{
 		PCI_DEVICE(PCI_VENDOR_ID_AMD, 0x740c),
-		.driver_data = (unsigned long)ohci_quirk_amd756,
+		.driver_data = (uintptr_t)ohci_quirk_amd756,
 	},
 	{
 		PCI_DEVICE(PCI_VENDOR_ID_OPTI, 0xc861),
-		.driver_data = (unsigned long)ohci_quirk_opti,
+		.driver_data = (uintptr_t)ohci_quirk_opti,
 	},
 	{
 		PCI_DEVICE(PCI_VENDOR_ID_NS, PCI_ANY_ID),
-		.driver_data = (unsigned long)ohci_quirk_ns,
+		.driver_data = (uintptr_t)ohci_quirk_ns,
 	},
 	{
 		PCI_DEVICE(PCI_VENDOR_ID_COMPAQ, 0xa0f8),
-		.driver_data = (unsigned long)ohci_quirk_zfmicro,
+		.driver_data = (uintptr_t)ohci_quirk_zfmicro,
 	},
 	{
 		PCI_DEVICE(PCI_VENDOR_ID_TOSHIBA_2, 0x01b6),
-		.driver_data = (unsigned long)ohci_quirk_toshiba_scc,
+		.driver_data = (uintptr_t)ohci_quirk_toshiba_scc,
 	},
 	{
 		PCI_DEVICE(PCI_VENDOR_ID_NEC, PCI_DEVICE_ID_NEC_USB),
-		.driver_data = (unsigned long)ohci_quirk_nec,
+		.driver_data = (uintptr_t)ohci_quirk_nec,
 	},
 	{
 		/* Toshiba portege 4000 */
@@ -225,34 +225,34 @@ static const struct pci_device_id ohci_pci_quirks[] = {
 		.device		= 0x5237,
 		.subvendor	= PCI_VENDOR_ID_TOSHIBA,
 		.subdevice	= 0x0004,
-		.driver_data	= (unsigned long) broken_suspend,
+		.driver_data	= (uintptr_t) broken_suspend,
 	},
 	{
 		PCI_DEVICE(PCI_VENDOR_ID_ITE, 0x8152),
-		.driver_data = (unsigned long) broken_suspend,
+		.driver_data = (uintptr_t) broken_suspend,
 	},
 	{
 		PCI_DEVICE(PCI_VENDOR_ID_ATI, 0x4397),
-		.driver_data = (unsigned long)ohci_quirk_amd700,
+		.driver_data = (uintptr_t)ohci_quirk_amd700,
 	},
 	{
 		PCI_DEVICE(PCI_VENDOR_ID_ATI, 0x4398),
-		.driver_data = (unsigned long)ohci_quirk_amd700,
+		.driver_data = (uintptr_t)ohci_quirk_amd700,
 	},
 	{
 		PCI_DEVICE(PCI_VENDOR_ID_ATI, 0x4399),
-		.driver_data = (unsigned long)ohci_quirk_amd700,
+		.driver_data = (uintptr_t)ohci_quirk_amd700,
 	},
 	{
 		PCI_DEVICE(PCI_VENDOR_ID_LOONGSON, 0x7a24),
-		.driver_data = (unsigned long)ohci_quirk_loongson,
+		.driver_data = (uintptr_t)ohci_quirk_loongson,
 	},
 	{
 		.vendor		= PCI_VENDOR_ID_APPLE,
 		.device		= 0x003f,
 		.subvendor	= PCI_SUBVENDOR_ID_REDHAT_QUMRANET,
 		.subdevice	= PCI_SUBDEVICE_ID_QEMU,
-		.driver_data	= (unsigned long)ohci_quirk_qemu,
+		.driver_data	= (uintptr_t)ohci_quirk_qemu,
 	},
 
 	{},

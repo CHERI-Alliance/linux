@@ -4789,7 +4789,7 @@ cont:
 			memset(inuse, 0, PAGE_SIZE);
 			goto cont;
 		}
-		free_page((unsigned long)inuse);
+		free_page((uintptr_t)inuse);
 	}
 
 	set->name = kasprintf(GFP_KERNEL_ACCOUNT, name, min + n);
@@ -5073,7 +5073,7 @@ static int nf_tables_dump_sets(struct sk_buff *skb, struct netlink_callback *cb)
 					       NFT_MSG_NEWSET,
 					       NLM_F_MULTI) < 0) {
 				cb->args[0] = idx;
-				cb->args[2] = (unsigned long) table;
+				cb->args[2] = (uintptr_t) table;
 				goto done;
 			}
 			nl_dump_check_consistent(cb, nlmsg_hdr(skb));

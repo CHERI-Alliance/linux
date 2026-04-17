@@ -581,19 +581,19 @@ static const struct driver_info sitecom_info = {
 static const struct usb_device_id products[] = {
 	{
 		USB_DEVICE(MCS7830_VENDOR_ID, MCS7832_PRODUCT_ID),
-		.driver_info = (unsigned long) &moschip_info,
+		.driver_info = (uintptr_t) &moschip_info,
 	},
 	{
 		USB_DEVICE(MCS7830_VENDOR_ID, MCS7830_PRODUCT_ID),
-		.driver_info = (unsigned long) &moschip_info,
+		.driver_info = (uintptr_t) &moschip_info,
 	},
 	{
 		USB_DEVICE(MCS7830_VENDOR_ID, MCS7730_PRODUCT_ID),
-		.driver_info = (unsigned long) &moschip_info,
+		.driver_info = (uintptr_t) &moschip_info,
 	},
 	{
 		USB_DEVICE(SITECOM_VENDOR_ID, LN_030_PRODUCT_ID),
-		.driver_info = (unsigned long) &sitecom_info,
+		.driver_info = (uintptr_t) &sitecom_info,
 	},
 	{},
 };

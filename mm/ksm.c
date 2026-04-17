@@ -950,7 +950,7 @@ static struct folio *ksm_get_folio(struct ksm_stable_node *stable_node,
 	void *expected_mapping;
 	unsigned long kpfn;
 
-	expected_mapping = (void *)((unsigned long)stable_node |
+	expected_mapping = (void *)((uintptr_t)stable_node |
 					FOLIO_MAPPING_KSM);
 again:
 	kpfn = READ_ONCE(stable_node->kpfn); /* Address dependency. */
@@ -1093,7 +1093,7 @@ static inline void folio_set_stable_node(struct folio *folio,
 					 struct ksm_stable_node *stable_node)
 {
 	VM_WARN_ON_FOLIO(folio_test_anon(folio) && PageAnonExclusive(&folio->page), folio);
-	folio->mapping = (void *)((unsigned long)stable_node | FOLIO_MAPPING_KSM);
+	folio->mapping = (void *)((uintptr_t)stable_node | FOLIO_MAPPING_KSM);
 }
 
 #ifdef CONFIG_SYSFS

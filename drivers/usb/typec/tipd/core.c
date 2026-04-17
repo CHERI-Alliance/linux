@@ -2025,7 +2025,7 @@ static const struct of_device_id tps6598x_of_match[] = {
 MODULE_DEVICE_TABLE(of, tps6598x_of_match);
 
 static const struct i2c_device_id tps6598x_id[] = {
-	{ "tps6598x", (kernel_ulong_t)&tps6598x_data },
+	{ "tps6598x", (uintptr_t)&tps6598x_data },
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, tps6598x_id);

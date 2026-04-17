@@ -90,7 +90,7 @@ void trace_filter_add_remove_task(struct trace_pid_list *pid_list,
  */
 void *trace_pid_next(struct trace_pid_list *pid_list, void *v, loff_t *pos)
 {
-	long pid = (unsigned long)v;
+	long pid = (uintptr_t)v;
 	unsigned int next;
 
 	(*pos)++;
@@ -129,7 +129,7 @@ void *trace_pid_start(struct trace_pid_list *pid_list, loff_t *pos)
 
 	/* Return pid + 1 so that zero can be the exit value */
 	for (pid++; pid && l < *pos;
-	     pid = (unsigned long)trace_pid_next(pid_list, (void *)pid, &l))
+	     pid = (uintptr_t)trace_pid_next(pid_list, (void *)pid, &l))
 		;
 	return (void *)pid;
 }
@@ -144,7 +144,7 @@ void *trace_pid_start(struct trace_pid_list *pid_list, loff_t *pos)
  */
 int trace_pid_show(struct seq_file *m, void *v)
 {
-	unsigned long pid = (unsigned long)v - 1;
+	unsigned long pid = (uintptr_t)v - 1;
 
 	seq_printf(m, "%lu\n", pid);
 	return 0;

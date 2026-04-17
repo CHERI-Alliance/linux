@@ -1997,8 +1997,8 @@ static const struct ov7670_devtype ov7675_devdata = {
 };
 
 static const struct i2c_device_id ov7670_id[] = {
-	{ "ov7670", (kernel_ulong_t)&ov7670_devdata },
-	{ "ov7675", (kernel_ulong_t)&ov7675_devdata },
+	{ "ov7670", (uintptr_t)&ov7670_devdata },
+	{ "ov7675", (uintptr_t)&ov7675_devdata },
 	{ /* sentinel */ }
 };
 MODULE_DEVICE_TABLE(i2c, ov7670_id);

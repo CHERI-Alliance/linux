@@ -689,7 +689,7 @@ to_cxl_root(const struct cxl_port *port)
 static inline struct cxl_dport *
 cxl_find_dport_by_dev(struct cxl_port *port, const struct device *dport_dev)
 {
-	return xa_load(&port->dports, (unsigned long)dport_dev);
+	return xa_load(&port->dports, (uintptr_t)dport_dev);
 }
 
 struct cxl_rcrb_info {

@@ -553,7 +553,7 @@ static inline int cifs_get_num_sgs(const struct smb_rqst *rqst,
 		for (j = 0; j < rqst[i].rq_nvec; j++) {
 			struct kvec *iov = &rqst[i].rq_iov[j];
 
-			addr = (unsigned long)iov->iov_base + skip;
+			addr = (uintptr_t)iov->iov_base + skip;
 			if (is_vmalloc_or_module_addr((void *)addr)) {
 				len = iov->iov_len - skip;
 				nents += DIV_ROUND_UP(offset_in_page(addr) + len,
@@ -577,7 +577,7 @@ static inline void cifs_sg_set_buf(struct sg_table *sgtable,
 				   const void *buf,
 				   unsigned int buflen)
 {
-	unsigned long addr = (unsigned long)buf;
+	uintptr_t addr = (uintptr_t)buf;
 	unsigned int off = offset_in_page(addr);
 
 	addr &= PAGE_MASK;

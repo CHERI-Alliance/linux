@@ -1226,7 +1226,7 @@ static int ntb_transport_init_queue(struct ntb_transport_ctx *nt,
 	INIT_LIST_HEAD(&qp->tx_offl_q);
 
 	tasklet_init(&qp->rxc_db_work, ntb_transport_rxc_db,
-		     (unsigned long)qp);
+		     (uintptr_t)qp);
 
 	return 0;
 }

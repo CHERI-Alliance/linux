@@ -724,7 +724,7 @@ zerocopy_fill_skb_from_devmem(struct sk_buff *skb, struct iov_iter *from,
 		if (i == MAX_SKB_FRAGS)
 			return -EMSGSIZE;
 
-		virt_addr = (size_t)iter_iov_addr(from);
+		virt_addr = (user_uintptr_t)iter_iov_addr(from);
 		niov = net_devmem_get_niov_at(binding, virt_addr, &off, &size);
 		if (!niov)
 			return -EFAULT;

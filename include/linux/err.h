@@ -62,7 +62,7 @@ static inline void * __must_check ERR_PTR(long error)
  */
 static inline long __must_check PTR_ERR(__force const void *ptr)
 {
-	return (long) ptr;
+	return (intptr_t) ptr;
 }
 
 /* Read an error pointer from the percpu address space. */

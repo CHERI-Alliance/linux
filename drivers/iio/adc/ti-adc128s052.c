@@ -248,24 +248,24 @@ static const struct of_device_id adc128_of_match[] = {
 MODULE_DEVICE_TABLE(of, adc128_of_match);
 
 static const struct spi_device_id adc128_id[] = {
-	{ "adc128s052", (kernel_ulong_t)&adc128s_config },
-	{ "adc122s021",	(kernel_ulong_t)&adc122s_config },
-	{ "adc122s051",	(kernel_ulong_t)&adc122s_config },
-	{ "adc122s101",	(kernel_ulong_t)&adc122s_config },
-	{ "adc124s021", (kernel_ulong_t)&adc124s_config },
-	{ "adc124s051", (kernel_ulong_t)&adc124s_config },
-	{ "adc124s101", (kernel_ulong_t)&adc124s_config },
-	{ "bd79100", (kernel_ulong_t)&bd79100_config },
-	{ "bd79101", (kernel_ulong_t)&bd79101_config },
-	{ "bd79102", (kernel_ulong_t)&bd79102_config },
-	{ "bd79103", (kernel_ulong_t)&bd79104_config },
-	{ "bd79104", (kernel_ulong_t)&bd79104_config },
+	{ "adc128s052", (uintptr_t)&adc128s_config },
+	{ "adc122s021",	(uintptr_t)&adc122s_config },
+	{ "adc122s051",	(uintptr_t)&adc122s_config },
+	{ "adc122s101",	(uintptr_t)&adc122s_config },
+	{ "adc124s021", (uintptr_t)&adc124s_config },
+	{ "adc124s051", (uintptr_t)&adc124s_config },
+	{ "adc124s101", (uintptr_t)&adc124s_config },
+	{ "bd79100", (uintptr_t)&bd79100_config },
+	{ "bd79101", (uintptr_t)&bd79101_config },
+	{ "bd79102", (uintptr_t)&bd79102_config },
+	{ "bd79103", (uintptr_t)&bd79104_config },
+	{ "bd79104", (uintptr_t)&bd79104_config },
 	{ }
 };
 MODULE_DEVICE_TABLE(spi, adc128_id);
 
 static const struct acpi_device_id adc128_acpi_match[] = {
-	{ "AANT1280", (kernel_ulong_t)&adc124s_config },
+	{ "AANT1280", (uintptr_t)&adc124s_config },
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, adc128_acpi_match);

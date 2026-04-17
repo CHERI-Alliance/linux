@@ -42,7 +42,7 @@ static int init_worker_threads(struct otx_cptvf *cptvf)
 
 	for (i = 0; i < cptvf->num_queues; i++) {
 		tasklet_init(&cwqe_info->vq_wqe[i].twork, vq_work_handler,
-			     (u64)cwqe_info);
+			     (uintptr_t)cwqe_info);
 		cwqe_info->vq_wqe[i].cptvf = cptvf;
 	}
 	cptvf->wqe_info = cwqe_info;

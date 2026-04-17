@@ -12,7 +12,7 @@
 static void __cold report_setget_bounds(const struct extent_buffer *eb,
 					const void *ptr, unsigned off, int size)
 {
-	unsigned long member_offset = (unsigned long)ptr + off;
+	unsigned long member_offset = (uintptr_t)ptr + off;
 
 	btrfs_warn(eb->fs_info,
 		   "bad eb member %s: ptr 0x%lx start %llu member offset %lu size %d",

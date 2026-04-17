@@ -884,25 +884,25 @@ static void efx_unregister_netdev(struct efx_nic *efx)
 /* PCI device ID table */
 static const struct pci_device_id efx_pci_table[] = {
 	{PCI_DEVICE(PCI_VENDOR_ID_SOLARFLARE, 0x0903),  /* SFC9120 PF */
-	 .driver_data = (unsigned long) &efx_hunt_a0_nic_type},
+	 .driver_data = (uintptr_t) &efx_hunt_a0_nic_type},
 	{PCI_DEVICE(PCI_VENDOR_ID_SOLARFLARE, 0x1903),  /* SFC9120 VF */
-	 .driver_data = (unsigned long) &efx_hunt_a0_vf_nic_type},
+	 .driver_data = (uintptr_t) &efx_hunt_a0_vf_nic_type},
 	{PCI_DEVICE(PCI_VENDOR_ID_SOLARFLARE, 0x0923),  /* SFC9140 PF */
-	 .driver_data = (unsigned long) &efx_hunt_a0_nic_type},
+	 .driver_data = (uintptr_t) &efx_hunt_a0_nic_type},
 	{PCI_DEVICE(PCI_VENDOR_ID_SOLARFLARE, 0x1923),  /* SFC9140 VF */
-	 .driver_data = (unsigned long) &efx_hunt_a0_vf_nic_type},
+	 .driver_data = (uintptr_t) &efx_hunt_a0_vf_nic_type},
 	{PCI_DEVICE(PCI_VENDOR_ID_SOLARFLARE, 0x0a03),  /* SFC9220 PF */
-	 .driver_data = (unsigned long) &efx_hunt_a0_nic_type},
+	 .driver_data = (uintptr_t) &efx_hunt_a0_nic_type},
 	{PCI_DEVICE(PCI_VENDOR_ID_SOLARFLARE, 0x1a03),  /* SFC9220 VF */
-	 .driver_data = (unsigned long) &efx_hunt_a0_vf_nic_type},
+	 .driver_data = (uintptr_t) &efx_hunt_a0_vf_nic_type},
 	{PCI_DEVICE(PCI_VENDOR_ID_SOLARFLARE, 0x0b03),  /* SFC9250 PF */
-	 .driver_data = (unsigned long) &efx_hunt_a0_nic_type},
+	 .driver_data = (uintptr_t) &efx_hunt_a0_nic_type},
 	{PCI_DEVICE(PCI_VENDOR_ID_SOLARFLARE, 0x1b03),  /* SFC9250 VF */
-	 .driver_data = (unsigned long) &efx_hunt_a0_vf_nic_type},
+	 .driver_data = (uintptr_t) &efx_hunt_a0_vf_nic_type},
 	{PCI_DEVICE(PCI_VENDOR_ID_SOLARFLARE, 0x0c03),  /* X4 PF (FF/LL) */
-	 .driver_data = (unsigned long)&efx_x4_nic_type},
+	 .driver_data = (uintptr_t)&efx_x4_nic_type},
 	{PCI_DEVICE(PCI_VENDOR_ID_SOLARFLARE, 0x2c03),  /* X4 PF (FF only) */
-	 .driver_data = (unsigned long)&efx_x4_nic_type},
+	 .driver_data = (uintptr_t)&efx_x4_nic_type},
 	{0}			/* end of list */
 };
 

@@ -822,7 +822,7 @@ static irqreturn_t orc_interrupt(struct orc_host * host)
 		scb_index = inb(host->base + ORC_RQUEUE);
 
 		/* Translate it back to a host pointer */
-		scb = (struct orc_scb *) ((unsigned long) host->scb_virt + (unsigned long) (sizeof(struct orc_scb) * scb_index));
+		scb = (struct orc_scb *) ((uintptr_t) host->scb_virt + (unsigned long) (sizeof(struct orc_scb) * scb_index));
 		scb->status = 0x0;
 		/* Process the SCB */
 		inia100_scb_handler(host, scb);

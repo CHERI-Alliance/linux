@@ -4068,13 +4068,13 @@ void btrfs_truncate_item(struct btrfs_trans_handle *trans,
 			fi = btrfs_item_ptr(leaf, slot,
 					    struct btrfs_file_extent_item);
 			fi = (struct btrfs_file_extent_item *)(
-			     (unsigned long)fi - size_diff);
+			     (uintptr_t)fi - size_diff);
 
 			if (btrfs_file_extent_type(leaf, fi) ==
 			    BTRFS_FILE_EXTENT_INLINE) {
 				ptr = btrfs_item_ptr_offset(leaf, slot);
 				memmove_extent_buffer(leaf, ptr,
-				      (unsigned long)fi,
+				      (uintptr_t)fi,
 				      BTRFS_FILE_EXTENT_INLINE_DATA_START);
 			}
 		}

@@ -767,7 +767,7 @@ static long autofs_dev_ioctl(struct file *file, unsigned int command,
 static long autofs_dev_ioctl_compat(struct file *file, unsigned int command,
 				    unsigned long u)
 {
-	return autofs_dev_ioctl(file, command, (unsigned long) compat_ptr(u));
+	return autofs_dev_ioctl(file, command, (user_uintptr_t) compat_ptr(u));
 }
 #else
 #define autofs_dev_ioctl_compat NULL

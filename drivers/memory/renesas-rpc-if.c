@@ -787,7 +787,7 @@ static void memcpy_fromio_readw(void *to,
 	u8 buf[2];
 
 	if (count && ((unsigned long)from & 1)) {
-		*(u16 *)buf = __raw_readw((void __iomem *)((unsigned long)from & ~1));
+		*(u16 *)buf = __raw_readw((void __iomem *)((uintptr_t)from & ~1));
 		*(u8 *)to = buf[1];
 		from++;
 		to++;

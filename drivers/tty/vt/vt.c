@@ -538,7 +538,7 @@ void vc_uniscr_copy_line(const struct vc_data *vc, void *dest, bool viewed,
 	if (WARN_ON_ONCE(!uni_lines))
 		return;
 
-	pos = (unsigned long)screenpos(vc, offset, viewed);
+	pos = (uintptr_t)screenpos(vc, offset, viewed);
 	if (pos >= vc->vc_origin && pos < vc->vc_scr_end) {
 		/*
 		 * Desired position falls in the main screen buffer.
@@ -740,7 +740,7 @@ void invert_screen(struct vc_data *vc, int offset, int count, bool viewed)
 	}
 
 	if (con_should_update(vc))
-		do_update_region(vc, (unsigned long) p, count);
+		do_update_region(vc, (uintptr_t) p, count);
 	notify_update(vc);
 }
 
@@ -788,7 +788,7 @@ static void insert_char(struct vc_data *vc, unsigned int nr)
 	scr_memsetw(p, vc->vc_video_erase_char, nr * 2);
 	vc->vc_need_wrap = 0;
 	if (con_should_update(vc))
-		do_update_region(vc, (unsigned long) p,
+		do_update_region(vc, (uintptr_t) p,
 			vc->vc_cols - vc->state.x);
 }
 
@@ -802,7 +802,7 @@ static void delete_char(struct vc_data *vc, unsigned int nr)
 			nr * 2);
 	vc->vc_need_wrap = 0;
 	if (con_should_update(vc))
-		do_update_region(vc, (unsigned long) p,
+		do_update_region(vc, (uintptr_t) p,
 			vc->vc_cols - vc->state.x);
 }
 
@@ -871,7 +871,7 @@ static void set_origin(struct vc_data *vc)
 	if (!con_is_visible(vc) ||
 	    !vc->vc_sw->con_set_origin ||
 	    !vc->vc_sw->con_set_origin(vc))
-		vc->vc_origin = (unsigned long)vc->vc_screenbuf;
+		vc->vc_origin = (uintptr_t)vc->vc_screenbuf;
 	vc->vc_visible_origin = vc->vc_origin;
 	vc->vc_scr_end = vc->vc_origin + vc->vc_screenbuf_size;
 	vc->vc_pos = vc->vc_origin + vc->vc_size_row * vc->state.y +
@@ -1207,7 +1207,7 @@ static int vc_do_resize(struct tty_struct *tty, struct vc_data *vc,
 	rlth = min(old_row_size, new_row_size);
 	rrem = new_row_size - rlth;
 	old_origin = vc->vc_origin;
-	new_origin = (long) newscreen;
+	new_origin = (intptr_t) newscreen;
 	new_scr_end = new_origin + new_screen_size;
 
 	if (vc->state.y > new_rows) {
@@ -1531,7 +1531,7 @@ static void csi_J(struct vc_data *vc, enum CSI_J vpar)
 	}
 	scr_memsetw(start, vc->vc_video_erase_char, 2 * count);
 	if (con_should_update(vc))
-		do_update_region(vc, (unsigned long) start, count);
+		do_update_region(vc, (uintptr_t) start, count);
 	vc->vc_need_wrap = 0;
 }
 
@@ -1567,7 +1567,7 @@ static void csi_K(struct vc_data *vc)
 	scr_memsetw(start + offset, vc->vc_video_erase_char, 2 * count);
 	vc->vc_need_wrap = 0;
 	if (con_should_update(vc))
-		do_update_region(vc, (unsigned long)(start + offset), count);
+		do_update_region(vc, (uintptr_t)(start + offset), count);
 }
 
 /* erase the following count positions */
@@ -3976,7 +3976,7 @@ static int do_bind_con_driver(const struct consw *csw, int first, int last,
 
 		old_was_color = vc->vc_can_do_color;
 		vc->vc_sw->con_deinit(vc);
-		vc->vc_origin = (unsigned long)vc->vc_screenbuf;
+		vc->vc_origin = (uintptr_t)vc->vc_screenbuf;
 		visual_init(vc, i, false);
 		set_origin(vc);
 		update_attr(vc);

@@ -289,7 +289,7 @@ int radeon_cs_parser_init(struct radeon_cs_parser *p, void *data)
 	if (p->chunks_array == NULL) {
 		return -ENOMEM;
 	}
-	chunk_array_ptr = (uint64_t *)(unsigned long)(cs->chunks);
+	chunk_array_ptr = (uint64_t *)(user_uintptr_t)(cs->chunks);
 	if (copy_from_user(p->chunks_array, chunk_array_ptr,
 			       sizeof(uint64_t)*cs->num_chunks)) {
 		return -EFAULT;
@@ -334,7 +334,7 @@ int radeon_cs_parser_init(struct radeon_cs_parser *p, void *data)
 		}
 
 		size = p->chunks[i].length_dw;
-		cdata = (void __user *)(unsigned long)user_chunk.chunk_data;
+		cdata = (void __user *)(user_uintptr_t)user_chunk.chunk_data;
 		p->chunks[i].user_ptr = cdata;
 		if (user_chunk.chunk_id == RADEON_CHUNK_ID_CONST_IB)
 			continue;

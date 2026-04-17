@@ -397,7 +397,7 @@ static int tls_device_copy_data(void *addr, size_t bytes, struct iov_iter *i)
 {
 	size_t pre_copy, nocache;
 
-	pre_copy = ~((unsigned long)addr - 1) & (SMP_CACHE_BYTES - 1);
+	pre_copy = ~((uintptr_t)addr - 1) & (SMP_CACHE_BYTES - 1);
 	if (pre_copy) {
 		pre_copy = min(pre_copy, bytes);
 		if (copy_from_iter(addr, pre_copy, i) != pre_copy)

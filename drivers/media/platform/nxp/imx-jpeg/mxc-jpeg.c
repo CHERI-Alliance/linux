@@ -787,7 +787,7 @@ static int mxc_get_free_slot(struct mxc_jpeg_slot_data *slot_data)
 static void mxc_jpeg_free(struct mxc_jpeg_dev *jpeg, size_t size, void *addr, dma_addr_t handle)
 {
 	if (jpeg->sram_pool)
-		gen_pool_free(jpeg->sram_pool, (unsigned long)addr, size);
+		gen_pool_free(jpeg->sram_pool, (uintptr_t)addr, size);
 	else
 		dma_free_coherent(jpeg->dev, size, addr, handle);
 }

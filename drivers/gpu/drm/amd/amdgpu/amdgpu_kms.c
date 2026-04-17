@@ -654,7 +654,7 @@ int amdgpu_info_ioctl(struct drm_device *dev, void *data, struct drm_file *filp)
 	struct amdgpu_device *adev = drm_to_adev(dev);
 	struct drm_amdgpu_info *info = data;
 	struct amdgpu_mode_info *minfo = &adev->mode_info;
-	void __user *out = (void __user *)(uintptr_t)info->return_pointer;
+	void __user *out = (void __user *)(user_uintptr_t)info->return_pointer;
 	struct amdgpu_fpriv *fpriv;
 	struct amdgpu_ip_block *ip_block;
 	enum amd_ip_block_type type;

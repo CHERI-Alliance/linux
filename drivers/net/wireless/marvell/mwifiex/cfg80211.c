@@ -3143,7 +3143,7 @@ struct wireless_dev *mwifiex_add_virtual_intf(struct wiphy *wiphy,
 	dev->ethtool_ops = &mwifiex_ethtool_ops;
 
 	mdev_priv = netdev_priv(dev);
-	*((unsigned long *) mdev_priv) = (unsigned long) priv;
+	*((unsigned long *) mdev_priv) = (uintptr_t) priv;
 
 	SET_NETDEV_DEV(dev, adapter->dev);
 
@@ -4869,7 +4869,7 @@ int mwifiex_register_cfg80211(struct mwifiex_adapter *adapter)
 
 	/* Set struct mwifiex_adapter pointer in wiphy_priv */
 	wdev_priv = wiphy_priv(wiphy);
-	*(unsigned long *)wdev_priv = (unsigned long)adapter;
+	*(unsigned long *)wdev_priv = (uintptr_t)adapter;
 
 	set_wiphy_dev(wiphy, priv->adapter->dev);
 

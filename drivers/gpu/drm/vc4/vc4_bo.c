@@ -872,7 +872,7 @@ vc4_create_shader_bo_ioctl(struct drm_device *dev, void *data,
 	bo->madv = VC4_MADV_WILLNEED;
 
 	if (copy_from_user(bo->base.vaddr,
-			     (void __user *)(uintptr_t)args->data,
+			     (void __user *)(user_uintptr_t)args->data,
 			     args->size)) {
 		ret = -EFAULT;
 		goto fail;

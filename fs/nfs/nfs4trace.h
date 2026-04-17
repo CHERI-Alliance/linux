@@ -1972,7 +1972,7 @@ TRACE_EVENT(pnfs_update_layout,
 				__entry->layoutstateid_seq = 0;
 				__entry->layoutstateid_hash = 0;
 			}
-			__entry->lseg = (long)lseg;
+			__entry->lseg = (intptr_t)lseg;
 		),
 		TP_printk(
 			"fileid=%02x:%02x:%llu fhandle=0x%08x "
@@ -2026,7 +2026,7 @@ DECLARE_EVENT_CLASS(pnfs_layout_event,
 				__entry->layoutstateid_seq = 0;
 				__entry->layoutstateid_hash = 0;
 			}
-			__entry->lseg = (long)lseg;
+			__entry->lseg = (intptr_t)lseg;
 		),
 		TP_printk(
 			"fileid=%02x:%02x:%llu fhandle=0x%08x "

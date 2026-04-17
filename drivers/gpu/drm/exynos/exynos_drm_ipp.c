@@ -108,7 +108,7 @@ int exynos_drm_ipp_get_res_ioctl(struct drm_device *dev, void *data,
 	struct drm_exynos_ioctl_ipp_get_res *resp = data;
 	struct exynos_drm_ipp *ipp;
 	uint32_t __user *ipp_ptr = (uint32_t __user *)
-						(unsigned long)resp->ipp_id_ptr;
+						(user_uintptr_t)resp->ipp_id_ptr;
 	unsigned int count = num_ipp, copied = 0;
 
 	/*
@@ -154,7 +154,7 @@ int exynos_drm_ipp_get_caps_ioctl(struct drm_device *dev, void *data,
 				  struct drm_file *file_priv)
 {
 	struct drm_exynos_ioctl_ipp_get_caps *resp = data;
-	void __user *ptr = (void __user *)(unsigned long)resp->formats_ptr;
+	void __user *ptr = (void __user *)(user_uintptr_t)resp->formats_ptr;
 	struct exynos_drm_ipp *ipp;
 	int i;
 
@@ -220,7 +220,7 @@ int exynos_drm_ipp_get_limits_ioctl(struct drm_device *dev, void *data,
 				    struct drm_file *file_priv)
 {
 	struct drm_exynos_ioctl_ipp_get_limits *resp = data;
-	void __user *ptr = (void __user *)(unsigned long)resp->limits_ptr;
+	void __user *ptr = (void __user *)(user_uintptr_t)resp->limits_ptr;
 	const struct exynos_drm_ipp_formats *format;
 	struct exynos_drm_ipp *ipp;
 
@@ -315,7 +315,7 @@ static int exynos_drm_ipp_task_set(struct exynos_drm_ipp_task *task,
 				   struct drm_exynos_ioctl_ipp_commit *arg)
 {
 	const struct exynos_drm_param_map *map = exynos_drm_ipp_params_maps;
-	void __user *params = (void __user *)(unsigned long)arg->params_ptr;
+	void __user *params = (void __user *)(user_uintptr_t)arg->params_ptr;
 	unsigned int size = arg->params_size;
 	uint32_t id;
 	int i;

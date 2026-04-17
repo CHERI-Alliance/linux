@@ -450,7 +450,7 @@ static int vfb_probe(struct platform_device *dev)
 		goto err1;
 	}
 
-	vfb_fix.smem_start = (unsigned long) videomemory;
+	vfb_fix.smem_start = (uintptr_t) videomemory;
 	vfb_fix.smem_len = videomemorysize;
 	info->fix = vfb_fix;
 	info->pseudo_palette = info->par;

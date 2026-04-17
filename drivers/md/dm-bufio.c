@@ -1211,7 +1211,7 @@ static void free_buffer_data(struct dm_bufio_client *c,
 		break;
 
 	case DATA_MODE_GET_FREE_PAGES:
-		free_pages((unsigned long)data,
+		free_pages((uintptr_t)data,
 			   c->sectors_per_block_bits - (PAGE_SHIFT - SECTOR_SHIFT));
 		break;
 

@@ -237,7 +237,7 @@ struct iwl_rx_cmd_buffer {
 
 static inline void *rxb_addr(struct iwl_rx_cmd_buffer *r)
 {
-	return (void *)((unsigned long)page_address(r->_page) + r->_offset);
+	return (void *)((uintptr_t)page_address(r->_page) + r->_offset);
 }
 
 static inline int rxb_offset(struct iwl_rx_cmd_buffer *r)

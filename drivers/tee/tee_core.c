@@ -778,7 +778,7 @@ static int params_to_supp(struct tee_context *ctx,
 		case TEE_IOCTL_PARAM_ATTR_TYPE_UBUF_INPUT:
 		case TEE_IOCTL_PARAM_ATTR_TYPE_UBUF_OUTPUT:
 		case TEE_IOCTL_PARAM_ATTR_TYPE_UBUF_INOUT:
-			ip.a = (__force unsigned long)p->u.ubuf.uaddr;
+			ip.a = (__force unsigned long)(user_uintptr_t)p->u.ubuf.uaddr;
 			ip.b = p->u.ubuf.size;
 			ip.c = 0;
 			break;

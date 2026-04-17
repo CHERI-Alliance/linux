@@ -835,7 +835,7 @@ static const struct of_device_id ads7950_of_table[] = {
 MODULE_DEVICE_TABLE(of, ads7950_of_table);
 
 static const struct spi_device_id tsc2046_adc_spi_ids[] = {
-	{ "tsc2046e-adc", (unsigned long)&tsc2046_adc_dcfg_tsc2046e },
+	{ "tsc2046e-adc", (uintptr_t)&tsc2046_adc_dcfg_tsc2046e },
 	{ }
 };
 MODULE_DEVICE_TABLE(spi, tsc2046_adc_spi_ids);

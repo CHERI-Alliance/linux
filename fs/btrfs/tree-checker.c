@@ -639,7 +639,7 @@ static int check_dir_item(struct extent_buffer *leaf,
 			char namebuf[MAX(BTRFS_NAME_LEN, XATTR_NAME_MAX)];
 
 			read_extent_buffer(leaf, namebuf,
-					(unsigned long)(di + 1), name_len);
+					(uintptr_t)(di + 1), name_len);
 			name_hash = btrfs_name_hash(namebuf, name_len);
 			if (unlikely(key->offset != name_hash)) {
 				dir_item_err(leaf, slot,
@@ -1490,7 +1490,7 @@ static int check_extent_item(struct extent_buffer *leaf,
 			return -EUCLEAN;
 		}
 	}
-	ptr = (unsigned long)(struct btrfs_extent_item *)(ei + 1);
+	ptr = (uintptr_t)(struct btrfs_extent_item *)(ei + 1);
 
 	/* Check the special case of btrfs_tree_block_info */
 	if (is_tree_block && key->type != BTRFS_METADATA_ITEM_KEY) {
@@ -1504,7 +1504,7 @@ static int check_extent_item(struct extent_buffer *leaf,
 				   BTRFS_MAX_LEVEL - 1);
 			return -EUCLEAN;
 		}
-		ptr = (unsigned long)(struct btrfs_tree_block_info *)(info + 1);
+		ptr = (uintptr_t)(struct btrfs_tree_block_info *)(info + 1);
 	}
 
 	/* Check inline refs */

@@ -2569,10 +2569,10 @@ void ef4_schedule_reset(struct ef4_nic *efx, enum reset_type type)
 static const struct pci_device_id ef4_pci_table[] = {
 	{PCI_DEVICE(PCI_VENDOR_ID_SOLARFLARE,
 		    PCI_DEVICE_ID_SOLARFLARE_SFC4000A_0),
-	 .driver_data = (unsigned long) &falcon_a1_nic_type},
+	 .driver_data = (uintptr_t) &falcon_a1_nic_type},
 	{PCI_DEVICE(PCI_VENDOR_ID_SOLARFLARE,
 		    PCI_DEVICE_ID_SOLARFLARE_SFC4000B),
-	 .driver_data = (unsigned long) &falcon_b0_nic_type},
+	 .driver_data = (uintptr_t) &falcon_b0_nic_type},
 	{0}			/* end of list */
 };
 

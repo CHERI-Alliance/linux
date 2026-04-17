@@ -337,7 +337,7 @@ static ssize_t sched_server_write_common(struct file *filp, const char __user *u
 					 size_t cnt, loff_t *ppos, enum dl_param param,
 					 void *server)
 {
-	long cpu = (long) ((struct seq_file *) filp->private_data)->private;
+	intptr_t cpu = (intptr_t) ((struct seq_file *) filp->private_data)->private;
 	struct sched_dl_entity *dl_se = (struct sched_dl_entity *)server;
 	u64 old_runtime, runtime, period;
 	struct rq *rq = cpu_rq(cpu);
@@ -416,7 +416,7 @@ static ssize_t
 sched_fair_server_runtime_write(struct file *filp, const char __user *ubuf,
 				size_t cnt, loff_t *ppos)
 {
-	long cpu = (long) ((struct seq_file *) filp->private_data)->private;
+	intptr_t cpu = (intptr_t) ((struct seq_file *) filp->private_data)->private;
 	struct rq *rq = cpu_rq(cpu);
 
 	return sched_server_write_common(filp, ubuf, cnt, ppos, DL_RUNTIME,
@@ -425,7 +425,7 @@ sched_fair_server_runtime_write(struct file *filp, const char __user *ubuf,
 
 static int sched_fair_server_runtime_show(struct seq_file *m, void *v)
 {
-	unsigned long cpu = (unsigned long) m->private;
+	uintptr_t cpu = (uintptr_t) m->private;
 	struct rq *rq = cpu_rq(cpu);
 
 	return sched_server_show_common(m, v, DL_RUNTIME, &rq->fair_server);
@@ -482,7 +482,7 @@ static ssize_t
 sched_fair_server_period_write(struct file *filp, const char __user *ubuf,
 			       size_t cnt, loff_t *ppos)
 {
-	long cpu = (long) ((struct seq_file *) filp->private_data)->private;
+	intptr_t cpu = (intptr_t) ((struct seq_file *) filp->private_data)->private;
 	struct rq *rq = cpu_rq(cpu);
 
 	return sched_server_write_common(filp, ubuf, cnt, ppos, DL_PERIOD,
@@ -491,7 +491,7 @@ sched_fair_server_period_write(struct file *filp, const char __user *ubuf,
 
 static int sched_fair_server_period_show(struct seq_file *m, void *v)
 {
-	unsigned long cpu = (unsigned long) m->private;
+	uintptr_t cpu = (uintptr_t) m->private;
 	struct rq *rq = cpu_rq(cpu);
 
 	return sched_server_show_common(m, v, DL_PERIOD, &rq->fair_server);

@@ -630,7 +630,7 @@ static inline bool within_module_mem_type(__ptraddr_t addr,
 {
 	unsigned long base, size;
 
-	base = (unsigned long)mod->mem[type].base;
+	base = (uintptr_t)mod->mem[type].base;
 	size = mod->mem[type].size;
 	return addr - base < size;
 }

@@ -420,7 +420,7 @@ static inline void edma_writeb(struct fsl_edma_engine *edma,
 {
 	/* swap the reg offset for these in big-endian mode */
 	if (edma->big_endian)
-		iowrite8(val, (void __iomem *)((unsigned long)addr ^ 0x3));
+		iowrite8(val, (void __iomem *)((uintptr_t)addr ^ 0x3));
 	else
 		iowrite8(val, addr);
 
@@ -432,7 +432,7 @@ static inline void edma_writew(struct fsl_edma_engine *edma,
 {
 	/* swap the reg offset for these in big-endian mode */
 	if (edma->big_endian)
-		iowrite16be(val, (void __iomem *)((unsigned long)addr ^ 0x2));
+		iowrite16be(val, (void __iomem *)((uintptr_t)addr ^ 0x2));
 	else
 		iowrite16(val, addr);
 

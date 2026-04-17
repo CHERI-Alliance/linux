@@ -229,15 +229,15 @@ static const struct c_can_driver_data am3352_dcan_drvdata = {
 static const struct platform_device_id c_can_id_table[] = {
 	{
 		.name = KBUILD_MODNAME,
-		.driver_data = (kernel_ulong_t)&c_can_drvdata,
+		.driver_data = (uintptr_t)&c_can_drvdata,
 	},
 	{
 		.name = "c_can",
-		.driver_data = (kernel_ulong_t)&c_can_drvdata,
+		.driver_data = (uintptr_t)&c_can_drvdata,
 	},
 	{
 		.name = "d_can",
-		.driver_data = (kernel_ulong_t)&d_can_drvdata,
+		.driver_data = (uintptr_t)&d_can_drvdata,
 	},
 	{ /* sentinel */ },
 };

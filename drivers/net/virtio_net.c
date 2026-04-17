@@ -551,7 +551,7 @@ static size_t virtnet_rss_trailer_size(const struct virtnet_info *vi)
 
 static enum virtnet_xmit_type virtnet_xmit_ptr_unpack(void **ptr)
 {
-	unsigned long p = (unsigned long)*ptr;
+	uintptr_t p = (uintptr_t)*ptr;
 
 	*ptr = (void *)(p & ~VIRTNET_XMIT_TYPE_MASK);
 
@@ -560,7 +560,7 @@ static enum virtnet_xmit_type virtnet_xmit_ptr_unpack(void **ptr)
 
 static void *virtnet_xmit_ptr_pack(void *ptr, enum virtnet_xmit_type type)
 {
-	return (void *)((unsigned long)ptr | type);
+	return (void *)((uintptr_t)ptr | type);
 }
 
 static int virtnet_add_outbuf(struct send_queue *sq, int num, void *data,
@@ -573,7 +573,7 @@ static int virtnet_add_outbuf(struct send_queue *sq, int num, void *data,
 
 static u32 virtnet_ptr_to_xsk_buff_len(void *ptr)
 {
-	return ((unsigned long)ptr) >> VIRTIO_XSK_FLAG_OFFSET;
+	return ((uintptr_t)ptr) >> VIRTIO_XSK_FLAG_OFFSET;
 }
 
 static void sg_fill_dma(struct scatterlist *sg, dma_addr_t addr, u32 len)
@@ -687,7 +687,7 @@ static void give_pages(struct receive_queue *rq, struct page *page)
 
 	/* Find end of list, sew whole thing into vi->rq.pages. */
 	for (end = page; end->private; end = (struct page *)end->private);
-	end->private = (unsigned long)rq->pages;
+	end->private = (uintptr_t)rq->pages;
 	rq->pages = page;
 }
 
@@ -795,7 +795,7 @@ static void *mergeable_len_to_ctx(unsigned int truesize,
 
 static unsigned int mergeable_ctx_to_headroom(void *mrg_ctx)
 {
-	return (unsigned long)mrg_ctx >> MRG_CTX_HEADER_SHIFT;
+	return (uintptr_t)mrg_ctx >> MRG_CTX_HEADER_SHIFT;
 }
 
 static unsigned int mergeable_ctx_to_truesize(void *mrg_ctx)
@@ -2713,7 +2713,7 @@ static int add_recvbuf_big(struct virtnet_info *vi, struct receive_queue *rq,
 		sg_set_buf(&rq->sg[i], page_address(first), PAGE_SIZE);
 
 		/* chain new page in list head to match sg */
-		first->private = (unsigned long)list;
+		first->private = (uintptr_t)list;
 		list = first;
 	}
 
@@ -2733,7 +2733,7 @@ static int add_recvbuf_big(struct virtnet_info *vi, struct receive_queue *rq,
 	sg_set_buf(&rq->sg[1], p + offset, PAGE_SIZE - offset);
 
 	/* chain first in list head */
-	first->private = (unsigned long)list;
+	first->private = (uintptr_t)list;
 	err = virtqueue_add_inbuf(rq->vq, rq->sg, vi->big_packets_num_skbfrags + 2,
 				  first, gfp);
 	if (err < 0)

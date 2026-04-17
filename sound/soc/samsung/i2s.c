@@ -1698,7 +1698,7 @@ static const struct samsung_i2s_dai_data fsd_dai_type __maybe_unused = {
 static const struct platform_device_id samsung_i2s_driver_ids[] = {
 	{
 		.name           = "samsung-i2s",
-		.driver_data	= (kernel_ulong_t)&i2sv3_dai_type,
+		.driver_data	= (uintptr_t)&i2sv3_dai_type,
 	},
 	{},
 };

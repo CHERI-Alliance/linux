@@ -1768,13 +1768,13 @@ static int bq256xx_probe(struct i2c_client *client)
 }
 
 static const struct i2c_device_id bq256xx_i2c_ids[] = {
-	{ "bq25600", (kernel_ulong_t)&bq256xx_chip_info_tbl[BQ25600] },
-	{ "bq25600d", (kernel_ulong_t)&bq256xx_chip_info_tbl[BQ25600D] },
-	{ "bq25601", (kernel_ulong_t)&bq256xx_chip_info_tbl[BQ25601] },
-	{ "bq25601d", (kernel_ulong_t)&bq256xx_chip_info_tbl[BQ25601D] },
-	{ "bq25611d", (kernel_ulong_t)&bq256xx_chip_info_tbl[BQ25611D] },
-	{ "bq25618", (kernel_ulong_t)&bq256xx_chip_info_tbl[BQ25618] },
-	{ "bq25619", (kernel_ulong_t)&bq256xx_chip_info_tbl[BQ25619] },
+	{ "bq25600", (uintptr_t)&bq256xx_chip_info_tbl[BQ25600] },
+	{ "bq25600d", (uintptr_t)&bq256xx_chip_info_tbl[BQ25600D] },
+	{ "bq25601", (uintptr_t)&bq256xx_chip_info_tbl[BQ25601] },
+	{ "bq25601d", (uintptr_t)&bq256xx_chip_info_tbl[BQ25601D] },
+	{ "bq25611d", (uintptr_t)&bq256xx_chip_info_tbl[BQ25611D] },
+	{ "bq25618", (uintptr_t)&bq256xx_chip_info_tbl[BQ25618] },
+	{ "bq25619", (uintptr_t)&bq256xx_chip_info_tbl[BQ25619] },
 	{}
 };
 MODULE_DEVICE_TABLE(i2c, bq256xx_i2c_ids);
@@ -1792,13 +1792,13 @@ static const struct of_device_id bq256xx_of_match[] = {
 MODULE_DEVICE_TABLE(of, bq256xx_of_match);
 
 static const struct acpi_device_id bq256xx_acpi_match[] = {
-	{ "bq25600", (kernel_ulong_t)&bq256xx_chip_info_tbl[BQ25600] },
-	{ "bq25600d", (kernel_ulong_t)&bq256xx_chip_info_tbl[BQ25600D] },
-	{ "bq25601", (kernel_ulong_t)&bq256xx_chip_info_tbl[BQ25601] },
-	{ "bq25601d", (kernel_ulong_t)&bq256xx_chip_info_tbl[BQ25601D] },
-	{ "bq25611d", (kernel_ulong_t)&bq256xx_chip_info_tbl[BQ25611D] },
-	{ "bq25618", (kernel_ulong_t)&bq256xx_chip_info_tbl[BQ25618] },
-	{ "bq25619", (kernel_ulong_t)&bq256xx_chip_info_tbl[BQ25619] },
+	{ "bq25600", (uintptr_t)&bq256xx_chip_info_tbl[BQ25600] },
+	{ "bq25600d", (uintptr_t)&bq256xx_chip_info_tbl[BQ25600D] },
+	{ "bq25601", (uintptr_t)&bq256xx_chip_info_tbl[BQ25601] },
+	{ "bq25601d", (uintptr_t)&bq256xx_chip_info_tbl[BQ25601D] },
+	{ "bq25611d", (uintptr_t)&bq256xx_chip_info_tbl[BQ25611D] },
+	{ "bq25618", (uintptr_t)&bq256xx_chip_info_tbl[BQ25618] },
+	{ "bq25619", (uintptr_t)&bq256xx_chip_info_tbl[BQ25619] },
 	{}
 };
 MODULE_DEVICE_TABLE(acpi, bq256xx_acpi_match);

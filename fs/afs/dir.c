@@ -1040,7 +1040,7 @@ static int afs_d_revalidate_rcu(struct afs_vnode *dvnode, struct dentry *dentry)
 	 * version.
 	 */
 	dir_version = (long)READ_ONCE(dvnode->status.data_version);
-	de_version = (long)READ_ONCE(dentry->d_fsdata);
+	de_version = (intptr_t)READ_ONCE(dentry->d_fsdata);
 	if (de_version != dir_version) {
 		dir_version = (long)READ_ONCE(dvnode->invalid_before);
 		if (de_version - dir_version < 0)
@@ -1100,7 +1100,7 @@ static int afs_d_revalidate(struct inode *parent_dir, const struct qstr *name,
 	 * version.
 	 */
 	dir_version = dir->status.data_version;
-	de_version = (long)dentry->d_fsdata;
+	de_version = (intptr_t)dentry->d_fsdata;
 	if (de_version == (long)dir_version)
 		goto out_valid_noupdate;
 

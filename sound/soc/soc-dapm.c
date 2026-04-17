@@ -4249,7 +4249,7 @@ dapm_alloc_kcontrol(struct snd_soc_card *card,
 	w_param_enum[0].texts = w_param_text;
 
 	*private_value =
-		(unsigned long) devm_kmemdup(card->dev,
+		(uintptr_t) devm_kmemdup(card->dev,
 			(void *)(kcontrol_dai_link[0].private_value),
 			sizeof(struct soc_enum), GFP_KERNEL);
 	if (!*private_value) {

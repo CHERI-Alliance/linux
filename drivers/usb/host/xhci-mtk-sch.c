@@ -942,7 +942,7 @@ static int add_ep_quirk(struct usb_hcd *hcd, struct usb_device *udev,
 	setup_sch_info(ep_ctx, sch_ep);
 
 	list_add_tail(&sch_ep->endpoint, &mtk->bw_ep_chk_list);
-	hash_add(mtk->sch_ep_hash, &sch_ep->hentry, (unsigned long)ep);
+	hash_add(mtk->sch_ep_hash, &sch_ep->hentry, (uintptr_t)ep);
 
 	return 0;
 }
@@ -961,7 +961,7 @@ static void drop_ep_quirk(struct usb_hcd *hcd, struct usb_device *udev,
 	xhci_dbg(xhci, "%s %s\n", __func__, decode_ep(ep, udev->speed));
 
 	hash_for_each_possible_safe(mtk->sch_ep_hash, sch_ep,
-				    hn, hentry, (unsigned long)ep) {
+				    hn, hentry, (uintptr_t)ep) {
 		if (sch_ep->ep == ep) {
 			destroy_sch_ep(mtk, udev, sch_ep);
 			break;

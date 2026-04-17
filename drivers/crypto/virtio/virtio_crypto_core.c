@@ -151,7 +151,7 @@ static int virtcrypto_find_vqs(struct virtio_crypto *vi)
 			goto err_engine;
 		}
 		tasklet_init(&vi->data_vq[i].done_task, virtcrypto_done_task,
-				(unsigned long)&vi->data_vq[i]);
+				(uintptr_t)&vi->data_vq[i]);
 	}
 
 	kfree(vqs_info);

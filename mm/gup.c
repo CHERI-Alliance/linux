@@ -2045,7 +2045,7 @@ static long __get_user_pages_locked(struct mm_struct *mm, unsigned long start,
  */
 size_t fault_in_writeable(char __user *uaddr, size_t size)
 {
-	const unsigned long start = (unsigned long)uaddr;
+	const user_uintptr_t start = (user_uintptr_t)uaddr;
 	const unsigned long end = start + size;
 	unsigned long cur;
 
@@ -2114,7 +2114,7 @@ EXPORT_SYMBOL(fault_in_subpage_writeable);
  */
 size_t fault_in_safe_writeable(const char __user *uaddr, size_t size)
 {
-	const unsigned long start = (unsigned long)uaddr;
+	const user_uintptr_t start = (user_uintptr_t)uaddr;
 	const unsigned long end = start + size;
 	unsigned long cur;
 	struct mm_struct *mm = current->mm;
@@ -2146,7 +2146,7 @@ EXPORT_SYMBOL(fault_in_safe_writeable);
  */
 size_t fault_in_readable(const char __user *uaddr, size_t size)
 {
-	const unsigned long start = (unsigned long)uaddr;
+	const user_uintptr_t start = (user_uintptr_t)uaddr;
 	const unsigned long end = start + size;
 	unsigned long cur;
 	volatile char c;
@@ -2364,7 +2364,7 @@ migrate_longterm_unpinnable_folios(struct list_head *movable_folio_list,
 		};
 
 		if (migrate_pages(movable_folio_list, alloc_migration_target,
-				  NULL, (unsigned long)&mtc, MIGRATE_SYNC,
+				  NULL, (uintptr_t)&mtc, MIGRATE_SYNC,
 				  MR_LONGTERM_PIN, NULL)) {
 			ret = -ENOMEM;
 			goto err;

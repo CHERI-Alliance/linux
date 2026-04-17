@@ -503,7 +503,7 @@ static inline struct page *erofs_allocpage(struct page **pagepool, gfp_t gfp)
 }
 static inline void erofs_pagepool_add(struct page **pagepool, struct page *page)
 {
-	set_page_private(page, (unsigned long)*pagepool);
+	set_page_private(page, (uintptr_t)*pagepool);
 	*pagepool = page;
 }
 void erofs_release_pages(struct page **pagepool);

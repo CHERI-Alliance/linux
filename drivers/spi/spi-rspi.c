@@ -1397,7 +1397,7 @@ error1:
 }
 
 static const struct platform_device_id spi_driver_ids[] = {
-	{ "rspi",	(kernel_ulong_t)&rspi_ops },
+	{ "rspi",	(uintptr_t)&rspi_ops },
 	{},
 };
 

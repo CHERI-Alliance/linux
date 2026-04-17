@@ -78,7 +78,7 @@ static int hda_hwdep_ioctl(struct snd_hwdep *hw, struct file *file,
 static int hda_hwdep_ioctl_compat(struct snd_hwdep *hw, struct file *file,
 				  unsigned int cmd, unsigned long arg)
 {
-	return hda_hwdep_ioctl(hw, file, cmd, (unsigned long)compat_ptr(arg));
+	return hda_hwdep_ioctl(hw, file, cmd, (user_uintptr_t)compat_ptr(arg));
 }
 #endif
 

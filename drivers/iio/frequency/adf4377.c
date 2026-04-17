@@ -1101,8 +1101,8 @@ static int adf4377_probe(struct spi_device *spi)
 }
 
 static const struct spi_device_id adf4377_id[] = {
-	{ "adf4377", (kernel_ulong_t)&adf4377_chip_info },
-	{ "adf4378", (kernel_ulong_t)&adf4378_chip_info },
+	{ "adf4377", (uintptr_t)&adf4377_chip_info },
+	{ "adf4378", (uintptr_t)&adf4378_chip_info },
 	{ }
 };
 MODULE_DEVICE_TABLE(spi, adf4377_id);

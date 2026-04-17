@@ -1275,7 +1275,7 @@ static int hcd_alloc_coherent(struct usb_bus *bus,
 	 * memory footprint over access speed since the amount
 	 * of memory available for dma may be limited.
 	 */
-	put_unaligned((unsigned long)*vaddr_handle,
+	put_unaligned((uintptr_t)*vaddr_handle,
 		      (unsigned long *)(vaddr + size));
 
 	if (dir == DMA_TO_DEVICE)
@@ -3141,7 +3141,7 @@ int usb_hcd_setup_local_mem(struct usb_hcd *hcd, phys_addr_t phys_addr,
 	 * It's not backed by system memory and thus there's no kernel mapping
 	 * for it.
 	 */
-	err = gen_pool_add_virt(hcd->localmem_pool, (unsigned long)local_mem,
+	err = gen_pool_add_virt(hcd->localmem_pool, (uintptr_t)local_mem,
 				dma, size, dev_to_node(hcd->self.sysdev));
 	if (err < 0) {
 		dev_err(hcd->self.sysdev, "gen_pool_add_virt failed with %d\n",

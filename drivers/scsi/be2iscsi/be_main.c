@@ -2733,7 +2733,7 @@ static int hwi_init_async_pdu_ctx(struct beiscsi_hba *phba)
 
 			pasync_ctx->async_entry =
 					(struct hd_async_entry *)
-					((long unsigned int)pasync_ctx +
+					((uintptr_t)pasync_ctx +
 					sizeof(struct hd_async_context));
 
 			pasync_ctx->num_entries = BEISCSI_ASYNC_HDQ_SIZE(phba,
@@ -2881,7 +2881,7 @@ static int hwi_init_async_pdu_ctx(struct beiscsi_hba *phba)
 				pasync_header_h->index = index;
 				INIT_LIST_HEAD(&pasync_header_h->link);
 				pasync_header_h->pbuffer =
-					(void *)((unsigned long)
+					(void *)((uintptr_t)
 						 (pasync_ctx->
 						  async_header.va_base) +
 						 (p->defpdu_hdr_sz * index));
@@ -2917,7 +2917,7 @@ static int hwi_init_async_pdu_ctx(struct beiscsi_hba *phba)
 						 phba->params.defpdu_data_sz);
 				}
 				pasync_data_h->pbuffer =
-					(void *)((unsigned long)
+					(void *)((uintptr_t)
 					(pasync_ctx->async_data.va_base) +
 					(p->defpdu_data_sz * num_per_mem));
 

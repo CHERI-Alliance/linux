@@ -403,51 +403,51 @@ static const struct can_bittiming_const kvaser_pciefd_bittiming_const = {
 static struct pci_device_id kvaser_pciefd_id_table[] = {
 	{
 		PCI_DEVICE(KVASER_PCIEFD_VENDOR, KVASER_PCIEFD_4HS_DEVICE_ID),
-		.driver_data = (kernel_ulong_t)&kvaser_pciefd_altera_driver_data,
+		.driver_data = (uintptr_t)&kvaser_pciefd_altera_driver_data,
 	},
 	{
 		PCI_DEVICE(KVASER_PCIEFD_VENDOR, KVASER_PCIEFD_2HS_V2_DEVICE_ID),
-		.driver_data = (kernel_ulong_t)&kvaser_pciefd_altera_driver_data,
+		.driver_data = (uintptr_t)&kvaser_pciefd_altera_driver_data,
 	},
 	{
 		PCI_DEVICE(KVASER_PCIEFD_VENDOR, KVASER_PCIEFD_HS_V2_DEVICE_ID),
-		.driver_data = (kernel_ulong_t)&kvaser_pciefd_altera_driver_data,
+		.driver_data = (uintptr_t)&kvaser_pciefd_altera_driver_data,
 	},
 	{
 		PCI_DEVICE(KVASER_PCIEFD_VENDOR, KVASER_PCIEFD_MINIPCIE_HS_V2_DEVICE_ID),
-		.driver_data = (kernel_ulong_t)&kvaser_pciefd_altera_driver_data,
+		.driver_data = (uintptr_t)&kvaser_pciefd_altera_driver_data,
 	},
 	{
 		PCI_DEVICE(KVASER_PCIEFD_VENDOR, KVASER_PCIEFD_MINIPCIE_2HS_V2_DEVICE_ID),
-		.driver_data = (kernel_ulong_t)&kvaser_pciefd_altera_driver_data,
+		.driver_data = (uintptr_t)&kvaser_pciefd_altera_driver_data,
 	},
 	{
 		PCI_DEVICE(KVASER_PCIEFD_VENDOR, KVASER_PCIEFD_2CAN_V3_DEVICE_ID),
-		.driver_data = (kernel_ulong_t)&kvaser_pciefd_sf2_driver_data,
+		.driver_data = (uintptr_t)&kvaser_pciefd_sf2_driver_data,
 	},
 	{
 		PCI_DEVICE(KVASER_PCIEFD_VENDOR, KVASER_PCIEFD_1CAN_V3_DEVICE_ID),
-		.driver_data = (kernel_ulong_t)&kvaser_pciefd_sf2_driver_data,
+		.driver_data = (uintptr_t)&kvaser_pciefd_sf2_driver_data,
 	},
 	{
 		PCI_DEVICE(KVASER_PCIEFD_VENDOR, KVASER_PCIEFD_4CAN_V2_DEVICE_ID),
-		.driver_data = (kernel_ulong_t)&kvaser_pciefd_sf2_driver_data,
+		.driver_data = (uintptr_t)&kvaser_pciefd_sf2_driver_data,
 	},
 	{
 		PCI_DEVICE(KVASER_PCIEFD_VENDOR, KVASER_PCIEFD_MINIPCIE_2CAN_V3_DEVICE_ID),
-		.driver_data = (kernel_ulong_t)&kvaser_pciefd_sf2_driver_data,
+		.driver_data = (uintptr_t)&kvaser_pciefd_sf2_driver_data,
 	},
 	{
 		PCI_DEVICE(KVASER_PCIEFD_VENDOR, KVASER_PCIEFD_MINIPCIE_1CAN_V3_DEVICE_ID),
-		.driver_data = (kernel_ulong_t)&kvaser_pciefd_sf2_driver_data,
+		.driver_data = (uintptr_t)&kvaser_pciefd_sf2_driver_data,
 	},
 	{
 		PCI_DEVICE(KVASER_PCIEFD_VENDOR, KVASER_PCIEFD_M2_4CAN_DEVICE_ID),
-		.driver_data = (kernel_ulong_t)&kvaser_pciefd_xilinx_driver_data,
+		.driver_data = (uintptr_t)&kvaser_pciefd_xilinx_driver_data,
 	},
 	{
 		PCI_DEVICE(KVASER_PCIEFD_VENDOR, KVASER_PCIEFD_8CAN_DEVICE_ID),
-		.driver_data = (kernel_ulong_t)&kvaser_pciefd_xilinx_driver_data,
+		.driver_data = (uintptr_t)&kvaser_pciefd_xilinx_driver_data,
 	},
 	{
 		0,

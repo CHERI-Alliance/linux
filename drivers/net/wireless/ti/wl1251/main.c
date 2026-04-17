@@ -744,7 +744,7 @@ static u64 wl1251_op_prepare_multicast(struct ieee80211_hw *hw,
 		}
 	}
 
-	return (u64)(unsigned long)fp;
+	return (u64)(uintptr_t)fp;
 }
 
 #define WL1251_SUPPORTED_FILTERS (FIF_ALLMULTI | \

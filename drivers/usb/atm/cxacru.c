@@ -976,7 +976,7 @@ static int cxacru_fw(struct usb_device *usb_dev, enum cxacru_fw_request fw,
 	ret = 0;
 
 cleanup:
-	free_page((unsigned long) buf);
+	free_page((uintptr_t) buf);
 	return ret;
 }
 
@@ -1218,8 +1218,8 @@ static int cxacru_bind(struct usbatm_data *usbatm_instance,
 	return 0;
 
  fail:
-	free_page((unsigned long) instance->snd_buf);
-	free_page((unsigned long) instance->rcv_buf);
+	free_page((uintptr_t) instance->snd_buf);
+	free_page((uintptr_t) instance->rcv_buf);
 	usb_free_urb(instance->snd_urb);
 	usb_free_urb(instance->rcv_urb);
 	kfree(instance);
@@ -1260,8 +1260,8 @@ static void cxacru_unbind(struct usbatm_data *usbatm_instance,
 	usb_free_urb(instance->snd_urb);
 	usb_free_urb(instance->rcv_urb);
 
-	free_page((unsigned long) instance->snd_buf);
-	free_page((unsigned long) instance->rcv_buf);
+	free_page((uintptr_t) instance->snd_buf);
+	free_page((uintptr_t) instance->rcv_buf);
 
 	kfree(instance);
 
@@ -1282,55 +1282,55 @@ static const struct cxacru_modem_type cxacru_cb00 = {
 
 static const struct usb_device_id cxacru_usb_ids[] = {
 	{ /* V = Conexant			P = ADSL modem (Euphrates project)	*/
-		USB_DEVICE(0x0572, 0xcafe),	.driver_info = (unsigned long) &cxacru_cafe
+		USB_DEVICE(0x0572, 0xcafe),	.driver_info = (uintptr_t) &cxacru_cafe
 	},
 	{ /* V = Conexant			P = ADSL modem (Hasbani project)	*/
-		USB_DEVICE(0x0572, 0xcb00),	.driver_info = (unsigned long) &cxacru_cb00
+		USB_DEVICE(0x0572, 0xcb00),	.driver_info = (uintptr_t) &cxacru_cb00
 	},
 	{ /* V = Conexant			P = ADSL modem				*/
-		USB_DEVICE(0x0572, 0xcb01),	.driver_info = (unsigned long) &cxacru_cb00
+		USB_DEVICE(0x0572, 0xcb01),	.driver_info = (uintptr_t) &cxacru_cb00
 	},
 	{ /* V = Conexant			P = ADSL modem (Well PTI-800) */
-		USB_DEVICE(0x0572, 0xcb02),	.driver_info = (unsigned long) &cxacru_cb00
+		USB_DEVICE(0x0572, 0xcb02),	.driver_info = (uintptr_t) &cxacru_cb00
 	},
 	{ /* V = Conexant			P = ADSL modem				*/
-		USB_DEVICE(0x0572, 0xcb06),	.driver_info = (unsigned long) &cxacru_cb00
+		USB_DEVICE(0x0572, 0xcb06),	.driver_info = (uintptr_t) &cxacru_cb00
 	},
 	{ /* V = Conexant			P = ADSL modem (ZTE ZXDSL 852)		*/
-		USB_DEVICE(0x0572, 0xcb07),	.driver_info = (unsigned long) &cxacru_cb00
+		USB_DEVICE(0x0572, 0xcb07),	.driver_info = (uintptr_t) &cxacru_cb00
 	},
 	{ /* V = Olitec				P = ADSL modem version 2		*/
-		USB_DEVICE(0x08e3, 0x0100),	.driver_info = (unsigned long) &cxacru_cafe
+		USB_DEVICE(0x08e3, 0x0100),	.driver_info = (uintptr_t) &cxacru_cafe
 	},
 	{ /* V = Olitec				P = ADSL modem version 3		*/
-		USB_DEVICE(0x08e3, 0x0102),	.driver_info = (unsigned long) &cxacru_cb00
+		USB_DEVICE(0x08e3, 0x0102),	.driver_info = (uintptr_t) &cxacru_cb00
 	},
 	{ /* V = Trust/Amigo Technology Co.	P = AMX-CA86U				*/
-		USB_DEVICE(0x0eb0, 0x3457),	.driver_info = (unsigned long) &cxacru_cafe
+		USB_DEVICE(0x0eb0, 0x3457),	.driver_info = (uintptr_t) &cxacru_cafe
 	},
 	{ /* V = Zoom				P = 5510				*/
-		USB_DEVICE(0x1803, 0x5510),	.driver_info = (unsigned long) &cxacru_cb00
+		USB_DEVICE(0x1803, 0x5510),	.driver_info = (uintptr_t) &cxacru_cb00
 	},
 	{ /* V = Draytek			P = Vigor 318				*/
-		USB_DEVICE(0x0675, 0x0200),	.driver_info = (unsigned long) &cxacru_cb00
+		USB_DEVICE(0x0675, 0x0200),	.driver_info = (uintptr_t) &cxacru_cb00
 	},
 	{ /* V = Zyxel				P = 630-C1 aka OMNI ADSL USB (Annex A)	*/
-		USB_DEVICE(0x0586, 0x330a),	.driver_info = (unsigned long) &cxacru_cb00
+		USB_DEVICE(0x0586, 0x330a),	.driver_info = (uintptr_t) &cxacru_cb00
 	},
 	{ /* V = Zyxel				P = 630-C3 aka OMNI ADSL USB (Annex B)	*/
-		USB_DEVICE(0x0586, 0x330b),	.driver_info = (unsigned long) &cxacru_cb00
+		USB_DEVICE(0x0586, 0x330b),	.driver_info = (uintptr_t) &cxacru_cb00
 	},
 	{ /* V = Aethra				P = Starmodem UM1020			*/
-		USB_DEVICE(0x0659, 0x0020),	.driver_info = (unsigned long) &cxacru_cb00
+		USB_DEVICE(0x0659, 0x0020),	.driver_info = (uintptr_t) &cxacru_cb00
 	},
 	{ /* V = Aztech Systems			P = ? AKA Pirelli AUA-010		*/
-		USB_DEVICE(0x0509, 0x0812),	.driver_info = (unsigned long) &cxacru_cb00
+		USB_DEVICE(0x0509, 0x0812),	.driver_info = (uintptr_t) &cxacru_cb00
 	},
 	{ /* V = Netopia			P = Cayman 3341(Annex A)/3351(Annex B)	*/
-		USB_DEVICE(0x100d, 0xcb01),	.driver_info = (unsigned long) &cxacru_cb00
+		USB_DEVICE(0x100d, 0xcb01),	.driver_info = (uintptr_t) &cxacru_cb00
 	},
 	{ /* V = Netopia			P = Cayman 3342(Annex A)/3352(Annex B)	*/
-		USB_DEVICE(0x100d, 0x3342),	.driver_info = (unsigned long) &cxacru_cb00
+		USB_DEVICE(0x100d, 0x3342),	.driver_info = (uintptr_t) &cxacru_cb00
 	},
 	{}
 };

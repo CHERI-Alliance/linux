@@ -160,7 +160,7 @@ static unsigned long inode_hash(struct super_block *sb, unsigned long hashval)
 {
 	unsigned long tmp;
 
-	tmp = (hashval * (unsigned long)sb) ^ (GOLDEN_RATIO_PRIME + hashval) /
+	tmp = (hashval * (uintptr_t)sb) ^ (GOLDEN_RATIO_PRIME + hashval) /
 		L1_CACHE_BYTES;
 	tmp = tmp ^ ((tmp ^ GOLDEN_RATIO_PRIME) >> inode_hash_shift);
 	return tmp & inode_hash_mask;
@@ -169,7 +169,7 @@ static unsigned long inode_hash(struct super_block *sb, unsigned long hashval)
 static struct ksmbd_inode *__ksmbd_inode_lookup(struct dentry *de)
 {
 	struct hlist_head *head = inode_hashtable +
-		inode_hash(d_inode(de)->i_sb, (unsigned long)de);
+		inode_hash(d_inode(de)->i_sb, (uintptr_t)de);
 	struct ksmbd_inode *ci = NULL, *ret_ci = NULL;
 
 	hlist_for_each_entry(ci, head, m_hash) {
@@ -266,7 +266,7 @@ void ksmbd_fd_set_delete_on_close(struct ksmbd_file *fp,
 static void ksmbd_inode_hash(struct ksmbd_inode *ci)
 {
 	struct hlist_head *b = inode_hashtable +
-		inode_hash(d_inode(ci->m_de)->i_sb, (unsigned long)ci->m_de);
+		inode_hash(d_inode(ci->m_de)->i_sb, (uintptr_t)ci->m_de);
 
 	hlist_add_head(&ci->m_hash, b);
 }

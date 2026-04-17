@@ -811,7 +811,7 @@ static void destroy_reply_info(struct ceph_mds_reply_info_parsed *info)
 		kfree(rde->inode.fscrypt_auth);
 		kfree(rde->inode.fscrypt_file);
 	}
-	free_pages((unsigned long)info->dir_entries, get_order(info->dir_buf_size));
+	free_pages((uintptr_t)info->dir_entries, get_order(info->dir_buf_size));
 }
 
 /*
@@ -1976,7 +1976,7 @@ enum {
 static int wake_up_session_cb(struct inode *inode, int mds, void *arg)
 {
 	struct ceph_inode_info *ci = ceph_inode(inode);
-	unsigned long ev = (unsigned long)arg;
+	uintptr_t ev = (uintptr_t)arg;
 
 	if (ev == RECONNECT) {
 		spin_lock(&ci->i_ceph_lock);

@@ -173,7 +173,7 @@ static int max5522_spi_probe(struct spi_device *spi)
 }
 
 static const struct spi_device_id max5522_ids[] = {
-	{ "max5522", (kernel_ulong_t)&max5522_chip_info_tbl[ID_MAX5522] },
+	{ "max5522", (uintptr_t)&max5522_chip_info_tbl[ID_MAX5522] },
 	{ }
 };
 MODULE_DEVICE_TABLE(spi, max5522_ids);

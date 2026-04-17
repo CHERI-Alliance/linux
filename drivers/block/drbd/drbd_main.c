@@ -1666,7 +1666,7 @@ int drbd_send_dblock(struct drbd_peer_device *peer_device, struct drbd_request *
 	if (!p)
 		return -EIO;
 	p->sector = cpu_to_be64(req->i.sector);
-	p->block_id = (unsigned long)req;
+	p->block_id = (uintptr_t)req;
 	p->seq_num = cpu_to_be32(atomic_inc_return(&device->packet_seq));
 	dp_flags = bio_flags_to_wire(peer_device->connection, req->master_bio);
 	if (device->state.conn >= C_SYNC_SOURCE &&
@@ -2433,8 +2433,8 @@ static int drbd_alloc_socket(struct drbd_socket *socket)
 
 static void drbd_free_socket(struct drbd_socket *socket)
 {
-	free_page((unsigned long) socket->sbuf);
-	free_page((unsigned long) socket->rbuf);
+	free_page((uintptr_t) socket->sbuf);
+	free_page((uintptr_t) socket->rbuf);
 }
 
 void conn_free_crypto(struct drbd_connection *connection)

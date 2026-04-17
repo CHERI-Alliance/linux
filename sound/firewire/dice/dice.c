@@ -267,7 +267,7 @@ static const struct ieee1394_device_id dice_id_table[] = {
 				  IEEE1394_MATCH_MODEL_ID,
 		.vendor_id	= OUI_MAUDIO,
 		.model_id	= 0x000010,
-		.driver_data = (kernel_ulong_t)snd_dice_detect_extension_formats,
+		.driver_data = (uintptr_t)snd_dice_detect_extension_formats,
 	},
 	/* M-Audio Profire 610 has a different value in version field. */
 	{
@@ -275,7 +275,7 @@ static const struct ieee1394_device_id dice_id_table[] = {
 				  IEEE1394_MATCH_MODEL_ID,
 		.vendor_id	= OUI_MAUDIO,
 		.model_id	= 0x000011,
-		.driver_data = (kernel_ulong_t)snd_dice_detect_extension_formats,
+		.driver_data = (uintptr_t)snd_dice_detect_extension_formats,
 	},
 	/* TC Electronic Konnekt 24D. */
 	{
@@ -283,7 +283,7 @@ static const struct ieee1394_device_id dice_id_table[] = {
 				  IEEE1394_MATCH_MODEL_ID,
 		.vendor_id	= OUI_TCELECTRONIC,
 		.model_id	= 0x000020,
-		.driver_data = (kernel_ulong_t)snd_dice_detect_tcelectronic_formats,
+		.driver_data = (uintptr_t)snd_dice_detect_tcelectronic_formats,
 	},
 	/* TC Electronic Konnekt 8. */
 	{
@@ -291,7 +291,7 @@ static const struct ieee1394_device_id dice_id_table[] = {
 				  IEEE1394_MATCH_MODEL_ID,
 		.vendor_id	= OUI_TCELECTRONIC,
 		.model_id	= 0x000021,
-		.driver_data = (kernel_ulong_t)snd_dice_detect_tcelectronic_formats,
+		.driver_data = (uintptr_t)snd_dice_detect_tcelectronic_formats,
 	},
 	/* TC Electronic Studio Konnekt 48. */
 	{
@@ -299,7 +299,7 @@ static const struct ieee1394_device_id dice_id_table[] = {
 				  IEEE1394_MATCH_MODEL_ID,
 		.vendor_id	= OUI_TCELECTRONIC,
 		.model_id	= 0x000022,
-		.driver_data = (kernel_ulong_t)snd_dice_detect_tcelectronic_formats,
+		.driver_data = (uintptr_t)snd_dice_detect_tcelectronic_formats,
 	},
 	/* TC Electronic Konnekt Live. */
 	{
@@ -307,7 +307,7 @@ static const struct ieee1394_device_id dice_id_table[] = {
 				  IEEE1394_MATCH_MODEL_ID,
 		.vendor_id	= OUI_TCELECTRONIC,
 		.model_id	= 0x000023,
-		.driver_data = (kernel_ulong_t)snd_dice_detect_tcelectronic_formats,
+		.driver_data = (uintptr_t)snd_dice_detect_tcelectronic_formats,
 	},
 	/* TC Electronic Desktop Konnekt 6. */
 	{
@@ -315,7 +315,7 @@ static const struct ieee1394_device_id dice_id_table[] = {
 				  IEEE1394_MATCH_MODEL_ID,
 		.vendor_id	= OUI_TCELECTRONIC,
 		.model_id	= 0x000024,
-		.driver_data = (kernel_ulong_t)snd_dice_detect_tcelectronic_formats,
+		.driver_data = (uintptr_t)snd_dice_detect_tcelectronic_formats,
 	},
 	/* TC Electronic Impact Twin. */
 	{
@@ -323,7 +323,7 @@ static const struct ieee1394_device_id dice_id_table[] = {
 				  IEEE1394_MATCH_MODEL_ID,
 		.vendor_id	= OUI_TCELECTRONIC,
 		.model_id	= 0x000027,
-		.driver_data = (kernel_ulong_t)snd_dice_detect_tcelectronic_formats,
+		.driver_data = (uintptr_t)snd_dice_detect_tcelectronic_formats,
 	},
 	/* TC Electronic Digital Konnekt x32. */
 	{
@@ -331,7 +331,7 @@ static const struct ieee1394_device_id dice_id_table[] = {
 				  IEEE1394_MATCH_MODEL_ID,
 		.vendor_id	= OUI_TCELECTRONIC,
 		.model_id	= 0x000030,
-		.driver_data = (kernel_ulong_t)snd_dice_detect_tcelectronic_formats,
+		.driver_data = (uintptr_t)snd_dice_detect_tcelectronic_formats,
 	},
 	/* Alesis iO14/iO26. */
 	{
@@ -339,7 +339,7 @@ static const struct ieee1394_device_id dice_id_table[] = {
 				  IEEE1394_MATCH_MODEL_ID,
 		.vendor_id	= OUI_ALESIS,
 		.model_id	= MODEL_ALESIS_IO_BOTH,
-		.driver_data = (kernel_ulong_t)snd_dice_detect_alesis_formats,
+		.driver_data = (uintptr_t)snd_dice_detect_alesis_formats,
 	},
 	// Alesis MasterControl.
 	{
@@ -347,7 +347,7 @@ static const struct ieee1394_device_id dice_id_table[] = {
 				  IEEE1394_MATCH_MODEL_ID,
 		.vendor_id	= OUI_ALESIS,
 		.model_id	= 0x000002,
-		.driver_data = (kernel_ulong_t)snd_dice_detect_alesis_mastercontrol_formats,
+		.driver_data = (uintptr_t)snd_dice_detect_alesis_mastercontrol_formats,
 	},
 	/* Mytek Stereo 192 DSD-DAC. */
 	{
@@ -355,7 +355,7 @@ static const struct ieee1394_device_id dice_id_table[] = {
 				  IEEE1394_MATCH_MODEL_ID,
 		.vendor_id	= OUI_MYTEK,
 		.model_id	= 0x000002,
-		.driver_data = (kernel_ulong_t)snd_dice_detect_mytek_formats,
+		.driver_data = (uintptr_t)snd_dice_detect_mytek_formats,
 	},
 	// Solid State Logic, Duende Classic and Mini.
 	// NOTE: each field of GUID in config ROM is not compliant to standard
@@ -372,7 +372,7 @@ static const struct ieee1394_device_id dice_id_table[] = {
 				  IEEE1394_MATCH_MODEL_ID,
 		.vendor_id	= OUI_PRESONUS,
 		.model_id	= 0x000008,
-		.driver_data	= (kernel_ulong_t)snd_dice_detect_presonus_formats,
+		.driver_data	= (uintptr_t)snd_dice_detect_presonus_formats,
 	},
 	// Lexicon I-ONYX FW810S.
 	{
@@ -380,7 +380,7 @@ static const struct ieee1394_device_id dice_id_table[] = {
 				  IEEE1394_MATCH_MODEL_ID,
 		.vendor_id	= OUI_HARMAN,
 		.model_id	= 0x000001,
-		.driver_data	= (kernel_ulong_t)snd_dice_detect_harman_formats,
+		.driver_data	= (uintptr_t)snd_dice_detect_harman_formats,
 	},
 	// Focusrite Saffire Pro 40 with TCD3070-CH.
 	// The model has quirk in its GUID, in which model field is 0x000013 and different from
@@ -390,70 +390,70 @@ static const struct ieee1394_device_id dice_id_table[] = {
 				  IEEE1394_MATCH_MODEL_ID,
 		.vendor_id	= OUI_FOCUSRITE,
 		.model_id	= 0x0000de,
-		.driver_data	= (kernel_ulong_t)snd_dice_detect_focusrite_pro40_tcd3070_formats,
+		.driver_data	= (uintptr_t)snd_dice_detect_focusrite_pro40_tcd3070_formats,
 	},
 	// Weiss DAC202: 192kHz 2-channel DAC
 	{
 		.match_flags	= IEEE1394_MATCH_VENDOR_ID | IEEE1394_MATCH_MODEL_ID,
 		.vendor_id	= OUI_WEISS,
 		.model_id	= 0x000007,
-		.driver_data	= (kernel_ulong_t)snd_dice_detect_weiss_formats,
+		.driver_data	= (uintptr_t)snd_dice_detect_weiss_formats,
 	},
 	// Weiss DAC202: 192kHz 2-channel DAC (Maya edition)
 	{
 		.match_flags	= IEEE1394_MATCH_VENDOR_ID | IEEE1394_MATCH_MODEL_ID,
 		.vendor_id	= OUI_WEISS,
 		.model_id	= 0x000008,
-		.driver_data	= (kernel_ulong_t)snd_dice_detect_weiss_formats,
+		.driver_data	= (uintptr_t)snd_dice_detect_weiss_formats,
 	},
 	// Weiss MAN301: 192kHz 2-channel music archive network player
 	{
 		.match_flags	= IEEE1394_MATCH_VENDOR_ID | IEEE1394_MATCH_MODEL_ID,
 		.vendor_id	= OUI_WEISS,
 		.model_id	= 0x00000b,
-		.driver_data	= (kernel_ulong_t)snd_dice_detect_weiss_formats,
+		.driver_data	= (uintptr_t)snd_dice_detect_weiss_formats,
 	},
 	// Weiss INT202: 192kHz unidirectional 2-channel digital Firewire face
 	{
 		.match_flags	= IEEE1394_MATCH_VENDOR_ID | IEEE1394_MATCH_MODEL_ID,
 		.vendor_id	= OUI_WEISS,
 		.model_id	= 0x000006,
-		.driver_data	= (kernel_ulong_t)snd_dice_detect_weiss_formats,
+		.driver_data	= (uintptr_t)snd_dice_detect_weiss_formats,
 	},
 	// Weiss INT203: 192kHz bidirectional 2-channel digital Firewire face
 	{
 		.match_flags	= IEEE1394_MATCH_VENDOR_ID | IEEE1394_MATCH_MODEL_ID,
 		.vendor_id	= OUI_WEISS,
 		.model_id	= 0x00000a,
-		.driver_data	= (kernel_ulong_t)snd_dice_detect_weiss_formats,
+		.driver_data	= (uintptr_t)snd_dice_detect_weiss_formats,
 	},
 	// Weiss ADC2: 192kHz A/D converter with microphone preamps and inputs
 	{
 		.match_flags	= IEEE1394_MATCH_VENDOR_ID | IEEE1394_MATCH_MODEL_ID,
 		.vendor_id	= OUI_WEISS,
 		.model_id	= 0x000001,
-		.driver_data	= (kernel_ulong_t)snd_dice_detect_weiss_formats,
+		.driver_data	= (uintptr_t)snd_dice_detect_weiss_formats,
 	},
 	// Weiss DAC2/Minerva: 192kHz 2-channel DAC
 	{
 		.match_flags	= IEEE1394_MATCH_VENDOR_ID | IEEE1394_MATCH_MODEL_ID,
 		.vendor_id	= OUI_WEISS,
 		.model_id	= 0x000003,
-		.driver_data	= (kernel_ulong_t)snd_dice_detect_weiss_formats,
+		.driver_data	= (uintptr_t)snd_dice_detect_weiss_formats,
 	},
 	// Weiss Vesta: 192kHz 2-channel Firewire to AES/EBU interface
 	{
 		.match_flags	= IEEE1394_MATCH_VENDOR_ID | IEEE1394_MATCH_MODEL_ID,
 		.vendor_id	= OUI_WEISS,
 		.model_id	= 0x000002,
-		.driver_data	= (kernel_ulong_t)snd_dice_detect_weiss_formats,
+		.driver_data	= (uintptr_t)snd_dice_detect_weiss_formats,
 	},
 	// Weiss AFI1: 192kHz 24-channel Firewire to ADAT or AES/EBU face
 	{
 		.match_flags	= IEEE1394_MATCH_VENDOR_ID | IEEE1394_MATCH_MODEL_ID,
 		.vendor_id	= OUI_WEISS,
 		.model_id	= 0x000004,
-		.driver_data	= (kernel_ulong_t)snd_dice_detect_weiss_formats,
+		.driver_data	= (uintptr_t)snd_dice_detect_weiss_formats,
 	},
 	{
 		.match_flags = IEEE1394_MATCH_VERSION,
@@ -469,7 +469,7 @@ static const struct ieee1394_device_id dice_id_table[] = {
 		.model_id	= OUI_TEAC,
 		.specifier_id	= OUI_TEAC,
 		.version	= 0x800006,
-		.driver_data = (kernel_ulong_t)snd_dice_detect_teac_formats,
+		.driver_data = (uintptr_t)snd_dice_detect_teac_formats,
 	},
 	{ }
 };

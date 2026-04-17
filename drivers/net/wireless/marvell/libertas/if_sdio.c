@@ -803,7 +803,7 @@ static void if_sdio_finish_power_on(struct if_sdio_card *card)
 
 		lbs_deb_sdio("send function INIT command\n");
 		if (__lbs_cmd(priv, CMD_FUNC_INIT, &cmd, sizeof(cmd),
-				lbs_cmd_copyback, (unsigned long) &cmd))
+				lbs_cmd_copyback, (uintptr_t) &cmd))
 			netdev_alert(priv->dev, "CMD_FUNC_INIT cmd failed\n");
 	}
 
@@ -982,7 +982,7 @@ static int if_sdio_enter_deep_sleep(struct lbs_private *priv)
 
 	lbs_deb_sdio("send DEEP_SLEEP command\n");
 	ret = __lbs_cmd(priv, CMD_802_11_DEEP_SLEEP, &cmd, sizeof(cmd),
-			lbs_cmd_copyback, (unsigned long) &cmd);
+			lbs_cmd_copyback, (uintptr_t) &cmd);
 	if (ret)
 		netdev_err(priv->dev, "DEEP_SLEEP cmd failed\n");
 
@@ -1273,7 +1273,7 @@ static void if_sdio_remove(struct sdio_func *func)
 		lbs_deb_sdio("send function SHUTDOWN command\n");
 		if (__lbs_cmd(card->priv, CMD_FUNC_SHUTDOWN,
 				&cmd, sizeof(cmd), lbs_cmd_copyback,
-				(unsigned long) &cmd))
+				(uintptr_t) &cmd))
 			pr_alert("CMD_FUNC_SHUTDOWN cmd failed\n");
 	}
 

@@ -75,7 +75,7 @@ unsigned long mutex_get_owner(struct mutex *lock)
 {
 	unsigned long owner = atomic_long_read(&lock->owner);
 
-	return (unsigned long)__owner_task(owner);
+	return (uintptr_t)__owner_task(owner);
 }
 
 /*
@@ -83,7 +83,7 @@ unsigned long mutex_get_owner(struct mutex *lock)
  */
 static inline struct task_struct *__mutex_trylock_common(struct mutex *lock, bool handoff)
 {
-	unsigned long owner, curr = (unsigned long)current;
+	uintptr_t owner, curr = (uintptr_t)current;
 
 	owner = atomic_long_read(&lock->owner);
 	for (;;) { /* must loop, can race against a flag */
@@ -151,7 +151,7 @@ EXPORT_SYMBOL(mutex_init_generic);
  */
 static __always_inline bool __mutex_trylock_fast(struct mutex *lock)
 {
-	unsigned long curr = (unsigned long)current;
+	uintptr_t curr = (uintptr_t)current;
 	unsigned long zero = 0UL;
 
 	MUTEX_WARN_ON(lock->magic != lock);
@@ -164,7 +164,7 @@ static __always_inline bool __mutex_trylock_fast(struct mutex *lock)
 
 static __always_inline bool __mutex_unlock_fast(struct mutex *lock)
 {
-	unsigned long curr = (unsigned long)current;
+	uintptr_t curr = (uintptr_t)current;
 
 	return atomic_long_try_cmpxchg_release(&lock->owner, &curr, 0UL);
 }
@@ -243,7 +243,7 @@ static void __mutex_handoff(struct mutex *lock, struct task_struct *task)
 		MUTEX_WARN_ON(owner & MUTEX_FLAG_PICKUP);
 
 		new = (owner & MUTEX_FLAG_WAITERS);
-		new |= (unsigned long)task;
+		new |= (uintptr_t)task;
 		if (task)
 			new |= MUTEX_FLAG_PICKUP;
 

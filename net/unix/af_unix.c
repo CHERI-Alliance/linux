@@ -198,7 +198,7 @@ static int unix_recvq_lock_cmp_fn(const struct lockdep_map *_a,
 
 static unsigned int unix_unbound_hash(struct sock *sk)
 {
-	unsigned long hash = (unsigned long)sk;
+	uintptr_t hash = (uintptr_t)sk;
 
 	hash ^= hash >> 16;
 	hash ^= hash >> 8;
@@ -3331,7 +3331,7 @@ static int unix_ioctl(struct socket *sock, unsigned int cmd, user_uintptr_t arg)
 #ifdef CONFIG_COMPAT
 static int unix_compat_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 {
-	return unix_ioctl(sock, cmd, (unsigned long)compat_ptr(arg));
+	return unix_ioctl(sock, cmd, (user_uintptr_t)compat_ptr(arg));
 }
 #endif
 

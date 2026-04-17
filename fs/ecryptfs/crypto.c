@@ -1026,7 +1026,7 @@ static unsigned long ecryptfs_get_zeroed_pages(gfp_t gfp_mask,
 
 	page = alloc_pages(gfp_mask | __GFP_ZERO, order);
 	if (page)
-		return (unsigned long) page_address(page);
+		return (uintptr_t) page_address(page);
 	return 0;
 }
 
@@ -1095,7 +1095,7 @@ int ecryptfs_write_metadata(struct dentry *ecryptfs_dentry,
 		goto out_free;
 	}
 out_free:
-	free_pages((unsigned long)virt, order);
+	free_pages((uintptr_t)virt, order);
 out:
 	return rc;
 }

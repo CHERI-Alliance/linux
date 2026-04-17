@@ -58,7 +58,7 @@ void rkvdec_free_rcb(struct rkvdec_ctx *ctx)
 
 		switch (cfg->rcb_bufs[i].type) {
 		case RKVDEC_ALLOC_SRAM:
-			virt_addr = (unsigned long)cfg->rcb_bufs[i].cpu;
+			virt_addr = (uintptr_t)cfg->rcb_bufs[i].cpu;
 
 			if (dev->iommu_domain)
 				iommu_unmap(dev->iommu_domain, virt_addr, rcb_size);
@@ -127,14 +127,14 @@ int rkvdec_allocate_rcb(struct rkvdec_ctx *ctx,
 
 		/* If an IOMMU is used, map the SRAM address through it */
 		if (cpu && rkvdec->iommu_domain) {
-			unsigned long virt_addr = (unsigned long)cpu;
+			uintptr_t virt_addr = (uintptr_t)cpu;
 			phys_addr_t phys_addr = dma;
 
 			ret = iommu_map(rkvdec->iommu_domain, virt_addr, phys_addr,
 					rcb_size, IOMMU_READ | IOMMU_WRITE, 0);
 			if (ret) {
 				gen_pool_free(ctx->dev->sram_pool,
-					      (unsigned long)cpu,
+					      (uintptr_t)cpu,
 					      rcb_size);
 				cpu = NULL;
 				goto ram_fallback;

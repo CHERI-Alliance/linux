@@ -480,8 +480,8 @@ DEFINE_PER_CPU(unsigned long [OVERFLOW_STACK_SIZE/sizeof(long)],
 
 asmlinkage void handle_bad_stack(struct pt_regs *regs)
 {
-	unsigned long tsk_stk = (unsigned long)current->stack;
-	unsigned long ovf_stk = (unsigned long)this_cpu_ptr(overflow_stack);
+	uintptr_t tsk_stk = (uintptr_t)current->stack;
+	uintptr_t ovf_stk = (uintptr_t)this_cpu_ptr(overflow_stack);
 
 	console_verbose();
 

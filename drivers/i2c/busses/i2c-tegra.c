@@ -2202,9 +2202,9 @@ static const struct dev_pm_ops tegra_i2c_pm = {
 };
 
 static const struct acpi_device_id tegra_i2c_acpi_match[] = {
-	{.id = "NVDA0101", .driver_data = (kernel_ulong_t)&tegra210_i2c_hw},
-	{.id = "NVDA0201", .driver_data = (kernel_ulong_t)&tegra186_i2c_hw},
-	{.id = "NVDA0301", .driver_data = (kernel_ulong_t)&tegra194_i2c_hw},
+	{.id = "NVDA0101", .driver_data = (uintptr_t)&tegra210_i2c_hw},
+	{.id = "NVDA0201", .driver_data = (uintptr_t)&tegra186_i2c_hw},
+	{.id = "NVDA0301", .driver_data = (uintptr_t)&tegra194_i2c_hw},
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, tegra_i2c_acpi_match);

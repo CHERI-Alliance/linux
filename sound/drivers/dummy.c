@@ -598,7 +598,7 @@ static void free_fake_buffer(void)
 		int i;
 		for (i = 0; i < 2; i++)
 			if (dummy_page[i]) {
-				free_page((unsigned long)dummy_page[i]);
+				free_page((uintptr_t)dummy_page[i]);
 				dummy_page[i] = NULL;
 			}
 	}

@@ -1390,13 +1390,13 @@ static const struct of_device_id ad9467_of_match[] = {
 MODULE_DEVICE_TABLE(of, ad9467_of_match);
 
 static const struct spi_device_id ad9467_ids[] = {
-	{ "ad9211", (kernel_ulong_t)&ad9211_chip_tbl },
-	{ "ad9265", (kernel_ulong_t)&ad9265_chip_tbl },
-	{ "ad9434", (kernel_ulong_t)&ad9434_chip_tbl },
-	{ "ad9467", (kernel_ulong_t)&ad9467_chip_tbl },
-	{ "ad9643", (kernel_ulong_t)&ad9643_chip_tbl },
-	{ "ad9649", (kernel_ulong_t)&ad9649_chip_tbl, },
-	{ "ad9652", (kernel_ulong_t)&ad9652_chip_tbl, },
+	{ "ad9211", (uintptr_t)&ad9211_chip_tbl },
+	{ "ad9265", (uintptr_t)&ad9265_chip_tbl },
+	{ "ad9434", (uintptr_t)&ad9434_chip_tbl },
+	{ "ad9467", (uintptr_t)&ad9467_chip_tbl },
+	{ "ad9643", (uintptr_t)&ad9643_chip_tbl },
+	{ "ad9649", (uintptr_t)&ad9649_chip_tbl, },
+	{ "ad9652", (uintptr_t)&ad9652_chip_tbl, },
 	{ }
 };
 MODULE_DEVICE_TABLE(spi, ad9467_ids);

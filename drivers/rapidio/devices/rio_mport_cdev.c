@@ -274,7 +274,7 @@ static int rio_mport_maint_rd(struct mport_cdev_priv *priv, void __user *arg,
 		offset += 4;
 	}
 
-	if (unlikely(copy_to_user((void __user *)(uintptr_t)maint_io.buffer,
+	if (unlikely(copy_to_user((void __user *)(user_uintptr_t)maint_io.buffer,
 				   buffer, maint_io.length)))
 		ret = -EFAULT;
 out:
@@ -306,7 +306,7 @@ static int rio_mport_maint_wr(struct mport_cdev_priv *priv, void __user *arg,
 	length = maint_io.length;
 
 	if (unlikely(copy_from_user(buffer,
-			(void __user *)(uintptr_t)maint_io.buffer, length))) {
+			(void __user *)(user_uintptr_t)maint_io.buffer, length))) {
 		ret = -EFAULT;
 		goto out;
 	}
@@ -964,7 +964,7 @@ static int rio_mport_transfer_ioctl(struct file *filp, void __user *arg)
 		return -ENOMEM;
 
 	if (unlikely(copy_from_user(transfer,
-				    (void __user *)(uintptr_t)transaction.block,
+				    (void __user *)(user_uintptr_t)transaction.block,
 				    size))) {
 		ret = -EFAULT;
 		goto out_free;
@@ -976,7 +976,7 @@ static int rio_mport_transfer_ioctl(struct file *filp, void __user *arg)
 		ret = rio_dma_transfer(filp, transaction.transfer_mode,
 			transaction.sync, dir, &transfer[i]);
 
-	if (unlikely(copy_to_user((void __user *)(uintptr_t)transaction.block,
+	if (unlikely(copy_to_user((void __user *)(user_uintptr_t)transaction.block,
 				  transfer, size)))
 		ret = -EFAULT;
 

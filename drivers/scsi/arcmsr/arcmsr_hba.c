@@ -657,7 +657,7 @@ static void arcmsr_hbaF_assign_regAddr(struct AdapterControlBlock *acb)
 	struct MessageUnit_F __iomem *pmuF;
 
 	memset(acb->dma_coherent2, 0xff, acb->completeQ_size);
-	acb->message_wbuffer = (uint32_t *)round_up((unsigned long)acb->dma_coherent2 +
+	acb->message_wbuffer = (uint32_t *)round_up((uintptr_t)acb->dma_coherent2 +
 		acb->completeQ_size, 4);
 	acb->message_rbuffer = ((void *)acb->message_wbuffer) + 0x100;
 	acb->msgcode_rwbuffer = ((void *)acb->message_wbuffer) + 0x200;
@@ -773,11 +773,11 @@ static int arcmsr_alloc_xor_buffer(struct AdapterControlBlock *acb)
 		&dma_coherent_handle, GFP_KERNEL);
 	acb->xorVirt = dma_coherent;
 	acb->xorPhys = dma_coherent_handle;
-	pXorPhys = (struct Xor_sg *)((unsigned long)dma_coherent +
+	pXorPhys = (struct Xor_sg *)((uintptr_t)dma_coherent +
 		sizeof(struct HostRamBuf));
 	acb->xorVirtOffset = sizeof(struct HostRamBuf) +
 		(sizeof(struct Xor_sg) * acb->xor_mega);
-	pXorVirt = (void **)((unsigned long)dma_coherent +
+	pXorVirt = (void **)((uintptr_t)dma_coherent +
 		(unsigned long)acb->xorVirtOffset);
 	for (i = 0; i < acb->xor_mega; i++) {
 		dma_coherent = dma_alloc_coherent(&pdev->dev,
@@ -845,7 +845,7 @@ static int arcmsr_alloc_ccb_pool(struct AdapterControlBlock *acb)
 	acb->ccbsize = roundup_ccbsize;
 	ccb_tmp = dma_coherent;
 	curr_phy_upper32 = upper_32_bits(dma_coherent_handle);
-	acb->vir2phy_offset = (unsigned long)dma_coherent - (unsigned long)dma_coherent_handle;
+	acb->vir2phy_offset = (uintptr_t)dma_coherent - (unsigned long)dma_coherent_handle;
 	for(i = 0; i < acb->maxFreeCCB; i++){
 		cdb_phyaddr = (unsigned long)dma_coherent_handle + offsetof(struct CommandControlBlock, arcmsr_cdb);
 		switch (acb->adapter_type) {
@@ -872,7 +872,7 @@ static int arcmsr_alloc_ccb_pool(struct AdapterControlBlock *acb)
 		}
 		else
 			list_add_tail(&ccb_tmp->list, &acb->ccb_free_list);
-		ccb_tmp = (struct CommandControlBlock *)((unsigned long)ccb_tmp + roundup_ccbsize);
+		ccb_tmp = (struct CommandControlBlock *)((uintptr_t)ccb_tmp + roundup_ccbsize);
 		dma_coherent_handle = next_ccb_phy;
 	}
 	if (acb->adapter_type != ACB_ADAPTER_TYPE_F) {
@@ -2090,7 +2090,7 @@ static void arcmsr_free_ccb_pool(struct AdapterControlBlock *acb)
 
 		pXorPhys = (struct Xor_sg *)(acb->xorVirt +
 			sizeof(struct HostRamBuf));
-		pXorVirt = (void **)((unsigned long)acb->xorVirt +
+		pXorVirt = (void **)((uintptr_t)acb->xorVirt +
 			(unsigned long)acb->xorVirtOffset);
 		for (i = 0; i < acb->xor_mega; i++) {
 			if (pXorPhys->xorPhys) {

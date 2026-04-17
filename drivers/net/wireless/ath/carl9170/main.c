@@ -1591,7 +1591,7 @@ static int carl9170_register_hwrng(struct ar9170 *ar)
 		 "%s_%s", KBUILD_MODNAME, wiphy_name(ar->hw->wiphy));
 	ar->rng.rng.name = ar->rng.name;
 	ar->rng.rng.data_read = carl9170_rng_read;
-	ar->rng.rng.priv = (unsigned long)ar;
+	ar->rng.rng.priv = (uintptr_t)ar;
 
 	err = devm_hwrng_register(&ar->udev->dev, &ar->rng.rng);
 	if (err) {

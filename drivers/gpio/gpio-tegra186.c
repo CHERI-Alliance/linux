@@ -1461,14 +1461,14 @@ static const struct of_device_id tegra186_gpio_of_match[] = {
 MODULE_DEVICE_TABLE(of, tegra186_gpio_of_match);
 
 static const struct acpi_device_id  tegra186_gpio_acpi_match[] = {
-	{ .id = "NVDA0108", .driver_data = (kernel_ulong_t)&tegra186_main_soc },
-	{ .id = "NVDA0208", .driver_data = (kernel_ulong_t)&tegra186_aon_soc },
-	{ .id = "NVDA0308", .driver_data = (kernel_ulong_t)&tegra194_main_soc },
-	{ .id = "NVDA0408", .driver_data = (kernel_ulong_t)&tegra194_aon_soc },
-	{ .id = "NVDA0508", .driver_data = (kernel_ulong_t)&tegra241_main_soc },
-	{ .id = "NVDA0608", .driver_data = (kernel_ulong_t)&tegra241_aon_soc },
-	{ .id = "NVDA0708", .driver_data = (kernel_ulong_t)&tegra410_compute_soc },
-	{ .id = "NVDA0808", .driver_data = (kernel_ulong_t)&tegra410_system_soc },
+	{ .id = "NVDA0108", .driver_data = (uintptr_t)&tegra186_main_soc },
+	{ .id = "NVDA0208", .driver_data = (uintptr_t)&tegra186_aon_soc },
+	{ .id = "NVDA0308", .driver_data = (uintptr_t)&tegra194_main_soc },
+	{ .id = "NVDA0408", .driver_data = (uintptr_t)&tegra194_aon_soc },
+	{ .id = "NVDA0508", .driver_data = (uintptr_t)&tegra241_main_soc },
+	{ .id = "NVDA0608", .driver_data = (uintptr_t)&tegra241_aon_soc },
+	{ .id = "NVDA0708", .driver_data = (uintptr_t)&tegra410_compute_soc },
+	{ .id = "NVDA0808", .driver_data = (uintptr_t)&tegra410_system_soc },
 	{}
 };
 MODULE_DEVICE_TABLE(acpi, tegra186_gpio_acpi_match);

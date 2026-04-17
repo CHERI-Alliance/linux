@@ -175,7 +175,7 @@ static void sg_kfree(struct scatterlist *sg, unsigned int nents)
 {
 	if (nents == SG_MAX_SINGLE_ALLOC) {
 		kmemleak_free(sg);
-		free_page((unsigned long) sg);
+		free_page((uintptr_t) sg);
 	} else
 		kfree(sg);
 }
@@ -1233,7 +1233,7 @@ static ssize_t extract_kvec_to_sg(struct iov_iter *iter,
 			continue;
 		}
 
-		kaddr = (unsigned long)kv[i].iov_base + start;
+		kaddr = (uintptr_t)kv[i].iov_base + start;
 		off = kaddr & ~PAGE_MASK;
 		len = min_t(size_t, maxsize, len - start);
 		kaddr &= PAGE_MASK;

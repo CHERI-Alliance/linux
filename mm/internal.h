@@ -147,7 +147,7 @@ static inline swp_entry_t folio_swap(swp_entry_t entry,
 
 static inline void *folio_raw_mapping(const struct folio *folio)
 {
-	unsigned long mapping = (unsigned long)folio->mapping;
+	uintptr_t mapping = (uintptr_t)folio->mapping;
 
 	return (void *)(mapping & ~FOLIO_MAPPING_FLAGS);
 }

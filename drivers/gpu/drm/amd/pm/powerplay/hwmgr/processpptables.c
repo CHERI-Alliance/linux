@@ -60,7 +60,7 @@ static uint16_t get_vce_table_offset(struct pp_hwmgr *hwmgr,
 		if (powerplay_table3->usExtendendedHeaderOffset > 0) {
 			const ATOM_PPLIB_EXTENDEDHEADER  *extended_header =
 						(const ATOM_PPLIB_EXTENDEDHEADER *)
-						(((unsigned long)powerplay_table3) +
+						(((uintptr_t)powerplay_table3) +
 						le16_to_cpu(powerplay_table3->usExtendendedHeaderOffset));
 			if (le16_to_cpu(extended_header->usSize) >=
 			   SIZE_OF_ATOM_PPLIB_EXTENDEDHEADER_V2)
@@ -92,7 +92,7 @@ static uint16_t get_vce_clock_info_array_size(struct pp_hwmgr *hwmgr,
 
 	if (table_offset > 0) {
 		const VCEClockInfoArray *p = (const VCEClockInfoArray *)
-			(((unsigned long) powerplay_table) + table_offset);
+			(((uintptr_t) powerplay_table) + table_offset);
 		table_size = sizeof(uint8_t) + p->ucNumEntries * sizeof(VCEClockInfo);
 	}
 
@@ -120,7 +120,7 @@ static uint16_t get_vce_clock_voltage_limit_table_size(struct pp_hwmgr *hwmgr,
 
 	if (table_offset > 0) {
 		const ATOM_PPLIB_VCE_Clock_Voltage_Limit_Table *ptable =
-			(const ATOM_PPLIB_VCE_Clock_Voltage_Limit_Table *)(((unsigned long) powerplay_table) + table_offset);
+			(const ATOM_PPLIB_VCE_Clock_Voltage_Limit_Table *)(((uintptr_t) powerplay_table) + table_offset);
 
 		table_size = sizeof(uint8_t) + ptable->numEntries * sizeof(ATOM_PPLIB_VCE_Clock_Voltage_Limit_Record);
 	}
@@ -144,7 +144,7 @@ static const ATOM_PPLIB_VCE_State_Table *get_vce_state_table(
 	uint16_t table_offset = get_vce_state_table_offset(hwmgr, powerplay_table);
 
 	if (table_offset > 0)
-		return (const ATOM_PPLIB_VCE_State_Table *)(((unsigned long) powerplay_table) + table_offset);
+		return (const ATOM_PPLIB_VCE_State_Table *)(((uintptr_t) powerplay_table) + table_offset);
 
 	return NULL;
 }
@@ -161,7 +161,7 @@ static uint16_t get_uvd_table_offset(struct pp_hwmgr *hwmgr,
 		if (powerplay_table3->usExtendendedHeaderOffset > 0) {
 			const ATOM_PPLIB_EXTENDEDHEADER  *extended_header =
 					(const ATOM_PPLIB_EXTENDEDHEADER *)
-					(((unsigned long)powerplay_table3) +
+					(((uintptr_t)powerplay_table3) +
 				le16_to_cpu(powerplay_table3->usExtendendedHeaderOffset));
 			if (le16_to_cpu(extended_header->usSize) >=
 			    SIZE_OF_ATOM_PPLIB_EXTENDEDHEADER_V3)
@@ -191,7 +191,7 @@ static uint16_t get_uvd_clock_info_array_size(struct pp_hwmgr *hwmgr,
 
 	if (table_offset > 0) {
 		const UVDClockInfoArray *p = (const UVDClockInfoArray *)
-					(((unsigned long) powerplay_table)
+					(((uintptr_t) powerplay_table)
 					+ table_offset);
 		table_size = sizeof(UCHAR) +
 			     p->ucNumEntries * sizeof(UVDClockInfo);
@@ -226,7 +226,7 @@ static uint16_t get_samu_table_offset(struct pp_hwmgr *hwmgr,
 		if (powerplay_table3->usExtendendedHeaderOffset > 0) {
 			const ATOM_PPLIB_EXTENDEDHEADER  *extended_header =
 				(const ATOM_PPLIB_EXTENDEDHEADER *)
-				(((unsigned long)powerplay_table3) +
+				(((uintptr_t)powerplay_table3) +
 				le16_to_cpu(powerplay_table3->usExtendendedHeaderOffset));
 			if (le16_to_cpu(extended_header->usSize) >=
 			    SIZE_OF_ATOM_PPLIB_EXTENDEDHEADER_V4)
@@ -262,7 +262,7 @@ static uint16_t get_acp_table_offset(struct pp_hwmgr *hwmgr,
 		if (powerplay_table3->usExtendendedHeaderOffset > 0) {
 			const ATOM_PPLIB_EXTENDEDHEADER  *pExtendedHeader =
 				(const ATOM_PPLIB_EXTENDEDHEADER *)
-				(((unsigned long)powerplay_table3) +
+				(((uintptr_t)powerplay_table3) +
 				le16_to_cpu(powerplay_table3->usExtendendedHeaderOffset));
 			if (le16_to_cpu(pExtendedHeader->usSize) >=
 			    SIZE_OF_ATOM_PPLIB_EXTENDEDHEADER_V6)
@@ -298,7 +298,7 @@ static uint16_t get_cacp_tdp_table_offset(
 		if (powerplay_table3->usExtendendedHeaderOffset > 0) {
 			const ATOM_PPLIB_EXTENDEDHEADER  *pExtendedHeader =
 					(const ATOM_PPLIB_EXTENDEDHEADER *)
-					(((unsigned long)powerplay_table3) +
+					(((uintptr_t)powerplay_table3) +
 				le16_to_cpu(powerplay_table3->usExtendendedHeaderOffset));
 			if (le16_to_cpu(pExtendedHeader->usSize) >=
 			    SIZE_OF_ATOM_PPLIB_EXTENDEDHEADER_V7)
@@ -349,7 +349,7 @@ static uint16_t get_sclk_vdd_gfx_table_offset(struct pp_hwmgr *hwmgr,
 		if (powerplay_table3->usExtendendedHeaderOffset > 0) {
 			const ATOM_PPLIB_EXTENDEDHEADER  *pExtendedHeader =
 				(const ATOM_PPLIB_EXTENDEDHEADER *)
-				(((unsigned long)powerplay_table3) +
+				(((uintptr_t)powerplay_table3) +
 				le16_to_cpu(powerplay_table3->usExtendendedHeaderOffset));
 			if (le16_to_cpu(pExtendedHeader->usSize) >=
 			    SIZE_OF_ATOM_PPLIB_EXTENDEDHEADER_V8)
@@ -779,7 +779,7 @@ static const ATOM_PPLIB_STATE_V2 *get_state_entry_v2(
 	if (entry_index <= pstate_arrays->ucNumEntries) {
 		for (i = 0; i < entry_index; i++)
 			pstate = (ATOM_PPLIB_STATE_V2 *)(
-						  (unsigned long)pstate +
+						  (uintptr_t)pstate +
 			     size_of_entry_v2(pstate->ucNumDPMLevels));
 	}
 	return pstate;
@@ -867,7 +867,7 @@ int pp_tables_get_num_of_entries(struct pp_hwmgr *hwmgr,
 		return -1;
 
 	if (powerplay_table->sHeader.ucTableFormatRevision >= 6) {
-		pstate_arrays = (StateArray *)(((unsigned long)powerplay_table) +
+		pstate_arrays = (StateArray *)(((uintptr_t)powerplay_table) +
 					le16_to_cpu(powerplay_table->usStateArrayOffset));
 
 		*num_of_entries = (unsigned long)(pstate_arrays->ucNumEntries);
@@ -902,27 +902,27 @@ int pp_tables_get_entry(struct pp_hwmgr *hwmgr,
 	ps->classification.bios_index = entry_index;
 
 	if (powerplay_table->sHeader.ucTableFormatRevision >= 6) {
-		pstate_arrays = (StateArray *)(((unsigned long)powerplay_table) +
+		pstate_arrays = (StateArray *)(((uintptr_t)powerplay_table) +
 					le16_to_cpu(powerplay_table->usStateArrayOffset));
 
 		if (entry_index > pstate_arrays->ucNumEntries)
 			return -1;
 
 		pstate_entry_v2 = get_state_entry_v2(pstate_arrays, entry_index);
-		pclock_arrays = (ClockInfoArray *)(((unsigned long)powerplay_table) +
+		pclock_arrays = (ClockInfoArray *)(((uintptr_t)powerplay_table) +
 					le16_to_cpu(powerplay_table->usClockInfoArrayOffset));
 
-		pnon_clock_arrays = (NonClockInfoArray *)(((unsigned long)powerplay_table) +
+		pnon_clock_arrays = (NonClockInfoArray *)(((uintptr_t)powerplay_table) +
 						le16_to_cpu(powerplay_table->usNonClockInfoArrayOffset));
 
-		pnon_clock_info = (ATOM_PPLIB_NONCLOCK_INFO *)((unsigned long)(pnon_clock_arrays->nonClockInfo) +
+		pnon_clock_info = (ATOM_PPLIB_NONCLOCK_INFO *)((uintptr_t)(pnon_clock_arrays->nonClockInfo) +
 					(pstate_entry_v2->nonClockInfoIndex * pnon_clock_arrays->ucEntrySize));
 
 		result = init_non_clock_fields(hwmgr, ps, pnon_clock_arrays->ucEntrySize, pnon_clock_info);
 
 		for (i = 0; i < pstate_entry_v2->ucNumDPMLevels; i++) {
 			const void *pclock_info = (const void *)(
-							(unsigned long)(pclock_arrays->clockInfo) +
+							(uintptr_t)(pclock_arrays->clockInfo) +
 							(pstate_entry_v2->clockInfoIndex[i] * pclock_arrays->ucEntrySize));
 			res = func(hwmgr, &ps->hardware, i, pclock_info);
 			if ((0 == result) && (0 != res))
@@ -932,11 +932,11 @@ int pp_tables_get_entry(struct pp_hwmgr *hwmgr,
 		if (entry_index > powerplay_table->ucNumStates)
 			return -1;
 
-		pstate_entry = (ATOM_PPLIB_STATE *)((unsigned long)powerplay_table +
+		pstate_entry = (ATOM_PPLIB_STATE *)((uintptr_t)powerplay_table +
 						    le16_to_cpu(powerplay_table->usStateArrayOffset) +
 						    entry_index * powerplay_table->ucStateEntrySize);
 
-		pnon_clock_info = (ATOM_PPLIB_NONCLOCK_INFO *)((unsigned long)powerplay_table +
+		pnon_clock_info = (ATOM_PPLIB_NONCLOCK_INFO *)((uintptr_t)powerplay_table +
 						le16_to_cpu(powerplay_table->usNonClockInfoArrayOffset) +
 						pstate_entry->ucNonClockStateIndex *
 						powerplay_table->ucNonClockSize);
@@ -946,7 +946,7 @@ int pp_tables_get_entry(struct pp_hwmgr *hwmgr,
 							pnon_clock_info);
 
 		for (i = 0; i < powerplay_table->ucStateEntrySize-1; i++) {
-			const void *pclock_info = (const void *)((unsigned long)powerplay_table +
+			const void *pclock_info = (const void *)((uintptr_t)powerplay_table +
 						le16_to_cpu(powerplay_table->usClockInfoArrayOffset) +
 						pstate_entry->ucClockStateIndices[i] *
 						powerplay_table->ucClockInfoSize);
@@ -1014,7 +1014,7 @@ static int init_thermal_controller(
 			return 0;
 		} else {
 			const ATOM_PPLIB_FANTABLE *fan_table =
-				(const ATOM_PPLIB_FANTABLE *)(((unsigned long)powerplay_table) +
+				(const ATOM_PPLIB_FANTABLE *)(((uintptr_t)powerplay_table) +
 							      le16_to_cpu(powerplay_table3->usFanTableOffset));
 
 			if (1 <= fan_table->ucFanTableFormat) {
@@ -1041,7 +1041,7 @@ static int init_thermal_controller(
 
 			if (2 <= fan_table->ucFanTableFormat) {
 				const ATOM_PPLIB_FANTABLE2 *fan_table2 =
-					(const ATOM_PPLIB_FANTABLE2 *)(((unsigned long)powerplay_table) +
+					(const ATOM_PPLIB_FANTABLE2 *)(((uintptr_t)powerplay_table) +
 								       le16_to_cpu(powerplay_table3->usFanTableOffset));
 				hwmgr->thermal_controller.advanceFanControlParameters.usTMax =
 					le16_to_cpu(fan_table2->usTMax);
@@ -1049,7 +1049,7 @@ static int init_thermal_controller(
 
 			if (3 <= fan_table->ucFanTableFormat) {
 				const ATOM_PPLIB_FANTABLE3 *fan_table3 =
-					(const ATOM_PPLIB_FANTABLE3 *) (((unsigned long)powerplay_table) +
+					(const ATOM_PPLIB_FANTABLE3 *) (((uintptr_t)powerplay_table) +
 									le16_to_cpu(powerplay_table3->usFanTableOffset));
 
 				hwmgr->thermal_controller.advanceFanControlParameters.ucFanControlMode =
@@ -1071,7 +1071,7 @@ static int init_thermal_controller(
 
 			if (6 <= fan_table->ucFanTableFormat) {
 				const ATOM_PPLIB_FANTABLE4 *fan_table4 =
-					(const ATOM_PPLIB_FANTABLE4 *)(((unsigned long)powerplay_table) +
+					(const ATOM_PPLIB_FANTABLE4 *)(((uintptr_t)powerplay_table) +
 								       le16_to_cpu(powerplay_table3->usFanTableOffset));
 
 				phm_cap_set(hwmgr->platform_descriptor.platformCaps,
@@ -1083,7 +1083,7 @@ static int init_thermal_controller(
 
 			if (7 <= fan_table->ucFanTableFormat) {
 				const ATOM_PPLIB_FANTABLE5 *fan_table5 =
-					(const ATOM_PPLIB_FANTABLE5 *)(((unsigned long)powerplay_table) +
+					(const ATOM_PPLIB_FANTABLE5 *)(((uintptr_t)powerplay_table) +
 								       le16_to_cpu(powerplay_table3->usFanTableOffset));
 
 				if (0x67A2 == adev->pdev->device ||
@@ -1146,7 +1146,7 @@ static int init_overdrive_limits_V2_1(struct pp_hwmgr *hwmgr,
 	if (0 == powerplay_table3->usExtendendedHeaderOffset)
 		return 0;
 
-	header = (ATOM_PPLIB_EXTENDEDHEADER *)(((unsigned long) powerplay_table) +
+	header = (ATOM_PPLIB_EXTENDEDHEADER *)(((uintptr_t) powerplay_table) +
 			le16_to_cpu(powerplay_table3->usExtendendedHeaderOffset));
 
 	hwmgr->platform_descriptor.overdriveLimit.engineClock = le32_to_cpu(header->ulMaxEngineClock);
@@ -1334,11 +1334,11 @@ static int init_clock_voltage_dependency(struct pp_hwmgr *hwmgr,
 						powerplay_table);
 	if (vce_clock_info_array_offset > 0 && table_offset > 0) {
 		const VCEClockInfoArray *array = (const VCEClockInfoArray *)
-				(((unsigned long) powerplay_table) +
+				(((uintptr_t) powerplay_table) +
 				vce_clock_info_array_offset);
 		const ATOM_PPLIB_VCE_Clock_Voltage_Limit_Table *table =
 				(const ATOM_PPLIB_VCE_Clock_Voltage_Limit_Table *)
-				(((unsigned long) powerplay_table) + table_offset);
+				(((uintptr_t) powerplay_table) + table_offset);
 		result = get_vce_clock_voltage_limit_table(hwmgr,
 				&hwmgr->dyn_state.vce_clock_voltage_dependency_table,
 				table, array);
@@ -1349,11 +1349,11 @@ static int init_clock_voltage_dependency(struct pp_hwmgr *hwmgr,
 
 	if (uvd_clock_info_array_offset > 0 && table_offset > 0) {
 		const UVDClockInfoArray *array = (const UVDClockInfoArray *)
-				(((unsigned long) powerplay_table) +
+				(((uintptr_t) powerplay_table) +
 				uvd_clock_info_array_offset);
 		const ATOM_PPLIB_UVD_Clock_Voltage_Limit_Table *ptable =
 				(const ATOM_PPLIB_UVD_Clock_Voltage_Limit_Table *)
-				(((unsigned long) powerplay_table) + table_offset);
+				(((uintptr_t) powerplay_table) + table_offset);
 		result = get_uvd_clock_voltage_limit_table(hwmgr,
 				&hwmgr->dyn_state.uvd_clock_voltage_dependency_table, ptable, array);
 	}
@@ -1364,7 +1364,7 @@ static int init_clock_voltage_dependency(struct pp_hwmgr *hwmgr,
 	if (table_offset > 0) {
 		const ATOM_PPLIB_SAMClk_Voltage_Limit_Table *ptable =
 				(const ATOM_PPLIB_SAMClk_Voltage_Limit_Table *)
-				(((unsigned long) powerplay_table) + table_offset);
+				(((uintptr_t) powerplay_table) + table_offset);
 		result = get_samu_clock_voltage_limit_table(hwmgr,
 				&hwmgr->dyn_state.samu_clock_voltage_dependency_table, ptable);
 	}
@@ -1375,19 +1375,19 @@ static int init_clock_voltage_dependency(struct pp_hwmgr *hwmgr,
 	if (table_offset > 0) {
 		const ATOM_PPLIB_ACPClk_Voltage_Limit_Table *ptable =
 				(const ATOM_PPLIB_ACPClk_Voltage_Limit_Table *)
-				(((unsigned long) powerplay_table) + table_offset);
+				(((uintptr_t) powerplay_table) + table_offset);
 		result = get_acp_clock_voltage_limit_table(hwmgr,
 				&hwmgr->dyn_state.acp_clock_voltage_dependency_table, ptable);
 	}
 
 	table_offset = get_cacp_tdp_table_offset(hwmgr, powerplay_table);
 	if (table_offset > 0) {
-		UCHAR rev_id = *(UCHAR *)(((unsigned long)powerplay_table) + table_offset);
+		UCHAR rev_id = *(UCHAR *)(((uintptr_t)powerplay_table) + table_offset);
 
 		if (rev_id > 0) {
 			const ATOM_PPLIB_POWERTUNE_Table_V1 *tune_table =
 				(const ATOM_PPLIB_POWERTUNE_Table_V1 *)
-				(((unsigned long) powerplay_table) + table_offset);
+				(((uintptr_t) powerplay_table) + table_offset);
 			result = get_cac_tdp_table(hwmgr, &hwmgr->dyn_state.cac_dtp_table,
 				&tune_table->power_tune_table,
 				le16_to_cpu(tune_table->usMaximumPowerDeliveryLimit));
@@ -1396,7 +1396,7 @@ static int init_clock_voltage_dependency(struct pp_hwmgr *hwmgr,
 		} else {
 			const ATOM_PPLIB_POWERTUNE_Table *tune_table =
 				(const ATOM_PPLIB_POWERTUNE_Table *)
-				(((unsigned long) powerplay_table) + table_offset);
+				(((uintptr_t) powerplay_table) + table_offset);
 			result = get_cac_tdp_table(hwmgr,
 				&hwmgr->dyn_state.cac_dtp_table,
 				&tune_table->power_tune_table, 255);
@@ -1409,7 +1409,7 @@ static int init_clock_voltage_dependency(struct pp_hwmgr *hwmgr,
 				(const ATOM_PPLIB_POWERPLAYTABLE4 *)powerplay_table;
 		if (0 != powerplay_table4->usVddcDependencyOnSCLKOffset) {
 			table = (ATOM_PPLIB_Clock_Voltage_Dependency_Table *)
-				(((unsigned long) powerplay_table4) +
+				(((uintptr_t) powerplay_table4) +
 				 le16_to_cpu(powerplay_table4->usVddcDependencyOnSCLKOffset));
 			result = get_clock_voltage_dependency_table(hwmgr,
 				&hwmgr->dyn_state.vddc_dependency_on_sclk, table);
@@ -1417,7 +1417,7 @@ static int init_clock_voltage_dependency(struct pp_hwmgr *hwmgr,
 
 		if (result == 0 && (0 != powerplay_table4->usVddciDependencyOnMCLKOffset)) {
 			table = (ATOM_PPLIB_Clock_Voltage_Dependency_Table *)
-				(((unsigned long) powerplay_table4) +
+				(((uintptr_t) powerplay_table4) +
 				 le16_to_cpu(powerplay_table4->usVddciDependencyOnMCLKOffset));
 			result = get_clock_voltage_dependency_table(hwmgr,
 				&hwmgr->dyn_state.vddci_dependency_on_mclk, table);
@@ -1425,7 +1425,7 @@ static int init_clock_voltage_dependency(struct pp_hwmgr *hwmgr,
 
 		if (result == 0 && (0 != powerplay_table4->usVddcDependencyOnMCLKOffset)) {
 			table = (ATOM_PPLIB_Clock_Voltage_Dependency_Table *)
-				(((unsigned long) powerplay_table4) +
+				(((uintptr_t) powerplay_table4) +
 				 le16_to_cpu(powerplay_table4->usVddcDependencyOnMCLKOffset));
 			result = get_clock_voltage_dependency_table(hwmgr,
 				&hwmgr->dyn_state.vddc_dependency_on_mclk, table);
@@ -1433,7 +1433,7 @@ static int init_clock_voltage_dependency(struct pp_hwmgr *hwmgr,
 
 		if (result == 0 && (0 != powerplay_table4->usMaxClockVoltageOnDCOffset)) {
 			limit_table = (ATOM_PPLIB_Clock_Voltage_Limit_Table *)
-				(((unsigned long) powerplay_table4) +
+				(((uintptr_t) powerplay_table4) +
 				 le16_to_cpu(powerplay_table4->usMaxClockVoltageOnDCOffset));
 			result = get_clock_voltage_limit(hwmgr,
 				&hwmgr->dyn_state.max_clock_voltage_on_dc, limit_table);
@@ -1452,7 +1452,7 @@ static int init_clock_voltage_dependency(struct pp_hwmgr *hwmgr,
 
 		if (result == 0 && (0 != powerplay_table4->usMvddDependencyOnMCLKOffset)) {
 			table = (ATOM_PPLIB_Clock_Voltage_Dependency_Table *)
-				(((unsigned long) powerplay_table4) +
+				(((uintptr_t) powerplay_table4) +
 				 le16_to_cpu(powerplay_table4->usMvddDependencyOnMCLKOffset));
 			result = get_clock_voltage_dependency_table(hwmgr,
 				&hwmgr->dyn_state.mvdd_dependency_on_mclk, table);
@@ -1464,7 +1464,7 @@ static int init_clock_voltage_dependency(struct pp_hwmgr *hwmgr,
 
 	if (table_offset > 0) {
 		table = (ATOM_PPLIB_Clock_Voltage_Dependency_Table *)
-			(((unsigned long) powerplay_table) + table_offset);
+			(((uintptr_t) powerplay_table) + table_offset);
 		result = get_clock_voltage_dependency_table(hwmgr,
 			&hwmgr->dyn_state.vdd_gfx_dependency_on_sclk, table);
 	}
@@ -1574,7 +1574,7 @@ static int init_dpm2_parameters(struct pp_hwmgr *hwmgr,
 
 		if (0 != ptable5->usCACLeakageTableOffset) {
 			const ATOM_PPLIB_CAC_Leakage_Table *pCAC_leakage_table =
-				(ATOM_PPLIB_CAC_Leakage_Table *)(((unsigned long)ptable5) +
+				(ATOM_PPLIB_CAC_Leakage_Table *)(((uintptr_t)ptable5) +
 				le16_to_cpu(ptable5->usCACLeakageTableOffset));
 			result = get_cac_leakage_table(hwmgr,
 				&hwmgr->dyn_state.cac_leakage_table, pCAC_leakage_table);
@@ -1586,14 +1586,14 @@ static int init_dpm2_parameters(struct pp_hwmgr *hwmgr,
 
 		if (0 != ptable3->usExtendendedHeaderOffset) {
 			extended_header = (const ATOM_PPLIB_EXTENDEDHEADER *)
-					(((unsigned long)powerplay_table) +
+					(((uintptr_t)powerplay_table) +
 					le16_to_cpu(ptable3->usExtendendedHeaderOffset));
 			if ((extended_header->usPPMTableOffset > 0) &&
 				le16_to_cpu(extended_header->usSize) >=
 				    SIZE_OF_ATOM_PPLIB_EXTENDEDHEADER_V5) {
 				table_offset = le16_to_cpu(extended_header->usPPMTableOffset);
 				atom_ppm_table = (ATOM_PPLIB_PPM_Table *)
-					(((unsigned long)powerplay_table) + table_offset);
+					(((uintptr_t)powerplay_table) + table_offset);
 				if (0 == get_platform_power_management_table(hwmgr, atom_ppm_table))
 					phm_cap_set(hwmgr->platform_descriptor.platformCaps,
 						PHM_PlatformCaps_EnablePlatformPowerManagement);
@@ -1614,7 +1614,7 @@ static int init_phase_shedding_table(struct pp_hwmgr *hwmgr,
 		if (0 != powerplay_table4->usVddcPhaseShedLimitsTableOffset) {
 			const ATOM_PPLIB_PhaseSheddingLimits_Table *ptable =
 				(ATOM_PPLIB_PhaseSheddingLimits_Table *)
-				(((unsigned long)powerplay_table4) +
+				(((uintptr_t)powerplay_table4) +
 				le16_to_cpu(powerplay_table4->usVddcPhaseShedLimitsTableOffset));
 			struct phm_phase_shedding_limits_table *table;
 			unsigned long i;
@@ -1667,9 +1667,9 @@ static int get_vce_state_table_entry(struct pp_hwmgr *hwmgr,
 
 	unsigned short vce_clock_info_array_offset = get_vce_clock_info_array_offset(hwmgr, powerplay_table);
 
-	const VCEClockInfoArray *vce_clock_info_array = (const VCEClockInfoArray *)(((unsigned long) powerplay_table) + vce_clock_info_array_offset);
+	const VCEClockInfoArray *vce_clock_info_array = (const VCEClockInfoArray *)(((uintptr_t) powerplay_table) + vce_clock_info_array_offset);
 
-	const ClockInfoArray *clock_arrays = (ClockInfoArray *)(((unsigned long)powerplay_table) +
+	const ClockInfoArray *clock_arrays = (ClockInfoArray *)(((uintptr_t)powerplay_table) +
 								le16_to_cpu(powerplay_table->usClockInfoArrayOffset));
 
 	const ATOM_PPLIB_VCE_State_Record *record = &vce_state_table->entries[i];
@@ -1683,7 +1683,7 @@ static int get_vce_state_table_entry(struct pp_hwmgr *hwmgr,
 	vce_state->evclk = ((uint32_t)vce_clock_info->ucEVClkHigh << 16) | le16_to_cpu(vce_clock_info->usEVClkLow);
 	vce_state->ecclk = ((uint32_t)vce_clock_info->ucECClkHigh << 16) | le16_to_cpu(vce_clock_info->usECClkLow);
 
-	*clock_info = (void *)((unsigned long)(clock_arrays->clockInfo) + (clockInfoIndex * clock_arrays->ucEntrySize));
+	*clock_info = (void *)((uintptr_t)(clock_arrays->clockInfo) + (clockInfoIndex * clock_arrays->ucEntrySize));
 
 	return 0;
 }

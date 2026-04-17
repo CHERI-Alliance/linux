@@ -450,7 +450,7 @@ static void s5p_free_sg_cpy(struct s5p_aes_dev *dev, struct scatterlist **sg)
 		return;
 
 	len = ALIGN(dev->req->cryptlen, AES_BLOCK_SIZE);
-	free_pages((unsigned long)sg_virt(*sg), get_order(len));
+	free_pages((uintptr_t)sg_virt(*sg), get_order(len));
 
 	kfree(*sg);
 	*sg = NULL;
@@ -1308,7 +1308,7 @@ static void s5p_hash_finish_req(struct ahash_request *req, int err)
 	unsigned long flags;
 
 	if (test_bit(HASH_FLAGS_SGS_COPIED, &dd->hash_flags))
-		free_pages((unsigned long)sg_virt(ctx->sg),
+		free_pages((uintptr_t)sg_virt(ctx->sg),
 			   get_order(ctx->sg->length));
 
 	if (test_bit(HASH_FLAGS_SGS_ALLOCED, &dd->hash_flags))
@@ -2232,7 +2232,7 @@ static int s5p_aes_probe(struct platform_device *pdev)
 	platform_set_drvdata(pdev, pdata);
 	s5p_dev = pdata;
 
-	tasklet_init(&pdata->tasklet, s5p_tasklet_cb, (unsigned long)pdata);
+	tasklet_init(&pdata->tasklet, s5p_tasklet_cb, (uintptr_t)pdata);
 	crypto_init_queue(&pdata->queue, CRYPTO_QUEUE_LEN);
 
 	for (i = 0; i < ARRAY_SIZE(algs); i++) {
@@ -2243,7 +2243,7 @@ static int s5p_aes_probe(struct platform_device *pdev)
 
 	if (pdata->use_hash) {
 		tasklet_init(&pdata->hash_tasklet, s5p_hash_tasklet_cb,
-			     (unsigned long)pdata);
+			     (uintptr_t)pdata);
 		crypto_init_queue(&pdata->hash_queue, SSS_HASH_QUEUE_LENGTH);
 
 		for (hash_i = 0; hash_i < ARRAY_SIZE(algs_sha1_md5_sha256);

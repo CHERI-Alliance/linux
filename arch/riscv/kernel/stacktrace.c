@@ -57,9 +57,9 @@ void notrace walk_stackframe(struct task_struct *task, struct pt_regs *regs,
 		sp = user_stack_pointer(regs);
 		pc = instruction_pointer(regs);
 	} else if (task == NULL || task == current) {
-		fp = (unsigned long)__builtin_frame_address(0);
+		fp = (uintptr_t)__builtin_frame_address(0);
 		sp = current_stack_pointer;
-		pc = (unsigned long)walk_stackframe;
+		pc = (uintptr_t)walk_stackframe;
 		level = -1;
 	} else {
 		/* task blocked in __switch_to */

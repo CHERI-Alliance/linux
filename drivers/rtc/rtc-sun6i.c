@@ -785,7 +785,7 @@ static int sun6i_rtc_probe(struct platform_device *pdev)
 
 	platform_set_drvdata(pdev, chip);
 
-	chip->flags = (unsigned long)of_device_get_match_data(&pdev->dev);
+	chip->flags = (uintptr_t)of_device_get_match_data(&pdev->dev);
 
 	chip->irq = platform_get_irq(pdev, 0);
 	if (chip->irq < 0)

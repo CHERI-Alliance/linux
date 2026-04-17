@@ -2335,7 +2335,7 @@ atmel_hsmc_nand_controller_remove(struct atmel_nand_controller *nc)
 
 	if (hsmc_nc->sram.pool)
 		gen_pool_free(hsmc_nc->sram.pool,
-			      (unsigned long)hsmc_nc->sram.virt,
+			      (uintptr_t)hsmc_nc->sram.virt,
 			      ATMEL_NFC_SRAM_SIZE);
 
 	if (hsmc_nc->clk) {

@@ -664,9 +664,9 @@ static struct mhi_driver qaic_mhi_driver = {
 };
 
 static const struct pci_device_id qaic_ids[] = {
-	{ PCI_DEVICE_DATA(QCOM, AIC080, (kernel_ulong_t)&aic080_config), },
-	{ PCI_DEVICE_DATA(QCOM, AIC100, (kernel_ulong_t)&aic100_config), },
-	{ PCI_DEVICE_DATA(QCOM, AIC200, (kernel_ulong_t)&aic200_config), },
+	{ PCI_DEVICE_DATA(QCOM, AIC080, (uintptr_t)&aic080_config), },
+	{ PCI_DEVICE_DATA(QCOM, AIC100, (uintptr_t)&aic100_config), },
+	{ PCI_DEVICE_DATA(QCOM, AIC200, (uintptr_t)&aic200_config), },
 	{ }
 };
 MODULE_DEVICE_TABLE(pci, qaic_ids);

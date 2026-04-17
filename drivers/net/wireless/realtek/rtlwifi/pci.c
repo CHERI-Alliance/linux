@@ -2149,7 +2149,7 @@ int rtl_pci_probe(struct pci_dev *pdev,
 
 	/*shared mem start */
 	rtlpriv->io.pci_mem_start =
-			(unsigned long)pci_iomap(pdev,
+			(uintptr_t)pci_iomap(pdev,
 			rtlpriv->cfg->bar_id, pmem_len);
 	if (rtlpriv->io.pci_mem_start == 0) {
 		WARN_ONCE(true, "rtlwifi: Can't map PCI mem\n");

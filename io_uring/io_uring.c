@@ -2295,7 +2295,7 @@ static __cold void io_tctx_exit_cb(struct callback_head *cb)
 	 * work cancelation off the exec path.
 	 */
 	if (tctx && !atomic_read(&tctx->in_cancel))
-		io_uring_del_tctx_node((unsigned long)work->ctx);
+		io_uring_del_tctx_node((uintptr_t)work->ctx);
 	complete(&work->completion);
 }
 
@@ -2435,7 +2435,7 @@ static struct io_uring_reg_wait *io_get_ext_arg_reg(struct io_ring_ctx *ctx,
 			const struct io_uring_getevents_arg __user *uarg)
 {
 	unsigned long size = sizeof(struct io_uring_reg_wait);
-	unsigned long offset = (uintptr_t)uarg;
+	user_uintptr_t offset = (user_uintptr_t)uarg;
 	unsigned long end;
 
 	if (unlikely(offset % sizeof(long)))

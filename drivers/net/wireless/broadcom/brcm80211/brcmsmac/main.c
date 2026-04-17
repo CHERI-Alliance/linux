@@ -510,7 +510,7 @@ brcms_c_attach_malloc(uint unit, uint *err, uint devid)
 
 		for (i = 1; i < MAXBANDS; i++)
 			wlc->hw->bandstate[i] = (struct brcms_hw_band *)
-			    ((unsigned long)wlc->hw->bandstate[0] +
+			    ((uintptr_t)wlc->hw->bandstate[0] +
 			     (sizeof(struct brcms_hw_band) * i));
 	}
 
@@ -555,7 +555,7 @@ brcms_c_attach_malloc(uint unit, uint *err, uint devid)
 
 		for (i = 1; i < MAXBANDS; i++)
 			wlc->bandstate[i] = (struct brcms_band *)
-				((unsigned long)wlc->bandstate[0]
+				((uintptr_t)wlc->bandstate[0]
 				+ (sizeof(struct brcms_band)*i));
 	}
 

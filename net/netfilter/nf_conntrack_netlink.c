@@ -2977,9 +2977,9 @@ static __be32 nf_expect_get_id(const struct nf_conntrack_expect *exp)
 
 	net_get_random_once(&exp_id_seed, sizeof(exp_id_seed));
 
-	a = (unsigned long)exp;
-	b = (unsigned long)exp->helper;
-	c = (unsigned long)exp->master;
+	a = (uintptr_t)exp;
+	b = (uintptr_t)exp->helper;
+	c = (uintptr_t)exp->master;
 	d = (unsigned long)siphash(&exp->tuple, sizeof(exp->tuple), &exp_id_seed);
 
 #ifdef CONFIG_64BIT
@@ -3135,7 +3135,7 @@ errout:
 
 static unsigned long ctnetlink_exp_id(const struct nf_conntrack_expect *exp)
 {
-	unsigned long id = (unsigned long)exp;
+	uintptr_t id = (uintptr_t)exp;
 
 	id += nf_ct_get_id(exp->master);
 	id += exp->class;

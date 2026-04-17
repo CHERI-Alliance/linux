@@ -77,7 +77,7 @@ void log_arm_hw_error(struct cper_sec_proc_arm *err, const u8 sev)
 		if (sz + (long)ctx_info - (long)err >= err->section_length)
 			sz += ctx_info->size;
 
-		ctx_info = (struct cper_arm_ctx_info *)((long)ctx_info + sz);
+		ctx_info = (struct cper_arm_ctx_info *)((intptr_t)ctx_info + sz);
 		ctx_len += sz;
 	}
 

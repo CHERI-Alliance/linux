@@ -3730,7 +3730,7 @@ static int lan78xx_bind(struct lan78xx_net *dev, struct usb_interface *intf)
 	int ret;
 	int i;
 
-	dev->data[0] = (unsigned long) kzalloc_obj(*pdata);
+	dev->data[0] = (uintptr_t) kzalloc_obj(*pdata);
 
 	pdata = (struct lan78xx_priv *)(dev->data[0]);
 	if (!pdata) {

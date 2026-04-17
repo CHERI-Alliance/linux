@@ -1082,9 +1082,9 @@ static const struct of_device_id mp2975_of_match[] = {
 MODULE_DEVICE_TABLE(of, mp2975_of_match);
 
 static const struct i2c_device_id mp2975_id[] = {
-	{"mp2971", (kernel_ulong_t)&mp2975_ddinfo[mp2971]},
-	{"mp2973", (kernel_ulong_t)&mp2975_ddinfo[mp2973]},
-	{"mp2975", (kernel_ulong_t)&mp2975_ddinfo[mp2975]},
+	{"mp2971", (uintptr_t)&mp2975_ddinfo[mp2971]},
+	{"mp2973", (uintptr_t)&mp2975_ddinfo[mp2973]},
+	{"mp2975", (uintptr_t)&mp2975_ddinfo[mp2975]},
 	{}
 };
 MODULE_DEVICE_TABLE(i2c, mp2975_id);

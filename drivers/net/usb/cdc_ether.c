@@ -845,115 +845,115 @@ static const struct usb_device_id	products[] = {
 	USB_DEVICE_AND_INTERFACE_INFO(ZTE_VENDOR_ID, 0x1003, USB_CLASS_COMM,
 				      USB_CDC_SUBCLASS_ETHERNET,
 				      USB_CDC_PROTO_NONE),
-	.driver_info = (unsigned long)&wwan_info,
+	.driver_info = (uintptr_t)&wwan_info,
 }, {
 	/* ZTE (Vodafone) K3806-Z */
 	USB_DEVICE_AND_INTERFACE_INFO(ZTE_VENDOR_ID, 0x1015, USB_CLASS_COMM,
 				      USB_CDC_SUBCLASS_ETHERNET,
 				      USB_CDC_PROTO_NONE),
-	.driver_info = (unsigned long)&wwan_info,
+	.driver_info = (uintptr_t)&wwan_info,
 }, {
 	/* ZTE (Vodafone) K4510-Z */
 	USB_DEVICE_AND_INTERFACE_INFO(ZTE_VENDOR_ID, 0x1173, USB_CLASS_COMM,
 				      USB_CDC_SUBCLASS_ETHERNET,
 				      USB_CDC_PROTO_NONE),
-	.driver_info = (unsigned long)&wwan_info,
+	.driver_info = (uintptr_t)&wwan_info,
 }, {
 	/* ZTE (Vodafone) K3770-Z */
 	USB_DEVICE_AND_INTERFACE_INFO(ZTE_VENDOR_ID, 0x1177, USB_CLASS_COMM,
 				      USB_CDC_SUBCLASS_ETHERNET,
 				      USB_CDC_PROTO_NONE),
-	.driver_info = (unsigned long)&wwan_info,
+	.driver_info = (uintptr_t)&wwan_info,
 }, {
 	/* ZTE (Vodafone) K3772-Z */
 	USB_DEVICE_AND_INTERFACE_INFO(ZTE_VENDOR_ID, 0x1181, USB_CLASS_COMM,
 				      USB_CDC_SUBCLASS_ETHERNET,
 				      USB_CDC_PROTO_NONE),
-	.driver_info = (unsigned long)&wwan_info,
+	.driver_info = (uintptr_t)&wwan_info,
 }, {
 	/* Telit modules */
 	USB_VENDOR_AND_INTERFACE_INFO(0x1bc7, USB_CLASS_COMM,
 			USB_CDC_SUBCLASS_ETHERNET, USB_CDC_PROTO_NONE),
-	.driver_info = (kernel_ulong_t) &wwan_info,
+	.driver_info = (uintptr_t) &wwan_info,
 }, {
 	/* Dell DW5580 modules */
 	USB_DEVICE_AND_INTERFACE_INFO(DELL_VENDOR_ID, 0x81ba, USB_CLASS_COMM,
 			USB_CDC_SUBCLASS_ETHERNET, USB_CDC_PROTO_NONE),
-	.driver_info = (kernel_ulong_t)&wwan_info,
+	.driver_info = (uintptr_t)&wwan_info,
 }, {
 	/* Huawei ME906 and ME909 */
 	USB_DEVICE_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, 0x15c1, USB_CLASS_COMM,
 				      USB_CDC_SUBCLASS_ETHERNET,
 				      USB_CDC_PROTO_NONE),
-	.driver_info = (unsigned long)&wwan_info,
+	.driver_info = (uintptr_t)&wwan_info,
 }, {
 	/* ZTE modules */
 	USB_VENDOR_AND_INTERFACE_INFO(ZTE_VENDOR_ID, USB_CLASS_COMM,
 				      USB_CDC_SUBCLASS_ETHERNET,
 				      USB_CDC_PROTO_NONE),
-	.driver_info = (unsigned long)&zte_cdc_info,
+	.driver_info = (uintptr_t)&zte_cdc_info,
 }, {
 	/* U-blox TOBY-L2 */
 	USB_DEVICE_AND_INTERFACE_INFO(UBLOX_VENDOR_ID, 0x1143, USB_CLASS_COMM,
 				      USB_CDC_SUBCLASS_ETHERNET,
 				      USB_CDC_PROTO_NONE),
-	.driver_info = (unsigned long)&wwan_info,
+	.driver_info = (uintptr_t)&wwan_info,
 }, {
 	/* U-blox SARA-U2 */
 	USB_DEVICE_AND_INTERFACE_INFO(UBLOX_VENDOR_ID, 0x1104, USB_CLASS_COMM,
 				      USB_CDC_SUBCLASS_ETHERNET,
 				      USB_CDC_PROTO_NONE),
-	.driver_info = (unsigned long)&wwan_info,
+	.driver_info = (uintptr_t)&wwan_info,
 }, {
 	/* U-blox LARA-R6 01B */
 	USB_DEVICE_AND_INTERFACE_INFO(UBLOX_VENDOR_ID, 0x1313, USB_CLASS_COMM,
 				      USB_CDC_SUBCLASS_ETHERNET,
 				      USB_CDC_PROTO_NONE),
-	.driver_info = (unsigned long)&wwan_info,
+	.driver_info = (uintptr_t)&wwan_info,
 }, {
 	/* U-blox LARA-L6 */
 	USB_DEVICE_AND_INTERFACE_INFO(UBLOX_VENDOR_ID, 0x1343, USB_CLASS_COMM,
 				      USB_CDC_SUBCLASS_ETHERNET,
 				      USB_CDC_PROTO_NONE),
-	.driver_info = (unsigned long)&wwan_info,
+	.driver_info = (uintptr_t)&wwan_info,
 }, {
 	/* Cinterion PLS8 modem by GEMALTO */
 	USB_DEVICE_AND_INTERFACE_INFO(0x1e2d, 0x0061, USB_CLASS_COMM,
 				      USB_CDC_SUBCLASS_ETHERNET,
 				      USB_CDC_PROTO_NONE),
-	.driver_info = (unsigned long)&wwan_info,
+	.driver_info = (uintptr_t)&wwan_info,
 }, {
 	/* Cinterion AHS3 modem by GEMALTO */
 	USB_DEVICE_AND_INTERFACE_INFO(0x1e2d, 0x0055, USB_CLASS_COMM,
 				      USB_CDC_SUBCLASS_ETHERNET,
 				      USB_CDC_PROTO_NONE),
-	.driver_info = (unsigned long)&wwan_info,
+	.driver_info = (uintptr_t)&wwan_info,
 }, {
 	/* Cinterion PLS62-W modem by GEMALTO/THALES */
 	USB_DEVICE_AND_INTERFACE_INFO(0x1e2d, 0x005b, USB_CLASS_COMM,
 				      USB_CDC_SUBCLASS_ETHERNET,
 				      USB_CDC_PROTO_NONE),
-	.driver_info = (unsigned long)&wwan_info,
+	.driver_info = (uintptr_t)&wwan_info,
 }, {
 	/* Cinterion PLS83/PLS63 modem by GEMALTO/THALES */
 	USB_DEVICE_AND_INTERFACE_INFO(0x1e2d, 0x0069, USB_CLASS_COMM,
 				      USB_CDC_SUBCLASS_ETHERNET,
 				      USB_CDC_PROTO_NONE),
-	.driver_info = (unsigned long)&wwan_info,
+	.driver_info = (uintptr_t)&wwan_info,
 }, {
 	USB_INTERFACE_INFO(USB_CLASS_COMM, USB_CDC_SUBCLASS_ETHERNET,
 			USB_CDC_PROTO_NONE),
-	.driver_info = (unsigned long) &cdc_info,
+	.driver_info = (uintptr_t) &cdc_info,
 }, {
 	USB_INTERFACE_INFO(USB_CLASS_COMM, USB_CDC_SUBCLASS_MDLM,
 			USB_CDC_PROTO_NONE),
-	.driver_info = (unsigned long)&wwan_info,
+	.driver_info = (uintptr_t)&wwan_info,
 
 }, {
 	/* Various Huawei modems with a network port like the UMG1831 */
 	USB_VENDOR_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, USB_CLASS_COMM,
 				      USB_CDC_SUBCLASS_ETHERNET, 255),
-	.driver_info = (unsigned long)&wwan_info,
+	.driver_info = (uintptr_t)&wwan_info,
 },
 	{ },		/* END */
 };

@@ -925,7 +925,7 @@ static int m41t80_probe(struct i2c_client *client)
 
 	m41t80_data->client = client;
 	if (client->dev.of_node) {
-		m41t80_data->features = (unsigned long)
+		m41t80_data->features = (uintptr_t)
 			of_device_get_match_data(&client->dev);
 	} else {
 		const struct i2c_device_id *id = i2c_match_id(m41t80_id, client);

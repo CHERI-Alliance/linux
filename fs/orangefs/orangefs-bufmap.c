@@ -251,7 +251,7 @@ orangefs_bufmap_map(struct orangefs_bufmap *bufmap,
 	int offset = 0, ret, i;
 
 	/* map the pages */
-	ret = pin_user_pages_fast((unsigned long)user_desc->ptr,
+	ret = pin_user_pages_fast((user_uintptr_t)user_desc->ptr,
 			     bufmap->page_count, FOLL_WRITE, bufmap->page_array);
 
 	if (ret < 0)
@@ -315,15 +315,15 @@ int orangefs_bufmap_initialize(struct ORANGEFS_dev_map_desc *user_desc)
 	 * sanity check alignment and size of buffer that caller wants to
 	 * work with
 	 */
-	if (PAGE_ALIGN((unsigned long)user_desc->ptr) !=
-	    (unsigned long)user_desc->ptr) {
+	if (PAGE_ALIGN((user_uintptr_t)user_desc->ptr) !=
+	    (user_uintptr_t)user_desc->ptr) {
 		gossip_err("orangefs error: memory alignment (front). %p\n",
 			   user_desc->ptr);
 		goto out;
 	}
 
-	if (PAGE_ALIGN(((unsigned long)user_desc->ptr + user_desc->total_size))
-	    != (unsigned long)(user_desc->ptr + user_desc->total_size)) {
+	if (PAGE_ALIGN(((user_uintptr_t)user_desc->ptr + user_desc->total_size))
+	    != (user_uintptr_t)(user_desc->ptr + user_desc->total_size)) {
 		gossip_err("orangefs error: memory alignment (back).(%p + %d)\n",
 			   user_desc->ptr,
 			   user_desc->total_size);

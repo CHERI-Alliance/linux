@@ -218,16 +218,16 @@ static int ad7606_par_probe(struct platform_device *pdev)
 }
 
 static const struct platform_device_id ad7606_driver_ids[] = {
-	{ .name	= "ad7605-4", .driver_data = (kernel_ulong_t)&ad7605_4_info, },
-	{ .name	= "ad7606-4", .driver_data = (kernel_ulong_t)&ad7606_4_info, },
-	{ .name	= "ad7606-6", .driver_data = (kernel_ulong_t)&ad7606_6_info, },
-	{ .name	= "ad7606-8", .driver_data = (kernel_ulong_t)&ad7606_8_info, },
-	{ .name	= "ad7606b", .driver_data = (kernel_ulong_t)&ad7606b_info, },
-	{ .name = "ad7606c-16", .driver_data = (kernel_ulong_t)&ad7606c_16_info },
-	{ .name = "ad7606c-18", .driver_data = (kernel_ulong_t)&ad7606c_18_info },
-	{ .name	= "ad7607", .driver_data = (kernel_ulong_t)&ad7607_info, },
-	{ .name	= "ad7608", .driver_data = (kernel_ulong_t)&ad7608_info, },
-	{ .name	= "ad7609", .driver_data = (kernel_ulong_t)&ad7609_info, },
+	{ .name	= "ad7605-4", .driver_data = (uintptr_t)&ad7605_4_info, },
+	{ .name	= "ad7606-4", .driver_data = (uintptr_t)&ad7606_4_info, },
+	{ .name	= "ad7606-6", .driver_data = (uintptr_t)&ad7606_6_info, },
+	{ .name	= "ad7606-8", .driver_data = (uintptr_t)&ad7606_8_info, },
+	{ .name	= "ad7606b", .driver_data = (uintptr_t)&ad7606b_info, },
+	{ .name = "ad7606c-16", .driver_data = (uintptr_t)&ad7606c_16_info },
+	{ .name = "ad7606c-18", .driver_data = (uintptr_t)&ad7606c_18_info },
+	{ .name	= "ad7607", .driver_data = (uintptr_t)&ad7607_info, },
+	{ .name	= "ad7608", .driver_data = (uintptr_t)&ad7608_info, },
+	{ .name	= "ad7609", .driver_data = (uintptr_t)&ad7609_info, },
 	{ }
 };
 MODULE_DEVICE_TABLE(platform, ad7606_driver_ids);

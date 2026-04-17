@@ -380,7 +380,7 @@ static __always_inline void __cmpwait(volatile void *ptr,
 
 	switch (size) {
 	case 1:
-		__ptr32b = (u32 *)((ulong)(ptr) & ~0x3);
+		__ptr32b = (u32 *)((uintptr_t)(ptr) & ~0x3);
 		__s = ((ulong)(ptr) & 0x3) * BITS_PER_BYTE;
 		__val = val << __s;
 		__mask = 0xff << __s;
@@ -397,7 +397,7 @@ static __always_inline void __cmpwait(volatile void *ptr,
 		: "memory");
 		break;
 	case 2:
-		__ptr32b = (u32 *)((ulong)(ptr) & ~0x3);
+		__ptr32b = (u32 *)((uintptr_t)(ptr) & ~0x3);
 		__s = ((ulong)(ptr) & 0x2) * BITS_PER_BYTE;
 		__val = val << __s;
 		__mask = 0xffff << __s;

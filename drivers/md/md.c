@@ -8355,7 +8355,7 @@ static int md_compat_ioctl(struct block_device *bdev, blk_mode_t mode,
 		/* These take in integer arg, do not convert */
 		break;
 	default:
-		arg = (unsigned long)compat_ptr(arg);
+		arg = (user_uintptr_t)compat_ptr(arg);
 		break;
 	}
 

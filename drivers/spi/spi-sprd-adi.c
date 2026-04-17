@@ -539,7 +539,7 @@ static int sprd_adi_probe(struct platform_device *pdev)
 	if (IS_ERR(sadi->base))
 		return PTR_ERR(sadi->base);
 
-	sadi->slave_vbase = (unsigned long)sadi->base +
+	sadi->slave_vbase = (uintptr_t)sadi->base +
 			    data->slave_offset;
 	sadi->slave_pbase = res->start + data->slave_offset;
 	sadi->ctlr = ctlr;

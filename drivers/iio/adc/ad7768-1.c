@@ -1734,10 +1734,10 @@ static int ad7768_probe(struct spi_device *spi)
 }
 
 static const struct spi_device_id ad7768_id_table[] = {
-	{ "ad7768-1", (kernel_ulong_t)&ad7768_chip_info },
-	{ "adaq7767-1", (kernel_ulong_t)&adaq7767_chip_info },
-	{ "adaq7768-1", (kernel_ulong_t)&adaq7768_chip_info },
-	{ "adaq7769-1", (kernel_ulong_t)&adaq7769_chip_info },
+	{ "ad7768-1", (uintptr_t)&ad7768_chip_info },
+	{ "adaq7767-1", (uintptr_t)&adaq7767_chip_info },
+	{ "adaq7768-1", (uintptr_t)&adaq7768_chip_info },
+	{ "adaq7769-1", (uintptr_t)&adaq7769_chip_info },
 	{ }
 };
 MODULE_DEVICE_TABLE(spi, ad7768_id_table);

@@ -2160,16 +2160,16 @@ MODULE_DEVICE_TABLE(of, mcp251xfd_of_match);
 static const struct spi_device_id mcp251xfd_id_table[] = {
 	{
 		.name = "mcp2517fd",
-		.driver_data = (kernel_ulong_t)&mcp251xfd_devtype_data_mcp2517fd,
+		.driver_data = (uintptr_t)&mcp251xfd_devtype_data_mcp2517fd,
 	}, {
 		.name = "mcp2518fd",
-		.driver_data = (kernel_ulong_t)&mcp251xfd_devtype_data_mcp2518fd,
+		.driver_data = (uintptr_t)&mcp251xfd_devtype_data_mcp2518fd,
 	}, {
 		.name = "mcp251863",
-		.driver_data = (kernel_ulong_t)&mcp251xfd_devtype_data_mcp251863,
+		.driver_data = (uintptr_t)&mcp251xfd_devtype_data_mcp251863,
 	}, {
 		.name = "mcp251xfd",
-		.driver_data = (kernel_ulong_t)&mcp251xfd_devtype_data_mcp251xfd,
+		.driver_data = (uintptr_t)&mcp251xfd_devtype_data_mcp251xfd,
 	}, {
 		/* sentinel */
 	},

@@ -928,13 +928,13 @@ static const struct of_device_id mcp3911_dt_ids[] = {
 MODULE_DEVICE_TABLE(of, mcp3911_dt_ids);
 
 static const struct spi_device_id mcp3911_id[] = {
-	{ "mcp3910", (kernel_ulong_t)&mcp3911_chip_info[MCP3910] },
-	{ "mcp3911", (kernel_ulong_t)&mcp3911_chip_info[MCP3911] },
-	{ "mcp3912", (kernel_ulong_t)&mcp3911_chip_info[MCP3912] },
-	{ "mcp3913", (kernel_ulong_t)&mcp3911_chip_info[MCP3913] },
-	{ "mcp3914", (kernel_ulong_t)&mcp3911_chip_info[MCP3914] },
-	{ "mcp3918", (kernel_ulong_t)&mcp3911_chip_info[MCP3918] },
-	{ "mcp3919", (kernel_ulong_t)&mcp3911_chip_info[MCP3919] },
+	{ "mcp3910", (uintptr_t)&mcp3911_chip_info[MCP3910] },
+	{ "mcp3911", (uintptr_t)&mcp3911_chip_info[MCP3911] },
+	{ "mcp3912", (uintptr_t)&mcp3911_chip_info[MCP3912] },
+	{ "mcp3913", (uintptr_t)&mcp3911_chip_info[MCP3913] },
+	{ "mcp3914", (uintptr_t)&mcp3911_chip_info[MCP3914] },
+	{ "mcp3918", (uintptr_t)&mcp3911_chip_info[MCP3918] },
+	{ "mcp3919", (uintptr_t)&mcp3911_chip_info[MCP3919] },
 	{ }
 };
 MODULE_DEVICE_TABLE(spi, mcp3911_id);

@@ -2917,7 +2917,7 @@ static int mlxsw_core_reg_access(struct mlxsw_core *mlxsw_core,
 	err = mlxsw_core_reg_access_emad(mlxsw_core, reg,
 					 payload, type, &bulk_list,
 					 mlxsw_core_reg_access_cb,
-					 (unsigned long) payload);
+					 (uintptr_t) payload);
 	if (err)
 		return err;
 	return mlxsw_reg_trans_bulk_wait(&bulk_list);

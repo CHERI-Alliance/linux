@@ -111,11 +111,11 @@ static unsigned int ip_vs_conn_hashkey(struct netns_ipvs *ipvs, int af, unsigned
 	if (af == AF_INET6)
 		return (jhash_3words(jhash(addr, 16, ip_vs_conn_rnd),
 				    (__force u32)port, proto, ip_vs_conn_rnd) ^
-			((size_t)ipvs>>8)) & ip_vs_conn_tab_mask;
+			((uintptr_t)ipvs>>8)) & ip_vs_conn_tab_mask;
 #endif
 	return (jhash_3words((__force u32)addr->ip, (__force u32)port, proto,
 			    ip_vs_conn_rnd) ^
-		((size_t)ipvs>>8)) & ip_vs_conn_tab_mask;
+		((uintptr_t)ipvs>>8)) & ip_vs_conn_tab_mask;
 }
 
 static unsigned int ip_vs_conn_hashkey_param(const struct ip_vs_conn_param *p,

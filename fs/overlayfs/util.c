@@ -602,7 +602,7 @@ void ovl_inode_update(struct inode *inode, struct dentry *upperdentry)
 	OVL_I(inode)->__upperdentry = upperdentry;
 	if (inode_unhashed(inode)) {
 		inode->i_private = upperinode;
-		__insert_inode_hash(inode, (unsigned long) upperinode);
+		__insert_inode_hash(inode, (uintptr_t) upperinode);
 	}
 }
 

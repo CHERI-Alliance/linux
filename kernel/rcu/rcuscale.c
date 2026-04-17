@@ -452,7 +452,7 @@ rcu_scale_reader(void *arg)
 {
 	unsigned long flags;
 	int idx;
-	long me = (long)arg;
+	intptr_t me = (intptr_t)arg;
 
 	VERBOSE_SCALEOUT_STRING("rcu_scale_reader task started");
 	set_cpus_allowed_ptr(current, cpumask_of(me % nr_cpu_ids));
@@ -528,7 +528,7 @@ rcu_scale_writer(void *arg)
 	int i = 0;
 	int i_max;
 	unsigned long jdone;
-	long me = (long)arg;
+	intptr_t me = (intptr_t)arg;
 	bool selfreport = false;
 	bool started = false, done = false, alldone = false;
 	u64 t;
@@ -726,7 +726,7 @@ static int
 kfree_scale_thread(void *arg)
 {
 	int i, loop = 0;
-	long me = (long)arg;
+	intptr_t me = (intptr_t)arg;
 	struct kfree_obj *alloc_ptr;
 	u64 start_time, end_time;
 	long long mem_begin, mem_during = 0;

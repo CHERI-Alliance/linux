@@ -217,7 +217,7 @@ int compat_setup_rt_frame(struct ksignal *ksig, sigset_t *set,
 	if (err)
 		return -EFAULT;
 
-	regs->ra = (unsigned long)COMPAT_VDSO_SYMBOL(
+	regs->ra = (user_uintptr_t)COMPAT_VDSO_SYMBOL(
 			current->mm->context.vdso, rt_sigreturn);
 
 	/*
@@ -227,11 +227,11 @@ int compat_setup_rt_frame(struct ksignal *ksig, sigset_t *set,
 	 * We always pass siginfo and mcontext, regardless of SA_SIGINFO,
 	 * since some things rely on this (e.g. glibc's debug/segfault.c).
 	 */
-	regs->epc = (unsigned long)ksig->ka.sa.sa_handler;
-	regs->sp = (unsigned long)frame;
+	regs->epc = (user_uintptr_t)ksig->ka.sa.sa_handler;
+	regs->sp = (user_uintptr_t)frame;
 	regs->a0 = ksig->sig;                     /* a0: signal number */
-	regs->a1 = (unsigned long)(&frame->info); /* a1: siginfo pointer */
-	regs->a2 = (unsigned long)(&frame->uc);   /* a2: ucontext pointer */
+	regs->a1 = (uintptr_t)(&frame->info); /* a1: siginfo pointer */
+	regs->a2 = (uintptr_t)(&frame->uc);   /* a2: ucontext pointer */
 
 #if COMPAT_DEBUG_SIG
 	pr_info("SIG deliver (%s:%d): sig=%d pc=%p ra=%p sp=%p\n",

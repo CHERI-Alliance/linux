@@ -390,7 +390,7 @@ static int max8660_probe(struct i2c_client *client)
 			return ret;
 
 		pdata = &pdata_of;
-		type = (unsigned long) id->data;
+		type = (uintptr_t) id->data;
 	} else {
 		type = i2c_id->driver_data;
 		memset(of_node, 0, sizeof(of_node));

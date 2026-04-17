@@ -215,10 +215,10 @@ static const struct ms_tp_data ms8607_data = {
 };
 
 static const struct i2c_device_id ms5637_id[] = {
-	{"ms5637", (kernel_ulong_t)&ms5637_data },
-	{"ms5805", (kernel_ulong_t)&ms5805_data },
-	{"ms5837", (kernel_ulong_t)&ms5837_data },
-	{"ms8607-temppressure", (kernel_ulong_t)&ms8607_data },
+	{"ms5637", (uintptr_t)&ms5637_data },
+	{"ms5805", (uintptr_t)&ms5805_data },
+	{"ms5837", (uintptr_t)&ms5837_data },
+	{"ms8607-temppressure", (uintptr_t)&ms8607_data },
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, ms5637_id);

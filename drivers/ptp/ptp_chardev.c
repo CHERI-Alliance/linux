@@ -504,7 +504,7 @@ long ptp_ioctl(struct posix_clock_context *pccontext, unsigned int cmd,
 	void __user *argptr;
 
 	if (in_compat_syscall() && cmd != PTP_ENABLE_PPS && cmd != PTP_ENABLE_PPS2)
-		arg = (unsigned long)compat_ptr(arg);
+		arg = (user_uintptr_t)compat_ptr(arg);
 	argptr = (void __force __user *)arg;
 
 	switch (cmd) {

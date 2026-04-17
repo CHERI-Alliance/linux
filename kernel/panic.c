@@ -1067,7 +1067,7 @@ void __warn(const char *file, int line, void *caller, unsigned taint,
 	print_irqtrace_events(current);
 
 	print_oops_end_marker();
-	trace_error_report_end(ERROR_DETECTOR_WARN, (unsigned long)caller);
+	trace_error_report_end(ERROR_DETECTOR_WARN, (uintptr_t)caller);
 
 	/* Just a warning, don't kill lockdep. */
 	add_taint(taint, LOCKDEP_STILL_OK);

@@ -553,7 +553,7 @@ static int p54_parse_rssical(struct ieee80211_hw *dev,
 	priv->rssi_db->entry_size = sizeof(*entry);
 	priv->rssi_db->len = db_len;
 
-	entry = (void *)((unsigned long)priv->rssi_db->data + priv->rssi_db->offset);
+	entry = (void *)((uintptr_t)priv->rssi_db->data + priv->rssi_db->offset);
 	if (type == PDR_RSSI_LINEAR_APPROXIMATION_EXTENDED) {
 		struct pda_rssi_cal_ext_entry *cal = (void *) &data[offset];
 

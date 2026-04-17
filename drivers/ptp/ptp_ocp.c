@@ -4300,7 +4300,7 @@ ptp_ocp_summary_show(struct seq_file *s, void *data)
 			   post_ns - pre_ns);
 	}
 
-	free_page((unsigned long)buf);
+	free_page((uintptr_t)buf);
 	return 0;
 }
 DEFINE_SHOW_ATTRIBUTE(ptp_ocp_summary);

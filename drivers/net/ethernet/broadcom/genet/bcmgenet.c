@@ -4349,7 +4349,7 @@ static const struct dev_pm_ops bcmgenet_pm_ops = {
 };
 
 static const struct acpi_device_id genet_acpi_match[] = {
-	{ "BCM6E4E", (kernel_ulong_t)&bcm2711_plat_data },
+	{ "BCM6E4E", (uintptr_t)&bcm2711_plat_data },
 	{ },
 };
 MODULE_DEVICE_TABLE(acpi, genet_acpi_match);

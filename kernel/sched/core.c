@@ -8620,7 +8620,7 @@ void __init sched_init(void)
 	ptr += 2 * nr_cpu_ids * sizeof(void **);
 #endif
 	if (ptr) {
-		ptr = (unsigned long)kzalloc(ptr, GFP_NOWAIT);
+		ptr = (uintptr_t)kzalloc(ptr, GFP_NOWAIT);
 
 #ifdef CONFIG_FAIR_GROUP_SCHED
 		root_task_group.se = (struct sched_entity **)ptr;

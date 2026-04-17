@@ -2797,7 +2797,7 @@ static int ____sys_recvmsg(struct socket *sock, struct msghdr *msg_sys,
 	ssize_t err;
 
 	msg_sys->msg_name = &addr;
-	cmsg_ptr = (unsigned long)msg_sys->msg_control;
+	cmsg_ptr = (uintptr_t)msg_sys->msg_control;
 	msg_sys->msg_flags = flags & (MSG_CMSG_CLOEXEC|MSG_CMSG_COMPAT);
 
 	/* We assume all kernel code knows the size of sockaddr_storage */
@@ -2830,7 +2830,7 @@ static int ____sys_recvmsg(struct socket *sock, struct msghdr *msg_sys,
 		err = __put_user((unsigned long)msg_sys->msg_control - cmsg_ptr,
 				 &msg_compat->msg_controllen);
 	else
-		err = __put_user((unsigned long)msg_sys->msg_control - cmsg_ptr,
+		err = __put_user((uintptr_t)msg_sys->msg_control - cmsg_ptr,
 				 &msg->msg_controllen);
 	if (err)
 		goto out;
@@ -3422,7 +3422,7 @@ static int compat_sock_ioctl_trans(struct file *file, struct socket *sock,
 	const struct proto_ops *ops;
 
 	if (cmd >= SIOCDEVPRIVATE && cmd <= (SIOCDEVPRIVATE + 15))
-		return sock_ioctl(file, cmd, (unsigned long)argp);
+		return sock_ioctl(file, cmd, (user_uintptr_t)argp);
 
 	switch (cmd) {
 	case SIOCWANDEV:

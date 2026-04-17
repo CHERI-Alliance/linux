@@ -629,35 +629,35 @@ static const struct dimm_info dimm_emr = {
 static const struct auxiliary_device_id peci_dimmtemp_ids[] = {
 	{
 		.name = "peci_cpu.dimmtemp.hsx",
-		.driver_data = (kernel_ulong_t)&dimm_hsx,
+		.driver_data = (uintptr_t)&dimm_hsx,
 	},
 	{
 		.name = "peci_cpu.dimmtemp.bdx",
-		.driver_data = (kernel_ulong_t)&dimm_bdx,
+		.driver_data = (uintptr_t)&dimm_bdx,
 	},
 	{
 		.name = "peci_cpu.dimmtemp.bdxd",
-		.driver_data = (kernel_ulong_t)&dimm_bdxd,
+		.driver_data = (uintptr_t)&dimm_bdxd,
 	},
 	{
 		.name = "peci_cpu.dimmtemp.skx",
-		.driver_data = (kernel_ulong_t)&dimm_skx,
+		.driver_data = (uintptr_t)&dimm_skx,
 	},
 	{
 		.name = "peci_cpu.dimmtemp.icx",
-		.driver_data = (kernel_ulong_t)&dimm_icx,
+		.driver_data = (uintptr_t)&dimm_icx,
 	},
 	{
 		.name = "peci_cpu.dimmtemp.icxd",
-		.driver_data = (kernel_ulong_t)&dimm_icxd,
+		.driver_data = (uintptr_t)&dimm_icxd,
 	},
 	{
 		.name = "peci_cpu.dimmtemp.spr",
-		.driver_data = (kernel_ulong_t)&dimm_spr,
+		.driver_data = (uintptr_t)&dimm_spr,
 	},
 	{
 		.name = "peci_cpu.dimmtemp.emr",
-		.driver_data = (kernel_ulong_t)&dimm_emr,
+		.driver_data = (uintptr_t)&dimm_emr,
 	},
 	{ }
 };

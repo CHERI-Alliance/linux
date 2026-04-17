@@ -124,7 +124,7 @@ static u32 l2tp_v2_session_key(u16 tunnel_id, u16 session_id)
 
 static unsigned long l2tp_v3_session_hashkey(struct sock *sk, u32 session_id)
 {
-	return ((unsigned long)sk) + session_id;
+	return ((uintptr_t)sk) + session_id;
 }
 
 #if IS_ENABLED(CONFIG_IPV6)

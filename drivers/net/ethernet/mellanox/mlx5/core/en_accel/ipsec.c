@@ -872,7 +872,7 @@ static int mlx5e_xfrm_add_state(struct net_device *dev,
 	}
 
 out:
-	x->xso.offload_handle = (unsigned long)sa_entry;
+	x->xso.offload_handle = (uintptr_t)sa_entry;
 	if (allow_tunnel_mode)
 		mlx5_eswitch_unblock_encap(priv->mdev);
 
@@ -1292,7 +1292,7 @@ static int mlx5e_xfrm_add_policy(struct xfrm_policy *x,
 	if (err)
 		goto err_fs;
 
-	x->xdo.offload_handle = (unsigned long)pol_entry;
+	x->xdo.offload_handle = (uintptr_t)pol_entry;
 	return 0;
 
 err_fs:

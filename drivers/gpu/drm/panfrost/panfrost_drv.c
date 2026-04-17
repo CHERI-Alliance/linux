@@ -202,7 +202,7 @@ panfrost_lookup_bos(struct drm_device *dev,
 		return 0;
 
 	ret = drm_gem_objects_lookup(file_priv,
-				     (void __user *)(uintptr_t)args->bo_handles,
+				     (void __user *)(user_uintptr_t)args->bo_handles,
 				     job->bo_count, &job->bos);
 	if (ret)
 		return ret;
@@ -265,7 +265,7 @@ panfrost_copy_in_sync(struct drm_device *dev,
 	}
 
 	if (copy_from_user(handles,
-			   (void __user *)(uintptr_t)args->in_syncs,
+			   (void __user *)(user_uintptr_t)args->in_syncs,
 			   in_fence_count * sizeof(u32))) {
 		ret = -EFAULT;
 		DRM_DEBUG("Failed to copy in syncobj handles\n");
@@ -603,7 +603,7 @@ static int panfrost_ioctl_sync_bo(struct drm_device *ddev, void *data,
 		return -ENOMEM;
 	}
 
-	if (copy_from_user(ops, (void __user *)(uintptr_t)args->ops,
+	if (copy_from_user(ops, (void __user *)(user_uintptr_t)args->ops,
 			   args->op_count * sizeof(*ops))) {
 		DRM_DEBUG("Failed to copy in BO sync ops\n");
 		ret = -EFAULT;

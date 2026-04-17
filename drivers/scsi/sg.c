@@ -902,7 +902,7 @@ static int put_compat_request_table(struct compat_sg_req_info __user *o,
 	int i;
 	for (i = 0; i < SG_MAX_QUEUE; i++) {
 		if (copy_to_user(o + i, rinfo + i, offsetof(sg_req_info_t, usr_ptr)) ||
-		    put_user((uintptr_t)rinfo[i].usr_ptr, &o[i].usr_ptr) ||
+		    put_user((user_uintptr_t)rinfo[i].usr_ptr, &o[i].usr_ptr) ||
 		    put_user(rinfo[i].duration, &o[i].duration) ||
 		    put_user(rinfo[i].unused, &o[i].unused))
 			return -EFAULT;
@@ -1773,7 +1773,7 @@ sg_start_req(Sg_request *srp, unsigned char *cmd)
 
 	if (sg_allow_dio && hp->flags & SG_FLAG_DIRECT_IO &&
 	    dxfer_dir != SG_DXFER_UNKNOWN && !iov_count &&
-	    blk_rq_aligned(q, (unsigned long)hp->dxferp, dxfer_len))
+	    blk_rq_aligned(q, (user_uintptr_t)hp->dxferp, dxfer_len))
 		md = NULL;
 	else
 		md = &map_data;

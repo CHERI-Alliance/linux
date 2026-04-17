@@ -3313,7 +3313,7 @@ static void coda_remove(struct platform_device *pdev)
 	v4l2_device_unregister(&dev->v4l2_dev);
 	destroy_workqueue(dev->workqueue);
 	if (dev->iram.vaddr)
-		gen_pool_free(dev->iram_pool, (unsigned long)dev->iram.vaddr,
+		gen_pool_free(dev->iram_pool, (uintptr_t)dev->iram.vaddr,
 			      dev->iram.size);
 	coda_free_aux_buf(dev, &dev->codebuf);
 	coda_free_aux_buf(dev, &dev->tempbuf);

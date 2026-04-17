@@ -32,22 +32,22 @@ MODULE_LICENSE("GPL v2");
 static const struct usb_device_id peak_usb_table[] = {
 	{
 		USB_DEVICE(PCAN_USB_VENDOR_ID, PCAN_USB_PRODUCT_ID),
-		.driver_info = (kernel_ulong_t)&pcan_usb,
+		.driver_info = (uintptr_t)&pcan_usb,
 	}, {
 		USB_DEVICE(PCAN_USB_VENDOR_ID, PCAN_USBPRO_PRODUCT_ID),
-		.driver_info = (kernel_ulong_t)&pcan_usb_pro,
+		.driver_info = (uintptr_t)&pcan_usb_pro,
 	}, {
 		USB_DEVICE(PCAN_USB_VENDOR_ID, PCAN_USBFD_PRODUCT_ID),
-		.driver_info = (kernel_ulong_t)&pcan_usb_fd,
+		.driver_info = (uintptr_t)&pcan_usb_fd,
 	}, {
 		USB_DEVICE(PCAN_USB_VENDOR_ID, PCAN_USBPROFD_PRODUCT_ID),
-		.driver_info = (kernel_ulong_t)&pcan_usb_pro_fd,
+		.driver_info = (uintptr_t)&pcan_usb_pro_fd,
 	}, {
 		USB_DEVICE(PCAN_USB_VENDOR_ID, PCAN_USBCHIP_PRODUCT_ID),
-		.driver_info = (kernel_ulong_t)&pcan_usb_chip,
+		.driver_info = (uintptr_t)&pcan_usb_chip,
 	}, {
 		USB_DEVICE(PCAN_USB_VENDOR_ID, PCAN_USBX6_PRODUCT_ID),
-		.driver_info = (kernel_ulong_t)&pcan_usb_x6,
+		.driver_info = (uintptr_t)&pcan_usb_x6,
 	}, {
 		/* Terminating entry */
 	}

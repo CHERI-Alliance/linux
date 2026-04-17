@@ -218,7 +218,7 @@ static int	tlan_ee_read_byte(struct net_device *, u8, u8 *);
 static inline void
 tlan_store_skb(struct tlan_list *tag, struct sk_buff *skb)
 {
-	unsigned long addr = (unsigned long)skb;
+	uintptr_t addr = (uintptr_t)skb;
 	tag->buffer[9].address = addr;
 	tag->buffer[8].address = upper_32_bits(addr);
 }
@@ -833,7 +833,7 @@ static int tlan_init(struct net_device *dev)
 		return -ENOMEM;
 	}
 	priv->rx_list = (struct tlan_list *)
-		ALIGN((unsigned long)priv->dma_storage, 8);
+		ALIGN((uintptr_t)priv->dma_storage, 8);
 	priv->rx_list_dma = ALIGN(priv->dma_storage_dma, 8);
 	priv->tx_list = priv->rx_list + TLAN_NUM_RX_LISTS;
 	priv->tx_list_dma =

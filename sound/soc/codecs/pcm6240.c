@@ -1379,7 +1379,7 @@ static int pcmdev_gain_ctrl_add(struct pcmdevice_priv *pcm_dev,
 		}
 		pcmdev_ctrl->dev_no = dev_no;
 		pcmdev_controls[mix_index].private_value =
-			(unsigned long)pcmdev_ctrl;
+			(uintptr_t)pcmdev_ctrl;
 		pcmdev_controls[mix_index].name = name;
 		pcmdev_controls[mix_index].access =
 			SNDRV_CTL_ELEM_ACCESS_TLV_READ |

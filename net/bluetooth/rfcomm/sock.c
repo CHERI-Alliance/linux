@@ -879,7 +879,7 @@ static int rfcomm_sock_ioctl(struct socket *sock, unsigned int cmd, user_uintptr
 #ifdef CONFIG_COMPAT
 static int rfcomm_sock_compat_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 {
-	return rfcomm_sock_ioctl(sock, cmd, (unsigned long)compat_ptr(arg));
+	return rfcomm_sock_ioctl(sock, cmd, (user_uintptr_t)compat_ptr(arg));
 }
 #endif
 

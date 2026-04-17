@@ -97,7 +97,7 @@ int psm_init_power_state_table(struct pp_hwmgr *hwmgr)
 
 		if (state->classification.flags & PP_StateClassificationFlag_Uvd)
 			hwmgr->uvd_ps = state;
-		state = (struct pp_power_state *)((unsigned long)state + size);
+		state = (struct pp_power_state *)((uintptr_t)state + size);
 	}
 
 	return 0;
@@ -136,7 +136,7 @@ static int psm_get_ui_state(struct pp_hwmgr *hwmgr,
 			*state_id = state->id;
 			return 0;
 		}
-		state = (struct pp_power_state *)((unsigned long)state + hwmgr->ps_size);
+		state = (struct pp_power_state *)((uintptr_t)state + hwmgr->ps_size);
 	}
 	return -EINVAL;
 }
@@ -157,7 +157,7 @@ static int psm_get_state_by_classification(struct pp_hwmgr *hwmgr,
 			*state_id = state->id;
 			return 0;
 		}
-		state = (struct pp_power_state *)((unsigned long)state + hwmgr->ps_size);
+		state = (struct pp_power_state *)((uintptr_t)state + hwmgr->ps_size);
 	}
 	return -EINVAL;
 }
@@ -177,7 +177,7 @@ static int psm_set_states(struct pp_hwmgr *hwmgr, unsigned long state_id)
 			memcpy(hwmgr->request_ps, state, hwmgr->ps_size);
 			return 0;
 		}
-		state = (struct pp_power_state *)((unsigned long)state + hwmgr->ps_size);
+		state = (struct pp_power_state *)((uintptr_t)state + hwmgr->ps_size);
 	}
 	return -EINVAL;
 }

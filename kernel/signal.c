@@ -1088,7 +1088,7 @@ static int __send_signal_locked(int sig, struct kernel_siginfo *info,
 
 	if (q) {
 		list_add_tail(&q->list, &pending->list);
-		switch ((unsigned long) info) {
+		switch ((uintptr_t) info) {
 		case (unsigned long) SEND_SIG_NOINFO:
 			clear_siginfo(&q->info);
 			q->info.si_signo = sig;
@@ -4416,7 +4416,7 @@ do_sigaltstack (const stack_t *ss, stack_t *oss, unsigned long sp,
 		 * Return before taking any locks if no actual
 		 * sigaltstack changes were requested.
 		 */
-		if (t->sas_ss_sp == (unsigned long)ss_sp &&
+		if (t->sas_ss_sp == (user_uintptr_t)ss_sp &&
 		    t->sas_ss_size == ss_size &&
 		    t->sas_ss_flags == ss_flags)
 			return 0;
@@ -4432,7 +4432,7 @@ do_sigaltstack (const stack_t *ss, stack_t *oss, unsigned long sp,
 				ret = -ENOMEM;
 		}
 		if (!ret) {
-			t->sas_ss_sp = (unsigned long) ss_sp;
+			t->sas_ss_sp = (user_uintptr_t) ss_sp;
 			t->sas_ss_size = ss_size;
 			t->sas_ss_flags = ss_flags;
 		}

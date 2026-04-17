@@ -374,7 +374,7 @@ static void do_btree_node_write(struct btree *b)
 
 	if (!bch_bio_alloc_pages(b->bio, GFP_NOWAIT)) {
 		struct bio_vec *bv;
-		void *addr = (void *) ((unsigned long) i & ~(PAGE_SIZE - 1));
+		void *addr = (void *) ((uintptr_t) i & ~(PAGE_SIZE - 1));
 		struct bvec_iter_all iter_all;
 
 		bio_for_each_segment_all(bv, b->bio, iter_all) {
@@ -759,7 +759,7 @@ void bch_btree_cache_free(struct cache_set *c)
 	if (c->verify_data)
 		list_move(&c->verify_data->list, &c->btree_cache);
 
-	free_pages((unsigned long) c->verify_ondisk, ilog2(meta_bucket_pages(&c->cache->sb)));
+	free_pages((uintptr_t) c->verify_ondisk, ilog2(meta_bucket_pages(&c->cache->sb)));
 #endif
 
 	list_splice(&c->btree_cache_freeable,

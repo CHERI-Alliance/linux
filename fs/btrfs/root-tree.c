@@ -353,7 +353,7 @@ again:
 		leaf = path->nodes[0];
 		ref = btrfs_item_ptr(leaf, path->slots[0],
 				     struct btrfs_root_ref);
-		ptr = (unsigned long)(ref + 1);
+		ptr = (uintptr_t)(ref + 1);
 		if ((btrfs_root_ref_dirid(leaf, ref) != dirid) ||
 		    (btrfs_root_ref_name_len(leaf, ref) != name->len) ||
 		    memcmp_extent_buffer(leaf, name->name, ptr, name->len))
@@ -426,7 +426,7 @@ again:
 	btrfs_set_root_ref_dirid(leaf, ref, dirid);
 	btrfs_set_root_ref_sequence(leaf, ref, sequence);
 	btrfs_set_root_ref_name_len(leaf, ref, name->len);
-	ptr = (unsigned long)(ref + 1);
+	ptr = (uintptr_t)(ref + 1);
 	write_extent_buffer(leaf, name->name, ptr, name->len);
 
 	if (key.type == BTRFS_ROOT_BACKREF_KEY) {

@@ -77,7 +77,7 @@ int cn10k_lmtst_init(struct otx2_nic *pfvf)
 
 	for_each_possible_cpu(cpu) {
 		lmt_info = per_cpu_ptr(pfvf->hw.lmt_info, cpu);
-		lmt_info->lmt_addr = ((u64)pfvf->hw.lmt_base +
+		lmt_info->lmt_addr = ((uintptr_t)pfvf->hw.lmt_base +
 				      (cpu * LMT_BURST_SIZE * LMT_LINE_SIZE));
 		lmt_info->lmt_id = cpu * LMT_BURST_SIZE;
 	}

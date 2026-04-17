@@ -23,7 +23,7 @@ static __always_inline unsigned long __mod_tree_val(struct latch_tree_node *n)
 {
 	struct module_memory *mod_mem = container_of(n, struct module_memory, mtn.node);
 
-	return (unsigned long)mod_mem->base;
+	return (uintptr_t)mod_mem->base;
 }
 
 static __always_inline unsigned long __mod_tree_size(struct latch_tree_node *n)
@@ -42,7 +42,7 @@ mod_tree_less(struct latch_tree_node *a, struct latch_tree_node *b)
 static __always_inline int
 mod_tree_comp(void *key, struct latch_tree_node *n)
 {
-	unsigned long val = (unsigned long)key;
+	uintptr_t val = (uintptr_t)key;
 	unsigned long start, end;
 
 	start = __mod_tree_val(n);

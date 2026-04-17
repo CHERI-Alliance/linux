@@ -74,36 +74,36 @@ static const u16 peak_pci_icr_masks[PEAK_PCI_CHAN_MAX] = {
 static const struct pci_device_id peak_pci_tbl[] = {
 	{
 		PEAK_PCI_VENDOR_ID, PEAK_PCI_DEVICE_ID, PCI_ANY_ID, PCI_ANY_ID,
-		.driver_data = (kernel_ulong_t)"PCAN-PCI",
+		.driver_data = (uintptr_t)"PCAN-PCI",
 	}, {
 		PEAK_PCI_VENDOR_ID, PEAK_PCIE_DEVICE_ID, PCI_ANY_ID, PCI_ANY_ID,
-		.driver_data = (kernel_ulong_t)"PCAN-PCI Express",
+		.driver_data = (uintptr_t)"PCAN-PCI Express",
 	}, {
 		PEAK_PCI_VENDOR_ID, PEAK_MPCI_DEVICE_ID, PCI_ANY_ID, PCI_ANY_ID,
-		.driver_data = (kernel_ulong_t)"PCAN-miniPCI",
+		.driver_data = (uintptr_t)"PCAN-miniPCI",
 	}, {
 		PEAK_PCI_VENDOR_ID, PEAK_MPCIE_DEVICE_ID, PCI_ANY_ID, PCI_ANY_ID,
-		.driver_data = (kernel_ulong_t)"PCAN-miniPCIe",
+		.driver_data = (uintptr_t)"PCAN-miniPCIe",
 	}, {
 		PEAK_PCI_VENDOR_ID, PEAK_PC_104P_DEVICE_ID, PCI_ANY_ID, PCI_ANY_ID,
-		.driver_data = (kernel_ulong_t)"PCAN-PC/104-Plus Quad",
+		.driver_data = (uintptr_t)"PCAN-PC/104-Plus Quad",
 	}, {
 		PEAK_PCI_VENDOR_ID, PEAK_PCI_104E_DEVICE_ID, PCI_ANY_ID, PCI_ANY_ID,
-		.driver_data = (kernel_ulong_t)"PCAN-PCI/104-Express",
+		.driver_data = (uintptr_t)"PCAN-PCI/104-Express",
 	}, {
 		PEAK_PCI_VENDOR_ID, PEAK_CPCI_DEVICE_ID, PCI_ANY_ID, PCI_ANY_ID,
-		.driver_data = (kernel_ulong_t)"PCAN-cPCI",
+		.driver_data = (uintptr_t)"PCAN-cPCI",
 	}, {
 		PEAK_PCI_VENDOR_ID, PEAK_PCIE_OEM_ID, PCI_ANY_ID, PCI_ANY_ID,
-		.driver_data = (kernel_ulong_t)"PCAN-Chip PCIe",
+		.driver_data = (uintptr_t)"PCAN-Chip PCIe",
 	},
 #ifdef CONFIG_CAN_PEAK_PCIEC
 	{
 		PEAK_PCI_VENDOR_ID, PEAK_PCIEC_DEVICE_ID, PCI_ANY_ID, PCI_ANY_ID,
-		.driver_data = (kernel_ulong_t)"PCAN-ExpressCard",
+		.driver_data = (uintptr_t)"PCAN-ExpressCard",
 	}, {
 		PEAK_PCI_VENDOR_ID, PEAK_PCIEC34_DEVICE_ID, PCI_ANY_ID, PCI_ANY_ID,
-		.driver_data = (kernel_ulong_t)"PCAN-ExpressCard 34",
+		.driver_data = (uintptr_t)"PCAN-ExpressCard 34",
 	},
 #endif
 	{ /* sentinel */ }

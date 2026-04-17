@@ -231,7 +231,7 @@ static inline unsigned int mt_attr(struct maple_tree *mt)
 static __always_inline enum maple_type mte_node_type(
 		const struct maple_enode *entry)
 {
-	return ((unsigned long)entry >> MAPLE_NODE_TYPE_SHIFT) &
+	return ((uintptr_t)entry >> MAPLE_NODE_TYPE_SHIFT) &
 		MAPLE_NODE_TYPE_MASK;
 }
 
@@ -299,7 +299,7 @@ static inline bool mas_is_underflow(struct ma_state *mas)
 static __always_inline struct maple_node *mte_to_node(
 		const struct maple_enode *entry)
 {
-	return (struct maple_node *)((unsigned long)entry & ~MAPLE_NODE_MASK);
+	return (struct maple_node *)((uintptr_t)entry & ~MAPLE_NODE_MASK);
 }
 
 /*
@@ -311,7 +311,7 @@ static __always_inline struct maple_node *mte_to_node(
 static inline struct maple_topiary *mte_to_mat(const struct maple_enode *entry)
 {
 	return (struct maple_topiary *)
-		((unsigned long)entry & ~MAPLE_NODE_MASK);
+		((uintptr_t)entry & ~MAPLE_NODE_MASK);
 }
 
 /*
@@ -345,28 +345,28 @@ static inline void mte_set_node_dead(struct maple_enode *mn)
 static inline struct maple_enode *mt_mk_node(const struct maple_node *node,
 					     enum maple_type type)
 {
-	return (void *)((unsigned long)node |
+	return (void *)((uintptr_t)node |
 			(type << MAPLE_ENODE_TYPE_SHIFT) | MAPLE_ENODE_NULL);
 }
 
 static inline void *mte_mk_root(const struct maple_enode *node)
 {
-	return (void *)((unsigned long)node | MAPLE_ROOT_NODE);
+	return (void *)((uintptr_t)node | MAPLE_ROOT_NODE);
 }
 
 static inline void *mte_safe_root(const struct maple_enode *node)
 {
-	return (void *)((unsigned long)node & ~MAPLE_ROOT_NODE);
+	return (void *)((uintptr_t)node & ~MAPLE_ROOT_NODE);
 }
 
 static inline void __maybe_unused *mte_set_full(const struct maple_enode *node)
 {
-	return (void *)((unsigned long)node & ~MAPLE_ENODE_NULL);
+	return (void *)((uintptr_t)node & ~MAPLE_ENODE_NULL);
 }
 
 static inline void __maybe_unused *mte_clear_full(const struct maple_enode *node)
 {
-	return (void *)((unsigned long)node | MAPLE_ENODE_NULL);
+	return (void *)((uintptr_t)node | MAPLE_ENODE_NULL);
 }
 
 static inline bool __maybe_unused mte_has_null(const struct maple_enode *node)
@@ -467,7 +467,7 @@ enum maple_type mas_parent_type(struct ma_state *mas, struct maple_enode *enode)
 {
 	unsigned long p_type;
 
-	p_type = (unsigned long)mte_to_node(enode)->parent;
+	p_type = (uintptr_t)mte_to_node(enode)->parent;
 	if (WARN_ON(p_type & MAPLE_PARENT_ROOT))
 		return 0;
 
@@ -497,7 +497,7 @@ static inline
 void mas_set_parent(struct ma_state *mas, struct maple_enode *enode,
 		    const struct maple_enode *parent, unsigned char slot)
 {
-	unsigned long val = (unsigned long)parent;
+	uintptr_t val = (uintptr_t)parent;
 	unsigned long shift;
 	unsigned long type;
 	enum maple_type p_type = mte_node_type(parent);
@@ -532,7 +532,7 @@ void mas_set_parent(struct ma_state *mas, struct maple_enode *enode,
 static __always_inline
 unsigned int mte_parent_slot(const struct maple_enode *enode)
 {
-	unsigned long val = (unsigned long)mte_to_node(enode)->parent;
+	uintptr_t val = (uintptr_t)mte_to_node(enode)->parent;
 
 	if (unlikely(val & MA_ROOT_PARENT))
 		return 0;
@@ -553,7 +553,7 @@ unsigned int mte_parent_slot(const struct maple_enode *enode)
 static __always_inline
 struct maple_node *mte_parent(const struct maple_enode *enode)
 {
-	return (void *)((unsigned long)
+	return (void *)((uintptr_t)
 			(mte_to_node(enode)->parent) & ~MAPLE_NODE_MASK);
 }
 
@@ -569,7 +569,7 @@ static __always_inline bool ma_dead_node(const struct maple_node *node)
 
 	/* Do not reorder reads from the node prior to the parent check */
 	smp_rmb();
-	parent = (void *)((unsigned long) node->parent & ~MAPLE_NODE_MASK);
+	parent = (void *)((uintptr_t) node->parent & ~MAPLE_NODE_MASK);
 	return (parent == node);
 }
 
@@ -6225,7 +6225,7 @@ static inline void mas_copy_node(struct ma_state *mas, struct ma_state *new_mas,
 	memcpy(new_node, node, sizeof(struct maple_node));
 	/* Update the parent node pointer. */
 	val = (unsigned long)node->parent & MAPLE_NODE_MASK;
-	new_node->parent = ma_parent_ptr(val | (unsigned long)parent);
+	new_node->parent = ma_parent_ptr(val | (uintptr_t)parent);
 }
 
 /*
@@ -6258,9 +6258,9 @@ static inline void mas_dup_alloc(struct ma_state *mas, struct ma_state *new_mas,
 
 	slots = ma_slots(node, type);
 	for (i = 0; i < count; i++) {
-		val = (unsigned long)mt_slot_locked(mas->tree, slots, i);
+		val = (uintptr_t)mt_slot_locked(mas->tree, slots, i);
 		val &= MAPLE_NODE_MASK;
-		new_slots[i] = ma_mnode_ptr((unsigned long)mas_pop_node(mas) |
+		new_slots[i] = ma_mnode_ptr((uintptr_t)mas_pop_node(mas) |
 					    val);
 	}
 }

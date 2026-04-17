@@ -1504,16 +1504,16 @@ static const struct edt_i2c_chip_data edt_ft8719_data = {
 };
 
 static const struct i2c_device_id edt_ft5x06_ts_id[] = {
-	{ .name = "edt-ft5x06", .driver_data = (long)&edt_ft5x06_data },
-	{ .name = "edt-ft5506", .driver_data = (long)&edt_ft5506_data },
-	{ .name = "ev-ft5726", .driver_data = (long)&edt_ft5506_data },
-	{ .name = "ft3518", .driver_data = (long)&edt_ft3518_data },
-	{ .name = "ft5452", .driver_data = (long)&edt_ft5452_data },
+	{ .name = "edt-ft5x06", .driver_data = (intptr_t)&edt_ft5x06_data },
+	{ .name = "edt-ft5506", .driver_data = (intptr_t)&edt_ft5506_data },
+	{ .name = "ev-ft5726", .driver_data = (intptr_t)&edt_ft5506_data },
+	{ .name = "ft3518", .driver_data = (intptr_t)&edt_ft3518_data },
+	{ .name = "ft5452", .driver_data = (intptr_t)&edt_ft5452_data },
 	/* Note no edt- prefix for compatibility with the ft6236.c driver */
-	{ .name = "ft6236", .driver_data = (long)&edt_ft6236_data },
-	{ .name = "ft8201", .driver_data = (long)&edt_ft8201_data },
-	{ .name = "ft8716", .driver_data = (long)&edt_ft8716_data },
-	{ .name = "ft8719", .driver_data = (long)&edt_ft8719_data },
+	{ .name = "ft6236", .driver_data = (intptr_t)&edt_ft6236_data },
+	{ .name = "ft8201", .driver_data = (intptr_t)&edt_ft8201_data },
+	{ .name = "ft8716", .driver_data = (intptr_t)&edt_ft8716_data },
+	{ .name = "ft8719", .driver_data = (intptr_t)&edt_ft8719_data },
 	{ /* sentinel */ }
 };
 MODULE_DEVICE_TABLE(i2c, edt_ft5x06_ts_id);

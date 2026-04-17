@@ -360,7 +360,7 @@ u32 nf_conntrack_count(const struct net *net);
 static inline void
 nf_ct_set(struct sk_buff *skb, struct nf_conn *ct, enum ip_conntrack_info info)
 {
-	skb_set_nfct(skb, (unsigned long)ct | info);
+	skb_set_nfct(skb, (uintptr_t)ct | info);
 }
 
 extern unsigned int nf_conntrack_net_id;

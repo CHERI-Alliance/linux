@@ -215,7 +215,7 @@ static int qcom_tzmem_pool_add_memory(struct qcom_tzmem_pool *pool,
 		return ret;
 	}
 
-	ret = gen_pool_add_virt(pool->genpool, (unsigned long)area->vaddr,
+	ret = gen_pool_add_virt(pool->genpool, (uintptr_t)area->vaddr,
 				(phys_addr_t)area->paddr, size, -1);
 	if (ret) {
 		dma_free_coherent(qcom_tzmem_dev, area->size,
@@ -457,7 +457,7 @@ void qcom_tzmem_free(void *vaddr)
 
 	scoped_guard(spinlock_irqsave, &qcom_tzmem_chunks_lock)
 		chunk = radix_tree_delete_item(&qcom_tzmem_chunks,
-					       (unsigned long)vaddr, NULL);
+					       (uintptr_t)vaddr, NULL);
 
 	if (!chunk) {
 		WARN(1, "Virtual address %p not owned by TZ memory allocator",
@@ -466,7 +466,7 @@ void qcom_tzmem_free(void *vaddr)
 	}
 
 	scoped_guard(spinlock_irqsave, &chunk->owner->lock)
-		gen_pool_free(chunk->owner->genpool, (unsigned long)vaddr,
+		gen_pool_free(chunk->owner->genpool, (uintptr_t)vaddr,
 			      chunk->size);
 	kfree(chunk);
 }
@@ -496,7 +496,7 @@ phys_addr_t qcom_tzmem_to_phys(void *vaddr)
 						&qcom_tzmem_chunks_lock);
 
 		ret = gen_pool_virt_to_phys(chunk->owner->genpool,
-					    (unsigned long)vaddr);
+					    (uintptr_t)vaddr);
 		if (ret == -1)
 			continue;
 

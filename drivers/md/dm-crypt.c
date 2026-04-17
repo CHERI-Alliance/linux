@@ -1236,10 +1236,10 @@ static u8 *iv_of_dmreq(struct crypt_config *cc,
 		       struct dm_crypt_request *dmreq)
 {
 	if (crypt_integrity_aead(cc))
-		return (u8 *)ALIGN((unsigned long)(dmreq + 1),
+		return (u8 *)ALIGN((uintptr_t)(dmreq + 1),
 			crypto_aead_alignmask(any_tfm_aead(cc)) + 1);
 	else
-		return (u8 *)ALIGN((unsigned long)(dmreq + 1),
+		return (u8 *)ALIGN((uintptr_t)(dmreq + 1),
 			crypto_skcipher_alignmask(any_tfm(cc)) + 1);
 }
 

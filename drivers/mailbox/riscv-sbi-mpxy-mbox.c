@@ -357,7 +357,7 @@ static int mpxy_setup_shmem(unsigned int cpu)
 	sret = sbi_ecall(SBI_EXT_MPXY, SBI_EXT_MPXY_SET_SHMEM,
 			 page_to_phys(shmem_page), 0, 0, 0, 0, 0);
 	if (sret.error) {
-		free_pages((unsigned long)page_to_virt(shmem_page),
+		free_pages((uintptr_t)page_to_virt(shmem_page),
 			   get_order(mpxy_shmem_size));
 		return sbi_err_map_linux_errno(sret.error);
 	}

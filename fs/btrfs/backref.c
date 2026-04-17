@@ -1036,8 +1036,8 @@ static int add_inline_refs(struct btrfs_backref_walk_ctx *ctx,
 	flags = btrfs_extent_flags(leaf, ei);
 	btrfs_item_key_to_cpu(leaf, &found_key, slot);
 
-	ptr = (unsigned long)(ei + 1);
-	end = (unsigned long)ei + item_size;
+	ptr = (uintptr_t)(ei + 1);
+	end = (uintptr_t)ei + item_size;
 
 	if (found_key.type == BTRFS_EXTENT_ITEM_KEY &&
 	    flags & BTRFS_EXTENT_FLAG_TREE_BLOCK) {
@@ -2178,7 +2178,7 @@ char *btrfs_ref_to_path(struct btrfs_root *fs_root, struct btrfs_path *path,
 		iref = btrfs_item_ptr(eb, slot, struct btrfs_inode_ref);
 
 		name_len = btrfs_inode_ref_name_len(eb, iref);
-		name_off = (unsigned long)(iref + 1);
+		name_off = (uintptr_t)(iref + 1);
 
 		parent = next_inum;
 		--bytes_left;
@@ -2316,12 +2316,12 @@ static int get_extent_inline_ref(unsigned long *ptr,
 		} else {
 			*out_eiref = (struct btrfs_extent_inline_ref *)(ei + 1);
 		}
-		*ptr = (unsigned long)*out_eiref;
+		*ptr = (uintptr_t)*out_eiref;
 		if ((unsigned long)(*ptr) >= (unsigned long)ei + item_size)
 			return -ENOENT;
 	}
 
-	end = (unsigned long)ei + item_size;
+	end = (uintptr_t)ei + item_size;
 	*out_eiref = (struct btrfs_extent_inline_ref *)(*ptr);
 	*out_type = btrfs_get_extent_inline_ref_type(eb, *out_eiref,
 						     BTRFS_REF_TYPE_ANY);
@@ -2638,7 +2638,7 @@ static int iterate_inode_refs(u64 inum, struct inode_fs_paths *ipath)
 				cur, found_key.objectid,
 				btrfs_root_id(fs_root));
 			ret = inode_to_path(parent, name_len,
-				      (unsigned long)(iref + 1), eb, ipath);
+				      (uintptr_t)(iref + 1), eb, ipath);
 			if (ret)
 				break;
 			len = sizeof(*iref) + name_len;
@@ -2697,7 +2697,7 @@ static int iterate_inode_extrefs(u64 inum, struct inode_fs_paths *ipath)
 			parent = btrfs_inode_extref_parent(eb, extref);
 			name_len = btrfs_inode_extref_name_len(eb, extref);
 			ret = inode_to_path(parent, name_len,
-				      (unsigned long)&extref->name, eb, ipath);
+				      (uintptr_t)&extref->name, eb, ipath);
 			if (ret)
 				break;
 
@@ -2737,7 +2737,7 @@ static int inode_to_path(u64 inum, u32 name_len, unsigned long name_off,
 		return PTR_ERR(fspath);
 
 	if (fspath > fspath_min) {
-		ipath->fspath->val[i] = (u64)(unsigned long)fspath;
+		ipath->fspath->val[i] = (u64)(uintptr_t)fspath;
 		++ipath->fspath->elem_cnt;
 		ipath->fspath->bytes_left = fspath - fspath_min;
 	} else {
