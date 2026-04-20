@@ -13,6 +13,11 @@
 
 #include "trace.h"
 
+typedef union {
+	u64 val;
+	char *str;
+} field_val;
+
 static int
 trace_inject_entry(struct trace_event_file *file, void *rec, int len)
 {
@@ -34,7 +39,7 @@ trace_inject_entry(struct trace_event_file *file, void *rec, int len)
 
 static int
 parse_field(char *str, struct trace_event_call *call,
-	    struct ftrace_event_field **pf, u64 *pv)
+	    struct ftrace_event_field **pf, field_val *pfv)
 {
 	struct ftrace_event_field *field;
 	char *field_name;
@@ -99,7 +104,7 @@ parse_field(char *str, struct trace_event_call *call,
 		if (ret)
 			return ret;
 
-		*pv = val;
+		pfv->val = val;
 		return i;
 	} else if (str[i] == '\'' || str[i] == '"') {
 		char q = str[i];
@@ -125,7 +130,7 @@ parse_field(char *str, struct trace_event_call *call,
 		if (len >= MAX_FILTER_STR_VAL)
 			return -EINVAL;
 
-		*pv = (unsigned long)(str + s);
+		pfv->str = str + s;
 		str[i] = 0;
 		/* go past the last quote */
 		i++;
@@ -198,7 +203,7 @@ static int parse_entry(char *str, struct trace_event_call *call, void **pentry)
 	struct ftrace_event_field *field;
 	void *entry = NULL;
 	int entry_size;
-	u64 val = 0;
+	field_val fv;
 	int len;
 
 	entry = trace_alloc_entry(call, &entry_size);
@@ -209,12 +214,12 @@ static int parse_entry(char *str, struct trace_event_call *call, void **pentry)
 	tracing_generic_entry_update(entry, call->event.type,
 				     tracing_gen_ctx());
 
-	while ((len = parse_field(str, call, &field, &val)) > 0) {
+	while ((len = parse_field(str, call, &field, &fv)) > 0) {
 		if (is_function_field(field))
 			return -EINVAL;
 
 		if (is_string_field(field)) {
-			char *addr = (char *)(unsigned long) val;
+			char *addr = fv.str;
 
 			if (field->filter_type == FILTER_STATIC_STRING) {
 				strscpy(entry + field->offset, addr, field->size);
@@ -246,25 +251,25 @@ static int parse_entry(char *str, struct trace_event_call *call, void **pentry)
 		} else {
 			switch (field->size) {
 			case 1: {
-				u8 tmp = (u8) val;
+				u8 tmp = (u8) fv.val;
 
 				memcpy(entry + field->offset, &tmp, 1);
 				break;
 			}
 			case 2: {
-				u16 tmp = (u16) val;
+				u16 tmp = (u16) fv.val;
 
 				memcpy(entry + field->offset, &tmp, 2);
 				break;
 			}
 			case 4: {
-				u32 tmp = (u32) val;
+				u32 tmp = (u32) fv.val;
 
 				memcpy(entry + field->offset, &tmp, 4);
 				break;
 			}
 			case 8:
-				memcpy(entry + field->offset, &val, 8);
+				memcpy(entry + field->offset, &fv.val, 8);
 				break;
 			default:
 				return -EINVAL;
