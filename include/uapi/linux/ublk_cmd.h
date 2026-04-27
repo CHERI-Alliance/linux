@@ -543,7 +543,11 @@ struct ublksrv_io_desc {
 	__u64		start_sector;
 
 	/* buffer address in ublksrv daemon vm space, from ublk driver */
-	__u64ptr	addr;
+	union {
+		// UAPI: NoConvert: Copy a s plain __u64
+		__u64ptr	addr;
+		__u64		addrval;
+	};
 };
 
 static inline __u8 ublksrv_get_op(const struct ublksrv_io_desc *iod)
@@ -640,14 +644,20 @@ struct ublksrv_io_cmd {
 };
 
 struct ublk_elem_header {
-	__u16 tag;	/* IO tag */
+	union {
+		struct {
+			__u16 tag;	/* IO tag */
 
-	/*
-	 * Buffer index for incoming io command, only valid iff
-	 * UBLK_F_AUTO_BUF_REG is set
-	 */
-	__u16 buf_index;
-	__s32 result;	/* I/O completion result (commit only) */
+			/*
+			 * Buffer index for incoming io command, only valid iff
+			 * UBLK_F_AUTO_BUF_REG is set
+			 */
+			__u16 buf_index;
+			__s32 result;	/* I/O completion result (commit only) */
+		};
+		/// UAPI: NoConvert: Padding/alignment only
+		__u64ptr _pad;
+	};
 };
 
 /*
