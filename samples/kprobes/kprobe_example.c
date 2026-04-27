@@ -48,8 +48,8 @@ static int __kprobes handler_pre(struct kprobe *p, struct pt_regs *regs)
 		p->symbol_name, p->addr, (long)regs->ARM_pc, (long)regs->ARM_cpsr);
 #endif
 #ifdef CONFIG_RISCV
-	pr_info("<%s> p->addr = 0x%p, pc = 0x%lx, status = 0x%lx\n",
-		p->symbol_name, p->addr, regs->epc, regs->status);
+	pr_info("<%s> p->addr = 0x%p, pc = 0x%llx, status = 0x%lx\n",
+		p->symbol_name, p->addr, __c_ua(regs->epc), regs->status);
 #endif
 #ifdef CONFIG_S390
 	pr_info("<%s> p->addr, 0x%p, ip = 0x%lx, flags = 0x%lx\n",
