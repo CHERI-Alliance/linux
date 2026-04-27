@@ -587,14 +587,20 @@ struct ublksrv_io_cmd {
 };
 
 struct ublk_elem_header {
-	__u16 tag;	/* IO tag */
+	union {
+		struct {
+			__u16 tag;	/* IO tag */
 
-	/*
-	 * Buffer index for incoming io command, only valid iff
-	 * UBLK_F_AUTO_BUF_REG is set
-	 */
-	__u16 buf_index;
-	__s32 result;	/* I/O completion result (commit only) */
+			/*
+			 * Buffer index for incoming io command, only valid iff
+			 * UBLK_F_AUTO_BUF_REG is set
+			 */
+			__u16 buf_index;
+			__s32 result;	/* I/O completion result (commit only) */
+		};
+		/// UAPI: NoConvert: Padding/alignment only
+		__u64ptr _pad;
+	};
 };
 
 /*
