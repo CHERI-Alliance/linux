@@ -20,7 +20,7 @@ struct ioptdesc {
 	unsigned long __page_flags;
 
 	struct list_head iopt_freelist_elm;
-	unsigned long __page_mapping;
+	uintptr_t __page_mapping;
 	union {
 		u8 incoherent;
 		pgoff_t __index;
@@ -30,7 +30,7 @@ struct ioptdesc {
 	unsigned int __page_type;
 	atomic_t __page_refcount;
 #ifdef CONFIG_MEMCG
-	unsigned long memcg_data;
+	uintptr_t memcg_data;
 #endif
 };
 
@@ -137,7 +137,7 @@ static inline void iommu_pages_flush_incoherent(struct device *dma_dev,
 						void *virt, size_t offset,
 						size_t len)
 {
-	dma_sync_single_for_device(dma_dev, (uintptr_t)virt + offset, len,
+	dma_sync_single_for_device(dma_dev, __c_pa(virt) + offset, len,
 				   DMA_TO_DEVICE);
 }
 void iommu_pages_stop_incoherent_list(struct iommu_pages_list *list,

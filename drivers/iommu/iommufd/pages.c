@@ -929,7 +929,7 @@ static int pfn_reader_user_pin(struct pfn_reader_user *user,
 		rc = pin_memfd_pages(user, start, npages);
 	} else if (!remote_mm) {
 		uptr = (user_uintptr_t)(pages->uptr + start_index * PAGE_SIZE);
-		rc = pin_user_pages_fast(uptr, npages, user->gup_flags,
+		rc = pin_user_pages_fast(__c_ua(uptr), npages, user->gup_flags,
 					 user->upages);
 	} else {
 		uptr = (user_uintptr_t)(pages->uptr + start_index * PAGE_SIZE);
@@ -937,7 +937,7 @@ static int pfn_reader_user_pin(struct pfn_reader_user *user,
 			mmap_read_lock(pages->source_mm);
 			user->locked = 1;
 		}
-		rc = pin_user_pages_remote(pages->source_mm, uptr, npages,
+		rc = pin_user_pages_remote(pages->source_mm, __c_ua(uptr), npages,
 					   user->gup_flags, user->upages,
 					   &user->locked);
 	}
@@ -2309,7 +2309,7 @@ static int iopt_pages_rw_page(struct iopt_pages *pages, unsigned long index,
 
 	mmap_read_lock(pages->source_mm);
 	rc = pin_user_pages_remote(
-		pages->source_mm, (user_uintptr_t)(pages->uptr + index * PAGE_SIZE),
+		pages->source_mm, __c_pa_u(pages->uptr + index * PAGE_SIZE),
 		1, (flags & IOMMUFD_ACCESS_RW_WRITE) ? FOLL_WRITE : 0, &page,
 		NULL);
 	mmap_read_unlock(pages->source_mm);

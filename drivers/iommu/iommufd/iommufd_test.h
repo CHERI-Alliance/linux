@@ -108,11 +108,11 @@ struct iommu_test_cmd {
 		struct {
 			__aligned_u64 iova;
 			__aligned_u64 length;
-			__aligned_u64 uptr;
+			__aligned_u64ptr uptr;
 		} check_map;
 		struct {
 			__aligned_u64 length;
-			__aligned_u64 uptr;
+			__aligned_u64ptr uptr;
 			__u32 refs;
 		} check_refs;
 		struct {
@@ -127,12 +127,12 @@ struct iommu_test_cmd {
 			__u32 out_access_pages_id;
 			__aligned_u64 iova;
 			__aligned_u64 length;
-			__aligned_u64 uptr;
+			__aligned_u64ptr uptr;
 		} access_pages;
 		struct {
 			__aligned_u64 iova;
 			__aligned_u64 length;
-			__aligned_u64 uptr;
+			__aligned_u64ptr uptr;
 			__u32 flags;
 		} access_rw;
 		struct {
@@ -146,7 +146,7 @@ struct iommu_test_cmd {
 			__aligned_u64 iova;
 			__aligned_u64 length;
 			__aligned_u64 page_size;
-			__aligned_u64 uptr;
+			__aligned_u64ptr uptr;
 			__aligned_u64 out_nr_dirty;
 		} dirty;
 		struct {

@@ -192,7 +192,7 @@ static int iova_bitmap_get(struct iova_bitmap *bitmap)
 	npages = min(npages + !!offset_in_page(__c_pa_u(addr)),
 		     PAGE_SIZE / sizeof(struct page *));
 
-	ret = pin_user_pages_fast((user_uintptr_t)addr, npages,
+	ret = pin_user_pages_fast(__c_pa_u(addr), npages,
 				  FOLL_WRITE, mapped->pages);
 	if (ret <= 0)
 		return -EFAULT;

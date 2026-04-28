@@ -120,7 +120,7 @@ static int pt_kunit_priv_init(struct kunit *test, struct kunit_iommu_priv *priv)
 	spin_lock_init(&priv->top_lock);
 
 #ifdef kunit_fmt_cfgs
-	priv->cfg = kunit_fmt_cfgs[((uintptr_t)test->param_value) - 1];
+	priv->cfg = kunit_fmt_cfgs[__c_pa(test->param_value) - 1];
 	/*
 	 * The format can set a list of features that the kunit_fmt_cfgs
 	 * controls, other features are default to on.
