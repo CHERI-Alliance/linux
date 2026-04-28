@@ -1372,7 +1372,7 @@ mwifiex_get_unused_priv_by_bss_type(struct mwifiex_adapter *adapter,
 static inline struct mwifiex_private *
 mwifiex_netdev_get_priv(struct net_device *dev)
 {
-	return (struct mwifiex_private *) (*(unsigned long *) netdev_priv(dev));
+	return (struct mwifiex_private *) (*(uintptr_t *) netdev_priv(dev));
 }
 
 /*

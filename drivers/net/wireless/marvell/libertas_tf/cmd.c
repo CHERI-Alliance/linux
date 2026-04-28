@@ -39,7 +39,7 @@ static struct cmd_ctrl_node *lbtf_get_cmd_ctrl_node(struct lbtf_private *priv);
  *
  *  Returns: 0 on success, error on failure
  */
-int lbtf_cmd_copyback(struct lbtf_private *priv, unsigned long extra,
+int lbtf_cmd_copyback(struct lbtf_private *priv, uintptr_t extra,
 		     struct cmd_header *resp)
 {
 	struct cmd_header *buf = (void *)extra;
@@ -602,9 +602,9 @@ done:
 
 static struct cmd_ctrl_node *__lbtf_cmd_async(struct lbtf_private *priv,
 	uint16_t command, struct cmd_header *in_cmd, int in_cmd_size,
-	int (*callback)(struct lbtf_private *, unsigned long,
+	int (*callback)(struct lbtf_private *, uintptr_t,
 			struct cmd_header *),
-	unsigned long callback_arg)
+	uintptr_t callback_arg)
 {
 	struct cmd_ctrl_node *cmdnode;
 
@@ -661,8 +661,8 @@ void lbtf_cmd_async(struct lbtf_private *priv, uint16_t command,
 int __lbtf_cmd(struct lbtf_private *priv, uint16_t command,
 	      struct cmd_header *in_cmd, int in_cmd_size,
 	      int (*callback)(struct lbtf_private *,
-			      unsigned long, struct cmd_header *),
-	      unsigned long callback_arg)
+			      uintptr_t, struct cmd_header *),
+	      uintptr_t callback_arg)
 {
 	struct cmd_ctrl_node *cmdnode;
 	unsigned long flags;
