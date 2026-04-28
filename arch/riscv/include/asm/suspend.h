@@ -36,8 +36,8 @@ int __cpu_suspend_enter(struct suspend_context *context);
 /* High-level CPU suspend which will save context and call finish() */
 int cpu_suspend(unsigned long arg,
 		int (*finish)(unsigned long arg,
-			      unsigned long entry,
-			      unsigned long context));
+			      uintptr_t entry,
+			      uintptr_t context));
 
 /* Low-level CPU resume entry function */
 int __cpu_resume_enter(unsigned long hartid, unsigned long context);
