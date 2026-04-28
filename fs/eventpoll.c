@@ -2379,6 +2379,27 @@ error_tgt_fput:
 	return error;
 }
 
+static int get_compat_epoll_event(struct epoll_event *epds,
+				  const void __user *user_epds)
+{
+	struct compat_epoll_event compat_epds;
+
+	if (unlikely(copy_from_user(&compat_epds, user_epds, sizeof(compat_epds))))
+		return -EFAULT;
+	epds->events = compat_epds.events;
+	epds->data = compat_epds.data;
+	return 0;
+}
+
+int copy_epoll_event_from_user(struct epoll_event *epds,
+			       const void __user *user_epds,
+			       bool compat)
+{
+	if (compat)
+		return get_compat_epoll_event(epds, user_epds);
+	return copy_from_user_with_ptr(epds, user_epds, sizeof(*epds));
+}
+
 /*
  * The following function implements the controller interface for
  * the eventpoll file that enables the insertion/removal/change of
@@ -2393,20 +2414,11 @@ SYSCALL_DEFINE4(epoll_ctl, int, epfd, int, op, int, fd,
 	struct epoll_event epds;
 
 	if (ep_op_has_event(op)) {
-		if (in_compat_syscall()) {
-			struct compat_epoll_event compat_epds;
+		int ret;
 
-			if (copy_from_user(&compat_epds, event,
-					   sizeof(struct compat_epoll_event)))
-				return -EFAULT;
-
-			epds.events = compat_epds.events;
-			epds.data = compat_epds.data;
-		} else {
-			if (copy_from_user_with_ptr(&epds, event,
-						    sizeof(struct epoll_event)))
-				return -EFAULT;
-		}
+		ret = copy_epoll_event_from_user(&epds, event, in_compat_syscall());
+		if (ret)
+			return -EFAULT;
 	}
 
 	return do_epoll_ctl(epfd, op, fd, &epds, false);
