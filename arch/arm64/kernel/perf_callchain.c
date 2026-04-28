@@ -17,6 +17,12 @@ static bool callchain_trace(void *data, unsigned long pc)
 	return perf_callchain_store(entry, pc) == 0;
 }
 
+/*
+ * TODO [PCuABI] - perf_callchain_user() is disabled for now because it needs
+ * explicit support for purecap + compat64 (as opposed to base AArch64 +
+ * compat32)
+ */
+#ifndef CONFIG_CHERI_PURECAP_UABI
 void perf_callchain_user(struct perf_callchain_entry_ctx *entry,
 			 struct pt_regs *regs)
 {
@@ -27,6 +33,7 @@ void perf_callchain_user(struct perf_callchain_entry_ctx *entry,
 
 	arch_stack_walk_user(callchain_trace, entry, regs);
 }
+#endif /* !CONFIG_CHERI_PURECAP_UABI */
 
 void perf_callchain_kernel(struct perf_callchain_entry_ctx *entry,
 			   struct pt_regs *regs)
