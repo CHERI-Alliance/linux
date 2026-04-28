@@ -1863,8 +1863,12 @@ endif # ARMV8_DEPRECATED
 
 endif # COMPAT
 
+config COMPAT64
+	bool
+	depends on COMPAT
+
 config COMPAT32
-	def_bool y if COMPAT
+	def_bool y if COMPAT && !COMPAT64
 
 menu "ARMv8.1 architectural features"
 
