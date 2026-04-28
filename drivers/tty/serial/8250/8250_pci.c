@@ -3979,10 +3979,10 @@ static struct pciserial_board pci_boards[] = {
 };
 
 #define REPORT_CONFIG(option) \
-	(IS_ENABLED(CONFIG_##option) ? 0 : (kernel_ulong_t)&#option)
+	(IS_ENABLED(CONFIG_##option) ? 0 : (uintptr_t)&#option)
 #define REPORT_8250_CONFIG(option) \
 	(IS_ENABLED(CONFIG_SERIAL_8250_##option) ? \
-	 0 : (kernel_ulong_t)&"SERIAL_8250_"#option)
+	 0 : (uintptr_t)&"SERIAL_8250_"#option)
 
 static const struct pci_device_id blacklist[] = {
 	/* softmodems */

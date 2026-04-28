@@ -60,7 +60,7 @@
 	.vendor = PCI_VENDOR_ID_IDT, .device = PCI_DEVICE_ID_IDT_##devname, \
 	.subvendor = PCI_ANY_ID, .subdevice = PCI_ANY_ID, \
 	.class = (PCI_CLASS_BRIDGE_OTHER << 8), .class_mask = (0xFFFF00), \
-	.driver_data = (kernel_ulong_t)&data
+	.driver_data = (uintptr_t)&data
 
 /*
  * IDT PCIe-switches device IDs

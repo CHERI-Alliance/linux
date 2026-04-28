@@ -1188,7 +1188,7 @@ static int rt712_sdca_fu_info(struct snd_kcontrol *kcontrol,
 }
 
 #define RT712_SDCA_PR_VALUE(xreg_base, xcount, xmax, xinvert) \
-	((unsigned long)&(struct rt712_dmic_kctrl_priv) \
+	((uintptr_t)&(struct rt712_dmic_kctrl_priv) \
 		{.reg_base = xreg_base, .count = xcount, .max = xmax, \
 		.invert = xinvert})
 

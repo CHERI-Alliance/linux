@@ -280,7 +280,7 @@ MODULE_DEVICE_TABLE(of, ad5110_of_match);
 
 #define AD5110_ID_TABLE(_name, cfg) {				\
 	.name = _name,						\
-	.driver_data = (kernel_ulong_t)&ad5110_cfg[cfg],	\
+	.driver_data = (uintptr_t)&ad5110_cfg[cfg],	\
 }
 
 static const struct i2c_device_id ad5110_id[] = {

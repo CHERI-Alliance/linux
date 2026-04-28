@@ -1157,7 +1157,7 @@ static const struct ngene_info ngene_info_terratec = {
 #define NGENE_ID(_subvend, _subdev, _driverdata) { \
 	.vendor = NGENE_VID, .device = NGENE_PID, \
 	.subvendor = _subvend, .subdevice = _subdev, \
-	.driver_data = (unsigned long) &_driverdata }
+	.driver_data = (uintptr_t) &_driverdata }
 
 /****************************************************************************/
 

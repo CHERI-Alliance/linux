@@ -388,11 +388,11 @@ static const s32 icon321_port_spec[] = {
 
 #define default_port_device(vendor, product)	\
 	USB_DEVICE(vendor, product),	\
-		.driver_info = (kernel_ulong_t)default_port_spec
+		.driver_info = (uintptr_t)default_port_spec
 
 #define icon321_port_device(vendor, product)	\
 	USB_DEVICE(vendor, product),	\
-		.driver_info = (kernel_ulong_t)icon321_port_spec
+		.driver_info = (uintptr_t)icon321_port_spec
 
 /* list of devices we support */
 static const struct usb_device_id hso_ids[] = {

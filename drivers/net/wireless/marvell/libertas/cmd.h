@@ -38,7 +38,7 @@ struct cmd_ctrl_node {
 })
 
 #define lbs_cmd_with_response(priv, cmdnr, cmd)	\
-	lbs_cmd(priv, cmdnr, cmd, lbs_cmd_copyback, (unsigned long) (cmd))
+	lbs_cmd(priv, cmdnr, cmd, lbs_cmd_copyback, (uintptr_t) (cmd))
 
 void lbs_cmd_async(struct lbs_private *priv, uint16_t command,
 	struct cmd_header *in_cmd, int in_cmd_size);

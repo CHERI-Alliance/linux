@@ -730,7 +730,7 @@ static __inline__ void gem_post_rxds(struct gem *gp, int limit)
 }
 
 #define ALIGNED_RX_SKB_ADDR(addr) \
-        ((((unsigned long)(addr) + (64UL - 1UL)) & ~(64UL - 1UL)) - (unsigned long)(addr))
+        ((((unsigned long __force)(addr) + (64UL - 1UL)) & ~(64UL - 1UL)) - (unsigned long __force)(addr))
 static __inline__ struct sk_buff *gem_alloc_skb(struct net_device *dev, int size,
 						gfp_t gfp_flags)
 {

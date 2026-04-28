@@ -743,7 +743,7 @@ static const char * const tegra_admaif_mono_conv_text[] = {
 	.name = xname,							       \
 	.get = xhandler_get,						       \
 	.put = xhandler_put,						       \
-	.private_value = (unsigned long)&(struct soc_enum)		       \
+	.private_value = (uintptr_t)&(struct soc_enum)		       \
 		SOC_ENUM_SINGLE(xreg, 0, ARRAY_SIZE(xenum_text), xenum_text)   \
 }
 

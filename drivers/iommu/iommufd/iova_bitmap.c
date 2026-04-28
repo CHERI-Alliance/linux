@@ -189,7 +189,7 @@ static int iova_bitmap_get(struct iova_bitmap *bitmap)
 	 * We always cap at max number of 'struct page' a base page can fit.
 	 * This is, for example, on x86 means 2M of bitmap data max.
 	 */
-	npages = min(npages + !!offset_in_page(addr),
+	npages = min(npages + !!offset_in_page(__c_pa_u(addr)),
 		     PAGE_SIZE / sizeof(struct page *));
 
 	ret = pin_user_pages_fast((user_uintptr_t)addr, npages,
@@ -206,7 +206,7 @@ static int iova_bitmap_get(struct iova_bitmap *bitmap)
 	 * This handles the case where the bitmap is not PAGE_SIZE
 	 * aligned.
 	 */
-	mapped->pgoff = offset_in_page(addr);
+	mapped->pgoff = offset_in_page(__c_pa_u(addr));
 	mapped->length = iova_bitmap_mapped_length(bitmap);
 	return 0;
 }

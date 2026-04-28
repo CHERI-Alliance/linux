@@ -356,7 +356,7 @@ static const struct snd_bebob_spec spec_normal = {
 	.vendor_id	= vendor, \
 	.model_id	= model, \
 	.specifier_id	= SPECIFIER_1394TA, \
-	.driver_data	= (kernel_ulong_t)data \
+	.driver_data	= (uintptr_t)data \
 }
 
 static const struct ieee1394_device_id bebob_id_table[] = {

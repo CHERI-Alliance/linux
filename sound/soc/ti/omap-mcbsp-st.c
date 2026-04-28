@@ -453,7 +453,7 @@ static int omap_mcbsp_st_get_mode(struct snd_kcontrol *kcontrol,
 {	.iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname,		\
 	.info = omap_mcbsp_st_info_volsw,				\
 	.get = xhandler_get, .put = xhandler_put,			\
-	.private_value = (unsigned long)&(struct soc_mixer_control)	\
+	.private_value = (uintptr_t)&(struct soc_mixer_control)	\
 	{.min = xmin, .max = xmax} }
 
 #define OMAP_MCBSP_ST_CONTROLS(port)					  \

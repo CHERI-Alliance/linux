@@ -94,7 +94,7 @@ static const struct driver_info	zaurus_sl5x00_info = {
 	.unbind =	usbnet_cdc_unbind,
 	.tx_fixup =	zaurus_tx_fixup,
 };
-#define	ZAURUS_STRONGARM_INFO	((unsigned long)&zaurus_sl5x00_info)
+#define	ZAURUS_STRONGARM_INFO	((uintptr_t)&zaurus_sl5x00_info)
 
 static const struct driver_info	zaurus_pxa_info = {
 	.description =	"Sharp Zaurus, PXA-2xx based",
@@ -104,7 +104,7 @@ static const struct driver_info	zaurus_pxa_info = {
 	.unbind =	usbnet_cdc_unbind,
 	.tx_fixup =	zaurus_tx_fixup,
 };
-#define	ZAURUS_PXA_INFO		((unsigned long)&zaurus_pxa_info)
+#define	ZAURUS_PXA_INFO		((uintptr_t)&zaurus_pxa_info)
 
 static const struct driver_info	olympus_mxl_info = {
 	.description =	"Olympus R1000",
@@ -114,7 +114,7 @@ static const struct driver_info	olympus_mxl_info = {
 	.unbind =	usbnet_cdc_unbind,
 	.tx_fixup =	zaurus_tx_fixup,
 };
-#define	OLYMPUS_MXL_INFO	((unsigned long)&olympus_mxl_info)
+#define	OLYMPUS_MXL_INFO	((uintptr_t)&olympus_mxl_info)
 
 
 /* Some more recent products using Lineo/Belcarra code will wrongly claim

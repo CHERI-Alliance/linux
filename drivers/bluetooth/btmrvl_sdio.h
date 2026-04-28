@@ -110,5 +110,5 @@ struct btmrvl_sdio_device {
 
 /* Macros for Data Alignment : address */
 #define ALIGN_ADDR(p, a)	\
-	((((unsigned long)(p)) + (((unsigned long)(a)) - 1)) & \
+	((((uintptr_t)(p)) + (((unsigned long)(a)) - 1)) & \
 					~(((unsigned long)(a)) - 1))

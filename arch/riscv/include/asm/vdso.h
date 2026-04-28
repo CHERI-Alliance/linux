@@ -25,18 +25,18 @@
 #ifdef CONFIG_RISCV_USER_CFI
 #define VDSO_SYMBOL(base, name)							\
 	  (riscv_has_extension_unlikely(RISCV_ISA_EXT_ZIMOP) ?			\
-	  (void __user *)((unsigned long)(base) + __vdso_##name##_cfi_offset) :	\
-	  (void __user *)((unsigned long)(base) + __vdso_##name##_offset))
+	  (void __user *)((uintptr_t)(base) + __vdso_##name##_cfi_offset) :	\
+	  (void __user *)((uintptr_t)(base) + __vdso_##name##_offset))
 #else
 #define VDSO_SYMBOL(base, name)							\
-	  ((void __user *)((unsigned long)(base) + __vdso_##name##_offset))
+	  ((void __user *)((uintptr_t)(base) + __vdso_##name##_offset))
 #endif
 
 #ifdef CONFIG_COMPAT
 #include <generated/compat_vdso-offsets.h>
 
 #define COMPAT_VDSO_SYMBOL(base, name)						\
-	(void __user *)((unsigned long)(base) + compat__vdso_##name##_offset)
+	(void __user *)((uintptr_t)(base) + compat__vdso_##name##_offset)
 
 extern char compat_vdso_start[], compat_vdso_end[];
 

@@ -615,7 +615,7 @@ static int bytes_info_ext(struct snd_kcontrol *kcontrol,
 {	.iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname, \
 	.info = bytes_info_ext, \
 	.get = coeff_ram_get, .put = coeff_ram_put, \
-	.private_value = (unsigned long)&(struct coeff_ram_ctl) { \
+	.private_value = (uintptr_t)&(struct coeff_ram_ctl) { \
 		.addr = xaddr, \
 		.bytes_ext = {.max = xcount, }, \
 	} \

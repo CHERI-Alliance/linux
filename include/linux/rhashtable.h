@@ -101,7 +101,7 @@ struct bucket_table {
  * Instead we store a NULL
  */
 #define	RHT_NULLS_MARKER(ptr)	\
-	((void *)NULLS_MARKER(((unsigned long) (ptr)) >> 1))
+	((void *)NULLS_MARKER(((uintptr_t) (ptr)) >> 1))
 #define INIT_RHT_NULLS_HEAD(ptr)	\
 	((ptr) = NULL)
 
@@ -368,7 +368,7 @@ static __always_inline struct rhash_head *__rht_ptr(
 	struct rhash_lock_head *p, struct rhash_lock_head __rcu *const *bkt,
 	const enum rht_lookup_freq freq)
 {
-	unsigned long p_val = (uintptr_t)p & ~BIT(0);
+	uintptr_t p_val = (uintptr_t)p & ~BIT(0);
 
 	BUILD_BUG_ON(!__builtin_constant_p(freq));
 

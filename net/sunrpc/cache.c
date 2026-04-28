@@ -586,7 +586,7 @@ EXPORT_SYMBOL_GPL(cache_purge);
  */
 
 #define	DFR_HASHSIZE	(PAGE_SIZE/sizeof(struct list_head))
-#define	DFR_HASH(item)	((((long)item)>>4 ^ (((long)item)>>13)) % DFR_HASHSIZE)
+#define	DFR_HASH(item)	((((long __force)item)>>4 ^ (((long __force)item)>>13)) % DFR_HASHSIZE)
 
 #define	DFR_MAX	300	/* ??? */
 

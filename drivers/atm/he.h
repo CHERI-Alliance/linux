@@ -92,7 +92,7 @@ struct he_irq {
 #define IRQ_ALIGNMENT		0x1000
 
 #define NEXT_ENTRY(base, tail, mask) \
-				(((unsigned long)base)|(((unsigned long)(tail+1))&mask))
+				(((uintptr_t)base)|(((unsigned long)(tail+1))&mask))
 
 #define ITYPE_INVALID		0xffffffff
 #define ITYPE_TBRQ_THRESH	(0<<3)

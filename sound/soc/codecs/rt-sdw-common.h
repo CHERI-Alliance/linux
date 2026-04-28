@@ -29,7 +29,7 @@ struct rt_sdca_dmic_kctrl_priv {
 };
 
 #define RT_SDCA_PR_VALUE(xreg_base, xcount, xmax, xinvert) \
-	((unsigned long)&(struct rt_sdca_dmic_kctrl_priv) \
+	((uintptr_t)&(struct rt_sdca_dmic_kctrl_priv) \
 		{.reg_base = xreg_base, .count = xcount, .max = xmax, \
 		.invert = xinvert})
 

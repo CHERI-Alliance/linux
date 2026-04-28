@@ -1149,7 +1149,7 @@ struct pci_driver {
 #define PCI_DEVICE_DATA(vend, dev, data) \
 	.vendor = PCI_VENDOR_ID_##vend, .device = PCI_DEVICE_ID_##vend##_##dev, \
 	.subvendor = PCI_ANY_ID, .subdevice = PCI_ANY_ID, 0, 0, \
-	.driver_data = (kernel_ulong_t)(data)
+	.driver_data = (uintptr_t)(data)
 
 enum {
 	PCI_REASSIGN_ALL_RSRC	= 0x00000001,	/* Ignore firmware setup */

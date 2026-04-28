@@ -1459,14 +1459,14 @@ static int aqc111_resume(struct usb_interface *intf)
 
 #define AQC111_USB_ETH_DEV(vid, pid, table) \
 	USB_DEVICE_INTERFACE_CLASS((vid), (pid), USB_CLASS_VENDOR_SPEC), \
-	.driver_info = (unsigned long)&(table) \
+	.driver_info = (uintptr_t)&(table) \
 }, \
 { \
 	USB_DEVICE_AND_INTERFACE_INFO((vid), (pid), \
 				      USB_CLASS_COMM, \
 				      USB_CDC_SUBCLASS_ETHERNET, \
 				      USB_CDC_PROTO_NONE), \
-	.driver_info = (unsigned long)&(table),
+	.driver_info = (uintptr_t)&(table),
 
 static const struct usb_device_id products[] = {
 	{AQC111_USB_ETH_DEV(0x2eca, 0xc101, aqc111_info)},

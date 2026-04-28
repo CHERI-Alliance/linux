@@ -669,7 +669,7 @@ static int rt722_sdca_dmic_set_gain_put(struct snd_kcontrol *kcontrol,
 }
 
 #define RT722_SDCA_PR_VALUE(xreg_base, xcount, xmax, xinvert) \
-	((unsigned long)&(struct rt722_sdca_dmic_kctrl_priv) \
+	((uintptr_t)&(struct rt722_sdca_dmic_kctrl_priv) \
 		{.reg_base = xreg_base, .count = xcount, .max = xmax, \
 		.invert = xinvert})
 

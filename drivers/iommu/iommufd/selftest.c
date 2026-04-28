@@ -1220,7 +1220,7 @@ static int iommufd_test_md_check_pa(struct iommufd_ucmd *ucmd,
 
 	page_size = 1 << __ffs(mock->domain.pgsize_bitmap);
 	if (iova % page_size || length % page_size ||
-	    (uintptr_t)uptr % page_size ||
+	    (user_uintptr_t)uptr % page_size ||
 	    check_add_overflow((user_uintptr_t)uptr, (uintptr_t)length, &end)) {
 		rc = -EINVAL;
 		goto out_put;
@@ -1247,7 +1247,7 @@ static int iommufd_test_md_check_pa(struct iommufd_ucmd *ucmd,
 
 		io_phys = mock->domain.ops->iova_to_phys(&mock->domain, iova);
 		if (io_phys !=
-		    pfn * PAGE_SIZE + ((uintptr_t)uptr % PAGE_SIZE)) {
+		    pfn * PAGE_SIZE + ((user_uintptr_t)uptr % PAGE_SIZE)) {
 			rc = -EINVAL;
 			goto out_put;
 		}
@@ -1268,7 +1268,7 @@ static int iommufd_test_md_check_refs(struct iommufd_ucmd *ucmd,
 {
 	uintptr_t end;
 
-	if (length % PAGE_SIZE || (uintptr_t)uptr % PAGE_SIZE ||
+	if (length % PAGE_SIZE || (user_uintptr_t)uptr % PAGE_SIZE ||
 	    check_add_overflow((user_uintptr_t)uptr, (uintptr_t)length, &end))
 		return -EINVAL;
 

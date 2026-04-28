@@ -12,7 +12,7 @@
 	.match_flags = USB_DEVICE_ID_MATCH_DEVICE, \
 	.idVendor = (vend), \
 	.idProduct = (prod), \
-	.driver_info = (kernel_ulong_t)&(cfg)
+	.driver_info = (uintptr_t)&(cfg)
 
 #define USB_HIGH_SPEED_BULK_SIZE	512
 #define USB_FULL_SPEED_BULK_SIZE	64

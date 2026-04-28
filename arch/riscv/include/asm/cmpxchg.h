@@ -29,11 +29,11 @@
 			: "rJ" (n)						\
 			: "memory");						\
 	} else {								\
-		u32 *__ptr32b = (u32 *)((ulong)(p) & ~0x3);			\
-		ulong __s = ((ulong)(p) & (0x4 - sizeof(*p))) * BITS_PER_BYTE;	\
+		u32 *__ptr32b = (u32 *)((uintptr_t)(p) & ~0x3);			\
+		ulong __s = ((ulong __force)(p) & (0x4 - sizeof(*p))) * BITS_PER_BYTE;	\
 		ulong __mask = GENMASK(((sizeof(*p)) * BITS_PER_BYTE) - 1, 0)	\
 				<< __s;						\
-		ulong __newx = (ulong)(n) << __s;				\
+		ulong __newx = (ulong __force)(n) << __s;				\
 		ulong __retx;							\
 		ulong __rc;							\
 										\
@@ -147,12 +147,12 @@
 			: "rJ" (n)						\
 			: "memory");						\
 	} else {								\
-		u32 *__ptr32b = (u32 *)((ulong)(p) & ~0x3);			\
-		ulong __s = ((ulong)(p) & (0x4 - sizeof(*p))) * BITS_PER_BYTE;	\
+		u32 *__ptr32b = (u32 *)((uintptr_t)(p) & ~0x3);			\
+		ulong __s = ((ulong __force)(p) & (0x4 - sizeof(*p))) * BITS_PER_BYTE;	\
 		ulong __mask = GENMASK(((sizeof(*p)) * BITS_PER_BYTE) - 1, 0)	\
 			       << __s;						\
-		ulong __newx = (ulong)(n) << __s;				\
-		ulong __oldx = (ulong)(o) << __s;				\
+		ulong __newx = (ulong __force)(n) << __s;			\
+		ulong __oldx = (ulong __force)(o) << __s;			\
 		ulong __retx;							\
 		ulong __rc;							\
 										\
@@ -365,7 +365,7 @@ union __u128_halves {
  * instruction exception.
  */
 static __always_inline void __cmpwait(volatile void *ptr,
-				      unsigned long val,
+				      uintptr_t val,
 				      int size)
 {
 	unsigned long tmp;
@@ -441,7 +441,7 @@ static __always_inline void __cmpwait(volatile void *ptr,
 }
 
 #define __cmpwait_relaxed(ptr, val) \
-	__cmpwait((ptr), (unsigned long)(val), sizeof(*(ptr)))
+	__cmpwait((ptr), (uintptr_t)(val), sizeof(*(ptr)))
 #endif
 
 #endif /* _ASM_RISCV_CMPXCHG_H */

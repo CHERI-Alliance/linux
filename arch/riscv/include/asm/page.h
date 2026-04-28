@@ -133,13 +133,13 @@ void *linear_mapping_pa_to_va(unsigned long x);
 
 #ifdef CONFIG_XIP_KERNEL
 #define kernel_mapping_pa_to_va(y)	({					\
-	unsigned long _y = (unsigned long)(y);					\
+	unsigned long _y = (unsigned long __force)(y);				\
 	(_y < phys_ram_base) ?							\
 		(void *)(_y + kernel_map.va_kernel_xip_text_pa_offset) :	\
 		(void *)(_y + kernel_map.va_kernel_xip_data_pa_offset);		\
 	})
 #else
-#define kernel_mapping_pa_to_va(y) ((void *)((unsigned long)(y) + kernel_map.va_kernel_pa_offset))
+#define kernel_mapping_pa_to_va(y) ((void *)(uintptr_t __force)((unsigned long __force)(y) + kernel_map.va_kernel_pa_offset))
 #endif
 
 #define __pa_to_va_nodebug(x)		linear_mapping_pa_to_va(x)
@@ -175,8 +175,8 @@ extern phys_addr_t __phys_addr_symbol(unsigned long x);
 #define __phys_addr_symbol(x)	__va_to_pa_nodebug(x)
 #endif /* CONFIG_DEBUG_VIRTUAL */
 
-#define __pa_symbol(x)	__phys_addr_symbol(RELOC_HIDE((unsigned long)(x), 0))
-#define __pa(x)		__virt_to_phys((unsigned long)(x))
+#define __pa_symbol(x)	__phys_addr_symbol(RELOC_HIDE((unsigned long __force)(x), 0))
+#define __pa(x)		__virt_to_phys((unsigned long __force)(x))
 #define __va(x)		((void *)__pa_to_va_nodebug((phys_addr_t)(x)))
 
 #define phys_to_pfn(phys)	(PFN_DOWN(phys))
@@ -200,7 +200,7 @@ static __always_inline void *pfn_to_kaddr(unsigned long pfn)
 #endif /* __ASSEMBLER__ */
 
 #define virt_addr_valid(vaddr)	({						\
-	unsigned long _addr = (unsigned long)vaddr;				\
+	unsigned long _addr = (unsigned long __force)vaddr;				\
 	(unsigned long)(_addr) >= PAGE_OFFSET && pfn_valid(virt_to_pfn(_addr));	\
 })
 

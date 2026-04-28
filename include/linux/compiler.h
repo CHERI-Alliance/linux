@@ -150,9 +150,9 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
 
 #ifndef RELOC_HIDE
 # define RELOC_HIDE(ptr, off)					\
-  ({ unsigned long __ptr;					\
-     __ptr = (unsigned long) (ptr);				\
-    (typeof(ptr)) (__ptr + (off)); })
+  ({ uintptr_t __ptr;						\
+     __ptr = (uintptr_t __force) (ptr);				\
+    (typeof(ptr) __force) (__ptr + (off)); })
 #endif
 
 #define absolute_pointer(val)	RELOC_HIDE((void *)(val), 0)

@@ -2790,8 +2790,8 @@ static inline void clear_page_pfmemalloc(struct page *page)
  */
 extern void pagefault_out_of_memory(void);
 
-#define offset_in_page(p)	((unsigned long)(p) & ~PAGE_MASK)
-#define offset_in_folio(folio, p) ((unsigned long)(p) & (folio_size(folio) - 1))
+#define offset_in_page(p)	((unsigned long __force)(p) & ~PAGE_MASK)
+#define offset_in_folio(folio, p) ((unsigned long __force)(p) & (folio_size(folio) - 1))
 
 /*
  * Parameter block passed down to zap_pte_range in exceptional cases.

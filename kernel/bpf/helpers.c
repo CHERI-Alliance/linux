@@ -3443,7 +3443,7 @@ __bpf_kfunc int bpf_copy_from_user_task_str(void *dst, u32 dst__sz,
 	if (unlikely(dst__sz == 0))
 		return 0;
 
-	ret = copy_remote_vm_str(tsk, (unsigned long)unsafe_ptr__ign, dst, dst__sz, 0);
+	ret = copy_remote_vm_str(tsk, (unsigned long)(user_uintptr_t)unsafe_ptr__ign, dst, dst__sz, 0);
 	if (ret < 0) {
 		if (flags & BPF_F_PAD_ZEROS)
 			memset(dst, 0, dst__sz);

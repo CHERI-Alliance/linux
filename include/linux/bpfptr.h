@@ -26,7 +26,7 @@ static inline bpfptr_t USER_BPFPTR(void __user *p)
 static inline bpfptr_t make_bpfptr(u64 addr, bool is_kernel)
 {
 	if (is_kernel)
-		return KERNEL_BPFPTR((void*) (uintptr_t) addr);
+		return KERNEL_BPFPTR((void *)(uintptr_t __force)(user_uintptr_t)ptr);
 	else
 		return USER_BPFPTR(u64_to_user_ptr(addr));
 }

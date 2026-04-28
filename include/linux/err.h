@@ -50,7 +50,7 @@ static inline void * __must_check ERR_PTR(long error)
 #define INIT_ERR_PTR(error) ((void *)(error))
 
 /* Return the pointer in the percpu address space. */
-#define ERR_PTR_PCPU(error) ((void __percpu *)(unsigned long)ERR_PTR(error))
+#define ERR_PTR_PCPU(error) ((void __percpu *)(uintptr_t)ERR_PTR(error))
 
 /* Cast an error pointer to __iomem. */
 #define IOMEM_ERR_PTR(error) (__force void __iomem *)ERR_PTR(error)

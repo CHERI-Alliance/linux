@@ -28,20 +28,20 @@
 #ifdef __KERNEL__
 #define INTEL_PCI_DEVICE(_id, _info) { \
 	PCI_DEVICE(PCI_VENDOR_ID_INTEL, (_id)), \
-	.driver_data = (kernel_ulong_t)(_info), \
+	.driver_data = (uintptr_t)(_info), \
 }
 
 #define INTEL_VGA_DEVICE(_id, _info) { \
 	PCI_DEVICE(PCI_VENDOR_ID_INTEL, (_id)), \
 	.class = PCI_BASE_CLASS_DISPLAY << 16, .class_mask = 0xff << 16, \
-	.driver_data = (kernel_ulong_t)(_info), \
+	.driver_data = (uintptr_t)(_info), \
 }
 
 #define INTEL_QUANTA_VGA_DEVICE(_info) { \
 	.vendor = PCI_VENDOR_ID_INTEL, .device = 0x16a, \
 	.subvendor = 0x152d, .subdevice = 0x8990, \
 	.class = PCI_BASE_CLASS_DISPLAY << 16, .class_mask = 0xff << 16, \
-	.driver_data = (kernel_ulong_t)(_info), \
+	.driver_data = (uintptr_t)(_info), \
 }
 #endif
 

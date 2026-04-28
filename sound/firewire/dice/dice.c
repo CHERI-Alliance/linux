@@ -255,7 +255,7 @@ static void dice_bus_reset(struct fw_unit *unit)
 		.model_id	= (model), \
 		.specifier_id	= (vendor), \
 		.version	= DICE_INTERFACE, \
-		.driver_data = (kernel_ulong_t)(data), \
+		.driver_data = (uintptr_t)(data), \
 	}
 
 static const struct ieee1394_device_id dice_id_table[] = {

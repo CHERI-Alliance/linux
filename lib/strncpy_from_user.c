@@ -31,7 +31,7 @@ static __always_inline long do_strncpy_from_user(char *dst, const char __user *s
 	const struct word_at_a_time constants = WORD_AT_A_TIME_CONSTANTS;
 	unsigned long res = 0;
 
-	if (IS_UNALIGNED(src, dst))
+	if (IS_UNALIGNED(__c_pa_u(src), __c_pa(dst)))
 		goto byte_at_a_time;
 
 	while (max >= sizeof(unsigned long)) {
