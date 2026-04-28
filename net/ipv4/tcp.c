@@ -1988,15 +1988,15 @@ static int get_compat64_tcp_zerocopy_receive(struct tcp_zerocopy_receive *zc,
 	if (copy_from_sockptr(&compat_zc, src, size))
 		return -EFAULT;
 
-	zc->address = compat_zc.address;
+	zc->address = (user_uintptr_t)compat_ptr(compat_zc.address);
 	zc->length = compat_zc.length;
 	zc->recv_skip_hint = compat_zc.recv_skip_hint;
 	zc->inq = compat_zc.inq;
 	zc->err = compat_zc.err;
-	zc->copybuf_address = compat_zc.copybuf_address;
+	zc->copybuf_address = (user_uintptr_t)compat_ptr(compat_zc.copybuf_address);
 	zc->copybuf_len = compat_zc.copybuf_len;
 	zc->flags = compat_zc.flags;
-	zc->msg_control = compat_zc.msg_control;
+	zc->msg_control = (user_uintptr_t)compat_ptr(compat_zc.msg_control);
 	zc->msg_controllen = compat_zc.msg_controllen;
 	zc->msg_flags = compat_zc.msg_flags;
 	zc->reserved = compat_zc.reserved;
@@ -2008,7 +2008,7 @@ static int copy_tcp_zerocopy_receive_from_sockptr(struct tcp_zerocopy_receive *z
 {
 	if (in_compat64())
 		return get_compat64_tcp_zerocopy_receive(zc, src, size);
-	if (copy_from_sockptr(zc, src, size))
+	if (copy_from_sockptr_with_ptr(zc, src, size))
 		return -EFAULT;
 	return 0;
 }
@@ -2018,15 +2018,15 @@ static int set_compat64_tcp_zerocopy_receive(sockptr_t dst,
 					     size_t size)
 {
 	struct compat_tcp_zerocopy_receive compat_zc = {
-		.address = zc->address,
+		.address = __c_ua(zc->address),
 		.length = zc->length,
 		.recv_skip_hint = zc->recv_skip_hint,
 		.inq = zc->inq,
 		.err = zc->err,
-		.copybuf_address = zc->copybuf_address,
+		.copybuf_address = __c_ua(zc->copybuf_address),
 		.copybuf_len = zc->copybuf_len,
 		.flags = zc->flags,
-		.msg_control = zc->msg_control,
+		.msg_control = __c_ua(zc->msg_control),
 		.msg_controllen = zc->msg_controllen,
 		.msg_flags = zc->msg_flags,
 		.reserved = zc->reserved,
@@ -2041,7 +2041,7 @@ static int copy_tcp_zerocopy_receive_to_sockptr(sockptr_t dst,
 {
 	if (in_compat64())
 		return set_compat64_tcp_zerocopy_receive(dst, zc, size);
-	if (copy_to_sockptr(dst, zc, size))
+	if (copy_to_sockptr_with_ptr(dst, zc, size))
 		return -EFAULT;
 	return 0;
 }
@@ -2090,7 +2090,7 @@ static int receive_fallback_to_copy(struct sock *sk,
 				    struct tcp_zerocopy_receive *zc, int inq,
 				    struct scm_timestamping_internal *tss)
 {
-	unsigned long copy_address = (unsigned long)zc->copybuf_address;
+	user_uintptr_t copy_address = (user_uintptr_t)zc->copybuf_address;
 	struct msghdr msg = {};
 	int err;
 
@@ -2100,7 +2100,7 @@ static int receive_fallback_to_copy(struct sock *sk,
 	if (copy_address != zc->copybuf_address)
 		return -EINVAL;
 
-	err = import_ubuf(ITER_DEST, uaddr_to_user_ptr(copy_address), inq,
+	err = import_ubuf(ITER_DEST, (void __user *)copy_address, inq,
 			  &msg.msg_iter);
 	if (err)
 		return err;
@@ -2126,14 +2126,14 @@ static int tcp_copy_straggler_data(struct tcp_zerocopy_receive *zc,
 				   struct sk_buff *skb, u32 copylen,
 				   u32 *offset, u32 *seq)
 {
-	unsigned long copy_address = (unsigned long)zc->copybuf_address;
+	user_uintptr_t copy_address = (user_uintptr_t)zc->copybuf_address;
 	struct msghdr msg = {};
 	int err;
 
 	if (copy_address != zc->copybuf_address)
 		return -EINVAL;
 
-	err = import_ubuf(ITER_DEST, uaddr_to_user_ptr(copy_address), copylen,
+	err = import_ubuf(ITER_DEST, (void __user *)copy_address, copylen,
 			  &msg.msg_iter);
 	if (err)
 		return err;
@@ -2258,11 +2258,11 @@ static void tcp_zc_finalize_rx_tstamp(struct sock *sk,
 				      struct tcp_zerocopy_receive *zc,
 				      struct scm_timestamping_internal *tss)
 {
-	unsigned long msg_control_addr;
+	user_uintptr_t msg_control_addr;
 	struct msghdr cmsg_dummy;
 
-	msg_control_addr = (unsigned long)zc->msg_control;
-	cmsg_dummy.msg_control_user = uaddr_to_user_ptr(msg_control_addr);
+	msg_control_addr = zc->msg_control;
+	cmsg_dummy.msg_control_user = (void __user *)msg_control_addr;
 	cmsg_dummy.msg_controllen =
 		(__kernel_size_t)zc->msg_controllen;
 	cmsg_dummy.msg_flags = in_compat_syscall()
@@ -2272,8 +2272,8 @@ static void tcp_zc_finalize_rx_tstamp(struct sock *sk,
 	if (zc->msg_control == msg_control_addr &&
 	    zc->msg_controllen == cmsg_dummy.msg_controllen) {
 		tcp_recv_timestamp(&cmsg_dummy, sk, tss);
-		zc->msg_control = (__u64)
-			((user_uintptr_t)cmsg_dummy.msg_control_user);
+		zc->msg_control =
+			(user_uintptr_t)cmsg_dummy.msg_control_user;
 		zc->msg_controllen =
 			(__u64)cmsg_dummy.msg_controllen;
 		zc->msg_flags = (__u32)cmsg_dummy.msg_flags;
@@ -2311,7 +2311,7 @@ static int tcp_zerocopy_receive(struct sock *sk,
 				struct scm_timestamping_internal *tss)
 {
 	u32 length = 0, offset, vma_len, avail_len, copylen = 0;
-	unsigned long address = (unsigned long)zc->address;
+	unsigned long address = __c_ua(zc->address);
 	struct page *pages[TCP_ZEROCOPY_PAGE_BATCH_SIZE];
 	s32 copybuf_len = zc->copybuf_len;
 	struct tcp_sock *tp = tcp_sk(sk);
@@ -2346,6 +2346,12 @@ static int tcp_zerocopy_receive(struct sock *sk,
 			return -EIO;
 		return 0;
 	}
+
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	/* Check that the pointer has ownership of the mapping */
+	if (!cheri_check_cap((void __user *)zc->address, zc->length, CHERI_PERM_SW_VMEM))
+		return -EINVAL;
+#endif
 
 	vma = find_tcp_vma(current->mm, address, &mmap_locked);
 	if (!vma)
