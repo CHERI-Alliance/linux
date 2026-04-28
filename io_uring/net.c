@@ -932,7 +932,7 @@ static int io_recvmsg_prep_multishot(struct io_async_msghdr *kmsg,
 				     struct io_sr_msg *sr, void __user2 * __capability *buf,
 				     size_t *len)
 {
-	user_uintptr_t ubuf = (user_uintptr_t) *buf;
+	void __user *ubuf = *buf;
 	unsigned long hdr;
 
 	hdr = sizeof(struct io_uring_recvmsg_out) + kmsg->namelen +
@@ -941,14 +941,14 @@ static int io_recvmsg_prep_multishot(struct io_async_msghdr *kmsg,
 		return -EFAULT;
 
 	if (kmsg->controllen) {
-		unsigned long control = ubuf + hdr - kmsg->controllen;
+		void __user *control = ubuf + hdr - kmsg->controllen;
 
-		kmsg->msg.msg_control_user = (void __user *) control;
+		kmsg->msg.msg_control_user = control;
 		kmsg->msg.msg_controllen = kmsg->controllen;
 	}
 
 	sr->buf = *buf; /* stash for later copy */
-	*buf = (void __user *) (ubuf + hdr);
+	*buf = ubuf + hdr;
 	kmsg->payloadlen = *len = *len - hdr;
 	return 0;
 }
