@@ -10,7 +10,7 @@ ifneq ($(LLVM),)
 CLANG_LDFLAGS = -fuse-ld=lld
 endif
 
-CFLAGS_PURECAP = -march=morello+c64 -mabi=purecap
+CFLAGS_PURECAP = -march=morello -mabi=purecap
 CFLAGS_COMMON = -ffreestanding -Wextra -MMD
 CFLAGS_COMMON += -nostdinc -isystem $(shell $(CC) -print-file-name=include 2>/dev/null)
 CFLAGS += $(CLANG_FLAGS) $(CFLAGS_PURECAP) $(CFLAGS_COMMON)
