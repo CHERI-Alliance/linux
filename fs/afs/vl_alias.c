@@ -45,8 +45,8 @@ static int afs_compare_fs_alists(const struct afs_server *server_a,
 	lb = rcu_dereference(server_b->endpoint_state)->addresses;
 
 	while (a < la->nr_addrs && b < lb->nr_addrs) {
-		uintptr_t pa = (uintptr_t)la->addrs[a].peer;
-		uintptr_t pb = (uintptr_t)lb->addrs[b].peer;
+		unsigned long pa = __c_pa(la->addrs[a].peer);
+		unsigned long pb = __c_pa(lb->addrs[b].peer);
 		long diff = pa - pb;
 
 		if (diff < 0) {

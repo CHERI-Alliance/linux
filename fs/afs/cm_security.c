@@ -33,7 +33,7 @@ static int afs_respond_to_challenge(struct sk_buff *challenge)
 	struct afs_server *server;
 #endif
 	struct rxrpc_peer *peer;
-	unsigned long peer_data;
+	uintptr_t peer_data;
 	u16 service_id;
 	u8 security_index;
 

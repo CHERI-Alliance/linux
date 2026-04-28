@@ -386,7 +386,7 @@ struct rxrpc_peer {
 	struct hlist_head	error_targets;	/* targets for net error distribution */
 	struct rb_root		service_conns;	/* Service connections */
 	struct list_head	keepalive_link;	/* Link in net->peer_keepalive[] */
-	unsigned long		app_data;	/* Application data (e.g. afs_server) */
+	uintptr_t		app_data;	/* Application data (e.g. afs_server) */
 	unsigned int		last_tx_at;	/* Last time packet sent here (time64_t LSW) */
 	seqlock_t		service_conn_lock;
 	spinlock_t		lock;		/* access lock */
@@ -726,7 +726,7 @@ struct rxrpc_call {
 	struct rxrpc_txbuf	*tx_pending;	/* Tx buffer being filled */
 	wait_queue_head_t	waitq;		/* Wait queue for channel or Tx */
 	s64			tx_total_len;	/* Total length left to be transmitted (or -1) */
-	unsigned long		user_call_ID;	/* user-defined call ID */
+	uintptr_t		user_call_ID;	/* user-defined call ID */
 	unsigned long		flags;
 	unsigned long		events;
 	spinlock_t		notify_lock;	/* Kernel notification lock */
@@ -889,7 +889,7 @@ enum rxrpc_command {
 
 struct rxrpc_call_params {
 	s64			tx_total_len;	/* Total Tx data length (if send data) */
-	unsigned long		user_call_ID;	/* User's call ID */
+	uintptr_t		user_call_ID;	/* User's call ID */
 	struct {
 		u32		hard;		/* Maximum lifetime (sec) */
 		u32		idle;		/* Max time since last data packet (msec) */
@@ -1029,7 +1029,7 @@ bool rxrpc_new_incoming_call(struct rxrpc_local *local,
 			     struct rxrpc_connection *conn,
 			     struct sockaddr_rxrpc *peer_srx,
 			     struct sk_buff *skb);
-int rxrpc_user_charge_accept(struct rxrpc_sock *, unsigned long);
+int rxrpc_user_charge_accept(struct rxrpc_sock *, uintptr_t);
 
 /*
  * call_event.c
@@ -1051,7 +1051,7 @@ extern const char *const rxrpc_call_completions[];
 extern struct kmem_cache *rxrpc_call_jar;
 
 void rxrpc_poke_call(struct rxrpc_call *call, enum rxrpc_call_poke_trace what);
-struct rxrpc_call *rxrpc_find_call_by_user_ID(struct rxrpc_sock *, unsigned long);
+struct rxrpc_call *rxrpc_find_call_by_user_ID(struct rxrpc_sock *, uintptr_t);
 struct rxrpc_call *rxrpc_alloc_call(struct rxrpc_sock *, gfp_t, unsigned int);
 struct rxrpc_call *rxrpc_new_client_call(struct rxrpc_sock *,
 					 struct rxrpc_conn_parameters *,

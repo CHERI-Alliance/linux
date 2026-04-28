@@ -173,10 +173,10 @@ static int rxrpc_recvmsg_user_id(struct rxrpc_call *call, struct msghdr *msg,
 		return put_cmsg(msg, SOL_RXRPC, RXRPC_USER_CALL_ID,
 				sizeof(unsigned int), &id32);
 	} else {
-		unsigned long idl = call->user_call_ID;
+		uintptr_t idl = call->user_call_ID;
 
 		return put_cmsg(msg, SOL_RXRPC, RXRPC_USER_CALL_ID,
-				sizeof(unsigned long), &idl);
+				sizeof(uintptr_t), &idl);
 	}
 }
 

@@ -800,7 +800,7 @@ The kernel interface functions are as follows:
 	rxrpc_kernel_begin_call(struct socket *sock,
 				struct sockaddr_rxrpc *srx,
 				struct key *key,
-				unsigned long user_call_ID,
+				uintptr_t user_call_ID,
 				s64 tx_total_len,
 				gfp_t gfp,
 				rxrpc_notify_rx_t notify_rx,
@@ -864,7 +864,7 @@ The kernel interface functions are as follows:
  (#) Send data through a call::
 
 	typedef void (*rxrpc_notify_end_tx_t)(struct sock *sk,
-					      unsigned long user_call_ID,
+					      uintptr_t user_call_ID,
 					      struct sk_buff *skb);
 
 	int rxrpc_kernel_send_data(struct socket *sock,
@@ -936,7 +936,7 @@ The kernel interface functions are as follows:
  (#) Intercept received RxRPC messages::
 
 	typedef void (*rxrpc_interceptor_t)(struct sock *sk,
-					    unsigned long user_call_ID,
+					    uintptr_t user_call_ID,
 					    struct sk_buff *skb);
 
 	void
@@ -984,7 +984,7 @@ The kernel interface functions are as follows:
 
 	struct rxrpc_call *
 	rxrpc_kernel_accept_call(struct socket *sock,
-				 unsigned long user_call_ID);
+				 uintptr_t user_call_ID);
 
      This is used to accept an incoming call and to assign it a call ID.  This
      function is similar to rxrpc_kernel_begin_call() and calls accepted must

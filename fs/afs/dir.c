@@ -808,7 +808,7 @@ static struct inode *afs_do_lookup(struct inode *dir, struct dentry *dentry)
 		afs_dir_iterate(dir, &cookie->ctx, NULL, &data_version);
 	}
 
-	dentry->d_fsdata = (void *)(unsigned long)data_version;
+	dentry->d_fsdata = __c_fakep(data_version);
 
 	/* Check to see if we already have an inode for the primary fid. */
 	inode = ilookup5(dir->i_sb, cookie->fids[1].vnode,
@@ -895,9 +895,9 @@ out_op:
 	}
 
 	if (op->file[0].scb.have_status)
-		dentry->d_fsdata = (void *)(unsigned long)op->file[0].scb.status.data_version;
+		dentry->d_fsdata = __c_fakep(op->file[0].scb.status.data_version);
 	else
-		dentry->d_fsdata = (void *)(unsigned long)op->file[0].dv_before;
+		dentry->d_fsdata = __c_fakep(op->file[0].dv_before);
 	ret = afs_put_operation(op);
 out:
 	kfree(cookie);
@@ -1040,7 +1040,7 @@ static int afs_d_revalidate_rcu(struct afs_vnode *dvnode, struct dentry *dentry)
 	 * version.
 	 */
 	dir_version = (long)READ_ONCE(dvnode->status.data_version);
-	de_version = (intptr_t)READ_ONCE(dentry->d_fsdata);
+	de_version = __c_pa(READ_ONCE(dentry->d_fsdata));
 	if (de_version != dir_version) {
 		dir_version = (long)READ_ONCE(dvnode->invalid_before);
 		if (de_version - dir_version < 0)
@@ -1100,7 +1100,7 @@ static int afs_d_revalidate(struct inode *parent_dir, const struct qstr *name,
 	 * version.
 	 */
 	dir_version = dir->status.data_version;
-	de_version = (intptr_t)dentry->d_fsdata;
+	de_version = __c_pa(dentry->d_fsdata);
 	if (de_version == (long)dir_version)
 		goto out_valid_noupdate;
 
@@ -1161,7 +1161,7 @@ static int afs_d_revalidate(struct inode *parent_dir, const struct qstr *name,
 	}
 
 out_valid:
-	dentry->d_fsdata = (void *)(unsigned long)dir_version;
+	dentry->d_fsdata = __c_fakep(dir_version);
 out_valid_noupdate:
 	key_put(key);
 	_leave(" = 1 [valid]");

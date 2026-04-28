@@ -83,12 +83,12 @@ static void rxrpc_destroy_call(struct work_struct *);
  * - called in process context with IRQs enabled
  */
 struct rxrpc_call *rxrpc_find_call_by_user_ID(struct rxrpc_sock *rx,
-					      unsigned long user_call_ID)
+					      uintptr_t user_call_ID)
 {
 	struct rxrpc_call *call;
 	struct rb_node *p;
 
-	_enter("%p,%lx", rx, user_call_ID);
+	_enter("%p,%lx", rx, (unsigned long)user_call_ID);
 
 	read_lock(&rx->call_lock);
 
@@ -235,7 +235,7 @@ static struct rxrpc_call *rxrpc_alloc_client_call(struct rxrpc_sock *rx,
 	rxrpc_set_call_state(call, RXRPC_CALL_CLIENT_AWAIT_CONN);
 
 	trace_rxrpc_call(call->debug_id, refcount_read(&call->ref),
-			 p->user_call_ID, rxrpc_call_new_client);
+			 __c_ua(p->user_call_ID), rxrpc_call_new_client);
 
 	_leave(" = %p", call);
 	return call;
@@ -293,7 +293,7 @@ static int rxrpc_connect_call(struct rxrpc_call *call, gfp_t gfp)
 	struct rxrpc_local *local = call->local;
 	int ret = -ENOMEM;
 
-	_enter("{%d,%lx},", call->debug_id, call->user_call_ID);
+	_enter("{%d,%lx},", call->debug_id, (unsigned long)call->user_call_ID);
 
 	ret = rxrpc_look_up_bundle(call, gfp);
 	if (ret < 0)
@@ -331,7 +331,7 @@ struct rxrpc_call *rxrpc_new_client_call(struct rxrpc_sock *rx,
 	struct rb_node *parent, **pp;
 	int ret;
 
-	_enter("%p,%lx", rx, p->user_call_ID);
+	_enter("%p,%lx", rx, (unsigned long)p->user_call_ID);
 
 	if (WARN_ON_ONCE(!cp->peer)) {
 		release_sock(&rx->sk);

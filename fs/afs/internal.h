@@ -1755,8 +1755,7 @@ static inline void afs_update_dentry_version(struct afs_operation *op,
 					     struct dentry *dentry)
 {
 	if (!op->cumul_error.error)
-		dentry->d_fsdata =
-			(void *)(unsigned long)dir_vp->scb.status.data_version;
+		dentry->d_fsdata = __c_fakep(dir_vp->scb.status.data_version);
 }
 
 /*
