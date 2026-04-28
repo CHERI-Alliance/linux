@@ -36,7 +36,7 @@ extern struct file *alloc_file_clone(struct file *, int flags,
  * or empty (represented by 0).
  */
 struct fd {
-	unsigned long word;
+	uintptr_t word;
 };
 #define FDPUT_FPUT       1
 #define FDPUT_POS_UNLOCK 2
