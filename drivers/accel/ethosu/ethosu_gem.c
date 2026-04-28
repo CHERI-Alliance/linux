@@ -677,7 +677,7 @@ static int ethosu_gem_cmdstream_copy_and_validate(struct drm_device *ddev,
  */
 int ethosu_gem_cmdstream_create(struct drm_file *file,
 				struct drm_device *ddev,
-				u32 size, u64 data, u32 flags, u32 *handle)
+				u32 size, user_uintptr_t data, u32 flags, u32 *handle)
 {
 	int ret;
 	struct drm_gem_dma_object *mem;
@@ -691,7 +691,7 @@ int ethosu_gem_cmdstream_create(struct drm_file *file,
 	bo->flags = flags;
 
 	ret = ethosu_gem_cmdstream_copy_and_validate(ddev,
-						     (void __user *)(uintptr_t)data,
+						     (void __user *)(user_uintptr_t)data,
 						     bo, size);
 	if (ret)
 		goto fail;
