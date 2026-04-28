@@ -413,14 +413,6 @@ static int preserve_morello_context(struct morello_context __user *ctx,
 	__put_user_error(sizeof(struct morello_context), &ctx->head.size, err);
 	__put_user_error(0, &ctx->__pad, err);
 
-	/*
-	 * current's 64-bit registers may have been modified (e.g. through
-	 * ptrace) since the last time it was scheduled.
-	 * Perform the standard 64-bit / capability register merging, to ensure
-	 * that both views in the signal frame are consistent.
-	 */
-	morello_merge_cap_regs(regs);
-
 	for (i = 0; i < ARRAY_SIZE(regs->cregs); i++)
 		__morello_put_user_cap_error(regs->cregs[i], &ctx->cregs[i], err);
 	__morello_put_user_cap_error(regs->csp, &ctx->csp, err);
@@ -1663,6 +1655,18 @@ static int setup_rt_frame(int usig, struct ksignal *ksig, sigset_t *set,
 	int err = 0;
 
 	fpsimd_save_and_flush_current_state();
+#ifdef CONFIG_ARM64_MORELLO
+	/*
+	 * current's 64-bit registers may have been modified since the last
+	 * time it was scheduled. This may have happened through ptrace, but
+	 * also if another signal frame just got set up without returning to
+	 * userspace.
+	 * Perform the standard 64-bit / capability register merging to ensure
+	 * that both views are consistent, as we will need to read the current
+	 * value of all (C/X) registers.
+	 */
+	morello_merge_cap_regs(regs);
+#endif
 
 	if (get_sigframe(&user, ksig, regs))
 		return 1;
