@@ -7,6 +7,7 @@
 
 #include <asm/asm-uaccess.h>
 #include <asm/assembler.h>
+#include <asm/morello.h>
 #include <asm/sysreg.h>
 
 SYM_FUNC_START(morello_cpu_setup)
@@ -30,6 +31,11 @@ SYM_FUNC_START(morello_cpu_setup)
 
 	ret
 SYM_FUNC_END(morello_cpu_setup)
+
+SYM_FUNC_START(morello_cap_get_lo_val)
+	ldr	c0, [x0]
+	ret
+SYM_FUNC_END(morello_cap_get_lo_val)
 
 SYM_FUNC_START(morello_capcpy)
 	mov	x3, x0
@@ -61,11 +67,18 @@ SYM_FUNC_START(morello_thread_init_user)
 	 *   well
 	 * - The value stored in thread.morello_user_state will be set the next
 	 *   time task_save_user_tls() is called, like thread_struct.uw.tp_value.
+	 *
+	 * tls_thread_flush() does not touch rcsp_el0, so we need to zero it
+	 * here, but its value in morello_user_state does not need to be
+	 * initialised here either.
 	 */
+	msr	rctpidr_el0, czr
 
 	/* DDC: initialised to the root capability (like PCC) */
 	msr	ddc_el0, c1
-	str	c1, [x0, #MORELLO_STATE_DDC]
+	/* RDDC: null capability (processes are always started in Executive) */
+	msr	rddc_el0, czr
+	stp	c1, czr, [x0, #MORELLO_STATE_DDC]
 	/* CID: null capability */
 	msr	cid_el0, czr
 	str	czr, [x0, #MORELLO_STATE_CID]
@@ -80,9 +93,10 @@ SYM_FUNC_START(morello_thread_save_user_state)
 	mov	x9, #THREAD_MORELLO_USER_STATE
 	add	x0, x0, x9		// x0 = tsk->thread.morello_user_state
 
-	/* CTPIDR is handled by task_save_user_tls */
+	/* (R)CTPIDR is handled by task_save_user_tls */
 	mrs	c1, ddc_el0
-	str	c1, [x0, #MORELLO_STATE_DDC]
+	mrs	c2, rddc_el0
+	stp	c1, c2, [x0, #MORELLO_STATE_DDC]
 	mrs	c1, cid_el0
 	str	c1, [x0, #MORELLO_STATE_CID]
 	mrs	x1, cctlr_el0
@@ -95,9 +109,10 @@ SYM_FUNC_START(morello_thread_restore_user_state)
 	mov	x9, #THREAD_MORELLO_USER_STATE
 	add	x0, x0, x9		// x0 = tsk->thread.morello_user_state
 
-	/* CTPIDR is handled by task_restore_user_tls */
-	ldr	c1, [x0, #MORELLO_STATE_DDC]
+	/* (R)CTPIDR is handled by task_restore_user_tls */
+	ldp	c1, c2, [x0, #MORELLO_STATE_DDC]
 	msr	ddc_el0, c1
+	msr	rddc_el0, c2
 	ldr	c1, [x0, #MORELLO_STATE_CID]
 	msr	cid_el0, c1
 	ldr	x1, [x0, #MORELLO_STATE_CCTLR]
@@ -107,32 +122,52 @@ SYM_FUNC_START(morello_thread_restore_user_state)
 SYM_FUNC_END(morello_thread_restore_user_state)
 
 SYM_FUNC_START(morello_task_save_user_tls)
+	get_task_pt_regs x8, x0
 	mov	x9, #THREAD_MORELLO_USER_STATE
 	add	x0, x0, x9		// x0 = tsk->thread.morello_user_state
 
 	mrs	c2, ctpidr_el0
-	/* Save CTPIDR */
-	str	c2, [x0, #MORELLO_STATE_CTPIDR]
-	/* Save TPIDR to the appropriate field of tsk->thread */
+	mrs	c3, rctpidr_el0
+	/* Save CTPIDR and RCTPIDR */
+	stp	c2, c3, [x0, #MORELLO_STATE_CTPIDR]
+
+	ldr	c5, [x8, #S_PCC]
+	/*
+	 * If the task is currently running in Restricted, save the lower 64 bits
+	 * of RCTPIDR (RTPIDR) in tsk->thread instead of TPIDR.
+	 */
+	morello_tst_cap_has_executive c5, x6	// Task running in Executive?
+	csel	x2, x2, x3, ne			// If not, save RTPIDR
 	str	x2, [x1]
 
 	ret
 SYM_FUNC_END(morello_task_save_user_tls)
 
 SYM_FUNC_START(morello_task_restore_user_tls)
+	get_task_pt_regs x8, x0
 	mov	x9, #THREAD_MORELLO_USER_STATE
 	add	x0, x0, x9		// x0 = tsk->thread.morello_user_state
 
-	/* Load the capability and 64-bit views of the TLS pointer */
-	ldr	c2, [x0, #MORELLO_STATE_CTPIDR]
-	ldr	x3, [x1]
+	/* Load CTPIDR, RCTPIDR and the 64-bit TLS pointer */
+	ldp	c2, c3, [x0, #MORELLO_STATE_CTPIDR]
+	ldr	x4, [x1]
+
 	/*
-	 * The 64-bit view may have been modified from within the kernel (e.g.
-	 * through ptrace) since morello_task_save_user_tls was called.
-	 * Merge the two views together.
+	 * The 64-bit TLS pointer may have been modified from within the kernel
+	 * (e.g. through ptrace) since morello_task_save_user_tls was called.
+	 * Merge it back into the active capability TLS pointer, that is RCTPIDR
+	 * if the task is running in Restricted and CTPIDR otherwise.
 	 */
-	morello_merge_c_x 2, x3
+	ldr	c5, [x8, #S_PCC]
+	morello_tst_cap_has_executive c5, x6	// Task running in Executive?
+	b.eq	1f				// If not, merge into RCTPIDR
+	morello_merge_c_x 2, x4 		// Merge the TLS pointer into CTPIDR
+	b	2f
+1:
+	morello_merge_c_x 3, x4 		// Merge the TLS pointer into RCTPIDR
+2:
 	msr	ctpidr_el0, c2
+	msr	rctpidr_el0, c3
 
 	ret
 SYM_FUNC_END(morello_task_restore_user_tls)
@@ -187,6 +222,13 @@ SYM_FUNC_START(__morello_merge_c_x)
 1:
 	ret
 SYM_FUNC_END(__morello_merge_c_x)
+
+SYM_FUNC_START(__morello_cap_has_executive)
+	ldr	c0, [x0]
+	gcperm	x0, c0
+	ubfx	x0, x0, #MORELLO_CAP_PERM_EXECUTIVE_BIT, #1
+	ret
+SYM_FUNC_END(__morello_cap_has_executive)
 
 SYM_FUNC_START(__morello_get_ddc)
 	mrs	c1, ddc

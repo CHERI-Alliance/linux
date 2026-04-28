@@ -384,6 +384,7 @@ static int preserve_morello_context(struct morello_context __user *ctx,
 	for (i = 0; i < ARRAY_SIZE(regs->cregs); i++)
 		__morello_put_user_cap_error(regs->cregs[i], &ctx->cregs[i], err);
 	__morello_put_user_cap_error(regs->csp, &ctx->csp, err);
+	__morello_put_user_cap_error(regs->rcsp, &ctx->rcsp, err);
 	__morello_put_user_cap_error(regs->pcc, &ctx->pcc, err);
 
 	return err ? -EFAULT : 0;
@@ -400,6 +401,7 @@ static int restore_morello_context(struct user_ctxs *user,
 	for (i = 0; i < ARRAY_SIZE(regs->cregs); i++)
 		__morello_get_user_cap_error(regs->cregs[i], &user->morello->cregs[i], err);
 	__morello_get_user_cap_error(regs->csp, &user->morello->csp, err);
+	__morello_get_user_cap_error(regs->rcsp, &user->morello->rcsp, err);
 	__morello_get_user_cap_error(regs->pcc, &user->morello->pcc, err);
 
 	return err ? -EFAULT : 0;
@@ -1451,6 +1453,21 @@ static int setup_sigframe(struct rt_sigframe_user_layout *user,
 	return err;
 }
 
+static unsigned long signal_sp(struct pt_regs *regs)
+{
+#ifdef CONFIG_ARM64_MORELLO
+	/*
+	 * If the interrupted context was in Restricted, regs->sp is actually
+	 * RSP_EL0, which is usually what we want but not here, because signal
+	 * handlers are always executed in Executive and therefore on the
+	 * Executive stack. Read the actual SP_EL0 from the saved CSP_EL0
+	 * instead.
+	 */
+	if (system_supports_morello())
+		return morello_cap_get_lo_val(&regs->csp);
+#endif
+	return regs->sp;
+}
 static int get_sigframe(struct rt_sigframe_user_layout *user,
 			 struct ksignal *ksig, struct pt_regs *regs)
 {
@@ -1462,7 +1479,7 @@ static int get_sigframe(struct rt_sigframe_user_layout *user,
 	if (err)
 		return err;
 
-	sp = sp_top = sigsp(regs->sp, ksig);
+	sp = sp_top = sigsp(signal_sp(regs), ksig);
 
 	sp = round_down(sp - sizeof(struct frame_record), 16);
 	user->next_frame = (struct frame_record __user *)sp;
