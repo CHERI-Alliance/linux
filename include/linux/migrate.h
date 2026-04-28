@@ -7,8 +7,8 @@
 #include <linux/migrate_mode.h>
 #include <linux/hugetlb.h>
 
-typedef struct folio *new_folio_t(struct folio *folio, unsigned long private);
-typedef void free_folio_t(struct folio *folio, unsigned long private);
+typedef struct folio *new_folio_t(struct folio *folio, uintptr_t private);
+typedef void free_folio_t(struct folio *folio, uintptr_t private);
 
 struct migration_target_control;
 
@@ -57,9 +57,9 @@ void putback_movable_pages(struct list_head *l);
 int migrate_folio(struct address_space *mapping, struct folio *dst,
 		struct folio *src, enum migrate_mode mode);
 int migrate_pages(struct list_head *l, new_folio_t new, free_folio_t free,
-		  unsigned long private, enum migrate_mode mode, int reason,
+		  uintptr_t private, enum migrate_mode mode, int reason,
 		  unsigned int *ret_succeeded);
-struct folio *alloc_migration_target(struct folio *src, unsigned long private);
+struct folio *alloc_migration_target(struct folio *src, uintptr_t private);
 bool isolate_movable_ops_page(struct page *page, isolate_mode_t mode);
 bool isolate_folio_to_list(struct folio *folio, struct list_head *list);
 
@@ -76,11 +76,11 @@ int set_movable_ops(const struct movable_operations *ops, enum pagetype type);
 
 static inline void putback_movable_pages(struct list_head *l) {}
 static inline int migrate_pages(struct list_head *l, new_folio_t new,
-		free_folio_t free, unsigned long private,
+		free_folio_t free, uintptr_t private,
 		enum migrate_mode mode, int reason, unsigned int *ret_succeeded)
 	{ return -ENOSYS; }
 static inline struct folio *alloc_migration_target(struct folio *src,
-		unsigned long private)
+		uintptr_t private)
 	{ return NULL; }
 static inline bool isolate_movable_ops_page(struct page *page, isolate_mode_t mode)
 	{ return false; }
