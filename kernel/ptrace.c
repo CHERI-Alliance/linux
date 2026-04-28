@@ -417,7 +417,7 @@ static inline void ptrace_set_stopped(struct task_struct *task, bool seize)
 }
 
 static int ptrace_attach(struct task_struct *task, long request,
-			 unsigned long addr,
+			 uintptr_t addr,
 			 unsigned long flags)
 {
 	bool seize = (request == PTRACE_SEIZE);
@@ -975,7 +975,7 @@ static unsigned long
 ptrace_get_syscall_info_entry(struct task_struct *child, struct pt_regs *regs,
 			      struct ptrace_syscall_info *info)
 {
-	unsigned long args[ARRAY_SIZE(info->entry.args)];
+	uintptr_t args[ARRAY_SIZE(info->entry.args)];
 	int i;
 
 	info->entry.nr = syscall_get_nr(child, regs);
@@ -1015,7 +1015,7 @@ ptrace_get_syscall_info_exit(struct task_struct *child, struct pt_regs *regs,
 	info->exit.rval = syscall_get_error(child, regs);
 	info->exit.is_error = !!info->exit.rval;
 	if (!info->exit.is_error)
-		info->exit.rval = syscall_get_return_value(child, regs);
+		info->exit.rval = __c_ua(syscall_get_return_value(child, regs));
 
 	/* is_error is the last field in struct ptrace_syscall_info.exit */
 	return offsetofend(struct ptrace_syscall_info, exit.is_error);
@@ -1081,7 +1081,7 @@ static int
 ptrace_set_syscall_info_entry(struct task_struct *child, struct pt_regs *regs,
 			      struct ptrace_syscall_info *info)
 {
-	unsigned long args[ARRAY_SIZE(info->entry.args)];
+	uintptr_t args[ARRAY_SIZE(info->entry.args)];
 	int nr = info->entry.nr;
 	int i;
 
@@ -1145,7 +1145,7 @@ ptrace_set_syscall_info_exit(struct task_struct *child, struct pt_regs *regs,
 	if (info->exit.is_error)
 		syscall_set_return_value(child, regs, rval, 0);
 	else
-		syscall_set_return_value(child, regs, 0, rval);
+		syscall_set_return_value(child, regs, 0, __c_fakeu(rval));
 
 	return 0;
 }
@@ -1203,16 +1203,16 @@ int ptrace_request(struct task_struct *child, long request,
 	switch (request) {
 	case PTRACE_PEEKTEXT:
 	case PTRACE_PEEKDATA:
-		return generic_ptrace_peekdata(child, addr, data);
+		return generic_ptrace_peekdata(child, __c_ua(addr), data);
 	case PTRACE_POKETEXT:
 	case PTRACE_POKEDATA:
-		return generic_ptrace_pokedata(child, addr, data);
+		return generic_ptrace_pokedata(child, __c_ua(addr), __c_ua(data));
 
 #ifdef PTRACE_OLDSETOPTIONS
 	case PTRACE_OLDSETOPTIONS:
 #endif
 	case PTRACE_SETOPTIONS:
-		ret = ptrace_setoptions(child, data);
+		ret = ptrace_setoptions(child, __c_ua(data));
 		break;
 	case PTRACE_GETEVENTMSG:
 		ret = put_user(child->ptrace_message, datalp);
@@ -1296,7 +1296,7 @@ int ptrace_request(struct task_struct *child, long request,
 		break;
 
 	case PTRACE_DETACH:	 /* detach a process that was attached. */
-		ret = ptrace_detach(child, data);
+		ret = ptrace_detach(child, __c_ua(data));
 		break;
 
 #ifdef CONFIG_BINFMT_ELF_FDPIC
@@ -1335,7 +1335,7 @@ int ptrace_request(struct task_struct *child, long request,
 #endif
 	case PTRACE_SYSCALL:
 	case PTRACE_CONT:
-		return ptrace_resume(child, request, data);
+		return ptrace_resume(child, request, __c_ua(data));
 
 	case PTRACE_KILL:
 		send_sig_info(SIGKILL, SEND_SIG_NOINFO, child);
@@ -1354,41 +1354,41 @@ int ptrace_request(struct task_struct *child, long request,
 		    __get_user(kiov.iov_len, &uiov->iov_len))
 			return -EFAULT;
 
-		ret = ptrace_regset(child, request, addr, &kiov);
+		ret = ptrace_regset(child, request, __c_ua(addr), &kiov);
 		if (!ret)
 			ret = __put_user(kiov.iov_len, &uiov->iov_len);
 		break;
 	}
 
 	case PTRACE_GET_SYSCALL_INFO:
-		ret = ptrace_get_syscall_info(child, addr, datavp);
+		ret = ptrace_get_syscall_info(child, __c_ua(addr), datavp);
 		break;
 
 	case PTRACE_SET_SYSCALL_INFO:
-		ret = ptrace_set_syscall_info(child, addr, datavp);
+		ret = ptrace_set_syscall_info(child, __c_ua(addr), datavp);
 		break;
 #endif
 
 	case PTRACE_SECCOMP_GET_FILTER:
-		ret = seccomp_get_filter(child, addr, datavp);
+		ret = seccomp_get_filter(child, __c_ua(addr), datavp);
 		break;
 
 	case PTRACE_SECCOMP_GET_METADATA:
-		ret = seccomp_get_metadata(child, addr, datavp);
+		ret = seccomp_get_metadata(child, __c_ua(addr), datavp);
 		break;
 
 #ifdef CONFIG_RSEQ
 	case PTRACE_GET_RSEQ_CONFIGURATION:
-		ret = ptrace_get_rseq_configuration(child, addr, datavp);
+		ret = ptrace_get_rseq_configuration(child, __c_ua(addr), datavp);
 		break;
 #endif
 
 	case PTRACE_SET_SYSCALL_USER_DISPATCH_CONFIG:
-		ret = syscall_user_dispatch_set_config(child, addr, datavp);
+		ret = syscall_user_dispatch_set_config(child, __c_ua(addr), datavp);
 		break;
 
 	case PTRACE_GET_SYSCALL_USER_DISPATCH_CONFIG:
-		ret = syscall_user_dispatch_get_config(child, addr, datavp);
+		ret = syscall_user_dispatch_get_config(child, __c_ua(addr), datavp);
 		break;
 
 	default:
@@ -1416,7 +1416,7 @@ SYSCALL_DEFINE4(ptrace, long, request, long, pid, user_uintptr_t, addr,
 	}
 
 	if (request == PTRACE_ATTACH || request == PTRACE_SEIZE) {
-		ret = ptrace_attach(child, request, addr, data);
+		ret = ptrace_attach(child, request, addr, __c_ua(data));
 		goto out_put_task_struct;
 	}
 
@@ -1581,7 +1581,7 @@ COMPAT_SYSCALL_DEFINE4(ptrace, compat_long_t, request, compat_long_t, pid,
 	}
 
 	if (request == PTRACE_ATTACH || request == PTRACE_SEIZE) {
-		ret = ptrace_attach(child, request, addr, data);
+		ret = ptrace_attach(child, request, addr, __c_ua(data));
 		goto out_put_task_struct;
 	}
 
