@@ -695,10 +695,10 @@ struct tasklet_struct
 	atomic_t count;
 	bool use_callback;
 	union {
-		void (*func)(unsigned long data);
+		void (*func)(uintptr_t data);
 		void (*callback)(struct tasklet_struct *t);
 	};
-	unsigned long data;
+	uintptr_t data;
 };
 
 #define DECLARE_TASKLET(name, _callback)		\
@@ -801,7 +801,7 @@ static inline void tasklet_enable(struct tasklet_struct *t)
 
 extern void tasklet_kill(struct tasklet_struct *t);
 extern void tasklet_init(struct tasklet_struct *t,
-			 void (*func)(unsigned long), unsigned long data);
+			 void (*func)(uintptr_t), uintptr_t data);
 extern void tasklet_setup(struct tasklet_struct *t,
 			  void (*callback)(struct tasklet_struct *));
 
