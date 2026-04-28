@@ -1960,6 +1960,92 @@ static int find_next_mappable_frag(const skb_frag_t *frag,
 	return offset;
 }
 
+struct compat_tcp_zerocopy_receive {
+	__u64 address;
+	__u32 length;
+	__u32 recv_skip_hint;
+	__u32 inq;
+	__s32 err;
+	__u64 copybuf_address;
+	__s32 copybuf_len;
+	__u32 flags;
+	__u64 msg_control;
+	__u64 msg_controllen;
+	__u32 msg_flags;
+	__u32 reserved;
+};
+
+static inline bool in_compat64(void)
+{
+	return IS_ENABLED(CONFIG_COMPAT64) && in_compat_syscall();
+}
+
+static int get_compat64_tcp_zerocopy_receive(struct tcp_zerocopy_receive *zc,
+					     sockptr_t src, size_t size)
+{
+	struct compat_tcp_zerocopy_receive compat_zc = {};
+
+	if (copy_from_sockptr(&compat_zc, src, size))
+		return -EFAULT;
+
+	zc->address = compat_zc.address;
+	zc->length = compat_zc.length;
+	zc->recv_skip_hint = compat_zc.recv_skip_hint;
+	zc->inq = compat_zc.inq;
+	zc->err = compat_zc.err;
+	zc->copybuf_address = compat_zc.copybuf_address;
+	zc->copybuf_len = compat_zc.copybuf_len;
+	zc->flags = compat_zc.flags;
+	zc->msg_control = compat_zc.msg_control;
+	zc->msg_controllen = compat_zc.msg_controllen;
+	zc->msg_flags = compat_zc.msg_flags;
+	zc->reserved = compat_zc.reserved;
+	return 0;
+}
+
+static int copy_tcp_zerocopy_receive_from_sockptr(struct tcp_zerocopy_receive *zc,
+						  sockptr_t src, size_t size)
+{
+	if (in_compat64())
+		return get_compat64_tcp_zerocopy_receive(zc, src, size);
+	if (copy_from_sockptr(zc, src, size))
+		return -EFAULT;
+	return 0;
+}
+
+static int set_compat64_tcp_zerocopy_receive(sockptr_t dst,
+					     struct tcp_zerocopy_receive *zc,
+					     size_t size)
+{
+	struct compat_tcp_zerocopy_receive compat_zc = {
+		.address = zc->address,
+		.length = zc->length,
+		.recv_skip_hint = zc->recv_skip_hint,
+		.inq = zc->inq,
+		.err = zc->err,
+		.copybuf_address = zc->copybuf_address,
+		.copybuf_len = zc->copybuf_len,
+		.flags = zc->flags,
+		.msg_control = zc->msg_control,
+		.msg_controllen = zc->msg_controllen,
+		.msg_flags = zc->msg_flags,
+		.reserved = zc->reserved,
+	};
+
+	return copy_to_sockptr(dst, &compat_zc, size);
+}
+
+static int copy_tcp_zerocopy_receive_to_sockptr(sockptr_t dst,
+						struct tcp_zerocopy_receive *zc,
+						size_t size)
+{
+	if (in_compat64())
+		return set_compat64_tcp_zerocopy_receive(dst, zc, size);
+	if (copy_to_sockptr(dst, zc, size))
+		return -EFAULT;
+	return 0;
+}
+
 static void tcp_zerocopy_set_hint_for_skb(struct sock *sk,
 					  struct tcp_zerocopy_receive *zc,
 					  struct sk_buff *skb, u32 offset)
@@ -4768,26 +4854,31 @@ int do_tcp_getsockopt(struct sock *sk, int level,
 		return 0;
 	}
 #ifdef CONFIG_MMU
+#define offsetofend_tcp_zerocopy_receive(member) \
+	(in_compat64() ? offsetofend(struct compat_tcp_zerocopy_receive, member) \
+		       : offsetofend(struct tcp_zerocopy_receive, member))
 	case TCP_ZEROCOPY_RECEIVE: {
 		struct scm_timestamping_internal tss;
 		struct tcp_zerocopy_receive zc = {};
 		int err;
+		size_t zc_size = in_compat64() ? sizeof(struct compat_tcp_zerocopy_receive)
+					       : sizeof(struct tcp_zerocopy_receive);
 
 		if (copy_from_sockptr(&len, optlen, sizeof(int)))
 			return -EFAULT;
 		if (len < 0 ||
-		    len < offsetofend(struct tcp_zerocopy_receive, length))
+		    len < offsetofend_tcp_zerocopy_receive(length))
 			return -EINVAL;
-		if (unlikely(len > sizeof(zc))) {
-			err = check_zeroed_sockptr(optval, sizeof(zc),
-						   len - sizeof(zc));
+		if (unlikely(len > zc_size)) {
+			err = check_zeroed_sockptr(optval, zc_size,
+						   len - zc_size);
 			if (err < 1)
 				return err == 0 ? -EINVAL : err;
-			len = sizeof(zc);
+			len = zc_size;
 			if (copy_to_sockptr(optlen, &len, sizeof(int)))
 				return -EFAULT;
 		}
-		if (copy_from_sockptr(&zc, optval, len))
+		if (copy_tcp_zerocopy_receive_from_sockptr(&zc, optval, len))
 			return -EFAULT;
 		if (zc.reserved)
 			return -EINVAL;
@@ -4798,24 +4889,14 @@ int do_tcp_getsockopt(struct sock *sk, int level,
 		err = BPF_CGROUP_RUN_PROG_GETSOCKOPT_KERN(sk, level, optname,
 							  &zc, &len, err);
 		sockopt_release_sock(sk);
-		if (len >= offsetofend(struct tcp_zerocopy_receive, msg_flags))
+		if (len >= offsetofend_tcp_zerocopy_receive(msg_flags))
 			goto zerocopy_rcv_cmsg;
-		switch (len) {
-		case offsetofend(struct tcp_zerocopy_receive, msg_flags):
-			goto zerocopy_rcv_cmsg;
-		case offsetofend(struct tcp_zerocopy_receive, msg_controllen):
-		case offsetofend(struct tcp_zerocopy_receive, msg_control):
-		case offsetofend(struct tcp_zerocopy_receive, flags):
-		case offsetofend(struct tcp_zerocopy_receive, copybuf_len):
-		case offsetofend(struct tcp_zerocopy_receive, copybuf_address):
-		case offsetofend(struct tcp_zerocopy_receive, err):
+		else if (len >= offsetofend_tcp_zerocopy_receive(err))
 			goto zerocopy_rcv_sk_err;
-		case offsetofend(struct tcp_zerocopy_receive, inq):
+		else if (len >= offsetofend_tcp_zerocopy_receive(inq))
 			goto zerocopy_rcv_inq;
-		case offsetofend(struct tcp_zerocopy_receive, length):
-		default:
+		else
 			goto zerocopy_rcv_out;
-		}
 zerocopy_rcv_cmsg:
 		if (zc.msg_flags & TCP_CMSG_TS)
 			tcp_zc_finalize_rx_tstamp(sk, &zc, &tss);
@@ -4827,10 +4908,11 @@ zerocopy_rcv_sk_err:
 zerocopy_rcv_inq:
 		zc.inq = tcp_inq_hint(sk);
 zerocopy_rcv_out:
-		if (!err && copy_to_sockptr(optval, &zc, len))
+		if (!err && copy_tcp_zerocopy_receive_to_sockptr(optval, &zc, len))
 			err = -EFAULT;
 		return err;
 	}
+#undef offsetofend_tcp_zerocopy_receive
 #endif
 	case TCP_AO_REPAIR:
 		if (!tcp_can_repair_sock(sk))
