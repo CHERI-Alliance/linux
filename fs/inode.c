@@ -686,7 +686,7 @@ static unsigned long hash(struct super_block *sb, u64 hashval)
  *
  *	Add an inode to the inode hash for this superblock.
  */
-void __insert_inode_hash(struct inode *inode, u64 hashval)
+void __insert_inode_hash(struct inode *inode, __ptraddr64_t hashval)
 {
 	struct hlist_head *b = inode_hashtable + hash(inode->i_sb, hashval);
 
