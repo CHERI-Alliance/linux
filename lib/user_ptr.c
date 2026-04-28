@@ -114,7 +114,9 @@ user_uintptr_t make_user_ptr_owning(const struct reserv_struct *reserv,
 user_ptr_perms_t user_ptr_owning_perms_from_prot(int prot, unsigned long vm_flags)
 {
 	user_ptr_perms_t perms = CHERI_PERMS_ROOTCAP;
-	int used_prot = PROT_MAX_EXTRACT(prot) ? PROT_MAX_EXTRACT(prot) : prot;
+	int rwx_mask = PROT_READ | PROT_WRITE | PROT_EXEC;
+	int prot_rwx_max = PROT_MAX_EXTRACT(prot);
+	int used_prot = prot_rwx_max ? (prot_rwx_max | (prot & ~rwx_mask)) : prot;
 
 	if (used_prot & PROT_READ) {
 		perms |= CHERI_PERM_LOAD;
