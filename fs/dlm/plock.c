@@ -145,7 +145,7 @@ int dlm_posix_lock(dlm_lockspace_t *lockspace, u64 number, struct file *file,
 	op->info.number		= number;
 	op->info.start		= fl->fl_start;
 	op->info.end		= fl->fl_end;
-	op->info.owner = (__u64)(long) fl->c.flc_owner;
+	op->info.owner		= __c_pa(fl->c.flc_owner);
 	/* async handling */
 	if (fl->fl_lmops && fl->fl_lmops->lm_grant) {
 		op_data = kzalloc_obj(*op_data, GFP_NOFS);
@@ -322,7 +322,7 @@ int dlm_posix_unlock(dlm_lockspace_t *lockspace, u64 number, struct file *file,
 	op->info.number		= number;
 	op->info.start		= fl->fl_start;
 	op->info.end		= fl->fl_end;
-	op->info.owner = (__u64)(long) fl->c.flc_owner;
+	op->info.owner		= __c_pa(fl->c.flc_owner);
 
 	if (fl->c.flc_flags & FL_CLOSE) {
 		op->info.flags |= DLM_PLOCK_FL_CLOSE;
@@ -382,7 +382,7 @@ int dlm_posix_cancel(dlm_lockspace_t *lockspace, u64 number, struct file *file,
 	info.number = number;
 	info.start = fl->fl_start;
 	info.end = fl->fl_end;
-	info.owner = (__u64)(long) fl->c.flc_owner;
+	info.owner = __c_pa(fl->c.flc_owner);
 
 	rv = do_lock_cancel(&info);
 	switch (rv) {
@@ -443,7 +443,7 @@ int dlm_posix_get(dlm_lockspace_t *lockspace, u64 number, struct file *file,
 	op->info.number		= number;
 	op->info.start		= fl->fl_start;
 	op->info.end		= fl->fl_end;
-	op->info.owner = (__u64)(long) fl->c.flc_owner;
+	op->info.owner		= __c_pa(fl->c.flc_owner);
 
 	send_op(op);
 	wait_event(recv_wq, (op->done != 0));
