@@ -52,7 +52,7 @@ context_lock_struct(rw_semaphore) {
 	 * the current state of the rwsem. Can be used as a speculative
 	 * check to see if the write owner is running on the cpu.
 	 */
-	atomic_long_t owner;
+	atomic_ptr_t owner;
 #ifdef CONFIG_RWSEM_SPIN_ON_OWNER
 	struct optimistic_spin_queue osq; /* spinner MCS lock */
 #endif
@@ -103,7 +103,7 @@ static inline void rwsem_assert_held_write_nolockdep(const struct rw_semaphore *
 
 #define __RWSEM_INITIALIZER(name)				\
 	{ __RWSEM_COUNT_INIT(name),				\
-	  .owner = ATOMIC_LONG_INIT(0),				\
+	  .owner = ATOMIC_PTR_INIT(0),				\
 	  __RWSEM_OPT_INIT(name)				\
 	  .wait_lock = __RAW_SPIN_LOCK_UNLOCKED(name.wait_lock),\
 	  .wait_list = LIST_HEAD_INIT((name).wait_list),	\

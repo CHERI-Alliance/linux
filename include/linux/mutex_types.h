@@ -39,7 +39,7 @@
  *   locks and tasks (and only those tasks)
  */
 context_lock_struct(mutex) {
-	atomic_long_t		owner;
+	atomic_ptr_t		owner;
 	raw_spinlock_t		wait_lock;
 #ifdef CONFIG_MUTEX_SPIN_ON_OWNER
 	struct optimistic_spin_queue osq; /* Spinner MCS lock */

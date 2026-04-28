@@ -128,7 +128,7 @@ static __always_inline void clear_rt_mutex_waiters(struct rt_mutex_base *lock)
 static __always_inline void
 fixup_rt_mutex_waiters(struct rt_mutex_base *lock, bool acquire_lock)
 {
-	unsigned long owner, *p = (unsigned long *) &lock->owner;
+	uintptr_t owner, *p = (uintptr_t *) &lock->owner;
 
 	if (rt_mutex_has_waiters(lock))
 		return;
@@ -240,8 +240,8 @@ static __always_inline bool rt_mutex_cmpxchg_release(struct rt_mutex_base *lock,
  */
 static __always_inline void mark_rt_mutex_waiters(struct rt_mutex_base *lock)
 {
-	unsigned long *p = (unsigned long *) &lock->owner;
-	unsigned long owner, new;
+	uintptr_t *p = (uintptr_t *) &lock->owner;
+	uintptr_t owner, new;
 
 	owner = READ_ONCE(*p);
 	do {

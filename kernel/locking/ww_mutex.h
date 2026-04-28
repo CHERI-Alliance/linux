@@ -67,7 +67,7 @@ __ww_mutex_owner(struct mutex *lock)
 static inline bool
 __ww_mutex_has_waiters(struct mutex *lock)
 {
-	return atomic_long_read(&lock->owner) & MUTEX_FLAG_WAITERS;
+	return atomic_ptr_read(&lock->owner) & MUTEX_FLAG_WAITERS;
 }
 
 static inline void lock_wait_lock(struct mutex *lock, unsigned long *flags)
