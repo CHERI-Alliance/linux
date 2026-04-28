@@ -191,7 +191,7 @@ int bpf_struct_ops_test_run(struct bpf_prog *prog, const union bpf_attr *kattr,
 	err = dummy_ops_copy_args(args);
 	if (err)
 		goto out;
-	if (put_user(prog_ret, &uattr->test.retval))
+	if (bpf_put_uattr(prog_ret, uattr, test.retval))
 		err = -EFAULT;
 out:
 	kfree(args);

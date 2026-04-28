@@ -20132,9 +20132,8 @@ skip_full_check:
 	if (err)
 		ret = err;
 
-	if (uattr_size >= offsetofend(union bpf_attr, log_true_size) &&
-	    copy_to_bpfptr_offset(uattr, offsetof(union bpf_attr, log_true_size),
-				  &log_true_size, sizeof(log_true_size))) {
+	if (bpf_field_exists(uattr_size, log_true_size) &&
+	    bpfptr_put_uattr(log_true_size, uattr, log_true_size)) {
 		ret = -EFAULT;
 		goto err_release_maps;
 	}

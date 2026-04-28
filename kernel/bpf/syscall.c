@@ -1973,7 +1973,7 @@ int generic_map_delete_batch(struct bpf_map *map,
 			break;
 		cond_resched();
 	}
-	if (copy_to_user(&uattr->batch.count, &cp, sizeof(cp)))
+	if (bpf_put_uattr(cp, uattr, batch.count))
 		err = -EFAULT;
 
 	kvfree(key);
@@ -2030,7 +2030,7 @@ int generic_map_update_batch(struct bpf_map *map, struct file *map_file,
 		cond_resched();
 	}
 
-	if (copy_to_user(&uattr->batch.count, &cp, sizeof(cp)))
+	if (bpf_put_uattr(cp, uattr, batch.count))
 		err = -EFAULT;
 
 	kvfree(value);
@@ -2061,7 +2061,7 @@ int generic_map_lookup_batch(struct bpf_map *map,
 	if (!max_count)
 		return 0;
 
-	if (put_user(0, &uattr->batch.count))
+	if (bpf_put_uattr(0, uattr, batch.count))
 		return -EFAULT;
 
 	buf_prevkey = kvmalloc(map->key_size, GFP_USER | __GFP_NOWARN);
@@ -2120,8 +2120,8 @@ next_key:
 	if (err == -EFAULT)
 		goto free_buf;
 
-	if ((copy_to_user(&uattr->batch.count, &cp, sizeof(cp)) ||
-		    (cp && copy_to_user(uobatch, prev_key, map->key_size))))
+	if (bpf_put_uattr(cp, uattr, batch.count) ||
+		    (cp && copy_to_user(uobatch, prev_key, map->key_size)))
 		err = -EFAULT;
 
 free_buf:
@@ -4768,7 +4768,7 @@ static int bpf_obj_get_next_id(const union bpf_attr *attr,
 	spin_unlock_bh(lock);
 
 	if (!err)
-		err = put_user(next_id, &uattr->next_id);
+		err = bpf_put_uattr(next_id, uattr, next_id);
 
 	return err;
 }
@@ -5567,7 +5567,7 @@ static int bpf_task_fd_query_copy(const union bpf_attr *attr,
 	u32 len = buf ? strlen(buf) : 0, input_len;
 	int err = 0;
 
-	if (put_user(len, &uattr->task_fd_query.buf_len))
+	if (bpf_put_uattr(len, uattr, task_fd_query.buf_len))
 		return -EFAULT;
 	input_len = attr->task_fd_query.buf_len;
 	if (input_len && ubuf) {
@@ -5584,10 +5584,10 @@ static int bpf_task_fd_query_copy(const union bpf_attr *attr,
 		}
 	}
 
-	if (put_user(prog_id, &uattr->task_fd_query.prog_id) ||
-	    put_user(fd_type, &uattr->task_fd_query.fd_type) ||
-	    put_user(probe_offset, &uattr->task_fd_query.probe_offset) ||
-	    put_user(probe_addr, &uattr->task_fd_query.probe_addr))
+	if (bpf_put_uattr(prog_id, uattr, task_fd_query.prog_id) ||
+	    bpf_put_uattr(fd_type, uattr, task_fd_query.fd_type) ||
+	    bpf_put_uattr(probe_offset, uattr, task_fd_query.probe_offset) ||
+	    bpf_put_uattr(probe_addr, uattr, task_fd_query.probe_addr))
 		return -EFAULT;
 
 	return err;
