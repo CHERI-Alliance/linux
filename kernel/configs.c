@@ -28,7 +28,9 @@ asm (
 "	.incbin \"kernel/config_data.gz\"	\n"
 "	.global kernel_config_data_end		\n"
 "kernel_config_data_end:			\n"
+"	.size kernel_config_data, . - kernel_config_data\n"
 "	.ascii \"IKCFG_ED\"			\n"
+"	.size kernel_config_data_end, . - kernel_config_data_end\n"
 "	.popsection				\n"
 );
 

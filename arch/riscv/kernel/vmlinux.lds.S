@@ -26,6 +26,7 @@ OUTPUT_ARCH(riscv)
 ENTRY(_start)
 
 jiffies = jiffies_64;
+size$jiffies = 8;
 
 SECTIONS
 {
@@ -46,6 +47,9 @@ SECTIONS
 		IRQENTRY_TEXT
 		SOFTIRQENTRY_TEXT
 		_etext = .;
+		size$_text = ABSOLUTE(. - _text);
+		size$_stext = ABSOLUTE(. - _stext);
+		size$_etext = 1;
 	}
 
 	. = ALIGN(SECTION_ALIGN);
@@ -55,6 +59,8 @@ SECTIONS
 		_sinittext = .;						\
 		INIT_TEXT						\
 		_einittext = .;						\
+		size$_sinittext = ABSOLUTE(. - _sinittext);
+		size$_einittext = 1;
 	}
 
 	. = ALIGN(8);
@@ -62,11 +68,17 @@ SECTIONS
 		__soc_early_init_table_start = .;
 		KEEP(*(__soc_early_init_table))
 		__soc_early_init_table_end = .;
+		size$__soc_early_init_table_start =
+			ABSOLUTE(. - __soc_early_init_table_start);
+		size$__soc_early_init_table_end = 1;
 	}
 	__soc_builtin_dtb_table : {
 		__soc_builtin_dtb_table_start = .;
 		KEEP(*(__soc_builtin_dtb_table))
 		__soc_builtin_dtb_table_end = .;
+		size$__soc_builtin_dtb_table_start =
+			ABSOLUTE(. - __soc_builtin_dtb_table_start);
+		size$__soc_builtin_dtb_table_end = 1;
 	}
 	/* we have to discard exit text and such at runtime, not link time */
 	__exittext_begin = .;
@@ -75,6 +87,8 @@ SECTIONS
 		EXIT_TEXT
 	}
 	__exittext_end = .;
+	size$__exittext_begin = ABSOLUTE(. - __exittext_begin);
+	size$__exittext_end = 1;
 
 	__init_text_end = .;
 	. = ALIGN(SECTION_ALIGN);
@@ -112,15 +126,27 @@ SECTIONS
 		__rela_dyn_end = .;
 	}
 
+#ifdef CONFIG_CHERI_KERNEL
+	__cap_relocs : ALIGN(8) {
+		*(__cap_relocs)
+	}
+#endif
+
 	__init_data_end = .;
+	size$__init_data_begin = ABSOLUTE(. - __init_data_begin);
+	size$__init_data_end = 1;
 
 	. = ALIGN(8);
 	.alternative : {
 		__alt_start = .;
 		KEEP(*(.alternative))
 		__alt_end = .;
+		size$__alt_start = ABSOLUTE(. - __alt_start);
+		size$__alt_end = 1;
 	}
 	__init_end = .;
+	size$__init_begin = ABSOLUTE(. - __init_begin);
+	size$__init_end = 1;
 
 	/* Start of data section */
 	_sdata = .;
@@ -133,12 +159,21 @@ SECTIONS
 	_data = .;
 
 	RW_DATA(L1_CACHE_BYTES, PAGE_SIZE, THREAD_ALIGN)
+
+#ifdef CONFIG_CHERI_KERNEL
+	.captable : {
+		*(.captable)
+	}
+#endif
+
 	.sdata : {
 		__global_pointer$ = . + 0x800;
 		*(.sdata*)
 	}
 
 	.got : { *(.got*) }
+
+	.data.rel : { *(.data.rel*) }
 
 #ifdef CONFIG_RELOCATABLE
 	.data.rel : { *(.data.rel*) }
@@ -158,6 +193,9 @@ SECTIONS
 
 	/* End of data section */
 	_edata = .;
+	size$_data = ABSOLUTE(. - _data);
+	size$_sdata = ABSOLUTE(. - _sdata);
+	size$_edata = 1;
 
 	BSS_SECTION(PAGE_SIZE, PAGE_SIZE, 0)
 
@@ -167,6 +205,8 @@ SECTIONS
 	__pecoff_data_virt_end = ABSOLUTE(.);
 #endif
 	_end = .;
+	size$_start = ABSOLUTE(. - _start);
+	size$_end = 1;
 
 	STABS_DEBUG
 	DWARF_DEBUG
