@@ -6,7 +6,11 @@
 #define pr_fmt(fmt) "morello: " fmt
 
 #include <linux/cache.h>
+#include <linux/capability.h>
+#include <linux/mm.h>
 #include <linux/printk.h>
+#include <linux/sched/coredump.h>
+#include <linux/sched/mm.h>
 
 #include <asm/cpufeature.h>
 #include <asm/morello.h>
@@ -104,6 +108,62 @@ void morello_show_regs(struct pt_regs *regs)
 		       i, format_cap(buf, sizeof(buf), &regs->cregs[i]),
 		       i - 1, format_cap(buf2, sizeof(buf2), &regs->cregs[i - 1]));
 	}
+}
+
+/* Inspired by __access_remote_vm() */
+static int read_remote_cap(struct task_struct *tsk, struct mm_struct *mm,
+			   unsigned long addr, struct user_cap *user_cap)
+{
+	cap128_t *src;
+	struct page *page;
+	int ret;
+
+	/* This guarantees that the access will not cross pages */
+	if ((addr & (sizeof(cap128_t) - 1)) != 0)
+		return -EINVAL;
+
+	if (mmap_read_lock_killable(mm))
+		return -EIO;
+
+	page = get_user_page_vma_remote(mm, addr, FOLL_FORCE, &vma);
+	if (IS_ERR(page)) {
+		ret = -EIO;
+		goto out_unlock;
+	}
+
+	src = (cap128_t *)(page_address(page) + offset_in_page(addr));
+	morello_cap_get_val_tag(src, &user_cap->val, &user_cap->tag);
+	ret = 0;
+
+	put_page(page);
+out_unlock:
+	mmap_read_unlock(mm);
+	return ret;
+}
+
+/* Inspired by ptrace_access_vm() */
+int morello_ptrace_read_remote_cap(struct task_struct *tsk, unsigned long addr,
+				   struct user_cap *user_cap)
+{
+	struct mm_struct *mm;
+	int ret;
+
+	mm = get_task_mm(tsk);
+	if (!mm)
+		return -EIO;
+
+	if (!tsk->ptrace ||
+	    (current != tsk->parent) ||
+	    ((get_dumpable(mm) != SUID_DUMP_USER) &&
+	     !ptracer_capable(tsk, mm->user_ns))) {
+		mmput(mm);
+		return -EPERM;
+	}
+
+	ret = read_remote_cap(tsk, mm, addr, user_cap);
+	mmput(mm);
+
+	return ret;
 }
 
 void morello_merge_cap_regs(struct pt_regs *regs)
