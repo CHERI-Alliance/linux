@@ -353,7 +353,7 @@ static int check_single_step(char *put_str, char *arg)
 		 NUMREGBYTES);
 	gdb_regs_to_pt_regs(kgdbts_gdb_regs, &kgdbts_regs);
 	v2printk("Singlestep stopped at IP: %lx\n",
-		   instruction_pointer(&kgdbts_regs));
+		   (unsigned long)instruction_pointer(&kgdbts_regs));
 
 	if (sstep_thread_id != cont_thread_id) {
 		/*
@@ -379,7 +379,7 @@ continue_test:
 	matched_id = 0;
 	if (instruction_pointer(&kgdbts_regs) == addr) {
 		eprintk("kgdbts: SingleStep failed at %lx\n",
-			   instruction_pointer(&kgdbts_regs));
+			   (unsigned long)instruction_pointer(&kgdbts_regs));
 		return 1;
 	}
 
@@ -498,7 +498,7 @@ static int emul_sstep_put(char *put_str, char *arg)
 			 NUMREGBYTES);
 		gdb_regs_to_pt_regs(kgdbts_gdb_regs, &kgdbts_regs);
 		v2printk("Stopped at IP: %lx\n",
-			 instruction_pointer(&kgdbts_regs));
+			 (unsigned long)instruction_pointer(&kgdbts_regs));
 		/* Want to stop at IP + break instruction size by default */
 		sstep_addr = cont_addr + BREAK_INSTR_SIZE;
 		break;

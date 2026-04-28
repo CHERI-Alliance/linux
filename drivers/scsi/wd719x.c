@@ -863,7 +863,7 @@ static int wd719x_board_found(struct Scsi_Host *sh)
 	sh->this_id = wd->params->own_scsi_id & WD719X_EE_SCSI_ID_MASK;
 
 	dev_info(&wd->pdev->dev, "%s at I/O 0x%lx, IRQ %u, SCSI ID %d\n",
-		 card_types[wd->type], sh->base, sh->irq, sh->this_id);
+		 card_types[wd->type], (unsigned long)sh->base, sh->irq, sh->this_id);
 
 	return 0;
 
