@@ -42,6 +42,7 @@
 #include <linux/uaccess.h>
 #include <linux/sync_file.h>
 #include <linux/file.h>
+#include <linux/cheri.h>
 
 #include "drm_crtc_internal.h"
 
@@ -465,7 +466,13 @@ static int drm_atomic_crtc_set_property(struct drm_crtc *crtc,
 	} else if (property == config->background_color_property) {
 		state->background_color = val;
 	} else if (property == config->prop_out_fence_ptr) {
+#ifdef __CHERI__
+		/* FIXCHERI: Need to get the provenance from userspace. */
+		s32 __user *fence_ptr = cheri_build_user_cap(val, sizeof(s32), CHERI_PERMS_READ | CHERI_PERMS_WRITE);
+		WARN_ONCE(1, "CHERI: %s: Need to fabricate user capability", __func__);
+#else
 		s32 __user *fence_ptr = u64_to_user_ptr(val);
+#endif
 
 		if (!fence_ptr)
 			return 0;
@@ -950,7 +957,13 @@ static int drm_atomic_connector_set_property(struct drm_connector *connector,
 			drm_framebuffer_put(fb);
 		return ret;
 	} else if (property == config->writeback_out_fence_ptr_property) {
+#ifdef __CHERI__
+		/* FIXCHERI: Need to get the provenance from userspace. */
+		s32 __user *fence_ptr = cheri_build_user_cap(val, sizeof(s32), CHERI_PERMS_READ | CHERI_PERMS_WRITE);
+		WARN_ONCE(1, "CHERI: %s: Need to fabricate user capability", __func__);
+#else
 		s32 __user *fence_ptr = u64_to_user_ptr(val);
+#endif
 
 		return set_out_fence_for_connector(state->state, connector,
 						   fence_ptr);
