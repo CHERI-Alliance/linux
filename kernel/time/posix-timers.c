@@ -83,7 +83,7 @@ DEFINE_CLASS_IS_COND_GUARD(lock_timer);
 
 static struct timer_hash_bucket *hash_bucket(struct signal_struct *sig, unsigned int nr)
 {
-	return &timer_buckets[jhash2((u32 *)&sig, sizeof(sig) / sizeof(u32), nr) & timer_hashmask];
+	return &timer_buckets[jhash2((u32 *)(void *)&sig, sizeof(sig) / sizeof(u32), nr) & timer_hashmask];
 }
 
 static struct k_itimer *posix_timer_by_id(timer_t id)
@@ -1033,7 +1033,7 @@ static void posix_timer_delete(struct k_itimer *timer)
 	timer->it_signal_seq++;
 
 	scoped_guard (spinlock, &current->sighand->siglock) {
-		unsigned long sig = (uintptr_t)timer->it_signal | 1UL;
+		uintptr_t sig = (uintptr_t)timer->it_signal | 1UL;
 
 		WRITE_ONCE(timer->it_signal, (struct signal_struct *)sig);
 		hlist_del_rcu(&timer->list);
