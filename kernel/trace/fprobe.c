@@ -284,9 +284,9 @@ static void fprobe_ftrace_entry(unsigned long ip, unsigned long parent_ip,
 			continue;
 
 		if (fprobe_shared_with_kprobes(fp))
-			__fprobe_kprobe_handler(ip, parent_ip, fp, fregs, NULL);
+			__fprobe_kprobe_handler(ip, __c_fakeu(parent_ip), fp, fregs, NULL);
 		else
-			__fprobe_handler(ip, parent_ip, fp, fregs, NULL);
+			__fprobe_handler(ip, __c_fakeu(parent_ip), fp, fregs, NULL);
 	}
 	rcu_read_unlock();
 	ftrace_test_recursion_unlock(bit);
