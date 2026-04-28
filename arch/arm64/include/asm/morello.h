@@ -26,6 +26,12 @@ struct morello_state {
 void morello_cap_get_val_tag(uintcap_t cap, __uint128_t *val, u8 *tag);
 
 /*
+ * Merge a 64-bit value into a capability (typically an X register into a C
+ * register).
+ */
+void morello_merge_cap_xval(uintcap_t *creg, u64 xreg);
+
+/*
  * Builds a user capability from a 128-bit pattern + tag. The capability will
  * be derived from cheri_user_root_allperms_cap and the object type will be
  * preserved.
