@@ -46,6 +46,7 @@
 #include <linux/ipc_namespace.h>
 #include <linux/rhashtable.h>
 #include <linux/nstree.h>
+#include <linux/mm_reserv.h>
 
 #include <linux/uaccess.h>
 
@@ -1521,11 +1522,11 @@ COMPAT_SYSCALL_DEFINE3(old_shmctl, int, shmid, int, cmd, void __user *, uptr)
  * Fix shmaddr, allocate descriptor, map shm, add attach descriptor to lists.
  *
  * NOTE! Despite the name, this is NOT a direct system call entrypoint. The
- * "raddr" thing points to kernel space, and there has to be a wrapper around
+ * "ruser_ptr" thing points to kernel space, and there has to be a wrapper around
  * this.
  */
 long do_shmat(int shmid, char __user *shmaddr, int shmflg,
-	      ulong *raddr, unsigned long shmlba)
+	      user_uintptr_t *ruser_ptr, unsigned long shmlba)
 {
 	struct shmid_kernel *shp;
 	user_uintptr_t addr = (user_uintptr_t)shmaddr;
@@ -1539,6 +1540,7 @@ long do_shmat(int shmid, char __user *shmaddr, int shmflg,
 	struct shm_file_data *sfd;
 	int f_flags;
 	unsigned long populate = 0;
+	user_uintptr_t user_ptr = (user_uintptr_t)shmaddr;
 
 	err = -EINVAL;
 	if (shmid < 0)
@@ -1667,11 +1669,23 @@ long do_shmat(int shmid, char __user *shmaddr, int shmflg,
 			goto invalid;
 	}
 
+	user_ptr = (user_uintptr_t)user_ptr_set_addr(shmaddr, addr);
+	err = check_pcuabi_map_ptr_arg(user_ptr, size, flags & MAP_FIXED, true);
+	if (err)
+		goto invalid;
+
 	addr = do_mmap(file, addr, size, prot, flags, 0, 0, &populate, NULL);
-	*raddr = addr;
+
+	if (!IS_ERR_VALUE(addr) && reserv_is_supported(current->mm)) {
+		if (!user_ptr_is_valid((const void __user *)user_ptr))
+			user_ptr = reserv_make_user_ptr_owning(addr, true);
+	} else {
+		user_ptr = addr;
+	}
+	*ruser_ptr = user_ptr;
 	err = 0;
-	if (IS_ERR_VALUE(addr))
-		err = (long)addr;
+	if (IS_ERR_VALUE(user_ptr))
+		err = (long)user_ptr;
 invalid:
 	mmap_write_unlock(current->mm);
 	if (populate)
@@ -1700,15 +1714,14 @@ out:
 
 SYSCALL_DEFINE3(__retptr__(shmat), int, shmid, char __user *, shmaddr, int, shmflg)
 {
-	unsigned long ret;
+	user_uintptr_t ret;
 	long err;
 
 	err = do_shmat(shmid, shmaddr, shmflg, &ret, SHMLBA);
 	if (err)
 		return err;
 	force_successful_syscall_return();
-	/* TODO [PCuABI] - derive proper capability */
-	return (user_uintptr_t)uaddr_to_user_ptr_safe(ret);
+	return ret;
 }
 
 #ifdef CONFIG_COMPAT
@@ -1719,7 +1732,7 @@ SYSCALL_DEFINE3(__retptr__(shmat), int, shmid, char __user *, shmaddr, int, shmf
 
 COMPAT_SYSCALL_DEFINE3(shmat, int, shmid, compat_uptr_t, shmaddr, int, shmflg)
 {
-	unsigned long ret;
+	user_uintptr_t ret;
 	long err;
 
 	err = do_shmat(shmid, compat_ptr(shmaddr), shmflg, &ret, COMPAT_SHMLBA);
@@ -1783,6 +1796,7 @@ long ksys_shmdt(char __user *shmaddr)
 		 */
 		if ((vma->vm_ops == &shm_vm_ops) &&
 			(vma->vm_start - addr)/PAGE_SIZE == vma->vm_pgoff) {
+			user_uintptr_t user_ptr = (user_uintptr_t)shmaddr;
 
 			/*
 			 * Record the file of the shm segment being
@@ -1792,6 +1806,15 @@ long ksys_shmdt(char __user *shmaddr)
 			 */
 			file = vma->vm_file;
 			size = i_size_read(file_inode(vma->vm_file));
+
+			if (reserv_is_supported(mm) &&
+			    !check_user_ptr_owning(user_ptr, size))
+				goto out_unlock;
+			if (!reserv_cap_within_reserv(user_ptr, true)) {
+				retval = -ERESERVATION;
+				goto out_unlock;
+			}
+
 			do_vmi_align_munmap(&vmi, vma, mm, vma->vm_start,
 					    vma->vm_end, NULL, false);
 			/*
@@ -1836,6 +1859,7 @@ long ksys_shmdt(char __user *shmaddr)
 
 #endif
 
+out_unlock:
 	mmap_write_unlock(mm);
 	return retval;
 }
