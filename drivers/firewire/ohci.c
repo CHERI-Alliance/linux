@@ -1199,7 +1199,11 @@ static int at_context_queue_packet(struct at_context *ctx, struct fw_packet *pac
 	__le32 *header;
 	int z, tcode;
 
+#if __SIZEOF_POINTER__ > __SIZEOF_LONG__
+	d = context_get_descriptors(context, 5, &d_bus);
+#else
 	d = context_get_descriptors(context, 4, &d_bus);
+#endif
 	if (d == NULL) {
 		packet->ack = RCODE_SEND_ERROR;
 		return -1;
@@ -1273,7 +1277,11 @@ static int at_context_queue_packet(struct at_context *ctx, struct fw_packet *pac
 		return -1;
 	}
 
+#if __SIZEOF_POINTER__ > __SIZEOF_LONG__
+	BUILD_BUG_ON(sizeof(struct driver_data) > 2 * sizeof(struct descriptor));
+#else
 	BUILD_BUG_ON(sizeof(struct driver_data) > sizeof(struct descriptor));
+#endif
 	driver_data = (struct driver_data *) &d[3];
 	driver_data->packet = packet;
 	packet->driver_data = driver_data;
@@ -1318,7 +1326,11 @@ static int at_context_queue_packet(struct at_context *ctx, struct fw_packet *pac
 		return -1;
 	}
 
+#if __SIZEOF_POINTER__ > __SIZEOF_LONG__
+	context_append(context, d, z, 5 - z);
+#else
 	context_append(context, d, z, 4 - z);
+#endif
 
 	if (context->running)
 		reg_write(ohci, CONTROL_SET(context->regs), CONTEXT_WAKE);

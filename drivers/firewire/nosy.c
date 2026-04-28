@@ -384,7 +384,7 @@ nosy_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 
 	case NOSY_IOC_FILTER:
 		spin_lock_irq(client_list_lock);
-		client->tcode_mask = arg;
+		client->tcode_mask = __c_ua(arg);
 		spin_unlock_irq(client_list_lock);
 
 		return 0;
