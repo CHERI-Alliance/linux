@@ -3377,7 +3377,7 @@ static void amifb_imageblit(struct fb_info *info, const struct fb_image *image)
 	 */
 
 static int amifb_ioctl(struct fb_info *info,
-		       unsigned int cmd, unsigned long arg)
+		       unsigned int cmd, user_uintptr_t arg)
 {
 	union {
 		struct fb_fix_cursorinfo fix;

@@ -176,7 +176,7 @@ static int vt8500lcd_setcolreg(unsigned regno, unsigned red, unsigned green,
 }
 
 static int vt8500lcd_ioctl(struct fb_info *info, unsigned int cmd,
-			 unsigned long arg)
+			 user_uintptr_t arg)
 {
 	int ret = 0;
 	struct vt8500lcd_info *fbi = to_vt8500lcd_info(info);
