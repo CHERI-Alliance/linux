@@ -8200,6 +8200,11 @@ int btf_get_info_by_fd(const struct btf *btf,
 	uinfo = u64_to_user_ptr(attr->info.info);
 	uinfo_len = attr->info.info_len;
 
+	ret = bpf_check_uarg_tail_zero(USER_BPFPTR(uinfo), sizeof(*uinfo),
+				       uinfo_len);
+	if (ret)
+		return ret;
+
 	info_copy = min_t(u32, uinfo_len, sizeof(info));
 	memset(&info, 0, sizeof(info));
 	if (copy_from_user(&info, uinfo, info_copy))
