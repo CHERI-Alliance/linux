@@ -2259,7 +2259,7 @@ repeat:
 		end = start + region->size;
 
 		if (memblock_is_nomap(region))
-			reserve_bootmem_region(start, end, nid);
+			reserve_bootmem_region(start, end, nid, false);
 
 		memblock_set_node(start, region->size, &memblock.reserved, nid);
 	}
@@ -2284,7 +2284,7 @@ repeat:
 			if (!numa_valid_node(nid))
 				nid = early_pfn_to_nid(PFN_DOWN(start));
 
-			reserve_bootmem_region(start, end, nid);
+			reserve_bootmem_region(start, end, nid, true);
 		}
 	}
 }

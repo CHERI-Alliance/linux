@@ -80,6 +80,15 @@ struct page {
 	memdesc_flags_t flags;		/* Atomic flags, some possibly
 					 * updated asynchronously */
 
+#ifdef CONFIG_CHERI_KERNEL
+	/*
+	 * Keep track or the page order for allocations. This allows
+	 * stuff like phys_to_virt to at least set boundaries according
+	 * to the page allocation order.
+	 */
+	long alloc_order;
+#endif
+
 	/*
 	 * Five words (20/40 bytes) are available in this union.
 	 * WARNING: bit 0 of the first word is used for PageTail(). That
@@ -405,6 +414,9 @@ struct folio {
 		struct {
 	/* public: */
 			memdesc_flags_t flags;
+#ifdef CONFIG_CHERI_KERNEL
+			long alloc_order;
+#endif
 			union {
 				struct list_head lru;
 	/* private: avoid cluttering the output */

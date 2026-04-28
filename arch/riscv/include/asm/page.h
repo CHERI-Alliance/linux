@@ -43,6 +43,8 @@
 
 #ifndef __ASSEMBLER__
 
+#include <linux/cheri.h>
+
 #ifdef CONFIG_RISCV_ISA_ZICBOZ
 void clear_page(void *page);
 #else
@@ -126,9 +128,9 @@ extern unsigned long vmemmap_start_pfn;
 	((x) >= PAGE_OFFSET && (!IS_ENABLED(CONFIG_64BIT) || (x) < PAGE_OFFSET + KERN_VIRT_SIZE))
 
 #ifndef CONFIG_DEBUG_VIRTUAL
-#define linear_mapping_pa_to_va(x)	((void *)((unsigned long)(x) + kernel_map.va_pa_offset))
+#define linear_mapping_pa_to_va(x)	((unsigned long)x + kernel_map.va_pa_offset)
 #else
-void *linear_mapping_pa_to_va(unsigned long x);
+unsigned long linear_mapping_pa_to_va(unsigned long x);
 #endif
 
 #ifdef CONFIG_XIP_KERNEL
@@ -177,7 +179,16 @@ extern phys_addr_t __phys_addr_symbol(unsigned long x);
 
 #define __pa_symbol(x)	__phys_addr_symbol(RELOC_HIDE((unsigned long __force)(x), 0))
 #define __pa(x)		__virt_to_phys((unsigned long __force)(x))
+#ifdef CONFIG_CHERI_KERNEL
+#define __va_a(x)	((unsigned long)__pa_to_va_nodebug((phys_addr_t)(x)))
+#define __va(x)		({ \
+	unsigned long __a = __va_a(x); \
+	cheri_build_kernel_data_cap((__a) & PAGE_MASK, __a, PAGE_SIZE); \
+})
+#else
 #define __va(x)		((void *)__pa_to_va_nodebug((phys_addr_t)(x)))
+#define __va_a(x)	((unsigned long)__pa_to_va_nodebug((phys_addr_t)(x)))
+#endif
 
 #define phys_to_pfn(phys)	(PFN_DOWN(phys))
 #define pfn_to_phys(pfn)	(PFN_PHYS(pfn))
@@ -186,7 +197,24 @@ extern phys_addr_t __phys_addr_symbol(unsigned long x);
 #define pfn_to_virt(pfn)	(__va(pfn_to_phys(pfn)))
 
 #define virt_to_page(vaddr)	(pfn_to_page(virt_to_pfn(vaddr)))
+#ifndef CONFIG_CHERI_KERNEL
 #define page_to_virt(page)	(pfn_to_virt(page_to_pfn(page)))
+#else
+#define page_to_virt(page) \
+({ \
+	unsigned long addr = __va_a(pfn_to_phys(page_to_pfn(page))); \
+	long order = (page)->alloc_order; \
+	void * __ret = __c_fakep(addr); \
+	if (likely(order >= 0)) { \
+		unsigned long sz = PAGE_SIZE << order; \
+		__ret = cheri_build_kernel_data_cap(addr & ~(sz - 1U), addr, sz); \
+	} else if (likely(order != -1)) { \
+		__ret = cheri_build_kernel_data_cap(addr & PAGE_MASK, \
+				addr, (unsigned long)-order); \
+	} \
+	__ret; \
+})
+#endif
 
 #define sym_to_pfn(x)           __phys_to_pfn(__pa_symbol(x))
 
