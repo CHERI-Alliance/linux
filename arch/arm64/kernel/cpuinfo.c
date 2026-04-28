@@ -167,7 +167,7 @@ static const char *const hwcap_str[] = {
 	[KERNEL_HWCAP_MORELLO]		= "morello",
 };
 
-#ifdef CONFIG_COMPAT
+#ifdef CONFIG_COMPAT32
 #define COMPAT_KERNEL_HWCAP(x)	const_ilog2(COMPAT_HWCAP_ ## x)
 static const char *const compat_hwcap_str[] = {
 	[COMPAT_KERNEL_HWCAP(SWP)]	= "swp",
@@ -210,7 +210,7 @@ static const char *const compat_hwcap2_str[] = {
 	[COMPAT_KERNEL_HWCAP2(SB)]	= "sb",
 	[COMPAT_KERNEL_HWCAP2(SSBS)]	= "ssbs",
 };
-#endif /* CONFIG_COMPAT */
+#endif /* CONFIG_COMPAT32 */
 
 static int c_show(struct seq_file *m, void *v)
 {
@@ -242,7 +242,7 @@ static int c_show(struct seq_file *m, void *v)
 	 */
 	seq_puts(m, "Features\t:");
 	if (compat) {
-#ifdef CONFIG_COMPAT
+#ifdef CONFIG_COMPAT32
 		for (j = 0; j < ARRAY_SIZE(compat_hwcap_str); j++) {
 			if (compat_elf_hwcap & (1 << j)) {
 				/*
@@ -259,7 +259,7 @@ static int c_show(struct seq_file *m, void *v)
 		for (j = 0; j < ARRAY_SIZE(compat_hwcap2_str); j++)
 			if (compat_elf_hwcap2 & (1 << j))
 				seq_printf(m, " %s", compat_hwcap2_str[j]);
-#endif /* CONFIG_COMPAT */
+#endif /* CONFIG_COMPAT32 */
 	} else {
 		for (j = 0; j < ARRAY_SIZE(hwcap_str); j++)
 			if (cpu_have_feature(j))
