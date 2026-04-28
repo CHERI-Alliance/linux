@@ -164,13 +164,6 @@ typedef unsigned long elf_greg_t;
 typedef elf_greg_t elf_gregset_t[ELF_NGREG];
 typedef struct user_fpsimd_state elf_fpregset_t;
 
-/*
- * When the program starts, a1 contains a pointer to a function to be
- * registered with atexit, as per the SVR4 ABI.  A value of 0 means we have no
- * such handler.
- */
-#define ELF_PLAT_INIT(_r, load_addr)	(_r)->regs[0] = 0
-
 #define SET_PERSONALITY_AARCH64()					\
 ({									\
 	current->personality &= ~READ_IMPLIES_EXEC;			\
