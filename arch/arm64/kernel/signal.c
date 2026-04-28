@@ -829,7 +829,7 @@ static int parse_user_sigframe(struct user_ctxs *user,
 	user->poe = NULL;
 	user->gcs = NULL;
 
-	if (!IS_ALIGNED((unsigned long)base, 16))
+	if (!IS_ALIGNED(user_ptr_addr(base), 16))
 		goto invalid;
 
 	while (1) {
@@ -1001,8 +1001,8 @@ static int parse_user_sigframe(struct user_ctxs *user,
 			/* Prevent looping/repeated parsing of extra_context */
 			have_extra_context = true;
 
-			base = (__force void __user *)extra_datap;
-			if (!IS_ALIGNED((unsigned long)base, 16))
+			base = uaddr_to_user_ptr(extra_datap);
+			if (!IS_ALIGNED(user_ptr_addr(base), 16))
 				goto invalid;
 
 			if (!IS_ALIGNED(extra_size, 16))
@@ -1178,7 +1178,7 @@ SYSCALL_DEFINE0(rt_sigreturn)
 	if (regs->sp & 15)
 		goto badframe;
 
-	frame = (struct rt_sigframe __user *)regs->sp;
+	frame = uaddr_to_user_ptr(regs->sp);
 
 	if (!access_ok(frame, sizeof (*frame)))
 		goto badframe;
@@ -1482,10 +1482,10 @@ static int get_sigframe(struct rt_sigframe_user_layout *user,
 	sp = sp_top = sigsp(signal_sp(regs), ksig);
 
 	sp = round_down(sp - sizeof(struct frame_record), 16);
-	user->next_frame = (struct frame_record __user *)sp;
+	user->next_frame = uaddr_to_user_ptr(sp);
 
 	sp = round_down(sp, 16) - sigframe_size(user);
-	user->sigframe = (struct rt_sigframe __user *)sp;
+	user->sigframe = uaddr_to_user_ptr(sp);
 
 	/*
 	 * Check that we can actually write to the signal frame.
@@ -1546,7 +1546,7 @@ static int setup_return(struct pt_regs *regs, struct ksignal *ksig,
 	int err;
 
 	if (ksig->ka.sa.sa_flags & SA_RESTORER)
-		sigtramp = ksig->ka.sa.sa_restorer;
+		sigtramp = user_ptr_addr(ksig->ka.sa.sa_restorer);
 	else
 		sigtramp = VDSO_SYMBOL(current->mm->context.vdso, sigtramp);
 
@@ -1569,7 +1569,7 @@ static int setup_return(struct pt_regs *regs, struct ksignal *ksig,
 	}
 	regs->sp = (unsigned long)user->sigframe;
 	regs->regs[29] = (unsigned long)&user->next_frame->fp;
-	regs->regs[30] = (unsigned long)sigtramp;
+	regs->regs[30] = sigtramp;
 	regs->pc = (unsigned long)ksig->ka.sa.sa_handler;
 
 	/*
@@ -1621,7 +1621,12 @@ static int setup_rt_frame(int usig, struct ksignal *ksig, sigset_t *set,
 	frame = user.sigframe;
 
 	__put_user_error(0, &frame->uc.uc_flags, err);
-	__put_user_error(NULL, &frame->uc.uc_link, err);
+	/*
+	 * TODO: uc_link should be a capability in PCuABI, for now copy it as
+	 * an unsigned long (__put_user gets confused by a raw void*)
+	 */
+	/* __put_user_error(NULL, &frame->uc.uc_link, err); */
+	__put_user_error(0, (unsigned long __user *)&frame->uc.uc_link, err);
 
 	err |= __save_altstack(&frame->uc.uc_stack, regs->sp);
 	err |= setup_sigframe(&user, regs, set, &ua_state);
