@@ -25,6 +25,9 @@ user_ptr_perms_t arch_user_ptr_owning_perms_from_prot(int prot, unsigned long vm
 			perms |= ARM_CAP_PERMISSION_EXECUTIVE;
 	}
 
+	if (prot & PROT_CAP_INVOKE)
+		perms |= ARM_CAP_PERMISSION_BRANCH_SEALED_PAIR;
+
 	return perms;
 }
 #define arch_user_ptr_owning_perms_from_prot arch_user_ptr_owning_perms_from_prot
