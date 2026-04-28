@@ -41,7 +41,7 @@
 	name:				\
 	.space	sz, 0
 
-#define TEMP_STACK_SIZE (1<<12)
+#define TEMP_STACK_SIZE (1<<14)
 
 /* See VARIABLE macro for why we do this */
 .macro got_get_ptr name, reg
