@@ -151,12 +151,12 @@ MODULE_DEVICE_TABLE(of, s3c24xx_i2c_match);
 /*
  * Get controller type either from device tree or platform device variant.
  */
-static inline kernel_ulong_t s3c24xx_get_device_quirks(struct platform_device *pdev)
+static inline unsigned long s3c24xx_get_device_quirks(struct platform_device *pdev)
 {
 	if (pdev->dev.of_node)
-		return (uintptr_t)of_device_get_match_data(&pdev->dev);
+		return __c_pa(of_device_get_match_data(&pdev->dev));
 
-	return platform_get_device_id(pdev)->driver_data;
+	return __c_ua(platform_get_device_id(pdev)->driver_data);
 }
 
 /*

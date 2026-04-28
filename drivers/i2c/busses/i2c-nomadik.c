@@ -1097,7 +1097,7 @@ static int nmk_i2c_probe(struct amba_device *adev, const struct amba_id *id)
 	 */
 	match = of_match_device(nmk_i2c_eyeq_match_table, dev);
 	if (match)
-		match_flags = (uintptr_t)match->data;
+		match_flags = __c_pa(match->data);
 
 	priv = devm_kzalloc(dev, sizeof(*priv), GFP_KERNEL);
 	if (!priv)
