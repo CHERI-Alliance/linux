@@ -74,7 +74,7 @@ static int nf_flowtable_by_dev_insert(struct nf_flowtable *ft,
 		if (!elem)
 			goto err_unlock;
 
-		elem->net_device_addr = key;
+		elem->net_device_addr = __c_ua(key);
 		INIT_LIST_HEAD(&elem->head);
 		hash_add_rcu(nf_xdp_hashtable, &elem->hnode, key);
 	}

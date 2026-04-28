@@ -538,7 +538,7 @@ static int rtentry_to_fib_config(struct net *net, int cmd, struct rtentry *rt,
 		struct net_device *dev;
 		char devname[IFNAMSIZ];
 
-		if (copy_from_user(devname, rt->rt_dev, IFNAMSIZ-1))
+		if (strncpy_from_user(devname, rt->rt_dev, IFNAMSIZ-1) < 0)
 			return -EFAULT;
 
 		devname[IFNAMSIZ-1] = 0;
