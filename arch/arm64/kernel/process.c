@@ -463,14 +463,7 @@ int copy_thread(struct task_struct *p, const struct kernel_clone_args *args)
 	ptrauth_thread_init_kernel(p);
 
 	if (likely(!args->fn)) {
-		if (!system_supports_morello()) {
-			*childregs = *current_pt_regs();
-		} else {
-			BUILD_BUG_ON(__alignof__(struct pt_regs) <
-				     __alignof__(__uint128_t));
-			morello_capcpy(childregs, current_pt_regs(),
-				       sizeof(*current_pt_regs()));
-		}
+		*childregs = *current_pt_regs();
 		childregs->regs[0] = 0;
 
 		/*
