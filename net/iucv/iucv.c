@@ -141,7 +141,7 @@ static LIST_HEAD(iucv_task_queue);
 /*
  * The tasklet for fast delivery of iucv interrupts.
  */
-static void iucv_tasklet_fn(unsigned long);
+static void iucv_tasklet_fn(uintptr_t);
 static DECLARE_TASKLET_OLD(iucv_tasklet, iucv_tasklet_fn);
 
 /*
@@ -1721,7 +1721,7 @@ static void iucv_message_pending(struct iucv_irq_data *data)
  * iucv_external_interrupt, calls the appropriate action handler
  * and then frees the buffer.
  */
-static void iucv_tasklet_fn(unsigned long ignored)
+static void iucv_tasklet_fn(uintptr_t ignored)
 {
 	typedef void iucv_irq_fn(struct iucv_irq_data *);
 	static iucv_irq_fn *irq_fn[] = {

@@ -150,7 +150,7 @@ static DECLARE_WORK(ap_scan_bus_work, ap_scan_bus_wq_callback);
 /*
  * Tasklet & timer for AP request polling and interrupts
  */
-static void ap_tasklet_fn(unsigned long);
+static void ap_tasklet_fn(uintptr_t);
 static DECLARE_TASKLET_OLD(ap_tasklet, ap_tasklet_fn);
 static DECLARE_WAIT_QUEUE_HEAD(ap_poll_wait);
 static struct task_struct *ap_poll_kthread;
@@ -475,7 +475,7 @@ static void ap_interrupt_handler(struct airq_struct *airq,
  *
  * Poll all AP devices on the bus.
  */
-static void ap_tasklet_fn(unsigned long dummy)
+static void ap_tasklet_fn(uintptr_t dummy)
 {
 	int bkt;
 	struct ap_queue *aq;

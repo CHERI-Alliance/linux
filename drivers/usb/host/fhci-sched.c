@@ -628,7 +628,7 @@ irqreturn_t fhci_irq(struct usb_hcd *hcd)
  * is process_del_list(),which unlinks URBs by scanning EDs,instead of scanning
  * the (re-reversed) done list as this does.
  */
-static void process_done_list(unsigned long data)
+static void process_done_list(uintptr_t data)
 {
 	struct urb *urb;
 	struct ed *ed;
