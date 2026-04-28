@@ -115,7 +115,7 @@ extern int mmap_rnd_compat_bits __read_mostly;
 #include <asm/processor.h>
 
 #ifndef __pa_symbol
-#define __pa_symbol(x)  __pa(RELOC_HIDE((unsigned long)(x), 0))
+#define __pa_symbol(x)  __pa(RELOC_HIDE(__c_pa(x), 0))
 #endif
 
 #ifndef page_to_virt
@@ -3505,7 +3505,14 @@ static inline bool ptlock_init(struct ptdesc *ptdesc)
 	 * It can happen if arch try to use slab for page table allocation:
 	 * slab code uses page->slab_cache, which share storage with page->ptl.
 	 */
-	VM_BUG_ON_PAGE(*(unsigned long *)&ptdesc->ptl, ptdesc_page(ptdesc));
+	/*
+	 * FIXCHERI:
+	 * Depending on the value of ALLOC_SPLIT_PTLOCKS ->ptl is either
+	 * a spinlock_t or a pointer to a spinlock_t. Silence the pointer
+	 * target size warning but it is unclear how the upstream
+	 * VM_BUG_ON_PAGE() is actually supposed to work in both cases.
+	 */
+	VM_BUG_ON_PAGE(*(unsigned long __force *)&ptdesc->ptl, ptdesc_page(ptdesc));
 	if (!ptlock_alloc(ptdesc))
 		return false;
 	spin_lock_init(ptlock_ptr(ptdesc));
