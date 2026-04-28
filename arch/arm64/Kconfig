@@ -2289,15 +2289,16 @@ config ARM64_MORELLO
 	  initialized and context-switched as appropriate, and capabilities can
 	  be stored in all private memory mappings in userspace. The kernel-user
 	  ABI remains entirely unchanged and backwards-compatible, which means
-	  that syscalls do not accept or return capabilities. Support for
-	  Morello in KVM guests is not provided at this stage.
+	  that syscalls do not accept or return capabilities.
 
-	  The feature is detected at runtime. If it is not present on the boot
-	  CPU, it will not be enabled. All secondary CPUs must implement Morello
-	  if the boot CPU does. If this option is enabled and Morello is
-	  implemented in hardware, the firmware _must_ support Morello.
+	  Please note that enabling this option creates a kernel image that can
+	  _only_ be booted on Morello hardware; Morello is not detected at
+	  runtime. All secondary CPUs must also implement Morello, and the
+	  firmware must support Morello as well.
 
 	  Selecting this option will disable the following features:
+	    * CONFIG_KVM, as KVM has not been modified to support Morello
+	      (whether in guests or within KVM itself) at this stage.
 	    * CONFIG_SWAP (and therefore hibernation), because there is no
 	      support for saving capability tags when swapping out pages at this
 	      stage.
