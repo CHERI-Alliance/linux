@@ -1692,7 +1692,7 @@ static int morello_set(struct task_struct *target,
 }
 
 int morello_ptrace_peekcap(struct task_struct *target, unsigned long addr,
-			   unsigned long data)
+			   user_uintptr_t data)
 {
 	struct user_cap __user *user_cap = (struct user_cap __user *)data;
 	struct user_cap tmp = {0};
@@ -1708,7 +1708,7 @@ int morello_ptrace_peekcap(struct task_struct *target, unsigned long addr,
 }
 
 int morello_ptrace_pokecap(struct task_struct *target, unsigned long addr,
-			   unsigned long data)
+			   user_uintptr_t data)
 {
 	const struct user_cap __user *user_cap =
 		(const struct user_cap __user *)data;
@@ -2496,7 +2496,7 @@ const struct user_regset_view *task_user_regset_view(struct task_struct *task)
 }
 
 long arch_ptrace(struct task_struct *child, long request,
-		 unsigned long addr, unsigned long data)
+		 user_uintptr_t addr, user_uintptr_t data)
 {
 	switch (request) {
 	case PTRACE_PEEKMTETAGS:
