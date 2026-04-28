@@ -4506,7 +4506,7 @@ lpfc_new_io_buf(struct lpfc_hba *phba, int num_to_alloc)
 						LOG_TRACE_EVENT,
 						"3369 Memory alignment err: "
 						"addr=%lx\n",
-						(unsigned long)lpfc_ncmd->data);
+						__c_pa(lpfc_ncmd->data));
 				dma_pool_free(phba->lpfc_sg_dma_buf_pool,
 					      lpfc_ncmd->data,
 					      lpfc_ncmd->dma_handle);

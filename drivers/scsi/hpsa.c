@@ -336,13 +336,13 @@ static bool hpsa_cmd_dev_match(struct ctlr_info *h, struct CommandList *c,
 
 static inline struct ctlr_info *sdev_to_hba(struct scsi_device *sdev)
 {
-	unsigned long *priv = shost_priv(sdev->host);
+	uintptr_t *priv = shost_priv(sdev->host);
 	return (struct ctlr_info *) *priv;
 }
 
 static inline struct ctlr_info *shost_to_hba(struct Scsi_Host *sh)
 {
-	unsigned long *priv = shost_priv(sh);
+	uintptr_t *priv = shost_priv(sh);
 	return (struct ctlr_info *) *priv;
 }
 

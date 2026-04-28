@@ -387,7 +387,7 @@ static void esp_map_dma(struct esp *esp, struct scsi_cmnd *cmd)
 		spriv->num_sg = scsi_sg_count(cmd);
 
 		scsi_for_each_sg(cmd, s, spriv->num_sg, i) {
-			s->dma_address = (uintptr_t)sg_virt(s);
+			s->dma_address = __c_ua((uintptr_t)sg_virt(s));
 			total += sg_dma_len(s);
 		}
 	} else {
@@ -631,7 +631,7 @@ static void esp_map_sense(struct esp *esp, struct esp_cmd_entry *ent)
 {
 	ent->sense_ptr = ent->cmd->sense_buffer;
 	if (esp->flags & ESP_FLAG_NO_DMA_MAP) {
-		ent->sense_dma = (uintptr_t)ent->sense_ptr;
+		ent->sense_dma = __c_ua((uintptr_t)ent->sense_ptr);
 		return;
 	}
 

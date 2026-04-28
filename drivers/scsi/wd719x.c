@@ -818,7 +818,7 @@ static int wd719x_board_found(struct Scsi_Host *sh)
 
 	INIT_LIST_HEAD(&wd->active_scbs);
 
-	sh->base = pci_resource_start(wd->pdev, 0);
+	sh->base = __c_fakeu(pci_resource_start(wd->pdev, 0));
 
 	wd->type = wd719x_detect_type(wd);
 

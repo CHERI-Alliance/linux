@@ -4191,7 +4191,7 @@ static int pqi_alloc_operational_queues(struct pqi_ctrl_info *ctrl_info)
 		aligned_pointer += sizeof(pqi_index_t);
 	}
 
-	alloc_length = (uintptr_t)aligned_pointer +
+	alloc_length = (size_t)__c_pa(aligned_pointer) +
 		PQI_QUEUE_ELEMENT_ARRAY_ALIGNMENT;
 
 	alloc_length += PQI_EXTRA_SGL_MEMORY;

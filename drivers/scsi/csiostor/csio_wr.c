@@ -907,7 +907,7 @@ csio_wr_get(struct csio_hw *hw, int qidx, uint32_t size,
 	 */
 	if (unlikely(((uintptr_t)cwr + req_sz) > (uintptr_t)(q->vwrap))) {
 		wrp->addr1 = cwr;
-		wrp->size1 = (uint32_t)((uintptr_t)q->vwrap - (uintptr_t)cwr);
+		wrp->size1 = (uint32_t)(__c_pa(q->vwrap) - __c_pa(cwr));
 		wrp->addr2 = q->vstart;
 		wrp->size2 = req_sz - wrp->size1;
 		q->pidx	= (uint16_t)(ALIGN(wrp->size2, CSIO_QCREDIT_SZ) /

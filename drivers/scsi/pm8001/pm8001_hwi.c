@@ -4582,7 +4582,7 @@ pm8001_chip_fw_flash_update_req(struct pm8001_hba_info *pm8001_ha,
 	fw_control_context = kzalloc_obj(struct fw_control_ex);
 	if (!fw_control_context)
 		return -ENOMEM;
-	fw_control = (struct fw_control_info *)&ioctl_payload->func_specific;
+	fw_control = (struct fw_control_info *)(void *)&ioctl_payload->func_specific;
 	pm8001_dbg(pm8001_ha, DEVIO,
 		   "dma fw_control context input length :%x\n",
 		   fw_control->len);

@@ -719,7 +719,7 @@ struct Scsi_Host {
 	unsigned char prot_guard_type;
 
 	/* legacy crap */
-	unsigned long base;
+	uintptr_t base;
 	unsigned long io_port;
 	unsigned char n_io_port;
 	unsigned char dma_channel;
@@ -757,8 +757,8 @@ struct Scsi_Host {
 	 * and also because some compilers (m68k) don't automatically force
 	 * alignment to a long boundary.
 	 */
-	unsigned long hostdata[]  /* Used for storage of host specific stuff */
-		__attribute__ ((aligned (sizeof(unsigned long))));
+	uintptr_t hostdata[]  /* Used for storage of host specific stuff */
+		__attribute__ ((aligned (sizeof(uintptr_t))));
 };
 
 #define		class_to_shost(d)	\

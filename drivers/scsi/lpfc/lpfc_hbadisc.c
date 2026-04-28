@@ -4990,7 +4990,7 @@ lpfc_set_disctmo(struct lpfc_vport *vport)
 			 "0247 Start Discovery Timer state x%x "
 			 "Data: x%x x%lx x%x x%x\n",
 			 vport->port_state, tmo,
-			 (unsigned long)&vport->fc_disctmo,
+			 __c_pa(&vport->fc_disctmo),
 			 atomic_read(&vport->fc_plogi_cnt),
 			 atomic_read(&vport->fc_adisc_cnt));
 

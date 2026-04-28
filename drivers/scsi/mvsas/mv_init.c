@@ -291,7 +291,7 @@ int mvs_ioremap(struct mvs_info *mvi, int bar, int bar_ex)
 		if (res_flag_ex & IORESOURCE_MEM)
 			mvi->regs_ex = ioremap(res_start, res_len);
 		else
-			mvi->regs_ex = (void *)res_start;
+			mvi->regs_ex = __c_fakep(res_start);
 		if (!mvi->regs_ex)
 			goto err_out;
 	}
@@ -338,7 +338,7 @@ static struct mvs_info *mvs_pci_alloc(struct pci_dev *pdev,
 
 	mvi->pdev = pdev;
 	mvi->dev = &pdev->dev;
-	mvi->chip_id = ent->driver_data;
+	mvi->chip_id = __c_ua(ent->driver_data);
 	mvi->chip = &mvs_chips[mvi->chip_id];
 	INIT_LIST_HEAD(&mvi->wq_list);
 

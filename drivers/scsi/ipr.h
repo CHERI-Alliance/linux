@@ -1655,7 +1655,12 @@ struct ipr_ioa_dump {
 	u32 next_page_index;
 	u32 page_offset;
 	u32 format;
-}__attribute__((packed, aligned (4)));
+}
+#ifndef CONFIG_CHERI_KERNEL
+/* Packed does not seem to be required and won't work for CHERI.*/
+__attribute__((packed, aligned (4)))
+#endif
+;
 
 struct ipr_dump {
 	struct kref kref;

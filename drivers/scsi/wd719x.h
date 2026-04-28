@@ -60,7 +60,7 @@ struct wd719x_scb {
 	struct scsi_cmnd *cmd;	/* a copy of the pointer we were passed */
 	struct list_head list;
 	struct wd719x_sglist sg_list[WD719X_SG] __aligned(8); /* SG list */
-} __packed;
+} __packed __cheri_pointer_align;
 
 struct wd719x {
 	struct Scsi_Host *sh;	/* pointer to host structure */

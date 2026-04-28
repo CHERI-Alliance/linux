@@ -953,7 +953,9 @@ typedef struct {
 typedef struct ips_stat {
    uint32_t residue_len;
    void     *scb_addr;
+#if __SIZEOF_POINTER__ <= 12
    uint8_t  padding[12 - sizeof(void *)];
+#endif
 } ips_stat_t;
 
 /*

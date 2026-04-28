@@ -115,7 +115,7 @@ void qla4_82xx_queue_iocb(struct scsi_qla_host *ha);
 void qla4_82xx_complete_iocb(struct scsi_qla_host *ha);
 
 void qla4_82xx_crb_win_unlock(struct scsi_qla_host *);
-int qla4_82xx_pci_get_crb_addr_2M(struct scsi_qla_host *, ulong *);
+int qla4_82xx_pci_get_crb_addr_2M(struct scsi_qla_host *, uintptr_t *);
 void qla4_82xx_wr_32(struct scsi_qla_host *, ulong, u32);
 uint32_t qla4_82xx_rd_32(struct scsi_qla_host *, ulong);
 int qla4_82xx_pci_mem_read_2M(struct scsi_qla_host *, u64, void *, int);
