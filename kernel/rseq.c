@@ -118,9 +118,9 @@ void __rseq_trace_update(struct task_struct *t)
 }
 
 void __rseq_trace_ip_fixup(unsigned long ip, unsigned long start_ip,
-			   unsigned long offset, unsigned long abort_ip)
+			   unsigned long offset, user_uintptr_t abort_ip)
 {
-	trace_rseq_ip_fixup(ip, start_ip, offset, abort_ip);
+	trace_rseq_ip_fixup(__c_fakeu(ip), start_ip, offset, abort_ip);
 }
 #endif /* CONFIG_TRACEPOINTS */
 
@@ -244,13 +244,13 @@ static bool rseq_set_ids(struct task_struct *t, struct rseq_ids *ids, u32 node_i
 static bool rseq_handle_cs(struct task_struct *t, struct pt_regs *regs)
 {
 	struct rseq __user *urseq = t->rseq.usrptr;
-	u64 csaddr;
+	__u64ptr csaddr;
 
 	scoped_user_read_access(urseq, efault)
-		unsafe_get_user(csaddr, &urseq->rseq_cs, efault);
+		unsafe_get_user_ptr(csaddr, &urseq->rseq_cs, efault);
 	if (likely(!csaddr))
 		return true;
-	return rseq_update_user_cs(t, regs, csaddr);
+	return rseq_update_user_cs(t, regs, (user_uintptr_t)u64_to_user_ptr(csaddr));
 efault:
 	return false;
 }
@@ -358,17 +358,17 @@ void __rseq_signal_deliver(int sig, struct pt_regs *regs)
 void __rseq_debug_syscall_return(struct pt_regs *regs)
 {
 	struct task_struct *t = current;
-	u64 csaddr;
+	__u64ptr csaddr;
 
 	if (!t->rseq.event.has_rseq)
 		return;
-	if (get_user(csaddr, &t->rseq.usrptr->rseq_cs))
+	if (get_user_ptr(csaddr, &t->rseq.usrptr->rseq_cs))
 		goto fail;
 	if (likely(!csaddr))
 		return;
 	if (unlikely(csaddr >= TASK_SIZE))
 		goto fail;
-	if (rseq_debug_update_user_cs(t, regs, csaddr))
+	if (rseq_debug_update_user_cs(t, regs, (user_uintptr_t)u64_to_user_ptr(csaddr)))
 		return;
 fail:
 	force_sig(SIGSEGV);
@@ -478,7 +478,7 @@ SYSCALL_DEFINE4(rseq, struct rseq __user *, rseq, u32, rseq_len, int, flags, u32
 		 * older libcs that reuse the rseq area for new threads without
 		 * clearing the fields. Don't bother reading it, just reset it.
 		 */
-		unsafe_put_user(0UL, &rseq->rseq_cs, efault);
+		unsafe_put_user_ptr((user_uintptr_t)0, &rseq->rseq_cs, efault);
 		unsafe_put_user(rseqfl, &rseq->flags, efault);
 		/* Initialize IDs in user space */
 		unsafe_put_user(RSEQ_CPU_ID_UNINITIALIZED, &rseq->cpu_id_start, efault);

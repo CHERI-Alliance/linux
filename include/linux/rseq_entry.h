@@ -52,7 +52,7 @@ DECLARE_TRACEPOINT(rseq_update);
 DECLARE_TRACEPOINT(rseq_ip_fixup);
 void __rseq_trace_update(struct task_struct *t);
 void __rseq_trace_ip_fixup(unsigned long ip, unsigned long start_ip,
-			   unsigned long offset, unsigned long abort_ip);
+			   unsigned long offset, user_uintptr_t abort_ip);
 
 static inline void rseq_trace_update(struct task_struct *t, struct rseq_ids *ids)
 {
@@ -61,7 +61,7 @@ static inline void rseq_trace_update(struct task_struct *t, struct rseq_ids *ids
 }
 
 static inline void rseq_trace_ip_fixup(unsigned long ip, unsigned long start_ip,
-				       unsigned long offset, unsigned long abort_ip)
+				       unsigned long offset, user_uintptr_t abort_ip)
 {
 	if (tracepoint_enabled(rseq_ip_fixup))
 		__rseq_trace_ip_fixup(ip, start_ip, offset, abort_ip);
@@ -70,7 +70,7 @@ static inline void rseq_trace_ip_fixup(unsigned long ip, unsigned long start_ip,
 #else /* CONFIG_TRACEPOINT */
 static inline void rseq_trace_update(struct task_struct *t, struct rseq_ids *ids) { }
 static inline void rseq_trace_ip_fixup(unsigned long ip, unsigned long start_ip,
-				       unsigned long offset, unsigned long abort_ip) { }
+				       unsigned long offset, user_uintptr_t abort_ip) { }
 #endif /* !CONFIG_TRACEPOINT */
 
 DECLARE_STATIC_KEY_MAYBE(CONFIG_RSEQ_DEBUG_DEFAULT_ENABLE, rseq_debug_enabled);
@@ -222,7 +222,7 @@ static __always_inline void rseq_slice_clear_grant(struct task_struct *t) { }
 static __always_inline bool rseq_grant_slice_extension(bool work_pending) { return false; }
 #endif /* !CONFIG_RSEQ_SLICE_EXTENSION */
 
-bool rseq_debug_update_user_cs(struct task_struct *t, struct pt_regs *regs, unsigned long csaddr);
+bool rseq_debug_update_user_cs(struct task_struct *t, struct pt_regs *regs, user_uintptr_t csaddr);
 bool rseq_debug_validate_ids(struct task_struct *t);
 
 static __always_inline void rseq_note_user_irq_entry(void)
@@ -265,11 +265,12 @@ static __always_inline void rseq_note_user_irq_entry(void)
  * @csaddr has already been checked by the caller to be in user space
  */
 bool rseq_debug_update_user_cs(struct task_struct *t, struct pt_regs *regs,
-			       unsigned long csaddr)
+			       user_uintptr_t csaddr)
 {
-	struct rseq_cs __user *ucs = (struct rseq_cs __user *)(unsigned long)csaddr;
-	u64 start_ip, abort_ip, offset, cs_end, head, tasksize = TASK_SIZE;
-	unsigned long ip = instruction_pointer(regs);
+	struct rseq_cs __user *ucs = (struct rseq_cs __user *)csaddr;
+	u64 start_ip, offset, cs_end, head, tasksize = TASK_SIZE;
+	__u64ptr abort_ip;
+	unsigned long ip = __c_ua(instruction_pointer(regs));
 	u64 __user *uc_head = (u64 __user *) ucs;
 	u32 usig, __user2 * __capability uc_sig;
 
@@ -295,7 +296,7 @@ bool rseq_debug_update_user_cs(struct task_struct *t, struct pt_regs *regs,
 		if (ip >= cs_end)
 			goto clear;
 
-		unsafe_get_user(abort_ip, &ucs->abort_ip, efault);
+		unsafe_get_user_ptr(abort_ip, &ucs->abort_ip, efault);
 		/* Ensure it's "valid" */
 		if (unlikely(abort_ip >= tasksize || abort_ip < sizeof(*uc_sig)))
 			goto die;
@@ -313,7 +314,7 @@ bool rseq_debug_update_user_cs(struct task_struct *t, struct pt_regs *regs,
 			goto die;
 
 		/* abort_ip - 4 is >= 0. See abort_ip check above */
-		uc_sig = (u32 __user *)(unsigned long)(abort_ip - sizeof(*uc_sig));
+		uc_sig = (u32 __user *)(user_uintptr_t)(abort_ip - sizeof(*uc_sig));
 		unsafe_get_user(usig, uc_sig, efault);
 		if (unlikely(usig != t->rseq.sig))
 			goto die;
@@ -324,12 +325,12 @@ bool rseq_debug_update_user_cs(struct task_struct *t, struct pt_regs *regs,
 			if (unlikely(!t->rseq.event.user_irq))
 				goto die;
 		}
-		unsafe_put_user(0ULL, &t->rseq.usrptr->rseq_cs, efault);
-		instruction_pointer_set(regs, (unsigned long)abort_ip);
+		unsafe_put_user_ptr((user_uintptr_t)0, &t->rseq.usrptr->rseq_cs, efault);
+		instruction_pointer_set(regs, (user_uintptr_t)abort_ip);
 		rseq_stat_inc(rseq_stats.fixup);
 		break;
 	clear:
-		unsafe_put_user(0ULL, &t->rseq.usrptr->rseq_cs, efault);
+		unsafe_put_user_ptr((user_uintptr_t)0, &t->rseq.usrptr->rseq_cs, efault);
 		rseq_stat_inc(rseq_stats.clear);
 		abort_ip = 0ULL;
 	}
@@ -389,12 +390,13 @@ efault:
  * No other sanity checks are done here, that's what the debug code is for.
  */
 static rseq_inline bool
-rseq_update_user_cs(struct task_struct *t, struct pt_regs *regs, unsigned long csaddr)
+rseq_update_user_cs(struct task_struct *t, struct pt_regs *regs, user_uintptr_t csaddr)
 {
-	struct rseq_cs __user *ucs = (struct rseq_cs __user *)(unsigned long)csaddr;
-	unsigned long ip = instruction_pointer(regs);
+	struct rseq_cs __user *ucs = (struct rseq_cs __user *)csaddr;
+	unsigned long ip = __c_ua(instruction_pointer(regs));
 	unsigned long tasksize = TASK_SIZE;
-	u64 start_ip, abort_ip, offset;
+	u64 start_ip, offset;
+	__u64ptr abort_ip;
 	u32 usig, __user2 * __capability uc_sig;
 
 	rseq_stat_inc(rseq_stats.cs);
@@ -410,7 +412,7 @@ rseq_update_user_cs(struct task_struct *t, struct pt_regs *regs, unsigned long c
 	scoped_user_rw_access(ucs, efault) {
 		unsafe_get_user(start_ip, &ucs->start_ip, efault);
 		unsafe_get_user(offset, &ucs->post_commit_offset, efault);
-		unsafe_get_user(abort_ip, &ucs->abort_ip, efault);
+		unsafe_get_user_ptr(abort_ip, &ucs->abort_ip, efault);
 
 		/*
 		 * No sanity checks. If user space screwed it up, it can
@@ -440,19 +442,19 @@ rseq_update_user_cs(struct task_struct *t, struct pt_regs *regs, unsigned long c
 			goto die;
 
 		/* The address is guaranteed to be >= 0 and < TASK_SIZE */
-		uc_sig = (u32 __user *)(unsigned long)(abort_ip - sizeof(*uc_sig));
+		uc_sig = (u32 __user *)(user_uintptr_t)(abort_ip - sizeof(*uc_sig));
 		unsafe_get_user(usig, uc_sig, efault);
 		if (unlikely(usig != t->rseq.sig))
 			goto die;
 
 		/* Invalidate the critical section */
-		unsafe_put_user(0ULL, &t->rseq.usrptr->rseq_cs, efault);
+		unsafe_put_user_ptr((user_uintptr_t)0, &t->rseq.usrptr->rseq_cs, efault);
 		/* Update the instruction pointer */
-		instruction_pointer_set(regs, (unsigned long)abort_ip);
+		instruction_pointer_set(regs, (user_uintptr_t)abort_ip);
 		rseq_stat_inc(rseq_stats.fixup);
 		break;
 	clear:
-		unsafe_put_user(0ULL, &t->rseq.usrptr->rseq_cs, efault);
+		unsafe_put_user_ptr((user_uintptr_t)0, &t->rseq.usrptr->rseq_cs, efault);
 		rseq_stat_inc(rseq_stats.clear);
 		abort_ip = 0ULL;
 	}
@@ -490,7 +492,7 @@ efault:
  */
 static rseq_inline
 bool rseq_set_ids_get_csaddr(struct task_struct *t, struct rseq_ids *ids,
-			     u32 node_id, u64 *csaddr)
+			     u32 node_id, __u64ptr *csaddr)
 {
 	struct rseq __user *rseq = t->rseq.usrptr;
 
@@ -505,7 +507,7 @@ bool rseq_set_ids_get_csaddr(struct task_struct *t, struct rseq_ids *ids,
 		unsafe_put_user(node_id, &rseq->node_id, efault);
 		unsafe_put_user(ids->mm_cid, &rseq->mm_cid, efault);
 		if (csaddr)
-			unsafe_get_user(*csaddr, &rseq->rseq_cs, efault);
+			unsafe_get_user_ptr(*csaddr, &rseq->rseq_cs, efault);
 
 		/* Open coded, so it's in the same user access region */
 		if (rseq_slice_extension_enabled()) {
@@ -531,7 +533,7 @@ efault:
 static rseq_inline bool rseq_update_usr(struct task_struct *t, struct pt_regs *regs,
 					struct rseq_ids *ids, u32 node_id)
 {
-	u64 csaddr;
+	__u64ptr csaddr;
 
 	if (!rseq_set_ids_get_csaddr(t, ids, node_id, &csaddr))
 		return false;
@@ -550,7 +552,7 @@ static rseq_inline bool rseq_update_usr(struct task_struct *t, struct pt_regs *r
 	if (likely(!csaddr))
 		return true;
 	/* Sigh, this really needs to do work */
-	return rseq_update_user_cs(t, regs, csaddr);
+	return rseq_update_user_cs(t, regs, (user_uintptr_t)u64_to_user_ptr(csaddr));
 }
 
 /*
@@ -608,10 +610,10 @@ static __always_inline bool rseq_exit_user_update(struct pt_regs *regs, struct t
 		 * If IDs have not changed rseq_event::user_irq must be true
 		 * See rseq_sched_switch_event().
 		 */
-		u64 csaddr;
+		__u64ptr csaddr;
 
 		scoped_user_rw_access(rseq, efault) {
-			unsafe_get_user(csaddr, &rseq->rseq_cs, efault);
+			unsafe_get_user_ptr(csaddr, &rseq->rseq_cs, efault);
 
 			/* Open coded, so it's in the same user access region */
 			if (rseq_slice_extension_enabled()) {
@@ -623,7 +625,7 @@ static __always_inline bool rseq_exit_user_update(struct pt_regs *regs, struct t
 		rseq_slice_clear_grant(t);
 
 		if (static_branch_unlikely(&rseq_debug_enabled) || unlikely(csaddr)) {
-			if (unlikely(!rseq_update_user_cs(t, regs, csaddr)))
+			if (unlikely(!rseq_update_user_cs(t, regs, (user_uintptr_t)u64_to_user_ptr(csaddr))))
 				return false;
 		}
 		return true;
