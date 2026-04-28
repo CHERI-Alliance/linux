@@ -37,7 +37,7 @@ struct vmemmap_remap_walk {
 					     struct vmemmap_remap_walk *walk);
 	unsigned long		nr_walked;
 	struct page		*reuse_page;
-	unsigned long		reuse_addr;
+	uintptr_t		reuse_addr;
 	struct list_head	*vmemmap_pages;
 
 /* Skip the TLB flush when we split the PMD */
@@ -159,15 +159,15 @@ static const struct mm_walk_ops vmemmap_remap_ops = {
 	.pte_entry	= vmemmap_pte_entry,
 };
 
-static int vmemmap_remap_range(unsigned long start, unsigned long end,
+static int vmemmap_remap_range(uintptr_t start, uintptr_t end,
 			       struct vmemmap_remap_walk *walk)
 {
 	int ret;
 
-	VM_BUG_ON(!PAGE_ALIGNED(start | end));
+	VM_BUG_ON(!PAGE_ALIGNED(__c_ua(start) | __c_ua(end)));
 
 	mmap_read_lock(&init_mm);
-	ret = walk_kernel_page_table_range(start, end, &vmemmap_remap_ops,
+	ret = walk_kernel_page_table_range(__c_ua(start), __c_ua(end), &vmemmap_remap_ops,
 				    NULL, walk);
 	mmap_read_unlock(&init_mm);
 	if (ret)
@@ -287,8 +287,8 @@ static void vmemmap_restore_pte(pte_t *pte, unsigned long addr,
  *
  * Return: %0 on success, negative error code otherwise.
  */
-static int vmemmap_remap_split(unsigned long start, unsigned long end,
-			       unsigned long reuse)
+static int vmemmap_remap_split(uintptr_t start, uintptr_t end,
+			       uintptr_t reuse)
 {
 	struct vmemmap_remap_walk walk = {
 		.remap_pte	= NULL,
@@ -316,8 +316,7 @@ static int vmemmap_remap_split(unsigned long start, unsigned long end,
  *
  * Return: %0 on success, negative error code otherwise.
  */
-static int vmemmap_remap_free(unsigned long start, unsigned long end,
-			      unsigned long reuse,
+static int vmemmap_remap_free(uintptr_t start, uintptr_t end, uintptr_t reuse,
 			      struct list_head *vmemmap_pages,
 			      unsigned long flags)
 {
@@ -384,11 +383,11 @@ static int vmemmap_remap_free(unsigned long start, unsigned long end,
 	return ret;
 }
 
-static int alloc_vmemmap_page_list(unsigned long start, unsigned long end,
+static int alloc_vmemmap_page_list(uintptr_t start, uintptr_t end,
 				   struct list_head *list)
 {
 	gfp_t gfp_mask = GFP_KERNEL | __GFP_RETRY_MAYFAIL;
-	unsigned long nr_pages = (end - start) >> PAGE_SHIFT;
+	unsigned long nr_pages = __c_ua(end - start) >> PAGE_SHIFT;
 	int nid = page_to_nid((struct page *)start);
 	struct page *page, *next;
 	int i;
@@ -421,8 +420,8 @@ out:
  *
  * Return: %0 on success, negative error code otherwise.
  */
-static int vmemmap_remap_alloc(unsigned long start, unsigned long end,
-			       unsigned long reuse, unsigned long flags)
+static int vmemmap_remap_alloc(uintptr_t start, uintptr_t end,
+			       uintptr_t reuse, unsigned long flags)
 {
 	LIST_HEAD(vmemmap_pages);
 	struct vmemmap_remap_walk walk = {
@@ -456,7 +455,7 @@ static int __hugetlb_vmemmap_restore_folio(const struct hstate *h,
 {
 	int ret;
 	uintptr_t vmemmap_start = (uintptr_t)&folio->page, vmemmap_end;
-	unsigned long vmemmap_reuse;
+	uintptr_t vmemmap_reuse;
 
 	VM_WARN_ON_ONCE_FOLIO(!folio_test_hugetlb(folio), folio);
 	VM_WARN_ON_ONCE_FOLIO(folio_ref_count(folio), folio);
@@ -568,7 +567,7 @@ static int __hugetlb_vmemmap_optimize_folio(const struct hstate *h,
 {
 	int ret = 0;
 	uintptr_t vmemmap_start = (uintptr_t)&folio->page, vmemmap_end;
-	unsigned long vmemmap_reuse;
+	uintptr_t vmemmap_reuse;
 
 	VM_WARN_ON_ONCE_FOLIO(!folio_test_hugetlb(folio), folio);
 	VM_WARN_ON_ONCE_FOLIO(folio_ref_count(folio), folio);
@@ -634,7 +633,7 @@ void hugetlb_vmemmap_optimize_folio(const struct hstate *h, struct folio *folio)
 static int hugetlb_vmemmap_split_folio(const struct hstate *h, struct folio *folio)
 {
 	uintptr_t vmemmap_start = (uintptr_t)&folio->page, vmemmap_end;
-	unsigned long vmemmap_reuse;
+	uintptr_t vmemmap_reuse;
 
 	if (!vmemmap_should_optimize_folio(h, folio))
 		return 0;
@@ -669,7 +668,7 @@ static void __hugetlb_vmemmap_optimize_folios(struct hstate *h,
 			 * Already optimized by pre-HVO, just map the
 			 * mirrored tail page structs RO.
 			 */
-			spfn = (uintptr_t)&folio->page;
+			spfn = __c_pa(&folio->page);
 			epfn = spfn + pages_per_huge_page(h);
 			vmemmap_wrprotect_hvo(spfn, epfn, folio_nid(folio),
 					HUGETLB_VMEMMAP_RESERVE_SIZE);
