@@ -5,6 +5,7 @@
 #include <linux/slab.h>
 #include <linux/net.h>
 #include <linux/compat.h>
+#include <linux/uaccess.h>
 #include <net/compat.h>
 #include <linux/io_uring.h>
 

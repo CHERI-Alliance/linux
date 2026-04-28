@@ -83,9 +83,9 @@ int io_account_mem(struct user_struct *user, struct mm_struct *mm_account,
 	return 0;
 }
 
-int io_validate_user_buf_range(u64 uaddr, u64 ulen)
+int io_validate_user_buf_range(user_uintptr_t uaddr, u64 ulen)
 {
-	unsigned long tmp, base = (unsigned long)uaddr;
+	unsigned long tmp, base = __c_ua(uaddr);
 	unsigned long acct_len = (unsigned long)PAGE_ALIGN(ulen);
 
 	/* arbitrary limit, but we need something */
@@ -223,9 +223,9 @@ static int __io_sqe_files_update(struct io_ring_ctx *ctx,
 		return -EINVAL;
 
 	for (done = 0; done < nr_args; done++) {
-		u64 tag = 0;
+		user_uintptr_t tag = 0;
 
-		if ((tags && copy_from_user(&tag, &tags[done], sizeof(tag))) ||
+		if ((tags && copy_from_user_with_ptr(&tag, &tags[done], sizeof(tag))) ||
 		    copy_from_user(&fd, &fds[done], sizeof(fd))) {
 			err = -EFAULT;
 			break;
@@ -281,7 +281,7 @@ static int __io_sqe_buffers_update(struct io_ring_ctx *ctx,
 	struct iovec fast_iov, *iov;
 	struct page *last_hpage = NULL;
 	struct iovec __user *uvec;
-	u64 user_data = up->data;
+	user_uintptr_t user_data = up->data;
 	__u32 done;
 	int i, err;
 
@@ -292,15 +292,15 @@ static int __io_sqe_buffers_update(struct io_ring_ctx *ctx,
 
 	for (done = 0; done < nr_args; done++) {
 		struct io_rsrc_node *node;
-		u64 tag = 0;
+		user_uintptr_t tag = 0;
 
-		uvec = u64_to_user_ptr(user_data);
+		uvec = (void __user *)user_data;
 		iov = iovec_from_user(uvec, 1, 1, &fast_iov, ctx->compat);
 		if (IS_ERR(iov)) {
 			err = PTR_ERR(iov);
 			break;
 		}
-		if (tags && copy_from_user(&tag, &tags[done], sizeof(tag))) {
+		if (tags && copy_from_user_with_ptr(&tag, &tags[done], sizeof(tag))) {
 			err = -EFAULT;
 			break;
 		}
@@ -521,7 +521,7 @@ int io_sqe_files_unregister(struct io_ring_ctx *ctx)
 }
 
 int io_sqe_files_register(struct io_ring_ctx *ctx, void __user *arg,
-			  unsigned nr_args, u64 __user *tags)
+			  unsigned nr_args, user_uintptr_t __user *tags)
 {
 	__s32 __user *fds = (__s32 __user *) arg;
 	struct file *file;
@@ -541,10 +541,10 @@ int io_sqe_files_register(struct io_ring_ctx *ctx, void __user *arg,
 
 	for (i = 0; i < nr_args; i++) {
 		struct io_rsrc_node *node;
-		u64 tag = 0;
+		user_uintptr_t tag = 0;
 
 		ret = -EFAULT;
-		if (tags && copy_from_user(&tag, &tags[i], sizeof(tag)))
+		if (tags && copy_from_user_with_ptr(&tag, &tags[i], sizeof(tag)))
 			goto fail;
 		if (fds && copy_from_user(&fd, &fds[i], sizeof(fd)))
 			goto fail;
@@ -793,7 +793,7 @@ static struct io_rsrc_node *io_sqe_buffer_register(struct io_ring_ctx *ctx,
 	 * Specifically we employ explicit checks before the user data provided
 	 * in the pre-registered buffers is accessed.
 	 */
-	pages = io_pin_pages(user_ptr_addr(iov->iov_base), iov->iov_len,
+	pages = io_pin_pages(__c_pa_u(iov->iov_base), iov->iov_len,
 				&nr_pages);
 	if (IS_ERR(pages)) {
 		ret = PTR_ERR(pages);
@@ -883,7 +883,7 @@ int io_sqe_buffers_register(struct io_ring_ctx *ctx, void __user *arg,
 
 	for (i = 0; i < nr_args; i++) {
 		struct io_rsrc_node *node;
-		u64 tag = 0;
+		user_uintptr_t tag = 0;
 
 		if (arg) {
 			uvec = (struct iovec __user *) arg;
@@ -899,7 +899,7 @@ int io_sqe_buffers_register(struct io_ring_ctx *ctx, void __user *arg,
 		}
 
 		if (tags) {
-			if (copy_from_user(&tag, &tags[i], sizeof(tag))) {
+			if (copy_from_user_with_ptr(&tag, &tags[i], sizeof(tag))) {
 				ret = -EFAULT;
 				break;
 			}
@@ -1074,7 +1074,7 @@ static int io_import_fixed(int ddir, struct iov_iter *iter,
 		return 0;
 	}
 
-	offset = user_ptr_addr(ubuf) - imu->ubuf;
+	offset = user_ptr_addr(ubuf) - __c_ua(imu->ubuf);
 
 	if (imu->flags & IO_REGBUF_F_KBUF)
 		return io_import_kbuf(ddir, iter, imu, len, offset);
@@ -1345,7 +1345,7 @@ static int io_vec_fill_bvec(int ddir, struct iov_iter *iter,
 
 	for (iov_idx = 0; iov_idx < nr_iovs; iov_idx++) {
 		size_t iov_len = iovec[iov_idx].iov_len;
-		u64 buf_addr = (u64)(user_uintptr_t)iovec[iov_idx].iov_base;
+		u64 buf_addr = __c_pa_u(iovec[iov_idx].iov_base);
 		struct bio_vec *src_bvec;
 		size_t offset;
 		int ret;
@@ -1359,7 +1359,7 @@ static int io_vec_fill_bvec(int ddir, struct iov_iter *iter,
 		if (unlikely(check_add_overflow(total_len, iov_len, &total_len)))
 			return -EOVERFLOW;
 
-		offset = buf_addr - imu->ubuf;
+		offset = buf_addr - __c_ua(imu->ubuf);
 		/*
 		 * Only the first bvec can have non zero bv_offset, account it
 		 * here and work with full folios below.
@@ -1412,7 +1412,7 @@ static int io_vec_fill_kern_bvec(int ddir, struct iov_iter *iter,
 	unsigned iov_idx;
 
 	for (iov_idx = 0; iov_idx < nr_iovs; iov_idx++) {
-		size_t offset = (size_t)(user_uintptr_t)iovec[iov_idx].iov_base;
+		size_t offset = __c_pa_u(iovec[iov_idx].iov_base);
 		size_t iov_len = iovec[iov_idx].iov_len;
 		struct bvec_iter bi = {
 			.bi_size        = offset + iov_len,
@@ -1432,7 +1432,7 @@ static int iov_kern_bvec_size(const struct iovec *iov,
 			      const struct io_mapped_ubuf *imu,
 			      unsigned int *nr_seg)
 {
-	size_t offset = (size_t)(user_uintptr_t)iov->iov_base;
+	size_t offset = __c_pa_u(iov->iov_base);
 	const struct bio_vec *bvec = imu->bvec;
 	int start = 0, i = 0;
 	size_t off = 0;

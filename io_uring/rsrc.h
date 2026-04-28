@@ -16,9 +16,9 @@ struct io_rsrc_node {
 	unsigned char			type;
 	int				refs;
 
-	u64 tag;
+	uintptr_t tag;
 	union {
-		unsigned long file_ptr;
+		uintptr_t file_ptr;
 		struct io_mapped_ubuf *buf;
 	};
 };
@@ -33,7 +33,7 @@ enum {
 };
 
 struct io_mapped_ubuf {
-	u64		ubuf;
+	user_uintptr_t	ubuf;
 	unsigned int	len;
 	unsigned int	nr_bvecs;
 	unsigned int    folio_shift;
@@ -88,7 +88,7 @@ int io_register_rsrc_update(struct io_ring_ctx *ctx, void __user *arg,
 			    unsigned size, unsigned type);
 int io_register_rsrc(struct io_ring_ctx *ctx, void __user *arg,
 			unsigned int size, unsigned int type);
-int io_validate_user_buf_range(u64 uaddr, u64 ulen);
+int io_validate_user_buf_range(user_uintptr_t uaddr, u64 ulen);
 
 bool io_check_coalesce_buffer(struct page **page_array, int nr_pages,
 			      struct io_imu_folio_data *data);

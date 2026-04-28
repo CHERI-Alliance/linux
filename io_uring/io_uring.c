@@ -675,7 +675,7 @@ static struct io_overflow_cqe *io_alloc_ocqe(struct io_ring_ctx *ctx,
 	}
 
 	ocqe = kzalloc(ocq_size, gfp | __GFP_ACCOUNT);
-	trace_io_uring_cqe_overflow(ctx, cqe->user_data, cqe->res, cqe->flags, ocqe);
+	trace_io_uring_cqe_overflow(ctx, __c_ua(cqe->user_data), cqe->res, cqe->flags, ocqe);
 	if (ocqe) {
 		ocqe->cqe.user_data = cqe->user_data;
 		ocqe->cqe.res = cqe->res;
@@ -2331,7 +2331,7 @@ static __cold void io_tctx_exit_cb(struct callback_head *cb)
 	 * work cancelation off the exec path.
 	 */
 	if (tctx && !atomic_read(&tctx->in_cancel))
-		io_uring_del_tctx_node((uintptr_t)work->ctx);
+		io_uring_del_tctx_node(__c_pa(work->ctx));
 	complete(&work->completion);
 }
 

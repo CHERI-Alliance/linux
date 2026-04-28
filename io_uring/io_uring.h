@@ -5,6 +5,8 @@
 #include <linux/errno.h>
 #include <linux/lockdep.h>
 #include <linux/resume_user_mode.h>
+#include <linux/kasan.h>
+#include <linux/compat.h>
 #include <linux/poll.h>
 #include <linux/io_uring_types.h>
 #include <uapi/linux/eventpoll.h>
@@ -309,7 +311,7 @@ static inline void convert_compat64_io_uring_sqe(struct io_ring_ctx *ctx,
 	switch (sqe->opcode) {
 	case IORING_OP_POLL_REMOVE:
 	case IORING_OP_MSG_RING:
-		sqe->addr2 = (user_uintptr_t)READ_ONCE(compat_sqe->addr2);
+		sqe->addr2 = __c_fakeu(READ_ONCE(compat_sqe->addr2));
 		break;
 	default:
 		sqe->addr2 = (user_uintptr_t)compat_ptr(READ_ONCE(compat_sqe->addr2));
@@ -326,7 +328,7 @@ static inline void convert_compat64_io_uring_sqe(struct io_ring_ctx *ctx,
 	case IORING_OP_POLL_REMOVE:
 	case IORING_OP_TIMEOUT_REMOVE:
 	case IORING_OP_ASYNC_CANCEL:
-		sqe->addr = (__kernel_uintptr_t)READ_ONCE(compat_sqe->addr);
+		sqe->addr = __c_fakeu(READ_ONCE(compat_sqe->addr));
 		break;
 	default:
 		sqe->addr = (user_uintptr_t)compat_ptr(READ_ONCE(compat_sqe->addr));
@@ -336,7 +338,7 @@ static inline void convert_compat64_io_uring_sqe(struct io_ring_ctx *ctx,
 	sqe->len = READ_ONCE(compat_sqe->len);
 	BUILD_BUG_COMPAT_SQE_UNION_ELEM(rw_flags, user_data);
 	sqe->rw_flags = READ_ONCE(compat_sqe->rw_flags);
-	sqe->user_data = (user_uintptr_t)READ_ONCE(compat_sqe->user_data);
+	sqe->user_data = (user_uintptr_t)__c_fakeu(READ_ONCE(compat_sqe->user_data));
 	BUILD_BUG_COMPAT_SQE_UNION_ELEM(buf_index, personality);
 	sqe->buf_index = READ_ONCE(compat_sqe->buf_index);
 	sqe->personality = READ_ONCE(compat_sqe->personality);
@@ -412,7 +414,7 @@ static inline void __io_fill_cqe(struct io_ring_ctx *ctx, struct io_uring_cqe *c
 	if (io_in_compat64(ctx)) {
 		struct __c64_io_uring_cqe *compat_cqe = (struct __c64_io_uring_cqe *)cqe;
 
-		WRITE_ONCE(compat_cqe->user_data, (__u64)user_data);
+		WRITE_ONCE(compat_cqe->user_data, __c_ua(user_data));
 		WRITE_ONCE(compat_cqe->res, res);
 		WRITE_ONCE(compat_cqe->flags, cflags);
 

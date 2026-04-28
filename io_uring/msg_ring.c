@@ -81,7 +81,7 @@ static void io_msg_tw_complete(struct io_tw_req tw_req, io_tw_token_t tw)
 }
 
 static void io_msg_remote_post(struct io_ring_ctx *ctx, struct io_kiocb *req,
-			      int res, u32 cflags, u64 user_data)
+			       int res, u32 cflags, user_uintptr_t user_data)
 {
 	req->opcode = IORING_OP_NOP;
 	req->cqe.user_data = user_data;
@@ -266,8 +266,8 @@ static int __io_msg_ring_prep(struct io_msg *msg, const struct io_uring_sqe *sqe
 	msg->src_file = NULL;
 	msg->user_data = READ_ONCE(sqe->addr2);
 	msg->len = READ_ONCE(sqe->len);
-	msg->cmd = READ_ONCE(sqe->addr);
-	msg->src_fd = READ_ONCE(sqe->addr3);
+	msg->cmd = __c_ua(READ_ONCE(sqe->addr));
+	msg->src_fd = __c_ua(READ_ONCE(sqe->addr3));
 	msg->dst_fd = READ_ONCE(sqe->file_index);
 	msg->flags = READ_ONCE(sqe->msg_ring_flags);
 	if (msg->flags & ~IORING_MSG_RING_MASK)

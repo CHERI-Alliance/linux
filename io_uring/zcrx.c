@@ -120,7 +120,7 @@ static int io_import_dmabuf(struct io_zcrx_ifq *ifq,
 			    struct io_zcrx_mem *mem,
 			    struct io_uring_zcrx_area_reg *area_reg)
 {
-	unsigned long off = (unsigned long)area_reg->addr;
+	unsigned long off = __c_ua(area_reg->addr);
 	unsigned long len = (unsigned long)area_reg->len;
 	unsigned long total_size = 0;
 	struct scatterlist *sg;
@@ -199,7 +199,7 @@ static int io_import_umem(struct io_zcrx_ifq *ifq,
 		return -EINVAL;
 	if (!area_reg->addr)
 		return -EFAULT;
-	pages = io_pin_pages((unsigned long)area_reg->addr, area_reg->len,
+	pages = io_pin_pages(__c_ua(area_reg->addr), area_reg->len,
 				   &nr_pages);
 	if (IS_ERR(pages))
 		return PTR_ERR(pages);

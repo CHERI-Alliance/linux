@@ -134,8 +134,8 @@ int io_futex_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 		return -EINVAL;
 
 	iof->uaddr = u64_to_user_ptr(READ_ONCE(sqe->addr));
-	iof->futex_val = READ_ONCE(sqe->addr2);
-	iof->futex_mask = READ_ONCE(sqe->addr3);
+	iof->futex_val = __c_ua(READ_ONCE(sqe->addr2));
+	iof->futex_mask = __c_ua(READ_ONCE(sqe->addr3));
 	flags = READ_ONCE(sqe->fd);
 
 	if (flags & ~FUTEX2_VALID_MASK)

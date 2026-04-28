@@ -138,7 +138,7 @@ static int io_region_pin_pages(struct io_mapped_region *mr,
 	struct page **pages;
 	int nr_pages;
 
-	pages = io_pin_pages(reg->user_addr, size, &nr_pages);
+	pages = io_pin_pages(__c_ua(reg->user_addr), size, &nr_pages);
 	if (IS_ERR(pages))
 		return PTR_ERR(pages);
 	if (WARN_ON_ONCE(nr_pages != mr->nr_pages))
