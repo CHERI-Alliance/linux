@@ -573,7 +573,7 @@ unsigned long do_mmap(struct file *file, unsigned long addr,
 int check_pcuabi_map_ptr_arg(user_uintptr_t user_ptr, unsigned long len,
 			     bool map_fixed, bool locked)
 {
-	ptraddr_t addr = (ptraddr_t)user_ptr;
+	ptraddr_t addr = __c_ua(user_ptr);
 
 	if (!reserv_is_supported(current->mm))
 		return 0;
@@ -608,7 +608,7 @@ user_uintptr_t ksys_mmap_pgoff(user_uintptr_t user_ptr, unsigned long len,
 {
 	struct file *file = NULL;
 	user_uintptr_t retval = -EINVAL;
-	ptraddr_t addr = (ptraddr_t)user_ptr;
+	ptraddr_t addr = __c_ua(user_ptr);
 
 	if (!(flags & MAP_ANONYMOUS)) {
 		audit_mmap_fd(fd, flags);
@@ -638,7 +638,7 @@ user_uintptr_t ksys_mmap_pgoff(user_uintptr_t user_ptr, unsigned long len,
 				HUGETLB_ANONHUGE_INODE,
 				(flags >> MAP_HUGE_SHIFT) & MAP_HUGE_MASK);
 		if (IS_ERR(file))
-			return PTR_ERR(file);
+			return (uintptr_t)file;
 	}
 
 	/*
@@ -658,11 +658,11 @@ user_uintptr_t ksys_mmap_pgoff(user_uintptr_t user_ptr, unsigned long len,
 			goto out_fput;
 		}
 	}
-	retval = check_pcuabi_map_ptr_arg(user_ptr, len, flags & MAP_FIXED, false);
+	retval = __c_fakeu(check_pcuabi_map_ptr_arg(user_ptr, len, flags & MAP_FIXED, false));
 	if (retval)
 		goto out_fput;
 
-	retval = vm_mmap_pgoff(file, addr, len, prot, flags, pgoff);
+	retval = __c_fakeu(vm_mmap_pgoff(file, addr, len, prot, flags, pgoff));
 	if (!IS_ERR_VALUE(retval) && reserv_is_supported(current->mm)) {
 		if (user_ptr_is_valid((const void __user *)user_ptr)) {
 			WARN_ON(!(flags & MAP_FIXED));	// FIXCHERI: CHECK! This case is very strange.
@@ -694,7 +694,7 @@ struct mmap_arg_struct {
 	unsigned long offset;
 };
 
-SYSCALL_DEFINE1(old_mmap, struct mmap_arg_struct __user *, arg)
+SYSCALL_DEFINE1(__retptr__(old_mmap), struct mmap_arg_struct __user *, arg)
 {
 	struct mmap_arg_struct a;
 
@@ -1177,7 +1177,7 @@ EXPORT_SYMBOL(vm_munmap);
 
 SYSCALL_DEFINE2(munmap, user_uintptr_t, user_ptr, size_t, len)
 {
-	ptraddr_t addr = untagged_addr((ptraddr_t)user_ptr);
+	ptraddr_t addr = untagged_addr(__c_ua(user_ptr));
 
 	if (reserv_is_supported(current->mm) && !check_user_ptr_owning(user_ptr, len))
 		return -EINVAL;
