@@ -18,6 +18,7 @@
 #include <linux/uaccess.h>
 #include <linux/personality.h>
 #include <linux/entry-common.h>
+#include <linux/binfmts.h>
 
 #include <asm/asm-prototypes.h>
 #include <asm/unistd.h>
@@ -31,7 +32,10 @@
 #include <asm/vector.h>
 #include <asm/cpufeature.h>
 #include <asm/exec.h>
+#include <asm/riscvcheri.h>
 #include <asm/usercfi.h>
+
+#include <linux/cheri.h>
 
 #if defined(CONFIG_STACKPROTECTOR) && !defined(CONFIG_STACKPROTECTOR_PER_TASK)
 #include <linux/stackprotector.h>
@@ -56,7 +60,7 @@ int set_unalign_ctl(struct task_struct *tsk, unsigned int val)
 	return 0;
 }
 
-int get_unalign_ctl(struct task_struct *tsk, unsigned long adr)
+int get_unalign_ctl(struct task_struct *tsk, uintptr_t adr)
 {
 	if (!unaligned_ctl_available())
 		return -EINVAL;
@@ -141,9 +145,16 @@ static int __init compat_mode_detect(void)
 early_initcall(compat_mode_detect);
 #endif
 
-void start_thread(struct pt_regs *regs, unsigned long pc,
-	unsigned long sp)
+int start_thread(struct pt_regs *regs, unsigned long pc,
+		 struct linux_binprm *bprm)
 {
+#ifdef CONFIG_CHERI_KERNEL
+	/*
+	 * Make sure that the register state does not contain stale
+	 * capability data.
+	 */
+	memset(regs, 0, sizeof(*regs));
+#endif
 	regs->status = SR_PIE;
 	if (has_fpu()) {
 		regs->status |= SR_FS_INITIAL;
@@ -153,8 +164,18 @@ void start_thread(struct pt_regs *regs, unsigned long pc,
 		 */
 		fstate_restore(current, regs);
 	}
+#ifndef CONFIG_CHERI_KERNEL
 	regs->epc = pc;
-	regs->sp = sp;
+	regs->sp = bprm->p;
+#else
+	/* FIXCHERI: compat support missing */
+	regs->epc = (uintptr_t)riscv_cheri_set_capmode(bprm->pcuabi.pcc);
+	regs->sp = (user_uintptr_t)bprm->pcuabi.csp;
+	regs->a0  = __c_fakeu(bprm->argc);
+	regs->a1 = (user_uintptr_t)bprm->pcuabi.argv;
+	regs->a2 = (user_uintptr_t)bprm->pcuabi.envp;
+	regs->a3 = (user_uintptr_t)bprm->pcuabi.auxv;
+#endif
 
 	/*
 	 * clear shadow stack state on exec.
@@ -179,6 +200,8 @@ void start_thread(struct pt_regs *regs, unsigned long pc,
 	else
 		regs->status |= SR_UXL_64;
 #endif
+
+	return bprm->argc;
 }
 
 void flush_thread(void)
@@ -240,9 +263,9 @@ asmlinkage void ret_from_fork_user(struct pt_regs *regs)
 int copy_thread(struct task_struct *p, const struct kernel_clone_args *args)
 {
 	u64 clone_flags = args->flags;
-	unsigned long usp = args->stack;
-	unsigned long tls = args->tls;
-	unsigned long ssp = 0;
+	uintptr_t usp = args->stack;
+	uintptr_t tls = args->tls;
+	uintptr_t ssp = 0;
 	struct pt_regs *childregs = task_pt_regs(p);
 
 	/* Ensure all threads in this mm have the same pointer masking mode. */
@@ -260,7 +283,7 @@ int copy_thread(struct task_struct *p, const struct kernel_clone_args *args)
 
 		p->thread.s[0] = (uintptr_t)args->fn;
 		p->thread.s[1] = (uintptr_t)args->fn_arg;
-		p->thread.ra = (uintptr_t)ret_from_fork_kernel_asm;
+		p->thread.ra = (uintptr_t)cheri_make_kernel_code_cap(__c_pa(&ret_from_fork_kernel_asm));
 	} else {
 		/* allocate new shadow stack if needed. In case of CLONE_VM we have to */
 		ssp = shstk_alloc_thread_stack(p, args);
@@ -278,7 +301,7 @@ int copy_thread(struct task_struct *p, const struct kernel_clone_args *args)
 		if (clone_flags & CLONE_SETTLS)
 			childregs->tp = tls;
 		childregs->a0 = 0; /* Return value of fork() */
-		p->thread.ra = (uintptr_t)ret_from_fork_user_asm;
+		p->thread.ra = (uintptr_t)cheri_make_kernel_code_cap(__c_pa(&ret_from_fork_user_asm));
 	}
 	p->thread.riscv_v_flags = 0;
 	if (has_vector() || has_xtheadvector())
