@@ -1680,24 +1680,23 @@ static int lo_compat_ioctl(struct block_device *bdev, blk_mode_t mode,
 			   unsigned int cmd, unsigned long arg)
 {
 	struct loop_device *lo = bdev->bd_disk->private_data;
+	void __user *argp = compat_ptr(arg);
 	int err;
 
 	switch(cmd) {
 	case LOOP_SET_STATUS:
-		err = loop_set_status_compat(lo,
-			     (const struct compat_loop_info __user *)arg);
+		err = loop_set_status_compat(lo, argp);
 		break;
 	case LOOP_GET_STATUS:
-		err = loop_get_status_compat(lo,
-				     (struct compat_loop_info __user *)arg);
+		err = loop_get_status_compat(lo, argp);
 		break;
 	case LOOP_SET_CAPACITY:
 	case LOOP_CLR_FD:
 	case LOOP_GET_STATUS64:
 	case LOOP_SET_STATUS64:
 	case LOOP_CONFIGURE:
-		arg = (user_uintptr_t) compat_ptr(arg);
-		fallthrough;
+		err = lo_ioctl(bdev, mode, cmd, (user_uintptr_t)argp);
+		break;
 	case LOOP_SET_FD:
 	case LOOP_CHANGE_FD:
 	case LOOP_SET_BLOCK_SIZE:
