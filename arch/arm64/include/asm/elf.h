@@ -184,10 +184,9 @@ typedef struct user_fpsimd_state elf_fpregset_t;
 })
 
 /* update AT_VECTOR_SIZE_ARCH if the number of NEW_AUX_ENT entries changes */
-#define ARCH_DLINFO							\
+#define SETUP_DLINFO(_EHDR_VAL)						\
 do {									\
-	NEW_AUX_ENT(AT_SYSINFO_EHDR,					\
-		    (elf_addr_t)current->mm->context.vdso);		\
+	NEW_AUX_ENT(AT_SYSINFO_EHDR, _EHDR_VAL);				\
 									\
 	/*								\
 	 * Should always be nonzero unless there's a kernel bug.	\
@@ -199,6 +198,16 @@ do {									\
 	else								\
 		NEW_AUX_ENT(AT_IGNORE, 0);				\
 } while (0)
+
+#ifdef CONFIG_CHERI_PURECAP_UABI
+/*
+ * TODO [PCuABI]: In Transitional PCuABI, AT_SYSINFO_EHDR is passed as NULL
+ * as there is no purecap vDSO yet.
+ */
+#define ARCH_DLINFO	SETUP_DLINFO(0)
+#else /* !CONFIG_CHERI_PURECAP_UABI */
+#define ARCH_DLINFO	SETUP_DLINFO((elf_addr_t)current->mm->context.vdso)
+#endif /* CONFIG_CHERI_PURECAP_UABI */
 
 #define ARCH_HAS_SETUP_ADDITIONAL_PAGES
 struct linux_binprm;
