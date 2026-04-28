@@ -2157,7 +2157,7 @@ static void es58x_free_netdevs(struct es58x_device *es58x_dev)
  *	any error occurs.
  */
 static struct es58x_device *es58x_init_es58x_dev(struct usb_interface *intf,
-						 kernel_ulong_t driver_info)
+						 uintptr_t driver_info)
 {
 	struct device *dev = &intf->dev;
 	struct es58x_device *es58x_dev;

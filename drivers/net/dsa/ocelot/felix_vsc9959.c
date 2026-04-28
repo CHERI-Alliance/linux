@@ -1797,7 +1797,7 @@ static int vsc9959_stream_identify(struct flow_cls_offload *f,
 		return -EOPNOTSUPP;
 	}
 
-	stream->id = f->cookie;
+	stream->id = __c_ua(f->cookie);
 
 	return 0;
 }
@@ -2404,7 +2404,7 @@ static int vsc9959_psfp_filter_del(struct ocelot *ocelot,
 
 	mutex_lock(&psfp->lock);
 
-	stream = vsc9959_stream_table_get(&psfp->stream_list, f->cookie);
+	stream = vsc9959_stream_table_get(&psfp->stream_list, __c_ua(f->cookie));
 	if (!stream) {
 		mutex_unlock(&psfp->lock);
 		return -ENOMEM;
@@ -2498,7 +2498,7 @@ static int vsc9959_psfp_stats_get(struct ocelot *ocelot,
 	static struct felix_stream_filter *sfi;
 	struct felix_stream *stream;
 
-	stream = vsc9959_stream_table_get(&psfp->stream_list, f->cookie);
+	stream = vsc9959_stream_table_get(&psfp->stream_list, __c_ua(f->cookie));
 	if (!stream)
 		return -ENOMEM;
 

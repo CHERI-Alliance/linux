@@ -301,7 +301,7 @@ static int par96_open(struct net_device *dev)
 
 	if (!dev || !bc)
 		return -ENXIO;
-	pp = parport_find_base(dev->base_addr);
+	pp = parport_find_base(__c_ua(dev->base_addr));
 	if (!pp) {
 		printk(KERN_ERR "baycom_par: parport at 0x%lx unknown\n", (unsigned long)dev->base_addr);
 		return -ENXIO;

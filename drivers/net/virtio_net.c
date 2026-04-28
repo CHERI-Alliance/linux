@@ -1488,7 +1488,7 @@ static void *virtnet_xsk_to_ptr(u32 len)
 
 	p = len << VIRTIO_XSK_FLAG_OFFSET;
 
-	return virtnet_xmit_ptr_pack((void *)p, VIRTNET_XMIT_TYPE_XSK);
+	return virtnet_xmit_ptr_pack(__c_fakep(p), VIRTNET_XMIT_TYPE_XSK);
 }
 
 static int virtnet_xsk_xmit_one(struct send_queue *sq,

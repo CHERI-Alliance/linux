@@ -143,7 +143,7 @@ static int __init arcrimi_found(struct net_device *dev)
 		return -ENODEV;
 	}
 
-	shmem = dev->mem_start;
+	shmem = __c_ua(dev->mem_start);
 	arcnet_writeb(TESTvalue, p, COM9026_REG_W_INTMASK);
 	arcnet_writeb(TESTvalue, p, COM9026_REG_W_COMMAND);
 					/* actually the station/node ID */
@@ -170,8 +170,8 @@ static int __init arcrimi_found(struct net_device *dev)
 		last_mirror += mirror_size;
 	last_mirror -= mirror_size;
 
-	dev->mem_start = first_mirror;
-	dev->mem_end = last_mirror + MIRROR_SIZE - 1;
+	dev->mem_start = __c_fakeu(first_mirror);
+	dev->mem_end = __c_fakeu(last_mirror + MIRROR_SIZE - 1);
 
 	/* initialize the rest of the device structure. */
 
@@ -200,7 +200,7 @@ static int __init arcrimi_found(struct net_device *dev)
 	}
 
 	lp->mem_start = ioremap(dev->mem_start,
-				dev->mem_end - dev->mem_start + 1);
+				__c_ua(dev->mem_end - dev->mem_start + 1));
 	if (!lp->mem_start) {
 		arc_printk(D_NORMAL, dev, "Can't remap device memory!\n");
 		goto err_release_mem;

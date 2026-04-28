@@ -166,7 +166,7 @@ struct asix_data {
 	u8 phymode;
 	u8 ledmode;
 	u8 res;
-};
+} __cheri_pointer_align;
 
 struct asix_rx_fixup_info {
 	struct sk_buff *ax_skb;
