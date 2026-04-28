@@ -102,7 +102,7 @@
 struct epoll_filefd {
 	struct file *file;
 	int fd;
-} __packed;
+} __packed __cheri_pointer_align;
 
 /* Wait structure used by the poll hooks */
 struct eppoll_entry {
@@ -2387,7 +2387,7 @@ static int get_compat_epoll_event(struct epoll_event *epds,
 	if (unlikely(copy_from_user(&compat_epds, user_epds, sizeof(compat_epds))))
 		return -EFAULT;
 	epds->events = compat_epds.events;
-	epds->data = compat_epds.data;
+	epds->data = __c_fakeu(compat_epds.data);
 	return 0;
 }
 

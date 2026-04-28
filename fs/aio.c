@@ -659,7 +659,7 @@ static int aio_setup_ring(struct kioctx *ctx, unsigned int nr_events)
 				 PROT_READ | PROT_WRITE,
 				 MAP_SHARED, 0, 0, &unused, NULL);
 	mmap_write_unlock(mm);
-	if (IS_ERR((void *)ctx->mmap_base)) {
+	if (IS_ERR(__c_fakep(ctx->mmap_base))) {
 		ctx->mmap_size = 0;
 		aio_free_ring(ctx);
 		return -ENOMEM;
@@ -1247,7 +1247,7 @@ static void aio_complete(struct aio_kiocb *iocb)
 		tail = 0;
 
 	pr_debug("%p[%u]: %p: %p %Lx %Lx %Lx\n", ctx, tail, iocb,
-		 (void __user *)(uintptr_t)iocb->ki_res.obj,
+		 (void *)(uintptr_t)iocb->ki_res.obj,
 		 (unsigned long long)iocb->ki_res.data,
 		 iocb->ki_res.res, iocb->ki_res.res2);
 
@@ -1518,7 +1518,7 @@ COMPAT_SYSCALL_DEFINE2(io_setup, unsigned, nr_events, compat_aio_context_t __use
 	ret = -EINVAL;
 	if (unlikely(ctx || nr_events == 0)) {
 		pr_debug("EINVAL: ctx %lu nr_events %u\n",
-		         ctx, nr_events);
+		         (unsigned long)ctx, nr_events);
 		goto out;
 	}
 

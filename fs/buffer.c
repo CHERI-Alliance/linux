@@ -1581,7 +1581,7 @@ void folio_set_bh(struct buffer_head *bh, struct folio *folio,
 		/*
 		 * This catches illegal uses and preserves the offset:
 		 */
-		bh->b_data = (char *)(0 + offset);
+		bh->b_data = (char*)__c_fakep(0 + offset);
 	else
 		bh->b_data = folio_address(folio) + offset;
 }

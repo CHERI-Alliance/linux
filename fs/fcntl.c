@@ -597,7 +597,8 @@ SYSCALL_DEFINE3(fcntl, unsigned int, fd, unsigned int, cmd, user_uintptr_t, arg)
 			return -EBADF;
 	}
 
-	err = security_file_fcntl(fd_file(f), cmd, arg);
+	/* FIXCHERI: This assumes that the security hook will not deref the argument. */
+	err = security_file_fcntl(fd_file(f), cmd, __c_ua(arg));
 	if (!err)
 		err = do_fcntl(fd, cmd, arg, fd_file(f));
 

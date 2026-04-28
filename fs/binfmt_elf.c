@@ -454,17 +454,17 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	 */
 	ARCH_DLINFO;
 #endif
-	NEW_AUX_ENT(AT_HWCAP, ELF_HWCAP);
+	NEW_AUX_ENT(AT_HWCAP, __c_fakeu(ELF_HWCAP));
 	NEW_AUX_ENT(AT_PAGESZ, ELF_EXEC_PAGESIZE);
 	NEW_AUX_ENT(AT_CLKTCK, CLOCKS_PER_SEC);
 	NEW_AUX_ENT(AT_PHDR, make_ro_at_from_addr(phdr_addr,
 				     exec->e_phnum * sizeof(struct elf_phdr)));
 	NEW_AUX_ENT(AT_PHENT, sizeof(struct elf_phdr));
 	NEW_AUX_ENT(AT_PHNUM, exec->e_phnum);
-	NEW_AUX_ENT(AT_BASE, interp_load_addr);
+	NEW_AUX_ENT(AT_BASE, __c_fakeu(interp_load_addr));
 	if (bprm->interp_flags & BINPRM_FLAGS_PRESERVE_ARGV0)
 		flags |= AT_FLAGS_PRESERVE_ARGV0;
-	NEW_AUX_ENT(AT_FLAGS, flags);
+	NEW_AUX_ENT(AT_FLAGS, __c_fakeu(flags));
 	NEW_AUX_ENT(AT_ENTRY, make_at_entry(exec_load_info));
 	NEW_AUX_ENT(AT_UID, from_kuid_munged(cred->user_ns, cred->uid));
 	NEW_AUX_ENT(AT_EUID, from_kuid_munged(cred->user_ns, cred->euid));
@@ -646,7 +646,7 @@ static unsigned long elf_map(struct file *filep, unsigned long addr,
 		map_addr = vm_mmap(filep, addr, size, prot, type, off);
 
 	if ((type & MAP_FIXED_NOREPLACE) &&
-	    PTR_ERR((void *)map_addr) == -EEXIST)
+	    PTR_ERR(__c_fakep(map_addr)) == -EEXIST)
 		pr_info("%d (%s): Uhuuh, elf segment at %px requested but the memory is mapped already\n",
 			task_pid_nr(current), current->comm, (void *)(uintptr_t)addr);
 
@@ -1452,7 +1452,7 @@ out_free_interp:
 							     elf_prot, elf_flags, total_size);
 					if (BAD_ADDR(load_bias)) {
 						retval = IS_ERR_VALUE(load_bias) ?
-							 PTR_ERR((void*)load_bias) : -EINVAL;
+							 PTR_ERR((void*)__c_fakep(load_bias)) : -EINVAL;
 						goto out_free_dentry;
 					}
 					vm_munmap(load_bias, total_size);
@@ -1478,7 +1478,7 @@ out_free_interp:
 				elf_prot, elf_flags, total_size);
 		if (BAD_ADDR(error)) {
 			retval = IS_ERR_VALUE(error) ?
-				PTR_ERR((void*)error) : -EINVAL;
+				PTR_ERR(__c_fakep(error)) : -EINVAL;
 			goto out_free_dentry;
 		}
 

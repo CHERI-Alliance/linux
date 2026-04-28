@@ -257,12 +257,12 @@ enum {
 
 static void offset_set(struct dentry *dentry, long offset)
 {
-	dentry->d_fsdata = (void *)offset;
+	dentry->d_fsdata = __c_fakep(offset);
 }
 
 static long dentry2offset(struct dentry *dentry)
 {
-	return (intptr_t)dentry->d_fsdata;
+	return (long)__c_pa(dentry->d_fsdata);
 }
 
 static struct lock_class_key simple_offset_lock_class;

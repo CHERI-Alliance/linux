@@ -728,7 +728,7 @@ static void locks_delete_global_locks(struct file_lock_core *flc)
 static unsigned long
 posix_owner_key(struct file_lock_core *flc)
 {
-	return (uintptr_t) flc->flc_owner;
+	return __c_pa(flc->flc_owner);
 }
 
 static void locks_insert_global_blocked(struct file_lock_core *waiter)
