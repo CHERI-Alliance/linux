@@ -2781,14 +2781,19 @@ SYSCALL_DEFINE5(clone, unsigned long, clone_flags, user_uintptr_t, newsp,
 		 user_uintptr_t, tls)
 #endif
 {
+	bool compat_mode = in_compat_syscall();
 	struct kernel_clone_args args = {
 		.flags		= (lower_32_bits(clone_flags) & ~CSIGNAL),
 		.pidfd		= parent_tidptr,
 		.child_tid	= child_tidptr,
 		.parent_tid	= parent_tidptr,
 		.exit_signal	= (lower_32_bits(clone_flags) & CSIGNAL),
-		.stack		= newsp,
-		.tls		= tls,
+		.stack		= (compat_mode ?
+				   (user_uintptr_t)(compat_ulong_t)newsp :
+				   newsp),
+		.tls		= (compat_mode ?
+				   (user_uintptr_t)(compat_ulong_t)tls :
+				   tls),
 	};
 
 	return kernel_clone(&args);
