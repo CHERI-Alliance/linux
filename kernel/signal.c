@@ -4954,17 +4954,23 @@ static inline void siginfo_buildtime_checks(void)
 		BUILD_BUG_ON(sizeof_field(struct siginfo, si_pid) !=
 			     sizeof(void __user *));
 	} else {
+#ifndef CONFIG_CHERI_PURECAP_UABI
+		/* TODO [PCuABI] - Revisit them during full signal support */
 		BUILD_BUG_ON((sizeof_field(struct siginfo, si_pid) +
 			      sizeof_field(struct siginfo, si_uid)) !=
 			     sizeof(void __user *));
+#endif
 		BUILD_BUG_ON(offsetofend(struct siginfo, si_pid) !=
 			     offsetof(struct siginfo, si_uid));
 	}
 #ifdef CONFIG_COMPAT
 	BUILD_BUG_ON(offsetof(struct compat_siginfo, si_pid) !=
 		     offsetof(struct compat_siginfo, si_addr));
+#ifndef CONFIG_CHERI_PURECAP_UABI
+	/* TODO [PCuABI] - Revisit them during full signal support */
 	BUILD_BUG_ON(sizeof_field(struct compat_siginfo, si_pid) !=
 		     sizeof(compat_uptr_t));
+#endif
 	BUILD_BUG_ON(sizeof_field(struct compat_siginfo, si_pid) !=
 		     sizeof_field(struct siginfo, si_pid));
 #endif
