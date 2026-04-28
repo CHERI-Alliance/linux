@@ -1470,7 +1470,7 @@ static int io_send_zc_import(struct io_kiocb *req,
 
 	if (!(sr->flags & IORING_SEND_VECTORIZED)) {
 		ret = io_import_reg_buf(notif, &kmsg->msg.msg_iter,
-					(u64)(user_uintptr_t)sr->buf, sr->len,
+					sr->buf, sr->len,
 					ITER_SOURCE, issue_flags);
 	} else {
 		unsigned uvec_segs = kmsg->msg.msg_iter.nr_segs;
@@ -1739,7 +1739,7 @@ int io_connect_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 		return -EINVAL;
 
 	conn->addr = u64_to_user_ptr(READ_ONCE(sqe->addr));
-	conn->addr_len =  READ_ONCE(sqe->addr2);
+	conn->addr_len = READ_ONCE(sqe->off);
 	conn->in_progress = conn->seen_econnaborted = false;
 
 	io = io_msg_alloc_async(req);
