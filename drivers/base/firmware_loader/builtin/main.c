@@ -11,7 +11,7 @@ struct builtin_fw {
 	char *name;
 	void *data;
 	unsigned long size;
-};
+} __cheri_pointer_align;
 
 extern struct builtin_fw __start_builtin_fw[];
 extern struct builtin_fw __end_builtin_fw[];
