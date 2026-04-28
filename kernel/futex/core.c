@@ -548,7 +548,7 @@ static u64 get_inode_sequence_number(struct inode *inode)
 int get_futex_key(u32 __user *uaddr, unsigned int flags, union futex_key *key,
 		  enum futex_access rw)
 {
-	user_uintptr_t address = (user_uintptr_t)uaddr;
+	unsigned long address = user_ptr_addr(uaddr);
 	struct mm_struct *mm = current->mm;
 	struct page *page;
 	struct folio *folio;
@@ -1139,7 +1139,14 @@ static inline int fetch_robust_entry(struct robust_list __user2 * __capability *
 	if (get_user(uentry, (unsigned long __user *)head))
 		return -EFAULT;
 
-	*entry = (void __user *)(uentry & ~1UL);
+	/*
+	 * TODO [PCuABI] - pointer conversion to be checked
+	 * Each entry points to either next one or head of the list
+	 * so this should probably operate on capabilities and use
+	 * get_user_ptr instead, or validate the capability prior to
+	 * get_user
+	 */
+	*entry = uaddr_to_user_ptr(uentry & ~1UL);
 	*pi = uentry & 1;
 
 	return 0;
