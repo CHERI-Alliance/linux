@@ -199,7 +199,9 @@ static inline void __user *__uaccess_mask_ptr(const void __user *ptr)
 #ifdef CONFIG_CC_HAS_ASM_GOTO_OUTPUT
 #define __get_mem_asm(load, reg, x, addr, label, type)			\
 	asm_goto_output(						\
+	__ASM_UACCESS_BEFORE						\
 	"1:	" load "	" reg "0, [%1]\n"			\
+	__ASM_UACCESS_AFTER						\
 	_ASM_EXTABLE_##type##ACCESS(1b, %l2)				\
 	: "=r" (x)							\
 	: "r" (addr) : : label)
@@ -207,8 +209,10 @@ static inline void __user *__uaccess_mask_ptr(const void __user *ptr)
 #define __get_mem_asm(load, reg, x, addr, label, type) do {		\
 	int __gma_err = 0;						\
 	asm volatile(							\
+	__ASM_UACCESS_BEFORE						\
 	"1:	" load "	" reg "1, [%2]\n"			\
 	"2:\n"								\
+	__ASM_UACCESS_AFTER						\
 	_ASM_EXTABLE_##type##ACCESS_ERR_ZERO(1b, 2b, %w0, %w1)		\
 	: "+r" (__gma_err), "=r" (x)					\
 	: "r" (addr));							\
@@ -308,8 +312,10 @@ do {									\
 
 #define __put_mem_asm(store, reg, x, addr, label, type)			\
 	asm goto(							\
+	__ASM_##type##ACCESS_BEFORE					\
 	"1:	" store "	" reg "0, [%1]\n"			\
 	"2:\n"								\
+	__ASM_##type##ACCESS_AFTER					\
 	_ASM_EXTABLE_##type##ACCESS(1b, %l2)				\
 	: : "rZ" (x), "r" (addr) : : label)
 
