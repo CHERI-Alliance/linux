@@ -614,4 +614,7 @@ typedef struct {
   Elf64_Word    vda_next;
 } Elf64_Verdaux;
 
+/* Bits for PCuABI ELF_header.e_flags for AArch64 */
+#define EF_AARCH64_CHERI_PURECAP		0x00010000
+
 #endif /* _UAPI_LINUX_ELF_H */
