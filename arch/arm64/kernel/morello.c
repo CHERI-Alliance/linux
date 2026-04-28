@@ -68,6 +68,44 @@ void morello_setup_signal_return(struct pt_regs *regs)
 	__morello_cap_cpy(&regs->cregs[30], &morello_root_cap);
 }
 
+static char *format_cap(char *buf, size_t size, const cap128_t *cap)
+{
+	u64 lo_val, hi_val;
+	u8 tag;
+
+	__morello_cap_lo_hi_tag(cap, &lo_val, &hi_val, &tag);
+
+	if (snprintf(buf, size, "%u:%016llx:%016llx", tag, hi_val, lo_val) <= 0)
+		buf[0] = '\0';
+	return buf;
+}
+
+void morello_show_regs(struct pt_regs *regs)
+{
+	char buf[48], buf2[48];
+	int i;
+
+	/*
+	 * To ensure that the 64-bit and capability views are consistent,
+	 * perform the standard register merging, like when saving registers on
+	 * the signal frame.
+	 */
+	morello_merge_cap_regs(regs);
+
+	/* Same layout as the X registers (see __show_regs()) */
+	printk("pcc: %s\n", format_cap(buf, sizeof(buf), &regs->pcc));
+	printk("clr: %s\n", format_cap(buf, sizeof(buf), &regs->cregs[30]));
+
+	printk("csp: %s\n", format_cap(buf, sizeof(buf), &regs->csp));
+	printk("rcsp: %s\n", format_cap(buf, sizeof(buf), &regs->rcsp));
+
+	for (i = 29; i > 0; i -= 2) {
+		printk("c%-2d: %s c%-2d: %s\n",
+		       i, format_cap(buf, sizeof(buf), &regs->cregs[i]),
+		       i - 1, format_cap(buf2, sizeof(buf2), &regs->cregs[i - 1]));
+	}
+}
+
 void morello_merge_cap_regs(struct pt_regs *regs)
 {
 	int i;
