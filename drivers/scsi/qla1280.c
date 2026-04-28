@@ -2800,7 +2800,7 @@ qla1280_64bit_start_scsi(struct scsi_qla_host *ha, struct srb * sp)
 	CMD_HANDLE(sp->cmd) = (unsigned char *)(uintptr_t)(cnt + 1);
 
 	dprintk(2, "start: cmd=%p sp=%p CDB=%xm, handle %lx\n", cmd, sp,
-		cmd->cmnd[0], (long)CMD_HANDLE(sp->cmd));
+		cmd->cmnd[0], (long)__c_pa(CMD_HANDLE(sp->cmd)));
 	dprintk(2, "             bus %i, target %i, lun %llu\n",
 		SCSI_BUS_32(cmd), SCSI_TCN_32(cmd), SCSI_LUN_32(cmd));
 	qla1280_dump_buffer(2, cmd->cmnd, MAX_COMMAND_SIZE);
@@ -4117,7 +4117,7 @@ static const struct scsi_host_template qla1280_driver_template = {
 static int
 qla1280_probe_one(struct pci_dev *pdev, const struct pci_device_id *id)
 {
-	int devnum = id->driver_data;
+	int devnum = __c_ua(id->driver_data);
 	struct qla_boards *bdp = &ql1280_board_tbl[devnum];
 	struct Scsi_Host *host;
 	struct scsi_qla_host *ha;

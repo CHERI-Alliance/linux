@@ -11064,7 +11064,7 @@ static int advansys_board_found(struct Scsi_Host *shost, unsigned int iop,
 			 * Convert x86 realmode code segment to a linear
 			 * address by shifting left 4.
 			 */
-			shost->base = ((ulong)boardp->bios_codeseg << 4);
+			shost->base = __c_fakeu(((ulong)boardp->bios_codeseg << 4));
 		} else {
 			shost->base = 0;
 		}

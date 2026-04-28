@@ -356,11 +356,12 @@ static char *qdev_state[] = {
  * side effect: lock crb window
  */
 static void
-qla4_82xx_pci_set_crbwindow_2M(struct scsi_qla_host *ha, ulong *off)
+qla4_82xx_pci_set_crbwindow_2M(struct scsi_qla_host *ha, uintptr_t *ptr)
 {
 	u32 win_read;
+	unsigned long off = __c_ua(*ptr);
 
-	ha->crb_win = CRB_HI(*off);
+	ha->crb_win = CRB_HI(off);
 	writel(ha->crb_win,
 		(void __iomem *)(CRB_WINDOW_2M + ha->nx_pcibase));
 
@@ -370,9 +371,9 @@ qla4_82xx_pci_set_crbwindow_2M(struct scsi_qla_host *ha, ulong *off)
 	if (win_read != ha->crb_win) {
 		DEBUG2(ql4_printk(KERN_INFO, ha,
 		    "%s: Written crbwin (0x%x) != Read crbwin (0x%x),"
-		    " off=0x%lx\n", __func__, ha->crb_win, win_read, *off));
+		    " off=0x%lx\n", __func__, ha->crb_win, win_read, off));
 	}
-	*off = (*off & MASK(16)) + CRB_INDIRECT_2M + ha->nx_pcibase;
+	*ptr = (off & MASK(16)) + CRB_INDIRECT_2M + ha->nx_pcibase;
 }
 
 #define CRB_WIN_LOCK_TIMEOUT 100000000
@@ -405,9 +406,10 @@ void qla4_82xx_crb_win_unlock(struct scsi_qla_host *ha)
 }
 
 void
-qla4_82xx_wr_32(struct scsi_qla_host *ha, ulong off, u32 data)
+qla4_82xx_wr_32(struct scsi_qla_host *ha, ulong uoff, u32 data)
 {
 	unsigned long flags = 0;
+	uintptr_t off = __c_fakeu(uoff);
 	int rv;
 
 	rv = qla4_82xx_pci_get_crb_addr_2M(ha, &off);
@@ -428,9 +430,10 @@ qla4_82xx_wr_32(struct scsi_qla_host *ha, ulong off, u32 data)
 	}
 }
 
-uint32_t qla4_82xx_rd_32(struct scsi_qla_host *ha, ulong off)
+uint32_t qla4_82xx_rd_32(struct scsi_qla_host *ha, ulong uoff)
 {
 	unsigned long flags = 0;
+	uintptr_t off = __c_fakeu(uoff);
 	int rv;
 	u32 data;
 
@@ -541,31 +544,32 @@ void qla4_82xx_idc_unlock(struct scsi_qla_host *ha)
 }
 
 int
-qla4_82xx_pci_get_crb_addr_2M(struct scsi_qla_host *ha, ulong *off)
+qla4_82xx_pci_get_crb_addr_2M(struct scsi_qla_host *ha, uintptr_t *ptr)
 {
 	struct crb_128M_2M_sub_block_map *m;
+	unsigned long off = __c_ua(*ptr);
 
-	if (*off >= QLA82XX_CRB_MAX)
+	if (off >= QLA82XX_CRB_MAX)
 		return -1;
 
-	if (*off >= QLA82XX_PCI_CAMQM && (*off < QLA82XX_PCI_CAMQM_2M_END)) {
-		*off = (*off - QLA82XX_PCI_CAMQM) +
+	if (off >= QLA82XX_PCI_CAMQM && (off < QLA82XX_PCI_CAMQM_2M_END)) {
+		*ptr = (off - QLA82XX_PCI_CAMQM) +
 		    QLA82XX_PCI_CAMQM_2M_BASE + ha->nx_pcibase;
 		return 0;
 	}
 
-	if (*off < QLA82XX_PCI_CRBSPACE)
+	if (off < QLA82XX_PCI_CRBSPACE)
 		return -1;
 
-	*off -= QLA82XX_PCI_CRBSPACE;
+	off -= QLA82XX_PCI_CRBSPACE;
 	/*
 	 * Try direct map
 	 */
 
-	m = &crb_128M_2M_map[CRB_BLK(*off)].sub_block[CRB_SUBBLK(*off)];
+	m = &crb_128M_2M_map[CRB_BLK(off)].sub_block[CRB_SUBBLK(off)];
 
-	if (m->valid && (m->start_128M <= *off) && (m->end_128M > *off)) {
-		*off = *off + m->start_2M - m->start_128M + ha->nx_pcibase;
+	if (m->valid && (m->start_128M <= off) && (m->end_128M > off)) {
+		*ptr = off + m->start_2M - m->start_128M + ha->nx_pcibase;
 		return 0;
 	}
 

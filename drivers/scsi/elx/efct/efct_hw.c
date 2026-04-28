@@ -480,7 +480,7 @@ efct_hw_setup_io(struct efct_hw *hw)
 	u32	i = 0;
 	struct efct_hw_io	*io = NULL;
 	uintptr_t	xfer_virt = 0;
-	uintptr_t	xfer_phys = 0;
+	unsigned long	xfer_phys = 0;
 	u32	index;
 	bool new_alloc = true;
 	struct efc_dma *dma;
@@ -1775,7 +1775,7 @@ efct_hw_io_init_sges(struct efct_hw *hw, struct efct_hw_io *io,
 
 int
 efct_hw_io_add_sge(struct efct_hw *hw, struct efct_hw_io *io,
-		   uintptr_t addr, u32 length)
+		   unsigned long addr, u32 length)
 {
 	struct sli4_sge	*data = NULL;
 	u32 sge_flags = 0;
@@ -3357,7 +3357,7 @@ efct_hw_port_control(struct efct_hw *hw, enum efct_hw_port ctrl,
 			break;
 		}
 		speed = hw->config.speed;
-		reset_alpa = (u8)(value & 0xff);
+		reset_alpa = (u8)(__c_ua(value) & 0xff);
 
 		rc = -EIO;
 		if (!sli_cmd_init_link(&hw->sli, link, speed, reset_alpa))

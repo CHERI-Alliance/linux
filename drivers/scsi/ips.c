@@ -2032,7 +2032,7 @@ ips_host_info(ips_ha_t *ha, struct seq_file *m)
 			  ha->mem_addr, ha->mem_len);
 		seq_printf(m,
 			  "\tShared memory address             : 0x%lx\n",
-			  (unsigned long)ha->mem_ptr);
+			  __c_pa(ha->mem_ptr));
 	}
 
 	seq_printf(m, "\tIRQ number                        : %d\n", ha->pcidev->irq);
