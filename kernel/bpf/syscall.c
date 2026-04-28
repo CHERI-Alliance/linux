@@ -6128,6 +6128,274 @@ out_prog_put:
 	return ret;
 }
 
+static void convert_compat_bpf_attr(union bpf_attr *dest,
+				    const union compat_bpf_attr *cattr, int cmd)
+{
+	switch (cmd) {
+	case BPF_MAP_CREATE:
+		copy_field(dest, cattr, map_type);
+		copy_field(dest, cattr, key_size);
+		copy_field(dest, cattr, value_size);
+		copy_field(dest, cattr, max_entries);
+		copy_field(dest, cattr, map_flags);
+		copy_field(dest, cattr, inner_map_fd);
+		copy_field(dest, cattr, numa_node);
+		strncpy(dest->map_name, cattr->map_name, BPF_OBJ_NAME_LEN);
+		copy_field(dest, cattr, map_ifindex);
+		copy_field(dest, cattr, btf_fd);
+		copy_field(dest, cattr, btf_key_type_id);
+		copy_field(dest, cattr, btf_value_type_id);
+		copy_field(dest, cattr, btf_vmlinux_value_type_id);
+		copy_field(dest, cattr, map_extra);
+		break;
+	case BPF_MAP_LOOKUP_ELEM:
+	case BPF_MAP_UPDATE_ELEM:
+	case BPF_MAP_DELETE_ELEM:
+	case BPF_MAP_LOOKUP_AND_DELETE_ELEM:
+		copy_field(dest, cattr, map_fd);
+		copy_field(dest, cattr, key);
+		copy_field(dest, cattr, value);
+		/* u64 next_key is in a union with u64 value */
+		copy_field(dest, cattr, flags);
+		break;
+	case BPF_MAP_LOOKUP_BATCH:
+	case BPF_MAP_LOOKUP_AND_DELETE_BATCH:
+	case BPF_MAP_UPDATE_BATCH:
+	case BPF_MAP_DELETE_BATCH:
+		copy_field(dest, cattr, batch.in_batch);
+		copy_field(dest, cattr, batch.out_batch);
+		copy_field(dest, cattr, batch.keys);
+		copy_field(dest, cattr, batch.values);
+		copy_field(dest, cattr, batch.count);
+		copy_field(dest, cattr, batch.map_fd);
+		copy_field(dest, cattr, batch.elem_flags);
+		copy_field(dest, cattr, batch.flags);
+		break;
+	case BPF_PROG_LOAD:
+		copy_field(dest, cattr, prog_type);
+		copy_field(dest, cattr, insn_cnt);
+		copy_field(dest, cattr, insns);
+		copy_field(dest, cattr, license);
+		copy_field(dest, cattr, log_level);
+		copy_field(dest, cattr, log_size);
+		copy_field(dest, cattr, log_buf);
+		copy_field(dest, cattr, kern_version);
+		copy_field(dest, cattr, prog_flags);
+		strncpy(dest->prog_name, cattr->prog_name, BPF_OBJ_NAME_LEN);
+		copy_field(dest, cattr, prog_ifindex);
+		copy_field(dest, cattr, expected_attach_type);
+		copy_field(dest, cattr, prog_btf_fd);
+		copy_field(dest, cattr, func_info_rec_size);
+		copy_field(dest, cattr, func_info);
+		copy_field(dest, cattr, func_info_cnt);
+		copy_field(dest, cattr, line_info_rec_size);
+		copy_field(dest, cattr, line_info);
+		copy_field(dest, cattr, line_info_cnt);
+		copy_field(dest, cattr, attach_btf_id);
+		copy_field(dest, cattr, attach_prog_fd);
+		/* u32 attach_btf_obj_fd is in a union with u32 attach_prog_fd */
+		copy_field(dest, cattr, core_relo_cnt);
+		copy_field(dest, cattr, fd_array);
+		copy_field(dest, cattr, core_relos);
+		copy_field(dest, cattr, core_relo_rec_size);
+		copy_field(dest, cattr, log_true_size);
+		break;
+	case BPF_OBJ_PIN:
+	case BPF_OBJ_GET:
+		copy_field(dest, cattr, pathname);
+		copy_field(dest, cattr, bpf_fd);
+		copy_field(dest, cattr, file_flags);
+		copy_field(dest, cattr, path_fd);
+		break;
+	case BPF_PROG_ATTACH:
+	case BPF_PROG_DETACH:
+		copy_field(dest, cattr, target_fd);
+		copy_field(dest, cattr, attach_bpf_fd);
+		copy_field(dest, cattr, attach_type);
+		copy_field(dest, cattr, attach_flags);
+		copy_field(dest, cattr, replace_bpf_fd);
+		copy_field(dest, cattr, relative_fd);
+		copy_field(dest, cattr, expected_revision);
+		break;
+	case BPF_PROG_RUN: /* same as BPF_PROG_TEST_RUN */
+		copy_field(dest, cattr, test.prog_fd);
+		copy_field(dest, cattr, test.retval);
+		copy_field(dest, cattr, test.data_size_in);
+		copy_field(dest, cattr, test.data_size_out);
+		copy_field(dest, cattr, test.data_in);
+		copy_field(dest, cattr, test.data_out);
+		copy_field(dest, cattr, test.repeat);
+		copy_field(dest, cattr, test.duration);
+		copy_field(dest, cattr, test.ctx_size_in);
+		copy_field(dest, cattr, test.ctx_size_out);
+		copy_field(dest, cattr, test.ctx_in);
+		copy_field(dest, cattr, test.ctx_out);
+		copy_field(dest, cattr, test.flags);
+		copy_field(dest, cattr, test.cpu);
+		copy_field(dest, cattr, test.batch_size);
+		break;
+	case BPF_PROG_GET_NEXT_ID:
+	case BPF_MAP_GET_NEXT_ID:
+	case BPF_PROG_GET_FD_BY_ID:
+	case BPF_MAP_GET_FD_BY_ID:
+	case BPF_BTF_GET_FD_BY_ID:
+	case BPF_BTF_GET_NEXT_ID:
+	case BPF_LINK_GET_FD_BY_ID:
+	case BPF_LINK_GET_NEXT_ID:
+		/*
+		 * u32 prog_id, map_id, btf_id + link_id are in a union with
+		 * u32 start_id
+		 */
+		copy_field(dest, cattr, start_id);
+		copy_field(dest, cattr, next_id);
+		copy_field(dest, cattr, open_flags);
+		break;
+	case BPF_OBJ_GET_INFO_BY_FD:
+		copy_field(dest, cattr, info.bpf_fd);
+		copy_field(dest, cattr, info.info_len);
+		copy_field(dest, cattr, info.info);
+		break;
+	case BPF_PROG_QUERY:
+		copy_field(dest, cattr, query.target_fd);
+		copy_field(dest, cattr, query.attach_type);
+		copy_field(dest, cattr, query.query_flags);
+		copy_field(dest, cattr, query.attach_flags);
+		copy_field(dest, cattr, query.prog_ids);
+		copy_field(dest, cattr, query.prog_cnt);
+		copy_field(dest, cattr, query.prog_attach_flags);
+		copy_field(dest, cattr, query.link_ids);
+		copy_field(dest, cattr, query.link_attach_flags);
+		copy_field(dest, cattr, query.revision);
+		break;
+	case BPF_RAW_TRACEPOINT_OPEN:
+		copy_field(dest, cattr, raw_tracepoint.name);
+		copy_field(dest, cattr, raw_tracepoint.prog_fd);
+		break;
+	case BPF_BTF_LOAD:
+		copy_field(dest, cattr, btf);
+		copy_field(dest, cattr, btf_log_buf);
+		copy_field(dest, cattr, btf_size);
+		copy_field(dest, cattr, btf_log_size);
+		copy_field(dest, cattr, btf_log_level);
+		copy_field(dest, cattr, btf_log_true_size);
+		break;
+	case BPF_TASK_FD_QUERY:
+		copy_field(dest, cattr, task_fd_query.pid);
+		copy_field(dest, cattr, task_fd_query.fd);
+		copy_field(dest, cattr, task_fd_query.flags);
+		copy_field(dest, cattr, task_fd_query.buf_len);
+		copy_field(dest, cattr, task_fd_query.buf);
+		copy_field(dest, cattr, task_fd_query.prog_id);
+		copy_field(dest, cattr, task_fd_query.fd_type);
+		copy_field(dest, cattr, task_fd_query.probe_offset);
+		copy_field(dest, cattr, task_fd_query.probe_addr);
+		break;
+	case BPF_LINK_CREATE:
+		copy_field(dest, cattr, link_create.prog_fd);
+		copy_field(dest, cattr, link_create.target_fd);
+		/* u32 target_ifindex is in a union with u32 target_fd */
+		copy_field(dest, cattr, link_create.attach_type);
+		copy_field(dest, cattr, link_create.flags);
+
+		/*
+		 * identify the union members that require conversion (i.e. with
+		 * pointers) by attach_type, otherwise just memcpy the lot
+		 */
+		switch (cattr->link_create.attach_type) {
+		/*
+		 * iter_info is a user pointer to union bpf_iter_link_info,
+		 * however since this union contains no pointers the
+		 * size/offsets are the same regardless of the ABI; hence no
+		 * conversion needed
+		 */
+		case BPF_TRACE_ITER:
+			copy_field(dest, cattr, link_create.iter_info);
+			copy_field(dest, cattr, link_create.iter_info_len);
+			break;
+		/* kprobe_multi is used in bpf_kprobe_multi_link_attach() */
+		case BPF_TRACE_KPROBE_MULTI:
+			copy_field(dest, cattr, link_create.kprobe_multi.flags);
+			copy_field(dest, cattr, link_create.kprobe_multi.cnt);
+			copy_field(dest, cattr, link_create.kprobe_multi.syms);
+			copy_field(dest, cattr, link_create.kprobe_multi.addrs);
+			copy_field(dest, cattr, link_create.kprobe_multi.cookies);
+			break;
+		case BPF_TRACE_UPROBE_MULTI:
+			copy_field(dest, cattr, link_create.uprobe_multi.path);
+			copy_field(dest, cattr, link_create.uprobe_multi.offsets);
+			copy_field(dest, cattr, link_create.uprobe_multi.ref_ctr_offsets);
+			copy_field(dest, cattr, link_create.uprobe_multi.cookies);
+			copy_field(dest, cattr, link_create.uprobe_multi.cnt);
+			copy_field(dest, cattr, link_create.uprobe_multi.flags);
+			copy_field(dest, cattr, link_create.uprobe_multi.pid);
+			break;
+		/*
+		 * remaining union members only contain fixed size integers
+		 * so offsets are the same across all ABIs -
+		 * calculate the size of the whole union + copy that
+		 */
+		default:
+			memcpy((u8 *)dest+offsetof(union bpf_attr,
+						   link_create.target_btf_id),
+			       (u8 *)cattr+offsetof(union compat_bpf_attr,
+						    link_create.target_btf_id),
+			       offsetofend(union compat_bpf_attr, link_create) -
+			       offsetofend(union compat_bpf_attr, link_create.flags));
+		}
+
+		break;
+	case BPF_LINK_UPDATE:
+		copy_field(dest, cattr, link_update.link_fd);
+		copy_field(dest, cattr, link_update.new_prog_fd);
+		copy_field(dest, cattr, link_update.flags);
+		copy_field(dest, cattr, link_update.old_prog_fd);
+		break;
+	case BPF_LINK_DETACH:
+		copy_field(dest, cattr, link_detach.link_fd);
+		break;
+	case BPF_ENABLE_STATS:
+		copy_field(dest, cattr, enable_stats.type);
+		break;
+	case BPF_ITER_CREATE:
+		copy_field(dest, cattr, iter_create.link_fd);
+		copy_field(dest, cattr, iter_create.flags);
+		break;
+	case BPF_PROG_BIND_MAP:
+		copy_field(dest, cattr, prog_bind_map.prog_fd);
+		copy_field(dest, cattr, prog_bind_map.map_fd);
+		copy_field(dest, cattr, prog_bind_map.flags);
+		break;
+	};
+}
+
+static int copy_bpf_attr_from_user(union bpf_attr *attr, int cmd,
+				   bpfptr_t uattr, unsigned int *size)
+{
+	union compat_bpf_attr cattr;
+	size_t attr_size = in_compat64_syscall() ? sizeof(union compat_bpf_attr)
+						 : sizeof(union bpf_attr);
+	int err;
+
+	err = bpf_check_uarg_tail_zero(uattr, attr_size, *size);
+	if (err)
+		return err;
+	*size = min_t(u32, *size, attr_size);
+
+	/* copy attributes from user space, may be less than sizeof(bpf_attr) */
+	memset(attr, 0, sizeof(*attr));
+	if (in_compat64_syscall()) {
+		memset(&cattr, 0, sizeof(cattr));
+		if (copy_from_bpfptr(&cattr, uattr, *size) != 0)
+			return -EFAULT;
+		convert_compat_bpf_attr(attr, &cattr, cmd);
+	} else {
+		if (copy_from_bpfptr(attr, uattr, *size) != 0)
+			return -EFAULT;
+	}
+
+	return 0;
+}
+
 #define BPF_TOKEN_CREATE_LAST_FIELD token_create.bpffs_fd
 
 static int token_create(union bpf_attr *attr)
@@ -6212,15 +6480,9 @@ static int __sys_bpf(enum bpf_cmd cmd, bpfptr_t uattr, unsigned int size)
 	union bpf_attr attr;
 	int err;
 
-	err = bpf_check_uarg_tail_zero(uattr, sizeof(attr), size);
+	err = copy_bpf_attr_from_user(&attr, cmd, uattr, &size);
 	if (err)
 		return err;
-	size = min_t(u32, size, sizeof(attr));
-
-	/* copy attributes from user space, may be less than sizeof(bpf_attr) */
-	memset(&attr, 0, sizeof(attr));
-	if (copy_from_bpfptr(&attr, uattr, size) != 0)
-		return -EFAULT;
 
 	err = security_bpf(cmd, &attr, size, uattr.is_kernel);
 	if (err < 0)
