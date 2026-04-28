@@ -2,6 +2,20 @@
 #ifndef _LINUX_TYPES_H
 #define _LINUX_TYPES_H
 
+/*
+ * By default the UAPI headers define __kernel_uintptr_t as a capability
+ * iff __CHERI_PURE_CAPABILITY__ is defined. For userspace this is fine
+ * as the define determines if the program will use the puercap UABI.
+ * However, the morello kernel can be compiled to run in hybrid
+ * (integer compatibility mode) while still handling capabilities
+ * in the purecap userspace UABI. Thus force the UABI types to be
+ * capabilities if we use the purecap UABI even if the kernel itself
+ * is compiled in hybrid mode.
+ */
+#ifdef CONFIG_CHERI_PURECAP_UABI
+#define __ARCH_WANT_PURECAP
+#endif
+
 #include <uapi/linux/types.h>
 
 #ifndef __ASSEMBLY__
@@ -38,8 +52,13 @@ typedef __kernel_gid32_t	gid_t;
 typedef __kernel_uid16_t        uid16_t;
 typedef __kernel_gid16_t        gid16_t;
 
+#ifdef __CHERI_PURE_CAPABILITY__
+typedef __uintcap_t		uintptr_t;
+typedef __intcap_t		intptr_t;
+#else
 typedef unsigned long		uintptr_t;
 typedef long			intptr_t;
+#endif
 
 static inline unsigned long
 __c_ua(uintptr_t ptr)
@@ -52,6 +71,10 @@ typedef __kernel_intptr_t	user_intptr_t;
 
 typedef __kernel_ptraddr_t	ptraddr_t;
 typedef __u64			ptraddr64_t;
+
+#if __has_feature(cheri)
+typedef __uintcap_t		uintcap_t;
+#endif
 
 #ifdef CONFIG_HAVE_UID16
 /* This is defined by arch/{arch}/include/asm/posix_types.h */
