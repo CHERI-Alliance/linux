@@ -135,7 +135,8 @@ static int padzero(unsigned long address)
 	nbyte = ELF_PAGEOFFSET(address);
 	if (nbyte) {
 		nbyte = ELF_MIN_ALIGN - nbyte;
-		if (clear_user(uaddr_to_user_ptr_safe(address), nbyte))
+		if (clear_user(make_user_ptr_for_write_uaccess(address, nbyte),
+			       nbyte))
 			return -EFAULT;
 	}
 	return 0;
@@ -1625,7 +1626,8 @@ static int fill_psinfo(struct elf_prpsinfo *psinfo, struct task_struct *p,
 	if (len >= ELF_PRARGSZ)
 		len = ELF_PRARGSZ-1;
 	if (copy_from_user(&psinfo->pr_psargs,
-			   uaddr_to_user_ptr_safe(mm->arg_start), len))
+			   make_user_ptr_for_read_uaccess(mm->arg_start, len),
+			   len))
 		return -EFAULT;
 	for(i = 0; i < len; i++)
 		if (psinfo->pr_psargs[i] == 0)
