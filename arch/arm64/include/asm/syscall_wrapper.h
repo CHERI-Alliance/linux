@@ -65,13 +65,13 @@
 		return ret;								\
 	}
 
-#define SYSCALL_DEFINE0(sname)							\
-	SYSCALL_METADATA(_##sname, 0);						\
-	asmlinkage long __arm64_sys_##sname(const struct pt_regs *__unused);	\
-	ALLOW_ERROR_INJECTION(__arm64_sys_##sname, ERRNO);			\
-	asmlinkage long __arm64_compatentry_sys_##sname(const struct pt_regs *__unused)\
-		__attribute__((alias(__stringify(__arm64_sys_##sname))));	\
-	asmlinkage long __arm64_sys_##sname(const struct pt_regs *__unused)
+#define __SYSCALL_DEFINE0(sname, ret_type)					\
+	SYSCALL_METADATA(sname, 0);						\
+	asmlinkage ret_type __arm64_sys##sname(const struct pt_regs *__unused);	\
+	ALLOW_ERROR_INJECTION(__arm64_sys##sname, ERRNO);			\
+	asmlinkage ret_type __arm64_compatentry_sys##sname(const struct pt_regs *__unused)\
+		__attribute__((alias(__stringify(__arm64_sys##sname))));	\
+	asmlinkage ret_type __arm64_sys##sname(const struct pt_regs *__unused)
 
 #define COND_SYSCALL(name)							\
 	asmlinkage long __arm64_sys_##name(const struct pt_regs *regs);		\
@@ -89,11 +89,11 @@
 
 #define __ARM64_SYS_STUBx(x, name, ...)
 
-#define SYSCALL_DEFINE0(sname)							\
-	SYSCALL_METADATA(_##sname, 0);						\
-	asmlinkage long __arm64_sys_##sname(const struct pt_regs *__unused);	\
-	ALLOW_ERROR_INJECTION(__arm64_sys_##sname, ERRNO);			\
-	asmlinkage long __arm64_sys_##sname(const struct pt_regs *__unused)
+#define __SYSCALL_DEFINE0(sname, ret_type)					\
+	SYSCALL_METADATA(sname, 0);						\
+	asmlinkage ret_type __arm64_sys##sname(const struct pt_regs *__unused);	\
+	ALLOW_ERROR_INJECTION(__arm64_sys##sname, ERRNO);			\
+	asmlinkage ret_type __arm64_sys##sname(const struct pt_regs *__unused)
 
 #define COND_SYSCALL(name)							\
 	asmlinkage long __arm64_sys_##name(const struct pt_regs *regs);		\
@@ -136,6 +136,19 @@
 #define __retptr__(name) name, _PTR
 #define __SYSCALL_ANNOTATE(name, ret_type) name, __SYSCALL_RET_T##ret_type
 #define SYSCALL_PREP(name, ...) __SYSCALL_ANNOTATE(_##name, __VA_ARGS__)
+
+/*
+ * Some syscalls with no parameters return valid capabilities, so __SYSCALL_DEFINE0
+ * is added to handle such cases.
+ * __SYSCALL_DEFINE0 receives a pair of the annotated syscall name and its
+ * return type due to the expansion of SYSCALL_PREP(name). Note that
+ * __SYSCALL_DEFINE0 is concatenating its macro arguments with other tokens, so
+ * SYSCALL_PREP(name) wouldn't have been expanded if it was passed directly to it.
+ * Therefore the intermediate helper macro __SYSCALL_DEFINE0_ANNOTATED is used to
+ * allow SYSCALL_PREP(name) to be expanded.
+ */
+#define __SYSCALL_DEFINE0_ANNOTATED(name) __SYSCALL_DEFINE0(name)
+#define SYSCALL_DEFINE0(name) __SYSCALL_DEFINE0_ANNOTATED(SYSCALL_PREP(name))
 
 #define __SYSCALL_DEFINEx(x, name, ret_type, ...)				\
 	asmlinkage ret_type __arm64_sys##name(const struct pt_regs *regs);	\
