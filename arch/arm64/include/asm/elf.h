@@ -202,11 +202,6 @@ extern int arch_setup_additional_pages(struct linux_binprm *bprm,
 #define compat_elf_check_arch(x)	((x)->e_machine == EM_AARCH64 && \
 					 !((x)->e_flags & EF_AARCH64_CHERI_PURECAP))
 
-/*
- * TODO [PCuABI]: Redefine below macros and typedefs to let ptrace pick them
- * and build. These redefinitions are not permanent and might not be required if
- * the ptrace is modified for complete COMPAT64 support.
- */
 #define COMPAT_ELF_NGREG		ELF_NGREG
 typedef unsigned long			compat_elf_greg_t;
 typedef compat_elf_greg_t		compat_elf_gregset_t[COMPAT_ELF_NGREG];
