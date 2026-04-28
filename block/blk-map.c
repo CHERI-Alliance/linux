@@ -366,7 +366,7 @@ static struct bio *bio_copy_kern(struct request *rq, void *data, unsigned int le
 		gfp_t gfp_mask)
 {
 	enum req_op op = req_op(rq);
-	uintptr_t kaddr = (uintptr_t)data;
+	unsigned long kaddr = __c_pa(data);
 	unsigned long end = (kaddr + len + PAGE_SIZE - 1) >> PAGE_SHIFT;
 	unsigned long start = kaddr >> PAGE_SHIFT;
 	struct bio *bio;
@@ -652,7 +652,7 @@ EXPORT_SYMBOL(blk_rq_unmap_user);
 int blk_rq_map_kern(struct request *rq, void *kbuf, unsigned int len,
 		gfp_t gfp_mask)
 {
-	uintptr_t addr = (uintptr_t) kbuf;
+	unsigned long addr = __c_pa(kbuf);
 	struct bio *bio;
 	int ret;
 

@@ -709,7 +709,7 @@ static int blkdev_common_ioctl(struct block_device *bdev, blk_mode_t mode,
 	case BLKFRASET:
 		if(!capable(CAP_SYS_ADMIN))
 			return -EACCES;
-		bdev->bd_disk->bdi->ra_pages = (arg * 512) / PAGE_SIZE;
+		bdev->bd_disk->bdi->ra_pages = (__c_ua(arg) * 512) / PAGE_SIZE;
 		return 0;
 	case BLKRRPART:
 		if (!capable(CAP_SYS_ADMIN))
@@ -854,7 +854,7 @@ long compat_blkdev_ioctl(struct file *file, unsigned cmd, unsigned long arg)
 		break;
 	}
 
-	ret = blkdev_common_ioctl(bdev, mode, cmd, arg, argp);
+	ret = blkdev_common_ioctl(bdev, mode, cmd, (user_uintptr_t)argp, argp);
 	if (ret == -ENOIOCTLCMD && disk->fops->compat_ioctl)
 		ret = disk->fops->compat_ioctl(bdev, mode, cmd, arg);
 
@@ -963,8 +963,8 @@ int blkdev_uring_cmd(struct io_uring_cmd *cmd, unsigned int issue_flags)
 	bic->res = 0;
 	bic->nowait = issue_flags & IO_URING_F_NONBLOCK;
 
-	start = READ_ONCE(sqe->addr);
-	len = READ_ONCE(sqe->addr3);
+	start = __c_ua(READ_ONCE(sqe->addr));
+	len = __c_ua(READ_ONCE(sqe->addr3));
 
 	switch (cmd_op) {
 	case BLOCK_URING_CMD_DISCARD:

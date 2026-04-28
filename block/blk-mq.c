@@ -3457,7 +3457,7 @@ static void blk_mq_clear_rq_mapping(struct blk_mq_tags *drv_tags,
 
 	list_for_each_entry(page, &tags->page_list, lru) {
 		uintptr_t start = (uintptr_t)page_address(page);
-		unsigned long end = start + order_to_size(page->private);
+		uintptr_t end = start + order_to_size(page->private);
 		int i;
 
 		for (i = 0; i < drv_tags->nr_tags; i++) {
