@@ -524,7 +524,7 @@ error_area:
 void __init swiotlb_exit(void)
 {
 	struct io_tlb_pool *mem = &io_tlb_default_mem.defpool;
-	unsigned long tbl_vaddr;
+	uintptr_t tbl_vaddr;
 	size_t tbl_size, slots_size;
 	unsigned int area_order;
 
