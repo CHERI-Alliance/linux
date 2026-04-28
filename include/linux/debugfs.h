@@ -56,7 +56,7 @@ static const struct file_operations __fops = {				\
 	.open	 = __fops ## _open,					\
 	.release = simple_attr_release,					\
 	.read	 = debugfs_attr_read,					\
-	.write	 = (__is_signed) ? debugfs_attr_write_signed : debugfs_attr_write,	\
+	.write	 = (void *)((__is_signed) ? debugfs_attr_write_signed : debugfs_attr_write),	\
 }
 
 #define DEFINE_DEBUGFS_ATTRIBUTE(__fops, __get, __set, __fmt)		\

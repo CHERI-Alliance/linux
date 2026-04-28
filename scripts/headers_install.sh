@@ -30,7 +30,8 @@ if [ -n "$(sed -n -e "/SPDX-License-Identifier:.*GPL-/{/WITH Linux-syscall-note/
 fi
 
 sed -E -e '
-	s/([[:space:](])(__user|__force|__iomem)[[:space:]]/\1/g
+	s/([[:space:](])(__user|__user2|__force|__iomem)[[:space:]]/\1/g
+	s/([[:space:](])(__capability)[[:space:]]/\1/g
 	s/__attribute_const__([[:space:]]|$)/\1/g
 	s@^#include <linux/compiler.h>@@
 	s/(^|[^a-zA-Z0-9])__packed([^a-zA-Z0-9_]|$)/\1__attribute__((packed))\2/g
