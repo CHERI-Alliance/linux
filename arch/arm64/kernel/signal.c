@@ -1811,6 +1811,35 @@ static_assert(NSIGTRAP	== 6);
 static_assert(NSIGCHLD	== 6);
 static_assert(NSIGSYS	== 2);
 static_assert(sizeof(siginfo_t) == 128);
+
+#ifdef CONFIG_CHERI_PURECAP_UABI
+static_assert(__alignof__(siginfo_t) == 16);
+static_assert(offsetof(siginfo_t, si_signo)	== 0x00);
+static_assert(offsetof(siginfo_t, si_errno)	== 0x04);
+static_assert(offsetof(siginfo_t, si_code)	== 0x08);
+static_assert(offsetof(siginfo_t, si_pid)	== 0x10);
+static_assert(offsetof(siginfo_t, si_uid)	== 0x14);
+static_assert(offsetof(siginfo_t, si_tid)	== 0x10);
+static_assert(offsetof(siginfo_t, si_overrun)	== 0x14);
+static_assert(offsetof(siginfo_t, si_status)	== 0x18);
+static_assert(offsetof(siginfo_t, si_utime)	== 0x20);
+static_assert(offsetof(siginfo_t, si_stime)	== 0x28);
+static_assert(offsetof(siginfo_t, si_value)	== 0x20);
+static_assert(offsetof(siginfo_t, si_int)	== 0x20);
+static_assert(offsetof(siginfo_t, si_ptr)	== 0x20);
+static_assert(offsetof(siginfo_t, si_addr)	== 0x10);
+static_assert(offsetof(siginfo_t, si_addr_lsb)	== 0x20);
+static_assert(offsetof(siginfo_t, si_lower)	== 0x30);
+static_assert(offsetof(siginfo_t, si_upper)	== 0x40);
+static_assert(offsetof(siginfo_t, si_pkey)	== 0x30);
+static_assert(offsetof(siginfo_t, si_perf_data)	== 0x20);
+static_assert(offsetof(siginfo_t, si_perf_type)	== 0x28);
+static_assert(offsetof(siginfo_t, si_band)	== 0x10);
+static_assert(offsetof(siginfo_t, si_fd)	== 0x18);
+static_assert(offsetof(siginfo_t, si_call_addr)	== 0x10);
+static_assert(offsetof(siginfo_t, si_syscall)	== 0x20);
+static_assert(offsetof(siginfo_t, si_arch)	== 0x24);
+#else /* CONFIG_CHERI_PURECAP_UABI */
 static_assert(__alignof__(siginfo_t) == 8);
 static_assert(offsetof(siginfo_t, si_signo)	== 0x00);
 static_assert(offsetof(siginfo_t, si_errno)	== 0x04);
@@ -1838,3 +1867,4 @@ static_assert(offsetof(siginfo_t, si_fd)	== 0x18);
 static_assert(offsetof(siginfo_t, si_call_addr)	== 0x10);
 static_assert(offsetof(siginfo_t, si_syscall)	== 0x18);
 static_assert(offsetof(siginfo_t, si_arch)	== 0x1c);
+#endif /* CONFIG_CHERI_PURECAP_UABI */
