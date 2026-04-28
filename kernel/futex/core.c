@@ -1134,20 +1134,13 @@ static inline int fetch_robust_entry(struct robust_list __user2 * __capability *
 				     struct robust_list __user2 * __capability __user2 * __capability head,
 				     unsigned int *pi)
 {
-	unsigned long uentry;
+	struct robust_list __user *uentry;
 
-	if (get_user(uentry, (unsigned long __user *)head))
+	if (get_user_ptr(uentry, head))
 		return -EFAULT;
 
-	/*
-	 * TODO [PCuABI] - pointer conversion to be checked
-	 * Each entry points to either next one or head of the list
-	 * so this should probably operate on capabilities and use
-	 * get_user_ptr instead, or validate the capability prior to
-	 * get_user
-	 */
-	*entry = uaddr_to_user_ptr(uentry & ~1UL);
-	*pi = uentry & 1;
+	*entry = USER_PTR_ALIGN_DOWN(uentry, 2);
+	*pi = user_ptr_addr(uentry) & 1;
 
 	return 0;
 }
