@@ -37,13 +37,11 @@ union futex_key {
 		/* unsigned int node; */
 	} shared;
 	struct {
-		union {
-			struct mm_struct *mm;
-			u64 __tmp;
-		};
+		u64 mmaddr;
 		unsigned long address;
 		unsigned int offset;
 		/* unsigned int node; */
+		struct mm_struct *mm;
 	} private;
 	struct {
 		u64 ptr;
