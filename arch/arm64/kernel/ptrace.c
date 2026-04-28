@@ -1963,6 +1963,7 @@ static const struct user_regset_view user_aarch64_view = {
 	.regsets = aarch64_regsets, .n = ARRAY_SIZE(aarch64_regsets)
 };
 
+#ifdef CONFIG_COMPAT32
 enum compat_regset {
 	REGSET_COMPAT_GPR,
 	REGSET_COMPAT_VFP,
@@ -2219,7 +2220,6 @@ static const struct user_regset_view user_aarch32_ptrace_view = {
 	.regsets = aarch32_ptrace_regsets, .n = ARRAY_SIZE(aarch32_ptrace_regsets)
 };
 
-#ifdef CONFIG_COMPAT
 static int compat_ptrace_read_user(struct task_struct *tsk, compat_ulong_t off,
 				   compat_ulong_t __user *ret)
 {
@@ -2400,6 +2400,7 @@ static int compat_ptrace_sethbpregs(struct task_struct *tsk, compat_long_t num,
 }
 #endif	/* CONFIG_HAVE_HW_BREAKPOINT */
 
+#ifdef CONFIG_COMPAT32
 long compat_arch_ptrace(struct task_struct *child, compat_long_t request,
 			compat_ulong_t caddr, compat_ulong_t cdata)
 {
@@ -2477,7 +2478,27 @@ long compat_arch_ptrace(struct task_struct *child, compat_long_t request,
 
 	return ret;
 }
-#endif /* CONFIG_COMPAT */
+#else /* !CONFIG_COMPAT32 */
+long compat_arch_ptrace(struct task_struct *child, compat_long_t request,
+			compat_ulong_t addr, compat_ulong_t data)
+{
+	user_uintptr_t datap = (user_uintptr_t)compat_ptr(data);
+
+	switch (request) {
+	case PTRACE_PEEKMTETAGS:
+	case PTRACE_POKEMTETAGS:
+		return mte_ptrace_copy_tags(child, request, addr, datap);
+#ifdef CONFIG_ARM64_MORELLO
+	case PTRACE_PEEKCAP:
+		return morello_ptrace_peekcap(child, addr, datap);
+	case PTRACE_POKECAP:
+		return morello_ptrace_pokecap(child, addr, datap);
+#endif
+	}
+
+	return compat_ptrace_request(child, request, addr, data);
+}
+#endif /* !CONFIG_COMPAT32 */
 
 const struct user_regset_view *task_user_regset_view(struct task_struct *task)
 {
@@ -2487,14 +2508,17 @@ const struct user_regset_view *task_user_regset_view(struct task_struct *task)
 	 * 32-bit children use an extended user_aarch32_ptrace_view to allow
 	 * access to the TLS register.
 	 */
+#ifdef CONFIG_COMPAT32
 	if (is_32bit_compat_task())
 		return &user_aarch32_view;
 	else if (is_32bit_compat_thread(task_thread_info(task)))
 		return &user_aarch32_ptrace_view;
+#endif
 
 	return &user_aarch64_view;
 }
 
+/* Keep the 64-bit compat_arch_ptrace() in sync when modifying arch_ptrace() */
 long arch_ptrace(struct task_struct *child, long request,
 		 user_uintptr_t addr, user_uintptr_t data)
 {
