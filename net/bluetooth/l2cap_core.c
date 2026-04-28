@@ -3051,7 +3051,7 @@ fail:
 }
 
 static inline int l2cap_get_conf_opt(void **ptr, int *type, int *olen,
-				     unsigned long *val)
+				     uintptr_t *val)
 {
 	struct l2cap_conf_opt *opt = *ptr;
 	int len;
@@ -3080,15 +3080,15 @@ static inline int l2cap_get_conf_opt(void **ptr, int *type, int *olen,
 		break;
 	}
 
-	BT_DBG("type 0x%2.2x len %u val 0x%lx", *type, opt->len, *val);
+	BT_DBG("type 0x%2.2x len %u val 0x%lx", *type, opt->len, (unsigned long)(*val));
 	return len;
 }
 
-static void l2cap_add_conf_opt(void **ptr, u8 type, u8 len, unsigned long val, size_t size)
+static void l2cap_add_conf_opt(void **ptr, u8 type, u8 len, uintptr_t val, size_t size)
 {
 	struct l2cap_conf_opt *opt = *ptr;
 
-	BT_DBG("type 0x%2.2x len %u val 0x%lx", type, len, val);
+	BT_DBG("type 0x%2.2x len %u val 0x%lx", type, len, (unsigned long)val);
 
 	if (size < L2CAP_CONF_OPT_SIZE + len)
 		return;
@@ -3426,7 +3426,7 @@ static int l2cap_parse_conf_req(struct l2cap_chan *chan, void *data, size_t data
 	void *req = chan->conf_req;
 	int len = chan->conf_len;
 	int type, hint, olen;
-	unsigned long val;
+	uintptr_t val;
 	struct l2cap_conf_rfc rfc = { .mode = L2CAP_MODE_BASIC };
 	struct l2cap_conf_efs efs;
 	u8 remote_efs = 0;
@@ -3668,7 +3668,7 @@ static int l2cap_parse_conf_rsp(struct l2cap_chan *chan, void *rsp, int len,
 	void *ptr = req->data;
 	void *endptr = data + size;
 	int type, olen;
-	unsigned long val;
+	uintptr_t val;
 	struct l2cap_conf_rfc rfc = { .mode = L2CAP_MODE_BASIC };
 	struct l2cap_conf_efs efs;
 
@@ -3927,7 +3927,7 @@ void __l2cap_connect_rsp_defer(struct l2cap_chan *chan)
 static void l2cap_conf_rfc_get(struct l2cap_chan *chan, void *rsp, int len)
 {
 	int type, olen;
-	unsigned long val;
+	uintptr_t val;
 	/* Use sane default values in case a misbehaving remote device
 	 * did not send an RFC or extended window size option.
 	 */
