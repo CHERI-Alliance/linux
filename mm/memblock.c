@@ -734,7 +734,7 @@ int __init_memblock memblock_add_node(phys_addr_t base, phys_addr_t size,
 	phys_addr_t end = base + size - 1;
 
 	memblock_dbg("%s: [%pa-%pa] nid=%d flags=%x %pS\n", __func__,
-		     &base, &end, nid, flags, (void *)_RET_IP_);
+		     &base, &end, nid, flags, __c_fakep(_RET_IP_));
 
 	return memblock_add_range(&memblock.memory, base, size, nid, flags);
 }
@@ -755,7 +755,7 @@ int __init_memblock memblock_add(phys_addr_t base, phys_addr_t size)
 	phys_addr_t end = base + size - 1;
 
 	memblock_dbg("%s: [%pa-%pa] %pS\n", __func__,
-		     &base, &end, (void *)_RET_IP_);
+		     &base, &end, __c_fakep(_RET_IP_));
 
 	return memblock_add_range(&memblock.memory, base, size, MAX_NUMNODES, 0);
 }
@@ -891,7 +891,7 @@ int __init_memblock memblock_remove(phys_addr_t base, phys_addr_t size)
 	phys_addr_t end = base + size - 1;
 
 	memblock_dbg("%s: [%pa-%pa] %pS\n", __func__,
-		     &base, &end, (void *)_RET_IP_);
+		     &base, &end, __c_fakep(_RET_IP_));
 
 	return memblock_remove_range(&memblock.memory, base, size);
 }
@@ -993,7 +993,7 @@ int __init_memblock memblock_phys_free(phys_addr_t base, phys_addr_t size)
 	int ret = 0;
 
 	memblock_dbg("%s: [%pa-%pa] %pS\n", __func__,
-		     &base, &end, (void *)_RET_IP_);
+		     &base, &end, __c_fakep(_RET_IP_));
 
 	kmemleak_free_part_phys(base, size);
 
@@ -1012,7 +1012,7 @@ int __init_memblock __memblock_reserve(phys_addr_t base, phys_addr_t size,
 	phys_addr_t end = base + size - 1;
 
 	memblock_dbg("%s: [%pa-%pa] nid=%d flags=%x %pS\n", __func__,
-		     &base, &end, nid, flags, (void *)_RET_IP_);
+		     &base, &end, nid, flags, __c_fakep(_RET_IP_));
 
 	return memblock_add_range(&memblock.reserved, base, size, nid, flags);
 }
@@ -1023,7 +1023,7 @@ int __init_memblock memblock_physmem_add(phys_addr_t base, phys_addr_t size)
 	phys_addr_t end = base + size - 1;
 
 	memblock_dbg("%s: [%pa-%pa] %pS\n", __func__,
-		     &base, &end, (void *)_RET_IP_);
+		     &base, &end, __c_fakep(_RET_IP_));
 
 	return memblock_add_range(&physmem, base, size, MAX_NUMNODES, 0);
 }
@@ -1659,7 +1659,7 @@ phys_addr_t __init memblock_phys_alloc_range(phys_addr_t size,
 {
 	memblock_dbg("%s: %llu bytes align=0x%llx from=%pa max_addr=%pa %pS\n",
 		     __func__, (u64)size, (u64)align, &start, &end,
-		     (void *)_RET_IP_);
+		     __c_fakep(_RET_IP_));
 	return memblock_alloc_range_nid(size, align, start, end, NUMA_NO_NODE,
 					false);
 }
@@ -1753,7 +1753,7 @@ void * __init memblock_alloc_exact_nid_raw(
 {
 	memblock_dbg("%s: %llu bytes align=0x%llx nid=%d from=%pa max_addr=%pa %pS\n",
 		     __func__, (u64)size, (u64)align, nid, &min_addr,
-		     &max_addr, (void *)_RET_IP_);
+		     &max_addr, __c_fakep(_RET_IP_));
 
 	return memblock_alloc_internal(size, align, min_addr, max_addr, nid,
 				       true);
@@ -1785,7 +1785,7 @@ void * __init memblock_alloc_try_nid_raw(
 {
 	memblock_dbg("%s: %llu bytes align=0x%llx nid=%d from=%pa max_addr=%pa %pS\n",
 		     __func__, (u64)size, (u64)align, nid, &min_addr,
-		     &max_addr, (void *)_RET_IP_);
+		     &max_addr, __c_fakep(_RET_IP_));
 
 	return memblock_alloc_internal(size, align, min_addr, max_addr, nid,
 				       false);
@@ -1817,7 +1817,7 @@ void * __init memblock_alloc_try_nid(
 
 	memblock_dbg("%s: %llu bytes align=0x%llx nid=%d from=%pa max_addr=%pa %pS\n",
 		     __func__, (u64)size, (u64)align, nid, &min_addr,
-		     &max_addr, (void *)_RET_IP_);
+		     &max_addr, __c_fakep(_RET_IP_));
 	ptr = memblock_alloc_internal(size, align,
 					   min_addr, max_addr, nid, false);
 	if (ptr)

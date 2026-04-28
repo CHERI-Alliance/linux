@@ -1367,7 +1367,8 @@ static void set_ps_flags(struct page_snapshot *ps, const struct folio *folio,
  */
 void snapshot_page(struct page_snapshot *ps, const struct page *page)
 {
-	unsigned long info, nr_pages = 1;
+	uintptr_t info;
+	unsigned long nr_pages = 1;
 	struct folio *foliop;
 	int loops = 5;
 
@@ -1393,7 +1394,7 @@ again:
 		if (compound_info_has_mask()) {
 			uintptr_t p = (uintptr_t)page;
 
-			foliop = (struct folio *)(p & info);
+			foliop = (struct folio *)(p & (__ptraddr_t)info);
 		} else {
 			foliop = (struct folio *)(info - 1);
 		}
