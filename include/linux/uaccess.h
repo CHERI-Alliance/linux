@@ -336,6 +336,21 @@ copy_to_user_with_captags(void __user *to, const void *from, unsigned long n)
 	return n;
 }
 
+/*
+ * Pointer-preserving uaccess routines.
+ *
+ * These routines should be used in situations where data containing (user)
+ * pointers needs to be transferred to or from user memory.
+ */
+#ifdef CONFIG_CHERI_PURECAP_UABI
+#define __copy_from_user_inatomic_with_ptr	__copy_from_user_inatomic_with_captags
+#define __copy_from_user_with_ptr		__copy_from_user_with_captags
+#define copy_from_user_with_ptr			copy_from_user_with_captags
+#define __copy_to_user_inatomic_with_ptr	__copy_to_user_inatomic_with_captags
+#define __copy_to_user_with_ptr			__copy_to_user_with_captags
+#define copy_to_user_with_ptr			copy_to_user_with_captags
+#define copy_struct_from_user_with_ptr		copy_struct_from_user_with_captags
+#else /* CONFIG_CHERI_PURECAP_UABI */
 #define __copy_from_user_inatomic_with_ptr	__copy_from_user_inatomic_no_ptr
 #define __copy_from_user_with_ptr		__copy_from_user_no_ptr
 #define copy_from_user_with_ptr			copy_from_user_no_ptr
@@ -343,6 +358,7 @@ copy_to_user_with_captags(void __user *to, const void *from, unsigned long n)
 #define __copy_to_user_with_ptr			__copy_to_user_no_ptr
 #define copy_to_user_with_ptr			copy_to_user_no_ptr
 #define copy_struct_from_user_with_ptr		copy_struct_from_user_no_ptr
+#endif /* CONFIG_CHERI_PURECAP_UABI */
 
 /*
  * Wrappers around usercopy macros that make it clear that tags are

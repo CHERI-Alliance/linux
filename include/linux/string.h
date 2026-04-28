@@ -16,7 +16,9 @@
 
 extern char *strndup_user(const char __user *, long);
 extern void *memdup_user(const void __user *, size_t) __realloc_size(2);
+extern void *memdup_user_with_ptr(const void __user *, size_t) __realloc_size(2);
 extern void *vmemdup_user(const void __user *, size_t) __realloc_size(2);
+extern void *vmemdup_user_with_ptr(const void __user *, size_t) __realloc_size(2);
 extern void *memdup_user_nul(const void __user *, size_t);
 
 /**
@@ -38,7 +40,20 @@ void *memdup_array_user(const void __user *src, size_t n, size_t size)
 
 	return memdup_user(src, nbytes);
 }
-#define memdup_array_user_with_ptr(SRC, N, SZ) memdup_array_user(SRC, N, SZ)
+
+/**
+ * memdup_array_user_with_ptr - Like memdup_array_user but tag preserving.
+ */
+static inline __realloc_size(2, 3)
+void *memdup_array_user_with_ptr(const void __user *src, size_t n, size_t size)
+{
+	size_t nbytes;
+
+	if (check_mul_overflow(n, size, &nbytes))
+		return ERR_PTR(-EOVERFLOW);
+
+	return memdup_user_with_ptr(src, nbytes);
+}
 
 /**
  * vmemdup_array_user - duplicate array from user space
@@ -59,7 +74,20 @@ void *vmemdup_array_user(const void __user *src, size_t n, size_t size)
 
 	return vmemdup_user(src, nbytes);
 }
-#define vmemdup_array_user_with_ptr(SRC, N, SZ) vmemdup_array_user(SRC, N, SZ)
+
+/**
+ * vmemdup_array_user_with_ptr - Like vmemdup_array_user but tag preserving.
+ */
+static inline __realloc_size(2, 3)
+void *vmemdup_array_user_with_ptr(const void __user *src, size_t n, size_t size)
+{
+	size_t nbytes;
+
+	if (check_mul_overflow(n, size, &nbytes))
+		return ERR_PTR(-EOVERFLOW);
+
+	return vmemdup_user_with_ptr(src, nbytes);
+}
 
 /*
  * Include machine specific inline routines
