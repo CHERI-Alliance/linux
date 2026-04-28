@@ -58,8 +58,8 @@ struct thread_info {
 	 * exception.  SP is also saved to the stack it can be recovered when
 	 * overwritten.
 	 */
-	long			kernel_sp;	/* Kernel stack pointer */
-	long			user_sp;	/* User stack pointer */
+	uintptr_t		kernel_sp;	/* Kernel stack pointer */
+	user_uintptr_t		user_sp;	/* User stack pointer */
 	int			cpu;
 	unsigned long		syscall_work;	/* SYSCALL_WORK_ flags */
 #ifdef CONFIG_SHADOW_CALL_STACK
@@ -71,7 +71,7 @@ struct thread_info {
 	 * Used in handle_exception() to save a0, a1 and a2 before knowing if we
 	 * can access the kernel stack.
 	 */
-	unsigned long		a0, a1, a2;
+	uintptr_t		a0, a1, a2;
 #endif
 #ifdef CONFIG_RISCV_USER_CFI
 	struct cfi_state	user_cfi_state;
