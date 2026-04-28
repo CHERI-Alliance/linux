@@ -49,7 +49,7 @@
 
 static int
 amdgpu_gem_add_input_fence(struct drm_file *filp,
-			   uint64_t syncobj_handles_array,
+			   __u64ptr syncobj_handles_array,
 			   uint32_t num_syncobj_handles)
 {
 	struct dma_fence *fence;
@@ -509,7 +509,7 @@ int amdgpu_gem_userptr_ioctl(struct drm_device *dev, void *data,
 	if (offset_in_page(args->addr | args->size))
 		return -EINVAL;
 
-	if (!access_ok((void __user *)(uintptr_t)args->addr, args->size))
+	if (!access_ok((void __user *)__c_fakeu(args->addr), args->size))
 		return -EFAULT;
 
 	/* reject unknown flag values */

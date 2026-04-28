@@ -38,7 +38,7 @@ struct xe_vmas_in_madvise_range {
 struct xe_madvise_details {
 	struct drm_pagemap *dpagemap;
 	bool has_purged_bo;
-	u64 retained_ptr;
+	__u64ptr retained_ptr;
 };
 
 static int get_vmas(struct xe_vm *vm, struct xe_vmas_in_madvise_range *madvise_range)

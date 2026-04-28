@@ -46,12 +46,12 @@ static int amdgpu_virt_ras_get_cmd_shared_mem(struct ras_core_context *ras_core,
 
 	if (fw_va && fw_va <= adev->virt.fw_reserve.ras_telemetry) {
 		fw_vram_usage_start_offset = adev->mman.resv_region[AMDGPU_RESV_FW_VRAM_USAGE].offset;
-		ras_telemetry_offset = (uintptr_t)adev->virt.fw_reserve.ras_telemetry -
-				(uintptr_t)fw_va;
+		ras_telemetry_offset = __c_pa(adev->virt.fw_reserve.ras_telemetry) -
+				__c_pa(fw_va);
 	} else if (drv_va && drv_va <= adev->virt.fw_reserve.ras_telemetry) {
 		fw_vram_usage_start_offset = adev->mman.resv_region[AMDGPU_RESV_DRV_VRAM_USAGE].offset;
-		ras_telemetry_offset = (uintptr_t)adev->virt.fw_reserve.ras_telemetry -
-				(uintptr_t)drv_va;
+		ras_telemetry_offset = __c_pa(adev->virt.fw_reserve.ras_telemetry) -
+				__c_pa(drv_va);
 	} else {
 		return -EINVAL;
 	}
@@ -59,7 +59,7 @@ static int amdgpu_virt_ras_get_cmd_shared_mem(struct ras_core_context *ras_core,
 	ras_telemetry_cpu =
 		(struct amdsriov_ras_telemetry *)adev->virt.fw_reserve.ras_telemetry;
 	ras_telemetry_gpu =
-		(struct amdsriov_ras_telemetry *)(uintptr_t)(fw_vram_usage_start_offset +
+		(struct amdsriov_ras_telemetry *)__c_fakeu(fw_vram_usage_start_offset +
 				ras_telemetry_offset);
 
 	if (cmd == RAS_CMD__GET_ALL_BLOCK_ECC_STATUS) {
@@ -68,7 +68,7 @@ static int amdgpu_virt_ras_get_cmd_shared_mem(struct ras_core_context *ras_core,
 
 		shared_mem->cpu_addr = ras_telemetry_cpu->uniras_shared_mem.blocks_ecc_buf;
 		shared_mem->gpa =
-			(uintptr_t)ras_telemetry_gpu->uniras_shared_mem.blocks_ecc_buf -
+			__c_pa(ras_telemetry_gpu->uniras_shared_mem.blocks_ecc_buf) -
 					adev->gmc.vram_start;
 		shared_mem->size = mem_size;
 	} else {
@@ -77,7 +77,7 @@ static int amdgpu_virt_ras_get_cmd_shared_mem(struct ras_core_context *ras_core,
 
 		shared_mem->cpu_addr = ras_telemetry_cpu->uniras_shared_mem.cmd_buf;
 		shared_mem->gpa =
-			(uintptr_t)ras_telemetry_gpu->uniras_shared_mem.cmd_buf -
+			__c_pa(ras_telemetry_gpu->uniras_shared_mem.cmd_buf) -
 					adev->gmc.vram_start;
 		shared_mem->size = mem_size;
 	}

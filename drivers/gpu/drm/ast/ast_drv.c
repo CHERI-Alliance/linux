@@ -420,7 +420,7 @@ static int ast_pci_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 		return PTR_ERR(drm);
 	pci_set_drvdata(pdev, drm);
 
-	ret = drm_dev_register(drm, ent->driver_data);
+	ret = drm_dev_register(drm, __c_ua(ent->driver_data));
 	if (ret)
 		return ret;
 
