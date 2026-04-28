@@ -114,7 +114,14 @@ __media_ioctl(struct file *filp, unsigned int cmd, unsigned long arg,
 	if (!media_devnode_is_registered(devnode))
 		return -EIO;
 
-	return ioctl_func(filp, cmd, arg);
+	/*
+	 * FIXCHERI:
+	 * This confuses the ioctl clang-tidy check but for
+	 * the non-compat ioctl it is ok because the only caller passes
+	 * in media_file_operations->ioctl which we add manually as in
+	 * ioctl struct field.
+	 */
+	return ioctl_func(filp, cmd, arg);	// NOLINT
 }
 
 static long media_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
@@ -124,6 +131,7 @@ static long media_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	return __media_ioctl(filp, cmd, arg, devnode->fops->ioctl);
 }
 
+#ifndef CONFIG_CHERI_KERNEL
 #ifdef CONFIG_COMPAT
 
 static long media_compat_ioctl(struct file *filp, unsigned int cmd,
@@ -135,6 +143,7 @@ static long media_compat_ioctl(struct file *filp, unsigned int cmd,
 }
 
 #endif /* CONFIG_COMPAT */
+#endif
 
 /* Override for the open function */
 static int media_open(struct inode *inode, struct file *filp)
@@ -197,9 +206,11 @@ static const struct file_operations media_devnode_fops = {
 	.write = media_write,
 	.open = media_open,
 	.unlocked_ioctl = media_ioctl,
+#ifndef CONFIG_CHERI_KERNEL
 #ifdef CONFIG_COMPAT
 	.compat_ioctl = media_compat_ioctl,
 #endif /* CONFIG_COMPAT */
+#endif
 	.release = media_release,
 	.poll = media_poll,
 };

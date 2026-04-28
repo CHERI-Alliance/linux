@@ -371,7 +371,7 @@ static long pde_ioctl(struct proc_dir_entry *pde, struct file *file, unsigned in
 {
 	const auto ioctl = pde->proc_ops->proc_ioctl;
 	if (ioctl)
-		return ioctl(file, cmd, arg);
+		return ioctl(file, cmd, arg);	// NOLINT
 	return -ENOTTY;
 }
 

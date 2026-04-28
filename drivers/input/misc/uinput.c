@@ -877,7 +877,7 @@ static int uinput_ff_upload_from_user(const char __user *buffer,
 		__ret =  -EINVAL;			\
 	else if ((_arg) > (_max))			\
 		__ret = -EINVAL;			\
-	else set_bit((_arg), udev->dev->_bit);		\
+	else set_bit(__c_ua(_arg), udev->dev->_bit);		\
 	__ret;						\
 })
 
