@@ -101,16 +101,16 @@ typedef struct page *pgtable_t;
 struct kernel_mapping {
 	unsigned long virt_addr;
 	unsigned long virt_offset;
-	uintptr_t phys_addr;
-	uintptr_t size;
+	unsigned long phys_addr;
+	unsigned long size;
 	/* Offset between linear mapping virtual address and kernel load address */
 	unsigned long va_pa_offset;
 	/* Offset between kernel mapping virtual address and kernel load address */
 #ifdef CONFIG_XIP_KERNEL
 	unsigned long va_kernel_xip_text_pa_offset;
 	unsigned long va_kernel_xip_data_pa_offset;
-	uintptr_t xiprom;
-	uintptr_t xiprom_sz;
+	unsigned long xiprom;
+	unsigned long xiprom_sz;
 #else
 	unsigned long page_offset;
 	unsigned long va_kernel_pa_offset;

@@ -151,14 +151,14 @@
 
 struct pt_alloc_ops {
 	pte_t *(*get_pte_virt)(phys_addr_t pa);
-	phys_addr_t (*alloc_pte)(uintptr_t va);
+	phys_addr_t (*alloc_pte)(unsigned long va);
 #ifndef __PAGETABLE_PMD_FOLDED
 	pmd_t *(*get_pmd_virt)(phys_addr_t pa);
-	phys_addr_t (*alloc_pmd)(uintptr_t va);
+	phys_addr_t (*alloc_pmd)(unsigned long va);
 	pud_t *(*get_pud_virt)(phys_addr_t pa);
-	phys_addr_t (*alloc_pud)(uintptr_t va);
+	phys_addr_t (*alloc_pud)(unsigned long va);
 	p4d_t *(*get_p4d_virt)(phys_addr_t pa);
-	phys_addr_t (*alloc_p4d)(uintptr_t va);
+	phys_addr_t (*alloc_p4d)(unsigned long va);
 #endif
 };
 

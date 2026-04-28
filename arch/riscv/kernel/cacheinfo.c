@@ -48,14 +48,14 @@ static struct cacheinfo *get_cacheinfo(u32 level, enum cache_type type)
 	return NULL;
 }
 
-uintptr_t get_cache_size(u32 level, enum cache_type type)
+unsigned long get_cache_size(u32 level, enum cache_type type)
 {
 	struct cacheinfo *this_leaf = get_cacheinfo(level, type);
 
 	return this_leaf ? this_leaf->size : 0;
 }
 
-uintptr_t get_cache_geometry(u32 level, enum cache_type type)
+unsigned long get_cache_geometry(u32 level, enum cache_type type)
 {
 	struct cacheinfo *this_leaf = get_cacheinfo(level, type);
 
