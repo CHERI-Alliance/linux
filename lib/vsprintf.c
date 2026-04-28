@@ -59,7 +59,7 @@
 #include "kstrtox.h"
 
 /* Disable pointer hashing if requested */
-bool no_hash_pointers __ro_after_init;
+bool no_hash_pointers __ro_after_init = true;
 EXPORT_SYMBOL_GPL(no_hash_pointers);
 
 /*
@@ -448,9 +448,6 @@ enum format_state {
 	FORMAT_STATE_CHAR,
 	FORMAT_STATE_STR,
 	FORMAT_STATE_PTR,
-#ifdef __CHERI__
-	FORMAT_STATE_CAPABILITY,
-#endif
 	FORMAT_STATE_PERCENT_CHAR,
 	FORMAT_STATE_INVALID,
 };
@@ -748,11 +745,13 @@ static char *pointer_string(char *buf, char *end,
 	spec.base = 16;
 	spec.flags |= SMALL;
 	if (spec.field_width == -1) {
-		spec.field_width = 2 * sizeof(ptr);
+		spec.field_width = 2 * sizeof(__c_pa(ptr));
+		if (spec.flags & SPECIAL)
+			spec.field_width += 2;
 		spec.flags |= ZEROPAD;
 	}
 
-	return number(buf, end, (uintptr_t)ptr, spec);
+	return number(buf, end, __c_pa(ptr), spec);
 }
 
 /* Make pointers available for printing early in the boot sequence. */
@@ -834,17 +833,17 @@ static char *ptr_to_id(char *buf, char *end, const void *ptr,
 	/* When debugging early boot use non-cryptographically secure hash. */
 	if (unlikely(debug_boot_weak_hash)) {
 		hashval = hash_long((unsigned long)ptr, 32);
-		return pointer_string(buf, end, (const void *)hashval, spec);
+		return pointer_string(buf, end, __c_fakep(hashval), spec);
 	}
 
 	ret = __ptr_to_hashval(ptr, &hashval);
 	if (ret) {
-		spec.field_width = 2 * sizeof(ptr);
+		spec.field_width = 2 * sizeof(__c_pa(ptr));
 		/* string length must be less than default_width */
 		return error_string(buf, end, str, spec);
 	}
 
-	return pointer_string(buf, end, (const void *)hashval, spec);
+	return pointer_string(buf, end, __c_fakep(hashval), spec);
 }
 
 static char *default_pointer(char *buf, char *end, const void *ptr,
@@ -1002,7 +1001,7 @@ char *symbol_string(char *buf, char *end, void *ptr,
 
 	if (fmt[1] == 'R')
 		ptr = __builtin_extract_return_addr(ptr);
-	value = (uintptr_t)ptr;
+	value = __c_pa(ptr);
 
 #ifdef CONFIG_KALLSYMS
 	if (*fmt == 'B' && fmt[1] == 'b')
@@ -2636,7 +2635,7 @@ char *pointer(const char *fmt, char *buf, char *end, void *ptr,
  *			 <tag>:<127:64>:<63:0>
  *			 (* outcome subject to kernel pointer hashing )
  *	#lp[x] - Simplified format as:
- *			 <address> [permissions=[rwxRWE],<base>-<top>] (attr=[invalid,sentry,sealed])
+ *			 <address> [<permissions>,<base>-<top>] (attr=[invalid,sentry,sealed])
  *			 (* outcome subject to kernel pointer hashing )
  *
  * Details at:
@@ -2661,34 +2660,86 @@ char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
 	/*
 	 * For null-derived capabilities switch to basic format
 	 * (address only).
-	 * Same applies when hashing is active.
+	 * Same applies when hashing is active or an extended pointer
+	 * format is used.
 	 */
-	if ((!cheri_tag_get(cap) && !__builtin_cheri_copy_from_high(cap)) ||
+	if ((!cheri_tag_get(cap) && !cheri_high_get(cap)) ||
+	    (isalnum(*fmt) && *fmt != 'x') ||
 	    (likely(!no_hash_pointers) && *fmt != 'x'))
-		return pointer(fmt, buf, end, (void *)cheri_address_get(cap),
-			       spec);
+#ifdef CONFIG_CHERI_KERNEL
+		return pointer(fmt, buf, end, cap, spec);
+#else
+		return pointer(fmt, buf, end, (void *)__c_pa_u(cap), spec);
+#endif
 
 	if (spec.flags & SPECIAL) { /* Simplified format for capabilities */
 		int orig_field_width = spec.field_width;
 		cheri_perms_t perms = cheri_perms_get(cap);
-		ptraddr_t base, top;
+		ptraddr_t base, top, len;
 		const char *start = buf;
-		char *attr_start;
 		unsigned int i;
-		int attrib = 0;
 		int orig_flags;
 
 		/* Note: order matters to match the format expected */
 		struct {
-			cheri_perms_t cperm; char id;
+			cheri_perms_t cperm;
+			char set, unset;
 		} static const __perms[] = {
-			{ CHERI_PERM_LOAD,              'r' },
-			{ CHERI_PERM_STORE,             'w' },
-			{ CHERI_PERM_EXECUTE,           'x' },
-			{ CHERI_PERM_LOAD_CAP,          'R' },
-			{ CHERI_PERM_STORE_CAP,         'W' },
+			{ 1U << 30,			'V', 'I' },	/* Tag */
+
+			{ 0, ':', ':' },
+
+#ifdef CHERI_PERM_SW_00
+			{ CHERI_PERM_SW_00,             '1', '0' },
+#endif
+#ifdef CHERI_PERM_SW_01
+			{ CHERI_PERM_SW_01,             '1', '0' },
+#endif
+#ifdef CHERI_PERM_SW_02
+			{ CHERI_PERM_SW_02,             '1', '0' },
+#endif
+#ifdef CHERI_PERM_SW_03
+			{ CHERI_PERM_SW_03,             '1', '0' },
+#endif
+
+#ifdef cheri_is_capmode
+			{ 0, ':', ':' },
+			{ 1U << 29,			'C', 'I' },	/* Cap vs. Int mode */
+#endif
+
+			{ 0, ':', ':' },
+
+			{ CHERI_PERM_LOAD,              'r', '.' },
+			{ CHERI_PERM_STORE,             'w', '.' },
+			{ CHERI_PERM_EXECUTE,           'x', '.' },
+#ifdef CHERI_PERM_CAP_RW
+			{ CHERI_PERM_CAP_RW,            'C', '.' },
+#endif
+#ifdef CHERI_PERM_LOAD_CAP
+			{ CHERI_PERM_LOAD_CAP,          'R', '.' },
+#endif
+#ifdef CHERI_PERM_STORE_CAP
+			{ CHERI_PERM_STORE_CAP,         'W', '.' },
+#endif
+#ifdef CHERI_PERM_SYSTEM_REGS
+			{ CHERI_PERM_SYSTEM_REGS,	'a', '.' },
+#endif
+#if defined(CHERI_PERM_MUTABLE_LOAD) && (CHERI_PERM_MUTABLE_LOAD != 0)
+			{ CHERI_PERM_MUTABLE_LOAD,      'l', '.' },
+#endif
+#if defined(CHERI_PERM_STORE_LOCAL_CAP) && (CHERI_PERM_STORE_LOCAL_CAP != 0)
+			{ CHERI_PERM_STORE_LOCAL_CAP,   's', '.' },
+#endif
+#if defined(CHERI_PERM_ELEVATED_LOAD) && (CHERI_PERM_ELEVATED_LOAD != 0)
+			{ CHERI_PERM_ELEVATED_LOAD,     'e', '.' },
+#endif
 #ifdef CONFIG_ARM64_MORELLO
-			{ ARM_CAP_PERMISSION_EXECUTIVE,	'E' }
+			{ ARM_CAP_PERMISSION_EXECUTIVE,	'E', '.' }
+#endif
+
+#if defined(CHERI_PERM_GLOBAL) && (CHERI_PERM_GLOBAL != 0)
+			{ 0, ':', ':' },
+			{ CHERI_PERM_GLOBAL,            '1', '0' },
 #endif
 		};
 
@@ -2717,61 +2768,37 @@ char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
 		orig_flags = spec.flags;
 		spec.flags &= ~(ZEROPAD | LEFT);
 
-		buf = pointer_string(buf, end, (void *)cheri_address_get(cap),
+		buf = pointer_string(buf, end,
+				     __c_fakep(cheri_address_get(cap)),
 				     spec);
 
-		update_buf_single(buf, end, ' ');
 		update_buf_single(buf, end, '[');
+		if (cheri_tag_get(cap))
+			perms |= 1U << 30;
+#ifdef cheri_is_capmode
+		if (cheri_is_capmode(cap))
+			perms |= 1U << 29;
+#endif
 		for (i = 0; i < ARRAY_SIZE(__perms); ++i) {
 			if (perms & __perms[i].cperm)
-				update_buf_single(buf, end, __perms[i].id);
+				update_buf_single(buf, end, __perms[i].set);
+			else
+				update_buf_single(buf, end, __perms[i].unset);
 		}
-		update_buf_single(buf, end, ',');
+		update_buf_single(buf, end, ':');
+		update_buf_single(buf, end, cheri_is_sealed(cap) ? 'S'  : '.');
+		update_buf_single(buf, end, ':');
 
 		base = cheri_base_get(cap);
-		buf = pointer_string(buf, end, (void *)base, spec);
+		buf = pointer_string(buf, end, __c_fakep(base), spec);
 		update_buf_single(buf, end, '-');
 
-		top =  base + cheri_length_get(cap);
-		buf = pointer_string(buf, end, (void *)top, spec);
+		len = cheri_length_get(cap);
+		top =  base + len;
+		if (top < len)
+			top--;
+		buf = pointer_string(buf, end, __c_fakep(top), spec);
 		update_buf_single(buf, end, ']');
-
-		/* Attributes */
-		/* Reset precision to output full attribute identifiers here */
-		spec.precision = -1;
-
-		/*
-		 * Keep track of the attribute start section to format
-		 * it properly in case there are attributes to be reported.
-		 * Otherwise simply rolling on a buffer might lead to overflowing
-		 * past the terminating character if the buffer is big enough.
-		 */
-		attr_start = buf;
-		buf += 2;
-
-		if (!cheri_tag_get(cap)) {
-			buf = string_nocheck(buf, end, "invalid", spec);
-			++attrib;
-		}
-		if (cheri_is_sentry(cap)) {
-			if (attrib++)
-				update_buf_single(buf, end, ',');
-			buf = string_nocheck(buf, end, "sentry", spec);
-
-		}
-		if (cheri_is_sealed(cap)) {
-			if (attrib++)
-				update_buf_single(buf, end, ',');
-			buf = string_nocheck(buf, end, "sealed", spec);
-		}
-
-		if (attrib) {
-			update_buf_single(attr_start, end, ' ');
-			update_buf_single(attr_start, end, '(');
-			update_buf_single(buf, end, ')');
-		} else {
-			buf = attr_start; /* Rollback on space and opening bracket */
-		}
 
 		/* Restore the originally requested width */
 		spec.field_width = orig_field_width;
@@ -2786,10 +2813,11 @@ char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
 	update_buf_single(buf, end, cheri_tag_get(cap) ? '1' : '0');
 	update_buf_single(buf, end, ':');
 	buf = pointer_string(buf, end,
-			     (void *) __builtin_cheri_copy_from_high(cap),
+			     __c_fakep(cheri_high_get(cap)),
 			     spec);
 	update_buf_single(buf, end, ':');
-	return pointer_string(buf, end, (void *)cheri_address_get(cap), spec);
+	return pointer_string(buf, end, __c_fakep(cheri_address_get(cap)),
+			      spec);
 
 #undef update_buf_single
 }
@@ -3126,14 +3154,19 @@ int vsnprintf(char *buf, size_t size, const char *fmt_str, va_list args)
 
 		case FORMAT_STATE_PTR:
 #ifdef __CHERI__
-			if (fmt.size == sizeof(long))
+			if (fmt.size == sizeof(long) || IS_ENABLED(CONFIG_CHERI_KERNEL))
 				str = capability(fmt.str, str, end,
 						 va_arg(args, void * __capability),
 						 spec);
 			else
 #endif
-			str = pointer(fmt.str, str, end, va_arg(args, void *),
-				      spec);
+			if (fmt.size == sizeof(short))
+				str = pointer(fmt.str, str, end,
+					      __c_fakep(va_arg(args, ptraddr_t)),
+					      spec);
+			else
+				str = pointer(fmt.str, str, end,
+					      va_arg(args, void *), spec);
 			while (isalnum(*fmt.str))
 				fmt.str++;
 			continue;
@@ -3338,6 +3371,7 @@ int vbin_printf(u32 *bin_buf, size_t size, const char *fmt_str, va_list args)
 #define save_arg(type)							\
 ({									\
 	unsigned long long value;					\
+	static_assert(sizeof(type) <= 8);				\
 	if (sizeof(type) == 8) {					\
 		unsigned long long val8;				\
 		str = PTR_ALIGN(str, sizeof(u32));			\
@@ -3358,6 +3392,25 @@ int vbin_printf(u32 *bin_buf, size_t size, const char *fmt_str, va_list args)
 	str += sizeof(type);						\
 	value;								\
 })
+
+#if __SIZEOF_POINTER__ > __SIZEOF_LONG__
+#define save_arg_p(type) do {						\
+	uintptr_t valp;							\
+	static_assert(__SIZEOF_POINTER__ == 16);			\
+	static_assert(sizeof(type) == 16);				\
+	str = PTR_ALIGN(str, sizeof(u32));				\
+	valp = va_arg(args, uintptr_t);					\
+	if (str + sizeof(type) <= end) {				\
+		*(u32 *)str = *(u32 *)(void *)&valp;				\
+		*(u32 *)(str + 4) = *((u32 *)(void *)&valp + 1);		\
+		*(u32 *)(str + 8) = *((u32 *)(void *)&valp + 2);		\
+		*(u32 *)(str + 12) = *((u32 *)(void *)&valp + 3);		\
+	}								\
+	str += sizeof(type);						\
+} while (0)
+#else
+#define save_arg_p(X)	save_arg(X)
+#endif
 
 	while (*fmt.str) {
 		fmt = format_decode(fmt, &spec);
@@ -3406,11 +3459,11 @@ int vbin_printf(u32 *bin_buf, size_t size, const char *fmt_str, va_list args)
 			case 'x':
 			case 'K':
 			case 'e':
-				save_arg(void *);
+				save_arg_p(void *);
 				break;
 			default:
 				if (!isalnum(*fmt.str)) {
-					save_arg(void *);
+					save_arg_p(void *);
 					break;
 				}
 #ifdef __CHERI__
@@ -3444,6 +3497,7 @@ int vbin_printf(u32 *bin_buf, size_t size, const char *fmt_str, va_list args)
 out:
 	return (u32 *)(PTR_ALIGN(str, sizeof(u32))) - bin_buf;
 #undef save_arg
+#undef save_arg_p
 }
 EXPORT_SYMBOL_GPL(vbin_printf);
 
@@ -3490,8 +3544,8 @@ int bstr_printf(char *buf, size_t size, const char *fmt_str, const u32 *bin_buf)
 	typeof(type) value;						\
 	if (sizeof(type) == 8) {					\
 		args = PTR_ALIGN(args, sizeof(u32));			\
-		*(u32 *)&value = *(u32 *)args;				\
-		*((u32 *)&value + 1) = *(u32 *)(args + 4);		\
+		*(u32 *)(void *)&value = *(u32 *)args;				\
+		*((u32 *)(void *)&value + 1) = *(u32 *)(args + 4);		\
 	} else {							\
 		args = PTR_ALIGN(args, sizeof(type));			\
 		value = *(typeof(type) *)args;				\

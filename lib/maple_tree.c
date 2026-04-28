@@ -404,7 +404,7 @@ static __always_inline bool mt_is_alloc(struct maple_tree *mt)
  * @parent: The parent pointer cast as an unsigned long
  * Return: The shift into that pointer to the star to of the slot
  */
-static inline unsigned long mte_parent_shift(unsigned long parent)
+static inline unsigned long mte_parent_shift(uintptr_t parent)
 {
 	/* Note bit 1 == 0 means 16B */
 	if (likely(parent & MAPLE_PARENT_NOT_RANGE16))
@@ -418,7 +418,7 @@ static inline unsigned long mte_parent_shift(unsigned long parent)
  * @parent: The parent pointer cast as an unsigned long.
  * Return: The slot mask for that parent.
  */
-static inline unsigned long mte_parent_slot_mask(unsigned long parent)
+static inline unsigned long mte_parent_slot_mask(uintptr_t parent)
 {
 	/* Note bit 1 == 0 means 16B */
 	if (likely(parent & MAPLE_PARENT_NOT_RANGE16))
@@ -437,7 +437,7 @@ static inline unsigned long mte_parent_slot_mask(unsigned long parent)
 static inline
 enum maple_type mas_parent_type(struct ma_state *mas, struct maple_enode *enode)
 {
-	unsigned long p_type;
+	uintptr_t p_type;
 
 	p_type = (uintptr_t)mte_to_node(enode)->parent;
 	if (WARN_ON(p_type & MAPLE_PARENT_ROOT))
@@ -5964,7 +5964,7 @@ static void mas_dup_free(struct ma_state *mas)
 		slots = ma_slots(node, type);
 		count = mas_data_end(mas) + 1;
 		for (i = 0; i < count; i++)
-			((unsigned long *)slots)[i] &= ~MAPLE_NODE_MASK;
+			((uintptr_t *)slots)[i] &= ~MAPLE_NODE_MASK;
 		mt_free_bulk(count, slots);
 	}
 
@@ -6025,7 +6025,7 @@ static inline void mas_dup_alloc(struct ma_state *mas, struct ma_state *new_mas,
 
 	slots = ma_slots(node, type);
 	for (i = 0; i < count; i++) {
-		val = (uintptr_t)mt_slot_locked(mas->tree, slots, i);
+		val = __c_pa(mt_slot_locked(mas->tree, slots, i));
 		val &= MAPLE_NODE_MASK;
 		/*
 		 * Warning, see rcu_assign_pointer() documentation.  Since this
