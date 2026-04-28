@@ -643,8 +643,8 @@ ice_vc_fdir_write_flow_prof(struct ice_vf *vf, enum ice_fltr_ptype flow,
 	struct device *dev;
 	struct ice_pf *pf;
 	struct ice_hw *hw;
-	u64 entry1_h = 0;
-	u64 entry2_h = 0;
+	uintptr_t entry1_h = 0;
+	uintptr_t entry2_h = 0;
 	int ret;
 
 	pf = vf->pf;

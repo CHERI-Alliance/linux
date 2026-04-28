@@ -60,7 +60,7 @@ struct efx_mcdi_filter_table {
 
 	struct rw_semaphore lock; /* Protects entries */
 	struct {
-		unsigned long spec;	/* pointer to spec plus flag bits */
+		uintptr_t spec;		/* pointer to spec plus flag bits */
 /* AUTO_OLD is used to mark and sweep MAC filters for the device address lists. */
 /* unused flag	1UL */
 #define EFX_EF10_FILTER_FLAG_AUTO_OLD	2UL

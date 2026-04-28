@@ -1132,7 +1132,7 @@ static int rhine_init_one_platform(struct platform_device *pdev)
 		return -EINVAL;
 
 	return rhine_init_one_common(&pdev->dev, *quirks,
-				     (intptr_t)ioaddr, ioaddr, irq);
+				     __c_pa(ioaddr), ioaddr, irq);
 }
 
 static int alloc_ring(struct net_device* dev)

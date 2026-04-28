@@ -1110,7 +1110,7 @@ static int hix5hd2_dev_probe(struct platform_device *pdev)
 	priv->dev = dev;
 	priv->netdev = ndev;
 
-	priv->hw_cap = (uintptr_t)device_get_match_data(dev);
+	priv->hw_cap = __c_pa(device_get_match_data(dev));
 
 	priv->base = devm_platform_ioremap_resource(pdev, 0);
 	if (IS_ERR(priv->base)) {

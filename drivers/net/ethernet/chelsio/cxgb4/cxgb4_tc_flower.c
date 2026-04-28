@@ -948,14 +948,14 @@ int cxgb4_tc_flower_replace(struct net_device *dev,
 
 	fs = &ch_flower->fs;
 	fs->hitcnts = 1;
-	fs->tc_cookie = cls->cookie;
+	fs->tc_cookie = __c_ua(cls->cookie);
 
 	ret = cxgb4_flow_rule_replace(dev, rule, cls->common.prio, extack, fs,
 				      &ch_flower->filter_id);
 	if (ret)
 		goto free_entry;
 
-	ch_flower->tc_flower_cookie = cls->cookie;
+	ch_flower->tc_flower_cookie = __c_ua(cls->cookie);
 	ret = rhashtable_insert_fast(&adap->flower_tbl, &ch_flower->node,
 				     adap->flower_ht_params);
 	if (ret)
@@ -1000,7 +1000,7 @@ int cxgb4_tc_flower_destroy(struct net_device *dev,
 	struct ch_tc_flower_entry *ch_flower;
 	int ret;
 
-	ch_flower = ch_flower_lookup(adap, cls->cookie);
+	ch_flower = ch_flower_lookup(adap, __c_ua(cls->cookie));
 	if (!ch_flower)
 		return -ENOENT;
 
@@ -1074,7 +1074,7 @@ int cxgb4_tc_flower_stats(struct net_device *dev,
 	u64 bytes;
 	int ret;
 
-	ch_flower = ch_flower_lookup(adap, cls->cookie);
+	ch_flower = ch_flower_lookup(adap, __c_ua(cls->cookie));
 	if (!ch_flower) {
 		ret = -ENOENT;
 		goto err;

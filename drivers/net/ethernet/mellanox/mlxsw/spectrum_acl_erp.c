@@ -310,7 +310,7 @@ mlxsw_sp_acl_erp_table_alloc(struct mlxsw_sp_acl_erp_core *erp_core,
 	entry_size = erp_core->erpt_entries_size[region_type];
 	num_rows = num_erps / erp_core->num_erp_banks;
 
-	index = gen_pool_alloc(erp_core->erp_tables, num_rows * entry_size);
+	index = __c_ua(gen_pool_alloc(erp_core->erp_tables, num_rows * entry_size));
 	if (!index)
 		return -ENOBUFS;
 
@@ -332,7 +332,7 @@ mlxsw_sp_acl_erp_table_free(struct mlxsw_sp_acl_erp_core *erp_core,
 	entry_size = erp_core->erpt_entries_size[region_type];
 	base_index = index + MLXSW_SP_ACL_ERP_GENALLOC_OFFSET;
 	size = num_erps / erp_core->num_erp_banks * entry_size;
-	gen_pool_free(erp_core->erp_tables, base_index, size);
+	gen_pool_free(erp_core->erp_tables, __c_fakeu(base_index), size);
 }
 
 static struct mlxsw_sp_acl_erp *
@@ -1524,7 +1524,7 @@ static int mlxsw_sp_acl_erp_tables_init(struct mlxsw_sp *mlxsw_sp,
 	gen_pool_set_algo(erp_core->erp_tables, gen_pool_best_fit, NULL);
 
 	err = gen_pool_add(erp_core->erp_tables,
-			   MLXSW_SP_ACL_ERP_GENALLOC_OFFSET, erpt_bank_size,
+			   __c_fakeu(MLXSW_SP_ACL_ERP_GENALLOC_OFFSET), erpt_bank_size,
 			   -1);
 	if (err)
 		goto err_gen_pool_add;

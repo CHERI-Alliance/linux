@@ -1355,8 +1355,8 @@ static int altera_tse_probe(struct platform_device *pdev)
 		goto err_free_netdev;
 
 	/* initialize netdev */
-	ndev->mem_start = control_port->start;
-	ndev->mem_end = control_port->end;
+	ndev->mem_start = __c_fakeu(control_port->start);
+	ndev->mem_end = __c_fakeu(control_port->end);
 	ndev->netdev_ops = &altera_tse_netdev_ops;
 	altera_tse_set_ethtool_ops(ndev);
 

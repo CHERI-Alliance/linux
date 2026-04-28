@@ -1011,8 +1011,7 @@ static int efx_tc_flower_handle_lhs_actions(struct efx_nic *efx,
 							       fa->hw_stats);
 					return -EOPNOTSUPP;
 				}
-				cnt = efx_tc_flower_get_counter_index(efx, tc->cookie,
-								      ctype);
+				cnt = efx_tc_flower_get_counter_index(efx, __c_ua(tc->cookie), ctype);
 				if (IS_ERR(cnt)) {
 					NL_SET_ERR_MSG_MOD(extack, "Failed to obtain a counter");
 					return PTR_ERR(cnt);
@@ -1510,7 +1509,7 @@ static int efx_tc_flower_replace_foreign_lhs_ar(struct efx_nic *efx,
 		rc = -ENOMEM;
 		goto release_encap_match;
 	}
-	rule->cookie = tc->cookie;
+	rule->cookie = __c_ua(tc->cookie);
 	rule->is_ar = true;
 	old = rhashtable_lookup_get_insert_fast(&efx->tc->lhs_rule_ht,
 						&rule->linkage,
@@ -1623,7 +1622,7 @@ static int efx_tc_flower_replace_foreign_lhs(struct efx_nic *efx,
 		rc = -ENOMEM;
 		goto release_encap_match;
 	}
-	rule->cookie = tc->cookie;
+	rule->cookie = __c_ua(tc->cookie);
 	old = rhashtable_lookup_get_insert_fast(&efx->tc->lhs_rule_ht,
 						&rule->linkage,
 						efx_tc_lhs_rule_ht_params);
@@ -1800,7 +1799,7 @@ static int efx_tc_flower_replace_foreign(struct efx_nic *efx,
 		goto release;
 	}
 	INIT_LIST_HEAD(&rule->acts.list);
-	rule->cookie = tc->cookie;
+	rule->cookie = __c_ua(tc->cookie);
 	old = rhashtable_lookup_get_insert_fast(&efx->tc->match_action_ht,
 						&rule->linkage,
 						efx_tc_match_action_ht_params);
@@ -1851,8 +1850,7 @@ static int efx_tc_flower_replace_foreign(struct efx_nic *efx,
 					goto release;
 				}
 
-				ctr = efx_tc_flower_get_counter_index(efx,
-								      tc->cookie,
+				ctr = efx_tc_flower_get_counter_index(efx, __c_ua(tc->cookie),
 								      EFX_TC_COUNTER_TYPE_AR);
 				if (IS_ERR(ctr)) {
 					rc = PTR_ERR(ctr);
@@ -2019,7 +2017,7 @@ static int efx_tc_flower_replace_lhs(struct efx_nic *efx,
 	rule = kzalloc_obj(*rule, GFP_USER);
 	if (!rule)
 		return -ENOMEM;
-	rule->cookie = tc->cookie;
+	rule->cookie = __c_ua(tc->cookie);
 	old = rhashtable_lookup_get_insert_fast(&efx->tc->lhs_rule_ht,
 						&rule->linkage,
 						efx_tc_lhs_rule_ht_params);
@@ -2183,7 +2181,7 @@ static int efx_tc_flower_replace(struct efx_nic *efx,
 		goto release;
 	}
 	INIT_LIST_HEAD(&rule->acts.list);
-	rule->cookie = tc->cookie;
+	rule->cookie = __c_ua(tc->cookie);
 	old = rhashtable_lookup_get_insert_fast(&efx->tc->match_action_ht,
 						&rule->linkage,
 						efx_tc_match_action_ht_params);
@@ -2271,7 +2269,7 @@ static int efx_tc_flower_replace(struct efx_nic *efx,
 				goto release;
 			}
 
-			ctr = efx_tc_flower_get_counter_index(efx, tc->cookie,
+			ctr = efx_tc_flower_get_counter_index(efx, __c_ua(tc->cookie),
 							      EFX_TC_COUNTER_TYPE_AR);
 			if (IS_ERR(ctr)) {
 				rc = PTR_ERR(ctr);
@@ -2607,7 +2605,7 @@ static int efx_tc_flower_stats(struct efx_nic *efx, struct net_device *net_dev,
 	struct efx_tc_counter *cnt;
 	u64 packets, bytes;
 
-	ctr = efx_tc_flower_find_counter_index(efx, tc->cookie);
+	ctr = efx_tc_flower_find_counter_index(efx, __c_ua(tc->cookie));
 	if (!ctr) {
 		/* See comment in efx_tc_flower_destroy() */
 		if (!IS_ERR(efx_tc_flower_lookup_efv(efx, net_dev)))

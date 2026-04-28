@@ -287,7 +287,7 @@ static int mlxsw_sp_sb_pm_occ_clear(struct mlxsw_sp *mlxsw_sp, u16 local_port,
 
 static void mlxsw_sp_sb_pm_occ_query_cb(struct mlxsw_core *mlxsw_core,
 					char *sbpm_pl, size_t sbpm_pl_len,
-					unsigned long cb_priv)
+					uintptr_t cb_priv)
 {
 	struct mlxsw_sp_sb_pm *pm = (struct mlxsw_sp_sb_pm *) cb_priv;
 
@@ -1557,7 +1557,7 @@ struct mlxsw_sp_sb_sr_occ_query_cb_ctx {
 
 static void mlxsw_sp_sb_sr_occ_query_cb(struct mlxsw_core *mlxsw_core,
 					char *sbsr_pl, size_t sbsr_pl_len,
-					unsigned long cb_priv)
+					uintptr_t cb_priv)
 {
 	struct mlxsw_sp *mlxsw_sp = mlxsw_core_driver_priv(mlxsw_core);
 	struct mlxsw_sp_sb_sr_occ_query_cb_ctx cb_ctx;
@@ -1611,7 +1611,7 @@ int mlxsw_sp_sb_occ_snapshot(struct mlxsw_core *mlxsw_core,
 	struct mlxsw_sp *mlxsw_sp = mlxsw_core_driver_priv(mlxsw_core);
 	struct mlxsw_sp_sb_sr_occ_query_cb_ctx cb_ctx;
 	u8 masked_count, current_page = 0;
-	unsigned long cb_priv = 0;
+	uintptr_t cb_priv = 0;
 	LIST_HEAD(bulk_list);
 	char *sbsr_pl;
 	int i;

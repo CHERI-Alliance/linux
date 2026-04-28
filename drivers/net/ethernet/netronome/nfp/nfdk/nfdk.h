@@ -92,7 +92,7 @@ struct nfp_nfdk_tx_buf {
 		union {
 			struct sk_buff *skb;
 			void *frag;
-			unsigned long val;
+			uintptr_t val;
 		};
 
 		/* 1 + nr_frags next slots */

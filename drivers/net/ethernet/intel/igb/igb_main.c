@@ -2692,7 +2692,7 @@ static int igb_parse_cls_flower(struct igb_adapter *adapter,
 	}
 
 	input->action = traffic_class;
-	input->cookie = f->cookie;
+	input->cookie = __c_ua(f->cookie);
 
 	return 0;
 }

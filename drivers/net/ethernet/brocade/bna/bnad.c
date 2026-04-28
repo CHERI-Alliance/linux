@@ -3434,8 +3434,8 @@ bnad_netdev_init(struct bnad *bnad)
 	netdev->features |= netdev->hw_features | NETIF_F_HW_VLAN_CTAG_FILTER |
 			    NETIF_F_HIGHDMA;
 
-	netdev->mem_start = bnad->mmio_start;
-	netdev->mem_end = bnad->mmio_start + bnad->mmio_len - 1;
+	netdev->mem_start = __c_fakeu(bnad->mmio_start);
+	netdev->mem_end = __c_fakeu(bnad->mmio_start + bnad->mmio_len - 1);
 
 	/* MTU range: 46 - 9000 */
 	netdev->min_mtu = ETH_ZLEN - ETH_HLEN;

@@ -3318,7 +3318,7 @@ static void niu_hash_page(struct rx_ring_info *rp, struct page *page, u64 base)
 {
 	unsigned int h = niu_hash_rxaddr(rp, base);
 
-	page->private = base;
+	page->private = __c_fakeu(base);
 	niu_next_page(page) = rp->rxhash[h];
 	rp->rxhash[h] = page;
 }
@@ -3402,7 +3402,7 @@ static int niu_rx_pkt_ignore(struct niu *np, struct rx_ring_info *rp)
 					 RCR_ENTRY_PKTBUFSZ_SHIFT];
 		if ((page->private + PAGE_SIZE) - rcr_size == addr) {
 			*link = niu_next_page(page);
-			np->ops->unmap_page(np->device, page->private,
+			np->ops->unmap_page(np->device, __c_ua(page->private),
 					    PAGE_SIZE, DMA_FROM_DEVICE);
 			page->private = 0;
 			niu_next_page(page) = NULL;
@@ -3471,7 +3471,7 @@ static int niu_process_rx_pkt(struct napi_struct *napi, struct niu *np,
 		niu_rx_skb_append(skb, page, off, append_size, rcr_size);
 		if ((page->private + rp->rbr_block_size) - rcr_size == addr) {
 			*link = niu_next_page(page);
-			np->ops->unmap_page(np->device, page->private,
+			np->ops->unmap_page(np->device, __c_ua(page->private),
 					    PAGE_SIZE, DMA_FROM_DEVICE);
 			page->private = 0;
 			niu_next_page(page) = NULL;
@@ -3538,7 +3538,7 @@ static void niu_rbr_free(struct niu *np, struct rx_ring_info *rp)
 		page = rp->rxhash[i];
 		while (page) {
 			struct page *next = niu_next_page(page);
-			u64 base = page->private;
+			u64 base = __c_ua(page->private);
 
 			np->ops->unmap_page(np->device, base, PAGE_SIZE,
 					    DMA_FROM_DEVICE);
@@ -6459,7 +6459,7 @@ static void niu_reset_buffers(struct niu *np)
 				page = rp->rxhash[j];
 				while (page) {
 					struct page *next = niu_next_page(page);
-					u64 base = page->private;
+					u64 base = __c_ua(page->private);
 					base = base >> RBR_DESCR_ADDR_SHIFT;
 					rp->rbr[k++] = cpu_to_le32(base);
 					page = next;

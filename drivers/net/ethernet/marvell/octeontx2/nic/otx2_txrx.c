@@ -878,17 +878,17 @@ unmap:
 
 static u64 otx2_tso_frag_dma_addr(struct otx2_snd_queue *sq,
 				  struct sk_buff *skb, int seg,
-				  u64 seg_addr, int hdr_len, int sqe)
+				  uintptr_t seg_addr, int hdr_len, int sqe)
 {
 	struct sg_list *sg = &sq->sg[sqe];
 	const skb_frag_t *frag;
 	int offset;
 
 	if (seg < 0)
-		return sg->dma_addr[0] + (seg_addr - (uintptr_t)skb->data);
+		return sg->dma_addr[0] + (__c_ua(seg_addr) - __c_pa(skb->data));
 
 	frag = &skb_shinfo(skb)->frags[seg];
-	offset = seg_addr - (u64)skb_frag_address(frag);
+	offset = __c_ua(seg_addr) - __c_pa(skb_frag_address(frag));
 	if (skb_headlen(skb) - hdr_len)
 		seg++;
 	return sg->dma_addr[seg] + offset;
