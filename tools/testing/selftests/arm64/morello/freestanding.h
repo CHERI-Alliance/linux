@@ -16,6 +16,7 @@ typedef __kernel_pid_t pid_t;
 
 void install_kernel_stack(void);
 uintcap_t __syscall(uintcap_t, uintcap_t, uintcap_t, uintcap_t, uintcap_t, uintcap_t, uintcap_t);
+int __attribute__ ((format(printf, 1, 2))) printf(const char *fmt, ...);
 
 #define __cap(x) ((uintcap_t) (x))
 /* make the syscall wrapper a bit more direct and convenient to use */
