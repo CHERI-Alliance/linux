@@ -44,9 +44,13 @@ gen_proto_order_variant()
 	local atomicname="${pfx}${name}${sfx}${order}"
 
 	local ret="$(gen_ret_type "${meta}" "long")"
+	local retptr="$(gen_ret_type "${meta}" "uintptr_t")"
 	local params="$(gen_params "long" "atomic_long" "$@")"
+	local paramsptr="$(gen_params "uintptr_t" "atomic_ptr" "$@")"
 	local argscast_32="$(gen_args_cast "int" "atomic" "$@")"
 	local argscast_64="$(gen_args_cast "s64" "atomic64" "$@")"
+	local argscast_long="$(gen_args_cast "long" "atomic_long" "$@")"
+	local argscast_ptr="$(gen_args_cast "uintptr_t" "atomicuintptr" "$@")"
 	local retstmt="$(gen_ret_stmt "${meta}")"
 
 	gen_kerneldoc "raw_" "${meta}" "${pfx}" "${name}" "${sfx}" "${order}" "atomic_long" "long" "$@"
@@ -59,6 +63,16 @@ raw_atomic_long_${atomicname}(${params})
 	${retstmt}raw_atomic64_${atomicname}(${argscast_64});
 #else
 	${retstmt}raw_atomic_${atomicname}(${argscast_32});
+#endif
+}
+
+static __always_inline ${retptr}
+raw_atomic_ptr_${atomicname}(${paramsptr})
+{
+#ifndef CONFIG_CHERI_KERNEL
+	${retstmt}raw_atomic_long_${atomicname}(${argscast_long});
+#else
+	${retstmt}raw_atomicuintptr_${atomicname}(${argscast_ptr});
 #endif
 }
 
@@ -87,6 +101,15 @@ typedef atomic_t atomic_long_t;
 #define ATOMIC_LONG_INIT(i)		ATOMIC_INIT(i)
 #define atomic_long_cond_read_acquire	atomic_cond_read_acquire
 #define atomic_long_cond_read_relaxed	atomic_cond_read_relaxed
+#endif
+
+#ifndef CONFIG_CHERI_KERNEL
+typedef atomic_long_t atomic_ptr_t;
+#define ATOMIC_PTR_INIT(i)		ATOMIC_LONG_INIT(i)
+#define atomicptr_cond_read_acquire	atomic_long_cond_read_acquire
+#define atomicptr_cond_read_relaxed	atomic_long_cond_read_relaxed
+#else
+typedef atomicuintptr_t atomic_ptr_t;
 #endif
 
 EOF
