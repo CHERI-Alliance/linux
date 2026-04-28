@@ -2611,31 +2611,31 @@ static const struct s3c24xx_serial_drv_data artpec8_serial_drv_data = {
 static const struct platform_device_id s3c24xx_serial_driver_ids[] = {
 	{
 		.name		= "s3c6400-uart",
-		.driver_data	= (kernel_ulong_t)S3C6400_SERIAL_DRV_DATA,
+		.driver_data	= (uintptr_t)S3C6400_SERIAL_DRV_DATA,
 	}, {
 		.name		= "s5pv210-uart",
-		.driver_data	= (kernel_ulong_t)S5PV210_SERIAL_DRV_DATA,
+		.driver_data	= (uintptr_t)S5PV210_SERIAL_DRV_DATA,
 	}, {
 		.name		= "exynos4210-uart",
-		.driver_data	= (kernel_ulong_t)EXYNOS4210_SERIAL_DRV_DATA,
+		.driver_data	= (uintptr_t)EXYNOS4210_SERIAL_DRV_DATA,
 	}, {
 		.name		= "exynos5433-uart",
-		.driver_data	= (kernel_ulong_t)EXYNOS5433_SERIAL_DRV_DATA,
+		.driver_data	= (uintptr_t)EXYNOS5433_SERIAL_DRV_DATA,
 	}, {
 		.name		= "s5l-uart",
-		.driver_data	= (kernel_ulong_t)S5L_SERIAL_DRV_DATA,
+		.driver_data	= (uintptr_t)S5L_SERIAL_DRV_DATA,
 	}, {
 		.name		= "exynos850-uart",
-		.driver_data	= (kernel_ulong_t)EXYNOS850_SERIAL_DRV_DATA,
+		.driver_data	= (uintptr_t)EXYNOS850_SERIAL_DRV_DATA,
 	}, {
 		.name		= "artpec8-uart",
-		.driver_data	= (kernel_ulong_t)ARTPEC8_SERIAL_DRV_DATA,
+		.driver_data	= (uintptr_t)ARTPEC8_SERIAL_DRV_DATA,
 	}, {
 		.name		= "gs101-uart",
-		.driver_data	= (kernel_ulong_t)GS101_SERIAL_DRV_DATA,
+		.driver_data	= (uintptr_t)GS101_SERIAL_DRV_DATA,
 	}, {
 		.name		= "exynos8895-uart",
-		.driver_data	= (kernel_ulong_t)EXYNOS8895_SERIAL_DRV_DATA,
+		.driver_data	= (uintptr_t)EXYNOS8895_SERIAL_DRV_DATA,
 	},
 	{ },
 };

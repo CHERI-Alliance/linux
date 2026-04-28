@@ -1901,10 +1901,10 @@ MODULE_DEVICE_TABLE(of, atmel_dma_dt_ids);
 static const struct platform_device_id atdma_devtypes[] = {
 	{
 		.name = "at91sam9rl_dma",
-		.driver_data = (unsigned long) &at91sam9rl_config,
+		.driver_data = (uintptr_t) &at91sam9rl_config,
 	}, {
 		.name = "at91sam9g45_dma",
-		.driver_data = (unsigned long) &at91sam9g45_config,
+		.driver_data = (uintptr_t) &at91sam9g45_config,
 	}, {
 		/* sentinel */
 	}

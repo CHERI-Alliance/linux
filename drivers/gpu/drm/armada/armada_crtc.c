@@ -1074,10 +1074,10 @@ MODULE_DEVICE_TABLE(of, armada_lcd_of_match);
 static const struct platform_device_id armada_lcd_platform_ids[] = {
 	{
 		.name		= "armada-lcd",
-		.driver_data	= (unsigned long)&armada510_ops,
+		.driver_data	= (uintptr_t)&armada510_ops,
 	}, {
 		.name		= "armada-510-lcd",
-		.driver_data	= (unsigned long)&armada510_ops,
+		.driver_data	= (uintptr_t)&armada510_ops,
 	},
 	{ },
 };

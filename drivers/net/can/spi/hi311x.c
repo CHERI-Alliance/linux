@@ -820,7 +820,7 @@ MODULE_DEVICE_TABLE(of, hi3110_of_match);
 static const struct spi_device_id hi3110_id_table[] = {
 	{
 		.name		= "hi3110",
-		.driver_data	= (kernel_ulong_t)CAN_HI3110_HI3110,
+		.driver_data	= (uintptr_t)CAN_HI3110_HI3110,
 	},
 	{ }
 };

@@ -2196,9 +2196,9 @@ static struct i2c_adapter_quirks mlxbf_i2c_quirks = {
 };
 
 static const struct acpi_device_id mlxbf_i2c_acpi_ids[] = {
-	{ "MLNXBF03", (kernel_ulong_t)&mlxbf_i2c_chip[MLXBF_I2C_CHIP_TYPE_1] },
-	{ "MLNXBF23", (kernel_ulong_t)&mlxbf_i2c_chip[MLXBF_I2C_CHIP_TYPE_2] },
-	{ "MLNXBF31", (kernel_ulong_t)&mlxbf_i2c_chip[MLXBF_I2C_CHIP_TYPE_3] },
+	{ "MLNXBF03", (uintptr_t)&mlxbf_i2c_chip[MLXBF_I2C_CHIP_TYPE_1] },
+	{ "MLNXBF23", (uintptr_t)&mlxbf_i2c_chip[MLXBF_I2C_CHIP_TYPE_2] },
+	{ "MLNXBF31", (uintptr_t)&mlxbf_i2c_chip[MLXBF_I2C_CHIP_TYPE_3] },
 	{},
 };
 

@@ -45,7 +45,7 @@ struct pci_device_id {
 	__u32 vendor, device;		/* Vendor and device ID or PCI_ANY_ID*/
 	__u32 subvendor, subdevice;	/* Subsystem ID's or PCI_ANY_ID */
 	__u32 class, class_mask;	/* (class,subclass,prog-if) triplet */
-	kernel_ulong_t driver_data;	/* Data private to the driver */
+	uintptr_t driver_data;	/* Data private to the driver */
 	__u32 override_only;
 };
 
@@ -61,7 +61,7 @@ struct ieee1394_device_id {
 	__u32 model_id;
 	__u32 specifier_id;
 	__u32 version;
-	kernel_ulong_t driver_data;
+	uintptr_t driver_data;
 };
 
 
@@ -149,7 +149,7 @@ struct usb_device_id {
 	__u8		bInterfaceNumber;
 
 	/* not matched against */
-	kernel_ulong_t	driver_info
+	uintptr_t	driver_info
 		__attribute__((aligned(sizeof(kernel_ulong_t))));
 };
 
@@ -175,7 +175,7 @@ struct hid_device_id {
 	__u16 group;
 	__u32 vendor;
 	__u32 product;
-	kernel_ulong_t driver_data;
+	uintptr_t driver_data;
 };
 
 /* s390 CCW devices */
@@ -187,7 +187,7 @@ struct ccw_device_id {
 	__u8	cu_model;	/* control unit model    */
 	__u8	dev_model;	/* device model          */
 
-	kernel_ulong_t driver_info;
+	uintptr_t driver_info;
 };
 
 #define CCW_DEVICE_ID_MATCH_CU_TYPE		0x01
@@ -199,7 +199,7 @@ struct ccw_device_id {
 struct ap_device_id {
 	__u16 match_flags;	/* which fields to match against */
 	__u8 dev_type;		/* device type */
-	kernel_ulong_t driver_info;
+	uintptr_t driver_info;
 };
 
 #define AP_DEVICE_ID_MATCH_CARD_TYPE		0x01
@@ -209,14 +209,14 @@ struct ap_device_id {
 struct css_device_id {
 	__u8 match_flags;
 	__u8 type; /* subchannel type */
-	kernel_ulong_t driver_data;
+	uintptr_t driver_data;
 };
 
 #define ACPI_ID_LEN	16
 
 struct acpi_device_id {
 	__u8 id[ACPI_ID_LEN];
-	kernel_ulong_t driver_data;
+	uintptr_t driver_data;
 	__u32 cls;
 	__u32 cls_msk;
 };
@@ -239,12 +239,12 @@ struct acpi_device_id {
 
 struct pnp_device_id {
 	__u8 id[PNP_ID_LEN];
-	kernel_ulong_t driver_data;
+	uintptr_t driver_data;
 };
 
 struct pnp_card_device_id {
 	__u8 id[PNP_ID_LEN];
-	kernel_ulong_t driver_data;
+	uintptr_t driver_data;
 	struct {
 		__u8 id[PNP_ID_LEN];
 	} devs[PNP_MAX_DEVICES];
@@ -265,7 +265,7 @@ struct hda_device_id {
 	__u32 rev_id;
 	__u8 api_version;
 	const char *name;
-	unsigned long driver_data;
+	uintptr_t driver_data;
 };
 
 struct sdw_device_id {
@@ -273,7 +273,7 @@ struct sdw_device_id {
 	__u16 part_id;
 	__u8  sdw_version;
 	__u8  class_id;
-	kernel_ulong_t driver_data;
+	uintptr_t driver_data;
 };
 
 /*
@@ -314,7 +314,7 @@ struct pcmcia_device_id {
 	const char *	prod_id[4];
 
 	/* not matched against */
-	kernel_ulong_t	driver_info;
+	uintptr_t	driver_info;
 	char *		cisfile;
 };
 
@@ -379,7 +379,7 @@ struct input_device_id {
 	kernel_ulong_t swbit[INPUT_DEVICE_ID_SW_MAX / BITS_PER_LONG + 1];
 	kernel_ulong_t propbit[INPUT_DEVICE_ID_PROP_MAX / BITS_PER_LONG + 1];
 
-	kernel_ulong_t driver_info;
+	uintptr_t driver_info;
 };
 
 /* EISA */
@@ -389,7 +389,7 @@ struct input_device_id {
 /* The EISA signature, in ASCII form, null terminated */
 struct eisa_device_id {
 	char          sig[EISA_SIG_LEN];
-	kernel_ulong_t driver_data;
+	uintptr_t driver_data;
 };
 
 #define EISA_DEVICE_MODALIAS_FMT "eisa:s%s"
@@ -414,7 +414,7 @@ struct sdio_device_id {
 	__u8	class;			/* Standard interface or SDIO_ANY_ID */
 	__u16	vendor;			/* Vendor or SDIO_ANY_ID */
 	__u16	device;			/* Device ID or SDIO_ANY_ID */
-	kernel_ulong_t driver_data;	/* Data private to the driver */
+	uintptr_t driver_data;	/* Data private to the driver */
 };
 
 /* SSB core, see drivers/ssb/ */
@@ -457,7 +457,7 @@ struct virtio_device_id {
  */
 struct hv_vmbus_device_id {
 	guid_t guid;
-	kernel_ulong_t driver_data;	/* Data private to the driver */
+	uintptr_t driver_data;	/* Data private to the driver */
 };
 
 /* rpmsg */
@@ -467,7 +467,7 @@ struct hv_vmbus_device_id {
 
 struct rpmsg_device_id {
 	char name[RPMSG_NAME_SIZE];
-	kernel_ulong_t driver_data;
+	uintptr_t driver_data;
 };
 
 /* i2c */
@@ -477,7 +477,7 @@ struct rpmsg_device_id {
 
 struct i2c_device_id {
 	char name[I2C_NAME_SIZE];
-	kernel_ulong_t driver_data;	/* Data private to the driver */
+	uintptr_t driver_data;	/* Data private to the driver */
 };
 
 /* pci_epf */
@@ -487,7 +487,7 @@ struct i2c_device_id {
 
 struct pci_epf_device_id {
 	char name[PCI_EPF_NAME_SIZE];
-	kernel_ulong_t driver_data;
+	uintptr_t driver_data;
 };
 
 /* i3c */
@@ -514,7 +514,7 @@ struct i3c_device_id {
 
 struct spi_device_id {
 	char name[SPI_NAME_SIZE];
-	kernel_ulong_t driver_data;	/* Data private to the driver */
+	uintptr_t driver_data;	/* Data private to the driver */
 };
 
 /* SLIMbus */
@@ -527,7 +527,7 @@ struct slim_device_id {
 	__u16 dev_index, instance;
 
 	/* Data private to the driver */
-	kernel_ulong_t driver_data;
+	uintptr_t driver_data;
 };
 
 #define APR_NAME_SIZE	32
@@ -538,7 +538,7 @@ struct apr_device_id {
 	__u32 domain_id;
 	__u32 svc_id;
 	__u32 svc_version;
-	kernel_ulong_t driver_data;	/* Data private to the driver */
+	uintptr_t driver_data;	/* Data private to the driver */
 };
 
 #define SPMI_NAME_SIZE	32
@@ -546,7 +546,7 @@ struct apr_device_id {
 
 struct spmi_device_id {
 	char name[SPMI_NAME_SIZE];
-	kernel_ulong_t driver_data;	/* Data private to the driver */
+	uintptr_t driver_data;	/* Data private to the driver */
 };
 
 /* dmi */
@@ -606,7 +606,7 @@ struct dmi_system_id {
 
 struct platform_device_id {
 	char name[PLATFORM_NAME_SIZE];
-	kernel_ulong_t driver_data;
+	uintptr_t driver_data;
 };
 
 #define MDIO_MODULE_PREFIX	"mdio:"
@@ -637,7 +637,7 @@ struct mdio_device_id {
 
 struct zorro_device_id {
 	__u32 id;			/* Device ID or ZORRO_WILDCARD */
-	kernel_ulong_t driver_data;	/* Data private to the driver */
+	uintptr_t driver_data;	/* Data private to the driver */
 };
 
 #define ZORRO_WILDCARD			(0xffffffff)	/* not official */
@@ -648,7 +648,7 @@ struct zorro_device_id {
 struct isapnp_device_id {
 	unsigned short card_vendor, card_device;
 	unsigned short vendor, function;
-	kernel_ulong_t driver_data;	/* data private to the driver */
+	uintptr_t driver_data;	/* data private to the driver */
 };
 
 /**
@@ -692,7 +692,7 @@ struct x86_cpu_id {
 	/* Solely for kernel-internal use: DO NOT EXPORT to userspace! */
 	__u16 flags;
 	__u8  type;
-	kernel_ulong_t driver_data;
+	uintptr_t driver_data;
 };
 
 /* Wild cards for x86_cpu_id::vendor, family, model and feature */
@@ -739,7 +739,7 @@ struct mei_cl_device_id {
 	char name[MEI_CL_NAME_SIZE];
 	uuid_le uuid;
 	__u8    version;
-	kernel_ulong_t driver_info;
+	uintptr_t driver_info;
 };
 
 /* RapidIO */
@@ -763,13 +763,13 @@ struct rio_device_id {
 
 struct mcb_device_id {
 	__u16 device;
-	kernel_ulong_t driver_data;
+	uintptr_t driver_data;
 };
 
 struct ulpi_device_id {
 	__u16 vendor;
 	__u16 product;
-	kernel_ulong_t driver_data;
+	uintptr_t driver_data;
 };
 
 /**
@@ -804,7 +804,7 @@ struct tb_service_id {
 	__u32 protocol_id;
 	__u32 protocol_version;
 	__u32 protocol_revision;
-	kernel_ulong_t driver_data;
+	uintptr_t driver_data;
 };
 
 #define TBSVC_MATCH_PROTOCOL_KEY	0x0001
@@ -825,7 +825,7 @@ struct tb_service_id {
 struct typec_device_id {
 	__u16 svid;
 	__u8 mode;
-	kernel_ulong_t driver_data;
+	uintptr_t driver_data;
 };
 
 /**
@@ -863,7 +863,7 @@ struct wmi_device_id {
  */
 struct mhi_device_id {
 	const char chan[MHI_NAME_SIZE];
-	kernel_ulong_t driver_data;
+	uintptr_t driver_data;
 };
 
 #define AUXILIARY_NAME_SIZE 40
@@ -871,7 +871,7 @@ struct mhi_device_id {
 
 struct auxiliary_device_id {
 	char name[AUXILIARY_NAME_SIZE];
-	kernel_ulong_t driver_data;
+	uintptr_t driver_data;
 };
 
 /* Surface System Aggregator Module */
@@ -889,7 +889,7 @@ struct ssam_device_id {
 	__u8 instance;
 	__u8 function;
 
-	kernel_ulong_t driver_data;
+	uintptr_t driver_data;
 };
 
 /*
@@ -913,7 +913,7 @@ struct ssam_device_id {
 struct dfl_device_id {
 	__u16 type;
 	__u16 feature_id;
-	kernel_ulong_t driver_data;
+	uintptr_t driver_data;
 };
 
 /* ISHTP (Integrated Sensor Hub Transport Protocol) */
@@ -927,7 +927,7 @@ struct dfl_device_id {
  */
 struct ishtp_device_id {
 	guid_t guid;
-	kernel_ulong_t driver_data;
+	uintptr_t driver_data;
 };
 
 #define CDX_ANY_ID (0xFFFF)
@@ -972,7 +972,7 @@ struct vchiq_device_id {
  */
 struct coreboot_device_id {
 	__u32 tag;
-	kernel_ulong_t driver_data;
+	uintptr_t driver_data;
 };
 
 #endif /* LINUX_MOD_DEVICETABLE_H */

@@ -514,7 +514,7 @@ static const struct usb_device_id go7007_usb_id_table[] = {
 		.bInterfaceClass	= 255,
 		.bInterfaceSubClass	= 0,
 		.bInterfaceProtocol	= 255,
-		.driver_info	= (kernel_ulong_t)GO7007_BOARDID_XMEN,
+		.driver_info	= (uintptr_t)GO7007_BOARDID_XMEN,
 	},
 	{
 		.match_flags	= USB_DEVICE_ID_MATCH_DEVICE_AND_VERSION,
@@ -522,7 +522,7 @@ static const struct usb_device_id go7007_usb_id_table[] = {
 		.idProduct	= 0x7007,  /* Product ID of GO7007SB chip */
 		.bcdDevice_lo	= 0x202,   /* Revision number of Matrix II */
 		.bcdDevice_hi	= 0x202,
-		.driver_info	= (kernel_ulong_t)GO7007_BOARDID_MATRIX_II,
+		.driver_info	= (uintptr_t)GO7007_BOARDID_MATRIX_II,
 	},
 	{
 		.match_flags	= USB_DEVICE_ID_MATCH_DEVICE_AND_VERSION,
@@ -530,7 +530,7 @@ static const struct usb_device_id go7007_usb_id_table[] = {
 		.idProduct	= 0x7007,  /* Product ID of GO7007SB chip */
 		.bcdDevice_lo	= 0x204,   /* Revision number of Matrix */
 		.bcdDevice_hi	= 0x204,   /*     Reloaded */
-		.driver_info	= (kernel_ulong_t)GO7007_BOARDID_MATRIX_RELOAD,
+		.driver_info	= (uintptr_t)GO7007_BOARDID_MATRIX_RELOAD,
 	},
 	{
 		.match_flags	= USB_DEVICE_ID_MATCH_DEVICE_AND_VERSION |
@@ -542,7 +542,7 @@ static const struct usb_device_id go7007_usb_id_table[] = {
 		.bInterfaceClass	= 255,
 		.bInterfaceSubClass	= 0,
 		.bInterfaceProtocol	= 255,
-		.driver_info	= (kernel_ulong_t)GO7007_BOARDID_XMEN_II,
+		.driver_info	= (uintptr_t)GO7007_BOARDID_XMEN_II,
 	},
 	{
 		.match_flags	= USB_DEVICE_ID_MATCH_DEVICE_AND_VERSION,
@@ -550,7 +550,7 @@ static const struct usb_device_id go7007_usb_id_table[] = {
 		.idProduct	= 0x7007,  /* Product ID of GO7007SB chip */
 		.bcdDevice_lo	= 0x208,   /* Revision number of Star Trek */
 		.bcdDevice_hi	= 0x208,
-		.driver_info	= (kernel_ulong_t)GO7007_BOARDID_STAR_TREK,
+		.driver_info	= (uintptr_t)GO7007_BOARDID_STAR_TREK,
 	},
 	{
 		.match_flags	= USB_DEVICE_ID_MATCH_DEVICE_AND_VERSION |
@@ -562,7 +562,7 @@ static const struct usb_device_id go7007_usb_id_table[] = {
 		.bInterfaceClass	= 255,
 		.bInterfaceSubClass	= 0,
 		.bInterfaceProtocol	= 255,
-		.driver_info	= (kernel_ulong_t)GO7007_BOARDID_XMEN_III,
+		.driver_info	= (uintptr_t)GO7007_BOARDID_XMEN_III,
 	},
 	{
 		.match_flags	= USB_DEVICE_ID_MATCH_DEVICE_AND_VERSION,
@@ -570,7 +570,7 @@ static const struct usb_device_id go7007_usb_id_table[] = {
 		.idProduct	= 0x7007,  /* Product ID of GO7007SB chip */
 		.bcdDevice_lo	= 0x210,   /* Revision number of Matrix */
 		.bcdDevice_hi	= 0x210,   /*     Revolution */
-		.driver_info	= (kernel_ulong_t)GO7007_BOARDID_MATRIX_REV,
+		.driver_info	= (uintptr_t)GO7007_BOARDID_MATRIX_REV,
 	},
 	{
 		.match_flags	= USB_DEVICE_ID_MATCH_DEVICE_AND_VERSION,
@@ -578,7 +578,7 @@ static const struct usb_device_id go7007_usb_id_table[] = {
 		.idProduct	= 0xa102,  /* Product ID of M402U */
 		.bcdDevice_lo	= 0x1,	   /* revision number of Blueberry */
 		.bcdDevice_hi	= 0x1,
-		.driver_info	= (kernel_ulong_t)GO7007_BOARDID_PX_M402U,
+		.driver_info	= (uintptr_t)GO7007_BOARDID_PX_M402U,
 	},
 	{
 		.match_flags	= USB_DEVICE_ID_MATCH_DEVICE_AND_VERSION,
@@ -586,7 +586,7 @@ static const struct usb_device_id go7007_usb_id_table[] = {
 		.idProduct	= 0xa104,  /* Product ID of TV402U */
 		.bcdDevice_lo	= 0x1,
 		.bcdDevice_hi	= 0x1,
-		.driver_info	= (kernel_ulong_t)GO7007_BOARDID_PX_TV402U,
+		.driver_info	= (uintptr_t)GO7007_BOARDID_PX_TV402U,
 	},
 	{
 		.match_flags	= USB_DEVICE_ID_MATCH_DEVICE_AND_VERSION,
@@ -594,7 +594,7 @@ static const struct usb_device_id go7007_usb_id_table[] = {
 		.idProduct	= 0xde00,  /* Product ID of Lifeview LR192 */
 		.bcdDevice_lo	= 0x1,
 		.bcdDevice_hi	= 0x1,
-		.driver_info	= (kernel_ulong_t)GO7007_BOARDID_LIFEVIEW_LR192,
+		.driver_info	= (uintptr_t)GO7007_BOARDID_LIFEVIEW_LR192,
 	},
 	{
 		.match_flags	= USB_DEVICE_ID_MATCH_DEVICE_AND_VERSION,
@@ -602,7 +602,7 @@ static const struct usb_device_id go7007_usb_id_table[] = {
 		.idProduct	= 0x2250,  /* Product ID of 2250/2251 */
 		.bcdDevice_lo	= 0x1,
 		.bcdDevice_hi	= 0x1,
-		.driver_info	= (kernel_ulong_t)GO7007_BOARDID_SENSORAY_2250,
+		.driver_info	= (uintptr_t)GO7007_BOARDID_SENSORAY_2250,
 	},
 	{
 		.match_flags	= USB_DEVICE_ID_MATCH_DEVICE_AND_VERSION,
@@ -610,7 +610,7 @@ static const struct usb_device_id go7007_usb_id_table[] = {
 		.idProduct	= 0x0709,  /* Product ID of DVD Xpress DX2 */
 		.bcdDevice_lo	= 0x204,
 		.bcdDevice_hi	= 0x204,
-		.driver_info	= (kernel_ulong_t)GO7007_BOARDID_ADS_USBAV_709,
+		.driver_info	= (uintptr_t)GO7007_BOARDID_ADS_USBAV_709,
 	},
 	{ }					/* Terminating entry */
 };

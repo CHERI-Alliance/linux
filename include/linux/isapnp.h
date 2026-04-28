@@ -42,7 +42,7 @@
 		{ .vendor = ISAPNP_VENDOR(_va, _vb, _vc), .function = ISAPNP_FUNCTION(_function) }
 
 struct isapnp_card_id {
-	unsigned long driver_data;	/* data private to the driver */
+	uintptr_t driver_data;	/* data private to the driver */
 	unsigned short card_vendor, card_device;
 	struct {
 		unsigned short vendor, function;
