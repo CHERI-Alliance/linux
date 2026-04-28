@@ -12,10 +12,10 @@
  * as_user_ptr - convert an arbitrary integer value to a user pointer
  * @x: the integer value to convert
  *
- * Returns @x represented as a user pointer. The result is not a valid pointer
- * and shall not be dereferenced.
+ * Returns up to 64 bits of @x represented as a user pointer. The result is
+ * not a valid pointer and shall not be dereferenced.
  */
-#define as_user_ptr(x) ((void __user *)(user_uintptr_t)(x))
+#define as_user_ptr(x) ((void __user *)(user_uintptr_t)(u64)(x))
 
 /* Same semantics as as_user_ptr(), but also requires x to be of a given type */
 #define as_user_ptr_strict(type, x) (	\
