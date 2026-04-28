@@ -61,9 +61,10 @@ EXPORT_SYMBOL_GPL(comedi_to_usb_dev);
  */
 int comedi_usb_auto_config(struct usb_interface *intf,
 			   struct comedi_driver *driver,
-			   unsigned long context)
+			   uintptr_t context)
 {
-	return comedi_auto_config(&intf->dev, driver, context);
+	/* CHERI: Downstream functions do not require a pointer. */
+	return comedi_auto_config(&intf->dev, driver, __c_ua(context));
 }
 EXPORT_SYMBOL_GPL(comedi_usb_auto_config);
 

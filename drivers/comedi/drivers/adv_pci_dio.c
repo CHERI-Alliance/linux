@@ -408,7 +408,7 @@ static int pci_dio_insn_bits_di_b(struct comedi_device *dev,
 				  struct comedi_insn *insn,
 				  unsigned int *data)
 {
-	uintptr_t reg = (uintptr_t)s->private;
+	unsigned long reg = __c_pa(s->private);
 	unsigned long iobase = dev->iobase + reg;
 
 	data[1] = inb(iobase);
@@ -427,7 +427,7 @@ static int pci_dio_insn_bits_di_w(struct comedi_device *dev,
 				  struct comedi_insn *insn,
 				  unsigned int *data)
 {
-	uintptr_t reg = (uintptr_t)s->private;
+	unsigned long reg = __c_pa(s->private);
 	unsigned long iobase = dev->iobase + reg;
 
 	data[1] = inw(iobase);
@@ -442,7 +442,7 @@ static int pci_dio_insn_bits_do_b(struct comedi_device *dev,
 				  struct comedi_insn *insn,
 				  unsigned int *data)
 {
-	uintptr_t reg = (uintptr_t)s->private;
+	unsigned long reg = __c_pa(s->private);
 	unsigned long iobase = dev->iobase + reg;
 
 	if (comedi_dio_update_state(s, data)) {
@@ -465,7 +465,7 @@ static int pci_dio_insn_bits_do_w(struct comedi_device *dev,
 				  struct comedi_insn *insn,
 				  unsigned int *data)
 {
-	uintptr_t reg = (uintptr_t)s->private;
+	unsigned long reg = __c_pa(s->private);
 	unsigned long iobase = dev->iobase + reg;
 
 	if (comedi_dio_update_state(s, data)) {
@@ -601,7 +601,7 @@ static int pci_dio_auto_attach(struct comedi_device *dev,
 			s->insn_bits	= board->is_16bit
 						? pci_dio_insn_bits_di_w
 						: pci_dio_insn_bits_di_b;
-			s->private	= (void *)d->addr;
+			s->private	= (void *)__c_fakep(d->addr);
 		}
 	}
 
@@ -618,7 +618,7 @@ static int pci_dio_auto_attach(struct comedi_device *dev,
 			s->insn_bits	= board->is_16bit
 						? pci_dio_insn_bits_do_w
 						: pci_dio_insn_bits_do_b;
-			s->private	= (void *)d->addr;
+			s->private	= __c_fakep(d->addr);
 
 			/* reset all outputs to 0 */
 			if (board->is_16bit) {
@@ -658,7 +658,7 @@ static int pci_dio_auto_attach(struct comedi_device *dev,
 		s->range_table	= &range_digital;
 		s->insn_bits	= board->is_16bit ? pci_dio_insn_bits_di_w
 						  : pci_dio_insn_bits_di_b;
-		s->private	= (void *)board->id_reg;
+		s->private	= __c_fakep(board->id_reg);
 	}
 
 	if (board->timer_regbase) {
@@ -763,8 +763,8 @@ static int adv_pci_dio_pci_probe(struct pci_dev *dev,
 {
 	unsigned long cardtype;
 
-	cardtype = pci_dio_override_cardtype(dev, id->driver_data);
-	return comedi_pci_auto_config(dev, &adv_pci_dio_driver, cardtype);
+	cardtype = pci_dio_override_cardtype(dev, __c_ua(id->driver_data));
+	return comedi_pci_auto_config(dev, &adv_pci_dio_driver, __c_fakeu(cardtype));
 }
 
 static const struct pci_device_id adv_pci_dio_pci_table[] = {
