@@ -483,10 +483,14 @@ int copy_thread(struct task_struct *p, const struct kernel_clone_args *args)
 			p->thread.por_el0 = read_sysreg_s(SYS_POR_EL0);
 
 		if (stack_start) {
-			if (is_compat_thread(task_thread_info(p)))
-				childregs->compat_sp = stack_start;
-			else
-				childregs->sp = stack_start;
+			if (is_compat_thread(task_thread_info(p))) {
+				childregs->compat_sp = (ptraddr_t)stack_start;
+			} else {
+				childregs->sp = (ptraddr_t)stack_start;
+#ifdef CONFIG_CHERI_PURECAP_UABI
+				morello_thread_set_csp(childregs, stack_start);
+#endif
+			}
 		}
 
 		/*

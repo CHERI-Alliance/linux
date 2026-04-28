@@ -74,6 +74,15 @@ void morello_thread_start(struct pt_regs *regs, unsigned long pc)
 	init_csp(regs);
 }
 
+#ifdef CONFIG_CHERI_PURECAP_UABI
+void morello_thread_set_csp(struct pt_regs *regs, user_uintptr_t sp)
+{
+	uintcap_t *thread_sp = __morello_cap_has_executive(regs->pcc) ?
+				    &regs->csp : &regs->rcsp;
+	*thread_sp = sp;
+}
+#endif
+
 void morello_setup_signal_return(struct pt_regs *regs)
 {
 	/*
