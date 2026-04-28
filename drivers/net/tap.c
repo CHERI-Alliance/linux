@@ -1031,6 +1031,17 @@ static long tap_ioctl(struct file *file, unsigned int cmd,
 	}
 }
 
+#ifdef CONFIG_COMPAT
+static long compat_tap_ioctl(struct file *file, unsigned int cmd,
+			     unsigned long arg)
+{
+	user_uintptr_t cmd_arg = (cmd != TUNSETOFFLOAD) ?
+				 (user_uintptr_t)compat_ptr(arg) :
+				 (user_uintptr_t)arg;
+	return tap_ioctl(file, cmd, cmd_arg);
+}
+#endif
+
 static const struct file_operations tap_fops = {
 	.owner		= THIS_MODULE,
 	.open		= tap_open,
@@ -1039,7 +1050,9 @@ static const struct file_operations tap_fops = {
 	.write_iter	= tap_write_iter,
 	.poll		= tap_poll,
 	.unlocked_ioctl	= tap_ioctl,
-	.compat_ioctl	= compat_ptr_ioctl,
+#ifdef CONFIG_COMPAT
+	.compat_ioctl	= compat_tap_ioctl,
+#endif
 };
 
 static int tap_get_user_xdp(struct tap_queue *q, struct xdp_buff *xdp)
