@@ -1453,9 +1453,8 @@ static int io_send_zc_import(struct io_kiocb *req, unsigned int issue_flags)
 	WARN_ON_ONCE(!(sr->flags & IORING_RECVSEND_FIXED_BUF));
 
 	sr->notif->buf_index = req->buf_index;
-	/* TODO [PCuABI] - capability checks for uaccess */
 	return io_import_reg_buf(sr->notif, &kmsg->msg.msg_iter,
-				(u64)(user_uintptr_t)sr->buf, sr->len,
+				sr->buf, sr->len,
 				ITER_SOURCE, issue_flags);
 }
 
@@ -1780,7 +1779,7 @@ int io_connect_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 		return -EINVAL;
 
 	conn->addr = u64_to_user_ptr(READ_ONCE(sqe->addr));
-	conn->addr_len =  READ_ONCE(sqe->addr2);
+	conn->addr_len = READ_ONCE(sqe->off);
 	conn->in_progress = conn->seen_econnaborted = false;
 
 	io = io_msg_alloc_async(req);

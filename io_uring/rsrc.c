@@ -786,7 +786,13 @@ static struct io_rsrc_node *io_sqe_buffer_register(struct io_ring_ctx *ctx,
 		return ERR_PTR(-ENOMEM);
 
 	ret = -ENOMEM;
-	/* TODO [PCuABI] - capability checks for uaccess */
+
+	/*
+	 * When working in PCuABI, explicit user pointer checking is not needed
+	 * during registration as we are already doing it in io_import_fixed.
+	 * Specifically we employ explicit checks before the user data provided
+	 * in the pre-registered buffers is accessed.
+	 */
 	pages = io_pin_pages(user_ptr_addr(iov->iov_base), iov->iov_len,
 				&nr_pages);
 	if (IS_ERR(pages)) {
@@ -1019,15 +1025,19 @@ unlock:
 }
 EXPORT_SYMBOL_GPL(io_buffer_unregister_bvec);
 
-static int validate_fixed_range(u64 buf_addr, size_t len,
+static int validate_fixed_range(void __user *ubuf, size_t len,
 				const struct io_mapped_ubuf *imu)
 {
+	u64 buf_addr = user_ptr_addr(ubuf);
 	u64 buf_end;
 
 	if (unlikely(check_add_overflow(buf_addr, (u64)len, &buf_end)))
 		return -EFAULT;
 	/* not inside the mapped region */
 	if (unlikely(buf_addr < imu->ubuf || buf_end > (imu->ubuf + imu->len)))
+		return -EFAULT;
+	if (unlikely(((imu->dir & ITER_SOURCE) && !check_user_ptr_read(ubuf, len)) ||
+		     ((imu->dir & ITER_DEST) && !check_user_ptr_write(ubuf, len))))
 		return -EFAULT;
 	if (unlikely(len > MAX_RW_COUNT))
 		return -EFAULT;
@@ -1046,7 +1056,7 @@ static int io_import_kbuf(int ddir, struct iov_iter *iter,
 
 static int io_import_fixed(int ddir, struct iov_iter *iter,
 			   struct io_mapped_ubuf *imu,
-			   u64 buf_addr, size_t len)
+			   void __user *ubuf, size_t len)
 {
 	const struct bio_vec *bvec;
 	size_t folio_mask;
@@ -1054,7 +1064,7 @@ static int io_import_fixed(int ddir, struct iov_iter *iter,
 	size_t offset;
 	int ret;
 
-	ret = validate_fixed_range(buf_addr, len, imu);
+	ret = validate_fixed_range(ubuf, len, imu);
 	if (unlikely(ret))
 		return ret;
 	if (!(imu->dir & (1 << ddir)))
@@ -1064,7 +1074,7 @@ static int io_import_fixed(int ddir, struct iov_iter *iter,
 		return 0;
 	}
 
-	offset = buf_addr - imu->ubuf;
+	offset = user_ptr_addr(ubuf) - imu->ubuf;
 
 	if (imu->flags & IO_REGBUF_F_KBUF)
 		return io_import_kbuf(ddir, iter, imu, len, offset);
@@ -1120,7 +1130,7 @@ inline struct io_rsrc_node *io_find_buf_node(struct io_kiocb *req,
 }
 
 int io_import_reg_buf(struct io_kiocb *req, struct iov_iter *iter,
-			u64 buf_addr, size_t len, int ddir,
+			void __user *ubuf, size_t len, int ddir,
 			unsigned issue_flags)
 {
 	struct io_rsrc_node *node;
@@ -1128,7 +1138,7 @@ int io_import_reg_buf(struct io_kiocb *req, struct iov_iter *iter,
 	node = io_find_buf_node(req, issue_flags);
 	if (!node)
 		return -EFAULT;
-	return io_import_fixed(ddir, iter, node->buf, buf_addr, len);
+	return io_import_fixed(ddir, iter, node->buf, ubuf, len);
 }
 
 /* Lock two rings at once. The rings must be different! */
@@ -1340,7 +1350,7 @@ static int io_vec_fill_bvec(int ddir, struct iov_iter *iter,
 		size_t offset;
 		int ret;
 
-		ret = validate_fixed_range(buf_addr, iov_len, imu);
+		ret = validate_fixed_range(iovec[iov_idx].iov_base, iov_len, imu);
 		if (unlikely(ret))
 			return ret;
 
@@ -1428,7 +1438,7 @@ static int iov_kern_bvec_size(const struct iovec *iov,
 	size_t off = 0;
 	int ret;
 
-	ret = validate_fixed_range(offset, iov->iov_len, imu);
+	ret = validate_fixed_range(iov->iov_base, iov->iov_len, imu);
 	if (unlikely(ret))
 		return ret;
 
