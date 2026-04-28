@@ -2140,8 +2140,8 @@ int batadv_mcast_flags_dump(struct sk_buff *msg, struct netlink_callback *cb)
 	struct batadv_hard_iface *primary_if = NULL;
 	int portid = NETLINK_CB(cb->skb).portid;
 	struct batadv_priv *bat_priv;
-	long *bucket = &cb->args[0];
-	long *idx = &cb->args[1];
+	intptr_t *bucket = &cb->args[0];
+	intptr_t *idx = &cb->args[1];
 	int ret;
 
 	ret = batadv_mcast_netlink_get_primary(cb, &primary_if);
