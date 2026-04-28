@@ -176,7 +176,7 @@ static long cuse_file_compat_ioctl(struct file *file, unsigned int cmd,
 	if (cc->unrestricted_ioctl)
 		flags |= FUSE_IOCTL_UNRESTRICTED;
 
-	return fuse_do_ioctl(file, cmd, arg, flags);
+	return fuse_do_ioctl(file, cmd, (user_uintptr_t)compat_ptr(arg), flags);
 }
 
 static const struct file_operations cuse_frontend_fops = {
