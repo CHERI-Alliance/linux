@@ -41,6 +41,10 @@ ccflags-y += $(CFI_FULL)
 asflags-y += $(KBUILD_BASE_ISA)$(CFI_MARCH)
 asflags-y += $(CFI_FULL)
 
+ifneq ($(CONFIG_CHERI_KERNEL),)
+KBUILD_CFLAGS += -mllvm --no-cap-table-relocs
+endif
+
 ifneq ($(c-gettimeofday-y),)
   CFLAGS_vgettimeofday.o += -fPIC -include $(c-gettimeofday-y)
 endif
