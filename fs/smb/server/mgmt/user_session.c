@@ -444,7 +444,7 @@ static int ksmbd_chann_del(struct ksmbd_conn *conn, struct ksmbd_session *sess)
 	struct channel *chann;
 
 	down_write(&sess->chann_lock);
-	chann = xa_erase(&sess->ksmbd_chann_list, (intptr_t)conn);
+	chann = xa_erase(&sess->ksmbd_chann_list, __c_pa(conn));
 	up_write(&sess->chann_lock);
 	if (!chann)
 		return -ENOENT;
@@ -550,7 +550,7 @@ struct ksmbd_session *ksmbd_session_lookup_all(struct ksmbd_conn *conn,
 	sess = ksmbd_session_lookup(conn, id);
 	if (!sess && conn->binding) {
 		sess = ksmbd_session_lookup_slowpath(id);
-		if (sess && !xa_load(&sess->ksmbd_chann_list, (intptr_t)conn)) {
+		if (sess && !xa_load(&sess->ksmbd_chann_list, __c_pa(conn))) {
 			ksmbd_user_session_put(sess);
 			sess = NULL;
 		}
