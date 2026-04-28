@@ -27,7 +27,7 @@
  */
 #ifdef CONFIG_MMU
 #define IO_SPACE_LIMIT		(PCI_IO_SIZE - 1)
-#define PCI_IOBASE		((void __iomem *)PCI_IO_START)
+#define PCI_IOBASE		((void __iomem *)cheri_make_kernel_data_cap(PCI_IO_START, PCI_IO_SIZE))
 
 #define ioremap_wc(addr, size)	\
 	ioremap_prot((addr), (size), __pgprot(_PAGE_KERNEL_NC))
