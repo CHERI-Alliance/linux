@@ -32,15 +32,21 @@
 				".arch morello+c64\n"
 #define __ASM_SWITCH_TO_A64	"	bx	#4\n"	\
 				".arch morello\n"
+#define __ASM_RO_UPTR_CONSTR	"C"
 #define __ASM_RW_UPTR_CONSTR	"+C"
 #else
 #define __ASM_SWITCH_TO_C64
 #define __ASM_SWITCH_TO_A64
+#define __ASM_RO_UPTR_CONSTR	"r"
 #define __ASM_RW_UPTR_CONSTR	"+r"
 #endif
 
 #define __ASM_UACCESS_BEFORE	__ASM_SWITCH_TO_C64
 #define __ASM_UACCESS_AFTER	__ASM_SWITCH_TO_A64
+#define __ASM_KACCESS_BEFORE
+#define __ASM_KACCESS_AFTER
+#define __ASM_RO_KPTR_CONSTR	"r"
+#define __ASM_RW_KPTR_CONSTR	"+r"
 
 static inline int __access_ok(const void __user *ptr, unsigned long size);
 
@@ -224,13 +230,13 @@ static inline void __user *__uaccess_mask_ptr(const void __user *ptr)
 #define __get_mem_asm(load, reg, x, addr, label, type) do {		\
 	int __gma_err = 0;						\
 	asm volatile(							\
-	__ASM_UACCESS_BEFORE						\
+	__ASM_##type##ACCESS_BEFORE					\
 	"1:	" load "	" reg "1, [%2]\n"			\
 	"2:\n"								\
-	__ASM_UACCESS_AFTER						\
+	__ASM_##type##ACCESS_AFTER					\
 	_ASM_EXTABLE_##type##ACCESS_ERR_ZERO(1b, 2b, %w0, %w1)		\
 	: "+r" (__gma_err), "=r" (x)					\
-	: "r" (addr));							\
+	: __ASM_RO_##type##PTR_CONSTR (addr));				\
 	if (__gma_err) goto label; } while (0)
 #endif
 
@@ -332,7 +338,7 @@ do {									\
 	"2:\n"								\
 	__ASM_##type##ACCESS_AFTER					\
 	_ASM_EXTABLE_##type##ACCESS(1b, %l2)				\
-	: : "rZ" (x), "r" (addr) : : label)
+	: : "rZ" (x), __ASM_RO_##type##PTR_CONSTR (addr) : : label)
 
 #define __raw_put_mem(str, x, ptr, label, type)					\
 do {										\
@@ -484,12 +490,13 @@ do {									\
 	__chk_user_ptr(ptr);						\
 	uaccess_ttbr0_enable();						\
 	asm volatile(							\
+	__ASM_UACCESS_BEFORE						\
 	"1:	ldtr %1, [%2]\n"					\
 	"2:\n"								\
+	__ASM_UACCESS_AFTER						\
 	_ASM_EXTABLE_UACCESS_ERR_ZERO(1b, 2b, %w0, %w1)			\
 	: "+r" (err), "=C" (x)						\
-	/* TODO [PCuABI] - perform the access via the user capability */\
-	: "r" ((ptraddr_t)(user_uintptr_t)(ptr)));			\
+	: __ASM_RO_UPTR_CONSTR (ptr));					\
 	uaccess_ttbr0_disable();					\
 } while (0)
 
@@ -520,12 +527,13 @@ do {									\
 	__chk_user_ptr(ptr);						\
 	uaccess_ttbr0_enable();						\
 	asm volatile(							\
+	__ASM_UACCESS_BEFORE						\
 	"1:	sttr %1, [%2]\n"					\
 	"2:\n"								\
+	__ASM_UACCESS_AFTER						\
 	_ASM_EXTABLE_UACCESS_ERR(1b, 2b, %w0)				\
 	: "+r" (err)							\
-	/* TODO [PCuABI] - perform the access via the user capability */\
-	: "CZ" (x), "r" ((ptraddr_t)(user_uintptr_t)(ptr)));		\
+	: "CZ" (x), __ASM_RO_UPTR_CONSTR (ptr));			\
 	uaccess_ttbr0_disable();					\
 } while (0)
 
