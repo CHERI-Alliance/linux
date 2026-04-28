@@ -113,6 +113,7 @@ endif
 
 ifeq ($(CONFIG_ARM64_MORELLO), y)
 KBUILD_CFLAGS	+= -march=morello -isystem $(shell $(CC) -print-file-name=include)
+KBUILD_CFLAGS	+= -Werror=cheri-pointer-conversion
 KBUILD_AFLAGS	+= -march=morello
 endif
 
