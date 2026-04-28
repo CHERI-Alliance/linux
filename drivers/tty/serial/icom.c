@@ -435,8 +435,7 @@ static int get_port_memory(struct icom_port *icom_port)
 		return -ENOMEM;
 	}
 
-	trace(icom_port, "GET_PORT_MEM",
-	      (uintptr_t) icom_port->xmit_buf);
+	trace(icom_port, "GET_PORT_MEM", __c_pa(icom_port->xmit_buf));
 
 	icom_port->recv_buf =
 	    dma_alloc_coherent(&dev->dev, 4096, &icom_port->recv_buf_pci,
@@ -446,8 +445,7 @@ static int get_port_memory(struct icom_port *icom_port)
 		free_port_memory(icom_port);
 		return -ENOMEM;
 	}
-	trace(icom_port, "GET_PORT_MEM",
-	      (uintptr_t) icom_port->recv_buf);
+	trace(icom_port, "GET_PORT_MEM", __c_pa(icom_port->recv_buf));
 
 	icom_port->statStg =
 	    dma_alloc_coherent(&dev->dev, 4096, &icom_port->statStg_pci,
@@ -457,8 +455,7 @@ static int get_port_memory(struct icom_port *icom_port)
 		free_port_memory(icom_port);
 		return -ENOMEM;
 	}
-	trace(icom_port, "GET_PORT_MEM",
-	      (uintptr_t) icom_port->statStg);
+	trace(icom_port, "GET_PORT_MEM", __c_pa(icom_port->statStg));
 
 	icom_port->xmitRestart =
 	    dma_alloc_coherent(&dev->dev, 4096, &icom_port->xmitRestart_pci,
@@ -474,7 +471,7 @@ static int get_port_memory(struct icom_port *icom_port)
            indicates that frames are to be transmitted
 	*/
 
-	stgAddr = (uintptr_t) icom_port->statStg;
+	stgAddr = __c_pa(icom_port->statStg);
 	for (index = 0; index < NUM_XBUFFS; index++) {
 		trace(icom_port, "FOD_ADDR", stgAddr);
 		stgAddr = stgAddr + sizeof(icom_port->statStg->xmit[0]);
@@ -483,16 +480,14 @@ static int get_port_memory(struct icom_port *icom_port)
 			icom_port->statStg->xmit[index].leLengthASD =
 			    cpu_to_le16(XMIT_BUFF_SZ);
 			trace(icom_port, "FOD_ADDR", stgAddr);
-			trace(icom_port, "FOD_XBUFF",
-			      (uintptr_t) icom_port->xmit_buf);
+			trace(icom_port, "FOD_XBUFF", __c_pa(icom_port->xmit_buf));
 			icom_port->statStg->xmit[index].leBuffer =
 			    cpu_to_le32(icom_port->xmit_buf_pci);
 		} else if (index == (NUM_XBUFFS - 1)) {
 			memset(&icom_port->statStg->xmit[index], 0, sizeof(struct xmit_status_area));
 			icom_port->statStg->xmit[index].leLengthASD =
 			    cpu_to_le16(XMIT_BUFF_SZ);
-			trace(icom_port, "FOD_XBUFF",
-			      (uintptr_t) icom_port->xmit_buf);
+			trace(icom_port, "FOD_XBUFF", __c_pa(icom_port->xmit_buf));
 			icom_port->statStg->xmit[index].leBuffer =
 			    cpu_to_le32(icom_port->xmit_buf_pci);
 		} else {
@@ -510,19 +505,18 @@ static int get_port_memory(struct icom_port *icom_port)
 		icom_port->statStg->rcv[index].WorkingLength =
 		    cpu_to_le16(RCV_BUFF_SZ);
 		if (index < (NUM_RBUFFS - 1) ) {
-			offset = stgAddr - (uintptr_t) icom_port->statStg;
+			offset = stgAddr - __c_pa(icom_port->statStg);
 			icom_port->statStg->rcv[index].leNext =
 			      cpu_to_le32(icom_port-> statStg_pci + offset);
-			trace(icom_port, "FID_RBUFF",
-			      (uintptr_t) icom_port->recv_buf);
+			trace(icom_port, "FID_RBUFF", __c_pa(icom_port->recv_buf));
 			icom_port->statStg->rcv[index].leBuffer =
 			    cpu_to_le32(icom_port->recv_buf_pci);
 		} else if (index == (NUM_RBUFFS -1) ) {
-			offset = startStgAddr - (uintptr_t) icom_port->statStg;
+			offset = startStgAddr - __c_pa(icom_port->statStg);
 			icom_port->statStg->rcv[index].leNext =
 			    cpu_to_le32(icom_port-> statStg_pci + offset);
 			trace(icom_port, "FID_RBUFF",
-			      (uintptr_t) icom_port->recv_buf + 2048);
+			      __c_pa(icom_port->recv_buf) + 2048);
 			icom_port->statStg->rcv[index].leBuffer =
 			    cpu_to_le32(icom_port->recv_buf_pci + 2048);
 		} else {
@@ -1779,8 +1773,12 @@ static int icom_probe(struct pci_dev *dev,
 			icom_port->uart_port.irq = icom_port->adapter->pci_dev->irq;
 			icom_port->uart_port.type = PORT_ICOM;
 			icom_port->uart_port.iotype = UPIO_MEM;
+			/*
+			 * FIXCHERI: membase seems unused. If this is not true the pointer
+			 * FIXCHERI: will trap with CHERI.
+			 */
 			icom_port->uart_port.membase =
-				(unsigned char __iomem *)icom_adapter->base_addr_pci;
+				(unsigned char __iomem *)__c_fakep(icom_adapter->base_addr_pci);
 			icom_port->uart_port.fifosize = 16;
 			icom_port->uart_port.ops = &icom_ops;
 			icom_port->uart_port.line =

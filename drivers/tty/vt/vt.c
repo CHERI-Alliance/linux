@@ -283,7 +283,7 @@ static inline bool con_should_update(const struct vc_data *vc)
 static inline u16 *screenpos(const struct vc_data *vc, unsigned int offset,
 			     bool viewed)
 {
-	unsigned long origin = viewed ? vc->vc_visible_origin : vc->vc_origin;
+	uintptr_t origin = viewed ? vc->vc_visible_origin : vc->vc_origin;
 
 	return (u16 *)(origin + offset);
 }
@@ -533,7 +533,7 @@ void vc_uniscr_copy_line(const struct vc_data *vc, void *dest, bool viewed,
 {
 	u32 **uni_lines = vc->vc_uni_lines;
 	int offset = row * vc->vc_size_row + col * 2;
-	unsigned long pos;
+	uintptr_t pos;
 
 	if (WARN_ON_ONCE(!uni_lines))
 		return;
@@ -593,7 +593,7 @@ static void con_scroll(struct vc_data *vc, unsigned int top,
 	scr_memsetw(clear, vc->vc_video_erase_char, vc->vc_size_row * nr);
 }
 
-static void do_update_region(struct vc_data *vc, unsigned long start, int count)
+static void do_update_region(struct vc_data *vc, uintptr_t start, int count)
 {
 	unsigned int xx, yy, offset;
 	u16 *p = (u16 *)start;
@@ -627,7 +627,7 @@ static void do_update_region(struct vc_data *vc, unsigned long start, int count)
 	}
 }
 
-void update_region(struct vc_data *vc, unsigned long start, int count)
+void update_region(struct vc_data *vc, uintptr_t start, int count)
 {
 	WARN_CONSOLE_UNLOCKED();
 
@@ -1135,8 +1135,9 @@ static inline int resize_screen(struct vc_data *vc, int width, int height,
 static int vc_do_resize(struct tty_struct *tty, struct vc_data *vc,
 			unsigned int cols, unsigned int lines, bool from_user)
 {
-	unsigned long old_origin, new_origin, new_scr_end, rlth, rrem, err = 0;
-	unsigned long end;
+	uintptr_t old_origin, new_origin, new_scr_end;
+	unsigned long rlth, rrem, err = 0;
+	uintptr_t end;
 	unsigned int old_rows, old_row_size, first_copied_row;
 	unsigned int new_cols, new_rows, new_row_size, new_screen_size;
 	unsigned short *oldscreen, *newscreen;
@@ -2809,7 +2810,7 @@ static void do_con_trol(struct tty_struct *tty, struct vc_data *vc, u8 c)
 }
 
 struct vc_draw_region {
-	unsigned long from, to;
+	uintptr_t from, to;
 	int x;
 };
 

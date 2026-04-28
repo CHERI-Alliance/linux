@@ -2757,7 +2757,7 @@ long tty_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 			return send_break(tty, 250);
 		return 0;
 	case TCSBRKP:	/* support for POSIX tcsendbreak() */
-		return send_break(tty, arg ? arg*100 : 250);
+		return send_break(tty, arg ? __c_ua(arg)*100 : 250);
 
 	case TIOCMGET:
 		return tty_tiocmget(tty, p);
