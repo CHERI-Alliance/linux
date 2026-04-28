@@ -189,7 +189,7 @@ static void *schedstat_start(struct seq_file *file, loff_t *offset)
 	*offset = n + 1;
 
 	if (n < nr_cpu_ids)
-		return (void *)(unsigned long)(n + 2);
+		return (void *)__c_fakep(n + 2);
 
 	return NULL;
 }
