@@ -227,7 +227,7 @@ static void s626_debi_replace(struct comedi_device *dev, unsigned int addr,
 static int s626_i2c_handshake_eoc(struct comedi_device *dev,
 				  struct comedi_subdevice *s,
 				  struct comedi_insn *insn,
-				  unsigned long context)
+				  uintptr_t context)
 {
 	bool status;
 
@@ -317,7 +317,7 @@ enum {
 static int s626_send_dac_eoc(struct comedi_device *dev,
 			     struct comedi_subdevice *s,
 			     struct comedi_insn *insn,
-			     unsigned long context)
+			     uintptr_t context)
 {
 	unsigned int status;
 
@@ -1471,7 +1471,7 @@ static void s626_reset_adc(struct comedi_device *dev, u8 *ppl)
 static int s626_ai_eoc(struct comedi_device *dev,
 		       struct comedi_subdevice *s,
 		       struct comedi_insn *insn,
-		       unsigned long context)
+		       uintptr_t context)
 {
 	unsigned int status;
 

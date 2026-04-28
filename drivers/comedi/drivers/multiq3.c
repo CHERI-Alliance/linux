@@ -85,7 +85,7 @@ static void multiq3_set_ctrl(struct comedi_device *dev, unsigned int bits)
 static int multiq3_ai_status(struct comedi_device *dev,
 			     struct comedi_subdevice *s,
 			     struct comedi_insn *insn,
-			     unsigned long context)
+			     uintptr_t context)
 {
 	unsigned int status;
 

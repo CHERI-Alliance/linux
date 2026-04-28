@@ -363,7 +363,7 @@ static void das6402_ai_soft_trig(struct comedi_device *dev)
 static int das6402_ai_eoc(struct comedi_device *dev,
 			  struct comedi_subdevice *s,
 			  struct comedi_insn *insn,
-			  unsigned long context)
+			  uintptr_t context)
 {
 	unsigned int status;
 

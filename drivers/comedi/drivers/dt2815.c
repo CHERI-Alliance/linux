@@ -57,7 +57,7 @@ struct dt2815_private {
 static int dt2815_ao_status(struct comedi_device *dev,
 			    struct comedi_subdevice *s,
 			    struct comedi_insn *insn,
-			    unsigned long context)
+			    uintptr_t context)
 {
 	unsigned int status;
 

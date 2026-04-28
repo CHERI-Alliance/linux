@@ -309,7 +309,7 @@ struct cb_pcidas_private {
 static int cb_pcidas_ai_eoc(struct comedi_device *dev,
 			    struct comedi_subdevice *s,
 			    struct comedi_insn *insn,
-			    unsigned long context)
+			    uintptr_t context)
 {
 	struct cb_pcidas_private *devpriv = dev->private;
 	unsigned int status;
@@ -467,7 +467,7 @@ static int cb_pcidas_ao_fifo_insn_write(struct comedi_device *dev,
 static int cb_pcidas_eeprom_ready(struct comedi_device *dev,
 				  struct comedi_subdevice *s,
 				  struct comedi_insn *insn,
-				  unsigned long context)
+				  uintptr_t context)
 {
 	struct cb_pcidas_private *devpriv = dev->private;
 	unsigned int status;

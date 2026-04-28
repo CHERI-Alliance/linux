@@ -416,7 +416,7 @@ static int s526_gpct_winsn(struct comedi_device *dev,
 static int s526_eoc(struct comedi_device *dev,
 		    struct comedi_subdevice *s,
 		    struct comedi_insn *insn,
-		    unsigned long context)
+		    uintptr_t context)
 {
 	unsigned int status;
 
