@@ -5,10 +5,6 @@
 #ifndef __ASM_MORELLO_H
 #define __ASM_MORELLO_H
 
-/* Architectural definitions */
-#define MORELLO_CAP_PERM_EXECUTIVE_BIT	1
-#define MORELLO_CAP_PERM_EXECUTIVE_MASK	(1 << MORELLO_CAP_PERM_EXECUTIVE_BIT)
-
 #ifndef __ASSEMBLY__
 
 struct pt_regs;
@@ -82,6 +78,9 @@ void morello_merge_cap_regs(struct pt_regs *regs);
 void morello_flush_cap_regs_to_64_regs(struct task_struct *tsk);
 
 #else /* __ASSEMBLY__ */
+
+#define MORELLO_CAP_PERM_EXECUTIVE_BIT	1
+#define MORELLO_CAP_PERM_EXECUTIVE_MASK	(1 << MORELLO_CAP_PERM_EXECUTIVE_BIT)
 
 /*
  * Merge an X register into a C register if C's lower 64 bits are not equal to
