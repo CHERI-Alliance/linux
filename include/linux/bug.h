@@ -39,7 +39,7 @@ static inline int is_warning_bug(const struct bug_entry *bug)
 void bug_get_file_line(struct bug_entry *bug, const char **file,
 		       unsigned int *line);
 
-struct bug_entry *find_bug(unsigned long bugaddr);
+struct bug_entry *find_bug(__ptraddr_t bugaddr);
 
 enum bug_trap_type report_bug(unsigned long bug_addr, struct pt_regs *regs);
 enum bug_trap_type report_bug_entry(struct bug_entry *bug, struct pt_regs *regs);
