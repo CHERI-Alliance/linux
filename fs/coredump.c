@@ -1763,8 +1763,10 @@ static bool dump_vma_snapshot(struct coredump_params *cprm)
 
 		if (m->dump_size == DUMP_SIZE_MAYBE_ELFHDR_PLACEHOLDER) {
 			char elfmag[SELFMAG];
+			const void __user *uptr = make_user_ptr_for_read_uaccess(
+				m->start, SELFMAG);
 
-			if (copy_from_user(elfmag, uaddr_to_user_ptr_safe(m->start), SELFMAG) ||
+			if (copy_from_user(elfmag, uptr, SELFMAG) ||
 					memcmp(elfmag, ELFMAG, SELFMAG) != 0) {
 				m->dump_size = 0;
 			} else {
