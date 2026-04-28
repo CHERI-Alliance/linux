@@ -641,6 +641,17 @@ user_uintptr_t ksys_mmap_pgoff(user_uintptr_t user_ptr, unsigned long len,
 			return PTR_ERR(file);
 	}
 
+	/*
+	 * Introduce additional checks for PCuABI:
+	 * - The PCuABI reservation model introduces the concept of maximum
+	 *   protection mappings can have. Add a check to make sure the
+	 *   requested protection does not exceed the maximum protection.
+	 */
+	if (reserv_is_supported(current->mm)) {
+		if ((PROT_MAX_EXTRACT(prot) != 0) &&
+		    ((PROT_EXTRACT(prot) & PROT_MAX_EXTRACT(prot)) != PROT_EXTRACT(prot)))
+			goto out_fput;
+	}
 	retval = check_pcuabi_map_ptr_arg(user_ptr, len, flags & MAP_FIXED, false);
 	if (retval)
 		goto out_fput;
