@@ -31,6 +31,7 @@
 #include <asm/ucontext.h>
 #include <asm/unistd.h>
 #include <asm/fpsimd.h>
+#include <asm/morello.h>
 #include <asm/ptrace.h>
 #include <asm/syscall.h>
 #include <asm/signal32.h>
@@ -57,6 +58,7 @@ struct rt_sigframe_user_layout {
 	unsigned long fpsimd_offset;
 	unsigned long esr_offset;
 	unsigned long gcs_offset;
+	unsigned long morello_offset;
 	unsigned long sve_offset;
 	unsigned long tpidr2_offset;
 	unsigned long za_offset;
@@ -232,6 +234,8 @@ static void __user *apply_user_offset(
 struct user_ctxs {
 	struct fpsimd_context __user *fpsimd;
 	u32 fpsimd_size;
+	struct morello_context __user *morello;
+	u32 morello_size;
 	struct sve_context __user *sve;
 	u32 sve_size;
 	struct tpidr2_context __user *tpidr2;
@@ -357,6 +361,58 @@ static int restore_poe_context(struct user_ctxs *user,
 
 	return err;
 }
+
+#ifdef CONFIG_ARM64_MORELLO
+
+static int preserve_morello_context(struct morello_context __user *ctx,
+				    struct pt_regs *regs)
+{
+	int i, err = 0;
+
+	__put_user_error(MORELLO_MAGIC, &ctx->head.magic, err);
+	__put_user_error(sizeof(struct morello_context), &ctx->head.size, err);
+	__put_user_error(0, &ctx->__pad, err);
+
+	/*
+	 * current's 64-bit registers may have been modified (e.g. through
+	 * ptrace) since the last time it was scheduled.
+	 * Perform the standard 64-bit / capability register merging, to ensure
+	 * that both views in the signal frame are consistent.
+	 */
+	morello_merge_cap_regs(regs);
+
+	for (i = 0; i < ARRAY_SIZE(regs->cregs); i++)
+		__morello_put_user_cap_error(regs->cregs[i], &ctx->cregs[i], err);
+	__morello_put_user_cap_error(regs->csp, &ctx->csp, err);
+	__morello_put_user_cap_error(regs->pcc, &ctx->pcc, err);
+
+	return err ? -EFAULT : 0;
+}
+
+static int restore_morello_context(struct user_ctxs *user,
+				   struct pt_regs *regs)
+{
+	int i, err = 0;
+
+	if (user->morello_size != sizeof(*user->morello))
+		return -EINVAL;
+
+	for (i = 0; i < ARRAY_SIZE(regs->cregs); i++)
+		__morello_get_user_cap_error(regs->cregs[i], &user->morello->cregs[i], err);
+	__morello_get_user_cap_error(regs->csp, &user->morello->csp, err);
+	__morello_get_user_cap_error(regs->pcc, &user->morello->pcc, err);
+
+	return err ? -EFAULT : 0;
+}
+
+#else /* ! CONFIG_ARM64_MORELLO */
+
+int preserve_morello_context(struct morello_context __user *ctx,
+			     struct pt_regs *regs);
+int restore_morello_context(struct user_ctxs *user,
+			    struct pt_regs *regs);
+
+#endif /* ! CONFIG_ARM64_MORELLO */
 
 #ifdef CONFIG_ARM64_SVE
 
@@ -762,6 +818,7 @@ static int parse_user_sigframe(struct user_ctxs *user,
 	char const __user *const sfp = (char const __user *)sf;
 
 	user->fpsimd = NULL;
+	user->morello = NULL;
 	user->sve = NULL;
 	user->tpidr2 = NULL;
 	user->za = NULL;
@@ -828,6 +885,16 @@ static int parse_user_sigframe(struct user_ctxs *user,
 
 			user->poe = (struct poe_context __user *)head;
 			user->poe_size = size;
+			break;
+		case MORELLO_MAGIC:
+			if (!system_supports_morello())
+				goto invalid;
+
+			if (user->morello)
+				goto invalid;
+
+			user->morello = (struct morello_context __user *)head;
+			user->morello_size = size;
 			break;
 
 		case SVE_MAGIC:
@@ -1035,6 +1102,8 @@ static int restore_sigframe(struct pt_regs *regs,
 
 	if (err == 0 && system_supports_poe() && user.poe)
 		err = restore_poe_context(&user, ua_state);
+	if (err == 0 && system_supports_morello() && user.morello)
+		err = restore_morello_context(&user, regs);
 
 	return err;
 }
@@ -1166,6 +1235,13 @@ static int setup_sigframe_layout(struct rt_sigframe_user_layout *user,
 	}
 #endif
 
+	if (system_supports_morello()) {
+		err = sigframe_alloc(user, &user->morello_offset,
+				     sizeof(struct morello_context));
+		if (err)
+			return err;
+	}
+
 	if (system_supports_sve() || system_supports_sme()) {
 		unsigned int vq = 0;
 
@@ -1278,6 +1354,12 @@ static int setup_sigframe(struct rt_sigframe_user_layout *user,
 		struct gcs_context __user *gcs_ctx =
 			apply_user_offset(user, user->gcs_offset);
 		err |= preserve_gcs_context(gcs_ctx);
+	}
+
+	if (system_supports_morello() && err == 0) {
+		struct morello_context __user *morello_ctx =
+			apply_user_offset(user, user->morello_offset);
+		err |= preserve_morello_context(morello_ctx, regs);
 	}
 
 	/* Scalable Vector Extension state (including streaming), if present */
@@ -1491,6 +1573,9 @@ static int setup_return(struct pt_regs *regs, struct ksignal *ksig,
 
 	/* TCO (Tag Check Override) always cleared for signal handlers */
 	regs->pstate &= ~PSR_TCO_BIT;
+
+	if (system_supports_morello())
+		morello_setup_signal_return(regs);
 
 	/* Signal handlers are invoked with ZA and streaming mode disabled */
 	if (system_supports_sme()) {
