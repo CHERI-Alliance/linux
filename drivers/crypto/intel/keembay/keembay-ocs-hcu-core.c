@@ -738,7 +738,7 @@ static int kmb_ocs_hcu_export(struct ahash_request *req, void *out)
 	struct ocs_hcu_rctx *rctx = ahash_request_ctx_dma(req);
 
 	/* Intermediate data is always stored and applied per request. */
-	memcpy(out, rctx, sizeof(*rctx));
+	memcpy((struct ocs_hcu_rctx *)out, rctx, sizeof(*rctx));
 
 	return 0;
 }

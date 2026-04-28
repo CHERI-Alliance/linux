@@ -117,7 +117,11 @@ static void emac_get_ethtool_stats(struct net_device *netdev,
 	spin_lock(&adpt->stats.lock);
 
 	emac_update_hw_stats(adpt);
-	memcpy(data, &adpt->stats, EMAC_STATS_LEN * sizeof(u64));
+	/*
+	 * CHERI: ->stats contains a spin lock that can contain pointers
+	 * but the data is not copied.
+	 */
+	memcpy(data, (void *)&adpt->stats, EMAC_STATS_LEN * sizeof(u64));
 
 	spin_unlock(&adpt->stats.lock);
 }

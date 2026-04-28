@@ -40,6 +40,21 @@ else
 	KBUILD_CFLAGS += -isystem $(shell $(CC) -print-file-name=include)
 	# FIXCHERI: Not sure why this triggers. Silence for now.
 	KBUILD_CFLAGS += -Wno-incompatible-library-redeclaration
+	# Enable all kinds of cheri related errors
+	KBUILD_CFLAGS += \
+		-Werror=cheri-capability-misuse \
+		-Werror=cheri-provenance \
+		-Werror=cheri-misaligned \
+		-Werror=cheri-bitwise-operations \
+		-Werror=cheri-implicit-conversion \
+		-Werror=cheri-implicit-conversion-sign \
+		-Werror=cheri-pointer-conversion \
+		-Werror=cheri-prototypes \
+		-Werror=cheri-prototypes-strict \
+		-Werror=cheri-pedantic \
+		-Wno-error=cheri-inefficient \
+		-Wno-capability-to-integer-cast \
+		-Wno-cheri-provenance-pedantic
 endif
 
 	KBUILD_LDFLAGS += -melf64lriscv

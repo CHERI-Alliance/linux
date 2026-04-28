@@ -725,7 +725,7 @@ static int tegra_sha_export(struct ahash_request *req, void *out)
 	if (ctx->fallback)
 		return tegra_sha_fallback_export(req, out);
 
-	memcpy(out, rctx, sizeof(*rctx));
+	memcpy((struct tegra_sha_reqctx *)out, rctx, sizeof(*rctx));
 
 	return 0;
 }
