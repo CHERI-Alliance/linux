@@ -96,7 +96,7 @@ static int pfn_is_ram(unsigned long pfn)
 void __init kclist_add(struct kcore_list *new, void *addr, size_t size,
 		       int type)
 {
-	new->addr = (uintptr_t)addr;
+	new->addr = __c_pa(addr);
 	new->size = size;
 	new->type = type;
 
@@ -166,8 +166,8 @@ get_sparsemem_vmemmap_info(struct kcore_list *ent, struct list_head *head)
 	struct kcore_list *vmm, *tmp;
 
 
-	start = ((uintptr_t)pfn_to_page(pfn)) & PAGE_MASK;
-	end = ((uintptr_t)pfn_to_page(pfn + nr_pages)) - 1;
+	start = __c_pa(pfn_to_page(pfn)) & PAGE_MASK;
+	end = __c_pa(pfn_to_page(pfn + nr_pages)) - 1;
 	end = PAGE_ALIGN(end);
 	/* overlap check (because we have to align page */
 	list_for_each_entry(tmp, head, list) {
@@ -213,7 +213,7 @@ kclist_add_private(unsigned long pfn, unsigned long nr_pages, void *arg)
 	ent = kmalloc_obj(*ent);
 	if (!ent)
 		return -ENOMEM;
-	ent->addr = (uintptr_t)page_to_virt(p);
+	ent->addr = __c_pa(page_to_virt(p));
 	ent->size = nr_pages << PAGE_SHIFT;
 
 	if (!virt_addr_valid((void *)(uintptr_t)ent->addr))
@@ -522,8 +522,8 @@ static ssize_t read_kcore_iter(struct kiocb *iocb, struct iov_iter *iter)
 		switch (m->type) {
 		case KCORE_VMALLOC:
 		{
-			const char *src = (char *)start;
 			size_t read = 0, left = tsz;
+			const char *src = cheri_make_kernel_data_cap(start, left);
 
 			/*
 			 * vmalloc uses spinlocks, so we optimistically try to
@@ -547,7 +547,7 @@ static ssize_t read_kcore_iter(struct kiocb *iocb, struct iov_iter *iter)
 		}
 		case KCORE_USER:
 			/* User page is handled prior to normal kernel page: */
-			if (copy_to_iter((char *)start, tsz, iter) != tsz) {
+			if (copy_to_iter(cheri_make_kernel_data_cap(start, tsz), tsz, iter) != tsz) {
 				ret = -EFAULT;
 				goto out;
 			}
@@ -583,7 +583,7 @@ static ssize_t read_kcore_iter(struct kiocb *iocb, struct iov_iter *iter)
 					goto out;
 				}
 			} else {
-				__start = (void *)start;
+				__start = __c_fakep(start);
 			}
 
 			/*
@@ -592,7 +592,8 @@ static ssize_t read_kcore_iter(struct kiocb *iocb, struct iov_iter *iter)
 			 * memory regions might not always be mapped on all
 			 * architectures.
 			 */
-			ret = copy_from_kernel_nofault(buf, __start, tsz);
+			ret = copy_from_kernel_nofault(buf,
+				cheri_make_kernel_data_cap(start, tsz), tsz);
 			if (m->type == KCORE_RAM)
 				kc_unxlate_dev_mem_ptr(phys, __start);
 			if (ret) {
@@ -730,7 +731,7 @@ static int __init proc_kcore_init(void)
 	/* Store text area if it's special */
 	proc_kcore_text_init();
 	/* Store vmalloc area */
-	kclist_add(&kcore_vmalloc, (void *)VMALLOC_START,
+	kclist_add(&kcore_vmalloc, __c_fakep(VMALLOC_START),
 		VMALLOC_END - VMALLOC_START, KCORE_VMALLOC);
 	add_modules_range();
 	/* Store direct-map area from physical memory map */

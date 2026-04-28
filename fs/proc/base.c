@@ -3976,12 +3976,12 @@ static int proc_task_getattr(struct mnt_idmap *idmap,
  */
 static loff_t proc_dir_llseek(struct file *file, loff_t offset, int whence)
 {
-	u64 cookie = (u64)(intptr_t)file->private_data;
+	u64 cookie = __c_pa(file->private_data);
 	loff_t off;
 
 	off = generic_llseek_cookie(file, offset, whence, &cookie);
 	WARN_ON_ONCE(cookie > INT_MAX);
-	file->private_data = (void *)(intptr_t)cookie; /* serialized by f_pos_lock */
+	file->private_data = __c_fakep(cookie); /* serialized by f_pos_lock */
 	return off;
 }
 
