@@ -19,6 +19,7 @@
 #include <linux/align.h>
 #include <linux/dma/amd_xdma.h>
 #include <linux/v4l2-dv-timings.h>
+#include <linux/empty_array.h>
 #include <media/v4l2-ioctl.h>
 #include <media/videobuf2-v4l2.h>
 #include <media/videobuf2-dma-sg.h>
@@ -79,8 +80,7 @@ static const struct mgb4_i2c_kv gmsl3c_i2c[] = {
 	{0x308, 0x01, 0x00}, {0x10, 0x20, 0x20}, {0x300, 0x40, 0x40}
 };
 
-static const struct mgb4_i2c_kv gmsl1_i2c[] = {
-};
+EMPTY_ARRAY(struct mgb4_i2c_kv, gmsl1_i2c);
 
 static const struct v4l2_dv_timings_cap video_timings_cap = {
 	.type = V4L2_DV_BT_656_1120,

@@ -25,6 +25,7 @@
 #include <linux/async.h>
 #include <linux/delay.h>
 #include <linux/vmalloc.h>
+#include <linux/empty_array.h>
 
 static int i_zero;
 static int i_one_hundred = 100;
@@ -222,7 +223,7 @@ static int test_sysctl_run_register_mount_point(void)
 	return 0;
 }
 
-static const struct ctl_table test_table_empty[] = { };
+EMPTY_ARRAY(struct ctl_table, test_table_empty)
 
 static int test_sysctl_run_register_empty(void)
 {

@@ -261,7 +261,7 @@ extern int sysctl_init_bases(void);
 extern void __register_sysctl_init(const char *path, const struct ctl_table *table,
 				 const char *table_name, size_t table_size);
 #define register_sysctl_init(path, table)	\
-	__register_sysctl_init(path, table, #table, ARRAY_SIZE(table))
+	if (ARRAY_SIZE(table)) { __register_sysctl_init(path, table, #table, ARRAY_SIZE(table)); }
 extern struct ctl_table_header *register_sysctl_mount_point(const char *path);
 
 void do_sysctl_args(void);
