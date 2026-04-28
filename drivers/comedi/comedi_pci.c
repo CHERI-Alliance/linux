@@ -138,9 +138,10 @@ EXPORT_SYMBOL_GPL(comedi_pci_detach);
  */
 int comedi_pci_auto_config(struct pci_dev *pcidev,
 			   struct comedi_driver *driver,
-			   unsigned long context)
+			   uintptr_t context)
 {
-	return comedi_auto_config(&pcidev->dev, driver, context);
+	/* CHERI: Downstream functions do not require a pointer. */
+	return comedi_auto_config(&pcidev->dev, driver, __c_ua(context));
 }
 EXPORT_SYMBOL_GPL(comedi_pci_auto_config);
 

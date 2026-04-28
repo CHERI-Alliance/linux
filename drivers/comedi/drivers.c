@@ -298,8 +298,8 @@ int comedi_timeout(struct comedi_device *dev,
 		   int (*cb)(struct comedi_device *dev,
 			     struct comedi_subdevice *s,
 			     struct comedi_insn *insn,
-			     unsigned long context),
-		   unsigned long context)
+			     uintptr_t context),
+		   uintptr_t context)
 {
 	unsigned long timeout = jiffies + msecs_to_jiffies(COMEDI_TIMEOUT_MS);
 	int ret;

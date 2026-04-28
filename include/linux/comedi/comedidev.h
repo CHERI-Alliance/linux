@@ -989,8 +989,8 @@ int comedi_timeout(struct comedi_device *dev, struct comedi_subdevice *s,
 		   struct comedi_insn *insn,
 		   int (*cb)(struct comedi_device *dev,
 			     struct comedi_subdevice *s,
-			     struct comedi_insn *insn, unsigned long context),
-		   unsigned long context);
+			     struct comedi_insn *insn, uintptr_t context),
+		   uintptr_t context);
 
 unsigned int comedi_handle_events(struct comedi_device *dev,
 				  struct comedi_subdevice *s);
