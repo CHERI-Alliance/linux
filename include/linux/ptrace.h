@@ -101,7 +101,7 @@ static inline void ptrace_unlink(struct task_struct *child)
 int generic_ptrace_peekdata(struct task_struct *tsk, unsigned long addr,
 			    user_uintptr_t data);
 int generic_ptrace_pokedata(struct task_struct *tsk, unsigned long addr,
-			    user_uintptr_t data);
+			    unsigned long data);
 
 /**
  * ptrace_parent - return the task that is tracing the given task
