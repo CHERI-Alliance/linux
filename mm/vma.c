@@ -2154,7 +2154,7 @@ static DEFINE_MUTEX(mm_all_locks_mutex);
 
 static void vm_lock_anon_vma(struct mm_struct *mm, struct anon_vma *anon_vma)
 {
-	if (!test_bit(0, (unsigned long *) &anon_vma->root->rb_root.rb_root.rb_node)) {
+	if (!test_bit(0, (unsigned long *)(void *) &anon_vma->root->rb_root.rb_root.rb_node)) {
 		/*
 		 * The LSB of head.next can't change from under us
 		 * because we hold the mm_all_locks_mutex.
@@ -2169,9 +2169,17 @@ static void vm_lock_anon_vma(struct mm_struct *mm, struct anon_vma *anon_vma)
 		 * can't change from under us thanks to the
 		 * anon_vma->root->rwsem.
 		 */
+#ifdef CONFIG_CHERI_KERNEL
+		{
+			uintptr_t old = atomic_ptr_fetch_or((uintptr_t)1,
+				(atomic_ptr_t *)&anon_vma->root->rb_root.rb_root.rb_node);
+			BUG_ON(old & 1U);
+		}
+#else
 		if (__test_and_set_bit(0, (unsigned long *)
 				       &anon_vma->root->rb_root.rb_root.rb_node))
 			BUG();
+#endif
 	}
 }
 
@@ -2289,7 +2297,7 @@ out_unlock:
 
 static void vm_unlock_anon_vma(struct anon_vma *anon_vma)
 {
-	if (test_bit(0, (unsigned long *) &anon_vma->root->rb_root.rb_root.rb_node)) {
+	if (test_bit(0, (unsigned long *)(void *) &anon_vma->root->rb_root.rb_root.rb_node)) {
 		/*
 		 * The LSB of head.next can't change to 0 from under
 		 * us because we hold the mm_all_locks_mutex.
@@ -2302,9 +2310,17 @@ static void vm_unlock_anon_vma(struct anon_vma *anon_vma)
 		 * can't change from under us until we release the
 		 * anon_vma->root->rwsem.
 		 */
+#ifdef CONFIG_CHERI_KERNEL
+		{
+			uintptr_t old = atomic_ptr_fetch_and(~(uintptr_t)1,
+				(atomic_ptr_t *)&anon_vma->root->rb_root.rb_root.rb_node);
+			BUG_ON(old & 1U);
+		}
+#else
 		if (!__test_and_clear_bit(0, (unsigned long *)
 					  &anon_vma->root->rb_root.rb_root.rb_node))
 			BUG();
+#endif
 		anon_vma_unlock_write(anon_vma);
 	}
 }
