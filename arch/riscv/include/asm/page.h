@@ -97,8 +97,8 @@ typedef struct page *pgtable_t;
 struct kernel_mapping {
 	unsigned long virt_addr;
 	unsigned long virt_offset;
-	uintptr_t phys_addr;
-	uintptr_t size;
+	unsigned long phys_addr;
+	unsigned long size;
 	/* Offset between linear mapping virtual address and kernel load address */
 	unsigned long va_pa_offset;
 	/* Offset between kernel mapping virtual address and kernel load address */
