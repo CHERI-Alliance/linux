@@ -493,7 +493,7 @@ static int btmrvl_sdio_download_helper(struct btmrvl_sdio_card *card)
 		goto done;
 	}
 
-	helperbuf = (u8 *) ALIGN_ADDR(tmphlprbuf, BTSDIO_DMA_ALIGN);
+	helperbuf = (u8 *) PTR_ALIGN(tmphlprbuf, BTSDIO_DMA_ALIGN);
 
 	/* Perform helper data transfer */
 	tx_len = (FIRMWARE_TRANSFER_NBLOCK * SDIO_BLOCK_SIZE)
@@ -592,7 +592,7 @@ static int btmrvl_sdio_download_fw_w_helper(struct btmrvl_sdio_card *card)
 	}
 
 	/* Ensure aligned firmware buffer */
-	fwbuf = (u8 *) ALIGN_ADDR(tmpfwbuf, BTSDIO_DMA_ALIGN);
+	fwbuf = (u8 *) PTR_ALIGN(tmpfwbuf, BTSDIO_DMA_ALIGN);
 
 	/* Perform firmware data transfer */
 	offset = 0;
@@ -1111,7 +1111,7 @@ static int btmrvl_sdio_host_to_card(struct btmrvl_private *priv,
 		tmpbuf = kzalloc(tmpbufsz, GFP_KERNEL);
 		if (!tmpbuf)
 			return -ENOMEM;
-		buf = (u8 *) ALIGN_ADDR(tmpbuf, BTSDIO_DMA_ALIGN);
+		buf = (u8 *) PTR_ALIGN(tmpbuf, BTSDIO_DMA_ALIGN);
 		memcpy(buf, payload, nb);
 	}
 
