@@ -18,7 +18,11 @@
  */
 static __always_inline ssize_t getrandom_syscall(void *_buffer, size_t _len, unsigned int _flags)
 {
+#if __SIZEOF_POINTER__ > __SIZEOF_LONG__
+	register void *buffer asm ("c0") = _buffer;
+#else
 	register void *buffer asm ("x0") = _buffer;
+#endif
 	register size_t len asm ("x1") = _len;
 	register unsigned int flags asm ("x2") = _flags;
 	register long ret asm ("x0");
