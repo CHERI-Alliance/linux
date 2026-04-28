@@ -9,7 +9,6 @@
 #include <linux/errno.h>
 #include <linux/signal.h>
 #include <linux/types.h>
-#include <limits.h>
 #include <cheriintrin.h>
 #include "signal_common.h"
 
