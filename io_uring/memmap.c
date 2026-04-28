@@ -205,6 +205,8 @@ int io_create_region(struct io_ring_ctx *ctx, struct io_mapped_region *mr,
 		return -EINVAL;
 	if (check_add_overflow(reg->user_addr, reg->size, &end))
 		return -EOVERFLOW;
+	if (reg->user_addr && !check_user_ptr_rw(u64_to_user_ptr(reg->user_addr), reg->size))
+		return -EFAULT;
 
 	nr_pages = reg->size >> PAGE_SHIFT;
 	if (ctx->user) {
