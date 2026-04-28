@@ -30,6 +30,8 @@ quiet_cmd_wrap_dtbs = WRAP    $@
 		echo '.incbin "'$$dtb'" ';				\
 		echo ".global $${symbase}_end";				\
 		echo "$${symbase}_end:";				\
+		echo ".size $${symbase}_end, 1";			\
+		echo ".size $${symbase}_begin, . - $${symbase}_begin";	\
 	done < $<;							\
 	} > $@
 
