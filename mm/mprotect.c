@@ -30,6 +30,7 @@
 #include <linux/mm_inline.h>
 #include <linux/pgtable.h>
 #include <linux/userfaultfd_k.h>
+#include <linux/mm_reserv.h>
 #include <uapi/linux/mman.h>
 #include <asm/cacheflush.h>
 #include <asm/mmu_context.h>
@@ -798,7 +799,7 @@ fail:
 /*
  * pkey==-1 when doing a legacy mprotect()
  */
-static int do_mprotect_pkey(user_uintptr_t start, size_t len,
+static int do_mprotect_pkey(user_uintptr_t user_ptr, size_t len,
 		unsigned long prot, int pkey)
 {
 	unsigned long nstart, end, tmp, reqprot;
@@ -809,9 +810,7 @@ static int do_mprotect_pkey(user_uintptr_t start, size_t len,
 				(prot & PROT_READ);
 	struct mmu_gather tlb;
 	struct vma_iterator vmi;
-
-	/* TODO [PCuABI] - capability checks for uaccess */
-	start = untagged_addr(start);
+	unsigned long start = untagged_addr(__c_ua(user_ptr));
 
 	prot &= ~(PROT_GROWSDOWN|PROT_GROWSUP);
 	if (grows == (PROT_GROWSDOWN|PROT_GROWSUP)) /* can't be both */
@@ -825,6 +824,11 @@ static int do_mprotect_pkey(user_uintptr_t start, size_t len,
 	end = start + len;
 	if (end <= start)
 		return -ENOMEM;
+
+	if (reserv_is_supported(current->mm) &&
+	    !(check_user_ptr_owning(user_ptr, len)))
+		return -EINVAL;
+
 	if (!arch_validate_prot(prot, start))
 		return -EINVAL;
 
@@ -832,6 +836,10 @@ static int do_mprotect_pkey(user_uintptr_t start, size_t len,
 
 	if (mmap_write_lock_killable(current->mm))
 		return -EINTR;
+
+	error = -ERESERVATION;
+	if (!reserv_cap_within_reserv(user_ptr, true))
+		goto out;
 
 	/*
 	 * If userspace did not allocate the pkey, do not let
@@ -946,18 +954,18 @@ out:
 	return error;
 }
 
-SYSCALL_DEFINE3(mprotect, user_uintptr_t, start, size_t, len,
+SYSCALL_DEFINE3(mprotect, user_uintptr_t, user_ptr, size_t, len,
 		unsigned long, prot)
 {
-	return do_mprotect_pkey(start, len, prot, -1);
+	return do_mprotect_pkey(user_ptr, len, prot, -1);
 }
 
 #ifdef CONFIG_ARCH_HAS_PKEYS
 
-SYSCALL_DEFINE4(pkey_mprotect, user_uintptr_t, start, size_t, len,
+SYSCALL_DEFINE4(pkey_mprotect, user_uintptr_t, user_ptr, size_t, len,
 		unsigned long, prot, int, pkey)
 {
-	return do_mprotect_pkey(start, len, prot, pkey);
+	return do_mprotect_pkey(user_ptr, len, prot, pkey);
 }
 
 SYSCALL_DEFINE2(pkey_alloc, unsigned long, flags, unsigned long, init_val)
