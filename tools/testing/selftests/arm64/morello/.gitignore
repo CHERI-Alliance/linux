@@ -3,5 +3,6 @@
 
 *.d
 bootstrap
+clone
 exit
 read_write
