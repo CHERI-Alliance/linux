@@ -105,9 +105,9 @@ struct pt_regs;
 /* CPU-specific state of a task */
 struct thread_struct {
 	/* Callee-saved registers */
-	unsigned long ra;
-	unsigned long sp;	/* Kernel mode stack */
-	unsigned long s[12];	/* s[0]: frame pointer */
+	uintptr_t ra;
+	uintptr_t sp;	/* Kernel mode stack */
+	uintptr_t s[12];	/* s[0]: frame pointer */
 	struct __riscv_d_ext_state fstate;
 	unsigned long bad_cause;
 	unsigned long envcfg;
@@ -157,19 +157,20 @@ static inline void arch_thread_struct_whitelist(unsigned long *offset,
 #define ARCH_HAS_PREFETCH
 static inline void prefetch(const void *x)
 {
-	__asm__ __volatile__(PREFETCH_ASM(%0) : : "r" (x) : "memory");
+	__asm__ __volatile__(PREFETCH_ASM(%0) : : PTRC (x) : "memory");
 }
 
 #define ARCH_HAS_PREFETCHW
 static inline void prefetchw(const void *x)
 {
-	__asm__ __volatile__(PREFETCHW_ASM(%0) : : "r" (x) : "memory");
+	__asm__ __volatile__(PREFETCHW_ASM(%0) : : PTRC (x) : "memory");
 }
 #endif /* CONFIG_RISCV_ISA_ZICBOP */
 
 /* Do necessary setup to start up a newly executed thread. */
-extern void start_thread(struct pt_regs *regs,
-			unsigned long pc, unsigned long sp);
+struct linux_binprm;
+extern int start_thread(struct pt_regs *regs, unsigned long pc,
+			struct linux_binprm *bprm);
 
 extern unsigned long __get_wchan(struct task_struct *p);
 
@@ -199,7 +200,7 @@ extern long riscv_v_vstate_ctrl_set_current(unsigned long arg);
 extern long riscv_v_vstate_ctrl_get_current(void);
 #endif /* CONFIG_RISCV_ISA_V */
 
-extern int get_unalign_ctl(struct task_struct *tsk, unsigned long addr);
+extern int get_unalign_ctl(struct task_struct *tsk, uintptr_t addr);
 extern int set_unalign_ctl(struct task_struct *tsk, unsigned int val);
 
 #define GET_UNALIGN_CTL(tsk, addr)	get_unalign_ctl((tsk), (addr))
