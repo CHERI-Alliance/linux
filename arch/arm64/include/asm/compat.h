@@ -111,7 +111,7 @@ static inline int is_compat_task(void)
 	       (IS_ENABLED(CONFIG_COMPAT64) && test_thread_flag(TIF_64BIT_COMPAT));
 }
 
-static inline int is_compat_thread(struct thread_info *thread)
+static inline int is_32bit_compat_thread(struct thread_info *thread)
 {
 	return IS_ENABLED(CONFIG_COMPAT32) && test_ti_thread_flag(thread, TIF_32BIT);
 }
@@ -120,7 +120,7 @@ long compat_arm_syscall(struct pt_regs *regs, int scno);
 
 #else /* !CONFIG_COMPAT */
 
-static inline int is_compat_thread(struct thread_info *thread)
+static inline int is_32bit_compat_thread(struct thread_info *thread)
 {
 	return 0;
 }

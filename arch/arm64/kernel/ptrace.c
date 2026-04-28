@@ -2489,7 +2489,7 @@ const struct user_regset_view *task_user_regset_view(struct task_struct *task)
 	 */
 	if (is_32bit_compat_task())
 		return &user_aarch32_view;
-	else if (is_compat_thread(task_thread_info(task)))
+	else if (is_32bit_compat_thread(task_thread_info(task)))
 		return &user_aarch32_ptrace_view;
 
 	return &user_aarch64_view;
@@ -2696,7 +2696,7 @@ int valid_user_regs(struct user_pt_regs *regs, struct task_struct *task)
 	/* https://lore.kernel.org/lkml/20191118131525.GA4180@willie-the-truck */
 	user_regs_reset_single_step(regs, task);
 
-	if (is_compat_thread(task_thread_info(task)))
+	if (is_32bit_compat_thread(task_thread_info(task)))
 		return valid_compat_regs(regs);
 	else
 		return valid_native_regs(regs);
