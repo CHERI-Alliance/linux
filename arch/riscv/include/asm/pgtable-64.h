@@ -168,10 +168,42 @@ static inline u64 riscv_page_io(void)
 #define _PAGE_IO		riscv_page_io()
 #define _PAGE_MTMASK		riscv_page_mtmask()
 
+/* Zcheripte support */
+#define _PAGE_CHERIPTE_CW	(1UL << 60)
+#define _PAGE_CHERIPTE_CRG	(1UL << 59)
+
+#ifdef CONFIG_RISCV_CHERI
+
+extern unsigned long riscv_cheripte_cw;
+
+static inline pgprot_t riscv_pgprot_set_cw(pgprot_t prot)
+{
+	unsigned long __prot = pgprot_val(prot);
+	if ((__prot & _PAGE_PRESENT) && (__prot & _PAGE_LEAF))
+		__prot |= riscv_cheripte_cw;
+
+	return __pgprot(__prot);
+}
+
+static inline pgprot_t riscv_pgprot_clear_cw(pgprot_t prot)
+{
+	return __pgprot(pgprot_val(prot) & ~riscv_cheripte_cw);
+}
+
+#else /* CONFIG_RISCV_CHERI */
+
+#define riscv_pgprot_set_cw(prot)	(prot)
+#define riscv_pgprot_clear_cw(prot)	(prot)
+#define riscv_cheripte_cw		0
+
+#endif /* CONFIG_RISCV_CHERI */
+
 /* Set of bits to preserve across pte_modify() */
 #define _PAGE_CHG_MASK  (~(unsigned long)(_PAGE_PRESENT | _PAGE_READ |	\
 					  _PAGE_WRITE | _PAGE_EXEC |	\
 					  _PAGE_USER | _PAGE_GLOBAL |	\
+					  _PAGE_CHERIPTE_CW |		\
+					  _PAGE_CHERIPTE_CRG |		\
 					  _PAGE_MTMASK))
 
 static inline int pud_present(pud_t pud)
