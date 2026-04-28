@@ -108,7 +108,7 @@ config ERRATA_THEAD
 
 config ERRATA_THEAD_MAE
 	bool "Apply T-Head's memory attribute extension (XTheadMae) errata"
-	depends on ERRATA_THEAD && 64BIT && MMU
+	depends on ERRATA_THEAD && 64BIT && MMU && !CHERI_KERNEL
 	select RISCV_ALTERNATIVE_EARLY
 	default y
 	help
