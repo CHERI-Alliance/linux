@@ -1645,7 +1645,7 @@ static int morello_get(struct task_struct *target,
 
 #define MORELLO_STATE_BUILD_CAP(state, reg, cap) do {			\
 	u8 tag = (state.tag_map >> MORELLO_PT_TAG_MAP_REG_BIT(reg)) & 0x1; \
-	cap = morello_build_cap_from_root_cap(&state.reg, tag);		\
+	cap = morello_build_any_user_cap(&state.reg, tag);		\
 } while (0)
 
 static int morello_set(struct task_struct *target,
