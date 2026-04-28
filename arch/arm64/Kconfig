@@ -1680,6 +1680,7 @@ config ARCH_FORCE_MAX_ORDER
 
 config UNMAP_KERNEL_AT_EL0
 	bool "Unmap kernel when running in userspace (KPTI)" if EXPERT
+	depends on !ARM64_MORELLO
 	default y
 	help
 	  Speculation attacks against some high-performance processors can
@@ -2257,6 +2258,51 @@ config ARM64_SME
 	  instruction set, together with the addition of new architectural
 	  register state capable of holding two dimensional matrix tiles to
 	  enable various matrix operations.
+
+config AS_HAS_MORELLO
+	def_bool $(as-instr,.arch morello)
+
+config ARM64_MORELLO
+	bool "Morello capability architecture support"
+	default y
+	depends on AS_HAS_MORELLO && ARM64_VHE
+	select ARCH_NO_SWAP
+	help
+	  The Morello architecture is an experimental extension to Armv8.2-A,
+	  which extends the AArch64 state with the principles proposed in
+	  version 7 of the Capability Hardware Enhanced RISC Instructions
+	  (CHERI) ISA. Through the introduction of a new data type, the
+	  capability, Morello provides hardware support for fine grain memory
+	  protection and scalable compartmentalization.
+
+	  In Morello, capabilities are 129-bit "fat pointers", encoding the
+	  address, bounds and permissions associated with the pointer in the
+	  addressable 128 bits. The 129th bit, the tag, must be set for the
+	  capability to be valid, and only valid capability operations allow a
+	  new capability to be created ("derived") from an existing capability
+	  while preserving the tag bit. The tag bit cannot be addressed directly
+	  in memory, and any non-capability write to memory clears the tag in
+	  the corresponding 128-bit granule.
+
+	  This option enables core support for Morello at EL0 (i.e. in
+	  userspace). All Morello registers accessible at EL0 will be
+	  initialized and context-switched as appropriate, and capabilities can
+	  be stored in all private memory mappings in userspace. The kernel-user
+	  ABI remains entirely unchanged and backwards-compatible, which means
+	  that syscalls do not accept or return capabilities. Support for
+	  Morello in KVM guests is not provided at this stage.
+
+	  The feature is detected at runtime. If it is not present on the boot
+	  CPU, it will not be enabled. All secondary CPUs must implement Morello
+	  if the boot CPU does. If this option is enabled and Morello is
+	  implemented in hardware, the firmware _must_ support Morello.
+
+	  Selecting this option will disable the following features:
+	    * CONFIG_SWAP (and therefore hibernation), because there is no
+	      support for saving capability tags when swapping out pages at this
+	      stage.
+	    * CONFIG_UNMAP_KERNEL_AT_EL0, because it makes it very difficult to
+	      return to userspace while preserving all capability registers.
 
 config ARM64_PSEUDO_NMI
 	bool "Support for NMI-like interrupts"
