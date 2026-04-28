@@ -1335,7 +1335,7 @@ static inline int unmap_poisoned_folio(struct folio *folio, unsigned long pfn, b
 }
 #endif
 
-extern unsigned long  __must_check vm_mmap_pgoff(struct file *, unsigned long,
+extern user_uintptr_t  __must_check vm_mmap_pgoff(struct file *, user_uintptr_t,
         unsigned long, unsigned long,
         unsigned long, unsigned long);
 

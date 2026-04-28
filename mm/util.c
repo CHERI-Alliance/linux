@@ -562,12 +562,12 @@ int account_locked_vm(struct mm_struct *mm, unsigned long pages, bool inc)
 }
 EXPORT_SYMBOL_GPL(account_locked_vm);
 
-unsigned long vm_mmap_pgoff(struct file *file, unsigned long addr,
+user_uintptr_t vm_mmap_pgoff(struct file *file, user_uintptr_t addr,
 	unsigned long len, unsigned long prot,
 	unsigned long flag, unsigned long pgoff)
 {
 	loff_t off = (loff_t)pgoff << PAGE_SHIFT;
-	unsigned long ret;
+	user_uintptr_t ret;
 	struct mm_struct *mm = current->mm;
 	unsigned long populate;
 	LIST_HEAD(uf);
@@ -578,12 +578,19 @@ unsigned long vm_mmap_pgoff(struct file *file, unsigned long addr,
 	if (!ret) {
 		if (mmap_write_lock_killable(mm))
 			return -EINTR;
+		/*
+		 * TODO [PCuABI] - might need propagating uintcap further down
+		 * to do_mmap to properly handle capabilities
+		 */
 		ret = do_mmap(file, addr, len, prot, flag, 0, pgoff, &populate,
 			      &uf);
 		mmap_write_unlock(mm);
 		userfaultfd_unmap_complete(mm, &uf);
 		if (populate)
 			mm_populate(ret, populate);
+		/* TODO [PCuABI] - derive proper capability */
+		if (!IS_ERR_VALUE(ret))
+			ret = (user_uintptr_t)uaddr_to_user_ptr_safe((ptraddr_t)ret);
 	}
 	return ret;
 }

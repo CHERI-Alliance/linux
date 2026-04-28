@@ -564,12 +564,12 @@ unsigned long do_mmap(struct file *file, unsigned long addr,
 	return addr;
 }
 
-unsigned long ksys_mmap_pgoff(unsigned long addr, unsigned long len,
+user_uintptr_t ksys_mmap_pgoff(user_uintptr_t addr, unsigned long len,
 			      unsigned long prot, unsigned long flags,
 			      unsigned long fd, unsigned long pgoff)
 {
 	struct file *file = NULL;
-	unsigned long retval;
+	user_uintptr_t retval;
 
 	if (!(flags & MAP_ANONYMOUS)) {
 		audit_mmap_fd(fd, flags);
@@ -609,7 +609,7 @@ out_fput:
 	return retval;
 }
 
-SYSCALL_DEFINE6(mmap_pgoff, unsigned long, addr, unsigned long, len,
+SYSCALL_DEFINE6(__retptr__(mmap_pgoff), user_uintptr_t, addr, unsigned long, len,
 		unsigned long, prot, unsigned long, flags,
 		unsigned long, fd, unsigned long, pgoff)
 {
@@ -1072,7 +1072,7 @@ int vm_munmap(unsigned long start, size_t len)
 }
 EXPORT_SYMBOL(vm_munmap);
 
-SYSCALL_DEFINE2(munmap, unsigned long, addr, size_t, len)
+SYSCALL_DEFINE2(munmap, user_uintptr_t, addr, size_t, len)
 {
 	addr = untagged_addr(addr);
 	return __vm_munmap(addr, len, true);

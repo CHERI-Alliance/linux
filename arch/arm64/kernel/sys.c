@@ -18,7 +18,7 @@
 #include <asm/cpufeature.h>
 #include <asm/syscall.h>
 
-SYSCALL_DEFINE6(mmap, unsigned long, addr, unsigned long, len,
+SYSCALL_DEFINE6(__retptr__(mmap), user_uintptr_t, addr, unsigned long, len,
 		unsigned long, prot, unsigned long, flags,
 		unsigned long, fd, unsigned long, off)
 {
