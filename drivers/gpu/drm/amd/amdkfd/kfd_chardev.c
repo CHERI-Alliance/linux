@@ -155,7 +155,7 @@ static int kfd_open(struct inode *inode, struct file *filep)
 	if (!READ_ONCE(kfd_dev_mapping))
 		cmpxchg(&kfd_dev_mapping, NULL, inode->i_mapping);
 
-	is_32bit_user_mode = in_compat_syscall();
+	is_32bit_user_mode = in_compat32_syscall();
 
 	if (is_32bit_user_mode) {
 		dev_warn(kfd_device,
