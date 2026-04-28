@@ -202,7 +202,7 @@ static int xgene_get_csr_resource(struct acpi_device *adev,
 	flags = IORESOURCE_MEM;
 	ret = acpi_dev_get_resources(adev, &list,
 				     acpi_dev_filter_resource_type_cb,
-				     (void *) flags);
+				     __c_fakep(flags));
 	if (ret < 0) {
 		dev_err(dev, "failed to parse _CRS method, error code %d\n",
 			ret);
