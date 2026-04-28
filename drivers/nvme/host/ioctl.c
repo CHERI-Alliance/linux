@@ -492,6 +492,7 @@ static int nvme_uring_cmd_io(struct nvme_ctrl *ctrl, struct nvme_ns *ns,
 	if (d.data_len && (ioucmd->flags & IORING_URING_CMD_FIXED)) {
 		int ddir = nvme_is_write(&c) ? WRITE : READ;
 
+		/* TODO [PCuABI]: change ubuffer type to void __user * */
 		if (vec)
 			ret = io_uring_cmd_import_fixed_vec(ioucmd,
 					u64_to_user_ptr(d.addr), d.data_len,
