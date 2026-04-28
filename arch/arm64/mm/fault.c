@@ -806,6 +806,13 @@ static int do_alignment_fault(unsigned long far, unsigned long esr,
 	return 0;
 }
 
+static int do_cap_fault(unsigned long far, unsigned long esr,
+			struct pt_regs *regs)
+{
+	do_bad_area(far, esr, regs);
+	return 0;
+}
+
 static int do_bad(unsigned long far, unsigned long esr, struct pt_regs *regs)
 {
 	return 1; /* "fault" */
@@ -899,11 +906,19 @@ static const struct fault_info fault_info[] = {
 	{ do_bad,		SIGKILL, SI_KERNEL,	"unknown 37"			},
 	{ do_bad,		SIGKILL, SI_KERNEL,	"unknown 38"			},
 	{ do_bad,		SIGKILL, SI_KERNEL,	"unknown 39"			},
+#ifndef CONFIG_ARM64_MORELLO
 	{ do_bad,		SIGKILL, SI_KERNEL,	"unknown 40"			},
 	{ do_bad,		SIGKILL, SI_KERNEL,	"level -1 address size fault"	},
 	{ do_bad,		SIGKILL, SI_KERNEL,	"unknown 42"			},
 	{ do_translation_fault,	SIGSEGV, SEGV_MAPERR,	"level -1 translation fault"	},
 	{ do_bad,		SIGKILL, SI_KERNEL,	"unknown 44"			},
+#else
+	{ do_cap_fault,		SIGSEGV, SEGV_CAPTAGERR,	"capability tag fault"		},
+	{ do_cap_fault,		SIGSEGV, SEGV_CAPSEALEDERR,	"capability sealed fault"	},
+	{ do_cap_fault,		SIGSEGV, SEGV_CAPBOUNDSERR,	"capability bounds fault"	},
+	{ do_cap_fault,		SIGSEGV, SEGV_CAPPERMERR,	"capability permission fault"	},
+	{ do_cap_fault,		SIGSEGV, SEGV_CAPACCESSERR,	"capability access fault"	},
+#endif
 	{ do_bad,		SIGKILL, SI_KERNEL,	"unknown 45"			},
 	{ do_bad,		SIGKILL, SI_KERNEL,	"unknown 46"			},
 	{ do_bad,		SIGKILL, SI_KERNEL,	"unknown 47"			},
