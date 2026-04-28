@@ -3092,6 +3092,9 @@ config MIPS32_COMPAT
 config COMPAT
 	bool
 
+config COMPAT32
+	def_bool y if COMPAT
+
 config MIPS32_O32
 	bool "Kernel support for o32 binaries"
 	depends on 64BIT

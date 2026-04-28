@@ -478,6 +478,9 @@ config COMPAT
 	select ARCH_WANT_OLD_COMPAT_IPC
 	select COMPAT_OLD_SIGACTION
 
+config COMPAT32
+	def_bool y if COMPAT
+
 config ARCH_CC_CAN_LINK
 	bool
 	default $(cc_can_link_user,-m64) if 64BIT
