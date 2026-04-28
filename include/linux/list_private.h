@@ -19,7 +19,7 @@
 #include <linux/list.h>
 
 #define __list_private_offset(type, member)					\
-	((size_t)(&ACCESS_PRIVATE(((type *)0), member)))
+	((size_t __force)(&ACCESS_PRIVATE(((type *)0), member)))
 
 /**
  * list_private_entry - get the struct for this entry

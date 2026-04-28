@@ -401,7 +401,7 @@ struct property_entry {
 			u16 u16_data[sizeof(u64) / sizeof(u16)];
 			u32 u32_data[sizeof(u64) / sizeof(u32)];
 			u64 u64_data[sizeof(u64) / sizeof(u64)];
-			const char *str[sizeof(u64) / sizeof(char *)];
+			const char *str[sizeof(uintptr_t) / sizeof(char *)];
 		} value;
 	};
 };
