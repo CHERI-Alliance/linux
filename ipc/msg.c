@@ -701,12 +701,18 @@ static int copy_compat_msqid_to_user(void __user *buf, struct msqid64_ds *in,
 		struct compat_msqid64_ds v;
 		memset(&v, 0, sizeof(v));
 		to_compat_ipc64_perm(&v.msg_perm, &in->msg_perm);
+#ifdef CONFIG_COMPAT64
+		v.msg_stime = in->msg_stime;
+		v.msg_rtime = in->msg_rtime;
+		v.msg_ctime = in->msg_ctime;
+#else
 		v.msg_stime	 = lower_32_bits(in->msg_stime);
 		v.msg_stime_high = upper_32_bits(in->msg_stime);
 		v.msg_rtime	 = lower_32_bits(in->msg_rtime);
 		v.msg_rtime_high = upper_32_bits(in->msg_rtime);
 		v.msg_ctime	 = lower_32_bits(in->msg_ctime);
 		v.msg_ctime_high = upper_32_bits(in->msg_ctime);
+#endif
 		v.msg_cbytes = in->msg_cbytes;
 		v.msg_qnum = in->msg_qnum;
 		v.msg_qbytes = in->msg_qbytes;
