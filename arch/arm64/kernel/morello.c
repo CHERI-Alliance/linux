@@ -25,6 +25,7 @@ void __morello_cap_lo_hi_tag(uintcap_t cap, u64 *lo_val, u64 *hi_val,
 			     u8 *tag);
 void __morello_merge_c_x(uintcap_t *creg, u64 xreg);
 bool __morello_cap_has_executive(uintcap_t cap);
+void __morello_thread_init_user(struct task_struct *tsk, uintcap_t ddc);
 
 /* Not defined as static because morello.S refers to it */
 uintcap_t morello_root_cap __ro_after_init;
@@ -77,6 +78,15 @@ void morello_thread_start(struct pt_regs *regs, unsigned long pc)
 		regs->pcc = cheri_user_root_allperms_cap;
 		/* CSP is null-derived in hybrid */
 	}
+}
+
+void morello_thread_init_user(void)
+{
+	/* TODO [PCuABI] - Set DDC to the null capability */
+	uintcap_t ddc = is_pure_task() ? cheri_user_root_cap
+				       : cheri_user_root_allperms_cap;
+
+	__morello_thread_init_user(current, ddc);
 }
 
 #ifdef CONFIG_CHERI_PURECAP_UABI
