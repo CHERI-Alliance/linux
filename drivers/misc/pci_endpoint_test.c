@@ -750,7 +750,7 @@ static int pci_endpoint_test_copy(struct pci_endpoint_test *test,
 	}
 
 	if (alignment && !IS_ALIGNED(orig_src_phys_addr, alignment)) {
-		src_phys_addr = PTR_ALIGN(orig_src_phys_addr, alignment);
+		src_phys_addr = ALIGN(orig_src_phys_addr, alignment);
 		offset = src_phys_addr - orig_src_phys_addr;
 		src_addr = orig_src_addr + offset;
 	} else {
@@ -782,7 +782,7 @@ static int pci_endpoint_test_copy(struct pci_endpoint_test *test,
 	}
 
 	if (alignment && !IS_ALIGNED(orig_dst_phys_addr, alignment)) {
-		dst_phys_addr = PTR_ALIGN(orig_dst_phys_addr, alignment);
+		dst_phys_addr = ALIGN(orig_dst_phys_addr, alignment);
 		offset = dst_phys_addr - orig_dst_phys_addr;
 		dst_addr = orig_dst_addr + offset;
 	} else {
@@ -884,7 +884,7 @@ static int pci_endpoint_test_write(struct pci_endpoint_test *test,
 	}
 
 	if (alignment && !IS_ALIGNED(orig_phys_addr, alignment)) {
-		phys_addr =  PTR_ALIGN(orig_phys_addr, alignment);
+		phys_addr =  ALIGN(orig_phys_addr, alignment);
 		offset = phys_addr - orig_phys_addr;
 		addr = orig_addr + offset;
 	} else {
@@ -979,7 +979,7 @@ static int pci_endpoint_test_read(struct pci_endpoint_test *test,
 	}
 
 	if (alignment && !IS_ALIGNED(orig_phys_addr, alignment)) {
-		phys_addr = PTR_ALIGN(orig_phys_addr, alignment);
+		phys_addr = ALIGN(orig_phys_addr, alignment);
 		offset = phys_addr - orig_phys_addr;
 		addr = orig_addr + offset;
 	} else {
