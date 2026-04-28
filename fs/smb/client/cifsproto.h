@@ -516,7 +516,7 @@ static inline int cifs_get_num_sgs(const struct smb_rqst *rqst,
 {
 	unsigned int len, skip;
 	unsigned int nents = 0;
-	unsigned long addr;
+	uintptr_t addr;
 	size_t data_size;
 	int i, j;
 

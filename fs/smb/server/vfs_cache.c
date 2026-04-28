@@ -156,11 +156,11 @@ static void fd_limit_close(void)
  * INODE hash
  */
 
-static unsigned long inode_hash(struct super_block *sb, unsigned long hashval)
+static unsigned long inode_hash(struct super_block *sb, __ptraddr_t hashval)
 {
 	unsigned long tmp;
 
-	tmp = (hashval * (uintptr_t)sb) ^ (GOLDEN_RATIO_PRIME + hashval) /
+	tmp = (hashval * __c_pa(sb)) ^ (GOLDEN_RATIO_PRIME + hashval) /
 		L1_CACHE_BYTES;
 	tmp = tmp ^ ((tmp ^ GOLDEN_RATIO_PRIME) >> inode_hash_shift);
 	return tmp & inode_hash_mask;
