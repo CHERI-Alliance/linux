@@ -2103,7 +2103,7 @@ SYSCALL_DEFINE3(io_submit, aio_context_t, ctx_id, long, nr,
 	for (i = 0; i < nr; i++) {
 		struct iocb __user *user_iocb;
 
-		if (unlikely(get_user(user_iocb, iocbpp + i))) {
+		if (unlikely(get_user_ptr(user_iocb, iocbpp + i))) {
 			ret = -EFAULT;
 			break;
 		}
