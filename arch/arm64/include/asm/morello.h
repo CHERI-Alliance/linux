@@ -39,6 +39,8 @@ void morello_cpu_setup(void);
 
 u64 morello_cap_get_lo_val(const cap128_t *cap);
 void morello_cap_get_val_tag(const cap128_t *cap, __uint128_t *val, u8 *tag);
+void morello_build_cap_from_root_cap(cap128_t *cap, const __uint128_t *val,
+				    u8 tag);
 
 /* Reads a capability from tsk's address space */
 int morello_ptrace_read_remote_cap(struct task_struct *tsk, unsigned long addr,
@@ -76,6 +78,13 @@ void morello_show_regs(struct pt_regs *regs);
  * This is the same logic as in kernel_exit.
  */
 void morello_merge_cap_regs(struct pt_regs *regs);
+
+/*
+ * Copy the lower 64 bits of all capability registers to their 64-bit
+ * counterparts. This ensures that the saved capability registers are restored
+ * as-is (i.e. unaffected by merging) the next time tsk is scheduled.
+ */
+void morello_flush_cap_regs_to_64_regs(struct task_struct *tsk);
 
 #else /* __ASSEMBLY__ */
 

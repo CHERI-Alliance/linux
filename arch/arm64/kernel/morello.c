@@ -11,6 +11,7 @@
 #include <linux/printk.h>
 #include <linux/sched/coredump.h>
 #include <linux/sched/mm.h>
+#include <linux/sched/task_stack.h>
 
 #include <asm/cpufeature.h>
 #include <asm/morello.h>
@@ -181,6 +182,32 @@ void morello_merge_cap_regs(struct pt_regs *regs)
 
 	__morello_merge_c_x(active_csp, regs->sp);
 	__morello_merge_c_x(&regs->pcc, regs->pc);
+}
+
+void morello_flush_cap_regs_to_64_regs(struct task_struct *tsk)
+{
+	struct pt_regs *regs = task_pt_regs(tsk);
+	struct morello_state *morello_state =
+		&tsk->thread.morello_user_state;
+	const cap128_t *active_csp;
+	const cap128_t *active_ctpidr;
+	int i;
+
+	if (__morello_cap_has_executive(&regs->pcc)) {
+		active_csp = &regs->csp;
+		active_ctpidr = &morello_state->ctpidr;
+	} else {
+		active_csp = &regs->rcsp;
+		active_ctpidr = &morello_state->rctpidr;
+	}
+
+	for (i = 0; i < ARRAY_SIZE(regs->cregs); i++)
+		regs->regs[i] = morello_cap_get_lo_val(&regs->cregs[i]);
+	regs->pc = morello_cap_get_lo_val(&regs->pcc);
+
+	regs->sp = morello_cap_get_lo_val(active_csp);
+
+	tsk->thread.uw.tp_value = morello_cap_get_lo_val(active_ctpidr);
 }
 
 
