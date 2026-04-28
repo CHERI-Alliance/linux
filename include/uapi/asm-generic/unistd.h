@@ -394,7 +394,7 @@ __SC_COMP_3264(__NR_rt_sigtimedwait, sys_rt_sigtimedwait_time32, \
 __SC_COMP(__NR_rt_sigqueueinfo, sys_rt_sigqueueinfo, \
 	  compat_sys_rt_sigqueueinfo)
 #define __NR_rt_sigreturn 139
-__SC_COMP(__NR_rt_sigreturn, sys_rt_sigreturn, compat_sys_rt_sigreturn)
+__SC_COMP_RETPTR(__NR_rt_sigreturn, sys_rt_sigreturn, compat_sys_rt_sigreturn)
 #define __NR_setpriority 140
 __SYSCALL(__NR_setpriority, sys_setpriority)
 #define __NR_getpriority 141
