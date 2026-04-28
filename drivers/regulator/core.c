@@ -3781,7 +3781,7 @@ static int _regulator_call_set_voltage(struct regulator_dev *rdev,
 		return ret;
 
 	_notifier_call_chain(rdev, REGULATOR_EVENT_ABORT_VOLTAGE_CHANGE,
-			     (void *)data.old_uV);
+			     __c_fakep(data.old_uV));
 
 	return ret;
 }
@@ -3805,7 +3805,7 @@ static int _regulator_call_set_voltage_sel(struct regulator_dev *rdev,
 		return ret;
 
 	_notifier_call_chain(rdev, REGULATOR_EVENT_ABORT_VOLTAGE_CHANGE,
-			     (void *)data.old_uV);
+			     __c_fakep(data.old_uV));
 
 	return ret;
 }
@@ -3990,7 +3990,7 @@ static int _regulator_do_set_voltage(struct regulator_dev *rdev,
 		unsigned long data = best_val;
 
 		_notifier_call_chain(rdev, REGULATOR_EVENT_VOLTAGE_CHANGE,
-				     (void *)data);
+				     __c_fakep(data));
 	}
 
 out:
