@@ -1500,7 +1500,8 @@ static int setup_sigframe(struct rt_sigframe_user_layout *user,
 static int get_sigframe(struct rt_sigframe_user_layout *user,
 			 struct ksignal *ksig, struct pt_regs *regs)
 {
-	user_uintptr_t sp, sp_top;
+	user_uintptr_t sp;
+	ptraddr_t sp_top;
 	int err;
 
 	init_user_layout(user);
@@ -1508,7 +1509,8 @@ static int get_sigframe(struct rt_sigframe_user_layout *user,
 	if (err)
 		return err;
 
-	sp = sp_top = sigsp(signal_sp(regs), ksig);
+	sp = sigsp(signal_sp(regs), ksig);
+	sp_top = (ptraddr_t)sp;
 
 	sp = round_down(sp - sizeof(struct frame_record), 16);
 	user->next_frame = (struct frame_record __user *)sp;
