@@ -87,7 +87,7 @@ k3_cppi_desc_pool_create_name(struct device *dev, size_t size,
 	if (!pool->cpumem)
 		goto dma_alloc_fail;
 
-	ret = gen_pool_add_virt(pool->gen_pool, (unsigned long)pool->cpumem,
+	ret = gen_pool_add_virt(pool->gen_pool, (uintptr_t)pool->cpumem,
 				(phys_addr_t)pool->dma_addr, pool->mem_size,
 				-1);
 	if (ret < 0) {
