@@ -261,7 +261,7 @@ static int ti_dac_probe(struct spi_device *spi)
 	ti_dac->powerdown = false;
 	ti_dac->spi = spi;
 
-	spec = &ti_dac_spec[spi_get_device_id(spi)->driver_data];
+	spec = &ti_dac_spec[__c_ua(spi_get_device_id(spi)->driver_data)];
 	indio_dev->num_channels = 1;
 	ti_dac->resolution = spec->resolution;
 

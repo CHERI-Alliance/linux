@@ -1648,7 +1648,7 @@ static struct eg20t_port *pch_uart_init_port(struct pci_dev *pdev,
 	struct pch_uart_driver_data *board;
 	char name[32];
 
-	board = &drv_dat[id->driver_data];
+	board = &drv_dat[__c_ua(id->driver_data)];
 	port_type = board->port_type;
 
 	priv = kzalloc_obj(struct eg20t_port);

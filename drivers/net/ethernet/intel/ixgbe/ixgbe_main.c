@@ -11531,7 +11531,7 @@ static int ixgbe_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	struct ixgbe_netdevice_priv *netdev_priv_wrapper;
 	struct ixgbe_adapter *adapter = NULL;
 	struct ixgbe_hw *hw;
-	const struct ixgbe_info *ii = ixgbe_info_tbl[ent->driver_data];
+	const struct ixgbe_info *ii = ixgbe_info_tbl[__c_ua(ent->driver_data)];
 	unsigned int indices = MAX_TX_QUEUES;
 	u8 part_str[IXGBE_PBANUM_LENGTH];
 	int i, err, expected_gts;

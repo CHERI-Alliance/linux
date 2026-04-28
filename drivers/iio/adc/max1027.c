@@ -539,7 +539,7 @@ static int max1027_probe(struct spi_device *spi)
 
 	st = iio_priv(indio_dev);
 	st->spi = spi;
-	st->info = &max1027_chip_info_tbl[spi_get_device_id(spi)->driver_data];
+	st->info = &max1027_chip_info_tbl[__c_ua(spi_get_device_id(spi)->driver_data)];
 
 	mutex_init(&st->lock);
 	init_completion(&st->complete);

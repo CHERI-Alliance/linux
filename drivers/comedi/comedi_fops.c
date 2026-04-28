@@ -2070,7 +2070,7 @@ static int do_lock_ioctl(struct comedi_device *dev, user_uintptr_t arg,
 	lockdep_assert_held(&dev->mutex);
 	if (arg >= dev->n_subdevices)
 		return -EINVAL;
-	s = &dev->subdevices[arg];
+	s = &dev->subdevices[__c_ua(arg)];
 
 	spin_lock_irqsave(&s->spin_lock, flags);
 	if (s->busy || s->lock)
@@ -2103,7 +2103,7 @@ static int do_unlock_ioctl(struct comedi_device *dev, user_uintptr_t arg,
 	lockdep_assert_held(&dev->mutex);
 	if (arg >= dev->n_subdevices)
 		return -EINVAL;
-	s = &dev->subdevices[arg];
+	s = &dev->subdevices[__c_ua(arg)];
 
 	if (s->busy)
 		return -EBUSY;
@@ -2138,7 +2138,7 @@ static int do_cancel_ioctl(struct comedi_device *dev, user_uintptr_t arg,
 	lockdep_assert_held(&dev->mutex);
 	if (arg >= dev->n_subdevices)
 		return -EINVAL;
-	s = &dev->subdevices[arg];
+	s = &dev->subdevices[__c_ua(arg)];
 	if (!s->async)
 		return -EINVAL;
 
@@ -2172,7 +2172,7 @@ static int do_poll_ioctl(struct comedi_device *dev, user_uintptr_t arg,
 	lockdep_assert_held(&dev->mutex);
 	if (arg >= dev->n_subdevices)
 		return -EINVAL;
-	s = &dev->subdevices[arg];
+	s = &dev->subdevices[__c_ua(arg)];
 
 	if (!s->busy)
 		return 0;
@@ -2209,7 +2209,7 @@ static int do_setrsubd_ioctl(struct comedi_device *dev, user_uintptr_t arg,
 	if (arg >= dev->n_subdevices)
 		return -EINVAL;
 
-	s_new = &dev->subdevices[arg];
+	s_new = &dev->subdevices[__c_ua(arg)];
 	s_old = comedi_file_read_subdevice(file);
 	if (s_old == s_new)
 		return 0;	/* no change */
@@ -2252,7 +2252,7 @@ static int do_setwsubd_ioctl(struct comedi_device *dev, user_uintptr_t arg,
 	if (arg >= dev->n_subdevices)
 		return -EINVAL;
 
-	s_new = &dev->subdevices[arg];
+	s_new = &dev->subdevices[__c_ua(arg)];
 	s_old = comedi_file_write_subdevice(file);
 	if (s_old == s_new)
 		return 0;	/* no change */

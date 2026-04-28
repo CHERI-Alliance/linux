@@ -1237,7 +1237,7 @@ ref_scale_reader(void *arg)
 {
 	unsigned long flags;
 	intptr_t me = (intptr_t)arg;
-	struct reader_task *rt = &(reader_tasks[me]);
+	struct reader_task *rt = &(reader_tasks[__c_ua(me)]);
 	u64 start;
 	s64 duration;
 

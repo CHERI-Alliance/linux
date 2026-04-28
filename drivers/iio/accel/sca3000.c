@@ -1449,8 +1449,8 @@ static int sca3000_probe(struct spi_device *spi)
 	spi_set_drvdata(spi, indio_dev);
 	st->us = spi;
 	mutex_init(&st->lock);
-	st->info = &sca3000_spi_chip_info_tbl[spi_get_device_id(spi)
-					      ->driver_data];
+	st->info = &sca3000_spi_chip_info_tbl[__c_ua(spi_get_device_id(spi)
+					      ->driver_data)];
 
 	indio_dev->name = spi_get_device_id(spi)->name;
 	indio_dev->info = &sca3000_info;

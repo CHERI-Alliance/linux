@@ -2288,7 +2288,7 @@ static int bcm4377_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 		return -ENOMEM;
 
 	bcm4377->pdev = pdev;
-	bcm4377->hw = &bcm4377_hw_variants[id->driver_data];
+	bcm4377->hw = &bcm4377_hw_variants[__c_ua(id->driver_data)];
 	init_completion(&bcm4377->event);
 
 	ret = bcm4377_prepare_rings(bcm4377);

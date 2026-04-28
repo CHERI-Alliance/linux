@@ -4306,7 +4306,7 @@ pciserial_init_one(struct pci_dev *dev, const struct pci_device_id *ent)
 		return -EINVAL;
 	}
 
-	board = &pci_boards[ent->driver_data];
+	board = &pci_boards[__c_ua(ent->driver_data)];
 
 	exclude = pci_match_id(blacklist, dev);
 	if (exclude) {

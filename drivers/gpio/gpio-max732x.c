@@ -501,7 +501,7 @@ static int max732x_irq_setup(struct max732x_chip *chip,
 			     const struct i2c_device_id *id)
 {
 	struct i2c_client *client = chip->client;
-	int has_irq = max732x_features[id->driver_data] >> 32;
+	int has_irq = max732x_features[__c_ua(id->driver_data)] >> 32;
 	int irq_base = 0;
 	int ret;
 
@@ -555,7 +555,7 @@ static int max732x_setup_gpio(struct max732x_chip *chip,
 					unsigned gpio_start)
 {
 	struct gpio_chip *gc = &chip->gpio_chip;
-	uint32_t id_data = (uint32_t)max732x_features[id->driver_data];
+	uint32_t id_data = (uint32_t)max732x_features[__c_ua(id->driver_data)];
 	int i, port = 0;
 
 	for (i = 0; i < 16; i++, id_data >>= 2) {

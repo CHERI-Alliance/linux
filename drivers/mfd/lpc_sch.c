@@ -133,7 +133,7 @@ static int lpc_sch_populate_cell(struct pci_dev *pdev, int where,
 static int lpc_sch_probe(struct pci_dev *dev, const struct pci_device_id *id)
 {
 	struct mfd_cell lpc_sch_cells[3];
-	struct lpc_sch_info *info = &sch_chipset_info[id->driver_data];
+	struct lpc_sch_info *info = &sch_chipset_info[__c_ua(id->driver_data)];
 	unsigned int cells = 0;
 	int ret;
 

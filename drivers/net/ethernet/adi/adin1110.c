@@ -1656,7 +1656,7 @@ static int adin1110_probe(struct spi_device *spi)
 		return -ENOMEM;
 
 	priv->spidev = spi;
-	priv->cfg = &adin1110_cfgs[dev_id->driver_data];
+	priv->cfg = &adin1110_cfgs[__c_ua(dev_id->driver_data)];
 	spi->bits_per_word = 8;
 	spi->mode = SPI_MODE_0;
 

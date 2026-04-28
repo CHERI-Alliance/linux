@@ -5809,7 +5809,7 @@ static int sisfb_post_xgi(struct pci_dev *pdev)
 
 static int sisfb_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 {
-	struct sisfb_chip_info	*chipinfo = &sisfb_chip_info[ent->driver_data];
+	struct sisfb_chip_info	*chipinfo = &sisfb_chip_info[__c_ua(ent->driver_data)];
 	struct sis_video_info	*ivideo = NULL;
 	struct fb_info		*sis_fb_info = NULL;
 	u16 reg16;

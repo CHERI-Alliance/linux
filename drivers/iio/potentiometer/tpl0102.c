@@ -133,7 +133,7 @@ static int tpl0102_probe(struct i2c_client *client)
 	data = iio_priv(indio_dev);
 	i2c_set_clientdata(client, indio_dev);
 
-	data->cfg = &tpl0102_cfg[id->driver_data];
+	data->cfg = &tpl0102_cfg[__c_ua(id->driver_data)];
 	data->regmap = devm_regmap_init_i2c(client, &tpl0102_regmap_config);
 	if (IS_ERR(data->regmap)) {
 		dev_err(dev, "regmap initialization failed\n");

@@ -551,7 +551,7 @@ static int podhd_probe(struct usb_interface *interface,
 		       const struct usb_device_id *id)
 {
 	return line6_probe(interface, id, "Line6-PODHD",
-			   &podhd_properties_table[id->driver_info],
+			   &podhd_properties_table[__c_ua(id->driver_info)],
 			   podhd_init, sizeof(struct usb_line6_podhd));
 }
 

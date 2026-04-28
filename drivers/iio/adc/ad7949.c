@@ -329,7 +329,7 @@ static int ad7949_spi_probe(struct spi_device *spi)
 	ad7949_adc->indio_dev = indio_dev;
 	ad7949_adc->spi = spi;
 
-	spec = &ad7949_adc_spec[spi_get_device_id(spi)->driver_data];
+	spec = &ad7949_adc_spec[__c_ua(spi_get_device_id(spi)->driver_data)];
 	indio_dev->num_channels = spec->num_channels;
 	ad7949_adc->resolution = spec->resolution;
 

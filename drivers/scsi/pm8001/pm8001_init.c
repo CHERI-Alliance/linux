@@ -1147,7 +1147,7 @@ static int pm8001_pci_probe(struct pci_dev *pdev,
 		rc = -ENOMEM;
 		goto err_out_regions;
 	}
-	chip = &pm8001_chips[ent->driver_data];
+	chip = &pm8001_chips[__c_ua(ent->driver_data)];
 	sha = kzalloc_obj(struct sas_ha_struct);
 	if (!sha) {
 		rc = -ENOMEM;

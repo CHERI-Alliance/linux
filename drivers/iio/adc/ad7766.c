@@ -213,7 +213,7 @@ static int ad7766_probe(struct spi_device *spi)
 		return -ENOMEM;
 
 	ad7766 = iio_priv(indio_dev);
-	ad7766->chip_info = &ad7766_chip_info[id->driver_data];
+	ad7766->chip_info = &ad7766_chip_info[__c_ua(id->driver_data)];
 
 	ad7766->mclk = devm_clk_get(&spi->dev, "mclk");
 	if (IS_ERR(ad7766->mclk))

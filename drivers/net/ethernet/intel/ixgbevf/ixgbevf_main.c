@@ -4557,7 +4557,7 @@ static int ixgbevf_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	struct net_device *netdev;
 	struct ixgbevf_adapter *adapter = NULL;
 	struct ixgbe_hw *hw = NULL;
-	const struct ixgbevf_info *ii = ixgbevf_info_tbl[ent->driver_data];
+	const struct ixgbevf_info *ii = ixgbevf_info_tbl[__c_ua(ent->driver_data)];
 	bool disable_dev = false;
 	int err;
 

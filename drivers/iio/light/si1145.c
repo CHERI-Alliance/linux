@@ -1281,7 +1281,7 @@ static int si1145_probe(struct i2c_client *client)
 	data = iio_priv(indio_dev);
 	i2c_set_clientdata(client, indio_dev);
 	data->client = client;
-	data->part_info = &si1145_part_info[id->driver_data];
+	data->part_info = &si1145_part_info[__c_ua(id->driver_data)];
 
 	part_id = ret = i2c_smbus_read_byte_data(data->client,
 						 SI1145_REG_PART_ID);

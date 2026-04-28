@@ -1012,7 +1012,7 @@ static int vortex_init_one(struct pci_dev *pdev,
 
 	if (global_use_mmio < 0 && (unit >= MAX_UNITS || use_mmio[unit] < 0)) {
 		/* Determine the default if the user didn't override us */
-		vci = &vortex_info_tbl[ent->driver_data];
+		vci = &vortex_info_tbl[__c_ua(ent->driver_data)];
 		pci_bar = vci->drv_flags & (IS_CYCLONE | IS_TORNADO) ? 1 : 0;
 	} else if (unit < MAX_UNITS && use_mmio[unit] >= 0)
 		pci_bar = use_mmio[unit] ? 1 : 0;

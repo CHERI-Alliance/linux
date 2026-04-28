@@ -8575,7 +8575,7 @@ bnx2_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	}
 
 	netdev_info(dev, "%s (%c%d) %s found at mem %lx, IRQ %d, "
-		    "node addr %pM\n", board_info[ent->driver_data].name,
+		    "node addr %pM\n", board_info[__c_ua(ent->driver_data)].name,
 		    ((BNX2_CHIP_ID(bp) & 0xf000) >> 12) + 'A',
 		    ((BNX2_CHIP_ID(bp) & 0x0ff0) >> 4),
 		    bnx2_bus_string(bp, str), (long)pci_resource_start(pdev, 0),

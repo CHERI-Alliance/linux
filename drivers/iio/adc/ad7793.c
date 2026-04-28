@@ -809,7 +809,7 @@ static int ad7793_probe(struct spi_device *spi)
 	}
 
 	st->chip_info =
-		&ad7793_chip_info_tbl[spi_get_device_id(spi)->driver_data];
+		&ad7793_chip_info_tbl[__c_ua(spi_get_device_id(spi)->driver_data)];
 
 	indio_dev->name = spi_get_device_id(spi)->name;
 	indio_dev->modes = INDIO_DIRECT_MODE;

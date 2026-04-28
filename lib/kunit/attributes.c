@@ -55,7 +55,7 @@ static const char *attr_enum_to_string(void *attr, const char * const str_list[]
 	*to_free = false;
 	if (!val)
 		return NULL;
-	return str_list[val];
+	return str_list[__c_ua(val)];
 }
 
 static const char *attr_bool_to_string(void *attr, bool *to_free)

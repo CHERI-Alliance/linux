@@ -13991,7 +13991,7 @@ static int bnx2x_init_one(struct pci_dev *pdev,
 	}
 	BNX2X_DEV_INFO(
 	       "%s (%c%d) PCI-E found at mem %lx, IRQ %d, node addr %pM\n",
-	       board_info[ent->driver_data].name,
+	       board_info[__c_ua(ent->driver_data)].name,
 	       (CHIP_REV(bp) >> 12) + 'A', (CHIP_METAL(bp) >> 4),
 	       dev->base_addr, bp->pdev->irq, dev->dev_addr);
 	pcie_print_link_status(bp->pdev);

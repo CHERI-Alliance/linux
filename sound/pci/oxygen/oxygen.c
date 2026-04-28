@@ -822,8 +822,8 @@ static int get_oxygen_model(struct oxygen *chip,
 		chip->model.misc_flags = OXYGEN_MISC_MIDI;
 		chip->model.device_config |= MIDI_OUTPUT | MIDI_INPUT;
 	}
-	if (id->driver_data < ARRAY_SIZE(names) && names[id->driver_data])
-		chip->model.shortname = names[id->driver_data];
+	if (id->driver_data < ARRAY_SIZE(names) && names[__c_ua(id->driver_data)])
+		chip->model.shortname = names[__c_ua(id->driver_data)];
 	return 0;
 }
 

@@ -563,7 +563,7 @@ static int ti_ads7950_probe(struct spi_device *spi)
 
 	st->spi = spi;
 
-	info = &ti_ads7950_chip_info[spi_get_device_id(spi)->driver_data];
+	info = &ti_ads7950_chip_info[__c_ua(spi_get_device_id(spi)->driver_data)];
 
 	indio_dev->name = spi_get_device_id(spi)->name;
 	indio_dev->modes = INDIO_DIRECT_MODE;

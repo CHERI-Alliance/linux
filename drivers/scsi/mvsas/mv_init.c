@@ -331,7 +331,7 @@ static struct mvs_info *mvs_pci_alloc(struct pci_dev *pdev,
 	struct sas_ha_struct *sha = SHOST_TO_SAS_HA(shost);
 
 	mvi = kzalloc(sizeof(*mvi) +
-		(1L << mvs_chips[ent->driver_data].slot_width) *
+		(1L << mvs_chips[__c_ua(ent->driver_data)].slot_width) *
 		sizeof(struct mvs_slot_info), GFP_KERNEL);
 	if (!mvi)
 		return NULL;
@@ -500,7 +500,7 @@ static int mvs_pci_init(struct pci_dev *pdev, const struct pci_device_id *ent)
 		goto err_out_regions;
 	}
 
-	chip = &mvs_chips[ent->driver_data];
+	chip = &mvs_chips[__c_ua(ent->driver_data)];
 	SHOST_TO_SAS_HA(shost) =
 		kzalloc_objs(struct sas_ha_struct, 1);
 	if (!SHOST_TO_SAS_HA(shost)) {

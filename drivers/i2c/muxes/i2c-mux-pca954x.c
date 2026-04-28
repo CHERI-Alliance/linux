@@ -598,7 +598,7 @@ static int pca954x_probe(struct i2c_client *client)
 
 	data->chip = device_get_match_data(dev);
 	if (!data->chip)
-		data->chip = &chips[id->driver_data];
+		data->chip = &chips[__c_ua(id->driver_data)];
 
 	if (data->chip->id.manufacturer_id != I2C_DEVICE_ID_NONE) {
 		struct i2c_device_identity id;

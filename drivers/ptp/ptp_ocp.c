@@ -3435,7 +3435,7 @@ ptp_ocp_tty_show(struct device *dev, struct device_attribute *attr, char *buf)
 	 * as a device path (e.g., "/dev/ttyS4"), and adding a newline would
 	 * break those applications. Do not add a newline to this output.
 	 */
-	return sysfs_emit(buf, "ttyS%d", bp->port[(uintptr_t)ea->var].line);
+	return sysfs_emit(buf, "ttyS%d", bp->port[__c_ua((uintptr_t)ea->var)].line);
 }
 
 static umode_t
@@ -3451,7 +3451,7 @@ ptp_ocp_timecard_tty_is_visible(struct kobject *kobj, struct attribute *attr, in
 
 	dattr = container_of(attr, struct device_attribute, attr);
 	ea = container_of(dattr, struct dev_ext_attribute, attr);
-	port = &bp->port[(uintptr_t)ea->var];
+	port = &bp->port[__c_ua((uintptr_t)ea->var)];
 	return port->line == -1 ? 0 : 0444;
 }
 

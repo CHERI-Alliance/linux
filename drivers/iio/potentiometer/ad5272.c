@@ -175,7 +175,7 @@ static int ad5272_probe(struct i2c_client *client)
 	data = iio_priv(indio_dev);
 	data->client = client;
 	mutex_init(&data->lock);
-	data->cfg = &ad5272_cfg[id->driver_data];
+	data->cfg = &ad5272_cfg[__c_ua(id->driver_data)];
 
 	ret = ad5272_reset(data);
 	if (ret)
