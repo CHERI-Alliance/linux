@@ -533,6 +533,8 @@ static void __io_cqring_overflow_flush(struct io_ring_ctx *ctx, bool dying)
 		struct io_uring_cqe *cqe;
 		struct io_overflow_cqe *ocqe;
 		bool is_cqe32 = false;
+		u64 extra1 = 0;
+		u64 extra2 = 0;
 
 		ocqe = list_first_entry(&ctx->cq_overflow_list,
 					struct io_overflow_cqe, list);
@@ -547,8 +549,16 @@ static void __io_cqring_overflow_flush(struct io_ring_ctx *ctx, bool dying)
 		if (!dying) {
 			if (!io_get_cqe_overflow(ctx, &cqe, true, is_cqe32))
 				break;
-			memcpy(cqe, &ocqe->cqe, cqe_size);
+			if (ctx->flags & IORING_SETUP_CQE32) {
+				extra1 = ocqe->cqe.big_cqe[0];
+				extra2 = ocqe->cqe.big_cqe[1];
+			}
+
+			__io_fill_cqe(ctx, cqe, ocqe->cqe.user_data,
+				      ocqe->cqe.res, ocqe->cqe.flags,
+				      extra1, extra2);
 		}
+
 		list_del(&ocqe->list);
 		kfree(ocqe);
 
@@ -744,6 +754,16 @@ bool io_cqe_cache_refill(struct io_ring_ctx *ctx, bool overflow, bool cqe32)
 	return true;
 }
 
+/*
+ * Retrieves a pointer to the ith CQE
+ */
+struct io_uring_cqe *__io_get_ith_cqe(struct io_ring_ctx *ctx, unsigned int i)
+{
+	return io_in_compat64(ctx) ?
+	       (struct io_uring_cqe *)&ctx->cq_cqes_compat[i] :
+	       &ctx->cq_cqes[i];
+}
+
 static bool io_fill_cqe_aux32(struct io_ring_ctx *ctx,
 			      struct io_uring_cqe src_cqe[2])
 {
@@ -754,7 +774,19 @@ static bool io_fill_cqe_aux32(struct io_ring_ctx *ctx,
 	if (unlikely(!io_get_cqe(ctx, &cqe, true)))
 		return false;
 
-	memcpy(cqe, src_cqe, 2 * sizeof(*cqe));
+	if (io_in_compat64(ctx)) {
+		/* FIXCHERI: Implement this properly */
+		WARN_ONCE(1, "NOT IMPLEMENTED FOR COMPAT64\n");
+#ifdef NOTYET
+		/* Probably something like this: */
+		struct __c64_io_uring_cqe *compat = (void *)cqe;
+		__to_c64_io_uring_cqe_2(compat, src_sqe);
+		/* Expect that the caller converts the additional payload. */
+		memcpy(&compat[1], &src_sqe[1], sizeof(compat[1]));
+#endif
+	} else {
+		memcpy(cqe, src_cqe, 2 * sizeof(*cqe));
+	}
 	trace_io_uring_complete(ctx, NULL, cqe);
 	return true;
 }
@@ -766,15 +798,7 @@ static bool io_fill_cqe_aux(struct io_ring_ctx *ctx, u64 user_data, s32 res,
 	struct io_uring_cqe *cqe;
 
 	if (likely(io_get_cqe(ctx, &cqe, cqe32))) {
-		WRITE_ONCE(cqe->user_data, user_data);
-		WRITE_ONCE(cqe->res, res);
-		WRITE_ONCE(cqe->flags, cflags);
-
-		if (cqe32) {
-			WRITE_ONCE(cqe->big_cqe[0], 0);
-			WRITE_ONCE(cqe->big_cqe[1], 0);
-		}
-
+		__io_fill_cqe(ctx, cqe, user_data, res, cflags, 0, 0);
 		trace_io_uring_complete(ctx, NULL, cqe);
 		return true;
 	}
@@ -2000,7 +2024,9 @@ static bool io_get_sqe(struct io_ring_ctx *ctx, const struct io_uring_sqe **sqe)
 	/* double index for 128-byte SQEs, twice as long */
 	if (ctx->flags & IORING_SETUP_SQE128)
 		head <<= 1;
-	*sqe = &ctx->sq_sqes[head];
+	*sqe = io_in_compat64(ctx) ?
+	       (struct io_uring_sqe *)&ctx->sq_sqes_compat[head] :
+	       &ctx->sq_sqes[head];
 	return true;
 }
 
@@ -2027,12 +2053,18 @@ int io_submit_sqes(struct io_ring_ctx *ctx, unsigned int nr)
 	do {
 		const struct io_uring_sqe *sqe;
 		struct io_kiocb *req;
+		struct io_uring_sqe native_sqe[2];
 
 		if (unlikely(!io_alloc_req(ctx, &req)))
 			break;
 		if (unlikely(!io_get_sqe(ctx, &sqe))) {
 			io_req_add_to_cache(req, ctx);
 			break;
+		}
+		if (io_in_compat64(ctx)) {
+			convert_compat64_io_uring_sqe(ctx, native_sqe,
+						      (struct __c64_io_uring_sqe *)sqe);
+			sqe = native_sqe;
 		}
 
 		/*
@@ -2072,8 +2104,7 @@ static void io_rings_free(struct io_ring_ctx *ctx)
 static int rings_size(unsigned int flags, unsigned int sq_entries,
 		      unsigned int cq_entries, struct io_rings_layout *rl)
 {
-	struct io_rings *rings;
-	size_t sqe_size, cqe_size, cq_array_size;
+	size_t sqe_size, cq_array_size;
 	size_t off;
 
 	if (flags & IORING_SETUP_CQE_MIXED) {
@@ -2087,7 +2118,7 @@ static int rings_size(unsigned int flags, unsigned int sq_entries,
 
 	rl->sq_array_offset = SIZE_MAX;
 
-	sqe_size = sizeof(struct io_uring_sqe);
+	sqe_size = __c64_sizeof(io_uring_sqe);
 	if (flags & IORING_SETUP_SQE128)
 		sqe_size *= 2;
 
@@ -2096,7 +2127,7 @@ static int rings_size(unsigned int flags, unsigned int sq_entries,
 		return -EOVERFLOW;
 
 	off = io_uring_cq_offset();
-	cq_array_size = array_size(sizeof(struct io_uring_cqe), cq_entries);
+	cq_array_size = array_size(__c64_sizeof(io_uring_cqe), cq_entries);
 	if (cq_array_size == SIZE_MAX)
 		return -EOVERFLOW;
 	if (check_add_overflow(off, cq_array_size, &off))
@@ -2439,8 +2470,8 @@ static int io_uring_release(struct inode *inode, struct file *file)
 static struct io_uring_reg_wait *io_get_ext_arg_reg(struct io_ring_ctx *ctx,
 			const struct io_uring_getevents_arg __user *uarg)
 {
-	unsigned long size = sizeof(struct io_uring_reg_wait);
-	user_uintptr_t offset = (user_uintptr_t)uarg;
+	unsigned long size = __c64c_sizeof(io_in_compat64(ctx), io_uring_reg_wait);
+	unsigned long offset = user_ptr_addr(uarg);
 	unsigned long end;
 
 	if (unlikely(offset % sizeof(long)))
@@ -2464,9 +2495,9 @@ static int io_validate_ext_arg(struct io_ring_ctx *ctx, unsigned flags,
 		return 0;
 	if (flags & IORING_ENTER_EXT_ARG_REG)
 		return -EINVAL;
-	if (argsz != sizeof(arg))
+	if (__c64c_sizeof(io_in_compat64(ctx), io_uring_getevents_arg) != argsz)
 		return -EINVAL;
-	if (copy_from_user_with_ptr(&arg, argp, sizeof(arg)))
+	if (__c64c_copy_from_user_with_ptr(io_in_compat64(ctx), io_uring_getevents_arg, &arg, argp))
 		return -EFAULT;
 	return 0;
 }
@@ -2474,7 +2505,9 @@ static int io_validate_ext_arg(struct io_ring_ctx *ctx, unsigned flags,
 static int io_get_ext_arg(struct io_ring_ctx *ctx, unsigned flags,
 			  const void __user *argp, struct ext_arg *ext_arg)
 {
+#if defined(CONFIG_64BIT) && !defined(CONFIG_CHERI_PURECAP_UABI)
 	const struct io_uring_getevents_arg __user *uarg = argp;
+#endif
 	struct io_uring_getevents_arg arg;
 
 	ext_arg->iowait = !(flags & IORING_ENTER_NO_IOWAIT);
@@ -2491,7 +2524,7 @@ static int io_get_ext_arg(struct io_ring_ctx *ctx, unsigned flags,
 	if (flags & IORING_ENTER_EXT_ARG_REG) {
 		struct io_uring_reg_wait *w;
 
-		if (ext_arg->argsz != sizeof(struct io_uring_reg_wait))
+		if (ext_arg->argsz != __c64c_sizeof(io_in_compat64(ctx), io_uring_reg_wait))
 			return -EINVAL;
 		w = io_get_ext_arg_reg(ctx, argp);
 		if (IS_ERR(w))
@@ -2500,8 +2533,14 @@ static int io_get_ext_arg(struct io_ring_ctx *ctx, unsigned flags,
 		if (w->flags & ~IORING_REG_WAIT_TS)
 			return -EINVAL;
 		ext_arg->min_time = READ_ONCE(w->min_wait_usec) * NSEC_PER_USEC;
-		ext_arg->sig = u64_to_user_ptr(READ_ONCE(w->sigmask));
-		ext_arg->argsz = READ_ONCE(w->sigmask_sz);
+		if (IS_ENABLED(CONFIG_CHERI_PURECAP_UABI) && !io_in_compat64(ctx)) {
+			ext_arg->sig = u64_to_user_ptr(READ_ONCE(w->sigmask));
+			ext_arg->argsz = READ_ONCE(w->sigmask_sz);
+		} else {
+			struct __c64_io_uring_reg_wait *compat = (void *)w;
+			ext_arg->sig = compat_ptr(compat->sigmask);
+			ext_arg->argsz = READ_ONCE(compat->sigmask_sz);
+		}
 		if (w->flags & IORING_REG_WAIT_TS) {
 			ext_arg->ts.tv_sec = READ_ONCE(w->ts.tv_sec);
 			ext_arg->ts.tv_nsec = READ_ONCE(w->ts.tv_nsec);
@@ -2514,9 +2553,9 @@ static int io_get_ext_arg(struct io_ring_ctx *ctx, unsigned flags,
 	 * EXT_ARG is set - ensure we agree on the size of it and copy in our
 	 * timespec and sigset_t pointers if good.
 	 */
-	if (ext_arg->argsz != sizeof(arg))
+	if (ext_arg->argsz != __c64c_sizeof(io_in_compat64(ctx), io_uring_getevents_arg))
 		return -EINVAL;
-#ifdef CONFIG_64BIT
+#if defined(CONFIG_64BIT) && !defined(CONFIG_CHERI_PURECAP_UABI)
 	if (!user_access_begin(uarg, sizeof(*uarg)))
 		return -EFAULT;
 	unsafe_get_user(arg.sigmask, &uarg->sigmask, uaccess_end);
@@ -2525,8 +2564,11 @@ static int io_get_ext_arg(struct io_ring_ctx *ctx, unsigned flags,
 	unsafe_get_user(arg.ts, &uarg->ts, uaccess_end);
 	user_access_end();
 #else
-	if (copy_from_user(&arg, uarg, sizeof(arg)))
-		return -EFAULT;
+	{
+		int ret = __c64c_copy_from_user_with_ptr(io_in_compat64(ctx), io_uring_getevents_arg, &arg, argp);
+		if (ret)
+			return ret;
+	}
 #endif
 	ext_arg->min_time = arg.min_wait_usec * NSEC_PER_USEC;
 	ext_arg->sig = u64_to_user_ptr(arg.sigmask);
@@ -2537,7 +2579,7 @@ static int io_get_ext_arg(struct io_ring_ctx *ctx, unsigned flags,
 		ext_arg->ts_set = true;
 	}
 	return 0;
-#ifdef CONFIG_64BIT
+#if defined(CONFIG_64BIT) && !defined(CONFIG_CHERI_PURECAP_UABI)
 uaccess_end:
 	user_access_end();
 	return -EFAULT;
@@ -2711,11 +2753,8 @@ static __cold int io_allocate_scq_urings(struct io_ring_ctx *ctx,
 	ret = io_create_region(ctx, &ctx->ring_region, &rd, IORING_OFF_CQ_RING);
 	if (ret)
 		return ret;
-	rings = io_region_get_ptr(&ctx->ring_region);
-	if (IS_ERR(rings))
-		return PTR_ERR(rings);
-	ctx->rings = rings;
-	ctx->cqes = (struct io_uring_cqe *)((char *)rings + io_uring_cq_offset());
+	ctx->rings = rings = io_region_get_ptr(&ctx->ring_region);
+	ctx->cq_cqes = (struct io_uring_cqe *)((char *)rings + io_uring_cq_offset());
 	rcu_assign_pointer(ctx->rings_rcu, rings);
 	if (!(ctx->flags & IORING_SETUP_NO_SQARRAY))
 		ctx->sq_array = (u32 *)((char *)rings + rl->sq_array_offset);
@@ -3025,7 +3064,7 @@ static __cold int io_uring_create(struct io_ctx_config *config)
 
 	p->features = IORING_FEAT_FLAGS;
 
-	if (copy_to_user_with_ptr(config->uptr, p, sizeof(*p))) {
+	if (__c64c_copy_to_user_with_ptr(io_in_compat64(ctx), io_uring_params, config->uptr, p)) {
 		ret = -EFAULT;
 		goto err;
 	}
@@ -3077,7 +3116,7 @@ static long io_uring_setup(u32 entries, struct io_uring_params __user *params)
 
 	memset(&config, 0, sizeof(config));
 
-	if (copy_from_user_with_ptr(&config.p, params, sizeof(config.p)))
+	if (__c64_copy_from_user_with_ptr(io_uring_params, &config.p, params))
 		return -EFAULT;
 
 	if (!mem_is_zero(&config.p.resv, sizeof(config.p.resv)))
@@ -3197,6 +3236,46 @@ static int __init io_uring_init(void)
 	BUILD_BUG_ON(offsetof(struct io_uring_buf_ring, bufs) != 0);
 	BUILD_BUG_ON(offsetof(struct io_uring_buf, resv) !=
 		     offsetof(struct io_uring_buf_ring, tail));
+
+#ifdef CONFIG_COMPAT64
+#define BUILD_BUG_COMPAT_SQE_ELEM(eoffset, etype, ename) \
+	__BUILD_BUG_VERIFY_OFFSET_SIZE(struct __c64_io_uring_sqe, eoffset, sizeof(etype), ename)
+#define BUILD_BUG_COMPAT_SQE_ELEM_SIZE(eoffset, esize, ename) \
+	__BUILD_BUG_VERIFY_OFFSET_SIZE(struct __c64_io_uring_sqe, eoffset, esize, ename)
+	BUILD_BUG_ON(sizeof(struct __c64_io_uring_sqe) != 64);
+	BUILD_BUG_COMPAT_SQE_ELEM(0,  __u8,  opcode);
+	BUILD_BUG_COMPAT_SQE_ELEM(1,  __u8,  flags);
+	BUILD_BUG_COMPAT_SQE_ELEM(2,  __u16, ioprio);
+	BUILD_BUG_COMPAT_SQE_ELEM(4,  __s32, fd);
+	BUILD_BUG_COMPAT_SQE_ELEM(8,  __u64, off);
+	BUILD_BUG_COMPAT_SQE_ELEM(8,  __u64, addr2);
+	BUILD_BUG_COMPAT_SQE_ELEM(8,  __u32, cmd_op);
+	BUILD_BUG_COMPAT_SQE_ELEM(12, __u32, __pad1);
+	BUILD_BUG_COMPAT_SQE_ELEM(16, __u64, addr);
+	BUILD_BUG_COMPAT_SQE_ELEM(16, __u64, splice_off_in);
+	BUILD_BUG_COMPAT_SQE_ELEM(24, __u32, len);
+	BUILD_BUG_COMPAT_SQE_ELEM(28, __kernel_rwf_t, rw_flags);
+	BUILD_BUG_COMPAT_SQE_ELEM(32, __u64, user_data);
+	BUILD_BUG_COMPAT_SQE_ELEM(40, __u16, buf_index);
+	BUILD_BUG_COMPAT_SQE_ELEM(40, __u16, buf_group);
+	BUILD_BUG_COMPAT_SQE_ELEM(42, __u16, personality);
+	BUILD_BUG_COMPAT_SQE_ELEM(44, __s32, splice_fd_in);
+	BUILD_BUG_COMPAT_SQE_ELEM(44, __u32, file_index);
+	BUILD_BUG_COMPAT_SQE_ELEM(44, __u16, addr_len);
+	BUILD_BUG_COMPAT_SQE_ELEM(46, __u16, __pad3[0]);
+	BUILD_BUG_COMPAT_SQE_ELEM(48, __u64, addr3);
+	BUILD_BUG_COMPAT_SQE_ELEM_SIZE(48, 0, cmd);
+	BUILD_BUG_COMPAT_SQE_ELEM(56, __u64, __pad2);
+
+	BUILD_BUG_ON(sizeof(struct __c64_io_uring_files_update) !=
+		     sizeof(struct __c64_io_uring_rsrc_update));
+	BUILD_BUG_ON(sizeof(struct __c64_io_uring_rsrc_update) >
+		     sizeof(struct __c64_io_uring_rsrc_update2));
+
+	BUILD_BUG_ON(offsetof(struct __c64_io_uring_buf_ring, bufs) != 0);
+	BUILD_BUG_ON(offsetof(struct __c64_io_uring_buf, resv) !=
+		     offsetof(struct __c64_io_uring_buf_ring, tail));
+#endif /* CONFIG_COMPAT64 */
 
 	/* should fit into one byte */
 	BUILD_BUG_ON(SQE_VALID_FLAGS >= (1 << 8));

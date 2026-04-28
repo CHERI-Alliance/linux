@@ -355,7 +355,7 @@ int io_register_files_update(struct io_ring_ctx *ctx, void __user *arg,
 	if (!nr_args)
 		return -EINVAL;
 	memset(&up, 0, sizeof(up));
-	if (copy_from_user_with_ptr(&up, arg, sizeof(struct io_uring_rsrc_update)))
+	if (__c64c_copy_from_user_with_ptr(io_in_compat64(ctx), io_uring_rsrc_update, (struct io_uring_rsrc_update *) &up, arg))
 		return -EFAULT;
 	if (up.resv || up.resv2)
 		return -EINVAL;
@@ -367,9 +367,9 @@ int io_register_rsrc_update(struct io_ring_ctx *ctx, void __user *arg,
 {
 	struct io_uring_rsrc_update2 up;
 
-	if (size != sizeof(up))
+	if (size != __c64c_sizeof(io_in_compat64(ctx), io_uring_rsrc_update2))
 		return -EINVAL;
-	if (copy_from_user_with_ptr(&up, arg, sizeof(up)))
+	if (__c64c_copy_from_user_with_ptr(io_in_compat64(ctx), io_uring_rsrc_update2, &up, arg))
 		return -EFAULT;
 	if (!up.nr || up.resv || up.resv2)
 		return -EINVAL;
@@ -381,12 +381,9 @@ __cold int io_register_rsrc(struct io_ring_ctx *ctx, void __user *arg,
 {
 	struct io_uring_rsrc_register rr;
 
-	/* keep it extendible */
-	if (size != sizeof(rr))
+	if (size != __c64c_sizeof(io_in_compat64(ctx), io_uring_rsrc_register))
 		return -EINVAL;
-
-	memset(&rr, 0, sizeof(rr));
-	if (copy_from_user_with_ptr(&rr, arg, size))
+	if (__c64c_copy_from_user_with_ptr(io_in_compat64(ctx), io_uring_rsrc_register, &rr, arg))
 		return -EFAULT;
 	if (!rr.nr || rr.resv2)
 		return -EINVAL;

@@ -271,7 +271,7 @@ int io_sync_cancel(struct io_ring_ctx *ctx, void __user *arg)
 	DEFINE_WAIT(wait);
 	int ret, i;
 
-	if (copy_from_user_with_ptr(&sc, arg, sizeof(sc)))
+	if (__c64c_copy_from_user_with_ptr(io_in_compat64(ctx), io_uring_sync_cancel_reg, &sc, arg))
 		return -EFAULT;
 	if (sc.flags & ~CANCEL_FLAGS)
 		return -EINVAL;
