@@ -1463,7 +1463,7 @@ static unsigned long signal_sp(struct pt_regs *regs)
 	 * Executive stack. Read the actual SP_EL0 from the saved CSP_EL0
 	 * instead.
 	 */
-	return morello_cap_get_lo_val(&regs->csp);
+	return (unsigned long)regs->csp;
 #else
 	return regs->sp;
 #endif
