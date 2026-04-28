@@ -181,7 +181,7 @@ extern int arch_setup_additional_pages(struct linux_binprm *bprm,
 				       int uses_interp);
 
 /* 1GB of VA */
-#ifdef CONFIG_COMPAT
+#ifdef CONFIG_COMPAT32
 #define STACK_RND_MASK			(test_thread_flag(TIF_32BIT) ? \
 						0x7ff >> (PAGE_SHIFT - 12) : \
 						0x3ffff >> (PAGE_SHIFT - 12))
@@ -311,7 +311,7 @@ static inline int arch_parse_elf_property(u32 type, const void *data,
 					  struct arch_elf_state *arch)
 {
 	/* No known properties for AArch32 yet */
-	if (IS_ENABLED(CONFIG_COMPAT) && compat)
+	if (IS_ENABLED(CONFIG_COMPAT32) && compat)
 		return 0;
 
 	if (type == GNU_PROPERTY_AARCH64_FEATURE_1_AND) {

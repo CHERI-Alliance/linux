@@ -200,7 +200,7 @@ void do_el0_svc(struct pt_regs *regs)
 	el0_svc_common(regs, regs->regs[8], __NR_syscalls, table);
 }
 
-#ifdef CONFIG_COMPAT
+#ifdef CONFIG_COMPAT32
 void do_el0_svc_compat(struct pt_regs *regs)
 {
 	el0_svc_common(regs, regs->regs[7], __NR_compat32_syscalls,
