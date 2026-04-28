@@ -250,14 +250,14 @@ static struct page *__dma_alloc_from_pool(struct device *dev, size_t size,
 		struct gen_pool *pool, void **cpu_addr,
 		bool (*phys_addr_ok)(struct device *, phys_addr_t, size_t))
 {
-	unsigned long addr;
+	uintptr_t addr;
 	phys_addr_t phys;
 
 	addr = gen_pool_alloc(pool, size);
 	if (!addr)
 		return NULL;
 
-	phys = gen_pool_virt_to_phys(pool, addr);
+	phys = gen_pool_virt_to_phys(pool, __c_ua(addr));
 	if (phys_addr_ok && !phys_addr_ok(dev, phys, size)) {
 		gen_pool_free(pool, addr, size);
 		return NULL;
@@ -299,7 +299,7 @@ bool dma_free_from_pool(struct device *dev, void *start, size_t size)
 	struct gen_pool *pool = NULL;
 
 	while ((pool = dma_guess_pool(pool, 0))) {
-		if (!gen_pool_has_addr(pool, (uintptr_t)start, size))
+		if (!gen_pool_has_addr(pool, __c_pa(start), size))
 			continue;
 		gen_pool_free(pool, (uintptr_t)start, size);
 		return true;

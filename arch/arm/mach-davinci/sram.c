@@ -64,7 +64,7 @@ static int __init sram_init(void)
 		addr = ioremap(phys, len);
 		if (!addr)
 			return -ENOMEM;
-		status = gen_pool_add_virt(sram_pool, (unsigned long) addr,
+		status = gen_pool_add_virt(sram_pool, (uintptr_t) addr,
 					   phys, len, -1);
 		if (status < 0)
 			iounmap(addr);
