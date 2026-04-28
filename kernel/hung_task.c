@@ -137,7 +137,8 @@ static bool task_is_hung(struct task_struct *t, unsigned long timeout)
 static void debug_show_blocker(struct task_struct *task, unsigned long timeout)
 {
 	struct task_struct *g, *t;
-	unsigned long owner, blocker, blocker_type;
+	uintptr_t owner, blocker;
+	unsigned long blocker_type;
 	const char *rwsem_blocked_by, *rwsem_blocked_as;
 
 	RCU_LOCKDEP_WARN(!rcu_read_lock_held(), "No rcu lock held");
