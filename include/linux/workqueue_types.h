@@ -14,7 +14,7 @@ typedef void (*work_func_t)(struct work_struct *work);
 void delayed_work_timer_fn(struct timer_list *t);
 
 struct work_struct {
-	atomic_long_t data;
+	atomic_ptr_t data;
 	struct list_head entry;
 	work_func_t func;
 #ifdef CONFIG_LOCKDEP

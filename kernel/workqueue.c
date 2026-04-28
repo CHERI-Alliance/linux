@@ -615,7 +615,7 @@ static bool work_is_static_object(void *addr)
 {
 	struct work_struct *work = addr;
 
-	return test_bit(WORK_STRUCT_STATIC_BIT, work_data_bits(work));
+	return atomic_ptr_read(&work->data) & WORK_STRUCT_STATIC;
 }
 
 /*
@@ -786,10 +786,10 @@ static unsigned long pool_offq_flags(struct worker_pool *pool)
  * queued anywhere after initialization until it is sync canceled.  pwq is
  * available only while the work item is queued.
  */
-static inline void set_work_data(struct work_struct *work, unsigned long data)
+static inline void set_work_data(struct work_struct *work, uintptr_t data)
 {
 	WARN_ON_ONCE(!work_pending(work));
-	atomic_long_set(&work->data, data | work_static(work));
+	atomic_ptr_set(&work->data, data | work_static(work));
 }
 
 static void set_work_pwq(struct work_struct *work, struct pool_workqueue *pwq,
@@ -802,8 +802,16 @@ static void set_work_pwq(struct work_struct *work, struct pool_workqueue *pwq,
 static void set_work_pool_and_keep_pending(struct work_struct *work,
 					   int pool_id, unsigned long flags)
 {
-	set_work_data(work, ((unsigned long)pool_id << WORK_OFFQ_POOL_SHIFT) |
-		      WORK_STRUCT_PENDING | flags);
+	set_work_data(work, __c_fakeu(((unsigned long)pool_id << WORK_OFFQ_POOL_SHIFT) |
+		      WORK_STRUCT_PENDING | flags));
+}
+
+static inline bool
+test_and_set_work_pending(struct work_struct *work)
+{
+	uintptr_t old = atomic_ptr_fetch_or(WORK_STRUCT_PENDING, &work->data);
+
+	return old & WORK_STRUCT_PENDING;
 }
 
 static void set_work_pool_and_clear_pending(struct work_struct *work,
@@ -816,8 +824,8 @@ static void set_work_pool_and_clear_pending(struct work_struct *work,
 	 * owner.
 	 */
 	smp_wmb();
-	set_work_data(work, ((unsigned long)pool_id << WORK_OFFQ_POOL_SHIFT) |
-		      flags);
+	set_work_data(work, __c_fakeu(((unsigned long)pool_id << WORK_OFFQ_POOL_SHIFT) |
+		      flags));
 	/*
 	 * The following mb guarantees that previous clear of a PENDING bit
 	 * will not be reordered with any speculative LOADS or STORES from
@@ -849,14 +857,14 @@ static void set_work_pool_and_clear_pending(struct work_struct *work,
 	smp_mb();
 }
 
-static inline struct pool_workqueue *work_struct_pwq(unsigned long data)
+static inline struct pool_workqueue *work_struct_pwq(uintptr_t data)
 {
 	return (struct pool_workqueue *)(data & WORK_STRUCT_PWQ_MASK);
 }
 
 static struct pool_workqueue *get_work_pwq(struct work_struct *work)
 {
-	unsigned long data = atomic_long_read(&work->data);
+	uintptr_t data = atomic_ptr_read(&work->data);
 
 	if (data & WORK_STRUCT_PWQ)
 		return work_struct_pwq(data);
@@ -881,15 +889,15 @@ static struct pool_workqueue *get_work_pwq(struct work_struct *work)
  */
 static struct worker_pool *get_work_pool(struct work_struct *work)
 {
-	unsigned long data = atomic_long_read(&work->data);
+	uintptr_t data = atomic_ptr_read(&work->data);
 	int pool_id;
 
 	assert_rcu_or_pool_mutex();
 
-	if (data & WORK_STRUCT_PWQ)
+	if (__c_ua(data) & WORK_STRUCT_PWQ)
 		return work_struct_pwq(data)->pool;
 
-	pool_id = data >> WORK_OFFQ_POOL_SHIFT;
+	pool_id = __c_ua(data) >> WORK_OFFQ_POOL_SHIFT;
 	if (pool_id == WORK_OFFQ_POOL_NONE)
 		return NULL;
 
@@ -1115,7 +1123,7 @@ static struct worker *find_worker_executing_work(struct worker_pool *pool,
 	struct worker *worker;
 
 	hash_for_each_possible(pool->busy_hash, worker, hentry,
-			       (uintptr_t)work)
+			       __c_pa(work))
 		if (worker->current_work == work &&
 		    worker->current_func == work->func)
 			return worker;
@@ -1154,7 +1162,7 @@ static void move_linked_works(struct work_struct *work, struct list_head *head,
 	 */
 	list_for_each_entry_safe_from(work, n, NULL, entry) {
 		list_move_tail(&work->entry, head);
-		if (!(*work_data_bits(work) & WORK_STRUCT_LINKED))
+		if (!(atomic_ptr_read(&work->data) & WORK_STRUCT_LINKED))
 			break;
 	}
 
@@ -1331,7 +1339,7 @@ static struct wci_ent *wci_find_ent(work_func_t func)
 	struct wci_ent *ent;
 
 	hash_for_each_possible_rcu(wci_hash, ent, hash_node,
-				   (uintptr_t)func) {
+				   __c_pa(func)) {
 		if (ent->func == func)
 			return ent;
 	}
@@ -1384,7 +1392,7 @@ restart:
 	ent = &wci_ents[wci_nr_ents++];
 	ent->func = func;
 	atomic64_set(&ent->cnt, 0);
-	hash_add_rcu(wci_hash, &ent->hash_node, (uintptr_t)func);
+	hash_add_rcu(wci_hash, &ent->hash_node, __c_pa(func));
 
 	raw_spin_unlock(&wci_lock);
 
@@ -1692,14 +1700,12 @@ static bool pwq_is_empty(struct pool_workqueue *pwq)
 static void __pwq_activate_work(struct pool_workqueue *pwq,
 				struct work_struct *work)
 {
-	unsigned long *wdb = work_data_bits(work);
-
-	WARN_ON_ONCE(!(*wdb & WORK_STRUCT_INACTIVE));
+	WARN_ON_ONCE(!(atomic_ptr_read(&work->data) & WORK_STRUCT_INACTIVE));
 	trace_workqueue_activate_work(work);
 	if (list_empty(&pwq->pool->worklist))
 		pwq->pool->last_progress_ts = jiffies;
 	move_linked_works(work, &pwq->pool->worklist, NULL);
-	__clear_bit(WORK_STRUCT_INACTIVE_BIT, wdb);
+	atomic_ptr_and(~(unsigned long)WORK_STRUCT_INACTIVE, &work->data);
 }
 
 static bool tryinc_node_nr_active(struct wq_node_nr_active *nna)
@@ -2014,11 +2020,11 @@ static void pwq_dec_nr_active(struct pool_workqueue *pwq)
  * CONTEXT:
  * raw_spin_lock_irq(pool->lock).
  */
-static void pwq_dec_nr_in_flight(struct pool_workqueue *pwq, unsigned long work_data)
+static void pwq_dec_nr_in_flight(struct pool_workqueue *pwq, uintptr_t work_data)
 {
-	int color = get_work_color(work_data);
+	int color = get_work_color(__c_ua(work_data));
 
-	if (!(work_data & WORK_STRUCT_INACTIVE))
+	if (!(__c_ua(work_data) & WORK_STRUCT_INACTIVE))
 		pwq_dec_nr_active(pwq);
 
 	pwq->nr_in_flight[color]--;
@@ -2094,7 +2100,7 @@ static int try_to_grab_pending(struct work_struct *work, u32 cflags,
 	}
 
 	/* try to claim PENDING the normal way */
-	if (!test_and_set_bit(WORK_STRUCT_PENDING_BIT, work_data_bits(work)))
+	if (!test_and_set_work_pending(work))
 		return 0;
 
 	rcu_read_lock();
@@ -2117,7 +2123,7 @@ static int try_to_grab_pending(struct work_struct *work, u32 cflags,
 	 */
 	pwq = get_work_pwq(work);
 	if (pwq && pwq->pool == pool) {
-		unsigned long work_data = *work_data_bits(work);
+		uintptr_t work_data = atomic_ptr_read(&work->data);
 
 		debug_work_deactivate(work);
 
@@ -2377,14 +2383,14 @@ out:
 
 static bool clear_pending_if_disabled(struct work_struct *work)
 {
-	unsigned long data = *work_data_bits(work);
+	uintptr_t data = atomic_ptr_read(&work->data);
 	struct work_offq_data offqd;
 
 	if (likely((data & WORK_STRUCT_PWQ) ||
 		   !(data & WORK_OFFQ_DISABLE_MASK)))
 		return false;
 
-	work_offqd_unpack(&offqd, data);
+	work_offqd_unpack(&offqd, __c_ua(data));
 	set_work_pool_and_clear_pending(work, offqd.pool_id,
 					work_offqd_pack_flags(&offqd));
 	return true;
@@ -2412,7 +2418,7 @@ bool queue_work_on(int cpu, struct workqueue_struct *wq,
 
 	local_irq_save(irq_flags);
 
-	if (!test_and_set_bit(WORK_STRUCT_PENDING_BIT, work_data_bits(work)) &&
+	if (!test_and_set_work_pending(work) &&
 	    !clear_pending_if_disabled(work)) {
 		__queue_work(cpu, wq, work);
 		ret = true;
@@ -2491,7 +2497,7 @@ bool queue_work_node(int node, struct workqueue_struct *wq,
 
 	local_irq_save(irq_flags);
 
-	if (!test_and_set_bit(WORK_STRUCT_PENDING_BIT, work_data_bits(work)) &&
+	if (!test_and_set_work_pending(work) &&
 	    !clear_pending_if_disabled(work)) {
 		int cpu = select_numa_node_cpu(node);
 
@@ -2581,7 +2587,7 @@ bool queue_delayed_work_on(int cpu, struct workqueue_struct *wq,
 	/* read the comment in __queue_work() */
 	local_irq_save(irq_flags);
 
-	if (!test_and_set_bit(WORK_STRUCT_PENDING_BIT, work_data_bits(work)) &&
+	if (!test_and_set_work_pending(work) &&
 	    !clear_pending_if_disabled(work)) {
 		__queue_delayed_work(cpu, wq, dwork, delay);
 		ret = true;
@@ -2654,7 +2660,7 @@ bool queue_rcu_work(struct workqueue_struct *wq, struct rcu_work *rwork)
 	 * rcu_work can't be canceled or disabled. Warn if the user reached
 	 * inside @rwork and disabled the inner work.
 	 */
-	if (!test_and_set_bit(WORK_STRUCT_PENDING_BIT, work_data_bits(work)) &&
+	if (!test_and_set_work_pending(work) &&
 	    !WARN_ON_ONCE(clear_pending_if_disabled(work))) {
 		rwork->wq = wq;
 		call_rcu_hurry(&rwork->rcu, rcu_work_rcufn);
@@ -3189,7 +3195,7 @@ __acquires(&pool->lock)
 {
 	struct pool_workqueue *pwq = get_work_pwq(work);
 	struct worker_pool *pool = worker->pool;
-	unsigned long work_data;
+	uintptr_t work_data;
 	int lockdep_start_depth, rcu_start_depth;
 	bool bh_draining = pool->flags & POOL_BH_DRAINING;
 #ifdef CONFIG_LOCKDEP
@@ -3210,15 +3216,15 @@ __acquires(&pool->lock)
 
 	/* claim and dequeue */
 	debug_work_deactivate(work);
-	hash_add(pool->busy_hash, &worker->hentry, (uintptr_t)work);
+	hash_add(pool->busy_hash, &worker->hentry, __c_pa(work));
 	worker->current_work = work;
 	worker->current_func = work->func;
 	worker->current_pwq = pwq;
 	if (worker->task)
 		worker->current_at = worker->task->se.sum_exec_runtime;
 	worker->current_start = jiffies;
-	work_data = *work_data_bits(work);
-	worker->current_color = get_work_color(work_data);
+	work_data = atomic_ptr_read(&work->data);
+	worker->current_color = get_work_color(__c_ua(work_data));
 
 	/*
 	 * Record wq name for cmdline and debug reporting, may get
@@ -3874,7 +3880,7 @@ static void insert_wq_barrier(struct pool_workqueue *pwq,
 	 */
 	INIT_WORK_ONSTACK_KEY(&barr->work, wq_barrier_func,
 			      (pwq->wq->flags & WQ_BH) ? &bh_key : &thr_key);
-	__set_bit(WORK_STRUCT_PENDING_BIT, work_data_bits(&barr->work));
+	atomic_ptr_or(WORK_STRUCT_PENDING, &barr->work.data);
 
 	init_completion_map(&barr->done, &target->lockdep_map);
 
@@ -3891,13 +3897,13 @@ static void insert_wq_barrier(struct pool_workqueue *pwq,
 		head = worker->scheduled.next;
 		work_color = worker->current_color;
 	} else {
-		unsigned long *bits = work_data_bits(target);
+		unsigned long bits = __c_ua(atomic_ptr_read(&target->data));
 
 		head = target->entry.next;
 		/* there can already be other linked works, inherit and set */
-		work_flags |= *bits & WORK_STRUCT_LINKED;
-		work_color = get_work_color(*bits);
-		__set_bit(WORK_STRUCT_LINKED_BIT, bits);
+		work_flags |= bits & WORK_STRUCT_LINKED;
+		work_color = get_work_color(bits);
+		atomic_ptr_or(WORK_STRUCT_LINKED, &target->data);
 	}
 
 	pwq->nr_in_flight[work_color]++;
@@ -4312,7 +4318,7 @@ static bool __flush_work(struct work_struct *work, bool from_cancel)
 	 * BH context and thus can be busy-waited.
 	 */
 	if (from_cancel) {
-		unsigned long data = *work_data_bits(work);
+		unsigned long data = __c_ua(atomic_ptr_read(&work->data));
 
 		if (!WARN_ON_ONCE(data & WORK_STRUCT_PWQ) &&
 		    (data & WORK_OFFQ_BH)) {
@@ -4394,7 +4400,7 @@ EXPORT_SYMBOL(flush_delayed_work);
  */
 bool flush_rcu_work(struct rcu_work *rwork)
 {
-	if (test_bit(WORK_STRUCT_PENDING_BIT, work_data_bits(&rwork->work))) {
+	if (work_pending(&rwork->work)) {
 		rcu_barrier();
 		flush_work(&rwork->work);
 		return true;
@@ -4430,7 +4436,7 @@ static bool __cancel_work(struct work_struct *work, u32 cflags)
 
 	ret = work_grab_pending(work, cflags, &irq_flags);
 
-	work_offqd_unpack(&offqd, *work_data_bits(work));
+	work_offqd_unpack(&offqd, __c_ua(atomic_ptr_read(&work->data)));
 
 	if (cflags & WORK_CANCEL_DISABLE)
 		work_offqd_disable(&offqd);
@@ -4447,7 +4453,7 @@ static bool __cancel_work_sync(struct work_struct *work, u32 cflags)
 
 	ret = __cancel_work(work, cflags | WORK_CANCEL_DISABLE);
 
-	if (*work_data_bits(work) & WORK_OFFQ_BH)
+	if (atomic_ptr_read(&work->data) & WORK_OFFQ_BH)
 		WARN_ON_ONCE(in_hardirq());
 	else
 		might_sleep();
@@ -4589,7 +4595,7 @@ bool enable_work(struct work_struct *work)
 
 	work_grab_pending(work, 0, &irq_flags);
 
-	work_offqd_unpack(&offqd, *work_data_bits(work));
+	work_offqd_unpack(&offqd, __c_ua(atomic_ptr_read(&work->data)));
 	work_offqd_enable(&offqd);
 	set_work_pool_and_clear_pending(work, offqd.pool_id,
 					work_offqd_pack_flags(&offqd));
@@ -5241,7 +5247,7 @@ static void init_pwq(struct pool_workqueue *pwq, struct workqueue_struct *wq,
 	 * surprise for kernel debugging tools and reviewers.
 	 */
 	INIT_WORK(&pwq->mayday_cursor, mayday_cursor_func);
-	atomic_long_set(&pwq->mayday_cursor.data, (uintptr_t)pwq |
+	atomic_ptr_set(&pwq->mayday_cursor.data, (uintptr_t)pwq |
 			WORK_STRUCT_PENDING | WORK_STRUCT_PWQ | WORK_STRUCT_INACTIVE);
 }
 
@@ -6315,7 +6321,7 @@ static void pr_cont_work_flush(bool comma, work_func_t func, struct pr_cont_work
 		pr_cont("%s %ld*%ps", pcwsp->comma ? "," : "", pcwsp->ctr, pcwsp->func);
 	pcwsp->ctr = 0;
 out_record:
-	if ((long)func == -1L)
+	if ((long)__c_pa(func) == -1L)
 		return;
 	pcwsp->comma = comma;
 	pcwsp->func = func;
@@ -6397,7 +6403,7 @@ static void show_pwq(struct pool_workqueue *pwq)
 				continue;
 
 			pr_cont_work(comma, work, &pcws);
-			comma = !(*work_data_bits(work) & WORK_STRUCT_LINKED);
+			comma = !(atomic_ptr_read(&work->data) & WORK_STRUCT_LINKED);
 		}
 		pr_cont_work_flush(comma, (work_func_t)-1L, &pcws);
 		pr_cont("\n");
@@ -6409,7 +6415,7 @@ static void show_pwq(struct pool_workqueue *pwq)
 		pr_info("    inactive:");
 		list_for_each_entry(work, &pwq->inactive_works, entry) {
 			pr_cont_work(comma, work, &pcws);
-			comma = !(*work_data_bits(work) & WORK_STRUCT_LINKED);
+			comma = !(atomic_ptr_read(&work->data) & WORK_STRUCT_LINKED);
 		}
 		pr_cont_work_flush(comma, (work_func_t)-1L, &pcws);
 		pr_cont("\n");
