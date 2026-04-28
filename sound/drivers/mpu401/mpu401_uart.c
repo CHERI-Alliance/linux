@@ -42,25 +42,25 @@ static void snd_mpu401_uart_output_write(struct snd_mpu401 * mpu);
 
 /* Build in lowlevel io */
 static void mpu401_write_port(struct snd_mpu401 *mpu, unsigned char data,
-			      unsigned long addr)
+			      uintptr_t addr)
 {
 	outb(data, addr);
 }
 
 static unsigned char mpu401_read_port(struct snd_mpu401 *mpu,
-				      unsigned long addr)
+				      uintptr_t addr)
 {
 	return inb(addr);
 }
 
 static void mpu401_write_mmio(struct snd_mpu401 *mpu, unsigned char data,
-			      unsigned long addr)
+			      uintptr_t addr)
 {
 	writeb(data, (void __iomem *)addr);
 }
 
 static unsigned char mpu401_read_mmio(struct snd_mpu401 *mpu,
-				      unsigned long addr)
+				      uintptr_t addr)
 {
 	return readb((void __iomem *)addr);
 }
@@ -233,7 +233,7 @@ static int snd_mpu401_uart_cmd(struct snd_mpu401 * mpu, unsigned char cmd,
 	if (!ok) {
 		dev_err(mpu->rmidi->dev,
 			"cmd: 0x%x failed at 0x%lx (status = 0x%x, data = 0x%x)\n",
-			cmd, mpu->port,
+			cmd, (unsigned long)mpu->port,
 			mpu->read(mpu, MPU401C(mpu)),
 			mpu->read(mpu, MPU401D(mpu)));
 		return 1;
@@ -498,7 +498,7 @@ static void snd_mpu401_uart_free(struct snd_rawmidi *rmidi)
  */
 int snd_mpu401_uart_new(struct snd_card *card, int device,
 			unsigned short hardware,
-			unsigned long port,
+			uintptr_t port,
 			unsigned int info_flags,
 			int irq,
 			struct snd_rawmidi ** rrawmidi)
@@ -533,11 +533,11 @@ int snd_mpu401_uart_new(struct snd_card *card, int device,
 	mpu->rmidi = rmidi;
 	if (! (info_flags & MPU401_INFO_INTEGRATED)) {
 		int res_size = hardware == MPU401_HW_PC98II ? 4 : 2;
-		mpu->res = request_region(port, res_size, "MPU401 UART");
+		mpu->res = request_region(__c_ua(port), res_size, "MPU401 UART");
 		if (!mpu->res) {
 			dev_err(rmidi->dev,
 				"mpu401_uart: unable to grab port 0x%lx size %d\n",
-				port, res_size);
+				(unsigned long)port, res_size);
 			err = -EBUSY;
 			goto free_device;
 		}
