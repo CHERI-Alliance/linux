@@ -561,6 +561,50 @@ TEST(test_brk_check)
 	EXPECT_EQ(retval, -ENOSYS);
 }
 
+/* test to verify the CHERI unrepresentable address/length  */
+TEST(test_cheri_unrepresentability)
+{
+	void *ptr1, *ptr2;
+	int retval;
+	int count = 0;
+	int prot = PROT_READ | PROT_WRITE;
+	int flags = MAP_PRIVATE | MAP_ANONYMOUS;
+	size_t len, representable_base;
+
+	/* Use pageshift 16 for 64K pages so as to use as mmap fixed address */
+	unsigned long pageshift = 16;
+
+	/* Generate an unrepresentable length/address */
+	do {
+		len = (1 << (pageshift++)) + ((count++ % pagesize) * pagesize);
+	} while (len == cheri_representable_length(len));
+
+	/* Create a memory mapping with reserved memory at the end */
+	ptr1 = mmap(NULL, len, prot, flags, -1, 0);
+	ASSERT_FALSE(IS_ERR_VALUE(ptr1));
+	EXPECT_EQ(1, cheri_tag_get(ptr1));
+	EXPECT_EQ(cheri_length_get(ptr1), cheri_representable_length(len));
+	representable_base = (cheri_address_get(ptr1) & cheri_representable_alignment_mask(len));
+	EXPECT_EQ(representable_base, cheri_base_get(ptr1));
+	EXPECT_EQ(0, probe_mem_range(ptr1, len, PROBE_MODE_TOUCH | PROBE_MODE_VERIFY));
+
+	/* Create a memory mapping with reserved memory at the front */
+	ptr2 = mmap((void *)(uintcap_t)len, len, prot, flags, -1, 0);
+	ASSERT_FALSE(IS_ERR_VALUE(ptr2));
+	EXPECT_EQ(1, cheri_tag_get(ptr2));
+	EXPECT_EQ(cheri_length_get(ptr2), cheri_representable_length(len));
+	representable_base = (cheri_address_get(ptr2) & cheri_representable_alignment_mask(len));
+	EXPECT_EQ(representable_base, cheri_base_get(ptr2));
+	ASSERT_EQ(len, cheri_address_get(ptr2));
+	EXPECT_EQ(0, probe_mem_range(ptr2, len, PROBE_MODE_TOUCH | PROBE_MODE_VERIFY));
+
+	retval = munmap(ptr1, len);
+	ASSERT_EQ(retval, 0);
+
+	retval = munmap(ptr2, len);
+	ASSERT_EQ(retval, 0);
+}
+
 int main(int argc __maybe_unused, char **argv __maybe_unused, char **envp __maybe_unused,
 	 struct morello_auxv *auxv)
 {
@@ -575,5 +619,6 @@ int main(int argc __maybe_unused, char **argv __maybe_unused, char **envp __mayb
 	test_check_mremap_reservation();
 	test_permissions();
 	test_brk_check();
+	test_cheri_unrepresentability();
 	return 0;
 }
