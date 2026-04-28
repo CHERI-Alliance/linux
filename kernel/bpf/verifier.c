@@ -24264,7 +24264,7 @@ patch_call_imm:
 				     func_id_name(insn->imm), insn->imm);
 			return -EFAULT;
 		}
-		insn->imm = fn->func - __bpf_call_base;
+		insn->imm = __c_pa(fn->func) - __c_pa(__bpf_call_base);
 next_insn:
 		if (subprogs[cur_subprog + 1].start == i + delta + 1) {
 			subprogs[cur_subprog].stack_depth += stack_depth_extra;

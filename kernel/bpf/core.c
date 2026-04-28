@@ -1280,7 +1280,7 @@ int bpf_jit_get_func_addr(const struct bpf_prog *prog,
 		addr = (u8 *)__bpf_call_base + imm;
 	}
 
-	*func_addr = (unsigned long)addr;
+	*func_addr = __c_pa(addr);
 	return 0;
 }
 
@@ -2096,15 +2096,14 @@ select_insn:
 		 * preserves BPF_R6-BPF_R9, and stores return value
 		 * into BPF_R0.
 		 */
-		BPF_R0 = (__bpf_call_base + insn->imm)(BPF_R1, BPF_R2, BPF_R3,
-						       BPF_R4, BPF_R5);
+		BPF_R0 = BPF_FUNC_CALL(insn->imm)(BPF_R1, BPF_R2, BPF_R3,
+					     BPF_R4, BPF_R5);
 		CONT;
 
 	JMP_CALL_ARGS:
-		BPF_R0 = (__bpf_call_base_args + insn->imm)(BPF_R1, BPF_R2,
-							    BPF_R3, BPF_R4,
-							    BPF_R5,
-							    insn + insn->off + 1);
+		BPF_R0 = BPF_FUNC_CALL_ARGS(insn->imm)(BPF_R1, BPF_R2, BPF_R3,
+						  BPF_R4, BPF_R5,
+						  insn + insn->off + 1);
 		CONT;
 
 	JMP_TAIL_CALL: {
@@ -2426,8 +2425,8 @@ void bpf_patch_call_args(struct bpf_insn *insn, u32 stack_depth)
 {
 	stack_depth = max_t(u32, stack_depth, 1);
 	insn->off = (s16) insn->imm;
-	insn->imm = interpreters_args[(round_up(stack_depth, 32) / 32) - 1] -
-		__bpf_call_base_args;
+	insn->imm = __c_pa(interpreters_args[(round_up(stack_depth, 32) / 32) - 1]) -
+		__c_pa(__bpf_call_base);
 	insn->code = BPF_JMP | BPF_CALL_ARGS;
 }
 #endif
