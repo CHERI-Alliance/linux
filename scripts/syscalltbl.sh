@@ -52,9 +52,21 @@ outfile="$2"
 
 nxt=0
 
+cat <<EOF > "${outfile}"
+#ifndef __SYSCALL_NORETURN
+#define __SYSCALL_NORETURN __SYSCALL
+#endif
+#ifndef __SYSCALL_RETPTR
+#define __SYSCALL_RETPTR __SYSCALL
+#endif
+#ifndef __SYSCALL_WITH_COMPAT_RETPTR
+#define __SYSCALL_WITH_COMPAT_RETPTR __SYSCALL_WITH_COMPAT
+#endif
+EOF
+
 grep -E "^[0-9]+[[:space:]]+$abis" "$infile" | {
 
-	while read nr abi name native compat noreturn; do
+	while read nr abi name native compat rettype; do
 
 		if [ $nxt -gt $nr ]; then
 			echo "error: $infile: syscall table is not sorted or duplicates the same syscall number" >&2
@@ -70,15 +82,22 @@ grep -E "^[0-9]+[[:space:]]+$abis" "$infile" | {
 			unset compat
 		fi
 
-		if [ -n "$noreturn" ]; then
-			if [ "$noreturn" != "noreturn" ]; then
-				echo "error: $infile: invalid string \"$noreturn\" in 'noreturn' column"
-				exit 1
-			fi
-			if [ -n "$compat" ]; then
-				echo "__SYSCALL_COMPAT_NORETURN($nr, $native, $compat)"
+		if [ -n "$rettype" ]; then
+			if [ "$rettype" = "noreturn" ]; then
+				if [ -n "$compat" ]; then
+					echo "__SYSCALL_COMPAT_NORETURN($nr, $native, $compat)"
+				else
+					echo "__SYSCALL_NORETURN($nr, $native)"
+				fi
+			elif [ "$rettype" = "retptr" ]; then
+				if [ -n "$compat" ]; then
+					echo "__SYSCALL_WITH_COMPAT_RETPTR($nr, $native, $compat)"
+				else
+					echo "__SYSCALL_RETPTR($nr, $native)"
+				fi
 			else
-				echo "__SYSCALL_NORETURN($nr, $native)"
+				echo "error: $infile: invalid string \"$rettype\" in 'rettype' column"
+				exit 1
 			fi
 		elif [ -n "$compat" ]; then
 			echo "__SYSCALL_WITH_COMPAT($nr, $native, $compat)"
@@ -89,4 +108,4 @@ grep -E "^[0-9]+[[:space:]]+$abis" "$infile" | {
 		fi
 		nxt=$((nr + 1))
 	done
-} > "$outfile"
+} >> "$outfile"
