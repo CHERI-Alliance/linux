@@ -73,7 +73,7 @@ enum kgdb_bpstate {
 };
 
 struct kgdb_bkpt {
-	unsigned long		bpt_addr;
+	uintptr_t		bpt_addr;
 	unsigned char		saved_instr[BREAK_INSTR_SIZE];
 	enum kgdb_bptype	type;
 	enum kgdb_bpstate	state;

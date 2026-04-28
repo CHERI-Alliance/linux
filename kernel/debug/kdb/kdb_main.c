@@ -1179,7 +1179,7 @@ static int kdb_local(kdb_reason_t reason, int error, struct pt_regs *regs,
 			kdb_printf("on processor %d ", raw_smp_processor_id());
 #endif
 			kdb_printf("due to Debug @ " kdb_machreg_fmt "\n",
-				   instruction_pointer(regs));
+				   (unsigned long)instruction_pointer(regs));
 			break;
 		case KDB_DB_SS:
 			break;
@@ -1212,7 +1212,7 @@ static int kdb_local(kdb_reason_t reason, int error, struct pt_regs *regs,
 	case KDB_REASON_OOPS:
 		kdb_printf("Oops: %s\n", kdb_diemsg);
 		kdb_printf("due to oops @ " kdb_machreg_fmt "\n",
-			   instruction_pointer(regs));
+			   (unsigned long)instruction_pointer(regs));
 		kdb_dumpregs(regs);
 		break;
 	case KDB_REASON_SYSTEM_NMI:
@@ -1221,13 +1221,13 @@ static int kdb_local(kdb_reason_t reason, int error, struct pt_regs *regs,
 	case KDB_REASON_NMI:
 		kdb_printf("due to NonMaskable Interrupt @ "
 			   kdb_machreg_fmt "\n",
-			   instruction_pointer(regs));
+			   (unsigned long)instruction_pointer(regs));
 		break;
 	case KDB_REASON_SSTEP:
 	case KDB_REASON_BREAK:
 		kdb_printf("due to %s @ " kdb_machreg_fmt "\n",
 			   reason == KDB_REASON_BREAK ?
-			   "Breakpoint" : "SS trap", instruction_pointer(regs));
+			   "Breakpoint" : "SS trap", (unsigned long)instruction_pointer(regs));
 		/*
 		 * Determine if this breakpoint is one that we
 		 * are interested in.
@@ -1241,7 +1241,7 @@ static int kdb_local(kdb_reason_t reason, int error, struct pt_regs *regs,
 		break;
 	case KDB_REASON_RECURSE:
 		kdb_printf("due to Recursion @ " kdb_machreg_fmt "\n",
-			   instruction_pointer(regs));
+			   (unsigned long)instruction_pointer(regs));
 		break;
 	default:
 		kdb_printf("kdb: unexpected reason code: %d\n", reason);
@@ -1971,7 +1971,7 @@ static int kdb_ef(int argc, const char **argv)
 	diag = kdbgetaddrarg(argc, argv, &nextarg, &addr, &offset, NULL);
 	if (diag)
 		return diag;
-	show_regs((struct pt_regs *)addr);
+	show_regs((struct pt_regs *)cheri_make_kernel_data_cap(addr, sizeof(struct pt_regs)));
 	return 0;
 }
 

@@ -293,7 +293,8 @@ char *kdb_strdup_dequote(const char *str, gfp_t type)
  */
 int kdb_getarea_size(void *res, unsigned long addr, size_t size)
 {
-	int ret = copy_from_kernel_nofault((char *)res, (char *)addr, size);
+	int ret = copy_from_kernel_nofault((char *)res,
+			cheri_make_kernel_data_cap(addr, size), size);
 	if (ret) {
 		if (!KDB_STATE(SUPPRESS)) {
 			kdb_func_printf("Bad address 0x%lx\n", addr);
@@ -318,7 +319,9 @@ int kdb_getarea_size(void *res, unsigned long addr, size_t size)
  */
 int kdb_putarea_size(unsigned long addr, void *res, size_t size)
 {
-	int ret = copy_to_kernel_nofault((char *)addr, (char *)res, size);
+	int ret = copy_to_kernel_nofault(
+			cheri_make_kernel_data_cap(addr, size),
+			(char *)res, size);
 	if (ret) {
 		if (!KDB_STATE(SUPPRESS)) {
 			kdb_func_printf("Bad address 0x%lx\n", addr);

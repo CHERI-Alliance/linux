@@ -63,6 +63,14 @@
 
 #endif
 
+#ifdef CONFIG_CHERI_KERNEL
+#define kdb_machreg_fmt_ptr	"%#p"
+#define kdb_reg_to_ptr(X)	((void *)(X))
+#else
+#define kdb_machreg_fmt_ptr	kdb_machreg_fmt
+#define kdb_reg_to_ptr(X)	(X)
+#endif
+
 /*
  * KDB_MAXBPT describes the total number of breakpoints
  * supported by this architecture.
