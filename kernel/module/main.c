@@ -497,7 +497,7 @@ static void percpu_modcopy(struct module *mod,
 		memcpy(per_cpu_ptr(mod->percpu, cpu), from, size);
 }
 
-bool __is_module_percpu_address(unsigned long addr, unsigned long *can_addr)
+bool __is_module_percpu_address(__ptraddr_t addr, unsigned long *can_addr)
 {
 	struct module *mod;
 	unsigned int cpu;
@@ -534,7 +534,7 @@ bool __is_module_percpu_address(unsigned long addr, unsigned long *can_addr)
  *
  * Return: %true if @addr is from module static percpu area
  */
-bool is_module_percpu_address(unsigned long addr)
+bool is_module_percpu_address(__ptraddr_t addr)
 {
 	return __is_module_percpu_address(addr, NULL);
 }
@@ -565,12 +565,12 @@ static inline void percpu_modcopy(struct module *mod,
 	/* pcpusec should be 0, and size of that section should be 0. */
 	BUG_ON(size != 0);
 }
-bool is_module_percpu_address(unsigned long addr)
+bool is_module_percpu_address(__ptraddr_t addr)
 {
 	return false;
 }
 
-bool __is_module_percpu_address(unsigned long addr, unsigned long *can_addr)
+bool __is_module_percpu_address(__ptraddr_t addr, unsigned long *can_addr)
 {
 	return false;
 }
@@ -3807,7 +3807,7 @@ const struct exception_table_entry *search_module_extables(unsigned long addr)
  * See is_module_text_address() if you simply want to see if the address
  * is code (not data).
  */
-bool is_module_address(unsigned long addr)
+bool is_module_address(__ptraddr_t addr)
 {
 	guard(rcu)();
 	return __module_address(addr) != NULL;
@@ -3820,7 +3820,7 @@ bool is_module_address(unsigned long addr)
  * Must be called within RCU read section or module mutex held so that
  * module doesn't get freed during this.
  */
-struct module *__module_address(unsigned long addr)
+struct module *__module_address(__ptraddr_t addr)
 {
 	struct module *mod;
 
@@ -3852,7 +3852,7 @@ lookup:
  * anywhere in a module.  See kernel_text_address() for testing if an
  * address corresponds to kernel or module code.
  */
-bool is_module_text_address(unsigned long addr)
+bool is_module_text_address(__ptraddr_t addr)
 {
 	guard(rcu)();
 	return __module_text_address(addr) != NULL;
@@ -3878,7 +3878,7 @@ void module_for_each_mod(int(*func)(struct module *mod, void *data), void *data)
  * Must be called within RCU read section or module mutex held so that
  * module doesn't get freed during this.
  */
-struct module *__module_text_address(unsigned long addr)
+struct module *__module_text_address(__ptraddr_t addr)
 {
 	struct module *mod = __module_address(addr);
 	if (mod) {

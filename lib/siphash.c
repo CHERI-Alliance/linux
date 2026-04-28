@@ -113,7 +113,7 @@ EXPORT_SYMBOL(__siphash_unaligned);
  * @first: first u64
  * @key: the siphash key
  */
-u64 siphash_1u64(const u64 first, const siphash_key_t *key)
+u64 siphash_1u64(const __ptraddr64_t first, const siphash_key_t *key)
 {
 	PREAMBLE(8)
 	v3 ^= first;
@@ -130,7 +130,7 @@ EXPORT_SYMBOL(siphash_1u64);
  * @second: second u64
  * @key: the siphash key
  */
-u64 siphash_2u64(const u64 first, const u64 second, const siphash_key_t *key)
+u64 siphash_2u64(const __ptraddr64_t first, const __ptraddr64_t second, const siphash_key_t *key)
 {
 	PREAMBLE(16)
 	v3 ^= first;
@@ -152,7 +152,7 @@ EXPORT_SYMBOL(siphash_2u64);
  * @third: third u64
  * @key: the siphash key
  */
-u64 siphash_3u64(const u64 first, const u64 second, const u64 third,
+u64 siphash_3u64(const __ptraddr64_t first, const __ptraddr64_t second, const __ptraddr64_t third,
 		 const siphash_key_t *key)
 {
 	PREAMBLE(24)
@@ -180,8 +180,8 @@ EXPORT_SYMBOL(siphash_3u64);
  * @forth: forth u64
  * @key: the siphash key
  */
-u64 siphash_4u64(const u64 first, const u64 second, const u64 third,
-		 const u64 forth, const siphash_key_t *key)
+u64 siphash_4u64(const __ptraddr64_t first, const __ptraddr64_t second, const __ptraddr64_t third,
+		 const __ptraddr64_t forth, const siphash_key_t *key)
 {
 	PREAMBLE(32)
 	v3 ^= first;

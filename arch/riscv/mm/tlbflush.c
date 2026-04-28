@@ -35,7 +35,7 @@ static inline void local_sinval_vma(unsigned long vma, unsigned long asid)
  */
 unsigned long tlb_flush_all_threshold __read_mostly = 64;
 
-static void local_flush_tlb_range_threshold_asid(unsigned long start,
+static void local_flush_tlb_range_threshold_asid(__ptraddr_t start,
 						 unsigned long size,
 						 unsigned long stride,
 						 unsigned long asid)
@@ -64,7 +64,7 @@ static void local_flush_tlb_range_threshold_asid(unsigned long start,
 	}
 }
 
-static inline void local_flush_tlb_range_asid(unsigned long start,
+static inline void local_flush_tlb_range_asid(__ptraddr_t start,
 		unsigned long size, unsigned long stride, unsigned long asid)
 {
 	if (size <= stride)
@@ -76,7 +76,7 @@ static inline void local_flush_tlb_range_asid(unsigned long start,
 }
 
 /* Flush a range of kernel pages without broadcasting */
-void local_flush_tlb_kernel_range(unsigned long start, unsigned long end)
+void local_flush_tlb_kernel_range(__ptraddr_t start, __ptraddr_t end)
 {
 	local_flush_tlb_range_asid(start, end - start, PAGE_SIZE, FLUSH_TLB_NO_ASID);
 }
@@ -117,7 +117,7 @@ static inline unsigned long get_mm_asid(struct mm_struct *mm)
 
 static void __flush_tlb_range(struct mm_struct *mm,
 			      const struct cpumask *cmask,
-			      unsigned long start, unsigned long size,
+			      __ptraddr_t start, unsigned long size,
 			      unsigned long stride)
 {
 	unsigned long asid = get_mm_asid(mm);
@@ -155,20 +155,20 @@ void flush_tlb_mm(struct mm_struct *mm)
 }
 
 void flush_tlb_mm_range(struct mm_struct *mm,
-			unsigned long start, unsigned long end,
+			__ptraddr_t start, __ptraddr_t end,
 			unsigned int page_size)
 {
 	__flush_tlb_range(mm, mm_cpumask(mm), start, end - start, page_size);
 }
 
-void flush_tlb_page(struct vm_area_struct *vma, unsigned long addr)
+void flush_tlb_page(struct vm_area_struct *vma, __ptraddr_t addr)
 {
 	__flush_tlb_range(vma->vm_mm, mm_cpumask(vma->vm_mm),
 			  addr, PAGE_SIZE, PAGE_SIZE);
 }
 
-void flush_tlb_range(struct vm_area_struct *vma, unsigned long start,
-		     unsigned long end)
+void flush_tlb_range(struct vm_area_struct *vma, __ptraddr_t start,
+		     __ptraddr_t end)
 {
 	unsigned long stride_size;
 
@@ -200,15 +200,15 @@ void flush_tlb_range(struct vm_area_struct *vma, unsigned long start,
 			  start, end - start, stride_size);
 }
 
-void flush_tlb_kernel_range(unsigned long start, unsigned long end)
+void flush_tlb_kernel_range(__ptraddr_t start, __ptraddr_t end)
 {
 	__flush_tlb_range(NULL, cpu_online_mask,
 			  start, end - start, PAGE_SIZE);
 }
 
 #ifdef CONFIG_TRANSPARENT_HUGEPAGE
-void flush_pmd_tlb_range(struct vm_area_struct *vma, unsigned long start,
-			unsigned long end)
+void flush_pmd_tlb_range(struct vm_area_struct *vma, __ptraddr_t start,
+			__ptraddr_t end)
 {
 	__flush_tlb_range(vma->vm_mm, mm_cpumask(vma->vm_mm),
 			  start, end - start, PMD_SIZE);
@@ -228,7 +228,7 @@ bool arch_tlbbatch_should_defer(struct mm_struct *mm)
 }
 
 void arch_tlbbatch_add_pending(struct arch_tlbflush_unmap_batch *batch,
-		struct mm_struct *mm, unsigned long start, unsigned long end)
+		struct mm_struct *mm, __ptraddr_t start, __ptraddr_t end)
 {
 	cpumask_or(&batch->cpumask, &batch->cpumask, mm_cpumask(mm));
 	mmu_notifier_arch_invalidate_secondary_tlbs(mm, start, end);

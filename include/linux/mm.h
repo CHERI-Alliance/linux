@@ -2898,7 +2898,7 @@ extern vm_fault_t handle_mm_fault(struct vm_area_struct *vma,
 				  unsigned long address, unsigned int flags,
 				  struct pt_regs *regs);
 extern int fixup_user_fault(struct mm_struct *mm,
-			    unsigned long address, unsigned int fault_flags,
+			    __ptraddr_t address, unsigned int fault_flags,
 			    bool *unlocked);
 void unmap_mapping_pages(struct address_space *mapping,
 		pgoff_t start, pgoff_t nr, bool even_cows);
@@ -2913,7 +2913,7 @@ static inline vm_fault_t handle_mm_fault(struct vm_area_struct *vma,
 	BUG();
 	return VM_FAULT_SIGBUS;
 }
-static inline int fixup_user_fault(struct mm_struct *mm, unsigned long address,
+static inline int fixup_user_fault(struct mm_struct *mm, __ptraddr_t address,
 		unsigned int fault_flags, bool *unlocked)
 {
 	/* should never happen if there's no MMU */

@@ -126,8 +126,8 @@ extern int __init pcpu_page_first_chunk(size_t reserved_size,
 				pcpu_fc_cpu_to_node_fn_t cpu_to_nd_fn);
 #endif
 
-extern bool __is_kernel_percpu_address(unsigned long addr, unsigned long *can_addr);
-extern bool is_kernel_percpu_address(unsigned long addr);
+extern bool __is_kernel_percpu_address(__ptraddr_t addr, __ptraddr_t *can_addr);
+extern bool is_kernel_percpu_address(__ptraddr_t addr);
 
 #if !defined(CONFIG_SMP) || !defined(CONFIG_HAVE_SETUP_PER_CPU_AREA)
 extern void __init setup_per_cpu_areas(void);

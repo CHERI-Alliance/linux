@@ -1562,7 +1562,7 @@ static bool vma_permits_fault(struct vm_area_struct *vma,
  * same semantics wrt the @mm->mmap_lock as does filemap_fault().
  */
 int fixup_user_fault(struct mm_struct *mm,
-		     unsigned long address, unsigned int fault_flags,
+		     __ptraddr_t address, unsigned int fault_flags,
 		     bool *unlocked)
 {
 	struct vm_area_struct *vma;

@@ -13,8 +13,8 @@ static inline void local_flush_icache_all(void)
 	asm volatile ("fence.i" ::: "memory");
 }
 
-static inline void local_flush_icache_range(unsigned long start,
-					    unsigned long end)
+static inline void local_flush_icache_range(__ptraddr_t start,
+					    __ptraddr_t end)
 {
 	local_flush_icache_all();
 }
@@ -44,7 +44,7 @@ do {							\
 extern u64 new_vmalloc[NR_CPUS / sizeof(u64) + 1];
 extern char _end[];
 #define flush_cache_vmap flush_cache_vmap
-static inline void flush_cache_vmap(unsigned long start, unsigned long end)
+static inline void flush_cache_vmap(__ptraddr_t start, __ptraddr_t end)
 {
 	if (is_vmalloc_or_module_addr((void *)start)) {
 		int i;
@@ -78,7 +78,7 @@ void flush_icache_mm(struct mm_struct *mm, bool local);
  * so instead we just flush the whole thing.
  */
 #define flush_icache_range flush_icache_range
-static inline void flush_icache_range(unsigned long start, unsigned long end)
+static inline void flush_icache_range(__ptraddr_t start, __ptraddr_t end)
 {
 	flush_icache_all();
 }

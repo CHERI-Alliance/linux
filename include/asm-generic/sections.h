@@ -154,7 +154,7 @@ static inline bool init_section_intersects(void *virt, size_t size)
  * Note: On some archs it may return true for core RODATA, and false
  *       for others. But will always be true for core RW data.
  */
-static inline bool is_kernel_core_data(unsigned long addr)
+static inline bool is_kernel_core_data(__ptraddr_t addr)
 {
 	if (addr >= (unsigned long)_sdata && addr < (unsigned long)_edata)
 		return true;
@@ -174,13 +174,13 @@ static inline bool is_kernel_core_data(unsigned long addr)
  *
  * Returns: true if the address is located in .rodata, false otherwise.
  */
-static inline bool is_kernel_rodata(unsigned long addr)
+static inline bool is_kernel_rodata(__ptraddr_t addr)
 {
 	return addr >= (unsigned long)__start_rodata &&
 	       addr < (unsigned long)__end_rodata;
 }
 
-static inline bool is_kernel_ro_after_init(unsigned long addr)
+static inline bool is_kernel_ro_after_init(__ptraddr_t addr)
 {
 	return addr >= (unsigned long)__start_ro_after_init &&
 	       addr < (unsigned long)__end_ro_after_init;
@@ -193,7 +193,7 @@ static inline bool is_kernel_ro_after_init(unsigned long addr)
  *
  * Returns: true if the address is located in .init.text, false otherwise.
  */
-static inline bool is_kernel_inittext(unsigned long addr)
+static inline bool is_kernel_inittext(__ptraddr_t addr)
 {
 	return addr >= (unsigned long)_sinittext &&
 	       addr < (unsigned long)_einittext;
@@ -208,7 +208,7 @@ static inline bool is_kernel_inittext(unsigned long addr)
  * Returns: true if the address is located in .text, false otherwise.
  * Note: an internal helper, only check the range of _stext to _etext.
  */
-static inline bool __is_kernel_text(unsigned long addr)
+static inline bool __is_kernel_text(__ptraddr_t addr)
 {
 	return addr >= (unsigned long)_stext &&
 	       addr < (unsigned long)_etext;
@@ -224,7 +224,7 @@ static inline bool __is_kernel_text(unsigned long addr)
  *       and range from __init_begin to __init_end, which can be outside
  *       of the _stext to _end range.
  */
-static inline bool __is_kernel(unsigned long addr)
+static inline bool __is_kernel(__ptraddr_t addr)
 {
 	return ((addr >= (unsigned long)_stext &&
 	         addr < (unsigned long)_end) ||

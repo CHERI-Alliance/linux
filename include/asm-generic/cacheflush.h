@@ -33,16 +33,16 @@ static inline void flush_cache_dup_mm(struct mm_struct *mm)
 
 #ifndef flush_cache_range
 static inline void flush_cache_range(struct vm_area_struct *vma,
-				     unsigned long start,
-				     unsigned long end)
+				     __ptraddr_t start,
+				     __ptraddr_t end)
 {
 }
 #endif
 
 #ifndef flush_cache_page
 static inline void flush_cache_page(struct vm_area_struct *vma,
-				    unsigned long vmaddr,
-				    unsigned long pfn)
+				    __ptraddr_t vmaddr,
+				    __ptraddr_t pfn)
 {
 }
 #endif
@@ -68,7 +68,7 @@ static inline void flush_dcache_mmap_unlock(struct address_space *mapping)
 #endif
 
 #ifndef flush_icache_range
-static inline void flush_icache_range(unsigned long start, unsigned long end)
+static inline void flush_icache_range(__ptraddr_t start, __ptraddr_t end)
 {
 }
 #endif
@@ -80,25 +80,25 @@ static inline void flush_icache_range(unsigned long start, unsigned long end)
 #ifndef flush_icache_user_page
 static inline void flush_icache_user_page(struct vm_area_struct *vma,
 					   struct page *page,
-					   unsigned long addr, int len)
+					   __ptraddr_t addr, int len)
 {
 }
 #endif
 
 #ifndef flush_cache_vmap
-static inline void flush_cache_vmap(unsigned long start, unsigned long end)
+static inline void flush_cache_vmap(__ptraddr_t start, __ptraddr_t end)
 {
 }
 #endif
 
 #ifndef flush_cache_vmap_early
-static inline void flush_cache_vmap_early(unsigned long start, unsigned long end)
+static inline void flush_cache_vmap_early(__ptraddr_t start, __ptraddr_t end)
 {
 }
 #endif
 
 #ifndef flush_cache_vunmap
-static inline void flush_cache_vunmap(unsigned long start, unsigned long end)
+static inline void flush_cache_vunmap(__ptraddr_t start, __ptraddr_t end)
 {
 }
 #endif

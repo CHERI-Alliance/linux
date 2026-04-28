@@ -36,11 +36,11 @@
  */
 
 /* Hash courtesy of the R5 hash in reiserfs modulo sign bits */
-#define init_name_hash(salt)		(unsigned long)(salt)
+#define init_name_hash(salt)		(__ptraddr_t)(salt)
 
 /* partial hash update function. Assume roughly 4 bits per character */
 static inline unsigned long
-partial_name_hash(unsigned long c, unsigned long prevhash)
+partial_name_hash(__ptraddr_t c, unsigned long prevhash)
 {
 	return (prevhash + (c << 4) + (c >> 4)) * 11;
 }
@@ -50,7 +50,7 @@ partial_name_hash(unsigned long c, unsigned long prevhash)
  * losing bits).  This also has the property (wanted by the dcache)
  * that the msbits make a good hash table index.
  */
-static inline unsigned int end_name_hash(unsigned long hash)
+static inline unsigned int end_name_hash(__ptraddr_t hash)
 {
 	return hash_long(hash, 32);
 }

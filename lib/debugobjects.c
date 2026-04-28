@@ -600,7 +600,7 @@ static void debug_objects_oom(void)
  * We use the pfn of the address for the hash. That way we can check
  * for freed objects simply by checking the affected bucket.
  */
-static struct debug_bucket *get_bucket(unsigned long addr)
+static struct debug_bucket *get_bucket(__ptraddr_t addr)
 {
 	unsigned long hash;
 
