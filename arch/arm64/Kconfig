@@ -2265,7 +2265,7 @@ config AS_HAS_MORELLO
 config ARM64_MORELLO
 	bool "Morello capability architecture support"
 	default y
-	depends on AS_HAS_MORELLO && ARM64_VHE
+	depends on AS_HAS_MORELLO
 	select ARCH_NO_SWAP
 	help
 	  The Morello architecture is an experimental extension to Armv8.2-A,
