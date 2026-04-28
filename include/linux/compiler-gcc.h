@@ -28,11 +28,16 @@
  * the inline assembly constraint from =g to =r, in this particular
  * case either is valid.
  */
+#if __SIZEOF_POINTER__ > __SIZEOF_LONG__
+#define __PTR_CONSTRAINT "=C"
+#else
+#define __PTR_CONSTRAINT "=r"
+#endif
 #define RELOC_HIDE(ptr, off)						\
 ({									\
-	unsigned long __ptr;						\
-	__asm__ ("" : "=r"(__ptr) : "0"(ptr));				\
-	(typeof(ptr)) (__ptr + (off));					\
+	uintptr_t __ptr;						\
+	__asm__ ("" : __PTR_CONSTRAINT(__ptr) : "0"(ptr));		\
+	(typeof(ptr) __force) (__ptr + (off));					\
 })
 
 #if defined(LATENT_ENTROPY_PLUGIN) && !defined(__CHECKER__)
