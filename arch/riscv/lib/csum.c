@@ -116,6 +116,7 @@ do_csum_common(const unsigned long *ptr, const unsigned long *end,
 		carry += csum < data;
 
 		memcpy(&data, ptr, (void *)end - (void *)ptr);
+		ptr++;
 	}
 #endif
 	/*
