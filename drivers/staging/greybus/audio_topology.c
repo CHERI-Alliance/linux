@@ -1336,11 +1336,11 @@ static int gbaudio_tplg_process_header(struct gbaudio_module_info *module,
 	module->route_offset = module->widget_offset +
 					le32_to_cpu(tplg_data->size_widgets);
 
-	dev_dbg(module->dev, "DAI offset is 0x%lx\n", module->dai_offset);
+	dev_dbg(module->dev, "DAI offset is 0x%lx\n", (unsigned long)module->dai_offset);
 	dev_dbg(module->dev, "control offset is %lx\n",
-		module->control_offset);
-	dev_dbg(module->dev, "widget offset is %lx\n", module->widget_offset);
-	dev_dbg(module->dev, "route offset is %lx\n", module->route_offset);
+		(unsigned long)module->control_offset);
+	dev_dbg(module->dev, "widget offset is %lx\n", (unsigned long)module->widget_offset);
+	dev_dbg(module->dev, "route offset is %lx\n", (unsigned long)module->route_offset);
 
 	return 0;
 }

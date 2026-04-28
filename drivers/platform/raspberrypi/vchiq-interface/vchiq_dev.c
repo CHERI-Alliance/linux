@@ -400,7 +400,7 @@ static inline int vchiq_get_user_ptr(void __user2 * __capability *buf, void __us
 	} else {
 		uintptr_t ptr, __user *uptr = ubuf;
 
-		ret = get_user(ptr, uptr + index);
+		ret = get_user_ptr(ptr, uptr + index);
 
 		if (ret)
 			return ret;
@@ -591,7 +591,7 @@ vchiq_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 
 	dev_dbg(instance->state->dev, "arm: instance %p, cmd %s, arg %lx\n", instance,
 		((_IOC_TYPE(cmd) == VCHIQ_IOC_MAGIC) && (_IOC_NR(cmd) <= VCHIQ_IOC_MAX)) ?
-		ioctl_names[_IOC_NR(cmd)] : "<invalid>", arg);
+		ioctl_names[_IOC_NR(cmd)] : "<invalid>", __c_ua(arg));
 
 	switch (cmd) {
 	case VCHIQ_IOC_SHUTDOWN:
@@ -662,7 +662,7 @@ vchiq_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 
 	case VCHIQ_IOC_CLOSE_SERVICE:
 	case VCHIQ_IOC_REMOVE_SERVICE: {
-		unsigned int handle = (unsigned int)arg;
+		unsigned int handle = __c_ua(arg);
 		struct user_service *user_service;
 
 		service = find_service_for_instance(instance, handle);
@@ -698,7 +698,7 @@ vchiq_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 
 	case VCHIQ_IOC_USE_SERVICE:
 	case VCHIQ_IOC_RELEASE_SERVICE:	{
-		unsigned int handle = (unsigned int)arg;
+		unsigned int handle = __c_ua(arg);
 
 		service = find_service_for_instance(instance, handle);
 		if (service) {
@@ -791,7 +791,7 @@ vchiq_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 	} break;
 
 	case VCHIQ_IOC_GET_CLIENT_ID: {
-		unsigned int handle = (unsigned int)arg;
+		unsigned int handle = __c_ua(arg);
 
 		ret = vchiq_get_client_id(instance, handle);
 	} break;
@@ -837,7 +837,7 @@ vchiq_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 	} break;
 
 	case VCHIQ_IOC_LIB_VERSION: {
-		unsigned int lib_version = (unsigned int)arg;
+		unsigned int lib_version = __c_ua(arg);
 
 		if (lib_version < VCHIQ_VERSION_MIN)
 			ret = -EINVAL;
@@ -846,7 +846,7 @@ vchiq_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 	} break;
 
 	case VCHIQ_IOC_CLOSE_DELIVERED: {
-		unsigned int handle = (unsigned int)arg;
+		unsigned int handle = __c_ua(arg);
 
 		service = find_closed_service_for_instance(instance, handle);
 		if (service) {
