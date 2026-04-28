@@ -141,6 +141,9 @@ int main(void)
 #endif
 #ifdef CONFIG_CPU_PM
   DEFINE(CPU_CTX_SP,		offsetof(struct cpu_suspend_ctx, sp));
+#ifdef CONFIG_ARM64_MORELLO
+  DEFINE(CPU_CTX_CREGS,		offsetof(struct cpu_suspend_ctx, ctx_cregs));
+#endif
   DEFINE(MPIDR_HASH_MASK,	offsetof(struct mpidr_hash, mask));
   DEFINE(MPIDR_HASH_SHIFTS,	offsetof(struct mpidr_hash, shift_aff));
   DEFINE(SLEEP_STACK_DATA_SYSTEM_REGS,	offsetof(struct sleep_stack_data, system_regs));
