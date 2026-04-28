@@ -25,6 +25,14 @@
 #include <asm/sections.h>
 #include <asm/text-patching.h>
 
+#ifdef CONFIG_CHERI_PURECAP_UABI
+bool module_elf_check_arch(Elf_Ehdr *hdr)
+{
+	return hdr->e_machine == EM_AARCH64 &&
+		!(hdr->e_flags & EF_AARCH64_CHERI_PURECAP);
+}
+#endif
+
 enum aarch64_reloc_op {
 	RELOC_OP_NONE,
 	RELOC_OP_ABS,
