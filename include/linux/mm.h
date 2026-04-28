@@ -3932,6 +3932,9 @@ struct vm_unmapped_area_info {
 
 extern unsigned long vm_unmapped_area(struct vm_unmapped_area_info *info);
 
+int check_pcuabi_map_ptr_arg(user_uintptr_t user_ptr, unsigned long len,
+			     bool map_fixed, bool locked);
+
 /* truncate.c */
 void truncate_inode_pages(struct address_space *mapping, loff_t lstart);
 void truncate_inode_pages_range(struct address_space *mapping, loff_t lstart,

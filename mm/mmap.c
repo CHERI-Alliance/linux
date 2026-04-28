@@ -570,12 +570,45 @@ unsigned long do_mmap(struct file *file, unsigned long addr,
 	return addr;
 }
 
-user_uintptr_t ksys_mmap_pgoff(user_uintptr_t addr, unsigned long len,
+int check_pcuabi_map_ptr_arg(user_uintptr_t user_ptr, unsigned long len,
+			     bool map_fixed, bool locked)
+{
+	ptraddr_t addr = (ptraddr_t)user_ptr;
+
+	if (!reserv_is_supported(current->mm))
+		return 0;
+
+	if (!check_user_ptr_owning(user_ptr, len)) {
+		if (!user_ptr_is_same((void __user *)user_ptr, as_user_ptr(addr)))
+			return -EINVAL;
+		/*
+		 * Checking that the aligned range is wholly contained inside a
+		 * reservation is sufficient. If the range is only partially
+		 * contained within a reservation, get_unmapped_area will
+		 * ensure that -ERESERVATION is returned.
+		 */
+		if (reserv_aligned_range_within_reserv(addr, len, locked))
+			return -ERESERVATION;
+		return 0;
+	}
+
+	if (!map_fixed)
+		return -EINVAL;
+	if (!reserv_cap_within_reserv(user_ptr, locked))
+		return -ERESERVATION;
+	if (reserv_range_mapped(addr, len, locked))
+		return -ENOMEM;
+
+	return 0;
+}
+
+user_uintptr_t ksys_mmap_pgoff(user_uintptr_t user_ptr, unsigned long len,
 			      unsigned long prot, unsigned long flags,
 			      unsigned long fd, unsigned long pgoff)
 {
 	struct file *file = NULL;
-	user_uintptr_t retval;
+	user_uintptr_t retval = -EINVAL;
+	ptraddr_t addr = (ptraddr_t)user_ptr;
 
 	if (!(flags & MAP_ANONYMOUS)) {
 		audit_mmap_fd(fd, flags);
@@ -608,7 +641,18 @@ user_uintptr_t ksys_mmap_pgoff(user_uintptr_t addr, unsigned long len,
 			return PTR_ERR(file);
 	}
 
+	retval = check_pcuabi_map_ptr_arg(user_ptr, len, flags & MAP_FIXED, false);
+	if (retval)
+		goto out_fput;
+
 	retval = vm_mmap_pgoff(file, addr, len, prot, flags, pgoff);
+	if (!IS_ERR_VALUE(retval) && reserv_is_supported(current->mm)) {
+		if (user_ptr_is_valid((const void __user *)user_ptr))
+			retval = user_ptr;
+		else
+			retval = reserv_make_user_ptr_owning((ptraddr_t)retval,
+							     false);
+	}
 out_fput:
 	if (file)
 		fput(file);
@@ -1113,9 +1157,15 @@ int vm_munmap(unsigned long start, size_t len)
 }
 EXPORT_SYMBOL(vm_munmap);
 
-SYSCALL_DEFINE2(munmap, user_uintptr_t, addr, size_t, len)
+SYSCALL_DEFINE2(munmap, user_uintptr_t, user_ptr, size_t, len)
 {
-	addr = untagged_addr(addr);
+	ptraddr_t addr = untagged_addr((ptraddr_t)user_ptr);
+
+	if (reserv_is_supported(current->mm) && !check_user_ptr_owning(user_ptr, len))
+		return -EINVAL;
+	if (!reserv_cap_within_reserv(user_ptr, false))
+		return -ERESERVATION;
+
 	return __vm_munmap(addr, len, true);
 }
 
