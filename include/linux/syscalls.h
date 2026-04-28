@@ -135,7 +135,34 @@ struct file_attr;
 #define __SC_CAST(t, a)	(__force t) a
 #define __SC_TYPE(t, a)	t
 #define __SC_ARGS(t, a)	a
+#ifdef CONFIG_CHERI_PURECAP_UABI
+/*
+ * There is no feasible nor reliable way to determine (at compile time)
+ * whether given type is an actual capability. That's a downer, as being able
+ * to do just that is required to properly validate syscall arguments.
+ * As an attempt of a last resort, entrust the compiler to do the actual job.
+ * This is achieved through the use of CHERI builtins that do guarantee this
+ * will go sideways, when trying to use one on a non-capability type, and this
+ * is exactly what's needed here. For those types that are assumed to be 'safe'
+ * (i.e. types that are at most as big as long), the null capability is being
+ * used (which is being gracefully handled).
+ * Note that any of the available CHERI intrinsics would/should work.
+ * This is a special case though, as there will be no extra code generated
+ * for those statements, which makes it harmless to use as such.
+ * For the static analyzers just skip the check because they are confused by
+ * the use of the CHERI intrinsics.
+ */
+#if defined(__CHECKER__) || defined(__clang_analyzer__)
+#define __SC_TEST(t, a) ((void)0)
+#else
+#define __SC_TEST(t, a) 					\
+	(void)(__builtin_cheri_address_get			\
+	       (__builtin_choose_expr(sizeof(t) > sizeof(long),	\
+				      (t)(a), 0)))
+#endif
+#else /* !CONFIG_CHERI_PURECAP_UABI */
 #define __SC_TEST(t, a) (void)BUILD_BUG_ON_ZERO(!__TYPE_IS_LL(t) && sizeof(t) > sizeof(long))
+#endif /* !CONFIG_CHERI_PURECAP_UABI */
 
 #ifdef CONFIG_FTRACE_SYSCALLS
 #define __SC_STR_ADECL(t, a)	#a
