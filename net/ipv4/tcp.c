@@ -1975,11 +1975,6 @@ struct compat_tcp_zerocopy_receive {
 	__u32 reserved;
 };
 
-static inline bool in_compat64(void)
-{
-	return IS_ENABLED(CONFIG_COMPAT64) && in_compat_syscall();
-}
-
 static int get_compat64_tcp_zerocopy_receive(struct tcp_zerocopy_receive *zc,
 					     sockptr_t src, size_t size)
 {
@@ -2006,7 +2001,7 @@ static int get_compat64_tcp_zerocopy_receive(struct tcp_zerocopy_receive *zc,
 static int copy_tcp_zerocopy_receive_from_sockptr(struct tcp_zerocopy_receive *zc,
 						  sockptr_t src, size_t size)
 {
-	if (in_compat64())
+	if (in_compat64_syscall())
 		return get_compat64_tcp_zerocopy_receive(zc, src, size);
 	if (copy_from_sockptr_with_ptr(zc, src, size))
 		return -EFAULT;
@@ -2039,7 +2034,7 @@ static int copy_tcp_zerocopy_receive_to_sockptr(sockptr_t dst,
 						struct tcp_zerocopy_receive *zc,
 						size_t size)
 {
-	if (in_compat64())
+	if (in_compat64_syscall())
 		return set_compat64_tcp_zerocopy_receive(dst, zc, size);
 	if (copy_to_sockptr_with_ptr(dst, zc, size))
 		return -EFAULT;
@@ -4861,14 +4856,15 @@ int do_tcp_getsockopt(struct sock *sk, int level,
 	}
 #ifdef CONFIG_MMU
 #define offsetofend_tcp_zerocopy_receive(member) \
-	(in_compat64() ? offsetofend(struct compat_tcp_zerocopy_receive, member) \
-		       : offsetofend(struct tcp_zerocopy_receive, member))
+	(in_compat64_syscall() ? offsetofend(struct compat_tcp_zerocopy_receive, member) \
+			       : offsetofend(struct tcp_zerocopy_receive, member))
 	case TCP_ZEROCOPY_RECEIVE: {
 		struct scm_timestamping_internal tss;
 		struct tcp_zerocopy_receive zc = {};
 		int err;
-		size_t zc_size = in_compat64() ? sizeof(struct compat_tcp_zerocopy_receive)
-					       : sizeof(struct tcp_zerocopy_receive);
+		size_t zc_size = in_compat64_syscall() ?
+			sizeof(struct compat_tcp_zerocopy_receive) :
+			sizeof(struct tcp_zerocopy_receive);
 
 		if (copy_from_sockptr(&len, optlen, sizeof(int)))
 			return -EFAULT;

@@ -108,11 +108,6 @@ struct mmc_blk_busy_data {
 	u32 status;
 };
 
-static inline bool in_compat64(void)
-{
-	return IS_ENABLED(CONFIG_COMPAT64) && in_compat_syscall();
-}
-
 struct compat_mmc_ioc_cmd {
 	int write_flag;
 	int is_acmd;
@@ -476,7 +471,7 @@ static int get_mmc_ioc_cmd_from_compat64(struct mmc_ioc_cmd *native_cmd,
 
 static int copy_mmc_ioc_cmd_from_user(struct mmc_ioc_cmd *to, void * __user src)
 {
-	if (in_compat64())
+	if (in_compat64_syscall())
 		return get_mmc_ioc_cmd_from_compat64(to, src);
 
 	if (copy_from_user(to, src, sizeof(*to)))
@@ -532,7 +527,7 @@ static int mmc_blk_ioctl_copy_to_user(struct mmc_ioc_cmd __user *ic_ptr,
 {
 	struct mmc_ioc_cmd *ic = &idata->ic;
 
-	__u32 __user *response_uptr = in_compat64() ?
+	__u32 __user *response_uptr = in_compat64_syscall() ?
 			&((struct compat_mmc_ioc_cmd __user *)ic_ptr)->response[0] :
 			&ic_ptr->response[0];
 
@@ -788,7 +783,7 @@ static inline struct mmc_ioc_cmd __user *get_ith_mmc_ioc_cmd_uptr(
 	struct mmc_ioc_multi_cmd __user *user,
 	unsigned int i)
 {
-	if (in_compat64())
+	if (in_compat64_syscall())
 		return (struct mmc_ioc_cmd __user *)&((struct compat_mmc_ioc_multi_cmd __user *)user)->cmds[i];
 	return &(user->cmds[i]);
 }
