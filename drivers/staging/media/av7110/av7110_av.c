@@ -1131,7 +1131,7 @@ static int dvb_video_ioctl(struct file *file,
 {
 	struct dvb_device *dvbdev = file->private_data;
 	struct av7110 *av7110 = dvbdev->priv;
-	uintptr_t arg = (uintptr_t)parg;
+	unsigned long arg = __c_pa(parg);
 	int ret = 0;
 
 	dprintk(1, "av7110:%p, cmd=%04x\n", av7110, cmd);
@@ -1363,7 +1363,7 @@ static int dvb_audio_ioctl(struct file *file,
 {
 	struct dvb_device *dvbdev = file->private_data;
 	struct av7110 *av7110 = dvbdev->priv;
-	uintptr_t arg = (uintptr_t)parg;
+	unsigned long arg = __c_pa(parg);
 	int ret = 0;
 
 	dprintk(1, "av7110:%p, cmd=%04x\n", av7110, cmd);
@@ -1582,7 +1582,9 @@ static const struct file_operations dvb_video_fops = {
 	.owner		= THIS_MODULE,
 	.write		= dvb_video_write,
 	.unlocked_ioctl	= dvb_generic_ioctl,
+#ifndef CONFIG_CHERI_KERNEL
 	.compat_ioctl	= dvb_generic_ioctl,
+#endif
 	.open		= dvb_video_open,
 	.release	= dvb_video_release,
 	.poll		= dvb_video_poll,
@@ -1602,7 +1604,9 @@ static const struct file_operations dvb_audio_fops = {
 	.owner		= THIS_MODULE,
 	.write		= dvb_audio_write,
 	.unlocked_ioctl	= dvb_generic_ioctl,
+#ifndef CONFIG_CHERI_KERNEL
 	.compat_ioctl	= dvb_generic_ioctl,
+#endif
 	.open		= dvb_audio_open,
 	.release	= dvb_audio_release,
 	.poll		= dvb_audio_poll,
