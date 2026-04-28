@@ -10,6 +10,18 @@
 
 #include <asm/errno.h>
 
+#ifdef CONFIG_CHERI_PURECAP_UABI
+#define __ASM_SWITCH_TO_C64	"	bx	#4\n"	\
+				".arch morello+c64\n"
+#define __ASM_SWITCH_TO_A64	"	bx	#4\n"	\
+				".arch morello\n"
+#define __ASM_RW_UPTR_CONSTR	"+C"
+#else
+#define __ASM_SWITCH_TO_C64
+#define __ASM_SWITCH_TO_A64
+#define __ASM_RW_UPTR_CONSTR "+r"
+#endif
+
 #define FUTEX_MAX_LOOPS	128 /* What's the largest number you can think of? */
 
 #define __futex_atomic_op(insn, ret, oldval, uaddr, tmp, oparg)		\
@@ -18,20 +30,24 @@ do {									\
 									\
 	uaccess_enable_privileged();					\
 	asm volatile(							\
-"	prfm	pstl1strm, %2\n"					\
-"1:	ldxr	%w1, %2\n"						\
+	__ASM_SWITCH_TO_C64						\
+"	prfm	pstl1strm, [%2]\n"					\
+"1:	ldxr	%w1, [%2]\n"						\
 	insn "\n"							\
-"2:	stlxr	%w0, %w3, %2\n"						\
+"2:	stlxr	%w0, %w3, [%2]\n"					\
 "	cbz	%w0, 3f\n"						\
 "	sub	%w4, %w4, %w0\n"					\
 "	cbnz	%w4, 1b\n"						\
 "	mov	%w0, %w6\n"						\
 "3:\n"									\
 "	dmb	ish\n"							\
+	__ASM_SWITCH_TO_A64						\
 	_ASM_EXTABLE_UACCESS_ERR(1b, 3b, %w0)				\
 	_ASM_EXTABLE_UACCESS_ERR(2b, 3b, %w0)				\
-	: "=&r" (ret), "=&r" (oldval), "+Q" (*uaddr), "=&r" (tmp),	\
-	  "+r" (loops)							\
+	/* TODO [PCuABI]: temporary solution for uaddr. Should be reverted to +Q
+	 *        once LLVM supports it for capabilities. */		\
+	: "=&r" (ret), "=&r" (oldval), __ASM_RW_UPTR_CONSTR (uaddr),	\
+	  "=&r" (tmp), "+r" (loops)					\
 	: "r" (oparg), "Ir" (-EAGAIN)					\
 	: "memory");							\
 	uaccess_disable_privileged();					\
@@ -41,8 +57,7 @@ static inline int
 arch_futex_atomic_op_inuser(int op, int oparg, int *oval, u32 __user *_uaddr)
 {
 	int oldval = 0, ret, tmp;
-	/* TODO [PCuABI] - perform the access via the user capability */
-	u32 *uaddr = (u32 *)user_ptr_addr(__uaccess_mask_ptr(_uaddr));
+	u32 __user *uaddr = __uaccess_mask_ptr(_uaddr);
 
 	if (!access_ok(_uaddr, sizeof(u32)))
 		return -EFAULT;
@@ -85,20 +100,20 @@ futex_atomic_cmpxchg_inatomic(u32 *uval, u32 __user *_uaddr,
 	int ret = 0;
 	unsigned int loops = FUTEX_MAX_LOOPS;
 	u32 val, tmp;
-	u32 *uaddr;
+	u32 __user *uaddr;
 
 	if (!access_ok(_uaddr, sizeof(u32)))
 		return -EFAULT;
 
-	/* TODO [PCuABI] - perform the access via the user capability */
-	uaddr = (u32 *)user_ptr_addr(__uaccess_mask_ptr(_uaddr));
+	uaddr = __uaccess_mask_ptr(_uaddr);
 	uaccess_enable_privileged();
 	asm volatile("// futex_atomic_cmpxchg_inatomic\n"
-"	prfm	pstl1strm, %2\n"
-"1:	ldxr	%w1, %2\n"
+	__ASM_SWITCH_TO_C64
+"	prfm	pstl1strm, [%2]\n"
+"1:	ldxr	%w1, [%2]\n"
 "	sub	%w3, %w1, %w5\n"
 "	cbnz	%w3, 4f\n"
-"2:	stlxr	%w3, %w6, %2\n"
+"2:	stlxr	%w3, %w6, [%2]\n"
 "	cbz	%w3, 3f\n"
 "	sub	%w4, %w4, %w3\n"
 "	cbnz	%w4, 1b\n"
@@ -106,9 +121,13 @@ futex_atomic_cmpxchg_inatomic(u32 *uval, u32 __user *_uaddr,
 "3:\n"
 "	dmb	ish\n"
 "4:\n"
+	__ASM_SWITCH_TO_A64
 	_ASM_EXTABLE_UACCESS_ERR(1b, 4b, %w0)
 	_ASM_EXTABLE_UACCESS_ERR(2b, 4b, %w0)
-	: "+r" (ret), "=&r" (val), "+Q" (*uaddr), "=&r" (tmp), "+r" (loops)
+	/* TODO [PCuABI]: temporary solution for uaddr. Should be reverted to +Q once
+	 *        LLVM supports it for capabilities. */
+	: "+r" (ret), "=&r" (val), __ASM_RW_UPTR_CONSTR (uaddr), "=&r" (tmp),
+	  "+r" (loops)
 	: "r" (oldval), "r" (newval), "Ir" (-EAGAIN)
 	: "memory");
 	uaccess_disable_privileged();
