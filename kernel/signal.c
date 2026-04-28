@@ -3169,6 +3169,12 @@ out:
 
 /**
  *  sys_restart_syscall - restart a system call
+ *
+ *  NOTE! In PCuABI, restart_syscall should be able to return a capability for
+ *  the restartable syscalls that return capabilities. However, there are no
+ *  syscalls that return capabilities and have implemented a restart function.
+ *  Therefore, modifying the syscall doesn't provide any functional improvement,
+ *  so it is left as is.
  */
 SYSCALL_DEFINE0(restart_syscall)
 {
