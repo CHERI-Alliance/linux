@@ -984,7 +984,7 @@ static void folio_check_dirty_writeback(struct folio *folio,
 }
 
 static struct folio *alloc_demote_folio(struct folio *src,
-		unsigned long private)
+		uintptr_t private)
 {
 	struct folio *dst;
 	nodemask_t *allowed_mask;

@@ -699,7 +699,7 @@ static inline unsigned int buddy_order(struct page *page)
  * times, potentially observing different values in the tests and the actual
  * use of the result.
  */
-#define buddy_order_unsafe(page)	READ_ONCE(page_private(page))
+#define buddy_order_unsafe(page)	__c_ua(READ_ONCE(page_private(page)))
 
 /*
  * This function checks whether a page is free && is the buddy

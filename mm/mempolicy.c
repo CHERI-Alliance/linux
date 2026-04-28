@@ -1432,7 +1432,7 @@ int do_migrate_pages(struct mm_struct *mm, const nodemask_t *from,
  * Allocate a new folio for page migration, according to NUMA mempolicy.
  */
 static struct folio *alloc_migration_target_by_mpol(struct folio *src,
-						    unsigned long private)
+						    uintptr_t private)
 {
 	struct migration_mpol *mmpol = (struct migration_mpol *)private;
 	struct mempolicy *pol = mmpol->pol;
@@ -1477,7 +1477,7 @@ int do_migrate_pages(struct mm_struct *mm, const nodemask_t *from,
 }
 
 static struct folio *alloc_migration_target_by_mpol(struct folio *src,
-						    unsigned long private)
+						    uintptr_t private)
 {
 	return NULL;
 }
