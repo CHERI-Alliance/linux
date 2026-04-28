@@ -18,7 +18,7 @@
 /* Redefine ACCESS_PRIVATE for this test. */
 #undef ACCESS_PRIVATE
 #define ACCESS_PRIVATE(p, member) \
-	(*((struct list_head *)((unsigned long)&((p)->member))))
+	(*((struct list_head *)((uintptr_t)&((p)->member))))
 
 struct list_test_struct {
 	int data;
