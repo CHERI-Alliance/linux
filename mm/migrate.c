@@ -2355,7 +2355,7 @@ static int do_pages_move(struct mm_struct *mm, nodemask_t task_nodes,
 
 			p = compat_ptr(cp);
 		} else {
-			if (get_user(p, pages + i))
+			if (get_user_ptr(p, pages + i))
 				goto out_flush;
 		}
 		if (get_user(node, nodes + i))
