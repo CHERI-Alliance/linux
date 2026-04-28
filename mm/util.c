@@ -442,7 +442,7 @@ unsigned long randomize_page(unsigned long start, unsigned long range)
 unsigned long __weak arch_randomize_brk(struct mm_struct *mm)
 {
 	/* Is the current task 32bit ? */
-	if (!IS_ENABLED(CONFIG_64BIT) || is_32bit_compat_task())
+	if (!IS_ENABLED(CONFIG_64BIT) || is_compat32_task())
 		return randomize_page(mm->brk, SZ_32M);
 
 	return randomize_page(mm->brk, SZ_1G);
