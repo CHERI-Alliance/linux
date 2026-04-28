@@ -358,7 +358,7 @@ static bool cxl_payload_from_user_allowed(u16 opcode, void *payload_in,
 
 static int cxl_mbox_cmd_ctor(struct cxl_mbox_cmd *mbox_cmd,
 			     struct cxl_mailbox *cxl_mbox, u16 opcode,
-			     size_t in_size, size_t out_size, u64 in_payload)
+			     size_t in_size, size_t out_size, __u64ptr in_payload)
 {
 	*mbox_cmd = (struct cxl_mbox_cmd) {
 		.opcode = opcode,
@@ -595,7 +595,7 @@ int cxl_query_cmd(struct cxl_mailbox *cxl_mbox,
  */
 static int handle_mailbox_cmd_from_user(struct cxl_mailbox *cxl_mbox,
 					struct cxl_mbox_cmd *mbox_cmd,
-					u64 out_payload, s32 *size_out,
+					__u64ptr out_payload, s32 *size_out,
 					u32 *retval)
 {
 	struct device *dev = cxl_mbox->host;

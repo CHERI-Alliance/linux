@@ -605,7 +605,24 @@ static struct cxl_dpa_perf *cxled_get_dpa_perf(struct cxl_endpoint_decoder *cxle
 struct cxl_perf_ctx {
 	struct access_coordinate coord[ACCESS_COORDINATE_MAX];
 	struct cxl_port *port;
+#ifdef CONFIG_CHERI_KERNEL
+	uintptr_t index;
+#endif
 };
+
+#ifdef CONFIG_CHERI_KERNEL
+static __always_inline void * xa_store_perf_ctx(struct xarray *xa,
+						uintptr_t index,
+						struct cxl_perf_ctx *ctx,
+						gfp_t gfp)
+{
+	ctx->index = index;
+
+	return xa_store(xa, __c_ua(index), ctx, gfp);
+}
+#else
+#define xa_store_perf_ctx(X, I, E, GFP) xa_store(X, I, E, GFP)
+#endif
 
 /**
  * cxl_endpoint_gather_bandwidth - collect all the endpoint bandwidth in an xarray
@@ -641,7 +658,7 @@ static int cxl_endpoint_gather_bandwidth(struct cxl_region *cxlr,
 	struct pci_dev *pdev = to_pci_dev(cxlds->dev);
 	struct cxl_perf_ctx *perf_ctx;
 	struct cxl_dpa_perf *perf;
-	unsigned long index;
+	uintptr_t index;
 	void *ptr;
 	int rc;
 
@@ -666,14 +683,14 @@ static int cxl_endpoint_gather_bandwidth(struct cxl_region *cxlr,
 	else
 		index = (uintptr_t)parent_port->uport_dev;
 
-	perf_ctx = xa_load(usp_xa, index);
+	perf_ctx = xa_load(usp_xa, __c_ua(index));
 	if (!perf_ctx) {
 		struct cxl_perf_ctx *c __free(kfree) =
 			kzalloc_obj(*perf_ctx);
 
 		if (!c)
 			return -ENOMEM;
-		ptr = xa_store(usp_xa, index, c, GFP_KERNEL);
+		ptr = xa_store_perf_ctx(usp_xa, index, c, GFP_KERNEL);
 		if (xa_is_err(ptr))
 			return xa_err(ptr);
 		perf_ctx = no_free_ptr(c);
@@ -759,7 +776,8 @@ static struct xarray *cxl_switch_gather_bandwidth(struct cxl_region *cxlr,
 		kzalloc_obj(*res_xa);
 	struct access_coordinate coords[ACCESS_COORDINATE_MAX];
 	struct cxl_perf_ctx *ctx, *us_ctx;
-	unsigned long index, us_index;
+	unsigned long index;
+	uintptr_t us_index;
 	int dev_count = 0;
 	int gp_count = 0;
 	void *ptr;
@@ -770,7 +788,11 @@ static struct xarray *cxl_switch_gather_bandwidth(struct cxl_region *cxlr,
 	xa_init(res_xa);
 
 	xa_for_each(input_xa, index, ctx) {
+#ifdef CONFIG_CHERI_KERNEL
+		struct device *dev = (struct device *)ctx->index;
+#else
 		struct device *dev = (struct device *)index;
+#endif
 		struct cxl_port *port = ctx->port;
 		struct cxl_port *parent_port = to_cxl_port(port->dev.parent);
 		struct cxl_port *gp_port = to_cxl_port(parent_port->dev.parent);
@@ -792,7 +814,7 @@ static struct xarray *cxl_switch_gather_bandwidth(struct cxl_region *cxlr,
 		else
 			us_index = (uintptr_t)parent_port->uport_dev;
 
-		us_ctx = xa_load(res_xa, us_index);
+		us_ctx = xa_load(res_xa, __c_ua(us_index));
 		if (!us_ctx) {
 			struct cxl_perf_ctx *n __free(kfree) =
 				kzalloc_obj(*n);
@@ -800,7 +822,7 @@ static struct xarray *cxl_switch_gather_bandwidth(struct cxl_region *cxlr,
 			if (!n)
 				return ERR_PTR(-ENOMEM);
 
-			ptr = xa_store(res_xa, us_index, n, GFP_KERNEL);
+			ptr = xa_store_perf_ctx(res_xa, us_index, n, GFP_KERNEL);
 			if (xa_is_err(ptr))
 				return ERR_PTR(xa_err(ptr));
 			us_ctx = no_free_ptr(n);
@@ -876,14 +898,14 @@ static struct xarray *cxl_rp_gather_bandwidth(struct xarray *xa)
 		struct cxl_perf_ctx *hb_ctx;
 		void *ptr;
 
-		hb_ctx = xa_load(hb_xa, hb_index);
+		hb_ctx = xa_load(hb_xa, __c_ua(hb_index));
 		if (!hb_ctx) {
 			struct cxl_perf_ctx *n __free(kfree) =
 				kzalloc_obj(*n);
 
 			if (!n)
 				return ERR_PTR(-ENOMEM);
-			ptr = xa_store(hb_xa, hb_index, n, GFP_KERNEL);
+			ptr = xa_store_perf_ctx(hb_xa, hb_index, n, GFP_KERNEL);
 			if (xa_is_err(ptr))
 				return ERR_PTR(xa_err(ptr));
 			hb_ctx = no_free_ptr(n);
@@ -919,20 +941,20 @@ static struct xarray *cxl_hb_gather_bandwidth(struct xarray *xa)
 		struct cxl_port *parent_port;
 		struct cxl_perf_ctx *mw_ctx;
 		struct cxl_dport *dport;
-		unsigned long mw_index;
+		uintptr_t mw_index;
 		void *ptr;
 
 		parent_port = to_cxl_port(port->dev.parent);
 		mw_index = (uintptr_t)parent_port->uport_dev;
 
-		mw_ctx = xa_load(mw_xa, mw_index);
+		mw_ctx = xa_load(mw_xa, __c_ua(mw_index));
 		if (!mw_ctx) {
 			struct cxl_perf_ctx *n __free(kfree) =
 				kzalloc_obj(*n);
 
 			if (!n)
 				return ERR_PTR(-ENOMEM);
-			ptr = xa_store(mw_xa, mw_index, n, GFP_KERNEL);
+			ptr = xa_store_perf_ctx(mw_xa, mw_index, n, GFP_KERNEL);
 			if (xa_is_err(ptr))
 				return ERR_PTR(xa_err(ptr));
 			mw_ctx = no_free_ptr(n);
