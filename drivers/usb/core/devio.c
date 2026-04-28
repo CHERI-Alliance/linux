@@ -1931,7 +1931,7 @@ static int proc_do_submiturb(struct usb_dev_state *ps, struct usbdevfs_urb *uurb
 
 		as->urb->transfer_flags |= URB_NO_TRANSFER_DMA_MAP;
 		as->urb->transfer_dma = as->usbm->dma_handle +
-				(uurb_start - as->usbm->vm_start);
+				(__c_ua(uurb_start) - as->usbm->vm_start);
 	} else if (is_in && uurb->buffer_length > 0)
 		as->userbuffer = uurb->buffer;
 	as->signr = uurb->signr;

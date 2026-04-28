@@ -1453,7 +1453,7 @@ static int mos7810_check(struct usb_serial *serial)
 static int mos7840_probe(struct usb_serial *serial,
 				const struct usb_device_id *id)
 {
-	unsigned long device_flags = id->driver_info;
+	unsigned long device_flags = __c_ua(id->driver_info);
 	u8 *buf;
 
 	/* Skip device-type detection if we already have device flags. */
@@ -1478,7 +1478,7 @@ static int mos7840_probe(struct usb_serial *serial,
 
 	kfree(buf);
 out:
-	usb_set_serial_data(serial, (void *)device_flags);
+	usb_set_serial_data(serial, __c_fakep(device_flags));
 
 	return 0;
 }

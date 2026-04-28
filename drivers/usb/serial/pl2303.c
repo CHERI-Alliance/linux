@@ -508,7 +508,7 @@ static int pl2303_startup(struct usb_serial *serial)
 		return -ENOMEM;
 
 	spriv->type = &pl2303_type_data[type];
-	spriv->quirks = (uintptr_t)usb_get_serial_data(serial);
+	spriv->quirks = __c_pa(usb_get_serial_data(serial));
 	spriv->quirks |= spriv->type->quirks;
 
 	if (type == TYPE_HXD && pl2303_is_hxd_clone(serial))

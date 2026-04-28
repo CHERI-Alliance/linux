@@ -3634,7 +3634,7 @@ static int net2280_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 	pci_set_drvdata(pdev, dev);
 	usb_initialize_gadget(&pdev->dev, &dev->gadget, gadget_release);
 	spin_lock_init(&dev->lock);
-	dev->quirks = id->driver_data;
+	dev->quirks = __c_ua(id->driver_data);
 	dev->pdev = pdev;
 	dev->gadget.ops = &net2280_ops;
 	dev->gadget.max_speed = (dev->quirks & PLX_SUPERSPEED) ?

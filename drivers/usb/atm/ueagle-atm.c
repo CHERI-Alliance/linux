@@ -241,7 +241,7 @@ enum {
 #define UEA_IS_PREFIRM(x) \
 	(!((x)->driver_info & PSTFIRM))
 #define UEA_CHIP_VERSION(x) \
-	((x)->driver_info & 0xf)
+	((unsigned long)(x)->driver_info & 0xf)
 
 #define IS_ISDN(x) \
 	((x)->annex & ANNEXB)
