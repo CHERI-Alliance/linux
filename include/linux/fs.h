@@ -2951,30 +2951,30 @@ static inline int inode_generic_drop(struct inode *inode)
 }
 void d_mark_dontcache(struct inode *inode);
 
-struct inode *ilookup5_nowait(struct super_block *sb, u64 hashval,
+struct inode *ilookup5_nowait(struct super_block *sb, __ptraddr64_t hashval,
 			      int (*test)(struct inode *, void *), void *data,
 			      bool *isnew);
-struct inode *ilookup5(struct super_block *sb, u64 hashval,
+struct inode *ilookup5(struct super_block *sb, __ptraddr64_t hashval,
 		       int (*test)(struct inode *, void *), void *data);
-struct inode *ilookup(struct super_block *sb, u64 ino);
+struct inode *ilookup(struct super_block *sb, __ptraddr64_t ino);
 
-struct inode *inode_insert5(struct inode *inode, u64 hashval,
+struct inode *inode_insert5(struct inode *inode, __ptraddr64_t hashval,
 			    int (*test)(struct inode *, void *),
 			    int (*set)(struct inode *, void *), void *data);
-struct inode *iget5_locked(struct super_block *sb, u64 hashval,
+struct inode *iget5_locked(struct super_block *sb, __ptraddr64_t hashval,
 			   int (*test)(struct inode *, void *),
 			   int (*set)(struct inode *, void *), void *data);
-struct inode *iget5_locked_rcu(struct super_block *sb, u64 hashval,
+struct inode *iget5_locked_rcu(struct super_block *sb, __ptraddr64_t hashval,
 			       int (*test)(struct inode *, void *),
 			       int (*set)(struct inode *, void *), void *data);
 struct inode *iget_locked(struct super_block *sb, u64 ino);
-struct inode *find_inode_nowait(struct super_block *sb, u64 hashval,
-				int (*match)(struct inode *, u64, void *),
+struct inode *find_inode_nowait(struct super_block *sb, __ptraddr64_t hashval,
+				int (*match)(struct inode *, __ptraddr64_t, void *),
 				void *data);
-struct inode *find_inode_rcu(struct super_block *sb, u64 hashval,
+struct inode *find_inode_rcu(struct super_block *sb, __ptraddr64_t hashval,
 			     int (*test)(struct inode *, void *), void *data);
-struct inode *find_inode_by_ino_rcu(struct super_block *sb, u64 ino);
-int insert_inode_locked4(struct inode *inode, u64 hashval,
+struct inode *find_inode_by_ino_rcu(struct super_block *sb, __ptraddr64_t ino);
+int insert_inode_locked4(struct inode *inode, __ptraddr64_t hashval,
 			 int (*test)(struct inode *, void *), void *data);
 int insert_inode_locked(struct inode *inode);
 #ifdef CONFIG_DEBUG_LOCK_ALLOC
@@ -3030,7 +3030,7 @@ int setattr_should_drop_sgid(struct mnt_idmap *idmap,
  */
 #define alloc_inode_sb(_sb, _cache, _gfp) kmem_cache_alloc_lru(_cache, &_sb->s_inode_lru, _gfp)
 
-void __insert_inode_hash(struct inode *inode, u64 hashval);
+void __insert_inode_hash(struct inode *inode, __ptraddr64_t hashval);
 static inline void insert_inode_hash(struct inode *inode)
 {
 	__insert_inode_hash(inode, inode->i_ino);
