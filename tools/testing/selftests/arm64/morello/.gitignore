@@ -2,5 +2,5 @@
 # Copyright (C) 2021  Arm Limited
 
 *.d
-purecap_syscall_test
+read_write
 tester
