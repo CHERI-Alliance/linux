@@ -1322,7 +1322,7 @@ void kvm_arch_mmu_enable_log_dirty_pt_masked(struct kvm *kvm,
 
 static void kvm_send_hwpoison_signal(unsigned long address, short lsb)
 {
-	send_sig_mceerr(BUS_MCEERR_AR, (void __user *)address, lsb, current);
+	send_sig_mceerr(BUS_MCEERR_AR, as_user_ptr(address), lsb, current);
 }
 
 static bool fault_supports_stage2_huge_mapping(struct kvm_memory_slot *memslot,
