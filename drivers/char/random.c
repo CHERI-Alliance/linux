@@ -1109,7 +1109,7 @@ void add_interrupt_randomness(int irq)
 	unsigned int new_count;
 
 	fast_mix(fast_pool->pool, entropy,
-		 (regs ? instruction_pointer(regs) : _RET_IP_) ^ swab(irq));
+		 (regs ? __c_ua(instruction_pointer(regs)) : _RET_IP_) ^ swab(irq));
 	new_count = ++fast_pool->count;
 
 	if (new_count & MIX_INFLIGHT)

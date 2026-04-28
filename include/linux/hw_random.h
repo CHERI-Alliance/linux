@@ -43,7 +43,7 @@ struct hwrng {
 	int (*data_present)(struct hwrng *rng, int wait);
 	int (*data_read)(struct hwrng *rng, u32 *data);
 	int (*read)(struct hwrng *rng, void *data, size_t max, bool wait);
-	unsigned long priv;
+	uintptr_t priv;
 	unsigned short quality;
 
 	/* internal. */
