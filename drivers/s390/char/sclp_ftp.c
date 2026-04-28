@@ -241,7 +241,7 @@ static struct sclp_register sclp_ftp_event = {
 int sclp_ftp_startup(void)
 {
 #ifdef DEBUG
-	unsigned long info;
+	uintptr_t info;
 #endif
 	int rc;
 

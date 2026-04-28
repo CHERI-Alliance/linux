@@ -862,7 +862,7 @@ static int handle_stsi(struct kvm_vcpu *vcpu)
 	int fc = (vcpu->run->s.regs.gprs[0] & 0xf0000000) >> 28;
 	int sel1 = vcpu->run->s.regs.gprs[0] & 0xff;
 	int sel2 = vcpu->run->s.regs.gprs[1] & 0xffff;
-	unsigned long mem = 0;
+	uintptr_t mem = 0;
 	u64 operand2;
 	int rc = 0;
 	u8 ar;

@@ -182,7 +182,7 @@ static int aarch32_alloc_kuser_vdso_page(void)
 {
 	extern char __kuser_helper_start[], __kuser_helper_end[];
 	int kuser_sz = __kuser_helper_end - __kuser_helper_start;
-	unsigned long vdso_page;
+	uintptr_t vdso_page;
 
 	if (!IS_ENABLED(CONFIG_KUSER_HELPERS))
 		return 0;

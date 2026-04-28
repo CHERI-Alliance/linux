@@ -443,7 +443,7 @@ static int rs_startup(struct tty_struct *tty, struct serial_state *info)
 	struct tty_port *port = &info->tport;
 	unsigned long flags;
 	int	retval=0;
-	unsigned long page;
+	uintptr_t page;
 
 	page = get_zeroed_page(GFP_KERNEL);
 	if (!page)

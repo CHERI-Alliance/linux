@@ -205,7 +205,7 @@ static void free_sampling_buffer(struct sf_buffer *sfb)
 static int alloc_sample_data_block(unsigned long *sdbt, gfp_t gfp_flags)
 {
 	struct hws_trailer_entry *te;
-	unsigned long sdb;
+	uintptr_t sdb;
 
 	/* Allocate and initialize sample-data-block */
 	sdb = get_zeroed_page(gfp_flags);

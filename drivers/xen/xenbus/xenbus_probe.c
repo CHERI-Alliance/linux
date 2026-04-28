@@ -919,7 +919,7 @@ EXPORT_SYMBOL_GPL(xen_set_callback_via);
 static int __init xenstored_local_init(void)
 {
 	int err = -ENOMEM;
-	unsigned long page = 0;
+	uintptr_t page = 0;
 	struct evtchn_alloc_unbound alloc_unbound;
 
 	/* Allocate Xenstore page */

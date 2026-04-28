@@ -186,7 +186,7 @@ static p4d_t *pti_user_pagetable_walk_p4d(unsigned long address)
 	}
 
 	if (pgd_none(*pgd)) {
-		unsigned long new_p4d_page = __get_free_page(gfp);
+		uintptr_t new_p4d_page = __get_free_page(gfp);
 		if (WARN_ON_ONCE(!new_p4d_page))
 			return NULL;
 
@@ -215,7 +215,7 @@ static pmd_t *pti_user_pagetable_walk_pmd(unsigned long address)
 
 	BUILD_BUG_ON(p4d_leaf(*p4d));
 	if (p4d_none(*p4d)) {
-		unsigned long new_pud_page = __get_free_page(gfp);
+		uintptr_t new_pud_page = __get_free_page(gfp);
 		if (WARN_ON_ONCE(!new_pud_page))
 			return NULL;
 
@@ -229,7 +229,7 @@ static pmd_t *pti_user_pagetable_walk_pmd(unsigned long address)
 		return NULL;
 	}
 	if (pud_none(*pud)) {
-		unsigned long new_pmd_page = __get_free_page(gfp);
+		uintptr_t new_pmd_page = __get_free_page(gfp);
 		if (WARN_ON_ONCE(!new_pmd_page))
 			return NULL;
 
@@ -270,7 +270,7 @@ static pte_t *pti_user_pagetable_walk_pte(unsigned long address, bool late_text)
 	}
 
 	if (pmd_none(*pmd)) {
-		unsigned long new_pte_page = __get_free_page(gfp);
+		uintptr_t new_pte_page = __get_free_page(gfp);
 		if (!new_pte_page)
 			return NULL;
 

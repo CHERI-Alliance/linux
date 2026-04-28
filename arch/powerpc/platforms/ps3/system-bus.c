@@ -508,7 +508,7 @@ static void * ps3_alloc_coherent(struct device *_dev, size_t size,
 {
 	int result;
 	struct ps3_system_bus_device *dev = ps3_dev_to_system_bus_dev(_dev);
-	unsigned long virt_addr;
+	uintptr_t virt_addr;
 
 	flag &= ~(__GFP_DMA | __GFP_HIGHMEM);
 	flag |= __GFP_ZERO;

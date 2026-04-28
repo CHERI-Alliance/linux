@@ -12,7 +12,7 @@ static int pool_op_alloc(struct tee_shm_pool *pool, struct tee_shm *shm,
 			 size_t size, size_t align)
 {
 	unsigned int order = get_order(size);
-	unsigned long va;
+	uintptr_t va;
 	int rc;
 
 	/*

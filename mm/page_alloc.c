@@ -5435,7 +5435,7 @@ static void *make_alloc_exact(uintptr_t addr, unsigned int order,
 void *alloc_pages_exact_noprof(size_t size, gfp_t gfp_mask)
 {
 	unsigned int order = get_order(size);
-	unsigned long addr;
+	uintptr_t addr;
 
 	if (WARN_ON_ONCE(gfp_mask & (__GFP_COMP | __GFP_HIGHMEM)))
 		gfp_mask &= ~(__GFP_COMP | __GFP_HIGHMEM);
