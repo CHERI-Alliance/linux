@@ -29,3 +29,21 @@ SYM_FUNC_START(morello_cpu_setup)
 
 	ret
 SYM_FUNC_END(morello_cpu_setup)
+
+
+SYM_FUNC_START(__morello_cap_lo_hi_tag)
+	ldr	c0, [x0]
+	str	x0, [x1]
+	cfhi	x4, c0			// Extract upper 64 bits
+	str	x4, [x2]
+	gctag	x4, c0
+	strb	w4, [x3]
+
+	ret
+SYM_FUNC_END(__morello_cap_lo_hi_tag)
+
+SYM_FUNC_START(__morello_get_ddc)
+	mrs	c1, ddc
+	str	c1, [x0]
+	ret
+SYM_FUNC_END(__morello_get_ddc)
