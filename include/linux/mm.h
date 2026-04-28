@@ -143,7 +143,7 @@ extern int mmap_rnd_compat_bits __read_mostly;
  * mm_zero_struct_page they should wrap the defines below in a #ifndef and
  * define their own version of this macro in <asm/pgtable.h>
  */
-#if BITS_PER_LONG == 64
+#if BITS_PER_LONG == 64 && !defined(CONFIG_CHERI_KERNEL)
 /* This function must be updated when the size of struct page grows above 96
  * or reduces below 56. The idea that compiler optimizes out switch()
  * statement, and only leaves move/store instructions. Also the compiler can
