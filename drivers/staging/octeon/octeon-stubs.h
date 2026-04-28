@@ -1211,7 +1211,7 @@ static inline int cvmx_wqe_get_grp(struct cvmx_wqe *work)
 
 static inline void *cvmx_phys_to_ptr(uint64_t physical_address)
 {
-	return (void *)(uintptr_t)(physical_address);
+	return __c_fakep(physical_address);
 }
 
 static inline phys_addr_t cvmx_ptr_to_phys(void *ptr)
