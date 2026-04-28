@@ -2014,7 +2014,7 @@ static int receive_fallback_to_copy(struct sock *sk,
 	if (copy_address != zc->copybuf_address)
 		return -EINVAL;
 
-	err = import_ubuf(ITER_DEST, (void __user *)copy_address, inq,
+	err = import_ubuf(ITER_DEST, uaddr_to_user_ptr(copy_address), inq,
 			  &msg.msg_iter);
 	if (err)
 		return err;
@@ -2047,7 +2047,7 @@ static int tcp_copy_straggler_data(struct tcp_zerocopy_receive *zc,
 	if (copy_address != zc->copybuf_address)
 		return -EINVAL;
 
-	err = import_ubuf(ITER_DEST, (void __user *)copy_address, copylen,
+	err = import_ubuf(ITER_DEST, uaddr_to_user_ptr(copy_address), copylen,
 			  &msg.msg_iter);
 	if (err)
 		return err;
@@ -2176,7 +2176,7 @@ static void tcp_zc_finalize_rx_tstamp(struct sock *sk,
 	struct msghdr cmsg_dummy;
 
 	msg_control_addr = (unsigned long)zc->msg_control;
-	cmsg_dummy.msg_control_user = (void __user *)msg_control_addr;
+	cmsg_dummy.msg_control_user = uaddr_to_user_ptr(msg_control_addr);
 	cmsg_dummy.msg_controllen =
 		(__kernel_size_t)zc->msg_controllen;
 	cmsg_dummy.msg_flags = in_compat_syscall()
