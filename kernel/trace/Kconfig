@@ -853,6 +853,7 @@ config EPROBE_EVENTS
 config BPF_EVENTS
 	depends on BPF_SYSCALL
 	depends on (KPROBE_EVENTS || UPROBE_EVENTS) && PERF_EVENTS
+	depends on CHERI_KERNEL || !CHERI_PURECAP_UABI
 	bool
 	default y
 	help
