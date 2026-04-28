@@ -3034,7 +3034,7 @@ retry:
 	} else {
 		tmp = vma_prev(&vmi);
 		if (tmp && vm_end_gap(tmp) > gap) {
-			high_limit = tmp->vm_start;
+			high_limit = reserv_vma_reserv_start(tmp);
 			vma_iter_reset(&vmi);
 			goto retry;
 		}
