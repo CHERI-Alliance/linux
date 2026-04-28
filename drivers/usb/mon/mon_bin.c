@@ -574,7 +574,7 @@ static void mon_bin_event(struct mon_reader_bin *rp, struct urb *urb,
 	ep->epnum = dir | usb_endpoint_num(epd);
 	ep->devnum = urb->dev->devnum;
 	ep->busnum = urb->dev->bus->busnum;
-	ep->id = (uintptr_t) urb;
+	ep->id = __c_pa(urb);
 	ep->ts_sec = ts.tv_sec;
 	ep->ts_usec = ts.tv_nsec / NSEC_PER_USEC;
 	ep->status = status;
@@ -662,7 +662,7 @@ static void mon_bin_error(void *data, struct urb *urb, int error)
 	ep->epnum |= usb_endpoint_num(&urb->ep->desc);
 	ep->devnum = urb->dev->devnum;
 	ep->busnum = urb->dev->bus->busnum;
-	ep->id = (uintptr_t) urb;
+	ep->id = __c_pa(urb);
 	ep->ts_sec = ts.tv_sec;
 	ep->ts_usec = ts.tv_nsec / NSEC_PER_USEC;
 	ep->status = error;
@@ -1337,7 +1337,7 @@ static int mon_bin_wait_event(struct file *file, struct mon_reader_bin *rp)
 static int mon_alloc_buff(struct mon_pgmap *map, int npages)
 {
 	int n;
-	unsigned long vaddr;
+	uintptr_t vaddr;
 
 	for (n = 0; n < npages; n++) {
 		vaddr = get_zeroed_page(GFP_KERNEL);

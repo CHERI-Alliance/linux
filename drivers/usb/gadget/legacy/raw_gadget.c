@@ -1363,7 +1363,9 @@ static long raw_ioctl(struct file *fd, unsigned int cmd, user_uintptr_t value)
 static const struct file_operations raw_fops = {
 	.open =			raw_open,
 	.unlocked_ioctl =	raw_ioctl,
+#ifndef CONFIG_CHERI_KERNEL
 	.compat_ioctl =		raw_ioctl,
+#endif
 	.release =		raw_release,
 };
 
