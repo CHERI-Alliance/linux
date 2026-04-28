@@ -35,6 +35,7 @@
 #include <linux/util_macros.h>
 #include <linux/wordpart.h>
 
+#include <linux/user_ptr.h>
 #include <asm/byteorder.h>
 
 #include <uapi/linux/kernel.h>
