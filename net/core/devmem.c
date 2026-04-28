@@ -416,7 +416,7 @@ out_err:
 
 struct net_iov *
 net_devmem_get_niov_at(struct net_devmem_dmabuf_binding *binding,
-		       size_t virt_addr, size_t *off, size_t *size)
+		       user_uintptr_t virt_addr, size_t *off, size_t *size)
 {
 	if (virt_addr >= binding->dmabuf->size)
 		return NULL;
@@ -424,7 +424,7 @@ net_devmem_get_niov_at(struct net_devmem_dmabuf_binding *binding,
 	*off = virt_addr % PAGE_SIZE;
 	*size = PAGE_SIZE - *off;
 
-	return binding->tx_vec[virt_addr / PAGE_SIZE];
+	return binding->tx_vec[__c_ua(virt_addr) / PAGE_SIZE];
 }
 
 /*** "Dmabuf devmem memory provider" ***/

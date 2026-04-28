@@ -1516,7 +1516,7 @@ int ieee80211_build_preq_ies(struct ieee80211_sub_if_data *sdata, u8 *buffer,
 		offs = __c_pa(ie_desc->ies[i]) - __c_pa(start);
 		ie_desc->ies[i] = buffer + offs;
 	}
-	offs = ie_desc->common_ies - start;
+	offs = __c_pa(ie_desc->common_ies) - __c_pa(start);
 	ie_desc->common_ies = buffer + offs;
 
 	ret = skb->len;

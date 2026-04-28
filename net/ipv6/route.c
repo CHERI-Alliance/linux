@@ -1696,7 +1696,7 @@ static void fib6_nh_excptn_bucket_set_flushed(struct fib6_nh *nh,
 					      spinlock_t *lock)
 {
 	struct rt6_exception_bucket *bucket;
-	unsigned long p;
+	uintptr_t p;
 
 	bucket = rcu_dereference_protected(nh->rt6i_exception_bucket,
 					   lockdep_is_held(lock));

@@ -1812,9 +1812,9 @@ static int compat_calc_entry(const struct ebt_entry *e,
 		if (info->hook_entry[i] &&
 		    (e < (struct ebt_entry *)(uintptr_t)(base - hookptr))) {
 			newinfo->hook_entry[i] -= off;
-			pr_debug("0x%08X -> 0x%08X\n",
-					newinfo->hook_entry[i] + off,
-					newinfo->hook_entry[i]);
+			pr_debug("0x%08lX -> 0x%08lX\n",
+					(unsigned long)newinfo->hook_entry[i] + off,
+					(unsigned long)newinfo->hook_entry[i]);
 		}
 	}
 
