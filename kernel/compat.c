@@ -173,21 +173,23 @@ COMPAT_SYSCALL_DEFINE3(sched_getaffinity, compat_pid_t,  pid, unsigned int, len,
  * We currently only need the following fields from the sigevent
  * structure: sigev_value, sigev_signo, sig_notify and (sometimes
  * sigev_notify_thread_id).  The others are handled in user mode.
- * We also assume that copying sigev_value.sival_int is sufficient
- * to keep all the bits of sigev_value.sival_ptr intact.
+ * Copying sigev_value.sival_int is insufficient to keep all the
+ * bits of sigev_value.sival_ptr intact in compat64 mode so the bigger
+ * member sigev_value.sival_ptr is copied.
  */
 int get_compat_sigevent(struct sigevent *event,
 		const struct compat_sigevent __user *u_event)
 {
+	struct compat_sigevent n;
+
 	memset(event, 0, sizeof(*event));
-	return (!access_ok(u_event, sizeof(*u_event)) ||
-		__get_user(event->sigev_value.sival_int,
-			&u_event->sigev_value.sival_int) ||
-		__get_user(event->sigev_signo, &u_event->sigev_signo) ||
-		__get_user(event->sigev_notify, &u_event->sigev_notify) ||
-		__get_user(event->sigev_notify_thread_id,
-			&u_event->sigev_notify_thread_id))
-		? -EFAULT : 0;
+	if (copy_from_user(&n, u_event, sizeof(struct compat_sigevent)))
+		return -EFAULT;
+	event->sigev_value.sival_ptr = as_user_ptr(n.sigev_value.sival_ptr);
+	event->sigev_signo = n.sigev_signo;
+	event->sigev_notify = n.sigev_notify;
+	event->sigev_notify_thread_id = n.sigev_notify_thread_id;
+	return 0;
 }
 
 long compat_get_bitmap(unsigned long *mask, const compat_ulong_t __user *umask,
