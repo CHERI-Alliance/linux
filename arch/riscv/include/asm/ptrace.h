@@ -13,46 +13,52 @@
 #ifndef __ASSEMBLER__
 
 struct pt_regs {
-	unsigned long epc;
-	unsigned long ra;
-	unsigned long sp;
-	unsigned long gp;
-	unsigned long tp;
-	unsigned long t0;
-	unsigned long t1;
-	unsigned long t2;
-	unsigned long s0;
-	unsigned long s1;
+	uintptr_t epc;
+	uintptr_t ra;
+	uintptr_t sp;
+	uintptr_t gp;
+	uintptr_t tp;
+	uintptr_t t0;
+	uintptr_t t1;
+	uintptr_t t2;
+	uintptr_t s0;
+	uintptr_t s1;
 	struct_group(a_regs,
-		unsigned long a0;
-		unsigned long a1;
-		unsigned long a2;
-		unsigned long a3;
-		unsigned long a4;
-		unsigned long a5;
-		unsigned long a6;
-		unsigned long a7;
+		uintptr_t a0;
+		uintptr_t a1;
+		uintptr_t a2;
+		uintptr_t a3;
+		uintptr_t a4;
+		uintptr_t a5;
+		uintptr_t a6;
+		uintptr_t a7;
 	);
-	unsigned long s2;
-	unsigned long s3;
-	unsigned long s4;
-	unsigned long s5;
-	unsigned long s6;
-	unsigned long s7;
-	unsigned long s8;
-	unsigned long s9;
-	unsigned long s10;
-	unsigned long s11;
-	unsigned long t3;
-	unsigned long t4;
-	unsigned long t5;
-	unsigned long t6;
+	uintptr_t s2;
+	uintptr_t s3;
+	uintptr_t s4;
+	uintptr_t s5;
+	uintptr_t s6;
+	uintptr_t s7;
+	uintptr_t s8;
+	uintptr_t s9;
+	uintptr_t s10;
+	uintptr_t s11;
+	uintptr_t t3;
+	uintptr_t t4;
+	uintptr_t t5;
+	uintptr_t t6;
+#ifdef CONFIG_CHERI_KERNEL
+	uintptr_t ddc;
+#endif
+	/* a0 value before the syscall */
+	uintptr_t orig_a0;
 	/* Supervisor/Machine CSRs */
 	unsigned long status;
 	unsigned long badaddr;
 	unsigned long cause;
-	/* a0 value before the syscall */
-	unsigned long orig_a0;
+#ifdef CONFIG_CHERI_KERNEL
+	unsigned long _pad;
+#endif
 };
 
 #define PTRACE_SYSEMU			0x1f
@@ -64,17 +70,23 @@ struct pt_regs {
 #define REG_FMT "%08lx"
 #endif
 
+#ifdef CONFIG_CHERI_KERNEL
+#define CREG_FMT "%#p"
+#else
+#define CREG_FMT "%p"
+#endif
+
 #define user_mode(regs) (((regs)->status & SR_PP) == 0)
 
 #define MAX_REG_OFFSET offsetof(struct pt_regs, orig_a0)
 
 /* Helpers for working with the instruction pointer */
-static inline unsigned long instruction_pointer(struct pt_regs *regs)
+static inline uintptr_t instruction_pointer(struct pt_regs *regs)
 {
 	return regs->epc;
 }
 static inline void instruction_pointer_set(struct pt_regs *regs,
-					   unsigned long val)
+					   uintptr_t val)
 {
 	regs->epc = val;
 }
@@ -82,40 +94,40 @@ static inline void instruction_pointer_set(struct pt_regs *regs,
 #define profile_pc(regs) instruction_pointer(regs)
 
 /* Helpers for working with the user stack pointer */
-static inline unsigned long user_stack_pointer(struct pt_regs *regs)
+static inline uintptr_t user_stack_pointer(struct pt_regs *regs)
 {
 	return regs->sp;
 }
 static inline void user_stack_pointer_set(struct pt_regs *regs,
-					  unsigned long val)
+					  uintptr_t val)
 {
 	regs->sp =  val;
 }
 
 /* Valid only for Kernel mode traps. */
-static inline unsigned long kernel_stack_pointer(struct pt_regs *regs)
+static inline uintptr_t kernel_stack_pointer(struct pt_regs *regs)
 {
 	return regs->sp;
 }
 
 /* Helpers for working with the frame pointer */
-static inline unsigned long frame_pointer(struct pt_regs *regs)
+static inline uintptr_t frame_pointer(struct pt_regs *regs)
 {
 	return regs->s0;
 }
 static inline void frame_pointer_set(struct pt_regs *regs,
-				     unsigned long val)
+				     uintptr_t val)
 {
 	regs->s0 = val;
 }
 
-static inline unsigned long regs_return_value(struct pt_regs *regs)
+static inline uintptr_t regs_return_value(struct pt_regs *regs)
 {
 	return regs->a0;
 }
 
 static inline void regs_set_return_value(struct pt_regs *regs,
-					 unsigned long val)
+					 uintptr_t val)
 {
 	regs->a0 = val;
 }
@@ -124,7 +136,7 @@ extern int regs_query_register_offset(const char *name);
 extern unsigned long regs_get_kernel_stack_nth(struct pt_regs *regs,
 					       unsigned int n);
 
-void prepare_ftrace_return(unsigned long *parent, unsigned long self_addr,
+void prepare_ftrace_return(uintptr_t *parent, unsigned long self_addr,
 			   unsigned long frame_pointer);
 
 /**
@@ -136,13 +148,13 @@ void prepare_ftrace_return(unsigned long *parent, unsigned long self_addr,
  * The @offset is the offset of the register in struct pt_regs.
  * If @offset is bigger than MAX_REG_OFFSET, this returns 0.
  */
-static inline unsigned long regs_get_register(struct pt_regs *regs,
-					      unsigned int offset)
+static inline uintptr_t regs_get_register(struct pt_regs *regs,
+					   unsigned int offset)
 {
 	if (unlikely(offset > MAX_REG_OFFSET))
 		return 0;
 
-	return *(unsigned long *)((uintptr_t)regs + offset);
+	return *(uintptr_t *)((uintptr_t)regs + offset);
 }
 
 /**
@@ -155,8 +167,8 @@ static inline unsigned long regs_get_register(struct pt_regs *regs,
  * Note you can get the parameter correctly if the function has no
  * more than eight arguments.
  */
-static inline unsigned long regs_get_kernel_argument(struct pt_regs *regs,
-						unsigned int n)
+static inline uintptr_t regs_get_kernel_argument(struct pt_regs *regs,
+						  unsigned int n)
 {
 	static const int nr_reg_arguments = 8;
 	static const unsigned int argument_offs[] = {
