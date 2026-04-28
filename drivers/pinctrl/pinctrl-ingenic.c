@@ -4003,7 +4003,7 @@ static int ingenic_pinmux_set_mux(struct pinctrl_dev *pctldev,
 	const struct function_desc *func;
 	struct group_desc *grp;
 	unsigned int i;
-	uintptr_t mode;
+	unsigned long mode;
 	u8 *pin_modes;
 
 	func = pinmux_generic_get_function(pctldev, selector);
@@ -4017,7 +4017,7 @@ static int ingenic_pinmux_set_mux(struct pinctrl_dev *pctldev,
 	dev_dbg(pctldev->dev, "enable function %s group %s\n",
 		func->func->name, grp->grp.name);
 
-	mode = (uintptr_t)grp->data;
+	mode = __c_pa(grp->data);
 	if (mode <= 3) {
 		for (i = 0; i < grp->grp.npins; i++)
 			ingenic_pinmux_set_pin_fn(jzpc, grp->grp.pins[i], mode);
