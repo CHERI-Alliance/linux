@@ -240,7 +240,7 @@ struct ath_desc {
 	u32 ds_ctl1;
 	u32 ds_hw[20];
 	void *ds_vdata;
-} __packed __aligned(4);
+} __packed __aligned(4) __cheri_pointer_align;
 
 #define ATH9K_TXDESC_NOACK		0x0002
 #define ATH9K_TXDESC_RTSENA		0x0004

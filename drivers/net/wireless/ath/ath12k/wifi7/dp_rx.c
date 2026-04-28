@@ -682,7 +682,10 @@ try_again:
 
 		desc_va = ((u64)le32_to_cpu(desc->buf_va_hi) << 32 |
 			   le32_to_cpu(desc->buf_va_lo));
-		desc_info = (struct ath12k_rx_desc_info *)((unsigned long)desc_va);
+		/* FIXCHERI: Get rid of cheri_make_kernel_data_cap() */
+		desc_info = (struct ath12k_rx_desc_info *)
+			cheri_make_kernel_data_cap(desc_va,
+						   sizeof(&desc_info));
 
 		device_id = hw_links[hw_link_id].device_id;
 		partner_dp = ath12k_dp_hw_grp_to_dp(dp_hw_grp, device_id);
@@ -1279,7 +1282,10 @@ ath12k_wifi7_dp_process_rx_err_buf(struct ath12k_pdev_dp *dp_pdev,
 
 	desc_va = ((u64)le32_to_cpu(desc->buf_va_hi) << 32 |
 		   le32_to_cpu(desc->buf_va_lo));
-	desc_info = (struct ath12k_rx_desc_info *)((unsigned long)desc_va);
+	/* FIXCHERI: Get rid of cheri_make_kernel_data_cap() */
+	desc_info = (struct ath12k_rx_desc_info *)
+		cheri_make_kernel_data_cap(desc_va,
+					   sizeof(*desc_info));
 
 	/* retry manual desc retrieval */
 	if (!desc_info) {
@@ -1358,8 +1364,11 @@ static int ath12k_dp_h_msdu_buffer_type(struct ath12k_dp *dp,
 
 	desc_va = (u64)le32_to_cpu(desc->buf_va_hi) << 32 |
 		  le32_to_cpu(desc->buf_va_lo);
-	desc_info = (struct ath12k_rx_desc_info *)(uintptr_t)desc_va;
-	if (!desc_info) {
+	desc_info = (struct ath12k_rx_desc_info *)__c_fakep(desc_va);
+	if (desc_info) {
+		// FIXCHERI
+		desc_info = cheri_make_kernel_data_cap(__c_pa(desc_info), sizeof(*desc_info));
+	} else {
 		u32 cookie;
 
 		cookie = le32_get_bits(desc->buf_addr_info.info1,

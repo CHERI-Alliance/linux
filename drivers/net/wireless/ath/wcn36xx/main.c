@@ -440,7 +440,7 @@ static void wcn36xx_configure_filter(struct ieee80211_hw *hw,
 
 	*total &= FIF_ALLMULTI;
 
-	fp = (void *)(unsigned long)multicast;
+	fp = (void *)multicast;
 	list_for_each_entry(tmp, &wcn->vif_list, list) {
 		vif = wcn36xx_priv_to_vif(tmp);
 
@@ -479,7 +479,7 @@ static uintptr_t wcn36xx_prepare_multicast(struct ieee80211_hw *hw,
 		}
 	}
 
-	return (u64)(uintptr_t)fp;
+	return (uintptr_t)fp;
 }
 
 static void wcn36xx_tx(struct ieee80211_hw *hw,

@@ -456,32 +456,34 @@ static void wil6210_debugfs_init_offset(struct wil6210_priv *wil,
 {
 	int i;
 
+#define MKPTR(base, off, sz) ((base) ? ((base) + (off)) : cheri_make_kernel_data_cap((off), sz))
 	for (i = 0; tbl[i].name; i++) {
 		switch (tbl[i].type) {
 		case doff_u32:
 			debugfs_create_u32(tbl[i].name, tbl[i].mode, dbg,
-					   base + tbl[i].off);
+					   MKPTR(base, tbl[i].off, sizeof(u32)));
 			break;
 		case doff_x32:
 			debugfs_create_x32(tbl[i].name, tbl[i].mode, dbg,
-					   base + tbl[i].off);
+					   MKPTR(base, tbl[i].off, sizeof(u32)));
 			break;
 		case doff_ulong:
 			debugfs_create_file_unsafe(tbl[i].name, tbl[i].mode,
-						   dbg, base + tbl[i].off,
+						   dbg, MKPTR(base, tbl[i].off, sizeof(ulong)),
 						   &wil_fops_ulong);
 			break;
 		case doff_io32:
 			wil_debugfs_create_iomem_x32(tbl[i].name, tbl[i].mode,
-						     dbg, base + tbl[i].off,
+						     dbg, MKPTR(base, tbl[i].off, sizeof(u32)),
 						     wil);
 			break;
 		case doff_u8:
 			debugfs_create_u8(tbl[i].name, tbl[i].mode, dbg,
-					  base + tbl[i].off);
+					  MKPTR(base, tbl[i].off, sizeof(u8)));
 			break;
 		}
 	}
+#undef MKPTR
 }
 
 static const struct dbg_off isr_off[] = {
@@ -2417,13 +2419,13 @@ static const struct dbg_off dbg_wil_regs[] = {
 
 /* static parameters */
 static const struct dbg_off dbg_statics[] = {
-	{"desc_index",	0644, (uintptr_t)&dbg_txdesc_index, doff_u32},
-	{"ring_index",	0644, (uintptr_t)&dbg_ring_index, doff_u32},
-	{"mem_addr",	0644, (uintptr_t)&mem_addr, doff_u32},
-	{"led_polarity", 0644, (uintptr_t)&led_polarity, doff_u8},
-	{"status_index", 0644, (uintptr_t)&dbg_status_msg_index, doff_u32},
-	{"sring_index",	0644, (uintptr_t)&dbg_sring_index, doff_u32},
-	{"drop_if_ring_full", 0644, (uintptr_t)&drop_if_ring_full, doff_u8},
+	{"desc_index",	0644, (ulong __force)&dbg_txdesc_index, doff_u32},
+	{"ring_index",	0644, (ulong __force)&dbg_ring_index, doff_u32},
+	{"mem_addr",	0644, (ulong __force)&mem_addr, doff_u32},
+	{"led_polarity", 0644, (ulong __force)&led_polarity, doff_u8},
+	{"status_index", 0644, (ulong __force)&dbg_status_msg_index, doff_u32},
+	{"sring_index",	0644, (ulong __force)&dbg_sring_index, doff_u32},
+	{"drop_if_ring_full", 0644, (ulong __force)&drop_if_ring_full, doff_u8},
 	{},
 };
 

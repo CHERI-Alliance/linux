@@ -400,8 +400,10 @@ int ath12k_wifi7_hal_wbm_desc_parse_err(struct ath12k_dp *dp, void *desc,
 
 		desc_va = ((u64)le32_to_cpu(wbm_cc_desc->buf_va_hi) << 32 |
 			   le32_to_cpu(wbm_cc_desc->buf_va_lo));
-		rel_info->rx_desc =
-			(struct ath12k_rx_desc_info *)((unsigned long)desc_va);
+		/* FIXCHERI: Get rid of cheri_make_kernel_data_cap() */
+		rel_info->rx_desc = (struct ath12k_rx_desc_info *)
+			cheri_make_kernel_data_cap(desc_va,
+						   sizeof(*rel_info->rx_desc));
 	}
 
 	rel_info->err_rel_src = rel_src;
