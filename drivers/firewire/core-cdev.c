@@ -258,23 +258,12 @@ static void __user *u64_to_uptr(u64 value)
 		return (void __user *)(unsigned long)value;
 }
 
-static u64 uptr_to_u64(void __user *ptr)
-{
-	if (in_compat_syscall())
-		return ptr_to_compat(ptr);
-	else
-		return (u64)(user_uintptr_t)ptr;
-}
 #else
-static inline void __user *u64_to_uptr(u64 value)
+static inline void __user *u64_to_uptr(uintptr_t value)
 {
-	return (void __user *)(unsigned long)value;
+	return (void __user *)(uintptr_t)value;
 }
 
-static inline u64 uptr_to_u64(void __user *ptr)
-{
-	return (u64)(unsigned long)ptr;
-}
 #endif /* CONFIG_COMPAT */
 
 static int fw_device_op_open(struct inode *inode, struct file *file)
@@ -1134,7 +1123,7 @@ static int ioctl_queue_iso(struct client *client, union ioctl_arg *arg)
 	 * use the indirect payload, the iso buffer need not be mapped
 	 * and the a->data pointer is ignored.
 	 */
-	payload = (unsigned long)a->data - client->vm_start;
+	payload = a->data - client->vm_start;
 	buffer_end = client->buffer.page_count << PAGE_SHIFT;
 	if (a->data == 0 || client->buffer.pages == NULL ||
 	    payload >= buffer_end) {
@@ -1201,8 +1190,8 @@ static int ioctl_queue_iso(struct client *client, union ioctl_arg *arg)
 	}
 	fw_iso_context_queue_flush(ctx);
 
-	a->size    -= uptr_to_u64(p) - a->packets;
-	a->packets  = uptr_to_u64(p);
+	a->size    -= __c_pa_u(p) - __c_ua(a->packets);
+	a->packets  = (user_uintptr_t)p;
 	a->data     = client->vm_start + payload;
 
 	return count;
@@ -1541,7 +1530,7 @@ static void outbound_phy_packet_callback(struct fw_packet *packet,
 	struct client *e_client = e->client;
 	u32 rcode;
 
-	trace_async_phy_outbound_complete((uintptr_t)packet, card->index, status, packet->generation,
+	trace_async_phy_outbound_complete(__c_pa(packet), card->index, status, packet->generation,
 					  packet->timestamp);
 
 	switch (status) {
@@ -1641,7 +1630,7 @@ static int ioctl_send_phy_packet(struct client *client, union ioctl_arg *arg)
 		memcpy(pp->data, a->data, sizeof(a->data));
 	}
 
-	trace_async_phy_outbound_initiate((uintptr_t)&e->p, card->index, e->p.generation,
+	trace_async_phy_outbound_initiate(__c_pa(&e->p), card->index, e->p.generation,
 					  e->p.header[1], e->p.header[2]);
 
 	card->driver->send_request(card, &e->p);
