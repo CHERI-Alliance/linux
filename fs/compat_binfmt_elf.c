@@ -38,18 +38,11 @@
 #undef elf_uaddr_to_user_ptr
 #define elf_uaddr_to_user_ptr(addr)		addr
 
-#ifdef CONFIG_CHERI_PURECAP_UABI
-
 #undef elf_copy_to_user_stack
 #define elf_copy_to_user_stack(to, from, len)	copy_to_user(to, from, len)
 
-#undef elf_stack_put_user_ptr
-#define elf_stack_put_user_ptr(val, ptr)	put_user(user_ptr_addr(val), ptr)
-
 #undef elf_stack_put_user
-#define elf_stack_put_user(val, ptr)		put_user(val, ptr)
-
-#endif /* CONFIG_CHERI_PURECAP_UABI */
+#define elf_stack_put_user(val, ptr)		put_user((elf_addr_t)(user_uintptr_t)(val), (ptr))
 
 #ifdef CONFIG_COMPAT32
 /*
