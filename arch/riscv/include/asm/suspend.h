@@ -14,7 +14,7 @@ struct suspend_context {
 	struct pt_regs regs;
 	/* Saved and restored by high-level functions */
 	unsigned long envcfg;
-	unsigned long tvec;
+	uintptr_t tvec;
 	unsigned long ie;
 #ifdef CONFIG_MMU
 	unsigned long satp;
