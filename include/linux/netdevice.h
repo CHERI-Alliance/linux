@@ -2189,9 +2189,9 @@ struct net_device {
 	 *	I/O specific fields
 	 *	FIXME: Merge these and struct ifmap into one
 	 */
-	unsigned long		mem_end;
-	unsigned long		mem_start;
-	unsigned long		base_addr;
+	uintptr_t		mem_end;
+	uintptr_t		mem_start;
+	uintptr_t		base_addr;
 
 	/*
 	 *	Some hardware also needs these fields (state,dev_list,

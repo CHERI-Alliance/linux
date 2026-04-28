@@ -151,7 +151,7 @@ extern struct ieee80211_rate mt76x02_rates[12];
 int mt76x02_init_device(struct mt76x02_dev *dev);
 void mt76x02_configure_filter(struct ieee80211_hw *hw,
 			      unsigned int changed_flags,
-			      unsigned int *total_flags, u64 multicast);
+			      unsigned int *total_flags, uintptr_t multicast);
 int mt76x02_sta_add(struct mt76_dev *mdev, struct ieee80211_vif *vif,
 		    struct ieee80211_sta *sta);
 void mt76x02_sta_remove(struct mt76_dev *mdev, struct ieee80211_vif *vif,
