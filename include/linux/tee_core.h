@@ -125,7 +125,7 @@ struct tee_driver_ops {
 			 struct tee_param *param);
 	int (*shm_register)(struct tee_context *ctx, struct tee_shm *shm,
 			    struct page **pages, size_t num_pages,
-			    unsigned long start);
+			    uintptr_t start);
 	int (*shm_unregister)(struct tee_context *ctx, struct tee_shm *shm);
 };
 
@@ -297,7 +297,7 @@ struct tee_shm_pool_ops {
  *
  * @returns pointer to a 'struct tee_shm_pool' or an ERR_PTR on failure.
  */
-struct tee_shm_pool *tee_shm_pool_alloc_res_mem(unsigned long vaddr,
+struct tee_shm_pool *tee_shm_pool_alloc_res_mem(uintptr_t vaddr,
 						phys_addr_t paddr, size_t size,
 						int min_alloc_order);
 
@@ -346,7 +346,7 @@ int tee_dyn_shm_alloc_helper(struct tee_shm *shm, size_t size, size_t align,
 						 struct tee_shm *shm,
 						 struct page **pages,
 						 size_t num_pages,
-						 unsigned long start));
+						 uintptr_t start));
 void tee_dyn_shm_free_helper(struct tee_shm *shm,
 			     int (*shm_unregister)(struct tee_context *ctx,
 						   struct tee_shm *shm));

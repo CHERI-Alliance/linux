@@ -12,7 +12,7 @@
 static int pool_op_gen_alloc(struct tee_shm_pool *pool, struct tee_shm *shm,
 			     size_t size, size_t align)
 {
-	unsigned long va;
+	uintptr_t va;
 	struct gen_pool *genpool = pool->private_data;
 	size_t a = max_t(size_t, align, BIT(genpool->min_alloc_order));
 	struct genpool_data_align data = { .align = a };
@@ -24,7 +24,7 @@ static int pool_op_gen_alloc(struct tee_shm_pool *pool, struct tee_shm *shm,
 
 	memset((void *)va, 0, s);
 	shm->kaddr = (void *)va;
-	shm->paddr = gen_pool_virt_to_phys(genpool, va);
+	shm->paddr = gen_pool_virt_to_phys(genpool, __c_ua(va));
 	shm->size = s;
 	/*
 	 * This is from a static shared memory pool so no need to register
@@ -53,7 +53,7 @@ static const struct tee_shm_pool_ops pool_ops_generic = {
 	.destroy_pool = pool_op_gen_destroy_pool,
 };
 
-struct tee_shm_pool *tee_shm_pool_alloc_res_mem(unsigned long vaddr,
+struct tee_shm_pool *tee_shm_pool_alloc_res_mem(uintptr_t vaddr,
 						phys_addr_t paddr, size_t size,
 						int min_alloc_order)
 {
@@ -62,7 +62,7 @@ struct tee_shm_pool *tee_shm_pool_alloc_res_mem(unsigned long vaddr,
 	int rc;
 
 	/* Start and end must be page aligned */
-	if (vaddr & page_mask || paddr & page_mask || size & page_mask)
+	if (__c_ua(vaddr) & page_mask || paddr & page_mask || size & page_mask)
 		return ERR_PTR(-EINVAL);
 
 	pool = kzalloc_obj(*pool);

@@ -336,7 +336,7 @@ int tee_dyn_shm_alloc_helper(struct tee_shm *shm, size_t size, size_t align,
 						 struct tee_shm *shm,
 						 struct page **pages,
 						 size_t num_pages,
-						 unsigned long start))
+						 uintptr_t start))
 {
 	size_t nr_pages = roundup(size, PAGE_SIZE) / PAGE_SIZE;
 	struct page **pages;
@@ -403,7 +403,7 @@ register_shm_helper(struct tee_context *ctx, struct iov_iter *iter, u32 flags,
 {
 	struct tee_device *teedev = ctx->teedev;
 	struct tee_shm *shm;
-	unsigned long start, addr;
+	uintptr_t start, addr;
 	size_t num_pages, off;
 	ssize_t len;
 	void *ret;
@@ -494,7 +494,7 @@ err_dev_put:
  * @returns a pointer to 'struct tee_shm'
  */
 struct tee_shm *tee_shm_register_user_buf(struct tee_context *ctx,
-					  unsigned long addr, size_t length)
+					  uintptr_t addr, size_t length)
 {
 	u32 flags = TEE_SHM_USER_MAPPED | TEE_SHM_DYNAMIC;
 	struct tee_device *teedev = ctx->teedev;

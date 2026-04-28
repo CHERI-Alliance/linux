@@ -461,7 +461,7 @@ static int params_from_user(struct tee_context *ctx, struct tee_param *params,
 		case TEE_IOCTL_PARAM_ATTR_TYPE_UBUF_INPUT:
 		case TEE_IOCTL_PARAM_ATTR_TYPE_UBUF_OUTPUT:
 		case TEE_IOCTL_PARAM_ATTR_TYPE_UBUF_INOUT:
-			params[n].u.ubuf.uaddr = u64_to_user_ptr(ip.a);
+			params[n].u.ubuf.uaddr = u64_to_user_ptr(ip.aptr);
 			params[n].u.ubuf.size = ip.b;
 
 			if (!access_ok(params[n].u.ubuf.uaddr,
@@ -892,7 +892,7 @@ static int params_from_supp(struct tee_param *params, size_t num_params,
 			break;
 		case TEE_IOCTL_PARAM_ATTR_TYPE_UBUF_OUTPUT:
 		case TEE_IOCTL_PARAM_ATTR_TYPE_UBUF_INOUT:
-			p->u.ubuf.uaddr = u64_to_user_ptr(ip.a);
+			p->u.ubuf.uaddr = u64_to_user_ptr(ip.aptr);
 			p->u.ubuf.size = ip.b;
 
 			if (!access_ok(params[n].u.ubuf.uaddr,
