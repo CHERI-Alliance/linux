@@ -40,7 +40,7 @@ struct cros_ec_codec_priv {
 
 	uint64_t ap_shm_phys_addr;
 	uint32_t ap_shm_len;
-	uint64_t ap_shm_addr;
+	uintptr_t ap_shm_addr;
 	uint64_t ap_shm_last_alloc;
 
 	/* DMIC */
@@ -984,7 +984,7 @@ static int cros_ec_codec_platform_probe(struct platform_device *pdev)
 		priv->ap_shm_phys_addr = res.start;
 		priv->ap_shm_len = resource_size(&res);
 		priv->ap_shm_addr =
-			(uint64_t)(uintptr_t)devm_ioremap_wc(
+			(uintptr_t)devm_ioremap_wc(
 				dev, priv->ap_shm_phys_addr,
 				priv->ap_shm_len);
 		priv->ap_shm_last_alloc = priv->ap_shm_phys_addr;

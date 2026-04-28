@@ -1946,7 +1946,7 @@ static int rsnd_probe(struct platform_device *pdev)
 		return -ENODEV;
 
 	priv->pdev	= pdev;
-	priv->flags	= (uintptr_t)of_device_get_match_data(dev);
+	priv->flags	= __c_pa(of_device_get_match_data(dev));
 	spin_lock_init(&priv->lock);
 
 	/*

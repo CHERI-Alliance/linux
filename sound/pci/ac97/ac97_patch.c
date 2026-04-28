@@ -3684,7 +3684,7 @@ static int snd_ac97_vt1618_UAJ_info(struct snd_kcontrol *kcontrol,
 				    struct snd_ctl_elem_info *uinfo)
 {
 	return snd_ctl_enum_info(uinfo, 1, 4,
-				 vt1618_uaj[kcontrol->private_value].items);
+				 vt1618_uaj[__c_ua(kcontrol->private_value)].items);
 }
 
 /* All of the vt1618 Universal Audio Jack twiddlers are on
@@ -3703,12 +3703,12 @@ static int snd_ac97_vt1618_UAJ_get(struct snd_kcontrol *kcontrol,
 	snd_ac97_update_bits(pac97, AC97_INT_PAGING, AC97_PAGE_MASK, 0);
 
 	uaj = snd_ac97_read(pac97, 0x60) &
-		vt1618_uaj[kcontrol->private_value].mask;
+		vt1618_uaj[__c_ua(kcontrol->private_value)].mask;
 
 	snd_ac97_update_bits(pac97, AC97_INT_PAGING, AC97_PAGE_MASK, datpag);
 
 	ucontrol->value.enumerated.item[0] = uaj >>
-		vt1618_uaj[kcontrol->private_value].shift;
+		vt1618_uaj[__c_ua(kcontrol->private_value)].shift;
 
 	return 0;
 }
@@ -3717,9 +3717,9 @@ static int snd_ac97_vt1618_UAJ_put(struct snd_kcontrol *kcontrol,
 				   struct snd_ctl_elem_value *ucontrol)
 {
 	return ac97_update_bits_page(snd_kcontrol_chip(kcontrol), 0x60,
-				     vt1618_uaj[kcontrol->private_value].mask,
+				     vt1618_uaj[__c_ua(kcontrol->private_value)].mask,
 				     ucontrol->value.enumerated.item[0]<<
-				     vt1618_uaj[kcontrol->private_value].shift,
+				     vt1618_uaj[__c_ua(kcontrol->private_value)].shift,
 				     0);
 }
 

@@ -1772,7 +1772,7 @@ static int snd_riptide_initialize(struct snd_riptide *chip)
 		if (!cif)
 			return -ENOMEM;
 		cif->dev = chip->card->dev;
-		cif->hwport = (struct riptideport *)chip->port;
+		cif->hwport = (struct riptideport *)__c_fakep(chip->port);
 		spin_lock_init(&cif->lock);
 		chip->cif = cif;
 	}
@@ -1835,7 +1835,7 @@ snd_riptide_create(struct snd_card *card, struct pci_dev *pci)
 	err = pcim_request_all_regions(pci, "RIPTIDE");
 	if (err < 0)
 		return err;
-	hwport = (struct riptideport *)chip->port;
+	hwport = (struct riptideport *)__c_fakep(chip->port);
 	UNSET_AIE(hwport);
 
 	if (devm_request_threaded_irq(&pci->dev, pci->irq,

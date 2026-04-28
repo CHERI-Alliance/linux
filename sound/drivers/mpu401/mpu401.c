@@ -72,7 +72,7 @@ static int snd_mpu401_create(struct device *devptr, int dev,
 		strcat(card->longname, "polled");
 	}
 
-	err = snd_mpu401_uart_new(card, 0, MPU401_HW_MPU401, port[dev], 0,
+	err = snd_mpu401_uart_new(card, 0, MPU401_HW_MPU401, __c_fakeu(port[dev]), 0,
 				  irq[dev], NULL);
 	if (err < 0) {
 		dev_err(devptr, "MPU401 not detected at 0x%lx\n", port[dev]);

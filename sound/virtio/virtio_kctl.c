@@ -48,9 +48,9 @@ static int virtsnd_kctl_info(struct snd_kcontrol *kcontrol,
 			     struct snd_ctl_elem_info *uinfo)
 {
 	struct virtio_snd *snd = snd_kcontrol_chip(kcontrol);
-	struct virtio_kctl *kctl = &snd->kctls[kcontrol->private_value];
+	struct virtio_kctl *kctl = &snd->kctls[__c_ua(kcontrol->private_value)];
 	struct virtio_snd_ctl_info *kinfo =
-		&snd->kctl_infos[kcontrol->private_value];
+		&snd->kctl_infos[__c_ua(kcontrol->private_value)];
 	unsigned int i;
 
 	uinfo->type = g_v2a_type_map[le32_to_cpu(kinfo->type)];
@@ -104,7 +104,7 @@ static int virtsnd_kctl_get(struct snd_kcontrol *kcontrol,
 {
 	struct virtio_snd *snd = snd_kcontrol_chip(kcontrol);
 	struct virtio_snd_ctl_info *kinfo =
-		&snd->kctl_infos[kcontrol->private_value];
+		&snd->kctl_infos[__c_ua(kcontrol->private_value)];
 	unsigned int type = le32_to_cpu(kinfo->type);
 	unsigned int count = le32_to_cpu(kinfo->count);
 	struct virtio_snd_msg *msg;
@@ -177,7 +177,7 @@ static int virtsnd_kctl_put(struct snd_kcontrol *kcontrol,
 {
 	struct virtio_snd *snd = snd_kcontrol_chip(kcontrol);
 	struct virtio_snd_ctl_info *kinfo =
-		&snd->kctl_infos[kcontrol->private_value];
+		&snd->kctl_infos[__c_ua(kcontrol->private_value)];
 	unsigned int type = le32_to_cpu(kinfo->type);
 	unsigned int count = le32_to_cpu(kinfo->count);
 	struct virtio_snd_msg *msg;

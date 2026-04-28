@@ -238,7 +238,7 @@ void snd_hdac_bus_remove_device(struct hdac_bus *bus,
 unsigned int snd_hdac_aligned_read(void __iomem *addr, unsigned int mask)
 {
 	void __iomem *aligned_addr =
-		(void __iomem *)((unsigned long)(addr) & ~0x3);
+		(void __iomem *)((uintptr_t)(addr) & ~0x3);
 	unsigned int shift = ((unsigned long)(addr) & 0x3) << 3;
 	unsigned int v;
 
@@ -251,7 +251,7 @@ void snd_hdac_aligned_write(unsigned int val, void __iomem *addr,
 			    unsigned int mask)
 {
 	void __iomem *aligned_addr =
-		(void __iomem *)((unsigned long)(addr) & ~0x3);
+		(void __iomem *)((uintptr_t)(addr) & ~0x3);
 	unsigned int shift = ((unsigned long)(addr) & 0x3) << 3;
 	unsigned int v;
 

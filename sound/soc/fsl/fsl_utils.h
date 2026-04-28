@@ -39,7 +39,7 @@ void fsl_asoc_constrain_rates(struct snd_pcm_hw_constraint_list *target_constr,
 	.access = SNDRV_CTL_ELEM_ACCESS_READ |		\
 		SNDRV_CTL_ELEM_ACCESS_VOLATILE,		\
 	.info = snd_soc_info_xr_sx, .get = xhandler_get, \
-	.private_value = (unsigned long)&(struct soc_mreg_control) \
+	.private_value = (uintptr_t)&(struct soc_mreg_control) \
 		{.regbase = xregbase, .regcount = xregcount, .nbits = xnbits, \
 		.invert = xinvert, .min = xmin, .max = xmax} }
 
@@ -59,7 +59,7 @@ void fsl_asoc_constrain_rates(struct snd_pcm_hw_constraint_list *target_constr,
 		  SNDRV_CTL_ELEM_ACCESS_READWRITE,	\
 	.info = snd_soc_info_enum_double, \
 	.get = xhandler_get, .put = xhandler_put, \
-	.private_value = (unsigned long)&xenum }
+	.private_value = (uintptr_t)&xenum }
 
 int fsl_asoc_get_xr_sx(struct snd_kcontrol *kcontrol,
 		       struct snd_ctl_elem_value *ucontrol);

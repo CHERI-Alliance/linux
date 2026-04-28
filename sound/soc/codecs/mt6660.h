@@ -9,7 +9,8 @@
 #include <linux/mutex.h>
 #include <linux/regmap.h>
 
-#pragma pack(push, 1)
+/* FIXCHERI: Why is this packed? */
+//#pragma pack(push, 1)
 struct mt6660_platform_data {
 	u8 init_setting_num;
 	u32 *init_setting_addr;
@@ -26,7 +27,7 @@ struct mt6660_chip {
 	struct regmap *regmap;
 	u16 chip_rev;
 };
-#pragma pack(pop)
+//#pragma pack(pop)
 
 #define MT6660_REG_DEVID		(0x00)
 #define MT6660_REG_SYSTEM_CTRL		(0x03)

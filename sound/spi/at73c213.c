@@ -581,7 +581,7 @@ static int snd_at73c213_pa_volume_info(struct snd_kcontrol *kcontrol,
 	uinfo->type = SNDRV_CTL_ELEM_TYPE_INTEGER;
 	uinfo->count = 1;
 	uinfo->value.integer.min = 0;
-	uinfo->value.integer.max = ((kcontrol->private_value >> 16) & 0xff) - 1;
+	uinfo->value.integer.max = ((__c_ua(kcontrol->private_value) >> 16) & 0xff) - 1;
 
 	return 0;
 }
@@ -620,7 +620,7 @@ static int snd_at73c213_aux_capture_volume_info(
 	.info = snd_at73c213_mono_switch_info,				\
 	.get = snd_at73c213_mono_switch_get,				\
 	.put = snd_at73c213_mono_switch_put,				\
-	.private_value = (reg | (shift << 8) | (mask << 16) | (invert << 24)) \
+	.private_value = (uintptr_t __force)(reg | (shift << 8) | (mask << 16) | (invert << 24)) \
 }
 
 #define AT73C213_STEREO(xname, xindex, left_reg, right_reg, shift_left, shift_right, mask, invert) \
@@ -631,7 +631,7 @@ static int snd_at73c213_aux_capture_volume_info(
 	.info = snd_at73c213_stereo_info,				\
 	.get = snd_at73c213_stereo_get,					\
 	.put = snd_at73c213_stereo_put,					\
-	.private_value = (left_reg | (right_reg << 8)			\
+	.private_value = (uintptr_t __force)(left_reg | (right_reg << 8)			\
 			| (shift_left << 16) | (shift_right << 19)	\
 			| (mask << 24) | (invert << 22))		\
 }
