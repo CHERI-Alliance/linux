@@ -51,7 +51,7 @@ static unsigned int fanotify_hash_fh(struct fanotify_fh *fh)
 	/*
 	 * full_name_hash() works long by long, so it handles fh buf optimally.
 	 */
-	return full_name_hash((void *)salt, fanotify_fh_buf(fh), fh->len);
+	return full_name_hash(__c_fakep(salt), fanotify_fh_buf(fh), fh->len);
 }
 
 static bool fanotify_fid_event_equal(struct fanotify_fid_event *ffe1,
@@ -684,11 +684,11 @@ static struct fanotify_event *fanotify_alloc_name_event(struct inode *dir,
 	}
 	if (name_len) {
 		fanotify_info_copy_name(info, name);
-		*hash ^= full_name_hash((void *)name_len, name->name, name_len);
+		*hash ^= full_name_hash(__c_fakep(name_len), name->name, name_len);
 	}
 	if (name2_len) {
 		fanotify_info_copy_name2(info, name2);
-		*hash ^= full_name_hash((void *)name2_len, name2->name,
+		*hash ^= full_name_hash(__c_fakep(name2_len), name2->name,
 					name2_len);
 	}
 
