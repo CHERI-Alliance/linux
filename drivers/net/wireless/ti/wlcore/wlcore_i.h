@@ -317,8 +317,8 @@ struct wl12xx_rx_filter_field {
 	__le16 offset;
 	u8 len;
 	u8 flags;
-	u8 *pattern;
-} __packed;
+	u8 *pattern __cheri_pointer_align;
+} __packed __cheri_pointer_align;
 
 struct wl12xx_rx_filter {
 	u8 action;
