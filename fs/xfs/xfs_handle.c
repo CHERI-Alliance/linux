@@ -859,14 +859,14 @@ xfs_ioc_getparents(
 		return -EPERM;
 	if (!xfs_has_parent(mp))
 		return -EOPNOTSUPP;
-	if (copy_from_user(kreq, ureq, sizeof(*kreq)))
+	if (copy_from_user_with_ptr(kreq, ureq, sizeof(*kreq)))
 		return -EFAULT;
 
 	error = xfs_getparents(&gpx);
 	if (error)
 		return error;
 
-	if (copy_to_user(ureq, kreq, sizeof(*kreq)))
+	if (copy_to_user_with_ptr(ureq, kreq, sizeof(*kreq)))
 		return -EFAULT;
 
 	return 0;
@@ -889,7 +889,7 @@ xfs_ioc_getparents_by_handle(
 		return -EPERM;
 	if (!xfs_has_parent(mp))
 		return -EOPNOTSUPP;
-	if (copy_from_user(kreq, ureq, sizeof(*kreq)))
+	if (copy_from_user_with_ptr(kreq, ureq, sizeof(*kreq)))
 		return -EFAULT;
 
 	/*
@@ -913,7 +913,7 @@ xfs_ioc_getparents_by_handle(
 	if (error)
 		goto out_rele;
 
-	if (copy_to_user(ureq, kreq, sizeof(*kreq)))
+	if (copy_to_user_with_ptr(ureq, kreq, sizeof(*kreq)))
 		error = -EFAULT;
 
 out_rele:
