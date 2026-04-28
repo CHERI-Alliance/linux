@@ -29,12 +29,12 @@ static inline void local_flush_tlb_all_asid(unsigned long asid)
 }
 
 /* Flush one page from local TLB */
-static inline void local_flush_tlb_page(unsigned long addr)
+static inline void local_flush_tlb_page(__ptraddr_t addr)
 {
 	ALT_SFENCE_VMA_ADDR(addr);
 }
 
-static inline void local_flush_tlb_page_asid(unsigned long addr,
+static inline void local_flush_tlb_page_asid(__ptraddr_t addr,
 					     unsigned long asid)
 {
 	if (asid != FLUSH_TLB_NO_ASID)
@@ -45,24 +45,24 @@ static inline void local_flush_tlb_page_asid(unsigned long addr,
 
 void flush_tlb_all(void);
 void flush_tlb_mm(struct mm_struct *mm);
-void flush_tlb_mm_range(struct mm_struct *mm, unsigned long start,
-			unsigned long end, unsigned int page_size);
-void flush_tlb_page(struct vm_area_struct *vma, unsigned long addr);
-void flush_tlb_range(struct vm_area_struct *vma, unsigned long start,
-		     unsigned long end);
-void flush_tlb_kernel_range(unsigned long start, unsigned long end);
-void local_flush_tlb_kernel_range(unsigned long start, unsigned long end);
+void flush_tlb_mm_range(struct mm_struct *mm, __ptraddr_t start,
+			__ptraddr_t end, unsigned int page_size);
+void flush_tlb_page(struct vm_area_struct *vma, __ptraddr_t addr);
+void flush_tlb_range(struct vm_area_struct *vma, __ptraddr_t start,
+		     __ptraddr_t end);
+void flush_tlb_kernel_range(__ptraddr_t start, __ptraddr_t end);
+void local_flush_tlb_kernel_range(__ptraddr_t start, __ptraddr_t end);
 #ifdef CONFIG_TRANSPARENT_HUGEPAGE
 #define __HAVE_ARCH_FLUSH_PMD_TLB_RANGE
-void flush_pmd_tlb_range(struct vm_area_struct *vma, unsigned long start,
+void flush_pmd_tlb_range(struct vm_area_struct *vma, __ptraddr_t start,
 			unsigned long end);
-void flush_pud_tlb_range(struct vm_area_struct *vma, unsigned long start,
+void flush_pud_tlb_range(struct vm_area_struct *vma, __ptraddr_t start,
 			 unsigned long end);
 #endif
 
 bool arch_tlbbatch_should_defer(struct mm_struct *mm);
 void arch_tlbbatch_add_pending(struct arch_tlbflush_unmap_batch *batch,
-		struct mm_struct *mm, unsigned long start, unsigned long end);
+		struct mm_struct *mm, __ptraddr_t start, __ptraddr_t end);
 void arch_tlbbatch_flush(struct arch_tlbflush_unmap_batch *batch);
 
 extern unsigned long tlb_flush_all_threshold;

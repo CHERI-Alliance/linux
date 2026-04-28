@@ -511,7 +511,7 @@ int regs_query_register_offset(const char *name)
  * regs_within_kernel_stack() checks @addr is within the kernel stack page(s).
  * If @addr is within the kernel stack, it returns true. If not, returns false.
  */
-static bool regs_within_kernel_stack(struct pt_regs *regs, unsigned long addr)
+static bool regs_within_kernel_stack(struct pt_regs *regs, __ptraddr_t addr)
 {
 	return (addr & ~(THREAD_SIZE - 1))  ==
 		(kernel_stack_pointer(regs) & ~(THREAD_SIZE - 1));

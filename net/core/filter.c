@@ -5015,7 +5015,7 @@ static const struct bpf_func_proto bpf_skb_under_cgroup_proto = {
 };
 
 #ifdef CONFIG_SOCK_CGROUP_DATA
-static inline u64 __bpf_sk_cgroup_id(struct sock *sk)
+static inline __ptraddr64_t __bpf_sk_cgroup_id(struct sock *sk)
 {
 	struct cgroup *cgrp;
 
@@ -5039,8 +5039,8 @@ static const struct bpf_func_proto bpf_skb_cgroup_id_proto = {
 	.arg1_type      = ARG_PTR_TO_CTX,
 };
 
-static inline u64 __bpf_sk_ancestor_cgroup_id(struct sock *sk,
-					      int ancestor_level)
+static inline __ptraddr64_t __bpf_sk_ancestor_cgroup_id(struct sock *sk,
+							int ancestor_level)
 {
 	struct cgroup *ancestor;
 	struct cgroup *cgrp;
@@ -5206,7 +5206,7 @@ static const struct bpf_func_proto bpf_get_socket_cookie_sock_ops_proto = {
 	.arg1_type	= ARG_PTR_TO_CTX,
 };
 
-static u64 __bpf_get_netns_cookie(struct sock *sk)
+static __ptraddr64_t __bpf_get_netns_cookie(struct sock *sk)
 {
 	const struct net *net = sk ? sock_net(sk) : &init_net;
 

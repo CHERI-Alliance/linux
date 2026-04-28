@@ -150,9 +150,9 @@ static inline void might_fault(void) { }
 
 void do_exit(long error_code) __noreturn;
 
-extern int core_kernel_text(unsigned long addr);
-extern int __kernel_text_address(unsigned long addr);
-extern int kernel_text_address(unsigned long addr);
+extern int core_kernel_text(__ptraddr_t addr);
+extern int __kernel_text_address(__ptraddr_t addr);
+extern int kernel_text_address(__ptraddr_t addr);
 extern int func_ptr_is_kernel_text(void *ptr);
 
 extern void bust_spinlocks(int yes);
