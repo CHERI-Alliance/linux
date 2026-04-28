@@ -1814,11 +1814,11 @@ static int compat_calc_entry(const struct ebt_entry *e,
 	for (i = 0; i < NF_BR_NUMHOOKS; i++) {
 		const void *hookptr = info->hook_entry[i];
 		if (info->hook_entry[i] &&
-		    (e < (struct ebt_entry *)(uintptr_t)(base - hookptr))) {
+		    (__c_pa(e) < __c_pa(base) - __c_pa(hookptr))) {
 			newinfo->hook_entry[i] -= off;
-			pr_debug("0x%08X -> 0x%08X\n",
-					newinfo->hook_entry[i] + off,
-					newinfo->hook_entry[i]);
+			pr_debug("0x%08lX -> 0x%08lX\n",
+					(unsigned long)newinfo->hook_entry[i] + off,
+					(unsigned long)newinfo->hook_entry[i]);
 		}
 	}
 

@@ -145,7 +145,7 @@ void net_devmem_free_dmabuf(struct net_iov *ppiov);
 struct net_devmem_dmabuf_binding *
 net_devmem_get_binding(struct sock *sk, unsigned int dmabuf_id);
 struct net_iov *
-net_devmem_get_niov_at(struct net_devmem_dmabuf_binding *binding, size_t addr,
+net_devmem_get_niov_at(struct net_devmem_dmabuf_binding *binding, user_uintptr_t addr,
 		       size_t *off, size_t *size);
 
 #else
@@ -221,7 +221,7 @@ net_devmem_get_binding(struct sock *sk, unsigned int dmabuf_id)
 }
 
 static inline struct net_iov *
-net_devmem_get_niov_at(struct net_devmem_dmabuf_binding *binding, size_t addr,
+net_devmem_get_niov_at(struct net_devmem_dmabuf_binding *binding, user_uintptr_t addr,
 		       size_t *off, size_t *size)
 {
 	return NULL;

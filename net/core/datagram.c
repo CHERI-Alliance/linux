@@ -709,7 +709,8 @@ zerocopy_fill_skb_from_devmem(struct sk_buff *skb, struct iov_iter *from,
 			      struct net_devmem_dmabuf_binding *binding)
 {
 	int i = skb_shinfo(skb)->nr_frags;
-	size_t virt_addr, size, off;
+	user_uintptr_t virt_addr;
+	size_t size, off;
 	struct net_iov *niov;
 
 	/* Devmem filling works by taking an IOVEC from the user where the
