@@ -32,6 +32,7 @@
 #include <linux/leafops.h>
 #include <linux/shmem_fs.h>
 #include <linux/mmu_notifier.h>
+#include <linux/mm_reserv.h>
 
 #include <asm/tlb.h>
 
@@ -1872,7 +1873,7 @@ static bool is_valid_madvise(unsigned long start, size_t len_in, int behavior)
  * operation.  This function returns true in the cases, otherwise false.  In
  * the former case we store an error on @err.
  */
-static bool madvise_should_skip(unsigned long start, size_t len_in,
+static bool madvise_should_skip(__ptraddr_t start, size_t len_in,
 		int behavior, int *err)
 {
 	if (!is_valid_madvise(start, len_in, behavior)) {
@@ -1912,10 +1913,12 @@ static inline unsigned long get_untagged_addr(struct mm_struct *mm,
 				   untagged_addr_remote(mm, start);
 }
 
-static int madvise_do_behavior(unsigned long start, size_t len_in,
-		struct madvise_behavior *madv_behavior)
+static int madvise_do_behavior(user_uintptr_t user_ptr, size_t len_in,
+		struct madvise_behavior *madv_behavior,
+		bool cap_check_skip)
 {
 	struct blk_plug plug;
+	unsigned long start = __c_ua(user_ptr);
 	int error;
 	struct madvise_behavior_range *range = &madv_behavior->range;
 
@@ -1928,6 +1931,15 @@ static int madvise_do_behavior(unsigned long start, size_t len_in,
 	/* TODO [PCuABI] - capability checks for uaccess */
 	range->start = get_untagged_addr(madv_behavior->mm, start);
 	range->end = range->start + PAGE_ALIGN(len_in);
+
+	if (!cap_check_skip) {
+		if (reserv_is_supported(current->mm) &&
+		    !check_user_ptr_owning(user_ptr, len_in))
+			return -EINVAL;
+		/* Check if the range exists within the reservation with mmap lock. */
+		if (!reserv_cap_within_reserv(user_ptr, true))
+			return -ERESERVATION;
+	}
 
 	blk_start_plug(&plug);
 	if (is_madvise_populate(madv_behavior))
@@ -2010,7 +2022,8 @@ static int madvise_do_behavior(unsigned long start, size_t len_in,
  *  -EAGAIN - a kernel resource was temporarily unavailable.
  *  -EPERM  - memory is sealed.
  */
-int do_madvise(struct mm_struct *mm, unsigned long start, size_t len_in, int behavior)
+int do_madvise(struct mm_struct *mm, user_uintptr_t user_ptr, size_t len_in,
+	       int behavior, bool cap_check_skip)
 {
 	int error;
 	struct mmu_gather tlb;
@@ -2020,22 +2033,23 @@ int do_madvise(struct mm_struct *mm, unsigned long start, size_t len_in, int beh
 		.tlb = &tlb,
 	};
 
-	if (madvise_should_skip(start, len_in, behavior, &error))
+	if (madvise_should_skip((ptraddr_t)user_ptr, len_in, behavior, &error))
 		return error;
 	error = madvise_lock(&madv_behavior);
 	if (error)
 		return error;
 	madvise_init_tlb(&madv_behavior);
-	error = madvise_do_behavior(start, len_in, &madv_behavior);
+	error = madvise_do_behavior(user_ptr, len_in, &madv_behavior,
+				    cap_check_skip);
 	madvise_finish_tlb(&madv_behavior);
 	madvise_unlock(&madv_behavior);
 
 	return error;
 }
 
-SYSCALL_DEFINE3(madvise, user_uintptr_t, start, size_t, len_in, int, behavior)
+SYSCALL_DEFINE3(madvise, user_uintptr_t, user_ptr, size_t, len_in, int, behavior)
 {
-	return do_madvise(current->mm, start, len_in, behavior);
+	return do_madvise(current->mm, user_ptr, len_in, behavior, false);
 }
 
 /* Perform an madvise operation over a vector of addresses and lengths. */
@@ -2066,7 +2080,8 @@ static ssize_t vector_madvise(struct mm_struct *mm, struct iov_iter *iter,
 		if (madvise_should_skip(start, len_in, behavior, &error))
 			ret = error;
 		else
-			ret = madvise_do_behavior(start, len_in, &madv_behavior);
+			ret = madvise_do_behavior(start, len_in,
+					&madv_behavior, true);
 		/*
 		 * An madvise operation is attempting to restart the syscall,
 		 * but we cannot proceed as it would not be correct to repeat
