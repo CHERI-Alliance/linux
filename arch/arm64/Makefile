@@ -112,7 +112,7 @@ KBUILD_CFLAGS	+= -Wa,-march=$(asm-arch) \
 endif
 
 ifeq ($(CONFIG_ARM64_MORELLO), y)
-KBUILD_CFLAGS	+= -march=morello
+KBUILD_CFLAGS	+= -march=morello -isystem $(shell $(CC) -print-file-name=include)
 KBUILD_AFLAGS	+= -march=morello
 endif
 
