@@ -273,7 +273,7 @@ static inline bool io_get_cqe_overflow(struct io_ring_ctx *ctx,
 		if (unlikely(!io_cqe_cache_refill(ctx, overflow, cqe32)))
 			return false;
 	}
-	*ret = ctx->cqe_cached;
+	*ret = &ctx->cqes[ctx->cqe_cached];
 	ctx->cached_cq_tail++;
 	ctx->cqe_cached++;
 	if (ctx->flags & IORING_SETUP_CQE32) {

@@ -375,8 +375,8 @@ struct io_ring_ctx {
 		 * We cache a range of free CQEs we can use, once exhausted it
 		 * should go through a slower range setup, see __io_get_cqe()
 		 */
-		struct io_uring_cqe	*cqe_cached;
-		struct io_uring_cqe	*cqe_sentinel;
+		unsigned int		cqe_cached;
+		unsigned int		cqe_sentinel;
 
 		unsigned		cached_cq_tail;
 		unsigned		cq_entries;

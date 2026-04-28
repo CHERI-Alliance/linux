@@ -739,7 +739,7 @@ bool io_cqe_cache_refill(struct io_ring_ctx *ctx, bool overflow, bool cqe32)
 		len <<= 1;
 	}
 
-	ctx->cqe_cached = &ctx->cqes[off];
+	ctx->cqe_cached = off;
 	ctx->cqe_sentinel = ctx->cqe_cached + len;
 	return true;
 }
