@@ -15,20 +15,25 @@ The appropriate API to represent and convert user pointers is described
 in the `user pointer documentation`_. A few examples of modifications
 required for PCuABI compliance:
 
-+--------------------------------+------------------------------------+
-| Invalid code                   | Potential replacement              |
-+================================+====================================+
-| ``(unsigned long)uptr``        | ``user_ptr_addr(uptr)``            |
-+--------------------------------+------------------------------------+
-| ``(void __user *)u64``         | | ``uaddr_to_user_ptr(u64)``       |
-|                                | | ``as_user_ptr(u64)``             |
-+--------------------------------+------------------------------------+
-| ``get_user(uptr, &uarg->ptr)`` | ``get_user_ptr(uptr, &uarg->ptr)`` |
-+--------------------------------+------------------------------------+
-| ``IS_ERR(ubuf)``               | ``USER_PTR_IS_ERR(ubuf)``          |
-+--------------------------------+------------------------------------+
-| ...                            | ...                                |
-+--------------------------------+------------------------------------+
++--------------------------------+------------------------------------+------------------------------------------+
+| Invalid code                   | Potential replacement              | Notes                                    |
++================================+====================================+==========================================+
+| ``(unsigned long)uptr``        | ``user_ptr_addr(uptr)``            | Extracting the address of a user pointer |
+|                                |                                    | may indicate that explicit capability    |
+|                                |                                    | checking is required, see the            |
+|                                |                                    | `Explicit capability checking`_ section. |
++--------------------------------+------------------------------------+------------------------------------------+
+| ``(void __user *)u64``         | | ``uaddr_to_user_ptr(u64)``       | Creating a user pointer from an address  |
+|                                | | ``as_user_ptr(u64)``             | should be avoided.                       |
+|                                |                                    | uapi structs may need to be modified to  |
+|                                |                                    | hold full user pointers.                 |
++--------------------------------+------------------------------------+------------------------------------------+
+| ``get_user(uptr, &uarg->ptr)`` | ``get_user_ptr(uptr, &uarg->ptr)`` |                                          |
++--------------------------------+------------------------------------+------------------------------------------+
+| ``IS_ERR(ubuf)``               | ``USER_PTR_IS_ERR(ubuf)``          |                                          |
++--------------------------------+------------------------------------+------------------------------------------+
+| ...                            | ...                                |                                          |
++--------------------------------+------------------------------------+------------------------------------------+
 
 ``ioctl`` handlers' third argument
 ==================================
@@ -362,6 +367,54 @@ of the `PCuABI documentation`_. For instance::
 
 Fortunately, ``__user`` is mostly used in simple types, and such fixups
 are rarely needed in driver code.
+
+Explicit capability checking
+============================
+
+In the vast majority of cases, the memory referenced by user pointers is
+accessed through the user mapping, using uaccess functions such as
+``copy_from_user()``. As long as the original user pointer is wholly
+propagated to the uaccess function, no particular attention is required.
+
+In certain situations, such accesses may instead occur via a kernel
+mapping (of the same underlying pages). Often, this kernel mapping is
+created by a function in the GUP family (``get_user_pages()``,
+``pin_user_pages()``). These cases should be carefully considered and
+typically require the user pointer to be explicitly checked (see below).
+
+The following code patterns may indicate that user memory is being
+accessed via a kernel mapping:
+
+* A call to any function named ``get_user_pages*`` or
+  ``pin_user_pages*``. Explicit checking is generally required before
+  calling such a function. Note that this does not normally apply to
+  ``{get,pin}_user_pages_remote()``, because they are intended to access
+  another process's memory and such an operation does not need to (and
+  typically cannot) be authorised by a capability.
+
+* Casting a user pointer to an integer (``(unsigned long)uptr``). This
+  typically indicates that an address-based operation, such as GUP, is
+  going to be carried out. ``user_ptr_addr()`` should be used instead of
+  the cast, but the way the address is used should also be carefully
+  considered.
+
+* Calling ``access_ok()``. Standard uaccess functions call that function
+  themselves, so an explicit call indicates either that a low-level
+  uaccess function (e.g. ``__copy_from_user()``) is going to be used -
+  which is fine - or that the access is not going to be done via uaccess
+  at all - which requires explicit checking. Note that ``access_ok()``
+  does not itself require a valid capability (i.e. it only considers the
+  address) and ``as_user_ptr()`` may occasionally be needed to pass it
+  a raw user address, but in general a full user pointer should be
+  provided by userspace and validated (either by uaccess or explicit
+  checking).
+
+Explicit checking should be done using one of the ``check_user_ptr_*()``
+functions, see the "Explicit checking" section of the `user pointer
+documentation`_. The required permissions (R/W/RW) should be minimal: if
+the kernel only reads memory via the pointer, then
+``check_user_ptr_read()`` should be used, so that a pointer without
+write permission will pass the check.
 
 .. _user pointer documentation: Documentation/core-api/user_ptr.rst
 .. _PCuABI documentation: Documentation/cheri/pcuabi.rst
