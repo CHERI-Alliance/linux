@@ -569,7 +569,7 @@ void kmem_cache_destroy(struct kmem_cache *s)
 	err = __kmem_cache_shutdown(s);
 	if (!slab_in_kunit_test())
 		WARN(err, "%s %s: Slab cache still has objects when called from %pS",
-		     __func__, s->name, (void *)_RET_IP_);
+		     __func__, s->name, (void *)__c_fakep(_RET_IP_));
 
 	list_del(&s->list);
 
@@ -644,7 +644,7 @@ bool kmem_dump_obj(void *object)
 	struct kmem_obj_info kp = { };
 
 	/* Some arches consider ZERO_SIZE_PTR to be a valid address. */
-	if (object < (void *)PAGE_SIZE || !virt_addr_valid(object))
+	if (object < __c_fakep(PAGE_SIZE) || !virt_addr_valid(object))
 		return false;
 	slab = virt_to_slab(object);
 	if (!slab)
