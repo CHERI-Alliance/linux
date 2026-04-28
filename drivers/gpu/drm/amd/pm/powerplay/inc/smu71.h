@@ -132,6 +132,7 @@ struct SMU71_PIDController {
 
 typedef struct SMU71_PIDController SMU71_PIDController;
 
+#ifndef CONFIG_CHERI_KERNEL
 struct SMU7_LocalDpmScoreboard {
     uint32_t PercentageBusy;
 
@@ -234,6 +235,7 @@ struct SMU7_VoltageScoreboard {
 };
 
 typedef struct SMU7_VoltageScoreboard SMU7_VoltageScoreboard;
+#endif
 
 // -------------------------------------------------------------------------------------------------------------------------
 #define SMU7_MAX_PCIE_LINK_SPEEDS 3 /* 0:Gen1 1:Gen2 2:Gen3 */

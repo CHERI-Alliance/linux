@@ -260,10 +260,10 @@ exit:
 	return ret;
 }
 
-static int set_prop_eu_stall_sampling_rate(struct xe_device *xe, u64 value,
+static int set_prop_eu_stall_sampling_rate(struct xe_device *xe, __u64ptr _value,
 					   struct eu_stall_open_properties *props)
 {
-	value = div_u64(value, 251);
+	uint64_t value = div_u64(__c_ua(_value), 251);
 	if (value == 0 || value > 7) {
 		drm_dbg(&xe->drm, "Invalid EU stall sampling rate %llu\n", value);
 		return -EINVAL;
@@ -272,7 +272,7 @@ static int set_prop_eu_stall_sampling_rate(struct xe_device *xe, u64 value,
 	return 0;
 }
 
-static int set_prop_eu_stall_wait_num_reports(struct xe_device *xe, u64 value,
+static int set_prop_eu_stall_wait_num_reports(struct xe_device *xe, __u64ptr value,
 					      struct eu_stall_open_properties *props)
 {
 	props->wait_num_reports = value;
@@ -280,20 +280,24 @@ static int set_prop_eu_stall_wait_num_reports(struct xe_device *xe, u64 value,
 	return 0;
 }
 
-static int set_prop_eu_stall_gt_id(struct xe_device *xe, u64 value,
+static int set_prop_eu_stall_gt_id(struct xe_device *xe, __u64ptr value,
 				   struct eu_stall_open_properties *props)
 {
 	struct xe_gt *gt = xe_device_get_gt(xe, value);
 
 	if (!gt) {
-		drm_dbg(&xe->drm, "Invalid GT ID %llu for EU stall sampling\n", value);
+		drm_dbg(&xe->drm, "Invalid GT ID %llu for EU stall sampling\n", (uint64_t)value);
 		return -EINVAL;
 	}
 	props->gt = gt;
 	return 0;
 }
 
-typedef int (*set_eu_stall_property_fn)(struct xe_device *xe, u64 value,
+/*
+ * NOTE: For the compat64 case this function will receive an unconverted
+ * 64-bit value in the __u64ptr argument.
+ */
+typedef int (*set_eu_stall_property_fn)(struct xe_device *xe, __u64ptr value,
 					struct eu_stall_open_properties *props);
 
 static const set_eu_stall_property_fn xe_set_eu_stall_property_funcs[] = {
@@ -302,10 +306,10 @@ static const set_eu_stall_property_fn xe_set_eu_stall_property_funcs[] = {
 	[DRM_XE_EU_STALL_PROP_GT_ID] = set_prop_eu_stall_gt_id,
 };
 
-static int xe_eu_stall_user_ext_set_property(struct xe_device *xe, u64 extension,
+static int xe_eu_stall_user_ext_set_property(struct xe_device *xe, user_uintptr_t extension,
 					     struct eu_stall_open_properties *props)
 {
-	u64 __user *address = u64_to_user_ptr(extension);
+	u64 __user *address = (void __user *)extension;
 	struct drm_xe_ext_set_property ext;
 	int err;
 	u32 idx;
@@ -319,20 +323,20 @@ static int xe_eu_stall_user_ext_set_property(struct xe_device *xe, u64 extension
 		return -EINVAL;
 
 	idx = array_index_nospec(ext.property, ARRAY_SIZE(xe_set_eu_stall_property_funcs));
-	return xe_set_eu_stall_property_funcs[idx](xe, ext.value, props);
+	return xe_set_eu_stall_property_funcs[idx](xe, ext.ptr, props);
 }
 
-typedef int (*xe_eu_stall_user_extension_fn)(struct xe_device *xe, u64 extension,
+typedef int (*xe_eu_stall_user_extension_fn)(struct xe_device *xe, user_uintptr_t extension,
 					     struct eu_stall_open_properties *props);
 static const xe_eu_stall_user_extension_fn xe_eu_stall_user_extension_funcs[] = {
 	[DRM_XE_EU_STALL_EXTENSION_SET_PROPERTY] = xe_eu_stall_user_ext_set_property,
 };
 
 #define MAX_USER_EXTENSIONS	5
-static int xe_eu_stall_user_extensions(struct xe_device *xe, u64 extension,
+static int xe_eu_stall_user_extensions(struct xe_device *xe, user_uintptr_t extension,
 				       int ext_number, struct eu_stall_open_properties *props)
 {
-	u64 __user *address = u64_to_user_ptr(extension);
+	u64 __user *address = (void __user *)extension;
 	struct drm_xe_user_extension ext;
 	int err;
 	u32 idx;
@@ -887,7 +891,9 @@ static const struct file_operations fops_eu_stall = {
 	.poll		= xe_eu_stall_stream_poll,
 	.read		= xe_eu_stall_stream_read,
 	.unlocked_ioctl = xe_eu_stall_stream_ioctl,
+#ifndef CONFIG_CHERI_KERNEL
 	.compat_ioctl   = xe_eu_stall_stream_ioctl,
+#endif
 };
 
 static int xe_eu_stall_stream_open_locked(struct drm_device *dev,
@@ -952,7 +958,7 @@ err_free:
  *
  * Returns: EU stall data stream fd on success or a negative error code.
  */
-int xe_eu_stall_stream_open(struct drm_device *dev, u64 data, struct drm_file *file)
+int xe_eu_stall_stream_open(struct drm_device *dev, user_uintptr_t data, struct drm_file *file)
 {
 	struct xe_device *xe = to_xe_device(dev);
 	struct eu_stall_open_properties props = {};

@@ -473,7 +473,7 @@ static int psb_pci_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	if (ret)
 		return ret;
 
-	ret = drm_dev_register(dev, ent->driver_data);
+	ret = drm_dev_register(dev, __c_ua(ent->driver_data));
 	if (ret)
 		return ret;
 

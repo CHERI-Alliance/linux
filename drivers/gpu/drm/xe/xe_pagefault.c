@@ -482,7 +482,7 @@ int xe_pagefault_handler(struct xe_device *xe, struct xe_pagefault *pf)
 	spin_lock_irqsave(&pf_queue->lock, flags);
 	full = xe_pagefault_queue_full(pf_queue);
 	if (!full) {
-		memcpy(pf_queue->data + pf_queue->head, pf, sizeof(*pf));
+		memcpy((struct xe_pagefault *)(pf_queue->data + pf_queue->head), pf, sizeof(*pf));
 		pf_queue->head = (pf_queue->head + xe_pagefault_entry_size()) %
 			pf_queue->size;
 		queue_work(xe->usm.pf_wq, &pf_queue->worker);

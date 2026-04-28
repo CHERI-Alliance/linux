@@ -113,11 +113,12 @@ int xe_exec_ioctl(struct drm_device *dev, void *data, struct drm_file *file)
 	struct xe_device *xe = to_xe_device(dev);
 	struct xe_file *xef = to_xe_file(file);
 	struct drm_xe_exec *args = data;
-	struct drm_xe_sync __user *syncs_user = u64_to_user_ptr(args->syncs);
-	u64 __user *addresses_user = u64_to_user_ptr(args->address);
+	struct drm_xe_sync __user *syncs_user = (void __user *)args->syncs;
+	user_uintptr_t *addresses_user = (void __user *)args->address;
 	struct xe_exec_queue *q;
 	struct xe_sync_entry *syncs = NULL;
-	u64 addresses[XE_HW_ENGINE_MAX_INSTANCE];
+	user_uintptr_t addresses[XE_HW_ENGINE_MAX_INSTANCE];
+	u64 addresses2[XE_HW_ENGINE_MAX_INSTANCE];
 	struct drm_gpuvm_exec vm_exec = {.extra.fn = xe_exec_fn};
 	struct drm_exec *exec = &vm_exec.exec;
 	u32 i, num_syncs, num_in_sync = 0, num_ufence = 0;
@@ -192,13 +193,21 @@ int xe_exec_ioctl(struct drm_device *dev, void *data, struct drm_file *file)
 		goto err_syncs;
 	}
 
+	/*
+	 * FIXCHERI: Check the type of the thing that is in addresses and check
+	 * if we should use capabilities or leave the ABI at u64.
+	 */
 	if (args->num_batch_buffer && xe_exec_queue_is_parallel(q)) {
-		err = copy_from_user(addresses, addresses_user,
+		err = copy_from_user_with_ptr(addresses, addresses_user,
 				     sizeof(u64) * q->width);
 		if (err) {
 			err = -EFAULT;
 			goto err_syncs;
 		}
+		for (unsigned int i = 0; i < q->width; ++i)
+			addresses2[i] = __c_ua(addresses[i]);
+	} else {
+		addresses2[0] = __c_ua(args->address);
 	}
 
 	group = q->hwe->hw_engine_group;
@@ -285,8 +294,7 @@ retry:
 			goto err_exec;
 	}
 
-	job = xe_sched_job_create(q, xe_exec_queue_is_parallel(q) ?
-				  addresses : &args->address);
+	job = xe_sched_job_create(q, addresses2);
 	if (IS_ERR(job)) {
 		err = PTR_ERR(job);
 		goto err_exec;

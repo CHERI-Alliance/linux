@@ -169,7 +169,7 @@ static void ttm_pool_alloc_basic(struct kunit *test)
 			KUNIT_ASSERT_NOT_NULL(test, (void *)(uintptr_t)fst_page->private);
 			KUNIT_ASSERT_NOT_NULL(test, (void *)(uintptr_t)last_page->private);
 		} else {
-			KUNIT_ASSERT_EQ(test, fst_page->private, params->order);
+			KUNIT_ASSERT_EQ(test, __c_ua(fst_page->private), params->order);
 		}
 	} else {
 		if (ttm_pool_uses_dma_alloc(pool)) {
@@ -180,10 +180,10 @@ static void ttm_pool_alloc_basic(struct kunit *test)
 			 * We expect to alloc one big block, followed by
 			 * order 0 blocks
 			 */
-			KUNIT_ASSERT_EQ(test, fst_page->private,
+			KUNIT_ASSERT_EQ(test, __c_ua(fst_page->private),
 					min_t(unsigned int, MAX_PAGE_ORDER,
 					      params->order));
-			KUNIT_ASSERT_EQ(test, last_page->private, 0);
+			KUNIT_ASSERT_EQ(test, __c_ua(last_page->private), 0);
 		}
 	}
 
@@ -227,8 +227,8 @@ static void ttm_pool_alloc_basic_dma_addr(struct kunit *test)
 	dma1 = tt->dma_address[0];
 	dma2 = tt->dma_address[tt->num_pages - 1];
 
-	KUNIT_ASSERT_NOT_NULL(test, (void *)(uintptr_t)dma1);
-	KUNIT_ASSERT_NOT_NULL(test, (void *)(uintptr_t)dma2);
+	KUNIT_ASSERT_NOT_NULL(test, __c_fakep(dma1));
+	KUNIT_ASSERT_NOT_NULL(test, __c_fakep(dma2));
 
 	ttm_pool_free(pool, tt);
 	ttm_tt_fini(tt);
