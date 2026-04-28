@@ -14,6 +14,7 @@
 /* this is provided by libc, so roll our own */
 typedef __kernel_ssize_t ssize_t;
 typedef __kernel_pid_t pid_t;
+typedef __kernel_mqd_t mqd_t;
 
 struct __test_meta {
 	int message;
@@ -175,6 +176,11 @@ static inline void *mmap_verified(void *addr, size_t length, int prot, int flags
 clean_up:
 	munmap(__addr, length);
 	return NULL;
+}
+
+static inline int close(int fd)
+{
+	return syscall(__NR_close, fd);
 }
 
 #endif
