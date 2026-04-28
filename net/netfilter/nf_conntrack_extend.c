@@ -29,7 +29,7 @@
 
 atomic_t nf_conntrack_ext_genid __read_mostly = ATOMIC_INIT(1);
 
-static const u8 nf_ct_ext_type_len[NF_CT_EXT_NUM] = {
+const u8 nf_ct_ext_type_len[NF_CT_EXT_NUM] = {
 	[NF_CT_EXT_HELPER] = sizeof(struct nf_conn_help),
 #if IS_ENABLED(CONFIG_NF_NAT)
 	[NF_CT_EXT_NAT] = sizeof(struct nf_conn_nat),
@@ -55,6 +55,7 @@ static const u8 nf_ct_ext_type_len[NF_CT_EXT_NUM] = {
 	[NF_CT_EXT_ACT_CT] = sizeof(struct nf_conn_act_ct_ext),
 #endif
 };
+EXPORT_SYMBOL(nf_ct_ext_type_len);
 
 static __always_inline unsigned int total_extension_size(void)
 {
@@ -98,7 +99,7 @@ void *nf_ct_ext_add(struct nf_conn *ct, enum nf_ct_ext_id id, gfp_t gfp)
 	WARN_ON(nf_ct_is_confirmed(ct));
 
 	/* struct nf_ct_ext uses u8 to store offsets/size */
-	BUILD_BUG_ON(total_extension_size() > 255u);
+	BUILD_BUG_ON(total_extension_size() > ~(__typeof__(new->len))0);
 
 	if (ct->ext) {
 		const struct nf_ct_ext *old = ct->ext;
@@ -128,7 +129,8 @@ void *nf_ct_ext_add(struct nf_conn *ct, enum nf_ct_ext_id id, gfp_t gfp)
 	memset((void *)new + newoff, 0, newlen - newoff);
 
 	ct->ext = new;
-	return (void *)new + newoff;
+	return cheri_bounds_set_kernel((void *)new + newoff,
+				       nf_ct_ext_type_len[id]);
 }
 EXPORT_SYMBOL(nf_ct_ext_add);
 
@@ -142,7 +144,8 @@ void *__nf_ct_ext_find(const struct nf_ct_ext *ext, u8 id)
 		return NULL;
 
 	if (this_id == 0 || ext->gen_id == gen_id)
-		return (void *)ext + ext->offset[id];
+		return cheri_bounds_set_kernel((void *)ext + ext->offset[id],
+					       nf_ct_ext_type_len[id]);
 
 	return NULL;
 }
