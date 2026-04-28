@@ -189,7 +189,7 @@ struct rzg3s_pcie_msi {
 	DECLARE_BITMAP(map, RZG3S_PCI_MSI_INT_NR);
 	dma_addr_t dma_addr;
 	dma_addr_t window_base;
-	unsigned long pages;
+	uintptr_t pages;
 	struct mutex map_lock;
 	int irq;
 };

@@ -1702,7 +1702,7 @@ int pci_add_dynid(struct pci_driver *drv,
 		  unsigned int vendor, unsigned int device,
 		  unsigned int subvendor, unsigned int subdevice,
 		  unsigned int class, unsigned int class_mask,
-		  unsigned long driver_data);
+		  uintptr_t driver_data);
 const struct pci_device_id *pci_match_id(const struct pci_device_id *ids,
 					 struct pci_dev *dev);
 int pci_scan_bridge(struct pci_bus *bus, struct pci_dev *dev, int max,
