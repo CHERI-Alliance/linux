@@ -155,7 +155,7 @@ static void __init invoke_init_callbacks(void)
 
 static inline struct page_ext *get_entry(void *base, unsigned long index)
 {
-	return base + page_ext_size * index;
+	return cheri_make_kernel_data_cap(__c_pa(base) + page_ext_size * index, page_ext_size);
 }
 
 #ifndef CONFIG_SPARSEMEM
