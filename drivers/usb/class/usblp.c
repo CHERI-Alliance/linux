@@ -1094,7 +1094,9 @@ static const struct file_operations usblp_fops = {
 	.write =	usblp_write,
 	.poll =		usblp_poll,
 	.unlocked_ioctl =	usblp_ioctl,
+#ifndef CONFIG_CHERI_KERNEL
 	.compat_ioctl =		usblp_ioctl,
+#endif
 	.open =		usblp_open,
 	.release =	usblp_release,
 	.llseek =	noop_llseek,
