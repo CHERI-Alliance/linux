@@ -73,7 +73,7 @@ static __always_inline u32 get_kstack_offset(void)
 		u32 offset = get_kstack_offset();			\
 		u8 *ptr = __kstack_alloca(KSTACK_OFFSET_MAX(offset));	\
 		/* Keep allocation even after "ptr" loses scope. */	\
-		asm volatile("" :: "r"(ptr) : "memory");		\
+		barrier_data(ptr);					\
 	}								\
 } while (0)
 
