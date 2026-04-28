@@ -106,7 +106,7 @@ static int fuse_copy_ioctl_iovec(struct fuse_conn *fc, struct iovec *dst,
 		    fiov[i].len != (unsigned long) fiov[i].len)
 			return -EIO;
 
-		dst[i].iov_base = (void __user *) (unsigned long) fiov[i].base;
+		dst[i].iov_base = (void __user *) (uintptr_t) fiov[i].base;
 		dst[i].iov_len = (size_t) fiov[i].len;
 
 #ifdef CONFIG_COMPAT
