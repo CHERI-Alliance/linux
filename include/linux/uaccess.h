@@ -841,6 +841,20 @@ static inline unsigned long user_access_save(void) { return 0UL; }
 static inline void user_access_restore(unsigned long flags) { }
 #endif /* !user_access_begin */
 
+#ifndef __CHERI__
+#ifndef unsafe_get_user_ptr
+#define unsafe_get_user_ptr(x,p,e) unsafe_get_user(x,p,e)
+#endif
+#ifndef unsafe_put_user_ptr
+#define unsafe_put_user_ptr(x,p,e) unsafe_put_user(x,p,e)
+#endif
+#ifndef unsafe_copy_to_user_with_ptr
+#define unsafe_copy_to_user_with_ptr(d,s,l,e) unsafe_copy_to_user(d,s,l,e)
+#endif
+#ifndef unsafe_copy_from_user_with_ptr
+#define unsafe_copy_from_user_with_ptr(d,s,l,e) unsafe_copy_from_user(d,s,l,e)
+#endif
+#endif /* __CHERI__ */
 #ifndef user_write_access_begin
 #define user_write_access_begin user_access_begin
 #define user_write_access_end user_access_end
@@ -1075,7 +1089,19 @@ void __noreturn usercopy_abort(const char *name, const char *detail,
 			       unsigned long len);
 #endif
 
+#ifndef __CHERI__
+#ifndef __get_user_ptr
+#define __get_user_ptr(x,y) __get_user(x,y)
+#endif
+#ifndef get_user_ptr
 #define get_user_ptr(x,y) __get_user(x,y)
+#endif
+#ifndef __put_user_ptr
+#define __put_user_ptr(x,y) __put_user(x,y)
+#endif
+#ifndef put_user_ptr
 #define put_user_ptr(x,y) __put_user(x,y)
+#endif
+#endif
 
 #endif		/* __LINUX_UACCESS_H__ */
