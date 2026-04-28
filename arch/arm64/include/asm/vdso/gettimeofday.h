@@ -14,22 +14,36 @@
 #include <asm/barrier.h>
 #include <asm/unistd.h>
 #include <asm/sysreg.h>
+#include <linux/stringify.h>
 
 #define VDSO_HAS_CLOCK_GETRES		1
+
+/*
+ * Inline Assembly Macros for Purecap
+ * PTR_REG(n) will expand to "cn" under purecap, and "xn" under non-purecap
+ * PTR_REG_OP will expand to "C" under purecap and "r" under non-purecap.
+ */
+#if defined(__CHERI_PURE_CAPABILITY__)
+#define PTR_REG(n) "c" __stringify(n)
+#define PTR_REG_OP "C"
+#else
+#define PTR_REG(n) "x" __stringify(n)
+#define PTR_REG_OP "r"
+#endif /* __CHERI_PURE_CAPABILITY__ */
 
 static __always_inline
 int gettimeofday_fallback(struct __kernel_old_timeval *_tv,
 			  struct timezone *_tz)
 {
-	register struct timezone *tz asm("x1") = _tz;
-	register struct __kernel_old_timeval *tv asm("x0") = _tv;
+	register struct timezone *tz asm(PTR_REG(1)) = _tz;
+	register struct __kernel_old_timeval *tv asm(PTR_REG(0)) = _tv;
 	register long ret asm ("x0");
 	register long nr asm("x8") = __NR_gettimeofday;
 
 	asm volatile(
 	"       svc #0\n"
 	: "=r" (ret)
-	: "r" (tv), "r" (tz), "r" (nr)
+	: PTR_REG_OP (tv), PTR_REG_OP (tz), "r" (nr)
 	: "memory");
 
 	return ret;
@@ -38,7 +52,7 @@ int gettimeofday_fallback(struct __kernel_old_timeval *_tv,
 static __always_inline
 long clock_gettime_fallback(clockid_t _clkid, struct __kernel_timespec *_ts)
 {
-	register struct __kernel_timespec *ts asm("x1") = _ts;
+	register struct __kernel_timespec *ts asm(PTR_REG(1)) = _ts;
 	register clockid_t clkid asm("x0") = _clkid;
 	register long ret asm ("x0");
 	register long nr asm("x8") = __NR_clock_gettime;
@@ -46,7 +60,7 @@ long clock_gettime_fallback(clockid_t _clkid, struct __kernel_timespec *_ts)
 	asm volatile(
 	"       svc #0\n"
 	: "=r" (ret)
-	: "r" (clkid), "r" (ts), "r" (nr)
+	: "r" (clkid), PTR_REG_OP (ts), "r" (nr)
 	: "memory");
 
 	return ret;
@@ -55,7 +69,7 @@ long clock_gettime_fallback(clockid_t _clkid, struct __kernel_timespec *_ts)
 static __always_inline
 int clock_getres_fallback(clockid_t _clkid, struct __kernel_timespec *_ts)
 {
-	register struct __kernel_timespec *ts asm("x1") = _ts;
+	register struct __kernel_timespec *ts asm(PTR_REG(1)) = _ts;
 	register clockid_t clkid asm("x0") = _clkid;
 	register long ret asm ("x0");
 	register long nr asm("x8") = __NR_clock_getres;
@@ -63,7 +77,7 @@ int clock_getres_fallback(clockid_t _clkid, struct __kernel_timespec *_ts)
 	asm volatile(
 	"       svc #0\n"
 	: "=r" (ret)
-	: "r" (clkid), "r" (ts), "r" (nr)
+	: "r" (clkid), PTR_REG_OP (ts), "r" (nr)
 	: "memory");
 
 	return ret;
@@ -83,6 +97,19 @@ static __always_inline u64 __arch_get_hw_counter(s32 clock_mode,
 	return __arch_counter_get_cntvct();
 }
 
+#if defined(__CHERI_PURE_CAPABILITY__)
+static __always_inline
+const struct vdso_data *__arch_get_vdso_data(void)
+{
+	const struct vdso_data *vd;
+	asm(".hidden _vdso_data\n\t"
+	    "adrp %0, _vdso_data\n\t"
+	    "add %0, %0, #:lo12:_vdso_data"
+	    : "=C"(vd));
+	return vd;
+}
+
+#else /* !__CHERI_PURE_CAPABILITY__ */
 #if IS_ENABLED(CONFIG_CC_IS_GCC) && IS_ENABLED(CONFIG_PAGE_SIZE_64KB)
 static __always_inline const struct vdso_time_data *__arch_get_vdso_u_time_data(void)
 {
@@ -95,6 +122,8 @@ static __always_inline const struct vdso_time_data *__arch_get_vdso_u_time_data(
 }
 #define __arch_get_vdso_u_time_data __arch_get_vdso_u_time_data
 #endif /* IS_ENABLED(CONFIG_CC_IS_GCC) && IS_ENABLED(CONFIG_PAGE_SIZE_64KB) */
+
+#endif /* __CHERI_PURE_CAPABILITY__ */
 
 #endif /* !__ASSEMBLER__ */
 

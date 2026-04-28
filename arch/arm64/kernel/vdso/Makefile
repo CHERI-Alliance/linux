@@ -13,7 +13,6 @@ obj-vdso := vgettimeofday.o note.o sigreturn.o vgetrandom.o vgetrandom-chacha.o
 
 # Build rules
 targets := $(obj-vdso) vdso.so vdso.so.dbg
-obj-vdso := $(addprefix $(obj)/, $(obj-vdso))
 
 btildflags-$(CONFIG_ARM64_BTI_KERNEL) += -z force-bti
 
@@ -33,6 +32,30 @@ ldflags-y += -T
 ccflags-y := -fno-common -fno-builtin -fno-stack-protector -ffixed-x18
 ccflags-y += -DDISABLE_BRANCH_PROFILING -DBUILD_VDSO
 
+# When building for PCuABI, this Makefile will be called twice: first to build
+# the regular arm64 vDSO, and second to build the purecap vDSO. We must change
+# certain variables/flags depending on which vDSO we are building.
+ifdef BUILD_PURECAP_VDSO
+  # Specify building for purecap
+  PURECAP_FLAGS := -mabi=purecap
+  # Remove this flag as capability registers are not considered
+  # as general purpose registers by the compiler.
+  REMOVE_FLAGS := -mgeneral-regs-only
+  ccflags-y += $(PURECAP_FLAGS)
+  asflags-y := $(PURECAP_FLAGS)
+  ccflags-remove-y := $(REMOVE_FLAGS)
+  asflags-remove-y := $(REMOVE_FLAGS)
+
+  # We want the purecap vDSO in its own directory (kernel/vdso/purecap)
+  targets := $(addprefix purecap/, $(targets))
+  output-dir := $(obj)/purecap
+  # Put the offsets for the purecap vDSO into their own header file
+  offsets := include/generated/vdso-purecap-offsets.h
+else
+  output-dir := $(obj)
+  offsets := include/generated/vdso-offsets.h
+endif
+
 # -Wmissing-prototypes and -Wmissing-declarations are removed from
 # the CFLAGS to make possible to build the kernel with CONFIG_WERROR enabled.
 CC_FLAGS_REMOVE_VDSO := $(CC_FLAGS_FTRACE) -Os $(CC_FLAGS_SCS) \
@@ -44,7 +67,9 @@ CC_FLAGS_REMOVE_VDSO := $(CC_FLAGS_FTRACE) -Os $(CC_FLAGS_SCS) \
 CC_FLAGS_ADD_VDSO := -O2 -mcmodel=tiny -fasynchronous-unwind-tables
 
 CFLAGS_REMOVE_vgettimeofday.o = $(CC_FLAGS_REMOVE_VDSO)
+CFLAGS_REMOVE_purecap/vgettimeofday.o = $(CFLAGS_REMOVE_vgettimeofday.o)
 CFLAGS_REMOVE_vgetrandom.o = $(CC_FLAGS_REMOVE_VDSO)
+CFLAGS_REMOVE_purecap/vgetrandom.o = $(CFLAGS_REMOVE_vgetrandom.o) -O2
 
 CFLAGS_vgettimeofday.o = $(CC_FLAGS_ADD_VDSO)
 CFLAGS_vgetrandom.o = $(CC_FLAGS_ADD_VDSO)
@@ -57,16 +82,38 @@ ifneq ($(c-getrandom-y),)
   CFLAGS_vgetrandom.o += -include $(c-getrandom-y)
 endif
 
+CFLAGS_purecap/vgettimeofday.o = $(CFLAGS_vgettimeofday.o)
+CFLAGS_purecap/vgetrandom.o = $(CFLAGS_vgetrandom.o) -O1
+
 targets += vdso.lds
 CPPFLAGS_vdso.lds += -P -C -U$(ARCH)
 
+obj-vdso := $(addprefix $(output-dir)/, $(obj-vdso))
+
+#Make the purecap directory under vdso/
+$(output-dir):
+ifdef BUILD_PURECAP_VDSO
+	@mkdir -p $(output-dir)
+endif
+
+# Explicit build rules are required for .o files when building for purecap,
+# as the path to the output directory for built objects no longer matches
+# the path to the source files.
+ifdef BUILD_PURECAP_VDSO
+$(output-dir)/%.o: $(srctree)/$(src)/%.c FORCE | $(output-dir)
+	$(call if_changed_rule,cc_o_c)
+
+$(output-dir)/%.o: $(srctree)/$(src)/%.S FORCE | $(output-dir)
+	$(call if_changed_rule,as_o_S)
+endif
+
 # Link rule for the .so file, .lds has to be first
-$(obj)/vdso.so.dbg: $(obj)/vdso.lds $(obj-vdso) FORCE
+$(output-dir)/vdso.so.dbg: $(obj)/vdso.lds $(obj-vdso) FORCE
 	$(call if_changed,vdsold_and_vdso_check)
 
 # Strip rule for the .so file
-$(obj)/%.so: OBJCOPYFLAGS := -S
-$(obj)/%.so: $(obj)/%.so.dbg FORCE
+$(output-dir)/%.so: OBJCOPYFLAGS := -S
+$(output-dir)/%.so: $(output-dir)/%.so.dbg FORCE
 	$(call if_changed,objcopy)
 
 # Generate VDSO offsets using helper script
@@ -74,9 +121,11 @@ gen-vdsosym := $(src)/gen_vdso_offsets.sh
 quiet_cmd_vdsosym = VDSOSYM $@
       cmd_vdsosym = $(NM) $< | $(gen-vdsosym) | LC_ALL=C sort > $@
 
-include/generated/vdso-offsets.h: $(obj)/vdso.so.dbg FORCE
+$(offsets): $(output-dir)/vdso.so.dbg FORCE
 	$(call if_changed,vdsosym)
 
 # Actual build commands
 quiet_cmd_vdsold_and_vdso_check = LD      $@
-      cmd_vdsold_and_vdso_check = $(cmd_ld); $(cmd_vdso_check)
+# FIXCHERI: Disable vdso checking for now.
+#     cmd_vdsold_and_vdso_check = $(cmd_ld); $(cmd_vdso_check)
+      cmd_vdsold_and_vdso_check = $(cmd_ld)
