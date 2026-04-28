@@ -353,7 +353,7 @@ static unsigned long relocate_restore_code(void)
 
 int swsusp_arch_resume(void)
 {
-	unsigned long end = (unsigned long)pfn_to_virt(max_low_pfn);
+	unsigned long end = __c_pa(pfn_to_virt(max_low_pfn));
 	unsigned long start = PAGE_OFFSET;
 	int ret;
 

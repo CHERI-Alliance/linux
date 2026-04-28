@@ -146,7 +146,7 @@ static int kcore_ram_list(struct list_head *head)
 	ent = kmalloc_obj(*ent);
 	if (!ent)
 		return -ENOMEM;
-	ent->addr = (unsigned long)__va(0);
+	ent->addr = __va_a(0);
 	ent->size = max_low_pfn << PAGE_SHIFT;
 	ent->type = KCORE_RAM;
 	list_add(&ent->list, head);
