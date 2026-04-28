@@ -2165,7 +2165,7 @@ static int prctl_set_mm_map(int opt, const void __user *addr, unsigned long data
 }
 #endif /* CONFIG_CHECKPOINT_RESTORE */
 
-static int prctl_set_auxv(struct mm_struct *mm, unsigned long addr,
+static int prctl_set_auxv(struct mm_struct *mm, user_uintptr_t addr,
 			  unsigned long len)
 {
 	/*
@@ -2195,7 +2195,7 @@ static int prctl_set_auxv(struct mm_struct *mm, unsigned long addr,
 	return 0;
 }
 
-static int prctl_set_mm(int opt, unsigned long addr,
+static int prctl_set_mm(int opt, user_uintptr_t addr,
 			unsigned long arg4, unsigned long arg5)
 {
 	struct mm_struct *mm = current->mm;
@@ -2335,7 +2335,7 @@ out:
 #ifdef CONFIG_CHECKPOINT_RESTORE
 static int prctl_get_tid_address(struct task_struct *me, int __user2 * __capability __user2 * __capability tid_addr)
 {
-	return put_user(me->clear_child_tid, tid_addr);
+	return put_user_ptr(me->clear_child_tid, tid_addr);
 }
 #else
 static int prctl_get_tid_address(struct task_struct *me, int __user2 * __capability __user2 * __capability tid_addr)
@@ -2407,7 +2407,7 @@ int __weak arch_prctl_lock_branch_landing_pad_state(struct task_struct *t)
 #define PR_IO_FLUSHER (PF_MEMALLOC_NOIO | PF_LOCAL_THROTTLE)
 
 static int prctl_set_vma(unsigned long opt, unsigned long addr,
-			 unsigned long size, unsigned long arg)
+			 unsigned long size, user_uintptr_t arg)
 {
 	int error;
 
@@ -2531,8 +2531,8 @@ static int prctl_set_thp_disable(bool thp_disable, unsigned long flags,
 	return 0;
 }
 
-SYSCALL_DEFINE5(prctl, int, option, unsigned long, arg2, unsigned long, arg3,
-		unsigned long, arg4, unsigned long, arg5)
+SYSCALL_DEFINE5(prctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
+		user_uintptr_t, arg4, user_uintptr_t, arg5)
 {
 	struct task_struct *me = current;
 	unsigned char comm[sizeof(me->comm)];
@@ -2653,7 +2653,7 @@ SYSCALL_DEFINE5(prctl, int, option, unsigned long, arg2, unsigned long, arg3,
 			current->timer_slack_ns = arg2;
 		break;
 	case PR_MCE_KILL:
-		if (arg4 | arg5)
+		if (arg4 || arg5)
 			return -EINVAL;
 		switch (arg2) {
 		case PR_MCE_KILL_CLEAR:
@@ -2678,7 +2678,7 @@ SYSCALL_DEFINE5(prctl, int, option, unsigned long, arg2, unsigned long, arg3,
 		}
 		break;
 	case PR_MCE_KILL_GET:
-		if (arg2 | arg3 | arg4 | arg5)
+		if (arg2 || arg3 || arg4 || arg5)
 			return -EINVAL;
 		if (current->flags & PF_MCE_PROCESS)
 			error = (current->flags & PF_MCE_EARLY) ?
@@ -2887,7 +2887,7 @@ SYSCALL_DEFINE5(prctl, int, option, unsigned long, arg2, unsigned long, arg3,
 	case PR_RSEQ_SLICE_EXTENSION:
 		if (arg4 || arg5)
 			return -EINVAL;
-		error = rseq_slice_extension_prctl(arg2, arg3);
+		error = rseq_slice_extension_prctl(__c_ua(arg2), __c_ua(arg3));
 		break;
 	case PR_GET_CFI:
 		if (arg2 != PR_CFI_BRANCH_LANDING_PADS)
@@ -2901,7 +2901,7 @@ SYSCALL_DEFINE5(prctl, int, option, unsigned long, arg2, unsigned long, arg3,
 			return -EINVAL;
 		if (arg4 || arg5)
 			return -EINVAL;
-		error = arch_prctl_set_branch_landing_pad_state(me, arg3);
+		error = arch_prctl_set_branch_landing_pad_state(me, __c_ua(arg3));
 		if (error)
 			break;
 		if (arg3 & PR_CFI_LOCK && !(arg3 & PR_CFI_DISABLE))
