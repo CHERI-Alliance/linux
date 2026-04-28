@@ -241,7 +241,7 @@ out:
 
 static int tstee_shm_register(struct tee_context *ctx, struct tee_shm *shm,
 			      struct page **pages, size_t num_pages,
-			      unsigned long start __always_unused)
+			      uintptr_t start __always_unused)
 {
 	struct tstee *tstee = tee_get_drvdata(ctx->teedev);
 	struct ffa_device *ffa_dev = tstee->ffa_dev;

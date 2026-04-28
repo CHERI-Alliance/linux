@@ -452,7 +452,7 @@ static void optee_fill_pages_list(u64 *dst, struct page **pages, int num_pages,
 
 static int optee_shm_register(struct tee_context *ctx, struct tee_shm *shm,
 			      struct page **pages, size_t num_pages,
-			      unsigned long start)
+			      uintptr_t start)
 {
 	struct optee *optee = tee_get_drvdata(ctx->teedev);
 	struct optee_msg_arg *msg_arg;
@@ -1423,7 +1423,7 @@ optee_config_shm_memremap(optee_invoke_fn *invoke_fn, void **memremaped_shm)
 		struct arm_smccc_res smccc;
 		struct optee_smc_get_shm_config_result result;
 	} res;
-	unsigned long vaddr;
+	uintptr_t vaddr;
 	phys_addr_t paddr;
 	size_t size;
 	phys_addr_t begin;
@@ -1452,7 +1452,7 @@ optee_config_shm_memremap(optee_invoke_fn *invoke_fn, void **memremaped_shm)
 		pr_err("shared memory ioremap failed\n");
 		return ERR_PTR(-EINVAL);
 	}
-	vaddr = (unsigned long)va;
+	vaddr = (uintptr_t)va;
 
 	rc = tee_shm_pool_alloc_res_mem(vaddr, paddr, size,
 					OPTEE_MIN_STATIC_POOL_ALIGN);
