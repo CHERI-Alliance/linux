@@ -353,7 +353,7 @@ static void nfp_nfd3_xsk_tx(struct nfp_net_tx_ring *tx_ring)
 		prefetchw(&tx_ring->txds[wr_idx]);
 
 		for (i = 0; i < got; i++)
-			xsk_buff_raw_dma_sync_for_device(xsk_pool, desc[i].addr,
+			xsk_buff_raw_dma_sync_for_device(xsk_pool, __c_ua(desc[i].addr),
 							 desc[i].len);
 
 		for (i = 0; i < got; i++) {

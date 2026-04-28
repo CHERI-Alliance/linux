@@ -452,7 +452,7 @@ struct lan78xx_net {
 	unsigned int		maxpacket;
 	struct timer_list	stat_monitor;
 
-	unsigned long		data[5];
+	uintptr_t		data[5];
 
 	u32			chipid;
 	u32			chiprev;

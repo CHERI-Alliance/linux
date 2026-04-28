@@ -77,7 +77,7 @@ int mv88e6xxx_cls_flower_add(struct dsa_switch *ds, int port,
 	struct mv88e6xxx_chip *chip = ds->priv;
 	struct mv88e6xxx_tcam_key key = { 0 };
 	const struct flow_action_entry *act;
-	unsigned long cookie = cls->cookie;
+	unsigned long cookie = __c_ua(cls->cookie);
 	struct mv88e6xxx_tcam_entry *entry;
 	int err, i;
 
@@ -148,7 +148,7 @@ int mv88e6xxx_cls_flower_del(struct dsa_switch *ds, int port,
 	int err = 0;
 
 	mv88e6xxx_reg_lock(chip);
-	entry = mv88e6xxx_tcam_entry_find(chip, cls->cookie);
+	entry = mv88e6xxx_tcam_entry_find(chip, __c_ua(cls->cookie));
 
 	if (entry)
 		err = mv88e6xxx_tcam_entry_del(chip, entry);
