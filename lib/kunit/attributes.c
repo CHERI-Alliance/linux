@@ -87,7 +87,7 @@ static const char op_list[] = "<>!=";
  * Returns whether the inputted integer value matches the filter given
  * by the operation string and inputted integer.
  */
-static int int_filter(long val, const char *op, int input, int *err)
+static int int_filter(intptr_t val, const char *op, int input, int *err)
 {
 	if (!strncmp(op, "<=", 2))
 		return (val <= input);
