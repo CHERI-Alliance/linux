@@ -635,6 +635,7 @@ overflow:
 	WRITE_ONCE(n.rings->cq_overflow, READ_ONCE(o.rings->cq_overflow));
 
 	/* all done, store old pointers and assign new ones */
+	ctx->cqes = (struct io_uring_cqe *)((char *)rings + io_uring_cq_offset());
 	if (!(ctx->flags & IORING_SETUP_NO_SQARRAY))
 		ctx->sq_array = (u32 *)((char *)n.rings + rl->sq_array_offset);
 

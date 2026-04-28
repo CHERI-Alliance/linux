@@ -209,14 +209,6 @@ struct io_rings {
 	 * ordered with any other data.
 	 */
 	u32			cq_overflow;
-	/*
-	 * Ring buffer of completion events.
-	 *
-	 * The kernel writes completion events fresh every time they are
-	 * produced, so the application is allowed to modify pending
-	 * entries.
-	 */
-	struct io_uring_cqe	cqes[] ____cacheline_aligned_in_smp;
 };
 
 struct io_bpf_filter;
@@ -367,7 +359,18 @@ struct io_ring_ctx {
 		u64					hybrid_poll_time;
 	} ____cacheline_aligned_in_smp;
 
+
+	/* completion data */
 	struct {
+		/*
+		 * Ring buffer of completion events.
+		 *
+		 * The kernel writes completion events fresh every time they are
+		 * produced, so the application is allowed to modify pending
+		 * entries.
+		 */
+		struct io_uring_cqe	*cqes;
+
 		/*
 		 * We cache a range of free CQEs we can use, once exhausted it
 		 * should go through a slower range setup, see __io_get_cqe()
