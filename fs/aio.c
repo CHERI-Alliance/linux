@@ -43,6 +43,7 @@
 #include <linux/percpu-refcount.h>
 #include <linux/mount.h>
 #include <linux/pseudo_fs.h>
+#include <linux/mm_reserv.h>
 
 #include <linux/uaccess.h>
 #include <linux/nospec.h>
@@ -470,8 +471,8 @@ static int aio_ring_mremap(struct vm_area_struct *vma)
 		if (ctx && ctx->aio_ring_file == file) {
 			if (!atomic_read(&ctx->dead)) {
 				ctx->mmap_base = vma->vm_start;
-				/* TODO [PCuABI] - derive proper capability */
-				ctx->user_id = uaddr_to_user_ptr_safe(ctx->mmap_base);
+				ctx->user_id = (aio_context_t)
+					reserv_vma_make_user_ptr_owning(vma);
 				res = 0;
 			}
 			break;
@@ -666,8 +667,8 @@ static int aio_setup_ring(struct kioctx *ctx, unsigned int nr_events)
 
 	pr_debug("mmap address: 0x%08lx\n", ctx->mmap_base);
 
-	/* TODO [PCuABI] - derive proper capability */
-	ctx->user_id = uaddr_to_user_ptr_safe(ctx->mmap_base);
+	ctx->user_id = (aio_context_t)
+		reserv_make_user_ptr_owning(ctx->mmap_base, false);
 	ctx->nr_events = nr_events; /* trusted copy */
 
 	ring = folio_address(ctx->ring_folios[0]);
