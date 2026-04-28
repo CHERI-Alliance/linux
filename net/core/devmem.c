@@ -93,8 +93,8 @@ net_devmem_alloc_dmabuf(struct net_devmem_dmabuf_binding *binding)
 	ssize_t offset;
 	ssize_t index;
 
-	dma_addr = gen_pool_alloc_owner(binding->chunk_pool, PAGE_SIZE,
-					(void **)&owner);
+	dma_addr = __c_ua(gen_pool_alloc_owner(binding->chunk_pool, PAGE_SIZE,
+					       (void **)&owner));
 	if (!dma_addr)
 		return NULL;
 
@@ -118,7 +118,7 @@ void net_devmem_free_dmabuf(struct net_iov *niov)
 				       PAGE_SIZE)))
 		return;
 
-	gen_pool_free(binding->chunk_pool, dma_addr, PAGE_SIZE);
+	gen_pool_free(binding->chunk_pool, __c_fakeu(dma_addr), PAGE_SIZE);
 }
 
 void net_devmem_unbind_dmabuf(struct net_devmem_dmabuf_binding *binding)
@@ -279,7 +279,7 @@ net_devmem_bind_dmabuf(struct net_device *dev,
 		owner->area.num_niovs = len / PAGE_SIZE;
 		owner->binding = binding;
 
-		err = gen_pool_add_owner(binding->chunk_pool, dma_addr,
+		err = gen_pool_add_owner(binding->chunk_pool, __c_fakeu(dma_addr),
 					 dma_addr, len, dev_to_node(&dev->dev),
 					 owner);
 		if (err) {

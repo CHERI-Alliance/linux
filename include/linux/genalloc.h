@@ -75,8 +75,8 @@ struct gen_pool_chunk {
 	atomic_long_t avail;
 	phys_addr_t phys_addr;		/* physical starting address of memory chunk */
 	void *owner;			/* private data to retrieve at alloc time */
-	unsigned long start_addr;	/* start address of memory chunk */
-	unsigned long end_addr;		/* end address of memory chunk (inclusive) */
+	uintptr_t start_addr;		/* start address of memory chunk */
+	uintptr_t end_addr;		/* end address of memory chunk (inclusive) */
 	unsigned long bits[];		/* bitmap for allocating memory chunk */
 };
 
@@ -96,10 +96,10 @@ struct genpool_data_fixed {
 
 extern struct gen_pool *gen_pool_create(int, int);
 extern phys_addr_t gen_pool_virt_to_phys(struct gen_pool *pool, unsigned long);
-extern int gen_pool_add_owner(struct gen_pool *, unsigned long, phys_addr_t,
+extern int gen_pool_add_owner(struct gen_pool *, uintptr_t, phys_addr_t,
 			     size_t, int, void *);
 
-static inline int gen_pool_add_virt(struct gen_pool *pool, unsigned long addr,
+static inline int gen_pool_add_virt(struct gen_pool *pool, uintptr_t addr,
 		phys_addr_t phys, size_t size, int nid)
 {
 	return gen_pool_add_owner(pool, addr, phys, size, nid, NULL);
@@ -117,23 +117,23 @@ static inline int gen_pool_add_virt(struct gen_pool *pool, unsigned long addr,
  *
  * Returns 0 on success or a -ve errno on failure.
  */
-static inline int gen_pool_add(struct gen_pool *pool, unsigned long addr,
+static inline int gen_pool_add(struct gen_pool *pool, uintptr_t addr,
 			       size_t size, int nid)
 {
 	return gen_pool_add_virt(pool, addr, -1, size, nid);
 }
 extern void gen_pool_destroy(struct gen_pool *);
-unsigned long gen_pool_alloc_algo_owner(struct gen_pool *pool, size_t size,
+uintptr_t gen_pool_alloc_algo_owner(struct gen_pool *pool, size_t size,
 		genpool_algo_t algo, void *data, void **owner);
 
-static inline unsigned long gen_pool_alloc_owner(struct gen_pool *pool,
+static inline uintptr_t gen_pool_alloc_owner(struct gen_pool *pool,
 		size_t size, void **owner)
 {
 	return gen_pool_alloc_algo_owner(pool, size, pool->algo, pool->data,
 			owner);
 }
 
-static inline unsigned long gen_pool_alloc_algo(struct gen_pool *pool,
+static inline uintptr_t gen_pool_alloc_algo(struct gen_pool *pool,
 		size_t size, genpool_algo_t algo, void *data)
 {
 	return gen_pool_alloc_algo_owner(pool, size, algo, data, NULL);
@@ -149,7 +149,7 @@ static inline unsigned long gen_pool_alloc_algo(struct gen_pool *pool,
  * Can not be used in NMI handler on architectures without
  * NMI-safe cmpxchg implementation.
  */
-static inline unsigned long gen_pool_alloc(struct gen_pool *pool, size_t size)
+static inline uintptr_t gen_pool_alloc(struct gen_pool *pool, size_t size)
 {
 	return gen_pool_alloc_algo(pool, size, pool->algo, pool->data);
 }
@@ -165,9 +165,9 @@ extern void *gen_pool_dma_zalloc_algo(struct gen_pool *pool, size_t size,
 		dma_addr_t *dma, genpool_algo_t algo, void *data);
 extern void *gen_pool_dma_zalloc_align(struct gen_pool *pool, size_t size,
 		dma_addr_t *dma, int align);
-extern void gen_pool_free_owner(struct gen_pool *pool, unsigned long addr,
+extern void gen_pool_free_owner(struct gen_pool *pool, uintptr_t addr,
 		size_t size, void **owner);
-static inline void gen_pool_free(struct gen_pool *pool, unsigned long addr,
+static inline void gen_pool_free(struct gen_pool *pool, uintptr_t addr,
                 size_t size)
 {
 	gen_pool_free_owner(pool, addr, size, NULL);

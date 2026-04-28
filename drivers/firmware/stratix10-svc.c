@@ -925,7 +925,7 @@ svc_create_memory_pool(struct platform_device *pdev,
 {
 	struct device *dev = &pdev->dev;
 	struct gen_pool *genpool;
-	unsigned long vaddr;
+	uintptr_t vaddr;
 	phys_addr_t paddr;
 	size_t size;
 	phys_addr_t begin;
@@ -944,7 +944,7 @@ svc_create_memory_pool(struct platform_device *pdev,
 		dev_err(dev, "fail to remap shared memory\n");
 		return ERR_PTR(-EINVAL);
 	}
-	vaddr = (unsigned long)va;
+	vaddr = (uintptr_t)va;
 	dev_dbg(dev,
 		"reserved memory vaddr: %p, paddr: 0x%16x size: 0x%8x\n",
 		va, (unsigned int)paddr, (unsigned int)size);

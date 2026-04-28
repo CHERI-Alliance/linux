@@ -1078,7 +1078,7 @@ struct gen_pool *cio_gp_dma_create(struct device *dma_dev, int nr_pages)
 					      CIO_DMA_GFP);
 		if (!cpu_addr)
 			return gp_dma;
-		gen_pool_add_virt(gp_dma, (unsigned long) cpu_addr,
+		gen_pool_add_virt(gp_dma, (uintptr_t) cpu_addr,
 				  dma_addr, PAGE_SIZE, -1);
 	}
 	return gp_dma;
@@ -1127,7 +1127,7 @@ void *__cio_gp_dma_zalloc(struct gen_pool *gp_dma, struct device *dma_dev,
 		addr = dma_alloc_coherent(dma_dev, chunk_size, &dma_addr, CIO_DMA_GFP);
 		if (!addr)
 			return NULL;
-		gen_pool_add_virt(gp_dma, (unsigned long)addr, dma_addr, chunk_size, -1);
+		gen_pool_add_virt(gp_dma, (uintptr_t)addr, dma_addr, chunk_size, -1);
 		addr = gen_pool_dma_alloc(gp_dma, size, dma_handle ? &dma_addr : NULL);
 	}
 	if (dma_handle)
