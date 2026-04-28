@@ -326,7 +326,7 @@ TRACE_EVENT(ext4_mark_inode_dirty,
 
 	TP_printk("dev %d,%d ino %lu caller %pS",
 		  MAJOR(__entry->dev), MINOR(__entry->dev),
-		  (unsigned long) __entry->ino, (void *)__entry->ip)
+		  (unsigned long) __entry->ino, __c_fakep(__entry->ip))
 );
 
 TRACE_EVENT(ext4_begin_ordered_truncate,
@@ -1813,7 +1813,7 @@ TRACE_EVENT(ext4_journal_start_sb,
 	TP_printk("dev %d,%d blocks %d, rsv_blocks %d, revoke_creds %d,"
 		  " type %d, caller %pS", MAJOR(__entry->dev),
 		  MINOR(__entry->dev), __entry->blocks, __entry->rsv_blocks,
-		  __entry->revoke_creds, __entry->type, (void *)__entry->ip)
+		  __entry->revoke_creds, __entry->type, __c_fakep(__entry->ip))
 );
 
 TRACE_EVENT(ext4_journal_start_inode,
@@ -1846,7 +1846,7 @@ TRACE_EVENT(ext4_journal_start_inode,
 		  " type %d, ino %lu, caller %pS", MAJOR(__entry->dev),
 		  MINOR(__entry->dev), __entry->blocks, __entry->rsv_blocks,
 		  __entry->revoke_creds, __entry->type, __entry->ino,
-		  (void *)__entry->ip)
+		  __c_fakep(__entry->ip))
 );
 
 TRACE_EVENT(ext4_journal_start_reserved,
@@ -1868,7 +1868,7 @@ TRACE_EVENT(ext4_journal_start_reserved,
 
 	TP_printk("dev %d,%d blocks, %d caller %pS",
 		  MAJOR(__entry->dev), MINOR(__entry->dev),
-		  __entry->blocks, (void *)__entry->ip)
+		  __entry->blocks, __c_fakep(__entry->ip))
 );
 
 DECLARE_EVENT_CLASS(ext4__trim,
