@@ -319,12 +319,12 @@ int lirc_prog_query(const union bpf_attr *attr, union bpf_attr __user *uattr)
 	progs = lirc_rcu_dereference(rcdev->raw->progs);
 	cnt = progs ? bpf_prog_array_length(progs) : 0;
 
-	if (copy_to_user(&uattr->query.prog_cnt, &cnt, sizeof(cnt))) {
+	if (bpf_put_uattr(cnt, uattr, query.prog_cnt)) {
 		ret = -EFAULT;
 		goto unlock;
 	}
 
-	if (copy_to_user(&uattr->query.attach_flags, &flags, sizeof(flags))) {
+	if (bpf_put_uattr(flags, uattr, query.attach_flags)) {
 		ret = -EFAULT;
 		goto unlock;
 	}

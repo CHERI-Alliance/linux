@@ -1802,7 +1802,7 @@ __htab_map_lookup_and_delete_batch(struct bpf_map *map,
 	if (!max_count)
 		return 0;
 
-	if (put_user(0, &uattr->batch.count))
+	if (bpf_put_uattr(0, uattr, batch.count))
 		return -EFAULT;
 
 	batch = 0;
@@ -1994,7 +1994,7 @@ after_loop:
 	/* copy # of entries and next batch */
 	ubatch = u64_to_user_ptr(attr->batch.out_batch);
 	if (copy_to_user(ubatch, &batch, sizeof(batch)) ||
-	    put_user(total, &uattr->batch.count))
+	    bpf_put_uattr(total, uattr, batch.count))
 		ret = -EFAULT;
 
 out:

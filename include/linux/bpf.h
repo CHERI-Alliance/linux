@@ -32,6 +32,7 @@
 #include <linux/memcontrol.h>
 #include <linux/cfi.h>
 #include <asm/rqspinlock.h>
+#include <linux/compat.h>
 #include <linux/bpf_compat.h>
 
 struct bpf_verifier_env;
@@ -66,6 +67,19 @@ extern spinlock_t btf_idr_lock;
 extern struct kobject *btf_kobj;
 extern struct bpf_mem_alloc bpf_global_ma, bpf_global_percpu_ma;
 extern bool bpf_global_ma_set;
+
+#define __bpf_put_uattr(x, uattr, to_field) \
+	(put_user(x, &((uattr)->to_field)))
+
+#define bpf_put_uattr(x, uattr, to_field) \
+	(in_compat64_syscall() ? \
+		__bpf_put_uattr(x, (union compat_bpf_attr __user *)uattr, to_field) : \
+		__bpf_put_uattr(x, (union bpf_attr __user *)uattr, to_field))
+
+#define bpf_field_exists(uattr_size, field) \
+	(in_compat64_syscall() ? \
+		(uattr_size >= offsetofend(union compat_bpf_attr, field)) : \
+		(uattr_size >= offsetofend(union bpf_attr, field)))
 
 typedef u64 (*bpf_callback_t)(u64, u64, u64, u64, u64);
 typedef int (*bpf_iter_init_seq_priv_t)(void *private_data,

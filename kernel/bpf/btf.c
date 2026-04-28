@@ -5873,9 +5873,8 @@ static int finalize_log(struct bpf_verifier_log *log, bpfptr_t uattr, u32 uattr_
 
 	err = bpf_vlog_finalize(log, &log_true_size);
 
-	if (uattr_size >= offsetofend(union bpf_attr, btf_log_true_size) &&
-	    copy_to_bpfptr_offset(uattr, offsetof(union bpf_attr, btf_log_true_size),
-				  &log_true_size, sizeof(log_true_size)))
+	if (bpf_field_exists(uattr_size, btf_log_true_size) &&
+	    bpfptr_put_uattr(log_true_size, uattr, btf_log_true_size))
 		err = -EFAULT;
 
 	return err;

@@ -19157,9 +19157,7 @@ static int check_btf_func_early(struct bpf_verifier_env *env,
 				/* set the size kernel expects so loader can zero
 				 * out the rest of the record.
 				 */
-				if (copy_to_bpfptr_offset(uattr,
-							  offsetof(union bpf_attr, func_info_rec_size),
-							  &min_size, sizeof(min_size)))
+				if (bpfptr_put_uattr(min_size, uattr, func_info_rec_size))
 					ret = -EFAULT;
 			}
 			goto err_free;
@@ -19349,9 +19347,7 @@ static int check_btf_line(struct bpf_verifier_env *env,
 		if (err) {
 			if (err == -E2BIG) {
 				verbose(env, "nonzero tailing record in line_info");
-				if (copy_to_bpfptr_offset(uattr,
-							  offsetof(union bpf_attr, line_info_rec_size),
-							  &expected_size, sizeof(expected_size)))
+				if (bpfptr_put_uattr(expected_size, uattr, line_info_rec_size))
 					err = -EFAULT;
 			}
 			goto err_free;
@@ -19472,9 +19468,7 @@ static int check_core_relo(struct bpf_verifier_env *env,
 		if (err) {
 			if (err == -E2BIG) {
 				verbose(env, "nonzero tailing record in core_relo");
-				if (copy_to_bpfptr_offset(uattr,
-							  offsetof(union bpf_attr, core_relo_rec_size),
-							  &expected_size, sizeof(expected_size)))
+				if (bpfptr_put_uattr(expected_size, uattr, core_relo_rec_size))
 					err = -EFAULT;
 			}
 			break;
@@ -26159,9 +26153,8 @@ skip_full_check:
 	if (err)
 		ret = err;
 
-	if (uattr_size >= offsetofend(union bpf_attr, log_true_size) &&
-	    copy_to_bpfptr_offset(uattr, offsetof(union bpf_attr, log_true_size),
-				  &log_true_size, sizeof(log_true_size))) {
+	if (bpf_field_exists(uattr_size, log_true_size) &&
+	    bpfptr_put_uattr(log_true_size, uattr, log_true_size)) {
 		ret = -EFAULT;
 		goto err_release_maps;
 	}
