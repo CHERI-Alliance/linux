@@ -522,7 +522,7 @@ static void kyber_exit_hctx(struct blk_mq_hw_ctx *hctx, unsigned int hctx_idx)
 
 static int rq_get_domain_token(struct request *rq)
 {
-	return (long)rq->elv.priv[0];
+	return (long)__c_pa(rq->elv.priv[0]);
 }
 
 static void rq_set_domain_token(struct request *rq, int token)
