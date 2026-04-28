@@ -2112,14 +2112,16 @@ EXPORT_SYMBOL(fault_in_subpage_writeable);
  * Returns the number of bytes not faulted in, like copy_to_user() and
  * copy_from_user().
  */
-size_t fault_in_safe_writeable(const char __user *uaddr, size_t size)
+size_t fault_in_safe_writeable(char __user *uaddr, size_t size)
 {
-	/* TODO [PCuABI] - capability checks for uaccess */
 	unsigned long start = user_ptr_addr(uaddr), end;
 	const unsigned long end = start + size;
 	unsigned long cur;
 	struct mm_struct *mm = current->mm;
 	bool unlocked = false;
+
+	if (unlikely(!check_user_ptr_write(uaddr, size)))
+		return 0;
 
 	if (unlikely(size == 0))
 		return 0;

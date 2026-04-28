@@ -1279,7 +1279,7 @@ int folio_wait_private_2_killable(struct folio *folio);
  */
 size_t fault_in_writeable(char __user *uaddr, size_t size);
 size_t fault_in_subpage_writeable(char __user *uaddr, size_t size);
-size_t fault_in_safe_writeable(const char __user *uaddr, size_t size);
+size_t fault_in_safe_writeable(char __user *uaddr, size_t size);
 size_t fault_in_readable(const char __user *uaddr, size_t size);
 
 int add_to_page_cache_lru(struct page *page, struct address_space *mapping,
