@@ -777,7 +777,7 @@ static inline int get_sigset_argpack(struct sigset_argpack *to,
 	// the path is hot enough for overhead of copy_from_user() to matter
 	if (from) {
 		scoped_user_read_access(from, Efault) {
-			unsafe_get_user(to->p, &from->p, Efault);
+			unsafe_get_user_ptr(to->p, &from->p, Efault);
 			unsafe_get_user(to->size, &from->size, Efault);
 		}
 	}
