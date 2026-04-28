@@ -1223,7 +1223,7 @@ static ssize_t extract_kvec_to_sg(struct iov_iter *iter,
 
 	for (i = 0; i < iter->nr_segs; i++) {
 		struct page *page;
-		unsigned long kaddr;
+		uintptr_t kaddr;
 		size_t off, len, seg;
 
 		len = kv[i].iov_len;

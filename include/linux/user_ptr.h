@@ -15,7 +15,7 @@ struct reserv_struct;
  * Return: Up to 64 bits of @x represented as a user pointer. The result is
  *         not a valid pointer and shall not be dereferenced.
  */
-#define as_user_ptr(x) ((void __user *)(user_uintptr_t)(u64)(x))
+#define as_user_ptr(x) ((void __user *)__c_fakep((u64)(x)))
 
 /* Same semantics as as_user_ptr(), but also requires x to be of a given type */
 #define as_user_ptr_strict(type, x) (	\
@@ -233,7 +233,7 @@ static inline bool user_ptr_may_set_prot(user_uintptr_t user_ptr, int prot)
  */
 static inline ptraddr_t user_ptr_addr(const void __user *ptr)
 {
-	return (ptraddr_t)(user_uintptr_t)ptr;
+	return (ptraddr_t __force)(user_uintptr_t __force)ptr;
 }
 
 /**
@@ -249,7 +249,7 @@ static inline ptraddr_t user_ptr_addr(const void __user *ptr)
 static inline ptraddr_t user_ptr_base(const void __user *ptr)
 {
 #ifdef CONFIG_CHERI_PURECAP_UABI
-	return __builtin_cheri_base_get(ptr);
+	return cheri_base_get(ptr);
 #else
 	return 0;
 #endif
@@ -269,7 +269,7 @@ static inline ptraddr_t user_ptr_base(const void __user *ptr)
 static inline ptraddr_t user_ptr_limit(const void __user *ptr)
 {
 #ifdef CONFIG_CHERI_PURECAP_UABI
-	return __builtin_cheri_base_get(ptr) + __builtin_cheri_length_get(ptr);
+	return cheri_base_get(ptr) + cheri_length_get(ptr);
 #else
 	/*
 	 * Ideally TASK_SIZE_MAX, unfortunately we cannot safely include
@@ -288,7 +288,7 @@ static inline ptraddr_t user_ptr_limit(const void __user *ptr)
 static inline bool user_ptr_is_valid(const void __user *ptr)
 {
 #ifdef CONFIG_CHERI_PURECAP_UABI
-	return __builtin_cheri_tag_get(ptr);
+	return cheri_tag_get(ptr);
 #else
 	return 0;
 #endif
@@ -324,7 +324,7 @@ static inline bool user_ptr_is_same(const void __user *p1, const void __user *p2
 static inline void __user *user_ptr_set_addr(void __user *ptr, ptraddr_t addr)
 {
 #ifdef CONFIG_CHERI_PURECAP_UABI
-	return __builtin_cheri_address_set(ptr, addr);
+	return cheri_address_set(ptr, addr);
 #else
 	return as_user_ptr(addr);
 #endif
@@ -346,7 +346,7 @@ static inline void __user *user_ptr_set_addr(void __user *ptr, ptraddr_t addr)
 static inline void __user *user_ptr_set_bounds(void __user *ptr, size_t len)
 {
 #ifdef CONFIG_CHERI_PURECAP_UABI
-	return __builtin_cheri_bounds_set(ptr, len);
+	return cheri_bounds_set(ptr, len);
 #else
 	return ptr;
 #endif
