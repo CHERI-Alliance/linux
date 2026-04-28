@@ -201,15 +201,35 @@ extern int arch_setup_additional_pages(struct linux_binprm *bprm,
 #define COMPAT_ELF_PLATFORM		("v8l")
 #endif
 
+#ifdef CONFIG_COMPAT64
+
+/*
+ * TODO [PCuABI]: Redefine below macros and typedefs to let ptrace pick them
+ * and build. These redefinitions are not permanent and might not be required if
+ * the ptrace is modified for complete COMPAT64 support.
+ */
+#define COMPAT_ELF_NGREG		ELF_NGREG
+typedef unsigned long			compat_elf_greg_t;
+typedef compat_elf_greg_t		compat_elf_gregset_t[COMPAT_ELF_NGREG];
+
+#else /* !CONFIG_COMPAT64 */
+
 /* AArch32 registers. */
 #define COMPAT_ELF_NGREG		18
 typedef unsigned int			compat_elf_greg_t;
 typedef compat_elf_greg_t		compat_elf_gregset_t[COMPAT_ELF_NGREG];
 
-#ifdef CONFIG_COMPAT
+#endif /* !CONFIG_COMPAT64 */
+
+#if defined(CONFIG_COMPAT) && !defined(CONFIG_COMPAT64) 
 
 /* PIE load location for compat arm. Must match ARM ELF_ET_DYN_BASE. */
 #define COMPAT_ELF_ET_DYN_BASE		0x000400000UL
+
+/* AArch32 registers. */
+#define COMPAT_ELF_NGREG		18
+typedef unsigned int			compat_elf_greg_t;
+typedef compat_elf_greg_t		compat_elf_gregset_t[COMPAT_ELF_NGREG];
 
 /* AArch32 EABI. */
 #define EF_ARM_EABI_MASK		0xff000000
