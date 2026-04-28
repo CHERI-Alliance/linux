@@ -302,10 +302,10 @@ EXPORT_SYMBOL_GPL(omap_vout_new_format);
 /*
  * Allocate buffers
  */
-unsigned long omap_vout_alloc_buffer(u32 buf_size, u32 *phys_addr)
+uintptr_t omap_vout_alloc_buffer(u32 buf_size, u32 *phys_addr)
 {
 	u32 order, size;
-	unsigned long virt_addr, addr;
+	uintptr_t virt_addr, addr;
 
 	size = PAGE_ALIGN(buf_size);
 	order = get_order(size);
@@ -326,10 +326,10 @@ unsigned long omap_vout_alloc_buffer(u32 buf_size, u32 *phys_addr)
 /*
  * Free buffers
  */
-void omap_vout_free_buffer(unsigned long virtaddr, u32 buf_size)
+void omap_vout_free_buffer(uintptr_t virtaddr, u32 buf_size)
 {
 	u32 order, size;
-	unsigned long addr = virtaddr;
+	uintptr_t addr = virtaddr;
 
 	size = PAGE_ALIGN(buf_size);
 	order = get_order(size);

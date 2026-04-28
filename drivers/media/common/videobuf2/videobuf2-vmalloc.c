@@ -95,7 +95,7 @@ static void *vb2_vmalloc_get_userptr(struct vb2_buffer *vb, struct device *dev,
 	buf->vec = vec;
 	n_pages = frame_vector_count(vec);
 	if (frame_vector_to_pages(vec) < 0) {
-		unsigned long *nums = frame_vector_pfns(vec);
+		uintptr_t *nums = frame_vector_pfns(vec);
 
 		/*
 		 * We cannot get page pointers for these pfns. Check memory is
@@ -105,7 +105,7 @@ static void *vb2_vmalloc_get_userptr(struct vb2_buffer *vb, struct device *dev,
 			if (nums[i-1] + 1 != nums[i])
 				goto fail_map;
 		buf->vaddr = (__force void *)
-			ioremap(__pfn_to_phys(nums[0]), size + offset);
+			ioremap(__pfn_to_phys(__c_ua(nums[0])), size + offset);
 	} else {
 		buf->vaddr = vm_map_ram(frame_vector_pages(vec), n_pages, -1);
 	}
@@ -126,7 +126,7 @@ fail_pfnvec_create:
 static void vb2_vmalloc_put_userptr(void *buf_priv)
 {
 	struct vb2_vmalloc_buf *buf = buf_priv;
-	unsigned long vaddr = (uintptr_t)buf->vaddr & PAGE_MASK;
+	uintptr_t vaddr = (uintptr_t)buf->vaddr & PAGE_MASK;
 	unsigned int i;
 	struct page **pages;
 	unsigned int n_pages;

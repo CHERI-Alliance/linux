@@ -513,11 +513,11 @@ static int smsusb_probe(struct usb_interface *intf,
 		 (unsigned long)id->driver_info,
 		 intf->cur_altsetting->desc.bInterfaceNumber);
 
-	if (sms_get_board(id->driver_info)->intf_num !=
+	if (sms_get_board(__c_ua(id->driver_info))->intf_num !=
 	    intf->cur_altsetting->desc.bInterfaceNumber) {
 		pr_debug("interface %d won't be used. Expecting interface %d to popup\n",
 			intf->cur_altsetting->desc.bInterfaceNumber,
-			sms_get_board(id->driver_info)->intf_num);
+			sms_get_board(__c_ua(id->driver_info))->intf_num);
 		return -ENODEV;
 	}
 
@@ -561,7 +561,7 @@ static int smsusb_probe(struct usb_interface *intf,
 			devpath);
 		rc = smsusb1_load_firmware(
 				udev, smscore_registry_getmode(devpath),
-				id->driver_info);
+				__c_ua(id->driver_info));
 
 		/* This device will reset and gain another USB ID */
 		if (!rc)
@@ -572,11 +572,11 @@ static int smsusb_probe(struct usb_interface *intf,
 
 		return rc;
 	} else {
-		rc = smsusb_init_device(intf, id->driver_info);
+		rc = smsusb_init_device(intf, __c_ua(id->driver_info));
 	}
 
 	pr_info("Device initialized with return code %d\n", rc);
-	sms_board_load_modules(id->driver_info);
+	sms_board_load_modules(__c_ua(id->driver_info));
 	return rc;
 }
 

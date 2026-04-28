@@ -1112,7 +1112,7 @@ static bool s5p_jpeg_subsampling_decode(struct s5p_jpeg_ctx *ctx,
 }
 
 static bool s5p_jpeg_parse_hdr(struct s5p_jpeg_q_data *result,
-			       unsigned long buffer, unsigned long size,
+			       uintptr_t buffer, unsigned long size,
 			       struct s5p_jpeg_ctx *ctx)
 {
 	int c, components = 0, notfound, n_dht = 0, n_dqt = 0;

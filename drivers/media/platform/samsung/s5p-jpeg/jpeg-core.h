@@ -239,7 +239,7 @@ struct s5p_jpeg_ctx {
 struct s5p_jpeg_buffer {
 	unsigned long size;
 	unsigned long curr;
-	unsigned long data;
+	uintptr_t data;
 };
 
 /**
