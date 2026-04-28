@@ -223,7 +223,8 @@ int mwifiex_debug_info_to_buffer(struct mwifiex_private *priv, char *buf,
 {
 	char *p = buf;
 	struct mwifiex_debug_data *d = &items[0];
-	size_t size, addr;
+	size_t size;
+	uintptr_t addr;
 	long val;
 	int i, j;
 

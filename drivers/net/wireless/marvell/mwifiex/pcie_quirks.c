@@ -83,7 +83,7 @@ void mwifiex_initialize_quirks(struct pcie_service_card *card)
 
 	dmi_id = dmi_first_match(mwifiex_quirk_table);
 	if (dmi_id)
-		card->quirks = (uintptr_t)dmi_id->driver_data;
+		card->quirks = __c_pa(dmi_id->driver_data);
 
 	if (!card->quirks)
 		dev_info(&pdev->dev, "no quirks enabled\n");
