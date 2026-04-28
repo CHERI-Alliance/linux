@@ -25,7 +25,7 @@ irqreturn_t mt792x_irq_handler(int irq, void *dev_instance)
 }
 EXPORT_SYMBOL_GPL(mt792x_irq_handler);
 
-void mt792x_irq_tasklet(unsigned long data)
+void mt792x_irq_tasklet(uintptr_t data)
 {
 	struct mt792x_dev *dev = (struct mt792x_dev *)data;
 	const struct mt792x_irq_map *irq_map = dev->irq_map;

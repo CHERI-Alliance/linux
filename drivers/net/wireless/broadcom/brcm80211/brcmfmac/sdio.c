@@ -4077,7 +4077,7 @@ brcmf_sdio_probe_attach(struct brcmf_sdio *bus)
 	if (!bus->hdrbuf)
 		return -ENOMEM;
 	/* Locate an appropriately-aligned portion of hdrbuf */
-	bus->rxhdr = (u8 *) roundup((unsigned long)&bus->hdrbuf[0],
+	bus->rxhdr = (u8 *) roundup((uintptr_t)&bus->hdrbuf[0],
 				    bus->head_align);
 
 	/* Set the poll and/or interrupt flags */

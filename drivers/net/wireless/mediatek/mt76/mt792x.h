@@ -424,7 +424,7 @@ irqreturn_t mt792x_irq_handler(int irq, void *dev_instance);
 void mt792x_rx_poll_complete(struct mt76_dev *mdev, enum mt76_rxq_id q);
 int mt792x_poll_tx(struct napi_struct *napi, int budget);
 int mt792x_poll_rx(struct napi_struct *napi, int budget);
-void mt792x_irq_tasklet(unsigned long data);
+void mt792x_irq_tasklet(uintptr_t data);
 int mt792x_wfsys_reset(struct mt792x_dev *dev);
 int mt792x_tx_stats_show(struct seq_file *file, void *data);
 int mt792x_queues_acq(struct seq_file *s, void *data);
