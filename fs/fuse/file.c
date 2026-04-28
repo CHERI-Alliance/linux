@@ -417,7 +417,7 @@ EXPORT_SYMBOL_GPL(fuse_sync_release);
 u64 fuse_lock_owner_id(struct fuse_conn *fc, fl_owner_t id)
 {
 	u32 *k = fc->scramble_key;
-	u64 v = (uintptr_t) id;
+	u64 v = __c_pa(id);
 	u32 v0 = v;
 	u32 v1 = v >> 32;
 	u32 sum = 0;
@@ -1529,7 +1529,7 @@ out:
 	return written ? written : err;
 }
 
-static inline unsigned long fuse_get_user_addr(const struct iov_iter *ii)
+static inline uintptr_t fuse_get_user_addr(const struct iov_iter *ii)
 {
 	return (user_uintptr_t)iter_iov(ii)->iov_base + ii->iov_offset;
 }

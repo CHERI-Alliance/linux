@@ -1965,7 +1965,7 @@ static long fuse_dir_compat_ioctl(struct file *file, unsigned int cmd,
 	if (fc->minor < 18)
 		return -ENOTTY;
 
-	return fuse_ioctl_common(file, cmd, arg,
+	return fuse_ioctl_common(file, cmd, (user_uintptr_t)compat_ptr(arg),
 				 FUSE_IOCTL_COMPAT | FUSE_IOCTL_DIR);
 }
 
