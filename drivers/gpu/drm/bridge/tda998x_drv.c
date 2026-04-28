@@ -11,8 +11,13 @@
 #include <linux/module.h>
 #include <linux/platform_data/tda9950.h>
 #include <linux/irq.h>
+#ifdef CONFIG_SND_SOC_HDMI_CODEC
 #include <sound/asoundef.h>
 #include <sound/hdmi-codec.h>
+#else
+#include <linux/delay.h>
+#include <linux/platform_device.h>
+#endif
 
 #include <drm/drm_atomic_helper.h>
 #include <drm/drm_bridge.h>
@@ -899,6 +904,7 @@ static const struct tda998x_audio_route tda998x_audio_route[AUDIO_ROUTE_NUM] = {
 	},
 };
 
+#ifdef CONFIG_SND_SOC_HDMI_CODEC
 /* Configure the TDA998x audio data and clock routing. */
 static int tda998x_derive_routing(struct tda998x_priv *priv,
 				  struct tda998x_audio_settings *s,
@@ -913,6 +919,7 @@ static int tda998x_derive_routing(struct tda998x_priv *priv,
 
 	return 0;
 }
+#endif
 
 /*
  * The audio clock divisor register controls a divider producing Audio_Clk_Out
@@ -1062,6 +1069,7 @@ static void tda998x_configure_audio(struct tda998x_priv *priv)
 	tda998x_write_aif(priv, &settings->cea);
 }
 
+#ifdef CONFIG_SND_SOC_HDMI_CODEC
 static int tda998x_audio_hw_params(struct device *dev, void *data,
 				   struct hdmi_codec_daifmt *daifmt,
 				   struct hdmi_codec_params *params)
@@ -1191,6 +1199,7 @@ static int tda998x_audio_codec_init(struct tda998x_priv *priv,
 
 	return PTR_ERR_OR_ZERO(priv->audio_pdev);
 }
+#endif /* CONFIG_SND_SOC_HDMI_CODEC */
 
 /* DRM connector functions */
 
@@ -1944,9 +1953,11 @@ static int tda998x_create(struct device *dev)
 		if (ret)
 			goto fail;
 
+#ifdef CONFIG_SND_SOC_HDMI_CODEC
 		if (priv->audio_port_enable[AUDIO_ROUTE_I2S] ||
 		    priv->audio_port_enable[AUDIO_ROUTE_SPDIF])
 			tda998x_audio_codec_init(priv, &client->dev);
+#endif
 	}
 
 #ifdef CONFIG_OF
