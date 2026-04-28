@@ -63,7 +63,7 @@ void syscall_mmap(void)
 static inline __attribute__((always_inline))
 void syscall_mmap2(void)
 {
-	const char *msg = "foo";
+	const char msg[] = "foo";
 	unsigned int msg_len = sizeof(msg); /* No need for the terminator */
 	const char *sample_file = "/limbo.dat";
 	void *addr;
