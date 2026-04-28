@@ -60,12 +60,6 @@ typedef unsigned long		uintptr_t;
 typedef long			intptr_t;
 #endif
 
-static inline unsigned long
-__c_ua(uintptr_t ptr)
-{
-	return (unsigned long __force)ptr;
-}
-
 typedef __kernel_uintptr_t	user_uintptr_t;
 typedef __kernel_intptr_t	user_intptr_t;
 

@@ -2,9 +2,46 @@
 #ifndef _LINUX_CHERI_H
 #define _LINUX_CHERI_H
 
+#ifdef __CHECKER__
+#define __capability
+#endif
+
 #ifdef __CHERI__
 
+#ifndef __CHECKER__
+
 #include <cheriintrin.h>
+
+/* For ARM morello. */
+#ifndef cheri_high_get
+#define cheri_high_get(x) __builtin_cheri_copy_from_high(x)
+#endif
+
+#else /* __CHECKER__ */
+
+typedef unsigned int cheri_perms_t;
+#define cheri_address_set(__c, __a) ((__typeof__(__c))(uintptr_t __force)__a)
+#define cheri_bounds_set(__c, __l) (__c)
+#define cheri_bounds_set_exact(__c, __l) (__c)
+#define cheri_sentry_create(__c) (__c)
+
+#define cheri_base_get(__c) ((ptraddr_t)0)
+#define cheri_address_get(__c) ((ptraddr_t __force)(uintptr_t __force)__c)
+#define cheri_length_get(__c) (~(ptraddr_t)0)
+#define cheri_high_get(__c) ((ptraddr_t)0)
+#define cheri_tag_get(__c) (1)
+#define cheri_representable_alignment_mask(__l) (~(ptraddr_t)0)
+#define cheri_representable_length(__l) (__l)
+#define __builtin_cheri_equal_exact(p1, p2) (((uintptr_t __force)p1) == ((uintptr_t __force)p2))
+#define cheri_is_sealed(__c) (0)
+#define cheri_is_unsealed(__c) (1)
+#define cheri_is_sentry(__c) (0)
+#define cheri_is_valid(__c) (1)
+#define cheri_is_invalid(__c) (0)
+#define cheri_perms_and(__c, __m) (__c)
+#define cheri_perms_get(__c) ~0U
+
+#endif /* __CHECKER__ */
 
 #include <linux/types.h>
 
@@ -85,7 +122,7 @@ cheri_build_user_cap(ptraddr_t addr, size_t len, cheri_perms_t perms);
  * If 2. does not hold, the returned capability will not have any of the invalid
  * permissions.
  */
-void * __capability
+void __user * __capability
 cheri_build_user_cap_inexact_bounds(ptraddr_t addr, size_t len,
 				    cheri_perms_t perms);
 
@@ -106,9 +143,23 @@ cheri_build_user_cap_inexact_bounds(ptraddr_t addr, size_t len,
  *
  *  Return: true if @cap passes the checks.
  */
-bool cheri_check_cap(const void * __capability cap, size_t len,
+bool cheri_check_cap(const void __user * __capability cap, size_t len,
 		     cheri_perms_t perms);
 
+/**
+ * Return the maximum length accessible from this capability starting
+ * with its current base.
+ * @c Capability
+ * @max An upper bound on the limit to return.
+ * @return The number of accessible bytes.
+ */
+static __always_inline unsigned long
+cheri_restrict_len(const volatile void __user *c, ptraddr_t max)
+{
+	ptraddr_t l = cheri_base_get(c) + cheri_length_get(c) - (__ptraddr_t)c;
+
+	return (l < max)  ? l : max;
+}
 
 /*
  * Root capabilities. Should be set in arch code during the early init phase,
@@ -128,7 +179,130 @@ extern uintcap_t cheri_user_root_cap;		/* Userspace (data/code) root */
 extern uintcap_t cheri_user_root_seal_cap;	/* Userspace sealing root */
 extern uintcap_t cheri_user_root_cid_cap;	/* Userspace compartment ID root */
 extern uintcap_t cheri_user_root_allperms_cap;	/* Userspace root (all permissions) */
+extern cheri_perms_t cheri_unsupported_perms;	/* Permission bits not supported by current hardware. */
+
+#else
+
+#define cheri_check_cap(cap, len, perms) (true)
+#define cheri_address_set(cap, addr) ((void *)(addr))
+#define cheri_bounds_set(__c, __l) (__c)
+#define cheri_bounds_set_exact(__c, __l) (__c)
+#define cheri_sentry_create(__c) (__c)
+#define cheri_restrict_len(C, L) (L)
 
 #endif /* __CHERI__ */
+
+/*
+ * Macros to correctly cast between unsigned long (aka ptraddr_t), void *
+ * the kernel notion of uintptr_t. These macros are for in kernel
+ * conversions between pointers and plain addresses and are relevant
+ * if CONFIG_CHERI_KERNEL is set. Conversion for user pointers has
+ * a different set of macros.
+ */
+
+/*
+ * Downgrade a pointer to its address.
+ * Use this if you intentionally want to remove the pointer property
+ * from a pointer and reduce it to its address. The result cannot be
+ * turned back into a pointer with CHERI.
+ *
+ * A valid example use would be an alignment check on a pointer's address:
+ *	static inline unsigned long offset_in_page(const void *ptr)
+ *	{
+ *		return __c_pa(ptr) % PAGE_SIZE;
+ *	}
+ *
+ * Other potential uses could be:
+ * - Decode additional information stored in the low bits of the pointer's
+ *   address (e.g. maple_tree, rb_tree).
+ * - Pass the address to printk.
+ * - Most of the VMA functions operate on addresses and not pointers, too.
+ */
+static __always_inline ptraddr_t
+__c_pa(const volatile void *ptr)
+{
+	return (ptraddr_t __force)(uintptr_t)ptr;
+}
+
+static __always_inline ptraddr_t
+__c_pa_u(const volatile void __user *ptr)
+{
+#ifdef __CHERI__
+	return (ptraddr_t __force)(__kernel_uintptr_t)ptr;
+#else
+	return (ptraddr_t __force)ptr;
+#endif
+}
+
+/*
+ * Downgrade a uintptr_t or similar to its address.
+ *
+ * This function is similar to __c_pa but takes a __u64ptr (or more
+ * commonly a promoted uintptr_t/user_uintptr_t and returns the
+ * address part. The explicit use of __u64ptr and __u64 ensures
+ * that a __u64ptr on 32-bit does not lose the higher bits.
+ */
+static __always_inline __u64
+__c_ua(__u64ptr ptr)
+{
+	return (unsigned long long __force)ptr;
+}
+
+/*
+ * Generate a pointer from an unsigned long value. The resulting pointer
+ * cannot be dereferenced!
+ *
+ * Valid user of this macro must be able to proof that the generated
+ * pointer will not be dereferenced.
+ *
+ * Examples of a valid use are:
+ * - An integer value is stored directly in a ->private field of some data
+ *   structure and users of the ->private data field will cast it back to
+ *   the original non-pointer type.
+ * - Additionally, the ERR_PTR related macros use this.
+ */
+static __always_inline void *
+__c_fakep(ptraddr_t val)
+{
+	return (void *)(uintptr_t __force)val;
+}
+
+/*
+ * Like __c_fakep but creates a __u64ptr instead of a void * pointer.
+ * Similar to __c_ua() the input and output values are at least 64-bit
+ * even on 32-bit systems.
+ */
+static __always_inline __u64ptr
+__c_fakeu(__u64 val)
+{
+	return (__u64ptr __force)val;
+}
+
+/*
+ * Fix the bounds of a pointer by taking them from another pointer.
+ * This is useful in some special cases, e.g. after reallocation when
+ * we know that the address of a pointer should be within the bounds
+ * of another pointer but due to address calculations the tag and bounds
+ * on the pointer may have been lost.
+ */
+#define cheri_fixup_bounds(__AUTH, __TOFIX) do {	\
+	void * __tofix = (__TOFIX);			\
+	void * __auth = (__AUTH);			\
+	(__TOFIX) = __auth + (__tofix - __auth);	\
+} while (0)
+
+#ifdef CONFIG_CHERI_KERNEL
+
+#define __cheri_pointer_align __attribute__((aligned(__SIZEOF_POINTER__)))
+#define __packed_if_not_cheri
+#define cheri_bounds_set_kernel(__c, __l) cheri_bounds_set(__c, __l)
+
+#else
+
+#define __cheri_pointer_align
+#define __packed_if_not_cheri __packed
+#define cheri_bounds_set_kernel(__c, __l) (__c)
+
+#endif
 
 #endif	/* _LINUX_CHERI_H */
