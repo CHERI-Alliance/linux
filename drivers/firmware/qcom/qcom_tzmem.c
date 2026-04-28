@@ -406,7 +406,7 @@ static bool qcom_tzmem_try_grow_pool(struct qcom_tzmem_pool *pool,
  */
 void *qcom_tzmem_alloc(struct qcom_tzmem_pool *pool, size_t size, gfp_t gfp)
 {
-	unsigned long vaddr;
+	uintptr_t vaddr;
 	int ret;
 
 	if (!size)
@@ -432,7 +432,7 @@ again:
 	chunk->owner = pool;
 
 	scoped_guard(spinlock_irqsave, &qcom_tzmem_chunks_lock) {
-		ret = radix_tree_insert(&qcom_tzmem_chunks, vaddr, chunk);
+		ret = radix_tree_insert(&qcom_tzmem_chunks, __c_ua(vaddr), chunk);
 		if (ret) {
 			gen_pool_free(pool->genpool, vaddr, size);
 			return NULL;
@@ -457,7 +457,7 @@ void qcom_tzmem_free(void *vaddr)
 
 	scoped_guard(spinlock_irqsave, &qcom_tzmem_chunks_lock)
 		chunk = radix_tree_delete_item(&qcom_tzmem_chunks,
-					       (uintptr_t)vaddr, NULL);
+					       __c_pa(vaddr), NULL);
 
 	if (!chunk) {
 		WARN(1, "Virtual address %p not owned by TZ memory allocator",
@@ -496,7 +496,7 @@ phys_addr_t qcom_tzmem_to_phys(void *vaddr)
 						&qcom_tzmem_chunks_lock);
 
 		ret = gen_pool_virt_to_phys(chunk->owner->genpool,
-					    (uintptr_t)vaddr);
+					    __c_pa(vaddr));
 		if (ret == -1)
 			continue;
 
