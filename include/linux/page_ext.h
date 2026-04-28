@@ -107,7 +107,7 @@ static inline struct page_ext *page_ext_next(struct page_ext *curr)
 {
 	void *next = curr;
 	next += page_ext_size;
-	return next;
+	return cheri_make_kernel_data_cap(__c_pa(next), page_ext_size);
 }
 
 struct page_ext_iter {
