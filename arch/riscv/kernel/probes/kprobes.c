@@ -49,12 +49,13 @@ static void __kprobes arch_simulate_insn(struct kprobe *p, struct pt_regs *regs)
 	post_kprobe_handler(p, kcb, regs);
 }
 
-static bool __kprobes arch_check_kprobe(unsigned long addr)
+static bool __kprobes arch_check_kprobe(uintptr_t addr)
 {
-	unsigned long tmp, offset;
+	uintptr_t tmp;
+	unsigned long offset;
 
 	/* start iterating at the closest preceding symbol */
-	if (!kallsyms_lookup_size_offset(addr, NULL, &offset))
+	if (!kallsyms_lookup_size_offset(__c_ua(addr), NULL, &offset))
 		return false;
 
 	tmp = addr - offset;
@@ -172,7 +173,7 @@ static void __kprobes setup_singlestep(struct kprobe *p,
 				       struct pt_regs *regs,
 				       struct kprobe_ctlblk *kcb, int reenter)
 {
-	unsigned long slot;
+	uintptr_t slot;
 
 	if (reenter) {
 		save_previous_kprobe(kcb);
@@ -288,7 +289,7 @@ kprobe_breakpoint_handler(struct pt_regs *regs)
 {
 	struct kprobe *p, *cur_kprobe;
 	struct kprobe_ctlblk *kcb;
-	unsigned long addr = instruction_pointer(regs);
+	uintptr_t addr = instruction_pointer(regs);
 
 	kcb = get_kprobe_ctlblk();
 	cur_kprobe = kprobe_running();
@@ -337,7 +338,7 @@ bool __kprobes
 kprobe_single_step_handler(struct pt_regs *regs)
 {
 	struct kprobe_ctlblk *kcb = get_kprobe_ctlblk();
-	unsigned long addr = instruction_pointer(regs);
+	uintptr_t addr = instruction_pointer(regs);
 	struct kprobe *cur = kprobe_running();
 
 	if (cur && (kcb->kprobe_status & (KPROBE_HIT_SS | KPROBE_REENTER)) &&
@@ -358,8 +359,8 @@ int __init arch_populate_kprobe_blacklist(void)
 {
 	int ret;
 
-	ret = kprobe_add_area_blacklist((uintptr_t)__irqentry_text_start,
-					(uintptr_t)__irqentry_text_end);
+	ret = kprobe_add_area_blacklist(__c_pa(__irqentry_text_start),
+					__c_pa(__irqentry_text_end));
 	return ret;
 }
 
