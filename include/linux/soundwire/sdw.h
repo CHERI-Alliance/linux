@@ -717,7 +717,7 @@ struct sdw_driver {
 #define SDW_SLAVE_ENTRY_EXT(_mfg_id, _part_id, _version, _c_id, _drv_data) \
 	{ .mfg_id = (_mfg_id), .part_id = (_part_id),		\
 	  .sdw_version = (_version), .class_id = (_c_id),	\
-	  .driver_data = (unsigned long)(_drv_data) }
+	  .driver_data = (uintptr_t)(_drv_data) }
 
 #define SDW_SLAVE_ENTRY(_mfg_id, _part_id, _drv_data)	\
 	SDW_SLAVE_ENTRY_EXT((_mfg_id), (_part_id), 0, 0, (_drv_data))

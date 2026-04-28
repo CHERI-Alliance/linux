@@ -221,7 +221,7 @@ static const struct ccu_reset_controller_data k3_dciu_reset_data = {
 #define K3_AUX_DEV_ID(_unit) \
 	{ \
 		.name = "spacemit_ccu.k3-" #_unit "-reset", \
-		.driver_data = (kernel_ulong_t)&k3_ ## _unit ## _reset_data, \
+		.driver_data = (uintptr_t)&k3_ ## _unit ## _reset_data, \
 	}
 
 static const struct auxiliary_device_id spacemit_k3_reset_ids[] = {

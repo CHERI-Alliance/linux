@@ -33,7 +33,7 @@
 #include <asm/intel-family.h>
 #include <asm/iosf_mbi.h>
 
-#define LPSS_ADDR(desc) ((unsigned long)&desc)
+#define LPSS_ADDR(desc) ((uintptr_t)&desc)
 
 #define LPSS_CLK_SIZE	0x04
 #define LPSS_LTR_SIZE	0x18

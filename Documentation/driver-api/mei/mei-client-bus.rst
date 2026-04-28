@@ -50,7 +50,7 @@ driver to bind itself against a device name.
                 char name[MEI_CL_NAME_SIZE];
                 uuid_le uuid;
                 __u8    version;
-                kernel_ulong_t driver_info;
+                uintptr_t driver_info;
         };
 
 To actually register a driver on the ME Client bus one must call the :c:func:`mei_cl_add_driver`

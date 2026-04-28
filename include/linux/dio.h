@@ -76,7 +76,7 @@ extern const struct bus_type dio_bus_type;
 
 struct dio_device_id {
 	dio_id id;                    /* Device ID or DIO_WILDCARD */
-	unsigned long driver_data;    /* Data private to the driver */
+	uintptr_t driver_data;    /* Data private to the driver */
 };
 
     /*

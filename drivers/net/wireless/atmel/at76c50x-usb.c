@@ -123,7 +123,7 @@ MODULE_FIRMWARE("atmel_at76c505-rfmd2958.bin");
 MODULE_FIRMWARE("atmel_at76c505a-rfmd2958.bin");
 MODULE_FIRMWARE("atmel_at76c505amx-rfmd.bin");
 
-#define USB_DEVICE_DATA(__ops)	.driver_info = (kernel_ulong_t)(__ops)
+#define USB_DEVICE_DATA(__ops)	.driver_info = (uintptr_t)(__ops)
 
 static const struct usb_device_id dev_table[] = {
 	/*

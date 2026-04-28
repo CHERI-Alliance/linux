@@ -110,7 +110,7 @@ static const struct drm_driver ast_driver = {
 	.device = id,				\
 	.subvendor = PCI_ANY_ID,		\
 	.subdevice = PCI_ANY_ID,		\
-	.driver_data = (unsigned long) info }
+	.driver_data = (uintptr_t) info }
 
 static const struct pci_device_id ast_pciidlist[] = {
 	AST_VGA_DEVICE(PCI_CHIP_AST2000, NULL),
