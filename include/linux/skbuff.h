@@ -5015,14 +5015,14 @@ enum skb_ext_id {
  *	@chunks: size currently allocated, stored in SKB_EXT_ALIGN_SHIFT units
  *	@data: start of extension data, variable sized
  *
- *	Note: offsets/lengths are stored in chunks of 8 bytes, this allows
+ *	Note: offsets/lengths are stored in chunks of 8/16 bytes, this allows
  *	to use 'u8' types while allowing up to 2kb worth of extension data.
  */
 struct skb_ext {
 	refcount_t refcnt;
-	u8 offset[SKB_EXT_NUM]; /* in chunks of 8 bytes */
+	u8 offset[SKB_EXT_NUM]; /* in chunks of 8/16 bytes */
 	u8 chunks;		/* same */
-	char data[] __aligned(8);
+	char data[] __aligned(8) __cheri_pointer_align;
 };
 
 struct skb_ext *__skb_ext_alloc(gfp_t flags);
@@ -5031,6 +5031,7 @@ void *__skb_ext_set(struct sk_buff *skb, enum skb_ext_id id,
 void *skb_ext_add(struct sk_buff *skb, enum skb_ext_id id);
 void __skb_ext_del(struct sk_buff *skb, enum skb_ext_id id);
 void __skb_ext_put(struct skb_ext *ext);
+void *__skb_ext_find(struct skb_ext *ext, enum skb_ext_id id);
 
 static inline void skb_ext_put(struct sk_buff *skb)
 {
@@ -5075,11 +5076,8 @@ static inline void skb_ext_del(struct sk_buff *skb, enum skb_ext_id id)
 
 static inline void *skb_ext_find(const struct sk_buff *skb, enum skb_ext_id id)
 {
-	if (skb_ext_exist(skb, id)) {
-		struct skb_ext *ext = skb->extensions;
-
-		return (void *)ext + (ext->offset[id] << 3);
-	}
+	if (skb_ext_exist(skb, id))
+		return __skb_ext_find(skb->extensions, id);
 
 	return NULL;
 }

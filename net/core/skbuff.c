@@ -5115,7 +5115,11 @@ err:
 EXPORT_SYMBOL_GPL(skb_segment);
 
 #ifdef CONFIG_SKB_EXTENSIONS
+#if __SIZEOF_POINTER__ > 8
+#define SKB_EXT_ALIGN_VALUE	__SIZEOF_POINTER__
+#else
 #define SKB_EXT_ALIGN_VALUE	8
+#endif
 #define SKB_EXT_CHUNKSIZEOF(x)	(ALIGN((sizeof(x)), SKB_EXT_ALIGN_VALUE) / SKB_EXT_ALIGN_VALUE)
 
 static const u8 skb_ext_type_len[] = {
@@ -7054,7 +7058,9 @@ EXPORT_SYMBOL(skb_condense);
 #ifdef CONFIG_SKB_EXTENSIONS
 static void *skb_ext_get_ptr(struct skb_ext *ext, enum skb_ext_id id)
 {
-	return (void *)ext + (ext->offset[id] * SKB_EXT_ALIGN_VALUE);
+	void *p = ((void *)ext + (ext->offset[id] * SKB_EXT_ALIGN_VALUE));
+
+	return cheri_bounds_set_kernel(p, skb_ext_type_len[id] * SKB_EXT_ALIGN_VALUE);
 }
 
 /**
@@ -7249,6 +7255,13 @@ free_now:
 	kmem_cache_free(skbuff_ext_cache, ext);
 }
 EXPORT_SYMBOL(__skb_ext_put);
+
+void * __skb_ext_find(struct skb_ext *ext, enum skb_ext_id id)
+{
+	return skb_ext_get_ptr(ext, id);
+}
+EXPORT_SYMBOL(__skb_ext_find);
+
 #endif /* CONFIG_SKB_EXTENSIONS */
 
 static void kfree_skb_napi_cache(struct sk_buff *skb)
