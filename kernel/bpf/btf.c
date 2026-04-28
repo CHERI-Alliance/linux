@@ -8185,30 +8185,95 @@ struct btf *btf_get_by_fd(int fd)
 	return btf;
 }
 
+static void convert_compat_btf_info_in(struct bpf_btf_info *dest,
+				       const struct compat_bpf_btf_info *cinfo)
+{
+	copy_field(dest, cinfo, btf);
+	copy_field(dest, cinfo, btf_size);
+	copy_field(dest, cinfo, id);
+	copy_field(dest, cinfo, name);
+	copy_field(dest, cinfo, name_len);
+	copy_field(dest, cinfo, kernel_btf);
+}
+
+static void convert_compat_btf_info_out(struct compat_bpf_btf_info *dest,
+					const struct bpf_btf_info *info)
+{
+	copy_field(dest, info, btf);
+	copy_field(dest, info, btf_size);
+	copy_field(dest, info, id);
+	copy_field(dest, info, name);
+	copy_field(dest, info, name_len);
+	copy_field(dest, info, kernel_btf);
+}
+
+static int copy_bpf_btf_info_from_user(const union bpf_attr *attr,
+				       struct bpf_btf_info *info,
+				       u32 *info_len)
+{
+	struct compat_bpf_btf_info cinfo;
+	int err;
+	size_t info_size = in_compat64_syscall() ? sizeof(struct compat_bpf_btf_info)
+						 : sizeof(struct bpf_btf_info);
+	void __user *uinfo = u64_to_user_ptr(attr->info.info);
+
+	*info_len = attr->info.info_len;
+	err = bpf_check_uarg_tail_zero(USER_BPFPTR(uinfo),
+				       info_size, *info_len);
+	if (err)
+		return err;
+	*info_len = min_t(u32, info_size, *info_len);
+
+	memset(info, 0, sizeof(*info));
+	if (in_compat64_syscall()) {
+		memset(&cinfo, 0, sizeof(cinfo));
+		if (copy_from_user(&cinfo, uinfo, *info_len))
+			return -EFAULT;
+		convert_compat_btf_info_in(info, &cinfo);
+	} else {
+		if (copy_from_user(info, uinfo, *info_len))
+			return -EFAULT;
+	}
+
+	return 0;
+}
+
+static int copy_bpf_btf_info_to_user(const union bpf_attr *attr,
+				     union bpf_attr __user *uattr,
+				     struct bpf_btf_info *info,
+				     u32 *info_len)
+{
+	struct compat_bpf_btf_info cinfo;
+	void *src_info = in_compat64_syscall() ? (struct bpf_btf_info *)&cinfo
+					       : info;
+	void __user *uinfo = u64_to_user_ptr(attr->info.info);
+
+	if (in_compat64_syscall()) {
+		memset(&cinfo, 0, sizeof(cinfo));
+		convert_compat_btf_info_out(&cinfo, info);
+	}
+
+	if (copy_to_user(uinfo, src_info, *info_len) ||
+	    bpf_put_uattr(*info_len, uattr, info.info_len))
+		return -EFAULT;
+
+	return 0;
+}
+
 int btf_get_info_by_fd(const struct btf *btf,
 		       const union bpf_attr *attr,
 		       union bpf_attr __user *uattr)
 {
-	struct bpf_btf_info __user *uinfo;
 	struct bpf_btf_info info;
-	u32 info_copy, btf_copy;
+	u32 btf_copy;
 	void __user *ubtf;
 	char __user *uname;
 	u32 uinfo_len, uname_len, name_len;
-	int ret = 0;
+	int ret;
 
-	uinfo = u64_to_user_ptr(attr->info.info);
-	uinfo_len = attr->info.info_len;
-
-	ret = bpf_check_uarg_tail_zero(USER_BPFPTR(uinfo), sizeof(*uinfo),
-				       uinfo_len);
+	ret = copy_bpf_btf_info_from_user(attr, &info, &uinfo_len);
 	if (ret)
 		return ret;
-
-	info_copy = min_t(u32, uinfo_len, sizeof(info));
-	memset(&info, 0, sizeof(info));
-	if (copy_from_user(&info, uinfo, info_copy))
-		return -EFAULT;
 
 	info.id = READ_ONCE(btf->id);
 	ubtf = u64_to_user_ptr(info.btf);
@@ -8243,8 +8308,7 @@ int btf_get_info_by_fd(const struct btf *btf,
 		}
 	}
 
-	if (copy_to_user(uinfo, &info, info_copy) ||
-	    put_user(info_copy, &uattr->info.info_len))
+	if (copy_bpf_btf_info_to_user(attr, uattr, &info, &uinfo_len))
 		return -EFAULT;
 
 	return ret;

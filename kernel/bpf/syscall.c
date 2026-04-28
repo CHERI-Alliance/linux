@@ -5009,28 +5009,163 @@ static int set_info_rec_size(struct bpf_prog_info *info)
 	return 0;
 }
 
+static void
+convert_compat_prog_info_in(struct bpf_prog_info *dest,
+			    const struct compat_bpf_prog_info *cinfo)
+{
+	copy_field(dest, cinfo, type);
+	copy_field(dest, cinfo, id);
+	memcpy(dest->tag, cinfo->tag, BPF_TAG_SIZE);
+	copy_field(dest, cinfo, jited_prog_len);
+	copy_field(dest, cinfo, xlated_prog_len);
+	copy_field(dest, cinfo, jited_prog_insns);
+	copy_field(dest, cinfo, xlated_prog_insns);
+	copy_field(dest, cinfo, load_time);
+	copy_field(dest, cinfo, created_by_uid);
+	copy_field(dest, cinfo, nr_map_ids);
+	copy_field(dest, cinfo, map_ids);
+	strncpy(dest->name, cinfo->name, BPF_OBJ_NAME_LEN);
+	copy_field(dest, cinfo, ifindex);
+	copy_field(dest, cinfo, gpl_compatible);
+	copy_field(dest, cinfo, netns_dev);
+	copy_field(dest, cinfo, netns_ino);
+	copy_field(dest, cinfo, nr_jited_ksyms);
+	copy_field(dest, cinfo, nr_jited_func_lens);
+	copy_field(dest, cinfo, jited_ksyms);
+	copy_field(dest, cinfo, jited_func_lens);
+	copy_field(dest, cinfo, btf_id);
+	copy_field(dest, cinfo, func_info_rec_size);
+	copy_field(dest, cinfo, func_info);
+	copy_field(dest, cinfo, nr_func_info);
+	copy_field(dest, cinfo, nr_line_info);
+	copy_field(dest, cinfo, line_info);
+	copy_field(dest, cinfo, jited_line_info);
+	copy_field(dest, cinfo, nr_jited_line_info);
+	copy_field(dest, cinfo, line_info_rec_size);
+	copy_field(dest, cinfo, jited_line_info_rec_size);
+	copy_field(dest, cinfo, nr_prog_tags);
+	copy_field(dest, cinfo, prog_tags);
+	copy_field(dest, cinfo, run_time_ns);
+	copy_field(dest, cinfo, run_cnt);
+	copy_field(dest, cinfo, recursion_misses);
+	copy_field(dest, cinfo, verified_insns);
+	copy_field(dest, cinfo, attach_btf_obj_id);
+	copy_field(dest, cinfo, attach_btf_id);
+}
+
+static void
+convert_compat_prog_info_out(struct compat_bpf_prog_info *dest,
+			     const struct bpf_prog_info *info)
+{
+	copy_field(dest, info, type);
+	copy_field(dest, info, id);
+	memcpy(dest->tag, info->tag, BPF_TAG_SIZE);
+	copy_field(dest, info, jited_prog_len);
+	copy_field(dest, info, xlated_prog_len);
+	copy_field(dest, info, jited_prog_insns);
+	copy_field(dest, info, xlated_prog_insns);
+	copy_field(dest, info, load_time);
+	copy_field(dest, info, created_by_uid);
+	copy_field(dest, info, nr_map_ids);
+	copy_field(dest, info, map_ids);
+	strncpy(dest->name, info->name, BPF_OBJ_NAME_LEN);
+	copy_field(dest, info, ifindex);
+	copy_field(dest, info, gpl_compatible);
+	copy_field(dest, info, netns_dev);
+	copy_field(dest, info, netns_ino);
+	copy_field(dest, info, nr_jited_ksyms);
+	copy_field(dest, info, nr_jited_func_lens);
+	copy_field(dest, info, jited_ksyms);
+	copy_field(dest, info, jited_func_lens);
+	copy_field(dest, info, btf_id);
+	copy_field(dest, info, func_info_rec_size);
+	copy_field(dest, info, func_info);
+	copy_field(dest, info, nr_func_info);
+	copy_field(dest, info, nr_line_info);
+	copy_field(dest, info, line_info);
+	copy_field(dest, info, jited_line_info);
+	copy_field(dest, info, nr_jited_line_info);
+	copy_field(dest, info, line_info_rec_size);
+	copy_field(dest, info, jited_line_info_rec_size);
+	copy_field(dest, info, nr_prog_tags);
+	copy_field(dest, info, prog_tags);
+	copy_field(dest, info, run_time_ns);
+	copy_field(dest, info, run_cnt);
+	copy_field(dest, info, recursion_misses);
+	copy_field(dest, info, verified_insns);
+	copy_field(dest, info, attach_btf_obj_id);
+	copy_field(dest, info, attach_btf_id);
+}
+
+static int copy_bpf_prog_info_from_user(const union bpf_attr *attr,
+					struct bpf_prog_info *info,
+					u32 *info_len)
+{
+	struct compat_bpf_prog_info cinfo;
+	int err;
+	size_t info_size = in_compat64_syscall() ? sizeof(struct compat_bpf_prog_info)
+						 : sizeof(struct bpf_prog_info);
+	void __user *uinfo = u64_to_user_ptr(attr->info.info);
+
+	*info_len = attr->info.info_len;
+	err = bpf_check_uarg_tail_zero(USER_BPFPTR(uinfo),
+				       info_size, *info_len);
+	if (err)
+		return err;
+	*info_len = min_t(u32, info_size, *info_len);
+
+	memset(info, 0, sizeof(*info));
+	if (in_compat64_syscall()) {
+		memset(&cinfo, 0, sizeof(cinfo));
+		if (copy_from_user(&cinfo, uinfo, *info_len))
+			return -EFAULT;
+		convert_compat_prog_info_in(info, &cinfo);
+	} else {
+		if (copy_from_user(info, uinfo, *info_len))
+			return -EFAULT;
+	}
+
+	return 0;
+}
+
+static int copy_bpf_prog_info_to_user(const union bpf_attr *attr,
+				      union bpf_attr __user *uattr,
+				      struct bpf_prog_info *info,
+				      u32 *info_len)
+{
+	struct compat_bpf_prog_info cinfo;
+	void *src_info = in_compat64_syscall() ? (struct bpf_prog_info *)&cinfo
+					       : info;
+	void __user *uinfo = (void __user *)attr->info.info;
+
+	if (in_compat64_syscall()) {
+		memset(&cinfo, 0, sizeof(cinfo));
+		convert_compat_prog_info_out(&cinfo, info);
+	}
+
+	if (copy_to_user(uinfo, src_info, *info_len) ||
+	    bpf_put_uattr(*info_len, uattr, info.info_len))
+		return -EFAULT;
+
+	return 0;
+}
+
 static int bpf_prog_get_info_by_fd(struct file *file,
 				   struct bpf_prog *prog,
 				   const union bpf_attr *attr,
 				   union bpf_attr __user *uattr)
 {
-	struct bpf_prog_info __user *uinfo = u64_to_user_ptr(attr->info.info);
 	struct btf *attach_btf = bpf_prog_get_target_btf(prog);
 	struct bpf_prog_info info;
-	u32 info_len = attr->info.info_len;
+	u32 info_len;
 	struct bpf_prog_kstats stats;
 	char __user *uinsns;
 	u32 ulen;
 	int err;
 
-	err = bpf_check_uarg_tail_zero(USER_BPFPTR(uinfo), sizeof(info), info_len);
+	err = copy_bpf_prog_info_from_user(attr, &info, &info_len);
 	if (err)
 		return err;
-	info_len = min_t(u32, sizeof(info), info_len);
-
-	memset(&info, 0, sizeof(info));
-	if (copy_from_user(&info, uinfo, info_len))
-		return -EFAULT;
 
 	info.type = prog->type;
 	info.id = prog->aux->id;
@@ -5291,8 +5426,7 @@ static int bpf_prog_get_info_by_fd(struct file *file,
 	}
 
 done:
-	if (copy_to_user(uinfo, &info, info_len) ||
-	    put_user(info_len, &uattr->info.info_len))
+	if (copy_bpf_prog_info_to_user(attr, uattr, &info, &info_len))
 		return -EFAULT;
 
 	return 0;
@@ -5378,24 +5512,213 @@ static int bpf_btf_get_info_by_fd(struct file *file,
 	return btf_get_info_by_fd(btf, attr, uattr);
 }
 
+static void
+convert_compat_link_info_in(struct bpf_link_info *dest,
+			    const struct compat_bpf_link_info *cinfo,
+			    enum bpf_link_type type)
+{
+	/*
+	 * Only a few fields in bpf_link_info are used as input, the
+	 * rest do not need conversion in
+	 */
+	switch (type) {
+	case BPF_LINK_TYPE_RAW_TRACEPOINT:
+		copy_field(dest, cinfo, raw_tracepoint.tp_name);
+		copy_field(dest, cinfo, raw_tracepoint.tp_name_len);
+		return;
+	case BPF_LINK_TYPE_ITER:
+		copy_field(dest, cinfo, iter.target_name);
+		copy_field(dest, cinfo, iter.target_name_len);
+		return;
+	case BPF_LINK_TYPE_KPROBE_MULTI:
+		copy_field(dest, cinfo, kprobe_multi.addrs);
+		copy_field(dest, cinfo, kprobe_multi.count);
+		copy_field(dest, cinfo, kprobe_multi.flags);
+		copy_field(dest, cinfo, kprobe_multi.missed);
+		return;
+	case BPF_LINK_TYPE_PERF_EVENT:
+		/*
+		 * We do not actually know which struct under the perf_event
+		 * union is active at this point, but this is fine as only the
+		 * pointer fields (file_name / func_name / tp_name) and name_len
+		 * are input fields, and they are in the same position
+		 * regardless of the active struct.
+		 */
+		copy_field(dest, cinfo, perf_event.uprobe.file_name);
+		copy_field(dest, cinfo, perf_event.uprobe.name_len);
+		return;
+	default:
+		return;
+	}
+}
+
+static void
+convert_compat_link_info_out(struct compat_bpf_link_info *dest,
+			     const struct bpf_link_info *info,
+			     enum bpf_link_type type)
+{
+	copy_field(dest, info, type);
+	copy_field(dest, info, id);
+	copy_field(dest, info, prog_id);
+
+	switch (type) {
+	case BPF_LINK_TYPE_RAW_TRACEPOINT:
+		copy_field(dest, info, raw_tracepoint.tp_name);
+		copy_field(dest, info, raw_tracepoint.tp_name_len);
+		return;
+	case BPF_LINK_TYPE_TRACING:
+		copy_field(dest, info, tracing.attach_type);
+		copy_field(dest, info, tracing.target_obj_id);
+		copy_field(dest, info, tracing.target_btf_id);
+		return;
+	case BPF_LINK_TYPE_CGROUP:
+		copy_field(dest, info, cgroup.cgroup_id);
+		copy_field(dest, info, cgroup.attach_type);
+		return;
+	case BPF_LINK_TYPE_ITER:
+		copy_field(dest, info, iter.target_name);
+		copy_field(dest, info, iter.target_name_len);
+		/*
+		 * remaining struct is fixed size integers, so identical in
+		 * any 64-bit ABI - since figuring out what members are active
+		 * is non-trivial, memcpy to the end of the struct
+		 */
+		memcpy((u8 *)dest+offsetof(struct compat_bpf_link_info, iter.map),
+		       (u8 *)info+offsetof(struct bpf_link_info, iter.map),
+		       offsetofend(struct bpf_link_info, iter.cgroup) -
+		       offsetof(struct bpf_link_info, iter.map));
+		return;
+	case BPF_LINK_TYPE_NETNS:
+		copy_field(dest, info, netns.netns_ino);
+		copy_field(dest, info, netns.attach_type);
+		return;
+	case BPF_LINK_TYPE_XDP:
+		copy_field(dest, info, xdp.ifindex);
+		return;
+	case BPF_LINK_TYPE_STRUCT_OPS:
+		copy_field(dest, info, struct_ops.map_id);
+		return;
+	case BPF_LINK_TYPE_NETFILTER:
+		copy_field(dest, info, netfilter.pf);
+		copy_field(dest, info, netfilter.hooknum);
+		copy_field(dest, info, netfilter.priority);
+		copy_field(dest, info, netfilter.flags);
+		return;
+	case BPF_LINK_TYPE_KPROBE_MULTI:
+		copy_field(dest, info, kprobe_multi.addrs);
+		copy_field(dest, info, kprobe_multi.count);
+		copy_field(dest, info, kprobe_multi.flags);
+		copy_field(dest, info, kprobe_multi.missed);
+		return;
+	case BPF_LINK_TYPE_PERF_EVENT:
+		copy_field(dest, info, perf_event.type);
+
+		switch (info->perf_event.type) {
+		case BPF_PERF_EVENT_UPROBE:
+		case BPF_PERF_EVENT_URETPROBE:
+			copy_field(dest, info, perf_event.uprobe.file_name);
+			copy_field(dest, info, perf_event.uprobe.name_len);
+			copy_field(dest, info, perf_event.uprobe.offset);
+			return;
+		case BPF_PERF_EVENT_KPROBE:
+		case BPF_PERF_EVENT_KRETPROBE:
+			copy_field(dest, info, perf_event.kprobe.func_name);
+			copy_field(dest, info, perf_event.kprobe.name_len);
+			copy_field(dest, info, perf_event.kprobe.offset);
+			copy_field(dest, info, perf_event.kprobe.addr);
+			copy_field(dest, info, perf_event.kprobe.missed);
+			return;
+		case BPF_PERF_EVENT_TRACEPOINT:
+			copy_field(dest, info, perf_event.tracepoint.tp_name);
+			copy_field(dest, info, perf_event.tracepoint.name_len);
+			return;
+		case BPF_PERF_EVENT_EVENT:
+			copy_field(dest, info, perf_event.event.config);
+			copy_field(dest, info, perf_event.event.type);
+			return;
+		default:
+			return;
+		}
+	case BPF_LINK_TYPE_TCX:
+		copy_field(dest, info, tcx.ifindex);
+		copy_field(dest, info, tcx.attach_type);
+		return;
+	case BPF_LINK_TYPE_NETKIT:
+		copy_field(dest, info, netkit.ifindex);
+		copy_field(dest, info, netkit.attach_type);
+		return;
+	default:
+		return;
+	}
+}
+
+static int copy_bpf_link_info_from_user(const union bpf_attr *attr,
+					struct bpf_link_info *info,
+					u32 *info_len,
+					enum bpf_link_type type)
+{
+	struct compat_bpf_link_info cinfo;
+	int err;
+	size_t info_size = in_compat64_syscall() ? sizeof(struct compat_bpf_link_info)
+						 : sizeof(struct bpf_link_info);
+	void __user *uinfo = u64_to_user_ptr(attr->info.info);
+
+	*info_len = attr->info.info_len;
+	err = bpf_check_uarg_tail_zero(USER_BPFPTR(uinfo),
+				       info_size, *info_len);
+	if (err)
+		return err;
+	*info_len = min_t(u32, info_size, *info_len);
+
+	memset(info, 0, sizeof(*info));
+	if (in_compat64_syscall()) {
+		memset(&cinfo, 0, sizeof(cinfo));
+		if (copy_from_user(&cinfo, uinfo, *info_len))
+			return -EFAULT;
+		convert_compat_link_info_in(info, &cinfo, type);
+	} else {
+		if (copy_from_user(info, uinfo, *info_len))
+			return -EFAULT;
+	}
+
+	return 0;
+}
+
+static int copy_bpf_link_info_to_user(const union bpf_attr *attr,
+				      union bpf_attr __user *uattr,
+				      struct bpf_link_info *info,
+				      u32 *info_len,
+				      enum bpf_link_type type)
+{
+	struct compat_bpf_link_info cinfo;
+	void *src_info = in_compat64_syscall() ? (struct bpf_link_info *)&cinfo
+					       : info;
+	void __user *uinfo = (void __user *)attr->info.info;
+
+	if (in_compat64_syscall()) {
+		memset(&cinfo, 0, sizeof(cinfo));
+		convert_compat_link_info_out(&cinfo, info, type);
+	}
+
+	if (copy_to_user(uinfo, src_info, *info_len) ||
+	    bpf_put_uattr(*info_len, uattr, info.info_len))
+		return -EFAULT;
+
+	return 0;
+}
+
 static int bpf_link_get_info_by_fd(struct file *file,
 				  struct bpf_link *link,
 				  const union bpf_attr *attr,
 				  union bpf_attr __user *uattr)
 {
-	struct bpf_link_info __user *uinfo = u64_to_user_ptr(attr->info.info);
 	struct bpf_link_info info;
-	u32 info_len = attr->info.info_len;
+	u32 info_len;
 	int err;
 
-	err = bpf_check_uarg_tail_zero(USER_BPFPTR(uinfo), sizeof(info), info_len);
+	err = copy_bpf_link_info_from_user(attr, &info, &info_len, link->type);
 	if (err)
 		return err;
-	info_len = min_t(u32, sizeof(info), info_len);
-
-	memset(&info, 0, sizeof(info));
-	if (copy_from_user(&info, uinfo, info_len))
-		return -EFAULT;
 
 	info.type = link->type;
 	info.id = link->id;
@@ -5408,8 +5731,7 @@ static int bpf_link_get_info_by_fd(struct file *file,
 			return err;
 	}
 
-	if (copy_to_user(uinfo, &info, info_len) ||
-	    put_user(info_len, &uattr->info.info_len))
+	if (copy_bpf_link_info_to_user(attr, uattr, &info, &info_len, link->type))
 		return -EFAULT;
 
 	return 0;
