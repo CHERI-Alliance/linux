@@ -45,7 +45,7 @@ static inline struct task_struct *__mutex_owner(struct mutex *lock)
 {
 	if (!lock)
 		return NULL;
-	return (struct task_struct *)(atomic_long_read(&lock->owner) & ~MUTEX_FLAGS);
+	return (struct task_struct *)(atomic_ptr_read(&lock->owner) & ~MUTEX_FLAGS);
 }
 
 static inline struct mutex *get_task_blocked_on(struct task_struct *p)
