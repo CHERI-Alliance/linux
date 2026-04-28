@@ -92,13 +92,13 @@ static int ets_quantum_parse(struct Qdisc *sch, const struct nlattr *attr,
 }
 
 static struct ets_class *
-ets_class_from_arg(struct Qdisc *sch, unsigned long arg)
+ets_class_from_arg(struct Qdisc *sch, uintptr_t arg)
 {
 	struct ets_sched *q = qdisc_priv(sch);
 
 	if (arg == 0 || arg > q->nbands)
 		return NULL;
-	return &q->classes[arg - 1];
+	return &q->classes[__c_ua(arg - 1)];
 }
 
 static u32 ets_class_id(struct Qdisc *sch, const struct ets_class *cl)
@@ -271,7 +271,7 @@ static int ets_class_graft(struct Qdisc *sch, uintptr_t arg,
 	}
 
 	*old = qdisc_replace(sch, new, &cl->qdisc);
-	ets_offload_graft(sch, new, *old, arg, extack);
+	ets_offload_graft(sch, new, *old, __c_ua(arg), extack);
 	return 0;
 }
 
@@ -289,7 +289,7 @@ static uintptr_t ets_class_find(struct Qdisc *sch, u32 classid)
 
 	if (band - 1 >= q->nbands)
 		return 0;
-	return band;
+	return __c_fakeu(band);
 }
 
 static void ets_class_qlen_notify(struct Qdisc *sch, uintptr_t arg)
@@ -352,7 +352,7 @@ static void ets_qdisc_walk(struct Qdisc *sch, struct qdisc_walker *arg)
 		return;
 
 	for (i = 0; i < q->nbands; i++) {
-		if (!tc_qdisc_stats_dump(sch, i + 1, arg))
+		if (!tc_qdisc_stats_dump(sch, __c_fakeu(i + 1), arg))
 			break;
 	}
 }

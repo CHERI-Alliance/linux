@@ -17,7 +17,7 @@ struct qdisc_walker {
 	int	stop;
 	int	skip;
 	int	count;
-	int	(*fn)(struct Qdisc *, unsigned long cl, struct qdisc_walker *);
+	int	(*fn)(struct Qdisc *, uintptr_t cl, struct qdisc_walker *);
 };
 
 #define qdisc_priv(q)							\
@@ -272,7 +272,7 @@ static inline void skb_txtime_consumed(struct sk_buff *skb)
 }
 
 static inline bool tc_qdisc_stats_dump(struct Qdisc *sch,
-				       unsigned long cl,
+				       uintptr_t cl,
 				       struct qdisc_walker *arg)
 {
 	if (arg->count >= arg->skip && arg->fn(sch, cl, arg) < 0) {

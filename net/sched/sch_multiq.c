@@ -281,7 +281,7 @@ static int multiq_graft(struct Qdisc *sch, uintptr_t arg, struct Qdisc *new,
 			struct Qdisc **old, struct netlink_ext_ack *extack)
 {
 	struct multiq_sched_data *q = qdisc_priv(sch);
-	unsigned long band = arg - 1;
+	unsigned long band = __c_ua(arg) - 1;
 
 	if (new == NULL)
 		new = &noop_qdisc;
@@ -294,7 +294,7 @@ static struct Qdisc *
 multiq_leaf(struct Qdisc *sch, uintptr_t arg)
 {
 	struct multiq_sched_data *q = qdisc_priv(sch);
-	unsigned long band = arg - 1;
+	unsigned long band = __c_ua(arg) - 1;
 
 	return q->queues[band];
 }
@@ -306,7 +306,7 @@ static uintptr_t multiq_find(struct Qdisc *sch, u32 classid)
 
 	if (band - 1 >= q->bands)
 		return 0;
-	return band;
+	return __c_fakeu(band);
 }
 
 static uintptr_t multiq_bind(struct Qdisc *sch, uintptr_t parent,
@@ -325,8 +325,8 @@ static int multiq_dump_class(struct Qdisc *sch, uintptr_t cl,
 {
 	struct multiq_sched_data *q = qdisc_priv(sch);
 
-	tcm->tcm_handle |= TC_H_MIN(cl);
-	tcm->tcm_info = q->queues[cl - 1]->handle;
+	tcm->tcm_handle |= TC_H_MIN(__c_ua(cl));
+	tcm->tcm_info = q->queues[__c_ua(cl) - 1]->handle;
 	return 0;
 }
 
@@ -336,7 +336,7 @@ static int multiq_dump_class_stats(struct Qdisc *sch, uintptr_t cl,
 	struct multiq_sched_data *q = qdisc_priv(sch);
 	struct Qdisc *cl_q;
 
-	cl_q = q->queues[cl - 1];
+	cl_q = q->queues[__c_ua(cl) - 1];
 	if (gnet_stats_copy_basic(d, cl_q->cpu_bstats, &cl_q->bstats, true) < 0 ||
 	    qdisc_qstats_copy(d, cl_q) < 0)
 		return -1;
@@ -353,7 +353,7 @@ static void multiq_walk(struct Qdisc *sch, struct qdisc_walker *arg)
 		return;
 
 	for (band = 0; band < q->bands; band++) {
-		if (!tc_qdisc_stats_dump(sch, band + 1, arg))
+		if (!tc_qdisc_stats_dump(sch, __c_fakeu(band + 1), arg))
 			break;
 	}
 }

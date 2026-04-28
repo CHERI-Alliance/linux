@@ -637,7 +637,7 @@ static struct tcf_block *fq_codel_tcf_block(struct Qdisc *sch, uintptr_t cl,
 static int fq_codel_dump_class(struct Qdisc *sch, uintptr_t cl,
 			       struct sk_buff *skb, struct tcmsg *tcm)
 {
-	tcm->tcm_handle |= TC_H_MIN(cl);
+	tcm->tcm_handle |= TC_H_MIN(__c_ua(cl));
 	return 0;
 }
 
@@ -645,7 +645,7 @@ static int fq_codel_dump_class_stats(struct Qdisc *sch, uintptr_t cl,
 				     struct gnet_dump *d)
 {
 	struct fq_codel_sched_data *q = qdisc_priv(sch);
-	u32 idx = cl - 1;
+	u32 idx = __c_ua(cl) - 1;
 	struct gnet_stats_queue qs = { 0 };
 	struct tc_fq_codel_xstats xstats;
 
@@ -701,7 +701,7 @@ static void fq_codel_walk(struct Qdisc *sch, struct qdisc_walker *arg)
 			arg->count++;
 			continue;
 		}
-		if (!tc_qdisc_stats_dump(sch, i + 1, arg))
+		if (!tc_qdisc_stats_dump(sch, __c_fakeu(i + 1), arg))
 			break;
 	}
 }

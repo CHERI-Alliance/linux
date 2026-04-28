@@ -159,16 +159,16 @@ static inline int tcf_classify(struct sk_buff *skb,
 
 #endif
 
-static inline unsigned long
-__cls_set_class(unsigned long *clp, unsigned long cl)
+static inline uintptr_t
+__cls_set_class(uintptr_t *clp, uintptr_t cl)
 {
 	return xchg(clp, cl);
 }
 
 static inline void
-__tcf_bind_filter(struct Qdisc *q, struct tcf_result *r, unsigned long base)
+__tcf_bind_filter(struct Qdisc *q, struct tcf_result *r, uintptr_t base)
 {
-	unsigned long cl;
+	uintptr_t cl;
 
 	cl = q->ops->cl_ops->bind_tcf(q, base, r->classid);
 	cl = __cls_set_class(&r->class, cl);
@@ -177,7 +177,7 @@ __tcf_bind_filter(struct Qdisc *q, struct tcf_result *r, unsigned long base)
 }
 
 static inline void
-tcf_bind_filter(struct tcf_proto *tp, struct tcf_result *r, unsigned long base)
+tcf_bind_filter(struct tcf_proto *tp, struct tcf_result *r, uintptr_t base)
 {
 	struct Qdisc *q = tp->chain->block->q;
 
@@ -194,7 +194,7 @@ tcf_bind_filter(struct tcf_proto *tp, struct tcf_result *r, unsigned long base)
 static inline void
 __tcf_unbind_filter(struct Qdisc *q, struct tcf_result *r)
 {
-	unsigned long cl;
+	uintptr_t cl;
 
 	if ((cl = __cls_set_class(&r->class, 0)) != 0)
 		q->ops->cl_ops->unbind_tcf(q, cl);
@@ -210,9 +210,9 @@ tcf_unbind_filter(struct tcf_proto *tp, struct tcf_result *r)
 	__tcf_unbind_filter(q, r);
 }
 
-static inline void tc_cls_bind_class(u32 classid, unsigned long cl,
+static inline void tc_cls_bind_class(u32 classid, uintptr_t cl,
 				     void *q, struct tcf_result *res,
-				     unsigned long base)
+				     uintptr_t base)
 {
 	if (res->classid == classid) {
 		if (cl)
@@ -403,7 +403,7 @@ struct tcf_ematch_ops;
  */
 struct tcf_ematch {
 	struct tcf_ematch_ops * ops;
-	unsigned long		data;
+	uintptr_t		data;
 	unsigned int		datalen;
 	u16			matchid;
 	u16			flags;
@@ -794,7 +794,7 @@ struct tc_cls_matchall_offload {
 	struct flow_rule *rule;
 	struct flow_stats stats;
 	bool use_act_stats;
-	unsigned long cookie;
+	uintptr_t cookie;
 };
 
 enum tc_clsbpf_command {

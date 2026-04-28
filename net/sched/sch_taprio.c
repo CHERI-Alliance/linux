@@ -2178,7 +2178,7 @@ static int taprio_graft(struct Qdisc *sch, uintptr_t cl,
 {
 	struct taprio_sched *q = qdisc_priv(sch);
 	struct net_device *dev = qdisc_dev(sch);
-	struct netdev_queue *dev_queue = taprio_queue_get(sch, cl);
+	struct netdev_queue *dev_queue = taprio_queue_get(sch, __c_ua(cl));
 
 	if (!dev_queue)
 		return -EINVAL;
@@ -2193,7 +2193,7 @@ static int taprio_graft(struct Qdisc *sch, uintptr_t cl,
 	 * both software and offload cases, to have an up-to-date reference to
 	 * our children.
 	 */
-	*old = q->qdiscs[cl - 1];
+	*old = q->qdiscs[__c_ua(cl - 1)];
 	if (FULL_OFFLOAD_IS_ENABLED(q->flags)) {
 		WARN_ON_ONCE(dev_graft_qdisc(dev_queue, new) != *old);
 		if (new)
@@ -2202,7 +2202,7 @@ static int taprio_graft(struct Qdisc *sch, uintptr_t cl,
 			qdisc_put(*old);
 	}
 
-	q->qdiscs[cl - 1] = new;
+	q->qdiscs[__c_ua(cl - 1)] = new;
 	if (new)
 		new->flags |= TCQ_F_ONETXQUEUE | TCQ_F_NOPARENT;
 
@@ -2486,7 +2486,7 @@ static int taprio_dump_class_stats(struct Qdisc *sch, uintptr_t cl,
 	struct tc_taprio_qopt_offload offload = {
 		.cmd = TAPRIO_CMD_QUEUE_STATS,
 		.queue_stats = {
-			.queue = cl - 1,
+			.queue = __c_ua(cl) - 1,
 		},
 	};
 
@@ -2507,7 +2507,7 @@ static void taprio_walk(struct Qdisc *sch, struct qdisc_walker *arg)
 
 	arg->count = arg->skip;
 	for (ntx = arg->skip; ntx < dev->num_tx_queues; ntx++) {
-		if (!tc_qdisc_stats_dump(sch, ntx + 1, arg))
+		if (!tc_qdisc_stats_dump(sch, __c_fakeu(ntx + 1), arg))
 			break;
 	}
 }
