@@ -8,6 +8,7 @@
 #ifndef __ASSEMBLY__
 
 struct pt_regs;
+struct task_struct;
 
 #ifdef CONFIG_ARM64_MORELLO
 
@@ -17,6 +18,14 @@ typedef struct {
 } cap128_t;
 
 #define ZERO_CAP (cap128_t){ .__val = 0 }
+
+/* Morello registers to be saved in thread_struct */
+struct morello_state {
+	cap128_t	ctpidr;
+	cap128_t	ddc;
+	cap128_t	cid;
+	unsigned long	cctlr;
+};
 
 /* Must be called with IRQs disabled */
 void morello_cpu_setup(void);
@@ -35,6 +44,12 @@ void morello_cpu_setup(void);
 void *morello_capcpy(void *dst, const void *src, size_t len);
 
 void morello_thread_start(struct pt_regs *regs, unsigned long pc);
+void morello_thread_init_user(struct task_struct *tsk);
+void morello_thread_save_user_state(struct task_struct *tsk);
+void morello_thread_restore_user_state(struct task_struct *tsk);
+void morello_task_save_user_tls(struct task_struct *tsk, unsigned long *tp_ptr);
+void morello_task_restore_user_tls(struct task_struct *tsk,
+				   const unsigned long *tp_ptr);
 
 #else /* __ASSEMBLY__ */
 
