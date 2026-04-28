@@ -78,7 +78,7 @@ static inline struct nf_conntrack_helper *tcf_ct_helper(const struct tc_action *
 
 #if IS_ENABLED(CONFIG_NET_ACT_CT)
 static inline void
-tcf_ct_flow_table_restore_skb(struct sk_buff *skb, unsigned long cookie)
+tcf_ct_flow_table_restore_skb(struct sk_buff *skb, uintptr_t cookie)
 {
 	enum ip_conntrack_info ctinfo = cookie & NFCT_INFOMASK;
 	struct nf_conn *ct;
@@ -89,7 +89,7 @@ tcf_ct_flow_table_restore_skb(struct sk_buff *skb, unsigned long cookie)
 }
 #else
 static inline void
-tcf_ct_flow_table_restore_skb(struct sk_buff *skb, unsigned long cookie) { }
+tcf_ct_flow_table_restore_skb(struct sk_buff *skb, uintptr_t cookie) { }
 #endif
 
 #endif /* __NET_TC_CT_H */
