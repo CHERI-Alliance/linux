@@ -2147,7 +2147,7 @@ SYSCALL_DEFINE3(io_submit, aio_context_t, ctx_id, long, nr,
 
 #ifdef CONFIG_COMPAT
 COMPAT_SYSCALL_DEFINE3(io_submit, compat_aio_context_t, ctx_id,
-		       int, nr, compat_uptr_t __user *, iocbpp)
+		       compat_long_t, nr, compat_uptr_t __user *, iocbpp)
 {
 	struct kioctx *ctx;
 	long ret = 0;
