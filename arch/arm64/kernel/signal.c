@@ -1706,7 +1706,7 @@ static int setup_rt_frame(int usig, struct ksignal *ksig, sigset_t *set,
 static void setup_restart_syscall(struct pt_regs *regs)
 {
 #ifdef CONFIG_COMPAT32
-	if (is_32bit_compat_task()) {
+	if (is_compat32_task()) {
 		compat_setup_restart_syscall(regs);
 		return;
 	}

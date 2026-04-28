@@ -930,7 +930,7 @@ int sve_set_current_vl(unsigned long arg)
 	vl = arg & PR_SVE_VL_LEN_MASK;
 	flags = arg & ~vl;
 
-	if (!system_supports_sve() || is_32bit_compat_task())
+	if (!system_supports_sve() || is_compat32_task())
 		return -EINVAL;
 
 	ret = vec_set_vector_length(current, ARM64_VEC_SVE, vl, flags);
@@ -943,7 +943,7 @@ int sve_set_current_vl(unsigned long arg)
 /* PR_SVE_GET_VL */
 int sve_get_current_vl(void)
 {
-	if (!system_supports_sve() || is_32bit_compat_task())
+	if (!system_supports_sve() || is_compat32_task())
 		return -EINVAL;
 
 	return vec_prctl_status(ARM64_VEC_SVE, 0);
@@ -1331,7 +1331,7 @@ void do_sve_acc(unsigned long esr, struct pt_regs *regs)
 {
 	/* Even if we chose not to use SVE, the hardware could still trap: */
 	if (unlikely(!system_supports_sve()) ||
-	    WARN_ON(is_32bit_compat_task())) {
+	    WARN_ON(is_compat32_task())) {
 		force_signal_inject(SIGILL, ILL_ILLOPC, regs->pc, 0);
 		return;
 	}
