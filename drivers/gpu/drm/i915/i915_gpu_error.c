@@ -781,7 +781,7 @@ static void err_free_sgl(struct scatterlist *sgl)
 		}
 
 		sg = sg_is_last(sg) ? NULL : sg_chain_ptr(sg);
-		free_page((unsigned long)sgl);
+		free_page((uintptr_t)sgl);
 		sgl = sg;
 	}
 }

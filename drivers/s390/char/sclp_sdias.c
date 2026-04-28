@@ -268,7 +268,7 @@ int __init sclp_sdias_init(void)
 	if (sclp_sdias_init_async() == 0)
 		goto out;
 	TRACE("init failed\n");
-	free_page((unsigned long) sclp_sdias_sccb);
+	free_page((uintptr_t) sclp_sdias_sccb);
 	return -ENODEV;
 out:
 	TRACE("init done\n");

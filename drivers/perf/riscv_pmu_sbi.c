@@ -663,7 +663,7 @@ static void pmu_sbi_snapshot_free(struct riscv_pmu *pmu)
 		if (!cpu_hw_evt->snapshot_addr)
 			continue;
 
-		free_page((unsigned long)cpu_hw_evt->snapshot_addr);
+		free_page((uintptr_t)cpu_hw_evt->snapshot_addr);
 		cpu_hw_evt->snapshot_addr = NULL;
 		cpu_hw_evt->snapshot_addr_phys = 0;
 	}

@@ -901,7 +901,7 @@ err:
 	for_each_possible_cpu(cpu) {
 		if (cpu == err_cpu)
 			break;
-		free_page((unsigned long)per_cpu_ptr(uprobe_cpu_buffer, cpu)->buf);
+		free_page((uintptr_t)per_cpu_ptr(uprobe_cpu_buffer, cpu)->buf);
 	}
 
 	free_percpu(uprobe_cpu_buffer);
@@ -931,7 +931,7 @@ static void uprobe_buffer_disable(void)
 
 	if (--uprobe_buffer_refcnt == 0) {
 		for_each_possible_cpu(cpu)
-			free_page((unsigned long)per_cpu_ptr(uprobe_cpu_buffer,
+			free_page((uintptr_t)per_cpu_ptr(uprobe_cpu_buffer,
 							     cpu)->buf);
 
 		free_percpu(uprobe_cpu_buffer);

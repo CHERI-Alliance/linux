@@ -164,13 +164,13 @@ static void dpaa2_eth_free_rx_fd(struct dpaa2_eth_priv *priv,
 		dma_unmap_page(dev, addr, priv->rx_buf_size,
 			       DMA_BIDIRECTIONAL);
 
-		free_pages((unsigned long)sg_vaddr, 0);
+		free_pages((uintptr_t)sg_vaddr, 0);
 		if (dpaa2_sg_is_final(&sgt[i]))
 			break;
 	}
 
 free_buf:
-	free_pages((unsigned long)vaddr, 0);
+	free_pages((uintptr_t)vaddr, 0);
 }
 
 /* Build a linear skb based on a single-buffer frame descriptor */
@@ -231,7 +231,7 @@ static struct sk_buff *dpaa2_eth_build_frag_skb(struct dpaa2_eth_priv *priv,
 				/* Free the first SG entry now, since we already
 				 * unmapped it and obtained the virtual address
 				 */
-				free_pages((unsigned long)sg_vaddr, 0);
+				free_pages((uintptr_t)sg_vaddr, 0);
 
 				/* We still need to subtract the buffers used
 				 * by this FD from our software counter
@@ -293,7 +293,7 @@ static void dpaa2_eth_free_bufs(struct dpaa2_eth_priv *priv, u64 *buf_array,
 		if (!xsk_zc) {
 			dma_unmap_page(dev, buf_array[i], priv->rx_buf_size,
 				       DMA_BIDIRECTIONAL);
-			free_pages((unsigned long)vaddr, 0);
+			free_pages((uintptr_t)vaddr, 0);
 		} else {
 			swa = (struct dpaa2_eth_swa *)
 				(vaddr + DPAA2_ETH_RX_HWA_SIZE);
@@ -479,7 +479,7 @@ static u32 dpaa2_eth_run_xdp(struct dpaa2_eth_priv *priv,
 					    virt_to_page(vaddr), 0,
 					    priv->rx_buf_size, DMA_BIDIRECTIONAL);
 			if (unlikely(dma_mapping_error(priv->net_dev->dev.parent, addr))) {
-				free_pages((unsigned long)vaddr, 0);
+				free_pages((uintptr_t)vaddr, 0);
 			} else {
 				ch->buf_count++;
 				dpaa2_eth_recycle_buf(priv, ch, addr);
@@ -626,7 +626,7 @@ void dpaa2_eth_rx(struct dpaa2_eth_priv *priv,
 		dma_unmap_page(dev, addr, priv->rx_buf_size,
 			       DMA_BIDIRECTIONAL);
 		skb = dpaa2_eth_build_frag_skb(priv, ch, buf_data);
-		free_pages((unsigned long)vaddr, 0);
+		free_pages((uintptr_t)vaddr, 0);
 		percpu_extras->rx_sg_frames++;
 		percpu_extras->rx_sg_bytes += dpaa2_fd_get_len(fd);
 	} else {
@@ -681,7 +681,7 @@ static void dpaa2_eth_rx_err(struct dpaa2_eth_priv *priv,
 		dma_unmap_page(dev, addr, priv->rx_buf_size,
 			       DMA_BIDIRECTIONAL);
 		skb = dpaa2_eth_build_frag_skb(priv, ch, buf_data);
-		free_pages((unsigned long)vaddr, 0);
+		free_pages((uintptr_t)vaddr, 0);
 	} else {
 		/* We don't support any other format */
 		dpaa2_eth_free_rx_fd(priv, fd, vaddr);

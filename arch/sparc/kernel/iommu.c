@@ -257,7 +257,7 @@ static void dma_4u_free_coherent(struct device *dev, size_t size,
 
 	order = get_order(size);
 	if (order < 10)
-		free_pages((unsigned long)cpu, order);
+		free_pages((uintptr_t)cpu, order);
 }
 
 static dma_addr_t dma_4u_map_phys(struct device *dev, phys_addr_t phys,

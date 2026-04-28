@@ -1362,7 +1362,7 @@ static int __init reipl_fcp_init(void)
 	reipl_fcp_kset = kset_create_and_add(IPL_FCP_STR, NULL,
 					     &reipl_kset->kobj);
 	if (!reipl_fcp_kset) {
-		free_page((unsigned long) reipl_block_fcp);
+		free_page((uintptr_t) reipl_block_fcp);
 		return -ENOMEM;
 	}
 
@@ -1402,7 +1402,7 @@ out2:
 	sysfs_remove_group(&reipl_fcp_kset->kobj, &reipl_fcp_attr_group);
 out1:
 	kset_unregister(reipl_fcp_kset);
-	free_page((unsigned long) reipl_block_fcp);
+	free_page((uintptr_t) reipl_block_fcp);
 	return rc;
 }
 
@@ -1418,7 +1418,7 @@ static int __init reipl_nvme_init(void)
 	reipl_nvme_kset = kset_create_and_add(IPL_NVME_STR, NULL,
 					     &reipl_kset->kobj);
 	if (!reipl_nvme_kset) {
-		free_page((unsigned long) reipl_block_nvme);
+		free_page((uintptr_t) reipl_block_nvme);
 		return -ENOMEM;
 	}
 
@@ -1458,7 +1458,7 @@ out2:
 	sysfs_remove_group(&reipl_nvme_kset->kobj, &reipl_nvme_attr_group);
 out1:
 	kset_unregister(reipl_nvme_kset);
-	free_page((unsigned long) reipl_block_nvme);
+	free_page((uintptr_t) reipl_block_nvme);
 	return rc;
 }
 
@@ -1477,7 +1477,7 @@ static int __init reipl_eckd_init(void)
 	reipl_eckd_kset = kset_create_and_add(IPL_ECKD_STR, NULL,
 					      &reipl_kset->kobj);
 	if (!reipl_eckd_kset) {
-		free_page((unsigned long)reipl_block_eckd);
+		free_page((uintptr_t)reipl_block_eckd);
 		return -ENOMEM;
 	}
 
@@ -1510,7 +1510,7 @@ out2:
 	sysfs_remove_group(&reipl_eckd_kset->kobj, &reipl_eckd_attr_group);
 out1:
 	kset_unregister(reipl_eckd_kset);
-	free_page((unsigned long)reipl_block_eckd);
+	free_page((uintptr_t)reipl_block_eckd);
 	return rc;
 }
 
@@ -1810,7 +1810,7 @@ static int __init dump_ccw_init(void)
 		return -ENOMEM;
 	rc = sysfs_create_group(&dump_kset->kobj, &dump_ccw_attr_group);
 	if (rc) {
-		free_page((unsigned long)dump_block_ccw);
+		free_page((uintptr_t)dump_block_ccw);
 		return rc;
 	}
 	dump_block_ccw->hdr.len = IPL_BP_CCW_LEN;
@@ -1832,7 +1832,7 @@ static int __init dump_fcp_init(void)
 		return -ENOMEM;
 	rc = sysfs_create_group(&dump_kset->kobj, &dump_fcp_attr_group);
 	if (rc) {
-		free_page((unsigned long)dump_block_fcp);
+		free_page((uintptr_t)dump_block_fcp);
 		return rc;
 	}
 	dump_block_fcp->hdr.len = IPL_BP_FCP_LEN;
@@ -1855,7 +1855,7 @@ static int __init dump_nvme_init(void)
 		return -ENOMEM;
 	rc = sysfs_create_group(&dump_kset->kobj, &dump_nvme_attr_group);
 	if (rc) {
-		free_page((unsigned long)dump_block_nvme);
+		free_page((uintptr_t)dump_block_nvme);
 		return rc;
 	}
 	dump_block_nvme->hdr.len = IPL_BP_NVME_LEN;
@@ -1878,7 +1878,7 @@ static int __init dump_eckd_init(void)
 		return -ENOMEM;
 	rc = sysfs_create_group(&dump_kset->kobj, &dump_eckd_attr_group);
 	if (rc) {
-		free_page((unsigned long)dump_block_eckd);
+		free_page((uintptr_t)dump_block_eckd);
 		return rc;
 	}
 	dump_block_eckd->hdr.len = IPL_BP_ECKD_LEN;

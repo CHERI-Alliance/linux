@@ -576,7 +576,7 @@ static int hv_crash_trampoline_setup(void)
 
 errout:
 	free_page(trampoline_va);
-	free_pages((ulong)hv_crash_ptpgs[0], order);
+	free_pages((uintptr_t)hv_crash_ptpgs[0], order);
 
 	return rc;
 }

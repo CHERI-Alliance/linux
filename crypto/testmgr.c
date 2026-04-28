@@ -177,7 +177,7 @@ static int __testmgr_alloc_buf(char *buf[XBUFSIZE], int order)
 
 err_free_buf:
 	while (i-- > 0)
-		free_pages((unsigned long)buf[i], order);
+		free_pages((uintptr_t)buf[i], order);
 
 	return -ENOMEM;
 }
@@ -192,7 +192,7 @@ static void __testmgr_free_buf(char *buf[XBUFSIZE], int order)
 	int i;
 
 	for (i = 0; i < XBUFSIZE; i++)
-		free_pages((unsigned long)buf[i], order);
+		free_pages((uintptr_t)buf[i], order);
 }
 
 static void testmgr_free_buf(char *buf[XBUFSIZE])

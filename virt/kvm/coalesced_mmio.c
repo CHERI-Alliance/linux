@@ -116,7 +116,7 @@ int kvm_coalesced_mmio_init(struct kvm *kvm)
 void kvm_coalesced_mmio_free(struct kvm *kvm)
 {
 	if (kvm->coalesced_mmio_ring)
-		free_page((unsigned long)kvm->coalesced_mmio_ring);
+		free_page((uintptr_t)kvm->coalesced_mmio_ring);
 }
 
 int kvm_vm_ioctl_register_coalesced_mmio(struct kvm *kvm,

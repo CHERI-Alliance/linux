@@ -128,8 +128,8 @@ void nx842_crypto_free_ctx(void *p)
 	struct nx842_crypto_ctx *ctx = p;
 
 	kfree(ctx->wmem);
-	free_pages((unsigned long)ctx->sbounce, BOUNCE_BUFFER_ORDER);
-	free_pages((unsigned long)ctx->dbounce, BOUNCE_BUFFER_ORDER);
+	free_pages((uintptr_t)ctx->sbounce, BOUNCE_BUFFER_ORDER);
+	free_pages((uintptr_t)ctx->dbounce, BOUNCE_BUFFER_ORDER);
 	kfree(ctx);
 }
 EXPORT_SYMBOL_GPL(nx842_crypto_free_ctx);

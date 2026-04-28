@@ -319,7 +319,7 @@ static void kvm_flush_range(struct kvm *kvm, gfn_t start_gfn, gfn_t end_gfn, int
 	 */
 	list_for_each_safe(pos, temp, &ctx.list) {
 		list_del(pos);
-		free_page((unsigned long)pos);
+		free_page((uintptr_t)pos);
 	}
 }
 

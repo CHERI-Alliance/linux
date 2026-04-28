@@ -80,7 +80,7 @@ int hv_call_withdraw_memory(u64 count, int node, u64 partition_id)
 
 		withdrawn += completed;
 	}
-	free_page((unsigned long)output_page);
+	free_page((uintptr_t)output_page);
 
 	trace_mshv_hvcall_withdraw_memory(partition_id, withdrawn, status);
 

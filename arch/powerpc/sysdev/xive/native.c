@@ -237,7 +237,7 @@ static void xive_native_cleanup_queue(unsigned int cpu, struct xive_cpu *xc, u8 
 	 */
 	__xive_native_disable_queue(get_hard_smp_processor_id(cpu), q, prio);
 	alloc_order = xive_alloc_order(xive_queue_shift);
-	free_pages((unsigned long)q->qpage, alloc_order);
+	free_pages((uintptr_t)q->qpage, alloc_order);
 	q->qpage = NULL;
 }
 

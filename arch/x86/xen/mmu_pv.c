@@ -154,7 +154,7 @@ static int alloc_discontig_frames(unsigned int order)
 
 	spin_unlock_irqrestore(&xen_reservation_lock, flags);
 
-	free_pages((unsigned long)old_array, old_order - MIN_CONTIG_ORDER);
+	free_pages((uintptr_t)old_array, old_order - MIN_CONTIG_ORDER);
 
 	return 0;
 }
@@ -1486,7 +1486,7 @@ static void xen_pgd_free(struct mm_struct *mm, pgd_t *pgd)
 	pgd_t *user_pgd = xen_get_user_pgd(pgd);
 
 	if (user_pgd)
-		free_page((unsigned long)user_pgd);
+		free_page((uintptr_t)user_pgd);
 }
 
 /*

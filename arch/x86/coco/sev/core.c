@@ -529,7 +529,7 @@ static void snp_cleanup_vmsa(struct sev_es_save_area *vmsa, int apic_id)
 	if (err)
 		pr_err("clear VMSA page failed (%u), leaking page\n", err);
 	else
-		free_page((unsigned long)vmsa);
+		free_page((uintptr_t)vmsa);
 }
 
 static void set_pte_enc(pte_t *kpte, int level, void *va)
@@ -863,7 +863,7 @@ static int wakeup_cpu_via_vmgexit(u32 apic_id, unsigned long start_ip, unsigned 
 	ret = snp_set_vmsa(vmsa, caa, apic_id, true);
 	if (ret) {
 		pr_err("set VMSA page failed (%u)\n", ret);
-		free_page((unsigned long)vmsa);
+		free_page((uintptr_t)vmsa);
 
 		return -EINVAL;
 	}

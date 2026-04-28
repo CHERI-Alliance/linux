@@ -71,7 +71,7 @@ int kvm_arch_init_vm(struct kvm *kvm, unsigned long type)
 	kvm->arch.phyid_map = kvzalloc_obj(struct kvm_phyid_map,
 					   GFP_KERNEL_ACCOUNT);
 	if (!kvm->arch.phyid_map) {
-		free_page((unsigned long)kvm->arch.pgd);
+		free_page((uintptr_t)kvm->arch.pgd);
 		kvm->arch.pgd = NULL;
 		return -ENOMEM;
 	}
@@ -103,7 +103,7 @@ int kvm_arch_init_vm(struct kvm *kvm, unsigned long type)
 void kvm_arch_destroy_vm(struct kvm *kvm)
 {
 	kvm_destroy_vcpus(kvm);
-	free_page((unsigned long)kvm->arch.pgd);
+	free_page((uintptr_t)kvm->arch.pgd);
 	kvm->arch.pgd = NULL;
 	kvfree(kvm->arch.phyid_map);
 	kvm->arch.phyid_map = NULL;

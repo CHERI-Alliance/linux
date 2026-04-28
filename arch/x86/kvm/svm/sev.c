@@ -5269,7 +5269,7 @@ struct vmcb_save_area *sev_decrypt_vmsa(struct kvm_vcpu *vcpu)
 		if (ret) {
 			pr_err("SEV: SNP_DBG_DECRYPT failed ret=%d, fw_error=%d (%#x)\n",
 			       ret, error, error);
-			free_page((unsigned long)vmsa);
+			free_page((uintptr_t)vmsa);
 
 			return NULL;
 		}
@@ -5307,5 +5307,5 @@ void sev_free_decrypted_vmsa(struct kvm_vcpu *vcpu, struct vmcb_save_area *vmsa)
 	if (!vcpu->arch.guest_state_protected || !vmsa)
 		return;
 
-	free_page((unsigned long)vmsa);
+	free_page((uintptr_t)vmsa);
 }

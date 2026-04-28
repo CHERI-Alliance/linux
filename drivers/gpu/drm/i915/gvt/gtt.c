@@ -2486,7 +2486,7 @@ static void clean_spt_oos(struct intel_gvt *gvt)
 	list_for_each_safe(pos, n, &gtt->oos_page_free_list_head) {
 		oos_page = container_of(pos, struct intel_vgpu_oos_page, list);
 		list_del(&oos_page->list);
-		free_page((unsigned long)oos_page->mem);
+		free_page((uintptr_t)oos_page->mem);
 		kfree(oos_page);
 	}
 }

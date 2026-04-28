@@ -176,7 +176,7 @@ static int generate_entropy(u8 *ebuf, size_t nbytes)
 
 	memzero_explicit(pblock, sizeof(pblock));
 	memzero_explicit(pg, PAGE_SIZE);
-	free_page((unsigned long)pg);
+	free_page((uintptr_t)pg);
 	return ret;
 }
 

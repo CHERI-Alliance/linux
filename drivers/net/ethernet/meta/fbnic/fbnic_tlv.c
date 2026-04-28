@@ -713,7 +713,7 @@ struct fbnic_tlv_msg *fbnic_tlv_test_create(struct fbnic_dev *fbd)
 
 	return msg;
 free_message:
-	free_page((unsigned long)msg);
+	free_page((uintptr_t)msg);
 	return NULL;
 }
 

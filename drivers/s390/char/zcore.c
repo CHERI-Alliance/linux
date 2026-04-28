@@ -237,7 +237,7 @@ static int __init zcore_reipl_init(void)
 	if (rc || (__force u32)csum_partial(zcore_ipl_block, zcore_ipl_block->hdr.len, 0) !=
 	    ipib_info.checksum) {
 		TRACE("Checksum does not match\n");
-		free_page((unsigned long) zcore_ipl_block);
+		free_page((uintptr_t) zcore_ipl_block);
 		zcore_ipl_block = NULL;
 	}
 	/*
@@ -268,7 +268,7 @@ static int __init zcore_reipl_init(void)
 			os_info_flags = 0;
 	}
 out:
-	free_page((unsigned long)os_info);
+	free_page((uintptr_t)os_info);
 	return 0;
 }
 

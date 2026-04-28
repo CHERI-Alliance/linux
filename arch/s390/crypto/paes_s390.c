@@ -1637,7 +1637,7 @@ static void paes_s390_fini(void)
 	__crypto_unregister_skcipher(&cbc_paes_alg);
 	__crypto_unregister_skcipher(&ecb_paes_alg);
 	if (ctrblk)
-		free_page((unsigned long)ctrblk);
+		free_page((uintptr_t)ctrblk);
 	misc_deregister(&paes_dev);
 }
 

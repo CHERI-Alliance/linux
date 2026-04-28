@@ -876,7 +876,7 @@ ccio_free(struct device *dev, size_t size, void *cpu_addr,
 		dma_addr_t dma_handle, unsigned long attrs)
 {
 	ccio_unmap_phys(dev, dma_handle, size, 0, 0);
-	free_pages((unsigned long)cpu_addr, get_order(size));
+	free_pages((uintptr_t)cpu_addr, get_order(size));
 }
 
 /*

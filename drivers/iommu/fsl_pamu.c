@@ -916,7 +916,7 @@ error:
 		iounmap(guts_regs);
 
 	if (ppaact)
-		free_pages((unsigned long)ppaact, order);
+		free_pages((uintptr_t)ppaact, order);
 
 	ppaact = NULL;
 

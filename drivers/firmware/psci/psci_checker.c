@@ -219,7 +219,7 @@ static int hotplug_tests(void)
 		err += down_and_up_cpus(cpu_groups[i], offlined_cpus);
 	}
 
-	free_page((unsigned long)page_buf);
+	free_page((uintptr_t)page_buf);
 out_free_cpu_groups:
 	free_cpu_groups(nb_cpu_group, &cpu_groups);
 out_free_cpus:

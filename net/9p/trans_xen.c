@@ -308,7 +308,7 @@ static void xen_9pfs_front_free(struct xen_9pfs_front_priv *priv)
 				gnttab_end_foreign_access(ring->ref, NULL);
 				ring->ref = INVALID_GRANT_REF;
 			}
-			free_page((unsigned long)ring->intf);
+			free_page((uintptr_t)ring->intf);
 			ring->intf = NULL;
 		}
 		kfree(priv->rings);
@@ -401,7 +401,7 @@ out:
 		ring->ref = INVALID_GRANT_REF;
 	}
 	if (ring->intf) {
-		free_page((unsigned long)ring->intf);
+		free_page((uintptr_t)ring->intf);
 		ring->intf = NULL;
 	}
 	ring->irq = -1;

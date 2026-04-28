@@ -537,7 +537,7 @@ static void rs_shutdown(struct tty_struct *tty, struct serial_state *info)
 	 */
 	free_irq(IRQ_AMIGA_VERTB, info);
 
-	free_page((unsigned long)info->xmit.buf);
+	free_page((uintptr_t)info->xmit.buf);
 	info->xmit.buf = NULL;
 
 	info->IER = 0;

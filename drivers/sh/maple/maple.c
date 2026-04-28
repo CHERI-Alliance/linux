@@ -869,7 +869,7 @@ cleanup_irq:
 	free_irq(HW_EVENT_MAPLE_DMA, 0);
 
 cleanup_dma:
-	free_pages((unsigned long) maple_sendbuf, MAPLE_DMA_PAGES);
+	free_pages((uintptr_t) maple_sendbuf, MAPLE_DMA_PAGES);
 
 cleanup_basic:
 	driver_unregister(&maple_unsupported_device.drv);

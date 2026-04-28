@@ -3643,7 +3643,7 @@ static int __init d40_probe(struct platform_device *pdev)
 				 DMA_TO_DEVICE);
 
 	if (!base->lcla_pool.base_unaligned && base->lcla_pool.base)
-		free_pages((unsigned long)base->lcla_pool.base,
+		free_pages((uintptr_t)base->lcla_pool.base,
 			   base->lcla_pool.pages);
 
 	kfree(base->lcla_pool.base_unaligned);

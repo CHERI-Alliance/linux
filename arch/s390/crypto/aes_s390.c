@@ -963,7 +963,7 @@ static void aes_s390_fini(void)
 	while (aes_s390_skciphers_num--)
 		crypto_unregister_skcipher(aes_s390_skcipher_algs[aes_s390_skciphers_num]);
 	if (ctrblk)
-		free_page((unsigned long) ctrblk);
+		free_page((uintptr_t) ctrblk);
 
 	if (aes_s390_aead_alg)
 		crypto_unregister_aead(aes_s390_aead_alg);

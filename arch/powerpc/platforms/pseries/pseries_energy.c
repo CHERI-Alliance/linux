@@ -204,7 +204,7 @@ static ssize_t get_best_energy_list(char *page, int activate)
 	rc = plpar_hcall9(H_BEST_ENERGY, retbuf, flags, 0, __pa(buf_page),
 				0, 0, 0, 0, 0, 0);
 	if (rc != H_SUCCESS) {
-		free_page((unsigned long) buf_page);
+		free_page((uintptr_t) buf_page);
 		return -EINVAL;
 	}
 
@@ -220,7 +220,7 @@ static ssize_t get_best_energy_list(char *page, int activate)
 		s += sprintf(s, "\n");
 	}
 
-	free_page((unsigned long) buf_page);
+	free_page((uintptr_t) buf_page);
 	return s-page;
 }
 

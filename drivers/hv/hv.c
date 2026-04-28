@@ -160,7 +160,7 @@ static int hv_free_page(void **page, bool encrypt, const char *note)
 		pr_err("deallocation failed for %s page, error %d, encrypt %d\n",
 			note, ret, encrypt);
 	else
-		free_page((unsigned long)*page);
+		free_page((uintptr_t)*page);
 
 	*page = NULL;
 

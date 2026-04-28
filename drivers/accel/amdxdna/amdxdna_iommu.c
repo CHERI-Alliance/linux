@@ -124,7 +124,7 @@ void amdxdna_iommu_free(struct amdxdna_dev *xdna, size_t size,
 {
 	iommu_unmap(xdna->domain, dma_addr, iova_align(&xdna->iovad, size));
 	free_iova(&xdna->iovad, iova_pfn(&xdna->iovad, dma_addr));
-	free_pages((unsigned long)cpu_addr, get_order(size));
+	free_pages((uintptr_t)cpu_addr, get_order(size));
 }
 
 int amdxdna_iommu_init(struct amdxdna_dev *xdna)

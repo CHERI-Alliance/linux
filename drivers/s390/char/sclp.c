@@ -1302,8 +1302,8 @@ fail_unregister_reboot_notifier:
 fail_init_state_uninitialized:
 	list_del(&sclp_state_change_event.list);
 	sclp_init_state = sclp_init_state_uninitialized;
-	free_page((unsigned long) sclp_read_sccb);
-	free_page((unsigned long) sclp_init_sccb);
+	free_page((uintptr_t) sclp_read_sccb);
+	free_page((uintptr_t) sclp_init_sccb);
 fail_unlock:
 	spin_unlock_irqrestore(&sclp_lock, flags);
 	return rc;

@@ -218,7 +218,7 @@ int hmcdrv_ftp_probe(void)
 		break;
 	} /* switch */
 out:
-	free_page((unsigned long) ftp.buf);
+	free_page((uintptr_t) ftp.buf);
 	return rc;
 }
 EXPORT_SYMBOL(hmcdrv_ftp_probe);
@@ -280,7 +280,7 @@ ssize_t hmcdrv_ftp_cmd(char __kernel *cmd, loff_t offset,
 		break;
 	}
 
-	free_pages((unsigned long) ftp.buf, order);
+	free_pages((uintptr_t) ftp.buf, order);
 	return retlen;
 }
 

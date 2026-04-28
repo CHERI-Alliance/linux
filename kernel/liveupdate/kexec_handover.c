@@ -217,7 +217,7 @@ int kho_radix_add_page(struct kho_radix_tree *tree,
 err_free_nodes:
 	for (i = KHO_TREE_MAX_DEPTH - 1; i > 0; i--) {
 		if (intermediate_nodes[i])
-			free_page((unsigned long)intermediate_nodes[i]);
+			free_page((uintptr_t)intermediate_nodes[i]);
 	}
 	if (anchor_node)
 		anchor_node->table[anchor_idx] = 0;
@@ -988,7 +988,7 @@ static struct kho_vmalloc_chunk *new_vmalloc_chunk(struct kho_vmalloc_chunk *cur
 	return chunk;
 
 err_free:
-	free_page((unsigned long)chunk);
+	free_page((uintptr_t)chunk);
 	return NULL;
 }
 
@@ -1091,7 +1091,7 @@ void kho_unpreserve_vmalloc(struct kho_vmalloc *preservation)
 		kho_vmalloc_unpreserve_chunk(chunk, preservation->order);
 
 		chunk = KHOSER_LOAD_PTR(chunk->hdr.next);
-		free_page((unsigned long)tmp);
+		free_page((uintptr_t)tmp);
 	}
 }
 EXPORT_SYMBOL_GPL(kho_unpreserve_vmalloc);

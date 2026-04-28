@@ -506,7 +506,7 @@ static int alloc_cmb(struct ccw_device *cdev)
 
 		if (cmb_area.mem) {
 			/* ok, another thread was faster */
-			free_pages((unsigned long)mem, get_order(size));
+			free_pages((uintptr_t)mem, get_order(size));
 		} else if (!mem) {
 			/* no luck */
 			ret = -ENOMEM;
@@ -550,7 +550,7 @@ static void free_cmb(struct ccw_device *cdev)
 		ssize_t size;
 		size = sizeof(struct cmb) * cmb_area.num_channels;
 		cmf_activate(NULL, CMF_OFF);
-		free_pages((unsigned long)cmb_area.mem, get_order(size));
+		free_pages((uintptr_t)cmb_area.mem, get_order(size));
 		cmb_area.mem = NULL;
 	}
 	spin_unlock_irq(cdev->ccwlock);

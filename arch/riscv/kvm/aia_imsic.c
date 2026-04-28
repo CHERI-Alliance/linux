@@ -1136,7 +1136,7 @@ int kvm_riscv_vcpu_aia_imsic_init(struct kvm_vcpu *vcpu)
 	return 0;
 
 fail_free_swfile:
-	free_pages((unsigned long)imsic->swfile,
+	free_pages((uintptr_t)imsic->swfile,
 		   get_order(sizeof(*imsic->swfile)));
 fail_free_imsic:
 	vcpu->arch.aia_context.imsic_state = NULL;
@@ -1158,7 +1158,7 @@ void kvm_riscv_vcpu_aia_imsic_cleanup(struct kvm_vcpu *vcpu)
 	kvm_io_bus_unregister_dev(kvm, KVM_MMIO_BUS, &imsic->iodev);
 	mutex_unlock(&kvm->slots_lock);
 
-	free_pages((unsigned long)imsic->swfile,
+	free_pages((uintptr_t)imsic->swfile,
 		   get_order(sizeof(*imsic->swfile)));
 
 	vcpu->arch.aia_context.imsic_state = NULL;

@@ -644,7 +644,7 @@ static void zfcp_fc_sg_free_table(struct scatterlist *sg, int count)
 
 	for (i = 0; i < count; i++, sg = sg_next(sg))
 		if (sg)
-			free_page((unsigned long) sg_virt(sg));
+			free_page((uintptr_t) sg_virt(sg));
 		else
 			break;
 }

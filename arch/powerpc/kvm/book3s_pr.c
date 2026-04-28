@@ -1781,7 +1781,7 @@ static int kvmppc_core_vcpu_create_pr(struct kvm_vcpu *vcpu)
 	return 0;
 
 free_shared_page:
-	free_page((unsigned long)vcpu->arch.shared);
+	free_page((uintptr_t)vcpu->arch.shared);
 free_shadow_vcpu:
 #ifdef CONFIG_KVM_BOOK3S_32_HANDLER
 	kfree(vcpu->arch.shadow_vcpu);

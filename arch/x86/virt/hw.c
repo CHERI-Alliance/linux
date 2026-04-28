@@ -157,7 +157,7 @@ static __init void x86_vmx_exit(void)
 	int cpu;
 
 	for_each_possible_cpu(cpu) {
-		free_page((unsigned long)per_cpu(root_vmcs, cpu));
+		free_page((uintptr_t)per_cpu(root_vmcs, cpu));
 		per_cpu(root_vmcs, cpu) = NULL;
 	}
 }

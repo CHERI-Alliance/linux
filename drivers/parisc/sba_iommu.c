@@ -913,7 +913,7 @@ sba_free(struct device *hwdev, size_t size, void *vaddr,
 		    dma_addr_t dma_handle, unsigned long attrs)
 {
 	sba_unmap_phys(hwdev, dma_handle, size, 0, 0);
-	free_pages((unsigned long) vaddr, get_order(size));
+	free_pages((uintptr_t) vaddr, get_order(size));
 }
 
 

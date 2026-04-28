@@ -417,11 +417,11 @@ static void sla_free(struct sla_addr_t sla, size_t len, bool firmware_state)
 		for (i = 0; i < npages; ++i) {
 			if (IS_SLA_EOL(scatter[i]))
 				break;
-			free_page((unsigned long)sla_to_va(scatter[i]));
+			free_page((uintptr_t)sla_to_va(scatter[i]));
 		}
 	}
 
-	free_page((unsigned long)sla_to_va(sla));
+	free_page((uintptr_t)sla_to_va(sla));
 }
 
 static struct sla_addr_t sla_alloc(size_t len, bool firmware_state)

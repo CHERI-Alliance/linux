@@ -151,7 +151,7 @@ int zpci_report_status(struct zpci_dev *zdev, const char *operation, const char 
 	else
 		pr_info("Reported PCI device status\n");
 
-	free_page((unsigned long)report);
+	free_page((uintptr_t)report);
 
 	return ret;
 }

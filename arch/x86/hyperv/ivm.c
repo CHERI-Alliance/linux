@@ -289,7 +289,7 @@ static void snp_cleanup_vmsa(struct sev_es_save_area *vmsa)
 	if (err)
 		pr_err("clear VMSA page failed (%u), leaking page\n", err);
 	else
-		free_page((unsigned long)vmsa);
+		free_page((uintptr_t)vmsa);
 }
 
 int hv_snp_boot_ap(u32 apic_id, unsigned long start_ip, unsigned int cpu)
@@ -350,7 +350,7 @@ int hv_snp_boot_ap(u32 apic_id, unsigned long start_ip, unsigned int cpu)
 	ret = snp_set_vmsa(vmsa, true);
 	if (ret) {
 		pr_err("RMPADJUST(%llx) failed: %llx\n", (u64)vmsa, ret);
-		free_page((u64)vmsa);
+		free_page((uintptr_t)vmsa);
 		return ret;
 	}
 

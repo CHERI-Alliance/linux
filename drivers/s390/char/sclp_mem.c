@@ -103,7 +103,7 @@ static int do_assign_storage(sclp_cmdw_t cmd, u16 rn)
 		break;
 	}
 out:
-	free_page((unsigned long)sccb);
+	free_page((uintptr_t)sccb);
 	return rc;
 }
 
@@ -152,7 +152,7 @@ static int sclp_attach_storage(u8 id)
 		break;
 	}
 out:
-	free_page((unsigned long)sccb);
+	free_page((uintptr_t)sccb);
 	return rc;
 }
 
@@ -531,7 +531,7 @@ static int __init sclp_setup_memory(void)
 		insert_increment(0, 1, 0);
 	rc = sclp_init_mem();
 out:
-	free_page((unsigned long)sccb);
+	free_page((uintptr_t)sccb);
 	return rc;
 }
 __initcall(sclp_setup_memory);

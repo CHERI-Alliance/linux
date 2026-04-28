@@ -2557,7 +2557,7 @@ static void dpaa2_switch_free_bufs(struct ethsw_core *ethsw, u64 *buf_array, int
 		vaddr = dpaa2_iova_to_virt(ethsw->iommu_domain, buf_array[i]);
 		dma_unmap_page(dev, buf_array[i], DPAA2_SWITCH_RX_BUF_SIZE,
 			       DMA_FROM_DEVICE);
-		free_pages((unsigned long)vaddr, 0);
+		free_pages((uintptr_t)vaddr, 0);
 	}
 }
 

@@ -625,7 +625,7 @@ static int core_imc_mem_init(int cpu, int size)
 				__pa((void *)mem_info->vbase),
 				get_hard_smp_processor_id(cpu));
 	if (rc) {
-		free_pages((u64)mem_info->vbase, get_order(size));
+		free_pages((uintptr_t)mem_info->vbase, get_order(size));
 		mem_info->vbase = NULL;
 	}
 
@@ -1574,7 +1574,7 @@ static void cleanup_all_core_imc_memory(void)
 	/* mem_info will never be NULL */
 	for (i = 0; i < nr_cores; i++) {
 		if (ptr[i].vbase)
-			free_pages((u64)ptr[i].vbase, get_order(size));
+			free_pages((uintptr_t)ptr[i].vbase, get_order(size));
 	}
 
 	kfree(ptr);
@@ -1601,7 +1601,8 @@ static void cleanup_all_thread_imc_memory(void)
 
 	for_each_online_cpu(i) {
 		if (per_cpu(thread_imc_mem, i))
-			free_pages((u64)per_cpu(thread_imc_mem, i), order);
+			free_pages((uintptr_t)per_cpu(thread_imc_mem, i),
+				   order);
 
 	}
 }
@@ -1612,7 +1613,8 @@ static void cleanup_all_trace_imc_memory(void)
 
 	for_each_online_cpu(i) {
 		if (per_cpu(trace_imc_mem, i))
-			free_pages((u64)per_cpu(trace_imc_mem, i), order);
+			free_pages((uintptr_t)per_cpu(trace_imc_mem, i),
+				   order);
 
 	}
 	kfree(trace_imc_refc);

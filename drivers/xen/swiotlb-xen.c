@@ -170,7 +170,7 @@ xen_swiotlb_alloc_coherent(struct device *dev, size_t size,
 	return ret;
 
 out_free_pages:
-	free_pages((unsigned long)ret, get_order(size));
+	free_pages((uintptr_t)ret, get_order(size));
 	return NULL;
 }
 
@@ -191,7 +191,7 @@ xen_swiotlb_free_coherent(struct device *dev, size_t size, void *vaddr,
 
 	if (TestClearPageXenRemapped(virt_to_page(vaddr)))
 		xen_destroy_contiguous_region(phys, order);
-	free_pages((unsigned long)vaddr, get_order(size));
+	free_pages((uintptr_t)vaddr, get_order(size));
 }
 #endif /* CONFIG_X86 */
 
