@@ -23,7 +23,7 @@
 
 struct io_cancel {
 	struct file			*file;
-	u64				addr;
+	__u64ptr			addr;
 	u32				flags;
 	s32				fd;
 	u8				opcode;
@@ -56,7 +56,7 @@ bool io_cancel_req_match(struct io_kiocb *req, struct io_cancel_data *cd)
 		if (req->opcode != cd->opcode)
 			return false;
 	}
-	if (match_user_data && req->cqe.user_data != cd->data)
+	if (match_user_data && !io_user_data_is_same(req->cqe.user_data, cd->data))
 		return false;
 	if (cd->flags & IORING_ASYNC_CANCEL_ALL) {
 check_seq:
