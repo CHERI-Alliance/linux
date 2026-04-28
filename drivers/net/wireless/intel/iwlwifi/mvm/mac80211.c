@@ -1993,7 +1993,7 @@ uintptr_t iwl_mvm_prepare_multicast(struct ieee80211_hw *hw,
 
 	if (pass_all) {
 		cmd->pass_all = 1;
-		return (u64)(uintptr_t)cmd;
+		return (uintptr_t)cmd;
 	}
 
 	netdev_hw_addr_list_for_each(addr, mc_list) {
@@ -2004,7 +2004,7 @@ uintptr_t iwl_mvm_prepare_multicast(struct ieee80211_hw *hw,
 		cmd->count++;
 	}
 
-	return (u64)(uintptr_t)cmd;
+	return (uintptr_t)cmd;
 }
 
 void iwl_mvm_configure_filter(struct ieee80211_hw *hw,
@@ -2012,7 +2012,7 @@ void iwl_mvm_configure_filter(struct ieee80211_hw *hw,
 			      unsigned int *total_flags, uintptr_t multicast)
 {
 	struct iwl_mvm *mvm = IWL_MAC80211_GET_MVM(hw);
-	struct iwl_mcast_filter_cmd *cmd = (void *)(unsigned long)multicast;
+	struct iwl_mcast_filter_cmd *cmd = (void *)multicast;
 
 	guard(mvm)(mvm);
 
