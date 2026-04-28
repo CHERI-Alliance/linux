@@ -886,8 +886,8 @@ static void kunit_stub_test(struct kunit *test)
 	KUNIT_ASSERT_EQ(test, fake_test.status, KUNIT_SUCCESS);
 	KUNIT_ASSERT_EQ(test, list_count_nodes(&fake_test.resources), 0);
 
-	__kunit_activate_static_stub(&fake_test, (void *)fake_real_fn_addr,
-				     (void *)fake_replacement_addr);
+	__kunit_activate_static_stub(&fake_test, __c_fakep(fake_real_fn_addr),
+				     __c_fakep(fake_replacement_addr));
 	KUNIT_ASSERT_EQ(test, fake_test.status, KUNIT_SUCCESS);
 	KUNIT_ASSERT_EQ(test, list_count_nodes(&fake_test.resources), 1);
 
@@ -896,10 +896,10 @@ static void kunit_stub_test(struct kunit *test)
 
 	stub_ctx = res->data;
 	KUNIT_EXPECT_NOT_NULL(test, stub_ctx);
-	KUNIT_EXPECT_EQ(test, (uintptr_t)stub_ctx->real_fn_addr, fake_real_fn_addr);
-	KUNIT_EXPECT_EQ(test, (uintptr_t)stub_ctx->replacement_addr, fake_replacement_addr);
+	KUNIT_EXPECT_EQ(test, __c_pa(stub_ctx->real_fn_addr), fake_real_fn_addr);
+	KUNIT_EXPECT_EQ(test, __c_pa(stub_ctx->replacement_addr), fake_replacement_addr);
 
-	__kunit_activate_static_stub(&fake_test, (void *)fake_real_fn_addr, NULL);
+	__kunit_activate_static_stub(&fake_test, __c_fakep(fake_real_fn_addr), NULL);
 	KUNIT_ASSERT_EQ(test, fake_test.status, KUNIT_SUCCESS);
 	KUNIT_ASSERT_EQ(test, list_count_nodes(&fake_test.resources), 0);
 }
