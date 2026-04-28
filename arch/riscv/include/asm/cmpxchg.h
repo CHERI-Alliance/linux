@@ -6,7 +6,8 @@
 #ifndef _ASM_RISCV_CMPXCHG_H
 #define _ASM_RISCV_CMPXCHG_H
 
-#include <linux/bug.h>
+#include <asm/bug.h>
+#include <linux/cheri.h>
 
 #include <asm/alternative-macros.h>
 #include <asm/fence.h>
@@ -15,6 +16,20 @@
 #include <asm/cpufeature-macros.h>
 #include <asm/processor.h>
 #include <asm/errata_list.h>
+
+/*
+ * The __UPCAST is never executed. It only serves to silence warnings
+ * in code that is later compiled away.
+ */
+
+#if __SIZEOF_POINTER__ > __SIZEOF_LONG__
+#define __UPCAST(e) (__typeof__(__builtin_choose_expr(	\
+	sizeof(e) == sizeof(void *),(uintptr_t __force)0, e)) __force)
+#else
+#define __UPCAST(e)
+#endif
+
+#define SIZEOF_SAFE(X) ((sizeof(X) > __SIZEOF_LONG__) ? __SIZEOF_LONG__ : sizeof(X))
 
 #define __arch_xchg_masked(sc_sfx, swap_sfx, prepend, sc_append,		\
 			   swap_append, r, p, n)				\
@@ -31,9 +46,9 @@
 	} else {								\
 		u32 *__ptr32b = (u32 *)((uintptr_t)(p) & ~0x3);			\
 		ulong __s = ((ulong __force)(p) & (0x4 - sizeof(*p))) * BITS_PER_BYTE;	\
-		ulong __mask = GENMASK(((sizeof(*p)) * BITS_PER_BYTE) - 1, 0)	\
+		ulong __mask = GENMASK(((SIZEOF_SAFE(*p)) * BITS_PER_BYTE) - 1, 0)	\
 				<< __s;						\
-		ulong __newx = (ulong __force)(n) << __s;				\
+		ulong __newx = (ulong __force)__UPCAST(n)(n) << __s;		\
 		ulong __retx;							\
 		ulong __rc;							\
 										\
@@ -47,23 +62,31 @@
 		       "	bnez %1, 0b\n"					\
 		       sc_append						\
 		       : "=&r" (__retx), "=&r" (__rc), "+A" (*(__ptr32b))	\
-		       : "rJ" (__newx), "rJ" (~__mask), "rJ" (__ptr32b)		\
+		       : "rJ" (__newx), "rJ" (~__mask), PTRC"J" (__ptr32b)		\
 		       : "memory");						\
 										\
-		r = (__typeof__(*(p)))((__retx & __mask) >> __s);		\
+		r = (__typeof__(*(p)))__UPCAST(*p)((__retx & __mask) >> __s);	\
 	}									\
 })
 
-#define __arch_xchg(sfx, prepend, append, r, p, n)			\
+#define __arch_xchg(sfx, constraint, prepend, append, r, p, n)		\
 ({									\
 	__asm__ __volatile__ (						\
 		prepend							\
 		"	amoswap" sfx " %0, %2, %1\n"			\
 		append							\
-		: "=r" (r), "+A" (*(p))					\
-		: "r" (n)						\
+		: "="constraint (r), "+A" (*(p))			\
+		: constraint (n)					\
 		: "memory");						\
 })
+
+#ifdef CONFIG_CHERI_KERNEL
+#define __arch_cxchg(sfx, constraint, prepend, append, r, p, n)		\
+	__arch_xchg(sfx, constraint, prepend, append, r, p, n)
+#else
+#define __arch_cxchg(sfx, constraint, prepend, append, r, p, n)		\
+	BUILD_BUG()
+#endif
 
 #define _arch_xchg(ptr, new, sc_sfx, swap_sfx, prepend,			\
 		   sc_append, swap_append)				\
@@ -84,11 +107,15 @@
 				   __ret, __ptr, __new);		\
 		break;							\
 	case 4:								\
-		__arch_xchg(".w" swap_sfx, prepend, swap_append,	\
+		__arch_xchg(".w" swap_sfx, "r", prepend, swap_append,	\
 			      __ret, __ptr, __new);			\
 		break;							\
 	case 8:								\
-		__arch_xchg(".d" swap_sfx, prepend, swap_append,	\
+		__arch_xchg(".d" swap_sfx, "r", prepend, swap_append,	\
+			      __ret, __ptr, __new);			\
+		break;							\
+	case 16:							\
+		__arch_cxchg(".c" swap_sfx, "C", prepend, swap_append,	\
 			      __ret, __ptr, __new);			\
 		break;							\
 	default:							\
@@ -149,10 +176,10 @@
 	} else {								\
 		u32 *__ptr32b = (u32 *)((uintptr_t)(p) & ~0x3);			\
 		ulong __s = ((ulong __force)(p) & (0x4 - sizeof(*p))) * BITS_PER_BYTE;	\
-		ulong __mask = GENMASK(((sizeof(*p)) * BITS_PER_BYTE) - 1, 0)	\
+		ulong __mask = GENMASK(((SIZEOF_SAFE(*p)) * BITS_PER_BYTE) - 1, 0)	\
 			       << __s;						\
-		ulong __newx = (ulong __force)(n) << __s;			\
-		ulong __oldx = (ulong __force)(o) << __s;			\
+		ulong __newx = (ulong __force)__UPCAST(n)(n) << __s;		\
+		ulong __oldx = (ulong __force)__UPCAST(o)(o) << __s;		\
 		ulong __retx;							\
 		ulong __rc;							\
 										\
@@ -172,7 +199,7 @@
 			  "rJ" (__mask), "rJ" (~__mask)				\
 			: "memory");						\
 										\
-		r = (__typeof__(*(p)))((__retx & __mask) >> __s);		\
+		r = (__typeof__(*(p)) __force)__UPCAST(*(p))((__retx & __mask) >> __s);	\
 	}									\
 })
 
@@ -210,6 +237,29 @@
 	}								\
 })
 
+
+#ifdef CONFIG_CHERI_KERNEL
+#define __arch_ccmpxchg(prepend, append, r, p, co, o, n)		\
+({									\
+	register unsigned int __rc;					\
+									\
+	__asm__ __volatile__ (						\
+		prepend							\
+		"0:	lr.c %0, %2\n"					\
+		"	sceq %1, %0, %z3\n"				\
+		"	beqz %1, 1f\n"					\
+		"	sc.c %1, %z4, %2\n"				\
+		"	bnez %1, 0b\n"					\
+		append							\
+		"1:\n"							\
+		: "=&C" (r), "=&r" (__rc), "+A" (*(p))			\
+		: "CJ" (co o), "CJ" (n)					\
+		: "memory");						\
+})
+#else
+#define __arch_ccmpxchg(prepend, append, r, p, co, o, n) BUILD_BUG()
+#endif
+
 #define _arch_cmpxchg(ptr, old, new, sc_sfx, cas_sfx,			\
 		      sc_prepend, sc_append,				\
 		      cas_prepend, cas_append)				\
@@ -243,6 +293,10 @@
 			       sc_prepend, sc_append,			\
 			       cas_prepend, cas_append,			\
 			       __ret, __ptr, /**/, __old, __new);	\
+		break;							\
+	case 16:							\
+		__arch_ccmpxchg(sc_prepend, sc_append, __ret, __ptr, /**/,	\
+				__old, __new);				\
 		break;							\
 	default:							\
 		BUILD_BUG();						\
@@ -369,6 +423,9 @@ static __always_inline void __cmpwait(volatile void *ptr,
 				      int size)
 {
 	unsigned long tmp;
+#if __SIZEOF_POINTER__ > __SIZEOF_LONG__
+	uintptr_t tmpptr;
+#endif
 
 	u32 *__ptr32b;
 	ulong __s, __val, __mask;
@@ -382,7 +439,7 @@ static __always_inline void __cmpwait(volatile void *ptr,
 	case 1:
 		__ptr32b = (u32 *)((uintptr_t)(ptr) & ~0x3);
 		__s = ((ulong)(ptr) & 0x3) * BITS_PER_BYTE;
-		__val = val << __s;
+		__val = __c_ua(val) << __s;
 		__mask = 0xff << __s;
 
 		asm volatile(
@@ -399,7 +456,7 @@ static __always_inline void __cmpwait(volatile void *ptr,
 	case 2:
 		__ptr32b = (u32 *)((uintptr_t)(ptr) & ~0x3);
 		__s = ((ulong)(ptr) & 0x2) * BITS_PER_BYTE;
-		__val = val << __s;
+		__val = __c_ua(val) << __s;
 		__mask = 0xffff << __s;
 
 		asm volatile(
@@ -421,7 +478,7 @@ static __always_inline void __cmpwait(volatile void *ptr,
 			ZAWRS_WRS_NTO "\n"
 		"1:"
 		: "=&r" (tmp), "+A" (*(u32 *)ptr)
-		: "r" (val));
+		: "r" (__c_ua(val)));
 		break;
 #if __riscv_xlen == 64
 	case 8:
@@ -432,7 +489,19 @@ static __always_inline void __cmpwait(volatile void *ptr,
 			ZAWRS_WRS_NTO "\n"
 		"1:"
 		: "=&r" (tmp), "+A" (*(u64 *)ptr)
-		: "r" (val));
+		: "r" (__c_ua(val)));
+		break;
+#endif
+#if __SIZEOF_POINTER__ > __SIZEOF_LONG__
+	case __SIZEOF_POINTER__:
+		asm volatile(
+		"	lr.c	%0, %2\n"
+		"	sceq	%1, %0, %3\n"
+		"	beqz	%1, 1f\n"
+			ZAWRS_WRS_NTO "\n"
+		"1:"
+		: "=&C" (tmpptr), "=&r" (tmp), "+A" (*(uintptr_t *)ptr)
+		: "C" (val));
 		break;
 #endif
 	default:
