@@ -30,8 +30,17 @@ ifeq ($(CONFIG_ARCH_RV64I),y)
 	BITS := 64
 	UTS_MACHINE := riscv64
 
+ifneq ($(CONFIG_CHERI_KERNEL),y)
 	KBUILD_CFLAGS += -mabi=lp64
 	KBUILD_AFLAGS += -mabi=lp64
+else
+	KBUILD_CFLAGS += -mabi=l64pc128
+	KBUILD_AFLAGS += -mabi=l64pc128
+	# For cheri headers (e.g. cheriintrin.h)
+	KBUILD_CFLAGS += -isystem $(shell $(CC) -print-file-name=include)
+	# FIXCHERI: Not sure why this triggers. Silence for now.
+	KBUILD_CFLAGS += -Wno-incompatible-library-redeclaration
+endif
 
 	KBUILD_LDFLAGS += -melf64lriscv
 
@@ -80,6 +89,9 @@ riscv-march-$(CONFIG_TOOLCHAIN_HAS_ZACAS) := $(riscv-march-y)_zacas
 
 # Check if the toolchain supports Zabha
 riscv-march-$(CONFIG_TOOLCHAIN_HAS_ZABHA) := $(riscv-march-y)_zabha
+
+# Enable RISCV CHERI support if requested
+riscv-march-$(CONFIG_CHERI_KERNEL) := $(riscv-march-y)_zcherihybrid
 
 KBUILD_BASE_ISA = -march=$(shell echo $(riscv-march-y) | sed -E 's/(rv32ima|rv64ima)fd([^v_]*)v?/\1\2/')
 export KBUILD_BASE_ISA

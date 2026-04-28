@@ -1795,10 +1795,36 @@ config HAVE_ARCH_CHERI_H
 config ARCH_HAS_CHERI_CAPABILITIES
 	bool
 
+config ARCH_HAS_CHERI_UABI_ONLY
+	bool
+
+config ARCH_HAS_CHERI_UABI_AND_KERNEL
+	bool
+
 config CHERI_PURECAP_UABI
+	bool
+
+config CHERI_KERNEL
+	bool
+
+choice
+	prompt "CHERI operation mode"
+	default CHERI_NONE
+	help
+	  This option selects the CHERI operation mode.
+
+config CHERI_NONE
+	bool "None"
+	depends on !ARCH_HAS_CHERI_CAPABILITIES
+	help
+	  Do not enable CHERI support at all.
+
+config CHERI_PURECAP_UABI_ONLY
 	bool "CHERI pure-capability userspace ABI"
 	depends on ARCH_HAS_CHERI_CAPABILITIES
+	depends on ARCH_HAS_CHERI_UABI_ONLY
 	select COMPAT64 if COMPAT
+	select CHERI_PURECAP_UABI
 	help
 	  Select this to convert the native kernel-user ABI to pure-capability
 	  (PCuABI). On the kernel side, all user pointers become capabilities.
@@ -1812,6 +1838,19 @@ config CHERI_PURECAP_UABI
 	  Warning: selecting this option creates a hard requirement for the
 	  availability of CHERI capabilities at compile-time; the resulting
 	  kernel image will not boot on incompatible hardware.
+
+config CHERI_UABI_AND_KERNEL
+	bool "CHERI protection for kernel and userspace"
+	select CHERI_PURECAP_UABI
+	select CHERI_KERNEL
+	depends on ARCH_HAS_CHERI_CAPABILITIES
+	depends on ARCH_HAS_CHERI_UABI_AND_KERNEL
+	help
+	  Select this to make use of the CHERI features within the kernel.
+	  This always forces the use of the pure-capability user space
+	  ABI (PCuABI).
+
+endchoice
 
 config HAVE_ARCH_USER_PTR_H
 	bool
