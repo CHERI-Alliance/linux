@@ -1574,13 +1574,13 @@ struct mwifiex_user_scan_cfg {
 	/* BSSID filter sent in the firmware command to limit the results */
 	u8 specific_bssid[ETH_ALEN];
 	/* SSID filter list used in the firmware to limit the scan results */
-	struct cfg80211_ssid *ssid_list;
+	struct cfg80211_ssid *ssid_list __cheri_pointer_align;
 	u8 num_ssids;
 	/* Variable number (fixed maximum) of channels to scan up */
 	struct mwifiex_user_scan_chan chan_list[MWIFIEX_USER_SCAN_CHAN_MAX];
 	u16 scan_chan_gap;
 	u8 random_mac[ETH_ALEN];
-} __packed;
+} __packed __cheri_pointer_align;
 
 #define MWIFIEX_BG_SCAN_CHAN_MAX 38
 #define MWIFIEX_BSS_MODE_INFRA 1
@@ -1606,11 +1606,11 @@ struct mwifiex_bg_scan_cfg {
 	u8 snr_threshold;
 	u16 repeat_count;
 	u16 start_later;
-	struct cfg80211_match_set *ssid_list;
+	struct cfg80211_match_set *ssid_list __cheri_pointer_align;
 	u8 num_ssids;
 	struct mwifiex_user_scan_chan chan_list[MWIFIEX_BG_SCAN_CHAN_MAX];
 	u16 scan_chan_gap;
-} __packed;
+} __packed __cheri_pointer_align;
 
 struct ie_body {
 	u8 grp_key_oui[4];

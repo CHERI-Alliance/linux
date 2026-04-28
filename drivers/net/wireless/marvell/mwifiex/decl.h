@@ -276,7 +276,7 @@ struct mwifiex_iface_comb {
 struct mwifiex_radar_params {
 	struct cfg80211_chan_def *chandef;
 	u32 cac_time_ms;
-} __packed;
+} __packed __cheri_pointer_align;
 
 struct mwifiex_11h_intf_state {
 	bool is_11h_enabled;

@@ -781,7 +781,7 @@ void lbs_debugfs_remove_one(struct lbs_private *priv)
 struct debug_data {
 	char name[32];
 	u32 size;
-	size_t addr;
+	uintptr_t addr;
 };
 
 /* To debug any member of struct lbs_private, simply add one line here.
@@ -922,7 +922,7 @@ static void lbs_debug_init(struct lbs_private *priv)
 		return;
 
 	for (i = 0; i < num_of_items; i++)
-		items[i].addr += (uintptr_t) priv;
+		items[i].addr = (uintptr_t)priv + __c_ua(items[i].addr);
 
 	priv->debugfs_debug = debugfs_create_file("debug", 0644,
 						  priv->debugfs_dir, &items[0],

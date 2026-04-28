@@ -540,7 +540,7 @@ static int lbs_cfg_set_mesh_channel(struct wiphy *wiphy,
 #define LBS_SCAN_RSSI_TO_MBM(rssi) \
 	((-(int)rssi + 3)*100)
 
-static int lbs_ret_scan(struct lbs_private *priv, unsigned long dummy,
+static int lbs_ret_scan(struct lbs_private *priv, uintptr_t dummy,
 	struct cmd_header *resp)
 {
 	struct cfg80211_bss *bss;
