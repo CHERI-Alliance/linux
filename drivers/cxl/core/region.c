@@ -219,7 +219,7 @@ static DEVICE_ATTR_RW(uuid);
 static struct cxl_region_ref *cxl_rr_load(struct cxl_port *port,
 					  struct cxl_region *cxlr)
 {
-	return xa_load(&port->regions, (uintptr_t)cxlr);
+	return xa_load(&port->regions, __c_pa(cxlr));
 }
 
 static int cxl_region_invalidate_memregion(struct cxl_region *cxlr)
@@ -1006,7 +1006,7 @@ alloc_region_ref(struct cxl_port *port, struct cxl_region *cxlr,
 	cxl_rr->nr_targets = 1;
 	xa_init(&cxl_rr->endpoints);
 
-	rc = xa_insert(&port->regions, (uintptr_t)cxlr, cxl_rr, GFP_KERNEL);
+	rc = xa_insert(&port->regions, __c_pa(cxlr), cxl_rr, GFP_KERNEL);
 	if (rc) {
 		dev_dbg(&cxlr->dev,
 			"%s: failed to track region reference: %d\n",
@@ -1039,7 +1039,7 @@ static void free_region_ref(struct cxl_region_ref *cxl_rr)
 	struct cxl_region *cxlr = cxl_rr->region;
 
 	cxl_rr_free_decoder(cxl_rr);
-	xa_erase(&port->regions, (uintptr_t)cxlr);
+	xa_erase(&port->regions, __c_pa(cxlr));
 	xa_destroy(&cxl_rr->endpoints);
 	kfree(cxl_rr);
 }
@@ -1054,7 +1054,7 @@ static int cxl_rr_ep_add(struct cxl_region_ref *cxl_rr,
 	struct cxl_ep *ep = cxl_ep_load(port, cxled_to_memdev(cxled));
 
 	if (ep) {
-		rc = xa_insert(&cxl_rr->endpoints, (uintptr_t)cxled, ep,
+		rc = xa_insert(&cxl_rr->endpoints, __c_pa(cxled), ep,
 			       GFP_KERNEL);
 		if (rc)
 			return rc;
@@ -1270,7 +1270,7 @@ static void cxl_port_detach_region(struct cxl_port *port,
 	if (cxl_rr->decoder == &cxled->cxld)
 		cxl_rr->nr_eps--;
 	else
-		ep = xa_erase(&cxl_rr->endpoints, (uintptr_t)cxled);
+		ep = xa_erase(&cxl_rr->endpoints, __c_pa(cxled));
 	if (ep) {
 		struct cxl_ep *ep_iter;
 		unsigned long index;

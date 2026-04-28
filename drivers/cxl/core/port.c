@@ -536,7 +536,7 @@ static void cxl_ep_remove(struct cxl_port *port, struct cxl_ep *ep)
 {
 	if (!ep)
 		return;
-	xa_erase(&port->endpoints, (uintptr_t) ep->ep);
+	xa_erase(&port->endpoints, __c_pa(ep->ep));
 	cxl_ep_release(ep);
 }
 
@@ -971,13 +971,13 @@ struct pci_bus *cxl_port_to_pci_bus(struct cxl_port *port)
 		return pdev->subordinate;
 	}
 
-	return xa_load(&cxl_root_buses, (uintptr_t)port->uport_dev);
+	return xa_load(&cxl_root_buses, __c_pa(port->uport_dev));
 }
 EXPORT_SYMBOL_NS_GPL(cxl_port_to_pci_bus, "CXL");
 
 static void unregister_pci_bus(void *uport_dev)
 {
-	xa_erase(&cxl_root_buses, (uintptr_t)uport_dev);
+	xa_erase(&cxl_root_buses, __c_pa(uport_dev));
 }
 
 int devm_cxl_register_pci_bus(struct device *host, struct device *uport_dev,
@@ -988,7 +988,7 @@ int devm_cxl_register_pci_bus(struct device *host, struct device *uport_dev,
 	if (dev_is_pci(uport_dev))
 		return -EINVAL;
 
-	rc = xa_insert(&cxl_root_buses, (uintptr_t)uport_dev, bus,
+	rc = xa_insert(&cxl_root_buses, __c_pa(uport_dev), bus,
 		       GFP_KERNEL);
 	if (rc)
 		return rc;
@@ -1058,7 +1058,7 @@ static int add_dport(struct cxl_port *port, struct cxl_dport *dport)
 	/* Arrange for dport_dev to be valid through remove_dport() */
 	struct device *dev __free(put_device) = get_device(dport->dport_dev);
 
-	rc = xa_insert(&port->dports, (uintptr_t)dport->dport_dev, dport,
+	rc = xa_insert(&port->dports, __c_pa(dport->dport_dev), dport,
 		       GFP_KERNEL);
 	if (rc)
 		return rc;
@@ -1093,7 +1093,7 @@ static void cxl_dport_remove(void *data)
 	struct cxl_port *port = dport->port;
 
 	port->nr_dports--;
-	xa_erase(&port->dports, (uintptr_t) dport->dport_dev);
+	xa_erase(&port->dports, __c_pa(dport->dport_dev));
 	put_device(dport->dport_dev);
 }
 
@@ -1322,7 +1322,7 @@ static int add_ep(struct cxl_ep *new)
 	if (port->dead)
 		return -ENXIO;
 
-	return xa_insert(&port->endpoints, (uintptr_t)new->ep,
+	return xa_insert(&port->endpoints, __c_pa(new->ep),
 			 new, GFP_KERNEL);
 }
 
