@@ -789,7 +789,8 @@ static struct io_rsrc_node *io_sqe_buffer_register(struct io_ring_ctx *ctx,
 		return ERR_PTR(-ENOMEM);
 
 	ret = -ENOMEM;
-	pages = io_pin_pages((user_uintptr_t) iov->iov_base, iov->iov_len,
+	/* TODO [PCuABI] - capability checks for uaccess */
+	pages = io_pin_pages(user_ptr_addr(iov->iov_base), iov->iov_len,
 				&nr_pages);
 	if (IS_ERR(pages)) {
 		ret = PTR_ERR(pages);
