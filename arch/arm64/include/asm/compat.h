@@ -96,6 +96,10 @@ static inline void __user *compat_ptr(compat_uptr_t uptr)
 #define compat_user_stack_pointer() (user_stack_pointer(task_pt_regs(current)))
 #define COMPAT_MINSIGSTKSZ	2048
 
+#ifdef CONFIG_COMPAT64
+#define COMPAT_USE_64BIT_TIME	1
+#endif
+
 static inline int is_compat_task(void)
 {
 	return test_thread_flag(TIF_32BIT);
