@@ -536,6 +536,25 @@ alternative_else_nop_endif
 #endif /* CONFIG_ARM64_HAFT */
 1:
 #endif	/* CONFIG_ARM64_HW_AFDBM */
+#ifdef CONFIG_ARM64_MORELLO
+	/*
+	 * If both Morello and TTPBHA are implemented, allow controlling the
+	 * Morello-defined capability tag load/store behaviour in PTEs by
+	 * enabling "Hardware Use" for all the PBHA bits and for both TTBR0 and
+	 * TTBR1.
+	 */
+	mrs	x9, id_aa64pfr1_el1
+	ubfx	x9, x9, #ID_AA64PFR1_EL1_CE_SHIFT, #4
+	cbz	x9, 1f
+	mrs	x9, id_aa64mmfr1_el1
+	ubfx	x9, x9, #ID_AA64MMFR1_EL1_HPDS_SHIFT, #4
+	cmp	x9, #ID_AA64MMFR1_EL1_HPDS_HPDS2
+	b.ne	1f
+	orr	tcr, tcr, #(TCR_HPD0 | TCR_HPD1 | \
+			    TCR_HWU059 | TCR_HWU060 | TCR_HWU061 | TCR_HWU062 | \
+			    TCR_HWU159 | TCR_HWU160 | TCR_HWU161 | TCR_HWU162)
+1:
+#endif	/* CONFIG_ARM64_MORELLO */
 	msr	mair_el1, mair
 	msr	tcr_el1, tcr
 
