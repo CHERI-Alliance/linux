@@ -93,8 +93,8 @@ admin:
  */
 static void __user *nvme_to_user_ptr(uintptr_t ptrval)
 {
-	if (in_compat_syscall())
-		ptrval = (compat_uptr_t)ptrval;
+	if (in_compat32_syscall())
+		ptrval = (uintptr_t __force)(compat_uptr_t __force)ptrval;
 	return (void __user *)ptrval;
 }
 
@@ -112,7 +112,7 @@ static struct request *nvme_alloc_user_request(struct request_queue *q,
 	return req;
 }
 
-static int nvme_map_user_request(struct request *req, u64 ubuffer,
+static int nvme_map_user_request(struct request *req, uintptr_t ubuffer,
 		unsigned bufflen, void __user *meta_buffer, unsigned meta_len,
 		struct iov_iter *iter, unsigned int flags)
 {
@@ -160,7 +160,7 @@ out_unmap:
 }
 
 static int nvme_submit_user_cmd(struct request_queue *q,
-		struct nvme_command *cmd, u64 ubuffer, unsigned bufflen,
+		struct nvme_command *cmd, uintptr_t ubuffer, unsigned bufflen,
 		void __user *meta_buffer, unsigned meta_len,
 		u64 *result, unsigned timeout, unsigned int flags)
 {
@@ -374,8 +374,8 @@ static int nvme_user_cmd64(struct nvme_ctrl *ctrl, struct nvme_ns *ns,
 }
 
 struct nvme_uring_data {
-	__u64	metadata;
-	__u64	addr;
+	user_uintptr_t	metadata;
+	user_uintptr_t	addr;
 	__u32	data_len;
 	__u32	metadata_len;
 	__u32	timeout_ms;
@@ -492,13 +492,12 @@ static int nvme_uring_cmd_io(struct nvme_ctrl *ctrl, struct nvme_ns *ns,
 	if (d.data_len && (ioucmd->flags & IORING_URING_CMD_FIXED)) {
 		int ddir = nvme_is_write(&c) ? WRITE : READ;
 
-		/* TODO [PCuABI]: change ubuffer type to void __user * */
 		if (vec)
 			ret = io_uring_cmd_import_fixed_vec(ioucmd,
-					u64_to_user_ptr(d.addr), d.data_len,
+					(void __user *)(d.addr), d.data_len,
 					ddir, &iter, issue_flags);
 		else
-			ret = io_uring_cmd_import_fixed(d.addr, d.data_len,
+			ret = io_uring_cmd_import_fixed((void __user *)d.addr, d.data_len,
 					ddir, &iter, ioucmd, issue_flags);
 		if (ret < 0)
 			return ret;
