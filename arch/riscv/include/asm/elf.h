@@ -91,33 +91,36 @@ do {								\
 	 * COMPAT ELFCLASS32.					\
 	 */							\
 	NEW_AUX_ENT(AT_SYSINFO_EHDR,				\
-		(elf_addr_t)(uintptr_t)current->mm->context.vdso);	\
+		(elf_stack_item_t)current->mm->context.vdso);	\
 	NEW_AUX_ENT(AT_L1I_CACHESIZE,				\
-		get_cache_size(1, CACHE_TYPE_INST));		\
+		__c_fakeu(get_cache_size(1, CACHE_TYPE_INST)));	\
 	NEW_AUX_ENT(AT_L1I_CACHEGEOMETRY,			\
-		get_cache_geometry(1, CACHE_TYPE_INST));	\
+		__c_fakeu(get_cache_geometry(1, CACHE_TYPE_INST)));	\
 	NEW_AUX_ENT(AT_L1D_CACHESIZE,				\
-		get_cache_size(1, CACHE_TYPE_DATA));		\
+		__c_fakeu(get_cache_size(1, CACHE_TYPE_DATA)));		\
 	NEW_AUX_ENT(AT_L1D_CACHEGEOMETRY,			\
-		get_cache_geometry(1, CACHE_TYPE_DATA));	\
+		__c_fakeu(get_cache_geometry(1, CACHE_TYPE_DATA)));	\
 	NEW_AUX_ENT(AT_L2_CACHESIZE,				\
-		get_cache_size(2, CACHE_TYPE_UNIFIED));		\
+		__c_fakeu(get_cache_size(2, CACHE_TYPE_UNIFIED)));		\
 	NEW_AUX_ENT(AT_L2_CACHEGEOMETRY,			\
-		get_cache_geometry(2, CACHE_TYPE_UNIFIED));	\
+		__c_fakeu(get_cache_geometry(2, CACHE_TYPE_UNIFIED)));	\
 	NEW_AUX_ENT(AT_L3_CACHESIZE,				\
-		get_cache_size(3, CACHE_TYPE_UNIFIED));		\
+		__c_fakeu(get_cache_size(3, CACHE_TYPE_UNIFIED)));		\
 	NEW_AUX_ENT(AT_L3_CACHEGEOMETRY,			\
-		get_cache_geometry(3, CACHE_TYPE_UNIFIED));	\
+		__c_fakeu(get_cache_geometry(3, CACHE_TYPE_UNIFIED)));	\
 	/*							 \
 	 * Should always be nonzero unless there's a kernel bug. \
 	 * If we haven't determined a sensible value to give to	 \
 	 * userspace, omit the entry:				 \
 	 */							 \
 	if (likely(signal_minsigstksz))				 \
-		NEW_AUX_ENT(AT_MINSIGSTKSZ, signal_minsigstksz); \
+		NEW_AUX_ENT(AT_MINSIGSTKSZ, __c_fakeu(signal_minsigstksz)); \
 	else							 \
 		NEW_AUX_ENT(AT_IGNORE, 0);			 \
 } while (0)
+
+#define START_THREAD(elf_ex, regs, elf_entry, bprm)		\
+	start_thread(regs, elf_entry, bprm)
 
 #ifdef CONFIG_MMU
 #define ARCH_HAS_SETUP_ADDITIONAL_PAGES
