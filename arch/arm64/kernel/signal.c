@@ -42,10 +42,6 @@
 #include <asm/traps.h>
 #include <asm/vdso.h>
 
-#ifdef CONFIG_CHERI_PURECAP_UABI
-#include <cheriintrin.h>
-#endif
-
 #define GCS_SIGNAL_CAP(addr) (((unsigned long)addr) & GCS_CAP_ADDR_MASK)
 
 #ifndef SIGNAL_COMPAT64
