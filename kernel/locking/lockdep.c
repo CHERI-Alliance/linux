@@ -549,7 +549,7 @@ struct lock_trace {
 /*
  * Stack-trace: sequence of lock_trace structures. Protected by the graph_lock.
  */
-static unsigned long stack_trace[MAX_STACK_TRACE_ENTRIES];
+static unsigned long stack_trace[MAX_STACK_TRACE_ENTRIES] __cheri_pointer_align;
 static struct hlist_head stack_trace_hash[STACK_TRACE_HASH_SIZE];
 
 static bool traces_identical(struct lock_trace *t1, struct lock_trace *t2)
@@ -595,6 +595,8 @@ static struct lock_trace *save_trace(void)
 			return t2;
 	}
 	nr_stack_trace_entries += LOCK_TRACE_SIZE_IN_LONGS + trace->nr_entries;
+	nr_stack_trace_entries = ALIGN(nr_stack_trace_entries,
+		 __SIZEOF_POINTER__ / sizeof(stack_trace[0]));
 	hlist_add_head(&trace->hash_entry, hash_head);
 
 	return trace;
@@ -954,7 +956,7 @@ look_up_lock_class(const struct lockdep_map *lock, unsigned int subclass)
  */
 static bool assign_lock_key(struct lockdep_map *lock)
 {
-	uintptr_t can_addr, addr = (uintptr_t)lock;
+	__ptraddr_t can_addr, addr = (uintptr_t)lock;
 
 #ifdef __KERNEL__
 	/*
@@ -968,9 +970,9 @@ static bool assign_lock_key(struct lockdep_map *lock)
 #endif
 
 	if (__is_kernel_percpu_address(addr, &can_addr))
-		lock->key = (void *)can_addr;
+		lock->key = (void *)(uintptr_t)can_addr;
 	else if (__is_module_percpu_address(addr, &can_addr))
-		lock->key = (void *)can_addr;
+		lock->key = (void *)(uintptr_t)can_addr;
 	else if (static_obj(lock))
 		lock->key = (void *)lock;
 	else {
