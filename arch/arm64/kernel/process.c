@@ -41,6 +41,7 @@
 #include <linux/thread_info.h>
 #include <linux/prctl.h>
 #include <linux/stacktrace.h>
+#include <linux/binfmts.h>
 
 #include <asm/alternative.h>
 #include <asm/arch_timer.h>
@@ -555,6 +556,21 @@ int copy_thread(struct task_struct *p, const struct kernel_clone_args *args)
 	ptrace_hw_copy_thread(p);
 
 	return 0;
+}
+
+int start_thread(struct pt_regs *regs, unsigned long pc,
+		 struct linux_binprm *bprm)
+{
+	int ret = 0;
+
+	start_thread_common(regs, pc, PSR_MODE_EL0t);
+	spectre_v4_enable_task_mitigation(current);
+	regs->sp = bprm->p;
+
+	if (system_supports_morello())
+		ret = morello_thread_start(regs, pc, bprm);
+
+	return ret;
 }
 
 void tls_preserve_current_state(void)
