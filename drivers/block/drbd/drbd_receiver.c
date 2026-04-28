@@ -1915,7 +1915,8 @@ find_request(struct drbd_device *device, struct rb_root *root, u64 id,
 	struct drbd_request *req;
 
 	/* Request object according to our peer */
-	req = (struct drbd_request *)(unsigned long)id;
+	/* FIXCHERI: Avoid use of cheri_make_kernel_data_cap() */
+	req = (struct drbd_request *)cheri_make_kernel_data_cap(id, sizeof(*req));
 	if (drbd_contains_interval(root, sector, &req->i) && req->i.local)
 		return req;
 	if (!missing_ok) {

@@ -1666,7 +1666,7 @@ int drbd_send_dblock(struct drbd_peer_device *peer_device, struct drbd_request *
 	if (!p)
 		return -EIO;
 	p->sector = cpu_to_be64(req->i.sector);
-	p->block_id = (uintptr_t)req;
+	p->block_id = __c_pa(req);
 	p->seq_num = cpu_to_be32(atomic_inc_return(&device->packet_seq));
 	dp_flags = bio_flags_to_wire(peer_device->connection, req->master_bio);
 	if (device->state.conn >= C_SYNC_SOURCE &&

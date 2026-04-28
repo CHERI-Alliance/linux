@@ -247,7 +247,7 @@ static int grab_drive(struct floppy_state *fs, enum swim_state state,
 static void release_drive(struct floppy_state *fs);
 static int fd_eject(struct floppy_state *fs);
 static int floppy_ioctl(struct block_device *bdev, blk_mode_t mode,
-			unsigned int cmd, unsigned long param);
+			unsigned int cmd, user_uintptr_t param);
 static int floppy_open(struct gendisk *disk, blk_mode_t mode);
 static unsigned int floppy_check_events(struct gendisk *disk,
 					unsigned int clearing);
@@ -884,7 +884,7 @@ static struct floppy_struct floppy_type =
 	{ 2880,18,2,80,0,0x1B,0x00,0xCF,0x6C,NULL };	/*  7 1.44MB 3.5"   */
 
 static int floppy_locked_ioctl(struct block_device *bdev, blk_mode_t mode,
-			unsigned int cmd, unsigned long param)
+			unsigned int cmd, user_uintptr_t param)
 {
 	struct floppy_state *fs = bdev->bd_disk->private_data;
 	int err;
@@ -912,7 +912,7 @@ static int floppy_locked_ioctl(struct block_device *bdev, blk_mode_t mode,
 }
 
 static int floppy_ioctl(struct block_device *bdev, blk_mode_t mode,
-				 unsigned int cmd, unsigned long param)
+				 unsigned int cmd, user_uintptr_t param)
 {
 	int ret;
 
