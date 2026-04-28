@@ -911,7 +911,7 @@ xfs_ioc_scrubv_metadata(
 	if (!capable(CAP_SYS_ADMIN))
 		return -EPERM;
 
-	if (copy_from_user(&head, uhead, sizeof(head)))
+	if (copy_from_user_with_ptr(&head, uhead, sizeof(head)))
 		return -EFAULT;
 
 	if (head.svh_reserved)
