@@ -362,7 +362,7 @@ out:
 	return ret;
 }
 
-static u64 p54_prepare_multicast(struct ieee80211_hw *dev,
+static uintptr_t p54_prepare_multicast(struct ieee80211_hw *dev,
 				 struct netdev_hw_addr_list *mc_list)
 {
 	struct p54_common *priv = dev->priv;
@@ -390,7 +390,7 @@ static u64 p54_prepare_multicast(struct ieee80211_hw *dev,
 static void p54_configure_filter(struct ieee80211_hw *dev,
 				 unsigned int changed_flags,
 				 unsigned int *total_flags,
-				 u64 multicast)
+				 uintptr_t multicast)
 {
 	struct p54_common *priv = dev->priv;
 

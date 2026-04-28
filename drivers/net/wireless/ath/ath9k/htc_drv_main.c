@@ -1257,7 +1257,7 @@ out:
 static void ath9k_htc_configure_filter(struct ieee80211_hw *hw,
 				       unsigned int changed_flags,
 				       unsigned int *total_flags,
-				       u64 multicast)
+				       uintptr_t multicast)
 {
 	struct ath9k_htc_priv *priv = hw->priv;
 	struct ath_common *common = ath9k_hw_common(priv->ah);

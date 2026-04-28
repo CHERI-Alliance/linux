@@ -1324,7 +1324,7 @@ static void adm8211_bss_info_changed(struct ieee80211_hw *dev,
 	}
 }
 
-static u64 adm8211_prepare_multicast(struct ieee80211_hw *hw,
+static uintptr_t adm8211_prepare_multicast(struct ieee80211_hw *hw,
 				     struct netdev_hw_addr_list *mc_list)
 {
 	unsigned int bit_nr;
@@ -1346,7 +1346,7 @@ static u64 adm8211_prepare_multicast(struct ieee80211_hw *hw,
 static void adm8211_configure_filter(struct ieee80211_hw *dev,
 				     unsigned int changed_flags,
 				     unsigned int *total_flags,
-				     u64 multicast)
+				     uintptr_t multicast)
 {
 	static const u8 bcast[ETH_ALEN] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 	struct adm8211_priv *priv = dev->priv;

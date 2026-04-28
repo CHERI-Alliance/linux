@@ -1564,7 +1564,7 @@ static int ath9k_config(struct ieee80211_hw *hw, int radio_idx, u32 changed)
 static void ath9k_configure_filter(struct ieee80211_hw *hw,
 				   unsigned int changed_flags,
 				   unsigned int *total_flags,
-				   u64 multicast)
+				   uintptr_t multicast)
 {
 	struct ath_softc *sc = hw->priv;
 	struct ath_chanctx *ctx;

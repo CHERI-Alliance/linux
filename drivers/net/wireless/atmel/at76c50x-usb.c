@@ -2052,7 +2052,8 @@ static void at76_bss_info_changed(struct ieee80211_hw *hw,
 /* must be atomic */
 static void at76_configure_filter(struct ieee80211_hw *hw,
 				  unsigned int changed_flags,
-				  unsigned int *total_flags, u64 multicast)
+				  unsigned int *total_flags,
+				  uintptr_t multicast)
 {
 	struct at76_priv *priv = hw->priv;
 	int flags;

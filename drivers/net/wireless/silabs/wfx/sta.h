@@ -25,7 +25,7 @@ int wfx_config(struct ieee80211_hw *hw, int radio_idx, u32 changed);
 int wfx_set_rts_threshold(struct ieee80211_hw *hw, int radio_idx, u32 value);
 void wfx_set_default_unicast_key(struct ieee80211_hw *hw, struct ieee80211_vif *vif, int idx);
 void wfx_configure_filter(struct ieee80211_hw *hw, unsigned int changed_flags,
-			  unsigned int *total_flags, u64 unused);
+			  unsigned int *total_flags, uintptr_t unused);
 
 int wfx_add_interface(struct ieee80211_hw *hw, struct ieee80211_vif *vif);
 void wfx_remove_interface(struct ieee80211_hw *hw, struct ieee80211_vif *vif);

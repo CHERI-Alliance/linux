@@ -1200,7 +1200,7 @@ static void zd_process_intr(struct work_struct *work)
 }
 
 
-static u64 zd_op_prepare_multicast(struct ieee80211_hw *hw,
+static uintptr_t zd_op_prepare_multicast(struct ieee80211_hw *hw,
 				   struct netdev_hw_addr_list *mc_list)
 {
 	struct zd_mac *mac = zd_hw_mac(hw);
@@ -1223,7 +1223,7 @@ static u64 zd_op_prepare_multicast(struct ieee80211_hw *hw,
 static void zd_op_configure_filter(struct ieee80211_hw *hw,
 			unsigned int changed_flags,
 			unsigned int *new_flags,
-			u64 multicast)
+			uintptr_t multicast)
 {
 	struct zd_mc_hash hash = {
 		.low = multicast,

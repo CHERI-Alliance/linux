@@ -763,7 +763,8 @@ static int rtl_op_config(struct ieee80211_hw *hw, int radio_idx, u32 changed)
 
 static void rtl_op_configure_filter(struct ieee80211_hw *hw,
 				    unsigned int changed_flags,
-				    unsigned int *new_flags, u64 multicast)
+				    unsigned int *new_flags,
+				    uintptr_t multicast)
 {
 	bool update_rcr = false;
 	struct rtl_priv *rtlpriv = rtl_priv(hw);

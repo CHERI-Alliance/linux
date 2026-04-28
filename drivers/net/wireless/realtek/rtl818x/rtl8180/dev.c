@@ -1563,7 +1563,7 @@ static void rtl8180_bss_info_changed(struct ieee80211_hw *dev,
 	}
 }
 
-static u64 rtl8180_prepare_multicast(struct ieee80211_hw *dev,
+static uintptr_t rtl8180_prepare_multicast(struct ieee80211_hw *dev,
 				     struct netdev_hw_addr_list *mc_list)
 {
 	return netdev_hw_addr_list_count(mc_list);
@@ -1572,7 +1572,7 @@ static u64 rtl8180_prepare_multicast(struct ieee80211_hw *dev,
 static void rtl8180_configure_filter(struct ieee80211_hw *dev,
 				     unsigned int changed_flags,
 				     unsigned int *total_flags,
-				     u64 multicast)
+				     uintptr_t multicast)
 {
 	struct rtl8180_priv *priv = dev->priv;
 

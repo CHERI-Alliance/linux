@@ -5242,7 +5242,7 @@ mwl8k_bss_info_changed(struct ieee80211_hw *hw, struct ieee80211_vif *vif,
 		mwl8k_bss_info_changed_ap(hw, vif, info, changed);
 }
 
-static u64 mwl8k_prepare_multicast(struct ieee80211_hw *hw,
+static uintptr_t mwl8k_prepare_multicast(struct ieee80211_hw *hw,
 				   struct netdev_hw_addr_list *mc_list)
 {
 	struct mwl8k_cmd_pkt_hdr *cmd;
@@ -5302,7 +5302,7 @@ static struct mwl8k_vif *mwl8k_first_vif(struct mwl8k_priv *priv)
 static void mwl8k_configure_filter(struct ieee80211_hw *hw,
 				   unsigned int changed_flags,
 				   unsigned int *total_flags,
-				   u64 multicast)
+				   uintptr_t multicast)
 {
 	struct mwl8k_priv *priv = hw->priv;
 	struct mwl8k_cmd_pkt_hdr *cmd = (void *)(unsigned long)multicast;

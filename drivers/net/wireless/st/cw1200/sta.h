@@ -26,7 +26,7 @@ int cw1200_config(struct ieee80211_hw *dev, int radio_idx, u32 changed);
 void cw1200_configure_filter(struct ieee80211_hw *dev,
 			     unsigned int changed_flags,
 			     unsigned int *total_flags,
-			     u64 multicast);
+			     uintptr_t multicast);
 int cw1200_conf_tx(struct ieee80211_hw *dev, struct ieee80211_vif *vif,
 		   unsigned int link_id, u16 queue,
 		   const struct ieee80211_tx_queue_params *params);
@@ -42,7 +42,7 @@ int cw1200_set_rts_threshold(struct ieee80211_hw *hw, int radio_idx,
 void cw1200_flush(struct ieee80211_hw *hw, struct ieee80211_vif *vif,
 		  u32 queues, bool drop);
 
-u64 cw1200_prepare_multicast(struct ieee80211_hw *hw,
+uintptr_t cw1200_prepare_multicast(struct ieee80211_hw *hw,
 			     struct netdev_hw_addr_list *mc_list);
 
 int cw1200_set_pm(struct cw1200_common *priv, const struct wsm_set_pm *arg);

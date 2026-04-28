@@ -954,7 +954,7 @@ out:
 	return err;
 }
 
-static u64 carl9170_op_prepare_multicast(struct ieee80211_hw *hw,
+static uintptr_t carl9170_op_prepare_multicast(struct ieee80211_hw *hw,
 					 struct netdev_hw_addr_list *mc_list)
 {
 	struct netdev_hw_addr *ha;
@@ -972,7 +972,7 @@ static u64 carl9170_op_prepare_multicast(struct ieee80211_hw *hw,
 static void carl9170_op_configure_filter(struct ieee80211_hw *hw,
 					 unsigned int changed_flags,
 					 unsigned int *new_flags,
-					 u64 multicast)
+					 uintptr_t multicast)
 {
 	struct ar9170 *ar = hw->priv;
 
