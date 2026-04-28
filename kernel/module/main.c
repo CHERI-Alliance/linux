@@ -1857,11 +1857,13 @@ static int elf_validity_ehdr(const struct load_info *info)
 		       info->hdr->e_type, ET_REL);
 		return -ENOEXEC;
 	}
+#ifndef ARCH_MODULE_SKIP_ELF_CHECK
 	if (!elf_check_arch(info->hdr)) {
 		pr_err("Invalid architecture in ELF header: %u\n",
 		       info->hdr->e_machine);
 		return -ENOEXEC;
 	}
+#endif
 	if (!module_elf_check_arch(info->hdr)) {
 		pr_err("Invalid module architecture in ELF header: %u\n",
 		       info->hdr->e_machine);

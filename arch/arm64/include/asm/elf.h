@@ -95,16 +95,9 @@
  * This is used to ensure we don't load something for the wrong architecture.
  */
 #ifdef CONFIG_CHERI_PURECAP_UABI
-/*
- * TODO [PCuABI] - elf_check_arch() is also used by the kernel module loader to
- * verify the ELF headers. However, kernel modules, just like the kernel, are
- * currently hybrid binaries and therefore do not have the
- * EF_AARCH64_CHERI_PURECAP flag. As a result elf_check_arch() currently fails
- * for kernel modules. This could be solved by introducing a new macro to check
- * kernel modules.
- */
 #define elf_check_arch(x)		((x)->e_machine == EM_AARCH64 && \
 					 (x)->e_flags & EF_AARCH64_CHERI_PURECAP)
+#define ARCH_MODULE_SKIP_ELF_CHECK
 #else
 #define elf_check_arch(x)		((x)->e_machine == EM_AARCH64)
 #endif
