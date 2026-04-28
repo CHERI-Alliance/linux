@@ -112,6 +112,11 @@ static inline int is_compat32_task(void)
 	return IS_ENABLED(CONFIG_COMPAT32) && test_thread_flag(TIF_32BIT);
 }
 
+static inline bool is_compat64_task(void)
+{
+	return IS_ENABLED(CONFIG_COMPAT64) && test_thread_flag(TIF_64BIT_COMPAT);
+}
+
 static inline int is_compat_task(void)
 {
 	return (IS_ENABLED(CONFIG_COMPAT32) && test_thread_flag(TIF_32BIT)) ||
