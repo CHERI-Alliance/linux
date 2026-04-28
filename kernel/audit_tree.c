@@ -215,7 +215,7 @@ static __cacheline_aligned_in_smp DEFINE_SPINLOCK(hash_lock);
 static unsigned long inode_to_key(const struct inode *inode)
 {
 	/* Use address pointed to by connector->obj as the key */
-	return (uintptr_t)&inode->i_fsnotify_marks;
+	return __c_pa(&inode->i_fsnotify_marks);
 }
 
 static inline struct list_head *chunk_hash(unsigned long key)

@@ -8,6 +8,7 @@
 #include <linux/linkage.h>
 #include <linux/ratelimit_types.h>
 #include <linux/once_lite.h>
+#include <linux/cheri.h>
 
 struct console;
 
@@ -428,7 +429,7 @@ struct pi_entry {
 	 * directly in the message format (@fmt), not here.
 	 */
 	const char *subsys_fmt_prefix;
-} __packed;
+} __packed_if_not_cheri;
 
 #define __printk_index_emit(_fmt, _level, _subsys_fmt_prefix)		\
 	do {								\
