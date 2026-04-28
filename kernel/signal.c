@@ -3855,7 +3855,7 @@ SYSCALL_DEFINE4(rt_sigtimedwait, const sigset_t __user *, uthese,
 	ret = do_sigtimedwait(&these, &info, uts ? &ts : NULL);
 
 	if (ret > 0 && uinfo) {
-		if (copy_siginfo_to_user(uinfo, &info))
+		if (copy_siginfo_to_user_with_ptr(uinfo, &info))
 			ret = -EFAULT;
 	}
 
