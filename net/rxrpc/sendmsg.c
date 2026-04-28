@@ -526,9 +526,9 @@ static int rxrpc_sendmsg_cmsg(struct msghdr *msg, struct rxrpc_send_params *p)
 					return -EINVAL;
 				p->call.user_call_ID = *(u32 *)CMSG_DATA(cmsg);
 			} else {
-				if (len != sizeof(unsigned long))
+				if (len != sizeof(uintptr_t))
 					return -EINVAL;
-				p->call.user_call_ID = *(unsigned long *)
+				p->call.user_call_ID = *(uintptr_t *)
 					CMSG_DATA(cmsg);
 			}
 			got_user_ID = true;

@@ -339,7 +339,7 @@ EXPORT_SYMBOL(rxrpc_kernel_put_peer);
 struct rxrpc_call *rxrpc_kernel_begin_call(struct socket *sock,
 					   struct rxrpc_peer *peer,
 					   struct key *key,
-					   unsigned long user_call_ID,
+					   uintptr_t user_call_ID,
 					   s64 tx_total_len,
 					   u32 hard_timeout,
 					   gfp_t gfp,
@@ -354,7 +354,7 @@ struct rxrpc_call *rxrpc_kernel_begin_call(struct socket *sock,
 	struct rxrpc_call *call;
 	struct rxrpc_sock *rx = rxrpc_sk(sock->sk);
 
-	_enter(",,%x,%lx", key_serial(key), user_call_ID);
+	_enter(",,%x,%lx", key_serial(key), (unsigned long)user_call_ID);
 
 	if (WARN_ON_ONCE(peer->local != rx->local))
 		return ERR_PTR(-EIO);
@@ -397,7 +397,7 @@ EXPORT_SYMBOL(rxrpc_kernel_begin_call);
  * Dummy function used to stop the notifier talking to recvmsg().
  */
 static void rxrpc_dummy_notify_rx(struct sock *sk, struct rxrpc_call *rxcall,
-				  unsigned long call_user_ID)
+				  uintptr_t call_user_ID)
 {
 }
 
