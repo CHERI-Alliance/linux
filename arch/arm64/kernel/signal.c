@@ -1793,6 +1793,9 @@ int arch_validate_sigaction(int sig, const struct k_sigaction *act,
 	    !(cheri_perms_get(act->sa.sa_handler) & ARM_CAP_PERMISSION_EXECUTIVE))
 		return -EINVAL;
 
+	if (act && act->sa.sa_flags & SA_RESTORER)
+		return -EINVAL;
+
 	return 0;
 }
 #endif
