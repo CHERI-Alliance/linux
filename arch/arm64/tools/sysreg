@@ -1277,7 +1277,10 @@ UnsignedEnum	27:24	SME
 	0b0001	IMP
 	0b0010	SME2
 EndEnum
-Res0	23:20
+UnsignedEnum	23:20	CE
+	0b0000	NI
+	0b0001	IMP
+EndEnum
 UnsignedEnum	19:16	MPAM_frac
 	0b0000	MINOR_0
 	0b0001	MINOR_1
@@ -2518,7 +2521,7 @@ Res0	27:26
 Field	25:24	SMEN
 Res0	23:22
 Field	21:20	FPEN
-Res0	19:18
+Field	19:18	CEN
 Field	17:16	ZEN
 Res0	15:0
 EndSysreg

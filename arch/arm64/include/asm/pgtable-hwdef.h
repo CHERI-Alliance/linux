@@ -175,6 +175,8 @@
 #define PTE_PXN			(_AT(pteval_t, 1) << 53)	/* Privileged XN */
 #define PTE_UXN			(_AT(pteval_t, 1) << 54)	/* User XN */
 #define PTE_SWBITS_MASK		_AT(pteval_t, (BIT(63) | GENMASK(58, 55)))
+#define PTE_LOAD_CAPS		(_AT(pteval_t, 1) << 61)	/* LC[1:0], reading capability tags allowed (PBHA[2:3]) */
+#define PTE_STORE_CAPS		(_AT(pteval_t, 1) << 60)	/* SC, writing capability tags allowed (PBHA[1]) */
 
 #define PTE_ADDR_LOW		(((_AT(pteval_t, 1) << (50 - PAGE_SHIFT)) - 1) << PAGE_SHIFT)
 #ifdef CONFIG_ARM64_PA_BITS_52
@@ -270,6 +272,14 @@
 #define TCR_HD			TCR_EL1_HD
 #define TCR_HPD0		TCR_EL1_HPD0
 #define TCR_HPD1		TCR_EL1_HPD1
+#define TCR_HWU059		TCR_EL1_HWU059
+#define TCR_HWU060		TCR_EL1_HWU060
+#define TCR_HWU061		TCR_EL1_HWU061
+#define TCR_HWU062		TCR_EL1_HWU062
+#define TCR_HWU159		TCR_EL1_HWU159
+#define TCR_HWU160		TCR_EL1_HWU160
+#define TCR_HWU161		TCR_EL1_HWU161
+#define TCR_HWU162		TCR_EL1_HWU162
 #define TCR_TBID0		TCR_EL1_TBID0
 #define TCR_TBID1		TCR_EL1_TBID1
 #define TCR_E0PD0		TCR_EL1_E0PD0
