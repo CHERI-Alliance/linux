@@ -471,7 +471,14 @@ static int io_register_clock(struct io_ring_ctx *ctx,
  */
 struct io_ring_ctx_rings {
 	struct io_rings *rings;
-	struct io_uring_sqe *sq_sqes;
+	union {
+		struct io_uring_sqe *sq_sqes;
+		struct __c64_io_uring_sqe *sq_sqes_compat;
+	};
+	union {
+		struct io_uring_cqe *cq_cqes;
+		struct __c64_io_uring_cqe *cq_cqes_compat;
+	};
 
 	struct io_mapped_region sq_region;
 	struct io_mapped_region ring_region;
@@ -510,7 +517,7 @@ static int io_register_resize_rings(struct io_ring_ctx *ctx, void __user *arg)
 	/* limited to DEFER_TASKRUN for now */
 	if (!(ctx->flags & IORING_SETUP_DEFER_TASKRUN))
 		return -EINVAL;
-	if (copy_from_user_with_ptr(p, arg, sizeof(*p)))
+	if (__c64c_copy_from_user_with_ptr(io_is_compat(ctx), io_uring_params, p, arg))
 		return -EFAULT;
 	if (p->flags & ~RESIZE_FLAGS)
 		return -EINVAL;
@@ -547,7 +554,7 @@ static int io_register_resize_rings(struct io_ring_ctx *ctx, void __user *arg)
 	WRITE_ONCE(n.rings->sq_ring_entries, p->sq_entries);
 	WRITE_ONCE(n.rings->cq_ring_entries, p->cq_entries);
 
-	if (copy_to_user_with_ptr(arg, p, sizeof(*p))) {
+	if (__c64c_copy_to_user_with_ptr(io_is_compat(ctx), io_uring_params, arg, p)) {
 		io_register_free_rings(ctx, &n);
 		return -EFAULT;
 	}
@@ -564,6 +571,7 @@ static int io_register_resize_rings(struct io_ring_ctx *ctx, void __user *arg)
 		return ret;
 	}
 	n.sq_sqes = io_region_get_ptr(&n.sq_region);
+	n.cq_cqes = (struct io_uring_cqe *)((char *)n.rings + io_uring_cq_offset());
 
 	/*
 	 * If using SQPOLL, park the thread
@@ -589,6 +597,8 @@ static int io_register_resize_rings(struct io_ring_ctx *ctx, void __user *arg)
 	ctx->rings = NULL;
 	o.sq_sqes = ctx->sq_sqes;
 	ctx->sq_sqes = NULL;
+	o.cq_cqes = ctx->cq_cqes;
+	ctx->cq_cqes = NULL;
 
 	/*
 	 * Now copy SQ and CQ entries, if any. If either of the destination
@@ -603,7 +613,7 @@ static int io_register_resize_rings(struct io_ring_ctx *ctx, void __user *arg)
 		size_t sq_size;
 
 		index = i;
-		sq_size = sizeof(struct io_uring_sqe);
+		sq_size = __c64c_sizeof(io_in_compat64(ctx), io_uring_sqe);
 		src_mask = ctx->sq_entries - 1;
 		dst_mask = p->sq_entries - 1;
 		if (ctx->flags & IORING_SETUP_SQE128) {
@@ -612,7 +622,10 @@ static int io_register_resize_rings(struct io_ring_ctx *ctx, void __user *arg)
 			src_mask = (ctx->sq_entries << 1) - 1;
 			dst_mask = (p->sq_entries << 1) - 1;
 		}
-		memcpy(&n.sq_sqes[index & dst_mask], &o.sq_sqes[index & src_mask], sq_size);
+		if (io_in_compat64(ctx))
+			memcpy(&n.sq_sqes_compat[index & dst_mask], &o.sq_sqes_compat[index & src_mask], sq_size);
+		else
+			memcpy(&n.sq_sqes[index & dst_mask], &o.sq_sqes[index & src_mask], sq_size);
 	}
 	WRITE_ONCE(n.rings->sq.head, old_head);
 	WRITE_ONCE(n.rings->sq.tail, tail);
@@ -624,6 +637,7 @@ overflow:
 		/* restore old rings, and return -EOVERFLOW via cleanup path */
 		ctx->rings = o.rings;
 		ctx->sq_sqes = o.sq_sqes;
+		ctx->cq_cqes = o.cq_cqes;
 		to_free = &n;
 		ret = -EOVERFLOW;
 		goto out;
@@ -633,7 +647,7 @@ overflow:
 		size_t cq_size;
 
 		index = i;
-		cq_size = sizeof(struct io_uring_cqe);
+		cq_size = __c64c_sizeof(io_in_compat64(ctx), io_uring_cqe);
 		src_mask = ctx->cq_entries - 1;
 		dst_mask = p->cq_entries - 1;
 		if (ctx->flags & IORING_SETUP_CQE32) {
@@ -642,12 +656,15 @@ overflow:
 			src_mask = (ctx->cq_entries << 1) - 1;
 			dst_mask = (p->cq_entries << 1) - 1;
 		}
-		memcpy(&n.rings->cqes[index & dst_mask], &o.rings->cqes[index & src_mask], cq_size);
+		if (io_in_compat64(ctx))
+			memcpy(&n.cq_cqes_compat[index & dst_mask], &o.cq_cqes_compat[index & src_mask], cq_size);
+		else
+			memcpy(&n.cq_cqes[index & dst_mask], &o.cq_cqes[index & src_mask], cq_size);
 	}
 	WRITE_ONCE(n.rings->cq.head, old_head);
 	WRITE_ONCE(n.rings->cq.tail, tail);
 	/* invalidate cached cqe refill */
-	ctx->cqe_cached = ctx->cqe_sentinel = NULL;
+	ctx->cqe_cached = ctx->cqe_sentinel = 0;
 
 	WRITE_ONCE(n.rings->sq_dropped, READ_ONCE(o.rings->sq_dropped));
 	atomic_set(&n.rings->sq_flags, atomic_read(&o.rings->sq_flags));
@@ -655,7 +672,6 @@ overflow:
 	WRITE_ONCE(n.rings->cq_overflow, READ_ONCE(o.rings->cq_overflow));
 
 	/* all done, store old pointers and assign new ones */
-	ctx->cqes = (struct io_uring_cqe *)((char *)rings + io_uring_cq_offset());
 	if (!(ctx->flags & IORING_SETUP_NO_SQARRAY))
 		ctx->sq_array = (u32 *)((char *)n.rings + rl->sq_array_offset);
 
@@ -672,6 +688,7 @@ overflow:
 	rcu_assign_pointer(ctx->rings_rcu, n.rings);
 
 	ctx->sq_sqes = n.sq_sqes;
+	ctx->cq_cqes = n.cq_cqes;
 	swap_old(ctx, o, n, ring_region);
 	swap_old(ctx, o, n, sq_region);
 	to_free = &o;
@@ -692,19 +709,18 @@ out:
 
 static int io_register_mem_region(struct io_ring_ctx *ctx, void __user *uarg)
 {
-	struct io_uring_mem_region_reg __user *reg_uptr = uarg;
 	struct io_uring_mem_region_reg reg;
-	struct io_uring_region_desc __user *rd_uptr;
+	void __user *rd_uptr;
 	struct io_uring_region_desc rd;
 	struct io_mapped_region region = {};
 	int ret;
 
 	if (io_region_is_set(&ctx->param_region))
 		return -EBUSY;
-	if (copy_from_user_with_ptr(&reg, reg_uptr, sizeof(reg)))
+	if (__c64c_copy_from_user_with_ptr(io_in_compat64(ctx), io_uring_mem_region_reg, &reg, uarg))
 		return -EFAULT;
 	rd_uptr = u64_to_user_ptr(reg.region_uptr);
-	if (copy_from_user_with_ptr(&rd, rd_uptr, sizeof(rd)))
+	if (__c64c_copy_from_user_with_ptr(io_in_compat64(ctx), io_uring_region_desc, &rd, rd_uptr))
 		return -EFAULT;
 	if (memchr_inv(&reg.__resv, 0, sizeof(reg.__resv)))
 		return -EINVAL;
@@ -723,7 +739,7 @@ static int io_register_mem_region(struct io_ring_ctx *ctx, void __user *uarg)
 	ret = io_create_region(ctx, &region, &rd, IORING_MAP_OFF_PARAM_REGION);
 	if (ret)
 		return ret;
-	if (copy_to_user_with_ptr(rd_uptr, &rd, sizeof(rd))) {
+	if (__c64c_copy_to_user_with_ptr_safe(io_in_compat64(ctx), io_uring_region_desc, rd_uptr, &rd)) {
 		io_free_region(ctx->user, &region);
 		return -EFAULT;
 	}
@@ -970,11 +986,19 @@ static int __io_uring_register(struct io_ring_ctx *ctx, unsigned opcode,
 static int io_uring_register_send_msg_ring(void __user *arg, unsigned int nr_args)
 {
 	struct io_uring_sqe sqe;
+	struct __c64_io_uring_sqe csqe;
+	int ret;
+	bool c64 = in_compat64_syscall();
 
 	if (!arg || nr_args != 1)
 		return -EINVAL;
-	if (copy_from_user_with_ptr(&sqe, arg, sizeof(sqe)))
+	ret = likely(!c64) ? copy_from_user_with_ptr(&sqe, arg, sizeof(sqe)) :
+			     copy_from_user_no_ptr(&csqe, arg, sizeof(csqe));
+	if (ret)
 		return -EFAULT;
+	if (unlikely(c64))
+		convert_compat64_io_uring_sqe(NULL, &sqe, &csqe);
+
 	/* no flags supported */
 	if (sqe.flags)
 		return -EINVAL;

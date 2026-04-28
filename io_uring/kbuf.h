@@ -2,6 +2,7 @@
 #ifndef IOU_KBUF_H
 #define IOU_KBUF_H
 
+#include <linux/io_uring_types.h>
 #include <uapi/linux/io_uring.h>
 #include <linux/io_uring_types.h>
 
@@ -19,7 +20,11 @@ struct io_buffer_list {
 	 */
 	union {
 		struct list_head buf_list;
-		struct io_uring_buf_ring *buf_ring;
+		struct page **buf_pages;
+		union {
+			struct io_uring_buf_ring *buf_ring;
+			struct __c64_io_uring_buf_ring *buf_ring_compat64;
+		};
 	};
 	/* count of classic/legacy buffers in buffer list */
 	int nbufs;
