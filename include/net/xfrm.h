@@ -161,7 +161,7 @@ struct xfrm_dev_offload {
 	 * is held.
 	 */
 	struct net_device	*real_dev;
-	unsigned long		offload_handle;
+	uintptr_t		offload_handle;
 	u8			dir : 2;
 	u8			type : 2;
 	u8			flags : 2;
