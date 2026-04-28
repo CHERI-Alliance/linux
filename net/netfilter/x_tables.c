@@ -491,7 +491,7 @@ int xt_check_match(struct xt_mtchk_param *par,
 		pr_err_ratelimited("%s_tables: %s.%u match: invalid size %u (kernel) != (user) %u\n",
 				   xt_prefix[par->family], par->match->name,
 				   par->match->revision,
-				   XT_ALIGN(par->match->matchsize), size);
+				   (unsigned int)XT_ALIGN(par->match->matchsize), size);
 		return -EINVAL;
 	}
 	if (par->match->table != NULL &&
@@ -1017,7 +1017,7 @@ int xt_check_target(struct xt_tgchk_param *par,
 		pr_err_ratelimited("%s_tables: %s.%u target: invalid size %u (kernel) != (user) %u\n",
 				   xt_prefix[par->family], par->target->name,
 				   par->target->revision,
-				   XT_ALIGN(par->target->targetsize), size);
+				   (unsigned int)XT_ALIGN(par->target->targetsize), size);
 		return -EINVAL;
 	}
 	if (par->target->table != NULL &&
