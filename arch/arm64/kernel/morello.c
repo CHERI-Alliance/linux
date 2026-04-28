@@ -58,9 +58,20 @@ static void init_pc_pcc(struct pt_regs *regs, unsigned long pc)
 	}
 }
 
+static void init_csp(struct pt_regs *regs)
+{
+	/*
+	 * TODO [PCuABI] - Adjust the bounds/permissions properly
+	 * This should also be somehow hooked up for stack limit changes
+	 */
+	/* The actual value for CSP will be set during ret_to_user */
+	regs->csp = morello_root_cap;
+}
+
 void morello_thread_start(struct pt_regs *regs, unsigned long pc)
 {
 	init_pc_pcc(regs, pc);
+	init_csp(regs);
 }
 
 void morello_setup_signal_return(struct pt_regs *regs)
