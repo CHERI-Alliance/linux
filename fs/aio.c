@@ -2349,7 +2349,7 @@ SYSCALL_DEFINE6(io_pgetevents_time32,
 	if (timeout && unlikely(get_old_timespec32(&ts, timeout)))
 		return -EFAULT;
 
-	if (usig && copy_from_user(&ksig, usig, sizeof(ksig)))
+	if (usig && copy_from_user_with_ptr(&ksig, usig, sizeof(ksig)))
 		return -EFAULT;
 
 
