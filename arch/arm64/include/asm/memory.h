@@ -288,9 +288,9 @@ static inline bool kaslr_enabled(void) { return false; }
 	((__force __typeof__(addr))sign_extend64((__force u64)(addr), 55))
 
 #define untagged_addr(addr)	({					\
-	u64 __addr = (__force u64)(addr);					\
+	u64 __addr = (u64)(__force user_uintptr_t)(addr);		\
 	__addr &= __untagged_addr(__addr);				\
-	(__force __typeof__(addr))__addr;				\
+	__addr;								\
 })
 
 #if defined(CONFIG_KASAN_SW_TAGS) || defined(CONFIG_KASAN_HW_TAGS)

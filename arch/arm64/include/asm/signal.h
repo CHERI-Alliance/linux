@@ -2,6 +2,7 @@
 #ifndef __ARM64_ASM_SIGNAL_H
 #define __ARM64_ASM_SIGNAL_H
 
+#include <linux/user_ptr.h>
 #include <asm/memory.h>
 #include <uapi/asm/signal.h>
 #include <uapi/asm/siginfo.h>
@@ -18,7 +19,7 @@ static inline void __user *arch_untagged_si_addr(void __user *addr,
 	if (sig == SIGTRAP && si_code == TRAP_BRKPT)
 		return addr;
 
-	return untagged_addr(addr);
+	return as_user_ptr(untagged_addr(addr));
 }
 #define arch_untagged_si_addr arch_untagged_si_addr
 
