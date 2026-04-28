@@ -8,7 +8,6 @@
 #include <scsi/sg.h>
 #include "scsi_priv.h"
 
-#define uptr64(val) ((void __user *)(uintptr_t)(val))
 
 /*
  * Per-command BSG SCSI PDU stored in io_uring_cmd.pdu[32].
@@ -17,7 +16,7 @@
 struct scsi_bsg_uring_cmd_pdu {
 	struct bio *bio;		/* mapped user buffer, unmap in task work */
 	struct request *req;		/* block request, freed in task work */
-	u64 response_addr;		/* user space response buffer address */
+	__u64ptr response_addr;		/* user space response buffer address */
 };
 static_assert(sizeof(struct scsi_bsg_uring_cmd_pdu) <= sizeof_field(struct io_uring_cmd, pdu));
 
@@ -50,7 +49,7 @@ static void scsi_bsg_uring_task_cb(struct io_tw_req tw_req, io_tw_token_t tw)
 	}
 
 	if (sense_len_wr) {
-		if (copy_to_user(uptr64(pdu->response_addr), scmd->sense_buffer,
+		if (copy_to_user(u64_to_user_ptr(pdu->response_addr), scmd->sense_buffer,
 				 sense_len_wr))
 			ret = -EFAULT;
 	}
@@ -80,20 +79,20 @@ static int scsi_bsg_map_user_buffer(struct request *req,
 {
 	const struct bsg_uring_cmd *cmd = io_uring_sqe128_cmd(ioucmd->sqe, struct bsg_uring_cmd);
 	bool is_write = cmd->dout_xfer_len > 0;
-	u64 buf_addr = is_write ? cmd->dout_xferp : cmd->din_xferp;
+	__u64ptr buf_addr = is_write ? cmd->dout_xferp : cmd->din_xferp;
 	unsigned long buf_len = is_write ? cmd->dout_xfer_len : cmd->din_xfer_len;
 	struct iov_iter iter;
 	int ret;
 
 	if (ioucmd->flags & IORING_URING_CMD_FIXED) {
-		ret = io_uring_cmd_import_fixed(buf_addr, buf_len,
+		ret = io_uring_cmd_import_fixed(u64_to_user_ptr(buf_addr), buf_len,
 						is_write ? WRITE : READ,
 						&iter, ioucmd, issue_flags);
 		if (ret < 0)
 			return ret;
 		ret = blk_rq_map_user_iov(req->q, req, NULL, &iter, gfp_mask);
 	} else {
-		ret = blk_rq_map_user(req->q, req, NULL, uptr64(buf_addr),
+		ret = blk_rq_map_user(req->q, req, NULL, u64_to_user_ptr(buf_addr),
 				      buf_len, gfp_mask);
 	}
 
@@ -144,7 +143,7 @@ static int scsi_bsg_uring_cmd(struct request_queue *q, struct io_uring_cmd *iouc
 	scmd->cmd_len = cmd->request_len;
 	scmd->allowed = SG_DEFAULT_RETRIES;
 
-	if (copy_from_user(scmd->cmnd, uptr64(cmd->request), cmd->request_len)) {
+	if (copy_from_user(scmd->cmnd, u64_to_user_ptr(cmd->request), cmd->request_len)) {
 		ret = -EFAULT;
 		goto out_free_req;
 	}
@@ -212,7 +211,7 @@ static int scsi_bsg_sg_io_fn(struct request_queue *q, struct sg_io_v4 *hdr,
 	}
 
 	ret = -EFAULT;
-	if (copy_from_user(scmd->cmnd, uptr64(hdr->request), scmd->cmd_len))
+	if (copy_from_user(scmd->cmnd, u64_to_user_ptr(hdr->request), scmd->cmd_len))
 		goto out_put_request;
 	ret = -EPERM;
 	if (!scsi_cmd_allowed(scmd->cmnd, open_for_write))
@@ -220,10 +219,10 @@ static int scsi_bsg_sg_io_fn(struct request_queue *q, struct sg_io_v4 *hdr,
 
 	ret = 0;
 	if (hdr->dout_xfer_len) {
-		ret = blk_rq_map_user(rq->q, rq, NULL, uptr64(hdr->dout_xferp),
+		ret = blk_rq_map_user(rq->q, rq, NULL, u64_to_user_ptr(hdr->dout_xferp),
 				hdr->dout_xfer_len, GFP_KERNEL);
 	} else if (hdr->din_xfer_len) {
-		ret = blk_rq_map_user(rq->q, rq, NULL, uptr64(hdr->din_xferp),
+		ret = blk_rq_map_user(rq->q, rq, NULL, u64_to_user_ptr(hdr->din_xferp),
 				hdr->din_xfer_len, GFP_KERNEL);
 	}
 
@@ -250,7 +249,7 @@ static int scsi_bsg_sg_io_fn(struct request_queue *q, struct sg_io_v4 *hdr,
 		int len = min_t(unsigned int, hdr->max_response_len,
 				scmd->sense_len);
 
-		if (copy_to_user(uptr64(hdr->response), scmd->sense_buffer,
+		if (copy_to_user(u64_to_user_ptr(hdr->response), scmd->sense_buffer,
 				 len))
 			ret = -EFAULT;
 		else

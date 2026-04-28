@@ -315,15 +315,15 @@ static int qedi_init_uio(struct qedi_ctx *qedi)
 
 	uinfo = &udev->qedi_uinfo;
 
-	uinfo->mem[0].addr = (unsigned long)udev->uctrl;
+	uinfo->mem[0].addr = __c_pa(udev->uctrl);
 	uinfo->mem[0].size = sizeof(struct qedi_uio_ctrl);
 	uinfo->mem[0].memtype = UIO_MEM_LOGICAL;
 
-	uinfo->mem[1].addr = (unsigned long)udev->ll2_ring;
+	uinfo->mem[1].addr = __c_pa(udev->ll2_ring);
 	uinfo->mem[1].size = udev->ll2_ring_size;
 	uinfo->mem[1].memtype = UIO_MEM_LOGICAL;
 
-	uinfo->mem[2].addr = (unsigned long)udev->ll2_buf;
+	uinfo->mem[2].addr = __c_pa(udev->ll2_buf);
 	uinfo->mem[2].size = udev->ll2_buf_size;
 	uinfo->mem[2].memtype = UIO_MEM_LOGICAL;
 

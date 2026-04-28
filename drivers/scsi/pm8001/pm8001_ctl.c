@@ -750,7 +750,7 @@ static int pm8001_update_flash(struct pm8001_hba_info *pm8001_ha)
 			payload->wr_length = 1024*16;
 			payload->id = 0;
 			fwControl =
-			      (struct fw_control_info *)&payload->func_specific;
+			      (struct fw_control_info *)(void *)&payload->func_specific;
 			fwControl->len = IOCTL_BUF_SIZE;   /* IN */
 			fwControl->size = partitionSize + HEADER_LEN;/* IN */
 			fwControl->retcode = 0;/* OUT */

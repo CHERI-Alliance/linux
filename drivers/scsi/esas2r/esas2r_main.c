@@ -695,7 +695,7 @@ int esas2r_show_info(struct seq_file *m, struct Scsi_Host *sh)
 		if (t->buffered_target_state == TS_PRESENT) {
 			seq_printf(m, " %3d   %3d\n",
 				   ++dev_count,
-				   (u16)(uintptr_t)(t - a->targetdb));
+				   (u16)(__c_pa(t) - __c_pa(a->targetdb)));
 		}
 
 	if (dev_count == 0)
