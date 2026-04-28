@@ -265,7 +265,7 @@ static void remove_node(struct allowedips_node *node, struct mutex *lock)
 	parent_bit = (struct allowedips_node **)(node->parent_bit_packed & ~3UL);
 	*parent_bit = child;
 	parent = (void *)parent_bit -
-			offsetof(struct allowedips_node, bit[node->parent_bit_packed & 1]);
+			offsetof(struct allowedips_node, bit[__c_ua(node->parent_bit_packed) & 1]);
 	free_parent = !rcu_access_pointer(node->bit[0]) && !rcu_access_pointer(node->bit[1]) &&
 			(node->parent_bit_packed & 3) <= 1 && !rcu_access_pointer(parent->peer);
 	if (free_parent)
