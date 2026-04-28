@@ -999,7 +999,7 @@ xfs_ioc_scrubv_metadata(
 	}
 
 	if (copy_to_user(uvectors, vectors, vec_bytes) ||
-	    copy_to_user(uhead, &head, sizeof(head))) {
+	    copy_to_user_with_ptr(uhead, &head, sizeof(head))) {
 		error = -EFAULT;
 		goto out_free;
 	}

@@ -2481,7 +2481,7 @@ static int prctl_get_auxv(void __user *addr, unsigned long len)
 	struct mm_struct *mm = current->mm;
 	unsigned long size = min_t(unsigned long, sizeof(mm->saved_auxv), len);
 
-	if (size && copy_to_user(addr, mm->saved_auxv, size))
+	if (size && copy_to_user_with_ptr(addr, mm->saved_auxv, size))
 		return -EFAULT;
 	return sizeof(mm->saved_auxv);
 }

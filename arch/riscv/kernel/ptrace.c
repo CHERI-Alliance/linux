@@ -611,7 +611,7 @@ static int ptrace_peekcap(struct task_struct *child,
 		return -EIO;
 	ucap.tag = cheri_tag_get(ucap.val);
 
-	if (copy_to_user(data, &ucap, sizeof(ucap)))
+	if (copy_to_user_no_ptr(data, &ucap, sizeof(ucap)))
 		return -EFAULT;
 
 	return 0;
