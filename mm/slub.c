@@ -498,12 +498,12 @@ static DEFINE_PER_CPU(struct slub_flush_work, slub_flush);
  * random number.
  */
 static inline freeptr_t freelist_ptr_encode(const struct kmem_cache *s,
-					    void *ptr, unsigned long ptr_addr)
+					    void *ptr, uintptr_t ptr_addr)
 {
-	unsigned long encoded;
+	uintptr_t encoded;
 
 #ifdef CONFIG_SLAB_FREELIST_HARDENED
-	encoded = (unsigned long)ptr ^ s->random ^ swab(ptr_addr);
+	encoded = (uintptr_t)ptr ^ s->random ^ swab(ptr_addr);
 #else
 	encoded = (uintptr_t)ptr;
 #endif
@@ -511,7 +511,7 @@ static inline freeptr_t freelist_ptr_encode(const struct kmem_cache *s,
 }
 
 static inline void *freelist_ptr_decode(const struct kmem_cache *s,
-					freeptr_t ptr, unsigned long ptr_addr)
+					freeptr_t ptr, uintptr_t ptr_addr)
 {
 	void *decoded;
 
@@ -525,7 +525,7 @@ static inline void *freelist_ptr_decode(const struct kmem_cache *s,
 
 static inline void *get_freepointer(struct kmem_cache *s, void *object)
 {
-	unsigned long ptr_addr;
+	uintptr_t ptr_addr;
 	freeptr_t p;
 
 	object = kasan_reset_tag(object);
@@ -536,7 +536,7 @@ static inline void *get_freepointer(struct kmem_cache *s, void *object)
 
 static inline void set_freepointer(struct kmem_cache *s, void *object, void *fp)
 {
-	unsigned long freeptr_addr = (uintptr_t)object + s->offset;
+	uintptr_t freeptr_addr = (uintptr_t)object + s->offset;
 
 #ifdef CONFIG_SLAB_FREELIST_HARDENED
 	BUG_ON(object == fp); /* naive detection of double free or corruption */
@@ -810,7 +810,7 @@ static inline bool obj_exts_fit_within_slab_leftover(struct kmem_cache *s,
 
 static inline bool obj_exts_in_slab(struct kmem_cache *s, struct slab *slab)
 {
-	unsigned long obj_exts;
+	uintptr_t obj_exts;
 	unsigned long start;
 	unsigned long end;
 
@@ -818,7 +818,7 @@ static inline bool obj_exts_in_slab(struct kmem_cache *s, struct slab *slab)
 	if (!obj_exts)
 		return false;
 
-	start = (uintptr_t)slab_address(slab);
+	start = __c_pa(slab_address(slab));
 	end = start + slab_size(slab);
 	return (obj_exts >= start) && (obj_exts < end);
 }
@@ -2072,7 +2072,7 @@ static inline bool mark_failed_objexts_alloc(struct slab *slab)
 	return cmpxchg(&slab->obj_exts, 0, OBJEXTS_ALLOC_FAIL) == 0;
 }
 
-static inline void handle_failed_objexts_alloc(unsigned long obj_exts,
+static inline void handle_failed_objexts_alloc(uintptr_t obj_exts,
 			struct slabobj_ext *vec, unsigned int objects)
 {
 	/*
@@ -2092,7 +2092,7 @@ static inline void handle_failed_objexts_alloc(unsigned long obj_exts,
 
 static inline void mark_obj_codetag_empty(const void *obj) {}
 static inline bool mark_failed_objexts_alloc(struct slab *slab) { return false; }
-static inline void handle_failed_objexts_alloc(unsigned long obj_exts,
+static inline void handle_failed_objexts_alloc(uintptr_t obj_exts,
 			struct slabobj_ext *vec, unsigned int objects) {}
 
 #endif /* CONFIG_MEM_ALLOC_PROFILING_DEBUG */
@@ -2143,8 +2143,8 @@ int alloc_slab_obj_exts(struct slab *slab, struct kmem_cache *s,
 {
 	bool allow_spin = gfpflags_allow_spinning(gfp);
 	unsigned int objects = objs_per_slab(s, slab);
-	unsigned long new_exts;
-	unsigned long old_exts;
+	uintptr_t new_exts;
+	uintptr_t old_exts;
 	struct slabobj_ext *vec;
 	size_t sz;
 
@@ -2262,7 +2262,7 @@ static inline void free_slab_obj_exts(struct slab *slab, bool allow_spin)
 static void alloc_slab_obj_exts_early(struct kmem_cache *s, struct slab *slab)
 {
 	void *addr;
-	unsigned long obj_exts;
+	uintptr_t obj_exts;
 
 	/* Initialize stride early to avoid memory ordering issues */
 	slab_set_stride(slab, sizeof(struct slabobj_ext));
@@ -2352,7 +2352,7 @@ prepare_slab_obj_exts_hook(struct kmem_cache *s, struct slab *slab,
 static noinline void
 __alloc_tagging_slab_alloc_hook(struct kmem_cache *s, void *object, gfp_t flags)
 {
-	unsigned long obj_exts;
+	uintptr_t obj_exts;
 	struct slabobj_ext *obj_ext;
 	struct slab *slab;
 
@@ -2397,7 +2397,7 @@ __alloc_tagging_slab_free_hook(struct kmem_cache *s, struct slab *slab, void **p
 			       int objects)
 {
 	int i;
-	unsigned long obj_exts;
+	uintptr_t obj_exts;
 
 	/* slab->obj_exts might not be NULL if it was created for MEMCG accounting. */
 	if (s->flags & (SLAB_NO_OBJ_EXT | SLAB_NOLEAKTRACE))
@@ -2471,7 +2471,7 @@ static __fastpath_inline
 void memcg_slab_free_hook(struct kmem_cache *s, struct slab *slab, void **p,
 			  int objects)
 {
-	unsigned long obj_exts;
+	uintptr_t obj_exts;
 
 	if (!memcg_kmem_online())
 		return;
@@ -2488,7 +2488,7 @@ void memcg_slab_free_hook(struct kmem_cache *s, struct slab *slab, void **p,
 static __fastpath_inline
 bool memcg_slab_post_charge(void *p, gfp_t flags)
 {
-	unsigned long obj_exts;
+	uintptr_t obj_exts;
 	struct slabobj_ext *obj_ext;
 	struct kmem_cache *s;
 	struct page *page;
@@ -4865,7 +4865,7 @@ out:
 	 */
 	slab_post_alloc_hook(s, lru, gfpflags, 1, &object, init, orig_size);
 
-	return object;
+	return cheri_bounds_set_kernel(object, s->size);
 }
 
 void *kmem_cache_alloc_noprof(struct kmem_cache *s, gfp_t gfpflags)
@@ -7281,6 +7281,10 @@ int kmem_cache_alloc_bulk_noprof(struct kmem_cache *s, gfp_t flags, size_t size,
 	}
 
 out:
+	/* Apply bounds for CHERI. */
+	for (int k = 0; k < size; ++k)
+		p[k] = cheri_bounds_set_kernel(p[k], s->size);
+
 	/*
 	 * memcg and kmem_cache debug support and memory initialization.
 	 * Done outside of the IRQ disabled fastpath loop.
@@ -7935,7 +7939,7 @@ void __kmem_obj_info(struct kmem_obj_info *kpp, void *object, struct slab *slab)
 #ifdef CONFIG_SLUB_DEBUG
 	objp = fixup_red_left(s, objp);
 	trackp = get_track(s, objp, TRACK_ALLOC);
-	kpp->kp_ret = (void *)trackp->addr;
+	kpp->kp_ret = __c_fakep(trackp->addr);
 #ifdef CONFIG_STACKDEPOT
 	{
 		depot_stack_handle_t handle;
@@ -7946,7 +7950,7 @@ void __kmem_obj_info(struct kmem_obj_info *kpp, void *object, struct slab *slab)
 		if (handle) {
 			nr_entries = stack_depot_fetch(handle, &entries);
 			for (i = 0; i < KS_ADDRS_COUNT && i < nr_entries; i++)
-				kpp->kp_stack[i] = (void *)entries[i];
+				kpp->kp_stack[i] = __c_fakep(entries[i]);
 		}
 
 		trackp = get_track(s, objp, TRACK_FREE);
@@ -7954,7 +7958,7 @@ void __kmem_obj_info(struct kmem_obj_info *kpp, void *object, struct slab *slab)
 		if (handle) {
 			nr_entries = stack_depot_fetch(handle, &entries);
 			for (i = 0; i < KS_ADDRS_COUNT && i < nr_entries; i++)
-				kpp->kp_free_stack[i] = (void *)entries[i];
+				kpp->kp_free_stack[i] = __c_fakep(entries[i]);
 		}
 	}
 #endif

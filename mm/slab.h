@@ -16,6 +16,14 @@
  * Internal slab definitions
  */
 
+#ifdef CONFIG_CHERI_KERNEL
+extern bool __this_cpu_try_cmpxchg_freelist_undefined_for_cheri(void);
+#define this_cpu_try_cmpxchg_freelist(A, B, C) ({			\
+	(void)(A); (void)(B); (void)(C);				\
+	__this_cpu_try_cmpxchg_freelist_undefined_for_cheri();		\
+})
+typedef struct { void * freelist; unsigned long counter; }	freelist_full_t;
+#else /* CONFIG_CHERI_KERNEL */
 #ifdef CONFIG_64BIT
 # ifdef system_has_cmpxchg128
 # define system_has_freelist_aba()	system_has_cmpxchg128()
@@ -33,6 +41,7 @@ typedef u64 freelist_full_t;
 #if defined(system_has_freelist_aba) && !defined(CONFIG_HAVE_ALIGNED_STRUCT_PAGE)
 #undef system_has_freelist_aba
 #endif
+#endif /*CONFIG_CHERI_KERNEL */
 
 /*
  * Freelist pointer and counter to cmpxchg together, avoids the typical ABA
@@ -86,8 +95,11 @@ struct slab {
 
 	unsigned int __page_type;
 	atomic_t __page_refcount;
+#ifdef CONFIG_CHERI_KERNEL
+	unsigned short _pad;
+#endif
 #ifdef CONFIG_SLAB_OBJ_EXT
-	unsigned long obj_exts;
+	uintptr_t obj_exts;
 #endif
 };
 
@@ -131,7 +143,7 @@ static_assert(IS_ALIGNED(offsetof(struct slab, freelist), sizeof(struct freelist
  */
 static inline struct slab *page_slab(const struct page *page)
 {
-	unsigned long head;
+	uintptr_t head;
 
 	head = READ_ONCE(page->compound_head);
 	if (head & 1)
@@ -530,9 +542,9 @@ static inline void metadata_access_disable(void)
  * Instead, it updates kasan/kmsan depth so that accesses to slabobj_ext
  * won't be reported as access violations.
  */
-static inline unsigned long slab_obj_exts(struct slab *slab)
+static inline uintptr_t slab_obj_exts(struct slab *slab)
 {
-	unsigned long obj_exts = READ_ONCE(slab->obj_exts);
+	uintptr_t obj_exts = READ_ONCE(slab->obj_exts);
 
 #ifdef CONFIG_MEMCG
 	/*
@@ -547,13 +559,13 @@ static inline unsigned long slab_obj_exts(struct slab *slab)
 	return obj_exts & ~OBJEXTS_FLAGS_MASK;
 }
 
-static inline void get_slab_obj_exts(unsigned long obj_exts)
+static inline void get_slab_obj_exts(uintptr_t obj_exts)
 {
 	VM_WARN_ON_ONCE(!obj_exts);
 	metadata_access_enable();
 }
 
-static inline void put_slab_obj_exts(unsigned long obj_exts)
+static inline void put_slab_obj_exts(uintptr_t obj_exts)
 {
 	metadata_access_disable();
 }
@@ -589,7 +601,7 @@ static inline unsigned int slab_get_stride(struct slab *slab)
  * Must be called within a section covered by get/put_slab_obj_exts().
  */
 static inline struct slabobj_ext *slab_obj_ext(struct slab *slab,
-					       unsigned long obj_exts,
+					       uintptr_t obj_exts,
 					       unsigned int index)
 {
 	struct slabobj_ext *obj_ext;
@@ -606,13 +618,13 @@ int alloc_slab_obj_exts(struct slab *slab, struct kmem_cache *s,
 
 #else /* CONFIG_SLAB_OBJ_EXT */
 
-static inline unsigned long slab_obj_exts(struct slab *slab)
+static inline uintptr_t slab_obj_exts(struct slab *slab)
 {
 	return 0;
 }
 
 static inline struct slabobj_ext *slab_obj_ext(struct slab *slab,
-					       unsigned long obj_exts,
+					       uintptr_t obj_exts,
 					       unsigned int index)
 {
 	return NULL;
@@ -634,7 +646,7 @@ static inline enum node_stat_item cache_vmstat_idx(struct kmem_cache *s)
 bool __memcg_slab_post_alloc_hook(struct kmem_cache *s, struct list_lru *lru,
 				  gfp_t flags, size_t size, void **p);
 void __memcg_slab_free_hook(struct kmem_cache *s, struct slab *slab,
-			    void **p, int objects, unsigned long obj_exts);
+			    void **p, int objects, uintptr_t obj_exts);
 #endif
 
 void kvfree_rcu_cb(struct rcu_head *head);

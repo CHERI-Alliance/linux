@@ -2622,7 +2622,7 @@ struct mem_cgroup *mem_cgroup_from_obj_slab(struct slab *slab, void *p)
 	 * Memcg membership data for each individual object is saved in
 	 * slab->obj_exts.
 	 */
-	unsigned long obj_exts;
+	uintptr_t obj_exts;
 	struct slabobj_ext *obj_ext;
 	unsigned int off;
 
@@ -3225,7 +3225,7 @@ bool __memcg_slab_post_alloc_hook(struct kmem_cache *s, struct list_lru *lru,
 	}
 
 	for (i = 0; i < size; i++) {
-		unsigned long obj_exts;
+		uintptr_t obj_exts;
 		struct slabobj_ext *obj_ext;
 
 		slab = virt_to_slab(p[i]);
@@ -3263,7 +3263,7 @@ bool __memcg_slab_post_alloc_hook(struct kmem_cache *s, struct list_lru *lru,
 }
 
 void __memcg_slab_free_hook(struct kmem_cache *s, struct slab *slab,
-			    void **p, int objects, unsigned long obj_exts)
+			    void **p, int objects, uintptr_t obj_exts)
 {
 	size_t obj_size = obj_full_size(s);
 

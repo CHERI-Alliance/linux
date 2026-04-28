@@ -1464,7 +1464,7 @@ struct slabobj_ext {
 #ifdef CONFIG_MEM_ALLOC_PROFILING
 	union codetag_ref ref;
 #endif
-} __aligned(8);
+} __aligned(8) __cheri_pointer_align;
 
 static inline struct lruvec *parent_lruvec(struct lruvec *lruvec)
 {
