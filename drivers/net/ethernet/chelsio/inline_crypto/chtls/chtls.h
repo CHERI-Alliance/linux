@@ -199,8 +199,11 @@ struct key_map {
 	unsigned int start;
 	unsigned int available;
 	unsigned int size;
+#ifdef CONFIG_CHERI_KERNEL
+	unsigned int pad;
+#endif
 	spinlock_t lock; /* lock for key id request from map */
-} __packed;
+} __packed __cheri_pointer_align;
 
 struct tls_scmd {
 	u32 seqno_numivs;

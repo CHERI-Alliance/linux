@@ -909,7 +909,7 @@ xirc2ps_config(struct pcmcia_device * link)
 
     /* give some infos about the hardware */
     netdev_info(dev, "%s: port %#3lx, irq %d, hwaddr %pM\n",
-		local->manf_str, (u_long)dev->base_addr, (int)dev->irq,
+		local->manf_str, (unsigned long)dev->base_addr, (int)dev->irq,
 		dev->dev_addr);
 
     return 0;

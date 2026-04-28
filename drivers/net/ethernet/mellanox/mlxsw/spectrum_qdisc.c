@@ -2023,7 +2023,7 @@ static int mlxsw_sp_qevent_mall_replace(struct mlxsw_sp *mlxsw_sp,
 	mall_entry = kzalloc_obj(*mall_entry);
 	if (!mall_entry)
 		return -ENOMEM;
-	mall_entry->cookie = f->cookie;
+	mall_entry->cookie = __c_ua(f->cookie);
 
 	if (act->id == FLOW_ACTION_MIRRED) {
 		mall_entry->type = MLXSW_SP_MALL_ACTION_TYPE_MIRROR;
@@ -2056,7 +2056,7 @@ static void mlxsw_sp_qevent_mall_destroy(struct mlxsw_sp_qevent_block *qevent_bl
 {
 	struct mlxsw_sp_mall_entry *mall_entry;
 
-	mall_entry = mlxsw_sp_qevent_mall_entry_find(qevent_block, f->cookie);
+	mall_entry = mlxsw_sp_qevent_mall_entry_find(qevent_block, __c_ua(f->cookie));
 	if (!mall_entry)
 		return;
 

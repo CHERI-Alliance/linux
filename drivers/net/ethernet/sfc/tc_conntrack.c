@@ -368,7 +368,7 @@ static int efx_tc_ct_replace(struct efx_tc_ct_zone *ct_zone,
 	conn = kzalloc_obj(*conn, GFP_USER);
 	if (!conn)
 		return -ENOMEM;
-	conn->cookie = tc->cookie;
+	conn->cookie = __c_ua(tc->cookie);
 	old = rhashtable_lookup_get_insert_fast(&efx->tc->ct_ht,
 						&conn->linkage,
 						efx_tc_ct_ht_params);

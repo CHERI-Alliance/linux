@@ -1474,7 +1474,7 @@ static bool e1000_check_64k_bound(struct e1000_adapter *adapter, void *start,
 				  unsigned long len)
 {
 	struct e1000_hw *hw = &adapter->hw;
-	uintptr_t begin = (uintptr_t)start;
+	unsigned long begin = __c_pa(start);
 	unsigned long end = begin + len;
 
 	/* First rev 82545 and 82546 need to not allow any memory
@@ -4635,7 +4635,7 @@ static void e1000_alloc_rx_buffers(struct e1000_adapter *adapter,
 
 		/* Fix for errata 23, can't cross 64kB boundary */
 		if (!e1000_check_64k_bound(adapter,
-					(void *)(unsigned long)buffer_info->dma,
+					__c_fakep(buffer_info->dma),
 					adapter->rx_buffer_len)) {
 			e_err(rx_err, "dma align check failed: %u bytes at "
 			      "%p\n", adapter->rx_buffer_len,

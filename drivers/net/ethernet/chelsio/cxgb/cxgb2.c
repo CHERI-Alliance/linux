@@ -1028,8 +1028,8 @@ static int init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 		netif_carrier_off(netdev);
 		netdev->irq = pdev->irq;
 		netdev->if_port = i;
-		netdev->mem_start = mmio_start;
-		netdev->mem_end = mmio_start + mmio_len - 1;
+		netdev->mem_start = __c_fakeu(mmio_start);
+		netdev->mem_end = __c_fakeu(mmio_start + mmio_len - 1);
 		netdev->ml_priv = adapter;
 		netdev->hw_features |= NETIF_F_SG | NETIF_F_IP_CSUM |
 			NETIF_F_RXCSUM;

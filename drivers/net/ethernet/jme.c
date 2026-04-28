@@ -569,8 +569,8 @@ jme_setup_tx_resources(struct jme_adapter *jme)
 	/*
 	 * 16 Bytes align
 	 */
-	txring->desc		= (void *)ALIGN((uintptr_t)(txring->alloc),
-						RING_DESC_ALIGN);
+	txring->desc		= (void *)PTR_ALIGN(txring->alloc,
+						    RING_DESC_ALIGN);
 	txring->dma		= ALIGN(txring->dmaalloc, RING_DESC_ALIGN);
 	txring->next_to_use	= 0;
 	atomic_set(&txring->next_to_clean, 0);
@@ -813,8 +813,8 @@ jme_setup_rx_resources(struct jme_adapter *jme)
 	/*
 	 * 16 Bytes align
 	 */
-	rxring->desc		= (void *)ALIGN((uintptr_t)(rxring->alloc),
-						RING_DESC_ALIGN);
+	rxring->desc		= (void *)PTR_ALIGN(rxring->alloc,
+						    RING_DESC_ALIGN);
 	rxring->dma		= ALIGN(rxring->dmaalloc, RING_DESC_ALIGN);
 	rxring->next_to_use	= 0;
 	atomic_set(&rxring->next_to_clean, 0);

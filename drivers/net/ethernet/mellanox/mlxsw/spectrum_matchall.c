@@ -246,7 +246,7 @@ int mlxsw_sp_mall_replace(struct mlxsw_sp *mlxsw_sp,
 	mall_entry = kzalloc_obj(*mall_entry);
 	if (!mall_entry)
 		return -ENOMEM;
-	mall_entry->cookie = f->cookie;
+	mall_entry->cookie = __c_ua(f->cookie);
 	mall_entry->priority = f->common.prio;
 	mall_entry->ingress = mlxsw_sp_flow_block_is_ingress_bound(block);
 
@@ -313,7 +313,7 @@ void mlxsw_sp_mall_destroy(struct mlxsw_sp_flow_block *block,
 	struct mlxsw_sp_flow_block_binding *binding;
 	struct mlxsw_sp_mall_entry *mall_entry;
 
-	mall_entry = mlxsw_sp_mall_entry_find(block, f->cookie);
+	mall_entry = mlxsw_sp_mall_entry_find(block, __c_ua(f->cookie));
 	if (!mall_entry) {
 		NL_SET_ERR_MSG(f->common.extack, "Entry not found");
 		return;

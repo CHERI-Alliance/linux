@@ -492,7 +492,7 @@ mtk_flow_offload_replace(struct mtk_eth *eth, struct flow_cls_offload *f,
 	if (!entry)
 		return -ENOMEM;
 
-	entry->cookie = f->cookie;
+	entry->cookie = __c_ua(f->cookie);
 	memcpy(&entry->data, &foe, sizeof(entry->data));
 	entry->wed_index = wed_index;
 	entry->ppe_index = ppe_index;

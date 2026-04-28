@@ -603,7 +603,7 @@ static int tc_add_flow(struct stmmac_priv *priv,
 	if (!entry->in_use)
 		return -EINVAL;
 
-	entry->cookie = cls->cookie;
+	entry->cookie = __c_ua(cls->cookie);
 	return 0;
 }
 
@@ -692,7 +692,7 @@ static int tc_add_vlan_flow(struct stmmac_priv *priv,
 		stmmac_rx_queue_prio(priv, priv->hw, prio, tc);
 
 		entry->in_use = true;
-		entry->cookie = cls->cookie;
+		entry->cookie = __c_ua(cls->cookie);
 		entry->tc = tc;
 		entry->type = STMMAC_RFS_T_VLAN;
 		priv->rfs_entries_cnt[STMMAC_RFS_T_VLAN]++;
@@ -783,7 +783,7 @@ static int tc_add_ethtype_flow(struct stmmac_priv *priv,
 		}
 
 		entry->in_use = true;
-		entry->cookie = cls->cookie;
+		entry->cookie = __c_ua(cls->cookie);
 		entry->tc = tc;
 		entry->etype = etype;
 

@@ -2240,7 +2240,7 @@ int bnx2x_vf_tpa_update(struct bnx2x *bp, struct bnx2x_virtf *vf,
 			struct vfpf_tpa_tlv *tlv,
 			struct bnx2x_queue_update_tpa_params *params)
 {
-	aligned_u64 *sge_addr = tlv->tpa_client_info.sge_addr;
+	u64 *sge_addr = tlv->tpa_client_info.sge_addr;
 	struct bnx2x_queue_state_params qstate;
 	int qid, rc = 0;
 

@@ -278,7 +278,7 @@ ice_fdir_remap_entries(struct ice_fd_hw_prof *prof, int tun, int idx)
 		int i;
 
 		for (i = idx; i < (prof->cnt - 1); i++) {
-			u64 old_entry_h;
+			uintptr_t old_entry_h;
 
 			old_entry_h = prof->entry_h[i + 1][tun];
 			prof->entry_h[i][tun] = old_entry_h;
@@ -452,7 +452,7 @@ void ice_fdir_replay_flows(struct ice_hw *hw)
 					  false, &hw_prof);
 			for (j = 0; j < prof->cnt; j++) {
 				enum ice_flow_priority prio;
-				u64 entry_h = 0;
+				uintptr_t entry_h = 0;
 				int err;
 
 				prio = ICE_FLOW_PRIO_NORMAL;
@@ -638,8 +638,8 @@ ice_fdir_set_hw_fltr_rule(struct ice_pf *pf, struct ice_flow_seg_info *seg,
 	struct ice_flow_prof *prof = NULL;
 	struct ice_fd_hw_prof *hw_prof;
 	struct ice_hw *hw = &pf->hw;
-	u64 entry1_h = 0;
-	u64 entry2_h = 0;
+	uintptr_t entry1_h = 0;
+	uintptr_t entry2_h = 0;
 	bool del_last;
 	int err;
 	int idx;

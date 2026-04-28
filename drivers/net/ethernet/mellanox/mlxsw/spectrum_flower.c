@@ -756,7 +756,7 @@ int mlxsw_sp_flower_replace(struct mlxsw_sp *mlxsw_sp,
 	if (IS_ERR(ruleset))
 		return PTR_ERR(ruleset);
 
-	rule = mlxsw_sp_acl_rule_create(mlxsw_sp, ruleset, f->cookie, NULL,
+	rule = mlxsw_sp_acl_rule_create(mlxsw_sp, ruleset, __c_ua(f->cookie), NULL,
 					f->common.extack);
 	if (IS_ERR(rule)) {
 		err = PTR_ERR(rule);
@@ -801,7 +801,7 @@ void mlxsw_sp_flower_destroy(struct mlxsw_sp *mlxsw_sp,
 	if (IS_ERR(ruleset))
 		return;
 
-	rule = mlxsw_sp_acl_rule_lookup(mlxsw_sp, ruleset, f->cookie);
+	rule = mlxsw_sp_acl_rule_lookup(mlxsw_sp, ruleset, __c_ua(f->cookie));
 	if (rule) {
 		mlxsw_sp_acl_rule_del(mlxsw_sp, rule);
 		mlxsw_sp_acl_rule_destroy(mlxsw_sp, rule);
@@ -829,7 +829,7 @@ int mlxsw_sp_flower_stats(struct mlxsw_sp *mlxsw_sp,
 	if (WARN_ON(IS_ERR(ruleset)))
 		return -EINVAL;
 
-	rule = mlxsw_sp_acl_rule_lookup(mlxsw_sp, ruleset, f->cookie);
+	rule = mlxsw_sp_acl_rule_lookup(mlxsw_sp, ruleset, __c_ua(f->cookie));
 	if (!rule) {
 		err = -EINVAL;
 		goto err_rule_get_stats;

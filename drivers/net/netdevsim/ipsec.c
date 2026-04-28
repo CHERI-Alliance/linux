@@ -193,7 +193,7 @@ static int nsim_ipsec_add_sa(struct net_device *dev,
 	/* the XFRM stack doesn't like offload_handle == 0,
 	 * so add a bitflag in case our array index is 0
 	 */
-	xs->xso.offload_handle = sa_idx | NSIM_IPSEC_VALID;
+	xs->xso.offload_handle = __c_fakeu(sa_idx | NSIM_IPSEC_VALID);
 	ipsec->count++;
 
 	return 0;

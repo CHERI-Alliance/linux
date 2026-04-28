@@ -8846,7 +8846,7 @@ static int i40e_configure_clsflower(struct i40e_vsi *vsi,
 	if (!filter)
 		return -ENOMEM;
 
-	filter->cookie = cls_flower->cookie;
+	filter->cookie = __c_ua(cls_flower->cookie);
 
 	err = i40e_parse_cls_flower(vsi, cls_flower, filter);
 	if (err < 0)
@@ -8888,14 +8888,14 @@ err:
  *
  **/
 static struct i40e_cloud_filter *i40e_find_cloud_filter(struct i40e_vsi *vsi,
-							unsigned long *cookie)
+							unsigned long cookie)
 {
 	struct i40e_cloud_filter *filter = NULL;
 	struct hlist_node *node2;
 
 	hlist_for_each_entry_safe(filter, node2,
 				  &vsi->back->cloud_filter_list, cloud_node)
-		if (!memcmp(cookie, &filter->cookie, sizeof(filter->cookie)))
+		if (cookie == filter->cookie)
 			return filter;
 	return NULL;
 }
@@ -8913,7 +8913,7 @@ static int i40e_delete_clsflower(struct i40e_vsi *vsi,
 	struct i40e_pf *pf = vsi->back;
 	int err = 0;
 
-	filter = i40e_find_cloud_filter(vsi, &cls_flower->cookie);
+	filter = i40e_find_cloud_filter(vsi, __c_ua(cls_flower->cookie));
 
 	if (!filter)
 		return -EINVAL;
