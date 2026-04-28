@@ -109,8 +109,8 @@ devm_kasprintf(struct device *dev, gfp_t gfp, const char *fmt, ...);
 
 void __percpu *__devm_alloc_percpu(struct device *dev, size_t size, size_t align);
 
-unsigned long devm_get_free_pages(struct device *dev, gfp_t gfp_mask, unsigned int order);
-void devm_free_pages(struct device *dev, unsigned long addr);
+uintptr_t devm_get_free_pages(struct device *dev, gfp_t gfp_mask, unsigned int order);
+void devm_free_pages(struct device *dev, uintptr_t addr);
 
 #ifdef CONFIG_HAS_IOMEM
 
