@@ -232,6 +232,32 @@ void *memdup_user(const void __user *src, size_t len)
 EXPORT_SYMBOL(memdup_user);
 
 /**
+ * memdup_user - duplicate memory region from user space with pointers
+ *
+ * @src: source address in user space
+ * @len: number of bytes to copy
+ *
+ * Return: an ERR_PTR() on failure.  Result is physically
+ * contiguous, to be freed by kfree().
+ */
+void *memdup_user_with_ptr(const void __user *src, size_t len)
+{
+	void *p;
+
+	p = kmem_buckets_alloc_track_caller(user_buckets, len, GFP_USER | __GFP_NOWARN);
+	if (!p)
+		return ERR_PTR(-ENOMEM);
+
+	if (copy_from_user_with_ptr(p, src, len)) {
+		kfree(p);
+		return ERR_PTR(-EFAULT);
+	}
+
+	return p;
+}
+EXPORT_SYMBOL(memdup_user_with_ptr);
+
+/**
  * vmemdup_user - duplicate memory region from user space
  *
  * @src: source address in user space
@@ -256,6 +282,32 @@ void *vmemdup_user(const void __user *src, size_t len)
 	return p;
 }
 EXPORT_SYMBOL(vmemdup_user);
+
+/**
+ * vmemdup_user - duplicate memory region from user space with pointers
+ *
+ * @src: source address in user space
+ * @len: number of bytes to copy
+ *
+ * Return: an ERR_PTR() on failure.  Result may be not
+ * physically contiguous.  Use kvfree() to free.
+ */
+void *vmemdup_user_with_ptr(const void __user *src, size_t len)
+{
+	void *p;
+
+	p = kmem_buckets_valloc(user_buckets, len, GFP_USER);
+	if (!p)
+		return ERR_PTR(-ENOMEM);
+
+	if (copy_from_user_with_ptr(p, src, len)) {
+		kvfree(p);
+		return ERR_PTR(-EFAULT);
+	}
+
+	return p;
+}
+EXPORT_SYMBOL(vmemdup_user_with_ptr);
 
 /**
  * strndup_user - duplicate an existing string from user space
