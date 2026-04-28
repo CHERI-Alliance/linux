@@ -32,9 +32,9 @@
  */
 SYM_FUNC_START(__arch_chacha20_blocks_nostack)
 
-#define output		a0
-#define key		a1
-#define counter		a2
+#define output		CREG(a0)
+#define key		CREG(a1)
+#define counter		CREG(a2)
 #define nblocks		a3
 #define i		a4
 #define state0		s0
@@ -82,18 +82,18 @@ SYM_FUNC_START(__arch_chacha20_blocks_nostack)
 	 * is spilled onto the stack.
 	 */
 	addi		sp, sp, -12*SZREG
-	REG_S		s0,         (sp)
-	REG_S		s1,    SZREG(sp)
-	REG_S		s2,  2*SZREG(sp)
-	REG_S		s3,  3*SZREG(sp)
-	REG_S		s4,  4*SZREG(sp)
-	REG_S		s5,  5*SZREG(sp)
-	REG_S		s6,  6*SZREG(sp)
-	REG_S		s7,  7*SZREG(sp)
-	REG_S		s8,  8*SZREG(sp)
-	REG_S		s9,  9*SZREG(sp)
-	REG_S		s10, 10*SZREG(sp)
-	REG_S		s11, 11*SZREG(sp)
+	REG_S		s0,         (CREG(sp))
+	REG_S		s1,    SZREG(CREG(sp))
+	REG_S		s2,  2*SZREG(CREG(sp))
+	REG_S		s3,  3*SZREG(CREG(sp))
+	REG_S		s4,  4*SZREG(CREG(sp))
+	REG_S		s5,  5*SZREG(CREG(sp))
+	REG_S		s6,  6*SZREG(CREG(sp))
+	REG_S		s7,  7*SZREG(CREG(sp))
+	REG_S		s8,  8*SZREG(CREG(sp))
+	REG_S		s9,  9*SZREG(CREG(sp))
+	REG_S		s10, 10*SZREG(CREG(sp))
+	REG_S		s11, 11*SZREG(CREG(sp))
 
 	ld		cnt, (counter)
 
@@ -214,7 +214,7 @@ SYM_FUNC_START(__arch_chacha20_blocks_nostack)
 	addi		cnt, cnt, 1
 
 	/* output += 64 */
-	addi		output, output, 64
+	CINSN(addi)	output, output, 64
 	/* --nblocks */
 	addi		nblocks, nblocks, -1
 	bnez		nblocks, .Lblock
@@ -232,18 +232,18 @@ SYM_FUNC_START(__arch_chacha20_blocks_nostack)
 	mv		state14, zero
 	mv		state15, zero
 
-	REG_L		s0,         (sp)
-	REG_L		s1,    SZREG(sp)
-	REG_L		s2,  2*SZREG(sp)
-	REG_L		s3,  3*SZREG(sp)
-	REG_L		s4,  4*SZREG(sp)
-	REG_L		s5,  5*SZREG(sp)
-	REG_L		s6,  6*SZREG(sp)
-	REG_L		s7,  7*SZREG(sp)
-	REG_L		s8,  8*SZREG(sp)
-	REG_L		s9,  9*SZREG(sp)
-	REG_L		s10, 10*SZREG(sp)
-	REG_L		s11, 11*SZREG(sp)
+	REG_L		s0,         (CREG(sp))
+	REG_L		s1,    SZREG(CREG(sp))
+	REG_L		s2,  2*SZREG(CREG(sp))
+	REG_L		s3,  3*SZREG(CREG(sp))
+	REG_L		s4,  4*SZREG(CREG(sp))
+	REG_L		s5,  5*SZREG(CREG(sp))
+	REG_L		s6,  6*SZREG(CREG(sp))
+	REG_L		s7,  7*SZREG(CREG(sp))
+	REG_L		s8,  8*SZREG(CREG(sp))
+	REG_L		s9,  9*SZREG(CREG(sp))
+	REG_L		s10, 10*SZREG(CREG(sp))
+	REG_L		s11, 11*SZREG(CREG(sp))
 	addi		sp, sp, 12*SZREG
 
 	ret
