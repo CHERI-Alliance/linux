@@ -680,7 +680,7 @@ const struct bpf_func_proto bpf_copy_from_user_proto = {
 };
 
 BPF_CALL_5(bpf_copy_from_user_task, void *, dst, u32, size,
-	   const void __user *, user_ptr, struct task_struct *, tsk, u64, flags)
+	   ptraddr_t, addr, struct task_struct *, tsk, u64, flags)
 {
 	int ret;
 
@@ -691,8 +691,7 @@ BPF_CALL_5(bpf_copy_from_user_task, void *, dst, u32, size,
 	if (unlikely(!size))
 		return 0;
 
-	/* TODO [PCuABI] - capability checks for uaccess */
-	ret = access_process_vm(tsk, user_ptr_addr(user_ptr), dst, size, 0);
+	ret = access_process_vm(tsk, addr, dst, size, 0);
 	if (ret == size)
 		return 0;
 
