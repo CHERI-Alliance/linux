@@ -1052,10 +1052,10 @@ static bool chk_code_allowed(u16 code_to_probe)
 	return codes[code_to_probe];
 }
 
-static bool bpf_check_basics_ok(const struct sock_filter *filter,
+static bool bpf_check_basics_ok(ptraddr_t filter_addr,
 				unsigned int flen)
 {
-	if (filter == NULL)
+	if (filter_addr == 0)
 		return false;
 	if (flen == 0 || flen > BPF_MAXINSNS)
 		return false;
@@ -1389,7 +1389,7 @@ int bpf_prog_create(struct bpf_prog **pfp, struct sock_fprog_kern *fprog)
 	struct bpf_prog *fp;
 
 	/* Make sure new filter is there and in the right amounts. */
-	if (!bpf_check_basics_ok(fprog->filter, fprog->len))
+	if (!bpf_check_basics_ok((ptraddr_t)fprog->filter, fprog->len))
 		return -EINVAL;
 
 	fp = bpf_prog_alloc(bpf_prog_size(fprog->len), 0);
@@ -1436,7 +1436,7 @@ int bpf_prog_create_from_user(struct bpf_prog **pfp, struct sock_fprog *fprog,
 	int err;
 
 	/* Make sure new filter is there and in the right amounts. */
-	if (!bpf_check_basics_ok(fprog->filter, fprog->len))
+	if (!bpf_check_basics_ok(user_ptr_addr(fprog->filter), fprog->len))
 		return -EINVAL;
 
 	fp = bpf_prog_alloc(bpf_prog_size(fprog->len), 0);
@@ -1514,7 +1514,7 @@ struct bpf_prog *__get_filter(struct sock_fprog *fprog, struct sock *sk)
 		return ERR_PTR(-EPERM);
 
 	/* Make sure new filter is there and in the right amounts. */
-	if (!bpf_check_basics_ok(fprog->filter, fprog->len))
+	if (!bpf_check_basics_ok(user_ptr_addr(fprog->filter), fprog->len))
 		return ERR_PTR(-EINVAL);
 
 	prog = bpf_prog_alloc(bpf_prog_size(fprog->len), 0);
