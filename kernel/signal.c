@@ -4297,14 +4297,25 @@ void __weak sigaction_compat_abi(struct k_sigaction *act,
 {
 }
 
+int __weak arch_validate_sigaction(int sig, const struct k_sigaction *act,
+				   const struct k_sigaction *oact)
+{
+	return 0;
+}
+
 int do_sigaction(int sig, struct k_sigaction *act, struct k_sigaction *oact)
 {
 	struct task_struct *p = current, *t;
 	struct k_sigaction *k;
 	sigset_t mask;
+	int ret;
 
 	if (!valid_signal(sig) || sig < 1 || (act && sig_kernel_only(sig)))
 		return -EINVAL;
+
+	ret = arch_validate_sigaction(sig, act, oact);
+	if (ret)
+		return ret;
 
 	k = &p->sighand->action[sig-1];
 

@@ -776,4 +776,6 @@ static inline unsigned long rlimit_max(unsigned int limit)
 	return task_rlimit_max(current, limit);
 }
 
+extern int arch_validate_sigaction(int sig, const struct k_sigaction *act,
+				   const struct k_sigaction *oact);
 #endif /* _LINUX_SCHED_SIGNAL_H */
