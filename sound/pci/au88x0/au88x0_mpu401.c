@@ -32,7 +32,7 @@ static int snd_vortex_midi(vortex_t *vortex)
 	struct snd_rawmidi *rmidi;
 	int temp, mode;
 	struct snd_mpu401 *mpu;
-	unsigned long port;
+	uintptr_t port;
 
 #ifdef VORTEX_MPU401_LEGACY
 	/* EnableHardCodedMPU401Port() */

@@ -97,6 +97,9 @@ static struct platform_device *device;
 
 #define DREG 0
 #define SREG 1
+
+/* FIXCHERI: Rename our ASM macro? */
+#undef CREG
 #define CREG 2
 
 //

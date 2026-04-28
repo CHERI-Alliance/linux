@@ -1650,7 +1650,7 @@ static int snd_korg1212_control_phase_put(struct snd_kcontrol *kcontrol,
 
 	korg1212->volumePhase[i] = !!u->value.integer.value[0];
 
-	val = korg1212->sharedBufferPtr->volumeData[kcontrol->private_value];
+	val = korg1212->sharedBufferPtr->volumeData[__c_ua(kcontrol->private_value)];
 
 	if ((u->value.integer.value[0] != 0) != (val < 0)) {
 		val = abs(val) * (korg1212->volumePhase[i] > 0 ? -1 : 1);
@@ -1661,7 +1661,7 @@ static int snd_korg1212_control_phase_put(struct snd_kcontrol *kcontrol,
 	if (i >= 8) {
 		korg1212->volumePhase[i+1] = !!u->value.integer.value[1];
 
-		val = korg1212->sharedBufferPtr->volumeData[kcontrol->private_value+1];
+		val = korg1212->sharedBufferPtr->volumeData[__c_ua(kcontrol->private_value+1)];
 
 		if ((u->value.integer.value[1] != 0) != (val < 0)) {
 			val = abs(val) * (korg1212->volumePhase[i+1] > 0 ? -1 : 1);

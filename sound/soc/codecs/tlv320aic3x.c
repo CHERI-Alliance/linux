@@ -1738,7 +1738,7 @@ static void aic3x_configure_ocmv(struct device *dev, struct aic3x_priv *aic3x)
 	}
 }
 
-int aic3x_probe(struct device *dev, struct regmap *regmap, kernel_ulong_t driver_data)
+int aic3x_probe(struct device *dev, struct regmap *regmap, uintptr_t driver_data)
 {
 	struct aic3x_priv *aic3x;
 	struct aic3x_setup_data *ai3x_setup;

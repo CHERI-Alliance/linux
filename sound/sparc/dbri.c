@@ -2258,7 +2258,7 @@ static int snd_cs4215_get_volume(struct snd_kcontrol *kcontrol,
 
 	if (snd_BUG_ON(!dbri))
 		return -EINVAL;
-	info = &dbri->stream_info[kcontrol->private_value];
+	info = &dbri->stream_info[__c_ua(kcontrol->private_value)];
 
 	ucontrol->value.integer.value[0] = info->left_gain;
 	ucontrol->value.integer.value[1] = info->right_gain;
@@ -2270,7 +2270,7 @@ static int snd_cs4215_put_volume(struct snd_kcontrol *kcontrol,
 {
 	struct snd_dbri *dbri = snd_kcontrol_chip(kcontrol);
 	struct dbri_streaminfo *info =
-				&dbri->stream_info[kcontrol->private_value];
+				&dbri->stream_info[__c_ua(kcontrol->private_value)];
 	unsigned int vol[2];
 	int changed = 0;
 

@@ -297,7 +297,7 @@ static int snd_usb_soundblaster_remote_init(struct usb_mixer_interface *mixer)
 
 static int snd_audigy2nx_led_get(struct snd_kcontrol *kcontrol, struct snd_ctl_elem_value *ucontrol)
 {
-	ucontrol->value.integer.value[0] = kcontrol->private_value >> 8;
+	ucontrol->value.integer.value[0] = __c_ua(kcontrol->private_value) >> 8;
 	return 0;
 }
 
@@ -1137,7 +1137,7 @@ static int snd_ni_control_init_val(struct usb_mixer_interface *mixer,
 static int snd_nativeinstruments_control_get(struct snd_kcontrol *kcontrol,
 					     struct snd_ctl_elem_value *ucontrol)
 {
-	ucontrol->value.integer.value[0] = kcontrol->private_value >> 24;
+	ucontrol->value.integer.value[0] = __c_ua(kcontrol->private_value) >> 24;
 	return 0;
 }
 
@@ -2085,7 +2085,7 @@ static int snd_microii_controls_create(struct usb_mixer_interface *mixer)
 static int snd_soundblaster_e1_switch_get(struct snd_kcontrol *kcontrol,
 					  struct snd_ctl_elem_value *ucontrol)
 {
-	ucontrol->value.integer.value[0] = kcontrol->private_value;
+	ucontrol->value.integer.value[0] = __c_ua(kcontrol->private_value);
 	return 0;
 }
 
@@ -3151,7 +3151,7 @@ static int snd_bbfpro_vol_get(struct snd_kcontrol *kcontrol,
 			      struct snd_ctl_elem_value *ucontrol)
 {
 	ucontrol->value.integer.value[0] =
-		kcontrol->private_value >> SND_BBFPRO_MIXER_VAL_SHIFT;
+		__c_ua(kcontrol->private_value) >> SND_BBFPRO_MIXER_VAL_SHIFT;
 	return 0;
 }
 
@@ -3555,8 +3555,8 @@ static int snd_rme_digiface_sync_state_get(struct snd_kcontrol *kcontrol,
 	if (err < 0)
 		return err;
 
-	valid = status[0] & BIT(kcontrol->private_value);
-	sync = status[0] & BIT(5 + kcontrol->private_value);
+	valid = status[0] & BIT(__c_ua(kcontrol->private_value));
+	sync = status[0] & BIT(5 + __c_ua(kcontrol->private_value));
 
 	if (!valid)
 		ucontrol->value.enumerated.item[0] = SND_RME_CLOCK_NOLOCK;
@@ -4213,7 +4213,7 @@ static const struct snd_djm_device snd_djm_devices[] = {
 static int snd_djm_controls_info(struct snd_kcontrol *kctl,
 				 struct snd_ctl_elem_info *info)
 {
-	unsigned long private_value = kctl->private_value;
+	unsigned long private_value = __c_ua(kctl->private_value);
 	u8 device_idx = (private_value & SND_DJM_DEVICE_MASK) >> SND_DJM_DEVICE_SHIFT;
 	u8 ctl_idx = (private_value & SND_DJM_GROUP_MASK) >> SND_DJM_GROUP_SHIFT;
 	const struct snd_djm_device *device = &snd_djm_devices[device_idx];
@@ -4274,13 +4274,13 @@ static int snd_djm_controls_put(struct snd_kcontrol *kctl, struct snd_ctl_elem_v
 {
 	struct usb_mixer_elem_list *list = snd_kcontrol_chip(kctl);
 	struct usb_mixer_interface *mixer = list->mixer;
-	unsigned long private_value = kctl->private_value;
+	unsigned long private_value = __c_ua(kctl->private_value);
 
 	u8 device = (private_value & SND_DJM_DEVICE_MASK) >> SND_DJM_DEVICE_SHIFT;
 	u8 group = (private_value & SND_DJM_GROUP_MASK) >> SND_DJM_GROUP_SHIFT;
 	u16 value = elem->value.enumerated.item[0];
 
-	kctl->private_value = (((unsigned long)device << SND_DJM_DEVICE_SHIFT) |
+	kctl->private_value = __c_fakeu(((unsigned long)device << SND_DJM_DEVICE_SHIFT) |
 			      (group << SND_DJM_GROUP_SHIFT) |
 			      value);
 
@@ -4289,7 +4289,7 @@ static int snd_djm_controls_put(struct snd_kcontrol *kctl, struct snd_ctl_elem_v
 
 static int snd_djm_controls_resume(struct usb_mixer_elem_list *list)
 {
-	unsigned long private_value = list->kctl->private_value;
+	unsigned long private_value = __c_ua(list->kctl->private_value);
 	u8 device = (private_value & SND_DJM_DEVICE_MASK) >> SND_DJM_DEVICE_SHIFT;
 	u8 group = (private_value & SND_DJM_GROUP_MASK) >> SND_DJM_GROUP_SHIFT;
 	u16 value = (private_value & SND_DJM_VALUE_MASK);
@@ -4317,10 +4317,10 @@ static int snd_djm_controls_create(struct usb_mixer_interface *mixer,
 	for (i = 0; i < device->ncontrols; i++) {
 		value = device->controls[i].default_value;
 		knew.name = device->controls[i].name;
-		knew.private_value =
+		knew.private_value = __c_fakeu(
 			((unsigned long)device_idx << SND_DJM_DEVICE_SHIFT) |
 			(i << SND_DJM_GROUP_SHIFT) |
-			value;
+			value);
 		err = snd_djm_controls_update(mixer, device_idx, i, value);
 		if (err)
 			return err;

@@ -116,7 +116,7 @@ struct apm_graph_open_params {
 	struct apm_module_list_params *mod_list_data;
 	struct apm_prop_list_params *mod_prop_data;
 	struct apm_mod_conn_list_params *mod_conn_list_data;
-} __packed;
+};
 
 struct apm_pcm_module_media_fmt_cmd {
 	struct apm_module_param_data param_data;

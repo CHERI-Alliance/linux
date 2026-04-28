@@ -15,10 +15,10 @@
 #define SND_US16X08_COMP_RELEASE_BIAS 1
 
 /* get macro for components of kcontrol private_value */
-#define SND_US16X08_KCBIAS(x) (((x)->private_value >> 24) & 0xff)
-#define SND_US16X08_KCSTEP(x) (((x)->private_value >> 16) & 0xff)
-#define SND_US16X08_KCMIN(x) (((x)->private_value >> 8) & 0xff)
-#define SND_US16X08_KCMAX(x) (((x)->private_value >> 0) & 0xff)
+#define SND_US16X08_KCBIAS(x) ((__c_ua((x)->private_value) >> 24) & 0xff)
+#define SND_US16X08_KCSTEP(x) ((__c_ua((x)->private_value) >> 16) & 0xff)
+#define SND_US16X08_KCMIN(x) ((__c_ua((x)->private_value) >> 8) & 0xff)
+#define SND_US16X08_KCMAX(x) ((__c_ua((x)->private_value) >> 0) & 0xff)
 /* set macro for kcontrol private_value */
 #define SND_US16X08_KCSET(bias, step, min, max)  \
 	(((bias) << 24) | ((step) << 16) | ((min) << 8) | (max))

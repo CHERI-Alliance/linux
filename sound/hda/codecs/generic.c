@@ -989,7 +989,7 @@ add_control(struct hda_gen_spec *spec, int type, const char *name,
 		knew->subdevice = HDA_SUBDEV_AMP_FLAG;
 	if (knew->access == 0)
 		knew->access = SNDRV_CTL_ELEM_ACCESS_READWRITE;
-	knew->private_value = val;
+	knew->private_value = __c_fakeu(val);
 	return knew;
 }
 
@@ -1115,7 +1115,7 @@ static int hda_gen_bind_mute_get(struct snd_kcontrol *kcontrol,
 				 struct snd_ctl_elem_value *ucontrol)
 {
 	struct hda_codec *codec = snd_kcontrol_chip(kcontrol);
-	unsigned long pval;
+	uintptr_t pval;
 	int err;
 
 	guard(mutex)(&codec->control_mutex);
@@ -1130,7 +1130,7 @@ static int hda_gen_bind_mute_put(struct snd_kcontrol *kcontrol,
 				 struct snd_ctl_elem_value *ucontrol)
 {
 	struct hda_codec *codec = snd_kcontrol_chip(kcontrol);
-	unsigned long pval;
+	uintptr_t pval;
 	int i, indices, err = 0, change = 0;
 
 	sync_auto_mute_bits(kcontrol, ucontrol);

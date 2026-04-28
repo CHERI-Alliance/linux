@@ -2403,7 +2403,7 @@ static int rt1320_t0_r0_load_info(struct snd_kcontrol *kcontrol,
 {
 	uinfo->type = SNDRV_CTL_ELEM_TYPE_INTEGER;
 	uinfo->count = 2;
-	uinfo->value.integer.max = kcontrol->private_value;
+	uinfo->value.integer.max = __c_ua(kcontrol->private_value);
 
 	return 0;
 }

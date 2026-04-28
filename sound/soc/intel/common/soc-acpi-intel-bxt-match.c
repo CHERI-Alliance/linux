@@ -33,7 +33,7 @@ static struct snd_soc_acpi_mach *apl_quirk(void *arg)
 
 	dmi_id = dmi_first_match(apl_table);
 	if (dmi_id) {
-		apl_machine_id = (uintptr_t)dmi_id->driver_data;
+		apl_machine_id = __c_pa(dmi_id->driver_data);
 		if (apl_machine_id == APL_RVP)
 			return NULL;
 	}

@@ -674,7 +674,7 @@ static int __oxygen_pci_probe(struct pci_dev *pci, int index, char *id,
 		if (chip->model.device_config & MIDI_INPUT)
 			info_flags |= MPU401_INFO_INPUT;
 		err = snd_mpu401_uart_new(card, 0, MPU401_HW_CMIPCI,
-					  chip->addr + OXYGEN_MPU401,
+					  __c_fakeu(chip->addr + OXYGEN_MPU401),
 					  info_flags, -1, &chip->midi);
 		if (err < 0)
 			return err;

@@ -2678,7 +2678,7 @@ static int wsa_macro_probe(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
 	struct wsa_macro *wsa;
-	kernel_ulong_t flags;
+	uintptr_t flags;
 	void __iomem *base;
 	int ret, def_count;
 

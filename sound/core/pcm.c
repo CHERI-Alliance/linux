@@ -1216,7 +1216,9 @@ static void snd_pcm_proc_done(void)
 static int __init alsa_pcm_init(void)
 {
 	snd_ctl_register_ioctl(snd_pcm_control_ioctl);
+#ifndef CONFIG_CHERI_KERNEL
 	snd_ctl_register_ioctl_compat(snd_pcm_control_ioctl);
+#endif
 	snd_pcm_proc_init();
 	return 0;
 }
@@ -1224,7 +1226,9 @@ static int __init alsa_pcm_init(void)
 static void __exit alsa_pcm_exit(void)
 {
 	snd_ctl_unregister_ioctl(snd_pcm_control_ioctl);
+#ifndef CONFIG_CHERI_KERNEL
 	snd_ctl_unregister_ioctl_compat(snd_pcm_control_ioctl);
+#endif
 	snd_pcm_proc_done();
 }
 

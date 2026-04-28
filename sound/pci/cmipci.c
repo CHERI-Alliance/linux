@@ -1972,7 +1972,7 @@ static int snd_cmipci_info_volume(struct snd_kcontrol *kcontrol,
 {
 	struct cmipci_sb_reg reg;
 
-	cmipci_sb_reg_decode(&reg, kcontrol->private_value);
+	cmipci_sb_reg_decode(&reg, __c_ua(kcontrol->private_value));
 	uinfo->type = reg.mask == 1 ? SNDRV_CTL_ELEM_TYPE_BOOLEAN : SNDRV_CTL_ELEM_TYPE_INTEGER;
 	uinfo->count = reg.stereo + 1;
 	uinfo->value.integer.min = 0;
@@ -1987,7 +1987,7 @@ static int snd_cmipci_get_volume(struct snd_kcontrol *kcontrol,
 	struct cmipci_sb_reg reg;
 	int val;
 
-	cmipci_sb_reg_decode(&reg, kcontrol->private_value);
+	cmipci_sb_reg_decode(&reg, __c_ua(kcontrol->private_value));
 	guard(spinlock_irq)(&cm->reg_lock);
 	val = (snd_cmipci_mixer_read(cm, reg.left_reg) >> reg.left_shift) & reg.mask;
 	if (reg.invert)
@@ -2010,7 +2010,7 @@ static int snd_cmipci_put_volume(struct snd_kcontrol *kcontrol,
 	int change;
 	int left, right, oleft, oright;
 
-	cmipci_sb_reg_decode(&reg, kcontrol->private_value);
+	cmipci_sb_reg_decode(&reg, __c_ua(kcontrol->private_value));
 	left = ucontrol->value.integer.value[0] & reg.mask;
 	if (reg.invert)
 		left = reg.mask - left;
@@ -2067,7 +2067,7 @@ static int snd_cmipci_get_input_sw(struct snd_kcontrol *kcontrol,
 	struct cmipci_sb_reg reg;
 	int val1, val2;
 
-	cmipci_sb_reg_decode(&reg, kcontrol->private_value);
+	cmipci_sb_reg_decode(&reg, __c_ua(kcontrol->private_value));
 	guard(spinlock_irq)(&cm->reg_lock);
 	val1 = snd_cmipci_mixer_read(cm, reg.left_reg);
 	val2 = snd_cmipci_mixer_read(cm, reg.right_reg);
@@ -2086,7 +2086,7 @@ static int snd_cmipci_put_input_sw(struct snd_kcontrol *kcontrol,
 	int change;
 	int val1, val2, oval1, oval2;
 
-	cmipci_sb_reg_decode(&reg, kcontrol->private_value);
+	cmipci_sb_reg_decode(&reg, __c_ua(kcontrol->private_value));
 	guard(spinlock_irq)(&cm->reg_lock);
 	oval1 = snd_cmipci_mixer_read(cm, reg.left_reg);
 	oval2 = snd_cmipci_mixer_read(cm, reg.right_reg);
@@ -2139,7 +2139,7 @@ static int snd_cmipci_info_native_mixer(struct snd_kcontrol *kcontrol,
 {
 	struct cmipci_sb_reg reg;
 
-	cmipci_sb_reg_decode(&reg, kcontrol->private_value);
+	cmipci_sb_reg_decode(&reg, __c_ua(kcontrol->private_value));
 	uinfo->type = reg.mask == 1 ? SNDRV_CTL_ELEM_TYPE_BOOLEAN : SNDRV_CTL_ELEM_TYPE_INTEGER;
 	uinfo->count = reg.stereo + 1;
 	uinfo->value.integer.min = 0;
@@ -2155,7 +2155,7 @@ static int snd_cmipci_get_native_mixer(struct snd_kcontrol *kcontrol,
 	struct cmipci_sb_reg reg;
 	unsigned char oreg, val;
 
-	cmipci_sb_reg_decode(&reg, kcontrol->private_value);
+	cmipci_sb_reg_decode(&reg, __c_ua(kcontrol->private_value));
 	guard(spinlock_irq)(&cm->reg_lock);
 	oreg = inb(cm->iobase + reg.left_reg);
 	val = (oreg >> reg.left_shift) & reg.mask;
@@ -2178,7 +2178,7 @@ static int snd_cmipci_put_native_mixer(struct snd_kcontrol *kcontrol,
 	struct cmipci_sb_reg reg;
 	unsigned char oreg, nreg, val;
 
-	cmipci_sb_reg_decode(&reg, kcontrol->private_value);
+	cmipci_sb_reg_decode(&reg, __c_ua(kcontrol->private_value));
 	guard(spinlock_irq)(&cm->reg_lock);
 	oreg = inb(cm->iobase + reg.left_reg);
 	val = ucontrol->value.integer.value[0] & reg.mask;
@@ -3129,7 +3129,7 @@ static int snd_cmipci_create(struct snd_card *card, struct pci_dev *pci,
 
 	if (iomidi > 0) {
 		err = snd_mpu401_uart_new(card, 0, MPU401_HW_CMIPCI,
-					  iomidi,
+					  __c_fakeu(iomidi),
 					  (integrated_midi ?
 					   MPU401_INFO_INTEGRATED : 0) |
 					  MPU401_INFO_IRQ_HOOK,

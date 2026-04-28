@@ -3763,7 +3763,7 @@ static const struct snd_soc_component_driver rx_macro_component_drv = {
 static int rx_macro_probe(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
-	kernel_ulong_t flags;
+	uintptr_t flags;
 	struct rx_macro *rx;
 	void __iomem *base;
 	int ret, def_count;

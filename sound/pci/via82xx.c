@@ -2058,7 +2058,7 @@ static int snd_via686_init_misc(struct via82xx *chip)
 	pci_write_config_byte(chip->pci, VIA_PNP_CONTROL, legacy_cfg);
 	if (chip->mpu_res) {
 		if (snd_mpu401_uart_new(chip->card, 0, MPU401_HW_VIA686A,
-					mpu_port, MPU401_INFO_INTEGRATED |
+					__c_fakeu(mpu_port), MPU401_INFO_INTEGRATED |
 					MPU401_INFO_IRQ_HOOK, -1,
 					&chip->rmidi) < 0) {
 			dev_warn(chip->card->dev,
