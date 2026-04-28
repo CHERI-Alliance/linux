@@ -5642,7 +5642,7 @@ struct wiphy_vendor_command {
 		    const void *data, int data_len);
 	int (*dumpit)(struct wiphy *wiphy, struct wireless_dev *wdev,
 		      struct sk_buff *skb, const void *data, int data_len,
-		      unsigned long *storage);
+		      uintptr_t *storage);
 	const struct nla_policy *policy;
 	unsigned int maxattr;
 };

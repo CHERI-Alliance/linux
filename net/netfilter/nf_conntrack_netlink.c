@@ -1233,13 +1233,13 @@ restart:
 			nf_ct_put(nf_ct_evict[i]);
 		}
 
-		lockp = &nf_conntrack_locks[cb->args[0] % CONNTRACK_LOCKS];
+		lockp = &nf_conntrack_locks[__c_ua(cb->args[0]) % CONNTRACK_LOCKS];
 		nf_conntrack_lock(lockp);
 		if (cb->args[0] >= nf_conntrack_htable_size) {
 			spin_unlock(lockp);
 			goto out;
 		}
-		hlist_nulls_for_each_entry(h, n, &nf_conntrack_hash[cb->args[0]],
+		hlist_nulls_for_each_entry(h, n, &nf_conntrack_hash[__c_ua(cb->args[0])],
 					   hnnode) {
 			ct = nf_ct_tuplehash_to_ctrack(h);
 			if (nf_ct_is_expired(ct)) {
@@ -3155,7 +3155,7 @@ ctnetlink_exp_dump_table(struct sk_buff *skb, struct netlink_callback *cb)
 	rcu_read_lock();
 	for (; cb->args[0] < nf_ct_expect_hsize; cb->args[0]++) {
 restart:
-		hlist_for_each_entry_rcu(exp, &nf_ct_expect_hash[cb->args[0]],
+		hlist_for_each_entry_rcu(exp, &nf_ct_expect_hash[__c_ua(cb->args[0])],
 					 hnode) {
 			if (l3proto && exp->tuple.src.l3num != l3proto)
 				continue;

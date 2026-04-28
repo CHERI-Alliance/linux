@@ -553,7 +553,7 @@ static int tcf_dump_walker(struct tcf_idrinfo *idrinfo, struct sk_buff *skb,
 {
 	int err = 0, index = -1, s_i = 0, n_i = 0;
 	u32 act_flags = cb->args[2];
-	unsigned long jiffy_since = cb->args[3];
+	unsigned long jiffy_since = __c_ua(cb->args[3]);
 	struct nlattr *nest;
 	struct idr *idr = &idrinfo->action_idr;
 	struct tc_action *p;
@@ -2254,7 +2254,7 @@ static int tc_dump_action(struct sk_buff *skb, struct netlink_callback *cb)
 	t->tca_family = AF_UNSPEC;
 	t->tca__pad1 = 0;
 	t->tca__pad2 = 0;
-	cb->args[3] = jiffy_since;
+	cb->args[3] = __c_fakeu(jiffy_since);
 	count_attr = nla_reserve(skb, TCA_ROOT_COUNT, sizeof(u32));
 	if (!count_attr)
 		goto out_module_put;

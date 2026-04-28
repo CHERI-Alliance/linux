@@ -1587,7 +1587,7 @@ ip_set_dump_do(struct sk_buff *skb, struct netlink_callback *cb)
 				    : inst->ip_set_max;
 dump_last:
 	pr_debug("dump type, flag: %u %u index: %ld\n",
-		 dump_type, dump_flags, cb->args[IPSET_CB_INDEX]);
+		 dump_type, dump_flags, (unsigned long)cb->args[IPSET_CB_INDEX]);
 	for (; cb->args[IPSET_CB_INDEX] < max; cb->args[IPSET_CB_INDEX]++) {
 		index = (ip_set_id_t)cb->args[IPSET_CB_INDEX];
 		write_lock_bh(&ip_set_ref_lock);

@@ -1375,7 +1375,7 @@ mtype_list(const struct ip_set *set,
 		incomplete = skb_tail_pointer(skb);
 		n = rcu_dereference(hbucket(t, cb->args[IPSET_CB_ARG0]));
 		pr_debug("cb->arg bucket: %lu, t %p n %p\n",
-			 cb->args[IPSET_CB_ARG0], t, n);
+			 (unsigned long)cb->args[IPSET_CB_ARG0], t, n);
 		if (!n)
 			continue;
 		for (i = 0; i < n->pos; i++) {
@@ -1385,7 +1385,7 @@ mtype_list(const struct ip_set *set,
 			if (SET_ELEM_EXPIRED(set, e))
 				continue;
 			pr_debug("list hash %lu hbucket %p i %u, data %p\n",
-				 cb->args[IPSET_CB_ARG0], n, i, e);
+				 (unsigned long)cb->args[IPSET_CB_ARG0], n, i, e);
 			nested = nla_nest_start(skb, IPSET_ATTR_DATA);
 			if (!nested) {
 				if (cb->args[IPSET_CB_ARG0] == first) {

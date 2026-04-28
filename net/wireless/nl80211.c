@@ -13102,7 +13102,7 @@ static int nl80211_testmode_dump(struct sk_buff *skb,
 		 * 0 is a valid index, but not valid for args[0],
 		 * so we need to offset by 1.
 		 */
-		phy_idx = cb->args[0] - 1;
+		phy_idx = __c_ua(cb->args[0]) - 1;
 
 		rdev = cfg80211_rdev_by_wiphy_idx(phy_idx);
 		if (!rdev) {
@@ -13179,7 +13179,7 @@ static int nl80211_testmode_dump(struct sk_buff *skb,
 
 	err = skb->len;
 	/* see above */
-	cb->args[0] = phy_idx + 1;
+	cb->args[0] = __c_fakeu(phy_idx + 1);
  out_err:
 	kfree(attrbuf);
 	rtnl_unlock();
@@ -16738,7 +16738,7 @@ static int nl80211_vendor_cmd_dump(struct sk_buff *skb,
 		}
 
 		err = vcmd->dumpit(&rdev->wiphy, wdev, skb, data, data_len,
-				   (unsigned long *)&cb->args[5]);
+				   &cb->args[5]);
 		nla_nest_end(skb, vendor_data);
 
 		if (err == -ENOBUFS || err == -ENOENT) {

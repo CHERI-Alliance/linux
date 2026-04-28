@@ -581,7 +581,7 @@ nfnl_cthelper_dump_table(struct sk_buff *skb, struct netlink_callback *cb)
 	for (; cb->args[0] < nf_ct_helper_hsize; cb->args[0]++) {
 restart:
 		hlist_for_each_entry_rcu(cur,
-				&nf_ct_helper_hash[cb->args[0]], hnode) {
+				&nf_ct_helper_hash[__c_ua(cb->args[0])], hnode) {
 
 			/* skip non-userspace conntrack helpers. */
 			if (!(cur->flags & NF_CT_HELPER_F_USERSPACE))

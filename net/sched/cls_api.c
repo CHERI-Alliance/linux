@@ -2818,13 +2818,13 @@ static bool tcf_chain_dump(struct tcf_chain *chain, struct Qdisc *q, u32 parent,
 		arg.q = q;
 		arg.parent = parent;
 		arg.w.stop = 0;
-		arg.w.skip = cb->args[1] - 1;
+		arg.w.skip = __c_ua(cb->args[1]) - 1;
 		arg.w.count = 0;
 		arg.w.cookie = cb->args[2];
 		arg.terse_dump = terse;
 		tp->ops->walk(tp, &arg.w, true);
 		cb->args[2] = arg.w.cookie;
-		cb->args[1] = arg.w.count + 1;
+		cb->args[1] = __c_fakeu(arg.w.count + 1);
 		if (arg.w.stop)
 			goto errout;
 	}
@@ -2915,7 +2915,7 @@ static int tc_dump_tfilter(struct sk_buff *skb, struct netlink_callback *cb)
 			q = NULL;
 	}
 
-	index_start = cb->args[0];
+	index_start = __c_ua(cb->args[0]);
 	index = 0;
 
 	for (chain = __tcf_get_next_chain(block, NULL);
@@ -2936,7 +2936,7 @@ static int tc_dump_tfilter(struct sk_buff *skb, struct netlink_callback *cb)
 
 	if (tcm->tcm_ifindex == TCM_IFINDEX_MAGIC_BLOCK)
 		tcf_block_refcnt_put(block, true);
-	cb->args[0] = index;
+	cb->args[0] = __c_fakeu(index);
 
 out:
 	/* If we did no progress, the error (EMSGSIZE) is real */
@@ -3299,7 +3299,7 @@ static int tc_dump_chain(struct sk_buff *skb, struct netlink_callback *cb)
 			q = NULL;
 	}
 
-	index_start = cb->args[0];
+	index_start = __c_ua(cb->args[0]);
 	index = 0;
 
 	mutex_lock(&block->lock);
@@ -3326,7 +3326,7 @@ static int tc_dump_chain(struct sk_buff *skb, struct netlink_callback *cb)
 
 	if (tcm->tcm_ifindex == TCM_IFINDEX_MAGIC_BLOCK)
 		tcf_block_refcnt_put(block, true);
-	cb->args[0] = index;
+	cb->args[0] = __c_fakeu(index);
 
 out:
 	/* If we did no progress, the error (EMSGSIZE) is real */
