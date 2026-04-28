@@ -632,7 +632,7 @@ static int pcxhr_update_r_buffer(struct pcxhr_stream *stream)
 	dev_dbg(chip->card->dev,
 		"%s(pcm%c%d) : addr(%p) bytes(%zx) subs(%d)\n", __func__,
 		is_capture ? 'c' : 'p',
-		chip->chip_idx, (void *)(long)subs->runtime->dma_addr,
+		chip->chip_idx, (void *)(uintptr_t)subs->runtime->dma_addr,
 		subs->runtime->dma_bytes, subs->number);
 
 	pcxhr_init_rmh(&rmh, CMD_UPDATE_R_BUFFERS);

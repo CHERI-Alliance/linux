@@ -617,7 +617,7 @@ static int s5p_mfc_set_dec_frame_buffer_v6(struct s5p_mfc_ctx *ctx)
 	buf_addr1 = ctx->bank1.dma;
 	buf_size1 = ctx->bank1.size;
 
-	mfc_debug(2, "Buf1: %p (%d)\n", (void *)buf_addr1, buf_size1);
+	mfc_debug(2, "Buf1: %p (%d)\n", (void *)(uintptr_t)buf_addr1, buf_size1);
 	mfc_debug(2, "Total DPB COUNT: %d\n", ctx->total_dpb_count);
 	mfc_debug(2, "Setting display delay to %d\n", ctx->display_delay);
 
@@ -780,7 +780,7 @@ static int s5p_mfc_set_enc_ref_buffer_v6(struct s5p_mfc_ctx *ctx)
 	buf_addr1 = ctx->bank1.dma;
 	buf_size1 = ctx->bank1.size;
 
-	mfc_debug(2, "Buf1: %p (%d)\n", (void *)buf_addr1, buf_size1);
+	mfc_debug(2, "Buf1: %p (%d)\n", (void *)(uintptr_t)buf_addr1, buf_size1);
 
 	if (IS_MFCV10_PLUS(dev)) {
 		/* start address of per buffer is aligned */

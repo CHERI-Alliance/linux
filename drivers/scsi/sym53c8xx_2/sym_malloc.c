@@ -124,7 +124,7 @@ static void ___sym_mfree(m_pool_p mp, void *ptr, int size)
 		}
 		b = a ^ s;
 		q = &h[i];
-		while (q->next && q->next != (m_link_p) b) {
+		while (q->next && q->next != (m_link_p)(uintptr_t) b) {
 			q = q->next;
 		}
 		if (!q->next) {

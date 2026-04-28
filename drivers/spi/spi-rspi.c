@@ -1103,7 +1103,7 @@ static struct dma_chan *rspi_request_dma_chan(struct device *dev,
 	dma_cap_set(DMA_SLAVE, mask);
 
 	chan = dma_request_slave_channel_compat(mask, shdma_chan_filter,
-				(void *)(unsigned long)id, dev,
+				(void *)(uintptr_t)id, dev,
 				dir == DMA_MEM_TO_DEV ? "tx" : "rx");
 	if (!chan) {
 		dev_warn(dev, "dma_request_slave_channel_compat failed\n");

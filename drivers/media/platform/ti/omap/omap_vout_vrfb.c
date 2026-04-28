@@ -53,7 +53,7 @@ static int omap_vout_allocate_vrfb_buffers(struct omap_vout_device *vout,
 			*count = 0;
 			return -ENOMEM;
 		}
-		memset((void *)(long)vout->smsshado_virt_addr[i], 0,
+		memset((void *)(uintptr_t)vout->smsshado_virt_addr[i], 0,
 		       vout->smsshado_size);
 	}
 	return 0;

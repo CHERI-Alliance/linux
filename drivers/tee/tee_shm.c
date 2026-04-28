@@ -503,7 +503,7 @@ struct tee_shm *tee_shm_register_user_buf(struct tee_context *ctx,
 	void *ret;
 	int id;
 
-	if (!access_ok((void __user *)addr, length))
+	if (!access_ok((void __user *)(uintptr_t)addr, length))
 		return ERR_PTR(-EFAULT);
 
 	mutex_lock(&teedev->mutex);

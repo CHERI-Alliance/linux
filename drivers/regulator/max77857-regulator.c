@@ -362,7 +362,7 @@ static int max77857_probe(struct i2c_client *client)
 
 	id = i2c_id->driver_data;
 
-	dev_set_drvdata(dev, (void *)id);
+	dev_set_drvdata(dev, (void *)(uintptr_t)id);
 
 	if (id == ID_MAX77859 || id == ID_MAX77859A) {
 		max77857_regulator_desc.ops = &max77859_regulator_ops;
@@ -412,7 +412,7 @@ static int max77857_probe(struct i2c_client *client)
 	}
 
 	cfg.dev = dev;
-	cfg.driver_data = (void *)id;
+	cfg.driver_data = (void *)(uintptr_t)id;
 	cfg.regmap = regmap;
 	cfg.init_data = of_get_regulator_init_data(dev, dev->of_node,
 						   &max77857_regulator_desc);

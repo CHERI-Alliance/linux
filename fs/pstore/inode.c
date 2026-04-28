@@ -117,7 +117,7 @@ static int pstore_ftrace_seq_show(struct seq_file *s, void *v)
 	seq_printf(s, "CPU:%d ts:%llu %08lx  %08lx  %ps <- %pS\n",
 		   pstore_ftrace_decode_cpu(rec),
 		   pstore_ftrace_read_timestamp(rec),
-		   ip, parent_ip, (void *)ip, (void *)parent_ip);
+		   ip, parent_ip, (void *)(uintptr_t)ip, (void *)(uintptr_t)parent_ip);
 
 	return 0;
 }

@@ -783,7 +783,7 @@ static void skb_xmit_done(struct virtqueue *vq)
 static void *mergeable_len_to_ctx(unsigned int truesize,
 				  unsigned int headroom)
 {
-	return (void *)(unsigned long)((headroom << MRG_CTX_HEADER_SHIFT) | truesize);
+	return (void *)(uintptr_t)((headroom << MRG_CTX_HEADER_SHIFT) | truesize);
 }
 
 static unsigned int mergeable_ctx_to_headroom(void *mrg_ctx)

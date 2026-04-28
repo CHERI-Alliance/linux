@@ -527,7 +527,7 @@ static int rq_get_domain_token(struct request *rq)
 
 static void rq_set_domain_token(struct request *rq, int token)
 {
-	rq->elv.priv[0] = (void *)(long)token;
+	rq->elv.priv[0] = (void *)(uintptr_t)token;
 }
 
 static void rq_clear_domain_token(struct kyber_queue_data *kqd,

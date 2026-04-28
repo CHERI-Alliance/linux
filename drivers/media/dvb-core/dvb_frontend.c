@@ -1943,12 +1943,12 @@ static int dtv_property_process_set(struct dvb_frontend *fe,
 	case DTV_VOLTAGE:
 		c->voltage = data;
 		r = dvb_frontend_handle_ioctl(file, FE_SET_VOLTAGE,
-					      (void *)c->voltage);
+					      (void *)(uintptr_t)c->voltage);
 		break;
 	case DTV_TONE:
 		c->sectone = data;
 		r = dvb_frontend_handle_ioctl(file, FE_SET_TONE,
-					      (void *)c->sectone);
+					      (void *)(uintptr_t)c->sectone);
 		break;
 	case DTV_CODE_RATE_HP:
 		c->code_rate_HP = data;

@@ -2056,7 +2056,7 @@ size_t fault_in_writeable(char __user *uaddr, size_t size)
 
 	/* Stop once we overflow to 0. */
 	for (cur = start; cur && cur < end; cur = PAGE_ALIGN_DOWN(cur + PAGE_SIZE))
-		unsafe_put_user(0, (char __user *)cur, out);
+		unsafe_put_user(0, (char __user *)(uintptr_t)cur, out);
 out:
 	user_write_access_end();
 	if (size > cur - start)
@@ -2158,7 +2158,7 @@ size_t fault_in_readable(const char __user *uaddr, size_t size)
 
 	/* Stop once we overflow to 0. */
 	for (cur = start; cur && cur < end; cur = PAGE_ALIGN_DOWN(cur + PAGE_SIZE))
-		unsafe_get_user(c, (const char __user *)cur, out);
+		unsafe_get_user(c, (const char __user *)(uintptr_t)cur, out);
 out:
 	user_read_access_end();
 	(void)c;

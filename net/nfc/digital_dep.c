@@ -1388,7 +1388,7 @@ static int digital_tg_send_psl_res(struct nfc_digital_dev *ddev, u8 did,
 	ddev->curr_nfc_dep_pni = 0;
 
 	rc = digital_tg_send_cmd(ddev, skb, 0, digital_tg_send_psl_res_complete,
-				 (void *)(unsigned long)rf_tech);
+				 (void *)(uintptr_t)rf_tech);
 	if (rc)
 		kfree_skb(skb);
 

@@ -331,7 +331,7 @@ void register_handler_proc(unsigned int irq, struct irqaction *action)
 void register_irq_proc(unsigned int irq, struct irq_desc *desc)
 {
 	static DEFINE_MUTEX(register_lock);
-	void __maybe_unused *irqp = (void *)(unsigned long) irq;
+	void __maybe_unused *irqp = (void *)(uintptr_t) irq;
 	char name [MAX_NAMELEN];
 
 	if (!root_irq_dir || (desc->irq_data.chip == &no_irq_chip))
@@ -379,7 +379,7 @@ void register_irq_proc(unsigned int irq, struct irq_desc *desc)
 # endif
 #endif
 	proc_create_single_data("spurious", 0444, desc->dir,
-				irq_spurious_proc_show, (void *)(long)irq);
+				irq_spurious_proc_show, (void *)(uintptr_t)irq);
 
 }
 

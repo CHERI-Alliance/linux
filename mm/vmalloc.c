@@ -354,7 +354,7 @@ int ioremap_page_range(unsigned long addr, unsigned long end,
 		return -EINVAL;
 	}
 	if (addr != (unsigned long)area->addr ||
-	    (void *)end != area->addr + get_vm_area_size(area)) {
+	    (void *)(uintptr_t)end != area->addr + get_vm_area_size(area)) {
 		WARN_ONCE(1, "ioremap request [%lx,%lx) doesn't match vm_area [%lx, %lx)\n",
 			  addr, end, (long)area->addr,
 			  (long)area->addr + get_vm_area_size(area));
@@ -736,7 +736,7 @@ static int check_sparse_vm_area(struct vm_struct *area, unsigned long start,
 	if ((end - start) >> PAGE_SHIFT > totalram_pages())
 		return -E2BIG;
 	if (start < (unsigned long)area->addr ||
-	    (void *)end > area->addr + get_vm_area_size(area))
+	    (void *)(uintptr_t)end > area->addr + get_vm_area_size(area))
 		return -ERANGE;
 	return 0;
 }
@@ -5206,7 +5206,7 @@ static void show_purge_info(struct seq_file *m)
 		spin_lock(&vn->lazy.lock);
 		list_for_each_entry(va, &vn->lazy.head, list) {
 			seq_printf(m, "0x%pK-0x%pK %7ld unpurged vm_area\n",
-				(void *)va->va_start, (void *)va->va_end,
+				(void *)(uintptr_t)va->va_start, (void *)(uintptr_t)va->va_end,
 				va_size(va));
 		}
 		spin_unlock(&vn->lazy.lock);
@@ -5229,7 +5229,7 @@ static int vmalloc_info_show(struct seq_file *m, void *p)
 			if (!va->vm) {
 				if (va->flags & VMAP_RAM)
 					seq_printf(m, "0x%pK-0x%pK %7ld vm_map_ram\n",
-						(void *)va->va_start, (void *)va->va_end,
+						(void *)(uintptr_t)va->va_start, (void *)(uintptr_t)va->va_end,
 						va_size(va));
 
 				continue;

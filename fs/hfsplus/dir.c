@@ -22,7 +22,7 @@
 static inline void hfsplus_instantiate(struct dentry *dentry,
 				       struct inode *inode, u32 cnid)
 {
-	dentry->d_fsdata = (void *)(unsigned long)cnid;
+	dentry->d_fsdata = (void *)(uintptr_t)cnid;
 	d_instantiate(dentry, inode);
 }
 
@@ -66,7 +66,7 @@ again:
 			goto fail;
 		}
 		cnid = be32_to_cpu(entry.folder.id);
-		dentry->d_fsdata = (void *)(unsigned long)cnid;
+		dentry->d_fsdata = (void *)(uintptr_t)cnid;
 	} else if (type == HFSPLUS_FILE) {
 		if (fd.entrylength < sizeof(struct hfsplus_cat_file)) {
 			err = -EIO;
@@ -95,7 +95,7 @@ again:
 				cnid = (unsigned long)dentry->d_fsdata;
 				linkid = 0;
 			} else {
-				dentry->d_fsdata = (void *)(unsigned long)cnid;
+				dentry->d_fsdata = (void *)(uintptr_t)cnid;
 				linkid =
 					be32_to_cpu(entry.file.permissions.dev);
 				str.len = sprintf(name, "iNode%d", linkid);
@@ -108,7 +108,7 @@ again:
 				goto again;
 			}
 		} else if (!dentry->d_fsdata)
-			dentry->d_fsdata = (void *)(unsigned long)cnid;
+			dentry->d_fsdata = (void *)(uintptr_t)cnid;
 	} else {
 		pr_err("invalid catalog entry type in lookup\n");
 		err = -EIO;
@@ -333,7 +333,7 @@ static int hfsplus_link(struct dentry *src_dentry, struct inode *dst_dir,
 		}
 		HFSPLUS_I(inode)->linkid = id;
 		cnid = sbi->next_cnid++;
-		src_dentry->d_fsdata = (void *)(unsigned long)cnid;
+		src_dentry->d_fsdata = (void *)(uintptr_t)cnid;
 		res = hfsplus_create_cat(cnid, src_dir,
 					 &src_dentry->d_name, inode);
 		if (res)

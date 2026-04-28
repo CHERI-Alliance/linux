@@ -67,7 +67,7 @@ FTRACE_ENTRY_REG(function, ftrace_entry,
 	),
 
 	F_printk(" %ps <-- %ps",
-		 (void *)__entry->ip, (void *)__entry->parent_ip),
+		 (void *)(uintptr_t)__entry->ip, (void *)(uintptr_t)__entry->parent_ip),
 
 	perf_ftrace_event_register
 );
@@ -84,7 +84,7 @@ FTRACE_ENTRY(funcgraph_entry, ftrace_graph_ent_entry,
 		__dynamic_array(unsigned long,	args				)
 	),
 
-	F_printk("--> %ps (%lu)", (void *)__entry->func, __entry->depth)
+	F_printk("--> %ps (%lu)", (void *)(uintptr_t)__entry->func, __entry->depth)
 );
 
 #ifdef CONFIG_FUNCTION_GRAPH_RETADDR
@@ -154,7 +154,7 @@ FTRACE_ENTRY_PACKED(funcgraph_exit, ftrace_graph_ret_entry,
 	),
 
 	F_printk("<-- %ps (%u) (start: %llx  end: %llx) over: %u",
-		 (void *)__entry->func, __entry->depth,
+		 (void *)(uintptr_t)__entry->func, __entry->depth,
 		 __entry->calltime, __entry->rettime,
 		 __entry->depth)
 );
@@ -226,10 +226,10 @@ FTRACE_ENTRY(kernel_stack, stack_entry,
 	F_printk("\t=> %ps\n\t=> %ps\n\t=> %ps\n"
 		 "\t=> %ps\n\t=> %ps\n\t=> %ps\n"
 		 "\t=> %ps\n\t=> %ps\n",
-		 (void *)__entry->caller[0], (void *)__entry->caller[1],
-		 (void *)__entry->caller[2], (void *)__entry->caller[3],
-		 (void *)__entry->caller[4], (void *)__entry->caller[5],
-		 (void *)__entry->caller[6], (void *)__entry->caller[7])
+		 (void *)(uintptr_t)__entry->caller[0], (void *)(uintptr_t)__entry->caller[1],
+		 (void *)(uintptr_t)__entry->caller[2], (void *)(uintptr_t)__entry->caller[3],
+		 (void *)(uintptr_t)__entry->caller[4], (void *)(uintptr_t)__entry->caller[5],
+		 (void *)(uintptr_t)__entry->caller[6], (void *)(uintptr_t)__entry->caller[7])
 );
 
 FTRACE_ENTRY(user_stack, userstack_entry,
@@ -244,10 +244,10 @@ FTRACE_ENTRY(user_stack, userstack_entry,
 	F_printk("\t=> %ps\n\t=> %ps\n\t=> %ps\n"
 		 "\t=> %ps\n\t=> %ps\n\t=> %ps\n"
 		 "\t=> %ps\n\t=> %ps\n",
-		 (void *)__entry->caller[0], (void *)__entry->caller[1],
-		 (void *)__entry->caller[2], (void *)__entry->caller[3],
-		 (void *)__entry->caller[4], (void *)__entry->caller[5],
-		 (void *)__entry->caller[6], (void *)__entry->caller[7])
+		 (void *)(uintptr_t)__entry->caller[0], (void *)(uintptr_t)__entry->caller[1],
+		 (void *)(uintptr_t)__entry->caller[2], (void *)(uintptr_t)__entry->caller[3],
+		 (void *)(uintptr_t)__entry->caller[4], (void *)(uintptr_t)__entry->caller[5],
+		 (void *)(uintptr_t)__entry->caller[6], (void *)(uintptr_t)__entry->caller[7])
 );
 
 /*
@@ -264,7 +264,7 @@ FTRACE_ENTRY(bprint, bprint_entry,
 	),
 
 	F_printk("%ps: %s",
-		 (void *)__entry->ip, __entry->fmt)
+		 (void *)(uintptr_t)__entry->ip, __entry->fmt)
 );
 
 FTRACE_ENTRY_REG(print, print_entry,
@@ -277,7 +277,7 @@ FTRACE_ENTRY_REG(print, print_entry,
 	),
 
 	F_printk("%ps: %s",
-		 (void *)__entry->ip, __entry->buf),
+		 (void *)(uintptr_t)__entry->ip, __entry->buf),
 
 	ftrace_event_register
 );
@@ -305,7 +305,7 @@ FTRACE_ENTRY(bputs, bputs_entry,
 	),
 
 	F_printk("%ps: %s",
-		 (void *)__entry->ip, __entry->str)
+		 (void *)(uintptr_t)__entry->ip, __entry->str)
 );
 
 FTRACE_ENTRY(mmiotrace_rw, trace_mmiotrace_rw,
@@ -411,8 +411,8 @@ FTRACE_ENTRY(func_repeats, func_repeats_entry,
 	),
 
 	F_printk(" %ps <-%ps\t(repeats:%u  delta: -%llu)",
-		 (void *)__entry->ip,
-		 (void *)__entry->parent_ip,
+		 (void *)(uintptr_t)__entry->ip,
+		 (void *)(uintptr_t)__entry->parent_ip,
 		 __entry->count,
 		 FUNC_REPEATS_GET_DELTA_TS(__entry))
 );

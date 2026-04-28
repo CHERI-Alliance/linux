@@ -330,7 +330,7 @@ static unsigned int hpt3x2n_qc_issue(struct ata_queued_cmd *qc)
 	if ((flags & USE_DPLL) != dpll) {
 		flags &= ~USE_DPLL;
 		flags |= dpll;
-		ap->host->private_data = (void *)(long)flags;
+		ap->host->private_data = (void *)(uintptr_t)flags;
 
 		hpt3x2n_set_clock(ap, dpll ? 0x21 : 0x23);
 	}

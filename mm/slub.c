@@ -1088,7 +1088,7 @@ static void print_track(const char *s, struct track *t, unsigned long pr_time)
 		return;
 
 	pr_err("%s in %pS age=%lu cpu=%u pid=%d\n",
-	       s, (void *)t->addr, pr_time - t->when, t->cpu, t->pid);
+	       s, (void *)(uintptr_t)t->addr, pr_time - t->when, t->cpu, t->pid);
 #ifdef CONFIG_STACKDEPOT
 	handle = READ_ONCE(t->handle);
 	if (handle)
@@ -9731,7 +9731,7 @@ static int slab_debugfs_show(struct seq_file *seq, void *v)
 		seq_printf(seq, "%7ld ", l->count);
 
 		if (l->addr)
-			seq_printf(seq, "%pS", (void *)l->addr);
+			seq_printf(seq, "%pS", (void *)(uintptr_t)l->addr);
 		else
 			seq_puts(seq, "<not-available>");
 
@@ -9771,7 +9771,7 @@ static int slab_debugfs_show(struct seq_file *seq, void *v)
 				nr_entries = stack_depot_fetch(handle, &entries);
 				seq_puts(seq, "\n");
 				for (j = 0; j < nr_entries; j++)
-					seq_printf(seq, "        %pS\n", (void *)entries[j]);
+					seq_printf(seq, "        %pS\n", (void *)(uintptr_t)entries[j]);
 			}
 		}
 #endif

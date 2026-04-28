@@ -104,6 +104,6 @@ int devm_gpio_request_one(struct device *dev, unsigned gpio,
 		return rc;
 	}
 
-	return devm_add_action_or_reset(dev, devm_gpio_release, (void *)(unsigned long)gpio);
+	return devm_add_action_or_reset(dev, devm_gpio_release, (void *)(uintptr_t)gpio);
 }
 EXPORT_SYMBOL_GPL(devm_gpio_request_one);

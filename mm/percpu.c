@@ -2296,7 +2296,7 @@ bool __is_kernel_percpu_address(__ptraddr_t addr, unsigned long *can_addr)
 
 	for_each_possible_cpu(cpu) {
 		void *start = per_cpu_ptr(base, cpu);
-		void *va = (void *)addr;
+		void *va = (void *)(uintptr_t)addr;
 
 		if (va >= start && va < start + static_size) {
 			if (can_addr) {

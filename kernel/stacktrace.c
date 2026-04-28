@@ -30,7 +30,7 @@ void stack_trace_print(const unsigned long *entries, unsigned int nr_entries,
 		return;
 
 	for (i = 0; i < nr_entries; i++)
-		printk("%*c%pS\n", 1 + spaces, ' ', (void *)entries[i]);
+		printk("%*c%pS\n", 1 + spaces, ' ', (void *)(uintptr_t)entries[i]);
 }
 EXPORT_SYMBOL_GPL(stack_trace_print);
 
@@ -54,7 +54,7 @@ int stack_trace_snprint(char *buf, size_t size, const unsigned long *entries,
 
 	for (i = 0; i < nr_entries && size; i++) {
 		generated = snprintf(buf, size, "%*c%pS\n", 1 + spaces, ' ',
-				     (void *)entries[i]);
+				     (void *)(uintptr_t)entries[i]);
 
 		total += generated;
 		if (generated >= size) {

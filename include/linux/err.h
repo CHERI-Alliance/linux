@@ -75,7 +75,7 @@ static inline long __must_check PTR_ERR(__force const void *ptr)
  */
 static inline bool __must_check IS_ERR(__force const void *ptr)
 {
-	return IS_ERR_VALUE((unsigned long)ptr);
+	return IS_ERR_VALUE((uintptr_t)ptr);
 }
 
 /* Read an error pointer from the percpu address space. */
@@ -89,7 +89,7 @@ static inline bool __must_check IS_ERR(__force const void *ptr)
  */
 static inline bool __must_check IS_ERR_OR_NULL(__force const void *ptr)
 {
-	return unlikely(!ptr) || IS_ERR_VALUE((unsigned long)ptr);
+	return unlikely(!ptr) || IS_ERR_VALUE((uintptr_t)ptr);
 }
 
 /**

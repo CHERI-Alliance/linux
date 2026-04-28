@@ -161,7 +161,7 @@ void dump_vma(const struct vm_area_struct *vma)
 		"refcnt %x\n"
 #endif
 		"flags: %#lx(%pGv)\n",
-		vma, (void *)vma->vm_start, (void *)vma->vm_end, vma->vm_mm,
+		vma, (void *)(uintptr_t)vma->vm_start, (void *)(uintptr_t)vma->vm_end, vma->vm_mm,
 		(unsigned long)pgprot_val(vma->vm_page_prot),
 		vma->anon_vma, vma->vm_ops, vma->vm_pgoff,
 		vma->vm_file, vma->vm_private_data,

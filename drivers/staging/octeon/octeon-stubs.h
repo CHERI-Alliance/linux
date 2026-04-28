@@ -1353,14 +1353,14 @@ static inline void cvmx_pow_work_request_async(int scr_addr,
 
 static inline struct cvmx_wqe *cvmx_pow_work_response_async(int scr_addr)
 {
-	struct cvmx_wqe *wqe = (void *)(unsigned long)scr_addr;
+	struct cvmx_wqe *wqe = (void *)(uintptr_t)scr_addr;
 
 	return wqe;
 }
 
 static inline struct cvmx_wqe *cvmx_pow_work_request_sync(cvmx_pow_wait_t wait)
 {
-	return (void *)(unsigned long)wait;
+	return (void *)(uintptr_t)wait;
 }
 
 static inline int cvmx_spi_restart_interface(int interface,

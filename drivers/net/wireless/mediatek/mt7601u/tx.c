@@ -201,7 +201,7 @@ void mt7601u_tx(struct ieee80211_hw *hw, struct ieee80211_tx_control *control,
 	int hw_q = skb2q(skb);
 
 	BUILD_BUG_ON(ARRAY_SIZE(info->status.status_driver_data) < 1);
-	info->status.status_driver_data[0] = (void *)(unsigned long)pkt_len;
+	info->status.status_driver_data[0] = (void *)(uintptr_t)pkt_len;
 
 	if (mt7601u_skb_rooms(dev, skb) || mt76_insert_hdr_pad(skb)) {
 		ieee80211_free_txskb(dev->hw, skb);

@@ -104,7 +104,7 @@ bool nmi_cpu_backtrace(struct pt_regs *regs)
 		printk_cpu_sync_get_irqsave(flags);
 		if (!READ_ONCE(backtrace_idle) && regs && cpu_in_idle(instruction_pointer(regs))) {
 			pr_warn("NMI backtrace for cpu %d skipped: idling at %pS\n",
-				cpu, (void *)instruction_pointer(regs));
+				cpu, (void *)(uintptr_t)instruction_pointer(regs));
 		} else {
 			pr_warn("NMI backtrace for cpu %d\n", cpu);
 			if (regs)

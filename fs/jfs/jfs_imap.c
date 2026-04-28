@@ -1256,8 +1256,8 @@ int diFree(struct inode *ip)
 	 *
 	 * It's not pretty, but it works.
 	 */
-	iplist[1] = (struct inode *) (size_t)iagno;
-	iplist[2] = (struct inode *) (size_t)extno;
+	iplist[1] = (struct inode *) (uintptr_t)iagno;
+	iplist[2] = (struct inode *) (uintptr_t)extno;
 
 	rc = txCommit(tid, 1, &iplist[0], COMMIT_FORCE);
 

@@ -192,7 +192,7 @@ static vm_fault_t etnaviv_gem_fault(struct vm_fault *vmf)
 
 	pfn = page_to_pfn(pages[pgoff]);
 
-	VERB("Inserting %p pfn %lx, pa %lx", (void *)vmf->address,
+	VERB("Inserting %p pfn %lx, pa %lx", (void *)(uintptr_t)vmf->address,
 	     pfn, pfn << PAGE_SHIFT);
 
 	return vmf_insert_pfn(vma, vmf->address, pfn);

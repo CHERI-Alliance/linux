@@ -215,7 +215,7 @@ affs_lookup(struct inode *dir, struct dentry *dentry, unsigned int flags)
 		u32 ino = bh->b_blocknr;
 
 		/* store the real header ino in d_fsdata for faster lookups */
-		dentry->d_fsdata = (void *)(long)ino;
+		dentry->d_fsdata = (void *)(uintptr_t)ino;
 		switch (be32_to_cpu(AFFS_TAIL(sb, bh)->stype)) {
 		//link to dirs disabled
 		//case ST_LINKDIR:

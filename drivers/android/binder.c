@@ -6114,7 +6114,7 @@ static int binder_open(struct inode *nodp, struct file *filp)
 		 */
 		proc->debugfs_entry = debugfs_create_file(strbuf, 0444,
 			binder_debugfs_dir_entry_proc,
-			(void *)(unsigned long)proc->pid,
+			(void *)(uintptr_t)proc->pid,
 			&proc_fops);
 	}
 
@@ -6130,7 +6130,7 @@ static int binder_open(struct inode *nodp, struct file *filp)
 		 * information on all contexts of a given PID.
 		 */
 		binderfs_entry = binderfs_create_file(binder_binderfs_dir_entry_proc,
-			strbuf, &proc_fops, (void *)(unsigned long)proc->pid);
+			strbuf, &proc_fops, (void *)(uintptr_t)proc->pid);
 		if (!IS_ERR(binderfs_entry)) {
 			proc->binderfs_entry = binderfs_entry;
 		} else {
@@ -6458,8 +6458,8 @@ static void print_binder_work_ilocked(struct seq_file *m,
 		if (hash_ptrs)
 			seq_printf(m, "%snode work %d: u%p c%p\n",
 				   prefix, node->debug_id,
-				   (void *)(long)node->ptr,
-				   (void *)(long)node->cookie);
+				   (void *)(uintptr_t)node->ptr,
+				   (void *)(uintptr_t)node->cookie);
 		else
 			seq_printf(m, "%snode work %d: u%016llx c%016llx\n",
 				   prefix, node->debug_id,
@@ -6537,7 +6537,7 @@ static void print_binder_node_nilocked(struct seq_file *m,
 
 	if (hash_ptrs)
 		seq_printf(m, "  node %d: u%p c%p", node->debug_id,
-			   (void *)(long)node->ptr, (void *)(long)node->cookie);
+			   (void *)(uintptr_t)node->ptr, (void *)(uintptr_t)node->cookie);
 	else
 		seq_printf(m, "  node %d: u%016llx c%016llx", node->debug_id,
 			   (u64)node->ptr, (u64)node->cookie);

@@ -153,7 +153,7 @@ struct ctl_table_poll {
 
 static inline void *proc_sys_poll_event(struct ctl_table_poll *poll)
 {
-	return (void *)(unsigned long)atomic_read(&poll->event);
+	return (void *)(uintptr_t)atomic_read(&poll->event);
 }
 
 #define __CTL_TABLE_POLL_INITIALIZER(name) {				\

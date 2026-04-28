@@ -542,10 +542,10 @@ static void seq_stats(struct seq_file *m, struct lock_stat_data *data)
 			seq_line(m, '-', 40-namelen, namelen);
 
 		snprintf(ip, sizeof(ip), "[<%p>]",
-				(void *)class->contention_point[i]);
+				(void *)(uintptr_t)class->contention_point[i]);
 		seq_printf(m, "%40s %14lu %29s %pS\n",
 			   name, stats->contention_point[i],
-			   ip, (void *)class->contention_point[i]);
+			   ip, (void *)(uintptr_t)class->contention_point[i]);
 	}
 	for (i = 0; i < LOCKSTAT_POINTS; i++) {
 		char ip[32];
@@ -557,10 +557,10 @@ static void seq_stats(struct seq_file *m, struct lock_stat_data *data)
 			seq_line(m, '-', 40-namelen, namelen);
 
 		snprintf(ip, sizeof(ip), "[<%p>]",
-				(void *)class->contending_point[i]);
+				(void *)(uintptr_t)class->contending_point[i]);
 		seq_printf(m, "%40s %14lu %29s %pS\n",
 			   name, stats->contending_point[i],
-			   ip, (void *)class->contending_point[i]);
+			   ip, (void *)(uintptr_t)class->contending_point[i]);
 	}
 	if (i) {
 		seq_puts(m, "\n");

@@ -376,7 +376,7 @@ static void handle_misaligned_access(struct type_mismatch_data_common *data,
 
 	pr_err("%s misaligned address %p for type %s\n",
 		type_check_kinds[data->type_check_kind],
-		(void *)ptr, data->type->type_name);
+		(void *)(uintptr_t)ptr, data->type->type_name);
 	pr_err("which requires %ld byte alignment\n", data->alignment);
 
 	ubsan_epilogue();
@@ -391,7 +391,7 @@ static void handle_object_size_mismatch(struct type_mismatch_data_common *data,
 	ubsan_prologue(data->location, "object-size-mismatch");
 	pr_err("%s address %p with insufficient space\n",
 		type_check_kinds[data->type_check_kind],
-		(void *) ptr);
+		(void *)(uintptr_t) ptr);
 	pr_err("for an object of type %s\n", data->type->type_name);
 	ubsan_epilogue();
 }

@@ -235,7 +235,7 @@ int octeon_init_droq(struct octeon_device *oct,
 	if (app_ctx)
 		droq->app_ctx = app_ctx;
 	else
-		droq->app_ctx = (void *)(size_t)q_no;
+		droq->app_ctx = (void *)(uintptr_t)q_no;
 
 	c_num_descs = num_descs;
 	c_buf_size = desc_size;
