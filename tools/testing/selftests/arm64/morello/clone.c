@@ -178,7 +178,7 @@ void wait_single(struct test_fixture *data)
 		__TH_LOG_ERROR("wait_test: Failed to clone");
 	}
 
-	result = syscall(__NR_waitid, P_PID, cpid, wait_si, WEXITED, wait_ru);
+	result = waitid(P_PID, cpid, wait_si, WEXITED, wait_ru);
 
 	ASSERT_EQ(result, 0) {
 		__TH_LOG_ERROR("wait_test: Failed on wait");

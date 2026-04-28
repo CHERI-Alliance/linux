@@ -87,3 +87,13 @@ int timer_settime(timer_t timerid, int flags, const struct itimerspec *new_value
 {
 	return syscall(__NR_timer_settime, timerid, flags, new_value, old_value);
 }
+
+int rt_sigqueueinfo(pid_t tgid, int sig, siginfo_t *uinfo)
+{
+	return syscall(__NR_rt_sigqueueinfo, tgid, sig, uinfo);
+}
+
+int rt_tgsigqueueinfo(pid_t tgid, pid_t tid, int sig, siginfo_t *uinfo)
+{
+	return syscall(__NR_rt_tgsigqueueinfo, tgid, tid, sig, uinfo);
+}
