@@ -534,6 +534,8 @@ static inline bool insn_is_cast_user(const struct bpf_insn *insn)
 		bpf_size = BPF_W;				\
 	else if (bytes == sizeof(u64))				\
 		bpf_size = BPF_DW;				\
+	else if (bytes == sizeof(void *))			\
+		bpf_size = BPF_DW;				\
 								\
 	bpf_size;						\
 })

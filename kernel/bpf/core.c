@@ -2194,6 +2194,15 @@ out:
 		 */
 		barrier_nospec();
 		CONT;
+		/*
+		 * FIXCHERI: This is a dirty hack to avoid changing the
+		 * FIXCHERI: BPF ABI too much for now. The BPF program
+		 * FIXCHERI: should tell if this is a capability load or not.
+		 */
+#define LDX_MAYBE_PTR(SIZETYPE, INSN) (					\
+		(__SIZEOF_POINTER__ > sizeof(ptraddr_t)) &&		\
+		(sizeof(SIZETYPE) == sizeof(ptraddr_t)) &&		\
+		((SRC + (INSN)->off) % __SIZEOF_POINTER__ == 0))
 #define LDST(SIZEOP, SIZE)						\
 	STX_MEM_##SIZEOP:						\
 		*(SIZE *)(uintptr_t) (DST + insn->off) = (SIZE __force) SRC;	\
@@ -2202,7 +2211,11 @@ out:
 		*(SIZE *)(uintptr_t) (DST + insn->off) = IMM;		\
 		CONT;							\
 	LDX_MEM_##SIZEOP:						\
-		DST = __c_fakeu(*(SIZE *)(uintptr_t) (SRC + insn->off));	\
+		if (LDX_MAYBE_PTR(SIZE, insn)) {			\
+			DST = (*(uintptr_t *)(uintptr_t) (SRC + insn->off));	\
+		} else { \
+			DST = __c_fakeu(*(SIZE *)(uintptr_t) (SRC + insn->off));	\
+		} \
 		CONT;							\
 	LDX_PROBE_MEM_##SIZEOP:						\
 		bpf_probe_read_kernel_common(&DST, sizeof(SIZE),	\
@@ -2218,7 +2231,11 @@ out:
 
 #define LDSX(SIZEOP, SIZE)						\
 	LDX_MEMSX_##SIZEOP:						\
-		DST = __c_fakeu(*(SIZE *)(uintptr_t) (SRC + insn->off));	\
+		if (LDX_MAYBE_PTR(SIZE, insn)) {			\
+			DST = (*(uintptr_t *)(uintptr_t) (SRC + insn->off));	\
+		} else {						\
+			DST = __c_fakeu(*(SIZE *)(uintptr_t) (SRC + insn->off));	\
+		}									\
 		CONT;							\
 	LDX_PROBE_MEMSX_##SIZEOP:					\
 		bpf_probe_read_kernel_common(&DST, sizeof(SIZE),		\
