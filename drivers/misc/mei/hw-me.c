@@ -1746,14 +1746,14 @@ static const struct mei_cfg *const mei_cfg_list[] = {
 	[MEI_ME_GSCFI_CFG] = &mei_me_gscfi_cfg,
 };
 
-const struct mei_cfg *mei_me_get_cfg(kernel_ulong_t idx)
+const struct mei_cfg *mei_me_get_cfg(uintptr_t idx)
 {
 	BUILD_BUG_ON(ARRAY_SIZE(mei_cfg_list) != MEI_ME_NUM_CFG);
 
 	if (idx >= MEI_ME_NUM_CFG)
 		return NULL;
 
-	return mei_cfg_list[idx];
+	return mei_cfg_list[__c_ua(idx)];
 }
 EXPORT_SYMBOL_GPL(mei_me_get_cfg);
 

@@ -133,7 +133,7 @@ enum mei_cfg_idx {
 	MEI_ME_NUM_CFG,
 };
 
-const struct mei_cfg *mei_me_get_cfg(kernel_ulong_t idx);
+const struct mei_cfg *mei_me_get_cfg(uintptr_t idx);
 
 struct mei_device *mei_me_dev_init(struct device *parent,
 				   const struct mei_cfg *cfg, bool slow_fw);

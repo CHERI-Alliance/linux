@@ -225,8 +225,8 @@ static unsigned long lookup_addr(char *arg)
 		cached_addr = kallsyms_lookup_name(arg);
 	}
 
-	return (uintptr_t)dereference_function_descriptor(
-			(void *)cached_addr);
+	return __c_pa(dereference_function_descriptor(
+			(void *)__c_fakep(cached_addr)));
 }
 
 static void break_helper(char *bp_type, char *arg, unsigned long vaddr)
@@ -306,14 +306,14 @@ static int get_thread_id_continue(char *put_str, char *arg)
 static int check_and_rewind_pc(char *put_str, char *arg)
 {
 	unsigned long addr = lookup_addr(arg);
-	unsigned long ip;
+	uintptr_t ip;
 	int offset = 0;
 
 	kgdb_hex2mem(&put_str[1], (char *)kgdbts_gdb_regs,
 		 NUMREGBYTES);
 	gdb_regs_to_pt_regs(kgdbts_gdb_regs, &kgdbts_regs);
 	ip = instruction_pointer(&kgdbts_regs);
-	v2printk("Stopped at IP: %lx\n", ip);
+	v2printk("Stopped at IP: %lx\n", (unsigned long)ip);
 #ifdef GDB_ADJUSTS_BREAK_OFFSET
 	/* On some arches, a breakpoint stop requires it to be decremented */
 	if (addr + BREAK_INSTR_SIZE == ip)
@@ -328,12 +328,12 @@ static int check_and_rewind_pc(char *put_str, char *arg)
 		restart_from_top_after_write = 1;
 	} else if (strcmp(arg, "silent") && ip + offset != addr) {
 		eprintk("kgdbts: BP mismatch %lx expected %lx\n",
-			   ip + offset, addr);
+			   (unsigned long)(ip + offset), addr);
 		return 1;
 	}
 	/* Readjust the instruction pointer if needed */
 	ip += offset;
-	cont_addr = ip;
+	cont_addr = __c_ua(ip);
 #ifdef GDB_ADJUSTS_BREAK_OFFSET
 	instruction_pointer_set(&kgdbts_regs, ip);
 #endif

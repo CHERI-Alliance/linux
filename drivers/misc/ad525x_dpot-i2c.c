@@ -64,7 +64,7 @@ static int ad_dpot_i2c_probe(struct i2c_client *client)
 		return -EIO;
 	}
 
-	return ad_dpot_probe(&client->dev, &bdata, id->driver_data, id->name);
+	return ad_dpot_probe(&client->dev, &bdata, __c_ua(id->driver_data), id->name);
 }
 
 static void ad_dpot_i2c_remove(struct i2c_client *client)
