@@ -485,7 +485,7 @@ static int romfs_fill_super(struct super_block *sb, struct fs_context *fc)
 	if (!rsb)
 		return -ENOMEM;
 
-	sb->s_fs_info = (void *) 512;
+	sb->s_fs_info = __c_fakep(512);
 	ret = romfs_dev_read(sb, 0, rsb, 512);
 	if (ret < 0)
 		goto error_rsb;
@@ -495,7 +495,7 @@ static int romfs_fill_super(struct super_block *sb, struct fs_context *fc)
 	if (sb->s_mtd && img_size > sb->s_mtd->size)
 		goto error_rsb_inval;
 
-	sb->s_fs_info = (void *) img_size;
+	sb->s_fs_info = __c_fakep(img_size);
 
 	if (rsb->word0 != ROMSB_WORD0 || rsb->word1 != ROMSB_WORD1 ||
 	    img_size < ROMFH_SIZE) {

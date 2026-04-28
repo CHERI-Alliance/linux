@@ -15,7 +15,7 @@ struct romfs_inode_info {
 
 static inline size_t romfs_maxsize(struct super_block *sb)
 {
-	return (size_t) (uintptr_t) sb->s_fs_info;
+	return __c_pa(sb->s_fs_info);
 }
 
 static inline struct romfs_inode_info *ROMFS_I(struct inode *inode)
