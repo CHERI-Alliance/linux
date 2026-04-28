@@ -144,7 +144,7 @@ enum trace_type {
 struct syscall_trace_enter {
 	struct trace_entry	ent;
 	int			nr;
-	unsigned long		args[];
+	uintptr_t		args[];
 };
 
 struct syscall_trace_exit {
@@ -155,7 +155,7 @@ struct syscall_trace_exit {
 
 struct kprobe_trace_entry_head {
 	struct trace_entry	ent;
-	unsigned long		ip;
+	uintptr_t		ip;
 };
 
 struct eprobe_trace_entry_head {
@@ -164,19 +164,19 @@ struct eprobe_trace_entry_head {
 
 struct kretprobe_trace_entry_head {
 	struct trace_entry	ent;
-	unsigned long		func;
-	unsigned long		ret_ip;
+	uintptr_t		func;
+	uintptr_t		ret_ip;
 };
 
 struct fentry_trace_entry_head {
 	struct trace_entry	ent;
-	unsigned long		ip;
+	uintptr_t		ip;
 };
 
 struct fexit_trace_entry_head {
 	struct trace_entry	ent;
-	unsigned long		func;
-	unsigned long		ret_ip;
+	uintptr_t		func;
+	uintptr_t		ret_ip;
 };
 
 #define TRACE_BUF_SIZE		1024
@@ -361,7 +361,7 @@ struct trace_array {
 
 	/* The below is for memory mapped ring buffer */
 	unsigned int		mapped;
-	unsigned long		range_addr_start;
+	uintptr_t		range_addr_start;
 	unsigned long		range_addr_size;
 	char			*range_name;
 	long			text_delta;
@@ -2188,7 +2188,7 @@ extern void tracing_log_err(struct trace_array *tr,
 #undef FTRACE_ENTRY
 #define FTRACE_ENTRY(call, struct_name, id, tstruct, print)	\
 	extern struct trace_event_call					\
-	__aligned(4) event_##call;
+	__aligned(TRACE_EVENT_ALIGN) event_##call;
 #undef FTRACE_ENTRY_DUP
 #define FTRACE_ENTRY_DUP(call, struct_name, id, tstruct, print)	\
 	FTRACE_ENTRY(call, struct_name, id, PARAMS(tstruct), PARAMS(print))

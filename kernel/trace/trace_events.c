@@ -3875,7 +3875,7 @@ EXPORT_SYMBOL_GPL(trace_remove_event_call);
 
 #define for_each_event(event, start, end)			\
 	for (event = start;					\
-	     (unsigned long)event < (unsigned long)end;		\
+	     __c_pa(event) < __c_pa(end);			\
 	     event++)
 
 #ifdef CONFIG_MODULES

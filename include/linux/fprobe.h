@@ -12,11 +12,11 @@
 
 struct fprobe;
 typedef int (*fprobe_entry_cb)(struct fprobe *fp, unsigned long entry_ip,
-			       unsigned long ret_ip, struct ftrace_regs *regs,
+			       uintptr_t ret_ip, struct ftrace_regs *regs,
 			       void *entry_data);
 
 typedef void (*fprobe_exit_cb)(struct fprobe *fp, unsigned long entry_ip,
-			       unsigned long ret_ip, struct ftrace_regs *regs,
+			       uintptr_t ret_ip, struct ftrace_regs *regs,
 			       void *entry_data);
 
 /**

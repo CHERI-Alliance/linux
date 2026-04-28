@@ -32,16 +32,16 @@ TRACE_EVENT(rseq_update,
 
 TRACE_EVENT(rseq_ip_fixup,
 
-	TP_PROTO(unsigned long regs_ip, unsigned long start_ip,
-		unsigned long post_commit_offset, unsigned long abort_ip),
+	TP_PROTO(uintptr_t regs_ip, unsigned long start_ip,
+		unsigned long post_commit_offset, uintptr_t abort_ip),
 
 	TP_ARGS(regs_ip, start_ip, post_commit_offset, abort_ip),
 
 	TP_STRUCT__entry(
-		__field(unsigned long, regs_ip)
+		__field(uintptr_t, regs_ip)
 		__field(unsigned long, start_ip)
 		__field(unsigned long, post_commit_offset)
-		__field(unsigned long, abort_ip)
+		__field(uintptr_t, abort_ip)
 	),
 
 	TP_fast_assign(
@@ -52,8 +52,8 @@ TRACE_EVENT(rseq_ip_fixup,
 	),
 
 	TP_printk("regs_ip=0x%lx start_ip=0x%lx post_commit_offset=%lu abort_ip=0x%lx",
-		__entry->regs_ip, __entry->start_ip,
-		__entry->post_commit_offset, __entry->abort_ip)
+		(unsigned long)__entry->regs_ip, __entry->start_ip,
+		__entry->post_commit_offset, (unsigned long)__entry->abort_ip)
 );
 
 #endif /* _TRACE_SOCK_H */

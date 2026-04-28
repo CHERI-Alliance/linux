@@ -2035,7 +2035,7 @@ TRACE_EVENT(rxrpc_connect_call,
 
 	    TP_STRUCT__entry(
 		    __field(unsigned int,		call)
-		    __field(unsigned long,		user_call_ID)
+		    __field(uintptr_t,			user_call_ID)
 		    __field(u32,			cid)
 		    __field(u32,			call_id)
 		    __field_struct(struct sockaddr_rxrpc, srx)

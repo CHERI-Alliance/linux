@@ -830,7 +830,7 @@ static int bpf_send_signal_common(u32 sig, enum pid_type type, struct task_struc
 		info.si_code = SI_KERNEL;
 		info.si_pid = 0;
 		info.si_uid = 0;
-		info.si_value.sival_ptr = (void __user __force *)(unsigned long)value;
+		info.si_value.sival_ptr = (void __user __force *)__c_fakeu(value);
 		siginfo = &info;
 	}
 
@@ -2589,7 +2589,7 @@ kprobe_multi_link_prog_run(struct bpf_kprobe_multi_link *link,
 
 static int
 kprobe_multi_link_handler(struct fprobe *fp, unsigned long fentry_ip,
-			  unsigned long ret_ip, struct ftrace_regs *fregs,
+			  uintptr_t ret_ip, struct ftrace_regs *fregs,
 			  void *data)
 {
 	struct bpf_kprobe_multi_link *link;
@@ -2603,7 +2603,7 @@ kprobe_multi_link_handler(struct fprobe *fp, unsigned long fentry_ip,
 
 static void
 kprobe_multi_link_exit_handler(struct fprobe *fp, unsigned long fentry_ip,
-			       unsigned long ret_ip, struct ftrace_regs *fregs,
+			       uintptr_t ret_ip, struct ftrace_regs *fregs,
 			       void *data)
 {
 	struct bpf_kprobe_multi_link *link;

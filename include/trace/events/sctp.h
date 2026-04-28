@@ -28,7 +28,7 @@ TRACE_EVENT(sctp_probe_path,
 	),
 
 	TP_fast_assign(
-		__entry->asoc = (unsigned long)asoc;
+		__entry->asoc = __c_pa(asoc);
 		__entry->primary = (sp == asoc->peer.primary_path);
 		memcpy(__entry->ipaddr, &sp->ipaddr, sizeof(union sctp_addr));
 		__entry->state = sp->state;
@@ -68,7 +68,7 @@ TRACE_EVENT(sctp_probe,
 	TP_fast_assign(
 		struct sk_buff *skb = chunk->skb;
 
-		__entry->asoc = (unsigned long)asoc;
+		__entry->asoc = __c_pa(asoc);
 		__entry->mark = skb->mark;
 		__entry->bind_port = ep->base.bind_addr.port;
 		__entry->peer_port = asoc->peer.port;

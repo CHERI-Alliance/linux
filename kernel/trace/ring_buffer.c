@@ -56,9 +56,9 @@ struct ring_buffer_meta {
 };
 
 struct ring_buffer_cpu_meta {
-	unsigned long	first_buffer;
-	unsigned long	head_buffer;
-	unsigned long	commit_buffer;
+	uintptr_t	first_buffer;
+	uintptr_t	head_buffer;
+	uintptr_t	commit_buffer;
 	__u32		subbuf_size;
 	__u32		nr_subbufs;
 	int		buffers[];
@@ -555,7 +555,7 @@ struct ring_buffer_per_cpu {
 	unsigned int			mapped;
 	unsigned int			user_mapped;	/* user space mapping */
 	struct mutex			mapping_lock;
-	unsigned long			*subbuf_ids;	/* ID to subbuf VA */
+	uintptr_t			*subbuf_ids;	/* ID to subbuf VA */
 	struct trace_buffer_meta	*meta_page;
 	struct ring_buffer_cpu_meta	*ring_meta;
 
@@ -587,8 +587,8 @@ struct trace_buffer {
 	struct rb_irq_work		irq_work;
 	bool				time_stamp_abs;
 
-	unsigned long			range_addr_start;
-	unsigned long			range_addr_end;
+	uintptr_t			range_addr_start;
+	uintptr_t			range_addr_end;
 
 	struct ring_buffer_meta		*meta;
 
@@ -1257,7 +1257,7 @@ static struct list_head *rb_list_head(struct list_head *list)
 static inline int
 rb_is_head_page(struct buffer_page *page, struct list_head *list)
 {
-	unsigned long val;
+	uintptr_t val;
 
 	val = (uintptr_t)list->next;
 
@@ -1286,9 +1286,9 @@ static bool rb_is_reader_page(struct buffer_page *page)
  */
 static void rb_set_list_to_head(struct list_head *list)
 {
-	unsigned long *ptr;
+	uintptr_t *ptr;
 
-	ptr = (unsigned long *)&list->next;
+	ptr = (uintptr_t *)&list->next;
 	*ptr |= RB_PAGE_HEAD;
 	*ptr &= ~RB_PAGE_UPDATE;
 }
@@ -1317,7 +1317,7 @@ static void rb_head_page_activate(struct ring_buffer_per_cpu *cpu_buffer)
 
 static void rb_list_head_clear(struct list_head *list)
 {
-	unsigned long *ptr = (unsigned long *)&list->next;
+	uintptr_t *ptr = (uintptr_t *)&list->next;
 
 	*ptr &= ~RB_FLAG_MASK;
 }
@@ -1344,20 +1344,20 @@ static int rb_head_page_set(struct ring_buffer_per_cpu *cpu_buffer,
 {
 	struct list_head *list;
 	uintptr_t val = (uintptr_t)&head->list;
-	unsigned long ret;
+	uintptr_t ret;
 
 	list = &prev->list;
 
 	val &= ~RB_FLAG_MASK;
 
-	ret = cmpxchg((unsigned long *)&list->next,
+	ret = cmpxchg((uintptr_t *)&list->next,
 		      val | old_flag, val | new_flag);
 
 	/* check if the reader took the page */
 	if ((ret & ~RB_FLAG_MASK) != val)
 		return RB_PAGE_MOVED;
 
-	return ret & RB_FLAG_MASK;
+	return __c_ua(ret) & RB_FLAG_MASK;
 }
 
 static int rb_head_page_set_update(struct ring_buffer_per_cpu *cpu_buffer,
@@ -1442,8 +1442,8 @@ rb_set_head_page(struct ring_buffer_per_cpu *cpu_buffer)
 static bool rb_head_page_replace(struct buffer_page *old,
 				struct buffer_page *new)
 {
-	unsigned long *ptr = (unsigned long *)&old->list.prev->next;
-	unsigned long val;
+	uintptr_t *ptr = (uintptr_t *)&old->list.prev->next;
+	uintptr_t val;
 
 	val = *ptr & ~RB_FLAG_MASK;
 	val |= RB_PAGE_HEAD;
@@ -1612,8 +1612,8 @@ out_locked:
  *
  * This is used to help find the next per cpu subbuffer within a mapped range.
  */
-static unsigned long
-rb_range_align_subbuf(unsigned long addr, int subbuf_size, int nr_subbufs)
+static uintptr_t
+rb_range_align_subbuf(uintptr_t addr, int subbuf_size, int nr_subbufs)
 {
 	addr += sizeof(struct ring_buffer_cpu_meta) +
 		sizeof(int) * nr_subbufs;
@@ -1628,7 +1628,7 @@ static void *rb_range_meta(struct trace_buffer *buffer, int nr_pages, int cpu)
 	int subbuf_size = buffer->subbuf_size + BUF_PAGE_HDR_SIZE;
 	struct ring_buffer_cpu_meta *meta;
 	struct ring_buffer_meta *bmeta;
-	unsigned long ptr;
+	uintptr_t ptr;
 	int nr_subbufs;
 
 	bmeta = buffer->meta;
@@ -1657,7 +1657,7 @@ static void *rb_range_meta(struct trace_buffer *buffer, int nr_pages, int cpu)
 		/* We can use multiplication to find chunks greater than 1 */
 		if (cpu > 1) {
 			unsigned long size;
-			unsigned long p;
+			uintptr_t p;
 
 			/* Save the beginning of this CPU chunk */
 			p = ptr;
@@ -1665,7 +1665,7 @@ static void *rb_range_meta(struct trace_buffer *buffer, int nr_pages, int cpu)
 			ptr += subbuf_size * nr_subbufs;
 
 			/* Now all chunks after this are the same size */
-			size = ptr - p;
+			size = __c_ua(ptr) - __c_ua(p);
 			ptr += size * (cpu - 2);
 		}
 	}
@@ -1676,7 +1676,7 @@ static void *rb_range_meta(struct trace_buffer *buffer, int nr_pages, int cpu)
 static void *rb_subbufs_from_meta(struct ring_buffer_cpu_meta *meta)
 {
 	int subbuf_size = meta->subbuf_size;
-	unsigned long ptr;
+	uintptr_t ptr;
 
 	ptr = (uintptr_t)meta;
 	ptr = rb_range_align_subbuf(ptr, subbuf_size, meta->nr_subbufs);
@@ -1690,7 +1690,7 @@ static void *rb_subbufs_from_meta(struct ring_buffer_cpu_meta *meta)
 static void *rb_range_buffer(struct ring_buffer_per_cpu *cpu_buffer, int idx)
 {
 	struct ring_buffer_cpu_meta *meta;
-	unsigned long ptr;
+	uintptr_t ptr;
 	int subbuf_size;
 
 	meta = rb_range_meta(cpu_buffer->buffer, 0, cpu_buffer->cpu);
@@ -1720,7 +1720,7 @@ static void *rb_range_buffer(struct ring_buffer_per_cpu *cpu_buffer, int idx)
  */
 static bool rb_meta_init(struct trace_buffer *buffer, int scratch_size)
 {
-	unsigned long ptr = buffer->range_addr_start;
+	uintptr_t ptr = buffer->range_addr_start;
 	struct ring_buffer_meta *bmeta;
 	unsigned long total_size;
 	int struct_sizes;
@@ -1728,7 +1728,7 @@ static bool rb_meta_init(struct trace_buffer *buffer, int scratch_size)
 	bmeta = (struct ring_buffer_meta *)ptr;
 	buffer->meta = bmeta;
 
-	total_size = buffer->range_addr_end - buffer->range_addr_start;
+	total_size = __c_ua(buffer->range_addr_end) - __c_ua(buffer->range_addr_start);
 
 	struct_sizes = sizeof(struct ring_buffer_cpu_meta);
 	struct_sizes |= sizeof(*bmeta) << 16;
@@ -1789,8 +1789,8 @@ static bool rb_cpu_meta_valid(struct ring_buffer_cpu_meta *meta, int cpu,
 {
 	int subbuf_size = PAGE_SIZE;
 	struct buffer_data_page *subbuf;
-	unsigned long buffers_start;
-	unsigned long buffers_end;
+	uintptr_t buffers_start;
+	uintptr_t buffers_end;
 	int i;
 
 	if (!subbuf_mask)
@@ -2112,7 +2112,7 @@ static void rb_range_meta_init(struct trace_buffer *buffer, int nr_pages, int sc
 		if (valid && rb_cpu_meta_valid(meta, cpu, buffer, nr_pages, subbuf_mask)) {
 			/* Make the mappings match the current address */
 			subbuf = rb_subbufs_from_meta(meta);
-			delta = (uintptr_t)subbuf - meta->first_buffer;
+			delta = __c_pa(subbuf) - __c_ua(meta->first_buffer);
 			meta->first_buffer += delta;
 			meta->head_buffer += delta;
 			meta->commit_buffer += delta;
@@ -2165,7 +2165,7 @@ static void *rbm_start(struct seq_file *m, loff_t *pos)
 	val = *pos;
 	val++;
 
-	return (void *)val;
+	return __c_fakep(val);
 }
 
 static void *rbm_next(struct seq_file *m, void *v, loff_t *pos)
@@ -2472,8 +2472,8 @@ static void rb_free_cpu_buffer(struct ring_buffer_per_cpu *cpu_buffer)
 }
 
 static struct trace_buffer *alloc_buffer(unsigned long size, unsigned flags,
-					 int order, unsigned long start,
-					 unsigned long end,
+					 int order, uintptr_t start,
+					 uintptr_t end,
 					 unsigned long scratch_size,
 					 struct lock_class_key *key)
 {
@@ -2517,23 +2517,23 @@ static struct trace_buffer *alloc_buffer(unsigned long size, unsigned flags,
 
 	/* If start/end are specified, then that overrides size */
 	if (start && end) {
-		unsigned long buffers_start;
-		unsigned long ptr;
+		uintptr_t buffers_start;
+		uintptr_t ptr;
 		int n;
 
 		/* Make sure that start is word aligned */
-		start = ALIGN(start, sizeof(long));
+		start = ALIGN(start, sizeof(intptr_t));
 
 		/* scratch_size needs to be aligned too */
-		scratch_size = ALIGN(scratch_size, sizeof(long));
+		scratch_size = ALIGN(scratch_size, sizeof(intptr_t));
 
 		/* Subtract the buffer meta data and word aligned */
 		buffers_start = start + sizeof(struct ring_buffer_cpu_meta);
-		buffers_start = ALIGN(buffers_start, sizeof(long));
+		buffers_start = ALIGN(buffers_start, sizeof(intptr_t));
 		buffers_start += scratch_size;
 
 		/* Calculate the size for the per CPU data */
-		size = end - buffers_start;
+		size = __c_ua(end) - __c_ua(buffers_start);
 		size = size / nr_cpu_ids;
 
 		/*
@@ -2641,7 +2641,7 @@ EXPORT_SYMBOL_GPL(__ring_buffer_alloc);
  * drop data when the tail hits the head.
  */
 struct trace_buffer *__ring_buffer_alloc_range(unsigned long size, unsigned flags,
-					       int order, unsigned long start,
+					       int order, uintptr_t start,
 					       unsigned long range_size,
 					       unsigned long scratch_size,
 					       struct lock_class_key *key)
@@ -3251,7 +3251,7 @@ rb_commit_index(struct ring_buffer_per_cpu *cpu_buffer)
 static __always_inline unsigned
 rb_event_index(struct ring_buffer_per_cpu *cpu_buffer, struct ring_buffer_event *event)
 {
-	uintptr_t addr = (uintptr_t)event;
+	unsigned long addr = __c_pa(event);
 
 	addr &= (PAGE_SIZE << cpu_buffer->buffer->subbuf_order) - 1;
 
@@ -3293,7 +3293,7 @@ static void rb_update_meta_head(struct ring_buffer_per_cpu *cpu_buffer,
 {
 	struct ring_buffer_cpu_meta *meta = cpu_buffer->ring_meta;
 	uintptr_t old_head = (uintptr_t)next_page->page;
-	unsigned long new_head;
+	uintptr_t new_head;
 
 	rb_inc_page(&next_page);
 	new_head = (uintptr_t)next_page->page;
@@ -3841,7 +3841,7 @@ rb_try_to_discard(struct ring_buffer_per_cpu *cpu_buffer,
 {
 	unsigned long new_index, old_index;
 	struct buffer_page *bpage;
-	unsigned long addr;
+	uintptr_t addr;
 
 	new_index = rb_event_index(cpu_buffer, event);
 	old_index = new_index + rb_event_ts_length(event);
@@ -7034,7 +7034,7 @@ static void rb_free_meta_page(struct ring_buffer_per_cpu *cpu_buffer)
 }
 
 static void rb_setup_ids_meta_page(struct ring_buffer_per_cpu *cpu_buffer,
-				   unsigned long *subbuf_ids)
+				   uintptr_t *subbuf_ids)
 {
 	struct trace_buffer_meta *meta = cpu_buffer->meta_page;
 	unsigned int nr_subbufs = cpu_buffer->nr_pages + 1;
@@ -7251,7 +7251,8 @@ int ring_buffer_map(struct trace_buffer *buffer, int cpu,
 		    struct vm_area_struct *vma)
 {
 	struct ring_buffer_per_cpu *cpu_buffer;
-	unsigned long flags, *subbuf_ids;
+	unsigned long flags;
+	uintptr_t *subbuf_ids;
 	int err;
 
 	if (!cpumask_test_cpu(cpu, buffer->cpumask))

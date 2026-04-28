@@ -20,6 +20,12 @@ union bpf_attr;
 /* Used for event string fields when they are NULL */
 #define EVENT_NULL_STR		"(null)"
 
+#ifdef CONFIG_CHERI_KERNEL
+#define TRACE_EVENT_ALIGN	__SIZEOF_POINTER__
+#else
+#define TRACE_EVENT_ALIGN	4
+#endif
+
 const char *trace_print_flags_seq(struct trace_seq *p, const char *delim,
 				  unsigned long flags,
 				  const struct trace_print_flags *flag_array);
@@ -392,7 +398,7 @@ struct trace_event_call {
 	int	(*perf_perm)(struct trace_event_call *,
 			     struct perf_event *);
 #endif
-};
+} __cheri_pointer_align;
 
 #ifdef CONFIG_DYNAMIC_EVENTS
 bool trace_event_dyn_try_get_ref(struct trace_event_call *call);

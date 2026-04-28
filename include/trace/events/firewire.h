@@ -453,7 +453,7 @@ TRACE_EVENT_CONDITION(isoc_outbound_allocate,
 		__field(u8, scode)
 	),
 	TP_fast_assign(
-		__entry->context = (uintptr_t)ctx;
+		__entry->context = __c_pa(ctx);
 		__entry->card_index = ctx->card->index;
 		__entry->channel = channel;
 		__entry->scode = scode;
@@ -478,7 +478,7 @@ TRACE_EVENT_CONDITION(isoc_inbound_single_allocate,
 		__field(u8, header_size)
 	),
 	TP_fast_assign(
-		__entry->context = (uintptr_t)ctx;
+		__entry->context = __c_pa(ctx);
 		__entry->card_index = ctx->card->index;
 		__entry->channel = channel;
 		__entry->header_size = header_size;
@@ -501,7 +501,7 @@ TRACE_EVENT_CONDITION(isoc_inbound_multiple_allocate,
 		__field(u8, card_index)
 	),
 	TP_fast_assign(
-		__entry->context = (uintptr_t)ctx;
+		__entry->context = __c_pa(ctx);
 		__entry->card_index = ctx->card->index;
 	),
 	TP_printk(
@@ -519,7 +519,7 @@ DECLARE_EVENT_CLASS(isoc_destroy_template,
 		__field(u8, card_index)
 	),
 	TP_fast_assign(
-		__entry->context = (uintptr_t)ctx;
+		__entry->context = __c_pa(ctx);
 		__entry->card_index = ctx->card->index;
 	),
 	TP_printk(
@@ -556,7 +556,7 @@ TRACE_EVENT(isoc_inbound_multiple_channels,
 		__field(u64, channels)
 	),
 	TP_fast_assign(
-		__entry->context = (uintptr_t)ctx;
+		__entry->context = __c_pa(ctx);
 		__entry->card_index = ctx->card->index;
 		__entry->channels = channels;
 	),
@@ -579,7 +579,7 @@ TRACE_EVENT_CONDITION(isoc_outbound_start,
 		__field(u16, cycle)
 	),
 	TP_fast_assign(
-		__entry->context = (uintptr_t)ctx;
+		__entry->context = __c_pa(ctx);
 		__entry->card_index = ctx->card->index;
 		__entry->cycle_match = cycle_match < 0 ? false : true;
 		__entry->cycle = __entry->cycle_match ? (u16)cycle_match : 0;
@@ -605,7 +605,7 @@ DECLARE_EVENT_CLASS(isoc_inbound_start_template,
 		__field(u8, tags)
 	),
 	TP_fast_assign(
-		__entry->context = (uintptr_t)ctx;
+		__entry->context = __c_pa(ctx);
 		__entry->card_index = ctx->card->index;
 		__entry->cycle_match = cycle_match < 0 ? false : true;
 		__entry->cycle = __entry->cycle_match ? (u16)cycle_match : 0;
@@ -648,7 +648,7 @@ DECLARE_EVENT_CLASS(isoc_stop_template,
 		__field(u8, card_index)
 	),
 	TP_fast_assign(
-		__entry->context = (uintptr_t)ctx;
+		__entry->context = __c_pa(ctx);
 		__entry->card_index = ctx->card->index;
 	),
 	TP_printk(
@@ -684,7 +684,7 @@ DECLARE_EVENT_CLASS(isoc_flush_template,
 		__field(u8, card_index)
 	),
 	TP_fast_assign(
-		__entry->context = (uintptr_t)ctx;
+		__entry->context = __c_pa(ctx);
 		__entry->card_index = ctx->card->index;
 	),
 	TP_printk(
@@ -720,7 +720,7 @@ DECLARE_EVENT_CLASS(isoc_flush_completions_template,
 		__field(u8, card_index)
 	),
 	TP_fast_assign(
-		__entry->context = (uintptr_t)ctx;
+		__entry->context = __c_pa(ctx);
 		__entry->card_index = ctx->card->index;
 	),
 	TP_printk(
@@ -762,7 +762,7 @@ DEFINE_EVENT_CONDITION(isoc_flush_completions_template, isoc_inbound_multiple_fl
 
 #define TP_fast_assign_iso_packet(ctx, buffer_offset, packet)		\
 	TP_fast_assign(							\
-		__entry->context = (uintptr_t)ctx;			\
+		__entry->context = __c_pa(ctx);			\
 		__entry->card_index = ctx->card->index;			\
 		__entry->buffer_offset = buffer_offset;			\
 		__entry->interrupt = packet->interrupt;			\
@@ -852,7 +852,7 @@ DECLARE_EVENT_CLASS(isoc_single_completions_template,
 		__dynamic_array(u32, header, header_length / QUADLET_SIZE)
 	),
 	TP_fast_assign(
-		__entry->context = (uintptr_t)ctx;
+		__entry->context = __c_pa(ctx);
 		__entry->card_index = ctx->card->index;
 		__entry->timestamp = timestamp;
 		__entry->cause = cause;
@@ -891,7 +891,7 @@ TRACE_EVENT(isoc_inbound_multiple_completions,
 		__field(u8, cause)
 	),
 	TP_fast_assign(
-		__entry->context = (uintptr_t)ctx;
+		__entry->context = __c_pa(ctx);
 		__entry->card_index = ctx->card->index;
 		__entry->completed = completed;
 		__entry->cause = cause;

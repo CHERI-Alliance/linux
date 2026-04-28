@@ -1031,7 +1031,12 @@ static void print_fields(struct trace_iterator *iter, struct trace_event_call *c
 			if (!iter->fmt_size)
 				trace_iter_expand_format(iter);
 			addr = trace_adjust_address(tr, *(unsigned long *)pos);
-			ret = strncpy_from_kernel_nofault(iter->fmt, (void *)addr,
+			ret = strncpy_from_kernel_nofault(iter->fmt,
+#ifdef CONFIG_CHERI_KERNEL
+							  "<FIXCHERI>",
+#else
+							  (void *)addr,
+#endif
 							  iter->fmt_size);
 			if (ret < 0)
 				trace_seq_printf(&iter->seq, "(0x%px)", pos);
@@ -1078,7 +1083,7 @@ static void print_fields(struct trace_iterator *iter, struct trace_event_call *c
 				    !strcmp(field->name, "parent_offs")) {
 					unsigned long ip;
 
-					ip = addr + (uintptr_t)_stext;
+					ip = addr + __c_pa(_stext);
 					ip = trace_adjust_address(tr, ip);
 					trace_seq_printf(&iter->seq, "%pS ", (void *)(uintptr_t)ip);
 				}
