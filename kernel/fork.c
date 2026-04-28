@@ -2795,67 +2795,150 @@ SYSCALL_DEFINE5(clone, unsigned long, clone_flags, user_uintptr_t, newsp,
 }
 #endif
 
+#define __clone_args_size_ver(ver, pfx)	\
+	pfx##CLONE_ARGS_SIZE_VER##ver
+
+#ifdef CONFIG_COMPAT64
+struct compat_clone_args {
+	__aligned_u64 flags;
+	__aligned_u64 pidfd;
+	__aligned_u64 child_tid;
+	__aligned_u64 parent_tid;
+	__aligned_u64 exit_signal;
+	__aligned_u64 stack;
+	__aligned_u64 stack_size;
+	__aligned_u64 tls;
+	__aligned_u64 set_tid;
+	__aligned_u64 set_tid_size;
+	__aligned_u64 cgroup;
+};
+
+#define COMPAT_CLONE_ARGS_SIZE_VER0 64 /* sizeof first published struct */
+#define COMPAT_CLONE_ARGS_SIZE_VER1 80 /* sizeof second published struct */
+#define COMPAT_CLONE_ARGS_SIZE_VER2 88 /* sizeof third published struct */
+
+#define clone_args_size_ver(args, ver)					\
+	((args)->compat_mode ? __clone_args_size_ver(ver, COMPAT_)	\
+			     : __clone_args_size_ver(ver, ))
+
+#define clone_args_get(args, member)				\
+	((args)->compat_mode ? (args)->__compat_args.member	\
+			     : (args)->__args.member)
+
+#define clone_args_get_user_ptr(args, member)					\
+	((args)->compat_mode ?							\
+		compat_ptr(clone_args_get(args, member)) :			\
+		(void __user *)(user_uintptr_t)(clone_args_get(args, member)))
+
+#else /* CONFIG_COMPAT64 */
+#define clone_args_size_ver(args, ver)	__clone_args_size_ver(ver, )
+#define clone_args_get(args, member)	((args)->member)
+#define clone_args_get_user_ptr(args, member)	\
+	(void __user *)(user_uintptr_t)(clone_args_get(args, member))
+#endif /* CONFIG_COMPAT64 */
+
+static inline void clone_args_validate_static(void)
+{
+#define CLONE_ARGS_BUILD_BUG_ON(type, pfx)				\
+do {									\
+	BUILD_BUG_ON(offsetofend(type, tls) !=				\
+		     __clone_args_size_ver(0, pfx));			\
+	BUILD_BUG_ON(offsetofend(type, set_tid_size) !=			\
+		     __clone_args_size_ver(1, pfx));			\
+	BUILD_BUG_ON(offsetofend(type, cgroup) !=			\
+		     __clone_args_size_ver(2, pfx));			\
+	BUILD_BUG_ON(sizeof(type) != __clone_args_size_ver(2, pfx));	\
+} while (0)
+
+	CLONE_ARGS_BUILD_BUG_ON(struct clone_args, );
+#ifdef CONFIG_COMPAT64
+	CLONE_ARGS_BUILD_BUG_ON(struct compat_clone_args, COMPAT_);
+	BUILD_BUG_ON(sizeof(struct clone_args) < sizeof(struct compat_clone_args));
+#endif
+}
+
 static noinline int copy_clone_args_from_user(struct kernel_clone_args *kargs,
 					      struct clone_args __user *uargs,
 					      size_t usize)
 {
 	int err;
+#ifdef CONFIG_COMPAT64
+	struct {
+		union {
+			struct clone_args	 __args;
+			struct compat_clone_args __compat_args;
+		};
+		bool compat_mode;
+	} args = {
+		.compat_mode = in_compat_syscall(),
+	};
+#else
 	struct clone_args args;
+#endif
 	pid_t *kset_tid = kargs->set_tid;
 
-	BUILD_BUG_ON(offsetofend(struct clone_args, tls) !=
-		     CLONE_ARGS_SIZE_VER0);
-	BUILD_BUG_ON(offsetofend(struct clone_args, set_tid_size) !=
-		     CLONE_ARGS_SIZE_VER1);
-	BUILD_BUG_ON(offsetofend(struct clone_args, cgroup) !=
-		     CLONE_ARGS_SIZE_VER2);
-	BUILD_BUG_ON(sizeof(struct clone_args) != CLONE_ARGS_SIZE_VER2);
+	clone_args_validate_static();
 
 	if (unlikely(usize > PAGE_SIZE))
 		return -E2BIG;
-	if (unlikely(usize < CLONE_ARGS_SIZE_VER0))
+	if (unlikely(usize < clone_args_size_ver(&args, 0)))
 		return -EINVAL;
 
+#ifdef CONFIG_COMPAT64
+	if (args.compat_mode)
+		err = copy_struct_from_user_no_ptr(&args.__compat_args,
+					    sizeof(args.__compat_args),
+					    uargs, usize);
+	else
+		err = copy_struct_from_user_with_ptr(&args.__args,
+						     sizeof(args.__args),
+						     uargs, usize);
+#else
 	err = copy_struct_from_user_with_ptr(&args, sizeof(args), uargs, usize);
+#endif
+
 	if (err)
 		return err;
 
-	if (unlikely(args.set_tid_size > MAX_PID_NS_LEVEL))
+	if (unlikely(clone_args_get(&args, set_tid_size) > MAX_PID_NS_LEVEL))
 		return -EINVAL;
 
-	if (unlikely(!args.set_tid && args.set_tid_size > 0))
+	if (unlikely(!clone_args_get(&args, set_tid) &&
+		     clone_args_get(&args, set_tid_size) > 0))
 		return -EINVAL;
 
-	if (unlikely(args.set_tid && args.set_tid_size == 0))
+	if (unlikely(clone_args_get(&args, set_tid) &&
+		     clone_args_get(&args, set_tid_size) == 0))
 		return -EINVAL;
 
 	/*
 	 * Verify that higher 32bits of exit_signal are unset and that
 	 * it is a valid signal
 	 */
-	if (unlikely((args.exit_signal & ~((u64)CSIGNAL)) ||
-		     !valid_signal(args.exit_signal)))
+	if (unlikely((clone_args_get(&args, exit_signal) & ~((u64)CSIGNAL)) ||
+		     !valid_signal(clone_args_get(&args, exit_signal))))
 		return -EINVAL;
 
-	if ((args.flags & CLONE_INTO_CGROUP) &&
-	    (args.cgroup > INT_MAX || usize < CLONE_ARGS_SIZE_VER2))
+	if ((clone_args_get(&args, flags) & CLONE_INTO_CGROUP) &&
+	    (clone_args_get(&args, cgroup) > INT_MAX ||
+	     usize < clone_args_size_ver(&args, 2)))
 		return -EINVAL;
 
 	*kargs = (struct kernel_clone_args){
-		.flags		= args.flags,
-		.pidfd		= u64_to_user_ptr(args.pidfd),
-		.child_tid	= u64_to_user_ptr(args.child_tid),
-		.parent_tid	= u64_to_user_ptr(args.parent_tid),
-		.exit_signal	= args.exit_signal,
-		.stack		= args.stack,
-		.stack_size	= args.stack_size,
-		.tls		= args.tls,
-		.set_tid_size	= args.set_tid_size,
-		.cgroup		= args.cgroup,
+		.flags		= clone_args_get(&args, flags),
+		.pidfd		= clone_args_get_user_ptr(&args, pidfd),
+		.child_tid	= clone_args_get_user_ptr(&args, child_tid),
+		.parent_tid	= clone_args_get_user_ptr(&args, parent_tid),
+		.exit_signal	= clone_args_get(&args, exit_signal),
+		.stack		= clone_args_get(&args, stack),
+		.stack_size	= clone_args_get(&args, stack_size),
+		.tls		= clone_args_get(&args, tls),
+		.set_tid_size	= clone_args_get(&args, set_tid_size),
+		.cgroup		= clone_args_get(&args, cgroup),
 	};
 
-	if (args.set_tid &&
-		copy_from_user(kset_tid, u64_to_user_ptr(args.set_tid),
+	if (clone_args_get(&args, set_tid) &&
+		copy_from_user(kset_tid, clone_args_get_user_ptr(&args, set_tid),
 			(kargs->set_tid_size * sizeof(pid_t))))
 		return -EFAULT;
 
