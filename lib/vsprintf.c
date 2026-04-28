@@ -54,6 +54,10 @@
 #include <asm/byteorder.h>	/* cpu_to_le16 */
 #include <linux/unaligned.h>
 
+#ifdef __CHERI__
+#include <cheriintrin.h>
+#endif
+
 #include <linux/string_helpers.h>
 #include "kstrtox.h"
 
@@ -447,6 +451,9 @@ enum format_state {
 	FORMAT_STATE_CHAR,
 	FORMAT_STATE_STR,
 	FORMAT_STATE_PTR,
+#ifdef __CHERI__
+	FORMAT_STATE_CAPABILITY,
+#endif
 	FORMAT_STATE_PERCENT_CHAR,
 	FORMAT_STATE_INVALID,
 };
@@ -2620,6 +2627,181 @@ char *pointer(const char *fmt, char *buf, char *end, void *ptr,
 	}
 }
 
+#ifdef __CHERI__
+/*
+ * Support for printing capabilities with %[#]lp[x] format.
+ * It stands slightly in contradiction to kernel extensions
+ * for pointer printk formats as it is using the 'l' length
+ * modifier instead of relying on extended format specifiers.
+ * Currently supported formats:
+ *
+ *	lp[x]  - Hex value of full capability bits preceded with capability tag:
+ *			 <tag>:<127:64>:<63:0>
+ *			 (* outcome subject to kernel pointer hashing )
+ *	#lp[x] - Simplified format as:
+ *			 <address> [permissions=[rwxRWE],<base>-<top>] (attr=[invalid,sentry,sealed])
+ *			 (* outcome subject to kernel pointer hashing )
+ *
+ * Details at:
+ *	Documentation/core-api/printk-formats.rst
+ *	(keep both updated when making any changes)
+ *
+ * * - only the address undergoes hashing, remaining bits are being disregarded
+ *
+ */
+static noinline_for_stack
+char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
+		 struct printf_spec spec)
+{
+/*
+ * Write to the buffer only when there is a space for it, otherwise
+ * just advance the buffer marker to account for the space needed to
+ * store full value here
+ */
+#define update_buf_single(buf, end, c)	\
+	do { if (buf < end) *buf++ = c; else ++buf; } while (0)
+
+	/*
+	 * For null-derived capabilities switch to basic format
+	 * (address only).
+	 * Same applies when hashing is active.
+	 */
+	if ((!cheri_tag_get(cap) && !__builtin_cheri_copy_from_high(cap)) ||
+	    (likely(!no_hash_pointers) && *fmt != 'x')) {
+
+		/* Avoid adding prefix */
+		spec.flags &= ~SPECIAL;
+		return pointer(fmt, buf, end, (void *)cheri_address_get(cap),
+			       spec);
+	}
+
+	if (spec.flags & SPECIAL) { /* Simplified format for capabilities */
+		int orig_field_width = spec.field_width;
+		cheri_perms_t perms = cheri_perms_get(cap);
+		ptraddr_t base, top;
+		const char *start = buf;
+		char *attr_start;
+		unsigned int i;
+		int attrib = 0;
+		int orig_flags;
+
+		/* Note: order matters to match the format expected */
+		struct {
+			cheri_perms_t cperm; char id;
+		} static const __perms[] = {
+			{ CHERI_PERM_LOAD,              'r' },
+			{ CHERI_PERM_STORE,             'w' },
+			{ CHERI_PERM_EXECUTE,           'x' },
+			{ CHERI_PERM_LOAD_CAP,          'R' },
+			{ CHERI_PERM_STORE_CAP,         'W' },
+#ifdef CONFIG_ARM64_MORELLO
+			{ ARM_CAP_PERMISSION_EXECUTIVE,	'E' }
+#endif
+		};
+
+		/*
+		 * Things get slightly confusing here when it comes to
+		 * precision. The standard format specification claims that
+		 * precision might cause truncation of the actual output,
+		 * contrary to width.
+		 * CHERI on the other hand suggests, that precision used
+		 * with the 'p' specifier should determine the width of
+		 * addresses though following current formatting for pointer types,
+		 * unless explicitly stated, the width will be enforced, leaving
+		 * precision being ineffective. Furthermore, according to the guide,
+		 * in theory precision should not affect the way the Raw and Simplified
+		 * formats are being handled (the non-address related parts).
+		 * Stick with that one.
+		 * Note: Using precision with pointers/capabilities with
+		 * active hashing might lead to slightly unexpected output.
+		 * That's the result of applying the precision while
+		 * respecting the field width.
+		 *
+		 * Width in this case refers to the width of final string generated for
+		 * the simplified format
+		 */
+		spec.field_width = -1;
+		orig_flags = spec.flags;
+		spec.flags &= ~(ZEROPAD | LEFT);
+
+		buf = pointer_string(buf, end, (void *)cheri_address_get(cap),
+				     spec);
+
+		update_buf_single(buf, end, ' ');
+		update_buf_single(buf, end, '[');
+		for (i = 0; i < ARRAY_SIZE(__perms); ++i) {
+			if (perms & __perms[i].cperm)
+				update_buf_single(buf, end, __perms[i].id);
+		}
+		update_buf_single(buf, end, ',');
+
+		base = cheri_base_get(cap);
+		buf = pointer_string(buf, end, (void *)base, spec);
+		update_buf_single(buf, end, '-');
+
+		top =  base + cheri_length_get(cap);
+		buf = pointer_string(buf, end, (void *)top, spec);
+		update_buf_single(buf, end, ']');
+
+		/* Attributes */
+		/* Reset precision to output full attribute identifiers here */
+		spec.precision = -1;
+
+		/*
+		 * Keep track of the attribute start section to format
+		 * it properly in case there are attributes to be reported.
+		 * Otherwise simply rolling on a buffer might lead to overflowing
+		 * past the terminating character if the buffer is big enough.
+		 */
+		attr_start = buf;
+		buf += 2;
+
+		if (!cheri_tag_get(cap)) {
+			buf = string_nocheck(buf, end, "invalid", spec);
+			++attrib;
+		}
+		if (cheri_is_sentry(cap)) {
+			if (attrib++)
+				update_buf_single(buf, end, ',');
+			buf = string_nocheck(buf, end, "sentry", spec);
+
+		}
+		if (cheri_is_sealed(cap)) {
+			if (attrib++)
+				update_buf_single(buf, end, ',');
+			buf = string_nocheck(buf, end, "sealed", spec);
+		}
+
+		if (attrib) {
+			update_buf_single(attr_start, end, ' ');
+			update_buf_single(attr_start, end, '(');
+			update_buf_single(buf, end, ')');
+		} else {
+			buf = attr_start; /* Rollback on space and opening bracket */
+		}
+
+		/* Restore the originally requested width */
+		spec.field_width = orig_field_width;
+		spec.flags |= orig_flags;
+
+		return widen_string(buf, buf - start, end, spec);
+	}
+
+	/*
+	 * Raw format: hex dump of full capability
+	 */
+	update_buf_single(buf, end, cheri_tag_get(cap) ? '1' : '0');
+	update_buf_single(buf, end, ':');
+	buf = pointer_string(buf, end,
+			     (void *) __builtin_cheri_copy_from_high(cap),
+			     spec);
+	update_buf_single(buf, end, ':');
+	return pointer_string(buf, end, (void *)cheri_address_get(cap), spec);
+
+#undef update_buf_single
+}
+#endif /* __CHERI__ */
+
 struct fmt {
 	const char *str;
 	unsigned char state;	// enum format_state
@@ -2845,6 +3027,7 @@ static unsigned long long convert_num_spec(unsigned int val, int size, struct pr
  *
  *  - ``%n`` is unsupported
  *  - ``%p*`` is handled by pointer()
+ *  - ``%lp[x]`` and ``%#lp[x]`` is handled by capability()
  *
  * See pointer() or Documentation/core-api/printk-formats.rst for more
  * extensive description.
@@ -2949,6 +3132,13 @@ int vsnprintf(char *buf, size_t size, const char *fmt_str, va_list args)
 			continue;
 
 		case FORMAT_STATE_PTR:
+#ifdef __CHERI__
+			if (fmt.size == sizeof(long))
+				str = capability(fmt.str, str, end,
+						 va_arg(args, void * __capability),
+						 spec);
+			else
+#endif
 			str = pointer(fmt.str, str, end, va_arg(args, void *),
 				      spec);
 			while (isalnum(*fmt.str))
@@ -3230,6 +3420,13 @@ int vbin_printf(u32 *bin_buf, size_t size, const char *fmt_str, va_list args)
 					save_arg(void *);
 					break;
 				}
+#ifdef __CHERI__
+				if (fmt.size == sizeof(long))
+					str = capability(fmt.str, str, end,
+							 va_arg(args, void * __capability),
+							 spec);
+				else
+#endif
 				str = pointer(fmt.str, str, end, va_arg(args, void *),
 					      spec);
 				if (str + 1 < end)
