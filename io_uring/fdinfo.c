@@ -16,6 +16,7 @@
 #include "cancel.h"
 #include "rsrc.h"
 #include "opdef.h"
+#include "io_uring.h"
 
 #ifdef CONFIG_NET_RX_BUSY_POLL
 static __cold void common_tracking_show_fdinfo(struct io_ring_ctx *ctx,
@@ -57,6 +58,42 @@ static inline void napi_show_fdinfo(struct io_ring_ctx *ctx,
 }
 #endif
 
+#define print_sqe(m, sqe, sq_idx, sq_shift, opcode)						\
+	do {										\
+		seq_printf(m, "%5u: opcode:%s, fd:%d, flags:%x, off:%llu, "		\
+			      "addr:0x%llx, rw_flags:0x%x, buf_index:%d "		\
+			      "user_data:%llu",						\
+			   (sq_idx), io_uring_get_opcode(opcode), (sqe)->fd,	\
+			   (sqe)->flags, (unsigned long long) (sqe)->off,		\
+			   (unsigned long long) (sqe)->addr, (sqe)->rw_flags,		\
+			   (sqe)->buf_index, (sqe)->user_data);				\
+		if (sq_shift) {								\
+			u64 *sqeb = (void *) ((sqe) + 1);				\
+			int size = sizeof(*(sqe)) / sizeof(u64);			\
+			int j;								\
+											\
+			for (j = 0; j < size; j++) {					\
+				seq_printf(m, ", e%d:0x%llx", j,			\
+					   (unsigned long long) *sqeb);			\
+				sqeb++;							\
+			}								\
+		}									\
+	} while (0)
+
+#define print_cqe(m, cqe, cq_idx, cqe32)					\
+	do {									\
+		seq_printf(m, "%5u: user_data:%llu, res:%d, flag:%x",		\
+			   (cq_idx), (cqe)->user_data, (cqe)->res,		\
+			   (cqe)->flags);					\
+		if (cqe32)							\
+			seq_printf(m, ", extra1:%llu, extra2:%llu",		\
+				   (cqe)->big_cqe[0], (cqe)->big_cqe[1]);	\
+	} while (0)
+
+/*
+ * Caller holds a reference to the file already, we don't need to do
+ * anything else to get an extra reference.
+ */
 static void __io_uring_show_fdinfo(struct io_ring_ctx *ctx, struct seq_file *m)
 {
 	struct io_overflow_cqe *ocqe;
@@ -93,8 +130,7 @@ static void __io_uring_show_fdinfo(struct io_ring_ctx *ctx, struct seq_file *m)
 	sq_entries = min(sq_tail - sq_head, ctx->sq_entries);
 	for (i = 0; i < sq_entries; i++) {
 		unsigned int entry = i + sq_head;
-		struct io_uring_sqe *sqe;
-		unsigned int sq_idx;
+		unsigned int sq_idx, sq_off;
 		bool sqe128 = false;
 		u8 opcode;
 
@@ -105,8 +141,11 @@ static void __io_uring_show_fdinfo(struct io_ring_ctx *ctx, struct seq_file *m)
 		if (sq_idx > sq_mask)
 			continue;
 
-		sqe = &ctx->sq_sqes[sq_idx << sq_shift];
-		opcode = READ_ONCE(sqe->opcode);
+		sq_off = sq_idx << sq_shift;
+		if (io_in_compat64(ctx))
+			opcode = READ_ONCE(ctx->sq_sqes_compat[sq_off].opcode);
+		else
+			opcode = READ_ONCE(ctx->sq_sqes[sq_off].opcode);
 		if (opcode >= IORING_OP_LAST)
 			continue;
 		opcode = array_index_nospec(opcode, IORING_OP_LAST);
@@ -129,43 +168,29 @@ static void __io_uring_show_fdinfo(struct io_ring_ctx *ctx, struct seq_file *m)
 			i++;
 			sqe128 = true;
 		}
-		seq_printf(m, "%5u: opcode:%s, fd:%d, flags:%x, off:%llu, "
-			      "addr:0x%llx, rw_flags:0x%x, buf_index:%d "
-			      "user_data:%llu",
-			   sq_idx, io_uring_get_opcode(opcode), sqe->fd,
-			   sqe->flags, (unsigned long long) sqe->off,
-			   (unsigned long long) sqe->addr, sqe->rw_flags,
-			   sqe->buf_index, (__u64)sqe->user_data);
-		if (sqe128) {
-			u64 *sqeb = (void *) (sqe + 1);
-			int size = sizeof(struct io_uring_sqe) / sizeof(u64);
-			int j;
+		if (io_in_compat64(ctx))
+			print_sqe(m, &ctx->sq_sqes_compat[sq_off], sq_idx, sqe128, opcode);
+		else
+			print_sqe(m, &ctx->sq_sqes[sq_off], sq_idx, sqe128, opcode);
 
-			for (j = 0; j < size; j++) {
-				seq_printf(m, ", e%d:0x%llx", j,
-						(unsigned long long) *sqeb);
-				sqeb++;
-			}
-		}
 		seq_printf(m, "\n");
 		cond_resched();
 	}
 	seq_printf(m, "CQEs:\t%u\n", cq_tail - cq_head);
 	cq_entries = min(cq_tail - cq_head, ctx->cq_entries);
 	for (i = 0; i < cq_entries; i++) {
-		struct io_uring_cqe *cqe;
-		bool cqe32 = false;
-
+		bool cqe32 = ctx->flags & IORING_SETUP_CQE32;
 		unsigned int cq_off = cq_head & cq_mask;
-		cqe = &ctx->cq_cqes[(cq_head & cq_mask)];
-		if (cqe->flags & IORING_CQE_F_32 || ctx->flags & IORING_SETUP_CQE32)
-			cqe32 = true;
-		seq_printf(m, "%5u: user_data:%llu, res:%d, flags:%x",
-			   cq_head & cq_mask, (__u64)cqe->user_data, cqe->res,
-			   cqe->flags);
-		if (cqe32)
-			seq_printf(m, ", extra1:%llu, extra2:%llu",
-					(__u64)cqe->big_cqe[0], (__u64)cqe->big_cqe[1]);
+
+		if (io_in_compat64(ctx)) {
+			struct __c64_io_uring_cqe *cqe = (void *)&ctx->cq_cqes_compat[cq_off];
+			cqe32 |= cqe->flags & IORING_CQE_F_32;
+			print_cqe(m, cqe, cq_off, cqe32);
+		} else {
+			struct io_uring_cqe *cqe = &ctx->cq_cqes[cq_off];
+			cqe32 |= cqe->flags & IORING_CQE_F_32;
+			print_cqe(m, cqe, cq_off, cqe32);
+		}
 		seq_printf(m, "\n");
 		cq_head++;
 		if (cqe32) {
