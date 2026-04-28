@@ -374,7 +374,7 @@ static void gro_list_prepare(const struct list_head *head,
 		if (!diffs && unlikely(skb->slow_gro | p->slow_gro)) {
 			diffs |= p->sk != skb->sk;
 			diffs |= skb_metadata_dst_cmp(p, skb);
-			diffs |= skb_get_nfct(p) ^ skb_get_nfct(skb);
+			diffs |= __c_ua(skb_get_nfct(p)) ^ __c_ua(skb_get_nfct(skb));
 
 			diffs |= gro_list_prepare_tc_ext(skb, p, diffs);
 			diffs |= __psp_skb_coalesce_diff(skb, p, diffs);

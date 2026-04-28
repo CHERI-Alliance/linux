@@ -168,7 +168,7 @@ int nf_conntrack_tuple_taken(const struct nf_conntrack_tuple *tuple,
 static inline struct nf_conn *
 nf_ct_get(const struct sk_buff *skb, enum ip_conntrack_info *ctinfo)
 {
-	unsigned long nfct = skb_get_nfct(skb);
+	uintptr_t nfct = skb_get_nfct(skb);
 
 	*ctinfo = nfct & NFCT_INFOMASK;
 	return (struct nf_conn *)(nfct & NFCT_PTRMASK);

@@ -480,7 +480,7 @@ struct udp_dev_scratch {
 
 static inline struct udp_dev_scratch *udp_skb_scratch(struct sk_buff *skb)
 {
-	return (struct udp_dev_scratch *)&skb->dev_scratch;
+	return (struct udp_dev_scratch *)(void *)&skb->dev_scratch;
 }
 
 #if BITS_PER_LONG == 64

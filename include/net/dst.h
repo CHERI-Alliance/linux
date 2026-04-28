@@ -266,7 +266,7 @@ void dst_release(struct dst_entry *dst);
 
 void dst_release_immediate(struct dst_entry *dst);
 
-static inline void refdst_drop(unsigned long refdst)
+static inline void refdst_drop(uintptr_t refdst)
 {
 	if (!(refdst & SKB_DST_NOREF))
 		dst_release((struct dst_entry *)(refdst & SKB_DST_PTRMASK));
@@ -286,7 +286,7 @@ static inline void skb_dst_drop(struct sk_buff *skb)
 	}
 }
 
-static inline void __skb_dst_copy(struct sk_buff *nskb, unsigned long refdst)
+static inline void __skb_dst_copy(struct sk_buff *nskb, uintptr_t refdst)
 {
 	nskb->slow_gro |= !!refdst;
 	nskb->_skb_refdst = refdst;

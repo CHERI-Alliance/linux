@@ -919,17 +919,17 @@ struct sk_buff {
 
 	union {
 		struct {
-			unsigned long	_skb_refdst;
+			uintptr_t	_skb_refdst;
 			void		(*destructor)(struct sk_buff *skb);
 		};
 		struct list_head	tcp_tsorted_anchor;
 #ifdef CONFIG_NET_SOCK_MSG
-		unsigned long		_sk_redir;
+		uintptr_t		_sk_redir;
 #endif
 	};
 
 #if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
-	unsigned long		 _nfct;
+	uintptr_t		 _nfct;
 #endif
 	unsigned int		len,
 				data_len;
@@ -1185,9 +1185,9 @@ static inline void skb_dst_check_unset(struct sk_buff *skb)
  *
  * Returns: original skb dst_entry.
  */
-static inline unsigned long skb_dstref_steal(struct sk_buff *skb)
+static inline uintptr_t skb_dstref_steal(struct sk_buff *skb)
 {
-	unsigned long refdst = skb->_skb_refdst;
+	uintptr_t refdst = skb->_skb_refdst;
 
 	skb->_skb_refdst = 0;
 	return refdst;
@@ -1198,7 +1198,7 @@ static inline unsigned long skb_dstref_steal(struct sk_buff *skb)
  * @skb: buffer
  * @refdst: dst entry from a call to skb_dstref_steal()
  */
-static inline void skb_dstref_restore(struct sk_buff *skb, unsigned long refdst)
+static inline void skb_dstref_restore(struct sk_buff *skb, uintptr_t refdst)
 {
 	skb_dst_check_unset(skb);
 	skb->_skb_refdst = refdst;
@@ -4965,7 +4965,7 @@ static inline struct nf_conntrack *skb_nfct(const struct sk_buff *skb)
 #endif
 }
 
-static inline unsigned long skb_get_nfct(const struct sk_buff *skb)
+static inline uintptr_t skb_get_nfct(const struct sk_buff *skb)
 {
 #if IS_ENABLED(CONFIG_NF_CONNTRACK)
 	return skb->_nfct;
@@ -4974,7 +4974,7 @@ static inline unsigned long skb_get_nfct(const struct sk_buff *skb)
 #endif
 }
 
-static inline void skb_set_nfct(struct sk_buff *skb, unsigned long nfct)
+static inline void skb_set_nfct(struct sk_buff *skb, uintptr_t nfct)
 {
 #if IS_ENABLED(CONFIG_NF_CONNTRACK)
 	skb->slow_gro |= !!nfct;

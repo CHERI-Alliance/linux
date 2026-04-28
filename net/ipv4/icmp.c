@@ -548,7 +548,7 @@ static struct rtable *icmp_route_lookup(struct net *net, struct flowi4 *fl4,
 			err = PTR_ERR(rt2);
 	} else {
 		struct flowi4 fl4_2 = {};
-		unsigned long orefdst;
+		uintptr_t orefdst;
 
 		fl4_2.daddr = fl4_dec.saddr;
 		rt2 = ip_route_output_key(net, &fl4_2);

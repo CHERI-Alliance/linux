@@ -2169,7 +2169,7 @@ static inline void tcp_skb_tsorted_anchor_cleanup(struct sk_buff *skb)
 }
 
 #define tcp_skb_tsorted_save(skb) {		\
-	unsigned long _save = skb->_skb_refdst;	\
+	uintptr_t _save = skb->_skb_refdst;	\
 	skb->_skb_refdst = 0UL;
 
 #define tcp_skb_tsorted_restore(skb)		\
