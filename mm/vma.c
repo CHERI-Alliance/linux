@@ -3083,6 +3083,9 @@ static int acct_stack_growth(struct vm_area_struct *vma,
 	if (size > rlimit(RLIMIT_STACK))
 		return -ENOMEM;
 
+	if (reserv_is_supported(mm) && size > reserv_vma_reserv_len(vma))
+		return -ERESERVATION;
+
 	/* mlock limit tests */
 	if (!mlock_future_ok(mm, vma->vm_flags & VM_LOCKED, grow << PAGE_SHIFT))
 		return -ENOMEM;
