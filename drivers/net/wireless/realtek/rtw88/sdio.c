@@ -850,7 +850,7 @@ static void rtw_sdio_tx_skb_prepare(struct rtw_dev *rtwdev,
 				    enum rtw_tx_queue_type queue)
 {
 	const struct rtw_chip_info *chip = rtwdev->chip;
-	unsigned long data_addr, aligned_addr;
+	uintptr_t data_addr, aligned_addr;
 	size_t offset;
 	u8 *pkt_desc;
 
@@ -863,7 +863,7 @@ static void rtw_sdio_tx_skb_prepare(struct rtw_dev *rtwdev,
 		/* Ensure that the start of the pkt_desc is always aligned at
 		 * RTW_SDIO_DATA_PTR_ALIGN.
 		 */
-		offset = RTW_SDIO_DATA_PTR_ALIGN - (aligned_addr - data_addr);
+		offset = RTW_SDIO_DATA_PTR_ALIGN - __c_ua(aligned_addr - data_addr);
 
 		pkt_desc = skb_push(skb, offset);
 
