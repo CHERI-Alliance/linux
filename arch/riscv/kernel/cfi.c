@@ -67,11 +67,11 @@ enum bug_trap_type handle_cfi_failure(struct pt_regs *regs)
 	unsigned long target;
 	u32 type;
 
-	if (!is_cfi_trap(regs->epc))
+	if (!is_cfi_trap(__c_ua(regs->epc)))
 		return BUG_TRAP_TYPE_NONE;
 
 	if (!decode_cfi_insn(regs, &target, &type))
-		return report_cfi_failure_noaddr(regs, regs->epc);
+		return report_cfi_failure_noaddr(regs, __c_ua(regs->epc));
 
-	return report_cfi_failure(regs, regs->epc, &target, type);
+	return report_cfi_failure(regs, __c_ua(regs->epc), &target, type);
 }
