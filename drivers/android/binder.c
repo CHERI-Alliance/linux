@@ -3559,7 +3559,7 @@ static void binder_transaction(struct binder_proc *proc,
 		case BINDER_TYPE_FD: {
 			struct binder_fd_object *fp = to_binder_fd_object(hdr);
 			binder_size_t fd_offset = object_offset +
-				(uintptr_t)&fp->fd - (uintptr_t)fp;
+				__c_pa(&fp->fd) - __c_pa(fp);
 			int ret = binder_translate_fd(fp->fd, fd_offset, t,
 						      thread, in_reply_to);
 
