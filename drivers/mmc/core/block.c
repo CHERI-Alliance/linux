@@ -83,6 +83,15 @@ MODULE_ALIAS("mmc:block");
 #define CHECK_SIZE_NEQ(val) ((val) != sizeof(struct rpmb_frame))
 #define CHECK_SIZE_ALIGNED(val) IS_ALIGNED((val), sizeof(struct rpmb_frame))
 
+/*
+ * The compat_mmc_ioc_{multi_}cmd structs have different sizes in PCuABI and in
+ * compat64, which affects the expected MMC_IOC_{MULTI_}CMD ioctl values. The
+ * following ioctl values reflect the sizes of the compat64 structs defined in
+ * this file.
+ */
+#define MMC_IOC_CMD_COMPAT _IOWR(MMC_BLOCK_MAJOR, 0, struct compat_mmc_ioc_cmd)
+#define MMC_IOC_MULTI_CMD_COMPAT _IOWR(MMC_BLOCK_MAJOR, 1, struct compat_mmc_ioc_multi_cmd)
+
 static DEFINE_MUTEX(block_mutex);
 
 /*
@@ -923,7 +932,34 @@ static int mmc_blk_ioctl(struct block_device *bdev, blk_mode_t mode,
 static int mmc_blk_compat_ioctl(struct block_device *bdev, blk_mode_t mode,
 	unsigned int cmd, unsigned long arg)
 {
-	return mmc_blk_ioctl(bdev, mode, cmd, (user_uintptr_t) compat_ptr(arg));
+	struct mmc_blk_data *md;
+	int ret;
+	void __user *uarg = compat_ptr(arg);
+
+	switch (cmd) {
+	case MMC_IOC_CMD_COMPAT:
+		ret = mmc_blk_check_blkdev(bdev);
+		if (ret)
+			return ret;
+		md = mmc_blk_get(bdev->bd_disk);
+		if (!md)
+			return -EINVAL;
+		ret = mmc_blk_ioctl_cmd(md, uarg, NULL);
+		mmc_blk_put(md);
+		return ret;
+	case MMC_IOC_MULTI_CMD_COMPAT:
+		ret = mmc_blk_check_blkdev(bdev);
+		if (ret)
+			return ret;
+		md = mmc_blk_get(bdev->bd_disk);
+		if (!md)
+			return -EINVAL;
+		ret = mmc_blk_ioctl_multi_cmd(md, uarg, NULL);
+		mmc_blk_put(md);
+		return ret;
+	default:
+		return -EINVAL;
+	}
 }
 #endif
 
@@ -2813,7 +2849,23 @@ static long mmc_rpmb_ioctl(struct file *filp, unsigned int cmd,
 static long mmc_rpmb_ioctl_compat(struct file *filp, unsigned int cmd,
 			      unsigned long arg)
 {
-	return mmc_rpmb_ioctl(filp, cmd, (user_uintptr_t)compat_ptr(arg));
+	struct mmc_rpmb_data *rpmb = filp->private_data;
+	int ret;
+	void __user *uarg = compat_ptr(arg);
+
+	switch (cmd) {
+	case MMC_IOC_CMD_COMPAT:
+		ret = mmc_blk_ioctl_cmd(rpmb->md, uarg, rpmb);
+		break;
+	case MMC_IOC_MULTI_CMD_COMPAT:
+		ret = mmc_blk_ioctl_multi_cmd(rpmb->md, uarg, rpmb);
+		break;
+	default:
+		ret = -EINVAL;
+		break;
+	}
+
+	return ret;
 }
 #endif
 
