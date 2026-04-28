@@ -1,8 +1,13 @@
 // SPDX-License-Identifier: GPL-2.0
 // Copyright (C) 2021  Arm Limited
-#include <errno.h>
-#include <sched.h>
+#include <linux/errno.h>
+#include <linux/sched.h>
 #include "freestanding.h"
+
+/* No longer provided in uapi headers, only in libc headers */
+struct sched_param {
+	int sched_priority;
+};
 
 /*
  * /proc/sys/kernel/pid_max substitute
@@ -64,7 +69,7 @@ TEST(test_sched_rr)
 
 TEST(test_sched_other)
 {
-	run_setget(SCHED_OTHER);
+	run_setget(SCHED_NORMAL);
 }
 
 TEST(test_sched_fifo)
