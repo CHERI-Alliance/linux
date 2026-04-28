@@ -55,16 +55,21 @@
 #define AIO_RING_COMPAT_FEATURES	1
 #define AIO_RING_INCOMPAT_FEATURES	0
 struct aio_ring {
-	unsigned	id;	/* kernel internal index number */
-	unsigned	nr;	/* number of io_events */
-	unsigned	head;	/* Written to by userland or under ring_lock
-				 * mutex by aio_read_events_ring(). */
-	unsigned	tail;
+	union {
+		struct {
+			unsigned	id;	/* kernel internal index number */
+			unsigned	nr;	/* number of io_events */
+			unsigned	head;	/* Written to by userland or under ring_lock
+						 * mutex by aio_read_events_ring(). */
+			unsigned	tail;
 
-	unsigned	magic;
-	unsigned	compat_features;
-	unsigned	incompat_features;
-	unsigned	header_length;	/* size of aio_ring */
+			unsigned	magic;
+			unsigned	compat_features;
+			unsigned	incompat_features;
+			unsigned	header_length;	/* size of aio_ring */
+		};
+		struct io_event pad;
+	};
 
 
 	struct io_event		io_events[];
@@ -1242,7 +1247,8 @@ static void aio_complete(struct aio_kiocb *iocb)
 
 	pr_debug("%p[%u]: %p: %p %Lx %Lx %Lx\n", ctx, tail, iocb,
 		 (void __user *)(uintptr_t)iocb->ki_res.obj,
-		 (__u64)iocb->ki_res.data, iocb->ki_res.res, iocb->ki_res.res2);
+		 (unsigned long long)iocb->ki_res.data,
+		 iocb->ki_res.res, iocb->ki_res.res2);
 
 	/* after flagging the request as done, we
 	 * must never even look at it again
