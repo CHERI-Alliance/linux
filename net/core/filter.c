@@ -109,7 +109,7 @@ int copy_bpf_fprog_from_user(struct sock_fprog *dst, sockptr_t src, int len)
 	} else {
 		if (len != sizeof(*dst))
 			return -EINVAL;
-		if (copy_from_sockptr(dst, src, sizeof(*dst)))
+		if (copy_from_sockptr_with_ptr(dst, src, sizeof(*dst)))
 			return -EFAULT;
 	}
 
@@ -198,7 +198,7 @@ BPF_CALL_3(bpf_skb_get_nlattr, struct sk_buff *, skb, u32, a, u32, x)
 
 	nla = nla_find((struct nlattr *) &skb->data[a], skb->len - a, x);
 	if (nla)
-		return (void *) nla - (void *) skb->data;
+		return __c_fakeu((void *) nla - (void *) skb->data);
 
 	return 0;
 }
@@ -222,7 +222,7 @@ BPF_CALL_3(bpf_skb_get_nlattr_nest, struct sk_buff *, skb, u32, a, u32, x)
 
 	nla = nla_find_nested(nla, x);
 	if (nla)
-		return (void *) nla - (void *) skb->data;
+		return __c_fakeu((void *) nla - (void *) skb->data);
 
 	return 0;
 }
@@ -1052,16 +1052,14 @@ static bool chk_code_allowed(u16 code_to_probe)
 	return codes[code_to_probe];
 }
 
-static bool bpf_check_basics_ok(ptraddr_t filter_addr,
-				unsigned int flen)
+static bool __bpf_check_basics_ok(unsigned int flen)
 {
-	if (filter_addr == 0)
-		return false;
 	if (flen == 0 || flen > BPF_MAXINSNS)
 		return false;
 
 	return true;
 }
+#define bpf_check_basics_ok(F,L) (((F) != NULL) && __bpf_check_basics_ok(L))
 
 /**
  *	bpf_check_classic - verify socket filter code
@@ -1389,7 +1387,7 @@ int bpf_prog_create(struct bpf_prog **pfp, struct sock_fprog_kern *fprog)
 	struct bpf_prog *fp;
 
 	/* Make sure new filter is there and in the right amounts. */
-	if (!bpf_check_basics_ok((ptraddr_t)fprog->filter, fprog->len))
+	if (!bpf_check_basics_ok(fprog->filter, fprog->len))
 		return -EINVAL;
 
 	fp = bpf_prog_alloc(bpf_prog_size(fprog->len), 0);
@@ -1436,7 +1434,7 @@ int bpf_prog_create_from_user(struct bpf_prog **pfp, struct sock_fprog *fprog,
 	int err;
 
 	/* Make sure new filter is there and in the right amounts. */
-	if (!bpf_check_basics_ok(user_ptr_addr(fprog->filter), fprog->len))
+	if (!bpf_check_basics_ok(fprog->filter, fprog->len))
 		return -EINVAL;
 
 	fp = bpf_prog_alloc(bpf_prog_size(fprog->len), 0);
@@ -1514,7 +1512,7 @@ struct bpf_prog *__get_filter(struct sock_fprog *fprog, struct sock *sk)
 		return ERR_PTR(-EPERM);
 
 	/* Make sure new filter is there and in the right amounts. */
-	if (!bpf_check_basics_ok(user_ptr_addr(fprog->filter), fprog->len))
+	if (!bpf_check_basics_ok(fprog->filter, fprog->len))
 		return ERR_PTR(-EINVAL);
 
 	prog = bpf_prog_alloc(bpf_prog_size(fprog->len), 0);
@@ -4095,7 +4093,7 @@ BPF_CALL_4(bpf_xdp_load_bytes, struct xdp_buff *, xdp, u32, offset,
 
 	ptr = bpf_xdp_pointer(xdp, offset, len);
 	if (IS_ERR(ptr))
-		return PTR_ERR(ptr);
+		return (uintptr_t)ptr;
 
 	if (!ptr)
 		bpf_xdp_copy_buf(xdp, offset, buf, len, false);
@@ -4127,7 +4125,7 @@ BPF_CALL_4(bpf_xdp_store_bytes, struct xdp_buff *, xdp, u32, offset,
 
 	ptr = bpf_xdp_pointer(xdp, offset, len);
 	if (IS_ERR(ptr))
-		return PTR_ERR(ptr);
+		return (uintptr_t)ptr;
 
 	if (!ptr)
 		bpf_xdp_copy_buf(xdp, offset, buf, len, true);
@@ -4658,7 +4656,7 @@ static const struct bpf_func_proto bpf_xdp_redirect_proto = {
 BPF_CALL_3(bpf_xdp_redirect_map, struct bpf_map *, map, u64, key,
 	   u64, flags)
 {
-	return map->ops->map_redirect(map, key, flags);
+	return __c_fakeu(map->ops->map_redirect(map, key, flags));
 }
 
 static const struct bpf_func_proto bpf_xdp_redirect_map_proto = {
@@ -4693,8 +4691,8 @@ BPF_CALL_5(bpf_skb_event_output, struct sk_buff *, skb, struct bpf_map *, map,
 	if (unlikely(!skb || skb_size > skb->len))
 		return -EFAULT;
 
-	return bpf_event_output(map, flags, meta, meta_size, skb, skb_size,
-				bpf_skb_copy);
+	return __c_fakeu(bpf_event_output(map, flags, meta, meta_size,
+					  skb, skb_size, bpf_skb_copy));
 }
 
 static const struct bpf_func_proto bpf_skb_event_output_proto = {
@@ -5107,8 +5105,8 @@ BPF_CALL_5(bpf_xdp_event_output, struct xdp_buff *, xdp, struct bpf_map *, map,
 	if (unlikely(!xdp || xdp_size > xdp_get_buff_len(xdp)))
 		return -EFAULT;
 
-	return bpf_event_output(map, flags, meta, meta_size, xdp,
-				xdp_size, bpf_xdp_copy);
+	return __c_fakeu(bpf_event_output(map, flags, meta, meta_size, xdp,
+					  xdp_size, bpf_xdp_copy));
 }
 
 static const struct bpf_func_proto bpf_xdp_event_output_proto = {
@@ -7679,7 +7677,7 @@ BPF_CALL_5(bpf_tcp_gen_syncookie, struct sock *, sk, void *, iph, u32, iph_len,
 	if (mss == 0)
 		return -ENOENT;
 
-	return cookie | ((u64)mss << 32);
+	return __c_fakeu(cookie | ((u64)mss << 32));
 #else
 	return -EOPNOTSUPP;
 #endif /* CONFIG_SYN_COOKIES */
@@ -7829,7 +7827,7 @@ BPF_CALL_4(bpf_sock_ops_load_hdr_opt, struct bpf_sock_ops_kern *, bpf_sock,
 	op = bpf_search_tcp_opt(op, opend, search_kind, magic, magic_len,
 				&eol);
 	if (IS_ERR(op))
-		return PTR_ERR(op);
+		return (uintptr_t)op;
 
 	copy_len = op[1];
 	ret = copy_len;
@@ -7903,7 +7901,7 @@ BPF_CALL_4(bpf_sock_ops_store_hdr_opt, struct bpf_sock_ops_kern *, bpf_sock,
 		return -EEXIST;
 
 	if (PTR_ERR(op) != -ENOMSG)
-		return PTR_ERR(op);
+		return (uintptr_t)op;
 
 	if (eol)
 		/* The option has been ended.  Treat it as no more
@@ -8010,7 +8008,7 @@ BPF_CALL_3(bpf_tcp_raw_gen_syncookie_ipv4, struct iphdr *, iph,
 	mss = tcp_parse_mss_option(th, 0) ?: TCP_MSS_DEFAULT;
 	cookie = __cookie_v4_init_sequence(iph, th, &mss);
 
-	return cookie | ((u64)mss << 32);
+	return __c_fakeu(cookie | ((u64)mss << 32));
 }
 
 static const struct bpf_func_proto bpf_tcp_raw_gen_syncookie_ipv4_proto = {
@@ -8039,7 +8037,7 @@ BPF_CALL_3(bpf_tcp_raw_gen_syncookie_ipv6, struct ipv6hdr *, iph,
 	mss = tcp_parse_mss_option(th, 0) ?: mss_clamp;
 	cookie = __cookie_v6_init_sequence(iph, th, &mss);
 
-	return cookie | ((u64)mss << 32);
+	return __c_fakeu(cookie | ((u64)mss << 32));
 #else
 	return -EPROTONOSUPPORT;
 #endif
@@ -10115,7 +10113,7 @@ static u32 bpf_convert_ctx_access(enum bpf_access_type type,
 		*insn++ = BPF_LDX_MEM(BPF_DW,
 				      si->dst_reg, si->dst_reg,
 				      bpf_target_off(struct skb_shared_info,
-						     hwtstamps, 8,
+						     hwtstamps.hwtstamp, 8,
 						     target_size));
 		break;
 	}
@@ -10970,7 +10968,7 @@ static u32 sock_ops_convert_ctx_access(enum bpf_access_type type,
 		insn = bpf_convert_shinfo_access(si->dst_reg, si->dst_reg, insn);
 		*insn++ = BPF_LDX_MEM(BPF_DW, si->dst_reg, si->dst_reg,
 				      bpf_target_off(struct skb_shared_info,
-						     hwtstamps, 8,
+						     hwtstamps.hwtstamp, 8,
 						     target_size));
 		*jmp_on_null_skb = BPF_JMP_IMM(BPF_JEQ, si->dst_reg, 0,
 					       insn - jmp_on_null_skb - 1);
