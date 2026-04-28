@@ -2312,7 +2312,7 @@ err_out_exit:
 	return err;
 }
 
-static void hifn_tasklet_callback(unsigned long data)
+static void hifn_tasklet_callback(uintptr_t data)
 {
 	struct hifn_device *dev = (struct hifn_device *)data;
 
@@ -2400,7 +2400,7 @@ static int hifn_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 
 	pci_set_drvdata(pdev, dev);
 
-	tasklet_init(&dev->tasklet, hifn_tasklet_callback, (unsigned long)dev);
+	tasklet_init(&dev->tasklet, hifn_tasklet_callback, (uintptr_t) dev);
 
 	crypto_init_queue(&dev->queue, 1);
 

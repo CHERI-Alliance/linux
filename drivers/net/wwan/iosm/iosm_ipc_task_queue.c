@@ -9,7 +9,7 @@
 /* Actual tasklet function, will be called whenever tasklet is scheduled.
  * Calls event handler involves callback for each element in the message queue
  */
-static void ipc_task_queue_handler(unsigned long data)
+static void ipc_task_queue_handler(uintptr_t data)
 {
 	struct ipc_task_queue *ipc_task = (struct ipc_task_queue *)data;
 	unsigned int q_rpos = ipc_task->q_rpos;

@@ -1131,7 +1131,7 @@ static void gpi_process_events(struct gpii *gpii)
 }
 
 /* processing events using tasklet */
-static void gpi_ev_tasklet(unsigned long data)
+static void gpi_ev_tasklet(uintptr_t data)
 {
 	struct gpii *gpii = (struct gpii *)data;
 
@@ -2248,7 +2248,7 @@ static int gpi_probe(struct platform_device *pdev)
 		mutex_init(&gpii->ctrl_lock);
 		rwlock_init(&gpii->pm_lock);
 		tasklet_init(&gpii->ev_task, gpi_ev_tasklet,
-			     (unsigned long)gpii);
+			     (uintptr_t) gpii);
 		init_completion(&gpii->cmd_completion);
 		gpii->gpii_id = i;
 		gpii->regs = gpi_dev->ee_base;

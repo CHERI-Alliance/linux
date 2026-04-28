@@ -125,7 +125,7 @@ static void cptvf_pfvf_mbox_destroy(struct otx2_cptvf_dev *cptvf)
 	otx2_mbox_destroy(&cptvf->pfvf_mbox);
 }
 
-static void cptlf_work_handler(unsigned long data)
+static void cptlf_work_handler(uintptr_t data)
 {
 	otx2_cpt_post_process((struct otx2_cptlf_wqe *) data);
 }

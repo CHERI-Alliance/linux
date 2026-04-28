@@ -820,7 +820,7 @@ unlock_and_exit:
 	return ret;
 }
 
-static void switchtec_dma_desc_task(unsigned long data)
+static void switchtec_dma_desc_task(uintptr_t data)
 {
 	struct switchtec_dma_chan *swdma_chan = (void *)data;
 

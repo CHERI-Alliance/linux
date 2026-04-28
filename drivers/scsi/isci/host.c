@@ -1111,7 +1111,7 @@ void ireq_done(struct isci_host *ihost, struct isci_request *ireq, struct sas_ta
  * @data: This parameter specifies the ISCI host object
  *
  */
-void isci_host_completion_routine(unsigned long data)
+void isci_host_completion_routine(uintptr_t data)
 {
 	struct isci_host *ihost = (struct isci_host *)data;
 	u16 active;

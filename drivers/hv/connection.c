@@ -404,7 +404,7 @@ struct vmbus_channel *relid2channel(u32 relid)
  *    If this tasklet has been running for a long time
  *    then reschedule ourselves.
  */
-void vmbus_on_event(unsigned long data)
+void vmbus_on_event(uintptr_t data)
 {
 	struct vmbus_channel *channel = (void *) data;
 	void (*callback_fn)(void *context);

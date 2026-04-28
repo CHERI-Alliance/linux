@@ -855,7 +855,7 @@ static void mpc_action_go_ready(fsm_instance *fsm, int event, void *arg)
  * helper of ctcm_init_netdevice
  * CTCM_PROTO_MPC only
  */
-void mpc_group_ready(unsigned long adev)
+void mpc_group_ready(uintptr_t adev)
 {
 	struct net_device *dev = (struct net_device *)adev;
 	struct ctcm_priv *priv = dev->ml_priv;
@@ -1219,7 +1219,7 @@ done:
  * Throttling back channel can result in excessive
  * channel inactivity and system deact of channel
  */
-void ctcmpc_bh(unsigned long thischan)
+void ctcmpc_bh(uintptr_t thischan)
 {
 	struct channel	  *ch	= (struct channel *)thischan;
 	struct sk_buff	  *skb;
@@ -1502,7 +1502,7 @@ void mpc_action_discontact(fsm_instance *fi, int event, void *arg)
  * CTCM_PROTO_MPC only
  * called from add_channel in ctcm_main.c
  */
-void mpc_action_send_discontact(unsigned long thischan)
+void mpc_action_send_discontact(uintptr_t thischan)
 {
 	int rc;
 	struct channel	*ch = (struct channel *)thischan;

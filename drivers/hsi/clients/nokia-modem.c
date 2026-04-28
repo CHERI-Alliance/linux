@@ -35,7 +35,7 @@ struct nokia_modem_device {
 	struct hsi_client	*cmt_speech;
 };
 
-static void do_nokia_modem_rst_ind_tasklet(unsigned long data)
+static void do_nokia_modem_rst_ind_tasklet(uintptr_t data)
 {
 	struct nokia_modem_device *modem = (struct nokia_modem_device *)data;
 

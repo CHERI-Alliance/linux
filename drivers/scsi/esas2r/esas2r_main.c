@@ -1544,7 +1544,7 @@ void esas2r_complete_request_cb(struct esas2r_adapter *a,
 }
 
 /* Run tasklet to handle stuff outside of interrupt context. */
-void esas2r_adapter_tasklet(unsigned long context)
+void esas2r_adapter_tasklet(uintptr_t context)
 {
 	struct esas2r_adapter *a = (struct esas2r_adapter *)context;
 

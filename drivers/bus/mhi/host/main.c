@@ -1043,7 +1043,7 @@ int mhi_process_data_event_ring(struct mhi_controller *mhi_cntrl,
 	return count;
 }
 
-void mhi_ev_task(unsigned long data)
+void mhi_ev_task(uintptr_t data)
 {
 	struct mhi_event *mhi_event = (struct mhi_event *)data;
 	struct mhi_controller *mhi_cntrl = mhi_event->mhi_cntrl;
@@ -1054,7 +1054,7 @@ void mhi_ev_task(unsigned long data)
 	spin_unlock_bh(&mhi_event->lock);
 }
 
-void mhi_ctrl_ev_task(unsigned long data)
+void mhi_ctrl_ev_task(uintptr_t data)
 {
 	struct mhi_event *mhi_event = (struct mhi_event *)data;
 	struct mhi_controller *mhi_cntrl = mhi_event->mhi_cntrl;

@@ -56,8 +56,8 @@ MODULE_LICENSE("GPL");
  * SECTION: prototypes for static functions of dasd.c
  */
 static int dasd_flush_block_queue(struct dasd_block *);
-static void dasd_device_tasklet(unsigned long);
-static void dasd_block_tasklet(unsigned long);
+static void dasd_device_tasklet(uintptr_t);
+static void dasd_block_tasklet(uintptr_t);
 static void do_kick_device(struct work_struct *);
 static void do_reload_device(struct work_struct *);
 static void do_requeue_requests(struct work_struct *);
@@ -118,7 +118,7 @@ struct dasd_device *dasd_alloc_device(void)
 	spin_lock_init(&device->mem_lock);
 	atomic_set(&device->tasklet_scheduled, 0);
 	tasklet_init(&device->tasklet, dasd_device_tasklet,
-		     (unsigned long) device);
+		     (uintptr_t) device);
 	INIT_LIST_HEAD(&device->ccw_queue);
 	timer_setup(&device->timer, dasd_device_timeout, 0);
 	INIT_WORK(&device->kick_work, do_kick_device);
@@ -158,7 +158,7 @@ struct dasd_block *dasd_alloc_block(void)
 
 	atomic_set(&block->tasklet_scheduled, 0);
 	tasklet_init(&block->tasklet, dasd_block_tasklet,
-		     (unsigned long) block);
+		     (uintptr_t) block);
 	INIT_LIST_HEAD(&block->ccw_queue);
 	spin_lock_init(&block->queue_lock);
 	INIT_LIST_HEAD(&block->format_list);
@@ -2113,7 +2113,7 @@ EXPORT_SYMBOL_GPL(dasd_flush_device_queue);
 /*
  * Acquire the device lock and process queues for the device.
  */
-static void dasd_device_tasklet(unsigned long data)
+static void dasd_device_tasklet(uintptr_t data)
 {
 	struct dasd_device *device = (struct dasd_device *) data;
 	struct list_head final_queue;
@@ -2859,7 +2859,7 @@ static void __dasd_block_start_head(struct dasd_block *block)
  * block layer request queue, creates ccw requests, enqueues them on
  * a dasd_device and processes ccw requests that have been returned.
  */
-static void dasd_block_tasklet(unsigned long data)
+static void dasd_block_tasklet(uintptr_t data)
 {
 	struct dasd_block *block = (struct dasd_block *) data;
 	struct list_head final_queue;

@@ -54,7 +54,7 @@ static irqreturn_t aspeed_hace_irq(int irq, void *dev)
 	return IRQ_HANDLED;
 }
 
-static void aspeed_hace_crypto_done_task(unsigned long data)
+static void aspeed_hace_crypto_done_task(uintptr_t data)
 {
 	struct aspeed_hace_dev *hace_dev = (struct aspeed_hace_dev *)data;
 	struct aspeed_engine_crypto *crypto_engine = &hace_dev->crypto_engine;
@@ -62,7 +62,7 @@ static void aspeed_hace_crypto_done_task(unsigned long data)
 	crypto_engine->resume(hace_dev);
 }
 
-static void aspeed_hace_hash_done_task(unsigned long data)
+static void aspeed_hace_hash_done_task(uintptr_t data)
 {
 	struct aspeed_hace_dev *hace_dev = (struct aspeed_hace_dev *)data;
 	struct aspeed_engine_hash *hash_engine = &hace_dev->hash_engine;

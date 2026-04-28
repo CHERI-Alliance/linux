@@ -1420,7 +1420,7 @@ out:
  * s5p_hash_tasklet_cb() - hash tasklet
  * @data:	ptr to s5p_aes_dev
  */
-static void s5p_hash_tasklet_cb(unsigned long data)
+static void s5p_hash_tasklet_cb(uintptr_t data)
 {
 	struct s5p_aes_dev *dd = (struct s5p_aes_dev *)data;
 
@@ -1947,7 +1947,7 @@ indata_error:
 	s5p_aes_complete(req, err);
 }
 
-static void s5p_tasklet_cb(unsigned long data)
+static void s5p_tasklet_cb(uintptr_t data)
 {
 	struct s5p_aes_dev *dev = (struct s5p_aes_dev *)data;
 	struct crypto_async_request *async_req, *backlog;
