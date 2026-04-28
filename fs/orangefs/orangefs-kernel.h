@@ -478,7 +478,7 @@ static inline void orangefs_set_timeout(struct dentry *dentry)
 {
 	unsigned long time = jiffies + orangefs_dcache_timeout_msecs*HZ/1000;
 
-	dentry->d_fsdata = (void *) time;
+	dentry->d_fsdata = __c_fakep(time);
 }
 
 #endif /* __ORANGEFSKERNEL_H */
