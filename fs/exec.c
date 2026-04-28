@@ -308,14 +308,14 @@ static const char __user *get_user_arg_ptr(struct user_arg_ptr argv, int nr)
 		compat_uptr_t compat;
 
 		if (get_user(compat, argv.ptr.compat + nr))
-			return ERR_PTR(-EFAULT);
+			return ERR_USER_PTR(-EFAULT);
 
 		return compat_ptr(compat);
 	}
 #endif
 
-	if (get_user(native, argv.ptr.native + nr))
-		return ERR_PTR(-EFAULT);
+	if (get_user_ptr(native, argv.ptr.native + nr))
+		return ERR_USER_PTR(-EFAULT);
 
 	return native;
 }
@@ -334,7 +334,7 @@ static int count(struct user_arg_ptr argv, int max)
 			if (!p)
 				break;
 
-			if (IS_ERR(p))
+			if (USER_PTR_IS_ERR(p))
 				return -EFAULT;
 
 			if (i >= max)
@@ -460,7 +460,7 @@ static int copy_strings(int argc, struct user_arg_ptr argv,
 
 		ret = -EFAULT;
 		str = get_user_arg_ptr(argv, argc);
-		if (IS_ERR(str))
+		if (USER_PTR_IS_ERR(str))
 			goto out;
 
 		len = strnlen_user(str, MAX_ARG_STRLEN);
