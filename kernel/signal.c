@@ -3546,9 +3546,16 @@ static int post_copy_siginfo_from_user(kernel_siginfo_t *info,
 }
 
 static int __copy_siginfo_from_user(int signo, kernel_siginfo_t *to,
-				    const siginfo_t __user *from)
+				    const siginfo_t __user *from,
+				    bool current_pid)
 {
-	if (copy_from_user_with_ptr(to, from, sizeof(struct kernel_siginfo)))
+	/*
+	 * TODO [PCuABI]: In case target pid differs from the current pid, this
+	 * code silently ignores the tag copy. Revisit this later to treat this
+	 * as an error(-EINVAL) for PCuABI.
+	 */
+	if (current_pid ? copy_from_user_with_ptr(to, from, sizeof(struct kernel_siginfo))
+			: copy_from_user(to, from, sizeof(struct kernel_siginfo)))
 		return -EFAULT;
 	to->si_signo = signo;
 	return post_copy_siginfo_from_user(to, from);
@@ -4234,7 +4241,7 @@ SYSCALL_DEFINE3(rt_sigqueueinfo, pid_t, pid, int, sig,
 		siginfo_t __user *, uinfo)
 {
 	kernel_siginfo_t info;
-	int ret = __copy_siginfo_from_user(sig, &info, uinfo);
+	int ret = __copy_siginfo_from_user(sig, &info, uinfo, (pid == task_pid_vnr(current)));
 	if (unlikely(ret))
 		return ret;
 	return do_rt_sigqueueinfo(pid, sig, &info);
@@ -4274,7 +4281,7 @@ SYSCALL_DEFINE4(rt_tgsigqueueinfo, pid_t, tgid, pid_t, pid, int, sig,
 		siginfo_t __user *, uinfo)
 {
 	kernel_siginfo_t info;
-	int ret = __copy_siginfo_from_user(sig, &info, uinfo);
+	int ret = __copy_siginfo_from_user(sig, &info, uinfo, (pid == task_pid_vnr(current)));
 	if (unlikely(ret))
 		return ret;
 	return do_rt_tgsigqueueinfo(tgid, pid, sig, &info);
