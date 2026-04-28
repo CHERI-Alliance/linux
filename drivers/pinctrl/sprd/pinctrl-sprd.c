@@ -106,9 +106,9 @@ enum pin_func_sel {
  */
 struct sprd_pin {
 	const char *name;
+	uintptr_t reg;
 	unsigned int number;
 	enum pin_type type;
-	unsigned long reg;
 	unsigned long bit_offset;
 	unsigned long bit_width;
 };
@@ -1027,7 +1027,7 @@ static int sprd_pinctrl_add_pins(struct sprd_pinctrl *sprd_pctl,
 		dev_dbg(sprd_pctl->dev, "pin name[%s-%d], type = %d, "
 			"bit offset = %ld, bit width = %ld, reg = 0x%lx\n",
 			pin->name, pin->number, pin->type,
-			pin->bit_offset, pin->bit_width, pin->reg);
+			pin->bit_offset, pin->bit_width, (unsigned long)pin->reg);
 	}
 
 	return 0;
