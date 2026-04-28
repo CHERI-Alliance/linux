@@ -5,7 +5,7 @@
 #define CREATE_TRACE_POINTS
 #include <asm/trace.h>
 
-long __sbi_base_ecall(int fid)
+intptr_t __sbi_base_ecall(int fid)
 {
 	struct sbiret ret;
 
@@ -17,9 +17,9 @@ long __sbi_base_ecall(int fid)
 }
 EXPORT_SYMBOL(__sbi_base_ecall);
 
-struct sbiret __sbi_ecall(unsigned long arg0, unsigned long arg1,
-			  unsigned long arg2, unsigned long arg3,
-			  unsigned long arg4, unsigned long arg5,
+struct sbiret __sbi_ecall(uintptr_t arg0, uintptr_t arg1,
+			  uintptr_t arg2, uintptr_t arg3,
+			  uintptr_t arg4, uintptr_t arg5,
 			  int fid, int ext)
 {
 	struct sbiret ret;
@@ -38,10 +38,10 @@ struct sbiret __sbi_ecall(unsigned long arg0, unsigned long arg1,
 		       : "+r" (a0), "+r" (a1)
 		       : "r" (a2), "r" (a3), "r" (a4), "r" (a5), "r" (a6), "r" (a7)
 		       : "memory");
-	ret.error = a0;
+	ret.error = (long)__c_ua(a0);
 	ret.value = a1;
 
-	trace_sbi_return(ext, ret.error, ret.value);
+	trace_sbi_return(ext, ret.error, __c_ua(ret.value));
 
 	return ret;
 }
