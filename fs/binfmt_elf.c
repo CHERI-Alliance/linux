@@ -172,12 +172,14 @@ struct elf_load_info {
 	unsigned long end_elf_rx;
 	unsigned long start_elf_rw;
 	unsigned long end_elf_rw;
+
+	unsigned long entry;
 };
 
 static int
 create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 		unsigned long interp_load_addr,
-		unsigned long e_entry, unsigned long phdr_addr,
+		unsigned long phdr_addr,
 		const struct elf_load_info *exec_load_info,
 		const struct elf_load_info *interp_load_info)
 {
@@ -282,7 +284,7 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 	if (bprm->interp_flags & BINPRM_FLAGS_PRESERVE_ARGV0)
 		flags |= AT_FLAGS_PRESERVE_ARGV0;
 	NEW_AUX_ENT(AT_FLAGS, flags);
-	NEW_AUX_ENT(AT_ENTRY, elf_uaddr_to_user_ptr(e_entry));
+	NEW_AUX_ENT(AT_ENTRY, elf_uaddr_to_user_ptr(exec_load_info->entry));
 	NEW_AUX_ENT(AT_UID, from_kuid_munged(cred->user_ns, cred->uid));
 	NEW_AUX_ENT(AT_EUID, from_kuid_munged(cred->user_ns, cred->euid));
 	NEW_AUX_ENT(AT_GID, from_kgid_munged(cred->user_ns, cred->gid));
@@ -923,7 +925,6 @@ static int load_elf_binary(struct linux_binprm *bprm)
 	bool brk_moved = false;
 	int retval, i;
 	unsigned long elf_entry;
-	unsigned long e_entry;
 	unsigned long interp_load_addr = 0;
 	unsigned long start_code, end_code, start_data, end_data;
 	unsigned long reloc_func_desc __maybe_unused = 0;
@@ -1337,7 +1338,7 @@ out_free_interp:
 		exec_load_info.end_elf_rx = max(k, exec_load_info.end_elf_rx);
 	}
 
-	e_entry = elf_ex->e_entry + load_bias;
+	exec_load_info.entry = elf_ex->e_entry + load_bias;
 	phdr_addr += load_bias;
 	elf_brk += load_bias;
 	start_code += load_bias;
@@ -1364,6 +1365,7 @@ out_free_interp:
 			 */
 			interp_load_addr = elf_entry;
 			elf_entry += interp_elf_ex->e_entry;
+			interp_load_info.entry = elf_entry;
 		}
 		if (BAD_ADDR(elf_entry)) {
 			retval = IS_ERR_VALUE(elf_entry) ?
@@ -1378,7 +1380,7 @@ out_free_interp:
 		kfree(interp_elf_ex);
 		kfree(interp_elf_phdata);
 	} else {
-		elf_entry = e_entry;
+		elf_entry = exec_load_info.entry;
 		if (BAD_ADDR(elf_entry)) {
 			retval = -EINVAL;
 			goto out_free_dentry;
@@ -1396,7 +1398,7 @@ out_free_interp:
 #endif /* ARCH_HAS_SETUP_ADDITIONAL_PAGES */
 
 	retval = create_elf_tables(bprm, elf_ex, interp_load_addr,
-				   e_entry, phdr_addr,
+				   phdr_addr,
 				   &exec_load_info, &interp_load_info);
 	if (retval < 0)
 		goto out;
