@@ -6,6 +6,7 @@
 #include <linux/net.h>
 #include <linux/un.h>
 #include <linux/compat.h>
+#include <linux/uaccess.h>
 #include <net/compat.h>
 #include <linux/io_uring.h>
 
@@ -1339,7 +1340,7 @@ int io_send_zc_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	struct io_ring_ctx *ctx = req->ctx;
 	struct io_async_msghdr *iomsg;
 	struct io_kiocb *notif;
-	u64 user_data;
+	__u64ptr user_data;
 	int ret;
 
 	zc->done_io = 0;
