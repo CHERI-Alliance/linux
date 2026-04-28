@@ -1027,6 +1027,9 @@ void start_kernel(void)
 	boot_cpu_init();
 	page_address_init();
 	pr_notice("%s", linux_banner);
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	pr_notice("Userspace ABI: pure-capability (PCuABI), transitional\n");
+#endif
 	setup_arch(&command_line);
 	mm_core_init_early();
 	/* Static keys and static calls are needed by LSMs */
