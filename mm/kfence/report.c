@@ -136,7 +136,7 @@ static void kfence_print_stack(struct seq_file *seq, const struct kfence_metadat
 void kfence_print_object(struct seq_file *seq, const struct kfence_metadata *meta)
 {
 	const int size = abs(meta->size);
-	const unsigned long start = meta->addr;
+	const uintptr_t start = meta->addr;
 	const struct kmem_cache *const cache = meta->cache;
 
 	lockdep_assert_held(&meta->lock);
@@ -166,14 +166,17 @@ static void print_diff_canary(unsigned long address, size_t bytes_to_show,
 			      const struct kfence_metadata *meta)
 {
 	const unsigned long show_until_addr = address + bytes_to_show;
-	const u8 *cur, *end;
+	const u8 *cur;
+	unsigned long end;
 
 	/* Do not show contents of object nor read into following guard page. */
-	end = (const u8 *)(address < meta->addr ? min(show_until_addr, meta->addr)
-						: min(show_until_addr, PAGE_ALIGN(address)));
+	end = (address < __c_ua(meta->addr)
+			? min(show_until_addr, __c_ua(meta->addr))
+			: min(show_until_addr, PAGE_ALIGN(address)));
 
 	pr_cont("[");
-	for (cur = (const u8 *)address; cur < end; cur++) {
+	cur = (const u8 *)cheri_make_kernel_data_cap(address, end - address);
+	for (; __c_pa(cur) < end; cur++) {
 		if (*cur == KFENCE_CANARY_PATTERN_U8(cur))
 			pr_cont(" .");
 		else if (no_hash_pointers)
@@ -229,7 +232,7 @@ void kfence_report_error(unsigned long address, bool is_write, struct pt_regs *r
 		       (void *)(uintptr_t)stack_entries[skipnr]);
 		pr_err("Out-of-bounds %s at 0x%p (%luB %s of kfence-#%td):\n",
 		       get_access_type(is_write), (void *)(uintptr_t)address,
-		       left_of_object ? meta->addr - address : address - meta->addr,
+		       left_of_object ? (unsigned long)meta->addr - address : address - (unsigned long)meta->addr,
 		       left_of_object ? "left" : "right", object_index);
 		break;
 	}
@@ -291,14 +294,14 @@ static void kfence_to_kp_stack(const struct kfence_track *track, void **kp_stack
 
 	i = get_stack_skipnr(track->stack_entries, track->num_stack_entries, NULL);
 	for (j = 0; i < track->num_stack_entries && j < KS_ADDRS_COUNT; ++i, ++j)
-		kp_stack[j] = (void *)track->stack_entries[i];
+		kp_stack[j] = __c_fakep(track->stack_entries[i]);
 	if (j < KS_ADDRS_COUNT)
 		kp_stack[j] = NULL;
 }
 
 bool __kfence_obj_info(struct kmem_obj_info *kpp, void *object, struct slab *slab)
 {
-	struct kfence_metadata *meta = addr_to_metadata((uintptr_t)object);
+	struct kfence_metadata *meta = addr_to_metadata(__c_pa(object));
 	unsigned long flags;
 
 	if (!meta)
