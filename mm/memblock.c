@@ -2313,9 +2313,13 @@ static unsigned long __init __free_memory_core(phys_addr_t start,
  * for each reserved range and marks the pages PageReserved.
  * When deferred initialization of struct pages is enabled it also ensures
  * that struct pages are properly initialised.
+ *
+ * Set "allocated" to true if the range can be used (e.g. for DMA)
+ * without being allocated by page_alloc().
  */
 static void __init memmap_init_reserved_range(phys_addr_t start,
-					      phys_addr_t end, int nid)
+					      phys_addr_t end, int nid,
+					      bool allocated)
 {
 	unsigned long pfn;
 
@@ -2330,6 +2334,15 @@ static void __init memmap_init_reserved_range(phys_addr_t start,
 		 * access it yet.
 		 */
 		__SetPageReserved(page);
+#ifdef CONFIG_CHERI_KERNEL
+		if (allocated) {
+			long len = end - (pfn << PAGE_SHIFT);
+			BUG_ON(len < 0);
+			page->alloc_order = (unsigned long)-len;
+		} else {
+			page->alloc_order = -1;
+		}
+#endif
 	}
 }
 
@@ -2352,7 +2365,7 @@ repeat:
 		end = start + region->size;
 
 		if (memblock_is_nomap(region))
-			memmap_init_reserved_range(start, end, nid);
+			memmap_init_reserved_range(start, end, nid, false);
 
 		memblock_set_node(start, region->size, &memblock.reserved, nid);
 	}
@@ -2377,7 +2390,7 @@ repeat:
 			if (!numa_valid_node(nid))
 				nid = early_pfn_to_nid(PFN_DOWN(start));
 
-			memmap_init_reserved_range(start, end, nid);
+			memmap_init_reserved_range(start, end, nid, true);
 		}
 	}
 }
