@@ -7,8 +7,8 @@
 #include <asm/ptrace.h>
 
 struct stackframe {
-	unsigned long fp;
-	unsigned long ra;
+	uintptr_t fp;
+	uintptr_t ra;
 };
 
 extern void notrace walk_stackframe(struct task_struct *task, struct pt_regs *regs,
