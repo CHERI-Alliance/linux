@@ -231,12 +231,12 @@ ABIs
 In the default kernel configuration, existing aspects of the standard
 AArch64 kernel-user ABI remain unchanged.
 
-As a highly experimental feature, it is possible to choose a different
-kernel-user ABI, the **pure-capability ABI** (PCuABI), by selecting the
-``CONFIG_CHERI_PURECAP_UABI`` option. In this ABI, all pointers at the
-kernel-user boundary are capabilities, providing a native interface for
-pure-capability executables; see the CHERI C/C++ Programming Guide [4]_
-for an overview of this programming model.
+As an experimental feature, it is possible to choose a different
+kernel-user ABI, the `pure-capability kernel-user ABI`_ (PCuABI), by
+selecting the ``CONFIG_CHERI_PURECAP_UABI`` option. In this ABI, all
+pointers at the kernel-user boundary are capabilities, providing a
+native interface for pure-capability executables; see the CHERI C/C++
+Programming Guide [4]_ for an overview of this programming model.
 
 When ``CONFIG_CHERI_PURECAP_UABI`` is selected, the meaning of
 ``CONFIG_COMPAT`` is modified: instead of providing support for AArch32
@@ -279,6 +279,8 @@ The rest of this document specifies **extensions to the standard AArch64
 ABI**. These extensions are also available in PCuABI, with a number of
 differences. The transitional PCuABI specification [5]_ takes precedence
 where it differs from the present document.
+
+.. _pure-capability kernel-user ABI: Documentation/cheri/pcuabi.rst
 
 Register handling
 -----------------
