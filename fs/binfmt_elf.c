@@ -1475,8 +1475,7 @@ out_free_interp:
 #endif
 
 	finalize_exec(bprm);
-	START_THREAD(elf_ex, regs, elf_entry, bprm->p);
-	retval = 0;
+	retval = START_THREAD(elf_ex, regs, elf_entry, bprm);
 out:
 	return retval;
 

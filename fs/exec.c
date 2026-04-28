@@ -1719,7 +1719,7 @@ static int exec_binprm(struct linux_binprm *bprm)
 	trace_sched_process_exec(current, old_pid, bprm);
 	ptrace_event(PTRACE_EVENT_EXEC, old_vpid);
 	proc_exec_connector(current);
-	return 0;
+	return ret;
 }
 
 static int bprm_execve(struct linux_binprm *bprm)
@@ -1890,7 +1890,8 @@ int kernel_execve(const char *kernel_filename,
 	if (retval < 0)
 		return retval;
 
-	return bprm_execve(bprm);
+	retval = bprm_execve(bprm);
+	return retval < 0 ? retval : 0;
 }
 
 void set_binfmt(struct linux_binfmt *new)
