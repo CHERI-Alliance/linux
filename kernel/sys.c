@@ -3012,20 +3012,20 @@ SYSCALL_DEFINE1(sysinfo, struct sysinfo __user *, info)
 
 #ifdef CONFIG_COMPAT
 struct compat_sysinfo {
-	s32 uptime;
-	u32 loads[3];
-	u32 totalram;
-	u32 freeram;
-	u32 sharedram;
-	u32 bufferram;
-	u32 totalswap;
-	u32 freeswap;
+	compat_long_t uptime;
+	compat_ulong_t loads[3];
+	compat_ulong_t totalram;
+	compat_ulong_t freeram;
+	compat_ulong_t sharedram;
+	compat_ulong_t bufferram;
+	compat_ulong_t totalswap;
+	compat_ulong_t freeswap;
 	u16 procs;
 	u16 pad;
-	u32 totalhigh;
-	u32 freehigh;
+	compat_ulong_t totalhigh;
+	compat_ulong_t freehigh;
 	u32 mem_unit;
-	char _f[20-2*sizeof(u32)-sizeof(int)];
+	char _f[20-2*sizeof(compat_ulong_t)-sizeof(u32)];
 };
 
 COMPAT_SYSCALL_DEFINE1(sysinfo, struct compat_sysinfo __user *, info)
@@ -3035,6 +3035,7 @@ COMPAT_SYSCALL_DEFINE1(sysinfo, struct compat_sysinfo __user *, info)
 
 	do_sysinfo(&s);
 
+#ifdef CONFIG_COMPAT32
 	/* Check to see if any memory value is too large for 32-bit and scale
 	 *  down if needed
 	 */
@@ -3055,6 +3056,7 @@ COMPAT_SYSCALL_DEFINE1(sysinfo, struct compat_sysinfo __user *, info)
 		s.totalhigh >>= bitcount;
 		s.freehigh >>= bitcount;
 	}
+#endif
 
 	memset(&s_32, 0, sizeof(s_32));
 	s_32.uptime = s.uptime;
