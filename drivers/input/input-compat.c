@@ -100,7 +100,7 @@ int input_bits_to_string(char *buf, int buf_size, unsigned long bits,
 {
 	int len = 0;
 
-	if (in_compat_syscall()) {
+	if (in_compat32_syscall()) {
 		u32 dword = bits >> 32;
 		if (dword || !skip_empty)
 			len += snprintf(buf, buf_size, "%x ", dword);

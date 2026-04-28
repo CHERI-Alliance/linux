@@ -1609,7 +1609,7 @@ struct kfd_process *create_process(const struct task_struct *thread, bool primar
 	err = kfd_event_init_process(process);
 	if (err)
 		goto err_event_init;
-	process->is_32bit_user_mode = in_compat_syscall();
+	process->is_32bit_user_mode = in_32bit_compat_syscall();
 	process->debug_trap_enabled = false;
 	process->debugger_process = NULL;
 	process->exception_enable_mask = 0;
