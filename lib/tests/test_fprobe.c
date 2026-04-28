@@ -33,7 +33,7 @@ static noinline u32 fprobe_selftest_target2(u32 value)
 }
 
 static notrace int fp_entry_handler(struct fprobe *fp, unsigned long ip,
-				    unsigned long ret_ip,
+				    uintptr_t ret_ip,
 				    struct ftrace_regs *fregs, void *data)
 {
 	KUNIT_EXPECT_FALSE(current_test, preemptible());
@@ -52,7 +52,7 @@ static notrace int fp_entry_handler(struct fprobe *fp, unsigned long ip,
 }
 
 static notrace void fp_exit_handler(struct fprobe *fp, unsigned long ip,
-				    unsigned long ret_ip,
+				    uintptr_t ret_ip,
 				    struct ftrace_regs *fregs, void *data)
 {
 	unsigned long ret = ftrace_regs_get_return_value(fregs);

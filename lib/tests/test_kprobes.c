@@ -76,14 +76,14 @@ static noinline u32 kprobe_target2(u32 value)
 static noinline unsigned long kprobe_stacktrace_internal_target(void)
 {
 	if (!target_return_address[0])
-		target_return_address[0] = (uintptr_t)__builtin_return_address(0);
+		target_return_address[0] = __c_pa(__builtin_return_address(0));
 	return target_return_address[0];
 }
 
 static noinline unsigned long kprobe_stacktrace_target(void)
 {
 	if (!target_return_address[1])
-		target_return_address[1] = (uintptr_t)__builtin_return_address(0);
+		target_return_address[1] = __c_pa(__builtin_return_address(0));
 
 	if (internal_target)
 		internal_target();
@@ -97,7 +97,7 @@ static noinline unsigned long kprobe_stacktrace_driver(void)
 		stacktrace_target();
 
 	/* This is for preventing inlining the function */
-	return (uintptr_t)__builtin_return_address(0);
+	return __c_pa(__builtin_return_address(0));
 }
 
 static int kp_pre_handler2(struct kprobe *p, struct pt_regs *regs)
@@ -181,7 +181,7 @@ static int entry_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 
 static int return_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 {
-	unsigned long ret = regs_return_value(regs);
+	unsigned long ret = __c_ua(regs_return_value(regs));
 
 	KUNIT_EXPECT_FALSE(current_test, preemptible());
 	KUNIT_EXPECT_EQ(current_test, ret, rand1 / div_factor);
@@ -207,7 +207,7 @@ static void test_kretprobe(struct kunit *test)
 
 static int return_handler2(struct kretprobe_instance *ri, struct pt_regs *regs)
 {
-	unsigned long ret = regs_return_value(regs);
+	unsigned long ret = __c_ua(regs_return_value(regs));
 
 	KUNIT_EXPECT_EQ(current_test, ret, (rand1 / div_factor) + 1);
 	KUNIT_EXPECT_NE(current_test, krph_val, 0);

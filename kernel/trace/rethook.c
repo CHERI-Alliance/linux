@@ -202,8 +202,8 @@ void rethook_hook(struct rethook_node *node, struct pt_regs *regs, bool mcount)
 NOKPROBE_SYMBOL(rethook_hook);
 
 /* This assumes the 'tsk' is the current task or is not running. */
-static unsigned long __rethook_find_ret_addr(struct task_struct *tsk,
-					     struct llist_node **cur)
+static uintptr_t __rethook_find_ret_addr(struct task_struct *tsk,
+					 struct llist_node **cur)
 {
 	struct rethook_node *rh = NULL;
 	struct llist_node *node = *cur;
@@ -241,11 +241,11 @@ NOKPROBE_SYMBOL(__rethook_find_ret_addr);
  *
  * Returns found address value or zero if not found.
  */
-unsigned long rethook_find_ret_addr(struct task_struct *tsk, unsigned long frame,
-				    struct llist_node **cur)
+uintptr_t rethook_find_ret_addr(struct task_struct *tsk, uintptr_t frame,
+				 struct llist_node **cur)
 {
 	struct rethook_node *rhn = NULL;
-	unsigned long ret;
+	uintptr_t ret;
 
 	if (WARN_ON_ONCE(!cur))
 		return 0;
@@ -265,7 +265,7 @@ unsigned long rethook_find_ret_addr(struct task_struct *tsk, unsigned long frame
 NOKPROBE_SYMBOL(rethook_find_ret_addr);
 
 void __weak arch_rethook_fixup_return(struct pt_regs *regs,
-				      unsigned long correct_ret_addr)
+				      uintptr_t correct_ret_addr)
 {
 	/*
 	 * Do nothing by default. If the architecture which uses a
@@ -276,11 +276,10 @@ void __weak arch_rethook_fixup_return(struct pt_regs *regs,
 }
 
 /* This function will be called from each arch-defined trampoline. */
-unsigned long rethook_trampoline_handler(struct pt_regs *regs,
-					 unsigned long frame)
+uintptr_t rethook_trampoline_handler(struct pt_regs *regs, uintptr_t frame)
 {
 	struct llist_node *first, *node = NULL;
-	unsigned long correct_ret_addr;
+	uintptr_t correct_ret_addr;
 	rethook_handler_t handler;
 	struct rethook_node *rhn;
 
