@@ -108,6 +108,33 @@ struct mmc_blk_busy_data {
 	u32 status;
 };
 
+static inline bool in_compat64(void)
+{
+	return IS_ENABLED(CONFIG_COMPAT64) && in_compat_syscall();
+}
+
+struct compat_mmc_ioc_cmd {
+	int write_flag;
+	int is_acmd;
+	__u32 opcode;
+	__u32 arg;
+	__u32 response[4];
+	unsigned int flags;
+	unsigned int blksz;
+	unsigned int blocks;
+	unsigned int postsleep_min_us;
+	unsigned int postsleep_max_us;
+	unsigned int data_timeout_ns;
+	unsigned int cmd_timeout_ms;
+	__u32 __pad;
+	__u64 data_ptr;
+};
+
+struct compat_mmc_ioc_multi_cmd {
+	__u64 num_of_cmds;
+	struct compat_mmc_ioc_cmd cmds[];
+};
+
 /*
  * There is one mmc_blk_data per slot.
  */
@@ -416,6 +443,47 @@ struct mmc_blk_ioc_data {
 	struct mmc_rpmb_data *rpmb;
 };
 
+/*
+ * Copy the data from a compat_mmc_ioc_cmd user pointer, src,
+ * to kernel space, storing it in native_cmd. Returns 0 for
+ * a successful copy.
+ */
+static int get_mmc_ioc_cmd_from_compat64(struct mmc_ioc_cmd *native_cmd,
+					 void * __user src)
+{
+	struct compat_mmc_ioc_cmd compat_cmd;
+
+	if (copy_from_user(&compat_cmd, src, sizeof(struct compat_mmc_ioc_cmd)))
+		return -EFAULT;
+
+	native_cmd->arg = compat_cmd.arg;
+	native_cmd->is_acmd = compat_cmd.is_acmd;
+	native_cmd->opcode = compat_cmd.opcode;
+	native_cmd->arg = compat_cmd.arg;
+	memcpy(native_cmd->response, compat_cmd.response, sizeof(compat_cmd.response));
+	native_cmd->flags = compat_cmd.flags;
+	native_cmd->blksz = compat_cmd.blksz;
+	native_cmd->blocks = compat_cmd.blocks;
+	native_cmd->postsleep_min_us = compat_cmd.postsleep_min_us;
+	native_cmd->postsleep_max_us = compat_cmd.postsleep_max_us;
+	native_cmd->data_timeout_ns = compat_cmd.data_timeout_ns;
+	native_cmd->cmd_timeout_ms = compat_cmd.cmd_timeout_ms;
+	native_cmd->__pad = compat_cmd.__pad;
+	native_cmd->data_ptr = (user_uintptr_t)compat_ptr(compat_cmd.data_ptr);
+
+	return 0;
+}
+
+static int copy_mmc_ioc_cmd_from_user(struct mmc_ioc_cmd *to, void * __user src)
+{
+	if (in_compat64())
+		return get_mmc_ioc_cmd_from_compat64(to, src);
+
+	if (copy_from_user(to, src, sizeof(*to)))
+		return -EFAULT;
+	return 0;
+}
+
 static struct mmc_blk_ioc_data *mmc_blk_ioctl_copy_from_user(
 	struct mmc_ioc_cmd __user *user)
 {
@@ -428,7 +496,7 @@ static struct mmc_blk_ioc_data *mmc_blk_ioctl_copy_from_user(
 		goto out;
 	}
 
-	if (copy_from_user_with_ptr(&idata->ic, user, sizeof(idata->ic))) {
+	if (copy_mmc_ioc_cmd_from_user(&idata->ic, user)) {
 		err = -EFAULT;
 		goto idata_err;
 	}
@@ -464,8 +532,11 @@ static int mmc_blk_ioctl_copy_to_user(struct mmc_ioc_cmd __user *ic_ptr,
 {
 	struct mmc_ioc_cmd *ic = &idata->ic;
 
-	if (copy_to_user(&(ic_ptr->response), ic->response,
-			 sizeof(ic->response)))
+	__u32 __user *response_uptr = in_compat64() ?
+			&((struct compat_mmc_ioc_cmd __user *)ic_ptr)->response[0] :
+			&ic_ptr->response[0];
+
+	if (copy_to_user(response_uptr, ic->response, sizeof(ic->response)))
 		return -EFAULT;
 
 	if (!idata->ic.write_flag) {
@@ -713,12 +784,20 @@ cmd_done:
 	return ioc_err ? ioc_err : err;
 }
 
+static inline struct mmc_ioc_cmd __user *get_ith_mmc_ioc_cmd_uptr(
+	struct mmc_ioc_multi_cmd __user *user,
+	unsigned int i)
+{
+	if (in_compat64())
+		return (struct mmc_ioc_cmd __user *)&((struct compat_mmc_ioc_multi_cmd __user *)user)->cmds[i];
+	return &(user->cmds[i]);
+}
+
 static int mmc_blk_ioctl_multi_cmd(struct mmc_blk_data *md,
 				   struct mmc_ioc_multi_cmd __user *user,
 				   struct mmc_rpmb_data *rpmb)
 {
 	struct mmc_blk_ioc_data **idata = NULL;
-	struct mmc_ioc_cmd __user *cmds = user->cmds;
 	struct mmc_card *card;
 	struct mmc_queue *mq;
 	int err = 0, ioc_err = 0;
@@ -726,6 +805,11 @@ static int mmc_blk_ioctl_multi_cmd(struct mmc_blk_data *md,
 	unsigned int i, n;
 	struct request *req;
 
+	/*
+	 * Both native and compat64 versions of mmc_ioc_multi_cmd
+	 * have num_of_cmds as the first field, so the offset does
+	 * not need to be recalculated for compat64.
+	 */
 	if (copy_from_user(&num_of_cmds, &user->num_of_cmds,
 			   sizeof(num_of_cmds)))
 		return -EFAULT;
@@ -742,7 +826,7 @@ static int mmc_blk_ioctl_multi_cmd(struct mmc_blk_data *md,
 		return -ENOMEM;
 
 	for (i = 0; i < n; i++) {
-		idata[i] = mmc_blk_ioctl_copy_from_user(&cmds[i]);
+		idata[i] = mmc_blk_ioctl_copy_from_user(get_ith_mmc_ioc_cmd_uptr(user, i));
 		if (IS_ERR(idata[i])) {
 			err = PTR_ERR(idata[i]);
 			n = i;
@@ -779,7 +863,7 @@ static int mmc_blk_ioctl_multi_cmd(struct mmc_blk_data *md,
 
 	/* copy to user if data and response */
 	for (i = 0; i < n && !err; i++)
-		err = mmc_blk_ioctl_copy_to_user(&cmds[i], idata[i]);
+		err = mmc_blk_ioctl_copy_to_user(get_ith_mmc_ioc_cmd_uptr(user, i), idata[i]);
 
 	blk_mq_free_request(req);
 
