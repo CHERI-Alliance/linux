@@ -657,8 +657,10 @@ const struct bpf_func_proto bpf_event_output_data_proto =  {
 };
 
 BPF_CALL_3(bpf_copy_from_user, void *, dst, u32, size,
-	   const void __user *, user_ptr)
+	   ptraddr_t, addr)
 {
+	const void __user *user_ptr =
+		make_user_ptr_for_read_uaccess(addr, size);
 	int ret = copy_from_user(dst, user_ptr, size);
 
 	if (unlikely(ret)) {
