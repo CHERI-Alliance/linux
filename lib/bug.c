@@ -54,7 +54,7 @@ extern struct bug_entry __start___bug_table[], __stop___bug_table[];
 static inline unsigned long bug_addr(const struct bug_entry *bug)
 {
 #ifdef CONFIG_GENERIC_BUG_RELATIVE_POINTERS
-	return (uintptr_t)&bug->bug_addr_disp + bug->bug_addr_disp;
+	return __c_pa(&bug->bug_addr_disp) + bug->bug_addr_disp;
 #else
 	return bug->bug_addr;
 #endif
@@ -128,7 +128,11 @@ void bug_get_file_line(struct bug_entry *bug, const char **file,
 {
 #ifdef CONFIG_DEBUG_BUGVERBOSE
 #ifdef CONFIG_GENERIC_BUG_RELATIVE_POINTERS
+#ifdef CONFIG_CHERI_KERNEL
+	*file = cheri_kcap_ro(__c_pa(&bug->file_disp ) + bug->file_disp);
+#else
 	*file = (const char *)&bug->file_disp + bug->file_disp;
+#endif
 #else
 	*file = bug->file;
 #endif
@@ -243,7 +247,7 @@ static enum bug_trap_type __report_bug(struct bug_entry *bug, unsigned long buga
 
 	if (warning) {
 		/* this is a WARN_ON rather than BUG/BUG_ON */
-		__warn(file, line, (void *)bugaddr, BUG_GET_TAINT(bug), regs,
+		__warn(file, line, __c_fakep(bugaddr), BUG_GET_TAINT(bug), regs,
 		       NULL);
 		return BUG_TRAP_TYPE_WARN;
 	}
