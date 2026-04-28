@@ -788,6 +788,52 @@ static int ptrace_peek_siginfo(struct task_struct *child,
 	return ret;
 }
 
+static int ptrace_getsigmask(struct task_struct *child, unsigned long addr,
+			     void __user *datavp)
+{
+	sigset_t *mask;
+
+	if (addr != sizeof(sigset_t))
+		return -EINVAL;
+
+	if (test_tsk_restore_sigmask(child))
+		mask = &child->saved_sigmask;
+	else
+		mask = &child->blocked;
+
+	if (copy_to_user(datavp, mask, sizeof(sigset_t)))
+		return -EFAULT;
+	else
+		return 0;
+}
+
+static int ptrace_setsigmask(struct task_struct *child, unsigned long addr,
+			     void __user *datavp)
+{
+	sigset_t new_set;
+
+	if (addr != sizeof(sigset_t))
+		return -EINVAL;
+
+	if (copy_from_user(&new_set, datavp, sizeof(sigset_t)))
+		return -EFAULT;
+
+	sigdelsetmask(&new_set, sigmask(SIGKILL)|sigmask(SIGSTOP));
+
+	/*
+	 * Every thread does recalc_sigpending() after resume, so
+	 * retarget_shared_pending() and recalc_sigpending() are not
+	 * called here.
+	 */
+	spin_lock_irq(&child->sighand->siglock);
+	child->blocked = new_set;
+	spin_unlock_irq(&child->sighand->siglock);
+
+	clear_tsk_restore_sigmask(child);
+
+	return 0;
+}
+
 #ifdef CONFIG_RSEQ
 static long ptrace_get_rseq_configuration(struct task_struct *task,
 					  unsigned long size, void __user *data)
@@ -1177,56 +1223,13 @@ int ptrace_request(struct task_struct *child, long request,
 			ret = ptrace_setsiginfo(child, &siginfo);
 		break;
 
-	case PTRACE_GETSIGMASK: {
-		sigset_t *mask;
-
-		if (addr != sizeof(sigset_t)) {
-			ret = -EINVAL;
-			break;
-		}
-
-		if (test_tsk_restore_sigmask(child))
-			mask = &child->saved_sigmask;
-		else
-			mask = &child->blocked;
-
-		if (copy_to_user(datavp, mask, sizeof(sigset_t)))
-			ret = -EFAULT;
-		else
-			ret = 0;
-
+	case PTRACE_GETSIGMASK:
+		ret = ptrace_getsigmask(child, addr, datavp);
 		break;
-	}
 
-	case PTRACE_SETSIGMASK: {
-		sigset_t new_set;
-
-		if (addr != sizeof(sigset_t)) {
-			ret = -EINVAL;
-			break;
-		}
-
-		if (copy_from_user(&new_set, datavp, sizeof(sigset_t))) {
-			ret = -EFAULT;
-			break;
-		}
-
-		sigdelsetmask(&new_set, sigmask(SIGKILL)|sigmask(SIGSTOP));
-
-		/*
-		 * Every thread does recalc_sigpending() after resume, so
-		 * retarget_shared_pending() and recalc_sigpending() are not
-		 * called here.
-		 */
-		spin_lock_irq(&child->sighand->siglock);
-		child->blocked = new_set;
-		spin_unlock_irq(&child->sighand->siglock);
-
-		clear_tsk_restore_sigmask(child);
-
-		ret = 0;
+	case PTRACE_SETSIGMASK:
+		ret = ptrace_setsigmask(child, addr, datavp);
 		break;
-	}
 
 	case PTRACE_INTERRUPT:
 		/*
@@ -1449,6 +1452,7 @@ int compat_ptrace_request(struct task_struct *child, compat_long_t request,
 			  compat_ulong_t addr, compat_ulong_t data)
 {
 	compat_ulong_t __user *datap = compat_ptr(data);
+	user_uintptr_t addrp = (user_uintptr_t)compat_ptr(addr);
 	compat_ulong_t word;
 	kernel_siginfo_t siginfo;
 	int ret;
@@ -1475,6 +1479,10 @@ int compat_ptrace_request(struct task_struct *child, compat_long_t request,
 		ret = put_user((compat_ulong_t) child->ptrace_message, datap);
 		break;
 
+	case PTRACE_PEEKSIGINFO:
+		ret = ptrace_peek_siginfo(child, addrp, (user_uintptr_t)data);
+		break;
+
 	case PTRACE_GETSIGINFO:
 		ret = ptrace_getsiginfo(child, &siginfo);
 		if (!ret)
@@ -1489,6 +1497,15 @@ int compat_ptrace_request(struct task_struct *child, compat_long_t request,
 		if (!ret)
 			ret = ptrace_setsiginfo(child, &siginfo);
 		break;
+
+	case PTRACE_GETSIGMASK:
+		ret = ptrace_getsigmask(child, addr, datap);
+		break;
+
+	case PTRACE_SETSIGMASK:
+		ret = ptrace_setsigmask(child, addr, datap);
+		break;
+
 #ifdef CONFIG_HAVE_ARCH_TRACEHOOK
 	case PTRACE_GETREGSET:
 	case PTRACE_SETREGSET:
@@ -1514,7 +1531,19 @@ int compat_ptrace_request(struct task_struct *child, compat_long_t request,
 			ret = __put_user(kiov.iov_len, &uiov->iov_len);
 		break;
 	}
+
+	case PTRACE_GET_SYSCALL_INFO:
+		ret = ptrace_get_syscall_info(child, addr, datap);
+		break;
 #endif
+
+	case PTRACE_SECCOMP_GET_FILTER:
+		ret = seccomp_get_filter(child, addr, datap);
+		break;
+
+	case PTRACE_SECCOMP_GET_METADATA:
+		ret = seccomp_get_metadata(child, addr, datap);
+		break;
 
 	default:
 		ret = ptrace_request(child, request, addr, data);
