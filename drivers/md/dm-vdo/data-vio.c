@@ -221,7 +221,7 @@ as_data_vio_pool(struct vdo_completion *completion)
 
 static inline u64 get_arrival_time(struct bio *bio)
 {
-	return (uintptr_t) bio->bi_private;
+	return __c_pa(bio->bi_private);
 }
 
 /**
@@ -964,7 +964,7 @@ void vdo_launch_bio(struct data_vio_pool *pool, struct bio *bio)
 	VDO_ASSERT_LOG_ONLY(!vdo_is_state_quiescent(&pool->state),
 			    "data_vio_pool not quiescent on acquire");
 
-	bio->bi_private = (void *) jiffies;
+	bio->bi_private = __c_fakep(jiffies);
 	spin_lock(&pool->lock);
 	if ((bio_op(bio) == REQ_OP_DISCARD) &&
 	    !acquire_permit(&pool->discard_limiter)) {

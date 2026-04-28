@@ -1667,7 +1667,7 @@ __acquires(bitmap->lock)
 		/* should we use the first or second counter field
 		 * of the hijacked pointer? */
 		int hi = (pageoff > PAGE_COUNTER_MASK);
-		return  &((bitmap_counter_t *)
+		return  &((bitmap_counter_t *)(void *)
 			  &bitmap->bp[page].map)[hi];
 	} else /* page is allocated */
 		return (bitmap_counter_t *)
