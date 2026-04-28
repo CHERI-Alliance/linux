@@ -1409,7 +1409,7 @@ struct rtl_sta_info {
 	u8 ratr_index;
 	u8 mimo_ps;
 	u8 mac_addr[ETH_ALEN];
-} __packed;
+} __packed __cheri_pointer_align;
 
 struct rtl_priv;
 struct rtl_io {
@@ -1418,7 +1418,7 @@ struct rtl_io {
 
 	/*PCI MEM map */
 	unsigned long pci_mem_end;	/*shared mem end        */
-	unsigned long pci_mem_start;	/*shared mem start */
+	uintptr_t pci_mem_start;	/*shared mem start */
 
 	/*PCI IO map */
 	unsigned long pci_base_addr;	/*device I/O address */

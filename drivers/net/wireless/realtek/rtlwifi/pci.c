@@ -2160,7 +2160,7 @@ int rtl_pci_probe(struct pci_dev *pdev,
 	rtl_dbg(rtlpriv, COMP_INIT, DBG_DMESG,
 		"mem mapped space: start: 0x%08lx len:%08lx flags:%08lx, after map:0x%08lx\n",
 		pmem_start, pmem_len, pmem_flags,
-		rtlpriv->io.pci_mem_start);
+		(unsigned long)rtlpriv->io.pci_mem_start);
 
 	/* Disable Clk Request */
 	pci_write_config_byte(pdev, 0x81, 0);

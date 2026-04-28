@@ -9036,9 +9036,9 @@ static void rtw89_hw_scan_set_extra_op_info(struct rtw89_dev *rtwdev,
 			.set = true,
 			.macid = tmp_link->mac_id,
 			.port = tmp_link->port,
-			.chan = *tmp_chan,
 			.rtwvif_link = tmp_link,
 		};
+		memcpy(&ext->chan, tmp_chan, sizeof(*tmp_chan));
 
 		rtw89_debug(rtwdev, RTW89_DBG_HW_SCAN,
 			    "hw scan: extra op: center %d primary %d\n",
