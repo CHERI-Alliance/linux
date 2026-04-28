@@ -33,7 +33,7 @@ static void *try_ram_remap(resource_size_t offset, size_t size,
 	/* In the simple case just return the existing linear address */
 	if (pfn_valid(pfn) && !PageHighMem(pfn_to_page(pfn)) &&
 	    arch_memremap_can_ram_remap(offset, size, flags))
-		return __va(offset);
+		return cheri_make_kernel_data_cap(__va_a(offset), size);
 
 	return NULL; /* fallback to arch_memremap_wb */
 }

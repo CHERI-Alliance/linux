@@ -478,7 +478,8 @@ static int __init_memblock memblock_double_array(struct memblock_type *type,
 			/* The memory may not have been accepted, yet. */
 			accept_memory(addr, new_alloc_size);
 
-			new_array = __va(addr);
+			new_array = cheri_make_kernel_data_cap(__va_a(addr),
+							       new_alloc_size);
 		} else {
 			new_array = NULL;
 		}
@@ -1630,7 +1631,7 @@ static void * __init memblock_alloc_internal(
 	if (!alloc)
 		return NULL;
 
-	return phys_to_virt(alloc);
+	return cheri_make_kernel_data_cap(phys_to_virt_a(alloc), size);
 }
 
 /**

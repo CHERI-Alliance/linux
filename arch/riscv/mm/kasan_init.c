@@ -68,7 +68,7 @@ static void __init kasan_populate_pmd(pud_t *pud, unsigned long vaddr, unsigned 
 			phys_addr = memblock_phys_alloc(PMD_SIZE, PMD_SIZE);
 			if (phys_addr) {
 				set_pmd(pmdp, pfn_pmd(PFN_DOWN(phys_addr), PAGE_KERNEL));
-				memset(__va(phys_addr), KASAN_SHADOW_INIT, PMD_SIZE);
+				memset(cheri_make_kernel_data_cap(__va_a(phys_addr), PMD_SIZE), KASAN_SHADOW_INIT, PMD_SIZE);
 				continue;
 			}
 		}
@@ -99,7 +99,7 @@ static void __init kasan_populate_pud(p4d_t *p4d,
 			phys_addr = memblock_phys_alloc(PUD_SIZE, PUD_SIZE);
 			if (phys_addr) {
 				set_pud(pudp, pfn_pud(PFN_DOWN(phys_addr), PAGE_KERNEL));
-				memset(__va(phys_addr), KASAN_SHADOW_INIT, PUD_SIZE);
+				memset(cheri_make_kernel_data_cap(__va_a(phys_addr), PUD_SIZE), KASAN_SHADOW_INIT, PUD_SIZE);
 				continue;
 			}
 		}
@@ -130,7 +130,7 @@ static void __init kasan_populate_p4d(pgd_t *pgd,
 			phys_addr = memblock_phys_alloc(P4D_SIZE, P4D_SIZE);
 			if (phys_addr) {
 				set_p4d(p4dp, pfn_p4d(PFN_DOWN(phys_addr), PAGE_KERNEL));
-				memset(__va(phys_addr), KASAN_SHADOW_INIT, P4D_SIZE);
+				memset(cheri_make_kernel_data_cap(__va_a(phys_addr), P4D_SIZE), KASAN_SHADOW_INIT, P4D_SIZE);
 				continue;
 			}
 		}
@@ -153,7 +153,7 @@ static void __init kasan_populate_pgd(pgd_t *pgdp,
 			phys_addr = memblock_phys_alloc(PGDIR_SIZE, PGDIR_SIZE);
 			if (phys_addr) {
 				set_pgd(pgdp, pfn_pgd(PFN_DOWN(phys_addr), PAGE_KERNEL));
-				memset(__va(phys_addr), KASAN_SHADOW_INIT, PGDIR_SIZE);
+				memset(cheri_make_kernel_data_cap(__va_a(phys_addr), PGDIR_SIZE), KASAN_SHADOW_INIT, PGDIR_SIZE);
 				continue;
 			}
 		}
@@ -509,8 +509,8 @@ void __init kasan_init(void)
 
 	/* Populate the linear mapping */
 	for_each_mem_range(i, &p_start, &p_end) {
-		void *start = (void *)__va(p_start);
-		void *end = (void *)__va(p_end);
+		void *start = __c_fakep(__va_a(p_start));
+		void *end = __c_fakep(__va_a(p_end));
 
 		if (start >= end)
 			break;

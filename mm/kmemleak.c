@@ -1597,7 +1597,7 @@ static void scan_object(struct kmemleak_object *object)
 	} else if (hlist_empty(&object->area_list) ||
 	    object->flags & OBJECT_FULL_SCAN) {
 		void *start = object->flags & OBJECT_PHYS ?
-				__va((phys_addr_t)object->pointer) :
+				cheri_make_kernel_data_cap(__va_a((phys_addr_t)__c_ua(object->pointer)), object->size) :
 				(void *)object->pointer;
 		void *end = start + object->size;
 		void *next;

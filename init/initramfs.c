@@ -639,7 +639,8 @@ void __init reserve_initrd_mem(void)
 
 	memblock_reserve(start, size);
 	/* Now convert initrd to virtual addresses */
-	initrd_start = (uintptr_t)__va(phys_initrd_start);
+	initrd_start = (uintptr_t)cheri_make_kernel_data_cap(
+			__va_a(phys_initrd_start), phys_initrd_size);
 	initrd_end = initrd_start + phys_initrd_size;
 	initrd_below_start_ok = 1;
 
@@ -666,8 +667,8 @@ void __weak __init free_initrd_mem(unsigned long start, unsigned long end)
 #ifdef CONFIG_CRASH_RESERVE
 static bool __init kexec_free_initrd(void)
 {
-	unsigned long crashk_start = (unsigned long)__va(crashk_res.start);
-	unsigned long crashk_end   = (unsigned long)__va(crashk_res.end);
+	unsigned long crashk_start = __va_a(crashk_res.start);
+	unsigned long crashk_end   = __va_a(crashk_res.end);
 
 	/*
 	 * If the initrd region is overlapped with crashkernel reserved region,
@@ -681,9 +682,9 @@ static bool __init kexec_free_initrd(void)
 	 */
 	memset((void *)initrd_start, 0, initrd_end - initrd_start);
 	if (initrd_start < crashk_start)
-		free_initrd_mem(initrd_start, crashk_start);
+		free_initrd_mem(__c_pa(initrd_start), crashk_start);
 	if (initrd_end > crashk_end)
-		free_initrd_mem(crashk_end, initrd_end);
+		free_initrd_mem(crashk_end, __c_pa(initrd_end));
 	return true;
 }
 #else
