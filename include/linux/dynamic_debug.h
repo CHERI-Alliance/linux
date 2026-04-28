@@ -57,7 +57,7 @@ struct _ddebug {
 		struct static_key_false dd_key_false;
 	} key;
 #endif
-} __attribute__((aligned(8)));
+} __attribute__((aligned(__SIZEOF_POINTER__)));
 
 enum class_map_type {
 	DD_CLASS_TYPE_DISJOINT_BITS,
@@ -102,7 +102,7 @@ struct ddebug_class_map {
  */
 #define DECLARE_DYNDBG_CLASSMAP(_var, _maptype, _base, ...)		\
 	static const char *_var##_classnames[] = { __VA_ARGS__ };	\
-	static struct ddebug_class_map __aligned(8) __used		\
+	static struct ddebug_class_map __aligned(__SIZEOF_POINTER__) __used		\
 		__section("__dyndbg_classes") _var = {			\
 		.mod = THIS_MODULE,					\
 		.mod_name = KBUILD_MODNAME,				\
@@ -168,7 +168,7 @@ void __dynamic_ibdev_dbg(struct _ddebug *descriptor,
 }
 
 #define DEFINE_DYNAMIC_DEBUG_METADATA_CLS(name, cls, fmt)	\
-	static struct _ddebug  __aligned(8)			\
+	static struct _ddebug  __aligned(__SIZEOF_POINTER__)	\
 	__section("__dyndbg") name = {				\
 		.modname = KBUILD_MODNAME,			\
 		.function = __func__,				\

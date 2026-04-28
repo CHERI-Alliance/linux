@@ -551,7 +551,7 @@ static __always_inline void __class_##_name##_cleanup_ctx(class_##_name##_t **_T
 	__no_context_analysis _unlock { }
 #define WITH_LOCK_GUARD_1_ATTRS(_name, _T)				\
 	class_##_name##_constructor(_T),				\
-	*__UNIQUE_ID(unlock) __cleanup(__class_##_name##_cleanup_ctx) = (void *)(unsigned long)(_T)
+	*__UNIQUE_ID(unlock) __cleanup(__class_##_name##_cleanup_ctx) = (void *)(uintptr_t)(_T)
 
 #define DEFINE_LOCK_GUARD_1(_name, _type, _lock, _unlock, ...)		\
 __DEFINE_CLASS_IS_CONDITIONAL(_name, false);				\

@@ -80,7 +80,7 @@ struct perf_raw_frag {
 	perf_copy_f			copy;
 	void				*data;
 	u32				size;
-} __packed;
+} __packed __cheri_pointer_align;
 
 struct perf_raw_record {
 	struct perf_raw_frag		frag;
