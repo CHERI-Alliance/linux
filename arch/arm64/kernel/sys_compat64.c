@@ -29,6 +29,16 @@
 #define __arm64_compatentry_compat_sys_fadvise64_64		__arm64_compatentry_sys_fadvise64_64
 
 /*
+ * The compat_sys_{preadv,pwritev}{,2} handlers are not appropriate for 64-bit
+ * tasks, as they expect the offset to be split in two 32-bit integers. The
+ * native handlers work fine in 64-bit compat too so just use those instead.
+ */
+#define __arm64_compatentry_compat_sys_preadv			__arm64_compatentry_sys_preadv
+#define __arm64_compatentry_compat_sys_preadv2			__arm64_compatentry_sys_preadv2
+#define __arm64_compatentry_compat_sys_pwritev			__arm64_compatentry_sys_pwritev
+#define __arm64_compatentry_compat_sys_pwritev2			__arm64_compatentry_sys_pwritev2
+
+/*
  * 64-bit tasks use mmap (not mmap2).
  */
 #define __arm64_compatentry_sys_mmap2				__arm64_compatentry_sys_mmap
