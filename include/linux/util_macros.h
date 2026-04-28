@@ -136,16 +136,17 @@
 #define PTR_IF(cond, ptr)	((cond) ? (ptr) : NULL)
 
 /**
- * u64_to_user_ptr - cast a pointer passed as u64 from user space to void __user *
+ * u64_to_user_ptr - cast a pointer passed as __u64ptr from user space to void __user *
  * @x: The u64 value from user space, usually via IOCTL
  *
  * u64_to_user_ptr() simply casts a pointer passed as u64 from user space to void
  * __user2 * __capability correctly. Using this lets us get rid of all the tiresome casts.
+ * For CHERI the integer value must be a capability.
  */
 #define u64_to_user_ptr(x)		\
 ({					\
-	typecheck(u64, (x));		\
-	(void __user *)(uintptr_t)(x);	\
+	typecheck(__u64ptr, (x));	\
+	(void __user *)(user_uintptr_t)(x);	\
 })
 
 /**
