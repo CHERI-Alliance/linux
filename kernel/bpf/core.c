@@ -1279,7 +1279,7 @@ int bpf_jit_get_func_addr(const struct bpf_prog *prog,
 		addr = (u8 *)__bpf_call_base + imm;
 	}
 
-	*func_addr = (unsigned long)addr;
+	*func_addr = __c_pa(addr);
 	return 0;
 }
 
@@ -1771,7 +1771,7 @@ static u32 abs_s32(s32 x)
 	return x >= 0 ? (u32)x : -(u32)x;
 }
 
-static u64 (*interpreters_args[])(u64 r1, u64 r2, u64 r3, u64 r4, u64 r5,
+static uintptr_t (*interpreters_args[])(uintptr_t r1, uintptr_t r2, uintptr_t r3, uintptr_t r4, uintptr_t r5,
 				  const struct bpf_insn *insn);
 
 /**
@@ -2107,8 +2107,8 @@ select_insn:
 		 * preserves BPF_R6-BPF_R9, and stores return value
 		 * into BPF_R0.
 		 */
-		BPF_R0 = (__bpf_call_base + insn->imm)(BPF_R1, BPF_R2, BPF_R3,
-						       BPF_R4, BPF_R5);
+		BPF_R0 = BPF_FUNC_CALL(insn->imm)(BPF_R1, BPF_R2, BPF_R3,
+					     BPF_R4, BPF_R5);
 		CONT;
 
 	JMP_CALL_ARGS:
