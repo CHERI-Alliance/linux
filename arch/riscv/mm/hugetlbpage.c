@@ -441,7 +441,7 @@ bool arch_hugetlb_migration_supported(struct hstate *h)
 static __init int gigantic_pages_init(void)
 {
 	/* With CONTIG_ALLOC, we can allocate gigantic pages at runtime */
-	if (IS_ENABLED(CONFIG_64BIT))
+	if (IS_ENABLED(CONFIG_64BIT) && !IS_ENABLED(CONFIG_CHERI_KERNEL))	/* FIXCHERI */
 		hugetlb_add_hstate(PUD_SHIFT - PAGE_SHIFT);
 	return 0;
 }
