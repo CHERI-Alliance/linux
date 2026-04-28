@@ -41,6 +41,6 @@ int ethosu_gem_create_with_handle(struct drm_file *file,
 
 int ethosu_gem_cmdstream_create(struct drm_file *file,
 				struct drm_device *ddev,
-				u32 size, u64 data, u32 flags, u32 *handle);
+				u32 size, user_uintptr_t data, u32 flags, u32 *handle);
 
 #endif /* __ETHOSU_GEM_H__ */
