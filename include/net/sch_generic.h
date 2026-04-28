@@ -264,33 +264,33 @@ struct Qdisc_class_ops {
 	unsigned int		flags;
 	/* Child qdisc manipulation */
 	struct netdev_queue *	(*select_queue)(struct Qdisc *, struct tcmsg *);
-	int			(*graft)(struct Qdisc *, unsigned long cl,
+	int			(*graft)(struct Qdisc *, uintptr_t cl,
 					struct Qdisc *, struct Qdisc **,
 					struct netlink_ext_ack *extack);
-	struct Qdisc *		(*leaf)(struct Qdisc *, unsigned long cl);
-	void			(*qlen_notify)(struct Qdisc *, unsigned long);
+	struct Qdisc *		(*leaf)(struct Qdisc *, uintptr_t cl);
+	void			(*qlen_notify)(struct Qdisc *, uintptr_t);
 
 	/* Class manipulation routines */
-	unsigned long		(*find)(struct Qdisc *, u32 classid);
+	uintptr_t		(*find)(struct Qdisc *, u32 classid);
 	int			(*change)(struct Qdisc *, u32, u32,
-					struct nlattr **, unsigned long *,
+					struct nlattr **, uintptr_t *,
 					struct netlink_ext_ack *);
-	int			(*delete)(struct Qdisc *, unsigned long,
+	int			(*delete)(struct Qdisc *, uintptr_t,
 					  struct netlink_ext_ack *);
 	void			(*walk)(struct Qdisc *, struct qdisc_walker * arg);
 
 	/* Filter manipulation */
 	struct tcf_block *	(*tcf_block)(struct Qdisc *sch,
-					     unsigned long arg,
+					     uintptr_t arg,
 					     struct netlink_ext_ack *extack);
-	unsigned long		(*bind_tcf)(struct Qdisc *, unsigned long,
+	uintptr_t		(*bind_tcf)(struct Qdisc *, uintptr_t,
 					u32 classid);
-	void			(*unbind_tcf)(struct Qdisc *, unsigned long);
+	void			(*unbind_tcf)(struct Qdisc *, uintptr_t);
 
 	/* rtnetlink specific */
-	int			(*dump)(struct Qdisc *, unsigned long,
+	int			(*dump)(struct Qdisc *, uintptr_t,
 					struct sk_buff *skb, struct tcmsg*);
-	int			(*dump_stats)(struct Qdisc *, unsigned long,
+	int			(*dump_stats)(struct Qdisc *, uintptr_t,
 					struct gnet_dump *);
 };
 
@@ -342,7 +342,7 @@ struct Qdisc_ops {
 struct tcf_result {
 	union {
 		struct {
-			unsigned long	class;
+			uintptr_t	class;
 			u32		classid;
 		};
 		const struct tcf_proto *goto_tp;
@@ -365,7 +365,7 @@ struct tcf_proto_ops {
 	void*			(*get)(struct tcf_proto*, u32 handle);
 	void			(*put)(struct tcf_proto *tp, void *f);
 	int			(*change)(struct net *net, struct sk_buff *,
-					struct tcf_proto*, unsigned long,
+					struct tcf_proto*, uintptr_t,
 					u32 handle, struct nlattr **,
 					void **, u32,
 					struct netlink_ext_ack *);
@@ -382,8 +382,8 @@ struct tcf_proto_ops {
 					  void *type_data);
 	void			(*hw_del)(struct tcf_proto *tp,
 					  void *type_data);
-	void			(*bind_class)(void *, u32, unsigned long,
-					      void *, unsigned long);
+	void			(*bind_class)(void *, u32, uintptr_t,
+					      void *, uintptr_t);
 	void *			(*tmplt_create)(struct net *net,
 						struct tcf_chain *chain,
 						struct nlattr **tca,
