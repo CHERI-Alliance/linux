@@ -1570,8 +1570,8 @@ int nfsd_nl_rpc_status_get_dumpit(struct sk_buff *skb,
 		}
 	}
 
-	cb->args[0] = i;
-	cb->args[1] = rqstp_index;
+	cb->args[0] = __c_fakeu(i);
+	cb->args[1] = __c_fakeu(rqstp_index);
 	ret = skb->len;
 out:
 	rcu_read_unlock();
