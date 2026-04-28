@@ -253,7 +253,7 @@ static int mcp4131_probe(struct spi_device *spi)
 	data->spi = spi;
 	data->cfg = device_get_match_data(&spi->dev);
 	if (!data->cfg) {
-		devid = spi_get_device_id(spi)->driver_data;
+		devid = __c_ua(spi_get_device_id(spi)->driver_data);
 		data->cfg = &mcp4131_cfg[devid];
 	}
 

@@ -179,7 +179,7 @@ static int abp060mg_probe(struct i2c_client *client)
 	const struct i2c_device_id *id = i2c_client_get_device_id(client);
 	struct iio_dev *indio_dev;
 	struct abp_state *state;
-	unsigned long cfg_id = id->driver_data;
+	unsigned long cfg_id = __c_ua(id->driver_data);
 
 	indio_dev = devm_iio_device_alloc(&client->dev, sizeof(*state));
 	if (!indio_dev)
