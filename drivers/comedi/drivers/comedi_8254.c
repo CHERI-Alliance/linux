@@ -127,7 +127,7 @@
 static unsigned int i8254_io8_cb(struct comedi_8254 *i8254, int dir,
 				unsigned int reg, unsigned int val)
 {
-	unsigned long iobase = i8254->context;
+	unsigned long iobase = __c_ua(i8254->context);
 	unsigned int reg_offset = (reg * I8254_IO8) << i8254->regshift;
 
 	if (dir) {
@@ -141,7 +141,7 @@ static unsigned int i8254_io8_cb(struct comedi_8254 *i8254, int dir,
 static unsigned int i8254_io16_cb(struct comedi_8254 *i8254, int dir,
 				  unsigned int reg, unsigned int val)
 {
-	unsigned long iobase = i8254->context;
+	unsigned long iobase = __c_ua(i8254->context);
 	unsigned int reg_offset = (reg * I8254_IO16) << i8254->regshift;
 
 	if (dir) {
@@ -155,7 +155,7 @@ static unsigned int i8254_io16_cb(struct comedi_8254 *i8254, int dir,
 static unsigned int i8254_io32_cb(struct comedi_8254 *i8254, int dir,
 				  unsigned int reg, unsigned int val)
 {
-	unsigned long iobase = i8254->context;
+	unsigned long iobase = __c_ua(i8254->context);
 	unsigned int reg_offset = (reg * I8254_IO32) << i8254->regshift;
 
 	if (dir) {
@@ -617,7 +617,7 @@ void comedi_8254_subdevice_init(struct comedi_subdevice *s,
 EXPORT_SYMBOL_GPL(comedi_8254_subdevice_init);
 
 static struct comedi_8254 *__i8254_init(comedi_8254_iocb_fn *iocb,
-					unsigned long context,
+					uintptr_t context,
 					unsigned int osc_base,
 					unsigned int iosize,
 					unsigned int regshift)
@@ -684,7 +684,7 @@ struct comedi_8254 *comedi_8254_io_alloc(unsigned long iobase,
 	default:
 		return ERR_PTR(-EINVAL);
 	}
-	return __i8254_init(iocb, iobase, osc_base, iosize, regshift);
+	return __i8254_init(iocb, __c_fakeu(iobase), osc_base, iosize, regshift);
 }
 EXPORT_SYMBOL_GPL(comedi_8254_io_alloc);
 
