@@ -44,11 +44,6 @@
 
 #define GCS_SIGNAL_CAP(addr) (((unsigned long)addr) & GCS_CAP_ADDR_MASK)
 
-/* TODO [PCuABI] - remove when actually porting this file to support PCuABI */
-#ifdef CONFIG_CHERI_PURECAP_UABI
-#pragma clang diagnostic ignored "-Wcheri-pointer-conversion"
-#endif
-
 /*
  * Do a signal return; undo the signal stack. These are aligned to 128-bit.
  */
@@ -89,6 +84,21 @@ struct rt_sigframe_user_layout {
 struct user_access_state {
 	u64 por_el0;
 };
+
+static user_uintptr_t signal_sp(struct pt_regs *regs)
+{
+#ifdef CONFIG_ARM64_MORELLO
+	/*
+	 * If the interrupted context was in Restricted, regs->csp is actually
+	 * RCSP_EL0, which is usually what we want but not here, because signal
+	 * handlers are always executed in Executive and therefore on the
+	 * Executive stack. Read the actual (Executive) CSP_EL0 instead.
+	 */
+	return (user_uintptr_t)regs->csp;
+#else
+	return regs->sp;
+#endif
+}
 
 #define TERMINATOR_SIZE round_up(sizeof(struct _aarch64_ctx), 16)
 #define EXTRA_CONTEXT_SIZE round_up(sizeof(struct extra_context), 16)
@@ -1010,14 +1020,15 @@ static int parse_user_sigframe(struct user_ctxs *user,
 			/* Prevent looping/repeated parsing of extra_context */
 			have_extra_context = true;
 
-			base = uaddr_to_user_ptr(extra_datap);
+			if (extra_datap != user_ptr_addr(userp))
+				goto invalid;
+
+			base = (char __user *)userp;
+
 			if (!IS_ALIGNED(user_ptr_addr(base), 16))
 				goto invalid;
 
 			if (!IS_ALIGNED(extra_size, 16))
-				goto invalid;
-
-			if (base != userp)
 				goto invalid;
 
 			/* Reject "unreasonably large" frames: */
@@ -1187,7 +1198,7 @@ SYSCALL_DEFINE0(rt_sigreturn)
 	if (regs->sp & 15)
 		goto badframe;
 
-	frame = uaddr_to_user_ptr(regs->sp);
+	frame = (struct rt_sigframe __user *)signal_sp(regs);
 
 	if (!access_ok(frame, sizeof (*frame)))
 		goto badframe;
@@ -1331,8 +1342,13 @@ static int setup_sigframe(struct rt_sigframe_user_layout *user,
 	struct rt_sigframe __user *sf = user->sigframe;
 
 	/* set up the stack frame for unwinding */
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	__morello_put_user_cap_error(regs->cregs[29], &user->next_frame->fp, err);
+	__morello_put_user_cap_error(regs->cregs[30], &user->next_frame->lr, err);
+#else
 	__put_user_error(regs->regs[29], &user->next_frame->fp, err);
 	__put_user_error(regs->regs[30], &user->next_frame->lr, err);
+#endif
 
 	for (i = 0; i < 31; i++)
 		__put_user_error(regs->regs[i], &sf->uc.uc_mcontext.regs[i],
@@ -1437,7 +1453,7 @@ static int setup_sigframe(struct rt_sigframe_user_layout *user,
 		 * The value gets cast back to a void __user *
 		 * during sigreturn.
 		 */
-		extra_datap = (__force u64)userp;
+		extra_datap = user_ptr_addr(userp);
 		extra_size = sfp + round_up(user->size, 16) - userp;
 
 		__put_user_error(EXTRA_MAGIC, &extra->head.magic, err);
@@ -1462,20 +1478,6 @@ static int setup_sigframe(struct rt_sigframe_user_layout *user,
 	return err;
 }
 
-static user_uintptr_t signal_sp(struct pt_regs *regs)
-{
-#ifdef CONFIG_ARM64_MORELLO
-	/*
-	 * If the interrupted context was in Restricted, regs->csp is actually
-	 * RCSP_EL0, which is usually what we want but not here, because signal
-	 * handlers are always executed in Executive and therefore on the
-	 * Executive stack. Read the actual (Executive) CSP_EL0 instead.
-	 */
-	return (user_uintptr_t)regs->csp;
-#else
-	return regs->sp;
-#endif
-}
 static int get_sigframe(struct rt_sigframe_user_layout *user,
 			 struct ksignal *ksig, struct pt_regs *regs)
 {
@@ -1506,7 +1508,7 @@ static int get_sigframe(struct rt_sigframe_user_layout *user,
 
 #ifdef CONFIG_ARM64_GCS
 
-static int gcs_signal_entry(__sigrestore_t sigtramp, struct ksignal *ksig)
+static int gcs_signal_entry(unsigned long sigtramp, struct ksignal *ksig)
 {
 	u64 gcspr_el0;
 	int ret = 0;
@@ -1540,7 +1542,7 @@ static int gcs_signal_entry(__sigrestore_t sigtramp, struct ksignal *ksig)
 }
 #else
 
-static int gcs_signal_entry(__sigrestore_t sigtramp, struct ksignal *ksig)
+static int gcs_signal_entry(unsigned long sigtramp, struct ksignal *ksig)
 {
 	return 0;
 }
@@ -1550,7 +1552,7 @@ static int gcs_signal_entry(__sigrestore_t sigtramp, struct ksignal *ksig)
 static int setup_return(struct pt_regs *regs, struct ksignal *ksig,
 			 struct rt_sigframe_user_layout *user, int usig)
 {
-	__sigrestore_t sigtramp;
+	unsigned long sigtramp;
 	int err;
 
 	if (ksig->ka.sa.sa_flags & SA_RESTORER)
@@ -1572,13 +1574,22 @@ static int setup_return(struct pt_regs *regs, struct ksignal *ksig,
 
 	regs->regs[0] = usig;
 	if (ksig->ka.sa.sa_flags & SA_SIGINFO) {
-		regs->regs[1] = (unsigned long)&user->sigframe->info;
-		regs->regs[2] = (unsigned long)&user->sigframe->uc;
+		regs->regs[1] = user_ptr_addr(&user->sigframe->info);
+		regs->regs[2] = user_ptr_addr(&user->sigframe->uc);
+#ifdef CONFIG_CHERI_PURECAP_UABI
+		regs->cregs[1] = (uintcap_t)&user->sigframe->info;
+		regs->cregs[2] = (uintcap_t)&user->sigframe->uc;
+#endif
 	}
-	regs->sp = (unsigned long)user->sigframe;
-	regs->regs[29] = (unsigned long)&user->next_frame->fp;
+	regs->sp = user_ptr_addr(user->sigframe);
+	regs->regs[29] = user_ptr_addr(&user->next_frame->fp);
 	regs->regs[30] = sigtramp;
-	regs->pc = (unsigned long)ksig->ka.sa.sa_handler;
+	regs->pc = usr_ptr_addr(ksig->ka.sa.sa_handler);
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	regs->csp = (uintcap_t)user->sigframe;
+	regs->cregs[29] = (uintcap_t)&user->next_frame->fp;
+	regs->pcc = (uintcap_t)ksig->ka.sa.sa_handler;
+#endif
 
 	/*
 	 * Signal delivery is a (wacky) indirect function call in
@@ -1629,12 +1640,7 @@ static int setup_rt_frame(int usig, struct ksignal *ksig, sigset_t *set,
 	frame = user.sigframe;
 
 	__put_user_error(0, &frame->uc.uc_flags, err);
-	/*
-	 * TODO: uc_link should be a capability in PCuABI, for now copy it as
-	 * an unsigned long (__put_user gets confused by a raw void*)
-	 */
-	/* __put_user_error(NULL, &frame->uc.uc_link, err); */
-	__put_user_error(0, (unsigned long __user *)&frame->uc.uc_link, err);
+	__put_user_ptr_error(as_user_ptr(NULL), &frame->uc.uc_link, err);
 
 	err |= __save_altstack(&frame->uc.uc_stack, regs->sp);
 	err |= setup_sigframe(&user, regs, set, &ua_state);
