@@ -73,30 +73,30 @@ void __show_regs(struct pt_regs *regs)
 		pr_cont(" ra : %pS\n", (void *)(uintptr_t)regs->ra);
 	}
 
-	pr_cont("epc : " REG_FMT " ra : " REG_FMT " sp : " REG_FMT "\n",
-		regs->epc, regs->ra, regs->sp);
-	pr_cont(" gp : " REG_FMT " tp : " REG_FMT " t0 : " REG_FMT "\n",
-		regs->gp, regs->tp, regs->t0);
-	pr_cont(" t1 : " REG_FMT " t2 : " REG_FMT " s0 : " REG_FMT "\n",
-		regs->t1, regs->t2, regs->s0);
-	pr_cont(" s1 : " REG_FMT " a0 : " REG_FMT " a1 : " REG_FMT "\n",
-		regs->s1, regs->a0, regs->a1);
-	pr_cont(" a2 : " REG_FMT " a3 : " REG_FMT " a4 : " REG_FMT "\n",
-		regs->a2, regs->a3, regs->a4);
-	pr_cont(" a5 : " REG_FMT " a6 : " REG_FMT " a7 : " REG_FMT "\n",
-		regs->a5, regs->a6, regs->a7);
-	pr_cont(" s2 : " REG_FMT " s3 : " REG_FMT " s4 : " REG_FMT "\n",
-		regs->s2, regs->s3, regs->s4);
-	pr_cont(" s5 : " REG_FMT " s6 : " REG_FMT " s7 : " REG_FMT "\n",
-		regs->s5, regs->s6, regs->s7);
-	pr_cont(" s8 : " REG_FMT " s9 : " REG_FMT " s10: " REG_FMT "\n",
-		regs->s8, regs->s9, regs->s10);
-	pr_cont(" s11: " REG_FMT " t3 : " REG_FMT " t4 : " REG_FMT "\n",
-		regs->s11, regs->t3, regs->t4);
-	pr_cont(" t5 : " REG_FMT " t6 : " REG_FMT " ssp : " REG_FMT "\n",
-		regs->t5, regs->t6, get_active_shstk(current));
+	pr_cont(" epc: " CREG_FMT "\n ra : " CREG_FMT "\n sp : " CREG_FMT "\n",
+		(void *)regs->epc, (void *)regs->ra, (void *)regs->sp);
+	pr_cont(" gp : " CREG_FMT "\n tp : " CREG_FMT "\n t0 : " CREG_FMT "\n",
+		(void *)regs->gp, (void *)regs->tp, (void *)regs->t0);
+	pr_cont(" t1 : " CREG_FMT "\n t2 : " CREG_FMT "\n s0 : " CREG_FMT "\n",
+		(void *)regs->t1, (void *)regs->t2, (void *)regs->s0);
+	pr_cont(" s1 : " CREG_FMT "\n a0 : " CREG_FMT "\n a1 : " CREG_FMT "\n",
+		(void *)regs->s1, (void *)regs->a0, (void *)regs->a1);
+	pr_cont(" a2 : " CREG_FMT "\n a3 : " CREG_FMT "\n a4 : " CREG_FMT "\n",
+		(void *)regs->a2, (void *)regs->a3, (void *)regs->a4);
+	pr_cont(" a5 : " CREG_FMT "\n a6 : " CREG_FMT "\n a7 : " CREG_FMT "\n",
+		(void *)regs->a5, (void *)regs->a6, (void *)regs->a7);
+	pr_cont(" s2 : " CREG_FMT "\n s3 : " CREG_FMT "\n s4 : " CREG_FMT "\n",
+		(void *)regs->s2, (void *)regs->s3, (void *)regs->s4);
+	pr_cont(" s5 : " CREG_FMT "\n s6 : " CREG_FMT "\n s7 : " CREG_FMT "\n",
+		(void *)regs->s5, (void *)regs->s6, (void *)regs->s7);
+	pr_cont(" s8 : " CREG_FMT "\n s9 : " CREG_FMT "\n s10: " CREG_FMT "\n",
+		(void *)regs->s8, (void *)regs->s9, (void *)regs->s10);
+	pr_cont(" s11: " CREG_FMT "\n t3 : " CREG_FMT "\n t4 : " CREG_FMT "\n",
+		(void *)regs->s11, (void *)regs->t3, (void *)regs->t4);
+	pr_cont(" t5 : " CREG_FMT "\n t6 : " CREG_FMT "\n ssp: " CREG_FMT "\n",
+		(void *)regs->t5, (void *)regs->t6, (void *)get_active_shstk(current));
 
-	pr_cont("status: " REG_FMT " badaddr: " REG_FMT " cause: " REG_FMT "\n",
+	pr_cont("status:  " REG_FMT " badaddr: " REG_FMT " cause: " REG_FMT "\n",
 		regs->status, regs->badaddr, regs->cause);
 }
 void show_regs(struct pt_regs *regs)
