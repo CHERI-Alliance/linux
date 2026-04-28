@@ -2047,6 +2047,7 @@ menu "ARMv8.5 architectural features"
 
 config AS_HAS_ARMV8_5
 	def_bool $(cc-option,-Wa$(comma)-march=armv8.5-a)
+	depends on !ARM64_MORELLO
 
 config ARM64_BTI
 	bool "Branch Target Identification support"
