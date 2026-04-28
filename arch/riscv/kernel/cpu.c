@@ -312,7 +312,7 @@ static void *c_start(struct seq_file *m, loff_t *pos)
 
 	*pos = cpumask_next(*pos - 1, cpu_online_mask);
 	if ((*pos) < nr_cpu_ids)
-		return (void *)(uintptr_t)(1 + *pos);
+		return __c_fakep(1 + *pos);
 	return NULL;
 }
 
@@ -328,7 +328,7 @@ static void c_stop(struct seq_file *m, void *v)
 
 static int c_show(struct seq_file *m, void *v)
 {
-	unsigned long cpu_id = (uintptr_t)v - 1;
+	unsigned long cpu_id = __c_pa(v) - 1;
 	struct riscv_cpuinfo *ci = per_cpu_ptr(&riscv_cpuinfo, cpu_id);
 	struct device_node *node;
 	const char *compat;
