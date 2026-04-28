@@ -35,18 +35,45 @@ static long __invoke_syscall(struct pt_regs *regs, syscall_fn_t syscall_fn)
 	return syscall_fn(regs);
 }
 
+#ifdef CONFIG_CHERI_PURECAP_UABI
+static user_intptr_t __invoke_syscall_retptr(struct pt_regs *regs,
+				syscall_retptr_fn_t syscall_fn)
+{
+	return syscall_fn(regs);
+}
+#endif
+
 static void invoke_syscall(struct pt_regs *regs, unsigned int scno,
 			   unsigned int sc_nr,
-			   const syscall_fn_t syscall_table[])
+			   const syscall_entry_t syscall_table[])
 {
 	long ret;
 
 	add_random_kstack_offset();
 
 	if (likely(scno < sc_nr)) {
+#ifdef CONFIG_CHERI_PURECAP_UABI
+		const syscall_entry_t *entry;
+		user_intptr_t __ret;
+
+		entry = &syscall_table[array_index_nospec(scno, sc_nr)];
+
+		__ret = entry->__retptr ?
+			__invoke_syscall_retptr(regs, entry->syscall_retptr_fn) :
+			__invoke_syscall(regs, entry->syscall_fn);
+
+		/*
+		 * Upon ret_to_user general-purpose registers will get merged
+		 * back to capability registers, which is why regs->reg[0] and
+		 * regs->creg[0] need to be aligned here.
+		 */
+		ret = (ptraddr_t)__ret;
+		regs->cregs[0] = __ret;
+#else
 		syscall_fn_t syscall_fn;
 		syscall_fn = syscall_table[array_index_nospec(scno, sc_nr)];
 		ret = __invoke_syscall(regs, syscall_fn);
+#endif
 	} else {
 		ret = do_ni_syscall(regs, scno);
 	}
@@ -71,7 +98,7 @@ static inline bool has_syscall_work(unsigned long flags)
 }
 
 static void el0_svc_common(struct pt_regs *regs, int scno, int sc_nr,
-			   const syscall_fn_t syscall_table[])
+			   const syscall_entry_t syscall_table[])
 {
 	unsigned long flags = read_thread_flags();
 
