@@ -51,8 +51,8 @@ static int kcmp_ptr(void *v1, void *v2, enum kcmp_type type)
 {
 	long t1, t2;
 
-	t1 = kptr_obfuscate((intptr_t)v1, type);
-	t2 = kptr_obfuscate((intptr_t)v2, type);
+	t1 = kptr_obfuscate((long)__c_pa(v1), type);
+	t2 = kptr_obfuscate((long)__c_pa(v2), type);
 
 	return (t1 < t2) | ((t1 > t2) << 1);
 }

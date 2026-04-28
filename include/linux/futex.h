@@ -78,7 +78,7 @@ void futex_exec_release(struct task_struct *tsk);
 
 long do_futex(u32 __user *uaddr, int op, u32 val, ktime_t *timeout,
 	      u32 __user *uaddr2, u32 val2, u32 val3);
-int futex_hash_prctl(unsigned long arg2, unsigned long arg3, unsigned long arg4);
+int futex_hash_prctl(user_uintptr_t arg2, user_uintptr_t arg3, user_uintptr_t arg4);
 
 #ifdef CONFIG_FUTEX_PRIVATE_HASH
 int futex_hash_allocate_default(void);
@@ -102,7 +102,7 @@ static inline long do_futex(u32 __user *uaddr, int op, u32 val,
 {
 	return -EINVAL;
 }
-static inline int futex_hash_prctl(unsigned long arg2, unsigned long arg3, unsigned long arg4)
+static inline int futex_hash_prctl(user_uintptr_t arg2, user_uintptr_t arg3, user_uintptr_t arg4)
 {
 	return -EINVAL;
 }

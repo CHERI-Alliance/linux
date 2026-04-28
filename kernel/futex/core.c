@@ -584,7 +584,7 @@ int get_futex_key(u32 __user *uaddr, unsigned int flags, union futex_key *key,
 	node = FUTEX_NO_NODE;
 
 	if (flags & FLAGS_NUMA) {
-		u32 __user *naddr = (void *)uaddr + size / 2;
+		u32 __user *naddr = (void __user *)uaddr + size / 2;
 
 		if (get_user_inline(node, naddr))
 			return -EFAULT;
@@ -600,7 +600,7 @@ int get_futex_key(u32 __user *uaddr, unsigned int flags, union futex_key *key,
 	}
 
 	if (flags & FLAGS_NUMA) {
-		u32 __user *naddr = (void *)uaddr + size / 2;
+		u32 __user *naddr = (void __user *)uaddr + size / 2;
 
 		if (node == FUTEX_NO_NODE) {
 			node = numa_node_id();
@@ -1964,7 +1964,7 @@ static int futex_hash_get_slots(void)
 
 #endif
 
-int futex_hash_prctl(unsigned long arg2, unsigned long arg3, unsigned long arg4)
+int futex_hash_prctl(user_uintptr_t arg2, user_uintptr_t arg3, user_uintptr_t arg4)
 {
 	unsigned int flags = FH_CUSTOM;
 	int ret;

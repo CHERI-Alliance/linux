@@ -2790,10 +2790,10 @@ SYSCALL_DEFINE5(clone, unsigned long, clone_flags, user_uintptr_t, newsp,
 		.parent_tid	= parent_tidptr,
 		.exit_signal	= (lower_32_bits(clone_flags) & CSIGNAL),
 		.stack		= (compat_mode ?
-				   (user_uintptr_t)(compat_ulong_t)newsp :
+				   (user_uintptr_t __force)(compat_ulong_t __force)newsp :
 				   newsp),
 		.tls		= (compat_mode ?
-				   (user_uintptr_t)(compat_ulong_t)tls :
+				   (user_uintptr_t __force)(compat_ulong_t __force)tls :
 				   tls),
 	};
 
@@ -2970,7 +2970,7 @@ static inline bool clone3_stack_valid(struct kernel_clone_args *kargs)
 		if (kargs->stack_size == 0)
 			return false;
 
-		if (!access_ok((void __user *)(uintptr_t)kargs->stack, kargs->stack_size))
+		if (!access_ok((void __user *)kargs->stack, kargs->stack_size))
 			return false;
 
 #if !defined(CONFIG_STACK_GROWSUP)

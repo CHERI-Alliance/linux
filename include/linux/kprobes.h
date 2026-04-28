@@ -200,7 +200,7 @@ static nokprobe_inline struct kretprobe *get_kretprobe(struct kretprobe_instance
 	/* rethook::data is non-changed field, so that you can access it freely. */
 	return (struct kretprobe *)ri->node.rethook->data;
 }
-static nokprobe_inline unsigned long get_kretprobe_retaddr(struct kretprobe_instance *ri)
+static nokprobe_inline uintptr_t get_kretprobe_retaddr(struct kretprobe_instance *ri)
 {
 	return ri->node.ret_addr;
 }
@@ -544,18 +544,18 @@ static nokprobe_inline bool is_kretprobe_trampoline(unsigned long addr)
 }
 
 static nokprobe_inline
-unsigned long kretprobe_find_ret_addr(struct task_struct *tsk, void *fp,
-				      struct llist_node **cur)
+uintptr_t kretprobe_find_ret_addr(struct task_struct *tsk, void *fp,
+				  struct llist_node **cur)
 {
 	return rethook_find_ret_addr(tsk, (uintptr_t)fp, cur);
 }
 #else
 static nokprobe_inline bool is_kretprobe_trampoline(unsigned long addr)
 {
-	return (void *)addr == kretprobe_trampoline_addr();
+	return addr == __c_pa(kretprobe_trampoline_addr());
 }
 
-unsigned long kretprobe_find_ret_addr(struct task_struct *tsk, void *fp,
+uintptr_t kretprobe_find_ret_addr(struct task_struct *tsk, void *fp,
 				      struct llist_node **cur);
 #endif
 #else
@@ -565,7 +565,7 @@ static nokprobe_inline bool is_kretprobe_trampoline(unsigned long addr)
 }
 
 static nokprobe_inline
-unsigned long kretprobe_find_ret_addr(struct task_struct *tsk, void *fp,
+uintptr_t kretprobe_find_ret_addr(struct task_struct *tsk, void *fp,
 				      struct llist_node **cur)
 {
 	return 0;

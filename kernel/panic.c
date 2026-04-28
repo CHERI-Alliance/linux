@@ -1067,7 +1067,7 @@ void __warn(const char *file, int line, void *caller, unsigned taint,
 	print_irqtrace_events(current);
 
 	print_oops_end_marker();
-	trace_error_report_end(ERROR_DETECTOR_WARN, (uintptr_t)caller);
+	trace_error_report_end(ERROR_DETECTOR_WARN, __c_pa(caller));
 
 	/* Just a warning, don't kill lockdep. */
 	add_taint(taint, LOCKDEP_STILL_OK);
@@ -1120,7 +1120,7 @@ EXPORT_SYMBOL(__warn_printk);
 static int clear_warn_once_set(void *data, u64 val)
 {
 	generic_bug_clear_once();
-	memset(__start_once, 0, __end_once - __start_once);
+	memset(__start_once, 0, __c_pa(__end_once) - __c_pa(__start_once));
 	return 0;
 }
 

@@ -286,7 +286,7 @@ long watch_queue_set_size(struct pipe_inode_info *pipe, unsigned int nr_notes)
 		pages[i] = alloc_page(GFP_KERNEL);
 		if (!pages[i])
 			goto error_p;
-		pages[i]->private = i * WATCH_QUEUE_NOTES_PER_PAGE;
+		pages[i]->private = __c_fakeu(i * WATCH_QUEUE_NOTES_PER_PAGE);
 	}
 
 	bitmap = bitmap_alloc(nr_notes, GFP_KERNEL);

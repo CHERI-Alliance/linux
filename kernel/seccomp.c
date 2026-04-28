@@ -249,18 +249,19 @@ static void populate_seccomp_data(struct seccomp_data *sd)
 	 */
 	struct task_struct *task = current;
 	struct pt_regs *regs = task_pt_regs(task);
-	unsigned long args[6];
+	uintptr_t args[6];
 
+	/* FIXCHERI: Support capabilities here? */
 	sd->nr = syscall_get_nr(task, regs);
 	sd->arch = syscall_get_arch(task);
 	syscall_get_arguments(task, regs, args);
-	sd->args[0] = args[0];
-	sd->args[1] = args[1];
-	sd->args[2] = args[2];
-	sd->args[3] = args[3];
-	sd->args[4] = args[4];
-	sd->args[5] = args[5];
-	sd->instruction_pointer = KSTK_EIP(task);
+	sd->args[0] = __c_ua(args[0]);
+	sd->args[1] = __c_ua(args[1]);
+	sd->args[2] = __c_ua(args[2]);
+	sd->args[3] = __c_ua(args[3]);
+	sd->args[4] = __c_ua(args[4]);
+	sd->args[5] = __c_ua(args[5]);
+	sd->instruction_pointer = __c_ua(KSTK_EIP(task));
 }
 
 /**
@@ -1251,8 +1252,9 @@ out:
 	if (flags & SECCOMP_USER_NOTIF_FLAG_CONTINUE)
 		return 0;
 
+	/* FIXCHERI: Cannot return a capability here. */
 	syscall_set_return_value(current, current_pt_regs(),
-				 err, ret);
+				 err, __c_fakeu(ret));
 	return -1;
 }
 

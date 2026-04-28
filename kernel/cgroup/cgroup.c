@@ -966,7 +966,7 @@ static unsigned long css_set_hash(struct cgroup_subsys_state **css)
 	int i;
 
 	for_each_subsys(ss, i)
-		key += (uintptr_t)css[i];
+		key += __c_pa(css[i]);
 	key = (key >> 16) ^ key;
 
 	return key;

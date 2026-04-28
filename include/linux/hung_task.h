@@ -68,14 +68,14 @@ static inline void hung_task_clear_blocker(void)
  *
  * Returns: BLOCKER_TYPE_MUTEX, BLOCKER_TYPE_SEM, etc.
  */
-static inline unsigned long hung_task_get_blocker_type(unsigned long blocker)
+static inline unsigned long hung_task_get_blocker_type(uintptr_t blocker)
 {
 	WARN_ON_ONCE(!blocker);
 
 	return blocker & BLOCKER_TYPE_MASK;
 }
 
-static inline void *hung_task_blocker_to_lock(unsigned long blocker)
+static inline void *hung_task_blocker_to_lock(uintptr_t blocker)
 {
 	WARN_ON_ONCE(!blocker);
 
@@ -88,11 +88,11 @@ static inline void hung_task_set_blocker(void *lock, unsigned long type)
 static inline void hung_task_clear_blocker(void)
 {
 }
-static inline unsigned long hung_task_get_blocker_type(unsigned long blocker)
+static inline unsigned long hung_task_get_blocker_type(uintptr_t blocker)
 {
 	return 0UL;
 }
-static inline void *hung_task_blocker_to_lock(unsigned long blocker)
+static inline void *hung_task_blocker_to_lock(uintptr_t blocker)
 {
 	return NULL;
 }

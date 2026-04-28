@@ -1244,7 +1244,7 @@ struct task_struct {
 	 * Encoded lock address causing task block (lower 2 bits = type from
 	 * <linux/hung_task.h>). Accessed via hung_task_*() helpers.
 	 */
-	unsigned long			blocker;
+	uintptr_t			blocker;
 #endif
 
 #ifdef CONFIG_DEBUG_ATOMIC_SLEEP

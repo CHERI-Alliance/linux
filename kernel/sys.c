@@ -2237,7 +2237,7 @@ static int prctl_set_mm(int opt, user_uintptr_t addr,
 	 * validation.
 	 */
 	mmap_read_lock(mm);
-	vma = find_vma(mm, addr);
+	vma = find_vma(mm, __c_ua(addr));
 
 	spin_lock(&mm->arg_lock);
 	prctl_map.start_code	= mm->start_code;
@@ -2254,37 +2254,37 @@ static int prctl_set_mm(int opt, user_uintptr_t addr,
 
 	switch (opt) {
 	case PR_SET_MM_START_CODE:
-		prctl_map.start_code = addr;
+		prctl_map.start_code = __c_ua(addr);
 		break;
 	case PR_SET_MM_END_CODE:
-		prctl_map.end_code = addr;
+		prctl_map.end_code = __c_ua(addr);
 		break;
 	case PR_SET_MM_START_DATA:
-		prctl_map.start_data = addr;
+		prctl_map.start_data = __c_ua(addr);
 		break;
 	case PR_SET_MM_END_DATA:
-		prctl_map.end_data = addr;
+		prctl_map.end_data = __c_ua(addr);
 		break;
 	case PR_SET_MM_START_STACK:
-		prctl_map.start_stack = addr;
+		prctl_map.start_stack = __c_ua(addr);
 		break;
 	case PR_SET_MM_START_BRK:
-		prctl_map.start_brk = addr;
+		prctl_map.start_brk = __c_ua(addr);
 		break;
 	case PR_SET_MM_BRK:
-		prctl_map.brk = addr;
+		prctl_map.brk = __c_ua(addr);
 		break;
 	case PR_SET_MM_ARG_START:
-		prctl_map.arg_start = addr;
+		prctl_map.arg_start = __c_ua(addr);
 		break;
 	case PR_SET_MM_ARG_END:
-		prctl_map.arg_end = addr;
+		prctl_map.arg_end = __c_ua(addr);
 		break;
 	case PR_SET_MM_ENV_START:
-		prctl_map.env_start = addr;
+		prctl_map.env_start = __c_ua(addr);
 		break;
 	case PR_SET_MM_ENV_END:
-		prctl_map.env_end = addr;
+		prctl_map.env_end = __c_ua(addr);
 		break;
 	default:
 		goto out;
@@ -2538,14 +2538,15 @@ SYSCALL_DEFINE5(prctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 	unsigned char comm[sizeof(me->comm)];
 	long error;
 
-	error = security_task_prctl(option, arg2, arg3, arg4, arg5);
+	/* FIXCHERI: This assumes that the security hook will not deref the user pointers. */
+	error = security_task_prctl(option, __c_ua(arg2), __c_ua(arg3), __c_ua(arg4), __c_ua(arg5));
 	if (error != -ENOSYS)
 		return error;
 
 	error = 0;
 	switch (option) {
 	case PR_SET_PDEATHSIG:
-		if (!valid_signal(arg2)) {
+		if (!valid_signal(__c_ua(arg2))) {
 			error = -EINVAL;
 			break;
 		}
@@ -2558,7 +2559,7 @@ SYSCALL_DEFINE5(prctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 		 * Also prevent the read of me->pdeath_signal from being a data race.
 		 */
 		read_lock(&tasklist_lock);
-		me->pdeath_signal = arg2;
+		me->pdeath_signal = __c_ua(arg2);
 		read_unlock(&tasklist_lock);
 		break;
 	case PR_GET_PDEATHSIG:
@@ -2623,7 +2624,7 @@ SYSCALL_DEFINE5(prctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 		error = prctl_get_seccomp();
 		break;
 	case PR_SET_SECCOMP:
-		error = prctl_set_seccomp(arg2, (char __user *)arg3);
+		error = prctl_set_seccomp(__c_ua(arg2), (char __user *)arg3);
 		break;
 	case PR_GET_TSC:
 		error = GET_TSC_CTL(arg2);
@@ -2650,7 +2651,7 @@ SYSCALL_DEFINE5(prctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 			current->timer_slack_ns =
 					current->default_timer_slack_ns;
 		else
-			current->timer_slack_ns = arg2;
+			current->timer_slack_ns = __c_ua(arg2);
 		break;
 	case PR_MCE_KILL:
 		if (arg4 || arg5)
@@ -2687,7 +2688,7 @@ SYSCALL_DEFINE5(prctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 			error = PR_MCE_KILL_DEFAULT;
 		break;
 	case PR_SET_MM:
-		error = prctl_set_mm(arg2, arg3, arg4, arg5);
+		error = prctl_set_mm(__c_ua(arg2), arg3, __c_ua(arg4), __c_ua(arg5));
 		break;
 	case PR_GET_TID_ADDRESS:
 		error = prctl_get_tid_address(me, (int __user2 * __capability __user2 * __capability)arg2);
@@ -2714,10 +2715,10 @@ SYSCALL_DEFINE5(prctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 			return -EINVAL;
 		return task_no_new_privs(current) ? 1 : 0;
 	case PR_GET_THP_DISABLE:
-		error = prctl_get_thp_disable(arg2, arg3, arg4, arg5);
+		error = prctl_get_thp_disable(__c_ua(arg2), __c_ua(arg3), __c_ua(arg4), __c_ua(arg5));
 		break;
 	case PR_SET_THP_DISABLE:
-		error = prctl_set_thp_disable(arg2, arg3, arg4, arg5);
+		error = prctl_set_thp_disable(__c_ua(arg2), __c_ua(arg3), __c_ua(arg4), __c_ua(arg5));
 		break;
 	case PR_MPX_ENABLE_MANAGEMENT:
 	case PR_MPX_DISABLE_MANAGEMENT:
@@ -2744,12 +2745,12 @@ SYSCALL_DEFINE5(prctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 	case PR_GET_SPECULATION_CTRL:
 		if (arg3 || arg4 || arg5)
 			return -EINVAL;
-		error = arch_prctl_spec_ctrl_get(me, arg2);
+		error = arch_prctl_spec_ctrl_get(me, __c_ua(arg2));
 		break;
 	case PR_SET_SPECULATION_CTRL:
 		if (arg4 || arg5)
 			return -EINVAL;
-		error = arch_prctl_spec_ctrl_set(me, arg2, arg3);
+		error = arch_prctl_spec_ctrl_set(me, __c_ua(arg2), __c_ua(arg3));
 		break;
 	case PR_PAC_RESET_KEYS:
 		if (arg3 || arg4 || arg5)
@@ -2800,7 +2801,7 @@ SYSCALL_DEFINE5(prctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 		error = (current->flags & PR_IO_FLUSHER) == PR_IO_FLUSHER;
 		break;
 	case PR_SET_SYSCALL_USER_DISPATCH:
-		error = set_syscall_user_dispatch(arg2, arg3, arg4,
+		error = set_syscall_user_dispatch(__c_ua(arg2), __c_ua(arg3), __c_ua(arg4),
 						  (char __user *) arg5);
 		break;
 #ifdef CONFIG_SCHED_CORE
@@ -2809,10 +2810,10 @@ SYSCALL_DEFINE5(prctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 		break;
 #endif
 	case PR_SET_MDWE:
-		error = prctl_set_mdwe(arg2, arg3, arg4, arg5);
+		error = prctl_set_mdwe(__c_ua(arg2), __c_ua(arg3), __c_ua(arg4), __c_ua(arg5));
 		break;
 	case PR_GET_MDWE:
-		error = prctl_get_mdwe(arg2, arg3, arg4, arg5);
+		error = prctl_get_mdwe(__c_ua(arg2), __c_ua(arg3), __c_ua(arg4), __c_ua(arg5));
 		break;
 	case PR_PPC_GET_DEXCR:
 		if (arg3 || arg4 || arg5)
@@ -2825,12 +2826,12 @@ SYSCALL_DEFINE5(prctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 		error = PPC_SET_DEXCR_ASPECT(me, arg2, arg3);
 		break;
 	case PR_SET_VMA:
-		error = prctl_set_vma(arg2, arg3, arg4, arg5);
+		error = prctl_set_vma(__c_ua(arg2), __c_ua(arg3), __c_ua(arg4), arg5);
 		break;
 	case PR_GET_AUXV:
 		if (arg4 || arg5)
 			return -EINVAL;
-		error = prctl_get_auxv((void __user *)arg2, arg3);
+		error = prctl_get_auxv((void __user *)arg2, __c_ua(arg3));
 		break;
 #ifdef CONFIG_KSM
 	case PR_SET_MEMORY_MERGE:
@@ -2859,7 +2860,7 @@ SYSCALL_DEFINE5(prctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 		error = RISCV_V_GET_CONTROL();
 		break;
 	case PR_RISCV_SET_ICACHE_FLUSH_CTX:
-		error = RISCV_SET_ICACHE_FLUSH_CTX(arg2, arg3);
+		error = RISCV_SET_ICACHE_FLUSH_CTX(__c_ua(arg2), __c_ua(arg3));
 		break;
 	case PR_GET_SHADOW_STACK_STATUS:
 		if (arg3 || arg4 || arg5)
@@ -2869,17 +2870,17 @@ SYSCALL_DEFINE5(prctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 	case PR_SET_SHADOW_STACK_STATUS:
 		if (arg3 || arg4 || arg5)
 			return -EINVAL;
-		error = arch_set_shadow_stack_status(me, arg2);
+		error = arch_set_shadow_stack_status(me, __c_ua(arg2));
 		break;
 	case PR_LOCK_SHADOW_STACK_STATUS:
 		if (arg3 || arg4 || arg5)
 			return -EINVAL;
-		error = arch_lock_shadow_stack_status(me, arg2);
+		error = arch_lock_shadow_stack_status(me, __c_ua(arg2));
 		break;
 	case PR_TIMER_CREATE_RESTORE_IDS:
 		if (arg3 || arg4 || arg5)
 			return -EINVAL;
-		error = posixtimer_create_prctl(arg2);
+		error = posixtimer_create_prctl(__c_ua(arg2));
 		break;
 	case PR_FUTEX_HASH:
 		error = futex_hash_prctl(arg2, arg3, arg4);
@@ -2908,7 +2909,7 @@ SYSCALL_DEFINE5(prctl, int, option, user_uintptr_t, arg2, user_uintptr_t, arg3,
 			error = arch_prctl_lock_branch_landing_pad_state(me);
 		break;
 	default:
-		trace_task_prctl_unknown(option, arg2, arg3, arg4, arg5);
+		trace_task_prctl_unknown(option, __c_ua(arg2), __c_ua(arg3), __c_ua(arg4), __c_ua(arg5));
 		error = -EINVAL;
 		break;
 	}
