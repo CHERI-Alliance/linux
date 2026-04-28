@@ -6958,7 +6958,7 @@ sub process {
 				my $fmt = get_quoted_string($lines[$count - 1], raw_line($count, 0));
 				$fmt =~ s/%%//g;
 
-				while ($fmt =~ /(\%[\*\d\.]*p(\w)(\w*))/g) {
+				while ($fmt =~ /(\%[\*\d\.#l]*p(\w)(\w*))/g) {
 					$specifier = $1;
 					$extension = $2;
 					$qualifier = $3;
@@ -6966,7 +6966,8 @@ sub process {
 					    ($extension eq "f" &&
 					     defined $qualifier && $qualifier !~ /^w/) ||
 					    ($extension eq "4" &&
-					     defined $qualifier && $qualifier !~ /^c(?:[hlbc]|hR)$/)) {
+					     defined $qualifier && $qualifier !~ /^c(?:[hlbc]|hR)$/) ||
+					    ($specifier =~ /lp/ && $extension ne "x")) {
 						$bad_specifier = $specifier;
 						last;
 					}
@@ -6978,6 +6979,14 @@ sub process {
 						     "Using vsprintf specifier '\%px' potentially exposes the kernel memory layout, if you don't really need the address please consider using '\%p'.\n" . "$here\n$stat_real\n");
 					}
 				}
+
+				if ($fmt =~ /\%[\*\d\.#]*lp/) {
+					my $stat_real = get_stat_real($linenr, $lc);
+
+					WARN("VSPRINTF_POINTER_EXTENSION",
+						"Using vsprintf specifier '\%[#]lp[x]' is undefined behaviour when used with non-capability types. Make sure you got it right.\n" . "$here\n$stat_real\n");
+				}
+
 				if ($bad_specifier ne "") {
 					my $stat_real = get_stat_real($linenr, $lc);
 					my $msg_level = \&WARN;
