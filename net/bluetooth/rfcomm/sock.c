@@ -861,7 +861,7 @@ static int rfcomm_sock_ioctl(struct socket *sock, unsigned int cmd, user_uintptr
 	struct sock *sk __maybe_unused = sock->sk;
 	int err;
 
-	BT_DBG("sk %p cmd %x arg %lx", sk, cmd, arg);
+	BT_DBG("sk %p cmd %x arg %lx", sk, cmd, (unsigned long)arg);
 
 	err = bt_sock_ioctl(sock, cmd, arg);
 

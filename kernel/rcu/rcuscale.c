@@ -608,7 +608,7 @@ rcu_scale_writer(void *arg)
 			WRITE_ONCE(writer_done[__c_ua(me)], true);
 			sched_set_normal(current, 0);
 			pr_alert("%s%s rcu_scale_writer %ld has %d measurements\n",
-				 scale_type, SCALE_FLAG, me, MIN_MEAS);
+				 scale_type, SCALE_FLAG, (unsigned long)me, MIN_MEAS);
 			if (atomic_inc_return(&n_rcu_scale_writer_finished) >=
 			    nrealwriters) {
 				schedule_timeout_interruptible(10);
@@ -639,7 +639,7 @@ rcu_scale_writer(void *arg)
 				for (i = 0; i < nrealwriters; i++) {
 					if (writer_done[i])
 						continue;
-					pr_info("%s: Task %ld flags writer %d:\n", __func__, me, i);
+					pr_info("%s: Task %ld flags writer %d:\n", __func__, (unsigned long)me, i);
 					sched_show_task(writer_tasks[i]);
 				}
 				if (cur_ops->stats)
@@ -648,7 +648,7 @@ rcu_scale_writer(void *arg)
 		}
 		if (!selfreport && time_after(jiffies, jdone + HZ * (70 + me))) {
 			pr_info("%s: Writer %ld self-report: started %d done %d/%d->%d i %d jdone %lu.\n",
-				__func__, me, started, done, writer_done[__c_ua(me)], atomic_read(&n_rcu_scale_writer_finished), i, jiffies - jdone);
+				__func__, (unsigned long)me, started, done, writer_done[__c_ua(me)], atomic_read(&n_rcu_scale_writer_finished), i, jiffies - jdone);
 			selfreport = true;
 		}
 		if (gp_succeeded && started && !alldone && i < MAX_MEAS - 1)

@@ -1696,7 +1696,7 @@ static void ublk_dispatch_req(struct ublk_queue *ubq, struct request *req)
 
 	pr_devel("%s: complete: qid %d tag %d io_flags %x addr %llx\n",
 			__func__, ubq->q_id, req->tag, io->flags,
-			ublk_get_iod(ubq, req->tag)->addr);
+			(__u64)ublk_get_iod(ubq, req->tag)->addr);
 
 	/*
 	 * Task is exiting if either:
@@ -3246,7 +3246,7 @@ static bool ublk_get_data(const struct ublk_queue *ubq, struct ublk_io *io,
 	ublk_get_iod(ubq, req->tag)->addr = io->buf.addr;
 	pr_devel("%s: update iod->addr: qid %d tag %d io_flags %x addr %llx\n",
 			__func__, ubq->q_id, req->tag, io->flags,
-			ublk_get_iod(ubq, req->tag)->addr);
+			(__u64)ublk_get_iod(ubq, req->tag)->addr);
 
 	return ublk_start_io(ubq, req, io);
 }
@@ -4764,7 +4764,7 @@ static inline void ublk_ctrl_cmd_dump(u32 cmd_op,
 {
 	pr_devel("%s: cmd_op %x, dev id %d qid %d data %llx buf %llx len %u\n",
 			__func__, cmd_op, header->dev_id, header->queue_id,
-			header->data[0], header->addr, header->len);
+			header->data[0], (__u64)header->addr, header->len);
 }
 
 static void ublk_ctrl_stop_dev(struct ublk_device *ub)

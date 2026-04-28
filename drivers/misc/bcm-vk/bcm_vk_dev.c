@@ -1233,7 +1233,7 @@ static long bcm_vk_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg
 
 	dev_dbg(&vk->pdev->dev,
 		"ioctl, cmd=0x%02x, arg=0x%02lx\n",
-		cmd, arg);
+		cmd, (unsigned long)arg);
 
 	mutex_lock(&vk->mutex);
 

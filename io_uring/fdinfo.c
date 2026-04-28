@@ -135,7 +135,7 @@ static void __io_uring_show_fdinfo(struct io_ring_ctx *ctx, struct seq_file *m)
 			   sq_idx, io_uring_get_opcode(opcode), sqe->fd,
 			   sqe->flags, (unsigned long long) sqe->off,
 			   (unsigned long long) sqe->addr, sqe->rw_flags,
-			   sqe->buf_index, sqe->user_data);
+			   sqe->buf_index, (__u64)sqe->user_data);
 		if (sqe128) {
 			u64 *sqeb = (void *) (sqe + 1);
 			int size = sizeof(struct io_uring_sqe) / sizeof(u64);
@@ -160,11 +160,11 @@ static void __io_uring_show_fdinfo(struct io_ring_ctx *ctx, struct seq_file *m)
 		if (cqe->flags & IORING_CQE_F_32 || ctx->flags & IORING_SETUP_CQE32)
 			cqe32 = true;
 		seq_printf(m, "%5u: user_data:%llu, res:%d, flags:%x",
-			   cq_head & cq_mask, cqe->user_data, cqe->res,
+			   cq_head & cq_mask, (__u64)cqe->user_data, cqe->res,
 			   cqe->flags);
 		if (cqe32)
 			seq_printf(m, ", extra1:%llu, extra2:%llu",
-					cqe->big_cqe[0], cqe->big_cqe[1]);
+					(__u64)cqe->big_cqe[0], (__u64)cqe->big_cqe[1]);
 		seq_printf(m, "\n");
 		cq_head++;
 		if (cqe32) {
@@ -244,7 +244,7 @@ static void __io_uring_show_fdinfo(struct io_ring_ctx *ctx, struct seq_file *m)
 		struct io_uring_cqe *cqe = &ocqe->cqe;
 
 		seq_printf(m, "  user_data=%llu, res=%d, flags=%x\n",
-			   cqe->user_data, cqe->res, cqe->flags);
+			   (__u64)cqe->user_data, cqe->res, cqe->flags);
 
 	}
 	spin_unlock(&ctx->completion_lock);

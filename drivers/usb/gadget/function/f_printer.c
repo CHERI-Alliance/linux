@@ -780,7 +780,7 @@ printer_ioctl(struct file *fd, unsigned int code, user_uintptr_t arg)
 	unsigned long		flags;
 	int			status = 0;
 
-	DBG(dev, "printer_ioctl: cmd=0x%4.4x, arg=%lu\n", code, arg);
+	DBG(dev, "printer_ioctl: cmd=0x%4.4x, arg=%lu\n", code, (unsigned long)arg);
 
 	/* handle ioctls */
 

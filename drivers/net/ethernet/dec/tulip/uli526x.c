@@ -398,7 +398,7 @@ static int uli526x_init_one(struct pci_dev *pdev,
 		goto err_out_unmap;
 
 	netdev_info(dev, "ULi M%04lx at pci%s, %pM, irq %d\n",
-		    ent->driver_data >> 16, pci_name(pdev),
+		    (unsigned long)ent->driver_data >> 16, pci_name(pdev),
 		    dev->dev_addr, pdev->irq);
 
 	pci_set_master(pdev);

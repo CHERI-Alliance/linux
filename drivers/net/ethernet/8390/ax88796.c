@@ -802,7 +802,7 @@ static int ax_init_dev(struct net_device *dev)
 		goto err_out;
 
 	netdev_info(dev, "%dbit, irq %d, %lx, MAC: %pM\n",
-		    ei_local->word16 ? 16 : 8, dev->irq, dev->base_addr,
+		    ei_local->word16 ? 16 : 8, dev->irq, (unsigned long)dev->base_addr,
 		    dev->dev_addr);
 
 	return 0;

@@ -70,7 +70,7 @@ static int __init arcrimi_probe(struct net_device *dev)
 		pr_info("%s\n", "RIM I (entirely mem-mapped) support");
 		pr_info("E-mail me if you actually test the RIM I driver, please!\n");
 		pr_info("Given: node %02Xh, shmem %lXh, irq %d\n",
-			dev->dev_addr[0], dev->mem_start, dev->irq);
+			dev->dev_addr[0], (unsigned long)dev->mem_start, dev->irq);
 	}
 
 	if (dev->mem_start <= 0 || dev->irq <= 0) {
@@ -212,8 +212,8 @@ static int __init arcrimi_found(struct net_device *dev)
 
 	arc_printk(D_NORMAL, dev, "ARCnet RIM I: station %02Xh found at IRQ %d, ShMem %lXh (%ld*%d bytes)\n",
 		   dev->dev_addr[0],
-		   dev->irq, dev->mem_start,
-		   (dev->mem_end - dev->mem_start + 1) / mirror_size,
+		   dev->irq, (unsigned long)dev->mem_start,
+		   (unsigned long)(dev->mem_end - dev->mem_start + 1) / mirror_size,
 		   mirror_size);
 
 	err = register_netdev(dev);

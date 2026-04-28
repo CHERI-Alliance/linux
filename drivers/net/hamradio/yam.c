@@ -838,7 +838,7 @@ static int yam_open(struct net_device *dev)
 	int i;
 	int ret=0;
 
-	printk(KERN_INFO "Trying %s at iobase 0x%lx irq %u\n", dev->name, dev->base_addr, dev->irq);
+	printk(KERN_INFO "Trying %s at iobase 0x%lx irq %u\n", dev->name, (unsigned long)dev->base_addr, dev->irq);
 
 	if (!yp->bitrate)
 		return -ENXIO;
@@ -848,7 +848,7 @@ static int yam_open(struct net_device *dev)
 	}
 	if (!request_region(dev->base_addr, YAM_EXTENT, dev->name))
 	{
-		printk(KERN_ERR "%s: cannot 0x%lx busy\n", dev->name, dev->base_addr);
+		printk(KERN_ERR "%s: cannot 0x%lx busy\n", dev->name, (unsigned long)dev->base_addr);
 		return -EACCES;
 	}
 	if ((u = yam_check_uart(dev->base_addr)) == c_uart_unknown) {
@@ -882,7 +882,7 @@ static int yam_open(struct net_device *dev)
 		yam_dev->stats.rx_fifo_errors = 0;
 	}
 
-	printk(KERN_INFO "%s at iobase 0x%lx irq %u uart %s\n", dev->name, dev->base_addr, dev->irq,
+	printk(KERN_INFO "%s at iobase 0x%lx irq %u uart %s\n", dev->name, (unsigned long)dev->base_addr, dev->irq,
 		   uart_str[u]);
 	return 0;
 
@@ -914,7 +914,7 @@ static int yam_close(struct net_device *dev)
 		dev_kfree_skb(skb);
 
 	printk(KERN_INFO "%s: close yam at iobase 0x%lx irq %u\n",
-		   yam_drvname, dev->base_addr, dev->irq);
+		   yam_drvname, (unsigned long)dev->base_addr, dev->irq);
 	return 0;
 }
 

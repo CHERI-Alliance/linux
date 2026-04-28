@@ -803,7 +803,7 @@ static void pcnet32_get_drvinfo(struct net_device *dev,
 			sizeof(info->bus_info));
 	else
 		snprintf(info->bus_info, sizeof(info->bus_info),
-			"VLB 0x%lx", dev->base_addr);
+			"VLB 0x%lx", (unsigned long)dev->base_addr);
 }
 
 static u32 pcnet32_get_link(struct net_device *dev)

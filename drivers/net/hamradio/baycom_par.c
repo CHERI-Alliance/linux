@@ -303,7 +303,7 @@ static int par96_open(struct net_device *dev)
 		return -ENXIO;
 	pp = parport_find_base(dev->base_addr);
 	if (!pp) {
-		printk(KERN_ERR "baycom_par: parport at 0x%lx unknown\n", dev->base_addr);
+		printk(KERN_ERR "baycom_par: parport at 0x%lx unknown\n", (unsigned long)dev->base_addr);
 		return -ENXIO;
 	}
 	if (pp->irq < 0) {
@@ -335,7 +335,7 @@ static int par96_open(struct net_device *dev)
 	bc->pdev = parport_register_dev_model(pp, dev->name, &par_cb, i);
 	parport_put_port(pp);
 	if (!bc->pdev) {
-		printk(KERN_ERR "baycom_par: cannot register parport at 0x%lx\n", dev->base_addr);
+		printk(KERN_ERR "baycom_par: cannot register parport at 0x%lx\n", (unsigned long)dev->base_addr);
 		return -ENXIO;
 	}
 	if (parport_claim(bc->pdev)) {
@@ -350,7 +350,7 @@ static int par96_open(struct net_device *dev)
 	pp->ops->write_data(pp, PAR96_PTT | PAR97_POWER); /* switch off PTT */
 	pp->ops->enable_irq(pp);
 	printk(KERN_INFO "%s: par96 at iobase 0x%lx irq %u options 0x%x\n",
-	       bc_drvname, dev->base_addr, dev->irq, bc->options);
+	       bc_drvname, (unsigned long)dev->base_addr, dev->irq, bc->options);
 	return 0;
 }
 
@@ -371,7 +371,7 @@ static int par96_close(struct net_device *dev)
 	parport_release(bc->pdev);
 	parport_unregister_device(bc->pdev);
 	printk(KERN_INFO "%s: close par96 at iobase 0x%lx irq %u\n",
-	       bc_drvname, dev->base_addr, dev->irq);
+	       bc_drvname, (unsigned long)dev->base_addr, dev->irq);
 	return 0;
 }
 

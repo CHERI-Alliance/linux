@@ -524,7 +524,7 @@ static int fmvj18x_config(struct pcmcia_device *link)
     /* print current configuration */
     netdev_info(dev, "%s, sram %s, port %#3lx, irq %d, hw_addr %pM\n",
 		card_name, sram_config == 0 ? "4K TX*2" : "8K TX*2",
-		dev->base_addr, dev->irq, dev->dev_addr);
+		(unsigned long)dev->base_addr, dev->irq, dev->dev_addr);
 
     return 0;
     
@@ -1049,7 +1049,7 @@ static void netdev_get_drvinfo(struct net_device *dev,
 	strscpy(info->driver, DRV_NAME, sizeof(info->driver));
 	strscpy(info->version, DRV_VERSION, sizeof(info->version));
 	snprintf(info->bus_info, sizeof(info->bus_info),
-		"PCMCIA 0x%lx", dev->base_addr);
+		"PCMCIA 0x%lx", (unsigned long)dev->base_addr);
 }
 
 static const struct ethtool_ops netdev_ethtool_ops = {

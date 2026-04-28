@@ -483,7 +483,7 @@ static int dmfe_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 		goto err_out_unmap;
 
 	dev_info(&dev->dev, "Davicom DM%04lx at pci%s, %pM, irq %d\n",
-		 ent->driver_data >> 16,
+		 (unsigned long)ent->driver_data >> 16,
 		 pci_name(pdev), dev->dev_addr, pdev->irq);
 
 	pci_set_master(pdev);

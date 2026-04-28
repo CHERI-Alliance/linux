@@ -1691,7 +1691,7 @@ static int hso_serial_ioctl(struct tty_struct *tty,
 {
 	struct hso_serial *serial = tty->driver_data;
 	int ret = 0;
-	hso_dbg(0x8, "IOCTL cmd: %d, arg: %ld\n", cmd, arg);
+	hso_dbg(0x8, "IOCTL cmd: %d, arg: %ld\n", cmd, (unsigned long)arg);
 
 	if (!serial)
 		return -ENODEV;

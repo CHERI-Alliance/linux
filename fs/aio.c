@@ -1147,7 +1147,7 @@ static void aio_complete(struct aio_kiocb *iocb)
 
 	pr_debug("%p[%u]: %p: %p %Lx %Lx %Lx\n", ctx, tail, iocb,
 		 (void __user *)(uintptr_t)iocb->ki_res.obj,
-		 iocb->ki_res.data, iocb->ki_res.res, iocb->ki_res.res2);
+		 (__u64)iocb->ki_res.data, iocb->ki_res.res, iocb->ki_res.res2);
 
 	/* after flagging the request as done, we
 	 * must never even look at it again

@@ -2192,7 +2192,7 @@ static int rbm_show(struct seq_file *m, void *v)
 	}
 
 	val -= 2;
-	seq_printf(m, "buffer[%ld]:    %d\n", val, meta->buffers[__c_ua(val)]);
+	seq_printf(m, "buffer[%ld]:    %d\n", (unsigned long)val, meta->buffers[__c_ua(val)]);
 
 	return 0;
 }

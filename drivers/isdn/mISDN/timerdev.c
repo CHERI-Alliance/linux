@@ -225,7 +225,7 @@ mISDN_ioctl(struct file *filep, unsigned int cmd, user_uintptr_t arg)
 
 	if (*debug & DEBUG_TIMER)
 		printk(KERN_DEBUG "%s(%p, %x, %lx)\n", __func__,
-		       filep, cmd, arg);
+		       filep, cmd, (unsigned long)arg);
 	mutex_lock(&mISDN_mutex);
 	switch (cmd) {
 	case IMADDTIMER:

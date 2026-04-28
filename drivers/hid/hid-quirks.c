@@ -1138,7 +1138,7 @@ static struct hid_device_id *hid_exists_dquirk(const struct hid_device *hdev)
 
 	if (bl_entry != NULL)
 		dbg_hid("Found dynamic quirk 0x%lx for HID device 0x%04x:0x%04x\n",
-			bl_entry->driver_data, bl_entry->vendor,
+			(unsigned long)bl_entry->driver_data, bl_entry->vendor,
 			bl_entry->product);
 
 	return bl_entry;

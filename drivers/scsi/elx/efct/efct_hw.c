@@ -1783,7 +1783,7 @@ efct_hw_io_add_sge(struct efct_hw *hw, struct efct_hw_io *io,
 	if (!io || !addr || !length) {
 		efc_log_err(hw->os,
 			    "bad parameter hw=%p io=%p addr=%lx length=%u\n",
-			    hw, io, addr, length);
+			    hw, io, (unsigned long)addr, length);
 		return -EIO;
 	}
 

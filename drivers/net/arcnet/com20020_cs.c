@@ -266,7 +266,7 @@ static int com20020_config(struct pcmcia_device *link)
 	}
 
 	netdev_dbg(dev, "port %#3lx, irq %d\n",
-		   dev->base_addr, dev->irq);
+		   (unsigned long)dev->base_addr, dev->irq);
 	return 0;
 
 failed:

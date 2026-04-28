@@ -557,7 +557,7 @@ static int acenic_probe_one(struct pci_dev *pdev,
 		break;
 	}
 
-	printk("Gigabit Ethernet at 0x%08lx, ", dev->base_addr);
+	printk("Gigabit Ethernet at 0x%08lx, ", (unsigned long)dev->base_addr);
 	printk("irq %d\n", pdev->irq);
 
 #ifdef CONFIG_ACENIC_OMIT_TIGON_I

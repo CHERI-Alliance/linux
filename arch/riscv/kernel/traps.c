@@ -487,9 +487,9 @@ asmlinkage void handle_bad_stack(struct pt_regs *regs)
 
 	pr_emerg("Insufficient stack space to handle exception!\n");
 	pr_emerg("Task stack:     [0x%016lx..0x%016lx]\n",
-			tsk_stk, tsk_stk + THREAD_SIZE);
+			(unsigned long)tsk_stk, tsk_stk + THREAD_SIZE);
 	pr_emerg("Overflow stack: [0x%016lx..0x%016lx]\n",
-			ovf_stk, ovf_stk + OVERFLOW_STACK_SIZE);
+			(unsigned long)ovf_stk, (unsigned long)ovf_stk + OVERFLOW_STACK_SIZE);
 
 	__show_regs(regs);
 	panic("Kernel stack overflow");

@@ -5719,7 +5719,7 @@ static int macb_probe(struct platform_device *pdev)
 
 	netdev_info(dev, "Cadence %s rev 0x%08x at 0x%08lx irq %d (%pM)\n",
 		    macb_is_gem(bp) ? "GEM" : "MACB", macb_readl(bp, MID),
-		    dev->base_addr, dev->irq, dev->dev_addr);
+		    (unsigned long)dev->base_addr, dev->irq, dev->dev_addr);
 
 	pm_runtime_put_autosuspend(&bp->pdev->dev);
 

@@ -1887,7 +1887,7 @@ static int safexcel_pci_probe(struct pci_dev *pdev,
 
 	dev_dbg(dev, "Probing PCIE device: vendor %04x, device %04x, subv %04x, subdev %04x, ctxt %lx\n",
 		ent->vendor, ent->device, ent->subvendor,
-		ent->subdevice, ent->driver_data);
+		ent->subdevice, (unsigned long)ent->driver_data);
 
 	priv = kzalloc_obj(*priv);
 	if (!priv)
