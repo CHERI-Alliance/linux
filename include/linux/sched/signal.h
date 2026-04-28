@@ -570,7 +570,7 @@ static inline int kill_cad_pid(int sig, int priv)
 #define SEND_SIG_NOINFO ((struct kernel_siginfo *) 0)
 #define SEND_SIG_PRIV	((struct kernel_siginfo *) 1)
 
-static inline int __on_sig_stack(unsigned long sp)
+static inline int __on_sig_stack(uintptr_t sp)
 {
 #ifdef CONFIG_STACK_GROWSUP
 	return sp >= current->sas_ss_sp &&
