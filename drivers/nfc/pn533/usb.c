@@ -568,7 +568,7 @@ static int pn533_usb_probe(struct usb_interface *interface,
 		goto error;
 	}
 
-	priv = pn53x_common_init(id->driver_info, protocol_type,
+	priv = pn53x_common_init(__c_ua(id->driver_info), protocol_type,
 					phy, &usb_phy_ops, fops,
 					&phy->udev->dev);
 
