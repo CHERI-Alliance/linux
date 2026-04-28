@@ -826,7 +826,8 @@ static int do_mprotect_pkey(user_uintptr_t user_ptr, size_t len,
 		return -ENOMEM;
 
 	if (reserv_is_supported(current->mm) &&
-	    !(check_user_ptr_owning(user_ptr, len)))
+	    !(check_user_ptr_owning(user_ptr, len) &&
+	      user_ptr_may_set_prot(user_ptr, prot)))
 		return -EINVAL;
 
 	if (!arch_validate_prot(prot, start))
