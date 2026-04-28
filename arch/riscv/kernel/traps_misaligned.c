@@ -143,11 +143,14 @@ static unsigned long get_f32_rs(unsigned long insn, u8 fp_reg_offset,
 	__ret;						\
 })
 
-static inline int get_insn(struct pt_regs *regs, ulong epc, ulong *r_insn)
+static inline int get_insn(struct pt_regs *regs, uintptr_t epc, ulong *r_insn)
 {
 	ulong insn = 0;
 
-	if (epc & 0x2) {
+	if (epc & 0x2 ||
+	    !cheri_check_cap((void *)epc, 4,
+			     CHERI_PERM_LOAD | CHERI_PERM_EXECUTE))
+	{
 		ulong tmp = 0;
 
 		if (__read_insn(regs, insn, epc, u16))
@@ -220,9 +223,10 @@ static int handle_vector_misaligned_load(struct pt_regs *regs)
 static int handle_scalar_misaligned_load(struct pt_regs *regs)
 {
 	union reg_data val;
-	unsigned long epc = regs->epc;
+	uintptr_t epc = regs->epc;
 	unsigned long insn;
 	unsigned long addr = regs->badaddr;
+	uintptr_t cap = 0;
 	int fp = 0, shift = 0, len = 0;
 
 	perf_sw_event(PERF_COUNT_SW_ALIGNMENT_FAULTS, 1, regs, addr);
@@ -243,57 +247,72 @@ static int handle_scalar_misaligned_load(struct pt_regs *regs)
 	if ((insn & INSN_MASK_LW) == INSN_MATCH_LW) {
 		len = 4;
 		shift = 8 * (sizeof(unsigned long) - len);
+		cap = GET_RS1(insn, regs);
 #if defined(CONFIG_64BIT)
 	} else if ((insn & INSN_MASK_LD) == INSN_MATCH_LD) {
 		len = 8;
 		shift = 8 * (sizeof(unsigned long) - len);
+		cap = GET_RS1(insn, regs);
 	} else if ((insn & INSN_MASK_LWU) == INSN_MATCH_LWU) {
 		len = 4;
+		cap = GET_RS1(insn, regs);
 #endif
 	} else if ((insn & INSN_MASK_FLD) == INSN_MATCH_FLD) {
 		fp = 1;
 		len = 8;
+		cap = GET_RS1(insn, regs);
 	} else if ((insn & INSN_MASK_FLW) == INSN_MATCH_FLW) {
 		fp = 1;
 		len = 4;
+		cap = GET_RS1(insn, regs);
 	} else if ((insn & INSN_MASK_LH) == INSN_MATCH_LH) {
 		len = 2;
 		shift = 8 * (sizeof(unsigned long) - len);
+		cap = GET_RS1(insn, regs);
 	} else if ((insn & INSN_MASK_LHU) == INSN_MATCH_LHU) {
 		len = 2;
+		cap = GET_RS1(insn, regs);
 #if defined(CONFIG_64BIT)
 	} else if ((insn & INSN_MASK_C_LD) == INSN_MATCH_C_LD) {
 		len = 8;
 		shift = 8 * (sizeof(unsigned long) - len);
 		insn = RVC_RS2S(insn) << SH_RD;
+		cap = GET_RS1S(insn, regs);
 	} else if ((insn & INSN_MASK_C_LDSP) == INSN_MATCH_C_LDSP &&
 		   ((insn >> SH_RD) & 0x1f)) {
 		len = 8;
 		shift = 8 * (sizeof(unsigned long) - len);
+		cap = regs->sp;
 #endif
 	} else if ((insn & INSN_MASK_C_LW) == INSN_MATCH_C_LW) {
 		len = 4;
 		shift = 8 * (sizeof(unsigned long) - len);
 		insn = RVC_RS2S(insn) << SH_RD;
+		cap = GET_RS1S(insn, regs);
 	} else if ((insn & INSN_MASK_C_LWSP) == INSN_MATCH_C_LWSP &&
 		   ((insn >> SH_RD) & 0x1f)) {
 		len = 4;
 		shift = 8 * (sizeof(unsigned long) - len);
+		cap = regs->sp;
 	} else if ((insn & INSN_MASK_C_FLD) == INSN_MATCH_C_FLD) {
 		fp = 1;
 		len = 8;
 		insn = RVC_RS2S(insn) << SH_RD;
+		cap = GET_RS1S(insn, regs);
 	} else if ((insn & INSN_MASK_C_FLDSP) == INSN_MATCH_C_FLDSP) {
 		fp = 1;
 		len = 8;
+		cap = regs->sp;
 #if defined(CONFIG_32BIT)
 	} else if ((insn & INSN_MASK_C_FLW) == INSN_MATCH_C_FLW) {
 		fp = 1;
 		len = 4;
 		insn = RVC_RS2S(insn) << SH_RD;
+		cap = GET_RS1S(insn, regs);
 	} else if ((insn & INSN_MASK_C_FLWSP) == INSN_MATCH_C_FLWSP) {
 		fp = 1;
 		len = 4;
+		cap = regs->sp;
 #endif
 	} else if ((insn & INSN_MASK_C_LHU) == INSN_MATCH_C_LHU) {
 		len = 2;
@@ -312,14 +331,16 @@ static int handle_scalar_misaligned_load(struct pt_regs *regs)
 
 	val.data_u64 = 0;
 	if (user_mode(regs)) {
-		if (copy_from_user(&val, (u8 __user *)addr, len))
+		u8 __user * uptr = (u8 __user *)cheri_address_set(cap, addr);
+		if (copy_from_user(&val, uptr, len))
 			return -1;
 	} else {
-		memcpy(&val, (u8 *)addr, len);
+		u8 * ptr = (u8 *)cheri_address_set(cap, addr);
+		memcpy(&val, ptr, len);
 	}
 
 	if (!fp)
-		SET_RD(insn, regs, (long)(val.data_ulong << shift) >> shift);
+		SET_RD(insn, regs, __c_fakeu((long)(val.data_ulong << shift) >> shift));
 	else if (len == 8)
 		set_f64_rd(insn, regs, val.data_u64);
 	else
@@ -333,10 +354,11 @@ static int handle_scalar_misaligned_load(struct pt_regs *regs)
 static int handle_scalar_misaligned_store(struct pt_regs *regs)
 {
 	union reg_data val;
-	unsigned long epc = regs->epc;
+	uintptr_t epc = regs->epc;
 	unsigned long insn;
 	unsigned long addr = regs->badaddr;
 	int len = 0, fp = 0;
+	uintptr_t cap = 0;
 
 	perf_sw_event(PERF_COUNT_SW_ALIGNMENT_FAULTS, 1, regs, addr);
 
@@ -351,38 +373,47 @@ static int handle_scalar_misaligned_store(struct pt_regs *regs)
 
 	regs->epc = 0;
 
-	val.data_ulong = GET_RS2(insn, regs);
+	val.data_ulong = __c_ua(GET_RS2(insn, regs));
 
 	if ((insn & INSN_MASK_SW) == INSN_MATCH_SW) {
 		len = 4;
+		cap = GET_RS1(insn, regs);
 #if defined(CONFIG_64BIT)
 	} else if ((insn & INSN_MASK_SD) == INSN_MATCH_SD) {
 		len = 8;
+		cap = GET_RS1(insn, regs);
 #endif
 	} else if ((insn & INSN_MASK_FSD) == INSN_MATCH_FSD) {
 		fp = 1;
 		len = 8;
 		val.data_u64 = GET_F64_RS2(insn, regs);
+		cap = GET_RS1(insn, regs);
 	} else if ((insn & INSN_MASK_FSW) == INSN_MATCH_FSW) {
 		fp = 1;
 		len = 4;
 		val.data_ulong = GET_F32_RS2(insn, regs);
+		cap = GET_RS1(insn, regs);
 	} else if ((insn & INSN_MASK_SH) == INSN_MATCH_SH) {
 		len = 2;
+		cap = GET_RS1(insn, regs);
 #if defined(CONFIG_64BIT)
 	} else if ((insn & INSN_MASK_C_SD) == INSN_MATCH_C_SD) {
 		len = 8;
-		val.data_ulong = GET_RS2S(insn, regs);
+		val.data_ulong = __c_ua(GET_RS2S(insn, regs));
+		cap = GET_RS1S(insn, regs);
 	} else if ((insn & INSN_MASK_C_SDSP) == INSN_MATCH_C_SDSP) {
 		len = 8;
-		val.data_ulong = GET_RS2C(insn, regs);
+		val.data_ulong = __c_ua(GET_RS2C(insn, regs));
+		cap = regs->sp;
 #endif
 	} else if ((insn & INSN_MASK_C_SW) == INSN_MATCH_C_SW) {
 		len = 4;
-		val.data_ulong = GET_RS2S(insn, regs);
+		val.data_ulong = __c_ua(GET_RS2S(insn, regs));
+		cap = GET_RS1S(insn, regs);
 	} else if ((insn & INSN_MASK_C_SWSP) == INSN_MATCH_C_SWSP) {
 		len = 4;
-		val.data_ulong = GET_RS2C(insn, regs);
+		val.data_ulong = __c_ua(GET_RS2C(insn, regs));
+		cap = GET_RS1S(insn, regs);
 	} else if ((insn & INSN_MASK_C_FSD) == INSN_MATCH_C_FSD) {
 		fp = 1;
 		len = 8;
@@ -391,19 +422,22 @@ static int handle_scalar_misaligned_store(struct pt_regs *regs)
 		fp = 1;
 		len = 8;
 		val.data_u64 = GET_F64_RS2C(insn, regs);
+		cap = regs->sp;
 #if !defined(CONFIG_64BIT)
 	} else if ((insn & INSN_MASK_C_FSW) == INSN_MATCH_C_FSW) {
 		fp = 1;
 		len = 4;
 		val.data_ulong = GET_F32_RS2S(insn, regs);
+		cap = GET_RS1S(insn, regs);
 	} else if ((insn & INSN_MASK_C_FSWSP) == INSN_MATCH_C_FSWSP) {
 		fp = 1;
 		len = 4;
 		val.data_ulong = GET_F32_RS2C(insn, regs);
+		cap = regs->sp;
 #endif
 	} else if ((insn & INSN_MASK_C_SH) == INSN_MATCH_C_SH) {
 		len = 2;
-		val.data_ulong = GET_RS2S(insn, regs);
+		val.data_ulong = __c_ua(GET_RS2S(insn, regs));
 	} else {
 		regs->epc = epc;
 		return -1;
@@ -413,10 +447,12 @@ static int handle_scalar_misaligned_store(struct pt_regs *regs)
 		return -EOPNOTSUPP;
 
 	if (user_mode(regs)) {
-		if (copy_to_user((u8 __user *)addr, &val, len))
+		u8 __user *uptr = (u8 __user *)cheri_address_set(cap, addr);
+		if (copy_to_user(uptr, &val, len))
 			return -1;
 	} else {
-		memcpy((u8 *)addr, &val, len);
+		u8 * ptr = (u8 *)cheri_address_set(cap, addr);
+		memcpy(ptr, &val, len);
 	}
 
 	regs->epc = epc + INSN_LEN(insn);
@@ -426,7 +462,7 @@ static int handle_scalar_misaligned_store(struct pt_regs *regs)
 
 int handle_misaligned_load(struct pt_regs *regs)
 {
-	unsigned long epc = regs->epc;
+	uintptr_t epc = regs->epc;
 	unsigned long insn;
 
 	if (IS_ENABLED(CONFIG_RISCV_VECTOR_MISALIGNED)) {
@@ -523,13 +559,14 @@ static void check_unaligned_access_emulated(void *arg __always_unused)
 {
 	int cpu = smp_processor_id();
 	long *mas_ptr = per_cpu_ptr(&misaligned_access_speed, cpu);
-	unsigned long tmp_var, tmp_val;
+	unsigned long tmp_val;
+	uintptr_t tmp_var;
 
 	*mas_ptr = RISCV_HWPROBE_MISALIGNED_SCALAR_UNKNOWN;
 
 	__asm__ __volatile__ (
 		"       "REG_L" %[tmp], 1(%[ptr])\n"
-		: [tmp] "=r" (tmp_val) : [ptr] "r" (&tmp_var) : "memory");
+		: [tmp] "=r" (tmp_val) : [ptr] PTRC (&tmp_var) : "memory");
 }
 
 static int cpu_online_check_unaligned_access_emulated(unsigned int cpu)
