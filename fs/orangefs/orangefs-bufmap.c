@@ -251,7 +251,7 @@ orangefs_bufmap_map(struct orangefs_bufmap *bufmap,
 	int offset = 0, ret, i;
 
 	/* map the pages */
-	ret = pin_user_pages_fast((user_uintptr_t)user_desc->ptr,
+	ret = pin_user_pages_fast(__c_pa_u(user_desc->ptr),
 			     bufmap->page_count, FOLL_WRITE, bufmap->page_array);
 
 	if (ret < 0)

@@ -93,7 +93,7 @@ static int orangefs_d_revalidate(struct inode *dir, const struct qstr *name,
 				 struct dentry *dentry, unsigned int flags)
 {
 	int ret;
-	uintptr_t time = (uintptr_t) dentry->d_fsdata;
+	unsigned long time = __c_pa(dentry->d_fsdata);
 
 	if (time_before(jiffies, time))
 		return 1;
