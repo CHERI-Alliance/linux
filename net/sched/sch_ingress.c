@@ -21,23 +21,23 @@ struct ingress_sched_data {
 	struct mini_Qdisc_pair miniqp;
 };
 
-static struct Qdisc *ingress_leaf(struct Qdisc *sch, unsigned long arg)
+static struct Qdisc *ingress_leaf(struct Qdisc *sch, uintptr_t arg)
 {
 	return NULL;
 }
 
-static unsigned long ingress_find(struct Qdisc *sch, u32 classid)
+static uintptr_t ingress_find(struct Qdisc *sch, u32 classid)
 {
 	return TC_H_MIN(classid) + 1;
 }
 
-static unsigned long ingress_bind_filter(struct Qdisc *sch,
-					 unsigned long parent, u32 classid)
+static uintptr_t ingress_bind_filter(struct Qdisc *sch,
+					 uintptr_t parent, u32 classid)
 {
 	return ingress_find(sch, classid);
 }
 
-static void ingress_unbind_filter(struct Qdisc *sch, unsigned long cl)
+static void ingress_unbind_filter(struct Qdisc *sch, uintptr_t cl)
 {
 }
 
@@ -45,7 +45,7 @@ static void ingress_walk(struct Qdisc *sch, struct qdisc_walker *walker)
 {
 }
 
-static struct tcf_block *ingress_tcf_block(struct Qdisc *sch, unsigned long cl,
+static struct tcf_block *ingress_tcf_block(struct Qdisc *sch, uintptr_t cl,
 					   struct netlink_ext_ack *extack)
 {
 	struct ingress_sched_data *q = qdisc_priv(sch);
@@ -180,7 +180,7 @@ struct clsact_sched_data {
 	struct mini_Qdisc_pair miniqp_egress;
 };
 
-static unsigned long clsact_find(struct Qdisc *sch, u32 classid)
+static uintptr_t clsact_find(struct Qdisc *sch, u32 classid)
 {
 	switch (TC_H_MIN(classid)) {
 	case TC_H_MIN(TC_H_MIN_INGRESS):
@@ -191,13 +191,13 @@ static unsigned long clsact_find(struct Qdisc *sch, u32 classid)
 	}
 }
 
-static unsigned long clsact_bind_filter(struct Qdisc *sch,
-					unsigned long parent, u32 classid)
+static uintptr_t clsact_bind_filter(struct Qdisc *sch,
+					uintptr_t parent, u32 classid)
 {
 	return clsact_find(sch, classid);
 }
 
-static struct tcf_block *clsact_tcf_block(struct Qdisc *sch, unsigned long cl,
+static struct tcf_block *clsact_tcf_block(struct Qdisc *sch, uintptr_t cl,
 					  struct netlink_ext_ack *extack)
 {
 	struct clsact_sched_data *q = qdisc_priv(sch);

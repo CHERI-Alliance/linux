@@ -193,7 +193,7 @@ struct netdev_queue *mq_select_queue(struct Qdisc *sch,
 }
 EXPORT_SYMBOL_NS_GPL(mq_select_queue, "NET_SCHED_INTERNAL");
 
-static int mq_graft(struct Qdisc *sch, unsigned long cl, struct Qdisc *new,
+static int mq_graft(struct Qdisc *sch, uintptr_t cl, struct Qdisc *new,
 		    struct Qdisc **old, struct netlink_ext_ack *extack)
 {
 	struct netdev_queue *dev_queue = mq_queue_get(sch, cl);
@@ -219,7 +219,7 @@ static int mq_graft(struct Qdisc *sch, unsigned long cl, struct Qdisc *new,
 	return 0;
 }
 
-struct Qdisc *mq_leaf(struct Qdisc *sch, unsigned long cl)
+struct Qdisc *mq_leaf(struct Qdisc *sch, uintptr_t cl)
 {
 	struct netdev_queue *dev_queue = mq_queue_get(sch, cl);
 
@@ -227,7 +227,7 @@ struct Qdisc *mq_leaf(struct Qdisc *sch, unsigned long cl)
 }
 EXPORT_SYMBOL_NS_GPL(mq_leaf, "NET_SCHED_INTERNAL");
 
-unsigned long mq_find(struct Qdisc *sch, u32 classid)
+uintptr_t mq_find(struct Qdisc *sch, u32 classid)
 {
 	unsigned int ntx = TC_H_MIN(classid);
 
@@ -237,7 +237,7 @@ unsigned long mq_find(struct Qdisc *sch, u32 classid)
 }
 EXPORT_SYMBOL_NS_GPL(mq_find, "NET_SCHED_INTERNAL");
 
-int mq_dump_class(struct Qdisc *sch, unsigned long cl,
+int mq_dump_class(struct Qdisc *sch, uintptr_t cl,
 		  struct sk_buff *skb, struct tcmsg *tcm)
 {
 	struct netdev_queue *dev_queue = mq_queue_get(sch, cl);
@@ -249,7 +249,7 @@ int mq_dump_class(struct Qdisc *sch, unsigned long cl,
 }
 EXPORT_SYMBOL_NS_GPL(mq_dump_class, "NET_SCHED_INTERNAL");
 
-int mq_dump_class_stats(struct Qdisc *sch, unsigned long cl,
+int mq_dump_class_stats(struct Qdisc *sch, uintptr_t cl,
 			struct gnet_dump *d)
 {
 	struct netdev_queue *dev_queue = mq_queue_get(sch, cl);

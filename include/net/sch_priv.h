@@ -16,11 +16,11 @@ void mq_attach(struct Qdisc *sch);
 void mq_dump_common(struct Qdisc *sch, struct sk_buff *skb);
 struct netdev_queue *mq_select_queue(struct Qdisc *sch,
 				     struct tcmsg *tcm);
-struct Qdisc *mq_leaf(struct Qdisc *sch, unsigned long cl);
-unsigned long mq_find(struct Qdisc *sch, u32 classid);
-int mq_dump_class(struct Qdisc *sch, unsigned long cl,
+struct Qdisc *mq_leaf(struct Qdisc *sch, uintptr_t cl);
+uintptr_t mq_find(struct Qdisc *sch, u32 classid);
+int mq_dump_class(struct Qdisc *sch, uintptr_t cl,
 		  struct sk_buff *skb, struct tcmsg *tcm);
-int mq_dump_class_stats(struct Qdisc *sch, unsigned long cl,
+int mq_dump_class_stats(struct Qdisc *sch, uintptr_t cl,
 			struct gnet_dump *d);
 void mq_walk(struct Qdisc *sch, struct qdisc_walker *arg);
 

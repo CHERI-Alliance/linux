@@ -910,7 +910,7 @@ static const struct nla_policy hfsc_policy[TCA_HFSC_MAX + 1] = {
 
 static int
 hfsc_change_class(struct Qdisc *sch, u32 classid, u32 parentid,
-		  struct nlattr **tca, unsigned long *arg,
+		  struct nlattr **tca, uintptr_t *arg,
 		  struct netlink_ext_ack *extack)
 {
 	struct hfsc_sched *q = qdisc_priv(sch);
@@ -1100,7 +1100,7 @@ hfsc_destroy_class(struct Qdisc *sch, struct hfsc_class *cl)
 }
 
 static int
-hfsc_delete_class(struct Qdisc *sch, unsigned long arg,
+hfsc_delete_class(struct Qdisc *sch, uintptr_t arg,
 		  struct netlink_ext_ack *extack)
 {
 	struct hfsc_sched *q = qdisc_priv(sch);
@@ -1182,7 +1182,7 @@ hfsc_classify(struct sk_buff *skb, struct Qdisc *sch, int *qerr)
 }
 
 static int
-hfsc_graft_class(struct Qdisc *sch, unsigned long arg, struct Qdisc *new,
+hfsc_graft_class(struct Qdisc *sch, uintptr_t arg, struct Qdisc *new,
 		 struct Qdisc **old, struct netlink_ext_ack *extack)
 {
 	struct hfsc_class *cl = (struct hfsc_class *)arg;
@@ -1201,7 +1201,7 @@ hfsc_graft_class(struct Qdisc *sch, unsigned long arg, struct Qdisc *new,
 }
 
 static struct Qdisc *
-hfsc_class_leaf(struct Qdisc *sch, unsigned long arg)
+hfsc_class_leaf(struct Qdisc *sch, uintptr_t arg)
 {
 	struct hfsc_class *cl = (struct hfsc_class *)arg;
 
@@ -1212,7 +1212,7 @@ hfsc_class_leaf(struct Qdisc *sch, unsigned long arg)
 }
 
 static void
-hfsc_qlen_notify(struct Qdisc *sch, unsigned long arg)
+hfsc_qlen_notify(struct Qdisc *sch, uintptr_t arg)
 {
 	struct hfsc_class *cl = (struct hfsc_class *)arg;
 
@@ -1225,14 +1225,14 @@ hfsc_qlen_notify(struct Qdisc *sch, unsigned long arg)
 		eltree_remove(cl);
 }
 
-static unsigned long
+static uintptr_t
 hfsc_search_class(struct Qdisc *sch, u32 classid)
 {
 	return (uintptr_t)hfsc_find_class(classid, sch);
 }
 
-static unsigned long
-hfsc_bind_tcf(struct Qdisc *sch, unsigned long parent, u32 classid)
+static uintptr_t
+hfsc_bind_tcf(struct Qdisc *sch, uintptr_t parent, u32 classid)
 {
 	struct hfsc_class *p = (struct hfsc_class *)parent;
 	struct hfsc_class *cl = hfsc_find_class(classid, sch);
@@ -1247,14 +1247,14 @@ hfsc_bind_tcf(struct Qdisc *sch, unsigned long parent, u32 classid)
 }
 
 static void
-hfsc_unbind_tcf(struct Qdisc *sch, unsigned long arg)
+hfsc_unbind_tcf(struct Qdisc *sch, uintptr_t arg)
 {
 	struct hfsc_class *cl = (struct hfsc_class *)arg;
 
 	qdisc_class_put(&cl->cl_common);
 }
 
-static struct tcf_block *hfsc_tcf_block(struct Qdisc *sch, unsigned long arg,
+static struct tcf_block *hfsc_tcf_block(struct Qdisc *sch, uintptr_t arg,
 					struct netlink_ext_ack *extack)
 {
 	struct hfsc_sched *q = qdisc_priv(sch);
@@ -1305,7 +1305,7 @@ hfsc_dump_curves(struct sk_buff *skb, struct hfsc_class *cl)
 }
 
 static int
-hfsc_dump_class(struct Qdisc *sch, unsigned long arg, struct sk_buff *skb,
+hfsc_dump_class(struct Qdisc *sch, uintptr_t arg, struct sk_buff *skb,
 		struct tcmsg *tcm)
 {
 	struct hfsc_class *cl = (struct hfsc_class *)arg;
@@ -1330,8 +1330,8 @@ hfsc_dump_class(struct Qdisc *sch, unsigned long arg, struct sk_buff *skb,
 }
 
 static int
-hfsc_dump_class_stats(struct Qdisc *sch, unsigned long arg,
-	struct gnet_dump *d)
+hfsc_dump_class_stats(struct Qdisc *sch, uintptr_t arg,
+		      struct gnet_dump *d)
 {
 	struct hfsc_class *cl = (struct hfsc_class *)arg;
 	struct tc_hfsc_stats xstats;

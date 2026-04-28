@@ -459,7 +459,7 @@ static struct netdev_queue *mqprio_queue_get(struct Qdisc *sch,
 	return netdev_get_tx_queue(dev, ntx);
 }
 
-static int mqprio_graft(struct Qdisc *sch, unsigned long cl, struct Qdisc *new,
+static int mqprio_graft(struct Qdisc *sch, uintptr_t cl, struct Qdisc *new,
 			struct Qdisc **old, struct netlink_ext_ack *extack)
 {
 	struct net_device *dev = qdisc_dev(sch);
@@ -608,7 +608,7 @@ nla_put_failure:
 	return -1;
 }
 
-static struct Qdisc *mqprio_leaf(struct Qdisc *sch, unsigned long cl)
+static struct Qdisc *mqprio_leaf(struct Qdisc *sch, uintptr_t cl)
 {
 	struct netdev_queue *dev_queue = mqprio_queue_get(sch, cl);
 
@@ -618,7 +618,7 @@ static struct Qdisc *mqprio_leaf(struct Qdisc *sch, unsigned long cl)
 	return rtnl_dereference(dev_queue->qdisc_sleeping);
 }
 
-static unsigned long mqprio_find(struct Qdisc *sch, u32 classid)
+static uintptr_t mqprio_find(struct Qdisc *sch, u32 classid)
 {
 	struct net_device *dev = qdisc_dev(sch);
 	unsigned int ntx = TC_H_MIN(classid);
@@ -637,8 +637,8 @@ static unsigned long mqprio_find(struct Qdisc *sch, u32 classid)
 	return ((ntx - TC_H_MIN_PRIORITY) < netdev_get_num_tc(dev)) ? ntx : 0;
 }
 
-static int mqprio_dump_class(struct Qdisc *sch, unsigned long cl,
-			 struct sk_buff *skb, struct tcmsg *tcm)
+static int mqprio_dump_class(struct Qdisc *sch, uintptr_t cl,
+			     struct sk_buff *skb, struct tcmsg *tcm)
 {
 	if (cl < TC_H_MIN_PRIORITY) {
 		struct netdev_queue *dev_queue = mqprio_queue_get(sch, cl);
@@ -657,7 +657,7 @@ static int mqprio_dump_class(struct Qdisc *sch, unsigned long cl,
 	return 0;
 }
 
-static int mqprio_dump_class_stats(struct Qdisc *sch, unsigned long cl,
+static int mqprio_dump_class_stats(struct Qdisc *sch, uintptr_t cl,
 				   struct gnet_dump *d)
 	__releases(d->lock)
 	__acquires(d->lock)

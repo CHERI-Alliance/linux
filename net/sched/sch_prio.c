@@ -283,7 +283,7 @@ nla_put_failure:
 	return -1;
 }
 
-static int prio_graft(struct Qdisc *sch, unsigned long arg, struct Qdisc *new,
+static int prio_graft(struct Qdisc *sch, uintptr_t arg, struct Qdisc *new,
 		      struct Qdisc **old, struct netlink_ext_ack *extack)
 {
 	struct prio_sched_data *q = qdisc_priv(sch);
@@ -314,7 +314,7 @@ static int prio_graft(struct Qdisc *sch, unsigned long arg, struct Qdisc *new,
 }
 
 static struct Qdisc *
-prio_leaf(struct Qdisc *sch, unsigned long arg)
+prio_leaf(struct Qdisc *sch, uintptr_t arg)
 {
 	struct prio_sched_data *q = qdisc_priv(sch);
 	unsigned long band = arg - 1;
@@ -322,7 +322,7 @@ prio_leaf(struct Qdisc *sch, unsigned long arg)
 	return q->queues[band];
 }
 
-static unsigned long prio_find(struct Qdisc *sch, u32 classid)
+static uintptr_t prio_find(struct Qdisc *sch, u32 classid)
 {
 	struct prio_sched_data *q = qdisc_priv(sch);
 	unsigned long band = TC_H_MIN(classid);
@@ -332,17 +332,18 @@ static unsigned long prio_find(struct Qdisc *sch, u32 classid)
 	return band;
 }
 
-static unsigned long prio_bind(struct Qdisc *sch, unsigned long parent, u32 classid)
+static uintptr_t prio_bind(struct Qdisc *sch, uintptr_t parent, u32 classid)
 {
 	return prio_find(sch, classid);
 }
 
 
-static void prio_unbind(struct Qdisc *q, unsigned long cl)
+static void prio_unbind(struct Qdisc *q, uintptr_t cl)
 {
 }
 
-static int prio_dump_class(struct Qdisc *sch, unsigned long cl, struct sk_buff *skb,
+static int prio_dump_class(struct Qdisc *sch, uintptr_t cl,
+			   struct sk_buff *skb,
 			   struct tcmsg *tcm)
 {
 	struct prio_sched_data *q = qdisc_priv(sch);
@@ -352,7 +353,7 @@ static int prio_dump_class(struct Qdisc *sch, unsigned long cl, struct sk_buff *
 	return 0;
 }
 
-static int prio_dump_class_stats(struct Qdisc *sch, unsigned long cl,
+static int prio_dump_class_stats(struct Qdisc *sch, uintptr_t cl,
 				 struct gnet_dump *d)
 {
 	struct prio_sched_data *q = qdisc_priv(sch);
@@ -381,7 +382,7 @@ static void prio_walk(struct Qdisc *sch, struct qdisc_walker *arg)
 	}
 }
 
-static struct tcf_block *prio_tcf_block(struct Qdisc *sch, unsigned long cl,
+static struct tcf_block *prio_tcf_block(struct Qdisc *sch, uintptr_t cl,
 					struct netlink_ext_ack *extack)
 {
 	struct prio_sched_data *q = qdisc_priv(sch);

@@ -481,7 +481,7 @@ static int red_dump_stats(struct Qdisc *sch, struct gnet_dump *d)
 	return gnet_stats_copy_app(d, &st, sizeof(st));
 }
 
-static int red_dump_class(struct Qdisc *sch, unsigned long cl,
+static int red_dump_class(struct Qdisc *sch, uintptr_t cl,
 			  struct sk_buff *skb, struct tcmsg *tcm)
 {
 	struct red_sched_data *q = qdisc_priv(sch);
@@ -506,7 +506,7 @@ static void red_graft_offload(struct Qdisc *sch,
 				   TC_SETUP_QDISC_RED, &graft_offload, extack);
 }
 
-static int red_graft(struct Qdisc *sch, unsigned long arg, struct Qdisc *new,
+static int red_graft(struct Qdisc *sch, uintptr_t arg, struct Qdisc *new,
 		     struct Qdisc **old, struct netlink_ext_ack *extack)
 {
 	struct red_sched_data *q = qdisc_priv(sch);
@@ -520,13 +520,13 @@ static int red_graft(struct Qdisc *sch, unsigned long arg, struct Qdisc *new,
 	return 0;
 }
 
-static struct Qdisc *red_leaf(struct Qdisc *sch, unsigned long arg)
+static struct Qdisc *red_leaf(struct Qdisc *sch, uintptr_t arg)
 {
 	struct red_sched_data *q = qdisc_priv(sch);
 	return q->qdisc;
 }
 
-static unsigned long red_find(struct Qdisc *sch, u32 classid)
+static uintptr_t red_find(struct Qdisc *sch, u32 classid)
 {
 	return 1;
 }
