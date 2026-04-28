@@ -57,6 +57,7 @@ asmlinkage void ret_from_fork_kernel(void *fn_arg, int (*fn)(void *), struct pt_
 asmlinkage void ret_from_fork_user(struct pt_regs *regs);
 asmlinkage void handle_bad_stack(struct pt_regs *regs);
 asmlinkage void do_page_fault(struct pt_regs *regs);
+asmlinkage void do_trap_cheri(struct pt_regs *regs);
 asmlinkage void do_irq(struct pt_regs *regs);
 
 #endif /* _ASM_RISCV_PROTOTYPES_H */

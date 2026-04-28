@@ -34,6 +34,8 @@
 #include <asm/vector.h>
 #include <asm/irq_stack.h>
 
+#include <linux/cheri.h>
+
 int show_unhandled_signals = 1;
 
 static DEFINE_RAW_SPINLOCK(die_lock);
@@ -120,13 +122,13 @@ void do_trap(struct pt_regs *regs, int signo, int code, unsigned long addr)
 	    && printk_ratelimit()) {
 		pr_info("%s[%d]: unhandled signal %d code 0x%x at 0x" REG_FMT,
 			tsk->comm, task_pid_nr(tsk), signo, code, addr);
-		print_vma_addr(KERN_CONT " in ", instruction_pointer(regs));
+		print_vma_addr(KERN_CONT " in ", __c_ua(instruction_pointer(regs)));
 		pr_cont("\n");
 		__show_regs(regs);
 		dump_instr(KERN_INFO, regs);
 	}
 
-	force_sig_fault(signo, code, (void __user *)addr);
+	force_sig_fault(signo, code, (void __user *)__c_fakeu(addr));
 }
 
 static void do_trap_error(struct pt_regs *regs, int signo, int code,
@@ -153,12 +155,14 @@ asmlinkage __visible __trap_section void name(struct pt_regs *regs)		\
 	if (user_mode(regs)) {							\
 		irqentry_enter_from_user_mode(regs);				\
 		local_irq_enable();						\
-		do_trap_error(regs, signo, code, regs->epc, "Oops - " str);	\
+		do_trap_error(regs, signo, code, __c_ua(regs->epc),		\
+			      "Oops - " str);	\
 		local_irq_disable();						\
 		irqentry_exit_to_user_mode(regs);				\
 	} else {								\
 		irqentry_state_t state = irqentry_nmi_enter(regs);		\
-		do_trap_error(regs, signo, code, regs->epc, "Oops - " str);	\
+		do_trap_error(regs, signo, code, __c_ua(regs->epc),		\
+			      "Oops - " str);					\
 		irqentry_nmi_exit(regs, state);					\
 	}									\
 }
@@ -180,7 +184,8 @@ asmlinkage __visible __trap_section void do_trap_insn_illegal(struct pt_regs *re
 
 		handled = riscv_v_first_use_handler(regs);
 		if (!handled)
-			do_trap_error(regs, SIGILL, ILL_ILLOPC, regs->epc,
+			do_trap_error(regs, SIGILL, ILL_ILLOPC,
+				      __c_ua(regs->epc),
 				      "Oops - illegal instruction");
 
 		local_irq_disable();
@@ -188,7 +193,7 @@ asmlinkage __visible __trap_section void do_trap_insn_illegal(struct pt_regs *re
 	} else {
 		irqentry_state_t state = irqentry_nmi_enter(regs);
 
-		do_trap_error(regs, SIGILL, ILL_ILLOPC, regs->epc,
+		do_trap_error(regs, SIGILL, ILL_ILLOPC, __c_ua(regs->epc),
 			      "Oops - illegal instruction");
 
 		irqentry_nmi_exit(regs, state);
@@ -228,7 +233,7 @@ static void do_trap_misaligned(struct pt_regs *regs, enum misaligned_access_type
 	}
 
 	if (misaligned_handler[type].handler(regs))
-		do_trap_error(regs, SIGBUS, BUS_ADRALN, regs->epc,
+		do_trap_error(regs, SIGBUS, BUS_ADRALN, __c_ua(regs->epc),
 			      misaligned_handler[type].type_str);
 
 	if (user_mode(regs)) {
@@ -256,7 +261,7 @@ DO_ERROR_INFO(do_trap_ecall_s,
 DO_ERROR_INFO(do_trap_ecall_m,
 	SIGILL, ILL_ILLTRP, "environment call from M-mode");
 
-static inline unsigned long get_break_insn_length(unsigned long pc)
+static inline unsigned long get_break_insn_length(uintptr_t pc)
 {
 	bug_insn_t insn;
 
@@ -291,13 +296,14 @@ void handle_break(struct pt_regs *regs)
 	current->thread.bad_cause = regs->cause;
 
 	if (user_mode(regs))
-		force_sig_fault(SIGTRAP, TRAP_BRKPT, (void __user *)regs->epc);
+		force_sig_fault(SIGTRAP, TRAP_BRKPT,
+				(void __user *)__c_fakeu(__c_ua(regs->epc)));
 #ifdef CONFIG_KGDB
 	else if (notify_die(DIE_TRAP, "EBREAK", regs, 0, regs->cause, SIGTRAP)
 								== NOTIFY_STOP)
 		return;
 #endif
-	else if (report_bug(regs->epc, regs) == BUG_TRAP_TYPE_WARN ||
+	else if (report_bug(__c_ua(regs->epc), regs) == BUG_TRAP_TYPE_WARN ||
 		 handle_cfi_failure(regs) == BUG_TRAP_TYPE_WARN)
 		regs->epc += get_break_insn_length(regs->epc);
 	else
@@ -327,7 +333,7 @@ asmlinkage __visible __trap_section  __no_stack_protector
 void do_trap_ecall_u(struct pt_regs *regs)
 {
 	if (user_mode(regs)) {
-		long syscall = regs->a7;
+		long syscall = __c_ua(regs->a7);
 
 		regs->epc += 4;
 		regs->orig_a0 = regs->a0;
@@ -360,7 +366,8 @@ void do_trap_ecall_u(struct pt_regs *regs)
 	} else {
 		irqentry_state_t state = irqentry_nmi_enter(regs);
 
-		do_trap_error(regs, SIGILL, ILL_ILLTRP, regs->epc,
+		do_trap_error(regs, SIGILL, ILL_ILLTRP,
+			__c_ua(regs->epc),
 			"Oops - environment call from U-mode");
 
 		irqentry_nmi_exit(regs, state);
@@ -389,7 +396,7 @@ bool handle_user_cfi_violation(struct pt_regs *regs)
 	}
 
 	if (is_fcfi || is_bcfi) {
-		do_trap_error(regs, SIGSEGV, SEGV_CPERR, regs->epc,
+		do_trap_error(regs, SIGSEGV, SEGV_CPERR, __c_ua(regs->epc),
 			      "Oops - control flow violation");
 		return true;
 	}
@@ -462,10 +469,11 @@ asmlinkage void noinstr do_irq(struct pt_regs *regs)
 int is_valid_bugaddr(unsigned long pc)
 {
 	bug_insn_t insn;
+	bug_insn_t *ptr = cheri_make_kernel_data_cap(pc, sizeof(insn));
 
 	if (pc < VMALLOC_START)
 		return 0;
-	if (get_kernel_nofault(insn, (bug_insn_t *)pc))
+	if (get_kernel_nofault(insn, ptr))
 		return 0;
 	if ((insn & __INSN_LENGTH_MASK) == __INSN_LENGTH_32)
 		return (insn == __BUG_INSN_32);
@@ -480,8 +488,8 @@ DEFINE_PER_CPU(unsigned long [OVERFLOW_STACK_SIZE/sizeof(long)],
 
 asmlinkage void handle_bad_stack(struct pt_regs *regs)
 {
-	uintptr_t tsk_stk = (uintptr_t)current->stack;
-	uintptr_t ovf_stk = (uintptr_t)this_cpu_ptr(overflow_stack);
+	unsigned long tsk_stk = __c_pa(current->stack);
+	unsigned long ovf_stk = __c_pa(this_cpu_ptr(overflow_stack));
 
 	console_verbose();
 
@@ -497,4 +505,95 @@ asmlinkage void handle_bad_stack(struct pt_regs *regs)
 	for (;;)
 		wait_for_interrupt();
 }
+#endif
+
+#ifdef CONFIG_CHERI_KERNEL
+
+#include <asm/riscvcheri.h>
+
+static inline const char *
+cheri_xtval2_type_to_str(unsigned long xtval2)
+{
+	switch ((xtval2 >> 16) & 0x0fU) {
+	case 0: return "instruction access fault";
+	case 1: return "data fault due to load store or AMO";
+	case 2: return "jump or branch fault";
+	default: return "<unknown>";
+	}
+}
+
+static inline const char *
+cheri_xtval2_cause_to_str(unsigned long xtval2)
+{
+	switch (xtval2 & 0x0fU) {
+	case 0: return "tag violation";
+	case 1: return "seal violation";
+	case 2: return "permission violation";
+	case 3: return "invalid access violation";
+	case 4: return "length violation";
+	default: return "<unknown>";
+	}
+}
+
+static inline unsigned int
+cheri_xtval2_to_siginfo(unsigned long xtval2)
+{
+	switch (xtval2 & 0x0fU) {
+	case 0: return SEGV_CAPTAGERR;
+	case 1: return SEGV_CAPSEALEDERR;
+	case 2: return SEGV_CAPPERMERR;
+	case 3: return SEGV_CAPACCESSERR;
+	case 4: return SEGV_CAPBOUNDSERR;
+	}
+
+	return 0;
+}
+
+void __always_inline __do_trap_cheri(struct pt_regs *regs, unsigned long xtval2)
+{
+	/* Among other things this handles CHERI faults during usercopy. */
+	if (!user_mode(regs)) {
+		if (fixup_exception(regs))
+			return;
+	}
+
+	if (!user_mode(regs) || show_unhandled_signals) {
+		/*
+		 * FIXCHERI: For the time being print information about
+		 * FIXCHERI: most CHERI faults.
+		 */
+		pr_err("===== CHERI exception: %#p %pS\n",
+		       (void *)regs->epc, (void *)regs->epc);
+		pr_err("===== CHERI exception: addr=%#lx xtval2=%#lx (%s, %s)\n",
+		       regs->badaddr, xtval2,
+		       cheri_xtval2_cause_to_str(xtval2),
+		       cheri_xtval2_type_to_str(xtval2));
+		show_regs(regs);
+		dump_instr(KERN_EMERG, regs);
+		dump_stack();
+	}
+
+	do_trap_error(regs, SIGSEGV, cheri_xtval2_to_siginfo(xtval2),
+		      regs->badaddr, "CHERI exception");
+}
+
+asmlinkage __visible __trap_section
+void do_trap_cheri(struct pt_regs *regs)
+{
+	/* Save before we enable interrupts. */
+	unsigned long xtval2 = csr_read(CSR_TVAL2);
+
+	if (user_mode(regs)) {
+		irqentry_enter_from_user_mode(regs);
+		local_irq_enable();
+		__do_trap_cheri(regs, xtval2);
+		local_irq_disable();
+		irqentry_exit_to_user_mode(regs);
+	} else {
+		irqentry_state_t state = irqentry_nmi_enter(regs);
+		__do_trap_cheri(regs, xtval2);
+		irqentry_nmi_exit(regs, state);
+	}
+}
+
 #endif
