@@ -103,19 +103,19 @@ static inline unsigned long __untagged_addr_remote(struct mm_struct *mm, unsigne
  * it is used in later function calls:
  * https://github.com/llvm/llvm-project/issues/143795
  */
-#define __get_user_asm(insn, x, ptr, label)			\
+#define ___get_user_asm(insn, x, ptr, label, regc)		\
 do {								\
 	u64 __tmp;						\
 	asm_goto_output(					\
 		"1:\n"						\
 		"	" insn " %0, %1\n"			\
 		_ASM_EXTABLE_UACCESS_ERR(1b, %l2, %0)		\
-		: "=&r" (__tmp)					\
+		: "=&"regc (__tmp)				\
 		: "m" (*(ptr)) : : label);			\
 	(x) = (__typeof__(x))(unsigned long)__tmp;		\
 } while (0)
 #else /* !CONFIG_CC_HAS_ASM_GOTO_OUTPUT */
-#define __get_user_asm(insn, x, ptr, label)			\
+#define ___get_user_asm(insn, x, ptr, label, regc)		\
 do {								\
 	long __gua_err = 0;					\
 	__asm__ __volatile__ (					\
@@ -123,12 +123,15 @@ do {								\
 		"	" insn " %1, %2\n"			\
 		"2:\n"						\
 		_ASM_EXTABLE_UACCESS_ERR_ZERO(1b, 2b, %0, %1)	\
-		: "+r" (__gua_err), "=&r" (x)			\
+		: "+r" (__gua_err), "=&"regc (x)			\
 		: "m" (*(ptr)));				\
 	if (__gua_err)						\
 		goto label;					\
 } while (0)
 #endif /* CONFIG_CC_HAS_ASM_GOTO_OUTPUT */
+#define __get_user_asm(insn, x, ptr, label)			\
+	___get_user_asm(insn, x, ptr, label, "r")
+
 
 #ifdef CONFIG_64BIT
 #define __get_user_8(x, ptr, label) \
@@ -187,35 +190,48 @@ unsigned long __must_check __asm_copy_from_user_sum_enabled(void *to,
 
 #define __get_user_nocheck(x, __gu_ptr, label)			\
 do {								\
+	__typeof__(__gu_ptr) ___gu_ptr = __gu_ptr;		\
 	if (!IS_ENABLED(CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS) &&	\
-	    !IS_ALIGNED((uintptr_t)__gu_ptr, sizeof(*__gu_ptr))) {	\
-		if (__asm_copy_from_user_sum_enabled(&(x), __gu_ptr, sizeof(*__gu_ptr))) \
+	    !IS_ALIGNED((user_uintptr_t)___gu_ptr, sizeof(*___gu_ptr))) {	\
+		if (__asm_copy_from_user_sum_enabled(&(x), ___gu_ptr, sizeof(*___gu_ptr))) \
 			goto label;				\
 		break;						\
 	}							\
-	switch (sizeof(*__gu_ptr)) {				\
+	switch (sizeof(*___gu_ptr)) {				\
 	case 1:							\
-		__get_user_asm("lb", (x), __gu_ptr, label);	\
+		__get_user_asm("lb", (x), ___gu_ptr, label);	\
 		break;						\
 	case 2:							\
-		__get_user_asm("lh", (x), __gu_ptr, label);	\
+		__get_user_asm("lh", (x), ___gu_ptr, label);	\
 		break;						\
 	case 4:							\
-		__get_user_asm("lw", (x), __gu_ptr, label);	\
+		__get_user_asm("lw", (x), ___gu_ptr, label);	\
 		break;						\
 	case 8:							\
-		__get_user_8((x), __gu_ptr, label);		\
+		__get_user_8((x), ___gu_ptr, label);		\
 		break;						\
 	default:						\
 		BUILD_BUG();					\
 	}							\
 } while (0)
 
-#define __get_user_error(x, ptr, err)					\
+#ifdef CONFIG_CHERI_KERNEL
+#define __get_user_nocheck_ptr(x, __gu_ptr, __gu_err)		\
+	___get_user_asm("lc", (x), __gu_ptr, __gu_err, "C")
+#else
+#define __get_user_nocheck_ptr(x, __gu_ptr, __gu_err)		\
+	__get_user_nocheck(x, __gu_ptr, __gu_err)
+#endif
+
+#define __get_user_error(x, ptr, err, isptr)				\
 do {									\
 	__label__ __gu_failed;						\
 									\
-	__get_user_nocheck(x, ptr, __gu_failed);			\
+	if (isptr) {							\
+		__get_user_nocheck_ptr(x, ptr, __gu_failed);		\
+	} else {							\
+		__get_user_nocheck(x, ptr, __gu_failed);		\
+	}								\
 		err = 0;						\
 		break;							\
 __gu_failed:								\
@@ -243,7 +259,7 @@ __gu_failed:								\
  * Returns zero on success, or -EFAULT on error.
  * On error, the variable @x is set to zero.
  */
-#define __get_user(x, ptr)					\
+#define __get_user_p(x, ptr, isptr)				\
 ({								\
 	const __typeof__(*(ptr)) __user *__gu_ptr = untagged_addr(ptr); \
 	long __gu_err = 0;					\
@@ -252,13 +268,15 @@ __gu_failed:								\
 	__chk_user_ptr(__gu_ptr);				\
 								\
 	__enable_user_access();					\
-	__get_user_error(__gu_val, __gu_ptr, __gu_err);		\
+	__get_user_error(__gu_val, __gu_ptr, __gu_err, isptr);	\
 	__disable_user_access();				\
 								\
 	(x) = __gu_val;						\
 								\
 	__gu_err;						\
 })
+#define __get_user(x, ptr) __get_user_p(x, ptr, 0)
+#define __get_user_ptr(x, ptr) __get_user_p(x, ptr, 1)
 
 /**
  * get_user: - Get a simple variable from user space.
@@ -277,24 +295,29 @@ __gu_failed:								\
  * Returns zero on success, or -EFAULT on error.
  * On error, the variable @x is set to zero.
  */
-#define get_user(x, ptr)					\
+#define get_user_p(x, ptr, isptr)				\
 ({								\
 	const __typeof__(*(ptr)) __user *__p = (ptr);		\
 	might_fault();						\
-	access_ok(__p, sizeof(*__p)) ?		\
-		__get_user((x), __p) :				\
+	access_ok(__p, sizeof(*__p)) ?				\
+		__get_user_p((x), __p, isptr) :			\
 		((x) = (__force __typeof__(x))0, -EFAULT);	\
 })
+#define get_user(x, ptr) get_user_p(x, ptr, 0)
+#define get_user_ptr(x, ptr) get_user_p(x, ptr, 1)
 
-#define __put_user_asm(insn, x, ptr, label)			\
+#define ___put_user_asm(insn, x, ptr, label, regc)		\
 do {								\
 	__typeof__(*(ptr)) __x = x;				\
 	asm goto(						\
 		"1:\n"						\
 		"	" insn " %z0, %1\n"			\
 		_ASM_EXTABLE(1b, %l2)				\
-		: : "rJ" (__x), "m"(*(ptr)) : : label);		\
+		: : regc"J" (__x), "m"(*(ptr)) : : label);	\
 } while (0)
+#define __put_user_asm(insn, x, ptr, err)			\
+	___put_user_asm(insn, x, ptr, err, "r")
+
 
 #ifdef CONFIG_64BIT
 #define __put_user_8(x, ptr, label) \
@@ -319,35 +342,47 @@ do {								\
 
 #define __put_user_nocheck(x, __gu_ptr, label)			\
 do {								\
+	__typeof__(__gu_ptr) ___gu_ptr  = __gu_ptr;		\
 	if (!IS_ENABLED(CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS) &&	\
-	    !IS_ALIGNED((uintptr_t)__gu_ptr, sizeof(*__gu_ptr))) {	\
+	    !IS_ALIGNED((user_uintptr_t)___gu_ptr, sizeof(*___gu_ptr))) {	\
 		__typeof__(*(__gu_ptr)) ___val = (x);		\
-		if (__asm_copy_to_user_sum_enabled(__gu_ptr, &(___val), sizeof(*__gu_ptr))) \
+		if (__asm_copy_to_user_sum_enabled(___gu_ptr, &(___val), sizeof(*___gu_ptr))) \
 			goto label;				\
 		break;						\
 	}							\
-	switch (sizeof(*__gu_ptr)) {				\
+	switch (sizeof(*___gu_ptr)) {				\
 	case 1:							\
-		__put_user_asm("sb", (x), __gu_ptr, label);	\
+		__put_user_asm("sb", (x), ___gu_ptr, label);	\
 		break;						\
 	case 2:							\
-		__put_user_asm("sh", (x), __gu_ptr, label);	\
+		__put_user_asm("sh", (x), ___gu_ptr, label);	\
 		break;						\
 	case 4:							\
-		__put_user_asm("sw", (x), __gu_ptr, label);	\
+		__put_user_asm("sw", (x), ___gu_ptr, label);	\
 		break;						\
 	case 8:							\
-		__put_user_8((x), __gu_ptr, label);		\
+		__put_user_8((x), ___gu_ptr, label);		\
 		break;						\
 	default:						\
 		BUILD_BUG();					\
 	}							\
 } while (0)
 
-#define __put_user_error(x, ptr, err)				\
+#ifdef CONFIG_CHERI_KERNEL
+#define __put_user_nocheck_ptr(x, __gu_ptr, __pu_err)		\
+	___put_user_asm("sc", x, __gu_ptr, __pu_err, "C")
+#else
+#define __put_user_nocheck_ptr(x, __gu_ptr, __pu_err)		\
+	__put_user_nocheck(x, __gu_ptr, __pu_err)
+#endif
+
+#define __put_user_error(x, ptr, err, isptr)			\
 do {								\
 	__label__ err_label;					\
-	__put_user_nocheck(x, ptr, err_label);			\
+	if (isptr)						\
+		__put_user_nocheck_ptr(x, ptr, err_label);	\
+	else							\
+		__put_user_nocheck(x, ptr, err_label);		\
 	break;							\
 err_label:							\
 	(err) = -EFAULT;					\
@@ -374,7 +409,7 @@ err_label:							\
  *
  * Returns zero on success, or -EFAULT on error.
  */
-#define __put_user(x, ptr)					\
+#define __put_user_p(x, ptr, isptr)				\
 ({								\
 	__typeof__(*(ptr)) __user *__gu_ptr = untagged_addr(ptr); \
 	__typeof__(*__gu_ptr) __val = (x);			\
@@ -383,11 +418,13 @@ err_label:							\
 	__chk_user_ptr(__gu_ptr);				\
 								\
 	__enable_user_access();					\
-	__put_user_error(__val, __gu_ptr, __pu_err);		\
+	__put_user_error(__val, __gu_ptr, __pu_err, isptr);	\
 	__disable_user_access();				\
 								\
 	__pu_err;						\
 })
+#define __put_user(x, ptr) __put_user_p(x, ptr, 0)
+#define __put_user_ptr(x, ptr) __put_user_p(x, ptr, 1)
 
 /**
  * put_user: - Write a simple value into user space.
@@ -405,14 +442,16 @@ err_label:							\
  *
  * Returns zero on success, or -EFAULT on error.
  */
-#define put_user(x, ptr)					\
+#define put_user_p(x, ptr, isptr)				\
 ({								\
 	__typeof__(*(ptr)) __user *__p = (ptr);			\
 	might_fault();						\
 	access_ok(__p, sizeof(*__p)) ?		\
-		__put_user((x), __p) :				\
+		__put_user_p((x), __p, isptr) :			\
 		-EFAULT;					\
 })
+#define put_user(x, ptr) put_user_p(x, ptr, 0)
+#define put_user_ptr(x, ptr) put_user_p(x, ptr, 1)
 
 
 unsigned long __must_check __asm_copy_to_user(void __user *to,
@@ -472,12 +511,24 @@ static inline void user_access_restore(unsigned long enabled) { }
  */
 #define arch_unsafe_put_user(x, ptr, label)				\
 	__put_user_nocheck(x, (ptr), label)
+#ifdef CONFIG_CHERI_KERNEL
+#define unsafe_put_user_ptr(x, ptr, label)				\
+	__put_user_nocheck_ptr(x, (ptr), label)
+#endif
+
 
 #define arch_unsafe_get_user(x, ptr, label)	do {			\
 	__inttype(*(ptr)) __gu_val;					\
 	__get_user_nocheck(__gu_val, (ptr), label);			\
 	(x) = (__force __typeof__(*(ptr)))__gu_val;			\
 } while (0)
+#ifdef CONFIG_CHERI_KERNEL
+#define unsafe_get_user_ptr(x, ptr, label)	do {			\
+	uintptr_t __gu_val;					\
+	__get_user_nocheck_ptr(__gu_val, (ptr), label);			\
+	(x) = (__force __typeof__(*(ptr)))__gu_val;			\
+} while (0)
+#endif
 
 #define unsafe_copy_to_user(_dst, _src, _len, label)			\
 	if (__asm_copy_to_user_sum_enabled(_dst, _src, _len))		\
