@@ -23,6 +23,7 @@ ARM64 Architecture
     memory
     memory-tagging-extension
     mops
+    morello
     perf
     pointer-authentication
     ptdump
