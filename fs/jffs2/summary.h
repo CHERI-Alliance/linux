@@ -104,7 +104,7 @@ struct jffs2_sum_inode_mem
 	jint32_t version;	/* inode version */
 	jint32_t offset;	/* offset on jeb */
 	jint32_t totlen; 	/* record length */
-} __attribute__((packed));
+} __attribute__((packed)) __cheri_pointer_align;
 
 struct jffs2_sum_dirent_mem
 {
@@ -118,7 +118,7 @@ struct jffs2_sum_dirent_mem
 	uint8_t nsize;		/* dirent name size */
 	uint8_t type;		/* dirent type */
 	uint8_t name[];	/* dirent name */
-} __attribute__((packed));
+} __attribute__((packed)) __cheri_pointer_align;
 
 struct jffs2_sum_xattr_mem
 {
@@ -128,14 +128,14 @@ struct jffs2_sum_xattr_mem
 	jint32_t version;
 	jint32_t offset;
 	jint32_t totlen;
-} __attribute__((packed));
+} __attribute__((packed)) __cheri_pointer_align;
 
 struct jffs2_sum_xref_mem
 {
 	union jffs2_sum_mem *next;
 	jint16_t nodetype;
 	jint32_t offset;
-} __attribute__((packed));
+} __attribute__((packed)) __cheri_pointer_align;
 
 union jffs2_sum_mem
 {
