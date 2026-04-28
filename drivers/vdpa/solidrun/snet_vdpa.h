@@ -103,7 +103,7 @@ struct snet_dev_cfg {
 	u32 cfg_size;
 	/* VirtIO device specific config address */
 	void __iomem *virtio_cfg;
-} __packed;
+} __packed_if_not_cheri;
 
 struct snet_cfg {
 	/* Magic key */
@@ -136,7 +136,7 @@ struct snet_cfg {
 	u32 devices_num;
 	/* The actual devices */
 	struct snet_dev_cfg **devs;
-} __packed;
+} __packed_if_not_cheri;
 
 /* SolidNET PCIe device, one device per PCIe physical function */
 struct psnet {
