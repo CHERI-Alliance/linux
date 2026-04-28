@@ -52,7 +52,7 @@ struct sctp_ulpevent {
 	__u16 stream;
 	__u16 flags;
 	__u16 msg_flags;
-} __packed;
+} __packed __cheri_pointer_align;
 
 /* Retrieve the skb this event sits inside of. */
 static inline struct sk_buff *sctp_event2skb(const struct sctp_ulpevent *ev)
