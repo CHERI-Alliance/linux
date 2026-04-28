@@ -21,6 +21,9 @@ typedef __kernel_timer_t timer_t;
 typedef __kernel_clockid_t clockid_t;
 typedef __kernel_uid_t uid_t;
 typedef __kernel_mode_t mode_t;
+#ifndef __clang__
+typedef __uintcap_t uintcap_t;
+#endif
 
 #define EXIT_SUCCESS 0
 
