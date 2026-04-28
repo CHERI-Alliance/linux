@@ -3462,7 +3462,7 @@ static inline int __wp_page_copy_user(struct page *dst, struct page *src,
 {
 	int ret;
 	void *kaddr;
-	void __user *uaddr;
+	const void __user *uaddr;
 	struct vm_area_struct *vma = vmf->vma;
 	struct mm_struct *mm = vma->vm_mm;
 	unsigned long addr = vmf->address;
@@ -3481,7 +3481,7 @@ static inline int __wp_page_copy_user(struct page *dst, struct page *src,
 	 */
 	kaddr = kmap_local_page(dst);
 	pagefault_disable();
-	uaddr = uaddr_to_user_ptr_safe(addr & PAGE_MASK);
+	uaddr = make_user_ptr_for_read_uaccess(addr & PAGE_MASK, PAGE_SIZE);
 
 	/*
 	 * On architectures with software "accessed" bits, we would
