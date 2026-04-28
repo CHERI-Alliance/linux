@@ -1409,13 +1409,13 @@ out:
 }
 
 #ifdef CONFIG_COMPAT
-COMPAT_SYSCALL_DEFINE2(io_setup, unsigned, nr_events, u32 __user *, ctx32p)
+COMPAT_SYSCALL_DEFINE2(io_setup, unsigned, nr_events, compat_aio_context_t __user *, ctxp)
 {
 	struct kioctx *ioctx = NULL;
 	unsigned long ctx;
 	long ret;
 
-	ret = get_user(ctx, ctx32p);
+	ret = get_user(ctx, ctxp);
 	if (unlikely(ret))
 		goto out;
 
@@ -1430,7 +1430,7 @@ COMPAT_SYSCALL_DEFINE2(io_setup, unsigned, nr_events, u32 __user *, ctx32p)
 	ret = PTR_ERR(ioctx);
 	if (!IS_ERR(ioctx)) {
 		/* truncating is ok because it's a user address */
-		ret = put_user((u32)ioctx->user_id, ctx32p);
+		ret = put_user((compat_aio_context_t)ioctx->user_id, ctxp);
 		if (ret)
 			kill_ioctx(current->mm, ioctx, NULL);
 		percpu_ref_put(&ioctx->users);
