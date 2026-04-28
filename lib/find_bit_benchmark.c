@@ -43,7 +43,8 @@ static int __init test_find_first_bit(const void *bitmap, unsigned long len)
 	time = ktime_get();
 	for (cnt = i = 0; i < len; cnt++) {
 		i = find_first_bit(cp, len);
-		__clear_bit(i, cp);
+		if (i < len)
+			__clear_bit(i, cp);
 	}
 	time = ktime_get() - time;
 	pr_err("find_first_bit:     %18llu ns, %6ld iterations\n", time, cnt);
@@ -63,7 +64,8 @@ static int __init test_find_first_and_bit(const void *bitmap, const void *bitmap
 	time = ktime_get();
 	for (cnt = i = 0; i < len; cnt++) {
 		i = find_first_and_bit(cp, bitmap2, len);
-		__clear_bit(i, cp);
+		if (i < len)
+			__clear_bit(i, cp);
 	}
 	time = ktime_get() - time;
 	pr_err("find_first_and_bit: %18llu ns, %6ld iterations\n", time, cnt);
