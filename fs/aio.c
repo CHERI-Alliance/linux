@@ -31,6 +31,7 @@
 #include <linux/slab.h>
 #include <linux/timer.h>
 #include <linux/aio.h>
+#include <linux/compat64_aio_abi.h>
 #include <linux/highmem.h>
 #include <linux/workqueue.h>
 #include <linux/security.h>
@@ -2019,6 +2020,26 @@ static int __io_submit_one(struct kioctx *ctx, const struct iocb *iocb,
 	}
 }
 
+static int get_compat_iocb(struct iocb *iocb, const struct iocb __user *user_iocb)
+{
+	struct __c64_iocb compat_iocb;
+	if (unlikely(copy_from_user_no_ptr(&compat_iocb, user_iocb, sizeof(struct __c64_iocb))))
+		return -EFAULT;
+	iocb->aio_data = __c_fakeu(compat_iocb.aio_data);
+	iocb->aio_key = compat_iocb.aio_key;
+	iocb->aio_rw_flags = compat_iocb.aio_rw_flags;
+	iocb->aio_lio_opcode = compat_iocb.aio_lio_opcode;
+	iocb->aio_reqprio = compat_iocb.aio_reqprio;
+	iocb->aio_fildes = compat_iocb.aio_fildes;
+	iocb->aio_buf = (user_uintptr_t)compat_ptr(compat_iocb.aio_buf);
+	iocb->aio_nbytes = compat_iocb.aio_nbytes;
+	iocb->aio_offset = compat_iocb.aio_offset;
+	iocb->aio_reserved2 = compat_iocb.aio_reserved2;
+	iocb->aio_flags = compat_iocb.aio_flags;
+	iocb->aio_resfd = compat_iocb.aio_resfd;
+	return 0;
+}
+
 static int io_submit_one(struct kioctx *ctx, struct iocb __user *user_iocb,
 			 bool compat)
 {
@@ -2026,8 +2047,13 @@ static int io_submit_one(struct kioctx *ctx, struct iocb __user *user_iocb,
 	struct iocb iocb;
 	int err;
 
-	if (unlikely(copy_from_user_with_ptr(&iocb, user_iocb, sizeof(iocb))))
-		return -EFAULT;
+	if (compat) {
+		if (unlikely(get_compat_iocb(&iocb, user_iocb)))
+			return -EFAULT;
+	} else {
+		if (unlikely(copy_from_user_with_ptr(&iocb, user_iocb, sizeof(iocb))))
+			return -EFAULT;
+	}
 
 	/* enforce forwards compatibility on users */
 	if (unlikely(iocb.aio_reserved2)) {
