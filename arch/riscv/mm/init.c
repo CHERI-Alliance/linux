@@ -63,6 +63,12 @@ bool pgtable_l4_enabled __ro_after_init = !IS_ENABLED(CONFIG_XIP_KERNEL);
 bool pgtable_l5_enabled __ro_after_init = !IS_ENABLED(CONFIG_XIP_KERNEL);
 EXPORT_SYMBOL(pgtable_l4_enabled);
 EXPORT_SYMBOL(pgtable_l5_enabled);
+
+#ifdef CONFIG_RISCV_CHERI
+unsigned long riscv_cheripte_cw = 0;
+EXPORT_SYMBOL(riscv_cheripte_cw);
+#endif
+
 #endif
 
 phys_addr_t phys_ram_base __ro_after_init;
@@ -391,7 +397,19 @@ static const pgprot_t protection_map[16] = {
 	[VM_SHARED | VM_EXEC | VM_WRITE]		= PAGE_SHARED_EXEC,
 	[VM_SHARED | VM_EXEC | VM_WRITE | VM_READ]	= PAGE_SHARED_EXEC
 };
-DECLARE_VM_GET_PAGE_PROT
+
+pgprot_t vm_get_page_prot(unsigned long vm_flags)
+{
+	pgprot_t prot = protection_map[
+		vm_flags & (VM_READ | VM_WRITE | VM_EXEC | VM_SHARED)];
+
+	if (vm_flags & (VM_READ_CAPS | VM_WRITE_CAPS))
+		prot = riscv_pgprot_set_cw(prot);
+
+	return prot;
+}
+EXPORT_SYMBOL(vm_get_page_prot);
+
 
 void __set_fixmap(enum fixed_addresses idx, phys_addr_t phys, pgprot_t prot)
 {
@@ -880,11 +898,32 @@ static void __init __PI set_mmap_rnd_bits_max(void)
  * The maximum SATP mode is limited by both the command line and the "mmu-type"
  * property in the device tree, since some platforms may hang if an unsupported
  * SATP mode is attempted.
+ *
+ * While we do not really support the Zcheripte extension we must
+ * set PTE.CW on all PTEs iff the extension is supported. Thus the
+ * code below tries to detect if this is the case by probing:
+ * - For sv57, sv49 and sv39 first set up page tables that
+ *   don't have PTE.CW set.
+ * - During the probing also try to write a capability
+ *   and if this succeeds assume that Zcheripte is not supported
+ *   and PTE.CW is not needed.
+ * - If it faults (for any reason) assume that PTE.CW is
+ *   neccessary and try again.
+ * CAVEATS:
+ * - The retry must do more mappings and include a mapping for
+ *   our stack.
+ * - As a consequence we must wipe early_pmd before a retry, too.
+ * - Probing must be done for sv39 as well. This affects the cases
+ *   where the mode is specified on the command line, too.
+ * - This method is not 100% safe if Zcheripte is not present
+ *   but another exension is supported that makes use of the same bit.
  */
 static __init __PI void set_satp_mode(uintptr_t dtb_pa)
 {
 	u64 identity_satp, hw_satp;
 	unsigned long set_satp_mode_pmd = __c_pa(set_satp_mode) & PMD_MASK;
+	void *tmp = NULL;
+	unsigned long stack_pmd = __c_pa(&tmp) & PMD_MASK;
 	u64 satp_mode_limit = min_not_zero(__pi_set_satp_mode_from_cmdline(dtb_pa),
 					   __pi_set_satp_mode_from_fdt(dtb_pa));
 
@@ -895,7 +934,6 @@ static __init __PI void set_satp_mode(uintptr_t dtb_pa)
 	} else if (satp_mode_limit == SATP_MODE_39) {
 		disable_pgtable_l5();
 		disable_pgtable_l4();
-		return;
 	}
 
 	__pi_create_p4d_mapping(early_p4d,
@@ -904,6 +942,7 @@ static __init __PI void set_satp_mode(uintptr_t dtb_pa)
 	__pi_create_pud_mapping(early_pud,
 			   set_satp_mode_pmd, (uintptr_t)early_pmd,
 			   PUD_SIZE, PAGE_TABLE);
+retry:
 	/* Handle the case where set_satp_mode straddles 2 PMDs */
 	__pi_create_pmd_mapping(early_pmd,
 			   set_satp_mode_pmd, set_satp_mode_pmd,
@@ -912,7 +951,8 @@ static __init __PI void set_satp_mode(uintptr_t dtb_pa)
 			   set_satp_mode_pmd + PMD_SIZE,
 			   set_satp_mode_pmd + PMD_SIZE,
 			   PMD_SIZE, PAGE_KERNEL_EXEC);
-retry:
+	__pi_create_pmd_mapping(early_pmd, stack_pmd, stack_pmd,
+			   PMD_SIZE, PAGE_KERNEL_EXEC);
 	__pi_create_pgd_mapping(early_pg_dir,
 			   set_satp_mode_pmd,
 			   pgtable_l5_enabled ?
@@ -924,17 +964,68 @@ retry:
 	identity_satp = PFN_DOWN(__c_pa(&early_pg_dir)) | satp_mode;
 
 	local_flush_tlb_all();
+#ifdef CONFIG_CHERI_KERNEL
+	tmp = NULL;
+	hw_satp = 0;
+	asm volatile(
+		/* Backup stvecc and calculate new one */
+		"	csrr ct0, stvecc\n"
+		"	llc ct1, 1f\n"
+
+		/*
+		 * Write satp and read it back into a scratch
+		 * register. Fail if the values differ.
+		 */
+		"	csrw satp, %1\n"
+		"	csrr %0, satp\n"
+		"	bne %0, %1, 1f\n"
+
+		/*
+		 * Store a capability. This will trap if we use PTE.CW
+		 * while not supported or vice versa. Set the trap
+		 * vector to recover from this. Otherwise it will set
+		 * tmp to its own address.
+		 */
+		"	sfence.vma\n"
+		"	csrw stvecc, ct1\n"
+		"	sc %2, (%2)\n"
+
+		/* Restore satp and stvecc */
+		".align 2\n"
+		"1:	csrw satp, zero\n"
+		"	csrw stvecc, ct0\n"
+		: "=&r"(hw_satp)
+		: "r" (identity_satp), "C" (&tmp)
+		: "t0", "ct0", "t1", "ct1", "memory"
+	);
+#else
 	csr_write(CSR_SATP, identity_satp);
 	hw_satp = csr_swap(CSR_SATP, 0ULL);
+#endif
 	local_flush_tlb_all();
 
-	if (hw_satp != identity_satp) {
+	if (hw_satp != identity_satp || tmp != &tmp) {
+#ifdef CONFIG_CHERI_KERNEL
+		if (riscv_cheripte_cw == 0 && hw_satp == identity_satp) {
+			riscv_cheripte_cw = _PAGE_CHERIPTE_CW;
+			memset(early_pg_dir, 0, PAGE_SIZE);
+			memset(early_pmd, 0, PAGE_SIZE);
+			goto retry;
+		}
+		riscv_cheripte_cw  = 0;
+#endif
 		if (pgtable_l5_enabled) {
 			disable_pgtable_l5();
 			memset(early_pg_dir, 0, PAGE_SIZE);
+			memset(early_pmd, 0, PAGE_SIZE);
 			goto retry;
 		}
-		disable_pgtable_l4();
+		if (pgtable_l4_enabled) {
+			disable_pgtable_l4();
+			memset(early_pg_dir, 0, PAGE_SIZE);
+			memset(early_pmd, 0, PAGE_SIZE);
+			goto retry;
+		}
 	}
 
 	memset(early_pg_dir, 0, PAGE_SIZE);
