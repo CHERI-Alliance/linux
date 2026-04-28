@@ -839,7 +839,7 @@ static long ptrace_get_rseq_configuration(struct task_struct *task,
 					  unsigned long size, void __user *data)
 {
 	struct ptrace_rseq_configuration conf = {
-		.rseq_abi_pointer = (u64)(user_uintptr_t)task->rseq.usrptr,
+		.rseq_abi_pointer = __c_pa_u(task->rseq.usrptr),
 		.rseq_abi_size = task->rseq.len,
 		.signature = task->rseq.sig,
 		.flags = 0,
@@ -1224,11 +1224,11 @@ int ptrace_request(struct task_struct *child, long request,
 		break;
 
 	case PTRACE_GETSIGMASK:
-		ret = ptrace_getsigmask(child, addr, datavp);
+		ret = ptrace_getsigmask(child, __c_ua(addr), datavp);
 		break;
 
 	case PTRACE_SETSIGMASK:
-		ret = ptrace_setsigmask(child, addr, datavp);
+		ret = ptrace_setsigmask(child, __c_ua(addr), datavp);
 		break;
 
 	case PTRACE_INTERRUPT:

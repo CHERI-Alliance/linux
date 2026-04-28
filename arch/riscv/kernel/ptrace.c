@@ -595,12 +595,46 @@ void ptrace_disable(struct task_struct *child)
 {
 }
 
+#ifdef CONFIG_CHERI_KERNEL
+static int ptrace_peekcap(struct task_struct *child,
+			  unsigned long addr, void __user *data)
+{
+	struct user_cap ucap = { 0, };
+	int copied;
+
+	if (addr % sizeof(uintcap_t))
+		return -EINVAL;
+
+	copied = ptrace_access_vm(child, addr, &ucap.val,
+				  sizeof(ucap.val), FOLL_FORCE);
+	if (copied != sizeof(ucap.val))
+		return -EIO;
+	ucap.tag = cheri_tag_get(ucap.val);
+
+	if (copy_to_user(data, &ucap, sizeof(ucap)))
+		return -EFAULT;
+
+	return 0;
+}
+#else
+static inline int ptrace_peekcap(struct task_struct *child,
+				 unsigned long addr, void __user *data)
+{
+	return -EIO;
+}
+#endif
+
 long arch_ptrace(struct task_struct *child, long request,
 		 user_uintptr_t addr, user_uintptr_t data)
 {
 	long ret = -EIO;
 
 	switch (request) {
+	case PTRACE_PEEKCAP:
+		ret = ptrace_peekcap(child, __c_ua(addr), (void __user *)data);
+		break;
+	case PTRACE_POKECAP:
+		break;
 	default:
 		ret = ptrace_request(child, request, addr, data);
 		break;

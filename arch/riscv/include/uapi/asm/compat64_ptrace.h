@@ -5,6 +5,49 @@
 #include <asm/compat64_i_ptrace.h>
 
 
+struct __c64_user_cap {
+	__c64_uptr val;
+	__u8 tag;
+	/// UAPI: NoConvert: Padding
+	__u8 _pad[sizeof(__c64_uptr ) - 1];
+};
+
+static __always_inline __maybe_unused void
+__from_c64_user_cap(struct user_cap *p)
+{
+	union {
+		struct user_cap native;
+		const struct __c64_user_cap compat;
+	} *u = (void *)p;
+
+	u->native.tag = u->compat.tag;
+	u->native.val = (user_uintptr_t)compat_ptr(u->compat.val);
+}
+static __always_inline __maybe_unused void
+__to_c64_user_cap(struct user_cap *p)
+{
+	union {
+		struct __c64_user_cap compat;
+		const struct user_cap native;
+	} *u = (void *)p;
+
+	u->compat.val = (__c64_uptr __force)u->native.val;
+	u->compat.tag = u->native.tag;
+}
+static __always_inline __maybe_unused void
+__from_c64_user_cap_2(struct user_cap *native, const struct __c64_user_cap *compat)
+{
+
+	native->val = (user_uintptr_t)compat_ptr(compat->val);
+	native->tag = compat->tag;
+}
+static __always_inline __maybe_unused void
+__to_c64_user_cap_2(struct __c64_user_cap *compat, const struct user_cap *native)
+{
+
+	compat->val = (__c64_uptr __force)native->val;
+	compat->tag = native->tag;
+}
 struct __c64___riscv_v_ext_state {
 	unsigned long vstart;
 	unsigned long vl;
