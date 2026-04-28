@@ -33,6 +33,9 @@ SYM_FUNC_START(fallback_scalar_usercopy)
 	csrs 	CSR_STATUS, t6
 	mv 	CREG(t6), CREG(ra)
 
+#ifdef CONFIG_RISCV_CHERI_DEBUG_USER_COPY
+	call	__cheri_check_tags
+#endif
 	call	__asm_copy_to_user_sum_enabled
 
 	/* Disable access to user memory */
