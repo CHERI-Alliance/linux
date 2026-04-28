@@ -140,7 +140,7 @@ static void		 ip_do_redirect(struct dst_entry *dst, struct sock *sk,
 					struct sk_buff *skb);
 static void		ipv4_dst_destroy(struct dst_entry *dst);
 
-static u32 *ipv4_cow_metrics(struct dst_entry *dst, unsigned long old)
+static u32 *ipv4_cow_metrics(struct dst_entry *dst, uintptr_t old)
 {
 	WARN_ON(1);
 	return NULL;

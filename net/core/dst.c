@@ -189,13 +189,13 @@ void dst_release_immediate(struct dst_entry *dst)
 }
 EXPORT_SYMBOL(dst_release_immediate);
 
-u32 *dst_cow_metrics_generic(struct dst_entry *dst, unsigned long old)
+u32 *dst_cow_metrics_generic(struct dst_entry *dst, uintptr_t old)
 {
 	struct dst_metrics *p = kmalloc_obj(*p, GFP_ATOMIC);
 
 	if (p) {
 		struct dst_metrics *old_p = (struct dst_metrics *)__DST_METRICS_PTR(old);
-		unsigned long prev, new;
+		uintptr_t prev, new;
 
 		refcount_set(&p->refcnt, 1);
 		memcpy(p->metrics, old_p->metrics, sizeof(p->metrics));
@@ -219,9 +219,9 @@ u32 *dst_cow_metrics_generic(struct dst_entry *dst, unsigned long old)
 EXPORT_SYMBOL(dst_cow_metrics_generic);
 
 /* Caller asserts that dst_metrics_read_only(dst) is false.  */
-void __dst_destroy_metrics_generic(struct dst_entry *dst, unsigned long old)
+void __dst_destroy_metrics_generic(struct dst_entry *dst, uintptr_t old)
 {
-	unsigned long prev, new;
+	uintptr_t prev, new;
 
 	new = ((uintptr_t) &dst_default_metrics) | DST_METRICS_READ_ONLY;
 	prev = cmpxchg(&dst->_metrics, old, new);
@@ -235,7 +235,7 @@ struct dst_entry *dst_blackhole_check(struct dst_entry *dst, u32 cookie)
 	return NULL;
 }
 
-u32 *dst_blackhole_cow_metrics(struct dst_entry *dst, unsigned long old)
+u32 *dst_blackhole_cow_metrics(struct dst_entry *dst, uintptr_t old)
 {
 	return NULL;
 }
