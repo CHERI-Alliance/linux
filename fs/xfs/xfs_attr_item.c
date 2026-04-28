@@ -285,7 +285,7 @@ xfs_attri_init(
 
 	xfs_log_item_init(mp, &attrip->attri_item, XFS_LI_ATTRI,
 			  &xfs_attri_item_ops);
-	attrip->attri_format.alfi_id = (uintptr_t)(void *)attrip;
+	attrip->attri_format.alfi_id = __c_pa(attrip);
 	atomic_set(&attrip->attri_refcount, 2);
 
 	return attrip;
