@@ -90,8 +90,8 @@ bool check_user_ptr_owning(user_uintptr_t user_ptr, size_t len)
 {
 	ptraddr_t addr;
 
-	addr = round_down((ptraddr_t)user_ptr, PAGE_SIZE);
-	len = round_up(len, PAGE_SIZE);
+	addr = round_down(__c_ua(user_ptr), PAGE_SIZE);
+	len = round_up(__c_ua(user_ptr) + len - addr, PAGE_SIZE);
 	user_ptr = cheri_address_set(user_ptr, addr);
 
 	return cheri_check_cap((void * __capability)user_ptr, len,
@@ -103,13 +103,21 @@ user_uintptr_t make_user_ptr_owning(const struct reserv_struct *reserv,
 {
 	user_uintptr_t user_ptr;
 
-	user_ptr = (user_uintptr_t)cheri_build_user_cap(reserv->start,
-							reserv->len,
+	user_ptr = (user_uintptr_t)cheri_build_user_cap(reserv->outer_start,
+							reserv->outer_len,
 							reserv->perms);
 	user_ptr = cheri_address_set(user_ptr, addr);
 
 	return user_ptr;
 }
+
+#ifdef CHERI_PERMS_LOAD_CAP
+#define __CHERI_PERMS_LOAD_CAP CHERI_PERMS_LOAD_CAP
+#define __CHERI_PERMS_STORE_CAP CHERI_PERMS_STORE_CAP
+#else
+#define __CHERI_PERMS_LOAD_CAP CHERI_PERM_LOAD_CAP
+#define __CHERI_PERMS_STORE_CAP CHERI_PERM_STORE_CAP
+#endif
 
 user_ptr_perms_t user_ptr_owning_perms_from_prot(int prot, unsigned long vm_flags)
 {
@@ -121,12 +129,12 @@ user_ptr_perms_t user_ptr_owning_perms_from_prot(int prot, unsigned long vm_flag
 	if (used_prot & PROT_READ) {
 		perms |= CHERI_PERM_LOAD;
 		if (vm_flags & VM_READ_CAPS)
-			perms |= CHERI_PERM_LOAD_CAP;
+			perms |= __CHERI_PERMS_LOAD_CAP;
 	}
 	if (used_prot & PROT_WRITE) {
 		perms |= CHERI_PERM_STORE;
 		if (vm_flags & VM_WRITE_CAPS)
-			perms |= (CHERI_PERM_STORE_CAP | CHERI_PERM_STORE_LOCAL_CAP);
+			perms |= (__CHERI_PERMS_STORE_CAP | CHERI_PERM_STORE_LOCAL_CAP);
 	}
 	if (used_prot & PROT_EXEC)
 		perms |= CHERI_PERM_EXECUTE;
@@ -134,7 +142,7 @@ user_ptr_perms_t user_ptr_owning_perms_from_prot(int prot, unsigned long vm_flag
 	/* Fetch any extra architecture specific permissions */
 	perms |= arch_user_ptr_owning_perms_from_prot(used_prot, vm_flags);
 
-	return perms;
+	return perms & ~cheri_unsupported_perms;
 }
 
 bool user_ptr_may_set_prot(user_uintptr_t user_ptr, int prot)

@@ -86,7 +86,7 @@ static __always_inline long do_strnlen_user(const char __user *src, long count, 
 {
 	unsigned long align, tail = 0;
 	long ret, res = 0;
-	ptraddr_t src_addr = untagged_addr(src);
+	ptraddr_t src_addr = untagged_addr(__c_pa_u(src));
 	ptraddr_t src_base = user_ptr_base(src);
 	ptraddr_t src_limit = user_ptr_limit(src);
 
@@ -208,7 +208,7 @@ long strnlen_user(const char __user *str, long count)
 	}
 
 	max_addr = TASK_SIZE_MAX;
-	src_addr = (user_uintptr_t)untagged_addr(str);
+	src_addr = (unsigned long)untagged_addr(__c_pa_u(str));
 	if (likely(src_addr < max_addr)) {
 		unsigned long max = max_addr - src_addr;
 		long retval;

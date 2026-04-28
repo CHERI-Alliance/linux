@@ -1224,7 +1224,7 @@ static ssize_t extract_kvec_to_sg(struct iov_iter *iter,
 
 	for (i = 0; i < iter->nr_segs; i++) {
 		struct page *page;
-		unsigned long kaddr;
+		uintptr_t kaddr;
 		size_t off, len, seg;
 
 		len = kv[i].iov_len;
@@ -1247,7 +1247,7 @@ static ssize_t extract_kvec_to_sg(struct iov_iter *iter,
 			else
 				page = virt_to_page((void *)(uintptr_t)kaddr);
 
-			sg_set_page(sg, page, len, off);
+			sg_set_page(sg, page, seg, off);
 			sgtable->nents++;
 			sg++;
 			sg_max--;

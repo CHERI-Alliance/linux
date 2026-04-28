@@ -473,7 +473,7 @@ struct ma_wr_state {
  * top of the tree as the tree may have been modified.
  */
 #define MA_ERROR(err) \
-		((struct maple_enode *)(((unsigned long)err << 2) | 2UL))
+		((struct maple_enode *)(((uintptr_t __force)err << 2) | 2UL))
 
 /*
  * When changing MA_STATE, remember to also change rust/kernel/maple_tree.rs
