@@ -15,9 +15,16 @@
 #include <asm/ptrace.h>
 
 /* ELF register definitions */
-typedef unsigned long elf_greg_t;
-typedef struct user_regs_struct elf_gregset_t;
-#define ELF_NGREG (sizeof(elf_gregset_t) / sizeof(elf_greg_t))
+typedef __ulptr elf_greg_t;
+#if defined(__ARCH_WANT_PURECAP) || defined(__CHERI_PURE_CAPABILITY__)
+/* Add one for the tags bitmap. */
+#define __ELF_NGREG ((sizeof(struct user_regs_struct) / sizeof(elf_greg_t)))
+#define ELF_NGREG (1 + __ELF_NGREG)	/* For the tags bitmap */
+#else
+#define __ELF_NGREG ((sizeof(struct user_regs_struct) / sizeof(elf_greg_t)))
+#define ELF_NGREG __ELF_NGREG
+#endif
+typedef elf_greg_t elf_gregset_t[ELF_NGREG];
 
 /* We don't support f without d, or q.  */
 typedef __u64 elf_fpreg_t;
