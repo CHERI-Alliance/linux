@@ -2316,7 +2316,7 @@ static int nv_init_one(struct pci_dev *pdev, const struct pci_device_id *ent)
 	int rc;
 	u32 bar;
 	void __iomem *base;
-	unsigned long type = ent->driver_data;
+	unsigned long type = __c_ua(ent->driver_data);
 
         // Make sure this is a SATA controller by counting the number of bars
         // (NVIDIA SATA controllers will always have six bars).  Otherwise,
