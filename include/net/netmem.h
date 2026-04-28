@@ -30,11 +30,14 @@
  * updating the anonymous aliasing union in struct net_iov.
  */
 struct netmem_desc {
-	unsigned long _flags;
+	union {
+		unsigned long _flags;
+		uintptr_t __unused_padding;
+	};
 	unsigned long pp_magic;
-	struct page_pool *pp;
-	unsigned long _pp_mapping_pad;
 	unsigned long dma_addr;
+	struct page_pool *pp;
+	uintptr_t _pp_mapping_pad;
 	atomic_long_t pp_ref_count;
 };
 
@@ -102,11 +105,14 @@ struct net_iov {
 		 * of niov->pp.
 		 */
 		struct {
-			unsigned long _flags;
+			union {
+				unsigned long _flags;
+				uintptr_t __unused_padding;
+			};
 			unsigned long pp_magic;
-			struct page_pool *pp;
-			unsigned long _pp_mapping_pad;
 			unsigned long dma_addr;
+			struct page_pool *pp;
+			uintptr_t _pp_mapping_pad;
 			atomic_long_t pp_ref_count;
 		};
 	};
@@ -163,7 +169,7 @@ static inline unsigned int net_iov_idx(const struct net_iov *niov)
  *
  * Use the supplied helpers to obtain the underlying memory pointer and fields.
  */
-typedef unsigned long __bitwise netmem_ref;
+typedef uintptr_t __bitwise netmem_ref;
 
 static inline bool netmem_is_net_iov(const netmem_ref netmem)
 {
@@ -197,7 +203,7 @@ static inline struct page *netmem_to_page(netmem_ref netmem)
 static inline struct net_iov *netmem_to_net_iov(netmem_ref netmem)
 {
 	if (netmem_is_net_iov(netmem))
-		return (struct net_iov *)((__force unsigned long)netmem &
+		return (struct net_iov *)((__force uintptr_t)netmem &
 					  ~NET_IOV);
 
 	DEBUG_NET_WARN_ON_ONCE(true);
@@ -206,7 +212,7 @@ static inline struct net_iov *netmem_to_net_iov(netmem_ref netmem)
 
 static inline netmem_ref net_iov_to_netmem(struct net_iov *niov)
 {
-	return (__force netmem_ref)((unsigned long)niov | NET_IOV);
+	return (__force netmem_ref)((uintptr_t)niov | NET_IOV);
 }
 
 #define page_to_netmem(p)	(_Generic((p),			\
@@ -290,7 +296,7 @@ static inline struct netmem_desc *__netmem_to_nmdesc(netmem_ref netmem)
  */
 static inline struct netmem_desc *netmem_to_nmdesc(netmem_ref netmem)
 {
-	void *p = (void *)((__force unsigned long)netmem & ~NET_IOV);
+	void *p = (void *)((__force uintptr_t)netmem & ~NET_IOV);
 
 	if (netmem_is_net_iov(netmem))
 		return &((struct net_iov *)p)->desc;
