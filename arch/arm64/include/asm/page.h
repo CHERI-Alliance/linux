@@ -46,11 +46,19 @@ int pfn_is_map_memory(unsigned long pfn);
 
 #endif /* !__ASSEMBLER__ */
 
+#ifdef CONFIG_ARM64_MORELLO
+#define VMA_DATA_FLAGS_TSK_EXEC_CHERI \
+		append_vma_flags(VMA_DATA_FLAGS_TSK_EXEC, \
+				 VMA_READ_CAPS_BIT, VMA_WRITE_CAPS_BIT)
+#else
+#define VMA_DATA_FLAGS_TSK_EXEC_CHERI VMA_DATA_FLAGS_TSK_EXEC
+#endif
+
 #ifdef CONFIG_ARM64_MTE
-#define VMA_DATA_DEFAULT_FLAGS	append_vma_flags(VMA_DATA_FLAGS_TSK_EXEC, \
+#define VMA_DATA_DEFAULT_FLAGS	append_vma_flags(VMA_DATA_FLAGS_TSK_EXEC_CHERI, \
 						 VMA_MTE_ALLOWED_BIT)
 #else
-#define VMA_DATA_DEFAULT_FLAGS	VMA_DATA_FLAGS_TSK_EXEC
+#define VMA_DATA_DEFAULT_FLAGS	VMA_DATA_FLAGS_TSK_EXEC_CHERI
 #endif
 
 #include <asm-generic/getorder.h>
