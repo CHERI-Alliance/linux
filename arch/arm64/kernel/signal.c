@@ -1668,7 +1668,7 @@ static int setup_rt_frame(int usig, struct ksignal *ksig, sigset_t *set,
 	err |= __save_altstack(&frame->uc.uc_stack, regs->sp);
 	err |= setup_sigframe(&user, regs, set, &ua_state);
 	if (ksig->ka.sa.sa_flags & SA_SIGINFO)
-		err |= copy_siginfo_to_user(&frame->info, &ksig->info);
+		err |= copy_siginfo_to_user_with_ptr(&frame->info, &ksig->info);
 
 	if (err == 0)
 		err = setup_return(regs, ksig, &user, usig);
