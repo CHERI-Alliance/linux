@@ -1183,6 +1183,10 @@ void __init riscv_user_isa_enable(void)
 	if (!riscv_has_extension_unlikely(RISCV_ISA_EXT_ZICBOP) &&
 	    any_cpu_has_zicbop)
 		pr_warn("Zicbop disabled as it is unavailable on some harts\n");
+
+#ifdef CONFIG_RISCV_CHERI
+	current->thread.envcfg |= ENVCFG_CRE;
+#endif
 }
 
 #ifdef CONFIG_RISCV_ALTERNATIVE
