@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0
 #include <asm/ioctls.h>
 #include <linux/io_uring/net.h>
+#include <linux/io_uring.h>
+#include <linux/compat64_io_uring.h>
 #include <linux/errqueue.h>
 #include <net/sock.h>
 
@@ -20,7 +22,15 @@ static inline int io_uring_cmd_getsockopt(struct socket *sock,
 	if (level != SOL_SOCKET)
 		return -EOPNOTSUPP;
 
-	optval = u64_to_user_ptr(READ_ONCE(sqe->optval));
+	/*
+	 * The compat64 SQE conversion function stores compat_sqe->optval in
+	 * sqe->__c64_optval of the CHERI SQE via the raw cmd copy. We have
+	 * to convert it as compat cap.
+	 */
+	if (IS_ENABLED(CONFIG_COMPAT64) && compat)
+		optval = compat_ptr(READ_ONCE(sqe->__c64_optval));
+	else
+		optval = u64_to_user_ptr(READ_ONCE(sqe->optval));
 	optname = READ_ONCE(sqe->optname);
 	optlen = READ_ONCE(sqe->optlen);
 
@@ -44,7 +54,11 @@ static inline int io_uring_cmd_setsockopt(struct socket *sock,
 	void __user *optval;
 	sockptr_t optval_s;
 
-	optval = u64_to_user_ptr(READ_ONCE(sqe->optval));
+	/* See comment in io_uring_cmd_getsockopt */
+	if (IS_ENABLED(CONFIG_COMPAT64) && compat)
+		optval = compat_ptr(READ_ONCE(sqe->__c64_optval));
+	else
+		optval = u64_to_user_ptr(READ_ONCE(sqe->optval));
 	optname = READ_ONCE(sqe->optname);
 	optlen = READ_ONCE(sqe->optlen);
 	level = READ_ONCE(sqe->level);
@@ -142,12 +156,19 @@ static int io_uring_cmd_getsockname(struct socket *sock,
 	struct sockaddr __user *uaddr;
 	unsigned int peer;
 	int __user *ulen;
+	bool compat = !!(issue_flags & IO_URING_F_COMPAT);
 
 	if (sqe->ioprio || sqe->__pad1 || sqe->len || sqe->rw_flags)
 		return -EINVAL;
 
 	uaddr = u64_to_user_ptr(READ_ONCE(sqe->addr));
-	ulen = u64_to_user_ptr(READ_ONCE(sqe->addr3));
+
+	/* See comment in io_uring_cmd_getsockopt */
+	if (IS_ENABLED(CONFIG_COMPAT64) && compat)
+		ulen = compat_ptr(READ_ONCE(sqe->__c64_addr3));
+	else
+		ulen = u64_to_user_ptr(READ_ONCE(sqe->addr3));
+
 	peer = READ_ONCE(sqe->optlen);
 	if (peer > 1)
 		return -EINVAL;
