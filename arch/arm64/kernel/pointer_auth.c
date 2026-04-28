@@ -18,7 +18,7 @@ int ptrauth_prctl_reset_keys(struct task_struct *tsk, unsigned long arg)
 	if (!system_supports_address_auth() && !system_supports_generic_auth())
 		return -EINVAL;
 
-	if (is_compat_thread(task_thread_info(tsk)))
+	if (is_32bit_compat_thread(task_thread_info(tsk)))
 		return -EINVAL;
 
 	if (!arg) {
@@ -72,7 +72,7 @@ int ptrauth_set_enabled_keys(struct task_struct *tsk, unsigned long keys,
 	if (!system_supports_address_auth())
 		return -EINVAL;
 
-	if (is_compat_thread(task_thread_info(tsk)))
+	if (is_32bit_compat_thread(task_thread_info(tsk)))
 		return -EINVAL;
 
 	if ((keys & ~PR_PAC_ENABLED_KEYS_MASK) || (enabled & ~keys))
@@ -97,7 +97,7 @@ int ptrauth_get_enabled_keys(struct task_struct *tsk)
 	if (!system_supports_address_auth())
 		return -EINVAL;
 
-	if (is_compat_thread(task_thread_info(tsk)))
+	if (is_32bit_compat_thread(task_thread_info(tsk)))
 		return -EINVAL;
 
 	if (tsk->thread.sctlr_user & SCTLR_ELx_ENIA)
