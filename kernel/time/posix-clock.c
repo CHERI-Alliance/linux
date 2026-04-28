@@ -152,7 +152,7 @@ static const struct file_operations posix_clock_file_operations = {
 	.read		= posix_clock_read,
 	.poll		= posix_clock_poll,
 	.unlocked_ioctl	= posix_clock_ioctl,
-	.compat_ioctl	= posix_clock_ioctl,
+	.compat_ioctl	= compat_ptr_ioctl,
 	.open		= posix_clock_open,
 	.release	= posix_clock_release,
 };
