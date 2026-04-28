@@ -546,7 +546,7 @@ event_trigger_print(const char *name, struct seq_file *m,
 	if (count == -1)
 		seq_puts(m, ":unlimited");
 	else
-		seq_printf(m, ":count=%ld", count);
+		seq_printf(m, ":count=%ld", (unsigned long)count);
 
 	if (filter_str)
 		seq_printf(m, " if %s\n", filter_str);

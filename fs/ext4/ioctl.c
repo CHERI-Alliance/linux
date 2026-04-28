@@ -1535,7 +1535,7 @@ static long __ext4_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg
 	struct super_block *sb = inode->i_sb;
 	struct mnt_idmap *idmap = file_mnt_idmap(filp);
 
-	ext4_debug("cmd = %u, arg = %lu\n", cmd, arg);
+	ext4_debug("cmd = %u, arg = %lu\n", cmd, (unsigned long)arg);
 
 	switch (cmd) {
 	case FS_IOC_GETFSMAP:

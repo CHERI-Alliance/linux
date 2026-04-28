@@ -403,7 +403,7 @@ static long i2cdev_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg
 	unsigned long funcs;
 
 	dev_dbg(&client->adapter->dev, "ioctl, cmd=0x%02x, arg=0x%02lx\n",
-		cmd, arg);
+		cmd, (unsigned long)arg);
 
 	switch (cmd) {
 	case I2C_SLAVE:

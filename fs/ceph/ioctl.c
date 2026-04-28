@@ -370,7 +370,7 @@ long ceph_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 	int ret;
 
 	doutc(fsc->client, "file %p %p %llx.%llx cmd %s arg %lu\n", file,
-	      inode, ceph_vinop(inode), ceph_ioctl_cmd_name(cmd), arg);
+	      inode, ceph_vinop(inode), ceph_ioctl_cmd_name(cmd), (unsigned long)arg);
 	switch (cmd) {
 	case CEPH_IOC_GET_LAYOUT:
 		return ceph_ioctl_get_layout(file, (void __user *)arg);

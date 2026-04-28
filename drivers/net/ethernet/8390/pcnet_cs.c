@@ -579,7 +579,7 @@ static int pcnet_config(struct pcmcia_device *link)
 	    local_hw_info = pcnet_try_config(link, &has_shmem, 1);
 	    if (local_hw_info == NULL) {
 		    dev_notice(&link->dev, "unable to read hardware net"
-			    " address for io base %#3lx\n", dev->base_addr);
+			    " address for io base %#3lx\n", (unsigned long)dev->base_addr);
 		    goto failed;
 	    }
     }
@@ -633,9 +633,9 @@ static int pcnet_config(struct pcmcia_device *link)
     } else {
 	netdev_info(dev, "NE2000 Compatible: ");
     }
-    pr_cont("io %#3lx, irq %d,", dev->base_addr, dev->irq);
+    pr_cont("io %#3lx, irq %d,", (unsigned long)dev->base_addr, dev->irq);
     if (info->flags & USE_SHMEM)
-	pr_cont(" mem %#5lx,", dev->mem_start);
+	pr_cont(" mem %#5lx,", (unsigned long)dev->mem_start);
     if (info->flags & HAS_MISC_REG)
 	pr_cont(" %s xcvr,", if_names[dev->if_port]);
     pr_cont(" hw_addr %pM\n", dev->dev_addr);
