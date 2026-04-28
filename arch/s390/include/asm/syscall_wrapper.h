@@ -14,7 +14,7 @@
 	      ,, regs->gprs[5],, regs->gprs[6],, regs->gprs[7])
 
 #define SYSCALL_DEFINE0(sname)						\
-	SYSCALL_METADATA(_##sname, 0);					\
+	SYSCALL_METADATA(0, _##sname);					\
 	long __s390x_sys_##sname(struct pt_regs *__unused);		\
 	ALLOW_ERROR_INJECTION(__s390x_sys_##sname, ERRNO);		\
 	static inline long __do_sys_##sname(void);			\

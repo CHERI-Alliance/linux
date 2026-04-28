@@ -207,7 +207,7 @@ extern struct trace_event_functions exit_syscall_print_funcs;
 	  __section("_ftrace_events")					\
 	*__event_exit_##sname = &event_exit_##sname;
 
-#define SYSCALL_METADATA(sname, nb, ...)			\
+#define __SYSCALL_METADATA(nb, sname, ...)			\
 	static const char *types_##sname[] = {			\
 		__MAP(nb,__SC_STR_TDECL,__VA_ARGS__)		\
 	};							\
@@ -238,12 +238,17 @@ static inline int is_syscall_trace_event(struct trace_event_call *tp_event)
 }
 
 #else
-#define SYSCALL_METADATA(sname, nb, ...)
+#define __SYSCALL_METADATA(nb, sname, ...)
 
 static inline int is_syscall_trace_event(struct trace_event_call *tp_event)
 {
 	return 0;
 }
+#endif
+
+#ifndef SYSCALL_METADATA
+#define SYSCALL_METADATA(nb, sname, ...)	\
+	__SYSCALL_METADATA(nb, sname, __VA_ARGS__)
 #endif
 
 #ifndef __retptr__
@@ -254,7 +259,7 @@ static inline int is_syscall_trace_event(struct trace_event_call *tp_event)
 
 #ifndef SYSCALL_DEFINE0
 #define SYSCALL_DEFINE0(sname)					\
-	SYSCALL_METADATA(_##sname, 0);				\
+	SYSCALL_METADATA(0, _##sname);				\
 	asmlinkage long sys_##sname(void);			\
 	ALLOW_ERROR_INJECTION(sys_##sname, ERRNO);		\
 	asmlinkage long sys_##sname(void)
@@ -270,7 +275,7 @@ static inline int is_syscall_trace_event(struct trace_event_call *tp_event)
 #define SYSCALL_DEFINE_MAXARGS	6
 
 #define SYSCALL_DEFINEx(x, sname, ...)				\
-	SYSCALL_METADATA(sname, x, __VA_ARGS__)			\
+	SYSCALL_METADATA(x, sname, __VA_ARGS__)			\
 	__SYSCALL_DEFINEx(x, sname, __VA_ARGS__)
 
 #define __PROTECT(...) asmlinkage_protect(__VA_ARGS__)
