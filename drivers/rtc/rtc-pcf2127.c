@@ -1539,7 +1539,7 @@ static int pcf2127_spi_probe(struct spi_device *spi)
 		if (!variant)
 			return -ENODEV;
 	} else {
-		enum pcf21xx_type type = spi_get_device_id(spi)->driver_data;
+		enum pcf21xx_type type = __c_ua(spi_get_device_id(spi)->driver_data);
 
 		if (type >= PCF21XX_LAST_ID)
 			return -ENODEV;

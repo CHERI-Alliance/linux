@@ -924,7 +924,7 @@ static int m41t80_probe(struct i2c_client *client)
 		return -ENOMEM;
 
 	m41t80_data->client = client;
-	m41t80_data->features = (uintptr_t)i2c_get_match_data(client);
+	m41t80_data->features = __c_pa(i2c_get_match_data(client));
 	i2c_set_clientdata(client, m41t80_data);
 
 	m41t80_data->rtc =  devm_rtc_allocate_device(&client->dev);
