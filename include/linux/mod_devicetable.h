@@ -150,7 +150,7 @@ struct usb_device_id {
 
 	/* not matched against */
 	uintptr_t	driver_info
-		__attribute__((aligned(sizeof(kernel_ulong_t))));
+		__attribute__((aligned(sizeof(uintptr_t))));
 };
 
 /* Some useful macros to use to create struct usb_device_id */

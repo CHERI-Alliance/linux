@@ -41,7 +41,7 @@ struct apd_private_data {
 };
 
 #if defined(CONFIG_X86_AMD_PLATFORM_DEVICE) || defined(CONFIG_ARM64)
-#define APD_ADDR(desc)	((unsigned long)&desc)
+#define APD_ADDR(desc)	((uintptr_t)&desc)
 
 static int acpi_apd_setup(struct apd_private_data *pdata)
 {

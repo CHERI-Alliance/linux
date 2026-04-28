@@ -50,7 +50,7 @@ struct atomisp_sensor_config {
 #define ATOMISP_SENSOR_CONFIG(_HID, _LANES, _VCM)			\
 {									\
 	.id = _HID,							\
-	.driver_data = (long)&((const struct atomisp_sensor_config) {	\
+	.driver_data = (uintptr_t)&((const struct atomisp_sensor_config) {	\
 		.lanes = _LANES,					\
 		.vcm = _VCM,						\
 	})								\

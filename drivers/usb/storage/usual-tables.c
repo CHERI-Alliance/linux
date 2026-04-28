@@ -19,7 +19,7 @@
 		    vendorName, productName, useProtocol, useTransport, \
 		    initFunction, flags) \
 { USB_DEVICE_VER(id_vendor, id_product, bcdDeviceMin, bcdDeviceMax), \
-  .driver_info = (kernel_ulong_t)(flags) }
+  .driver_info = (uintptr_t)(flags) }
 
 #define COMPLIANT_DEV	UNUSUAL_DEV
 

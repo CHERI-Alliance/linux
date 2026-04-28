@@ -189,7 +189,7 @@ static const struct ccu_reset_controller_data k1_apbc2_reset_data = {
 #define K1_AUX_DEV_ID(_unit) \
 	{ \
 		.name = "spacemit_ccu.k1-" #_unit "-reset", \
-		.driver_data = (kernel_ulong_t)&k1_ ## _unit ## _reset_data, \
+		.driver_data = (uintptr_t)&k1_ ## _unit ## _reset_data, \
 	}
 
 static const struct auxiliary_device_id spacemit_k1_reset_ids[] = {
