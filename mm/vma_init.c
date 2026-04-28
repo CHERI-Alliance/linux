@@ -75,6 +75,10 @@ static void vm_area_init_from(const struct vm_area_struct *src,
 #ifdef __HAVE_PFNMAP_TRACKING
 	dest->pfnmap_track_ctx = NULL;
 #endif
+#ifdef CONFIG_CHERI_KERNEL
+	if (reserv_is_supported(dest->vm_mm))
+		reserv_vma_set_reserv_data(dest, &src->reserv_data);
+#endif
 }
 
 #ifdef __HAVE_PFNMAP_TRACKING
