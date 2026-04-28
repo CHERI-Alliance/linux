@@ -221,7 +221,7 @@ struct dsa_mall_mirror_tc_entry {
 /* TC matchall entry */
 struct dsa_mall_tc_entry {
 	struct list_head list;
-	unsigned long cookie;
+	uintptr_t cookie;
 	enum dsa_port_mall_action_type type;
 	union {
 		struct dsa_mall_mirror_tc_entry mirror;

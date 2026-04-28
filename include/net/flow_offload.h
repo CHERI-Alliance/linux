@@ -249,7 +249,7 @@ struct flow_action_police {
 struct flow_action_entry {
 	enum flow_action_id		id;
 	u32				hw_index;
-	unsigned long			cookie;
+	uintptr_t			cookie;
 	u64				miss_cookie;
 	enum flow_action_hw_stats	hw_stats;
 	action_destr			destructor;
@@ -297,7 +297,7 @@ struct flow_action_entry {
 			struct nf_flowtable *flow_table;
 		} ct;
 		struct {
-			unsigned long cookie;
+			uintptr_t cookie;
 			u32 mark;
 			u32 labels[4];
 			bool orig_dir;
@@ -695,7 +695,7 @@ struct flow_cls_offload {
 	struct flow_cls_common_offload common;
 	enum flow_cls_command command;
 	bool use_act_stats;
-	unsigned long cookie;
+	uintptr_t cookie;
 	struct flow_rule *rule;
 	struct flow_stats stats;
 	u32 classid;
@@ -712,7 +712,7 @@ struct flow_offload_action {
 	enum offload_act_command  command;
 	enum flow_action_id id;
 	u32 index;
-	unsigned long cookie;
+	uintptr_t cookie;
 	struct flow_stats stats;
 	struct flow_action action;
 };

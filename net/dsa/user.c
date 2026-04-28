@@ -1352,7 +1352,7 @@ static void dsa_user_poll_controller(struct net_device *dev)
 #endif
 
 static struct dsa_mall_tc_entry *
-dsa_user_mall_tc_entry_find(struct net_device *dev, unsigned long cookie)
+dsa_user_mall_tc_entry_find(struct net_device *dev, uintptr_t cookie)
 {
 	struct dsa_user_priv *p = netdev_priv(dev);
 	struct dsa_mall_tc_entry *mall_tc_entry;
