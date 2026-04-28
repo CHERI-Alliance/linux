@@ -25,7 +25,7 @@ struct hlist_nulls_head {
 struct hlist_nulls_node {
 	struct hlist_nulls_node *next, **pprev;
 };
-#define NULLS_MARKER(value) ((uintptr_t)1UL | (((intptr_t)value) << 1))
+#define NULLS_MARKER(value) ((uintptr_t)1UL | (uintptr_t __force)(((long __force)value) << 1))
 #define INIT_HLIST_NULLS_HEAD(ptr, nulls) \
 	((ptr)->first = (struct hlist_nulls_node *) NULLS_MARKER(nulls))
 #define HLIST_NULLS_HEAD_INIT(nulls) {.first = (struct hlist_nulls_node *)NULLS_MARKER(nulls)}
@@ -54,7 +54,7 @@ static inline int is_a_nulls(const struct hlist_nulls_node *ptr)
  */
 static inline unsigned long get_nulls_value(const struct hlist_nulls_node *ptr)
 {
-	return ((uintptr_t)ptr) >> 1;
+	return __c_pa(ptr) >> 1;
 }
 
 /**

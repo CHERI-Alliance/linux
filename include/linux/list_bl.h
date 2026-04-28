@@ -98,7 +98,7 @@ static inline void hlist_bl_add_before(struct hlist_bl_node *n,
 	/* pprev may be `first`, so be careful not to lose the lock bit */
 	WRITE_ONCE(*pprev,
 		   (struct hlist_bl_node *)
-			((uintptr_t)n | ((uintptr_t)*pprev & LIST_BL_LOCKMASK)));
+			((uintptr_t)n | ((unsigned long)(uintptr_t)*pprev & LIST_BL_LOCKMASK)));
 }
 
 static inline void hlist_bl_add_behind(struct hlist_bl_node *n,
@@ -146,18 +146,18 @@ static inline void hlist_bl_del_init(struct hlist_bl_node *n)
 static inline void hlist_bl_lock(struct hlist_bl_head *b)
 	__acquires(__bitlock(0, b))
 {
-	bit_spin_lock(0, (unsigned long *)b);
+	bit_spin_lock_ptr(0, (uintptr_t *)b);
 }
 
 static inline void hlist_bl_unlock(struct hlist_bl_head *b)
 	__releases(__bitlock(0, b))
 {
-	__bit_spin_unlock(0, (unsigned long *)b);
+	__bit_spin_unlock_ptr(0, (uintptr_t *)b);
 }
 
 static inline bool hlist_bl_is_locked(struct hlist_bl_head *b)
 {
-	return bit_spin_is_locked(0, (unsigned long *)b);
+	return bit_spin_is_locked_ptr(0, (uintptr_t *)b);
 }
 
 /**

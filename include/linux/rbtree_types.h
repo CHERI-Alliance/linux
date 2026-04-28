@@ -3,7 +3,7 @@
 #define _LINUX_RBTREE_TYPES_H
 
 struct rb_node {
-	unsigned long  __rb_parent_color;
+	uintptr_t  __rb_parent_color;
 	struct rb_node *rb_right;
 	struct rb_node *rb_left;
 } __attribute__((aligned(sizeof(long))));

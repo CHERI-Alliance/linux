@@ -173,7 +173,7 @@ RB_DECLARE_CALLBACKS(RBSTATIC, RBNAME,					      \
 
 #define __rb_parent(pc)    ((struct rb_node *)(pc & ~3))
 
-#define __rb_color(pc)     ((pc) & 1)
+#define __rb_color(pc)     ((unsigned long)(pc) & 1)
 #define __rb_is_black(pc)  __rb_color(pc)
 #define __rb_is_red(pc)    (!__rb_color(pc))
 #define rb_color(rb)       __rb_color((rb)->__rb_parent_color)
@@ -227,7 +227,7 @@ __rb_erase_augmented(struct rb_node *node, struct rb_root *root,
 	struct rb_node *child = node->rb_right;
 	struct rb_node *tmp = node->rb_left;
 	struct rb_node *parent, *rebalance;
-	unsigned long pc;
+	uintptr_t pc;
 
 	if (!tmp) {
 		/*
