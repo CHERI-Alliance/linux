@@ -3555,7 +3555,7 @@ static int __copy_siginfo_from_user(int signo, kernel_siginfo_t *to,
 	 * as an error(-EINVAL) for PCuABI.
 	 */
 	if (current_pid ? copy_from_user_with_ptr(to, from, sizeof(struct kernel_siginfo))
-			: copy_from_user(to, from, sizeof(struct kernel_siginfo)))
+			: copy_from_user_no_ptr(to, from, sizeof(struct kernel_siginfo)))
 		return -EFAULT;
 	to->si_signo = signo;
 	return post_copy_siginfo_from_user(to, from);

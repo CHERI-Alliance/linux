@@ -1563,7 +1563,7 @@ static int copy_everything_to_user(struct ebt_table *t, void __user *user,
 		oldcounters = t->table->counters;
 	}
 
-	if (copy_from_user(&tmp, user, sizeof(tmp)))
+	if (copy_from_user_with_ptr(&tmp, user, sizeof(tmp)))
 		return -EFAULT;
 
 	if (*len != sizeof(struct ebt_replace) + entries_size +
@@ -2460,7 +2460,7 @@ static int do_ebt_get_ctl(struct sock *sk, int cmd, void __user *user, int *len)
 		return compat_do_ebt_get_ctl(sk, cmd, user, len);
 #endif
 
-	if (copy_from_user(&tmp, user, sizeof(tmp)))
+	if (copy_from_user_with_ptr(&tmp, user, sizeof(tmp)))
 		return -EFAULT;
 
 	tmp.name[sizeof(tmp.name) - 1] = '\0';
@@ -2487,7 +2487,7 @@ static int do_ebt_get_ctl(struct sock *sk, int cmd, void __user *user, int *len)
 			tmp.valid_hooks = t->table->valid_hooks;
 		}
 		mutex_unlock(&ebt_mutex);
-		if (copy_to_user(user, &tmp, *len) != 0) {
+		if (copy_to_user_with_ptr(user, &tmp, *len) != 0) {
 			ret = -EFAULT;
 			break;
 		}

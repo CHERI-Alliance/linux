@@ -690,11 +690,11 @@ static int copy_entries_to_user(unsigned int total_size,
 		const struct xt_entry_target *t;
 
 		e = loc_cpu_entry + off;
-		if (copy_to_user(userptr + off, e, sizeof(*e))) {
+		if (copy_to_user_with_ptr(userptr + off, e, sizeof(*e))) {
 			ret = -EFAULT;
 			goto free_counters;
 		}
-		if (copy_to_user(userptr + off
+		if (copy_to_user_with_ptr(userptr + off
 				 + offsetof(struct arpt_entry, counters),
 				 &counters[num],
 				 sizeof(counters[num])) != 0) {
@@ -852,7 +852,7 @@ static int get_entries(struct net *net, struct arpt_get_entries __user *uptr,
 
 	if (*len < sizeof(get))
 		return -EINVAL;
-	if (copy_from_user(&get, uptr, sizeof(get)) != 0)
+	if (copy_from_user_with_ptr(&get, uptr, sizeof(get)) != 0)
 		return -EFAULT;
 	if (*len != sizeof(struct arpt_get_entries) + get.size)
 		return -EINVAL;
@@ -931,7 +931,7 @@ static int __do_replace(struct net *net, const char *name,
 		cleanup_entry(iter, net);
 
 	xt_free_table_info(oldinfo);
-	if (copy_to_user(counters_ptr, counters,
+	if (copy_to_user_with_ptr(counters_ptr, counters,
 			 sizeof(struct xt_counters) * num_counters) != 0) {
 		/* Silent error, can't fail, new table is already in place */
 		net_warn_ratelimited("arptables: counters copy to user failed while replacing table\n");
@@ -1315,8 +1315,8 @@ static int compat_copy_entry_to_user(struct arpt_entry *e, void __user2 * __capa
 
 	origsize = *size;
 	ce = *dstptr;
-	if (copy_to_user(ce, e, sizeof(struct arpt_entry)) != 0 ||
-	    copy_to_user(&ce->counters, &counters[i],
+	if (copy_to_user_with_ptr(ce, e, sizeof(struct arpt_entry)) != 0 ||
+	    copy_to_user_with_ptr(&ce->counters, &counters[i],
 	    sizeof(counters[i])) != 0)
 		return -EFAULT;
 
