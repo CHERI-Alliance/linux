@@ -1,21 +1,30 @@
 // SPDX-License-Identifier: GPL-2.0
 // Copyright (C) 2021  Arm Limited
+#include "freestanding.h"
 #include <linux/mman.h>
 #include <linux/resource.h>
 #include <linux/wait.h>
 #include <linux/signal.h>
 #include <linux/sched.h>
 #include <linux/errno.h>
+#include <linux/signal.h>
+#include <linux/types.h>
+#include <limits.h>
 #include <cheriintrin.h>
-#include "freestanding.h"
+#include "signal_common.h"
 
 #define STACK_SIZE	1024*1024
+#define TLS_SIZE	4096
 
 #define in_restricted()	\
 	(!(cheri_perms_get(cheri_pcc_get()) & ARM_CAP_PERMISSION_EXECUTIVE))
 
 
 #define MAGIC_NR	0x3562 /* whatever really ..... */
+
+#ifndef MAX_PID_NS_LEVEL
+#define MAX_PID_NS_LEVEL 32
+#endif
 
 /* Cloned thread result */
 #define CTR_SUCCESS  	 1
@@ -256,6 +265,217 @@ TEST(test_wait_rusage)
 	RUN_WITH_FIXTURE(data, CLONE_TH_RUSAGE, wait_single);
 }
 
+#define GET_ERRNO(err) (((err) + MAX_ERRNO) ^ MAX_ERRNO)
+
+#define CUSTOM_CLONE_STACK_INV BIT(1)
+
+static struct clone3_fixture {
+	size_t args_size;
+	struct clone_args args;
+	int test_flags;
+	int e_result;
+} clone3_data[] = {
+	/* BEGIN_SECTION: expected failure */
+	/* size of clone_args smaller than CLONE_ARGS_SIZE_VER0 */
+	{
+		.args_size = offsetof(struct clone_args, tls),
+		.e_result = -EINVAL
+	}, /* @{0} */
+	/* invalid set_tid array size */
+	{
+		.args.set_tid_size = MAX_PID_NS_LEVEL + 1,
+		.e_result = -EINVAL
+	}, /* @{1} */
+	/* Invalid combination of set_tid & set_tid_size */
+	{
+		.args.set_tid_size = 1,
+		.e_result = -EINVAL
+	}, /* @{2} */
+	/* Invalid exit_signal */
+	{
+		.args.exit_signal = _NSIG + 1,
+		.e_result = -EINVAL
+	}, /* @{3} */
+	/* Invalid cgroup number */
+	{
+		.args.flags = CLONE_INTO_CGROUP,
+		.args.cgroup = (__u64)INT_MAX + 1,
+		.e_result = -EINVAL
+	}, /* @{4} */
+	/* Invalid size for clone_args with cgroup */
+	{
+		.args_size = offsetof(struct clone_args, cgroup),
+		.args.flags = CLONE_INTO_CGROUP,
+		.args.cgroup = 1,
+		.e_result = -EINVAL
+	}, /* @{5} */
+	/* Invalid stack & stack_size combination */
+	{
+		.args.stack_size = STACK_SIZE,
+		.test_flags = CUSTOM_CLONE_STACK_INV,
+		.e_result = -EINVAL
+	}, /* @{6} */
+	{
+		.test_flags = CUSTOM_CLONE_STACK_INV,
+		.e_result = -EINVAL
+	}, /* @{7} */
+	/* Invalid set_tid entry */
+	{
+		.args.set_tid = (uintptr_t)&(pid_t){1},
+		.args.set_tid_size = 1,
+		.e_result = -EEXIST
+	}, /* @{8} */
+
+	/* END_SECTION: expected failure */
+	{
+		.args.flags = CLONE_PIDFD | CLONE_CHILD_SETTID |
+			      CLONE_CHILD_CLEARTID,
+		.e_result = 0
+	}, /* @{9} */
+	{
+		.args.flags = CLONE_PARENT_SETTID | CLONE_CHILD_SETTID,
+		.e_result = 0
+	}, /* @{10} */
+	{
+		.args.flags = CLONE_SETTLS,
+		.e_result = 0
+	}, /* @{11} */
+};
+
+static __attribute__((noinline)) void run_child(struct clone_args *args)
+{
+	static __thread int tls_data;
+
+	if (args->flags & CLONE_CHILD_SETTID) {
+		pid_t current_pid = getpid();
+
+		ASSERT_EQ(current_pid, *(pid_t *)args->child_tid);
+	}
+
+	if (args->flags & CLONE_SETTLS && args->tls) {
+		ptraddr_t base_addr = cheri_address_get(args->tls);
+		ptraddr_t ref_addr = cheri_address_get(&tls_data);
+		size_t length = cheri_length_get(args->tls);
+
+		ASSERT_TRUE(cheri_tag_get(&tls_data));
+		ASSERT_TRUE(ref_addr >= base_addr && ref_addr < base_addr + length);
+	}
+
+	if (args->flags & CLONE_PIDFD) {
+		sigset_t set;
+
+		ASSERT_EQ(sigemptyset(&set), 0);
+		ASSERT_EQ(sigaddset(&set, SIGUSR1), 0);
+		ASSERT_EQ(sigprocmask(SIG_BLOCK, &set, NULL), 0);
+
+		/* Suspend utill parent kicks things back in */
+		ASSERT_EQ(syscall(__NR_kill, getpid(), SIGSTOP), 0);
+
+		/* Wait for a signal */
+		ASSERT_EQ(rt_sigtimedwait(&set, NULL, 0, sizeof(set)),
+			  SIGUSR1);
+	}
+	syscall(__NR_exit, 0);
+}
+
+static inline __attribute__((always_inline))
+void run_clone3(struct clone3_fixture *data)
+{
+	struct clone_args *args = &(data->args);
+	int pidfd, parent_tid = 0, child_tid = 0;
+	siginfo_t wait_si;
+	int result;
+	pid_t pid;
+	void *tls;
+
+	args->pidfd = (uintcap_t)&pidfd;
+	args->parent_tid = (uintcap_t)&parent_tid;
+	args->child_tid = (uintcap_t)&child_tid;
+
+	if (!args->exit_signal)
+		args->exit_signal = SIGCHLD;
+
+	if (!args->stack_size) {
+		args->stack = (uintcap_t) mmap_verified(NULL, STACK_SIZE,
+							PROT_READ | PROT_WRITE,
+							MAP_ANONYMOUS | MAP_PRIVATE,
+							-1, 0, STACK_REQ_PERMS);
+		ASSERT_NE(args->stack, 0);
+		args->stack_size =
+			data->test_flags & CUSTOM_CLONE_STACK_INV ? 0 : STACK_SIZE;
+	}
+
+	if (!data->args_size)
+		data->args_size = sizeof(struct clone_args);
+
+	if (data->e_result) {
+		result = syscall(__NR_clone3, args, data->args_size);
+		ASSERT_EQ(result, data->e_result) {
+			TH_LOG("Expected: %d while %d was received",
+			       GET_ERRNO(data->e_result), GET_ERRNO(result));
+		}
+		if (args->stack)
+			munmap((void *)args->stack, STACK_SIZE);
+		return;
+	}
+
+	args->flags |= CLONE_VM;
+
+	if (args->flags & CLONE_SETTLS) {
+		tls = mmap_verified(NULL, TLS_SIZE, PROT_READ | PROT_WRITE,
+				    MAP_ANONYMOUS | MAP_PRIVATE, -1, 0,
+				    CAP_LOAD_PERMS | CAP_STORE_PERMS);
+
+		ASSERT_NE(tls, NULL);
+		args->tls = (uintcap_t)cheri_bounds_set(tls, TLS_SIZE);
+	}
+
+	pid = syscall(__NR_clone3, args, data->args_size);
+
+	ASSERT_GE(pid, 0);
+	if (!pid)
+		run_child(args);
+
+	if (args->flags & CLONE_PIDFD) {
+		/* Make sure the child here gets a chance to block the signal */
+		result = waitid(P_PID, pid, &wait_si, WSTOPPED, NULL);
+		ASSERT_EQ(result, 0);
+		result = syscall(__NR_kill, pid, SIGCONT);
+		ASSERT_EQ(result, 0);
+		/* Signal handling is not the test target here: valid pidfd is */
+		result = syscall(__NR_pidfd_send_signal, pidfd, SIGUSR1, NULL, 0);
+		ASSERT_EQ(result, 0);
+	}
+
+	result = waitid(P_PID, pid, &wait_si, WEXITED, NULL);
+	ASSERT_EQ(result, 0);
+
+	/* child_tid set once the thread gets scheduled */
+	if (args->flags & CLONE_PARENT_SETTID && args->flags & CLONE_CHILD_SETTID
+	    && !(args->flags & CLONE_CHILD_CLEARTID)) {
+		ASSERT_EQ(parent_tid, child_tid);
+		ASSERT_NE(parent_tid, 0);
+	}
+
+	if (args->flags & CLONE_CHILD_CLEARTID)
+		ASSERT_EQ(child_tid, 0);
+
+	munmap((void *)args->stack, STACK_SIZE);
+	if (args->flags & CLONE_SETTLS)
+		/* unmap TLS with a capability cached prior to setting the bounds */
+		munmap(tls, TLS_SIZE);
+}
+
+TEST(test_clone3)
+{
+	int ncount = sizeof(clone3_data)/sizeof(clone3_data[0]);
+
+	for (int i = 0; i < ncount; ++i) {
+		TH_LOG("Validating clone3 @{%d}", i);
+		run_clone3(&clone3_data[i]);
+	}
+}
+
 void run_restricted(uintcap_t entry_point)
 {
 	void *new_stack = allocate_mem_raw(STACK_SIZE);
@@ -290,5 +510,6 @@ int main(void)
 	run_restricted((uintcap_t)test_clone_tls_restricted);
 	test_wait_raw();
 	test_wait_rusage();
+	test_clone3();
 	return 0;
 }

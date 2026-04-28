@@ -37,3 +37,4 @@ $(OUTPUT)/%: $(OUTPUT)/%.o $(OUTPUT)/freestanding_start.o $(OUTPUT)/freestanding
 	$(CC) $^ -o $@ $(LDFLAGS)
 
 $(OUTPUT)/signal: $(OUTPUT)/signal_common.o
+$(OUTPUT)/clone: $(OUTPUT)/signal_common.o
