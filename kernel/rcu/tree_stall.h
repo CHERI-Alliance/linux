@@ -845,7 +845,7 @@ static void check_cpu_stall(struct rcu_data *rdp)
 		++rcu_stall_count;
 #endif
 
-		rcu_stall_notifier_call_chain(RCU_STALL_NOTIFY_NORM, (void *)j - gps);
+		rcu_stall_notifier_call_chain(RCU_STALL_NOTIFY_NORM, __c_fakep(j) - gps);
 		if (READ_ONCE(csd_lock_suppress_rcu_stall) && csd_lock_is_stuck()) {
 			pr_err("INFO: %s detected stall, but suppressed full report due to a stuck CSD-lock.\n", rcu_state.name);
 		} else if (self_detected) {

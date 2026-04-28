@@ -4572,7 +4572,7 @@ rcu_torture_init(void)
 	}
 	for (i = 0; i < nrealreaders; i++) {
 		rcu_torture_reader_mbchk[i].rtc_chkrdr = -1;
-		firsterr = torture_create_kthread(rcu_torture_reader, (void *)i,
+		firsterr = torture_create_kthread(rcu_torture_reader, __c_fakep(i),
 						  reader_tasks[i]);
 		if (torture_init_error(firsterr))
 			goto unwind;

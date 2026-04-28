@@ -668,7 +668,7 @@ static void synchronize_rcu_expedited_wait(void)
 		nbcon_cpu_emergency_enter();
 
 		j = jiffies;
-		rcu_stall_notifier_call_chain(RCU_STALL_NOTIFY_EXP, (void *)(j - jiffies_start));
+		rcu_stall_notifier_call_chain(RCU_STALL_NOTIFY_EXP, __c_fakep(j - jiffies_start));
 		trace_rcu_stall_warning(rcu_state.name, TPS("ExpeditedStall"));
 		synchronize_rcu_expedited_stall(jiffies_start, j);
 		jiffies_stall = 3 * rcu_exp_jiffies_till_stall_check() + 3;

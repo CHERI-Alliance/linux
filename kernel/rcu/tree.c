@@ -3790,7 +3790,7 @@ static void rcu_barrier_entrain(struct rcu_data *rdp)
  */
 static void rcu_barrier_handler(void *cpu_in)
 {
-	uintptr_t cpu = (uintptr_t)cpu_in;
+	unsigned long cpu = __c_pa(cpu_in);
 	struct rcu_data *rdp = per_cpu_ptr(&rcu_data, cpu);
 
 	lockdep_assert_irqs_disabled();
@@ -3816,7 +3816,7 @@ static void rcu_barrier_handler(void *cpu_in)
  */
 void rcu_barrier(void)
 {
-	uintptr_t cpu;
+	unsigned int cpu;
 	unsigned long flags;
 	unsigned long gseq;
 	struct rcu_data *rdp;
@@ -3877,7 +3877,7 @@ retry:
 			continue;
 		}
 		raw_spin_unlock_irqrestore(&rcu_state.barrier_lock, flags);
-		if (smp_call_function_single(cpu, rcu_barrier_handler, (void *)cpu, 1)) {
+		if (smp_call_function_single(cpu, rcu_barrier_handler, __c_fakep(cpu), 1)) {
 			schedule_timeout_uninterruptible(1);
 			goto retry;
 		}

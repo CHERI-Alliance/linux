@@ -1236,19 +1236,19 @@ static int
 ref_scale_reader(void *arg)
 {
 	unsigned long flags;
-	intptr_t me = (intptr_t)arg;
-	struct reader_task *rt = &(reader_tasks[__c_ua(me)]);
+	long me = (long)__c_pa(arg);
+	struct reader_task *rt = &(reader_tasks[me]);
 	u64 start;
 	s64 duration;
 
-	VERBOSE_SCALEOUT_BATCH("ref_scale_reader %ld: task started", (unsigned long)me);
+	VERBOSE_SCALEOUT_BATCH("ref_scale_reader %ld: task started", me);
 	WARN_ON_ONCE(set_cpus_allowed_ptr(current, cpumask_of(me % nr_cpu_ids)));
 	set_user_nice(current, MAX_NICE);
 	atomic_inc(&n_init);
 	if (holdoff)
 		schedule_timeout_interruptible(holdoff * HZ);
 repeat:
-	VERBOSE_SCALEOUT_BATCH("ref_scale_reader %ld: waiting to start next experiment on cpu %d", (unsigned long)me, raw_smp_processor_id());
+	VERBOSE_SCALEOUT_BATCH("ref_scale_reader %ld: waiting to start next experiment on cpu %d", me, raw_smp_processor_id());
 
 	// Wait for signal that this reader can start.
 	wait_event(rt->wq, (atomic_read(&nreaders_exp) && smp_load_acquire(&rt->start_reader)) ||
@@ -1265,7 +1265,7 @@ repeat:
 		while (atomic_read_acquire(&n_started))
 			cpu_relax();
 
-	VERBOSE_SCALEOUT_BATCH("ref_scale_reader %ld: experiment %d started", (unsigned long)me, exp_idx);
+	VERBOSE_SCALEOUT_BATCH("ref_scale_reader %ld: experiment %d started", me, exp_idx);
 
 
 	// To reduce noise, do an initial cache-warming invocation, check
@@ -1298,7 +1298,7 @@ repeat:
 		wake_up(&main_wq);
 
 	VERBOSE_SCALEOUT_BATCH("ref_scale_reader %ld: experiment %d ended, (readers remaining=%d)",
-				(unsigned long)me, exp_idx, atomic_read(&nreaders_exp));
+				me, exp_idx, atomic_read(&nreaders_exp));
 
 	if (!torture_must_stop())
 		goto repeat;
@@ -1586,7 +1586,7 @@ ref_scale_init(void)
 
 	for (i = 0; i < nreaders; i++) {
 		init_waitqueue_head(&reader_tasks[i].wq);
-		firsterr = torture_create_kthread(ref_scale_reader, (void *)i,
+		firsterr = torture_create_kthread(ref_scale_reader, __c_fakep(i),
 						  reader_tasks[i].task);
 		if (torture_init_error(firsterr))
 			goto unwind;
