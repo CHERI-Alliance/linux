@@ -81,8 +81,8 @@ int cpm_muram_init(void)
 	while (of_address_to_resource(np, i++, &r) == 0) {
 		if (r.end > max)
 			max = r.end;
-		ret = gen_pool_add(muram_pool, r.start - muram_pbase +
-				   GENPOOL_OFFSET, resource_size(&r), -1);
+		ret = gen_pool_add(muram_pool, __c_fakeu(r.start - muram_pbase +
+				   GENPOOL_OFFSET), resource_size(&r), -1);
 		if (ret) {
 			pr_err("QE: couldn't add muram to pool!\n");
 			goto out_pool;
@@ -121,7 +121,7 @@ static s32 cpm_muram_alloc_common(unsigned long size,
 	entry = kmalloc_obj(*entry, GFP_ATOMIC);
 	if (!entry)
 		return -ENOMEM;
-	start = gen_pool_alloc_algo(muram_pool, size, algo, data);
+	start = __c_ua(gen_pool_alloc_algo(muram_pool, size, algo, data));
 	if (!start) {
 		kfree(entry);
 		return -ENOMEM;
@@ -183,7 +183,7 @@ void cpm_muram_free(s32 offset)
 			break;
 		}
 	}
-	gen_pool_free(muram_pool, offset + GENPOOL_OFFSET, size);
+	gen_pool_free(muram_pool, __c_fakeu(offset + GENPOOL_OFFSET), size);
 	spin_unlock_irqrestore(&cpm_muram_lock, flags);
 }
 EXPORT_SYMBOL(cpm_muram_free);
