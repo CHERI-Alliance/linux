@@ -156,7 +156,8 @@ static void __io_uring_show_fdinfo(struct io_ring_ctx *ctx, struct seq_file *m)
 		struct io_uring_cqe *cqe;
 		bool cqe32 = false;
 
-		cqe = &r->cqes[(cq_head & cq_mask)];
+		unsigned int cq_off = cq_head & cq_mask;
+		cqe = &ctx->cq_cqes[(cq_head & cq_mask)];
 		if (cqe->flags & IORING_CQE_F_32 || ctx->flags & IORING_SETUP_CQE32)
 			cqe32 = true;
 		seq_printf(m, "%5u: user_data:%llu, res:%d, flags:%x",
