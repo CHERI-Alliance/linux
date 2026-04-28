@@ -499,7 +499,8 @@ uvc_register_video(struct uvc_device *uvc)
 #define UVC_COPY_XU_DESCRIPTOR(mem, dst, desc)					\
 	do {									\
 		*(dst)++ = mem;							\
-		memcpy(mem, desc, 22); /* bLength to bNrInPins */		\
+		/* CHERI: Hide the pointers in desc from llvm. */		\
+		memcpy(mem, (void *)desc, 22); /* bLength to bNrInPins */		\
 		mem += 22;							\
 										\
 		memcpy(mem, (desc)->baSourceID, (desc)->bNrInPins);		\
