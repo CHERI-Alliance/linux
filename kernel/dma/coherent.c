@@ -164,7 +164,7 @@ static void *__dma_alloc_from_coherent(struct device *dev,
 	ret = mem->virt_base + ((dma_addr_t)pageno << PAGE_SHIFT);
 	spin_unlock_irqrestore(&mem->spinlock, flags);
 	memset(ret, 0, size);
-	return ret;
+	return cheri_bounds_set_kernel(ret, size);
 err:
 	spin_unlock_irqrestore(&mem->spinlock, flags);
 	return NULL;
