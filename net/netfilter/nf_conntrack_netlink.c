@@ -2977,10 +2977,10 @@ static __be32 nf_expect_get_id(const struct nf_conntrack_expect *exp)
 
 	net_get_random_once(&exp_id_seed, sizeof(exp_id_seed));
 
-	a = (uintptr_t)exp;
-	b = (uintptr_t)exp->helper;
-	c = (uintptr_t)exp->master;
-	d = (unsigned long)siphash(&exp->tuple, sizeof(exp->tuple), &exp_id_seed);
+	a = __c_pa(exp);
+	b = __c_pa(exp->helper);
+	c = __c_pa(exp->master);
+	d = siphash(&exp->tuple, sizeof(exp->tuple), &exp_id_seed);
 
 #ifdef CONFIG_64BIT
 	return (__force __be32)siphash_4u64((u64)a, (u64)b, (u64)c, (u64)d, &exp_id_seed);

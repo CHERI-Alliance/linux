@@ -488,9 +488,9 @@ u32 nf_ct_get_id(const struct nf_conn *ct)
 
 	net_get_random_once(&ct_id_seed, sizeof(ct_id_seed));
 
-	a = (uintptr_t)ct;
-	b = (uintptr_t)ct->master;
-	c = (uintptr_t)nf_ct_net(ct);
+	a = __c_pa(ct);
+	b = __c_pa(ct->master);
+	c = __c_pa(nf_ct_net(ct));
 	d = (unsigned long)siphash(&ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple,
 				   sizeof(ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple),
 				   &ct_id_seed);
@@ -1229,7 +1229,7 @@ __nf_conntrack_confirm(struct sk_buff *skb)
 	do {
 		sequence = read_seqcount_begin(&nf_conntrack_generation);
 		/* reuse the hash saved before */
-		hash = *(unsigned long *)&ct->tuplehash[IP_CT_DIR_REPLY].hnnode.pprev;
+		hash = __c_pa(ct->tuplehash[IP_CT_DIR_REPLY].hnnode.pprev);
 		hash = scale_hash(hash);
 		reply_hash = hash_conntrack(net,
 					   &ct->tuplehash[IP_CT_DIR_REPLY].tuple,
@@ -1695,7 +1695,7 @@ __nf_conntrack_alloc(struct net *net,
 	ct->tuplehash[IP_CT_DIR_ORIGINAL].hnnode.pprev = NULL;
 	ct->tuplehash[IP_CT_DIR_REPLY].tuple = *repl;
 	/* save hash for reusing when confirming */
-	*(unsigned long *)(&ct->tuplehash[IP_CT_DIR_REPLY].hnnode.pprev) = hash;
+	ct->tuplehash[IP_CT_DIR_REPLY].hnnode.pprev = __c_fakep(hash);
 	ct->status = 0;
 	WRITE_ONCE(ct->timeout, 0);
 	write_pnet(&ct->ct_net, net);
