@@ -11,7 +11,21 @@
 
 typedef long (*syscall_fn_t)(const struct pt_regs *regs);
 
-extern const syscall_fn_t sys_call_table[];
+#ifdef CONFIG_CHERI_PURECAP_UABI
+typedef user_intptr_t (*syscall_retptr_fn_t)(const struct pt_regs *regs);
+
+typedef struct {
+	union {
+		syscall_fn_t		syscall_fn;
+		syscall_retptr_fn_t	syscall_retptr_fn;
+	};
+	bool __retptr;
+} syscall_entry_t;
+#else
+typedef syscall_fn_t syscall_entry_t;
+#endif /* CONFIG_CHERI_PURECAP_UABI */
+extern const syscall_entry_t sys_call_table[];
+
 
 #ifdef CONFIG_COMPAT
 extern const syscall_fn_t compat_sys_call_table[];
