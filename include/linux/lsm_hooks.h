@@ -69,7 +69,7 @@ struct lsm_static_calls_table {
 		struct lsm_static_call NAME[MAX_LSM_COUNT];
 	#include <linux/lsm_hook_defs.h>
 	#undef LSM_HOOK
-} __packed __randomize_layout;
+} __packed __randomize_layout __cheri_pointer_align;
 
 /**
  * struct lsm_id - Identify a Linux Security Module.
@@ -186,12 +186,12 @@ struct lsm_info {
 #define DEFINE_LSM(lsm)							\
 	static struct lsm_info __lsm_##lsm				\
 		__used __section(".lsm_info.init")			\
-		__aligned(sizeof(unsigned long))
+		__aligned(__SIZEOF_POINTER__)
 
 #define DEFINE_EARLY_LSM(lsm)						\
 	static struct lsm_info __early_lsm_##lsm			\
 		__used __section(".early_lsm_info.init")		\
-		__aligned(sizeof(unsigned long))
+		__aligned(__SIZEOF_POINTER__)
 
 
 /* DO NOT tamper with these variables outside of the LSM framework */

@@ -333,7 +333,7 @@ void aa_label_destroy(struct aa_label *label)
 		label_for_each(i, label, profile) {
 			aa_put_profile(profile);
 			label->vec[i.i] = (struct aa_profile *)
-					   (LABEL_POISON + (long) i.i);
+					   __c_fakep(LABEL_POISON + (long) i.i);
 		}
 	}
 

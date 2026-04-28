@@ -420,7 +420,7 @@ static u32 filenametr_hash(const void *k)
 	const struct filename_trans_key *ft = k;
 	unsigned long salt = ft->ttype ^ ft->tclass;
 
-	return full_name_hash((void *)salt, ft->name, strlen(ft->name));
+	return full_name_hash(__c_fakep(salt), ft->name, strlen(ft->name));
 }
 
 static int filenametr_cmp(const void *k1, const void *k2)

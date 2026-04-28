@@ -50,7 +50,7 @@ struct landlock_cred_security {
 	 */
 	u8 log_subdomains_off : 1;
 #endif /* CONFIG_AUDIT */
-} __packed;
+} __packed __cheri_pointer_align;
 
 #ifdef CONFIG_AUDIT
 
