@@ -156,8 +156,8 @@ struct thread_struct {
 	 * implicit padding.
 	 */
 	struct {
-		unsigned long	tp_value;	/* TLS register */
-		unsigned long	tp2_value;
+		user_uintptr_t	tp_value;	/* TLS register */
+		user_uintptr_t	tp2_value;
 		u64		fpmr;
 		unsigned long	pad;
 		struct user_fpsimd_state fpsimd_state;
