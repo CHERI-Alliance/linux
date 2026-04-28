@@ -1486,7 +1486,7 @@ int w_send_read_req(struct drbd_work *w, int cancel)
 	maybe_send_barrier(connection, req->epoch);
 
 	err = drbd_send_drequest(peer_device, P_DATA_REQUEST, req->i.sector, req->i.size,
-				 (uintptr_t)req);
+				 __c_pa(req));
 
 	req_mod(req, err ? SEND_FAILED : HANDED_OVER_TO_NETWORK, peer_device);
 

@@ -191,7 +191,7 @@ struct ublk_batch_io_data {
 #define UBLK_BATCH_IO_UNUSED_TAG	((unsigned short)-1)
 
 union ublk_io_buf {
-	__u64	addr;
+	__u64ptr addr;
 	struct ublk_auto_buf_reg auto_reg;
 };
 
@@ -446,20 +446,20 @@ static DEFINE_XARRAY(ublk_zoned_report_descs);
 static int ublk_zoned_insert_report_desc(const struct request *req,
 		struct ublk_zoned_report_desc *desc)
 {
-	return xa_insert(&ublk_zoned_report_descs, (uintptr_t)req,
+	return xa_insert(&ublk_zoned_report_descs, __c_pa(req),
 			    desc, GFP_KERNEL);
 }
 
 static struct ublk_zoned_report_desc *ublk_zoned_erase_report_desc(
 		const struct request *req)
 {
-	return xa_erase(&ublk_zoned_report_descs, (uintptr_t)req);
+	return xa_erase(&ublk_zoned_report_descs, __c_pa(req));
 }
 
 static struct ublk_zoned_report_desc *ublk_zoned_get_report_desc(
 		const struct request *req)
 {
-	return xa_load(&ublk_zoned_report_descs, (uintptr_t)req);
+	return xa_load(&ublk_zoned_report_descs, __c_pa(req));
 }
 
 static int ublk_get_nr_zones(const struct ublk_device *ub)
@@ -2977,7 +2977,7 @@ static inline int ublk_set_auto_buf_reg(struct ublk_io *io, struct io_uring_cmd 
 {
 	struct ublk_auto_buf_reg buf;
 
-	buf = ublk_sqe_addr_to_auto_buf_reg(READ_ONCE(cmd->sqe->addr));
+	buf = ublk_sqe_addr_to_auto_buf_reg(__c_ua(READ_ONCE(cmd->sqe->addr)));
 
 	if (buf.reserved0 || buf.reserved1)
 		return -EINVAL;
@@ -3034,7 +3034,7 @@ ublk_fill_io_cmd(struct ublk_io *io, struct io_uring_cmd *cmd)
 
 static inline int
 ublk_config_io_buf(const struct ublk_device *ub, struct ublk_io *io,
-		   struct io_uring_cmd *cmd, unsigned long buf_addr,
+		   struct io_uring_cmd *cmd, __u64ptr buf_addr,
 		   u16 *buf_idx)
 {
 	if (ublk_dev_support_auto_buf_reg(ub))
@@ -3142,7 +3142,7 @@ static int ublk_unregister_io_buf(struct io_uring_cmd *cmd,
 	return io_buffer_unregister_bvec(cmd, index, issue_flags);
 }
 
-static int ublk_check_fetch_buf(const struct ublk_device *ub, __u64 buf_addr)
+static int ublk_check_fetch_buf(const struct ublk_device *ub, __u64ptr buf_addr)
 {
 	if (ublk_dev_need_map_io(ub)) {
 		/*
@@ -3182,7 +3182,7 @@ static int __ublk_fetch(struct io_uring_cmd *cmd, struct ublk_device *ub,
 }
 
 static int ublk_fetch(struct io_uring_cmd *cmd, struct ublk_device *ub,
-		      struct ublk_io *io, __u64 buf_addr, u16 q_id)
+		      struct ublk_io *io, __u64ptr buf_addr, u16 q_id)
 {
 	int ret;
 
@@ -3202,7 +3202,7 @@ static int ublk_fetch(struct io_uring_cmd *cmd, struct ublk_device *ub,
 }
 
 static int ublk_check_commit_and_fetch(const struct ublk_device *ub,
-				       struct ublk_io *io, __u64 buf_addr)
+				       struct ublk_io *io, __u64ptr buf_addr)
 {
 	struct request *req = io->req;
 
@@ -3265,7 +3265,7 @@ static int ublk_ch_uring_cmd_local(struct io_uring_cmd *cmd,
 	u16 q_id = READ_ONCE(ub_src->q_id);
 	u16 tag = READ_ONCE(ub_src->tag);
 	s32 result = READ_ONCE(ub_src->result);
-	u64 addr = READ_ONCE(ub_src->addr); /* unioned with zone_append_lba */
+	uintptr_t addr = READ_ONCE(ub_src->addr); /* unioned with zone_append_lba */
 	struct request *req;
 	int ret;
 	bool compl;
@@ -3351,7 +3351,7 @@ static int ublk_ch_uring_cmd_local(struct io_uring_cmd *cmd,
 		compl = ublk_need_complete_req(ub, io);
 
 		if (req_op(req) == REQ_OP_ZONE_APPEND)
-			req->__sector = addr;
+			req->__sector = __c_ua(addr);
 		if (compl)
 			__ublk_complete_rq(req, io, ublk_dev_need_map_io(ub), NULL);
 
@@ -3438,13 +3438,13 @@ static int ublk_ch_uring_cmd(struct io_uring_cmd *cmd, unsigned int issue_flags)
 	return ublk_ch_uring_cmd_local(cmd, issue_flags);
 }
 
-static inline __u64 ublk_batch_buf_addr(const struct ublk_batch_io *uc,
+static inline __u64ptr ublk_batch_buf_addr(const struct ublk_batch_io *uc,
 					const struct ublk_elem_header *elem)
 {
 	const void *buf = elem;
 
 	if (uc->flags & UBLK_BATCH_F_HAS_BUF_ADDR)
-		return *(const __u64 *)(buf + sizeof(*elem));
+		return *(const __u64ptr *)(buf + sizeof(*elem));
 	return 0;
 }
 

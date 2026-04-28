@@ -1609,7 +1609,7 @@ static int __nbd_ioctl(struct block_device *bdev, struct nbd_device *nbd,
 	case NBD_SET_SIZE:
 		return nbd_set_size(nbd, __c_ua(arg), nbd_blksize(config));
 	case NBD_SET_SIZE_BLOCKS:
-		if (check_shl_overflow(arg, config->blksize_bits, &bytesize))
+		if (check_shl_overflow(__c_ua(arg), config->blksize_bits, &bytesize))
 			return -EINVAL;
 		return nbd_set_size(nbd, bytesize, nbd_blksize(config));
 	case NBD_SET_TIMEOUT:
@@ -1770,7 +1770,9 @@ static const struct block_device_operations nbd_fops =
 	.open =		nbd_open,
 	.release =	nbd_release,
 	.ioctl =	nbd_ioctl,
+#ifndef CONFIG_CHERI_KERNEL
 	.compat_ioctl =	nbd_ioctl,
+#endif
 	.free_disk =	nbd_free_disk,
 };
 
