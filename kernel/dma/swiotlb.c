@@ -266,9 +266,9 @@ void __init swiotlb_update_mem_attributes(void)
 }
 
 static void swiotlb_init_io_tlb_pool(struct io_tlb_pool *mem, phys_addr_t start,
-		unsigned long nslabs, bool late_alloc, unsigned int nareas)
+				     void *vaddr, unsigned long nslabs,
+				     bool late_alloc, unsigned int nareas)
 {
-	void *vaddr = phys_to_virt(start);
 	unsigned long bytes = nslabs << IO_TLB_SHIFT, i;
 
 	mem->nslabs = nslabs;
@@ -409,7 +409,7 @@ void __init swiotlb_init_remap(bool addressing_limit, unsigned int flags,
 		return;
 	}
 
-	swiotlb_init_io_tlb_pool(mem, __pa(tlb), nslabs, false, nareas);
+	swiotlb_init_io_tlb_pool(mem, __pa(tlb), tlb, nslabs, false, nareas);
 	add_mem_pool(&io_tlb_default_mem, mem);
 
 	if (flags & SWIOTLB_VERBOSE)
@@ -507,8 +507,8 @@ retry:
 
 	set_memory_decrypted((unsigned long)vstart,
 			     (nslabs << IO_TLB_SHIFT) >> PAGE_SHIFT);
-	swiotlb_init_io_tlb_pool(mem, virt_to_phys(vstart), nslabs, true,
-				 nareas);
+	swiotlb_init_io_tlb_pool(mem, virt_to_phys(vstart), vstart, nslabs,
+				 true, nareas);
 	add_mem_pool(&io_tlb_default_mem, mem);
 
 	swiotlb_print_info();
@@ -715,7 +715,8 @@ static struct io_tlb_pool *swiotlb_alloc_pool(struct device *dev,
 	if (!pool->slots)
 		goto error_slots;
 
-	swiotlb_init_io_tlb_pool(pool, page_to_phys(tlb), nslabs, true, nareas);
+	swiotlb_init_io_tlb_pool(pool, page_to_phys(tlb), page_to_virt(tlb),
+				 nslabs, true, nareas);
 	return pool;
 
 error_slots:
@@ -1825,6 +1826,7 @@ static int rmem_swiotlb_device_init(struct reserved_mem *rmem,
 	 */
 	if (!mem) {
 		struct io_tlb_pool *pool;
+		void *virt;
 
 		mem = kzalloc_obj(*mem);
 		if (!mem)
@@ -1846,7 +1848,9 @@ static int rmem_swiotlb_device_init(struct reserved_mem *rmem,
 
 		set_memory_decrypted((unsigned long)phys_to_virt(rmem->base),
 				     rmem->size >> PAGE_SHIFT);
-		swiotlb_init_io_tlb_pool(pool, rmem->base, nslabs,
+		virt = cheri_make_kernel_data_cap(phys_to_virt_a(rmem->base),
+						  rmem->size);
+		swiotlb_init_io_tlb_pool(pool, rmem->base, virt, nslabs,
 					 false, nareas);
 		mem->force_bounce = true;
 		mem->for_alloc = true;
