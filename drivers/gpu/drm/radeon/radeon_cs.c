@@ -32,6 +32,7 @@
 #include <drm/drm_device.h>
 #include <drm/drm_file.h>
 #include <drm/radeon_drm.h>
+#include <drm/compat64_radeon_drm.h>
 
 #include "radeon.h"
 #include "radeon_reg.h"
@@ -264,7 +265,7 @@ static int radeon_cs_sync_rings(struct radeon_cs_parser *p)
 int radeon_cs_parser_init(struct radeon_cs_parser *p, void *data)
 {
 	struct drm_radeon_cs *cs = data;
-	uint64_t *chunk_array_ptr;
+	__u64ptr __user *chunk_array_ptr;
 	u64 size;
 	unsigned i;
 	u32 ring = RADEON_CS_RING_GFX;
@@ -285,13 +286,13 @@ int radeon_cs_parser_init(struct radeon_cs_parser *p, void *data)
 	p->chunk_relocs = NULL;
 	p->chunk_flags = NULL;
 	p->chunk_const_ib = NULL;
-	p->chunks_array = kvmalloc_array(cs->num_chunks, sizeof(uint64_t), GFP_KERNEL);
+	p->chunks_array = kvmalloc_array(cs->num_chunks, sizeof(__u64ptr), GFP_KERNEL);
 	if (p->chunks_array == NULL) {
 		return -ENOMEM;
 	}
-	chunk_array_ptr = (uint64_t *)(user_uintptr_t)(cs->chunks);
-	if (copy_from_user(p->chunks_array, chunk_array_ptr,
-			       sizeof(uint64_t)*cs->num_chunks)) {
+	chunk_array_ptr = (__u64ptr __user *)(user_uintptr_t)(cs->chunks);
+	if (__c64_ptr64_array_from_user(p->chunks_array, chunk_array_ptr,
+				      cs->num_chunks)) {
 		return -EFAULT;
 	}
 	p->cs_flags = 0;
@@ -305,9 +306,9 @@ int radeon_cs_parser_init(struct radeon_cs_parser *p, void *data)
 		struct drm_radeon_cs_chunk user_chunk;
 		uint32_t __user *cdata;
 
-		chunk_ptr = (void __user*)(unsigned long)p->chunks_array[i];
-		if (copy_from_user_with_ptr(&user_chunk, chunk_ptr,
-				       sizeof(struct drm_radeon_cs_chunk))) {
+		chunk_ptr = (void __user *)(user_uintptr_t)p->chunks_array[i];
+		if (__c64_copy_from_user_with_ptr(drm_radeon_cs_chunk,
+						  &user_chunk, chunk_ptr)) {
 			return -EFAULT;
 		}
 		p->chunks[i].length_dw = user_chunk.length_dw;

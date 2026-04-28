@@ -237,7 +237,7 @@ int radeon_info_ioctl(struct drm_device *dev, void *data, struct drm_file *filp)
 	struct drm_crtc *crtc;
 	int i, found;
 
-	value_ptr = (uint32_t *)((unsigned long)info->value);
+	value_ptr = (uint32_t *)((uintptr_t)info->value);
 	value = &value_tmp;
 	value_size = sizeof(uint32_t);
 
