@@ -8,7 +8,7 @@
 #include "rethook.h"
 
 /* This is called from arch_rethook_trampoline() */
-unsigned long __used arch_rethook_trampoline_callback(struct pt_regs *regs)
+uintptr_t __used arch_rethook_trampoline_callback(struct pt_regs *regs)
 {
 	return rethook_trampoline_handler(regs, regs->s0);
 }
