@@ -178,7 +178,7 @@ static int cs42l43_sdw_probe(struct sdw_slave *sdw, const struct sdw_device_id *
 
 	cs42l43->dev = dev;
 	cs42l43->sdw = sdw;
-	cs42l43->variant_id = (long)id->driver_data;
+	cs42l43->variant_id = (long)__c_ua(id->driver_data);
 
 	cs42l43->regmap = devm_regmap_init_sdw(sdw, &cs42l43_sdw_regmap);
 	if (IS_ERR(cs42l43->regmap))
