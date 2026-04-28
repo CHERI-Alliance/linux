@@ -99,7 +99,11 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
  * the compiler that the inline asm absolutely may see the contents
  * of @ptr. See also: https://llvm.org/bugs/show_bug.cgi?id=15495
  */
+#ifndef CONFIG_CHERI_KERNEL
 # define barrier_data(ptr) __asm__ __volatile__("": :"r"(ptr) :"memory")
+#else
+# define barrier_data(ptr) __asm__ __volatile__("": :"C"(ptr) :"memory")
+#endif
 #endif
 
 /* workaround for GCC PR82365 if needed */
@@ -159,8 +163,19 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
 
 #ifndef OPTIMIZER_HIDE_VAR
 /* Make the optimizer believe the variable can be manipulated arbitrarily. */
+#ifdef __CHERI__
+#define OPTIMIZER_HIDE_VAR(var)						\
+do {									\
+	if (sizeof(var) > sizeof(unsigned long)) {			\
+		__asm__ ("" : "=C" (var) : "0" (var));			\
+	} else {							\
+		__asm__ ("" : "=r" (var) : "0" (var));			\
+	}								\
+} while (0)
+#else
 #define OPTIMIZER_HIDE_VAR(var)						\
 	__asm__ ("" : "=r" (var) : "0" (var))
+#endif
 #endif
 
 /* Format: __UNIQUE_ID_<name>_<__COUNTER__> */
@@ -211,6 +226,11 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
 #define __is_byte_array(a)	(__is_array(a) && sizeof((a)[0]) == 1)
 #define __must_be_byte_array(a)	__BUILD_BUG_ON_ZERO_MSG(!__is_byte_array(a), \
 							"must be byte array")
+
+#ifndef __CHERI__
+typedef long __intcap_t;
+typedef unsigned long __uintcap_t;
+#endif
 
 /*
  * If the "nonstring" attribute isn't available, we have to return true
@@ -273,7 +293,7 @@ static inline void *offset_to_ptr(const int *off)
  */
 #define ___ADDRESSABLE(sym, __attrs)						\
 	static void * __used __attrs						\
-	__UNIQUE_ID(__PASTE(addressable_, sym)) = (void *)(uintptr_t)&sym;
+	__UNIQUE_ID(__PASTE(addressable_, sym)) = (void * __force)(__uintcap_t)&sym;
 
 #define __ADDRESSABLE(sym) \
 	___ADDRESSABLE(sym, __section(".discard.addressable"))
@@ -322,8 +342,13 @@ static inline void *offset_to_ptr(const int *off)
  *     sizeof(int) == sizeof(int)     (x) was a constant expression
  *     sizeof(int) != sizeof(void)    (x) was not a constant expression
  */
+#if __SIZEOF_POINTER__ != __SIZEOF_LONG__
 #define __is_constexpr(x) \
-	(sizeof(int) == sizeof(*(8 ? ((void *)((long)(x) * 0l)) : (int *)8)))
+	(sizeof(int) == sizeof(*(8 ? ((void * __force)(__uintcap_t __force)((long __force)(x) * 0l)) : (int *)8)))
+#else
+#define __is_constexpr(x) \
+	(sizeof(int) == sizeof(*(8 ? ((void * __force)(unsigned long __force)((long __force)(x) * 0l)) : (int *)8)))
+#endif
 
 /*
  * Whether 'type' is a signed type or an unsigned type. Supports scalar types,

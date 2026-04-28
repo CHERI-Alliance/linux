@@ -691,7 +691,7 @@ struct ftrace_likely_data {
 #define __native_word(t) \
 	(sizeof(t) == sizeof(char) || sizeof(t) == sizeof(short) || \
 	 sizeof(t) == sizeof(int) || sizeof(t) == sizeof(long) || \
-	 __same_type(t, __intcap_t) || __same_type(t, __uintcap_t))
+	 sizeof(t) == sizeof(void __user *))
 #else
 #define __native_word(t) \
 	(sizeof(t) == sizeof(char) || sizeof(t) == sizeof(short) || \
