@@ -3011,7 +3011,7 @@ ptp_ocp_allow_irq(struct ptp_ocp *bp, struct ocp_resource *r)
 }
 
 static int
-ptp_ocp_register_resources(struct ptp_ocp *bp, kernel_ulong_t driver_data)
+ptp_ocp_register_resources(struct ptp_ocp *bp, uintptr_t driver_data)
 {
 	struct ocp_resource *r, *table;
 	int err = 0;
@@ -3470,7 +3470,7 @@ signal_store(struct device *dev, struct device_attribute *attr,
 	struct dev_ext_attribute *ea = to_ext_attr(attr);
 	struct ptp_ocp *bp = dev_get_drvdata(dev);
 	struct ptp_ocp_signal s = { };
-	int gen = (uintptr_t)ea->var;
+	int gen = __c_pa(ea->var);
 	int argc, err;
 	char **argv;
 
@@ -3551,7 +3551,7 @@ duty_show(struct device *dev, struct device_attribute *attr, char *buf)
 {
 	struct dev_ext_attribute *ea = to_ext_attr(attr);
 	struct ptp_ocp *bp = dev_get_drvdata(dev);
-	int i = (uintptr_t)ea->var;
+	int i = __c_pa(ea->var);
 
 	return sysfs_emit(buf, "%d\n", bp->signal[i].duty);
 }
@@ -3565,7 +3565,7 @@ period_show(struct device *dev, struct device_attribute *attr, char *buf)
 {
 	struct dev_ext_attribute *ea = to_ext_attr(attr);
 	struct ptp_ocp *bp = dev_get_drvdata(dev);
-	int i = (uintptr_t)ea->var;
+	int i = __c_pa(ea->var);
 
 	return sysfs_emit(buf, "%llu\n", bp->signal[i].period);
 }
@@ -3579,7 +3579,7 @@ phase_show(struct device *dev, struct device_attribute *attr, char *buf)
 {
 	struct dev_ext_attribute *ea = to_ext_attr(attr);
 	struct ptp_ocp *bp = dev_get_drvdata(dev);
-	int i = (uintptr_t)ea->var;
+	int i = __c_pa(ea->var);
 
 	return sysfs_emit(buf, "%llu\n", bp->signal[i].phase);
 }
@@ -3594,7 +3594,7 @@ polarity_show(struct device *dev, struct device_attribute *attr,
 {
 	struct dev_ext_attribute *ea = to_ext_attr(attr);
 	struct ptp_ocp *bp = dev_get_drvdata(dev);
-	int i = (uintptr_t)ea->var;
+	int i = __c_pa(ea->var);
 
 	return sysfs_emit(buf, "%d\n", bp->signal[i].polarity);
 }
@@ -3608,7 +3608,7 @@ running_show(struct device *dev, struct device_attribute *attr, char *buf)
 {
 	struct dev_ext_attribute *ea = to_ext_attr(attr);
 	struct ptp_ocp *bp = dev_get_drvdata(dev);
-	int i = (uintptr_t)ea->var;
+	int i = __c_pa(ea->var);
 
 	return sysfs_emit(buf, "%d\n", bp->signal[i].running);
 }
@@ -3622,7 +3622,7 @@ start_show(struct device *dev, struct device_attribute *attr, char *buf)
 {
 	struct dev_ext_attribute *ea = to_ext_attr(attr);
 	struct ptp_ocp *bp = dev_get_drvdata(dev);
-	int i = (uintptr_t)ea->var;
+	int i = __c_pa(ea->var);
 	struct timespec64 ts;
 
 	ts = ktime_to_timespec64(bp->signal[i].start);
@@ -3639,7 +3639,7 @@ seconds_store(struct device *dev, struct device_attribute *attr,
 {
 	struct dev_ext_attribute *ea = to_ext_attr(attr);
 	struct ptp_ocp *bp = dev_get_drvdata(dev);
-	int idx = (uintptr_t)ea->var;
+	int idx = __c_pa(ea->var);
 	u32 val;
 	int err;
 
@@ -3662,7 +3662,7 @@ seconds_show(struct device *dev, struct device_attribute *attr, char *buf)
 {
 	struct dev_ext_attribute *ea = to_ext_attr(attr);
 	struct ptp_ocp *bp = dev_get_drvdata(dev);
-	int idx = (uintptr_t)ea->var;
+	int idx = __c_pa(ea->var);
 	u32 val;
 
 	val = ioread32(&bp->freq_in[idx]->ctrl);
@@ -3683,7 +3683,7 @@ frequency_show(struct device *dev, struct device_attribute *attr, char *buf)
 {
 	struct dev_ext_attribute *ea = to_ext_attr(attr);
 	struct ptp_ocp *bp = dev_get_drvdata(dev);
-	int idx = (uintptr_t)ea->var;
+	int idx = __c_pa(ea->var);
 	u32 val;
 
 	val = ioread32(&bp->freq_in[idx]->status);
