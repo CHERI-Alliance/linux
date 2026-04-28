@@ -5750,7 +5750,7 @@ struct wmi_bcn_tx_hdr {
 struct wmi_bcn_tx_cmd {
 	struct wmi_bcn_tx_hdr hdr;
 	u8 *bcn[];
-} __packed;
+} __packed __cheri_pointer_align;
 
 struct wmi_bcn_tx_arg {
 	u32 vdev_id;
@@ -5800,7 +5800,7 @@ struct wmi_bcn_filter_rx_cmd {
 	/* Buffer len */
 	__le32 bcn_filter_len;
 	/* Filter info (threshold, BSSID, RSSI) */
-	u8 *bcn_filter_buf;
+	unsigned long bcn_filter_buf;
 } __packed;
 
 /* Capabilities and IEs to be passed to firmware */
@@ -6110,7 +6110,7 @@ struct wmi_tim_info_arg {
 	const __le32 *tim_bitmap;
 	__le32 tim_changed;
 	__le32 tim_num_ps_pending;
-} __packed;
+};
 
 /* Maximum number of NOA Descriptors supported */
 #define WMI_P2P_MAX_NOA_DESCRIPTORS 4

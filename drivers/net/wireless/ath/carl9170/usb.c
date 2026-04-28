@@ -1059,7 +1059,7 @@ static int carl9170_usb_probe(struct usb_interface *intf,
 	udev = interface_to_usbdev(intf);
 	ar->udev = udev;
 	ar->intf = intf;
-	ar->features = id->driver_info;
+	ar->features = __c_ua(id->driver_info);
 
 	/* We need to remember the type of endpoint 4 because it differs
 	 * between high- and full-speed configuration. The high-speed

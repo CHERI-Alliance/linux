@@ -129,7 +129,7 @@ struct ath10k_skb_cb {
 	struct ieee80211_vif *vif;
 	struct ieee80211_txq *txq;
 	u32 ucast_cipher;
-} __packed;
+};
 
 struct ath10k_skb_rxcb {
 	dma_addr_t paddr;
