@@ -66,6 +66,12 @@ VARIABLE(__cur_test, 16)
 
 .text
 FUNCTION_START(_start)
+	/* save x0, c1-c3 which has argc/argv/envp/auxv */
+	mov	x20, x0
+	mov	c21, c1
+	mov	c22, c2
+	mov	c23, c3
+
 	bl	__morello_init_globals
 
 	/* save the initial kernel stack to a global variable */
@@ -84,7 +90,11 @@ FUNCTION_START(_start)
 	mov	csp, c0
 #endif
 
-	/* call int main(void) */
+	/* call int main(int argc, char **argv, char **envp, char **auxv) */
+	mov	x0, x20
+	mov	c1, c21
+	mov	c2, c22
+	mov	c3, c23
 	bl	main
 
 	/* exit. Argument is in x0 already */
