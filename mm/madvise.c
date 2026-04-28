@@ -1925,6 +1925,7 @@ static int madvise_do_behavior(unsigned long start, size_t len_in,
 		return madvise_inject_error(madv_behavior);
 	}
 
+	/* TODO [PCuABI] - capability checks for uaccess */
 	range->start = get_untagged_addr(madv_behavior->mm, start);
 	range->end = range->start + PAGE_ALIGN(len_in);
 
@@ -2032,7 +2033,7 @@ int do_madvise(struct mm_struct *mm, unsigned long start, size_t len_in, int beh
 	return error;
 }
 
-SYSCALL_DEFINE3(madvise, unsigned long, start, size_t, len_in, int, behavior)
+SYSCALL_DEFINE3(madvise, user_uintptr_t, start, size_t, len_in, int, behavior)
 {
 	return do_madvise(current->mm, start, len_in, behavior);
 }
