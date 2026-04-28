@@ -286,7 +286,7 @@ static void pci1710_ai_setup_chanlist(struct comedi_device *dev,
 static int pci1710_ai_eoc(struct comedi_device *dev,
 			  struct comedi_subdevice *s,
 			  struct comedi_insn *insn,
-			  unsigned long context)
+			  uintptr_t context)
 {
 	unsigned int status;
 

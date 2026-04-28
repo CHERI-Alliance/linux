@@ -72,7 +72,7 @@ static const struct comedi_lrange adv_pci1724_ao_ranges = {
 static int adv_pci1724_dac_idle(struct comedi_device *dev,
 				struct comedi_subdevice *s,
 				struct comedi_insn *insn,
-				unsigned long context)
+				uintptr_t context)
 {
 	unsigned int status;
 

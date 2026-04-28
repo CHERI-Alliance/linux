@@ -506,7 +506,7 @@ static irqreturn_t das800_interrupt(int irq, void *d)
 static int das800_ai_eoc(struct comedi_device *dev,
 			 struct comedi_subdevice *s,
 			 struct comedi_insn *insn,
-			 unsigned long context)
+			 uintptr_t context)
 {
 	unsigned int status;
 

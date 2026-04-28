@@ -281,7 +281,7 @@ static void daqp_ai_set_one_scanlist_entry(struct comedi_device *dev,
 static int daqp_ai_eos(struct comedi_device *dev,
 		       struct comedi_subdevice *s,
 		       struct comedi_insn *insn,
-		       unsigned long context)
+		       uintptr_t context)
 {
 	unsigned int status;
 
@@ -617,7 +617,7 @@ static int daqp_ai_cmd(struct comedi_device *dev, struct comedi_subdevice *s)
 static int daqp_ao_empty(struct comedi_device *dev,
 			 struct comedi_subdevice *s,
 			 struct comedi_insn *insn,
-			 unsigned long context)
+			 uintptr_t context)
 {
 	unsigned int status;
 

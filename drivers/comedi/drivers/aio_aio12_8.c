@@ -98,7 +98,7 @@ static const struct aio12_8_boardtype board_types[] = {
 static int aio_aio12_8_ai_eoc(struct comedi_device *dev,
 			      struct comedi_subdevice *s,
 			      struct comedi_insn *insn,
-			      unsigned long context)
+			      uintptr_t context)
 {
 	unsigned int status;
 
