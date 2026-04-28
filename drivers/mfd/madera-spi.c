@@ -25,7 +25,7 @@ static int madera_spi_probe(struct spi_device *spi)
 	const char *name;
 	int ret;
 
-	type = (uintptr_t)spi_get_device_match_data(spi);
+	type = __c_pa(spi_get_device_match_data(spi));
 	switch (type) {
 	case CS47L15:
 		if (IS_ENABLED(CONFIG_MFD_CS47L15)) {

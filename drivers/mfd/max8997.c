@@ -156,7 +156,7 @@ static int max8997_i2c_probe(struct i2c_client *i2c)
 	i2c_set_clientdata(i2c, max8997);
 	max8997->dev = &i2c->dev;
 	max8997->i2c = i2c;
-	max8997->type = (uintptr_t)i2c_get_match_data(i2c);
+	max8997->type = __c_pa(i2c_get_match_data(i2c));
 	max8997->irq = i2c->irq;
 
 	if (IS_ENABLED(CONFIG_OF) && max8997->dev->of_node) {

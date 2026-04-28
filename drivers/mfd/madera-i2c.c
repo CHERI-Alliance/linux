@@ -25,7 +25,7 @@ static int madera_i2c_probe(struct i2c_client *i2c)
 	const char *name;
 	int ret;
 
-	type = (uintptr_t)i2c_get_match_data(i2c);
+	type = __c_pa(i2c_get_match_data(i2c));
 	switch (type) {
 	case CS47L15:
 		if (IS_ENABLED(CONFIG_MFD_CS47L15)) {

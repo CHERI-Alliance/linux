@@ -44,7 +44,8 @@ static int s10_protected_reg_write(void *base,
 	struct arm_smccc_res result;
 	uintptr_t sysmgr_base = (uintptr_t)base;
 
-	arm_smccc_smc(INTEL_SIP_SMC_REG_WRITE, sysmgr_base + reg,
+	// FIXCHERI: Pass capability to SMC call?
+	arm_smccc_smc(INTEL_SIP_SMC_REG_WRITE, __c_ua(sysmgr_base + reg),
 		      val, 0, 0, 0, 0, 0, &result);
 
 	return (int)result.a0;
@@ -66,7 +67,8 @@ static int s10_protected_reg_read(void *base,
 	struct arm_smccc_res result;
 	uintptr_t sysmgr_base = (uintptr_t)base;
 
-	arm_smccc_smc(INTEL_SIP_SMC_REG_READ, sysmgr_base + reg,
+	// FIXCHERI: Pass capability to SMC call?
+	arm_smccc_smc(INTEL_SIP_SMC_REG_READ, __c_ua(sysmgr_base + reg),
 		      0, 0, 0, 0, 0, 0, &result);
 
 	*val = (unsigned int)result.a1;
