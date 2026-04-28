@@ -297,11 +297,89 @@ __c_fakeu(__u64 val)
 #define __packed_if_not_cheri
 #define cheri_bounds_set_kernel(__c, __l) cheri_bounds_set(__c, __l)
 
+/* Kernel root capabilities. Use with care. */
+extern void * kernel_data_cap;
+extern void * kernel_code_cap;
+extern void * kernel_ro_cap;
+
+/*
+ * Create a read-only data capability for a kernel address.
+ * @addr The address.
+ * @return A pointer with bounds that allow access to the
+ *     entire kernel range.
+ *
+ * NOTE: A need to use this function means that the CHERI adoption
+ *       is incomplete. The caller should at least be able to provide
+ *       bounds and thus use cheri_make_kernel_data_cap or
+ *       cheri_make_kernel_code_cap instead.
+ */
+static __always_inline void *
+cheri_kcap_ro(ptraddr_t addr)
+{
+	return cheri_address_set(kernel_ro_cap, addr);
+}
+
+/*
+ * Create a capability to access kernel data. The capability is
+ * derived from kernel_data_cap and thus will allow read and write
+ * accesses.
+ */
+static __always_inline void *
+cheri_make_kernel_data_cap(ptraddr_t addr, size_t len)
+{
+	void * ret = cheri_address_set(kernel_data_cap, addr);
+
+	return cheri_bounds_set(ret, len);
+}
+
+/*
+ * Create a capbility for kernel read-only data and/or code.
+ * The capability is derived from kernel_code_cap and thus will
+ * allow read/exec and (if used as a pcc) access to system registers.
+ */
+static __always_inline void *
+cheri_make_kernel_code_cap(ptraddr_t addr)
+{
+	return cheri_address_set(kernel_code_cap, addr);
+}
+
+static __maybe_unused void *
+cheri_build_kernel_data_cap(ptraddr_t base, ptraddr_t addr, size_t len)
+{
+	return cheri_address_set(cheri_make_kernel_data_cap(base, len), addr);
+}
+
 #else
 
 #define __cheri_pointer_align
 #define __packed_if_not_cheri __packed
 #define cheri_bounds_set_kernel(__c, __l) (__c)
+
+static __always_inline void *
+cheri_kcap_ro(ptraddr_t addr)
+{
+	return (void *)addr;
+}
+
+static __always_inline void *
+cheri_make_kernel_data_cap(ptraddr_t addr, size_t len)
+{
+	(void)len;
+
+	return (void *)addr;
+}
+
+static __always_inline void *
+cheri_make_kernel_code_cap(ptraddr_t addr)
+{
+	return (void *)addr;
+}
+
+static __always_inline void *
+cheri_build_kernel_data_cap(ptraddr_t base, ptraddr_t addr, size_t len)
+{
+	return (void *)addr;
+}
 
 #endif
 

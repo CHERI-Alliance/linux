@@ -289,6 +289,7 @@ int copy_thread(struct task_struct *p, const struct kernel_clone_args *args)
 
 void __init arch_task_cache_init(void)
 {
+	riscv_cheri_init();
 	riscv_v_setup_ctx_cache();
 }
 
