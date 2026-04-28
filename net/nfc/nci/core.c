@@ -680,7 +680,7 @@ int nci_nfcee_discover(struct nci_dev *ndev, u8 action)
 {
 	unsigned long opt = action;
 
-	return __nci_request(ndev, nci_nfcee_discover_req, (void *)opt,
+	return __nci_request(ndev, nci_nfcee_discover_req, __c_fakep(opt),
 				msecs_to_jiffies(NCI_CMD_TIMEOUT));
 }
 EXPORT_SYMBOL(nci_nfcee_discover);
@@ -763,7 +763,7 @@ int nci_core_conn_close(struct nci_dev *ndev, u8 conn_id)
 	unsigned long opt = conn_id;
 
 	ndev->cur_conn_id = conn_id;
-	return __nci_request(ndev, nci_core_conn_close_req, (void *)opt,
+	return __nci_request(ndev, nci_core_conn_close_req, __c_fakep(opt),
 			     msecs_to_jiffies(NCI_CMD_TIMEOUT));
 }
 EXPORT_SYMBOL(nci_core_conn_close);
@@ -988,7 +988,7 @@ static void nci_deactivate_target(struct nfc_dev *nfc_dev,
 	}
 
 	if (atomic_read(&ndev->state) == NCI_POLL_ACTIVE) {
-		nci_request(ndev, nci_rf_deactivate_req, (void *)nci_mode,
+		nci_request(ndev, nci_rf_deactivate_req, __c_fakep(nci_mode),
 			    msecs_to_jiffies(NCI_RF_DEACTIVATE_TIMEOUT));
 	}
 }
