@@ -128,7 +128,7 @@ affs_fix_dcache(struct inode *inode, u32 entry_ino)
 	spin_lock(&inode->i_lock);
 	for_each_alias(dentry, inode) {
 		if (entry_ino == (u32)(long)dentry->d_fsdata) {
-			dentry->d_fsdata = (void *)(unsigned long)inode->i_ino;
+			dentry->d_fsdata = __c_fakep(inode->i_ino);
 			break;
 		}
 	}
