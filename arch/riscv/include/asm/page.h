@@ -148,7 +148,7 @@ extern phys_addr_t __phys_addr_symbol(unsigned long x);
 #define __phys_addr_symbol(x)	__va_to_pa_nodebug(x)
 #endif /* CONFIG_DEBUG_VIRTUAL */
 
-#define __pa_symbol(x)	__phys_addr_symbol(RELOC_HIDE((unsigned long __force)(x), 0))
+#define __pa_symbol(x)	__phys_addr_symbol((unsigned long __force)RELOC_HIDE((uintptr_t __force)(x), 0))
 #define __pa(x)		__virt_to_phys((unsigned long __force)(x))
 #ifdef CONFIG_CHERI_KERNEL
 #define __va_a(x)	((unsigned long)__pa_to_va_nodebug((phys_addr_t)(x)))
@@ -206,7 +206,12 @@ static __always_inline void *pfn_to_kaddr(unsigned long pfn)
 	(unsigned long)(_addr) >= PAGE_OFFSET && pfn_valid(virt_to_pfn(_addr));	\
 })
 
+#ifdef CONFIG_RISCV_CHERI
+#define VMA_DATA_DEFAULT_FLAGS	append_vma_flags(VMA_DATA_FLAGS_NON_EXEC, \
+					VMA_READ_CAPS_BIT, VMA_WRITE_CAPS_BIT)
+#else
 #define VMA_DATA_DEFAULT_FLAGS	VMA_DATA_FLAGS_NON_EXEC
+#endif
 
 #include <asm-generic/memory_model.h>
 #include <asm-generic/getorder.h>
