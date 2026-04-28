@@ -2067,11 +2067,11 @@ skip:
 static int
 __batadv_mcast_flags_dump(struct sk_buff *msg, u32 portid,
 			  struct netlink_callback *cb,
-			  struct batadv_priv *bat_priv, long *bucket, long *idx)
+			  struct batadv_priv *bat_priv, intptr_t *bucket, intptr_t *idx)
 {
 	struct batadv_hashtable *hash = bat_priv->orig_hash;
-	long bucket_tmp = *bucket;
-	long idx_tmp = *idx;
+	long bucket_tmp = __c_ua(*bucket);
+	long idx_tmp = __c_ua(*idx);
 
 	while (bucket_tmp < hash->size) {
 		if (batadv_mcast_flags_dump_bucket(msg, portid, cb, hash,
@@ -2082,8 +2082,8 @@ __batadv_mcast_flags_dump(struct sk_buff *msg, u32 portid,
 		idx_tmp = 0;
 	}
 
-	*bucket = bucket_tmp;
-	*idx = idx_tmp;
+	*bucket = __c_fakeu(bucket_tmp);
+	*idx = __c_fakeu(idx_tmp);
 
 	return msg->len;
 }

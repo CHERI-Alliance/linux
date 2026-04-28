@@ -374,7 +374,7 @@ static struct fq_flow *fq_classify(struct Qdisc *sch, struct sk_buff *skb,
 		/* By forcing low order bit to 1, we make sure to not
 		 * collide with a local flow (socket pointers are word aligned)
 		 */
-		sk = (struct sock *)((hash << 1) | 1UL);
+		sk = (struct sock *)__c_fakeu((hash << 1) | 1UL);
 		skb_orphan(skb);
 	} else if (sk->sk_state == TCP_CLOSE) {
 		unsigned long hash = skb_get_hash(skb) & q->orphan_mask;
@@ -386,7 +386,7 @@ static struct fq_flow *fq_classify(struct Qdisc *sch, struct sk_buff *skb,
 		 * non connected sockets, instead of sk_state == TCP_CLOSE,
 		 * if we care enough.
 		 */
-		sk = (struct sock *)((hash << 1) | 1UL);
+		sk = (struct sock *)__c_fakeu((hash << 1) | 1UL);
 	}
 
 	if (fq_fastpath_check(sch, skb, now)) {
