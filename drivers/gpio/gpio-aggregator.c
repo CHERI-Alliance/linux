@@ -1622,7 +1622,7 @@ static int gpio_aggregator_probe(struct platform_device *pdev)
 		}
 	}
 
-	features = (uintptr_t)device_get_match_data(dev);
+	features = __c_pa(device_get_match_data(dev));
 	fwd = gpiochip_fwd_create(dev, n, descs, features);
 	if (IS_ERR(fwd))
 		return PTR_ERR(fwd);

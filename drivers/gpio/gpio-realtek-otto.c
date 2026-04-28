@@ -371,7 +371,7 @@ static int realtek_gpio_probe(struct platform_device *pdev)
 	if (!ctrl)
 		return -ENOMEM;
 
-	dev_flags = (uintptr_t)device_get_match_data(dev);
+	dev_flags = __c_pa(device_get_match_data(dev));
 
 	ngpios = REALTEK_GPIO_MAX;
 	device_property_read_u32(dev, "ngpios", &ngpios);

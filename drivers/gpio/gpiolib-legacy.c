@@ -70,7 +70,7 @@ EXPORT_SYMBOL_GPL(gpio_request);
 
 static void devm_gpio_release(void *gpio)
 {
-	gpio_free((unsigned)(unsigned long)gpio);
+	gpio_free((unsigned)(uintptr_t)gpio);
 }
 
 /**
