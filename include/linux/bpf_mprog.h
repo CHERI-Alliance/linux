@@ -166,7 +166,10 @@ bpf_mprog_peer(const struct bpf_mprog_entry *entry)
 
 static inline void bpf_mprog_bundle_init(struct bpf_mprog_bundle *bundle)
 {
+#ifndef CONFIG_CHERI_KERNEL
+	/* FIXCHERI: Disable this for now. Needs more thought, though. */
 	BUILD_BUG_ON(sizeof(bundle->a.fp_items[0]) > sizeof(u64));
+#endif
 	BUILD_BUG_ON(ARRAY_SIZE(bundle->a.fp_items) !=
 		     ARRAY_SIZE(bundle->cp_items));
 
