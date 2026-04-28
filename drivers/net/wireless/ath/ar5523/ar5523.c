@@ -1333,7 +1333,7 @@ out_unlock:
 static void ar5523_configure_filter(struct ieee80211_hw *hw,
 				    unsigned int changed_flags,
 				    unsigned int *total_flags,
-				    u64 multicast)
+				    uintptr_t multicast)
 {
 	struct ar5523 *ar = hw->priv;
 	u32 filter = 0;

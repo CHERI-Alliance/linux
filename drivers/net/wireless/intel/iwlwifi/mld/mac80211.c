@@ -805,7 +805,7 @@ void iwl_mld_recalc_multicast_filter(struct iwl_mld *mld)
 					    &iter_data);
 }
 
-static u64
+static uintptr_t
 iwl_mld_mac80211_prepare_multicast(struct ieee80211_hw *hw,
 				   struct netdev_hw_addr_list *mc_list)
 {
@@ -846,7 +846,7 @@ static
 void iwl_mld_mac80211_configure_filter(struct ieee80211_hw *hw,
 				       unsigned int changed_flags,
 				       unsigned int *total_flags,
-				       u64 multicast)
+				       uintptr_t multicast)
 {
 	struct iwl_mld *mld = IWL_MAC80211_GET_MLD(hw);
 	struct iwl_mcast_filter_cmd *cmd = (void *)(unsigned long)multicast;

@@ -786,7 +786,7 @@ out:
 static void mt7925_configure_filter(struct ieee80211_hw *hw,
 				    unsigned int changed_flags,
 				    unsigned int *total_flags,
-				    u64 multicast)
+				    uintptr_t multicast)
 {
 #define MT7925_FILTER_FCSFAIL    BIT(2)
 #define MT7925_FILTER_CONTROL    BIT(5)

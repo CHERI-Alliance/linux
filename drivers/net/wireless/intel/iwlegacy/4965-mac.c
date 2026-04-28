@@ -6131,7 +6131,7 @@ out:
 
 void
 il4965_configure_filter(struct ieee80211_hw *hw, unsigned int changed_flags,
-			unsigned int *total_flags, u64 multicast)
+			unsigned int *total_flags, uintptr_t multicast)
 {
 	struct il_priv *il = hw->priv;
 	__le32 filter_or = 0, filter_nand = 0;

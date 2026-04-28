@@ -235,7 +235,7 @@ ath12k_mac_op_change_vif_links
 void ath12k_mac_op_configure_filter(struct ieee80211_hw *hw,
 				    unsigned int changed_flags,
 				    unsigned int *total_flags,
-				    u64 multicast);
+				    uintptr_t multicast);
 int ath12k_mac_op_hw_scan(struct ieee80211_hw *hw,
 			  struct ieee80211_vif *vif,
 			  struct ieee80211_scan_request *hw_req);

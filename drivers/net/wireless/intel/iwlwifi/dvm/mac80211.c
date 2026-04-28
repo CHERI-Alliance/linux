@@ -1020,7 +1020,7 @@ void iwl_chswitch_done(struct iwl_priv *priv, bool is_success)
 static void iwlagn_configure_filter(struct ieee80211_hw *hw,
 				    unsigned int changed_flags,
 				    unsigned int *total_flags,
-				    u64 multicast)
+				    uintptr_t multicast)
 {
 	struct iwl_priv *priv = IWL_MAC80211_GET_DVM(hw);
 	__le32 filter_or = 0, filter_nand = 0;

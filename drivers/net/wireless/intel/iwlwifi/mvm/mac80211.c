@@ -1970,7 +1970,7 @@ static void iwl_mvm_recalc_multicast(struct iwl_mvm *mvm)
 		IWL_ERR(mvm, "Failed to synchronize multicast groups update\n");
 }
 
-u64 iwl_mvm_prepare_multicast(struct ieee80211_hw *hw,
+uintptr_t iwl_mvm_prepare_multicast(struct ieee80211_hw *hw,
 			      struct netdev_hw_addr_list *mc_list)
 {
 	struct iwl_mvm *mvm = IWL_MAC80211_GET_MVM(hw);
@@ -2009,7 +2009,7 @@ u64 iwl_mvm_prepare_multicast(struct ieee80211_hw *hw,
 
 void iwl_mvm_configure_filter(struct ieee80211_hw *hw,
 			      unsigned int changed_flags,
-			      unsigned int *total_flags, u64 multicast)
+			      unsigned int *total_flags, uintptr_t multicast)
 {
 	struct iwl_mvm *mvm = IWL_MAC80211_GET_MVM(hw);
 	struct iwl_mcast_filter_cmd *cmd = (void *)(unsigned long)multicast;

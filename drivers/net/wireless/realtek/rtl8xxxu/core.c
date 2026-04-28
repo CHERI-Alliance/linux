@@ -6852,7 +6852,8 @@ static int rtl8xxxu_conf_tx(struct ieee80211_hw *hw,
 
 static void rtl8xxxu_configure_filter(struct ieee80211_hw *hw,
 				      unsigned int changed_flags,
-				      unsigned int *total_flags, u64 multicast)
+				      unsigned int *total_flags,
+				      uintptr_t multicast)
 {
 	struct rtl8xxxu_priv *priv = hw->priv;
 	u32 rcr = priv->regrcr;

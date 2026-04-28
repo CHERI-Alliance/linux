@@ -4283,7 +4283,7 @@ out_unlock:
 
 static void b43_op_configure_filter(struct ieee80211_hw *hw,
 				    unsigned int changed, unsigned int *fflags,
-				    u64 multicast)
+				    uintptr_t multicast)
 {
 	struct b43_wl *wl = hw_to_b43_wl(hw);
 	struct b43_wldev *dev;

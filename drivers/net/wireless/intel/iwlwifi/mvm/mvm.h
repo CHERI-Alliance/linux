@@ -2706,12 +2706,12 @@ static inline int iwl_mvm_mac_config(struct ieee80211_hw *hw, int radio_idx,
 	return 0;
 }
 
-u64 iwl_mvm_prepare_multicast(struct ieee80211_hw *hw,
+uintptr_t iwl_mvm_prepare_multicast(struct ieee80211_hw *hw,
 			      struct netdev_hw_addr_list *mc_list);
 
 void iwl_mvm_configure_filter(struct ieee80211_hw *hw,
 			      unsigned int changed_flags,
-			      unsigned int *total_flags, u64 multicast);
+			      unsigned int *total_flags, uintptr_t multicast);
 int iwl_mvm_mac_hw_scan(struct ieee80211_hw *hw, struct ieee80211_vif *vif,
 			struct ieee80211_scan_request *hw_req);
 void iwl_mvm_mac_cancel_hw_scan(struct ieee80211_hw *hw,

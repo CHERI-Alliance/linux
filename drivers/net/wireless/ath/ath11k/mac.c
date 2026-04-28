@@ -7435,7 +7435,7 @@ err_vdev_del:
 static void ath11k_mac_op_configure_filter(struct ieee80211_hw *hw,
 					   unsigned int changed_flags,
 					   unsigned int *total_flags,
-					   u64 multicast)
+					   uintptr_t multicast)
 {
 	struct ath11k *ar = hw->priv;
 
