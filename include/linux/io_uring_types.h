@@ -667,8 +667,13 @@ struct io_cqe {
  */
 struct io_cmd_data {
 	struct file		*file;
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	/* Extended space to fit bigger command structs in PCuABI */
+	__u8			data[120];
+#else
 	/* each command gets 56 bytes of data */
 	__u8			data[56];
+#endif
 };
 
 static inline void io_kiocb_cmd_sz_check(size_t cmd_sz)
