@@ -131,7 +131,7 @@ struct tcg_algorithm_info {
 };
 
 #ifndef TPM_MEMREMAP
-static inline void *TPM_MEMREMAP(unsigned long start, size_t size)
+static inline void *TPM_MEMREMAP(uintptr_t start, size_t size)
 {
 	return NULL;
 }

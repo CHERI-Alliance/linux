@@ -520,7 +520,7 @@ static struct xillyusb_endpoint
 
 	for (i = 0; i < bufnum; i++) {
 		struct xillybuffer *xb;
-		unsigned long addr;
+		uintptr_t addr;
 
 		xb = kzalloc_obj(*xb);
 
