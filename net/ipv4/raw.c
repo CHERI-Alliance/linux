@@ -869,7 +869,7 @@ static int raw_getsockopt(struct sock *sk, int level, int optname,
 	return do_raw_getsockopt(sk, optname, optval, optlen);
 }
 
-static int raw_ioctl(struct sock *sk, int cmd, int *karg)
+static int _raw_ioctl(struct sock *sk, int cmd, int *karg)
 {
 	switch (cmd) {
 	case SIOCOUTQ: {
@@ -936,7 +936,7 @@ struct proto raw_prot = {
 	.destroy	   = raw_destroy,
 	.connect	   = ip4_datagram_connect,
 	.disconnect	   = __udp_disconnect,
-	.ioctl		   = raw_ioctl,
+	.ioctl		   = _raw_ioctl,
 	.init		   = raw_sk_init,
 	.setsockopt	   = raw_setsockopt,
 	.getsockopt	   = raw_getsockopt,

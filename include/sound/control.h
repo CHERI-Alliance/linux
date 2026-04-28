@@ -126,7 +126,7 @@ struct snd_ctl_layer_ops {
 
 typedef int (*snd_kctl_ioctl_func_t) (struct snd_card * card,
 				      struct snd_ctl_file * control,
-				      unsigned int cmd, unsigned long arg);
+				      unsigned int cmd, user_uintptr_t arg);
 
 void snd_ctl_notify(struct snd_card * card, unsigned int mask, struct snd_ctl_elem_id * id);
 void snd_ctl_notify_one(struct snd_card * card, unsigned int mask, struct snd_kcontrol * kctl, unsigned int ioff);

@@ -99,7 +99,7 @@ typedef int (*dm_message_fn) (struct dm_target *ti, unsigned int argc, char **ar
  * the ioctl and the return value is the return value for the whole ioctl.
  */
 typedef int (*dm_prepare_ioctl_fn) (struct dm_target *ti, struct block_device **bdev,
-				    unsigned int cmd, unsigned long arg,
+				    unsigned int cmd, user_uintptr_t arg,
 				    bool *forward);
 
 #ifdef CONFIG_BLK_DEV_ZONED

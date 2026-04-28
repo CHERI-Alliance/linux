@@ -336,7 +336,7 @@ struct gpio_desc;
  *	Interrupts: caller dependent.
  *
  * @ioctl: ``int ()(struct uart_port *port, unsigned int cmd,
- *		unsigned long arg)``
+ *		user_uintptr_t arg)``
  *
  *	Perform any port specific IOCTLs. IOCTL commands must be defined using
  *	the standard numbering system found in <asm/ioctl.h>.

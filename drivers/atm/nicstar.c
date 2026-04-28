@@ -144,7 +144,7 @@ static void recycle_iov_buf(ns_dev * card, struct sk_buff *iovb);
 static void dequeue_sm_buf(ns_dev * card, struct sk_buff *sb);
 static void dequeue_lg_buf(ns_dev * card, struct sk_buff *lb);
 static int ns_proc_read(struct atm_dev *dev, loff_t * pos, char *page);
-static int ns_ioctl(struct atm_dev *dev, unsigned int cmd, void __user * arg);
+static int _ns_ioctl(struct atm_dev *dev, unsigned int cmd, void __user * arg);
 #ifdef EXTRA_DEBUG
 static void which_list(ns_dev * card, struct sk_buff *skb);
 #endif
@@ -160,7 +160,7 @@ static unsigned num_cards;
 static const struct atmdev_ops atm_ops = {
 	.open = ns_open,
 	.close = ns_close,
-	.ioctl = ns_ioctl,
+	.ioctl = _ns_ioctl,
 	.send = ns_send,
 	.send_bh = ns_send_bh,
 	.phy_put = ns_phy_put,
@@ -2472,7 +2472,7 @@ static int ns_proc_read(struct atm_dev *dev, loff_t * pos, char *page)
 	return 0;
 }
 
-static int ns_ioctl(struct atm_dev *dev, unsigned int cmd, void __user * arg)
+static int _ns_ioctl(struct atm_dev *dev, unsigned int cmd, void __user * arg)
 {
 	ns_dev *card;
 	pool_levels pl;

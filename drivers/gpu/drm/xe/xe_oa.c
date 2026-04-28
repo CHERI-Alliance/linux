@@ -1331,9 +1331,9 @@ static const xe_oa_set_property_fn xe_oa_set_property_funcs_config[] = {
 };
 
 static int xe_oa_user_ext_set_property(struct xe_oa *oa, enum xe_oa_user_extn_from from,
-				       u64 extension, struct xe_oa_open_param *param)
+				       user_uintptr_t extension, struct xe_oa_open_param *param)
 {
-	u64 __user *address = u64_to_user_ptr(extension);
+	u64 __user *address = (void __user *)extension;
 	struct drm_xe_ext_set_property ext;
 	int err;
 	u32 idx;
@@ -1358,7 +1358,7 @@ static int xe_oa_user_ext_set_property(struct xe_oa *oa, enum xe_oa_user_extn_fr
 }
 
 typedef int (*xe_oa_user_extension_fn)(struct xe_oa *oa,  enum xe_oa_user_extn_from from,
-				       u64 extension, struct xe_oa_open_param *param);
+				       user_uintptr_t, struct xe_oa_open_param *param);
 static const xe_oa_user_extension_fn xe_oa_user_extension_funcs[] = {
 	[DRM_XE_OA_EXTENSION_SET_PROPERTY] = xe_oa_user_ext_set_property,
 };
@@ -1367,7 +1367,7 @@ static const xe_oa_user_extension_fn xe_oa_user_extension_funcs[] = {
 static int xe_oa_user_extensions(struct xe_oa *oa, enum xe_oa_user_extn_from from, u64 extension,
 				 int ext_number, struct xe_oa_open_param *param)
 {
-	u64 __user *address = u64_to_user_ptr(extension);
+	u64 __user *address = (void __user *)extension;
 	struct drm_xe_user_extension ext;
 	int err;
 	u32 idx;
@@ -1384,7 +1384,7 @@ static int xe_oa_user_extensions(struct xe_oa *oa, enum xe_oa_user_extn_from fro
 		return -EINVAL;
 
 	idx = array_index_nospec(ext.name, ARRAY_SIZE(xe_oa_user_extension_funcs));
-	err = xe_oa_user_extension_funcs[idx](oa, from, extension, param);
+	err = xe_oa_user_extension_funcs[idx](oa, from, extension, param);	// NOLINT
 	if (XE_IOCTL_DBG(oa->xe, err))
 		return err;
 
@@ -2355,7 +2355,7 @@ int xe_oa_add_config_ioctl(struct drm_device *dev, u64 data, struct drm_file *fi
 		return -EACCES;
 	}
 
-	err = copy_from_user_with_ptr(&param, u64_to_user_ptr(data), sizeof(param));
+	err = copy_from_user_with_ptr(&param, (void __user *)data, sizeof(param));
 	if (XE_IOCTL_DBG(oa->xe, err))
 		return -EFAULT;
 
@@ -2444,7 +2444,7 @@ int xe_oa_remove_config_ioctl(struct drm_device *dev, u64 data, struct drm_file 
 	struct xe_device *xe = to_xe_device(dev);
 	struct xe_oa *oa = &xe->oa;
 	struct xe_oa_config *oa_config;
-	u64 arg, *ptr = u64_to_user_ptr(data);
+	u64 arg, *ptr = (void __user *)data;
 	int ret;
 
 	if (!oa->xe) {

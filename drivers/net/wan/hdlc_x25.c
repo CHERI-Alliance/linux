@@ -29,7 +29,7 @@ struct x25_state {
 	struct tasklet_struct rx_tasklet;
 };
 
-static int x25_ioctl(struct net_device *dev, struct if_settings *ifs);
+static int _x25_ioctl(struct net_device *dev, struct if_settings *ifs);
 
 static struct x25_state *state(hdlc_device *hdlc)
 {
@@ -268,13 +268,13 @@ static int x25_rx(struct sk_buff *skb)
 static struct hdlc_proto proto = {
 	.open		= x25_open,
 	.close		= x25_close,
-	.ioctl		= x25_ioctl,
+	.ioctl		= _x25_ioctl,
 	.netif_rx	= x25_rx,
 	.xmit		= x25_xmit,
 	.module		= THIS_MODULE,
 };
 
-static int x25_ioctl(struct net_device *dev, struct if_settings *ifs)
+static int _x25_ioctl(struct net_device *dev, struct if_settings *ifs)
 {
 	x25_hdlc_proto __user *x25_s = ifs->ifs_ifsu.x25;
 	const size_t size = sizeof(x25_hdlc_proto);

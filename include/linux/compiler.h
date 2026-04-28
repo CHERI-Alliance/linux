@@ -260,7 +260,7 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
  */
 static inline void *offset_to_ptr(const int *off)
 {
-	return (void *)((unsigned long)off + *off);
+	return (void *)((char *)off + *off);
 }
 
 #endif /* __ASSEMBLY__ */

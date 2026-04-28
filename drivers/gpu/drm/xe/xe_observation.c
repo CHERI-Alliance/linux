@@ -15,7 +15,7 @@
 u32 xe_observation_paranoid = true;
 static struct ctl_table_header *sysctl_header;
 
-static int xe_oa_ioctl(struct drm_device *dev, struct drm_xe_observation_param *arg,
+static int _xe_oa_ioctl(struct drm_device *dev, struct drm_xe_observation_param *arg,
 		       struct drm_file *file)
 {
 	switch (arg->observation_op) {
@@ -62,7 +62,7 @@ int xe_observation_ioctl(struct drm_device *dev, void *data, struct drm_file *fi
 
 	switch (arg->observation_type) {
 	case DRM_XE_OBSERVATION_TYPE_OA:
-		return xe_oa_ioctl(dev, arg, file);
+		return _xe_oa_ioctl(dev, arg, file);
 	case DRM_XE_OBSERVATION_TYPE_EU_STALL:
 		return xe_eu_stall_ioctl(dev, arg, file);
 	default:
