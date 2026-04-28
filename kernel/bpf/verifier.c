@@ -25998,8 +25998,7 @@ int bpf_check(struct bpf_prog **prog, union bpf_attr *attr, bpfptr_t uattr, __u3
 	 * and supplied buffer to store the verification trace
 	 */
 	ret = bpf_vlog_init(&env->log, attr->log_level,
-			    (char __user *) (unsigned long) attr->log_buf,
-			    attr->log_size);
+			    (char __user *)attr->log_buf, attr->log_size);
 	if (ret)
 		goto err_unlock;
 

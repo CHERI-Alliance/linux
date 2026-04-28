@@ -2402,8 +2402,8 @@ static void bpf_kprobe_multi_link_dealloc(struct bpf_link *link)
 static int bpf_kprobe_multi_link_fill_link_info(const struct bpf_link *link,
 						struct bpf_link_info *info)
 {
-	u64 __user *ucookies = u64_to_user_ptr(info->kprobe_multi.cookies);
-	u64 __user *uaddrs = u64_to_user_ptr(info->kprobe_multi.addrs);
+	u64 __user *ucookies = (u64 __user *)info->kprobe_multi.cookies;
+	u64 __user *uaddrs = (u64 __user *)info->kprobe_multi.addrs;
 	struct bpf_kprobe_multi_link *kmulti_link;
 	u32 ucount = info->kprobe_multi.count;
 	int err = 0, i;
@@ -2764,8 +2764,8 @@ int bpf_kprobe_multi_link_attach(const union bpf_attr *attr, struct bpf_prog *pr
 	if (flags & ~BPF_F_KPROBE_MULTI_RETURN)
 		return -EINVAL;
 
-	uaddrs = u64_to_user_ptr(attr->link_create.kprobe_multi.addrs);
-	usyms = u64_to_user_ptr(attr->link_create.kprobe_multi.syms);
+	uaddrs = (void __user *)attr->link_create.kprobe_multi.addrs;
+	usyms = (void __user *)attr->link_create.kprobe_multi.syms;
 	if (!!uaddrs == !!usyms)
 		return -EINVAL;
 
@@ -2780,7 +2780,7 @@ int bpf_kprobe_multi_link_attach(const union bpf_attr *attr, struct bpf_prog *pr
 	if (!addrs)
 		return -ENOMEM;
 
-	ucookies = u64_to_user_ptr(attr->link_create.kprobe_multi.cookies);
+	ucookies = (void __user *)attr->link_create.kprobe_multi.cookies;
 	if (ucookies) {
 		cookies = kvmalloc_array(cnt, sizeof(*addrs), GFP_KERNEL);
 		if (!cookies) {
@@ -3203,8 +3203,8 @@ int bpf_uprobe_multi_link_attach(const union bpf_attr *attr, struct bpf_prog *pr
 	 * path, offsets and cnt are mandatory,
 	 * ref_ctr_offsets and cookies are optional
 	 */
-	upath = u64_to_user_ptr(attr->link_create.uprobe_multi.path);
-	uoffsets = u64_to_user_ptr(attr->link_create.uprobe_multi.offsets);
+	upath = (void __user *)attr->link_create.uprobe_multi.path;
+	uoffsets = (unsigned long __user *)attr->link_create.uprobe_multi.offsets;
 	cnt = attr->link_create.uprobe_multi.cnt;
 	pid = attr->link_create.uprobe_multi.pid;
 
@@ -3213,8 +3213,8 @@ int bpf_uprobe_multi_link_attach(const union bpf_attr *attr, struct bpf_prog *pr
 	if (cnt > MAX_UPROBE_MULTI_CNT)
 		return -E2BIG;
 
-	uref_ctr_offsets = u64_to_user_ptr(attr->link_create.uprobe_multi.ref_ctr_offsets);
-	ucookies = u64_to_user_ptr(attr->link_create.uprobe_multi.cookies);
+	uref_ctr_offsets = (unsigned long __user *)attr->link_create.uprobe_multi.ref_ctr_offsets;
+	ucookies = (u64 __user *)attr->link_create.uprobe_multi.cookies;
 
 	name = strndup_user(upath, PATH_MAX);
 	if (IS_ERR(name)) {

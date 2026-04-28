@@ -40,12 +40,12 @@ dummy_ops_init_args(const union bpf_attr *kattr, unsigned int nr)
 	if (!args)
 		return ERR_PTR(-ENOMEM);
 
-	ctx_in = u64_to_user_ptr(kattr->test.ctx_in);
+	ctx_in = (void __user *)kattr->test.ctx_in;
 	if (copy_from_user(args->args, ctx_in, size_in))
 		goto out;
 
 	/* args[0] is 0 means state argument of test_N will be NULL */
-	u_state = u64_to_user_ptr(args->args[0]);
+	u_state = (void __user *)args->args[0];
 	if (u_state && copy_from_user(&args->state, u_state,
 				      sizeof(args->state)))
 		goto out;
@@ -60,7 +60,7 @@ static int dummy_ops_copy_args(struct bpf_dummy_ops_test_args *args)
 {
 	void __user *u_state;
 
-	u_state = u64_to_user_ptr(args->args[0]);
+	u_state = (void __user *)args->args[0];
 	if (u_state && copy_to_user(u_state, &args->state, sizeof(args->state)))
 		return -EFAULT;
 

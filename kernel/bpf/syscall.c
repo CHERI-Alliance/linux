@@ -1711,8 +1711,8 @@ static void *___bpf_copy_key(bpfptr_t ukey, u64 key_size)
 
 static int map_lookup_elem(union bpf_attr *attr)
 {
-	void __user *ukey = u64_to_user_ptr(attr->key);
-	void __user *uvalue = u64_to_user_ptr(attr->value);
+	void __user *ukey = (void __user *)attr->key;
+	void __user *uvalue = (void __user *)attr->value;
 	struct bpf_map *map;
 	void *key, *value;
 	u32 value_size;
@@ -1870,8 +1870,8 @@ err_put:
 
 static int map_get_next_key(union bpf_attr *attr)
 {
-	void __user *ukey = u64_to_user_ptr(attr->key);
-	void __user *unext_key = u64_to_user_ptr(attr->next_key);
+	void __user *ukey = (void __user *)attr->key;
+	void __user *unext_key = (void __user *)attr->next_key;
 	struct bpf_map *map;
 	void *key, *next_key;
 	int err;
@@ -1925,7 +1925,7 @@ int generic_map_delete_batch(struct bpf_map *map,
 			     const union bpf_attr *attr,
 			     union bpf_attr __user *uattr)
 {
-	void __user *keys = u64_to_user_ptr(attr->batch.keys);
+	void __user *keys = (void __user *)attr->batch.keys;
 	u32 cp, max_count;
 	int err = 0;
 	void *key;
@@ -1981,8 +1981,8 @@ int generic_map_update_batch(struct bpf_map *map, struct file *map_file,
 			     const union bpf_attr *attr,
 			     union bpf_attr __user *uattr)
 {
-	void __user *values = u64_to_user_ptr(attr->batch.values);
-	void __user *keys = u64_to_user_ptr(attr->batch.keys);
+	void __user *values = (void __user *)attr->batch.values;
+	void __user *keys = (void __user *)attr->batch.keys;
 	u32 value_size, cp, max_count;
 	void *key, *value;
 	int err = 0;
@@ -2039,10 +2039,10 @@ int generic_map_lookup_batch(struct bpf_map *map,
 				    const union bpf_attr *attr,
 				    union bpf_attr __user *uattr)
 {
-	void __user *uobatch = u64_to_user_ptr(attr->batch.out_batch);
-	void __user *ubatch = u64_to_user_ptr(attr->batch.in_batch);
-	void __user *values = u64_to_user_ptr(attr->batch.values);
-	void __user *keys = u64_to_user_ptr(attr->batch.keys);
+	void __user *uobatch = (void __user *)attr->batch.out_batch;
+	void __user *ubatch = (void __user *)attr->batch.in_batch;
+	void __user *values = (void __user *)attr->batch.values;
+	void __user *keys = (void __user *)attr->batch.keys;
 	void *buf, *buf_prevkey, *prev_key, *key, *value;
 	u32 value_size, cp, max_count;
 	int err;
@@ -2130,8 +2130,8 @@ free_buf:
 
 static int map_lookup_and_delete_elem(union bpf_attr *attr)
 {
-	void __user *ukey = u64_to_user_ptr(attr->key);
-	void __user *uvalue = u64_to_user_ptr(attr->value);
+	void __user *ukey = (void __user *)attr->key;
+	void __user *uvalue = (void __user *)attr->value;
 	struct bpf_map *map;
 	void *key, *value;
 	u32 value_size;
@@ -3140,7 +3140,7 @@ static int bpf_obj_pin(const union bpf_attr *attr)
 
 	path_fd = attr->file_flags & BPF_F_PATH_FD ? attr->path_fd : AT_FDCWD;
 	return bpf_obj_pin_user(attr->bpf_fd, path_fd,
-				u64_to_user_ptr(attr->pathname));
+				(void __user *)attr->pathname);
 }
 
 static int bpf_obj_get(const union bpf_attr *attr)
@@ -3156,7 +3156,7 @@ static int bpf_obj_get(const union bpf_attr *attr)
 		return -EINVAL;
 
 	path_fd = attr->file_flags & BPF_F_PATH_FD ? attr->path_fd : AT_FDCWD;
-	return bpf_obj_get_user(path_fd, u64_to_user_ptr(attr->pathname),
+	return bpf_obj_get_user(path_fd, (void __user *)attr->pathname,
 				attr->file_flags);
 }
 
@@ -3831,7 +3831,7 @@ static int bpf_raw_tp_link_fill_link_info(const struct bpf_link *link,
 {
 	struct bpf_raw_tp_link *raw_tp_link =
 		container_of(link, struct bpf_raw_tp_link, link);
-	char __user *ubuf = u64_to_user_ptr(info->raw_tracepoint.tp_name);
+	char __user *ubuf = (char __user *)info->raw_tracepoint.tp_name;
 	const char *tp_name = raw_tp_link->btp->tp->name;
 	u32 ulen = info->raw_tracepoint.tp_name_len;
 	size_t tp_len = strlen(tp_name);
@@ -3928,7 +3928,7 @@ static int bpf_perf_link_fill_kprobe(const struct perf_event *event,
 	u32 ulen, type;
 	int err;
 
-	uname = u64_to_user_ptr(info->perf_event.kprobe.func_name);
+	uname = (char __user *)info->perf_event.kprobe.func_name;
 	ulen = info->perf_event.kprobe.name_len;
 	err = bpf_perf_link_fill_common(event, uname, &ulen, &offset, &addr,
 					&type, &missed);
@@ -3984,7 +3984,7 @@ static int bpf_perf_link_fill_uprobe(const struct perf_event *event,
 	u32 ulen, type;
 	int err;
 
-	uname = u64_to_user_ptr(info->perf_event.uprobe.file_name);
+	uname = (char __user *)info->perf_event.uprobe.file_name;
 	ulen = info->perf_event.uprobe.name_len;
 	err = bpf_perf_link_fill_common(event, uname, &ulen, &offset, &ref_ctr_offset,
 					&type, NULL);
@@ -4049,7 +4049,7 @@ static int bpf_perf_link_fill_tracepoint(const struct perf_event *event,
 	u32 ulen;
 	int err;
 
-	uname = u64_to_user_ptr(info->perf_event.tracepoint.tp_name);
+	uname = (char __user *)info->perf_event.tracepoint.tp_name;
 	ulen = info->perf_event.tracepoint.name_len;
 	err = bpf_perf_link_fill_common(event, uname, &ulen, NULL, NULL, NULL, NULL);
 	if (err)
@@ -4305,7 +4305,7 @@ static int bpf_raw_tracepoint_open(const union bpf_attr *attr)
 	if (IS_ERR(prog))
 		return PTR_ERR(prog);
 
-	tp_name = u64_to_user_ptr(attr->raw_tracepoint.name);
+	tp_name = (void __user *)attr->raw_tracepoint.name;
 	cookie = attr->raw_tracepoint.cookie;
 	fd = bpf_raw_tp_link_attach(prog, tp_name, cookie, prog->expected_attach_type);
 	if (fd < 0)
@@ -4980,12 +4980,12 @@ convert_compat_prog_info_in(struct bpf_prog_info *dest,
 	memcpy(dest->tag, cinfo->tag, BPF_TAG_SIZE);
 	copy_field(dest, cinfo, jited_prog_len);
 	copy_field(dest, cinfo, xlated_prog_len);
-	copy_field(dest, cinfo, jited_prog_insns);
-	copy_field(dest, cinfo, xlated_prog_insns);
+	bpf_compat_ptr_field(dest, cinfo, jited_prog_insns);
+	bpf_compat_ptr_field(dest, cinfo, xlated_prog_insns);
 	copy_field(dest, cinfo, load_time);
 	copy_field(dest, cinfo, created_by_uid);
 	copy_field(dest, cinfo, nr_map_ids);
-	copy_field(dest, cinfo, map_ids);
+	bpf_compat_ptr_field(dest, cinfo, map_ids);
 	strncpy(dest->name, cinfo->name, BPF_OBJ_NAME_LEN);
 	copy_field(dest, cinfo, ifindex);
 	copy_field(dest, cinfo, gpl_compatible);
@@ -4993,20 +4993,20 @@ convert_compat_prog_info_in(struct bpf_prog_info *dest,
 	copy_field(dest, cinfo, netns_ino);
 	copy_field(dest, cinfo, nr_jited_ksyms);
 	copy_field(dest, cinfo, nr_jited_func_lens);
-	copy_field(dest, cinfo, jited_ksyms);
-	copy_field(dest, cinfo, jited_func_lens);
+	bpf_compat_ptr_field(dest, cinfo, jited_ksyms);
+	bpf_compat_ptr_field(dest, cinfo, jited_func_lens);
 	copy_field(dest, cinfo, btf_id);
 	copy_field(dest, cinfo, func_info_rec_size);
-	copy_field(dest, cinfo, func_info);
+	bpf_compat_ptr_field(dest, cinfo, func_info);
 	copy_field(dest, cinfo, nr_func_info);
 	copy_field(dest, cinfo, nr_line_info);
-	copy_field(dest, cinfo, line_info);
-	copy_field(dest, cinfo, jited_line_info);
+	bpf_compat_ptr_field(dest, cinfo, line_info);
+	bpf_compat_ptr_field(dest, cinfo, jited_line_info);
 	copy_field(dest, cinfo, nr_jited_line_info);
 	copy_field(dest, cinfo, line_info_rec_size);
 	copy_field(dest, cinfo, jited_line_info_rec_size);
 	copy_field(dest, cinfo, nr_prog_tags);
-	copy_field(dest, cinfo, prog_tags);
+	bpf_compat_ptr_field(dest, cinfo, prog_tags);
 	copy_field(dest, cinfo, run_time_ns);
 	copy_field(dest, cinfo, run_cnt);
 	copy_field(dest, cinfo, recursion_misses);
@@ -5067,7 +5067,7 @@ static int copy_bpf_prog_info_from_user(const union bpf_attr *attr,
 	int err;
 	size_t info_size = in_compat64_syscall() ? sizeof(struct compat_bpf_prog_info)
 						 : sizeof(struct bpf_prog_info);
-	void __user *uinfo = u64_to_user_ptr(attr->info.info);
+	void __user *uinfo = (void __user *)attr->info.info;
 
 	*info_len = attr->info.info_len;
 	err = bpf_check_uarg_tail_zero(USER_BPFPTR(uinfo),
@@ -5083,7 +5083,7 @@ static int copy_bpf_prog_info_from_user(const union bpf_attr *attr,
 			return -EFAULT;
 		convert_compat_prog_info_in(info, &cinfo);
 	} else {
-		if (copy_from_user(info, uinfo, *info_len))
+		if (copy_from_user_with_ptr(info, uinfo, *info_len))
 			return -EFAULT;
 	}
 
@@ -5105,7 +5105,7 @@ static int copy_bpf_prog_info_to_user(const union bpf_attr *attr,
 		convert_compat_prog_info_out(&cinfo, info);
 	}
 
-	if (copy_to_user(uinfo, src_info, *info_len) ||
+	if (bpf_copy_to_user_with_ptr(uinfo, src_info, *info_len) ||
 	    bpf_put_uattr(*info_len, uattr, info.info_len))
 		return -EFAULT;
 
@@ -5144,7 +5144,7 @@ static int bpf_prog_get_info_by_fd(struct file *file,
 	info.nr_map_ids = prog->aux->used_map_cnt;
 	ulen = min_t(u32, info.nr_map_ids, ulen);
 	if (ulen) {
-		u32 __user *user_map_ids = u64_to_user_ptr(info.map_ids);
+		u32 __user *user_map_ids = (u32 __user *)info.map_ids;
 		u32 i;
 
 		for (i = 0; i < ulen; i++)
@@ -5225,7 +5225,7 @@ static int bpf_prog_get_info_by_fd(struct file *file,
 
 	if (info.jited_prog_len && ulen) {
 		if (bpf_dump_raw_ok(file->f_cred)) {
-			uinsns = u64_to_user_ptr(info.jited_prog_insns);
+			uinsns = (char __user *)info.jited_prog_insns;
 			ulen = min_t(u32, info.jited_prog_len, ulen);
 
 			/* for multi-function programs, copy the JITed
@@ -5268,7 +5268,7 @@ static int bpf_prog_get_info_by_fd(struct file *file,
 			 * corresponding to each function
 			 */
 			ulen = min_t(u32, info.nr_jited_ksyms, ulen);
-			user_ksyms = u64_to_user_ptr(info.jited_ksyms);
+			user_ksyms = (u64 __user *)info.jited_ksyms;
 			if (prog->aux->func_cnt) {
 				for (i = 0; i < ulen; i++) {
 					ksym_addr = (unsigned long)
@@ -5296,7 +5296,7 @@ static int bpf_prog_get_info_by_fd(struct file *file,
 
 			/* copy the JITed image lengths for each function */
 			ulen = min_t(u32, info.nr_jited_func_lens, ulen);
-			user_lens = u64_to_user_ptr(info.jited_func_lens);
+			user_lens = (u32 __user *)info.jited_func_lens;
 			if (prog->aux->func_cnt) {
 				for (i = 0; i < ulen; i++) {
 					func_len =
@@ -5323,7 +5323,7 @@ static int bpf_prog_get_info_by_fd(struct file *file,
 	if (info.nr_func_info && ulen) {
 		char __user *user_finfo;
 
-		user_finfo = u64_to_user_ptr(info.func_info);
+		user_finfo = (char __user *)info.func_info;
 		ulen = min_t(u32, info.nr_func_info, ulen);
 		if (copy_to_user(user_finfo, prog->aux->func_info,
 				 info.func_info_rec_size * ulen))
@@ -5335,7 +5335,7 @@ static int bpf_prog_get_info_by_fd(struct file *file,
 	if (info.nr_line_info && ulen) {
 		__u8 __user *user_linfo;
 
-		user_linfo = u64_to_user_ptr(info.line_info);
+		user_linfo = (__u8 __user *)info.line_info;
 		ulen = min_t(u32, info.nr_line_info, ulen);
 		if (copy_to_user(user_linfo, prog->aux->linfo,
 				 info.line_info_rec_size * ulen))
@@ -5353,7 +5353,7 @@ static int bpf_prog_get_info_by_fd(struct file *file,
 			__u64 __user *user_linfo;
 			u32 i;
 
-			user_linfo = u64_to_user_ptr(info.jited_line_info);
+			user_linfo = (__u64 __user *)info.jited_line_info;
 			ulen = min_t(u32, info.nr_jited_line_info, ulen);
 			for (i = 0; i < ulen; i++) {
 				line_addr = (unsigned long)prog->aux->jited_linfo[i];
@@ -5368,20 +5368,20 @@ static int bpf_prog_get_info_by_fd(struct file *file,
 	ulen = info.nr_prog_tags;
 	info.nr_prog_tags = prog->aux->func_cnt ? : 1;
 	if (ulen) {
-		__u8 __user (*user_prog_tags)[BPF_TAG_SIZE];
+		__u8 __user *user_prog_tags;
 		u32 i;
 
-		user_prog_tags = u64_to_user_ptr(info.prog_tags);
+		user_prog_tags = (__u8 __user *)info.prog_tags;
 		ulen = min_t(u32, info.nr_prog_tags, ulen);
 		if (prog->aux->func_cnt) {
 			for (i = 0; i < ulen; i++) {
-				if (copy_to_user(user_prog_tags[i],
+				if (copy_to_user(&user_prog_tags[i],
 						 prog->aux->func[i]->tag,
 						 BPF_TAG_SIZE))
 					return -EFAULT;
 			}
 		} else {
-			if (copy_to_user(user_prog_tags[0],
+			if (copy_to_user(&user_prog_tags[0],
 					 prog->tag, BPF_TAG_SIZE))
 				return -EFAULT;
 		}
@@ -5399,7 +5399,8 @@ static int bpf_map_get_info_by_fd(struct file *file,
 				  const union bpf_attr *attr,
 				  union bpf_attr __user *uattr)
 {
-	struct bpf_map_info __user *uinfo = u64_to_user_ptr(attr->info.info);
+	struct bpf_map_info __user *uinfo =
+		(struct bpf_map_info __user *)attr->info.info;
 	struct bpf_map_info info;
 	u32 info_len = attr->info.info_len;
 	int err;
@@ -5485,15 +5486,15 @@ convert_compat_link_info_in(struct bpf_link_info *dest,
 	 */
 	switch (type) {
 	case BPF_LINK_TYPE_RAW_TRACEPOINT:
-		copy_field(dest, cinfo, raw_tracepoint.tp_name);
+		bpf_compat_ptr_field(dest, cinfo, raw_tracepoint.tp_name);
 		copy_field(dest, cinfo, raw_tracepoint.tp_name_len);
 		return;
 	case BPF_LINK_TYPE_ITER:
-		copy_field(dest, cinfo, iter.target_name);
+		bpf_compat_ptr_field(dest, cinfo, iter.target_name);
 		copy_field(dest, cinfo, iter.target_name_len);
 		return;
 	case BPF_LINK_TYPE_KPROBE_MULTI:
-		copy_field(dest, cinfo, kprobe_multi.addrs);
+		bpf_compat_ptr_field(dest, cinfo, kprobe_multi.addrs);
 		copy_field(dest, cinfo, kprobe_multi.count);
 		copy_field(dest, cinfo, kprobe_multi.flags);
 		copy_field(dest, cinfo, kprobe_multi.missed);
@@ -5506,7 +5507,7 @@ convert_compat_link_info_in(struct bpf_link_info *dest,
 		 * are input fields, and they are in the same position
 		 * regardless of the active struct.
 		 */
-		copy_field(dest, cinfo, perf_event.uprobe.file_name);
+		bpf_compat_ptr_field(dest, cinfo, perf_event.uprobe.file_name);
 		copy_field(dest, cinfo, perf_event.uprobe.name_len);
 		return;
 	default:
@@ -5623,7 +5624,7 @@ static int copy_bpf_link_info_from_user(const union bpf_attr *attr,
 	int err;
 	size_t info_size = in_compat64_syscall() ? sizeof(struct compat_bpf_link_info)
 						 : sizeof(struct bpf_link_info);
-	void __user *uinfo = u64_to_user_ptr(attr->info.info);
+	void __user *uinfo = (void __user *)attr->info.info;
 
 	*info_len = attr->info.info_len;
 	err = bpf_check_uarg_tail_zero(USER_BPFPTR(uinfo),
@@ -5639,7 +5640,7 @@ static int copy_bpf_link_info_from_user(const union bpf_attr *attr,
 			return -EFAULT;
 		convert_compat_link_info_in(info, &cinfo, type);
 	} else {
-		if (copy_from_user(info, uinfo, *info_len))
+		if (copy_from_user_with_ptr(info, uinfo, *info_len))
 			return -EFAULT;
 	}
 
@@ -5662,7 +5663,7 @@ static int copy_bpf_link_info_to_user(const union bpf_attr *attr,
 		convert_compat_link_info_out(&cinfo, info, type);
 	}
 
-	if (copy_to_user(uinfo, src_info, *info_len) ||
+	if (bpf_copy_to_user_with_ptr(uinfo, src_info, *info_len) ||
 	    bpf_put_uattr(*info_len, uattr, info.info_len))
 		return -EFAULT;
 
@@ -5805,7 +5806,7 @@ static int bpf_task_fd_query_copy(const union bpf_attr *attr,
 				    const char *buf, u64 probe_offset,
 				    u64 probe_addr)
 {
-	char __user *ubuf = u64_to_user_ptr(attr->task_fd_query.buf);
+	char __user *ubuf = (char __user *)attr->task_fd_query.buf;
 	u32 len = buf ? strlen(buf) : 0, input_len;
 	int err = 0;
 
@@ -6553,8 +6554,8 @@ static void convert_compat_bpf_attr(union bpf_attr *dest,
 	case BPF_MAP_DELETE_ELEM:
 	case BPF_MAP_LOOKUP_AND_DELETE_ELEM:
 		copy_field(dest, cattr, map_fd);
-		copy_field(dest, cattr, key);
-		copy_field(dest, cattr, value);
+		bpf_compat_ptr_field(dest, cattr, key);
+		bpf_compat_ptr_field(dest, cattr, value);
 		/* u64 next_key is in a union with u64 value */
 		copy_field(dest, cattr, flags);
 		break;
@@ -6562,10 +6563,10 @@ static void convert_compat_bpf_attr(union bpf_attr *dest,
 	case BPF_MAP_LOOKUP_AND_DELETE_BATCH:
 	case BPF_MAP_UPDATE_BATCH:
 	case BPF_MAP_DELETE_BATCH:
-		copy_field(dest, cattr, batch.in_batch);
-		copy_field(dest, cattr, batch.out_batch);
-		copy_field(dest, cattr, batch.keys);
-		copy_field(dest, cattr, batch.values);
+		bpf_compat_ptr_field(dest, cattr, batch.in_batch);
+		bpf_compat_ptr_field(dest, cattr, batch.out_batch);
+		bpf_compat_ptr_field(dest, cattr, batch.keys);
+		bpf_compat_ptr_field(dest, cattr, batch.values);
 		copy_field(dest, cattr, batch.count);
 		copy_field(dest, cattr, batch.map_fd);
 		copy_field(dest, cattr, batch.elem_flags);
@@ -6574,11 +6575,11 @@ static void convert_compat_bpf_attr(union bpf_attr *dest,
 	case BPF_PROG_LOAD:
 		copy_field(dest, cattr, prog_type);
 		copy_field(dest, cattr, insn_cnt);
-		copy_field(dest, cattr, insns);
-		copy_field(dest, cattr, license);
+		bpf_compat_ptr_field(dest, cattr, insns);
+		bpf_compat_ptr_field(dest, cattr, license);
 		copy_field(dest, cattr, log_level);
 		copy_field(dest, cattr, log_size);
-		copy_field(dest, cattr, log_buf);
+		bpf_compat_ptr_field(dest, cattr, log_buf);
 		copy_field(dest, cattr, kern_version);
 		copy_field(dest, cattr, prog_flags);
 		strncpy(dest->prog_name, cattr->prog_name, BPF_OBJ_NAME_LEN);
@@ -6586,23 +6587,23 @@ static void convert_compat_bpf_attr(union bpf_attr *dest,
 		copy_field(dest, cattr, expected_attach_type);
 		copy_field(dest, cattr, prog_btf_fd);
 		copy_field(dest, cattr, func_info_rec_size);
-		copy_field(dest, cattr, func_info);
+		bpf_compat_ptr_field(dest, cattr, func_info);
 		copy_field(dest, cattr, func_info_cnt);
 		copy_field(dest, cattr, line_info_rec_size);
-		copy_field(dest, cattr, line_info);
+		bpf_compat_ptr_field(dest, cattr, line_info);
 		copy_field(dest, cattr, line_info_cnt);
 		copy_field(dest, cattr, attach_btf_id);
 		copy_field(dest, cattr, attach_prog_fd);
 		/* u32 attach_btf_obj_fd is in a union with u32 attach_prog_fd */
 		copy_field(dest, cattr, core_relo_cnt);
-		copy_field(dest, cattr, fd_array);
-		copy_field(dest, cattr, core_relos);
+		bpf_compat_ptr_field(dest, cattr, fd_array);
+		bpf_compat_ptr_field(dest, cattr, core_relos);
 		copy_field(dest, cattr, core_relo_rec_size);
 		copy_field(dest, cattr, log_true_size);
 		break;
 	case BPF_OBJ_PIN:
 	case BPF_OBJ_GET:
-		copy_field(dest, cattr, pathname);
+		bpf_compat_ptr_field(dest, cattr, pathname);
 		copy_field(dest, cattr, bpf_fd);
 		copy_field(dest, cattr, file_flags);
 		copy_field(dest, cattr, path_fd);
@@ -6622,14 +6623,14 @@ static void convert_compat_bpf_attr(union bpf_attr *dest,
 		copy_field(dest, cattr, test.retval);
 		copy_field(dest, cattr, test.data_size_in);
 		copy_field(dest, cattr, test.data_size_out);
-		copy_field(dest, cattr, test.data_in);
-		copy_field(dest, cattr, test.data_out);
+		bpf_compat_ptr_field(dest, cattr, test.data_in);
+		bpf_compat_ptr_field(dest, cattr, test.data_out);
 		copy_field(dest, cattr, test.repeat);
 		copy_field(dest, cattr, test.duration);
 		copy_field(dest, cattr, test.ctx_size_in);
 		copy_field(dest, cattr, test.ctx_size_out);
-		copy_field(dest, cattr, test.ctx_in);
-		copy_field(dest, cattr, test.ctx_out);
+		bpf_compat_ptr_field(dest, cattr, test.ctx_in);
+		bpf_compat_ptr_field(dest, cattr, test.ctx_out);
 		copy_field(dest, cattr, test.flags);
 		copy_field(dest, cattr, test.cpu);
 		copy_field(dest, cattr, test.batch_size);
@@ -6653,27 +6654,27 @@ static void convert_compat_bpf_attr(union bpf_attr *dest,
 	case BPF_OBJ_GET_INFO_BY_FD:
 		copy_field(dest, cattr, info.bpf_fd);
 		copy_field(dest, cattr, info.info_len);
-		copy_field(dest, cattr, info.info);
+		bpf_compat_ptr_field(dest, cattr, info.info);
 		break;
 	case BPF_PROG_QUERY:
 		copy_field(dest, cattr, query.target_fd);
 		copy_field(dest, cattr, query.attach_type);
 		copy_field(dest, cattr, query.query_flags);
 		copy_field(dest, cattr, query.attach_flags);
-		copy_field(dest, cattr, query.prog_ids);
+		bpf_compat_ptr_field(dest, cattr, query.prog_ids);
 		copy_field(dest, cattr, query.prog_cnt);
-		copy_field(dest, cattr, query.prog_attach_flags);
-		copy_field(dest, cattr, query.link_ids);
-		copy_field(dest, cattr, query.link_attach_flags);
+		bpf_compat_ptr_field(dest, cattr, query.prog_attach_flags);
+		bpf_compat_ptr_field(dest, cattr, query.link_ids);
+		bpf_compat_ptr_field(dest, cattr, query.link_attach_flags);
 		copy_field(dest, cattr, query.revision);
 		break;
 	case BPF_RAW_TRACEPOINT_OPEN:
-		copy_field(dest, cattr, raw_tracepoint.name);
+		bpf_compat_ptr_field(dest, cattr, raw_tracepoint.name);
 		copy_field(dest, cattr, raw_tracepoint.prog_fd);
 		break;
 	case BPF_BTF_LOAD:
-		copy_field(dest, cattr, btf);
-		copy_field(dest, cattr, btf_log_buf);
+		bpf_compat_ptr_field(dest, cattr, btf);
+		bpf_compat_ptr_field(dest, cattr, btf_log_buf);
 		copy_field(dest, cattr, btf_size);
 		copy_field(dest, cattr, btf_log_size);
 		copy_field(dest, cattr, btf_log_level);
@@ -6684,7 +6685,7 @@ static void convert_compat_bpf_attr(union bpf_attr *dest,
 		copy_field(dest, cattr, task_fd_query.fd);
 		copy_field(dest, cattr, task_fd_query.flags);
 		copy_field(dest, cattr, task_fd_query.buf_len);
-		copy_field(dest, cattr, task_fd_query.buf);
+		bpf_compat_ptr_field(dest, cattr, task_fd_query.buf);
 		copy_field(dest, cattr, task_fd_query.prog_id);
 		copy_field(dest, cattr, task_fd_query.fd_type);
 		copy_field(dest, cattr, task_fd_query.probe_offset);
@@ -6709,22 +6710,22 @@ static void convert_compat_bpf_attr(union bpf_attr *dest,
 		 * conversion needed
 		 */
 		case BPF_TRACE_ITER:
-			copy_field(dest, cattr, link_create.iter_info);
+			bpf_compat_ptr_field(dest, cattr, link_create.iter_info);
 			copy_field(dest, cattr, link_create.iter_info_len);
 			break;
 		/* kprobe_multi is used in bpf_kprobe_multi_link_attach() */
 		case BPF_TRACE_KPROBE_MULTI:
 			copy_field(dest, cattr, link_create.kprobe_multi.flags);
 			copy_field(dest, cattr, link_create.kprobe_multi.cnt);
-			copy_field(dest, cattr, link_create.kprobe_multi.syms);
-			copy_field(dest, cattr, link_create.kprobe_multi.addrs);
-			copy_field(dest, cattr, link_create.kprobe_multi.cookies);
+			bpf_compat_ptr_field(dest, cattr, link_create.kprobe_multi.syms);
+			bpf_compat_ptr_field(dest, cattr, link_create.kprobe_multi.addrs);
+			bpf_compat_ptr_field(dest, cattr, link_create.kprobe_multi.cookies);
 			break;
 		case BPF_TRACE_UPROBE_MULTI:
-			copy_field(dest, cattr, link_create.uprobe_multi.path);
-			copy_field(dest, cattr, link_create.uprobe_multi.offsets);
-			copy_field(dest, cattr, link_create.uprobe_multi.ref_ctr_offsets);
-			copy_field(dest, cattr, link_create.uprobe_multi.cookies);
+			bpf_compat_ptr_field(dest, cattr, link_create.uprobe_multi.path);
+			bpf_compat_ptr_field(dest, cattr, link_create.uprobe_multi.offsets);
+			bpf_compat_ptr_field(dest, cattr, link_create.uprobe_multi.ref_ctr_offsets);
+			bpf_compat_ptr_field(dest, cattr, link_create.uprobe_multi.cookies);
 			copy_field(dest, cattr, link_create.uprobe_multi.cnt);
 			copy_field(dest, cattr, link_create.uprobe_multi.flags);
 			copy_field(dest, cattr, link_create.uprobe_multi.pid);
@@ -6792,7 +6793,7 @@ static int copy_bpf_attr_from_user(union bpf_attr *attr, int cmd,
 			return -EINVAL;
 		convert_compat_bpf_attr(attr, &cattr, cmd);
 	} else {
-		if (copy_from_bpfptr(attr, uattr, *size) != 0)
+		if (copy_from_bpfptr_with_ptr(attr, uattr, *size) != 0)
 			return -EFAULT;
 		err = check_attr(cmd, attr);
 		if (err)
