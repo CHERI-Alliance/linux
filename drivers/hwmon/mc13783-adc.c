@@ -69,7 +69,7 @@ static ssize_t mc13783_adc_bp_show(struct device *dev,
 {
 	unsigned val;
 	struct platform_device *pdev = to_platform_device(dev);
-	kernel_ulong_t driver_data = platform_get_device_id(pdev)->driver_data;
+	uintptr_t driver_data = platform_get_device_id(pdev)->driver_data;
 	int ret = mc13783_adc_read(dev, devattr, &val);
 
 	if (ret)
@@ -112,7 +112,7 @@ static ssize_t mc13783_adc_uid_show(struct device *dev,
 {
 	unsigned int val;
 	struct platform_device *pdev = to_platform_device(dev);
-	kernel_ulong_t driver_data = platform_get_device_id(pdev)->driver_data;
+	uintptr_t driver_data = platform_get_device_id(pdev)->driver_data;
 	int ret = mc13783_adc_read(dev, devattr, &val);
 
 	if (ret)
@@ -134,7 +134,7 @@ static ssize_t mc13783_adc_temp_show(struct device *dev,
 {
 	unsigned int val;
 	struct platform_device *pdev = to_platform_device(dev);
-	kernel_ulong_t driver_data = platform_get_device_id(pdev)->driver_data;
+	uintptr_t driver_data = platform_get_device_id(pdev)->driver_data;
 	int ret = mc13783_adc_read(dev, devattr, &val);
 
 	if (ret)
@@ -288,7 +288,7 @@ out_err_create_16chans:
 static void mc13783_adc_remove(struct platform_device *pdev)
 {
 	struct mc13783_adc_priv *priv = platform_get_drvdata(pdev);
-	kernel_ulong_t driver_data = platform_get_device_id(pdev)->driver_data;
+	uintptr_t driver_data = platform_get_device_id(pdev)->driver_data;
 
 	hwmon_device_unregister(priv->hwmon_dev);
 

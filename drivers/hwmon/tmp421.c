@@ -433,7 +433,7 @@ static int tmp421_probe(struct i2c_client *client)
 	if (!data)
 		return -ENOMEM;
 
-	data->channels = (uintptr_t)i2c_get_match_data(client);
+	data->channels = __c_pa(i2c_get_match_data(client));
 	data->client = client;
 
 	for (i = 0; i < data->channels; i++) {
