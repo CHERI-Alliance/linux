@@ -16,8 +16,12 @@ struct io_uring_cmd {
 	const struct io_uring_sqe *sqe;
 	u32		cmd_op;
 	u32		flags;
+#ifndef CONFIG_CHERI_KERNEL
 	u8		pdu[32]; /* available inline for free use */
 	u8		unused[8];
+#else
+	u8		pdu[48];
+#endif
 };
 
 #define io_uring_sqe128_cmd(sqe, type)	({					\

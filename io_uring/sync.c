@@ -92,7 +92,7 @@ int io_fallocate_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 		return -EINVAL;
 
 	sync->off = READ_ONCE(sqe->off);
-	sync->len = READ_ONCE(sqe->addr);
+	sync->len = __c_ua(READ_ONCE(sqe->addr));
 	sync->mode = READ_ONCE(sqe->len);
 	req->flags |= REQ_F_FORCE_ASYNC;
 	return 0;
