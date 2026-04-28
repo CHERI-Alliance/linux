@@ -641,13 +641,13 @@ int put_sg_io_hdr(const struct sg_io_hdr *hdr, void __user *argp)
 			.mx_sb_len	 = hdr->mx_sb_len,
 			.iovec_count	 = hdr->iovec_count,
 			.dxfer_len	 = hdr->dxfer_len,
-			.dxferp		 = (user_uintptr_t)hdr->dxferp,
-			.cmdp		 = (user_uintptr_t)hdr->cmdp,
-			.sbp		 = (user_uintptr_t)hdr->sbp,
+			.dxferp		 = ptr_to_compat(hdr->dxferp),
+			.cmdp		 = ptr_to_compat(hdr->cmdp),
+			.sbp		 = ptr_to_compat(hdr->sbp),
 			.timeout	 = hdr->timeout,
 			.flags		 = hdr->flags,
 			.pack_id	 = hdr->pack_id,
-			.usr_ptr	 = (user_uintptr_t)hdr->usr_ptr,
+			.usr_ptr	 = ptr_to_compat(hdr->usr_ptr),
 			.status		 = hdr->status,
 			.masked_status	 = hdr->masked_status,
 			.msg_status	 = hdr->msg_status,
@@ -769,14 +769,14 @@ static int scsi_put_cdrom_generic_arg(const struct cdrom_generic_command *cgc,
 #ifdef CONFIG_COMPAT
 	if (in_compat_syscall()) {
 		struct compat_cdrom_generic_command cgc32 = {
-			.buffer		= (user_uintptr_t)(cgc->buffer),
+			.buffer		= ptr_to_compat(cgc->buffer),
 			.buflen		= cgc->buflen,
 			.stat		= cgc->stat,
-			.sense		= (user_uintptr_t)(cgc->sense),
+			.sense		= ptr_to_compat(cgc->sense),
 			.data_direction	= cgc->data_direction,
 			.quiet		= cgc->quiet,
 			.timeout	= cgc->timeout,
-			.unused		= (user_uintptr_t)(cgc->unused),
+			.unused		= ptr_to_compat(cgc->unused),
 		};
 		memcpy(&cgc32.cmd, &cgc->cmd, CDROM_PACKET_SIZE);
 
