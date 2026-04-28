@@ -2,6 +2,7 @@
 #include <linux/printk.h>
 #include <linux/cheri.h>
 #include <linux/pgtable.h>
+#include <linux/ratelimit.h>
 
 #include <asm/riscvcheri.h>
 
@@ -168,4 +169,11 @@ void * __capability riscv_cheri_clear_capmode(void * __capability cap)
 
 	return cap;
 }
+
+#ifdef CONFIG_RISCV_CHERI_DEBUG_USER_COPY
+void do_warn_tags(void *dst, void *src, size_t len, void *p)
+{
+	WARN_RATELIMIT(1, "Tags stripped in usercopy: src=%#p dst=%#p 0x%lx fault=%#p", src, dst, len, p);
+}
+#endif
 
