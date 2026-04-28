@@ -48,6 +48,94 @@ SYM_FUNC_START(morello_capcpy)
 	ret
 SYM_FUNC_END(morello_capcpy)
 
+SYM_FUNC_START(morello_thread_init_user)
+	mov	x9, #THREAD_MORELLO_USER_STATE
+	add	x0, x0, x9		// x0 = tsk->thread.morello_user_state
+	adr_l	x1, morello_root_cap
+	ldr	c1, [x1]
+
+	/*
+	 * CTPIDR doesn't need to be initialised explicitly:
+	 * - tls_thread_flush() already zeroes tpidr_el0, zeroing ctpidr_el0 as
+	 *   well
+	 * - The value stored in thread.morello_user_state will be set the next
+	 *   time task_save_user_tls() is called, like thread_struct.uw.tp_value.
+	 */
+
+	/* DDC: initialised to the root capability (like PCC) */
+	msr	ddc_el0, c1
+	str	c1, [x0, #MORELLO_STATE_DDC]
+	/* CID: null capability */
+	msr	cid_el0, czr
+	str	czr, [x0, #MORELLO_STATE_CID]
+	/* CCTLR: all bits cleared */
+	msr	cctlr_el0, xzr
+	str	xzr, [x0, #MORELLO_STATE_CCTLR]
+
+	ret
+SYM_FUNC_END(morello_thread_init_user)
+
+SYM_FUNC_START(morello_thread_save_user_state)
+	mov	x9, #THREAD_MORELLO_USER_STATE
+	add	x0, x0, x9		// x0 = tsk->thread.morello_user_state
+
+	/* CTPIDR is handled by task_save_user_tls */
+	mrs	c1, ddc_el0
+	str	c1, [x0, #MORELLO_STATE_DDC]
+	mrs	c1, cid_el0
+	str	c1, [x0, #MORELLO_STATE_CID]
+	mrs	x1, cctlr_el0
+	str	x1, [x0, #MORELLO_STATE_CCTLR]
+
+	ret
+SYM_FUNC_END(morello_thread_save_user_state)
+
+SYM_FUNC_START(morello_thread_restore_user_state)
+	mov	x9, #THREAD_MORELLO_USER_STATE
+	add	x0, x0, x9		// x0 = tsk->thread.morello_user_state
+
+	/* CTPIDR is handled by task_restore_user_tls */
+	ldr	c1, [x0, #MORELLO_STATE_DDC]
+	msr	ddc_el0, c1
+	ldr	c1, [x0, #MORELLO_STATE_CID]
+	msr	cid_el0, c1
+	ldr	x1, [x0, #MORELLO_STATE_CCTLR]
+	msr	cctlr_el0, x1
+
+	ret
+SYM_FUNC_END(morello_thread_restore_user_state)
+
+SYM_FUNC_START(morello_task_save_user_tls)
+	mov	x9, #THREAD_MORELLO_USER_STATE
+	add	x0, x0, x9		// x0 = tsk->thread.morello_user_state
+
+	mrs	c2, ctpidr_el0
+	/* Save CTPIDR */
+	str	c2, [x0, #MORELLO_STATE_CTPIDR]
+	/* Save TPIDR to the appropriate field of tsk->thread */
+	str	x2, [x1]
+
+	ret
+SYM_FUNC_END(morello_task_save_user_tls)
+
+SYM_FUNC_START(morello_task_restore_user_tls)
+	mov	x9, #THREAD_MORELLO_USER_STATE
+	add	x0, x0, x9		// x0 = tsk->thread.morello_user_state
+
+	/* Load the capability and 64-bit views of the TLS pointer */
+	ldr	c2, [x0, #MORELLO_STATE_CTPIDR]
+	ldr	x3, [x1]
+	/*
+	 * The 64-bit view may have been modified from within the kernel (e.g.
+	 * through ptrace) since morello_task_save_user_tls was called.
+	 * Merge the two views together.
+	 */
+	morello_merge_c_x 2, x3
+	msr	ctpidr_el0, c2
+
+	ret
+SYM_FUNC_END(morello_task_restore_user_tls)
+
 
 SYM_FUNC_START(__morello_cap_lo_hi_tag)
 	ldr	c0, [x0]

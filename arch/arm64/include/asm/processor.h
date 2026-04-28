@@ -200,6 +200,9 @@ struct thread_struct {
 	u64			gcs_base;
 	u64			gcs_size;
 #endif
+#ifdef CONFIG_ARM64_MORELLO
+	struct morello_state	morello_user_state;
+#endif
 };
 
 static inline unsigned int thread_get_vl(struct thread_struct *thread,
