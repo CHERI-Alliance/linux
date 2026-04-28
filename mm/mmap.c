@@ -664,10 +664,11 @@ user_uintptr_t ksys_mmap_pgoff(user_uintptr_t user_ptr, unsigned long len,
 
 	retval = vm_mmap_pgoff(file, addr, len, prot, flags, pgoff);
 	if (!IS_ERR_VALUE(retval) && reserv_is_supported(current->mm)) {
-		if (user_ptr_is_valid((const void __user *)user_ptr))
+		if (user_ptr_is_valid((const void __user *)user_ptr)) {
+			WARN_ON(!(flags & MAP_FIXED));	// FIXCHERI: CHECK! This case is very strange.
 			retval = user_ptr;
-		else
-			retval = reserv_make_user_ptr_owning((ptraddr_t)retval,
+		} else
+			retval = reserv_make_user_ptr_owning(__c_ua(retval),
 							     false);
 	}
 out_fput:
@@ -761,7 +762,7 @@ generic_get_unmapped_area(struct file *filp, unsigned long addr,
 	struct vm_area_struct *vma, *prev;
 	struct vm_unmapped_area_info info = {};
 	const unsigned long mmap_end = arch_get_mmap_end(addr, len, flags);
-	unsigned long aligned_len = reserv_representable_length(len);
+	unsigned long aligned_len = reserv_representable_length(len + reserv_representable_alignment(len));
 
 	if (aligned_len > mmap_end - mmap_min_addr)
 		return -ENOMEM;
@@ -827,7 +828,7 @@ generic_get_unmapped_area_topdown(struct file *filp, unsigned long addr,
 	struct mm_struct *mm = current->mm;
 	struct vm_unmapped_area_info info = {};
 	const unsigned long mmap_end = arch_get_mmap_end(addr, len, flags);
-	unsigned long aligned_len = reserv_representable_length(len);
+	unsigned long aligned_len = reserv_representable_length(len + reserv_representable_alignment(len));
 
 	/* requested length too big for entire address space */
 	if (aligned_len > mmap_end - mmap_min_addr)
