@@ -162,7 +162,7 @@ xfs_rui_init(
 
 	xfs_log_item_init(mp, &ruip->rui_item, item_type, &xfs_rui_item_ops);
 	ruip->rui_format.rui_nextents = nextents;
-	ruip->rui_format.rui_id = (uintptr_t)(void *)ruip;
+	ruip->rui_format.rui_id = __c_pa(ruip);
 	atomic_set(&ruip->rui_next_extent, 0);
 	atomic_set(&ruip->rui_refcount, 2);
 

@@ -1543,7 +1543,7 @@ DECLARE_EVENT_CLASS(xfs_loggrant_class,
 	),
 	TP_fast_assign(
 		__entry->dev = log->l_mp->m_super->s_dev;
-		__entry->tic = (uintptr_t)tic;
+		__entry->tic = __c_pa(tic);
 		__entry->ocnt = tic->t_ocnt;
 		__entry->cnt = tic->t_cnt;
 		__entry->curr_res = tic->t_curr_res;
@@ -2656,7 +2656,7 @@ DECLARE_EVENT_CLASS(xfs_log_recover_item_class,
 	TP_ARGS(log, trans, item, pass),
 	TP_STRUCT__entry(
 		__field(dev_t, dev)
-		__field(unsigned long, item)
+		__field(uintptr_t, item)
 		__field(xlog_tid_t, tid)
 		__field(xfs_lsn_t, lsn)
 		__field(int, type)

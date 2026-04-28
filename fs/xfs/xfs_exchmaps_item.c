@@ -135,7 +135,7 @@ xfs_xmi_init(
 	xmi_lip = kmem_cache_zalloc(xfs_xmi_cache, GFP_KERNEL | __GFP_NOFAIL);
 
 	xfs_log_item_init(mp, &xmi_lip->xmi_item, XFS_LI_XMI, &xfs_xmi_item_ops);
-	xmi_lip->xmi_format.xmi_id = (uintptr_t)(void *)xmi_lip;
+	xmi_lip->xmi_format.xmi_id = __c_pa(xmi_lip);
 	atomic_set(&xmi_lip->xmi_refcount, 2);
 
 	return xmi_lip;

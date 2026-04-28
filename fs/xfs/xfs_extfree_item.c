@@ -166,7 +166,7 @@ xfs_efi_init(
 
 	xfs_log_item_init(mp, &efip->efi_item, item_type, &xfs_efi_item_ops);
 	efip->efi_format.efi_nextents = nextents;
-	efip->efi_format.efi_id = (uintptr_t)(void *)efip;
+	efip->efi_format.efi_id = __c_pa(efip);
 	atomic_set(&efip->efi_next_extent, 0);
 	atomic_set(&efip->efi_refcount, 2);
 

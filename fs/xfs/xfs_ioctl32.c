@@ -462,7 +462,7 @@ xfs_file_compat_ioctl(
 	/* long changes size, but xfs only copiese out 32 bits */
 	case XFS_IOC_GETVERSION_32:
 		cmd = _NATIVE_IOC(cmd, long);
-		return xfs_file_ioctl(filp, cmd, p);
+		return xfs_file_ioctl(filp, cmd, (user_uintptr_t)arg);
 	case XFS_IOC_SWAPEXT_32: {
 		struct xfs_swapext	  sxp;
 		struct compat_xfs_swapext __user *sxu = arg;

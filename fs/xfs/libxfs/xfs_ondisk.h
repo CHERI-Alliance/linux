@@ -184,8 +184,11 @@ xfs_check_ondisk_structs(void)
 
 	/* parent pointer ioctls */
 	XFS_CHECK_STRUCT_SIZE(struct xfs_getparents_rec,	32);
+#ifndef CONFIG_CHERI_KERNEL
+	/* FIXCHERI: These don't seem to be ondisk structs. */
 	XFS_CHECK_STRUCT_SIZE(struct xfs_getparents,		40);
 	XFS_CHECK_STRUCT_SIZE(struct xfs_getparents_by_handle,	64);
+#endif
 
 	/*
 	 * The v5 superblock format extended several v4 header structures with
@@ -320,7 +323,9 @@ xfs_check_ondisk_structs(void)
 	XFS_CHECK_STRUCT_SIZE(struct xfs_fsid,			8);
 	XFS_CHECK_STRUCT_SIZE(struct xfs_scrub_metadata,	64);
 	XFS_CHECK_STRUCT_SIZE(struct xfs_scrub_vec,		16);
+#if !__has_feature(capabilities)
 	XFS_CHECK_STRUCT_SIZE(struct xfs_scrub_vec_head,	40);
+#endif
 }
 
 #endif /* __XFS_ONDISK_H */

@@ -161,7 +161,7 @@ xfs_cui_init(
 
 	xfs_log_item_init(mp, &cuip->cui_item, item_type, &xfs_cui_item_ops);
 	cuip->cui_format.cui_nextents = nextents;
-	cuip->cui_format.cui_id = (uintptr_t)(void *)cuip;
+	cuip->cui_format.cui_id = __c_pa(cuip);
 	atomic_set(&cuip->cui_next_extent, 0);
 	atomic_set(&cuip->cui_refcount, 2);
 

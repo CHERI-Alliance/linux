@@ -817,7 +817,7 @@ struct xfs_scrub_vec_head {
 	__u16 svh_rest_us;	/* wait this much time between vector items */
 	__u16 svh_nr;		/* number of svh_vectors */
 	__u64 svh_reserved;	/* must be zero */
-	__u64 svh_vectors;	/* pointer to buffer of xfs_scrub_vec */
+	__u64ptr svh_vectors;	/* pointer to buffer of xfs_scrub_vec */
 };
 
 #define XFS_SCRUB_VEC_FLAGS_ALL		(0)
@@ -956,9 +956,11 @@ struct xfs_getparents {
 	__u64				gp_reserved;
 
 	/* Pointer to a buffer in which to place xfs_getparents_rec */
-	__u64				gp_buffer;
+	__u64ptr			gp_buffer;
 };
 
+#if 0
+// FIXCHERI: These are unused and cause clang-tidy warnings
 static inline struct xfs_getparents_rec *
 xfs_getparents_first_rec(struct xfs_getparents *gp)
 {
@@ -977,6 +979,7 @@ xfs_getparents_next_rec(struct xfs_getparents *gp,
 
 	return (struct xfs_getparents_rec *)next;
 }
+#endif
 
 /* Iterate through this file handle's directory parent pointers. */
 struct xfs_getparents_by_handle {

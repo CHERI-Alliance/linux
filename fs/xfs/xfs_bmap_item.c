@@ -150,7 +150,7 @@ xfs_bui_init(
 
 	xfs_log_item_init(mp, &buip->bui_item, XFS_LI_BUI, &xfs_bui_item_ops);
 	buip->bui_format.bui_nextents = XFS_BUI_MAX_FAST_EXTENTS;
-	buip->bui_format.bui_id = (uintptr_t)(void *)buip;
+	buip->bui_format.bui_id = __c_pa(buip);
 	atomic_set(&buip->bui_next_extent, 0);
 	atomic_set(&buip->bui_refcount, 2);
 
