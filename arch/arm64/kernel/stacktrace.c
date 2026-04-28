@@ -506,7 +506,7 @@ void show_stack(struct task_struct *tsk, unsigned long *sp, const char *loglvl)
 struct frame_tail {
 	struct frame_tail	__user *fp;
 	unsigned long		lr;
-} __attribute__((packed));
+} __attribute__((packed)) __attribute__((annotate("underaligned_capability")));
 
 /*
  * Get the return address for a single stackframe and return a pointer to the
