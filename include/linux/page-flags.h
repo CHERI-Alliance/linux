@@ -221,9 +221,9 @@ static __always_inline bool compound_info_has_mask(void)
 	return is_power_of_2(sizeof(struct page));
 }
 
-static __always_inline unsigned long _compound_head(const struct page *page)
+static __always_inline uintptr_t _compound_head(const struct page *page)
 {
-	unsigned long info = READ_ONCE(page->compound_info);
+	uintptr_t info = READ_ONCE(page->compound_info);
 	unsigned long mask;
 
 	if (!compound_info_has_mask()) {
@@ -244,10 +244,10 @@ static __always_inline unsigned long _compound_head(const struct page *page)
 	 */
 
 	/* Non-tail: -1UL, Tail: 0 */
-	mask = (info & 1) - 1;
+	mask = (__c_ua(info) & 1) - 1;
 
 	/* Non-tail: -1UL, Tail: info */
-	mask |= info;
+	mask |= __c_ua(info);
 
 	return (uintptr_t)page & mask;
 }
@@ -276,7 +276,7 @@ static __always_inline void set_compound_head(struct page *tail,
 	mask = GENMASK(BITS_PER_LONG - 1, shift);
 
 	/* Bit 0 encodes PageTail() */
-	WRITE_ONCE(tail->compound_info, mask | 1);
+	WRITE_ONCE(tail->compound_info, __c_fakeu(mask | 1));
 }
 
 static __always_inline void clear_compound_head(struct page *page)
