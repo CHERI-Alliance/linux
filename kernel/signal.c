@@ -3511,6 +3511,17 @@ int copy_siginfo_to_user(siginfo_t __user *to, const kernel_siginfo_t *from)
 	return 0;
 }
 
+int copy_siginfo_to_user_with_ptr(siginfo_t __user *to, const kernel_siginfo_t *from)
+{
+	char __user *expansion = si_expansion(to);
+
+	if (copy_to_user_with_ptr(to, from, sizeof(struct kernel_siginfo)))
+		return -EFAULT;
+	if (clear_user(expansion, SI_EXPANSION_SIZE))
+		return -EFAULT;
+	return 0;
+}
+
 static int post_copy_siginfo_from_user(kernel_siginfo_t *info,
 				       const siginfo_t __user *from)
 {
@@ -3544,6 +3555,13 @@ static int __copy_siginfo_from_user(int signo, kernel_siginfo_t *to,
 }
 
 int copy_siginfo_from_user(kernel_siginfo_t *to, const siginfo_t __user *from)
+{
+	if (copy_from_user_with_ptr(to, from, sizeof(struct kernel_siginfo)))
+		return -EFAULT;
+	return post_copy_siginfo_from_user(to, from);
+}
+
+int copy_siginfo_from_user_with_ptr(kernel_siginfo_t *to, const siginfo_t __user *from)
 {
 	if (copy_from_user_with_ptr(to, from, sizeof(struct kernel_siginfo)))
 		return -EFAULT;
