@@ -149,7 +149,7 @@ static int hisi_sfc_v3xx_adjust_op_size(struct spi_mem *mem,
 {
 	struct spi_device *spi = mem->spi;
 	struct hisi_sfc_v3xx_host *host;
-	uintptr_t addr = (uintptr_t)op->data.buf.in;
+	unsigned long addr = __c_pa(op->data.buf.in);
 	int max_byte_count;
 
 	host = spi_controller_get_devdata(spi->controller);

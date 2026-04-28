@@ -1427,7 +1427,7 @@ static ssize_t cqspi_read(struct cqspi_flash_pdata *f_pdata,
 	loff_t from = op->addr.val;
 	size_t len = op->data.nbytes;
 	u_char *buf = op->data.buf.in;
-	u64 dma_align = (u64)(uintptr_t)buf;
+	u64 dma_align = (u64)__c_pa(buf);
 	int ret;
 
 	ret = cqspi_read_setup(f_pdata, op);
