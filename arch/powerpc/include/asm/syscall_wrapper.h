@@ -34,7 +34,7 @@ struct pt_regs;
 	static inline long __do_sys##name(__MAP(x,__SC_DECL,__VA_ARGS__))
 
 #define SYSCALL_DEFINE0(sname)							\
-	SYSCALL_METADATA(_##sname, 0);						\
+	SYSCALL_METADATA(0, _##sname);						\
 	long sys_##sname(const struct pt_regs *__unused);		\
 	ALLOW_ERROR_INJECTION(sys_##sname, ERRNO);			\
 	long sys_##sname(const struct pt_regs *__unused)

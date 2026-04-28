@@ -66,7 +66,7 @@
 	}
 
 #define __SYSCALL_DEFINE0(sname, ret_type)					\
-	SYSCALL_METADATA(sname, 0);						\
+	SYSCALL_METADATA(0, sname,);						\
 	asmlinkage ret_type __arm64_sys##sname(const struct pt_regs *__unused);	\
 	ALLOW_ERROR_INJECTION(__arm64_sys##sname, ERRNO);			\
 	asmlinkage ret_type __arm64_compatentry_sys##sname(const struct pt_regs *__unused)\
@@ -90,7 +90,7 @@
 #define __ARM64_SYS_STUBx(x, name, ...)
 
 #define __SYSCALL_DEFINE0(sname, ret_type)					\
-	SYSCALL_METADATA(sname, 0);						\
+	SYSCALL_METADATA(0, sname,);						\
 	asmlinkage ret_type __arm64_sys##sname(const struct pt_regs *__unused);	\
 	ALLOW_ERROR_INJECTION(__arm64_sys##sname, ERRNO);			\
 	asmlinkage ret_type __arm64_sys##sname(const struct pt_regs *__unused)
