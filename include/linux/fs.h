@@ -1827,8 +1827,11 @@ int vfs_utimes(const struct path *path, struct timespec64 *times);
 #ifdef CONFIG_COMPAT
 extern long compat_ptr_ioctl(struct file *file, unsigned int cmd,
 					unsigned long arg);
+extern long compat_noptr_ioctl(struct file *file, unsigned int cmd,
+					unsigned long arg);
 #else
 #define compat_ptr_ioctl NULL
+#define compat_noptr_ioctl NULL
 #endif
 
 /*
