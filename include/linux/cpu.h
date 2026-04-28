@@ -170,7 +170,7 @@ void __noreturn cpu_startup_entry(enum cpuhp_state state);
 
 void cpu_idle_poll_ctrl(bool enable);
 
-bool cpu_in_idle(unsigned long pc);
+bool cpu_in_idle(__ptraddr_t pc);
 
 void arch_cpu_idle(void);
 void arch_cpu_idle_prepare(void);

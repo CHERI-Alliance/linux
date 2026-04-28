@@ -337,7 +337,7 @@ static ssize_t sched_server_write_common(struct file *filp, const char __user *u
 					 size_t cnt, loff_t *ppos, enum dl_param param,
 					 void *server)
 {
-	intptr_t cpu = (intptr_t) ((struct seq_file *) filp->private_data)->private;
+	long cpu = __c_pa(((struct seq_file *) filp->private_data)->private);
 	struct sched_dl_entity *dl_se = (struct sched_dl_entity *)server;
 	u64 old_runtime, runtime, period;
 	struct rq *rq = cpu_rq(cpu);
@@ -416,7 +416,7 @@ static ssize_t
 sched_fair_server_runtime_write(struct file *filp, const char __user *ubuf,
 				size_t cnt, loff_t *ppos)
 {
-	intptr_t cpu = (intptr_t) ((struct seq_file *) filp->private_data)->private;
+	long cpu = __c_pa(((struct seq_file *) filp->private_data)->private);
 	struct rq *rq = cpu_rq(cpu);
 
 	return sched_server_write_common(filp, ubuf, cnt, ppos, DL_RUNTIME,
@@ -425,7 +425,7 @@ sched_fair_server_runtime_write(struct file *filp, const char __user *ubuf,
 
 static int sched_fair_server_runtime_show(struct seq_file *m, void *v)
 {
-	uintptr_t cpu = (uintptr_t) m->private;
+	unsigned long cpu = __c_pa(m->private);
 	struct rq *rq = cpu_rq(cpu);
 
 	return sched_server_show_common(m, v, DL_RUNTIME, &rq->fair_server);
@@ -482,7 +482,7 @@ static ssize_t
 sched_fair_server_period_write(struct file *filp, const char __user *ubuf,
 			       size_t cnt, loff_t *ppos)
 {
-	intptr_t cpu = (intptr_t) ((struct seq_file *) filp->private_data)->private;
+	long cpu = __c_pa(((struct seq_file *) filp->private_data)->private);
 	struct rq *rq = cpu_rq(cpu);
 
 	return sched_server_write_common(filp, ubuf, cnt, ppos, DL_PERIOD,
@@ -491,7 +491,7 @@ sched_fair_server_period_write(struct file *filp, const char __user *ubuf,
 
 static int sched_fair_server_period_show(struct seq_file *m, void *v)
 {
-	uintptr_t cpu = (uintptr_t) m->private;
+	unsigned long cpu = __c_pa(m->private);
 	struct rq *rq = cpu_rq(cpu);
 
 	return sched_server_show_common(m, v, DL_PERIOD, &rq->fair_server);
@@ -562,8 +562,8 @@ static void debugfs_fair_server_init(void)
 		snprintf(buf, sizeof(buf), "cpu%lu", cpu);
 		d_cpu = debugfs_create_dir(buf, d_fair);
 
-		debugfs_create_file("runtime", 0644, d_cpu, (void *) cpu, &fair_server_runtime_fops);
-		debugfs_create_file("period", 0644, d_cpu, (void *) cpu, &fair_server_period_fops);
+		debugfs_create_file("runtime", 0644, d_cpu, __c_fakep(cpu), &fair_server_runtime_fops);
+		debugfs_create_file("period", 0644, d_cpu, __c_fakep(cpu), &fair_server_period_fops);
 	}
 }
 
@@ -1181,7 +1181,7 @@ static void *sched_debug_start(struct seq_file *file, loff_t *offset)
 	unsigned long n = *offset;
 
 	if (n == 0)
-		return (void *) 1;
+		return (void *)(uintptr_t)1;
 
 	n--;
 
@@ -1193,7 +1193,7 @@ static void *sched_debug_start(struct seq_file *file, loff_t *offset)
 	*offset = n + 1;
 
 	if (n < nr_cpu_ids)
-		return (void *)(unsigned long)(n + 2);
+		return __c_fakep(n + 2);
 
 	return NULL;
 }

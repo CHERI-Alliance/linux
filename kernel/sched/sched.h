@@ -2721,6 +2721,13 @@ extern const struct sched_class rt_sched_class;
 extern const struct sched_class fair_sched_class;
 extern const struct sched_class idle_sched_class;
 
+static __always_inline const struct sched_class *
+sched_class_provenance(const struct sched_class *c)
+{
+	c = __sched_class_highest + (c - __sched_class_highest);
+	return cheri_bounds_set_kernel(c, sizeof(*c));
+}
+
 /*
  * Iterate only active classes. SCX can take over all fair tasks or be
  * completely disabled. If the former, skip fair. If the latter, skip SCX.
@@ -2734,11 +2741,11 @@ static inline const struct sched_class *next_active_class(const struct sched_cla
 	if (!scx_enabled() && class == &ext_sched_class)
 		class++;
 #endif
-	return class;
+	return sched_class_provenance(class);
 }
 
 #define for_class_range(class, _from, _to) \
-	for (class = (_from); class < (_to); class++)
+	for (class = (_from); class < (_to); class = sched_class_provenance(++class))
 
 #define for_each_class(class) \
 	for_class_range(class, __sched_class_highest, __sched_class_lowest)

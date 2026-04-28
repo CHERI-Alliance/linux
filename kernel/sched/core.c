@@ -8598,7 +8598,7 @@ static struct kmem_cache *task_group_cache __ro_after_init;
 
 void __init sched_init(void)
 {
-	unsigned long ptr = 0;
+	uintptr_t ptr = 0;
 	int i;
 
 	/* Make sure the linker didn't screw up */
@@ -8620,7 +8620,7 @@ void __init sched_init(void)
 	ptr += 2 * nr_cpu_ids * sizeof(void **);
 #endif
 	if (ptr) {
-		ptr = (uintptr_t)kzalloc(ptr, GFP_NOWAIT);
+		ptr = (uintptr_t)kzalloc(__c_ua(ptr), GFP_NOWAIT);
 
 #ifdef CONFIG_FAIR_GROUP_SCHED
 		root_task_group.se = (struct sched_entity **)ptr;
