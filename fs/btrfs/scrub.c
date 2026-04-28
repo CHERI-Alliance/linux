@@ -564,7 +564,12 @@ static int scrub_print_warning_inode(u64 inum, u64 offset, u64 num_bytes,
 				  swarn->physical,
 				  root, inum, offset,
 				  fs_info->sectorsize, nlink,
-				  (char *)(uintptr_t)ipath->fspath->val[i]);
+#ifdef CONFIG_CHERI_KERNEL
+				  (char *)ipath->fspath->val + (ipath->fspath->val[i] - __c_pa(ipath->fspath->val))
+#else
+				  (char *)(uintptr_t)ipath->fspath->val[i]
+#endif
+				  );
 
 	btrfs_put_root(local_root);
 	return 0;

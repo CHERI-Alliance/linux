@@ -141,10 +141,10 @@ static void print_extent_item(const struct extent_buffer *eb, int slot, int type
 		iref = (struct btrfs_extent_inline_ref *)(ei + 1);
 	}
 
-	ptr = (uintptr_t)iref;
-	end = (uintptr_t)ei + item_size;
+	ptr = __c_pa(iref);
+	end = __c_pa(ei) + item_size;
 	while (ptr < end) {
-		iref = (struct btrfs_extent_inline_ref *)ptr;
+		iref = (struct btrfs_extent_inline_ref *)__c_fakep(ptr);
 		type = btrfs_extent_inline_ref_type(eb, iref);
 		offset = btrfs_extent_inline_ref_offset(eb, iref);
 		pr_info("\t\tref#%d: ", ref_index++);

@@ -27,7 +27,7 @@ struct ulist_iterator {
  */
 struct ulist_node {
 	u64 val;		/* value to store */
-	u64 aux;		/* auxiliary value saved along with the val */
+	uintptr_t aux;		/* auxiliary value saved along with the val */
 
 	struct list_head list;  /* used to link node */
 	struct rb_node rb_node;	/* used to speed up search */
@@ -50,10 +50,10 @@ void ulist_reinit(struct ulist *ulist);
 struct ulist *ulist_alloc(gfp_t gfp_mask);
 void ulist_prealloc(struct ulist *ulist, gfp_t mask);
 void ulist_free(struct ulist *ulist);
-int ulist_add(struct ulist *ulist, u64 val, u64 aux, gfp_t gfp_mask);
-int ulist_add_merge(struct ulist *ulist, u64 val, u64 aux,
-		    u64 *old_aux, gfp_t gfp_mask);
-int ulist_del(struct ulist *ulist, u64 val, u64 aux);
+int ulist_add(struct ulist *ulist, u64 val, uintptr_t aux, gfp_t gfp_mask);
+int ulist_add_merge(struct ulist *ulist, u64 val, uintptr_t aux,
+		    uintptr_t *old_aux, gfp_t gfp_mask);
+int ulist_del(struct ulist *ulist, u64 val, uintptr_t aux);
 
 /* just like ulist_add_merge() but take a pointer for the aux data */
 static inline int ulist_add_merge_ptr(struct ulist *ulist, u64 val, void *aux,
@@ -65,7 +65,7 @@ static inline int ulist_add_merge_ptr(struct ulist *ulist, u64 val, void *aux,
 	*old_aux = (void *)((uintptr_t)old64);
 	return ret;
 #else
-	return ulist_add_merge(ulist, val, (uintptr_t)aux, (u64 *)old_aux, gfp_mask);
+	return ulist_add_merge(ulist, val, (uintptr_t)aux, (uintptr_t *)old_aux, gfp_mask);
 #endif
 }
 
