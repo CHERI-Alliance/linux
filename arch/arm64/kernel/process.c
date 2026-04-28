@@ -409,6 +409,28 @@ static int copy_thread_za(struct task_struct *dst, struct task_struct *src)
 
 asmlinkage void ret_from_fork(void) asm("ret_from_fork");
 
+static unsigned long *task_user_tls(struct task_struct *tsk)
+{
+	if (is_compat_thread(task_thread_info(tsk)))
+		return &tsk->thread.uw.tp2_value;
+	else
+		return &tsk->thread.uw.tp_value;
+}
+
+static void task_save_user_tls(struct task_struct *tsk)
+{
+	unsigned long *user_tls = task_user_tls(tsk);
+
+	*user_tls = read_sysreg(tpidr_el0);
+}
+
+static void task_restore_user_tls(struct task_struct *tsk)
+{
+	unsigned long *user_tls = task_user_tls(tsk);
+
+	write_sysreg(*user_tls, tpidr_el0);
+}
+
 int copy_thread(struct task_struct *p, const struct kernel_clone_args *args)
 {
 	u64 clone_flags = args->flags;
@@ -445,7 +467,7 @@ int copy_thread(struct task_struct *p, const struct kernel_clone_args *args)
 		 * Read the current TLS pointer from tpidr_el0 as it may be
 		 * out-of-sync with the saved value.
 		 */
-		*task_user_tls(p) = read_sysreg(tpidr_el0);
+		task_save_user_tls(p);
 
 		if (system_supports_poe())
 			p->thread.por_el0 = read_sysreg_s(SYS_POR_EL0);
@@ -528,7 +550,7 @@ int copy_thread(struct task_struct *p, const struct kernel_clone_args *args)
 
 void tls_preserve_current_state(void)
 {
-	*task_user_tls(current) = read_sysreg(tpidr_el0);
+	task_save_user_tls(current);
 	if (system_supports_tpidr2() && !is_compat_task())
 		current->thread.tpidr2_el0 = read_sysreg_s(SYS_TPIDR2_EL0);
 }
@@ -542,7 +564,7 @@ static void tls_thread_switch(struct task_struct *next)
 	else
 		write_sysreg(0, tpidrro_el0);
 
-	write_sysreg(*task_user_tls(next), tpidr_el0);
+	task_restore_user_tls(next);
 	if (system_supports_tpidr2())
 		write_sysreg_s(next->thread.tpidr2_el0, SYS_TPIDR2_EL0);
 }
