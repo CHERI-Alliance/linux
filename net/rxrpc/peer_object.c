@@ -539,7 +539,7 @@ EXPORT_SYMBOL(rxrpc_kernel_remote_addr);
  *
  * Return: The previous app_data.
  */
-unsigned long rxrpc_kernel_set_peer_data(struct rxrpc_peer *peer, unsigned long app_data)
+uintptr_t rxrpc_kernel_set_peer_data(struct rxrpc_peer *peer, uintptr_t app_data)
 {
 	return xchg(&peer->app_data, app_data);
 }
@@ -553,7 +553,7 @@ EXPORT_SYMBOL(rxrpc_kernel_set_peer_data);
  *
  * Return: The peer's app data.
  */
-unsigned long rxrpc_kernel_get_peer_data(const struct rxrpc_peer *peer)
+uintptr_t rxrpc_kernel_get_peer_data(const struct rxrpc_peer *peer)
 {
 	return peer->app_data;
 }
