@@ -41,6 +41,7 @@
 #include <asm/hw_breakpoint.h>
 #include <asm/kasan.h>
 #include <asm/lse.h>
+#include <asm/morello.h>
 #include <asm/pgtable-hwdef.h>
 #include <asm/pointer_auth.h>
 #include <asm/ptrace.h>
@@ -339,6 +340,9 @@ static inline void start_thread(struct pt_regs *regs, unsigned long pc,
 	start_thread_common(regs, pc, PSR_MODE_EL0t);
 	spectre_v4_enable_task_mitigation(current);
 	regs->sp = sp;
+
+	if (system_supports_morello())
+		morello_thread_start(regs, pc);
 }
 
 #ifdef CONFIG_COMPAT

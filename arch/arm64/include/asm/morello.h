@@ -7,6 +7,8 @@
 
 #ifndef __ASSEMBLY__
 
+struct pt_regs;
+
 #ifdef CONFIG_ARM64_MORELLO
 
 /* Opaque type representing a capability, should not be accessed directly */
@@ -31,6 +33,8 @@ void morello_cpu_setup(void);
  * All of dst, src and len must be 16-byte aligned.
  */
 void *morello_capcpy(void *dst, const void *src, size_t len);
+
+void morello_thread_start(struct pt_regs *regs, unsigned long pc);
 
 #else /* __ASSEMBLY__ */
 

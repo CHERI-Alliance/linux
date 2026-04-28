@@ -60,6 +60,12 @@ SYM_FUNC_START(__morello_cap_lo_hi_tag)
 	ret
 SYM_FUNC_END(__morello_cap_lo_hi_tag)
 
+SYM_FUNC_START(__morello_cap_cpy)
+	ldr	c2, [x1]
+	str	c2, [x0]
+	ret
+SYM_FUNC_END(__morello_cap_cpy)
+
 SYM_FUNC_START(__morello_get_ddc)
 	mrs	c1, ddc
 	str	c1, [x0]
