@@ -6,4 +6,5 @@ bootstrap
 clone
 exit
 read_write
+sched
 signal
