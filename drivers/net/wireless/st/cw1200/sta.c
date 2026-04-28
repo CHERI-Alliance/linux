@@ -565,7 +565,7 @@ uintptr_t cw1200_prepare_multicast(struct ieee80211_hw *hw,
 		priv->multicast_filter.num_addrs = __cpu_to_le32(count);
 	}
 
-	return netdev_hw_addr_list_count(mc_list);
+	return __c_fakeu(netdev_hw_addr_list_count(mc_list));
 }
 
 void cw1200_configure_filter(struct ieee80211_hw *dev,

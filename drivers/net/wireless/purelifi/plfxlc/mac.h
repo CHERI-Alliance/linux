@@ -89,7 +89,8 @@ struct plfxlc_ctrlset {
 struct plfxlc_header {
 	struct plfxlc_ctrlset plf_ctrl;
 	u32    frametype;
-	u8    *dmac;
+	/* FIXCHERI: Check this, upstream as "u8 * dmac" here. */
+	u8     dmac[];
 } __packed;
 
 struct tx_status {
