@@ -3,10 +3,19 @@
 #ifndef _LINUX_BPFPTR_H
 #define _LINUX_BPFPTR_H
 
+#include <linux/compat.h>
 #include <linux/mm.h>
 #include <linux/sockptr.h>
 
 typedef sockptr_t bpfptr_t;
+
+#define __bpfptr_put_uattr(type, x, uattr, to_field) \
+	(copy_to_bpfptr_offset(uattr, offsetof(type, to_field), &x, sizeof(x)))
+
+#define bpfptr_put_uattr(x, uattr, to_field) \
+	(in_compat64_syscall() ? \
+		__bpfptr_put_uattr(union compat_bpf_attr, x, uattr, to_field) : \
+		__bpfptr_put_uattr(union bpf_attr, x, uattr, to_field))
 
 static inline bool bpfptr_is_kernel(bpfptr_t bpfptr)
 {
