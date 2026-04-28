@@ -31,9 +31,9 @@
 
 /* 'empty' nodes are nodes that are known not to be inserted in an rbtree */
 #define RB_EMPTY_NODE(node)  \
-	((node)->__rb_parent_color == (unsigned long)(node))
+	((node)->__rb_parent_color == (uintptr_t)(node))
 #define RB_CLEAR_NODE(node)  \
-	((node)->__rb_parent_color = (unsigned long)(node))
+	((node)->__rb_parent_color = (uintptr_t)(node))
 
 #define RB_EMPTY_LINKED_NODE(lnode)  RB_EMPTY_NODE(&(lnode)->node)
 #define RB_CLEAR_LINKED_NODE(lnode)  ({					\

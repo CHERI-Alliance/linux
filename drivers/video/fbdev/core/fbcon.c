@@ -173,7 +173,7 @@ static int margin_color;
 
 static const struct consw fb_con;
 
-#define advance_row(p, delta) (unsigned short *)((unsigned long)(p) + (delta) * vc->vc_size_row)
+#define advance_row(p, delta) (unsigned short *)((uintptr_t)(p) + (delta) * vc->vc_size_row)
 
 static bool fbcon_cursor_blink = true;
 

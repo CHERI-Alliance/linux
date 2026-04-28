@@ -364,7 +364,7 @@ EXPORT_SYMBOL(bt878_device_control);
 		.vendor = PCI_VENDOR_ID_BROOKTREE, \
 		.device = PCI_DEVICE_ID_BROOKTREE_878, \
 		.subvendor = (vend), .subdevice = (dev), \
-		.driver_data = (unsigned long) name \
+		.driver_data = (uintptr_t) name \
 	}
 
 static const struct pci_device_id bt878_pci_tbl[] = {

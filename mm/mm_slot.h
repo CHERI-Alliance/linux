@@ -37,7 +37,7 @@ static inline void mm_slot_free(struct kmem_cache *cache, void *objp)
 ({									       \
 	struct mm_slot *tmp_slot, *mm_slot = NULL;			       \
 									       \
-	hash_for_each_possible(_hashtable, tmp_slot, hash, (unsigned long)_mm) \
+	hash_for_each_possible(_hashtable, tmp_slot, hash, (unsigned long __force)_mm) \
 		if (_mm == tmp_slot->mm) {				       \
 			mm_slot = tmp_slot;				       \
 			break;						       \
@@ -49,7 +49,7 @@ static inline void mm_slot_free(struct kmem_cache *cache, void *objp)
 #define mm_slot_insert(_hashtable, _mm, _mm_slot)			       \
 ({									       \
 	_mm_slot->mm = _mm;						       \
-	hash_add(_hashtable, &_mm_slot->hash, (unsigned long)_mm);	       \
+	hash_add(_hashtable, &_mm_slot->hash, (unsigned long __force)_mm);     \
 })
 
 #endif /* _LINUX_MM_SLOT_H */

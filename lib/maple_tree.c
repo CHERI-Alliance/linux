@@ -90,7 +90,7 @@
 #define MA_STATE_PREALLOC	1
 
 #define ma_parent_ptr(x) ((struct maple_pnode *)(x))
-#define mas_tree_parent(x) ((unsigned long)(x->tree) | MA_ROOT_PARENT)
+#define mas_tree_parent(x) ((uintptr_t)(x->tree) | MA_ROOT_PARENT)
 #define ma_mnode_ptr(x) ((struct maple_node *)(x))
 #define ma_enode_ptr(x) ((struct maple_enode *)(x))
 static struct kmem_cache *maple_node_cache;

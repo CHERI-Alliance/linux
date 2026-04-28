@@ -110,8 +110,8 @@ asm volatile(ALTERNATIVE(						\
 	"bltu a0, %2, 3b\n\t",						\
 	0, RISCV_ISA_EXT_ZICBOM, CONFIG_RISCV_ISA_ZICBOM)		\
 	: : "r"(_cachesize),						\
-	    "r"((unsigned long)(_start) & ~((_cachesize) - 1UL)),	\
-	    "r"((unsigned long)(_start) + (_size))			\
+	    "r"((uintptr_t)(_start) & ~((_cachesize) - 1UL)),		\
+	    "r"((unsigned long __force)(_start) + (_size))		\
 	: "a0")
 
 #define THEAD_C9XX_RV_IRQ_PMU			17

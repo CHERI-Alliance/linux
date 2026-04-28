@@ -950,12 +950,12 @@ static const struct driver_info	qmi_wwan_info_quirk_dtr = {
 /* map QMI/wwan function by a fixed interface number */
 #define QMI_FIXED_INTF(vend, prod, num) \
 	USB_DEVICE_INTERFACE_NUMBER(vend, prod, num), \
-	.driver_info = (unsigned long)&qmi_wwan_info
+	.driver_info = (uintptr_t)&qmi_wwan_info
 
 /* devices requiring "set DTR" quirk */
 #define QMI_QUIRK_SET_DTR(vend, prod, num) \
 	USB_DEVICE_INTERFACE_NUMBER(vend, prod, num), \
-	.driver_info = (unsigned long)&qmi_wwan_info_quirk_dtr
+	.driver_info = (uintptr_t)&qmi_wwan_info_quirk_dtr
 
 /* Gobi 1000 QMI/wwan interface number is 3 according to qcserial */
 #define QMI_GOBI1K_DEVICE(vend, prod) \
@@ -976,7 +976,7 @@ static const struct driver_info	qmi_wwan_info_quirk_dtr = {
 #define QMI_MATCH_FF_FF_FF(vend, prod) \
 	USB_DEVICE_AND_INTERFACE_INFO(vend, prod, USB_CLASS_VENDOR_SPEC, \
 				      USB_SUBCLASS_VENDOR_SPEC, 0xff), \
-	.driver_info = (unsigned long)&qmi_wwan_info_quirk_dtr
+	.driver_info = (uintptr_t)&qmi_wwan_info_quirk_dtr
 
 static const struct usb_device_id products[] = {
 	/* 1. CDC ECM like devices match on the control interface */

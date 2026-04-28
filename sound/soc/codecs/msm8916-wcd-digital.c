@@ -211,7 +211,7 @@ enum {
 	.info = wcd_iir_filter_info, \
 	.get = msm8x16_wcd_get_iir_band_audio_mixer, \
 	.put = msm8x16_wcd_put_iir_band_audio_mixer, \
-	.private_value = (unsigned long)&(struct wcd_iir_filter_ctl) { \
+	.private_value = (uintptr_t)&(struct wcd_iir_filter_ctl) { \
 		.iir_idx = iidx, \
 		.band_idx = bidx, \
 		.bytes_ext = {.max = WCD_IIR_FILTER_SIZE, }, \

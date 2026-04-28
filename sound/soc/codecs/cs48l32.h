@@ -178,7 +178,7 @@
 {	.iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname,	\
 	.info = cs48l32_eq_coeff_info, .get = cs48l32_eq_coeff_get,	\
 	.put = cs48l32_eq_coeff_put, .private_value =		\
-	(unsigned long)&(struct cs48l32_eq_control) { .reg = xreg,\
+	(uintptr_t)&(struct cs48l32_eq_control) { .reg = xreg,\
 	.shift = xshift, .block_base = xbase, .max = 65535 } }
 
 #define CS48L32_EQ_REG_NAME_PASTER(eq, band, type) \
@@ -224,7 +224,7 @@
 {	.iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = xname,	\
 	.info = snd_soc_bytes_info, .get = snd_soc_bytes_get,	\
 	.put = cs48l32_lhpf_coeff_put, .private_value =		\
-	((unsigned long)&(struct soc_bytes) { .base = xbase,	\
+	((uintptr_t)&(struct soc_bytes) { .base = xbase,	\
 	 .num_regs = 1 }) }
 
 /* these have a subseq number so they run after SYSCLK and DSPCLK widgets */

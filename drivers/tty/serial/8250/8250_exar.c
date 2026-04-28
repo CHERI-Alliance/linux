@@ -1648,7 +1648,7 @@ static const struct exar8250_board pbn_exar_XR17V8358 = {
 		PCI_DEVICE_ID_EXAR_##devid,             \
 		PCI_SUBVENDOR_ID_CONNECT_TECH,          \
 		PCI_ANY_ID), 0, 0,                      \
-		(kernel_ulong_t)&bd                     \
+		(uintptr_t)&bd                          \
 	}
 
 #define EXAR_DEVICE(vend, devid, bd) { PCI_DEVICE_DATA(vend, devid, &bd) }
@@ -1659,7 +1659,7 @@ static const struct exar8250_board pbn_exar_XR17V8358 = {
 		PCI_DEVICE_ID_EXAR_##devid,		\
 		PCI_SUBVENDOR_ID_IBM,			\
 		PCI_SUBDEVICE_ID_IBM_##sdevid), 0, 0,	\
-		(kernel_ulong_t)&bd			\
+		(uintptr_t)&bd				\
 	}
 
 #define USR_DEVICE(devid, sdevid, bd) {			\
@@ -1668,7 +1668,7 @@ static const struct exar8250_board pbn_exar_XR17V8358 = {
 		PCI_DEVICE_ID_EXAR_##devid,		\
 		PCI_VENDOR_ID_EXAR,			\
 		PCI_SUBDEVICE_ID_USR_##sdevid), 0, 0,	\
-		(kernel_ulong_t)&bd			\
+		(uintptr_t)&bd				\
 	}
 
 static const struct pci_device_id exar_pci_tbl[] = {

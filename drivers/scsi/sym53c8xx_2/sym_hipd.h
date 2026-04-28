@@ -1112,7 +1112,7 @@ bad:
 #define sym_get_mem_cluster()	\
 	(void *) __get_free_pages(GFP_ATOMIC, SYM_MEM_PAGE_ORDER)
 #define sym_free_mem_cluster(p)	\
-	free_pages((unsigned long)p, SYM_MEM_PAGE_ORDER)
+	free_pages((uintptr_t)p, SYM_MEM_PAGE_ORDER)
 
 /*
  *  Link between free memory chunks of a given size.
@@ -1136,7 +1136,7 @@ typedef struct sym_m_vtob {	/* Virtual to Bus address translation */
 #define VTOB_HASH_SIZE		(1UL << VTOB_HASH_SHIFT)
 #define VTOB_HASH_MASK		(VTOB_HASH_SIZE-1)
 #define VTOB_HASH_CODE(m)	\
-	((((unsigned long)(m)) >> SYM_MEM_CLUSTER_SHIFT) & VTOB_HASH_MASK)
+	((((unsigned long __force)(m)) >> SYM_MEM_CLUSTER_SHIFT) & VTOB_HASH_MASK)
 
 /*
  *  Memory pool of a given kind.
@@ -1174,7 +1174,7 @@ dma_addr_t __vtobus(m_pool_ident_t dev_dmat, void *m);
  * The _uvptv_ macro avoids a nasty warning about pointer to volatile 
  * being discarded.
  */
-#define _uvptv_(p) ((void *)((u_long)(p)))
+#define _uvptv_(p) ((void *)((uintptr_t)(p)))
 
 #define _sym_calloc_dma(np, l, n)	__sym_calloc_dma(np->bus_dmat, l, n)
 #define _sym_mfree_dma(np, p, l, n)	\

@@ -187,7 +187,7 @@ err:
 	.access = SNDRV_CTL_ELEM_ACCESS_READWRITE, \
 	.info = fsl_easrc_iec958_info, .get = fsl_easrc_get_reg, \
 	.put = fsl_easrc_set_reg, \
-	.private_value = (unsigned long)&(struct soc_mreg_control) \
+	.private_value = (uintptr_t)&(struct soc_mreg_control) \
 		{ .regbase = xreg, .regcount = 1, .nbits = 32, \
 		  .invert = 0, .min = 0, .max = 0xffffffff, } }
 
@@ -196,7 +196,7 @@ err:
 	.access = SNDRV_CTL_ELEM_ACCESS_READWRITE, \
 	.info = snd_soc_info_xr_sx, .get = fsl_easrc_iec958_get_bits, \
 	.put = fsl_easrc_iec958_put_bits, \
-	.private_value = (unsigned long)&(struct soc_mreg_control) \
+	.private_value = (uintptr_t)&(struct soc_mreg_control) \
 		{ .regbase = xreg, .regcount = 1, .nbits = 32, \
 		  .invert = 0, .min = 0, .max = 2, } }
 

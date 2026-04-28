@@ -208,7 +208,7 @@ static const struct iio_info mcp4531_info = {
 
 #define MCP4531_ID_TABLE(_name, cfg) {				\
 	.name = _name,						\
-	.driver_data = (kernel_ulong_t)&mcp4531_cfg[cfg],	\
+	.driver_data = (uintptr_t)&mcp4531_cfg[cfg],	\
 }
 
 static const struct i2c_device_id mcp4531_id[] = {

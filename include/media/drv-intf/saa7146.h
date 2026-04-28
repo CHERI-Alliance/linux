@@ -83,7 +83,7 @@ struct saa7146_pci_extension_data {
 		.device	   = PCI_DEVICE_ID_PHILIPS_SAA7146,	\
 		.subvendor = x_vendor,				\
 		.subdevice = x_device,				\
-		.driver_data = (unsigned long)& x_var,		\
+		.driver_data = (uintptr_t)& x_var,		\
 	}
 
 struct saa7146_extension

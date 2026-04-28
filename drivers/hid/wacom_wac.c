@@ -4947,23 +4947,23 @@ static const struct wacom_features wacom_features_0x94 =
 
 #define USB_DEVICE_WACOM(prod)						\
 	HID_DEVICE(BUS_USB, HID_GROUP_WACOM, USB_VENDOR_ID_WACOM, prod),\
-	.driver_data = (kernel_ulong_t)&wacom_features_##prod
+	.driver_data = (uintptr_t)&wacom_features_##prod
 
 #define BT_DEVICE_WACOM(prod)						\
 	HID_DEVICE(BUS_BLUETOOTH, HID_GROUP_WACOM, USB_VENDOR_ID_WACOM, prod),\
-	.driver_data = (kernel_ulong_t)&wacom_features_##prod
+	.driver_data = (uintptr_t)&wacom_features_##prod
 
 #define I2C_DEVICE_WACOM(prod)						\
 	HID_DEVICE(BUS_I2C, HID_GROUP_WACOM, USB_VENDOR_ID_WACOM, prod),\
-	.driver_data = (kernel_ulong_t)&wacom_features_##prod
+	.driver_data = (uintptr_t)&wacom_features_##prod
 
 #define PCI_DEVICE_WACOM(prod)						\
 	HID_DEVICE(BUS_PCI, HID_GROUP_WACOM, USB_VENDOR_ID_WACOM, prod),\
-	.driver_data = (kernel_ulong_t)&wacom_features_##prod
+	.driver_data = (uintptr_t)&wacom_features_##prod
 
 #define USB_DEVICE_LENOVO(prod)					\
 	HID_USB_DEVICE(USB_VENDOR_ID_LENOVO, prod),			\
-	.driver_data = (kernel_ulong_t)&wacom_features_##prod
+	.driver_data = (uintptr_t)&wacom_features_##prod
 
 const struct hid_device_id wacom_ids[] = {
 	{ USB_DEVICE_WACOM(0x00) },

@@ -371,7 +371,7 @@ struct snd_soc_dapm_context;
 	.info = snd_soc_dapm_info_pin_switch, \
 	.get = snd_soc_dapm_get_pin_switch, \
 	.put = snd_soc_dapm_put_pin_switch, \
-	.private_value = (unsigned long)xname }
+	.private_value = (uintptr_t)xname }
 
 /* dapm stream operations */
 #define SND_SOC_DAPM_STREAM_NOP			0x0

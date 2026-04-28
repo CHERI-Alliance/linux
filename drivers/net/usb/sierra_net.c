@@ -930,11 +930,11 @@ sierra_net_probe(struct usb_interface *udev, const struct usb_device_id *prod)
 
 #define DIRECT_IP_DEVICE(vend, prod) \
 	{USB_DEVICE_INTERFACE_NUMBER(vend, prod, 7), \
-	.driver_info = (unsigned long)&sierra_net_info_direct_ip}, \
+	.driver_info = (uintptr_t)&sierra_net_info_direct_ip}, \
 	{USB_DEVICE_INTERFACE_NUMBER(vend, prod, 10), \
-	.driver_info = (unsigned long)&sierra_net_info_direct_ip}, \
+	.driver_info = (uintptr_t)&sierra_net_info_direct_ip}, \
 	{USB_DEVICE_INTERFACE_NUMBER(vend, prod, 11), \
-	.driver_info = (unsigned long)&sierra_net_info_direct_ip}
+	.driver_info = (uintptr_t)&sierra_net_info_direct_ip}
 
 static const struct usb_device_id products[] = {
 	DIRECT_IP_DEVICE(0x1199, 0x68A3), /* Sierra Wireless USB-to-WWAN modem */

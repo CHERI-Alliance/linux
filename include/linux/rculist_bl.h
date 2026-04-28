@@ -29,7 +29,7 @@ static inline void hlist_bl_set_first_rcu(struct hlist_bl_head *h,
 	struct hlist_bl_head *__head = (head);				\
 									\
 	(struct hlist_bl_node *)					\
-	((unsigned long)rcu_dereference_check(hlist_bl_first_rcu(__head), \
+	((uintptr_t)rcu_dereference_check(hlist_bl_first_rcu(__head), \
 					      hlist_bl_is_locked(__head)) & \
 					      ~LIST_BL_LOCKMASK);	\
 })

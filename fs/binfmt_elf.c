@@ -141,14 +141,14 @@ static int padzero(unsigned long address)
 #ifdef CONFIG_STACK_GROWSUP
 #define STACK_ADD(sp, items) ((elf_addr_t __user *)(sp) + (items))
 #define STACK_ROUND(sp, items) \
-	((15 + (unsigned long) ((sp) + (items))) &~ 15UL)
+	((15 + (user_uintptr_t) ((sp) + (items))) &~ 15UL)
 #define STACK_ALLOC(sp, len) ({ \
 	elf_addr_t __user *old_sp = (elf_addr_t __user *)sp; sp += len; \
 	old_sp; })
 #else
 #define STACK_ADD(sp, items) ((elf_addr_t __user *)(sp) - (items))
 #define STACK_ROUND(sp, items) \
-	(((unsigned long) (sp - items)) &~ 15UL)
+	(((user_uintptr_t) (sp - items)) &~ 15UL)
 #define STACK_ALLOC(sp, len) (sp -= len)
 #endif
 

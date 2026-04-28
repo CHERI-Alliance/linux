@@ -401,7 +401,7 @@ static __always_inline bool riscv_insn_is_c_jalr(u32 code)
 	(SHIFT_RIGHT((insn), (pos) - LOG_REGBYTES) & REG_MASK)
 
 #define REG_PTR(insn, pos, regs)	\
-	((ulong *)((ulong)(regs) + REG_OFFSET(insn, pos)))
+	((uintptr_t *)((uintptr_t)(regs) + REG_OFFSET(insn, pos)))
 
 #define GET_RS1(insn, regs)	(*REG_PTR(insn, SH_RS1, regs))
 #define GET_RS2(insn, regs)	(*REG_PTR(insn, SH_RS2, regs))
@@ -421,9 +421,17 @@ static __always_inline bool riscv_insn_is_c_jalr(u32 code)
 #define MASK_RX			0x1f
 
 #if defined(CONFIG_64BIT)
+#ifndef CONFIG_CHERI_KERNEL
 #define LOG_REGBYTES		3
 #else
+#define LOG_REGBYTES		4
+#endif
+#else
+#ifndef CONFIG_CHERI_KERNEL
 #define LOG_REGBYTES		2
+#else
+#define LOG_REGBYTES		3
+#endif
 #endif
 
 #define MASK_FUNCT3		0x7000

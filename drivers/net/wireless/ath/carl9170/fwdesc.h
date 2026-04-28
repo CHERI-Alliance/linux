@@ -237,7 +237,7 @@ static inline void carl9170fw_fill_desc(struct carl9170fw_desc_head *head,
 	     memcmp(desc->magic, LAST_MAGIC, CARL9170FW_MAGIC_SIZE) &&	\
 	     le16_to_cpu(desc->length) >= CARL9170FW_DESC_HEAD_SIZE &&	\
 	     le16_to_cpu(desc->length) < CARL9170FW_DESC_MAX_LENGTH;	\
-	     desc = (void *)((unsigned long)desc + le16_to_cpu(desc->length)))
+	     desc = (void *)((uintptr_t)desc + le16_to_cpu(desc->length)))
 
 #define CHECK_HDR_VERSION(head, _min_ver)				\
 	(((head)->cur_ver < _min_ver) || ((head)->min_ver > _min_ver))	\

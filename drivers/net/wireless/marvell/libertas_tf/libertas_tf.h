@@ -502,7 +502,7 @@ void lbtf_bcn_sent(struct lbtf_private *priv);
 })
 
 #define lbtf_cmd_with_response(priv, cmdnr, cmd)	\
-	lbtf_cmd(priv, cmdnr, cmd, lbtf_cmd_copyback, (unsigned long) (cmd))
+	lbtf_cmd(priv, cmdnr, cmd, lbtf_cmd_copyback, (uintptr_t) (cmd))
 
 void lbtf_cmd_async(struct lbtf_private *priv, uint16_t command,
 	struct cmd_header *in_cmd, int in_cmd_size);

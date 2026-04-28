@@ -134,7 +134,7 @@ static inline void arch_thread_struct_whitelist(unsigned long *offset,
 }
 
 #define INIT_THREAD {					\
-	.sp = sizeof(init_stack) + (long)&init_stack,	\
+	.sp = sizeof(init_stack) + (intptr_t)&init_stack,	\
 	.align_ctl = PR_UNALIGN_NOPRINT,		\
 }
 
