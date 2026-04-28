@@ -37,7 +37,7 @@ SYSCALL_DEFINE3(msync, user_uintptr_t, user_ptr, size_t, len, int, flags)
 	struct vm_area_struct *vma;
 	int unmapped_error = 0;
 	int error = -EINVAL;
-	unsigned long start = untagged_addr((ptraddr_t)user_ptr);
+	unsigned long start = untagged_addr(__c_ua(user_ptr));
 
 	if (flags & ~(MS_ASYNC | MS_INVALIDATE | MS_SYNC))
 		goto out;

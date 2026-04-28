@@ -120,8 +120,8 @@ static bool overlaps(const __ptraddr_t ptr, unsigned long n,
 static inline void check_kernel_text_object(const __ptraddr_t ptr,
 					    unsigned long n, bool to_user)
 {
-	uintptr_t textlow = (uintptr_t)_stext;
-	uintptr_t texthigh = (uintptr_t)_etext;
+	unsigned long textlow = __c_pa(_stext);
+	unsigned long texthigh = __c_pa(_etext);
 	unsigned long textlow_linear, texthigh_linear;
 
 	if (overlaps(ptr, n, textlow, texthigh))
@@ -135,13 +135,13 @@ static inline void check_kernel_text_object(const __ptraddr_t ptr,
 	 * __pa() is not just the reverse of __va(). This can be detected
 	 * and checked:
 	 */
-	textlow_linear = (uintptr_t)lm_alias(textlow);
+	textlow_linear = __c_pa(lm_alias(textlow));
 	/* No different mapping: we're done. */
 	if (textlow_linear == textlow)
 		return;
 
 	/* Check the secondary mapping... */
-	texthigh_linear = (uintptr_t)lm_alias(texthigh);
+	texthigh_linear = __c_pa(lm_alias(texthigh));
 	if (overlaps(ptr, n, textlow_linear, texthigh_linear))
 		usercopy_abort("linear kernel text", NULL, to_user,
 			       ptr - textlow_linear, n);
@@ -162,7 +162,7 @@ static inline void check_bogus_address(const unsigned long ptr, unsigned long n,
 static inline void check_heap_object(const void *ptr, unsigned long n,
 				     bool to_user)
 {
-	uintptr_t addr = (uintptr_t)ptr;
+	unsigned long addr = __c_pa(ptr);
 	unsigned long offset;
 	struct page *page;
 	struct slab *slab;
@@ -227,7 +227,7 @@ void __check_object_size(const void *ptr, unsigned long n, bool to_user)
 		return;
 
 	/* Check for invalid addresses. */
-	check_bogus_address((uintptr_t)ptr, n, to_user);
+	check_bogus_address(__c_pa(ptr), n, to_user);
 
 	/* Check for bad stack object. */
 	switch (check_stack_object(ptr, n)) {
