@@ -169,7 +169,7 @@ struct tls_offload_context_tx {
 	 * Currently the belief is that there is not enough
 	 * driver specific state to justify another layer of indirection
 	 */
-	u8 driver_state[TLS_DRIVER_STATE_SIZE_TX] __aligned(8);
+	u8 driver_state[TLS_DRIVER_STATE_SIZE_TX] __aligned(8) __cheri_pointer_align;
 };
 
 enum tls_context_flags {
@@ -302,7 +302,11 @@ struct tls_offload_resync_async {
 	u32 log[TLS_DEVICE_RESYNC_ASYNC_LOGMAX];
 };
 
+#if __SIZEOF_POINTER__ > 8
+#define TLS_DRIVER_STATE_SIZE_RX	__SIZEOF_POINTER__
+#else
 #define TLS_DRIVER_STATE_SIZE_RX	8
+#endif
 struct tls_offload_context_rx {
 	/* sw must be the first member of tls_offload_context_rx */
 	struct tls_sw_context_rx sw;
@@ -330,7 +334,7 @@ struct tls_offload_context_rx {
 	 * Currently the belief is that there is not enough
 	 * driver specific state to justify another layer of indirection
 	 */
-	u8 driver_state[TLS_DRIVER_STATE_SIZE_RX] __aligned(8);
+	u8 driver_state[TLS_DRIVER_STATE_SIZE_RX] __aligned(8) __cheri_pointer_align;
 };
 
 struct tls_record_info *tls_get_record(struct tls_offload_context_tx *context,
