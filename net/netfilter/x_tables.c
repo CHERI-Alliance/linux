@@ -1959,7 +1959,7 @@ bool xt_percpu_counter_alloc(struct xt_percpu_counter_alloc_state *state,
 		if (!state->mem)
 			return false;
 	}
-	counter->pcnt = (__force unsigned long)(state->mem + state->off);
+	counter->percpu = (void * __force)(state->mem + state->off);
 	state->off += sizeof(*counter);
 	if (state->off > (XT_PCPU_BLOCK_SIZE - sizeof(*counter))) {
 		state->mem = NULL;
@@ -1971,10 +1971,10 @@ EXPORT_SYMBOL_GPL(xt_percpu_counter_alloc);
 
 void xt_percpu_counter_free(struct xt_counters *counters)
 {
-	unsigned long pcnt = counters->pcnt;
+	uintptr_t percpu = (uintptr_t)counters->percpu;
 
-	if (nr_cpu_ids > 1 && (pcnt & (XT_PCPU_BLOCK_SIZE - 1)) == 0)
-		free_percpu((void __percpu *)pcnt);
+	if (nr_cpu_ids > 1 && (percpu & (XT_PCPU_BLOCK_SIZE - 1)) == 0)
+		free_percpu((void __percpu *)percpu);
 }
 EXPORT_SYMBOL_GPL(xt_percpu_counter_free);
 #endif
