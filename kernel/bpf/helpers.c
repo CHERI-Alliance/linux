@@ -691,7 +691,8 @@ BPF_CALL_5(bpf_copy_from_user_task, void *, dst, u32, size,
 	if (unlikely(!size))
 		return 0;
 
-	ret = access_process_vm(tsk, (unsigned long)user_ptr, dst, size, 0);
+	/* TODO [PCuABI] - capability checks for uaccess */
+	ret = access_process_vm(tsk, user_ptr_addr(user_ptr), dst, size, 0);
 	if (ret == size)
 		return 0;
 
