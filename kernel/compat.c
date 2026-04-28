@@ -215,7 +215,7 @@ long compat_get_bitmap(unsigned long *mask, const compat_ulong_t __user *umask,
 			compat_ulong_t l1, l2;
 			unsafe_get_user(l1, umask++, Efault);
 			unsafe_get_user(l2, umask++, Efault);
-			*mask++ = ((unsigned long)l2 << BITS_PER_COMPAT_LONG) | l1;
+			*mask++ = ((unsigned long)l2 << (BITS_PER_LONG / 2)) | l1;
 			nr_compat_longs -= 2;
 		}
 		if (nr_compat_longs)
@@ -252,7 +252,7 @@ long compat_put_bitmap(compat_ulong_t __user *umask, unsigned long *mask,
 		while (nr_compat_longs > 1) {
 			unsigned long m = *mask++;
 			unsafe_put_user((compat_ulong_t)m, umask++, Efault);
-			unsafe_put_user(m >> BITS_PER_COMPAT_LONG, umask++, Efault);
+			unsafe_put_user(m >> (BITS_PER_LONG / 2), umask++, Efault);
 			nr_compat_longs -= 2;
 		}
 		if (nr_compat_longs)
