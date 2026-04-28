@@ -2172,7 +2172,7 @@ static struct netdev_queue *taprio_queue_get(struct Qdisc *sch,
 	return netdev_get_tx_queue(dev, ntx);
 }
 
-static int taprio_graft(struct Qdisc *sch, unsigned long cl,
+static int taprio_graft(struct Qdisc *sch, uintptr_t cl,
 			struct Qdisc *new, struct Qdisc **old,
 			struct netlink_ext_ack *extack)
 {
@@ -2444,7 +2444,7 @@ start_error:
 	return -ENOSPC;
 }
 
-static struct Qdisc *taprio_leaf(struct Qdisc *sch, unsigned long cl)
+static struct Qdisc *taprio_leaf(struct Qdisc *sch, uintptr_t cl)
 {
 	struct taprio_sched *q = qdisc_priv(sch);
 	struct net_device *dev = qdisc_dev(sch);
@@ -2456,7 +2456,7 @@ static struct Qdisc *taprio_leaf(struct Qdisc *sch, unsigned long cl)
 	return q->qdiscs[ntx];
 }
 
-static unsigned long taprio_find(struct Qdisc *sch, u32 classid)
+static uintptr_t taprio_find(struct Qdisc *sch, u32 classid)
 {
 	unsigned int ntx = TC_H_MIN(classid);
 
@@ -2465,7 +2465,7 @@ static unsigned long taprio_find(struct Qdisc *sch, u32 classid)
 	return ntx;
 }
 
-static int taprio_dump_class(struct Qdisc *sch, unsigned long cl,
+static int taprio_dump_class(struct Qdisc *sch, uintptr_t cl,
 			     struct sk_buff *skb, struct tcmsg *tcm)
 {
 	struct Qdisc *child = taprio_leaf(sch, cl);
@@ -2477,7 +2477,7 @@ static int taprio_dump_class(struct Qdisc *sch, unsigned long cl,
 	return 0;
 }
 
-static int taprio_dump_class_stats(struct Qdisc *sch, unsigned long cl,
+static int taprio_dump_class_stats(struct Qdisc *sch, uintptr_t cl,
 				   struct gnet_dump *d)
 	__releases(d->lock)
 	__acquires(d->lock)

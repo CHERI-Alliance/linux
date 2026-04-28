@@ -237,7 +237,7 @@ static int fw_set_parms(struct net *net, struct tcf_proto *tp,
 }
 
 static int fw_change(struct net *net, struct sk_buff *in_skb,
-		     struct tcf_proto *tp, unsigned long base,
+		     struct tcf_proto *tp, uintptr_t base,
 		     u32 handle, struct nlattr **tca, void **arg,
 		     u32 flags, struct netlink_ext_ack *extack)
 {
@@ -422,8 +422,8 @@ nla_put_failure:
 	return -1;
 }
 
-static void fw_bind_class(void *fh, u32 classid, unsigned long cl, void *q,
-			  unsigned long base)
+static void fw_bind_class(void *fh, u32 classid, uintptr_t cl, void *q,
+			  uintptr_t base)
 {
 	struct fw_filter *f = fh;
 

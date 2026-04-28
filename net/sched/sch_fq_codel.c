@@ -604,27 +604,27 @@ static int fq_codel_dump_stats(struct Qdisc *sch, struct gnet_dump *d)
 	return gnet_stats_copy_app(d, &st, sizeof(st));
 }
 
-static struct Qdisc *fq_codel_leaf(struct Qdisc *sch, unsigned long arg)
+static struct Qdisc *fq_codel_leaf(struct Qdisc *sch, uintptr_t arg)
 {
 	return NULL;
 }
 
-static unsigned long fq_codel_find(struct Qdisc *sch, u32 classid)
+static uintptr_t fq_codel_find(struct Qdisc *sch, u32 classid)
 {
 	return 0;
 }
 
-static unsigned long fq_codel_bind(struct Qdisc *sch, unsigned long parent,
-			      u32 classid)
+static uintptr_t fq_codel_bind(struct Qdisc *sch, uintptr_t parent,
+			       u32 classid)
 {
 	return 0;
 }
 
-static void fq_codel_unbind(struct Qdisc *q, unsigned long cl)
+static void fq_codel_unbind(struct Qdisc *q, uintptr_t cl)
 {
 }
 
-static struct tcf_block *fq_codel_tcf_block(struct Qdisc *sch, unsigned long cl,
+static struct tcf_block *fq_codel_tcf_block(struct Qdisc *sch, uintptr_t cl,
 					    struct netlink_ext_ack *extack)
 {
 	struct fq_codel_sched_data *q = qdisc_priv(sch);
@@ -634,14 +634,14 @@ static struct tcf_block *fq_codel_tcf_block(struct Qdisc *sch, unsigned long cl,
 	return q->block;
 }
 
-static int fq_codel_dump_class(struct Qdisc *sch, unsigned long cl,
-			  struct sk_buff *skb, struct tcmsg *tcm)
+static int fq_codel_dump_class(struct Qdisc *sch, uintptr_t cl,
+			       struct sk_buff *skb, struct tcmsg *tcm)
 {
 	tcm->tcm_handle |= TC_H_MIN(cl);
 	return 0;
 }
 
-static int fq_codel_dump_class_stats(struct Qdisc *sch, unsigned long cl,
+static int fq_codel_dump_class_stats(struct Qdisc *sch, uintptr_t cl,
 				     struct gnet_dump *d)
 {
 	struct fq_codel_sched_data *q = qdisc_priv(sch);

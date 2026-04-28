@@ -1076,27 +1076,27 @@ static void dualpi2_destroy(struct Qdisc *sch)
 	tcf_block_put(q->tcf_block);
 }
 
-static struct Qdisc *dualpi2_leaf(struct Qdisc *sch, unsigned long arg)
+static struct Qdisc *dualpi2_leaf(struct Qdisc *sch, uintptr_t arg)
 {
 	return NULL;
 }
 
-static unsigned long dualpi2_find(struct Qdisc *sch, u32 classid)
+static uintptr_t dualpi2_find(struct Qdisc *sch, u32 classid)
 {
 	return 0;
 }
 
-static unsigned long dualpi2_bind(struct Qdisc *sch, unsigned long parent,
+static uintptr_t dualpi2_bind(struct Qdisc *sch, uintptr_t parent,
 				  u32 classid)
 {
 	return 0;
 }
 
-static void dualpi2_unbind(struct Qdisc *q, unsigned long cl)
+static void dualpi2_unbind(struct Qdisc *q, uintptr_t cl)
 {
 }
 
-static struct tcf_block *dualpi2_tcf_block(struct Qdisc *sch, unsigned long cl,
+static struct tcf_block *dualpi2_tcf_block(struct Qdisc *sch, uintptr_t cl,
 					   struct netlink_ext_ack *extack)
 {
 	struct dualpi2_sched_data *q = qdisc_priv(sch);

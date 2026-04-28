@@ -170,7 +170,7 @@ static int basic_set_parms(struct net *net, struct tcf_proto *tp,
 }
 
 static int basic_change(struct net *net, struct sk_buff *in_skb,
-			struct tcf_proto *tp, unsigned long base, u32 handle,
+			struct tcf_proto *tp, uintptr_t base, u32 handle,
 			struct nlattr **tca, void **arg,
 			u32 flags, struct netlink_ext_ack *extack)
 {
@@ -258,8 +258,8 @@ static void basic_walk(struct tcf_proto *tp, struct tcf_walker *arg,
 	}
 }
 
-static void basic_bind_class(void *fh, u32 classid, unsigned long cl, void *q,
-			     unsigned long base)
+static void basic_bind_class(void *fh, u32 classid, uintptr_t cl, void *q,
+			     uintptr_t base)
 {
 	struct basic_filter *f = fh;
 

@@ -206,7 +206,7 @@ static bool ets_class_is_strict(struct ets_sched *q, const struct ets_class *cl)
 }
 
 static int ets_class_change(struct Qdisc *sch, u32 classid, u32 parentid,
-			    struct nlattr **tca, unsigned long *arg,
+			    struct nlattr **tca, uintptr_t *arg,
 			    struct netlink_ext_ack *extack)
 {
 	struct ets_class *cl = ets_class_from_arg(sch, *arg);
@@ -255,7 +255,7 @@ static int ets_class_change(struct Qdisc *sch, u32 classid, u32 parentid,
 	return 0;
 }
 
-static int ets_class_graft(struct Qdisc *sch, unsigned long arg,
+static int ets_class_graft(struct Qdisc *sch, uintptr_t arg,
 			   struct Qdisc *new, struct Qdisc **old,
 			   struct netlink_ext_ack *extack)
 {
@@ -275,14 +275,14 @@ static int ets_class_graft(struct Qdisc *sch, unsigned long arg,
 	return 0;
 }
 
-static struct Qdisc *ets_class_leaf(struct Qdisc *sch, unsigned long arg)
+static struct Qdisc *ets_class_leaf(struct Qdisc *sch, uintptr_t arg)
 {
 	struct ets_class *cl = ets_class_from_arg(sch, arg);
 
 	return cl->qdisc;
 }
 
-static unsigned long ets_class_find(struct Qdisc *sch, u32 classid)
+static uintptr_t ets_class_find(struct Qdisc *sch, u32 classid)
 {
 	unsigned long band = TC_H_MIN(classid);
 	struct ets_sched *q = qdisc_priv(sch);
@@ -292,7 +292,7 @@ static unsigned long ets_class_find(struct Qdisc *sch, u32 classid)
 	return band;
 }
 
-static void ets_class_qlen_notify(struct Qdisc *sch, unsigned long arg)
+static void ets_class_qlen_notify(struct Qdisc *sch, uintptr_t arg)
 {
 	struct ets_class *cl = ets_class_from_arg(sch, arg);
 	struct ets_sched *q = qdisc_priv(sch);
@@ -305,7 +305,7 @@ static void ets_class_qlen_notify(struct Qdisc *sch, unsigned long arg)
 		list_del_init(&cl->alist);
 }
 
-static int ets_class_dump(struct Qdisc *sch, unsigned long arg,
+static int ets_class_dump(struct Qdisc *sch, uintptr_t arg,
 			  struct sk_buff *skb, struct tcmsg *tcm)
 {
 	struct ets_class *cl = ets_class_from_arg(sch, arg);
@@ -330,7 +330,7 @@ nla_put_failure:
 	return -EMSGSIZE;
 }
 
-static int ets_class_dump_stats(struct Qdisc *sch, unsigned long arg,
+static int ets_class_dump_stats(struct Qdisc *sch, uintptr_t arg,
 				struct gnet_dump *d)
 {
 	struct ets_class *cl = ets_class_from_arg(sch, arg);
@@ -358,7 +358,7 @@ static void ets_qdisc_walk(struct Qdisc *sch, struct qdisc_walker *arg)
 }
 
 static struct tcf_block *
-ets_qdisc_tcf_block(struct Qdisc *sch, unsigned long cl,
+ets_qdisc_tcf_block(struct Qdisc *sch, uintptr_t cl,
 		    struct netlink_ext_ack *extack)
 {
 	struct ets_sched *q = qdisc_priv(sch);
@@ -371,13 +371,13 @@ ets_qdisc_tcf_block(struct Qdisc *sch, unsigned long cl,
 	return q->block;
 }
 
-static unsigned long ets_qdisc_bind_tcf(struct Qdisc *sch, unsigned long parent,
+static uintptr_t ets_qdisc_bind_tcf(struct Qdisc *sch, uintptr_t parent,
 					u32 classid)
 {
 	return ets_class_find(sch, classid);
 }
 
-static void ets_qdisc_unbind_tcf(struct Qdisc *sch, unsigned long arg)
+static void ets_qdisc_unbind_tcf(struct Qdisc *sch, uintptr_t arg)
 {
 }
 
