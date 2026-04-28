@@ -46,7 +46,7 @@
 struct meson_mx_ao_arc_rproc_priv {
 	void __iomem		*remap_base;
 	void __iomem		*cpu_base;
-	unsigned long		sram_va;
+	uintptr_t		sram_va;
 	phys_addr_t		sram_pa;
 	size_t			sram_size;
 	struct gen_pool		*sram_pool;
@@ -174,7 +174,7 @@ static int meson_mx_ao_arc_rproc_probe(struct platform_device *pdev)
 		return -ENOMEM;
 	}
 
-	priv->sram_pa = gen_pool_virt_to_phys(priv->sram_pool, priv->sram_va);
+	priv->sram_pa = gen_pool_virt_to_phys(priv->sram_pool, __c_ua(priv->sram_va));
 	if (priv->sram_pa & ~MESON_AO_RPROC_SRAM_USABLE_BITS) {
 		dev_err(dev, "SRAM address contains unusable bits\n");
 		ret = -EINVAL;
