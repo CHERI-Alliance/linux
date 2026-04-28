@@ -2943,18 +2943,18 @@ static int pagemap_scan_get_args(struct pm_scan_arg *arg,
 
 	arg->start = untagged_addr((unsigned long)arg->start);
 	arg->end = untagged_addr((unsigned long)arg->end);
-	arg->vec = untagged_addr((unsigned long)arg->vec);
+	arg->vec = untagged_addr(arg->vec);
 
 	/* Validate memory pointers */
 	if (!IS_ALIGNED(arg->start, PAGE_SIZE))
 		return -EINVAL;
-	if (!access_ok((void __user *)(uintptr_t)arg->start, arg->end - arg->start))
+	if (!access_ok((void __user *)__c_fakep(arg->start), arg->end - arg->start))
 		return -EFAULT;
 	if (!arg->vec && arg->vec_len)
 		return -EINVAL;
 	if (UINT_MAX == SIZE_MAX && arg->vec_len > SIZE_MAX)
 		return -EINVAL;
-	if (arg->vec && !access_ok((void __user *)(uintptr_t)arg->vec,
+	if (arg->vec && !access_ok(u64_to_user_ptr(arg->vec),
 				   size_mul(arg->vec_len, sizeof(struct page_region))))
 		return -EFAULT;
 
