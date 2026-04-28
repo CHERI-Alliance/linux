@@ -481,6 +481,11 @@ static int aio_ring_mmap_prepare(struct vm_area_desc *desc)
 {
 	vma_desc_set_flags(desc, VMA_DONTEXPAND_BIT);
 	desc->vm_ops = &aio_ring_vm_ops;
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	vma_desc_set_flags(desc, VMA_READ_CAPS_BIT);
+	vma_desc_set_flags(desc, VMA_WRITE_CAPS_BIT);
+#endif
+
 	return 0;
 }
 
