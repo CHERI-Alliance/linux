@@ -10,10 +10,16 @@
 
 #include <asm/ptrace.h>
 
+#ifdef CONFIG_CHERI_PURECAP_UABI
+#define __ARM64_REG(n)	regs->cregs[(n)]
+#else
+#define __ARM64_REG(n)	regs->regs[(n)]
+#endif
+
 #define SC_ARM64_REGS_TO_ARGS(x, ...)				\
-	__MAP(x,__SC_ARGS					\
-	      ,,regs->regs[0],,regs->regs[1],,regs->regs[2]	\
-	      ,,regs->regs[3],,regs->regs[4],,regs->regs[5])
+	__MAP(x,__SC_ARGS                                       \
+	      ,,__ARM64_REG(0),,__ARM64_REG(1),,__ARM64_REG(2)  \
+	      ,,__ARM64_REG(3),,__ARM64_REG(4),,__ARM64_REG(5))
 
 #ifdef CONFIG_COMPAT
 
