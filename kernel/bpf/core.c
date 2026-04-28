@@ -1582,7 +1582,7 @@ struct bpf_prog *bpf_jit_blind_constants(struct bpf_prog *prog)
  * to go into kallsyms for correlation from e.g. bpftool, so naming
  * must not change.
  */
-noinline u64 __bpf_call_base(u64 r1, u64 r2, u64 r3, u64 r4, u64 r5)
+noinline uintptr_t __bpf_call_base(uintptr_t r1, uintptr_t r2, uintptr_t r3, uintptr_t r4, uintptr_t r5)
 {
 	return 0;
 }
@@ -1772,7 +1772,7 @@ static u32 abs_s32(s32 x)
  *
  * Return: whatever value is in %BPF_R0 at program exit
  */
-static u64 ___bpf_prog_run(u64 *regs, const struct bpf_insn *insn)
+static uintptr_t ___bpf_prog_run(uintptr_t *regs, const struct bpf_insn *insn)
 {
 #define BPF_INSN_2_LBL(x, y)    [BPF_##x | BPF_##y] = &&x##_##y
 #define BPF_INSN_3_LBL(x, y, z) [BPF_##x | BPF_##y | BPF_##z] = &&x##_##y##_##z
@@ -1830,7 +1830,7 @@ select_insn:
 	/* ALU (rest) */
 #define ALU(OPCODE, OP)					\
 	ALU64_##OPCODE##_X:				\
-		DST = DST OP SRC;			\
+		DST = DST OP (uintptr_t __force)(u64 __force)SRC;	\
 		CONT;					\
 	ALU_##OPCODE##_X:				\
 		DST = (u32) DST OP (u32) SRC;		\
@@ -1852,7 +1852,7 @@ select_insn:
 #undef SHT
 #undef ALU
 	ALU_NEG:
-		DST = (u32) -DST;
+		DST = __c_fakeu((u32) -(long)__c_ua(DST));
 		CONT;
 	ALU64_NEG:
 		DST = -DST;
@@ -1890,10 +1890,10 @@ select_insn:
 		}
 		CONT;
 	ALU64_MOV_K:
-		DST = IMM;
+		DST = __c_fakeu(IMM);
 		CONT;
 	LD_IMM_DW:
-		DST = (u64) (u32) insn[0].imm | ((u64) (u32) insn[1].imm) << 32;
+		DST = __c_fakeu((u64) (u32) insn[0].imm | ((u64) (u32) insn[1].imm) << 32);
 		insn++;
 		CONT;
 	ALU_ARSH_X:
@@ -1903,47 +1903,61 @@ select_insn:
 		DST = (u64) (u32) (((s32) DST) >> IMM);
 		CONT;
 	ALU64_ARSH_X:
-		(*(s64 *) &DST) >>= (SRC & 63);
+		(*(s64 *)(void *) &DST) >>= (SRC & 63);
 		CONT;
 	ALU64_ARSH_K:
-		(*(s64 *) &DST) >>= IMM;
+		(*(s64 *)(void *) &DST) >>= IMM;
 		CONT;
 	ALU64_MOD_X:
 		switch (OFF) {
 		case 0:
-			div64_u64_rem(DST, SRC, &AX);
+			{
+			u64 tmp;
+			div64_u64_rem(__c_ua(DST), __c_ua(SRC), &tmp);
+			AX = __c_fakeu(tmp);
 			DST = AX;
+			}
 			break;
 		case 1:
-			AX = div64_s64(DST, SRC);
-			DST = DST - AX * SRC;
+			AX = __c_fakeu(div64_s64(__c_ua(DST), __c_ua(SRC)));
+			DST = __c_fakeu(__c_ua(DST) - (u64) __c_ua(AX) * __c_ua(SRC));
 			break;
 		}
 		CONT;
 	ALU_MOD_X:
 		switch (OFF) {
 		case 0:
-			AX = (u32) DST;
-			DST = do_div(AX, (u32) SRC);
+			{
+			u64 tmp = __c_ua(DST);
+			DST = __c_fakeu(do_div(tmp, (u32) SRC));
+			AX = __c_fakeu(tmp);
 			break;
+			}
 		case 1:
-			AX = abs_s32((s32)DST);
-			AX = do_div(AX, abs_s32((s32)SRC));
-			if ((s32)DST < 0)
-				DST = (u32)-AX;
+			{
+			u64 tmp = abs_s32((s32) DST);
+			tmp = do_div(tmp, abs_s32((s32) SRC));
+			if ((s32) DST < 0)
+				DST = (u32)-(long)__c_ua(AX);
 			else
-				DST = (u32)AX;
+				DST = __c_fakeu((u32) AX);
+			AX = __c_fakeu(tmp);
+			}
 			break;
 		}
 		CONT;
 	ALU64_MOD_K:
 		switch (OFF) {
 		case 0:
-			div64_u64_rem(DST, IMM, &AX);
+			{
+			u64 tmp;
+			div64_u64_rem(__c_ua(DST), IMM, &tmp);
+			AX = __c_fakeu(tmp);
 			DST = AX;
+			}
 			break;
 		case 1:
-			AX = div64_s64(DST, IMM);
+			AX = __c_fakeu(div64_s64(__c_ua(DST), IMM));
 			DST = DST - AX * IMM;
 			break;
 		}
@@ -1951,70 +1965,88 @@ select_insn:
 	ALU_MOD_K:
 		switch (OFF) {
 		case 0:
-			AX = (u32) DST;
-			DST = do_div(AX, (u32) IMM);
+			{
+			u64 tmp = (u32) DST;
+			DST = __c_fakeu(do_div(tmp, (u32) IMM));
+			AX = __c_fakeu(tmp);
+			}
 			break;
 		case 1:
-			AX = abs_s32((s32)DST);
-			AX = do_div(AX, abs_s32((s32)IMM));
-			if ((s32)DST < 0)
-				DST = (u32)-AX;
+			{
+			u64 tmp = abs_s32((s32) DST);
+			tmp = do_div(tmp, abs_s32((s32)IMM));
+			if ((s32) DST < 0)
+				DST = (u32)-tmp;
 			else
-				DST = (u32)AX;
+				DST = (u32)tmp;
+			AX = __c_fakeu(tmp);
+			}
 			break;
 		}
 		CONT;
 	ALU64_DIV_X:
 		switch (OFF) {
 		case 0:
-			DST = div64_u64(DST, SRC);
+			DST = __c_fakeu(div64_u64(__c_ua(DST), __c_ua(SRC)));
 			break;
 		case 1:
-			DST = div64_s64(DST, SRC);
+			DST = __c_fakeu(div64_s64(__c_ua(DST), __c_ua(SRC)));
 			break;
 		}
 		CONT;
 	ALU_DIV_X:
 		switch (OFF) {
 		case 0:
-			AX = (u32) DST;
-			do_div(AX, (u32) SRC);
-			DST = (u32) AX;
+			{
+			u64 tmp = (u32) DST;
+			do_div(tmp, (u32) SRC);
+			DST = (u32) tmp;
+			AX = __c_fakeu(tmp);
+			}
 			break;
 		case 1:
-			AX = abs_s32((s32)DST);
-			do_div(AX, abs_s32((s32)SRC));
-			if (((s32)DST < 0) == ((s32)SRC < 0))
-				DST = (u32)AX;
+			{
+			u64 tmp = abs_s32((s32) DST);
+			do_div(tmp, abs_s32((s32) SRC));
+			if (((s32) DST < 0) == ((s32) SRC < 0))
+				DST = (u32)tmp;
 			else
-				DST = (u32)-AX;
+				DST = (u32)-tmp;
+			AX = __c_fakeu(tmp);
+			}
 			break;
 		}
 		CONT;
 	ALU64_DIV_K:
 		switch (OFF) {
 		case 0:
-			DST = div64_u64(DST, IMM);
+			DST = __c_fakeu(div64_u64(__c_ua(DST), IMM));
 			break;
 		case 1:
-			DST = div64_s64(DST, IMM);
+			DST = __c_fakeu(div64_s64(__c_ua(DST), IMM));
 			break;
 		}
 		CONT;
 	ALU_DIV_K:
 		switch (OFF) {
 		case 0:
-			AX = (u32) DST;
-			do_div(AX, (u32) IMM);
-			DST = (u32) AX;
+			{
+			u64 tmp = (u32) DST;
+			do_div(tmp, (u32) IMM);
+			DST = (u32) tmp;
+			AX = __c_fakeu(tmp);
+			}
 			break;
 		case 1:
-			AX = abs_s32((s32)DST);
-			do_div(AX, abs_s32((s32)IMM));
-			if (((s32)DST < 0) == ((s32)IMM < 0))
-				DST = (u32)AX;
+			{
+			u64 tmp = abs_s32((s32) DST);
+			do_div(tmp, abs_s32((s32)IMM));
+			if (((s32) DST < 0) == ((s32)IMM < 0))
+				DST = (u32)tmp;
 			else
-				DST = (u32)-AX;
+				DST = (u32)-tmp;
+			AX = __c_fakeu(tmp);
+			}
 			break;
 		}
 		CONT;
@@ -2027,7 +2059,7 @@ select_insn:
 			DST = (__force u32) cpu_to_be32(DST);
 			break;
 		case 64:
-			DST = (__force u64) cpu_to_be64(DST);
+			DST = __c_fakeu((__force u64) cpu_to_be64((u64 __force) DST));
 			break;
 		}
 		CONT;
@@ -2040,7 +2072,7 @@ select_insn:
 			DST = (__force u32) cpu_to_le32(DST);
 			break;
 		case 64:
-			DST = (__force u64) cpu_to_le64(DST);
+			DST = __c_fakeu((__force u64) cpu_to_le64(DST));
 			break;
 		}
 		CONT;
@@ -2053,7 +2085,7 @@ select_insn:
 			DST = (__force u32) __swab32(DST);
 			break;
 		case 64:
-			DST = (__force u64) __swab64(DST);
+			DST = __c_fakeu((__force u64) __swab64((u64 __force) DST));
 			break;
 		}
 		CONT;
@@ -2076,7 +2108,7 @@ select_insn:
 		CONT;
 
 	JMP_TAIL_CALL: {
-		struct bpf_map *map = (struct bpf_map *) (unsigned long) BPF_R2;
+		struct bpf_map *map = (struct bpf_map *) (uintptr_t) BPF_R2;
 		struct bpf_array *array = container_of(map, struct bpf_array, map);
 		struct bpf_prog *prog;
 		u32 index = BPF_R3;
@@ -2114,7 +2146,7 @@ out:
 	/* JMP */
 #define COND_JMP(SIGN, OPCODE, CMP_OP)				\
 	JMP_##OPCODE##_X:					\
-		if ((SIGN##64) DST CMP_OP (SIGN##64) SRC) {	\
+		if ((SIGN##64 __force) DST CMP_OP (SIGN##64 __force) SRC) {	\
 			insn += insn->off;			\
 			CONT_JMP;				\
 		}						\
@@ -2126,7 +2158,7 @@ out:
 		}						\
 		CONT;						\
 	JMP_##OPCODE##_K:					\
-		if ((SIGN##64) DST CMP_OP (SIGN##64) IMM) {	\
+		if ((SIGN##64 __force) DST CMP_OP (SIGN##64 __force) IMM) {	\
 			insn += insn->off;			\
 			CONT_JMP;				\
 		}						\
@@ -2165,18 +2197,18 @@ out:
 		CONT;
 #define LDST(SIZEOP, SIZE)						\
 	STX_MEM_##SIZEOP:						\
-		*(SIZE *)(unsigned long) (DST + insn->off) = SRC;	\
+		*(SIZE *)(uintptr_t) (DST + insn->off) = (SIZE __force) SRC;	\
 		CONT;							\
 	ST_MEM_##SIZEOP:						\
-		*(SIZE *)(unsigned long) (DST + insn->off) = IMM;	\
+		*(SIZE *)(uintptr_t) (DST + insn->off) = IMM;		\
 		CONT;							\
 	LDX_MEM_##SIZEOP:						\
-		DST = *(SIZE *)(unsigned long) (SRC + insn->off);	\
+		DST = __c_fakeu(*(SIZE *)(uintptr_t) (SRC + insn->off));	\
 		CONT;							\
 	LDX_PROBE_MEM_##SIZEOP:						\
 		bpf_probe_read_kernel_common(&DST, sizeof(SIZE),	\
-			      (const void *)(long) (SRC + insn->off));	\
-		DST = *((SIZE *)&DST);					\
+			      (const void *)(uintptr_t) (SRC + insn->off));	\
+		DST = __c_fakeu(*((SIZE *)(void *)&DST));				\
 		CONT;
 
 	LDST(B,   u8)
@@ -2187,12 +2219,12 @@ out:
 
 #define LDSX(SIZEOP, SIZE)						\
 	LDX_MEMSX_##SIZEOP:						\
-		DST = *(SIZE *)(unsigned long) (SRC + insn->off);	\
+		DST = __c_fakeu(*(SIZE *)(uintptr_t) (SRC + insn->off));	\
 		CONT;							\
 	LDX_PROBE_MEMSX_##SIZEOP:					\
 		bpf_probe_read_kernel_common(&DST, sizeof(SIZE),		\
-				      (const void *)(long) (SRC + insn->off));	\
-		DST = *((SIZE *)&DST);					\
+				      (const void *)(uintptr_t) (SRC + insn->off));	\
+		DST = __c_fakeu(*((SIZE *)(void *)&DST));					\
 		CONT;
 
 	LDSX(B,   s8)
@@ -2203,10 +2235,10 @@ out:
 #define ATOMIC_ALU_OP(BOP, KOP)						\
 		case BOP:						\
 			if (BPF_SIZE(insn->code) == BPF_W)		\
-				atomic_##KOP((u32) SRC, (atomic_t *)(unsigned long) \
+				atomic_##KOP((u32) SRC, (atomic_t *)(uintptr_t) \
 					     (DST + insn->off));	\
 			else if (BPF_SIZE(insn->code) == BPF_DW)	\
-				atomic64_##KOP((u64) SRC, (atomic64_t *)(unsigned long) \
+				atomic64_##KOP((u64) __c_ua(SRC), (atomic64_t *)(uintptr_t) \
 					       (DST + insn->off));	\
 			else						\
 				goto default_label;			\
@@ -2215,11 +2247,11 @@ out:
 			if (BPF_SIZE(insn->code) == BPF_W)		\
 				SRC = (u32) atomic_fetch_##KOP(		\
 					(u32) SRC,			\
-					(atomic_t *)(unsigned long) (DST + insn->off)); \
+					(atomic_t *)(uintptr_t) (DST + insn->off)); \
 			else if (BPF_SIZE(insn->code) == BPF_DW)	\
-				SRC = (u64) atomic64_fetch_##KOP(	\
-					(u64) SRC,			\
-					(atomic64_t *)(unsigned long) (DST + insn->off)); \
+				SRC = __c_fakeu((u64) atomic64_fetch_##KOP(	\
+					(u64) __c_ua(SRC),			\
+					(atomic64_t *)(uintptr_t) (DST + insn->off))); \
 			else						\
 				goto default_label;			\
 			break;
@@ -2241,24 +2273,24 @@ out:
 		case BPF_XCHG:
 			if (BPF_SIZE(insn->code) == BPF_W)
 				SRC = (u32) atomic_xchg(
-					(atomic_t *)(unsigned long) (DST + insn->off),
+					(atomic_t *)(uintptr_t) (DST + insn->off),
 					(u32) SRC);
 			else if (BPF_SIZE(insn->code) == BPF_DW)
-				SRC = (u64) atomic64_xchg(
-					(atomic64_t *)(unsigned long) (DST + insn->off),
-					(u64) SRC);
+				SRC = __c_fakeu((u64) atomic64_xchg(
+					(atomic64_t *)(uintptr_t) (DST + insn->off),
+					(u64) __c_ua(SRC)));
 			else
 				goto default_label;
 			break;
 		case BPF_CMPXCHG:
 			if (BPF_SIZE(insn->code) == BPF_W)
 				BPF_R0 = (u32) atomic_cmpxchg(
-					(atomic_t *)(unsigned long) (DST + insn->off),
+					(atomic_t *)(uintptr_t) (DST + insn->off),
 					(u32) BPF_R0, (u32) SRC);
 			else if (BPF_SIZE(insn->code) == BPF_DW)
-				BPF_R0 = (u64) atomic64_cmpxchg(
-					(atomic64_t *)(unsigned long) (DST + insn->off),
-					(u64) BPF_R0, (u64) SRC);
+				BPF_R0 = __c_fakeu((u64) atomic64_cmpxchg(
+					(atomic64_t *)(uintptr_t) (DST + insn->off),
+					(u64) __c_ua(BPF_R0), (u64) __c_ua(SRC)));
 			else
 				goto default_label;
 			break;
@@ -2269,8 +2301,8 @@ out:
 			switch (BPF_SIZE(insn->code)) {
 #define LOAD_ACQUIRE(SIZEOP, SIZE)				\
 			case BPF_##SIZEOP:			\
-				DST = (SIZE)smp_load_acquire(	\
-					(SIZE *)(unsigned long)(SRC + insn->off));	\
+				DST = __c_fakeu((SIZE)smp_load_acquire(	\
+					(SIZE *)(uintptr_t)(SRC + insn->off)));	\
 				break;
 			LOAD_ACQUIRE(B,   u8)
 			LOAD_ACQUIRE(H,  u16)
@@ -2288,7 +2320,7 @@ out:
 #define STORE_RELEASE(SIZEOP, SIZE)			\
 			case BPF_##SIZEOP:		\
 				smp_store_release(	\
-					(SIZE *)(unsigned long)(DST + insn->off), (SIZE)SRC);	\
+					(SIZE *)(uintptr_t)(DST + insn->off), (SIZE)__c_ua(SRC));	\
 				break;
 			STORE_RELEASE(B,   u8)
 			STORE_RELEASE(H,  u16)
@@ -2320,29 +2352,33 @@ out:
 		return 0;
 }
 
+/*
+ * FIXCHERI: Use sizeof(u64) for the division to maintain userland expectations
+ * FIXCHERI: wrt. the number of values that can be put on the stack.
+ */
 #define PROG_NAME(stack_size) __bpf_prog_run##stack_size
 #define DEFINE_BPF_PROG_RUN(stack_size) \
 static unsigned int PROG_NAME(stack_size)(const void *ctx, const struct bpf_insn *insn) \
 { \
-	u64 stack[stack_size / sizeof(u64)]; \
-	u64 regs[MAX_BPF_EXT_REG] = {}; \
+	uintptr_t stack[stack_size / sizeof(u64)]; \
+	uintptr_t regs[MAX_BPF_EXT_REG] = {}; \
 \
 	kmsan_unpoison_memory(stack, sizeof(stack)); \
-	FP = (u64) (uintptr_t) &stack[ARRAY_SIZE(stack)]; \
-	ARG1 = (u64) (uintptr_t) ctx; \
+	FP = (uintptr_t) &stack[ARRAY_SIZE(stack)]; \
+	ARG1 = (uintptr_t) ctx; \
 	return ___bpf_prog_run(regs, insn); \
 }
 
 #define PROG_NAME_ARGS(stack_size) __bpf_prog_run_args##stack_size
 #define DEFINE_BPF_PROG_RUN_ARGS(stack_size) \
-static u64 PROG_NAME_ARGS(stack_size)(u64 r1, u64 r2, u64 r3, u64 r4, u64 r5, \
+static uintptr_t PROG_NAME_ARGS(stack_size)(uintptr_t r1, uintptr_t r2, uintptr_t r3, uintptr_t r4, uintptr_t r5, \
 				      const struct bpf_insn *insn) \
 { \
-	u64 stack[stack_size / sizeof(u64)]; \
-	u64 regs[MAX_BPF_EXT_REG]; \
+	uintptr_t stack[stack_size / sizeof(u64)]; \
+	uintptr_t regs[MAX_BPF_EXT_REG]; \
 \
 	kmsan_unpoison_memory(stack, sizeof(stack)); \
-	FP = (u64) (uintptr_t) &stack[ARRAY_SIZE(stack)]; \
+	FP = (uintptr_t) &stack[ARRAY_SIZE(stack)]; \
 	BPF_R1 = r1; \
 	BPF_R2 = r2; \
 	BPF_R3 = r3; \
@@ -2377,7 +2413,7 @@ EVAL4(PROG_NAME_LIST, 416, 448, 480, 512)
 #undef PROG_NAME_LIST
 #define PROG_NAME_LIST(stack_size) PROG_NAME_ARGS(stack_size),
 static __maybe_unused
-u64 (*interpreters_args[])(u64 r1, u64 r2, u64 r3, u64 r4, u64 r5,
+uintptr_t (*interpreters_args[])(uintptr_t r1, uintptr_t r2, uintptr_t r3, uintptr_t r4, uintptr_t r5,
 			   const struct bpf_insn *insn) = {
 EVAL6(PROG_NAME_LIST, 32, 64, 96, 128, 160, 192)
 EVAL6(PROG_NAME_LIST, 224, 256, 288, 320, 352, 384)

@@ -941,7 +941,7 @@ static_assert(__BPF_RET_TYPE_MAX <= BPF_BASE_TYPE_LIMIT);
  * instructions after verifying
  */
 struct bpf_func_proto {
-	u64 (*func)(u64 r1, u64 r2, u64 r3, u64 r4, u64 r5);
+	uintptr_t (*func)(uintptr_t r1, uintptr_t r2, uintptr_t r3, uintptr_t r4, uintptr_t r5);
 	bool gpl_only;
 	bool pkt_access;
 	bool might_sleep;
@@ -3763,8 +3763,8 @@ const struct bpf_func_proto *tracing_prog_func_proto(
 
 /* Shared helpers among cBPF and eBPF. */
 void bpf_user_rnd_init_once(void);
-u64 bpf_user_rnd_u32(u64 r1, u64 r2, u64 r3, u64 r4, u64 r5);
-u64 bpf_get_raw_cpu_id(u64 r1, u64 r2, u64 r3, u64 r4, u64 r5);
+uintptr_t bpf_user_rnd_u32(uintptr_t r1, uintptr_t r2, uintptr_t r3, uintptr_t r4, uintptr_t r5);
+uintptr_t bpf_get_raw_cpu_id(uintptr_t r1, uintptr_t r2, uintptr_t r3, uintptr_t r4, uintptr_t r5);
 
 #if defined(CONFIG_NET)
 bool bpf_sock_common_is_valid_access(int off, int size,
