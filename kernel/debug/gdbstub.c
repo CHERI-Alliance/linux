@@ -373,10 +373,11 @@ static int write_mem_msg(int binary)
 
 	if (kgdb_hex2long(&ptr, &addr) > 0 && *(ptr++) == ',' &&
 	    kgdb_hex2long(&ptr, &length) > 0 && *(ptr++) == ':') {
+		void *addrp = cheri_make_kernel_data_cap(addr, length);
 		if (binary)
-			err = kgdb_ebin2mem(ptr, (char *)addr, length);
+			err = kgdb_ebin2mem(ptr, addrp, length);
 		else
-			err = kgdb_hex2mem(ptr, (char *)addr, length);
+			err = kgdb_hex2mem(ptr, addrp, length);
 		if (err)
 			return err;
 		if (CACHE_FLUSH_IS_SAFE)
@@ -563,7 +564,8 @@ static void gdb_cmd_memread(struct kgdb_state *ks)
 
 	if (kgdb_hex2long(&ptr, &addr) > 0 && *ptr++ == ',' &&
 					kgdb_hex2long(&ptr, &length) > 0) {
-		err = kgdb_mem2hex((char *)addr, remcom_out_buffer, length);
+		void *addrp = cheri_make_kernel_data_cap(addr, length);
+		err = kgdb_mem2hex(addrp, remcom_out_buffer, length);
 		if (!err)
 			error_packet(remcom_out_buffer, -EINVAL);
 	} else {
