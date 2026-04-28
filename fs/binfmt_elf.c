@@ -131,7 +131,7 @@ static int padzero(unsigned long address)
 	nbyte = ELF_PAGEOFFSET(address);
 	if (nbyte) {
 		nbyte = ELF_MIN_ALIGN - nbyte;
-		if (clear_user((void __user *)address, nbyte))
+		if (clear_user(uaddr_to_user_ptr_safe(address), nbyte))
 			return -EFAULT;
 	}
 	return 0;
@@ -139,17 +139,17 @@ static int padzero(unsigned long address)
 
 /* Let's use some macros to make this stack manipulation a little clearer */
 #ifdef CONFIG_STACK_GROWSUP
-#define STACK_ADD(sp, items) ((elf_addr_t __user *)(sp) + (items))
+#define STACK_ADD(sp, items) ((elf_addr_t __user *)uaddr_to_user_ptr_safe(sp) + (items))
 #define STACK_ROUND(sp, items) \
-	((15 + (user_uintptr_t) ((sp) + (items))) &~ 15UL)
+	((15 + user_ptr_addr((sp) + (items))) &~ 15UL)
 #define STACK_ALLOC(sp, len) ({ \
-	elf_addr_t __user *old_sp = (elf_addr_t __user *)sp; sp += len; \
+	elf_addr_t __user *old_sp = uaddr_to_user_ptr_safe(sp); sp += len; \
 	old_sp; })
 #else
-#define STACK_ADD(sp, items) ((elf_addr_t __user *)(sp) - (items))
+#define STACK_ADD(sp, items) ((elf_addr_t __user *)uaddr_to_user_ptr_safe(sp) - (items))
 #define STACK_ROUND(sp, items) \
-	(((user_uintptr_t) (sp - items)) &~ 15UL)
-#define STACK_ALLOC(sp, len) (sp -= len)
+	(user_ptr_addr((sp) - (items)) &~ 15UL)
+#define STACK_ALLOC(sp, len) ({ sp -= len ; (elf_addr_t __user *)uaddr_to_user_ptr_safe(sp); })
 #endif
 
 #ifndef ELF_BASE_PLATFORM
@@ -305,10 +305,10 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 
 	/* Point sp at the lowest address on the stack */
 #ifdef CONFIG_STACK_GROWSUP
-	sp = (elf_addr_t __user *)bprm->p - items - ei_index;
+	sp = (elf_addr_t __user *)uaddr_to_user_ptr_safe(bprm->p) - items - ei_index;
 	bprm->exec = (unsigned long)sp; /* XXX: PARISC HACK */
 #else
-	sp = (elf_addr_t __user *)bprm->p;
+	sp = (elf_addr_t __user *)uaddr_to_user_ptr_safe(bprm->p);
 #endif
 
 
@@ -333,7 +333,7 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 		size_t len;
 		if (put_user((elf_addr_t)p, sp++))
 			return -EFAULT;
-		len = strnlen_user((void __user *)p, MAX_ARG_STRLEN);
+		len = strnlen_user(uaddr_to_user_ptr_safe(p), MAX_ARG_STRLEN);
 		if (!len || len > MAX_ARG_STRLEN)
 			return -EINVAL;
 		p += len;
@@ -348,7 +348,7 @@ create_elf_tables(struct linux_binprm *bprm, const struct elfhdr *exec,
 		size_t len;
 		if (put_user((elf_addr_t)p, sp++))
 			return -EFAULT;
-		len = strnlen_user((void __user *)p, MAX_ARG_STRLEN);
+		len = strnlen_user(uaddr_to_user_ptr_safe(p), MAX_ARG_STRLEN);
 		if (!len || len > MAX_ARG_STRLEN)
 			return -EINVAL;
 		p += len;
@@ -1532,7 +1532,7 @@ static int fill_psinfo(struct elf_prpsinfo *psinfo, struct task_struct *p,
 	if (len >= ELF_PRARGSZ)
 		len = ELF_PRARGSZ-1;
 	if (copy_from_user(&psinfo->pr_psargs,
-		           (const char __user *)mm->arg_start, len))
+			   uaddr_to_user_ptr_safe(mm->arg_start), len))
 		return -EFAULT;
 	for(i = 0; i < len; i++)
 		if (psinfo->pr_psargs[i] == 0)
