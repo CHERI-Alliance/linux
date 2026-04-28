@@ -769,7 +769,7 @@ static int uio_mmap_physical(struct vm_area_struct *vma)
 	 */
 	return remap_pfn_range(vma,
 			       vma->vm_start,
-			       mem->addr >> PAGE_SHIFT,
+			       __c_ua(mem->addr) >> PAGE_SHIFT,
 			       vma->vm_end - vma->vm_start,
 			       vma->vm_page_prot);
 }
@@ -843,7 +843,7 @@ static int uio_mmap(struct file *filep, struct vm_area_struct *vma)
 	}
 
 	requested_pages = vma_pages(vma);
-	actual_pages = ((idev->info->mem[mi].addr & ~PAGE_MASK)
+	actual_pages = ((__c_ua(idev->info->mem[mi].addr) & ~PAGE_MASK)
 			+ idev->info->mem[mi].size + PAGE_SIZE -1) >> PAGE_SHIFT;
 	if (requested_pages > actual_pages) {
 		ret = -EINVAL;

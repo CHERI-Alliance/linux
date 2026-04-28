@@ -41,7 +41,7 @@ struct uio_map;
  */
 struct uio_mem {
 	const char		*name;
-	phys_addr_t		addr;
+	uintptr_t		addr;
 	dma_addr_t		dma_addr;
 	unsigned long		offs;
 	resource_size_t		size;

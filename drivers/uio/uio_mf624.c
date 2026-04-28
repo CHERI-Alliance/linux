@@ -120,7 +120,7 @@ static int mf624_setup_mem(struct pci_dev *dev, int bar, struct uio_mem *mem, co
 	resource_size_t len = pci_resource_len(dev, bar);
 
 	mem->name = name;
-	mem->addr = start & PAGE_MASK;
+	mem->addr = __c_fakeu(start & PAGE_MASK);
 	mem->offs = start & ~PAGE_MASK;
 	if (!mem->addr)
 		return -ENODEV;
