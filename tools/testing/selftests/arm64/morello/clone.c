@@ -385,7 +385,7 @@ void run_clone3(struct clone3_fixture *data)
 	siginfo_t wait_si;
 	int result;
 	pid_t pid;
-	void *tls;
+	void *tls = NULL;
 
 	args->pidfd = (uintcap_t)&pidfd;
 	args->parent_tid = (uintcap_t)&parent_tid;
