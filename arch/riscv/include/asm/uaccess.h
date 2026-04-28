@@ -486,11 +486,26 @@ unsigned long __must_check clear_user(void __user *to, unsigned long n)
 		__clear_user(untagged_addr(to), n) : n;
 }
 
-#define arch_get_kernel_nofault(dst, src, type, err_label)			\
-	__get_user_nocheck(*((type *)(dst)), (__force __user type *)(src), err_label)
+#define arch_get_kernel_nofault(dst, src, type, err_label)		\
+	do {								\
+		if (sizeof(type) == __SIZEOF_POINTER__)			\
+			__get_user_nocheck_ptr(*((type *)(dst)),	\
+				       (__force type __user *)(src),	\
+				       err_label);			\
+		else							\
+			__get_user_nocheck(*((type *)(dst)),		\
+				(__force __user type *)(src), err_label);\
+	} while (0)
 
-#define arch_put_kernel_nofault(dst, src, type, err_label)			\
-	__put_user_nocheck(*((type *)(src)), (__force __user type *)(dst), err_label)
+#define arch_put_kernel_nofault(dst, src, type, err_label)		\
+	do {								\
+		if (sizeof(type) == __SIZEOF_POINTER__)			\
+			__put_user_nocheck_ptr(*((type *)(src)),	\
+			       (__force type __user *)(dst), err_label);\
+		else							\
+			__put_user_nocheck(*((type *)(src)),		\
+				(__force __user type *)(dst), err_label);\
+	} while (0)
 
 static __must_check __always_inline bool user_access_begin(const void __user *ptr, size_t len)
 {
@@ -512,7 +527,7 @@ static inline void user_access_restore(unsigned long enabled) { }
 #define arch_unsafe_put_user(x, ptr, label)				\
 	__put_user_nocheck(x, (ptr), label)
 #ifdef CONFIG_CHERI_KERNEL
-#define unsafe_put_user_ptr(x, ptr, label)				\
+#define arch_unsafe_put_user_ptr(x, ptr, label)				\
 	__put_user_nocheck_ptr(x, (ptr), label)
 #endif
 
@@ -523,8 +538,8 @@ static inline void user_access_restore(unsigned long enabled) { }
 	(x) = (__force __typeof__(*(ptr)))__gu_val;			\
 } while (0)
 #ifdef CONFIG_CHERI_KERNEL
-#define unsafe_get_user_ptr(x, ptr, label)	do {			\
-	uintptr_t __gu_val;					\
+#define arch_unsafe_get_user_ptr(x, ptr, label)	do {			\
+	uintptr_t __gu_val;						\
 	__get_user_nocheck_ptr(__gu_val, (ptr), label);			\
 	(x) = (__force __typeof__(*(ptr)))__gu_val;			\
 } while (0)
