@@ -15,7 +15,11 @@
 #include "protocol.h"
 
 #define MIN_INFO_OPTLEN_SIZE		16
+#if __SIZEOF_POINTER__ <= 8
 #define MIN_FULL_INFO_OPTLEN_SIZE	40
+#else
+#define MIN_FULL_INFO_OPTLEN_SIZE	64
+#endif
 
 static struct sock *__mptcp_tcp_fallback(struct mptcp_sock *msk)
 {
@@ -1315,11 +1319,11 @@ static int mptcp_getsockopt_full_info(struct mptcp_sock *msk, char __user *optva
 	mfi.size_tcpinfo_kernel = sizeof(struct tcp_info);
 	mfi.size_tcpinfo_user = min_t(unsigned int, mfi.size_tcpinfo_user,
 				      sizeof(struct tcp_info));
-	sfinfoptr = u64_to_user_ptr(mfi.subflow_info);
+	sfinfoptr = (void *)mfi.subflow_info;
 	mfi.size_sfinfo_kernel = sizeof(struct mptcp_subflow_info);
 	mfi.size_sfinfo_user = min_t(unsigned int, mfi.size_sfinfo_user,
 				     sizeof(struct mptcp_subflow_info));
-	tcpinfoptr = u64_to_user_ptr(mfi.tcp_info);
+	tcpinfoptr = (void *)mfi.tcp_info;
 
 	lock_sock(sk);
 	mptcp_for_each_subflow(msk, subflow) {
