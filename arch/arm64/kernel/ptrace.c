@@ -692,7 +692,11 @@ static int tls_set(struct task_struct *target, const struct user_regset *regset,
 	if (ret)
 		return ret;
 
-	target->thread.uw.tp_value = (user_uintptr_t)tls[0];
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	morello_merge_cap_xval(&target->thread.uw.tp_value, tls[0]);
+#else
+	target->thread.uw.tp_value = tls[0];
+#endif
 	if (system_supports_tpidr2())
 		target->thread.tpidr2_el0 = tls[1];
 
@@ -1963,7 +1967,6 @@ static const struct user_regset_view user_aarch64_view = {
 	.regsets = aarch64_regsets, .n = ARRAY_SIZE(aarch64_regsets)
 };
 
-#ifdef CONFIG_COMPAT32
 enum compat_regset {
 	REGSET_COMPAT_GPR,
 	REGSET_COMPAT_VFP,
