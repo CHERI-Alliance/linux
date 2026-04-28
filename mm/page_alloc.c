@@ -5302,7 +5302,7 @@ EXPORT_SYMBOL(__folio_alloc_noprof);
  * address cannot represent highmem pages. Use alloc_pages and then kmap if
  * you need to access high mem.
  */
-unsigned long get_free_pages_noprof(gfp_t gfp_mask, unsigned int order)
+uintptr_t get_free_pages_noprof(gfp_t gfp_mask, unsigned int order)
 {
 	struct page *page;
 
@@ -5313,7 +5313,7 @@ unsigned long get_free_pages_noprof(gfp_t gfp_mask, unsigned int order)
 }
 EXPORT_SYMBOL(get_free_pages_noprof);
 
-unsigned long get_zeroed_page_noprof(gfp_t gfp_mask)
+uintptr_t get_zeroed_page_noprof(gfp_t gfp_mask)
 {
 	return get_free_pages_noprof(gfp_mask | __GFP_ZERO, 0);
 }
@@ -5388,7 +5388,7 @@ void free_pages_nolock(struct page *page, unsigned int order)
  * to free pages when you only have a valid virtual address. If you have
  * the page, call __free_pages() instead.
  */
-void free_pages(unsigned long addr, unsigned int order)
+void free_pages(uintptr_t addr, unsigned int order)
 {
 	if (addr != 0) {
 		VM_BUG_ON(!virt_addr_valid((void *)(uintptr_t)addr));
@@ -5398,7 +5398,7 @@ void free_pages(unsigned long addr, unsigned int order)
 
 EXPORT_SYMBOL(free_pages);
 
-static void *make_alloc_exact(unsigned long addr, unsigned int order,
+static void *make_alloc_exact(uintptr_t addr, unsigned int order,
 		size_t size)
 {
 	if (addr) {
@@ -5481,7 +5481,7 @@ void * __meminit alloc_pages_exact_nid_noprof(int nid, size_t size, gfp_t gfp_ma
 void free_pages_exact(void *virt, size_t size)
 {
 	uintptr_t addr = (uintptr_t)virt;
-	unsigned long end = addr + PAGE_ALIGN(size);
+	uintptr_t end = addr + PAGE_ALIGN(size);
 
 	while (addr < end) {
 		free_page(addr);
