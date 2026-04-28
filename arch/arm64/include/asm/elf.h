@@ -166,11 +166,7 @@ do {									\
 } while (0)
 
 #ifdef CONFIG_CHERI_PURECAP_UABI
-/*
- * TODO [PCuABI]: In Transitional PCuABI, AT_SYSINFO_EHDR is passed as NULL
- * as there is no purecap vDSO yet.
- */
-#define ARCH_DLINFO	SETUP_DLINFO(0)
+#define ARCH_DLINFO	SETUP_DLINFO(current->mm->context.vdso)
 #else /* !CONFIG_CHERI_PURECAP_UABI */
 #define ARCH_DLINFO	SETUP_DLINFO((elf_addr_t)current->mm->context.vdso)
 #endif /* CONFIG_CHERI_PURECAP_UABI */
@@ -212,7 +208,7 @@ typedef compat_elf_greg_t		compat_elf_gregset_t[COMPAT_ELF_NGREG];
 	SET_PERSONALITY_AARCH64();					\
 })
 
-#define COMPAT_ARCH_DLINFO	SETUP_DLINFO((elf_addr_t)current->mm->context.vdso)
+#define COMPAT_ARCH_DLINFO	SETUP_DLINFO(current->mm->context.vdso)
 
 #else /* !CONFIG_COMPAT64 */
 

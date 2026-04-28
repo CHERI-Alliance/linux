@@ -30,7 +30,7 @@ typedef struct {
 	void		*sigpage;
 #endif
 	refcount_t	pinned;
-	void		*vdso;
+	user_uintptr_t	vdso;
 	unsigned long	flags;
 	u8		pkey_allocation_map;
 } mm_context_t;
