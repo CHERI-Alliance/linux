@@ -17,6 +17,8 @@
 #ifndef _LINUX_PERCPU_DEFS_H
 #define _LINUX_PERCPU_DEFS_H
 
+#include <linux/cheri.h>
+
 #ifdef CONFIG_SMP
 
 #ifdef MODULE
@@ -231,8 +233,31 @@ do {									\
  * Add an offset to a pointer.  Use RELOC_HIDE() to prevent the compiler
  * from making incorrect assumptions about the pointer value.
  */
+
+#ifdef CONFIG_CHERI_KERNEL
+/* FIXCHERI: This is a hot path. Optimize! */
+static inline void * cheri_shift_percpu_ptr(const uintptr_t p, ptraddr_t off)
+{
+	__ptraddr_t ret = p + off;
+	void *auth = (void *)p;
+
+	if (cheri_tag_get((void *)p)) {
+		auth = cheri_make_kernel_data_cap(cheri_base_get(p) + off,
+						  cheri_length_get(p));
+		auth = cheri_perms_and(auth, cheri_perms_get(p));
+	}
+
+	auth = cheri_address_set(auth, ret);
+	OPTIMIZER_HIDE_VAR(auth);
+
+	return auth;
+}
+#define SHIFT_PERCPU_PTR(__p, __offset)					\
+	((typeof(*(__p)) *)cheri_shift_percpu_ptr((uintptr_t)__p, __offset))
+#else
 #define SHIFT_PERCPU_PTR(__p, __offset)					\
 	RELOC_HIDE(PERCPU_PTR(__p), (__offset))
+#endif
 
 #define per_cpu_ptr(ptr, cpu)						\
 ({									\
@@ -317,6 +342,12 @@ extern void __this_cpu_preempt_check(const char *op);
 static __always_inline void __this_cpu_preempt_check(const char *op) { }
 #endif
 
+#if __SIZEOF_POINTER__ == 16
+#define IFLP128(x) x
+#else
+#define IFLP128(x)
+#endif
+
 #define __pcpu_size_call_return(stem, variable)				\
 ({									\
 	TYPEOF_UNQUAL(variable) pscr_ret__;				\
@@ -326,6 +357,7 @@ static __always_inline void __this_cpu_preempt_check(const char *op) { }
 	case 2: pscr_ret__ = stem##2(variable); break;			\
 	case 4: pscr_ret__ = stem##4(variable); break;			\
 	case 8: pscr_ret__ = stem##8(variable); break;			\
+	IFLP128(case 16: pscr_ret__ = stem##16(variable); break;)	\
 	default:							\
 		__bad_size_call_parameter(); break;			\
 	}								\
@@ -341,6 +373,7 @@ static __always_inline void __this_cpu_preempt_check(const char *op) { }
 	case 2: pscr2_ret__ = stem##2(variable, __VA_ARGS__); break;	\
 	case 4: pscr2_ret__ = stem##4(variable, __VA_ARGS__); break;	\
 	case 8: pscr2_ret__ = stem##8(variable, __VA_ARGS__); break;	\
+	IFLP128(case 16: pscr2_ret__ = stem##16(variable, __VA_ARGS__); break;)	\
 	default:							\
 		__bad_size_call_parameter(); break;			\
 	}								\
@@ -356,6 +389,7 @@ static __always_inline void __this_cpu_preempt_check(const char *op) { }
 	case 2: pscr2_ret__ = stem##2(variable, __VA_ARGS__); break;	\
 	case 4: pscr2_ret__ = stem##4(variable, __VA_ARGS__); break;	\
 	case 8: pscr2_ret__ = stem##8(variable, __VA_ARGS__); break;	\
+	IFLP128(case 16: pscr2_ret__ = stem##16(variable, __VA_ARGS__); break;)	\
 	default:							\
 		__bad_size_call_parameter(); break;			\
 	}								\
@@ -370,6 +404,7 @@ do {									\
 		case 2: stem##2(variable, __VA_ARGS__);break;		\
 		case 4: stem##4(variable, __VA_ARGS__);break;		\
 		case 8: stem##8(variable, __VA_ARGS__);break;		\
+		IFLP128(case 16: stem##16(variable, __VA_ARGS__);break;)	\
 		default: 						\
 			__bad_size_call_parameter();break;		\
 	}								\
