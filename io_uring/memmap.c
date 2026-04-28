@@ -307,6 +307,11 @@ __cold int io_uring_mmap(struct file *file, struct vm_area_struct *vma)
 	if (IS_ERR(ptr))
 		return PTR_ERR(ptr);
 
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	vm_flags_set(vma, VM_READ_CAPS | VM_WRITE_CAPS);
+	vma_set_page_prot(vma);
+#endif
+
 	switch (offset & IORING_OFF_MMAP_MASK) {
 	case IORING_OFF_SQ_RING:
 	case IORING_OFF_CQ_RING:
