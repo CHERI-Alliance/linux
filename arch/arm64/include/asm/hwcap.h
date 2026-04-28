@@ -183,6 +183,8 @@
 
 #define KERNEL_HWCAP_MORELLO		__khwcap3_feature(MORELLO)
 
+#define KERNEL_HWCAP_MORELLO		__khwcap3_feature(MORELLO)
+
 /*
  * This yields a mask that user programs can use to figure out what
  * instruction set this cpu supports.
