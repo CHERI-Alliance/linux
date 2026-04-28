@@ -62,7 +62,7 @@ static void __init sbus_iommu_init(struct platform_device *op)
 	unsigned long *bitmap;
 	unsigned long control;
 	unsigned long base;
-	unsigned long tmp;
+	uintptr_t tmp;
 
 	iommu = kmalloc_obj(struct iommu_struct);
 	if (!iommu) {

@@ -55,7 +55,7 @@ void free_stack(unsigned long stack, int order)
 
 unsigned long alloc_stack(int order, int atomic)
 {
-	unsigned long page;
+	uintptr_t page;
 	gfp_t flags = GFP_KERNEL;
 
 	if (atomic)

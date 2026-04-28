@@ -715,7 +715,7 @@ int __init gart_iommu_init(void)
 	unsigned long iommu_start;
 	unsigned long aper_base, aper_size;
 	unsigned long start_pfn, end_pfn;
-	unsigned long scratch;
+	uintptr_t scratch;
 
 	if (!amd_nb_has_feature(AMD_NB_GART))
 		return 0;

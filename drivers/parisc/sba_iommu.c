@@ -1132,7 +1132,7 @@ PAT_MOD(mod)->mod_info.ioc         = PAT_GET_IOC(temp);
 static void *
 sba_alloc_pdir(unsigned int pdir_size)
 {
-        unsigned long pdir_base;
+        uintptr_t pdir_base;
 	unsigned long pdir_order = get_order(pdir_size);
 
 	pdir_base = __get_free_pages(GFP_KERNEL, pdir_order);
@@ -1173,7 +1173,7 @@ sba_alloc_pdir(unsigned int pdir_size)
 	if (pdir_order <= (19-12)) {
 		if (((virt_to_phys(pdir_base)+pdir_size-1) & PIRANHA_ADDR_MASK) == PIRANHA_ADDR_VAL) {
 			/* allocate a new one on 512k alignment */
-			unsigned long new_pdir = __get_free_pages(GFP_KERNEL, (19-12));
+			uintptr_t new_pdir = __get_free_pages(GFP_KERNEL, (19-12));
 			/* release original */
 			free_pages(pdir_base, pdir_order);
 
@@ -1192,7 +1192,7 @@ sba_alloc_pdir(unsigned int pdir_size)
 		** 1MB or 2MB Pdir
 		** Needs to be aligned on an "odd" 1MB boundary.
 		*/
-		unsigned long new_pdir = __get_free_pages(GFP_KERNEL, pdir_order+1); /* 2 or 4MB */
+		uintptr_t new_pdir = __get_free_pages(GFP_KERNEL, pdir_order+1); /* 2 or 4MB */
 
 		/* release original */
 		free_pages( pdir_base, pdir_order);

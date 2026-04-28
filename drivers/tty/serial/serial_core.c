@@ -246,7 +246,7 @@ static int uart_alloc_xmit_buf(struct tty_port *port)
 	struct uart_state *state = container_of(port, struct uart_state, port);
 	struct uart_port *uport;
 	unsigned long flags;
-	unsigned long page;
+	uintptr_t page;
 
 	/*
 	 * Initialise and allocate the transmit and temporary
