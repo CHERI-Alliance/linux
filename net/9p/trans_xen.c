@@ -301,7 +301,7 @@ static void xen_9pfs_front_free(struct xen_9pfs_front_priv *priv)
 					   XEN_PAGE_SHIFT));
 			}
 			gnttab_end_foreign_access(priv->rings[i].ref, NULL);
-			free_page((unsigned long)priv->rings[i].intf);
+			free_page((uintptr_t)priv->rings[i].intf);
 		}
 		kfree(priv->rings);
 	}
@@ -381,7 +381,7 @@ out:
 		free_pages_exact(bytes, 1UL << (order + XEN_PAGE_SHIFT));
 	}
 	gnttab_end_foreign_access(ring->ref, NULL);
-	free_page((unsigned long)ring->intf);
+	free_page((uintptr_t)ring->intf);
 	return ret;
 }
 

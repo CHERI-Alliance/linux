@@ -1691,7 +1691,7 @@ ld_drv_map_alloc_fail:
 			if (is_vmalloc_addr(fusion->ld_drv_map[i]))
 				vfree(fusion->ld_drv_map[i]);
 			else
-				free_pages((ulong)fusion->ld_drv_map[i],
+				free_pages((uintptr_t)fusion->ld_drv_map[i],
 					   fusion->drv_map_pages);
 		}
 	}
@@ -5348,15 +5348,15 @@ megasas_free_fusion_context(struct megasas_instance *instance)
 			if (is_vmalloc_addr(fusion->load_balance_info))
 				vfree(fusion->load_balance_info);
 			else
-				free_pages((ulong)fusion->load_balance_info,
-					fusion->load_balance_info_pages);
+				free_pages((uintptr_t)fusion->load_balance_info,
+					   fusion->load_balance_info_pages);
 		}
 
 		if (fusion->log_to_span) {
 			if (is_vmalloc_addr(fusion->log_to_span))
 				vfree(fusion->log_to_span);
 			else
-				free_pages((ulong)fusion->log_to_span,
+				free_pages((uintptr_t)fusion->log_to_span,
 					   fusion->log_to_span_pages);
 		}
 

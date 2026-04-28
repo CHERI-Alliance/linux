@@ -1125,7 +1125,7 @@ static void hyp_mc_free_fn(void *addr, void *mc)
 	if (memcache->flags & HYP_MEMCACHE_ACCOUNT_STAGE2)
 		kvm_account_pgtable_pages(addr, -1);
 
-	free_page((unsigned long)addr);
+	free_page((uintptr_t)addr);
 }
 
 static void *hyp_mc_alloc_fn(void *mc)

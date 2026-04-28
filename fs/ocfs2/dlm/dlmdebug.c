@@ -263,7 +263,7 @@ void dlm_print_one_mle(struct dlm_master_list_entry *mle)
 	buf = (char *) get_zeroed_page(GFP_ATOMIC);
 	if (buf) {
 		dump_mle(mle, buf, PAGE_SIZE - 1);
-		free_page((unsigned long)buf);
+		free_page((uintptr_t)buf);
 	}
 }
 
@@ -280,7 +280,7 @@ static struct dentry *dlm_debugfs_root;
 /* begin - utils funcs */
 static int debug_release(struct inode *inode, struct file *file)
 {
-	free_page((unsigned long)file->private_data);
+	free_page((uintptr_t)file->private_data);
 	return 0;
 }
 

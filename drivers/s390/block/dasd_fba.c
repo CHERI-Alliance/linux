@@ -745,7 +745,7 @@ dasd_fba_dump_sense(struct dasd_device *device, struct dasd_ccw_req * req,
 	}
 	if (len > 0)
 		dev_err(dev, "%s", page);
-	free_page((unsigned long) page);
+	free_page((uintptr_t) page);
 }
 
 static unsigned int dasd_fba_max_sectors(struct dasd_block *block)
@@ -804,7 +804,7 @@ static void __exit
 dasd_fba_cleanup(void)
 {
 	ccw_driver_unregister(&dasd_fba_driver);
-	free_page((unsigned long)dasd_fba_zero_page);
+	free_page((uintptr_t)dasd_fba_zero_page);
 }
 
 module_init(dasd_fba_init);

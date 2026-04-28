@@ -1122,8 +1122,8 @@ static void kfd_process_destroy_pdds(struct kfd_process *p)
 			fput(pdd->drm_file);
 
 		if (pdd->qpd.cwsr_kaddr && !pdd->qpd.cwsr_base)
-			free_pages((unsigned long)pdd->qpd.cwsr_kaddr,
-				get_order(KFD_CWSR_TBA_TMA_SIZE));
+			free_pages((uintptr_t)pdd->qpd.cwsr_kaddr,
+				   get_order(KFD_CWSR_TBA_TMA_SIZE));
 
 		idr_destroy(&pdd->alloc_idr);
 

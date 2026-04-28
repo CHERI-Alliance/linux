@@ -308,8 +308,8 @@ void avic_vm_destroy(struct kvm *kvm)
 	if (!enable_apicv)
 		return;
 
-	free_page((unsigned long)kvm_svm->avic_logical_id_table);
-	free_pages((unsigned long)kvm_svm->avic_physical_id_table,
+	free_page((uintptr_t)kvm_svm->avic_logical_id_table);
+	free_pages((uintptr_t)kvm_svm->avic_physical_id_table,
 		   avic_get_physical_id_table_order(kvm));
 
 	spin_lock_irqsave(&svm_vm_data_hash_lock, flags);

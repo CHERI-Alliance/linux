@@ -782,7 +782,7 @@ static int grow_gnttab_list(unsigned int more_frames)
 
 grow_nomem:
 	while (i-- > nr_glist_frames)
-		free_page((unsigned long) gnttab_list[i]);
+		free_page((uintptr_t) gnttab_list[i]);
 	return -ENOMEM;
 }
 
@@ -1674,7 +1674,7 @@ int gnttab_init(void)
 
  ini_nomem:
 	for (i--; i >= 0; i--)
-		free_page((unsigned long)gnttab_list[i]);
+		free_page((uintptr_t)gnttab_list[i]);
 	kfree(gnttab_list);
 	bitmap_free(gnttab_free_bitmap);
 	return ret;

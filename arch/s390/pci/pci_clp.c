@@ -96,7 +96,7 @@ static void *clp_alloc_block(gfp_t gfp_mask)
 
 static void clp_free_block(void *ptr)
 {
-	free_pages((unsigned long) ptr, get_order(CLP_BLK_SIZE));
+	free_pages((uintptr_t) ptr, get_order(CLP_BLK_SIZE));
 }
 
 static void clp_store_query_pci_fngrp(struct zpci_dev *zdev,

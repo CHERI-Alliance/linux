@@ -4032,7 +4032,7 @@ static void release_sub_crq_queue(struct ibmvnic_adapter *adapter,
 
 	dma_unmap_single(dev, scrq->msg_token, 4 * PAGE_SIZE,
 			 DMA_BIDIRECTIONAL);
-	free_pages((unsigned long)scrq->msgs, 2);
+	free_pages((uintptr_t)scrq->msgs, 2);
 	free_cpumask_var(scrq->affinity_mask);
 	kfree(scrq);
 }
@@ -4110,7 +4110,7 @@ reg_failed:
 map_failed:
 	free_cpumask_var(scrq->affinity_mask);
 cpumask_alloc_failed:
-	free_pages((unsigned long)scrq->msgs, 2);
+	free_pages((uintptr_t)scrq->msgs, 2);
 zero_page_failed:
 	kfree(scrq);
 
@@ -6252,7 +6252,7 @@ static void release_crq_queue(struct ibmvnic_adapter *adapter)
 
 	dma_unmap_single(&vdev->dev, crq->msg_token, PAGE_SIZE,
 			 DMA_BIDIRECTIONAL);
-	free_page((unsigned long)crq->msgs);
+	free_page((uintptr_t)crq->msgs);
 	crq->msgs = NULL;
 	crq->active = false;
 }
@@ -6330,7 +6330,7 @@ req_irq_failed:
 reg_crq_failed:
 	dma_unmap_single(dev, crq->msg_token, PAGE_SIZE, DMA_BIDIRECTIONAL);
 map_failed:
-	free_page((unsigned long)crq->msgs);
+	free_page((uintptr_t)crq->msgs);
 	crq->msgs = NULL;
 	return retrc;
 }

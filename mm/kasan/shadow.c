@@ -390,7 +390,7 @@ static int __kasan_populate_vmalloc_do(unsigned long start, unsigned long end, g
 		nr_total -= nr_pages;
 	}
 
-	free_page((unsigned long)data.pages);
+	free_page((uintptr_t)data.pages);
 
 	return ret;
 }

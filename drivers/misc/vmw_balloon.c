@@ -1293,7 +1293,7 @@ static unsigned long vmballoon_deflate(struct vmballoon *b, uint64_t n_frames,
  */
 static void vmballoon_deinit_batching(struct vmballoon *b)
 {
-	free_page((unsigned long)b->batch_page);
+	free_page((uintptr_t)b->batch_page);
 	b->batch_page = NULL;
 	static_branch_disable(&vmw_balloon_batching);
 	b->batch_max_pages = 1;

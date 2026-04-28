@@ -1745,7 +1745,7 @@ static struct sk_buff *dpaa_cleanup_tx_fd(const struct dpaa_priv *priv,
 
 	if (qm_fd_get_format(fd) == qm_fd_sg)
 		/* Free the page that we allocated on Tx for the SGT */
-		free_pages((unsigned long)vaddr, 0);
+		free_pages((uintptr_t)vaddr, 0);
 
 	return skb;
 }
@@ -1801,7 +1801,7 @@ static struct sk_buff *contig_fd_to_skb(const struct dpaa_priv *priv,
 	return skb;
 
 free_buffer:
-	free_pages((unsigned long)vaddr, 0);
+	free_pages((uintptr_t)vaddr, 0);
 	return NULL;
 }
 
@@ -1908,7 +1908,7 @@ static struct sk_buff *sg_fd_to_skb(const struct dpaa_priv *priv,
 	WARN_ONCE(i == DPAA_SGT_MAX_ENTRIES, "No final bit on SGT\n");
 
 	/* free the SG table buffer */
-	free_pages((unsigned long)vaddr, 0);
+	free_pages((uintptr_t)vaddr, 0);
 
 	return skb;
 
@@ -1921,7 +1921,7 @@ free_buffers:
 		if (j > i)
 			dma_unmap_page(priv->rx_dma_dev, qm_sg_addr(&sgt[j]),
 				       DPAA_BP_RAW_SIZE, DMA_FROM_DEVICE);
-		free_pages((unsigned long)sg_vaddr, 0);
+		free_pages((uintptr_t)sg_vaddr, 0);
 		/* counters 0..i-1 were decremented */
 		if (j >= i) {
 			dpaa_bp = dpaa_bpid2pool(sgt[j].bpid);
@@ -1935,7 +1935,7 @@ free_buffers:
 			break;
 	}
 	/* free the SGT fragment */
-	free_pages((unsigned long)vaddr, 0);
+	free_pages((uintptr_t)vaddr, 0);
 
 	return NULL;
 }
@@ -2096,7 +2096,7 @@ sg_map_failed:
 			       qm_sg_entry_get_len(&sgt[j]), dma_dir);
 sg0_map_failed:
 csum_failed:
-	free_pages((unsigned long)buff_start, 0);
+	free_pages((uintptr_t)buff_start, 0);
 
 	return err;
 }
@@ -2643,7 +2643,7 @@ static u32 dpaa_run_xdp(struct dpaa_priv *priv, struct qm_fd *fd, void *vaddr,
 		xdp.frame_sz = DPAA_BP_RAW_SIZE;
 		xdpf = xdp_convert_buff_to_frame(&xdp);
 		if (unlikely(!xdpf)) {
-			free_pages((unsigned long)vaddr, 0);
+			free_pages((uintptr_t)vaddr, 0);
 			break;
 		}
 
@@ -2659,7 +2659,7 @@ static u32 dpaa_run_xdp(struct dpaa_priv *priv, struct qm_fd *fd, void *vaddr,
 		err = xdp_do_redirect(priv->net_dev, &xdp, xdp_prog);
 		if (err) {
 			trace_xdp_exception(priv->net_dev, xdp_prog, xdp_act);
-			free_pages((unsigned long)vaddr, 0);
+			free_pages((uintptr_t)vaddr, 0);
 		}
 		break;
 	default:
@@ -2670,7 +2670,7 @@ static u32 dpaa_run_xdp(struct dpaa_priv *priv, struct qm_fd *fd, void *vaddr,
 		fallthrough;
 	case XDP_DROP:
 		/* Free the buffer */
-		free_pages((unsigned long)vaddr, 0);
+		free_pages((uintptr_t)vaddr, 0);
 		break;
 	}
 
@@ -2793,7 +2793,7 @@ static enum qman_cb_dqrr_result rx_default_dqrr(struct qman_portal *portal,
 			WARN_ONCE(1, "S/G frames not supported under XDP\n");
 			sgt = vaddr + qm_fd_get_offset(fd);
 			dpaa_release_sgt_members(sgt);
-			free_pages((unsigned long)vaddr, 0);
+			free_pages((uintptr_t)vaddr, 0);
 			return qman_cb_dqrr_consume;
 		}
 		skb = sg_fd_to_skb(priv, fd);

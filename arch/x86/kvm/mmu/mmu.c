@@ -1822,8 +1822,8 @@ static void kvm_mmu_free_shadow_page(struct kvm_mmu_page *sp)
 
 	hlist_del(&sp->hash_link);
 	list_del(&sp->link);
-	free_page((unsigned long)sp->spt);
-	free_page((unsigned long)sp->shadowed_translation);
+	free_page((uintptr_t)sp->spt);
+	free_page((uintptr_t)sp->shadowed_translation);
 	kmem_cache_free(mmu_page_header_cache, sp);
 }
 
@@ -4237,9 +4237,9 @@ static int mmu_alloc_special_roots(struct kvm_vcpu *vcpu)
 
 #ifdef CONFIG_X86_64
 err_pml5:
-	free_page((unsigned long)pml4_root);
+	free_page((uintptr_t)pml4_root);
 err_pml4:
-	free_page((unsigned long)pae_root);
+	free_page((uintptr_t)pae_root);
 	return -ENOMEM;
 #endif
 }
@@ -6624,9 +6624,9 @@ static void free_mmu_pages(struct kvm_mmu *mmu)
 {
 	if (!tdp_enabled && mmu->pae_root)
 		set_memory_encrypted((unsigned long)mmu->pae_root, 1);
-	free_page((unsigned long)mmu->pae_root);
-	free_page((unsigned long)mmu->pml4_root);
-	free_page((unsigned long)mmu->pml5_root);
+	free_page((uintptr_t)mmu->pae_root);
+	free_page((uintptr_t)mmu->pml4_root);
+	free_page((uintptr_t)mmu->pml5_root);
 }
 
 static int __kvm_mmu_create(struct kvm_vcpu *vcpu, struct kvm_mmu *mmu)

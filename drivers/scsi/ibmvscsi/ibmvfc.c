@@ -882,7 +882,7 @@ static void ibmvfc_free_queue(struct ibmvfc_host *vhost,
 	struct device *dev = vhost->dev;
 
 	dma_unmap_single(dev, queue->msg_token, PAGE_SIZE, DMA_BIDIRECTIONAL);
-	free_page((unsigned long)queue->msgs.handle);
+	free_page((uintptr_t)queue->msgs.handle);
 	queue->msgs.handle = NULL;
 
 	ibmvfc_free_event_pool(vhost, queue);
@@ -5842,7 +5842,7 @@ static int ibmvfc_alloc_queue(struct ibmvfc_host *vhost,
 					  DMA_BIDIRECTIONAL);
 
 	if (dma_mapping_error(dev, queue->msg_token)) {
-		free_page((unsigned long)queue->msgs.handle);
+		free_page((uintptr_t)queue->msgs.handle);
 		queue->msgs.handle = NULL;
 		return -ENOMEM;
 	}

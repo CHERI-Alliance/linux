@@ -191,11 +191,11 @@ static void free_sampling_buffer(struct sf_buffer *sfb)
 		if (is_link_entry(curr)) {
 			/* Process table-link entries */
 			curr = get_next_sdbt(curr);
-			free_page((unsigned long)sdbt);
+			free_page((uintptr_t)sdbt);
 			sdbt = curr;
 		} else {
 			/* Process SDB pointer */
-			free_page((unsigned long)phys_to_virt(*curr));
+			free_page((uintptr_t)phys_to_virt(*curr));
 			curr++;
 		}
 	} while (curr != head);
@@ -291,7 +291,7 @@ static int realloc_sampling_buffer(struct sf_buffer *sfb,
 			 */
 			if (tail_prev) {
 				sfb->num_sdbt--;
-				free_page((unsigned long)new);
+				free_page((uintptr_t)new);
 				tail = tail_prev;
 			}
 			break;

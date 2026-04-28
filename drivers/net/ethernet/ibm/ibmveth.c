@@ -759,9 +759,9 @@ out_free_queue_mem:
 			  adapter->rx_queue.queue_addr,
 			  adapter->rx_queue.queue_dma);
 out_free_filter_list:
-	free_page((unsigned long)adapter->filter_list_addr);
+	free_page((uintptr_t)adapter->filter_list_addr);
 out_free_buffer_list:
-	free_page((unsigned long)adapter->buffer_list_addr);
+	free_page((uintptr_t)adapter->buffer_list_addr);
 out:
 	napi_disable(&adapter->napi);
 	return rc;
@@ -797,11 +797,11 @@ static int ibmveth_close(struct net_device *netdev)
 
 	dma_unmap_single(dev, adapter->buffer_list_dma, 4096,
 			 DMA_BIDIRECTIONAL);
-	free_page((unsigned long)adapter->buffer_list_addr);
+	free_page((uintptr_t)adapter->buffer_list_addr);
 
 	dma_unmap_single(dev, adapter->filter_list_dma, 4096,
 			 DMA_BIDIRECTIONAL);
-	free_page((unsigned long)adapter->filter_list_addr);
+	free_page((uintptr_t)adapter->filter_list_addr);
 
 	dma_free_coherent(dev, adapter->rx_queue.queue_len,
 			  adapter->rx_queue.queue_addr,

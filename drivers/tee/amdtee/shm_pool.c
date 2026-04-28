@@ -42,7 +42,7 @@ static void pool_op_free(struct tee_shm_pool *pool, struct tee_shm *shm)
 {
 	/* Unmap the shared memory from TEE */
 	amdtee_unmap_shmem(shm);
-	free_pages((unsigned long)shm->kaddr, get_order(shm->size));
+	free_pages((uintptr_t)shm->kaddr, get_order(shm->size));
 	shm->kaddr = NULL;
 }
 

@@ -1454,7 +1454,7 @@ static int vcc_table_allocate(struct lanai_dev *lanai)
 static inline void vcc_table_deallocate(const struct lanai_dev *lanai)
 {
 #ifdef VCCTABLE_GETFREEPAGE
-	free_page((unsigned long) lanai->vccs);
+	free_page((uintptr_t) lanai->vccs);
 #else
 	vfree(lanai->vccs);
 #endif

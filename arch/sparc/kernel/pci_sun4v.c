@@ -349,7 +349,7 @@ static void dma_4v_free_coherent(struct device *dev, size_t size, void *cpu,
 	iommu_tbl_range_free(tbl, dvma, npages, IOMMU_ERROR_CODE);
 	order = get_order(size);
 	if (order < 10)
-		free_pages((unsigned long)cpu, order);
+		free_pages((uintptr_t)cpu, order);
 }
 
 static dma_addr_t dma_4v_map_phys(struct device *dev, phys_addr_t phys,
@@ -800,7 +800,7 @@ static int pci_sun4v_atu_alloc_iotsb(struct pci_pbm_info *pbm)
 	return 0;
 
 iotsb_conf_failed:
-	free_pages((unsigned long)table, order);
+	free_pages((uintptr_t)table, order);
 table_failed:
 	kfree(iotsb);
 out_err:

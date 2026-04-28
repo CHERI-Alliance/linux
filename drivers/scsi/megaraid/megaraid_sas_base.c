@@ -8052,7 +8052,7 @@ skip_firing_dcmds:
 				if (is_vmalloc_addr(fusion->ld_drv_map[i]))
 					vfree(fusion->ld_drv_map[i]);
 				else
-					free_pages((ulong)fusion->ld_drv_map[i],
+					free_pages((uintptr_t)fusion->ld_drv_map[i],
 						   fusion->drv_map_pages);
 			}
 

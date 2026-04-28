@@ -247,7 +247,7 @@ static void its_free_pages(void *addr, unsigned int order)
 	 */
 	if (set_memory_encrypted((unsigned long)addr, 1 << order))
 		return;
-	free_pages((unsigned long)addr, order);
+	free_pages((uintptr_t)addr, order);
 }
 
 static struct gen_pool *itt_pool;

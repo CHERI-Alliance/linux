@@ -755,7 +755,7 @@ int pud_free_pmd_page(pud_t *pud, unsigned long addr)
 		}
 	}
 
-	free_page((unsigned long)pmd_sv);
+	free_page((uintptr_t)pmd_sv);
 
 	pmd_free(&init_mm, pmd);
 

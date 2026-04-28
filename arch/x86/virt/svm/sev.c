@@ -344,7 +344,7 @@ static void __init free_rmp_segment_table(void)
 		kfree(desc);
 	}
 
-	free_page((unsigned long)rmp_segment_table);
+	free_page((uintptr_t)rmp_segment_table);
 
 	rmp_segment_table = NULL;
 }

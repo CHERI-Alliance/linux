@@ -291,7 +291,7 @@ void intel_vgpu_clean_opregion(struct intel_vgpu *vgpu)
 		return;
 
 	/* Guest opregion is released by VFIO */
-	free_pages((unsigned long)vgpu_opregion(vgpu)->va,
+	free_pages((uintptr_t)vgpu_opregion(vgpu)->va,
 		   get_order(INTEL_GVT_OPREGION_SIZE));
 
 	vgpu_opregion(vgpu)->va = NULL;

@@ -427,7 +427,7 @@ static void des_s390_exit(void)
 	while (des_s390_skciphers_num--)
 		crypto_unregister_skcipher(des_s390_skciphers_ptr[des_s390_skciphers_num]);
 	if (ctrblk)
-		free_page((unsigned long) ctrblk);
+		free_page((uintptr_t) ctrblk);
 }
 
 static int __init des_s390_init(void)

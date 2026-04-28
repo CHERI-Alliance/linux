@@ -1142,7 +1142,7 @@ int __ref efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
 
 	rc = efi_mem_reserve_iomem(__pa(rsv), SZ_4K);
 	if (rc) {
-		free_page((unsigned long)rsv);
+		free_page((uintptr_t)rsv);
 		return rc;
 	}
 

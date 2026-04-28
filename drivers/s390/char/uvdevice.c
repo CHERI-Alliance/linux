@@ -377,7 +377,7 @@ static int uvio_list_secrets(struct uvio_ioctl_cb *uv_ioctl)
 
 	rc = uvio_get_list(zpage, uv_ioctl);
 
-	free_page((unsigned long)zpage);
+	free_page((uintptr_t)zpage);
 	return rc;
 }
 

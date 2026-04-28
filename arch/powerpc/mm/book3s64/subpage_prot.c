@@ -30,7 +30,7 @@ void subpage_prot_free(struct mm_struct *mm)
 
 	for (i = 0; i < 4; ++i) {
 		if (spt->low_prot[i]) {
-			free_page((unsigned long)spt->low_prot[i]);
+			free_page((uintptr_t)spt->low_prot[i]);
 			spt->low_prot[i] = NULL;
 		}
 	}
@@ -43,8 +43,8 @@ void subpage_prot_free(struct mm_struct *mm)
 		for (j = 0; j < SBP_L2_COUNT && addr < spt->maxaddr;
 		     ++j, addr += PAGE_SIZE)
 			if (p[j])
-				free_page((unsigned long)p[j]);
-		free_page((unsigned long)p);
+				free_page((uintptr_t)p[j]);
+		free_page((uintptr_t)p);
 	}
 	spt->maxaddr = 0;
 	kfree(spt);

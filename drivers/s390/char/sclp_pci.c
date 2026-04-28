@@ -65,7 +65,7 @@ static int do_pci_configure(sclp_cmdw_t cmd, u32 fid)
 		break;
 	}
 out:
-	free_page((unsigned long) sccb);
+	free_page((uintptr_t) sccb);
 	return rc;
 }
 
@@ -173,7 +173,7 @@ int sclp_pci_report(struct zpci_report_error_header *report, u32 fh, u32 fid)
 	}
 
 out_free_req:
-	free_page((unsigned long) sccb);
+	free_page((uintptr_t) sccb);
 out_unregister:
 	sclp_unregister(&sclp_pci_event);
 out_unlock:

@@ -122,7 +122,7 @@ static int sclp_ofb_send_req(char *ev_data, size_t len)
 		rc = -EIO;
 	}
 out:
-	free_page((unsigned long)sccb);
+	free_page((uintptr_t)sccb);
 	return rc;
 }
 

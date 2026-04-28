@@ -1344,7 +1344,8 @@ static void stm32_hash_unprepare_request(struct ahash_request *req)
 		dmaengine_terminate_sync(hdev->dma_lch);
 
 	if (state->flags & HASH_FLAGS_SGS_COPIED)
-		free_pages((unsigned long)sg_virt(rctx->sg), get_order(rctx->sg->length));
+		free_pages((uintptr_t)sg_virt(rctx->sg),
+			   get_order(rctx->sg->length));
 
 	rctx->sg = NULL;
 	rctx->offset = 0;

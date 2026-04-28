@@ -42,7 +42,7 @@ int hv_call_deposit_pages(int node, u64 partition_id, u32 num_pages)
 
 	counts = kzalloc_objs(int, HV_DEPOSIT_MAX);
 	if (!counts) {
-		free_page((unsigned long)pages);
+		free_page((uintptr_t)pages);
 		return -ENOMEM;
 	}
 
@@ -104,7 +104,7 @@ err_free_allocations:
 	}
 
 free_buf:
-	free_page((unsigned long)pages);
+	free_page((uintptr_t)pages);
 	kfree(counts);
 	return ret;
 }

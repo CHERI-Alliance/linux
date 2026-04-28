@@ -95,9 +95,9 @@ int __init efi_alloc_page_tables(void)
 
 free_p4d:
 	if (pgtable_l5_enabled())
-		free_page((unsigned long)pgd_page_vaddr(*pgd));
+		free_page((uintptr_t)pgd_page_vaddr(*pgd));
 free_pgd:
-	free_pages((unsigned long)efi_pgd, pgd_allocation_order());
+	free_pages((uintptr_t)efi_pgd, pgd_allocation_order());
 fail:
 	return -ENOMEM;
 }

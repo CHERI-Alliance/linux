@@ -128,7 +128,7 @@ static DEFINE_MUTEX(pai_reserve_mutex);
 static void pai_free(struct pai_mapptr *mp)
 {
 	if (mp->mapptr->fullpage)
-		free_page((unsigned long)mp->mapptr->area);
+		free_page((uintptr_t)mp->mapptr->area);
 	else
 		kfree(mp->mapptr->area);
 	kfree(mp->mapptr->paiext_cb);

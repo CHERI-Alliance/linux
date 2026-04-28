@@ -889,12 +889,12 @@ static inline void dat_ptep_clear(union pte *ptep, gfn_t gfn, union asce asce, b
 
 static inline void dat_free_pt(struct page_table *pt)
 {
-	free_page((unsigned long)pt);
+	free_page((uintptr_t)pt);
 }
 
 static inline void _dat_free_crst(struct crst_table *table)
 {
-	free_pages((unsigned long)table, CRST_ALLOC_ORDER);
+	free_pages((uintptr_t)table, CRST_ALLOC_ORDER);
 }
 
 #define dat_free_crst(x) _dat_free_crst(_CRSTP(x))

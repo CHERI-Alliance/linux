@@ -2449,7 +2449,8 @@ static void __init teardown_hyp_mode(void)
 			struct cpu_sve_state *sve_state;
 
 			sve_state = per_cpu_ptr_nvhe_sym(kvm_host_data, cpu)->sve_state;
-			free_pages((unsigned long) sve_state, pkvm_host_sve_state_order());
+			free_pages((uintptr_t) sve_state,
+				   pkvm_host_sve_state_order());
 		}
 
 		free_pages(kvm_nvhe_sym(kvm_arm_hyp_percpu_base)[cpu], nvhe_percpu_order());

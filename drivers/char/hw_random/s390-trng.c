@@ -94,7 +94,7 @@ static ssize_t trng_read(struct file *file, char __user *ubuf,
 	}
 
 	if (p != buf)
-		free_page((unsigned long) p);
+		free_page((uintptr_t) p);
 
 	DEBUG_DBG("trng_read()=%zd\n", ret);
 	return ret;

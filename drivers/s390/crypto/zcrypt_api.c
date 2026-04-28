@@ -1807,7 +1807,7 @@ int zcrypt_rng_device_add(void)
 	return 0;
 
 out_free:
-	free_page((unsigned long)zcrypt_rng_buffer);
+	free_page((uintptr_t)zcrypt_rng_buffer);
 out:
 	mutex_unlock(&zcrypt_rng_mutex);
 	return rc;
@@ -1819,7 +1819,7 @@ void zcrypt_rng_device_remove(void)
 	zcrypt_rng_device_count--;
 	if (zcrypt_rng_device_count == 0) {
 		hwrng_unregister(&zcrypt_rng_dev);
-		free_page((unsigned long)zcrypt_rng_buffer);
+		free_page((uintptr_t)zcrypt_rng_buffer);
 	}
 	mutex_unlock(&zcrypt_rng_mutex);
 }

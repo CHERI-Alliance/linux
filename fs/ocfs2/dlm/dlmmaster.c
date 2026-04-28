@@ -2727,7 +2727,7 @@ leave:
 		wake_up(&res->wq);
 
 	if (mres)
-		free_page((unsigned long)mres);
+		free_page((uintptr_t)mres);
 
 	dlm_put(dlm);
 

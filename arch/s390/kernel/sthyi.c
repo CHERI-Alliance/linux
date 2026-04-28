@@ -225,7 +225,7 @@ static void fill_stsi(struct sthyi_sctns *sctns)
 	fill_stsi_mac(sctns, sysinfo);
 	fill_stsi_par(sctns, sysinfo);
 
-	free_pages((unsigned long)sysinfo, 0);
+	free_pages((uintptr_t)sysinfo, 0);
 }
 
 static void fill_diag_mac(struct sthyi_sctns *sctns,
@@ -417,7 +417,7 @@ static void fill_diag(struct sthyi_sctns *sctns, void *diag204_buf)
 	sctns->par.infpval1 |= PAR_WGHT_VLD;
 
 out:
-	free_page((unsigned long)diag224_buf);
+	free_page((uintptr_t)diag224_buf);
 }
 
 static int sthyi(u64 vaddr, u64 *rc)
@@ -551,6 +551,6 @@ SYSCALL_DEFINE4(s390_sthyi, unsigned long, function_code, void __user *, buffer,
 	if (copy_to_user(buffer, info, PAGE_SIZE))
 		r = -EFAULT;
 out:
-	free_page((unsigned long)info);
+	free_page((uintptr_t)info);
 	return r;
 }
