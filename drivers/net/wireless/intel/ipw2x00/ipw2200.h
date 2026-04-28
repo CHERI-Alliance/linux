@@ -1104,9 +1104,9 @@ struct ipw_fw_error {	 /* XXX */
 	u32 config;
 	u32 elem_len;
 	u32 log_len;
-	struct ipw_event *log;
+	struct ipw_event *log __cheri_pointer_align;
 	struct ipw_error_elem elem[];
-} __packed;
+} __packed __cheri_pointer_align;
 
 #ifdef CONFIG_IPW2200_PROMISCUOUS
 
@@ -1940,8 +1940,8 @@ struct host_cmd {
 	u8 cmd;
 	u8 len;
 	u16 reserved;
-	const u32 *param;
-} __packed;	/* XXX */
+	const u32 *param __cheri_pointer_align;
+} __packed __cheri_pointer_align;
 
 struct cmdlog_host_cmd {
 	u8 cmd;

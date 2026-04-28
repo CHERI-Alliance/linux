@@ -340,7 +340,12 @@ static void iwlagn_mac_set_rekey_data(struct ieee80211_hw *hw,
 	memcpy(priv->kek, data->kek, NL80211_KEK_LEN);
 	memcpy(priv->kck, data->kck, NL80211_KCK_LEN);
 	priv->replay_ctr =
+#if 0
 		cpu_to_le64(be64_to_cpup((__be64 *)&data->replay_ctr));
+#else
+		/* FIXCHERI: Looks like an upstream bug? */
+		cpu_to_le64(be64_to_cpup((__be64 *)data->replay_ctr));
+#endif
 	priv->have_rekey_data = true;
 
  out:
