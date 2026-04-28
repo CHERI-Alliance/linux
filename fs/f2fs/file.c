@@ -2252,7 +2252,7 @@ static inline u32 f2fs_fsflags_to_iflags(u32 fsflags)
 	return iflags;
 }
 
-static int f2fs_ioc_getversion(struct file *filp, unsigned long arg)
+static int f2fs_ioc_getversion(struct file *filp, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 
@@ -2505,7 +2505,7 @@ out:
 	return ret;
 }
 
-static int f2fs_ioc_shutdown(struct file *filp, unsigned long arg)
+static int f2fs_ioc_shutdown(struct file *filp, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	struct f2fs_sb_info *sbi = F2FS_I_SB(inode);
@@ -2596,7 +2596,7 @@ static int f2fs_keep_noreuse_range(struct inode *inode,
 	return ret;
 }
 
-static int f2fs_ioc_fitrim(struct file *filp, unsigned long arg)
+static int f2fs_ioc_fitrim(struct file *filp, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	struct f2fs_sb_info *sbi = F2FS_I_SB(inode);
@@ -2641,7 +2641,7 @@ static bool uuid_is_nonzero(__u8 u[16])
 	return false;
 }
 
-static int f2fs_ioc_set_encryption_policy(struct file *filp, unsigned long arg)
+static int f2fs_ioc_set_encryption_policy(struct file *filp, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	int ret;
@@ -2654,14 +2654,14 @@ static int f2fs_ioc_set_encryption_policy(struct file *filp, unsigned long arg)
 	return ret;
 }
 
-static int f2fs_ioc_get_encryption_policy(struct file *filp, unsigned long arg)
+static int f2fs_ioc_get_encryption_policy(struct file *filp, user_uintptr_t arg)
 {
 	if (!f2fs_sb_has_encrypt(F2FS_I_SB(file_inode(filp))))
 		return -EOPNOTSUPP;
 	return fscrypt_ioctl_get_policy(filp, (void __user *)arg);
 }
 
-static int f2fs_ioc_get_encryption_pwsalt(struct file *filp, unsigned long arg)
+static int f2fs_ioc_get_encryption_pwsalt(struct file *filp, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	struct f2fs_sb_info *sbi = F2FS_I_SB(inode);
@@ -2702,7 +2702,7 @@ out_err:
 }
 
 static int f2fs_ioc_get_encryption_policy_ex(struct file *filp,
-					     unsigned long arg)
+					     user_uintptr_t arg)
 {
 	if (!f2fs_sb_has_encrypt(F2FS_I_SB(file_inode(filp))))
 		return -EOPNOTSUPP;
@@ -2710,7 +2710,7 @@ static int f2fs_ioc_get_encryption_policy_ex(struct file *filp,
 	return fscrypt_ioctl_get_policy_ex(filp, (void __user *)arg);
 }
 
-static int f2fs_ioc_add_encryption_key(struct file *filp, unsigned long arg)
+static int f2fs_ioc_add_encryption_key(struct file *filp, user_uintptr_t arg)
 {
 	if (!f2fs_sb_has_encrypt(F2FS_I_SB(file_inode(filp))))
 		return -EOPNOTSUPP;
@@ -2718,7 +2718,7 @@ static int f2fs_ioc_add_encryption_key(struct file *filp, unsigned long arg)
 	return fscrypt_ioctl_add_key(filp, (void __user *)arg);
 }
 
-static int f2fs_ioc_remove_encryption_key(struct file *filp, unsigned long arg)
+static int f2fs_ioc_remove_encryption_key(struct file *filp, user_uintptr_t arg)
 {
 	if (!f2fs_sb_has_encrypt(F2FS_I_SB(file_inode(filp))))
 		return -EOPNOTSUPP;
@@ -2727,7 +2727,7 @@ static int f2fs_ioc_remove_encryption_key(struct file *filp, unsigned long arg)
 }
 
 static int f2fs_ioc_remove_encryption_key_all_users(struct file *filp,
-						    unsigned long arg)
+						    user_uintptr_t arg)
 {
 	if (!f2fs_sb_has_encrypt(F2FS_I_SB(file_inode(filp))))
 		return -EOPNOTSUPP;
@@ -2736,7 +2736,7 @@ static int f2fs_ioc_remove_encryption_key_all_users(struct file *filp,
 }
 
 static int f2fs_ioc_get_encryption_key_status(struct file *filp,
-					      unsigned long arg)
+					      user_uintptr_t arg)
 {
 	if (!f2fs_sb_has_encrypt(F2FS_I_SB(file_inode(filp))))
 		return -EOPNOTSUPP;
@@ -2744,7 +2744,7 @@ static int f2fs_ioc_get_encryption_key_status(struct file *filp,
 	return fscrypt_ioctl_get_key_status(filp, (void __user *)arg);
 }
 
-static int f2fs_ioc_get_encryption_nonce(struct file *filp, unsigned long arg)
+static int f2fs_ioc_get_encryption_nonce(struct file *filp, user_uintptr_t arg)
 {
 	if (!f2fs_sb_has_encrypt(F2FS_I_SB(file_inode(filp))))
 		return -EOPNOTSUPP;
@@ -2752,7 +2752,7 @@ static int f2fs_ioc_get_encryption_nonce(struct file *filp, unsigned long arg)
 	return fscrypt_ioctl_get_nonce(filp, (void __user *)arg);
 }
 
-static int f2fs_ioc_gc(struct file *filp, unsigned long arg)
+static int f2fs_ioc_gc(struct file *filp, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	struct f2fs_sb_info *sbi = F2FS_I_SB(inode);
@@ -2847,7 +2847,7 @@ out:
 	return ret;
 }
 
-static int f2fs_ioc_gc_range(struct file *filp, unsigned long arg)
+static int f2fs_ioc_gc_range(struct file *filp, user_uintptr_t arg)
 {
 	struct f2fs_gc_range range;
 
@@ -3048,7 +3048,7 @@ unlock_out:
 	return err;
 }
 
-static int f2fs_ioc_defragment(struct file *filp, unsigned long arg)
+static int f2fs_ioc_defragment(struct file *filp, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	struct f2fs_sb_info *sbi = F2FS_I_SB(inode);
@@ -3260,7 +3260,7 @@ static int __f2fs_ioc_move_range(struct file *filp,
 	return err;
 }
 
-static int f2fs_ioc_move_range(struct file *filp, unsigned long arg)
+static int f2fs_ioc_move_range(struct file *filp, user_uintptr_t arg)
 {
 	struct f2fs_move_range range;
 
@@ -3270,7 +3270,7 @@ static int f2fs_ioc_move_range(struct file *filp, unsigned long arg)
 	return __f2fs_ioc_move_range(filp, &range);
 }
 
-static int f2fs_ioc_flush_device(struct file *filp, unsigned long arg)
+static int f2fs_ioc_flush_device(struct file *filp, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	struct f2fs_sb_info *sbi = F2FS_I_SB(inode);
@@ -3341,7 +3341,7 @@ out:
 	return ret;
 }
 
-static int f2fs_ioc_get_features(struct file *filp, unsigned long arg)
+static int f2fs_ioc_get_features(struct file *filp, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	u32 sb_feature = le32_to_cpu(F2FS_I_SB(inode)->raw_super->feature);
@@ -3507,7 +3507,7 @@ int f2fs_pin_file_control(struct inode *inode, bool inc)
 	return 0;
 }
 
-static int f2fs_ioc_set_pin_file(struct file *filp, unsigned long arg)
+static int f2fs_ioc_set_pin_file(struct file *filp, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	struct f2fs_sb_info *sbi = F2FS_I_SB(inode);
@@ -3581,7 +3581,7 @@ out:
 	return ret;
 }
 
-static int f2fs_ioc_get_pin_file(struct file *filp, unsigned long arg)
+static int f2fs_ioc_get_pin_file(struct file *filp, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	__u32 pin = 0;
@@ -3653,7 +3653,7 @@ static int f2fs_ioc_precache_extents(struct file *filp)
 	return f2fs_precache_extents(file_inode(filp));
 }
 
-static int f2fs_ioc_resize_fs(struct file *filp, unsigned long arg)
+static int f2fs_ioc_resize_fs(struct file *filp, user_uintptr_t arg)
 {
 	struct f2fs_sb_info *sbi = F2FS_I_SB(file_inode(filp));
 	__u64 block_count;
@@ -3671,7 +3671,7 @@ static int f2fs_ioc_resize_fs(struct file *filp, unsigned long arg)
 	return f2fs_resize_fs(filp, block_count);
 }
 
-static int f2fs_ioc_enable_verity(struct file *filp, unsigned long arg)
+static int f2fs_ioc_enable_verity(struct file *filp, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 
@@ -3687,7 +3687,7 @@ static int f2fs_ioc_enable_verity(struct file *filp, unsigned long arg)
 	return fsverity_ioctl_enable(filp, (const void __user *)arg);
 }
 
-static int f2fs_ioc_measure_verity(struct file *filp, unsigned long arg)
+static int f2fs_ioc_measure_verity(struct file *filp, user_uintptr_t arg)
 {
 	if (!f2fs_sb_has_verity(F2FS_I_SB(file_inode(filp))))
 		return -EOPNOTSUPP;
@@ -3695,7 +3695,7 @@ static int f2fs_ioc_measure_verity(struct file *filp, unsigned long arg)
 	return fsverity_ioctl_measure(filp, (void __user *)arg);
 }
 
-static int f2fs_ioc_read_verity_metadata(struct file *filp, unsigned long arg)
+static int f2fs_ioc_read_verity_metadata(struct file *filp, user_uintptr_t arg)
 {
 	if (!f2fs_sb_has_verity(F2FS_I_SB(file_inode(filp))))
 		return -EOPNOTSUPP;
@@ -3703,7 +3703,7 @@ static int f2fs_ioc_read_verity_metadata(struct file *filp, unsigned long arg)
 	return fsverity_ioctl_read_metadata(filp, (const void __user *)arg);
 }
 
-static int f2fs_ioc_getfslabel(struct file *filp, unsigned long arg)
+static int f2fs_ioc_getfslabel(struct file *filp, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	struct f2fs_sb_info *sbi = F2FS_I_SB(inode);
@@ -3729,7 +3729,7 @@ static int f2fs_ioc_getfslabel(struct file *filp, unsigned long arg)
 	return err;
 }
 
-static int f2fs_ioc_setfslabel(struct file *filp, unsigned long arg)
+static int f2fs_ioc_setfslabel(struct file *filp, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	struct f2fs_sb_info *sbi = F2FS_I_SB(inode);
@@ -3778,7 +3778,7 @@ static int f2fs_get_compress_blocks(struct inode *inode, __u64 *blocks)
 	return 0;
 }
 
-static int f2fs_ioc_get_compress_blocks(struct file *filp, unsigned long arg)
+static int f2fs_ioc_get_compress_blocks(struct file *filp, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	__u64 blocks;
@@ -3844,7 +3844,7 @@ next:
 	return released_blocks;
 }
 
-static int f2fs_release_compress_blocks(struct file *filp, unsigned long arg)
+static int f2fs_release_compress_blocks(struct file *filp, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	struct f2fs_inode_info *fi = F2FS_I(inode);
@@ -4041,7 +4041,7 @@ next:
 	return 0;
 }
 
-static int f2fs_reserve_compress_blocks(struct file *filp, unsigned long arg)
+static int f2fs_reserve_compress_blocks(struct file *filp, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	struct f2fs_inode_info *fi = F2FS_I(inode);
@@ -4171,7 +4171,7 @@ static int f2fs_secure_erase(struct block_device *bdev, struct inode *inode,
 	return ret;
 }
 
-static int f2fs_sec_trim_file(struct file *filp, unsigned long arg)
+static int f2fs_sec_trim_file(struct file *filp, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	struct f2fs_sb_info *sbi = F2FS_I_SB(inode);
@@ -4334,7 +4334,7 @@ err:
 	return ret;
 }
 
-static int f2fs_ioc_get_compress_option(struct file *filp, unsigned long arg)
+static int f2fs_ioc_get_compress_option(struct file *filp, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	struct f2fs_comp_option option;
@@ -4361,7 +4361,7 @@ static int f2fs_ioc_get_compress_option(struct file *filp, unsigned long arg)
 	return 0;
 }
 
-static int f2fs_ioc_set_compress_option(struct file *filp, unsigned long arg)
+static int f2fs_ioc_set_compress_option(struct file *filp, user_uintptr_t arg)
 {
 	struct inode *inode = file_inode(filp);
 	struct f2fs_inode_info *fi = F2FS_I(inode);
@@ -4633,7 +4633,7 @@ out:
 	return ret;
 }
 
-static long __f2fs_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+static long __f2fs_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 {
 	switch (cmd) {
 	case FS_IOC_GETVERSION:
@@ -4728,7 +4728,7 @@ static long __f2fs_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	}
 }
 
-long f2fs_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+long f2fs_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 {
 	if (unlikely(f2fs_cp_error(F2FS_I_SB(file_inode(filp)))))
 		return -EIO;

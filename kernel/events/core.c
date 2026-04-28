@@ -6596,7 +6596,7 @@ static int __perf_event_set_bpf_prog(struct perf_event *event,
 				     struct bpf_prog *prog,
 				     u64 bpf_cookie);
 
-static long _perf_ioctl(struct perf_event *event, unsigned int cmd, unsigned long arg)
+static long _perf_ioctl(struct perf_event *event, unsigned int cmd, user_uintptr_t arg)
 {
 	void (*func)(struct perf_event *);
 	u32 flags = arg;
@@ -6708,7 +6708,7 @@ static long _perf_ioctl(struct perf_event *event, unsigned int cmd, unsigned lon
 	return 0;
 }
 
-static long perf_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+static long perf_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 {
 	struct perf_event *event = file->private_data;
 	struct perf_event_context *ctx;

@@ -429,11 +429,13 @@ long fuse_file_ioctl(struct file *file, unsigned int cmd, user_uintptr_t arg)
 	return fuse_ioctl_common(file, cmd, arg, 0);
 }
 
+#ifdef CONFIG_COMPAT
 long fuse_file_compat_ioctl(struct file *file, unsigned int cmd,
 			    unsigned long arg)
 {
 	return fuse_ioctl_common(file, cmd, arg, FUSE_IOCTL_COMPAT);
 }
+#endif
 
 static int fuse_priv_ioctl(struct inode *inode, struct fuse_file *ff,
 			   unsigned int cmd, void *ptr, size_t size)

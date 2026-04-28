@@ -3790,7 +3790,7 @@ int f2fs_precache_extents(struct inode *inode);
 int f2fs_fileattr_get(struct dentry *dentry, struct file_kattr *fa);
 int f2fs_fileattr_set(struct mnt_idmap *idmap,
 		      struct dentry *dentry, struct file_kattr *fa);
-long f2fs_ioctl(struct file *filp, unsigned int cmd, unsigned long arg);
+long f2fs_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg);
 long f2fs_compat_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
 int f2fs_transfer_project_quota(struct inode *inode, kprojid_t kprojid);
 int f2fs_pin_file_control(struct inode *inode, bool inc);

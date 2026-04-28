@@ -361,7 +361,9 @@ static const struct file_operations inotify_fops = {
 	.fasync		= fsnotify_fasync,
 	.release	= inotify_release,
 	.unlocked_ioctl	= inotify_ioctl,
+#ifdef CONFIG_COMPAT
 	.compat_ioctl	= inotify_ioctl,
+#endif
 	.llseek		= noop_llseek,
 };
 
