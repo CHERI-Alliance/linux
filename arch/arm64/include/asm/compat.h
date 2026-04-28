@@ -5,8 +5,10 @@
 #ifndef __ASM_COMPAT_H
 #define __ASM_COMPAT_H
 
+#ifdef CONFIG_COMPAT32
 #define compat_mode_t compat_mode_t
 typedef u16		compat_mode_t;
+#endif
 
 #define __compat_uid_t	__compat_uid_t
 typedef u16		__compat_uid_t;
