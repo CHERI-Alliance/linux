@@ -6,7 +6,7 @@
 
 #include "do_mounts.h"
 
-unsigned long initrd_start, initrd_end;
+uintptr_t initrd_start, initrd_end;
 int initrd_below_start_ok;
 static int __initdata mount_initrd = 1;
 

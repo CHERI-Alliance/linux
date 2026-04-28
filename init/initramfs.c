@@ -657,10 +657,10 @@ void __weak __init free_initrd_mem(unsigned long start, unsigned long end)
 	unsigned long aligned_start = ALIGN_DOWN(start, PAGE_SIZE);
 	unsigned long aligned_end = ALIGN(end, PAGE_SIZE);
 
-	memblock_free((void *)aligned_start, aligned_end - aligned_start);
+	memblock_free(__c_fakep(aligned_start), aligned_end - aligned_start);
 #endif
 
-	free_reserved_area((void *)start, (void *)end, POISON_FREE_INITMEM,
+	free_reserved_area(__c_fakep(start), __c_fakep(end), POISON_FREE_INITMEM,
 			"initrd");
 }
 
@@ -682,9 +682,9 @@ static bool __init kexec_free_initrd(void)
 	 */
 	memset((void *)initrd_start, 0, initrd_end - initrd_start);
 	if (initrd_start < crashk_start)
-		free_initrd_mem(__c_pa(initrd_start), crashk_start);
+		free_initrd_mem(__c_ua(initrd_start), crashk_start);
 	if (initrd_end > crashk_end)
-		free_initrd_mem(crashk_end, __c_pa(initrd_end));
+		free_initrd_mem(crashk_end, __c_ua(initrd_end));
 	return true;
 }
 #else
@@ -707,11 +707,11 @@ static void __init populate_initrd_image(char *err)
 	if (IS_ERR(file))
 		return;
 
-	written = xwrite(file, (char *)initrd_start, initrd_end - initrd_start,
+	written = xwrite(file, (char *)initrd_start, __c_ua(initrd_end) - __c_ua(initrd_start),
 			&pos);
 	if (written != initrd_end - initrd_start)
 		pr_err("/initrd.image: incomplete write (%zd != %ld)\n",
-		       written, initrd_end - initrd_start);
+		       written, (unsigned long)(initrd_end - initrd_start));
 	fput(file);
 }
 #endif /* CONFIG_BLK_DEV_RAM */
@@ -731,7 +731,7 @@ static void __init do_populate_rootfs(void *unused, async_cookie_t cookie)
 	else
 		printk(KERN_INFO "Unpacking initramfs...\n");
 
-	err = unpack_to_rootfs((char *)initrd_start, initrd_end - initrd_start);
+	err = unpack_to_rootfs((char *)initrd_start, __c_ua(initrd_end - initrd_start));
 	if (err) {
 #ifdef CONFIG_BLK_DEV_RAM
 		populate_initrd_image(err);
@@ -748,9 +748,9 @@ done:
 	 * free only memory that is not part of crashkernel region.
 	 */
 	if (!do_retain_initrd && initrd_start && !kexec_free_initrd()) {
-		free_initrd_mem(initrd_start, initrd_end);
+		free_initrd_mem(__c_ua(initrd_start), __c_ua(initrd_end));
 	} else if (do_retain_initrd && initrd_start) {
-		bin_attr_initrd.size = initrd_end - initrd_start;
+		bin_attr_initrd.size = __c_ua(initrd_end - initrd_start);
 		bin_attr_initrd.private = (void *)initrd_start;
 		if (sysfs_create_bin_file(firmware_kobj, &bin_attr_initrd))
 			pr_err("Failed to create initrd sysfs file");

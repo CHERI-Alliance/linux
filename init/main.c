@@ -297,7 +297,7 @@ found:
 	data = ((void *)hdr) - size;
 	if ((unsigned long)data < initrd_start) {
 		pr_err("bootconfig size %d is greater than initrd size %ld\n",
-			size, initrd_end - initrd_start);
+			size, (unsigned long)initrd_end - (unsigned long)initrd_start);
 		return NULL;
 	}
 
@@ -1277,7 +1277,7 @@ static bool __init_or_module initcall_blacklisted(initcall_t fn)
 	if (list_empty(&blacklisted_initcalls))
 		return false;
 
-	addr = (uintptr_t) dereference_function_descriptor(fn);
+	addr = __c_pa(dereference_function_descriptor(fn));
 	sprint_symbol_no_offset(fn_name, addr);
 
 	/*
