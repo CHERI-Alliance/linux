@@ -1085,13 +1085,14 @@ EXPORT_SYMBOL_GPL(debug_object_active_state);
 #ifdef CONFIG_DEBUG_OBJECTS_FREE
 static void __debug_check_no_obj_freed(const void *address, unsigned long size)
 {
-	unsigned long flags, oaddr, saddr, eaddr, paddr, chunks;
+	unsigned long flags, saddr, eaddr, paddr, chunks;
+	uintptr_t oaddr;
 	int cnt, objs_checked = 0;
 	struct debug_obj *obj, o;
 	struct debug_bucket *db;
 	struct hlist_node *tmp;
 
-	saddr = (uintptr_t) address;
+	saddr = __c_pa(address);
 	eaddr = saddr + size;
 	paddr = saddr & ODEBUG_CHUNK_MASK;
 	chunks = ((eaddr - paddr) + (ODEBUG_CHUNK_SIZE - 1));
