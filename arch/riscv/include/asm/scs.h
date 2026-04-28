@@ -4,6 +4,7 @@
 
 #ifdef __ASSEMBLER__
 #include <asm/asm-offsets.h>
+#include <asm/asmcheri.h>
 
 #ifdef CONFIG_SHADOW_CALL_STACK
 
@@ -15,12 +16,12 @@
 
 /* Load the per-CPU IRQ shadow call stack to gp. */
 .macro scs_load_irq_stack tmp
-	load_per_cpu gp, irq_shadow_call_stack_ptr, \tmp
+	load_per_cpu CREG(gp), irq_shadow_call_stack_ptr, \tmp
 .endm
 
 /* Load task_scs_sp(current) to gp. */
 .macro scs_load_current
-	REG_L	gp, TASK_TI_SCS_SP(tp)
+	CREG_L	CREG(gp), TASK_TI_SCS_SP(CREG(tp))
 .endm
 
 /* Load task_scs_sp(current) to gp, but only if tp has changed. */
@@ -32,7 +33,7 @@ _skip_scs:
 
 /* Save gp to task_scs_sp(current). */
 .macro scs_save_current
-	REG_S	gp, TASK_TI_SCS_SP(tp)
+	CREG_S	CREG(gp), TASK_TI_SCS_SP(CREG(tp))
 .endm
 
 #else /* CONFIG_SHADOW_CALL_STACK */

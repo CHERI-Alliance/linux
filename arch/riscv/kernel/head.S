@@ -15,8 +15,13 @@
 #include <asm/image.h>
 #include <asm/scs.h>
 #include <asm/xip_fixup.h>
+#include <asm/asmcheri.h>
 #include <asm/usercfi.h>
 #include "efi-header.S"
+
+#ifdef CONFIG_CHERI_KERNEL
+.option nocapmode
+#endif
 
 __HEAD
 SYM_CODE_START(_start)
@@ -69,28 +74,48 @@ pe_head_start:
 	.word 0
 #endif
 
+#ifdef CONFIG_CHERI_KERNEL
+.option capmode
+#endif
+
 .align 2
 #ifdef CONFIG_MMU
+	/*
+	 * Arguments:
+	 * - a0 contains the target page tables.
+	 * - For CHERI a1 contains the code capability to derive
+	 *   the target PC and return value from.
+	 */
 	.global relocate_enable_mmu
 relocate_enable_mmu:
 	/* Relocate return address */
+#ifdef CONFIG_CHERI_KERNEL
+	/* Save away. */
+	mv CREG(a6), CREG(a1)
+#endif
 	la a1, kernel_map
 	XIP_FIXUP_OFFSET a1
-	REG_L a1, KERNEL_MAP_VIRT_ADDR(a1)
+	REG_L a1, KERNEL_MAP_VIRT_ADDR(CREG(a1))
 	la a2, _start
 	sub a1, a1, a2
 	add ra, ra, a1
+#ifdef CONFIG_CHERI_KERNEL
+	scaddr cra, ca6, ra
+#endif
 
 	/* Point stvec to virtual address of intruction after satp write */
 	la a2, 1f
-	add a2, a2, a1
+	add CREG(a2), CREG(a2), a1
+#ifdef CONFIG_CHERI_KERNEL
+	scaddr ca2, ca6, a2
+#endif
 	csrw CSR_TVEC, a2
 
 	/* Compute satp for kernel page tables, but don't load it yet */
 	srl a2, a0, PAGE_SHIFT
 	la a1, satp_mode
 	XIP_FIXUP_OFFSET a1
-	REG_L a1, 0(a1)
+	REG_L a1, 0(CREG(a1))
 	or a2, a2, a1
 
 	/*
@@ -126,8 +151,7 @@ relocate_enable_mmu:
 	ret
 #endif /* CONFIG_MMU */
 #ifdef CONFIG_SMP
-	.global secondary_start_sbi
-secondary_start_sbi:
+SYM_CODE_START(secondary_start_sbi)
 	/* Mask all interrupts */
 	csrw CSR_IE, zero
 	csrw CSR_IP, zero
@@ -137,6 +161,15 @@ secondary_start_sbi:
 	li t0, 0x2
 	csrw CSR_SCOUNTEREN, t0
 #endif
+
+#ifdef CONFIG_CHERI_KERNEL
+	/* Setup environment. */
+	enter_capmode t0
+
+	/* Provide provenance for boot data. */
+	auipc ct0, 0
+	scaddr ca1, ct0, a1
+#endif /* CONFIG_CHERI_KERNEL */
 
 	/* Load the global pointer */
 	load_global_pointer
@@ -155,12 +188,19 @@ secondary_start_sbi:
 	/* a0 contains the hartid & a1 contains boot data */
 	li a2, SBI_HART_BOOT_TASK_PTR_OFFSET
 	XIP_FIXUP_OFFSET a2
-	add a2, a2, a1
-	REG_L tp, (a2)
+	add CREG(a2), CREG(a1), a2
+	CREG_L CREG(tp), (CREG(a2))
 	li a3, SBI_HART_BOOT_STACK_PTR_OFFSET
 	XIP_FIXUP_OFFSET a3
-	add a3, a3, a1
-	REG_L sp, (a3)
+	add CREG(a3), CREG(a1), a3
+	CREG_L CREG(sp), (CREG(a3))
+#ifdef CONFIG_CHERI_KERNEL
+	li a3, SBI_HART_BOOT_KERNEL_CODE_CAP_OFFSET
+	XIP_FIXUP_OFFSET a3
+	add CREG(a3), CREG(a1), a3
+	CREG_L CREG(a1), (CREG(a3))
+
+#endif
 
 .Lsecondary_start_common:
 
@@ -170,7 +210,15 @@ secondary_start_sbi:
 	XIP_FIXUP_OFFSET a0
 	call relocate_enable_mmu
 #endif
+#ifdef CONFIG_CHERI_KERNEL
+	setup_pcc kernel_code_cap t0 t1
+#endif
 	call .Lsetup_trap_vector
+#ifdef CONFIG_CHERI_KERNEL
+	/* Reset registers. */
+	csrw CSR_DDC, zero
+	reset_gprs
+#endif
 #if defined(CONFIG_RISCV_SBI) && defined(CONFIG_RISCV_USER_CFI)
 	li a7, SBI_EXT_FWFT
 	li a6, SBI_EXT_FWFT_SET
@@ -181,11 +229,12 @@ secondary_start_sbi:
 	beqz a0, 1f
 	la a1, riscv_nousercfi
 	li a0, CMDLINE_DISABLE_RISCV_USERCFI_BCFI
-	REG_S a0, (a1)
+	REG_S a0, (CREG(a1))
 1:
 #endif
 	scs_load_current
 	call smp_callin
+SYM_CODE_END(secondary_start_sbi)
 #endif /* CONFIG_SMP */
 
 .align 2
@@ -218,6 +267,8 @@ SYM_CODE_START(_start_kernel)
 	/* Mask all interrupts */
 	csrw CSR_IE, zero
 	csrw CSR_IP, zero
+
+	enter_capmode t1
 
 #ifdef CONFIG_RISCV_M_MODE
 	/* flush the instruction cache */
@@ -273,7 +324,7 @@ SYM_CODE_START(_start_kernel)
 	/* Pick one hart to run the main boot sequence */
 	la a3, hart_lottery
 	li a2, 1
-	amoadd.w a3, a2, (a3)
+	amoadd.w a3, a2, (CREG(a3))
 	bnez a3, .Lsecondary_start
 
 #else
@@ -289,6 +340,15 @@ SYM_CODE_START(_start_kernel)
 
 #endif /* CONFIG_XIP */
 #endif /* CONFIG_RISCV_BOOT_SPINWAIT */
+
+#ifdef CONFIG_CHERI_KERNEL
+	/* Detect zcherilevels. Use kernel_data_cap as scratch. */
+	detect_cheri_levels t1, kernel_data_cap, t2
+
+	/* Write back result */
+	llc ct0, has_cheri_levels
+	sb t1, (ct0)
+#endif
 
 #ifdef CONFIG_XIP_KERNEL
 	la sp, _end + THREAD_SIZE
@@ -308,26 +368,38 @@ SYM_CODE_START(_start_kernel)
 	la a4, __bss_stop
 	ble a4, a3, .Lclear_bss_done
 .Lclear_bss:
-	REG_S zero, (a3)
-	add a3, a3, RISCV_SZPTR
+	REG_S zero, (CREG(a3))
+	CINSN(addi) CREG(a3), CREG(a3), __SIZEOF_LONG__
 	blt a3, a4, .Lclear_bss
 .Lclear_bss_done:
 #endif
 	la a2, boot_cpu_hartid
 	XIP_FIXUP_OFFSET a2
-	REG_S a0, (a2)
+	REG_S a0, (CREG(a2))
+
+#ifdef CONFIG_CHERI_KERNEL
+	/* Temporarily setup kernel_code_cap as infinite */
+	la t1, kernel_code_cap
+	auipc ct0, 0
+	scaddr ct0, ct0, x0
+	sc ct0, (ct1)
+
+	/* Temporarily setup kernel_data_cap as infinite */
+	la t1, kernel_data_cap
+	sc ct0, (ct1)
+#endif
 
 	/* Initialize page tables and relocate to virtual addresses */
 	la tp, init_task
 	la sp, init_thread_union + THREAD_SIZE
 	XIP_FIXUP_OFFSET sp
-	addi sp, sp, -PT_SIZE_ON_STACK
+	CINSN(addi) CREG(sp), CREG(sp), -PT_SIZE_ON_STACK
 	scs_load_init_stack
 #ifdef CONFIG_BUILTIN_DTB
 	la a0, __dtb_start
 	XIP_FIXUP_OFFSET a0
 #else
-	mv a0, a1
+	mv CREG(a0), CREG(a1)
 #endif /* CONFIG_BUILTIN_DTB */
 	/* Set trap vector to spin forever to help debug */
 	la a3, .Lsecondary_park
@@ -336,14 +408,56 @@ SYM_CODE_START(_start_kernel)
 #ifdef CONFIG_MMU
 	la a0, early_pg_dir
 	XIP_FIXUP_OFFSET a0
+#ifdef CONFIG_CHERI_KERNEL
+	auipc ca1, 0
+#endif
 	call relocate_enable_mmu
 #endif /* CONFIG_MMU */
 
 	call .Lsetup_trap_vector
 	/* Restore C environment */
 	la tp, init_task
+#ifdef CONFIG_CHERI_KERNEL
+	scs_load_init_stack
+	li t0, TASK_STRUCT_SIZE
+	scbnds ctp, ctp, t0
+#endif
+#ifndef CONFIG_CHERI_KERNEL
 	la sp, init_thread_union + THREAD_SIZE
-	addi sp, sp, -PT_SIZE_ON_STACK
+#else
+	la sp, init_thread_union
+	li t0, THREAD_SIZE
+	scbnds csp, csp, t0
+	add csp, csp, t0
+#endif
+	CINSN(addi) CREG(sp), CREG(sp), -PT_SIZE_ON_STACK
+
+#ifdef CONFIG_CHERI_KERNEL
+	auipc ca0, 0
+	call init_cap_relocs
+
+	auipc ca0, 0
+	call riscv_cheri_caps_init
+
+	/*
+	 * Restrict permissions on csp and ctp according to
+	 * kernel_data_cap.
+	 */
+	la t0, kernel_data_cap
+	lc ct0, (ct0)
+	gcperm t0, ct0
+	acperm csp, csp, t0
+	acperm ctp, ctp, t0
+
+	/*
+	 * Setup/Reset registers. Setup trap vector again to derive it
+	 * from the new pcc.
+	 */
+	setup_pcc kernel_code_cap t0 t1
+	call .Lsetup_trap_vector
+	csrw CSR_DDC, zero
+	reset_gprs
+#endif
 #if defined(CONFIG_RISCV_SBI) && defined(CONFIG_RISCV_USER_CFI)
 	li a7, SBI_EXT_FWFT
 	li a6, SBI_EXT_FWFT_SET
@@ -354,7 +468,7 @@ SYM_CODE_START(_start_kernel)
 	beqz a0, 1f
 	la a1, riscv_nousercfi
 	li a0, CMDLINE_DISABLE_RISCV_USERCFI_BCFI
-	REG_S a0, (a1)
+	REG_S a0, (CREG(a1))
 1:
 #endif
 	scs_load_current
@@ -377,8 +491,8 @@ SYM_CODE_START(_start_kernel)
 	XIP_FIXUP_OFFSET a1
 	la a2, __cpu_spinwait_task_pointer
 	XIP_FIXUP_OFFSET a2
-	add a1, a3, a1
-	add a2, a3, a2
+	add CREG(a1), CREG(a1), a3
+	add CREG(a2), CREG(a2), a3
 
 	/*
 	 * This hart didn't win the lottery, so we wait for the winning hart to
@@ -386,11 +500,14 @@ SYM_CODE_START(_start_kernel)
 	 */
 .Lwait_for_cpu_up:
 	/* FIXME: We should WFI to save some energy here. */
-	REG_L sp, (a1)
-	REG_L tp, (a2)
+	CREG_L CREG(sp), (CREG(a1))
+	CREG_L CREG(tp), (CREG(a2))
 	beqz sp, .Lwait_for_cpu_up
 	beqz tp, .Lwait_for_cpu_up
 	fence
+#ifdef CONFIG_CHERI_KERNEL
+	auipc ca1, 0
+#endif
 
 	tail .Lsecondary_start_common
 #endif /* CONFIG_RISCV_BOOT_SPINWAIT */

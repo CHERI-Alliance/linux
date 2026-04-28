@@ -25,7 +25,7 @@ struct cfi_state {
 	unsigned long ubcfi_locked : 1;
 	unsigned long ufcfi_en : 1; /* Enable for forward cfi. Note that ELP goes in sstatus */
 	unsigned long ufcfi_locked : 1;
-	unsigned long user_shdw_stk; /* Current user shadow stack pointer */
+	uintptr_t user_shdw_stk; /* Current user shadow stack pointer */
 	unsigned long shdw_stk_base; /* Base address of shadow stack */
 	unsigned long shdw_stk_size; /* size of shadow stack */
 };
