@@ -773,7 +773,7 @@ static int lg_probe(struct hid_device *hdev, const struct hid_device_id *id)
 		hid_err(hdev, "Insufficient memory, cannot allocate driver data\n");
 		return -ENOMEM;
 	}
-	drv_data->quirks = id->driver_data;
+	drv_data->quirks = __c_ua(id->driver_data);
 
 	hid_set_drvdata(hdev, (void *)drv_data);
 

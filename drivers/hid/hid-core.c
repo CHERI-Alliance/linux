@@ -2619,7 +2619,7 @@ static ssize_t new_id_store(struct device_driver *drv, const char *buf,
 	dynid->id.group = HID_GROUP_ANY;
 	dynid->id.vendor = vendor;
 	dynid->id.product = product;
-	dynid->id.driver_data = driver_data;
+	dynid->id.driver_data = __c_fakeu(driver_data);
 
 	spin_lock(&hdrv->dyn_lock);
 	list_add_tail(&dynid->list, &hdrv->dyn_list);

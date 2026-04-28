@@ -36,7 +36,7 @@ struct saitek_sc {
 static int saitek_probe(struct hid_device *hdev,
 		const struct hid_device_id *id)
 {
-	unsigned long quirks = id->driver_data;
+	unsigned long quirks = __c_ua(id->driver_data);
 	struct saitek_sc *ssc;
 	int ret;
 

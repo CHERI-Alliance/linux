@@ -867,7 +867,7 @@ static int magicmouse_probe(struct hid_device *hdev,
 	msc->hdev = hdev;
 	INIT_DEFERRABLE_WORK(&msc->work, magicmouse_enable_mt_work);
 
-	msc->quirks = id->driver_data;
+	msc->quirks = __c_ua(id->driver_data);
 	hid_set_drvdata(hdev, msc);
 
 	ret = hid_parse(hdev);

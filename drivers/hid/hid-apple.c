@@ -936,7 +936,7 @@ static int apple_magic_backlight_init(struct hid_device *hdev)
 static int apple_probe(struct hid_device *hdev,
 		const struct hid_device_id *id)
 {
-	unsigned long quirks = id->driver_data;
+	unsigned long quirks = __c_ua(id->driver_data);
 	struct apple_sc *asc;
 	int ret;
 

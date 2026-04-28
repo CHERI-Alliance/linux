@@ -127,7 +127,7 @@ static int cp_event(struct hid_device *hdev, struct hid_field *field,
 
 static int cp_probe(struct hid_device *hdev, const struct hid_device_id *id)
 {
-	unsigned long quirks = id->driver_data;
+	uintptr_t quirks = id->driver_data;
 	int ret;
 
 	hid_set_drvdata(hdev, (void *)quirks);

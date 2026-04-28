@@ -214,7 +214,7 @@ static int ish_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	}
 	hw = to_ish_hw(ishtp);
 	ishtp->print_log = ish_event_tracer;
-	ishtp->driver_data = &ishtp_driver_data[ent->driver_data];
+	ishtp->driver_data = &ishtp_driver_data[__c_ua(ent->driver_data)];
 
 	/* mapping IO device memory */
 	hw->mem_addr = pcim_iomap_table(pdev)[0];

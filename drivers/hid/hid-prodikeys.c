@@ -788,7 +788,7 @@ static int pk_probe(struct hid_device *hdev, const struct hid_device_id *id)
 	int ret;
 	struct usb_interface *intf;
 	unsigned short ifnum;
-	unsigned long quirks = id->driver_data;
+	uintptr_t quirks = id->driver_data;
 	struct pcmidi_snd *pm;
 
 	if (!hid_is_usb(hdev))

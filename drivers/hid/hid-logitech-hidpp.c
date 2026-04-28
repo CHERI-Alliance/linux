@@ -4386,7 +4386,7 @@ static int hidpp_probe(struct hid_device *hdev, const struct hid_device_id *id)
 
 	hidpp->hid_dev = hdev;
 	hidpp->name = hdev->name;
-	hidpp->quirks = id->driver_data;
+	hidpp->quirks = __c_ua(id->driver_data);
 	hid_set_drvdata(hdev, hidpp);
 
 	ret = hid_parse(hdev);

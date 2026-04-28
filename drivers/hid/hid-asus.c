@@ -1207,7 +1207,7 @@ static int asus_probe(struct hid_device *hdev, const struct hid_device_id *id)
 
 	hid_set_drvdata(hdev, drvdata);
 
-	drvdata->quirks = id->driver_data;
+	drvdata->quirks = __c_ua(id->driver_data);
 
 	/*
 	 * T90CHI's keyboard dock returns same ID values as T100CHI's dock.
