@@ -335,6 +335,21 @@ static inline void start_thread(struct pt_regs *regs, unsigned long pc,
 }
 
 #ifdef CONFIG_COMPAT
+#ifdef CONFIG_COMPAT64
+
+static inline void compat_start_thread(struct pt_regs *regs, unsigned long pc,
+				       unsigned long sp)
+{
+	start_thread_common(regs, pc, PSR_MODE_EL0t);
+	spectre_v4_enable_task_mitigation(current);
+	regs->sp = sp;
+
+	if (system_supports_morello())
+		morello_thread_start(regs, pc);
+}
+
+#else /* CONFIG_COMPAT64 */
+
 static inline void compat_start_thread(struct pt_regs *regs, unsigned long pc,
 				       unsigned long sp)
 {
@@ -348,7 +363,9 @@ static inline void compat_start_thread(struct pt_regs *regs, unsigned long pc,
 	spectre_v4_enable_task_mitigation(current);
 	regs->compat_sp = sp;
 }
-#endif
+
+#endif /* !CONFIG_COMPAT64 */
+#endif /* CONFIG_COMPAT */
 
 static __always_inline bool is_ttbr0_addr(unsigned long addr)
 {
