@@ -5,7 +5,7 @@ Morello in AArch64 Linux
 Author: Kevin Brodsky <kevin.brodsky@arm.com>
 
 | Original date: 2020-09-07
-| Last updated: 2022-04-22
+| Last updated: 2022-12-07
 |
 
 This document describes the provision of Morello functionalities to
@@ -295,8 +295,7 @@ are initialized as follows:
 
 * For capability registers, the upper 64 bits and tag are set to:
 
-  - CMAX for PCC and DDC_EL0, as defined in the architecture (tag set,
-    maximum bounds, maximum permissions, object type set to 0).
+  - CROOT for PCC and DDC_EL0, as defined below.
   - All zeroes for all other registers.
 
 * For capability registers, the lower 64 bits are set to:
@@ -309,10 +308,18 @@ are initialized as follows:
 
 * CCTLR_EL0 is set to 0.
 
+CROOT corresponds to the following capability attributes:
+
+* Tag set.
+* Object type set to 0.
+* Bounds including the entire user address space (whose size depends on
+  ``CONFIG_ARM64_VA_BITS``).
+* All hardware-defined permissions and the User[0] permission.
+
 Note
-  PCC has all permissions set after ``execve()``, which means that a
-  process is always started in Executive. All Restricted registers are
-  zeroed.
+  This means in particular that PCC is initialized with the Executive
+  permission set; as a result a process is always started in Executive. All
+  Restricted registers are zeroed.
 
 Register merging principle
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -486,14 +493,14 @@ Signal handling
 
 When a signal handler is invoked:
 
-* PCC is reset to CMAX (see Generalities_ in the Register handling
+* PCC is reset to CROOT (see Generalities_ in the Register handling
   section), and its address is set as usual to the signal handler's.
   This means in particular that **signal handlers are always run in
   Executive**. Accordingly, the signal frame is stored on the Executive
   stack (i.e. through CSP_EL0), if the alternate signal stack is not
   used.
 
-* CLR (C30) is also reset to CMAX, and its address set as usual (to the
+* CLR (C30) is also reset to CROOT, and its address set as usual (to the
   signal trampoline). This allows a signal handler to return to the
   trampoline using the ``ret clr`` instruction, in addition to the usual
   ``ret [lr]`` instruction.
