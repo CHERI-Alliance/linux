@@ -176,10 +176,10 @@ static int mq_dump(struct Qdisc *sch, struct sk_buff *skb)
 	return mq_offload_stats(sch);
 }
 
-static struct netdev_queue *mq_queue_get(struct Qdisc *sch, unsigned long cl)
+static struct netdev_queue *mq_queue_get(struct Qdisc *sch, uintptr_t cl)
 {
 	struct net_device *dev = qdisc_dev(sch);
-	unsigned long ntx = cl - 1;
+	unsigned long ntx = __c_ua(cl) - 1;
 
 	if (ntx >= dev->num_tx_queues)
 		return NULL;
@@ -210,7 +210,7 @@ static int mq_graft(struct Qdisc *sch, uintptr_t cl, struct Qdisc *new,
 		dev_activate(dev);
 
 	graft_offload.handle = sch->handle;
-	graft_offload.graft_params.queue = cl - 1;
+	graft_offload.graft_params.queue = __c_ua(cl) - 1;
 	graft_offload.graft_params.child_handle = new ? new->handle : 0;
 	graft_offload.command = TC_MQ_GRAFT;
 

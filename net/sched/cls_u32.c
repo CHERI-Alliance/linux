@@ -729,7 +729,7 @@ static void u32_unbind_filter(struct tcf_proto *tp, struct tc_u_knode *n,
 }
 
 static void u32_bind_filter(struct tcf_proto *tp, struct tc_u_knode *n,
-			    unsigned long base, struct nlattr **tb)
+			    uintptr_t base, struct nlattr **tb)
 {
 	if (tb[TCA_U32_CLASSID]) {
 		n->res.classid = nla_get_u32(tb[TCA_U32_CLASSID]);

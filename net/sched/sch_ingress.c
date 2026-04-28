@@ -28,7 +28,7 @@ static struct Qdisc *ingress_leaf(struct Qdisc *sch, uintptr_t arg)
 
 static uintptr_t ingress_find(struct Qdisc *sch, u32 classid)
 {
-	return TC_H_MIN(classid) + 1;
+	return __c_fakeu(TC_H_MIN(classid) + 1);
 }
 
 static uintptr_t ingress_bind_filter(struct Qdisc *sch,
