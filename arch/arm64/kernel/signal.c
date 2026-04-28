@@ -1826,6 +1826,10 @@ int arch_validate_sigaction(int sig, const struct k_sigaction *act,
 {
 	struct pt_regs *regs = current_pt_regs();
 
+	/* The following restrictions only apply to PCuABI */
+	if (is_compat_task())
+		return 0;
+
 	if (!(cheri_perms_get(regs->pcc) & ARM_CAP_PERMISSION_EXECUTIVE))
 		return -EPERM;
 
