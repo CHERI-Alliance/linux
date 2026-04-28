@@ -506,6 +506,22 @@ SYM_DATA_START_LOCAL(excp_vect_table)
 	RISCV_PTR do_trap_hardware_error /* hardware error (19) */
 SYM_DATA_END_LABEL(excp_vect_table, SYM_L_LOCAL, excp_vect_table_end)
 
+#ifdef CONFIG_CHERI_KERNEL
+	.align CLGREG
+SYM_DATA_START(kernel_code_cap)
+	RISCV_PTR 0
+SYM_DATA_END(kernel_code_cap)
+SYM_DATA_START(kernel_data_cap)
+	RISCV_PTR 0
+SYM_DATA_END(kernel_data_cap)
+SYM_DATA_START(kernel_ro_cap)
+	RISCV_PTR 0
+SYM_DATA_END(kernel_ro_cap)
+SYM_DATA_START(has_cheri_levels)
+	.byte 0
+SYM_DATA_END(has_cheri_levels)
+#endif
+
 #ifndef CONFIG_CHERI_KERNEL
 	.section ".rodata"
 	.align LGREG
