@@ -109,6 +109,7 @@
 #include <linux/unwind_deferred.h>
 #include <linux/pgalloc.h>
 #include <linux/uaccess.h>
+#include <linux/mm_reserv.h>
 
 #include <asm/mmu_context.h>
 #include <asm/cacheflush.h>

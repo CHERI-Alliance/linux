@@ -62,6 +62,7 @@ struct vma_remap_struct {
 
 	/* VMA state, determined in do_mremap(). */
 	struct vm_area_struct *vma;
+	struct reserv_struct reserv_info, *reserv_ptr;
 
 	/* Internal state, determined in do_mremap(). */
 	unsigned long delta;		/* Absolute delta of old_len,new_len. */
@@ -964,6 +965,10 @@ static unsigned long vrm_set_new_addr(struct vma_remap_struct *vrm)
 		return res;
 
 	vrm->new_addr = res;
+	if (reserv_find_reserv_info_range(res, vrm->new_len, true,
+					 &vrm->reserv_info))
+		vrm->reserv_ptr = &vrm->reserv_info;
+
 	return 0;
 }
 
@@ -1195,7 +1200,7 @@ static int copy_vma_and_data(struct vma_remap_struct *vrm,
 	PAGETABLE_MOVE(pmc, NULL, NULL, vrm->addr, vrm->new_addr, vrm->old_len);
 
 	new_vma = copy_vma(&vma, vrm->new_addr, vrm->new_len, new_pgoff,
-			   &pmc.need_rmap_locks);
+			   &pmc.need_rmap_locks, vrm->reserv_ptr);
 	if (!new_vma) {
 		vrm_uncharge(vrm);
 		*new_vma_ptr = NULL;
@@ -1368,6 +1373,9 @@ static unsigned long mremap_to(struct vma_remap_struct *vrm)
 {
 	struct mm_struct *mm = current->mm;
 	unsigned long err;
+
+	if (reserv_find_reserv_info_range(vrm->new_addr, vrm->new_len, true, &vrm->reserv_info))
+		vrm->reserv_ptr = &vrm->reserv_info;
 
 	if (vrm->flags & MREMAP_FIXED) {
 		/*
@@ -1972,7 +1980,7 @@ SYSCALL_DEFINE5(__retptr__(mremap), user_uintptr_t, addr, unsigned long, old_len
 	struct vm_userfaultfd_ctx uf = NULL_VM_UFFD_CTX;
 	LIST_HEAD(uf_unmap_early);
 	LIST_HEAD(uf_unmap);
-	/* @TODO [PCuABI] - capability validation */
+
 	/*
 	 * There is a deliberate asymmetry here: we strip the pointer tag
 	 * from the old address but leave the new address alone. This is
