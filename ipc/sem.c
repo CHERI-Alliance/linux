@@ -1648,7 +1648,7 @@ out_up:
 	return err;
 }
 
-static long ksys_semctl(int semid, int semnum, int cmd, unsigned long arg, int version)
+static long ksys_semctl(int semid, int semnum, int cmd, user_uintptr_t arg, int version)
 {
 	struct ipc_namespace *ns;
 	void __user *p = (void __user *)arg;
@@ -1702,7 +1702,7 @@ static long ksys_semctl(int semid, int semnum, int cmd, unsigned long arg, int v
 	}
 }
 
-SYSCALL_DEFINE4(semctl, int, semid, int, semnum, int, cmd, unsigned long, arg)
+SYSCALL_DEFINE4(semctl, int, semid, int, semnum, int, cmd, user_uintptr_t, arg)
 {
 	return ksys_semctl(semid, semnum, cmd, arg, IPC_64);
 }
