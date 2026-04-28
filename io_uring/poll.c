@@ -24,8 +24,8 @@
 
 struct io_poll_update {
 	struct file			*file;
-	u64				old_user_data;
-	u64				new_user_data;
+	user_uintptr_t			old_user_data;
+	user_uintptr_t			new_user_data;
 	__poll_t			events;
 	bool				update_events;
 	bool				update_user_data;
@@ -759,7 +759,7 @@ static struct io_kiocb *io_poll_find(struct io_ring_ctx *ctx, bool poll_only,
 	struct io_hash_bucket *hb = &ctx->cancel_table.hbs[index];
 
 	hlist_for_each_entry(req, &hb->list, hash_node) {
-		if (cd->data != req->cqe.user_data)
+		if (!io_user_data_is_same(cd->data, req->cqe.user_data))
 			continue;
 		if (poll_only && req->opcode != IORING_OP_POLL_ADD)
 			continue;
@@ -865,7 +865,7 @@ int io_poll_remove_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	upd->update_events = flags & IORING_POLL_UPDATE_EVENTS;
 	upd->update_user_data = flags & IORING_POLL_UPDATE_USER_DATA;
 
-	upd->new_user_data = READ_ONCE(sqe->off);
+	upd->new_user_data = READ_ONCE(sqe->addr2);
 	if (!upd->update_user_data && upd->new_user_data)
 		return -EINVAL;
 	if (upd->update_events)

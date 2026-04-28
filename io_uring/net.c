@@ -273,11 +273,11 @@ static int io_copy_msghdr_from_user(struct user_msghdr *msg,
 {
 	if (!user_access_begin(umsg, sizeof(*umsg)))
 		return -EFAULT;
-	unsafe_get_user(msg->msg_name, &umsg->msg_name, ua_end);
+	unsafe_get_user_ptr(msg->msg_name, &umsg->msg_name, ua_end);
 	unsafe_get_user(msg->msg_namelen, &umsg->msg_namelen, ua_end);
-	unsafe_get_user(msg->msg_iov, &umsg->msg_iov, ua_end);
+	unsafe_get_user_ptr(msg->msg_iov, &umsg->msg_iov, ua_end);
 	unsafe_get_user(msg->msg_iovlen, &umsg->msg_iovlen, ua_end);
-	unsafe_get_user(msg->msg_control, &umsg->msg_control, ua_end);
+	unsafe_get_user_ptr(msg->msg_control, &umsg->msg_control, ua_end);
 	unsafe_get_user(msg->msg_controllen, &umsg->msg_controllen, ua_end);
 	user_access_end();
 	return 0;

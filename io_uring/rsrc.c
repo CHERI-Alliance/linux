@@ -22,7 +22,7 @@
 
 struct io_rsrc_update {
 	struct file			*file;
-	u64				arg;
+	__s32 __user			*arg;
 	u32				nr_args;
 	u32				offset;
 };
@@ -212,7 +212,7 @@ static int __io_sqe_files_update(struct io_ring_ctx *ctx,
 				 struct io_uring_rsrc_update2 *up,
 				 unsigned nr_args)
 {
-	u64 __user *tags = u64_to_user_ptr(up->tags);
+	user_uintptr_t __user *tags = u64_to_user_ptr(up->tags);
 	__s32 __user *fds = u64_to_user_ptr(up->data);
 	int fd, i, err = 0;
 	unsigned int done;
@@ -277,7 +277,7 @@ static int __io_sqe_buffers_update(struct io_ring_ctx *ctx,
 				   struct io_uring_rsrc_update2 *up,
 				   unsigned int nr_args)
 {
-	u64 __user *tags = u64_to_user_ptr(up->tags);
+	user_uintptr_t __user *tags = u64_to_user_ptr(up->tags);
 	struct iovec fast_iov, *iov;
 	struct page *last_hpage = NULL;
 	struct iovec __user *uvec;
@@ -418,7 +418,7 @@ int io_files_update_prep(struct io_kiocb *req, const struct io_uring_sqe *sqe)
 	up->nr_args = READ_ONCE(sqe->len);
 	if (!up->nr_args)
 		return -EINVAL;
-	up->arg = READ_ONCE(sqe->addr);
+	up->arg = u64_to_user_ptr(READ_ONCE(sqe->addr));
 	return 0;
 }
 
@@ -426,7 +426,7 @@ static int io_files_update_with_index_alloc(struct io_kiocb *req,
 					    unsigned int issue_flags)
 {
 	struct io_rsrc_update *up = io_kiocb_to_cmd(req, struct io_rsrc_update);
-	__s32 __user *fds = u64_to_user_ptr(up->arg);
+	__s32 __user *fds = up->arg;
 	unsigned int done;
 	struct file *file;
 	int ret, fd;
@@ -469,7 +469,7 @@ int io_files_update(struct io_kiocb *req, unsigned int issue_flags)
 	int ret;
 
 	up2.offset = up->offset;
-	up2.data = up->arg;
+	up2.data = (user_uintptr_t)up->arg;
 	up2.nr = 0;
 	up2.tags = 0;
 	up2.resv = 0;

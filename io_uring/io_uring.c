@@ -791,8 +791,8 @@ static bool io_fill_cqe_aux32(struct io_ring_ctx *ctx,
 	return true;
 }
 
-static bool io_fill_cqe_aux(struct io_ring_ctx *ctx, u64 user_data, s32 res,
-			      u32 cflags)
+static bool io_fill_cqe_aux(struct io_ring_ctx *ctx,
+			    user_uintptr_t, s32 res, u32 cflags)
 {
 	bool cqe32 = cflags & IORING_CQE_F_32;
 	struct io_uring_cqe *cqe;
@@ -805,7 +805,7 @@ static bool io_fill_cqe_aux(struct io_ring_ctx *ctx, u64 user_data, s32 res,
 	return false;
 }
 
-static inline struct io_cqe io_init_cqe(u64 user_data, s32 res, u32 cflags)
+static inline struct io_cqe io_init_cqe(user_uintptr_t user_data, s32 res, u32 cflags)
 {
 	return (struct io_cqe) { .user_data = user_data, .res = res, .flags = cflags };
 }
@@ -831,7 +831,7 @@ static __cold bool io_cqe_overflow_locked(struct io_ring_ctx *ctx,
 	return io_cqring_add_overflow(ctx, ocqe);
 }
 
-bool io_post_aux_cqe(struct io_ring_ctx *ctx, u64 user_data, s32 res, u32 cflags)
+bool io_post_aux_cqe(struct io_ring_ctx *ctx, user_uintptr_t user_data, s32 res, u32 cflags)
 {
 	bool filled;
 
@@ -850,7 +850,7 @@ bool io_post_aux_cqe(struct io_ring_ctx *ctx, u64 user_data, s32 res, u32 cflags
  * Must be called from inline task_work so we know a flush will happen later,
  * and obviously with ctx->uring_lock held (tw always has that).
  */
-void io_add_aux_cqe(struct io_ring_ctx *ctx, u64 user_data, s32 res, u32 cflags)
+void io_add_aux_cqe(struct io_ring_ctx *ctx, user_uintptr_t user_data, s32 res, u32 cflags)
 {
 	lockdep_assert_held(&ctx->uring_lock);
 	lockdep_assert(ctx->lockless_cq);
@@ -3179,6 +3179,49 @@ static int __init io_uring_init(void)
 	__BUILD_BUG_VERIFY_OFFSET_SIZE(struct io_uring_sqe, eoffset, sizeof(etype), ename)
 #define BUILD_BUG_SQE_ELEM_SIZE(eoffset, esize, ename) \
 	__BUILD_BUG_VERIFY_OFFSET_SIZE(struct io_uring_sqe, eoffset, esize, ename)
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	BUILD_BUG_ON(sizeof(struct io_uring_sqe) != 128);
+	BUILD_BUG_SQE_ELEM(0,  __u8,  opcode);
+	BUILD_BUG_SQE_ELEM(1,  __u8,  flags);
+	BUILD_BUG_SQE_ELEM(2,  __u16, ioprio);
+	BUILD_BUG_SQE_ELEM(4,  __s32, fd);
+	BUILD_BUG_SQE_ELEM(16, __u64, off);
+	BUILD_BUG_SQE_ELEM(16, __uintcap_t, addr2);
+	BUILD_BUG_SQE_ELEM(16, __u32, cmd_op);
+	BUILD_BUG_SQE_ELEM(20, __u32, __pad1);
+	BUILD_BUG_SQE_ELEM(32, __uintcap_t, addr);
+	BUILD_BUG_SQE_ELEM(32, __u64, splice_off_in);
+	BUILD_BUG_SQE_ELEM(48, __u32, len);
+	BUILD_BUG_SQE_ELEM(52, __kernel_rwf_t, rw_flags);
+	BUILD_BUG_SQE_ELEM(52, __u32, fsync_flags);
+	BUILD_BUG_SQE_ELEM(52, __u16, poll_events);
+	BUILD_BUG_SQE_ELEM(52, __u32, poll32_events);
+	BUILD_BUG_SQE_ELEM(52, __u32, sync_range_flags);
+	BUILD_BUG_SQE_ELEM(52, __u32, msg_flags);
+	BUILD_BUG_SQE_ELEM(52, __u32, timeout_flags);
+	BUILD_BUG_SQE_ELEM(52, __u32, accept_flags);
+	BUILD_BUG_SQE_ELEM(52, __u32, cancel_flags);
+	BUILD_BUG_SQE_ELEM(52, __u32, open_flags);
+	BUILD_BUG_SQE_ELEM(52, __u32, statx_flags);
+	BUILD_BUG_SQE_ELEM(52, __u32, fadvise_advice);
+	BUILD_BUG_SQE_ELEM(52, __u32, splice_flags);
+	BUILD_BUG_SQE_ELEM(52, __u32, rename_flags);
+	BUILD_BUG_SQE_ELEM(52, __u32, unlink_flags);
+	BUILD_BUG_SQE_ELEM(52, __u32, hardlink_flags);
+	BUILD_BUG_SQE_ELEM(52, __u32, xattr_flags);
+	BUILD_BUG_SQE_ELEM(52, __u32, msg_ring_flags);
+	BUILD_BUG_SQE_ELEM(64, __uintcap_t, user_data);
+	BUILD_BUG_SQE_ELEM(80, __u16, buf_index);
+	BUILD_BUG_SQE_ELEM(80, __u16, buf_group);
+	BUILD_BUG_SQE_ELEM(82, __u16, personality);
+	BUILD_BUG_SQE_ELEM(84, __s32, splice_fd_in);
+	BUILD_BUG_SQE_ELEM(84, __u32, file_index);
+	BUILD_BUG_SQE_ELEM(84, __u16, addr_len);
+	BUILD_BUG_SQE_ELEM(86, __u16, __pad3[0]);
+	BUILD_BUG_SQE_ELEM(96, __uintcap_t, addr3);
+	BUILD_BUG_SQE_ELEM_SIZE(96, 0, cmd);
+	BUILD_BUG_SQE_ELEM(112, __uintcap_t, __pad2);
+#else /* !CONFIG_CHERI_PURECAP_UABI */
 	BUILD_BUG_ON(sizeof(struct io_uring_sqe) != 64);
 	BUILD_BUG_SQE_ELEM(0,  __u8,   opcode);
 	BUILD_BUG_SQE_ELEM(1,  __u8,   flags);
@@ -3226,6 +3269,7 @@ static int __init io_uring_init(void)
 	BUILD_BUG_SQE_ELEM(48, __u64, attr_ptr);
 	BUILD_BUG_SQE_ELEM(56, __u64, attr_type_mask);
 	BUILD_BUG_SQE_ELEM(56, __u64,  __pad2);
+#endif /* !CONFIG_CHERI_PURECAP_UABI */
 
 	BUILD_BUG_ON(sizeof(struct io_uring_files_update) !=
 		     sizeof(struct io_uring_rsrc_update));

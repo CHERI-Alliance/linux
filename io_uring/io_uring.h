@@ -185,8 +185,9 @@ static inline size_t io_uring_cq_offset(void)
 struct io_uring_cqe *__io_get_ith_cqe(struct io_ring_ctx *ctx, unsigned int i);
 bool io_cqe_cache_refill(struct io_ring_ctx *ctx, bool overflow, bool cqe32);
 void io_req_defer_failed(struct io_kiocb *req, s32 res);
-bool io_post_aux_cqe(struct io_ring_ctx *ctx, u64 user_data, s32 res, u32 cflags);
-void io_add_aux_cqe(struct io_ring_ctx *ctx, u64 user_data, s32 res, u32 cflags);
+bool io_post_aux_cqe(struct io_ring_ctx *ctx, user_uintptr_t user_data,
+		     s32 res, u32 cflags);
+void io_add_aux_cqe(struct io_ring_ctx *ctx, user_uintptr_t user_data, s32 res, u32 cflags);
 bool io_req_post_cqe(struct io_kiocb *req, s32 res, u32 cflags);
 bool io_req_post_cqe32(struct io_kiocb *req, struct io_uring_cqe src_cqe[2]);
 void __io_commit_cqring_flush(struct io_ring_ctx *ctx);
@@ -269,6 +270,16 @@ static inline bool io_in_compat64(struct io_ring_ctx *ctx)
 	return IS_ENABLED(CONFIG_COMPAT64) && ctx->compat;
 }
 
+static inline bool io_user_data_is_same(user_uintptr_t d1,
+					user_uintptr_t d2)
+{
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	return __builtin_cheri_equal_exact(d1, d2);
+#else
+	return d1 == d2;
+#endif
+}
+
 static inline void convert_compat64_io_uring_sqe(struct io_ring_ctx *ctx,
 						 struct io_uring_sqe *sqe,
 						 const struct __c64_io_uring_sqe *compat_sqe)
@@ -290,13 +301,29 @@ static inline void convert_compat64_io_uring_sqe(struct io_ring_ctx *ctx,
 	sqe->ioprio = READ_ONCE(compat_sqe->ioprio);
 	sqe->fd = READ_ONCE(compat_sqe->fd);
 	BUILD_BUG_COMPAT_SQE_UNION_ELEM(addr2, addr);
-	sqe->addr2 = READ_ONCE(compat_sqe->addr2);
+	sqe->addr2 = (user_uintptr_t)compat_ptr(READ_ONCE(compat_sqe->addr2));
 	BUILD_BUG_COMPAT_SQE_UNION_ELEM(addr, len);
-	sqe->addr = READ_ONCE(compat_sqe->addr);
+
+	/*
+	 * Some opcodes set a user_data value in the addr field to be matched
+	 * with a pre-existing IO event's user_data. It's not dereferenced by
+	 * the kernel, so don't modify it.
+	 */
+	switch (sqe->opcode) {
+	case IORING_OP_POLL_REMOVE:
+	case IORING_OP_TIMEOUT_REMOVE:
+	case IORING_OP_ASYNC_CANCEL:
+		sqe->addr = (__kernel_uintptr_t)READ_ONCE(compat_sqe->addr);
+		break;
+	default:
+		sqe->addr = (user_uintptr_t)compat_ptr(READ_ONCE(compat_sqe->addr));
+		break;
+	}
+
 	sqe->len = READ_ONCE(compat_sqe->len);
 	BUILD_BUG_COMPAT_SQE_UNION_ELEM(rw_flags, user_data);
 	sqe->rw_flags = READ_ONCE(compat_sqe->rw_flags);
-	sqe->user_data = READ_ONCE(compat_sqe->user_data);
+	sqe->user_data = (user_uintptr_t)READ_ONCE(compat_sqe->user_data);
 	BUILD_BUG_COMPAT_SQE_UNION_ELEM(buf_index, personality);
 	sqe->buf_index = READ_ONCE(compat_sqe->buf_index);
 	sqe->personality = READ_ONCE(compat_sqe->personality);
@@ -365,14 +392,14 @@ static inline bool io_defer_get_uncommited_cqe(struct io_ring_ctx *ctx,
 }
 
 static inline void __io_fill_cqe(struct io_ring_ctx *ctx, struct io_uring_cqe *cqe,
-				 u64 user_data, s32 res, u32 cflags,
+				 user_uintptr_t user_data, s32 res, u32 cflags,
 				 u64 extra1, u64 extra2)
 {
 	bool is_cqe32 = (ctx->flags & IORING_SETUP_CQE32) || cflags & IORING_CQE_F_32;
 	if (io_in_compat64(ctx)) {
 		struct __c64_io_uring_cqe *compat_cqe = (struct __c64_io_uring_cqe *)cqe;
 
-		WRITE_ONCE(compat_cqe->user_data, user_data);
+		WRITE_ONCE(compat_cqe->user_data, (__u64)user_data);
 		WRITE_ONCE(compat_cqe->res, res);
 		WRITE_ONCE(compat_cqe->flags, cflags);
 
