@@ -2240,7 +2240,7 @@ static int processcompl_compat(struct async *as, void __user2 * __capability __u
 		}
 	}
 
-	if (put_user(ptr_to_compat(addr), (u32 __user *)arg))
+	if (put_user(ptr_to_compat(addr), (compat_uptr_t __user *)(void __user *)arg))
 		return -EFAULT;
 	return 0;
 }
