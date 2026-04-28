@@ -2963,6 +2963,10 @@ unacct_fail:
  * @info: The unmapped area information including the range [low_limit -
  * high_limit), the alignment offset and mask.
  *
+ * CHERI: An unmapped area must never overlap with the reserve of an
+ * CHERI: existing vma. This requires more expensive checks because
+ * CHERI: searching the vma-tree does not take reservations into account.
+ *
  * Return: A memory address or -ENOMEM.
  */
 unsigned long unmapped_area(struct vm_unmapped_area_info *info)
@@ -2994,6 +2998,7 @@ retry:
 	gap = vma_iter_addr(&vmi) + info->start_gap;
 	gap += (info->align_offset - gap) & info->align_mask;
 	tmp = vma_next(&vmi);
+#ifndef CONFIG_CHERI_PURECAP_UABI
 	if (tmp && (tmp->vm_flags & VM_STARTGAP_FLAGS)) { /* Avoid prev check if possible */
 		if (vm_start_gap(tmp) < gap + length - 1) {
 			low_limit = tmp->vm_end;
@@ -3008,6 +3013,20 @@ retry:
 			goto retry;
 		}
 	}
+#else
+	if (tmp && vm_start_gap(tmp) < gap + length - 1) {
+		low_limit = reserv_vma_outer_start(tmp) +
+					reserv_vma_outer_len(tmp);
+		vma_iter_reset(&vmi);
+		goto retry;
+	}
+	tmp = vma_prev(&vmi);
+	if (tmp && vm_end_gap(tmp) > gap) {
+		low_limit = vm_end_gap(tmp);
+		vma_iter_reset(&vmi);
+		goto retry;
+	}
+#endif
 
 	return gap;
 }
@@ -3019,6 +3038,10 @@ retry:
  *
  * @info: The unmapped area information including the range [low_limit -
  * high_limit), the alignment offset and mask.
+ *
+ * CHERI: An unmapped area must never overlap with the reserve of an
+ * CHERI: existing vma. This requires more expensive checks because
+ * CHERI: searching the vma-tree does not take reservations into account.
  *
  * Return: A memory address or -ENOMEM.
  */
@@ -3046,6 +3069,7 @@ retry:
 	gap -= (gap - info->align_offset) & info->align_mask;
 	gap_end = vma_iter_end(&vmi);
 	tmp = vma_next(&vmi);
+#ifndef CONFIG_CHERI_PURECAP_UABI
 	if (tmp && (tmp->vm_flags & VM_STARTGAP_FLAGS)) { /* Avoid prev check if possible */
 		if (vm_start_gap(tmp) < gap_end) {
 			high_limit = vm_start_gap(tmp);
@@ -3055,11 +3079,24 @@ retry:
 	} else {
 		tmp = vma_prev(&vmi);
 		if (tmp && vm_end_gap(tmp) > gap) {
-			high_limit = reserv_vma_reserv_start(tmp);
+			high_limit = tmp->vm_start;
 			vma_iter_reset(&vmi);
 			goto retry;
 		}
 	}
+#else
+	if (tmp && vm_start_gap(tmp) < gap_end) {
+		high_limit = vm_start_gap(tmp);
+		vma_iter_reset(&vmi);
+		goto retry;
+	}
+	tmp = vma_prev(&vmi);
+	if (tmp && vm_end_gap(tmp) > gap) {
+		high_limit = reserv_vma_outer_start(tmp);
+		vma_iter_reset(&vmi);
+		goto retry;
+	}
+#endif
 
 	return gap;
 }
@@ -3083,7 +3120,7 @@ static int acct_stack_growth(struct vm_area_struct *vma,
 	if (size > rlimit(RLIMIT_STACK))
 		return -ENOMEM;
 
-	if (reserv_is_supported(mm) && size > reserv_vma_reserv_len(vma))
+	if (reserv_is_supported(mm) && size > reserv_vma_inner_len(vma))
 		return -ERESERVATION;
 
 	/* mlock limit tests */

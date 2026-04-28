@@ -21,13 +21,22 @@
 	(reserv_is_supported(current->mm)				\
 	 ? cheri_representable_length(len) : (len))
 
-#define reserv_vma_reserv_start(vma)					\
+#define reserv_vma_inner_start(vma)					\
 	(reserv_is_supported((vma)->vm_mm)				\
-	 ? (vma)->reserv_data.start : (vma)->vm_start)
+	 ? (vma)->reserv_data.inner_start : (vma)->vm_start)
 
-#define reserv_vma_reserv_len(vma)					\
+#define reserv_vma_outer_start(vma)					\
 	(reserv_is_supported((vma)->vm_mm)				\
-	 ? (vma)->reserv_data.len : ((vma)->vm_end - (vma)->vm_start))
+	 ? (vma)->reserv_data.outer_start : (vma)->vm_start)
+
+#define reserv_vma_inner_len(vma)					\
+	(reserv_is_supported((vma)->vm_mm)				\
+	 ? (vma)->reserv_data.inner_len : ((vma)->vm_end - (vma)->vm_start))
+
+#define reserv_vma_outer_len(vma)					\
+	(reserv_is_supported((vma)->vm_mm)				\
+	 ? (vma)->reserv_data.outer_len : ((vma)->vm_end - (vma)->vm_start))
+
 
 /**
  * reserv_vma_set_reserv() - Set the reservation information in the VMA.
@@ -39,9 +48,11 @@
  * Return: 0 if reservation information set successfully or negative errorcode
  *         otherwise.
  *
- * The start address is stored as CHERI representable base and the length as
- * CHERI representable length. They are expected to not overlap with any other
- * VMA. This function should be called with mmap_lock held.
+ * The given range is stored as in the becomes the inner range of the
+ * reservation. The outer range is calculated automatically and will
+ * be a CHERI representable range. The outer range is expected to not
+ * overlap with any other VMA.
+ * This function should be called with mmap_lock held.
  */
 int reserv_vma_set_reserv(struct vm_area_struct *vma, ptraddr_t start,
 			  size_t len, int prot);
@@ -55,10 +66,11 @@ int reserv_vma_set_reserv(struct vm_area_struct *vma, ptraddr_t start,
  * Return: 0 if reservation information set successfully or negative errorcode
  *         otherwise.
  *
- * The start address is stored as CHERI representable base and the length as
- * CHERI representable length. They are expected to not overlap with any other
- * VMA. The reservation permissions are left unchanged.  This function should
- * be called with mmap_lock held.
+ * The given range is stored as in the becomes the inner range of the
+ * reservation. The outer range is calculated automatically and will
+ * be a CHERI representable range. The outer range is expected to not
+ * overlap with any other VMA.
+ * This function should be called with mmap_lock held.
  */
 int reserv_vma_set_reserv_start_len(struct vm_area_struct *vma, ptraddr_t start,
 				    size_t len);
@@ -76,7 +88,7 @@ void reserv_vma_set_reserv_data(struct vm_area_struct *vma,
 
 /**
  * reserv_find_reserv_info_range() - Find a reservation spanning at least the
- *   input address range.
+ *   input address range with its inner range.
  * @start: Region start address.
  * @len: Region length.
  * @locked: Flag to indicate if mmap_lock is already held.
@@ -87,7 +99,6 @@ void reserv_vma_set_reserv_data(struct vm_area_struct *vma,
  *
  * This function internally uses mmap_lock to access VMAs if mmap_lock is not
  * already held.
-
  */
 bool reserv_find_reserv_info_range(ptraddr_t start, size_t len, bool locked,
 				   struct reserv_struct *reserv_info);
@@ -100,7 +111,7 @@ bool reserv_find_reserv_info_range(ptraddr_t start, size_t len, bool locked,
  * @len: Region length.
  *
  * Return: True if the input address range falls within the reserved virtual
- *         address range or false otherwise.
+ *         inner address range or false otherwise.
  *
  * This function should be called with mmap_lock held.
  */
@@ -109,7 +120,7 @@ bool reserv_vma_range_within_reserv(struct vm_area_struct *vma, ptraddr_t start,
 
 /**
  * reserv_cap_within_reserv() - Check that the capability bounds of @cap
- *   are wholly contained within an existing reservation.
+ *   are wholly contained within the outer limits of an existing reservation.
  * @cap: Capability to check.
  * @locked: Flag to indicate if mmap_lock is already held.
  *
@@ -122,8 +133,8 @@ bool reserv_vma_range_within_reserv(struct vm_area_struct *vma, ptraddr_t start,
 bool reserv_cap_within_reserv(user_uintptr_t cap, bool locked);
 
 /**
- * reserv_aligned_range_within_reserv() - Check that the input address range falls
- *   within any reservation.
+ * reserv_range_within_reserv() - Check that the input address range falls
+ *   within the inner boundaries of any reservation.
  * @start: Region start address.
  * @len: Region length.
  * @locked: Flag to indicate if mmap_lock is already held.
@@ -131,12 +142,9 @@ bool reserv_cap_within_reserv(user_uintptr_t cap, bool locked);
  * Return: True if the input address range (aligned for representability) falls
  *         within a reservation or false otherwise.
  *
- * @start and @len are appropriately aligned down/up so that the range that is
- * checked corresponds to that of a new reservation. This function should be
- * called with mmap_lock held.
+ * This function should be called with mmap_lock held.
  */
-bool reserv_aligned_range_within_reserv(ptraddr_t start, size_t len,
-					bool locked);
+bool reserv_range_within_reserv(ptraddr_t start, size_t len, bool locked);
 
 /**
  * reserv_range_mapped() - Check that the input address range is fully mapped.
@@ -223,9 +231,11 @@ do {								\
 
 #define reserv_representable_length(len) len
 
-#define reserv_vma_reserv_start(vma) vma->vm_start
+#define reserv_vma_inner_start(vma) vma->vm_start
+#define reserv_vma_outer_start(vma) vma->vm_start
 
-#define reserv_vma_reserv_len(vma) (vma->vm_end - vma->vm_start)
+#define reserv_vma_inner_len(vma) (vma->vm_end - vma->vm_start)
+#define reserv_vma_outer_len(vma) (vma->vm_end - vma->vm_start)
 
 static inline int reserv_vma_set_reserv(struct vm_area_struct *vma,
 					ptraddr_t start, size_t len, int prot)
@@ -262,9 +272,8 @@ static inline bool reserv_cap_within_reserv(user_uintptr_t cap, bool locked)
 	return true;
 }
 
-static inline bool reserv_aligned_range_within_reserv(ptraddr_t start,
-						      size_t len,
-						      bool locked)
+static inline bool reserv_range_within_reserv(ptraddr_t start, size_t len,
+					      bool locked)
 {
 	return true;
 }

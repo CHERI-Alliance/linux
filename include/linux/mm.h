@@ -4000,24 +4000,26 @@ static inline unsigned long stack_guard_start_gap(const struct vm_area_struct *v
 static inline unsigned long vm_start_gap(const struct vm_area_struct *vma)
 {
 	unsigned long gap = stack_guard_start_gap(vma);
-	unsigned long vm_start = reserv_vma_reserv_start(vma);
+	unsigned long inner_start = reserv_vma_inner_start(vma);
+	unsigned long outer_start = reserv_vma_outer_start(vma);
 
-	vm_start -= gap;
-	if (vm_start > vma->vm_start)
-		vm_start = 0;
-	return vm_start;
+	inner_start -= gap;
+	if (inner_start > vma->vm_start)
+		inner_start = 0;
+	return min_t(unsigned long, inner_start, outer_start);
 }
 
 static inline unsigned long vm_end_gap(const struct vm_area_struct *vma)
 {
-	unsigned long vm_end = reserv_vma_reserv_start(vma) + reserv_vma_reserv_len(vma);
+	unsigned long inner_end = reserv_vma_inner_start(vma) + reserv_vma_inner_len(vma);
+	unsigned long outer_end = reserv_vma_outer_start(vma) + reserv_vma_outer_len(vma);
 
 	if (vma->vm_flags & VM_GROWSUP) {
-		vm_end += stack_guard_gap;
-		if (vm_end < vma->vm_end)
-			vm_end = -PAGE_SIZE;
+		inner_end += stack_guard_gap;
+		if (inner_end < vma->vm_end)
+			inner_end = -PAGE_SIZE;
 	}
-	return vm_end;
+	return max_t(unsigned long, inner_end, outer_end);
 }
 
 static inline unsigned long vma_pages(const struct vm_area_struct *vma)

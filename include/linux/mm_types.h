@@ -915,9 +915,18 @@ struct vm_area_desc {
 	struct mmap_action action;
 };
 
+/*
+ * Track inner and outer boundaries of a reservation:
+ * - The inner boundaries are the actual reservation. Whenever a
+ *   check is done if a range is within a reservation the inner range
+ *   must be used.
+ * - The outer boundaries are a representable range that completely
+ *   covers the inner range. Whenever conflict checking is done the
+ *   out range of the reservation must be used.
+ */
 struct reserv_struct {
-	ptraddr_t start;
-	size_t len;
+	ptraddr_t inner_start, outer_start;
+	size_t inner_len, outer_len;
 	user_ptr_perms_t perms;
 };
 

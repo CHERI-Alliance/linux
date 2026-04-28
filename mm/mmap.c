@@ -587,7 +587,7 @@ int check_pcuabi_map_ptr_arg(user_uintptr_t user_ptr, unsigned long len,
 		 * contained within a reservation, get_unmapped_area will
 		 * ensure that -ERESERVATION is returned.
 		 */
-		if (reserv_aligned_range_within_reserv(addr, len, locked))
+		if (reserv_range_within_reserv(addr, len, locked))
 			return -ERESERVATION;
 		return 0;
 	}
