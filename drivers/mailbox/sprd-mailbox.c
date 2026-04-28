@@ -234,7 +234,7 @@ static irqreturn_t sprd_mbox_inbox_isr(int irq, void *data)
 static int sprd_mbox_send_data(struct mbox_chan *chan, void *msg)
 {
 	struct sprd_mbox_priv *priv = to_sprd_mbox_priv(chan->mbox);
-	uintptr_t id = (uintptr_t)chan->con_priv;
+	unsigned long id = __c_pa(chan->con_priv);
 	u32 *data = msg;
 
 	/* Write data into inbox FIFO, and only support 8 bytes every time */
@@ -253,7 +253,7 @@ static int sprd_mbox_send_data(struct mbox_chan *chan, void *msg)
 static int sprd_mbox_flush(struct mbox_chan *chan, unsigned long timeout)
 {
 	struct sprd_mbox_priv *priv = to_sprd_mbox_priv(chan->mbox);
-	uintptr_t id = (uintptr_t)chan->con_priv;
+	unsigned long id = __c_pa(chan->con_priv);
 	u32 busy;
 
 	timeout = jiffies + msecs_to_jiffies(timeout);
@@ -425,7 +425,7 @@ static int sprd_mbox_probe(struct platform_device *pdev)
 		priv->mbox.num_chans = SPRD_MBOX_R1_CHAN_MAX;
 
 	for (id = 0; id < priv->mbox.num_chans; id++)
-		priv->chan[id].con_priv = (void *)id;
+		priv->chan[id].con_priv = __c_fakep(id);
 
 	ret = devm_mbox_controller_register(dev, &priv->mbox);
 	if (ret) {
