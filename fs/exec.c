@@ -1200,7 +1200,8 @@ int begin_new_exec(struct linux_binprm * bprm)
 			bprm->rlim_stack.rlim_cur = _STK_LIM;
 	}
 
-	me->sas_ss_sp = me->sas_ss_size = 0;
+	me->sas_ss_sp = 0;
+	me->sas_ss_size = 0;
 
 	/*
 	 * Figure out dumpability. Note that this checking only of current
