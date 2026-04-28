@@ -1592,6 +1592,18 @@ config SERIAL_NUVOTON_MA35D1_CONSOLE
 	  but you can alter that using a kernel command line option such as
 	  "console=ttyNVTx".
 
+config SERIAL_SAILUART
+	tristate "SailUART serial port support"
+	depends on HAS_IOMEM
+	depends on OF || COMPILE_TEST
+	select SERIAL_CORE
+
+config SERIAL_SAILUART_CONSOLE
+	bool "SailUART serial port console support"
+	depends on SERIAL_SAILUART=y
+	select SERIAL_CORE_CONSOLE
+	select SERIAL_EARLYCON
+
 endmenu
 
 config SERIAL_MCTRL_GPIO
