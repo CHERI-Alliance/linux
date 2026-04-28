@@ -2389,9 +2389,21 @@ SYSCALL_DEFINE4(epoll_ctl, int, epfd, int, op, int, fd,
 {
 	struct epoll_event epds;
 
-	if (ep_op_has_event(op) &&
-	    copy_from_user_with_ptr(&epds, event, sizeof(struct epoll_event)))
-		return -EFAULT;
+	if (ep_op_has_event(op)) {
+		if (in_compat_syscall()) {
+			struct compat_epoll_event compat_epds;
+
+			if (copy_from_user(&compat_epds, event,
+					   sizeof(struct compat_epoll_event)))
+				return -EFAULT;
+
+			epds.events = compat_epds.events;
+			epds.data = compat_epds.data;
+		} else {
+			if (copy_from_user(&epds, event, sizeof(struct epoll_event)))
+				return -EFAULT;
+		}
+	}
 
 	return do_epoll_ctl(epfd, op, fd, &epds, false);
 }
@@ -2399,12 +2411,15 @@ SYSCALL_DEFINE4(epoll_ctl, int, epfd, int, op, int, fd,
 static int ep_check_params(struct file *file, struct epoll_event __user *evs,
 			   int maxevents)
 {
+	size_t event_size = in_compat_syscall() ? sizeof(struct compat_epoll_event)
+						: sizeof(struct epoll_event);
+
 	/* The maximum number of event must be greater than zero */
 	if (maxevents <= 0 || maxevents > EP_MAX_EVENTS)
 		return -EINVAL;
 
 	/* Verify that the area passed by the user is writeable */
-	if (!access_ok(evs, maxevents * sizeof(struct epoll_event)))
+	if (!access_ok(evs, maxevents * event_size))
 		return -EFAULT;
 
 	/*
