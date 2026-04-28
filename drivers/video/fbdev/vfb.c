@@ -384,7 +384,7 @@ static int vfb_mmap(struct fb_info *info,
 {
 	vma->vm_page_prot = pgprot_decrypted(vma->vm_page_prot);
 
-	return remap_vmalloc_range(vma, (void *)info->fix.smem_start, vma->vm_pgoff);
+	return remap_vmalloc_range(vma, __c_fakep(info->fix.smem_start), vma->vm_pgoff);
 }
 
 #ifndef MODULE
@@ -450,7 +450,7 @@ static int vfb_probe(struct platform_device *dev)
 		goto err1;
 	}
 
-	vfb_fix.smem_start = (uintptr_t) videomemory;
+	vfb_fix.smem_start = __c_pa(videomemory);
 	vfb_fix.smem_len = videomemorysize;
 	info->fix = vfb_fix;
 	info->pseudo_palette = info->par;
