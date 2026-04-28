@@ -175,7 +175,7 @@ struct cxl_mem_query_commands {
 	__u32 n_commands;
 	__u32 rsvd;
 
-	struct cxl_command_info __user commands[]; /* out: supported commands */
+	struct cxl_command_info __user2 commands[]; /* out: supported commands */
 };
 
 /**

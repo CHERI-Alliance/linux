@@ -11,6 +11,16 @@
 #define __has_builtin(x) (0)
 #endif
 
+/* Define __has_feature for older compilers. */
+#ifndef __has_feature
+#define __has_feature(x) (0)
+#endif
+
+/* Define __capbility for the non-CHERI case. */
+#if !__has_feature(capabilities)
+#define __capability
+#endif
+
 /* Indirect macros required for expanded argument pasting, eg. __LINE__. */
 #define ___PASTE(a, b) a##b
 #define __PASTE(a, b) ___PASTE(a, b)
@@ -37,8 +47,19 @@
 #if defined(CONFIG_DEBUG_INFO_BTF) && defined(CONFIG_PAHOLE_HAS_BTF_TAG) && \
 	__has_attribute(btf_type_tag) && !defined(__BINDGEN__)
 # define BTF_TYPE_TAG(value) __attribute__((btf_type_tag(#value)))
+# define __user_as
 #else
 # define BTF_TYPE_TAG(value) /* nothing */
+#if __has_attribute(btf_type_tag)
+# define __user_as __attribute__((btf_type_tag("user")))
+#else
+# define __user_as
+#endif
+/* Skip attribute on hybrid kernels due to clang bug. */
+#if defined(CONFIG_CHERI_PURECAP_UABI) && !defined(CONFIG_CHERI_KERNEL)
+#undef __user_as
+#define __user_as
+#endif
 #endif
 
 #include <linux/compiler-context-analysis.h>
@@ -47,7 +68,8 @@
 #ifdef __CHECKER__
 /* address spaces */
 # define __kernel	__attribute__((address_space(0)))
-# define __user		__attribute__((noderef, address_space(__user)))
+# define __user2	__attribute__((noderef, address_space(__user)))
+# define __user		__capability __user2
 # define __iomem	__attribute__((noderef, address_space(__iomem)))
 # define __percpu	__attribute__((noderef, address_space(__percpu)))
 # define __rcu		__attribute__((noderef, address_space(__rcu)))
@@ -63,9 +85,11 @@ static inline void __chk_io_ptr(const volatile void __iomem *ptr) { }
 /* address spaces */
 # define __kernel
 # ifdef STRUCTLEAK_PLUGIN
-#  define __user	__attribute__((user))
+#  define __user2	__attribute__((user))
+#  define __user	__capability __user2
 # else
-#  define __user	BTF_TYPE_TAG(user)
+#  define __user2	__user_as BTF_TYPE_TAG(user)
+#  define __user	__capability __user2
 # endif
 # define __iomem
 # define __percpu	__percpu_qual BTF_TYPE_TAG(percpu)
