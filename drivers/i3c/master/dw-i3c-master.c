@@ -1646,7 +1646,7 @@ int dw_i3c_common_probe(struct dw_i3c_master *master,
 	master->free_pos = GENMASK(master->maxdevs - 1, 0);
 
 	if (has_acpi_companion(&pdev->dev)) {
-		quirks = (uintptr_t)device_get_match_data(&pdev->dev);
+		quirks = __c_pa(device_get_match_data(&pdev->dev));
 	} else if (pdev->dev.of_node) {
 		drvdata = device_get_match_data(&pdev->dev);
 		if (drvdata)

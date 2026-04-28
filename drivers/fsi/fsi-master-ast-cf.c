@@ -1350,7 +1350,7 @@ static int fsi_master_acf_probe(struct platform_device *pdev)
 	}
 	dev_dbg(&pdev->dev, "SRAM allocation @%lx\n",
 		(unsigned long)gen_pool_virt_to_phys(master->sram_pool,
-						     (uintptr_t)master->sram));
+						     __c_pa(master->sram)));
 
 	/*
 	 * Hookup with the GPIO driver for arbitration of GPIO banks

@@ -558,7 +558,7 @@ static int ktd202x_probe(struct i2c_client *client)
 	if (ret)
 		return ret;
 
-	chip->num_leds = (uintptr_t)i2c_get_match_data(client);
+	chip->num_leds = __c_pa(i2c_get_match_data(client));
 
 	chip->regulators[0].supply = "vin";
 	chip->regulators[1].supply = "vio";

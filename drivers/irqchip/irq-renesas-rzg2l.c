@@ -500,7 +500,7 @@ static int rzg2l_irqc_alloc(struct irq_domain *domain, unsigned int virq,
 		return -EINVAL;
 
 	ret = irq_domain_set_hwirq_and_chip(domain, virq, hwirq, priv->irqchip,
-					    (void *)(uintptr_t)tint);
+					    __c_fakep(tint));
 	if (ret)
 		return ret;
 
