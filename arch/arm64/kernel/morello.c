@@ -5,10 +5,9 @@
 
 #define pr_fmt(fmt) "morello: " fmt
 
-#include <cheriintrin.h>
-
 #include <linux/cache.h>
 #include <linux/capability.h>
+#include <linux/cheri.h>
 #include <linux/compat.h>
 #include <linux/mm.h>
 #include <linux/printk.h>
@@ -20,10 +19,6 @@
 #include <asm/cpufeature.h>
 #include <asm/morello.h>
 #include <asm/ptrace.h>
-
-#ifdef CONFIG_CHERI_PURECAP_UABI
-#include <cheriintrin.h>
-#endif
 
 /* Private functions implemented in morello.S */
 void __morello_cap_lo_hi_tag(uintcap_t cap, u64 *lo_val, u64 *hi_val,
@@ -40,6 +35,8 @@ static uintcap_t morello_sentry_unsealcap __ro_after_init;
 /* DDC_ELx reset value (low/high 64 bits), as defined in the Morello spec */
 #define DDC_RESET_VAL_LOW_64	0x0
 #define DDC_RESET_VAL_HIGH_64	0xffffc00000010005ULL
+
+#define CAP_OTYPE_FIELD_BITS	15
 
 uintcap_t morello_get_root_cap(void)
 {
@@ -293,8 +290,8 @@ static void __init check_root_cap(uintcap_t cap)
 	__morello_cap_lo_hi_tag(cap, &lo_val, &hi_val, &tag);
 
 	/*
-	 * Check that DDC has the reset value, otherwise morello_root_cap and
-	 * all capabilities derived from it (especially those exposed to
+	 * Check that DDC has the reset value, otherwise root capabilities and
+	 * all capabilities derived from them (notably those exposed to
 	 * userspace) may not be reliable.
 	 */
 	if (!(tag == 1 &&
@@ -303,22 +300,62 @@ static void __init check_root_cap(uintcap_t cap)
 		pr_warn("DDC does not have its reset value, this may be a firmware bug\n");
 }
 
+#define __build_cap(root, perms, length, ...)				\
+({									\
+	uintcap_t c = (root);						\
+	size_t len = (length);						\
+									\
+	c = cheri_perms_and(c, (perms));				\
+	if (len)							\
+		c = cheri_bounds_set(c, len);				\
+									\
+	c;								\
+})
+#define build_cap(root, perms, ...) __build_cap((root), (perms), ##__VA_ARGS__, 0)
+
 static int __init morello_cap_init(void)
 {
-#ifdef CONFIG_CHERI_PURECAP_UABI
-	uintcap_t ctemp;
-#endif
+	uintcap_t root_cap;
+	cheri_perms_t perms;
 
-	morello_root_cap = (uintcap_t)cheri_ddc_get();
+	root_cap = (uintcap_t)cheri_ddc_get();
+	check_root_cap(root_cap);
 
-	check_root_cap(morello_root_cap);
+	/* Initialise standard CHERI root capabilities. */
+
+	perms = CHERI_PERMS_ROOTCAP |
+		CHERI_PERMS_READ | CHERI_PERMS_WRITE | CHERI_PERMS_EXEC |
+		ARM_CAP_PERMISSION_BRANCH_SEALED_PAIR |
+		CHERI_PERM_SEAL | CHERI_PERM_UNSEAL |
+		ARM_CAP_PERMISSION_COMPARTMENT_ID;
+	/* Same upper limit as for access_ok() and __uaccess_mask_ptr() */
+	cheri_user_root_allperms_cap = build_cap(root_cap, perms, TASK_SIZE_MAX);
+
+	perms = CHERI_PERMS_ROOTCAP |
+		CHERI_PERMS_READ | CHERI_PERMS_WRITE | CHERI_PERMS_EXEC |
+		ARM_CAP_PERMISSION_BRANCH_SEALED_PAIR;
+	cheri_user_root_cap = build_cap(cheri_user_root_allperms_cap, perms);
+
+	perms = CHERI_PERM_GLOBAL | CHERI_PERM_SEAL | CHERI_PERM_UNSEAL;
+	/*
+	 * Includes all object types, not a final decision - some of them may
+	 * be later reserved to the kernel.
+	 */
+	cheri_user_root_seal_cap = build_cap(cheri_user_root_allperms_cap,
+					     perms, 1u << CAP_OTYPE_FIELD_BITS);
+
+	perms = CHERI_PERM_GLOBAL | ARM_CAP_PERMISSION_COMPARTMENT_ID;
+	/* Maximum userspace bounds for the time being. */
+	cheri_user_root_cid_cap = build_cap(cheri_user_root_allperms_cap, perms);
+
+	/* Initialise Morello-specific root capabilities. */
+	morello_root_cap = root_cap;
 
 #ifdef CONFIG_CHERI_PURECAP_UABI
 	/* Initialize a capability able to unseal sentry capabilities. */
-	ctemp = cheri_address_set(morello_root_cap, CHERI_OTYPE_SENTRY);
-	ctemp = cheri_bounds_set(ctemp, 1);
-	ctemp = cheri_perms_and(ctemp, CHERI_PERM_GLOBAL | CHERI_PERM_UNSEAL);
-	morello_sentry_unsealcap = ctemp;
+	perms = CHERI_PERM_GLOBAL | CHERI_PERM_UNSEAL;
+	morello_sentry_unsealcap = cheri_address_set(root_cap, CHERI_OTYPE_SENTRY);
+	morello_sentry_unsealcap = build_cap(morello_sentry_unsealcap, perms, 1);
 #endif
 
 	return 0;
