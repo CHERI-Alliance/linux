@@ -182,7 +182,7 @@ enum sprd_dma_int_type {
  * configuration, and pass the virtual and physical address to DMA controller.
  */
 struct sprd_dma_linklist {
-	unsigned long virt_addr;
+	uintptr_t virt_addr;
 	phys_addr_t phy_addr;
 	phys_addr_t wrap_addr;
 };
