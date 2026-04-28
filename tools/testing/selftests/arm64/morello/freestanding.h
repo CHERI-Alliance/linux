@@ -18,6 +18,8 @@ typedef __kernel_mqd_t mqd_t;
 typedef __kernel_timer_t timer_t;
 typedef __kernel_clockid_t clockid_t;
 
+#define EXIT_SUCCESS 0
+
 struct __test_meta {
 	int message;
 };
