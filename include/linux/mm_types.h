@@ -898,6 +898,12 @@ struct vm_area_desc {
 	struct mmap_action action;
 };
 
+struct reserv_struct {
+	ptraddr_t start;
+	size_t len;
+	user_ptr_perms_t perms;
+};
+
 /*
  * This struct describes a virtual memory area. There is one of these
  * per VM-area/task. A VM area is any part of the process virtual memory
@@ -1052,6 +1058,9 @@ struct vm_area_struct {
 	struct vm_userfaultfd_ctx vm_userfaultfd_ctx;
 #ifdef __HAVE_PFNMAP_TRACKING
 	struct pfnmap_track_ctx *pfnmap_track_ctx;
+#endif
+#ifdef CONFIG_CHERI_PURECAP_UABI
+	struct reserv_struct reserv_data;
 #endif
 } __randomize_layout;
 
