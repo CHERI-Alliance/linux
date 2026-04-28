@@ -71,10 +71,10 @@ void trace_syscall_exit(struct pt_regs *regs, long ret);
 static inline void syscall_enter_audit(struct pt_regs *regs, long syscall)
 {
 	if (unlikely(audit_context())) {
-		unsigned long args[6];
+		uintptr_t args[6];
 
 		syscall_get_arguments(current, regs, args);
-		audit_syscall_entry(syscall, args[0], args[1], args[2], args[3]);
+		audit_syscall_entry(syscall, __c_ua(args[0]), __c_ua(args[1]), __c_ua(args[2]), __c_ua(args[3]));
 	}
 }
 
