@@ -3458,7 +3458,7 @@ static int compat_sock_ioctl_trans(struct file *file, struct socket *sock,
 	case SIOCGIFCONF:
 	case SIOCSIFBR:
 	case SIOCGIFBR:
-		return sock_ioctl(file, cmd, arg);
+		return sock_ioctl(file, cmd, (user_uintptr_t)argp);
 
 	case SIOCGIFFLAGS:
 	case SIOCSIFFLAGS:
@@ -3504,7 +3504,7 @@ static int compat_sock_ioctl_trans(struct file *file, struct socket *sock,
 	case SIOCOUTQ:
 	case SIOCOUTQNSD:
 	case SIOCATMARK:
-		return sock_do_ioctl(net, sock, cmd, arg);
+		return sock_do_ioctl(net, sock, cmd, (user_uintptr_t)argp);
 	}
 
 	return -ENOIOCTLCMD;
