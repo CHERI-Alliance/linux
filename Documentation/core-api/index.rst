@@ -57,6 +57,7 @@ Library functionality that is used throughout the kernel.
    min_heap
    parser
    list
+   user_ptr
 
 Low level entry and exit
 ========================
