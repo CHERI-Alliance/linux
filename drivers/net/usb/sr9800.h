@@ -188,7 +188,7 @@ struct sr_data {
 	u8 phymode;
 	u8 ledmode;
 	u8 eeprom_len;
-};
+} __cheri_pointer_align;
 
 struct sr9800_int_data {
 	__le16 res1;

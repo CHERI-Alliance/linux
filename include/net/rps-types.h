@@ -5,7 +5,7 @@
 /* Define a rps_tag_ptr:
  * Low order 5 bits are used to store the ilog2(size) of an RPS table.
  */
-typedef unsigned long rps_tag_ptr;
+typedef uintptr_t rps_tag_ptr;
 
 static inline u8 rps_tag_to_log(rps_tag_ptr tag_ptr)
 {

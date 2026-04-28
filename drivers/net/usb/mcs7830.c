@@ -102,7 +102,7 @@ enum {
 struct mcs7830_data {
 	u8 multi_filter[8];
 	u8 config;
-};
+} __cheri_pointer_align;
 
 static const char driver_name[] = "MOSCHIP usb-ethernet driver";
 

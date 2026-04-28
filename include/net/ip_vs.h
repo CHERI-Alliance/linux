@@ -20,6 +20,7 @@
 #include <linux/compiler.h>
 #include <linux/timer.h>
 #include <linux/bug.h>
+#include <linux/cheri.h>		/* for __packed_if_not_cheri */
 
 #include <net/checksum.h>
 #include <linux/netfilter.h>		/* for union nf_inet_addr */
@@ -792,7 +793,7 @@ struct ip_vs_conn_hnode {
 	struct hlist_bl_node	node;		/* node in conn_tab */
 	u32			hash_key;	/* Key for the hash table */
 	u8			dir;		/* 0=out->in, 1=in->out */
-} __packed;
+} __packed_if_not_cheri;
 
 /* IP_VS structure allocated for each dynamically scheduled connection */
 struct ip_vs_conn {
