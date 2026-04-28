@@ -21,6 +21,7 @@ void asm_offsets(void);
 
 void asm_offsets(void)
 {
+	DEFINE(TASK_STRUCT_SIZE, sizeof(struct task_struct));
 	OFFSET(TASK_THREAD_RA, task_struct, thread.ra);
 	OFFSET(TASK_THREAD_SP, task_struct, thread.sp);
 	OFFSET(TASK_THREAD_S0, task_struct, thread.s[0]);
@@ -130,6 +131,9 @@ void asm_offsets(void)
 	OFFSET(PT_STATUS, pt_regs, status);
 	OFFSET(PT_BADADDR, pt_regs, badaddr);
 	OFFSET(PT_CAUSE, pt_regs, cause);
+#ifdef CONFIG_CHERI_KERNEL
+	OFFSET(PT_DDC, pt_regs, ddc);
+#endif
 
 	OFFSET(SUSPEND_CONTEXT_REGS, suspend_context, regs);
 
@@ -499,6 +503,9 @@ void asm_offsets(void)
 	OFFSET(KERNEL_MAP_VIRT_ADDR, kernel_mapping, virt_addr);
 	OFFSET(SBI_HART_BOOT_TASK_PTR_OFFSET, sbi_hart_boot_data, task_ptr);
 	OFFSET(SBI_HART_BOOT_STACK_PTR_OFFSET, sbi_hart_boot_data, stack_ptr);
+#ifdef CONFIG_CHERI_KERNEL
+	OFFSET(SBI_HART_BOOT_KERNEL_CODE_CAP_OFFSET, sbi_hart_boot_data, kernel_code_cap);
+#endif
 
 	DEFINE(STACKFRAME_SIZE_ON_STACK, ALIGN(sizeof(struct stackframe), STACK_ALIGN));
 	OFFSET(STACKFRAME_FP, stackframe, fp);
