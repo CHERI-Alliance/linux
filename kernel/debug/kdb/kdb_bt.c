@@ -75,8 +75,8 @@ kdb_bt1(struct task_struct *p, const char *mask, bool btaprompt)
 {
 	char ch;
 
-	if (kdb_getarea(ch, (uintptr_t)p) ||
-	    kdb_getarea(ch, (uintptr_t)(p+1)-1))
+	if (kdb_getarea(ch, __c_pa(p)) ||
+	    kdb_getarea(ch, __c_pa(p+1)-1))
 		return KDB_BADADDR;
 	if (!kdb_task_state(p, mask))
 		return 0;
@@ -173,7 +173,9 @@ kdb_bt(int argc, const char **argv)
 		diag = kdbgetularg((char *)argv[1], &addr);
 		if (diag)
 			return diag;
-		return kdb_bt1((struct task_struct *)addr, "A", false);
+		return kdb_bt1((struct task_struct *)
+			cheri_make_kernel_data_cap(addr, sizeof(struct task_struct)),
+			"A", false);
 	} else if (strcmp(argv[0], "btc") == 0) {
 		unsigned long cpu = ~0;
 		if (argc > 1)
@@ -206,7 +208,8 @@ kdb_bt(int argc, const char **argv)
 					     &offset, NULL);
 			if (diag)
 				return diag;
-			kdb_show_stack(kdb_current_task, (void *)addr);
+			kdb_show_stack(kdb_current_task, kdb_current_task +
+				       (__c_pa(kdb_current_task->stack) - addr));
 			return 0;
 		} else {
 			return kdb_bt1(kdb_current_task, "A", false);

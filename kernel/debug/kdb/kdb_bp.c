@@ -105,7 +105,7 @@ static int _kdb_bp_remove(kdb_bp_t *bp)
 static void kdb_handle_bp(struct pt_regs *regs, kdb_bp_t *bp)
 {
 	if (KDB_DEBUG(BP))
-		kdb_printf("regs->ip = 0x%lx\n", instruction_pointer(regs));
+		kdb_printf("regs->ip = 0x%lx\n", (unsigned long)instruction_pointer(regs));
 
 	/*
 	 * Setup single step

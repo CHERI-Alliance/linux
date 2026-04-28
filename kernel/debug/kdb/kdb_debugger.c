@@ -64,7 +64,7 @@ int kdb_stub(struct kgdb_state *ks)
 	if (KDB_STATE(REENTRY)) {
 		reason = KDB_REASON_SWITCH;
 		KDB_STATE_CLEAR(REENTRY);
-		addr = instruction_pointer(ks->linux_regs);
+		addr = __c_ua(instruction_pointer(ks->linux_regs));
 	}
 	ks->pass_exception = 0;
 	if (atomic_read(&kgdb_setting_breakpoint))

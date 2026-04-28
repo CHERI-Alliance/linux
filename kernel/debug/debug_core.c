@@ -187,7 +187,7 @@ int __weak kgdb_validate_break_address(unsigned long addr)
 	 * are deep trouble not being able to put things back the way we
 	 * found them.
 	 */
-	tmp.bpt_addr = addr;
+	tmp.bpt_addr = (uintptr_t)cheri_make_kernel_data_cap(addr, BREAK_INSTR_SIZE);;
 	err = kgdb_arch_set_breakpoint(&tmp);
 	if (err)
 		return err;
@@ -200,7 +200,7 @@ int __weak kgdb_validate_break_address(unsigned long addr)
 
 unsigned long __weak kgdb_arch_pc(int exception, struct pt_regs *regs)
 {
-	return instruction_pointer(regs);
+	return __c_ua(instruction_pointer(regs));
 }
 NOKPROBE_SYMBOL(kgdb_arch_pc);
 
@@ -277,7 +277,7 @@ NOKPROBE_SYMBOL(kgdb_roundup_cpus);
  * Some architectures need cache flushes when we set/clear a
  * breakpoint:
  */
-static void kgdb_flush_swbreak_addr(unsigned long addr)
+static void kgdb_flush_swbreak_addr(uintptr_t addr)
 {
 	if (!CACHE_FLUSH_IS_SAFE)
 		return;
@@ -304,7 +304,7 @@ int dbg_activate_sw_breakpoints(void)
 		if (error) {
 			ret = error;
 			pr_info("BP install failed: %lx\n",
-				kgdb_break[i].bpt_addr);
+				(unsigned long)kgdb_break[i].bpt_addr);
 			continue;
 		}
 
@@ -351,7 +351,7 @@ int dbg_set_sw_break(unsigned long addr)
 
 	kgdb_break[breakno].state = BP_SET;
 	kgdb_break[breakno].type = BP_BREAKPOINT;
-	kgdb_break[breakno].bpt_addr = addr;
+	kgdb_break[breakno].bpt_addr = (uintptr_t)cheri_make_kernel_data_cap(addr, BREAK_INSTR_SIZE);
 
 	return 0;
 }
@@ -368,7 +368,7 @@ int dbg_deactivate_sw_breakpoints(void)
 		error = kgdb_arch_remove_breakpoint(&kgdb_break[i]);
 		if (error) {
 			pr_info("BP remove failed: %lx\n",
-				kgdb_break[i].bpt_addr);
+				(unsigned long)kgdb_break[i].bpt_addr);
 			ret = error;
 		}
 
@@ -429,7 +429,7 @@ int dbg_remove_all_break(void)
 		error = kgdb_arch_remove_breakpoint(&kgdb_break[i]);
 		if (error)
 			pr_err("breakpoint remove failed: %lx\n",
-			       kgdb_break[i].bpt_addr);
+			       (unsigned long)kgdb_break[i].bpt_addr);
 setundefined:
 		kgdb_break[i].state = BP_UNDEFINED;
 	}
