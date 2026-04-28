@@ -1122,13 +1122,13 @@ long compat_put_bitmap(compat_ulong_t __user *umask, unsigned long *mask,
 #ifndef compat_ptr
 static inline void __user *compat_ptr(compat_uptr_t uptr)
 {
-	return (void __user *)(uintptr_t)uptr;
+	return uaddr_to_user_ptr(uptr);
 }
 #endif
 
 static inline compat_uptr_t ptr_to_compat(void __user *uptr)
 {
-	return (u32)(user_uintptr_t)uptr;
+	return user_ptr_addr(uptr);
 }
 
 static __always_inline __maybe_unused unsigned long
