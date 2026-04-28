@@ -92,6 +92,7 @@ struct linux_binfmt {
 	int (*load_binary)(struct linux_binprm *);
 #ifdef CONFIG_COREDUMP
 	int (*core_dump)(struct coredump_params *cprm);
+	int (*auxv_size)(struct mm_struct *mm);
 	unsigned long min_coredump;	/* minimal dump size */
 #endif
 } __randomize_layout;

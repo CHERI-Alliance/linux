@@ -79,6 +79,8 @@ static int elf_core_dump(struct coredump_params *cprm);
 #define elf_core_dump	NULL
 #endif
 
+static int elf_auxv_size(struct mm_struct *mm);
+
 #if ELF_EXEC_PAGESIZE > PAGE_SIZE
 #define ELF_MIN_ALIGN	ELF_EXEC_PAGESIZE
 #else
@@ -98,6 +100,7 @@ static struct linux_binfmt elf_format = {
 	.load_binary	= load_elf_binary,
 #ifdef CONFIG_COREDUMP
 	.core_dump	= elf_core_dump,
+	.auxv_size	= elf_auxv_size,
 	.min_coredump	= ELF_EXEC_PAGESIZE,
 #endif
 };
@@ -1567,12 +1570,7 @@ static int fill_psinfo(struct elf_prpsinfo *psinfo, struct task_struct *p,
 
 static void fill_auxv_note(struct memelfnote *note, struct mm_struct *mm)
 {
-	elf_stack_item_t *auxv = (elf_stack_item_t *) mm->saved_auxv;
-	int i = 0;
-	do
-		i += 2;
-	while (auxv[i - 2] != AT_NULL);
-	fill_note(note, AUXV, i * sizeof(elf_stack_item_t), auxv);
+	fill_note(note, AUXV, elf_auxv_size(mm), mm->saved_auxv);
 }
 
 static void fill_siginfo_note(struct memelfnote *note, user_siginfo_t *csigdata,
@@ -2129,6 +2127,19 @@ end_coredump:
 }
 
 #endif		/* CONFIG_ELF_CORE */
+
+
+static int elf_auxv_size(struct mm_struct *mm)
+{
+	elf_stack_item_t *auxv = (elf_stack_item_t *) mm->saved_auxv;
+	int nitems = 0;
+
+	do {
+		nitems += 2;
+	} while (auxv[nitems - 2] != AT_NULL);
+
+	return nitems * sizeof(elf_stack_item_t);
+}
 
 static int __init init_elf_binfmt(void)
 {
