@@ -36,6 +36,7 @@
 #include <asm/fpsimd.h>
 #include <asm/gcs.h>
 #include <asm/mte.h>
+#include <asm/morello.h>
 #include <asm/pointer_auth.h>
 #include <asm/stacktrace.h>
 #include <asm/syscall.h>
@@ -1574,6 +1575,84 @@ static int gcs_set(struct task_struct *target, const struct
 }
 #endif
 
+#ifdef CONFIG_ARM64_MORELLO
+static int morello_active(struct task_struct *target,
+			  const struct user_regset *regset)
+{
+	if (!system_supports_morello())
+		return -ENODEV;
+	return regset->n;
+}
+
+#define MORELLO_STATE_COPY_VAL_TAG(out, reg, cap) do {			\
+	u8 tag;								\
+	morello_cap_get_val_tag(&cap, &out.reg, &tag);			\
+	out.tag_map |= (__u64)tag << MORELLO_PT_TAG_MAP_REG_BIT(reg);	\
+} while (0)
+
+static int morello_get(struct task_struct *target,
+		       const struct user_regset *regset,
+		       struct membuf to)
+{
+	struct pt_regs *regs = task_pt_regs(target);
+	const struct morello_state *morello_state =
+		&target->thread.morello_user_state;
+	struct user_morello_state out;
+	int i;
+
+	if (!system_supports_morello())
+		return -EINVAL;
+
+	/*
+	 * Make sure tag_map is big enough to fit all the capability register
+	 * tags (assuming tag_map immediately follows the last capability
+	 * register in struct user_morello_state).
+	 */
+	BUILD_BUG_ON(MORELLO_PT_TAG_MAP_REG_BIT(tag_map) >
+		     sizeof_field(struct user_morello_state, tag_map) * 8);
+
+	/*
+	 * The target's 64-bit registers may have been modified (e.g. through
+	 * gpr_set()) since the last time the target was scheduled.
+	 * Perform the standard 64-bit / capability register merging to ensure
+	 * that both views are consistent.
+	 */
+	morello_merge_cap_regs(regs);
+
+	/*
+	 * If we are dumping current, the registers stored in morello_state may
+	 * be out of sync. To avoid dumping stale values, flush the actual
+	 * register values back to current's thread_struct before reading it.
+	 */
+	if (target == current) {
+		/* This takes care of (R)CTPIDR */
+		tls_preserve_current_state();
+		/* This takes care of the rest of morello_state */
+		morello_thread_save_user_state(current);
+	}
+
+	out.tag_map = 0;
+
+	for (i = 0; i < ARRAY_SIZE(regs->cregs); i++)
+		MORELLO_STATE_COPY_VAL_TAG(out, cregs[i], regs->cregs[i]);
+	MORELLO_STATE_COPY_VAL_TAG(out, pcc, regs->pcc);
+
+	MORELLO_STATE_COPY_VAL_TAG(out, csp, regs->csp);
+	MORELLO_STATE_COPY_VAL_TAG(out, ddc, morello_state->ddc);
+	MORELLO_STATE_COPY_VAL_TAG(out, ctpidr, morello_state->ctpidr);
+
+	MORELLO_STATE_COPY_VAL_TAG(out, rcsp, regs->rcsp);
+	MORELLO_STATE_COPY_VAL_TAG(out, rddc, morello_state->rddc);
+	MORELLO_STATE_COPY_VAL_TAG(out, rctpidr, morello_state->rctpidr);
+
+	MORELLO_STATE_COPY_VAL_TAG(out, cid, morello_state->cid);
+
+	out.cctlr = morello_state->cctlr;
+
+	return membuf_write(&to, &out, sizeof(out));
+}
+#endif /* CONFIG_ARM64_MORELLO */
+
 enum aarch64_regset {
 	REGSET_GPR,
 	REGSET_FPR,
@@ -1608,6 +1687,9 @@ enum aarch64_regset {
 #endif
 #ifdef CONFIG_ARM64_GCS
 	REGSET_GCS,
+#endif
+#ifdef CONFIG_ARM64_MORELLO
+	REGSET_MORELLO,
 #endif
 };
 
@@ -1786,6 +1868,16 @@ static const struct user_regset aarch64_regsets[] = {
 		.align = sizeof(u64),
 		.regset_get = gcs_get,
 		.set = gcs_set,
+	}
+#endif
+#ifdef CONFIG_ARM64_MORELLO
+	[REGSET_MORELLO] = {
+		.core_note_type = NT_ARM_MORELLO,
+		.n = sizeof(struct user_morello_state) / sizeof(__uint128_t),
+		.size = sizeof(__uint128_t),
+		.align = sizeof(__uint128_t),
+		.active = morello_active,
+		.regset_get = morello_get,
 	},
 #endif
 };

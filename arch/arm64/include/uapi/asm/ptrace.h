@@ -333,6 +333,37 @@ struct user_gcs {
 	__u64 gcspr_el0;
 };
 
+/* Morello registers (NT_ARM_MORELLO) */
+
+#define MORELLO_PT_TAG_MAP_REG_BIT(reg)	\
+	(offsetof(struct user_morello_state, reg) / sizeof(__uint128_t))
+#define MORELLO_PT_TAG_MAP_REG_MASK(reg)	\
+	_BITUL(MORELLO_PT_TAG_MAP_REG_BIT(reg))
+
+struct user_morello_state {
+	/* Capability GPRs and PCC */
+	__uint128_t	cregs[31];
+	__uint128_t	pcc;
+	/* Executive capability registers */
+	__uint128_t	csp;
+	__uint128_t	ddc;
+	__uint128_t	ctpidr;
+	/* Restricted capability registers */
+	__uint128_t	rcsp;
+	__uint128_t	rddc;
+	__uint128_t	rctpidr;
+	/* Compartment ID register */
+	__uint128_t	cid;
+	/*
+	 * Bitmap storing the tags of all the capability registers.
+	 * The tag for register <reg> is stored at bit index
+	 * MORELLO_PT_TAG_MAP_REG_BIT(<reg>) in tag_map.
+	 */
+	__u64		tag_map;
+	/* Capability control register */
+	__u64		cctlr;
+};
+
 #endif /* __ASSEMBLER__ */
 
 #endif /* _UAPI__ASM_PTRACE_H */
