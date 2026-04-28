@@ -2348,12 +2348,16 @@ int pskb_expand_head(struct sk_buff *skb, int nhead, int ntail,
 	skb->head     = data;
 	skb->head_frag = 0;
 	skb->data    += off;
+	cheri_fixup_bounds(data, skb->data);
 
 	skb_set_end_offset(skb, size);
 #ifdef NET_SKBUFF_DATA_USES_OFFSET
 	off           = nhead;
 #endif
 	skb->tail	      += off;
+#ifndef NET_SKBUFF_DATA_USES_OFFSET
+	cheri_fixup_bounds(data, skb->tail);
+#endif
 	skb_headers_offset_update(skb, nhead);
 	skb->cloned   = 0;
 	skb->hdr_len  = 0;
