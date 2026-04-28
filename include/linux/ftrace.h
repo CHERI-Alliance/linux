@@ -1362,7 +1362,7 @@ static inline void ftrace_graph_init_idle_task(struct task_struct *t, int cpu) {
 
 static inline unsigned long
 ftrace_graph_ret_addr(struct task_struct *task, int *idx, unsigned long ret,
-		      unsigned long *retp)
+		      uintptr_t *retp)
 {
 	return ret;
 }
