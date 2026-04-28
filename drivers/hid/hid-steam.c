@@ -1238,7 +1238,7 @@ static int steam_probe(struct hid_device *hdev,
 	hid_set_drvdata(hdev, steam);
 	spin_lock_init(&steam->lock);
 	mutex_init(&steam->report_mutex);
-	steam->quirks = id->driver_data;
+	steam->quirks = __c_ua(id->driver_data);
 	INIT_WORK(&steam->work_connect, steam_work_connect_cb);
 	INIT_DELAYED_WORK(&steam->mode_switch, steam_mode_switch_cb);
 	INIT_LIST_HEAD(&steam->list);
