@@ -62,11 +62,11 @@ static int ivtv_yuv_prep_user_dma(struct ivtv *itv, struct ivtv_user_dma *dma,
 	ivtv_udma_get_page_info (&uv_dma, (user_uintptr_t)args->uv_source, 360 * uv_decode_height);
 
 	/* Pin user pages for DMA Xfer */
-	y_pages = pin_user_pages_unlocked(y_dma.uaddr,
+	y_pages = pin_user_pages_unlocked(__c_ua(y_dma.uaddr),
 			y_dma.page_count, &dma->map[0], 0);
 	uv_pages = 0; /* silence gcc. value is set and consumed only if: */
 	if (y_pages == y_dma.page_count) {
-		uv_pages = pin_user_pages_unlocked(uv_dma.uaddr,
+		uv_pages = pin_user_pages_unlocked(__c_ua(uv_dma.uaddr),
 				uv_dma.page_count, &dma->map[y_pages], 0);
 	}
 

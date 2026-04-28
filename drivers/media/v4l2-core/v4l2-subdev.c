@@ -1196,7 +1196,7 @@ static long subdev_compat_ioctl32(struct file *file, unsigned int cmd,
 
 #else /* CONFIG_VIDEO_V4L2_SUBDEV_API */
 static long subdev_ioctl(struct file *file, unsigned int cmd,
-			 unsigned long arg)
+			 user_uintptr_t arg)
 {
 	return -ENODEV;
 }

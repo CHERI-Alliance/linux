@@ -418,7 +418,7 @@ static inline u32 to_codec_addr(struct allegro_dev *dev, dma_addr_t phys)
 
 static inline u64 ptr_to_u64(const void *ptr)
 {
-	return (uintptr_t)ptr;
+	return __c_pa(ptr);
 }
 
 /* Helper functions for channel and user operations */

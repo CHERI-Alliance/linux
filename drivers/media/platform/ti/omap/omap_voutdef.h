@@ -160,7 +160,7 @@ struct omap_vout_device {
 
 	struct vid_vrfb_dma vrfb_dma_tx;
 	unsigned int smsshado_phy_addr[MAC_VRFB_CTXS];
-	unsigned int smsshado_virt_addr[MAC_VRFB_CTXS];
+	uintptr_t smsshado_virt_addr[MAC_VRFB_CTXS];
 	struct vrfb vrfb_context[MAC_VRFB_CTXS];
 	bool vrfb_static_allocation;
 	unsigned int smsshado_size;

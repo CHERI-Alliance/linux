@@ -44,7 +44,7 @@ void rkvdec_free_rcb(struct rkvdec_ctx *ctx)
 {
 	struct rkvdec_dev *dev = ctx->dev;
 	struct rkvdec_rcb_config *cfg = ctx->rcb_config;
-	unsigned long virt_addr;
+	uintptr_t virt_addr;
 	int i;
 
 	if (!cfg)
@@ -61,7 +61,7 @@ void rkvdec_free_rcb(struct rkvdec_ctx *ctx)
 			virt_addr = (uintptr_t)cfg->rcb_bufs[i].cpu;
 
 			if (dev->iommu_domain)
-				iommu_unmap(dev->iommu_domain, virt_addr, rcb_size);
+				iommu_unmap(dev->iommu_domain, __c_ua(virt_addr), rcb_size);
 			gen_pool_free(dev->sram_pool, virt_addr, rcb_size);
 			break;
 		case RKVDEC_ALLOC_DMA:
@@ -127,7 +127,7 @@ int rkvdec_allocate_rcb(struct rkvdec_ctx *ctx,
 
 		/* If an IOMMU is used, map the SRAM address through it */
 		if (cpu && rkvdec->iommu_domain) {
-			uintptr_t virt_addr = (uintptr_t)cpu;
+			unsigned long virt_addr = __c_pa(cpu);
 			phys_addr_t phys_addr = dma;
 
 			ret = iommu_map(rkvdec->iommu_domain, virt_addr, phys_addr,
