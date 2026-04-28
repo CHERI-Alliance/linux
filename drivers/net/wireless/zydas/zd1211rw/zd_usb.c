@@ -1036,7 +1036,7 @@ int zd_usb_tx(struct zd_usb *usb, struct sk_buff *skb)
 	usb_fill_bulk_urb(urb, udev, usb_sndbulkpipe(udev, EP_DATA_OUT),
 		          skb->data, skb->len, tx_urb_complete, skb);
 
-	info->rate_driver_data[1] = (void *)jiffies;
+	info->rate_driver_data[1] = __c_fakep(jiffies);
 	skb_queue_tail(&tx->submitted_skbs, skb);
 	usb_anchor_urb(urb, &tx->submitted);
 
@@ -1067,7 +1067,7 @@ static bool zd_tx_timeout(struct zd_usb *usb)
 	spin_lock_irqsave(&q->lock, flags);
 	skb_queue_walk_safe(q, skb, skbnext) {
 		info = IEEE80211_SKB_CB(skb);
-		trans_start = (uintptr_t)info->rate_driver_data[1];
+		trans_start = __c_pa(info->rate_driver_data[1]);
 
 		if (time_is_before_jiffies(trans_start + ZD_TX_TIMEOUT)) {
 			have_timedout = true;
@@ -1140,8 +1140,9 @@ static void zd_rx_idle_timer_handler(struct work_struct *work)
 	zd_usb_reset_rx(usb);
 }
 
-static void zd_usb_reset_rx_idle_timer_tasklet(struct tasklet_struct *t)
+static void zd_usb_reset_rx_idle_timer_tasklet(uintptr_t data)
 {
+	struct tasklet_struct *t = (struct tasklet_struct *)data;
 	struct zd_usb *usb = from_tasklet(usb, t, rx.reset_timer_tasklet);
 
 	zd_usb_reset_rx_idle_timer(usb);
@@ -1178,8 +1179,7 @@ static inline void init_usb_rx(struct zd_usb *usb)
 	}
 	ZD_ASSERT(rx->fragment_length == 0);
 	INIT_DELAYED_WORK(&rx->idle_work, zd_rx_idle_timer_handler);
-	rx->reset_timer_tasklet.func = (void (*))
-					zd_usb_reset_rx_idle_timer_tasklet;
+	rx->reset_timer_tasklet.func = zd_usb_reset_rx_idle_timer_tasklet;
 	rx->reset_timer_tasklet.data = (uintptr_t)&rx->reset_timer_tasklet;
 }
 
