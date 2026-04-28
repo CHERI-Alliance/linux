@@ -61,8 +61,7 @@ int btrfs_getxattr(const struct inode *inode, const char *name,
 	 * content of the xattr.  data_ptr points to the location in memory
 	 * where the data starts in the in memory leaf
 	 */
-	data_ptr = (uintptr_t)((char *)(di + 1) +
-				   btrfs_dir_name_len(leaf, di));
+	data_ptr = __c_pa((char *)(di + 1) + btrfs_dir_name_len(leaf, di));
 	read_extent_buffer(leaf, buffer, data_ptr,
 			   btrfs_dir_data_len(leaf, di));
 	return btrfs_dir_data_len(leaf, di);
@@ -190,7 +189,7 @@ int btrfs_setxattr(struct btrfs_trans_handle *trans, struct inode *inode,
 		ptr += btrfs_item_size(leaf, slot) - data_size;
 		di = (struct btrfs_dir_item *)ptr;
 		btrfs_set_dir_data_len(leaf, di, size);
-		data_ptr = ((uintptr_t)(di + 1)) + name_len;
+		data_ptr = __c_pa(di + 1) + name_len;
 		write_extent_buffer(leaf, value, data_ptr, size);
 	} else {
 		/*
@@ -310,7 +309,7 @@ ssize_t btrfs_listxattr(struct dentry *dentry, char *buffer, size_t size)
 			u16 name_len = btrfs_dir_name_len(leaf, di);
 			u16 data_len = btrfs_dir_data_len(leaf, di);
 			u32 this_len = sizeof(*di) + name_len + data_len;
-			uintptr_t name_ptr = (uintptr_t)(di + 1);
+			unsigned long name_ptr = __c_pa(di + 1);
 
 			total_size += name_len + 1;
 			/*
