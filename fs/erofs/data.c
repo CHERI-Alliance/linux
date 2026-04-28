@@ -245,7 +245,7 @@ void erofs_onlinefolio_init(struct folio *folio)
 
 void erofs_onlinefolio_split(struct folio *folio)
 {
-	atomic_inc((atomic_t *)&folio->private);
+	atomic_inc((atomic_t *)(void *)&folio->private);
 }
 
 void erofs_onlinefolio_end(struct folio *folio, int err, bool dirty)
@@ -253,11 +253,11 @@ void erofs_onlinefolio_end(struct folio *folio, int err, bool dirty)
 	int orig, v;
 
 	do {
-		orig = atomic_read((atomic_t *)&folio->private);
+		orig = atomic_read((atomic_t *)(void *)&folio->private);
 		DBG_BUGON(orig <= 0);
 		v = dirty << EROFS_ONLINEFOLIO_DIRTY;
 		v |= (orig - 1) | (!!err << EROFS_ONLINEFOLIO_EIO);
-	} while (atomic_cmpxchg((atomic_t *)&folio->private, orig, v) != orig);
+	} while (atomic_cmpxchg((atomic_t *)(void *)&folio->private, orig, v) != orig);
 
 	if (v & (BIT(EROFS_ONLINEFOLIO_DIRTY) - 1))
 		return;

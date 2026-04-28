@@ -147,7 +147,7 @@ static struct page *z_erofs_bvec_iter_end(struct z_erofs_bvec_iter *iter)
 
 static struct page *z_erofs_bvset_flip(struct z_erofs_bvec_iter *iter)
 {
-	uintptr_t base = (uintptr_t)((struct z_erofs_bvset *)0)->bvec;
+	unsigned long base = __c_pa(((struct z_erofs_bvset *)0)->bvec);
 	/* have to access nextpage in advance, otherwise it will be unmapped */
 	struct page *nextpage = iter->bvset->nextpage;
 	struct page *oldpage;
