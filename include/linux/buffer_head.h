@@ -174,7 +174,7 @@ static __always_inline int buffer_uptodate(const struct buffer_head *bh)
 
 static inline unsigned long bh_offset(const struct buffer_head *bh)
 {
-	return (uintptr_t)(bh)->b_data & (page_size(bh->b_page) - 1);
+	return __c_pa((bh)->b_data) & (page_size(bh->b_page) - 1);
 }
 
 /* If we *know* page->private refers to buffer_heads */
