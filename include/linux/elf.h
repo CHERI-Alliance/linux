@@ -63,8 +63,8 @@ extern Elf64_Dyn _DYNAMIC [];
 
 #define elf_stack_item_t			user_uintptr_t
 #define elf_uaddr_to_user_ptr(addr)		uaddr_to_user_ptr_safe(addr)
+#define elf_copy_to_user_stack(to, from, len)	copy_to_user_with_ptr(to, from, len)
 #ifdef CONFIG_CHERI_PURECAP_UABI
-#define elf_copy_to_user_stack(to, from, len)	copy_to_user_with_captags(to, from, len)
 #define elf_stack_put_user_ptr(val, ptr)			\
 		put_user_ptr(elf_uaddr_to_user_ptr(val),	\
 			     (void * __capability * __capability)ptr)
@@ -72,7 +72,6 @@ extern Elf64_Dyn _DYNAMIC [];
 		put_user_ptr(as_user_ptr(val),			\
 			     (void * __capability * __capability)ptr)
 #else
-#define elf_copy_to_user_stack(to, from, len)	copy_to_user(to, from, len)
 #define elf_stack_put_user_ptr(val, ptr)	put_user((elf_addr_t)val, ptr)
 #define elf_stack_put_user(val, ptr)		put_user(val, ptr)
 #endif
