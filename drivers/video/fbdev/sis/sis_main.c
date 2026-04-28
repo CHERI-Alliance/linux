@@ -6212,7 +6212,7 @@ error_3:	vfree(ivideo->bios_abase);
 	}
 
 	printk(KERN_INFO "sisfb: Video RAM at 0x%lx, mapped to 0x%lx, size %ldk\n",
-		ivideo->video_base, (unsigned long)ivideo->video_vbase, ivideo->video_size / 1024);
+		ivideo->video_base, __c_pa(ivideo->video_vbase), ivideo->video_size / 1024);
 
 	if(ivideo->video_offset) {
 		printk(KERN_INFO "sisfb: Viewport offset %ldk\n",
@@ -6220,7 +6220,7 @@ error_3:	vfree(ivideo->bios_abase);
 	}
 
 	printk(KERN_INFO "sisfb: MMIO at 0x%lx, mapped to 0x%lx, size %ldk\n",
-		ivideo->mmio_base, (unsigned long)ivideo->mmio_vbase, ivideo->mmio_size / 1024);
+		ivideo->mmio_base, __c_pa(ivideo->mmio_vbase), ivideo->mmio_size / 1024);
 
 
 	/* Determine the size of the command queue */

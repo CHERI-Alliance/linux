@@ -386,7 +386,7 @@ static struct au1100fb_panel known_lcd_panels[] =
  * for 32 bit configurations. Provide a stub for compile testing
  * on other platforms.
  */
-#define KSEG1ADDR(x) (x)
+#define KSEG1ADDR(x) __c_fakeu(x)
 #endif
 
 #define DRIVER_NAME "au1100fb"

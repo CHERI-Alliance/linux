@@ -201,12 +201,12 @@ static int atyfb_cursor(struct fb_info *info, struct fb_cursor *cursor)
 
 int aty_init_cursor(struct fb_info *info, struct fb_ops *atyfb_ops)
 {
-	unsigned long addr;
+	uintptr_t addr;
 
 	info->fix.smem_len -= PAGE_SIZE;
 
 #ifdef __sparc__
-	addr = (unsigned long) info->screen_base - 0x800000 + info->fix.smem_len;
+	addr = (uintptr_t) info->screen_base - 0x800000 + info->fix.smem_len;
 	info->sprite.addr = (u8 *) addr;
 #else
 #ifdef __BIG_ENDIAN

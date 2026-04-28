@@ -1865,7 +1865,7 @@ static int i810_allocate_pci_resource(struct i810fb_par *par,
 
 	if (!request_mem_region(par->aperture.physical,
 				par->aperture.size,
-				i810_pci_list[entry->driver_data])) {
+				i810_pci_list[__c_ua(entry->driver_data)])) {
 		dev_warn(&par->dev->dev, "cannot request framebuffer region\n");
 		return -ENODEV;
 	}
@@ -1880,7 +1880,7 @@ static int i810_allocate_pci_resource(struct i810fb_par *par,
 
 	if (!request_mem_region(par->mmio_start_phys,
 				MMIO_SIZE,
-				i810_pci_list[entry->driver_data])) {
+				i810_pci_list[__c_ua(entry->driver_data)])) {
 		dev_warn(&par->dev->dev, "cannot request mmio region\n");
 		return -ENODEV;
 	}
@@ -2089,7 +2089,7 @@ static int i810fb_init_pci(struct pci_dev *dev,
 		"Monitor     : H: %d-%d KHz V: %d-%d Hz\n"
 		"Mode        : %dx%d-%dbpp@%dHz\n",
 	       info->node,
-	       i810_pci_list[entry->driver_data],
+	       i810_pci_list[__c_ua(entry->driver_data)],
 	       VERSION_MAJOR, VERSION_MINOR, VERSION_TEENIE, BRANCH_VERSION,
 	       (int) par->fb.size>>10, info->monspecs.hfmin/1000,
 	       info->monspecs.hfmax/1000, info->monspecs.vfmin,

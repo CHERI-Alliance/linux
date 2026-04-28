@@ -1921,7 +1921,7 @@ static int aty128_init(struct pci_dev *pdev, const struct pci_device_id *ent)
 	else
 		printk("%dk %s\n", par->vram_size / 1024, par->mem->name);
 
-	par->chip_gen = ent->driver_data;
+	par->chip_gen = __c_ua(ent->driver_data);
 
 	/* fill in info */
 	info->fbops = &aty128fb_ops;

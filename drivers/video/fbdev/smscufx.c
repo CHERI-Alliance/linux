@@ -45,6 +45,14 @@
 #define USB_VENDOR_REQUEST_WRITE_REGISTER	0xA0
 #define USB_VENDOR_REQUEST_READ_REGISTER	0xA1
 
+/* FIXCHERI: Avoid use of cheri_make_kernel_data_cap() here. */
+#ifdef CONFIG_CHERI_KERNEL
+#define SMEM_TO_PTR(F) cheri_make_kernel_data_cap((F).smem_start,	\
+						    (F).smem_len)
+#else
+#define SMEM_TO_PTR(F) ((char *)(F).smem_start)
+#endif
+
 /*
  * TODO: Propose standard fb.h ioctl for reporting damage,
  * using _IOWR() and one of the existing area structs from fb.h
@@ -798,7 +806,7 @@ static int ufx_ops_mmap(struct fb_info *info, struct vm_area_struct *vma)
 		  pos, size);
 
 	while (size > 0) {
-		page = vmalloc_to_pfn((void *)pos);
+		page = vmalloc_to_pfn(__c_fakep(pos));
 		if (remap_pfn_range(vma, start, page, PAGE_SIZE, PAGE_SHARED))
 			return -EAGAIN;
 
@@ -848,7 +856,7 @@ static void ufx_raw_rect(struct ufx_data *dev, u16 *cmd, int x, int y,
 		const int line_offset = dev->info->fix.line_length * (y + line);
 		const int byte_offset = line_offset + (x * BPP);
 		memcpy(&cmd[(24 + (packed_line_len * line)) / 2],
-			(char *)dev->info->fix.smem_start + byte_offset, width * BPP);
+			SMEM_TO_PTR(dev->info->fix) + byte_offset, width * BPP);
 	}
 }
 
@@ -1290,7 +1298,7 @@ static int ufx_realloc_framebuffer(struct ufx_data *dev, struct fb_info *info)
 
 		info->screen_buffer = new_fb;
 		info->fix.smem_len = PAGE_ALIGN(new_len);
-		info->fix.smem_start = (uintptr_t) new_fb;
+		info->fix.smem_start = __c_pa(new_fb);
 		info->flags = smscufx_info_flags;
 	}
 	return 0;

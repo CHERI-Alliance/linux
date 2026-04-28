@@ -2570,7 +2570,7 @@ static void atafb_imageblit(struct fb_info *info, const struct fb_image *image)
 }
 
 static int
-atafb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg)
+atafb_ioctl(struct fb_info *info, unsigned int cmd, user_uintptr_t arg)
 {
 	switch (cmd) {
 #ifdef FBCMD_GET_CURRENTPAR
