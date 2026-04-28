@@ -81,6 +81,7 @@
 #define __arm64_compatentry_compat_sys_io_pgetevents		__arm64_compatentry_compat_sys_io_pgetevents_time64
 #define __arm64_compatentry_compat_sys_getitimer		__arm64_compatentry_sys_getitimer
 #define __arm64_compatentry_compat_sys_setitimer		__arm64_compatentry_sys_setitimer
+#define __arm64_compatentry_compat_sys_getrusage		__arm64_compatentry_sys_getrusage
 
 asmlinkage long sys_ni_syscall(void);
 
