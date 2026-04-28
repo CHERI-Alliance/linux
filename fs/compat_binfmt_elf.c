@@ -115,11 +115,6 @@
 #define	ELF_PLAT_INIT		COMPAT_ELF_PLAT_INIT
 #endif
 
-#ifdef	COMPAT_SET_PERSONALITY
-#undef	SET_PERSONALITY
-#define	SET_PERSONALITY		COMPAT_SET_PERSONALITY
-#endif
-
 #ifdef	compat_start_thread
 #define COMPAT_START_THREAD(ex, regs, new_ip, new_sp)	\
 	compat_start_thread(regs, new_ip, new_sp)
@@ -159,6 +154,11 @@
 #define binfmt_elf_test_suite	compat_binfmt_elf_test_suite
 
 #endif /* CONFIG_COMPAT32 */
+
+#ifdef	COMPAT_SET_PERSONALITY
+#undef	SET_PERSONALITY
+#define	SET_PERSONALITY		COMPAT_SET_PERSONALITY
+#endif
 
 /*
  * We share all the actual code with the native (64-bit) version.
