@@ -170,7 +170,7 @@ int scm_legacy_call(struct device *dev, const struct qcom_scm_desc *desc,
 	}
 
 	smc.args[0] = 1;
-	smc.args[1] = (uintptr_t)&context_id;
+	smc.args[1] = __c_pa(&context_id);
 	smc.args[2] = cmd_phys;
 
 	mutex_lock(&qcom_scm_lock);
@@ -232,7 +232,7 @@ int scm_legacy_call_atomic(struct device *unused,
 	BUG_ON(arglen > SCM_LEGACY_ATOMIC_N_REG_ARGS);
 
 	arm_smccc_smc(SCM_LEGACY_ATOMIC_ID(desc->svc, desc->cmd, arglen),
-		      (uintptr_t)&context_id,
+		      __c_pa(&context_id),
 		      desc->args[0], desc->args[1], desc->args[2],
 		      desc->args[3], desc->args[4], 0, &smc_res);
 
