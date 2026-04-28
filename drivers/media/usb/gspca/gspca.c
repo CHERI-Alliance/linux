@@ -424,7 +424,7 @@ void gspca_frame_add(struct gspca_dev *gspca_dev,
 		if (gspca_dev->image_len + len > PAGE_ALIGN(gspca_dev->pixfmt.sizeimage)) {
 			gspca_err(gspca_dev, "frame overflow %d > %d\n",
 				  gspca_dev->image_len + len,
-				  PAGE_ALIGN(gspca_dev->pixfmt.sizeimage));
+				  (unsigned int)PAGE_ALIGN(gspca_dev->pixfmt.sizeimage));
 			packet_type = DISCARD_PACKET;
 		} else {
 /* !! image is NULL only when last pkt is LAST or DISCARD

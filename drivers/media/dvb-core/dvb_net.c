@@ -1496,7 +1496,7 @@ static int dvb_net_do_ioctl(struct file *file,
 			ret = -EINVAL;
 			goto ioctl_error;
 		}
-		ret = dvb_net_remove_if(dvbnet, (uintptr_t) parg);
+		ret = dvb_net_remove_if(dvbnet, __c_pa(parg));
 		if (!ret)
 			module_put(dvbdev->adapter->module);
 		break;
