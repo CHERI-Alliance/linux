@@ -108,7 +108,14 @@ struct _xt_align {
 #define ADD_COUNTER(c,b,p) do { (c).bcnt += (b); (c).pcnt += (p); } while(0)
 
 struct xt_counters {
-	__u64 pcnt, bcnt;			/* Packet and byte counters */
+	union {
+		struct {
+			__u64 pcnt, bcnt;	/* Packet and byte counters */
+		};
+#ifdef __KERNEL__
+		void * percpu;
+#endif
+	};
 };
 
 /* The argument to IPT_SO_ADD_COUNTERS. */
