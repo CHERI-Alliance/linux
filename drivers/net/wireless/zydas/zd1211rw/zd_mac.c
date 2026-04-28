@@ -1214,7 +1214,7 @@ static uintptr_t zd_op_prepare_multicast(struct ieee80211_hw *hw,
 		zd_mc_add_addr(&hash, ha->addr);
 	}
 
-	return hash.low | ((u64)hash.high << 32);
+	return __c_fakeu(hash.low | ((u64)hash.high << 32));
 }
 
 #define SUPPORTED_FIF_FLAGS \
@@ -1226,8 +1226,8 @@ static void zd_op_configure_filter(struct ieee80211_hw *hw,
 			uintptr_t multicast)
 {
 	struct zd_mc_hash hash = {
-		.low = multicast,
-		.high = multicast >> 32,
+		.low = __c_ua(multicast),
+		.high = __c_ua(multicast) >> 32,
 	};
 	struct zd_mac *mac = zd_hw_mac(hw);
 	unsigned long flags;
