@@ -9,6 +9,7 @@
 #define __ASM_PTRACE_H
 
 #include <asm/cpufeature.h>
+#include <asm/morello.h>
 
 #include <uapi/asm/ptrace.h>
 
@@ -169,6 +170,11 @@ struct pt_regs {
 
 	u64 sdei_ttbr1;
 	struct frame_record_meta stackframe;
+
+#ifdef CONFIG_ARM64_MORELLO
+	cap128_t cregs[31];
+	cap128_t csp;
+#endif
 };
 
 /* For correct stack alignment, pt_regs has to be a multiple of 16 bytes. */

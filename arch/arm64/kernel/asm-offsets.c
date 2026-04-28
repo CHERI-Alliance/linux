@@ -78,6 +78,10 @@ int main(void)
   DEFINE(S_PMR,			offsetof(struct pt_regs, pmr));
   DEFINE(S_STACKFRAME,		offsetof(struct pt_regs, stackframe));
   DEFINE(S_STACKFRAME_TYPE,	offsetof(struct pt_regs, stackframe.type));
+#ifdef CONFIG_ARM64_MORELLO
+  DEFINE(S_CREGS,		offsetof(struct pt_regs, cregs));
+  DEFINE(S_CSP,			offsetof(struct pt_regs, csp));
+#endif
   DEFINE(PT_REGS_SIZE,		sizeof(struct pt_regs));
   BLANK();
 #ifdef CONFIG_DYNAMIC_FTRACE_WITH_ARGS
