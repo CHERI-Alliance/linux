@@ -636,7 +636,7 @@ static int smc_pnet_dump(struct sk_buff *skb, struct netlink_callback *cb)
 	int idx;
 
 	idx = _smc_pnet_dump(net, skb, NETLINK_CB(cb->skb).portid,
-			     cb->nlh->nlmsg_seq, NULL, cb->args[0]);
+			     cb->nlh->nlmsg_seq, NULL, __c_ua(cb->args[0]));
 
 	cb->args[0] = idx;
 	return skb->len;
