@@ -827,6 +827,28 @@ do {							\
 } while (0)
 #endif /* arch_unsafe_get_user */
 
+#ifdef arch_unsafe_get_user_ptr
+#define unsafe_get_user_ptr(x, ptr, label)		\
+do {							\
+	__label__ local_label;				\
+	arch_unsafe_get_user_ptr(x, ptr, local_label);	\
+	if (0) {					\
+	local_label:					\
+		goto label;				\
+	}						\
+} while (0)
+
+#define unsafe_put_user_ptr(x, ptr, label)		\
+do {							\
+	__label__ local_label;				\
+	arch_unsafe_put_user_ptr(x, ptr, local_label);	\
+	if (0) {					\
+	local_label:					\
+		goto label;				\
+	}						\
+} while (0)
+#endif
+
 #else /* user_access_begin */
 #define user_access_begin(ptr,len) access_ok(ptr, len)
 #define user_access_end() do { } while (0)
