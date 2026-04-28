@@ -73,7 +73,7 @@
 #undef DEFINE_EVENT
 #define DEFINE_EVENT(template, name, proto, args)	\
 	static struct trace_event_call	__used		\
-	__attribute__((__aligned__(4))) event_##name
+	__attribute__((__aligned__(TRACE_EVENT_ALIGN))) event_##name
 
 #undef DEFINE_EVENT_FN
 #define DEFINE_EVENT_FN(template, name, proto, args, reg, unreg)	\

@@ -90,7 +90,7 @@ struct trace_buffer *
 __ring_buffer_alloc(unsigned long size, unsigned flags, struct lock_class_key *key);
 
 struct trace_buffer *__ring_buffer_alloc_range(unsigned long size, unsigned flags,
-					       int order, unsigned long start,
+					       int order, uintptr_t start,
 					       unsigned long range_size,
 					       unsigned long scratch_size,
 					       struct lock_class_key *key);
@@ -255,8 +255,8 @@ int ring_buffer_map_get_reader(struct trace_buffer *buffer, int cpu);
 struct ring_buffer_desc {
 	int		cpu;
 	unsigned int	nr_page_va; /* excludes the meta page */
-	unsigned long	meta_va;
-	unsigned long	page_va[] __counted_by(nr_page_va);
+	uintptr_t	meta_va;
+	uintptr_t	page_va[] __counted_by(nr_page_va);
 };
 
 struct trace_buffer_desc {

@@ -50,7 +50,7 @@
 #undef DEFINE_CUSTOM_EVENT
 #define DEFINE_CUSTOM_EVENT(template, name, proto, args)	\
 	static struct trace_event_call	__used			\
-	__attribute__((__aligned__(4))) custom_event_##name
+	__attribute__((__aligned__(TRACE_EVENT_ALIGN))) custom_event_##name
 
 #include TRACE_INCLUDE(TRACE_INCLUDE_FILE)
 
