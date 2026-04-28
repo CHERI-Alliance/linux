@@ -163,7 +163,7 @@ acpi_parse_entries_array(char *id, unsigned long table_size,
 	table_len = acpi_table_get_length(type, table_header);
 	if (max_length && max_length < table_len)
 		table_len = max_length;
-	table_end = (uintptr_t)table_header + table_len;
+	table_end = __c_pa(table_header) + table_len;
 
 	/* Parse all entries looking for a match. */
 
