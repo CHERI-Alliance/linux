@@ -444,7 +444,7 @@ rcu_scale_reader(void *arg)
 {
 	unsigned long flags;
 	int idx;
-	intptr_t me = (intptr_t)arg;
+	long me = (long)__c_pa(arg);
 
 	VERBOSE_SCALEOUT_STRING("rcu_scale_reader task started");
 	set_cpus_allowed_ptr(current, cpumask_of(me % nr_cpu_ids));
@@ -522,14 +522,14 @@ rcu_scale_writer(void *arg)
 	int i = 0;
 	int i_max;
 	unsigned long jdone;
-	intptr_t me = (intptr_t)arg;
+	long me = (long)__c_pa(arg);
 	bool selfreport = false;
 	bool started = false, done = false, alldone = false;
 	u64 t;
 	DEFINE_TORTURE_RANDOM(tr);
 	u64 *wdp;
-	u64 *wdpp = writer_durations[__c_ua(me)];
-	struct writer_freelist *wflp = &writer_freelists[__c_ua(me)];
+	u64 *wdpp = writer_durations[me];
+	struct writer_freelist *wflp = &writer_freelists[me];
 	struct writer_mblock *wmbp = NULL;
 
 	VERBOSE_SCALEOUT_STRING("rcu_scale_writer task started");
@@ -599,10 +599,10 @@ rcu_scale_writer(void *arg)
 			started = true;
 		if (!done && i >= MIN_MEAS && time_after(jiffies, jdone)) {
 			done = true;
-			WRITE_ONCE(writer_done[__c_ua(me)], true);
+			WRITE_ONCE(writer_done[me], true);
 			sched_set_normal(current, 0);
 			pr_alert("%s%s rcu_scale_writer %ld has %d measurements\n",
-				 scale_type, SCALE_FLAG, (unsigned long)me, MIN_MEAS);
+				 scale_type, SCALE_FLAG, me, MIN_MEAS);
 			if (atomic_inc_return(&n_rcu_scale_writer_finished) >=
 			    nrealwriters) {
 				schedule_timeout_interruptible(10);
@@ -617,7 +617,7 @@ rcu_scale_writer(void *arg)
 						cur_ops->get_gp_seq();
 				}
 				if (shutdown_secs) {
-					writer_tasks[__c_ua(me)] = NULL;
+					writer_tasks[me] = NULL;
 					smp_mb(); /* Assign before wake. */
 					rcu_scale_cleanup();
 					kernel_power_off();
@@ -635,7 +635,7 @@ rcu_scale_writer(void *arg)
 				for (i = 0; i < nrealwriters; i++) {
 					if (writer_done[i])
 						continue;
-					pr_info("%s: Task %ld flags writer %d:\n", __func__, (unsigned long)me, i);
+					pr_info("%s: Task %ld flags writer %d:\n", __func__, me, i);
 					sched_show_task(writer_tasks[i]);
 				}
 				if (cur_ops->stats)
@@ -644,7 +644,7 @@ rcu_scale_writer(void *arg)
 		}
 		if (!selfreport && time_after(jiffies, jdone + HZ * (70 + me))) {
 			pr_info("%s: Writer %ld self-report: started %d done %d/%d->%d i %d jdone %lu.\n",
-				__func__, (unsigned long)me, started, done, writer_done[__c_ua(me)], atomic_read(&n_rcu_scale_writer_finished), i, jiffies - jdone);
+				__func__, me, started, done, writer_done[me], atomic_read(&n_rcu_scale_writer_finished), i, jiffies - jdone);
 			selfreport = true;
 		}
 		if (gp_succeeded && started && !alldone && i < MAX_MEAS - 1)
@@ -655,7 +655,7 @@ rcu_scale_writer(void *arg)
 		rcu_scale_free(wmbp);
 		cur_ops->gp_barrier();
 	}
-	writer_n_durations[__c_ua(me)] = i_max + 1;
+	writer_n_durations[me] = i_max + 1;
 	torture_kthread_stopping("rcu_scale_writer");
 	return 0;
 }
@@ -724,7 +724,7 @@ static int
 kfree_scale_thread(void *arg)
 {
 	int i, loop = 0;
-	intptr_t me = (intptr_t)arg;
+	long me = (long)__c_pa(arg);
 	struct kfree_obj *alloc_ptr;
 	u64 start_time, end_time;
 	long long mem_begin, mem_during = 0;
@@ -790,7 +790,7 @@ kfree_scale_thread(void *arg)
 		       PAGES_TO_MB(mem_begin - mem_during));
 
 		if (shutdown_secs) {
-			kfree_reader_tasks[__c_ua(me)] = NULL;
+			kfree_reader_tasks[me] = NULL;
 			smp_mb(); /* Assign before wake. */
 			kfree_scale_cleanup();
 			kernel_power_off();
@@ -897,7 +897,7 @@ kfree_scale_init(void)
 	}
 
 	for (i = 0; i < kfree_nrealthreads; i++) {
-		firsterr = torture_create_kthread(kfree_scale_thread, (void *)i,
+		firsterr = torture_create_kthread(kfree_scale_thread, __c_fakep(i),
 						  kfree_reader_tasks[i]);
 		if (torture_init_error(firsterr))
 			goto unwind;
@@ -1100,7 +1100,7 @@ rcu_scale_init(void)
 		goto unwind;
 	}
 	for (i = 0; i < nrealreaders; i++) {
-		firsterr = torture_create_kthread(rcu_scale_reader, (void *)i,
+		firsterr = torture_create_kthread(rcu_scale_reader, __c_fakep(i),
 						  reader_tasks[i]);
 		if (torture_init_error(firsterr))
 			goto unwind;
@@ -1154,7 +1154,7 @@ rcu_scale_init(void)
 				llist_add(&wmbp->wmb_node, &wflp->ws_lhp);
 			}
 		}
-		firsterr = torture_create_kthread(rcu_scale_writer, (void *)i,
+		firsterr = torture_create_kthread(rcu_scale_writer, __c_fakep(i),
 						  writer_tasks[i]);
 		if (torture_init_error(firsterr))
 			goto unwind;
