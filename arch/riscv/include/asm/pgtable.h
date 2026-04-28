@@ -271,7 +271,7 @@ static inline struct page *pmd_page(pmd_t pmd)
 	return pfn_to_page(__page_val_to_pfn(pmd_val(pmd)));
 }
 
-static inline unsigned long pmd_page_vaddr(pmd_t pmd)
+static inline uintptr_t pmd_page_vaddr(pmd_t pmd)
 {
 	return (uintptr_t)pfn_to_virt(__page_val_to_pfn(pmd_val(pmd)));
 }

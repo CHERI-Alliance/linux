@@ -37,6 +37,12 @@
 
 #include "../kernel/head.h"
 
+#ifdef __CHERI__
+#define __PI __attribute__((nocaprelocs))
+#else
+#define __PI
+#endif
+
 u64 new_vmalloc[NR_CPUS / sizeof(u64) + 1];
 
 struct kernel_mapping kernel_map __ro_after_init;
@@ -152,7 +158,7 @@ static void __init print_vm_layout(void)
 		(unsigned long)MODULES_END);
 #endif
 	print_ml("lowmem", (unsigned long)PAGE_OFFSET,
-		(uintptr_t)high_memory);
+		__c_pa(high_memory));
 	if (IS_ENABLED(CONFIG_64BIT)) {
 #ifdef CONFIG_KASAN
 		print_ml("kasan", KASAN_SHADOW_START, KASAN_SHADOW_END);
@@ -389,7 +395,7 @@ DECLARE_VM_GET_PAGE_PROT
 
 void __set_fixmap(enum fixed_addresses idx, phys_addr_t phys, pgprot_t prot)
 {
-	unsigned long addr = __fix_to_virt(idx);
+	unsigned long addr = __fix_to_virt_a(idx);
 	pte_t *ptep;
 
 	BUG_ON(idx <= FIX_HOLE || idx >= __end_of_fixed_addresses);
@@ -403,9 +409,9 @@ void __set_fixmap(enum fixed_addresses idx, phys_addr_t phys, pgprot_t prot)
 	local_flush_tlb_page(addr);
 }
 
-static inline pte_t *__init get_pte_virt_early(phys_addr_t pa)
+static inline pte_t *__init __PI get_pte_virt_early(phys_addr_t pa)
 {
-	return (pte_t *)((uintptr_t)pa);
+	return (pte_t *)cheri_make_kernel_data_cap(pa, PAGE_SIZE);
 }
 
 static inline pte_t *__init get_pte_virt_fixmap(phys_addr_t pa)
@@ -419,7 +425,7 @@ static inline pte_t *__meminit get_pte_virt_late(phys_addr_t pa)
 	return (pte_t *) __va(pa);
 }
 
-static inline phys_addr_t __init alloc_pte_early(__ptraddr_t va)
+static inline phys_addr_t __init __PI alloc_pte_early(__ptraddr_t va)
 {
 	/*
 	 * We only create PMD or PGD early mappings so we
@@ -446,8 +452,12 @@ static phys_addr_t __meminit alloc_pte_late(__ptraddr_t va)
 	return __pa((pte_t *)ptdesc_address(ptdesc));
 }
 
-static void __meminit create_pte_mapping(pte_t *ptep, __ptraddr_t va, phys_addr_t pa, phys_addr_t sz,
-					 pgprot_t prot)
+static void __meminit __PI __pi_create_pte_mapping(pte_t *ptep,
+						   __ptraddr_t va, phys_addr_t pa,
+						   phys_addr_t sz, pgprot_t prot);
+static void __meminit create_pte_mapping(pte_t *ptep,
+					 __ptraddr_t va, phys_addr_t pa,
+					 phys_addr_t sz, pgprot_t prot)
 {
 	__ptraddr_t pte_idx = pte_index(va);
 
@@ -489,10 +499,10 @@ static pud_t early_pud[PTRS_PER_PUD] __initdata __aligned(PAGE_SIZE);
 #define early_pud      ((pud_t *)XIP_FIXUP(early_pud))
 #endif /* CONFIG_XIP_KERNEL */
 
-static pmd_t *__init get_pmd_virt_early(phys_addr_t pa)
+static pmd_t *__init __PI get_pmd_virt_early(phys_addr_t pa)
 {
 	/* Before MMU is enabled */
-	return (pmd_t *)((uintptr_t)pa);
+	return (pmd_t *)cheri_make_kernel_data_cap(pa, PAGE_SIZE);
 }
 
 static pmd_t *__init get_pmd_virt_fixmap(phys_addr_t pa)
@@ -506,7 +516,7 @@ static pmd_t *__meminit get_pmd_virt_late(phys_addr_t pa)
 	return (pmd_t *) __va(pa);
 }
 
-static phys_addr_t __init alloc_pmd_early(__ptraddr_t va)
+static phys_addr_t __init __PI alloc_pmd_early(__ptraddr_t va)
 {
 	BUG_ON((va - kernel_map.virt_addr) >> PUD_SHIFT);
 
@@ -527,6 +537,9 @@ static phys_addr_t __meminit alloc_pmd_late(__ptraddr_t va)
 	return __pa((pmd_t *)ptdesc_address(ptdesc));
 }
 
+static void __meminit __PI __pi_create_pmd_mapping(pmd_t *pmdp,
+				      __ptraddr_t va, phys_addr_t pa,
+				      phys_addr_t sz, pgprot_t prot);
 static void __meminit create_pmd_mapping(pmd_t *pmdp,
 					 __ptraddr_t va, phys_addr_t pa,
 					 phys_addr_t sz, pgprot_t prot)
@@ -554,9 +567,9 @@ static void __meminit create_pmd_mapping(pmd_t *pmdp,
 	create_pte_mapping(ptep, va, pa, sz, prot);
 }
 
-static pud_t *__init get_pud_virt_early(phys_addr_t pa)
+static pud_t *__init __PI get_pud_virt_early(phys_addr_t pa)
 {
-	return (pud_t *)((uintptr_t)pa);
+	return (pud_t *)cheri_make_kernel_data_cap(pa, PAGE_SIZE);
 }
 
 static pud_t *__init get_pud_virt_fixmap(phys_addr_t pa)
@@ -570,7 +583,7 @@ static pud_t *__meminit get_pud_virt_late(phys_addr_t pa)
 	return (pud_t *)__va(pa);
 }
 
-static phys_addr_t __init alloc_pud_early(__ptraddr_t va)
+static phys_addr_t __init __PI alloc_pud_early(__ptraddr_t va)
 {
 	/* Only one PUD is available for early mapping */
 	BUG_ON((va - kernel_map.virt_addr) >> PGDIR_SHIFT);
@@ -592,9 +605,9 @@ static phys_addr_t __meminit alloc_pud_late(__ptraddr_t va)
 	return __pa((pud_t *)ptdesc_address(ptdesc));
 }
 
-static p4d_t *__init get_p4d_virt_early(phys_addr_t pa)
+static p4d_t *__init __PI get_p4d_virt_early(phys_addr_t pa)
 {
-	return (p4d_t *)((uintptr_t)pa);
+	return (p4d_t *)cheri_make_kernel_data_cap(pa, PAGE_SIZE);
 }
 
 static p4d_t *__init get_p4d_virt_fixmap(phys_addr_t pa)
@@ -608,7 +621,7 @@ static p4d_t *__meminit get_p4d_virt_late(phys_addr_t pa)
 	return (p4d_t *)__va(pa);
 }
 
-static phys_addr_t __init alloc_p4d_early(__ptraddr_t va)
+static phys_addr_t __init __PI alloc_p4d_early(__ptraddr_t va)
 {
 	/* Only one P4D is available for early mapping */
 	BUG_ON((va - kernel_map.virt_addr) >> PGDIR_SHIFT);
@@ -630,8 +643,12 @@ static phys_addr_t __meminit alloc_p4d_late(__ptraddr_t va)
 	return __pa((p4d_t *)ptdesc_address(ptdesc));
 }
 
-static void __meminit create_pud_mapping(pud_t *pudp, __ptraddr_t va, phys_addr_t pa, phys_addr_t sz,
-					 pgprot_t prot)
+static void __meminit __PI __pi_create_pud_mapping(pud_t *pudp,
+						   __ptraddr_t va, phys_addr_t pa,
+						   phys_addr_t sz, pgprot_t prot);
+static void __meminit create_pud_mapping(pud_t *pudp,
+					 __ptraddr_t va, phys_addr_t pa,
+					 phys_addr_t sz, pgprot_t prot)
 {
 	pmd_t *nextp;
 	phys_addr_t next_phys;
@@ -656,8 +673,12 @@ static void __meminit create_pud_mapping(pud_t *pudp, __ptraddr_t va, phys_addr_
 	create_pmd_mapping(nextp, va, pa, sz, prot);
 }
 
-static void __meminit create_p4d_mapping(p4d_t *p4dp, __ptraddr_t va, phys_addr_t pa, phys_addr_t sz,
-					 pgprot_t prot)
+static void __meminit __PI __pi_create_p4d_mapping(p4d_t *p4dp,
+						   __ptraddr_t va, phys_addr_t pa,
+						   phys_addr_t sz, pgprot_t prot);
+static void __meminit create_p4d_mapping(p4d_t *p4dp,
+					 __ptraddr_t va, phys_addr_t pa,
+					 phys_addr_t sz, pgprot_t prot)
 {
 	pud_t *nextp;
 	phys_addr_t next_phys;
@@ -713,8 +734,12 @@ static void __meminit create_p4d_mapping(p4d_t *p4dp, __ptraddr_t va, phys_addr_
 #define create_pmd_mapping(__pmdp, __va, __pa, __sz, __prot) do {} while(0)
 #endif /* __PAGETABLE_PMD_FOLDED */
 
-void __meminit create_pgd_mapping(pgd_t *pgdp, __ptraddr_t va, phys_addr_t pa, phys_addr_t sz,
-				  pgprot_t prot)
+void __meminit __PI __pi_create_pgd_mapping(pgd_t *pgdp,
+					    __ptraddr_t va, phys_addr_t pa,
+					    phys_addr_t sz, pgprot_t prot);
+void __meminit create_pgd_mapping(pgd_t *pgdp,
+				  __ptraddr_t va, phys_addr_t pa,
+				  phys_addr_t sz, pgprot_t prot)
 {
 	pgd_next_t *nextp;
 	phys_addr_t next_phys;
@@ -739,7 +764,8 @@ void __meminit create_pgd_mapping(pgd_t *pgdp, __ptraddr_t va, phys_addr_t pa, p
 	create_pgd_next_mapping(nextp, va, pa, sz, prot);
 }
 
-static __ptraddr_t __meminit best_map_size(phys_addr_t pa, __ptraddr_t va, phys_addr_t size)
+static __ptraddr_t __meminit best_map_size(phys_addr_t pa, __ptraddr_t va,
+					   phys_addr_t size)
 {
 	if (debug_pagealloc_enabled())
 		return PAGE_SIZE;
@@ -841,7 +867,7 @@ static int __init print_no5lvl(char *p)
 }
 early_param("no5lvl", print_no5lvl);
 
-static void __init set_mmap_rnd_bits_max(void)
+static void __init __PI set_mmap_rnd_bits_max(void)
 {
 	mmap_rnd_bits_max = MMAP_VA_BITS - PAGE_SHIFT - 3;
 }
@@ -855,10 +881,10 @@ static void __init set_mmap_rnd_bits_max(void)
  * property in the device tree, since some platforms may hang if an unsupported
  * SATP mode is attempted.
  */
-static __init void set_satp_mode(uintptr_t dtb_pa)
+static __init __PI void set_satp_mode(uintptr_t dtb_pa)
 {
 	u64 identity_satp, hw_satp;
-	uintptr_t set_satp_mode_pmd = ((uintptr_t)set_satp_mode) & PMD_MASK;
+	unsigned long set_satp_mode_pmd = __c_pa(set_satp_mode) & PMD_MASK;
 	u64 satp_mode_limit = min_not_zero(__pi_set_satp_mode_from_cmdline(dtb_pa),
 					   __pi_set_satp_mode_from_fdt(dtb_pa));
 
@@ -872,28 +898,30 @@ static __init void set_satp_mode(uintptr_t dtb_pa)
 		return;
 	}
 
-	create_p4d_mapping(early_p4d,
+	__pi_create_p4d_mapping(early_p4d,
 			set_satp_mode_pmd, (uintptr_t)early_pud,
 			P4D_SIZE, PAGE_TABLE);
-	create_pud_mapping(early_pud,
+	__pi_create_pud_mapping(early_pud,
 			   set_satp_mode_pmd, (uintptr_t)early_pmd,
 			   PUD_SIZE, PAGE_TABLE);
 	/* Handle the case where set_satp_mode straddles 2 PMDs */
-	create_pmd_mapping(early_pmd,
+	__pi_create_pmd_mapping(early_pmd,
 			   set_satp_mode_pmd, set_satp_mode_pmd,
 			   PMD_SIZE, PAGE_KERNEL_EXEC);
-	create_pmd_mapping(early_pmd,
+	__pi_create_pmd_mapping(early_pmd,
 			   set_satp_mode_pmd + PMD_SIZE,
 			   set_satp_mode_pmd + PMD_SIZE,
 			   PMD_SIZE, PAGE_KERNEL_EXEC);
 retry:
-	create_pgd_mapping(early_pg_dir,
+	__pi_create_pgd_mapping(early_pg_dir,
 			   set_satp_mode_pmd,
 			   pgtable_l5_enabled ?
-				(uintptr_t)early_p4d : (uintptr_t)early_pud,
+				(uintptr_t)early_p4d :
+				(pgtable_l4_enabled ?  (uintptr_t)early_pud :
+				(uintptr_t)early_pmd),
 			   PGDIR_SIZE, PAGE_TABLE);
 
-	identity_satp = PFN_DOWN((uintptr_t)&early_pg_dir) | satp_mode;
+	identity_satp = PFN_DOWN(__c_pa(&early_pg_dir)) | satp_mode;
 
 	local_flush_tlb_all();
 	csr_write(CSR_SATP, identity_satp);
@@ -930,11 +958,13 @@ retry:
  * for init.o in mm/Makefile.
  */
 
-#ifndef __riscv_cmodel_medany
+#if !defined(__riscv_cmodel_medany) && !defined(__CHECKER__)
 #error "setup_vm() is called from head.S before relocate so it should not use absolute addressing."
 #endif
 
 #ifdef CONFIG_XIP_KERNEL
+static void __init __PI create_kernel_page_table(pgd_t *pgdir,
+					    __always_unused bool early);
 static void __init create_kernel_page_table(pgd_t *pgdir,
 					    __always_unused bool early)
 {
@@ -956,6 +986,7 @@ static void __init create_kernel_page_table(pgd_t *pgdir,
 				   PMD_SIZE, PAGE_KERNEL);
 }
 #else
+static void __init __PI __pi_create_kernel_page_table(pgd_t *pgdir, bool early);
 static void __init create_kernel_page_table(pgd_t *pgdir, bool early)
 {
 	__ptraddr_t va, end_va;
@@ -975,9 +1006,10 @@ static void __init create_kernel_page_table(pgd_t *pgdir, bool early)
  * this means 2 PMD entries whereas for 32-bit kernel, this is only 1 PGDIR
  * entry.
  */
-static void __init create_fdt_early_page_table(__ptraddr_t fix_fdt_va,
-					       uintptr_t dtb_pa)
+static void __init __PI create_fdt_early_page_table(__ptraddr_t fix_fdt_va,
+						    uintptr_t dtb_pa)
 {
+	unsigned long fdtlen = fdt_totalsize(dtb_pa);
 #ifndef CONFIG_BUILTIN_DTB
 	__ptraddr_t pa = dtb_pa & ~(PMD_SIZE - 1);
 
@@ -986,16 +1018,17 @@ static void __init create_fdt_early_page_table(__ptraddr_t fix_fdt_va,
 
 	/* In 32-bit only, the fdt lies in its own PGD */
 	if (!IS_ENABLED(CONFIG_64BIT)) {
-		create_pgd_mapping(early_pg_dir, fix_fdt_va,
+		__pi_create_pgd_mapping(early_pg_dir, fix_fdt_va,
 				   pa, MAX_FDT_SIZE, PAGE_KERNEL);
 	} else {
-		create_pmd_mapping(fixmap_pmd, fix_fdt_va,
+		__pi_create_pmd_mapping(fixmap_pmd, fix_fdt_va,
 				   pa, PMD_SIZE, PAGE_KERNEL);
-		create_pmd_mapping(fixmap_pmd, fix_fdt_va + PMD_SIZE,
+		__pi_create_pmd_mapping(fixmap_pmd, fix_fdt_va + PMD_SIZE,
 				   pa + PMD_SIZE, PMD_SIZE, PAGE_KERNEL);
 	}
 
-	dtb_early_va = (void *)(uintptr_t)fix_fdt_va + (dtb_pa & (PMD_SIZE - 1));
+	dtb_early_va = (void *)cheri_make_kernel_data_cap(
+			fix_fdt_va + ((unsigned long)dtb_pa & (PMD_SIZE - 1)), fdtlen);
 #else
 	/*
 	 * For 64-bit kernel, __va can't be used since it would return a linear
@@ -1003,17 +1036,25 @@ static void __init create_fdt_early_page_table(__ptraddr_t fix_fdt_va,
 	 * setup_vm_final installs the linear mapping. For 32-bit kernel, as the
 	 * kernel is mapped in the linear mapping, that makes no difference.
 	 */
-	dtb_early_va = kernel_mapping_pa_to_va(dtb_pa);
+	dtb_early_va = cheri_make_kernel_data_cap(
+		__c_pa(kernel_mapping_pa_to_va((void *)dtb_pa)), fdtlen);
 #endif
 
 	dtb_early_pa = dtb_pa;
+#ifdef CONFIG_CHERI_KERNEL
+	dtb_early_va = cheri_perms_and(dtb_early_va,
+				       CHERI_PERMS_READ | CHERI_PERMS_WRITE);
+	dtb_early_pa = cheri_bounds_set(dtb_early_pa, fdtlen);
+	dtb_early_pa = cheri_perms_and(dtb_early_pa,
+				       CHERI_PERMS_READ | CHERI_PERMS_WRITE);
+#endif
 }
 
 /*
  * MMU is not enabled, the page tables are allocated directly using
  * early_pmd/pud/p4d and the address returned is the physical one.
  */
-static void __init pt_ops_set_early(void)
+static void __init __PI pt_ops_set_early(void)
 {
 	pt_ops.alloc_pte = alloc_pte_early;
 	pt_ops.get_pte_virt = get_pte_virt_early;
@@ -1035,17 +1076,26 @@ static void __init pt_ops_set_early(void)
  * Note that this is called with MMU disabled, hence kernel_mapping_pa_to_va,
  * but it will be used as described above.
  */
-static void __init pt_ops_set_fixmap(void)
+static void __init __PI pt_ops_set_fixmap(void)
 {
-	pt_ops.alloc_pte = kernel_mapping_pa_to_va(alloc_pte_fixmap);
-	pt_ops.get_pte_virt = kernel_mapping_pa_to_va(get_pte_virt_fixmap);
+#ifdef CONFIG_CHERI_KERNEL
+	/* FIXCHERI: split is wrong for 32-bit. */
+	void *base = NULL;
+	ptraddr_t split = 1ULL << 63;
+	base = cheri_address_set(kernel_data_cap, split);
+	base = cheri_bounds_set(base, split);
+	base = cheri_perms_and(base, CHERI_PERMS_READ | CHERI_PERMS_EXEC);
+#endif
+
+	pt_ops.alloc_pte = (void *)cheri_address_set(base, __c_pa(kernel_mapping_pa_to_va(alloc_pte_fixmap)));
+	pt_ops.get_pte_virt = (void *)cheri_address_set(base, __c_pa(kernel_mapping_pa_to_va(get_pte_virt_fixmap)));
 #ifndef __PAGETABLE_PMD_FOLDED
-	pt_ops.alloc_pmd = kernel_mapping_pa_to_va(alloc_pmd_fixmap);
-	pt_ops.get_pmd_virt = kernel_mapping_pa_to_va(get_pmd_virt_fixmap);
-	pt_ops.alloc_pud = kernel_mapping_pa_to_va(alloc_pud_fixmap);
-	pt_ops.get_pud_virt = kernel_mapping_pa_to_va(get_pud_virt_fixmap);
-	pt_ops.alloc_p4d = kernel_mapping_pa_to_va(alloc_p4d_fixmap);
-	pt_ops.get_p4d_virt = kernel_mapping_pa_to_va(get_p4d_virt_fixmap);
+	pt_ops.alloc_pmd = (void *)cheri_address_set(base, __c_pa(kernel_mapping_pa_to_va(alloc_pmd_fixmap)));
+	pt_ops.get_pmd_virt = (void *)cheri_address_set(base, __c_pa(kernel_mapping_pa_to_va(get_pmd_virt_fixmap)));
+	pt_ops.alloc_pud = (void *)cheri_address_set(base, __c_pa(kernel_mapping_pa_to_va(alloc_pud_fixmap)));
+	pt_ops.get_pud_virt = (void *)cheri_address_set(base, __c_pa(kernel_mapping_pa_to_va(get_pud_virt_fixmap)));
+	pt_ops.alloc_p4d = (void *)cheri_address_set(base, __c_pa(kernel_mapping_pa_to_va(alloc_p4d_fixmap)));
+	pt_ops.get_p4d_virt = (void *)cheri_address_set(base, __c_pa(kernel_mapping_pa_to_va(get_p4d_virt_fixmap)));
 #endif
 }
 
@@ -1085,7 +1135,7 @@ unsigned long kaslr_offset(void)
 }
 #endif
 
-asmlinkage void __init setup_vm(uintptr_t dtb_pa)
+asmlinkage void __init __PI setup_vm(uintptr_t dtb_pa)
 {
 	pmd_t __maybe_unused fix_bmap_spmd, fix_bmap_epmd;
 
@@ -1111,22 +1161,22 @@ asmlinkage void __init setup_vm(uintptr_t dtb_pa)
 	kernel_map.virt_addr = KERNEL_LINK_ADDR + kernel_map.virt_offset;
 
 #ifdef CONFIG_XIP_KERNEL
-	kernel_map.xiprom = (uintptr_t)CONFIG_XIP_PHYS_ADDR;
+	kernel_map.xiprom = CONFIG_XIP_PHYS_ADDR;
 	kernel_map.xiprom_sz = (uintptr_t)(&_exiprom) - (uintptr_t)(&_xiprom);
 
 	phys_ram_base = CONFIG_PHYS_RAM_BASE;
 #ifdef CONFIG_SPARSEMEM_VMEMMAP
 	vmemmap_start_pfn = round_down(phys_ram_base, VMEMMAP_ADDR_ALIGN) >> PAGE_SHIFT;
 #endif
-	kernel_map.phys_addr = (uintptr_t)CONFIG_PHYS_RAM_BASE;
-	kernel_map.size = (uintptr_t)(&_end) - (uintptr_t)(&_start);
+	kernel_map.phys_addr = CONFIG_PHYS_RAM_BASE;
+	kernel_map.size = (unsigned long)(&_end) - (unsigned long)(&_start);
 
 	kernel_map.va_kernel_xip_text_pa_offset = kernel_map.virt_addr - kernel_map.xiprom;
 	kernel_map.va_kernel_xip_data_pa_offset = kernel_map.virt_addr - kernel_map.phys_addr
 						+ (uintptr_t)&_sdata - (uintptr_t)&_start;
 #else
-	kernel_map.phys_addr = (uintptr_t)(&_start);
-	kernel_map.size = (uintptr_t)(&_end) - kernel_map.phys_addr;
+	kernel_map.phys_addr = __c_pa(&_start);
+	kernel_map.size = __c_pa(&_end) - kernel_map.phys_addr;
 	kernel_map.va_kernel_pa_offset = kernel_map.virt_addr - kernel_map.phys_addr;
 #endif
 
@@ -1176,43 +1226,44 @@ asmlinkage void __init setup_vm(uintptr_t dtb_pa)
 	relocate_kernel();
 #endif
 
+	// FIXCHERI: apply_early_boot_alternatives() is not __PI
 	apply_early_boot_alternatives();
 	pt_ops_set_early();
 
 	/* Setup early PGD for fixmap */
-	create_pgd_mapping(early_pg_dir, FIXADDR_START,
+	__pi_create_pgd_mapping(early_pg_dir, FIXADDR_START,
 			   fixmap_pgd_next, PGDIR_SIZE, PAGE_TABLE);
 
 #ifndef __PAGETABLE_PMD_FOLDED
 	/* Setup fixmap P4D and PUD */
 	if (pgtable_l5_enabled)
-		create_p4d_mapping(fixmap_p4d, FIXADDR_START,
+		__pi_create_p4d_mapping(fixmap_p4d, FIXADDR_START,
 				   (uintptr_t)fixmap_pud, P4D_SIZE, PAGE_TABLE);
 	/* Setup fixmap PUD and PMD */
 	if (pgtable_l4_enabled)
-		create_pud_mapping(fixmap_pud, FIXADDR_START,
+		__pi_create_pud_mapping(fixmap_pud, FIXADDR_START,
 				   (uintptr_t)fixmap_pmd, PUD_SIZE, PAGE_TABLE);
-	create_pmd_mapping(fixmap_pmd, FIXADDR_START,
+	__pi_create_pmd_mapping(fixmap_pmd, FIXADDR_START,
 			   (uintptr_t)fixmap_pte, PMD_SIZE, PAGE_TABLE);
 	/* Setup trampoline PGD and PMD */
-	create_pgd_mapping(trampoline_pg_dir, kernel_map.virt_addr,
+	__pi_create_pgd_mapping(trampoline_pg_dir, kernel_map.virt_addr,
 			   trampoline_pgd_next, PGDIR_SIZE, PAGE_TABLE);
 	if (pgtable_l5_enabled)
-		create_p4d_mapping(trampoline_p4d, kernel_map.virt_addr,
+		__pi_create_p4d_mapping(trampoline_p4d, kernel_map.virt_addr,
 				   (uintptr_t)trampoline_pud, P4D_SIZE, PAGE_TABLE);
 	if (pgtable_l4_enabled)
-		create_pud_mapping(trampoline_pud, kernel_map.virt_addr,
+		__pi_create_pud_mapping(trampoline_pud, kernel_map.virt_addr,
 				   (uintptr_t)trampoline_pmd, PUD_SIZE, PAGE_TABLE);
 #ifdef CONFIG_XIP_KERNEL
-	create_pmd_mapping(trampoline_pmd, kernel_map.virt_addr,
+	__pi_create_pmd_mapping(trampoline_pmd, kernel_map.virt_addr,
 			   kernel_map.xiprom, PMD_SIZE, PAGE_KERNEL_EXEC);
 #else
-	create_pmd_mapping(trampoline_pmd, kernel_map.virt_addr,
+	__pi_create_pmd_mapping(trampoline_pmd, kernel_map.virt_addr,
 			   kernel_map.phys_addr, PMD_SIZE, PAGE_KERNEL_EXEC);
 #endif
 #else
 	/* Setup trampoline PGD */
-	create_pgd_mapping(trampoline_pg_dir, kernel_map.virt_addr,
+	__pi_create_pgd_mapping(trampoline_pg_dir, kernel_map.virt_addr,
 			   kernel_map.phys_addr, PGDIR_SIZE, PAGE_KERNEL_EXEC);
 #endif
 
@@ -1221,10 +1272,10 @@ asmlinkage void __init setup_vm(uintptr_t dtb_pa)
 	 * us to reach paging_init(). We map all memory banks later
 	 * in setup_vm_final() below.
 	 */
-	create_kernel_page_table(early_pg_dir, true);
+	__pi_create_kernel_page_table(early_pg_dir, true);
 
 	/* Setup early mapping for FDT early scan */
-	create_fdt_early_page_table(__fix_to_virt(FIX_FDT), dtb_pa);
+	create_fdt_early_page_table(__fix_to_virt_a(FIX_FDT), dtb_pa);
 
 	/*
 	 * Bootime fixmap only can handle PMD_SIZE mapping. Thus, boot-ioremap
@@ -1240,16 +1291,16 @@ asmlinkage void __init setup_vm(uintptr_t dtb_pa)
 	 * FIX_BTMAP_BEGIN should lie in the same pmd. Verify that and warn
 	 * the user if not.
 	 */
-	fix_bmap_spmd = fixmap_pmd[pmd_index(__fix_to_virt(FIX_BTMAP_BEGIN))];
-	fix_bmap_epmd = fixmap_pmd[pmd_index(__fix_to_virt(FIX_BTMAP_END))];
+	fix_bmap_spmd = fixmap_pmd[pmd_index(__fix_to_virt_a(FIX_BTMAP_BEGIN))];
+	fix_bmap_epmd = fixmap_pmd[pmd_index(__fix_to_virt_a(FIX_BTMAP_END))];
 	if (pmd_val(fix_bmap_spmd) != pmd_val(fix_bmap_epmd)) {
 		WARN_ON(1);
 		pr_warn("fixmap btmap start [%08lx] != end [%08lx]\n",
 			pmd_val(fix_bmap_spmd), pmd_val(fix_bmap_epmd));
 		pr_warn("fix_to_virt(FIX_BTMAP_BEGIN): %08lx\n",
-			fix_to_virt(FIX_BTMAP_BEGIN));
+			(unsigned long)fix_to_virt(FIX_BTMAP_BEGIN));
 		pr_warn("fix_to_virt(FIX_BTMAP_END):   %08lx\n",
-			fix_to_virt(FIX_BTMAP_END));
+			(unsigned long)fix_to_virt(FIX_BTMAP_END));
 
 		pr_warn("FIX_BTMAP_END:       %d\n", FIX_BTMAP_END);
 		pr_warn("FIX_BTMAP_BEGIN:     %d\n", FIX_BTMAP_BEGIN);
@@ -1259,14 +1310,16 @@ asmlinkage void __init setup_vm(uintptr_t dtb_pa)
 	pt_ops_set_fixmap();
 }
 
-static void __meminit create_linear_mapping_range(phys_addr_t start, phys_addr_t end,
-						  __ptraddr_t fixed_map_size, const pgprot_t *pgprot)
+static void __meminit create_linear_mapping_range(phys_addr_t start,
+						  phys_addr_t end,
+						  __ptraddr_t fixed_map_size,
+						  const pgprot_t *pgprot)
 {
 	phys_addr_t pa;
 	__ptraddr_t va, map_size;
 
 	for (pa = start; pa < end; pa += map_size) {
-		va = (uintptr_t)__va(pa);
+		va = __va_a(pa);
 		map_size = fixed_map_size ? fixed_map_size :
 					    best_map_size(pa, va, end - pa);
 
@@ -1340,7 +1393,7 @@ static void __init setup_vm_final(void)
 	 * directly in swapper_pg_dir in addition to the pgd entry that points
 	 * to fixmap_pte.
 	 */
-	unsigned long idx = pgd_index(__fix_to_virt(FIX_FDT));
+	unsigned long idx = pgd_index(__fix_to_virt_a(FIX_FDT));
 
 	set_pgd(&swapper_pg_dir[idx], early_pg_dir[idx]);
 #endif
@@ -1372,7 +1425,7 @@ static void __init setup_vm_final(void)
 	pt_ops_set_late();
 }
 #else
-asmlinkage void __init setup_vm(uintptr_t dtb_pa)
+asmlinkage void __init __PI setup_vm(uintptr_t dtb_pa)
 {
 	dtb_early_va = (void *)dtb_pa;
 	dtb_early_pa = dtb_pa;
@@ -1830,3 +1883,5 @@ void __ref vmemmap_free(unsigned long start, unsigned long end, struct vmem_altm
 	remove_pgd_mapping(start, end, true, altmap);
 }
 #endif /* CONFIG_MEMORY_HOTPLUG */
+
+#include "init_pi.h"

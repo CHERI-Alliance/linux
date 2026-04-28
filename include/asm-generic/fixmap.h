@@ -18,7 +18,13 @@
 #include <linux/bug.h>
 #include <linux/mm_types.h>
 
-#define __fix_to_virt(x)	(FIXADDR_TOP - ((x) << PAGE_SHIFT))
+#define __fix_to_virt_a(x)	(FIXADDR_TOP - ((x) << PAGE_SHIFT))
+#ifndef CONFIG_CHERI_KERNEL
+#define __fix_to_virt(x) __fix_to_virt_a(x)
+#else
+#define __fix_to_virt(x)	((uintptr_t)cheri_make_kernel_data_cap(__fix_to_virt_a(x), PAGE_SIZE))
+#endif
+
 #define __virt_to_fix(x)	((FIXADDR_TOP - ((x)&PAGE_MASK)) >> PAGE_SHIFT)
 
 #ifndef __ASSEMBLY__
@@ -27,7 +33,7 @@
  * directly without translation, we catch the bug with a NULL-deference
  * kernel oops. Illegal ranges of incoming indices are caught too.
  */
-static __always_inline unsigned long fix_to_virt(const unsigned int idx)
+static __always_inline uintptr_t fix_to_virt(const unsigned int idx)
 {
 	BUILD_BUG_ON(idx >= __end_of_fixed_addresses);
 	return __fix_to_virt(idx);
@@ -73,7 +79,7 @@ static inline unsigned long virt_to_fix(const unsigned long vaddr)
 /* Return a pointer with offset calculated */
 #define __set_fixmap_offset(idx, phys, flags)				\
 ({									\
-	unsigned long ________addr;					\
+	uintptr_t ________addr;					\
 	__set_fixmap(idx, phys, flags);					\
 	________addr = fix_to_virt(idx) + ((phys) & (PAGE_SIZE - 1));	\
 	________addr;							\
