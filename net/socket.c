@@ -110,6 +110,7 @@
 #include <linux/errqueue.h>
 #include <linux/ptp_clock_kernel.h>
 #include <trace/events/sock.h>
+#include <linux/cheri.h>
 
 #include "core/dev.h"
 
@@ -2899,7 +2900,7 @@ static int ____sys_recvmsg(struct socket *sock, struct msghdr *msg_sys,
 					(struct compat_msghdr __user *) msg;
 	int __user *uaddr_len = COMPAT_NAMELEN(msg);
 	struct sockaddr_storage addr;
-	unsigned long cmsg_ptr;
+	uintptr_t cmsg_ptr;
 	int len;
 	ssize_t err;
 
@@ -2937,7 +2938,7 @@ static int ____sys_recvmsg(struct socket *sock, struct msghdr *msg_sys,
 		err = __put_user((unsigned long)msg_sys->msg_control - cmsg_ptr,
 				 &msg_compat->msg_controllen);
 	else
-		err = __put_user((uintptr_t)msg_sys->msg_control - cmsg_ptr,
+		err = __put_user(__c_pa(msg_sys->msg_control) - __c_ua(cmsg_ptr),
 				 &msg->msg_controllen);
 	if (err)
 		goto out;
