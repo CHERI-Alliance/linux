@@ -362,6 +362,9 @@ config COMPAT
 	default 64BIT
 	depends on 64BIT
 
+config COMPAT32
+	def_bool y if COMPAT
+
 config AUDIT_ARCH
 	def_bool y
 
