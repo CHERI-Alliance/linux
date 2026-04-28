@@ -420,7 +420,7 @@ bool percpu_ref_is_zero(struct percpu_ref *ref)
 	if (ref->data)
 		count = atomic_long_read(&ref->data->count);
 	else
-		count = ref->percpu_count_ptr >> __PERCPU_REF_FLAG_BITS;
+		count = __c_ua(ref->percpu_count_ptr) >> __PERCPU_REF_FLAG_BITS;
 	spin_unlock_irqrestore(&percpu_ref_switch_lock, flags);
 
 	return count == 0;
