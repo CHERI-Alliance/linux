@@ -88,10 +88,6 @@
  */
 SYM_FUNC_START(cpu_do_suspend)
 #ifdef CONFIG_ARM64_MORELLO
-alternative_if_not ARM64_MORELLO
-	b	1f
-alternative_else_nop_endif
-
 	/*
 	 * Save the EL0 Morello registers that are stored in thread_struct
 	 * (all of them except (R)CSP_EL0).
@@ -110,12 +106,10 @@ alternative_else_nop_endif
 	stp	c9, c10, [x0, #CPU_CTX_CREGS]
 	stp	c11, c12, [x0, #CPU_CTX_CREGS + 32]
 	stp	c13, c14, [x0, #CPU_CTX_CREGS + 64]
-	b	2f
-1:
-#endif /* CONFIG_ARM64_MORELLO */
+#else /* CONFIG_ARM64_MORELLO */
 	mrs	x2, tpidr_el0
 	mrs	x8, vbar_el1
-2:
+#endif /* CONFIG_ARM64_MORELLO */
 	mrs	x3, tpidrro_el0
 	mrs	x4, contextidr_el1
 	mrs	x5, osdlr_el1
@@ -174,10 +168,6 @@ SYM_FUNC_START(cpu_do_resume)
 	msr	tcr_el1, x8
 
 #ifdef CONFIG_ARM64_MORELLO
-alternative_if_not ARM64_MORELLO
-	b	1f
-alternative_else_nop_endif
-
 	/*
 	 * Ensure that the new value of CPACR_EL1 is effective, to disable
 	 * trapping of Morello instructions.
@@ -196,12 +186,11 @@ alternative_else_nop_endif
 	ldp	c2, c3, [x0, #CPU_CTX_CREGS + 64]
 	msr	cid_el0, c2
 	msr	cvbar_el1, c3
-	b	2f
-1:
-#endif /* CONFIG_ARM64_MORELLO */
+#else /* CONFIG_ARM64_MORELLO */
 	msr	tpidr_el0, x2
 	msr	vbar_el1, x9
-2:
+#endif /* CONFIG_ARM64_MORELLO */
+
 	msr	mdscr_el1, x10
 alternative_if ARM64_HAS_TCR2
 	ldr	x2, [x0, #104]

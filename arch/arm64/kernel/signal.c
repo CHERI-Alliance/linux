@@ -1463,10 +1463,10 @@ static unsigned long signal_sp(struct pt_regs *regs)
 	 * Executive stack. Read the actual SP_EL0 from the saved CSP_EL0
 	 * instead.
 	 */
-	if (system_supports_morello())
-		return morello_cap_get_lo_val(&regs->csp);
-#endif
+	return morello_cap_get_lo_val(&regs->csp);
+#else
 	return regs->sp;
+#endif
 }
 static int get_sigframe(struct rt_sigframe_user_layout *user,
 			 struct ksignal *ksig, struct pt_regs *regs)
