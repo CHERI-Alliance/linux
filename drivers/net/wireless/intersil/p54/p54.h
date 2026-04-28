@@ -81,8 +81,17 @@ struct bootrec_end {
 	u8 md5[16];
 } __packed;
 
+#ifndef CONFIG_CHERI_KERNEL
+
 /* provide 16 bytes for the transport back-end */
 #define P54_TX_INFO_DATA_SIZE		16
+
+#else
+
+/* For CHERI the storage space in ieee80211_tx_info is increased. */
+#define P54_TX_INFO_DATA_SIZE		32
+
+#endif
 
 /* stored in ieee80211_tx_info's rate_driver_data */
 struct p54_tx_info {
