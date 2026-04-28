@@ -63,9 +63,22 @@ static inline int copy_from_bpfptr_offset(void *dst, bpfptr_t src,
 	return copy_from_kernel_nofault(dst, src.kernel + offset, size);
 }
 
+static inline int copy_from_bpfptr_offset_with_ptr(void *dst, bpfptr_t src,
+						   size_t offset, size_t size)
+{
+	if (!bpfptr_is_kernel(src))
+		return copy_from_user_with_ptr(dst, src.user + offset, size);
+	return copy_from_kernel_nofault(dst, src.kernel + offset, size);
+}
+
 static inline int copy_from_bpfptr(void *dst, bpfptr_t src, size_t size)
 {
 	return copy_from_bpfptr_offset(dst, src, 0, size);
+}
+
+static inline int copy_from_bpfptr_with_ptr(void *dst, bpfptr_t src, size_t size)
+{
+	return copy_from_bpfptr_offset_with_ptr(dst, src, 0, size);
 }
 
 static inline int copy_to_bpfptr_offset(bpfptr_t dst, size_t offset,
