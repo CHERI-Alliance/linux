@@ -1737,7 +1737,7 @@ menuconfig COMPAT
 
 	  If you want to execute 32-bit userspace applications, say Y.
 
-if COMPAT
+if COMPAT && COMPAT32
 
 config KUSER_HELPERS
 	bool "Enable kuser helpers page for 32-bit applications"
