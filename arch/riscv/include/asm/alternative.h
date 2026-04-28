@@ -26,7 +26,7 @@
 #define RISCV_ALTERNATIVES_EARLY_BOOT	2 /* alternatives applied before mmu start */
 
 /* add the relative offset to the address of the offset to get the absolute address */
-#define __ALT_PTR(a, f)			((void *)&(a)->f + (a)->f)
+#define __ALT_PTR(a, f)			cheri_make_kernel_data_cap(__c_pa(&(a)->f) + (a)->f, (a)->alt_len)
 #define ALT_OLD_PTR(a)			__ALT_PTR(a, old_offset)
 #define ALT_ALT_PTR(a)			__ALT_PTR(a, alt_offset)
 
