@@ -862,7 +862,7 @@ static unsigned long iov_iter_alignment_kvec(const struct iov_iter *i)
 	for (k = 0; k < i->nr_segs; k++, skip = 0) {
 		size_t len = i->kvec[k].iov_len - skip;
 		if (len) {
-			res |= (ptraddr_t)i->kvec[k].iov_base + skip;
+			res |= __c_pa(i->kvec[k].iov_base) + skip;
 			if (len > size)
 				len = size;
 			res |= len;
@@ -900,7 +900,7 @@ unsigned long iov_iter_alignment(const struct iov_iter *i)
 	if (likely(iter_is_ubuf(i))) {
 		size_t size = i->count;
 		if (size)
-			return ((user_uintptr_t)i->ubuf + i->iov_offset) | size;
+			return (__c_pa_u(i->ubuf) + i->iov_offset) | size;
 		return 0;
 	}
 
@@ -942,7 +942,7 @@ unsigned long iov_iter_gap_alignment(const struct iov_iter *i)
 			user_uintptr_t base = (user_uintptr_t)iov->iov_base;
 			if (v) // if not the first one
 				res |= base | v; // this start | previous end
-			v = base + iov->iov_len;
+			v = __c_ua(base) + iov->iov_len;
 			if (size <= iov->iov_len)
 				break;
 			size -= iov->iov_len;
