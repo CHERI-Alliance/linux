@@ -1044,7 +1044,7 @@ static inline void *devlog_get_idx(struct devlog_info *dinfo, loff_t pos)
 	if (pos > dinfo->nentries)
 		return NULL;
 
-	return (void *)(uintptr_t)(pos + 1);
+	return __c_fakep(pos + 1);
 }
 
 static void *devlog_start(struct seq_file *seq, loff_t *pos)
@@ -1194,7 +1194,7 @@ static inline void *mboxlog_get_idx(struct seq_file *seq, loff_t pos)
 	struct adapter *adapter = seq->private;
 	struct mbox_cmd_log *log = adapter->mbox_log;
 
-	return ((pos <= log->size) ? (void *)(uintptr_t)(pos + 1) : NULL);
+	return ((pos <= log->size) ? __c_fakep(pos + 1) : NULL);
 }
 
 static void *mboxlog_start(struct seq_file *seq, loff_t *pos)
@@ -1890,7 +1890,7 @@ static inline void *mps_tcam_get_idx(struct seq_file *seq, loff_t pos)
 	int max_mac_addr = is_t4(adap->params.chip) ?
 				NUM_MPS_CLS_SRAM_L_INSTANCES :
 				NUM_MPS_T5_CLS_SRAM_L_INSTANCES;
-	return ((pos <= max_mac_addr) ? (void *)(uintptr_t)(pos + 1) : NULL);
+	return ((pos <= max_mac_addr) ? __c_fakep(pos + 1) : NULL);
 }
 
 static void *mps_tcam_start(struct seq_file *seq, loff_t *pos)
@@ -2389,7 +2389,7 @@ static int dcb_info_show(struct seq_file *seq, void *v)
 	if (v == SEQ_START_TOKEN) {
 		seq_puts(seq, "Data Center Bridging Information\n");
 	} else {
-		int port = (uintptr_t)v - 2;
+		int port = __c_pa(v) - 2;
 		struct net_device *dev = adap->port[port];
 		struct port_info *pi = netdev2pinfo(dev);
 		struct port_dcb_info *dcb = &pi->dcb;
@@ -2514,7 +2514,7 @@ static int dcb_info_show(struct seq_file *seq, void *v)
 static inline void *dcb_info_get_idx(struct adapter *adap, loff_t pos)
 {
 	return (pos <= adap->params.nports
-		? (void *)((uintptr_t)pos + 1)
+		? __c_fakep(pos + 1)
 		: NULL);
 }
 
@@ -3208,7 +3208,7 @@ static void *sge_queue_start(struct seq_file *seq, loff_t *pos)
 {
 	int entries = sge_queue_entries(seq->private);
 
-	return *pos < entries ? (void *)((uintptr_t)*pos + 1) : NULL;
+	return *pos < entries ? __c_fakep(*pos + 1) : NULL;
 }
 
 static void sge_queue_stop(struct seq_file *seq, void *v)
@@ -3220,7 +3220,7 @@ static void *sge_queue_next(struct seq_file *seq, void *v, loff_t *pos)
 	int entries = sge_queue_entries(seq->private);
 
 	++*pos;
-	return *pos < entries ? (void *)((uintptr_t)*pos + 1) : NULL;
+	return *pos < entries ? __c_fakep(*pos + 1) : NULL;
 }
 
 static const struct seq_operations sge_qinfo_seq_ops = {

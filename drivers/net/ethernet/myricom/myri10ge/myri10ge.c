@@ -386,7 +386,7 @@ myri10ge_send_cmd(struct myri10ge_priv *mgp, u32 cmd,
 	int sleep_total = 0;
 
 	/* ensure buf is aligned to 8 bytes */
-	buf = (struct mcp_cmd *)ALIGN((uintptr_t)buf_bytes, 8);
+	buf = (struct mcp_cmd *)PTR_ALIGN(&buf_bytes, 8);
 
 	buf->data0 = htonl(data->data0);
 	buf->data1 = htonl(data->data1);
@@ -1983,7 +1983,7 @@ static int myri10ge_allocate_rings(struct myri10ge_slice_state *ss)
 
 	/* ensure req_list entries are aligned to 8 bytes */
 	ss->tx.req_list = (struct mcp_kreq_ether_send *)
-	    ALIGN((uintptr_t)ss->tx.req_bytes, 8);
+	    PTR_ALIGN(ss->tx.req_bytes, 8);
 	ss->tx.queue_active = 0;
 
 	bytes = rx_ring_entries * sizeof(*ss->rx_small.shadow);

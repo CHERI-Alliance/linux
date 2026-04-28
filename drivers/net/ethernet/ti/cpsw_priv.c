@@ -1408,7 +1408,7 @@ static int cpsw_qos_clsflower_add_policer(struct cpsw_priv *priv,
 		if (ret)
 			return ret;
 
-		priv->ale_bc_ratelimit.cookie = cls->cookie;
+		priv->ale_bc_ratelimit.cookie = __c_ua(cls->cookie);
 		priv->ale_bc_ratelimit.rate_packet_ps = rate_pkt_ps;
 	} else if (ether_addr_equal_unaligned(match.key->dst, mc_mac) &&
 		   ether_addr_equal_unaligned(match.mask->dst, mc_mac)) {
@@ -1416,7 +1416,7 @@ static int cpsw_qos_clsflower_add_policer(struct cpsw_priv *priv,
 		if (ret)
 			return ret;
 
-		priv->ale_mc_ratelimit.cookie = cls->cookie;
+		priv->ale_mc_ratelimit.cookie = __c_ua(cls->cookie);
 		priv->ale_mc_ratelimit.rate_packet_ps = rate_pkt_ps;
 	} else {
 		NL_SET_ERR_MSG_MOD(extack, "Not supported matching key");

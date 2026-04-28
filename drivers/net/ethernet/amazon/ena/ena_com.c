@@ -1228,7 +1228,7 @@ static int ena_com_create_io_sq(struct ena_com_dev *ena_dev,
 	io_sq->idx = cmd_completion.sq_idx;
 
 	io_sq->db_addr = (u32 __iomem *)((uintptr_t)ena_dev->reg_bar +
-		(uintptr_t)cmd_completion.sq_doorbell_offset);
+		(unsigned long)cmd_completion.sq_doorbell_offset);
 
 	if (io_sq->mem_queue_type == ENA_ADMIN_PLACEMENT_POLICY_DEV) {
 		io_sq->desc_addr.pbuf_dev_addr =

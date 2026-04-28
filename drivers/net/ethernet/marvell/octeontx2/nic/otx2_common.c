@@ -1027,7 +1027,7 @@ int otx2_sq_init(struct otx2_nic *pfvf, u16 qidx, u16 sqb_aura)
 	sq->sqe_thresh = ((sq->num_sqbs * sq->sqe_per_sqb) * 10) / 100;
 	sq->aura_id = sqb_aura;
 	sq->aura_fc_addr = pool->fc_addr->base;
-	sq->io_addr = (__force u64)otx2_get_regaddr(pfvf, NIX_LF_OP_SENDX(0));
+	sq->io_addr = (uintptr_t)otx2_get_regaddr(pfvf, NIX_LF_OP_SENDX(0));
 
 	sq->stats.bytes = 0;
 	sq->stats.pkts = 0;

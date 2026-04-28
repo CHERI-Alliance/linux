@@ -1380,8 +1380,8 @@ static int atl2_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	netdev->max_mtu = ETH_DATA_LEN + VLAN_HLEN;
 	strscpy(netdev->name, pci_name(pdev), sizeof(netdev->name));
 
-	netdev->mem_start = mmio_start;
-	netdev->mem_end = mmio_start + mmio_len;
+	netdev->mem_start = __c_fakeu(mmio_start);
+	netdev->mem_end = __c_fakeu(mmio_start + mmio_len);
 	adapter->bd_number = cards_found;
 	adapter->pci_using_64 = false;
 

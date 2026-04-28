@@ -248,7 +248,7 @@ static int cn10k_outb_cptlf_iq_alloc(struct otx2_nic *pf)
 
 	/* Align pointers */
 	iq->vaddr = PTR_ALIGN(iq->vaddr, OTX2_ALIGN);
-	iq->dma_addr = PTR_ALIGN(iq->dma_addr, OTX2_ALIGN);
+	iq->dma_addr = ALIGN(iq->dma_addr, OTX2_ALIGN);
 	return 0;
 }
 
@@ -330,7 +330,7 @@ static int cn10k_outb_cpt_init(struct net_device *netdev)
 	if (ret)
 		goto lf_free;
 
-	pf->ipsec.io_addr = (__force u64)otx2_get_regaddr(pf,
+	pf->ipsec.io_addr = (__force uintptr_t)otx2_get_regaddr(pf,
 						CN10K_CPT_LF_NQX(0));
 
 	/* Set ipsec offload enabled for this device */
@@ -382,7 +382,8 @@ static void cn10k_cpt_inst_flush(struct otx2_nic *pf, struct cpt_inst_s *inst,
 				 u64 size)
 {
 	struct otx2_lmt_info *lmt_info;
-	u64 val = 0, tar_addr = 0;
+	u64 val = 0;
+	uintptr_t tar_addr = 0;
 
 	lmt_info = per_cpu_ptr(pf->hw.lmt_info, smp_processor_id());
 	/* FIXME: val[0:10] LMT_ID.
@@ -394,7 +395,8 @@ static void cn10k_cpt_inst_flush(struct otx2_nic *pf, struct cpt_inst_s *inst,
 	 * words are present.
 	 * tar_addr[6:4] size of first LMTST - 1 in units of 128b.
 	 */
-	tar_addr |= pf->ipsec.io_addr | (((size / 16) - 1) & 0x7) << 4;
+	tar_addr = pf->ipsec.io_addr;
+	tar_addr |= (((size / 16) - 1) & 0x7) << 4;
 	dma_wmb();
 	memcpy((u64 *)lmt_info->lmt_addr, inst, size);
 	cn10k_lmt_flush(val, tar_addr);

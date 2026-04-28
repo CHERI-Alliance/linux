@@ -1278,7 +1278,7 @@ static void *mtk_dma_ring_alloc(struct mtk_eth *eth, size_t size,
 		if (!dma_ring)
 			return dma_ring;
 		*dma_handle = gen_pool_virt_to_phys(eth->sram_pool,
-						    (uintptr_t)dma_ring);
+						    __c_pa(dma_ring));
 	} else {
 		dma_ring = dma_alloc_coherent(eth->dma_dev, size, dma_handle,
 					      GFP_KERNEL);

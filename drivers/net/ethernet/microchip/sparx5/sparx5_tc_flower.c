@@ -1188,7 +1188,7 @@ static int sparx5_tc_flower_replace(struct net_device *ndev,
 	if (IS_ERR(vrule))
 		return PTR_ERR(vrule);
 
-	vrule->cookie = fco->cookie;
+	vrule->cookie = __c_ua(fco->cookie);
 
 	state.vrule = vrule;
 	state.frule = flow_cls_offload_flow_rule(fco);
@@ -1391,7 +1391,7 @@ static int sparx5_tc_flower_destroy(struct net_device *ndev,
 
 	vctrl = port->sparx5->vcap_ctrl;
 	while (true) {
-		rule_id = vcap_lookup_rule_by_cookie(vctrl, fco->cookie);
+		rule_id = vcap_lookup_rule_by_cookie(vctrl, __c_ua(fco->cookie));
 		if (rule_id <= 0)
 			break;
 		if (count == 0) {
@@ -1426,7 +1426,7 @@ static int sparx5_tc_flower_stats(struct net_device *ndev,
 	int err;
 
 	vctrl = port->sparx5->vcap_ctrl;
-	err = vcap_get_rule_count_by_cookie(vctrl, &ctr, fco->cookie);
+	err = vcap_get_rule_count_by_cookie(vctrl, &ctr, __c_ua(fco->cookie));
 	if (err)
 		return err;
 	flow_stats_update(&fco->stats, 0x0, ctr.value, 0, lastused,

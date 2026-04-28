@@ -793,7 +793,7 @@ static int cnic_alloc_dma(struct cnic_dev *dev, struct cnic_dma *dma,
 	if (dma->pg_arr == NULL)
 		return -ENOMEM;
 
-	dma->pg_map_arr = (dma_addr_t *) (dma->pg_arr + pages);
+	dma->pg_map_arr = (dma_addr_t *)(void *) (dma->pg_arr + pages);
 	dma->num_pages = pages;
 
 	for (i = 0; i < pages; i++) {

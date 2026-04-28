@@ -2149,7 +2149,7 @@ static netdev_tx_t ravb_start_xmit(struct sk_buff *skb, struct net_device *ndev)
 	if (num_tx_desc > 1) {
 		buffer = PTR_ALIGN(priv->tx_align[q], DPTR_ALIGN) +
 			 entry / num_tx_desc * DPTR_ALIGN;
-		len = PTR_ALIGN(skb->data, DPTR_ALIGN) - skb->data;
+		len = ALIGN(__c_pa(skb->data), DPTR_ALIGN) - __c_pa(skb->data);
 
 		/* Zero length DMA descriptors are problematic as they seem
 		 * to terminate DMA transfers. Avoid them by simply using a
@@ -3085,7 +3085,7 @@ static int ravb_probe(struct platform_device *pdev)
 
 	/* Print device information */
 	netdev_info(ndev, "Base address at %#x, %pM, IRQ %d.\n",
-		    (u32)ndev->base_addr, ndev->dev_addr, ndev->irq);
+		    (u32)__c_ua(ndev->base_addr), ndev->dev_addr, ndev->irq);
 
 	pm_runtime_put_autosuspend(&pdev->dev);
 

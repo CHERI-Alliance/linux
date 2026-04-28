@@ -16,9 +16,9 @@ struct muram_info {
 };
 
 static unsigned long fman_muram_vbase_to_offset(struct muram_info *muram,
-						unsigned long vaddr)
+						uintptr_t vaddr)
 {
-	return vaddr - (uintptr_t)muram->vbase;
+	return __c_ua(vaddr) - __c_pa(muram->vbase);
 }
 
 /**
@@ -86,8 +86,8 @@ muram_free:
  *
  * Return: The address of the memory block
  */
-unsigned long fman_muram_offset_to_vbase(struct muram_info *muram,
-					 unsigned long offset)
+uintptr_t fman_muram_offset_to_vbase(struct muram_info *muram,
+				     unsigned long offset)
 {
 	return offset + (uintptr_t)muram->vbase;
 }
@@ -103,7 +103,7 @@ unsigned long fman_muram_offset_to_vbase(struct muram_info *muram,
  */
 unsigned long fman_muram_alloc(struct muram_info *muram, size_t size)
 {
-	unsigned long vaddr;
+	uintptr_t vaddr;
 
 	vaddr = gen_pool_alloc(muram->pool, size);
 	if (!vaddr)
@@ -125,7 +125,7 @@ unsigned long fman_muram_alloc(struct muram_info *muram, size_t size)
 void fman_muram_free_mem(struct muram_info *muram, unsigned long offset,
 			 size_t size)
 {
-	unsigned long addr = fman_muram_offset_to_vbase(muram, offset);
+	uintptr_t addr = fman_muram_offset_to_vbase(muram, offset);
 
 	gen_pool_free(muram->pool, addr, size);
 }

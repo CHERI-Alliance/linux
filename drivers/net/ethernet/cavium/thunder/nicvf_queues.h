@@ -269,9 +269,9 @@ struct snd_queue {
 	atomic_t	free_cnt;
 	u32		head;
 	u32		tail;
-	u64		*skbuff;
+	uintptr_t	*skbuff;
 	void		*desc;
-	u64		*xdp_page;
+	uintptr_t	*xdp_page;
 	u16		xdp_desc_cnt;
 	u16		xdp_free_cnt;
 	bool		is_xdp;
@@ -343,7 +343,7 @@ void nicvf_sq_free_used_descs(struct net_device *netdev,
 int nicvf_sq_append_skb(struct nicvf *nic, struct snd_queue *sq,
 			struct sk_buff *skb, u8 sq_num);
 int nicvf_xdp_sq_append_pkt(struct nicvf *nic, struct snd_queue *sq,
-			    u64 bufaddr, u64 dma_addr, u16 len);
+			    uintptr_t bufaddr, u64 dma_addr, u16 len);
 void nicvf_xdp_sq_doorbell(struct nicvf *nic, struct snd_queue *sq, int sq_num);
 
 struct sk_buff *nicvf_get_rcv_skb(struct nicvf *nic,

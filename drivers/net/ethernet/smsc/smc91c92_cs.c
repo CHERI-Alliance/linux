@@ -1053,7 +1053,7 @@ static int smc_open(struct net_device *dev)
     struct pcmcia_device *link = smc->p_dev;
 
     dev_dbg(&link->dev, "%s: smc_open(%p), ID/Window %4.4x.\n",
-	  dev->name, dev, inw(dev->base_addr + BANK_SELECT));
+	  dev->name, dev, inw(__c_ua(dev->base_addr) + BANK_SELECT));
 #ifdef PCMCIA_DEBUG
     smc_dump(dev);
 #endif

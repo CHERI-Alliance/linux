@@ -7424,7 +7424,7 @@ static int hclge_add_cls_flower(struct hnae3_handle *handle,
 	rule->cls_flower.tc = tc;
 	rule->location = cls_flower->common.prio - 1;
 	rule->vf_id = 0;
-	rule->cls_flower.cookie = cls_flower->cookie;
+	rule->cls_flower.cookie = __c_ua(cls_flower->cookie);
 	rule->rule_type = HCLGE_FD_TC_FLOWER_ACTIVE;
 
 	ret = hclge_add_fd_entry_common(hdev, rule);
@@ -7461,7 +7461,7 @@ static int hclge_del_cls_flower(struct hnae3_handle *handle,
 
 	spin_lock_bh(&hdev->fd_rule_lock);
 
-	rule = hclge_find_cls_flower(hdev, cls_flower->cookie);
+	rule = hclge_find_cls_flower(hdev, __c_ua(cls_flower->cookie));
 	if (!rule) {
 		spin_unlock_bh(&hdev->fd_rule_lock);
 		return -EINVAL;

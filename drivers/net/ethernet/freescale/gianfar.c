@@ -1829,7 +1829,7 @@ static netdev_tx_t gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	if (do_csum) {
 		gfar_tx_checksum(skb, fcb, fcb_len);
 
-		if (unlikely(gfar_csum_errata_12(priv, (uintptr_t)fcb)) ||
+		if (unlikely(gfar_csum_errata_12(priv, __c_pa(fcb))) ||
 		    unlikely(gfar_csum_errata_76(priv, skb->len))) {
 			__skb_pull(skb, GMAC_FCB_LEN);
 			skb_checksum_help(skb);

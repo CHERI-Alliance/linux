@@ -13112,9 +13112,9 @@ static int bnx2x_init_dev(struct bnx2x *bp, struct pci_dev *pdev,
 		goto err_out_release;
 	}
 
-	dev->mem_start = pci_resource_start(pdev, 0);
+	dev->mem_start = __c_fakeu(pci_resource_start(pdev, 0));
 	dev->base_addr = dev->mem_start;
-	dev->mem_end = pci_resource_end(pdev, 0);
+	dev->mem_end = __c_fakeu(pci_resource_end(pdev, 0));
 
 	dev->irq = pdev->irq;
 
@@ -13891,7 +13891,7 @@ static int bnx2x_init_one(struct pci_dev *pdev,
 
 	pci_set_drvdata(pdev, dev);
 
-	rc = bnx2x_init_dev(bp, pdev, dev, ent->driver_data);
+	rc = bnx2x_init_dev(bp, pdev, dev, __c_ua(ent->driver_data));
 	if (rc < 0) {
 		free_netdev(dev);
 		return rc;

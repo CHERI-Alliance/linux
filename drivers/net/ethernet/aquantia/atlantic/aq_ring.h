@@ -12,6 +12,7 @@
 
 #include "aq_common.h"
 #include "aq_vec.h"
+#include <linux/cheri.h>
 
 #define AQ_XDP_HEADROOM		ALIGN(max(NET_SKB_PAD, XDP_PACKET_HEADROOM), 8)
 #define AQ_XDP_TAILROOM		SKB_DATA_ALIGN(sizeof(struct skb_shared_info))
@@ -38,7 +39,7 @@ struct aq_rxpage {
  *  This aq_ring_buff_s doesn't have endianness dependency.
  *  It is __packed for cache line optimizations.
  */
-struct __packed aq_ring_buff_s {
+struct __packed_if_not_cheri aq_ring_buff_s {
 	union {
 		/* RX/TX */
 		dma_addr_t pa;
@@ -91,7 +92,7 @@ struct __packed aq_ring_buff_s {
 		};
 		u64 flags;
 	};
-};
+} __cheri_pointer_align;
 
 struct aq_ring_stats_rx_s {
 	struct u64_stats_sync syncp;	/* must be first */

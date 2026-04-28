@@ -3123,7 +3123,7 @@ static int cxgb_ioctl(struct net_device *dev, struct ifreq *req, int cmd)
 	unsigned int mbox;
 	int ret = 0, prtad, devad;
 	struct port_info *pi = netdev_priv(dev);
-	struct mii_ioctl_data *data = (struct mii_ioctl_data *)&req->ifr_data;
+	struct mii_ioctl_data *data = (struct mii_ioctl_data *)(void *)&req->ifr_data;
 
 	switch (cmd) {
 	case SIOCGMIIPHY:

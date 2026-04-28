@@ -511,7 +511,7 @@ static int nicvf_init_snd_queue(struct nicvf *nic,
 		return err;
 
 	sq->desc = sq->dmem.base;
-	sq->skbuff = kcalloc(q_len, sizeof(u64), GFP_KERNEL);
+	sq->skbuff = kcalloc(q_len, sizeof(*sq->skbuff), GFP_KERNEL);
 	if (!sq->skbuff)
 		return -ENOMEM;
 
@@ -524,7 +524,7 @@ static int nicvf_init_snd_queue(struct nicvf *nic,
 		qidx += ((nic->sqs_id + 1) * MAX_SND_QUEUES_PER_QS);
 	if (qidx < nic->pnicvf->xdp_tx_queues) {
 		/* Alloc memory to save page pointers for XDP_TX */
-		sq->xdp_page = kcalloc(q_len, sizeof(u64), GFP_KERNEL);
+		sq->xdp_page = kcalloc(q_len, sizeof(*sq->xdp_page), GFP_KERNEL);
 		if (!sq->xdp_page)
 			return -ENOMEM;
 		sq->xdp_desc_cnt = 0;
@@ -1219,7 +1219,7 @@ void nicvf_xdp_sq_doorbell(struct nicvf *nic,
 
 static inline void
 nicvf_xdp_sq_add_hdr_subdesc(struct snd_queue *sq, int qentry,
-			     int subdesc_cnt, u64 data, int len)
+			     int subdesc_cnt, uintptr_t data, int len)
 {
 	struct sq_hdr_subdesc *hdr;
 
@@ -1233,7 +1233,7 @@ nicvf_xdp_sq_add_hdr_subdesc(struct snd_queue *sq, int qentry,
 }
 
 int nicvf_xdp_sq_append_pkt(struct nicvf *nic, struct snd_queue *sq,
-			    u64 bufaddr, u64 dma_addr, u16 len)
+			    uintptr_t bufaddr, u64 dma_addr, u16 len)
 {
 	int subdesc_cnt = MIN_SQ_DESC_PER_PKT_XMIT;
 	int qentry;

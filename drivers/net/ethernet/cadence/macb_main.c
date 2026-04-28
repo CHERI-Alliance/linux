@@ -5582,7 +5582,7 @@ static int macb_probe(struct platform_device *pdev)
 		goto err_disable_clocks;
 	}
 
-	dev->base_addr = regs->start;
+	dev->base_addr = __c_fakeu(regs->start);
 
 	SET_NETDEV_DEV(dev, &pdev->dev);
 

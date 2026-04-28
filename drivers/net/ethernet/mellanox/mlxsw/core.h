@@ -216,16 +216,16 @@ int mlxsw_core_trap_state_set(struct mlxsw_core *mlxsw_core,
 			      bool enabled);
 
 typedef void mlxsw_reg_trans_cb_t(struct mlxsw_core *mlxsw_core, char *payload,
-				  size_t payload_len, unsigned long cb_priv);
+				  size_t payload_len, uintptr_t cb_priv);
 
 int mlxsw_reg_trans_query(struct mlxsw_core *mlxsw_core,
 			  const struct mlxsw_reg_info *reg, char *payload,
 			  struct list_head *bulk_list,
-			  mlxsw_reg_trans_cb_t *cb, unsigned long cb_priv);
+			  mlxsw_reg_trans_cb_t *cb, uintptr_t cb_priv);
 int mlxsw_reg_trans_write(struct mlxsw_core *mlxsw_core,
 			  const struct mlxsw_reg_info *reg, char *payload,
 			  struct list_head *bulk_list,
-			  mlxsw_reg_trans_cb_t *cb, unsigned long cb_priv);
+			  mlxsw_reg_trans_cb_t *cb, uintptr_t cb_priv);
 int mlxsw_reg_trans_bulk_wait(struct list_head *bulk_list);
 
 typedef void mlxsw_irq_event_cb_t(struct mlxsw_core *mlxsw_core);

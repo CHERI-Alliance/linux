@@ -158,7 +158,8 @@ void cn10k_sqe_flush(void *dev, struct otx2_snd_queue *sq, int size, int qidx)
 {
 	struct otx2_lmt_info *lmt_info;
 	struct otx2_nic *pfvf = dev;
-	u64 val = 0, tar_addr = 0;
+	u64 val = 0;
+	uintptr_t tar_addr = 0;
 
 	lmt_info = per_cpu_ptr(pfvf->hw.lmt_info, smp_processor_id());
 	/* FIXME: val[0:10] LMT_ID.
@@ -170,7 +171,8 @@ void cn10k_sqe_flush(void *dev, struct otx2_snd_queue *sq, int size, int qidx)
 	 * words are present.
 	 * tar_addr[6:4] size of first LMTST - 1 in units of 128b.
 	 */
-	tar_addr |= sq->io_addr | (((size / 16) - 1) & 0x7) << 4;
+	tar_addr = sq->io_addr;
+	tar_addr |= (((size / 16) - 1) & 0x7) << 4;
 	dma_wmb();
 	memcpy((u64 *)lmt_info->lmt_addr, sq->sqe_base, size);
 	cn10k_lmt_flush(val, tar_addr);

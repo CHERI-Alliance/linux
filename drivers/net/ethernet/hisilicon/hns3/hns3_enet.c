@@ -3149,7 +3149,7 @@ static int hns3_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 		return -ENOMEM;
 
 	ae_dev->pdev = pdev;
-	ae_dev->flag = ent->driver_data;
+	ae_dev->flag = __c_ua(ent->driver_data);
 	pci_set_drvdata(pdev, ae_dev);
 
 	ret = hnae3_register_ae_dev(ae_dev);

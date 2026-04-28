@@ -528,7 +528,7 @@ static int el3_open(struct net_device *dev)
 	mod_timer(&lp->media, jiffies + HZ);
 
 	dev_dbg(&link->dev, "%s: opened, status %4.4x.\n",
-	  dev->name, inw(dev->base_addr + EL3_STATUS));
+	  dev->name, inw(__c_ua(dev->base_addr) + EL3_STATUS));
 
 	return 0;
 }

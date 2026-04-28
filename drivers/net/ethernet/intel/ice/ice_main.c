@@ -8589,7 +8589,7 @@ static int ice_add_vsi_to_fdir(struct ice_pf *pf, struct ice_vsi *vsi)
 	for (flow = 0; flow < ICE_FLTR_PTYPE_MAX; flow++) {
 		struct ice_fd_hw_prof *prof;
 		int tun, status;
-		u64 entry_h;
+		uintptr_t entry_h;
 
 		if (!(hw->fdir_prof && hw->fdir_prof[flow] &&
 		      hw->fdir_prof[flow]->cnt))

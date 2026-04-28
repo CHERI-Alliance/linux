@@ -91,7 +91,7 @@ enum arua_mapped_qtypes {
 	otx2_read64(pfvf, NIX_LF_TX_STATX(reg))
 
 struct otx2_lmt_info {
-	u64 lmt_addr;
+	uintptr_t lmt_addr;
 	u16 lmt_id;
 };
 
@@ -783,10 +783,11 @@ static inline void __cn10k_aura_freeptr(struct otx2_nic *pfvf, u64 aura,
 {
 	struct otx2_lmt_info *lmt_info;
 	u64 size = 0, count_eot = 0;
-	u64 tar_addr, val = 0;
+	uintptr_t tar_addr;
+	u64 val = 0;
 
 	lmt_info = per_cpu_ptr(pfvf->hw.lmt_info, smp_processor_id());
-	tar_addr = (__force u64)otx2_get_regaddr(pfvf, NPA_LF_AURA_BATCH_FREE0);
+	tar_addr = (uintptr_t)otx2_get_regaddr(pfvf, NPA_LF_AURA_BATCH_FREE0);
 	/* LMTID is same as AURA Id */
 	val = (lmt_info->lmt_id & 0x7FF) | BIT_ULL(63);
 	/* Meaning of count_eot

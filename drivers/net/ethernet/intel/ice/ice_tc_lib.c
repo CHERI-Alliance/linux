@@ -2195,7 +2195,7 @@ ice_add_tc_fltr(struct net_device *netdev, struct ice_vsi *vsi,
 	if (!fltr)
 		return -ENOMEM;
 
-	fltr->cookie = f->cookie;
+	fltr->cookie = __c_ua(f->cookie);
 	fltr->extack = f->common.extack;
 	fltr->src_vsi = vsi;
 	INIT_HLIST_NODE(&fltr->tc_flower_node);
@@ -2277,7 +2277,7 @@ int ice_add_cls_flower(struct net_device *netdev, struct ice_vsi *vsi,
 	}
 
 	/* avoid duplicate entries, if exists - return error */
-	fltr = ice_find_tc_flower_fltr(pf, cls_flower->cookie);
+	fltr = ice_find_tc_flower_fltr(pf, __c_ua(cls_flower->cookie));
 	if (fltr) {
 		NL_SET_ERR_MSG_MOD(extack, "filter cookie already exists, ignoring");
 		return -EEXIST;
@@ -2306,7 +2306,7 @@ ice_del_cls_flower(struct ice_vsi *vsi, struct flow_cls_offload *cls_flower)
 	int err;
 
 	/* find filter */
-	fltr = ice_find_tc_flower_fltr(pf, cls_flower->cookie);
+	fltr = ice_find_tc_flower_fltr(pf, __c_ua(cls_flower->cookie));
 	if (!fltr) {
 		if (!test_bit(ICE_FLAG_TC_MQPRIO, pf->flags) &&
 		    hlist_empty(&pf->tc_flower_fltr_list))

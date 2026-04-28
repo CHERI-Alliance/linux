@@ -233,14 +233,14 @@ int cn20k_rvu_get_mbox_regions(struct rvu *rvu, void **mbox_addr,
 			       int num, int type, unsigned long *pf_bmap)
 {
 	int region;
-	u64 bar;
+	uintptr_t bar;
 
 	if (type == TYPE_AFVF) {
 		for (region = 0; region < num; region++) {
 			if (!test_bit(region, pf_bmap))
 				continue;
 
-			bar = (uintptr_t)phys_to_virt((uintptr_t)rvu->ng_rvu->vf_mbox_addr->base);
+			bar = (uintptr_t)phys_to_virt(__c_pa(rvu->ng_rvu->vf_mbox_addr->base));
 			bar += region * MBOX_SIZE;
 			mbox_addr[region] = (void *)bar;
 
@@ -254,7 +254,7 @@ int cn20k_rvu_get_mbox_regions(struct rvu *rvu, void **mbox_addr,
 		if (!test_bit(region, pf_bmap))
 			continue;
 
-		bar = (uintptr_t)phys_to_virt((uintptr_t)rvu->ng_rvu->pf_mbox_addr->base);
+		bar = (uintptr_t)phys_to_virt(__c_pa(rvu->ng_rvu->pf_mbox_addr->base));
 		bar += region * MBOX_SIZE;
 
 		mbox_addr[region] = (void *)bar;

@@ -2036,7 +2036,7 @@ static void ixgbe_dma_sync_frag(struct ixgbe_ring *rx_ring,
 {
 	if (ring_uses_build_skb(rx_ring)) {
 		unsigned long mask = (unsigned long)ixgbe_rx_pg_size(rx_ring) - 1;
-		unsigned long offset = (uintptr_t)(skb->data) & mask;
+		unsigned long offset = __c_pa(skb->data) & mask;
 
 		dma_sync_single_range_for_cpu(rx_ring->dev,
 					      IXGBE_CB(skb)->dma,

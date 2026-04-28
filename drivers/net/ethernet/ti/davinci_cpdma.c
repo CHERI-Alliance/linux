@@ -281,7 +281,7 @@ static inline dma_addr_t desc_phys(struct cpdma_desc_pool *pool,
 {
 	if (!desc)
 		return 0;
-	return pool->hw_addr + (__force long)desc - (__force long)pool->iomap;
+	return pool->hw_addr + __c_pa(desc) - __c_pa(pool->iomap);
 }
 
 static inline struct cpdma_desc __iomem *
@@ -1061,7 +1061,11 @@ static int cpdma_chan_submit_si(struct submit_info *si)
 	writel_relaxed(buffer, &desc->hw_buffer);
 	writel_relaxed(len, &desc->hw_len);
 	writel_relaxed(mode | len, &desc->hw_mode);
+#ifdef CONFIG_CHERI_KERNEL
+	desc->sw_token = si->token;
+#else
 	writel_relaxed((uintptr_t)si->token, &desc->sw_token);
+#endif
 	writel_relaxed(buffer, &desc->sw_buffer);
 	writel_relaxed(si->data_dma ? len | CPDMA_DMA_EXT_MAP : len,
 		       &desc->sw_len);
@@ -1200,7 +1204,7 @@ static void __cpdma_chan_free(struct cpdma_chan *chan,
 	int				origlen;
 	uintptr_t			token;
 
-	token      = desc_read(desc, sw_token);
+	token      = (uintptr_t)desc->sw_token;
 	origlen    = desc_read(desc, sw_len);
 
 	buff_dma   = desc_read(desc, sw_buffer);
