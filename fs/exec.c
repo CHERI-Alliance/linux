@@ -431,7 +431,7 @@ static int bprm_stack_limits(struct linux_binprm *bprm)
 	 * See do_execveat_common().
 	 */
 	if (check_add_overflow(max(bprm->argc, 1), bprm->envc, &ptr_size) ||
-	    check_mul_overflow(ptr_size, sizeof(void *), &ptr_size))
+	    check_mul_overflow(ptr_size, sizeof(user_uintptr_t), &ptr_size))
 		return -E2BIG;
 	if (limit <= ptr_size)
 		return -E2BIG;
