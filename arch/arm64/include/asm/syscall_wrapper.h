@@ -137,6 +137,11 @@
 #define __SYSCALL_ANNOTATE(name, ret_type) name, __SYSCALL_RET_T##ret_type
 #define SYSCALL_PREP(name, ...) __SYSCALL_ANNOTATE(_##name, __VA_ARGS__)
 
+#ifdef CONFIG_FTRACE_SYSCALLS
+#define SYSCALL_METADATA(x, name, ret_type, ...) \
+	__SYSCALL_METADATA(x, name,  __VA_ARGS__)
+#endif
+
 /*
  * Some syscalls with no parameters return valid capabilities, so __SYSCALL_DEFINE0
  * is added to handle such cases.
