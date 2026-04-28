@@ -2074,13 +2074,13 @@ ntb_transport_create_queue(void *data, struct device *client_dev,
 	if (use_dma) {
 		qp->tx_dma_chan =
 			dma_request_channel(dma_mask, ntb_dma_filter_fn,
-					    (void *)(unsigned long)node);
+					    (void *)(uintptr_t)node);
 		if (!qp->tx_dma_chan)
 			dev_info(&pdev->dev, "Unable to allocate TX DMA channel\n");
 
 		qp->rx_dma_chan =
 			dma_request_channel(dma_mask, ntb_dma_filter_fn,
-					    (void *)(unsigned long)node);
+					    (void *)(uintptr_t)node);
 		if (!qp->rx_dma_chan)
 			dev_info(&pdev->dev, "Unable to allocate RX DMA channel\n");
 	} else {

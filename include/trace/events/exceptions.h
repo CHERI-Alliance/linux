@@ -27,7 +27,7 @@ DECLARE_EVENT_CLASS(exceptions,
 	),
 
 	TP_printk("address=%ps ip=%ps error_code=0x%lx",
-		  (void *)__entry->address, (void *)__entry->ip,
+		  (void *)(uintptr_t)__entry->address, (void *)(uintptr_t)__entry->ip,
 		  __entry->error_code) );
 
 DEFINE_EVENT(exceptions, page_fault_user,

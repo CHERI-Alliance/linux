@@ -91,7 +91,7 @@ int fdtv_start_feed(struct dvb_demux_feed *dvbdmxfeed)
 		goto out;
 	}
 
-	dvbdmxfeed->priv = (typeof(dvbdmxfeed->priv))(unsigned long)c;
+	dvbdmxfeed->priv = (typeof(dvbdmxfeed->priv))(uintptr_t)c;
 	fdtv->channel_pid[c] = dvbdmxfeed->pid;
 	collect_channels(fdtv, &pidc, pids);
 

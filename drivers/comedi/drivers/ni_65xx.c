@@ -697,7 +697,7 @@ static int ni_65xx_auto_attach(struct comedi_device *dev,
 		s->insn_bits	= ni_65xx_dio_insn_bits;
 
 		/* the output ports always start after the input ports */
-		s->private = (void *)(unsigned long)board->num_di_ports;
+		s->private = (void *)(uintptr_t)board->num_di_ports;
 
 		/*
 		 * Use the io_bits to handle the inverted outputs.  Inverted

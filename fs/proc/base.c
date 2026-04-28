@@ -493,7 +493,7 @@ static int proc_pid_stack(struct seq_file *m, struct pid_namespace *ns,
 						  MAX_STACK_TRACE_DEPTH, 0);
 
 		for (i = 0; i < nr_entries; i++) {
-			seq_printf(m, "[<0>] %pB\n", (void *)entries[i]);
+			seq_printf(m, "[<0>] %pB\n", (void *)(uintptr_t)entries[i]);
 		}
 
 		unlock_trace(task);
@@ -544,7 +544,7 @@ static int lstats_show_proc(struct seq_file *m, void *v)
 
 				if (!bt)
 					break;
-				seq_printf(m, " %ps", (void *)bt);
+				seq_printf(m, " %ps", (void *)(uintptr_t)bt);
 			}
 			seq_putc(m, '\n');
 		}
@@ -2383,7 +2383,7 @@ static struct dentry *proc_map_files_lookup(struct inode *dir,
 
 	if (vma->vm_file)
 		result = proc_map_files_instantiate(dentry, task,
-				(void *)(unsigned long)vma->vm_file->f_mode);
+				(void *)(uintptr_t)vma->vm_file->f_mode);
 
 out_no_vma:
 	mmap_read_unlock(mm);
@@ -2483,7 +2483,7 @@ proc_map_files_readdir(struct file *file, struct dir_context *ctx)
 				      buf, len,
 				      proc_map_files_instantiate,
 				      task,
-				      (void *)(unsigned long)p->mode))
+				      (void *)(uintptr_t)p->mode))
 			break;
 		ctx->pos++;
 	}

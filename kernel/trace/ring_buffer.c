@@ -1758,7 +1758,7 @@ static bool rb_meta_init(struct trace_buffer *buffer, int scratch_size)
 		goto init;
 	}
 
-	if (bmeta->buffers_offset != (void *)ptr - (void *)bmeta) {
+	if (bmeta->buffers_offset != (void *)(uintptr_t)ptr - (void *)bmeta) {
 		pr_info("Ring buffer boot meta mismatch of first buffer offset\n");
 		goto init;
 	}
@@ -3854,7 +3854,7 @@ rb_try_to_discard(struct ring_buffer_per_cpu *cpu_buffer,
 	 * Make sure the tail_page is still the same and
 	 * the next write location is the end of this event
 	 */
-	if (bpage->page == (void *)addr && rb_page_write(bpage) == old_index) {
+	if (bpage->page == (void *)(uintptr_t)addr && rb_page_write(bpage) == old_index) {
 		unsigned long write_mask =
 			local_read(&bpage->write) & ~RB_WRITE_MASK;
 		unsigned long event_length = rb_event_length(event);
@@ -7224,7 +7224,7 @@ static int __rb_map_vma(struct ring_buffer_per_cpu *cpu_buffer,
 		if (WARN_ON_ONCE(s >= nr_subbufs))
 			return -EINVAL;
 
-		page = virt_to_page((void *)cpu_buffer->subbuf_ids[s]);
+		page = virt_to_page((void *)(uintptr_t)cpu_buffer->subbuf_ids[s]);
 
 		for (; off < (1 << (subbuf_order)); off++, page++) {
 			if (p >= nr_pages)

@@ -13,7 +13,7 @@ phys_addr_t __virt_to_phys(unsigned long x)
 	 */
 	WARN(!is_linear_mapping(x) && !is_kernel_mapping(x),
 	     "virt_to_phys used for non-linear address: %p (%pS)\n",
-	     (void *)x, (void *)x);
+	     (void *)(uintptr_t)x, (void *)(uintptr_t)x);
 
 	return __va_to_pa_nodebug(x);
 }

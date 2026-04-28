@@ -192,7 +192,7 @@ static int data_reloc_print_warning_inode(u64 inum, u64 offset, u64 num_bytes,
 "checksum error at logical %llu mirror %u root %llu inode %llu offset %llu length %u links %u (path: %s)",
 			   warn->logical, warn->mirror_num, root, inum, offset,
 			   fs_info->sectorsize, nlink,
-			   (char *)(unsigned long)ipath->fspath->val[i]);
+			   (char *)(uintptr_t)ipath->fspath->val[i]);
 	}
 
 	btrfs_put_root(local_root);

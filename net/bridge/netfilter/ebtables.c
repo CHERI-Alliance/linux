@@ -1810,7 +1810,7 @@ static int compat_calc_entry(const struct ebt_entry *e,
 	for (i = 0; i < NF_BR_NUMHOOKS; i++) {
 		const void *hookptr = info->hook_entry[i];
 		if (info->hook_entry[i] &&
-		    (e < (struct ebt_entry *)(base - hookptr))) {
+		    (e < (struct ebt_entry *)(uintptr_t)(base - hookptr))) {
 			newinfo->hook_entry[i] -= off;
 			pr_debug("0x%08X -> 0x%08X\n",
 					newinfo->hook_entry[i] + off,

@@ -166,15 +166,15 @@ static void ttm_pool_alloc_basic(struct kunit *test)
 
 	if (params->order <= MAX_PAGE_ORDER) {
 		if (ttm_pool_uses_dma_alloc(pool)) {
-			KUNIT_ASSERT_NOT_NULL(test, (void *)fst_page->private);
-			KUNIT_ASSERT_NOT_NULL(test, (void *)last_page->private);
+			KUNIT_ASSERT_NOT_NULL(test, (void *)(uintptr_t)fst_page->private);
+			KUNIT_ASSERT_NOT_NULL(test, (void *)(uintptr_t)last_page->private);
 		} else {
 			KUNIT_ASSERT_EQ(test, fst_page->private, params->order);
 		}
 	} else {
 		if (ttm_pool_uses_dma_alloc(pool)) {
-			KUNIT_ASSERT_NOT_NULL(test, (void *)fst_page->private);
-			KUNIT_ASSERT_NULL(test, (void *)last_page->private);
+			KUNIT_ASSERT_NOT_NULL(test, (void *)(uintptr_t)fst_page->private);
+			KUNIT_ASSERT_NULL(test, (void *)(uintptr_t)last_page->private);
 		} else {
 			/*
 			 * We expect to alloc one big block, followed by

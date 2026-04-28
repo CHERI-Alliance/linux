@@ -1041,7 +1041,7 @@ static void print_fields(struct trace_iterator *iter, struct trace_event_call *c
 			break;
 		case FILTER_TRACE_FN:
 			addr = trace_adjust_address(tr, *(unsigned long *)pos);
-			trace_seq_printf(&iter->seq, "%pS", (void *)addr);
+			trace_seq_printf(&iter->seq, "%pS", (void *)(uintptr_t)addr);
 			break;
 		case FILTER_CPU:
 		case FILTER_OTHER:
@@ -1080,13 +1080,13 @@ static void print_fields(struct trace_iterator *iter, struct trace_event_call *c
 
 					ip = addr + (uintptr_t)_stext;
 					ip = trace_adjust_address(tr, ip);
-					trace_seq_printf(&iter->seq, "%pS ", (void *)ip);
+					trace_seq_printf(&iter->seq, "%pS ", (void *)(uintptr_t)ip);
 				}
 
 				if (sizeof(long) == 4) {
 					addr = trace_adjust_address(tr, addr);
 					trace_seq_printf(&iter->seq, "%pS (%d)",
-							 (void *)addr, (int)addr);
+							 (void *)(uintptr_t)addr, (int)addr);
 				} else {
 					trace_seq_printf(&iter->seq, "0x%x (%d)",
 							 (unsigned int)addr, (int)addr);
@@ -1097,7 +1097,7 @@ static void print_fields(struct trace_iterator *iter, struct trace_event_call *c
 				if (sizeof(long) == 8) {
 					laddr = trace_adjust_address(tr, (unsigned long)laddr);
 					trace_seq_printf(&iter->seq, "%pS (%lld)",
-							 (void *)(long)laddr, laddr);
+							 (void *)(uintptr_t)laddr, laddr);
 				} else {
 					trace_seq_printf(&iter->seq, "0x%llx (%lld)", laddr, laddr);
 				}

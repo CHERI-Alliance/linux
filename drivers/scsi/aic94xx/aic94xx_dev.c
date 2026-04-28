@@ -144,7 +144,7 @@ static int asd_init_target_ddb(struct domain_device *dev)
 	if (ddb < 0)
 		return ddb;
 
-	dev->lldd_dev = (void *) (unsigned long) ddb;
+	dev->lldd_dev = (void *) (uintptr_t) ddb;
 
 	asd_ddbsite_write_byte(asd_ha, ddb, 0, DDB_TP_CONN_TYPE);
 	asd_ddbsite_write_byte(asd_ha, ddb, 1, 0);

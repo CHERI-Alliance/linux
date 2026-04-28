@@ -216,9 +216,9 @@ static void *attr_speed_get(void *test_or_suite, bool is_test)
 	struct kunit_case *test = is_test ? test_or_suite : NULL;
 
 	if (test)
-		return ((void *) test->attr.speed);
+		return ((void *)(uintptr_t) test->attr.speed);
 	else
-		return ((void *) suite->attr.speed);
+		return ((void *)(uintptr_t) suite->attr.speed);
 }
 
 static void *attr_module_get(void *test_or_suite, bool is_test)
@@ -243,7 +243,7 @@ static void *attr_is_init_get(void *test_or_suite, bool is_test)
 	if (test)
 		return ((void *) NULL);
 	else
-		return ((void *) suite->is_init);
+		return ((void *)(uintptr_t) suite->is_init);
 }
 
 /* List of all Test Attributes */

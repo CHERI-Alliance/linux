@@ -1272,7 +1272,7 @@ static int pci_create_attr(struct pci_dev *pdev, int num, int write_combine)
 	res_attr->attr.name = res_attr_name;
 	res_attr->attr.mode = 0600;
 	res_attr->size = pci_resource_len(pdev, num);
-	res_attr->private = (void *)(unsigned long)num;
+	res_attr->private = (void *)(uintptr_t)num;
 	retval = sysfs_create_bin_file(&pdev->dev.kobj, res_attr);
 	if (retval) {
 		kfree(res_attr);

@@ -3125,7 +3125,7 @@ static void *ext4_mb_seq_groups_start(struct seq_file *seq, loff_t *pos)
 	if (*pos < 0 || *pos >= ext4_get_groups_count(sb))
 		return NULL;
 	group = *pos + 1;
-	return (void *) ((unsigned long) group);
+	return (void *) ((uintptr_t) group);
 }
 
 static void *ext4_mb_seq_groups_next(struct seq_file *seq, void *v, loff_t *pos)
@@ -3137,7 +3137,7 @@ static void *ext4_mb_seq_groups_next(struct seq_file *seq, void *v, loff_t *pos)
 	if (*pos < 0 || *pos >= ext4_get_groups_count(sb))
 		return NULL;
 	group = *pos + 1;
-	return (void *) ((unsigned long) group);
+	return (void *) ((uintptr_t) group);
 }
 
 static int ext4_mb_seq_groups_show(struct seq_file *seq, void *v)

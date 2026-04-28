@@ -763,7 +763,7 @@ int ubifs_save_dirty_idx_lnums(struct ubifs_info *c)
 			 c->dirty_idx.arr[c->dirty_idx.cnt - 1]->free);
 	/* Replace the lprops pointers with LEB numbers */
 	for (i = 0; i < c->dirty_idx.cnt; i++)
-		c->dirty_idx.arr[i] = (void *)(size_t)c->dirty_idx.arr[i]->lnum;
+		c->dirty_idx.arr[i] = (void *)(uintptr_t)c->dirty_idx.arr[i]->lnum;
 	ubifs_release_lprops(c);
 	return 0;
 }

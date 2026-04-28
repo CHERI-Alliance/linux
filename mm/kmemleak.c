@@ -299,7 +299,7 @@ static void hex_dump_object(struct seq_file *seq,
 		return;
 
 	if (object->flags & OBJECT_PERCPU)
-		ptr = (const u8 *)this_cpu_ptr((void __percpu *)object->pointer);
+		ptr = (const u8 *)this_cpu_ptr((void __percpu *)(uintptr_t)object->pointer);
 
 	/* limit the number of lines to HEX_MAX_LINES */
 	len = min_t(size_t, object->size, HEX_MAX_LINES * HEX_ROW_SIZE);
@@ -1397,7 +1397,7 @@ static bool update_checksum(struct kmemleak_object *object)
 
 		object->checksum = 0;
 		for_each_possible_cpu(cpu) {
-			void *ptr = per_cpu_ptr((void __percpu *)object->pointer, cpu);
+			void *ptr = per_cpu_ptr((void __percpu *)(uintptr_t)object->pointer, cpu);
 
 			object->checksum ^= crc32(0, kasan_reset_tag((void *)ptr), object->size);
 		}
@@ -1583,7 +1583,7 @@ static void scan_object(struct kmemleak_object *object)
 		unsigned int cpu;
 
 		for_each_possible_cpu(cpu) {
-			void *start = per_cpu_ptr((void __percpu *)object->pointer, cpu);
+			void *start = per_cpu_ptr((void __percpu *)(uintptr_t)object->pointer, cpu);
 			void *end = start + object->size;
 
 			scan_block(start, end, object);

@@ -203,7 +203,7 @@ static unsigned int dio200_subdev_8254_offset(struct comedi_device *dev,
 
 	/* get the offset that was passed to comedi_8254_*_init() */
 	if (dev->mmio)
-		offset = (void __iomem *)i8254->context - dev->mmio;
+		offset = (void __iomem *)(uintptr_t)i8254->context - dev->mmio;
 	else
 		offset = i8254->context - dev->iobase;
 

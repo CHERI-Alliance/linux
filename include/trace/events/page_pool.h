@@ -61,7 +61,7 @@ TRACE_EVENT(page_pool_state_release,
 	),
 
 	TP_printk("page_pool=%p netmem=%p is_net_iov=%lu pfn=0x%lx release=%u",
-		  __entry->pool, (void *)__entry->netmem,
+		  __entry->pool, (void *)(uintptr_t)__entry->netmem,
 		  __entry->netmem & NET_IOV, __entry->pfn, __entry->release)
 );
 
@@ -87,7 +87,7 @@ TRACE_EVENT(page_pool_state_hold,
 	),
 
 	TP_printk("page_pool=%p netmem=%p is_net_iov=%lu, pfn=0x%lx hold=%u",
-		  __entry->pool, (void *)__entry->netmem,
+		  __entry->pool, (void *)(uintptr_t)__entry->netmem,
 		  __entry->netmem & NET_IOV, __entry->pfn, __entry->hold)
 );
 

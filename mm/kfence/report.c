@@ -72,7 +72,7 @@ static int get_stack_skipnr(const unsigned long stack_entries[], int num_entries
 	}
 
 	for (skipnr = 0; skipnr < num_entries; skipnr++) {
-		int len = scnprintf(buf, sizeof(buf), "%ps", (void *)stack_entries[skipnr]);
+		int len = scnprintf(buf, sizeof(buf), "%ps", (void *)(uintptr_t)stack_entries[skipnr]);
 
 		if (str_has_prefix(buf, ARCH_FUNC_PREFIX "kfence_") ||
 		    str_has_prefix(buf, ARCH_FUNC_PREFIX "__kfence_") ||
@@ -127,7 +127,7 @@ static void kfence_print_stack(struct seq_file *seq, const struct kfence_metadat
 
 		/* stack_trace_seq_print() does not exist; open code our own. */
 		for (; i < track->num_stack_entries; i++)
-			seq_con_printf(seq, " %pS\n", (void *)track->stack_entries[i]);
+			seq_con_printf(seq, " %pS\n", (void *)(uintptr_t)track->stack_entries[i]);
 	} else {
 		seq_con_printf(seq, " no %s stack\n", show_alloc ? "allocation" : "deallocation");
 	}
@@ -147,7 +147,7 @@ void kfence_print_object(struct seq_file *seq, const struct kfence_metadata *met
 	}
 
 	seq_con_printf(seq, "kfence-#%td: 0x%p-0x%p, size=%d, cache=%s\n\n",
-		       meta - kfence_metadata, (void *)start, (void *)(start + size - 1),
+		       meta - kfence_metadata, (void *)(uintptr_t)start, (void *)(uintptr_t)(start + size - 1),
 		       size, (cache && cache->name) ? cache->name : "<destroyed>");
 
 	kfence_print_stack(seq, meta, true);
@@ -226,34 +226,34 @@ void kfence_report_error(unsigned long address, bool is_write, struct pt_regs *r
 		const bool left_of_object = address < meta->addr;
 
 		pr_err("BUG: KFENCE: out-of-bounds %s in %pS\n\n", get_access_type(is_write),
-		       (void *)stack_entries[skipnr]);
+		       (void *)(uintptr_t)stack_entries[skipnr]);
 		pr_err("Out-of-bounds %s at 0x%p (%luB %s of kfence-#%td):\n",
-		       get_access_type(is_write), (void *)address,
+		       get_access_type(is_write), (void *)(uintptr_t)address,
 		       left_of_object ? meta->addr - address : address - meta->addr,
 		       left_of_object ? "left" : "right", object_index);
 		break;
 	}
 	case KFENCE_ERROR_UAF:
 		pr_err("BUG: KFENCE: use-after-free %s in %pS\n\n", get_access_type(is_write),
-		       (void *)stack_entries[skipnr]);
+		       (void *)(uintptr_t)stack_entries[skipnr]);
 		pr_err("Use-after-free %s at 0x%p (in kfence-#%td):\n",
-		       get_access_type(is_write), (void *)address, object_index);
+		       get_access_type(is_write), (void *)(uintptr_t)address, object_index);
 		break;
 	case KFENCE_ERROR_CORRUPTION:
-		pr_err("BUG: KFENCE: memory corruption in %pS\n\n", (void *)stack_entries[skipnr]);
-		pr_err("Corrupted memory at 0x%p ", (void *)address);
+		pr_err("BUG: KFENCE: memory corruption in %pS\n\n", (void *)(uintptr_t)stack_entries[skipnr]);
+		pr_err("Corrupted memory at 0x%p ", (void *)(uintptr_t)address);
 		print_diff_canary(address, 16, meta);
 		pr_cont(" (in kfence-#%td):\n", object_index);
 		break;
 	case KFENCE_ERROR_INVALID:
 		pr_err("BUG: KFENCE: invalid %s in %pS\n\n", get_access_type(is_write),
-		       (void *)stack_entries[skipnr]);
+		       (void *)(uintptr_t)stack_entries[skipnr]);
 		pr_err("Invalid %s at 0x%p:\n", get_access_type(is_write),
-		       (void *)address);
+		       (void *)(uintptr_t)address);
 		break;
 	case KFENCE_ERROR_INVALID_FREE:
-		pr_err("BUG: KFENCE: invalid free in %pS\n\n", (void *)stack_entries[skipnr]);
-		pr_err("Invalid free of 0x%p (in kfence-#%td):\n", (void *)address,
+		pr_err("BUG: KFENCE: invalid free in %pS\n\n", (void *)(uintptr_t)stack_entries[skipnr]);
+		pr_err("Invalid free of 0x%p (in kfence-#%td):\n", (void *)(uintptr_t)address,
 		       object_index);
 		break;
 	}

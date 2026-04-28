@@ -1122,7 +1122,7 @@ long compat_put_bitmap(compat_ulong_t __user *umask, unsigned long *mask,
 #ifndef compat_ptr
 static inline void __user *compat_ptr(compat_uptr_t uptr)
 {
-	return (void __user *)(unsigned long)uptr;
+	return (void __user *)(uintptr_t)uptr;
 }
 #endif
 

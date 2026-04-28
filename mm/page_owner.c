@@ -911,7 +911,7 @@ static int stack_print(struct seq_file *m, void *v)
 		nr_entries = stack_record->size;
 		entries = stack_record->entries;
 		for (i = 0; i < nr_entries; i++)
-			seq_printf(m, " %pS\n", (void *)entries[i]);
+			seq_printf(m, " %pS\n", (void *)(uintptr_t)entries[i]);
 	}
 	if (ctx->flags & STACK_PRINT_FLAG_HANDLE)
 		seq_printf(m, "handle: %d\n", stack_record->handle.handle);

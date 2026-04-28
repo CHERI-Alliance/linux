@@ -4335,7 +4335,7 @@ static void *smb2_aead_req_alloc(struct crypto_aead *tfm, const struct smb_rqst 
 	u8 *p;
 
 	*num_sgs = cifs_get_num_sgs(rqst, num_rqst, sig);
-	if (IS_ERR_VALUE((long)(int)*num_sgs))
+	if (IS_ERR_VALUE((uintptr_t)(int)*num_sgs))
 		return ERR_PTR(*num_sgs);
 
 	len = iv_size;

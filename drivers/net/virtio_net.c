@@ -790,7 +790,7 @@ static void skb_xmit_done(struct virtqueue *vq)
 static void *mergeable_len_to_ctx(unsigned int truesize,
 				  unsigned int headroom)
 {
-	return (void *)(unsigned long)((headroom << MRG_CTX_HEADER_SHIFT) | truesize);
+	return (void *)(uintptr_t)((headroom << MRG_CTX_HEADER_SHIFT) | truesize);
 }
 
 static unsigned int mergeable_ctx_to_headroom(void *mrg_ctx)
@@ -2666,7 +2666,7 @@ static int add_recvbuf_small(struct virtnet_info *vi, struct receive_queue *rq,
 {
 	char *buf;
 	unsigned int xdp_headroom = virtnet_get_headroom(vi);
-	void *ctx = (void *)(unsigned long)xdp_headroom;
+	void *ctx = (void *)(uintptr_t)xdp_headroom;
 	int len = vi->hdr_len + VIRTNET_RX_PAD + GOOD_PACKET_LEN + xdp_headroom;
 	int err;
 

@@ -117,13 +117,13 @@ static int __idpf_xdp_rxq_info_deinit(struct idpf_rx_queue *rxq, void *arg)
 
 void idpf_xdp_rxq_info_deinit(struct idpf_rx_queue *rxq, u32 model)
 {
-	__idpf_xdp_rxq_info_deinit(rxq, (void *)(size_t)model);
+	__idpf_xdp_rxq_info_deinit(rxq, (void *)(uintptr_t)model);
 }
 
 void idpf_xdp_rxq_info_deinit_all(const struct idpf_q_vec_rsrc *rsrc)
 {
 	idpf_rxq_for_each(rsrc, __idpf_xdp_rxq_info_deinit,
-			  (void *)(size_t)rsrc->rxq_model);
+			  (void *)(uintptr_t)rsrc->rxq_model);
 }
 
 static int idpf_xdp_rxq_assign_prog(struct idpf_rx_queue *rxq, void *arg)

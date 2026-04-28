@@ -780,7 +780,7 @@ static void print_lock(struct held_lock *hlock)
 
 	printk(KERN_CONT "%px", hlock->instance);
 	print_lock_name(hlock, lock);
-	printk(KERN_CONT ", at: %pS\n", (void *)hlock->acquire_ip);
+	printk(KERN_CONT ", at: %pS\n", (void *)(uintptr_t)hlock->acquire_ip);
 }
 
 static void lockdep_print_held_locks(struct task_struct *p)
@@ -4205,17 +4205,17 @@ void print_irqtrace_events(struct task_struct *curr)
 
 	printk("irq event stamp: %u\n", trace->irq_events);
 	printk("hardirqs last  enabled at (%u): [<%px>] %pS\n",
-		trace->hardirq_enable_event, (void *)trace->hardirq_enable_ip,
-		(void *)trace->hardirq_enable_ip);
+		trace->hardirq_enable_event, (void *)(uintptr_t)trace->hardirq_enable_ip,
+		(void *)(uintptr_t)trace->hardirq_enable_ip);
 	printk("hardirqs last disabled at (%u): [<%px>] %pS\n",
-		trace->hardirq_disable_event, (void *)trace->hardirq_disable_ip,
-		(void *)trace->hardirq_disable_ip);
+		trace->hardirq_disable_event, (void *)(uintptr_t)trace->hardirq_disable_ip,
+		(void *)(uintptr_t)trace->hardirq_disable_ip);
 	printk("softirqs last  enabled at (%u): [<%px>] %pS\n",
-		trace->softirq_enable_event, (void *)trace->softirq_enable_ip,
-		(void *)trace->softirq_enable_ip);
+		trace->softirq_enable_event, (void *)(uintptr_t)trace->softirq_enable_ip,
+		(void *)(uintptr_t)trace->softirq_enable_ip);
 	printk("softirqs last disabled at (%u): [<%px>] %pS\n",
-		trace->softirq_disable_event, (void *)trace->softirq_disable_ip,
-		(void *)trace->softirq_disable_ip);
+		trace->softirq_disable_event, (void *)(uintptr_t)trace->softirq_disable_ip,
+		(void *)(uintptr_t)trace->softirq_disable_ip);
 
 	nbcon_cpu_emergency_exit();
 }

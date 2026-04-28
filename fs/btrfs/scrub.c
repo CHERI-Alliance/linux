@@ -564,7 +564,7 @@ static int scrub_print_warning_inode(u64 inum, u64 offset, u64 num_bytes,
 				  swarn->physical,
 				  root, inum, offset,
 				  fs_info->sectorsize, nlink,
-				  (char *)(unsigned long)ipath->fspath->val[i]);
+				  (char *)(uintptr_t)ipath->fspath->val[i]);
 
 	btrfs_put_root(local_root);
 	return 0;

@@ -3261,7 +3261,7 @@ int drbd_adm_dump_resources(struct sk_buff *skb, struct netlink_callback *cb)
 	rcu_read_lock();
 	if (cb->args[0]) {
 		for_each_resource_rcu(resource, &drbd_resources)
-			if (resource == (struct drbd_resource *)cb->args[0])
+			if (resource == (struct drbd_resource *)(uintptr_t)cb->args[0])
 				goto found_resource;
 		err = 0;  /* resource was probably deleted */
 		goto out;
@@ -3488,7 +3488,7 @@ int drbd_adm_dump_connections(struct sk_buff *skb, struct netlink_callback *cb)
 	rcu_read_lock();
 	if (cb->args[2]) {
 		for_each_connection_rcu(connection, resource)
-			if (connection == (struct drbd_connection *)cb->args[2])
+			if (connection == (struct drbd_connection *)(uintptr_t)cb->args[2])
 				goto found_connection;
 		/* connection was probably deleted */
 		goto no_more_connections;
@@ -3650,7 +3650,7 @@ next_device:
 	}
 	if (cb->args[2]) {
 		for_each_peer_device(peer_device, device)
-			if (peer_device == (struct drbd_peer_device *)cb->args[2])
+			if (peer_device == (struct drbd_peer_device *)(uintptr_t)cb->args[2])
 				goto found_peer_device;
 		/* peer device was probably deleted */
 		goto next_device;

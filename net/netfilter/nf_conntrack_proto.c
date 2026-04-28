@@ -513,7 +513,7 @@ retry:
 	if (fixup_needed) {
 		struct nf_ct_iter_data iter_data = {
 			.net	= net,
-			.data	= (void *)(unsigned long)nfproto,
+			.data	= (void *)(uintptr_t)nfproto,
 		};
 		nf_ct_iterate_cleanup_net(nf_ct_tcp_fixup, &iter_data);
 	}

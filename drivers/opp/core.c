@@ -2698,7 +2698,7 @@ int devm_pm_opp_set_config(struct device *dev, struct dev_pm_opp_config *config)
 		return token;
 
 	return devm_add_action_or_reset(dev, devm_pm_opp_config_release,
-					(void *) ((unsigned long) token));
+					(void *) ((uintptr_t) token));
 }
 EXPORT_SYMBOL_GPL(devm_pm_opp_set_config);
 

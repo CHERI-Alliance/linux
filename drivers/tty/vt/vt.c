@@ -2819,7 +2819,7 @@ static void con_flush(struct vc_data *vc, struct vc_draw_region *draw)
 		return;
 
 	vc->vc_sw->con_putcs(vc, (u16 *)draw->from,
-			(u16 *)draw->to - (u16 *)draw->from, vc->state.y,
+			(u16 *)(uintptr_t)draw->to - (u16 *)(uintptr_t)draw->from, vc->state.y,
 			draw->x);
 	draw->x = -1;
 }

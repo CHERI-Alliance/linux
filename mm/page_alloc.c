@@ -3048,7 +3048,7 @@ void free_unref_folios(struct folio_batch *folios)
 				      pfn, order, FPI_NONE);
 			continue;
 		}
-		folio->private = (void *)(unsigned long)order;
+		folio->private = (void *)(uintptr_t)order;
 		if (j != i)
 			folios->folios[j] = folio;
 		j++;
@@ -5391,8 +5391,8 @@ void free_pages_nolock(struct page *page, unsigned int order)
 void free_pages(unsigned long addr, unsigned int order)
 {
 	if (addr != 0) {
-		VM_BUG_ON(!virt_addr_valid((void *)addr));
-		__free_pages(virt_to_page((void *)addr), order);
+		VM_BUG_ON(!virt_addr_valid((void *)(uintptr_t)addr));
+		__free_pages(virt_to_page((void *)(uintptr_t)addr), order);
 	}
 }
 
@@ -5403,7 +5403,7 @@ static void *make_alloc_exact(unsigned long addr, unsigned int order,
 {
 	if (addr) {
 		unsigned long nr = DIV_ROUND_UP(size, PAGE_SIZE);
-		struct page *page = virt_to_page((void *)addr);
+		struct page *page = virt_to_page((void *)(uintptr_t)addr);
 		struct page *last = page + nr;
 
 		__split_page(page, order);

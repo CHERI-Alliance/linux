@@ -2797,7 +2797,7 @@ qla1280_64bit_start_scsi(struct scsi_qla_host *ha, struct srb * sp)
 
 	ha->outstanding_cmds[cnt] = sp;
 	ha->req_q_cnt -= req_cnt;
-	CMD_HANDLE(sp->cmd) = (unsigned char *)(unsigned long)(cnt + 1);
+	CMD_HANDLE(sp->cmd) = (unsigned char *)(uintptr_t)(cnt + 1);
 
 	dprintk(2, "start: cmd=%p sp=%p CDB=%xm, handle %lx\n", cmd, sp,
 		cmd->cmnd[0], (long)CMD_HANDLE(sp->cmd));

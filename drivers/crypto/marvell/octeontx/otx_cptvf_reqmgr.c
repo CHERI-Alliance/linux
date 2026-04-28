@@ -36,7 +36,7 @@ void otx_cpt_dump_sg_list(struct pci_dev *pdev, struct otx_cpt_req_info *req)
 	for (i = 0; i < req->incnt; i++) {
 		pr_debug("Buffer %d size %d, vptr 0x%p, dmaptr 0x%p\n", i,
 			 req->in[i].size, req->in[i].vptr,
-			 (void *) req->in[i].dma_addr);
+			 (void *)(uintptr_t) req->in[i].dma_addr);
 		pr_debug("Buffer hexdump (%d bytes)\n",
 			 req->in[i].size);
 		print_hex_dump_debug("", DUMP_PREFIX_NONE, 16, 1,
@@ -47,7 +47,7 @@ void otx_cpt_dump_sg_list(struct pci_dev *pdev, struct otx_cpt_req_info *req)
 	for (i = 0; i < req->outcnt; i++) {
 		pr_debug("Buffer %d size %d, vptr 0x%p, dmaptr 0x%p\n", i,
 			 req->out[i].size, req->out[i].vptr,
-			 (void *) req->out[i].dma_addr);
+			 (void *)(uintptr_t) req->out[i].dma_addr);
 		pr_debug("Buffer hexdump (%d bytes)\n", req->out[i].size);
 		print_hex_dump_debug("", DUMP_PREFIX_NONE, 16, 1,
 				     req->out[i].vptr, req->out[i].size, false);

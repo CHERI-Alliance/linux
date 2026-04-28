@@ -27,7 +27,7 @@
 
 static void gfs2_print_trans(struct gfs2_sbd *sdp, const struct gfs2_trans *tr)
 {
-	fs_warn(sdp, "Transaction created at: %pSR\n", (void *)tr->tr_ip);
+	fs_warn(sdp, "Transaction created at: %pSR\n", (void *)(uintptr_t)tr->tr_ip);
 	fs_warn(sdp, "blocks=%u revokes=%u reserved=%u touched=%u\n",
 		tr->tr_blocks, tr->tr_revokes, tr->tr_reserved,
 		test_bit(TR_TOUCHED, &tr->tr_flags));

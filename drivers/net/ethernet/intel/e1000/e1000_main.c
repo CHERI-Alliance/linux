@@ -4639,7 +4639,7 @@ static void e1000_alloc_rx_buffers(struct e1000_adapter *adapter,
 					adapter->rx_buffer_len)) {
 			e_err(rx_err, "dma align check failed: %u bytes at "
 			      "%p\n", adapter->rx_buffer_len,
-			      (void *)(unsigned long)buffer_info->dma);
+			      (void *)(uintptr_t)buffer_info->dma);
 
 			dma_unmap_single(&pdev->dev, buffer_info->dma,
 					 adapter->rx_buffer_len,

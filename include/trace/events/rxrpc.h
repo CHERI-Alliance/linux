@@ -2051,7 +2051,7 @@ TRACE_EVENT(rxrpc_connect_call,
 
 	    TP_printk("c=%08x u=%p %08x:%08x dst=%pISp",
 		      __entry->call,
-		      (void *)__entry->user_call_ID,
+		      (void *)(uintptr_t)__entry->user_call_ID,
 		      __entry->cid,
 		      __entry->call_id,
 		      &__entry->srx.transport)

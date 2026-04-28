@@ -1146,7 +1146,7 @@ static void aio_complete(struct aio_kiocb *iocb)
 	flush_dcache_folio(ctx->ring_folios[pos / AIO_EVENTS_PER_PAGE]);
 
 	pr_debug("%p[%u]: %p: %p %Lx %Lx %Lx\n", ctx, tail, iocb,
-		 (void __user *)(unsigned long)iocb->ki_res.obj,
+		 (void __user *)(uintptr_t)iocb->ki_res.obj,
 		 iocb->ki_res.data, iocb->ki_res.res, iocb->ki_res.res2);
 
 	/* after flagging the request as done, we

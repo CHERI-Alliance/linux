@@ -2004,7 +2004,7 @@ static void wake_up_session_caps(struct ceph_mds_session *session, int ev)
 
 	doutc(cl, "session %p mds%d\n", session, session->s_mds);
 	ceph_iterate_session_caps(session, wake_up_session_cb,
-				  (void *)(unsigned long)ev);
+				  (void *)(uintptr_t)ev);
 }
 
 /*

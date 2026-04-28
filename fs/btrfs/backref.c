@@ -2994,7 +2994,7 @@ int btrfs_backref_iter_next(struct btrfs_backref_iter *iter)
 			int type;
 
 			iref = (struct btrfs_extent_inline_ref *)
-				((unsigned long)iter->cur_ptr);
+				((uintptr_t)iter->cur_ptr);
 			type = btrfs_extent_inline_ref_type(eb, iref);
 
 			size = btrfs_extent_inline_ref_size(type);
@@ -3516,7 +3516,7 @@ int btrfs_backref_add_tree_node(struct btrfs_trans_handle *trans,
 
 			/* Update key for inline backref */
 			iref = (struct btrfs_extent_inline_ref *)
-				((unsigned long)iter->cur_ptr);
+				((uintptr_t)iter->cur_ptr);
 			type = btrfs_get_extent_inline_ref_type(eb, iref,
 							BTRFS_REF_TYPE_BLOCK);
 			if (unlikely(type == BTRFS_REF_TYPE_INVALID)) {

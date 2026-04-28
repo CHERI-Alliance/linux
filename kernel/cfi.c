@@ -16,10 +16,10 @@ enum bug_trap_type report_cfi_failure(struct pt_regs *regs, unsigned long addr,
 {
 	if (target)
 		pr_err("CFI failure at %pS (target: %pS; expected type: 0x%08x)\n",
-		       (void *)addr, (void *)*target, type);
+		       (void *)(uintptr_t)addr, (void *)(uintptr_t)*target, type);
 	else
 		pr_err("CFI failure at %pS (no target information)\n",
-		       (void *)addr);
+		       (void *)(uintptr_t)addr);
 
 	if (cfi_warn) {
 		__warn(NULL, 0, (void *)addr, 0, regs, NULL);

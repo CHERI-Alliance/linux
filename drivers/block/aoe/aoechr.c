@@ -200,7 +200,7 @@ aoechr_open(struct inode *inode, struct file *filp)
 
 	mutex_lock(&aoechr_mutex);
 	n = iminor(inode);
-	filp->private_data = (void *) (unsigned long) n;
+	filp->private_data = (void *) (uintptr_t) n;
 
 	for (i = 0; i < ARRAY_SIZE(chardevs); ++i)
 		if (chardevs[i].minor == n) {

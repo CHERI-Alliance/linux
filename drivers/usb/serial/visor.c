@@ -381,7 +381,7 @@ static int palm_os_3_probe(struct usb_serial *serial,
 	 * save off our num_ports info so that we can use it in the
 	 * calc_num_ports callback
 	 */
-	usb_set_serial_data(serial, (void *)(long)num_ports);
+	usb_set_serial_data(serial, (void *)(uintptr_t)num_ports);
 
 	/* ask for the number of bytes available, but ignore the
 	   response as it is broken */

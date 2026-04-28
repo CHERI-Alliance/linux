@@ -4312,7 +4312,7 @@ pciserial_init_one(struct pci_dev *dev, const struct pci_device_id *ent)
 	if (exclude) {
 		if (exclude->driver_data)
 			pci_warn(dev, "ignoring port, enable %s to handle\n",
-				 (const char *)exclude->driver_data);
+				 (const char *)(uintptr_t)exclude->driver_data);
 		return -ENODEV;
 	}
 

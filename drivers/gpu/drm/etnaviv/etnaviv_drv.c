@@ -396,7 +396,7 @@ static int etnaviv_ioctl_gem_userptr(struct drm_device *dev, void *data,
 	    args->user_ptr & ~PAGE_MASK)
 		return -EINVAL;
 
-	if (!access_ok((void __user *)(unsigned long)args->user_ptr,
+	if (!access_ok((void __user *)(user_uintptr_t)args->user_ptr,
 		       args->user_size))
 		return -EFAULT;
 

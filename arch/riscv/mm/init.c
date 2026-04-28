@@ -995,7 +995,7 @@ static void __init create_fdt_early_page_table(__ptraddr_t fix_fdt_va,
 				   pa + PMD_SIZE, PMD_SIZE, PAGE_KERNEL);
 	}
 
-	dtb_early_va = (void *)fix_fdt_va + (dtb_pa & (PMD_SIZE - 1));
+	dtb_early_va = (void *)(uintptr_t)fix_fdt_va + (dtb_pa & (PMD_SIZE - 1));
 #else
 	/*
 	 * For 64-bit kernel, __va can't be used since it would return a linear
