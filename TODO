@@ -1,0 +1,87 @@
+This is a (probably incomplete) list of things (mainly config options)
+that do not work with CHERI for some reason.
+- UAPI header compile test and our compat headers
+- Check open tickets from morello that never got resolved
+  https://git.morello-project.org/morello/kernel/linux/-/issues
+- Move argv, envp and aux vector data off the program stack.
+  We already pass capabilities in registers but the data itself
+  should not be accessible by the stack capability.
+- Port PROT_CAP/PROT_NO_CAP for mmap and friends from CheriBSD
+- ptrace(): Deal with capability writes
+- CONFIG_ERRATA_SIFIVE_CIP_453
+- CONFIG_RISCV_ISA_SUPM
+- SHADOW_CALL_STACK
+- RANDSTRUCT
+- SELF TESTS
+- FORTIFY_SOURCE
+- TOMOYO
+- LOCKDEP
+- runtime-const.h
+- semaphore debugging
+- Implement set_bit/clear_bit for pointers
+- KCOV
+- UBSAN
+- KFENCE
+- CONFIG_NUMA
+- Sanitizers
+- CONFIG_CFI
+- KEXEC
+- CONFIG_KVM, VIRTUALIZATION
+- BPF
+- GCOV
+- PERF_EVENTS
+- TRACE (in progress)
+- USERFAULTFD
+- STACK_AUTO_INIT, CONFIG_INIT_STACK_...
+- CONFIG_ZRAM
+- NTFS3	=> Has a static assertion in log replay
+- NILFS2	=> Uses a bmap tree with fixed __u64 value that must store a pointer
+- OCFS2	=> The ioctl API uses nested pointers
+- F2FS	=> Strange bit operation magic on page_private() pointer.
+- DCACHE_WORD_ACCESS	=> Disabled for CHERI, try to enable it!
+- BTREE	=> Doable but only used by 3 drivers and uses arrays of longs to store pointers.
+- CRYPTO_842	=> Compress has a failing assertion
+- CONFIG_ACPI	=> In memory tables need some more thought.
+- CONFIG_EFI	=> API needs much more thought.
+- NOUVEAU		=> Various complicated UAPI issues
+- CONFIG_RDS
+- CONFIG_CUSE	=> ioctls have UAPI issues.
+- CONFIG_RISCV_MODULE_LINKING_KUNIT
+- CONFIG_DVB_VIDTV
+- CONFIG_VIDEO_MEDIATEK_MDP
+- CONFIG_VIDEO_MEDIATEK_VCODEC
+- CONFIG_VIDEO_MEDIATEK_MDP3
+- CONFIG_SCSI_BFA_FC
+- CONFIG_MEGARAID_{MM,SAS,MAILBOX,LEGACY}
+- CONFIG_SCSI_SNIC
+- CONFIG_SCSI_HPTIOP
+- CONFIG_SCSI_CHELSIO_FCOE
+- CONFIG_SCSI_AACRAID
+- CONFIG_THUNDER_NIC_VF
+- CONFIG_MVPP2
+- CONFIG_BE2NET
+- CONFIG_INFINIBAND_OCRDMA
+- CONFIG_SH_ETH
+- CONFIG_BNXT
+- CONFIG_NETXEN_NIC
+- CONFIG_XILINX_LL_TEMAC
+- CONFIG_QED
+- CONFIG_ROCKER
+- CONFIG_NI_XGE_MANAGEMENT_ENET
+- CONFIG_VME_FAKE
+- CONFIG_INFINIBAND
+- CONFIG_ALTERA_STAPL
+- CONFIG_QCOM_FASTRPC
+- CONFIG_GENWQE
+- CONFIG_FUSION
+- CONFIG_CRYPTO_DEV_QAT_*
+- CONFIG_CRYPTO_DEV_CHELSIO
+- CONFIG_ATM_FORE200E
+- CONFIG_ATM_ENI
+- VHOST and dependant config options
+- CONFIG_TCM_USER2
+- CONFIG_ARCNET_COM90xx
+- CONFIG_USB_CONFIGFS_F_UAC*
+- CONFIG_BCM2835_VCHIQ
+- CONFIG_DLM with COMPAT64
+- CONFIG_FBNIC
