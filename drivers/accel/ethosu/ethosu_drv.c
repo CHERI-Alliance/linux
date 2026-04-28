@@ -129,7 +129,7 @@ static int ethosu_ioctl_cmdstream_bo_create(struct drm_device *ddev, void *data,
 
 	args->flags |= DRM_ETHOSU_BO_NO_MMAP;
 
-	ret = ethosu_gem_cmdstream_create(file, ddev, args->size, args->data,
+	ret = ethosu_gem_cmdstream_create(file, ddev, args->size, (user_uintptr_t)args->data,
 					  args->flags, &args->handle);
 
 out_dev_exit:
