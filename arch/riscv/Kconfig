@@ -1378,6 +1378,16 @@ config RISCV_CHERI
 	  RISCV CHERI is an implementation of the CHERI capability
 	  architecture for RISCV.
 
+config RISCV_CHERI_DEBUG_USER_COPY
+	bool "Debug capability tags in usercopy"
+	default n
+	depends on CHERI_KERNEL
+	depends on RISCV_CHERI
+	help
+	  If CHERI is enabled warn if a user copy operation strips
+	  capability tags. This has a performance immpact so don't
+	  enable this in production builds.
+
 config BUILTIN_DTB
 	bool "Built-in device tree"
 	depends on OF && NONPORTABLE

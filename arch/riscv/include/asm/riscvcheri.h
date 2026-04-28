@@ -15,7 +15,10 @@ extern unsigned char has_cheri_levels;
 static inline void riscv_cheri_init(void)
 {
 }
+#endif
 
+#ifdef CONFIG_RISCV_CHERI_DEBUG_USER_COPY
+extern void do_warn_tags(void *, void *, size_t, void *);
 #endif
 
 #endif /* __ASM_RISCVCHERI_H */
