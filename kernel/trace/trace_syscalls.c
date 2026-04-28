@@ -289,10 +289,10 @@ print_syscall_enter(struct trace_iterator *iter, int flags,
 		/* parameter values */
 		if (trace->args[i] < 10)
 			trace_seq_printf(s, "%s: %lu", entry->args[i],
-					 trace->args[i]);
+					 __c_ua(trace->args[i]));
 		else
 			trace_seq_printf(s, "%s: 0x%lx", entry->args[i],
-					 trace->args[i]);
+					 __c_ua(trace->args[i]));
 
 		if (!(BIT(i) & entry->user_mask))
 			continue;
@@ -536,11 +536,11 @@ static int __init syscall_enter_define_fields(struct trace_event_call *call)
 	for (i = 0; i < meta->nb_args; i++) {
 		ret = trace_define_field(call, meta->types[i],
 					 meta->args[i], offset,
-					 sizeof(unsigned long), 0,
+					 sizeof(uintptr_t), 0,
 					 FILTER_OTHER);
 		if (ret)
 			break;
-		offset += sizeof(unsigned long);
+		offset += sizeof(uintptr_t);
 	}
 
 	if (ret || !meta->user_mask)
@@ -691,7 +691,7 @@ static int syscall_copy_user_array(char *buf, const char __user *ptr,
 static char *sys_fault_user(unsigned int buf_size,
 			    struct syscall_metadata *sys_data,
 			    struct syscall_user_buffer *sbuf,
-			    unsigned long *args,
+			    uintptr_t *args,
 			    unsigned int data_size[SYSCALL_FAULT_MAX_CNT])
 {
 	trace_user_buf_copy syscall_copy = syscall_copy_user;
@@ -715,7 +715,7 @@ static char *sys_fault_user(unsigned int buf_size,
 	 */
 	if (sys_data->user_arg_size >= 0) {
 		array = true;
-		size = args[sys_data->user_arg_size];
+		size = __c_ua(args[sys_data->user_arg_size]);
 		if (size > SYSCALL_FAULT_ARG_SZ - 1)
 			size = SYSCALL_FAULT_ARG_SZ - 1;
 		syscall_copy = syscall_copy_user_array;
@@ -785,7 +785,7 @@ static char *sys_fault_user(unsigned int buf_size,
 }
 
 static int
-syscall_get_data(struct syscall_metadata *sys_data, unsigned long *args,
+syscall_get_data(struct syscall_metadata *sys_data, uintptr_t *args,
 		 char **buffer, int *size, int *user_sizes, int *uargs,
 		 int buf_size)
 {
@@ -864,7 +864,7 @@ static void ftrace_syscall_enter(void *data, struct pt_regs *regs, long id)
 	struct syscall_trace_enter *entry;
 	struct syscall_metadata *sys_data;
 	struct trace_event_buffer fbuffer;
-	unsigned long args[6];
+	uintptr_t args[6];
 	char *user_ptr;
 	int user_sizes[SYSCALL_FAULT_MAX_CNT] = {};
 	int syscall_nr;
@@ -906,7 +906,7 @@ static void ftrace_syscall_enter(void *data, struct pt_regs *regs, long id)
 			return;
 	}
 
-	size += sizeof(*entry) + sizeof(unsigned long) * sys_data->nb_args;
+	size += sizeof(*entry) + sizeof(uintptr_t) * sys_data->nb_args;
 
 	entry = trace_event_buffer_reserve(&fbuffer, trace_file, size);
 	if (!entry)
@@ -915,7 +915,7 @@ static void ftrace_syscall_enter(void *data, struct pt_regs *regs, long id)
 	entry = ring_buffer_event_data(fbuffer.event);
 	entry->nr = syscall_nr;
 
-	memcpy(entry->args, args, sizeof(unsigned long) * sys_data->nb_args);
+	memcpy(entry->args, args, sizeof(uintptr_t) * sys_data->nb_args);
 
 	if (mayfault)
 		syscall_put_data(sys_data, entry, user_ptr, size, user_sizes, uargs);
@@ -960,7 +960,7 @@ static void ftrace_syscall_exit(void *data, struct pt_regs *regs, long ret)
 
 	entry = ring_buffer_event_data(fbuffer.event);
 	entry->nr = syscall_nr;
-	entry->ret = syscall_get_return_value(current, regs);
+	entry->ret = __c_ua(syscall_get_return_value(current, regs));
 
 	trace_event_buffer_commit(&fbuffer);
 }
@@ -1380,8 +1380,8 @@ static int perf_call_bpf_enter(struct trace_event_call *call, struct pt_regs *re
 	struct syscall_tp_t {
 		struct trace_entry ent;
 		int syscall_nr;
-		unsigned long args[SYSCALL_DEFINE_MAXARGS];
-	} __aligned(8) param;
+		uintptr_t args[SYSCALL_DEFINE_MAXARGS];
+	} __aligned(8) __cheri_pointer_align param;
 	int i;
 
 	BUILD_BUG_ON(sizeof(param.ent) < sizeof(void *));
@@ -1401,7 +1401,7 @@ static void perf_syscall_enter(void *ignore, struct pt_regs *regs, long id)
 	struct syscall_trace_enter *rec;
 	struct pt_regs *fake_regs;
 	struct hlist_head *head;
-	unsigned long args[6];
+	uintptr_t args[6];
 	bool valid_prog_array;
 	bool mayfault;
 	char *user_ptr;
@@ -1446,7 +1446,7 @@ static void perf_syscall_enter(void *ignore, struct pt_regs *regs, long id)
 		return;
 
 	/* get the size after alignment with the u32 buffer size field */
-	size += sizeof(unsigned long) * sys_data->nb_args + sizeof(*rec);
+	size += sizeof(uintptr_t) * sys_data->nb_args + sizeof(*rec);
 	size = ALIGN(size + sizeof(u32), sizeof(u64));
 	size -= sizeof(u32);
 
@@ -1455,7 +1455,7 @@ static void perf_syscall_enter(void *ignore, struct pt_regs *regs, long id)
 		return;
 
 	rec->nr = syscall_nr;
-	memcpy(&rec->args, args, sizeof(unsigned long) * sys_data->nb_args);
+	memcpy(&rec->args, args, sizeof(uintptr_t) * sys_data->nb_args);
 
 	if (mayfault)
 		syscall_put_data(sys_data, rec, user_ptr, size, user_sizes, uargs);
@@ -1575,7 +1575,7 @@ static void perf_syscall_exit(void *ignore, struct pt_regs *regs, long ret)
 		return;
 
 	rec->nr = syscall_nr;
-	rec->ret = syscall_get_return_value(current, regs);
+	rec->ret = __c_ua(syscall_get_return_value(current, regs));
 
 	if ((valid_prog_array &&
 	     !perf_call_bpf_exit(sys_data->exit_event, fake_regs, rec)) ||

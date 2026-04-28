@@ -90,7 +90,7 @@ void trace_filter_add_remove_task(struct trace_pid_list *pid_list,
  */
 void *trace_pid_next(struct trace_pid_list *pid_list, void *v, loff_t *pos)
 {
-	long pid = (uintptr_t)v;
+	long pid = __c_pa(v);
 	unsigned int next;
 
 	(*pos)++;
@@ -102,7 +102,7 @@ void *trace_pid_next(struct trace_pid_list *pid_list, void *v, loff_t *pos)
 	pid = next;
 
 	/* Return pid + 1 to allow zero to be represented */
-	return (void *)(pid + 1);
+	return __c_fakep(pid + 1);
 }
 
 /**
@@ -129,9 +129,9 @@ void *trace_pid_start(struct trace_pid_list *pid_list, loff_t *pos)
 
 	/* Return pid + 1 so that zero can be the exit value */
 	for (pid++; pid && l < *pos;
-	     pid = (uintptr_t)trace_pid_next(pid_list, (void *)pid, &l))
+	     pid = __c_pa(trace_pid_next(pid_list, __c_fakep(pid), &l)))
 		;
-	return (void *)pid;
+	return __c_fakep(pid);
 }
 
 /**
@@ -144,7 +144,7 @@ void *trace_pid_start(struct trace_pid_list *pid_list, loff_t *pos)
  */
 int trace_pid_show(struct seq_file *m, void *v)
 {
-	unsigned long pid = (uintptr_t)v - 1;
+	unsigned long pid = __c_pa(v) - 1;
 
 	seq_printf(m, "%lu\n", pid);
 	return 0;

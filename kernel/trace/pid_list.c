@@ -84,7 +84,7 @@ static inline bool upper_empty(union upper_chunk *chunk)
 	 * If chunk->data has no lower chunks, it will be the same
 	 * as a zeroed bitmask.
 	 */
-	return bitmap_empty((unsigned long *)chunk->data, BITS_PER_TYPE(chunk->data));
+	return bitmap_empty((unsigned long *)(void *)chunk->data, BITS_PER_TYPE(chunk->data));
 }
 
 static inline int pid_split(unsigned int pid, unsigned int *upper1,
