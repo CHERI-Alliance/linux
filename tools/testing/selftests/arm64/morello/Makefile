@@ -11,7 +11,7 @@ LDFLAGS := -fuse-ld=lld
 CFLAGS += $(CFLAGS_CLANG) $(CFLAGS_PURECAP) $(CFLAGS_COMMON)
 
 SRCS := $(wildcard *.c) $(wildcard *.S)
-PROGS := bootstrap clone exit read_write sched signal
+PROGS := bootstrap clone exit mmap read_write sched signal
 DEPS := $(wildcard *.h)
 
 # these are the final executables
