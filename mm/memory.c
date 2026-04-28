@@ -3481,7 +3481,7 @@ static inline int __wp_page_copy_user(struct page *dst, struct page *src,
 	 */
 	kaddr = kmap_local_page(dst);
 	pagefault_disable();
-	uaddr = (void __user *)(addr & PAGE_MASK);
+	uaddr = uaddr_to_user_ptr_safe(addr & PAGE_MASK);
 
 	/*
 	 * On architectures with software "accessed" bits, we would
