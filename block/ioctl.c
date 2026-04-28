@@ -587,7 +587,7 @@ struct compat_hd_geometry {
 	unsigned char heads;
 	unsigned char sectors;
 	unsigned short cylinders;
-	u32 start;
+	compat_ulong_t start;
 };
 
 static int compat_hdio_getgeo(struct block_device *bdev,
@@ -806,9 +806,9 @@ long blkdev_ioctl(struct file *file, unsigned cmd, user_uintptr_t arg)
 
 #ifdef CONFIG_COMPAT
 
-#define BLKBSZGET_32		_IOR(0x12, 112, int)
-#define BLKBSZSET_32		_IOW(0x12, 113, int)
-#define BLKGETSIZE64_32		_IOR(0x12, 114, int)
+#define BLKBSZGET_COMPAT	_IOR(0x12, 112, compat_size_t)
+#define BLKBSZSET_COMPAT	_IOW(0x12, 113, compat_size_t)
+#define BLKGETSIZE64_COMPAT	_IOR(0x12, 114, compat_size_t)
 
 /* Most of the generic ioctls are handled in the normal fallback path.
    This assumes the blkdev's low level compat_ioctl always returns
@@ -828,7 +828,6 @@ long compat_blkdev_ioctl(struct file *file, unsigned cmd, unsigned long arg)
 	case BLKPG:
 		return compat_blkpg_ioctl(bdev, argp);
 
-	/* Compat mode returns 32-bit data instead of 'long' */
 	case BLKRAGET:
 	case BLKFRAGET:
 		if (!argp)
@@ -841,11 +840,11 @@ long compat_blkdev_ioctl(struct file *file, unsigned cmd, unsigned long arg)
 		return compat_put_ulong(argp, bdev_nr_sectors(bdev));
 
 	/* The data is compatible, but the command number is different */
-	case BLKBSZGET_32: /* get the logical block size (cf. BLKSSZGET) */
+	case BLKBSZGET_COMPAT: /* get the logical block size (cf. BLKSSZGET) */
 		return put_int(argp, bdev_logical_block_size(bdev));
-	case BLKBSZSET_32:
+	case BLKBSZSET_COMPAT:
 		return blkdev_bszset(file, mode, argp);
-	case BLKGETSIZE64_32:
+	case BLKGETSIZE64_COMPAT:
 		return put_u64(argp, bdev_nr_bytes(bdev));
 
 	/* Incompatible alignment on i386 */
