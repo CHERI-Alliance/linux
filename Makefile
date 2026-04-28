@@ -925,6 +925,13 @@ stackp-flags-$(CONFIG_STACKPROTECTOR_STRONG)      := -fstack-protector-strong
 
 KBUILD_CFLAGS += $(stackp-flags-y)
 
+ifdef CONFIG_CHERI_PURECAP_UABI
+# Since we define __user to __capability in PCuABI, we end up using
+# __capability in the deprecated position, i.e. as a prefix for *.
+# Disable deprecated-declarations to avoid getting warnings about this.
+KBUILD_CFLAGS	+= $(call cc-disable-warning, deprecated-declarations)
+endif
+
 ifdef CONFIG_FRAME_POINTER
 KBUILD_CFLAGS	+= -fno-omit-frame-pointer -fno-optimize-sibling-calls
 KBUILD_RUSTFLAGS += -Cforce-frame-pointers=y
