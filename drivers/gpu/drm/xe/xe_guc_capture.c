@@ -4,6 +4,7 @@
  */
 
 #include <linux/types.h>
+#include <linux/empty_array.h>
 
 #include <drm/drm_managed.h>
 #include <drm/drm_print.h>
@@ -206,8 +207,7 @@ static const struct __guc_mmio_reg_descr xe3p_rc_inst_regs[] = {
  * Empty list to prevent warnings about unknown class/instance types
  * as not all class/instance types have entries on all platforms.
  */
-static const struct __guc_mmio_reg_descr empty_regs_list[] = {
-};
+EMPTY_ARRAY(struct __guc_mmio_reg_descr, empty_regs_list)
 
 #define TO_GCAP_DEF_OWNER(x) (GUC_CAPTURE_LIST_INDEX_##x)
 #define TO_GCAP_DEF_TYPE(x) (GUC_STATE_CAPTURE_TYPE_##x)

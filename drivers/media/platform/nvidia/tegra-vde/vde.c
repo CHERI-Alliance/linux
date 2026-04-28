@@ -18,6 +18,7 @@
 #include <linux/reset.h>
 #include <linux/slab.h>
 #include <linux/uaccess.h>
+#include <linux/empty_array.h>
 
 #include <soc/tegra/common.h>
 #include <soc/tegra/pmc.h>
@@ -455,9 +456,8 @@ static const struct dev_pm_ops tegra_vde_pm_ops = {
 				tegra_vde_pm_resume)
 };
 
-static const u32 tegra124_decoded_fmts[] = {
-	/* TBD: T124 supports only a non-standard Tegra tiled format */
-};
+/* TBD: T124 supports only a non-standard Tegra tiled format */
+EMPTY_ARRAY(u32, tegra124_decoded_fmts)
 
 static const struct tegra_coded_fmt_desc tegra124_coded_fmts[] = {
 	{

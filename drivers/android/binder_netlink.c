@@ -4,6 +4,8 @@
 /* YNL-GEN kernel source */
 /* To regenerate run: tools/net/ynl/ynl-regen.sh */
 
+#include <linux/empty_array.h>
+
 #include <net/netlink.h>
 #include <net/genetlink.h>
 
@@ -12,8 +14,7 @@
 #include <uapi/linux/android/binder_netlink.h>
 
 /* Ops table for binder */
-static const struct genl_split_ops binder_nl_ops[] = {
-};
+EMPTY_ARRAY(struct genl_split_ops, binder_nl_ops)
 
 static const struct genl_multicast_group binder_nl_mcgrps[] = {
 	[BINDER_NLGRP_REPORT] = { "report", },

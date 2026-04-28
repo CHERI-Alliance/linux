@@ -10,6 +10,7 @@
 #include <linux/of_device.h>
 #include <linux/pinctrl/pinctrl.h>
 #include <linux/platform_device.h>
+#include <linux/empty_array.h>
 #include "linux/stddef.h"
 
 #include "../core.h"
@@ -30,20 +31,20 @@ static const char * const gpio11_group[] = {"GPIO11"};
 static const char * const gpio12_group[] = {"GPIO12"};
 static const char * const gpio13_group[] = {"GPIO13"};
 static const char * const gpio14_group[] = {"GPIO14"};
-static const char * const rsmrst_group[] = { };
-static const char * const srst_group[] = { };
-static const char * const slp_s3_group[] = { };
-static const char * const slp_s5_group[] = { };
-static const char * const pwrgd_group[] = { };
-static const char * const pwrok_group[] = { };
-static const char * const pwrbtn_group[] = { };
-static const char * const ddrio_gate_group[] = { };
-static const char * const jtag_gpio_group[] = { };
-static const char * const jtag_tck_group[] = { };
-static const char * const jtag_tdi_group[] = { };
-static const char * const jtag_tdo_group[] = { };
-static const char * const tms_group[] = { };
-static const char * const trsl_group[] = { };
+EMPTY_ARRAY(char * const, rsmrst_group);
+EMPTY_ARRAY(char * const, srst_group);
+EMPTY_ARRAY(char * const, slp_s3_group);
+EMPTY_ARRAY(char * const, slp_s5_group);
+EMPTY_ARRAY(char * const, pwrgd_group);
+EMPTY_ARRAY(char * const, pwrok_group);
+EMPTY_ARRAY(char * const, pwrbtn_group);
+EMPTY_ARRAY(char * const, ddrio_gate_group);
+EMPTY_ARRAY(char * const, jtag_gpio_group);
+EMPTY_ARRAY(char * const, jtag_tck_group);
+EMPTY_ARRAY(char * const, jtag_tdi_group);
+EMPTY_ARRAY(char * const, jtag_tdo_group);
+EMPTY_ARRAY(char * const, tms_group);
+EMPTY_ARRAY(char * const, trsl_group);
 static const char * const sfi_i2c0_scl_group[] = {"SFI_I2C0_SCL",
 					"SFI_I3C0_SCL"};
 static const char * const sfi_i2c0_sda_group[] = {"SFI_I2C0_SDA",
@@ -169,28 +170,28 @@ static const char * const gpio43_group[] = {"GPIO43"};
 static const char * const gpio44_group[] = {"GPIO44"};
 static const char * const gpio45_group[] = {"GPIO45"};
 static const char * const gpio46_group[] = {"GPIO46"};
-static const char * const reset_in_group[] = { };
-static const char * const plt_reset_group[] = { };
-static const char * const thermtrip_group[] = { };
-static const char * const prochot_group[] = { };
-static const char * const pm_i2c0_clk_group[] = { };
-static const char * const pm_i2c0_data_group[] = { };
-static const char * const pm_i2c1_clk_group[] = { };
-static const char * const pm_i2c1_data_group[] = { };
-static const char * const pm_i2c2_clk_group[] = { };
-static const char * const pm_i2c2_data_group[] = { };
-static const char * const pm_i2c3_clk_group[] = { };
-static const char * const pm_i2c3_data_group[] = { };
-static const char * const strap0_group[] = { };
-static const char * const strap1_group[] = { };
+EMPTY_ARRAY(char * const, reset_in_group);
+EMPTY_ARRAY(char * const, plt_reset_group);
+EMPTY_ARRAY(char * const, thermtrip_group);
+EMPTY_ARRAY(char * const, prochot_group);
+EMPTY_ARRAY(char * const, pm_i2c0_clk_group);
+EMPTY_ARRAY(char * const, pm_i2c0_data_group);
+EMPTY_ARRAY(char * const, pm_i2c1_clk_group);
+EMPTY_ARRAY(char * const, pm_i2c1_data_group);
+EMPTY_ARRAY(char * const, pm_i2c2_clk_group);
+EMPTY_ARRAY(char * const, pm_i2c2_data_group);
+EMPTY_ARRAY(char * const, pm_i2c3_clk_group);
+EMPTY_ARRAY(char * const, pm_i2c3_data_group);
+EMPTY_ARRAY(char * const, strap0_group);
+EMPTY_ARRAY(char * const, strap1_group);
 static const char * const dp2_digon_group[] = {"DP2_DIGON"};
 static const char * const dp2_blon_group[] = {"DP2_BLON"};
 static const char * const dp2_vary_bl_group[] = {"DP2_VARY_BL"};
 static const char * const i2c7_scl_group[] = {"I2C7_SCL"};
 static const char * const i2c7_sda_group[] = {"I2C7_SDA"};
-static const char * const uart6_csu_se_txd_group[] = { };
-static const char * const clk_req1_group[] = { };
-static const char * const clk_req3_group[] = { };
+EMPTY_ARRAY(char * const, uart6_csu_se_txd_group);
+EMPTY_ARRAY(char * const, clk_req1_group);
+EMPTY_ARRAY(char * const, clk_req3_group);
 static const char * const i2c5_scl_group[] = {"I2C5_SCL", "GPIO47"};
 static const char * const i2c5_sda_group[] = {"I2C5_SDA", "GPIO48"};
 static const char * const i2c6_scl_group[] = {"I2C6_SCL", "GPIO49"};

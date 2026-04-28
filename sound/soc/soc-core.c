@@ -55,8 +55,14 @@ static LIST_HEAD(unbind_card_list);
 /*
  * This is used if driver don't need to have CPU/Codec/Platform
  * dai_link. see soc.h
+ * FIXCHERI: Cannot use linux/empty_array.h because of the export.
  */
-struct snd_soc_dai_link_component null_dailink_component[0];
+static const struct {
+	const struct snd_soc_dai_link_component __a[0];
+	const char dummy;
+} __null_dailink_component;
+extern struct snd_soc_dai_link_component null_dailink_component[0]
+	__attribute__((alias("__null_dailink_component")));
 EXPORT_SYMBOL_GPL(null_dailink_component);
 
 /*

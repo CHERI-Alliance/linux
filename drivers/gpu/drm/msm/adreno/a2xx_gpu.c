@@ -5,6 +5,8 @@
 #include "msm_gem.h"
 #include "msm_mmu.h"
 
+#include <linux/empty_array.h>
+
 extern bool hang_debug;
 
 static void a2xx_dump(struct msm_gpu *gpu);
@@ -489,9 +491,8 @@ static u32 a2xx_get_rptr(struct msm_gpu *gpu, struct msm_ringbuffer *ring)
 	return ring->memptrs->rptr;
 }
 
-static const struct msm_gpu_perfcntr perfcntrs[] = {
 /* TODO */
-};
+EMPTY_ARRAY(struct msm_gpu_perfcntr, perfcntrs)
 
 static struct msm_gpu *a2xx_gpu_init(struct drm_device *dev)
 {
