@@ -7,111 +7,47 @@
 #include <linux/atomic.h>
 #include <linux/bug.h>
 
-#include <asm/processor.h>  /* for cpu_relax() */
+#define __BSL_TYPE unsigned long
+#define __BSL_NAME(n) n
+#define __BSL_TEST_AND_SET(B,A) test_and_set_bit_lock((B), (A))
+#define __BSL_TEST(B, A) test_bit((B), (A))
+#define __BSL_CLEAR(B, A) clear_bit_unlock((B), (A))
+#define ____BSL_CLEAR(B, A) __clear_bit_unlock((B), (A))
+#include "bit_spinlock_impl.h"
+#undef __BSL_CLEAR
+#undef ____BSL_CLEAR
+#undef __BSL_TEST
+#undef __BSL_TEST_AND_SET
+#undef __BSL_NAME
+#undef __BSL_TYPE
 
-/*
- * For static context analysis, we need a unique token for each possible bit
- * that can be used as a bit_spinlock. The easiest way to do that is to create a
- * fake context that we can cast to with the __bitlock(bitnum, addr) macro
- * below, which will give us unique instances for each (bit, addr) pair that the
- * static analysis can use.
- */
-context_lock_struct(__context_bitlock) { };
-#define __bitlock(bitnum, addr) (struct __context_bitlock *)(bitnum + (addr))
+#define __BSL_TYPE uintptr_t
+#define __BSL_NAME(n) n ## _ptr
+#define __BSL_TEST_AND_SET(B,A) ({					\
+	unsigned long __m = BIT_MASK((B));				\
+	atomic_ptr_t * __a = (atomic_ptr_t *)(A);			\
+	uintptr_t __o = atomic_ptr_fetch_or_acquire(__c_fakeu(__m), __a); \
+	!!(__o & __m);							\
+})
+#define __BSL_TEST(B, A) ({						\
+	unsigned long __m = BIT_MASK((B));				\
+	atomic_ptr_t * __a = (atomic_ptr_t *)(A);			\
+	!!(atomic_ptr_read(__a) & __m);				\
+})
+#define __BSL_CLEAR(B, A) ({						\
+	unsigned long __m = BIT_MASK((B));				\
+	atomic_ptr_t * __a = (atomic_ptr_t *)(A);			\
+	atomic_ptr_and(__c_fakeu(~__m), __a);				\
+})
+#define ____BSL_CLEAR(B, A) __BSL_CLEAR((B), (A))
+#include "bit_spinlock_impl.h"
+#undef __BSL_CLEAR
+#undef ____BSL_CLEAR
+#undef __BSL_TEST
+#undef __BSL_TEST_AND_SET
+#undef __BSL_NAME
+#undef __BSL_TYPE
 
-/*
- *  bit-based spin_lock()
- *
- * Don't use this unless you really need to: spin_lock() and spin_unlock()
- * are significantly faster.
- */
-static __always_inline void bit_spin_lock(int bitnum, unsigned long *addr)
-	__acquires(__bitlock(bitnum, addr))
-{
-	/*
-	 * Assuming the lock is uncontended, this never enters
-	 * the body of the outer loop. If it is contended, then
-	 * within the inner loop a non-atomic test is used to
-	 * busywait with less bus contention for a good time to
-	 * attempt to acquire the lock bit.
-	 */
-	preempt_disable();
-#if defined(CONFIG_SMP) || defined(CONFIG_DEBUG_SPINLOCK)
-	while (unlikely(test_and_set_bit_lock(bitnum, addr))) {
-		preempt_enable();
-		do {
-			cpu_relax();
-		} while (test_bit(bitnum, addr));
-		preempt_disable();
-	}
-#endif
-	__acquire(__bitlock(bitnum, addr));
-}
-
-/*
- * Return true if it was acquired
- */
-static __always_inline int bit_spin_trylock(int bitnum, unsigned long *addr)
-	__cond_acquires(true, __bitlock(bitnum, addr))
-{
-	preempt_disable();
-#if defined(CONFIG_SMP) || defined(CONFIG_DEBUG_SPINLOCK)
-	if (unlikely(test_and_set_bit_lock(bitnum, addr))) {
-		preempt_enable();
-		return 0;
-	}
-#endif
-	__acquire(__bitlock(bitnum, addr));
-	return 1;
-}
-
-/*
- *  bit-based spin_unlock()
- */
-static __always_inline void bit_spin_unlock(int bitnum, unsigned long *addr)
-	__releases(__bitlock(bitnum, addr))
-{
-#ifdef CONFIG_DEBUG_SPINLOCK
-	BUG_ON(!test_bit(bitnum, addr));
-#endif
-#if defined(CONFIG_SMP) || defined(CONFIG_DEBUG_SPINLOCK)
-	clear_bit_unlock(bitnum, addr);
-#endif
-	preempt_enable();
-	__release(__bitlock(bitnum, addr));
-}
-
-/*
- *  bit-based spin_unlock()
- *  non-atomic version, which can be used eg. if the bit lock itself is
- *  protecting the rest of the flags in the word.
- */
-static __always_inline void __bit_spin_unlock(int bitnum, unsigned long *addr)
-	__releases(__bitlock(bitnum, addr))
-{
-#ifdef CONFIG_DEBUG_SPINLOCK
-	BUG_ON(!test_bit(bitnum, addr));
-#endif
-#if defined(CONFIG_SMP) || defined(CONFIG_DEBUG_SPINLOCK)
-	__clear_bit_unlock(bitnum, addr);
-#endif
-	preempt_enable();
-	__release(__bitlock(bitnum, addr));
-}
-
-/*
- * Return true if the lock is held.
- */
-static inline int bit_spin_is_locked(int bitnum, unsigned long *addr)
-{
-#if defined(CONFIG_SMP) || defined(CONFIG_DEBUG_SPINLOCK)
-	return test_bit(bitnum, addr);
-#elif defined CONFIG_PREEMPT_COUNT
-	return preempt_count();
-#else
-	return 1;
-#endif
-}
 
 #endif /* __LINUX_BIT_SPINLOCK_H */
 
