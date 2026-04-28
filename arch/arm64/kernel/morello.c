@@ -27,8 +27,6 @@ void __morello_merge_c_x(uintcap_t *creg, u64 xreg);
 bool __morello_cap_has_executive(uintcap_t cap);
 void __morello_thread_init_user(struct task_struct *tsk, uintcap_t ddc);
 
-/* Not defined as static because morello.S refers to it */
-uintcap_t morello_root_cap __ro_after_init;
 static uintcap_t morello_sentry_unsealcap __ro_after_init;
 
 /* DDC_ELx reset value (low/high 64 bits), as defined in the Morello spec */
@@ -36,11 +34,6 @@ static uintcap_t morello_sentry_unsealcap __ro_after_init;
 #define DDC_RESET_VAL_HIGH_64	0xffffc00000010005ULL
 
 #define CAP_OTYPE_FIELD_BITS	15
-
-uintcap_t morello_get_root_cap(void)
-{
-	return morello_root_cap;
-}
 
 static bool is_pure_task(void)
 {
@@ -356,9 +349,6 @@ static int __init morello_cap_init(void)
 	perms = CHERI_PERM_GLOBAL | ARM_CAP_PERMISSION_COMPARTMENT_ID;
 	/* Maximum userspace bounds for the time being. */
 	cheri_user_root_cid_cap = build_cap(cheri_user_root_allperms_cap, perms);
-
-	/* Initialise Morello-specific root capabilities. */
-	morello_root_cap = root_cap;
 
 	/* Initialize a capability able to unseal sentry capabilities. */
 	perms = CHERI_PERM_GLOBAL | CHERI_PERM_UNSEAL;
