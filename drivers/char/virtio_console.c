@@ -27,6 +27,7 @@
 #include <linux/module.h>
 #include <linux/dma-mapping.h>
 #include <linux/string_choices.h>
+#include <linux/empty_array.h>
 #include "../tty/hvc/hvc_console.h"
 
 #define is_rproc_enabled IS_ENABLED(CONFIG_REMOTEPROC)
@@ -2081,8 +2082,7 @@ static const struct virtio_device_id rproc_serial_id_table[] = {
 };
 MODULE_DEVICE_TABLE(virtio, rproc_serial_id_table);
 
-static const unsigned int rproc_serial_features[] = {
-};
+EMPTY_ARRAY(unsigned int, rproc_serial_features)
 
 #ifdef CONFIG_PM_SLEEP
 static int virtcons_freeze(struct virtio_device *vdev)

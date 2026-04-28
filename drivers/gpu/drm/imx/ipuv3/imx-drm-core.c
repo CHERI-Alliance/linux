@@ -10,6 +10,7 @@
 #include <linux/dma-buf.h>
 #include <linux/module.h>
 #include <linux/platform_device.h>
+#include <linux/empty_array.h>
 
 #include <video/imx-ipu-v3.h>
 
@@ -135,9 +136,7 @@ int imx_drm_encoder_parse_of(struct drm_device *drm,
 }
 EXPORT_SYMBOL_GPL(imx_drm_encoder_parse_of);
 
-static const struct drm_ioctl_desc imx_drm_ioctls[] = {
-	/* none so far */
-};
+EMPTY_ARRAY(struct drm_ioctl_desc, imx_drm_ioctls)
 
 static int imx_drm_dumb_create(struct drm_file *file_priv,
 			       struct drm_device *drm,

@@ -13,6 +13,7 @@
 #include <linux/pci.h>
 #include <linux/align.h>
 #include <linux/dma/amd_xdma.h>
+#include <linux/empty_array.h>
 #include <media/v4l2-ioctl.h>
 #include <media/videobuf2-v4l2.h>
 #include <media/videobuf2-dma-sg.h>
@@ -47,8 +48,7 @@ static const struct mgb4_i2c_kv fpdl3_i2c[] = {
 	{0x05, 0xFF, 0x04}, {0x06, 0xFF, 0x01}, {0xC2, 0xFF, 0x80}
 };
 
-static const struct mgb4_i2c_kv gmsl1_i2c[] = {
-};
+EMPTY_ARRAY(struct mgb4_i2c_kv, gmsl1_i2c);
 
 static const struct v4l2_dv_timings_cap video_timings_cap = {
 	.type = V4L2_DV_BT_656_1120,

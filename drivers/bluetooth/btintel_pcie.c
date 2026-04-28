@@ -13,6 +13,7 @@
 #include <linux/wait.h>
 #include <linux/delay.h>
 #include <linux/interrupt.h>
+#include <linux/empty_array.h>
 
 #include <linux/unaligned.h>
 #include <linux/devcoredump.h>
@@ -2403,7 +2404,7 @@ static const struct hci_drv_handler btintel_pcie_hci_drv_common_handlers[] = {
 	{ btintel_pcie_hci_drv_read_info,       HCI_DRV_READ_INFO_SIZE },
 };
 
-static const struct hci_drv_handler btintel_pcie_hci_drv_specific_handlers[] = {};
+EMPTY_ARRAY(struct hci_drv_handler, btintel_pcie_hci_drv_specific_handlers);
 
 static struct hci_drv btintel_pcie_hci_drv = {
 	.common_handler_count   = ARRAY_SIZE(btintel_pcie_hci_drv_common_handlers),

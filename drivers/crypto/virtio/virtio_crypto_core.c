@@ -8,6 +8,7 @@
 #include <linux/module.h>
 #include <linux/virtio_config.h>
 #include <linux/cpu.h>
+#include <linux/empty_array.h>
 
 #include <uapi/linux/virtio_crypto.h>
 #include "virtio_crypto_common.h"
@@ -565,9 +566,7 @@ free_vqs:
 }
 #endif
 
-static const unsigned int features[] = {
-	/* none */
-};
+EMPTY_ARRAY(unsigned int, features)	/* none */
 
 static const struct virtio_device_id id_table[] = {
 	{ VIRTIO_ID_CRYPTO, VIRTIO_DEV_ANY_ID },

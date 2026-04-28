@@ -9,6 +9,8 @@
 #include "etnaviv_perfmon.h"
 #include "state_hi.xml.h"
 
+#include <linux/empty_array.h>
+
 struct etnaviv_pm_domain;
 
 struct etnaviv_pm_signal {
@@ -442,8 +444,7 @@ static const struct etnaviv_pm_domain doms_2d[] = {
 	}
 };
 
-static const struct etnaviv_pm_domain doms_vg[] = {
-};
+EMPTY_ARRAY(struct etnaviv_pm_domain, doms_vg)
 
 static const struct etnaviv_pm_domain_meta doms_meta[] = {
 	{
