@@ -288,20 +288,20 @@ static inline int pin_longterm_test_start(user_uintptr_t arg)
 
 static inline int pin_longterm_test_read(user_uintptr_t arg)
 {
-	__u64 user_addr;
+	user_uintptr_t user_addr;
 	unsigned long i;
 
 	if (!pin_longterm_test_pages)
 		return -EINVAL;
 
-	if (copy_from_user(&user_addr, (void __user *)arg, sizeof(user_addr)))
+	if (copy_from_user_with_ptr(&user_addr, (void __user *)arg, sizeof(user_addr)))
 		return -EFAULT;
 
 	for (i = 0; i < pin_longterm_test_nr_pages; i++) {
 		void *addr = kmap_local_page(pin_longterm_test_pages[i]);
 		unsigned long ret;
 
-		ret = copy_to_user((void __user *)(unsigned long)user_addr, addr,
+		ret = copy_to_user_with_ptr((void __user *)(user_uintptr_t)user_addr, addr,
 				   PAGE_SIZE);
 		kunmap_local(addr);
 		if (ret)

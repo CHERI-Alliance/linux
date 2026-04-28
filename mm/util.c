@@ -1289,7 +1289,8 @@ static void set_ps_flags(struct page_snapshot *ps, const struct folio *folio,
  */
 void snapshot_page(struct page_snapshot *ps, const struct page *page)
 {
-	unsigned long head, nr_pages = 1;
+	uintptr_t head;
+	unsigned long nr_pages = 1;
 	struct folio *foliop;
 	int loops = 5;
 

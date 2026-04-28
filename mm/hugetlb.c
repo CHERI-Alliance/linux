@@ -1073,13 +1073,13 @@ __weak unsigned long vma_mmu_pagesize(struct vm_area_struct *vma)
  * reference it, this region map represents those offsets which have consumed
  * reservation ie. where pages have been instantiated.
  */
-static unsigned long get_vma_private_data(struct vm_area_struct *vma)
+static uintptr_t get_vma_private_data(struct vm_area_struct *vma)
 {
 	return (uintptr_t)vma->vm_private_data;
 }
 
 static void set_vma_private_data(struct vm_area_struct *vma,
-							unsigned long value)
+				 uintptr_t value)
 {
 	vma->vm_private_data = (void *)value;
 }
@@ -5951,7 +5951,7 @@ u32 hugetlb_fault_mutex_hash(struct address_space *mapping, pgoff_t idx)
 	unsigned long key[2];
 	u32 hash;
 
-	key[0] = (uintptr_t) mapping;
+	key[0] = __c_pa(mapping);
 	key[1] = idx;
 
 	hash = jhash2((u32 *)&key, sizeof(key)/(sizeof(u32)), 0);

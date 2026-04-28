@@ -587,7 +587,7 @@ void __init anon_vma_init(void)
 struct anon_vma *folio_get_anon_vma(const struct folio *folio)
 {
 	struct anon_vma *anon_vma = NULL;
-	unsigned long anon_mapping;
+	uintptr_t anon_mapping;
 
 	VM_WARN_ON_FOLIO(!folio_test_locked(folio), folio);
 
@@ -635,7 +635,7 @@ struct anon_vma *folio_lock_anon_vma_read(const struct folio *folio,
 {
 	struct anon_vma *anon_vma = NULL;
 	struct anon_vma *root_anon_vma;
-	unsigned long anon_mapping;
+	uintptr_t anon_mapping;
 
 	VM_WARN_ON_FOLIO(!folio_test_locked(folio), folio);
 
@@ -2413,7 +2413,7 @@ static bool try_to_migrate_one(struct folio *folio, struct vm_area_struct *vma,
 	pte_t pteval;
 	struct page *subpage;
 	struct mmu_notifier_range range;
-	enum ttu_flags flags = (enum ttu_flags)(long)arg;
+	enum ttu_flags flags = (enum ttu_flags)__c_pa(arg);
 	unsigned long pfn;
 	unsigned long hsz = 0;
 

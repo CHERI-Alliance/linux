@@ -772,6 +772,12 @@ struct per_cpu_zonestat {
 	 */
 	unsigned long vm_numa_event[NR_VM_NUMA_EVENT_ITEMS];
 #endif
+#ifdef CONFIG_CHERI_KERNEL
+#if !defined(CONFIG_SMP) && !defined(CONFIG_NUMA)
+	/* FIXCHERI: Zero sized struct generates a linker warning. */
+	unsigned char dummy;
+#endif
+#endif
 };
 
 struct per_cpu_nodestat {
@@ -1924,10 +1930,10 @@ struct mem_section {
 	 * the location of the section here to guide allocation.
 	 * (see sparse.c::memory_present())
 	 *
-	 * Making it a UL at least makes someone do a cast
+	 * Making it a uintptr_t at least makes someone do a cast
 	 * before using it wrong.
 	 */
-	unsigned long section_mem_map;
+	uintptr_t section_mem_map;
 
 	struct mem_section_usage *usage;
 #ifdef CONFIG_PAGE_EXTENSION
@@ -2026,7 +2032,7 @@ enum {
 
 static inline struct page *__section_mem_map_addr(struct mem_section *section)
 {
-	unsigned long map = section->section_mem_map;
+	uintptr_t map = section->section_mem_map;
 	map &= SECTION_MAP_MASK;
 	return (struct page *)map;
 }

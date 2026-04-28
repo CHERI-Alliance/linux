@@ -2046,8 +2046,8 @@ static long __get_user_pages_locked(struct mm_struct *mm, unsigned long start,
 size_t fault_in_writeable(char __user *uaddr, size_t size)
 {
 	const user_uintptr_t start = (user_uintptr_t)uaddr;
-	const unsigned long end = start + size;
-	unsigned long cur;
+	const unsigned long end = __c_ua(start) + size;
+	user_uintptr_t cur;
 
 	if (unlikely(size == 0))
 		return 0;
@@ -2056,11 +2056,11 @@ size_t fault_in_writeable(char __user *uaddr, size_t size)
 
 	/* Stop once we overflow to 0. */
 	for (cur = start; cur && cur < end; cur = PAGE_ALIGN_DOWN(cur + PAGE_SIZE))
-		unsafe_put_user(0, (char __user *)(uintptr_t)cur, out);
+		unsafe_put_user(0, (char __user *)(user_uintptr_t)cur, out);
 out:
 	user_write_access_end();
 	if (size > cur - start)
-		return size - (cur - start);
+		return size - (__c_ua(cur) - __c_ua(start));
 	return 0;
 }
 EXPORT_SYMBOL(fault_in_writeable);
@@ -2114,7 +2114,7 @@ EXPORT_SYMBOL(fault_in_subpage_writeable);
  */
 size_t fault_in_safe_writeable(char __user *uaddr, size_t size)
 {
-	unsigned long start = user_ptr_addr(uaddr), end;
+	unsigned long start = user_ptr_addr(uaddr);
 	const unsigned long end = start + size;
 	unsigned long cur;
 	struct mm_struct *mm = current->mm;
@@ -2149,8 +2149,8 @@ EXPORT_SYMBOL(fault_in_safe_writeable);
 size_t fault_in_readable(const char __user *uaddr, size_t size)
 {
 	const user_uintptr_t start = (user_uintptr_t)uaddr;
-	const unsigned long end = start + size;
-	unsigned long cur;
+	const unsigned long end = __c_ua(start) + size;
+	user_uintptr_t cur;
 	volatile char c;
 
 	if (unlikely(size == 0))
@@ -2160,12 +2160,12 @@ size_t fault_in_readable(const char __user *uaddr, size_t size)
 
 	/* Stop once we overflow to 0. */
 	for (cur = start; cur && cur < end; cur = PAGE_ALIGN_DOWN(cur + PAGE_SIZE))
-		unsafe_get_user(c, (const char __user *)(uintptr_t)cur, out);
+		unsafe_get_user(c, (const char __user *)(user_uintptr_t)cur, out);
 out:
 	user_read_access_end();
 	(void)c;
 	if (size > cur - start)
-		return size - (cur - start);
+		return size - (__c_ua(cur) - __c_ua(start));
 	return 0;
 }
 EXPORT_SYMBOL(fault_in_readable);

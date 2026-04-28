@@ -615,7 +615,7 @@ static __must_check int do_mlock(user_uintptr_t user_ptr, size_t len, vm_flags_t
 	unsigned long locked;
 	unsigned long lock_limit;
 	int error = -ENOMEM;
-	unsigned long start = untagged_addr(user_ptr);
+	unsigned long start = untagged_addr(__c_ua(user_ptr));
 
 	if (!can_do_mlock())
 		return -EPERM;
@@ -686,7 +686,7 @@ SYSCALL_DEFINE3(mlock2, user_uintptr_t, user_ptr, size_t, len, int, flags)
 SYSCALL_DEFINE2(munlock, user_uintptr_t, user_ptr, size_t, len)
 {
 	int ret;
-	unsigned long start = untagged_addr(user_ptr);
+	unsigned long start = untagged_addr(__c_ua(user_ptr));
 
 	len = PAGE_ALIGN(len + (offset_in_page(start)));
 	start &= PAGE_MASK;

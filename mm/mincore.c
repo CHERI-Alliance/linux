@@ -21,6 +21,7 @@
 
 #include <linux/mm_reserv.h>
 #include <linux/uaccess.h>
+#include <linux/cheri.h>
 #include "swap.h"
 #include "internal.h"
 
@@ -340,14 +341,14 @@ SYSCALL_DEFINE3(mincore, user_uintptr_t, user_ptr, size_t, len,
 	long retval;
 	unsigned long pages;
 	unsigned char *tmp;
-	unsigned long start = untagged_addr((ptraddr_t)user_ptr);
+	unsigned long start = untagged_addr(__c_ua(user_ptr));
 
 	/* Check the start address: needs to be page-aligned.. */
 	if (unlikely(start & ~PAGE_MASK))
 		return -EINVAL;
 
 	/* ..and we need to be passed a valid user-space range */
-	if (!access_ok((void __user *)(uintptr_t) start, len))
+	if (!access_ok((void __user *)(uintptr_t __force) start, len))
 		return -ENOMEM;
 
 	/* This also avoids any overflows on PAGE_ALIGN */

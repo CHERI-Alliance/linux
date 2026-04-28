@@ -53,7 +53,7 @@ static vm_fault_t secretmem_fault(struct vm_fault *vmf)
 	struct inode *inode = file_inode(vmf->vma->vm_file);
 	pgoff_t offset = vmf->pgoff;
 	gfp_t gfp = vmf->gfp_mask;
-	unsigned long addr;
+	uintptr_t addr;
 	struct folio *folio;
 	vm_fault_t ret;
 	int err;

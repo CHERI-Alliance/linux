@@ -15,7 +15,8 @@
 void __iomem *generic_ioremap_prot(phys_addr_t phys_addr, size_t size,
 				   pgprot_t prot)
 {
-	unsigned long offset, vaddr;
+	unsigned long offset;
+	uintptr_t vaddr;
 	phys_addr_t last_addr;
 	struct vm_struct *area;
 
@@ -40,11 +41,10 @@ void __iomem *generic_ioremap_prot(phys_addr_t phys_addr, size_t size,
 	vaddr = (uintptr_t)area->addr;
 	area->phys_addr = phys_addr;
 
-	if (ioremap_page_range(vaddr, vaddr + size, phys_addr, prot)) {
+	if (ioremap_page_range(__c_ua(vaddr), __c_ua(vaddr) + size, phys_addr, prot)) {
 		free_vm_area(area);
 		return NULL;
 	}
-
 	return (void __iomem *)(vaddr + offset);
 }
 
