@@ -46,7 +46,7 @@ static void *squashfs_decompressor_create(struct squashfs_sb_info *msblk,
 	}
 
 	kfree(comp_opts);
-	return (void *)(__force unsigned long) percpu;
+	return (void *)(__force uintptr_t) percpu;
 
 out:
 	for_each_possible_cpu(cpu) {
