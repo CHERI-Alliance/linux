@@ -10,18 +10,6 @@
 
 #include <asm/errno.h>
 
-#ifdef CONFIG_CHERI_PURECAP_UABI
-#define __ASM_SWITCH_TO_C64	"	bx	#4\n"	\
-				".arch morello+c64\n"
-#define __ASM_SWITCH_TO_A64	"	bx	#4\n"	\
-				".arch morello\n"
-#define __ASM_RW_UPTR_CONSTR	"+C"
-#else
-#define __ASM_SWITCH_TO_C64
-#define __ASM_SWITCH_TO_A64
-#define __ASM_RW_UPTR_CONSTR "+r"
-#endif
-
 #define FUTEX_MAX_LOOPS	128 /* What's the largest number you can think of? */
 
 #define __futex_atomic_op(insn, ret, oldval, uaddr, tmp, oparg)		\
@@ -30,7 +18,7 @@ do {									\
 									\
 	uaccess_enable_privileged();					\
 	asm volatile(							\
-	__ASM_SWITCH_TO_C64						\
+	__ASM_UACCESS_BEFORE						\
 "	prfm	pstl1strm, [%2]\n"					\
 "1:	ldxr	%w1, [%2]\n"						\
 	insn "\n"							\
@@ -41,7 +29,7 @@ do {									\
 "	mov	%w0, %w6\n"						\
 "3:\n"									\
 "	dmb	ish\n"							\
-	__ASM_SWITCH_TO_A64						\
+	__ASM_UACCESS_AFTER						\
 	_ASM_EXTABLE_UACCESS_ERR(1b, 3b, %w0)				\
 	_ASM_EXTABLE_UACCESS_ERR(2b, 3b, %w0)				\
 	/* TODO [PCuABI]: temporary solution for uaddr. Should be reverted to +Q
@@ -108,7 +96,7 @@ futex_atomic_cmpxchg_inatomic(u32 *uval, u32 __user *_uaddr,
 	uaddr = __uaccess_mask_ptr(_uaddr);
 	uaccess_enable_privileged();
 	asm volatile("// futex_atomic_cmpxchg_inatomic\n"
-	__ASM_SWITCH_TO_C64
+	__ASM_UACCESS_BEFORE
 "	prfm	pstl1strm, [%2]\n"
 "1:	ldxr	%w1, [%2]\n"
 "	sub	%w3, %w1, %w5\n"
@@ -121,7 +109,7 @@ futex_atomic_cmpxchg_inatomic(u32 *uval, u32 __user *_uaddr,
 "3:\n"
 "	dmb	ish\n"
 "4:\n"
-	__ASM_SWITCH_TO_A64
+	__ASM_UACCESS_AFTER
 	_ASM_EXTABLE_UACCESS_ERR(1b, 4b, %w0)
 	_ASM_EXTABLE_UACCESS_ERR(2b, 4b, %w0)
 	/* TODO [PCuABI]: temporary solution for uaddr. Should be reverted to +Q once
