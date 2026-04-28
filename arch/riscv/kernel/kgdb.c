@@ -20,7 +20,7 @@ enum {
 	KGDB_SW_SINGLE_STEP
 };
 
-static unsigned long stepped_address;
+static uintptr_t stepped_address;
 static unsigned int stepped_opcode;
 
 static int decode_register_index(unsigned long opcode, int offset)
@@ -34,10 +34,10 @@ static int decode_register_index_short(unsigned long opcode, int offset)
 }
 
 /* Calculate the new address for after a step */
-static int get_step_address(struct pt_regs *regs, unsigned long *next_addr)
+static int get_step_address(struct pt_regs *regs, uintptr_t *next_addr)
 {
-	unsigned long pc = regs->epc;
-	unsigned long *regs_ptr = (unsigned long *)regs;
+	uintptr_t pc = regs->epc;
+	uintptr_t *regs_ptr = (uintptr_t *)regs;
 	unsigned int rs1_num, rs2_num;
 	int op_code;
 
@@ -77,9 +77,9 @@ static int get_step_address(struct pt_regs *regs, unsigned long *next_addr)
 			rs1_num = decode_register_index(op_code, RVG_RS1_OPOFF);
 			rs2_num = decode_register_index(op_code, RVG_RS2_OPOFF);
 			if (rs1_num)
-				rs1_val = regs_ptr[rs1_num];
+				rs1_val = __c_ua(regs_ptr[rs1_num]);
 			if (rs2_num)
-				rs2_val = regs_ptr[rs2_num];
+				rs2_val = __c_ua(regs_ptr[rs2_num]);
 
 			if (riscv_insn_is_beq(op_code))
 				result = (rs1_val == rs2_val) ? true : false;
@@ -106,7 +106,7 @@ static int get_step_address(struct pt_regs *regs, unsigned long *next_addr)
 		} else if (riscv_insn_is_jalr(op_code)) {
 			rs1_num = decode_register_index(op_code, RVG_RS1_OPOFF);
 			if (rs1_num)
-				*next_addr = ((unsigned long *)regs)[rs1_num];
+				*next_addr = ((uintptr_t *)regs)[rs1_num];
 			*next_addr += RV_EXTRACT_ITYPE_IMM(op_code);
 		} else if (riscv_insn_is_sret(op_code)) {
 			*next_addr = pc;
@@ -120,7 +120,7 @@ static int get_step_address(struct pt_regs *regs, unsigned long *next_addr)
 static int do_single_step(struct pt_regs *regs)
 {
 	/* Determine where the target instruction will send us to */
-	unsigned long addr = 0;
+	uintptr_t addr = 0;
 	int error = get_step_address(regs, &addr);
 
 	if (error)
@@ -234,25 +234,25 @@ sleeping_thread_to_gdb_regs(unsigned long *gdb_regs, struct task_struct *task)
 	/* Initialize to zero */
 	memset((char *)gdb_regs, 0, NUMREGBYTES);
 
-	gdb_regs[DBG_REG_SP_OFF] = task->thread.sp;
-	gdb_regs[DBG_REG_FP_OFF] = task->thread.s[0];
-	gdb_regs[DBG_REG_S1_OFF] = task->thread.s[1];
-	gdb_regs[DBG_REG_S2_OFF] = task->thread.s[2];
-	gdb_regs[DBG_REG_S3_OFF] = task->thread.s[3];
-	gdb_regs[DBG_REG_S4_OFF] = task->thread.s[4];
-	gdb_regs[DBG_REG_S5_OFF] = task->thread.s[5];
-	gdb_regs[DBG_REG_S6_OFF] = task->thread.s[6];
-	gdb_regs[DBG_REG_S7_OFF] = task->thread.s[7];
-	gdb_regs[DBG_REG_S8_OFF] = task->thread.s[8];
-	gdb_regs[DBG_REG_S9_OFF] = task->thread.s[9];
-	gdb_regs[DBG_REG_S10_OFF] = task->thread.s[10];
-	gdb_regs[DBG_REG_S11_OFF] = task->thread.s[11];
-	gdb_regs[DBG_REG_EPC_OFF] = task->thread.ra;
+	gdb_regs[DBG_REG_SP_OFF] = __c_ua(task->thread.sp);
+	gdb_regs[DBG_REG_FP_OFF] = __c_ua(task->thread.s[0]);
+	gdb_regs[DBG_REG_S1_OFF] = __c_ua(task->thread.s[1]);
+	gdb_regs[DBG_REG_S2_OFF] = __c_ua(task->thread.s[2]);
+	gdb_regs[DBG_REG_S3_OFF] = __c_ua(task->thread.s[3]);
+	gdb_regs[DBG_REG_S4_OFF] = __c_ua(task->thread.s[4]);
+	gdb_regs[DBG_REG_S5_OFF] = __c_ua(task->thread.s[5]);
+	gdb_regs[DBG_REG_S6_OFF] = __c_ua(task->thread.s[6]);
+	gdb_regs[DBG_REG_S7_OFF] = __c_ua(task->thread.s[7]);
+	gdb_regs[DBG_REG_S8_OFF] = __c_ua(task->thread.s[8]);
+	gdb_regs[DBG_REG_S9_OFF] = __c_ua(task->thread.s[9]);
+	gdb_regs[DBG_REG_S10_OFF] = __c_ua(task->thread.s[10]);
+	gdb_regs[DBG_REG_S11_OFF] = __c_ua(task->thread.s[11]);
+	gdb_regs[DBG_REG_EPC_OFF] = __c_ua(task->thread.ra);
 }
 
 void kgdb_arch_set_pc(struct pt_regs *regs, unsigned long pc)
 {
-	regs->epc = pc;
+	regs->epc = (uintptr_t)cheri_make_kernel_code_cap(pc);
 }
 
 noinline void arch_kgdb_breakpoint(void)
@@ -281,7 +281,7 @@ static inline void kgdb_arch_update_addr(struct pt_regs *regs,
 
 	ptr = &remcom_in_buffer[1];
 	if (kgdb_hex2long(&ptr, &addr))
-		regs->epc = addr;
+		regs->epc = (uintptr_t)cheri_make_kernel_code_cap(addr);
 }
 
 int kgdb_arch_handle_exception(int vector, int signo, int err_code,
@@ -331,7 +331,7 @@ static int kgdb_riscv_notify(struct notifier_block *self, unsigned long cmd,
 	if (user_mode(regs))
 		return NOTIFY_DONE;
 
-	type = kgdb_riscv_kgdbbreak(regs->epc);
+	type = kgdb_riscv_kgdbbreak(__c_ua(regs->epc));
 	if (type == NOT_KGDB_BREAK && cmd == DIE_TRAP)
 		return NOTIFY_DONE;
 
