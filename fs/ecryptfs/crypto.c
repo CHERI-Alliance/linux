@@ -1019,7 +1019,7 @@ out:
 	return rc;
 }
 
-static unsigned long ecryptfs_get_zeroed_pages(gfp_t gfp_mask,
+static uintptr_t ecryptfs_get_zeroed_pages(gfp_t gfp_mask,
 					       unsigned int order)
 {
 	struct page *page;
