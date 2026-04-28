@@ -17,6 +17,12 @@
 #define PROT_GROWSDOWN	0x01000000	/* mprotect flag: extend change to start of growsdown vma */
 #define PROT_GROWSUP	0x02000000	/* mprotect flag: extend change to end of growsup vma */
 
+/* PCuABI mapping and capability permissions */
+#define _PROT_MAX_SHIFT		16
+#define PROT_MAX(prot)		((prot) << _PROT_MAX_SHIFT)
+#define PROT_EXTRACT(prot)	((prot) & (PROT_READ | PROT_WRITE | PROT_EXEC))
+#define PROT_MAX_EXTRACT(prot)	(((prot) >> _PROT_MAX_SHIFT) & (PROT_READ | PROT_WRITE | PROT_EXEC))
+
 /* 0x01 - 0x03 are defined in linux/mman.h */
 #define MAP_TYPE	0x0f		/* Mask for type of mapping */
 #define MAP_FIXED	0x10		/* Interpret addr exactly */
