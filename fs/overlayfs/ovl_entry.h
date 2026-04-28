@@ -153,7 +153,7 @@ static inline struct dentry *ovl_lowerdata_dentry(struct ovl_entry *oe)
 /* private information held for every overlayfs dentry */
 static inline unsigned long *OVL_E_FLAGS(struct dentry *dentry)
 {
-	return (unsigned long *) &dentry->d_fsdata;
+	return (unsigned long *)(void *) &dentry->d_fsdata;
 }
 
 struct ovl_inode {
