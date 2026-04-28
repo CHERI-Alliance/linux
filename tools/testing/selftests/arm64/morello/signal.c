@@ -302,7 +302,7 @@ TEST(test_rt_sigqueueinfo)
 
 TEST(test_rt_tgsigqueueinfo)
 {
-	siginfo_t si, wait_si;
+	siginfo_t si;
 	pid_t cpid;
 	struct sigaction sa;
 	int ret;
@@ -324,15 +324,15 @@ TEST(test_rt_tgsigqueueinfo)
 	ASSERT_EQ(ret, 0) {
 		__TH_LOG_ERROR("rt_tgsigqueueinfo syscall failed");
 	}
-	ret = waitid(P_PID, cpid, &wait_si, WEXITED, NULL);
-	ASSERT_EQ(ret, 0) {
+	ret = waitpid(cpid, NULL, 0);
+	ASSERT_EQ(ret, cpid) {
 		__TH_LOG_ERROR("test_rt_tgsigqueueinfo: Failed on wait");
 	}
 }
 
 TEST(test_pidfd_send_signal)
 {
-	siginfo_t si, wait_si;
+	siginfo_t si;
 	pid_t cpid;
 	int pidfd, ret;
 	struct sigaction sa;
@@ -364,8 +364,8 @@ TEST(test_pidfd_send_signal)
 	ASSERT_EQ(ret, 0) {
 		__TH_LOG_ERROR("pidfd_send_signal syscall failed");
 	}
-	ret = waitid(P_PID, cpid, &wait_si, WEXITED, NULL);
-	ASSERT_EQ(ret, 0) {
+	ret = waitpid(cpid, NULL, 0);
+	ASSERT_EQ(ret, cpid) {
 		__TH_LOG_ERROR("test_pidfd_send_signal: Failed on wait");
 	}
 	close(pidfd);
