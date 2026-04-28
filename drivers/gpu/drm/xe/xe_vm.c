@@ -4232,7 +4232,8 @@ void xe_vm_snapshot_capture_delayed(struct xe_vm_snapshot *snap)
 			err = xe_bo_read(bo, snap->snap[i].bo_ofs,
 					 snap->snap[i].data, snap->snap[i].len);
 		} else {
-			void __user *userptr = (void __user *)(size_t)snap->snap[i].bo_ofs;
+			/* FIXCHERI: User space should provide a valid cap. */
+			const void __user *userptr = make_user_ptr_for_read_uaccess(snap->snap[i].bo_ofs, snap->snap[i].len);
 
 			kthread_use_mm(snap->snap[i].mm);
 			if (!copy_from_user(snap->snap[i].data, userptr, snap->snap[i].len))

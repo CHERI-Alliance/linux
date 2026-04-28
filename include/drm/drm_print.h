@@ -413,7 +413,7 @@ static inline struct drm_printer drm_dbg_printer(struct drm_device *drm,
 	struct drm_printer p = {
 		.printfn = __drm_printfn_dbg,
 		.arg = drm,
-		.origin = (const void *)_THIS_IP_, /* it's fine as we will be inlined */
+		.origin = __c_fakep(_THIS_IP_), /* it's fine as we will be inlined */
 		.prefix = prefix,
 		.category = category,
 	};

@@ -65,7 +65,7 @@ static DECLARE_FAULT_ATTR(backup_fault_inject);
  */
 struct ttm_pool_dma {
 	dma_addr_t addr;
-	unsigned long vaddr;
+	uintptr_t vaddr;
 };
 
 /**
@@ -411,7 +411,7 @@ static unsigned int ttm_pool_page_order(struct ttm_pool *pool, struct page *p)
 		return dma->vaddr & ~PAGE_MASK;
 	}
 
-	return p->private;
+	return __c_ua(p->private);
 }
 
 /*

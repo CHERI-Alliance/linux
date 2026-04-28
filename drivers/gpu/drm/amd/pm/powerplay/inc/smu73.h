@@ -210,6 +210,7 @@ struct SMU73_PIDController {
 
 typedef struct SMU73_PIDController SMU73_PIDController;
 
+#ifndef CONFIG_CHERI_KERNEL
 struct SMU7_LocalDpmScoreboard {
     uint32_t PercentageBusy;
 
@@ -295,6 +296,7 @@ struct SMU7_LocalDpmScoreboard {
 };
 
 typedef struct SMU7_LocalDpmScoreboard SMU7_LocalDpmScoreboard;
+#endif
 
 #define SMU7_MAX_VOLTAGE_CLIENTS 12
 
@@ -309,6 +311,7 @@ typedef uint8_t (*VoltageChangeHandler_t)(uint16_t, uint8_t);
 
 typedef uint32_t SMU_VoltageLevel;
 
+#ifndef CONFIG_CHERI_KERNEL
 struct SMU7_VoltageScoreboard {
     SMU_VoltageLevel TargetVoltage;
     uint16_t MaxVid;
@@ -355,6 +358,7 @@ struct SMU7_VoltageScoreboard {
 };
 
 typedef struct SMU7_VoltageScoreboard SMU7_VoltageScoreboard;
+#endif
 
 // -------------------------------------------------------------------------------------------------------------------------
 #define SMU7_MAX_PCIE_LINK_SPEEDS 3 /* 0:Gen1 1:Gen2 2:Gen3 */

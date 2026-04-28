@@ -179,17 +179,25 @@ static int amdgpu_cs_pass1(struct amdgpu_cs_parser *p,
 	struct amdgpu_fpriv *fpriv = p->filp->driver_priv;
 	unsigned int num_ibs[AMDGPU_CS_GANG_SIZE] = { };
 	struct amdgpu_vm *vm = &fpriv->vm;
-	uint64_t *chunk_array;
+	__u64ptr __user *chunk_array_user;
+	__u64ptr *chunk_array;
 	uint32_t uf_offset = 0;
 	size_t size;
 	int ret;
 	int i;
 
-	chunk_array = memdup_array_user(u64_to_user_ptr(cs->in.chunks),
-					cs->in.num_chunks,
-					sizeof(uint64_t));
-	if (IS_ERR(chunk_array))
-		return PTR_ERR(chunk_array);
+	chunk_array = kvmalloc_array(cs->in.num_chunks, sizeof(__u64ptr),
+				     GFP_KERNEL);
+	if (!chunk_array)
+		return -ENOMEM;
+
+	/* get chunks */
+	chunk_array_user = u64_to_user_ptr(cs->in.chunks);
+	if (copy_from_user(chunk_array, chunk_array_user,
+			   sizeof(__u64ptr)*cs->in.num_chunks)) {
+		ret = -EFAULT;
+		goto free_chunk;
+	}
 
 	p->nchunks = cs->in.num_chunks;
 	p->chunks = kvmalloc_objs(struct amdgpu_cs_chunk, p->nchunks);

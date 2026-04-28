@@ -133,7 +133,7 @@ query_engine_cycles(struct xe_device *xe,
 		return -EINVAL;
 	}
 
-	query_ptr = u64_to_user_ptr(query->data);
+	query_ptr = (void __user *)query->data;
 	if (copy_from_user(&resp, query_ptr, size))
 		return -EFAULT;
 
@@ -184,8 +184,7 @@ static int query_engines(struct xe_device *xe,
 			 struct drm_xe_device_query *query)
 {
 	size_t size = calc_hw_engine_info_size(xe);
-	struct drm_xe_query_engines __user *query_ptr =
-		u64_to_user_ptr(query->data);
+	struct drm_xe_query_engines __user *query_ptr = (void __user *)query->data;
 	struct drm_xe_query_engines *engines;
 	struct xe_hw_engine *hwe;
 	enum xe_hw_engine_id id;
@@ -247,7 +246,7 @@ static int query_mem_regions(struct xe_device *xe,
 	size_t size = calc_mem_regions_size(xe);
 	struct drm_xe_query_mem_regions *mem_regions;
 	struct drm_xe_query_mem_regions __user *query_ptr =
-		u64_to_user_ptr(query->data);
+		(void __user *)query->data;
 	struct ttm_resource_manager *man;
 	int ret, i;
 
@@ -315,7 +314,7 @@ static int query_config(struct xe_device *xe, struct drm_xe_device_query *query)
 	size_t size =
 		sizeof(struct drm_xe_query_config) + num_params * sizeof(u64);
 	struct drm_xe_query_config __user *query_ptr =
-		u64_to_user_ptr(query->data);
+		(void __user *)query->data;
 	struct drm_xe_query_config *config;
 
 	if (query->size == 0) {
@@ -364,7 +363,7 @@ static int query_gt_list(struct xe_device *xe, struct drm_xe_device_query *query
 	size_t size = sizeof(struct drm_xe_query_gt_list) +
 		xe->info.gt_count * sizeof(struct drm_xe_gt);
 	struct drm_xe_query_gt_list __user *query_ptr =
-		u64_to_user_ptr(query->data);
+		(void __user *)query->data;
 	struct drm_xe_query_gt_list *gt_list;
 	int iter = 0;
 	u8 id;
@@ -502,7 +501,7 @@ static int copy_mask(void __user2 * __capability *ptr,
 static int query_gt_topology(struct xe_device *xe,
 			     struct drm_xe_device_query *query)
 {
-	void __user *query_ptr = u64_to_user_ptr(query->data);
+	void __user *query_ptr = (void __user *)query->data;
 	size_t size = calc_topo_query_size(xe);
 	struct drm_xe_query_topology_mask topo;
 	struct xe_gt *gt;
@@ -561,7 +560,7 @@ static int query_gt_topology(struct xe_device *xe,
 static int
 query_uc_fw_version(struct xe_device *xe, struct drm_xe_device_query *query)
 {
-	struct drm_xe_query_uc_fw_version __user *query_ptr = u64_to_user_ptr(query->data);
+	struct drm_xe_query_uc_fw_version __user *query_ptr = (void __user *)query->data;
 	size_t size = sizeof(struct drm_xe_query_uc_fw_version);
 	struct drm_xe_query_uc_fw_version resp;
 	struct xe_uc_fw_version *version = NULL;
@@ -651,7 +650,7 @@ static size_t calc_oa_unit_query_size(struct xe_device *xe)
 static int query_oa_units(struct xe_device *xe,
 			  struct drm_xe_device_query *query)
 {
-	void __user *query_ptr = u64_to_user_ptr(query->data);
+	void __user *query_ptr = (void __user *)query->data;
 	size_t size = calc_oa_unit_query_size(xe);
 	struct drm_xe_query_oa_units *qoa;
 	enum xe_hw_engine_id hwe_id;
@@ -713,7 +712,7 @@ static int query_oa_units(struct xe_device *xe,
 
 static int query_pxp_status(struct xe_device *xe, struct drm_xe_device_query *query)
 {
-	struct drm_xe_query_pxp_status __user *query_ptr = u64_to_user_ptr(query->data);
+	struct drm_xe_query_pxp_status __user *query_ptr = (void __user *)query->data;
 	size_t size = sizeof(struct drm_xe_query_pxp_status);
 	struct drm_xe_query_pxp_status resp = { 0 };
 	int ret;
@@ -741,7 +740,7 @@ static int query_pxp_status(struct xe_device *xe, struct drm_xe_device_query *qu
 static int query_eu_stall(struct xe_device *xe,
 			  struct drm_xe_device_query *query)
 {
-	void __user *query_ptr = u64_to_user_ptr(query->data);
+	void __user *query_ptr = (void __user *)query->data;
 	struct drm_xe_query_eu_stall *info;
 	size_t size, array_size;
 	const u64 *rates;

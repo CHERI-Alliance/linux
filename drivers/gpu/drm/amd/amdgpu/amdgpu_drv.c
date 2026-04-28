@@ -2389,7 +2389,7 @@ static int amdgpu_pci_probe(struct pci_dev *pdev,
 {
 	struct drm_device *ddev;
 	struct amdgpu_device *adev;
-	unsigned long flags = ent->driver_data;
+	unsigned long flags = __c_ua(ent->driver_data);
 	int ret, retry = 0, i;
 	bool supports_atomic = false;
 

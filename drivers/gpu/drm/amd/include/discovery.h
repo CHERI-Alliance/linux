@@ -162,9 +162,9 @@ typedef struct ip_structure
 			ip *ip_list;
 			ip_v3 *ip_v3_list;
 			ip_v4 *ip_v4_list;
-		};                                  /* IP list. Variable size*/
-	} die;
-} ip_structure;
+		} __cheri_pointer_align;	/* IP list. Variable size*/
+	} __cheri_pointer_align die;
+} __cheri_pointer_align ip_structure;
 
 struct gpu_info_header {
 	uint32_t table_id;      /* table ID */

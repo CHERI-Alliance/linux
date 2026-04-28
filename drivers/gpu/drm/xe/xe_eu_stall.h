@@ -15,7 +15,7 @@ size_t xe_eu_stall_get_sampling_rates(u32 *num_rates, const u64 **rates);
 
 int xe_eu_stall_init(struct xe_gt *gt);
 int xe_eu_stall_stream_open(struct drm_device *dev,
-			    u64 data,
+			    user_uintptr_t data,
 			    struct drm_file *file);
 
 static inline bool xe_eu_stall_supported_on_platform(struct xe_device *xe)

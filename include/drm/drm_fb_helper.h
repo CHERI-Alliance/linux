@@ -345,7 +345,7 @@ static inline int drm_fb_helper_setcmap(struct fb_cmap *cmap,
 }
 
 static inline int drm_fb_helper_ioctl(struct fb_info *info, unsigned int cmd,
-				      unsigned long arg)
+				      user_uintptr_t arg)
 {
 	return 0;
 }

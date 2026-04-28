@@ -116,7 +116,7 @@ qxl_pci_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	drm_kms_helper_poll_init(&qdev->ddev);
 
 	/* Complete initialization. */
-	ret = drm_dev_register(&qdev->ddev, ent->driver_data);
+	ret = drm_dev_register(&qdev->ddev, __c_ua(ent->driver_data));
 	if (ret)
 		goto modeset_cleanup;
 

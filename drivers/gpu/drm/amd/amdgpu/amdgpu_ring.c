@@ -545,7 +545,7 @@ static ssize_t amdgpu_ras_cper_debugfs_read(struct file *f, char __user *buf,
 	start_cper_id = snapshot_rsp->start_cper_id;
 	total_cper_num = snapshot_rsp->total_cper_num;
 
-	record_req->buf_ptr = (uint64_t)(user_uintptr_t)buf;
+	record_req->buf_ptr = (user_uintptr_t)buf;
 	record_req->buf_size = size;
 	record_req->cper_start_id = start_cper_id + *offset;
 	record_req->cper_num = total_cper_num;

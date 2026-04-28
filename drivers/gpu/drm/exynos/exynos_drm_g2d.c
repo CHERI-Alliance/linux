@@ -155,7 +155,7 @@ enum g2d_flag_bits {
 /* cmdlist data structure */
 struct g2d_cmdlist {
 	u32		head;
-	unsigned long	data[G2D_CMDLIST_DATA_NUM];
+	uintptr_t	data[G2D_CMDLIST_DATA_NUM];
 	u32		last;	/* last data offset */
 };
 
@@ -367,7 +367,7 @@ static void g2d_add_cmdlist_to_inuse(struct drm_exynos_file_private *file_priv,
 	/* this links to base address of new cmdlist */
 	lnode = list_entry(file_priv->inuse_cmdlist.prev,
 				struct g2d_cmdlist_node, list);
-	lnode->cmdlist->data[lnode->cmdlist->last] = node->dma_addr;
+	lnode->cmdlist->data[lnode->cmdlist->last] = __c_fakeu(node->dma_addr);
 
 add_to_list:
 	list_add_tail(&node->list, &file_priv->inuse_cmdlist);
@@ -693,12 +693,12 @@ static int g2d_map_cmdlist_gem(struct g2d_data *g2d,
 		struct g2d_buf_desc *buf_desc;
 		enum g2d_reg_type reg_type;
 		int reg_pos;
-		unsigned long handle;
+		uintptr_t handle;
 		dma_addr_t *addr;
 
 		reg_pos = cmdlist->last - 2 * (i + 1);
 
-		offset = cmdlist->data[reg_pos];
+		offset = __c_ua(cmdlist->data[reg_pos]);
 		handle = cmdlist->data[reg_pos + 1];
 
 		reg_type = g2d_get_reg_type(g2d, offset);
@@ -712,7 +712,7 @@ static int g2d_map_cmdlist_gem(struct g2d_data *g2d,
 		if (buf_info->types[reg_type] == BUF_TYPE_GEM) {
 			struct exynos_drm_gem *exynos_gem;
 
-			exynos_gem = exynos_drm_gem_get(file, handle);
+			exynos_gem = exynos_drm_gem_get(file, __c_ua(handle));
 			if (!exynos_gem) {
 				ret = -EFAULT;
 				goto err;
@@ -754,7 +754,7 @@ static int g2d_map_cmdlist_gem(struct g2d_data *g2d,
 			}
 		}
 
-		cmdlist->data[reg_pos + 1] = *addr;
+		cmdlist->data[reg_pos + 1] = __c_fakeu(*addr);
 		buf_info->reg_types[i] = reg_type;
 	}
 
@@ -1037,7 +1037,7 @@ static int g2d_check_reg_offset(struct g2d_data *g2d,
 
 		index = cmdlist->last - 2 * (i + 1);
 
-		reg_offset = cmdlist->data[index] & ~0xfffff000;
+		reg_offset = __c_ua(cmdlist->data[index]) & ~0xfffff000;
 		if (reg_offset < G2D_VALID_START || reg_offset > G2D_VALID_END)
 			goto err;
 		if (reg_offset % 4)
@@ -1070,7 +1070,7 @@ static int g2d_check_reg_offset(struct g2d_data *g2d,
 			reg_type = g2d_get_reg_type(g2d, reg_offset);
 
 			buf_desc = &buf_info->descs[reg_type];
-			buf_desc->stride = cmdlist->data[index + 1];
+			buf_desc->stride = __c_ua(cmdlist->data[index + 1]);
 			break;
 		case G2D_SRC_COLOR_MODE:
 		case G2D_DST_COLOR_MODE:
@@ -1080,7 +1080,7 @@ static int g2d_check_reg_offset(struct g2d_data *g2d,
 			reg_type = g2d_get_reg_type(g2d, reg_offset);
 
 			buf_desc = &buf_info->descs[reg_type];
-			value = cmdlist->data[index + 1];
+			value = __c_ua(cmdlist->data[index + 1]);
 
 			buf_desc->format = value & 0xf;
 			break;
@@ -1092,7 +1092,7 @@ static int g2d_check_reg_offset(struct g2d_data *g2d,
 			reg_type = g2d_get_reg_type(g2d, reg_offset);
 
 			buf_desc = &buf_info->descs[reg_type];
-			value = cmdlist->data[index + 1];
+			value = __c_ua(cmdlist->data[index + 1]);
 
 			buf_desc->left_x = value & 0x1fff;
 			buf_desc->top_y = (value & 0x1fff0000) >> 16;
@@ -1105,7 +1105,7 @@ static int g2d_check_reg_offset(struct g2d_data *g2d,
 			reg_type = g2d_get_reg_type(g2d, reg_offset);
 
 			buf_desc = &buf_info->descs[reg_type];
-			value = cmdlist->data[index + 1];
+			value = __c_ua(cmdlist->data[index + 1]);
 
 			buf_desc->right_x = value & 0x1fff;
 			buf_desc->bottom_y = (value & 0x1fff0000) >> 16;
@@ -1120,7 +1120,7 @@ static int g2d_check_reg_offset(struct g2d_data *g2d,
 	return 0;
 
 err:
-	dev_err(g2d->dev, "Bad register offset: 0x%lx\n", cmdlist->data[index]);
+	dev_err(g2d->dev, "Bad register offset: 0x%lx\n", (unsigned long)cmdlist->data[index]);
 	return -EINVAL;
 }
 
@@ -1236,7 +1236,7 @@ int exynos_g2d_set_cmdlist_ioctl(struct drm_device *drm_dev, void *data,
 
 	cmd = (struct drm_exynos_g2d_cmd *)(user_uintptr_t)req->cmd;
 
-	if (copy_from_user(cmdlist->data + cmdlist->last,
+	if (copy_from_user_with_ptr(cmdlist->data + cmdlist->last,
 				(void __user *)cmd,
 				sizeof(*cmd) * req->cmd_nr)) {
 		ret = -EFAULT;
@@ -1255,7 +1255,7 @@ int exynos_g2d_set_cmdlist_ioctl(struct drm_device *drm_dev, void *data,
 		cmd_buf = (struct drm_exynos_g2d_cmd *)
 				(user_uintptr_t)req->cmd_buf;
 
-		if (copy_from_user(cmdlist->data + cmdlist->last,
+		if (copy_from_user_with_ptr(cmdlist->data + cmdlist->last,
 					(void __user *)cmd_buf,
 					sizeof(*cmd_buf) * req->cmd_buf_nr)) {
 			ret = -EFAULT;

@@ -3063,7 +3063,7 @@ void xe_bo_vunmap(struct xe_bo *bo)
 	__xe_bo_vunmap(bo);
 }
 
-static int gem_create_set_pxp_type(struct xe_device *xe, struct xe_bo *bo, u64 value)
+static int gem_create_set_pxp_type(struct xe_device *xe, struct xe_bo *bo, __u64ptr value)
 {
 	if (value == DRM_XE_PXP_TYPE_NONE)
 		return 0;
@@ -3075,9 +3075,13 @@ static int gem_create_set_pxp_type(struct xe_device *xe, struct xe_bo *bo, u64 v
 	return xe_pxp_key_assign(xe->pxp, bo);
 }
 
+/*
+ * NOTE: In the "compat64" case the value parameter must be compat
+ * converted as necessary by this function!.
+ */
 typedef int (*xe_gem_create_set_property_fn)(struct xe_device *xe,
 					     struct xe_bo *bo,
-					     u64 value);
+					     __u64ptr value);
 
 static const xe_gem_create_set_property_fn gem_create_set_property_funcs[] = {
 	[DRM_XE_GEM_CREATE_SET_PROPERTY_PXP_TYPE] = gem_create_set_pxp_type,
@@ -3085,9 +3089,9 @@ static const xe_gem_create_set_property_fn gem_create_set_property_funcs[] = {
 
 static int gem_create_user_ext_set_property(struct xe_device *xe,
 					    struct xe_bo *bo,
-					    u64 extension)
+					    user_uintptr_t extension)
 {
-	u64 __user *address = u64_to_user_ptr(extension);
+	u64 __user *address = (void __user *)extension;
 	struct drm_xe_ext_set_property ext;
 	int err;
 	u32 idx;
@@ -3106,12 +3110,12 @@ static int gem_create_user_ext_set_property(struct xe_device *xe,
 	if (!gem_create_set_property_funcs[idx])
 		return -EINVAL;
 
-	return gem_create_set_property_funcs[idx](xe, bo, ext.value);
+	return gem_create_set_property_funcs[idx](xe, bo, ext.ptr);
 }
 
 typedef int (*xe_gem_create_user_extension_fn)(struct xe_device *xe,
 					       struct xe_bo *bo,
-					       u64 extension);
+					       user_uintptr_t extension);
 
 static const xe_gem_create_user_extension_fn gem_create_user_extension_funcs[] = {
 	[DRM_XE_GEM_CREATE_EXTENSION_SET_PROPERTY] = gem_create_user_ext_set_property,
@@ -3119,9 +3123,9 @@ static const xe_gem_create_user_extension_fn gem_create_user_extension_funcs[] =
 
 #define MAX_USER_EXTENSIONS	16
 static int gem_create_user_extensions(struct xe_device *xe, struct xe_bo *bo,
-				      u64 extensions, int ext_number)
+				      user_uintptr_t extensions, int ext_number)
 {
-	u64 __user *address = u64_to_user_ptr(extensions);
+	u64 __user *address = (void __user *)extensions;
 	struct drm_xe_user_extension ext;
 	int err;
 	u32 idx;

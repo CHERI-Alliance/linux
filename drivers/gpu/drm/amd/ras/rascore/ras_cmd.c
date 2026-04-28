@@ -32,7 +32,7 @@ static int ras_cmd_add_device(struct ras_core_context *ras_core)
 {
 	INIT_LIST_HEAD(&ras_core->ras_cmd.head);
 	ras_core->ras_cmd.ras_core = ras_core;
-	ras_core->ras_cmd.dev_handle = (uintptr_t)ras_core ^ RAS_CMD_DEV_HANDLE_MAGIC;
+	ras_core->ras_cmd.dev_handle = __c_pa(ras_core) ^ RAS_CMD_DEV_HANDLE_MAGIC;
 	return 0;
 }
 

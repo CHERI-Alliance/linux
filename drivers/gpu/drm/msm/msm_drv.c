@@ -319,7 +319,7 @@ static int msm_ioctl_get_param(struct drm_device *dev, void *data,
 		return -ENXIO;
 
 	return gpu->funcs->get_param(gpu, file->driver_priv,
-				     args->param, &args->value, &args->len);
+				     args->param, (uint64_t *)(void *)&args->value, &args->len);
 }
 
 static int msm_ioctl_set_param(struct drm_device *dev, void *data,
@@ -557,6 +557,7 @@ static int msm_ioctl_gem_info(struct drm_device *dev, void *data,
 	struct drm_msm_gem_info *args = data;
 	struct drm_gem_object *obj;
 	struct msm_gem_object *msm_obj;
+	uint64_t iova;
 	int i, ret = 0;
 
 	if (args->pad)
@@ -590,13 +591,14 @@ static int msm_ioctl_gem_info(struct drm_device *dev, void *data,
 	case MSM_INFO_GET_OFFSET:
 		ret = drm_gem_create_mmap_offset(obj);
 		if (ret == 0)
-		    args->value = drm_vma_node_offset_addr(&obj->vma_node);
+		    args->value = __c_fakeu(drm_vma_node_offset_addr(&obj->vma_node));
 		break;
 	case MSM_INFO_GET_IOVA:
-		ret = msm_ioctl_gem_info_iova(dev, file, obj, &args->value);
+		ret = msm_ioctl_gem_info_iova(dev, file, obj, &iova);
+		args->value = __c_fakeu(iova);
 		break;
 	case MSM_INFO_SET_IOVA:
-		ret = msm_ioctl_gem_info_set_iova(dev, file, obj, args->value);
+		ret = msm_ioctl_gem_info_set_iova(dev, file, obj, __c_ua(args->value));
 		break;
 	case MSM_INFO_GET_FLAGS:
 		if (drm_gem_is_imported(obj)) {

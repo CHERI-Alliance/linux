@@ -480,7 +480,7 @@ struct v3d_submit_ext {
 	u32 wait_stage;
 
 	u32 in_sync_count;
-	u64 in_syncs;
+	__u64ptr in_syncs;
 
 	u32 out_sync_count;
 	struct v3d_submit_outsync *out_syncs;

@@ -55,7 +55,7 @@
  * Return: 0 on success, a negative error code otherwise.
  */
 static int
-panthor_set_uobj(u64 usr_ptr, u32 usr_size, u32 min_size, u32 kern_size, const void *in)
+panthor_set_uobj(__u64ptr usr_ptr, u32 usr_size, u32 min_size, u32 kern_size, const void *in)
 {
 	/* User size shouldn't be smaller than the minimal object size. */
 	if (usr_size < min_size)

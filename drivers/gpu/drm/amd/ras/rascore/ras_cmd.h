@@ -357,14 +357,20 @@ struct ras_cmd_cper_snapshot_rsp {
 	uint64_t latest_cper_id;
 };
 
+#if __has_feature(capabilities)
+#pragma pack(pop)
+#endif
 struct ras_cmd_cper_record_req {
 	struct ras_cmd_dev_handle dev;
 	uint64_t cper_start_id;
 	uint32_t cper_num;
 	uint32_t buf_size;
-	uint64_t buf_ptr;
+	__u64ptr buf_ptr;
 	uint32_t reserved[4];
 };
+#if __has_feature(capabilities)
+#pragma pack(push, 8)
+#endif
 
 struct ras_cmd_cper_record_rsp {
 	uint32_t version;

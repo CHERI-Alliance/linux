@@ -18,7 +18,7 @@ struct drm_syncobj **
 msm_syncobj_parse_deps(struct drm_device *dev,
 		       struct drm_sched_job *job,
 		       struct drm_file *file,
-		       uint64_t in_syncobjs_addr,
+		       __u64ptr in_syncobjs_addr,
 		       uint32_t nr_in_syncobjs,
 		       size_t syncobj_stride);
 

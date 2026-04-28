@@ -47,7 +47,7 @@
 
 static int
 amdgpu_gem_add_input_fence(struct drm_file *filp,
-			   uint64_t syncobj_handles_array,
+			   __u64ptr syncobj_handles_array,
 			   uint32_t num_syncobj_handles)
 {
 	struct dma_fence *fence;

@@ -14,13 +14,13 @@
 #include "xe_macros.h"
 #include "xe_exec_queue.h"
 
-static int do_compare(u64 addr, u64 value, u64 mask, u16 op)
+static int do_compare(user_uintptr_t addr, u64 value, u64 mask, u16 op)
 {
 	u64 rvalue;
 	int err;
 	bool passed;
 
-	err = copy_from_user(&rvalue, u64_to_user_ptr(addr), sizeof(rvalue));
+	err = copy_from_user(&rvalue, (void __user *)addr, sizeof(rvalue));
 	if (err)
 		return -EFAULT;
 
@@ -105,7 +105,7 @@ int xe_wait_user_fence_ioctl(struct drm_device *dev, void *data,
 	DEFINE_WAIT_FUNC(w_wait, woken_wake_function);
 	struct drm_xe_wait_user_fence *args = data;
 	struct xe_exec_queue *q = NULL;
-	u64 addr = args->addr;
+	user_uintptr_t addr = args->addr;
 	int err = 0;
 	long timeout;
 	ktime_t start;

@@ -799,7 +799,7 @@ static int exynos5433_decon_probe(struct platform_device *pdev)
 		return -ENOMEM;
 
 	ctx->dev = dev;
-	ctx->out_type = (uintptr_t)of_device_get_match_data(dev);
+	ctx->out_type = __c_pa(of_device_get_match_data(dev));
 	spin_lock_init(&ctx->vblank_lock);
 
 	if (ctx->out_type & IFTYPE_HDMI)

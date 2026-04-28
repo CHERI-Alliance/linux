@@ -449,7 +449,7 @@ int adreno_get_param(struct msm_gpu *gpu, struct msm_context *ctx,
 }
 
 int adreno_set_param(struct msm_gpu *gpu, struct msm_context *ctx,
-		     uint32_t param, uint64_t value, uint32_t len)
+		     uint32_t param, __u64ptr value, uint32_t len)
 {
 	struct drm_device *drm = gpu->dev;
 

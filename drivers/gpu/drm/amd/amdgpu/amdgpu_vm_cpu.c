@@ -69,12 +69,13 @@ static int amdgpu_vm_cpu_prepare(struct amdgpu_vm_update_params *p,
  * Write count number of PT/PD entries directly.
  */
 static int amdgpu_vm_cpu_update(struct amdgpu_vm_update_params *p,
-				struct amdgpu_bo_vm *vmbo, uint64_t pe,
+				struct amdgpu_bo_vm *vmbo, uint64_t __pe,
 				uint64_t addr, unsigned count, uint32_t incr,
 				uint64_t flags)
 {
 	unsigned int i;
 	uint64_t value;
+	uintptr_t pe;
 	long r;
 
 	r = dma_resv_wait_timeout(vmbo->bo.tbo.base.resv, DMA_RESV_USAGE_KERNEL,
@@ -82,16 +83,15 @@ static int amdgpu_vm_cpu_update(struct amdgpu_vm_update_params *p,
 	if (r < 0)
 		return r;
 
-	pe += (uintptr_t)amdgpu_bo_kptr(&vmbo->bo);
+	pe = (uintptr_t)amdgpu_bo_kptr(&vmbo->bo) + __pe;
 
-	trace_amdgpu_vm_set_ptes(pe, addr, count, incr, flags, p->immediate);
+	trace_amdgpu_vm_set_ptes(__c_ua(pe), addr, count, incr, flags, p->immediate);
 
 	for (i = 0; i < count; i++) {
 		value = p->pages_addr ?
 			amdgpu_vm_map_gart(p->pages_addr, addr) :
 			addr;
-		amdgpu_gmc_set_pte_pde(p->adev, (void *)(uintptr_t)pe,
-				       i, value, flags);
+		amdgpu_gmc_set_pte_pde(p->adev, (void *)pe, i, value, flags);
 		addr += incr;
 	}
 	return 0;

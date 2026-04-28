@@ -633,7 +633,7 @@ int smu_v11_0_notify_memory_pool_location(struct smu_context *smu)
 	if (memory_pool->size == 0 || memory_pool->cpu_addr == NULL)
 		return ret;
 
-	address = (uintptr_t)memory_pool->cpu_addr;
+	address = __c_pa(memory_pool->cpu_addr);
 	address_high = (uint32_t)upper_32_bits(address);
 	address_low  = (uint32_t)lower_32_bits(address);
 

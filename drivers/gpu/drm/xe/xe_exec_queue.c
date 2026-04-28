@@ -108,7 +108,7 @@ enum xe_exec_queue_sched_prop {
 };
 
 static int exec_queue_user_extensions(struct xe_device *xe, struct xe_exec_queue *q,
-				      u64 extensions);
+				      user_uintptr_t extensions);
 
 static void xe_exec_queue_group_cleanup(struct xe_exec_queue *q)
 {
@@ -199,7 +199,7 @@ static struct xe_exec_queue *__xe_exec_queue_alloc(struct xe_device *xe,
 						   struct xe_vm *vm,
 						   u32 logical_mask,
 						   u16 width, struct xe_hw_engine *hwe,
-						   u32 flags, u64 extensions)
+						   u32 flags, user_uintptr_t extensions)
 {
 	struct xe_exec_queue *q;
 	struct xe_gt *gt = hwe->gt;
@@ -337,7 +337,7 @@ err_lrc:
 struct xe_exec_queue *xe_exec_queue_create(struct xe_device *xe, struct xe_vm *vm,
 					   u32 logical_mask, u16 width,
 					   struct xe_hw_engine *hwe, u32 flags,
-					   u64 extensions)
+					   user_uintptr_t extensions)
 {
 	struct xe_exec_queue *q;
 	int err;
@@ -380,7 +380,7 @@ ALLOW_ERROR_INJECTION(xe_exec_queue_create, ERRNO);
 struct xe_exec_queue *xe_exec_queue_create_class(struct xe_device *xe, struct xe_gt *gt,
 						 struct xe_vm *vm,
 						 enum xe_engine_class class,
-						 u32 flags, u64 extensions)
+						 u32 flags, user_uintptr_t extensions)
 {
 	struct xe_hw_engine *hwe, *hwe0 = NULL;
 	enum xe_hw_engine_id id;
@@ -423,7 +423,7 @@ struct xe_exec_queue *xe_exec_queue_create_class(struct xe_device *xe, struct xe
 struct xe_exec_queue *xe_exec_queue_create_bind(struct xe_device *xe,
 						struct xe_tile *tile,
 						struct xe_vm *user_vm,
-						u32 flags, u64 extensions)
+						u32 flags, user_uintptr_t extensions)
 {
 	struct xe_gt *gt = tile->primary_gt;
 	struct xe_exec_queue *q;
@@ -561,7 +561,7 @@ xe_exec_queue_device_get_max_priority(struct xe_device *xe)
 }
 
 static int exec_queue_set_priority(struct xe_device *xe, struct xe_exec_queue *q,
-				   u64 value)
+				   __u64ptr value)
 {
 	if (XE_IOCTL_DBG(xe, value > XE_EXEC_QUEUE_PRIORITY_HIGH))
 		return -EINVAL;
@@ -626,7 +626,7 @@ xe_exec_queue_get_prop_minmax(struct xe_hw_engine_class_intf *eclass,
 }
 
 static int exec_queue_set_timeslice(struct xe_device *xe, struct xe_exec_queue *q,
-				    u64 value)
+				    __u64ptr value)
 {
 	u32 min = 0, max = 0;
 
@@ -634,15 +634,15 @@ static int exec_queue_set_timeslice(struct xe_device *xe, struct xe_exec_queue *
 				      XE_EXEC_QUEUE_TIMESLICE, &min, &max);
 
 	if (xe_exec_queue_enforce_schedule_limit() &&
-	    !xe_hw_engine_timeout_in_range(value, min, max))
+	    !xe_hw_engine_timeout_in_range(__c_ua(value), min, max))
 		return -EINVAL;
 
-	q->sched_props.timeslice_us = value;
+	q->sched_props.timeslice_us = __c_ua(value);
 	return 0;
 }
 
 static int
-exec_queue_set_pxp_type(struct xe_device *xe, struct xe_exec_queue *q, u64 value)
+exec_queue_set_pxp_type(struct xe_device *xe, struct xe_exec_queue *q, __u64ptr value)
 {
 	if (value == DRM_XE_PXP_TYPE_NONE)
 		return 0;
@@ -659,7 +659,7 @@ exec_queue_set_pxp_type(struct xe_device *xe, struct xe_exec_queue *q, u64 value
 
 static int exec_queue_set_hang_replay_state(struct xe_device *xe,
 					    struct xe_exec_queue *q,
-					    u64 value)
+					    __u64ptr value)
 {
 	size_t size = xe_gt_lrc_hang_replay_size(q->gt, q->class);
 	u64 __user *address = u64_to_user_ptr(value);
@@ -793,7 +793,7 @@ static void xe_exec_queue_group_delete(struct xe_device *xe, struct xe_exec_queu
 }
 
 static int exec_queue_set_multi_group(struct xe_device *xe, struct xe_exec_queue *q,
-				      u64 value)
+				      __u64ptr value)
 {
 	if (XE_IOCTL_DBG(xe, !xe_exec_queue_supports_multi_queue(q)))
 		return -ENODEV;
@@ -828,7 +828,7 @@ static int exec_queue_set_multi_group(struct xe_device *xe, struct xe_exec_queue
 }
 
 static int exec_queue_set_multi_queue_priority(struct xe_device *xe, struct xe_exec_queue *q,
-					       u64 value)
+					       __u64ptr value)
 {
 	if (XE_IOCTL_DBG(xe, value > XE_MULTI_QUEUE_PRIORITY_HIGH))
 		return -EINVAL;
@@ -845,9 +845,10 @@ static int exec_queue_set_multi_queue_priority(struct xe_device *xe, struct xe_e
 	return q->ops->set_multi_queue_priority(q, value);
 }
 
+/* NOTE: In the compat case the __u64ptr arg is unconverted. */
 typedef int (*xe_exec_queue_set_property_fn)(struct xe_device *xe,
 					     struct xe_exec_queue *q,
-					     u64 value);
+					     __u64ptr value);
 
 static const xe_exec_queue_set_property_fn exec_queue_set_property_funcs[] = {
 	[DRM_XE_EXEC_QUEUE_SET_PROPERTY_PRIORITY] = exec_queue_set_priority,
@@ -882,7 +883,7 @@ int xe_exec_queue_set_property_ioctl(struct drm_device *dev, void *data,
 
 	idx = array_index_nospec(args->property,
 				 ARRAY_SIZE(exec_queue_set_property_funcs));
-	ret = exec_queue_set_property_funcs[idx](xe, q, args->value);
+	ret = exec_queue_set_property_funcs[idx](xe, q, args->ptr);
 	if (XE_IOCTL_DBG(xe, ret))
 		goto err_post_lookup;
 
@@ -922,9 +923,9 @@ static int exec_queue_user_ext_check_final(struct xe_exec_queue *q, u64 properti
 
 static int exec_queue_user_ext_set_property(struct xe_device *xe,
 					    struct xe_exec_queue *q,
-					    u64 extension, u64 *properties)
+					    user_uintptr_t extension, u64 *properties)
 {
-	u64 __user *address = u64_to_user_ptr(extension);
+	user_uintptr_t __user *address = (void __user *)extension;
 	struct drm_xe_ext_set_property ext;
 	int err;
 	u32 idx;
@@ -953,12 +954,12 @@ static int exec_queue_user_ext_set_property(struct xe_device *xe,
 	if (XE_IOCTL_DBG(xe, err))
 		return err;
 
-	return exec_queue_set_property_funcs[idx](xe, q, ext.value);
+	return exec_queue_set_property_funcs[idx](xe, q, ext.ptr);
 }
 
 typedef int (*xe_exec_queue_user_extension_fn)(struct xe_device *xe,
 					       struct xe_exec_queue *q,
-					       u64 extension, u64 *properties);
+					       user_uintptr_t extension, u64 *properties);
 
 static const xe_exec_queue_user_extension_fn exec_queue_user_extension_funcs[] = {
 	[DRM_XE_EXEC_QUEUE_EXTENSION_SET_PROPERTY] = exec_queue_user_ext_set_property,
@@ -966,9 +967,9 @@ static const xe_exec_queue_user_extension_fn exec_queue_user_extension_funcs[] =
 
 #define MAX_USER_EXTENSIONS	16
 static int __exec_queue_user_extensions(struct xe_device *xe, struct xe_exec_queue *q,
-					u64 extensions, int ext_number, u64 *properties)
+					user_uintptr_t extensions, int ext_number, u64 *properties)
 {
-	u64 __user *address = u64_to_user_ptr(extensions);
+	user_uintptr_t __user *address = (void __user *)extensions;
 	struct drm_xe_user_extension ext;
 	int err;
 	u32 idx;
@@ -999,7 +1000,7 @@ static int __exec_queue_user_extensions(struct xe_device *xe, struct xe_exec_que
 }
 
 static int exec_queue_user_extensions(struct xe_device *xe, struct xe_exec_queue *q,
-				      u64 extensions)
+				      user_uintptr_t extensions)
 {
 	u64 properties = 0;
 	int err;
@@ -1091,7 +1092,7 @@ int xe_exec_queue_create_ioctl(struct drm_device *dev, void *data,
 	struct drm_xe_exec_queue_create *args = data;
 	struct drm_xe_engine_class_instance eci[XE_HW_ENGINE_MAX_INSTANCE];
 	struct drm_xe_engine_class_instance __user *user_eci =
-		u64_to_user_ptr(args->instances);
+		(void __user *)args->instances;
 	struct xe_hw_engine *hwe;
 	struct xe_vm *vm;
 	struct xe_tile *tile;

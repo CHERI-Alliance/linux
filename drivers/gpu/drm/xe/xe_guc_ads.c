@@ -697,7 +697,7 @@ static int guc_capture_prep_lists(struct xe_guc_ads *ads)
 
 	if (ads->capture_size != PAGE_ALIGN(total_size))
 		xe_gt_dbg(gt, "Updated ADS capture size %d (was %d)\n",
-			  PAGE_ALIGN(total_size), ads->capture_size);
+			  (unsigned int)PAGE_ALIGN(total_size), ads->capture_size);
 	return PAGE_ALIGN(total_size);
 }
 
