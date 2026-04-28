@@ -512,7 +512,7 @@ static inline int print_page_owner_memcg(char *kbuf, size_t count, int ret,
 					 struct page *page)
 {
 #ifdef CONFIG_MEMCG
-	unsigned long memcg_data;
+	uintptr_t memcg_data;
 	struct mem_cgroup *memcg;
 	bool online;
 	char name[80];
