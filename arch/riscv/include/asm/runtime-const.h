@@ -1,3 +1,7 @@
+#if __SIZEOF_POINTER__ > __SIZEOF_LONG__
+/* FIXCHERI: Not supported on CHERI, yet. */
+#include <asm-generic/runtime-const.h>
+#else
 /* SPDX-License-Identifier: GPL-2.0 */
 #ifndef _ASM_RISCV_RUNTIME_CONST_H
 #define _ASM_RISCV_RUNTIME_CONST_H
@@ -270,3 +274,4 @@ static inline void runtime_const_fixup(void (*fn)(void *, unsigned long),
 }
 
 #endif /* _ASM_RISCV_RUNTIME_CONST_H */
+#endif
