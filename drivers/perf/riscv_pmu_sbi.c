@@ -365,10 +365,12 @@ static void pmu_sbi_check_event(struct sbi_pmu_event_data *edata)
 	struct sbiret ret;
 
 	ret = sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_COUNTER_CFG_MATCH,
-			0, cmask, 0, edata->event_idx, 0, 0);
+			0, __c_fakeu(cmask), 0,
+			__c_fakeu(edata->event_idx), 0, 0);
 	if (!ret.error) {
 		sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_COUNTER_STOP,
-			  ret.value, 0x1, SBI_PMU_STOP_FLAG_RESET, 0, 0, 0);
+			  __c_fakeu(ret.value), 0x1, SBI_PMU_STOP_FLAG_RESET,
+			  0, 0, 0);
 	} else if (ret.error == SBI_ERR_NOT_SUPPORTED) {
 		/* This event cannot be monitored by any counter */
 		edata->event_idx = -ENOENT;
@@ -564,12 +566,14 @@ static int pmu_sbi_ctr_get_idx(struct perf_event *event)
 
 	/* retrieve the available counter index */
 #if defined(CONFIG_32BIT)
-	ret = sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_COUNTER_CFG_MATCH, cbase,
-			cmask, cflags, hwc->event_base, hwc->config,
-			hwc->config >> 32);
+	ret = sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_COUNTER_CFG_MATCH,
+			__c_fakeu(cbase), __c_fakeu(cmask), __c_fakeu(cflags),
+			__c_fakeu(hwc->event_base), __c_fakeu(hwc->config),
+			__c_fakeu(hwc->config >> 32));
 #else
-	ret = sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_COUNTER_CFG_MATCH, cbase,
-			cmask, cflags, hwc->event_base, hwc->config, 0);
+	ret = sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_COUNTER_CFG_MATCH,
+			__c_fakeu(cbase), __c_fakeu(cmask), __c_fakeu(cflags),
+			__c_fakeu(hwc->event_base), __c_fakeu(hwc->config), 0);
 #endif
 	if (ret.error) {
 		pr_debug("Not able to find a counter for event %lx config %llx\n",
@@ -717,11 +721,13 @@ static int pmu_sbi_snapshot_setup(struct riscv_pmu *pmu, int cpu)
 
 	if (IS_ENABLED(CONFIG_32BIT))
 		ret = sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_SNAPSHOT_SET_SHMEM,
-				cpu_hw_evt->snapshot_addr_phys,
-				(u64)(cpu_hw_evt->snapshot_addr_phys) >> 32, 0, 0, 0, 0);
+				__c_fakeu(cpu_hw_evt->snapshot_addr_phys),
+				__c_fakeu((u64)(cpu_hw_evt->snapshot_addr_phys) >> 32),
+				0, 0, 0, 0);
 	else
 		ret = sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_SNAPSHOT_SET_SHMEM,
-				cpu_hw_evt->snapshot_addr_phys, 0, 0, 0, 0, 0);
+				__c_fakeu(cpu_hw_evt->snapshot_addr_phys),
+				0, 0, 0, 0, 0);
 
 	/* Free up the snapshot area memory and fall back to SBI PMU calls without snapshot */
 	if (ret.error) {
@@ -755,14 +761,14 @@ static u64 pmu_sbi_ctr_read(struct perf_event *event)
 
 	if (pmu_sbi_is_fw_event(event)) {
 		ret = sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_COUNTER_FW_READ,
-				hwc->idx, 0, 0, 0, 0, 0);
+				__c_fakeu(hwc->idx), 0, 0, 0, 0, 0);
 		if (ret.error)
 			return 0;
 
 		val = ret.value;
 		if (IS_ENABLED(CONFIG_32BIT) && sbi_v2_available && info.width >= 32) {
 			ret = sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_COUNTER_FW_READ_HI,
-					hwc->idx, 0, 0, 0, 0, 0);
+					__c_fakeu(hwc->idx), 0, 0, 0, 0, 0);
 			if (!ret.error)
 				val |= ((u64)ret.value << 32);
 			else
@@ -804,11 +810,13 @@ static void pmu_sbi_ctr_start(struct perf_event *event, u64 ival)
 
 	/* There is no benefit setting SNAPSHOT FLAG for a single counter */
 #if defined(CONFIG_32BIT)
-	ret = sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_COUNTER_START, hwc->idx,
-			1, flag, ival, ival >> 32, 0);
+	ret = sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_COUNTER_START,
+			__c_fakeu(hwc->idx), 1, __c_fakeu(flag),
+			__c_fakeu(ival), __c_fakeu(ival >> 32), 0);
 #else
-	ret = sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_COUNTER_START, hwc->idx,
-			1, flag, ival, 0, 0);
+	ret = sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_COUNTER_START,
+			__c_fakeu(hwc->idx), 1, __c_fakeu(flag),
+			__c_fakeu(ival), 0, 0);
 #endif
 	if (ret.error && (ret.error != SBI_ERR_ALREADY_STARTED))
 		pr_err("Starting counter idx %d failed with error %d\n",
@@ -834,7 +842,8 @@ static void pmu_sbi_ctr_stop(struct perf_event *event, unsigned long flag)
 	if (sbi_pmu_snapshot_available())
 		flag |= SBI_PMU_STOP_FLAG_TAKE_SNAPSHOT;
 
-	ret = sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_COUNTER_STOP, hwc->idx, 1, flag, 0, 0, 0);
+	ret = sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_COUNTER_STOP,
+			__c_fakeu(hwc->idx), 1, __c_fakeu(flag), 0, 0, 0);
 	if (!ret.error && sbi_pmu_snapshot_available()) {
 		/*
 		 * The counter snapshot is based on the index base specified by hwc->idx.
@@ -877,7 +886,8 @@ static int pmu_sbi_get_ctrinfo(int nctr, unsigned long *mask)
 		return -ENOMEM;
 
 	for (i = 0; i < nctr; i++) {
-		ret = sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_COUNTER_GET_INFO, i, 0, 0, 0, 0, 0);
+		ret = sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_COUNTER_GET_INFO,
+				__c_fakeu(i), 0, 0, 0, 0, 0);
 		if (ret.error)
 			/* The logical counter ids are not expected to be contiguous */
 			continue;
@@ -904,7 +914,7 @@ static inline void pmu_sbi_stop_all(struct riscv_pmu *pmu)
 	 * which may include counters that are not enabled yet.
 	 */
 	sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_COUNTER_STOP,
-		  0, pmu->cmask, SBI_PMU_STOP_FLAG_RESET, 0, 0, 0);
+		  0, __c_fakeu(pmu->cmask), SBI_PMU_STOP_FLAG_RESET, 0, 0, 0);
 }
 
 static inline void pmu_sbi_stop_hw_ctrs(struct riscv_pmu *pmu)
@@ -924,8 +934,10 @@ static inline void pmu_sbi_stop_hw_ctrs(struct riscv_pmu *pmu)
 
 	for (i = 0; i < BITS_TO_LONGS(RISCV_MAX_COUNTERS); i++) {
 		/* No need to check the error here as we can't do anything about the error */
-		ret = sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_COUNTER_STOP, i * BITS_PER_LONG,
-				cpu_hw_evt->used_hw_ctrs[i], flag, 0, 0, 0);
+		ret = sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_COUNTER_STOP,
+				__c_fakeu(i * BITS_PER_LONG),
+				__c_fakeu(cpu_hw_evt->used_hw_ctrs[i]),
+				__c_fakeu(flag), 0, 0, 0);
 		if (!ret.error && sbi_pmu_snapshot_available()) {
 			/* Save the counter values to avoid clobbering */
 			for_each_set_bit(idx, &cpu_hw_evt->used_hw_ctrs[i], BITS_PER_LONG)
@@ -966,8 +978,9 @@ static inline void pmu_sbi_start_ovf_ctrs_sbi(struct cpu_hw_events *cpu_hw_evt,
 		ctr_start_mask = cpu_hw_evt->used_hw_ctrs[i] & ~ctr_ovf_mask;
 		/* Start all the counters that did not overflow in a single shot */
 		if (ctr_start_mask) {
-			sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_COUNTER_START, i * BITS_PER_LONG,
-				  ctr_start_mask, 0, 0, 0, 0);
+			sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_COUNTER_START,
+				  __c_fakeu(i * BITS_PER_LONG),
+				  __c_fakeu(ctr_start_mask), 0, 0, 0, 0);
 		}
 	}
 
@@ -979,11 +992,13 @@ static inline void pmu_sbi_start_ovf_ctrs_sbi(struct cpu_hw_events *cpu_hw_evt,
 			max_period = riscv_pmu_ctr_get_width_mask(event);
 			init_val = local64_read(&hwc->prev_count) & max_period;
 #if defined(CONFIG_32BIT)
-			sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_COUNTER_START, idx, 1,
-				  flag, init_val, init_val >> 32, 0);
+			sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_COUNTER_START,
+				  __c_fakeu(idx), 1, __c_fakeu(flag),
+				  __c_fakeu(init_val), __c_fakeu(init_val >> 32), 0);
 #else
-			sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_COUNTER_START, idx, 1,
-				  flag, init_val, 0, 0);
+			sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_COUNTER_START,
+				  __c_fakeu(idx), 1, __c_fakeu(flag),
+				  __c_fakeu(init_val), 0, 0);
 #endif
 			perf_event_update_userpage(event);
 		}
@@ -1022,8 +1037,10 @@ static inline void pmu_sbi_start_ovf_ctrs_snapshot(struct cpu_hw_events *cpu_hw_
 			sdata->ctr_values[idx] =
 					cpu_hw_evt->snapshot_cval_shcopy[idx + i * BITS_PER_LONG];
 		/* Start all the counters in a single shot */
-		sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_COUNTER_START, idx * BITS_PER_LONG,
-			  cpu_hw_evt->used_hw_ctrs[i], flag, 0, 0, 0);
+		sbi_ecall(SBI_EXT_PMU, SBI_EXT_PMU_COUNTER_START,
+			  __c_fakeu(idx * BITS_PER_LONG),
+			  __c_fakeu(cpu_hw_evt->used_hw_ctrs[i]),
+			  __c_fakeu(flag), 0, 0, 0);
 	}
 }
 

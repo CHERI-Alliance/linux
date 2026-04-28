@@ -560,14 +560,14 @@ union sbi_dbtr_shmem_entry {
 extern unsigned long sbi_spec_version;
 struct sbiret {
 	long error;
-	long value;
+	intptr_t value;
 };
 
 void sbi_init(void);
-long __sbi_base_ecall(int fid);
-struct sbiret __sbi_ecall(unsigned long arg0, unsigned long arg1,
-			  unsigned long arg2, unsigned long arg3,
-			  unsigned long arg4, unsigned long arg5,
+intptr_t __sbi_base_ecall(int fid);
+struct sbiret __sbi_ecall(uintptr_t arg0, uintptr_t arg1,
+			  uintptr_t arg2, uintptr_t arg3,
+			  uintptr_t arg4, uintptr_t arg5,
 			  int fid, int ext);
 #define sbi_ecall(e, f, a0, a1, a2, a3, a4, a5)	\
 		__sbi_ecall(a0, a1, a2, a3, a4, a5, f, e)

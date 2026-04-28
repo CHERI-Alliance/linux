@@ -16,7 +16,7 @@ void suspend_save_csrs(struct suspend_context *context)
 {
 	if (riscv_has_extension_unlikely(RISCV_ISA_EXT_XLINUXENVCFG))
 		context->envcfg = csr_read(CSR_ENVCFG);
-	context->tvec = csr_read(CSR_TVEC);
+	context->tvec = csr_cread(CSR_TVEC);
 	context->ie = csr_read(CSR_IE);
 
 	/*
@@ -43,10 +43,10 @@ void suspend_save_csrs(struct suspend_context *context)
 
 void suspend_restore_csrs(struct suspend_context *context)
 {
-	csr_write(CSR_SCRATCH, 0);
+	csr_cwrite(CSR_SCRATCH, 0);
 	if (riscv_has_extension_unlikely(RISCV_ISA_EXT_XLINUXENVCFG))
 		csr_write(CSR_ENVCFG, context->envcfg);
-	csr_write(CSR_TVEC, context->tvec);
+	csr_cwrite(CSR_TVEC, context->tvec);
 	csr_write(CSR_IE, context->ie);
 
 #ifdef CONFIG_MMU
@@ -64,8 +64,8 @@ void suspend_restore_csrs(struct suspend_context *context)
 
 int cpu_suspend(unsigned long arg,
 		int (*finish)(unsigned long arg,
-			      unsigned long entry,
-			      unsigned long context))
+			      uintptr_t entry,
+			      uintptr_t context))
 {
 	int rc = 0;
 	struct suspend_context context = { 0 };
@@ -87,8 +87,10 @@ int cpu_suspend(unsigned long arg,
 	/* Save context on stack */
 	if (__cpu_suspend_enter(&context)) {
 		/* Call the finisher */
-		rc = finish(arg, __pa_symbol(__cpu_resume_enter),
-			    (uintptr_t)&context);
+		uintptr_t entry = (uintptr_t)cheri_address_set(
+					cheri_user_root_cap,
+					__pa_symbol(__cpu_resume_enter));
+		rc = finish(arg, entry, (uintptr_t)&context);
 
 		/*
 		 * Should never reach here, unless the suspend finisher
@@ -110,13 +112,13 @@ int cpu_suspend(unsigned long arg,
 
 #ifdef CONFIG_RISCV_SBI
 static int sbi_system_suspend(unsigned long sleep_type,
-			      unsigned long resume_addr,
-			      unsigned long opaque)
+			      uintptr_t resume_addr,
+			      uintptr_t opaque)
 {
 	struct sbiret ret;
 
 	ret = sbi_ecall(SBI_EXT_SUSP, SBI_EXT_SUSP_SYSTEM_SUSPEND,
-			sleep_type, resume_addr, opaque, 0, 0, 0);
+			__c_fakeu(sleep_type), resume_addr, opaque, 0, 0, 0);
 	if (ret.error)
 		return sbi_err_map_linux_errno(ret.error);
 
@@ -148,13 +150,13 @@ static int __init sbi_system_suspend_init(void)
 arch_initcall(sbi_system_suspend_init);
 
 static int sbi_suspend_finisher(unsigned long suspend_type,
-				unsigned long resume_addr,
-				unsigned long opaque)
+				uintptr_t resume_addr,
+				uintptr_t opaque)
 {
 	struct sbiret ret;
 
 	ret = sbi_ecall(SBI_EXT_HSM, SBI_EXT_HSM_HART_SUSPEND,
-			suspend_type, resume_addr, opaque, 0, 0, 0);
+			__c_fakeu(suspend_type), resume_addr, opaque, 0, 0, 0);
 
 	return (ret.error) ? sbi_err_map_linux_errno(ret.error) : 0;
 }
