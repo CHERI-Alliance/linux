@@ -1385,7 +1385,7 @@ static int cy8c95x0_probe(struct i2c_client *client)
 	chip->dev = dev;
 
 	/* Set the device type */
-	driver_data = (uintptr_t)i2c_get_match_data(client);
+	driver_data = __c_pa(i2c_get_match_data(client));
 
 	chip->tpin = driver_data & CY8C95X0_GPIO_MASK;
 	chip->nport = DIV_ROUND_UP(CY8C95X0_PIN_TO_OFFSET(chip->tpin), BANK_SZ);
