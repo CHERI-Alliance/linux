@@ -773,7 +773,7 @@ static int abx80x_probe(struct i2c_client *client)
 	int i, data, err, trickle_cfg = -EINVAL;
 	char buf[7];
 	const struct i2c_device_id *id = i2c_match_id(abx80x_id, client);
-	unsigned int part = id->driver_data;
+	unsigned int part = __c_ua(id->driver_data);
 	unsigned int partnumber;
 	unsigned int majrev, minrev;
 	unsigned int lot;
