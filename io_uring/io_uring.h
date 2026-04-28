@@ -301,9 +301,22 @@ static inline void convert_compat64_io_uring_sqe(struct io_ring_ctx *ctx,
 	sqe->ioprio = READ_ONCE(compat_sqe->ioprio);
 	sqe->fd = READ_ONCE(compat_sqe->fd);
 	BUILD_BUG_COMPAT_SQE_UNION_ELEM(addr2, addr);
-	sqe->addr2 = (user_uintptr_t)compat_ptr(READ_ONCE(compat_sqe->addr2));
-	BUILD_BUG_COMPAT_SQE_UNION_ELEM(addr, len);
+	/*
+	 * Some opcodes set a user_data value in the addr2 field to propagate
+	 * it as-is to the user_data field of a CQE. It's not dereferenced
+	 * by the kernel, so don't modify it.
+	 */
+	switch (sqe->opcode) {
+	case IORING_OP_POLL_REMOVE:
+	case IORING_OP_MSG_RING:
+		sqe->addr2 = (user_uintptr_t)READ_ONCE(compat_sqe->addr2);
+		break;
+	default:
+		sqe->addr2 = (user_uintptr_t)compat_ptr(READ_ONCE(compat_sqe->addr2));
+		break;
+	}
 
+	BUILD_BUG_COMPAT_SQE_UNION_ELEM(addr, len);
 	/*
 	 * Some opcodes set a user_data value in the addr field to be matched
 	 * with a pre-existing IO event's user_data. It's not dereferenced by
