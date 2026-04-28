@@ -399,7 +399,7 @@ static int ds278x_battery_probe(struct i2c_client *client)
 
 	i2c_set_clientdata(client, info);
 	info->client = client;
-	info->ops  = &ds278x_ops[id->driver_data];
+	info->ops  = &ds278x_ops[__c_ua(id->driver_data)];
 	ds278x_power_supply_init(&info->battery_desc);
 	psy_cfg.drv_data = info;
 

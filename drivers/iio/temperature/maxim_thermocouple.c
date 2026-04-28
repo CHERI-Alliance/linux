@@ -248,7 +248,7 @@ static int maxim_thermocouple_probe(struct spi_device *spi)
 	data = iio_priv(indio_dev);
 	data->spi = spi;
 	data->chip = chip;
-	data->tc_type = maxim_tc_types[id->driver_data];
+	data->tc_type = maxim_tc_types[__c_ua(id->driver_data)];
 
 	ret = devm_iio_triggered_buffer_setup(&spi->dev,
 				indio_dev, NULL,

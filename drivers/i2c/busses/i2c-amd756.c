@@ -366,7 +366,7 @@ static int amd756_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 	amd756_smbus.dev.parent = &pdev->dev;
 
 	snprintf(amd756_smbus.name, sizeof(amd756_smbus.name),
-		 "SMBus %s adapter at %04x", chipname[id->driver_data],
+		 "SMBus %s adapter at %04x", chipname[__c_ua(id->driver_data)],
 		 amd756_ioport);
 
 	error = i2c_add_adapter(&amd756_smbus);

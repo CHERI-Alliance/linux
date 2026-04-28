@@ -478,7 +478,7 @@ static int tlan_probe1(struct pci_dev *pdev, long ioaddr, int irq, int rev,
 	if (pdev) {
 		u32		   pci_io_base = 0;
 
-		priv->adapter = &board_info[ent->driver_data];
+		priv->adapter = &board_info[__c_ua(ent->driver_data)];
 
 		rc = dma_set_mask(&pdev->dev, DMA_BIT_MASK(32));
 		if (rc) {

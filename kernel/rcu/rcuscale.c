@@ -528,8 +528,8 @@ rcu_scale_writer(void *arg)
 	u64 t;
 	DEFINE_TORTURE_RANDOM(tr);
 	u64 *wdp;
-	u64 *wdpp = writer_durations[me];
-	struct writer_freelist *wflp = &writer_freelists[me];
+	u64 *wdpp = writer_durations[__c_ua(me)];
+	struct writer_freelist *wflp = &writer_freelists[__c_ua(me)];
 	struct writer_mblock *wmbp = NULL;
 
 	VERBOSE_SCALEOUT_STRING("rcu_scale_writer task started");
@@ -599,7 +599,7 @@ rcu_scale_writer(void *arg)
 			started = true;
 		if (!done && i >= MIN_MEAS && time_after(jiffies, jdone)) {
 			done = true;
-			WRITE_ONCE(writer_done[me], true);
+			WRITE_ONCE(writer_done[__c_ua(me)], true);
 			sched_set_normal(current, 0);
 			pr_alert("%s%s rcu_scale_writer %ld has %d measurements\n",
 				 scale_type, SCALE_FLAG, me, MIN_MEAS);
@@ -617,7 +617,7 @@ rcu_scale_writer(void *arg)
 						cur_ops->get_gp_seq();
 				}
 				if (shutdown_secs) {
-					writer_tasks[me] = NULL;
+					writer_tasks[__c_ua(me)] = NULL;
 					smp_mb(); /* Assign before wake. */
 					rcu_scale_cleanup();
 					kernel_power_off();
@@ -644,7 +644,7 @@ rcu_scale_writer(void *arg)
 		}
 		if (!selfreport && time_after(jiffies, jdone + HZ * (70 + me))) {
 			pr_info("%s: Writer %ld self-report: started %d done %d/%d->%d i %d jdone %lu.\n",
-				__func__, me, started, done, writer_done[me], atomic_read(&n_rcu_scale_writer_finished), i, jiffies - jdone);
+				__func__, me, started, done, writer_done[__c_ua(me)], atomic_read(&n_rcu_scale_writer_finished), i, jiffies - jdone);
 			selfreport = true;
 		}
 		if (gp_succeeded && started && !alldone && i < MAX_MEAS - 1)
@@ -655,7 +655,7 @@ rcu_scale_writer(void *arg)
 		rcu_scale_free(wmbp);
 		cur_ops->gp_barrier();
 	}
-	writer_n_durations[me] = i_max + 1;
+	writer_n_durations[__c_ua(me)] = i_max + 1;
 	torture_kthread_stopping("rcu_scale_writer");
 	return 0;
 }
@@ -790,7 +790,7 @@ kfree_scale_thread(void *arg)
 		       PAGES_TO_MB(mem_begin - mem_during));
 
 		if (shutdown_secs) {
-			kfree_reader_tasks[me] = NULL;
+			kfree_reader_tasks[__c_ua(me)] = NULL;
 			smp_mb(); /* Assign before wake. */
 			kfree_scale_cleanup();
 			kernel_power_off();

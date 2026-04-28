@@ -789,7 +789,7 @@ static int ad799x_probe(struct i2c_client *client)
 	struct ad799x_state *st;
 	struct iio_dev *indio_dev;
 	const struct ad799x_chip_info *chip_info =
-		&ad799x_chip_info_tbl[id->driver_data];
+		&ad799x_chip_info_tbl[__c_ua(id->driver_data)];
 
 	indio_dev = devm_iio_device_alloc(&client->dev, sizeof(*st));
 	if (indio_dev == NULL)

@@ -2515,8 +2515,8 @@ brcmf_pcie_probe(struct pci_dev *pdev, const struct pci_device_id *id)
 	bus->proto_type = BRCMF_PROTO_MSGBUF;
 	bus->chip = devinfo->coreid;
 	bus->wowl_supported = pci_pme_capable(pdev, PCI_D3hot);
-	bus->fwvid = drvdata[id->driver_data].vendor;
-	devinfo->fwseed = drvdata[id->driver_data].fw_seed;
+	bus->fwvid = drvdata[__c_ua(id->driver_data)].vendor;
+	devinfo->fwseed = drvdata[__c_ua(id->driver_data)].fw_seed;
 	dev_set_drvdata(&pdev->dev, bus);
 
 	ret = brcmf_alloc(&devinfo->pdev->dev, devinfo->settings);

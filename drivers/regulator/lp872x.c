@@ -902,7 +902,7 @@ static int lp872x_probe(struct i2c_client *cl)
 	if (!lp)
 		return -ENOMEM;
 
-	lp->num_regulators = lp872x_num_regulators[id->driver_data];
+	lp->num_regulators = lp872x_num_regulators[__c_ua(id->driver_data)];
 
 	lp->regmap = devm_regmap_init_i2c(cl, &lp872x_regmap_config);
 	if (IS_ERR(lp->regmap)) {

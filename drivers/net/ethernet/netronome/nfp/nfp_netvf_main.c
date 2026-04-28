@@ -91,7 +91,7 @@ static int nfp_netvf_pci_probe(struct pci_dev *pdev,
 	int stride;
 	int err;
 
-	dev_info = &nfp_dev_info[pci_id->driver_data];
+	dev_info = &nfp_dev_info[__c_ua(pci_id->driver_data)];
 
 	vf = kzalloc_obj(*vf);
 	if (!vf)

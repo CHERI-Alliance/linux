@@ -2911,7 +2911,7 @@ static int velocity_pci_probe(struct pci_dev *pdev,
 			       const struct pci_device_id *ent)
 {
 	const struct velocity_info_tbl *info =
-					&chip_info_table[ent->driver_data];
+					&chip_info_table[__c_ua(ent->driver_data)];
 	int ret;
 
 	ret = pci_enable_device(pdev);

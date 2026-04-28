@@ -1006,7 +1006,7 @@ static int rtl8139_init_one(struct pci_dev *pdev,
 	tp = netdev_priv(dev);
 
 	/* note: tp->chipset set in rtl8139_init_board */
-	tp->drv_flags = board_info[ent->driver_data].hw_flags;
+	tp->drv_flags = board_info[__c_ua(ent->driver_data)].hw_flags;
 	tp->mmio_addr = ioaddr;
 	tp->msg_enable =
 		(debug < 0 ? RTL8139_DEF_MSG_ENABLE : ((1 << debug) - 1));
@@ -1028,7 +1028,7 @@ static int rtl8139_init_one(struct pci_dev *pdev,
 	pci_set_drvdata (pdev, dev);
 
 	netdev_info(dev, "%s at 0x%p, %pM, IRQ %d\n",
-		    board_info[ent->driver_data].name,
+		    board_info[__c_ua(ent->driver_data)].name,
 		    ioaddr, dev->dev_addr, pdev->irq);
 
 	netdev_dbg(dev, "Identified 8139 chip type '%s'\n",

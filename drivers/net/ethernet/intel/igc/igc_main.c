@@ -7123,7 +7123,7 @@ static int igc_probe(struct pci_dev *pdev,
 	struct igc_adapter *adapter;
 	struct net_device *netdev;
 	struct igc_hw *hw;
-	const struct igc_info *ei = igc_info_tbl[ent->driver_data];
+	const struct igc_info *ei = igc_info_tbl[__c_ua(ent->driver_data)];
 	int err;
 
 	err = pci_enable_device_mem(pdev);

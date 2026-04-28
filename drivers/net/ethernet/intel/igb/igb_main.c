@@ -3209,7 +3209,7 @@ static int igb_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	u16 eeprom_data = 0;
 	s32 ret_val;
 	static int global_quad_port_a; /* global quad port a indication */
-	const struct e1000_info *ei = igb_info_tbl[ent->driver_data];
+	const struct e1000_info *ei = igb_info_tbl[__c_ua(ent->driver_data)];
 	u8 part_str[E1000_PBANUM_LENGTH];
 	int err;
 

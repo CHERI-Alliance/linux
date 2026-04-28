@@ -148,7 +148,7 @@ static int mcp41010_probe(struct spi_device *spi)
 	data->spi = spi;
 	data->cfg = device_get_match_data(&spi->dev);
 	if (!data->cfg)
-		data->cfg = &mcp41010_cfg[spi_get_device_id(spi)->driver_data];
+		data->cfg = &mcp41010_cfg[__c_ua(spi_get_device_id(spi)->driver_data)];
 
 	mutex_init(&data->lock);
 

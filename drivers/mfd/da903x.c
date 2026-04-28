@@ -503,7 +503,7 @@ static int da903x_probe(struct i2c_client *client)
 
 	chip->client = client;
 	chip->dev = &client->dev;
-	chip->ops = &da903x_ops[id->driver_data];
+	chip->ops = &da903x_ops[__c_ua(id->driver_data)];
 
 	mutex_init(&chip->lock);
 	INIT_WORK(&chip->irq_work, da903x_irq_work);

@@ -426,7 +426,7 @@ static int lmk04832_check_vco_ranges(struct lmk04832 *lmk, unsigned long rate)
 	const struct lmk04832_device_info *info;
 	unsigned long mhz = rate / 1000000;
 
-	info = &lmk04832_device_info[spi_get_device_id(spi)->driver_data];
+	info = &lmk04832_device_info[__c_ua(spi_get_device_id(spi)->driver_data)];
 
 	if (mhz >= info->vco0_range[0] && mhz <= info->vco0_range[1])
 		return LMK04832_VAL_VCO_MUX_VCO0;
@@ -1405,7 +1405,7 @@ static int lmk04832_probe(struct spi_device *spi)
 	int ret;
 	int i;
 
-	info = &lmk04832_device_info[spi_get_device_id(spi)->driver_data];
+	info = &lmk04832_device_info[__c_ua(spi_get_device_id(spi)->driver_data)];
 
 	lmk = devm_kzalloc(&spi->dev, sizeof(struct lmk04832), GFP_KERNEL);
 	if (!lmk)
