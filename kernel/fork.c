@@ -2759,26 +2759,26 @@ SYSCALL_DEFINE0(vfork)
 
 #ifdef __ARCH_WANT_SYS_CLONE
 #ifdef CONFIG_CLONE_BACKWARDS
-SYSCALL_DEFINE5(clone, unsigned long, clone_flags, unsigned long, newsp,
+SYSCALL_DEFINE5(clone, unsigned long, clone_flags, user_uintptr_t, newsp,
 		 int __user *, parent_tidptr,
-		 unsigned long, tls,
+		 user_uintptr_t, tls,
 		 int __user *, child_tidptr)
 #elif defined(CONFIG_CLONE_BACKWARDS2)
-SYSCALL_DEFINE5(clone, unsigned long, newsp, unsigned long, clone_flags,
+SYSCALL_DEFINE5(clone, user_uintptr_t, newsp, unsigned long, clone_flags,
 		 int __user *, parent_tidptr,
 		 int __user *, child_tidptr,
-		 unsigned long, tls)
+		 user_uintptr_t, tls)
 #elif defined(CONFIG_CLONE_BACKWARDS3)
-SYSCALL_DEFINE6(clone, unsigned long, clone_flags, unsigned long, newsp,
+SYSCALL_DEFINE6(clone, unsigned long, clone_flags, user_uintptr_t, newsp,
 		int, stack_size,
 		int __user *, parent_tidptr,
 		int __user *, child_tidptr,
-		unsigned long, tls)
+		user_uintptr_t, tls)
 #else
-SYSCALL_DEFINE5(clone, unsigned long, clone_flags, unsigned long, newsp,
+SYSCALL_DEFINE5(clone, unsigned long, clone_flags, user_uintptr_t, newsp,
 		 int __user *, parent_tidptr,
 		 int __user *, child_tidptr,
-		 unsigned long, tls)
+		 user_uintptr_t, tls)
 #endif
 {
 	struct kernel_clone_args args = {
