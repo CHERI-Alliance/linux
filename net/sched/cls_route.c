@@ -34,8 +34,8 @@ struct route4_fastmap {
 
 struct route4_head {
 	struct route4_fastmap		fastmap[16];
-	struct route4_bucket __rcu	*table[256 + 1];
 	struct rcu_head			rcu;
+	struct route4_bucket __rcu	*table[256 + 1];
 };
 
 struct route4_bucket {

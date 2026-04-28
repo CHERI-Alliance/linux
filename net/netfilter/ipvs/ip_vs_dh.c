@@ -60,8 +60,8 @@ struct ip_vs_dh_bucket {
 #define IP_VS_DH_TAB_MASK               (IP_VS_DH_TAB_SIZE - 1)
 
 struct ip_vs_dh_state {
-	struct ip_vs_dh_bucket		buckets[IP_VS_DH_TAB_SIZE];
 	struct rcu_head			rcu_head;
+	struct ip_vs_dh_bucket		buckets[IP_VS_DH_TAB_SIZE];
 };
 
 /*
