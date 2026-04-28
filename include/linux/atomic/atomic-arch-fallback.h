@@ -4689,5 +4689,2129 @@ raw_atomic64_dec_if_positive(atomic64_t *v)
 #endif
 }
 
+#ifdef CONFIG_CHERI_KERNEL
+/**
+ * raw_atomicuintptr_read() - atomic load with relaxed ordering
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically loads the value of @v with relaxed ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_read() elsewhere.
+ *
+ * Return: The value loaded from @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_read(const atomicuintptr_t *v)
+{
+	return arch_atomicuintptr_read(v);
+}
+
+/**
+ * raw_atomicuintptr_read_acquire() - atomic load with acquire ordering
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically loads the value of @v with acquire ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_read_acquire() elsewhere.
+ *
+ * Return: The value loaded from @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_read_acquire(const atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_read_acquire)
+	return arch_atomicuintptr_read_acquire(v);
+#else
+	uintptr_t ret;
+
+	if (__native_word(atomicuintptr_t)) {
+		ret = smp_load_acquire(&(v)->counter);
+	} else {
+		ret = raw_atomicuintptr_read(v);
+		__atomic_acquire_fence();
+	}
+
+	return ret;
+#endif
+}
+
+/**
+ * raw_atomicuintptr_set() - atomic set with relaxed ordering
+ * @v: pointer to atomicuintptr_t
+ * @i: uintptr_t value to assign
+ *
+ * Atomically sets @v to @i with relaxed ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_set() elsewhere.
+ *
+ * Return: Nothing.
+ */
+static __always_inline void
+raw_atomicuintptr_set(atomicuintptr_t *v, uintptr_t i)
+{
+	arch_atomicuintptr_set(v, i);
+}
+
+/**
+ * raw_atomicuintptr_set_release() - atomic set with release ordering
+ * @v: pointer to atomicuintptr_t
+ * @i: uintptr_t value to assign
+ *
+ * Atomically sets @v to @i with release ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_set_release() elsewhere.
+ *
+ * Return: Nothing.
+ */
+static __always_inline void
+raw_atomicuintptr_set_release(atomicuintptr_t *v, uintptr_t i)
+{
+#if defined(arch_atomicuintptr_set_release)
+	arch_atomicuintptr_set_release(v, i);
+#else
+	if (__native_word(atomicuintptr_t)) {
+		smp_store_release(&(v)->counter, i);
+	} else {
+		__atomic_release_fence();
+		raw_atomicuintptr_set(v, i);
+	}
+#endif
+}
+
+/**
+ * raw_atomicuintptr_add() - atomic add with relaxed ordering
+ * @i: uintptr_t value to add
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v + @i) with relaxed ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_add() elsewhere.
+ *
+ * Return: Nothing.
+ */
+static __always_inline void
+raw_atomicuintptr_add(uintptr_t i, atomicuintptr_t *v)
+{
+	arch_atomicuintptr_add(i, v);
+}
+
+/**
+ * raw_atomicuintptr_add_return() - atomic add with full ordering
+ * @i: uintptr_t value to add
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v + @i) with full ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_add_return() elsewhere.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_add_return(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_add_return)
+	return arch_atomicuintptr_add_return(i, v);
+#elif defined(arch_atomicuintptr_add_return_relaxed)
+	uintptr_t ret;
+	__atomic_pre_full_fence();
+	ret = arch_atomicuintptr_add_return_relaxed(i, v);
+	__atomic_post_full_fence();
+	return ret;
+#else
+#error "Unable to define raw_atomicuintptr_add_return"
+#endif
+}
+
+/**
+ * raw_atomicuintptr_add_return_acquire() - atomic add with acquire ordering
+ * @i: uintptr_t value to add
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v + @i) with acquire ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_add_return_acquire() elsewhere.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_add_return_acquire(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_add_return_acquire)
+	return arch_atomicuintptr_add_return_acquire(i, v);
+#elif defined(arch_atomicuintptr_add_return_relaxed)
+	uintptr_t ret = arch_atomicuintptr_add_return_relaxed(i, v);
+	__atomic_acquire_fence();
+	return ret;
+#elif defined(arch_atomicuintptr_add_return)
+	return arch_atomicuintptr_add_return(i, v);
+#else
+#error "Unable to define raw_atomicuintptr_add_return_acquire"
+#endif
+}
+
+/**
+ * raw_atomicuintptr_add_return_release() - atomic add with release ordering
+ * @i: uintptr_t value to add
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v + @i) with release ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_add_return_release() elsewhere.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_add_return_release(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_add_return_release)
+	return arch_atomicuintptr_add_return_release(i, v);
+#elif defined(arch_atomicuintptr_add_return_relaxed)
+	__atomic_release_fence();
+	return arch_atomicuintptr_add_return_relaxed(i, v);
+#elif defined(arch_atomicuintptr_add_return)
+	return arch_atomicuintptr_add_return(i, v);
+#else
+#error "Unable to define raw_atomicuintptr_add_return_release"
+#endif
+}
+
+/**
+ * raw_atomicuintptr_add_return_relaxed() - atomic add with relaxed ordering
+ * @i: uintptr_t value to add
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v + @i) with relaxed ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_add_return_relaxed() elsewhere.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_add_return_relaxed(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_add_return_relaxed)
+	return arch_atomicuintptr_add_return_relaxed(i, v);
+#elif defined(arch_atomicuintptr_add_return)
+	return arch_atomicuintptr_add_return(i, v);
+#else
+#error "Unable to define raw_atomicuintptr_add_return_relaxed"
+#endif
+}
+
+/**
+ * raw_atomicuintptr_fetch_add() - atomic add with full ordering
+ * @i: uintptr_t value to add
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v + @i) with full ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_add() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_add(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_add)
+	return arch_atomicuintptr_fetch_add(i, v);
+#elif defined(arch_atomicuintptr_fetch_add_relaxed)
+	uintptr_t ret;
+	__atomic_pre_full_fence();
+	ret = arch_atomicuintptr_fetch_add_relaxed(i, v);
+	__atomic_post_full_fence();
+	return ret;
+#else
+#error "Unable to define raw_atomicuintptr_fetch_add"
+#endif
+}
+
+/**
+ * raw_atomicuintptr_fetch_add_acquire() - atomic add with acquire ordering
+ * @i: uintptr_t value to add
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v + @i) with acquire ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_add_acquire() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_add_acquire(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_add_acquire)
+	return arch_atomicuintptr_fetch_add_acquire(i, v);
+#elif defined(arch_atomicuintptr_fetch_add_relaxed)
+	uintptr_t ret = arch_atomicuintptr_fetch_add_relaxed(i, v);
+	__atomic_acquire_fence();
+	return ret;
+#elif defined(arch_atomicuintptr_fetch_add)
+	return arch_atomicuintptr_fetch_add(i, v);
+#else
+#error "Unable to define raw_atomicuintptr_fetch_add_acquire"
+#endif
+}
+
+/**
+ * raw_atomicuintptr_fetch_add_release() - atomic add with release ordering
+ * @i: uintptr_t value to add
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v + @i) with release ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_add_release() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_add_release(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_add_release)
+	return arch_atomicuintptr_fetch_add_release(i, v);
+#elif defined(arch_atomicuintptr_fetch_add_relaxed)
+	__atomic_release_fence();
+	return arch_atomicuintptr_fetch_add_relaxed(i, v);
+#elif defined(arch_atomicuintptr_fetch_add)
+	return arch_atomicuintptr_fetch_add(i, v);
+#else
+#error "Unable to define raw_atomicuintptr_fetch_add_release"
+#endif
+}
+
+/**
+ * raw_atomicuintptr_fetch_add_relaxed() - atomic add with relaxed ordering
+ * @i: uintptr_t value to add
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v + @i) with relaxed ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_add_relaxed() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_add_relaxed(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_add_relaxed)
+	return arch_atomicuintptr_fetch_add_relaxed(i, v);
+#elif defined(arch_atomicuintptr_fetch_add)
+	return arch_atomicuintptr_fetch_add(i, v);
+#else
+#error "Unable to define raw_atomicuintptr_fetch_add_relaxed"
+#endif
+}
+
+/**
+ * raw_atomicuintptr_sub() - atomic subtract with relaxed ordering
+ * @i: uintptr_t value to subtract
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v - @i) with relaxed ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_sub() elsewhere.
+ *
+ * Return: Nothing.
+ */
+static __always_inline void
+raw_atomicuintptr_sub(uintptr_t i, atomicuintptr_t *v)
+{
+	arch_atomicuintptr_sub(i, v);
+}
+
+/**
+ * raw_atomicuintptr_sub_return() - atomic subtract with full ordering
+ * @i: uintptr_t value to subtract
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v - @i) with full ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_sub_return() elsewhere.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_sub_return(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_sub_return)
+	return arch_atomicuintptr_sub_return(i, v);
+#elif defined(arch_atomicuintptr_sub_return_relaxed)
+	uintptr_t ret;
+	__atomic_pre_full_fence();
+	ret = arch_atomicuintptr_sub_return_relaxed(i, v);
+	__atomic_post_full_fence();
+	return ret;
+#else
+#error "Unable to define raw_atomicuintptr_sub_return"
+#endif
+}
+
+/**
+ * raw_atomicuintptr_sub_return_acquire() - atomic subtract with acquire ordering
+ * @i: uintptr_t value to subtract
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v - @i) with acquire ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_sub_return_acquire() elsewhere.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_sub_return_acquire(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_sub_return_acquire)
+	return arch_atomicuintptr_sub_return_acquire(i, v);
+#elif defined(arch_atomicuintptr_sub_return_relaxed)
+	uintptr_t ret = arch_atomicuintptr_sub_return_relaxed(i, v);
+	__atomic_acquire_fence();
+	return ret;
+#elif defined(arch_atomicuintptr_sub_return)
+	return arch_atomicuintptr_sub_return(i, v);
+#else
+#error "Unable to define raw_atomicuintptr_sub_return_acquire"
+#endif
+}
+
+/**
+ * raw_atomicuintptr_sub_return_release() - atomic subtract with release ordering
+ * @i: uintptr_t value to subtract
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v - @i) with release ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_sub_return_release() elsewhere.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_sub_return_release(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_sub_return_release)
+	return arch_atomicuintptr_sub_return_release(i, v);
+#elif defined(arch_atomicuintptr_sub_return_relaxed)
+	__atomic_release_fence();
+	return arch_atomicuintptr_sub_return_relaxed(i, v);
+#elif defined(arch_atomicuintptr_sub_return)
+	return arch_atomicuintptr_sub_return(i, v);
+#else
+#error "Unable to define raw_atomicuintptr_sub_return_release"
+#endif
+}
+
+/**
+ * raw_atomicuintptr_sub_return_relaxed() - atomic subtract with relaxed ordering
+ * @i: uintptr_t value to subtract
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v - @i) with relaxed ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_sub_return_relaxed() elsewhere.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_sub_return_relaxed(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_sub_return_relaxed)
+	return arch_atomicuintptr_sub_return_relaxed(i, v);
+#elif defined(arch_atomicuintptr_sub_return)
+	return arch_atomicuintptr_sub_return(i, v);
+#else
+#error "Unable to define raw_atomicuintptr_sub_return_relaxed"
+#endif
+}
+
+/**
+ * raw_atomicuintptr_fetch_sub() - atomic subtract with full ordering
+ * @i: uintptr_t value to subtract
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v - @i) with full ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_sub() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_sub(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_sub)
+	return arch_atomicuintptr_fetch_sub(i, v);
+#elif defined(arch_atomicuintptr_fetch_sub_relaxed)
+	uintptr_t ret;
+	__atomic_pre_full_fence();
+	ret = arch_atomicuintptr_fetch_sub_relaxed(i, v);
+	__atomic_post_full_fence();
+	return ret;
+#else
+#error "Unable to define raw_atomicuintptr_fetch_sub"
+#endif
+}
+
+/**
+ * raw_atomicuintptr_fetch_sub_acquire() - atomic subtract with acquire ordering
+ * @i: uintptr_t value to subtract
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v - @i) with acquire ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_sub_acquire() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_sub_acquire(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_sub_acquire)
+	return arch_atomicuintptr_fetch_sub_acquire(i, v);
+#elif defined(arch_atomicuintptr_fetch_sub_relaxed)
+	uintptr_t ret = arch_atomicuintptr_fetch_sub_relaxed(i, v);
+	__atomic_acquire_fence();
+	return ret;
+#elif defined(arch_atomicuintptr_fetch_sub)
+	return arch_atomicuintptr_fetch_sub(i, v);
+#else
+#error "Unable to define raw_atomicuintptr_fetch_sub_acquire"
+#endif
+}
+
+/**
+ * raw_atomicuintptr_fetch_sub_release() - atomic subtract with release ordering
+ * @i: uintptr_t value to subtract
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v - @i) with release ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_sub_release() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_sub_release(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_sub_release)
+	return arch_atomicuintptr_fetch_sub_release(i, v);
+#elif defined(arch_atomicuintptr_fetch_sub_relaxed)
+	__atomic_release_fence();
+	return arch_atomicuintptr_fetch_sub_relaxed(i, v);
+#elif defined(arch_atomicuintptr_fetch_sub)
+	return arch_atomicuintptr_fetch_sub(i, v);
+#else
+#error "Unable to define raw_atomicuintptr_fetch_sub_release"
+#endif
+}
+
+/**
+ * raw_atomicuintptr_fetch_sub_relaxed() - atomic subtract with relaxed ordering
+ * @i: uintptr_t value to subtract
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v - @i) with relaxed ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_sub_relaxed() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_sub_relaxed(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_sub_relaxed)
+	return arch_atomicuintptr_fetch_sub_relaxed(i, v);
+#elif defined(arch_atomicuintptr_fetch_sub)
+	return arch_atomicuintptr_fetch_sub(i, v);
+#else
+#error "Unable to define raw_atomicuintptr_fetch_sub_relaxed"
+#endif
+}
+
+/**
+ * raw_atomicuintptr_inc() - atomic increment with relaxed ordering
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v + 1) with relaxed ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_inc() elsewhere.
+ *
+ * Return: Nothing.
+ */
+static __always_inline void
+raw_atomicuintptr_inc(atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_inc)
+	arch_atomicuintptr_inc(v);
+#else
+	raw_atomicuintptr_add(1, v);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_inc_return() - atomic increment with full ordering
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v + 1) with full ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_inc_return() elsewhere.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_inc_return(atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_inc_return)
+	return arch_atomicuintptr_inc_return(v);
+#elif defined(arch_atomicuintptr_inc_return_relaxed)
+	uintptr_t ret;
+	__atomic_pre_full_fence();
+	ret = arch_atomicuintptr_inc_return_relaxed(v);
+	__atomic_post_full_fence();
+	return ret;
+#else
+	return raw_atomicuintptr_add_return(1, v);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_inc_return_acquire() - atomic increment with acquire ordering
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v + 1) with acquire ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_inc_return_acquire() elsewhere.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_inc_return_acquire(atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_inc_return_acquire)
+	return arch_atomicuintptr_inc_return_acquire(v);
+#elif defined(arch_atomicuintptr_inc_return_relaxed)
+	uintptr_t ret = arch_atomicuintptr_inc_return_relaxed(v);
+	__atomic_acquire_fence();
+	return ret;
+#elif defined(arch_atomicuintptr_inc_return)
+	return arch_atomicuintptr_inc_return(v);
+#else
+	return raw_atomicuintptr_add_return_acquire(1, v);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_inc_return_release() - atomic increment with release ordering
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v + 1) with release ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_inc_return_release() elsewhere.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_inc_return_release(atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_inc_return_release)
+	return arch_atomicuintptr_inc_return_release(v);
+#elif defined(arch_atomicuintptr_inc_return_relaxed)
+	__atomic_release_fence();
+	return arch_atomicuintptr_inc_return_relaxed(v);
+#elif defined(arch_atomicuintptr_inc_return)
+	return arch_atomicuintptr_inc_return(v);
+#else
+	return raw_atomicuintptr_add_return_release(1, v);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_inc_return_relaxed() - atomic increment with relaxed ordering
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v + 1) with relaxed ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_inc_return_relaxed() elsewhere.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_inc_return_relaxed(atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_inc_return_relaxed)
+	return arch_atomicuintptr_inc_return_relaxed(v);
+#elif defined(arch_atomicuintptr_inc_return)
+	return arch_atomicuintptr_inc_return(v);
+#else
+	return raw_atomicuintptr_add_return_relaxed(1, v);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_fetch_inc() - atomic increment with full ordering
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v + 1) with full ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_inc() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_inc(atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_inc)
+	return arch_atomicuintptr_fetch_inc(v);
+#elif defined(arch_atomicuintptr_fetch_inc_relaxed)
+	uintptr_t ret;
+	__atomic_pre_full_fence();
+	ret = arch_atomicuintptr_fetch_inc_relaxed(v);
+	__atomic_post_full_fence();
+	return ret;
+#else
+	return raw_atomicuintptr_fetch_add(1, v);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_fetch_inc_acquire() - atomic increment with acquire ordering
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v + 1) with acquire ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_inc_acquire() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_inc_acquire(atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_inc_acquire)
+	return arch_atomicuintptr_fetch_inc_acquire(v);
+#elif defined(arch_atomicuintptr_fetch_inc_relaxed)
+	uintptr_t ret = arch_atomicuintptr_fetch_inc_relaxed(v);
+	__atomic_acquire_fence();
+	return ret;
+#elif defined(arch_atomicuintptr_fetch_inc)
+	return arch_atomicuintptr_fetch_inc(v);
+#else
+	return raw_atomicuintptr_fetch_add_acquire(1, v);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_fetch_inc_release() - atomic increment with release ordering
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v + 1) with release ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_inc_release() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_inc_release(atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_inc_release)
+	return arch_atomicuintptr_fetch_inc_release(v);
+#elif defined(arch_atomicuintptr_fetch_inc_relaxed)
+	__atomic_release_fence();
+	return arch_atomicuintptr_fetch_inc_relaxed(v);
+#elif defined(arch_atomicuintptr_fetch_inc)
+	return arch_atomicuintptr_fetch_inc(v);
+#else
+	return raw_atomicuintptr_fetch_add_release(1, v);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_fetch_inc_relaxed() - atomic increment with relaxed ordering
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v + 1) with relaxed ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_inc_relaxed() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_inc_relaxed(atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_inc_relaxed)
+	return arch_atomicuintptr_fetch_inc_relaxed(v);
+#elif defined(arch_atomicuintptr_fetch_inc)
+	return arch_atomicuintptr_fetch_inc(v);
+#else
+	return raw_atomicuintptr_fetch_add_relaxed(1, v);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_dec() - atomic decrement with relaxed ordering
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v - 1) with relaxed ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_dec() elsewhere.
+ *
+ * Return: Nothing.
+ */
+static __always_inline void
+raw_atomicuintptr_dec(atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_dec)
+	arch_atomicuintptr_dec(v);
+#else
+	raw_atomicuintptr_sub(1, v);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_dec_return() - atomic decrement with full ordering
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v - 1) with full ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_dec_return() elsewhere.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_dec_return(atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_dec_return)
+	return arch_atomicuintptr_dec_return(v);
+#elif defined(arch_atomicuintptr_dec_return_relaxed)
+	uintptr_t ret;
+	__atomic_pre_full_fence();
+	ret = arch_atomicuintptr_dec_return_relaxed(v);
+	__atomic_post_full_fence();
+	return ret;
+#else
+	return raw_atomicuintptr_sub_return(1, v);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_dec_return_acquire() - atomic decrement with acquire ordering
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v - 1) with acquire ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_dec_return_acquire() elsewhere.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_dec_return_acquire(atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_dec_return_acquire)
+	return arch_atomicuintptr_dec_return_acquire(v);
+#elif defined(arch_atomicuintptr_dec_return_relaxed)
+	uintptr_t ret = arch_atomicuintptr_dec_return_relaxed(v);
+	__atomic_acquire_fence();
+	return ret;
+#elif defined(arch_atomicuintptr_dec_return)
+	return arch_atomicuintptr_dec_return(v);
+#else
+	return raw_atomicuintptr_sub_return_acquire(1, v);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_dec_return_release() - atomic decrement with release ordering
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v - 1) with release ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_dec_return_release() elsewhere.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_dec_return_release(atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_dec_return_release)
+	return arch_atomicuintptr_dec_return_release(v);
+#elif defined(arch_atomicuintptr_dec_return_relaxed)
+	__atomic_release_fence();
+	return arch_atomicuintptr_dec_return_relaxed(v);
+#elif defined(arch_atomicuintptr_dec_return)
+	return arch_atomicuintptr_dec_return(v);
+#else
+	return raw_atomicuintptr_sub_return_release(1, v);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_dec_return_relaxed() - atomic decrement with relaxed ordering
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v - 1) with relaxed ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_dec_return_relaxed() elsewhere.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_dec_return_relaxed(atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_dec_return_relaxed)
+	return arch_atomicuintptr_dec_return_relaxed(v);
+#elif defined(arch_atomicuintptr_dec_return)
+	return arch_atomicuintptr_dec_return(v);
+#else
+	return raw_atomicuintptr_sub_return_relaxed(1, v);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_fetch_dec() - atomic decrement with full ordering
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v - 1) with full ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_dec() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_dec(atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_dec)
+	return arch_atomicuintptr_fetch_dec(v);
+#elif defined(arch_atomicuintptr_fetch_dec_relaxed)
+	uintptr_t ret;
+	__atomic_pre_full_fence();
+	ret = arch_atomicuintptr_fetch_dec_relaxed(v);
+	__atomic_post_full_fence();
+	return ret;
+#else
+	return raw_atomicuintptr_fetch_sub(1, v);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_fetch_dec_acquire() - atomic decrement with acquire ordering
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v - 1) with acquire ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_dec_acquire() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_dec_acquire(atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_dec_acquire)
+	return arch_atomicuintptr_fetch_dec_acquire(v);
+#elif defined(arch_atomicuintptr_fetch_dec_relaxed)
+	uintptr_t ret = arch_atomicuintptr_fetch_dec_relaxed(v);
+	__atomic_acquire_fence();
+	return ret;
+#elif defined(arch_atomicuintptr_fetch_dec)
+	return arch_atomicuintptr_fetch_dec(v);
+#else
+	return raw_atomicuintptr_fetch_sub_acquire(1, v);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_fetch_dec_release() - atomic decrement with release ordering
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v - 1) with release ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_dec_release() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_dec_release(atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_dec_release)
+	return arch_atomicuintptr_fetch_dec_release(v);
+#elif defined(arch_atomicuintptr_fetch_dec_relaxed)
+	__atomic_release_fence();
+	return arch_atomicuintptr_fetch_dec_relaxed(v);
+#elif defined(arch_atomicuintptr_fetch_dec)
+	return arch_atomicuintptr_fetch_dec(v);
+#else
+	return raw_atomicuintptr_fetch_sub_release(1, v);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_fetch_dec_relaxed() - atomic decrement with relaxed ordering
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v - 1) with relaxed ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_dec_relaxed() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_dec_relaxed(atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_dec_relaxed)
+	return arch_atomicuintptr_fetch_dec_relaxed(v);
+#elif defined(arch_atomicuintptr_fetch_dec)
+	return arch_atomicuintptr_fetch_dec(v);
+#else
+	return raw_atomicuintptr_fetch_sub_relaxed(1, v);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_and() - atomic bitwise AND with relaxed ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v & @i) with relaxed ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_and() elsewhere.
+ *
+ * Return: Nothing.
+ */
+static __always_inline void
+raw_atomicuintptr_and(uintptr_t i, atomicuintptr_t *v)
+{
+	arch_atomicuintptr_and(i, v);
+}
+
+/**
+ * raw_atomicuintptr_fetch_and() - atomic bitwise AND with full ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v & @i) with full ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_and() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_and(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_and)
+	return arch_atomicuintptr_fetch_and(i, v);
+#elif defined(arch_atomicuintptr_fetch_and_relaxed)
+	uintptr_t ret;
+	__atomic_pre_full_fence();
+	ret = arch_atomicuintptr_fetch_and_relaxed(i, v);
+	__atomic_post_full_fence();
+	return ret;
+#else
+#error "Unable to define raw_atomicuintptr_fetch_and"
+#endif
+}
+
+/**
+ * raw_atomicuintptr_fetch_and_acquire() - atomic bitwise AND with acquire ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v & @i) with acquire ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_and_acquire() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_and_acquire(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_and_acquire)
+	return arch_atomicuintptr_fetch_and_acquire(i, v);
+#elif defined(arch_atomicuintptr_fetch_and_relaxed)
+	uintptr_t ret = arch_atomicuintptr_fetch_and_relaxed(i, v);
+	__atomic_acquire_fence();
+	return ret;
+#elif defined(arch_atomicuintptr_fetch_and)
+	return arch_atomicuintptr_fetch_and(i, v);
+#else
+#error "Unable to define raw_atomicuintptr_fetch_and_acquire"
+#endif
+}
+
+/**
+ * raw_atomicuintptr_fetch_and_release() - atomic bitwise AND with release ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v & @i) with release ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_and_release() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_and_release(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_and_release)
+	return arch_atomicuintptr_fetch_and_release(i, v);
+#elif defined(arch_atomicuintptr_fetch_and_relaxed)
+	__atomic_release_fence();
+	return arch_atomicuintptr_fetch_and_relaxed(i, v);
+#elif defined(arch_atomicuintptr_fetch_and)
+	return arch_atomicuintptr_fetch_and(i, v);
+#else
+#error "Unable to define raw_atomicuintptr_fetch_and_release"
+#endif
+}
+
+/**
+ * raw_atomicuintptr_fetch_and_relaxed() - atomic bitwise AND with relaxed ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v & @i) with relaxed ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_and_relaxed() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_and_relaxed(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_and_relaxed)
+	return arch_atomicuintptr_fetch_and_relaxed(i, v);
+#elif defined(arch_atomicuintptr_fetch_and)
+	return arch_atomicuintptr_fetch_and(i, v);
+#else
+#error "Unable to define raw_atomicuintptr_fetch_and_relaxed"
+#endif
+}
+
+/**
+ * raw_atomicuintptr_andnot() - atomic bitwise AND NOT with relaxed ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v & ~@i) with relaxed ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_andnot() elsewhere.
+ *
+ * Return: Nothing.
+ */
+static __always_inline void
+raw_atomicuintptr_andnot(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_andnot)
+	arch_atomicuintptr_andnot(i, v);
+#else
+	raw_atomicuintptr_and(~i, v);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_fetch_andnot() - atomic bitwise AND NOT with full ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v & ~@i) with full ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_andnot() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_andnot(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_andnot)
+	return arch_atomicuintptr_fetch_andnot(i, v);
+#elif defined(arch_atomicuintptr_fetch_andnot_relaxed)
+	uintptr_t ret;
+	__atomic_pre_full_fence();
+	ret = arch_atomicuintptr_fetch_andnot_relaxed(i, v);
+	__atomic_post_full_fence();
+	return ret;
+#else
+	return raw_atomicuintptr_fetch_and(~i, v);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_fetch_andnot_acquire() - atomic bitwise AND NOT with acquire ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v & ~@i) with acquire ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_andnot_acquire() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_andnot_acquire(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_andnot_acquire)
+	return arch_atomicuintptr_fetch_andnot_acquire(i, v);
+#elif defined(arch_atomicuintptr_fetch_andnot_relaxed)
+	uintptr_t ret = arch_atomicuintptr_fetch_andnot_relaxed(i, v);
+	__atomic_acquire_fence();
+	return ret;
+#elif defined(arch_atomicuintptr_fetch_andnot)
+	return arch_atomicuintptr_fetch_andnot(i, v);
+#else
+	return raw_atomicuintptr_fetch_and_acquire(~i, v);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_fetch_andnot_release() - atomic bitwise AND NOT with release ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v & ~@i) with release ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_andnot_release() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_andnot_release(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_andnot_release)
+	return arch_atomicuintptr_fetch_andnot_release(i, v);
+#elif defined(arch_atomicuintptr_fetch_andnot_relaxed)
+	__atomic_release_fence();
+	return arch_atomicuintptr_fetch_andnot_relaxed(i, v);
+#elif defined(arch_atomicuintptr_fetch_andnot)
+	return arch_atomicuintptr_fetch_andnot(i, v);
+#else
+	return raw_atomicuintptr_fetch_and_release(~i, v);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_fetch_andnot_relaxed() - atomic bitwise AND NOT with relaxed ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v & ~@i) with relaxed ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_andnot_relaxed() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_andnot_relaxed(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_andnot_relaxed)
+	return arch_atomicuintptr_fetch_andnot_relaxed(i, v);
+#elif defined(arch_atomicuintptr_fetch_andnot)
+	return arch_atomicuintptr_fetch_andnot(i, v);
+#else
+	return raw_atomicuintptr_fetch_and_relaxed(~i, v);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_or() - atomic bitwise OR with relaxed ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v | @i) with relaxed ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_or() elsewhere.
+ *
+ * Return: Nothing.
+ */
+static __always_inline void
+raw_atomicuintptr_or(uintptr_t i, atomicuintptr_t *v)
+{
+	arch_atomicuintptr_or(i, v);
+}
+
+/**
+ * raw_atomicuintptr_fetch_or() - atomic bitwise OR with full ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v | @i) with full ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_or() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_or(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_or)
+	return arch_atomicuintptr_fetch_or(i, v);
+#elif defined(arch_atomicuintptr_fetch_or_relaxed)
+	uintptr_t ret;
+	__atomic_pre_full_fence();
+	ret = arch_atomicuintptr_fetch_or_relaxed(i, v);
+	__atomic_post_full_fence();
+	return ret;
+#else
+#error "Unable to define raw_atomicuintptr_fetch_or"
+#endif
+}
+
+/**
+ * raw_atomicuintptr_fetch_or_acquire() - atomic bitwise OR with acquire ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v | @i) with acquire ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_or_acquire() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_or_acquire(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_or_acquire)
+	return arch_atomicuintptr_fetch_or_acquire(i, v);
+#elif defined(arch_atomicuintptr_fetch_or_relaxed)
+	uintptr_t ret = arch_atomicuintptr_fetch_or_relaxed(i, v);
+	__atomic_acquire_fence();
+	return ret;
+#elif defined(arch_atomicuintptr_fetch_or)
+	return arch_atomicuintptr_fetch_or(i, v);
+#else
+#error "Unable to define raw_atomicuintptr_fetch_or_acquire"
+#endif
+}
+
+/**
+ * raw_atomicuintptr_fetch_or_release() - atomic bitwise OR with release ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v | @i) with release ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_or_release() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_or_release(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_or_release)
+	return arch_atomicuintptr_fetch_or_release(i, v);
+#elif defined(arch_atomicuintptr_fetch_or_relaxed)
+	__atomic_release_fence();
+	return arch_atomicuintptr_fetch_or_relaxed(i, v);
+#elif defined(arch_atomicuintptr_fetch_or)
+	return arch_atomicuintptr_fetch_or(i, v);
+#else
+#error "Unable to define raw_atomicuintptr_fetch_or_release"
+#endif
+}
+
+/**
+ * raw_atomicuintptr_fetch_or_relaxed() - atomic bitwise OR with relaxed ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v | @i) with relaxed ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_or_relaxed() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_or_relaxed(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_or_relaxed)
+	return arch_atomicuintptr_fetch_or_relaxed(i, v);
+#elif defined(arch_atomicuintptr_fetch_or)
+	return arch_atomicuintptr_fetch_or(i, v);
+#else
+#error "Unable to define raw_atomicuintptr_fetch_or_relaxed"
+#endif
+}
+
+/**
+ * raw_atomicuintptr_xor() - atomic bitwise XOR with relaxed ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v ^ @i) with relaxed ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_xor() elsewhere.
+ *
+ * Return: Nothing.
+ */
+static __always_inline void
+raw_atomicuintptr_xor(uintptr_t i, atomicuintptr_t *v)
+{
+	arch_atomicuintptr_xor(i, v);
+}
+
+/**
+ * raw_atomicuintptr_fetch_xor() - atomic bitwise XOR with full ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v ^ @i) with full ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_xor() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_xor(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_xor)
+	return arch_atomicuintptr_fetch_xor(i, v);
+#elif defined(arch_atomicuintptr_fetch_xor_relaxed)
+	uintptr_t ret;
+	__atomic_pre_full_fence();
+	ret = arch_atomicuintptr_fetch_xor_relaxed(i, v);
+	__atomic_post_full_fence();
+	return ret;
+#else
+#error "Unable to define raw_atomicuintptr_fetch_xor"
+#endif
+}
+
+/**
+ * raw_atomicuintptr_fetch_xor_acquire() - atomic bitwise XOR with acquire ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v ^ @i) with acquire ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_xor_acquire() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_xor_acquire(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_xor_acquire)
+	return arch_atomicuintptr_fetch_xor_acquire(i, v);
+#elif defined(arch_atomicuintptr_fetch_xor_relaxed)
+	uintptr_t ret = arch_atomicuintptr_fetch_xor_relaxed(i, v);
+	__atomic_acquire_fence();
+	return ret;
+#elif defined(arch_atomicuintptr_fetch_xor)
+	return arch_atomicuintptr_fetch_xor(i, v);
+#else
+#error "Unable to define raw_atomicuintptr_fetch_xor_acquire"
+#endif
+}
+
+/**
+ * raw_atomicuintptr_fetch_xor_release() - atomic bitwise XOR with release ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v ^ @i) with release ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_xor_release() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_xor_release(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_xor_release)
+	return arch_atomicuintptr_fetch_xor_release(i, v);
+#elif defined(arch_atomicuintptr_fetch_xor_relaxed)
+	__atomic_release_fence();
+	return arch_atomicuintptr_fetch_xor_relaxed(i, v);
+#elif defined(arch_atomicuintptr_fetch_xor)
+	return arch_atomicuintptr_fetch_xor(i, v);
+#else
+#error "Unable to define raw_atomicuintptr_fetch_xor_release"
+#endif
+}
+
+/**
+ * raw_atomicuintptr_fetch_xor_relaxed() - atomic bitwise XOR with relaxed ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v ^ @i) with relaxed ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_xor_relaxed() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_xor_relaxed(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_fetch_xor_relaxed)
+	return arch_atomicuintptr_fetch_xor_relaxed(i, v);
+#elif defined(arch_atomicuintptr_fetch_xor)
+	return arch_atomicuintptr_fetch_xor(i, v);
+#else
+#error "Unable to define raw_atomicuintptr_fetch_xor_relaxed"
+#endif
+}
+
+/**
+ * raw_atomicuintptr_xchg() - atomic exchange with full ordering
+ * @v: pointer to atomicuintptr_t
+ * @new: uintptr_t value to assign
+ *
+ * Atomically updates @v to @new with full ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_xchg() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_xchg(atomicuintptr_t *v, uintptr_t new)
+{
+#if defined(arch_atomicuintptr_xchg)
+	return arch_atomicuintptr_xchg(v, new);
+#elif defined(arch_atomicuintptr_xchg_relaxed)
+	uintptr_t ret;
+	__atomic_pre_full_fence();
+	ret = arch_atomicuintptr_xchg_relaxed(v, new);
+	__atomic_post_full_fence();
+	return ret;
+#else
+	return raw_xchg(&v->counter, new);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_xchg_acquire() - atomic exchange with acquire ordering
+ * @v: pointer to atomicuintptr_t
+ * @new: uintptr_t value to assign
+ *
+ * Atomically updates @v to @new with acquire ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_xchg_acquire() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_xchg_acquire(atomicuintptr_t *v, uintptr_t new)
+{
+#if defined(arch_atomicuintptr_xchg_acquire)
+	return arch_atomicuintptr_xchg_acquire(v, new);
+#elif defined(arch_atomicuintptr_xchg_relaxed)
+	uintptr_t ret = arch_atomicuintptr_xchg_relaxed(v, new);
+	__atomic_acquire_fence();
+	return ret;
+#elif defined(arch_atomicuintptr_xchg)
+	return arch_atomicuintptr_xchg(v, new);
+#else
+	return raw_xchg_acquire(&v->counter, new);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_xchg_release() - atomic exchange with release ordering
+ * @v: pointer to atomicuintptr_t
+ * @new: uintptr_t value to assign
+ *
+ * Atomically updates @v to @new with release ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_xchg_release() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_xchg_release(atomicuintptr_t *v, uintptr_t new)
+{
+#if defined(arch_atomicuintptr_xchg_release)
+	return arch_atomicuintptr_xchg_release(v, new);
+#elif defined(arch_atomicuintptr_xchg_relaxed)
+	__atomic_release_fence();
+	return arch_atomicuintptr_xchg_relaxed(v, new);
+#elif defined(arch_atomicuintptr_xchg)
+	return arch_atomicuintptr_xchg(v, new);
+#else
+	return raw_xchg_release(&v->counter, new);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_xchg_relaxed() - atomic exchange with relaxed ordering
+ * @v: pointer to atomicuintptr_t
+ * @new: uintptr_t value to assign
+ *
+ * Atomically updates @v to @new with relaxed ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_xchg_relaxed() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_xchg_relaxed(atomicuintptr_t *v, uintptr_t new)
+{
+#if defined(arch_atomicuintptr_xchg_relaxed)
+	return arch_atomicuintptr_xchg_relaxed(v, new);
+#elif defined(arch_atomicuintptr_xchg)
+	return arch_atomicuintptr_xchg(v, new);
+#else
+	return raw_xchg_relaxed(&v->counter, new);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_cmpxchg() - atomic compare and exchange with full ordering
+ * @v: pointer to atomicuintptr_t
+ * @old: uintptr_t value to compare with
+ * @new: uintptr_t value to assign
+ *
+ * If (@v == @old), atomically updates @v to @new with full ordering.
+ * Otherwise, @v is not modified and relaxed ordering is provided.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_cmpxchg() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_cmpxchg(atomicuintptr_t *v, uintptr_t old, uintptr_t new)
+{
+#if defined(arch_atomicuintptr_cmpxchg)
+	return arch_atomicuintptr_cmpxchg(v, old, new);
+#elif defined(arch_atomicuintptr_cmpxchg_relaxed)
+	uintptr_t ret;
+	__atomic_pre_full_fence();
+	ret = arch_atomicuintptr_cmpxchg_relaxed(v, old, new);
+	__atomic_post_full_fence();
+	return ret;
+#else
+	return raw_cmpxchg(&v->counter, old, new);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_cmpxchg_acquire() - atomic compare and exchange with acquire ordering
+ * @v: pointer to atomicuintptr_t
+ * @old: uintptr_t value to compare with
+ * @new: uintptr_t value to assign
+ *
+ * If (@v == @old), atomically updates @v to @new with acquire ordering.
+ * Otherwise, @v is not modified and relaxed ordering is provided.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_cmpxchg_acquire() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_cmpxchg_acquire(atomicuintptr_t *v, uintptr_t old, uintptr_t new)
+{
+#if defined(arch_atomicuintptr_cmpxchg_acquire)
+	return arch_atomicuintptr_cmpxchg_acquire(v, old, new);
+#elif defined(arch_atomicuintptr_cmpxchg_relaxed)
+	uintptr_t ret = arch_atomicuintptr_cmpxchg_relaxed(v, old, new);
+	__atomic_acquire_fence();
+	return ret;
+#elif defined(arch_atomicuintptr_cmpxchg)
+	return arch_atomicuintptr_cmpxchg(v, old, new);
+#else
+	return raw_cmpxchg_acquire(&v->counter, old, new);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_cmpxchg_release() - atomic compare and exchange with release ordering
+ * @v: pointer to atomicuintptr_t
+ * @old: uintptr_t value to compare with
+ * @new: uintptr_t value to assign
+ *
+ * If (@v == @old), atomically updates @v to @new with release ordering.
+ * Otherwise, @v is not modified and relaxed ordering is provided.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_cmpxchg_release() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_cmpxchg_release(atomicuintptr_t *v, uintptr_t old, uintptr_t new)
+{
+#if defined(arch_atomicuintptr_cmpxchg_release)
+	return arch_atomicuintptr_cmpxchg_release(v, old, new);
+#elif defined(arch_atomicuintptr_cmpxchg_relaxed)
+	__atomic_release_fence();
+	return arch_atomicuintptr_cmpxchg_relaxed(v, old, new);
+#elif defined(arch_atomicuintptr_cmpxchg)
+	return arch_atomicuintptr_cmpxchg(v, old, new);
+#else
+	return raw_cmpxchg_release(&v->counter, old, new);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_cmpxchg_relaxed() - atomic compare and exchange with relaxed ordering
+ * @v: pointer to atomicuintptr_t
+ * @old: uintptr_t value to compare with
+ * @new: uintptr_t value to assign
+ *
+ * If (@v == @old), atomically updates @v to @new with relaxed ordering.
+ * Otherwise, @v is not modified and relaxed ordering is provided.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_cmpxchg_relaxed() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_cmpxchg_relaxed(atomicuintptr_t *v, uintptr_t old, uintptr_t new)
+{
+#if defined(arch_atomicuintptr_cmpxchg_relaxed)
+	return arch_atomicuintptr_cmpxchg_relaxed(v, old, new);
+#elif defined(arch_atomicuintptr_cmpxchg)
+	return arch_atomicuintptr_cmpxchg(v, old, new);
+#else
+	return raw_cmpxchg_relaxed(&v->counter, old, new);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_try_cmpxchg() - atomic compare and exchange with full ordering
+ * @v: pointer to atomicuintptr_t
+ * @old: pointer to uintptr_t value to compare with
+ * @new: uintptr_t value to assign
+ *
+ * If (@v == @old), atomically updates @v to @new with full ordering.
+ * Otherwise, @v is not modified, @old is updated to the current value of @v,
+ * and relaxed ordering is provided.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_try_cmpxchg() elsewhere.
+ *
+ * Return: @true if the exchange occurred, @false otherwise.
+ */
+static __always_inline bool
+raw_atomicuintptr_try_cmpxchg(atomicuintptr_t *v, uintptr_t *old, uintptr_t new)
+{
+#if defined(arch_atomicuintptr_try_cmpxchg)
+	return arch_atomicuintptr_try_cmpxchg(v, old, new);
+#elif defined(arch_atomicuintptr_try_cmpxchg_relaxed)
+	bool ret;
+	__atomic_pre_full_fence();
+	ret = arch_atomicuintptr_try_cmpxchg_relaxed(v, old, new);
+	__atomic_post_full_fence();
+	return ret;
+#else
+	uintptr_t r, o = *old;
+	r = raw_atomicuintptr_cmpxchg(v, o, new);
+	if (unlikely(r != o))
+		*old = r;
+	return likely(r == o);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_try_cmpxchg_acquire() - atomic compare and exchange with acquire ordering
+ * @v: pointer to atomicuintptr_t
+ * @old: pointer to uintptr_t value to compare with
+ * @new: uintptr_t value to assign
+ *
+ * If (@v == @old), atomically updates @v to @new with acquire ordering.
+ * Otherwise, @v is not modified, @old is updated to the current value of @v,
+ * and relaxed ordering is provided.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_try_cmpxchg_acquire() elsewhere.
+ *
+ * Return: @true if the exchange occurred, @false otherwise.
+ */
+static __always_inline bool
+raw_atomicuintptr_try_cmpxchg_acquire(atomicuintptr_t *v, uintptr_t *old, uintptr_t new)
+{
+#if defined(arch_atomicuintptr_try_cmpxchg_acquire)
+	return arch_atomicuintptr_try_cmpxchg_acquire(v, old, new);
+#elif defined(arch_atomicuintptr_try_cmpxchg_relaxed)
+	bool ret = arch_atomicuintptr_try_cmpxchg_relaxed(v, old, new);
+	__atomic_acquire_fence();
+	return ret;
+#elif defined(arch_atomicuintptr_try_cmpxchg)
+	return arch_atomicuintptr_try_cmpxchg(v, old, new);
+#else
+	uintptr_t r, o = *old;
+	r = raw_atomicuintptr_cmpxchg_acquire(v, o, new);
+	if (unlikely(r != o))
+		*old = r;
+	return likely(r == o);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_try_cmpxchg_release() - atomic compare and exchange with release ordering
+ * @v: pointer to atomicuintptr_t
+ * @old: pointer to uintptr_t value to compare with
+ * @new: uintptr_t value to assign
+ *
+ * If (@v == @old), atomically updates @v to @new with release ordering.
+ * Otherwise, @v is not modified, @old is updated to the current value of @v,
+ * and relaxed ordering is provided.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_try_cmpxchg_release() elsewhere.
+ *
+ * Return: @true if the exchange occurred, @false otherwise.
+ */
+static __always_inline bool
+raw_atomicuintptr_try_cmpxchg_release(atomicuintptr_t *v, uintptr_t *old, uintptr_t new)
+{
+#if defined(arch_atomicuintptr_try_cmpxchg_release)
+	return arch_atomicuintptr_try_cmpxchg_release(v, old, new);
+#elif defined(arch_atomicuintptr_try_cmpxchg_relaxed)
+	__atomic_release_fence();
+	return arch_atomicuintptr_try_cmpxchg_relaxed(v, old, new);
+#elif defined(arch_atomicuintptr_try_cmpxchg)
+	return arch_atomicuintptr_try_cmpxchg(v, old, new);
+#else
+	uintptr_t r, o = *old;
+	r = raw_atomicuintptr_cmpxchg_release(v, o, new);
+	if (unlikely(r != o))
+		*old = r;
+	return likely(r == o);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_try_cmpxchg_relaxed() - atomic compare and exchange with relaxed ordering
+ * @v: pointer to atomicuintptr_t
+ * @old: pointer to uintptr_t value to compare with
+ * @new: uintptr_t value to assign
+ *
+ * If (@v == @old), atomically updates @v to @new with relaxed ordering.
+ * Otherwise, @v is not modified, @old is updated to the current value of @v,
+ * and relaxed ordering is provided.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_try_cmpxchg_relaxed() elsewhere.
+ *
+ * Return: @true if the exchange occurred, @false otherwise.
+ */
+static __always_inline bool
+raw_atomicuintptr_try_cmpxchg_relaxed(atomicuintptr_t *v, uintptr_t *old, uintptr_t new)
+{
+#if defined(arch_atomicuintptr_try_cmpxchg_relaxed)
+	return arch_atomicuintptr_try_cmpxchg_relaxed(v, old, new);
+#elif defined(arch_atomicuintptr_try_cmpxchg)
+	return arch_atomicuintptr_try_cmpxchg(v, old, new);
+#else
+	uintptr_t r, o = *old;
+	r = raw_atomicuintptr_cmpxchg_relaxed(v, o, new);
+	if (unlikely(r != o))
+		*old = r;
+	return likely(r == o);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_sub_and_test() - atomic subtract and test if zero with full ordering
+ * @i: uintptr_t value to subtract
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v - @i) with full ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_sub_and_test() elsewhere.
+ *
+ * Return: @true if the resulting value of @v is zero, @false otherwise.
+ */
+static __always_inline bool
+raw_atomicuintptr_sub_and_test(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_sub_and_test)
+	return arch_atomicuintptr_sub_and_test(i, v);
+#else
+	return raw_atomicuintptr_sub_return(i, v) == 0;
+#endif
+}
+
+/**
+ * raw_atomicuintptr_dec_and_test() - atomic decrement and test if zero with full ordering
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v - 1) with full ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_dec_and_test() elsewhere.
+ *
+ * Return: @true if the resulting value of @v is zero, @false otherwise.
+ */
+static __always_inline bool
+raw_atomicuintptr_dec_and_test(atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_dec_and_test)
+	return arch_atomicuintptr_dec_and_test(v);
+#else
+	return raw_atomicuintptr_dec_return(v) == 0;
+#endif
+}
+
+/**
+ * raw_atomicuintptr_inc_and_test() - atomic increment and test if zero with full ordering
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v + 1) with full ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_inc_and_test() elsewhere.
+ *
+ * Return: @true if the resulting value of @v is zero, @false otherwise.
+ */
+static __always_inline bool
+raw_atomicuintptr_inc_and_test(atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_inc_and_test)
+	return arch_atomicuintptr_inc_and_test(v);
+#else
+	return raw_atomicuintptr_inc_return(v) == 0;
+#endif
+}
+
+/**
+ * raw_atomicuintptr_add_negative() - atomic add and test if negative with full ordering
+ * @i: uintptr_t value to add
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v + @i) with full ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_add_negative() elsewhere.
+ *
+ * Return: @true if the resulting value of @v is negative, @false otherwise.
+ */
+static __always_inline bool
+raw_atomicuintptr_add_negative(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_add_negative)
+	return arch_atomicuintptr_add_negative(i, v);
+#elif defined(arch_atomicuintptr_add_negative_relaxed)
+	bool ret;
+	__atomic_pre_full_fence();
+	ret = arch_atomicuintptr_add_negative_relaxed(i, v);
+	__atomic_post_full_fence();
+	return ret;
+#else
+	return raw_atomicuintptr_add_return(i, v) < 0;
+#endif
+}
+
+/**
+ * raw_atomicuintptr_add_negative_acquire() - atomic add and test if negative with acquire ordering
+ * @i: uintptr_t value to add
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v + @i) with acquire ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_add_negative_acquire() elsewhere.
+ *
+ * Return: @true if the resulting value of @v is negative, @false otherwise.
+ */
+static __always_inline bool
+raw_atomicuintptr_add_negative_acquire(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_add_negative_acquire)
+	return arch_atomicuintptr_add_negative_acquire(i, v);
+#elif defined(arch_atomicuintptr_add_negative_relaxed)
+	bool ret = arch_atomicuintptr_add_negative_relaxed(i, v);
+	__atomic_acquire_fence();
+	return ret;
+#elif defined(arch_atomicuintptr_add_negative)
+	return arch_atomicuintptr_add_negative(i, v);
+#else
+	return raw_atomicuintptr_add_return_acquire(i, v) < 0;
+#endif
+}
+
+/**
+ * raw_atomicuintptr_add_negative_release() - atomic add and test if negative with release ordering
+ * @i: uintptr_t value to add
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v + @i) with release ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_add_negative_release() elsewhere.
+ *
+ * Return: @true if the resulting value of @v is negative, @false otherwise.
+ */
+static __always_inline bool
+raw_atomicuintptr_add_negative_release(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_add_negative_release)
+	return arch_atomicuintptr_add_negative_release(i, v);
+#elif defined(arch_atomicuintptr_add_negative_relaxed)
+	__atomic_release_fence();
+	return arch_atomicuintptr_add_negative_relaxed(i, v);
+#elif defined(arch_atomicuintptr_add_negative)
+	return arch_atomicuintptr_add_negative(i, v);
+#else
+	return raw_atomicuintptr_add_return_release(i, v) < 0;
+#endif
+}
+
+/**
+ * raw_atomicuintptr_add_negative_relaxed() - atomic add and test if negative with relaxed ordering
+ * @i: uintptr_t value to add
+ * @v: pointer to atomicuintptr_t
+ *
+ * Atomically updates @v to (@v + @i) with relaxed ordering.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_add_negative_relaxed() elsewhere.
+ *
+ * Return: @true if the resulting value of @v is negative, @false otherwise.
+ */
+static __always_inline bool
+raw_atomicuintptr_add_negative_relaxed(uintptr_t i, atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_add_negative_relaxed)
+	return arch_atomicuintptr_add_negative_relaxed(i, v);
+#elif defined(arch_atomicuintptr_add_negative)
+	return arch_atomicuintptr_add_negative(i, v);
+#else
+	return raw_atomicuintptr_add_return_relaxed(i, v) < 0;
+#endif
+}
+
+/**
+ * raw_atomicuintptr_fetch_add_unless() - atomic add unless value with full ordering
+ * @v: pointer to atomicuintptr_t
+ * @a: uintptr_t value to add
+ * @u: uintptr_t value to compare with
+ *
+ * If (@v != @u), atomically updates @v to (@v + @a) with full ordering.
+ * Otherwise, @v is not modified and relaxed ordering is provided.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_fetch_add_unless() elsewhere.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_fetch_add_unless(atomicuintptr_t *v, uintptr_t a, uintptr_t u)
+{
+#if defined(arch_atomicuintptr_fetch_add_unless)
+	return arch_atomicuintptr_fetch_add_unless(v, a, u);
+#else
+	uintptr_t c = raw_atomicuintptr_read(v);
+
+	do {
+		if (unlikely(c == u))
+			break;
+	} while (!raw_atomicuintptr_try_cmpxchg(v, &c, c + a));
+
+	return c;
+#endif
+}
+
+/**
+ * raw_atomicuintptr_add_unless() - atomic add unless value with full ordering
+ * @v: pointer to atomicuintptr_t
+ * @a: uintptr_t value to add
+ * @u: uintptr_t value to compare with
+ *
+ * If (@v != @u), atomically updates @v to (@v + @a) with full ordering.
+ * Otherwise, @v is not modified and relaxed ordering is provided.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_add_unless() elsewhere.
+ *
+ * Return: @true if @v was updated, @false otherwise.
+ */
+static __always_inline bool
+raw_atomicuintptr_add_unless(atomicuintptr_t *v, uintptr_t a, uintptr_t u)
+{
+#if defined(arch_atomicuintptr_add_unless)
+	return arch_atomicuintptr_add_unless(v, a, u);
+#else
+	return raw_atomicuintptr_fetch_add_unless(v, a, u) != u;
+#endif
+}
+
+/**
+ * raw_atomicuintptr_inc_not_zero() - atomic increment unless zero with full ordering
+ * @v: pointer to atomicuintptr_t
+ *
+ * If (@v != 0), atomically updates @v to (@v + 1) with full ordering.
+ * Otherwise, @v is not modified and relaxed ordering is provided.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_inc_not_zero() elsewhere.
+ *
+ * Return: @true if @v was updated, @false otherwise.
+ */
+static __always_inline bool
+raw_atomicuintptr_inc_not_zero(atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_inc_not_zero)
+	return arch_atomicuintptr_inc_not_zero(v);
+#else
+	return raw_atomicuintptr_add_unless(v, 1, 0);
+#endif
+}
+
+/**
+ * raw_atomicuintptr_inc_unless_negative() - atomic increment unless negative with full ordering
+ * @v: pointer to atomicuintptr_t
+ *
+ * If (@v >= 0), atomically updates @v to (@v + 1) with full ordering.
+ * Otherwise, @v is not modified and relaxed ordering is provided.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_inc_unless_negative() elsewhere.
+ *
+ * Return: @true if @v was updated, @false otherwise.
+ */
+static __always_inline bool
+raw_atomicuintptr_inc_unless_negative(atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_inc_unless_negative)
+	return arch_atomicuintptr_inc_unless_negative(v);
+#else
+	uintptr_t c = raw_atomicuintptr_read(v);
+
+	do {
+		if (unlikely(c < 0))
+			return false;
+	} while (!raw_atomicuintptr_try_cmpxchg(v, &c, c + 1));
+
+	return true;
+#endif
+}
+
+/**
+ * raw_atomicuintptr_dec_unless_positive() - atomic decrement unless positive with full ordering
+ * @v: pointer to atomicuintptr_t
+ *
+ * If (@v <= 0), atomically updates @v to (@v - 1) with full ordering.
+ * Otherwise, @v is not modified and relaxed ordering is provided.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_dec_unless_positive() elsewhere.
+ *
+ * Return: @true if @v was updated, @false otherwise.
+ */
+static __always_inline bool
+raw_atomicuintptr_dec_unless_positive(atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_dec_unless_positive)
+	return arch_atomicuintptr_dec_unless_positive(v);
+#else
+	uintptr_t c = raw_atomicuintptr_read(v);
+
+	do {
+		if (unlikely(c > 0))
+			return false;
+	} while (!raw_atomicuintptr_try_cmpxchg(v, &c, c - 1));
+
+	return true;
+#endif
+}
+
+/**
+ * raw_atomicuintptr_dec_if_positive() - atomic decrement if positive with full ordering
+ * @v: pointer to atomicuintptr_t
+ *
+ * If (@v > 0), atomically updates @v to (@v - 1) with full ordering.
+ * Otherwise, @v is not modified and relaxed ordering is provided.
+ *
+ * Safe to use in noinstr code; prefer atomicuintptr_dec_if_positive() elsewhere.
+ *
+ * Return: The old value of (@v - 1), regardless of whether @v was updated.
+ */
+static __always_inline uintptr_t
+raw_atomicuintptr_dec_if_positive(atomicuintptr_t *v)
+{
+#if defined(arch_atomicuintptr_dec_if_positive)
+	return arch_atomicuintptr_dec_if_positive(v);
+#else
+	uintptr_t dec, c = raw_atomicuintptr_read(v);
+
+	do {
+		dec = c - 1;
+		if (unlikely(dec < 0))
+			break;
+	} while (!raw_atomicuintptr_try_cmpxchg(v, &c, dec));
+
+	return dec;
+#endif
+}
+
+#endif /* CONFIG_CHERI_KERNEL */
 #endif /* _LINUX_ATOMIC_FALLBACK_H */
-// 206314f82b8b73a5c3aa69cf7f35ac9e7b5d6b58
+// 9e91cb30f2327a9278ca88c862a734e1341b3869

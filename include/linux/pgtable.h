@@ -45,13 +45,13 @@
  * because in such cases PTRS_PER_PxD equals 1.
  */
 
-static inline unsigned long pte_index(unsigned long address)
+static inline unsigned long pte_index(__ptraddr_t address)
 {
 	return (address >> PAGE_SHIFT) & (PTRS_PER_PTE - 1);
 }
 
 #ifndef pmd_index
-static inline unsigned long pmd_index(unsigned long address)
+static inline unsigned long pmd_index(__ptraddr_t address)
 {
 	return (address >> PMD_SHIFT) & (PTRS_PER_PMD - 1);
 }
@@ -59,7 +59,7 @@ static inline unsigned long pmd_index(unsigned long address)
 #endif
 
 #ifndef pud_index
-static inline unsigned long pud_index(unsigned long address)
+static inline unsigned long pud_index(__ptraddr_t address)
 {
 	return (address >> PUD_SHIFT) & (PTRS_PER_PUD - 1);
 }
@@ -93,7 +93,7 @@ static inline void pud_init(void *addr)
 #endif
 
 #ifndef pte_offset_kernel
-static inline pte_t *pte_offset_kernel(pmd_t *pmd, unsigned long address)
+static inline pte_t *pte_offset_kernel(pmd_t *pmd, __ptraddr_t address)
 {
 	return (pte_t *)pmd_page_vaddr(*pmd) + pte_index(address);
 }
@@ -108,7 +108,7 @@ static inline pte_t *pte_offset_kernel(pmd_t *pmd, unsigned long address)
 	rcu_read_unlock();	\
 } while (0)
 #else
-static inline pte_t *__pte_map(pmd_t *pmd, unsigned long address)
+static inline pte_t *__pte_map(pmd_t *pmd, __ptraddr_t address)
 {
 	return pte_offset_kernel(pmd, address);
 }
@@ -122,7 +122,7 @@ void pte_free_defer(struct mm_struct *mm, pgtable_t pgtable);
 
 /* Find an entry in the second-level page table.. */
 #ifndef pmd_offset
-static inline pmd_t *pmd_offset(pud_t *pud, unsigned long address)
+static inline pmd_t *pmd_offset(pud_t *pud, __ptraddr_t address)
 {
 	return pud_pgtable(*pud) + pmd_index(address);
 }
@@ -130,14 +130,14 @@ static inline pmd_t *pmd_offset(pud_t *pud, unsigned long address)
 #endif
 
 #ifndef pud_offset
-static inline pud_t *pud_offset(p4d_t *p4d, unsigned long address)
+static inline pud_t *pud_offset(p4d_t *p4d, __ptraddr_t address)
 {
 	return p4d_pgtable(*p4d) + pud_index(address);
 }
 #define pud_offset pud_offset
 #endif
 
-static inline pgd_t *pgd_offset_pgd(pgd_t *pgd, unsigned long address)
+static inline pgd_t *pgd_offset_pgd(pgd_t *pgd, __ptraddr_t address)
 {
 	return (pgd + pgd_index(address));
 };
@@ -425,28 +425,28 @@ static inline void set_ptes(struct mm_struct *mm, unsigned long addr,
 
 #ifndef __HAVE_ARCH_PTEP_SET_ACCESS_FLAGS
 extern int ptep_set_access_flags(struct vm_area_struct *vma,
-				 unsigned long address, pte_t *ptep,
+				 __ptraddr_t address, pte_t *ptep,
 				 pte_t entry, int dirty);
 #endif
 
 #ifndef __HAVE_ARCH_PMDP_SET_ACCESS_FLAGS
 #ifdef CONFIG_TRANSPARENT_HUGEPAGE
 extern int pmdp_set_access_flags(struct vm_area_struct *vma,
-				 unsigned long address, pmd_t *pmdp,
+				 __ptraddr_t address, pmd_t *pmdp,
 				 pmd_t entry, int dirty);
 extern int pudp_set_access_flags(struct vm_area_struct *vma,
-				 unsigned long address, pud_t *pudp,
+				 __ptraddr_t address, pud_t *pudp,
 				 pud_t entry, int dirty);
 #else
 static inline int pmdp_set_access_flags(struct vm_area_struct *vma,
-					unsigned long address, pmd_t *pmdp,
+					__ptraddr_t address, pmd_t *pmdp,
 					pmd_t entry, int dirty)
 {
 	BUILD_BUG();
 	return 0;
 }
 static inline int pudp_set_access_flags(struct vm_area_struct *vma,
-					unsigned long address, pud_t *pudp,
+					__ptraddr_t address, pud_t *pudp,
 					pud_t entry, int dirty)
 {
 	BUILD_BUG();
@@ -492,7 +492,7 @@ static inline pgd_t pgdp_get(pgd_t *pgdp)
 
 #ifndef __HAVE_ARCH_PTEP_TEST_AND_CLEAR_YOUNG
 static inline int ptep_test_and_clear_young(struct vm_area_struct *vma,
-					    unsigned long address,
+					    __ptraddr_t address,
 					    pte_t *ptep)
 {
 	pte_t pte = ptep_get(ptep);
@@ -508,7 +508,7 @@ static inline int ptep_test_and_clear_young(struct vm_area_struct *vma,
 #ifndef __HAVE_ARCH_PMDP_TEST_AND_CLEAR_YOUNG
 #if defined(CONFIG_TRANSPARENT_HUGEPAGE) || defined(CONFIG_ARCH_HAS_NONLEAF_PMD_YOUNG)
 static inline int pmdp_test_and_clear_young(struct vm_area_struct *vma,
-					    unsigned long address,
+					    __ptraddr_t address,
 					    pmd_t *pmdp)
 {
 	pmd_t pmd = *pmdp;
@@ -521,7 +521,7 @@ static inline int pmdp_test_and_clear_young(struct vm_area_struct *vma,
 }
 #else
 static inline int pmdp_test_and_clear_young(struct vm_area_struct *vma,
-					    unsigned long address,
+					    __ptraddr_t address,
 					    pmd_t *pmdp)
 {
 	BUILD_BUG();
@@ -532,20 +532,20 @@ static inline int pmdp_test_and_clear_young(struct vm_area_struct *vma,
 
 #ifndef __HAVE_ARCH_PTEP_CLEAR_YOUNG_FLUSH
 int ptep_clear_flush_young(struct vm_area_struct *vma,
-			   unsigned long address, pte_t *ptep);
+			   __ptraddr_t address, pte_t *ptep);
 #endif
 
 #ifndef __HAVE_ARCH_PMDP_CLEAR_YOUNG_FLUSH
 #ifdef CONFIG_TRANSPARENT_HUGEPAGE
 extern int pmdp_clear_flush_young(struct vm_area_struct *vma,
-				  unsigned long address, pmd_t *pmdp);
+				  __ptraddr_t address, pmd_t *pmdp);
 #else
 /*
  * Despite relevant to THP only, this API is called from generic rmap code
  * under PageTransHuge(), hence needs a dummy implementation for !THP
  */
 static inline int pmdp_clear_flush_young(struct vm_area_struct *vma,
-					 unsigned long address, pmd_t *pmdp)
+					 __ptraddr_t address, pmd_t *pmdp)
 {
 	BUILD_BUG();
 	return 0;
@@ -610,7 +610,7 @@ static inline void arch_check_zapped_pud(struct vm_area_struct *vma, pud_t pud)
 
 #ifndef __HAVE_ARCH_PTEP_GET_AND_CLEAR
 static inline pte_t ptep_get_and_clear(struct mm_struct *mm,
-				       unsigned long address,
+				       __ptraddr_t address,
 				       pte_t *ptep)
 {
 	pte_t pte = ptep_get(ptep);
@@ -763,7 +763,7 @@ static inline void pmdp_get_lockless_sync(void)
 #ifdef CONFIG_TRANSPARENT_HUGEPAGE
 #ifndef __HAVE_ARCH_PMDP_HUGE_GET_AND_CLEAR
 static inline pmd_t pmdp_huge_get_and_clear(struct mm_struct *mm,
-					    unsigned long address,
+					    __ptraddr_t address,
 					    pmd_t *pmdp)
 {
 	pmd_t pmd = *pmdp;
@@ -776,7 +776,7 @@ static inline pmd_t pmdp_huge_get_and_clear(struct mm_struct *mm,
 #endif /* __HAVE_ARCH_PMDP_HUGE_GET_AND_CLEAR */
 #ifndef __HAVE_ARCH_PUDP_HUGE_GET_AND_CLEAR
 static inline pud_t pudp_huge_get_and_clear(struct mm_struct *mm,
-					    unsigned long address,
+					    __ptraddr_t address,
 					    pud_t *pudp)
 {
 	pud_t pud = *pudp;
@@ -792,7 +792,7 @@ static inline pud_t pudp_huge_get_and_clear(struct mm_struct *mm,
 #ifdef CONFIG_TRANSPARENT_HUGEPAGE
 #ifndef __HAVE_ARCH_PMDP_HUGE_GET_AND_CLEAR_FULL
 static inline pmd_t pmdp_huge_get_and_clear_full(struct vm_area_struct *vma,
-					    unsigned long address, pmd_t *pmdp,
+					    __ptraddr_t address, pmd_t *pmdp,
 					    int full)
 {
 	return pmdp_huge_get_and_clear(vma->vm_mm, address, pmdp);
@@ -801,7 +801,7 @@ static inline pmd_t pmdp_huge_get_and_clear_full(struct vm_area_struct *vma,
 
 #ifndef __HAVE_ARCH_PUDP_HUGE_GET_AND_CLEAR_FULL
 static inline pud_t pudp_huge_get_and_clear_full(struct vm_area_struct *vma,
-					    unsigned long address, pud_t *pudp,
+					    __ptraddr_t address, pud_t *pudp,
 					    int full)
 {
 	return pudp_huge_get_and_clear(vma->vm_mm, address, pudp);
@@ -811,7 +811,7 @@ static inline pud_t pudp_huge_get_and_clear_full(struct vm_area_struct *vma,
 
 #ifndef __HAVE_ARCH_PTEP_GET_AND_CLEAR_FULL
 static inline pte_t ptep_get_and_clear_full(struct mm_struct *mm,
-					    unsigned long address, pte_t *ptep,
+					    __ptraddr_t address, pte_t *ptep,
 					    int full)
 {
 	return ptep_get_and_clear(mm, address, ptep);
@@ -944,13 +944,13 @@ static inline void clear_ptes(struct mm_struct *mm, unsigned long addr,
  */
 #ifndef update_mmu_tlb_range
 static inline void update_mmu_tlb_range(struct vm_area_struct *vma,
-				unsigned long address, pte_t *ptep, unsigned int nr)
+				__ptraddr_t address, pte_t *ptep, unsigned int nr)
 {
 }
 #endif
 
 static inline void update_mmu_tlb(struct vm_area_struct *vma,
-				unsigned long address, pte_t *ptep)
+				__ptraddr_t address, pte_t *ptep)
 {
 	update_mmu_tlb_range(vma, address, ptep, 1);
 }
@@ -962,7 +962,7 @@ static inline void update_mmu_tlb(struct vm_area_struct *vma,
  */
 #ifndef __HAVE_ARCH_PTE_CLEAR_NOT_PRESENT_FULL
 static inline void pte_clear_not_present_full(struct mm_struct *mm,
-					      unsigned long address,
+					      __ptraddr_t address,
 					      pte_t *ptep,
 					      int full)
 {
@@ -1001,16 +1001,16 @@ static inline void clear_not_present_full_ptes(struct mm_struct *mm,
 
 #ifndef __HAVE_ARCH_PTEP_CLEAR_FLUSH
 extern pte_t ptep_clear_flush(struct vm_area_struct *vma,
-			      unsigned long address,
+			      __ptraddr_t address,
 			      pte_t *ptep);
 #endif
 
 #ifndef __HAVE_ARCH_PMDP_HUGE_CLEAR_FLUSH
 extern pmd_t pmdp_huge_clear_flush(struct vm_area_struct *vma,
-			      unsigned long address,
+			      __ptraddr_t address,
 			      pmd_t *pmdp);
 extern pud_t pudp_huge_clear_flush(struct vm_area_struct *vma,
-			      unsigned long address,
+			      __ptraddr_t address,
 			      pud_t *pudp);
 #endif
 
@@ -1030,7 +1030,7 @@ static inline pmd_t pmd_mkwrite(pmd_t pmd, struct vm_area_struct *vma)
 
 #ifndef __HAVE_ARCH_PTEP_SET_WRPROTECT
 struct mm_struct;
-static inline void ptep_set_wrprotect(struct mm_struct *mm, unsigned long address, pte_t *ptep)
+static inline void ptep_set_wrprotect(struct mm_struct *mm, __ptraddr_t address, pte_t *ptep)
 {
 	pte_t old_pte = ptep_get(ptep);
 	set_pte_at(mm, address, ptep, pte_wrprotect(old_pte));
@@ -1122,14 +1122,14 @@ static inline pte_t pte_sw_mkyoung(pte_t pte)
 #ifndef __HAVE_ARCH_PMDP_SET_WRPROTECT
 #ifdef CONFIG_TRANSPARENT_HUGEPAGE
 static inline void pmdp_set_wrprotect(struct mm_struct *mm,
-				      unsigned long address, pmd_t *pmdp)
+				      __ptraddr_t address, pmd_t *pmdp)
 {
 	pmd_t old_pmd = *pmdp;
 	set_pmd_at(mm, address, pmdp, pmd_wrprotect(old_pmd));
 }
 #else
 static inline void pmdp_set_wrprotect(struct mm_struct *mm,
-				      unsigned long address, pmd_t *pmdp)
+				      __ptraddr_t address, pmd_t *pmdp)
 {
 	BUILD_BUG();
 }
@@ -1139,7 +1139,7 @@ static inline void pmdp_set_wrprotect(struct mm_struct *mm,
 #ifdef CONFIG_HAVE_ARCH_TRANSPARENT_HUGEPAGE_PUD
 #ifdef CONFIG_TRANSPARENT_HUGEPAGE
 static inline void pudp_set_wrprotect(struct mm_struct *mm,
-				      unsigned long address, pud_t *pudp)
+				      __ptraddr_t address, pud_t *pudp)
 {
 	pud_t old_pud = *pudp;
 
@@ -1147,7 +1147,7 @@ static inline void pudp_set_wrprotect(struct mm_struct *mm,
 }
 #else
 static inline void pudp_set_wrprotect(struct mm_struct *mm,
-				      unsigned long address, pud_t *pudp)
+				      __ptraddr_t address, pud_t *pudp)
 {
 	BUILD_BUG();
 }
@@ -1158,10 +1158,10 @@ static inline void pudp_set_wrprotect(struct mm_struct *mm,
 #ifndef pmdp_collapse_flush
 #ifdef CONFIG_TRANSPARENT_HUGEPAGE
 extern pmd_t pmdp_collapse_flush(struct vm_area_struct *vma,
-				 unsigned long address, pmd_t *pmdp);
+				 __ptraddr_t address, pmd_t *pmdp);
 #else
 static inline pmd_t pmdp_collapse_flush(struct vm_area_struct *vma,
-					unsigned long address,
+					__ptraddr_t address,
 					pmd_t *pmdp)
 {
 	BUILD_BUG();
@@ -1191,7 +1191,7 @@ extern pgtable_t pgtable_trans_huge_withdraw(struct mm_struct *mm, pmd_t *pmdp);
  * can't race with CPU which sets these bits and non-atomic approach is fine.
  */
 static inline pmd_t generic_pmdp_establish(struct vm_area_struct *vma,
-		unsigned long address, pmd_t *pmdp, pmd_t pmd)
+		__ptraddr_t address, pmd_t *pmdp, pmd_t pmd)
 {
 	pmd_t old_pmd = *pmdp;
 	set_pmd_at(vma->vm_mm, address, pmdp, pmd);
@@ -1200,7 +1200,7 @@ static inline pmd_t generic_pmdp_establish(struct vm_area_struct *vma,
 #endif
 
 #ifndef __HAVE_ARCH_PMDP_INVALIDATE
-extern pmd_t pmdp_invalidate(struct vm_area_struct *vma, unsigned long address,
+extern pmd_t pmdp_invalidate(struct vm_area_struct *vma, __ptraddr_t address,
 			    pmd_t *pmdp);
 #endif
 
@@ -1221,7 +1221,7 @@ extern pmd_t pmdp_invalidate(struct vm_area_struct *vma, unsigned long address,
  * needed.
  */
 extern pmd_t pmdp_invalidate_ad(struct vm_area_struct *vma,
-				unsigned long address, pmd_t *pmdp);
+				__ptraddr_t address, pmd_t *pmdp);
 #endif
 
 #ifndef __HAVE_ARCH_PTE_SAME

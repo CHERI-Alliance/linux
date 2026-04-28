@@ -4750,6 +4750,1584 @@ atomic_long_dec_if_positive(atomic_long_t *v)
 	return raw_atomic_long_dec_if_positive(v);
 }
 
+/**
+ * atomic_ptr_read() - atomic load with relaxed ordering
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically loads the value of @v with relaxed ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_read() there.
+ *
+ * Return: The value loaded from @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_read(const atomic_ptr_t *v)
+{
+	instrument_atomic_read(v, sizeof(*v));
+	return raw_atomic_ptr_read(v);
+}
+
+/**
+ * atomic_ptr_read_acquire() - atomic load with acquire ordering
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically loads the value of @v with acquire ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_read_acquire() there.
+ *
+ * Return: The value loaded from @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_read_acquire(const atomic_ptr_t *v)
+{
+	instrument_atomic_read(v, sizeof(*v));
+	return raw_atomic_ptr_read_acquire(v);
+}
+
+/**
+ * atomic_ptr_set() - atomic set with relaxed ordering
+ * @v: pointer to atomic_ptr_t
+ * @i: uintptr_t value to assign
+ *
+ * Atomically sets @v to @i with relaxed ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_set() there.
+ *
+ * Return: Nothing.
+ */
+static __always_inline void
+atomic_ptr_set(atomic_ptr_t *v, uintptr_t i)
+{
+	instrument_atomic_write(v, sizeof(*v));
+	raw_atomic_ptr_set(v, i);
+}
+
+/**
+ * atomic_ptr_set_release() - atomic set with release ordering
+ * @v: pointer to atomic_ptr_t
+ * @i: uintptr_t value to assign
+ *
+ * Atomically sets @v to @i with release ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_set_release() there.
+ *
+ * Return: Nothing.
+ */
+static __always_inline void
+atomic_ptr_set_release(atomic_ptr_t *v, uintptr_t i)
+{
+	kcsan_release();
+	instrument_atomic_write(v, sizeof(*v));
+	raw_atomic_ptr_set_release(v, i);
+}
+
+/**
+ * atomic_ptr_add() - atomic add with relaxed ordering
+ * @i: uintptr_t value to add
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v + @i) with relaxed ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_add() there.
+ *
+ * Return: Nothing.
+ */
+static __always_inline void
+atomic_ptr_add(uintptr_t i, atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	raw_atomic_ptr_add(i, v);
+}
+
+/**
+ * atomic_ptr_add_return() - atomic add with full ordering
+ * @i: uintptr_t value to add
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v + @i) with full ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_add_return() there.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_add_return(uintptr_t i, atomic_ptr_t *v)
+{
+	kcsan_mb();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_add_return(i, v);
+}
+
+/**
+ * atomic_ptr_add_return_acquire() - atomic add with acquire ordering
+ * @i: uintptr_t value to add
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v + @i) with acquire ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_add_return_acquire() there.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_add_return_acquire(uintptr_t i, atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_add_return_acquire(i, v);
+}
+
+/**
+ * atomic_ptr_add_return_release() - atomic add with release ordering
+ * @i: uintptr_t value to add
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v + @i) with release ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_add_return_release() there.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_add_return_release(uintptr_t i, atomic_ptr_t *v)
+{
+	kcsan_release();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_add_return_release(i, v);
+}
+
+/**
+ * atomic_ptr_add_return_relaxed() - atomic add with relaxed ordering
+ * @i: uintptr_t value to add
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v + @i) with relaxed ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_add_return_relaxed() there.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_add_return_relaxed(uintptr_t i, atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_add_return_relaxed(i, v);
+}
+
+/**
+ * atomic_ptr_fetch_add() - atomic add with full ordering
+ * @i: uintptr_t value to add
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v + @i) with full ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_add() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_add(uintptr_t i, atomic_ptr_t *v)
+{
+	kcsan_mb();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_add(i, v);
+}
+
+/**
+ * atomic_ptr_fetch_add_acquire() - atomic add with acquire ordering
+ * @i: uintptr_t value to add
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v + @i) with acquire ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_add_acquire() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_add_acquire(uintptr_t i, atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_add_acquire(i, v);
+}
+
+/**
+ * atomic_ptr_fetch_add_release() - atomic add with release ordering
+ * @i: uintptr_t value to add
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v + @i) with release ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_add_release() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_add_release(uintptr_t i, atomic_ptr_t *v)
+{
+	kcsan_release();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_add_release(i, v);
+}
+
+/**
+ * atomic_ptr_fetch_add_relaxed() - atomic add with relaxed ordering
+ * @i: uintptr_t value to add
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v + @i) with relaxed ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_add_relaxed() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_add_relaxed(uintptr_t i, atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_add_relaxed(i, v);
+}
+
+/**
+ * atomic_ptr_sub() - atomic subtract with relaxed ordering
+ * @i: uintptr_t value to subtract
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v - @i) with relaxed ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_sub() there.
+ *
+ * Return: Nothing.
+ */
+static __always_inline void
+atomic_ptr_sub(uintptr_t i, atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	raw_atomic_ptr_sub(i, v);
+}
+
+/**
+ * atomic_ptr_sub_return() - atomic subtract with full ordering
+ * @i: uintptr_t value to subtract
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v - @i) with full ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_sub_return() there.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_sub_return(uintptr_t i, atomic_ptr_t *v)
+{
+	kcsan_mb();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_sub_return(i, v);
+}
+
+/**
+ * atomic_ptr_sub_return_acquire() - atomic subtract with acquire ordering
+ * @i: uintptr_t value to subtract
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v - @i) with acquire ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_sub_return_acquire() there.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_sub_return_acquire(uintptr_t i, atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_sub_return_acquire(i, v);
+}
+
+/**
+ * atomic_ptr_sub_return_release() - atomic subtract with release ordering
+ * @i: uintptr_t value to subtract
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v - @i) with release ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_sub_return_release() there.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_sub_return_release(uintptr_t i, atomic_ptr_t *v)
+{
+	kcsan_release();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_sub_return_release(i, v);
+}
+
+/**
+ * atomic_ptr_sub_return_relaxed() - atomic subtract with relaxed ordering
+ * @i: uintptr_t value to subtract
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v - @i) with relaxed ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_sub_return_relaxed() there.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_sub_return_relaxed(uintptr_t i, atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_sub_return_relaxed(i, v);
+}
+
+/**
+ * atomic_ptr_fetch_sub() - atomic subtract with full ordering
+ * @i: uintptr_t value to subtract
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v - @i) with full ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_sub() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_sub(uintptr_t i, atomic_ptr_t *v)
+{
+	kcsan_mb();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_sub(i, v);
+}
+
+/**
+ * atomic_ptr_fetch_sub_acquire() - atomic subtract with acquire ordering
+ * @i: uintptr_t value to subtract
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v - @i) with acquire ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_sub_acquire() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_sub_acquire(uintptr_t i, atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_sub_acquire(i, v);
+}
+
+/**
+ * atomic_ptr_fetch_sub_release() - atomic subtract with release ordering
+ * @i: uintptr_t value to subtract
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v - @i) with release ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_sub_release() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_sub_release(uintptr_t i, atomic_ptr_t *v)
+{
+	kcsan_release();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_sub_release(i, v);
+}
+
+/**
+ * atomic_ptr_fetch_sub_relaxed() - atomic subtract with relaxed ordering
+ * @i: uintptr_t value to subtract
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v - @i) with relaxed ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_sub_relaxed() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_sub_relaxed(uintptr_t i, atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_sub_relaxed(i, v);
+}
+
+/**
+ * atomic_ptr_inc() - atomic increment with relaxed ordering
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v + 1) with relaxed ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_inc() there.
+ *
+ * Return: Nothing.
+ */
+static __always_inline void
+atomic_ptr_inc(atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	raw_atomic_ptr_inc(v);
+}
+
+/**
+ * atomic_ptr_inc_return() - atomic increment with full ordering
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v + 1) with full ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_inc_return() there.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_inc_return(atomic_ptr_t *v)
+{
+	kcsan_mb();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_inc_return(v);
+}
+
+/**
+ * atomic_ptr_inc_return_acquire() - atomic increment with acquire ordering
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v + 1) with acquire ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_inc_return_acquire() there.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_inc_return_acquire(atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_inc_return_acquire(v);
+}
+
+/**
+ * atomic_ptr_inc_return_release() - atomic increment with release ordering
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v + 1) with release ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_inc_return_release() there.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_inc_return_release(atomic_ptr_t *v)
+{
+	kcsan_release();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_inc_return_release(v);
+}
+
+/**
+ * atomic_ptr_inc_return_relaxed() - atomic increment with relaxed ordering
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v + 1) with relaxed ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_inc_return_relaxed() there.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_inc_return_relaxed(atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_inc_return_relaxed(v);
+}
+
+/**
+ * atomic_ptr_fetch_inc() - atomic increment with full ordering
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v + 1) with full ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_inc() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_inc(atomic_ptr_t *v)
+{
+	kcsan_mb();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_inc(v);
+}
+
+/**
+ * atomic_ptr_fetch_inc_acquire() - atomic increment with acquire ordering
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v + 1) with acquire ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_inc_acquire() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_inc_acquire(atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_inc_acquire(v);
+}
+
+/**
+ * atomic_ptr_fetch_inc_release() - atomic increment with release ordering
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v + 1) with release ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_inc_release() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_inc_release(atomic_ptr_t *v)
+{
+	kcsan_release();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_inc_release(v);
+}
+
+/**
+ * atomic_ptr_fetch_inc_relaxed() - atomic increment with relaxed ordering
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v + 1) with relaxed ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_inc_relaxed() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_inc_relaxed(atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_inc_relaxed(v);
+}
+
+/**
+ * atomic_ptr_dec() - atomic decrement with relaxed ordering
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v - 1) with relaxed ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_dec() there.
+ *
+ * Return: Nothing.
+ */
+static __always_inline void
+atomic_ptr_dec(atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	raw_atomic_ptr_dec(v);
+}
+
+/**
+ * atomic_ptr_dec_return() - atomic decrement with full ordering
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v - 1) with full ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_dec_return() there.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_dec_return(atomic_ptr_t *v)
+{
+	kcsan_mb();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_dec_return(v);
+}
+
+/**
+ * atomic_ptr_dec_return_acquire() - atomic decrement with acquire ordering
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v - 1) with acquire ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_dec_return_acquire() there.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_dec_return_acquire(atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_dec_return_acquire(v);
+}
+
+/**
+ * atomic_ptr_dec_return_release() - atomic decrement with release ordering
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v - 1) with release ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_dec_return_release() there.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_dec_return_release(atomic_ptr_t *v)
+{
+	kcsan_release();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_dec_return_release(v);
+}
+
+/**
+ * atomic_ptr_dec_return_relaxed() - atomic decrement with relaxed ordering
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v - 1) with relaxed ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_dec_return_relaxed() there.
+ *
+ * Return: The updated value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_dec_return_relaxed(atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_dec_return_relaxed(v);
+}
+
+/**
+ * atomic_ptr_fetch_dec() - atomic decrement with full ordering
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v - 1) with full ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_dec() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_dec(atomic_ptr_t *v)
+{
+	kcsan_mb();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_dec(v);
+}
+
+/**
+ * atomic_ptr_fetch_dec_acquire() - atomic decrement with acquire ordering
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v - 1) with acquire ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_dec_acquire() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_dec_acquire(atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_dec_acquire(v);
+}
+
+/**
+ * atomic_ptr_fetch_dec_release() - atomic decrement with release ordering
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v - 1) with release ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_dec_release() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_dec_release(atomic_ptr_t *v)
+{
+	kcsan_release();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_dec_release(v);
+}
+
+/**
+ * atomic_ptr_fetch_dec_relaxed() - atomic decrement with relaxed ordering
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v - 1) with relaxed ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_dec_relaxed() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_dec_relaxed(atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_dec_relaxed(v);
+}
+
+/**
+ * atomic_ptr_and() - atomic bitwise AND with relaxed ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v & @i) with relaxed ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_and() there.
+ *
+ * Return: Nothing.
+ */
+static __always_inline void
+atomic_ptr_and(uintptr_t i, atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	raw_atomic_ptr_and(i, v);
+}
+
+/**
+ * atomic_ptr_fetch_and() - atomic bitwise AND with full ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v & @i) with full ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_and() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_and(uintptr_t i, atomic_ptr_t *v)
+{
+	kcsan_mb();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_and(i, v);
+}
+
+/**
+ * atomic_ptr_fetch_and_acquire() - atomic bitwise AND with acquire ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v & @i) with acquire ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_and_acquire() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_and_acquire(uintptr_t i, atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_and_acquire(i, v);
+}
+
+/**
+ * atomic_ptr_fetch_and_release() - atomic bitwise AND with release ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v & @i) with release ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_and_release() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_and_release(uintptr_t i, atomic_ptr_t *v)
+{
+	kcsan_release();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_and_release(i, v);
+}
+
+/**
+ * atomic_ptr_fetch_and_relaxed() - atomic bitwise AND with relaxed ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v & @i) with relaxed ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_and_relaxed() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_and_relaxed(uintptr_t i, atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_and_relaxed(i, v);
+}
+
+/**
+ * atomic_ptr_andnot() - atomic bitwise AND NOT with relaxed ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v & ~@i) with relaxed ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_andnot() there.
+ *
+ * Return: Nothing.
+ */
+static __always_inline void
+atomic_ptr_andnot(uintptr_t i, atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	raw_atomic_ptr_andnot(i, v);
+}
+
+/**
+ * atomic_ptr_fetch_andnot() - atomic bitwise AND NOT with full ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v & ~@i) with full ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_andnot() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_andnot(uintptr_t i, atomic_ptr_t *v)
+{
+	kcsan_mb();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_andnot(i, v);
+}
+
+/**
+ * atomic_ptr_fetch_andnot_acquire() - atomic bitwise AND NOT with acquire ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v & ~@i) with acquire ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_andnot_acquire() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_andnot_acquire(uintptr_t i, atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_andnot_acquire(i, v);
+}
+
+/**
+ * atomic_ptr_fetch_andnot_release() - atomic bitwise AND NOT with release ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v & ~@i) with release ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_andnot_release() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_andnot_release(uintptr_t i, atomic_ptr_t *v)
+{
+	kcsan_release();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_andnot_release(i, v);
+}
+
+/**
+ * atomic_ptr_fetch_andnot_relaxed() - atomic bitwise AND NOT with relaxed ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v & ~@i) with relaxed ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_andnot_relaxed() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_andnot_relaxed(uintptr_t i, atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_andnot_relaxed(i, v);
+}
+
+/**
+ * atomic_ptr_or() - atomic bitwise OR with relaxed ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v | @i) with relaxed ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_or() there.
+ *
+ * Return: Nothing.
+ */
+static __always_inline void
+atomic_ptr_or(uintptr_t i, atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	raw_atomic_ptr_or(i, v);
+}
+
+/**
+ * atomic_ptr_fetch_or() - atomic bitwise OR with full ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v | @i) with full ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_or() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_or(uintptr_t i, atomic_ptr_t *v)
+{
+	kcsan_mb();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_or(i, v);
+}
+
+/**
+ * atomic_ptr_fetch_or_acquire() - atomic bitwise OR with acquire ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v | @i) with acquire ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_or_acquire() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_or_acquire(uintptr_t i, atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_or_acquire(i, v);
+}
+
+/**
+ * atomic_ptr_fetch_or_release() - atomic bitwise OR with release ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v | @i) with release ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_or_release() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_or_release(uintptr_t i, atomic_ptr_t *v)
+{
+	kcsan_release();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_or_release(i, v);
+}
+
+/**
+ * atomic_ptr_fetch_or_relaxed() - atomic bitwise OR with relaxed ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v | @i) with relaxed ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_or_relaxed() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_or_relaxed(uintptr_t i, atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_or_relaxed(i, v);
+}
+
+/**
+ * atomic_ptr_xor() - atomic bitwise XOR with relaxed ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v ^ @i) with relaxed ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_xor() there.
+ *
+ * Return: Nothing.
+ */
+static __always_inline void
+atomic_ptr_xor(uintptr_t i, atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	raw_atomic_ptr_xor(i, v);
+}
+
+/**
+ * atomic_ptr_fetch_xor() - atomic bitwise XOR with full ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v ^ @i) with full ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_xor() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_xor(uintptr_t i, atomic_ptr_t *v)
+{
+	kcsan_mb();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_xor(i, v);
+}
+
+/**
+ * atomic_ptr_fetch_xor_acquire() - atomic bitwise XOR with acquire ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v ^ @i) with acquire ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_xor_acquire() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_xor_acquire(uintptr_t i, atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_xor_acquire(i, v);
+}
+
+/**
+ * atomic_ptr_fetch_xor_release() - atomic bitwise XOR with release ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v ^ @i) with release ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_xor_release() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_xor_release(uintptr_t i, atomic_ptr_t *v)
+{
+	kcsan_release();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_xor_release(i, v);
+}
+
+/**
+ * atomic_ptr_fetch_xor_relaxed() - atomic bitwise XOR with relaxed ordering
+ * @i: uintptr_t value
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v ^ @i) with relaxed ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_xor_relaxed() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_xor_relaxed(uintptr_t i, atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_xor_relaxed(i, v);
+}
+
+/**
+ * atomic_ptr_xchg() - atomic exchange with full ordering
+ * @v: pointer to atomic_ptr_t
+ * @new: uintptr_t value to assign
+ *
+ * Atomically updates @v to @new with full ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_xchg() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_xchg(atomic_ptr_t *v, uintptr_t new)
+{
+	kcsan_mb();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_xchg(v, new);
+}
+
+/**
+ * atomic_ptr_xchg_acquire() - atomic exchange with acquire ordering
+ * @v: pointer to atomic_ptr_t
+ * @new: uintptr_t value to assign
+ *
+ * Atomically updates @v to @new with acquire ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_xchg_acquire() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_xchg_acquire(atomic_ptr_t *v, uintptr_t new)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_xchg_acquire(v, new);
+}
+
+/**
+ * atomic_ptr_xchg_release() - atomic exchange with release ordering
+ * @v: pointer to atomic_ptr_t
+ * @new: uintptr_t value to assign
+ *
+ * Atomically updates @v to @new with release ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_xchg_release() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_xchg_release(atomic_ptr_t *v, uintptr_t new)
+{
+	kcsan_release();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_xchg_release(v, new);
+}
+
+/**
+ * atomic_ptr_xchg_relaxed() - atomic exchange with relaxed ordering
+ * @v: pointer to atomic_ptr_t
+ * @new: uintptr_t value to assign
+ *
+ * Atomically updates @v to @new with relaxed ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_xchg_relaxed() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_xchg_relaxed(atomic_ptr_t *v, uintptr_t new)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_xchg_relaxed(v, new);
+}
+
+/**
+ * atomic_ptr_cmpxchg() - atomic compare and exchange with full ordering
+ * @v: pointer to atomic_ptr_t
+ * @old: uintptr_t value to compare with
+ * @new: uintptr_t value to assign
+ *
+ * If (@v == @old), atomically updates @v to @new with full ordering.
+ * Otherwise, @v is not modified and relaxed ordering is provided.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_cmpxchg() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_cmpxchg(atomic_ptr_t *v, uintptr_t old, uintptr_t new)
+{
+	kcsan_mb();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_cmpxchg(v, old, new);
+}
+
+/**
+ * atomic_ptr_cmpxchg_acquire() - atomic compare and exchange with acquire ordering
+ * @v: pointer to atomic_ptr_t
+ * @old: uintptr_t value to compare with
+ * @new: uintptr_t value to assign
+ *
+ * If (@v == @old), atomically updates @v to @new with acquire ordering.
+ * Otherwise, @v is not modified and relaxed ordering is provided.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_cmpxchg_acquire() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_cmpxchg_acquire(atomic_ptr_t *v, uintptr_t old, uintptr_t new)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_cmpxchg_acquire(v, old, new);
+}
+
+/**
+ * atomic_ptr_cmpxchg_release() - atomic compare and exchange with release ordering
+ * @v: pointer to atomic_ptr_t
+ * @old: uintptr_t value to compare with
+ * @new: uintptr_t value to assign
+ *
+ * If (@v == @old), atomically updates @v to @new with release ordering.
+ * Otherwise, @v is not modified and relaxed ordering is provided.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_cmpxchg_release() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_cmpxchg_release(atomic_ptr_t *v, uintptr_t old, uintptr_t new)
+{
+	kcsan_release();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_cmpxchg_release(v, old, new);
+}
+
+/**
+ * atomic_ptr_cmpxchg_relaxed() - atomic compare and exchange with relaxed ordering
+ * @v: pointer to atomic_ptr_t
+ * @old: uintptr_t value to compare with
+ * @new: uintptr_t value to assign
+ *
+ * If (@v == @old), atomically updates @v to @new with relaxed ordering.
+ * Otherwise, @v is not modified and relaxed ordering is provided.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_cmpxchg_relaxed() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_cmpxchg_relaxed(atomic_ptr_t *v, uintptr_t old, uintptr_t new)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_cmpxchg_relaxed(v, old, new);
+}
+
+/**
+ * atomic_ptr_try_cmpxchg() - atomic compare and exchange with full ordering
+ * @v: pointer to atomic_ptr_t
+ * @old: pointer to uintptr_t value to compare with
+ * @new: uintptr_t value to assign
+ *
+ * If (@v == @old), atomically updates @v to @new with full ordering.
+ * Otherwise, @v is not modified, @old is updated to the current value of @v,
+ * and relaxed ordering is provided.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_try_cmpxchg() there.
+ *
+ * Return: @true if the exchange occurred, @false otherwise.
+ */
+static __always_inline bool
+atomic_ptr_try_cmpxchg(atomic_ptr_t *v, uintptr_t *old, uintptr_t new)
+{
+	kcsan_mb();
+	instrument_atomic_read_write(v, sizeof(*v));
+	instrument_read_write(old, sizeof(*old));
+	return raw_atomic_ptr_try_cmpxchg(v, old, new);
+}
+
+/**
+ * atomic_ptr_try_cmpxchg_acquire() - atomic compare and exchange with acquire ordering
+ * @v: pointer to atomic_ptr_t
+ * @old: pointer to uintptr_t value to compare with
+ * @new: uintptr_t value to assign
+ *
+ * If (@v == @old), atomically updates @v to @new with acquire ordering.
+ * Otherwise, @v is not modified, @old is updated to the current value of @v,
+ * and relaxed ordering is provided.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_try_cmpxchg_acquire() there.
+ *
+ * Return: @true if the exchange occurred, @false otherwise.
+ */
+static __always_inline bool
+atomic_ptr_try_cmpxchg_acquire(atomic_ptr_t *v, uintptr_t *old, uintptr_t new)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	instrument_read_write(old, sizeof(*old));
+	return raw_atomic_ptr_try_cmpxchg_acquire(v, old, new);
+}
+
+/**
+ * atomic_ptr_try_cmpxchg_release() - atomic compare and exchange with release ordering
+ * @v: pointer to atomic_ptr_t
+ * @old: pointer to uintptr_t value to compare with
+ * @new: uintptr_t value to assign
+ *
+ * If (@v == @old), atomically updates @v to @new with release ordering.
+ * Otherwise, @v is not modified, @old is updated to the current value of @v,
+ * and relaxed ordering is provided.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_try_cmpxchg_release() there.
+ *
+ * Return: @true if the exchange occurred, @false otherwise.
+ */
+static __always_inline bool
+atomic_ptr_try_cmpxchg_release(atomic_ptr_t *v, uintptr_t *old, uintptr_t new)
+{
+	kcsan_release();
+	instrument_atomic_read_write(v, sizeof(*v));
+	instrument_read_write(old, sizeof(*old));
+	return raw_atomic_ptr_try_cmpxchg_release(v, old, new);
+}
+
+/**
+ * atomic_ptr_try_cmpxchg_relaxed() - atomic compare and exchange with relaxed ordering
+ * @v: pointer to atomic_ptr_t
+ * @old: pointer to uintptr_t value to compare with
+ * @new: uintptr_t value to assign
+ *
+ * If (@v == @old), atomically updates @v to @new with relaxed ordering.
+ * Otherwise, @v is not modified, @old is updated to the current value of @v,
+ * and relaxed ordering is provided.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_try_cmpxchg_relaxed() there.
+ *
+ * Return: @true if the exchange occurred, @false otherwise.
+ */
+static __always_inline bool
+atomic_ptr_try_cmpxchg_relaxed(atomic_ptr_t *v, uintptr_t *old, uintptr_t new)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	instrument_read_write(old, sizeof(*old));
+	return raw_atomic_ptr_try_cmpxchg_relaxed(v, old, new);
+}
+
+/**
+ * atomic_ptr_sub_and_test() - atomic subtract and test if zero with full ordering
+ * @i: uintptr_t value to subtract
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v - @i) with full ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_sub_and_test() there.
+ *
+ * Return: @true if the resulting value of @v is zero, @false otherwise.
+ */
+static __always_inline bool
+atomic_ptr_sub_and_test(uintptr_t i, atomic_ptr_t *v)
+{
+	kcsan_mb();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_sub_and_test(i, v);
+}
+
+/**
+ * atomic_ptr_dec_and_test() - atomic decrement and test if zero with full ordering
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v - 1) with full ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_dec_and_test() there.
+ *
+ * Return: @true if the resulting value of @v is zero, @false otherwise.
+ */
+static __always_inline bool
+atomic_ptr_dec_and_test(atomic_ptr_t *v)
+{
+	kcsan_mb();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_dec_and_test(v);
+}
+
+/**
+ * atomic_ptr_inc_and_test() - atomic increment and test if zero with full ordering
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v + 1) with full ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_inc_and_test() there.
+ *
+ * Return: @true if the resulting value of @v is zero, @false otherwise.
+ */
+static __always_inline bool
+atomic_ptr_inc_and_test(atomic_ptr_t *v)
+{
+	kcsan_mb();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_inc_and_test(v);
+}
+
+/**
+ * atomic_ptr_add_negative() - atomic add and test if negative with full ordering
+ * @i: uintptr_t value to add
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v + @i) with full ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_add_negative() there.
+ *
+ * Return: @true if the resulting value of @v is negative, @false otherwise.
+ */
+static __always_inline bool
+atomic_ptr_add_negative(uintptr_t i, atomic_ptr_t *v)
+{
+	kcsan_mb();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_add_negative(i, v);
+}
+
+/**
+ * atomic_ptr_add_negative_acquire() - atomic add and test if negative with acquire ordering
+ * @i: uintptr_t value to add
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v + @i) with acquire ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_add_negative_acquire() there.
+ *
+ * Return: @true if the resulting value of @v is negative, @false otherwise.
+ */
+static __always_inline bool
+atomic_ptr_add_negative_acquire(uintptr_t i, atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_add_negative_acquire(i, v);
+}
+
+/**
+ * atomic_ptr_add_negative_release() - atomic add and test if negative with release ordering
+ * @i: uintptr_t value to add
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v + @i) with release ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_add_negative_release() there.
+ *
+ * Return: @true if the resulting value of @v is negative, @false otherwise.
+ */
+static __always_inline bool
+atomic_ptr_add_negative_release(uintptr_t i, atomic_ptr_t *v)
+{
+	kcsan_release();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_add_negative_release(i, v);
+}
+
+/**
+ * atomic_ptr_add_negative_relaxed() - atomic add and test if negative with relaxed ordering
+ * @i: uintptr_t value to add
+ * @v: pointer to atomic_ptr_t
+ *
+ * Atomically updates @v to (@v + @i) with relaxed ordering.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_add_negative_relaxed() there.
+ *
+ * Return: @true if the resulting value of @v is negative, @false otherwise.
+ */
+static __always_inline bool
+atomic_ptr_add_negative_relaxed(uintptr_t i, atomic_ptr_t *v)
+{
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_add_negative_relaxed(i, v);
+}
+
+/**
+ * atomic_ptr_fetch_add_unless() - atomic add unless value with full ordering
+ * @v: pointer to atomic_ptr_t
+ * @a: uintptr_t value to add
+ * @u: uintptr_t value to compare with
+ *
+ * If (@v != @u), atomically updates @v to (@v + @a) with full ordering.
+ * Otherwise, @v is not modified and relaxed ordering is provided.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_fetch_add_unless() there.
+ *
+ * Return: The original value of @v.
+ */
+static __always_inline uintptr_t
+atomic_ptr_fetch_add_unless(atomic_ptr_t *v, uintptr_t a, uintptr_t u)
+{
+	kcsan_mb();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_fetch_add_unless(v, a, u);
+}
+
+/**
+ * atomic_ptr_add_unless() - atomic add unless value with full ordering
+ * @v: pointer to atomic_ptr_t
+ * @a: uintptr_t value to add
+ * @u: uintptr_t value to compare with
+ *
+ * If (@v != @u), atomically updates @v to (@v + @a) with full ordering.
+ * Otherwise, @v is not modified and relaxed ordering is provided.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_add_unless() there.
+ *
+ * Return: @true if @v was updated, @false otherwise.
+ */
+static __always_inline bool
+atomic_ptr_add_unless(atomic_ptr_t *v, uintptr_t a, uintptr_t u)
+{
+	kcsan_mb();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_add_unless(v, a, u);
+}
+
+/**
+ * atomic_ptr_inc_not_zero() - atomic increment unless zero with full ordering
+ * @v: pointer to atomic_ptr_t
+ *
+ * If (@v != 0), atomically updates @v to (@v + 1) with full ordering.
+ * Otherwise, @v is not modified and relaxed ordering is provided.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_inc_not_zero() there.
+ *
+ * Return: @true if @v was updated, @false otherwise.
+ */
+static __always_inline bool
+atomic_ptr_inc_not_zero(atomic_ptr_t *v)
+{
+	kcsan_mb();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_inc_not_zero(v);
+}
+
+/**
+ * atomic_ptr_inc_unless_negative() - atomic increment unless negative with full ordering
+ * @v: pointer to atomic_ptr_t
+ *
+ * If (@v >= 0), atomically updates @v to (@v + 1) with full ordering.
+ * Otherwise, @v is not modified and relaxed ordering is provided.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_inc_unless_negative() there.
+ *
+ * Return: @true if @v was updated, @false otherwise.
+ */
+static __always_inline bool
+atomic_ptr_inc_unless_negative(atomic_ptr_t *v)
+{
+	kcsan_mb();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_inc_unless_negative(v);
+}
+
+/**
+ * atomic_ptr_dec_unless_positive() - atomic decrement unless positive with full ordering
+ * @v: pointer to atomic_ptr_t
+ *
+ * If (@v <= 0), atomically updates @v to (@v - 1) with full ordering.
+ * Otherwise, @v is not modified and relaxed ordering is provided.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_dec_unless_positive() there.
+ *
+ * Return: @true if @v was updated, @false otherwise.
+ */
+static __always_inline bool
+atomic_ptr_dec_unless_positive(atomic_ptr_t *v)
+{
+	kcsan_mb();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_dec_unless_positive(v);
+}
+
+/**
+ * atomic_ptr_dec_if_positive() - atomic decrement if positive with full ordering
+ * @v: pointer to atomic_ptr_t
+ *
+ * If (@v > 0), atomically updates @v to (@v - 1) with full ordering.
+ * Otherwise, @v is not modified and relaxed ordering is provided.
+ *
+ * Unsafe to use in noinstr code; use raw_atomic_ptr_dec_if_positive() there.
+ *
+ * Return: The old value of (@v - 1), regardless of whether @v was updated.
+ */
+static __always_inline uintptr_t
+atomic_ptr_dec_if_positive(atomic_ptr_t *v)
+{
+	kcsan_mb();
+	instrument_atomic_read_write(v, sizeof(*v));
+	return raw_atomic_ptr_dec_if_positive(v);
+}
+
 #define xchg(ptr, ...) \
 ({ \
 	typeof(ptr) __ai_ptr = (ptr); \
@@ -5050,4 +6628,4 @@ atomic_long_dec_if_positive(atomic_long_t *v)
 
 
 #endif /* _LINUX_ATOMIC_INSTRUMENTED_H */
-// 9dd948d3012b22c4e75933a5172983f912e46439
+// 2b91c420433828bdb80d240f89cf7810f7ed5eda

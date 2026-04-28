@@ -21,6 +21,15 @@ typedef atomic_t atomic_long_t;
 #define atomic_long_cond_read_relaxed	atomic_cond_read_relaxed
 #endif
 
+#ifndef CONFIG_CHERI_KERNEL
+typedef atomic_long_t atomic_ptr_t;
+#define ATOMIC_PTR_INIT(i)		ATOMIC_LONG_INIT(i)
+#define atomicptr_cond_read_acquire	atomic_long_cond_read_acquire
+#define atomicptr_cond_read_relaxed	atomic_long_cond_read_relaxed
+#else
+typedef atomicuintptr_t atomic_ptr_t;
+#endif
+
 /**
  * raw_atomic_long_read() - atomic load with relaxed ordering
  * @v: pointer to atomic_long_t
@@ -41,6 +50,16 @@ raw_atomic_long_read(const atomic_long_t *v)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_read(const atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_read(v);
+#else
+	return raw_atomicuintptr_read(v);
+#endif
+}
+
 /**
  * raw_atomic_long_read_acquire() - atomic load with acquire ordering
  * @v: pointer to atomic_long_t
@@ -58,6 +77,16 @@ raw_atomic_long_read_acquire(const atomic_long_t *v)
 	return raw_atomic64_read_acquire(v);
 #else
 	return raw_atomic_read_acquire(v);
+#endif
+}
+
+static __always_inline uintptr_t
+raw_atomic_ptr_read_acquire(const atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_read_acquire(v);
+#else
+	return raw_atomicuintptr_read_acquire(v);
 #endif
 }
 
@@ -82,6 +111,16 @@ raw_atomic_long_set(atomic_long_t *v, long i)
 #endif
 }
 
+static __always_inline void
+raw_atomic_ptr_set(atomic_ptr_t *v, uintptr_t i)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	raw_atomic_long_set(v, i);
+#else
+	raw_atomicuintptr_set(v, i);
+#endif
+}
+
 /**
  * raw_atomic_long_set_release() - atomic set with release ordering
  * @v: pointer to atomic_long_t
@@ -100,6 +139,16 @@ raw_atomic_long_set_release(atomic_long_t *v, long i)
 	raw_atomic64_set_release(v, i);
 #else
 	raw_atomic_set_release(v, i);
+#endif
+}
+
+static __always_inline void
+raw_atomic_ptr_set_release(atomic_ptr_t *v, uintptr_t i)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	raw_atomic_long_set_release(v, i);
+#else
+	raw_atomicuintptr_set_release(v, i);
 #endif
 }
 
@@ -124,6 +173,16 @@ raw_atomic_long_add(long i, atomic_long_t *v)
 #endif
 }
 
+static __always_inline void
+raw_atomic_ptr_add(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	raw_atomic_long_add(i, v);
+#else
+	raw_atomicuintptr_add(i, v);
+#endif
+}
+
 /**
  * raw_atomic_long_add_return() - atomic add with full ordering
  * @i: long value to add
@@ -142,6 +201,16 @@ raw_atomic_long_add_return(long i, atomic_long_t *v)
 	return raw_atomic64_add_return(i, v);
 #else
 	return raw_atomic_add_return(i, v);
+#endif
+}
+
+static __always_inline uintptr_t
+raw_atomic_ptr_add_return(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_add_return(i, v);
+#else
+	return raw_atomicuintptr_add_return(i, v);
 #endif
 }
 
@@ -166,6 +235,16 @@ raw_atomic_long_add_return_acquire(long i, atomic_long_t *v)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_add_return_acquire(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_add_return_acquire(i, v);
+#else
+	return raw_atomicuintptr_add_return_acquire(i, v);
+#endif
+}
+
 /**
  * raw_atomic_long_add_return_release() - atomic add with release ordering
  * @i: long value to add
@@ -184,6 +263,16 @@ raw_atomic_long_add_return_release(long i, atomic_long_t *v)
 	return raw_atomic64_add_return_release(i, v);
 #else
 	return raw_atomic_add_return_release(i, v);
+#endif
+}
+
+static __always_inline uintptr_t
+raw_atomic_ptr_add_return_release(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_add_return_release(i, v);
+#else
+	return raw_atomicuintptr_add_return_release(i, v);
 #endif
 }
 
@@ -208,6 +297,16 @@ raw_atomic_long_add_return_relaxed(long i, atomic_long_t *v)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_add_return_relaxed(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_add_return_relaxed(i, v);
+#else
+	return raw_atomicuintptr_add_return_relaxed(i, v);
+#endif
+}
+
 /**
  * raw_atomic_long_fetch_add() - atomic add with full ordering
  * @i: long value to add
@@ -226,6 +325,16 @@ raw_atomic_long_fetch_add(long i, atomic_long_t *v)
 	return raw_atomic64_fetch_add(i, v);
 #else
 	return raw_atomic_fetch_add(i, v);
+#endif
+}
+
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_add(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_add(i, v);
+#else
+	return raw_atomicuintptr_fetch_add(i, v);
 #endif
 }
 
@@ -250,6 +359,16 @@ raw_atomic_long_fetch_add_acquire(long i, atomic_long_t *v)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_add_acquire(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_add_acquire(i, v);
+#else
+	return raw_atomicuintptr_fetch_add_acquire(i, v);
+#endif
+}
+
 /**
  * raw_atomic_long_fetch_add_release() - atomic add with release ordering
  * @i: long value to add
@@ -268,6 +387,16 @@ raw_atomic_long_fetch_add_release(long i, atomic_long_t *v)
 	return raw_atomic64_fetch_add_release(i, v);
 #else
 	return raw_atomic_fetch_add_release(i, v);
+#endif
+}
+
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_add_release(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_add_release(i, v);
+#else
+	return raw_atomicuintptr_fetch_add_release(i, v);
 #endif
 }
 
@@ -292,6 +421,16 @@ raw_atomic_long_fetch_add_relaxed(long i, atomic_long_t *v)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_add_relaxed(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_add_relaxed(i, v);
+#else
+	return raw_atomicuintptr_fetch_add_relaxed(i, v);
+#endif
+}
+
 /**
  * raw_atomic_long_sub() - atomic subtract with relaxed ordering
  * @i: long value to subtract
@@ -310,6 +449,16 @@ raw_atomic_long_sub(long i, atomic_long_t *v)
 	raw_atomic64_sub(i, v);
 #else
 	raw_atomic_sub(i, v);
+#endif
+}
+
+static __always_inline void
+raw_atomic_ptr_sub(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	raw_atomic_long_sub(i, v);
+#else
+	raw_atomicuintptr_sub(i, v);
 #endif
 }
 
@@ -334,6 +483,16 @@ raw_atomic_long_sub_return(long i, atomic_long_t *v)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_sub_return(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_sub_return(i, v);
+#else
+	return raw_atomicuintptr_sub_return(i, v);
+#endif
+}
+
 /**
  * raw_atomic_long_sub_return_acquire() - atomic subtract with acquire ordering
  * @i: long value to subtract
@@ -352,6 +511,16 @@ raw_atomic_long_sub_return_acquire(long i, atomic_long_t *v)
 	return raw_atomic64_sub_return_acquire(i, v);
 #else
 	return raw_atomic_sub_return_acquire(i, v);
+#endif
+}
+
+static __always_inline uintptr_t
+raw_atomic_ptr_sub_return_acquire(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_sub_return_acquire(i, v);
+#else
+	return raw_atomicuintptr_sub_return_acquire(i, v);
 #endif
 }
 
@@ -376,6 +545,16 @@ raw_atomic_long_sub_return_release(long i, atomic_long_t *v)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_sub_return_release(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_sub_return_release(i, v);
+#else
+	return raw_atomicuintptr_sub_return_release(i, v);
+#endif
+}
+
 /**
  * raw_atomic_long_sub_return_relaxed() - atomic subtract with relaxed ordering
  * @i: long value to subtract
@@ -394,6 +573,16 @@ raw_atomic_long_sub_return_relaxed(long i, atomic_long_t *v)
 	return raw_atomic64_sub_return_relaxed(i, v);
 #else
 	return raw_atomic_sub_return_relaxed(i, v);
+#endif
+}
+
+static __always_inline uintptr_t
+raw_atomic_ptr_sub_return_relaxed(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_sub_return_relaxed(i, v);
+#else
+	return raw_atomicuintptr_sub_return_relaxed(i, v);
 #endif
 }
 
@@ -418,6 +607,16 @@ raw_atomic_long_fetch_sub(long i, atomic_long_t *v)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_sub(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_sub(i, v);
+#else
+	return raw_atomicuintptr_fetch_sub(i, v);
+#endif
+}
+
 /**
  * raw_atomic_long_fetch_sub_acquire() - atomic subtract with acquire ordering
  * @i: long value to subtract
@@ -436,6 +635,16 @@ raw_atomic_long_fetch_sub_acquire(long i, atomic_long_t *v)
 	return raw_atomic64_fetch_sub_acquire(i, v);
 #else
 	return raw_atomic_fetch_sub_acquire(i, v);
+#endif
+}
+
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_sub_acquire(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_sub_acquire(i, v);
+#else
+	return raw_atomicuintptr_fetch_sub_acquire(i, v);
 #endif
 }
 
@@ -460,6 +669,16 @@ raw_atomic_long_fetch_sub_release(long i, atomic_long_t *v)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_sub_release(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_sub_release(i, v);
+#else
+	return raw_atomicuintptr_fetch_sub_release(i, v);
+#endif
+}
+
 /**
  * raw_atomic_long_fetch_sub_relaxed() - atomic subtract with relaxed ordering
  * @i: long value to subtract
@@ -478,6 +697,16 @@ raw_atomic_long_fetch_sub_relaxed(long i, atomic_long_t *v)
 	return raw_atomic64_fetch_sub_relaxed(i, v);
 #else
 	return raw_atomic_fetch_sub_relaxed(i, v);
+#endif
+}
+
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_sub_relaxed(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_sub_relaxed(i, v);
+#else
+	return raw_atomicuintptr_fetch_sub_relaxed(i, v);
 #endif
 }
 
@@ -501,6 +730,16 @@ raw_atomic_long_inc(atomic_long_t *v)
 #endif
 }
 
+static __always_inline void
+raw_atomic_ptr_inc(atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	raw_atomic_long_inc(v);
+#else
+	raw_atomicuintptr_inc(v);
+#endif
+}
+
 /**
  * raw_atomic_long_inc_return() - atomic increment with full ordering
  * @v: pointer to atomic_long_t
@@ -518,6 +757,16 @@ raw_atomic_long_inc_return(atomic_long_t *v)
 	return raw_atomic64_inc_return(v);
 #else
 	return raw_atomic_inc_return(v);
+#endif
+}
+
+static __always_inline uintptr_t
+raw_atomic_ptr_inc_return(atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_inc_return(v);
+#else
+	return raw_atomicuintptr_inc_return(v);
 #endif
 }
 
@@ -541,6 +790,16 @@ raw_atomic_long_inc_return_acquire(atomic_long_t *v)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_inc_return_acquire(atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_inc_return_acquire(v);
+#else
+	return raw_atomicuintptr_inc_return_acquire(v);
+#endif
+}
+
 /**
  * raw_atomic_long_inc_return_release() - atomic increment with release ordering
  * @v: pointer to atomic_long_t
@@ -558,6 +817,16 @@ raw_atomic_long_inc_return_release(atomic_long_t *v)
 	return raw_atomic64_inc_return_release(v);
 #else
 	return raw_atomic_inc_return_release(v);
+#endif
+}
+
+static __always_inline uintptr_t
+raw_atomic_ptr_inc_return_release(atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_inc_return_release(v);
+#else
+	return raw_atomicuintptr_inc_return_release(v);
 #endif
 }
 
@@ -581,6 +850,16 @@ raw_atomic_long_inc_return_relaxed(atomic_long_t *v)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_inc_return_relaxed(atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_inc_return_relaxed(v);
+#else
+	return raw_atomicuintptr_inc_return_relaxed(v);
+#endif
+}
+
 /**
  * raw_atomic_long_fetch_inc() - atomic increment with full ordering
  * @v: pointer to atomic_long_t
@@ -598,6 +877,16 @@ raw_atomic_long_fetch_inc(atomic_long_t *v)
 	return raw_atomic64_fetch_inc(v);
 #else
 	return raw_atomic_fetch_inc(v);
+#endif
+}
+
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_inc(atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_inc(v);
+#else
+	return raw_atomicuintptr_fetch_inc(v);
 #endif
 }
 
@@ -621,6 +910,16 @@ raw_atomic_long_fetch_inc_acquire(atomic_long_t *v)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_inc_acquire(atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_inc_acquire(v);
+#else
+	return raw_atomicuintptr_fetch_inc_acquire(v);
+#endif
+}
+
 /**
  * raw_atomic_long_fetch_inc_release() - atomic increment with release ordering
  * @v: pointer to atomic_long_t
@@ -638,6 +937,16 @@ raw_atomic_long_fetch_inc_release(atomic_long_t *v)
 	return raw_atomic64_fetch_inc_release(v);
 #else
 	return raw_atomic_fetch_inc_release(v);
+#endif
+}
+
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_inc_release(atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_inc_release(v);
+#else
+	return raw_atomicuintptr_fetch_inc_release(v);
 #endif
 }
 
@@ -661,6 +970,16 @@ raw_atomic_long_fetch_inc_relaxed(atomic_long_t *v)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_inc_relaxed(atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_inc_relaxed(v);
+#else
+	return raw_atomicuintptr_fetch_inc_relaxed(v);
+#endif
+}
+
 /**
  * raw_atomic_long_dec() - atomic decrement with relaxed ordering
  * @v: pointer to atomic_long_t
@@ -678,6 +997,16 @@ raw_atomic_long_dec(atomic_long_t *v)
 	raw_atomic64_dec(v);
 #else
 	raw_atomic_dec(v);
+#endif
+}
+
+static __always_inline void
+raw_atomic_ptr_dec(atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	raw_atomic_long_dec(v);
+#else
+	raw_atomicuintptr_dec(v);
 #endif
 }
 
@@ -701,6 +1030,16 @@ raw_atomic_long_dec_return(atomic_long_t *v)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_dec_return(atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_dec_return(v);
+#else
+	return raw_atomicuintptr_dec_return(v);
+#endif
+}
+
 /**
  * raw_atomic_long_dec_return_acquire() - atomic decrement with acquire ordering
  * @v: pointer to atomic_long_t
@@ -718,6 +1057,16 @@ raw_atomic_long_dec_return_acquire(atomic_long_t *v)
 	return raw_atomic64_dec_return_acquire(v);
 #else
 	return raw_atomic_dec_return_acquire(v);
+#endif
+}
+
+static __always_inline uintptr_t
+raw_atomic_ptr_dec_return_acquire(atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_dec_return_acquire(v);
+#else
+	return raw_atomicuintptr_dec_return_acquire(v);
 #endif
 }
 
@@ -741,6 +1090,16 @@ raw_atomic_long_dec_return_release(atomic_long_t *v)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_dec_return_release(atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_dec_return_release(v);
+#else
+	return raw_atomicuintptr_dec_return_release(v);
+#endif
+}
+
 /**
  * raw_atomic_long_dec_return_relaxed() - atomic decrement with relaxed ordering
  * @v: pointer to atomic_long_t
@@ -758,6 +1117,16 @@ raw_atomic_long_dec_return_relaxed(atomic_long_t *v)
 	return raw_atomic64_dec_return_relaxed(v);
 #else
 	return raw_atomic_dec_return_relaxed(v);
+#endif
+}
+
+static __always_inline uintptr_t
+raw_atomic_ptr_dec_return_relaxed(atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_dec_return_relaxed(v);
+#else
+	return raw_atomicuintptr_dec_return_relaxed(v);
 #endif
 }
 
@@ -781,6 +1150,16 @@ raw_atomic_long_fetch_dec(atomic_long_t *v)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_dec(atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_dec(v);
+#else
+	return raw_atomicuintptr_fetch_dec(v);
+#endif
+}
+
 /**
  * raw_atomic_long_fetch_dec_acquire() - atomic decrement with acquire ordering
  * @v: pointer to atomic_long_t
@@ -798,6 +1177,16 @@ raw_atomic_long_fetch_dec_acquire(atomic_long_t *v)
 	return raw_atomic64_fetch_dec_acquire(v);
 #else
 	return raw_atomic_fetch_dec_acquire(v);
+#endif
+}
+
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_dec_acquire(atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_dec_acquire(v);
+#else
+	return raw_atomicuintptr_fetch_dec_acquire(v);
 #endif
 }
 
@@ -821,6 +1210,16 @@ raw_atomic_long_fetch_dec_release(atomic_long_t *v)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_dec_release(atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_dec_release(v);
+#else
+	return raw_atomicuintptr_fetch_dec_release(v);
+#endif
+}
+
 /**
  * raw_atomic_long_fetch_dec_relaxed() - atomic decrement with relaxed ordering
  * @v: pointer to atomic_long_t
@@ -838,6 +1237,16 @@ raw_atomic_long_fetch_dec_relaxed(atomic_long_t *v)
 	return raw_atomic64_fetch_dec_relaxed(v);
 #else
 	return raw_atomic_fetch_dec_relaxed(v);
+#endif
+}
+
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_dec_relaxed(atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_dec_relaxed(v);
+#else
+	return raw_atomicuintptr_fetch_dec_relaxed(v);
 #endif
 }
 
@@ -862,6 +1271,16 @@ raw_atomic_long_and(long i, atomic_long_t *v)
 #endif
 }
 
+static __always_inline void
+raw_atomic_ptr_and(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	raw_atomic_long_and(i, v);
+#else
+	raw_atomicuintptr_and(i, v);
+#endif
+}
+
 /**
  * raw_atomic_long_fetch_and() - atomic bitwise AND with full ordering
  * @i: long value
@@ -880,6 +1299,16 @@ raw_atomic_long_fetch_and(long i, atomic_long_t *v)
 	return raw_atomic64_fetch_and(i, v);
 #else
 	return raw_atomic_fetch_and(i, v);
+#endif
+}
+
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_and(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_and(i, v);
+#else
+	return raw_atomicuintptr_fetch_and(i, v);
 #endif
 }
 
@@ -904,6 +1333,16 @@ raw_atomic_long_fetch_and_acquire(long i, atomic_long_t *v)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_and_acquire(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_and_acquire(i, v);
+#else
+	return raw_atomicuintptr_fetch_and_acquire(i, v);
+#endif
+}
+
 /**
  * raw_atomic_long_fetch_and_release() - atomic bitwise AND with release ordering
  * @i: long value
@@ -922,6 +1361,16 @@ raw_atomic_long_fetch_and_release(long i, atomic_long_t *v)
 	return raw_atomic64_fetch_and_release(i, v);
 #else
 	return raw_atomic_fetch_and_release(i, v);
+#endif
+}
+
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_and_release(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_and_release(i, v);
+#else
+	return raw_atomicuintptr_fetch_and_release(i, v);
 #endif
 }
 
@@ -946,6 +1395,16 @@ raw_atomic_long_fetch_and_relaxed(long i, atomic_long_t *v)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_and_relaxed(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_and_relaxed(i, v);
+#else
+	return raw_atomicuintptr_fetch_and_relaxed(i, v);
+#endif
+}
+
 /**
  * raw_atomic_long_andnot() - atomic bitwise AND NOT with relaxed ordering
  * @i: long value
@@ -964,6 +1423,16 @@ raw_atomic_long_andnot(long i, atomic_long_t *v)
 	raw_atomic64_andnot(i, v);
 #else
 	raw_atomic_andnot(i, v);
+#endif
+}
+
+static __always_inline void
+raw_atomic_ptr_andnot(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	raw_atomic_long_andnot(i, v);
+#else
+	raw_atomicuintptr_andnot(i, v);
 #endif
 }
 
@@ -988,6 +1457,16 @@ raw_atomic_long_fetch_andnot(long i, atomic_long_t *v)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_andnot(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_andnot(i, v);
+#else
+	return raw_atomicuintptr_fetch_andnot(i, v);
+#endif
+}
+
 /**
  * raw_atomic_long_fetch_andnot_acquire() - atomic bitwise AND NOT with acquire ordering
  * @i: long value
@@ -1006,6 +1485,16 @@ raw_atomic_long_fetch_andnot_acquire(long i, atomic_long_t *v)
 	return raw_atomic64_fetch_andnot_acquire(i, v);
 #else
 	return raw_atomic_fetch_andnot_acquire(i, v);
+#endif
+}
+
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_andnot_acquire(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_andnot_acquire(i, v);
+#else
+	return raw_atomicuintptr_fetch_andnot_acquire(i, v);
 #endif
 }
 
@@ -1030,6 +1519,16 @@ raw_atomic_long_fetch_andnot_release(long i, atomic_long_t *v)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_andnot_release(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_andnot_release(i, v);
+#else
+	return raw_atomicuintptr_fetch_andnot_release(i, v);
+#endif
+}
+
 /**
  * raw_atomic_long_fetch_andnot_relaxed() - atomic bitwise AND NOT with relaxed ordering
  * @i: long value
@@ -1048,6 +1547,16 @@ raw_atomic_long_fetch_andnot_relaxed(long i, atomic_long_t *v)
 	return raw_atomic64_fetch_andnot_relaxed(i, v);
 #else
 	return raw_atomic_fetch_andnot_relaxed(i, v);
+#endif
+}
+
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_andnot_relaxed(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_andnot_relaxed(i, v);
+#else
+	return raw_atomicuintptr_fetch_andnot_relaxed(i, v);
 #endif
 }
 
@@ -1072,6 +1581,16 @@ raw_atomic_long_or(long i, atomic_long_t *v)
 #endif
 }
 
+static __always_inline void
+raw_atomic_ptr_or(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	raw_atomic_long_or(i, v);
+#else
+	raw_atomicuintptr_or(i, v);
+#endif
+}
+
 /**
  * raw_atomic_long_fetch_or() - atomic bitwise OR with full ordering
  * @i: long value
@@ -1090,6 +1609,16 @@ raw_atomic_long_fetch_or(long i, atomic_long_t *v)
 	return raw_atomic64_fetch_or(i, v);
 #else
 	return raw_atomic_fetch_or(i, v);
+#endif
+}
+
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_or(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_or(i, v);
+#else
+	return raw_atomicuintptr_fetch_or(i, v);
 #endif
 }
 
@@ -1114,6 +1643,16 @@ raw_atomic_long_fetch_or_acquire(long i, atomic_long_t *v)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_or_acquire(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_or_acquire(i, v);
+#else
+	return raw_atomicuintptr_fetch_or_acquire(i, v);
+#endif
+}
+
 /**
  * raw_atomic_long_fetch_or_release() - atomic bitwise OR with release ordering
  * @i: long value
@@ -1132,6 +1671,16 @@ raw_atomic_long_fetch_or_release(long i, atomic_long_t *v)
 	return raw_atomic64_fetch_or_release(i, v);
 #else
 	return raw_atomic_fetch_or_release(i, v);
+#endif
+}
+
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_or_release(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_or_release(i, v);
+#else
+	return raw_atomicuintptr_fetch_or_release(i, v);
 #endif
 }
 
@@ -1156,6 +1705,16 @@ raw_atomic_long_fetch_or_relaxed(long i, atomic_long_t *v)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_or_relaxed(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_or_relaxed(i, v);
+#else
+	return raw_atomicuintptr_fetch_or_relaxed(i, v);
+#endif
+}
+
 /**
  * raw_atomic_long_xor() - atomic bitwise XOR with relaxed ordering
  * @i: long value
@@ -1174,6 +1733,16 @@ raw_atomic_long_xor(long i, atomic_long_t *v)
 	raw_atomic64_xor(i, v);
 #else
 	raw_atomic_xor(i, v);
+#endif
+}
+
+static __always_inline void
+raw_atomic_ptr_xor(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	raw_atomic_long_xor(i, v);
+#else
+	raw_atomicuintptr_xor(i, v);
 #endif
 }
 
@@ -1198,6 +1767,16 @@ raw_atomic_long_fetch_xor(long i, atomic_long_t *v)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_xor(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_xor(i, v);
+#else
+	return raw_atomicuintptr_fetch_xor(i, v);
+#endif
+}
+
 /**
  * raw_atomic_long_fetch_xor_acquire() - atomic bitwise XOR with acquire ordering
  * @i: long value
@@ -1216,6 +1795,16 @@ raw_atomic_long_fetch_xor_acquire(long i, atomic_long_t *v)
 	return raw_atomic64_fetch_xor_acquire(i, v);
 #else
 	return raw_atomic_fetch_xor_acquire(i, v);
+#endif
+}
+
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_xor_acquire(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_xor_acquire(i, v);
+#else
+	return raw_atomicuintptr_fetch_xor_acquire(i, v);
 #endif
 }
 
@@ -1240,6 +1829,16 @@ raw_atomic_long_fetch_xor_release(long i, atomic_long_t *v)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_xor_release(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_xor_release(i, v);
+#else
+	return raw_atomicuintptr_fetch_xor_release(i, v);
+#endif
+}
+
 /**
  * raw_atomic_long_fetch_xor_relaxed() - atomic bitwise XOR with relaxed ordering
  * @i: long value
@@ -1258,6 +1857,16 @@ raw_atomic_long_fetch_xor_relaxed(long i, atomic_long_t *v)
 	return raw_atomic64_fetch_xor_relaxed(i, v);
 #else
 	return raw_atomic_fetch_xor_relaxed(i, v);
+#endif
+}
+
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_xor_relaxed(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_xor_relaxed(i, v);
+#else
+	return raw_atomicuintptr_fetch_xor_relaxed(i, v);
 #endif
 }
 
@@ -1282,6 +1891,16 @@ raw_atomic_long_xchg(atomic_long_t *v, long new)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_xchg(atomic_ptr_t *v, uintptr_t new)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_xchg(v, new);
+#else
+	return raw_atomicuintptr_xchg(v, new);
+#endif
+}
+
 /**
  * raw_atomic_long_xchg_acquire() - atomic exchange with acquire ordering
  * @v: pointer to atomic_long_t
@@ -1300,6 +1919,16 @@ raw_atomic_long_xchg_acquire(atomic_long_t *v, long new)
 	return raw_atomic64_xchg_acquire(v, new);
 #else
 	return raw_atomic_xchg_acquire(v, new);
+#endif
+}
+
+static __always_inline uintptr_t
+raw_atomic_ptr_xchg_acquire(atomic_ptr_t *v, uintptr_t new)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_xchg_acquire(v, new);
+#else
+	return raw_atomicuintptr_xchg_acquire(v, new);
 #endif
 }
 
@@ -1324,6 +1953,16 @@ raw_atomic_long_xchg_release(atomic_long_t *v, long new)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_xchg_release(atomic_ptr_t *v, uintptr_t new)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_xchg_release(v, new);
+#else
+	return raw_atomicuintptr_xchg_release(v, new);
+#endif
+}
+
 /**
  * raw_atomic_long_xchg_relaxed() - atomic exchange with relaxed ordering
  * @v: pointer to atomic_long_t
@@ -1342,6 +1981,16 @@ raw_atomic_long_xchg_relaxed(atomic_long_t *v, long new)
 	return raw_atomic64_xchg_relaxed(v, new);
 #else
 	return raw_atomic_xchg_relaxed(v, new);
+#endif
+}
+
+static __always_inline uintptr_t
+raw_atomic_ptr_xchg_relaxed(atomic_ptr_t *v, uintptr_t new)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_xchg_relaxed(v, new);
+#else
+	return raw_atomicuintptr_xchg_relaxed(v, new);
 #endif
 }
 
@@ -1368,6 +2017,16 @@ raw_atomic_long_cmpxchg(atomic_long_t *v, long old, long new)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_cmpxchg(atomic_ptr_t *v, uintptr_t old, uintptr_t new)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_cmpxchg(v, old, new);
+#else
+	return raw_atomicuintptr_cmpxchg(v, old, new);
+#endif
+}
+
 /**
  * raw_atomic_long_cmpxchg_acquire() - atomic compare and exchange with acquire ordering
  * @v: pointer to atomic_long_t
@@ -1388,6 +2047,16 @@ raw_atomic_long_cmpxchg_acquire(atomic_long_t *v, long old, long new)
 	return raw_atomic64_cmpxchg_acquire(v, old, new);
 #else
 	return raw_atomic_cmpxchg_acquire(v, old, new);
+#endif
+}
+
+static __always_inline uintptr_t
+raw_atomic_ptr_cmpxchg_acquire(atomic_ptr_t *v, uintptr_t old, uintptr_t new)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_cmpxchg_acquire(v, old, new);
+#else
+	return raw_atomicuintptr_cmpxchg_acquire(v, old, new);
 #endif
 }
 
@@ -1414,6 +2083,16 @@ raw_atomic_long_cmpxchg_release(atomic_long_t *v, long old, long new)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_cmpxchg_release(atomic_ptr_t *v, uintptr_t old, uintptr_t new)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_cmpxchg_release(v, old, new);
+#else
+	return raw_atomicuintptr_cmpxchg_release(v, old, new);
+#endif
+}
+
 /**
  * raw_atomic_long_cmpxchg_relaxed() - atomic compare and exchange with relaxed ordering
  * @v: pointer to atomic_long_t
@@ -1434,6 +2113,16 @@ raw_atomic_long_cmpxchg_relaxed(atomic_long_t *v, long old, long new)
 	return raw_atomic64_cmpxchg_relaxed(v, old, new);
 #else
 	return raw_atomic_cmpxchg_relaxed(v, old, new);
+#endif
+}
+
+static __always_inline uintptr_t
+raw_atomic_ptr_cmpxchg_relaxed(atomic_ptr_t *v, uintptr_t old, uintptr_t new)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_cmpxchg_relaxed(v, old, new);
+#else
+	return raw_atomicuintptr_cmpxchg_relaxed(v, old, new);
 #endif
 }
 
@@ -1461,6 +2150,16 @@ raw_atomic_long_try_cmpxchg(atomic_long_t *v, long *old, long new)
 #endif
 }
 
+static __always_inline bool
+raw_atomic_ptr_try_cmpxchg(atomic_ptr_t *v, uintptr_t *old, uintptr_t new)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_try_cmpxchg(v, (long *)old, new);
+#else
+	return raw_atomicuintptr_try_cmpxchg(v, (uintptr_t *)old, new);
+#endif
+}
+
 /**
  * raw_atomic_long_try_cmpxchg_acquire() - atomic compare and exchange with acquire ordering
  * @v: pointer to atomic_long_t
@@ -1482,6 +2181,16 @@ raw_atomic_long_try_cmpxchg_acquire(atomic_long_t *v, long *old, long new)
 	return raw_atomic64_try_cmpxchg_acquire(v, (s64 *)old, new);
 #else
 	return raw_atomic_try_cmpxchg_acquire(v, (int *)old, new);
+#endif
+}
+
+static __always_inline bool
+raw_atomic_ptr_try_cmpxchg_acquire(atomic_ptr_t *v, uintptr_t *old, uintptr_t new)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_try_cmpxchg_acquire(v, (long *)old, new);
+#else
+	return raw_atomicuintptr_try_cmpxchg_acquire(v, (uintptr_t *)old, new);
 #endif
 }
 
@@ -1509,6 +2218,16 @@ raw_atomic_long_try_cmpxchg_release(atomic_long_t *v, long *old, long new)
 #endif
 }
 
+static __always_inline bool
+raw_atomic_ptr_try_cmpxchg_release(atomic_ptr_t *v, uintptr_t *old, uintptr_t new)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_try_cmpxchg_release(v, (long *)old, new);
+#else
+	return raw_atomicuintptr_try_cmpxchg_release(v, (uintptr_t *)old, new);
+#endif
+}
+
 /**
  * raw_atomic_long_try_cmpxchg_relaxed() - atomic compare and exchange with relaxed ordering
  * @v: pointer to atomic_long_t
@@ -1533,6 +2252,16 @@ raw_atomic_long_try_cmpxchg_relaxed(atomic_long_t *v, long *old, long new)
 #endif
 }
 
+static __always_inline bool
+raw_atomic_ptr_try_cmpxchg_relaxed(atomic_ptr_t *v, uintptr_t *old, uintptr_t new)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_try_cmpxchg_relaxed(v, (long *)old, new);
+#else
+	return raw_atomicuintptr_try_cmpxchg_relaxed(v, (uintptr_t *)old, new);
+#endif
+}
+
 /**
  * raw_atomic_long_sub_and_test() - atomic subtract and test if zero with full ordering
  * @i: long value to subtract
@@ -1551,6 +2280,16 @@ raw_atomic_long_sub_and_test(long i, atomic_long_t *v)
 	return raw_atomic64_sub_and_test(i, v);
 #else
 	return raw_atomic_sub_and_test(i, v);
+#endif
+}
+
+static __always_inline bool
+raw_atomic_ptr_sub_and_test(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_sub_and_test(i, v);
+#else
+	return raw_atomicuintptr_sub_and_test(i, v);
 #endif
 }
 
@@ -1574,6 +2313,16 @@ raw_atomic_long_dec_and_test(atomic_long_t *v)
 #endif
 }
 
+static __always_inline bool
+raw_atomic_ptr_dec_and_test(atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_dec_and_test(v);
+#else
+	return raw_atomicuintptr_dec_and_test(v);
+#endif
+}
+
 /**
  * raw_atomic_long_inc_and_test() - atomic increment and test if zero with full ordering
  * @v: pointer to atomic_long_t
@@ -1591,6 +2340,16 @@ raw_atomic_long_inc_and_test(atomic_long_t *v)
 	return raw_atomic64_inc_and_test(v);
 #else
 	return raw_atomic_inc_and_test(v);
+#endif
+}
+
+static __always_inline bool
+raw_atomic_ptr_inc_and_test(atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_inc_and_test(v);
+#else
+	return raw_atomicuintptr_inc_and_test(v);
 #endif
 }
 
@@ -1615,6 +2374,16 @@ raw_atomic_long_add_negative(long i, atomic_long_t *v)
 #endif
 }
 
+static __always_inline bool
+raw_atomic_ptr_add_negative(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_add_negative(i, v);
+#else
+	return raw_atomicuintptr_add_negative(i, v);
+#endif
+}
+
 /**
  * raw_atomic_long_add_negative_acquire() - atomic add and test if negative with acquire ordering
  * @i: long value to add
@@ -1633,6 +2402,16 @@ raw_atomic_long_add_negative_acquire(long i, atomic_long_t *v)
 	return raw_atomic64_add_negative_acquire(i, v);
 #else
 	return raw_atomic_add_negative_acquire(i, v);
+#endif
+}
+
+static __always_inline bool
+raw_atomic_ptr_add_negative_acquire(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_add_negative_acquire(i, v);
+#else
+	return raw_atomicuintptr_add_negative_acquire(i, v);
 #endif
 }
 
@@ -1657,6 +2436,16 @@ raw_atomic_long_add_negative_release(long i, atomic_long_t *v)
 #endif
 }
 
+static __always_inline bool
+raw_atomic_ptr_add_negative_release(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_add_negative_release(i, v);
+#else
+	return raw_atomicuintptr_add_negative_release(i, v);
+#endif
+}
+
 /**
  * raw_atomic_long_add_negative_relaxed() - atomic add and test if negative with relaxed ordering
  * @i: long value to add
@@ -1675,6 +2464,16 @@ raw_atomic_long_add_negative_relaxed(long i, atomic_long_t *v)
 	return raw_atomic64_add_negative_relaxed(i, v);
 #else
 	return raw_atomic_add_negative_relaxed(i, v);
+#endif
+}
+
+static __always_inline bool
+raw_atomic_ptr_add_negative_relaxed(uintptr_t i, atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_add_negative_relaxed(i, v);
+#else
+	return raw_atomicuintptr_add_negative_relaxed(i, v);
 #endif
 }
 
@@ -1701,6 +2500,16 @@ raw_atomic_long_fetch_add_unless(atomic_long_t *v, long a, long u)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_fetch_add_unless(atomic_ptr_t *v, uintptr_t a, uintptr_t u)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_fetch_add_unless(v, a, u);
+#else
+	return raw_atomicuintptr_fetch_add_unless(v, a, u);
+#endif
+}
+
 /**
  * raw_atomic_long_add_unless() - atomic add unless value with full ordering
  * @v: pointer to atomic_long_t
@@ -1721,6 +2530,16 @@ raw_atomic_long_add_unless(atomic_long_t *v, long a, long u)
 	return raw_atomic64_add_unless(v, a, u);
 #else
 	return raw_atomic_add_unless(v, a, u);
+#endif
+}
+
+static __always_inline bool
+raw_atomic_ptr_add_unless(atomic_ptr_t *v, uintptr_t a, uintptr_t u)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_add_unless(v, a, u);
+#else
+	return raw_atomicuintptr_add_unless(v, a, u);
 #endif
 }
 
@@ -1745,6 +2564,16 @@ raw_atomic_long_inc_not_zero(atomic_long_t *v)
 #endif
 }
 
+static __always_inline bool
+raw_atomic_ptr_inc_not_zero(atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_inc_not_zero(v);
+#else
+	return raw_atomicuintptr_inc_not_zero(v);
+#endif
+}
+
 /**
  * raw_atomic_long_inc_unless_negative() - atomic increment unless negative with full ordering
  * @v: pointer to atomic_long_t
@@ -1763,6 +2592,16 @@ raw_atomic_long_inc_unless_negative(atomic_long_t *v)
 	return raw_atomic64_inc_unless_negative(v);
 #else
 	return raw_atomic_inc_unless_negative(v);
+#endif
+}
+
+static __always_inline bool
+raw_atomic_ptr_inc_unless_negative(atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_inc_unless_negative(v);
+#else
+	return raw_atomicuintptr_inc_unless_negative(v);
 #endif
 }
 
@@ -1787,6 +2626,16 @@ raw_atomic_long_dec_unless_positive(atomic_long_t *v)
 #endif
 }
 
+static __always_inline bool
+raw_atomic_ptr_dec_unless_positive(atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_dec_unless_positive(v);
+#else
+	return raw_atomicuintptr_dec_unless_positive(v);
+#endif
+}
+
 /**
  * raw_atomic_long_dec_if_positive() - atomic decrement if positive with full ordering
  * @v: pointer to atomic_long_t
@@ -1808,5 +2657,15 @@ raw_atomic_long_dec_if_positive(atomic_long_t *v)
 #endif
 }
 
+static __always_inline uintptr_t
+raw_atomic_ptr_dec_if_positive(atomic_ptr_t *v)
+{
+#ifndef CONFIG_CHERI_KERNEL
+	return raw_atomic_long_dec_if_positive(v);
+#else
+	return raw_atomicuintptr_dec_if_positive(v);
+#endif
+}
+
 #endif /* _LINUX_ATOMIC_LONG_H */
-// 4b882bf19018602c10816c52f8b4ae280adc887b
+// 67d06ebbed602f97d1c2ab468794d1ae66df17eb
