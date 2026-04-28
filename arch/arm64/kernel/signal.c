@@ -1462,17 +1462,16 @@ static int setup_sigframe(struct rt_sigframe_user_layout *user,
 	return err;
 }
 
-static unsigned long signal_sp(struct pt_regs *regs)
+static user_uintptr_t signal_sp(struct pt_regs *regs)
 {
 #ifdef CONFIG_ARM64_MORELLO
 	/*
-	 * If the interrupted context was in Restricted, regs->sp is actually
-	 * RSP_EL0, which is usually what we want but not here, because signal
+	 * If the interrupted context was in Restricted, regs->csp is actually
+	 * RCSP_EL0, which is usually what we want but not here, because signal
 	 * handlers are always executed in Executive and therefore on the
-	 * Executive stack. Read the actual SP_EL0 from the saved CSP_EL0
-	 * instead.
+	 * Executive stack. Read the actual (Executive) CSP_EL0 instead.
 	 */
-	return (unsigned long)regs->csp;
+	return (user_uintptr_t)regs->csp;
 #else
 	return regs->sp;
 #endif
@@ -1480,7 +1479,7 @@ static unsigned long signal_sp(struct pt_regs *regs)
 static int get_sigframe(struct rt_sigframe_user_layout *user,
 			 struct ksignal *ksig, struct pt_regs *regs)
 {
-	unsigned long sp, sp_top;
+	user_uintptr_t sp, sp_top;
 	int err;
 
 	init_user_layout(user);
@@ -1491,10 +1490,10 @@ static int get_sigframe(struct rt_sigframe_user_layout *user,
 	sp = sp_top = sigsp(signal_sp(regs), ksig);
 
 	sp = round_down(sp - sizeof(struct frame_record), 16);
-	user->next_frame = uaddr_to_user_ptr(sp);
+	user->next_frame = (struct frame_record __user *)sp;
 
 	sp = round_down(sp, 16) - sigframe_size(user);
-	user->sigframe = uaddr_to_user_ptr(sp);
+	user->sigframe = (struct rt_sigframe __user *)sp;
 
 	/*
 	 * Check that we can actually write to the signal frame.
