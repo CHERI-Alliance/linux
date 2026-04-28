@@ -4595,12 +4595,12 @@ struct ieee80211_ops {
 	void (*stop_ap)(struct ieee80211_hw *hw, struct ieee80211_vif *vif,
 			struct ieee80211_bss_conf *link_conf);
 
-	u64 (*prepare_multicast)(struct ieee80211_hw *hw,
+	uintptr_t (*prepare_multicast)(struct ieee80211_hw *hw,
 				 struct netdev_hw_addr_list *mc_list);
 	void (*configure_filter)(struct ieee80211_hw *hw,
 				 unsigned int changed_flags,
 				 unsigned int *total_flags,
-				 u64 multicast);
+				 uintptr_t multicast);
 	void (*config_iface_filter)(struct ieee80211_hw *hw,
 				    struct ieee80211_vif *vif,
 				    unsigned int filter_flags,

@@ -182,17 +182,17 @@ void drv_link_info_changed(struct ieee80211_local *local,
 			   struct ieee80211_bss_conf *info,
 			   int link_id, u64 changed);
 
-static inline u64 drv_prepare_multicast(struct ieee80211_local *local,
+static inline uintptr_t drv_prepare_multicast(struct ieee80211_local *local,
 					struct netdev_hw_addr_list *mc_list)
 {
-	u64 ret = 0;
+	uintptr_t ret = 0;
 
 	trace_drv_prepare_multicast(local, mc_list->count);
 
 	if (local->ops->prepare_multicast)
 		ret = local->ops->prepare_multicast(&local->hw, mc_list);
 
-	trace_drv_return_u64(local, ret);
+	trace_drv_return_u64(local, __c_ua(ret));
 
 	return ret;
 }
@@ -200,13 +200,13 @@ static inline u64 drv_prepare_multicast(struct ieee80211_local *local,
 static inline void drv_configure_filter(struct ieee80211_local *local,
 					unsigned int changed_flags,
 					unsigned int *total_flags,
-					u64 multicast)
+					uintptr_t multicast)
 {
 	might_sleep();
 	lockdep_assert_wiphy(local->hw.wiphy);
 
 	trace_drv_configure_filter(local, changed_flags, total_flags,
-				   multicast);
+				   __c_ua(multicast));
 	local->ops->configure_filter(&local->hw, changed_flags, total_flags,
 				     multicast);
 	trace_drv_return_void(local);
