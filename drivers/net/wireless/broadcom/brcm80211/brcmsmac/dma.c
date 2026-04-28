@@ -1125,7 +1125,7 @@ void dma_counterreset(struct dma_pub *pub)
 }
 
 /* get the address of the var in order to change later */
-unsigned long dma_getvar(struct dma_pub *pub, const char *name)
+uintptr_t dma_getvar(struct dma_pub *pub, const char *name)
 {
 	struct dma_info *di = container_of(pub, struct dma_info, dma);
 
