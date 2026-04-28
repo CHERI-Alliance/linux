@@ -11,38 +11,41 @@
 #include <linux/extable.h>
 #include <linux/module.h>
 #include <linux/uaccess.h>
+#include <linux/cheri.h>
 #include <asm/asm-extable.h>
 #include <asm/ptrace.h>
 
-static inline unsigned long
-get_ex_fixup(const struct exception_table_entry *ex)
+static inline uintptr_t
+get_ex_fixup(const struct exception_table_entry *ex, struct pt_regs *regs)
 {
-	return ((uintptr_t)&ex->fixup + ex->fixup);
+	/* CHERI: Derive the bounds from the faulting pcc. */
+	return (uintptr_t)cheri_address_set(regs->epc,
+					    __c_pa(&ex->fixup) + ex->fixup);
 }
 
 static bool ex_handler_fixup(const struct exception_table_entry *ex,
 			     struct pt_regs *regs)
 {
-	regs->epc = get_ex_fixup(ex);
+	regs->epc = get_ex_fixup(ex, regs);
 	return true;
 }
 
-static inline unsigned long regs_get_gpr(struct pt_regs *regs, unsigned int offset)
+static inline uintptr_t regs_get_gpr(struct pt_regs *regs, unsigned int offset)
 {
 	if (unlikely(!offset || offset > MAX_REG_OFFSET))
 		return 0;
 
-	return *(unsigned long *)((uintptr_t)regs + offset);
+	return *(uintptr_t *)((uintptr_t)regs + offset);
 }
 
 static inline void regs_set_gpr(struct pt_regs *regs, unsigned int offset,
-				unsigned long val)
+				uintptr_t val)
 {
 	if (unlikely(offset > MAX_REG_OFFSET))
 		return;
 
 	if (offset)
-		*(unsigned long *)((uintptr_t)regs + offset) = val;
+		*(uintptr_t *)((uintptr_t)regs + offset) = val;
 }
 
 static bool ex_handler_uaccess_err_zero(const struct exception_table_entry *ex,
@@ -51,10 +54,10 @@ static bool ex_handler_uaccess_err_zero(const struct exception_table_entry *ex,
 	int reg_err = FIELD_GET(EX_DATA_REG_ERR, ex->data);
 	int reg_zero = FIELD_GET(EX_DATA_REG_ZERO, ex->data);
 
-	regs_set_gpr(regs, reg_err * sizeof(unsigned long), -EFAULT);
-	regs_set_gpr(regs, reg_zero * sizeof(unsigned long), 0);
+	regs_set_gpr(regs, reg_err * sizeof(uintptr_t), -EFAULT);
+	regs_set_gpr(regs, reg_zero * sizeof(uintptr_t), 0);
 
-	regs->epc = get_ex_fixup(ex);
+	regs->epc = get_ex_fixup(ex, regs);
 	return true;
 }
 
@@ -64,18 +67,19 @@ ex_handler_load_unaligned_zeropad(const struct exception_table_entry *ex,
 {
 	int reg_data = FIELD_GET(EX_DATA_REG_DATA, ex->data);
 	int reg_addr = FIELD_GET(EX_DATA_REG_ADDR, ex->data);
-	unsigned long data, addr, offset;
+	unsigned long offset;
+	uintptr_t data, addr;
 
-	addr = regs_get_gpr(regs, reg_addr * sizeof(unsigned long));
+	addr = regs_get_gpr(regs, reg_addr * sizeof(uintptr_t));
 
-	offset = addr & 0x7UL;
+	offset = __c_ua(addr) & 0x7UL;
 	addr &= ~0x7UL;
 
-	data = *(unsigned long *)addr >> (offset * 8);
+	data = __c_fakeu(*(unsigned long *)addr >> (offset * 8));
 
-	regs_set_gpr(regs, reg_data * sizeof(unsigned long), data);
+	regs_set_gpr(regs, reg_data * sizeof(uintptr_t), data);
 
-	regs->epc = get_ex_fixup(ex);
+	regs->epc = get_ex_fixup(ex, regs);
 	return true;
 }
 
@@ -83,7 +87,7 @@ bool fixup_exception(struct pt_regs *regs)
 {
 	const struct exception_table_entry *ex;
 
-	ex = search_exception_tables(regs->epc);
+	ex = search_exception_tables(__c_ua(regs->epc));
 	if (!ex)
 		return false;
 
