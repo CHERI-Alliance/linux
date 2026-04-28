@@ -2383,6 +2383,9 @@ error_tgt_fput:
  * The following function implements the controller interface for
  * the eventpoll file that enables the insertion/removal/change of
  * file descriptors inside the interest set.
+ *
+ * TODO [PCuABI] - restrict passing capabilities between processes via
+ * epoll_ctl/epoll_wait
  */
 SYSCALL_DEFINE4(epoll_ctl, int, epfd, int, op, int, fd,
 		struct epoll_event __user *, event)
