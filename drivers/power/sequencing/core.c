@@ -302,13 +302,13 @@ static int pwrseq_check_unit_deps(const struct pwrseq_unit_data *data,
 	const struct pwrseq_unit_data *tmp, **cur;
 	int ret;
 
-	ret = radix_tree_insert(visited_units, (uintptr_t)data,
+	ret = radix_tree_insert(visited_units, __c_pa(data),
 				(void *)data);
 	if (ret)
 		return ret;
 
 	for (cur = data->deps; cur && *cur; cur++) {
-		tmp = radix_tree_lookup(visited_units, (uintptr_t)*cur);
+		tmp = radix_tree_lookup(visited_units, __c_pa(*cur));
 		if (tmp) {
 			WARN(1, "Circular dependency in power sequencing flow detected!\n");
 			return -EINVAL;
@@ -353,7 +353,7 @@ pwrseq_unit_setup(const struct pwrseq_unit_data *data,
 	struct pwrseq_unit *unit;
 	int ret;
 
-	unit = radix_tree_lookup(processed_units, (uintptr_t)data);
+	unit = radix_tree_lookup(processed_units, __c_pa(data));
 	if (unit)
 		return pwrseq_unit_get(unit);
 
@@ -370,7 +370,7 @@ pwrseq_unit_setup(const struct pwrseq_unit_data *data,
 		}
 	}
 
-	ret = radix_tree_insert(processed_units, (uintptr_t)data, unit);
+	ret = radix_tree_insert(processed_units, __c_pa(data), unit);
 	if (ret) {
 		pwrseq_unit_put(unit);
 		return ERR_PTR(ret);
