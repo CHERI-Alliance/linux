@@ -88,8 +88,8 @@ int btrfs_insert_xattr_item(struct btrfs_trans_handle *trans,
 	btrfs_set_dir_name_len(leaf, dir_item, name_len);
 	btrfs_set_dir_transid(leaf, dir_item, trans->transid);
 	btrfs_set_dir_data_len(leaf, dir_item, data_len);
-	name_ptr = (uintptr_t)(dir_item + 1);
-	data_ptr = (uintptr_t)((char *)name_ptr + name_len);
+	name_ptr = __c_pa(dir_item + 1);
+	data_ptr = name_ptr + name_len;
 
 	write_extent_buffer(leaf, name, name_ptr, name_len);
 	write_extent_buffer(leaf, data, data_ptr, data_len);
@@ -149,7 +149,7 @@ int btrfs_insert_dir_item(struct btrfs_trans_handle *trans,
 	btrfs_set_dir_data_len(leaf, dir_item, 0);
 	btrfs_set_dir_name_len(leaf, dir_item, name->len);
 	btrfs_set_dir_transid(leaf, dir_item, trans->transid);
-	name_ptr = (uintptr_t)(dir_item + 1);
+	name_ptr = __c_pa(dir_item + 1);
 
 	write_extent_buffer(leaf, name->name, name_ptr, name->len);
 
@@ -386,7 +386,7 @@ struct btrfs_dir_item *btrfs_match_dir_item_name(const struct btrfs_path *path,
 		this_len = sizeof(*dir_item) +
 			btrfs_dir_name_len(leaf, dir_item) +
 			btrfs_dir_data_len(leaf, dir_item);
-		name_ptr = (uintptr_t)(dir_item + 1);
+		name_ptr = __c_pa(dir_item + 1);
 
 		if (btrfs_dir_name_len(leaf, dir_item) == name_len &&
 		    memcmp_extent_buffer(leaf, name, name_ptr, name_len) == 0)
@@ -422,7 +422,7 @@ int btrfs_delete_one_dir_name(struct btrfs_trans_handle *trans,
 		ret = btrfs_del_item(trans, root, path);
 	} else {
 		/* MARKER */
-		uintptr_t ptr = (uintptr_t)di;
+		unsigned long ptr = __c_pa(di);
 		unsigned long start;
 
 		start = btrfs_item_ptr_offset(leaf, path->slots[0]);

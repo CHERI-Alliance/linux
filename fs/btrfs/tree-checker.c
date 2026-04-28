@@ -639,7 +639,7 @@ static int check_dir_item(struct extent_buffer *leaf,
 			char namebuf[MAX(BTRFS_NAME_LEN, XATTR_NAME_MAX)];
 
 			read_extent_buffer(leaf, namebuf,
-					(uintptr_t)(di + 1), name_len);
+					__c_pa(di + 1), name_len);
 			name_hash = btrfs_name_hash(namebuf, name_len);
 			if (unlikely(key->offset != name_hash)) {
 				dir_item_err(leaf, slot,
@@ -1490,13 +1490,13 @@ static int check_extent_item(struct extent_buffer *leaf,
 			return -EUCLEAN;
 		}
 	}
-	ptr = (uintptr_t)(struct btrfs_extent_item *)(ei + 1);
+	ptr = __c_pa((struct btrfs_extent_item *)(ei + 1));
 
 	/* Check the special case of btrfs_tree_block_info */
 	if (is_tree_block && key->type != BTRFS_METADATA_ITEM_KEY) {
 		struct btrfs_tree_block_info *info;
 
-		info = (struct btrfs_tree_block_info *)ptr;
+		info = (struct btrfs_tree_block_info *)__c_fakep(ptr);
 		if (unlikely(btrfs_tree_block_level(leaf, info) >= BTRFS_MAX_LEVEL)) {
 			extent_err(leaf, slot,
 			"invalid tree block info level, have %u expect [0, %u]",
@@ -1504,7 +1504,7 @@ static int check_extent_item(struct extent_buffer *leaf,
 				   BTRFS_MAX_LEVEL - 1);
 			return -EUCLEAN;
 		}
-		ptr = (uintptr_t)(struct btrfs_tree_block_info *)(info + 1);
+		ptr = __c_pa((struct btrfs_tree_block_info *)(info + 1));
 	}
 
 	/* Check inline refs */
@@ -1525,7 +1525,7 @@ static int check_extent_item(struct extent_buffer *leaf,
 				   ptr, sizeof(*iref), end);
 			return -EUCLEAN;
 		}
-		iref = (struct btrfs_extent_inline_ref *)ptr;
+		iref = (struct btrfs_extent_inline_ref *)__c_fakep(ptr);
 		inline_type = btrfs_extent_inline_ref_type(leaf, iref);
 		inline_offset = btrfs_extent_inline_ref_offset(leaf, iref);
 		seq = inline_offset;
@@ -1743,7 +1743,7 @@ static int check_extent_data_ref(struct extent_buffer *leaf,
 		 * We cannot check the extent_data_ref hash due to possible
 		 * overflow from the leaf due to hash collisions.
 		 */
-		dref = (struct btrfs_extent_data_ref *)ptr;
+		dref = (struct btrfs_extent_data_ref *)__c_fakep(ptr);
 		root = btrfs_extent_data_ref_root(leaf, dref);
 		objectid = btrfs_extent_data_ref_objectid(leaf, dref);
 		offset = btrfs_extent_data_ref_offset(leaf, dref);
@@ -1808,7 +1808,7 @@ static int check_inode_ref(struct extent_buffer *leaf,
 			return -EUCLEAN;
 		}
 
-		iref = (struct btrfs_inode_ref *)ptr;
+		iref = (struct btrfs_inode_ref *)__c_fakep(ptr);
 		namelen = btrfs_inode_ref_name_len(leaf, iref);
 		if (unlikely(ptr + sizeof(*iref) + namelen > end)) {
 			inode_ref_err(leaf, slot,
@@ -1838,7 +1838,7 @@ static int check_inode_extref(struct extent_buffer *leaf,
 		return -EUCLEAN;
 
 	while (ptr < end) {
-		struct btrfs_inode_extref *extref = (struct btrfs_inode_extref *)ptr;
+		struct btrfs_inode_extref *extref = (struct btrfs_inode_extref *)__c_fakep(ptr);
 		u16 namelen;
 
 		if (unlikely(ptr + sizeof(*extref) > end)) {

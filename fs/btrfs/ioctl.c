@@ -1706,7 +1706,7 @@ static noinline int btrfs_search_path_in_tree(struct btrfs_fs_info *info,
 		}
 
 		*(ptr + len) = '/';
-		read_extent_buffer(l, ptr, (uintptr_t)(iref + 1), len);
+		read_extent_buffer(l, ptr, __c_pa(iref + 1), len);
 
 		if (key.offset == BTRFS_FIRST_FREE_OBJECTID)
 			break;
@@ -1788,8 +1788,7 @@ static int btrfs_search_path_in_tree_user(struct mnt_idmap *idmap,
 			}
 
 			*(ptr + len) = '/';
-			read_extent_buffer(leaf, ptr,
-					(uintptr_t)(iref + 1), len);
+			read_extent_buffer(leaf, ptr, __c_pa(iref + 1), len);
 
 			/*
 			 * We don't need the path anymore, so release it and
@@ -3207,7 +3206,7 @@ static long btrfs_ioctl_ino_to_path(struct btrfs_root *root, void __user *arg)
 
 	for (i = 0; i < ipath->fspath->elem_cnt; ++i) {
 		rel_ptr = ipath->fspath->val[i] -
-			  (u64)(uintptr_t)ipath->fspath->val;
+			  (u64)__c_pa(ipath->fspath->val);
 		ipath->fspath->val[i] = rel_ptr;
 	}
 
@@ -5230,7 +5229,7 @@ long btrfs_ioctl(struct file *file, unsigned int
 	case BTRFS_IOC_BALANCE_V2:
 		return btrfs_ioctl_balance(file, argp);
 	case BTRFS_IOC_BALANCE_CTL:
-		return btrfs_ioctl_balance_ctl(fs_info, arg);
+		return btrfs_ioctl_balance_ctl(fs_info, __c_ua(arg));
 	case BTRFS_IOC_BALANCE_PROGRESS:
 		return btrfs_ioctl_balance_progress(fs_info, argp);
 	case BTRFS_IOC_SET_RECEIVED_SUBVOL:

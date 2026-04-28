@@ -4073,8 +4073,7 @@ void btrfs_truncate_item(struct btrfs_trans_handle *trans,
 			if (btrfs_file_extent_type(leaf, fi) ==
 			    BTRFS_FILE_EXTENT_INLINE) {
 				ptr = btrfs_item_ptr_offset(leaf, slot);
-				memmove_extent_buffer(leaf, ptr,
-				      (uintptr_t)fi,
+				memmove_extent_buffer(leaf, ptr, __c_pa(fi),
 				      BTRFS_FILE_EXTENT_INLINE_DATA_START);
 			}
 		}

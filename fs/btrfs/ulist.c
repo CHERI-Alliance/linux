@@ -197,13 +197,13 @@ static int ulist_rbtree_insert(struct ulist *ulist, struct ulist_node *ins)
  * In case of allocation failure -ENOMEM is returned and the ulist stays
  * unaltered.
  */
-int ulist_add(struct ulist *ulist, u64 val, u64 aux, gfp_t gfp_mask)
+int ulist_add(struct ulist *ulist, u64 val, uintptr_t aux, gfp_t gfp_mask)
 {
 	return ulist_add_merge(ulist, val, aux, NULL, gfp_mask);
 }
 
-int ulist_add_merge(struct ulist *ulist, u64 val, u64 aux,
-		    u64 *old_aux, gfp_t gfp_mask)
+int ulist_add_merge(struct ulist *ulist, u64 val, uintptr_t aux,
+		    uintptr_t *old_aux, gfp_t gfp_mask)
 {
 	int ret;
 	struct ulist_node *node;
@@ -246,7 +246,7 @@ int ulist_add_merge(struct ulist *ulist, u64 val, u64 aux,
  * Return 0 for successful delete.
  * Return > 0 for not found.
  */
-int ulist_del(struct ulist *ulist, u64 val, u64 aux)
+int ulist_del(struct ulist *ulist, u64 val, uintptr_t aux)
 {
 	struct ulist_node *node;
 

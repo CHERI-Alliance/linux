@@ -851,7 +851,7 @@ char *btrfs_get_subvol_name_from_objectid(struct btrfs_fs_info *fs_info,
 			goto err;
 		}
 		read_extent_buffer(path->nodes[0], ptr + 1,
-				   (uintptr_t)(root_ref + 1), len);
+				   __c_pa(root_ref + 1), len);
 		ptr[0] = '/';
 		dirid = btrfs_root_ref_dirid(path->nodes[0], root_ref);
 		btrfs_release_path(path);
@@ -893,7 +893,7 @@ char *btrfs_get_subvol_name_from_objectid(struct btrfs_fs_info *fs_info,
 				goto err;
 			}
 			read_extent_buffer(path->nodes[0], ptr + 1,
-					   (uintptr_t)(inode_ref + 1), len);
+					   __c_pa(inode_ref + 1), len);
 			ptr[0] = '/';
 			btrfs_release_path(path);
 		}

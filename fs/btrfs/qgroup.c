@@ -4146,7 +4146,7 @@ static int qgroup_unreserve_range(struct btrfs_inode *inode,
 
 		entry = rb_entry(node, struct ulist_node, rb_node);
 		entry_start = entry->val;
-		entry_end = entry->aux;
+		entry_end = __c_ua(entry->aux);
 		entry_len = entry_end - entry_start + 1;
 
 		if (entry_start >= start + len)
@@ -4334,7 +4334,7 @@ static int qgroup_free_reserved_data(struct btrfs_inode *inode,
 	while ((unode = ulist_next(&reserved->range_changed, &uiter))) {
 		u64 range_start = unode->val;
 		/* unode->aux is the inclusive end */
-		u64 range_len = unode->aux - range_start + 1;
+		u64 range_len = __c_ua(unode->aux) - range_start + 1;
 		u64 free_start;
 		u64 free_len;
 
@@ -4649,8 +4649,8 @@ void btrfs_qgroup_check_reserved_leak(struct btrfs_inode *inode)
 		ULIST_ITER_INIT(&iter);
 		while ((unode = ulist_next(&changeset.range_changed, &iter))) {
 			btrfs_warn(inode->root->fs_info,
-		"leaking qgroup reserved space, ino: %llu, start: %llu, end: %llu",
-				btrfs_ino(inode), unode->val, unode->aux);
+		"leaking qgroup reserved space, ino: %llu, start: %llu, end: %lu",
+				btrfs_ino(inode), unode->val, (unsigned long)unode->aux);
 		}
 		btrfs_qgroup_free_refroot(inode->root->fs_info,
 				btrfs_root_id(inode->root),

@@ -195,7 +195,7 @@ static int add_extent_changeset(struct extent_state *state, u32 bits,
 		return 0;
 	changeset->bytes_changed += state->end - state->start + 1;
 
-	return ulist_add(&changeset->range_changed, state->start, state->end, GFP_ATOMIC);
+	return ulist_add(&changeset->range_changed, state->start, __c_fakeu(state->end), GFP_ATOMIC);
 }
 
 static inline struct extent_state *next_state(struct extent_state *state)
