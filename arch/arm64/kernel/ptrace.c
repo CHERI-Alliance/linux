@@ -1715,13 +1715,37 @@ int morello_ptrace_peekcap(struct task_struct *target, unsigned long addr,
 	if (!system_supports_morello())
 		return -EINVAL;
 
-	err = morello_ptrace_read_remote_cap(target, addr, &tmp);
+	err = morello_ptrace_access_remote_cap(target, addr, &tmp, FOLL_FORCE);
 	if (err)
 		return err;
 
 	err = copy_to_user(user_cap, &tmp, sizeof(tmp));
 
 	return err ? -EFAULT : 0;
+}
+
+int morello_ptrace_pokecap(struct task_struct *target, unsigned long addr,
+			   unsigned long data)
+{
+	const struct user_cap __user *user_cap =
+		(const struct user_cap __user *)data;
+	struct user_cap tmp;
+	int err;
+
+	if (!system_supports_morello())
+		return -EINVAL;
+
+	if (!morello_ptrace_forge_cap_enabled)
+		return -EPERM;
+
+	err = copy_from_user(&tmp, user_cap, sizeof(tmp));
+	if (err)
+		return -EFAULT;
+
+	err = morello_ptrace_access_remote_cap(target, addr, &tmp,
+					       FOLL_FORCE | FOLL_WRITE);
+
+	return err;
 }
 #endif /* CONFIG_ARM64_MORELLO */
 
@@ -2502,6 +2526,8 @@ long arch_ptrace(struct task_struct *child, long request,
 #ifdef CONFIG_ARM64_MORELLO
 	case PTRACE_PEEKCAP:
 		return morello_ptrace_peekcap(child, addr, data);
+	case PTRACE_POKECAP:
+		return morello_ptrace_pokecap(child, addr, data);
 #endif
 	}
 
