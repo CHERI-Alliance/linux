@@ -419,7 +419,7 @@ static inline pte_t *__meminit get_pte_virt_late(phys_addr_t pa)
 	return (pte_t *) __va(pa);
 }
 
-static inline phys_addr_t __init alloc_pte_early(uintptr_t va)
+static inline phys_addr_t __init alloc_pte_early(__ptraddr_t va)
 {
 	/*
 	 * We only create PMD or PGD early mappings so we
@@ -428,12 +428,12 @@ static inline phys_addr_t __init alloc_pte_early(uintptr_t va)
 	BUG();
 }
 
-static inline phys_addr_t __init alloc_pte_fixmap(uintptr_t va)
+static inline phys_addr_t __init alloc_pte_fixmap(__ptraddr_t va)
 {
 	return memblock_phys_alloc(PAGE_SIZE, PAGE_SIZE);
 }
 
-static phys_addr_t __meminit alloc_pte_late(uintptr_t va)
+static phys_addr_t __meminit alloc_pte_late(__ptraddr_t va)
 {
 	struct ptdesc *ptdesc = pagetable_alloc(GFP_KERNEL, 0);
 
@@ -446,10 +446,10 @@ static phys_addr_t __meminit alloc_pte_late(uintptr_t va)
 	return __pa((pte_t *)ptdesc_address(ptdesc));
 }
 
-static void __meminit create_pte_mapping(pte_t *ptep, uintptr_t va, phys_addr_t pa, phys_addr_t sz,
+static void __meminit create_pte_mapping(pte_t *ptep, __ptraddr_t va, phys_addr_t pa, phys_addr_t sz,
 					 pgprot_t prot)
 {
-	uintptr_t pte_idx = pte_index(va);
+	__ptraddr_t pte_idx = pte_index(va);
 
 	BUG_ON(sz != PAGE_SIZE);
 
@@ -506,19 +506,19 @@ static pmd_t *__meminit get_pmd_virt_late(phys_addr_t pa)
 	return (pmd_t *) __va(pa);
 }
 
-static phys_addr_t __init alloc_pmd_early(uintptr_t va)
+static phys_addr_t __init alloc_pmd_early(__ptraddr_t va)
 {
 	BUG_ON((va - kernel_map.virt_addr) >> PUD_SHIFT);
 
 	return (uintptr_t)early_pmd;
 }
 
-static phys_addr_t __init alloc_pmd_fixmap(uintptr_t va)
+static phys_addr_t __init alloc_pmd_fixmap(__ptraddr_t va)
 {
 	return memblock_phys_alloc(PAGE_SIZE, PAGE_SIZE);
 }
 
-static phys_addr_t __meminit alloc_pmd_late(uintptr_t va)
+static phys_addr_t __meminit alloc_pmd_late(__ptraddr_t va)
 {
 	struct ptdesc *ptdesc = pagetable_alloc(GFP_KERNEL, 0);
 
@@ -528,12 +528,12 @@ static phys_addr_t __meminit alloc_pmd_late(uintptr_t va)
 }
 
 static void __meminit create_pmd_mapping(pmd_t *pmdp,
-					 uintptr_t va, phys_addr_t pa,
+					 __ptraddr_t va, phys_addr_t pa,
 					 phys_addr_t sz, pgprot_t prot)
 {
 	pte_t *ptep;
 	phys_addr_t pte_phys;
-	uintptr_t pmd_idx = pmd_index(va);
+	__ptraddr_t pmd_idx = pmd_index(va);
 
 	if (sz == PMD_SIZE) {
 		if (pmd_none(pmdp[pmd_idx]))
@@ -570,7 +570,7 @@ static pud_t *__meminit get_pud_virt_late(phys_addr_t pa)
 	return (pud_t *)__va(pa);
 }
 
-static phys_addr_t __init alloc_pud_early(uintptr_t va)
+static phys_addr_t __init alloc_pud_early(__ptraddr_t va)
 {
 	/* Only one PUD is available for early mapping */
 	BUG_ON((va - kernel_map.virt_addr) >> PGDIR_SHIFT);
@@ -578,12 +578,12 @@ static phys_addr_t __init alloc_pud_early(uintptr_t va)
 	return (uintptr_t)early_pud;
 }
 
-static phys_addr_t __init alloc_pud_fixmap(uintptr_t va)
+static phys_addr_t __init alloc_pud_fixmap(__ptraddr_t va)
 {
 	return memblock_phys_alloc(PAGE_SIZE, PAGE_SIZE);
 }
 
-static phys_addr_t __meminit alloc_pud_late(uintptr_t va)
+static phys_addr_t __meminit alloc_pud_late(__ptraddr_t va)
 {
 	struct ptdesc *ptdesc = pagetable_alloc(GFP_KERNEL, 0);
 
@@ -608,7 +608,7 @@ static p4d_t *__meminit get_p4d_virt_late(phys_addr_t pa)
 	return (p4d_t *)__va(pa);
 }
 
-static phys_addr_t __init alloc_p4d_early(uintptr_t va)
+static phys_addr_t __init alloc_p4d_early(__ptraddr_t va)
 {
 	/* Only one P4D is available for early mapping */
 	BUG_ON((va - kernel_map.virt_addr) >> PGDIR_SHIFT);
@@ -616,12 +616,12 @@ static phys_addr_t __init alloc_p4d_early(uintptr_t va)
 	return (uintptr_t)early_p4d;
 }
 
-static phys_addr_t __init alloc_p4d_fixmap(uintptr_t va)
+static phys_addr_t __init alloc_p4d_fixmap(__ptraddr_t va)
 {
 	return memblock_phys_alloc(PAGE_SIZE, PAGE_SIZE);
 }
 
-static phys_addr_t __meminit alloc_p4d_late(uintptr_t va)
+static phys_addr_t __meminit alloc_p4d_late(__ptraddr_t va)
 {
 	struct ptdesc *ptdesc = pagetable_alloc(GFP_KERNEL, 0);
 
@@ -630,12 +630,12 @@ static phys_addr_t __meminit alloc_p4d_late(uintptr_t va)
 	return __pa((p4d_t *)ptdesc_address(ptdesc));
 }
 
-static void __meminit create_pud_mapping(pud_t *pudp, uintptr_t va, phys_addr_t pa, phys_addr_t sz,
+static void __meminit create_pud_mapping(pud_t *pudp, __ptraddr_t va, phys_addr_t pa, phys_addr_t sz,
 					 pgprot_t prot)
 {
 	pmd_t *nextp;
 	phys_addr_t next_phys;
-	uintptr_t pud_index = pud_index(va);
+	__ptraddr_t pud_index = pud_index(va);
 
 	if (sz == PUD_SIZE) {
 		if (pud_val(pudp[pud_index]) == 0)
@@ -656,12 +656,12 @@ static void __meminit create_pud_mapping(pud_t *pudp, uintptr_t va, phys_addr_t 
 	create_pmd_mapping(nextp, va, pa, sz, prot);
 }
 
-static void __meminit create_p4d_mapping(p4d_t *p4dp, uintptr_t va, phys_addr_t pa, phys_addr_t sz,
+static void __meminit create_p4d_mapping(p4d_t *p4dp, __ptraddr_t va, phys_addr_t pa, phys_addr_t sz,
 					 pgprot_t prot)
 {
 	pud_t *nextp;
 	phys_addr_t next_phys;
-	uintptr_t p4d_index = p4d_index(va);
+	__ptraddr_t p4d_index = p4d_index(va);
 
 	if (sz == P4D_SIZE) {
 		if (p4d_val(p4dp[p4d_index]) == 0)
@@ -713,12 +713,12 @@ static void __meminit create_p4d_mapping(p4d_t *p4dp, uintptr_t va, phys_addr_t 
 #define create_pmd_mapping(__pmdp, __va, __pa, __sz, __prot) do {} while(0)
 #endif /* __PAGETABLE_PMD_FOLDED */
 
-void __meminit create_pgd_mapping(pgd_t *pgdp, uintptr_t va, phys_addr_t pa, phys_addr_t sz,
+void __meminit create_pgd_mapping(pgd_t *pgdp, __ptraddr_t va, phys_addr_t pa, phys_addr_t sz,
 				  pgprot_t prot)
 {
 	pgd_next_t *nextp;
 	phys_addr_t next_phys;
-	uintptr_t pgd_idx = pgd_index(va);
+	__ptraddr_t pgd_idx = pgd_index(va);
 
 	if (sz == PGDIR_SIZE) {
 		if (pgd_val(pgdp[pgd_idx]) == 0)
@@ -739,7 +739,7 @@ void __meminit create_pgd_mapping(pgd_t *pgdp, uintptr_t va, phys_addr_t pa, phy
 	create_pgd_next_mapping(nextp, va, pa, sz, prot);
 }
 
-static uintptr_t __meminit best_map_size(phys_addr_t pa, uintptr_t va, phys_addr_t size)
+static __ptraddr_t __meminit best_map_size(phys_addr_t pa, __ptraddr_t va, phys_addr_t size)
 {
 	if (debug_pagealloc_enabled())
 		return PAGE_SIZE;
@@ -775,7 +775,7 @@ asmlinkage void __init __copy_data(void)
 #endif
 
 #ifdef CONFIG_STRICT_KERNEL_RWX
-static __meminit pgprot_t pgprot_from_va(uintptr_t va)
+static __meminit pgprot_t pgprot_from_va(__ptraddr_t va)
 {
 	if (is_va_kernel_text(va))
 		return PAGE_KERNEL_READ_EXEC;
@@ -800,7 +800,7 @@ void mark_rodata_ro(void)
 				  set_memory_ro);
 }
 #else
-static __meminit pgprot_t pgprot_from_va(uintptr_t va)
+static __meminit pgprot_t pgprot_from_va(__ptraddr_t va)
 {
 	if (IS_ENABLED(CONFIG_64BIT) && !is_kernel_mapping(va))
 		return PAGE_KERNEL;
@@ -938,7 +938,7 @@ retry:
 static void __init create_kernel_page_table(pgd_t *pgdir,
 					    __always_unused bool early)
 {
-	uintptr_t va, start_va, end_va;
+	__ptraddr_t va, start_va, end_va;
 
 	/* Map the flash resident part */
 	end_va = kernel_map.virt_addr + kernel_map.xiprom_sz;
@@ -958,7 +958,7 @@ static void __init create_kernel_page_table(pgd_t *pgdir,
 #else
 static void __init create_kernel_page_table(pgd_t *pgdir, bool early)
 {
-	uintptr_t va, end_va;
+	__ptraddr_t va, end_va;
 
 	end_va = kernel_map.virt_addr + kernel_map.size;
 	for (va = kernel_map.virt_addr; va < end_va; va += PMD_SIZE)
@@ -975,11 +975,11 @@ static void __init create_kernel_page_table(pgd_t *pgdir, bool early)
  * this means 2 PMD entries whereas for 32-bit kernel, this is only 1 PGDIR
  * entry.
  */
-static void __init create_fdt_early_page_table(uintptr_t fix_fdt_va,
+static void __init create_fdt_early_page_table(__ptraddr_t fix_fdt_va,
 					       uintptr_t dtb_pa)
 {
 #ifndef CONFIG_BUILTIN_DTB
-	uintptr_t pa = dtb_pa & ~(PMD_SIZE - 1);
+	__ptraddr_t pa = dtb_pa & ~(PMD_SIZE - 1);
 
 	/* Make sure the fdt fixmap address is always aligned on PMD size */
 	BUILD_BUG_ON(FIX_FDT % (PMD_SIZE / PAGE_SIZE));
@@ -1260,10 +1260,10 @@ asmlinkage void __init setup_vm(uintptr_t dtb_pa)
 }
 
 static void __meminit create_linear_mapping_range(phys_addr_t start, phys_addr_t end,
-						  uintptr_t fixed_map_size, const pgprot_t *pgprot)
+						  __ptraddr_t fixed_map_size, const pgprot_t *pgprot)
 {
 	phys_addr_t pa;
-	uintptr_t va, map_size;
+	__ptraddr_t va, map_size;
 
 	for (pa = start; pa < end; pa += map_size) {
 		va = (uintptr_t)__va(pa);
