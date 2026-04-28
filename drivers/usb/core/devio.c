@@ -2069,7 +2069,7 @@ static int processcompl(struct async *as, void __user2 * __capability __user2 * 
 		}
 	}
 
-	if (put_user(addr, (void __user2 * __capability __user2 * __capability)arg))
+	if (put_user_ptr(addr, (void __user2 * __capability __user2 * __capability)arg))
 		return -EFAULT;
 	return 0;
 
