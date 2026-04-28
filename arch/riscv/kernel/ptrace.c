@@ -41,8 +41,25 @@ static int riscv_gpr_get(struct task_struct *target,
 			 const struct user_regset *regset,
 			 struct membuf to)
 {
-	return membuf_write(&to, task_pt_regs(target),
-			    sizeof(struct user_regs_struct));
+	elf_greg_t *regs = (elf_greg_t *)task_pt_regs(target);
+	int ret = membuf_write(&to, regs, __ELF_NGREG * sizeof(elf_greg_t));
+#ifdef CONFIG_CHERI_KERNEL
+	union {
+		elf_greg_t r;
+		u8 b[sizeof(elf_greg_t)];
+	} tags = { .r = __c_fakeu(0) };
+	unsigned int i;
+
+	if (ret < 0)
+		return ret;
+	for (i = 0; i < __ELF_NGREG; ++i) {
+		if (cheri_tag_get(regs[i]))
+			tags.b[i / 8] |= 1U << (i % 8);
+	}
+	ret = membuf_write(&to, &tags, sizeof(elf_greg_t));
+#endif
+
+	return ret;
 }
 
 static int riscv_gpr_set(struct task_struct *target,
@@ -50,10 +67,47 @@ static int riscv_gpr_set(struct task_struct *target,
 			 unsigned int pos, unsigned int count,
 			 const void *kbuf, const void __user *ubuf)
 {
-	struct pt_regs *regs;
+	elf_greg_t *ptregs = (elf_greg_t *)task_pt_regs(target);
+	elf_gregset_t nregs;
+	int ret, i;
+#ifdef CONFIG_CHERI_KERNEL
+	u8 *tags = (u8 *)&nregs[__ELF_NGREG];
+#endif
 
-	regs = task_pt_regs(target);
-	return user_regset_copyin(&pos, &count, &kbuf, &ubuf, regs, 0, -1);
+	BUILD_BUG_ON(sizeof(struct user_regs_struct) != __ELF_NGREG * sizeof(elf_greg_t));
+	BUILD_BUG_ON(sizeof(elf_gregset_t) != ELF_NGREG * sizeof(elf_greg_t));
+
+	if (pos != 0 || count != sizeof(elf_gregset_t)) {
+		struct membuf mbuf = {
+			.p = &nregs,
+			.left = sizeof(nregs),
+		};
+		ret = riscv_gpr_get(target, regset, mbuf);
+		if (ret != 0)
+			return -EIO;
+	}
+	ret = user_regset_copyin(&pos, &count, &kbuf, &ubuf, &nregs, 0,
+				 sizeof(nregs));
+	if (ret)
+		return ret;
+
+	for (i = 0; i < __ELF_NGREG; ++i) {
+		elf_greg_t val = nregs[i];
+#ifdef CONFIG_CHERI_KERNEL
+		elf_greg_t old = ptregs[i];
+		char tag = tags[i / 8] & (1U << (i % 8));
+		/*
+		 * Take provenance from the old cap. This allows for
+		 * the common cases without the need to worry about
+		 * security.
+		 */
+		if (tag)
+			asm volatile ("cbld %0, %1, %2" : "=C" (val) : "C" (old), "C" (val));
+#endif
+		ptregs[i] = val;
+	}
+
+	return 0;
 }
 
 #ifdef CONFIG_FPU
