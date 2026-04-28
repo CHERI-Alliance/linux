@@ -321,7 +321,7 @@ static void ccp_enable_queue_interrupts(struct ccp_device *ccp)
 	iowrite32(ccp->qim, ccp->io_regs + IRQ_MASK_REG);
 }
 
-static void ccp_irq_bh(unsigned long data)
+static void ccp_irq_bh(uintptr_t data)
 {
 	struct ccp_device *ccp = (struct ccp_device *)data;
 	struct ccp_cmd_queue *cmd_q;
@@ -458,7 +458,7 @@ static int ccp_init(struct ccp_device *ccp)
 	/* Initialize the ISR tasklet? */
 	if (ccp->use_tasklet)
 		tasklet_init(&ccp->irq_tasklet, ccp_irq_bh,
-			     (unsigned long)ccp);
+			     (uintptr_t) ccp);
 
 	dev_dbg(dev, "Starting threads...\n");
 	/* Create a kthread for each queue */

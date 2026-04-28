@@ -229,10 +229,10 @@ static inline void ctcmpc_dump32(char *buf, int len)
 }
 
 void ctcm_ccw_check_rc(struct channel *, int, char *);
-void mpc_group_ready(unsigned long adev);
+void mpc_group_ready(uintptr_t adev);
 void mpc_channel_action(struct channel *ch, int direction, int action);
-void mpc_action_send_discontact(unsigned long thischan);
+void mpc_action_send_discontact(uintptr_t thischan);
 void mpc_action_discontact(fsm_instance *fi, int event, void *arg);
-void ctcmpc_bh(unsigned long thischan);
+void ctcmpc_bh(uintptr_t thischan);
 #endif
 /* --- This is the END my friend --- */

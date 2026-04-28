@@ -207,7 +207,7 @@ static void pm8001_free(struct pm8001_hba_info *pm8001_ha)
  * @opaque: the passed general host adapter struct
  * Note: pm8001_tasklet is common for pm8001 & pm80xx
  */
-static void pm8001_tasklet(unsigned long opaque)
+static void pm8001_tasklet(uintptr_t opaque)
 {
 	struct isr_param *irq_vector = (struct isr_param *)opaque;
 	struct pm8001_hba_info *pm8001_ha = irq_vector->drv_inst;

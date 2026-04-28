@@ -1179,7 +1179,7 @@ fore200e_interrupt(int irq, void* dev)
 
 #ifdef FORE200E_USE_TASKLET
 static void
-fore200e_tx_tasklet(unsigned long data)
+fore200e_tx_tasklet(uintptr_t data)
 {
     struct fore200e* fore200e = (struct fore200e*) data;
     unsigned long flags;
@@ -1193,7 +1193,7 @@ fore200e_tx_tasklet(unsigned long data)
 
 
 static void
-fore200e_rx_tasklet(unsigned long data)
+fore200e_rx_tasklet(uintptr_t data)
 {
     struct fore200e* fore200e = (struct fore200e*) data;
     unsigned long    flags;
@@ -1944,8 +1944,10 @@ static int fore200e_irq_request(struct fore200e *fore200e)
 	   fore200e_irq_itoa(fore200e->irq), fore200e->name);
 
 #ifdef FORE200E_USE_TASKLET
-    tasklet_init(&fore200e->tx_tasklet, fore200e_tx_tasklet, (unsigned long)fore200e);
-    tasklet_init(&fore200e->rx_tasklet, fore200e_rx_tasklet, (unsigned long)fore200e);
+    tasklet_init(&fore200e->tx_tasklet, fore200e_tx_tasklet,
+                 (uintptr_t) fore200e);
+    tasklet_init(&fore200e->rx_tasklet, fore200e_rx_tasklet,
+                 (uintptr_t) fore200e);
 #endif
 
     fore200e->state = FORE200E_STATE_IRQ;

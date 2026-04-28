@@ -602,7 +602,7 @@ static void jmb38x_ms_abort(struct timer_list *t)
 	spin_unlock_irqrestore(&host->lock, flags);
 }
 
-static void jmb38x_ms_req_tasklet(unsigned long data)
+static void jmb38x_ms_req_tasklet(uintptr_t data)
 {
 	struct memstick_host *msh = (struct memstick_host *)data;
 	struct jmb38x_ms_host *host = memstick_priv(msh);

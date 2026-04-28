@@ -924,7 +924,7 @@ static __poll_t mshv_vtl_sint_poll(struct file *filp, poll_table *wait)
 	return mask;
 }
 
-static void mshv_vtl_sint_on_msg_dpc(unsigned long data)
+static void mshv_vtl_sint_on_msg_dpc(uintptr_t data)
 {
 	WRITE_ONCE(has_message, true);
 	wake_up_interruptible_poll(&fd_wait_queue, EPOLLIN);

@@ -17,7 +17,7 @@
 #define DRV_NAME	"octeontx-cptvf"
 #define DRV_VERSION	"1.0"
 
-static void vq_work_handler(unsigned long data)
+static void vq_work_handler(uintptr_t data)
 {
 	struct otx_cptvf_wqe_info *cwqe_info =
 					(struct otx_cptvf_wqe_info *) data;

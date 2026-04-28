@@ -121,7 +121,7 @@ static void megaraid_mbox_prepare_epthru(adapter_t *, scb_t *,
 
 static irqreturn_t megaraid_isr(int, void *);
 
-static void megaraid_mbox_dpc(unsigned long);
+static void megaraid_mbox_dpc(uintptr_t);
 
 static ssize_t megaraid_mbox_app_hndl_show(struct device *, struct device_attribute *attr, char *);
 static ssize_t megaraid_mbox_ld_show(struct device *, struct device_attribute *attr, char *);
@@ -883,7 +883,7 @@ megaraid_init_mbox(adapter_t *adapter)
 
 	// setup tasklet for DPC
 	tasklet_init(&adapter->dpc_h, megaraid_mbox_dpc,
-			(unsigned long)adapter);
+			(uintptr_t) adapter);
 
 	con_log(CL_DLEVEL1, (KERN_INFO
 		"megaraid mbox hba successfully initialized\n"));
@@ -2169,7 +2169,7 @@ megaraid_isr(int irq, void *devp)
  * it is being called.
  */
 static void
-megaraid_mbox_dpc(unsigned long devp)
+megaraid_mbox_dpc(uintptr_t devp)
 {
 	adapter_t		*adapter = (adapter_t *)devp;
 	mraid_device_t		*raid_dev;

@@ -2064,7 +2064,7 @@ static void ibmvmc_handle_crq(struct ibmvmc_crq_msg *crq,
 	}
 }
 
-static void ibmvmc_task(unsigned long data)
+static void ibmvmc_task(uintptr_t data)
 {
 	struct crq_server_adapter *adapter =
 		(struct crq_server_adapter *)data;
@@ -2150,7 +2150,7 @@ static int ibmvmc_init_crq_queue(struct crq_server_adapter *adapter)
 	queue->cur = 0;
 	spin_lock_init(&queue->lock);
 
-	tasklet_init(&adapter->work_task, ibmvmc_task, (unsigned long)adapter);
+	tasklet_init(&adapter->work_task, ibmvmc_task, (uintptr_t) adapter);
 
 	if (request_irq(vdev->irq,
 			ibmvmc_handle_event,

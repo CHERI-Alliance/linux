@@ -2079,7 +2079,7 @@ static void artpec6_crypto_timeout(struct timer_list *t)
 	tasklet_schedule(&ac->task);
 }
 
-static void artpec6_crypto_task(unsigned long data)
+static void artpec6_crypto_task(uintptr_t data)
 {
 	struct artpec6_crypto *ac = (struct artpec6_crypto *)data;
 	struct artpec6_crypto_req_common *req;
@@ -2892,7 +2892,7 @@ static int artpec6_crypto_probe(struct platform_device *pdev)
 #endif
 
 	tasklet_init(&ac->task, artpec6_crypto_task,
-		     (unsigned long)ac);
+		     (uintptr_t) ac);
 
 	ac->pad_buffer = devm_kcalloc(&pdev->dev, 2, ARTPEC_CACHE_LINE_MAX,
 				      GFP_KERNEL);

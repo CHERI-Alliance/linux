@@ -1198,7 +1198,7 @@ msg_handled:
 	vmbus_signal_eom(msg, message_type);
 }
 
-void vmbus_on_msg_dpc(unsigned long data)
+void vmbus_on_msg_dpc(uintptr_t data)
 {
 	struct hv_per_cpu_context *hv_cpu = (void *)data;
 

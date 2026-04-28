@@ -424,8 +424,8 @@ void vmbus_disconnect(void);
 
 int vmbus_post_msg(void *buffer, size_t buflen, bool can_sleep);
 
-void vmbus_on_event(unsigned long data);
-void vmbus_on_msg_dpc(unsigned long data);
+void vmbus_on_event(uintptr_t data);
+void vmbus_on_msg_dpc(uintptr_t data);
 
 int hv_kvp_init(struct hv_util_service *srv);
 int hv_kvp_init_transport(void);

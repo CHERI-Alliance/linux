@@ -21,7 +21,7 @@ struct cptvf_wqe_info {
 	struct cptvf_wqe vq_wqe[CPT_NUM_QS_PER_VF];
 };
 
-static void vq_work_handler(unsigned long data)
+static void vq_work_handler(uintptr_t data)
 {
 	struct cptvf_wqe_info *cwqe_info = (struct cptvf_wqe_info *)data;
 	struct cptvf_wqe *cwqe = &cwqe_info->vq_wqe[0];

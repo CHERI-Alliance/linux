@@ -279,7 +279,7 @@ static void poll_scq(struct rds_ib_connection *ic, struct ib_cq *cq,
 	}
 }
 
-static void rds_ib_tasklet_fn_send(unsigned long data)
+static void rds_ib_tasklet_fn_send(uintptr_t data)
 {
 	struct rds_ib_connection *ic = (struct rds_ib_connection *)data;
 	struct rds_connection *conn = ic->conn;
@@ -319,7 +319,7 @@ static void poll_rcq(struct rds_ib_connection *ic, struct ib_cq *cq,
 	}
 }
 
-static void rds_ib_tasklet_fn_recv(unsigned long data)
+static void rds_ib_tasklet_fn_recv(uintptr_t data)
 {
 	struct rds_ib_connection *ic = (struct rds_ib_connection *)data;
 	struct rds_connection *conn = ic->conn;
@@ -1215,9 +1215,9 @@ int rds_ib_conn_alloc(struct rds_connection *conn, gfp_t gfp)
 
 	INIT_LIST_HEAD(&ic->ib_node);
 	tasklet_init(&ic->i_send_tasklet, rds_ib_tasklet_fn_send,
-		     (unsigned long)ic);
+		     (uintptr_t) ic);
 	tasklet_init(&ic->i_recv_tasklet, rds_ib_tasklet_fn_recv,
-		     (unsigned long)ic);
+		     (uintptr_t) ic);
 	mutex_init(&ic->i_recv_mutex);
 #ifndef KERNEL_HAS_ATOMIC64
 	spin_lock_init(&ic->i_ack_lock);

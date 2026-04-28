@@ -396,8 +396,8 @@ void mhi_reset_chan(struct mhi_controller *mhi_cntrl,
 		    struct mhi_chan *mhi_chan);
 
 /* Event processing methods */
-void mhi_ctrl_ev_task(unsigned long data);
-void mhi_ev_task(unsigned long data);
+void mhi_ctrl_ev_task(uintptr_t data);
+void mhi_ev_task(uintptr_t data);
 int mhi_process_data_event_ring(struct mhi_controller *mhi_cntrl,
 				struct mhi_event *mhi_event, u32 event_quota);
 int mhi_process_ctrl_ev_ring(struct mhi_controller *mhi_cntrl,

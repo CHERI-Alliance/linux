@@ -90,7 +90,7 @@ static struct device *vme_root;
 /*
  * Calling VME bus interrupt callback if provided.
  */
-static void fake_VIRQ_tasklet(unsigned long data)
+static void fake_VIRQ_tasklet(uintptr_t data)
 {
 	struct vme_bridge *fake_bridge;
 	struct fake_driver *bridge;
@@ -1095,7 +1095,7 @@ static int __init fake_init(void)
 	mutex_init(&fake_device->vme_int);
 	mutex_init(&fake_bridge->irq_mtx);
 	tasklet_init(&fake_device->int_tasklet, fake_VIRQ_tasklet,
-		     (unsigned long)fake_bridge);
+		     (uintptr_t) fake_bridge);
 
 	strscpy(fake_bridge->name, driver_name, sizeof(fake_bridge->name));
 

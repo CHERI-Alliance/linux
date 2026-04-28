@@ -256,7 +256,7 @@ static irqreturn_t caam_jr_interrupt(int irq, void *st_dev)
 }
 
 /* Deferred service handler, run as interrupt-fired tasklet */
-static void caam_jr_dequeue(unsigned long devarg)
+static void caam_jr_dequeue(uintptr_t devarg)
 {
 	int hw_idx, sw_idx, i, head, tail;
 	struct caam_jr_dequeue_params *params = (void *)devarg;
@@ -562,7 +562,7 @@ static int caam_jr_init(struct device *dev)
 	jrp->tasklet_params.dev = dev;
 	jrp->tasklet_params.enable_itr = 1;
 	tasklet_init(&jrp->irqtask, caam_jr_dequeue,
-		     (unsigned long)&jrp->tasklet_params);
+		     (uintptr_t)&jrp->tasklet_params);
 
 	/* Connect job ring interrupt handler. */
 	error = devm_request_irq(dev, jrp->irq, caam_jr_interrupt, IRQF_SHARED,
