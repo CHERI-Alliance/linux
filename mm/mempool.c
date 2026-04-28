@@ -84,7 +84,7 @@ static void check_element(struct mempool *pool, void *element)
 		__check_element(pool, element, kmem_cache_size(pool->pool_data));
 	} else if (pool->free == mempool_free_pages) {
 		/* Mempools backed by page allocator */
-		int order = (int)(long)pool->pool_data;
+		int order = (int)(long)__c_pa(pool->pool_data);
 
 #ifdef CONFIG_HIGHMEM
 		for (int i = 0; i < (1 << order); i++) {
@@ -118,12 +118,12 @@ static void poison_element(struct mempool *pool, void *element)
 
 	/* Mempools backed by slab allocator */
 	if (pool->alloc == mempool_kmalloc) {
-		__poison_element(element, (size_t)pool->pool_data);
+		__poison_element(element, __c_pa(pool->pool_data));
 	} else if (pool->alloc == mempool_alloc_slab) {
 		__poison_element(element, kmem_cache_size(pool->pool_data));
 	} else if (pool->alloc == mempool_alloc_pages) {
 		/* Mempools backed by page allocator */
-		int order = (int)(long)pool->pool_data;
+		int order = (int)(long)__c_pa(pool->pool_data);
 
 #ifdef CONFIG_HIGHMEM
 		for (int i = 0; i < (1 << order); i++) {
@@ -156,14 +156,14 @@ static __always_inline bool kasan_poison_element(struct mempool *pool,
 		return kasan_mempool_poison_object(element);
 	else if (pool->alloc == mempool_alloc_pages)
 		return kasan_mempool_poison_pages(element,
-						(unsigned long)pool->pool_data);
+						  __c_pa(pool->pool_data));
 	return true;
 }
 
 static void kasan_unpoison_element(struct mempool *pool, void *element)
 {
 	if (pool->alloc == mempool_kmalloc)
-		kasan_mempool_unpoison_object(element, (uintptr_t)pool->pool_data);
+		kasan_mempool_unpoison_object(element, __c_pa(pool->pool_data));
 	else if (pool->alloc == mempool_alloc_slab)
 		kasan_mempool_unpoison_object(element,
 					      kmem_cache_size(pool->pool_data));
@@ -505,7 +505,7 @@ int mempool_alloc_bulk_noprof(struct mempool *pool, void **elems,
 	 */
 	if (should_fail_ex(&fail_mempool_alloc_bulk, 1, FAULT_NOWARN)) {
 		pr_info("forcing mempool usage for %pS\n",
-				(void *)_RET_IP_);
+				__c_fakep(_RET_IP_));
 		goto use_pool;
 	}
 
@@ -560,7 +560,7 @@ void *mempool_alloc_noprof(struct mempool *pool, gfp_t gfp_mask)
 repeat_alloc:
 	if (should_fail_ex(&fail_mempool_alloc, 1, FAULT_NOWARN)) {
 		pr_info("forcing mempool usage for %pS\n",
-				(void *)_RET_IP_);
+				__c_fakep(_RET_IP_));
 		element = NULL;
 	} else {
 		element = pool->alloc(gfp_temp, pool->pool_data);
@@ -736,7 +736,7 @@ EXPORT_SYMBOL(mempool_free_slab);
  */
 void *mempool_kmalloc(gfp_t gfp_mask, void *pool_data)
 {
-	uintptr_t size = (uintptr_t)pool_data;
+	size_t size = __c_pa(pool_data);
 	return kmalloc_noprof(size, gfp_mask);
 }
 EXPORT_SYMBOL(mempool_kmalloc);
@@ -753,14 +753,14 @@ EXPORT_SYMBOL(mempool_kfree);
  */
 void *mempool_alloc_pages(gfp_t gfp_mask, void *pool_data)
 {
-	int order = (int)(long)pool_data;
+	int order = (int)(long)__c_pa(pool_data);
 	return alloc_pages_noprof(gfp_mask, order);
 }
 EXPORT_SYMBOL(mempool_alloc_pages);
 
 void mempool_free_pages(void *element, void *pool_data)
 {
-	int order = (int)(long)pool_data;
+	int order = (int)(long)__c_pa(pool_data);
 	__free_pages(element, order);
 }
 EXPORT_SYMBOL(mempool_free_pages);
