@@ -1208,6 +1208,20 @@
 		asm volatile(__msr_s(r, "%x0") : : "r" (__val));	\
 } while (0)
 
+#ifdef CONFIG_ARM64_MORELLO
+#define read_cap_sysreg(r) ({						\
+	uintcap_t __cap;						\
+	asm volatile("mrs %0, " __stringify(r) : "=r" (__cap));		\
+	__cap;								\
+})
+
+#define write_cap_sysreg(v, r) do {					\
+	uintcap_t __cap = (uintcap_t)(v);				\
+	asm volatile("msr " __stringify(r) ", %0"			\
+		     : : "rZ" (__cap));					\
+} while (0)
+#endif
+
 /*
  * Modify bits in a sysreg. Bits in the clear mask are zeroed, then bits in the
  * set mask are set. Other bits are left as-is.
