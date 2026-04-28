@@ -85,7 +85,7 @@ epoll_put_uevent(__poll_t revents, __u64 data,
 		 struct epoll_event __user *uevent);
 #else
 static inline struct epoll_event __user *
-epoll_put_uevent(__poll_t revents, __u64 data,
+epoll_put_uevent(__poll_t revents, user_uintptr_t data,
 		 struct epoll_event __user *uevent)
 {
 	if (in_compat_syscall()) {
