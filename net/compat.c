@@ -112,9 +112,10 @@ int get_compat_msghdr(struct msghdr *kmsg,
 	(sizeof(struct compat_cmsghdr) + (len))
 
 #define CMSG_COMPAT_FIRSTHDR(msg)			\
-	(((msg)->msg_controllen) >= sizeof(struct compat_cmsghdr) ?	\
+	((struct compat_cmsghdr __user *) \
+	(void __user *)(((msg)->msg_controllen) >= sizeof(struct compat_cmsghdr) ?	\
 	 (struct compat_cmsghdr __user *)((msg)->msg_control_user) :	\
-	 (struct compat_cmsghdr __user *)NULL)
+	 (struct compat_cmsghdr __user *)NULL))
 
 #define CMSG_COMPAT_OK(ucmlen, ucmsg, mhdr) \
 	((ucmlen) >= sizeof(struct compat_cmsghdr) && \

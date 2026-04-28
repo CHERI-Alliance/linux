@@ -469,7 +469,7 @@ static inline ssize_t debugfs_read_file_str(struct file *file,
 
 #define debugfs_create_file_aux_num(name, mode, parent, data, n, fops) \
 	debugfs_create_file_aux(name, mode, parent, data, \
-				(void *)(unsigned long)n, fops)
+				(void *)(uintptr_t)n, fops)
 #define debugfs_get_aux_num(f) (unsigned long)debugfs_get_aux(f)
 
 /**
