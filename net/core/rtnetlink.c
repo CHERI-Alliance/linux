@@ -1699,9 +1699,9 @@ static int rtnl_fill_link_ifmap(struct sk_buff *skb,
 	struct rtnl_link_ifmap map;
 
 	memset(&map, 0, sizeof(map));
-	map.mem_start = READ_ONCE(dev->mem_start);
-	map.mem_end   = READ_ONCE(dev->mem_end);
-	map.base_addr = READ_ONCE(dev->base_addr);
+	map.mem_start = __c_ua(READ_ONCE(dev->mem_start));
+	map.mem_end   = __c_ua(READ_ONCE(dev->mem_end));
+	map.base_addr = __c_ua(READ_ONCE(dev->base_addr));
 	map.irq       = READ_ONCE(dev->irq);
 	map.dma       = READ_ONCE(dev->dma);
 	map.port      = READ_ONCE(dev->if_port);

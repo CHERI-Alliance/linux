@@ -331,7 +331,7 @@ static int nci_uart_tty_ioctl(struct tty_struct *tty, unsigned int cmd,
 	switch (cmd) {
 	case NCIUARTSETDRIVER:
 		if (!nu)
-			return nci_uart_set_driver(tty, (unsigned int)arg);
+			return nci_uart_set_driver(tty, __c_ua(arg));
 		else
 			return -EBUSY;
 		break;
@@ -432,7 +432,9 @@ static struct tty_ldisc_ops nci_uart_ldisc = {
 	.receive_buf	= nci_uart_tty_receive,
 	.write_wakeup	= nci_uart_tty_wakeup,
 	.ioctl		= nci_uart_tty_ioctl,
+#ifndef CONFIG_CHERI_KERNEL
 	.compat_ioctl	= nci_uart_tty_ioctl,
+#endif
 };
 
 static int __init nci_uart_init(void)

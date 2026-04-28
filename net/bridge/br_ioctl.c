@@ -219,28 +219,28 @@ int br_dev_siocdevprivate(struct net_device *dev, struct ifreq *rq,
 		if (!ns_capable(dev_net(dev)->user_ns, CAP_NET_ADMIN))
 			return -EPERM;
 
-		ret = br_set_forward_delay(br, args[1]);
+		ret = br_set_forward_delay(br, __c_ua(args[1]));
 		break;
 
 	case BRCTL_SET_BRIDGE_HELLO_TIME:
 		if (!ns_capable(dev_net(dev)->user_ns, CAP_NET_ADMIN))
 			return -EPERM;
 
-		ret = br_set_hello_time(br, args[1]);
+		ret = br_set_hello_time(br, __c_ua(args[1]));
 		break;
 
 	case BRCTL_SET_BRIDGE_MAX_AGE:
 		if (!ns_capable(dev_net(dev)->user_ns, CAP_NET_ADMIN))
 			return -EPERM;
 
-		ret = br_set_max_age(br, args[1]);
+		ret = br_set_max_age(br, __c_ua(args[1]));
 		break;
 
 	case BRCTL_SET_AGEING_TIME:
 		if (!ns_capable(dev_net(dev)->user_ns, CAP_NET_ADMIN))
 			return -EPERM;
 
-		ret = br_set_ageing_time(br, args[1]);
+		ret = br_set_ageing_time(br, __c_ua(args[1]));
 		break;
 
 	case BRCTL_GET_PORT_INFO:
@@ -280,7 +280,7 @@ int br_dev_siocdevprivate(struct net_device *dev, struct ifreq *rq,
 		if (!ns_capable(dev_net(dev)->user_ns, CAP_NET_ADMIN))
 			return -EPERM;
 
-		ret = br_stp_set_enabled(br, args[1], NULL);
+		ret = br_stp_set_enabled(br, __c_ua(args[1]), NULL);
 		break;
 
 	case BRCTL_SET_BRIDGE_PRIORITY:
@@ -300,7 +300,7 @@ int br_dev_siocdevprivate(struct net_device *dev, struct ifreq *rq,
 		if ((p = br_get_port(br, args[1])) == NULL)
 			ret = -EINVAL;
 		else
-			ret = br_stp_set_port_priority(p, args[2]);
+			ret = br_stp_set_port_priority(p, __c_ua(args[2]));
 		spin_unlock_bh(&br->lock);
 		break;
 	}
@@ -314,13 +314,13 @@ int br_dev_siocdevprivate(struct net_device *dev, struct ifreq *rq,
 		if ((p = br_get_port(br, args[1])) == NULL)
 			ret = -EINVAL;
 		else
-			ret = br_stp_set_path_cost(p, args[2]);
+			ret = br_stp_set_path_cost(p, __c_ua(args[2]));
 		spin_unlock_bh(&br->lock);
 		break;
 	}
 
 	case BRCTL_GET_FDB_ENTRIES:
-		return get_fdb_entries(br, argp, args[2], args[3]);
+		return get_fdb_entries(br, argp, __c_ua(args[2]), __c_ua(args[3]));
 
 	default:
 		ret = -EOPNOTSUPP;
@@ -357,15 +357,15 @@ static int old_deviceless(struct net *net, void __user *data)
 
 		if (args[2] >= 2048)
 			return -ENOMEM;
-		indices = kzalloc_objs(int, args[2]);
+		indices = kzalloc_objs(int, __c_ua(args[2]));
 		if (indices == NULL)
 			return -ENOMEM;
 
 		args[2] = get_bridge_ifindices(net, indices, args[2]);
 
 		ret = copy_to_user(argp, indices,
-				   array_size(args[2], sizeof(int)))
-			? -EFAULT : (int)args[2];
+				   array_size(__c_ua(args[2]), sizeof(int)))
+			? -EFAULT : (int)__c_ua(args[2]);
 
 		kfree(indices);
 		return ret;
