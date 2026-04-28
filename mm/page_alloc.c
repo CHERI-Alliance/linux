@@ -1099,7 +1099,7 @@ static inline bool page_expected_state(struct page *page,
 	if (unlikely((unsigned long)page->mapping |
 			page_ref_count(page) |
 #ifdef CONFIG_MEMCG
-			page->memcg_data |
+			__c_ua(page->memcg_data) |
 #endif
 			page_pool_page_is_pp(page) |
 			(page->flags.f & check_flags)))

@@ -2868,7 +2868,7 @@ out:
 
 static struct obj_cgroup *page_objcg(const struct page *page)
 {
-	unsigned long memcg_data = page->memcg_data;
+	uintptr_t memcg_data = page->memcg_data;
 
 	if (mem_cgroup_disabled() || !memcg_data)
 		return NULL;
@@ -4222,7 +4222,12 @@ static void mem_cgroup_kmem_attach(struct cgroup_taskset *tset)
 
 	cgroup_taskset_for_each(task, css, tset) {
 		/* atomically set the update bit */
+		/* FIXCHERI: HACK ALERT: Support proper bit operations on pointers. */
+#if __SIZEOF_POINTER__ > __SIZEOF_LONG__
+		atomic_ptr_or(1ULL << CURRENT_OBJCG_UPDATE_BIT, (atomic_ptr_t *)&task->objcg);
+#else
 		set_bit(CURRENT_OBJCG_UPDATE_BIT, (unsigned long *)&task->objcg);
+#endif
 	}
 }
 

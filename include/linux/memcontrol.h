@@ -394,7 +394,7 @@ static inline struct mem_cgroup *obj_cgroup_memcg(struct obj_cgroup *objcg)
  */
 static inline struct mem_cgroup *__folio_memcg(struct folio *folio)
 {
-	unsigned long memcg_data = folio->memcg_data;
+	uintptr_t memcg_data = folio->memcg_data;
 
 	VM_BUG_ON_FOLIO(folio_test_slab(folio), folio);
 	VM_BUG_ON_FOLIO(memcg_data & MEMCG_DATA_OBJEXTS, folio);
@@ -415,7 +415,7 @@ static inline struct mem_cgroup *__folio_memcg(struct folio *folio)
  */
 static inline struct obj_cgroup *__folio_objcg(struct folio *folio)
 {
-	unsigned long memcg_data = folio->memcg_data;
+	uintptr_t memcg_data = folio->memcg_data;
 
 	VM_BUG_ON_FOLIO(folio_test_slab(folio), folio);
 	VM_BUG_ON_FOLIO(memcg_data & MEMCG_DATA_OBJEXTS, folio);
@@ -487,7 +487,7 @@ static inline struct mem_cgroup *folio_memcg_check(struct folio *folio)
 	 * Because folio->memcg_data might be changed asynchronously
 	 * for slabs, READ_ONCE() should be used here.
 	 */
-	unsigned long memcg_data = READ_ONCE(folio->memcg_data);
+	uintptr_t memcg_data = READ_ONCE(folio->memcg_data);
 
 	if (memcg_data & MEMCG_DATA_OBJEXTS)
 		return NULL;
