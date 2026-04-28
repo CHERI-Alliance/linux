@@ -750,7 +750,7 @@ static inline void create_wreq(struct chcr_context *ctx,
 		htonl(FW_CRYPTO_LOOKASIDE_WR_HASH_SIZE_V(hash_sz));
 	chcr_req->wreq.len16_pkd =
 		htonl(FW_CRYPTO_LOOKASIDE_WR_LEN16_V(DIV_ROUND_UP(len16, 16)));
-	chcr_req->wreq.cookie = cpu_to_be64((uintptr_t)req);
+	chcr_req->wreq.cookie = cpu_to_be64(__c_pa(req));
 	chcr_req->wreq.rx_chid_to_rx_q_id = FILL_WR_RX_Q_ID(rx_channel_id, qid,
 							    !!lcb, txqidx);
 

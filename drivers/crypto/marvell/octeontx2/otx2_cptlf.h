@@ -178,7 +178,7 @@ static inline int otx2_cpt_alloc_instruction_queues(
 
 		/* Align pointers */
 		iq->vaddr = PTR_ALIGN(iq->vaddr, OTX2_CPT_INST_Q_ALIGNMENT);
-		iq->dma_addr = PTR_ALIGN(iq->dma_addr,
+		iq->dma_addr = ALIGN(iq->dma_addr,
 					 OTX2_CPT_INST_Q_ALIGNMENT);
 	}
 	return 0;

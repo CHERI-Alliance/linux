@@ -69,7 +69,7 @@ struct se_crypto_request {
 	u8 opcode;
 	gfp_t gfp;
 	u32 flags;
-	u64 ctx_handle;
+	uintptr_t ctx_handle;
 
 	struct gphdr gph;
 	union se_req_ctrl ctrl;
@@ -202,7 +202,7 @@ struct crypto_ctx_hdr {
 struct nitrox_crypto_ctx {
 	struct nitrox_device *ndev;
 	union {
-		u64 ctx_handle;
+		uintptr_t ctx_handle;
 		struct flexi_crypto_context *fctx;
 	} u;
 	struct crypto_ctx_hdr *chdr;
@@ -240,7 +240,7 @@ struct nitrox_aead_rctx {
 	u8 *iv;
 	int ivsize;
 	u32 flags;
-	u64 ctx_handle;
+	uintptr_t ctx_handle;
 	struct scatterlist *src;
 	struct scatterlist *dst;
 	u8 ctrl_arg;
