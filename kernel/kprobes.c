@@ -1489,12 +1489,12 @@ bool within_kprobe_blacklist(unsigned long addr)
  * Specifically, for things like IBT/BTI, skip the resp. ENDBR/BTI.C
  * instruction at +0.
  */
-kprobe_opcode_t *__weak arch_adjust_kprobe_addr(unsigned long addr,
+kprobe_opcode_t *__weak arch_adjust_kprobe_addr(uintptr_t addr,
 						unsigned long offset,
 						bool *on_func_entry)
 {
 	*on_func_entry = !offset;
-	return (kprobe_opcode_t *)__c_fakep(addr + offset);
+	return (kprobe_opcode_t *)addr + offset;
 }
 
 /*
@@ -1502,6 +1502,8 @@ kprobe_opcode_t *__weak arch_adjust_kprobe_addr(unsigned long addr,
  * to it. This way, we can specify a relative address to a symbol.
  * This returns encoded errors if it fails to look up symbol or invalid
  * combination of parameters.
+ *
+ * addr is a fake pointer, see the comment in register_kprobe.
  */
 static kprobe_opcode_t *
 _kprobe_addr(kprobe_opcode_t *addr, const char *symbol_name,
@@ -1536,8 +1538,10 @@ _kprobe_addr(kprobe_opcode_t *addr, const char *symbol_name,
 	 * Then ask the architecture to re-combine them, taking care of
 	 * magical function entry details while telling us if this was indeed
 	 * at the start of the function.
+	 *
+	 * This turns addr into a proper capability.
 	 */
-	addr = arch_adjust_kprobe_addr(__c_pa(addr), offset, on_func_entry);
+	addr = arch_adjust_kprobe_addr((uintptr_t)addr, offset, on_func_entry);
 	if (!addr)
 		return ERR_PTR(-EINVAL);
 
@@ -1628,9 +1632,9 @@ static int check_kprobe_address_safe(struct kprobe *p,
 
 	/* Ensure the address is in a text area, and find a module if exists. */
 	*probed_mod = NULL;
-	if (!core_kernel_text((unsigned long) p->addr)) {
+	if (!core_kernel_text(__c_pa(p->addr))) {
 		guard(rcu)();
-		*probed_mod = __module_text_address((unsigned long) p->addr);
+		*probed_mod = __module_text_address(__c_pa(p->addr));
 		if (!(*probed_mod))
 			return -EINVAL;
 
@@ -1646,8 +1650,8 @@ static int check_kprobe_address_safe(struct kprobe *p,
 	    within_kprobe_blacklist(__c_pa(p->addr)) ||
 	    jump_label_text_reserved(p->addr, p->addr) ||
 	    static_call_text_reserved(p->addr, p->addr) ||
-	    find_bug((uintptr_t)p->addr) ||
-	    is_cfi_preamble_symbol((uintptr_t)p->addr)) {
+	    find_bug(__c_pa(p->addr)) ||
+	    is_cfi_preamble_symbol(__c_pa(p->addr))) {
 		module_put(*probed_mod);
 		return -EINVAL;
 	}
@@ -1712,7 +1716,12 @@ int register_kprobe(struct kprobe *p)
 	kprobe_opcode_t *addr;
 	bool on_func_entry;
 
-	/* Canonicalize probe address from symbol */
+	/*
+	 * Canonicalize probe address from symbol.
+	 *
+	 * p->addr may originate from user input (kprobe_events). Treat it as
+	 * fake pointer until _kprobe_addr has fixed up bounds and permissions.
+	 */
 	addr = _kprobe_addr(p->addr, p->symbol_name, p->offset, &on_func_entry);
 	if (IS_ERR(addr))
 		return PTR_ERR(addr);

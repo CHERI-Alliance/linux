@@ -4,7 +4,7 @@
 #define _ASM_RISCV_PROBES_H
 
 typedef u32 probe_opcode_t;
-typedef bool (probes_handler_t) (u32 opcode, uintptr_t addr, struct pt_regs *);
+typedef bool (probes_handler_t) (u32 opcode, ptraddr_t addr, struct pt_regs *);
 
 /* architecture specific copy of original instruction */
 struct arch_probe_insn {

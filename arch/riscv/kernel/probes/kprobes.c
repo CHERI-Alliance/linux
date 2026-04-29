@@ -22,12 +22,40 @@ DEFINE_PER_CPU(struct kprobe_ctlblk, kprobe_ctlblk);
 static void __kprobes
 post_kprobe_handler(struct kprobe *, struct kprobe_ctlblk *, struct pt_regs *);
 
+kprobe_opcode_t *arch_adjust_kprobe_addr(uintptr_t addr, unsigned long offset,
+					 bool *on_func_entry)
+{
+	*on_func_entry = !offset;
+
+	/*
+	 * The returned capability points to the probe point (addr + offset).
+	 * Bounds must be from symbol start (addr) to probe point + one
+	 * instruction (assuming uncompressed for now).
+	 *
+	 * offset is in bytes, (addr + offset) needs brackets.
+	 */
+
+	addr = (uintptr_t)cheri_make_kernel_data_cap(__c_ua(addr), offset +
+						     GET_INSN_LENGTH(__BUG_INSN_32));
+
+	return (kprobe_opcode_t *)(addr + offset);
+}
+
 static void __kprobes arch_prepare_ss_slot(struct kprobe *p)
 {
 	size_t len = GET_INSN_LENGTH(p->opcode);
 	u32 insn = __BUG_INSN_32;
 
-	p->ainsn.api.restore = (uintptr_t)p->addr + len;
+	/*
+	 * restore cap must be unsealed, as if the kprobe wasn't there.
+	 * cheri_make_kernel_code_cap would return a sealed cap.
+	 */
+	p->ainsn.api.restore = (uintptr_t)cheri_address_set(kernel_code_cap,
+							    __c_pa(p->addr) + len);
+
+	/* limit bounds to the two instructions we store in the slot */
+	p->ainsn.api.insn = cheri_bounds_set(p->ainsn.api.insn,
+					     len + GET_INSN_LENGTH(insn));
 
 	patch_text_nosync(p->ainsn.api.insn, &p->opcode, len);
 	patch_text_nosync((void *)p->ainsn.api.insn + len, &insn, GET_INSN_LENGTH(insn));
@@ -43,8 +71,7 @@ static void __kprobes arch_simulate_insn(struct kprobe *p, struct pt_regs *regs)
 	struct kprobe_ctlblk *kcb = get_kprobe_ctlblk();
 
 	if (p->ainsn.api.handler)
-		p->ainsn.api.handler((u32)p->opcode,
-					(uintptr_t)p->addr, regs);
+		p->ainsn.api.handler((u32)p->opcode, __c_pa(p->addr), regs);
 
 	post_kprobe_handler(p, kcb, regs);
 }
@@ -58,6 +85,7 @@ static bool __kprobes arch_check_kprobe(uintptr_t addr)
 	if (!kallsyms_lookup_size_offset(__c_ua(addr), NULL, &offset))
 		return false;
 
+	/* go back to symbol start, this is within addr's bounds */
 	tmp = addr - offset;
 
 	while (tmp <= addr) {
@@ -74,7 +102,7 @@ int __kprobes arch_prepare_kprobe(struct kprobe *p)
 {
 	u16 *insn = (u16 *)p->addr;
 
-	if ((unsigned long)insn & 0x1)
+	if (__c_pa(insn) & 0x1)
 		return -EILSEQ;
 
 	if (!arch_check_kprobe((uintptr_t)p->addr))
@@ -185,7 +213,12 @@ static void __kprobes setup_singlestep(struct kprobe *p,
 
 	if (p->ainsn.api.insn) {
 		/* prepare for single stepping */
-		slot = (uintptr_t)p->ainsn.api.insn;
+
+		/* p->ainsn.api.insn has proper addr and bounds, but no x perm */
+		slot = (uintptr_t)cheri_address_set(regs->epc,
+						    __c_pa(p->ainsn.api.insn));
+		slot = (uintptr_t)cheri_bounds_set((void *)slot,
+						   cheri_length_get(p->ainsn.api.insn));
 
 		/* IRQs and single stepping do not mix well. */
 		kprobes_save_local_irqflag(kcb, regs);
@@ -338,11 +371,11 @@ bool __kprobes
 kprobe_single_step_handler(struct pt_regs *regs)
 {
 	struct kprobe_ctlblk *kcb = get_kprobe_ctlblk();
-	uintptr_t addr = instruction_pointer(regs);
+	ptraddr_t addr = __c_ua(instruction_pointer(regs));
 	struct kprobe *cur = kprobe_running();
 
 	if (cur && (kcb->kprobe_status & (KPROBE_HIT_SS | KPROBE_REENTER)) &&
-	    ((unsigned long)&cur->ainsn.api.insn[0] + GET_INSN_LENGTH(cur->opcode) == addr)) {
+	    (__c_pa(&cur->ainsn.api.insn[0]) + GET_INSN_LENGTH(cur->opcode) == addr)) {
 		kprobes_restore_local_irqflag(kcb, regs);
 		post_kprobe_handler(cur, kcb, regs);
 		return true;

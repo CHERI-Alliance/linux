@@ -7,6 +7,11 @@
 #include "decode-insn.h"
 #include "simulate-insn.h"
 
+static inline void epc_update(struct pt_regs *regs, ptraddr_t new_addr)
+{
+	regs->epc = (uintptr_t)cheri_address_set(regs->epc, new_addr);
+}
+
 static inline bool rv_insn_reg_get_val(struct pt_regs *regs, u32 index,
 				       uintptr_t *ptr)
 {
@@ -33,7 +38,7 @@ static inline bool rv_insn_reg_set_val(struct pt_regs *regs, u32 index,
 	return true;
 }
 
-bool __kprobes simulate_jal(u32 opcode, uintptr_t addr, struct pt_regs *regs)
+bool __kprobes simulate_jal(u32 opcode, ptraddr_t addr, struct pt_regs *regs)
 {
 	/*
 	 *     31    30       21    20     19        12 11 7 6      0
@@ -44,18 +49,20 @@ bool __kprobes simulate_jal(u32 opcode, uintptr_t addr, struct pt_regs *regs)
 	s32 imm;
 	u32 index = RV_EXTRACT_RD_REG(opcode);
 
-	ret = rv_insn_reg_set_val(regs, index, addr + 4);
+	/* jal writes a sealed capability into rd */
+	ret = rv_insn_reg_set_val(regs, index,
+				  (uintptr_t)cheri_make_kernel_code_cap(addr + 4));
 	if (!ret)
 		return ret;
 
 	imm = RV_EXTRACT_JTYPE_IMM(opcode);
 
-	instruction_pointer_set(regs, addr + imm);
+	epc_update(regs, addr + imm);
 
 	return ret;
 }
 
-bool __kprobes simulate_jalr(u32 opcode, uintptr_t addr, struct pt_regs *regs)
+bool __kprobes simulate_jalr(u32 opcode, ptraddr_t addr, struct pt_regs *regs)
 {
 	/*
 	 * 31          20 19 15 14 12 11 7 6      0
@@ -72,16 +79,25 @@ bool __kprobes simulate_jalr(u32 opcode, uintptr_t addr, struct pt_regs *regs)
 	if (!ret)
 		return ret;
 
-	ret = rv_insn_reg_set_val(regs, rd_index, addr + 4);
+	/* jalr writes a sealed capability into rd */
+	ret = rv_insn_reg_set_val(regs, rd_index,
+				  (uintptr_t)cheri_make_kernel_code_cap(addr + 4));
 	if (!ret)
 		return ret;
 
-	instruction_pointer_set(regs, (base_addr + sign_extend32((imm), 11))&~1);
+	/*
+	 * The cheri spec requires the hart to unseal the calculated epc
+	 * (rs1 + sign-extended imm) if it's sealed.
+	 *
+	 * (The current epc can never be sealed or we wouldn't be able to
+	 * increment it for the next instruction.)
+	 */
+	epc_update(regs, (__c_ua(base_addr) + sign_extend32((imm), 11))&~1);
 
 	return ret;
 }
 
-bool __kprobes simulate_auipc(u32 opcode, uintptr_t addr, struct pt_regs *regs)
+bool __kprobes simulate_auipc(u32 opcode, ptraddr_t addr, struct pt_regs *regs)
 {
 	/*
 	 * auipc instruction:
@@ -91,17 +107,18 @@ bool __kprobes simulate_auipc(u32 opcode, uintptr_t addr, struct pt_regs *regs)
 	 */
 
 	u32 rd_idx = RV_EXTRACT_RD_REG(opcode);
-	uintptr_t rd_val = addr + (s32)RV_EXTRACT_UTYPE_IMM(opcode);
+	uintptr_t rd_val = (uintptr_t)cheri_address_set(regs->epc, addr +
+							(s32)RV_EXTRACT_UTYPE_IMM(opcode));
 
 	if (!rv_insn_reg_set_val(regs, rd_idx, rd_val))
 		return false;
 
-	instruction_pointer_set(regs, addr + 4);
+	epc_update(regs, addr + 4);
 
 	return true;
 }
 
-bool __kprobes simulate_branch(u32 opcode, uintptr_t addr, struct pt_regs *regs)
+bool __kprobes simulate_branch(u32 opcode, ptraddr_t addr, struct pt_regs *regs)
 {
 	/*
 	 * branch instructions:
@@ -149,21 +166,21 @@ bool __kprobes simulate_branch(u32 opcode, uintptr_t addr, struct pt_regs *regs)
 		return false;
 	}
 
-	instruction_pointer_set(regs, addr + offset);
+	epc_update(regs, addr + offset);
 
 	return true;
 }
 
-bool __kprobes simulate_c_j(u32 opcode, uintptr_t addr, struct pt_regs *regs)
+bool __kprobes simulate_c_j(u32 opcode, ptraddr_t addr, struct pt_regs *regs)
 {
 	s32 offset = RVC_EXTRACT_JTYPE_IMM(opcode);
 
-	instruction_pointer_set(regs, addr + offset);
+	epc_update(regs, addr + offset);
 
 	return true;
 }
 
-static bool __kprobes simulate_c_jr_jalr(u32 opcode, uintptr_t addr, struct pt_regs *regs,
+static bool __kprobes simulate_c_jr_jalr(u32 opcode, ptraddr_t addr, struct pt_regs *regs,
 					 bool is_jalr)
 {
 	/*
@@ -182,25 +199,27 @@ static bool __kprobes simulate_c_jr_jalr(u32 opcode, uintptr_t addr, struct pt_r
 	if (!rv_insn_reg_get_val(regs, rs1, &jump_addr))
 		return false;
 
-	if (is_jalr && !rv_insn_reg_set_val(regs, 1, addr + 2))
+	if (is_jalr &&
+	    !rv_insn_reg_set_val(regs, 1,
+				 (uintptr_t)cheri_make_kernel_code_cap(addr + 2)))
 		return false;
 
-	instruction_pointer_set(regs, jump_addr);
+	epc_update(regs, __c_ua(jump_addr));
 
 	return true;
 }
 
-bool __kprobes simulate_c_jr(u32 opcode, uintptr_t addr, struct pt_regs *regs)
+bool __kprobes simulate_c_jr(u32 opcode, ptraddr_t addr, struct pt_regs *regs)
 {
 	return simulate_c_jr_jalr(opcode, addr, regs, false);
 }
 
-bool __kprobes simulate_c_jalr(u32 opcode, uintptr_t addr, struct pt_regs *regs)
+bool __kprobes simulate_c_jalr(u32 opcode, ptraddr_t addr, struct pt_regs *regs)
 {
 	return simulate_c_jr_jalr(opcode, addr, regs, true);
 }
 
-static bool __kprobes simulate_c_bnez_beqz(u32 opcode, uintptr_t addr, struct pt_regs *regs,
+static bool __kprobes simulate_c_bnez_beqz(u32 opcode, ptraddr_t addr, struct pt_regs *regs,
 					   bool is_bnez)
 {
 	/*
@@ -223,17 +242,17 @@ static bool __kprobes simulate_c_bnez_beqz(u32 opcode, uintptr_t addr, struct pt
 	else
 		offset = 2;
 
-	instruction_pointer_set(regs, addr + offset);
+	epc_update(regs, addr + offset);
 
 	return true;
 }
 
-bool __kprobes simulate_c_bnez(u32 opcode, uintptr_t addr, struct pt_regs *regs)
+bool __kprobes simulate_c_bnez(u32 opcode, ptraddr_t addr, struct pt_regs *regs)
 {
 	return simulate_c_bnez_beqz(opcode, addr, regs, true);
 }
 
-bool __kprobes simulate_c_beqz(u32 opcode, uintptr_t addr, struct pt_regs *regs)
+bool __kprobes simulate_c_beqz(u32 opcode, ptraddr_t addr, struct pt_regs *regs)
 {
 	return simulate_c_bnez_beqz(opcode, addr, regs, false);
 }
