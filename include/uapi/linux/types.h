@@ -47,6 +47,15 @@ typedef __u32 __bitwise __wsum;
 typedef __kernel_uintptr_t __ulptr;
 typedef __kernel_intptr_t __slptr;
 
+/*
+ * FIXCHERI: Support old userland code that has copied kernel headers.
+ * for some time but do not mess with an existing macro.
+ */
+#if !defined(__KERNEL__) && !defined(__uptr)
+typedef __ulptr __uptr;
+typedef __slptr __sptr;
+#endif
+
 /* At least 64-bit and large enough for a pointer. */
 #if defined(__ARCH_WANT_PURECAP) || defined(__CHERI_PURE_CAPABILITY__)
 typedef __kernel_uintptr_t __u64ptr;
