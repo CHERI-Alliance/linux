@@ -47,7 +47,7 @@ static struct fgraph_ops fprobe_graph_ops;
 
 static u32 fprobe_node_hashfn(const void *data, u32 len, u32 seed)
 {
-	return hash_ptr(*(unsigned long **)data, 32);
+	return hash_ptr(__c_fakep(*(unsigned long *)data), 32);
 }
 
 static int fprobe_node_cmp(struct rhashtable_compare_arg *arg,
