@@ -429,7 +429,7 @@ __fexit_trace_func(struct trace_fprobe *tf, unsigned long entry_ip,
 	fbuffer.regs = ftrace_get_regs(fregs);
 	entry = fbuffer.entry = ring_buffer_event_data(fbuffer.event);
 	entry->func = entry_ip;
-	entry->ret_ip = __c_ua(ret_ip);
+	entry->ret_ip = ret_ip;
 	store_trace_args(&entry[1], &tf->tp, fregs, entry_data, sizeof(*entry), dsize);
 
 	trace_event_buffer_commit(&fbuffer);
@@ -484,7 +484,7 @@ NOKPROBE_SYMBOL(fentry_perf_func);
 
 static void
 fexit_perf_func(struct trace_fprobe *tf, unsigned long entry_ip,
-		uintptr_t ret_ip, struct ftrace_regs *fregs,
+		unsigned long ret_ip, struct ftrace_regs *fregs,
 		void *entry_data)
 {
 	struct trace_event_call *call = trace_probe_event_call(&tf->tp);
@@ -510,7 +510,7 @@ fexit_perf_func(struct trace_fprobe *tf, unsigned long entry_ip,
 	regs = ftrace_fill_perf_regs(fregs, regs);
 
 	entry->func = entry_ip;
-	entry->ret_ip = __c_ua(ret_ip);
+	entry->ret_ip = ret_ip;
 	store_trace_args(&entry[1], &tf->tp, fregs, entry_data, sizeof(*entry), dsize);
 	perf_trace_buf_submit(entry, size, rctx, call->event.type, 1, regs,
 			      head, NULL);
