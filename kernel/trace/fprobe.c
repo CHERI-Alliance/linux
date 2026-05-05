@@ -222,7 +222,7 @@ static inline void read_fprobe_header(uintptr_t *stack,
  * the shadow stack with its entry data size.
  *
  */
-static inline int __fprobe_handler(unsigned long ip, uintptr_t parent_ip,
+static inline int __fprobe_handler(unsigned long ip, unsigned long parent_ip,
 				   struct fprobe *fp, struct ftrace_regs *fregs,
 				   void *data)
 {
@@ -232,7 +232,7 @@ static inline int __fprobe_handler(unsigned long ip, uintptr_t parent_ip,
 	return fp->entry_handler(fp, ip, parent_ip, fregs, data);
 }
 
-static inline int __fprobe_kprobe_handler(unsigned long ip, uintptr_t parent_ip,
+static inline int __fprobe_kprobe_handler(unsigned long ip, unsigned long parent_ip,
 					  struct fprobe *fp, struct ftrace_regs *fregs,
 					  void *data)
 {
@@ -376,7 +376,7 @@ static int fprobe_fgraph_entry(struct ftrace_graph_ent *trace, struct fgraph_ops
 	unsigned long func = trace->func;
 	struct fprobe_hlist_node *node;
 	struct rhlist_head *head, *pos;
-	uintptr_t ret_ip;
+	unsigned long ret_ip;
 	int reserved_words;
 	struct fprobe *fp;
 	int used, ret;
@@ -418,7 +418,7 @@ static int fprobe_fgraph_entry(struct ftrace_graph_ent *trace, struct fgraph_ops
 	 * TODO: recursion detection has been done in the fgraph. Thus we need
 	 * to add a callback to increment missed counter.
 	 */
-	ret_ip = ftrace_regs_get_return_address(fregs);
+	ret_ip = __c_ua(ftrace_regs_get_return_address(fregs));
 	used = 0;
 	rhl_for_each_entry_rcu(node, pos, head, hlist) {
 		int data_size;
@@ -460,7 +460,7 @@ static void fprobe_return(struct ftrace_graph_ret *trace,
 			  struct ftrace_regs *fregs)
 {
 	uintptr_t *fgraph_data = NULL;
-	uintptr_t ret_ip;
+	unsigned long ret_ip;
 	struct fprobe *fp;
 	int size, curr;
 	int size_words;
@@ -469,7 +469,7 @@ static void fprobe_return(struct ftrace_graph_ret *trace,
 	if (WARN_ON_ONCE(!fgraph_data))
 		return;
 	size_words = SIZE_IN_LONG(size);
-	ret_ip = ftrace_regs_get_instruction_pointer(fregs);
+	ret_ip = __c_ua(ftrace_regs_get_instruction_pointer(fregs));
 
 	preempt_disable_notrace();
 
