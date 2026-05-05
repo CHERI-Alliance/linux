@@ -23,7 +23,7 @@
 
 #define FPROBE_HASH_BITS 6
 #define FPROBE_TABLE_SIZE (1 << FPROBE_HASH_BITS)
-#define SIZE_IN_LONG(x) DIV_ROUND_UP(x, RET_STACK_WORD_SIZE)
+#define SIZE_IN_WORDS(x) DIV_ROUND_UP(x, RET_STACK_WORD_SIZE)
 
 /*
  * fprobe_table: hold 'fprobe_hlist::hlist' for checking the fprobe still
@@ -159,7 +159,7 @@ static int del_fprobe_hash(struct fprobe *fp)
 #ifdef ARCH_DEFINE_ENCODE_FPROBE_HEADER
 
 /* The arch should encode fprobe_header info into one unsigned long */
-#define FPROBE_HEADER_SIZE_IN_LONG	1
+#define FPROBE_HEADER_SIZE_IN_WORDS	1
 
 static inline bool write_fprobe_header(uintptr_t *stack,
 					struct fprobe *fp, unsigned int size_words)
@@ -187,7 +187,7 @@ struct __fprobe_header {
 	unsigned long size_words;
 } __packed_if_not_cheri;
 
-#define FPROBE_HEADER_SIZE_IN_LONG	SIZE_IN_LONG(sizeof(struct __fprobe_header))
+#define FPROBE_HEADER_SIZE_IN_WORDS	SIZE_IN_WORDS(sizeof(struct __fprobe_header))
 
 static inline bool write_fprobe_header(uintptr_t *stack,
 					struct fprobe *fp, unsigned int size_words)
@@ -398,7 +398,7 @@ static int fprobe_fgraph_entry(struct ftrace_graph_ent *trace, struct fgraph_ops
 		 * fprobe's disabled flag in this loop.
 		 */
 		reserved_words +=
-			FPROBE_HEADER_SIZE_IN_LONG + SIZE_IN_LONG(fp->entry_data_size);
+			FPROBE_HEADER_SIZE_IN_WORDS + SIZE_IN_WORDS(fp->entry_data_size);
 	}
 	if (reserved_words) {
 		fgraph_data = fgraph_reserve_data(gops->idx, reserved_words * RET_STACK_WORD_SIZE);
@@ -432,7 +432,7 @@ static int fprobe_fgraph_entry(struct ftrace_graph_ent *trace, struct fgraph_ops
 
 		data_size = fp->entry_data_size;
 		if (data_size && fp->exit_handler)
-			data = fgraph_data + used + FPROBE_HEADER_SIZE_IN_LONG;
+			data = fgraph_data + used + FPROBE_HEADER_SIZE_IN_WORDS;
 		else
 			data = NULL;
 
@@ -443,10 +443,10 @@ static int fprobe_fgraph_entry(struct ftrace_graph_ent *trace, struct fgraph_ops
 
 		/* If entry_handler returns !0, nmissed is not counted but skips exit_handler. */
 		if (!ret && fp->exit_handler) {
-			int size_words = SIZE_IN_LONG(data_size);
+			int size_words = SIZE_IN_WORDS(data_size);
 
 			if (write_fprobe_header(&fgraph_data[used], fp, size_words))
-				used += FPROBE_HEADER_SIZE_IN_LONG + size_words;
+				used += FPROBE_HEADER_SIZE_IN_WORDS + size_words;
 		}
 	}
 
@@ -468,7 +468,7 @@ static void fprobe_return(struct ftrace_graph_ret *trace,
 	fgraph_data = (uintptr_t *)fgraph_retrieve_data(gops->idx, &size);
 	if (WARN_ON_ONCE(!fgraph_data))
 		return;
-	size_words = SIZE_IN_LONG(size);
+	size_words = SIZE_IN_WORDS(size);
 	ret_ip = __c_ua(ftrace_regs_get_instruction_pointer(fregs));
 
 	preempt_disable_notrace();
@@ -478,7 +478,7 @@ static void fprobe_return(struct ftrace_graph_ret *trace,
 		read_fprobe_header(&fgraph_data[curr], &fp, &size);
 		if (!fp)
 			break;
-		curr += FPROBE_HEADER_SIZE_IN_LONG;
+		curr += FPROBE_HEADER_SIZE_IN_WORDS;
 		if (is_fprobe_still_exist(fp) && !fprobe_disabled(fp)) {
 			if (WARN_ON_ONCE(curr + size > size_words))
 				break;
