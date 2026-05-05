@@ -174,7 +174,6 @@ stage3:
 			goto array;
 		case FETCH_OP_ST_USTRING:
 			ret = fetch_store_strlen_user(__c_ua(val) + code->offset);
-			pr_crit("fetch_store_strlen_user ret %d\n", ret);
 			code++;
 			goto array;
 		case FETCH_OP_ST_SYMSTR:
