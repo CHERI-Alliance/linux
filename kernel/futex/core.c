@@ -1130,8 +1130,8 @@ retry:
 /*
  * Fetch a robust-list pointer. Bit 0 signals PI futexes:
  */
-static inline int fetch_robust_entry(struct robust_list __user **entry,
-				     struct robust_list __user * __user *head,
+static inline int fetch_robust_entry(struct robust_list __user2 * __capability *entry,
+				     struct robust_list __user2 * __capability __user2 * __capability head,
 				     unsigned int *pi)
 {
 	unsigned long uentry;
@@ -1227,7 +1227,7 @@ static void __user *futex_uaddr(struct robust_list __user *entry,
  * Fetch a robust-list pointer. Bit 0 signals PI futexes:
  */
 static inline int
-compat_fetch_robust_entry(compat_uptr_t *uentry, struct robust_list __user **entry,
+compat_fetch_robust_entry(compat_uptr_t *uentry, struct robust_list __user2 * __capability *entry,
 		   compat_uptr_t __user *head, unsigned int *pi)
 {
 	if (get_user(*uentry, head))

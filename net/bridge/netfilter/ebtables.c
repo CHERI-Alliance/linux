@@ -1637,7 +1637,7 @@ static int ebt_compat_match_offset(const struct xt_match *match,
 	return xt_compat_match_offset(match);
 }
 
-static int compat_match_to_user(struct ebt_entry_match *m, void __user **dstptr,
+static int compat_match_to_user(struct ebt_entry_match *m, void __user2 * __capability *dstptr,
 				unsigned int *size)
 {
 	const struct xt_match *match = m->u.match;
@@ -1669,7 +1669,7 @@ static int compat_match_to_user(struct ebt_entry_match *m, void __user **dstptr,
 }
 
 static int compat_target_to_user(struct ebt_entry_target *t,
-				 void __user **dstptr,
+				 void __user2 * __capability *dstptr,
 				 unsigned int *size)
 {
 	const struct xt_target *target = t->u.target;
@@ -1701,14 +1701,14 @@ static int compat_target_to_user(struct ebt_entry_target *t,
 }
 
 static int compat_watcher_to_user(struct ebt_entry_watcher *w,
-				  void __user **dstptr,
+				  void __user2 * __capability *dstptr,
 				  unsigned int *size)
 {
 	return compat_target_to_user((struct ebt_entry_target *)w,
 							dstptr, size);
 }
 
-static int compat_copy_entry_to_user(struct ebt_entry *e, void __user **dstptr,
+static int compat_copy_entry_to_user(struct ebt_entry *e, void __user2 * __capability *dstptr,
 				unsigned int *size)
 {
 	struct ebt_entry_target *t;

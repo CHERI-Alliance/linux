@@ -1199,14 +1199,14 @@ snd_pcm_lib_read(struct snd_pcm_substream *substream,
 
 static inline snd_pcm_sframes_t
 snd_pcm_lib_writev(struct snd_pcm_substream *substream,
-		   void __user **bufs, snd_pcm_uframes_t frames)
+		   void __user2 * __capability *bufs, snd_pcm_uframes_t frames)
 {
 	return __snd_pcm_lib_xfer(substream, (void *)bufs, false, frames, false);
 }
 
 static inline snd_pcm_sframes_t
 snd_pcm_lib_readv(struct snd_pcm_substream *substream,
-		  void __user **bufs, snd_pcm_uframes_t frames)
+		  void __user2 * __capability *bufs, snd_pcm_uframes_t frames)
 {
 	return __snd_pcm_lib_xfer(substream, (void *)bufs, false, frames, false);
 }

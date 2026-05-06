@@ -482,7 +482,7 @@ static size_t calc_topo_query_size(struct xe_device *xe)
 	return query_size;
 }
 
-static int copy_mask(void __user **ptr,
+static int copy_mask(void __user2 * __capability *ptr,
 		     struct drm_xe_query_topology_mask *topo,
 		     void *mask, size_t mask_size)
 {

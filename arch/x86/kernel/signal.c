@@ -92,7 +92,7 @@ static inline u32 sig_prepare_pkru(void)
  */
 void __user *
 get_sigframe(struct ksignal *ksig, struct pt_regs *regs, size_t frame_size,
-	     void __user **fpstate)
+	     void __user2 * __capability *fpstate)
 {
 	struct k_sigaction *ka = &ksig->ka;
 	int ia32_frame = is_ia32_frame(ksig);

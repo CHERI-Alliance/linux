@@ -1135,7 +1135,7 @@ static int sco_sock_getsockopt(struct socket *sock, int level, int optname,
 	u32 phys;
 	int buf_len;
 	struct codec_list *c;
-	u8 num_codecs, i, __user *ptr;
+	u8 num_codecs, i, __user2 * __capability ptr;
 	struct hci_dev *hdev;
 	struct hci_codec_caps *caps;
 	struct bt_codec codec;

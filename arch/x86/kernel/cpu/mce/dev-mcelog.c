@@ -159,7 +159,7 @@ static int mce_chrdev_release(struct inode *inode, struct file *file)
 static int mce_apei_read_done;
 
 /* Collect MCE record of previous boot in persistent storage via APEI ERST. */
-static int __mce_read_apei(char __user **ubuf, size_t usize)
+static int __mce_read_apei(char __user2 * __capability *ubuf, size_t usize)
 {
 	int rc;
 	u64 record_id;

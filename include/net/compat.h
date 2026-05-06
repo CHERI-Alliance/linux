@@ -47,9 +47,9 @@ struct compat_rtentry {
 };
 
 int __get_compat_msghdr(struct msghdr *kmsg, struct compat_msghdr *msg,
-			struct sockaddr __user **save_addr);
+			struct sockaddr __user2 * __capability *save_addr);
 int get_compat_msghdr(struct msghdr *, struct compat_msghdr __user *,
-		      struct sockaddr __user **, struct iovec **);
+		      struct sockaddr __user2 * __capability *, struct iovec **);
 int put_cmsg_compat(struct msghdr*, int, int, int, void *);
 
 int cmsghdr_from_user_compat_to_kern(struct msghdr *, struct sock *,

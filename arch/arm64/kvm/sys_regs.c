@@ -5463,7 +5463,7 @@ static u64 sys_reg_to_index(const struct sys_reg_desc *reg)
 		(reg->Op2 << KVM_REG_ARM64_SYSREG_OP2_SHIFT));
 }
 
-static bool copy_reg_to_user(const struct sys_reg_desc *reg, u64 __user **uind)
+static bool copy_reg_to_user(const struct sys_reg_desc *reg, u64 __user2 * __capability *uind)
 {
 	u64 idx;
 
@@ -5490,7 +5490,7 @@ static bool copy_reg_to_user(const struct sys_reg_desc *reg, u64 __user **uind)
 
 static int walk_one_sys_reg(const struct kvm_vcpu *vcpu,
 			    const struct sys_reg_desc *rd,
-			    u64 __user **uind,
+			    u64 __user2 * __capability *uind,
 			    unsigned int *total)
 {
 	/*

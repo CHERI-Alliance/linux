@@ -1302,7 +1302,7 @@ static int compat_do_replace(struct net *net, sockptr_t arg, unsigned int len)
 	return ret;
 }
 
-static int compat_copy_entry_to_user(struct arpt_entry *e, void __user **dstptr,
+static int compat_copy_entry_to_user(struct arpt_entry *e, void __user2 * __capability *dstptr,
 				     compat_uint_t *size,
 				     struct xt_counters *counters,
 				     unsigned int i)

@@ -1215,7 +1215,7 @@ struct compat_ipt_replace {
 };
 
 static int
-compat_copy_entry_to_user(struct ipt_entry *e, void __user **dstptr,
+compat_copy_entry_to_user(struct ipt_entry *e, void __user2 * __capability *dstptr,
 			  unsigned int *size, struct xt_counters *counters,
 			  unsigned int i)
 {

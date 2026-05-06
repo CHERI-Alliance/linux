@@ -292,7 +292,7 @@ struct user_arg_ptr {
 	bool is_compat;
 #endif
 	union {
-		const char __user *const __user *native;
+		const char __user2 * __capability const __user2 * __capability native;
 #ifdef CONFIG_COMPAT
 		const compat_uptr_t __user *compat;
 #endif
@@ -1916,15 +1916,15 @@ void set_dumpable(struct mm_struct *mm, int value)
 	__mm_flags_set_mask_dumpable(mm, value);
 }
 
-static inline struct user_arg_ptr native_arg(const char __user *const __user *p)
+static inline struct user_arg_ptr native_arg(const char __user2 * __capability const __user2 * __capability p)
 {
 	return (struct user_arg_ptr){.ptr.native = p};
 }
 
 SYSCALL_DEFINE3(execve,
 		const char __user *, filename,
-		const char __user *const __user *, argv,
-		const char __user *const __user *, envp)
+		const char __user2 * __capability const __user2 * __capability, argv,
+		const char __user2 * __capability const __user2 * __capability, envp)
 {
 	CLASS(filename, name)(filename);
 	return do_execveat_common(AT_FDCWD, name,
@@ -1933,8 +1933,8 @@ SYSCALL_DEFINE3(execve,
 
 SYSCALL_DEFINE5(execveat,
 		int, fd, const char __user *, filename,
-		const char __user *const __user *, argv,
-		const char __user *const __user *, envp,
+		const char __user2 * __capability const __user2 * __capability, argv,
+		const char __user2 * __capability const __user2 * __capability, envp,
 		int, flags)
 {
 	CLASS(filename_uflags, name)(filename, flags);

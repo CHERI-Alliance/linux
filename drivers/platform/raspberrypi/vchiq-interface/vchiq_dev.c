@@ -384,7 +384,7 @@ out:
 }
 
 /* read a user pointer value from an array pointers in user space */
-static inline int vchiq_get_user_ptr(void __user **buf, void __user *ubuf, int index)
+static inline int vchiq_get_user_ptr(void __user2 * __capability *buf, void __user *ubuf, int index)
 {
 	int ret;
 

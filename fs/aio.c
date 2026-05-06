@@ -2079,7 +2079,7 @@ static int io_submit_one(struct kioctx *ctx, struct iocb __user *user_iocb,
  *	fail with -ENOSYS if not implemented.
  */
 SYSCALL_DEFINE3(io_submit, aio_context_t, ctx_id, long, nr,
-		struct iocb __user * __user *, iocbpp)
+		struct iocb __user2 * __capability __user2 * __capability, iocbpp)
 {
 	struct kioctx *ctx;
 	long ret = 0;

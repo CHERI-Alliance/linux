@@ -2352,7 +2352,7 @@ static void send_exception_work_handler(struct work_struct *work)
 
 	csa_header = (void __user *)q->properties.ctx_save_restore_area_address;
 
-	get_user(err_payload_ptr, (uint64_t __user **)&csa_header->err_payload_addr);
+	get_user(err_payload_ptr, (uint64_t __user2 * __capability *)&csa_header->err_payload_addr);
 	get_user(cur_err, err_payload_ptr);
 	cur_err |= workarea->error_reason;
 	put_user(cur_err, err_payload_ptr);

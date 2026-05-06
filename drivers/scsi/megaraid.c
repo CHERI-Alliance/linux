@@ -3520,7 +3520,7 @@ mega_n_to_m(void __user *arg, megacmd_t *mc)
 
 			umc = MBOX_P(uiocp);
 
-			if (get_user(upthru, (mega_passthru __user * __user *)&umc->xferaddr))
+			if (get_user(upthru, (mega_passthru __user2 * __capability __user2 * __capability)&umc->xferaddr))
 				return -EFAULT;
 
 			if( put_user(mc->status, (u8 __user *)&upthru->scsistatus))
@@ -3537,7 +3537,7 @@ mega_n_to_m(void __user *arg, megacmd_t *mc)
 
 			umc = (megacmd_t __user *)uioc_mimd->mbox;
 
-			if (get_user(upthru, (mega_passthru __user * __user *)&umc->xferaddr))
+			if (get_user(upthru, (mega_passthru __user2 * __capability __user2 * __capability)&umc->xferaddr))
 				return (-EFAULT);
 
 			if( put_user(mc->status, (u8 __user *)&upthru->scsistatus) )

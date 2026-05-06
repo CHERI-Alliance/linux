@@ -612,7 +612,7 @@ struct snd_xferi {
 
 struct snd_xfern {
 	snd_pcm_sframes_t result;
-	void __user * __user *bufs;
+	void __user2 * __capability __user2 * __capability bufs;
 	snd_pcm_uframes_t frames;
 };
 

@@ -4611,7 +4611,7 @@ static void binder_stat_br(struct binder_proc *proc,
 
 static int binder_put_node_cmd(struct binder_proc *proc,
 			       struct binder_thread *thread,
-			       void __user **ptrp,
+			       void __user2 * __capability *ptrp,
 			       binder_uintptr_t node_ptr,
 			       binder_uintptr_t node_cookie,
 			       int node_debug_id,

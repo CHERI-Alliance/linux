@@ -35,7 +35,7 @@
 
 int __get_compat_msghdr(struct msghdr *kmsg,
 			struct compat_msghdr *msg,
-			struct sockaddr __user **save_addr)
+			struct sockaddr __user2 * __capability *save_addr)
 {
 	ssize_t err;
 
@@ -82,7 +82,7 @@ int __get_compat_msghdr(struct msghdr *kmsg,
 
 int get_compat_msghdr(struct msghdr *kmsg,
 		      struct compat_msghdr __user *umsg,
-		      struct sockaddr __user **save_addr,
+		      struct sockaddr __user2 * __capability *save_addr,
 		      struct iovec **iov)
 {
 	struct compat_msghdr msg;

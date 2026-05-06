@@ -211,7 +211,7 @@ static int io_create_mock_file(struct io_uring_cmd *cmd, unsigned int issue_flag
 {
 	const struct file_operations *fops = &io_mock_fops;
 	const struct io_uring_sqe *sqe = cmd->sqe;
-	struct io_uring_mock_create mc, __user *uarg;
+	struct io_uring_mock_create mc, __user2 * __capability uarg;
 	struct file *file;
 	struct io_mock_file *mf __free(kfree) = NULL;
 	size_t uarg_size;
@@ -278,7 +278,7 @@ static int io_create_mock_file(struct io_uring_cmd *cmd, unsigned int issue_flag
 static int io_probe_mock(struct io_uring_cmd *cmd)
 {
 	const struct io_uring_sqe *sqe = cmd->sqe;
-	struct io_uring_mock_probe mp, __user *uarg;
+	struct io_uring_mock_probe mp, __user2 * __capability uarg;
 	size_t uarg_size;
 
 	uarg = u64_to_user_ptr(READ_ONCE(sqe->addr));

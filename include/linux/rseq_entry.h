@@ -271,7 +271,7 @@ bool rseq_debug_update_user_cs(struct task_struct *t, struct pt_regs *regs,
 	u64 start_ip, abort_ip, offset, cs_end, head, tasksize = TASK_SIZE;
 	unsigned long ip = instruction_pointer(regs);
 	u64 __user *uc_head = (u64 __user *) ucs;
-	u32 usig, __user *uc_sig;
+	u32 usig, __user2 * __capability uc_sig;
 
 	scoped_user_rw_access(ucs, efault) {
 		/*
@@ -395,7 +395,7 @@ rseq_update_user_cs(struct task_struct *t, struct pt_regs *regs, unsigned long c
 	unsigned long ip = instruction_pointer(regs);
 	unsigned long tasksize = TASK_SIZE;
 	u64 start_ip, abort_ip, offset;
-	u32 usig, __user *uc_sig;
+	u32 usig, __user2 * __capability uc_sig;
 
 	rseq_stat_inc(rseq_stats.cs);
 

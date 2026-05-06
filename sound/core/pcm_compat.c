@@ -349,7 +349,7 @@ static int snd_pcm_ioctl_xfern_compat(struct snd_pcm_substream *substream,
 		return -EFAULT;
 	bufptr = compat_ptr(buf);
 
-	void __user **bufs __free(kfree) =
+	void __user2 * __capability *bufs __free(kfree) =
 		kmalloc_array(ch, sizeof(void __user *), GFP_KERNEL);
 	if (bufs == NULL)
 		return -ENOMEM;

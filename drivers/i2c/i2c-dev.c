@@ -243,7 +243,7 @@ static int i2cdev_check_addr(struct i2c_adapter *adapter, unsigned int addr)
 static noinline int i2cdev_ioctl_rdwr(struct i2c_client *client,
 		unsigned nmsgs, struct i2c_msg *msgs)
 {
-	u8 __user **data_ptrs;
+	u8 __user2 * __capability *data_ptrs;
 	int i, res;
 
 	/* Adapter must support I2C transfers */
@@ -523,7 +523,7 @@ struct i2c_msg32 {
 };
 
 struct i2c_rdwr_ioctl_data32 {
-	compat_caddr_t msgs; /* struct i2c_msg __user *msgs */
+	compat_caddr_t msgs; /* struct i2c_msg __user2 * __capability msgs */
 	u32 nmsgs;
 };
 

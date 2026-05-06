@@ -24,7 +24,7 @@
 
 #define CCH_LOCK_ATTEMPTS	10
 
-static int gru_user_copy_handle(void __user **dp, void *s)
+static int gru_user_copy_handle(void __user2 * __capability *dp, void *s)
 {
 	if (copy_to_user(*dp, s, GRU_HANDLE_BYTES))
 		return -1;

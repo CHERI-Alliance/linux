@@ -8438,7 +8438,7 @@ megasas_mgmt_fw_ioctl(struct megasas_instance *instance,
 			uptr = compat_ptr(get_unaligned((compat_uptr_t *)
 							sense_ptr));
 		else
-			uptr = get_unaligned((void __user **)sense_ptr);
+			uptr = get_unaligned((void __user2 * __capability *)sense_ptr);
 
 		if (copy_to_user(uptr, sense, ioc->sense_len)) {
 			dev_err(&instance->pdev->dev, "Failed to copy out to user "

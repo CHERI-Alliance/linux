@@ -458,7 +458,7 @@ static int fpr_get(struct task_struct *target,
  */
 static int fpr_set_fpa(struct task_struct *target,
 		       unsigned int *pos, unsigned int *count,
-		       const void **kbuf, const void __user **ubuf)
+		       const void **kbuf, const void __user2 * __capability *ubuf)
 {
 	return user_regset_copyin(pos, count, kbuf, ubuf,
 				  &target->thread.fpu,
@@ -473,7 +473,7 @@ static int fpr_set_fpa(struct task_struct *target,
  */
 static int fpr_set_msa(struct task_struct *target,
 		       unsigned int *pos, unsigned int *count,
-		       const void **kbuf, const void __user **ubuf)
+		       const void **kbuf, const void __user2 * __capability *ubuf)
 {
 	unsigned int i;
 	u64 fpr_val;

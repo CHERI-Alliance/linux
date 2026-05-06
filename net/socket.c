@@ -2467,7 +2467,7 @@ struct used_address {
 
 int __copy_msghdr(struct msghdr *kmsg,
 		  struct user_msghdr *msg,
-		  struct sockaddr __user **save_addr)
+		  struct sockaddr __user2 * __capability *save_addr)
 {
 	ssize_t err;
 
@@ -2513,7 +2513,7 @@ int __copy_msghdr(struct msghdr *kmsg,
 
 static int copy_msghdr_from_user(struct msghdr *kmsg,
 				 struct user_msghdr __user *umsg,
-				 struct sockaddr __user **save_addr,
+				 struct sockaddr __user2 * __capability *save_addr,
 				 struct iovec **iov)
 {
 	struct user_msghdr msg;
@@ -2764,7 +2764,7 @@ SYSCALL_DEFINE4(sendmmsg, int, fd, struct mmsghdr __user *, mmsg,
 
 static int recvmsg_copy_msghdr(struct msghdr *msg,
 			       struct user_msghdr __user *umsg, unsigned flags,
-			       struct sockaddr __user **uaddr,
+			       struct sockaddr __user2 * __capability *uaddr,
 			       struct iovec **iov)
 {
 	ssize_t err;
@@ -3332,7 +3332,7 @@ void socket_seq_show(struct seq_file *seq)
  * the next page isn't readable/writable, we get a fault. To prevent
  * that, copy back and forth to the full size.
  */
-int get_user_ifreq(struct ifreq *ifr, void __user **ifrdata, void __user *arg)
+int get_user_ifreq(struct ifreq *ifr, void __user2 * __capability *ifrdata, void __user *arg)
 {
 	if (in_compat_syscall()) {
 		struct compat_ifreq *ifr32 = (struct compat_ifreq *)ifr;

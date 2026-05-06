@@ -3609,7 +3609,7 @@ static ssize_t snd_pcm_readv(struct kiocb *iocb, struct iov_iter *to)
 		return -EINVAL;
 	frames = bytes_to_samples(runtime, iov->iov_len);
 
-	void __user **bufs __free(kfree) =
+	void __user2 * __capability *bufs __free(kfree) =
 		kmalloc_array(to->nr_segs, sizeof(void *), GFP_KERNEL);
 	if (bufs == NULL)
 		return -ENOMEM;
@@ -3648,7 +3648,7 @@ static ssize_t snd_pcm_writev(struct kiocb *iocb, struct iov_iter *from)
 		return -EINVAL;
 	frames = bytes_to_samples(runtime, iov->iov_len);
 
-	void __user **bufs __free(kfree) =
+	void __user2 * __capability *bufs __free(kfree) =
 		kmalloc_array(from->nr_segs, sizeof(void *), GFP_KERNEL);
 	if (bufs == NULL)
 		return -ENOMEM;

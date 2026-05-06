@@ -512,13 +512,13 @@ int xt_compat_match_offset(const struct xt_match *match);
 void xt_compat_match_from_user(struct xt_entry_match *m, void **dstptr,
 			      unsigned int *size);
 int xt_compat_match_to_user(const struct xt_entry_match *m,
-			    void __user **dstptr, unsigned int *size);
+			    void __user2 * __capability *dstptr, unsigned int *size);
 
 int xt_compat_target_offset(const struct xt_target *target);
 void xt_compat_target_from_user(struct xt_entry_target *t, void **dstptr,
 				unsigned int *size);
 int xt_compat_target_to_user(const struct xt_entry_target *t,
-			     void __user **dstptr, unsigned int *size);
+			     void __user2 * __capability *dstptr, unsigned int *size);
 int xt_compat_check_entry_offsets(const void *base, const char *elems,
 				  unsigned int target_offset,
 				  unsigned int next_offset);

@@ -3167,7 +3167,7 @@ unlock:
 }
 
 static int check_array_args(unsigned int cmd, void *parg, size_t *array_size,
-			    void __user **user_ptr, void ***kernel_ptr)
+			    void __user2 * __capability *user_ptr, void ***kernel_ptr)
 {
 	int ret = 0;
 

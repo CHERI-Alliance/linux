@@ -96,7 +96,7 @@ static u_char const type_table[64] = {
 u_char emulating = 0;
 #endif /* RE_ENTRANT_CHECKING */
 
-static int valid_prefix(u_char *Byte, u_char __user ** fpu_eip,
+static int valid_prefix(u_char *Byte, u_char __user2 * __capability * fpu_eip,
 			overrides * override);
 
 void math_emulate(struct math_emu_info *info)
@@ -164,7 +164,7 @@ void math_emulate(struct math_emu_info *info)
 
 	FPU_lookahead = !(FPU_EFLAGS & X86_EFLAGS_TF);
 
-	if (!valid_prefix(&byte1, (u_char __user **) & FPU_EIP,
+	if (!valid_prefix(&byte1, (u_char __user2 * __capability *) & FPU_EIP,
 			  &addr_modes.override)) {
 		RE_ENTRANT_CHECK_OFF;
 		printk
@@ -528,7 +528,7 @@ void math_emulate(struct math_emu_info *info)
 
 	if (FPU_lookahead && !need_resched()) {
 		FPU_ORIG_EIP = FPU_EIP - code_base;
-		if (valid_prefix(&byte1, (u_char __user **) & FPU_EIP,
+		if (valid_prefix(&byte1, (u_char __user2 * __capability *) & FPU_EIP,
 				 &addr_modes.override))
 			goto do_another_FPU_instruction;
 	}
@@ -543,7 +543,7 @@ void math_emulate(struct math_emu_info *info)
    all prefix bytes, further changes are needed in the emulator code
    which accesses user address space. Access to separate segments is
    important for msdos emulation. */
-static int valid_prefix(u_char *Byte, u_char __user **fpu_eip,
+static int valid_prefix(u_char *Byte, u_char __user2 * __capability *fpu_eip,
 			overrides * override)
 {
 	u_char byte;

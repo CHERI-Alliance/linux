@@ -146,7 +146,7 @@ static int seq_copy_in_kernel(void *ptr, void *src, int size)
 
 static int seq_copy_in_user(void *ptr, void *src, int size)
 {
-	char __user **bufptr = ptr;
+	char __user2 * __capability *bufptr = ptr;
 
 	if (copy_to_user(*bufptr, src, size))
 		return -EFAULT;

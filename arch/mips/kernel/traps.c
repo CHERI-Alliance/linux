@@ -529,7 +529,7 @@ struct task_struct *ll_task;
 
 static inline int simulate_ll(struct pt_regs *regs, unsigned int opcode)
 {
-	unsigned long value, __user *vaddr;
+	unsigned long value, __user2 * __capability vaddr;
 	long offset;
 
 	/*

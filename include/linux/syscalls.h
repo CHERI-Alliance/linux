@@ -306,7 +306,7 @@ static inline int is_syscall_trace_event(struct trace_event_call *tp_event)
 asmlinkage long sys_io_setup(unsigned nr_reqs, aio_context_t __user *ctx);
 asmlinkage long sys_io_destroy(aio_context_t ctx);
 asmlinkage long sys_io_submit(aio_context_t, long,
-			struct iocb __user * __user *);
+			struct iocb __user2 * __capability __user2 * __capability);
 asmlinkage long sys_io_cancel(aio_context_t ctx_id, struct iocb __user *iocb,
 			      struct io_event __user *result);
 asmlinkage long sys_io_getevents(aio_context_t ctx_id,
@@ -573,7 +573,7 @@ asmlinkage long sys_futex_time32(u32 __user *uaddr, int op, u32 val,
 				 const struct old_timespec32 __user *utime,
 				 u32 __user *uaddr2, u32 val3);
 asmlinkage long sys_get_robust_list(int pid,
-				    struct robust_list_head __user * __user *head_ptr,
+				    struct robust_list_head __user2 * __capability __user2 * __capability head_ptr,
 				    size_t __user *len_ptr);
 asmlinkage long sys_set_robust_list(struct robust_list_head __user *head,
 				    size_t len);
@@ -821,8 +821,8 @@ asmlinkage long sys_clone(unsigned long, unsigned long, int __user *,
 asmlinkage long sys_clone3(struct clone_args __user *uargs, size_t size);
 
 asmlinkage long sys_execve(const char __user *filename,
-		const char __user *const __user *argv,
-		const char __user *const __user *envp);
+		const char __user2 * __capability const __user2 * __capability argv,
+		const char __user2 * __capability const __user2 * __capability envp);
 asmlinkage long sys_fadvise64_64(int fd, loff_t offset, loff_t len, int advice);
 
 /* CONFIG_MMU only */
@@ -860,7 +860,7 @@ asmlinkage long sys_migrate_pages(pid_t pid, unsigned long maxnode,
 				const unsigned long __user *from,
 				const unsigned long __user *to);
 asmlinkage long sys_move_pages(pid_t pid, unsigned long nr_pages,
-				const void __user * __user *pages,
+				const void __user2 * __capability __user2 * __capability pages,
 				const int __user *nodes,
 				int __user *status,
 				int flags);
@@ -938,8 +938,8 @@ asmlinkage long sys_getrandom(char __user *buf, size_t count,
 asmlinkage long sys_memfd_create(const char __user *uname_ptr, unsigned int flags);
 asmlinkage long sys_bpf(int cmd, union bpf_attr __user *attr, unsigned int size);
 asmlinkage long sys_execveat(int dfd, const char __user *filename,
-			const char __user *const __user *argv,
-			const char __user *const __user *envp, int flags);
+			const char __user2 * __capability const __user2 * __capability argv,
+			const char __user2 * __capability const __user2 * __capability envp, int flags);
 asmlinkage long sys_userfaultfd(int flags);
 asmlinkage long sys_membarrier(int cmd, unsigned int flags, int cpu_id);
 asmlinkage long sys_mlock2(unsigned long start, size_t len, int flags);

@@ -4556,7 +4556,7 @@ static int sctp_setsockopt_probe_interval(struct sock *sk,
  * The syntax is:
  *
  *   ret = getsockopt(int sd, int level, int optname, void __user *optval,
- *                    int __user *optlen);
+ *                    int __user2 * __capability optlen);
  *   ret = setsockopt(int sd, int level, int optname, const void __user *optval,
  *                    int optlen);
  *

@@ -121,7 +121,7 @@ static void mlx5vf_buf_read_done(struct mlx5_vhca_data_buffer *vhca_buf)
 }
 
 static ssize_t mlx5vf_buf_read(struct mlx5_vhca_data_buffer *vhca_buf,
-			       char __user **buf, size_t *len, loff_t *pos)
+			       char __user2 * __capability *buf, size_t *len, loff_t *pos)
 {
 	unsigned long offset;
 	ssize_t done = 0;
@@ -677,7 +677,7 @@ out:
 
 static int
 mlx5vf_append_page_to_mig_buf(struct mlx5_vhca_data_buffer *vhca_buf,
-			      const char __user **buf, size_t *len,
+			      const char __user2 * __capability *buf, size_t *len,
 			      loff_t *pos, ssize_t *done)
 {
 	unsigned long offset;
@@ -711,7 +711,7 @@ mlx5vf_append_page_to_mig_buf(struct mlx5_vhca_data_buffer *vhca_buf,
 static ssize_t
 mlx5vf_resume_read_image(struct mlx5_vf_migration_file *migf,
 			 struct mlx5_vhca_data_buffer *vhca_buf,
-			 size_t image_size, const char __user **buf,
+			 size_t image_size, const char __user2 * __capability *buf,
 			 size_t *len, loff_t *pos, ssize_t *done,
 			 bool *has_work)
 {
@@ -740,7 +740,7 @@ mlx5vf_resume_read_image(struct mlx5_vf_migration_file *migf,
 static int
 mlx5vf_resume_read_header_data(struct mlx5_vf_migration_file *migf,
 			       struct mlx5_vhca_data_buffer *vhca_buf,
-			       const char __user **buf, size_t *len,
+			       const char __user2 * __capability *buf, size_t *len,
 			       loff_t *pos, ssize_t *done)
 {
 	size_t copy_len, to_copy;
@@ -790,7 +790,7 @@ mlx5vf_resume_read_header_data(struct mlx5_vf_migration_file *migf,
 static int
 mlx5vf_resume_read_header(struct mlx5_vf_migration_file *migf,
 			  struct mlx5_vhca_data_buffer *vhca_buf,
-			  const char __user **buf,
+			  const char __user2 * __capability *buf,
 			  size_t *len, loff_t *pos,
 			  ssize_t *done, bool *has_work)
 {
