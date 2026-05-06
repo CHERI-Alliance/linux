@@ -3,6 +3,7 @@
 #define _LINUX_STAT_H
 
 
+#include <linux/types.h>
 #include <asm/stat.h>
 #include <uapi/linux/stat.h>
 
@@ -15,7 +16,6 @@
 #define UTIME_NOW	((1l << 30) - 1l)
 #define UTIME_OMIT	((1l << 30) - 2l)
 
-#include <linux/types.h>
 #include <linux/time.h>
 #include <linux/uidgid.h>
 
