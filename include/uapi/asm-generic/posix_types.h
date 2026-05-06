@@ -16,6 +16,10 @@ typedef long		__kernel_long_t;
 typedef unsigned long	__kernel_ulong_t;
 #endif
 
+#if defined(__KERNEL__) && !defined(_LINUX_TYPES_H)
+#error "In the kernel include linux/types.h before UAPI headers!"
+#endif
+
 #ifndef __kernel_uintptr_t
 #if defined(__ARCH_WANT_PURECAP) || defined(__CHERI_PURE_CAPABILITY__)
 typedef __uintcap_t	__kernel_uintptr_t;
