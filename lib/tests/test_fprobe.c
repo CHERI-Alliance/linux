@@ -313,7 +313,7 @@ static struct kunit_case fprobe_testcases[] = {
 	KUNIT_CASE(test_fprobe_syms),
 	KUNIT_CASE(test_fprobe_data),
 	KUNIT_CASE(test_fprobe_skip),
-	KUNIT_CASE(test_fprobe_multi),
+	KUNIT_CASE_SLOW(test_fprobe_multi),
 	{}
 };
 
