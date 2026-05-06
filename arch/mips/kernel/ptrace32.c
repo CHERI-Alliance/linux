@@ -67,7 +67,7 @@ long compat_arch_ptrace(struct task_struct *child, compat_long_t request,
 		ret = -EIO;
 
 		/* Get the addr in the other process that we want to read */
-		if (get_user(addrOthers, (u32 __user * __user *) (unsigned long) addr) != 0)
+		if (get_user(addrOthers, (u32 __user2 * __capability __user2 * __capability) (unsigned long) addr) != 0)
 			break;
 
 		copied = ptrace_access_vm(child, (u64)addrOthers, &tmp,
@@ -180,7 +180,7 @@ long compat_arch_ptrace(struct task_struct *child, compat_long_t request,
 
 		/* Get the addr in the other process that we want to write into */
 		ret = -EIO;
-		if (get_user(addrOthers, (u32 __user * __user *) (unsigned long) addr) != 0)
+		if (get_user(addrOthers, (u32 __user2 * __capability __user2 * __capability) (unsigned long) addr) != 0)
 			break;
 		ret = 0;
 		if (ptrace_access_vm(child, (u64)addrOthers, &data,

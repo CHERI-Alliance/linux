@@ -239,7 +239,7 @@ static int io_net_import_vec(struct io_kiocb *req, struct io_async_msghdr *iomsg
 static int io_compat_msg_copy_hdr(struct io_kiocb *req,
 				  struct io_async_msghdr *iomsg,
 				  struct compat_msghdr *msg, int ddir,
-				  struct sockaddr __user **save_addr)
+				  struct sockaddr __user2 * __capability *save_addr)
 {
 	struct io_sr_msg *sr = io_kiocb_to_cmd(req, struct io_sr_msg);
 	struct compat_iovec __user *uiov;
@@ -289,7 +289,7 @@ ua_end:
 
 static int io_msg_copy_hdr(struct io_kiocb *req, struct io_async_msghdr *iomsg,
 			   struct user_msghdr *msg, int ddir,
-			   struct sockaddr __user **save_addr)
+			   struct sockaddr __user2 * __capability *save_addr)
 {
 	struct io_sr_msg *sr = io_kiocb_to_cmd(req, struct io_sr_msg);
 	struct user_msghdr __user *umsg = sr->umsg;
@@ -935,7 +935,7 @@ finish:
 }
 
 static int io_recvmsg_prep_multishot(struct io_async_msghdr *kmsg,
-				     struct io_sr_msg *sr, void __user **buf,
+				     struct io_sr_msg *sr, void __user2 * __capability *buf,
 				     size_t *len)
 {
 	unsigned long ubuf = (unsigned long) *buf;

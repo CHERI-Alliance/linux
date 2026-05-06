@@ -271,7 +271,7 @@ static int cg14_sbusfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned lo
 {
 	struct cg14_par *par = (struct cg14_par *) info->par;
 	struct cg14_regs __iomem *regs = par->regs;
-	struct mdi_cfginfo kmdi, __user *mdii;
+	struct mdi_cfginfo kmdi, __user2 * __capability mdii;
 	unsigned long flags;
 	int cur_mode, mode, ret = 0;
 

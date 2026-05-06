@@ -163,7 +163,7 @@ static int fpr_get(struct task_struct *target,
 
 static int gfpr_set(struct task_struct *target,
 		    unsigned int *pos, unsigned int *count,
-		    const void **kbuf, const void __user **ubuf)
+		    const void **kbuf, const void __user2 * __capability *ubuf)
 {
 	return user_regset_copyin(pos, count, kbuf, ubuf,
 				  &target->thread.fpu.fpr,
@@ -172,7 +172,7 @@ static int gfpr_set(struct task_struct *target,
 
 static int gfpr_set_simd(struct task_struct *target,
 		       unsigned int *pos, unsigned int *count,
-		       const void **kbuf, const void __user **ubuf)
+		       const void **kbuf, const void __user2 * __capability *ubuf)
 {
 	int i, err;
 	u64 fpr_val;

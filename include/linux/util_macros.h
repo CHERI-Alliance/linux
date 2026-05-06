@@ -140,7 +140,7 @@
  * @x: The u64 value from user space, usually via IOCTL
  *
  * u64_to_user_ptr() simply casts a pointer passed as u64 from user space to void
- * __user * correctly. Using this lets us get rid of all the tiresome casts.
+ * __user2 * __capability correctly. Using this lets us get rid of all the tiresome casts.
  */
 #define u64_to_user_ptr(x)		\
 ({					\

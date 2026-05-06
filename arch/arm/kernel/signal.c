@@ -59,7 +59,7 @@ static int preserve_iwmmxt_context(struct iwmmxt_sigframe __user *frame)
 	return err;
 }
 
-static int restore_iwmmxt_context(char __user **auxp)
+static int restore_iwmmxt_context(char __user2 * __capability *auxp)
 {
 	struct iwmmxt_sigframe __user *frame =
 		(struct iwmmxt_sigframe __user *)*auxp;
@@ -115,7 +115,7 @@ static int preserve_vfp_context(struct vfp_sigframe __user *frame)
 	return __copy_to_user(frame, &kframe, sizeof(kframe));
 }
 
-static int restore_vfp_context(char __user **auxp)
+static int restore_vfp_context(char __user2 * __capability *auxp)
 {
 	struct vfp_sigframe frame;
 	int err;

@@ -247,7 +247,7 @@ int setup_signal_stack_sc(unsigned long stack_top, struct ksignal *ksig,
 	if (ksig->ka.sa.sa_flags & SA_RESTORER)
 		restorer = ksig->ka.sa.sa_restorer;
 
-	err |= __put_user(restorer, (void __user * __user *)&frame->pretcode);
+	err |= __put_user(restorer, (void __user2 * __capability __user2 * __capability)&frame->pretcode);
 	err |= __put_user(sig, &frame->sig);
 
 	fp_to = (unsigned long)frame + sizeof(*frame);
@@ -303,10 +303,10 @@ int setup_signal_stack_si(unsigned long stack_top, struct ksignal *ksig,
 	if (ksig->ka.sa.sa_flags & SA_RESTORER)
 		restorer = ksig->ka.sa.sa_restorer;
 
-	err |= __put_user(restorer, (void __user * __user *)&frame->pretcode);
+	err |= __put_user(restorer, (void __user2 * __capability __user2 * __capability)&frame->pretcode);
 	err |= __put_user(sig, &frame->sig);
-	err |= __put_user(&frame->info, (void __user * __user *)&frame->pinfo);
-	err |= __put_user(&frame->uc, (void __user * __user *)&frame->puc);
+	err |= __put_user(&frame->info, (void __user2 * __capability __user2 * __capability)&frame->pinfo);
+	err |= __put_user(&frame->uc, (void __user2 * __capability __user2 * __capability)&frame->puc);
 	err |= copy_siginfo_to_user(&frame->info, &ksig->info);
 
 	fp_to = (unsigned long)frame + sizeof(*frame);

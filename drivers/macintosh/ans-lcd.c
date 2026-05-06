@@ -82,7 +82,7 @@ anslcd_write( struct file * file, const char __user * buf,
 static long
 anslcd_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
-	char ch, __user *temp;
+	char ch, __user2 * __capability temp;
 	long ret = 0;
 
 #ifdef DEBUG

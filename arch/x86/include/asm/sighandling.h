@@ -17,7 +17,7 @@ void signal_fault(struct pt_regs *regs, void __user *frame, char *where);
 
 void __user *
 get_sigframe(struct ksignal *ksig, struct pt_regs *regs, size_t frame_size,
-	     void __user **fpstate);
+	     void __user2 * __capability *fpstate);
 
 int ia32_setup_frame(struct ksignal *ksig, struct pt_regs *regs);
 int ia32_setup_rt_frame(struct ksignal *ksig, struct pt_regs *regs);

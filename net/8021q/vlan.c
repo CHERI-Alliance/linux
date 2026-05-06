@@ -561,7 +561,7 @@ static struct notifier_block vlan_notifier_block __read_mostly = {
 /*
  *	VLAN IOCTL handler.
  *	o execute requested action or pass command to the device driver
- *   arg is really a struct vlan_ioctl_args __user *.
+ *   arg is really a struct vlan_ioctl_args __user2 * __capability .
  */
 static int vlan_ioctl_handler(struct net *net, void __user *arg)
 {

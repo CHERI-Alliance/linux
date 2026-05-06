@@ -54,7 +54,7 @@ struct vchiq_await_completion {
 	struct vchiq_completion_data __user *buf;
 	unsigned int msgbufsize;
 	unsigned int msgbufcount; /* IN/OUT */
-	void * __user *msgbufs;
+	void * __user2 * __capability msgbufs;
 };
 
 struct vchiq_dequeue_message {

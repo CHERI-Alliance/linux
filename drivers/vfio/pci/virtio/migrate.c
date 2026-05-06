@@ -328,7 +328,7 @@ virtiovf_get_data_buff_from_pos(struct virtiovf_migration_file *migf,
 }
 
 static ssize_t virtiovf_buf_read(struct virtiovf_data_buffer *vhca_buf,
-				 char __user **buf, size_t *len, loff_t *pos)
+				 char __user2 * __capability *buf, size_t *len, loff_t *pos)
 {
 	unsigned long offset;
 	ssize_t done = 0;
@@ -746,7 +746,7 @@ static int virtiovf_set_obj_cmd_header(struct virtiovf_data_buffer *vhca_buf)
 
 static int
 virtiovf_append_page_to_mig_buf(struct virtiovf_data_buffer *vhca_buf,
-				const char __user **buf, size_t *len,
+				const char __user2 * __capability *buf, size_t *len,
 				loff_t *pos, ssize_t *done)
 {
 	unsigned long offset;
@@ -786,7 +786,7 @@ virtiovf_append_page_to_mig_buf(struct virtiovf_data_buffer *vhca_buf,
 static ssize_t
 virtiovf_resume_read_chunk(struct virtiovf_migration_file *migf,
 			   struct virtiovf_data_buffer *vhca_buf,
-			   size_t chunk_size, const char __user **buf,
+			   size_t chunk_size, const char __user2 * __capability *buf,
 			   size_t *len, loff_t *pos, ssize_t *done,
 			   bool *has_work)
 {
@@ -815,7 +815,7 @@ virtiovf_resume_read_chunk(struct virtiovf_migration_file *migf,
 static int
 virtiovf_resume_read_header_data(struct virtiovf_migration_file *migf,
 				 struct virtiovf_data_buffer *vhca_buf,
-				 const char __user **buf, size_t *len,
+				 const char __user2 * __capability *buf, size_t *len,
 				 loff_t *pos, ssize_t *done)
 {
 	size_t copy_len, to_copy;
@@ -851,7 +851,7 @@ virtiovf_resume_read_header_data(struct virtiovf_migration_file *migf,
 static int
 virtiovf_resume_read_header(struct virtiovf_migration_file *migf,
 			    struct virtiovf_data_buffer *vhca_buf,
-			    const char __user **buf,
+			    const char __user2 * __capability *buf,
 			    size_t *len, loff_t *pos,
 			    ssize_t *done, bool *has_work)
 {

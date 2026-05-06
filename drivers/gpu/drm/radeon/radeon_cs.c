@@ -301,7 +301,7 @@ int radeon_cs_parser_init(struct radeon_cs_parser *p, void *data)
 		return -ENOMEM;
 	}
 	for (i = 0; i < p->nchunks; i++) {
-		struct drm_radeon_cs_chunk __user **chunk_ptr = NULL;
+		struct drm_radeon_cs_chunk __user2 * __capability *chunk_ptr = NULL;
 		struct drm_radeon_cs_chunk user_chunk;
 		uint32_t __user *cdata;
 
