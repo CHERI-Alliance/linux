@@ -265,7 +265,7 @@ int perf_kprobe_init(struct perf_event *p_event, bool is_retprobe)
 	}
 
 	tp_event = create_local_trace_kprobe(
-		func, (void *)(unsigned long)(p_event->attr.kprobe_addr),
+		func, (ptraddr_t)(p_event->attr.kprobe_addr),
 		p_event->attr.probe_offset, is_retprobe);
 	if (IS_ERR(tp_event)) {
 		ret = PTR_ERR(tp_event);

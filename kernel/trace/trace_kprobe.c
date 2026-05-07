@@ -208,7 +208,7 @@ unsigned long trace_kprobe_address(struct trace_kprobe *tk)
 		if (addr)
 			addr += tk->rp.kp.offset;
 	} else {
-		addr = (unsigned long)tk->rp.kp.addr;
+		addr = __c_pa(tk->rp.kp.addr);
 	}
 	return addr;
 }
@@ -267,7 +267,7 @@ DEFINE_FREE(free_trace_kprobe, struct trace_kprobe *,
  */
 static struct trace_kprobe *alloc_trace_kprobe(const char *group,
 					     const char *event,
-					     void *addr,
+					     ptraddr_t addr,
 					     const char *symbol,
 					     unsigned long offs,
 					     int maxactive,
@@ -291,7 +291,7 @@ static struct trace_kprobe *alloc_trace_kprobe(const char *group,
 		tk->rp.kp.symbol_name = tk->symbol;
 		tk->rp.kp.offset = offs;
 	} else
-		tk->rp.kp.addr = addr;
+		tk->rp.kp.addr = __c_fakep(addr);
 
 	if (is_return)
 		tk->rp.handler = kretprobe_dispatcher;
@@ -472,7 +472,7 @@ static bool within_notrace_func(struct trace_kprobe *tk)
 		if (!p)
 			return true;
 		*p = '\0';
-		addr = (unsigned long)kprobe_lookup_name(symname, 0);
+		addr = __c_pa(kprobe_lookup_name(symname, 0));
 		if (addr)
 			return __within_notrace_func(addr);
 	}
@@ -497,7 +497,7 @@ static int __register_trace_kprobe(struct trace_kprobe *tk)
 
 	if (within_notrace_func(tk)) {
 		pr_warn("Could not probe notrace function %ps\n",
-			(void *)trace_kprobe_address(tk));
+			__c_fakep(trace_kprobe_address(tk)));
 		return -EINVAL;
 	}
 
@@ -882,7 +882,7 @@ static int trace_kprobe_create_internal(int argc, const char *argv[],
 	enum probe_print_type ptype;
 	bool is_return = false;
 	int maxactive = 0;
-	void *addr = NULL;
+	unsigned long addr;
 	char *tmp = NULL;
 	long offset = 0;
 
@@ -1006,7 +1006,7 @@ static int trace_kprobe_create_internal(int argc, const char *argv[],
 				 is_return ? 'r' : 'p', symbol, offset);
 		else
 			snprintf(ebuf, MAX_EVENT_NAME_LEN, "%c_0x%p",
-				 is_return ? 'r' : 'p', addr);
+				 is_return ? 'r' : 'p', __c_fakep(addr));
 		sanitize_event_name(ebuf);
 		event = ebuf;
 	}
@@ -1431,7 +1431,7 @@ process_fetch_insn(struct fetch_insn *code, void *rec, void *edata,
 		   void *dest, void *base)
 {
 	struct pt_regs *regs = rec;
-	unsigned long val;
+	uintptr_t val;
 	int ret;
 
 retry:
@@ -1454,7 +1454,7 @@ retry:
 		val = regs_get_kernel_argument(regs, code->param);
 		break;
 	case FETCH_OP_EDATA:
-		val = *(unsigned long *)((unsigned long)edata + code->offset);
+		val = *(uintptr_t *)((uintptr_t)edata + code->offset);
 		break;
 #endif
 	case FETCH_NOP_SYMBOL:	/* Ignore a place holder */
@@ -1494,7 +1494,7 @@ __kprobe_trace_func(struct trace_kprobe *tk, struct pt_regs *regs,
 		return;
 
 	fbuffer.regs = regs;
-	entry->ip = (unsigned long)tk->rp.kp.addr;
+	entry->ip = __c_pa(tk->rp.kp.addr);
 	store_trace_args(&entry[1], &tk->tp, regs, NULL, sizeof(*entry), dsize);
 
 	trace_event_buffer_commit(&fbuffer);
@@ -1559,8 +1559,8 @@ __kretprobe_trace_func(struct trace_kprobe *tk, struct kretprobe_instance *ri,
 		return;
 
 	fbuffer.regs = regs;
-	entry->func = (unsigned long)tk->rp.kp.addr;
-	entry->ret_ip = get_kretprobe_retaddr(ri);
+	entry->func = __c_pa(tk->rp.kp.addr);
+	entry->ret_ip = __c_ua(get_kretprobe_retaddr(ri));
 	store_trace_args(&entry[1], &tk->tp, regs, ri->data, sizeof(*entry), dsize);
 
 	trace_event_buffer_commit(&fbuffer);
@@ -1670,8 +1670,8 @@ static int kretprobe_event_define_fields(struct trace_event_call *event_call)
 	if (WARN_ON_ONCE(!tp))
 		return -ENOENT;
 
-	DEFINE_FIELD(unsigned long, func, FIELD_STRING_FUNC, 0);
-	DEFINE_FIELD(unsigned long, ret_ip, FIELD_STRING_RETIP, 0);
+	DEFINE_FIELD(ptraddr_t, func, FIELD_STRING_FUNC, 0);
+	DEFINE_FIELD(ptraddr_t, ret_ip, FIELD_STRING_RETIP, 0);
 
 	return traceprobe_define_arg_fields(event_call, sizeof(field), tp);
 }
@@ -1689,7 +1689,7 @@ kprobe_perf_func(struct trace_kprobe *tk, struct pt_regs *regs)
 	int rctx;
 
 	if (bpf_prog_array_valid(call)) {
-		unsigned long orig_ip = instruction_pointer(regs);
+		uintptr_t orig_ip = instruction_pointer(regs);
 		int ret;
 
 		ret = trace_call_bpf(call, regs);
@@ -1718,7 +1718,7 @@ kprobe_perf_func(struct trace_kprobe *tk, struct pt_regs *regs)
 	if (!entry)
 		return 0;
 
-	entry->ip = (unsigned long)tk->rp.kp.addr;
+	entry->ip = __c_pa(tk->rp.kp.addr);
 	memset(&entry[1], 0, dsize);
 	store_trace_args(&entry[1], &tk->tp, regs, NULL, sizeof(*entry), dsize);
 	perf_trace_buf_submit(entry, size, rctx, call->event.type, 1, regs,
@@ -1754,8 +1754,8 @@ kretprobe_perf_func(struct trace_kprobe *tk, struct kretprobe_instance *ri,
 	if (!entry)
 		return;
 
-	entry->func = (unsigned long)tk->rp.kp.addr;
-	entry->ret_ip = get_kretprobe_retaddr(ri);
+	entry->func = __c_pa(tk->rp.kp.addr);
+	entry->ret_ip = __c_ua(get_kretprobe_retaddr(ri));
 	store_trace_args(&entry[1], &tk->tp, regs, ri->data, sizeof(*entry), dsize);
 	perf_trace_buf_submit(entry, size, rctx, call->event.type, 1, regs,
 			      head, NULL);
@@ -1782,7 +1782,7 @@ int bpf_get_kprobe_info(const struct perf_event *event, u32 *fd_type,
 					      : BPF_FD_TYPE_KPROBE;
 	*probe_offset = tk->rp.kp.offset;
 	*probe_addr = kallsyms_show_value(current_cred()) ?
-		      (unsigned long)tk->rp.kp.addr : 0;
+		      __c_pa(tk->rp.kp.addr) : 0;
 	*symbol = tk->symbol;
 	if (missed)
 		*missed = trace_kprobe_missed(tk);
@@ -1921,7 +1921,7 @@ static int unregister_kprobe_event(struct trace_kprobe *tk)
 
 /* create a trace_kprobe, but don't add it to global lists */
 struct trace_event_call *
-create_local_trace_kprobe(char *func, void *addr, unsigned long offs,
+create_local_trace_kprobe(char *func, ptraddr_t addr, unsigned long offs,
 			  bool is_return)
 {
 	enum probe_print_type ptype;
@@ -1942,7 +1942,7 @@ create_local_trace_kprobe(char *func, void *addr, unsigned long offs,
 	 */
 	event = func ? func : "DUMMY_EVENT";
 
-	tk = alloc_trace_kprobe(KPROBE_EVENT_SYSTEM, event, (void *)addr, func,
+	tk = alloc_trace_kprobe(KPROBE_EVENT_SYSTEM, event, addr, func,
 				offs, 0 /* maxactive */, 0 /* nargs */,
 				is_return);
 

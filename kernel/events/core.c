@@ -13560,7 +13560,7 @@ static int perf_copy_attr(struct perf_event_attr __user *uattr,
 	if (size < PERF_ATTR_SIZE_VER0 || size > PAGE_SIZE)
 		goto err_size;
 
-	ret = copy_struct_from_user(attr, sizeof(*attr), uattr, size);
+	ret = copy_struct_from_user_with_captags(attr, sizeof(*attr), uattr, size);
 	if (ret) {
 		if (ret == -E2BIG)
 			goto err_size;

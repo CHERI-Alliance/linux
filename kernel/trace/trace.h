@@ -156,7 +156,7 @@ struct syscall_trace_exit {
 
 struct kprobe_trace_entry_head {
 	struct trace_entry	ent;
-	uintptr_t		ip;
+	ptraddr_t		ip;
 };
 
 struct eprobe_trace_entry_head {
@@ -165,8 +165,8 @@ struct eprobe_trace_entry_head {
 
 struct kretprobe_trace_entry_head {
 	struct trace_entry	ent;
-	uintptr_t		func;
-	uintptr_t		ret_ip;
+	ptraddr_t		func;
+	ptraddr_t		ret_ip;
 };
 
 struct fentry_trace_entry_head {
