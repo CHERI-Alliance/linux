@@ -35,7 +35,7 @@
 static struct trace_event_file *gen_kprobe_test;
 static struct trace_event_file *gen_kretprobe_test;
 
-#define KPROBE_GEN_TEST_FUNC	"do_sys_open"
+#define KPROBE_GEN_TEST_FUNC	"do_sys_openat2"
 
 /* X86 */
 #if defined(CONFIG_X86_64) || defined(CONFIG_X86_32)
