@@ -126,8 +126,8 @@ int objpool_init(struct objpool_head *pool, int nr_objs, int object_size,
 	    object_size <= 0 || object_size > OBJPOOL_OBJECT_SIZE_MAX)
 		return -EINVAL;
 
-	/* align up to unsigned long size */
-	object_size = ALIGN(object_size, sizeof(long));
+	/* align up to pointer size */
+	object_size = ALIGN(object_size, sizeof(void *));
 
 	/* calculate capacity of percpu objpool_slot */
 	capacity = roundup_pow_of_two(nr_objs);
