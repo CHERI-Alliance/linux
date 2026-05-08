@@ -374,8 +374,8 @@ static int iommufd_fill_cap_iova(struct iommufd_ioas *ioas,
 				 size_t avail)
 {
 	struct vfio_iommu_type1_info_cap_iova_range __user *ucap_iovas =
-		container_of(cur,
-			     struct vfio_iommu_type1_info_cap_iova_range __user,
+		container_of_user(cur,
+			     struct vfio_iommu_type1_info_cap_iova_range,
 			     header);
 	struct vfio_iommu_type1_info_cap_iova_range cap_iovas = {
 		.header = {

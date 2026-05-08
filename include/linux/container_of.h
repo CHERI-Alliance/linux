@@ -23,9 +23,18 @@
 		      "pointer type mismatch in container_of()");	\
 	((type *)(__mptr - offsetof(type, member))); })
 
+#define container_of_user(ptr, type, member) ({				\
+	void __user *__mptr = (void __user *)(ptr);			\
+	static_assert(__same_type(*(ptr), ((type *)0)->member) ||\
+		      __same_type(*(ptr), void),			\
+		      "pointer type mismatch in container_of()");	\
+	((type __user *)(__mptr - offsetof(type, member))); })
+
+
 /**
  * container_of_const - cast a member of a structure out to the containing
- *			structure and preserve the const-ness of the pointer
+ *			structure and preserve the const-ness and address space
+ *			of the pointer
  * @ptr:		the pointer to the member
  * @type:		the type of the container struct this is embedded in.
  * @member:		the name of the member within the struct.

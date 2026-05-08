@@ -50,17 +50,4 @@ static __always_inline ptrdiff_t ptrdiff(const void *a, const void *b)
 	(T *)(uintptr_t)(x);						\
 })
 
-/*
- * container_of_user: Extract the superclass from a pointer to a member.
- *
- * Exactly like container_of() with the exception that it plays nicely
- * with sparse for __user @ptr.
- */
-#define container_of_user(ptr, type, member) ({				\
-	void __user *__mptr = (void __user *)(ptr);			\
-	BUILD_BUG_ON_MSG(!__same_type(*(ptr), typeof_member(type, member)) && \
-			 !__same_type(*(ptr), void),			\
-			 "pointer type mismatch in container_of()");	\
-	((type __user *)(__mptr - offsetof(type, member))); })
-
 #endif /* __I915_PTR_UTIL_H__ */
