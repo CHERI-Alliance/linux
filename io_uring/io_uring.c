@@ -1753,7 +1753,8 @@ static __cold int io_init_fail_req(struct io_kiocb *req, int err)
 }
 
 static int io_init_req(struct io_ring_ctx *ctx, struct io_kiocb *req,
-		       const struct io_uring_sqe *sqe, unsigned int *left)
+		       const struct io_uring_sqe *sqe, unsigned int sqe_idx,
+		       unsigned int *left)
 	__must_hold(&ctx->uring_lock)
 {
 	const struct io_issue_def *def;
@@ -1783,9 +1784,9 @@ static int io_init_req(struct io_ring_ctx *ctx, struct io_kiocb *req,
 		 * A 128b op on a non-128b SQ requires mixed SQE support as
 		 * well as 2 contiguous entries.
 		 */
-		if (!(ctx->flags & IORING_SETUP_SQE_MIXED) || *left < 2 ||
-		    (unsigned)(sqe - ctx->sq_sqes) >= ctx->sq_entries - 1)
+		if (!(ctx->flags & IORING_SETUP_SQE_MIXED) || *left < 2 || (sqe_idx >= ctx->sq_entries - 1))
 			return io_init_fail_req(req, -EINVAL);
+
 		/*
 		 * A 128b operation on a mixed SQ uses two entries, so we have
 		 * to increment the head and cached refs, and decrement what's
@@ -1905,13 +1906,14 @@ static __cold int io_submit_fail_init(const struct io_uring_sqe *sqe,
 }
 
 static inline int io_submit_sqe(struct io_ring_ctx *ctx, struct io_kiocb *req,
-			 const struct io_uring_sqe *sqe, unsigned int *left)
+			 const struct io_uring_sqe *sqe, unsigned int sqe_idx,
+			 unsigned int *left)
 	__must_hold(&ctx->uring_lock)
 {
 	struct io_submit_link *link = &ctx->submit_state.link;
 	int ret;
 
-	ret = io_init_req(ctx, req, sqe, left);
+	ret = io_init_req(ctx, req, sqe, sqe_idx, left);
 	if (unlikely(ret))
 		return io_submit_fail_init(sqe, req, ret);
 
@@ -2068,6 +2070,7 @@ int io_submit_sqes(struct io_ring_ctx *ctx, unsigned int nr)
 
 	do {
 		const struct io_uring_sqe *sqe;
+		unsigned int sqe_idx;
 		struct io_kiocb *req;
 		struct io_uring_sqe native_sqe[2];
 
@@ -2078,16 +2081,18 @@ int io_submit_sqes(struct io_ring_ctx *ctx, unsigned int nr)
 			break;
 		}
 		if (io_in_compat64(ctx)) {
-			convert_compat64_io_uring_sqe(ctx, native_sqe,
-						      (struct __c64_io_uring_sqe *)sqe);
+			struct __c64_io_uring_sqe *c64_sqe = (struct __c64_io_uring_sqe *) sqe;
+			convert_compat64_io_uring_sqe(ctx, native_sqe, c64_sqe);
 			sqe = native_sqe;
-		}
+			sqe_idx = c64_sqe - ctx->sq_sqes_compat;
+		} else
+			sqe_idx = sqe - ctx->sq_sqes;
 
 		/*
 		 * Continue submitting even for sqe failure if the
 		 * ring was setup with IORING_SETUP_SUBMIT_ALL
 		 */
-		if (unlikely(io_submit_sqe(ctx, req, sqe, &left)) &&
+		if (unlikely(io_submit_sqe(ctx, req, sqe, sqe_idx, &left)) &&
 		    !(ctx->flags & IORING_SETUP_SUBMIT_ALL)) {
 			left--;
 			break;
