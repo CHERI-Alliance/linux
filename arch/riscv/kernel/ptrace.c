@@ -96,12 +96,19 @@ static int riscv_gpr_set(struct task_struct *target,
 #ifdef CONFIG_CHERI_KERNEL
 		elf_greg_t old = ptregs[i];
 		char tag = tags[i / 8] & (1U << (i % 8));
+
 		/*
-		 * Take provenance from the old cap. This allows for
-		 * the common cases without the need to worry about
-		 * security.
+		 * Preserve sealed capability registers unchanged. gpr_set()
+		 * updates the full register set under ptrace and sealed
+		 * capabilities cannot be safely rebuilt using cbld.
+		 *
+		 * For unsealed capabilities, take provenance from the old cap.
+		 * This allows for the common cases without the need to worry
+		 * about security.
 		 */
-		if (tag)
+		if (cheri_is_sealed(old))
+			val = old;
+		else if (tag)
 			asm volatile ("cbld %0, %1, %2" : "=C" (val) : "C" (old), "C" (val));
 #endif
 		ptregs[i] = val;
