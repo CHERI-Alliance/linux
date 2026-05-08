@@ -14,7 +14,7 @@
 #ifndef __ASSEMBLER__
 
 /* array of addresses to install kprobes */
-extern void *test_kprobes_addresses[];
+extern ptraddr_t test_kprobes_addresses[];
 
 /* array of functions that return KPROBE_TEST_MAGIC */
 extern long (*test_kprobes_functions[])(void);

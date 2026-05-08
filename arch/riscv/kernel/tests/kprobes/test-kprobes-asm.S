@@ -16,11 +16,11 @@ SYM_FUNC_END(test_kprobes_add)
 
 SYM_FUNC_START(test_kprobes_jal)
 	li a0, 0
-	mv a1, ra
+	mv CREG(a1), CREG(ra)
 	.option push
 	.option norvc
 test_kprobes_jal_addr1:
-	jal x0, 2f
+	jal CREG(x0), 2f
 	ret
 	.option pop
 1:	li a0, KPROBE_TEST_MAGIC_UPPER
@@ -32,28 +32,28 @@ test_kprobes_jal_addr2:
 	.option pop
 	li a2, KPROBE_TEST_MAGIC_LOWER
 	add a0, a0, a2
-	jr a1
+	jr CREG(a1)
 SYM_FUNC_END(test_kprobes_jal)
 
 SYM_FUNC_START(test_kprobes_jalr)
-	la a0, 1f
-	mv a1, ra
+	CINSN(la) CREG(a0), 1f
+	mv CREG(a1), CREG(ra)
 	.option push
 	.option norvc
 test_kprobes_jalr_addr:
-	jalr a0
+	jalr CREG(a0)
 	.option pop
 	li t0, KPROBE_TEST_MAGIC_UPPER
 	add a0, a0, t0
-	jr a1
+	jr CREG(a1)
 1:	li a0, KPROBE_TEST_MAGIC_LOWER
 	ret
 SYM_FUNC_END(test_kprobes_jalr)
 
 SYM_FUNC_START(test_kprobes_auipc)
 test_kprobes_auipc_addr:
-	auipc a0, KPROBE_TEST_MAGIC_LOWER
-	la a1, test_kprobes_auipc_addr
+	auipc CREG(a0), KPROBE_TEST_MAGIC_LOWER
+	CINSN(la) CREG(a1), test_kprobes_auipc_addr
 	sub a0, a0, a1
 	srli a0, a0, 12
 	li a1, KPROBE_TEST_MAGIC_UPPER
@@ -116,28 +116,28 @@ test_kprobes_branch_c_j_addr2:
 SYM_FUNC_END(test_kprobes_c_j)
 
 SYM_FUNC_START(test_kprobes_c_jr)
-	la a0, 2f
+	CINSN(la) CREG(a0), 2f
 test_kprobes_c_jr_addr1:
-	c.jr a0
+	c.jr CREG(a0)
 	ret
 1:	li a1, KPROBE_TEST_MAGIC_LOWER
 	add a0, a0, a1
 	ret
 2:
 	li a0, KPROBE_TEST_MAGIC_UPPER
-	la a1, 1b
+	CINSN(la) CREG(a1), 1b
 test_kprobes_c_jr_addr2:
-	c.jr a1
+	c.jr CREG(a1)
 SYM_FUNC_END(test_kprobes_c_jr)
 
 SYM_FUNC_START(test_kprobes_c_jalr)
-	mv a1, ra
-	la a0, 1f
+	mv CREG(a1), CREG(ra)
+	CINSN(la) CREG(a0), 1f
 test_kprobes_c_jalr_addr:
-	c.jalr a0
+	c.jalr CREG(a0)
 	li a2, KPROBE_TEST_MAGIC_UPPER
 	add a0, a0, a2
-	jr a1
+	jr CREG(a1)
 1:	li a0, KPROBE_TEST_MAGIC_LOWER
 	ret
 SYM_FUNC_END(test_kprobes_c_jalr)
@@ -183,37 +183,42 @@ SYM_FUNC_END(test_kprobes_c_bnez)
 
 .section .rodata
 SYM_DATA_START(test_kprobes_addresses)
-	RISCV_PTR test_kprobes_add_addr1
-	RISCV_PTR test_kprobes_add_addr2
-	RISCV_PTR test_kprobes_jal_addr1
-	RISCV_PTR test_kprobes_jal_addr2
-	RISCV_PTR test_kprobes_jalr_addr
-	RISCV_PTR test_kprobes_auipc_addr
-	RISCV_PTR test_kprobes_branch_addr1
-	RISCV_PTR test_kprobes_branch_addr2
-	RISCV_PTR test_kprobes_branch_addr3
-	RISCV_PTR test_kprobes_branch_addr4
-	RISCV_PTR test_kprobes_branch_addr5
-	RISCV_PTR test_kprobes_branch_addr6
-	RISCV_PTR test_kprobes_branch_addr7
-	RISCV_PTR test_kprobes_branch_addr8
+	RISCV_PTRADDR test_kprobes_add_addr1
+	RISCV_PTRADDR test_kprobes_add_addr2
+	RISCV_PTRADDR test_kprobes_jal_addr1
+	RISCV_PTRADDR test_kprobes_jal_addr2
+	RISCV_PTRADDR test_kprobes_jalr_addr
+	RISCV_PTRADDR test_kprobes_auipc_addr
+	RISCV_PTRADDR test_kprobes_branch_addr1
+	RISCV_PTRADDR test_kprobes_branch_addr2
+	RISCV_PTRADDR test_kprobes_branch_addr3
+	RISCV_PTRADDR test_kprobes_branch_addr4
+	RISCV_PTRADDR test_kprobes_branch_addr5
+	RISCV_PTRADDR test_kprobes_branch_addr6
+	RISCV_PTRADDR test_kprobes_branch_addr7
+	RISCV_PTRADDR test_kprobes_branch_addr8
 #ifdef CONFIG_RISCV_ISA_C
-	RISCV_PTR test_kprobes_branch_c_j_addr1
-	RISCV_PTR test_kprobes_branch_c_j_addr2
-	RISCV_PTR test_kprobes_c_jr_addr1
-	RISCV_PTR test_kprobes_c_jr_addr2
-	RISCV_PTR test_kprobes_c_jalr_addr
-	RISCV_PTR test_kprobes_c_beqz_addr1
-	RISCV_PTR test_kprobes_c_beqz_addr2
-	RISCV_PTR test_kprobes_c_beqz_addr3
-	RISCV_PTR test_kprobes_c_bnez_addr1
-	RISCV_PTR test_kprobes_c_bnez_addr2
-	RISCV_PTR test_kprobes_c_bnez_addr3
+	RISCV_PTRADDR test_kprobes_branch_c_j_addr1
+	RISCV_PTRADDR test_kprobes_branch_c_j_addr2
+	RISCV_PTRADDR test_kprobes_c_jr_addr1
+	RISCV_PTRADDR test_kprobes_c_jr_addr2
+	RISCV_PTRADDR test_kprobes_c_jalr_addr
+	RISCV_PTRADDR test_kprobes_c_beqz_addr1
+	RISCV_PTRADDR test_kprobes_c_beqz_addr2
+	RISCV_PTRADDR test_kprobes_c_beqz_addr3
+	RISCV_PTRADDR test_kprobes_c_bnez_addr1
+	RISCV_PTRADDR test_kprobes_c_bnez_addr2
+	RISCV_PTRADDR test_kprobes_c_bnez_addr3
 #endif /* CONFIG_RISCV_ISA_C */
-	RISCV_PTR 0
+	RISCV_PTRADDR 0
 SYM_DATA_END(test_kprobes_addresses)
 
-.section .rodata
+#ifdef CONFIG_CHERI_KERNEL
+	.section ".data"
+#else
+	.section ".rodata"
+#endif
+	.align CLGREG
 SYM_DATA_START(test_kprobes_functions)
 	RISCV_PTR test_kprobes_add
 	RISCV_PTR test_kprobes_jal

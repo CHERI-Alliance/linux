@@ -26,7 +26,7 @@ static void test_kprobe_riscv(struct kunit *test)
 		return;
 
 	for (i = 0; i < num_kprobe; ++i) {
-		kp[i].addr = test_kprobes_addresses[i];
+		kp[i].addr = __c_fakep(test_kprobes_addresses[i]);
 		kp[i].pre_handler = kprobe_dummy_handler;
 		KUNIT_EXPECT_EQ(test, 0, register_kprobe(&kp[i]));
 	}
