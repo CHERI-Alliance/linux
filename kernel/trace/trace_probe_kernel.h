@@ -12,7 +12,19 @@
 static nokprobe_inline int
 fetch_store_strlen_user(ptraddr_t addr)
 {
-	return strnlen_user_nofault((const void __user *)cheri_make_kernel_data_cap(addr, MAX_STRING_SIZE),
+	/*
+	 * make_user_ptr_for_read_uaccess WARN()s if addr is not a userspace
+	 * address
+	 *
+	 * (CONFIG_ARCH_HAS_NON_OVERLAPPING_ADDRESS_SPACE is set on all cheri
+	 * archs)
+	 */
+	if (IS_ENABLED(CONFIG_ARCH_HAS_NON_OVERLAPPING_ADDRESS_SPACE) &&
+	    addr >= TASK_SIZE)
+		return 0;
+
+	return strnlen_user_nofault(make_user_ptr_for_read_uaccess(addr,
+								   MAX_STRING_SIZE),
 				    MAX_STRING_SIZE);
 }
 
@@ -62,7 +74,7 @@ fetch_store_string_user(ptraddr_t addr, void *dest, void *base)
 	__dest = get_loc_data(dest, base);
 
 	ret = strncpy_from_user_nofault(__dest,
-					(const void __user *)cheri_make_kernel_data_cap(addr, maxlen),
+					make_user_ptr_for_read_uaccess(addr, maxlen),
 					maxlen);
 	set_data_loc(ret, dest, __dest, base);
 
@@ -106,7 +118,7 @@ static nokprobe_inline int
 probe_mem_read_user(void *dest, ptraddr_t src, size_t size)
 {
 	return copy_from_user_nofault(dest,
-				      (const void __user *)cheri_make_kernel_data_cap(src, size),
+				      make_user_ptr_for_read_uaccess(src, size),
 				      size);
 }
 
