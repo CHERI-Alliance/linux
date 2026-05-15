@@ -141,8 +141,8 @@ int main(int argc, char *argv[])
 {
 	FILE *f;
 	char buf;
-	char *line;
 	int status;
+	char *line = NULL;
 	int ret = -1;
 	size_t len = 0;
 	int pid_max = 0;
