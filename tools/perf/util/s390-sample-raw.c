@@ -159,12 +159,12 @@ static int get_counter_name_callback(void *vdata, struct pmu_event_info *info)
 	return 0;
 }
 
-static size_t get_counter_name_hash_fn(long key, void *ctx __maybe_unused)
+static size_t get_counter_name_hash_fn(intptr_t key, void *ctx __maybe_unused)
 {
 	return key;
 }
 
-static bool get_counter_name_hashmap_equal_fn(long key1, long key2, void *ctx __maybe_unused)
+static bool get_counter_name_hashmap_equal_fn(intptr_t key1, intptr_t key2, void *ctx __maybe_unused)
 {
 	return key1 == key2;
 }
