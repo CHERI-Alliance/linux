@@ -18,6 +18,13 @@ user_ptr_perms_t arch_user_ptr_owning_perms_from_prot(int prot, unsigned long vm
 	if ((prot & PROT_READ) && (vm_flags & VM_READ_CAPS))
 		perms |= CHERI_PERM_MUTABLE_LOAD;
 
+	if (prot & PROT_NO_CAP) {
+		if (prot & PROT_READ)
+			perms |= CHERI_PERMS_LOAD_CAP;
+		if (prot & PROT_WRITE)
+			perms |= CHERI_PERMS_STORE_CAP;
+	}
+
 	if (prot & PROT_EXEC) {
 		if (cheri_perms_get(regs->epc) & CHERI_PERM_SYSTEM_REGS)
 			perms |= CHERI_PERM_SYSTEM_REGS;
