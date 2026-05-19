@@ -41,12 +41,21 @@
  * only supports synchronous operation, it does not do clock recovery, so we
  * need the clock which is not on by default.
  *
- * Phy address 1 is actually the phy that does an GMII to SGMII conversion
- * inside the Ethernet block itself.
+ * Phy address 1 is the PCS phy that does an GMII to SGMII conversion
+ * inside the Ethernet block itself when AXI emac supports SGMII mode.
  */
 
 &axi_ethernet {
 	phy-mode = "sgmii";
+	managed = "in-band-status";
+	pcs-handle = <&pcs_phy>;
+
+	mdio {
+		pcs_phy: ethernet-phy@1 {
+			device_type = "ethernet-phy";
+			reg = <1>;
+		};
+	};
 };
 
 &phy0 {
