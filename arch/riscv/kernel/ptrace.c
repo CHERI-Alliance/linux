@@ -587,12 +587,12 @@ static bool regs_within_kernel_stack(struct pt_regs *regs, __ptraddr_t addr)
  * is specified by @regs. If the @n th entry is NOT in the kernel stack,
  * this returns 0.
  */
-unsigned long regs_get_kernel_stack_nth(struct pt_regs *regs, unsigned int n)
+uintptr_t regs_get_kernel_stack_nth(struct pt_regs *regs, unsigned int n)
 {
-	unsigned long *addr = (unsigned long *)kernel_stack_pointer(regs);
+	uintptr_t *addr = (uintptr_t *)kernel_stack_pointer(regs);
 
 	addr += n;
-	if (regs_within_kernel_stack(regs, (unsigned long)addr))
+	if (regs_within_kernel_stack(regs, __c_pa(addr)))
 		return *addr;
 	else
 		return 0;
