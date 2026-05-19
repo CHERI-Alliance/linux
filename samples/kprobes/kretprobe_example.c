@@ -56,7 +56,7 @@ NOKPROBE_SYMBOL(entry_handler);
  */
 static int ret_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 {
-	unsigned long retval = regs_return_value(regs);
+	uintptr_t retval = regs_return_value(regs);
 	struct my_data *data = (struct my_data *)ri->data;
 	s64 delta;
 	ktime_t now;
@@ -64,7 +64,7 @@ static int ret_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 	now = ktime_get();
 	delta = ktime_to_ns(ktime_sub(now, data->entry_stamp));
 	pr_info("%s returned %lu and took %lld ns to execute\n",
-			func_name, retval, (long long)delta);
+			func_name, __c_ua(retval), (long long)delta);
 	return 0;
 }
 NOKPROBE_SYMBOL(ret_handler);
