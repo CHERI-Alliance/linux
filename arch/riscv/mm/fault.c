@@ -246,29 +246,33 @@ flush_tlb:
 	local_flush_tlb_page(addr);
 }
 
-static inline bool access_error(unsigned long cause, struct vm_area_struct *vma)
+/*
+ * Returns 0 if the access is permitted, otherwise the SIGSEGV si_code to
+ * deliver.
+ */
+static inline int access_error(unsigned long cause, struct vm_area_struct *vma,
+			       bool cheri_pte_fault)
 {
 	switch (cause) {
 	case EXC_INST_PAGE_FAULT:
-		if (!(vma->vm_flags & VM_EXEC)) {
-			return true;
-		}
+		if (!(vma->vm_flags & VM_EXEC))
+			return SEGV_ACCERR;
 		break;
 	case EXC_LOAD_PAGE_FAULT:
 		/* Write implies read */
-		if (!(vma->vm_flags & (VM_READ | VM_WRITE))) {
-			return true;
-		}
+		if (!(vma->vm_flags & (VM_READ | VM_WRITE)))
+			return SEGV_ACCERR;
 		break;
 	case EXC_STORE_PAGE_FAULT:
-		if (!(vma->vm_flags & VM_WRITE)) {
-			return true;
-		}
+		if (!(vma->vm_flags & VM_WRITE))
+			return SEGV_ACCERR;
+		if (cheri_pte_fault && !(vma->vm_flags & VM_WRITE_CAPS))
+			return SEGV_STORETAG;
 		break;
 	default:
 		panic("%s: unhandled cause %lu", __func__, cause);
 	}
-	return false;
+	return 0;
 }
 
 /*
@@ -283,10 +287,21 @@ void handle_page_fault(struct pt_regs *regs)
 	unsigned long addr, cause;
 	unsigned int flags = FAULT_FLAG_DEFAULT;
 	int code = SEGV_MAPERR;
+	int access_code;
 	vm_fault_t fault;
+	bool cheri_pte_fault = false;
 
 	cause = regs->cause;
 	addr = regs->badaddr;
+
+#ifdef CONFIG_RISCV_CHERI
+	if (cause == EXC_STORE_PAGE_FAULT || cause == EXC_LOAD_PAGE_FAULT) {
+		unsigned long t2 = csr_read(CSR_TVAL2);
+
+		cheri_pte_fault = (t2 == TVAL2_PF_CHERI ||
+				   t2 == TVAL2_PF_RISCV_CHERI);
+	}
+#endif
 
 	tsk = current;
 	mm = tsk->mm;
@@ -351,11 +366,12 @@ void handle_page_fault(struct pt_regs *regs)
 	if (!vma)
 		goto lock_mmap;
 
-	if (unlikely(access_error(cause, vma))) {
+	access_code = access_error(cause, vma, cheri_pte_fault);
+	if (unlikely(access_code)) {
 		vma_end_read(vma);
 		count_vm_vma_lock_event(VMA_LOCK_SUCCESS);
 		tsk->thread.bad_cause = cause;
-		bad_area_nosemaphore(regs, SEGV_ACCERR, addr);
+		bad_area_nosemaphore(regs, access_code, addr);
 		return;
 	}
 
@@ -390,11 +406,10 @@ retry:
 	 * Ok, we have a good vm_area for this memory access, so
 	 * we can handle it.
 	 */
-	code = SEGV_ACCERR;
-
-	if (unlikely(access_error(cause, vma))) {
+	access_code = access_error(cause, vma, cheri_pte_fault);
+	if (unlikely(access_code)) {
 		tsk->thread.bad_cause = cause;
-		bad_area(regs, mm, code, addr);
+		bad_area(regs, mm, access_code, addr);
 		return;
 	}
 
