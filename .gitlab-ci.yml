@@ -14,6 +14,16 @@ variables:
 stages:
   - build
 
+# Since we have a job that only runs on merge_request_event, we need
+# to specify a default for all other jobs.
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    # Avoid duplicating CI runs if this is a branch push *but* an MR is already open.
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_COMMIT_BRANCH
 
 .riscv64_cheri_script: &riscv64_cheri_script
   - S=$SCHEDULE
@@ -136,3 +146,33 @@ build_riscv64:
     - cd $CI_PROJECT_DIR
     - make ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- defconfig
     - make -j $(nproc) ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- all modules
+
+checkpatch-mr:
+  stage: build
+  rules:
+    - if: $CI_MERGE_REQUEST_LABELS =~ /\bno-checkpatch\b/
+      when: never
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+  variables:
+    GIT_DEPTH: 100
+  script: |
+    [[ -n ${DEBUG_SCRIPTS:-} ]] && set -x
+    IGNORED_TYPES=(
+    	FILE_PATH_CHANGES
+    )
+    IGNORE_STR=$(printf "%s," "${IGNORED_TYPES[@]}")
+    IGNORE_STR=${IGNORE_STR%,}
+    echo "Fetching ${CI_MERGE_REQUEST_TARGET_BRANCH_NAME} from origin"
+    git fetch --depth ${GIT_DEPTH} origin ${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}
+    MERGE_BASE=$(git merge-base origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME HEAD)
+    CHECKPATCH_ARGS=(
+    	--show-types
+    	--ignore "${IGNORE_STR}"
+    )
+    if [[ CI_MERGE_REQUEST_LABELS =~ /\bcheckpatch-strict\b/ ]]; then
+    	CHECKPATCH_ARGS+=( --strict )
+    fi
+    CHECKPATCH_ARGS+=( --git ${MERGE_BASE}..HEAD )
+    echo ./scripts/checkpatch.pl "${CHECKPATCH_ARGS[@]}"
+    ./scripts/checkpatch.pl \
+    	"${CHECKPATCH_ARGS[@]}"
