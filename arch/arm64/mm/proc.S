@@ -190,7 +190,6 @@ SYM_FUNC_START(cpu_do_resume)
 	msr	tpidr_el0, x2
 	msr	vbar_el1, x9
 #endif /* CONFIG_ARM64_MORELLO */
-
 	msr	mdscr_el1, x10
 alternative_if ARM64_HAS_TCR2
 	ldr	x2, [x0, #104]

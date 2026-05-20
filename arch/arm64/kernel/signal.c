@@ -1133,6 +1133,7 @@ static int restore_sigframe(struct pt_regs *regs,
 
 	if (err == 0 && system_supports_poe() && user.poe)
 		err = restore_poe_context(&user, ua_state);
+
 	if (err == 0 && system_supports_morello() && user.morello)
 		err = restore_morello_context(&user, regs);
 

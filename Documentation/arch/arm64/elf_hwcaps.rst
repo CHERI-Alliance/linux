@@ -455,6 +455,7 @@ HWCAP3_MORELLO
     Functionality implied by ID_AA64PFR1_EL1.CE == 0b0001, as described
     by Documentation/arm64/morello.rst.
 
+
 4. Unused AT_HWCAP bits
 -----------------------
 

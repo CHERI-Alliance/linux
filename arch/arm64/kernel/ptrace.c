@@ -1948,7 +1948,7 @@ static const struct user_regset aarch64_regsets[] = {
 		.align = sizeof(u64),
 		.regset_get = gcs_get,
 		.set = gcs_set,
-	}
+	},
 #endif
 #ifdef CONFIG_ARM64_MORELLO
 	[REGSET_MORELLO] = {
