@@ -1,0 +1,72 @@
+# SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
+# Copyright (c) 2026 Codasip GmbH. All rights reserved.
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/perf/codasip,codasip-cmu.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Capability Management Unit (CMU)
+
+maintainers:
+  - Ka Leung Ho <ka.ho@codasip.com>
+
+description:
+  The Capability Management Unit (CMU) is a system-level component that
+  supports the maintenance of tag bits associated with CHERI capabilities
+  on the Codasip platform with a Codasip CHERI CPU.
+
+  Each CMU instance should have an alias correctly assigned in the "aliases"
+  node, following the format cmuN, where N is the CMU index (a non-negative
+  decimal integer).
+
+properties:
+  compatible:
+    const: codasip,codasip-cmu
+
+  reg:
+    maxItems: 1
+
+  interrupts-extended:
+    items:
+      - description: Low-priority signal
+      - description: High-priority signal
+
+  interrupt-names:
+    items:
+      - const: low
+      - const: high
+
+required:
+  - compatible
+  - reg
+  - interrupts-extended
+  - interrupt-names
+
+additionalProperties: false
+
+examples:
+  - |
+    aliases {
+      cmu0 = &cmu0;
+      cmu1 = &cmu1;
+    };
+
+    soc {
+      #address-cells = <1>;
+      #size-cells = <1>;
+
+      cmu0: cmu@10690000 {
+        compatible = "codasip,codasip-cmu";
+        reg = <0x10690000 0x10000>;
+        interrupts-extended = <&plic 27>, <&plic 28>;
+        interrupt-names = "low", "high";
+      };
+
+      cmu1: cmu@106a0000 {
+        compatible = "codasip,codasip-cmu";
+        reg = <0x106a0000 0x10000>;
+        interrupts-extended = <&plic 29>, <&plic 30>;
+        interrupt-names = "low", "high";
+      };
+    };
+...
