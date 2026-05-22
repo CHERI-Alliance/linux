@@ -154,7 +154,7 @@ checkpatch-mr:
       when: never
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
   variables:
-    GIT_DEPTH: 4096
+    GIT_DEPTH: 100
   script: |
     [[ -n ${DEBUG_SCRIPTS:-} ]] && set -x
     IGNORED_TYPES=(
@@ -173,6 +173,6 @@ checkpatch-mr:
     	CHECKPATCH_ARGS+=( --strict )
     fi
     CHECKPATCH_ARGS+=( --git ${MERGE_BASE}..HEAD )
-    echo "./scripts/checkpatch.pl "${CHECKPATCH_ARGS[@]}"
+    echo ./scripts/checkpatch.pl "${CHECKPATCH_ARGS[@]}"
     ./scripts/checkpatch.pl \
     	"${CHECKPATCH_ARGS[@]}"
