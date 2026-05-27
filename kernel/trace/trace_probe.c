@@ -1359,12 +1359,9 @@ static char *parse_probe_arg_type(char *arg, struct probe_arg *parg,
 		return ERR_PTR(-EINVAL);
 	}
 
-	if (parg->type->composite == FC_CAP) {
-		ctx->flags |= TPARG_FL_CAP_FIELD;
-		if (parg->count) {
-			trace_probe_log_err(ctx->offset + offs, UNSUPP_CAP_ARRAY);
-			return ERR_PTR(-EINVAL);
-		}
+	if (parg->type->composite == FC_CAP && parg->count) {
+		trace_probe_log_err(ctx->offset + offs, UNSUPP_CAP_ARRAY);
+		return ERR_PTR(-EINVAL);
 	}
 
 	return t;
@@ -2048,7 +2045,7 @@ int traceprobe_define_arg_fields(struct trace_event_call *event_call,
 			ret = trace_define_field(event_call, fmt, tm_name,
 						 offset + parg->offset + size,
 						 size,
-						 parg->type->is_signed,
+						 parg->type->is_signed, 1,
 						 FILTER_OTHER);
 			if (ret) {
 				kfree(tm_name);
