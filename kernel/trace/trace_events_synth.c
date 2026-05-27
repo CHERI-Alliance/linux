@@ -145,7 +145,7 @@ static int synth_event_define_fields(struct trace_event_call *call)
 		filter_type = is_stack ? FILTER_STACKTRACE : FILTER_OTHER;
 
 		ret = trace_define_field(call, type, name, offset, size,
-					 is_signed, filter_type);
+					 is_signed, 0, filter_type);
 		if (ret)
 			break;
 

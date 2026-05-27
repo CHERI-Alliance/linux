@@ -114,8 +114,8 @@ trace_find_event_field(struct trace_event_call *call, char *name)
 
 static int __trace_define_field(struct list_head *head, const char *type,
 				const char *name, int offset, int size,
-				int is_signed, int filter_type, int len,
-				int need_test)
+				int is_signed, int dyn_name, int filter_type,
+				int len, int need_test)
 {
 	struct ftrace_event_field *field;
 
@@ -134,6 +134,7 @@ static int __trace_define_field(struct list_head *head, const char *type,
 	field->offset = offset;
 	field->size = size;
 	field->is_signed = is_signed;
+	field->dyn_name = dyn_name;
 	field->needs_test = need_test;
 	field->len = len;
 
@@ -144,7 +145,7 @@ static int __trace_define_field(struct list_head *head, const char *type,
 
 int trace_define_field(struct trace_event_call *call, const char *type,
 		       const char *name, int offset, int size, int is_signed,
-		       int filter_type)
+		       int dyn_name, int filter_type)
 {
 	struct list_head *head;
 
@@ -153,7 +154,7 @@ int trace_define_field(struct trace_event_call *call, const char *type,
 
 	head = trace_get_fields(call);
 	return __trace_define_field(head, type, name, offset, size,
-				    is_signed, filter_type, 0, 0);
+				    is_signed, dyn_name, filter_type, 0, 0);
 }
 EXPORT_SYMBOL_GPL(trace_define_field);
 
@@ -168,13 +169,13 @@ static int trace_define_field_ext(struct trace_event_call *call, const char *typ
 
 	head = trace_get_fields(call);
 	return __trace_define_field(head, type, name, offset, size,
-				    is_signed, filter_type, len, need_test);
+				    is_signed, 0, filter_type, len, need_test);
 }
 
 #define __generic_field(type, item, filter_type)			\
 	ret = __trace_define_field(&ftrace_generic_fields, #type,	\
 				   #item, 0, 0, is_signed_type(type),	\
-				   filter_type, 0, 0);			\
+				   0, filter_type, 0, 0);			\
 	if (ret)							\
 		return ret;
 
@@ -183,8 +184,8 @@ static int trace_define_field_ext(struct trace_event_call *call, const char *typ
 				   "common_" #item,			\
 				   offsetof(typeof(ent), item),		\
 				   sizeof(ent.item),			\
-				   is_signed_type(type), FILTER_OTHER,	\
-				   0, 0);				\
+				   is_signed_type(type), 0,		\
+				   FILTER_OTHER, 0, 0);			\
 	if (ret)							\
 		return ret;
 
@@ -224,7 +225,7 @@ static void trace_destroy_fields(struct trace_event_call *call)
 
 	head = trace_get_fields(call);
 	list_for_each_entry_safe(field, next, head, link) {
-		if (call->flags & TRACE_EVENT_FL_DYN_NAMES)
+		if (field->dyn_name)
 			kfree(field->name);
 		list_del(&field->link);
 		kmem_cache_free(field_cachep, field);

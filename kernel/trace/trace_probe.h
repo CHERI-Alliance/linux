@@ -47,12 +47,10 @@
 #undef DEFINE_FIELD
 #define DEFINE_FIELD(type, item, name, is_signed)			\
 	do {								\
-		ret = trace_define_field(event_call, #type,		\
-					 event_call->flags & TRACE_EVENT_FL_DYN_NAMES ? \
-					 kstrdup(name, GFP_KERNEL) : name, \
+		ret = trace_define_field(event_call, #type, name,	\
 					 offsetof(typeof(field), item),	\
 					 sizeof(field.item), is_signed, \
-					 FILTER_OTHER);			\
+					 0, FILTER_OTHER);		\
 		if (ret)						\
 			return ret;					\
 	} while (0)
@@ -401,14 +399,13 @@ static inline int traceprobe_get_entry_data_size(struct trace_probe *tp)
  * TPARG_FL_FPROBE and TPARG_FL_TPOINT are optional but it should be with
  * TPARG_FL_KERNEL.
  */
-#define TPARG_FL_RETURN		BIT(0)
-#define TPARG_FL_KERNEL		BIT(1)
-#define TPARG_FL_FENTRY		BIT(2)
-#define TPARG_FL_TEVENT		BIT(3)
-#define TPARG_FL_USER		BIT(4)
-#define TPARG_FL_FPROBE		BIT(5)
-#define TPARG_FL_TPOINT		BIT(6)
-#define TPARG_FL_CAP_FIELD	BIT(7)
+#define TPARG_FL_RETURN BIT(0)
+#define TPARG_FL_KERNEL BIT(1)
+#define TPARG_FL_FENTRY BIT(2)
+#define TPARG_FL_TEVENT BIT(3)
+#define TPARG_FL_USER   BIT(4)
+#define TPARG_FL_FPROBE BIT(5)
+#define TPARG_FL_TPOINT BIT(6)
 #define TPARG_FL_LOC_MASK	GENMASK(4, 0)
 
 static inline bool tparg_is_function_entry(unsigned int flags)
