@@ -8,10 +8,6 @@ CONFIG_AS_HAS_MOPS:
 	Needs fixing
 CONFIG_ARM64_GCS:
 	Crashes the morello compiler
-CONFIG_VMAP_STACK:
-	This is mandatory on arm64, now. However, the entry code does
-	magic trick (e.g. to detect stack overflows) that will invalidate
-	tags on capabilities.
 Conflicts ignored:
 	arch/arm64/lib/copy_page.S
 	arch/arm64/lib/copy_from_user.S
