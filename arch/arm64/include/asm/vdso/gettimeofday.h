@@ -102,6 +102,31 @@ const struct vdso_data *__arch_get_vdso_data(void)
 	return vd;
 }
 
+static __always_inline
+const struct vdso_time_data *__arch_get_vdso_u_time_data(void)
+{
+	const struct vdso_time_data *ret;
+
+	asm(".hidden vdso_u_time_data\n\t"
+	    "adrp %0, vdso_u_time_data\n\t"
+	    "add %0, %0, #:lo12:vdso_u_time_data"
+	    : "=C"(ret));
+	return ret;
+}
+#define __arch_get_vdso_u_time_data __arch_get_vdso_u_time_data
+
+static __always_inline
+const struct vdso_rng_data *__arch_get_vdso_u_rng_data(void)
+{
+	const struct vdso_rng_data *ret;
+
+	asm(".hidden vdso_u_rng_data\n\t"
+	    "adrp %0, vdso_u_rng_data\n\t"
+	    "add %0, %0, #:lo12:vdso_u_rng_data"
+	    : "=C"(ret));
+	return ret;
+}
+#define __arch_get_vdso_u_rng_data __arch_get_vdso_u_rng_data
 #else /* !__CHERI_PURE_CAPABILITY__ */
 #if IS_ENABLED(CONFIG_CC_IS_GCC) && IS_ENABLED(CONFIG_PAGE_SIZE_64KB)
 static __always_inline const struct vdso_time_data *__arch_get_vdso_u_time_data(void)
