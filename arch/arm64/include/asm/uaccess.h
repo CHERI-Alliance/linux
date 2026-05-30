@@ -210,13 +210,18 @@ static inline void __user *__uaccess_mask_ptr(const void __user *ptr)
  *
  * The "__xxx_error" versions set the third argument to -EFAULT if an error
  * occurs, and leave it unchanged on success.
+ *
+ * The asm_goto block cannot be used for Morello. If a memory fault occurs,
+ * the exception handler redirects execution directly to the external C label,
+ * completely bypassing __ASM_UACCESS_AFTER. This would leave PSTATE.C64 active
+ * on the fault path. Toggling back to A64 mode via __ASM_UACCESS_AFTER is
+ * strictly mandatory on all execution paths (success or fault) to prevent
+ * subsequent instruction stream corruption.
  */
-#ifdef CONFIG_CC_HAS_ASM_GOTO_OUTPUT
+#if defined(CONFIG_CC_HAS_ASM_GOTO_OUTPUT) && !defined(CONFIG_ARM64_MORELLO)
 #define __get_mem_asm(load, reg, x, addr, label, type)			\
 	asm_goto_output(						\
-	__ASM_UACCESS_BEFORE						\
 	"1:	" load "	" reg "0, [%1]\n"			\
-	__ASM_UACCESS_AFTER						\
 	_ASM_EXTABLE_##type##ACCESS(1b, %l2)				\
 	: "=r" (x)							\
 	: "r" (addr) : : label)
