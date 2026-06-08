@@ -72,11 +72,20 @@
 
 end	.req	x5
 dstin	.req	x6
-srcin	.req	x15
+req_reg_pcuabi srcin, c15, x15
 SYM_FUNC_START(COPY_FUNC_NAME)
 	add	end, x0, x2
 	mov	dstin, x0
+#ifdef CONFIG_CHERI_PURECAP_UABI
+.arch morello+c64
+	bx	#4
+	/* See comments in copy_from_user.S */
+	cvtp	clr, lr
+	cvtd	c1, x1
+	mov	srcin, c1
+#else
 	mov	srcin, x1
+#endif
 #include "copy_template.S"
 	mov	x0, #0
 	ret
@@ -84,14 +93,14 @@ SYM_FUNC_START(COPY_FUNC_NAME)
 	// Exception fixups
 9996:	b.cs	9997f
 	// Registers are in Option A format
-	add	dst, dst, count
-9997:	cmp	dst, dstin
+	add	dstx, dstx, count
+9997:	cmp	dstx, dstin
 	b.ne	9998f
 	// Before being absolutely sure we couldn't copy anything, try harder
 	ldrb	tmp1w, [srcin]
 USER(9998f, sttrb tmp1w, [dst])
 	add	dst, dst, #1
-9998:	sub	x0, end, dst			// bytes not copied
+9998:	sub	x0, end, dstx			// bytes not copied
 	ret
 SYM_FUNC_END(COPY_FUNC_NAME)
 EXPORT_SYMBOL(COPY_FUNC_NAME)
