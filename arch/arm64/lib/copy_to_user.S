@@ -62,6 +62,14 @@
 	USER_CPY(9996f, 1, cpyfewt [\dst]!, [\src]!, \count!)
 	.endm
 
+	.macro ldpc1 reg1, reg2, ptr, val
+	ldp \reg1, \reg2, [\ptr], \val
+	.endm
+
+	.macro stpc1 reg1, reg2, ptr, val
+	user_stp 9997f, \reg1, \reg2, \ptr, \val, #16
+	.endm
+
 end	.req	x5
 srcin	.req	x15
 SYM_FUNC_START(COPY_FUNC_NAME)
