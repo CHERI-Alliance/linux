@@ -98,6 +98,14 @@ typedef __u64 __ptraddr64_t;
 #define __aligned_s64ptr __s64ptr __attribute__((aligned(8)))
 #endif
 
+/*
+ * FIXCHERI: Define __kernel_aligned_uintptr_t for backward compatibility with
+ * legacy Morello userspace (e.g. LTP) that still uses this type. Provide it
+ * as an alias for __aligned_u64ptr so that such userspace continues to work
+ * on both legacy Morello Linux and CHERI-Linux.
+ */
+typedef __aligned_u64ptr __kernel_aligned_uintptr_t;
+
 typedef unsigned __bitwise __poll_t;
 
 #endif /*  __ASSEMBLY__ */
