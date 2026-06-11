@@ -459,6 +459,36 @@ static void xilinx_free_irq_domains(struct xilinx_pcie *pcie)
 
 /* INTx Functions */
 
+static void xilinx_intx_irq_mask(struct irq_data *data)
+{
+	struct xilinx_pcie *pcie = irq_data_get_irq_chip_data(data);
+	unsigned int mask = 1U << (16 + data->hwirq);
+	unsigned long flags;
+
+	spin_lock_irqsave(&pcie->mask_lock, flags);
+	mask = pcie_read(pcie, XILINX_PCIE_REG_RPID2M) & ~mask;
+	pcie_write(pcie, mask, XILINX_PCIE_REG_RPID2M);
+	spin_unlock_irqrestore(&pcie->mask_lock, flags);
+}
+
+static void xilinx_intx_irq_unmask(struct irq_data *data)
+{
+	struct xilinx_pcie *pcie = irq_data_get_irq_chip_data(data);
+	unsigned int mask = 1U << (16 + data->hwirq);
+	unsigned long flags;
+
+	spin_lock_irqsave(&pcie->mask_lock, flags);
+	mask = pcie_read(pcie, XILINX_PCIE_REG_RPID2M) | mask;
+	pcie_write(pcie, mask, XILINX_PCIE_REG_RPID2M);
+	spin_unlock_irqrestore(&pcie->mask_lock, flags);
+}
+
+static struct irq_chip xilinx_irq_chip = {
+	.name = "XILINX INTx",
+	.irq_mask = xilinx_intx_irq_mask,
+	.irq_unmask = xilinx_intx_irq_unmask,
+};
+
 /**
  * xilinx_pcie_intx_map - Set the handler for the INTx and mark IRQ as valid
  * @domain: IRQ domain
@@ -470,7 +500,7 @@ static void xilinx_free_irq_domains(struct xilinx_pcie *pcie)
 static int xilinx_pcie_intx_map(struct irq_domain *domain, unsigned int irq,
 				irq_hw_number_t hwirq)
 {
-	irq_set_chip_and_handler(irq, &dummy_irq_chip, handle_simple_irq);
+	irq_set_chip_and_handler(irq, &xilinx_irq_chip, handle_level_irq);
 	irq_set_chip_data(irq, domain->host_data);
 
 	return 0;
@@ -572,6 +602,7 @@ static void xilinx_handle_decode_intx_irq(struct xilinx_pcie *pcie)
 	unsigned long mask;
 
 	mask = pcie_read(pcie, XILINX_PCIE_REG_RPID2) >> 16;
+	mask &= pcie_read(pcie, XILINX_PCIE_REG_RPID2M) >> 16;
 	for_each_set_bit(bit, &mask, 4)
 		generic_handle_domain_irq(domain, bit);
 }
@@ -749,8 +780,7 @@ static void xilinx_pcie_init_port(struct xilinx_pcie *pcie)
 			 XILINX_PCIE_REG_MSI_LOW_MASK);
 	pcie_write(pcie, XILINX_PCIE_IDR_ALL_MASK,
 			 XILINX_PCIE_REG_MSI_HI_MASK);
-	pcie_write(pcie, GENMASK(19, 16),
-			       XILINX_PCIE_REG_RPID2M);
+	pcie_write(pcie, 0, XILINX_PCIE_REG_RPID2M);
 }
 
 /**
