@@ -1580,9 +1580,9 @@ static int setup_buffering(struct scsi_tape *STp, const char __user *buf,
 	else
 		i = STp->try_dio_now && try_wdio;
 
-	if (i && ((unsigned long)buf & queue_dma_alignment(
+	if (i && ((user_uintptr_t)buf & queue_dma_alignment(
 					STp->device->request_queue)) == 0) {
-		i = sgl_map_user_pages(STbp, STbp->use_sg, (unsigned long)buf,
+		i = sgl_map_user_pages(STbp, STbp->use_sg, (user_uintptr_t)buf,
 				       count, (is_read ? READ : WRITE));
 		if (i > 0) {
 			STbp->do_dio = i;

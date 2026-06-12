@@ -51,7 +51,7 @@ static inline struct file *io_slot_file(struct io_rsrc_node *node)
 static inline void io_fixed_file_set(struct io_rsrc_node *node,
 				     struct file *file)
 {
-	node->file_ptr = (unsigned long)file |
+	node->file_ptr = (uintptr_t)file |
 		(io_file_get_flags(file) >> REQ_F_SUPPORT_NOWAIT_BIT);
 }
 

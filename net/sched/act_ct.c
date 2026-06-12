@@ -190,7 +190,7 @@ static void tcf_ct_flow_table_add_action_meta(struct nf_conn *ct,
 	entry->ct_metadata.mark = READ_ONCE(ct->mark);
 #endif
 	/* aligns with the CT reference on the SKB nf_ct_set */
-	entry->ct_metadata.cookie = (unsigned long)ct | ctinfo;
+	entry->ct_metadata.cookie = (uintptr_t)ct | ctinfo;
 	entry->ct_metadata.orig_dir = dir == IP_CT_DIR_ORIGINAL;
 
 	act_ct_labels = entry->ct_metadata.labels;

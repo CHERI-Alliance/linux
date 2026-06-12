@@ -21,7 +21,7 @@ static inline void hlist_bl_set_first_rcu(struct hlist_bl_head *h,
 	LIST_BL_BUG_ON(((unsigned long)h->first & LIST_BL_LOCKMASK) !=
 							LIST_BL_LOCKMASK);
 	rcu_assign_pointer(hlist_bl_first_rcu(h),
-		(struct hlist_bl_node *)((unsigned long)n | LIST_BL_LOCKMASK));
+		(struct hlist_bl_node *)((uintptr_t)n | LIST_BL_LOCKMASK));
 }
 
 #define hlist_bl_first_rcu_dereference(head)				\

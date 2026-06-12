@@ -408,7 +408,7 @@ static const struct of_device_id loongson_rtc_of_match[] = {
 MODULE_DEVICE_TABLE(of, loongson_rtc_of_match);
 
 static const struct acpi_device_id loongson_rtc_acpi_match[] = {
-	{ "LOON0001", .driver_data = (kernel_ulong_t)&generic_rtc_config },
+	{ "LOON0001", .driver_data = (uintptr_t)&generic_rtc_config },
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, loongson_rtc_acpi_match);

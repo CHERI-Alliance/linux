@@ -826,7 +826,7 @@ static int very_verbose(struct lock_class *class)
 #ifdef __KERNEL__
 static int static_obj(const void *obj)
 {
-	unsigned long addr = (unsigned long) obj;
+	uintptr_t addr = (uintptr_t) obj;
 
 	if (is_kernel_core_data(addr))
 		return 1;
@@ -954,7 +954,7 @@ look_up_lock_class(const struct lockdep_map *lock, unsigned int subclass)
  */
 static bool assign_lock_key(struct lockdep_map *lock)
 {
-	unsigned long can_addr, addr = (unsigned long)lock;
+	uintptr_t can_addr, addr = (uintptr_t)lock;
 
 #ifdef __KERNEL__
 	/*

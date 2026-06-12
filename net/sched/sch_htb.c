@@ -196,7 +196,7 @@ static inline struct htb_class *htb_find(u32 handle, struct Qdisc *sch)
 
 static unsigned long htb_search(struct Qdisc *sch, u32 handle)
 {
-	return (unsigned long)htb_find(handle, sch);
+	return (uintptr_t)htb_find(handle, sch);
 }
 
 #define HTB_DIRECT ((struct htb_class *)-1L)
@@ -2056,7 +2056,7 @@ static int htb_change_class(struct Qdisc *sch, u32 classid,
 
 	qdisc_class_hash_grow(sch, &q->clhash);
 
-	*arg = (unsigned long)cl;
+	*arg = (uintptr_t)cl;
 	return 0;
 
 err_kill_estimator:
@@ -2093,7 +2093,7 @@ static unsigned long htb_bind_filter(struct Qdisc *sch, unsigned long parent,
 	 */
 	if (cl)
 		qdisc_class_get(&cl->common);
-	return (unsigned long)cl;
+	return (uintptr_t)cl;
 }
 
 static void htb_unbind_filter(struct Qdisc *sch, unsigned long arg)
@@ -2114,7 +2114,7 @@ static void htb_walk(struct Qdisc *sch, struct qdisc_walker *arg)
 
 	for (i = 0; i < q->clhash.hashsize; i++) {
 		hlist_for_each_entry(cl, &q->clhash.hash[i], common.hnode) {
-			if (!tc_qdisc_stats_dump(sch, (unsigned long)cl, arg))
+			if (!tc_qdisc_stats_dump(sch, (uintptr_t)cl, arg))
 				return;
 		}
 	}

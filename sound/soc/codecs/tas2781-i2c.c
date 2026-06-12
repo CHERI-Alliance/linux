@@ -1433,7 +1433,7 @@ static int tasdevice_create_cali_ctrls(struct tasdevice_priv *priv)
 	cali_ctrls[i].info = snd_soc_bytes_info_ext;
 	cali_ctrls[i].get = tasdev_cali_data_get;
 	cali_ctrls[i].put = tasdev_cali_data_put;
-	cali_ctrls[i].private_value = (unsigned long)ext_cali_data;
+	cali_ctrls[i].private_value = (uintptr_t)ext_cali_data;
 	i++;
 
 	cali_data->data = devm_kzalloc(priv->dev, cali_data->total_sz,
@@ -1475,7 +1475,7 @@ static int tasdevice_create_cali_ctrls(struct tasdevice_priv *priv)
 		cali_ctrls[i].info = snd_soc_bytes_info_ext;
 		cali_ctrls[i].put = tas2781_calib_start_put;
 		cali_ctrls[i].get = tasdev_nop_get;
-		cali_ctrls[i].private_value = (unsigned long)ext_cali_start;
+		cali_ctrls[i].private_value = (uintptr_t)ext_cali_start;
 		i++;
 	}
 
@@ -2086,26 +2086,26 @@ static void tasdevice_i2c_remove(struct i2c_client *client)
 }
 
 static const struct acpi_device_id tasdevice_acpi_match[] = {
-	{ "TXNW2020", (kernel_ulong_t)&tasdevice_id[TAS2020] },
-	{ "TXNW2118", (kernel_ulong_t)&tasdevice_id[TAS2118] },
-	{ "TXNW2120", (kernel_ulong_t)&tasdevice_id[TAS2120] },
-	{ "TXNW2320", (kernel_ulong_t)&tasdevice_id[TAS2320] },
-	{ "TXNW2563", (kernel_ulong_t)&tasdevice_id[TAS2563] },
-	{ "TXNW2568", (kernel_ulong_t)&tasdevice_id[TAS2568] },
-	{ "TXNW2570", (kernel_ulong_t)&tasdevice_id[TAS2570] },
-	{ "TXNW2572", (kernel_ulong_t)&tasdevice_id[TAS2572] },
-	{ "TXNW2574", (kernel_ulong_t)&tasdevice_id[TAS2574] },
-	{ "TXNW2781", (kernel_ulong_t)&tasdevice_id[TAS2781] },
-	{ "TXNW5802", (kernel_ulong_t)&tasdevice_id[TAS5802] },
-	{ "TXNW806M", (kernel_ulong_t)&tasdevice_id[TAS5806M] },
-	{ "TXNW806D", (kernel_ulong_t)&tasdevice_id[TAS5806MD] },
-	{ "TXNW5815", (kernel_ulong_t)&tasdevice_id[TAS5815] },
-	{ "TXNW5822", (kernel_ulong_t)&tasdevice_id[TAS5822] },
-	{ "TXNW5825", (kernel_ulong_t)&tasdevice_id[TAS5825] },
-	{ "TXNW5827", (kernel_ulong_t)&tasdevice_id[TAS5827] },
-	{ "TXNW5828", (kernel_ulong_t)&tasdevice_id[TAS5828] },
-	{ "TXNW5830", (kernel_ulong_t)&tasdevice_id[TAS5830] },
-	{ "TXNW5832", (kernel_ulong_t)&tasdevice_id[TAS5832] },
+	{ "TXNW2020", (uintptr_t)&tasdevice_id[TAS2020] },
+	{ "TXNW2118", (uintptr_t)&tasdevice_id[TAS2118] },
+	{ "TXNW2120", (uintptr_t)&tasdevice_id[TAS2120] },
+	{ "TXNW2320", (uintptr_t)&tasdevice_id[TAS2320] },
+	{ "TXNW2563", (uintptr_t)&tasdevice_id[TAS2563] },
+	{ "TXNW2568", (uintptr_t)&tasdevice_id[TAS2568] },
+	{ "TXNW2570", (uintptr_t)&tasdevice_id[TAS2570] },
+	{ "TXNW2572", (uintptr_t)&tasdevice_id[TAS2572] },
+	{ "TXNW2574", (uintptr_t)&tasdevice_id[TAS2574] },
+	{ "TXNW2781", (uintptr_t)&tasdevice_id[TAS2781] },
+	{ "TXNW5802", (uintptr_t)&tasdevice_id[TAS5802] },
+	{ "TXNW806M", (uintptr_t)&tasdevice_id[TAS5806M] },
+	{ "TXNW806D", (uintptr_t)&tasdevice_id[TAS5806MD] },
+	{ "TXNW5815", (uintptr_t)&tasdevice_id[TAS5815] },
+	{ "TXNW5822", (uintptr_t)&tasdevice_id[TAS5822] },
+	{ "TXNW5825", (uintptr_t)&tasdevice_id[TAS5825] },
+	{ "TXNW5827", (uintptr_t)&tasdevice_id[TAS5827] },
+	{ "TXNW5828", (uintptr_t)&tasdevice_id[TAS5828] },
+	{ "TXNW5830", (uintptr_t)&tasdevice_id[TAS5830] },
+	{ "TXNW5832", (uintptr_t)&tasdevice_id[TAS5832] },
 	{},
 };
 

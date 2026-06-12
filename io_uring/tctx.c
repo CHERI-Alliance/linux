@@ -114,7 +114,7 @@ static int io_tctx_install_node(struct io_ring_ctx *ctx,
 	struct io_tctx_node *node;
 	int ret;
 
-	if (xa_load(&tctx->xa, (unsigned long)ctx))
+	if (xa_load(&tctx->xa, (uintptr_t)ctx))
 		return 0;
 
 	node = kmalloc_obj(*node);
@@ -123,7 +123,7 @@ static int io_tctx_install_node(struct io_ring_ctx *ctx,
 	node->ctx = ctx;
 	node->task = current;
 
-	ret = xa_err(xa_store(&tctx->xa, (unsigned long)ctx,
+	ret = xa_err(xa_store(&tctx->xa, (uintptr_t)ctx,
 				node, GFP_KERNEL));
 	if (ret) {
 		kfree(node);

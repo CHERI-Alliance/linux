@@ -347,7 +347,7 @@ static int get_v4l2_plane32(struct v4l2_plane *p64,
 		m.mem_offset = plane32.m.mem_offset;
 		break;
 	case V4L2_MEMORY_USERPTR:
-		m.userptr = (unsigned long)compat_ptr(plane32.m.userptr);
+		m.userptr = (user_uintptr_t)compat_ptr(plane32.m.userptr);
 		break;
 	case V4L2_MEMORY_DMABUF:
 		m.fd = plane32.m.fd;
@@ -428,7 +428,7 @@ static int get_v4l2_buffer32(struct v4l2_buffer *vb,
 		vb->m.offset = vb32.m.offset;
 		break;
 	case V4L2_MEMORY_USERPTR:
-		vb->m.userptr = (unsigned long)compat_ptr(vb32.m.userptr);
+		vb->m.userptr = (user_uintptr_t)compat_ptr(vb32.m.userptr);
 		break;
 	case V4L2_MEMORY_DMABUF:
 		vb->m.fd = vb32.m.fd;
@@ -472,7 +472,7 @@ static int get_v4l2_buffer32_time32(struct v4l2_buffer *vb,
 		vb->m.offset = vb32.m.offset;
 		break;
 	case V4L2_MEMORY_USERPTR:
-		vb->m.userptr = (unsigned long)compat_ptr(vb32.m.userptr);
+		vb->m.userptr = (user_uintptr_t)compat_ptr(vb32.m.userptr);
 		break;
 	case V4L2_MEMORY_DMABUF:
 		vb->m.fd = vb32.m.fd;
@@ -1195,7 +1195,7 @@ long v4l2_compat_ioctl32(struct file *file, unsigned int cmd, unsigned long arg)
 
 	if (_IOC_TYPE(cmd) == 'V' && _IOC_NR(cmd) < BASE_VIDIOC_PRIVATE)
 		ret = file->f_op->unlocked_ioctl(file, cmd,
-					(unsigned long)compat_ptr(arg));
+					(user_uintptr_t)compat_ptr(arg));
 	else if (vdev->fops->compat_ioctl32)
 		ret = vdev->fops->compat_ioctl32(file, cmd, arg);
 

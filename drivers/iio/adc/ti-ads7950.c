@@ -678,18 +678,18 @@ static void ti_ads7950_remove(struct spi_device *spi)
 }
 
 static const struct spi_device_id ti_ads7950_id[] = {
-	{ "ads7950", (kernel_ulong_t)&ti_ads7950_chip_info },
-	{ "ads7951", (kernel_ulong_t)&ti_ads7951_chip_info },
-	{ "ads7952", (kernel_ulong_t)&ti_ads7952_chip_info },
-	{ "ads7953", (kernel_ulong_t)&ti_ads7953_chip_info },
-	{ "ads7954", (kernel_ulong_t)&ti_ads7954_chip_info },
-	{ "ads7955", (kernel_ulong_t)&ti_ads7955_chip_info },
-	{ "ads7956", (kernel_ulong_t)&ti_ads7956_chip_info },
-	{ "ads7957", (kernel_ulong_t)&ti_ads7957_chip_info },
-	{ "ads7958", (kernel_ulong_t)&ti_ads7958_chip_info },
-	{ "ads7959", (kernel_ulong_t)&ti_ads7959_chip_info },
-	{ "ads7960", (kernel_ulong_t)&ti_ads7960_chip_info },
-	{ "ads7961", (kernel_ulong_t)&ti_ads7961_chip_info },
+	{ "ads7950", (uintptr_t)&ti_ads7950_chip_info },
+	{ "ads7951", (uintptr_t)&ti_ads7951_chip_info },
+	{ "ads7952", (uintptr_t)&ti_ads7952_chip_info },
+	{ "ads7953", (uintptr_t)&ti_ads7953_chip_info },
+	{ "ads7954", (uintptr_t)&ti_ads7954_chip_info },
+	{ "ads7955", (uintptr_t)&ti_ads7955_chip_info },
+	{ "ads7956", (uintptr_t)&ti_ads7956_chip_info },
+	{ "ads7957", (uintptr_t)&ti_ads7957_chip_info },
+	{ "ads7958", (uintptr_t)&ti_ads7958_chip_info },
+	{ "ads7959", (uintptr_t)&ti_ads7959_chip_info },
+	{ "ads7960", (uintptr_t)&ti_ads7960_chip_info },
+	{ "ads7961", (uintptr_t)&ti_ads7961_chip_info },
 	{ }
 };
 MODULE_DEVICE_TABLE(spi, ti_ads7950_id);

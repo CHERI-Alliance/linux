@@ -149,7 +149,7 @@ static int probe_common(struct virtio_device *vdev)
 	vi->hwrng = (struct hwrng) {
 		.read = virtio_read,
 		.cleanup = virtio_cleanup,
-		.priv = (unsigned long)vi,
+		.priv = (uintptr_t)vi,
 		.name = vi->name,
 	};
 	vdev->priv = vi;

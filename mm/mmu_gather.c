@@ -158,7 +158,7 @@ static void tlb_batch_list_free(struct mmu_gather *tlb)
 
 	for (batch = tlb->local.next; batch; batch = next) {
 		next = batch->next;
-		free_pages((unsigned long)batch, 0);
+		free_pages((uintptr_t)batch, 0);
 	}
 	tlb->local.next = NULL;
 }
@@ -227,7 +227,7 @@ static void __tlb_remove_table_free(struct mmu_table_batch *batch)
 	for (i = 0; i < batch->nr; i++)
 		__tlb_remove_table(batch->tables[i]);
 
-	free_page((unsigned long)batch);
+	free_page((uintptr_t)batch);
 }
 
 #ifdef CONFIG_MMU_GATHER_RCU_TABLE_FREE

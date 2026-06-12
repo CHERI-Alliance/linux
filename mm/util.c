@@ -699,7 +699,7 @@ EXPORT_SYMBOL(vcalloc_noprof);
 
 struct anon_vma *folio_anon_vma(const struct folio *folio)
 {
-	unsigned long mapping = (unsigned long)folio->mapping;
+	uintptr_t mapping = (uintptr_t)folio->mapping;
 
 	if ((mapping & FOLIO_MAPPING_FLAGS) != FOLIO_MAPPING_ANON)
 		return NULL;
@@ -1339,7 +1339,7 @@ again:
 	} else {
 		/* See compound_head() */
 		if (compound_info_has_mask()) {
-			unsigned long p = (unsigned long)page;
+			uintptr_t p = (uintptr_t)page;
 
 			foliop = (struct folio *)(p & info);
 		} else {

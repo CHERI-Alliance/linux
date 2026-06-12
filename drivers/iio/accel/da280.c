@@ -155,16 +155,16 @@ static const struct da280_match_data da226_match_data = { "da226", 2 };
 static const struct da280_match_data da280_match_data = { "da280", 3 };
 
 static const struct acpi_device_id da280_acpi_match[] = {
-	{ "NSA2513", (kernel_ulong_t)&da217_match_data },
-	{ "MIRAACC", (kernel_ulong_t)&da280_match_data },
+	{ "NSA2513", (uintptr_t)&da217_match_data },
+	{ "MIRAACC", (uintptr_t)&da280_match_data },
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, da280_acpi_match);
 
 static const struct i2c_device_id da280_i2c_id[] = {
-	{ "da217", (kernel_ulong_t)&da217_match_data },
-	{ "da226", (kernel_ulong_t)&da226_match_data },
-	{ "da280", (kernel_ulong_t)&da280_match_data },
+	{ "da217", (uintptr_t)&da217_match_data },
+	{ "da226", (uintptr_t)&da226_match_data },
+	{ "da280", (uintptr_t)&da280_match_data },
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, da280_i2c_id);

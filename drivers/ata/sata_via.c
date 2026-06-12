@@ -444,7 +444,7 @@ static void vt6421_init_addrs(struct ata_port *ap)
 	ioaddr->cmd_addr = reg_addr;
 	ioaddr->altstatus_addr =
 	ioaddr->ctl_addr = (void __iomem *)
-		((unsigned long)(reg_addr + 8) | ATA_PCI_CTL_OFS);
+		((uintptr_t)(reg_addr + 8) | ATA_PCI_CTL_OFS);
 	ioaddr->bmdma_addr = bmdma_addr;
 	ioaddr->scr_addr = vt6421_scr_addr(iomap[5], ap->port_no);
 

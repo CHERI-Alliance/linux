@@ -236,9 +236,9 @@ int mwifiex_debug_info_to_buffer(struct mwifiex_private *priv, char *buf,
 		size = d[i].size / d[i].num;
 
 		if (i < (num_of_items - 3))
-			addr = d[i].addr + (size_t)info;
+			addr = d[i].addr + (uintptr_t)info;
 		else /* The last 3 items are struct mwifiex_adapter variables */
-			addr = d[i].addr + (size_t)priv->adapter;
+			addr = d[i].addr + (uintptr_t)priv->adapter;
 
 		for (j = 0; j < d[i].num; j++) {
 			switch (size) {

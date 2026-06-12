@@ -249,7 +249,7 @@ ctnl_timeout_dump(struct sk_buff *skb, struct netlink_callback *cb)
 					   cb->nlh->nlmsg_seq,
 					   NFNL_MSG_TYPE(cb->nlh->nlmsg_type),
 					   IPCTNL_MSG_TIMEOUT_NEW, cur) < 0) {
-			cb->args[1] = (unsigned long)cur;
+			cb->args[1] = (uintptr_t)cur;
 			break;
 		}
 	}

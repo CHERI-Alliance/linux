@@ -45,7 +45,7 @@ static int nvdimm_map_flush(struct device *dev, struct nvdimm *nvdimm, int dimm,
 		}
 
 		if (j < i)
-			flush_page = (void __iomem *) ((unsigned long)
+			flush_page = (void __iomem *) ((uintptr_t)
 					ndrd_get_flush_wpq(ndrd, dimm, j)
 					& PAGE_MASK);
 		else

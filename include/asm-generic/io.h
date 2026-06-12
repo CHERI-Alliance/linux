@@ -1096,7 +1096,7 @@ static inline void iowrite64_rep(volatile void __iomem *addr,
 #define virt_to_phys virt_to_phys
 static inline unsigned long virt_to_phys(volatile void *address)
 {
-	return __pa((unsigned long)address);
+	return __pa((uintptr_t)address);
 }
 #endif
 

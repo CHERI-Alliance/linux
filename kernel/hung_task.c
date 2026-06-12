@@ -157,7 +157,7 @@ static void debug_show_blocker(struct task_struct *task, unsigned long timeout)
 		break;
 	case BLOCKER_TYPE_RWSEM_READER:
 	case BLOCKER_TYPE_RWSEM_WRITER:
-		owner = (unsigned long)rwsem_owner(
+		owner = (uintptr_t)rwsem_owner(
 					hung_task_blocker_to_lock(blocker));
 		rwsem_blocked_as = (blocker_type == BLOCKER_TYPE_RWSEM_READER) ?
 					"reader" : "writer";

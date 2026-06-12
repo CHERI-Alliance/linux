@@ -2694,7 +2694,7 @@ static int binder_translate_fd_array(struct list_head *pf_head,
 				fda->parent_offset;
 
 	if (!IS_ALIGNED((unsigned long)fda_offset, sizeof(u32)) ||
-	    !IS_ALIGNED((unsigned long)sender_ufda_base, sizeof(u32))) {
+	    !IS_ALIGNED((user_uintptr_t)sender_ufda_base, sizeof(u32))) {
 		binder_user_error("%d:%d parent offset not aligned correctly.\n",
 				  proc->pid, thread->pid);
 		return -EINVAL;

@@ -479,7 +479,7 @@ static ssize_t usb_device_dump(char __user2 * __capability *buffer, size_t *nbyt
 		if (length > *nbytes)
 			length = *nbytes;
 		if (copy_to_user(*buffer, pages_start + *skip_bytes, length)) {
-			free_pages((unsigned long)pages_start, 1);
+			free_pages((uintptr_t)pages_start, 1);
 			return -EFAULT;
 		}
 		*nbytes -= length;
@@ -490,7 +490,7 @@ static ssize_t usb_device_dump(char __user2 * __capability *buffer, size_t *nbyt
 	} else
 		*skip_bytes -= length;
 
-	free_pages((unsigned long)pages_start, 1);
+	free_pages((uintptr_t)pages_start, 1);
 
 	/* Now look at all of this device's children. */
 	usb_hub_for_each_child(usbdev, chix, childdev) {

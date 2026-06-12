@@ -251,7 +251,7 @@ static int write_key_bytes(struct btrfs_inode *inode, u8 key_type, u64 offset,
 
 		data = btrfs_item_ptr(leaf, path->slots[0], void);
 		write_extent_buffer(leaf, src + src_offset,
-				    (unsigned long)data, copy_bytes);
+				    (uintptr_t)data, copy_bytes);
 		offset += copy_bytes;
 		src_offset += copy_bytes;
 		len -= copy_bytes;
@@ -368,7 +368,7 @@ static int read_key_bytes(struct btrfs_inode *inode, u8 key_type, u64 offset,
 
 			data = btrfs_item_ptr(leaf, path->slots[0], void);
 			read_extent_buffer(leaf, kaddr + dest_offset,
-					   (unsigned long)data + copy_offset,
+					   (uintptr_t)data + copy_offset,
 					   copy_bytes);
 
 			if (dest_folio)

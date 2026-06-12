@@ -27,7 +27,7 @@ static void __kprobes arch_prepare_ss_slot(struct kprobe *p)
 	size_t len = GET_INSN_LENGTH(p->opcode);
 	u32 insn = __BUG_INSN_32;
 
-	p->ainsn.api.restore = (unsigned long)p->addr + len;
+	p->ainsn.api.restore = (uintptr_t)p->addr + len;
 
 	patch_text_nosync(p->ainsn.api.insn, &p->opcode, len);
 	patch_text_nosync((void *)p->ainsn.api.insn + len, &insn, GET_INSN_LENGTH(insn));
@@ -44,7 +44,7 @@ static void __kprobes arch_simulate_insn(struct kprobe *p, struct pt_regs *regs)
 
 	if (p->ainsn.api.handler)
 		p->ainsn.api.handler((u32)p->opcode,
-					(unsigned long)p->addr, regs);
+					(uintptr_t)p->addr, regs);
 
 	post_kprobe_handler(p, kcb, regs);
 }
@@ -76,7 +76,7 @@ int __kprobes arch_prepare_kprobe(struct kprobe *p)
 	if ((unsigned long)insn & 0x1)
 		return -EILSEQ;
 
-	if (!arch_check_kprobe((unsigned long)p->addr))
+	if (!arch_check_kprobe((uintptr_t)p->addr))
 		return -EILSEQ;
 
 	/* copy instruction */
@@ -184,7 +184,7 @@ static void __kprobes setup_singlestep(struct kprobe *p,
 
 	if (p->ainsn.api.insn) {
 		/* prepare for single stepping */
-		slot = (unsigned long)p->ainsn.api.insn;
+		slot = (uintptr_t)p->ainsn.api.insn;
 
 		/* IRQs and single stepping do not mix well. */
 		kprobes_save_local_irqflag(kcb, regs);
@@ -260,7 +260,7 @@ int __kprobes kprobe_fault_handler(struct pt_regs *regs, unsigned int trapnr)
 		 * and allow the page fault handler to continue as a
 		 * normal page fault.
 		 */
-		regs->epc = (unsigned long) cur->addr;
+		regs->epc = (uintptr_t) cur->addr;
 		BUG_ON(!instruction_pointer(regs));
 
 		if (kcb->kprobe_status == KPROBE_REENTER)
@@ -358,8 +358,8 @@ int __init arch_populate_kprobe_blacklist(void)
 {
 	int ret;
 
-	ret = kprobe_add_area_blacklist((unsigned long)__irqentry_text_start,
-					(unsigned long)__irqentry_text_end);
+	ret = kprobe_add_area_blacklist((uintptr_t)__irqentry_text_start,
+					(uintptr_t)__irqentry_text_end);
 	return ret;
 }
 

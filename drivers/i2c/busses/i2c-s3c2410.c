@@ -154,7 +154,7 @@ MODULE_DEVICE_TABLE(of, s3c24xx_i2c_match);
 static inline kernel_ulong_t s3c24xx_get_device_quirks(struct platform_device *pdev)
 {
 	if (pdev->dev.of_node)
-		return (kernel_ulong_t)of_device_get_match_data(&pdev->dev);
+		return (uintptr_t)of_device_get_match_data(&pdev->dev);
 
 	return platform_get_device_id(pdev)->driver_data;
 }

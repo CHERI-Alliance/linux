@@ -284,7 +284,7 @@ static ssize_t get_mm_proctitle(struct mm_struct *mm, char __user *buf,
 			ret = len;
 		}
 	}
-	free_page((unsigned long)page);
+	free_page((uintptr_t)page);
 	return ret;
 }
 
@@ -371,7 +371,7 @@ static ssize_t get_mm_cmdline(struct mm_struct *mm, char __user *buf,
 		count -= got;
 	}
 
-	free_page((unsigned long)page);
+	free_page((uintptr_t)page);
 	return len;
 }
 
@@ -949,7 +949,7 @@ static ssize_t mem_rw(struct file *file, char __user *buf,
 
 	mmput(mm);
 free:
-	free_page((unsigned long) page);
+	free_page((uintptr_t) page);
 	return copied;
 }
 
@@ -1062,7 +1062,7 @@ static ssize_t environ_read(struct file *file, char __user *buf,
 	mmput(mm);
 
 free:
-	free_page((unsigned long) page);
+	free_page((uintptr_t) page);
 	return ret;
 }
 

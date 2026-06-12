@@ -70,23 +70,23 @@ static int jh7110_reset_probe(struct auxiliary_device *adev,
 static const struct auxiliary_device_id jh7110_reset_ids[] = {
 	{
 		.name = "clk_starfive_jh7110_sys.rst-sys",
-		.driver_data = (kernel_ulong_t)&jh7110_sys_info,
+		.driver_data = (uintptr_t)&jh7110_sys_info,
 	},
 	{
 		.name = "clk_starfive_jh7110_sys.rst-aon",
-		.driver_data = (kernel_ulong_t)&jh7110_aon_info,
+		.driver_data = (uintptr_t)&jh7110_aon_info,
 	},
 	{
 		.name = "clk_starfive_jh7110_sys.rst-stg",
-		.driver_data = (kernel_ulong_t)&jh7110_stg_info,
+		.driver_data = (uintptr_t)&jh7110_stg_info,
 	},
 	{
 		.name = "clk_starfive_jh7110_sys.rst-isp",
-		.driver_data = (kernel_ulong_t)&jh7110_isp_info,
+		.driver_data = (uintptr_t)&jh7110_isp_info,
 	},
 	{
 		.name = "clk_starfive_jh7110_sys.rst-vo",
-		.driver_data = (kernel_ulong_t)&jh7110_vout_info,
+		.driver_data = (uintptr_t)&jh7110_vout_info,
 	},
 	{ /* sentinel */ }
 };

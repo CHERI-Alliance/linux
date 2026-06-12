@@ -1037,7 +1037,7 @@ int nfp_flower_merge_offloaded_flows(struct nfp_app *app,
 	if (!merge_flow)
 		return -ENOMEM;
 
-	merge_flow->tc_flower_cookie = (unsigned long)merge_flow;
+	merge_flow->tc_flower_cookie = (uintptr_t)merge_flow;
 	merge_flow->ingress_dev = sub_flow1->ingress_dev;
 
 	memcpy(merge_flow->unmasked_data, sub_flow1->unmasked_data,

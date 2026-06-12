@@ -968,7 +968,7 @@ static const struct snd_kcontrol_new sma1307_aif_in_source_control = {
 	.info = snd_soc_info_enum_double,
 	.get = sma1307_dapm_aif_in_get,
 	.put = sma1307_dapm_aif_in_put,
-	.private_value = (unsigned long)&sma1307_aif_in_source_enum
+	.private_value = (uintptr_t)&sma1307_aif_in_source_enum
 };
 
 static const struct snd_kcontrol_new sma1307_sdo_setting_control = {
@@ -977,7 +977,7 @@ static const struct snd_kcontrol_new sma1307_sdo_setting_control = {
 	.info = snd_soc_info_enum_double,
 	.get = sma1307_dapm_sdo_setting_get,
 	.put = sma1307_dapm_sdo_setting_put,
-	.private_value = (unsigned long)&sma1307_sdo_setting_enum
+	.private_value = (uintptr_t)&sma1307_sdo_setting_enum
 };
 
 static const struct snd_kcontrol_new sma1307_aif_out0_source_control = {
@@ -986,7 +986,7 @@ static const struct snd_kcontrol_new sma1307_aif_out0_source_control = {
 	.info = snd_soc_info_enum_double,
 	.get = sma1307_dapm_aif_out_get,
 	.put = sma1307_dapm_aif_out_put,
-	.private_value = (unsigned long)&sma1307_aif_out_source_enum
+	.private_value = (uintptr_t)&sma1307_aif_out_source_enum
 };
 
 static const struct snd_kcontrol_new sma1307_aif_out1_source_control = {
@@ -995,7 +995,7 @@ static const struct snd_kcontrol_new sma1307_aif_out1_source_control = {
 	.info = snd_soc_info_enum_double,
 	.get = sma1307_dapm_aif_out_get,
 	.put = sma1307_dapm_aif_out_put,
-	.private_value = (unsigned long)&sma1307_aif_out_source_enum
+	.private_value = (uintptr_t)&sma1307_aif_out_source_enum
 };
 
 static const struct snd_kcontrol_new sma1307_sdo_control =

@@ -36,11 +36,11 @@ static int kx022a_i2c_probe(struct i2c_client *i2c)
 }
 
 static const struct i2c_device_id kx022a_i2c_id[] = {
-	{ .name = "kx022a", .driver_data = (kernel_ulong_t)&kx022a_chip_info },
-	{ .name = "kx132-1211", .driver_data = (kernel_ulong_t)&kx132_chip_info },
-	{ .name = "kx134-1211", .driver_data = (kernel_ulong_t)&kx134_chip_info },
-	{ .name = "kx132acr-lbz", .driver_data = (kernel_ulong_t)&kx132acr_chip_info },
-	{ .name = "kx134acr-lbz", .driver_data = (kernel_ulong_t)&kx134acr_chip_info },
+	{ .name = "kx022a", .driver_data = (uintptr_t)&kx022a_chip_info },
+	{ .name = "kx132-1211", .driver_data = (uintptr_t)&kx132_chip_info },
+	{ .name = "kx134-1211", .driver_data = (uintptr_t)&kx134_chip_info },
+	{ .name = "kx132acr-lbz", .driver_data = (uintptr_t)&kx132acr_chip_info },
+	{ .name = "kx134acr-lbz", .driver_data = (uintptr_t)&kx134acr_chip_info },
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, kx022a_i2c_id);

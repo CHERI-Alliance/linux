@@ -200,7 +200,7 @@ u32 *dst_cow_metrics_generic(struct dst_entry *dst, unsigned long old)
 		refcount_set(&p->refcnt, 1);
 		memcpy(p->metrics, old_p->metrics, sizeof(p->metrics));
 
-		new = (unsigned long) p;
+		new = (uintptr_t) p;
 		prev = cmpxchg(&dst->_metrics, old, new);
 
 		if (prev != old) {
@@ -223,7 +223,7 @@ void __dst_destroy_metrics_generic(struct dst_entry *dst, unsigned long old)
 {
 	unsigned long prev, new;
 
-	new = ((unsigned long) &dst_default_metrics) | DST_METRICS_READ_ONLY;
+	new = ((uintptr_t) &dst_default_metrics) | DST_METRICS_READ_ONLY;
 	prev = cmpxchg(&dst->_metrics, old, new);
 	if (prev == old)
 		kfree(__DST_METRICS_PTR(old));

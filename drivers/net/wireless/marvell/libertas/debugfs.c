@@ -261,7 +261,7 @@ static ssize_t lbs_threshold_read(uint16_t tlv_type, uint16_t event_mask,
 	kfree(subscribed);
 
  out_page:
-	free_page((unsigned long)buf);
+	free_page((uintptr_t)buf);
 	return ret;
 }
 
@@ -922,7 +922,7 @@ static void lbs_debug_init(struct lbs_private *priv)
 		return;
 
 	for (i = 0; i < num_of_items; i++)
-		items[i].addr += (size_t) priv;
+		items[i].addr += (uintptr_t) priv;
 
 	priv->debugfs_debug = debugfs_create_file("debug", 0644,
 						  priv->debugfs_dir, &items[0],

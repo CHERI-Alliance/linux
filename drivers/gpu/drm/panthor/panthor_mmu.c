@@ -487,7 +487,7 @@ static void free_pt(void *cookie, void *data, size_t size)
 	struct panthor_vm *vm = cookie;
 
 	if (unlikely(vm->root_page_table == data)) {
-		free_pages((unsigned long)data, get_order(size));
+		free_pages((uintptr_t)data, get_order(size));
 		vm->root_page_table = NULL;
 		return;
 	}

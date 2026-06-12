@@ -140,7 +140,7 @@ int cc_req_mgr_init(struct cc_drvdata *drvdata)
 #else
 	dev_dbg(dev, "Initializing completion tasklet\n");
 	tasklet_init(&req_mgr_h->comptask, comp_handler,
-		     (unsigned long)drvdata);
+		     (uintptr_t)drvdata);
 #endif
 	req_mgr_h->hw_queue_size = cc_ioread(drvdata,
 					     CC_REG(DSCRPTR_QUEUE_SRAM_SIZE));

@@ -1290,7 +1290,7 @@ static int ufx_realloc_framebuffer(struct ufx_data *dev, struct fb_info *info)
 
 		info->screen_buffer = new_fb;
 		info->fix.smem_len = PAGE_ALIGN(new_len);
-		info->fix.smem_start = (unsigned long) new_fb;
+		info->fix.smem_start = (uintptr_t) new_fb;
 		info->flags = smscufx_info_flags;
 	}
 	return 0;

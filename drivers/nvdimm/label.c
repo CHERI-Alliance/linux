@@ -283,8 +283,8 @@ static int to_slot(struct nvdimm_drvdata *ndd,
 {
 	unsigned long label, base;
 
-	label = (unsigned long) nd_label;
-	base = (unsigned long) nd_label_base(ndd);
+	label = (uintptr_t) nd_label;
+	base = (uintptr_t) nd_label_base(ndd);
 
 	return (label - base) / sizeof_namespace_label(ndd);
 }
@@ -293,7 +293,7 @@ static struct nd_namespace_label *to_label(struct nvdimm_drvdata *ndd, int slot)
 {
 	unsigned long label, base;
 
-	base = (unsigned long) nd_label_base(ndd);
+	base = (uintptr_t) nd_label_base(ndd);
 	label = base + sizeof_namespace_label(ndd) * slot;
 
 	return (struct nd_namespace_label *) label;

@@ -3389,7 +3389,7 @@ static long comedi_compat_ioctl(struct file *file, unsigned int cmd, unsigned lo
 	case COMEDI_BUFCONFIG:
 	case COMEDI_BUFINFO:
 		/* Just need to translate the pointer argument. */
-		arg = (unsigned long)compat_ptr(arg);
+		arg = (user_uintptr_t)compat_ptr(arg);
 		rc = comedi_unlocked_ioctl(file, cmd, arg);
 		break;
 	case COMEDI_LOCK:

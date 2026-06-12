@@ -463,17 +463,17 @@ static int ad7606_spi_probe(struct spi_device *spi)
 }
 
 static const struct spi_device_id ad7606_id_table[] = {
-	{ "ad7605-4", (kernel_ulong_t)&ad7605_4_bus_info },
-	{ "ad7606-4", (kernel_ulong_t)&ad7606_4_bus_info },
-	{ "ad7606-6", (kernel_ulong_t)&ad7606_6_bus_info },
-	{ "ad7606-8", (kernel_ulong_t)&ad7606_8_bus_info },
-	{ "ad7606b",  (kernel_ulong_t)&ad7606b_bus_info },
-	{ "ad7606c-16", (kernel_ulong_t)&ad7606c_16_bus_info },
-	{ "ad7606c-18", (kernel_ulong_t)&ad7606c_18_bus_info },
-	{ "ad7607",   (kernel_ulong_t)&ad7607_bus_info },
-	{ "ad7608",   (kernel_ulong_t)&ad7608_bus_info },
-	{ "ad7609",   (kernel_ulong_t)&ad7609_bus_info },
-	{ "ad7616",   (kernel_ulong_t)&ad7616_bus_info },
+	{ "ad7605-4", (uintptr_t)&ad7605_4_bus_info },
+	{ "ad7606-4", (uintptr_t)&ad7606_4_bus_info },
+	{ "ad7606-6", (uintptr_t)&ad7606_6_bus_info },
+	{ "ad7606-8", (uintptr_t)&ad7606_8_bus_info },
+	{ "ad7606b",  (uintptr_t)&ad7606b_bus_info },
+	{ "ad7606c-16", (uintptr_t)&ad7606c_16_bus_info },
+	{ "ad7606c-18", (uintptr_t)&ad7606c_18_bus_info },
+	{ "ad7607",   (uintptr_t)&ad7607_bus_info },
+	{ "ad7608",   (uintptr_t)&ad7608_bus_info },
+	{ "ad7609",   (uintptr_t)&ad7609_bus_info },
+	{ "ad7616",   (uintptr_t)&ad7616_bus_info },
 	{ }
 };
 MODULE_DEVICE_TABLE(spi, ad7606_id_table);

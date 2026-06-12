@@ -117,7 +117,7 @@ static int omap3_rom_rng_probe(struct platform_device *pdev)
 		return -ENOMEM;
 
 	ddata->dev = &pdev->dev;
-	ddata->ops.priv = (unsigned long)ddata;
+	ddata->ops.priv = (uintptr_t)ddata;
 	ddata->ops.name = "omap3-rom";
 	ddata->ops.read = of_device_get_match_data(&pdev->dev);
 	ddata->ops.quality = 900;

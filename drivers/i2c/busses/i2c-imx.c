@@ -318,10 +318,10 @@ static const struct imx_i2c_hwdata s32g2_i2c_hwdata = {
 static const struct platform_device_id imx_i2c_devtype[] = {
 	{
 		.name = "imx1-i2c",
-		.driver_data = (kernel_ulong_t)&imx1_i2c_hwdata,
+		.driver_data = (uintptr_t)&imx1_i2c_hwdata,
 	}, {
 		.name = "imx21-i2c",
-		.driver_data = (kernel_ulong_t)&imx21_i2c_hwdata,
+		.driver_data = (uintptr_t)&imx21_i2c_hwdata,
 	}, {
 		/* sentinel */
 	}
@@ -349,7 +349,7 @@ static const struct of_device_id i2c_imx_dt_ids[] = {
 MODULE_DEVICE_TABLE(of, i2c_imx_dt_ids);
 
 static const struct acpi_device_id i2c_imx_acpi_ids[] = {
-	{"NXP0001", .driver_data = (kernel_ulong_t)&vf610_i2c_hwdata},
+	{"NXP0001", .driver_data = (uintptr_t)&vf610_i2c_hwdata},
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, i2c_imx_acpi_ids);

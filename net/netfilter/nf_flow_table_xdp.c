@@ -26,7 +26,7 @@ static DEFINE_MUTEX(nf_xdp_hashtable_lock);
 /* caller must hold rcu read lock */
 struct nf_flowtable *nf_flowtable_by_dev(const struct net_device *dev)
 {
-	unsigned long key = (unsigned long)dev;
+	uintptr_t key = (uintptr_t)dev;
 	struct flow_offload_xdp *iter;
 
 	hash_for_each_possible_rcu(nf_xdp_hashtable, iter, hnode, key) {
@@ -51,7 +51,7 @@ static int nf_flowtable_by_dev_insert(struct nf_flowtable *ft,
 				      const struct net_device *dev)
 {
 	struct flow_offload_xdp *iter, *elem = NULL;
-	unsigned long key = (unsigned long)dev;
+	uintptr_t key = (uintptr_t)dev;
 	struct flow_offload_xdp_ft *ft_elem;
 
 	ft_elem = kzalloc_obj(*ft_elem, GFP_KERNEL_ACCOUNT);
@@ -95,7 +95,7 @@ static void nf_flowtable_by_dev_remove(struct nf_flowtable *ft,
 				       const struct net_device *dev)
 {
 	struct flow_offload_xdp *iter, *elem = NULL;
-	unsigned long key = (unsigned long)dev;
+	uintptr_t key = (uintptr_t)dev;
 
 	mutex_lock(&nf_xdp_hashtable_lock);
 

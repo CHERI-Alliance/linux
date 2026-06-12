@@ -171,7 +171,7 @@ aoechr_write(struct file *filp, const char __user *buf, size_t cnt, loff_t *offp
 {
 	int ret = -EINVAL;
 
-	switch ((unsigned long) filp->private_data) {
+	switch ((uintptr_t) filp->private_data) {
 	default:
 		printk(KERN_INFO "aoe: can't write to that file.\n");
 		break;
@@ -226,7 +226,7 @@ aoechr_read(struct file *filp, char __user *buf, size_t cnt, loff_t *off)
 	ssize_t len;
 	ulong flags;
 
-	n = (unsigned long) filp->private_data;
+	n = (uintptr_t) filp->private_data;
 	if (n != MINOR_ERR)
 		return -EFAULT;
 

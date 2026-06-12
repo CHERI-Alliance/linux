@@ -386,7 +386,7 @@ static int pds_vfio_dirty_seq_ack(struct pds_vfio_pci_device *pds_vfio,
 	int err;
 	int i;
 
-	bmp = (void *)((u64)seq_ack_bmp + offset);
+	bmp = (void *)((uintptr_t)seq_ack_bmp + offset);
 	page_offset = offset_in_page(bmp);
 	bmp -= page_offset;
 
@@ -479,8 +479,8 @@ static int pds_vfio_dirty_process_bitmaps(struct pds_vfio_pci_device *pds_vfio,
 	int dword_count;
 
 	dword_count = len_bytes / sizeof(u64);
-	seq = (__le64 *)((u64)region->host_seq + bmp_offset);
-	ack = (__le64 *)((u64)region->host_ack + bmp_offset);
+	seq = (__le64 *)((uintptr_t)region->host_seq + bmp_offset);
+	ack = (__le64 *)((uintptr_t)region->host_ack + bmp_offset);
 	bmp_offset_bit = bmp_offset * 8;
 
 	for (int i = 0; i < dword_count; i++) {

@@ -637,38 +637,38 @@ static const struct usb_device_id	products [] = {
 	/* 2Wire HomePortal 1000SW */
 	USB_DEVICE_AND_INTERFACE_INFO(0x1630, 0x0042,
 				      USB_CLASS_COMM, 2 /* ACM */, 0x0ff),
-	.driver_info = (unsigned long) &rndis_poll_status_info,
+	.driver_info = (uintptr_t) &rndis_poll_status_info,
 }, {
 	/* Hytera Communications DMR radios' "Radio to PC Network" */
 	USB_VENDOR_AND_INTERFACE_INFO(0x238b,
 				      USB_CLASS_COMM, 2 /* ACM */, 0x0ff),
-	.driver_info = (unsigned long)&rndis_info,
+	.driver_info = (uintptr_t)&rndis_info,
 }, {
 	/* ZTE WWAN modules */
 	USB_VENDOR_AND_INTERFACE_INFO(0x19d2,
 				      USB_CLASS_WIRELESS_CONTROLLER, 1, 3),
-	.driver_info = (unsigned long)&zte_rndis_info,
+	.driver_info = (uintptr_t)&zte_rndis_info,
 }, {
 	/* ZTE WWAN modules, ACM flavour */
 	USB_VENDOR_AND_INTERFACE_INFO(0x19d2,
 				      USB_CLASS_COMM, 2 /* ACM */, 0x0ff),
-	.driver_info = (unsigned long)&zte_rndis_info,
+	.driver_info = (uintptr_t)&zte_rndis_info,
 }, {
 	/* RNDIS is MSFT's un-official variant of CDC ACM */
 	USB_INTERFACE_INFO(USB_CLASS_COMM, 2 /* ACM */, 0x0ff),
-	.driver_info = (unsigned long) &rndis_info,
+	.driver_info = (uintptr_t) &rndis_info,
 }, {
 	/* "ActiveSync" is an undocumented variant of RNDIS, used in WM5 */
 	USB_INTERFACE_INFO(USB_CLASS_MISC, 1, 1),
-	.driver_info = (unsigned long) &rndis_poll_status_info,
+	.driver_info = (uintptr_t) &rndis_poll_status_info,
 }, {
 	/* RNDIS for tethering */
 	USB_INTERFACE_INFO(USB_CLASS_WIRELESS_CONTROLLER, 1, 3),
-	.driver_info = (unsigned long) &rndis_info,
+	.driver_info = (uintptr_t) &rndis_info,
 }, {
 	/* Novatel Verizon USB730L */
 	USB_INTERFACE_INFO(USB_CLASS_MISC, 4, 1),
-	.driver_info = (unsigned long) &rndis_info,
+	.driver_info = (uintptr_t) &rndis_info,
 },
 	{ },		// END
 };

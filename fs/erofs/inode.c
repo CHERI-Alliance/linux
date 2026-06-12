@@ -372,7 +372,7 @@ long erofs_ioctl(struct file *filp, unsigned int cmd, user_uintptr_t arg)
 long erofs_compat_ioctl(struct file *filp, unsigned int cmd,
 			unsigned long arg)
 {
-	return erofs_ioctl(filp, cmd, (unsigned long)compat_ptr(arg));
+	return erofs_ioctl(filp, cmd, (user_uintptr_t)compat_ptr(arg));
 }
 #endif
 

@@ -6708,7 +6708,7 @@ static int pcidev_init(struct pci_dev *pdev, const struct pci_device_id *id)
 			hw->port_info[pi].state = media_disconnected;
 		}
 
-		dev->mem_start = (unsigned long) hw->io;
+		dev->mem_start = (uintptr_t) hw->io;
 		dev->mem_end = dev->mem_start + reg_len - 1;
 		dev->irq = pdev->irq;
 		if (MAIN_PORT == i)

@@ -743,15 +743,15 @@ static void m10bmc_sec_remove(struct platform_device *pdev)
 static const struct platform_device_id intel_m10bmc_sec_ids[] = {
 	{
 		.name = "n3000bmc-sec-update",
-		.driver_data = (kernel_ulong_t)&m10sec_n3000_ops,
+		.driver_data = (uintptr_t)&m10sec_n3000_ops,
 	},
 	{
 		.name = "d5005bmc-sec-update",
-		.driver_data = (kernel_ulong_t)&m10sec_n3000_ops,
+		.driver_data = (uintptr_t)&m10sec_n3000_ops,
 	},
 	{
 		.name = "n6000bmc-sec-update",
-		.driver_data = (kernel_ulong_t)&m10sec_n6000_ops,
+		.driver_data = (uintptr_t)&m10sec_n6000_ops,
 	},
 	{ }
 };

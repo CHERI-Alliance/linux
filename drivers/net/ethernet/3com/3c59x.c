@@ -1158,7 +1158,7 @@ static int vortex_probe1(struct device *gendev, void __iomem *ioaddr, int irq,
 	       vci->name,
 	       ioaddr);
 
-	dev->base_addr = (unsigned long)ioaddr;
+	dev->base_addr = (uintptr_t)ioaddr;
 	dev->irq = irq;
 	dev->mtu = mtu;
 	vp->ioaddr = ioaddr;

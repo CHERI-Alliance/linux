@@ -1068,7 +1068,7 @@ static int switchtec_dma_chan_init(struct switchtec_dma_dev *swdma_dev,
 	spin_lock_init(&swdma_chan->submit_lock);
 	spin_lock_init(&swdma_chan->complete_lock);
 	tasklet_init(&swdma_chan->desc_task, switchtec_dma_desc_task,
-		     (unsigned long)swdma_chan);
+		     (uintptr_t)swdma_chan);
 
 	swdma_chan->mmio_chan_fw =
 		swdma_dev->bar + SWITCHTEC_DMAC_CHAN_CFG_STS_OFFSET +

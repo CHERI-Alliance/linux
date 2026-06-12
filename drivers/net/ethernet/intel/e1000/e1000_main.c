@@ -1474,7 +1474,7 @@ static bool e1000_check_64k_bound(struct e1000_adapter *adapter, void *start,
 				  unsigned long len)
 {
 	struct e1000_hw *hw = &adapter->hw;
-	unsigned long begin = (unsigned long)start;
+	uintptr_t begin = (uintptr_t)start;
 	unsigned long end = begin + len;
 
 	/* First rev 82545 and 82546 need to not allow any memory

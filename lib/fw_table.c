@@ -163,13 +163,13 @@ acpi_parse_entries_array(char *id, unsigned long table_size,
 	table_len = acpi_table_get_length(type, table_header);
 	if (max_length && max_length < table_len)
 		table_len = max_length;
-	table_end = (unsigned long)table_header + table_len;
+	table_end = (uintptr_t)table_header + table_len;
 
 	/* Parse all entries looking for a match. */
 
 	entry.type = type;
 	entry.hdr = (union acpi_subtable_headers *)
-	    ((unsigned long)table_header + table_size);
+	    ((uintptr_t)table_header + table_size);
 	subtable_len = acpi_get_subtable_header_length(&entry);
 
 	while (((unsigned long)entry.hdr) + subtable_len < table_end) {
@@ -197,7 +197,7 @@ acpi_parse_entries_array(char *id, unsigned long table_size,
 		}
 
 		entry.hdr = (union acpi_subtable_headers *)
-		    ((unsigned long)entry.hdr + entry_len);
+		    ((uintptr_t)entry.hdr + entry_len);
 	}
 
 	if (max_entries && count > max_entries) {

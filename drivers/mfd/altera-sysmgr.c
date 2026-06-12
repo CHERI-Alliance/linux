@@ -42,7 +42,7 @@ static int s10_protected_reg_write(void *base,
 				   unsigned int reg, unsigned int val)
 {
 	struct arm_smccc_res result;
-	unsigned long sysmgr_base = (unsigned long)base;
+	uintptr_t sysmgr_base = (uintptr_t)base;
 
 	arm_smccc_smc(INTEL_SIP_SMC_REG_WRITE, sysmgr_base + reg,
 		      val, 0, 0, 0, 0, 0, &result);
@@ -64,7 +64,7 @@ static int s10_protected_reg_read(void *base,
 				  unsigned int reg, unsigned int *val)
 {
 	struct arm_smccc_res result;
-	unsigned long sysmgr_base = (unsigned long)base;
+	uintptr_t sysmgr_base = (uintptr_t)base;
 
 	arm_smccc_smc(INTEL_SIP_SMC_REG_READ, sysmgr_base + reg,
 		      0, 0, 0, 0, 0, 0, &result);

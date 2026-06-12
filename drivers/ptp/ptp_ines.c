@@ -204,7 +204,7 @@ static int ines_clock_init(struct ines_clock *clock, struct device *device,
 
 	for (i = 0; i < INES_N_PORTS; i++) {
 		port = &clock->port[i];
-		port_addr = (unsigned long) clock->base +
+		port_addr = (uintptr_t) clock->base +
 			INES_PORT_OFFSET + i * INES_PORT_SIZE;
 		port->regs = (struct ines_port_registers *) port_addr;
 		port->clock = clock;

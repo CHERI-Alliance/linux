@@ -138,7 +138,7 @@ static inline void sg_assign_page(struct scatterlist *sg, struct page *page)
 #ifdef CONFIG_DEBUG_SG
 	BUG_ON(sg_is_chain(sg));
 #endif
-	sg->page_link = page_link | (unsigned long) page;
+	sg->page_link = page_link | (uintptr_t) page;
 }
 
 /**
@@ -245,7 +245,7 @@ static inline void __sg_chain(struct scatterlist *chain_sg,
 	 * Set lowest bit to indicate a link pointer, and make sure to clear
 	 * the termination bit if it happens to be set.
 	 */
-	chain_sg->page_link = ((unsigned long) sgl | SG_CHAIN) & ~SG_END;
+	chain_sg->page_link = ((uintptr_t) sgl | SG_CHAIN) & ~SG_END;
 }
 
 /**

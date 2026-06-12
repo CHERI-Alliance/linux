@@ -21,7 +21,7 @@ static int module_set_memory(const struct module *mod, enum mod_mem_type type,
 		return 0;
 
 	set_vm_flush_reset_perms(mod_mem->base);
-	return set_memory((unsigned long)mod_mem->base, mod_mem->size >> PAGE_SHIFT);
+	return set_memory((uintptr_t)mod_mem->base, mod_mem->size >> PAGE_SHIFT);
 }
 
 /*

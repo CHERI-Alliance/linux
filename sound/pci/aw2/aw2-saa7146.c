@@ -379,14 +379,14 @@ unsigned int snd_aw2_saa7146_get_hw_ptr_playback(struct snd_aw2_saa7146 *chip,
 
 	if (stream_number == 0) {
 		pci_adp = READREG(PCI_ADP3);
-		ptr = pci_adp - (long)start_addr;
+		ptr = pci_adp - (intptr_t)start_addr;
 
 		if (ptr == buffer_size)
 			ptr = 0;
 	}
 	if (stream_number == 1) {
 		pci_adp = READREG(PCI_ADP1);
-		ptr = pci_adp - (size_t) start_addr;
+		ptr = pci_adp - (uintptr_t) start_addr;
 
 		if (ptr == buffer_size)
 			ptr = 0;
@@ -403,7 +403,7 @@ unsigned int snd_aw2_saa7146_get_hw_ptr_capture(struct snd_aw2_saa7146 *chip,
 	size_t ptr = 0;
 	if (stream_number == 0) {
 		pci_adp = READREG(PCI_ADP2);
-		ptr = pci_adp - (size_t) start_addr;
+		ptr = pci_adp - (uintptr_t) start_addr;
 
 		if (ptr == buffer_size)
 			ptr = 0;

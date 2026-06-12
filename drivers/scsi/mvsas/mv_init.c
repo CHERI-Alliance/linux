@@ -543,7 +543,7 @@ static int mvs_pci_init(struct pci_dev *pdev, const struct pci_device_id *ent)
 	struct mvs_prv_info *mpi = SHOST_TO_SAS_HA(shost)->lldd_ha;
 
 	tasklet_init(&(mpi->mv_tasklet), mvs_tasklet,
-		     (unsigned long)SHOST_TO_SAS_HA(shost));
+		     (uintptr_t)SHOST_TO_SAS_HA(shost));
 	}
 #endif
 

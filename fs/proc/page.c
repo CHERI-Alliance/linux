@@ -163,7 +163,7 @@ u64 stable_page_flags(const struct page *page)
 	folio = &ps.folio_snapshot;
 
 	k = folio->flags.f;
-	mapping = (unsigned long)folio->mapping;
+	mapping = (uintptr_t)folio->mapping;
 	is_anon = mapping & FOLIO_MAPPING_ANON;
 
 	/*

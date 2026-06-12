@@ -161,7 +161,7 @@ static int simple_mux_probe(struct platform_device *pdev)
 
 	/* switch to use priv data instead of default */
 	priv->mux_enum.texts			= priv->mux_texts;
-	priv->mux_mux.private_value		= (unsigned long)&priv->mux_enum;
+	priv->mux_mux.private_value		= (uintptr_t)&priv->mux_enum;
 	priv->mux_widgets[2].kcontrol_news	= &priv->mux_mux;
 	priv->mux_routes[1].control		= priv->mux_texts[0]; // "Input 1"
 	priv->mux_routes[2].control		= priv->mux_texts[1]; // "Input 2"

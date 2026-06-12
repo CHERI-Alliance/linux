@@ -155,7 +155,7 @@ int ath12k_dp_tx_align_payload(struct ath12k_dp *dp, struct sk_buff **pskb)
 	int tailroom = skb_tailroom(skb);
 	int ret = 0;
 
-	offset = (unsigned long)skb->data & iova_mask;
+	offset = (uintptr_t)skb->data & iova_mask;
 	delta1 = offset;
 	delta2 = iova_mask - offset + 1;
 
@@ -172,7 +172,7 @@ int ath12k_dp_tx_align_payload(struct ath12k_dp *dp, struct sk_buff **pskb)
 
 		dev_kfree_skb_any(skb);
 
-		offset = (unsigned long)skb2->data & iova_mask;
+		offset = (uintptr_t)skb2->data & iova_mask;
 		if (offset)
 			ath12k_dp_tx_move_payload(skb2, offset, true);
 		*pskb = skb2;

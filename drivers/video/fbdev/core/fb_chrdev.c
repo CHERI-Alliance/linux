@@ -287,7 +287,7 @@ static long fb_compat_ioctl(struct file *file, unsigned int cmd,
 	case FBIOPAN_DISPLAY:
 	case FBIOGET_CON2FBMAP:
 	case FBIOPUT_CON2FBMAP:
-		arg = (unsigned long) compat_ptr(arg);
+		arg = (user_uintptr_t) compat_ptr(arg);
 		fallthrough;
 	case FBIOBLANK:
 		ret = do_fb_ioctl(info, cmd, arg);

@@ -141,7 +141,7 @@ static void ensure_safe_net_sysctl(struct net *net, const char *path,
 		}
 
 		/* Where does data point? */
-		addr = (unsigned long)ent->data;
+		addr = (uintptr_t)ent->data;
 		if (is_module_address(addr))
 			where = "module";
 		else if (is_kernel_core_data(addr))

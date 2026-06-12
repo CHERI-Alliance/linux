@@ -706,7 +706,7 @@ static int counter_name_attr_create(struct device *const dev,
 static ssize_t counter_comp_id_show(struct device *dev,
 				    struct device_attribute *attr, char *buf)
 {
-	const size_t id = (size_t)to_counter_attribute(attr)->comp.priv;
+	const uintptr_t id = (uintptr_t)to_counter_attribute(attr)->comp.priv;
 
 	return sysfs_emit(buf, "%zu\n", id);
 }

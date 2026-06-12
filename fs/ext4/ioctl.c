@@ -1995,7 +1995,7 @@ long ext4_compat_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 	default:
 		return -ENOIOCTLCMD;
 	}
-	return ext4_ioctl(file, cmd, (unsigned long) compat_ptr(arg));
+	return ext4_ioctl(file, cmd, (user_uintptr_t) compat_ptr(arg));
 }
 #endif
 

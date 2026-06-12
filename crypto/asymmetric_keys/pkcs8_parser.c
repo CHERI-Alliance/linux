@@ -107,7 +107,7 @@ static struct public_key *pkcs8_parse(const void *data, size_t datalen)
 	if (!ctx.pub)
 		goto error;
 
-	ctx.data = (unsigned long)data;
+	ctx.data = (uintptr_t)data;
 
 	/* Attempt to decode the private key */
 	ret = asn1_ber_decoder(&pkcs8_decoder, &ctx, data, datalen);

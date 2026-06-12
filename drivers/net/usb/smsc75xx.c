@@ -1450,7 +1450,7 @@ static int smsc75xx_bind(struct usbnet *dev, struct usb_interface *intf)
 		return ret;
 	}
 
-	dev->data[0] = (unsigned long) kzalloc_obj(struct smsc75xx_priv);
+	dev->data[0] = (uintptr_t) kzalloc_obj(struct smsc75xx_priv);
 
 	pdata = (struct smsc75xx_priv *)(dev->data[0]);
 	if (!pdata)
@@ -2308,12 +2308,12 @@ static const struct usb_device_id products[] = {
 	{
 		/* SMSC7500 USB Gigabit Ethernet Device */
 		USB_DEVICE(USB_VENDOR_ID_SMSC, USB_PRODUCT_ID_LAN7500),
-		.driver_info = (unsigned long) &smsc75xx_info,
+		.driver_info = (uintptr_t) &smsc75xx_info,
 	},
 	{
 		/* SMSC7500 USB Gigabit Ethernet Device */
 		USB_DEVICE(USB_VENDOR_ID_SMSC, USB_PRODUCT_ID_LAN7505),
-		.driver_info = (unsigned long) &smsc75xx_info,
+		.driver_info = (uintptr_t) &smsc75xx_info,
 	},
 	{ },		/* END */
 };

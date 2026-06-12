@@ -367,7 +367,7 @@ static int ssi_add_controller(struct hsi_controller *ssi,
 		goto out_err;
 	omap_ssi->gdd_irq = err;
 	tasklet_init(&omap_ssi->gdd_tasklet, ssi_gdd_tasklet,
-							(unsigned long)ssi);
+							(uintptr_t)ssi);
 	err = devm_request_irq(&ssi->device, omap_ssi->gdd_irq, ssi_gdd_isr,
 						0, "gdd_mpu", ssi);
 	if (err < 0) {

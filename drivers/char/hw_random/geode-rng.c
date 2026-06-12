@@ -121,7 +121,7 @@ found:
 	if (!mem)
 		goto free_priv;
 
-	geode_rng.priv = (unsigned long)priv;
+	geode_rng.priv = (uintptr_t)priv;
 	priv->membase = mem;
 	priv->pcidev = pdev;
 

@@ -64,7 +64,7 @@ static int qcom_apcs_ipc_send_data(struct mbox_chan *chan, void *data)
 {
 	struct qcom_apcs_ipc *apcs = container_of(chan->mbox,
 						  struct qcom_apcs_ipc, mbox);
-	unsigned long idx = (unsigned long)chan->con_priv;
+	uintptr_t idx = (uintptr_t)chan->con_priv;
 
 	return regmap_write(apcs->regmap, apcs->offset, BIT(idx));
 }

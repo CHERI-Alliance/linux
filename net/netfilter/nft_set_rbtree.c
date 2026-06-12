@@ -301,7 +301,7 @@ static void nft_rbtree_maybe_reset_start_cookie(struct nft_rbtree *priv,
 static void nft_rbtree_set_start_cookie(struct nft_rbtree *priv,
 					const struct nft_rbtree_elem *rbe)
 {
-	priv->start_rbe_cookie = (unsigned long)rbe;
+	priv->start_rbe_cookie = (uintptr_t)rbe;
 }
 
 static bool nft_rbtree_cmp_start_cookie(struct nft_rbtree *priv,

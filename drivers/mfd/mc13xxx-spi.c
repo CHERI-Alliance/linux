@@ -22,13 +22,13 @@
 static const struct spi_device_id mc13xxx_device_id[] = {
 	{
 		.name = "mc13783",
-		.driver_data = (kernel_ulong_t)&mc13xxx_variant_mc13783,
+		.driver_data = (uintptr_t)&mc13xxx_variant_mc13783,
 	}, {
 		.name = "mc13892",
-		.driver_data = (kernel_ulong_t)&mc13xxx_variant_mc13892,
+		.driver_data = (uintptr_t)&mc13xxx_variant_mc13892,
 	}, {
 		.name = "mc34708",
-		.driver_data = (kernel_ulong_t)&mc13xxx_variant_mc34708,
+		.driver_data = (uintptr_t)&mc13xxx_variant_mc34708,
 	}, {
 		/* sentinel */
 	}

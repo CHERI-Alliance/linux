@@ -98,13 +98,13 @@ static void store_io_and_region_in_bio(struct bio *bio, struct io *io,
 		BUG();
 	}
 
-	bio->bi_private = (void *)((unsigned long)io | region);
+	bio->bi_private = (void *)((uintptr_t)io | region);
 }
 
 static void retrieve_io_and_region_from_bio(struct bio *bio, struct io **io,
 				       unsigned int *region)
 {
-	unsigned long val = (unsigned long)bio->bi_private;
+	uintptr_t val = (uintptr_t)bio->bi_private;
 
 	*io = (void *)(val & -(unsigned long)DM_IO_MAX_REGIONS);
 	*region = val & (DM_IO_MAX_REGIONS - 1);

@@ -1087,25 +1087,25 @@ static DEFINE_RUNTIME_DEV_PM_OPS(ak8975_dev_pm_ops, ak8975_runtime_suspend,
 				 ak8975_runtime_resume, NULL);
 
 static const struct acpi_device_id ak_acpi_match[] = {
-	{"AK8963", (kernel_ulong_t)&ak_def_array[AK8963] },
-	{"AK8975", (kernel_ulong_t)&ak_def_array[AK8975] },
-	{"AK009911", (kernel_ulong_t)&ak_def_array[AK09911] },
-	{"AK09911", (kernel_ulong_t)&ak_def_array[AK09911] },
-	{"AK09912", (kernel_ulong_t)&ak_def_array[AK09912] },
-	{"AKM9911", (kernel_ulong_t)&ak_def_array[AK09911] },
-	{"INVN6500", (kernel_ulong_t)&ak_def_array[AK8963] },
+	{"AK8963", (uintptr_t)&ak_def_array[AK8963] },
+	{"AK8975", (uintptr_t)&ak_def_array[AK8975] },
+	{"AK009911", (uintptr_t)&ak_def_array[AK09911] },
+	{"AK09911", (uintptr_t)&ak_def_array[AK09911] },
+	{"AK09912", (uintptr_t)&ak_def_array[AK09912] },
+	{"AKM9911", (uintptr_t)&ak_def_array[AK09911] },
+	{"INVN6500", (uintptr_t)&ak_def_array[AK8963] },
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, ak_acpi_match);
 
 static const struct i2c_device_id ak8975_id[] = {
-	{"AK8963", (kernel_ulong_t)&ak_def_array[AK8963] },
-	{"ak8963", (kernel_ulong_t)&ak_def_array[AK8963] },
-	{"ak8975", (kernel_ulong_t)&ak_def_array[AK8975] },
-	{"ak09911", (kernel_ulong_t)&ak_def_array[AK09911] },
-	{"ak09912", (kernel_ulong_t)&ak_def_array[AK09912] },
-	{"ak09916", (kernel_ulong_t)&ak_def_array[AK09916] },
-	{"ak09918", (kernel_ulong_t)&ak_def_array[AK09918] },
+	{"AK8963", (uintptr_t)&ak_def_array[AK8963] },
+	{"ak8963", (uintptr_t)&ak_def_array[AK8963] },
+	{"ak8975", (uintptr_t)&ak_def_array[AK8975] },
+	{"ak09911", (uintptr_t)&ak_def_array[AK09911] },
+	{"ak09912", (uintptr_t)&ak_def_array[AK09912] },
+	{"ak09916", (uintptr_t)&ak_def_array[AK09916] },
+	{"ak09918", (uintptr_t)&ak_def_array[AK09918] },
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, ak8975_id);

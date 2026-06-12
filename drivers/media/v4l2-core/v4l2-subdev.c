@@ -1012,7 +1012,7 @@ static long subdev_do_ioctl(struct file *file, unsigned int cmd, void *arg,
 
 		krouting = &state->routing;
 
-		memcpy((struct v4l2_subdev_route *)(uintptr_t)routing->routes,
+		memcpy((struct v4l2_subdev_route *)(user_uintptr_t)routing->routes,
 		       krouting->routes,
 		       min(krouting->num_routes, routing->len_routes) *
 		       sizeof(*krouting->routes));
@@ -1024,7 +1024,7 @@ static long subdev_do_ioctl(struct file *file, unsigned int cmd, void *arg,
 	case VIDIOC_SUBDEV_S_ROUTING: {
 		struct v4l2_subdev_routing *routing = arg;
 		struct v4l2_subdev_route *routes =
-			(struct v4l2_subdev_route *)(uintptr_t)routing->routes;
+			(struct v4l2_subdev_route *)(user_uintptr_t)routing->routes;
 		struct v4l2_subdev_krouting krouting = {};
 		unsigned int num_active_routes = 0;
 		unsigned int i;
@@ -1084,7 +1084,7 @@ static long subdev_do_ioctl(struct file *file, unsigned int cmd, void *arg,
 		 * the routing table.
 		 */
 		if (!v4l2_subdev_has_op(sd, pad, set_routing)) {
-			memcpy((struct v4l2_subdev_route *)(uintptr_t)routing->routes,
+			memcpy((struct v4l2_subdev_route *)(user_uintptr_t)routing->routes,
 			       state->routing.routes,
 			       min(state->routing.num_routes, routing->len_routes) *
 			       sizeof(*state->routing.routes));
@@ -1102,7 +1102,7 @@ static long subdev_do_ioctl(struct file *file, unsigned int cmd, void *arg,
 		if (rval < 0)
 			return rval;
 
-		memcpy((struct v4l2_subdev_route *)(uintptr_t)routing->routes,
+		memcpy((struct v4l2_subdev_route *)(user_uintptr_t)routing->routes,
 		       state->routing.routes,
 		       min(state->routing.num_routes, routing->len_routes) *
 		       sizeof(*state->routing.routes));

@@ -630,7 +630,7 @@ static int plic_probe(struct fwnode_handle *fwnode)
 
 		id = of_match_node(plic_match, to_of_node(fwnode));
 		if (id)
-			plic_quirks = (unsigned long)id->data;
+			plic_quirks = (uintptr_t)id->data;
 
 		regs = of_iomap(to_of_node(fwnode), 0);
 		if (!regs)

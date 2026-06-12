@@ -96,7 +96,7 @@ static struct inode *__ecryptfs_get_inode(struct inode *lower_inode,
 
 	if (!igrab(lower_inode))
 		return ERR_PTR(-ESTALE);
-	inode = iget5_locked(sb, (unsigned long)lower_inode,
+	inode = iget5_locked(sb, (uintptr_t)lower_inode,
 			     ecryptfs_inode_test, ecryptfs_inode_set,
 			     lower_inode);
 	if (!inode) {

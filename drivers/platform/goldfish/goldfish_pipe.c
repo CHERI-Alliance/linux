@@ -405,7 +405,7 @@ static ssize_t goldfish_pipe_read_write(struct file *filp,
 	if (unlikely(!access_ok(buffer, bufflen)))
 		return -EFAULT;
 
-	address = (unsigned long)buffer;
+	address = (user_uintptr_t)buffer;
 	address_end = address + bufflen;
 	last_page = (address_end - 1) & PAGE_MASK;
 	last_page_size = ((address_end - 1) & ~PAGE_MASK) + 1;
@@ -750,7 +750,7 @@ err_cmd:
 	dev->pipes[id] = NULL;
 err_id_locked:
 	spin_unlock_irqrestore(&dev->lock, flags);
-	free_page((unsigned long)pipe->command_buffer);
+	free_page((uintptr_t)pipe->command_buffer);
 err_pipe:
 	kfree(pipe);
 	return status;
@@ -771,7 +771,7 @@ static int goldfish_pipe_release(struct inode *inode, struct file *filp)
 	spin_unlock_irqrestore(&dev->lock, flags);
 
 	filp->private_data = NULL;
-	free_page((unsigned long)pipe->command_buffer);
+	free_page((uintptr_t)pipe->command_buffer);
 	kfree(pipe);
 	return 0;
 }
@@ -868,7 +868,7 @@ static void goldfish_pipe_device_deinit(struct platform_device *pdev,
 {
 	misc_deregister(&dev->miscdev);
 	kfree(dev->pipes);
-	free_page((unsigned long)dev->buffers);
+	free_page((uintptr_t)dev->buffers);
 }
 
 static int goldfish_pipe_probe(struct platform_device *pdev)

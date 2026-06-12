@@ -568,10 +568,10 @@ MODULE_DEVICE_TABLE(of, samsung_keypad_dt_match);
 static const struct platform_device_id samsung_keypad_driver_ids[] = {
 	{
 		.name		= "samsung-keypad",
-		.driver_data	= (kernel_ulong_t)&samsung_s3c6410_chip_info,
+		.driver_data	= (uintptr_t)&samsung_s3c6410_chip_info,
 	}, {
 		.name		= "s5pv210-keypad",
-		.driver_data	= (kernel_ulong_t)&samsung_s5pv210_chip_info,
+		.driver_data	= (uintptr_t)&samsung_s5pv210_chip_info,
 	},
 	{ }
 };

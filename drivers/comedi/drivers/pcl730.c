@@ -242,7 +242,7 @@ static int pcl730_do_insn_bits(struct comedi_device *dev,
 			       struct comedi_insn *insn,
 			       unsigned int *data)
 {
-	unsigned long reg = (unsigned long)s->private;
+	uintptr_t reg = (uintptr_t)s->private;
 	unsigned int mask;
 
 	mask = comedi_dio_update_state(s, data);
@@ -265,7 +265,7 @@ static int pcl730_do_insn_bits(struct comedi_device *dev,
 static unsigned int pcl730_get_bits(struct comedi_device *dev,
 				    struct comedi_subdevice *s)
 {
-	unsigned long reg = (unsigned long)s->private;
+	uintptr_t reg = (uintptr_t)s->private;
 	unsigned int val;
 
 	val = inb(dev->iobase + reg);

@@ -982,11 +982,11 @@ static struct folio *alloc_demote_folio(struct folio *src,
 	target_nid_mtc = *mtc;
 	target_nid_mtc.nmask = NULL;
 	target_nid_mtc.gfp_mask |= __GFP_THISNODE;
-	dst = alloc_migration_target(src, (unsigned long)&target_nid_mtc);
+	dst = alloc_migration_target(src, (uintptr_t)&target_nid_mtc);
 	if (dst)
 		return dst;
 
-	return alloc_migration_target(src, (unsigned long)mtc);
+	return alloc_migration_target(src, (uintptr_t)mtc);
 }
 
 /*
@@ -1030,7 +1030,7 @@ static unsigned int demote_folio_list(struct list_head *demote_folios,
 
 	/* Demotion ignores all cpuset and mempolicy settings */
 	migrate_pages(demote_folios, alloc_demote_folio, NULL,
-		      (unsigned long)&mtc, MIGRATE_ASYNC, MR_DEMOTION,
+		      (uintptr_t)&mtc, MIGRATE_ASYNC, MR_DEMOTION,
 		      &nr_succeeded);
 
 	return nr_succeeded;

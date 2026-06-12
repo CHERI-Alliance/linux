@@ -657,19 +657,19 @@ static int ad3552r_probe(struct spi_device *spi)
 static const struct spi_device_id ad3552r_id[] = {
 	{
 		.name = "ad3541r",
-		.driver_data = (kernel_ulong_t)&ad3541r_model_data
+		.driver_data = (uintptr_t)&ad3541r_model_data
 	},
 	{
 		.name = "ad3542r",
-		.driver_data = (kernel_ulong_t)&ad3542r_model_data
+		.driver_data = (uintptr_t)&ad3542r_model_data
 	},
 	{
 		.name = "ad3551r",
-		.driver_data = (kernel_ulong_t)&ad3551r_model_data
+		.driver_data = (uintptr_t)&ad3551r_model_data
 	},
 	{
 		.name = "ad3552r",
-		.driver_data = (kernel_ulong_t)&ad3552r_model_data
+		.driver_data = (uintptr_t)&ad3552r_model_data
 	},
 	{ }
 };

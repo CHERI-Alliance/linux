@@ -324,7 +324,7 @@ static int rt5759_probe(struct i2c_client *i2c)
 		return -ENOMEM;
 
 	priv->dev = &i2c->dev;
-	priv->chip_type = (unsigned long)of_device_get_match_data(&i2c->dev);
+	priv->chip_type = (uintptr_t)of_device_get_match_data(&i2c->dev);
 	i2c_set_clientdata(i2c, priv);
 
 	priv->regmap = devm_regmap_init_i2c(i2c, &rt5759_regmap_config);

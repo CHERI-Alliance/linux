@@ -96,7 +96,7 @@ static __always_inline struct task_struct *
 rt_mutex_owner_encode(struct rt_mutex_base *lock, struct task_struct *owner)
 	__must_hold(&lock->wait_lock)
 {
-	unsigned long val = (unsigned long)owner;
+	uintptr_t val = (uintptr_t)owner;
 
 	if (rt_mutex_has_waiters(lock))
 		val |= RT_MUTEX_HAS_WAITERS;
@@ -126,7 +126,7 @@ static __always_inline void clear_rt_mutex_waiters(struct rt_mutex_base *lock)
 	__must_hold(&lock->wait_lock)
 {
 	lock->owner = (struct task_struct *)
-			((unsigned long)lock->owner & ~RT_MUTEX_HAS_WAITERS);
+			((uintptr_t)lock->owner & ~RT_MUTEX_HAS_WAITERS);
 }
 
 static __always_inline void
@@ -336,7 +336,7 @@ static __always_inline void mark_rt_mutex_waiters(struct rt_mutex_base *lock)
 	__must_hold(&lock->wait_lock)
 {
 	lock->owner = (struct task_struct *)
-			((unsigned long)lock->owner | RT_MUTEX_HAS_WAITERS);
+			((uintptr_t)lock->owner | RT_MUTEX_HAS_WAITERS);
 }
 
 /*

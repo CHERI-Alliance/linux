@@ -281,7 +281,7 @@ static int iopt_alloc_area_pages(struct io_pagetable *iopt,
 				       next);
 		switch (elm->pages->type) {
 		case IOPT_ADDRESS_USER:
-			start = elm->start_byte + (uintptr_t)elm->pages->uptr;
+			start = elm->start_byte + (user_uintptr_t)elm->pages->uptr;
 			break;
 		case IOPT_ADDRESS_FILE:
 			start = elm->start_byte + elm->pages->start;

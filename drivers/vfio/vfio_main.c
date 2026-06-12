@@ -75,7 +75,7 @@ static const struct class vfio_device_class = {
 
 int vfio_assign_device_set(struct vfio_device *device, void *set_id)
 {
-	unsigned long idx = (unsigned long)set_id;
+	uintptr_t idx = (uintptr_t)set_id;
 	struct vfio_device_set *new_dev_set;
 	struct vfio_device_set *dev_set;
 
@@ -137,7 +137,7 @@ static void vfio_release_device_set(struct vfio_device *device)
 	xa_lock(&vfio_device_set_xa);
 	if (!--dev_set->device_count) {
 		__xa_erase(&vfio_device_set_xa,
-			   (unsigned long)dev_set->set_id);
+			   (uintptr_t)dev_set->set_id);
 		mutex_destroy(&dev_set->lock);
 		kfree(dev_set);
 	}

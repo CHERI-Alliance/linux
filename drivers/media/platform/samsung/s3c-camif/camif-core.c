@@ -615,10 +615,10 @@ static struct s3c_camif_drvdata s3c6410_camif_drvdata = {
 static const struct platform_device_id s3c_camif_driver_ids[] = {
 	{
 		.name		= "s3c2440-camif",
-		.driver_data	= (unsigned long)&s3c244x_camif_drvdata,
+		.driver_data	= (uintptr_t)&s3c244x_camif_drvdata,
 	}, {
 		.name		= "s3c6410-camif",
-		.driver_data	= (unsigned long)&s3c6410_camif_drvdata,
+		.driver_data	= (uintptr_t)&s3c6410_camif_drvdata,
 	},
 	{ /* sentinel */ },
 };

@@ -318,7 +318,7 @@ ssize_t netfs_perform_write(struct kiocb *iocb, struct iov_iter *iter,
 			finfo->netfs_group = netfs_get_group(netfs_group);
 			finfo->dirty_offset = offset;
 			finfo->dirty_len = copied;
-			folio_attach_private(folio, (void *)((unsigned long)finfo |
+			folio_attach_private(folio, (void *)((uintptr_t)finfo |
 							     NETFS_FOLIO_INFO));
 			trace = netfs_streaming_write;
 			goto copied;

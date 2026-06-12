@@ -933,16 +933,16 @@ static int mcp9982_probe(struct i2c_client *client)
 }
 
 static const struct i2c_device_id mcp9982_id[] = {
-	{ .name = "mcp9933", .driver_data = (kernel_ulong_t)&mcp9933_chip_config },
-	{ .name = "mcp9933d", .driver_data = (kernel_ulong_t)&mcp9933d_chip_config },
-	{ .name = "mcp9982", .driver_data = (kernel_ulong_t)&mcp9982_chip_config },
-	{ .name = "mcp9982d", .driver_data = (kernel_ulong_t)&mcp9982d_chip_config },
-	{ .name = "mcp9983", .driver_data = (kernel_ulong_t)&mcp9983_chip_config },
-	{ .name = "mcp9983d", .driver_data = (kernel_ulong_t)&mcp9983d_chip_config },
-	{ .name = "mcp9984", .driver_data = (kernel_ulong_t)&mcp9984_chip_config },
-	{ .name = "mcp9984d", .driver_data = (kernel_ulong_t)&mcp9984d_chip_config },
-	{ .name = "mcp9985", .driver_data = (kernel_ulong_t)&mcp9985_chip_config },
-	{ .name = "mcp9985d", .driver_data = (kernel_ulong_t)&mcp9985d_chip_config },
+	{ .name = "mcp9933", .driver_data = (uintptr_t)&mcp9933_chip_config },
+	{ .name = "mcp9933d", .driver_data = (uintptr_t)&mcp9933d_chip_config },
+	{ .name = "mcp9982", .driver_data = (uintptr_t)&mcp9982_chip_config },
+	{ .name = "mcp9982d", .driver_data = (uintptr_t)&mcp9982d_chip_config },
+	{ .name = "mcp9983", .driver_data = (uintptr_t)&mcp9983_chip_config },
+	{ .name = "mcp9983d", .driver_data = (uintptr_t)&mcp9983d_chip_config },
+	{ .name = "mcp9984", .driver_data = (uintptr_t)&mcp9984_chip_config },
+	{ .name = "mcp9984d", .driver_data = (uintptr_t)&mcp9984d_chip_config },
+	{ .name = "mcp9985", .driver_data = (uintptr_t)&mcp9985_chip_config },
+	{ .name = "mcp9985d", .driver_data = (uintptr_t)&mcp9985d_chip_config },
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, mcp9982_id);

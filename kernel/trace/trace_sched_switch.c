@@ -195,7 +195,7 @@ static void free_saved_cmdlines_buffer(struct saved_cmdlines_buffer *s)
 	int order = get_order(sizeof(*s) + s->cmdline_num * TASK_COMM_LEN);
 
 	kmemleak_free(s);
-	free_pages((unsigned long)s, order);
+	free_pages((uintptr_t)s, order);
 }
 
 static struct saved_cmdlines_buffer *allocate_cmdlines_buffer(unsigned int val)

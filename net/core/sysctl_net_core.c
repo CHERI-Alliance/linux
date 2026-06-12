@@ -182,7 +182,7 @@ static int rps_sock_flow_sysctl(const struct ctl_table *table, int write,
 			net_hotdata.rps_cpu_mask =
 				roundup_pow_of_two(nr_cpu_ids) - 1;
 			log = ilog2(size);
-			tag_ptr = (rps_tag_ptr)sock_table | log;
+			tag_ptr = (uintptr_t)sock_table | log;
 		}
 
 		for (i = 0; i < size; i++)

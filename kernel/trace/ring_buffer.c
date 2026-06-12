@@ -374,7 +374,7 @@ static void free_buffer_page(struct buffer_page *bpage)
 {
 	/* Range pages are not to be freed */
 	if (!bpage->range)
-		free_pages((unsigned long)bpage->page, bpage->order);
+		free_pages((uintptr_t)bpage->page, bpage->order);
 	kfree(bpage);
 }
 
@@ -1215,7 +1215,7 @@ EXPORT_SYMBOL_GPL(ring_buffer_normalize_time_stamp);
  */
 static struct list_head *rb_list_head(struct list_head *list)
 {
-	unsigned long val = (unsigned long)list;
+	uintptr_t val = (uintptr_t)list;
 
 	return (struct list_head *)(val & ~RB_FLAG_MASK);
 }
@@ -1233,7 +1233,7 @@ rb_is_head_page(struct buffer_page *page, struct list_head *list)
 {
 	unsigned long val;
 
-	val = (unsigned long)list->next;
+	val = (uintptr_t)list->next;
 
 	if ((val & ~RB_FLAG_MASK) != (unsigned long)&page->list)
 		return RB_PAGE_MOVED;
@@ -1285,7 +1285,7 @@ static void rb_head_page_activate(struct ring_buffer_per_cpu *cpu_buffer)
 
 	if (cpu_buffer->ring_meta) {
 		struct ring_buffer_cpu_meta *meta = cpu_buffer->ring_meta;
-		meta->head_buffer = (unsigned long)head->page;
+		meta->head_buffer = (uintptr_t)head->page;
 	}
 }
 
@@ -1317,7 +1317,7 @@ static int rb_head_page_set(struct ring_buffer_per_cpu *cpu_buffer,
 			    int old_flag, int new_flag)
 {
 	struct list_head *list;
-	unsigned long val = (unsigned long)&head->list;
+	uintptr_t val = (uintptr_t)&head->list;
 	unsigned long ret;
 
 	list = &prev->list;
@@ -1422,7 +1422,7 @@ static bool rb_head_page_replace(struct buffer_page *old,
 	val = *ptr & ~RB_FLAG_MASK;
 	val |= RB_PAGE_HEAD;
 
-	return try_cmpxchg(ptr, &val, (unsigned long)&new->list);
+	return try_cmpxchg(ptr, &val, (uintptr_t)&new->list);
 }
 
 /*
@@ -1492,7 +1492,7 @@ static void rb_tail_page_update(struct ring_buffer_per_cpu *cpu_buffer,
 static void rb_check_bpage(struct ring_buffer_per_cpu *cpu_buffer,
 			  struct buffer_page *bpage)
 {
-	unsigned long val = (unsigned long)bpage;
+	uintptr_t val = (uintptr_t)bpage;
 
 	RB_WARN_ON(cpu_buffer, val & RB_FLAG_MASK);
 }
@@ -1609,7 +1609,7 @@ static void *rb_range_meta(struct trace_buffer *buffer, int nr_pages, int cpu)
 	if (!bmeta)
 		return NULL;
 
-	ptr = (unsigned long)bmeta + bmeta->buffers_offset;
+	ptr = (uintptr_t)bmeta + bmeta->buffers_offset;
 	meta = (struct ring_buffer_cpu_meta *)ptr;
 
 	/* When nr_pages passed in is zero, the first meta has already been initialized */
@@ -1652,7 +1652,7 @@ static void *rb_subbufs_from_meta(struct ring_buffer_cpu_meta *meta)
 	int subbuf_size = meta->subbuf_size;
 	unsigned long ptr;
 
-	ptr = (unsigned long)meta;
+	ptr = (uintptr_t)meta;
 	ptr = rb_range_align_subbuf(ptr, subbuf_size, meta->nr_subbufs);
 
 	return (void *)ptr;
@@ -1679,7 +1679,7 @@ static void *rb_range_buffer(struct ring_buffer_per_cpu *cpu_buffer, int idx)
 	/* Map this buffer to the order that's in meta->buffers[] */
 	idx = meta->buffers[idx];
 
-	ptr = (unsigned long)rb_subbufs_from_meta(meta);
+	ptr = (uintptr_t)rb_subbufs_from_meta(meta);
 
 	ptr += subbuf_size * idx;
 	if (ptr + subbuf_size > cpu_buffer->buffer->range_addr_end)
@@ -1983,7 +1983,7 @@ static void rb_meta_validate_events(struct ring_buffer_per_cpu *cpu_buffer)
 		cpu_buffer->pages = &head_page->list;
 
 		cpu_buffer->head_page = head_page;
-		meta->head_buffer = (unsigned long)head_page->page;
+		meta->head_buffer = (uintptr_t)head_page->page;
 
 		/* Reset all the indexes */
 		bpage = cpu_buffer->reader_page;
@@ -2087,7 +2087,7 @@ static void rb_range_meta_init(struct trace_buffer *buffer, int nr_pages, int sc
 		if (valid && rb_cpu_meta_valid(meta, cpu, buffer, nr_pages, subbuf_mask)) {
 			/* Make the mappings match the current address */
 			subbuf = rb_subbufs_from_meta(meta);
-			delta = (unsigned long)subbuf - meta->first_buffer;
+			delta = (uintptr_t)subbuf - meta->first_buffer;
 			meta->first_buffer += delta;
 			meta->head_buffer += delta;
 			meta->commit_buffer += delta;
@@ -2106,7 +2106,7 @@ static void rb_range_meta_init(struct trace_buffer *buffer, int nr_pages, int sc
 
 		subbuf = rb_subbufs_from_meta(meta);
 
-		meta->first_buffer = (unsigned long)subbuf;
+		meta->first_buffer = (uintptr_t)subbuf;
 
 		/*
 		 * The buffers[] array holds the order of the sub-buffers
@@ -2154,7 +2154,7 @@ static int rbm_show(struct seq_file *m, void *v)
 {
 	struct ring_buffer_per_cpu *cpu_buffer = m->private;
 	struct ring_buffer_cpu_meta *meta = cpu_buffer->ring_meta;
-	unsigned long val = (unsigned long)v;
+	uintptr_t val = (uintptr_t)v;
 
 	if (val == 1) {
 		seq_printf(m, "head_buffer:   %d\n",
@@ -2519,7 +2519,7 @@ static void rb_free_cpu_buffer(struct ring_buffer_per_cpu *cpu_buffer)
 		free_buffer_page(bpage);
 	}
 
-	free_page((unsigned long)cpu_buffer->free_page);
+	free_page((uintptr_t)cpu_buffer->free_page);
 
 	kfree(cpu_buffer);
 }
@@ -2751,7 +2751,7 @@ void *ring_buffer_meta_scratch(struct trace_buffer *buffer, unsigned int *size)
 
 	meta = buffer->meta;
 
-	ptr = (void *)ALIGN((unsigned long)meta + sizeof(*meta), sizeof(long));
+	ptr = (void *)ALIGN((uintptr_t)meta + sizeof(*meta), sizeof(long));
 
 	if (size)
 		*size = (void *)meta + meta->buffers_offset - ptr;
@@ -2862,7 +2862,7 @@ rb_remove_pages(struct ring_buffer_per_cpu *cpu_buffer, unsigned long nr_pages)
 	 * Make sure that we have head_bit value preserved for the
 	 * next page
 	 */
-	tail_page->next = (struct list_head *)((unsigned long)next_page |
+	tail_page->next = (struct list_head *)((uintptr_t)next_page |
 						head_bit);
 	next_page = rb_list_head(next_page);
 	next_page->prev = tail_page;
@@ -2962,7 +2962,7 @@ rb_insert_pages(struct ring_buffer_per_cpu *cpu_buffer)
 		last_page  = pages->prev;
 
 		head_page_with_bit = (struct list_head *)
-				     ((unsigned long)head_page | RB_PAGE_HEAD);
+				     ((uintptr_t)head_page | RB_PAGE_HEAD);
 
 		last_page->next = head_page_with_bit;
 		first_page->prev = prev_page;
@@ -3345,7 +3345,7 @@ rb_commit_index(struct ring_buffer_per_cpu *cpu_buffer)
 static __always_inline unsigned
 rb_event_index(struct ring_buffer_per_cpu *cpu_buffer, struct ring_buffer_event *event)
 {
-	unsigned long addr = (unsigned long)event;
+	uintptr_t addr = (uintptr_t)event;
 
 	addr &= (PAGE_SIZE << cpu_buffer->buffer->subbuf_order) - 1;
 
@@ -3378,7 +3378,7 @@ static int rb_meta_subbuf_idx(struct ring_buffer_cpu_meta *meta, void *subbuf)
 	void *subbuf_array;
 
 	subbuf_array = (void *)meta + sizeof(int) * meta->nr_subbufs;
-	subbuf_array = (void *)ALIGN((unsigned long)subbuf_array, meta->subbuf_size);
+	subbuf_array = (void *)ALIGN((uintptr_t)subbuf_array, meta->subbuf_size);
 	return (subbuf - subbuf_array) / meta->subbuf_size;
 }
 
@@ -3386,11 +3386,11 @@ static void rb_update_meta_head(struct ring_buffer_per_cpu *cpu_buffer,
 				struct buffer_page *next_page)
 {
 	struct ring_buffer_cpu_meta *meta = cpu_buffer->ring_meta;
-	unsigned long old_head = (unsigned long)next_page->page;
+	uintptr_t old_head = (uintptr_t)next_page->page;
 	unsigned long new_head;
 
 	rb_inc_page(&next_page);
-	new_head = (unsigned long)next_page->page;
+	new_head = (uintptr_t)next_page->page;
 
 	/*
 	 * Only move it forward once, if something else came in and
@@ -3939,7 +3939,7 @@ rb_try_to_discard(struct ring_buffer_per_cpu *cpu_buffer,
 
 	new_index = rb_event_index(cpu_buffer, event);
 	old_index = new_index + rb_event_ts_length(event);
-	addr = (unsigned long)event;
+	addr = (uintptr_t)event;
 	addr &= ~((PAGE_SIZE << cpu_buffer->buffer->subbuf_order) - 1);
 
 	bpage = READ_ONCE(cpu_buffer->tail_page);
@@ -4032,7 +4032,7 @@ rb_set_commit_to_write(struct ring_buffer_per_cpu *cpu_buffer)
 		rb_inc_page(&cpu_buffer->commit_page);
 		if (cpu_buffer->ring_meta) {
 			struct ring_buffer_cpu_meta *meta = cpu_buffer->ring_meta;
-			meta->commit_buffer = (unsigned long)cpu_buffer->commit_page->page;
+			meta->commit_buffer = (uintptr_t)cpu_buffer->commit_page->page;
 		}
 		/* add barrier to keep gcc from optimizing too much */
 		barrier();
@@ -4847,7 +4847,7 @@ static inline void
 rb_decrement_entry(struct ring_buffer_per_cpu *cpu_buffer,
 		   struct ring_buffer_event *event)
 {
-	unsigned long addr = (unsigned long)event;
+	uintptr_t addr = (uintptr_t)event;
 	struct buffer_page *bpage = cpu_buffer->commit_page;
 	struct buffer_page *start;
 
@@ -6850,7 +6850,7 @@ void ring_buffer_free_read_page(struct trace_buffer *buffer, int cpu,
 	local_irq_restore(flags);
 
  out:
-	free_pages((unsigned long)bpage, data_page->order);
+	free_pages((uintptr_t)bpage, data_page->order);
 	kfree(data_page);
 }
 EXPORT_SYMBOL_GPL(ring_buffer_free_read_page);
@@ -7250,7 +7250,7 @@ int ring_buffer_subbuf_order_set(struct trace_buffer *buffer, int order)
 			list_del_init(&bpage->list);
 			free_buffer_page(bpage);
 		}
-		free_pages((unsigned long)old_free_data_page, old_order);
+		free_pages((uintptr_t)old_free_data_page, old_order);
 
 		rb_check_pages(cpu_buffer);
 	}
@@ -7299,7 +7299,7 @@ static int rb_alloc_meta_page(struct ring_buffer_per_cpu *cpu_buffer)
 
 static void rb_free_meta_page(struct ring_buffer_per_cpu *cpu_buffer)
 {
-	unsigned long addr = (unsigned long)cpu_buffer->meta_page;
+	uintptr_t addr = (uintptr_t)cpu_buffer->meta_page;
 
 	free_page(addr);
 	cpu_buffer->meta_page = NULL;

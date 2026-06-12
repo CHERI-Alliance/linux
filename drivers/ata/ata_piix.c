@@ -1561,7 +1561,7 @@ static bool piix_broken_system_poweroff(struct pci_dev *pdev)
 	const struct dmi_system_id *dmi = dmi_first_match(broken_systems);
 
 	if (dmi) {
-		unsigned long slot = (unsigned long)dmi->driver_data;
+		uintptr_t slot = (uintptr_t)dmi->driver_data;
 		/* apply the quirk only to on-board controllers */
 		return slot == PCI_SLOT(pdev->devfn);
 	}

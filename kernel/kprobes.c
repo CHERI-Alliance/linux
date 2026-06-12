@@ -190,7 +190,7 @@ kprobe_opcode_t *__get_insn_slot(struct kprobe_insn_cache *c)
 	list_add_rcu(&kip->list, &c->pages);
 
 	/* Record the perf ksymbol register event after adding the page */
-	perf_event_ksymbol(PERF_RECORD_KSYMBOL_TYPE_OOL, (unsigned long)kip->insns,
+	perf_event_ksymbol(PERF_RECORD_KSYMBOL_TYPE_OOL, (uintptr_t)kip->insns,
 			   PAGE_SIZE, false, c->sym);
 
 	return kip->insns;
@@ -216,7 +216,7 @@ static bool collect_one_slot(struct kprobe_insn_page *kip, int idx)
 		 * the page.
 		 */
 		perf_event_ksymbol(PERF_RECORD_KSYMBOL_TYPE_OOL,
-				   (unsigned long)kip->insns, PAGE_SIZE, true,
+				   (uintptr_t)kip->insns, PAGE_SIZE, true,
 				   kip->cache->sym);
 		list_del_rcu(&kip->list);
 		synchronize_rcu();
@@ -327,7 +327,7 @@ int kprobe_cache_get_kallsym(struct kprobe_insn_cache *c, unsigned int *symnum,
 			continue;
 		strscpy(sym, c->sym, KSYM_NAME_LEN);
 		*type = 't';
-		*value = (unsigned long)kip->insns;
+		*value = (uintptr_t)kip->insns;
 		ret = 0;
 		break;
 	}
@@ -1468,7 +1468,7 @@ bool within_kprobe_blacklist(unsigned long addr)
 		if (!p)
 			return false;
 		*p = '\0';
-		addr = (unsigned long)kprobe_lookup_name(symname, 0);
+		addr = (uintptr_t)kprobe_lookup_name(symname, 0);
 		if (addr)
 			return __within_kprobe_blacklist(addr);
 	}
@@ -1528,7 +1528,7 @@ _kprobe_addr(kprobe_opcode_t *addr, const char *symbol_name,
 	 * @addr' + @offset' where @addr' is the symbol start address.
 	 */
 	addr = (void *)addr + offset;
-	if (!kallsyms_lookup_size_offset((unsigned long)addr, NULL, &offset))
+	if (!kallsyms_lookup_size_offset((uintptr_t)addr, NULL, &offset))
 		return ERR_PTR(-ENOENT);
 	addr = (void *)addr - offset;
 
@@ -1537,7 +1537,7 @@ _kprobe_addr(kprobe_opcode_t *addr, const char *symbol_name,
 	 * magical function entry details while telling us if this was indeed
 	 * at the start of the function.
 	 */
-	addr = arch_adjust_kprobe_addr((unsigned long)addr, offset, on_func_entry);
+	addr = arch_adjust_kprobe_addr((uintptr_t)addr, offset, on_func_entry);
 	if (!addr)
 		return ERR_PTR(-EINVAL);
 
@@ -1592,7 +1592,7 @@ static inline int warn_kprobe_rereg(struct kprobe *p)
 
 static int check_ftrace_location(struct kprobe *p)
 {
-	unsigned long addr = (unsigned long)p->addr;
+	uintptr_t addr = (uintptr_t)p->addr;
 
 	if (ftrace_location(addr) == addr) {
 #ifdef CONFIG_KPROBES_ON_FTRACE
@@ -1642,12 +1642,12 @@ static int check_kprobe_address_safe(struct kprobe *p,
 			return -ENOENT;
 	}
 	/* Ensure it is not in reserved area. */
-	if (in_gate_area_no_mm((unsigned long) p->addr) ||
-	    within_kprobe_blacklist((unsigned long) p->addr) ||
+	if (in_gate_area_no_mm((uintptr_t) p->addr) ||
+	    within_kprobe_blacklist((uintptr_t) p->addr) ||
 	    jump_label_text_reserved(p->addr, p->addr) ||
 	    static_call_text_reserved(p->addr, p->addr) ||
-	    find_bug((unsigned long)p->addr) ||
-	    is_cfi_preamble_symbol((unsigned long)p->addr)) {
+	    find_bug((uintptr_t)p->addr) ||
+	    is_cfi_preamble_symbol((uintptr_t)p->addr)) {
 		module_put(*probed_mod);
 		return -EINVAL;
 	}
@@ -2573,7 +2573,7 @@ static int __init populate_kprobe_blacklist(unsigned long *start,
 	int ret;
 
 	for (iter = start; iter < end; iter++) {
-		entry = (unsigned long)dereference_symbol_descriptor((void *)*iter);
+		entry = (uintptr_t)dereference_symbol_descriptor((void *)*iter);
 		ret = kprobe_add_ksym_blacklist(entry);
 		if (ret == -EINVAL)
 			continue;
@@ -2582,14 +2582,14 @@ static int __init populate_kprobe_blacklist(unsigned long *start,
 	}
 
 	/* Symbols in '__kprobes_text' are blacklisted */
-	ret = kprobe_add_area_blacklist((unsigned long)__kprobes_text_start,
-					(unsigned long)__kprobes_text_end);
+	ret = kprobe_add_area_blacklist((uintptr_t)__kprobes_text_start,
+					(uintptr_t)__kprobes_text_end);
 	if (ret)
 		return ret;
 
 	/* Symbols in 'noinstr' section are blacklisted */
-	ret = kprobe_add_area_blacklist((unsigned long)__noinstr_text_start,
-					(unsigned long)__noinstr_text_end);
+	ret = kprobe_add_area_blacklist((uintptr_t)__noinstr_text_start,
+					(uintptr_t)__noinstr_text_end);
 
 	return ret ? : arch_populate_kprobe_blacklist();
 }
@@ -2623,13 +2623,13 @@ static void add_module_kprobe_blacklist(struct module *mod)
 			kprobe_add_ksym_blacklist(mod->kprobe_blacklist[i]);
 	}
 
-	start = (unsigned long)mod->kprobes_text_start;
+	start = (uintptr_t)mod->kprobes_text_start;
 	if (start) {
 		end = start + mod->kprobes_text_size;
 		kprobe_add_area_blacklist(start, end);
 	}
 
-	start = (unsigned long)mod->noinstr_text_start;
+	start = (uintptr_t)mod->noinstr_text_start;
 	if (start) {
 		end = start + mod->noinstr_text_size;
 		kprobe_add_area_blacklist(start, end);
@@ -2646,13 +2646,13 @@ static void remove_module_kprobe_blacklist(struct module *mod)
 			kprobe_remove_ksym_blacklist(mod->kprobe_blacklist[i]);
 	}
 
-	start = (unsigned long)mod->kprobes_text_start;
+	start = (uintptr_t)mod->kprobes_text_start;
 	if (start) {
 		end = start + mod->kprobes_text_size;
 		kprobe_remove_area_blacklist(start, end);
 	}
 
-	start = (unsigned long)mod->noinstr_text_start;
+	start = (uintptr_t)mod->noinstr_text_start;
 	if (start) {
 		end = start + mod->noinstr_text_size;
 		kprobe_remove_area_blacklist(start, end);

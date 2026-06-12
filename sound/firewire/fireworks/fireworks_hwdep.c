@@ -280,7 +280,7 @@ hwdep_compat_ioctl(struct snd_hwdep *hwdep, struct file *file,
 		   unsigned int cmd, unsigned long arg)
 {
 	return hwdep_ioctl(hwdep, file, cmd,
-			   (unsigned long)compat_ptr(arg));
+			   (user_uintptr_t)compat_ptr(arg));
 }
 #else
 #define hwdep_compat_ioctl NULL

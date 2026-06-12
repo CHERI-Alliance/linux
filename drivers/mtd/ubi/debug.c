@@ -328,7 +328,7 @@ void ubi_debugfs_exit(void)
 static ssize_t dfs_file_read(struct file *file, char __user *user_buf,
 			     size_t count, loff_t *ppos)
 {
-	unsigned long ubi_num = (unsigned long)file->private_data;
+	uintptr_t ubi_num = (uintptr_t)file->private_data;
 	struct dentry *dent = file->f_path.dentry;
 	struct ubi_device *ubi;
 	struct ubi_debug_info *d;
@@ -395,7 +395,7 @@ out:
 static ssize_t dfs_file_write(struct file *file, const char __user *user_buf,
 			      size_t count, loff_t *ppos)
 {
-	unsigned long ubi_num = (unsigned long)file->private_data;
+	uintptr_t ubi_num = (uintptr_t)file->private_data;
 	struct dentry *dent = file->f_path.dentry;
 	struct ubi_device *ubi;
 	struct ubi_debug_info *d;

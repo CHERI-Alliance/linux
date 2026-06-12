@@ -2590,7 +2590,7 @@ int snd_hda_create_spdif_share_sw(struct hda_codec *codec,
 	 * private_value for the share-switch callbacks and cache the
 	 * assigned control for forced-disable notifications.
 	 */
-	kctl->private_value = (unsigned long)mout;
+	kctl->private_value = (uintptr_t)mout;
 	err = snd_hda_ctl_add(codec, mout->dig_out_nid, kctl);
 	if (err < 0)
 		return err;

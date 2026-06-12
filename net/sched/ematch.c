@@ -266,7 +266,7 @@ static int tcf_em_validate(struct tcf_proto *tp,
 					err = -ENOBUFS;
 					goto errout;
 				}
-				em->data = (unsigned long) v;
+				em->data = (uintptr_t) v;
 			}
 			em->datalen = data_len;
 		}

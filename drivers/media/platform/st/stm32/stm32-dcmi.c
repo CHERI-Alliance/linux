@@ -2206,7 +2206,7 @@ err_media_device_cleanup:
 	media_device_cleanup(&dcmi->mdev);
 err_mdma_slave_config:
 	if (dcmi->mdma_chan)
-		gen_pool_free(dcmi->sram_pool, (unsigned long)dcmi->sram_buf, dcmi->sram_buf_size);
+		gen_pool_free(dcmi->sram_pool, (uintptr_t)dcmi->sram_buf, dcmi->sram_buf_size);
 err_dma_slave_config:
 	dma_release_channel(dcmi->dma_chan);
 	if (dcmi->mdma_chan)
@@ -2229,7 +2229,7 @@ static void dcmi_remove(struct platform_device *pdev)
 
 	dma_release_channel(dcmi->dma_chan);
 	if (dcmi->mdma_chan) {
-		gen_pool_free(dcmi->sram_pool, (unsigned long)dcmi->sram_buf, dcmi->sram_buf_size);
+		gen_pool_free(dcmi->sram_pool, (uintptr_t)dcmi->sram_buf, dcmi->sram_buf_size);
 		dma_release_channel(dcmi->mdma_chan);
 	}
 }

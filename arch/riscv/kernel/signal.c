@@ -87,7 +87,7 @@ static long save_v_state(struct pt_regs *regs, void __user *sc_vec)
 	datap = state + 1;
 
 	/* datap is designed to be 16 byte aligned for better performance */
-	WARN_ON(!IS_ALIGNED((unsigned long)datap, 16));
+	WARN_ON(!IS_ALIGNED((user_uintptr_t)datap, 16));
 
 	get_cpu_vector_context();
 	riscv_v_vstate_save(&current->thread.vstate, regs);
@@ -435,7 +435,7 @@ static int setup_rt_frame(struct ksignal *ksig, sigset_t *set,
 
 	/* Set up to return from userspace. */
 #ifdef CONFIG_MMU
-	regs->ra = (unsigned long)VDSO_SYMBOL(
+	regs->ra = (user_uintptr_t)VDSO_SYMBOL(
 		current->mm->context.vdso, rt_sigreturn);
 
 	/* if bcfi is enabled x1 (ra) and x5 (t0) must match. not sure if we need this? */
@@ -465,11 +465,11 @@ static int setup_rt_frame(struct ksignal *ksig, sigset_t *set,
 	 * We always pass siginfo and mcontext, regardless of SA_SIGINFO,
 	 * since some things rely on this (e.g. glibc's debug/segfault.c).
 	 */
-	regs->epc = (unsigned long)ksig->ka.sa.sa_handler;
-	regs->sp = (unsigned long)frame;
+	regs->epc = (user_uintptr_t)ksig->ka.sa.sa_handler;
+	regs->sp = (user_uintptr_t)frame;
 	regs->a0 = ksig->sig;                     /* a0: signal number */
-	regs->a1 = (unsigned long)(&frame->info); /* a1: siginfo pointer */
-	regs->a2 = (unsigned long)(&frame->uc);   /* a2: ucontext pointer */
+	regs->a1 = (uintptr_t)(&frame->info); /* a1: siginfo pointer */
+	regs->a2 = (uintptr_t)(&frame->uc);   /* a2: ucontext pointer */
 
 #if DEBUG_SIG
 	pr_info("SIG deliver (%s:%d): sig=%d pc=%p ra=%p sp=%p\n",

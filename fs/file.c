@@ -1036,7 +1036,7 @@ static inline struct file *__fget_files_rcu(struct files_struct *files,
 
 		/* Do the load, then mask any invalid result */
 		file = rcu_dereference_raw(*fdentry);
-		file = (void *)(nospec_mask & (unsigned long)file);
+		file = (void *)(nospec_mask & (uintptr_t)file);
 		if (unlikely(!file))
 			return NULL;
 

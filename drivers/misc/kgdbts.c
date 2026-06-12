@@ -225,7 +225,7 @@ static unsigned long lookup_addr(char *arg)
 		cached_addr = kallsyms_lookup_name(arg);
 	}
 
-	return (unsigned long)dereference_function_descriptor(
+	return (uintptr_t)dereference_function_descriptor(
 			(void *)cached_addr);
 }
 

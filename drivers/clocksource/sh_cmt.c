@@ -974,8 +974,8 @@ static int sh_cmt_map_memory(struct sh_cmt_device *cmt)
 }
 
 static const struct platform_device_id sh_cmt_id_table[] = {
-	{ "sh-cmt-16", (kernel_ulong_t)&sh_cmt_info[SH_CMT_16BIT] },
-	{ "sh-cmt-32", (kernel_ulong_t)&sh_cmt_info[SH_CMT_32BIT] },
+	{ "sh-cmt-16", (uintptr_t)&sh_cmt_info[SH_CMT_16BIT] },
+	{ "sh-cmt-32", (uintptr_t)&sh_cmt_info[SH_CMT_32BIT] },
 	{ }
 };
 MODULE_DEVICE_TABLE(platform, sh_cmt_id_table);

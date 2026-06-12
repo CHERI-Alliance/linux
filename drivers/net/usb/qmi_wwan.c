@@ -982,105 +982,105 @@ static const struct usb_device_id products[] = {
 	/* 1. CDC ECM like devices match on the control interface */
 	{	/* Huawei E392, E398 and possibly others sharing both device id and more... */
 		USB_VENDOR_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, USB_CLASS_VENDOR_SPEC, 1, 9),
-		.driver_info        = (unsigned long)&qmi_wwan_info,
+		.driver_info        = (uintptr_t)&qmi_wwan_info,
 	},
 	{	/* Vodafone/Huawei K5005 (12d1:14c8) and similar modems */
 		USB_VENDOR_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, USB_CLASS_VENDOR_SPEC, 1, 57),
-		.driver_info        = (unsigned long)&qmi_wwan_info,
+		.driver_info        = (uintptr_t)&qmi_wwan_info,
 	},
 	{	/* HUAWEI_INTERFACE_NDIS_CONTROL_QUALCOMM */
 		USB_VENDOR_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, USB_CLASS_VENDOR_SPEC, 0x01, 0x69),
-		.driver_info        = (unsigned long)&qmi_wwan_info,
+		.driver_info        = (uintptr_t)&qmi_wwan_info,
 	},
 	{	/* Motorola Mapphone devices with MDM6600 */
 		USB_VENDOR_AND_INTERFACE_INFO(0x22b8, USB_CLASS_VENDOR_SPEC, 0xfb, 0xff),
-		.driver_info        = (unsigned long)&qmi_wwan_info,
+		.driver_info        = (uintptr_t)&qmi_wwan_info,
 	},
 
 	/* 2. Combined interface devices matching on class+protocol */
 	{	/* Huawei E367 and possibly others in "Windows mode" */
 		USB_VENDOR_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, USB_CLASS_VENDOR_SPEC, 1, 7),
-		.driver_info        = (unsigned long)&qmi_wwan_info,
+		.driver_info        = (uintptr_t)&qmi_wwan_info,
 	},
 	{	/* Huawei E392, E398 and possibly others in "Windows mode" */
 		USB_VENDOR_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, USB_CLASS_VENDOR_SPEC, 1, 17),
-		.driver_info        = (unsigned long)&qmi_wwan_info,
+		.driver_info        = (uintptr_t)&qmi_wwan_info,
 	},
 	{	/* HUAWEI_NDIS_SINGLE_INTERFACE_VDF */
 		USB_VENDOR_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, USB_CLASS_VENDOR_SPEC, 0x01, 0x37),
-		.driver_info        = (unsigned long)&qmi_wwan_info,
+		.driver_info        = (uintptr_t)&qmi_wwan_info,
 	},
 	{	/* HUAWEI_INTERFACE_NDIS_HW_QUALCOMM */
 		USB_VENDOR_AND_INTERFACE_INFO(HUAWEI_VENDOR_ID, USB_CLASS_VENDOR_SPEC, 0x01, 0x67),
-		.driver_info        = (unsigned long)&qmi_wwan_info,
+		.driver_info        = (uintptr_t)&qmi_wwan_info,
 	},
 	{	/* Pantech UML290, P4200 and more */
 		USB_VENDOR_AND_INTERFACE_INFO(0x106c, USB_CLASS_VENDOR_SPEC, 0xf0, 0xff),
-		.driver_info        = (unsigned long)&qmi_wwan_info,
+		.driver_info        = (uintptr_t)&qmi_wwan_info,
 	},
 	{	/* Pantech UML290 - newer firmware */
 		USB_VENDOR_AND_INTERFACE_INFO(0x106c, USB_CLASS_VENDOR_SPEC, 0xf1, 0xff),
-		.driver_info        = (unsigned long)&qmi_wwan_info,
+		.driver_info        = (uintptr_t)&qmi_wwan_info,
 	},
 	{	/* Novatel USB551L and MC551 */
 		USB_DEVICE_AND_INTERFACE_INFO(0x1410, 0xb001,
 		                              USB_CLASS_COMM,
 		                              USB_CDC_SUBCLASS_ETHERNET,
 		                              USB_CDC_PROTO_NONE),
-		.driver_info        = (unsigned long)&qmi_wwan_info,
+		.driver_info        = (uintptr_t)&qmi_wwan_info,
 	},
 	{	/* Novatel E362 */
 		USB_DEVICE_AND_INTERFACE_INFO(0x1410, 0x9010,
 		                              USB_CLASS_COMM,
 		                              USB_CDC_SUBCLASS_ETHERNET,
 		                              USB_CDC_PROTO_NONE),
-		.driver_info        = (unsigned long)&qmi_wwan_info,
+		.driver_info        = (uintptr_t)&qmi_wwan_info,
 	},
 	{	/* Novatel Expedite E371 */
 		USB_DEVICE_AND_INTERFACE_INFO(0x1410, 0x9011,
 		                              USB_CLASS_COMM,
 		                              USB_CDC_SUBCLASS_ETHERNET,
 		                              USB_CDC_PROTO_NONE),
-		.driver_info        = (unsigned long)&qmi_wwan_info,
+		.driver_info        = (uintptr_t)&qmi_wwan_info,
 	},
 	{	/* Dell Wireless 5800 (Novatel E362) */
 		USB_DEVICE_AND_INTERFACE_INFO(0x413C, 0x8195,
 					      USB_CLASS_COMM,
 					      USB_CDC_SUBCLASS_ETHERNET,
 					      USB_CDC_PROTO_NONE),
-		.driver_info        = (unsigned long)&qmi_wwan_info,
+		.driver_info        = (uintptr_t)&qmi_wwan_info,
 	},
 	{	/* Dell Wireless 5800 V2 (Novatel E362) */
 		USB_DEVICE_AND_INTERFACE_INFO(0x413C, 0x8196,
 					      USB_CLASS_COMM,
 					      USB_CDC_SUBCLASS_ETHERNET,
 					      USB_CDC_PROTO_NONE),
-		.driver_info        = (unsigned long)&qmi_wwan_info,
+		.driver_info        = (uintptr_t)&qmi_wwan_info,
 	},
 	{	/* Dell Wireless 5804 (Novatel E371) */
 		USB_DEVICE_AND_INTERFACE_INFO(0x413C, 0x819b,
 					      USB_CLASS_COMM,
 					      USB_CDC_SUBCLASS_ETHERNET,
 					      USB_CDC_PROTO_NONE),
-		.driver_info        = (unsigned long)&qmi_wwan_info,
+		.driver_info        = (uintptr_t)&qmi_wwan_info,
 	},
 	{	/* ADU960S */
 		USB_DEVICE_AND_INTERFACE_INFO(0x16d5, 0x650a,
 					      USB_CLASS_COMM,
 					      USB_CDC_SUBCLASS_ETHERNET,
 					      USB_CDC_PROTO_NONE),
-		.driver_info        = (unsigned long)&qmi_wwan_info,
+		.driver_info        = (uintptr_t)&qmi_wwan_info,
 	},
 	{	/* HP lt2523 (Novatel E371) */
 		USB_DEVICE_AND_INTERFACE_INFO(0x03f0, 0x421d,
 					      USB_CLASS_COMM,
 					      USB_CDC_SUBCLASS_ETHERNET,
 					      USB_CDC_PROTO_NONE),
-		.driver_info        = (unsigned long)&qmi_wwan_info,
+		.driver_info        = (uintptr_t)&qmi_wwan_info,
 	},
 	{	/* HP lt4112 LTE/HSPA+ Gobi 4G Module (Huawei me906e) */
 		USB_DEVICE_AND_INTERFACE_INFO(0x03f0, 0x581d, USB_CLASS_VENDOR_SPEC, 1, 7),
-		.driver_info = (unsigned long)&qmi_wwan_info,
+		.driver_info = (uintptr_t)&qmi_wwan_info,
 	},
 	{QMI_MATCH_FF_FF_FF(0x2c7c, 0x0122)},	/* Quectel RG650V */
 	{QMI_MATCH_FF_FF_FF(0x2c7c, 0x0125)},	/* Quectel EC25, EC20 R2.0  Mini PCIe */
@@ -1540,7 +1540,7 @@ static int qmi_wwan_probe(struct usb_interface *intf,
 	 */
 	if (!id->driver_info) {
 		dev_dbg(&intf->dev, "setting defaults for dynamic device id\n");
-		id->driver_info = (unsigned long)&qmi_wwan_info;
+		id->driver_info = (uintptr_t)&qmi_wwan_info;
 	}
 
 	/* There are devices where the same interface number can be

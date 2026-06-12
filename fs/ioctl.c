@@ -631,7 +631,7 @@ long compat_ptr_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 	if (!file->f_op->unlocked_ioctl)
 		return -ENOIOCTLCMD;
 
-	return file->f_op->unlocked_ioctl(file, cmd, (unsigned long)compat_ptr(arg));
+	return file->f_op->unlocked_ioctl(file, cmd, (user_uintptr_t)compat_ptr(arg));
 }
 EXPORT_SYMBOL(compat_ptr_ioctl);
 
@@ -687,7 +687,7 @@ COMPAT_SYSCALL_DEFINE3(ioctl, unsigned int, fd, unsigned int, cmd,
 	 */
 	default:
 		error = do_vfs_ioctl(fd_file(f), fd, cmd,
-				     (unsigned long)compat_ptr(arg));
+				     (user_uintptr_t)compat_ptr(arg));
 		if (error != -ENOIOCTLCMD)
 			break;
 

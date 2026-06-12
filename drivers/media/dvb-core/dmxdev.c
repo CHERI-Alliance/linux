@@ -1047,7 +1047,7 @@ static int dvb_demux_do_ioctl(struct file *file,
 {
 	struct dmxdev_filter *dmxdevfilter = file->private_data;
 	struct dmxdev *dmxdev = dmxdevfilter->dev;
-	unsigned long arg = (unsigned long)parg;
+	uintptr_t arg = (uintptr_t)parg;
 	int ret = 0;
 
 	if (mutex_lock_interruptible(&dmxdev->mutex))
@@ -1288,7 +1288,7 @@ static int dvb_dvr_do_ioctl(struct file *file,
 {
 	struct dvb_device *dvbdev = file->private_data;
 	struct dmxdev *dmxdev = dvbdev->priv;
-	unsigned long arg = (unsigned long)parg;
+	uintptr_t arg = (uintptr_t)parg;
 	int ret;
 
 	if (mutex_lock_interruptible(&dmxdev->mutex))

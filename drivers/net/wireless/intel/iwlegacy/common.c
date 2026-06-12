@@ -3313,7 +3313,7 @@ il_tx_cmd_complete(struct il_priv *il, struct il_rx_buf *rxb)
 
 	/* Input error checking is done when commands are added to queue. */
 	if (meta->flags & CMD_WANT_SKB) {
-		meta->source->reply_page = (unsigned long)rxb_addr(rxb);
+		meta->source->reply_page = (uintptr_t)rxb_addr(rxb);
 		rxb->page = NULL;
 	} else if (meta->callback)
 		meta->callback(il, cmd, pkt);

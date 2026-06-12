@@ -187,7 +187,7 @@ static int __create_free_space_inode(struct btrfs_root *root,
 	inode_item = btrfs_item_ptr(leaf, path->slots[0],
 				    struct btrfs_inode_item);
 	btrfs_item_key(leaf, &disk_key, path->slots[0]);
-	memzero_extent_buffer(leaf, (unsigned long)inode_item,
+	memzero_extent_buffer(leaf, (uintptr_t)inode_item,
 			     sizeof(*inode_item));
 	btrfs_set_inode_generation(leaf, inode_item, trans->transid);
 	btrfs_set_inode_size(leaf, inode_item, 0);
@@ -214,7 +214,7 @@ static int __create_free_space_inode(struct btrfs_root *root,
 	leaf = path->nodes[0];
 	header = btrfs_item_ptr(leaf, path->slots[0],
 				struct btrfs_free_space_header);
-	memzero_extent_buffer(leaf, (unsigned long)header, sizeof(*header));
+	memzero_extent_buffer(leaf, (uintptr_t)header, sizeof(*header));
 	btrfs_set_free_space_key(leaf, header, &disk_key);
 	btrfs_release_path(path);
 

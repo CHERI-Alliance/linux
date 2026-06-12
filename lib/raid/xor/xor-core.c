@@ -132,7 +132,7 @@ static int __init calibrate_xor_blocks(void)
 	pr_info("xor: using function: %s (%d MB/sec)\n",
 	       fastest->name, fastest->speed);
 
-	free_pages((unsigned long)b1, 2);
+	free_pages((uintptr_t)b1, 2);
 	return 0;
 }
 

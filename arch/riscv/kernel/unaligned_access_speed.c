@@ -82,7 +82,7 @@ compare_unaligned_access(void (*word_copy)(void *dst, const void *src, size_t le
 	int ratio;
 
 	/* Make an unaligned destination buffer. */
-	dst = (void *)((unsigned long)buf | 0x1);
+	dst = (void *)((uintptr_t)buf | 0x1);
 	/* Unalign src as well, but differently (off by 1 + 2 = 3). */
 	src = dst + (MISALIGNED_BUFFER_SIZE / 2);
 	src += 2;

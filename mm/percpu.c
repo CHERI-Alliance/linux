@@ -253,7 +253,7 @@ static int pcpu_chunk_slot(const struct pcpu_chunk *chunk)
 /* set the pointer to a chunk in a page struct */
 static void pcpu_set_page_chunk(struct page *page, struct pcpu_chunk *pcpu)
 {
-	page->private = (unsigned long)pcpu;
+	page->private = (uintptr_t)pcpu;
 }
 
 /* obtain pointer to a chunk from a page struct */
@@ -275,7 +275,7 @@ static unsigned long pcpu_unit_page_offset(unsigned int cpu, int page_idx)
 static unsigned long pcpu_chunk_addr(struct pcpu_chunk *chunk,
 				     unsigned int cpu, int page_idx)
 {
-	return (unsigned long)chunk->base_addr +
+	return (uintptr_t)chunk->base_addr +
 	       pcpu_unit_page_offset(cpu, page_idx);
 }
 
@@ -2301,7 +2301,7 @@ bool __is_kernel_percpu_address(__ptraddr_t addr, unsigned long *can_addr)
 		if (va >= start && va < start + static_size) {
 			if (can_addr) {
 				*can_addr = (unsigned long) (va - start);
-				*can_addr += (unsigned long)
+				*can_addr += (uintptr_t)
 					per_cpu_ptr(base, get_boot_cpu_id());
 			}
 			return true;
@@ -2368,9 +2368,9 @@ phys_addr_t per_cpu_ptr_to_phys(void *addr)
 	 * static region.  Assumes good intent as the first chunk may
 	 * not be full (ie. < pcpu_unit_pages in size).
 	 */
-	first_low = (unsigned long)pcpu_base_addr +
+	first_low = (uintptr_t)pcpu_base_addr +
 		    pcpu_unit_page_offset(pcpu_low_unit_cpu, 0);
-	first_high = (unsigned long)pcpu_base_addr +
+	first_high = (uintptr_t)pcpu_base_addr +
 		     pcpu_unit_page_offset(pcpu_high_unit_cpu, pcpu_unit_pages);
 	if ((unsigned long)addr >= first_low &&
 	    (unsigned long)addr < first_high) {
@@ -2712,11 +2712,11 @@ void __init pcpu_setup_first_chunk(const struct pcpu_alloc_info *ai,
 	 * - dynamic (pcpu_first_chunk) - serves the dynamic part of the first
 	 *   chunk.
 	 */
-	tmp_addr = (unsigned long)base_addr + static_size;
+	tmp_addr = (uintptr_t)base_addr + static_size;
 	if (ai->reserved_size)
 		pcpu_reserved_chunk = pcpu_alloc_first_chunk(tmp_addr,
 						ai->reserved_size);
-	tmp_addr = (unsigned long)base_addr + static_size + ai->reserved_size;
+	tmp_addr = (uintptr_t)base_addr + static_size + ai->reserved_size;
 	pcpu_first_chunk = pcpu_alloc_first_chunk(tmp_addr, dyn_size);
 
 	pcpu_nr_empty_pop_pages = pcpu_first_chunk->nr_empty_pop_pages;
@@ -3249,7 +3249,7 @@ int __init pcpu_page_first_chunk(size_t reserved_size, pcpu_fc_cpu_to_node_fn_t 
 
 	for (unit = 0; unit < num_possible_cpus(); unit++) {
 		unsigned long unit_addr =
-			(unsigned long)vm.addr + unit * ai->unit_size;
+			(uintptr_t)vm.addr + unit * ai->unit_size;
 
 		for (i = 0; i < unit_pages; i++)
 			pcpu_populate_pte(unit_addr + (i << PAGE_SHIFT));

@@ -2289,7 +2289,7 @@ int ieee80211_if_add(struct ieee80211_local *local, const char *name,
 		 * that will only be transmitted during discovery windows (DWs)
 		 */
 		if (type == NL80211_IFTYPE_NAN) {
-			txqi = (struct txq_info *)((unsigned long)sdata + size);
+			txqi = (struct txq_info *)((uintptr_t)sdata + size);
 			ieee80211_txq_init(sdata, NULL, txqi,
 					   IEEE80211_NUM_TIDS);
 		}

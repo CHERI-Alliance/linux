@@ -748,7 +748,7 @@ static char *pointer_string(char *buf, char *end,
 		spec.flags |= ZEROPAD;
 	}
 
-	return number(buf, end, (unsigned long int)ptr, spec);
+	return number(buf, end, (uintptr_t)ptr, spec);
 }
 
 /* Make pointers available for printing early in the boot sequence. */
@@ -998,7 +998,7 @@ char *symbol_string(char *buf, char *end, void *ptr,
 
 	if (fmt[1] == 'R')
 		ptr = __builtin_extract_return_addr(ptr);
-	value = (unsigned long)ptr;
+	value = (uintptr_t)ptr;
 
 #ifdef CONFIG_KALLSYMS
 	if (*fmt == 'B' && fmt[1] == 'b')

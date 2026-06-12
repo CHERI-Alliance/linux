@@ -526,35 +526,35 @@ MODULE_DEVICE_TABLE(of, loongson_gpio_of_match);
 static const struct acpi_device_id loongson_gpio_acpi_match[] = {
 	{
 		.id = "LOON0002",
-		.driver_data = (kernel_ulong_t)&loongson_gpio_ls7a_data,
+		.driver_data = (uintptr_t)&loongson_gpio_ls7a_data,
 	},
 	{
 		.id = "LOON0007",
-		.driver_data = (kernel_ulong_t)&loongson_gpio_ls3a5000_data,
+		.driver_data = (uintptr_t)&loongson_gpio_ls3a5000_data,
 	},
 	{
 		.id = "LOON000A",
-		.driver_data = (kernel_ulong_t)&loongson_gpio_ls2k2000_data0,
+		.driver_data = (uintptr_t)&loongson_gpio_ls2k2000_data0,
 	},
 	{
 		.id = "LOON000B",
-		.driver_data = (kernel_ulong_t)&loongson_gpio_ls2k2000_data1,
+		.driver_data = (uintptr_t)&loongson_gpio_ls2k2000_data1,
 	},
 	{
 		.id = "LOON000C",
-		.driver_data = (kernel_ulong_t)&loongson_gpio_ls2k2000_data2,
+		.driver_data = (uintptr_t)&loongson_gpio_ls2k2000_data2,
 	},
 	{
 		.id = "LOON000D",
-		.driver_data = (kernel_ulong_t)&loongson_gpio_ls7a2000_data0,
+		.driver_data = (uintptr_t)&loongson_gpio_ls7a2000_data0,
 	},
 	{
 		.id = "LOON000E",
-		.driver_data = (kernel_ulong_t)&loongson_gpio_ls7a2000_data1,
+		.driver_data = (uintptr_t)&loongson_gpio_ls7a2000_data1,
 	},
 	{
 		.id = "LOON000F",
-		.driver_data = (kernel_ulong_t)&loongson_gpio_ls3a6000_data,
+		.driver_data = (uintptr_t)&loongson_gpio_ls3a6000_data,
 	},
 	{}
 };

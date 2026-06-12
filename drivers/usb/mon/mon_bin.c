@@ -574,7 +574,7 @@ static void mon_bin_event(struct mon_reader_bin *rp, struct urb *urb,
 	ep->epnum = dir | usb_endpoint_num(epd);
 	ep->devnum = urb->dev->devnum;
 	ep->busnum = urb->dev->bus->busnum;
-	ep->id = (unsigned long) urb;
+	ep->id = (uintptr_t) urb;
 	ep->ts_sec = ts.tv_sec;
 	ep->ts_usec = ts.tv_nsec / NSEC_PER_USEC;
 	ep->status = status;
@@ -662,7 +662,7 @@ static void mon_bin_error(void *data, struct urb *urb, int error)
 	ep->epnum |= usb_endpoint_num(&urb->ep->desc);
 	ep->devnum = urb->dev->devnum;
 	ep->busnum = urb->dev->bus->busnum;
-	ep->id = (unsigned long) urb;
+	ep->id = (uintptr_t) urb;
 	ep->ts_sec = ts.tv_sec;
 	ep->ts_usec = ts.tv_nsec / NSEC_PER_USEC;
 	ep->status = error;
@@ -1187,7 +1187,7 @@ static long mon_bin_compat_ioctl(struct file *file,
 		return 0;
 
 	case MON_IOCG_STATS:
-		return mon_bin_ioctl(file, cmd, (unsigned long) compat_ptr(arg));
+		return mon_bin_ioctl(file, cmd, (user_uintptr_t) compat_ptr(arg));
 
 	case MON_IOCQ_URB_LEN:
 	case MON_IOCQ_RING_SIZE:
@@ -1343,7 +1343,7 @@ static int mon_alloc_buff(struct mon_pgmap *map, int npages)
 		vaddr = get_zeroed_page(GFP_KERNEL);
 		if (vaddr == 0) {
 			while (n-- != 0)
-				free_page((unsigned long) map[n].ptr);
+				free_page((uintptr_t) map[n].ptr);
 			return -ENOMEM;
 		}
 		map[n].ptr = (unsigned char *) vaddr;
@@ -1357,7 +1357,7 @@ static void mon_free_buff(struct mon_pgmap *map, int npages)
 	int n;
 
 	for (n = 0; n < npages; n++)
-		free_page((unsigned long) map[n].ptr);
+		free_page((uintptr_t) map[n].ptr);
 }
 
 int mon_bin_add(struct mon_bus *mbus, const struct usb_bus *ubus)

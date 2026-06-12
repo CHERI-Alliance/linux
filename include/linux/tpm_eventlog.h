@@ -188,7 +188,7 @@ static __always_inline u32 __calc_tpm2_event_size(struct tcg_pcr_event2_head *ev
 	/* Map the event header */
 	if (do_mapping) {
 		mapping_size = marker - marker_start;
-		mapping = TPM_MEMREMAP((unsigned long)marker_start,
+		mapping = TPM_MEMREMAP((uintptr_t)marker_start,
 				       mapping_size);
 		if (!mapping) {
 			size = 0;
@@ -237,7 +237,7 @@ static __always_inline u32 __calc_tpm2_event_size(struct tcg_pcr_event2_head *ev
 		if (do_mapping) {
 			TPM_MEMUNMAP(mapping, mapping_size);
 			mapping_size = halg_size;
-			mapping = TPM_MEMREMAP((unsigned long)marker,
+			mapping = TPM_MEMREMAP((uintptr_t)marker,
 					     mapping_size);
 			if (!mapping) {
 				size = 0;
@@ -271,7 +271,7 @@ static __always_inline u32 __calc_tpm2_event_size(struct tcg_pcr_event2_head *ev
 	if (do_mapping) {
 		TPM_MEMUNMAP(mapping, mapping_size);
 		mapping_size += sizeof(event_field->event_size);
-		mapping = TPM_MEMREMAP((unsigned long)marker,
+		mapping = TPM_MEMREMAP((uintptr_t)marker,
 				       mapping_size);
 		if (!mapping) {
 			size = 0;

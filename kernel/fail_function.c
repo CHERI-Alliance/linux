@@ -122,7 +122,7 @@ static int fei_retval_set(void *data, u64 val)
 	}
 
 	if (attr->kp.addr) {
-		if (adjust_error_retval((unsigned long)attr->kp.addr,
+		if (adjust_error_retval((uintptr_t)attr->kp.addr,
 					val) != retv)
 			err = -EINVAL;
 	}

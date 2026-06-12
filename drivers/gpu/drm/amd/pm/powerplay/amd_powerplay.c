@@ -205,7 +205,7 @@ static void pp_reserve_vram_for_smu(struct amdgpu_device *adev)
 	if (hwmgr->hwmgr_func->notify_cac_buffer_info)
 		r = hwmgr->hwmgr_func->notify_cac_buffer_info(hwmgr,
 					lower_32_bits((unsigned long)cpu_ptr),
-					upper_32_bits((unsigned long)cpu_ptr),
+					upper_32_bits((uintptr_t)cpu_ptr),
 					lower_32_bits(gpu_addr),
 					upper_32_bits(gpu_addr),
 					adev->pm.smu_prv_buffer_size);
@@ -606,7 +606,7 @@ static int pp_dpm_get_pp_num_states(void *handle,
 
 	for (i = 0; i < hwmgr->num_ps; i++) {
 		struct pp_power_state *state = (struct pp_power_state *)
-				((unsigned long)hwmgr->ps + i * hwmgr->ps_size);
+				((uintptr_t)hwmgr->ps + i * hwmgr->ps_size);
 		switch (state->classification.ui_label) {
 		case PP_StateUILabel_Battery:
 			data->states[i] = POWER_STATE_TYPE_BATTERY;

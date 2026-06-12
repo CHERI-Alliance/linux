@@ -50,7 +50,7 @@ static const char * const speed_str_list[] = {"unset", "very_slow", "slow", "nor
 
 static const char *attr_enum_to_string(void *attr, const char * const str_list[], bool *to_free)
 {
-	long val = (long)attr;
+	intptr_t val = (intptr_t)attr;
 
 	*to_free = false;
 	if (!val)
@@ -115,7 +115,7 @@ static int attr_enum_filter(void *attr, const char *input, int *err,
 		const char * const str_list[], int max)
 {
 	int i, j, input_int = -1;
-	long test_val = (long)attr;
+	intptr_t test_val = (intptr_t)attr;
 	const char *input_val = NULL;
 
 	for (i = 0; input[i]; i++) {
@@ -179,7 +179,7 @@ static int attr_string_filter(void *attr, const char *input, int *err)
 static int attr_bool_filter(void *attr, const char *input, int *err)
 {
 	int i, input_int = -1;
-	long val = (long)attr;
+	intptr_t val = (intptr_t)attr;
 	const char *input_str = NULL;
 
 	for (i = 0; input[i]; i++) {

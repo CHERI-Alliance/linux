@@ -197,7 +197,7 @@ static inline struct sierra_net_data *sierra_net_get_private(struct usbnet *dev)
 static inline void sierra_net_set_private(struct usbnet *dev,
 			struct sierra_net_data *priv)
 {
-	dev->data[0] = (unsigned long)priv;
+	dev->data[0] = (uintptr_t)priv;
 }
 
 /* is packet IPv4/IPv6 */

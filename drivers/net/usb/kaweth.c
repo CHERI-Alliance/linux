@@ -985,7 +985,7 @@ static int kaweth_probe(
 		/* Device will now disappear for a moment...  */
 		dev_info(dev, "Firmware loaded.  I'll be back...\n");
 err_fw:
-		free_page((unsigned long)kaweth->firmware_buf);
+		free_page((uintptr_t)kaweth->firmware_buf);
 		free_netdev(netdev);
 		return -EIO;
 	}

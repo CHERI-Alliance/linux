@@ -131,13 +131,13 @@ static inline bool assoc_array_ptr_is_node(const struct assoc_array_ptr *x)
 
 static inline void *assoc_array_ptr_to_leaf(const struct assoc_array_ptr *x)
 {
-	return (void *)((unsigned long)x & ~ASSOC_ARRAY_PTR_TYPE_MASK);
+	return (void *)((uintptr_t)x & ~ASSOC_ARRAY_PTR_TYPE_MASK);
 }
 
 static inline
 unsigned long __assoc_array_ptr_to_meta(const struct assoc_array_ptr *x)
 {
-	return (unsigned long)x &
+	return (uintptr_t)x &
 		~(ASSOC_ARRAY_PTR_SUBTYPE_MASK | ASSOC_ARRAY_PTR_TYPE_MASK);
 }
 static inline
@@ -154,7 +154,7 @@ struct assoc_array_shortcut *assoc_array_ptr_to_shortcut(const struct assoc_arra
 static inline
 struct assoc_array_ptr *__assoc_array_x_to_ptr(const void *p, unsigned long t)
 {
-	return (struct assoc_array_ptr *)((unsigned long)p | t);
+	return (struct assoc_array_ptr *)((uintptr_t)p | t);
 }
 static inline
 struct assoc_array_ptr *assoc_array_leaf_to_ptr(const void *p)

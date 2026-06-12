@@ -154,7 +154,7 @@ static struct parsed_partitions *check_partition(struct gendisk *hd)
 	if (res > 0) {
 		printk(KERN_INFO "%s", seq_buf_str(&state->pp_buf));
 
-		free_page((unsigned long)state->pp_buf.buffer);
+		free_page((uintptr_t)state->pp_buf.buffer);
 		return state;
 	}
 	if (state->access_beyond_eod)
@@ -170,7 +170,7 @@ static struct parsed_partitions *check_partition(struct gendisk *hd)
 		printk(KERN_INFO "%s", seq_buf_str(&state->pp_buf));
 	}
 
-	free_page((unsigned long)state->pp_buf.buffer);
+	free_page((uintptr_t)state->pp_buf.buffer);
 	free_partitions(state);
 	return ERR_PTR(res);
 }

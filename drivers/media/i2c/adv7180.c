@@ -1626,17 +1626,17 @@ static SIMPLE_DEV_PM_OPS(adv7180_pm_ops, adv7180_suspend, adv7180_resume);
 #endif
 
 static const struct i2c_device_id adv7180_id[] = {
-	{ "adv7180", (kernel_ulong_t)&adv7180_info },
-	{ "adv7180cp", (kernel_ulong_t)&adv7180_info },
-	{ "adv7180st", (kernel_ulong_t)&adv7180_info },
-	{ "adv7182", (kernel_ulong_t)&adv7182_info },
-	{ "adv7280", (kernel_ulong_t)&adv7280_info },
-	{ "adv7280-m", (kernel_ulong_t)&adv7280_m_info },
-	{ "adv7281", (kernel_ulong_t)&adv7281_info },
-	{ "adv7281-m", (kernel_ulong_t)&adv7281_m_info },
-	{ "adv7281-ma", (kernel_ulong_t)&adv7281_ma_info },
-	{ "adv7282", (kernel_ulong_t)&adv7282_info },
-	{ "adv7282-m", (kernel_ulong_t)&adv7282_m_info },
+	{ "adv7180", (uintptr_t)&adv7180_info },
+	{ "adv7180cp", (uintptr_t)&adv7180_info },
+	{ "adv7180st", (uintptr_t)&adv7180_info },
+	{ "adv7182", (uintptr_t)&adv7182_info },
+	{ "adv7280", (uintptr_t)&adv7280_info },
+	{ "adv7280-m", (uintptr_t)&adv7280_m_info },
+	{ "adv7281", (uintptr_t)&adv7281_info },
+	{ "adv7281-m", (uintptr_t)&adv7281_m_info },
+	{ "adv7281-ma", (uintptr_t)&adv7281_ma_info },
+	{ "adv7282", (uintptr_t)&adv7282_info },
+	{ "adv7282-m", (uintptr_t)&adv7282_m_info },
 	{}
 };
 MODULE_DEVICE_TABLE(i2c, adv7180_id);

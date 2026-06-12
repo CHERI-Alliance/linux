@@ -156,7 +156,7 @@ int xgbe_config_netdev(struct xgbe_prv_data *pdata)
 	int ret;
 
 	netdev->irq = pdata->dev_irq;
-	netdev->base_addr = (unsigned long)pdata->xgmac_regs;
+	netdev->base_addr = (uintptr_t)pdata->xgmac_regs;
 	eth_hw_addr_set(netdev, pdata->mac_addr);
 
 	/* Initialize ECC timestamps */

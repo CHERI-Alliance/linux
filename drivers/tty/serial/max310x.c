@@ -1561,10 +1561,10 @@ static void max310x_spi_remove(struct spi_device *spi)
 }
 
 static const struct spi_device_id max310x_id_table[] = {
-	{ "max3107",	(kernel_ulong_t)&max3107_devtype, },
-	{ "max3108",	(kernel_ulong_t)&max3108_devtype, },
-	{ "max3109",	(kernel_ulong_t)&max3109_devtype, },
-	{ "max14830",	(kernel_ulong_t)&max14830_devtype, },
+	{ "max3107",	(uintptr_t)&max3107_devtype, },
+	{ "max3108",	(uintptr_t)&max3108_devtype, },
+	{ "max3109",	(uintptr_t)&max3109_devtype, },
+	{ "max14830",	(uintptr_t)&max14830_devtype, },
 	{ }
 };
 MODULE_DEVICE_TABLE(spi, max310x_id_table);
@@ -1671,10 +1671,10 @@ static void max310x_i2c_remove(struct i2c_client *client)
 }
 
 static const struct i2c_device_id max310x_i2c_id_table[] = {
-	{ "max3107",	(kernel_ulong_t)&max3107_devtype, },
-	{ "max3108",	(kernel_ulong_t)&max3108_devtype, },
-	{ "max3109",	(kernel_ulong_t)&max3109_devtype, },
-	{ "max14830",	(kernel_ulong_t)&max14830_devtype, },
+	{ "max3107",	(uintptr_t)&max3107_devtype, },
+	{ "max3108",	(uintptr_t)&max3108_devtype, },
+	{ "max3109",	(uintptr_t)&max3109_devtype, },
+	{ "max14830",	(uintptr_t)&max14830_devtype, },
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, max310x_i2c_id_table);

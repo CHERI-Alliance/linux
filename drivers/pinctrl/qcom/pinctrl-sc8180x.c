@@ -1695,7 +1695,7 @@ static int sc8180x_pinctrl_probe(struct platform_device *pdev)
 static const struct acpi_device_id sc8180x_pinctrl_acpi_match[] = {
 	{
 		.id = "QCOM040D",
-		.driver_data = (kernel_ulong_t) &sc8180x_acpi_pinctrl,
+		.driver_data = (uintptr_t) &sc8180x_acpi_pinctrl,
 	},
 	{ }
 };

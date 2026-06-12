@@ -50,7 +50,7 @@ static int nmk_rng_probe(struct amba_device *dev, const struct amba_id *id)
 			    resource_size(&dev->res));
 	if (!base)
 		goto out_release;
-	nmk_rng.priv = (unsigned long)base;
+	nmk_rng.priv = (uintptr_t)base;
 	ret = devm_hwrng_register(&dev->dev, &nmk_rng);
 	if (ret)
 		goto out_release;

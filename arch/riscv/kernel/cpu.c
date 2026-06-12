@@ -328,7 +328,7 @@ static void c_stop(struct seq_file *m, void *v)
 
 static int c_show(struct seq_file *m, void *v)
 {
-	unsigned long cpu_id = (unsigned long)v - 1;
+	unsigned long cpu_id = (uintptr_t)v - 1;
 	struct riscv_cpuinfo *ci = per_cpu_ptr(&riscv_cpuinfo, cpu_id);
 	struct device_node *node;
 	const char *compat;

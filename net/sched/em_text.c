@@ -97,7 +97,7 @@ retry:
 	tm->config      = ts_conf;
 
 	m->datalen = sizeof(*tm);
-	m->data = (unsigned long) tm;
+	m->data = (uintptr_t) tm;
 
 	return 0;
 }

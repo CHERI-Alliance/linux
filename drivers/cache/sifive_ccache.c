@@ -257,7 +257,7 @@ static int sifive_ccache_probe(struct platform_device *pdev)
 	unsigned long quirks;
 	int intr_num, rc;
 
-	quirks = (unsigned long)device_get_match_data(dev);
+	quirks = (uintptr_t)device_get_match_data(dev);
 
 	intr_num = platform_irq_count(pdev);
 	if (!intr_num)

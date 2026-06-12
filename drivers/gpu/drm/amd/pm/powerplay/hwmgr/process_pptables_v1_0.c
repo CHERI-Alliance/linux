@@ -276,7 +276,7 @@ static int init_dpm_2_parameters(
 
 	if (0 != powerplay_table->usVddcLookupTableOffset) {
 		const ATOM_Tonga_Voltage_Lookup_Table *pVddcCACTable =
-			(ATOM_Tonga_Voltage_Lookup_Table *)(((unsigned long)powerplay_table) +
+			(ATOM_Tonga_Voltage_Lookup_Table *)(((uintptr_t)powerplay_table) +
 			le16_to_cpu(powerplay_table->usVddcLookupTableOffset));
 
 		result = get_vddc_lookup_table(hwmgr,
@@ -285,7 +285,7 @@ static int init_dpm_2_parameters(
 
 	if (0 != powerplay_table->usVddgfxLookupTableOffset) {
 		const ATOM_Tonga_Voltage_Lookup_Table *pVddgfxCACTable =
-			(ATOM_Tonga_Voltage_Lookup_Table *)(((unsigned long)powerplay_table) +
+			(ATOM_Tonga_Voltage_Lookup_Table *)(((uintptr_t)powerplay_table) +
 			le16_to_cpu(powerplay_table->usVddgfxLookupTableOffset));
 
 		result = get_vddc_lookup_table(hwmgr,
@@ -295,7 +295,7 @@ static int init_dpm_2_parameters(
 	disable_ppm = 0;
 	if (0 == disable_ppm) {
 		atom_ppm_table = (ATOM_Tonga_PPM_Table *)
-			(((unsigned long)powerplay_table) + le16_to_cpu(powerplay_table->usPPMTableOffset));
+			(((uintptr_t)powerplay_table) + le16_to_cpu(powerplay_table->usPPMTableOffset));
 
 		if (0 != powerplay_table->usPPMTableOffset) {
 			if (get_platform_power_management_table(hwmgr, atom_ppm_table) == 0) {
@@ -791,25 +791,25 @@ static int init_clock_voltage_dependency(
 		(struct phm_ppt_v1_information *)(hwmgr->pptable);
 
 	const ATOM_Tonga_MM_Dependency_Table *mm_dependency_table =
-		(const ATOM_Tonga_MM_Dependency_Table *)(((unsigned long) powerplay_table) +
+		(const ATOM_Tonga_MM_Dependency_Table *)(((uintptr_t) powerplay_table) +
 		le16_to_cpu(powerplay_table->usMMDependencyTableOffset));
 	const PPTable_Generic_SubTable_Header *pPowerTuneTable =
-		(const PPTable_Generic_SubTable_Header *)(((unsigned long) powerplay_table) +
+		(const PPTable_Generic_SubTable_Header *)(((uintptr_t) powerplay_table) +
 		le16_to_cpu(powerplay_table->usPowerTuneTableOffset));
 	const ATOM_Tonga_MCLK_Dependency_Table *mclk_dep_table =
-		(const ATOM_Tonga_MCLK_Dependency_Table *)(((unsigned long) powerplay_table) +
+		(const ATOM_Tonga_MCLK_Dependency_Table *)(((uintptr_t) powerplay_table) +
 		le16_to_cpu(powerplay_table->usMclkDependencyTableOffset));
 	const PPTable_Generic_SubTable_Header *sclk_dep_table =
-		(const PPTable_Generic_SubTable_Header *)(((unsigned long) powerplay_table) +
+		(const PPTable_Generic_SubTable_Header *)(((uintptr_t) powerplay_table) +
 		le16_to_cpu(powerplay_table->usSclkDependencyTableOffset));
 	const ATOM_Tonga_Hard_Limit_Table *pHardLimits =
-		(const ATOM_Tonga_Hard_Limit_Table *)(((unsigned long) powerplay_table) +
+		(const ATOM_Tonga_Hard_Limit_Table *)(((uintptr_t) powerplay_table) +
 		le16_to_cpu(powerplay_table->usHardLimitTableOffset));
 	const PPTable_Generic_SubTable_Header *pcie_table =
-		(const PPTable_Generic_SubTable_Header *)(((unsigned long) powerplay_table) +
+		(const PPTable_Generic_SubTable_Header *)(((uintptr_t) powerplay_table) +
 		le16_to_cpu(powerplay_table->usPCIETableOffset));
 	const ATOM_Tonga_GPIO_Table *gpio_table =
-		(const ATOM_Tonga_GPIO_Table *)(((unsigned long) powerplay_table) +
+		(const ATOM_Tonga_GPIO_Table *)(((uintptr_t) powerplay_table) +
 		le16_to_cpu(powerplay_table->usGPIOTableOffset));
 
 	pp_table_information->vdd_dep_on_sclk = NULL;
@@ -911,7 +911,7 @@ static int init_thermal_controller(
 	ATOM_Tonga_Thermal_Controller *thermal_controller;
 
 	thermal_controller = (ATOM_Tonga_Thermal_Controller *)
-		(((unsigned long)powerplay_table) +
+		(((uintptr_t)powerplay_table) +
 		le16_to_cpu(powerplay_table->usThermalControllerOffset));
 	PP_ASSERT_WITH_CODE((0 != powerplay_table->usThermalControllerOffset),
 		"Thermal controller table not set!", return -1);
@@ -944,7 +944,7 @@ static int init_thermal_controller(
 	}
 
 	fan_table = (const PPTable_Generic_SubTable_Header *)
-		(((unsigned long)powerplay_table) +
+		(((uintptr_t)powerplay_table) +
 		le16_to_cpu(powerplay_table->usFanTableOffset));
 
 	PP_ASSERT_WITH_CODE((0 != powerplay_table->usFanTableOffset),
@@ -1117,7 +1117,7 @@ static int check_powerplay_tables(
 {
 	const ATOM_Tonga_State_Array *state_arrays;
 
-	state_arrays = (ATOM_Tonga_State_Array *)(((unsigned long)powerplay_table) +
+	state_arrays = (ATOM_Tonga_State_Array *)(((uintptr_t)powerplay_table) +
 		le16_to_cpu(powerplay_table->usStateArrayOffset));
 
 	PP_ASSERT_WITH_CODE((ATOM_Tonga_TABLE_REVISION_TONGA <=
@@ -1245,7 +1245,7 @@ int get_number_of_powerplay_table_entries_v1_0(struct pp_hwmgr *hwmgr)
 			ATOM_Tonga_TABLE_REVISION_TONGA),
 			"Incorrect PowerPlay table revision!", return -1);
 
-	state_arrays = (ATOM_Tonga_State_Array *)(((unsigned long)pp_table) +
+	state_arrays = (ATOM_Tonga_State_Array *)(((uintptr_t)pp_table) +
 			le16_to_cpu(pp_table->usStateArrayOffset));
 
 	return (uint32_t)(state_arrays->ucNumEntries);
@@ -1306,13 +1306,13 @@ static int ppt_get_vce_state_table_entry_v1_0(struct pp_hwmgr *hwmgr, uint32_t i
 	ATOM_Tonga_MCLK_Dependency_Record *mclk_dep_record;
 	ATOM_Tonga_MM_Dependency_Record *mm_dep_record;
 	const ATOM_Tonga_POWERPLAYTABLE *pptable = get_powerplay_table(hwmgr);
-	const ATOM_Tonga_VCE_State_Table *vce_state_table = (ATOM_Tonga_VCE_State_Table *)(((unsigned long)pptable)
+	const ATOM_Tonga_VCE_State_Table *vce_state_table = (ATOM_Tonga_VCE_State_Table *)(((uintptr_t)pptable)
 							  + le16_to_cpu(pptable->usVCEStateTableOffset));
-	const ATOM_Tonga_SCLK_Dependency_Table *sclk_dep_table = (ATOM_Tonga_SCLK_Dependency_Table *)(((unsigned long)pptable)
+	const ATOM_Tonga_SCLK_Dependency_Table *sclk_dep_table = (ATOM_Tonga_SCLK_Dependency_Table *)(((uintptr_t)pptable)
 							  + le16_to_cpu(pptable->usSclkDependencyTableOffset));
-	const ATOM_Tonga_MCLK_Dependency_Table *mclk_dep_table = (ATOM_Tonga_MCLK_Dependency_Table *)(((unsigned long)pptable)
+	const ATOM_Tonga_MCLK_Dependency_Table *mclk_dep_table = (ATOM_Tonga_MCLK_Dependency_Table *)(((uintptr_t)pptable)
 							  + le16_to_cpu(pptable->usMclkDependencyTableOffset));
-	const ATOM_Tonga_MM_Dependency_Table *mm_dep_table = (ATOM_Tonga_MM_Dependency_Table *)(((unsigned long)pptable)
+	const ATOM_Tonga_MM_Dependency_Table *mm_dep_table = (ATOM_Tonga_MM_Dependency_Table *)(((uintptr_t)pptable)
 							  + le16_to_cpu(pptable->usMMDependencyTableOffset));
 
 	PP_ASSERT_WITH_CODE((i < vce_state_table->ucNumEntries),
@@ -1377,7 +1377,7 @@ int get_powerplay_table_entry_v1_0(struct pp_hwmgr *hwmgr,
 
 	if (pp_table->sHeader.ucTableFormatRevision >=
 			ATOM_Tonga_TABLE_REVISION_TONGA) {
-		state_arrays = (ATOM_Tonga_State_Array *)(((unsigned long)pp_table) +
+		state_arrays = (ATOM_Tonga_State_Array *)(((uintptr_t)pp_table) +
 				le16_to_cpu(pp_table->usStateArrayOffset));
 
 		PP_ASSERT_WITH_CODE((0 < pp_table->usStateArrayOffset),

@@ -533,9 +533,9 @@ static bool rseq_length_valid(struct rseq __user *rseq, unsigned int rseq_len)
 		return false;
 
 	if (rseq_len == ORIG_RSEQ_SIZE)
-		return IS_ALIGNED((unsigned long)rseq, ORIG_RSEQ_SIZE);
+		return IS_ALIGNED((user_uintptr_t)rseq, ORIG_RSEQ_SIZE);
 
-	return IS_ALIGNED((unsigned long)rseq, rseq_alloc_align()) &&
+	return IS_ALIGNED((user_uintptr_t)rseq, rseq_alloc_align()) &&
 		rseq_len >= offsetof(struct rseq, end);
 }
 

@@ -1840,7 +1840,7 @@ static int cm_chan_msg_send(void __user *arg)
 	if (msg.size > RIO_MAX_MSG_SIZE)
 		return -EINVAL;
 
-	buf = memdup_user((void __user *)(uintptr_t)msg.msg, msg.size);
+	buf = memdup_user((void __user *)(user_uintptr_t)msg.msg, msg.size);
 	if (IS_ERR(buf))
 		return PTR_ERR(buf);
 
@@ -1880,7 +1880,7 @@ static int cm_chan_msg_rcv(void __user *arg)
 
 	msg_size = min(msg.size, (u16)(RIO_MAX_MSG_SIZE));
 
-	if (copy_to_user((void __user *)(uintptr_t)msg.msg, buf, msg_size))
+	if (copy_to_user((void __user *)(user_uintptr_t)msg.msg, buf, msg_size))
 		ret = -EFAULT;
 
 	riocm_ch_free_rxbuf(ch, buf);

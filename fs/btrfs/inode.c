@@ -5852,7 +5852,7 @@ static int fixup_tree_root_location(struct btrfs_fs_info *fs_info,
 		goto out;
 
 	ret = memcmp_extent_buffer(leaf, fname.disk_name.name,
-				   (unsigned long)(ref + 1), fname.disk_name.len);
+				   (uintptr_t)(ref + 1), fname.disk_name.len);
 	if (ret)
 		goto out;
 
@@ -6372,7 +6372,7 @@ again:
 		entry = addr;
 		name_ptr = (char *)(entry + 1);
 		read_extent_buffer(leaf, name_ptr,
-				   (unsigned long)(di + 1), name_len);
+				   (uintptr_t)(di + 1), name_len);
 		put_unaligned(name_len, &entry->name_len);
 		put_unaligned(fs_ftype_to_dtype(ftype), &entry->type);
 		btrfs_dir_item_key_to_cpu(leaf, di, &location);
@@ -6772,14 +6772,14 @@ int btrfs_create_new_inode(struct btrfs_trans_handle *trans,
 
 	inode_item = btrfs_item_ptr(path->nodes[0], path->slots[0],
 				  struct btrfs_inode_item);
-	memzero_extent_buffer(path->nodes[0], (unsigned long)inode_item,
+	memzero_extent_buffer(path->nodes[0], (uintptr_t)inode_item,
 			     sizeof(*inode_item));
 	fill_inode_item(trans, path->nodes[0], inode_item, inode);
 
 	if (!args->orphan) {
 		ref = btrfs_item_ptr(path->nodes[0], path->slots[0] + 1,
 				     struct btrfs_inode_ref);
-		ptr = (unsigned long)(ref + 1);
+		ptr = (uintptr_t)(ref + 1);
 		if (args->subvol) {
 			btrfs_set_inode_ref_name_len(path->nodes[0], ref, 2);
 			btrfs_set_inode_ref_index(path->nodes[0], ref, 0);

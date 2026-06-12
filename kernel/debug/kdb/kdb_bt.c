@@ -75,8 +75,8 @@ kdb_bt1(struct task_struct *p, const char *mask, bool btaprompt)
 {
 	char ch;
 
-	if (kdb_getarea(ch, (unsigned long)p) ||
-	    kdb_getarea(ch, (unsigned long)(p+1)-1))
+	if (kdb_getarea(ch, (uintptr_t)p) ||
+	    kdb_getarea(ch, (uintptr_t)(p+1)-1))
 		return KDB_BADADDR;
 	if (!kdb_task_state(p, mask))
 		return 0;

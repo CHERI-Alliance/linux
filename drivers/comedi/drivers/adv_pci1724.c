@@ -87,7 +87,7 @@ static int adv_pci1724_insn_write(struct comedi_device *dev,
 				  struct comedi_insn *insn,
 				  unsigned int *data)
 {
-	unsigned long mode = (unsigned long)s->private;
+	uintptr_t mode = (uintptr_t)s->private;
 	unsigned int chan = CR_CHAN(insn->chanspec);
 	unsigned int ctrl;
 	int ret;

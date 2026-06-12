@@ -18,7 +18,7 @@ struct muram_info {
 static unsigned long fman_muram_vbase_to_offset(struct muram_info *muram,
 						unsigned long vaddr)
 {
-	return vaddr - (unsigned long)muram->vbase;
+	return vaddr - (uintptr_t)muram->vbase;
 }
 
 /**
@@ -56,7 +56,7 @@ struct muram_info *fman_muram_init(phys_addr_t base, size_t size)
 		goto pool_destroy;
 	}
 
-	ret = gen_pool_add_virt(muram->pool, (unsigned long)vaddr,
+	ret = gen_pool_add_virt(muram->pool, (uintptr_t)vaddr,
 				base, size, -1);
 	if (ret < 0) {
 		pr_err("%s(): MURAM pool add failed\n", __func__);
@@ -89,7 +89,7 @@ muram_free:
 unsigned long fman_muram_offset_to_vbase(struct muram_info *muram,
 					 unsigned long offset)
 {
-	return offset + (unsigned long)muram->vbase;
+	return offset + (uintptr_t)muram->vbase;
 }
 
 /**

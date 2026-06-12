@@ -1064,7 +1064,7 @@ void *tegra_drm_alloc(struct tegra_drm *tegra, size_t size, dma_addr_t *dma)
 free_iova:
 	__free_iova(&tegra->carveout.domain, alloc);
 free_pages:
-	free_pages((unsigned long)virt, get_order(size));
+	free_pages((uintptr_t)virt, get_order(size));
 
 	return ERR_PTR(err);
 }
@@ -1083,7 +1083,7 @@ void tegra_drm_free(struct tegra_drm *tegra, size_t size, void *virt,
 			  iova_pfn(&tegra->carveout.domain, dma));
 	}
 
-	free_pages((unsigned long)virt, get_order(size));
+	free_pages((uintptr_t)virt, get_order(size));
 }
 
 static bool host1x_drm_wants_iommu(struct host1x_device *dev)

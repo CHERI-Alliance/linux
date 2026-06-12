@@ -163,9 +163,9 @@ static const struct pca9570_chip_data slg7xl45106_gpio = {
 };
 
 static const struct i2c_device_id pca9570_id_table[] = {
-	{ "pca9570", (kernel_ulong_t)&pca9570_gpio},
-	{ "pca9571", (kernel_ulong_t)&pca9571_gpio },
-	{ "slg7xl45106", (kernel_ulong_t)&slg7xl45106_gpio },
+	{ "pca9570", (uintptr_t)&pca9570_gpio},
+	{ "pca9571", (uintptr_t)&pca9571_gpio },
+	{ "slg7xl45106", (uintptr_t)&slg7xl45106_gpio },
 	{ /* sentinel */ }
 };
 MODULE_DEVICE_TABLE(i2c, pca9570_id_table);

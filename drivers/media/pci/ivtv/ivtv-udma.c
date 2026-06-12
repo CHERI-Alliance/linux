@@ -105,7 +105,7 @@ int ivtv_udma_setup(struct ivtv *itv, unsigned long ivtv_dest_addr,
 		return -EBUSY;
 	}
 
-	ivtv_udma_get_page_info(&user_dma, (unsigned long)userbuf, size_in_bytes);
+	ivtv_udma_get_page_info(&user_dma, (user_uintptr_t)userbuf, size_in_bytes);
 
 	if (user_dma.page_count <= 0) {
 		IVTV_DEBUG_WARN("ivtv_udma_setup: Error %d page_count from %d bytes %d offset\n",

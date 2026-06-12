@@ -39,14 +39,14 @@ static int inv_icm45600_probe(struct i2c_client *client)
  * supported by this driver.
  */
 static const struct i2c_device_id inv_icm45600_id[] = {
-	{ "icm45605", (kernel_ulong_t)&inv_icm45605_chip_info },
-	{ "icm45606", (kernel_ulong_t)&inv_icm45606_chip_info },
-	{ "icm45608", (kernel_ulong_t)&inv_icm45608_chip_info },
-	{ "icm45634", (kernel_ulong_t)&inv_icm45634_chip_info },
-	{ "icm45686", (kernel_ulong_t)&inv_icm45686_chip_info },
-	{ "icm45687", (kernel_ulong_t)&inv_icm45687_chip_info },
-	{ "icm45688p", (kernel_ulong_t)&inv_icm45688p_chip_info },
-	{ "icm45689", (kernel_ulong_t)&inv_icm45689_chip_info },
+	{ "icm45605", (uintptr_t)&inv_icm45605_chip_info },
+	{ "icm45606", (uintptr_t)&inv_icm45606_chip_info },
+	{ "icm45608", (uintptr_t)&inv_icm45608_chip_info },
+	{ "icm45634", (uintptr_t)&inv_icm45634_chip_info },
+	{ "icm45686", (uintptr_t)&inv_icm45686_chip_info },
+	{ "icm45687", (uintptr_t)&inv_icm45687_chip_info },
+	{ "icm45688p", (uintptr_t)&inv_icm45688p_chip_info },
+	{ "icm45689", (uintptr_t)&inv_icm45689_chip_info },
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, inv_icm45600_id);

@@ -168,12 +168,12 @@ out:
 #define NEW_FOLIO 0x2
 static inline struct folio *mlock_lru(struct folio *folio)
 {
-	return (struct folio *)((unsigned long)folio + LRU_FOLIO);
+	return (struct folio *)((uintptr_t)folio + LRU_FOLIO);
 }
 
 static inline struct folio *mlock_new(struct folio *folio)
 {
-	return (struct folio *)((unsigned long)folio + NEW_FOLIO);
+	return (struct folio *)((uintptr_t)folio + NEW_FOLIO);
 }
 
 /*
@@ -193,7 +193,7 @@ static void mlock_folio_batch(struct folio_batch *fbatch)
 	for (i = 0; i < folio_batch_count(fbatch); i++) {
 		folio = fbatch->folios[i];
 		mlock = (unsigned long)folio & (LRU_FOLIO | NEW_FOLIO);
-		folio = (struct folio *)((unsigned long)folio - mlock);
+		folio = (struct folio *)((uintptr_t)folio - mlock);
 		fbatch->folios[i] = folio;
 
 		if (mlock & LRU_FOLIO)

@@ -65,7 +65,7 @@ static inline struct ahash_request *ah_tmp_req(struct crypto_ahash *ahash,
 static inline struct scatterlist *ah_req_sg(struct crypto_ahash *ahash,
 					     struct ahash_request *req)
 {
-	return (void *)ALIGN((unsigned long)(req + 1) +
+	return (void *)ALIGN((uintptr_t)(req + 1) +
 			     crypto_ahash_reqsize(ahash),
 			     __alignof__(struct scatterlist));
 }

@@ -650,7 +650,7 @@ static int sigmadsp_alloc_control(struct sigmadsp *sigmadsp,
 	template.info = sigmadsp_ctrl_info;
 	template.get = sigmadsp_ctrl_get;
 	template.put = sigmadsp_ctrl_put;
-	template.private_value = (unsigned long)ctrl;
+	template.private_value = (uintptr_t)ctrl;
 	template.access = SNDRV_CTL_ELEM_ACCESS_READWRITE;
 	if (!sigmadsp_samplerate_valid(ctrl->samplerates, samplerate_mask))
 		template.access |= SNDRV_CTL_ELEM_ACCESS_INACTIVE;

@@ -651,13 +651,13 @@ static const struct of_device_id cap11xx_dt_ids[] = {
 MODULE_DEVICE_TABLE(of, cap11xx_dt_ids);
 
 static const struct i2c_device_id cap11xx_i2c_ids[] = {
-	{ "cap1106", (kernel_ulong_t)&cap1106_model },
-	{ "cap1126", (kernel_ulong_t)&cap1126_model },
-	{ "cap1188", (kernel_ulong_t)&cap1188_model },
-	{ "cap1203", (kernel_ulong_t)&cap1203_model },
-	{ "cap1206", (kernel_ulong_t)&cap1206_model },
-	{ "cap1293", (kernel_ulong_t)&cap1293_model },
-	{ "cap1298", (kernel_ulong_t)&cap1298_model },
+	{ "cap1106", (uintptr_t)&cap1106_model },
+	{ "cap1126", (uintptr_t)&cap1126_model },
+	{ "cap1188", (uintptr_t)&cap1188_model },
+	{ "cap1203", (uintptr_t)&cap1203_model },
+	{ "cap1206", (uintptr_t)&cap1206_model },
+	{ "cap1293", (uintptr_t)&cap1293_model },
+	{ "cap1298", (uintptr_t)&cap1298_model },
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, cap11xx_i2c_ids);

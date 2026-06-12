@@ -408,7 +408,7 @@ static int pci_dio_insn_bits_di_b(struct comedi_device *dev,
 				  struct comedi_insn *insn,
 				  unsigned int *data)
 {
-	unsigned long reg = (unsigned long)s->private;
+	uintptr_t reg = (uintptr_t)s->private;
 	unsigned long iobase = dev->iobase + reg;
 
 	data[1] = inb(iobase);
@@ -427,7 +427,7 @@ static int pci_dio_insn_bits_di_w(struct comedi_device *dev,
 				  struct comedi_insn *insn,
 				  unsigned int *data)
 {
-	unsigned long reg = (unsigned long)s->private;
+	uintptr_t reg = (uintptr_t)s->private;
 	unsigned long iobase = dev->iobase + reg;
 
 	data[1] = inw(iobase);
@@ -442,7 +442,7 @@ static int pci_dio_insn_bits_do_b(struct comedi_device *dev,
 				  struct comedi_insn *insn,
 				  unsigned int *data)
 {
-	unsigned long reg = (unsigned long)s->private;
+	uintptr_t reg = (uintptr_t)s->private;
 	unsigned long iobase = dev->iobase + reg;
 
 	if (comedi_dio_update_state(s, data)) {
@@ -465,7 +465,7 @@ static int pci_dio_insn_bits_do_w(struct comedi_device *dev,
 				  struct comedi_insn *insn,
 				  unsigned int *data)
 {
-	unsigned long reg = (unsigned long)s->private;
+	uintptr_t reg = (uintptr_t)s->private;
 	unsigned long iobase = dev->iobase + reg;
 
 	if (comedi_dio_update_state(s, data)) {

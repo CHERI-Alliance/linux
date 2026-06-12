@@ -203,7 +203,7 @@ struct page *fscrypt_encrypt_pagecache_blocks(struct folio *folio,
 		}
 	}
 	SetPagePrivate(ciphertext_page);
-	set_page_private(ciphertext_page, (unsigned long)folio);
+	set_page_private(ciphertext_page, (uintptr_t)folio);
 	return ciphertext_page;
 }
 EXPORT_SYMBOL(fscrypt_encrypt_pagecache_blocks);

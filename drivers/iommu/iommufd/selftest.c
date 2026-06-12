@@ -605,7 +605,7 @@ static void mock_viommu_destroy(struct iommufd_viommu *viommu)
 	if (mock_viommu->mmap_offset)
 		iommufd_viommu_destroy_mmap(&mock_viommu->core,
 					    mock_viommu->mmap_offset);
-	free_pages((unsigned long)mock_viommu->page, 1);
+	free_pages((uintptr_t)mock_viommu->page, 1);
 	mutex_destroy(&mock_viommu->queue_mutex);
 
 	/* iommufd core frees mock_viommu and viommu */
@@ -839,7 +839,7 @@ err_destroy_mmap:
 	iommufd_viommu_destroy_mmap(&mock_viommu->core,
 				    mock_viommu->mmap_offset);
 err_free_page:
-	free_pages((unsigned long)mock_viommu->page, 1);
+	free_pages((uintptr_t)mock_viommu->page, 1);
 	return rc;
 }
 
@@ -1189,8 +1189,8 @@ static int iommufd_test_md_check_pa(struct iommufd_ucmd *ucmd,
 
 	page_size = 1 << __ffs(mock->domain.pgsize_bitmap);
 	if (iova % page_size || length % page_size ||
-	    (uintptr_t)uptr % page_size ||
-	    check_add_overflow((uintptr_t)uptr, (uintptr_t)length, &end)) {
+	    (user_uintptr_t)uptr % page_size ||
+	    check_add_overflow((user_uintptr_t)uptr, (uintptr_t)length, &end)) {
 		rc = -EINVAL;
 		goto out_put;
 	}
@@ -1201,7 +1201,7 @@ static int iommufd_test_md_check_pa(struct iommufd_ucmd *ucmd,
 		unsigned long pfn;
 		long npages;
 
-		npages = get_user_pages_fast((uintptr_t)uptr & PAGE_MASK, 1, 0,
+		npages = get_user_pages_fast((user_uintptr_t)uptr & PAGE_MASK, 1, 0,
 					     pages);
 		if (npages < 0) {
 			rc = npages;
@@ -1216,7 +1216,7 @@ static int iommufd_test_md_check_pa(struct iommufd_ucmd *ucmd,
 
 		io_phys = mock->domain.ops->iova_to_phys(&mock->domain, iova);
 		if (io_phys !=
-		    pfn * PAGE_SIZE + ((uintptr_t)uptr % PAGE_SIZE)) {
+		    pfn * PAGE_SIZE + ((user_uintptr_t)uptr % PAGE_SIZE)) {
 			rc = -EINVAL;
 			goto out_put;
 		}
@@ -1237,15 +1237,15 @@ static int iommufd_test_md_check_refs(struct iommufd_ucmd *ucmd,
 {
 	uintptr_t end;
 
-	if (length % PAGE_SIZE || (uintptr_t)uptr % PAGE_SIZE ||
-	    check_add_overflow((uintptr_t)uptr, (uintptr_t)length, &end))
+	if (length % PAGE_SIZE || (user_uintptr_t)uptr % PAGE_SIZE ||
+	    check_add_overflow((user_uintptr_t)uptr, (uintptr_t)length, &end))
 		return -EINVAL;
 
 	for (; length; length -= PAGE_SIZE) {
 		struct page *pages[1];
 		long npages;
 
-		npages = get_user_pages_fast((uintptr_t)uptr, 1, 0, pages);
+		npages = get_user_pages_fast((user_uintptr_t)uptr, 1, 0, pages);
 		if (npages < 0)
 			return npages;
 		if (WARN_ON(npages != 1))
@@ -1512,7 +1512,7 @@ static int iommufd_test_check_pages(void __user *uptr, struct page **pages,
 		struct page *tmp_pages[1];
 		long rc;
 
-		rc = get_user_pages_fast((uintptr_t)uptr, 1, 0, tmp_pages);
+		rc = get_user_pages_fast((user_uintptr_t)uptr, 1, 0, tmp_pages);
 		if (rc < 0)
 			return rc;
 		if (WARN_ON(rc != 1))

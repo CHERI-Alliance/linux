@@ -1107,7 +1107,7 @@ static ssize_t store_rps_dev_flow_table_cnt(struct netdev_rx_queue *queue,
 			table = vmalloc(sz);
 		if (!table)
 			return -ENOMEM;
-		tag_ptr = (rps_tag_ptr)table;
+		tag_ptr = (uintptr_t)table;
 		if (rps_tag_to_log(tag_ptr)) {
 			pr_err_once("store_rps_dev_flow_table_cnt() got a non page aligned allocation.\n");
 			kvfree(table);

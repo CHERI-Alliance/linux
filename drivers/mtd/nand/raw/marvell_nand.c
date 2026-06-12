@@ -3138,7 +3138,7 @@ static const struct marvell_nfc_caps marvell_pxa3xx_nfc_legacy_caps = {
 static const struct platform_device_id marvell_nfc_platform_ids[] = {
 	{
 		.name = "pxa3xx-nand",
-		.driver_data = (kernel_ulong_t)&marvell_pxa3xx_nfc_legacy_caps,
+		.driver_data = (uintptr_t)&marvell_pxa3xx_nfc_legacy_caps,
 	},
 	{ /* sentinel */ },
 };

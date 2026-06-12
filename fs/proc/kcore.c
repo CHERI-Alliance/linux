@@ -96,7 +96,7 @@ static int pfn_is_ram(unsigned long pfn)
 void __init kclist_add(struct kcore_list *new, void *addr, size_t size,
 		       int type)
 {
-	new->addr = (unsigned long)addr;
+	new->addr = (uintptr_t)addr;
 	new->size = size;
 	new->type = type;
 
@@ -166,8 +166,8 @@ get_sparsemem_vmemmap_info(struct kcore_list *ent, struct list_head *head)
 	struct kcore_list *vmm, *tmp;
 
 
-	start = ((unsigned long)pfn_to_page(pfn)) & PAGE_MASK;
-	end = ((unsigned long)pfn_to_page(pfn + nr_pages)) - 1;
+	start = ((uintptr_t)pfn_to_page(pfn)) & PAGE_MASK;
+	end = ((uintptr_t)pfn_to_page(pfn + nr_pages)) - 1;
 	end = PAGE_ALIGN(end);
 	/* overlap check (because we have to align page */
 	list_for_each_entry(tmp, head, list) {
@@ -213,7 +213,7 @@ kclist_add_private(unsigned long pfn, unsigned long nr_pages, void *arg)
 	ent = kmalloc_obj(*ent);
 	if (!ent)
 		return -ENOMEM;
-	ent->addr = (unsigned long)page_to_virt(p);
+	ent->addr = (uintptr_t)page_to_virt(p);
 	ent->size = nr_pages << PAGE_SHIFT;
 
 	if (!virt_addr_valid((void *)ent->addr))

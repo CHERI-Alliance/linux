@@ -856,7 +856,7 @@ static void rtw_sdio_tx_skb_prepare(struct rtw_dev *rtwdev,
 
 	pkt_desc = skb_push(skb, chip->tx_pkt_desc_sz);
 
-	data_addr = (unsigned long)pkt_desc;
+	data_addr = (uintptr_t)pkt_desc;
 	aligned_addr = ALIGN(data_addr, RTW_SDIO_DATA_PTR_ALIGN);
 
 	if (data_addr != aligned_addr) {

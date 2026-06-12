@@ -1477,7 +1477,7 @@ drain_page_cache(struct kfree_rcu_cpu *krcp)
 	raw_spin_unlock_irqrestore(&krcp->lock, flags);
 
 	llist_for_each_safe(pos, n, page_list) {
-		free_page((unsigned long)pos);
+		free_page((uintptr_t)pos);
 		freed++;
 	}
 
@@ -1517,7 +1517,7 @@ kvfree_rcu_bulk(struct kfree_rcu_cpu *krcp,
 	raw_spin_unlock_irqrestore(&krcp->lock, flags);
 
 	if (bnode)
-		free_page((unsigned long) bnode);
+		free_page((uintptr_t) bnode);
 
 	cond_resched_tasks_rcu_qs();
 }
@@ -1814,7 +1814,7 @@ static void fill_page_cache_func(struct work_struct *work)
 		raw_spin_unlock_irqrestore(&krcp->lock, flags);
 
 		if (!pushed) {
-			free_page((unsigned long) bnode);
+			free_page((uintptr_t) bnode);
 			break;
 		}
 	}

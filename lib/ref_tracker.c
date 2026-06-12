@@ -53,11 +53,11 @@ static inline void ref_tracker_debugfs_mark(struct ref_tracker_dir *dir)
 	unsigned long flags;
 
 	xa_lock_irqsave(&debugfs_dentries, flags);
-	__xa_set_mark(&debugfs_dentries, (unsigned long)dir, REF_TRACKER_DIR_DEAD);
+	__xa_set_mark(&debugfs_dentries, (uintptr_t)dir, REF_TRACKER_DIR_DEAD);
 	xa_unlock_irqrestore(&debugfs_dentries, flags);
 
 	xa_lock_irqsave(&debugfs_symlinks, flags);
-	__xa_set_mark(&debugfs_symlinks, (unsigned long)dir, REF_TRACKER_DIR_DEAD);
+	__xa_set_mark(&debugfs_symlinks, (uintptr_t)dir, REF_TRACKER_DIR_DEAD);
 	xa_unlock_irqrestore(&debugfs_symlinks, flags);
 
 	schedule_work(&debugfs_reap_worker);
@@ -369,7 +369,7 @@ static int ref_tracker_dir_seq_print(struct ref_tracker_dir *dir, struct seq_fil
 static int ref_tracker_debugfs_show(struct seq_file *f, void *v)
 {
 	struct ref_tracker_dir *dir = f->private;
-	unsigned long index = (unsigned long)dir;
+	uintptr_t index = (uintptr_t)dir;
 	unsigned long flags;
 	int ret;
 
@@ -429,7 +429,7 @@ void ref_tracker_dir_debugfs(struct ref_tracker_dir *dir)
 	int ret;
 
 	/* No-op if already created */
-	dentry = xa_load(&debugfs_dentries, (unsigned long)dir);
+	dentry = xa_load(&debugfs_dentries, (uintptr_t)dir);
 	if (dentry && !xa_is_err(dentry))
 		return;
 
@@ -443,7 +443,7 @@ void ref_tracker_dir_debugfs(struct ref_tracker_dir *dir)
 		if (!IS_ERR(dentry)) {
 			void *old;
 
-			old = xa_store_irq(&debugfs_dentries, (unsigned long)dir,
+			old = xa_store_irq(&debugfs_dentries, (uintptr_t)dir,
 					   dentry, GFP_KERNEL);
 
 			if (xa_is_err(old))
@@ -462,8 +462,8 @@ void __ostream_printf ref_tracker_dir_symlink(struct ref_tracker_dir *dir, const
 	va_list args;
 	int ret;
 
-	symlink = xa_load(&debugfs_symlinks, (unsigned long)dir);
-	dentry = xa_load(&debugfs_dentries, (unsigned long)dir);
+	symlink = xa_load(&debugfs_symlinks, (uintptr_t)dir);
+	dentry = xa_load(&debugfs_dentries, (uintptr_t)dir);
 
 	/* Already created?*/
 	if (symlink && !xa_is_err(symlink))
@@ -483,7 +483,7 @@ void __ostream_printf ref_tracker_dir_symlink(struct ref_tracker_dir *dir, const
 		if (!IS_ERR(symlink)) {
 			void *old;
 
-			old = xa_store_irq(&debugfs_symlinks, (unsigned long)dir,
+			old = xa_store_irq(&debugfs_symlinks, (uintptr_t)dir,
 					   symlink, GFP_KERNEL);
 			if (xa_is_err(old))
 				debugfs_remove(symlink);

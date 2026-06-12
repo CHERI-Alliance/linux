@@ -47,7 +47,7 @@
 static struct klist *knode_klist(struct klist_node *knode)
 {
 	return (struct klist *)
-		((unsigned long)knode->n_klist & KNODE_KLIST_MASK);
+		((uintptr_t)knode->n_klist & KNODE_KLIST_MASK);
 }
 
 static bool knode_dead(struct klist_node *knode)

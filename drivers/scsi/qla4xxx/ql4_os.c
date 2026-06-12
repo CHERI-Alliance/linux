@@ -5550,7 +5550,7 @@ int qla4_8xxx_iospace_config(struct scsi_qla_host *ha)
 	    __func__, mem_base, mem_len));
 
 	/* mapping of pcibase pointer */
-	ha->nx_pcibase = (unsigned long)ioremap(mem_base, mem_len);
+	ha->nx_pcibase = (uintptr_t)ioremap(mem_base, mem_len);
 	if (!ha->nx_pcibase) {
 		printk(KERN_ERR
 		    "cannot remap MMIO (%s), aborting\n", pci_name(pdev));

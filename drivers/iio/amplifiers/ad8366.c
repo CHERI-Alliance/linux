@@ -352,19 +352,19 @@ static int ad8366_probe(struct spi_device *spi)
 }
 
 static const struct spi_device_id ad8366_id[] = {
-	{ "ad8366", (kernel_ulong_t)&ad8366_chip_info },
-	{ "ada4961", (kernel_ulong_t)&ada4961_chip_info },
-	{ "adl5240", (kernel_ulong_t)&adl5240_chip_info },
-	{ "adrf5702", (kernel_ulong_t)&adrf5702_chip_info },
-	{ "adrf5703", (kernel_ulong_t)&adrf5703_chip_info },
-	{ "adrf5720", (kernel_ulong_t)&adrf5720_chip_info },
-	{ "adrf5730", (kernel_ulong_t)&adrf5730_chip_info },
-	{ "adrf5731", (kernel_ulong_t)&adrf5731_chip_info },
-	{ "hmc271a", (kernel_ulong_t)&hmc271_chip_info },
-	{ "hmc792a", (kernel_ulong_t)&hmc792_chip_info },
-	{ "hmc1018a", (kernel_ulong_t)&hmc1018_chip_info },
-	{ "hmc1019a", (kernel_ulong_t)&hmc1019_chip_info },
-	{ "hmc1119", (kernel_ulong_t)&hmc1119_chip_info },
+	{ "ad8366", (uintptr_t)&ad8366_chip_info },
+	{ "ada4961", (uintptr_t)&ada4961_chip_info },
+	{ "adl5240", (uintptr_t)&adl5240_chip_info },
+	{ "adrf5702", (uintptr_t)&adrf5702_chip_info },
+	{ "adrf5703", (uintptr_t)&adrf5703_chip_info },
+	{ "adrf5720", (uintptr_t)&adrf5720_chip_info },
+	{ "adrf5730", (uintptr_t)&adrf5730_chip_info },
+	{ "adrf5731", (uintptr_t)&adrf5731_chip_info },
+	{ "hmc271a", (uintptr_t)&hmc271_chip_info },
+	{ "hmc792a", (uintptr_t)&hmc792_chip_info },
+	{ "hmc1018a", (uintptr_t)&hmc1018_chip_info },
+	{ "hmc1019a", (uintptr_t)&hmc1019_chip_info },
+	{ "hmc1119", (uintptr_t)&hmc1119_chip_info },
 	{ }
 };
 MODULE_DEVICE_TABLE(spi, ad8366_id);

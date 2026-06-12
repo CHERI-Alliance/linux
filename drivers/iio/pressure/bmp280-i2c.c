@@ -38,12 +38,12 @@ static const struct of_device_id bmp280_of_i2c_match[] = {
 MODULE_DEVICE_TABLE(of, bmp280_of_i2c_match);
 
 static const struct i2c_device_id bmp280_i2c_id[] = {
-	{"bmp085", (kernel_ulong_t)&bmp085_chip_info },
-	{"bmp180", (kernel_ulong_t)&bmp180_chip_info },
-	{"bmp280", (kernel_ulong_t)&bmp280_chip_info },
-	{"bme280", (kernel_ulong_t)&bme280_chip_info },
-	{"bmp380", (kernel_ulong_t)&bmp380_chip_info },
-	{"bmp580", (kernel_ulong_t)&bmp580_chip_info },
+	{"bmp085", (uintptr_t)&bmp085_chip_info },
+	{"bmp180", (uintptr_t)&bmp180_chip_info },
+	{"bmp280", (uintptr_t)&bmp280_chip_info },
+	{"bme280", (uintptr_t)&bme280_chip_info },
+	{"bmp380", (uintptr_t)&bmp380_chip_info },
+	{"bmp580", (uintptr_t)&bmp580_chip_info },
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, bmp280_i2c_id);

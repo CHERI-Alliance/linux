@@ -972,10 +972,10 @@ int mhi_register_controller(struct mhi_controller *mhi_cntrl,
 		spin_lock_init(&mhi_event->lock);
 		if (mhi_event->data_type == MHI_ER_CTRL)
 			tasklet_init(&mhi_event->task, mhi_ctrl_ev_task,
-				     (ulong)mhi_event);
+				     (uintptr_t)mhi_event);
 		else
 			tasklet_init(&mhi_event->task, mhi_ev_task,
-				     (ulong)mhi_event);
+				     (uintptr_t)mhi_event);
 	}
 
 	mhi_chan = mhi_cntrl->mhi_chan;

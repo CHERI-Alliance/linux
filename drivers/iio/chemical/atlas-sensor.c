@@ -586,11 +586,11 @@ static const struct iio_info atlas_info = {
 };
 
 static const struct i2c_device_id atlas_id[] = {
-	{ "atlas-ph-sm", (kernel_ulong_t)&atlas_devices[ATLAS_PH_SM] },
-	{ "atlas-ec-sm", (kernel_ulong_t)&atlas_devices[ATLAS_EC_SM] },
-	{ "atlas-orp-sm", (kernel_ulong_t)&atlas_devices[ATLAS_ORP_SM] },
-	{ "atlas-do-sm", (kernel_ulong_t)&atlas_devices[ATLAS_DO_SM] },
-	{ "atlas-rtd-sm", (kernel_ulong_t)&atlas_devices[ATLAS_RTD_SM] },
+	{ "atlas-ph-sm", (uintptr_t)&atlas_devices[ATLAS_PH_SM] },
+	{ "atlas-ec-sm", (uintptr_t)&atlas_devices[ATLAS_EC_SM] },
+	{ "atlas-orp-sm", (uintptr_t)&atlas_devices[ATLAS_ORP_SM] },
+	{ "atlas-do-sm", (uintptr_t)&atlas_devices[ATLAS_DO_SM] },
+	{ "atlas-rtd-sm", (uintptr_t)&atlas_devices[ATLAS_RTD_SM] },
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, atlas_id);

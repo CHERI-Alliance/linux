@@ -373,9 +373,9 @@ static const struct rt1711h_chip_info rt1715 = {
 };
 
 static const struct i2c_device_id rt1711h_id[] = {
-	{ "et7304", (kernel_ulong_t)&rt1715 },
-	{ "rt1711h", (kernel_ulong_t)&rt1711h },
-	{ "rt1715", (kernel_ulong_t)&rt1715 },
+	{ "et7304", (uintptr_t)&rt1715 },
+	{ "rt1711h", (uintptr_t)&rt1711h },
+	{ "rt1715", (uintptr_t)&rt1715 },
 	{}
 };
 MODULE_DEVICE_TABLE(i2c, rt1711h_id);

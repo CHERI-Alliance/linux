@@ -64,7 +64,7 @@ static int sram_add_pool(struct sram_dev *sram, struct sram_reserve *block,
 	if (IS_ERR(part->pool))
 		return PTR_ERR(part->pool);
 
-	ret = gen_pool_add_virt(part->pool, (unsigned long)part->base, start,
+	ret = gen_pool_add_virt(part->pool, (uintptr_t)part->base, start,
 				block->size, NUMA_NO_NODE);
 	if (ret < 0) {
 		dev_err(sram->dev, "failed to register subpool: %d\n", ret);
@@ -316,7 +316,7 @@ static int sram_reserve_regions(struct sram_dev *sram, struct resource *res)
 				cur_start, cur_start + cur_size);
 
 			ret = gen_pool_add_virt(sram->pool,
-					(unsigned long)sram->virt_base + cur_start,
+					(uintptr_t)sram->virt_base + cur_start,
 					res->start + cur_start, cur_size, -1);
 			if (ret < 0) {
 				sram_free_partitions(sram);

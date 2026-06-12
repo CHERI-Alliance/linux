@@ -157,7 +157,7 @@ static int atlantis_reset_probe(struct auxiliary_device *adev,
 
 static const struct auxiliary_device_id atlantis_reset_ids[] = {
 	{ .name = "atlantis_prcm.rcpu-reset",
-	  .driver_data = (kernel_ulong_t)&atlantis_rcpu_reset_data },
+	  .driver_data = (uintptr_t)&atlantis_rcpu_reset_data },
 	{},
 };
 MODULE_DEVICE_TABLE(auxiliary, atlantis_reset_ids);

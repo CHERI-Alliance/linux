@@ -133,7 +133,7 @@ static const struct driver_info int51x1_info = {
 static const struct usb_device_id products[] = {
 	{
 	USB_DEVICE(INT51X1_VENDOR_ID, INT51X1_PRODUCT_ID),
-		.driver_info = (unsigned long) &int51x1_info,
+		.driver_info = (uintptr_t) &int51x1_info,
 	},
 	{},
 };

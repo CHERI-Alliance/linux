@@ -273,7 +273,7 @@ static int skfp_init_one(struct pci_dev *pdev,
 	smc->os.ResetRequested = FALSE;
 	skb_queue_head_init(&smc->os.SendSkbQueue);
 
-	dev->base_addr = (unsigned long)mem;
+	dev->base_addr = (uintptr_t)mem;
 
 	err = skfp_driver_init(dev);
 	if (err)

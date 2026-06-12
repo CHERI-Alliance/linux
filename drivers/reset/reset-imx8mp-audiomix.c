@@ -221,11 +221,11 @@ static int imx8mp_audiomix_reset_probe(struct auxiliary_device *adev,
 static const struct auxiliary_device_id imx8mp_audiomix_reset_ids[] = {
 	{
 		.name = "clk_imx8mp_audiomix.reset",
-		.driver_data = (kernel_ulong_t)&imx8mp_reset_info,
+		.driver_data = (uintptr_t)&imx8mp_reset_info,
 	},
 	{
 		.name = "clk_imx8ulp_sim_lpav.reset",
-		.driver_data = (kernel_ulong_t)&imx8ulp_reset_info,
+		.driver_data = (uintptr_t)&imx8ulp_reset_info,
 	},
 	{ }
 };

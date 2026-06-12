@@ -401,7 +401,7 @@ int esas2r_init_adapter(struct Scsi_Host *host, struct pci_dev *pcid,
 
 	tasklet_init(&a->tasklet,
 		     esas2r_adapter_tasklet,
-		     (unsigned long)a);
+		     (uintptr_t)a);
 
 	/*
 	 * Disable chip interrupts to prevent spurious interrupts

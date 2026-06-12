@@ -2714,7 +2714,7 @@ static int pktgen_output_ipsec(struct sk_buff *skb, struct pktgen_dev *pkt_dev)
 	 * supports both transport/tunnel mode + ESP/AH type.
 	 */
 	if ((x->props.mode == XFRM_MODE_TUNNEL) && (pkt_dev->spi != 0))
-		skb->_skb_refdst = (unsigned long)&pkt_dev->xdst.u.dst | SKB_DST_NOREF;
+		skb->_skb_refdst = (uintptr_t)&pkt_dev->xdst.u.dst | SKB_DST_NOREF;
 
 	rcu_read_lock_bh();
 	err = pktgen_xfrm_outer_mode_output(x, skb);

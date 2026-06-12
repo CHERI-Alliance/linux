@@ -389,7 +389,7 @@ static __always_inline void __folio_rmap_sanity_checks(const struct folio *folio
 	 *    middle of an RCU delay for getting freed).
 	 */
 	if (folio_test_anon(folio) && !folio_test_ksm(folio)) {
-		unsigned long mapping = (unsigned long)folio->mapping;
+		uintptr_t mapping = (uintptr_t)folio->mapping;
 		struct anon_vma *anon_vma;
 
 		anon_vma = (void *)(mapping - FOLIO_MAPPING_ANON);

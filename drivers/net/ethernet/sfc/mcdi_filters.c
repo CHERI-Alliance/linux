@@ -86,7 +86,7 @@ efx_mcdi_filter_set_entry(struct efx_mcdi_filter_table *table,
 			  const struct efx_filter_spec *spec,
 			  unsigned int flags)
 {
-	table->entry[filter_idx].spec =	(unsigned long)spec | flags;
+	table->entry[filter_idx].spec =	(uintptr_t)spec | flags;
 }
 
 static void

@@ -3119,7 +3119,7 @@ static const struct pci_device_id myrs_id_table[] = {
 		PCI_DEVICE_SUB(PCI_VENDOR_ID_MYLEX,
 			       PCI_DEVICE_ID_MYLEX_DAC960_GEM,
 			       PCI_VENDOR_ID_MYLEX, PCI_ANY_ID),
-		.driver_data	= (unsigned long) &DAC960_GEM_privdata,
+		.driver_data	= (uintptr_t) &DAC960_GEM_privdata,
 	},
 	{
 		PCI_DEVICE_DATA(MYLEX, DAC960_BA, &DAC960_BA_privdata),

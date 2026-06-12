@@ -315,7 +315,7 @@ static int peb2466_add_lkup_ctrl(struct snd_soc_component *component,
 	control.info = peb2466_lkup_ctrl_info;
 	control.get = peb2466_lkup_ctrl_get;
 	control.put = peb2466_lkup_ctrl_put;
-	control.private_value = (unsigned long)lkup_ctrl;
+	control.private_value = (uintptr_t)lkup_ctrl;
 
 	return snd_soc_add_component_controls(component, &control, 1);
 }

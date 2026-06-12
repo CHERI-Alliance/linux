@@ -278,12 +278,12 @@ static int btrfs_get_name(struct dentry *parent, char *name,
 	if (ino == BTRFS_FIRST_FREE_OBJECTID) {
 		rref = btrfs_item_ptr(leaf, path->slots[0],
 				     struct btrfs_root_ref);
-		name_ptr = (unsigned long)(rref + 1);
+		name_ptr = (uintptr_t)(rref + 1);
 		name_len = btrfs_root_ref_name_len(leaf, rref);
 	} else {
 		iref = btrfs_item_ptr(leaf, path->slots[0],
 				      struct btrfs_inode_ref);
-		name_ptr = (unsigned long)(iref + 1);
+		name_ptr = (uintptr_t)(iref + 1);
 		name_len = btrfs_inode_ref_name_len(leaf, iref);
 	}
 

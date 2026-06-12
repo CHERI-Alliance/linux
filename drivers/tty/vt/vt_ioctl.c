@@ -1019,7 +1019,7 @@ compat_kdfontop_ioctl(struct compat_console_font_op __user *fontop,
 	i = con_font_op(vc, op);
 	if (i)
 		return i;
-	((struct compat_console_font_op *)op)->data = (unsigned long)op->data;
+	((struct compat_console_font_op *)op)->data = (user_uintptr_t)op->data;
 	if (copy_to_user_with_ptr(fontop, op, sizeof(struct compat_console_font_op)))
 		return -EFAULT;
 	return 0;
@@ -1109,7 +1109,7 @@ long vt_compat_ioctl(struct tty_struct *tty,
 	 * but we have to convert it to a proper 64 bit pointer.
 	 */
 	default:
-		return vt_ioctl(tty, cmd, (unsigned long)up);
+		return vt_ioctl(tty, cmd, (user_uintptr_t)up);
 	}
 }
 

@@ -95,7 +95,7 @@ static const char *get_access_type(const struct expect_report *r)
 /* Check observed report matches information in @r. */
 static bool report_matches(const struct expect_report *r)
 {
-	unsigned long addr = (unsigned long)r->addr;
+	uintptr_t addr = (uintptr_t)r->addr;
 	bool ret = false;
 	unsigned long flags;
 	typeof(observed.lines) expect;
@@ -738,7 +738,7 @@ static void test_krealloc(struct kunit *test)
 		KUNIT_EXPECT_EQ(test, buf[i], (char)(i + 1));
 
 	buf = krealloc(buf, 0, GFP_KERNEL); /* Free. */
-	KUNIT_EXPECT_EQ(test, (unsigned long)buf, (unsigned long)ZERO_SIZE_PTR);
+	KUNIT_EXPECT_EQ(test, (uintptr_t)buf, (unsigned long)ZERO_SIZE_PTR);
 	KUNIT_ASSERT_FALSE(test, report_available()); /* No reports yet! */
 
 	READ_ONCE(*expect.addr); /* Ensure krealloc() actually freed earlier KFENCE object. */

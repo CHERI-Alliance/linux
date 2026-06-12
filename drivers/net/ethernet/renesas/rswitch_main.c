@@ -1955,7 +1955,7 @@ static int rswitch_device_alloc(struct rswitch_private *priv, unsigned int index
 	rdev->etha = &priv->etha[index];
 	rdev->addr = priv->addr;
 
-	ndev->base_addr = (unsigned long)rdev->addr;
+	ndev->base_addr = (uintptr_t)rdev->addr;
 	snprintf(ndev->name, IFNAMSIZ, "tsn%d", index);
 	ndev->netdev_ops = &rswitch_netdev_ops;
 	ndev->ethtool_ops = &rswitch_ethtool_ops;

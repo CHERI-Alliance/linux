@@ -386,7 +386,7 @@ static const struct snd_kcontrol_new mchp_pdmc_snd_controls[] = {
 		.info = snd_soc_info_enum_double,
 		.get = mchp_pdmc_sinc_order_get,
 		.put = mchp_pdmc_sinc_order_put,
-		.private_value = (unsigned long)&mchp_pdmc_sinc_filter_order_enum,
+		.private_value = (uintptr_t)&mchp_pdmc_sinc_filter_order_enum,
 	},
 };
 

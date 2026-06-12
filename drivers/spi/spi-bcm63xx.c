@@ -471,11 +471,11 @@ static const unsigned long bcm6358_spi_reg_offsets[] = {
 static const struct platform_device_id bcm63xx_spi_dev_match[] = {
 	{
 		.name = "bcm6348-spi",
-		.driver_data = (unsigned long)bcm6348_spi_reg_offsets,
+		.driver_data = (uintptr_t)bcm6348_spi_reg_offsets,
 	},
 	{
 		.name = "bcm6358-spi",
-		.driver_data = (unsigned long)bcm6358_spi_reg_offsets,
+		.driver_data = (uintptr_t)bcm6358_spi_reg_offsets,
 	},
 	{
 	},

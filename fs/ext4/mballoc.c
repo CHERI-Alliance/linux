@@ -465,7 +465,7 @@ static inline void *mb_correct_addr_and_bit(int *bit, void *addr)
 {
 #if BITS_PER_LONG == 64
 	*bit += ((unsigned long) addr & 7UL) << 3;
-	addr = (void *) ((unsigned long) addr & ~7UL);
+	addr = (void *) ((uintptr_t) addr & ~7UL);
 #elif BITS_PER_LONG == 32
 	*bit += ((unsigned long) addr & 3UL) << 3;
 	addr = (void *) ((unsigned long) addr & ~3UL);
@@ -3334,7 +3334,7 @@ static int ext4_mb_seq_structs_summary_show(struct seq_file *seq, void *v)
 {
 	struct super_block *sb = pde_data(file_inode(seq->file));
 	struct ext4_sb_info *sbi = EXT4_SB(sb);
-	unsigned long position = ((unsigned long) v);
+	unsigned long position = ((uintptr_t) v);
 	struct ext4_group_info *grp;
 	unsigned int count;
 	unsigned long idx;

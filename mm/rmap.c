@@ -592,7 +592,7 @@ struct anon_vma *folio_get_anon_vma(const struct folio *folio)
 	VM_WARN_ON_FOLIO(!folio_test_locked(folio), folio);
 
 	rcu_read_lock();
-	anon_mapping = (unsigned long)READ_ONCE(folio->mapping);
+	anon_mapping = (uintptr_t)READ_ONCE(folio->mapping);
 	if ((anon_mapping & FOLIO_MAPPING_FLAGS) != FOLIO_MAPPING_ANON)
 		goto out;
 	if (!folio_mapped(folio))
@@ -640,7 +640,7 @@ struct anon_vma *folio_lock_anon_vma_read(const struct folio *folio,
 	VM_WARN_ON_FOLIO(!folio_test_locked(folio), folio);
 
 	rcu_read_lock();
-	anon_mapping = (unsigned long)READ_ONCE(folio->mapping);
+	anon_mapping = (uintptr_t)READ_ONCE(folio->mapping);
 	if ((anon_mapping & FOLIO_MAPPING_FLAGS) != FOLIO_MAPPING_ANON)
 		goto out;
 	if (!folio_mapped(folio))

@@ -5854,7 +5854,7 @@ static int hpsa_scsi_host_alloc(struct ctlr_info *h)
 	sh->cmd_per_lun = sh->can_queue;
 	sh->sg_tablesize = h->maxsgentries;
 	sh->transportt = hpsa_sas_transport_template;
-	sh->hostdata[0] = (unsigned long) h;
+	sh->hostdata[0] = (uintptr_t) h;
 	sh->irq = pci_irq_vector(h->pdev, 0);
 	sh->unique_id = sh->irq;
 

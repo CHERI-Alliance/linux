@@ -2665,7 +2665,7 @@ static const struct pci_device_id pch_gbe_pcidev_id[] = {
 	 .subdevice = PCI_SUBSYSTEM_ID_CIRCUITCO_MINNOWBOARD,
 	 .class = (PCI_CLASS_NETWORK_ETHERNET << 8),
 	 .class_mask = (0xFFFF00),
-	 .driver_data = (kernel_ulong_t)&pch_gbe_minnow_privdata
+	 .driver_data = (uintptr_t)&pch_gbe_minnow_privdata
 	 },
 	{.vendor = PCI_VENDOR_ID_INTEL,
 	 .device = PCI_DEVICE_ID_INTEL_IOH1_GBE,

@@ -3898,7 +3898,7 @@ int tc_setup_action(struct flow_action *flow_action,
 		for (k = 0; k < index ; k++) {
 			entry[k].hw_stats = tc_act_hw_stats(act->hw_stats);
 			entry[k].hw_index = act->tcfa_index;
-			entry[k].cookie = (unsigned long)act;
+			entry[k].cookie = (uintptr_t)act;
 			entry[k].miss_cookie =
 				tcf_exts_miss_cookie_get(miss_cookie_base, i);
 		}

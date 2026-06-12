@@ -900,8 +900,8 @@ again:
 	ei = btrfs_item_ptr(leaf, path->slots[0], struct btrfs_extent_item);
 	flags = btrfs_extent_flags(leaf, ei);
 
-	ptr = (unsigned long)(ei + 1);
-	end = (unsigned long)ei + item_size;
+	ptr = (uintptr_t)(ei + 1);
+	end = (uintptr_t)ei + item_size;
 
 	if (flags & BTRFS_EXTENT_FLAG_TREE_BLOCK && !skinny_metadata) {
 		ptr += sizeof(struct btrfs_tree_block_info);
@@ -1062,8 +1062,8 @@ void setup_inline_extent_backref(struct btrfs_trans_handle *trans,
 	if (extent_op)
 		__run_delayed_extent_op(extent_op, leaf, ei);
 
-	ptr = (unsigned long)ei + item_offset;
-	end = (unsigned long)ei + btrfs_item_size(leaf, path->slots[0]);
+	ptr = (uintptr_t)ei + item_offset;
+	end = (uintptr_t)ei + btrfs_item_size(leaf, path->slots[0]);
 	if (ptr < end - size)
 		memmove_extent_buffer(leaf, ptr + size, ptr,
 				      end - size - ptr);
@@ -1223,8 +1223,8 @@ static noinline_for_stack int update_inline_extent_backref(
 	} else {
 		size =  btrfs_extent_inline_ref_size(type);
 		item_size = btrfs_item_size(leaf, path->slots[0]);
-		ptr = (unsigned long)iref;
-		end = (unsigned long)ei + item_size;
+		ptr = (uintptr_t)iref;
+		end = (uintptr_t)ei + item_size;
 		if (ptr + size < end)
 			memmove_extent_buffer(leaf, ptr, ptr + size,
 					      end - ptr - size);
@@ -3113,8 +3113,8 @@ u64 btrfs_get_extent_owner_root(struct btrfs_fs_info *fs_info,
 		return 0;
 
 	ei = btrfs_item_ptr(leaf, slot, struct btrfs_extent_item);
-	ptr = (unsigned long)(ei + 1);
-	end = (unsigned long)ei + btrfs_item_size(leaf, slot);
+	ptr = (uintptr_t)(ei + 1);
+	end = (uintptr_t)ei + btrfs_item_size(leaf, slot);
 
 	/* No inline ref items of any kind, can't check type. */
 	if (ptr == end)

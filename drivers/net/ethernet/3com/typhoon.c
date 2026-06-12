@@ -752,7 +752,7 @@ typhoon_start_tx(struct sk_buff *skb, struct net_device *dev)
 	first_txd->flags = TYPHOON_TX_DESC | TYPHOON_DESC_VALID;
 	first_txd->numDesc = 0;
 	first_txd->len = 0;
-	first_txd->tx_addr = (u64)((unsigned long) skb);
+	first_txd->tx_addr = (u64)((uintptr_t) skb);
 	first_txd->processFlags = 0;
 
 	if (skb->ip_summed == CHECKSUM_PARTIAL) {

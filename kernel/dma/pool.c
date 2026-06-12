@@ -117,7 +117,7 @@ static int atomic_pool_expand(struct gen_pool *pool, size_t pool_size,
 				   1 << order);
 	if (ret)
 		goto remove_mapping;
-	ret = gen_pool_add_virt(pool, (unsigned long)addr, page_to_phys(page),
+	ret = gen_pool_add_virt(pool, (uintptr_t)addr, page_to_phys(page),
 				pool_size, NUMA_NO_NODE);
 	if (ret)
 		goto encrypt_mapping;
@@ -299,9 +299,9 @@ bool dma_free_from_pool(struct device *dev, void *start, size_t size)
 	struct gen_pool *pool = NULL;
 
 	while ((pool = dma_guess_pool(pool, 0))) {
-		if (!gen_pool_has_addr(pool, (unsigned long)start, size))
+		if (!gen_pool_has_addr(pool, (uintptr_t)start, size))
 			continue;
-		gen_pool_free(pool, (unsigned long)start, size);
+		gen_pool_free(pool, (uintptr_t)start, size);
 		return true;
 	}
 

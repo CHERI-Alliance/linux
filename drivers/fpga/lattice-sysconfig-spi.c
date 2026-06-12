@@ -124,7 +124,7 @@ static int sysconfig_spi_probe(struct spi_device *spi)
 static const struct spi_device_id sysconfig_spi_ids[] = {
 	{
 		.name = "sysconfig-ecp5",
-		.driver_data = (kernel_ulong_t)&ecp5_spi_max_speed_hz,
+		.driver_data = (uintptr_t)&ecp5_spi_max_speed_hz,
 	}, {},
 };
 MODULE_DEVICE_TABLE(spi, sysconfig_spi_ids);

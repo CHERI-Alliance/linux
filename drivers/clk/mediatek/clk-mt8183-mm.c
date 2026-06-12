@@ -88,7 +88,7 @@ static const struct mtk_clk_desc mm_desc = {
 };
 
 static const struct platform_device_id clk_mt8183_mm_id_table[] = {
-	{ .name = "clk-mt8183-mm", .driver_data = (kernel_ulong_t)&mm_desc },
+	{ .name = "clk-mt8183-mm", .driver_data = (uintptr_t)&mm_desc },
 	{ /* sentinel */ }
 };
 MODULE_DEVICE_TABLE(platform, clk_mt8183_mm_id_table);

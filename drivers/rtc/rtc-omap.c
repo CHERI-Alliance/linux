@@ -532,13 +532,13 @@ static const struct omap_rtc_device_type omap_rtc_da830_type = {
 static const struct platform_device_id omap_rtc_id_table[] = {
 	{
 		.name	= "omap_rtc",
-		.driver_data = (kernel_ulong_t)&omap_rtc_default_type,
+		.driver_data = (uintptr_t)&omap_rtc_default_type,
 	}, {
 		.name	= "am3352-rtc",
-		.driver_data = (kernel_ulong_t)&omap_rtc_am3352_type,
+		.driver_data = (uintptr_t)&omap_rtc_am3352_type,
 	}, {
 		.name	= "da830-rtc",
-		.driver_data = (kernel_ulong_t)&omap_rtc_da830_type,
+		.driver_data = (uintptr_t)&omap_rtc_da830_type,
 	}, {
 		/* sentinel */
 	}

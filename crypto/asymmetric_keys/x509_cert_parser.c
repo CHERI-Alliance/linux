@@ -79,7 +79,7 @@ struct x509_certificate *x509_cert_parse(const void *data, size_t datalen)
 		return ERR_PTR(-ENOMEM);
 
 	ctx->cert = cert;
-	ctx->data = (unsigned long)data;
+	ctx->data = (uintptr_t)data;
 
 	/* Attempt to decode the certificate */
 	ret = asn1_ber_decoder(&x509_decoder, ctx, data, datalen);

@@ -491,7 +491,7 @@ int ethosu_ioctl_submit(struct drm_device *dev, void *data, struct drm_file *fil
 		return -ENOMEM;
 
 	if (copy_from_user(jobs,
-			   (void __user *)(uintptr_t)args->jobs,
+			   (void __user *)(user_uintptr_t)args->jobs,
 			   args->job_count * sizeof(*jobs))) {
 		drm_dbg(dev, "Failed to copy incoming job array\n");
 		return -EFAULT;

@@ -1829,7 +1829,7 @@ static netdev_tx_t gfar_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	if (do_csum) {
 		gfar_tx_checksum(skb, fcb, fcb_len);
 
-		if (unlikely(gfar_csum_errata_12(priv, (unsigned long)fcb)) ||
+		if (unlikely(gfar_csum_errata_12(priv, (uintptr_t)fcb)) ||
 		    unlikely(gfar_csum_errata_76(priv, skb->len))) {
 			__skb_pull(skb, GMAC_FCB_LEN);
 			skb_checksum_help(skb);
@@ -3177,7 +3177,7 @@ static int gfar_probe(struct platform_device *ofdev)
 	gfar_detect_errata(priv);
 
 	/* Set the dev->base_addr to the gfar reg region */
-	dev->base_addr = (unsigned long) priv->gfargrp[0].regs;
+	dev->base_addr = (uintptr_t) priv->gfargrp[0].regs;
 
 	/* Fill in the dev structure */
 	dev->watchdog_timeo = TX_TIMEOUT;

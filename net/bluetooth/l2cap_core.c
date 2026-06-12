@@ -3078,7 +3078,7 @@ static inline int l2cap_get_conf_opt(void **ptr, int *type, int *olen,
 		break;
 
 	default:
-		*val = (unsigned long) opt->val;
+		*val = (uintptr_t) opt->val;
 		break;
 	}
 
@@ -3147,7 +3147,7 @@ static void l2cap_add_opt_efs(void **ptr, struct l2cap_chan *chan, size_t size)
 	}
 
 	l2cap_add_conf_opt(ptr, L2CAP_CONF_EFS, sizeof(efs),
-			   (unsigned long) &efs, size);
+			   (uintptr_t) &efs, size);
 }
 
 static void l2cap_ack_timeout(struct work_struct *work)
@@ -3347,7 +3347,7 @@ done:
 		rfc.max_pdu_size    = 0;
 
 		l2cap_add_conf_opt(&ptr, L2CAP_CONF_RFC, sizeof(rfc),
-				   (unsigned long) &rfc, endptr - ptr);
+				   (uintptr_t) &rfc, endptr - ptr);
 		break;
 
 	case L2CAP_MODE_ERTM:
@@ -3367,7 +3367,7 @@ done:
 				       L2CAP_DEFAULT_TX_WINDOW);
 
 		l2cap_add_conf_opt(&ptr, L2CAP_CONF_RFC, sizeof(rfc),
-				   (unsigned long) &rfc, endptr - ptr);
+				   (uintptr_t) &rfc, endptr - ptr);
 
 		if (test_bit(FLAG_EFS_ENABLE, &chan->flags))
 			l2cap_add_opt_efs(&ptr, chan, endptr - ptr);
@@ -3399,7 +3399,7 @@ done:
 		rfc.max_pdu_size = cpu_to_le16(size);
 
 		l2cap_add_conf_opt(&ptr, L2CAP_CONF_RFC, sizeof(rfc),
-				   (unsigned long) &rfc, endptr - ptr);
+				   (uintptr_t) &rfc, endptr - ptr);
 
 		if (test_bit(FLAG_EFS_ENABLE, &chan->flags))
 			l2cap_add_opt_efs(&ptr, chan, endptr - ptr);
@@ -3530,7 +3530,7 @@ done:
 			return -ECONNREFUSED;
 
 		l2cap_add_conf_opt(&ptr, L2CAP_CONF_RFC, sizeof(rfc),
-				   (unsigned long) &rfc, endptr - ptr);
+				   (uintptr_t) &rfc, endptr - ptr);
 	}
 
 	if (result == L2CAP_CONF_SUCCESS) {
@@ -3580,7 +3580,7 @@ done:
 
 				l2cap_add_conf_opt(&ptr, L2CAP_CONF_EFS,
 						   sizeof(efs),
-						   (unsigned long) &efs, endptr - ptr);
+						   (uintptr_t) &efs, endptr - ptr);
 			} else {
 				/* Send PENDING Conf Rsp */
 				result = L2CAP_CONF_PENDING;
@@ -3613,7 +3613,7 @@ done:
 			set_bit(CONF_MODE_DONE, &chan->conf_state);
 
 			l2cap_add_conf_opt(&ptr, L2CAP_CONF_RFC,
-					   sizeof(rfc), (unsigned long) &rfc, endptr - ptr);
+					   sizeof(rfc), (uintptr_t) &rfc, endptr - ptr);
 
 			if (remote_efs &&
 			    test_bit(FLAG_EFS_ENABLE, &chan->flags)) {
@@ -3628,7 +3628,7 @@ done:
 					le32_to_cpu(efs.sdu_itime);
 				l2cap_add_conf_opt(&ptr, L2CAP_CONF_EFS,
 						   sizeof(efs),
-						   (unsigned long) &efs, endptr - ptr);
+						   (uintptr_t) &efs, endptr - ptr);
 			}
 			break;
 
@@ -3642,7 +3642,7 @@ done:
 			set_bit(CONF_MODE_DONE, &chan->conf_state);
 
 			l2cap_add_conf_opt(&ptr, L2CAP_CONF_RFC, sizeof(rfc),
-					   (unsigned long) &rfc, endptr - ptr);
+					   (uintptr_t) &rfc, endptr - ptr);
 
 			break;
 
@@ -3711,7 +3711,7 @@ static int l2cap_parse_conf_rsp(struct l2cap_chan *chan, void *rsp, int len,
 				return -ECONNREFUSED;
 			chan->fcs = 0;
 			l2cap_add_conf_opt(&ptr, L2CAP_CONF_RFC, sizeof(rfc),
-					   (unsigned long) &rfc, endptr - ptr);
+					   (uintptr_t) &rfc, endptr - ptr);
 			break;
 
 		case L2CAP_CONF_EWS:
@@ -3731,7 +3731,7 @@ static int l2cap_parse_conf_rsp(struct l2cap_chan *chan, void *rsp, int len,
 			    efs.stype != chan->local_stype)
 				return -ECONNREFUSED;
 			l2cap_add_conf_opt(&ptr, L2CAP_CONF_EFS, sizeof(efs),
-					   (unsigned long) &efs, endptr - ptr);
+					   (uintptr_t) &efs, endptr - ptr);
 			break;
 
 		case L2CAP_CONF_FCS:

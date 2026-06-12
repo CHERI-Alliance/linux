@@ -260,7 +260,7 @@ static int cpdma_desc_pool_create(struct cpdma_ctlr *ctlr)
 	if (!pool->iomap)
 		goto gen_pool_create_fail;
 
-	ret = gen_pool_add_virt(pool->gen_pool, (unsigned long)pool->iomap,
+	ret = gen_pool_add_virt(pool->gen_pool, (uintptr_t)pool->iomap,
 				pool->phys, pool->mem_size, -1);
 	if (ret < 0) {
 		dev_err(ctlr->dev, "pool add failed %d\n", ret);
@@ -300,7 +300,7 @@ cpdma_desc_alloc(struct cpdma_desc_pool *pool)
 static void cpdma_desc_free(struct cpdma_desc_pool *pool,
 			    struct cpdma_desc __iomem *desc, int num_desc)
 {
-	gen_pool_free(pool->gen_pool, (unsigned long)desc, pool->desc_size);
+	gen_pool_free(pool->gen_pool, (uintptr_t)desc, pool->desc_size);
 }
 
 static int _cpdma_control_set(struct cpdma_ctlr *ctlr, int control, int value)

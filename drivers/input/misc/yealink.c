@@ -776,7 +776,7 @@ static const struct usb_device_id usb_table [] = {
 		.bInterfaceClass	= USB_CLASS_HID,
 		.bInterfaceSubClass	= 0,
 		.bInterfaceProtocol	= 0,
-		.driver_info		= (kernel_ulong_t)&info_P1K
+		.driver_info		= (uintptr_t)&info_P1K
 	},
 	{ }
 };

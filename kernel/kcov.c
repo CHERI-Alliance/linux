@@ -752,7 +752,7 @@ static long kcov_ioctl(struct file *filep, unsigned int cmd, user_uintptr_t arg)
 			kfree(remote_arg);
 			return -EINVAL;
 		}
-		arg = (unsigned long)remote_arg;
+		arg = (uintptr_t)remote_arg;
 		fallthrough;
 	default:
 		/*

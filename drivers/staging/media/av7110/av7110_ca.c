@@ -168,7 +168,7 @@ static ssize_t ci_ll_write(struct dvb_ringbuffer *cibuf, struct file *file,
 
 	res = dvb_ringbuffer_write(cibuf, page, count);
 out:
-	free_page((unsigned long)page);
+	free_page((uintptr_t)page);
 	return res;
 }
 
@@ -238,7 +238,7 @@ static int dvb_ca_ioctl(struct file *file, unsigned int cmd, void *parg)
 {
 	struct dvb_device *dvbdev = file->private_data;
 	struct av7110 *av7110 = dvbdev->priv;
-	unsigned long arg = (unsigned long)parg;
+	uintptr_t arg = (uintptr_t)parg;
 	int ret = 0;
 
 	dprintk(8, "av7110:%p\n", av7110);

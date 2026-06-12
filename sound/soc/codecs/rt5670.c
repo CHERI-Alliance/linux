@@ -2895,7 +2895,7 @@ MODULE_DEVICE_TABLE(acpi, rt5670_acpi_match);
 
 static int rt5670_quirk_cb(const struct dmi_system_id *id)
 {
-	rt5670_quirk = (unsigned long)id->driver_data;
+	rt5670_quirk = (uintptr_t)id->driver_data;
 	return 1;
 }
 

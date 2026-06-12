@@ -16,7 +16,7 @@ static int ceph_lock_wait_for_completion(struct ceph_mds_client *mdsc,
 
 static inline u64 secure_addr(void *addr)
 {
-	u64 v = lock_secret ^ (u64)(unsigned long)addr;
+	u64 v = lock_secret ^ (u64)(uintptr_t)addr;
 	/*
 	 * Set the most significant bit, so that MDS knows the 'owner'
 	 * is sufficient to identify the owner of lock. (old code uses

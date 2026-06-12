@@ -475,7 +475,7 @@ static int cctrng_probe(struct platform_device *pdev)
 		return -ENOMEM;
 
 	drvdata->rng.read = cctrng_read;
-	drvdata->rng.priv = (unsigned long)drvdata;
+	drvdata->rng.priv = (uintptr_t)drvdata;
 	drvdata->rng.quality = CC_TRNG_QUALITY;
 
 	platform_set_drvdata(pdev, drvdata);

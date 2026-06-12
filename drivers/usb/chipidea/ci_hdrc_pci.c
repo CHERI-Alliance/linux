@@ -132,24 +132,24 @@ static void ci_hdrc_pci_remove(struct pci_dev *pdev)
 static const struct pci_device_id ci_hdrc_pci_id_table[] = {
 	{
 		PCI_DEVICE(0x153F, 0x1004),
-		.driver_data = (kernel_ulong_t)&pci_platdata,
+		.driver_data = (uintptr_t)&pci_platdata,
 	},
 	{
 		PCI_DEVICE(0x153F, 0x1006),
-		.driver_data = (kernel_ulong_t)&pci_platdata,
+		.driver_data = (uintptr_t)&pci_platdata,
 	},
 	{
 		PCI_VDEVICE(INTEL, 0x0811),
-		.driver_data = (kernel_ulong_t)&langwell_pci_platdata,
+		.driver_data = (uintptr_t)&langwell_pci_platdata,
 	},
 	{
 		PCI_VDEVICE(INTEL, 0x0829),
-		.driver_data = (kernel_ulong_t)&penwell_pci_platdata,
+		.driver_data = (uintptr_t)&penwell_pci_platdata,
 	},
 	{
 		/* Intel Clovertrail */
 		PCI_VDEVICE(INTEL, 0xe006),
-		.driver_data = (kernel_ulong_t)&penwell_pci_platdata,
+		.driver_data = (uintptr_t)&penwell_pci_platdata,
 	},
 	{ 0 } /* end: all zeroes */
 };

@@ -413,7 +413,7 @@ static int nfnl_hook_dump_start(struct netlink_callback *cb)
 		return -ENOMEM;
 
 	strscpy(ctx->devname, name, sizeof(ctx->devname));
-	ctx->headv = (unsigned long)head;
+	ctx->headv = (uintptr_t)head;
 	ctx->hook = hooknum;
 
 	cb->seq = 1;

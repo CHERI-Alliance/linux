@@ -130,7 +130,7 @@ static inline unsigned long shadow_to_swp_tb(void *shadow, unsigned int count)
 	VM_WARN_ON_ONCE(shadow && !xa_is_value(shadow));
 	VM_WARN_ON_ONCE(shadow && ((unsigned long)shadow & SWP_TB_COUNT_MASK));
 
-	return (unsigned long)shadow | __count_to_swp_tb(count) | SWP_TB_SHADOW_MARK;
+	return (uintptr_t)shadow | __count_to_swp_tb(count) | SWP_TB_SHADOW_MARK;
 }
 
 /*

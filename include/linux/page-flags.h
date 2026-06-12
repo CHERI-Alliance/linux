@@ -231,7 +231,7 @@ static __always_inline unsigned long _compound_head(const struct page *page)
 		if (info & 1)
 			return info - 1;
 
-		return (unsigned long)page;
+		return (uintptr_t)page;
 	}
 
 	/*
@@ -249,7 +249,7 @@ static __always_inline unsigned long _compound_head(const struct page *page)
 	/* Non-tail: -1UL, Tail: info */
 	mask |= info;
 
-	return (unsigned long)page & mask;
+	return (uintptr_t)page & mask;
 }
 
 #define compound_head(page)	((typeof(page))_compound_head(page))
@@ -261,7 +261,7 @@ static __always_inline void set_compound_head(struct page *tail,
 	unsigned long mask;
 
 	if (!compound_info_has_mask()) {
-		WRITE_ONCE(tail->compound_info, (unsigned long)head | 1);
+		WRITE_ONCE(tail->compound_info, (uintptr_t)head | 1);
 		return;
 	}
 
@@ -725,7 +725,7 @@ static __always_inline bool folio_test_lazyfree(const struct folio *folio)
 
 static __always_inline bool PageAnonNotKsm(const struct page *page)
 {
-	unsigned long flags = (unsigned long)page_folio(page)->mapping;
+	uintptr_t flags = (uintptr_t)page_folio(page)->mapping;
 
 	return (flags & FOLIO_MAPPING_FLAGS) == FOLIO_MAPPING_ANON;
 }

@@ -556,59 +556,59 @@ static const struct driver_info dm9601_info = {
 static const struct usb_device_id products[] = {
 	{
 	 USB_DEVICE(0x07aa, 0x9601),	/* Corega FEther USB-TXC */
-	 .driver_info = (unsigned long)&dm9601_info,
+	 .driver_info = (uintptr_t)&dm9601_info,
 	 },
 	{
 	 USB_DEVICE(0x0a46, 0x9601),	/* Davicom USB-100 */
-	 .driver_info = (unsigned long)&dm9601_info,
+	 .driver_info = (uintptr_t)&dm9601_info,
 	 },
 	{
 	 USB_DEVICE(0x0a46, 0x6688),	/* ZT6688 USB NIC */
-	 .driver_info = (unsigned long)&dm9601_info,
+	 .driver_info = (uintptr_t)&dm9601_info,
 	 },
 	{
 	 USB_DEVICE(0x0a46, 0x0268),	/* ShanTou ST268 USB NIC */
-	 .driver_info = (unsigned long)&dm9601_info,
+	 .driver_info = (uintptr_t)&dm9601_info,
 	 },
 	{
 	 USB_DEVICE(0x0a46, 0x8515),	/* ADMtek ADM8515 USB NIC */
-	 .driver_info = (unsigned long)&dm9601_info,
+	 .driver_info = (uintptr_t)&dm9601_info,
 	 },
 	{
 	USB_DEVICE(0x0a47, 0x9601),	/* Hirose USB-100 */
-	.driver_info = (unsigned long)&dm9601_info,
+	.driver_info = (uintptr_t)&dm9601_info,
 	 },
 	{
 	USB_DEVICE(0x0fe6, 0x8101),	/* DM9601 USB to Fast Ethernet Adapter */
-	.driver_info = (unsigned long)&dm9601_info,
+	.driver_info = (uintptr_t)&dm9601_info,
 	 },
 	{
 	 USB_DEVICE(0x0a46, 0x9000),	/* DM9000E */
-	 .driver_info = (unsigned long)&dm9601_info,
+	 .driver_info = (uintptr_t)&dm9601_info,
 	 },
 	{
 	 USB_DEVICE(0x0a46, 0x9620),	/* DM9620 USB to Fast Ethernet Adapter */
-	 .driver_info = (unsigned long)&dm9601_info,
+	 .driver_info = (uintptr_t)&dm9601_info,
 	 },
 	{
 	 USB_DEVICE(0x0a46, 0x9621),	/* DM9621A USB to Fast Ethernet Adapter */
-	 .driver_info = (unsigned long)&dm9601_info,
+	 .driver_info = (uintptr_t)&dm9601_info,
 	},
 	{
 	 USB_DEVICE(0x0a46, 0x9622),	/* DM9622 USB to Fast Ethernet Adapter */
-	 .driver_info = (unsigned long)&dm9601_info,
+	 .driver_info = (uintptr_t)&dm9601_info,
 	},
 	{
 	 USB_DEVICE(0x0a46, 0x0269),	/* DM962OA USB to Fast Ethernet Adapter */
-	 .driver_info = (unsigned long)&dm9601_info,
+	 .driver_info = (uintptr_t)&dm9601_info,
 	},
 	{
 	 USB_DEVICE(0x0a46, 0x1269),	/* DM9621A USB to Fast Ethernet Adapter */
-	 .driver_info = (unsigned long)&dm9601_info,
+	 .driver_info = (uintptr_t)&dm9601_info,
 	},
 	{
 	 USB_DEVICE(0x0586, 0x3427),	/* ZyXEL Keenetic Plus DSL xDSL modem */
-	 .driver_info = (unsigned long)&dm9601_info,
+	 .driver_info = (uintptr_t)&dm9601_info,
 	},
 	{},			// END
 };

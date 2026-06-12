@@ -163,7 +163,7 @@ static void *dma_sg_map_benchmark_prepare(struct map_benchmark_data *map)
 
 free_page:
 	while (i-- > 0)
-		free_page((unsigned long)params->buf[i]);
+		free_page((uintptr_t)params->buf[i]);
 
 	sg_free_table(&params->sgt);
 free_buf:
@@ -179,7 +179,7 @@ static void dma_sg_map_benchmark_unprepare(void *mparam)
 	int i;
 
 	for (i = 0; i < params->npages; i++)
-		free_page((unsigned long)params->buf[i]);
+		free_page((uintptr_t)params->buf[i]);
 
 	sg_free_table(&params->sgt);
 

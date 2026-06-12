@@ -2939,7 +2939,7 @@ static long tty_compat_ioctl(struct file *file, unsigned int cmd,
 
 	case PPPIOCGCHAN:
 	case PPPIOCGUNIT:
-		return tty_ioctl(file, cmd, (unsigned long)compat_ptr(arg));
+		return tty_ioctl(file, cmd, (user_uintptr_t)compat_ptr(arg));
 	case TIOCCONS:
 	case TIOCEXCL:
 	case TIOCNXCL:
@@ -2979,7 +2979,7 @@ static long tty_compat_ioctl(struct file *file, unsigned int cmd,
 	if (ld->ops->compat_ioctl)
 		retval = ld->ops->compat_ioctl(tty, cmd, arg);
 	if (retval == -ENOIOCTLCMD && ld->ops->ioctl)
-		retval = ld->ops->ioctl(tty, (unsigned long)compat_ptr(cmd),
+		retval = ld->ops->ioctl(tty, (user_uintptr_t)compat_ptr(cmd),
 				arg);
 	tty_ldisc_deref(ld);
 

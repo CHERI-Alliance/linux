@@ -231,7 +231,7 @@ static int nft_inner_parse(const struct nft_inner *priv,
 	}
 
 	tun_ctx->type = priv->type;
-	tun_ctx->cookie = (unsigned long)pkt->skb;
+	tun_ctx->cookie = (uintptr_t)pkt->skb;
 	pkt->flags |= NFT_PKTINFO_INNER_FULL;
 
 	return 0;

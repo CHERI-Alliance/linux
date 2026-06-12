@@ -102,7 +102,7 @@ EXPORT_SYMBOL(pppox_ioctl);
 #ifdef CONFIG_COMPAT
 int pppox_compat_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 {
-	return pppox_ioctl(sock, cmd, (unsigned long)compat_ptr(arg));
+	return pppox_ioctl(sock, cmd, (user_uintptr_t)compat_ptr(arg));
 }
 
 EXPORT_SYMBOL(pppox_compat_ioctl);

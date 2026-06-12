@@ -326,8 +326,8 @@ static const struct of_device_id nvt_ts_of_match[] = {
 MODULE_DEVICE_TABLE(of, nvt_ts_of_match);
 
 static const struct i2c_device_id nvt_ts_i2c_id[] = {
-	{ "nt11205-ts", (unsigned long) &nvt_nt11205_ts_data },
-	{ "nt36672a-ts", (unsigned long) &nvt_nt36672a_ts_data },
+	{ "nt11205-ts", (uintptr_t) &nvt_nt11205_ts_data },
+	{ "nt36672a-ts", (uintptr_t) &nvt_nt36672a_ts_data },
 	{ }
 };
 MODULE_DEVICE_TABLE(i2c, nvt_ts_i2c_id);

@@ -290,9 +290,9 @@ static const struct mc13xxx_led_devtype mc34708_led_devtype = {
 };
 
 static const struct platform_device_id mc13xxx_led_id_table[] = {
-	{ "mc13783-led", (kernel_ulong_t)&mc13783_led_devtype, },
-	{ "mc13892-led", (kernel_ulong_t)&mc13892_led_devtype, },
-	{ "mc34708-led", (kernel_ulong_t)&mc34708_led_devtype, },
+	{ "mc13783-led", (uintptr_t)&mc13783_led_devtype, },
+	{ "mc13892-led", (uintptr_t)&mc13892_led_devtype, },
+	{ "mc34708-led", (uintptr_t)&mc34708_led_devtype, },
 	{ }
 };
 MODULE_DEVICE_TABLE(platform, mc13xxx_led_id_table);

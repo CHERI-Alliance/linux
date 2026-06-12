@@ -64,7 +64,7 @@ static const unsigned int orders[] = {8, 4, 0};
 
 static int system_heap_set_page_decrypted(struct page *page)
 {
-	unsigned long addr = (unsigned long)page_address(page);
+	uintptr_t addr = (uintptr_t)page_address(page);
 	unsigned int nr_pages = 1 << compound_order(page);
 	int ret;
 
@@ -78,7 +78,7 @@ static int system_heap_set_page_decrypted(struct page *page)
 
 static int system_heap_set_page_encrypted(struct page *page)
 {
-	unsigned long addr = (unsigned long)page_address(page);
+	uintptr_t addr = (uintptr_t)page_address(page);
 	unsigned int nr_pages = 1 << compound_order(page);
 	int ret;
 
