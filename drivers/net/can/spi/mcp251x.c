@@ -1314,15 +1314,15 @@ MODULE_DEVICE_TABLE(of, mcp251x_of_match);
 static const struct spi_device_id mcp251x_id_table[] = {
 	{
 		.name		= "mcp2510",
-		.driver_data	= (kernel_ulong_t)CAN_MCP251X_MCP2510,
+		.driver_data	= (uintptr_t)CAN_MCP251X_MCP2510,
 	},
 	{
 		.name		= "mcp2515",
-		.driver_data	= (kernel_ulong_t)CAN_MCP251X_MCP2515,
+		.driver_data	= (uintptr_t)CAN_MCP251X_MCP2515,
 	},
 	{
 		.name		= "mcp25625",
-		.driver_data	= (kernel_ulong_t)CAN_MCP251X_MCP25625,
+		.driver_data	= (uintptr_t)CAN_MCP251X_MCP25625,
 	},
 	{ }
 };

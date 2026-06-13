@@ -736,7 +736,7 @@ static const struct dev_pm_ops sdhci_s3c_pmops = {
 static const struct platform_device_id sdhci_s3c_driver_ids[] = {
 	{
 		.name		= "s3c-sdhci",
-		.driver_data	= (kernel_ulong_t)NULL,
+		.driver_data	= (uintptr_t)NULL,
 	},
 	{ }
 };

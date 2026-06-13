@@ -238,7 +238,7 @@ struct pca953x_chip {
 
 	struct i2c_client *client;
 	struct gpio_chip gpio_chip;
-	unsigned long driver_data;
+	uintptr_t driver_data;
 	struct regulator *regulator;
 
 	const struct pca953x_reg_config *regs;
