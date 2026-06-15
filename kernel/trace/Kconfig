@@ -839,8 +839,6 @@ config UPROBE_EVENTS
 config EPROBE_EVENTS
 	bool "Enable event-based dynamic events"
 	depends on TRACING
-	# FIXCHERI: Address handling and provenance needs more work
-	depends on !CHERI_PURECAP_UABI
 	depends on HAVE_REGS_AND_STACK_ACCESS_API
 	select PROBE_EVENTS
 	select DYNAMIC_EVENTS

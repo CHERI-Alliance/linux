@@ -294,28 +294,39 @@ print_eprobe_event(struct trace_iterator *iter, int flags,
 	return trace_handle_return(s);
 }
 
-static nokprobe_inline unsigned long
+static nokprobe_inline uintptr_t
 get_event_field(struct fetch_insn *code, void *rec)
 {
 	struct ftrace_event_field *field = code->data;
-	unsigned long val;
+	uintptr_t val;
 	void *addr;
 
 	addr = rec + field->offset;
 
+	/*
+	 * Almost all fetch operations below strip val's metadata. We're
+	 * reading from the ringbuffer, which has no capability support.
+	 *
+	 * addr points to the field info in the ringbuffer, its bounds are
+	 * related to the ringbuffer, not to the field itself.
+	 *
+	 * If the field contains an address, we have to fabricate a capability
+	 * for reading from the address. The caller may add an arbitrary offset.
+	 */
+
 	if (is_string_field(field)) {
 		switch (field->filter_type) {
 		case FILTER_DYN_STRING:
-			val = (unsigned long)(rec + (*(unsigned int *)addr & 0xffff));
+			val = __c_fakeu(__c_pa(rec + (*(unsigned int *)addr & 0xffff)));
 			break;
 		case FILTER_RDYN_STRING:
-			val = (unsigned long)(addr + (*(unsigned int *)addr & 0xffff));
+			val = __c_fakeu(__c_pa(addr + (*(unsigned int *)addr & 0xffff)));
 			break;
 		case FILTER_STATIC_STRING:
-			val = (unsigned long)addr;
+			val = __c_fakeu(__c_pa(addr));
 			break;
 		case FILTER_PTR_STRING:
-			val = *(unsigned long *)addr;
+			val = __c_fakeu(*(ptraddr_t *)addr);
 			break;
 		default:
 			WARN_ON_ONCE(1);
@@ -346,13 +357,13 @@ get_event_field(struct fetch_insn *code, void *rec)
 	default:
 		if (field->size == sizeof(long)) {
 			if (field->is_signed)
-				val = *(long *)addr;
+				val = __c_fakeu(*(long *)addr);
 			else
-				val = *(unsigned long *)addr;
+				val = __c_fakeu(*(unsigned long *)addr);
 			break;
 		}
 		/* This is an array, point to the addr itself */
-		val = (unsigned long)addr;
+		val = (uintptr_t)addr;
 		break;
 	}
 	return val;
@@ -367,7 +378,7 @@ static int get_eprobe_size(struct trace_probe *tp, void *rec)
 	for (i = 0; i < tp->nr_args; i++) {
 		arg = tp->args + i;
 		if (arg->dynamic) {
-			unsigned long val;
+			uintptr_t val;
 
 			code = arg->code;
  retry:
@@ -399,7 +410,7 @@ static int
 process_fetch_insn(struct fetch_insn *code, void *rec, void *edata,
 		   void *dest, void *base)
 {
-	unsigned long val;
+	uintptr_t val;
 	int ret;
 
  retry:

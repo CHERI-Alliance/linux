@@ -1104,6 +1104,14 @@ parse_probe_arg(char *arg, const struct fetch_type *type,
 
 	switch (arg[0]) {
 	case '$':
+		/*
+		 * For now, the capability fetch type is not supported for
+		 * eprobe fields.
+		 */
+		if ((ctx->flags & TPARG_FL_TEVENT) && (type->composite == FC_CAP)) {
+			trace_probe_log_err(ctx->offset, BAD_CAP_OP);
+			break;
+		}
 		ret = parse_probe_vars(arg, type, pcode, end, ctx);
 		break;
 
