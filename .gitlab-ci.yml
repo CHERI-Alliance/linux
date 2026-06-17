@@ -159,6 +159,7 @@ checkpatch-mr:
     [[ -n ${DEBUG_SCRIPTS:-} ]] && set -x
     IGNORED_TYPES=(
     	FILE_PATH_CHANGES
+        UNKNOWN_COMMIT_ID
     )
     IGNORE_STR=$(printf "%s," "${IGNORED_TYPES[@]}")
     IGNORE_STR=${IGNORE_STR%,}
