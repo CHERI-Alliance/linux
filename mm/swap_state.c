@@ -86,7 +86,7 @@ void show_swap_cache_info(void)
  */
 struct folio *swap_cache_get_folio(swp_entry_t entry)
 {
-	unsigned long swp_tb;
+	uintptr_t swp_tb;
 	struct folio *folio;
 
 	for (;;) {
@@ -111,7 +111,7 @@ struct folio *swap_cache_get_folio(swp_entry_t entry)
  */
 bool swap_cache_has_folio(swp_entry_t entry)
 {
-	unsigned long swp_tb;
+	uintptr_t swp_tb;
 
 	swp_tb = swap_table_get(__swap_entry_to_cluster(entry),
 				swp_cluster_offset(entry));
@@ -128,7 +128,7 @@ bool swap_cache_has_folio(swp_entry_t entry)
  */
 void *swap_cache_get_shadow(swp_entry_t entry)
 {
-	unsigned long swp_tb;
+	uintptr_t swp_tb;
 
 	swp_tb = swap_table_get(__swap_entry_to_cluster(entry),
 				swp_cluster_offset(entry));
@@ -143,7 +143,7 @@ void __swap_cache_add_folio(struct swap_cluster_info *ci,
 	unsigned int ci_off = swp_cluster_offset(entry), ci_end;
 	unsigned long nr_pages = folio_nr_pages(folio);
 	unsigned long pfn = folio_pfn(folio);
-	unsigned long old_tb;
+	uintptr_t old_tb;
 
 	VM_WARN_ON_ONCE_FOLIO(!folio_test_locked(folio), folio);
 	VM_WARN_ON_ONCE_FOLIO(folio_test_swapcache(folio), folio);

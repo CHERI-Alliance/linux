@@ -8,7 +8,7 @@
 
 /* A typical flat array in each cluster as swap table */
 struct swap_table {
-	atomic_long_t entries[SWAPFILE_CLUSTER];
+	atomic_ptr_t entries[SWAPFILE_CLUSTER];
 };
 
 #define SWP_TABLE_USE_PAGE (sizeof(struct swap_table) == PAGE_SIZE)
@@ -84,9 +84,9 @@ struct swap_table {
 /*
  * Helpers for casting one type of info into a swap table entry.
  */
-static inline unsigned long null_to_swp_tb(void)
+static inline uintptr_t null_to_swp_tb(void)
 {
-	BUILD_BUG_ON(sizeof(unsigned long) != sizeof(atomic_long_t));
+	BUILD_BUG_ON(sizeof(uintptr_t) != sizeof(atomic_ptr_t));
 	return 0;
 }
 
@@ -121,7 +121,7 @@ static inline unsigned long folio_to_swp_tb(struct folio *folio, unsigned int co
 	return pfn_to_swp_tb(folio_pfn(folio), count);
 }
 
-static inline unsigned long shadow_to_swp_tb(void *shadow, unsigned int count)
+static inline uintptr_t shadow_to_swp_tb(void *shadow, unsigned int count)
 {
 	BUILD_BUG_ON((BITS_PER_XA_VALUE + 1) !=
 		     BITS_PER_BYTE * sizeof(unsigned long));
@@ -136,27 +136,27 @@ static inline unsigned long shadow_to_swp_tb(void *shadow, unsigned int count)
 /*
  * Helpers for swap table entry type checking.
  */
-static inline bool swp_tb_is_null(unsigned long swp_tb)
+static inline bool swp_tb_is_null(uintptr_t swp_tb)
 {
 	return !swp_tb;
 }
 
-static inline bool swp_tb_is_folio(unsigned long swp_tb)
+static inline bool swp_tb_is_folio(uintptr_t swp_tb)
 {
 	return ((swp_tb & SWP_TB_PFN_MARK_MASK) == SWP_TB_PFN_MARK);
 }
 
-static inline bool swp_tb_is_shadow(unsigned long swp_tb)
+static inline bool swp_tb_is_shadow(uintptr_t swp_tb)
 {
 	return xa_is_value((void *)swp_tb);
 }
 
-static inline bool swp_tb_is_bad(unsigned long swp_tb)
+static inline bool swp_tb_is_bad(uintptr_t swp_tb)
 {
 	return swp_tb == SWP_TB_BAD;
 }
 
-static inline bool swp_tb_is_countable(unsigned long swp_tb)
+static inline bool swp_tb_is_countable(uintptr_t swp_tb)
 {
 	return (swp_tb_is_shadow(swp_tb) || swp_tb_is_folio(swp_tb) ||
 		swp_tb_is_null(swp_tb));
@@ -165,33 +165,33 @@ static inline bool swp_tb_is_countable(unsigned long swp_tb)
 /*
  * Helpers for retrieving info from swap table.
  */
-static inline struct folio *swp_tb_to_folio(unsigned long swp_tb)
+static inline struct folio *swp_tb_to_folio(uintptr_t swp_tb)
 {
 	VM_WARN_ON(!swp_tb_is_folio(swp_tb));
-	return pfn_folio((swp_tb & ~SWP_TB_COUNT_MASK) >> SWP_TB_PFN_MARK_BITS);
+	return pfn_folio((__c_ua(swp_tb) & ~SWP_TB_COUNT_MASK) >> SWP_TB_PFN_MARK_BITS);
 }
 
-static inline void *swp_tb_to_shadow(unsigned long swp_tb)
+static inline void *swp_tb_to_shadow(uintptr_t swp_tb)
 {
 	VM_WARN_ON(!swp_tb_is_shadow(swp_tb));
 	/* No shift needed, xa_value is stored as it is in the lower bits. */
 	return (void *)(swp_tb & ~SWP_TB_COUNT_MASK);
 }
 
-static inline unsigned char __swp_tb_get_count(unsigned long swp_tb)
+static inline unsigned char __swp_tb_get_count(uintptr_t swp_tb)
 {
 	VM_WARN_ON(!swp_tb_is_countable(swp_tb));
 	return ((swp_tb & SWP_TB_COUNT_MASK) >> SWP_TB_COUNT_SHIFT);
 }
 
-static inline int swp_tb_get_count(unsigned long swp_tb)
+static inline int swp_tb_get_count(uintptr_t swp_tb)
 {
 	if (swp_tb_is_countable(swp_tb))
 		return __swp_tb_get_count(swp_tb);
 	return -EINVAL;
 }
 
-static inline unsigned long __swp_tb_mk_count(unsigned long swp_tb, int count)
+static inline uintptr_t __swp_tb_mk_count(uintptr_t swp_tb, int count)
 {
 	return ((swp_tb & ~SWP_TB_COUNT_MASK) | __count_to_swp_tb(count));
 }
@@ -201,48 +201,48 @@ static inline unsigned long __swp_tb_mk_count(unsigned long swp_tb, int count)
  * the swap cluster must be locked.
  */
 static inline void __swap_table_set(struct swap_cluster_info *ci,
-				    unsigned int off, unsigned long swp_tb)
+				    unsigned int off, uintptr_t swp_tb)
 {
-	atomic_long_t *table = rcu_dereference_protected(ci->table, true);
+	atomic_ptr_t *table = rcu_dereference_protected(ci->table, true);
 
 	lockdep_assert_held(&ci->lock);
 	VM_WARN_ON_ONCE(off >= SWAPFILE_CLUSTER);
-	atomic_long_set(&table[off], swp_tb);
+	atomic_ptr_set(&table[off], swp_tb);
 }
 
-static inline unsigned long __swap_table_xchg(struct swap_cluster_info *ci,
-					      unsigned int off, unsigned long swp_tb)
+static inline uintptr_t __swap_table_xchg(struct swap_cluster_info *ci,
+					      unsigned int off, uintptr_t swp_tb)
 {
-	atomic_long_t *table = rcu_dereference_protected(ci->table, true);
+	atomic_ptr_t *table = rcu_dereference_protected(ci->table, true);
 
 	lockdep_assert_held(&ci->lock);
 	VM_WARN_ON_ONCE(off >= SWAPFILE_CLUSTER);
 	/* Ordering is guaranteed by cluster lock, relax */
-	return atomic_long_xchg_relaxed(&table[off], swp_tb);
+	return atomic_ptr_xchg_relaxed(&table[off], swp_tb);
 }
 
-static inline unsigned long __swap_table_get(struct swap_cluster_info *ci,
+static inline uintptr_t __swap_table_get(struct swap_cluster_info *ci,
 					     unsigned int off)
 {
-	atomic_long_t *table;
+	atomic_ptr_t *table;
 
 	VM_WARN_ON_ONCE(off >= SWAPFILE_CLUSTER);
 	table = rcu_dereference_check(ci->table, lockdep_is_held(&ci->lock));
 
-	return atomic_long_read(&table[off]);
+	return atomic_ptr_read(&table[off]);
 }
 
-static inline unsigned long swap_table_get(struct swap_cluster_info *ci,
+static inline uintptr_t swap_table_get(struct swap_cluster_info *ci,
 					unsigned int off)
 {
-	atomic_long_t *table;
-	unsigned long swp_tb;
+	atomic_ptr_t *table;
+	uintptr_t swp_tb;
 
 	VM_WARN_ON_ONCE(off >= SWAPFILE_CLUSTER);
 
 	rcu_read_lock();
 	table = rcu_dereference(ci->table);
-	swp_tb = table ? atomic_long_read(&table[off]) : null_to_swp_tb();
+	swp_tb = table ? atomic_ptr_read(&table[off]) : null_to_swp_tb();
 	rcu_read_unlock();
 
 	return swp_tb;
