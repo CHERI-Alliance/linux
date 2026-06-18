@@ -41,7 +41,7 @@ struct cs_char {
 	struct list_head	dataind_queue;
 	int			dataind_pending;
 	/* mmap things */
-	unsigned long		mmap_base;
+	uintptr_t		mmap_base;
 	unsigned long		mmap_size;
 	spinlock_t		lock;
 	struct fasync_struct	*async_queue;
@@ -88,7 +88,7 @@ struct cs_hsi_iface {
 	/* state exposed to application */
 	struct cs_mmap_config_block	*mmap_cfg;
 
-	unsigned long			mmap_base;
+	uintptr_t			mmap_base;
 	unsigned long			mmap_size;
 
 	unsigned int			rx_slot;
@@ -982,7 +982,7 @@ error:
 }
 
 static int cs_hsi_start(struct cs_hsi_iface **hi, struct hsi_client *cl,
-			unsigned long mmap_base, unsigned long mmap_size)
+			uintptr_t mmap_base, unsigned long mmap_size)
 {
 	int err = 0;
 	struct cs_hsi_iface *hsi_if = kzalloc_obj(*hsi_if);
