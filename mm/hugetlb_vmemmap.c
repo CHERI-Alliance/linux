@@ -207,7 +207,9 @@ static void vmemmap_remap_pte(pte_t *pte, unsigned long addr,
 
 	/* Remapping the head page requires r/w */
 	if (unlikely(walk->nr_walked == 0 && walk->vmemmap_head)) {
+#ifndef CONFIG_CHERI_KERNEL
 		VM_WARN_ON_ONCE(!PageHead((const struct page *)addr));
+#endif
 
 		list_del(&walk->vmemmap_head->lru);
 
@@ -220,7 +222,9 @@ static void vmemmap_remap_pte(pte_t *pte, unsigned long addr,
 
 		entry = mk_pte(walk->vmemmap_head, PAGE_KERNEL);
 	} else {
+#ifndef CONFIG_CHERI_KERNEL
 		VM_WARN_ON_ONCE(!PageTail((const struct page *)addr));
+#endif
 
 		/*
 		 * Remap the tail pages as read-only to catch illegal write
@@ -246,7 +250,9 @@ static void vmemmap_restore_pte(pte_t *pte, unsigned long addr,
 	if (walk->vmemmap_tail && walk->vmemmap_tail != src)
 		return;
 
+#ifndef CONFIG_CHERI_KERNEL
 	VM_WARN_ON_ONCE(PageHead((const struct page *)addr));
+#endif
 
 	dst = list_first_entry(walk->vmemmap_pages, struct page, lru);
 	list_del(&dst->lru);
