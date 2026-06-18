@@ -2,7 +2,7 @@
 #ifndef _MM_SWAP_H
 #define _MM_SWAP_H
 
-#include <linux/atomic.h> /* for atomic_long_t */
+#include <linux/atomic.h> /* for atomic_ptr_t */
 struct mempolicy;
 struct swap_iocb;
 
@@ -36,7 +36,7 @@ struct swap_cluster_info {
 	u16 count;
 	u8 flags;
 	u8 order;
-	atomic_long_t __rcu *table;	/* Swap table entries, see mm/swap_table.h */
+	atomic_ptr_t __rcu *table;	/* Swap table entries, see mm/swap_table.h */
 	unsigned int *extend_table;	/* For large swap count, protected by ci->lock */
 	struct list_head list;
 };
