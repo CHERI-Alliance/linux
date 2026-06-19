@@ -176,8 +176,9 @@ SYM_FUNC_START(FUNCNAME)
 
 	/*
 	 * Align _only_ a1 reading bytes into the word in t0.
+	 * Unused bits are set to one.
 	 */
-	li		t0, 0
+	li		t0, -1
 	beq		a1, t1, .Lunaligned_main
 .align 3
 .Lunaligned_pre_loop:
@@ -187,6 +188,7 @@ SYM_FUNC_START(FUNCNAME)
 	sll		t0, t0, 8
 	or		t0, t0, t6
 #else
+	xori		t0, t0, 255
 	or		t0, t0, t6
 	rori		t0, t0, 8
 #endif
@@ -213,18 +215,29 @@ SYM_FUNC_START(FUNCNAME)
 
 	/*
 	 * This is the main word at a time loop for unaligned strings.
+	 * Check that t0 does not contain a NUL byte before we enter
+	 * the loop.
 	 */
 	li		t3, -1
+	orc.b		t5, t0
+	bne		t5, t3, .Lunaligned_post
 .align 3
 .Lunaligned_main_loop:
 #ifdef HAS_WORDLOOP_LIMIT
 	beq		a0, a2, .Lunaligned_post
 #endif
 	/*
+	 * Load the next aligned word bail out if it contains a NUL byte.
+	 *
+	 */
+	REG_L		t5, (CREG(a0))
+	orc.b		t4, t5
+	bne		t4, t3, .Lunaligned_post
+
+	/*
 	 * Construct the next unaligned word in t6 by
 	 * combining the leftover high bits in t0 with the low bits
-	 * in the next word and read the next aligned word at the
-	 * source into t5.
+	 * in the next word. Bail out of we read a NUL byte.
 	 */
 #ifdef CONFIG_CPU_BIG_ENDIAN
 	sll		t6, t0, a4
@@ -232,7 +245,8 @@ SYM_FUNC_START(FUNCNAME)
 	srl		t6, t0, a4
 #endif
 	REG_L		t0, (CREG(a1))
-	REG_L		t5, (CREG(a0))
+	orc.b		t4, t0
+	bne		t4, t3, .Lunaligned_post
 #ifdef CONFIG_CPU_BIG_ENDIAN
 	srl		t4, t0, a3
 #else
@@ -240,9 +254,7 @@ SYM_FUNC_START(FUNCNAME)
 #endif
 	or		t6, t6, t4
 
-	/* Now, compare the current words normally including NUL byte checks. */
-	orc.b		t4, t5
-	bne		t4, t3, .Ldo_mask
+	/* Now, compare the current words normally. */
 	CINSN(addi)	CREG(a0), CREG(a0), SZREG
 	CINSN(addi)	CREG(a1), CREG(a1), SZREG
 	beq		t5, t6, .Lunaligned_main_loop

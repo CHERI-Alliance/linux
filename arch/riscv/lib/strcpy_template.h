@@ -219,8 +219,9 @@ SYM_FUNC_START(FUNCNAME)
 
 	/*
 	 * Align _only_ a1 reading bytes into the word in t5.
+	 * Unused bits are set to one.
 	 */
-	li		t5, 0
+	li		t5, -1
 	beq		a1, t1, .Lunaligned_main
 .align 3
 .Lunaligned_pre_loop:
@@ -230,6 +231,7 @@ SYM_FUNC_START(FUNCNAME)
 	sll		t5, t5, 8
 	or		t5, t5, t6
 #else
+	xori		t5, t5, 255
 	or		t5, t5, t6
 	rori		t5, t5, 8
 #endif
@@ -256,8 +258,12 @@ SYM_FUNC_START(FUNCNAME)
 
 	/*
 	 * This is the main word at a time loop for unaligned strings.
+	 * Check that t5 does not contain a NUL byte before we enter
+	 * the loop
 	 */
 	li		t3, -1
+	orc.b		t6, t5
+	bne		t6, t3, .Lunaligned_post
 .align 3
 .Lunaligned_main_loop:
 #ifdef HAS_WORDLOOP_LIMIT
@@ -274,6 +280,8 @@ SYM_FUNC_START(FUNCNAME)
 	srl		t6, t5, a4
 #endif
 	REG_L		t5, (CREG(a1))
+	orc.b		t4, t5
+	bne		t4, t3, .Lunaligned_post
 #ifdef CONFIG_CPU_BIG_ENDIAN
 	srl		t4, t5, a3
 #else
@@ -281,9 +289,7 @@ SYM_FUNC_START(FUNCNAME)
 #endif
 	or		t6, t6, t4
 
-	/* Now, store the word in t6 normally including NUL byte checks. */
-	orc.b		t4, t6
-	bne		t4, t3, .Ldo_partial
+	/* Now, store the word in t6. It cannot contain NUL bytes. */
 	REG_S		t6, (CREG(t0))
 	CINSN(addi)	CREG(t0), CREG(t0), SZREG
 	CINSN(addi)	CREG(a1), CREG(a1), SZREG
