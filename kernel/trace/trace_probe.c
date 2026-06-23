@@ -904,7 +904,7 @@ static int __store_entry_arg(struct trace_probe *tp, int argnum)
 		last_offset = earg->code[i - 1].offset;
 	}
 
-	offset = last_offset + sizeof(unsigned long);
+	offset = last_offset + sizeof(uintptr_t);
 	store_entry_arg_at(&earg->code[i], argnum, offset);
 	return offset;
 }
@@ -916,7 +916,7 @@ int traceprobe_get_entry_data_size(struct trace_probe *tp)
 	if (!earg)
 		return 0;
 
-	return get_entry_arg_max_offset(earg) + sizeof(unsigned long);
+	return get_entry_arg_max_offset(earg) + sizeof(uintptr_t);
 }
 
 void store_trace_entry_data(void *edata, struct trace_probe *tp, struct pt_regs *regs)
