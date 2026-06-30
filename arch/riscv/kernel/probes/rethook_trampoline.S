@@ -41,6 +41,9 @@
 	CREG_S CREG(x29), PT_T4(CREG(sp))
 	CREG_S CREG(x30), PT_T5(CREG(sp))
 	CREG_S CREG(x31), PT_T6(CREG(sp))
+	/* save original sp */
+	CINSN(addi) CREG(a0), CREG(sp), PT_SIZE_ON_STACK
+	CREG_S CREG(a0), PT_SP(CREG(sp))
 	.endm
 
 	.macro restore_all_base_regs
