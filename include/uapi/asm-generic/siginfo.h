@@ -244,7 +244,8 @@ typedef struct siginfo {
 #define SEGV_CAPBOUNDSERR	12	/* Capability bounds fault */
 #define SEGV_CAPPERMERR		13	/* Capability permission fault */
 #define SEGV_CAPACCESSERR	14	/* Capability access fault */
-#define NSIGSEGV	14
+#define SEGV_STORETAG		15	/* Capability tag store fault */
+#define NSIGSEGV	15
 
 /*
  * SIGBUS si_codes

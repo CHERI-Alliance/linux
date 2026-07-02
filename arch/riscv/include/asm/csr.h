@@ -331,6 +331,13 @@
 #define CSR_STVAL2		0x14b
 #define CSR_SATP		0x180
 
+/*
+ * Page-fault encoding in stval2/mtval2. Note this is an enum, not a bitfield.
+ */
+#define TVAL2_PF_RISCV		0	/* RISC-V page fault only */
+#define TVAL2_PF_CHERI		1	/* CHERI PTE fault only */
+#define TVAL2_PF_RISCV_CHERI	2	/* both */
+
 #define CSR_STIMECMP		0x14D
 #define CSR_STIMECMPH		0x15D
 

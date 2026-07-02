@@ -19,6 +19,8 @@
 
 /* PCuABI mapping and capability permissions */
 #define PROT_CAP_INVOKE	0x2000		/* mmap flag: provide CInvoke capability permission */
+#define PROT_CAP	0x4000		/* region may hold valid capability tags (tag stores preserved) */
+#define PROT_NO_CAP	0x8000		/* region may not hold valid capability tags (tag store fails with a signal) */
 
 #define _PROT_MAX_SHIFT		16
 #define PROT_MAX(prot)		((prot) << _PROT_MAX_SHIFT)
