@@ -1949,6 +1949,19 @@ static inline int io_submit_sqe(struct io_ring_ctx *ctx, struct io_kiocb *req,
 	} else if (unlikely(req->flags & (IO_REQ_LINK_FLAGS |
 					  REQ_F_FORCE_ASYNC | REQ_F_FAIL))) {
 		if (req->flags & IO_REQ_LINK_FLAGS) {
+			/*
+			 * Some operations require access to the SQE during
+			 * issueing, e.g. uring_cmd, and take for linked
+			 * requests a copy of the SQE for all but the head SQE.
+			 * The head is submitted synchronously, see above
+			 * comment, so its reference remains valid.
+			 * However, in compat64, we convert each c64 SQE to a
+			 * CHERI SQE stored on the stack. This SQE won't remain
+			 * valid as it is overwritten by converted consecutive
+			 * SQE. Thus, take a copy of the head here as well.
+			 */
+			if (io_in_compat64(ctx))
+				io_req_sqe_copy(req, IO_URING_F_INLINE);
 			link->head = req;
 			link->last = req;
 		} else {
