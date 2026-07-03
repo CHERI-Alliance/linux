@@ -7,9 +7,9 @@
 #include "libbpf_common.h"
 #include "libbpf_internal.h"
 
-static inline __u64 ptr_to_u64(const void *ptr)
+static inline __u64ptr ptr_to_u64(const void *ptr)
 {
-	return (__u64)(unsigned long)ptr;
+	return (__u64ptr)(uintptr_t)ptr;
 }
 
 int probe_fd(int fd)

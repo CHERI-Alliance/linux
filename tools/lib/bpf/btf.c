@@ -184,9 +184,9 @@ struct btf {
 	int ptr_sz;
 };
 
-static inline __u64 ptr_to_u64(const void *ptr)
+static inline __u64ptr ptr_to_u64(const void *ptr)
 {
-	return (__u64) (unsigned long) ptr;
+	return (__u64ptr) (uintptr_t) ptr;
 }
 
 /* Ensure given dynamically allocated memory region pointed to by *data* with
