@@ -36,7 +36,7 @@ make_str() {
 
 	data=`printf -- 'X%.0s' $(seq $cnt)`
 
-	printf "${val}${data}"
+	$STDBUF printf "${val}${data}"
 }
 
 write_buffer() {
@@ -106,6 +106,15 @@ test_buffer() {
 		exit_fail
 	fi
 }
+
+# Use fully buffered output stream, avoid fragmented writes to tracefs files.
+#
+# stdbuf(1) claims that fully buffered mode is undefined behaviour for glibc.
+# It seems that this applies only to very old glibc versions.
+#
+# musl needs buffer size x+8 to send x bytes unfragmented.
+#
+[ -x /usr/bin/stdbuf ] && STDBUF="stdbuf -o $((`get_buffer_data_size` + 8))"
 
 ORIG=`cat buffer_size_kb`
 
