@@ -2,9 +2,73 @@
 
 
 #include <linux/compat.h>
-#include <linux/io_uring/compat64_i_zcrx.h>
 
 
+struct __c64_io_uring_zcrx_area_reg {
+	__c64_ptr64	addr;
+	__u64	len;
+	__u64	rq_area_token;
+	__u32	flags;
+	__u32	dmabuf_fd;
+	__u64	__resv2[2];
+};
+
+static __always_inline __maybe_unused void
+__from_c64_io_uring_zcrx_area_reg(struct io_uring_zcrx_area_reg *p)
+{
+	union {
+		struct io_uring_zcrx_area_reg native;
+		const struct __c64_io_uring_zcrx_area_reg compat;
+	} *u = (void *)p;
+
+	BUILD_BUG_ON(sizeof(u->compat.__resv2) != sizeof(u->native.__resv2));
+	memmove(&u->native.__resv2, &u->compat.__resv2, sizeof(u->native.__resv2));
+	u->native.dmabuf_fd = u->compat.dmabuf_fd;
+	u->native.flags = u->compat.flags;
+	u->native.rq_area_token = u->compat.rq_area_token;
+	u->native.len = u->compat.len;
+	u->native.addr = (user_uintptr_t)compat_ptr(u->compat.addr);
+}
+static __always_inline __maybe_unused void
+__to_c64_io_uring_zcrx_area_reg(struct io_uring_zcrx_area_reg *p)
+{
+	union {
+		struct __c64_io_uring_zcrx_area_reg compat;
+		const struct io_uring_zcrx_area_reg native;
+	} *u = (void *)p;
+
+	u->compat.addr = (__c64_ptr64 __force)u->native.addr;
+	u->compat.len = u->native.len;
+	u->compat.rq_area_token = u->native.rq_area_token;
+	u->compat.flags = u->native.flags;
+	u->compat.dmabuf_fd = u->native.dmabuf_fd;
+	BUILD_BUG_ON(sizeof(u->native.__resv2) != sizeof(u->compat.__resv2));
+	memmove(&u->compat.__resv2, &u->native.__resv2, sizeof(u->compat.__resv2));
+}
+static __always_inline __maybe_unused void
+__from_c64_io_uring_zcrx_area_reg_2(struct io_uring_zcrx_area_reg *native, const struct __c64_io_uring_zcrx_area_reg *compat)
+{
+
+	native->addr = (user_uintptr_t)compat_ptr(compat->addr);
+	native->len = compat->len;
+	native->rq_area_token = compat->rq_area_token;
+	native->flags = compat->flags;
+	native->dmabuf_fd = compat->dmabuf_fd;
+	BUILD_BUG_ON(sizeof(compat->__resv2) != sizeof(native->__resv2));
+	memcpy(&native->__resv2, &compat->__resv2, sizeof(native->__resv2));
+}
+static __always_inline __maybe_unused void
+__to_c64_io_uring_zcrx_area_reg_2(struct __c64_io_uring_zcrx_area_reg *compat, const struct io_uring_zcrx_area_reg *native)
+{
+
+	compat->addr = (__c64_ptr64 __force)native->addr;
+	compat->len = native->len;
+	compat->rq_area_token = native->rq_area_token;
+	compat->flags = native->flags;
+	compat->dmabuf_fd = native->dmabuf_fd;
+	BUILD_BUG_ON(sizeof(native->__resv2) != sizeof(compat->__resv2));
+	memcpy(&compat->__resv2, &native->__resv2, sizeof(compat->__resv2));
+}
 struct __c64_io_uring_zcrx_ifq_reg {
 	__u32	if_idx;
 	__u32	if_rxq;
