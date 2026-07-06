@@ -1375,6 +1375,9 @@ config RISCV_ISA_FALLBACK
 config CC_HAS_RISCV_CHERI
 	def_bool $(cc-option,-march=rv64imafdc_zcherihybrid -mabi=l64pc128d)
 
+config CC_HAS_RISCV_CHERI_ZCHERILEVELS
+	def_bool $(cc-option,-march=rv64imafdc_zcherilevels -mabi=l64pc128d)
+
 config RISCV_CHERI
 	bool "RISCV CHERI capability support"
 	default n
