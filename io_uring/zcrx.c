@@ -9,6 +9,7 @@
 #include <linux/rtnetlink.h>
 #include <linux/skbuff_ref.h>
 #include <linux/anon_inodes.h>
+#include <linux/compat.h>
 
 #include <net/page_pool/helpers.h>
 #include <net/page_pool/memory_provider.h>
@@ -21,6 +22,7 @@
 #include <trace/events/page_pool.h>
 
 #include <uapi/linux/io_uring.h>
+#include <uapi/linux/io_uring/compat64_zcrx.h>
 
 #include "io_uring.h"
 #include "kbuf.h"
@@ -764,7 +766,7 @@ static int import_zcrx(struct io_ring_ctx *ctx,
 
 	reg->zcrx_id = id;
 	io_fill_zcrx_offsets(&reg->offsets);
-	if (copy_to_user_with_ptr(arg, reg, sizeof(*reg))) {
+	if (__c64c_copy_to_user_with_ptr_safe(io_in_compat64(ctx), io_uring_zcrx_ifq_reg, arg, reg)) {
 		ret = -EFAULT;
 		goto err_xa_erase;
 	}
@@ -847,7 +849,7 @@ int io_register_zcrx(struct io_ring_ctx *ctx,
 		return -EINVAL;
 	if (!(ctx->flags & (IORING_SETUP_CQE32|IORING_SETUP_CQE_MIXED)))
 		return -EINVAL;
-	if (copy_from_user_with_ptr(&reg, arg, sizeof(reg)))
+	if (__c64c_copy_from_user_with_ptr(io_in_compat64(ctx), io_uring_zcrx_ifq_reg, &reg, arg))
 		return -EFAULT;
 	if (!mem_is_zero(&reg.__resv, sizeof(reg.__resv)) || reg.zcrx_id)
 		return -EINVAL;
@@ -855,7 +857,7 @@ int io_register_zcrx(struct io_ring_ctx *ctx,
 		return -EINVAL;
 	if (reg.flags & ZCRX_REG_IMPORT)
 		return import_zcrx(ctx, arg, &reg);
-	if (copy_from_user_with_ptr(&rd, u64_to_user_ptr(reg.region_ptr), sizeof(rd)))
+	if (__c64c_copy_from_user_with_ptr(io_in_compat64(ctx), io_uring_region_desc, &rd, u64_to_user_ptr(reg.region_ptr)))
 		return -EFAULT;
 	if (reg.if_rxq == -1 || !reg.rq_entries)
 		return -EINVAL;
@@ -868,7 +870,7 @@ int io_register_zcrx(struct io_ring_ctx *ctx,
 	}
 	reg.rq_entries = roundup_pow_of_two(reg.rq_entries);
 
-	if (copy_from_user_with_ptr(&area, u64_to_user_ptr(reg.area_ptr), sizeof(area)))
+	if (__c64c_copy_from_user_with_ptr(io_in_compat64(ctx), io_uring_zcrx_area_reg, &area, u64_to_user_ptr(reg.area_ptr)))
 		return -EFAULT;
 
 	ifq = io_zcrx_ifq_alloc(ctx);
@@ -919,9 +921,10 @@ int io_register_zcrx(struct io_ring_ctx *ctx,
 
 	reg.rx_buf_len = 1U << ifq->niov_shift;
 
-	if (copy_to_user_with_ptr(arg, &reg, sizeof(reg)) ||
-	    copy_to_user_with_ptr(u64_to_user_ptr(reg.region_ptr), &rd, sizeof(rd)) ||
-	    copy_to_user_with_ptr(u64_to_user_ptr(reg.area_ptr), &area, sizeof(area))) {
+	// CHERI: use _safe variant for zcrx_ifq_reg, otherwise we destroy reg.region_ptr/area_ptr
+	if (__c64c_copy_to_user_with_ptr_safe(io_in_compat64(ctx), io_uring_zcrx_ifq_reg, arg, &reg) ||
+	    __c64c_copy_to_user_with_ptr(io_in_compat64(ctx), io_uring_region_desc, u64_to_user_ptr(reg.region_ptr), &rd) ||
+	    __c64c_copy_to_user_with_ptr(io_in_compat64(ctx), io_uring_zcrx_area_reg, u64_to_user_ptr(reg.area_ptr), &area)) {
 		ret = -EFAULT;
 		goto err;
 	}
@@ -1292,20 +1295,33 @@ static bool io_zcrx_queue_cqe(struct io_kiocb *req, struct net_iov *niov,
 	struct io_uring_zcrx_cqe *rcqe;
 	struct io_zcrx_area *area;
 	struct io_uring_cqe *cqe;
+	struct __c64_io_uring_cqe *compat;
 	u64 offset;
+	u32 flags;
 
 	if (!io_defer_get_uncommited_cqe(ctx, &cqe))
 		return false;
 
-	cqe->user_data = req->cqe.user_data;
-	cqe->res = len;
-	cqe->flags = IORING_CQE_F_MORE;
+	flags = IORING_CQE_F_MORE;
 	if (ctx->flags & IORING_SETUP_CQE_MIXED)
-		cqe->flags |= IORING_CQE_F_32;
+		flags |= IORING_CQE_F_32;
+
+	if (io_in_compat64(ctx)) {
+		compat = (void *)cqe;
+		compat->user_data = __c_ua(req->cqe.user_data);
+		compat->res = len;
+		compat->flags = flags;
+		rcqe = (struct io_uring_zcrx_cqe *)(compat + 1);
+	} else {
+		cqe->user_data = req->cqe.user_data;
+		cqe->res = len;
+		cqe->flags = flags;
+		rcqe = (struct io_uring_zcrx_cqe *)(cqe + 1);
+	}
 
 	area = io_zcrx_iov_to_area(niov);
 	offset = off + (net_iov_idx(niov) << ifq->niov_shift);
-	rcqe = (struct io_uring_zcrx_cqe *)(cqe + 1);
+
 	rcqe->off = offset + ((u64)area->area_id << IORING_ZCRX_AREA_SHIFT);
 	rcqe->__pad = 0;
 	return true;
