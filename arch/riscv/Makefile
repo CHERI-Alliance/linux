@@ -116,7 +116,9 @@ riscv-march-$(CONFIG_TOOLCHAIN_HAS_ZABHLRSC) := $(riscv-march-y)_zabhlrsc
 
 # Enable RISCV CHERI support if requested
 riscv-march-$(CONFIG_CHERI_KERNEL) := $(riscv-march-y)_zcherihybrid
+ifeq ($(CONFIG_CHERI_KERNEL),y)
 riscv-march-$(CONFIG_CC_HAS_RISCV_CHERI_ZCHERILEVELS) := $(riscv-march-y)_zcherilevels
+endif
 
 riscv-march-y := $(riscv-march-y)$(CONFIG_RISCV_ISA_APPEND)
 
