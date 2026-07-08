@@ -163,7 +163,7 @@ static int check_wsl_eas(struct kvec *rsp_iov)
 		if (!IS_ALIGNED(next, 4) ||
 		    check_add_overflow(__c_pa(ea), next, &addr))
 			return -EINVAL;
-		ea = cheri_address_set((void *)ea, addr);
+		ea = cheri_address_set_kernel((void *)ea, addr);
 	}
 	return 0;
 }
