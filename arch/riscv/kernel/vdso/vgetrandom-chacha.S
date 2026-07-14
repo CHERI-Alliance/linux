@@ -81,19 +81,19 @@ SYM_FUNC_START(__arch_chacha20_blocks_nostack)
 	 * This does not violate the stack-less requirement: no sensitive data
 	 * is spilled onto the stack.
 	 */
-	addi		sp, sp, -12*SZREG
-	REG_S		s0,         (CREG(sp))
-	REG_S		s1,    SZREG(CREG(sp))
-	REG_S		s2,  2*SZREG(CREG(sp))
-	REG_S		s3,  3*SZREG(CREG(sp))
-	REG_S		s4,  4*SZREG(CREG(sp))
-	REG_S		s5,  5*SZREG(CREG(sp))
-	REG_S		s6,  6*SZREG(CREG(sp))
-	REG_S		s7,  7*SZREG(CREG(sp))
-	REG_S		s8,  8*SZREG(CREG(sp))
-	REG_S		s9,  9*SZREG(CREG(sp))
-	REG_S		s10, 10*SZREG(CREG(sp))
-	REG_S		s11, 11*SZREG(CREG(sp))
+	CINSN(addi)	CREG(sp), CREG(sp), -12*CSZREG
+	CREG_S		CREG(s0),         (CREG(sp))
+	CREG_S		CREG(s1),    CSZREG(CREG(sp))
+	CREG_S		CREG(s2),  2*CSZREG(CREG(sp))
+	CREG_S		CREG(s3),  3*CSZREG(CREG(sp))
+	CREG_S		CREG(s4),  4*CSZREG(CREG(sp))
+	CREG_S		CREG(s5),  5*CSZREG(CREG(sp))
+	CREG_S		CREG(s6),  6*CSZREG(CREG(sp))
+	CREG_S		CREG(s7),  7*CSZREG(CREG(sp))
+	CREG_S		CREG(s8),  8*CSZREG(CREG(sp))
+	CREG_S		CREG(s9),  9*CSZREG(CREG(sp))
+	CREG_S		CREG(s10), 10*CSZREG(CREG(sp))
+	CREG_S		CREG(s11), 11*CSZREG(CREG(sp))
 
 	ld		cnt, (counter)
 
@@ -232,19 +232,19 @@ SYM_FUNC_START(__arch_chacha20_blocks_nostack)
 	mv		state14, zero
 	mv		state15, zero
 
-	REG_L		s0,         (CREG(sp))
-	REG_L		s1,    SZREG(CREG(sp))
-	REG_L		s2,  2*SZREG(CREG(sp))
-	REG_L		s3,  3*SZREG(CREG(sp))
-	REG_L		s4,  4*SZREG(CREG(sp))
-	REG_L		s5,  5*SZREG(CREG(sp))
-	REG_L		s6,  6*SZREG(CREG(sp))
-	REG_L		s7,  7*SZREG(CREG(sp))
-	REG_L		s8,  8*SZREG(CREG(sp))
-	REG_L		s9,  9*SZREG(CREG(sp))
-	REG_L		s10, 10*SZREG(CREG(sp))
-	REG_L		s11, 11*SZREG(CREG(sp))
-	addi		sp, sp, 12*SZREG
+	CREG_L		CREG(s0),         (CREG(sp))
+	CREG_L		CREG(s1),    CSZREG(CREG(sp))
+	CREG_L		CREG(s2),  2*CSZREG(CREG(sp))
+	CREG_L		CREG(s3),  3*CSZREG(CREG(sp))
+	CREG_L		CREG(s4),  4*CSZREG(CREG(sp))
+	CREG_L		CREG(s5),  5*CSZREG(CREG(sp))
+	CREG_L		CREG(s6),  6*CSZREG(CREG(sp))
+	CREG_L		CREG(s7),  7*CSZREG(CREG(sp))
+	CREG_L		CREG(s8),  8*CSZREG(CREG(sp))
+	CREG_L		CREG(s9),  9*CSZREG(CREG(sp))
+	CREG_L		CREG(s10), 10*CSZREG(CREG(sp))
+	CREG_L		CREG(s11), 11*CSZREG(CREG(sp))
+	CINSN(addi)	CREG(sp), CREG(sp), 12*CSZREG
 
 	ret
 SYM_FUNC_END(__arch_chacha20_blocks_nostack)
