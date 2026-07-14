@@ -2340,6 +2340,29 @@ void __init hash_pointers_finalize(bool slub_debug)
 		break;
 	}
 
+#ifdef CONFIG_CHERI_KERNEL
+	if (!no_hash_pointers) {
+		no_hash_pointers = true;
+		pr_warn("**********************************************************\n");
+		pr_warn("**   NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE   **\n");
+		pr_warn("**                                                      **\n");
+		pr_warn("** Pointer hashing is disabled in CHERI kernels.        **\n");
+		pr_warn("** CHERI already mitigates many of the attacks that     **\n");
+		pr_warn("** pointer hashing is intended to address. Pointer      **\n");
+		pr_warn("** hashing was designed for integer pointers, not       **\n");
+		pr_warn("** CHERI capability pointers.                           **\n");
+		pr_warn("**                                                      **\n");
+		pr_warn("** If you have a use case for enabling both to          **\n");
+		pr_warn("** coexist, please submit a feature request to the      **\n");
+		pr_warn("** CHERI Alliance.                                      **\n");
+		pr_warn("**                                                      **\n");
+		pr_warn("** For reference and discussion, see:                   **\n");
+		pr_warn("** https://github.com/CHERI-Alliance/linux/issues/31    **\n");
+		pr_warn("**   NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE   **\n");
+		pr_warn("**********************************************************\n");
+	}
+	return;
+#else
 	if (!no_hash_pointers)
 		return;
 
@@ -2358,6 +2381,7 @@ void __init hash_pointers_finalize(bool slub_debug)
 	pr_warn("**                                                      **\n");
 	pr_warn("**   NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE   **\n");
 	pr_warn("**********************************************************\n");
+#endif
 }
 
 static int __init hash_pointers_mode_parse(char *str)
