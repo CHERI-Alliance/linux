@@ -40,12 +40,12 @@ void __init riscv_cheri_init(void)
 	pr_info("CHERI: Selected SATP mode: 0x%lx PTE.CW support: %s\n",
 		(unsigned long)satp_mode, riscv_cheripte_cw ? "yes" : "no");
 
-	pr_info("CHERI: kernel code cap: %#lp\n", kernel_code_cap);
-	pr_info("CHERI: kernel data cap: %#lp\n", kernel_data_cap);
-	pr_info("CHERI: kernel ro   cap: %#lp\n", kernel_ro_cap);
-	pr_info("CHERI: user allperms cap: %#lp\n",
+	pr_info("CHERI: kernel code cap: %#lpx\n", kernel_code_cap);
+	pr_info("CHERI: kernel data cap: %#lpx\n", kernel_data_cap);
+	pr_info("CHERI: kernel ro   cap: %#lpx\n", kernel_ro_cap);
+	pr_info("CHERI: user allperms cap: %#lpx\n",
 		(void *)cheri_user_root_allperms_cap);
-	pr_info("CHERI: user root cap: %#lp\n", (void *)cheri_user_root_cap);
+	pr_info("CHERI: user root cap: %#lpx\n", (void *)cheri_user_root_cap);
 	pr_info("CHERI: Permission bits not supported by hardware: 0x%x\n",
 		cheri_unsupported_perms);
 }
@@ -62,7 +62,7 @@ static void __init riscv_cheri_check_root_cap(uintcap_t root_cap)
 
 	cheri_perms_t perms = cheri_perms_get(root_cap);
 
-	pr_info("CHERI: Root capability: %#lp (%lp)\n",
+	pr_info("CHERI: Root capability: %#lpx (%lpx)\n",
 		(void *)root_cap, (void *)root_cap);
 
 	if (!cheri_tag_get(root_cap)) {
