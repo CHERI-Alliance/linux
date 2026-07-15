@@ -2343,6 +2343,9 @@ void __init hash_pointers_finalize(bool slub_debug)
 	if (!no_hash_pointers)
 		return;
 
+#ifdef CONFIG_CHERI_KERNEL
+	pr_info("Pointer hashing is off (ok on CHERI). Use \"hash_pointers=always\" to force it on\n");
+#else
 	pr_warn("**********************************************************\n");
 	pr_warn("**   NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE   **\n");
 	pr_warn("**                                                      **\n");
@@ -2358,6 +2361,7 @@ void __init hash_pointers_finalize(bool slub_debug)
 	pr_warn("**                                                      **\n");
 	pr_warn("**   NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE   **\n");
 	pr_warn("**********************************************************\n");
+#endif
 }
 
 static int __init hash_pointers_mode_parse(char *str)
