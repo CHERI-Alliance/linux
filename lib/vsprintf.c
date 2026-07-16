@@ -819,7 +819,7 @@ int ptr_to_hashval(const void *ptr, unsigned long *hashval_out)
 static char *ptr_to_id(char *buf, char *end, const void *ptr,
 		       struct printf_spec spec)
 {
-	const char *str = sizeof(__ptraddr_t) == 8 ? "(____ptrval____)" : "(ptrval)";
+	const char *str = sizeof(ptr) == 8 ? "(____ptrval____)" : "(ptrval)";
 	unsigned long hashval;
 	int ret;
 
@@ -2654,7 +2654,6 @@ static noinline_for_stack
 char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
 		 struct printf_spec spec)
 {
-	bool do_hash = !no_hash_pointers && *fmt != 'x';
 /*
  * Write to the buffer only when there is a space for it, otherwise
  * just advance the buffer marker to account for the space needed to
@@ -2662,9 +2661,6 @@ char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
  */
 #define update_buf_single(buf, end, c)	\
 	do { if (buf < end) *buf++ = c; else ++buf; } while (0)
-#define address_string(B, E, A, S) \
-	(do_hash ? ptr_to_id(B, E, __c_fakep(A), S) \
-	    : pointer_string(B, E, __c_fakep(A), S))
 
 	/*
 	 * For null-derived capabilities switch to basic format
@@ -2673,7 +2669,8 @@ char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
 	 * format is used.
 	 */
 	if ((!cheri_tag_get(cap) && !cheri_high_get(cap)) ||
-	    (isalnum(*fmt) && *fmt != 'x'))
+	    (isalnum(*fmt) && *fmt != 'x') ||
+	    (likely(!no_hash_pointers) && *fmt != 'x'))
 #ifdef CONFIG_CHERI_KERNEL
 		return pointer(fmt, buf, end, cap, spec);
 #else
@@ -2776,7 +2773,9 @@ char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
 		orig_flags = spec.flags;
 		spec.flags &= ~(ZEROPAD | LEFT);
 
-		buf = address_string(buf, end, cheri_address_get(cap), spec);
+		buf = pointer_string(buf, end,
+				     __c_fakep(cheri_address_get(cap)),
+				     spec);
 
 		update_buf_single(buf, end, '[');
 		if (cheri_tag_get(cap))
@@ -2796,14 +2795,14 @@ char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
 		update_buf_single(buf, end, ':');
 
 		base = cheri_base_get(cap);
-		buf = address_string(buf, end, base, spec);
+		buf = pointer_string(buf, end, __c_fakep(base), spec);
 		update_buf_single(buf, end, '-');
 
 		len = cheri_length_get(cap);
 		top =  base + len;
 		if (top < len)
 			top--;
-		buf = address_string(buf, end, top, spec);
+		buf = pointer_string(buf, end, __c_fakep(top), spec);
 		update_buf_single(buf, end, ']');
 
 		/* Restore the originally requested width */
@@ -2822,9 +2821,9 @@ char *capability(const char *fmt, char *buf, char *end, void * __capability cap,
 			     __c_fakep(cheri_high_get(cap)),
 			     spec);
 	update_buf_single(buf, end, ':');
-	return address_string(buf, end, cheri_address_get(cap), spec);
+	return pointer_string(buf, end, __c_fakep(cheri_address_get(cap)),
+			      spec);
 
-#undef address_string
 #undef update_buf_single
 }
 #endif /* __has_feature(capabilities) */
