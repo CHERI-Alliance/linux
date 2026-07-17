@@ -83,4 +83,57 @@ bool cheri_check_cap(const void __user *cap, size_t len,
 	return true;
 }
 
+#ifdef CONFIG_CHERI_KERNEL
+
+/*
+ * The list below contains settings that might have a negative effect
+ * on a CHERI_KERNEL. Mismatched config options will result in a very
+ * prominent warning during boot. Thus, please think twice before adding
+ * to this list. In general it should be reserved for config options
+ * where all of the following are true:
+ * - There is good reason to believe that the non-recommended
+ *   setting has no benefit on a CHERI kernel.
+ * - The non-recommended setting has a noticeable negative effect,
+ *   e.g. for performance.
+ * - The recommended setting for CHERI differs from the default
+ *   or from conventional wisdom on non-CHERI kernels.
+ */
+#define CHERI_OBSOLETE(X) { IS_ENABLED(X), #X " should be OFF" }
+#define CHERI_RECOMMENDED(X) { !IS_ENABLED(X), #X " should be ON" }
+static __initconst const struct {
+	bool wrong;
+	const char *name;
+} cheri_configs[] = {
+	{ false, NULL }
+};
+
+static int __init cheri_kernel_config_warning(void)
+{
+	unsigned int i;
+
+	for (i = 0; cheri_configs[i].name; ++i) {
+		if (cheri_configs[i].wrong)
+			break;
+	}
+	if (cheri_configs[i].name == NULL)
+		return 0;
+
+	pr_warn("********************************************************\n");
+	pr_warn("** We have detected config settings that are believed **\n");
+	pr_warn("** to have little or no benefit on a CHERI kernel.    **\n");
+	pr_warn("** Please consider changing them, in particular when  **\n");
+	pr_warn("** bencharking.                                       **\n");
+	for (; cheri_configs[i].name; ++i) {
+		if (!cheri_configs[i].wrong)
+			continue;
+		pr_warn("**    %-47s **\n", cheri_configs[i].name);
+	}
+	pr_warn("********************************************************\n");
+
+	return 0;
+}
+
+early_initcall(cheri_kernel_config_warning);
+#endif
+
 #endif /* __has_feature(capabilities) */
