@@ -5669,7 +5669,8 @@ retry:
 				if (err < 0)
 					goto err_out;
 			} else if (map->def.type == BPF_MAP_TYPE_ARENA) {
-				map->mmaped = mmap((void *)(long)map->map_extra,
+				/* no remapping, addr can be a fake ptr */
+				map->mmaped = mmap((void *)(intptr_t)map->map_extra,
 						   bpf_map_mmap_sz(map), PROT_READ | PROT_WRITE,
 						   map->map_extra ? MAP_SHARED | MAP_FIXED : MAP_SHARED,
 						   map->fd, 0);

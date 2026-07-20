@@ -44,6 +44,7 @@ struct bpf_map_desc {
 	int map_fd;
 	/* input for the loader prog */
 	__u32 max_entries;
+	// FIXCHERI - initial_value stores a pointer
 	__aligned_u64 initial_value;
 };
 struct bpf_prog_desc {
@@ -207,7 +208,8 @@ static inline void *skel_finalize_map_data(__u64 *init_val, size_t mmap_sz, int 
 {
 	void *addr;
 
-	addr = mmap((void *) (long) *init_val, mmap_sz, flags, MAP_SHARED | MAP_FIXED, fd, 0);
+	/* called during initial loading of a bpf object, fake ptr for init_val is ok */
+	addr = mmap((void *) (intptr_t) *init_val, mmap_sz, flags, MAP_SHARED | MAP_FIXED, fd, 0);
 	if (addr == (void *) -1)
 		return NULL;
 	return addr;
