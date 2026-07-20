@@ -2163,7 +2163,7 @@ struct btf_pipe {
 
 static int btf_rewrite_str(struct btf_pipe *p, __u32 *str_off)
 {
-	long mapped_off;
+	intptr_t mapped_off;
 	int off, err;
 
 	if (!*str_off) /* nothing to do for empty strings */
@@ -2234,8 +2234,8 @@ int btf__add_type(struct btf *btf, const struct btf *src_btf, const struct btf_t
 	return btf_add_type(&p, src_type);
 }
 
-static size_t btf_dedup_identity_hash_fn(long key, void *ctx);
-static bool btf_dedup_equal_fn(long k1, long k2, void *ctx);
+static size_t btf_dedup_identity_hash_fn(intptr_t key, void *ctx);
+static bool btf_dedup_equal_fn(intptr_t k1, intptr_t k2, void *ctx);
 
 int btf__add_btf(struct btf *btf, const struct btf *src_btf)
 {
@@ -4048,17 +4048,17 @@ static void btf_dedup_free(struct btf_dedup *d)
 	free(d);
 }
 
-static size_t btf_dedup_identity_hash_fn(long key, void *ctx)
+static size_t btf_dedup_identity_hash_fn(intptr_t key, void *ctx)
 {
-	return key;
+	return (size_t)key;
 }
 
-static size_t btf_dedup_collision_hash_fn(long key, void *ctx)
+static size_t btf_dedup_collision_hash_fn(intptr_t key, void *ctx)
 {
 	return 0;
 }
 
-static bool btf_dedup_equal_fn(long k1, long k2, void *ctx)
+static bool btf_dedup_equal_fn(intptr_t k1, intptr_t k2, void *ctx)
 {
 	return k1 == k2;
 }

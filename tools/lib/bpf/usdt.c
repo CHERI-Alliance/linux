@@ -937,12 +937,12 @@ static void bpf_link_usdt_dealloc(struct bpf_link *link)
 	free(usdt_link);
 }
 
-static size_t specs_hash_fn(long key, void *ctx)
+static size_t specs_hash_fn(intptr_t key, void *ctx)
 {
 	return str_hash((char *)key);
 }
 
-static bool specs_equal_fn(long key1, long key2, void *ctx)
+static bool specs_equal_fn(intptr_t key1, intptr_t key2, void *ctx)
 {
 	return strcmp((char *)key1, (char *)key2) == 0;
 }
@@ -951,13 +951,13 @@ static int allocate_spec_id(struct usdt_manager *man, struct hashmap *specs_hash
 			    struct bpf_link_usdt *link, struct usdt_target *target,
 			    int *spec_id, bool *is_new)
 {
-	long tmp;
+	intptr_t tmp;
 	void *new_ids;
 	int err;
 
 	/* check if we already allocated spec ID for this spec string */
-	if (hashmap__find(specs_hash, target->spec_str, &tmp)) {
-		*spec_id = tmp;
+	if (hashmap__find(specs_hash, (intptr_t)(target->spec_str), &tmp)) {
+		*spec_id = (int)tmp;
 		*is_new = false;
 		return 0;
 	}

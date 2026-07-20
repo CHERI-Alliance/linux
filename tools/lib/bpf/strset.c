@@ -19,19 +19,19 @@ struct strset {
 	struct hashmap *strs_hash;
 };
 
-static size_t strset_hash_fn(long key, void *ctx)
+static size_t strset_hash_fn(intptr_t key, void *ctx)
 {
 	const struct strset *s = ctx;
-	const char *str = s->strs_data + key;
+	const char *str = s->strs_data + (size_t)key;
 
 	return str_hash(str);
 }
 
-static bool strset_equal_fn(long key1, long key2, void *ctx)
+static bool strset_equal_fn(intptr_t key1, intptr_t key2, void *ctx)
 {
 	const struct strset *s = ctx;
-	const char *str1 = s->strs_data + key1;
-	const char *str2 = s->strs_data + key2;
+	const char *str1 = s->strs_data + (size_t)key1;
+	const char *str2 = s->strs_data + (size_t)key2;
 
 	return strcmp(str1, str2) == 0;
 }
@@ -115,7 +115,7 @@ static void *strset_add_str_mem(struct strset *set, size_t add_sz)
  */
 int strset__find_str(struct strset *set, const char *s)
 {
-	long old_off, new_off, len;
+	intptr_t old_off, new_off, len;
 	void *p;
 
 	/* see strset__add_str() for why we do this */
@@ -141,7 +141,7 @@ int strset__find_str(struct strset *set, const char *s)
  */
 int strset__add_str(struct strset *set, const char *s)
 {
-	long old_off, new_off, len;
+	intptr_t old_off, new_off, len;
 	void *p;
 	int err;
 

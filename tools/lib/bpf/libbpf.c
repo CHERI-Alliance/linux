@@ -5991,12 +5991,12 @@ int bpf_core_types_match(const struct btf *local_btf, __u32 local_id,
 	return __bpf_core_types_match(local_btf, local_id, targ_btf, targ_id, false, 32);
 }
 
-static size_t bpf_core_hash_fn(const long key, void *ctx)
+static size_t bpf_core_hash_fn(const intptr_t key, void *ctx)
 {
-	return key;
+	return (size_t)key;
 }
 
-static bool bpf_core_equal_fn(const long k1, const long k2, void *ctx)
+static bool bpf_core_equal_fn(const intptr_t k1, const intptr_t k2, void *ctx)
 {
 	return k1 == k2;
 }
