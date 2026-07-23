@@ -23,9 +23,11 @@
 # define ST_NOSYMFOLLOW 0x2000  /* Do not follow symlinks */
 #endif
 
-#define DATA "/tmp/data"
-#define LINK "/tmp/symlink"
-#define TMP  "/tmp"
+#define TMP "/tmp"
+
+static char mntp_path[PATH_MAX];
+static char data_path[PATH_MAX];
+static char link_path[PATH_MAX];
 
 static void die(char *fmt, ...)
 {
@@ -112,27 +114,46 @@ static void create_and_enter_ns(void)
 		die("unshare(CLONE_NEWNS) failed: %s\n", strerror(errno));
 }
 
+static void setup_paths(void)
+{
+	int ret;
+	char *path;
+
+	path = realpath(TMP, NULL);
+	if (!path)
+		die("realpath on %s failed: %s\n", TMP, strerror(errno));
+
+	ret = snprintf(mntp_path, sizeof(mntp_path), "%s", path) < sizeof(mntp_path) ? 0 : 1;
+	ret |= snprintf(data_path, sizeof(data_path), "%s/data", path) < sizeof(data_path) ? 0 : 1;
+	ret |= snprintf(link_path, sizeof(link_path), "%s/symlink", path) < sizeof(link_path) ?
+	       0 : 1;
+	if (ret)
+		die("Path %s too long\n", path);
+
+	free(path);
+}
+
 static void setup_symlink(void)
 {
 	int data, err;
 
-	data = creat(DATA, O_RDWR);
+	data = creat(data_path, O_RDWR);
 	if (data < 0)
 		die("creat failed: %s\n", strerror(errno));
 
-	err = symlink(DATA, LINK);
+	err = symlink(data_path, link_path);
 	if (err < 0)
 		die("symlink failed: %s\n", strerror(errno));
 
 	if (close(data) != 0)
-		die("close of %s failed: %s\n", DATA, strerror(errno));
+		die("close of %s failed: %s\n", data_path, strerror(errno));
 }
 
 static void test_link_traversal(bool nosymfollow)
 {
 	int link;
 
-	link = open(LINK, 0, O_RDWR);
+	link = open(link_path, 0, O_RDWR);
 	if (nosymfollow) {
 		if ((link != -1 || errno != ELOOP)) {
 			die("link traversal unexpected result: %d, %s\n",
@@ -154,20 +175,20 @@ static void test_readlink(void)
 
 	bzero(buf, sizeof(buf));
 
-	ret = readlink(LINK, buf, sizeof(buf));
+	ret = readlink(link_path, buf, sizeof(buf));
 	if (ret < 0)
 		die("readlink failed: %s\n", strerror(errno));
-	if (strcmp(buf, DATA) != 0)
-		die("readlink strcmp failed: '%s' '%s'\n", buf, DATA);
+	if (strcmp(buf, data_path) != 0)
+		die("readlink strcmp failed: '%s' '%s'\n", buf, data_path);
 }
 
 static void test_realpath(void)
 {
-	char *path = realpath(LINK, NULL);
+	char *path = realpath(link_path, NULL);
 
 	if (!path)
 		die("realpath failed: %s\n", strerror(errno));
-	if (strcmp(path, DATA) != 0)
+	if (strcmp(path, data_path) != 0)
 		die("realpath strcmp failed\n");
 
 	free(path);
@@ -178,16 +199,16 @@ static void test_statfs(bool nosymfollow)
 	struct statfs buf;
 	int ret;
 
-	ret = statfs(TMP, &buf);
+	ret = statfs(mntp_path, &buf);
 	if (ret)
 		die("statfs failed: %s\n", strerror(errno));
 
 	if (nosymfollow) {
 		if ((buf.f_flags & ST_NOSYMFOLLOW) == 0)
-			die("ST_NOSYMFOLLOW not set on %s\n", TMP);
+			die("ST_NOSYMFOLLOW not set on %s\n", mntp_path);
 	} else {
 		if ((buf.f_flags & ST_NOSYMFOLLOW) != 0)
-			die("ST_NOSYMFOLLOW set on %s\n", TMP);
+			die("ST_NOSYMFOLLOW set on %s\n", mntp_path);
 	}
 }
 
@@ -201,15 +222,16 @@ static void run_tests(bool nosymfollow)
 
 int main(int argc, char **argv)
 {
+	setup_paths();
 	create_and_enter_ns();
 
-	if (mount("testing", TMP, "ramfs", 0, NULL) != 0)
+	if (mount("testing", mntp_path, "ramfs", 0, NULL) != 0)
 		die("mount failed: %s\n", strerror(errno));
 
 	setup_symlink();
 	run_tests(false);
 
-	if (mount("testing", TMP, "ramfs", MS_REMOUNT|MS_NOSYMFOLLOW, NULL) != 0)
+	if (mount("testing", mntp_path, "ramfs", MS_REMOUNT|MS_NOSYMFOLLOW, NULL) != 0)
 		die("remount failed: %s\n", strerror(errno));
 
 	run_tests(true);
