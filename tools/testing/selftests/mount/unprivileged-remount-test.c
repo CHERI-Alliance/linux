@@ -45,6 +45,10 @@
 # define MS_STRICTATIME (1 << 24)
 #endif
 
+#ifndef ST_VALID
+# define ST_VALID (0x0020)
+#endif
+
 static void die(char *fmt, ...)
 {
 	va_list ap;
@@ -123,6 +127,9 @@ static int read_mnt_flags(const char *path)
 		die("statvfs of %s failed: %s\n",
 			path, strerror(errno));
 	}
+#ifndef __GLIBC__
+	stat.f_flag &= ~ST_VALID;
+#endif
 	if (stat.f_flag & ~(ST_RDONLY | ST_NOSUID | ST_NODEV | \
 			ST_NOEXEC | ST_NOATIME | ST_NODIRATIME | ST_RELATIME | \
 			ST_SYNCHRONOUS | ST_MANDLOCK)) {
