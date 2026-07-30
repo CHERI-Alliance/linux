@@ -45,8 +45,14 @@ TEST(vmaccess)
 
 TEST(attach)
 {
-	int s, k, pid = fork();
+	/*
+	 * FIXME: Test triggers a deadlock in the kernel running into a timeout, see proposed patch series here:
+	 * https://lore.kernel.org/linux-kselftest/GV2PPF74270EBEEF1962CC34BF2D1858DAAE4A9A@GV2PPF74270EBEE.EURP195.PROD.OUTLOOK.COM/#t
+	 */
+	ksft_exit_skip("Ptrace attach on multi-threaded child exec causes deadlock due to a known issue. "
+			"Skip test to avoid failure on timeout\n");
 
+	int s, k, pid = fork();
 	if (!pid) {
 		pthread_t pt;
 
