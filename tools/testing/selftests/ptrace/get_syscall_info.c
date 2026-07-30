@@ -10,6 +10,7 @@
 #include "kselftest_harness.h"
 #include <err.h>
 #include <signal.h>
+#include <stdint.h>
 #include <asm/unistd.h>
 #include "linux/ptrace.h"
 
@@ -28,7 +29,7 @@ kill_tracee(pid_t pid)
 }
 
 static long
-sys_ptrace(int request, pid_t pid, unsigned long addr, unsigned long data)
+sys_ptrace(int request, pid_t pid, unsigned long addr, uintptr_t data)
 {
 	return syscall(__NR_ptrace, request, pid, addr, data);
 }
@@ -42,11 +43,11 @@ sys_ptrace(int request, pid_t pid, unsigned long addr, unsigned long data)
 
 TEST(get_syscall_info)
 {
-	static const unsigned long args[][7] = {
+	static const uintptr_t args[][7] = {
 		/* a sequence of architecture-agnostic syscalls */
 		{
 			__NR_chdir,
-			(unsigned long) "",
+			(uintptr_t) "",
 			0xbad1fed1,
 			0xbad2fed2,
 			0xbad3fed3,
@@ -72,7 +73,7 @@ TEST(get_syscall_info)
 			0xfac5c0d5
 		}
 	};
-	const unsigned long *exp_args;
+	const uintptr_t *exp_args;
 
 	pid_t pid = fork();
 
@@ -154,7 +155,7 @@ TEST(get_syscall_info)
 			}
 			ASSERT_LT(0, (rc = sys_ptrace(PTRACE_GET_SYSCALL_INFO,
 						      pid, size,
-						      (unsigned long) &info))) {
+						      (uintptr_t) &info))) {
 				LOG_KILL_TRACEE("PTRACE_GET_SYSCALL_INFO: %m");
 			}
 			ASSERT_EQ(expected_none_size, rc) {
@@ -177,7 +178,7 @@ TEST(get_syscall_info)
 		case SIGTRAP | 0x80:
 			ASSERT_LT(0, (rc = sys_ptrace(PTRACE_GET_SYSCALL_INFO,
 						      pid, size,
-						      (unsigned long) &info))) {
+						      (uintptr_t) &info))) {
 				LOG_KILL_TRACEE("PTRACE_GET_SYSCALL_INFO: %m");
 			}
 			switch (ptrace_stop) {
