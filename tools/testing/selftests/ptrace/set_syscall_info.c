@@ -17,17 +17,17 @@
 
 #if defined(_MIPS_SIM) && _MIPS_SIM == _MIPS_SIM_NABI32
 /*
- * MIPS N32 is the only architecture where __kernel_ulong_t
+ * MIPS N32 is the only architecture where __kernel_uintptr_t
  * does not match the bitness of syscall arguments.
  */
-typedef unsigned long long kernel_ulong_t;
+typedef unsigned long long kernel_uintptr_t;
 #else
-typedef __kernel_ulong_t kernel_ulong_t;
+typedef __kernel_uintptr_t kernel_uintptr_t;
 #endif
 
 struct si_entry {
 	int nr;
-	kernel_ulong_t args[6];
+	kernel_uintptr_t args[6];
 };
 struct si_exit {
 	unsigned int is_error;
@@ -52,7 +52,7 @@ kill_tracee(pid_t pid)
 }
 
 static long
-sys_ptrace(int request, pid_t pid, unsigned long addr, unsigned long data)
+sys_ptrace(int request, pid_t pid, unsigned long addr, uintptr_t data)
 {
 	return syscall(__NR_ptrace, request, pid, addr, data);
 }
@@ -129,13 +129,13 @@ check_psi_exit(struct __test_metadata *_metadata,
 TEST(set_syscall_info)
 {
 	const pid_t tracer_pid = getpid();
-	const kernel_ulong_t dummy[] = {
-		(kernel_ulong_t) 0xdad0bef0bad0fed0ULL,
-		(kernel_ulong_t) 0xdad1bef1bad1fed1ULL,
-		(kernel_ulong_t) 0xdad2bef2bad2fed2ULL,
-		(kernel_ulong_t) 0xdad3bef3bad3fed3ULL,
-		(kernel_ulong_t) 0xdad4bef4bad4fed4ULL,
-		(kernel_ulong_t) 0xdad5bef5bad5fed5ULL,
+	const kernel_uintptr_t dummy[] = {
+		(kernel_uintptr_t) 0xdad0bef0bad0fed0ULL,
+		(kernel_uintptr_t) 0xdad1bef1bad1fed1ULL,
+		(kernel_uintptr_t) 0xdad2bef2bad2fed2ULL,
+		(kernel_uintptr_t) 0xdad3bef3bad3fed3ULL,
+		(kernel_uintptr_t) 0xdad4bef4bad4fed4ULL,
+		(kernel_uintptr_t) 0xdad5bef5bad5fed5ULL,
 	};
 	int splice_in[2], splice_out[2];
 
