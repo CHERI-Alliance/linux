@@ -211,7 +211,11 @@ TEST(set_syscall_info)
 				{ 0, tracer_pid }, { 0, tracer_pid + 1 }
 			}
 		},
-
+/*
+ * FIXCHERI: Changing a capability via PTRACE_SET_SYSCALL_INFO, in below's case
+ * the path, isn't supported at the moment.
+ */
+#ifndef __CHERI_PURE_CAPABILITY__
 		/* change arg1, keep non-error rval */
 		{
 			{
@@ -234,7 +238,7 @@ TEST(set_syscall_info)
 				{ 0, 0 }, { 0, 0 }
 			}
 		},
-
+#endif
 		/* set scno to -1, change error rval to non-error */
 		{
 			{
