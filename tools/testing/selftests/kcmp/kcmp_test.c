@@ -20,7 +20,7 @@
 
 #include "kselftest.h"
 
-static long sys_kcmp(int pid1, int pid2, int type, unsigned long fd1, unsigned long fd2)
+static long sys_kcmp(int pid1, int pid2, int type, uintptr_t fd1, uintptr_t fd2)
 {
 	return syscall(__NR_kcmp, pid1, pid2, type, fd1, fd2);
 }
@@ -144,7 +144,7 @@ int main(int argc, char **argv)
 			.toff	= 0,
 		};
 		ret = sys_kcmp(pid1, pid1, KCMP_EPOLL_TFD, pipefd[1],
-			       (unsigned long)(void *)&epoll_slot);
+			       (uintptr_t)(void *)&epoll_slot);
 		if (ret) {
 			printf("FAIL: 0 expected but %d returned (%s)\n",
 				ret, strerror(errno));
