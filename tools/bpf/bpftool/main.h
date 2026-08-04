@@ -27,14 +27,14 @@
 /* Make sure we do not use kernel-only integer typedefs */
 #pragma GCC poison u8 u16 u32 u64 s8 s16 s32 s64
 
-static inline __u64 ptr_to_u64(const void *ptr)
+static inline __u64ptr ptr_to_u64(const void *ptr)
 {
-	return (__u64)(unsigned long)ptr;
+	return (__u64ptr) (uintptr_t) ptr;
 }
 
-static inline void *u64_to_ptr(__u64 ptr)
+static inline void *u64_to_ptr(__u64ptr ptr)
 {
-	return (void *)(unsigned long)ptr;
+	return (void *)(uintptr_t)ptr;
 }
 
 #define NEXT_ARG()	({ argc--; argv++; if (argc < 0) usage(); })
