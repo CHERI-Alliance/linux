@@ -256,8 +256,8 @@ int do_filter_dump(struct tcmsg *ifinfo, struct nlattr **tb, const char *kind,
 int print_all_levels(__maybe_unused enum libbpf_print_level level,
 		     const char *format, va_list args);
 
-size_t hash_fn_for_key_as_id(long key, void *ctx);
-bool equal_fn_for_key_as_id(long k1, long k2, void *ctx);
+size_t hash_fn_for_key_as_id(intptr_t key, void *ctx);
+bool equal_fn_for_key_as_id(intptr_t k1, intptr_t k2, void *ctx);
 
 /* bpf_attach_type_input_str - convert the provided attach type value into a
  * textual representation that we accept for input purposes.

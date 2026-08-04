@@ -1151,12 +1151,12 @@ int map_parse_fd_and_info(int *argc, char ***argv, struct bpf_map_info *info,
 	return fd;
 }
 
-size_t hash_fn_for_key_as_id(long key, void *ctx)
+size_t hash_fn_for_key_as_id(intptr_t key, void *ctx)
 {
-	return key;
+	return (size_t)key;
 }
 
-bool equal_fn_for_key_as_id(long k1, long k2, void *ctx)
+bool equal_fn_for_key_as_id(intptr_t k1, intptr_t k2, void *ctx)
 {
 	return k1 == k2;
 }

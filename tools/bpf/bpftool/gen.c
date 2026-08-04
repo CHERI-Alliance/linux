@@ -2024,12 +2024,12 @@ struct btfgen_info {
 	struct btf *marked_btf; /* btf structure used to mark used types */
 };
 
-static size_t btfgen_hash_fn(long key, void *ctx)
+static size_t btfgen_hash_fn(intptr_t key, void *ctx)
 {
-	return key;
+	return (size_t)key;
 }
 
-static bool btfgen_equal_fn(long k1, long k2, void *ctx)
+static bool btfgen_equal_fn(intptr_t k1, intptr_t k2, void *ctx)
 {
 	return k1 == k2;
 }
