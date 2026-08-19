@@ -141,7 +141,7 @@ int syscall_user_dispatch_get_config(struct task_struct *task, unsigned long siz
 	struct syscall_user_dispatch *sd = &task->syscall_dispatch;
 	struct ptrace_sud_config cfg;
 
-	if (size != sizeof(cfg))
+	if (size != __c64_sizeof(ptrace_sud_config))
 		return -EINVAL;
 
 	if (test_task_syscall_work(task, SYSCALL_USER_DISPATCH))
@@ -164,7 +164,7 @@ int syscall_user_dispatch_set_config(struct task_struct *task, unsigned long siz
 {
 	struct ptrace_sud_config cfg;
 
-	if (size != sizeof(cfg))
+	if (size != __c64_sizeof(ptrace_sud_config))
 		return -EINVAL;
 
 	if (__c64_copy_from_user_with_ptr(ptrace_sud_config, &cfg, data))
