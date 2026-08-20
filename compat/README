@@ -1,0 +1,28 @@
+
+
+To generate the compat headers, the following files are required:
+
+* compat.pl generates compat headers from annotations produced by clang-tidy
+* clang-tidy needs a source file and compile_commands.json to reproduce the
+  compilation steps
+* scripts/clang-tools/gen_compile_commands.py creates compile_commands.json
+  from .*.cmd files
+* the .*.cmd files are created by Kbuild when a .c file is compiled
+* regen64.c is a dummy C program that includes all possible uapi headers
+
+
+These dependencies translate into steps for generating the compat headers.
+Run the commands below from the top-level kernel source directory:
+
+make ARCH=riscv LLVM=/path/to/llvm/bin/ \
+    CC="clang -target riscv64-unknown-linux-gnu" \
+    HOSTCC="clang -target x86_64" \
+    compat/regen64.o
+
+python3 scripts/clang-tools/gen_compile_commands.py \
+    compat/ -o compat/compile_commands.json
+
+clang-tidy --checks="-*,cheri-Uapi*" --header-filter=".*" -system-headers \
+    compat/regen64.c > compat/clt.log
+
+perl ./compat/compat.pl ./compat/clt.log
