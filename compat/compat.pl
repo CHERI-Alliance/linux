@@ -8,7 +8,7 @@ compat.pl - Generate compat headers from clang-tidy output
 
 =head1 SYNOPSIS
 
-perl compat.pl [ -G ] [ -F ] [ FILE ... ]
+perl compat.pl [ -G ] [ -F ] [ -3 ] [ FILE ... ]
 
 =head1 DESCRIPTION
 
@@ -54,6 +54,11 @@ or C<compat64_i_> prefix. The default is to generate them only if they do
 not exist. Note that you have to delete these files manually if they exist
 and are no longer needed.
 
+=item -3
+
+Generate the compat32 headers in addition to compat64. By default, only the
+compat64 headers are generated.
+
 =back
 
 =cut
@@ -67,9 +72,10 @@ my @ops32 = ();
 my @ops64 = ();
 my %opts;
 
-die "Invalid option" unless getopts('GF', \%opts);
+die "Invalid option" unless getopts('GF3', \%opts);
 my $gen = $opts{G} // 0;
 my $force = $opts{F} // 0;
+my $gen32 = $opts{3} // 0;
 
 my %validops = (
 	BEGIN => {
@@ -769,19 +775,22 @@ while (<>) {
 		push @{$op->{args}}, $1;
 	}
 	die "Chunk at end of args: $args" unless $args =~ m{\s*^\[};
-	if ($op->{type} == 32) {
+	if ($gen32 && $op->{type} == 32) {
 		push @ops32, $op;
-	} else {
+	} elsif ($op->{type} == 64) {
 		push @ops64, $op;
 	}
 };
 
-@ops32 = sort_ops_unique(@ops32);
-@ops64 = sort_ops_unique(@ops64);
+if ($gen32) {
+	print "VALIDATE 32\n";
+	@ops32 = sort_ops_unique(@ops32);
+	process_ops(\@ops32);
+}
 
-print "VALIDATE 32\n";
-process_ops(\@ops32);
 print "VALIDATE 64\n";
+@ops64 = sort_ops_unique(@ops64);
 process_ops(\@ops64);
+
 print "VALIDATE END\n";
-print "NOPS: ", scalar @ops32, " ", scalar @ops64, "\n";
+print "NOPS: ", $gen32 ? scalar @ops32 . " " : "", scalar @ops64, "\n";
