@@ -37,14 +37,32 @@ TEST(basic_interface)
 	page_size = sysconf(_SC_PAGESIZE);
 
 	/* Query a 0 byte sized range */
+	errno = 0;
 	retval = mincore(0, 0, vec);
+#ifdef __CHERI_PURE_CAPABILITY__
+	/*
+	 * On a PCuABI, mincore should fail with -EINVAL unless the passed capability:
+	 *      - is a valid unsealed cap with permissions: global and any of RWX
+	 *      - the cap bounds include or intersect with the queried range
+	 *
+	 * As an invalid cap is passed in, expect -EINVAL
+	 */
+	EXPECT_EQ(-1, retval);
+	EXPECT_EQ(EINVAL, errno);
+#else
 	EXPECT_EQ(0, retval);
+#endif
 
 	/* Addresses in the specified range are invalid or unmapped */
 	errno = 0;
 	retval = mincore(NULL, page_size, vec);
 	EXPECT_EQ(-1, retval);
+#ifdef __CHERI_PURE_CAPABILITY__
+	/* Again, the capability is invalid. */
+	EXPECT_EQ(EINVAL, errno);
+#else
 	EXPECT_EQ(ENOMEM, errno);
+#endif
 
 	errno = 0;
 	addr = mmap(NULL, page_size, PROT_READ | PROT_WRITE,
@@ -52,6 +70,13 @@ TEST(basic_interface)
 	ASSERT_NE(MAP_FAILED, addr) {
 		TH_LOG("mmap error: %s", strerror(errno));
 	}
+
+#ifdef __CHERI_PURE_CAPABILITY__
+	/* Query a zero-sized range for a sane cap */
+	errno = 0;
+	retval = mincore(addr, 0, vec);
+	EXPECT_EQ(0, retval);
+#endif
 
 	/* <addr> argument is not page-aligned */
 	errno = 0;
