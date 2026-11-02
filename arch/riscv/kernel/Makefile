@@ -119,6 +119,8 @@ obj-$(CONFIG_JUMP_LABEL)	+= jump_label.o
 
 obj-$(CONFIG_CFI)		+= cfi.o
 obj-$(CONFIG_CHERI_KERNEL)	+= riscvcheri.o
+# cheri_init_globals_bw.h and the compiler headers it includes
+CFLAGS_riscvcheri.o += -isystem $(shell $(CC) -print-file-name=include)
 
 obj-$(CONFIG_EFI)		+= efi.o
 obj-$(CONFIG_COMPAT32)		+= compat_syscall_table.o

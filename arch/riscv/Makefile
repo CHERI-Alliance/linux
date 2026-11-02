@@ -43,8 +43,6 @@ ifneq ($(CONFIG_CHERI_KERNEL),y)
 else
 	KBUILD_CFLAGS += -mabi=l64pc128
 	KBUILD_AFLAGS += -mabi=l64pc128
-	# For cheri headers (e.g. cheriintrin.h)
-	KBUILD_CFLAGS += -isystem $(shell $(CC) -print-file-name=include)
 	# FIXCHERI: Not sure why this triggers. Silence for now.
 	KBUILD_CFLAGS += -Wno-incompatible-library-redeclaration
 	# Enable all kinds of cheri related errors

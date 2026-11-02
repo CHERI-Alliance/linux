@@ -963,6 +963,12 @@ stackp-flags-$(CONFIG_STACKPROTECTOR_STRONG)      := -fstack-protector-strong
 
 KBUILD_CFLAGS += $(stackp-flags-y)
 
+ifdef CONFIG_ARCH_HAS_CHERI_CAPABILITIES
+# Make <cheriintrin.h> available to include/linux/cheri.h without putting all
+# of the compiler's resource headers on the include path via -isystem.
+KBUILD_CFLAGS	+= -DLINUX_CHERIINTRIN_H='"$(shell $(CC) -print-file-name=include/cheriintrin.h)"'
+endif
+
 ifdef CONFIG_CHERI_PURECAP_UABI
 # Since we define __user to __capability in PCuABI, we end up using
 # __capability in the deprecated position, i.e. as a prefix for *.

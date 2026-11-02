@@ -16,7 +16,8 @@ typedef unsigned int cheri_perms_t;
 
 #ifndef __CHECKER__
 
-#include <cheriintrin.h>
+/* Absolute path to the compiler's cheriintrin.h, set in the top-level Makefile. */
+#include LINUX_CHERIINTRIN_H
 
 /* For ARM morello. */
 #ifndef cheri_high_get
