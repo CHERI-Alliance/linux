@@ -211,6 +211,7 @@ extern cheri_perms_t cheri_unsupported_perms;	/* Permission bits not supported b
 #define cheri_bounds_set_exact(__c, __l) (__c)
 #define cheri_sentry_create(__c) (__c)
 #define cheri_restrict_len(C, L) (L)
+#define cheri_perms_and(__c, __m) (__c)
 
 #endif /* __has_feature(capabilities) */
 
