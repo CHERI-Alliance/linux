@@ -599,5 +599,5 @@ DEFINE_FREE(trace_probe_log_clear, const char *, if (_T) trace_probe_log_clear()
 
 struct uprobe_dispatch_data {
 	struct trace_uprobe	*tu;
-	unsigned long		bp_addr;
+	uintptr_t		bp_addr;
 };

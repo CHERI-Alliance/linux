@@ -4,6 +4,8 @@
 #include <linux/kernel.h>
 #include <linux/kprobes.h>
 
+#include <asm/ptrace.h>
+
 #include "decode-insn.h"
 #include "simulate-insn.h"
 
@@ -47,11 +49,18 @@ bool __kprobes simulate_jal(u32 opcode, ptraddr_t addr, struct pt_regs *regs)
 	 */
 	bool ret;
 	s32 imm;
+	uintptr_t new_rd;
 	u32 index = RV_EXTRACT_RD_REG(opcode);
 
-	/* jal writes a sealed capability into rd */
-	ret = rv_insn_reg_set_val(regs, index,
-				  (uintptr_t)cheri_make_kernel_code_cap(addr + 4));
+	/*
+	 * jal writes a sealed capability into rd
+	 * for uprobes, we assume that regs->epc covers the whole executable
+	 */
+	new_rd = cheri_sentry_create(cheri_address_set(user_mode(regs) ? regs->epc :
+						       (uintptr_t)kernel_code_cap,
+						       addr + 4));
+
+	ret = rv_insn_reg_set_val(regs, index, new_rd);
 	if (!ret)
 		return ret;
 
@@ -70,7 +79,7 @@ bool __kprobes simulate_jalr(u32 opcode, ptraddr_t addr, struct pt_regs *regs)
 	 *      12         5      3    5    JALR/JR
 	 */
 	bool ret;
-	uintptr_t base_addr;
+	uintptr_t base_addr, new_rd;
 	u32 imm = RV_EXTRACT_ITYPE_IMM(opcode);
 	u32 rd_index = RV_EXTRACT_RD_REG(opcode);
 	u32 rs1_index = RV_EXTRACT_RS1_REG(opcode);
@@ -79,9 +88,15 @@ bool __kprobes simulate_jalr(u32 opcode, ptraddr_t addr, struct pt_regs *regs)
 	if (!ret)
 		return ret;
 
-	/* jalr writes a sealed capability into rd */
-	ret = rv_insn_reg_set_val(regs, rd_index,
-				  (uintptr_t)cheri_make_kernel_code_cap(addr + 4));
+	/*
+	 * jal writes a sealed capability into rd
+	 * for uprobes, we assume that regs->epc covers the whole executable
+	 */
+	new_rd = cheri_sentry_create(cheri_address_set(user_mode(regs) ? regs->epc :
+						       (uintptr_t)kernel_code_cap,
+						       addr + 4));
+
+	ret = rv_insn_reg_set_val(regs, rd_index, new_rd);
 	if (!ret)
 		return ret;
 
@@ -199,10 +214,20 @@ static bool __kprobes simulate_c_jr_jalr(u32 opcode, ptraddr_t addr, struct pt_r
 	if (!rv_insn_reg_get_val(regs, rs1, &jump_addr))
 		return false;
 
-	if (is_jalr &&
-	    !rv_insn_reg_set_val(regs, 1,
-				 (uintptr_t)cheri_make_kernel_code_cap(addr + 2)))
-		return false;
+	if (is_jalr) {
+		uintptr_t new_rd;
+
+		/*
+		 * jal writes a sealed capability into rd
+		 * for uprobes, we assume that regs->epc covers the whole executable
+		 */
+		new_rd = cheri_sentry_create(cheri_address_set(user_mode(regs) ? regs->epc :
+							       (uintptr_t)kernel_code_cap,
+							       addr + 2));
+
+		if (!rv_insn_reg_set_val(regs, 1, new_rd))
+			return false;
+	}
 
 	epc_update(regs, __c_ua(jump_addr));
 

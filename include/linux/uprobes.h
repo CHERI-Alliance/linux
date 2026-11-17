@@ -53,7 +53,7 @@ struct uprobe_consumer {
 	 */
 	int (*handler)(struct uprobe_consumer *self, struct pt_regs *regs, __u64 *data);
 	int (*ret_handler)(struct uprobe_consumer *self,
-				unsigned long func,
+				uintptr_t func,
 				struct pt_regs *regs, __u64 *data);
 	bool (*filter)(struct uprobe_consumer *self, struct mm_struct *mm);
 
@@ -135,17 +135,17 @@ struct uprobe_task {
 	union {
 		struct {
 			struct arch_uprobe_task	autask;
-			unsigned long		vaddr;
+			uintptr_t		vaddr;
 		};
 
 		struct {
 			struct callback_head	dup_xol_work;
-			unsigned long		dup_xol_addr;
+			uintptr_t		dup_xol_addr;
 		};
 	};
 
 	struct uprobe			*active_uprobe;
-	unsigned long			xol_vaddr;
+	uintptr_t			xol_vaddr;
 	bool				signal_denied;
 
 	struct arch_uprobe              *auprobe;
@@ -158,9 +158,9 @@ struct return_consumer {
 
 struct return_instance {
 	struct hprobe		hprobe;
-	unsigned long		func;
+	uintptr_t		func;
 	unsigned long		stack;		/* stack pointer */
-	unsigned long		orig_ret_vaddr; /* original return address */
+	uintptr_t		orig_ret_vaddr; /* original return address */
 	bool			chained;	/* true, if instance is nested */
 	int			cons_cnt;	/* total number of session consumers */
 
@@ -199,8 +199,8 @@ extern int set_swbp(struct arch_uprobe *aup, struct vm_area_struct *vma, unsigne
 extern int set_orig_insn(struct arch_uprobe *aup, struct vm_area_struct *vma, unsigned long vaddr);
 extern bool is_swbp_insn(uprobe_opcode_t *insn);
 extern bool is_trap_insn(uprobe_opcode_t *insn);
-extern unsigned long uprobe_get_swbp_addr(struct pt_regs *regs);
-extern unsigned long uprobe_get_trap_addr(struct pt_regs *regs);
+extern uintptr_t uprobe_get_swbp_addr(struct pt_regs *regs);
+extern uintptr_t uprobe_get_trap_addr(struct pt_regs *regs);
 extern int uprobe_write_opcode(struct arch_uprobe *auprobe, struct vm_area_struct *vma, unsigned long vaddr, uprobe_opcode_t,
 			       bool is_register);
 extern int uprobe_write(struct arch_uprobe *auprobe, struct vm_area_struct *vma, const unsigned long opcode_vaddr,
@@ -229,20 +229,21 @@ extern int  arch_uprobe_post_xol(struct arch_uprobe *aup, struct pt_regs *regs);
 extern bool arch_uprobe_xol_was_trapped(struct task_struct *tsk);
 extern int  arch_uprobe_exception_notify(struct notifier_block *self, unsigned long val, void *data);
 extern void arch_uprobe_abort_xol(struct arch_uprobe *aup, struct pt_regs *regs);
-extern unsigned long arch_uretprobe_hijack_return_addr(unsigned long trampoline_vaddr, struct pt_regs *regs);
+extern uintptr_t arch_uretprobe_hijack_return_addr(uintptr_t trampoline_vaddr,
+						   struct pt_regs *regs);
 extern bool arch_uretprobe_is_alive(struct return_instance *ret, enum rp_check ctx, struct pt_regs *regs);
 extern bool arch_uprobe_ignore(struct arch_uprobe *aup, struct pt_regs *regs);
 extern void arch_uprobe_copy_ixol(struct page *page, unsigned long vaddr,
 					 void *src, unsigned long len);
 extern void uprobe_handle_trampoline(struct pt_regs *regs);
 extern void *arch_uretprobe_trampoline(unsigned long *psize);
-extern unsigned long uprobe_get_trampoline_vaddr(void);
+extern uintptr_t uprobe_get_trampoline_vaddr(void);
 extern void uprobe_copy_from_page(struct page *page, unsigned long vaddr, void *dst, int len);
 extern void arch_uprobe_clear_state(struct mm_struct *mm);
 extern void arch_uprobe_init_state(struct mm_struct *mm);
-extern void handle_syscall_uprobe(struct pt_regs *regs, unsigned long bp_vaddr);
-extern void arch_uprobe_optimize(struct arch_uprobe *auprobe, unsigned long vaddr);
-extern unsigned long arch_uprobe_get_xol_area(void);
+extern void handle_syscall_uprobe(struct pt_regs *regs, uintptr_t bp_vaddr);
+extern void arch_uprobe_optimize(struct arch_uprobe *auprobe, uintptr_t vaddr);
+extern user_uintptr_t arch_uprobe_get_xol_area(void);
 #else /* !CONFIG_UPROBES */
 struct uprobes_state {
 };

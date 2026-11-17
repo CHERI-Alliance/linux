@@ -184,7 +184,7 @@ static void fixup_uretprobe_trampoline_entries(struct perf_callchain_entry *entr
 #ifdef CONFIG_UPROBES
 	struct uprobe_task *utask = current->utask;
 	struct return_instance *ri;
-	__u64 *cur_ip, *last_ip, tramp_addr;
+	ptraddr64_t *cur_ip, *last_ip, tramp_addr;
 
 	if (likely(!utask || !utask->return_instances))
 		return;
@@ -192,7 +192,7 @@ static void fixup_uretprobe_trampoline_entries(struct perf_callchain_entry *entr
 	cur_ip = &entry->ip[start_entry_idx];
 	last_ip = &entry->ip[entry->nr - 1];
 	ri = utask->return_instances;
-	tramp_addr = uprobe_get_trampoline_vaddr();
+	tramp_addr = __c_ua(uprobe_get_trampoline_vaddr());
 
 	/*
 	 * If there are pending uretprobes for the current thread, they are
@@ -208,7 +208,7 @@ static void fixup_uretprobe_trampoline_entries(struct perf_callchain_entry *entr
 	 */
 	while (ri && cur_ip <= last_ip) {
 		if (*cur_ip == tramp_addr) {
-			*cur_ip = ri->orig_ret_vaddr;
+			*cur_ip = __c_ua(ri->orig_ret_vaddr);
 			ri = ri->next;
 		}
 		cur_ip++;

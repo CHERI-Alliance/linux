@@ -94,29 +94,29 @@ static int unregister_uprobe_event(struct trace_uprobe *tu);
 static int uprobe_dispatcher(struct uprobe_consumer *con, struct pt_regs *regs,
 			     __u64 *data);
 static int uretprobe_dispatcher(struct uprobe_consumer *con,
-				unsigned long func, struct pt_regs *regs,
+				uintptr_t func, struct pt_regs *regs,
 				__u64 *data);
 
 #ifdef CONFIG_STACK_GROWSUP
-static unsigned long adjust_stack_addr(unsigned long addr, unsigned int n)
+static uintptr_t adjust_stack_addr(uintptr_t addr, unsigned int n)
 {
-	return addr - (n * sizeof(long));
+	return addr - (n * sizeof(intptr_t));
 }
 #else
-static unsigned long adjust_stack_addr(unsigned long addr, unsigned int n)
+static uintptr_t adjust_stack_addr(uintptr_t addr, unsigned int n)
 {
-	return addr + (n * sizeof(long));
+	return addr + (n * sizeof(intptr_t));
 }
 #endif
 
-static unsigned long get_user_stack_nth(struct pt_regs *regs, unsigned int n)
+static uintptr_t get_user_stack_nth(struct pt_regs *regs, unsigned int n)
 {
-	unsigned long ret;
-	unsigned long addr = user_stack_pointer(regs);
+	uintptr_t ret;
+	uintptr_t addr = user_stack_pointer(regs);
 
 	addr = adjust_stack_addr(addr, n);
 
-	if (copy_from_user(&ret, (void __force __user *) addr, sizeof(ret)))
+	if (copy_from_user_with_ptr(&ret, (void __force __user *) addr, sizeof(ret)))
 		return 0;
 
 	return ret;
@@ -128,7 +128,7 @@ static unsigned long get_user_stack_nth(struct pt_regs *regs, unsigned int n)
 static nokprobe_inline int
 probe_mem_read(void *dest, ptraddr_t src, size_t size)
 {
-	void __user *vaddr = (void __force __user *)src;
+	const void __user *vaddr = make_user_ptr_for_read_uaccess(src, size);
 
 	return copy_from_user(dest, vaddr, size) ? -EFAULT : 0;
 }
@@ -150,15 +150,18 @@ fetch_store_string(unsigned long addr, void *dest, void *base)
 	u32 loc = *(u32 *)dest;
 	int maxlen  = get_loc_len(loc);
 	u8 *dst = get_loc_data(dest, base);
-	void __user *src = (void __force __user *) addr;
+
 
 	if (unlikely(!maxlen))
 		return -ENOMEM;
 
 	if (addr == FETCH_TOKEN_COMM)
 		ret = strscpy(dst, current->comm, maxlen);
-	else
+	else {
+		void __user *src = cheri_build_user_cap_inexact_bounds(addr, maxlen,
+								       CHERI_PERMS_READ);
 		ret = strncpy_from_user(dst, src, maxlen);
+	}
 	if (ret >= 0) {
 		if (ret == maxlen)
 			dst[ret - 1] = '\0';
@@ -187,12 +190,14 @@ static nokprobe_inline int
 fetch_store_strlen(unsigned long addr)
 {
 	int len;
-	void __user *vaddr = (void __force __user *) addr;
 
 	if (addr == FETCH_TOKEN_COMM)
 		len = strlen(current->comm) + 1;
-	else
+	else {
+		void __user *vaddr = cheri_build_user_cap_inexact_bounds(addr, MAX_STRING_SIZE,
+									 CHERI_PERMS_READ);
 		len = strnlen_user(vaddr, MAX_STRING_SIZE);
+	}
 
 	return (len > MAX_STRING_SIZE) ? 0 : len;
 }
@@ -210,7 +215,8 @@ static unsigned long translate_user_vaddr(unsigned long file_offset)
 
 	udd = (void *) current->utask->vaddr;
 
-	base_addr = udd->bp_addr - udd->tu->offset;
+	/* TODO: This works only if the executable's mapping is contiguous. */
+	base_addr = __c_ua(udd->bp_addr) - udd->tu->offset;
 	return base_addr + file_offset;
 }
 
@@ -220,7 +226,7 @@ process_fetch_insn(struct fetch_insn *code, void *rec, void *edata,
 		   void *dest, void *base)
 {
 	struct pt_regs *regs = rec;
-	unsigned long val;
+	uintptr_t val;
 	int ret;
 
 	/* 1st stage: get value from context */
@@ -238,10 +244,10 @@ process_fetch_insn(struct fetch_insn *code, void *rec, void *edata,
 		val = regs_return_value(regs);
 		break;
 	case FETCH_OP_COMM:
-		val = FETCH_TOKEN_COMM;
+		val = __c_fakeu(FETCH_TOKEN_COMM);
 		break;
 	case FETCH_OP_FOFFS:
-		val = translate_user_vaddr(code->immediate);
+		val = __c_fakeu(translate_user_vaddr(code->immediate));
 		break;
 	default:
 		ret = process_common_fetch_insn(code, &val);
@@ -991,7 +997,7 @@ static struct uprobe_cpu_buffer *prepare_uprobe_buffer(struct trace_uprobe *tu,
 }
 
 static void __uprobe_trace_func(struct trace_uprobe *tu,
-				unsigned long func, struct pt_regs *regs,
+				uintptr_t func, struct pt_regs *regs,
 				struct uprobe_cpu_buffer *ucb,
 				struct trace_event_file *trace_file)
 {
@@ -1013,11 +1019,11 @@ static void __uprobe_trace_func(struct trace_uprobe *tu,
 		return;
 
 	if (is_ret_probe(tu)) {
-		entry->vaddr[0] = func;
-		entry->vaddr[1] = instruction_pointer(regs);
+		entry->vaddr[0] = __c_ua(func);
+		entry->vaddr[1] = __c_ua(instruction_pointer(regs));
 		data = DATAOF_TRACE_ENTRY(entry, true);
 	} else {
-		entry->vaddr[0] = instruction_pointer(regs);
+		entry->vaddr[0] = __c_ua(instruction_pointer(regs));
 		data = DATAOF_TRACE_ENTRY(entry, false);
 	}
 
@@ -1046,7 +1052,7 @@ static int uprobe_trace_func(struct trace_uprobe *tu, struct pt_regs *regs,
 	return 0;
 }
 
-static void uretprobe_trace_func(struct trace_uprobe *tu, unsigned long func,
+static void uretprobe_trace_func(struct trace_uprobe *tu, uintptr_t func,
 				 struct pt_regs *regs,
 				 struct uprobe_cpu_buffer **ucbp)
 {
@@ -1384,7 +1390,7 @@ static bool uprobe_perf_filter(struct uprobe_consumer *uc, struct mm_struct *mm)
 }
 
 static void __uprobe_perf_func(struct trace_uprobe *tu,
-			       unsigned long func, struct pt_regs *regs,
+			       uintptr_t func, struct pt_regs *regs,
 			       struct uprobe_cpu_buffer **ucbp)
 {
 	struct trace_event_call *call = trace_probe_event_call(&tu->tp);
@@ -1427,11 +1433,11 @@ static void __uprobe_perf_func(struct trace_uprobe *tu,
 		goto out;
 
 	if (is_ret_probe(tu)) {
-		entry->vaddr[0] = func;
-		entry->vaddr[1] = instruction_pointer(regs);
+		entry->vaddr[0] = __c_ua(func);
+		entry->vaddr[1] = __c_ua(instruction_pointer(regs));
 		data = DATAOF_TRACE_ENTRY(entry, true);
 	} else {
-		entry->vaddr[0] = instruction_pointer(regs);
+		entry->vaddr[0] = __c_ua(instruction_pointer(regs));
 		data = DATAOF_TRACE_ENTRY(entry, false);
 	}
 
@@ -1458,7 +1464,7 @@ static int uprobe_perf_func(struct trace_uprobe *tu, struct pt_regs *regs,
 	return 0;
 }
 
-static void uretprobe_perf_func(struct trace_uprobe *tu, unsigned long func,
+static void uretprobe_perf_func(struct trace_uprobe *tu, uintptr_t func,
 				struct pt_regs *regs,
 				struct uprobe_cpu_buffer **ucbp)
 {
@@ -1539,7 +1545,7 @@ static int uprobe_dispatcher(struct uprobe_consumer *con, struct pt_regs *regs,
 	udd.tu = tu;
 	udd.bp_addr = instruction_pointer(regs);
 
-	current->utask->vaddr = (unsigned long) &udd;
+	current->utask->vaddr = (uintptr_t) &udd;
 
 	if (WARN_ON_ONCE(!uprobe_cpu_buffer))
 		return 0;
@@ -1557,7 +1563,7 @@ static int uprobe_dispatcher(struct uprobe_consumer *con, struct pt_regs *regs,
 }
 
 static int uretprobe_dispatcher(struct uprobe_consumer *con,
-				unsigned long func, struct pt_regs *regs,
+				uintptr_t func, struct pt_regs *regs,
 				__u64 *data)
 {
 	struct trace_uprobe *tu;
@@ -1570,7 +1576,7 @@ static int uretprobe_dispatcher(struct uprobe_consumer *con,
 	udd.tu = tu;
 	udd.bp_addr = func;
 
-	current->utask->vaddr = (unsigned long) &udd;
+	current->utask->vaddr = (uintptr_t) &udd;
 
 	if (WARN_ON_ONCE(!uprobe_cpu_buffer))
 		return 0;

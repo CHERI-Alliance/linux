@@ -116,7 +116,7 @@ struct xol_area {
 	 * itself.  The probed process or a naughty kernel module could make
 	 * the vma go away, and we must handle that reasonably gracefully.
 	 */
-	unsigned long			vaddr;		/* Page(s) of instruction slots */
+	uintptr_t			vaddr;		/* Page(s) of instruction slots */
 };
 
 static void uprobe_warn(struct task_struct *t, const char *msg)
@@ -1694,10 +1694,13 @@ static const struct vm_special_mapping xol_mapping = {
 	.mremap = xol_mremap,
 };
 
-unsigned long __weak arch_uprobe_get_xol_area(void)
+user_uintptr_t __weak arch_uprobe_get_xol_area(void)
 {
 	/* Try to map as high as possible, this is only a hint. */
-	return get_unmapped_area(NULL, TASK_SIZE - PAGE_SIZE, PAGE_SIZE, 0, 0);
+	return (user_uintptr_t)cheri_build_user_cap(get_unmapped_area(NULL, TASK_SIZE - PAGE_SIZE,
+								      PAGE_SIZE, 0, 0),
+						    PAGE_SIZE, CHERI_PERMS_READ |
+						    CHERI_PERMS_WRITE | CHERI_PERMS_EXEC);
 }
 
 /* Slot allocation for XOL */
@@ -1715,14 +1718,22 @@ static int xol_add_vma(struct mm_struct *mm, struct xol_area *area)
 	}
 
 	if (!area->vaddr) {
-		area->vaddr = arch_uprobe_get_xol_area();
+		/*
+		 * xol_slot is derived from vaddr and goes into a register.
+		 * vaddr and xol_slot must be capabilities for cheri risc-v.
+		 *
+		 * for morello, the cast would downgrade a user capability to
+		 * a numeric value. writing a numeric register seems to be
+		 * sufficient...
+		 */
+		area->vaddr = (uintptr_t)arch_uprobe_get_xol_area();
 		if (IS_ERR_VALUE(area->vaddr)) {
 			ret = area->vaddr;
 			goto fail;
 		}
 	}
 
-	vma = _install_special_mapping(mm, area->vaddr, PAGE_SIZE,
+	vma = _install_special_mapping(mm, __c_ua(area->vaddr), PAGE_SIZE,
 				VM_EXEC|VM_MAYEXEC|VM_DONTCOPY|VM_IO|
 				VM_SEALED_SYSMAP,
 				&xol_mapping);
@@ -1748,7 +1759,7 @@ void * __weak arch_uretprobe_trampoline(unsigned long *psize)
 	return &insn;
 }
 
-static struct xol_area *__create_xol_area(unsigned long vaddr)
+static struct xol_area *__create_xol_area(uintptr_t vaddr)
 {
 	struct mm_struct *mm = current->mm;
 	unsigned long insns_size;
@@ -1881,7 +1892,7 @@ static bool xol_get_insn_slot(struct uprobe *uprobe, struct uprobe_task *utask)
 	wait_event(area->wq, (slot_nr = xol_get_slot_nr(area)) < UINSNS_PER_PAGE);
 
 	utask->xol_vaddr = area->vaddr + slot_nr * UPROBE_XOL_SLOT_BYTES;
-	arch_uprobe_copy_ixol(area->page, utask->xol_vaddr,
+	arch_uprobe_copy_ixol(area->page, __c_ua(utask->xol_vaddr),
 			      &uprobe->arch.ixol, sizeof(uprobe->arch.ixol));
 	return true;
 }
@@ -1892,7 +1903,7 @@ static bool xol_get_insn_slot(struct uprobe *uprobe, struct uprobe_task *utask)
 static void xol_free_insn_slot(struct uprobe_task *utask)
 {
 	struct xol_area *area = current->mm->uprobes_state.xol_area;
-	unsigned long offset = utask->xol_vaddr - area->vaddr;
+	unsigned long offset = __c_ua(utask->xol_vaddr) - __c_ua(area->vaddr);
 	unsigned int slot_nr;
 
 	utask->xol_vaddr = 0;
@@ -1928,12 +1939,12 @@ void __weak arch_uprobe_copy_ixol(struct page *page, unsigned long vaddr,
  * instruction.
  * Return the address of the breakpoint instruction.
  */
-unsigned long __weak uprobe_get_swbp_addr(struct pt_regs *regs)
+uintptr_t __weak uprobe_get_swbp_addr(struct pt_regs *regs)
 {
 	return instruction_pointer(regs) - UPROBE_SWBP_INSN_SIZE;
 }
 
-unsigned long uprobe_get_trap_addr(struct pt_regs *regs)
+uintptr_t uprobe_get_trap_addr(struct pt_regs *regs)
 {
 	struct uprobe_task *utask = current->utask;
 
@@ -2220,9 +2231,9 @@ void uprobe_copy_process(struct task_struct *t, u64 flags)
  *
  * Returns -1 in case the xol_area is not allocated.
  */
-unsigned long uprobe_get_trampoline_vaddr(void)
+uintptr_t uprobe_get_trampoline_vaddr(void)
 {
-	unsigned long trampoline_vaddr = UPROBE_NO_TRAMPOLINE_VADDR;
+	uintptr_t trampoline_vaddr = UPROBE_NO_TRAMPOLINE_VADDR;
 	struct xol_area *area;
 
 	/* Pairs with xol_add_vma() smp_store_release() */
@@ -2253,7 +2264,7 @@ static void prepare_uretprobe(struct uprobe *uprobe, struct pt_regs *regs,
 			      struct return_instance *ri)
 {
 	struct uprobe_task *utask = current->utask;
-	unsigned long orig_ret_vaddr, trampoline_vaddr;
+	uintptr_t orig_ret_vaddr, trampoline_vaddr;
 	bool chained;
 	int srcu_idx;
 
@@ -2297,7 +2308,7 @@ static void prepare_uretprobe(struct uprobe *uprobe, struct pt_regs *regs,
 	srcu_idx = __srcu_read_lock(&uretprobes_srcu);
 
 	ri->func = instruction_pointer(regs);
-	ri->stack = user_stack_pointer(regs);
+	ri->stack = __c_ua(user_stack_pointer(regs));
 	ri->orig_ret_vaddr = orig_ret_vaddr;
 	ri->chained = chained;
 
@@ -2316,7 +2327,7 @@ free:
 
 /* Prepare to single-step probed instruction out of line. */
 static int
-pre_ssout(struct uprobe *uprobe, struct pt_regs *regs, unsigned long bp_vaddr)
+pre_ssout(struct uprobe *uprobe, struct pt_regs *regs, uintptr_t bp_vaddr)
 {
 	struct uprobe_task *utask = current->utask;
 	int err;
@@ -2397,7 +2408,7 @@ static void mmf_recalc_uprobes(struct mm_struct *mm)
 	mm_flags_clear(MMF_HAS_UPROBES, mm);
 }
 
-static int is_trap_at_addr(struct mm_struct *mm, unsigned long vaddr)
+static int is_trap_at_addr(struct mm_struct *mm, uintptr_t vaddr)
 {
 	struct page *page;
 	uprobe_opcode_t opcode;
@@ -2413,11 +2424,11 @@ static int is_trap_at_addr(struct mm_struct *mm, unsigned long vaddr)
 	if (likely(result == 0))
 		goto out;
 
-	result = get_user_pages(vaddr, 1, FOLL_FORCE, &page);
+	result = get_user_pages(__c_ua(vaddr), 1, FOLL_FORCE, &page);
 	if (result < 0)
 		return result;
 
-	uprobe_copy_from_page(page, vaddr, &opcode, UPROBE_SWBP_INSN_SIZE);
+	uprobe_copy_from_page(page, __c_ua(vaddr), &opcode, UPROBE_SWBP_INSN_SIZE);
 	put_page(page);
  out:
 	/* This needs to return true for any variant of the trap insn */
@@ -2466,22 +2477,22 @@ static struct uprobe *find_active_uprobe_speculative(unsigned long bp_vaddr)
 }
 
 /* assumes being inside RCU protected region */
-static struct uprobe *find_active_uprobe_rcu(unsigned long bp_vaddr, int *is_swbp)
+static struct uprobe *find_active_uprobe_rcu(uintptr_t bp_vaddr, int *is_swbp)
 {
 	struct mm_struct *mm = current->mm;
 	struct uprobe *uprobe = NULL;
 	struct vm_area_struct *vma;
 
-	uprobe = find_active_uprobe_speculative(bp_vaddr);
+	uprobe = find_active_uprobe_speculative(__c_ua(bp_vaddr));
 	if (uprobe)
 		return uprobe;
 
 	mmap_read_lock(mm);
-	vma = vma_lookup(mm, bp_vaddr);
+	vma = vma_lookup(mm, __c_ua(bp_vaddr));
 	if (vma) {
 		if (vma->vm_file) {
 			struct inode *inode = file_inode(vma->vm_file);
-			loff_t offset = vaddr_to_offset(vma, bp_vaddr);
+			loff_t offset = vaddr_to_offset(vma, __c_ua(bp_vaddr));
 
 			uprobe = find_uprobe_rcu(inode, offset);
 		}
@@ -2701,7 +2712,7 @@ bool __weak arch_uretprobe_is_alive(struct return_instance *ret, enum rp_check c
 	return true;
 }
 
-void __weak arch_uprobe_optimize(struct arch_uprobe *auprobe, unsigned long vaddr)
+void __weak arch_uprobe_optimize(struct arch_uprobe *auprobe, uintptr_t vaddr)
 {
 }
 
@@ -2712,11 +2723,11 @@ void __weak arch_uprobe_optimize(struct arch_uprobe *auprobe, unsigned long vadd
 static void handle_swbp(struct pt_regs *regs)
 {
 	struct uprobe *uprobe;
-	unsigned long bp_vaddr;
+	uintptr_t bp_vaddr;
 	int is_swbp;
 
 	bp_vaddr = uprobe_get_swbp_addr(regs);
-	if (bp_vaddr == uprobe_get_trampoline_vaddr())
+	if (__c_ua(bp_vaddr) == __c_ua(uprobe_get_trampoline_vaddr()))
 		return uprobe_handle_trampoline(regs);
 
 	rcu_read_lock_trace();
@@ -2790,7 +2801,7 @@ out:
 	rcu_read_unlock_trace();
 }
 
-void handle_syscall_uprobe(struct pt_regs *regs, unsigned long bp_vaddr)
+void handle_syscall_uprobe(struct pt_regs *regs, uintptr_t bp_vaddr)
 {
 	struct uprobe *uprobe;
 	int is_swbp;

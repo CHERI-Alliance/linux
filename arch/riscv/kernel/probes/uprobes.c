@@ -23,7 +23,7 @@ bool is_trap_insn(uprobe_opcode_t *insn)
 	return riscv_insn_is_ebreak(*insn) || riscv_insn_is_c_ebreak(*insn);
 }
 
-unsigned long uprobe_get_swbp_addr(struct pt_regs *regs)
+uintptr_t uprobe_get_swbp_addr(struct pt_regs *regs)
 {
 	return instruction_pointer(regs);
 }
@@ -63,6 +63,11 @@ int arch_uprobe_pre_xol(struct arch_uprobe *auprobe, struct pt_regs *regs)
 	utask->autask.saved_cause = current->thread.bad_cause;
 	current->thread.bad_cause = UPROBE_TRAP_NR;
 
+	/* if we did this in xol_get_insn_slot, we'd have to exclude morello */
+	utask->xol_vaddr = cheri_bounds_set(utask->xol_vaddr, UPROBE_XOL_SLOT_BYTES);
+	utask->xol_vaddr = cheri_perms_and(utask->xol_vaddr,
+					   CHERI_PERMS_READ | CHERI_PERMS_EXEC);
+
 	instruction_pointer_set(regs, utask->xol_vaddr);
 
 	return 0;
@@ -91,13 +96,13 @@ bool arch_uprobe_xol_was_trapped(struct task_struct *t)
 bool arch_uprobe_skip_sstep(struct arch_uprobe *auprobe, struct pt_regs *regs)
 {
 	probe_opcode_t insn;
-	unsigned long addr;
+	ptraddr_t addr;
 
 	if (!auprobe->simulate)
 		return false;
 
 	insn = *(probe_opcode_t *)(&auprobe->insn[0]);
-	addr = instruction_pointer(regs);
+	addr = __c_ua(instruction_pointer(regs));
 
 	if (auprobe->api.handler)
 		auprobe->api.handler(insn, addr, regs);
@@ -126,11 +131,11 @@ bool arch_uretprobe_is_alive(struct return_instance *ret, enum rp_check ctx,
 		return regs->sp < ret->stack;
 }
 
-unsigned long
-arch_uretprobe_hijack_return_addr(unsigned long trampoline_vaddr,
+uintptr_t
+arch_uretprobe_hijack_return_addr(uintptr_t trampoline_vaddr,
 				  struct pt_regs *regs)
 {
-	unsigned long ra;
+	uintptr_t ra;
 
 	ra = regs->ra;
 
@@ -167,7 +172,7 @@ void arch_uprobe_copy_ixol(struct page *page, unsigned long vaddr,
 	/* Initialize the slot */
 	void *kaddr = kmap_local_page(page);
 	void *dst = kaddr + (vaddr & ~PAGE_MASK);
-	unsigned long start = (unsigned long)dst;
+	unsigned long start = __c_pa(dst);
 
 	memcpy(dst, src, len);
 
