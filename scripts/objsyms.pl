@@ -50,6 +50,7 @@ sub decode_insn
 {
 	my ($line) = @_;
 
+	$line =~ s{\s+\<[^<>]+\>\s*$}{};
 	my @line = split /\s+/, $line;
 	my $ret = {
 		addr => undef,
