@@ -56,9 +56,9 @@ bool __kprobes simulate_jal(u32 opcode, ptraddr_t addr, struct pt_regs *regs)
 	 * jal writes a sealed capability into rd
 	 * for uprobes, we assume that regs->epc covers the whole executable
 	 */
-	new_rd = cheri_sentry_create(cheri_address_set(user_mode(regs) ? regs->epc :
-						       (uintptr_t)kernel_code_cap,
-						       addr + 4));
+	new_rd = user_mode(regs) ?
+		cheri_sentry_create(cheri_address_set(regs->epc, addr + 4)) :
+		(uintptr_t)cheri_make_kernel_code_cap(addr + 4);
 
 	ret = rv_insn_reg_set_val(regs, index, new_rd);
 	if (!ret)
@@ -92,9 +92,9 @@ bool __kprobes simulate_jalr(u32 opcode, ptraddr_t addr, struct pt_regs *regs)
 	 * jal writes a sealed capability into rd
 	 * for uprobes, we assume that regs->epc covers the whole executable
 	 */
-	new_rd = cheri_sentry_create(cheri_address_set(user_mode(regs) ? regs->epc :
-						       (uintptr_t)kernel_code_cap,
-						       addr + 4));
+	new_rd = user_mode(regs) ?
+		 cheri_sentry_create(cheri_address_set(regs->epc, addr + 4)) :
+		 (uintptr_t)cheri_make_kernel_code_cap(addr + 4);
 
 	ret = rv_insn_reg_set_val(regs, rd_index, new_rd);
 	if (!ret)
@@ -221,9 +221,9 @@ static bool __kprobes simulate_c_jr_jalr(u32 opcode, ptraddr_t addr, struct pt_r
 		 * jal writes a sealed capability into rd
 		 * for uprobes, we assume that regs->epc covers the whole executable
 		 */
-		new_rd = cheri_sentry_create(cheri_address_set(user_mode(regs) ? regs->epc :
-							       (uintptr_t)kernel_code_cap,
-							       addr + 2));
+		new_rd = user_mode(regs) ?
+			 cheri_sentry_create(cheri_address_set(regs->epc, addr + 2)) :
+			 (uintptr_t)cheri_make_kernel_code_cap(addr + 2);
 
 		if (!rv_insn_reg_set_val(regs, 1, new_rd))
 			return false;
