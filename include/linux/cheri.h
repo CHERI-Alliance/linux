@@ -206,12 +206,14 @@ extern cheri_perms_t cheri_unsupported_perms;	/* Permission bits not supported b
 #define cheri_build_user_cap(__c, __l, __p) ((void *)(__c))
 #define cheri_build_user_cap_inexact_bounds(__c, __l, __p) ((void *)(__c))
 #define cheri_check_cap(cap, len, perms) (true)
-#define cheri_address_set(cap, addr) ((void *)(addr))
+#define cheri_address_set(__c, __a) ((__typeof__(__c))(uintptr_t __force)__a)
 #define cheri_bounds_set(__c, __l) (__c)
 #define cheri_bounds_set_exact(__c, __l) (__c)
 #define cheri_sentry_create(__c) (__c)
 #define cheri_restrict_len(C, L) (L)
 #define cheri_perms_and(__c, __m) (__c)
+
+#define cheri_user_root_cap ((unsigned long)0)
 
 #endif /* __has_feature(capabilities) */
 
@@ -377,7 +379,7 @@ cheri_build_kernel_data_cap(ptraddr_t base, ptraddr_t addr, size_t len)
 
 #define __cheri_pointer_align
 #define __packed_if_not_cheri __packed
-#define cheri_address_set_kernel(cap, addr) ((void *)addr)
+#define cheri_address_set_kernel(__c, __l) ((__typeof__(__c))(uintptr_t __force)__a)
 #define cheri_bounds_set_kernel(__c, __l) (__c)
 
 static __always_inline void *
