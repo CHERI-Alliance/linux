@@ -1162,7 +1162,11 @@ typedef uintptr_t (*__bpf_call_base_args_t)(uintptr_t r1, uintptr_t r2,
 uintptr_t __bpf_call_base(uintptr_t r1, uintptr_t r2, uintptr_t r3, uintptr_t r4, uintptr_t r5);
 
 /* FIXCHERI: Maybe we can do better than cheri_address_set_kernel here... */
+#ifdef __CHERI_PURE_CAPABILITY__
 #define BPF_FUNC_CALL_BASE ((void *)cheri_address_set_kernel(kernel_code_cap, __c_pa(__bpf_call_base)))
+#else
+#define BPF_FUNC_CALL_BASE ((void *)__bpf_call_base)
+#endif
 #define BPF_FUNC_CALL(OFF) ((__bpf_call_base_t)BPF_FUNC_CALL_BASE + (OFF))
 
 struct bpf_prog *bpf_int_jit_compile(struct bpf_verifier_env *env, struct bpf_prog *prog);
