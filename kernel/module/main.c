@@ -1650,7 +1650,7 @@ static int simplify_symbols(struct module *mod, const struct load_info *info)
 
 			/* Divert to percpu allocation if a percpu var. */
 			if (sym[i].st_shndx == info->index.pcpu)
-				secbase = __c_pa(mod_percpu(mod));
+				secbase = __c_ua((uintptr_t)mod_percpu(mod));
 			else
 				secbase = info->sechdrs[sym[i].st_shndx].sh_addr;
 			sym[i].st_value += secbase;
