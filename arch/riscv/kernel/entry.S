@@ -123,7 +123,7 @@
 		__stringify(				\
 		andi \tmp, \status, SR_SPP;		\
 		bnez \tmp, skip_ssp_restore;		\
-		CREG_L \ctmp, TASK_TI_USER_SSP(CREG(tp0));	\
+		CREG_L \ctmp, TASK_TI_USER_SSP(CREG(tp));	\
 		csrw CSR_SSP, \ctmp;			\
 		skip_ssp_restore:),
 		0,

@@ -1906,7 +1906,7 @@ area_found:
 
 	pcpu_alloc_tag_alloc_hook(chunk, off, size);
 
-	return cheri_make_kernel_data_cap(__c_ua((uintptr_t)ptr), size);
+	return (void __percpu *)(uintptr_t)cheri_make_kernel_data_cap(__c_ua((uintptr_t)ptr), size);
 
 fail_unlock:
 	spin_unlock_irqrestore(&pcpu_lock, flags);
